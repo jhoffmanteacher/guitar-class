@@ -217,6 +217,26 @@ async function showTeacherApp(user){
     shell.addEventListener('click', e=>{
       const navBtn=e.target.closest('#t-side [data-view]');
       if(navBtn){ setTeacherView(navBtn.dataset.view); return; }
+      // ── Class activities: the list + tabbed detail ──
+      // An open More menu closes on any click outside it, and after a pick
+      // inside it (the item's own handler below still runs).
+      document.querySelectorAll('#teacher-app details[data-ta-more][open]').forEach(d=>{
+        if(!d.contains(e.target) || e.target.closest('.ta-more-item')) d.open=false;
+      });
+      const taPick=e.target.closest('[data-ta-pick]');
+      if(taPick){ teacherPickActivity(taPick.dataset.id); return; }
+      const taFilter=e.target.closest('[data-ta-filter]');
+      if(taFilter){ teacherSetActivityFilter(taFilter.dataset.taFilter); return; }
+      const taUnit=e.target.closest('[data-ta-unit]');
+      if(taUnit){ teacherToggleUnit(taUnit.dataset.taUnit); return; }
+      const taTab=e.target.closest('[data-ta-tab]');
+      if(taTab){ teacherSetDetailTab(taTab.dataset.taTab); return; }
+      if(e.target.closest('[data-ta-board-open]')){ teacherOpenArrangeBoard(); return; }
+      if(e.target.closest('[data-ta-board-back]')){ teacherCloseArrangeBoard(); return; }
+      const taGoto=e.target.closest('[data-ta-goto-view]');
+      if(taGoto){ setTeacherView(taGoto.dataset.taGotoView); return; }
+      const taRename=e.target.closest('[data-ta-rename]');
+      if(taRename){ activityEditId=taRename.dataset.id; teacherSetDetailTab('settings'); teacherRenderRenameView(); return; }
       if(e.target.closest('[data-refresh-students]')){ teacherRefreshStudents({manual:true}); teacherRefreshReportsBadge(); return; }
       if(e.target.closest('[data-back-to-students]')){ backToStudentsRoster(); return; }
       const pmSort=e.target.closest('[data-pm-sort]');
@@ -332,6 +352,11 @@ async function showTeacherApp(user){
       const whoBox=e.target.closest('[data-set-activity-student]');
       if(whoBox){ teacherSetActivityStudent(whoBox.dataset.id, whoBox.dataset.uid, whoBox.checked); return; }
     });
+    // The Class activities list's search box: repaint the rows on every key.
+    shell.addEventListener('input', e=>{
+      const q=e.target && typeof e.target.closest==='function' && e.target.closest('[data-ta-search]');
+      if(q){ activityListQuery=q.value; teacherPaintActivityList(true); }
+    });
     /* An <details> in the board remembers whether it was open across the
        next re-render — the board repaints on every write, and an Archived
        list that snapped shut each time would be unusable. `toggle` doesn't
@@ -391,6 +416,16 @@ async function showTeacherApp(user){
     // Enter saves, Escape backs out — the rename box is a one-line field in a
     // table cell, not a form, so there's no submit event to lean on.
     shell.addEventListener('keydown', e=>{
+      // The detail's tab strip: Left / Right / Home / End move between tabs.
+      const tabKey=e.target.closest && e.target.closest('[data-ta-tab]');
+      if(tabKey && ['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){
+        e.preventDefault();
+        const i=TA_TABS.indexOf(tabKey.dataset.taTab), n=TA_TABS.length;
+        const j=e.key==='Home'?0:e.key==='End'?n-1:(i+(e.key==='ArrowRight'?1:n-1))%n;
+        teacherSetDetailTab(TA_TABS[j], true);
+        return;
+      }
+      if(e.key==='Escape'){ const m=document.querySelector('#teacher-app details[data-ta-more][open]'); if(m){ m.open=false; const sm=m.querySelector('summary'); if(sm) sm.focus(); return; } }
       // Release date: Enter saves, Escape puts the saved date back, and any
       // key that edits the value marks the box as being typed in, so the
       // per-keystroke 'change' events above don't save half a date.
@@ -547,7 +582,10 @@ async function teacherFetchStudents(){
       const opensRaw=(data.songOpens&&typeof data.songOpens==='object')?data.songOpens:{};
       const songOpens={};
       Object.keys(opensRaw).forEach(k=>{ const n=Math.floor(Number(opensRaw[k])); if(Number.isFinite(n)&&n>0) songOpens[k]=Math.min(n,1000); });
-      out.push({uid:doc.id,skills,name:String(data.name||''),email:String(data.email||''),responses:data.responses||{},coachSkill:gamesData.coachSkill||{},drillSkill:gamesData.drillSkill||{},classActivities:data.classActivities||{},exitChecks:data.exitChecks||{},period:data.period||'',songOpens});
+      out.push({uid:doc.id,skills,name:String(data.name||''),email:String(data.email||''),responses:data.responses||{},coachSkill:gamesData.coachSkill||{},drillSkill:gamesData.drillSkill||{},classActivities:data.classActivities||{},exitChecks:data.exitChecks||{},period:data.period||'',songOpens,
+        // Step ticks (caSteps, `<id>:<n>`), only to tell "started" from "not started" on an
+        // activity's Students tab — keys are tested with startsWith, never shown.
+        caSteps:(data.caSteps&&typeof data.caSteps==='object')?data.caSteps:{}});
   });
   return out;
 }
@@ -620,7 +658,9 @@ function teacherRefreshSafe(){
   if(boardDragId) return false;
   if(activityEditId) return false;
   const ae=document.activeElement;
-  if(ae && /^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName) && ae.closest('#teacher-app')) return false;
+  // The list's search box is the exception: a refresh repaints the rows
+  // under it, never the box itself.
+  if(ae && /^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName) && ae.closest('#teacher-app') && !ae.matches('[data-ta-search]')) return false;
   const sel=window.getSelection ? window.getSelection() : null;
   const grid=document.getElementById('t-grid-container');
   if(sel && !sel.isCollapsed && grid && sel.anchorNode && grid.contains(sel.anchorNode)) return false;
@@ -648,10 +688,14 @@ async function teacherRefreshStudents(opts){
   try{
     renderTeacherSummary();
     if(teacherView==='activities'){
-      if(activityDetailId) teacherRepaintActivityStudents(activityDetailId);
-      // The button re-reads the class settings too, like any write's repaint;
-      // the timer and tab-return paint over the config already in hand.
-      else renderTeacherActivities(manual ? undefined : {cached:true});
+      // The board repaints whole. The list and an activity repaint the
+      // list's rows and the Students boxes only — never the Preview, where a
+      // song or drill may be playing. The button re-reads the class
+      // settings too, like any write's repaint; the timer and tab-return
+      // paint over the config already in hand.
+      if(activityBoardMode) renderTeacherActivities(manual ? undefined : {cached:true});
+      else if(manual) renderTeacherActivities();
+      else { teacherPaintActivityList(false); if(activityDetailId) teacherRepaintActivityStudents(activityDetailId); }
     } else if(!TEACHER_NO_REFRESH_BAR_VIEWS.includes(teacherView)){
       // A student's page scrolls to the top when it's drawn (it's built for
       // opening one); a refresh keeps the teacher's place.
@@ -663,17 +707,21 @@ async function teacherRefreshStudents(opts){
   teacherPaintRefreshBar();
 }
 /* An activity's page: repaint the [data-ta-live] boxes only — the Students
-   block (teacherActivityGridHtml), and for an exit check its turned-in line
-   too (teacherCheckLiveParts). The Preview under them is left alone. */
+   tab's counts and its block (teacherActivityGridHtml), and for an exit
+   check its turned-in line too (teacherCheckLiveParts) — plus the count on
+   the Students tab itself. The Preview is left alone. */
 function teacherRepaintActivityStudents(id){
   const box=document.getElementById('t-grid-container');
   const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
   if(!box || !a) return;
   const parts = a.kind==='check' ? teacherCheckLiveParts(a) : {grid: teacherActivityGridHtml(a)};
+  parts.counts=teacherActivityCountsHtml(a);
   Object.keys(parts).forEach(k=>{
     const el=box.querySelector(`[data-ta-live="${k}"]`);
     if(el) el.innerHTML=parts[k];
   });
+  const lab=box.querySelector('[data-ta-students-label]');
+  if(lab) lab.innerHTML=teacherStudentsTabLabelHtml(a);
 }
 /* Start or stop the once-a-minute timer to match the view and the tab's
    visibility, and repaint the bar. Called from renderTeacherBody (every view
@@ -914,10 +962,10 @@ function abbreviate(text){ const words=text.split(' '); if(words.length<=4) retu
    one renderTeacherBody shows, kept separate from teacherView so a name
    click in the skills grid can jump straight to a student's detail without
    a view flag of its own. */
-/* The console opens on Class activities — the board is what gets touched
-   before and during a period, where the skills grid is a look-back.
-   showTeacherApp marks it in the sidebar (applyTeacherViewChrome) once the
-   sidebar is built. */
+/* The console opens on Class activities — the list and an activity's
+   preview are what get used before and during a period, where the skills
+   grid is a look-back. showTeacherApp marks it in the sidebar
+   (applyTeacherViewChrome) once the sidebar is built. */
 let teacherView='activities';
 let studentDetailUid=null;
 // Which activity's detail is showing in the Class activities view — same
@@ -1022,7 +1070,14 @@ function setTeacherView(v){
   if(teacherView==='tsongs' && v!=='tsongs' && typeof stopCardAudio==='function') stopCardAudio();
   teacherView=v;
   if(v==='students') studentDetailUid=null; // clicking the tab always starts back at the roster
-  if(v==='activities'||v==='songs'){ activityDetailId=null; activityEditId=null; } // same — the tab always starts back at the list, nothing mid-rename
+  if(v==='songs'){ activityDetailId=null; activityEditId=null; } // the tab always starts back at the list, nothing mid-rename
+  /* Class activities opens on its list + detail split. The activity picked
+     there stays picked when you come back to the tab; one opened from
+     somewhere else (Songs, a student's page) does not. */
+  if(v==='activities'){
+    if(activityDetailFrom!=='activities') activityDetailId=null;
+    activityDetailFrom='activities'; activityBoardMode=false; activityEditId=null;
+  }
   applyTeacherViewChrome(v);
   renderTeacherBody();
 }
@@ -1034,47 +1089,72 @@ function openStudentDetail(uid){
   renderTeacherBody();
 }
 function backToStudentsRoster(){ studentDetailUid=null; renderTeacherBody(); }
-/* Where the Class activities table was scrolled when a title was clicked, so
-   Back can put you down on the row you left rather than the top of a long
-   list. Only meaningful coming FROM that table — a "Blocked by" row on a
-   student's page opens the same detail with no row to return to. */
+/* ── Class activities: which screen is up (Layout A, 2026-11-08) ─────────
+   Three screens share teacherView 'activities':
+     'split'  the list (left) and the picked activity (right, in tabs) — the
+              default, and what the tab always opens on;
+     'board'  "Arrange board": the full drag-and-drop board, unchanged,
+              with a Back to list button;
+     'detail' the tabbed detail alone, with a Back button — an activity
+              opened from somewhere else (a Songs row, a student's "Blocked
+              by" row), so Back returns there.
+   activityDetailId is the picked activity in 'split' and the one shown in
+   'detail'. It survives a trip to the board, so Back to list lands on it. */
+let activityBoardMode=false;
+let activityDetailFromUid=null;    // the student page an activity was opened from
+/* Which list the detail page was opened from: 'activities' (the list or the
+   board), 'songs' (the Songs view) or 'student' (a "Blocked by" row on
+   activityDetailFromUid's page). Back returns there and that tab stays lit. */
+let activityDetailFrom='activities';
+function teacherActivityScreen(){
+  if(activityBoardMode) return 'board';
+  return (activityDetailId && activityDetailFrom!=='activities') ? 'detail' : 'split';
+}
+/* Where the board was scrolled when a card on it was opened, so Arrange
+   board lands back there. */
 let activityListScrollY = 0;
 let restoreActivityScroll = false;
-/* Jumps straight to one activity's detail page — from the Class activities
-   table's title cell, or a "Blocked by" row on a student's page.
-
-   The scroll reset is the whole reason clicking a title looked broken. The
-   table is usually taller than the window, so a row low in it is clicked
-   from a scrolled page — and the detail page that replaces it is taller than
-   the window too (one row per student), so the browser has nothing to clamp
-   the scroll back to. Without this you stay parked at the same offset,
-   looking at the middle of a student table that reads just like the one you
-   just clicked in. renderTeacherStudentDetail has ended with the same line
-   since it was written; this was the copy that was missing.
-
-   It lives HERE rather than at the end of the two detail renderers because
-   those re-render in place — a Preview-as-student toggle, a period filter
-   change, the Students part after every per-student Clear — and jumping to the top mid-way down a 60-row
-   grid is its own bug. Opening is the only moment the scroll should move.
-   window, not a scroll pane: the dashboard is a plain long page, and #app
-   (which does have its own pane — scrollPane() in app.js) is hidden the
-   whole time teacher mode is up. */
-/* Which list the detail page was opened from — 'songs' when it came from the
-   Songs view, so Back returns there and that tab stays lit. */
-let activityDetailFrom='activities';
+/* Opens one activity — from a card on the board (its title or Preview), a
+   Songs row, or a "Blocked by" row on a student's page. From the board it
+   lands in the split view with that card picked; from anywhere else on the
+   tabbed detail alone, with Back. Opening is the one moment the window
+   scrolls to the top: the detail pages re-render in place (a tab, a
+   Preview-as-student toggle, a Clear), and jumping mid-grid is its own bug.
+   window, not a scroll pane: the dashboard is a plain long page. */
 function openActivityDetail(id){
-  activityListScrollY = (teacherView==='activities' && !activityDetailId) ? window.scrollY : 0;
-  activityDetailFrom = (teacherView==='songs') ? 'songs' : 'activities';
+  const from = teacherView==='songs' ? 'songs' : (teacherView==='students' && studentDetailUid) ? 'student' : 'activities';
+  if(teacherView==='activities' && activityBoardMode) activityListScrollY=window.scrollY;
+  activityDetailFrom=from;
+  activityDetailFromUid = from==='student' ? studentDetailUid : null;
+  activityBoardMode=false; activityEditId=null;
   teacherView='activities'; activityDetailId=id;
-  applyTeacherViewChrome(activityDetailFrom);
-  renderTeacherBody();   // synchronous for a detail page — renderTeacherActivities returns early before its config promise
+  applyTeacherViewChrome(from==='songs' ? 'songs' : from==='student' ? 'students' : 'activities');
+  renderTeacherBody();
   window.scrollTo({top:0});
 }
 function backToActivitiesList(){
-  activityDetailId=null;
-  if(activityDetailFrom==='songs'){ activityDetailFrom='activities'; setTeacherView('songs'); window.scrollTo({top:0}); return; }
-  restoreActivityScroll=true;   // the table paints from a promise — see renderTeacherActivities
+  const from=activityDetailFrom, uid=activityDetailFromUid;
+  activityDetailFrom='activities'; activityDetailFromUid=null;
+  if(from==='songs'){ activityDetailId=null; setTeacherView('songs'); window.scrollTo({top:0}); return; }
+  if(from==='student' && uid){ activityDetailId=null; openStudentDetail(uid); return; }
+  activityBoardMode=false;
   renderTeacherBody();
+}
+/* Arrange board / Back to list. The board is today's full board, drawn by
+   renderTeacherActivities exactly as before; the list's picked activity is
+   kept for the way back. */
+function teacherOpenArrangeBoard(){
+  // From an activity opened elsewhere (Songs, a student): the board belongs to Class activities.
+  if(activityDetailFrom!=='activities'){ activityDetailFrom='activities'; activityDetailFromUid=null; applyTeacherViewChrome('activities'); }
+  activityBoardMode=true; activityEditId=null;
+  if(activityListScrollY) restoreActivityScroll=true;
+  renderTeacherActivities();
+}
+function teacherCloseArrangeBoard(){
+  activityBoardMode=false; activityEditId=null;
+  activityListScrollY=window.scrollY;
+  renderTeacherActivities({cached:true});
+  window.scrollTo({top:0});
 }
 function renderTeacherBody(){
   teacherSyncAutoRefresh();   // the progress timer runs on Class activities only
@@ -1389,6 +1469,187 @@ async function teacherMigrateActivityBoard(cfg){
   return true;
 }
 
+/* The per-card parts of the Class activities board — done counts, title
+   line, publish controls and the Visible / Required / Play Along / Pin / Who
+   / Move-to / Songs switches — built once per paint from one config. Shared
+   by the board (renderTeacherActivities) and an activity's Settings tab
+   (teacherActivitySettingsHtml), so the two draw the same controls with the
+   same data-* attributes, and the same delegated listeners call the same
+   writers. `activities` is the board's list (no Songs-page or teacher-only
+   cards). */
+function teacherActivityCtlKit(cfg, activities){
+  const hidden=cfg.hiddenActivities||{};
+  const optional=cfg.optionalActivities||{};
+  const playAlong=cfg.playAlongActivities||{};
+  const pins=teacherActivityPins(cfg);
+  const dates=cfg.activityDates||{};
+  const today=dayStr(new Date());
+  const view=teacherBoardView(cfg);
+  const nums=view.number;
+  const byId={}; activities.forEach(a=>{ byId[a.id]=a; });
+  const manifest=(typeof MODULE_MANIFEST!=='undefined')?MODULE_MANIFEST:[];
+
+  /* ── Shared card parts ──────────────────────────────────────────── */
+  // How many students have finished this one, and who hasn't — broken out
+  // by period so the number can't be misread as the whole class when the
+  // dashboard's period filter (t-period-filter) is narrowed to P4, P7,
+  // CAS, or Unassigned. Deliberately reads the FULL roster (allStudentsRaw, minus
+  // archived) rather than `allStudents`, which follows that filter — this
+  // card is meant to answer "who's done" for the whole class regardless of
+  // whatever the teacher is currently looking at elsewhere on the page.
+  // Reads the SAME student docs the Students tab already fetched
+  // (loadAllStudents) — no second Firestore read path for completion data.
+  const doneSummaryRoster=(teacherShowArchived?allStudentsRaw:allStudentsRaw.filter(s=>!((cfg.archived||{})[s.uid])));
+  const doneSummary=a=>{
+    const isCheck=a.kind==='check';
+    const forIt=doneSummaryRoster.filter(s=>teacherActivityForStudent(a,s.uid,cfg));
+    const groups=[['4','P4'],['7','P7'],['CAS','CAS'],['','Unassigned']]
+      .map(([val,label])=>({label, students:forIt.filter(s=>teacherStudentPeriod(s)===val)}))
+      .filter(g=>g.students.length);
+    const rows=groups.map(g=>{
+      const notDone=g.students.filter(s=>isCheck
+        ? !(s.exitChecks||{})[a.id]
+        : (s.classActivities||{})[a.id]!==true);
+      const doneCount=g.students.length-notDone.length;
+      const listHtml=notDone.length
+        ? notDone.map(s=>`<div style="padding:2px 0">${escHtml(s.name||'(no name)')}${s.email?` &middot; ${escHtml(s.email)}`:''}</div>`).join('')
+        : `<div style="padding:2px 0">Everyone has ${isCheck?'turned this one in':'finished this one'}.</div>`;
+      const results=isCheck?g.students.map(s=>(s.exitChecks||{})[a.id]).filter(Boolean):[];
+      const itemTotal=isCheck?(((a.check||{}).items)||[]).length:0;
+      const avg=results.length?(results.reduce((n,r)=>n+(Number(r.score)||0),0)/results.length).toFixed(1):null;
+      const head=isCheck
+        ? `${g.label}: ${doneCount} / ${g.students.length} turned in${avg!==null?` &middot; avg ${avg}/${itemTotal}`:' &middot; avg —'}`
+        : `${g.label}: ${doneCount} / ${g.students.length} done`;
+      const openKey=a.id+'|'+g.label;
+      return `<div class="t-board-done-row"><strong>${head}</strong> &middot; <details data-board-done data-key="${escAttr(openKey)}"${boardDoneOpen[openKey]?' open':''}><summary>who hasn't ${isCheck?'turned it in':'finished'} (${notDone.length})</summary>${listHtml}</details></div>`;
+    }).join('');
+    return `<div class="t-board-done">${rows||'<div class="t-board-done-row">No student data yet.</div>'}</div>`;
+  };
+  // Title line: the rename editor when it's open on this card, otherwise
+  // the name + pencil + id + Copy link. The whole line is the link into
+  // the detail page, so the buttons inside it are matched FIRST by the
+  // delegated click listener (see showTeacherApp).
+  const titleBlock=a=>{
+    const shown=teacherActivityTitle(a,cfg);
+    const renamed=teacherActivityRenamed(a,cfg);
+    if(activityEditId===a.id){
+      return `<div class="t-board-title">`
+        +`<span class="t-act-title-lbl">rename (English)</span>`
+        +`<input type="text" class="t-act-title-edit" data-id="${escAttr(a.id)}" value="${escAttr(shown)}" maxlength="120" spellcheck="false" aria-label="Rename ${escAttr(shown)} (English)">`
+        +`<span class="t-act-title-hint">Students see this right away, in English in both languages, until the Spanish twin ships in the next update.</span>`
+        +`<div style="margin-top:7px;display:flex;gap:6px;flex-wrap:wrap">`
+        +`<button class="tg-seg-btn on" data-rename-save data-id="${escAttr(a.id)}">Save</button>`
+        +`<button class="tg-seg-btn" data-rename-cancel>Cancel</button>`
+        +(renamed?`<button class="tg-seg-btn" data-rename-reset data-id="${escAttr(a.id)}">Undo rename</button>`:'')
+        +`</div></div>`;
+    }
+    const prefix=a.kind==='check'?'Exit check · ':'';
+    return `<div class="t-board-title" data-open-activity data-id="${escAttr(a.id)}" title="${escAttr(prefix+shown)}">`
+      +`${escHtml(prefix)}<span class="t-board-name">${escHtml(shown)}</span> `
+      +`<span class="t-board-id">(${escHtml(a.id)})</span> `
+      +`<button class="t-act-pencil" data-rename-activity data-id="${escAttr(a.id)}" title="Rename this activity" aria-label="Rename ${escAttr(shown)}">&#x270E;</button>`
+      +`<button class="tg-seg-btn t-act-link" data-copy-activity-link data-id="${escAttr(a.id)}" title="Copy the student link straight to this ${a.kind==='check'?'exit check':'activity'}" aria-label="Copy the student link to ${escAttr(shown)}">Copy link</button>`
+      +(renamed?`<span class="t-act-title-hint">Renamed — students see this in both languages until the Spanish twin ships. Was: ${escHtml(a.title)}</span>`:'')
+      +`</div>`;
+  };
+  /* Publish controls, driven entirely by activityDates[id] — there is no
+     separate published flag. Three states, and the button that leaves each
+     one: undated (Publish now writes today, or schedule a day), scheduled
+     (change the day, or Unpublish), live (Unpublish). All three go through
+     the existing teacherSetActivityDate writer; '' clears. */
+  const publishBlock=a=>{
+    const dateVal=dates[a.id]||'';
+    const isHidden=hidden[a.id]===true;
+    // max: the calendar greys out the years teacherCommitActivityDate refuses.
+    const dateInput=`<input type="date" class="t-date-input" data-set-activity-date data-id="${escAttr(a.id)}" value="${escAttr(dateVal)}" max="${new Date().getFullYear()+1}-12-31" aria-label="Release date for ${escAttr(teacherActivityTitle(a,cfg))}">`;
+    const pubNow=`<button class="tg-seg-btn" data-publish-activity data-id="${escAttr(a.id)}" data-state="now" title="Publish today — students see it as soon as they reload">Publish now</button>`;
+    const unpub=`<button class="tg-seg-btn" data-publish-activity data-id="${escAttr(a.id)}" data-state="off" title="Clear the release date — students stop seeing it">Unpublish</button>`;
+    let status, controls;
+    if(!dateVal){ status=`<span class="t-board-status">Not published</span>`; controls=pubNow+` <span class="t-board-sched">or schedule ${dateInput}</span>`; }
+    else if(dateVal>today){ status=`<span class="t-board-status t-board-sched-on">Scheduled ${escHtml(dateVal)}</span>`; controls=dateInput+' '+unpub; }
+    /* A live card's date is editable too (Jonathan, 2026-09-16). It used
+       to render read-only, which meant moving something already out to
+       students to a different day took Unpublish → re-date — two writes,
+       and a window where the card vanished from In-Class Activities in
+       between. Typing
+       a new day straight into the box is one write either way: a past
+       date just re-dates it, a future one pulls it back to Scheduled. */
+    else { status=`<span class="t-board-status ${isHidden?'t-board-hidden-on':'t-board-live'}">${isHidden?'Hidden':'Live'}</span>`; controls=dateInput+' '+unpub; }
+    return `<div class="t-board-publish">${status}<span class="t-board-pubctl">${controls}</span></div>`;
+  };
+  const visSeg=a=>{
+    const isHidden=hidden[a.id]===true;
+    return `<div class="tg-seg">`
+      +`<button class="tg-seg-btn ${!isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="show">Visible</button>`
+      +`<button class="tg-seg-btn ${isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="hide">Hidden</button></div>`;
+  };
+  // Required: until it's done or cleared, In-Class Activities opens first
+  // at sign-in (the activity gate's lock is off — CA_GATE_LOCKS in app.js);
+  // Optional still shows, tagged "Optional", but never does. Independent
+  // of Visible/Hidden — see teacherSetActivityOptional.
+  const optSeg=a=>{
+    const isOpt=teacherActivityOptional(a.id,cfg);
+    return `<div class="tg-seg">`
+      +`<button class="tg-seg-btn ${!isOpt?'on':''}" data-set-activity-optional data-id="${escAttr(a.id)}" data-state="required" title="Until students finish this (or you clear it for them), In-Class Activities opens first when they sign in. Nothing else is locked.">Required</button>`
+      +`<button class="tg-seg-btn ${isOpt?'on':''}" data-set-activity-optional data-id="${escAttr(a.id)}" data-state="optional" title="Students see it, tagged Optional, but it never opens first when they sign in">Optional</button></div>`;
+  };
+  // Practice cards only (view:'card'): when the Songs page's Play Along
+  // list shows this card. "By date" is the rule every card follows — listed
+  // once its release date arrives. "Now" lists it there today, dated or
+  // not, and changes nothing else: it stays off In-Class Activities and
+  // never blocks. See teacherSetActivityPlayAlong.
+  const playSeg=a=>{
+    if(a.view!=='card') return '';
+    const isOn=playAlong[a.id]===true;
+    return `<div class="tg-seg">`
+      +`<button class="tg-seg-btn ${!isOn?'on':''}" data-set-activity-playalong data-id="${escAttr(a.id)}" data-state="date" title="Songs page lists this card under Play Along once its release date arrives">Play Along by date</button>`
+      +`<button class="tg-seg-btn ${isOn?'on':''}" data-set-activity-playalong data-id="${escAttr(a.id)}" data-state="now" title="Songs page lists this card under Play Along now, with or without a release date. It stays off In-Class Activities and never blocks.">Play Along now</button></div>`;
+  };
+  // The Keep practicing row (config/class.activityPins): a pinned card is
+  // one click away for students at the top of In-Class Activities, with
+  // or without a release date. Exit checks are never pinnable. See
+  // teacherSetActivityPin.
+  const pinBtn=a=>{
+    if(a.kind==='check') return '';
+    const at=pins.indexOf(a.id);
+    return `<div class="tg-seg">`
+      +`<button class="tg-seg-btn ${at<0?'on':''}" data-set-activity-pin data-id="${escAttr(a.id)}" data-state="off" title="Not on the Keep practicing row at the top of students' In-Class Activities page">Not pinned</button>`
+      +`<button class="tg-seg-btn ${at>=0?'on':''}" data-set-activity-pin data-id="${escAttr(a.id)}" data-state="on" title="On the Keep practicing row at the top of students' In-Class Activities page — no release date needed. It never blocks and never counts as one of today's activities. ${TEACHER_PINS_MAX} at most.">${at>=0?`Pinned ${at+1} of ${TEACHER_PINS_MAX}`:'Pin'}</button></div>`;
+  };
+  /* Who: the whole class (the default), or only the students ticked here
+     — config/class.activityStudents, id -> { uid -> true }. Students
+     nobody ticked never see the card, aren't sent to it at sign-in, and
+     aren't counted in its done list. See teacherSetActivityStudent. */
+  const whoPicker=a=>{
+    const n=Object.keys(teacherActivityStudents(a.id,cfg)).length;
+    const sum=n?`Only ${n} student${n===1?'':'s'}`:'Whole class';
+    return `<details class="t-who${n?' t-who-on':''}" data-board-who data-id="${escAttr(a.id)}"${boardWhoOpen[a.id]?' open':''}>`
+      +`<summary title="Who this activity is for">Who: ${sum}</summary>`
+      +`<div class="t-who-body"><div class="t-who-note">Tick students to give this activity to them only. Nobody ticked = the whole class.</div>`
+      +(n?`<div class="tg-seg"><button class="tg-seg-btn" data-activity-whole-class data-id="${escAttr(a.id)}">Back to whole class</button></div>`:'')
+      +`<div data-who-boxes>${boardWhoOpen[a.id]?teacherWhoBoxesHtml(a,cfg):''}</div></div></details>`;
+  };
+  // A movable song (caIsSongCard) can go to the Songs page instead — see
+  // teacherSetSongPlace. Its board slot is kept for the trip back.
+  const songBtn=a=>caIsSongCard(a)
+    ? `<button class="tg-seg-btn" data-set-song-place data-id="${escAttr(a.id)}" data-state="songs" title="Take this off the board and put it on every student's Songs page, under More Play Along songs">Move to Songs</button>`
+    // A teacher-only card moved here goes back the same way — see
+    // teacherSetClassSong. Its board slot is kept for the next trip.
+    : a.teacherOnly===true
+    ? `<button class="tg-seg-btn" data-tvs-share data-id="${escAttr(a.id)}" data-state="teacher" title="Take this off the board and students' In-Class Activities, back to the Teacher view songs tab only">Move to Teacher view songs</button>`
+    : '';
+  // Where a card can be sent without a drag. Used as "Assign to" in Built
+  // and "Move to" in Assigned; both append at the end of the section they
+  // name, which is what a drag onto empty space does too.
+  const moveSelect=(a,label,curModule)=>{
+    const opts=[`<option value="">${escHtml(label)}</option>`,`<option value="0"${curModule===0?' disabled':''}>Unsorted</option>`]
+      .concat(manifest.map(m=>`<option value="${m.num}"${curModule===m.num?' disabled':''}>Module ${m.num} — ${escHtml(m.name)}</option>`));
+    return `<select class="t-board-move" data-move-activity data-id="${escAttr(a.id)}" aria-label="${escAttr(label+' '+teacherActivityTitle(a,cfg))}">${opts.join('')}</select>`;
+  };
+
+  return {hidden, optional, playAlong, pins, dates, today, view, nums, byId, manifest, doneSummaryRoster, doneSummary,
+    titleBlock, publishBlock, visSeg, optSeg, playSeg, pinBtn, whoPicker, songBtn, moveSelect};
+}
 /* ── Class activities: the board ────────────────────────────────────────
    Two columns. LEFT, "Built": every activity that has been pushed to the
    site but not yet placed in the course — newest first, because the one
@@ -1420,9 +1681,12 @@ async function teacherMigrateActivityBoard(cfg){
    after it still follows), and the student-progress auto-refresh repaints
    new done counts over the config already in hand (teacherRefreshStudents). */
 function renderTeacherActivities(opts){
+  // The list + detail split and the detail alone have their own painter;
+  // what follows is the board ("Arrange board"), unchanged.
+  const screen=teacherActivityScreen();
+  if(screen!=='board'){ teacherRenderActivityScreen(screen, opts); return; }
   const cached = !!(opts && opts.cached) && teacherClassConfigLoaded;
   const box=document.getElementById('t-grid-container');
-  if(activityDetailId){ renderTeacherActivityDetail(activityDetailId); return; }
   const allActivities=window.CLASS_ACTIVITIES||[];
   if(!allActivities.length){
     box.innerHTML='<div class="t-loading">No activities yet — they\'ll appear here once one is pushed to the site.</div>';
@@ -1442,9 +1706,9 @@ function renderTeacherActivities(opts){
   (cached ? Promise.resolve(teacherClassConfig) : loadTeacherClassConfig()).then(async cfg=>{
     if(teacherView!=='activities') return;   // switched views mid-flight
     if(!cfg) return;                         // superseded by a newer toggle
-    // An activity's page opened mid-flight. It starts no config read of its
-    // own, so this one is still the newest and would paint the board over it.
-    if(activityDetailId) return;
+    // Back to the list (or an activity opened) mid-flight: this read would
+    // paint the board over it.
+    if(!activityBoardMode) return;
     // First ever board render: place what's already published, then paint.
     if(!cfg.activityBoardSeeded && !boardMigrating){
       if(!teacherClassConfigReadOk){
@@ -1452,7 +1716,7 @@ function renderTeacherActivities(opts){
         return;
       }
       const done=await teacherMigrateActivityBoard(cfg);
-      if(teacherView!=='activities' || activityDetailId) return;
+      if(teacherView!=='activities' || !activityBoardMode) return;
       if(!done && !cfg.activityBoardSeeded){
         box.innerHTML='<div class="t-loading">Could not set up the activity board — reload to try again.</div>';
         return;
@@ -1463,174 +1727,8 @@ function renderTeacherActivities(opts){
     // Teacher-only cards neither — the Teacher view songs tab has them,
     // until its Move to Class activities brings one here.
     const activities=allActivities.filter(a=>!caIsLibraryCard(a, cfg.songLibrary||{}) && !caIsTeacherSong(a, cfg.classSongs||{}));
-    const hidden=cfg.hiddenActivities||{};
-    const optional=cfg.optionalActivities||{};
-    const playAlong=cfg.playAlongActivities||{};
-    const pins=teacherActivityPins(cfg);
-    const dates=cfg.activityDates||{};
-    const today=dayStr(new Date());
-    const view=teacherBoardView(cfg);
-    const nums=view.number;
-    const byId={}; activities.forEach(a=>{ byId[a.id]=a; });
-    const manifest=(typeof MODULE_MANIFEST!=='undefined')?MODULE_MANIFEST:[];
-
-    /* ── Shared card parts ──────────────────────────────────────────── */
-    // How many students have finished this one, and who hasn't — broken out
-    // by period so the number can't be misread as the whole class when the
-    // dashboard's period filter (t-period-filter) is narrowed to P4, P7,
-    // CAS, or Unassigned. Deliberately reads the FULL roster (allStudentsRaw, minus
-    // archived) rather than `allStudents`, which follows that filter — this
-    // card is meant to answer "who's done" for the whole class regardless of
-    // whatever the teacher is currently looking at elsewhere on the page.
-    // Reads the SAME student docs the Students tab already fetched
-    // (loadAllStudents) — no second Firestore read path for completion data.
-    const doneSummaryRoster=(teacherShowArchived?allStudentsRaw:allStudentsRaw.filter(s=>!((cfg.archived||{})[s.uid])));
-    const doneSummary=a=>{
-      const isCheck=a.kind==='check';
-      const forIt=doneSummaryRoster.filter(s=>teacherActivityForStudent(a,s.uid,cfg));
-      const groups=[['4','P4'],['7','P7'],['CAS','CAS'],['','Unassigned']]
-        .map(([val,label])=>({label, students:forIt.filter(s=>teacherStudentPeriod(s)===val)}))
-        .filter(g=>g.students.length);
-      const rows=groups.map(g=>{
-        const notDone=g.students.filter(s=>isCheck
-          ? !(s.exitChecks||{})[a.id]
-          : (s.classActivities||{})[a.id]!==true);
-        const doneCount=g.students.length-notDone.length;
-        const listHtml=notDone.length
-          ? notDone.map(s=>`<div style="padding:2px 0">${escHtml(s.name||'(no name)')}${s.email?` &middot; ${escHtml(s.email)}`:''}</div>`).join('')
-          : `<div style="padding:2px 0">Everyone has ${isCheck?'turned this one in':'finished this one'}.</div>`;
-        const results=isCheck?g.students.map(s=>(s.exitChecks||{})[a.id]).filter(Boolean):[];
-        const itemTotal=isCheck?(((a.check||{}).items)||[]).length:0;
-        const avg=results.length?(results.reduce((n,r)=>n+(Number(r.score)||0),0)/results.length).toFixed(1):null;
-        const head=isCheck
-          ? `${g.label}: ${doneCount} / ${g.students.length} turned in${avg!==null?` &middot; avg ${avg}/${itemTotal}`:' &middot; avg —'}`
-          : `${g.label}: ${doneCount} / ${g.students.length} done`;
-        const openKey=a.id+'|'+g.label;
-        return `<div class="t-board-done-row"><strong>${head}</strong> &middot; <details data-board-done data-key="${escAttr(openKey)}"${boardDoneOpen[openKey]?' open':''}><summary>who hasn't ${isCheck?'turned it in':'finished'} (${notDone.length})</summary>${listHtml}</details></div>`;
-      }).join('');
-      return `<div class="t-board-done">${rows||'<div class="t-board-done-row">No student data yet.</div>'}</div>`;
-    };
-    // Title line: the rename editor when it's open on this card, otherwise
-    // the name + pencil + id + Copy link. The whole line is the link into
-    // the detail page, so the buttons inside it are matched FIRST by the
-    // delegated click listener (see showTeacherApp).
-    const titleBlock=a=>{
-      const shown=teacherActivityTitle(a,cfg);
-      const renamed=teacherActivityRenamed(a,cfg);
-      if(activityEditId===a.id){
-        return `<div class="t-board-title">`
-          +`<span class="t-act-title-lbl">rename (English)</span>`
-          +`<input type="text" class="t-act-title-edit" data-id="${escAttr(a.id)}" value="${escAttr(shown)}" maxlength="120" spellcheck="false" aria-label="Rename ${escAttr(shown)} (English)">`
-          +`<span class="t-act-title-hint">Students see this right away, in English in both languages, until the Spanish twin ships in the next update.</span>`
-          +`<div style="margin-top:7px;display:flex;gap:6px;flex-wrap:wrap">`
-          +`<button class="tg-seg-btn on" data-rename-save data-id="${escAttr(a.id)}">Save</button>`
-          +`<button class="tg-seg-btn" data-rename-cancel>Cancel</button>`
-          +(renamed?`<button class="tg-seg-btn" data-rename-reset data-id="${escAttr(a.id)}">Undo rename</button>`:'')
-          +`</div></div>`;
-      }
-      const prefix=a.kind==='check'?'Exit check · ':'';
-      return `<div class="t-board-title" data-open-activity data-id="${escAttr(a.id)}" title="${escAttr(prefix+shown)}">`
-        +`${escHtml(prefix)}<span class="t-board-name">${escHtml(shown)}</span> `
-        +`<span class="t-board-id">(${escHtml(a.id)})</span> `
-        +`<button class="t-act-pencil" data-rename-activity data-id="${escAttr(a.id)}" title="Rename this activity" aria-label="Rename ${escAttr(shown)}">&#x270E;</button>`
-        +`<button class="tg-seg-btn t-act-link" data-copy-activity-link data-id="${escAttr(a.id)}" title="Copy the student link straight to this ${a.kind==='check'?'exit check':'activity'}" aria-label="Copy the student link to ${escAttr(shown)}">Copy link</button>`
-        +(renamed?`<span class="t-act-title-hint">Renamed — students see this in both languages until the Spanish twin ships. Was: ${escHtml(a.title)}</span>`:'')
-        +`</div>`;
-    };
-    /* Publish controls, driven entirely by activityDates[id] — there is no
-       separate published flag. Three states, and the button that leaves each
-       one: undated (Publish now writes today, or schedule a day), scheduled
-       (change the day, or Unpublish), live (Unpublish). All three go through
-       the existing teacherSetActivityDate writer; '' clears. */
-    const publishBlock=a=>{
-      const dateVal=dates[a.id]||'';
-      const isHidden=hidden[a.id]===true;
-      // max: the calendar greys out the years teacherCommitActivityDate refuses.
-      const dateInput=`<input type="date" class="t-date-input" data-set-activity-date data-id="${escAttr(a.id)}" value="${escAttr(dateVal)}" max="${new Date().getFullYear()+1}-12-31" aria-label="Release date for ${escAttr(teacherActivityTitle(a,cfg))}">`;
-      const pubNow=`<button class="tg-seg-btn" data-publish-activity data-id="${escAttr(a.id)}" data-state="now" title="Publish today — students see it as soon as they reload">Publish now</button>`;
-      const unpub=`<button class="tg-seg-btn" data-publish-activity data-id="${escAttr(a.id)}" data-state="off" title="Clear the release date — students stop seeing it">Unpublish</button>`;
-      let status, controls;
-      if(!dateVal){ status=`<span class="t-board-status">Not published</span>`; controls=pubNow+` <span class="t-board-sched">or schedule ${dateInput}</span>`; }
-      else if(dateVal>today){ status=`<span class="t-board-status t-board-sched-on">Scheduled ${escHtml(dateVal)}</span>`; controls=dateInput+' '+unpub; }
-      /* A live card's date is editable too (Jonathan, 2026-09-16). It used
-         to render read-only, which meant moving something already out to
-         students to a different day took Unpublish → re-date — two writes,
-         and a window where the card vanished from In-Class Activities in
-         between. Typing
-         a new day straight into the box is one write either way: a past
-         date just re-dates it, a future one pulls it back to Scheduled. */
-      else { status=`<span class="t-board-status ${isHidden?'t-board-hidden-on':'t-board-live'}">${isHidden?'Hidden':'Live'}</span>`; controls=dateInput+' '+unpub; }
-      return `<div class="t-board-publish">${status}<span class="t-board-pubctl">${controls}</span></div>`;
-    };
-    const visSeg=a=>{
-      const isHidden=hidden[a.id]===true;
-      return `<div class="tg-seg">`
-        +`<button class="tg-seg-btn ${!isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="show">Visible</button>`
-        +`<button class="tg-seg-btn ${isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="hide">Hidden</button></div>`;
-    };
-    // Required: until it's done or cleared, In-Class Activities opens first
-    // at sign-in (the activity gate's lock is off — CA_GATE_LOCKS in app.js);
-    // Optional still shows, tagged "Optional", but never does. Independent
-    // of Visible/Hidden — see teacherSetActivityOptional.
-    const optSeg=a=>{
-      const isOpt=teacherActivityOptional(a.id,cfg);
-      return `<div class="tg-seg">`
-        +`<button class="tg-seg-btn ${!isOpt?'on':''}" data-set-activity-optional data-id="${escAttr(a.id)}" data-state="required" title="Until students finish this (or you clear it for them), In-Class Activities opens first when they sign in. Nothing else is locked.">Required</button>`
-        +`<button class="tg-seg-btn ${isOpt?'on':''}" data-set-activity-optional data-id="${escAttr(a.id)}" data-state="optional" title="Students see it, tagged Optional, but it never opens first when they sign in">Optional</button></div>`;
-    };
-    // Practice cards only (view:'card'): when the Songs page's Play Along
-    // list shows this card. "By date" is the rule every card follows — listed
-    // once its release date arrives. "Now" lists it there today, dated or
-    // not, and changes nothing else: it stays off In-Class Activities and
-    // never blocks. See teacherSetActivityPlayAlong.
-    const playSeg=a=>{
-      if(a.view!=='card') return '';
-      const isOn=playAlong[a.id]===true;
-      return `<div class="tg-seg">`
-        +`<button class="tg-seg-btn ${!isOn?'on':''}" data-set-activity-playalong data-id="${escAttr(a.id)}" data-state="date" title="Songs page lists this card under Play Along once its release date arrives">Play Along by date</button>`
-        +`<button class="tg-seg-btn ${isOn?'on':''}" data-set-activity-playalong data-id="${escAttr(a.id)}" data-state="now" title="Songs page lists this card under Play Along now, with or without a release date. It stays off In-Class Activities and never blocks.">Play Along now</button></div>`;
-    };
-    // The Keep practicing row (config/class.activityPins): a pinned card is
-    // one click away for students at the top of In-Class Activities, with
-    // or without a release date. Exit checks are never pinnable. See
-    // teacherSetActivityPin.
-    const pinBtn=a=>{
-      if(a.kind==='check') return '';
-      const at=pins.indexOf(a.id);
-      return `<div class="tg-seg">`
-        +`<button class="tg-seg-btn ${at<0?'on':''}" data-set-activity-pin data-id="${escAttr(a.id)}" data-state="off" title="Not on the Keep practicing row at the top of students' In-Class Activities page">Not pinned</button>`
-        +`<button class="tg-seg-btn ${at>=0?'on':''}" data-set-activity-pin data-id="${escAttr(a.id)}" data-state="on" title="On the Keep practicing row at the top of students' In-Class Activities page — no release date needed. It never blocks and never counts as one of today's activities. ${TEACHER_PINS_MAX} at most.">${at>=0?`Pinned ${at+1} of ${TEACHER_PINS_MAX}`:'Pin'}</button></div>`;
-    };
-    /* Who: the whole class (the default), or only the students ticked here
-       — config/class.activityStudents, id -> { uid -> true }. Students
-       nobody ticked never see the card, aren't sent to it at sign-in, and
-       aren't counted in its done list. See teacherSetActivityStudent. */
-    const whoPicker=a=>{
-      const n=Object.keys(teacherActivityStudents(a.id,cfg)).length;
-      const sum=n?`Only ${n} student${n===1?'':'s'}`:'Whole class';
-      return `<details class="t-who${n?' t-who-on':''}" data-board-who data-id="${escAttr(a.id)}"${boardWhoOpen[a.id]?' open':''}>`
-        +`<summary title="Who this activity is for">Who: ${sum}</summary>`
-        +`<div class="t-who-body"><div class="t-who-note">Tick students to give this activity to them only. Nobody ticked = the whole class.</div>`
-        +(n?`<div class="tg-seg"><button class="tg-seg-btn" data-activity-whole-class data-id="${escAttr(a.id)}">Back to whole class</button></div>`:'')
-        +`<div data-who-boxes>${boardWhoOpen[a.id]?teacherWhoBoxesHtml(a,cfg):''}</div></div></details>`;
-    };
-    // A movable song (caIsSongCard) can go to the Songs page instead — see
-    // teacherSetSongPlace. Its board slot is kept for the trip back.
-    const songBtn=a=>caIsSongCard(a)
-      ? `<button class="tg-seg-btn" data-set-song-place data-id="${escAttr(a.id)}" data-state="songs" title="Take this off the board and put it on every student's Songs page, under More Play Along songs">Move to Songs</button>`
-      // A teacher-only card moved here goes back the same way — see
-      // teacherSetClassSong. Its board slot is kept for the next trip.
-      : a.teacherOnly===true
-      ? `<button class="tg-seg-btn" data-tvs-share data-id="${escAttr(a.id)}" data-state="teacher" title="Take this off the board and students' In-Class Activities, back to the Teacher view songs tab only">Move to Teacher view songs</button>`
-      : '';
-    // Where a card can be sent without a drag. Used as "Assign to" in Built
-    // and "Move to" in Assigned; both append at the end of the section they
-    // name, which is what a drag onto empty space does too.
-    const moveSelect=(a,label,curModule)=>{
-      const opts=[`<option value="">${escHtml(label)}</option>`,`<option value="0"${curModule===0?' disabled':''}>Unsorted</option>`]
-        .concat(manifest.map(m=>`<option value="${m.num}"${curModule===m.num?' disabled':''}>Module ${m.num} — ${escHtml(m.name)}</option>`));
-      return `<select class="t-board-move" data-move-activity data-id="${escAttr(a.id)}" aria-label="${escAttr(label+' '+teacherActivityTitle(a,cfg))}">${opts.join('')}</select>`;
-    };
+    const {hidden, optional, pins, dates, view, nums, byId, manifest, doneSummaryRoster, doneSummary,
+      titleBlock, publishBlock, visSeg, optSeg, playSeg, pinBtn, whoPicker, songBtn, moveSelect}=teacherActivityCtlKit(cfg, activities);
 
     /* ── Left column: Built ─────────────────────────────────────────── */
     // Newest id first by default (boardSortDir 'desc'), like everything else
@@ -1856,7 +1954,9 @@ function renderTeacherActivities(opts){
     // read's config (loadTeacherClassConfig) paints just after that one, and
     // the keepY it took when it started can be a scroll the teacher has left.
     const paintY=oldBuilt ? window.scrollY : keepY;
-    box.innerHTML=`<div class="tg-note">Drag a built activity into a module to assign it. It goes live for students on its release date.</div>`
+    box.innerHTML=`<div class="ta-board-bar"><button type="button" class="stu-back" data-ta-board-back>&#x2190; Back to list</button>`
+      +`<span class="ta-board-bar-note">Arrange board: drag cards into modules, renumber, assign and archive. The list is where you check and set up one activity.</span></div>`
+      +`<div class="tg-note">Drag a built activity into a module to assign it. It goes live for students on its release date.</div>`
       +pinsHtml
       +`<details class="tg-help" data-board-help${boardHelpOpen?' open':''}><summary>How this page works</summary>`
       +`<div class="tg-note">A card shows to students only when all four are true: it is <strong>assigned</strong> to a module here, its <strong>release date</strong> has arrived, it is not <strong>Hidden</strong>, and it is not <strong>Archived</strong>. Publish now dates it today; scheduling a later day holds it until then; Unpublish clears the date. A card's date stays editable once it's live, so you can move it to another day without unpublishing first — type a future day and it goes back to Scheduled. Use Hidden to pull back something already live, then un-hide any time — the date and the Hidden switch are independent, either one hides. <strong>Hide all</strong> on a module's heading sets every card in it to Hidden at once (<strong>Show all</strong> undoes it); after that, any one card can still be set back to Visible on its own.<br><br>`
@@ -1891,6 +1991,460 @@ function teacherBoardFold(module){
 function teacherBoardSetSort(key){ boardSortKey=key; renderTeacherActivities({cached:true}); }
 function teacherBoardFlipDir(){ boardSortDir = boardSortDir==='desc' ? 'asc' : 'desc'; renderTeacherActivities({cached:true}); }
 function teacherBoardArchToggle(key, open){ boardArchOpen[key]=!!open; }
+
+/* ── Class activities: the list + tabbed detail (Layout A, 2026-11-08) ────
+   The screen the tab opens on. LEFT, the list: a search box, five filters
+   (Units — the default — / This week / Keep practicing / Not dated / All)
+   and one row per card with its #N, date, title and a done bar. RIGHT, the
+   picked activity: a header, then three tabs — Preview (the default; what
+   renderTeacherActivityDetail always drew), Students (the roll and the
+   per-student table, in the same [data-ta-live] boxes the refresh repaints)
+   and Settings (the board's per-card controls, drawn by the same
+   teacherActivityCtlKit, so every switch calls the writer it always did).
+
+   Picking a row repaints the right column only: the list keeps its element
+   and its scroll. A write repaints the list, the header, Settings and the
+   Students boxes and leaves the Preview alone, so a song playing there
+   keeps playing. "Unit" is the classroom name for a module (Unit N =
+   Module N, always); this part of the console says Unit, everything else
+   says Module. Reordering stays on the board ("Arrange board"). */
+let activityListFilter='units';      // 'units' | 'week' | 'pins' | 'undated' | 'all'
+let activityListQuery='';            // the search box
+let activityUnitOpen={};             // unit key -> true/false; unset = only the newest unit is open
+let activityDetailTab='preview';     // the tab the next activity opens on: the last one used
+const TA_FILTERS=[['units','Units'],['week','This week'],['pins','Keep practicing'],['undated','Not dated'],['all','All']];
+const TA_TABS=['preview','students','settings'];
+// The cards this list (and the board) holds: not a Songs-page song, not a teacher-only card.
+function teacherActivityListActivities(cfg){
+  return (window.CLASS_ACTIVITIES||[]).filter(a=>!caIsLibraryCard(a, (cfg&&cfg.songLibrary)||{}) && !caIsTeacherSong(a, (cfg&&cfg.classSongs)||{}));
+}
+// "2026-11-05" -> "Nov 5". English, like the rest of the console.
+function teacherShortDate(d){
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(d||''));
+  return m ? new Date(+m[1], +m[2]-1, +m[3]).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : String(d||'');
+}
+function teacherActivityKindLabel(a){
+  if(a.kind==='check') return 'Exit check';
+  if(typeof caIsCard==='function' && caIsCard(a)) return 'Practice card';
+  if(typeof caHasPaths==='function' && caHasPaths(a)) return 'Focus view, paths';
+  return a.view==='focus' ? 'Focus view' : 'Step list';
+}
+// Unit number of a placed card (0 = Unsorted), or null when it is not on the board.
+function teacherActivityUnit(id, view){
+  if(!view.assigned[id]) return null;
+  const sec=view.sections.find(s=>s.ids.includes(id)||s.retiredIds.includes(id));
+  return sec ? sec.module : 0;
+}
+function teacherUnitName(mn){
+  if(mn===0) return 'Unsorted';
+  const mod=((typeof MODULE_MANIFEST!=='undefined')?MODULE_MANIFEST:[]).find(m=>m.num===mn);
+  return `Unit ${mn}${mod?` — ${mod.name}`:''}`;
+}
+/* Done / for-whom counts, the way the board's done lines count them: the
+   students the card is for (its Who picker), done = classActivities[id], or
+   a turned-in result for an exit check. Read off allStudents, so they follow
+   the console's period filter — on All they add up the board's P4 / P7 /
+   CAS / Unassigned lines; on P4 they are the board's P4 line. */
+function teacherActivityDoneCounts(a, cfg){
+  const forIt=allStudents.filter(s=>teacherActivityForStudent(a, s.uid, cfg));
+  const isDone=a.kind==='check' ? (s=>!!(s.exitChecks||{})[a.id]) : (s=>(s.classActivities||{})[a.id]===true);
+  const done=forIt.filter(isDone);
+  const pre=a.id+':';
+  const started=a.kind==='check' ? [] : forIt.filter(s=>!isDone(s) && Object.keys(s.caSteps||{}).some(k=>k.startsWith(pre) && s.caSteps[k]));
+  return {total:forIt.length, done:done.length, started:started.length, results:a.kind==='check'?done.map(s=>s.exitChecks[a.id]):[]};
+}
+/* Every card the list can show, with what its row and the filters need. */
+function teacherActivityListModel(cfg){
+  const acts=teacherActivityListActivities(cfg);
+  const view=teacherBoardView(cfg);
+  const dates=cfg.activityDates||{}, hidden=cfg.hiddenActivities||{};
+  const pins=teacherActivityPins(cfg);
+  const rows={};
+  acts.forEach(a=>{
+    const unit=teacherActivityUnit(a.id, view);
+    rows[a.id]={a, id:a.id, title:teacherActivityTitle(a,cfg), num:view.number[a.id]||null, unit, assigned:unit!==null,
+      date:dates[a.id]||'', hidden:hidden[a.id]===true, optional:teacherActivityOptional(a.id,cfg),
+      archived:teacherActivityArchived(a.id,cfg), deleted:teacherActivityDeleted(a.id,cfg), pin:pins.indexOf(a.id),
+      isCheck:a.kind==='check', counts:unit!==null?teacherActivityDoneCounts(a,cfg):null};
+  });
+  // Units, newest first: each placed unit's live cards newest first (the
+  // board's default), its archived ones after them; Unsorted, then Built.
+  const units=view.sections.filter(s=>s.module!==0 && (s.ids.length||s.retiredIds.length)).map(s=>s.module).sort((x,y)=>y-x);
+  const groups=units.map(mn=>{ const s=view.sections.find(x=>x.module===mn); return {key:String(mn), label:teacherUnitName(mn), ids:s.ids.slice().reverse().concat(s.retiredIds.slice().reverse())}; });
+  const uns=view.sections.find(s=>s.module===0);
+  if(uns && (uns.ids.length||uns.retiredIds.length)) groups.push({key:'0', label:'Unsorted', ids:uns.ids.slice().reverse().concat(uns.retiredIds.slice().reverse())});
+  const built=acts.filter(a=>!rows[a.id].assigned).sort((x,y)=>teacherActivityIdNum(y)-teacherActivityIdNum(x));
+  const builtIds=built.filter(a=>!teacherActivityRetired(a.id,cfg)).concat(built.filter(a=>teacherActivityRetired(a.id,cfg))).map(a=>a.id);
+  if(builtIds.length) groups.push({key:'built', label:'Built — not assigned yet', ids:builtIds});
+  groups.forEach(g=>{ g.ids=g.ids.filter(id=>rows[id]); });
+  return {rows, groups, pins, view};
+}
+/* The ids a flat filter shows, in order. */
+function teacherActivityFilterIds(model, filter){
+  const all=[].concat(...model.groups.map(g=>g.ids));
+  const R=model.rows;
+  if(filter==='pins') return model.pins.filter(id=>R[id]);
+  if(filter==='undated') return all.filter(id=>R[id].assigned && !R[id].archived && !R[id].deleted && !R[id].date);
+  if(filter==='week'){
+    // Monday to Sunday of this week.
+    const now=new Date(); const mon=new Date(now.getFullYear(), now.getMonth(), now.getDate()-((now.getDay()+6)%7));
+    const sun=new Date(mon.getFullYear(), mon.getMonth(), mon.getDate()+6);
+    const lo=dayStr(mon), hi=dayStr(sun);
+    return all.filter(id=>R[id].date && R[id].date>=lo && R[id].date<=hi && !R[id].archived && !R[id].deleted)
+      .sort((x,y)=>R[y].date.localeCompare(R[x].date) || ((R[y].num||0)-(R[x].num||0)));
+  }
+  return all;
+}
+function teacherActivityMatches(r, q){
+  if(!q) return true;
+  const n=/^#?\s*(\d+)$/.exec(q);
+  if(n && (r.num===Number(n[1]) || r.id==='ca-'+n[1])) return true;
+  const t=q.toLowerCase().replace(/^#/, '');
+  return r.title.toLowerCase().includes(t) || r.id.toLowerCase()===t;
+}
+function teacherActivityRowHtml(r){
+  const today=dayStr(new Date());
+  const tags=[];
+  if(r.deleted) tags.push(['Deleted','off']);
+  else if(r.archived) tags.push(['Archived','off']);
+  if(!r.assigned && !r.deleted && !r.archived) tags.push(['Not assigned','off']);
+  if(r.hidden && !r.archived && !r.deleted) tags.push(['Hidden','warn']);
+  if(r.optional && r.assigned) tags.push(['Optional','']);
+  if(r.date && r.date>today && r.assigned) tags.push(['Scheduled','sched']);
+  if(r.pin>=0 && r.date) tags.push(['Pinned','']);
+  const num=r.isCheck ? '<span class="ta-row-num ta-row-check">Check</span>' : `<span class="ta-row-num">${r.num?'#'+r.num:'—'}</span>`;
+  const when=r.date ? teacherShortDate(r.date) : (r.pin>=0 ? 'Pinned' : 'No date');
+  let bar='';
+  if(r.counts){
+    const c=r.counts, pct=c.total?Math.round(c.done/c.total*100):0;
+    bar=`<span class="ta-row-done"><span class="ta-bar" aria-hidden="true"><i style="width:${pct}%"></i></span>${c.done}/${c.total} ${r.isCheck?'turned in':'done'}</span>`;
+  }
+  const sel=r.id===activityDetailId;
+  return `<button type="button" class="ta-row${sel?' is-sel':''}${(r.archived||r.deleted)?' is-off':''}" data-ta-pick data-id="${escAttr(r.id)}"${sel?' aria-current="true"':''}>`
+    +num+`<span class="ta-row-main"><span class="ta-row-top"><span class="ta-row-date">${escHtml(when)}</span>`
+    +tags.map(([t,k])=>`<span class="ta-tag${k?' ta-tag-'+k:''}">${t}</span>`).join('')+`</span>`
+    +`<span class="ta-row-title">${escHtml(r.title)}</span>${bar}</span></button>`;
+}
+function teacherActivityListBodyHtml(cfg){
+  const model=teacherActivityListModel(cfg);
+  const q=activityListQuery.trim();
+  const R=model.rows;
+  if(activityListFilter==='units'){
+    const newest=(model.groups.find(g=>g.key!=='built' && g.ids.some(id=>!R[id].archived && !R[id].deleted))||model.groups[0]||{}).key;
+    const html=model.groups.map(g=>{
+      const ids=g.ids.filter(id=>teacherActivityMatches(R[id], q));
+      if(q && !ids.length) return '';
+      const open=q ? true : (activityUnitOpen[g.key]!==undefined ? activityUnitOpen[g.key] : g.key===newest);
+      return `<div class="ta-unit" data-unit="${escAttr(g.key)}"><button type="button" class="ta-unit-head" data-ta-unit="${escAttr(g.key)}" aria-expanded="${open}">`
+        +`<span class="ta-caret" aria-hidden="true"></span><span class="ta-unit-name">${escHtml(g.label)}</span><span class="ta-unit-count">${ids.length}</span></button>`
+        +(open?`<div class="ta-unit-rows">${ids.map(id=>teacherActivityRowHtml(R[id])).join('')}</div>`:'')+`</div>`;
+    }).join('');
+    return html || `<div class="ta-list-empty">${q?'Nothing matches that search.':'No activities yet.'}</div>`;
+  }
+  const ids=teacherActivityFilterIds(model, activityListFilter).filter(id=>teacherActivityMatches(R[id], q));
+  const empty={week:'Nothing is released this week.', pins:'Nothing is pinned. Use Pin to Keep practicing on an activity.', undated:'Every assigned activity has a date.', all:'No activities yet.'}[activityListFilter];
+  return ids.length ? ids.map(id=>teacherActivityRowHtml(R[id])).join('') : `<div class="ta-list-empty">${q?'Nothing matches that search.':empty}</div>`;
+}
+function teacherActivityListHeadHtml(){
+  return `<div class="ta-list-head">`
+    +`<div class="ta-list-top"><span class="ta-list-title">Class activities</span>`
+    +`<button type="button" class="tg-seg-btn ta-board-btn" data-ta-board-open title="The full board: drag cards into units, renumber, assign, archive">Arrange board</button></div>`
+    +`<input type="search" class="ta-search" data-ta-search placeholder="Search title or #number" aria-label="Search activities by title or #number" value="${escAttr(activityListQuery)}" autocomplete="off" spellcheck="false">`
+    +`<div class="ta-filters" role="group" aria-label="Show">${TA_FILTERS.map(([k,l])=>`<button type="button" class="ta-filter" data-ta-filter="${k}" aria-pressed="${k===activityListFilter}">${l}</button>`).join('')}</div>`
+    +`</div>`;
+}
+/* Repaint the list's rows only (the head with the search box stays, so it
+   keeps focus while typing). `top` scrolls the rows back to the start — a
+   new filter or search is a new list; a repaint after a write is not. */
+function teacherPaintActivityList(top){
+  const body=document.querySelector('#t-grid-container [data-ta-list-body]');
+  if(!body) return;
+  const y=body.scrollTop;
+  body.innerHTML=teacherActivityListBodyHtml(teacherClassConfig);
+  body.scrollTop=top?0:y;
+  document.querySelectorAll('#t-grid-container [data-ta-filter]').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.taFilter===activityListFilter)));
+}
+function teacherSetActivityFilter(f){
+  if(!TA_FILTERS.some(([k])=>k===f)) return;
+  activityListFilter=f;
+  teacherPaintActivityList(true);
+}
+function teacherToggleUnit(key){
+  const head=document.querySelector(`#t-grid-container [data-ta-unit="${CSS.escape(key)}"]`);
+  activityUnitOpen[key]=!(head && head.getAttribute('aria-expanded')==='true');
+  teacherPaintActivityList(false);
+}
+/* What the list picks when nothing is picked yet: the newest card students
+   can see now (released, assigned, not Hidden, not retired), else the first
+   row of the list. */
+function teacherDefaultActivityPick(cfg){
+  const model=teacherActivityListModel(cfg);
+  const today=dayStr(new Date());
+  const live=Object.values(model.rows).filter(r=>r.assigned && r.date && r.date<=today && !r.hidden && !r.archived && !r.deleted)
+    .sort((x,y)=>y.date.localeCompare(x.date) || ((y.num||0)-(x.num||0)));
+  if(live.length) return live[0].id;
+  const first=model.groups.find(g=>g.ids.length);
+  return first ? first.ids[0] : null;
+}
+function teacherPickActivity(id){
+  if(id===activityDetailId && document.querySelector(`#t-grid-container [data-ta-head][data-id="${CSS.escape(id)}"]`)) return;
+  // The previewed card's song or snippet belongs to the card being left.
+  // Safe here: Teacher view songs (the room's song) is another tab, and
+  // leaving it already stopped its card (setTeacherView).
+  if(typeof stopCardAudio==='function') stopCardAudio();
+  activityDetailId=id; activityEditId=null;
+  document.querySelectorAll('#t-grid-container [data-ta-pick]').forEach(r=>{
+    const on=r.dataset.id===id;
+    r.classList.toggle('is-sel', on);
+    if(on) r.setAttribute('aria-current','true'); else r.removeAttribute('aria-current');
+  });
+  renderTeacherActivityDetail(id);
+  // A row picked low on a long page: bring the top of the detail into view.
+  const det=document.querySelector('#t-grid-container [data-ta-detail]');
+  if(det){
+    const hdr=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hdr'))||60;
+    const top=det.getBoundingClientRect().top;
+    if(top<hdr) window.scrollTo({top:Math.max(0, window.scrollY+top-hdr-12)});
+  }
+}
+function teacherSetDetailTab(tab, focus){
+  if(!TA_TABS.includes(tab)) return;
+  activityDetailTab=tab;
+  const box=document.getElementById('t-grid-container');
+  box.querySelectorAll('[data-ta-tab]').forEach(b=>{
+    const on=b.dataset.taTab===tab;
+    b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); b.tabIndex=on?0:-1;
+    if(on && focus) b.focus();
+  });
+  box.querySelectorAll('[data-ta-pane]').forEach(p=>{ p.hidden = p.dataset.taPane!==tab; });
+}
+/* The Students tab's count: done (or turned in) / the students it is for. */
+function teacherStudentsTabLabelHtml(a){
+  const c=teacherActivityDoneCounts(a, teacherClassConfig);
+  return `Students <span class="ta-tab-count">${c.done}/${c.total}</span>`;
+}
+/* Three counts above the Students tab's roll, from the roster already in
+   hand — no extra read. "Started" = at least one step or check ticked
+   (caSteps) but not marked done. Nothing records a card being opened, so
+   the third count is "Not started", not "not opened". */
+function teacherActivityCountsHtml(a){
+  const c=teacherActivityDoneCounts(a, teacherClassConfig);
+  const chip=(n,label,cls)=>`<span class="ta-count ${cls}"><b>${n}</b> ${label}</span>`;
+  if(a.kind==='check'){
+    const items=(((a.check||{}).items)||[]).length;
+    const avg=c.results.length?(c.results.reduce((n,r)=>n+(Number(r.score)||0),0)/c.results.length).toFixed(1):null;
+    return `<div class="ta-counts">${chip(c.done,'turned in','ta-count-done')}${chip(c.total-c.done,'not turned in','ta-count-not')}`
+      +`<span class="ta-count">average <b>${avg===null?'—':avg+'/'+items}</b></span></div>`;
+  }
+  return `<div class="ta-counts">${chip(c.done,'done','ta-count-done')}${chip(c.started,'started','ta-count-started')}${chip(c.total-c.done-c.started,'not started','ta-count-not')}</div>`;
+}
+/* The detail header: "Unit 3 · #7 · Released Nov 5 · Practice card", the
+   title, then Copy link, Pin and a More menu. Every button carries the same
+   data-* attribute as its twin on the board, so it calls the same writer. */
+function teacherActivityHeadHtml(a, cfg){
+  const raw=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===a.id)||a;
+  const view=teacherBoardView(cfg);
+  const lib=caIsLibraryCard(raw, cfg.songLibrary||{}), tsong=caIsTeacherSong(raw, cfg.classSongs||{});
+  const unit=(lib||tsong) ? null : teacherActivityUnit(a.id, view);
+  const retired=teacherActivityRetired(a.id,cfg), del=teacherActivityDeleted(a.id,cfg);
+  const date=(cfg.activityDates||{})[a.id]||'';
+  const today=dayStr(new Date());
+  const meta=[lib?'Songs page':tsong?'Teacher view songs':unit===null?'Built, not assigned':unit===0?'Unsorted':`Unit ${unit}`];
+  if(view.number[a.id]) meta.push('#'+view.number[a.id]);
+  meta.push(date ? (date<=today?`Released ${teacherShortDate(date)}`:`Scheduled ${teacherShortDate(date)}`) : 'No release date');
+  meta.push(teacherActivityKindLabel(a));
+  const tags=[];
+  if(retired) tags.push(['ta-tag-off', del?'Deleted':'Archived']);
+  if((cfg.hiddenActivities||{})[a.id]===true && !retired) tags.push(['ta-tag-warn','Hidden']);
+  if(unit!==null && teacherActivityOptional(a.id,cfg)) tags.push(['','Optional']);
+  const pins=teacherActivityPins(cfg), at=pins.indexOf(a.id);
+  const placed=unit!==null && !retired;
+  const pinBtn=(a.kind!=='check' && (placed || at>=0))
+    ? `<button type="button" class="tg-seg-btn ta-act-btn${at>=0?' on':''}" data-set-activity-pin data-id="${escAttr(a.id)}" data-state="${at>=0?'off':'on'}" aria-pressed="${at>=0}" title="${at>=0?'On the Keep practicing row at the top of students’ In-Class Activities page — click to unpin':`Put this on the Keep practicing row at the top of students’ In-Class Activities page — no release date needed. ${TEACHER_PINS_MAX} at most.`}">${at>=0?`Pinned ${at+1} of ${TEACHER_PINS_MAX}`:'Pin to Keep practicing'}</button>`
+    : '';
+  const isHidden=(cfg.hiddenActivities||{})[a.id]===true;
+  const item=(attrs,label,cls)=>`<button type="button" class="ta-more-item${cls?' '+cls:''}" role="menuitem" ${attrs}>${label}</button>`;
+  const id=escAttr(a.id);
+  const more=[];
+  if(!lib && !tsong){
+    more.push(item(`data-ta-rename data-id="${id}"`,'Rename…'));
+    if(placed) more.push(item(`data-set-activity-hidden data-id="${id}" data-state="${isHidden?'show':'hide'}"`, isHidden?'Show to students':'Hide from students'));
+    if(placed) more.push(item(`data-unassign-activity data-id="${id}"`,'Un-assign (back to Built)'));
+    more.push(item(`data-ta-board-open`,'Open Arrange board'));
+    if(del) more.push(item(`data-set-activity-archived data-id="${id}" data-state="restore"`,'Restore'));
+    else if(retired) more.push(item(`data-set-activity-archived data-id="${id}" data-state="restore"`,'Restore')+item(`data-delete-activity data-id="${id}"`,'Delete','t-act-danger'));
+    else more.push(item(`data-set-activity-archived data-id="${id}" data-state="archive"`,'Archive')+item(`data-delete-activity data-id="${id}"`,'Delete','t-act-danger'));
+  } else {
+    more.push(item(`data-ta-goto-view="${lib?'songs':'tsongs'}"`, lib?'Open the Songs tab':'Open Teacher view songs'));
+  }
+  return `<div class="ta-meta">${meta.map(escHtml).join(' · ')}${tags.map(([c,t])=>` <span class="ta-tag ${c}">${t}</span>`).join('')}</div>`
+    +`<div class="ta-title-row"><h2 class="ta-title">${escHtml(teacherActivityTitle(a,cfg))} <span class="ta-title-id">(${escHtml(a.id)})</span></h2>`
+    +`<div class="ta-actions"><button type="button" class="tg-seg-btn ta-act-btn" data-copy-activity-link data-id="${id}" title="Copy the student link straight to this ${a.kind==='check'?'exit check':'activity'}">Copy link</button>`
+    +pinBtn
+    +`<details class="ta-more" data-ta-more><summary class="tg-seg-btn ta-act-btn" aria-label="More actions" title="More actions">More &#x25BE;</summary><div class="ta-more-menu" role="menu">${more.join('')}</div></details>`
+    +`</div></div>`;
+}
+/* The Settings tab: the per-card controls from the board, for this one card,
+   in the states the board shows them (a card not yet assigned gets Assign to
+   and Archive / Delete, an archived one Restore). */
+function teacherActivitySettingsHtml(a, cfg){
+  const raw=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===a.id)||a;
+  const row=(label, html, note)=>html?`<div class="ta-set-row"><div class="ta-set-lbl">${label}</div><div class="ta-set-ctl">${html}${note?`<div class="ta-set-note">${note}</div>`:''}</div></div>`:'';
+  if(caIsLibraryCard(raw, cfg.songLibrary||{}) || caIsTeacherSong(raw, cfg.classSongs||{})){
+    const lib=caIsLibraryCard(raw, cfg.songLibrary||{});
+    return `<div class="tg-note">${escHtml(teacherActivityPlace(a.id))}</div>`
+      +row('Managed on', `<button type="button" class="tg-seg-btn ta-act-btn" data-ta-goto-view="${lib?'songs':'tsongs'}">${lib?'Songs tab':'Teacher view songs tab'}</button>`, lib?'Rename it, hide it, or move it back to Class activities there.':'Move it to Class activities there.')
+      +row('Student link', linkRow(a));
+  }
+  const acts=teacherActivityListActivities(cfg);
+  const kit=teacherActivityCtlKit(cfg, acts);
+  const view=kit.view;
+  const unit=teacherActivityUnit(a.id, view);
+  const retired=teacherActivityRetired(a.id,cfg), del=teacherActivityDeleted(a.id,cfg);
+  const id=escAttr(a.id);
+  const renamed=teacherActivityRenamed(raw,cfg);
+  const shown=teacherActivityTitle(raw,cfg);
+  const nameHtml = activityEditId===a.id
+    ? `<input type="text" class="t-act-title-edit ta-rename" data-id="${id}" value="${escAttr(shown)}" maxlength="120" spellcheck="false" aria-label="Rename ${escAttr(shown)} (English)">`
+      +`<div class="ta-set-btns"><button type="button" class="tg-seg-btn on" data-rename-save data-id="${id}">Save</button><button type="button" class="tg-seg-btn" data-rename-cancel>Cancel</button>`
+      +(renamed?`<button type="button" class="tg-seg-btn" data-rename-reset data-id="${id}">Undo rename</button>`:'')+`</div>`
+    : `<span class="ta-set-btns"><span class="ta-set-name">${escHtml(shown)}</span><button type="button" class="t-act-pencil" data-rename-activity data-id="${id}" title="Rename this activity" aria-label="Rename ${escAttr(shown)}">&#x270E;</button></span>`;
+  const nameNote = activityEditId===a.id ? 'Students see this right away, in English in both languages, until the Spanish twin ships in the next update.'
+    : renamed ? `Renamed — students see this in both languages until the Spanish twin ships. Was: ${escHtml(raw.title)}` : '';
+  const retireHtml = del
+    ? `<button type="button" class="tg-seg-btn" data-set-activity-archived data-id="${id}" data-state="restore" title="Put this activity back — it returns blank, ready to place and publish">Restore</button>`
+    : retired
+    ? `<button type="button" class="tg-seg-btn" data-set-activity-archived data-id="${id}" data-state="restore" title="Put this activity back, with its date and name">Restore</button>`
+      +`<button type="button" class="tg-seg-btn t-act-danger" data-delete-activity data-id="${id}" title="Clear this activity's date, name and gate clears, and take it off the board">Delete</button>`
+    : `<button type="button" class="tg-seg-btn" data-set-activity-archived data-id="${id}" data-state="archive" title="Take this off students' In-Class Activities page but keep its place, date and name">Archive</button>`
+      +`<button type="button" class="tg-seg-btn t-act-danger" data-delete-activity data-id="${id}" title="Retire it AND clear its date, name and gate clears">Delete</button>`;
+  const retireNote = del ? 'Deleted — Restore brings it back blank, in Built.' : retired ? 'Archived — students don’t see it and it holds no number. Restore puts it back where it was.'
+    : 'Archive takes it off students’ page but keeps its place, date and name. Delete also clears the date, rename and gate clears, and takes it off the board. Neither touches what students finished.';
+  let html=teacherRetiredBanner(a.id);
+  if(unit===null){
+    const strays=[];
+    if(kit.dates[a.id]) strays.push(`release date ${escHtml(kit.dates[a.id])}`);
+    if(kit.hidden[a.id]===true) strays.push('Hidden');
+    if(kit.optional[a.id]===true) strays.push('Optional');
+    if(kit.optional[a.id]===false) strays.push('Required');
+    if(kit.pins.includes(a.id)) strays.push('Pinned');
+    html+=row('Unit', retired ? '' : kit.moveSelect(a,'Assign to…',null), 'Not assigned to a unit yet, so no student sees it. Assign it, then set its release date here.'+(strays.length?` It carries: ${strays.join(' · ')} — no effect until it’s assigned.`:''))
+      +row('Name', nameHtml, nameNote)
+      +row('Songs', kit.songBtn(a))
+      +row('Retire', `<div class="ta-set-btns">${retireHtml}</div>`, retireNote)
+      +row('Student link', linkRow(a));
+    return html;
+  }
+  if(retired){
+    return html+row('Unit', `<span>${escHtml(teacherUnitName(unit))}</span>`)
+      +row('Name', nameHtml, nameNote)
+      +row('Retire', `<div class="ta-set-btns">${retireHtml}</div>`, retireNote)
+      +row('Student link', linkRow(a));
+  }
+  const curModule=Number(((cfg.activityBoard||{})[a.id]||{}).module)||0;
+  return html
+    +row('Release', kit.publishBlock(a), 'Students see it once it is assigned, its date has arrived, and it is not Hidden or archived.')
+    +row('Students see it', kit.visSeg(a), 'Hidden pulls back a card that is already live. The date and Hidden are independent.')
+    +row('Required', kit.optSeg(a), 'A Required card opens first at sign-in until a student finishes it or you clear it. Nothing else is locked.')
+    +row('Play Along', kit.playSeg(a))
+    +row('Keep practicing', kit.pinBtn(a))
+    +row('Who', kit.whoPicker(a))
+    +row('Unit', `<div class="ta-set-btns">${kit.moveSelect(a,'Move to…',curModule)}<button type="button" class="tg-seg-btn" data-unassign-activity data-id="${id}" title="Send this back to Built — it keeps its date and name">Un-assign</button></div>`,
+      `${escHtml(teacherUnitName(unit))}${kit.nums[a.id]?` · #${kit.nums[a.id]}`:''}. To change its place inside the unit, use Arrange board.`)
+    +row('Name', nameHtml, nameNote)
+    +row('Songs', kit.songBtn(a))
+    +row('Retire', `<div class="ta-set-btns">${retireHtml}</div>`, retireNote)
+    +row('Student link', linkRow(a));
+}
+/* The detail column's frame: header, tab strip, three panes. Only the
+   chosen tab's pane is shown; all three are in the page, so switching tabs
+   draws nothing and a song playing in the Preview keeps playing. */
+function teacherDetailFrameHtml(a, back, panes){
+  const cfg=teacherClassConfig;
+  const tab=activityDetailTab;
+  const tabBtn=(k,label)=>`<button type="button" role="tab" class="ta-tab${k===tab?' on':''}" id="ta-tab-${k}" data-ta-tab="${k}" aria-selected="${k===tab}" aria-controls="ta-pane-${k}" tabindex="${k===tab?0:-1}">${label}</button>`;
+  const pane=k=>`<div class="ta-pane" role="tabpanel" id="ta-pane-${k}" aria-labelledby="ta-tab-${k}" data-ta-pane="${k}"${k===tab?'':' hidden'}>${panes[k]}</div>`;
+  return back
+    +`<div class="ta-dhead" data-ta-head data-id="${escAttr(a.id)}">${teacherActivityHeadHtml(a,cfg)}</div>`
+    +`<div class="ta-tabs" role="tablist" aria-label="Activity">${tabBtn('preview','Preview')}${tabBtn('students',`<span data-ta-students-label>${teacherStudentsTabLabelHtml(a)}</span>`)}${tabBtn('settings','Settings')}</div>`
+    +pane('preview')+pane('students')+`<div class="ta-pane" role="tabpanel" id="ta-pane-settings" aria-labelledby="ta-tab-settings" data-ta-pane="settings"${tab==='settings'?'':' hidden'}><div data-ta-settings>${panes.settings}</div></div>`;
+}
+/* Where the detail draws: the right column of the split, or the whole
+   content area when it was opened from Songs or a student's page. */
+function teacherDetailHost(){
+  const box=document.getElementById('t-grid-container');
+  if(teacherView==='activities' && teacherActivityScreen()==='split') return box.querySelector('[data-ta-detail]');
+  return box;
+}
+/* After a write or a refresh: repaint the header, Settings and the Students
+   boxes of the activity on screen, never its Preview. Draws it whole the
+   first time. */
+function teacherSoftRepaintDetail(){
+  const host=teacherDetailHost();
+  if(!host || !activityDetailId) return;
+  const head=host.querySelector('[data-ta-head]');
+  if(!head || head.dataset.id!==activityDetailId){ renderTeacherActivityDetail(activityDetailId); return; }
+  const raw=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===activityDetailId);
+  if(!raw) return;
+  const a=typeof caView==='function'?caView(raw):raw;
+  const cfg=teacherClassConfig;
+  // An open More menu is closed by the repaint — it was the click that wrote.
+  head.innerHTML=teacherActivityHeadHtml(a,cfg);
+  const set=host.querySelector('[data-ta-settings]');
+  if(set) set.innerHTML=teacherActivitySettingsHtml(a,cfg);
+  teacherRepaintActivityStudents(a.id);
+  if(activityEditId){ const inp=host.querySelector('.t-act-title-edit'); if(inp){ inp.focus(); inp.select(); } }
+}
+/* The Class activities screens other than the board: the split, and the
+   detail alone. Same `cached` contract as the board (see its comment). */
+function teacherRenderActivityScreen(screen, opts){
+  const cached = !!(opts && opts.cached) && teacherClassConfigLoaded;
+  const box=document.getElementById('t-grid-container');
+  if(screen==='detail'){
+    if(!box.querySelector(`[data-ta-head][data-id="${CSS.escape(activityDetailId)}"]`)) renderTeacherActivityDetail(activityDetailId);
+    else teacherSoftRepaintDetail();
+    if(!cached) loadTeacherClassConfig().then(cfg=>{ if(cfg && teacherView==='activities' && teacherActivityScreen()==='detail') teacherSoftRepaintDetail(); });
+    return;
+  }
+  if(!(window.CLASS_ACTIVITIES||[]).length){
+    box.innerHTML='<div class="t-loading">No activities yet — they\'ll appear here once one is pushed to the site.</div>';
+    return;
+  }
+  if(!cached && !box.querySelector('[data-ta-split]')) box.innerHTML='<div class="t-loading">Loading…</div>';
+  (cached ? Promise.resolve(teacherClassConfig) : loadTeacherClassConfig()).then(async cfg=>{
+    if(teacherView!=='activities' || teacherActivityScreen()!=='split') return;   // switched away mid-flight
+    if(!cfg) return;
+    // First ever paint on a class with no board yet: the same one-time
+    // placement the board runs (teacherMigrateActivityBoard), then paint.
+    if(!cfg.activityBoardSeeded && !boardMigrating){
+      if(!teacherClassConfigReadOk){
+        box.innerHTML='<div class="t-loading">Could not read the class settings, so the activity board hasn\'t been set up yet — check your connection and reload.</div>';
+        return;
+      }
+      const done=await teacherMigrateActivityBoard(cfg);
+      if(teacherView!=='activities' || teacherActivityScreen()!=='split') return;
+      if(!done && !cfg.activityBoardSeeded){
+        box.innerHTML='<div class="t-loading">Could not set up the activity board — reload to try again.</div>';
+        return;
+      }
+    }
+    if(!activityDetailId || !(window.CLASS_ACTIVITIES||[]).some(a=>a.id===activityDetailId)) activityDetailId=teacherDefaultActivityPick(cfg);
+    if(box.querySelector('[data-ta-split]')){
+      teacherPaintActivityList(false);
+      if(activityDetailId) teacherSoftRepaintDetail();
+      return;
+    }
+    box.innerHTML=`<div class="ta-split" data-ta-split>`
+      +`<aside class="ta-list" data-ta-list aria-label="Class activities list">${teacherActivityListHeadHtml()}<div class="ta-list-body" data-ta-list-body></div></aside>`
+      +`<section class="ta-detail" data-ta-detail aria-label="Picked activity"></section></div>`;
+    teacherPaintActivityList(true);
+    // The picked row in view inside the list's own scroller (never the window).
+    const body=box.querySelector('[data-ta-list-body]'), sel=box.querySelector('[data-ta-pick].is-sel');
+    if(body && sel){ const off=sel.getBoundingClientRect().top-body.getBoundingClientRect().top; if(off>body.clientHeight-40) body.scrollTop=off-body.clientHeight/3; }
+    if(activityDetailId) renderTeacherActivityDetail(activityDetailId);
+    else box.querySelector('[data-ta-detail]').innerHTML='<div class="t-loading">Pick an activity on the left.</div>';
+  });
+}
 
 /* ── The one writer every move goes through ─────────────────────────────
    A drag, an "Assign to"/"Move to" pick, a ▲▼ bump and a typed #number all
@@ -2398,17 +2952,29 @@ function teacherActivityGridHtml(a){
     +`<div class="tg-note">Gate: until a student finishes a Required activity, In-Class Activities opens first when they sign in. Nothing else on the site is locked. Clear lets one student skip this one at sign-in without finishing it — a sub day, a connectivity problem, work done on paper.</div>`
     +studentTable;
 }
+/* One activity, in its tabs (Layout A): Preview, Students, Settings. Drawn
+   into the split's right column, or alone with a Back button when it was
+   opened from Songs or a student's page (teacherDetailHost). The board has
+   no detail column, so a call while it is up just repaints it. */
 function renderTeacherActivityDetail(id){
   const box=document.getElementById('t-grid-container');
-  const back=`<button type="button" class="stu-back" data-back-to-activities>&#x2190; ${activityDetailFrom==='songs'?'All songs':'All activities'}</button>`;
+  if(teacherView==='activities' && teacherActivityScreen()==='board'){ renderTeacherActivities({cached:true}); return; }
+  if(teacherView==='activities' && teacherActivityScreen()==='split'){
+    activityDetailId=id;
+    if(!box.querySelector('[data-ta-detail]')){ renderTeacherActivities({cached:true}); return; }
+  }
+  const host=teacherDetailHost();
+  const fromStu=activityDetailFrom==='student' ? allStudentsRaw.find(s=>s.uid===activityDetailFromUid) : null;
+  const back = (teacherView==='activities' && teacherActivityScreen()==='split') ? ''
+    : `<button type="button" class="stu-back" data-back-to-activities>&#x2190; ${activityDetailFrom==='songs'?'All songs':fromStu?`Back to ${escHtml(fromStu.name||fromStu.email||'the student')}`:'All activities'}</button>`;
   const raw=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
-  if(!raw){ box.innerHTML=`${back}<div class="t-loading">Could not find that activity — it may have been renamed or removed.</div>`; return; }
+  if(!raw){ host.innerHTML=`${back}<div class="t-loading">Could not find that activity — it may have been renamed or removed.</div>`; return; }
   /* The Full chords / Power chords switch (chordVersions — caView in app.js):
      the preview draws the version the switch shows, through the same
      transform the student card uses, so the two can't disagree. */
   const a=typeof caView==='function'?caView(raw):raw;
   // A check has no steps — its detail page is a results grid, see below.
-  if(a.kind==='check') return renderTeacherCheckDetail(a, back);
+  if(a.kind==='check') return renderTeacherCheckDetail(a, back, host);
   // Where this card sits in the course, straight off the board — "Module 3
   // · #7", or the reason it has no number. Same view students' #N comes
   // from (caBoardOrder), so the two can't disagree.
@@ -2506,43 +3072,43 @@ function renderTeacherActivityDetail(id){
       + `<div class="tr-card ca-prev-step">${n?stepInnerHtml(steps[route[cur]],route[cur],cur):'No steps on this activity yet.'}</div>`
       + `<div class="ca-focus-nav">${back}${next}</div>`;
   };
-  box.innerHTML=`${back}
-    <div class="stu-section-head" style="margin-top:0">${escHtml(teacherActivityTitle(a,teacherClassConfig))} <span style="opacity:.55;font-size:.72em">(${escHtml(a.id)})</span></div>
-    <div class="tg-note">${escHtml(place)}</div>
-    ${teacherRetiredBanner(a.id)}
-    ${teacherOptionalBanner(a.id)}
-    ${linkRow(a)}
-    ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
-    ${/* Focus view is activity-level presentation, not a step field — the
-         preview DEFAULTS to showing every step (that's what a fast pre-class
-         check wants), so the note says how students actually see them, and
-         "Preview as student" switches this same page to the real
-         one-step-at-a-time shape (focusPreviewHtml, above) — a local-only
-         toggle, nothing saved. See caIsFocus in app.js. */
-       a.view==='focus'?`<div class="tg-note">Focus view: students see one step at a time, with numbered step buttons above it and a "Got it — next step" button under it. A step opens only after the one before it is marked done. ${taFocusPreviewOn[a.id]?'Previewing one step at a time below.':'The preview below shows every step.'} <button type="button" class="tg-seg-btn" data-ta-focus-toggle data-id="${escAttr(a.id)}">${taFocusPreviewOn[a.id]?'Show full list':'Preview as student'}</button></div>`:''}
-    ${/* `metronome: <bpm>` (ca-21): tapping the card open starts each
-         student's own Metro tool at that tempo — caAutoStartMetro() in
-         app.js, which runs only on a real tap, never on a re-render or a
-         Copy-link deep link. Said here because nothing in the preview shows
-         it, and this preview never starts audio on its own. */
-       a.metronome?`<div class="tg-note">Metronome: when a student taps this activity open, the Metro tool on their device starts at ${escHtml(String(Number(a.metronome)))} BPM in 4/4, one click per beat. They can stop it or change the tempo. It does not start when they arrive from a Copy link URL, and it does not start in this preview.</div>`:''}
-    ${/* Practice card (view:'card'): the preview IS the student card —
-         caCardBodyHtml() in app.js, the one body renderer both sides call
-         (same shape as an exit check's caCheckBodyHtml), so it can't drift.
-         The song plays for real; ticks here save nothing. */ typeof caIsCard==='function'&&caIsCard(a)?`<div class="tg-note">Practice card: students see this one screen — Play song, the tab, and the checks. The card counts as done once every numbered check is ticked; Level up is extra. Ticks in this preview are not saved.</div>`:''}
-    <div class="stu-section-head">Students</div>
-    <div data-ta-live="grid">${teacherActivityGridHtml(a)}</div>
-    <div class="stu-section-head">Preview</div>
-    ${/* A practice card draws its own switch inside caCardBodyHtml. */ typeof caIsCard==='function'&&caIsCard(a)?'':(typeof caKeySwitchHtml==='function'?caKeySwitchHtml(a):'')+(typeof caChordSwitchHtml==='function'?caChordSwitchHtml(a):'')}
-    ${typeof caIsCard==='function'&&caIsCard(a) ? caCardBodyHtml(a,{preview:true})
+  /* Short info lines above the preview — how students meet this card that
+     the preview itself can't show. Focus view is activity-level
+     presentation, not a step field: the preview DEFAULTS to every step (a
+     fast pre-class read), and "Preview as student" switches it to the real
+     one-step-at-a-time shape (focusPreviewHtml) — local, nothing saved. See
+     caIsFocus in app.js. `metronome: <bpm>` (ca-21): tapping the card open
+     starts the student's own Metro tool — caAutoStartMetro() in app.js, on
+     a real tap only. */
+  const isCard=typeof caIsCard==='function'&&caIsCard(a);
+  const info=[];
+  if(a.view==='focus') info.push(`<div class="ta-info">Focus view: students see one step at a time and open each after marking the one before done. <button type="button" class="tg-seg-btn ta-act-btn" data-ta-focus-toggle data-id="${escAttr(a.id)}">${taFocusPreviewOn[a.id]?'Show full list':'Preview as student'}</button></div>`);
+  if(a.metronome) info.push(`<div class="ta-info">Metronome: opening this starts each student's Metro tool at ${escHtml(String(Number(a.metronome)))} BPM in 4/4 (not from a Copy link URL, and not in this preview).</div>`);
+  if(isCard) info.push(`<div class="ta-info">Practice card: students see this one screen. It counts as done once every numbered check is ticked; Level up is extra. Ticks here are not saved.</div>`);
+  /* Practice card (view:'card'): the preview IS the student card —
+     caCardBodyHtml() in app.js, the one body renderer both sides call (same
+     shape as an exit check's caCheckBodyHtml), so it can't drift. The song
+     plays for real; ticks here save nothing. A practice card draws its own
+     key / chord switch inside caCardBodyHtml. */
+  const levelUp=(()=>{ /* A Level up that opens another card (caCardLinkHtml in app.js) — name it here, since the preview card renders no link. */
+    const lu=isCard?((a.card.checks||[]).slice(-1)[0]||{}):{};
+    const to=lu.levelUp&&lu.card?(window.CLASS_ACTIVITIES||[]).find(x=>x.id===lu.card):null;
+    return to?`<div class="tg-note">Level up button opens ${escHtml(to.id)} · ${escHtml(to.title||'')} — shown to students once that card is released or set to Play Along now. Before its date it opens in place of this card, and closing it brings this card back.</div>`:'';
+  })();
+  const preview=info.join('')
+    +(a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:'')
+    +(isCard?'':(typeof caKeySwitchHtml==='function'?caKeySwitchHtml(a):'')+(typeof caChordSwitchHtml==='function'?caChordSwitchHtml(a):''))
+    +(isCard ? caCardBodyHtml(a,{preview:true})
       : (a.view==='focus' && taFocusPreviewOn[a.id]) ? focusPreviewHtml()
-      : (stepsHtml || '<div class="stu-empty">No steps on this activity yet.</div>')}
-    ${(()=>{ /* A Level up that opens another card (caCardLinkHtml in app.js) — name it here, since the preview card renders no link. */
-      const lu=typeof caIsCard==='function'&&caIsCard(a)?((a.card.checks||[]).slice(-1)[0]||{}):{};
-      const to=lu.levelUp&&lu.card?(window.CLASS_ACTIVITIES||[]).find(x=>x.id===lu.card):null;
-      return to?`<div class="tg-note">Level up button opens ${escHtml(to.id)} · ${escHtml(to.title||'')} — shown to students once that card is released or set to Play Along now. Before its date it opens in place of this card, and closing it brings this card back.</div>`:'';
-    })()}
-    ${caJourneyUrl(a)?`<div class="ca-journey-row"><a class="jl-song-btn" href="${escAttr(caJourneyUrl(a))}" target="_blank" rel="noopener">${escHtml(t('ca.openJourney',{song:(SONG_JOURNEYS.find(s=>s.id===a.journey)||{}).name||''}))} &#x2197;</a></div>`:''}`;
+      : (stepsHtml || '<div class="stu-empty">No steps on this activity yet.</div>'))
+    +levelUp
+    +(caJourneyUrl(a)?`<div class="ca-journey-row"><a class="jl-song-btn" href="${escAttr(caJourneyUrl(a))}" target="_blank" rel="noopener">${escHtml(t('ca.openJourney',{song:(SONG_JOURNEYS.find(s=>s.id===a.journey)||{}).name||''}))} &#x2197;</a></div>`:'');
+  const students=`<div class="tg-note">${escHtml(place)}</div>`
+    +`<div data-ta-live="counts">${teacherActivityCountsHtml(a)}</div>`
+    +teacherOptionalBanner(a.id)
+    +`<div data-ta-live="grid">${teacherActivityGridHtml(a)}</div>`;
+  host.innerHTML=teacherDetailFrameHtml(a, back, {preview, students, settings:teacherActivitySettingsHtml(a, teacherClassConfig)});
+  if(activityEditId){ const inp=host.querySelector('.t-act-title-edit'); if(inp){ inp.focus(); inp.select(); } }
 }
 /* An exit check's detail page: who turned it in, what they picked, and
    which question the room missed. Deliberately NOT the plain step list
@@ -2558,20 +3124,17 @@ function renderTeacherActivityDetail(id){
    roll and the results grid — are built by teacherCheckLiveParts() and sit
    in their own [data-ta-live] boxes, so the student-progress refresh can
    repaint them without rebuilding the preview (and wiping its picks). */
-function renderTeacherCheckDetail(a, back){
-  const box=document.getElementById('t-grid-container');
+function renderTeacherCheckDetail(a, back, host){
+  host=host||document.getElementById('t-grid-container');
   const live=teacherCheckLiveParts(a);
-  box.innerHTML=`${back}
-    <div class="stu-section-head" style="margin-top:0">Exit check &middot; ${escHtml(teacherActivityTitle(a,teacherClassConfig))} <span style="opacity:.55;font-size:.72em">(${escHtml(a.id)})</span></div>
-    ${teacherRetiredBanner(a.id)}
-    ${teacherOptionalBanner(a.id)}
-    <div class="tg-note" data-ta-live="note">${live.note}</div>
-    ${linkRow(a)}
-    ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
-    <div data-ta-live="grid">${live.grid}</div>
-    <div class="stu-section-head">Preview</div>
-    <div class="tg-note">Try the check yourself — nothing you pick here is saved.</div>
-    <div id="ec-preview-body-${escAttr(a.id)}">${caCheckBodyHtml(a,{preview:true,keyPrefix:'ca-preview'})}</div>`;
+  const preview=`<div class="ta-info">Try the check yourself — nothing you pick here is saved.</div>`
+    +(a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:'')
+    +`<div id="ec-preview-body-${escAttr(a.id)}">${caCheckBodyHtml(a,{preview:true,keyPrefix:'ca-preview'})}</div>`;
+  const students=`<div class="tg-note" data-ta-live="note">${live.note}</div>`
+    +`<div data-ta-live="counts">${teacherActivityCountsHtml(a)}</div>`
+    +teacherOptionalBanner(a.id)
+    +`<div data-ta-live="grid">${live.grid}</div>`;
+  host.innerHTML=teacherDetailFrameHtml(a, back, {preview, students, settings:teacherActivitySettingsHtml(a, teacherClassConfig)});
 }
 function teacherCheckLiveParts(a){
   const c=a.check||{};
@@ -3320,7 +3883,7 @@ function teacherRetiredBanner(id){
   const cfg=teacherClassConfig;
   if(!teacherActivityRetired(id,cfg)) return '';
   const del=teacherActivityDeleted(id,cfg);
-  return `<div class="tg-note"><strong>${del?'Deleted':'Archived'}.</strong> Students don't see this activity and it doesn't gate the site${del?' — and its date, rename, place on the board and gate clears have been cleared':''}. Restore it from the Class activities board${del?' — it\'s in Built, under “Archived / deleted”':' — it\'s under “Archived” inside its module'}.</div>`;
+  return `<div class="tg-note"><strong>${del?'Deleted':'Archived'}.</strong> Students don't see this activity and it doesn't gate the site${del?' — and its date, rename, place on the board and gate clears have been cleared':''}. Restore it in this activity's Settings tab, or on Arrange board${del?' — it\'s in Built, under “Archived / deleted”':' — it\'s under “Archived” inside its module'}.</div>`;
 }
 // The Gate column for a CAS student on the activity/check detail grids:
 // every activity is optional for CAS (teacherBlockersFor), so a Clear
@@ -3385,7 +3948,7 @@ function teacherBlockersFor(stu, cfg){
    of Clear buttons that do nothing students can see. */
 function teacherOptionalBanner(id){
   if(!teacherActivityOptional(id, teacherClassConfig)) return '';
-  return `<div class="tg-note"><strong>Optional.</strong> Students see this one, tagged “Optional”, but it never sends them to In-Class Activities when they sign in, so the Clear buttons below change nothing for now. Switch it back to Required on the Class activities board.</div>`;
+  return `<div class="tg-note"><strong>Optional.</strong> Students see this one, tagged “Optional”, but it never sends them to In-Class Activities when they sign in, so the Clear buttons below change nothing for now. Switch it back to Required in the Settings tab.</div>`;
 }
 async function teacherSetActivityClear(uid, id, state){
   const on=state==='clear';
