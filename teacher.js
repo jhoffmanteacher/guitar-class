@@ -119,7 +119,7 @@ function teacherApplyRosterFilter(){
 }
 /* The segmented control itself. Repainted from teacherApplyRosterFilter so
    the Unassigned count follows every override the teacher sets, and lives
-   beside the view toggle rather than inside one view — the filter is
+   in the top bar rather than inside one view — the filter is
    class-wide, and burying it in Manage would hide it from the four views
    that actually benefit. */
 function renderTeacherPeriodFilter(onRoster){
@@ -169,64 +169,23 @@ async function showTeacherApp(user){
   document.getElementById('teacher-app').style.display='block';
   document.getElementById('user-area').innerHTML=userHeaderHtml(user);
   if(window.PM) PM.syncHeader(false);   // same: hidden on the console (PM_HOST.user() is null there too)
-  // "Trouble spots" is a class-wide view, not per-set — added here (rather than
-  // in index.html) so the whole feature stays contained to this file. Guarded
-  // so re-entering teacher mode doesn't insert it twice.
-  const toggle=document.getElementById('t-viewtoggle');
-  if(toggle && !toggle.querySelector('[data-view="trouble"]')){
-    toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="trouble" onclick="setTeacherView('trouble')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3v18"/><path d="M5 4h11l-3 4 3 4H5"/></svg> Trouble spots</button>`);
-  }
-  if(toggle && !toggle.querySelector('[data-view="students"]')){
-    toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="students" onclick="setTeacherView('students')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg> Students</button>`);
-  }
-  // Practice minutes (2026-11-06) — every student's minutes, streak, rank and Top 5; renderTeacherMinutes.
-  if(toggle && !toggle.querySelector('[data-view="minutes"]')){
-    toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="minutes" onclick="setTeacherView('minutes')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 2h6"/></svg> Practice minutes</button>`);
-  }
-  if(toggle && !toggle.querySelector('[data-view="manage"]')){
-    toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="manage" onclick="setTeacherView('manage')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg> Manage</button>`);
-  }
-  if(toggle && !toggle.querySelector('[data-view="activities"]')){
-    toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="activities" onclick="setTeacherView('activities')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="m9 13 2 2 4-4"/></svg> Class activities</button>`);
-  }
-  // Songs — the Songs page's library (renderTeacherSongs), managed apart
-  // from the Class activities board.
-  if(toggle && !toggle.querySelector('[data-view="songs"]')){
-    toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="songs" onclick="setTeacherView('songs')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> Songs</button>`);
-  }
-  // Teacher view songs — teacher-only practice cards (teacherOnly: true),
-  // played from here for the whole room; renderTeacherViewSongs.
-  if(toggle && !toggle.querySelector('[data-view="tsongs"]')){
-    toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="tsongs" onclick="setTeacherView('tsongs')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/><path d="m10 8 5 2.5-5 2.5z"/></svg> Teacher view songs</button>`);
-  }
-  // Live quiz — the whole-class game (live-quiz.js). Injected here like its
-  // neighbours so the feature stays in one file; the render call in
-  // renderTeacherBody is guarded because that file loads separately.
-  if(toggle && !toggle.querySelector('[data-view="livequiz"]')){
-    toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="livequiz" onclick="setTeacherView('livequiz')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg> Live quiz</button>`);
-  }
-  if(toggle && !toggle.querySelector('[data-view="mic"]')){
-    toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="mic" onclick="setTeacherView('mic')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg> Mic recordings</button>`);
-  }
-  if(toggle && !toggle.querySelector('[data-view="reports"]')){
-    toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="reports" onclick="setTeacherView('reports')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="0.6" fill="currentColor" stroke="none"/></svg> Reports</button>`);
-  }
-  /* Class-period filter — a sibling of the view toggle, not a member of it:
-     it narrows the roster every view renders from rather than switching
-     views, so it must not pick up .t-vt's aria-pressed group behaviour.
-     Injected here like its neighbours, and filled in by
-     renderTeacherPeriodFilter once the roster has loaded. */
-  if(toggle && !document.getElementById('t-period-filter')){
-    toggle.insertAdjacentHTML('afterend', `<div class="tg-seg t-period-filter" id="t-period-filter" role="group" aria-label="Filter by class period"></div>`);
-  }
-  /* Refresh student progress, and how old the progress on screen is — see
-     teacherRefreshStudents. Beside the period filter for the same reason
-     the filter sits beside the view toggle: it's class-wide, not one view's.
-     Inline styles because the console's CSS has no rule for it yet; the
-     spacing matches .t-period-filter. */
-  const periodFilter=document.getElementById('t-period-filter');
-  if(periodFilter && !document.getElementById('t-refresh-bar')){
-    periodFilter.insertAdjacentHTML('afterend', `<span id="t-refresh-bar" style="display:inline-flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0 0 16px 10px;vertical-align:top;font-size:0.8125rem;color:var(--text2)">`
+  /* The sidebar (Layout A, 2026-11-08) — one button per view, grouped, built
+     from TEACHER_NAV. It replaced the row of view buttons that used to sit
+     above the content (index.html's static three plus ten injected here).
+     Same data-view values, same setTeacherView; a delegated click on the
+     shell (below) does the switching. Guarded so re-entering teacher mode
+     doesn't build it twice. */
+  const side=document.getElementById('t-side');
+  if(side && !side.querySelector('[data-view]')) side.innerHTML=teacherNavHtml();
+  /* Class-period filter and Refresh, in the slim top bar beside Student
+     view. The filter narrows the roster every view renders from rather than
+     switching views; renderTeacherPeriodFilter fills it in once the roster
+     has loaded. Refresh re-reads student progress (teacherRefreshStudents)
+     and says how old the progress on screen is. */
+  const tools=document.getElementById('t-topbar-tools');
+  if(tools && !document.getElementById('t-period-filter')){
+    tools.insertAdjacentHTML('afterbegin', `<div class="tg-seg t-period-filter" id="t-period-filter" role="group" aria-label="Filter by class period"></div>`
+      +`<span id="t-refresh-bar" class="t-refresh-bar">`
       +`<span class="tg-seg"><button type="button" class="tg-seg-btn" data-refresh-students title="Read every student's progress again: Done counts, who hasn't finished, Pending">Refresh</button></span>`
       +`<span data-refresh-when></span></span>`);
   }
@@ -234,7 +193,7 @@ async function showTeacherApp(user){
   // green check (index.html's static legend) doesn't distinguish a Coach
   // pass or a gate override from a self-declared "I've got it!". Inserted
   // here rather than in index.html so the whole feature stays in this file;
-  // guarded the same way as the view-toggle buttons above.
+  // guarded the same way as the sidebar above.
   const legend=document.getElementById('t-legend');
   if(legend && !legend.querySelector('[data-leg="coach-verified"]')){
     legend.insertAdjacentHTML('beforeend', `<div class="t-leg" data-leg="coach-verified"><span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:2px solid var(--blue-text)">${TCK_CHECK_SVG}</span> Listening Coach verified</div>`);
@@ -256,6 +215,8 @@ async function showTeacherApp(user){
   if(shell && !shell.dataset.delegated){
     shell.dataset.delegated='1';
     shell.addEventListener('click', e=>{
+      const navBtn=e.target.closest('#t-side [data-view]');
+      if(navBtn){ setTeacherView(navBtn.dataset.view); return; }
       if(e.target.closest('[data-refresh-students]')){ teacherRefreshStudents({manual:true}); teacherRefreshReportsBadge(); return; }
       if(e.target.closest('[data-back-to-students]')){ backToStudentsRoster(); return; }
       const pmSort=e.target.closest('[data-pm-sort]');
@@ -464,11 +425,8 @@ async function showTeacherApp(user){
   renderTeacherSetTabs();
   const firstSet=SETS.find(w=>!w.locked&&w.skills&&w.skills.length>0);
   if(firstSet){ teacherSetId=firstSet.id; activateTeacherSetTab(firstSet.id); }
-  // Match the chrome to whichever view the console opens on (Class
-  // activities) — index.html's markup is written for the skills grid, and
-  // the runtime buttons above ship with no aria-pressed of their own.
+  // Mark the view the console opens on (Class activities) in the sidebar.
   applyTeacherViewChrome(teacherView);
-  syncPressedGroup('#t-viewtoggle','.t-vt','on');
   loadAllStudents();
 }
 
@@ -799,7 +757,7 @@ async function teacherRefreshReportsBadge(){
   teacherPaintReportsBadge(n);
 }
 function teacherPaintReportsBadge(n){
-  const btn=document.querySelector('#t-viewtoggle [data-view="reports"]');
+  const btn=document.querySelector('#t-side [data-view="reports"]');
   if(!btn) return;
   let b=btn.querySelector('.t-reports-badge');
   if(!n){
@@ -948,18 +906,18 @@ function renderTeacherGrid(){
 
 function abbreviate(text){ const words=text.split(' '); if(words.length<=4) return text; return words.slice(0,3).join(' ')+'…'; }
 
-/* ── Teacher view toggle: skill grid ⇄ responses ⇄ games ⇄ trouble ⇄
-   Students (Session 6.2, extended for the Students view) ── Read-only. Uses
+/* ── Teacher views: skill grid ⇄ responses ⇄ games ⇄ trouble ⇄ Students
+   (Session 6.2, extended for the Students view; one sidebar since Layout A,
+   2026-11-08) ── Read-only. Uses
    the same one-shot student fetch (no extra reads). Students has two
    screens (roster / one student's detail); studentDetailUid tracks which
    one renderTeacherBody shows, kept separate from teacherView so a name
    click in the skills grid can jump straight to a student's detail without
    a view flag of its own. */
 /* The console opens on Class activities — the board is what gets touched
-   before and during a period, where the skills grid is a look-back. The
-   static .t-vt "on" class in index.html still says Skills grid, so
-   showTeacherApp calls applyTeacherViewChrome once the runtime buttons are
-   in to bring the chrome into line. */
+   before and during a period, where the skills grid is a look-back.
+   showTeacherApp marks it in the sidebar (applyTeacherViewChrome) once the
+   sidebar is built. */
 let teacherView='activities';
 let studentDetailUid=null;
 // Which activity's detail is showing in the Class activities view — same
@@ -1013,12 +971,49 @@ let taFocusPreviewPath={};   // id -> path key picked in the preview (paths acti
    that section's "Archived (N)" disclosure — it still holds its place, so
    Restore puts it back where it was. A DELETED one is taken off the board
    as well, so it lands back in Built with everything else unplaced. */
+/* ── The sidebar (Layout A, 2026-11-08) ──────────────────────────────────
+   Four groups, in Jonathan's order. Every entry is a view renderTeacherBody
+   already knows; nothing here decides what a view shows. There is no
+   "Modules" item (his call). The icons are the ones the old top-bar buttons
+   carried; Skills grid had none and got a small grid. */
+const TEACHER_NAV_ICON={
+  activities:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="m9 13 2 2 4-4"/>',
+  songs:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  tsongs:'<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/><path d="m10 8 5 2.5-5 2.5z"/>',
+  livequiz:'<path d="M13 2 4 14h6l-1 8 9-12h-6z"/>',
+  students:'<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>',
+  skills:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="m14.5 17.5 2 2 4-4"/>',
+  trouble:'<path d="M5 3v18"/><path d="M5 4h11l-3 4 3 4H5"/>',
+  minutes:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 2h6"/>',
+  responses:'<path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/>',
+  manage:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
+  games:'<rect x="2.5" y="6.5" width="19" height="11" rx="5.5"/><path d="M7 9.5v3M5.5 11h3"/><circle cx="15.7" cy="10.7" r="0.95" fill="currentColor" stroke="none"/><circle cx="17.6" cy="12.6" r="0.95" fill="currentColor" stroke="none"/>',
+  mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
+  reports:'<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="0.6" fill="currentColor" stroke="none"/>',
+};
+const TEACHER_NAV=[
+  {group:'Teach', items:[['activities','Class activities'],['songs','Songs'],['tsongs','Teacher view songs'],['livequiz','Live quiz']]},
+  {group:'Students', items:[['students','Students'],['skills','Skills grid'],['trouble','Trouble spots'],['minutes','Practice minutes'],['responses','Responses']]},
+  {group:'Set up', items:[['manage','Manage'],['games','Games']]},
+  {group:'Tools', items:[['mic','Mic recordings'],['reports','Reports']]},
+];
+function teacherNavHtml(){
+  return TEACHER_NAV.map(g=>`<div class="t-side-group" role="group" aria-label="${escAttr(g.group)}"><div class="t-side-head" aria-hidden="true">${escHtml(g.group)}</div>`
+    +g.items.map(([v,label])=>`<button type="button" class="t-vt t-side-item" data-view="${v}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${TEACHER_NAV_ICON[v]||''}</svg><span class="t-side-label">${escHtml(label)}</span></button>`).join('')
+    +`</div>`).join('');
+}
+/* Marks the sidebar item for view v: .on for the look, aria-current="page"
+   for screen readers (only the current item carries it). */
 function applyTeacherViewChrome(v){
-  document.querySelectorAll('.t-vt').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
+  document.querySelectorAll('.t-vt').forEach(b=>{
+    const on=b.dataset.view===v;
+    b.classList.toggle('on',on);
+    if(on) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+  });
   const legend=document.getElementById('t-legend'); if(legend) legend.style.display = v==='skills' ? '' : 'none';
-  // Games, Trouble-spots and Students are all class-wide, not per-week —
-  // hide the week tabs and the skill summary while any of them is showing.
-  const classWide = v==='games'||v==='trouble'||v==='students'||v==='minutes'||v==='manage'||v==='activities'||v==='reports'||v==='livequiz'||v==='mic'||v==='songs'||v==='tsongs';
+  // Only the skills grid is per-set: every other view hides the set tabs
+  // and the skill summary.
+  const classWide = v!=='skills';
   const tabs=document.getElementById('t-week-tabs'); if(tabs) tabs.style.display = classWide ? 'none' : '';
   const summ=document.getElementById('t-summary'); if(summ) summ.style.display = classWide ? 'none' : '';
 }

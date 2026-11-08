@@ -113,9 +113,11 @@ function radioGroupKeydown(e, groupSel, itemSel, onClass){
   syncRadioGroupAria(groupSel, itemSel, onClass);
   items[next].focus();
 }
-/* Toggle-button flavour: aria-pressed, every button stays tabbable. Used where
-   the group gains buttons at runtime (the teacher view toggle) and a roving
-   tabindex would leave those unmanaged siblings out of step. */
+/* Toggle-button flavour: aria-pressed, every button stays tabbable. For a
+   group that gains buttons at runtime, where a roving tabindex would leave
+   those unmanaged siblings out of step. (Its one caller, the teacher
+   console's old row of view buttons, became a sidebar on 2026-11-08 that
+   marks the current view with aria-current instead.) */
 function syncPressedGroup(groupSel, itemSel, onClass){
   const g = document.querySelector(groupSel);
   if(!g) return;

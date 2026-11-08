@@ -523,36 +523,30 @@
   <button type="button" class="back-to-top" id="back-to-top" onclick="scrollPaneTop(true)" data-i18n-attr="aria-label:btn.backToTop;title:btn.backToTop" aria-label="Back to top" title="Back to top">&#x2191; <span data-i18n="btn.top">Top</span></button>
 </div>
 <div id="teacher-app" style="display:none">
-  <div class="t-main">
-    <div class="t-header">
-      <div class="t-header-row">
-        <div>
+  <!-- Layout A (2026-11-08): a grouped left sidebar replaces the old row of
+       view buttons. showTeacherApp fills #t-side from TEACHER_NAV (teacher.js);
+       the slim top bar keeps the title, the class-period filter, Refresh and
+       Student view (both injected into #t-topbar-tools by showTeacherApp). -->
+  <div class="t-shell">
+    <nav class="t-side" id="t-side" aria-label="Console sections"></nav>
+    <div class="t-main">
+      <div class="t-topbar">
+        <div class="t-topbar-title">
           <div class="t-title">Class progress</div>
           <div class="t-sub">Sequoia High School — Beginning Guitar · Year 1 · Teacher view</div>
         </div>
-        <button type="button" class="tg-seg-btn" onclick="teacherOpenStudentView()" title="Opens the site in a new tab the way a student sees it — no dashboard, no gate. Since it's still your own account, it skips the sequential set gate like any teacher preview.">Student view</button>
+        <div class="t-topbar-tools" id="t-topbar-tools">
+          <button type="button" class="tg-seg-btn t-studentview-btn" onclick="teacherOpenStudentView()" title="Opens the site in a new tab the way a student sees it — no dashboard, no gate. Since it's still your own account, it skips the sequential set gate like any teacher preview.">Student view</button>
+        </div>
       </div>
-    </div>
-    <div class="t-summary" id="t-summary"></div>
-    <!-- Which view is showing was conveyed by the .on class alone. Mirrored to
-         aria-pressed by a delegated onclick (runs after the button's own
-         handler bubbles, so teacher.js stays untouched). Deliberately
-         aria-pressed toggle buttons rather than the radiogroup + roving
-         tabindex used in the tool popups: showTeacherApp injects three more
-         .t-vt buttons here at runtime (Trouble spots / Students / Manage), and
-         a roving tabindex would leave those unmanaged siblings tabbable while
-         the static ones weren't. aria-pressed degrades cleanly instead. -->
-    <div class="t-viewtoggle" id="t-viewtoggle" role="group" aria-label="Dashboard view" onclick="syncPressedGroup('#t-viewtoggle','.t-vt','on')">
-      <button type="button" class="t-vt on" data-view="skills" onclick="setTeacherView('skills')" aria-pressed="true">Skills grid</button>
-      <button type="button" class="t-vt" data-view="responses" onclick="setTeacherView('responses')" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> Responses</button>
-      <button type="button" class="t-vt" data-view="games" onclick="setTeacherView('games')" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6.5" width="19" height="11" rx="5.5"/><path d="M7 9.5v3M5.5 11h3"/><circle cx="15.7" cy="10.7" r="0.95" fill="currentColor" stroke="none"/><circle cx="17.6" cy="12.6" r="0.95" fill="currentColor" stroke="none"/></svg> Games</button>
-    </div>
-    <div class="t-week-tabs" id="t-week-tabs"></div>
-    <div id="t-grid-container"><div class="t-loading">Loading student data…</div></div>
-    <div class="t-legend" id="t-legend">
-      <div class="t-leg"><span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px"><svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> I've got it!</div>
-      <div class="t-leg"><span class="tck" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:var(--amber-bg);color:var(--amber-text);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.8"/></svg></span> Still working on it</div>
-      <div class="t-leg"><span class="tck no" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px"><svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M3 6h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span> Not yet</div>
+      <div class="t-summary" id="t-summary"></div>
+      <div class="t-week-tabs" id="t-week-tabs"></div>
+      <div id="t-grid-container"><div class="t-loading">Loading student data…</div></div>
+      <div class="t-legend" id="t-legend">
+        <div class="t-leg"><span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px"><svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> I've got it!</div>
+        <div class="t-leg"><span class="tck" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:var(--amber-bg);color:var(--amber-text);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.8"/></svg></span> Still working on it</div>
+        <div class="t-leg"><span class="tck no" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px"><svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M3 6h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span> Not yet</div>
+      </div>
     </div>
   </div>
 </div>

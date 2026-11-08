@@ -13669,15 +13669,20 @@ function checkPracticeMinutes(i18nTable) {
     if (!bad) console.log(`${C.dim}      ${K.size} pm.* strings, ${litCount} references, ${tabs} Journey pages${C.reset}`);
   }
   // 6. the teacher console's Practice minutes view (2026-11-06; teacher.js). Its maths is run in pm-sim section 17.
-  /* Pinned defaults: the button sits right after Students in the view toggle, the view opens sorted by This week, and it is wired into
+  /* Pinned defaults: the item sits right after Students in the console sidebar, the view opens sorted by This week, and it is wired into
      renderTeacherBody. Its read path is pinned too: it lists minutes/{uid}/weeks from the SERVER and touches nothing else — no days, no
      meta/board (the tag), no rankBoard/weekBoard, no collectionGroup (1cg forbids the wildcard-first rule it would need), and no write of
      any kind. firestore.rules lets the teacher read the weeks docs only (WEEKS_SHIPPED above). */
   {
     const tsrc = strip((read('teacher.js') || '').replace(/\r\n/g, '\n'));
-    const iStu = tsrc.indexOf(`querySelector('[data-view="students"]')`), iMin = tsrc.indexOf(`querySelector('[data-view="minutes"]')`), iMan = tsrc.indexOf(`querySelector('[data-view="manage"]')`);
-    if (iMin < 0 || !/data-view="minutes" onclick="setTeacherView\('minutes'\)"[^`]*> Practice minutes<\/button>/.test(tsrc)) fail('teacher.js: the "Practice minutes" view-toggle button (data-view="minutes") is missing');
-    else if (!(iStu >= 0 && iStu < iMin && iMin < iMan)) fail('teacher.js: the "Practice minutes" button must be added right after "Students" and before "Manage"');
+    /* Since Layout A (2026-11-08) the views are one sidebar built from TEACHER_NAV: the item must be there, labelled, in the
+       Students group, after Students and before Manage. */
+    const navM = /\nconst TEACHER_NAV=\[([\s\S]*?)\n\];/.exec(tsrc);
+    const nav = navM ? navM[1] : '';
+    const iStu = nav.indexOf(`['students','Students']`), iMin = nav.indexOf(`['minutes','Practice minutes']`), iMan = nav.indexOf(`['manage','Manage']`);
+    const minGroup = (nav.split('\n').find(l => l.includes(`['minutes',`)) || '');
+    if (!navM || iMin < 0) fail('teacher.js: the "Practice minutes" sidebar item (TEACHER_NAV [\'minutes\',\'Practice minutes\']) is missing');
+    else if (!(iStu >= 0 && iStu < iMin && iMin < iMan) || !/group:'Students'/.test(minGroup)) fail('teacher.js: the "Practice minutes" sidebar item must sit in the Students group, after "Students" and before "Manage"');
     if (!/\nlet teacherPmSort='week';/.test(tsrc)) fail("teacher.js: the Practice minutes view must open sorted by This week (let teacherPmSort='week';)");
     const bodyFn = /\nfunction renderTeacherBody\(\)\{[\s\S]*?\n\}\n/.exec(tsrc);
     if (!bodyFn || !/else if\(teacherView==='minutes'\) renderTeacherMinutes\(\);/.test(bodyFn[0])) fail('teacher.js renderTeacherBody(): the minutes view is not dispatched to renderTeacherMinutes()');
