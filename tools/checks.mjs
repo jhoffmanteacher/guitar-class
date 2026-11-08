@@ -12698,15 +12698,15 @@ function checkCoachVerdicts() {
       const clean = game(PAIR, 30, play(n4, 20));
       if (!clean.txt.includes('4 of 4 changes worked before you stopped.')) flag(`1ck stopped-clean: 4 right then Stop does not read "4 of 4 changes worked before you stopped." (${clean.txt.slice(0, 160)})`);
       if (clean.txt.includes(TOOFAST) || clean.txt.includes(DROP)) flag('1ck stopped-clean: 4 right then Stop still says "too fast" or "Drop ..."');
-      if (!clean.txt.includes('Every change you got to worked. Play it again and go all the way.')) flag('1ck stopped-clean: the advice line is not "Every change you got to worked. Play it again and go all the way."');
-      if (!clean.txt.includes('– 0 no strum heard')) flag('1ck stopped-clean: the breakdown still counts the 11 changes never reached as "no strum heard"');
-      const chipsOf = html => ({ pending: (html.match(/coach-chip pending/g) || []).length, miss: (html.match(/coach-chip miss/g) || []).length, ok: (html.match(/coach-chip ok/g) || []).length });
+      if (!clean.txt.includes('Every change you reached worked. Play it again, to the end.')) flag('1ck stopped-clean: the advice line is not "Every change you reached worked. Play it again, to the end."');
+      if (!clean.txt.includes('– 0 no strum heard · 11 not reached')) flag('1ck stopped-clean: the breakdown still counts the 11 changes never reached as "no strum heard"');
+      const chipsOf = html => ({ pending: (html.match(/coach-chip notreached/g) || []).length, miss: (html.match(/coach-chip miss/g) || []).length, ok: (html.match(/coach-chip ok/g) || []).length });
       const cc1 = chipsOf(clean.html);
       if (cc1.ok !== 4 || cc1.pending !== 11 || cc1.miss !== 0) flag(`1ck stopped-clean: the chips are ${JSON.stringify(cc1)}, expected 4 right, 11 not reached, 0 "no strum heard"`);
       if ((/id="cc-done-bpm">(\d+) BPM</.exec(clean.html) || [])[1] !== '30') flag('1ck stopped-clean: the Again row is not on the tempo that was played (30)');
       run("setLang('es'); ccRenderDone();");
       const cleanEs = text('cc-body').replace(/\s+/g, ' ');
-      if (!cleanEs.includes('4 de 4 cambios funcionaron antes de que pararas.') || !cleanEs.includes('Todos los cambios a los que llegaste funcionaron. Tócalo otra vez hasta el final.') || cleanEs.includes('demasiado rápida') || cleanEs.includes('Baja '))
+      if (!cleanEs.includes('4 de 4 cambios funcionaron antes de que pararas.') || !cleanEs.includes('Todos los cambios a los que llegaste funcionaron. Tócalo otra vez, hasta el final.') || cleanEs.includes('demasiado rápida') || cleanEs.includes('Baja '))
         flag(`1ck stopped-clean (Spanish): ${cleanEs.slice(0, 200)}`);
       run("setLang('en');");
       // a song switch Stopped in round 2 (round 1 all right, 3 of round 2 right): the reached changes are all right, even across the round boundary
@@ -12721,6 +12721,18 @@ function checkCoachVerdicts() {
       if (!off1.txt.includes(TOOFAST) || off1.txt.includes('before you stopped')) flag('1ck stopped-clean: 3 right and 1 "chord sounded wrong", then Stop, no longer reads as a low game (it was not "every change reached right")');
       const endLow = game(PAIR, 60, `__t = 25000; __cbs[0](); cc.changes.forEach((c, i) => { c.result = i < 4 ? 'ok' : 'off'; }); __t = 25000 + 17000; ccStageEnd();`);
       if (!endLow.txt.includes(TOOFAST) || endLow.txt.includes('before you stopped')) flag('1ck stopped-clean: a game played to the end with 4 of 15 right and 11 on time but the wrong chord no longer says "too fast" (nothing was left unreached)');
+      // a Stop before the first change (Jonathan, 2026-11-07: neutral screen, no tempo advice): in the count-in (not reachable from the buttons) and a second into play
+      for (const [what, body] of [['in the first count-in', `__t = 5000; ccFinish(false);`], ['a second into play', `__t = 25000; __cbs[0](); __t = 26000 + coachMicLatencyMs(); ccFinish(false);`]]) {
+        const g0 = game(PAIR, 30, body), c0 = chipsOf(g0.html);
+        if (!g0.txt.includes('You stopped before the first change.') || !g0.txt.includes('Play it again, to the end.') || g0.txt.includes(TOOFAST) || g0.txt.includes(DROP) || g0.txt.includes('before you stopped') || !g0.txt.includes('– 0 no strum heard · 15 not reached') || c0.pending !== 15 || c0.miss !== 0 || (/id="cc-done-bpm">(\d+) BPM</.exec(g0.html) || [])[1] !== '30')
+          flag(`1ck stopped-early: a pair Stopped ${what} (nothing reached) must read the neutral screen, 15 grey chips, tempo row on 30: ${g0.txt.slice(0, 220)} ${JSON.stringify(c0)}`);
+      }
+      run("setLang('es'); ccRenderDone();");
+      if (!text('cc-body').replace(/\s+/g, ' ').includes('Paraste antes del primer cambio. ') && !text('cc-body').replace(/\s+/g, ' ').includes('Paraste antes del primer cambio.')) flag('1ck stopped-early (Spanish): "Paraste antes del primer cambio." is missing');
+      if (!text('cc-body').replace(/\s+/g, ' ').includes('Tócalo otra vez, hasta el final.') || text('cc-body').includes('Baja ')) flag('1ck stopped-early (Spanish): the advice is not "Tócalo otra vez, hasta el final."');
+      run("setLang('en');");
+      const sw0 = game(SW, 30, `__t = 25000; __cbs[0](); __t = 25500 + coachMicLatencyMs(); ccFinish(false);`);
+      if (!sw0.txt.includes('You stopped before the first change.') || sw0.txt.includes(TOOFAST) || sw0.txt.includes(DROP)) flag(`1ck stopped-early: a song switch Stopped half a second into round 1 must read the neutral screen: ${sw0.txt.slice(0, 200)}`);
       const none = game(PAIR, 30, `__t = 5000; ccFinish(false);`);
       if (none.txt.includes('before you stopped')) flag('1ck stopped-clean: a Stop in the first count-in (nothing reached) says "changes worked before you stopped"');
       const hi = game(PAIR, 30, play(Array(14).fill('ok'), 40));
@@ -12728,6 +12740,37 @@ function checkCoachVerdicts() {
       const heard = game(PAIR, 30, play(['ok', 'ok', ...Array(10).fill('miss')], 20));
       if (heard.txt.includes('before you stopped') || !heard.txt.includes(HINT)) flag('1ck stopped-clean: 2 right and 10 not heard, then Stop, lost the strum-firmer screen');
             // the song-switch setup: a tempo of 135 or 140 chosen for a pair reads 130 on a song switch (round 1 plays at most 130), in the readout, the slider and the session
+      // 85% or better of ALL changes keeps the good-score headline, but the never-reached changes are still not "no strum heard" (review R1-1)
+      const hi13 = game(PAIR, 30, play(Array(13).fill('ok'), 40)), ch13 = chipsOf(hi13.html);
+      if (!hi13.txt.includes('13 of 15 changes on time') || hi13.txt.includes('before you stopped') || !hi13.txt.includes('– 0 no strum heard · 2 not reached') || ch13.pending !== 2 || ch13.miss !== 0)
+        flag(`1ck stopped-clean: 13 right then Stop (87% of all) must keep the good-score headline but not call the 2 never reached "no strum heard": ${hi13.txt.slice(0, 220)} ${JSON.stringify(ch13)}`);
+      const twelve = game(PAIR, 30, play(Array(12).fill('ok'), 40));
+      if (!twelve.txt.includes('12 of 12 changes worked before you stopped.')) flag('1ck stopped-clean: 12 right and 3 never reached does not read "12 of 12 changes worked before you stopped."');
+      const one = game(PAIR, 30, play(['ok'], 20));
+      if (!one.txt.includes('1 of 1 change worked before you stopped.')) flag(`1ck stopped-clean: 1 right then Stop does not read "1 of 1 change worked before you stopped." (${one.txt.slice(0, 120)})`);
+      run("setLang('es'); ccRenderDone();");
+      if (!text('cc-body').replace(/\s+/g, ' ').includes('1 de 1 cambio funcionó antes de que pararas.')) flag('1ck stopped-clean (Spanish): 1 right then Stop does not read "1 de 1 cambio funcionó antes de que pararas."');
+      run("setLang('en');");
+      // one change the student REACHED and got wrong, among 4 right: not "every change reached" (the reviewer's mutant "ok >= reached - 1" passed every other test)
+      const oneMiss = game(PAIR, 30, `__t = 25000; __cbs[0](); cc.changes.forEach((c, i) => { c.result = i < 4 ? 'ok' : i === 4 ? 'miss' : null; }); cc.lastOnsetT = cc.changes[3].t + 400 + coachMicLatencyMs(); __t = cc.changes[4].t + 8000 + coachMicLatencyMs(); ccFinish(false);`);
+      if (oneMiss.txt.includes('before you stopped') || !oneMiss.txt.includes(TOOFAST)) flag(`1ck stopped-clean: 4 right and 1 change reached and not heard (due 8 s before the Stop), then Stop, no longer reads as a low game: ${oneMiss.txt.slice(0, 200)}`);
+      // a strum heard AFTER change 5 fell due, outside every window (a late one): change 5 was reached, so this is not "every change reached" (review R1-4)
+      const late = game(PAIR, 30, `__t = 25000; __cbs[0](); cc.changes.forEach((c, i) => { c.result = i < 4 ? 'ok' : i === 4 ? 'miss' : null; }); cc.lastOnsetT = cc.changes[4].t + 700 + coachMicLatencyMs(); __t = cc.changes[4].t + 1500 + coachMicLatencyMs(); ccFinish(false);`);
+      if (late.txt.includes('before you stopped') || !late.txt.includes(TOOFAST)) flag(`1ck stopped-clean: 4 right, then a strum 0.7 s after change 5 fell due (outside its window) and Stop, reads "before you stopped" although the student tried change 5: ${late.txt.slice(0, 200)}`);
+      // the same Stop with the last strum BEFORE change 5 fell due is the old reach case: change 5 was never reached, still clean
+      const early5 = game(PAIR, 30, `__t = 25000; __cbs[0](); cc.changes.forEach((c, i) => { c.result = i < 4 ? 'ok' : i === 4 ? 'miss' : null; }); cc.lastOnsetT = cc.changes[3].t + 300 + coachMicLatencyMs(); __t = cc.changes[4].t + 1500 + coachMicLatencyMs(); ccFinish(false);`);
+      if (!early5.txt.includes('4 of 4 changes worked before you stopped.')) flag(`1ck stopped-clean: 4 right, the last strum before change 5 fell due, Stop 1.5 s after it: not clean ("${early5.txt.slice(0, 160)}")`);
+      // a Stop that is NOT all-right keeps counting the never-reached changes as before (out of scope on purpose): 3 right, 1 off, then Stop
+      if (!game(PAIR, 30, play(['ok', 'ok', 'ok', 'off'], 20)).txt.includes('– 11 no strum heard')) flag('1ck stopped-clean: the breakdown of a Stop with one wrong change changed (it must still read "11 no strum heard")');
+      // Change Up (not Power Chord Switch) takes the same branch: headline, advice, grey chips, the Again button highlighted
+      run(`setLang('en'); currentUser = { uid: 'pw-check' }; games = {}; ccSetup('open'); ccPickRate(2); ccPickProg(0); cc.bpm = 60; cc.micOn = true; ccPrepare(false); cc.firstPlayAt = null; cc.unreached = 0; ccBeginStage(); __t = 25000; __cbs[0](); cc.changes.forEach((c, i) => { c.result = i < 4 ? 'ok' : null; }); __t = 25000 + 20000; ccFinish(false);`);
+      const cuHtml = bodies['cc-body'] || '', cuTxt = text('cc-body').replace(/\s+/g, ' '), cuChips = chipsOf(cuHtml), cuAgain = /coach-start" onclick="ccAgain\(0\)"/.test(cuHtml);
+      if (!cuTxt.includes('4 of 4 changes worked before you stopped.') || cuTxt.includes(TOOFAST) || cuTxt.includes('Drop ') || cuChips.pending < 1 || cuChips.miss !== 0 || !cuAgain)
+        flag(`1ck stopped-clean (Change Up): ${cuTxt.slice(0, 200)} chips ${JSON.stringify(cuChips)}, Again highlighted ${cuAgain}`);
+      song.stopChecks++;
+      // a song switch: the rounds line counts only the changes reached in each round, and a round with none reached is not listed (review R1-5)
+      const swr = game(SW, 90, `__t = 25000; __cbs[0](); cc.changes.forEach((c, i) => { c.result = i < 4 ? 'ok' : 'miss'; }); __t = 25000 + 9 * 60000 / 90; ccStageEnd(); __t = cc.listenStart; __cbs[1](); __t += 500; ccFinish(false);`);
+      if (!swr.txt.includes('Round 1 · 90 BPM: 4 of 4') || /Round 2/.test(swr.txt)) flag(`1ck stopped-clean: the rounds line of a song switch stopped 0.5 s into round 2 should read only "Round 1 · 90 BPM: 4 of 4": ${swr.txt.slice(0, 220)}`);
       const setupOf = () => { const h = bodies['cc-body'] || ''; return JSON.stringify([run('cc.bpm'), (/id="cc-bpm-readout">(\d+) BPM</.exec(h) || [])[1], (/id="cc-bpm-slider"[^>]* max="(\d+)"/.exec(h) || [])[1], (/id="cc-bpm-slider"[^>]* value="(\d+)"/.exec(h) || [])[1], run("sessionStorage.getItem('pwBpm')"), /(\d+) BPM[^<]*[^\d]*?(\d+) BPM[^<]*[^\d]*?(\d+) BPM/.exec((/id="cc-ladder-note">(.*?)<\/div>/s.exec(h) || [])[1] || '') ? 'rounds' : 'none']); };
       run(`setLang('en'); ccSetup('power'); ccPickRate(2); ccPickProg(${PAIR}); ccSetBpm(140); ccRenderSetup();`);   // ccSetBpm only updates the readout in place, so draw the screen the student would see
       const pairSetup = setupOf();
@@ -12738,6 +12781,11 @@ function checkCoachVerdicts() {
       if (!pairSetup.startsWith('[140,"140","140","140"')) flag(`1ck song-switch setup: a pair at 140 reads ${pairSetup}, expected 140 on the readout, slider top and value`);
       if (!swSetup.startsWith('[130,"130","130","130","130"') || !/130 BPM.*135 BPM.*140 BPM/.test(swNote.replace(/<[^>]*>/g, ''))) flag(`1ck song-switch setup: a song switch after a pair at 140 reads ${swSetup} with rounds "${swNote.replace(/<[^>]*>/g, '')}", expected 130 on the readout, slider top and value and the session, and rounds 130 / 135 / 140`);
       if (!swAfter.startsWith('[130,"130","130","130"') || Number(swNudge) !== 130 || Number(swSet) !== 130) flag(`1ck song-switch setup: +5 at 130 gives ${swNudge} and setting 140 gives ${swSet}; a song switch stays at 130`);
+      run(`ccSetup('power'); ccPickRate(2); ccPickProg(${PAIR}); ccSetBpm(140); ccPickProg(${SW}); ccPickProg(${PAIR}); ccRenderSetup();`);   // looking at a song switch and coming back, setting no tempo there
+      const pairBack = JSON.stringify([run('cc.bpm'), (/id="cc-bpm-readout">(\d+) BPM</.exec(bodies['cc-body'] || '') || [])[1], (/id="cc-bpm-slider"[^>]* value="(\d+)"/.exec(bodies['cc-body'] || '') || [])[1]]);
+      if (pairBack !== '[140,"140","140"]') flag(`1ck song-switch setup: a pair at 140, a look at a song switch and back reads ${pairBack}; the pair's 140 must come back (review R1-6)`);
+      run(`ccPickProg(${SW}); ccSetBpm(125); ccPickProg(${PAIR});`);
+      if (Number(run('cc.bpm')) !== 125) flag(`1ck song-switch setup: a tempo set on the song switch (125) is replaced by the held pair tempo: ${run('cc.bpm')}`);
       if (String(pairAgain) !== '140') flag(`1ck song-switch setup: back on a pair the slider's top is ${pairAgain}, expected 140`);
       song.stopChecks += 1;
     }
@@ -12844,7 +12892,7 @@ function checkCoachVerdicts() {
     if (pk !== 'ccBest:F5-G5:beat') flag(`1ck: a pair's best-score key changed to "${pk}" (a student's saved bests would be lost)`);
     const pairPlan = JSON.parse(run(`JSON.stringify(ccRoundPlan(CC_POWER_PROGRESSIONS[1], CC_POWER_PROGRESSIONS[1].chords, CC_RATES[1]))`));
     if (pairPlan.slots !== 12 || pairPlan.ladder || pairPlan.rounds !== 1) flag(`1ck: a pair's round changed (${pairPlan.slots} slots at "Every 2 beats", expected 12, one round)`);
-    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, gridChecks: 60, hintChecks: 20, topChecks: 50, stopChecks: 41, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
+    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, gridChecks: 60, hintChecks: 20, topChecks: 50, stopChecks: 53, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
     for (const [k, n] of Object.entries(SONG_PIN)) if (song[k] !== n) flag(`1ck: ${song[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
     songCounts = song;
     run(`setLang('en'); cc = null; ccStop();`);

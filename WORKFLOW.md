@@ -146,7 +146,7 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
   line now says so); the smoke Play-clicks slider gap (`smoke.mjs` drags the card slider to 77; with `strumOpenMetro` forced
   to 60 it reports 7 failing steps); check `1d` flags a shared step before a path step (reviewed by `site-reviewer`, 2 minor
   points fixed). The coach.js fixes (Stop hint, 10 s of play, 130 cap) were reviewed by `site-reviewer-deep` the same day and landed 2026-11-07. What is left:
-  - [x] *Stopped-game headline + song-switch setup tempo (DECIDED 2026-11-07 by Jonathan, built 2026-11-08):* a Stop with changes still ahead, where every change
+  - [x] *Stopped-game headline + song-switch setup tempo (DECIDED 2026-11-07 by Jonathan, built 2026-11-07):* a Stop with changes still ahead, where every change
     the student reached was right (`ok === total - cc.unreached`, `cc.unreached > 0`, under 85% of all changes), now reads "N of M changes worked before you stopped."
     (M = the changes reached) and "Every change you got to worked. Play it again and go all the way." (`games.cc.verdict.stopped`, `games.cc.advice.stopped`, EN + ES),
     in both games: no "too fast", no "Drop 5 BPM"; the breakdown's "no strum heard" is 0; the never-reached chips are grey (`coach-chip pending`, flagged
@@ -179,20 +179,20 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
     `coach.js`. No `firestore.rules` change (the take's fields are not pinned). Check `1ck` runs the real `ccLoop` (48 runs, a stray sound with no change
     open and with the change due next taking it), reads the saved take's field and pins the number, the line and the console's reading of it; `1cl`
     pins the older-take fixture (`pw-drift-old`, whose grid differs from its twin's); thirteen broken versions in all each turn one of them red.
-    **Status: MERGED to main 2026-11-08 (e77ec8f), at Jonathan's request ("push work from other worktree"), after three deep-review rounds** (round 1: two major
+    **Status: MERGED to main 2026-11-07 (e77ec8f), at Jonathan's request ("push work from other worktree"), after three deep-review rounds** (round 1: two major
     problems, old takes replayed capped and a guard that could not see a taken strum; round 2: two guard gaps and a wrong explanation of the sim numbers; round 3: one wrong
     label, three more guard gaps and an understated CHANGELOG range). All fixed in the last commit, each with a mutant that turns a check red; **that last commit was not
     reviewed again** (the Friday-check rule would have held it for a fourth round).
     Not decided here: the Listening Coach (`coach.js` `coachMatchEvent`, `gridDelta = dev * 0.15`) is uncapped; its window is 0.9 beat, so one stray
     sound at its 30 BPM floor can move its grid up to 270 ms (the nearest event wins, which limits it). Left alone.
-  - [x] *Power Chord Switch UX, top-tempo advice (2026-11-07; merged to main 2026-11-08 at Jonathan's request: three review rounds, see the end of this bullet):* the done screen said "Level up: try it 5 BPM faster" at 140 (a pair) and 130
+  - [x] *Power Chord Switch UX, top-tempo advice (2026-11-07; merged to main 2026-11-07 at Jonathan's request: three review rounds, see the end of this bullet):* the done screen said "Level up: try it 5 BPM faster" at 140 (a pair) and 130
     (a song switch's first round) although the done row cannot go up. When the step up lands on the tempo just played (`ccDoneUpBpm() <= ccDonePlayedBpm()`, the
     same numbers the row's tempo uses) it says `games.pw.advice.top` instead: "The tempo cannot go higher. Play it again." / "El tempo no puede subir más. Tócalo
     otra vez." The wording is deliberate: not "top speed" (the setup's "speed" buttons are Every bar / Every 2 beats / Every beat, and a faster one exists at 140 BPM) and
     not "fastest tempo ... at this tempo" (a song switch is not played at one tempo: its row says "Again from 130 BPM" after rounds at 130 / 135 / 140). Under 85% right
     nothing changes. Check `1ck` renders the real done screen in 25 cases x EN + ES (50 renders) and compares the whole advice line and the tempo the row opens on:
     a pair at 140 and 135 (all right, 13 of 15, 10 of 15 wrong or not heard, firmer, under half), at every switch speed, as the computer's pick, and after a live
-    slow-down; a song switch from 130 and 125 (all right, 6 of 7, under half) Stopped in round 1, 2 or late (the changes never reached counted), with the Next round buttons pressed, and after a live slow-down of round 1 (the finished game's stage and lowest tempo are set as the real game leaves them); Change Up at 140 untouched. Three deep-review rounds (round 3 found the code correct in 40,000 states and only holes in this check, fixed afterwards without a fourth round; merged to main 2026-11-08 at Jonathan's request without one); every mutant they found (21 kinds) turns it red, and `cc.nextBpm` being cleared by Again is pinned. **Not changed (product call):** the row follows the settled
+    slow-down; a song switch from 130 and 125 (all right, 6 of 7, under half) Stopped in round 1, 2 or late (the changes never reached counted), with the Next round buttons pressed, and after a live slow-down of round 1 (the finished game's stage and lowest tempo are set as the real game leaves them); Change Up at 140 untouched. Three deep-review rounds (round 3 found the code correct in 40,000 states and only holes in this check, fixed afterwards without a fourth round; merged to main 2026-11-07 at Jonathan's request without one); every mutant they found (21 kinds) turns it red, and `cc.nextBpm` being cleared by Again is pinned. **Not changed (product call):** the row follows the settled
     "counted at its lowest tempo" rule, so a pair started at 135 (or 140) that the student sped up with the live +5 still says "Level up" with a +5 that does
     nothing (the counted tempo is 135), and so does a song switch from 125 sped up to 130 in round 1; rare. **Same shape, not fixed (not asked for):** Change Up
     says "Level up: try it 10 BPM faster" at 140 (`games.cc.advice.great`), and at the BOTTOM both games say "Drop 5 BPM and try again" (Change Up: 10) at 10 BPM

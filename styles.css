@@ -2454,6 +2454,7 @@ body.rail-collapsed .rail-tools .tool-popup{
 #cc-body .cc-back-btn{display:flex;align-items:center;gap:6px;width:max-content;max-width:100%;min-height:44px;margin:0 0 8px;padding:8px 16px;border-radius:var(--radius-sm);border:2px solid var(--text2);background:var(--bg2);color:var(--text);font-family:inherit;font-size:0.9375rem;font-weight:700;line-height:1.2;cursor:pointer;white-space:nowrap}
 #cc-body .cc-back-btn:hover{background:var(--bg3)}
 #cc-body .coach-chip.pending{opacity:0.8}
+#cc-body .coach-chip.notreached{opacity:0.45}   /* the done screen's changes a Stop never reached: as dim as a "no strum heard" chip, with no mark */
 
 /* ── Resource viewer: floating mini-player (replaces the right-side panel).
       No backdrop — the page stays visible and usable, so a student can watch

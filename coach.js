@@ -3386,6 +3386,7 @@ function ccSetBpm(v){
   if (!cc) return;
   v = Number(v);
   if (!isFinite(v)) return;
+  cc.heldPairBpm = null;   // a tempo the student set themselves replaces the one held across a song switch
   cc.bpm = Math.min(ccSetupMaxBpm(), Math.max(ccBpmMin(), Math.round(v / 5) * 5));   // steps of 5, like the buttons and the slider; 130 at most on a song switch
   try { sessionStorage.setItem(ccSk('Bpm'), String(cc.bpm)); } catch(e){}
   const el = document.getElementById('cc-bpm-readout');
@@ -3433,7 +3434,11 @@ function ccRenderSetup(msg){
   const power = ccIsPower();
   /* A tempo picked for a pair (135, 140) comes down to 130 on a song switch, on the readout, the slider and in the session. */
   if (power && cc.bpm > ccSetupMaxBpm()){
+    cc.heldPairBpm = cc.bpm;   // the pair's tempo comes back when the student goes back to a pair, unless they set another tempo in between (ccSetBpm clears it)
     cc.bpm = ccSetupMaxBpm();
+    try { sessionStorage.setItem(ccSk('Bpm'), String(cc.bpm)); } catch(e){}
+  } else if (power && cc.heldPairBpm != null && ccSetupMaxBpm() === CC_BPM_MAX){
+    cc.bpm = cc.heldPairBpm; cc.heldPairBpm = null;
     try { sessionStorage.setItem(ccSk('Bpm'), String(cc.bpm)); } catch(e){}
   }
   /* Change Up groups its loops by how many chords; Power Chord Switch by what
@@ -4018,6 +4023,7 @@ function ccStageEnd(){
   });
   cc.stageLog.push({ bpm: ccRoundBpm(), changes: cc.changes });
   cc.stage++;
+  cc.prevLastOnsetT = cc.lastOnsetT;   // ccBeginStage resets it; ccFinish needs the round's last strum if the Stop comes early in the next one
   cc.roundEndT = performance.now();
   ccBeginStage();
 }
@@ -4053,8 +4059,12 @@ function ccFinish(complete){
   const stopT = performance.now() - coachMicLatencyMs();
   let lastHeard = -1;
   cc.changes.forEach((c, i) => { if (c.pend || c.result === 'ok' || c.result === 'off') lastHeard = i; });
+  /* A strum the mic heard AFTER a change fell due means the student reached it, even if the strum landed outside every window (a late one): that change
+     is not "never reached" (a student who strums late and gives up must still get the old screen). lastStrumT is that strum's played time (cc.lastOnsetT is
+     when it arrived, minus the mic latency, as stopT is), in the clock of c.t; -1e9 when no strum was heard this round. */
+  const lastStrumT = cc.lastOnsetT - coachMicLatencyMs();
   const neverReached = ended || (cc.ladder && cc.phase === 'countin' && cc.stage > 0) ? []
-    : cc.changes.filter((c, i) => (c.result === null && !c.pend) || (i > lastHeard && c.result === 'miss' && stopT - c.t < CC_STOP_REACH_MS));
+    : cc.changes.filter((c, i) => i > lastHeard && c.t > lastStrumT && ((c.result === null && !c.pend) || (c.result === 'miss' && stopT - c.t < CC_STOP_REACH_MS)));
   neverReached.forEach(c => { c.neverReached = true; });   // ccRenderDone draws these as "not reached", not as "no strum heard", when everything the student did reach was right
   cc.unreached = neverReached.length;
   /* A Stop early in a later round, before any strum of it was heard: the hand may have left in the round before (the count-in has no Stop button, so the
@@ -4063,7 +4073,9 @@ function ccFinish(complete){
     const prev = cc.stageLog[cc.stageLog.length - 1].changes, gap = cc.listenStart - cc.roundEndT;
     let prevHeard = -1;
     prev.forEach((c, i) => { if (c.result === 'ok' || c.result === 'off') prevHeard = i; });
-    const prevUn = prev.filter((c, i) => i > prevHeard && c.result === 'miss' && stopT - gap - c.t < CC_STOP_REACH_MS);
+    /* The previous round's own last strum (saved when that round ended) and any strum already heard in this round both mean the hand did not go for Stop. */
+    const prevStrumT = (cc.prevLastOnsetT == null ? -1e9 : cc.prevLastOnsetT) - coachMicLatencyMs();
+    const prevUn = cc.lastOnsetT > 0 ? [] : prev.filter((c, i) => i > prevHeard && c.t > prevStrumT && c.result === 'miss' && stopT - gap - c.t < CC_STOP_REACH_MS);
     prevUn.forEach(c => { c.neverReached = true; });
     cc.unreached += prevUn.length;
   }
@@ -4132,10 +4144,15 @@ function ccRenderDone(){
      fast"). The headline counts the changes reached, the advice says to play it through, the breakdown and chips do not call the rest "no strum
      heard", and the row stays at the same tempo. At 85% or better of ALL the changes the "great" screen is still right, so it keeps that. */
   const reachedN = total - (cc.unreached || 0);
-  const stoppedClean = (cc.unreached || 0) > 0 && reachedN > 0 && ok === reachedN && r < 0.85;
+  const allReachedRight = (cc.unreached || 0) > 0 && ok === reachedN;   // the chips, the breakdown and the rounds line follow this at any score (also true when nothing was reached)
+  const noneReached = (cc.unreached || 0) > 0 && reachedN === 0;        // a Stop before the first change (Jonathan, 2026-11-07: a neutral screen, no tempo advice)
+  const stoppedClean = allReachedRight && !noneReached && r < 0.85;     // the headline and advice only below 85%: from there on the "great" screen is right
   let verdict, advice;
-  if (stoppedClean){
-    verdict = '&#x1F44D; ' + t('games.cc.verdict.stopped', { ok, reached: reachedN });
+  if (noneReached){
+    verdict = '&#x1F3B8; ' + t('games.cc.verdict.stoppedEarly');
+    advice = t('games.cc.advice.stoppedEarly');
+  } else if (stoppedClean){
+    verdict = '&#x1F44D; ' + t(reachedN === 1 ? 'games.cc.verdict.stoppedOne' : 'games.cc.verdict.stopped', { ok, reached: reachedN });
     advice = t('games.cc.advice.stopped');
   } else if (r >= 0.85){
     verdict = '&#x1F31F; ' + t('games.cc.verdict.great', { ok, total });
@@ -4163,14 +4180,14 @@ function ccRenderDone(){
     verdict = '&#x1F3B8; ' + t(firmer ? 'games.cc.verdict.ok' : 'games.cc.verdict.low', { ok, total });
     advice = firmer ? t('games.pw.advice.firmer') : t(ccIsPower() ? 'games.pw.advice.low' : 'games.cc.advice.low');
   }
-  const chips = cc.changes.map(c => stoppedClean && c.neverReached
-    ? `<span class="coach-chip pending">${escHtml(pwChordName(c.to))}</span>`
+  const chips = cc.changes.map(c => allReachedRight && c.neverReached
+    ? `<span class="coach-chip notreached">${escHtml(pwChordName(c.to))}</span>`
     : `<span class="coach-chip ${c.result === 'ok' ? 'ok' : c.result === 'off' ? 'wrong' : 'miss'}">${escHtml(ccChipText(c))}</span>`
   ).join('');
   /* What the chips mean, in numbers: right, on time but the chord sounded wrong, no strum heard. */
-  const nMiss = total - ok - off - (stoppedClean ? cc.unreached : 0);
-  const breakdown = `<div class="cc-breakdown">${escHtml(t('games.cc.breakdown', { ok, off, miss: nMiss }))}</div>`;
-  const rec = firmer || stoppedClean ? 'same' : r >= 0.85 ? 'up' : r >= 0.5 ? 'same' : 'down';
+  const nMiss = total - ok - off - (allReachedRight ? cc.unreached : 0);
+  const breakdown = `<div class="cc-breakdown">${escHtml(t('games.cc.breakdown', { ok, off, miss: nMiss }) + (allReachedRight ? t('games.cc.breakdown.left', { left: cc.unreached }) : ''))}</div>`;
+  const rec = firmer || stoppedClean || noneReached ? 'same' : r >= 0.85 ? 'up' : r >= 0.5 ? 'same' : 'down';
   /* A song switch: how each round went, at its own tempo. */
   /* Power Chord Switch (2026-11-05, Jonathan: the button should take more than one click and show the tempo): a −5 / +5 row
      with the tempo between, as on the setup screen, and one big "Again at N BPM" that plays it. The row opens on the tempo the
@@ -4192,8 +4209,10 @@ function ccRenderDone(){
        <button type="button" class="${rec === 'same' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(0)">&#x21BB; ${t('games.common.again', { bpm: cc.bpm })}</button>
        <button type="button" class="${rec === 'up' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(10)">&#x2B06; ${t('games.common.bpmUp10')}</button>
      </div>`;
-  const rounds = cc.ladder ? '<div class="cc-rounds">' + cc.stageLog.map((sg, k) =>
-    `<span>${escHtml(t('games.pw.ladder.roundResult', { n: k + 1, bpm: sg.bpm, ok: sg.changes.filter(c => c.result === 'ok').length, total: sg.changes.length }))}</span>`).join('') + '</div>' : '';
+  /* When everything reached was right, a round counts only the changes reached in it, and a round with none left is not listed ("4 of 4" next to "Round 1: 4 of 7" read as a contradiction). */
+  const roundRows = cc.ladder ? cc.stageLog.map((sg, k) => ({ k, sg, shown: allReachedRight ? sg.changes.filter(c => !c.neverReached) : sg.changes })).filter(x => x.shown.length) : [];
+  const rounds = cc.ladder ? '<div class="cc-rounds">' + roundRows.map(({ k, sg, shown }) =>
+    `<span>${escHtml(t('games.pw.ladder.roundResult', { n: k + 1, bpm: sg.bpm, ok: shown.filter(c => c.result === 'ok').length, total: shown.length }))}</span>`).join('') + '</div>' : '';
   /* The way back to the setup: Power Chord Switch's is the first thing on the screen (pwBackBtnHtml); Change Up keeps its button at the bottom. */
   const backTop = ccIsPower() ? pwBackBtnHtml(`ccSetup(${jsonAttrArg('power')})`) : '';
   const backBottom = ccIsPower() ? '' : `<button type="button" class="tp-btn cc-change-loop" onclick="ccSetup(${jsonAttrArg(cc.mode || '')})">${t('games.cc.pickDifferentLoop')}</button>`;
