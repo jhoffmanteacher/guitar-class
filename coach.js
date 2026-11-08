@@ -3386,7 +3386,7 @@ function ccSetBpm(v){
   if (!cc) return;
   v = Number(v);
   if (!isFinite(v)) return;
-  cc.bpm = Math.min(CC_BPM_MAX, Math.max(ccBpmMin(), Math.round(v / 5) * 5));   // steps of 5, like the buttons and the slider
+  cc.bpm = Math.min(ccSetupMaxBpm(), Math.max(ccBpmMin(), Math.round(v / 5) * 5));   // steps of 5, like the buttons and the slider; 130 at most on a song switch
   try { sessionStorage.setItem(ccSk('Bpm'), String(cc.bpm)); } catch(e){}
   const el = document.getElementById('cc-bpm-readout');
   if (el) el.textContent = cc.bpm + ' BPM';
@@ -3421,10 +3421,21 @@ function ccDiagramsHtml(chords, curName, idPrefix, shapes){
   return boxes ? `<div class="chord-diagrams cc-diagrams">${boxes}</div>` : '';
 }
 
+/* The highest tempo the setup may show: a song switch's first round tops out two steps below CC_BPM_MAX (ccLadderBpms), so a readout of
+   135 or 140 would play as 130 (Jonathan, 2026-11-07). A pair goes to CC_BPM_MAX. */
+function ccSetupMaxBpm(){
+  const pr = cc && ccProgs()[cc.progIdx];
+  return pr && pr.ladder ? CC_BPM_MAX - (CC_LADDER_ROUNDS - 1) * CC_LADDER_STEP : CC_BPM_MAX;
+}
 function ccRenderSetup(msg){
   const body = ccBody();
   if (!body || !cc) return;
   const power = ccIsPower();
+  /* A tempo picked for a pair (135, 140) comes down to 130 on a song switch, on the readout, the slider and in the session. */
+  if (power && cc.bpm > ccSetupMaxBpm()){
+    cc.bpm = ccSetupMaxBpm();
+    try { sessionStorage.setItem(ccSk('Bpm'), String(cc.bpm)); } catch(e){}
+  }
   /* Change Up groups its loops by how many chords; Power Chord Switch by what
      the hand does between them (CC_POWER_GROUPS). */
   const groups = power
@@ -3500,7 +3511,7 @@ function ccRenderSetup(msg){
        <span class="coach-bpm-readout" id="cc-bpm-readout">${cc.bpm} BPM</span>
        <button type="button" class="tp-btn" onclick="ccNudgeBpm(5)">+5</button>
      </div>
-     <input type="range" class="cc-bpm-slider" id="cc-bpm-slider" min="${CC_POWER_BPM_MIN}" max="${CC_BPM_MAX}" step="5" value="${cc.bpm}" aria-label="${escAttr(t('games.pw.tempoSliderAria'))}" aria-valuetext="${cc.bpm} BPM" oninput="ccSetBpm(this.value)">`
+     <input type="range" class="cc-bpm-slider" id="cc-bpm-slider" min="${CC_POWER_BPM_MIN}" max="${ccSetupMaxBpm()}" step="5" value="${cc.bpm}" aria-label="${escAttr(t('games.pw.tempoSliderAria'))}" aria-valuetext="${cc.bpm} BPM" oninput="ccSetBpm(this.value)">`
     : `<div class="coach-bpm-row">
        <button type="button" class="tp-btn" onclick="ccNudgeBpm(-5)">&#x2212;5</button>
        <span class="coach-bpm-readout" id="cc-bpm-readout">${cc.bpm} BPM</span>
@@ -4042,15 +4053,19 @@ function ccFinish(complete){
   const stopT = performance.now() - coachMicLatencyMs();
   let lastHeard = -1;
   cc.changes.forEach((c, i) => { if (c.pend || c.result === 'ok' || c.result === 'off') lastHeard = i; });
-  cc.unreached = ended || (cc.ladder && cc.phase === 'countin' && cc.stage > 0) ? 0
-    : cc.changes.filter((c, i) => (c.result === null && !c.pend) || (i > lastHeard && c.result === 'miss' && stopT - c.t < CC_STOP_REACH_MS)).length;
+  const neverReached = ended || (cc.ladder && cc.phase === 'countin' && cc.stage > 0) ? []
+    : cc.changes.filter((c, i) => (c.result === null && !c.pend) || (i > lastHeard && c.result === 'miss' && stopT - c.t < CC_STOP_REACH_MS));
+  neverReached.forEach(c => { c.neverReached = true; });   // ccRenderDone draws these as "not reached", not as "no strum heard", when everything the student did reach was right
+  cc.unreached = neverReached.length;
   /* A Stop early in a later round, before any strum of it was heard: the hand may have left in the round before (the count-in has no Stop button, so the
      click waits for this round's play screen). The count-in is not reach time. */
   if (!ended && cc.ladder && cc.phase === 'play' && cc.stage > 0 && lastHeard < 0 && cc.stageLog.length && cc.roundEndT != null){
     const prev = cc.stageLog[cc.stageLog.length - 1].changes, gap = cc.listenStart - cc.roundEndT;
     let prevHeard = -1;
     prev.forEach((c, i) => { if (c.result === 'ok' || c.result === 'off') prevHeard = i; });
-    cc.unreached += prev.filter((c, i) => i > prevHeard && c.result === 'miss' && stopT - gap - c.t < CC_STOP_REACH_MS).length;
+    const prevUn = prev.filter((c, i) => i > prevHeard && c.result === 'miss' && stopT - gap - c.t < CC_STOP_REACH_MS);
+    prevUn.forEach(c => { c.neverReached = true; });
+    cc.unreached += prevUn.length;
   }
   cc.changes.forEach(c => {
     if (c.pend) ccResolvePend(c);
@@ -4112,8 +4127,17 @@ function ccRenderDone(){
      of it. */
   const unheard = total - ok - off - (cc.unreached || 0);   // not the changes a Stop left unplayed
   const firmer = ccIsPower() && r < 0.85 && unheard >= 2 && unheard > off;
+  /* A Stop with changes still ahead, where every change the student DID reach was right (Jonathan, 2026-11-07): the changes never reached say
+     nothing about the speed, so there is no "this speed is too fast" and no "Drop 5 BPM" (4 right, then Stop, used to read "4 of 15 ... too
+     fast"). The headline counts the changes reached, the advice says to play it through, the breakdown and chips do not call the rest "no strum
+     heard", and the row stays at the same tempo. At 85% or better of ALL the changes the "great" screen is still right, so it keeps that. */
+  const reachedN = total - (cc.unreached || 0);
+  const stoppedClean = (cc.unreached || 0) > 0 && reachedN > 0 && ok === reachedN && r < 0.85;
   let verdict, advice;
-  if (r >= 0.85){
+  if (stoppedClean){
+    verdict = '&#x1F44D; ' + t('games.cc.verdict.stopped', { ok, reached: reachedN });
+    advice = t('games.cc.advice.stopped');
+  } else if (r >= 0.85){
     verdict = '&#x1F31F; ' + t('games.cc.verdict.great', { ok, total });
     /* Power Chord Switch: at the top tempo the "5 BPM faster" line is false (the row below cannot go up), so it says that instead
        (2026-11-07). The test is the done row's own: the step up lands on the tempo just played. */
@@ -4139,13 +4163,14 @@ function ccRenderDone(){
     verdict = '&#x1F3B8; ' + t(firmer ? 'games.cc.verdict.ok' : 'games.cc.verdict.low', { ok, total });
     advice = firmer ? t('games.pw.advice.firmer') : t(ccIsPower() ? 'games.pw.advice.low' : 'games.cc.advice.low');
   }
-  const chips = cc.changes.map(c =>
-    `<span class="coach-chip ${c.result === 'ok' ? 'ok' : c.result === 'off' ? 'wrong' : 'miss'}">${escHtml(ccChipText(c))}</span>`
+  const chips = cc.changes.map(c => stoppedClean && c.neverReached
+    ? `<span class="coach-chip pending">${escHtml(pwChordName(c.to))}</span>`
+    : `<span class="coach-chip ${c.result === 'ok' ? 'ok' : c.result === 'off' ? 'wrong' : 'miss'}">${escHtml(ccChipText(c))}</span>`
   ).join('');
   /* What the chips mean, in numbers: right, on time but the chord sounded wrong, no strum heard. */
-  const nMiss = total - ok - off;
+  const nMiss = total - ok - off - (stoppedClean ? cc.unreached : 0);
   const breakdown = `<div class="cc-breakdown">${escHtml(t('games.cc.breakdown', { ok, off, miss: nMiss }))}</div>`;
-  const rec = firmer ? 'same' : r >= 0.85 ? 'up' : r >= 0.5 ? 'same' : 'down';
+  const rec = firmer || stoppedClean ? 'same' : r >= 0.85 ? 'up' : r >= 0.5 ? 'same' : 'down';
   /* A song switch: how each round went, at its own tempo. */
   /* Power Chord Switch (2026-11-05, Jonathan: the button should take more than one click and show the tempo): a −5 / +5 row
      with the tempo between, as on the setup screen, and one big "Again at N BPM" that plays it. The row opens on the tempo the

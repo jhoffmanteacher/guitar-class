@@ -146,12 +146,15 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
   line now says so); the smoke Play-clicks slider gap (`smoke.mjs` drags the card slider to 77; with `strumOpenMetro` forced
   to 60 it reports 7 failing steps); check `1d` flags a shared step before a path step (reviewed by `site-reviewer`, 2 minor
   points fixed). The coach.js fixes (Stop hint, 10 s of play, 130 cap) were reviewed by `site-reviewer-deep` the same day and landed 2026-11-07. What is left:
-  - *DECIDED 2026-11-07 (Jonathan), not built yet:* after a Stop, if every change the student reached was right, the done screen must NOT say
-    "this speed is too fast for now" or "Drop 5 BPM" (today: 4 right then Stop reads "4 of 15 — this speed is too fast for now. Drop 5 BPM", and the
-    breakdown says "11 no strum heard"). The changes never reached (`cc.unreached`, including the 4 s reach window) are not "not heard" there either.
-    It is a ccRenderDone change in coach.js: always Reviewed. Both earlier coach changes that edit the done screen are now on main (the top-tempo advice and the gridOffset cap, 2026-11-08), so it can be built next. Needs a Spanish twin for any new line. Also to fix in the same pass: the song-switch SETUP readout and slider show the
-    tempo the student picked (135 or 140 BPM, `cc-bpm-readout`, slider max `CC_BPM_MAX`) but round 1 plays at most 130 (`ccLadderBpms` clamps the first
-    round to 130, so rounds are 130/135/140); clamp the readout and slider max to 130 when the loop is a song switch.
+  - [x] *Stopped-game headline + song-switch setup tempo (DECIDED 2026-11-07 by Jonathan, built 2026-11-08):* a Stop with changes still ahead, where every change
+    the student reached was right (`ok === total - cc.unreached`, `cc.unreached > 0`, under 85% of all changes), now reads "N of M changes worked before you stopped."
+    (M = the changes reached) and "Every change you got to worked. Play it again and go all the way." (`games.cc.verdict.stopped`, `games.cc.advice.stopped`, EN + ES),
+    in both games: no "too fast", no "Drop 5 BPM"; the breakdown's "no strum heard" is 0; the never-reached chips are grey (`coach-chip pending`, flagged
+    `c.neverReached` in `ccFinish`, including the previous round's swept tail in a song switch); the tempo row stays on the tempo played. NOT changed: a Stop where any
+    reached change was wrong or not heard, a game played to the end, a Stop with nothing reached (first count-in), 85% or better of all changes. Still true there:
+    a Stopped game with some wrong or unheard changes counts the never-reached ones in its headline fraction and breakdown (Jonathan's call covered only the all-right case).
+    Song-switch setup: the tempo readout, slider top and session tempo stop at 130 (`ccSetupMaxBpm`); a tempo of 135 or 140 picked for a pair comes down to 130 when a
+    song switch is picked. Check `1ck` runs 9 real games and a setup walk for this; eight broken versions each turn it red.
   - [x] *coach.js detection:* **Grid step cap (2026-11-07, branch `coach-open`).** `ccLoop` moved `gridOffset` by a quarter of a strum's distance
     from the nearest beat, uncapped: one stray sound half a beat off moved it 749 ms at 10 BPM (499 at 15, 250 at 30, 125 at 60). It now moves
     `CC_GRID_STEP_CAP_MS` = 60 ms at most, in both games (`teacher.js` `micEvalTakePw` replays each take with the `gridStepCapMs` it saved; none = uncapped).

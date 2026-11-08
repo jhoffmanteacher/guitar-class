@@ -5,6 +5,11 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-08 — Power Chord Switch and Change Up: Stop early, and the screen no longer says "too fast"
+
+- **If you press Stop early and every change you got to was right, the screen no longer says "this speed is too fast" or "Drop 5 BPM".** Before, 4 right and then Stop read "4 of 15 — this speed is too fast for now", and said 11 strums were not heard. Now it says "4 of 4 changes worked before you stopped." and "Every change you got to worked. Play it again and go all the way." The changes you did not get to are shown grey, not as "no strum heard", and the tempo row stays on the tempo you played. If even one change you reached was wrong or not heard, the screen works as before.
+- **A song switch tops out at 130 BPM on the setup screen.** The first round never played above 130 (the rounds go 130, 135, 140), but the number and the slider could show 135 or 140. They now stop at 130 when you pick a song switch. A pair still goes to 140.
+
 ## 2026-11-07 — Power Chord Switch: no "faster" at the top tempo
 
 - **At the top tempo the game no longer says to go faster.** After a good game at 140 BPM (a chord pair), or a song switch that starts at 130 BPM (its rounds go 130, 135, 140), the screen said "Level up: try it 5 BPM faster", but the tempo cannot go up. It now says "The tempo cannot go higher. Play it again." (Spanish: "El tempo no puede subir más. Tócalo otra vez.") One step below the top it still says "Level up".
