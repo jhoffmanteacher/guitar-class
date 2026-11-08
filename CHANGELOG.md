@@ -10,6 +10,15 @@ see `WORKFLOW.md` and the git commit log.
 - **The click of the Stop button is no longer counted as a strum.** Before, at "Every beat" and "Every 2 beats", pressing Stop could count the click as a change: after 4 right changes the screen could read "5 of 5 changes worked" with a check on a change you never played, or "5 of 15 — this speed is too fast" with "Drop 5 BPM". Now it reads "4 of 4 changes worked before you stopped."
 - **If changes went by with no strum heard, then you press Stop, the screen says "No strum was heard before you stopped."** Before, it said "You stopped before the first change." even when several changes had already gone by. That line now shows only when no change had come yet. Spanish: "No se oyó ningún rasgueo antes de que pararas."
 
+## 2026-11-08 — Tuning Simulator: green means done, and the Module 1 note circle turns the same way
+
+- **On the circle of notes, green now means the string is done.** Before, the string's note went green as soon as the tuner showed the right letter, even while the needle was still off. Now it stays purple and amber until the needle is green too.
+- **The note circle in Module 1 now goes up counterclockwise, like the Tuning Simulator.** In "Right needle, wrong letter" the picture reads "HIGHER = tighten ↺" and "↻ LOWER = loosen". Before, the picture went the other way.
+- **The keyboard works on Tighten and Loosen.** Press Space or Enter on a button to turn the peg one small step. After you answer with the keyboard, the next button is ready, so you do not need the mouse.
+- **Clearer Spanish.** The buttons say "gira en sentido antihorario" and "gira en sentido horario", and the answers say "Sube — aprieta" and "Baja — afloja", the same words as the circle.
+- **A clearer level-up line.** For example: "Level 4. Now a string can start up to 5 notes away from its own note. Use the circle to choose Up or Down."
+- **"Pluck again" fits on one line.**
+
 ## 2026-11-07 — Power Chord Switch and Change Up: Stop early, and the screen no longer says "too fast"
 
 - **If you press Stop early and every change you got to was right, the screen no longer says "this speed is too fast" or "Drop 5 BPM" ("Drop 10 BPM" in Change Up).** Before, 4 right and then Stop read "4 of 15 — this speed is too fast for now", and said 11 strums were not heard. Now it says "4 of 4 changes worked before you stopped." and "Every change you reached worked. Play it again, to the end." The changes you did not get to are shown grey and counted as "not reached", not as "no strum heard", and the tempo row stays on the tempo you played. At 85% or more you still get the good-score screen, with the unreached changes grey. If even one change you reached was wrong or not heard, the screen works as before.
