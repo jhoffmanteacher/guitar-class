@@ -149,7 +149,7 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
   - *DECIDED 2026-11-07 (Jonathan), not built yet:* after a Stop, if every change the student reached was right, the done screen must NOT say
     "this speed is too fast for now" or "Drop 5 BPM" (today: 4 right then Stop reads "4 of 15 — this speed is too fast for now. Drop 5 BPM", and the
     breakdown says "11 no strum heard"). The changes never reached (`cc.unreached`, including the 4 s reach window) are not "not heard" there either.
-    It is a ccRenderDone change in coach.js: always Reviewed. Build it AFTER the top-tempo advice (landed 2026-11-07) is on main: both edit the done screen. (The gridOffset cap on branch `coach-open` does not touch it.) Needs a Spanish twin for any new line. Also to fix in the same pass: the song-switch SETUP readout and slider show the
+    It is a ccRenderDone change in coach.js: always Reviewed. Both earlier coach changes that edit the done screen are now on main (the top-tempo advice and the gridOffset cap, 2026-11-08), so it can be built next. Needs a Spanish twin for any new line. Also to fix in the same pass: the song-switch SETUP readout and slider show the
     tempo the student picked (135 or 140 BPM, `cc-bpm-readout`, slider max `CC_BPM_MAX`) but round 1 plays at most 130 (`ccLadderBpms` clamps the first
     round to 130, so rounds are 130/135/140); clamp the readout and slider max to 130 when the loop is a song switch.
   - [x] *coach.js detection:* **Grid step cap (2026-11-07, branch `coach-open`).** `ccLoop` moved `gridOffset` by a quarter of a strum's distance
@@ -182,15 +182,14 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
     reviewed again** (the Friday-check rule would have held it for a fourth round).
     Not decided here: the Listening Coach (`coach.js` `coachMatchEvent`, `gridDelta = dev * 0.15`) is uncapped; its window is 0.9 beat, so one stray
     sound at its 30 BPM floor can move its grid up to 270 ms (the nearest event wins, which limits it). Left alone.
-  - [x] *Power Chord Switch UX, top-tempo advice (2026-11-07, pushed to main):* the done screen said "Level up: try it 5 BPM faster" at 140 (a pair) and 130
+  - [x] *Power Chord Switch UX, top-tempo advice (2026-11-07; merged to main 2026-11-08 at Jonathan's request: three review rounds, see the end of this bullet):* the done screen said "Level up: try it 5 BPM faster" at 140 (a pair) and 130
     (a song switch's first round) although the done row cannot go up. When the step up lands on the tempo just played (`ccDoneUpBpm() <= ccDonePlayedBpm()`, the
     same numbers the row's tempo uses) it says `games.pw.advice.top` instead: "The tempo cannot go higher. Play it again." / "El tempo no puede subir más. Tócalo
     otra vez." The wording is deliberate: not "top speed" (the setup's "speed" buttons are Every bar / Every 2 beats / Every beat, and a faster one exists at 140 BPM) and
     not "fastest tempo ... at this tempo" (a song switch is not played at one tempo: its row says "Again from 130 BPM" after rounds at 130 / 135 / 140). Under 85% right
-    nothing changes. Check `1ck` renders the real done screen in 20 cases x EN + ES (40 renders) and compares the whole advice line and the tempo the row opens on:
+    nothing changes. Check `1ck` renders the real done screen in 25 cases x EN + ES (50 renders) and compares the whole advice line and the tempo the row opens on:
     a pair at 140 and 135 (all right, 13 of 15, 10 of 15 wrong or not heard, firmer, under half), at every switch speed, as the computer's pick, and after a live
-    slow-down; a song switch from 130 and 125 (all right, 6 of 7, under half) and Stopped in round 1 or 2; Change Up at 140 untouched. Two deep-review rounds; every
-    mutant they found (14 kinds) turns it red, and `cc.nextBpm` being cleared by Again is pinned. **Not changed (product call):** the row follows the settled
+    slow-down; a song switch from 130 and 125 (all right, 6 of 7, under half) Stopped in round 1, 2 or late (the changes never reached counted), with the Next round buttons pressed, and after a live slow-down of round 1 (the finished game's stage and lowest tempo are set as the real game leaves them); Change Up at 140 untouched. Three deep-review rounds (round 3 found the code correct in 40,000 states and only holes in this check, fixed afterwards without a fourth round; merged to main 2026-11-08 at Jonathan's request without one); every mutant they found (21 kinds) turns it red, and `cc.nextBpm` being cleared by Again is pinned. **Not changed (product call):** the row follows the settled
     "counted at its lowest tempo" rule, so a pair started at 135 (or 140) that the student sped up with the live +5 still says "Level up" with a +5 that does
     nothing (the counted tempo is 135), and so does a song switch from 125 sped up to 130 in round 1; rare. **Same shape, not fixed (not asked for):** Change Up
     says "Level up: try it 10 BPM faster" at 140 (`games.cc.advice.great`), and at the BOTTOM both games say "Drop 5 BPM and try again" (Change Up: 10) at 10 BPM
