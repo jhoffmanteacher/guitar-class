@@ -12398,12 +12398,13 @@ function checkCoachVerdicts() {
        "Grid step cap"): no cap leaves all grading alone; at 60 ms 72 wrong changes turned right and 4 right ones turned wrong. Here the real ccLoop is run: a stray sound just under half a beat off the
        grid, early and late, at several tempos and speeds in both games, must move the grid by min(cap, a quarter of its distance); a student really 150 ms late
        must still pull the grid to within 20 ms of that in 16 strums (a cap that is too small stops following a real player); one 300 ms late moves it exactly
-       the cap on its first strum; and the console's replay (teacher.js PW_GRID_STEP_CAP_MS) uses the same number. */
+       the cap on its first strum; and the console's replay (teacher.js micEvalTakePw) uses the cap each take saved (gridStepCapMs; none = uncapped). The 150-ms-late run catches a cap
+       under 9 ms; the pin on the number (60) is what holds the value. */
     song.gridChecks = 0;
     const GRID_CAP = Number((cSrc2.match(/^const CC_GRID_STEP_CAP_MS = (\d+);/m) || [])[1]);
     if (GRID_CAP !== 60) flag(`1ck: CC_GRID_STEP_CAP_MS is ${GRID_CAP}, pinned 60 (re-pin on purpose, with a tools/grid-sim.mjs run recorded in WORKFLOW.md)`);
     if (!/gridStepCapMs: CC_GRID_STEP_CAP_MS,/.test(jsFunctionBody(cSrc2, 'ccRecMeta') || '')) flag('1ck: ccRecMeta no longer saves "gridStepCapMs: CC_GRID_STEP_CAP_MS" in the take (the console replays the grid with it; a take without it is replayed uncapped)');
-    if (!/const gridCap = num\(d\.gridStepCapMs\) && d\.gridStepCapMs > 0 && d\.gridStepCapMs <= 10000 \? d\.gridStepCapMs : Infinity;/.test(readFileSync(join(ROOT, 'teacher.js'), 'utf8'))) flag('1ck: teacher.js micEvalTakePw no longer takes its grid cap from the take (d.gridStepCapMs, none = uncapped), or reads it another way (re-pin on purpose)');
+    if (!/const gridCap = num\(d\.gridStepCapMs\) && d\.gridStepCapMs >= 0 && d\.gridStepCapMs <= 10000 \? d\.gridStepCapMs : Infinity;/.test(readFileSync(join(ROOT, 'teacher.js'), 'utf8'))) flag('1ck: teacher.js micEvalTakePw no longer takes its grid cap from the take (d.gridStepCapMs, none = uncapped), or reads it another way (re-pin on purpose)');
     if (!/cc\.gridOffset \+= Math\.max\(-CC_GRID_STEP_CAP_MS, Math\.min\(CC_GRID_STEP_CAP_MS, dev \* 0\.25\)\);/.test(ccLoopSrc)) flag('1ck: ccLoop no longer moves the grid with exactly "cc.gridOffset += Math.max(-CC_GRID_STEP_CAP_MS, Math.min(CC_GRID_STEP_CAP_MS, dev * 0.25));" (the only place it moves; re-pin on purpose)');
     // the grid after each of these strums (played times in ms from the first beat), the real ccLoop, one frame per strum
     const gridRun = (mode, rate, bpm, played, real) => JSON.parse(run(`(function(){
@@ -12454,6 +12455,7 @@ function checkCoachVerdicts() {
       if (!(Math.abs(far - GRID_CAP) < 0.01)) flag(`1ck: ${mode === 'power' ? 'Power Chord Switch' : 'Change Up'}: a first strum 300 ms late moved the grid ${Math.round(far * 10) / 10} ms, expected exactly the cap, ${GRID_CAP}`);
       song.gridChecks += 2;
     }
+    if (full.saves.length === 1 && full.saves[0].fields.gridStepCapMs !== GRID_CAP) flag(`1ck: the saved take records gridStepCapMs ${full.saves[0].fields.gridStepCapMs}, want ${GRID_CAP} (the console replays a take without it uncapped)`);
     if (full.saves.length === 1 && (full.saves[0].fields.onsetRatio !== R.pw || full.saves[0].fields.hfRatio !== R.pwHf)) flag(`1ck: the saved take records strum ratios ${full.saves[0].fields.onsetRatio} / ${full.saves[0].fields.hfRatio}, want ${R.pw} / ${R.pwHf}`);
     /* The "strum a little firmer" hint (2026-11-05). Power Chord Switch hears a strum only above its own, stricter ratios, so a soft strum shows "no strum
        heard", and "Drop 10 BPM and try again" (what the done screen said below half right, whatever the cause) cannot help it. The real done screen is
@@ -12810,7 +12812,7 @@ function checkCoachVerdicts() {
    byte-identical by a differential when micEvalSignal was split out of it.
    ════════════════════════════════════════════════════════════════════ */
 const PW_EVAL_PIN = { takes: 19, rounds: 38, changes: 300, judged: 291, dropped: 9, agree: 201, 'detector-missed': 33, 'false-hit': 22, 'off-window': 15, 'silent-miss': 20,
-  mismatch: 1, gridOffsets: 291, farGridOffsets: 50, clickRounds: 30, noClickRounds: 8, siteCentred: 34, beepCentred: 3, extra: 32, htmlChecks: 5, hovers: 38, textRounds: 38, evaluateRun: 2, evalTakesLines: 4, crafted: 4,
+  mismatch: 1, gridOffsets: 291, farGridOffsets: 50, clickRounds: 30, noClickRounds: 8, siteCentred: 34, beepCentred: 3, extra: 32, htmlChecks: 5, hovers: 38, textRounds: 38, evaluateRun: 2, evalTakesLines: 4, crafted: 4, uncappedTakes: 1,
   whatIfTakes: 19, whatIfCandidates: 76, whatIfTruth: 8, whatIfRows: 45, dropNotes: 2, pitchTakes: 5, pitchNone: 14, pitchRight: 64, pitchTimingOnly: 39, pitchRows: 20, ratioRows: 14 };
 async function checkPwTakeEvaluator() {
   head('1cl. Power Chord Switch takes: the evaluator is run on takes whose site verdicts come from ccLoop\'s own rule');
@@ -12861,6 +12863,9 @@ async function checkPwTakeEvaluator() {
     try { take = fx.makePwTake(f); row = ev.micEvalRow('T' + String(rows.length + 1).padStart(2, '0'), take.meta, take.pcm, deps); }
     catch (e) { fail(`${f.name}: ${e.message}`); continue; }
     tot.takes++; rows.push(row); names.push(f.name); takes.push(take);
+    // A take saved by the 2026-11-07 coach.js carries gridStepCapMs; only the older-take fixture ("uncapped") does not. If that flag is lost the fixture stops testing the old-take path.
+    if (('gridStepCapMs' in take.meta) === !!f.uncapped) fail(`${f.name}: ${f.uncapped ? 'an older (uncapped) take carries gridStepCapMs' : 'the take does not carry gridStepCapMs'}`);
+    if (f.uncapped) tot.uncappedTakes++;
     if (row.kind !== 'pw' || row.game !== 'Switch ' + take.meta.progression) { fail(`${f.name}: micEvalRow did not measure it as a Power Chord Switch take (kind ${row.kind}, game "${row.game}")`); continue; }
     const got = new Map(row.perNote.map(n => [n.i, n.why && n.why.cat]));
     for (const c of take.truth.changes) {
@@ -12940,6 +12945,10 @@ async function checkPwTakeEvaluator() {
     if (wantIdeal == null ? row.latency.idealMs != null || row.latency.skewMs != null : !near(row.latency.idealMs, wantIdeal) || !near(row.latency.skewMs, wantSkew))
       fail(`${f.name}: the take's mic delay should be ${wantIdeal == null ? 'unmeasured' : wantIdeal + ' ms (skew ' + wantSkew + ')'}, got ${row.latency.idealMs} (skew ${row.latency.skewMs})`);
   }
+  // The older-take fixture must really be graded on another grid than its capped twin (same take otherwise): else it cannot tell a console that ignores the saved cap from one that follows it
+  { const a = takes[names.indexOf('pw-drift')], b = takes[names.indexOf('pw-drift-old')];
+    const moved = a && b ? a.truth.changes.filter((c, k) => b.truth.changes[k] && c.goff != null && Math.abs(c.goff - b.truth.changes[k].goff) > 2).length : 0;
+    if (moved < 3) fail(`pw-drift-old: only ${moved} change(s) have a site gridOffset more than 2 ms from pw-drift's; the capped and uncapped grids must differ in at least 3`); }
   if (!rows.length) { fail('no take was measured'); return; }
   const byName = nm => rows[names.indexOf(nm)];
 

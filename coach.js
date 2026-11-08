@@ -3116,12 +3116,16 @@ const CC_LADDER_ROUNDS = 3, CC_LADDER_STEP = 5, CC_LADDER_SLOTS = 8;
 const CC_POWER_AGAIN_STEP = 5;
 /* The most the beat grid may move for ONE strum (ms), in both games (2026-11-07). Each strum pulls the grid a quarter of the way to its
    nearest beat (ccLoop), so a stray sound (a cough, a chair) half a beat off the grid moved it by 0.125 of a beat: 749 ms at 10 BPM,
-   125 ms at 60. Capped, it moves 60 ms at most. Chosen with tools/grid-sim.mjs, which runs the real ccLoop on 21,888 scripted games per
-   version (Power Chord Switch 10-140 BPM, Change Up 40-140, every beat and every bar, 19 kinds of player; 240,768 graded changes). No cap
-   leaves all grading alone. At 60 ms and 30 BPM and above: 72 changes that were graded wrong (a wrong chord or a miss, nearly all because a
-   stray sound had pulled the grid off) turned right, and 4 that were right turned wrong (all from a very loose player, 0.2 beat of spread,
-   as the grid catches up more slowly). 100 ms: 22 and 0. 40 ms and under: more of both. 60 has the best balance. The console's replay
-   follows the cap each take saves (gridStepCapMs; a take without it is replayed uncapped), and 1ck pins the number. */
+   125 ms at 60. Capped, it moves 60 ms at most. Chosen with tools/grid-sim.mjs (SEEDS=12): the real ccLoop on 21,888 scripted games per
+   version (Power Chord Switch 10-140 BPM, Change Up 40-140, every beat and every bar, 19 kinds of player; 240,768 graded changes).
+   No cap leaves all grading alone. At 60 ms and 30 BPM and above, 72 changes that were graded wrong turned right and 4 that were right
+   turned wrong. 67 of the 72 and all 4 come from one very loose player (strums spread 0.2 beat, up to 0.49 beat off, no stray sounds:
+   each far-off strum acts like a stray sound); stray sounds among steadier players account for 5. In grading a stray sound rarely
+   matters at any cap, because a change's window is half a beat; for a stray sound the cap mostly keeps the beat dots still. Other caps,
+   same games (right to wrong / wrong to right): 40 ms 164 / 4, 50 ms 104 / 4, 80 ms 47 / 4, 100 ms 22 / 0, 150 ms 3 / 2. By those counts
+   40 or 50 would fix more; 60 was kept (the suggested value; the grid catches up faster; 40's four include an on-time player with
+   stray sounds). A judgment call, listed in WORKFLOW.md. The console's replay follows the cap each take saves (gridStepCapMs; a take
+   without it is replayed uncapped), and 1ck pins the number. */
 const CC_GRID_STEP_CAP_MS = 60;
 /* The three round tempos. The first round's tempo is the base, but never above CC_BPM_MAX minus two steps (130): with the old 15 step, a
    base of 125 gave rounds 125 / 140 / 140, and "each round faster" was not true. */

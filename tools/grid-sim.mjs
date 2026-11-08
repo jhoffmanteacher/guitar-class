@@ -1,9 +1,10 @@
 /* Grid step cap simulation (2026-11-07) — the evidence for coach.js CC_GRID_STEP_CAP_MS.
-     node tools/grid-sim.mjs [caps, comma list, default 40,50,60,80,100]      (env SEEDS=20 by default 8)
+     node tools/grid-sim.mjs [caps, comma list, default 40,50,60,80,100]
+   env: SEEDS (default 8; the numbers in coach.js and WORKFLOW.md are SEEDS=12, 21,888 games per version), PARTS (default 1,2,3; PARTS=1,3 skips the slow games).
    Runs the REAL ccLoop (coach.js, with app.js and the other scripts, in a vm) on scripted frames, once with the old uncapped rule
    (cc.gridOffset += dev * 0.25) and once per candidate cap, and compares the grading:
      Part 1  one stray sound half a beat off the grid: how far the grid moves, per tempo;
-     Part 2  scripted games, Power Chord Switch 10-140 BPM and Change Up 40-140, every beat and every bar, 15 kinds of player (on time,
+     Part 2  scripted games, Power Chord Switch 10-140 BPM and Change Up 40-140, every beat and every bar, 19 kinds of player (on time,
              loose, late, early, rushing, dragging, with and without stray sounds); "right" is the true answer (the student plays the
              right chord on the beat); counts changes that turned wrong or right, at 30 BPM and above and below it;
      Part 3  does the grid still follow a player who is really late or drifting.
@@ -191,6 +192,7 @@ function sim(ctxObj, bpm, rate, onsets, mode = 'power') {
   return JSON.parse(ctxObj.run(`__sim(${JSON.stringify(mode)}, ${bpm}, ${rate.idx}, ${JSON.stringify(onsets)}, ${FRAME}, ${LAT})`));
 }
 
+const PARTS = (process.env.PARTS || '1,2,3').split(',');
 // ---- Part 1: one stray sound alone: how far does the grid move? ----
 console.log('PART 1: one stray sound, worst phase (half a beat off the grid); grid move in ms');
 console.log('bpm  old    ' + CAPS.map(c => 'cap' + c).join('  '));
@@ -205,7 +207,7 @@ for (const bpm of [10, 15, 20, 30, 40, 60, 90, 120, 140]) {
 const stats = {}; // cap -> {runs, diffRuns, diffChanges, ge30Runs, ge30DiffRuns, ge30DiffChanges, lt30..., byScen}
 for (const c of newCs) stats[c.cap] = { runs: 0, diffRuns: 0, diffChanges: 0, ge30Runs: 0, ge30DiffRuns: 0, ge30DiffChanges: 0, lt30Runs: 0, lt30DiffRuns: 0, lt30DiffChanges: 0, detail: [] };
 let baselineChanges = 0, oldOk = 0, oldMiss = 0;
-const MODES = [{ mode: 'power', tempos: TEMPOS }, { mode: 'open', tempos: TEMPOS.filter(b => b >= 40) }];
+const MODES = !PARTS.includes('2') ? [] : [{ mode: 'power', tempos: TEMPOS }, { mode: 'open', tempos: TEMPOS.filter(b => b >= 40) }];
 let games = 0;
 for (const M of MODES) for (const bpm of M.tempos) for (const rate of RATES) for (const scen of SCEN) for (let sd = 1; sd <= SEEDS; sd++) {
   const onsets = withChords(oldC.run, M.mode, rate, buildOnsets(scen, rate, bpm, sd * 7919 + bpm));
@@ -216,6 +218,7 @@ for (const M of MODES) for (const bpm of M.tempos) for (const rate of RATES) for
     const n = sim(c.ctx, bpm, rate, onsets, M.mode);
     const st = stats[c.cap]; let d = 0, reg = 0, imp = 0;
     for (let i = 0; i < o.res.length; i++) if (o.res[i] !== n.res[i]) { d++; if (o.res[i] === '+' && n.res[i] !== '+') reg++; else if (o.res[i] !== '+' && n.res[i] === '+') imp++; }
+    if (imp) { st.impScen = st.impScen || {}; const k2 = (bpm >= 30 ? 'ge30 ' : 'lt30 ') + scen.name; st.impScen[k2] = (st.impScen[k2] || 0) + imp; }
     if (bpm >= 30 && reg) { st.byScen = st.byScen || {}; const k = scen.name; st.byScen[k] = (st.byScen[k] || 0) + reg; }
     if (bpm < 30) { st.lt30reg = (st.lt30reg || 0) + reg; st.lt30imp = (st.lt30imp || 0) + imp; }
     if (bpm >= 30) { st.reg = (st.reg || 0) + reg; st.imp = (st.imp || 0) + imp; st.other = (st.other || 0) + (d - reg - imp); }
@@ -224,19 +227,22 @@ for (const M of MODES) for (const bpm of M.tempos) for (const rate of RATES) for
     else { st.lt30Runs++; if (d) { st.lt30DiffRuns++; st.lt30DiffChanges += d; st.lt30Detail = (st.lt30Detail || []); st.lt30Detail.push(`${bpm} BPM ${rate.name} "${scen.name}" seed ${sd}: ${d}`); } }
   }
 }
+if (PARTS.includes('2')) {
 console.log(`\nPART 2: ${games} scripted games per version (Power Chord Switch 10-140 BPM and Change Up 40-140 BPM, ${RATES.length} speeds, ${SCEN.length} scenarios, ${SEEDS} seeds each ; ${baselineChanges} graded changes in the old run; old: ${oldOk} right, ${oldMiss} missed)`);
 for (const c of newCs) {
   const s = stats[c.cap];
   console.log(`cap ${c.cap} ms: >=30 BPM ${s.ge30DiffChanges} changes differ in ${s.ge30DiffRuns} of ${s.ge30Runs} games (${s.reg || 0} newly wrong, ${s.imp || 0} newly right, ${s.other || 0} wrong either way but differently) | <30 BPM ${s.lt30DiffChanges} changes differ in ${s.lt30DiffRuns} of ${s.lt30Runs} games (${s.lt30reg || 0} newly wrong, ${s.lt30imp || 0} newly right)`);
 }
+for (const c of newCs) { const s = stats[c.cap]; console.log(`cap ${c.cap}: newly right by band and scenario: ` + JSON.stringify(s.impScen || {})); }
 for (const c of newCs) { const s = stats[c.cap]; console.log(`cap ${c.cap}: newly wrong (>=30 BPM) by scenario: ` + JSON.stringify(s.byScen || {})); }
 for (const c of newCs) { const s = stats[c.cap]; if (s.lt30Detail && s.lt30Detail.length) { console.log(`\nBelow 30 BPM, cap ${c.cap} (first 8):`); s.lt30Detail.slice(0, 8).forEach(x => console.log('  ' + x)); } }
 for (const c of newCs) { const s = stats[c.cap]; if (s.detail.length) { console.log(`\nDetail, cap ${c.cap} (first 12):`); s.detail.slice(0, 12).forEach(x => console.log('  ' + x)); } }
+}
 
 // ---- Part 3: does the grid still follow a student who is really late or drifting? mean final grid offset (ms), Power Chord Switch, every beat ----
-console.log('\nPART 3: mean grid offset at the end of a game (ms). A student 250 ms late should pull the grid toward +250; 1.5% drift is +/-0.015 x the game length');
-const P3 = SCEN.filter(x => ['late +150', 'late +250', 'rushing 1.5%', 'dragging 1.5%'].includes(x.name));
-for (const scen of P3) for (const bpm of [20, 30, 60, 100, 140]) {
+if (PARTS.includes('3')) console.log('\nPART 3: mean grid offset at the end of a game (ms). A student 250 ms late should pull the grid toward +250; 1.5% drift is +/-0.015 x the game length');
+const P3 = !PARTS.includes('3') ? [] : SCEN.filter(x => ['late +150', 'late +250', 'rushing 1.5%', 'dragging 1.5%'].includes(x.name));
+for (const scen of P3) for (const bpm of [10, 15, 20, 30, 60, 100, 140]) {
   const row = [];
   const ctxs = [{ name: 'old', c: oldC }, ...newCs.map(c => ({ name: 'cap' + c.cap, c: c.ctx }))];
   const sums = ctxs.map(() => 0);

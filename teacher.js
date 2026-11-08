@@ -5110,7 +5110,7 @@ function micEvalTakePw(pcm, R, d, deps){
   const BPM_MIN = 10, BPM_MAX = 140, ROUNDS = 3, BPCS = [1, 2, 4];
   /* The most the site's grid moved for one strum (coach.js CC_GRID_STEP_CAP_MS): saved in the take since 2026-11-07 (ccRecMeta gridStepCapMs). A take without it
      was graded on the uncapped grid, so it is replayed uncapped, or the console would judge it on a grid the site did not use. */
-  const gridCap = num(d.gridStepCapMs) && d.gridStepCapMs > 0 && d.gridStepCapMs <= 10000 ? d.gridStepCapMs : Infinity;
+  const gridCap = num(d.gridStepCapMs) && d.gridStepCapMs >= 0 && d.gridStepCapMs <= 10000 ? d.gridStepCapMs : Infinity;
   const endMs = s2ms(N);
   /* A change can fall long after the saved audio ends: the audio is capped at 30 s, and a 3-round song switch at
      BPM_MIN is 3 x (4 + 32 + 1) beats x 6 s = 666 s. Those are `dropped` (came after the recording stopped), not bad data. */
