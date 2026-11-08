@@ -153,10 +153,19 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
     both edit the done screen. Needs a Spanish twin for any new line. Also to fix in the same pass: the song-switch SETUP readout and slider show the
     tempo the student picked (135 or 140 BPM, `cc-bpm-readout`, slider max `CC_BPM_MAX`) but round 1 plays at most 130 (`ccLadderBpms` clamps the first
     round to 130, so rounds are 130/135/140); clamp the readout and slider max to 130 when the loop is a song switch.
-  - *coach.js detection (needs an xhigh review):* at 10 BPM one stray sound moves `gridOffset` by up to 0.73 s
-    (`ccLoop`, `cc.gridOffset += dev * 0.25`, uncapped; 123 ms at 60 BPM). Cap the step (for example ±60 ms).
-  - *Power Chord Switch UX:* no Stop button during the count-in (24 s per round at 10 BPM); the done-screen advice says
-    "5 BPM faster" at 140 (pair) and 130 (song switch) although the tempo cannot go up.
+  - [x] *coach.js detection:* **Grid step cap (2026-11-07, branch `coach-open`).** `ccLoop` moved `gridOffset` by a quarter of a strum's distance
+    from the nearest beat, uncapped: one stray sound half a beat off moved it 749 ms at 10 BPM (499 at 15, 250 at 30, 125 at 60). It now moves
+    `CC_GRID_STEP_CAP_MS` = 60 ms at most, in both games (`teacher.js` `PW_GRID_STEP_CAP_MS` and `tools/mic-sim/fake-pw-take.mjs` follow it).
+    Chosen by `node tools/grid-sim.mjs` (the real `ccLoop`, old rule against each cap, 28,800 scripted games per version: Power Chord Switch
+    10-140 BPM, Change Up 40-140, every beat and every bar, 15 kinds of player, 316,800 graded changes). At 60 ms, 30 BPM and above: **0 changes
+    turned from right to wrong, 25 turned from missed to right** (each missed only because a stray sound had pulled the grid off); below 30 BPM 21
+    changes differ in 6 of 2,400 games (not split by direction). At 50 ms 5 right changes turned wrong in a 30-seed run, at 40 ms 4 in a 20-seed run, so 60 is the smallest cap tried
+    that never did. It does NOT leave all grading unchanged: it changes a few, only in the player's favour. The grid still follows a player 150 ms
+    late on every beat (148 ms after 16 strums, as before) and one 1.5% fast or slow (within 3 ms of before). Check `1ck` runs the real
+    `ccLoop` (28 runs) and pins the number, the exact line, and the console's copy; six broken versions each turn it red.
+  - *Power Chord Switch UX, still open:* no Stop button during the count-in. **Product call, not built.** The count-in is 4 beats plus
+    0.1 s (0.4 s while recording): 24.0 s at 10 BPM, 16.0 s at 15, 12.0 s at 20, 9.6 s at 25, 8.0 s at 30, 6.0 s at 40, 4.0 s at 60,
+    2.7 s at 90, 1.7 s at 140. A song switch has one count-in per round (the first at the starting tempo; the later ones at the next tempos).
   - *Product calls:* Follow steps pass by tapping every 250 ms (early taps cost nothing); "Play strum" does not stop a running
     Metronome and still accents beat 1 after "every click the same"; the Tuning Simulator's "Which way?" screen already
     shows "Too low — tighten the peg" (the answer); Name the Power Chord resets its round when the tab is hidden;

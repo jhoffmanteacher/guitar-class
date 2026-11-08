@@ -3114,6 +3114,13 @@ const CC_POWER_START_BPM = 30;
 const CC_LADDER_ROUNDS = 3, CC_LADDER_STEP = 5, CC_LADDER_SLOTS = 8;
 /* How far the tempo moves per tap on Power Chord Switch's done screen (Change Up's buttons move 10). */
 const CC_POWER_AGAIN_STEP = 5;
+/* The most the beat grid may move for ONE strum (ms), in both games (2026-11-07). Each strum pulls the grid a quarter of the way to its
+   nearest beat (ccLoop), so a stray sound (a cough, a chair) half a beat off the grid moved it by 0.125 of a beat: 749 ms at 10 BPM,
+   125 ms at 60. Capped, it moves 60 ms at most. Chosen by tools/grid-sim.mjs, which runs the real ccLoop on 28,800 scripted games
+   per version (Power Chord Switch 10-140 BPM, Change Up 40-140, every beat and every bar, 15 kinds of player): at 60 ms no change
+   of 316,800 that was graded right turned wrong at 30 BPM and above; 25 that a stray sound had made wrong turned right. 50 ms and
+   under turned some right changes wrong. The console's replay (teacher.js PW_GRID_STEP_CAP_MS) must use the same number: 1ck pins both. */
+const CC_GRID_STEP_CAP_MS = 60;
 /* The three round tempos. The first round's tempo is the base, but never above CC_BPM_MAX minus two steps (130): with the old 15 step, a
    base of 125 gave rounds 125 / 140 / 140, and "each round faster" was not true. */
 function ccLadderBpms(base){
@@ -3918,7 +3925,7 @@ function ccLoop(){
       const rel = at - lat - cc.listenStart - cc.gridOffset;
       const beatIdx = Math.round(rel / cc.beatMs);
       const dev = rel - beatIdx * cc.beatMs;
-      if (Math.abs(dev) < cc.beatMs * 0.5) cc.gridOffset += dev * 0.25;
+      if (Math.abs(dev) < cc.beatMs * 0.5) cc.gridOffset += Math.max(-CC_GRID_STEP_CAP_MS, Math.min(CC_GRID_STEP_CAP_MS, dev * 0.25));
       // Cap the match window at half the spacing between changes (bpc beats) so a
       // single strum can't land inside two adjacent change windows at fast rates.
       const win = Math.min(cc.beatMs * cc.bpc * 0.5, Math.max(220, cc.beatMs * 0.5));

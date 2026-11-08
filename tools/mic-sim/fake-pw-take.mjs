@@ -21,8 +21,8 @@
        the site hears is an onset at played time = attack + map - micLatencyMs,
        and the site's VERDICTS ARE NOT PLANTED: they come from coach.js
        ccLoop's own rule, run here on those onsets in order — rel = played -
-       listenStart - gridOffset; gridOffset += 0.25 × (rel - nearest beat)
-       when that is under half a beat; the first change still open with
+       listenStart - gridOffset; gridOffset += 0.25 × (rel - nearest beat), at most
+       CC_GRID_STEP_CAP_MS either way, when that is under half a beat; the first change still open with
        |its beat - rel| <= win (half a beat, at least 220 ms, at most half the
        gap between changes) takes the strum: 'off' if it was the wrong chord,
        else 'ok'; a change nothing took is 'miss'. Onsets are logged as events
@@ -93,6 +93,10 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+
+/* The most the site's grid moves for one strum: read from coach.js, so this stand-in for ccLoop cannot drift from it (2026-11-07). */
+const GRID_STEP_CAP_MS = Number((/^const CC_GRID_STEP_CAP_MS = (\d+);/m.exec(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'coach.js'), 'utf8')) || [])[1]);
+if (!(GRID_STEP_CAP_MS > 0)) throw new Error('coach.js has no CC_GRID_STEP_CAP_MS (fake-pw-take reads it)');
 
 const R = 24000, CAP_MS = 30000;
 // Root midi of each three-finger shape (coach.js CC_POWER_PROGRESSIONS): root, +7, +12.
@@ -215,7 +219,7 @@ export function makePwTake(o){
     rd.siteHear = (played, sharp) => {
       const rel = played - rd.listen - goff;
       const bi = Math.round(rel / rd.beat), dev = rel - bi * rd.beat, before = goff;
-      if (Math.abs(dev) < rd.beat * 0.5) goff += dev * 0.25;
+      if (Math.abs(dev) < rd.beat * 0.5) goff += Math.max(-GRID_STEP_CAP_MS, Math.min(GRID_STEP_CAP_MS, dev * 0.25));
       const ch = rd.changes.find(c => !c.match && Math.abs(c.s * o.bpc * rd.beat - rel) <= rd.win);
       if (ch) ch.match = { played, sharp, goff: before };
       rd.onsets.push({ played, goffAfter: goff });

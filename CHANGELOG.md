@@ -5,6 +5,10 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-07 — Power Chord Switch and Change Up: a stray sound no longer throws off the beat
+
+- **One cough, bump or chair noise no longer moves the beat dots.** The game follows your strumming a little at a time, so it keeps in time if you play a little early or late. Before, one stray sound moved it a lot at slow tempos (3/4 of a second at 10 BPM). Now one strum can move it 60 ms at most, at every tempo. It still follows you if you play late on every beat.
+
 ## 2026-11-07 — Tuning Simulator: a circle of notes, levels, and a peg that turns the right way
 
 - **The Tuning Simulator is on the Games page now.** Look for **Tuning Simulator** with the games that do not need a guitar. The link under the tip in the Tuner popup is gone.
