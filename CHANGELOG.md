@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-07 — Tuning Simulator: a circle of notes, levels, and a peg that turns the right way
+
+- **The Tuning Simulator is on the Games page now.** Look for **Tuning Simulator** with the games that do not need a guitar. It is still in the Tuner popup too.
+- **A circle of notes.** All 12 notes (C to B) are drawn round a ring. A purple ring marks the string's note. An amber ring marks the note the tuner shows now. Going up the circle is counterclockwise, the same way the peg turns to tighten. After you answer Up or Down, an arrow shows the short way round and how many steps it is.
+- **Levels, easy to hard.** Level 1 is the same as before: the tuner shows the right letter and only the needle is off. In levels 2 to 4 the string starts whole notes away (up to 2, up to 4, then up to 5, a 4th), so the tuner shows a different letter. Read both letters on the circle to find the way. Three rounds in a row with no mistake move you up a level. The site remembers your level on this computer.
+- **Done means the right letter, in green.** Green on a different letter does not count.
+- **The peg turns the way a real one does.** **Tighten** turns it counterclockwise and the note goes up. **Loosen** turns it clockwise and the note goes down. Each button says which way to turn. The Left arrow key is counterclockwise (tighten) and the Right arrow key is clockwise (loosen). Before, the buttons and the picture were the other way round.
+- **Easier to control.** The big Up and Down answer buttons are smaller, and they go away while you turn the peg, so the only buttons left are Tighten and Loosen. If you hold a button, it turns faster, so a string that starts far away does not take long. Let go and press again to go slowly for the last bit.
+- **"Show the circle" is now "Show the string names".** It is the same switch for the string names on the picture, which fade out after six right in a row.
+
 ## 2026-11-07 — Power Chord Switch hears softer strums again
 
 - **A strum does not have to be quite as loud to count in Power Chord Switch.** Since 2026-11-05 it sometimes did not hear a real strum, mostly in slow games (started at 35 to 40 BPM). "No strum heard" should now show less often on strums you really played. A noise in the room may count as a strum a little more often than last week, but less often than before 2026-11-05. Change Up is unchanged.

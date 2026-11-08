@@ -2705,7 +2705,7 @@ function gamesStopMic(keepPanel){
   const screen = document.getElementById('games-screen');
   const p = document.getElementById('games-panel');
   if (!keepPanel && screen && !screen.hasAttribute('hidden') && p &&
-      GAMES_META.some(g => document.getElementById(g.body))){
+      GAMES_META.some(g => g.body && document.getElementById(g.body))){
     gamesRenderHub(p);
   }
 }
@@ -2780,6 +2780,8 @@ const GAME_ICO = {
   // Pattern Detective — a magnifying glass over a down-strum arrow: inspect
   // the written bar, judge whether what you heard matches it.
   patterndet: gIco('<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.3 15.3 21 21"/><path d="M10.5 7v7M10.5 14l-2.2-2.2M10.5 14l2.2-2.2"/>'),
+  // Tuning Simulator — a tuner's tick marks with its needle at the centre.
+  tuningsim:  gIco('<path d="M3 18a9 9 0 0 1 18 0"/><path d="M12 18l4-7"/><path d="M12 6V4M5.5 8.5 4 7M18.5 8.5 20 7"/><circle cx="12" cy="18" r="1.2" fill="currentColor" stroke="none"/>'),
   // Build-a-Chord — a fretboard grid with finger dots being placed.
   buildchord: gIco('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 4v16M3 12h18"/><circle cx="6" cy="8" r="1.8" fill="currentColor" stroke="none"/><circle cx="18" cy="16" r="1.8" fill="currentColor" stroke="none"/>'),
 };
@@ -2805,6 +2807,11 @@ const GAMES_META = [
     body:'nr-body', setup:() => fgSetup(), foot:true },
   { key:'simonguitar', cls:'gc-simonguitar', ico:GAME_ICO.simonguitar, titleKey:'games.psg.title', guitar:true, descKey:'games.psg.desc',
     body:'psg-body', setup:() => psgSetup() },
+  /* Tuning Simulator is a page of its own (tuning-sim.html), not a view in this panel: its
+     card goes there (href), so it has no body or setup. gamesShow() and the card handler
+     both send the student to the page. It lives here for now (Jonathan, 2026-11-07). */
+  { key:'tuningsim', cls:'gc-tuningsim', ico:GAME_ICO.tuningsim, titleKey:'games.ts.title',  guitar:false, descKey:'games.ts.desc',
+    href:'tuning-sim.html' },
   { key:'runner',   cls:'gc-runner',   ico:GAME_ICO.runner,     titleKey:'games.riff.title',  guitar:false, descKey:'games.riff.desc',
     body:'rn-body', setup:() => rnSetup() },
   { key:'blitz',    cls:'gc-blitz',    ico:GAME_ICO.blitz,      titleKey:'games.cb.title',    guitar:false, descKey:'games.cb.desc',
@@ -3036,6 +3043,7 @@ function gamesShow(view){
   }
   const g = GAMES_META.find(x => x.key === view);
   if (!g) return;
+  if (g.href){ location.href = g.href; return; }
   gamesSyncTopbar(true);
   p.innerHTML = gamesHeadHtml(g.ico + ' ' + t(g.titleKey)) + `<div id="${g.body}"></div>` + (g.foot ? coachFootHtml(g.records) : '');
   g.setup();

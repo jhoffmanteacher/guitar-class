@@ -3724,6 +3724,7 @@ body.games-open{overflow:hidden}
    flashes the offending string columns; a right one turns the dots
    green for the celebration beat. ── */
 .games-card.gc-buildchord::before{background:var(--red-text)}
+.games-card.gc-tuningsim::before{background:var(--green-text)}
 .bc-prompt{text-align:center;font-size:1.375rem;font-weight:800;margin:10px 0 2px}
 .bc-grid{display:flex;gap:6px;justify-content:center;margin:12px 0}
 .bc-col{display:flex;flex-direction:column;gap:5px;border-radius:10px;padding:3px}

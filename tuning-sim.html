@@ -56,7 +56,7 @@ button{font-family:inherit;color:inherit}
 .top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:10px}
 .crumb{display:inline-flex;align-items:center;gap:6px;font-size:.8125rem;font-weight:600;color:var(--text2);text-decoration:none;padding:3px 10px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--border2)}
 .crumb:hover{color:var(--text);background:var(--bg3)}
-.crumb:focus-visible,.sw:focus-visible,.btn:focus-visible,.bubble:focus-visible,.peg-btn:focus-visible{outline:2px solid var(--purple-accent);outline-offset:2px}
+.crumb:focus-visible,.sw:focus-visible,.btn:focus-visible,.bubble:focus-visible,.peg-btn:focus-visible,.ans:focus-visible{outline:2px solid var(--purple-accent);outline-offset:2px}
 .top-l{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px}
 h1{font-size:1.5rem;margin:0;letter-spacing:-0.01em;flex-basis:100%}
 .score{margin:0;font-size:.9375rem;color:var(--text2);font-variant-numeric:tabular-nums}
@@ -98,13 +98,18 @@ h1{font-size:1.5rem;margin:0;letter-spacing:-0.01em;flex-basis:100%}
 .mlabels{display:flex;justify-content:space-between;font-size:.75rem;font-weight:600;padding:4px 0 0;opacity:.85}
 .lcd-status{text-align:center;font-size:.875rem;font-weight:600;min-height:20px;margin-top:6px}
 
-/* ── the peg ── */
+/* ── the peg ── Tighten turns it counterclockwise (the note goes up), Loosen turns it clockwise (the note goes down). */
 .peg-panel{display:grid;grid-template-columns:1fr 104px 1fr;gap:10px;align-items:center;margin-top:14px}
-.peg-btn{min-height:76px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg2);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:1rem;font-weight:600;touch-action:none;user-select:none;-webkit-user-select:none}
-.peg-btn .gly{font-size:1.5rem;line-height:1}
-.peg-btn small{font-size:.75rem;font-weight:400;color:var(--text2)}
+.peg-btn{min-height:76px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg2);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:6px 8px;font-size:1rem;font-weight:700;touch-action:none;user-select:none;-webkit-user-select:none}
+.peg-btn .pl{display:inline-flex;align-items:center;gap:6px;line-height:1.2}
+.peg-btn .pl svg{width:22px;height:22px;flex-shrink:0}
+.peg-btn .pl svg path.arc{fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round}
+.peg-btn .pl svg polygon{fill:currentColor}
+.peg-btn small{font-size:.75rem;font-weight:400;color:var(--text2);line-height:1.25;text-align:center}
+.peg-btn small b{font-weight:600;color:var(--text)}
 .peg-btn:hover:not(:disabled){background:var(--bg3)}
 .peg-btn.held{background:var(--purple-bg);border-color:var(--purple-accent);color:var(--purple-text)}
+.peg-btn.held small,.peg-btn.held small b{color:var(--purple-text)}
 .peg-btn:disabled{opacity:.5;cursor:default}
 .peg-svg{width:104px;height:104px;display:block}
 .peg-svg g.rot{transform-origin:52px 52px;transition:transform .12s linear}
@@ -120,7 +125,8 @@ h1{font-size:1.5rem;margin:0;letter-spacing:-0.01em;flex-basis:100%}
 .chip.on{background:var(--purple-bg);border-color:var(--purple-accent);color:var(--purple-text);font-weight:600}
 .chip.past{opacity:.6}
 h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
-.hint{margin:0 0 10px;color:var(--text2);font-size:.9375rem;min-height:1.3em}
+.hint{margin:0 0 10px;color:var(--text2);font-size:.9375rem;min-height:2.7em}
+.board{display:grid;grid-template-columns:minmax(0,1fr) 224px;gap:14px;align-items:start}
 
 .strings{display:flex;flex-direction:column;gap:2px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px}
 .srow{display:grid;grid-template-columns:1fr 112px;align-items:center;gap:12px;height:34px;border-radius:var(--radius-sm);padding:0 6px;transition:background .15s}
@@ -135,18 +141,39 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
 .bubble:disabled{cursor:default}
 .bubble.right{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text)}
 .bubble.wrong{background:var(--red-bg);border-color:var(--red-text);color:var(--red-text)}
-.strings.nocircle .bubble{opacity:0;pointer-events:none}
+.strings.nonames .bubble{opacity:0;pointer-events:none}
 
-.answers{min-height:76px;margin-top:10px;display:flex;gap:10px;align-items:stretch}
-.ans{flex:1 1 0;min-height:64px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg2);font-size:1.0625rem;font-weight:600;cursor:pointer;padding:0 10px}
+/* ── the circle of notes: the 12 notes round a ring, going UP counterclockwise (the way the peg turns to raise the note) ── */
+.ringbox{display:flex;flex-direction:column;align-items:center;gap:2px}
+#ring{width:224px;height:224px;display:block;overflow:visible}
+.rguide{fill:none;stroke:var(--border2);stroke-width:1.5;stroke-dasharray:2 5}
+.rn circle{fill:var(--bg);stroke:var(--border2);stroke-width:1.5}
+.rn text{fill:var(--text);font-size:13px;font-weight:700;text-anchor:middle;dominant-baseline:central;font-family:inherit}
+.rn.tgt circle{fill:var(--purple-bg);stroke:var(--purple-accent);stroke-width:3.5}
+.rn.tgt text{fill:var(--purple-text)}
+.rn.cur circle{fill:var(--amber-bg);stroke:var(--amber-text);stroke-width:3.5}
+.rn.cur text{fill:var(--amber-text)}
+.rn.tgt.cur circle{fill:var(--green-bg);stroke:var(--green-text)}
+.rn.tgt.cur text{fill:var(--green-text)}
+.rarc{fill:none;stroke:var(--purple-accent);stroke-width:3;stroke-linecap:round}
+.ahead{fill:var(--purple-accent)}
+.rc1{fill:var(--text);font-size:15px;font-weight:700;text-anchor:middle;font-family:inherit}
+.rc2{fill:var(--text2);font-size:13px;text-anchor:middle;font-family:inherit}
+.legend{display:flex;gap:14px;font-size:.8125rem;color:var(--text2)}
+.legend .lg{display:inline-flex;align-items:center;gap:5px}
+.legend .dot{width:12px;height:12px;border-radius:50%;border:3px solid var(--purple-accent);background:var(--purple-bg);display:inline-block}
+.legend .dot.cur{border-color:var(--amber-text);background:var(--amber-bg)}
+
+.answers{min-height:52px;margin-top:10px;display:flex;gap:10px;align-items:center}
+.ans{flex:0 1 auto;min-height:44px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg2);font-size:1rem;font-weight:600;cursor:pointer;padding:0 18px}
 .ans:hover:not(:disabled){background:var(--bg3)}
 .ans.right{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text)}
 .ans.wrong{background:var(--red-bg);border-color:var(--red-text);color:var(--red-text)}
 .ans:focus-visible{outline:2px solid var(--purple-accent);outline-offset:2px}
-.ans.six{min-height:56px;font-size:.9375rem;padding:0 4px}
+.ans.six{flex:1 1 0;min-height:48px;font-size:.9375rem;padding:0 4px}
 .plain{color:var(--text2);font-size:.9375rem;align-self:center}
-.feedback{margin:8px 0 0;min-height:24px;font-size:1rem;color:var(--text)}
-.feedback.note{margin-top:2px;min-height:24px}
+.feedback{margin:8px 0 0;min-height:2.6em;font-size:1rem;color:var(--text)}
+.feedback.note{margin-top:2px;min-height:1.4em}
 .feedback.bad{color:var(--red-text)}
 .feedback.ok{color:var(--green-text)}
 .feedback.note{color:var(--purple-text)}
@@ -163,7 +190,7 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
     </div>
     <div class="top-r">
       <button type="button" class="sw" id="sound-sw" role="switch" aria-checked="true"><span class="knob" aria-hidden="true"></span><span id="sound-lbl"></span></button>
-      <button type="button" class="sw" id="circle-sw" role="switch" aria-checked="true"><span class="knob" aria-hidden="true"></span><span data-t="showCircle">Show the circle</span></button>
+      <button type="button" class="sw" id="names-sw" role="switch" aria-checked="true"><span class="knob" aria-hidden="true"></span><span data-t="showNames">Show the string names</span></button>
     </div>
   </header>
 
@@ -185,7 +212,7 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
       </div>
 
       <div class="peg-panel">
-        <button type="button" class="peg-btn" id="peg-down" data-dir="-1"><span class="gly" aria-hidden="true">&#x27F2;</span><span data-t="loosen">Loosen</span><small data-t="loosenSub">note goes down</small></button>
+        <button type="button" class="peg-btn" id="peg-up" data-dir="1"><span class="pl"><svg viewBox="0 0 40 40" aria-hidden="true"><g transform="translate(40,0) scale(-1,1)"><path class="arc" d="M8.74 13.5 A13 13 0 1 1 13.5 31.26"/><polygon points="7.44,27.76 15.75,27.36 11.25,35.16"/></g></svg><span data-t="tighten">Tighten</span></span><small><b data-t="tightenTurn">turn counterclockwise</b><br><span data-t="tightenSub">note goes up</span></small></button>
         <svg class="peg-svg" viewBox="0 0 104 104" aria-hidden="true">
           <g class="rot" id="peg-rot">
             <circle cx="52" cy="52" r="46" fill="#9a9d9f" stroke="#5c5f61" stroke-width="2"/>
@@ -197,7 +224,7 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
             <rect x="49" y="26" width="6" height="22" rx="3" fill="#f0f0ee"/>
           </g>
         </svg>
-        <button type="button" class="peg-btn" id="peg-up" data-dir="1"><span class="gly" aria-hidden="true">&#x27F3;</span><span data-t="tighten">Tighten</span><small data-t="tightenSub">note goes up</small></button>
+        <button type="button" class="peg-btn" id="peg-down" data-dir="-1"><span class="pl"><svg viewBox="0 0 40 40" aria-hidden="true"><path class="arc" d="M8.74 13.5 A13 13 0 1 1 13.5 31.26"/><polygon points="7.44,27.76 15.75,27.36 11.25,35.16"/></svg><span data-t="loosen">Loosen</span></span><small><b data-t="loosenTurn">turn clockwise</b><br><span data-t="loosenSub">note goes down</span></small></button>
       </div>
       <div class="peg-foot">
         <button type="button" class="btn" id="pluck" data-t="pluck">Pluck again</button>
@@ -209,7 +236,13 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
       <div class="chips" id="chips"></div>
       <h2 id="prompt"></h2>
       <p class="hint" id="hint"></p>
-      <div class="strings" id="strings"></div>
+      <div class="board">
+        <div class="strings" id="strings"></div>
+        <div class="ringbox">
+          <svg id="ring" viewBox="0 0 224 224" role="img" data-tl="ringLabel"></svg>
+          <div class="legend"><span class="lg"><i class="dot" aria-hidden="true"></i><span data-t="legStr">string</span></span><span class="lg"><i class="dot cur" aria-hidden="true"></i><span data-t="legTun">tuner shows</span></span></div>
+        </div>
+      </div>
       <div class="answers" id="answers"></div>
       <p class="feedback" id="feedback" aria-live="polite"></p>
       <p class="feedback note" id="note2" aria-live="polite"></p>
@@ -232,12 +265,18 @@ const STRINGS = [
   { id:'B3', freq:246.94, note:'B' },
   { id:'E4', freq:329.63, note:'E' }
 ];
-const MIN_DETUNE = 12, MAX_DETUNE = 45;   // cents, flat or sharp; never already green, never a new letter
+const MIN_DETUNE = 12, MAX_DETUNE = 45;   // level 1: cents, flat or sharp; never already green, never a new letter
+/* Levels 2-4: the string starts whole notes away (one note = one fret = 100 cents), flat or sharp, so the tuner
+   shows another letter. Level 4 goes up to 5 notes, a 4th. A 5th (7 notes) is not drawn: round the circle it is a
+   4th the other way, so the student would tune it from the other side. */
+const LEVELS = [ { min:0, max:0 }, { min:1, max:2 }, { min:2, max:4 }, { min:3, max:5 } ];
+const JITTER = 20;                        // levels 2-4: plus or minus this many cents on top, so the needle is not always centred
+const CLEAN_TO_LEVEL_UP = 3;              // rounds in a row with no wrong name and no wrong way
 const TICK_CENTS = 2;                     // one peg tick
-const PEG_LIMIT = 100;                    // the peg stops here, either way
+const PEG_LIMIT = 650;                    // the peg stops here, either way
 const STREAK_TO_PHASE2 = 6;               // one full set of strings named right in a row
 const DONE_MS = 1000;                     // green for this long = tuned
-const DEFAULTS = { soundOn: true, circleShownPhase1: true, circleShownPhase2: false };
+const DEFAULTS = { soundOn: true, namesShownPhase1: true, namesShownPhase2: false };
 
 function nearestNote(freq){
   const n = Math.round(12 * Math.log2(freq / 440)) + 69;
@@ -250,14 +289,28 @@ function pickString(prev, rnd){
   do { i = Math.floor(rnd() * STRINGS.length); } while (i === prev);
   return i;
 }
-function pickDetune(rnd){
-  const mag = MIN_DETUNE + Math.floor(rnd() * (MAX_DETUNE - MIN_DETUNE + 1));
-  return (rnd() < 0.5 ? -1 : 1) * mag;
+function pickDetune(rnd, level){
+  const L = LEVELS[(level || 1) - 1];
+  if (!L.max) {
+    const mag = MIN_DETUNE + Math.floor(rnd() * (MAX_DETUNE - MIN_DETUNE + 1));
+    return (rnd() < 0.5 ? -1 : 1) * mag;
+  }
+  const notes = L.min + Math.floor(rnd() * (L.max - L.min + 1));
+  const jit = Math.floor(rnd() * (2 * JITTER + 1)) - JITTER;
+  return (rnd() < 0.5 ? -1 : 1) * notes * 100 + jit;
 }
 function rightWay(cents){ return cents < 0 ? 'up' : 'down'; }
-function makeRound(prev, rnd){
-  const idx = pickString(prev, rnd), cents = pickDetune(rnd);
-  return { idx, cents, answer: rightWay(cents), letter: nearestNote(centsToFreq(idx, cents)).name };
+/* The circle of notes: from the letter the tuner shows to the string's letter, the short way round.
+   Up is counterclockwise, the way the peg turns to tighten. */
+function ringMove(from, to){
+  const d = ((NOTES.indexOf(to) - NOTES.indexOf(from)) % 12 + 12) % 12;
+  if (d === 0) return { n: 0, way: '' };
+  return d <= 6 ? { n: d, way: 'up' } : { n: 12 - d, way: 'down' };
+}
+function makeRound(prev, rnd, level){
+  const idx = pickString(prev, rnd), cents = pickDetune(rnd, level);
+  const letter = nearestNote(centsToFreq(idx, cents)).name, target = STRINGS[idx].note;
+  return { idx, cents, answer: rightWay(cents), letter, target, steps: ringMove(letter, target).n };
 }
 /* Sticky in-tune band, same numbers as tuner.js: enter green inside +-8 cents,
    leave only outside +-11. */
@@ -278,51 +331,69 @@ try { LANG = localStorage.getItem('gc-lang') === 'es' ? 'es' : 'en'; } catch(e){
 const I = {
   en: {
     back:'Back to class site', title:'Tuning Simulator',
-    showCircle:'Show the circle',
+    showNames:'Show the string names',
     soundOn:'Sound: on', soundOff:'Sound: off',
     flat:'flat', inTune:'in tune', sharp:'sharp',
     stInTune:'In tune ✓', stSharp:'Too high — loosen the peg (sharp)', stFlat:'Too low — tighten the peg (flat)',
-    loosen:'Loosen', loosenSub:'note goes down', tighten:'Tighten', tightenSub:'note goes up',
-    pluck:'Pluck again', keys:'Keys: ← loosen · → tighten',
-    score:'Strings tuned: {n} · Named right: {k} in a row',
+    stOther:'The tuner shows {x}. You need {y}.',
+    loosen:'Loosen', loosenTurn:'turn clockwise', loosenSub:'note goes down',
+    tighten:'Tighten', tightenTurn:'turn counterclockwise', tightenSub:'note goes up',
+    pluck:'Pluck again', keys:'Keys: ← counterclockwise (tighten) · → clockwise (loosen)',
+    score:'Level {l} of {m} · Strings tuned: {n} · Named right: {k} in a row',
     chip1:'Name it', chip2:'Read the tuner', chip3:'Turn the peg',
     p1:'Which string is this?', h1a:'Find the string on the picture. Tap its name.', h1b:'Name the string from memory.',
     p2:'Which way?', h2:'Look at the needle. Is it left or right of the center?',
-    p3:'Turn the peg until the needle is green.', h3:'Hold a button. Keep the needle green for one second.',
+    h2n:'The tuner shows a different letter than the string. Find both letters on the circle. Counterclockwise ↺ is up. Clockwise ↻ is down.',
+    p3:'Turn the peg until the tuner shows {y} in green.', h3:'Hold Tighten or Loosen. Keep the needle green for one second.',
+    h3n:'Hold Tighten or Loosen. The note slides. Stop when the tuner shows {y} and the needle is green for one second.',
     p4:'In tune. Next string…',
     up:'Up — tighten', down:'Down — loosen',
     names:['low E','A','D','G','B','high e'],
     nameOk:'That is the {a} string.', nameBad:'That is the {a} string, not {b}.',
-    nameBadBack:'That is the {a} string, not {b}. The circle is back for this string.',
-    phase2:'Six in a row. The note circle is hidden now. Name each string from memory.',
+    nameBadBack:'That is the {a} string, not {b}. The names are back for this string.',
+    phase2:'Six in a row. The string names are hidden now. Name each string from memory.',
     wayFlat:'The needle is left of center: too low. Tighten to go up.',
     waySharp:'The needle is right of center: too high. Loosen to go down.',
+    wayUpN:'At the start the tuner showed {x}. The string is {y}. On the circle, {y} is {s} up from {x}. Tighten to go up.',
+    wayDownN:'At the start the tuner showed {x}. The string is {y}. On the circle, {y} is {s} down from {x}. Loosen to go down.',
     wayWrong:'Other way. ',
-    done:'The {a} string is in tune.'
+    done:'The {a} string is in tune.',
+    levelUp:'Level {l}. A string can now start up to {m} steps from its note. Use the circle to find the way.',
+    ringLabel:'Circle of notes', legStr:'string', legTun:'tuner shows',
+    step1:'{n} step', stepN:'{n} steps', ringUp:'↺ up', ringDown:'↻ down', ringUpWord:'up', ringDownWord:'down'
   },
   es: {
     back:'Volver al sitio de la clase', title:'Simulador de afinación',
-    showCircle:'Mostrar el círculo',
+    showNames:'Mostrar los nombres de las cuerdas',
     soundOn:'Sonido: sí', soundOff:'Sonido: no',
     flat:'bemol', inTune:'afinado', sharp:'sostenido',
     stInTune:'Afinado ✓', stSharp:'Muy alta — afloja la clavija (sostenido)', stFlat:'Muy baja — aprieta la clavija (bemol)',
-    loosen:'Aflojar', loosenSub:'la nota baja', tighten:'Apretar', tightenSub:'la nota sube',
-    pluck:'Tocar otra vez', keys:'Teclas: ← aflojar · → apretar',
-    score:'Cuerdas afinadas: {n} · Nombradas bien: {k} seguidas',
+    stOther:'El afinador muestra {x}. Necesitas {y}.',
+    loosen:'Aflojar', loosenTurn:'gira con el reloj', loosenSub:'la nota baja',
+    tighten:'Apretar', tightenTurn:'gira contra el reloj', tightenSub:'la nota sube',
+    pluck:'Tocar otra vez', keys:'Teclas: ← contra el reloj (apretar) · → con el reloj (aflojar)',
+    score:'Nivel {l} de {m} · Cuerdas afinadas: {n} · Nombradas bien: {k} seguidas',
     chip1:'Nómbrala', chip2:'Lee el afinador', chip3:'Gira la clavija',
     p1:'¿Qué cuerda es esta?', h1a:'Busca la cuerda en el dibujo. Toca su nombre.', h1b:'Nombra la cuerda de memoria.',
     p2:'¿Hacia dónde?', h2:'Mira la aguja. ¿Está a la izquierda o a la derecha del centro?',
-    p3:'Gira la clavija hasta que la aguja se ponga verde.', h3:'Mantén un botón apretado. Deja la aguja en verde durante un segundo.',
+    h2n:'El afinador muestra una letra distinta a la de la cuerda. Busca las dos letras en el círculo. Contra el reloj ↺ es subir. Con el reloj ↻ es bajar.',
+    p3:'Gira la clavija hasta que el afinador muestre {y} en verde.', h3:'Mantén presionado Apretar o Aflojar. Deja la aguja en verde durante un segundo.',
+    h3n:'Mantén presionado Apretar o Aflojar. La nota se desliza. Detente cuando el afinador muestre {y} y la aguja esté en verde durante un segundo.',
     p4:'Afinada. Sigue la siguiente cuerda…',
     up:'Arriba — aprieta', down:'Abajo — afloja',
     names:['Mi grave','La','Re','Sol','Si','mi aguda'],
     nameOk:'Esa es la cuerda {a}.', nameBad:'Esa es la cuerda {a}, no la cuerda {b}.',
-    nameBadBack:'Esa es la cuerda {a}, no la cuerda {b}. El círculo vuelve para esta cuerda.',
-    phase2:'Seis seguidas. El círculo de notas ya no se muestra. Nombra cada cuerda de memoria.',
+    nameBadBack:'Esa es la cuerda {a}, no la cuerda {b}. Los nombres vuelven para esta cuerda.',
+    phase2:'Seis seguidas. Los nombres de las cuerdas ya no se muestran. Nombra cada cuerda de memoria.',
     wayFlat:'La aguja está a la izquierda del centro: muy baja. Aprieta para subir.',
     waySharp:'La aguja está a la derecha del centro: muy alta. Afloja para bajar.',
+    wayUpN:'Al principio el afinador mostraba {x}. La cuerda es {y}. En el círculo, {y} está {s} arriba de {x}. Aprieta para subir.',
+    wayDownN:'Al principio el afinador mostraba {x}. La cuerda es {y}. En el círculo, {y} está {s} abajo de {x}. Afloja para bajar.',
     wayWrong:'Al revés. ',
-    done:'La cuerda {a} está afinada.'
+    done:'La cuerda {a} está afinada.',
+    levelUp:'Nivel {l}. Ahora una cuerda puede empezar hasta {m} pasos lejos de su nota. Usa el círculo para encontrar el camino.',
+    ringLabel:'Círculo de notas', legStr:'cuerda', legTun:'el afinador muestra',
+    step1:'{n} paso', stepN:'{n} pasos', ringUp:'↺ sube', ringDown:'↻ baja', ringUpWord:'sube', ringDownWord:'baja'
   }
 };
 function T(k, p){
@@ -330,35 +401,43 @@ function T(k, p){
   if (p) for (const key in p) s = s.split('{' + key + '}').join(p[key]);
   return s;
 }
-/* A string's name. Spanish shows the note letter too in the circle (La · A);
+/* A string's name. Spanish shows the note letter too next to the name (La · A);
    the tuner's big letter always stays a letter. */
 function nameOf(i){ return I[LANG].names[i]; }
 function letterOf(i){ return STRINGS[i].note; }
 
-/* ── saved: only whether this browser has reached Phase 2 ── */
-const PHASE2_KEY = 'gc-tuningsim-phase2';
+/* ── saved: whether this browser has reached Phase 2, and its level ── */
+const PHASE2_KEY = 'gc-tuningsim-phase2', LEVEL_KEY = 'gc-tuningsim-level';
 function loadPhase2(){ try { return localStorage.getItem(PHASE2_KEY) === '1'; } catch(e){ return false; } }
 function savePhase2(){ try { localStorage.setItem(PHASE2_KEY, '1'); } catch(e){} }
+function clampLevel(n){ n = Math.round(+n); return n >= 1 && n <= LEVELS.length ? n : 1; }
+function loadLevel(){
+  try { const q = new URLSearchParams(location.search).get('level'); if (q) return clampLevel(q); } catch(e){}   // ?level=4 lets a teacher look at a level
+  try { return clampLevel(localStorage.getItem(LEVEL_KEY)); } catch(e){ return 1; }
+}
+function saveLevel(){ try { localStorage.setItem(LEVEL_KEY, String(S.level)); } catch(e){} }
 
 /* ── state ── */
 const S = {
   phase: loadPhase2() ? 2 : 1,
-  showCircle: false,        // the "Show the circle" switch (Phase 2 only)
-  missRound: false,         // a Phase 2 miss brings the circle back for this round only
+  level: 1, clean: 0, roundClean: true,   // level 1..4; rounds in a row with no miss
+  showNames: false,         // the "Show the string names" switch (Phase 2 only)
+  missRound: false,         // a Phase 2 miss brings the names back for this round only
   soundOn: DEFAULTS.soundOn,
   streak: 0, tuned: 0,
   state: 'name',            // name | read | turn | between
   prev: -1, round: null, cents: 0, pegAngle: 0,
   picked: -1, wayPicked: '', fb: '', fbClass: '', note: '',
-  disp: { shown: null, inTune: false }
+  disp: { shown: null, letter: null, green: false, inTune: false }   // inTune = green on the string's own letter
 };
-S.showCircle = S.phase === 1 ? DEFAULTS.circleShownPhase1 : DEFAULTS.circleShownPhase2;
+S.level = loadLevel();
+S.showNames = S.phase === 1 ? DEFAULTS.namesShownPhase1 : DEFAULTS.namesShownPhase2;
 const $ = id => document.getElementById(id);
-const el = { score:$('score'), chips:$('chips'), prompt:$('prompt'), hint:$('hint'), strings:$('strings'), answers:$('answers'),
+const el = { ring:$('ring'), score:$('score'), chips:$('chips'), prompt:$('prompt'), hint:$('hint'), strings:$('strings'), answers:$('answers'),
   feedback:$('feedback'), note2:$('note2'), snark:$('snark'), lcd:$('lcd'), note:$('note'), needle:$('needle'), status:$('status'), hz:$('hz'),
-  pegRot:$('peg-rot'), pegUp:$('peg-up'), pegDown:$('peg-down'), pluck:$('pluck'), soundSw:$('sound-sw'), circleSw:$('circle-sw') };
+  pegRot:$('peg-rot'), pegUp:$('peg-up'), pegDown:$('peg-down'), pluck:$('pluck'), soundSw:$('sound-sw'), namesSw:$('names-sw') };
 
-function circleVisible(){ return S.phase === 1 || S.showCircle || S.missRound; }
+function namesVisible(){ return S.phase === 1 || S.showNames || S.missRound; }
 
 /* ── timers: everything started here is stopped in stopAll() ── */
 let doneTimer = 0, nextTimer = 0, holdTimer = 0, popTimer = 0;
@@ -436,6 +515,39 @@ function followPitch(){
   else pluck(S.round.idx, S.cents, 0.6);                  // the note has died away: a soft pluck so you hear where you are
 }
 
+/* ═══ THE CIRCLE OF NOTES ═══
+   The 12 notes round a ring. Going UP is counterclockwise, the same way the peg turns to tighten.
+   Purple = the string's note, amber = the note the tuner shows now; both on one note = green.
+   After the student answers Up or Down, an arrow shows the short way round from where the tuner started. */
+const RC = 112, RR = 88, RA = 58;
+const ringNodes = [];
+function ringPt(i, r){ const a = -i * Math.PI / 6; return [RC + r * Math.sin(a), RC - r * Math.cos(a)]; }
+function ringInit(){
+  let h = '<defs><marker id="ahead" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="ahead"/></marker></defs>';
+  h += '<circle class="rguide" cx="' + RC + '" cy="' + RC + '" r="' + RR + '"/>';
+  NOTES.forEach((n, i) => { const [x, y] = ringPt(i, RR); h += '<g class="rn" data-note="' + n + '"><circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="18"/><text x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '">' + n + '</text></g>'; });
+  h += '<path id="rarc" class="rarc" d=""/><text id="rc1" class="rc1" x="' + RC + '" y="' + (RC - 4) + '"></text><text id="rc2" class="rc2" x="' + RC + '" y="' + (RC + 16) + '"></text>';
+  el.ring.innerHTML = h;
+  el.ring.querySelectorAll('.rn').forEach(g => ringNodes.push(g));
+}
+function stepsText(n){ return T(n === 1 ? 'step1' : 'stepN', { n }); }
+function ringRender(){
+  const r = S.round, known = !!r && S.state !== 'name';
+  const tgt = known ? r.target : '', cur = known && S.disp.letter ? S.disp.letter : '';
+  ringNodes.forEach(g => { const n = g.getAttribute('data-note'); g.classList.toggle('tgt', n === tgt); g.classList.toggle('cur', n === cur); });
+  const arc = $('rarc'), c1 = $('rc1'), c2 = $('rc2');
+  if (known && r.steps > 0 && (S.state === 'turn' || S.state === 'between')) {
+    const a = NOTES.indexOf(r.letter), b = NOTES.indexOf(r.target), up = r.answer === 'up';
+    const [x1, y1] = ringPt(a, RA), [x2, y2] = ringPt(b, RA);
+    arc.setAttribute('d', 'M' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' A' + RA + ' ' + RA + ' 0 0 ' + (up ? 0 : 1) + ' ' + x2.toFixed(1) + ' ' + y2.toFixed(1));
+    arc.setAttribute('marker-end', 'url(#ahead)');
+    c1.textContent = stepsText(r.steps); c2.textContent = T(up ? 'ringUp' : 'ringDown');
+  } else {
+    arc.setAttribute('d', ''); arc.removeAttribute('marker-end');
+    c1.textContent = T('ringUp'); c2.textContent = T('ringDown');
+  }
+}
+
 /* ═══ THE TUNER DISPLAY (same rules as tuner.js, in string-lock mode) ═══ */
 function ticksInit(){
   let h = '';
@@ -447,35 +559,36 @@ function flashPop(){
   clearTimeout(popTimer); popTimer = setTimeout(() => el.note.classList.remove('pop'), 500);
 }
 function lcdOff(){
-  S.disp.shown = null; S.disp.inTune = false;
+  S.disp.shown = null; S.disp.letter = null; S.disp.green = false; S.disp.inTune = false;
   el.snark.dataset.on = '0'; el.lcd.dataset.mode = 'off';
   el.note.textContent = '—'; el.hz.textContent = '';
   el.needle.style.left = '50%'; el.status.textContent = '';
   el.note.classList.remove('pop');
+  ringRender();
 }
+/* The tuner shows the note nearest the pitch and how far the needle is from THAT note, like a real one.
+   The string is done when it shows the string's own letter, green. Green on another letter is not done. */
 function updateDisplay(){
   if (!S.round || (S.state !== 'turn' && S.state !== 'read' && S.state !== 'between')) { lcdOff(); return; }
-  const target = S.round.idx;
+  const target = S.round.idx, tLetter = STRINGS[target].note;
   const freq = centsToFreq(target, S.cents);
-  const cents = Math.round(1200 * Math.log2(freq / STRINGS[target].freq));
-  const clamped = Math.max(-50, Math.min(50, cents));
+  const nn = nearestNote(freq);
+  const clamped = Math.max(-50, Math.min(50, nn.cents));
   const D = S.disp;
-  if (D.shown === null || Math.abs(clamped - D.shown) >= 2 || (clamped === 0 && D.shown !== 0)) {
+  if (D.shown === null || nn.name !== D.letter || Math.abs(clamped - D.shown) >= 2 || (clamped === 0 && D.shown !== 0)) {
     D.shown = clamped;
     el.needle.style.left = (50 + clamped) + '%';
   }
+  D.letter = nn.name;
   el.snark.dataset.on = '1';
-  el.note.textContent = letterOf(target);
+  el.note.textContent = nn.name;
   el.hz.textContent = (Math.round(freq * 10) / 10) + ' Hz';
-  const now = stickyInTune(D.inTune, D.shown);
-  if (now) {
-    if (!D.inTune) flashPop();
-    D.inTune = true; el.lcd.dataset.mode = 'in'; el.status.textContent = T('stInTune');
-  } else if (D.shown > 0) {
-    D.inTune = false; el.lcd.dataset.mode = 'sharp'; el.status.textContent = T('stSharp');
-  } else {
-    D.inTune = false; el.lcd.dataset.mode = 'flat'; el.status.textContent = T('stFlat');
-  }
+  const green = stickyInTune(D.green, D.shown), onTarget = nn.name === tLetter;
+  if (green && !D.green && onTarget) flashPop();
+  D.green = green; D.inTune = green && onTarget;
+  el.lcd.dataset.mode = green ? 'in' : (D.shown > 0 ? 'sharp' : 'flat');
+  el.status.textContent = !onTarget ? T('stOther', { x: nn.name, y: tLetter }) : green ? T('stInTune') : (D.shown > 0 ? T('stSharp') : T('stFlat'));
+  ringRender();
   checkGreen();
 }
 function checkGreen(){
@@ -489,10 +602,11 @@ function newRound(){
   clearTimeout(nextTimer); nextTimer = 0;
   clearTimeout(doneTimer); doneTimer = 0;
   stopVoice(0.15);
-  S.round = makeRound(S.prev, Math.random);
+  S.round = makeRound(S.prev, Math.random, S.level);
   S.prev = S.round.idx;
   S.cents = S.round.cents; S.pegAngle = 0;
-  S.picked = -1; S.wayPicked = ''; S.missRound = false;
+  el.pegRot.style.transform = 'rotate(0deg)';
+  S.picked = -1; S.wayPicked = ''; S.missRound = false; S.roundClean = true;
   S.state = 'name';
   S.fb = ''; S.fbClass = '';
   lcdOff();
@@ -508,11 +622,11 @@ function answerName(i){
     S.streak++;
     S.fb = T('nameOk', { a: nameOf(right) }); S.fbClass = 'ok';
     if (S.phase === 1 && S.streak >= STREAK_TO_PHASE2) {
-      S.phase = 2; S.showCircle = DEFAULTS.circleShownPhase2; savePhase2();
+      S.phase = 2; S.showNames = DEFAULTS.namesShownPhase2; savePhase2();
       S.note = T('phase2');
     }
   } else {
-    S.streak = 0;
+    S.streak = 0; S.roundClean = false;
     if (S.phase === 2) { S.missRound = true; S.fb = T('nameBadBack', { a: nameOf(right), b: nameOf(i) }); }
     else S.fb = T('nameBad', { a: nameOf(right), b: nameOf(i) });
     S.fbClass = 'bad';
@@ -523,12 +637,17 @@ function answerName(i){
   pluck(S.round.idx, S.cents, 1);
   focusFirst();
 }
+/* What the student reads after answering Up or Down: the needle on level 1, the circle on the others. */
+function waySentence(r){
+  if (!r.steps) return r.answer === 'up' ? T('wayFlat') : T('waySharp');
+  return T(r.answer === 'up' ? 'wayUpN' : 'wayDownN', { x: r.letter, y: r.target, s: stepsText(r.steps) });
+}
 function answerWay(w){
   if (S.state !== 'read') return;
   S.wayPicked = w;
-  const sentence = S.round.answer === 'up' ? T('wayFlat') : T('waySharp');
+  const sentence = waySentence(S.round);
   if (w === S.round.answer) { S.fb = sentence; S.fbClass = 'ok'; }
-  else { S.fb = T('wayWrong') + sentence; S.fbClass = 'bad'; }
+  else { S.fb = T('wayWrong') + sentence; S.fbClass = 'bad'; S.roundClean = false; }
   S.state = 'turn';
   render();
   updateDisplay();
@@ -539,16 +658,29 @@ function finishRound(){
   S.state = 'between';
   S.tuned++;
   S.fb = T('done', { a: nameOf(S.round.idx) }); S.fbClass = 'ok';
+  /* Three clean rounds in a row move up a level; a miss starts the count again. */
+  S.clean = S.roundClean ? S.clean + 1 : 0;
+  let leveled = false;
+  if (S.clean >= CLEAN_TO_LEVEL_UP && S.level < LEVELS.length) {
+    S.level++; S.clean = 0; saveLevel(); leveled = true;
+    S.note = T('levelUp', { l: S.level, m: LEVELS[S.level - 1].max });
+  }
   stopHold();
   render();
-  nextTimer = setTimeout(newRound, 1700);
+  nextTimer = setTimeout(newRound, leveled ? 3200 : 1700);
 }
 
-/* ═══ THE PEG ═══ */
-function tick(dir){
+/* ═══ THE PEG ═══
+   Tighten turns the peg COUNTERCLOCKWISE and the note goes up; Loosen turns it CLOCKWISE and the note goes down.
+   (CSS rotate(): positive = clockwise.) Holding speeds up, in bigger steps for a string that starts several
+   notes away; letting go and pressing again starts slow again, for the last bit. */
+const DEG_PER_CENT = 4;
+function stepFor(ms){ return ms < 500 ? TICK_CENTS : ms < 1100 ? 5 : ms < 1800 ? 12 : 24; }
+function tick(dir, size){
   if (S.state !== 'turn') return;
-  S.cents = Math.max(-PEG_LIMIT, Math.min(PEG_LIMIT, S.cents + dir * TICK_CENTS));
-  S.pegAngle += dir * 14;
+  const c = size || TICK_CENTS;
+  S.cents = Math.max(-PEG_LIMIT, Math.min(PEG_LIMIT, S.cents + dir * c));
+  S.pegAngle -= dir * c * DEG_PER_CENT;
   el.pegRot.style.transform = 'rotate(' + S.pegAngle + 'deg)';
   followPitch();
   updateDisplay();
@@ -557,8 +689,9 @@ function tick(dir){
 function holdDelay(ms){ return ms < 400 ? 130 : ms < 1000 ? 100 : ms < 1800 ? 72 : 52; }
 function holdLoop(){
   if (!holdDir) return;
-  tick(holdDir);
-  holdTimer = setTimeout(holdLoop, holdDelay(performance.now() - holdStart));
+  const ms = performance.now() - holdStart;
+  tick(holdDir, stepFor(ms));
+  holdTimer = setTimeout(holdLoop, holdDelay(ms));
 }
 function startHold(dir){
   if (S.state !== 'turn') return;
@@ -583,11 +716,12 @@ function applyStatic(){
     if (k === 'back') { n.textContent = T('back'); return; }
     n.textContent = T(k);
   });
+  document.querySelectorAll('[data-tl]').forEach(n => n.setAttribute('aria-label', T(n.getAttribute('data-tl'))));
   el.soundSw.querySelector('#sound-lbl').textContent = S.soundOn ? T('soundOn') : T('soundOff');
 }
 function render(){
   const st = S.state;
-  el.score.textContent = T('score', { n: S.tuned, k: S.streak });
+  el.score.textContent = T('score', { l: S.level, m: LEVELS.length, n: S.tuned, k: S.streak });
   // chips
   const order = ['name', 'read', 'turn'];
   const cur = st === 'between' ? 2 : order.indexOf(st);
@@ -595,10 +729,11 @@ function render(){
     '<span class="chip' + (i === cur ? ' on' : (i < cur ? ' past' : '')) + '">' + (i + 1) + ' · ' + esc(T(k)) + '</span>').join('');
   // prompt + hint
   const p = st === 'name' ? 'p1' : st === 'read' ? 'p2' : st === 'turn' ? 'p3' : 'p4';
-  el.prompt.textContent = T(p);
-  el.hint.textContent = st === 'name' ? (S.phase === 1 ? T('h1a') : T('h1b')) : st === 'read' ? T('h2') : st === 'turn' ? T('h3') : '';
+  const far = !!S.round && S.round.steps > 0, y = S.round ? S.round.target : '';
+  el.prompt.textContent = T(p, { y });
+  el.hint.textContent = st === 'name' ? (S.phase === 1 ? T('h1a') : T('h1b')) : st === 'read' ? T(far ? 'h2n' : 'h2') : st === 'turn' ? T(far ? 'h3n' : 'h3', { y }) : '';
   // strings picture
-  const show = circleVisible();
+  const show = namesVisible();
   const th = [5.5, 4.5, 3.6, 2.8, 2.2, 1.6];
   let sh = '';
   for (let i = 0; i < 6; i++) {
@@ -610,7 +745,7 @@ function render(){
     sh += '<div class="srow' + (on ? ' on' : '') + '"><div class="sline' + (i < 3 ? ' wound' : '') + '" style="--th:' + th[i] + 'px"></div>' +
       '<div class="slot"><button type="button" class="' + cls + '" data-name="' + i + '"' + (canTap ? '' : ' disabled') + (show ? '' : ' tabindex="-1" aria-hidden="true"') + '>' + label + '</button></div></div>';
   }
-  el.strings.className = 'strings' + (show ? '' : ' nocircle');
+  el.strings.className = 'strings' + (show ? '' : ' nonames');
   el.strings.innerHTML = sh;
   // answers
   let ah = '';
@@ -620,14 +755,7 @@ function render(){
     }
   } else if (st === 'read') {
     ah = '<button type="button" class="ans" data-way="up">' + esc(T('up')) + '</button><button type="button" class="ans" data-way="down">' + esc(T('down')) + '</button>';
-  } else if (st === 'turn') {
-    ['up','down'].forEach(w => {
-      let c = 'ans';
-      if (S.wayPicked === w) c += (w === S.round.answer ? ' right' : ' wrong');
-      else if (w === S.round.answer && S.wayPicked) c += ' right';
-      ah += '<button type="button" class="' + c + '" disabled>' + esc(T(w)) + '</button>';
-    });
-  }
+  }   // while turning there are no answer buttons: the only controls are Tighten and Loosen
   el.answers.innerHTML = ah;
   el.feedback.className = 'feedback ' + S.fbClass;
   el.feedback.textContent = S.fb;
@@ -639,8 +767,9 @@ function render(){
   el.soundSw.setAttribute('aria-checked', S.soundOn ? 'true' : 'false');
   el.soundSw.querySelector('#sound-lbl').textContent = S.soundOn ? T('soundOn') : T('soundOff');
   const p1 = S.phase === 1;
-  el.circleSw.setAttribute('aria-checked', circleVisible() ? 'true' : 'false');
-  el.circleSw.setAttribute('aria-disabled', p1 ? 'true' : 'false');
+  el.namesSw.setAttribute('aria-checked', namesVisible() ? 'true' : 'false');
+  el.namesSw.setAttribute('aria-disabled', p1 ? 'true' : 'false');
+  ringRender();
 }
 function focusFirst(){
   const b = el.answers.querySelector('button:not(:disabled)') || (S.state === 'name' && el.strings.querySelector('.bubble:not(:disabled)'));
@@ -663,9 +792,9 @@ el.soundSw.addEventListener('click', () => {
   else ensureCtx();
   render();
 });
-el.circleSw.addEventListener('click', () => {
-  if (S.phase === 1) return;                               // the circle is part of Phase 1
-  S.showCircle = !S.showCircle;
+el.namesSw.addEventListener('click', () => {
+  if (S.phase === 1) return;                               // the names are part of Phase 1
+  S.showNames = !S.showNames;
   render();
 });
 [el.pegUp, el.pegDown].forEach(b => {
@@ -675,22 +804,23 @@ el.circleSw.addEventListener('click', () => {
 ['pointerup','pointercancel'].forEach(ev => window.addEventListener(ev, stopHold));
 window.addEventListener('blur', stopHold);
 
-/* Keyboard — keydown only. Left/Right turn the peg; holding a key keeps turning
-   (the browser's key repeat, paced by the same speed-up as the buttons). Every
-   other repeat is ignored. Ignored while focus is in an input. */
+/* Keyboard — keydown only. Left turns the peg counterclockwise (tighten, note up), Right
+   clockwise (loosen, note down), like the picture. Holding a key keeps turning (the browser's
+   key repeat, paced by the same speed-up as the buttons). Every other repeat is ignored.
+   Ignored while focus is in an input. */
 function onKey(e){
   const tg = e.target, tag = tg && tg.tagName;
   if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (tg && tg.isContentEditable)) return;
   if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
   e.preventDefault();
   if (S.state !== 'turn') return;
-  const dir = e.key === 'ArrowRight' ? 1 : -1, now = performance.now();
+  const dir = e.key === 'ArrowLeft' ? 1 : -1, now = performance.now();
   if (!e.repeat || dir !== keyDir || now - keyLast > 700) { keyStart = now; }
   keyDir = dir; keyLast = now;
   ensureCtx();
   if (e.repeat && now - (onKey.last || 0) < holdDelay(now - keyStart) - 10) return;
   onKey.last = now;
-  tick(dir);
+  tick(dir, e.repeat ? stepFor(now - keyStart) : TICK_CENTS);
 }
 let keysOn = false;
 function keysAttach(){ if (!keysOn) { document.addEventListener('keydown', onKey); keysOn = true; } }
@@ -728,8 +858,10 @@ $('back-link').addEventListener('click', e => {
 });
 
 /* A hook for tools/smoke.mjs and the proof tool; reads only. */
-window.TuningSim = { S, DEFAULTS, makeRound, nearestNote, STRINGS, MIN_DETUNE, MAX_DETUNE, tick, newRound };
+window.TuningSim = { S, DEFAULTS, LEVELS, makeRound, nearestNote, ringMove, STRINGS, MIN_DETUNE, MAX_DETUNE, tick, newRound,
+  setLevel(n){ S.level = clampLevel(n); S.clean = 0; return S.level; } };   // setLevel does not save
 
+ringInit();
 ticksInit();
 applyStatic();
 keysAttach();

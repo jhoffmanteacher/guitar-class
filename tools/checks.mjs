@@ -5583,24 +5583,30 @@ function checkPrecacheCoverage(src) {
    mic). The round logic itself is run by tools/tuning-sim-proof.mjs (1,000
    rounds), which is NOT part of this file. */
 function checkTuningSim() {
-  head('1cp. Tuning Simulator: defaults and the no-mic rule are pinned');
+  head('1cp. Tuning Simulator: defaults, levels and the no-mic rule are pinned');
   let src;
   try { src = readFileSync(join(ROOT, 'tuning-sim.html'), 'utf8'); }
   catch { err('tuning-sim.html is missing'); problems++; return; }
   const code = src.replace(/<!--[\s\S]*?-->/g, '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:\\'"`])\/\/[^\n]*/g, '$1');
   let bad = 0;
   const m = code.match(/const DEFAULTS = \{([^}]*)\};/);
-  const want = 'soundOn: true, circleShownPhase1: true, circleShownPhase2: false';
+  const want = 'soundOn: true, namesShownPhase1: true, namesShownPhase2: false';
   if (!m || m[1].trim().replace(/\s+/g, ' ') !== want) { err(`tuning-sim.html DEFAULTS must be { ${want} } (found: ${m ? m[1].trim() : 'nothing'})`); problems++; bad++; }
   if (/getUserMedia|mediaDevices/.test(code)) { err('tuning-sim.html asks for the mic (getUserMedia / mediaDevices) — it must never'); problems++; bad++; }
   if (/<script\b[^>]*\bsrc=/i.test(code)) { err('tuning-sim.html loads a script file — it is standalone (no app.js, no tuner.js, no i18n.js)'); problems++; bad++; }
   if (!/S\.soundOn\s*=\s*DEFAULTS\.soundOn/.test(code) && !/soundOn:\s*DEFAULTS\.soundOn/.test(code)) { err('tuning-sim.html does not start its sound switch from DEFAULTS.soundOn'); problems++; bad++; }
-  if (!/S\.showCircle\s*=\s*S\.phase === 1 \? DEFAULTS\.circleShownPhase1 : DEFAULTS\.circleShownPhase2/.test(code)) { err('tuning-sim.html does not start "Show the circle" from the two DEFAULTS'); problems++; bad++; }
+  if (!/S\.showNames\s*=\s*S\.phase === 1 \? DEFAULTS\.namesShownPhase1 : DEFAULTS\.namesShownPhase2/.test(code)) { err('tuning-sim.html does not start "Show the string names" from the two DEFAULTS'); problems++; bad++; }
+  /* 2026-11-07: the levels (how many notes off a string can start: 0, up to 2, 4, 5 — a 4th at the top; a 5th is a 4th the other way round the circle),
+     and a first visit starts on level 1. Games page: a card that goes to this page. */
+  if (!/const LEVELS = \[ \{ min:0, max:0 \}, \{ min:1, max:2 \}, \{ min:2, max:4 \}, \{ min:3, max:5 \} \];/.test(code)) { err('tuning-sim.html LEVELS must be 0, 1-2, 2-4 and 3-5 notes off (a 4th at the top)'); problems++; bad++; }
+  if (!/function clampLevel\(n\)\{[^}]*\? n : 1;/.test(code) || !/S\.level\s*=\s*loadLevel\(\)/.test(code)) { err('tuning-sim.html must start a first visit on level 1 (clampLevel falls back to 1; S.level = loadLevel())'); problems++; bad++; }
+  let coachSrc = ''; try { coachSrc = readFileSync(join(ROOT, 'coach.js'), 'utf8'); } catch {}
+  if (!/key:'tuningsim'[^}]*href:'tuning-sim\.html'/.test(coachSrc)) { err("coach.js GAMES_META has no { key:'tuningsim', …, href:'tuning-sim.html' } card — the Tuning Simulator lives on the Games page for now"); problems++; bad++; }
   let idx = ''; try { idx = readFileSync(join(ROOT, 'index.html'), 'utf8').replace(/<!--[\s\S]*?-->/g, ''); } catch {}
   if (!/<a\b[^>]*href="tuning-sim\.html"[^>]*data-i18n="tools\.tuningSim"/.test(idx)) { err('index.html has no tuner-popup link to tuning-sim.html with data-i18n="tools.tuningSim"'); problems++; bad++; }
   let i18n = ''; try { i18n = readFileSync(join(ROOT, 'i18n.js'), 'utf8'); } catch {}
   if (!/'tools\.tuningSim':\s*\{\s*en:\s*'[^']+',\s*es:\s*'[^']+'\s*\}/.test(i18n)) { err("i18n.js has no 'tools.tuningSim' in both en and es"); problems++; bad++; }
-  if (bad === 0) ok('tuning-sim.html: defaults pinned (sound on; circle shown in Phase 1, off in Phase 2), no mic, no script files, linked from the Tuner popup with its en + es label');
+  if (bad === 0) ok('tuning-sim.html: defaults pinned (sound on; string names shown in Phase 1, off in Phase 2; level 1 first; the four levels), no mic, no script files, linked from the Tuner popup with its en + es label, and a card on the Games page');
 }
 
 /* Journey pages are referenced by ~30 hand-typed 'tabs/*.html' strings across
