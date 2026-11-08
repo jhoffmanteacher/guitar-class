@@ -20,7 +20,12 @@
        own letter AND the sticky green band (the same +-8 in / +-11 out numbers as
        tuner.js) from every start, and never starts already done
    and, for all 132 pairs of different notes on the circle, that a pair 1-5 steps
-   apart gives the same way as the pitch (the higher note is "up").
+   apart gives the same way as the pitch (the higher note is "up"). The drawing:
+   ringPt puts C at the top and each next note 30 degrees COUNTERCLOCKWISE on the
+   screen (up = the way the peg turns to tighten), and for every pair the arrow
+   ringArc draws turns counterclockwise for Up and clockwise for Down, through
+   exactly the steps ringMove counts, round the ring's centre (the SVG arc worked out the way the SVG spec
+   does, endpoint to centre). tools/smoke.mjs measures the arrow in a real browser.
 
    It also checks that what the page copies is still what the site says:
      - STRINGS matches STRING_TARGETS in tuner.js (all six frequencies)
@@ -29,7 +34,8 @@
      node tools/tuning-sim-proof.mjs                 prove tuning-sim.html
      node tools/tuning-sim-proof.mjs --file <path>   prove another copy (break-it runs)
 
-   Not part of checks.mjs (it is a tool); checks.mjs 1cp pins the defaults. */
+   Not part of checks.mjs (it is a tool); checks.mjs 1cp pins the defaults and the
+   direction words, and runs ringPt / ringArc itself. */
 import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -47,7 +53,7 @@ const m = html.match(/\/\* ROUND-LOGIC-START \*\/([\s\S]*?)\/\* ROUND-LOGIC-END 
 if (!m) { console.error('tuning-sim-proof: no ROUND-LOGIC block in ' + FILE); process.exit(1); }
 // The block is plain `const`s and functions; return them from one expression.
 const ctx = vm.createContext({});
-const L = vm.runInContext(`(function(){ ${m[1]}\n return { NOTES, STRINGS, MIN_DETUNE, MAX_DETUNE, LEVELS, JITTER, CLEAN_TO_LEVEL_UP, TICK_CENTS, PEG_LIMIT, STREAK_TO_PHASE2, DONE_MS, DEFAULTS, nearestNote, centsToFreq, makeRound, rightWay, ringMove, stickyInTune }; })()`, ctx);
+const L = vm.runInContext(`(function(){ ${m[1]}\n return { NOTES, STRINGS, MIN_DETUNE, MAX_DETUNE, LEVELS, JITTER, CLEAN_TO_LEVEL_UP, TICK_CENTS, PEG_LIMIT, STREAK_TO_PHASE2, DONE_MS, DEFAULTS, nearestNote, centsToFreq, makeRound, rightWay, ringMove, stickyInTune, RC, RA, ringPt, ringArc }; })()`, ctx);
 
 const mulberry = a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 
@@ -109,6 +115,34 @@ for (let a = 0; a < 12; a++) for (let b = 0; b < 12; b++) {
 }
 console.log(`circle of notes: ${pairs} of 120 pairs 1-5 steps apart give the right way and count (the 12 pairs 6 apart are never drawn)`);
 must(pairs === 120, `only ${pairs} of 120 note pairs were right on the circle`);
+
+/* The drawing's direction. Screen angle of a point: counterclockwise on the screen is positive (y points down in SVG). */
+const scrAng = ([x, y]) => Math.atan2(L.RC - y, x - L.RC) * 180 / Math.PI;
+const norm = d => ((d % 360) + 540) % 360 - 180;
+let ccw = 0;
+for (let i = 0; i < 12; i++) { const step = norm(scrAng(L.ringPt((i + 1) % 12, 88)) - scrAng(L.ringPt(i, 88))); if (Math.abs(step - 30) < 0.01) ccw++; else fails.push(`ringPt: ${L.NOTES[(i + 1) % 12]} sits ${step.toFixed(1)} degrees from ${L.NOTES[i]} (expected +30, counterclockwise)`); }
+const top = L.ringPt(0, 88);
+must(Math.abs(top[0] - L.RC) < 0.01 && top[1] < L.RC, `ringPt: C is not at the top (${top})`);
+/* An SVG arc "M x1 y1 A r r 0 large sweep x2 y2", turned into a signed screen angle (counterclockwise positive), the way SVG 1.1 F.6.5 does it. */
+function arcTurn(d) {
+  const n = d.match(/-?[\d.]+/g).map(Number), [x1, y1, r, , , fA, fS, x2, y2] = n;
+  const hx = (x1 - x2) / 2, hy = (y1 - y2) / 2, h2 = hx * hx + hy * hy;
+  const k = (fA !== fS ? 1 : -1) * Math.sqrt(Math.max(0, (r * r - h2) / h2));
+  const cx = k * hy + (x1 + x2) / 2, cy = -k * hx + (y1 + y2) / 2;
+  let dt = Math.atan2(y2 - cy, x2 - cx) - Math.atan2(y1 - cy, x1 - cx);
+  if (!fS && dt > 0) dt -= 2 * Math.PI; if (fS && dt < 0) dt += 2 * Math.PI;
+  return { turn: -dt * 180 / Math.PI, cx, cy };   // SVG angles grow clockwise on the screen
+}
+let arcs = 0;
+for (let a = 0; a < 12; a++) for (let b = 0; b < 12; b++) {
+  const mv = L.ringMove(L.NOTES[a], L.NOTES[b]);
+  if (mv.n < 1 || mv.n > 5) continue;
+  const { turn, cx, cy } = arcTurn(L.ringArc(a, b, mv.way === 'up')), want = (mv.way === 'up' ? 1 : -1) * mv.n * 30;
+  const centred = Math.hypot(cx - L.RC, cy - L.RC) < 1;   // round the ring's own centre, not bulging the other way
+  if (centred && Math.abs(turn - want) < 1) arcs++; else fails.push(`ringArc ${L.NOTES[a]}->${L.NOTES[b]} (${mv.n} ${mv.way}): the arrow turns ${turn.toFixed(1)} degrees on screen round (${cx.toFixed(1)}, ${cy.toFixed(1)}), expected ${want} (+ = counterclockwise) round the ring's centre (${L.RC}, ${L.RC})`);
+}
+console.log(`the drawing: ${ccw} of 12 notes sit 30 degrees counterclockwise of the one before, C at the top; ${arcs} of 120 arrows turn counterclockwise for Up and clockwise for Down through the right number of steps`);
+must(ccw === 12 && arcs === 120, `the circle is drawn the wrong way round (${ccw} of 12 notes, ${arcs} of 120 arrows)`);
 
 // Pinned numbers from the work order.
 must(L.MIN_DETUNE === 12 && L.MAX_DETUNE === 45, `detune range is ${L.MIN_DETUNE}..${L.MAX_DETUNE}, the work order says 12..45`);

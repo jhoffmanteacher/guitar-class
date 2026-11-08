@@ -321,6 +321,15 @@ function makeRound(prev, rnd, level){
 /* Sticky in-tune band, same numbers as tuner.js: enter green inside +-8 cents,
    leave only outside +-11. */
 function stickyInTune(was, shown){ return was ? Math.abs(shown) <= 11 : Math.abs(shown) < 8; }
+/* Where the circle draws note i (0 = C) in the 224x224 ring: C at the top, each next note COUNTERCLOCKWISE
+   (going up = the way the peg turns to tighten). The proof tool and checks.mjs 1cp check the direction. */
+const RC = 112, RR = 88, RA = 58;
+function ringPt(i, r){ const a = -i * Math.PI / 6; return [RC + r * Math.sin(a), RC - r * Math.cos(a)]; }
+/* The arrow from note a to note b, the short way: SVG sweep flag 0 turns counterclockwise on screen (up), 1 clockwise (down). */
+function ringArc(a, b, up){
+  const [x1, y1] = ringPt(a, RA), [x2, y2] = ringPt(b, RA);
+  return 'M' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' A' + RA + ' ' + RA + ' 0 0 ' + (up ? 0 : 1) + ' ' + x2.toFixed(1) + ' ' + y2.toFixed(1);
+}
 /* ROUND-LOGIC-END */
 
 (function(){
@@ -532,9 +541,7 @@ function followPitch(){
    The 12 notes round a ring. Going UP is counterclockwise, the same way the peg turns to tighten.
    Purple = the string's note, amber = the note the tuner shows now; green = on the string's note AND in tune (done).
    After the student answers Up or Down, an arrow shows the short way round from where the tuner started. */
-const RC = 112, RR = 88, RA = 58;
 const ringNodes = [];
-function ringPt(i, r){ const a = -i * Math.PI / 6; return [RC + r * Math.sin(a), RC - r * Math.cos(a)]; }
 function ringInit(){
   let h = '<defs><marker id="ahead" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="ahead"/></marker></defs>';
   h += '<circle class="rguide" cx="' + RC + '" cy="' + RC + '" r="' + RR + '"/>';
@@ -550,9 +557,8 @@ function ringRender(){
   ringNodes.forEach(g => { const n = g.getAttribute('data-note'); g.classList.toggle('tgt', n === tgt); g.classList.toggle('cur', n === cur); g.classList.toggle('done', n === tgt && n === cur && S.disp.inTune); });
   const arc = $('rarc'), c1 = $('rc1'), c2 = $('rc2');
   if (known && r.steps > 0 && (S.state === 'turn' || S.state === 'between')) {
-    const a = NOTES.indexOf(r.letter), b = NOTES.indexOf(r.target), up = r.answer === 'up';
-    const [x1, y1] = ringPt(a, RA), [x2, y2] = ringPt(b, RA);
-    arc.setAttribute('d', 'M' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' A' + RA + ' ' + RA + ' 0 0 ' + (up ? 0 : 1) + ' ' + x2.toFixed(1) + ' ' + y2.toFixed(1));
+    const up = r.answer === 'up';
+    arc.setAttribute('d', ringArc(NOTES.indexOf(r.letter), NOTES.indexOf(r.target), up));
     arc.setAttribute('marker-end', 'url(#ahead)');
     c1.textContent = stepsText(r.steps); c2.textContent = T(up ? 'ringUp' : 'ringDown');
   } else {
