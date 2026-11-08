@@ -411,11 +411,18 @@ const PHASE2_KEY = 'gc-tuningsim-phase2', LEVEL_KEY = 'gc-tuningsim-level';
 function loadPhase2(){ try { return localStorage.getItem(PHASE2_KEY) === '1'; } catch(e){ return false; } }
 function savePhase2(){ try { localStorage.setItem(PHASE2_KEY, '1'); } catch(e){} }
 function clampLevel(n){ n = Math.round(+n); return n >= 1 && n <= LEVELS.length ? n : 1; }
+/* ?level=4 lets a teacher look at a level. Only a whole level 1-4 counts; anything else
+   (?level=9, ?level=abc) falls through to the saved level. */
 function loadLevel(){
-  try { const q = new URLSearchParams(location.search).get('level'); if (q) return clampLevel(q); } catch(e){}   // ?level=4 lets a teacher look at a level
+  let q = NaN;
+  try { q = Math.round(+new URLSearchParams(location.search).get('level')); } catch(e){}
+  if (q >= 1 && q <= LEVELS.length) return q;
   try { return clampLevel(localStorage.getItem(LEVEL_KEY)); } catch(e){ return 1; }
 }
-function saveLevel(){ try { localStorage.setItem(LEVEL_KEY, String(S.level)); } catch(e){} }
+/* Never lowers the saved level: a ?level=2 look must not undo a student's level 4. */
+function saveLevel(){
+  try { if (S.level > clampLevel(localStorage.getItem(LEVEL_KEY))) localStorage.setItem(LEVEL_KEY, String(S.level)); } catch(e){}
+}
 
 /* ── state ── */
 const S = {
