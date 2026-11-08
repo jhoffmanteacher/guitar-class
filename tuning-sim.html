@@ -195,7 +195,7 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
   </header>
 
   <main class="stage">
-    <section class="left" aria-label="Tuner">
+    <section class="left" aria-label="Tuner" data-tl="secTuner">
       <div class="snark" id="snark" data-on="0">
         <div class="snark-top"><span class="led" aria-hidden="true"></span><span class="snark-hz notranslate" id="hz" translate="no"></span></div>
         <div class="lcd" id="lcd" data-mode="off">
@@ -232,7 +232,7 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
       </div>
     </section>
 
-    <section class="right" aria-label="Question">
+    <section class="right" aria-label="Question" data-tl="secQuestion">
       <div class="chips" id="chips"></div>
       <h2 id="prompt"></h2>
       <p class="hint" id="hint"></p>
@@ -359,7 +359,7 @@ const I = {
     wayWrong:'Other way. ',
     done:'The {a} string is in tune.',
     levelUp:'Level {l}. Now a string can start up to {m} notes away from its own note. Use the circle to choose Up or Down.',
-    ringLabel:'Circle of notes', legStr:'string', legTun:'tuner shows',
+    ringLabel:'Circle of notes', legStr:'string', legTun:'tuner shows', secTuner:'Tuner', secQuestion:'Question',
     step1:'{n} step', stepN:'{n} steps', ringUp:'↺ up', ringDown:'↻ down'
   },
   es: {
@@ -392,7 +392,7 @@ const I = {
     wayWrong:'Al revés. ',
     done:'La cuerda {a} está afinada.',
     levelUp:'Nivel {l}. Ahora una cuerda puede empezar a hasta {m} notas de su propia nota. Usa el círculo para elegir Sube o Baja.',
-    ringLabel:'Círculo de notas', legStr:'cuerda', legTun:'el afinador muestra',
+    ringLabel:'Círculo de notas', legStr:'cuerda', legTun:'el afinador muestra', secTuner:'Afinador', secQuestion:'Pregunta',
     step1:'{n} paso', stepN:'{n} pasos', ringUp:'↺ sube', ringDown:'↻ baja'
   }
 };
