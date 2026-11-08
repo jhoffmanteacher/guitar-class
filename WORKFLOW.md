@@ -146,9 +146,13 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
   line now says so); the smoke Play-clicks slider gap (`smoke.mjs` drags the card slider to 77; with `strumOpenMetro` forced
   to 60 it reports 7 failing steps); check `1d` flags a shared step before a path step (reviewed by `site-reviewer`, 2 minor
   points fixed). The coach.js fixes (Stop hint, 10 s of play, 130 cap) were reviewed by `site-reviewer-deep` the same day and landed 2026-11-07. What is left:
-  - *Product call (deep review, 2026-11-07):* a Stopped game's headline, tempo advice and breakdown still count the changes never reached as
-    misses: 4 right then Stop reads "4 of 15 — this speed is too fast for now. Drop 5 BPM", and the breakdown says "11 no strum heard".
-    Only the strum-firmer hint leaves them out. Also: the song-switch setup readout says 135 or 140 BPM when round 1 plays 130.
+  - *DECIDED 2026-11-07 (Jonathan), not built yet:* after a Stop, if every change the student reached was right, the done screen must NOT say
+    "this speed is too fast for now" or "Drop 5 BPM" (today: 4 right then Stop reads "4 of 15 — this speed is too fast for now. Drop 5 BPM", and the
+    breakdown says "11 no strum heard"). The changes never reached (`cc.unreached`, including the 4 s reach window) are not "not heard" there either.
+    It is a ccRenderDone change in coach.js: always Reviewed. Build it AFTER the coach-open branch (gridOffset cap + top-tempo advice) has landed:
+    both edit the done screen. Needs a Spanish twin for any new line. Also to fix in the same pass: the song-switch SETUP readout and slider show the
+    tempo the student picked (135 or 140 BPM, `cc-bpm-readout`, slider max `CC_BPM_MAX`) but round 1 plays at most 130 (`ccLadderBpms` clamps the first
+    round to 130, so rounds are 130/135/140); clamp the readout and slider max to 130 when the loop is a song switch.
   - *coach.js detection (needs an xhigh review):* at 10 BPM one stray sound moves `gridOffset` by up to 0.73 s
     (`ccLoop`, `cc.gridOffset += dev * 0.25`, uncapped; 123 ms at 60 BPM). Cap the step (for example ±60 ms).
   - *Power Chord Switch UX:* no Stop button during the count-in (24 s per round at 10 BPM); the done-screen advice says
