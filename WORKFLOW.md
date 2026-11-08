@@ -158,6 +158,15 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
     shows "Too low — tighten the peg" (the answer); Name the Power Chord resets its round when the tab is hidden;
     `styles.css` `.ca-paths-grid` adds a 760px breakpoint; two devices can save different path picks.
 
+- [ ] **2026-11-07 — `tools/smoke.mjs` hangs and may freeze Jonathan's own Chrome.** Two runs of
+  `node tools/smoke.mjs --baseline origin/main` in the `guitar-class-ratio` worktree never finished: the first sat for about 4 hours
+  after printing "walking origin/main for comparison" (headless Chrome 157, idle), the second sat in the first walk; Jonathan had to
+  force quit Chrome in Activity Manager. Earlier the same day a run in another worktree finished clean (0 errors, 36 sets, 3163 handlers).
+  Not the profile or the port (`mkdtempSync` profile, free port per run) and not machine load (load average about 3 on 8 cores). Same
+  family as the 2026-11-04 hang. Decided 2026-11-07 (Jonathan): the ratio change 1.8 / 2.19 shipped WITHOUT a smoke run (check 1ck runs the real
+  `ccLoop` around both thresholds; the deep review was clean). Next time: add a hard time limit to `smoke.mjs` (a watchdog that closes the
+  browser and exits non-zero with the step it was on) and have it print the step it is on, so a hang names itself; run it only with Chrome closed.
+
 - [ ] **2026-11-02 — `tools/smoke.mjs` flakes after its page reload (cause not
   found).** On this Mac, about 4 of 9 runs on 2026-11-02 reported errors that the
   baseline did not, all right after the Power Chord walk's `Page.navigate` reload:
