@@ -5045,7 +5045,7 @@ function micEvalStrumHits(frames, rule, ratio, hfRatio){
        change with |its beat - rel| <= win (inclusive), rel = played time -
        listenStart - gridOffset, win = half a beat, at least 220 ms, at most
        half the gap between changes; gridOffset moves a quarter of the way to
-       each strum's nearest beat, by at most PW_GRID_STEP_CAP_MS (from 0 each round), AFTER rel is taken. Every
+       each strum's nearest beat, by at most the take's gridStepCapMs (none saved = uncapped; from 0 each round), AFTER rel is taken. Every
        strum it heard is in `events` (played time), so the match and the
        gridOffset are run again here, and on the recording the window sits at
        due + gridOffset + micLatencyMs - map. With no map (fewer than 3 heard
@@ -5108,7 +5108,9 @@ function micEvalTakePw(pcm, R, d, deps){
   const med = a => pct(a, 0.5);
   const num = v => typeof v === 'number' && isFinite(v);
   const BPM_MIN = 10, BPM_MAX = 140, ROUNDS = 3, BPCS = [1, 2, 4];
-  const PW_GRID_STEP_CAP_MS = 60;   // coach.js CC_GRID_STEP_CAP_MS: the most the site's grid moves for one strum (checks.mjs 1ck pins the two equal)
+  /* The most the site's grid moved for one strum (coach.js CC_GRID_STEP_CAP_MS): saved in the take since 2026-11-07 (ccRecMeta gridStepCapMs). A take without it
+     was graded on the uncapped grid, so it is replayed uncapped, or the console would judge it on a grid the site did not use. */
+  const gridCap = num(d.gridStepCapMs) && d.gridStepCapMs > 0 && d.gridStepCapMs <= 10000 ? d.gridStepCapMs : Infinity;
   const endMs = s2ms(N);
   /* A change can fall long after the saved audio ends: the audio is capped at 30 s, and a 3-round song switch at
      BPM_MIN is 3 x (4 + 32 + 1) beats x 6 s = 666 s. Those are `dropped` (came after the recording stopped), not bad data. */
@@ -5207,7 +5209,7 @@ function micEvalTakePw(pcm, R, d, deps){
         if (!match[k]){ match[k] = { t: ev.t, goff }; break; }
       }
       const dev = rel - Math.round(rel / rd.beat) * rd.beat;
-      if (Math.abs(dev) < rd.beat * 0.5) goff += Math.max(-PW_GRID_STEP_CAP_MS, Math.min(PW_GRID_STEP_CAP_MS, dev * 0.25));
+      if (Math.abs(dev) < rd.beat * 0.5) goff += Math.max(-gridCap, Math.min(gridCap, dev * 0.25));
       timeline.push([ev.t, goff]);
     });
     return { match, timeline };

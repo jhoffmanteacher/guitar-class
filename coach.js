@@ -3116,10 +3116,12 @@ const CC_LADDER_ROUNDS = 3, CC_LADDER_STEP = 5, CC_LADDER_SLOTS = 8;
 const CC_POWER_AGAIN_STEP = 5;
 /* The most the beat grid may move for ONE strum (ms), in both games (2026-11-07). Each strum pulls the grid a quarter of the way to its
    nearest beat (ccLoop), so a stray sound (a cough, a chair) half a beat off the grid moved it by 0.125 of a beat: 749 ms at 10 BPM,
-   125 ms at 60. Capped, it moves 60 ms at most. Chosen by tools/grid-sim.mjs, which runs the real ccLoop on 28,800 scripted games
-   per version (Power Chord Switch 10-140 BPM, Change Up 40-140, every beat and every bar, 15 kinds of player): at 60 ms no change
-   of 316,800 that was graded right turned wrong at 30 BPM and above; 25 that a stray sound had made wrong turned right. 50 ms and
-   under turned some right changes wrong. The console's replay (teacher.js PW_GRID_STEP_CAP_MS) must use the same number: 1ck pins both. */
+   125 ms at 60. Capped, it moves 60 ms at most. Chosen with tools/grid-sim.mjs, which runs the real ccLoop on 21,888 scripted games per
+   version (Power Chord Switch 10-140 BPM, Change Up 40-140, every beat and every bar, 19 kinds of player; 240,768 graded changes). No cap
+   leaves all grading alone. At 60 ms and 30 BPM and above: 72 changes that were graded wrong (a wrong chord or a miss, nearly all because a
+   stray sound had pulled the grid off) turned right, and 4 that were right turned wrong (all from a very loose player, 0.2 beat of spread,
+   as the grid catches up more slowly). 100 ms: 22 and 0. 40 ms and under: more of both. 60 has the best balance. The console's replay
+   follows the cap each take saves (gridStepCapMs; a take without it is replayed uncapped), and 1ck pins the number. */
 const CC_GRID_STEP_CAP_MS = 60;
 /* The three round tempos. The first round's tempo is the base, but never above CC_BPM_MAX minus two steps (130): with the old 15 step, a
    base of 125 gave rounds 125 / 140 / 140, and "each round faster" was not true. */
@@ -3676,6 +3678,7 @@ function ccRecMeta(complete){
     fields: { game: 'pw', complete: complete === true, progression: cc.chords.join('-'), song: progDef.song || null, ladder: !!cc.ladder,
               bpm: ccStartBpms()[0], stageBpms: ccStartBpms(), bpc: cc.bpc, eventTimes: 'played (arrival - micLatencyMs)',
               onsetRatio: CC_POWER_ONSET_RATIO, hfRatio: CC_POWER_HF_RATIO,
+              gridStepCapMs: CC_GRID_STEP_CAP_MS,   // the console replays the grid with this cap; a take without it was graded on the uncapped grid
               changeReadings: 'per change: null = no strum in its window; [] = a strum but no pitch could be read; else the midi readings its chord check used (under 3 passes on timing alone)' },
     expected: cc.changes.map((c, i) => Object.assign({ i, t: c.t, from: c.from, to: c.to, stage: c.stage == null ? 0 : c.stage, bpm: c.bpm, verdict: c.result,
       readings: c.readings ? c.readings.map(r2) : null }, (cc.retimedStages || []).indexOf(c.stage == null ? 0 : c.stage) >= 0 ? { retimed: true } : {})),

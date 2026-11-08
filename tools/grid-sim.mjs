@@ -7,6 +7,7 @@
              loose, late, early, rushing, dragging, with and without stray sounds); "right" is the true answer (the student plays the
              right chord on the beat); counts changes that turned wrong or right, at 30 BPM and above and below it;
      Part 3  does the grid still follow a player who is really late or drifting.
+   "Newly wrong" = graded right by the old rule, not right by the capped one; "newly right" = the reverse (a wrong chord or a miss that is now right).
    Not part of tools/checks.mjs (minutes, not seconds); checks.mjs 1ck pins the chosen number and runs the real ccLoop on a few frames.
    The old rule is made by rewriting the capped line in a copy of coach.js in memory; nothing on disk changes. */
 import vm from 'node:vm';
@@ -126,8 +127,8 @@ function strumsFor(rate, bpm, opt, seed) {
   const out = [];
   for (let b = 0; b < n; b++) {
     let t = b * beatMs * (1 + (opt.drift || 0)) + (opt.late || 0) + (opt.lateBeats || 0) * beatMs + gauss(r) * ((opt.sigma || 0) + (opt.sigmaBeats || 0) * beatMs);
-    // keep a strum at most 0.45 beat from its beat (a student who is further off is playing another beat)
-    const lim = 0.45 * beatMs; const dev = t - b * beatMs; if (Math.abs(dev) > lim && !opt.noClip) t = b * beatMs + Math.sign(dev) * lim;
+    // keep a strum at most opt.clip (default 0.45) beat from its beat (a student who is further off is playing another beat)
+    const lim = (opt.clip || 0.45) * beatMs; const dev = t - b * beatMs; if (Math.abs(dev) > lim && !opt.noClip) t = b * beatMs + Math.sign(dev) * lim;
     out.push({ tp: t, chordIdx: Math.floor(b / rate.bpc) });
   }
   return { out, r, beatMs, n };
@@ -146,6 +147,10 @@ const SCEN = [
   { name: 'late 0.35 beat + 3 strays', stray: 3, mk: (rate, bpm, s) => strumsFor(rate, bpm, { lateBeats: 0.35, sigmaBeats: 0.06 }, s) },
   { name: 'early 0.35 beat + 3 strays', stray: 3, mk: (rate, bpm, s) => strumsFor(rate, bpm, { lateBeats: -0.35, sigmaBeats: 0.06 }, s) },
   { name: 'loose (sd 0.15 beat) + 3 strays', stray: 3, mk: (rate, bpm, s) => strumsFor(rate, bpm, { sigmaBeats: 0.15 }, s) },
+  { name: 'late 0.40 beat, sd 0.05 (near half, clip .49)', mk: (rate, bpm, s) => strumsFor(rate, bpm, { lateBeats: 0.40, sigmaBeats: 0.05, clip: 0.49 }, s) },
+  { name: 'early 0.40 beat, sd 0.05 (near half, clip .49)', mk: (rate, bpm, s) => strumsFor(rate, bpm, { lateBeats: -0.40, sigmaBeats: 0.05, clip: 0.49 }, s) },
+  { name: 'late 0.30 beat, sd 0.08 + 3 strays (clip .49)', stray: 3, mk: (rate, bpm, s) => strumsFor(rate, bpm, { lateBeats: 0.30, sigmaBeats: 0.08, clip: 0.49 }, s) },
+  { name: 'loose sd 0.20 beat (clip .49)', mk: (rate, bpm, s) => strumsFor(rate, bpm, { sigmaBeats: 0.20, clip: 0.49 }, s) },
   { name: 'on time + 3 strays', stray: 3, mk: (rate, bpm, s) => strumsFor(rate, bpm, { sigma: 30 }, s) },
   { name: 'loose + 3 strays', stray: 3, mk: (rate, bpm, s) => strumsFor(rate, bpm, { sigma: 90 }, s) },
 ];
@@ -212,6 +217,7 @@ for (const M of MODES) for (const bpm of M.tempos) for (const rate of RATES) for
     const st = stats[c.cap]; let d = 0, reg = 0, imp = 0;
     for (let i = 0; i < o.res.length; i++) if (o.res[i] !== n.res[i]) { d++; if (o.res[i] === '+' && n.res[i] !== '+') reg++; else if (o.res[i] !== '+' && n.res[i] === '+') imp++; }
     if (bpm >= 30 && reg) { st.byScen = st.byScen || {}; const k = scen.name; st.byScen[k] = (st.byScen[k] || 0) + reg; }
+    if (bpm < 30) { st.lt30reg = (st.lt30reg || 0) + reg; st.lt30imp = (st.lt30imp || 0) + imp; }
     if (bpm >= 30) { st.reg = (st.reg || 0) + reg; st.imp = (st.imp || 0) + imp; st.other = (st.other || 0) + (d - reg - imp); }
     st.runs++; if (d) { st.diffRuns++; st.diffChanges += d; }
     if (bpm >= 30) { st.ge30Runs++; if (d) { st.ge30DiffRuns++; st.ge30DiffChanges += d; st.detail.push(`${M.mode === 'power' ? 'Power Chord Switch' : 'Change Up'} ${bpm} BPM ${rate.name} "${scen.name}" seed ${sd}: ${d} change(s) differ (old ${o.res} new ${n.res})`); } }
@@ -221,7 +227,7 @@ for (const M of MODES) for (const bpm of M.tempos) for (const rate of RATES) for
 console.log(`\nPART 2: ${games} scripted games per version (Power Chord Switch 10-140 BPM and Change Up 40-140 BPM, ${RATES.length} speeds, ${SCEN.length} scenarios, ${SEEDS} seeds each ; ${baselineChanges} graded changes in the old run; old: ${oldOk} right, ${oldMiss} missed)`);
 for (const c of newCs) {
   const s = stats[c.cap];
-  console.log(`cap ${c.cap} ms: >=30 BPM ${s.ge30DiffChanges} changes differ in ${s.ge30DiffRuns} of ${s.ge30Runs} games (${s.reg || 0} newly wrong, ${s.imp || 0} newly right, ${s.other || 0} wrong either way but differently) | <30 BPM ${s.lt30DiffChanges} changes differ in ${s.lt30DiffRuns} of ${s.lt30Runs} games`);
+  console.log(`cap ${c.cap} ms: >=30 BPM ${s.ge30DiffChanges} changes differ in ${s.ge30DiffRuns} of ${s.ge30Runs} games (${s.reg || 0} newly wrong, ${s.imp || 0} newly right, ${s.other || 0} wrong either way but differently) | <30 BPM ${s.lt30DiffChanges} changes differ in ${s.lt30DiffRuns} of ${s.lt30Runs} games (${s.lt30reg || 0} newly wrong, ${s.lt30imp || 0} newly right)`);
 }
 for (const c of newCs) { const s = stats[c.cap]; console.log(`cap ${c.cap}: newly wrong (>=30 BPM) by scenario: ` + JSON.stringify(s.byScen || {})); }
 for (const c of newCs) { const s = stats[c.cap]; if (s.lt30Detail && s.lt30Detail.length) { console.log(`\nBelow 30 BPM, cap ${c.cap} (first 8):`); s.lt30Detail.slice(0, 8).forEach(x => console.log('  ' + x)); } }

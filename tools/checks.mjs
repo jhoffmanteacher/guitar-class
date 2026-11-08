@@ -12394,23 +12394,24 @@ function checkCoachVerdicts() {
       if (!ccLoopSrc.includes(line)) flag(`1ck: ccLoop no longer chooses its strum ratios with exactly "${line}" (the game alone must decide; re-pin on purpose)`);
     /* The grid step cap (2026-11-07). Each strum ccLoop hears pulls the beat grid a quarter of the way to its nearest beat; uncapped, ONE stray sound
        half a beat off moved it by 749 ms at 10 BPM (125 ms at 60), so the highlight jumped and the "no strum by then" cut-off moved with it. It now moves
-       CC_GRID_STEP_CAP_MS (60) at most, in both games. 60 comes from tools/grid-sim.mjs (the real ccLoop on 28,800 scripted games per version; WORKFLOW.md,
-       "Grid step cap"): at 50 ms and under some changes graded right turned wrong. Here the real ccLoop is run: a stray sound just under half a beat off the
+       CC_GRID_STEP_CAP_MS (60) at most, in both games. 60 comes from tools/grid-sim.mjs (the real ccLoop on 21,888 scripted games per version; WORKFLOW.md,
+       "Grid step cap"): no cap leaves all grading alone; at 60 ms 72 wrong changes turned right and 4 right ones turned wrong. Here the real ccLoop is run: a stray sound just under half a beat off the
        grid, early and late, at several tempos and speeds in both games, must move the grid by min(cap, a quarter of its distance); a student really 150 ms late
        must still pull the grid to within 20 ms of that in 16 strums (a cap that is too small stops following a real player); one 300 ms late moves it exactly
        the cap on its first strum; and the console's replay (teacher.js PW_GRID_STEP_CAP_MS) uses the same number. */
     song.gridChecks = 0;
     const GRID_CAP = Number((cSrc2.match(/^const CC_GRID_STEP_CAP_MS = (\d+);/m) || [])[1]);
     if (GRID_CAP !== 60) flag(`1ck: CC_GRID_STEP_CAP_MS is ${GRID_CAP}, pinned 60 (re-pin on purpose, with a tools/grid-sim.mjs run recorded in WORKFLOW.md)`);
-    const tCap = Number((readFileSync(join(ROOT, 'teacher.js'), 'utf8').match(/const PW_GRID_STEP_CAP_MS = (\d+);/) || [])[1]);
-    if (tCap !== GRID_CAP) flag(`1ck: the console's replay caps the grid step at ${tCap} ms (teacher.js PW_GRID_STEP_CAP_MS), the site at ${GRID_CAP}: they must be equal or the console re-judges takes on a different grid`);
+    if (!/gridStepCapMs: CC_GRID_STEP_CAP_MS,/.test(jsFunctionBody(cSrc2, 'ccRecMeta') || '')) flag('1ck: ccRecMeta no longer saves "gridStepCapMs: CC_GRID_STEP_CAP_MS" in the take (the console replays the grid with it; a take without it is replayed uncapped)');
+    if (!/const gridCap = num\(d\.gridStepCapMs\) && d\.gridStepCapMs > 0 && d\.gridStepCapMs <= 10000 \? d\.gridStepCapMs : Infinity;/.test(readFileSync(join(ROOT, 'teacher.js'), 'utf8'))) flag('1ck: teacher.js micEvalTakePw no longer takes its grid cap from the take (d.gridStepCapMs, none = uncapped), or reads it another way (re-pin on purpose)');
     if (!/cc\.gridOffset \+= Math\.max\(-CC_GRID_STEP_CAP_MS, Math\.min\(CC_GRID_STEP_CAP_MS, dev \* 0\.25\)\);/.test(ccLoopSrc)) flag('1ck: ccLoop no longer moves the grid with exactly "cc.gridOffset += Math.max(-CC_GRID_STEP_CAP_MS, Math.min(CC_GRID_STEP_CAP_MS, dev * 0.25));" (the only place it moves; re-pin on purpose)');
     // the grid after each of these strums (played times in ms from the first beat), the real ccLoop, one frame per strum
-    const gridAfter = (mode, rate, bpm, played) => JSON.parse(run(`(function(){
-      const keep = { rf: coachReadFrame, an: coachAnalyser, hf: coachHfRms, at: coachOnsetAt, pn: performance.now };
+    const gridRun = (mode, rate, bpm, played, real) => JSON.parse(run(`(function(){
+      const keep = { rf: coachReadFrame, an: coachAnalyser, hf: coachHfRms, at: coachOnsetAt, pn: performance.now, pr: coachPitchReadings };
       try {
         micRec = null; setLang('en'); ccSetup(${JSON.stringify(mode)}); ccPickRate(${rate}); ccPickProg(1); cc.bpm = ${bpm}; ccPrepare(false); ccBeginStage();
-        cc.phase = 'play'; cc.listenStart = 0; cc.changes = []; cc.gridOffset = 0;
+        cc.phase = 'play'; cc.listenStart = 0; cc.gridOffset = 0; ${real ? '' : 'cc.changes = [];'}
+        coachPitchReadings = () => [];
         coachAnalyser = {}; coachHfRms = 0; const lat = coachMicLatencyMs(), out = [];
         for (const p of ${JSON.stringify(played)}){
           cc.smoothRms = 0.01; cc.smoothHf = 0; cc.lastOnsetT = -1e9;
@@ -12418,15 +12419,30 @@ function checkCoachVerdicts() {
           __ccLoop();
           out.push(cc.gridOffset);
         }
-        return JSON.stringify(out);
-      } finally { coachReadFrame = keep.rf; coachAnalyser = keep.an; coachHfRms = keep.hf; coachOnsetAt = keep.at; performance.now = keep.pn; micRec = null; cc = null; ccStop(); }
+        return JSON.stringify({ g: out, pend: cc.changes.filter(c => c.pend).length });
+      } finally { coachReadFrame = keep.rf; coachAnalyser = keep.an; coachHfRms = keep.hf; coachOnsetAt = keep.at; performance.now = keep.pn; coachPitchReadings = keep.pr; micRec = null; cc = null; ccStop(); }
     })()`));
+    const gridAfter = (mode, rate, bpm, played) => gridRun(mode, rate, bpm, played, false).g;
     for (const [mode, rate, bpm] of [['power', 2, 10], ['power', 2, 30], ['power', 2, 60], ['power', 2, 140], ['power', 0, 10], ['power', 0, 60], ['power', 0, 140], ['open', 2, 40], ['open', 2, 60], ['open', 2, 140], ['open', 0, 40], ['open', 0, 140]]) {
       const beatMs = 60000 / bpm;
       for (const sign of [1, -1]) {
         const p = sign * 0.49 * beatMs, want = sign * Math.min(GRID_CAP, 0.25 * Math.abs(p));
         const got = gridAfter(mode, rate, bpm, [p])[0];
         if (!(Math.abs(got - want) < 0.01)) flag(`1ck: ${mode === 'power' ? 'Power Chord Switch' : 'Change Up'} at ${bpm} BPM (speed ${rate}): one stray sound ${sign > 0 ? 'late' : 'early'} by ${Math.round(Math.abs(p))} ms moved the grid ${Math.round(got * 10) / 10} ms, expected ${Math.round(want * 10) / 10} (a quarter of the way, never more than ${GRID_CAP})`);
+        song.gridChecks++;
+      }
+    }
+    /* The same stray sound with the round's real changes open: a change whose window holds it TAKES it (pend), which is the common case at "every beat" (about
+       half of all stray sounds), and the grid must still move by the capped step, not the old one. (The first version of this block ran with no changes at all
+       and could not see a break in that path: a reviewer's mutant that gave the uncapped step back on a taken strum stayed green.) The change under test is
+       the one due at the beat nearest the stray: beat 3 at every beat (stray 0.49 beat before or after it), beat 4 at every bar. */
+    for (const [mode, rate, bpm, nearBeat] of [['power', 2, 10, 3], ['power', 2, 30, 3], ['power', 2, 60, 3], ['power', 0, 10, 4], ['power', 0, 30, 4], ['power', 0, 60, 4], ['open', 2, 40, 3], ['open', 2, 60, 3], ['open', 0, 40, 4], ['open', 0, 60, 4]]) {
+      const beatMs = 60000 / bpm;
+      for (const sign of [1, -1]) {
+        const p = (nearBeat + sign * 0.49) * beatMs, want = sign * Math.min(GRID_CAP, 0.25 * 0.49 * beatMs);
+        const r = gridRun(mode, rate, bpm, [p], true);
+        if (r.pend !== 1) flag(`1ck: ${mode === 'power' ? 'Power Chord Switch' : 'Change Up'} at ${bpm} BPM (speed ${rate}): the stray sound ${sign > 0 ? 'after' : 'before'} beat ${nearBeat} was not taken by the change due there (${r.pend} open checks), so this run does not test the path it exists for`);
+        if (!(Math.abs(r.g[0] - want) < 0.01)) flag(`1ck: ${mode === 'power' ? 'Power Chord Switch' : 'Change Up'} at ${bpm} BPM (speed ${rate}): a stray sound a change TOOK moved the grid ${Math.round(r.g[0] * 10) / 10} ms, expected ${Math.round(want * 10) / 10} (the cap applies to a taken strum too)`);
         song.gridChecks++;
       }
     }
@@ -12709,7 +12725,7 @@ function checkCoachVerdicts() {
     if (pk !== 'ccBest:F5-G5:beat') flag(`1ck: a pair's best-score key changed to "${pk}" (a student's saved bests would be lost)`);
     const pairPlan = JSON.parse(run(`JSON.stringify(ccRoundPlan(CC_POWER_PROGRESSIONS[1], CC_POWER_PROGRESSIONS[1].chords, CC_RATES[1]))`));
     if (pairPlan.slots !== 12 || pairPlan.ladder || pairPlan.rounds !== 1) flag(`1ck: a pair's round changed (${pairPlan.slots} slots at "Every 2 beats", expected 12, one round)`);
-    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, gridChecks: 28, hintChecks: 20, stopChecks: 32, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
+    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, gridChecks: 48, hintChecks: 20, stopChecks: 32, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
     for (const [k, n] of Object.entries(SONG_PIN)) if (song[k] !== n) flag(`1ck: ${song[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
     songCounts = song;
     run(`setLang('en'); cc = null; ccStop();`);
@@ -12718,7 +12734,7 @@ function checkCoachVerdicts() {
   for (const [k, n] of Object.entries(EXPECT)) {
     if (counts[k] !== n) flag(`1ca: rendered ${counts[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin EXPECT on purpose)`);
   }
-  if (bad === 0 && songCounts) { head('1ck. Power Chord Switch song switches: each activity is checked against its card and the three rounds are run'); ok(`${songCounts.songs} songs, ${songCounts.entries} switch activities (${songCounts.cardSwitches} distinct card switches, each once; Sweet Child's open A5 only next to C5/B5/E5, the fret-5 A5 only next to G5, same pitches as A5); the ladder run for every one (${songCounts.rounds} round changes: 60/65/70 BPM, 21 changes, the BPM buttons ${songCounts.nudges} times: only later rounds, 10..140, off in the last); ${songCounts.hints} "next:" hints (EN+ES) match the diagrams, ${songCounts.setups} setup and ${songCounts.dones} done screens never show the key "A5o", the computer never picks a song, best keys are per switch and the pair keys are unchanged; a saved take carries each change's pitch readings (${songCounts.readingChecks} of 21 changes read back: no strum null, strum with no pitch [], four readings rounded; grading unchanged); the real ccLoop run on scripted frames: Power Chord Switch grades a strum with its own ratios (1.8 / 2.19) and Change Up with the shared ones (1.4 / 1.7) — ${songCounts.ratioChecks} runs just below and above every threshold: Change Up as a pair and as the computer's pick at three speeds, and Power Chord Switch as a song switch (all three rounds), a pair and the computer's pick at three speeds, with a recording live and without; the two lines that choose the ratios are pinned by text; and the saved take records the ratios; the grid moves at most 60 ms for one strum in both games (${songCounts.gridChecks} real ccLoop runs: a stray sound just under half a beat early and late at 10 to 140 BPM and two speeds, a player 150 ms late still pulls it to within 20 ms in 16 strums, one 300 ms late moves it exactly 60, and the console's replay caps it at the same number); the done screen's "strum a little firmer" hint shows exactly when it is true (${songCounts.stopChecks} real games (the count-in's own callback at a faked clock, the real Stop: saved only after 10 s of play, across a song switch's rounds; "strum firmer" for strums the mic missed and not for changes never reached; the top song switch says 130), ${songCounts.hintChecks} renders, EN + ES: nothing heard, many heard, a single miss, a tie, mostly wrong chords, 85% and better, Change Up)`); }
+  if (bad === 0 && songCounts) { head('1ck. Power Chord Switch song switches: each activity is checked against its card and the three rounds are run'); ok(`${songCounts.songs} songs, ${songCounts.entries} switch activities (${songCounts.cardSwitches} distinct card switches, each once; Sweet Child's open A5 only next to C5/B5/E5, the fret-5 A5 only next to G5, same pitches as A5); the ladder run for every one (${songCounts.rounds} round changes: 60/65/70 BPM, 21 changes, the BPM buttons ${songCounts.nudges} times: only later rounds, 10..140, off in the last); ${songCounts.hints} "next:" hints (EN+ES) match the diagrams, ${songCounts.setups} setup and ${songCounts.dones} done screens never show the key "A5o", the computer never picks a song, best keys are per switch and the pair keys are unchanged; a saved take carries each change's pitch readings (${songCounts.readingChecks} of 21 changes read back: no strum null, strum with no pitch [], four readings rounded; grading unchanged); the real ccLoop run on scripted frames: Power Chord Switch grades a strum with its own ratios (2.2 / 2.67) and Change Up with the shared ones (1.4 / 1.7) — ${songCounts.ratioChecks} runs just below and above every threshold: Change Up as a pair and as the computer's pick at three speeds, and Power Chord Switch as a song switch (all three rounds), a pair and the computer's pick at three speeds, with a recording live and without; the two lines that choose the ratios are pinned by text; and the saved take records the ratios; the grid moves at most 60 ms for one strum in both games (${songCounts.gridChecks} real ccLoop runs: a stray sound just under half a beat early and late at 10 to 140 BPM and two speeds, with no change open and with the change due next TAKING it, a player 150 ms late still pulls it to within 20 ms in 16 strums, one 300 ms late moves it exactly 60, the take saves the cap and the console replays an older take, which has none, uncapped); the done screen's "strum a little firmer" hint shows exactly when it is true (${songCounts.stopChecks} real games (the count-in's own callback at a faked clock, the real Stop: saved only after 10 s of play, across a song switch's rounds; "strum firmer" for strums the mic missed and not for changes never reached; the top song switch says 130), ${songCounts.hintChecks} renders, EN + ES: nothing heard, many heard, a single miss, a tie, mostly wrong chords, 85% and better, Change Up)`); }
   if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwDraws} random draws all listed pairs (11 of 11 and both orders seen), the Again button replays the pair and Start draws, Start sticks in Change Up and not in Power Chord Switch (two columns that fit 657px), Every beat is the first speed button there, the live quiz keeps its 760px shell, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up; the way back to the chords is one \u25C0 Pick different chords button, first on the songs view and the done screen, run and found absent where it must be (${counts.pwBack} screens, EN + ES); tempo controls: setup −5 +5 and a 10..140 slider in steps of 5, the live change keeps the beat the student is on (re-anchored, exact on a fixed clock), holds 30..140, counts the round at its lowest tempo, moves a song switch's later rounds by the same amount, and the saved take says so (${counts.pwLive} assertions)`);
 }
 
@@ -12793,9 +12809,9 @@ function checkCoachVerdicts() {
    micEvalTake (Coach / Note Runner) is otherwise not run here: its rows were proved
    byte-identical by a differential when micEvalSignal was split out of it.
    ════════════════════════════════════════════════════════════════════ */
-const PW_EVAL_PIN = { takes: 18, rounds: 37, changes: 285, judged: 276, dropped: 9, agree: 188, 'detector-missed': 32, 'false-hit': 22, 'off-window': 15, 'silent-miss': 19,
-  mismatch: 1, gridOffsets: 276, farGridOffsets: 41, clickRounds: 29, noClickRounds: 8, siteCentred: 33, beepCentred: 3, extra: 31, htmlChecks: 5, hovers: 37, textRounds: 37, evaluateRun: 2, evalTakesLines: 4, crafted: 4,
-  whatIfTakes: 18, whatIfCandidates: 72, whatIfTruth: 8, whatIfRows: 43, dropNotes: 2, pitchTakes: 5, pitchNone: 13, pitchRight: 64, pitchTimingOnly: 39, pitchRows: 20, ratioRows: 17 };
+const PW_EVAL_PIN = { takes: 19, rounds: 38, changes: 300, judged: 291, dropped: 9, agree: 201, 'detector-missed': 33, 'false-hit': 22, 'off-window': 15, 'silent-miss': 20,
+  mismatch: 1, gridOffsets: 291, farGridOffsets: 50, clickRounds: 30, noClickRounds: 8, siteCentred: 34, beepCentred: 3, extra: 32, htmlChecks: 5, hovers: 38, textRounds: 38, evaluateRun: 2, evalTakesLines: 4, crafted: 4,
+  whatIfTakes: 19, whatIfCandidates: 76, whatIfTruth: 8, whatIfRows: 45, dropNotes: 2, pitchTakes: 5, pitchNone: 14, pitchRight: 64, pitchTimingOnly: 39, pitchRows: 20, ratioRows: 14 };
 async function checkPwTakeEvaluator() {
   head('1cl. Power Chord Switch takes: the evaluator is run on takes whose site verdicts come from ccLoop\'s own rule');
   let bad = 0;
