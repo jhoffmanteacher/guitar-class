@@ -3067,7 +3067,7 @@ window.addEventListener('gc-langchange', function(){
    the new bar, and does it ring like the new chord's notes (hedged, never
    a claimed chord name). Levels are the loop length: 2 chords back and
    forth → 3 → 4. Pass a round (≥85%) and it offers +10 BPM (Power Chord
-   Switch: +5, on its done screen's −5 / +5 row); best clean
+   Switch: +5, on its done screen's −5 / +5 row, not past the top tempo); best clean
    tempo per loop is remembered for the session.
    ════════════════════════════════════════════════════════════════════ */
 
@@ -4115,7 +4115,9 @@ function ccRenderDone(){
   let verdict, advice;
   if (r >= 0.85){
     verdict = '&#x1F31F; ' + t('games.cc.verdict.great', { ok, total });
-    advice = t(ccIsPower() ? 'games.pw.advice.great' : 'games.cc.advice.great');
+    /* Power Chord Switch: at the top tempo the "5 BPM faster" line is false (the row below cannot go up), so it says that instead
+       (2026-11-07). The test is the done row's own: the step up lands on the tempo just played. */
+    advice = t(ccIsPower() ? (ccDoneUpBpm() <= ccDonePlayedBpm() ? 'games.pw.advice.top' : 'games.pw.advice.great') : 'games.cc.advice.great');
     try {
       const k = ccBestKey(prog, cc.rateIdx);
       const best = parseInt(sessionStorage.getItem(k), 10) || 0;
@@ -4147,10 +4149,10 @@ function ccRenderDone(){
   /* A song switch: how each round went, at its own tempo. */
   /* Power Chord Switch (2026-11-05, Jonathan: the button should take more than one click and show the tempo): a −5 / +5 row
      with the tempo between, as on the setup screen, and one big "Again at N BPM" that plays it. The row opens on the tempo the
-     advice names (5 up after 85%, 5 down after under half, else the same); cc.nextBpm is set once per finished game (ccStart
+     advice names (5 up after 85% but not past the top, 5 down after under half, else the same); cc.nextBpm is set once per finished game (ccStart
      clears it), so drawing the screen again does not move it a second time. Change Up keeps its three buttons. */
   if (ccIsPower() && cc.nextBpm == null)
-    cc.nextBpm = Math.min(ccDoneMaxBpm(), Math.max(CC_POWER_BPM_MIN, (cc.ladder ? (cc.stageLog.length ? cc.stageLog[0].bpm : cc.bpm) : ccScoreBpm()) + (rec === 'up' ? CC_POWER_AGAIN_STEP : rec === 'down' ? -CC_POWER_AGAIN_STEP : 0)));
+    cc.nextBpm = Math.min(ccDoneMaxBpm(), Math.max(CC_POWER_BPM_MIN, ccDonePlayedBpm() + (rec === 'up' ? CC_POWER_AGAIN_STEP : rec === 'down' ? -CC_POWER_AGAIN_STEP : 0)));
   const actions = ccIsPower()
     ? `<div class="coach-bpm-row">
          <button type="button" class="tp-btn" onclick="ccDoneNudge(${-CC_POWER_AGAIN_STEP})">&#x2212;${CC_POWER_AGAIN_STEP}</button>
@@ -4188,6 +4190,11 @@ function ccDoneAgainText(){
 /* Power Chord Switch's done-screen −5 / +5: only moves the tempo shown; "Again" plays it. */
 /* The highest tempo the done row may show: a song switch's first round tops out two steps below CC_BPM_MAX (ccLadderBpms), so 135 would play as 130. */
 function ccDoneMaxBpm(){ return cc.ladder ? CC_BPM_MAX - (CC_LADDER_ROUNDS - 1) * CC_LADDER_STEP : CC_BPM_MAX; }
+/* The tempo the finished game was played at, which the done row starts from: a song switch's first round, a pair's lowest tempo. */
+function ccDonePlayedBpm(){ return cc.ladder ? (cc.stageLog.length ? cc.stageLog[0].bpm : cc.bpm) : ccScoreBpm(); }
+/* Where "Level up" would go: one step above the tempo played, but never above the top the row allows. When that is the tempo just
+   played, there is no step up to recommend. */
+function ccDoneUpBpm(){ return Math.min(ccDoneMaxBpm(), ccDonePlayedBpm() + CC_POWER_AGAIN_STEP); }
 function ccDoneNudge(d){
   if (!cc || cc.phase !== 'done' || !ccIsPower() || cc.nextBpm == null) return;
   cc.nextBpm = Math.min(ccDoneMaxBpm(), Math.max(CC_POWER_BPM_MIN, cc.nextBpm + d));

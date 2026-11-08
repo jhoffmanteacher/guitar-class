@@ -149,8 +149,7 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
   - *DECIDED 2026-11-07 (Jonathan), not built yet:* after a Stop, if every change the student reached was right, the done screen must NOT say
     "this speed is too fast for now" or "Drop 5 BPM" (today: 4 right then Stop reads "4 of 15 — this speed is too fast for now. Drop 5 BPM", and the
     breakdown says "11 no strum heard"). The changes never reached (`cc.unreached`, including the 4 s reach window) are not "not heard" there either.
-    It is a ccRenderDone change in coach.js: always Reviewed. Build it AFTER the coach-open branch (gridOffset cap + top-tempo advice) has landed:
-    both edit the done screen. Needs a Spanish twin for any new line. Also to fix in the same pass: the song-switch SETUP readout and slider show the
+    It is a ccRenderDone change in coach.js: always Reviewed. Build it AFTER the top-tempo advice (landed 2026-11-07) is on main: both edit the done screen. (The gridOffset cap on branch `coach-open` does not touch it.) Needs a Spanish twin for any new line. Also to fix in the same pass: the song-switch SETUP readout and slider show the
     tempo the student picked (135 or 140 BPM, `cc-bpm-readout`, slider max `CC_BPM_MAX`) but round 1 plays at most 130 (`ccLadderBpms` clamps the first
     round to 130, so rounds are 130/135/140); clamp the readout and slider max to 130 when the loop is a song switch.
   - [x] *coach.js detection:* **Grid step cap (2026-11-07, branch `coach-open`).** `ccLoop` moved `gridOffset` by a quarter of a strum's distance
@@ -177,15 +176,26 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
     `coach.js`. No `firestore.rules` change (the take's fields are not pinned). Check `1ck` runs the real `ccLoop` (48 runs, a stray sound with no change
     open and with the change due next taking it), reads the saved take's field and pins the number, the line and the console's reading of it; `1cl`
     pins the older-take fixture (`pw-drift-old`, whose grid differs from its twin's); thirteen broken versions in all each turn one of them red.
-    **Status (2026-11-07): three deep-review rounds, NOT merged to main.** Round 1 found two major problems (old takes replayed capped; the guard could not see
-    a taken strum), round 2 two guard gaps and a wrong explanation of the sim numbers, round 3 one wrong label in the paragraph above plus three more guard
-    gaps (the console's use of the saved number, a second uncapped assignment, the field in the document `micRecSaveNow` writes) and an understated
-    CHANGELOG range. All are fixed in the last commit on the branch, and each fix has a mutant that turns a check red; that last commit has NOT been
-    reviewed again. By the Friday-check rule (not clean after three rounds) it waits for you: a fourth review round, or merge as is.
+    **Status: MERGED to main 2026-11-08 (e77ec8f), at Jonathan's request ("push work from other worktree"), after three deep-review rounds** (round 1: two major
+    problems, old takes replayed capped and a guard that could not see a taken strum; round 2: two guard gaps and a wrong explanation of the sim numbers; round 3: one wrong
+    label, three more guard gaps and an understated CHANGELOG range). All fixed in the last commit, each with a mutant that turns a check red; **that last commit was not
+    reviewed again** (the Friday-check rule would have held it for a fourth round).
     Not decided here: the Listening Coach (`coach.js` `coachMatchEvent`, `gridDelta = dev * 0.15`) is uncapped; its window is 0.9 beat, so one stray
     sound at its 30 BPM floor can move its grid up to 270 ms (the nearest event wins, which limits it). Left alone.
-  - *Power Chord Switch UX, still open:* the done-screen advice says "Level up: try it 5 BPM faster" at 140 (a pair) and 130 (a song
-    switch) although the tempo cannot go up (`games.pw.advice.great`; a later commit on branch `coach-open`, not made yet, fixes it).
+  - [x] *Power Chord Switch UX, top-tempo advice (2026-11-07, pushed to main):* the done screen said "Level up: try it 5 BPM faster" at 140 (a pair) and 130
+    (a song switch's first round) although the done row cannot go up. When the step up lands on the tempo just played (`ccDoneUpBpm() <= ccDonePlayedBpm()`, the
+    same numbers the row's tempo uses) it says `games.pw.advice.top` instead: "The tempo cannot go higher. Play it again." / "El tempo no puede subir más. Tócalo
+    otra vez." The wording is deliberate: not "top speed" (the setup's "speed" buttons are Every bar / Every 2 beats / Every beat, and a faster one exists at 140 BPM) and
+    not "fastest tempo ... at this tempo" (a song switch is not played at one tempo: its row says "Again from 130 BPM" after rounds at 130 / 135 / 140). Under 85% right
+    nothing changes. Check `1ck` renders the real done screen in 20 cases x EN + ES (40 renders) and compares the whole advice line and the tempo the row opens on:
+    a pair at 140 and 135 (all right, 13 of 15, 10 of 15 wrong or not heard, firmer, under half), at every switch speed, as the computer's pick, and after a live
+    slow-down; a song switch from 130 and 125 (all right, 6 of 7, under half) and Stopped in round 1 or 2; Change Up at 140 untouched. Two deep-review rounds; every
+    mutant they found (14 kinds) turns it red, and `cc.nextBpm` being cleared by Again is pinned. **Not changed (product call):** the row follows the settled
+    "counted at its lowest tempo" rule, so a pair started at 135 (or 140) that the student sped up with the live +5 still says "Level up" with a +5 that does
+    nothing (the counted tempo is 135), and so does a song switch from 125 sped up to 130 in round 1; rare. **Same shape, not fixed (not asked for):** Change Up
+    says "Level up: try it 10 BPM faster" at 140 (`games.cc.advice.great`), and at the BOTTOM both games say "Drop 5 BPM and try again" (Change Up: 10) at 10 BPM
+    (Change Up: 40) with a row that cannot go lower (`games.pw.advice.low`, coach.js ccRenderDone), found by the round-2 reviewer: a pair at 10 BPM with 3 of 15 right
+    reads "this speed is too fast for now. Drop 5 BPM", and −5 stays at 10.
   - *Power Chord Switch UX, product call, NOT built:* no Stop button during the count-in. The count-in is exactly 4 beats, plus a 0.1 s
     lead (0.4 s while recording): 24 s at 10 BPM, 16 s at 15, 12 s at 20, 9.6 s at 25, 8 s at 30, 6 s at 40, 4 s at 60, 2.7 s at 90,
     1.7 s at 140 (add the lead: 10 BPM is 24.1 s, or 24.4 s recording). A song switch has one count-in per round (the first at the

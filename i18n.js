@@ -1810,6 +1810,8 @@
       es: 'No se oyeron algunos rasgueos. Rasguea un poco más fuerte y mantén la guitarra cerca del micrófono.' },
     'games.pw.advice.great': { en: 'Level up: try it 5 BPM faster.',
       es: 'Sube de nivel: pruébalo 5 BPM más rápido.' },
+    'games.pw.advice.top': { en: 'The tempo cannot go higher. Play it again.',
+      es: 'El tempo no puede subir más. Tócalo otra vez.' },
     'games.pw.advice.low': { en: 'Drop 5 BPM and try again.',
       es: 'Baja 5 BPM e inténtalo de nuevo.' },
     'games.cc.advice.practiceWorst': { en: 'Practice just {worst} on its own — {early}.',

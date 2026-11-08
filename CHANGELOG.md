@@ -5,6 +5,10 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-07 — Power Chord Switch: no "faster" at the top tempo
+
+- **At the top tempo the game no longer says to go faster.** After a good game at 140 BPM (a chord pair), or a song switch that starts at 130 BPM (its rounds go 130, 135, 140), the screen said "Level up: try it 5 BPM faster", but the tempo cannot go up. It now says "The tempo cannot go higher. Play it again." (Spanish: "El tempo no puede subir más. Tócalo otra vez.") One step below the top it still says "Level up".
+
 ## 2026-11-07 — Power Chord Switch and Change Up: a stray sound no longer throws off the beat
 
 - **One cough, bump or chair noise now barely moves the beat dots.** The game follows your strumming a little at a time, so it keeps in time if you play a little early or late. Before, one stray sound moved it a lot at slow tempos (3/4 of a second at 10 BPM). Now one strum can move it 60 ms at most, at every tempo. It still follows you if you play late on every beat; at slow tempos (below about 60 BPM) it catches up more slowly when you are far off the beat.
