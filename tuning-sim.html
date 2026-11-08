@@ -98,7 +98,7 @@ h1{font-size:1.5rem;margin:0;letter-spacing:-0.01em;flex-basis:100%}
 .mlabels{display:flex;justify-content:space-between;font-size:.75rem;font-weight:600;padding:4px 0 0;opacity:.85}
 .lcd-status{text-align:center;font-size:.875rem;font-weight:600;min-height:20px;margin-top:6px}
 
-/* ── the peg ── Tighten turns it clockwise (the note goes up), Loosen turns it counterclockwise (the note goes down). Jonathan, 2026-11-07: on the class guitars (3 + 3 headstocks) a peg always turns counterclockwise to loosen. */
+/* ── the peg ── Tighten turns it counterclockwise (the note goes up), Loosen turns it clockwise (the note goes down). */
 .peg-panel{display:grid;grid-template-columns:1fr 104px 1fr;gap:10px;align-items:center;margin-top:14px}
 .peg-btn{min-height:76px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg2);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:6px 8px;font-size:1rem;font-weight:700;touch-action:none;user-select:none;-webkit-user-select:none}
 .peg-btn .pl{display:inline-flex;align-items:center;gap:6px;line-height:1.2}
@@ -143,7 +143,7 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
 .bubble.wrong{background:var(--red-bg);border-color:var(--red-text);color:var(--red-text)}
 .strings.nonames .bubble{opacity:0;pointer-events:none}
 
-/* ── the circle of notes: the 12 notes round a ring, going UP clockwise (the way the peg turns to raise the note) ── */
+/* ── the circle of notes: the 12 notes round a ring, going UP counterclockwise (the way the peg turns to raise the note) ── */
 .ringbox{display:flex;flex-direction:column;align-items:center;gap:2px}
 #ring{width:224px;height:224px;display:block;overflow:visible}
 .rguide{fill:none;stroke:var(--border2);stroke-width:1.5;stroke-dasharray:2 5}
@@ -212,7 +212,7 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
       </div>
 
       <div class="peg-panel">
-        <button type="button" class="peg-btn" id="peg-down" data-dir="-1"><span class="pl"><svg viewBox="0 0 40 40" aria-hidden="true"><g transform="translate(40,0) scale(-1,1)"><path class="arc" d="M8.74 13.5 A13 13 0 1 1 13.5 31.26"/><polygon points="7.44,27.76 15.75,27.36 11.25,35.16"/></g></svg><span data-t="loosen">Loosen</span></span><small><b data-t="loosenTurn">turn counterclockwise</b><br><span data-t="loosenSub">note goes down</span></small></button>
+        <button type="button" class="peg-btn" id="peg-up" data-dir="1"><span class="pl"><svg viewBox="0 0 40 40" aria-hidden="true"><g transform="translate(40,0) scale(-1,1)"><path class="arc" d="M8.74 13.5 A13 13 0 1 1 13.5 31.26"/><polygon points="7.44,27.76 15.75,27.36 11.25,35.16"/></g></svg><span data-t="tighten">Tighten</span></span><small><b data-t="tightenTurn">turn counterclockwise</b><br><span data-t="tightenSub">note goes up</span></small></button>
         <svg class="peg-svg" viewBox="0 0 104 104" aria-hidden="true">
           <g class="rot" id="peg-rot">
             <circle cx="52" cy="52" r="46" fill="#9a9d9f" stroke="#5c5f61" stroke-width="2"/>
@@ -224,7 +224,7 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
             <rect x="49" y="26" width="6" height="22" rx="3" fill="#f0f0ee"/>
           </g>
         </svg>
-        <button type="button" class="peg-btn" id="peg-up" data-dir="1"><span class="pl"><svg viewBox="0 0 40 40" aria-hidden="true"><path class="arc" d="M8.74 13.5 A13 13 0 1 1 13.5 31.26"/><polygon points="7.44,27.76 15.75,27.36 11.25,35.16"/></svg><span data-t="tighten">Tighten</span></span><small><b data-t="tightenTurn">turn clockwise</b><br><span data-t="tightenSub">note goes up</span></small></button>
+        <button type="button" class="peg-btn" id="peg-down" data-dir="-1"><span class="pl"><svg viewBox="0 0 40 40" aria-hidden="true"><path class="arc" d="M8.74 13.5 A13 13 0 1 1 13.5 31.26"/><polygon points="7.44,27.76 15.75,27.36 11.25,35.16"/></svg><span data-t="loosen">Loosen</span></span><small><b data-t="loosenTurn">turn clockwise</b><br><span data-t="loosenSub">note goes down</span></small></button>
       </div>
       <div class="peg-foot">
         <button type="button" class="btn" id="pluck" data-t="pluck">Pluck again</button>
@@ -301,7 +301,7 @@ function pickDetune(rnd, level){
 }
 function rightWay(cents){ return cents < 0 ? 'up' : 'down'; }
 /* The circle of notes: from the letter the tuner shows to the string's letter, the short way round.
-   Up is clockwise, the way the peg turns to tighten. */
+   Up is counterclockwise, the way the peg turns to tighten. */
 function ringMove(from, to){
   const d = ((NOTES.indexOf(to) - NOTES.indexOf(from)) % 12 + 12) % 12;
   if (d === 0) return { n: 0, way: '' };
@@ -336,14 +336,14 @@ const I = {
     flat:'flat', inTune:'in tune', sharp:'sharp',
     stInTune:'In tune ✓', stSharp:'Too high — loosen the peg (sharp)', stFlat:'Too low — tighten the peg (flat)',
     stOther:'The tuner shows {x}. You need {y}.',
-    loosen:'Loosen', loosenTurn:'turn counterclockwise', loosenSub:'note goes down',
-    tighten:'Tighten', tightenTurn:'turn clockwise', tightenSub:'note goes up',
-    pluck:'Pluck again', keys:'Keys: ← counterclockwise (loosen) · → clockwise (tighten)',
+    loosen:'Loosen', loosenTurn:'turn clockwise', loosenSub:'note goes down',
+    tighten:'Tighten', tightenTurn:'turn counterclockwise', tightenSub:'note goes up',
+    pluck:'Pluck again', keys:'Keys: ← counterclockwise (tighten) · → clockwise (loosen)',
     score:'Level {l} of {m} · Strings tuned: {n} · Named right: {k} in a row',
     chip1:'Name it', chip2:'Read the tuner', chip3:'Turn the peg',
     p1:'Which string is this?', h1a:'Find the string on the picture. Tap its name.', h1b:'Name the string from memory.',
     p2:'Which way?', h2:'Look at the needle. Is it left or right of the center?',
-    h2n:'The tuner shows a different letter than the string. Find both letters on the circle. Clockwise ↻ is up. Counterclockwise ↺ is down.',
+    h2n:'The tuner shows a different letter than the string. Find both letters on the circle. Counterclockwise ↺ is up. Clockwise ↻ is down.',
     p3:'Turn the peg until the tuner shows {y} in green.', h3:'Hold Tighten or Loosen. Keep the needle green for one second.',
     h3n:'Hold Tighten or Loosen. The note slides. Stop when the tuner shows {y} and the needle is green for one second.',
     p4:'In tune. Next string…',
@@ -360,7 +360,7 @@ const I = {
     done:'The {a} string is in tune.',
     levelUp:'Level {l}. A string can now start up to {m} steps from its note. Use the circle to find the way.',
     ringLabel:'Circle of notes', legStr:'string', legTun:'tuner shows',
-    step1:'{n} step', stepN:'{n} steps', ringUp:'↻ up', ringDown:'↺ down', ringUpWord:'up', ringDownWord:'down'
+    step1:'{n} step', stepN:'{n} steps', ringUp:'↺ up', ringDown:'↻ down', ringUpWord:'up', ringDownWord:'down'
   },
   es: {
     back:'Volver al sitio de la clase', title:'Simulador de afinación',
@@ -369,14 +369,14 @@ const I = {
     flat:'bemol', inTune:'afinado', sharp:'sostenido',
     stInTune:'Afinado ✓', stSharp:'Muy alta — afloja la clavija (sostenido)', stFlat:'Muy baja — aprieta la clavija (bemol)',
     stOther:'El afinador muestra {x}. Necesitas {y}.',
-    loosen:'Aflojar', loosenTurn:'gira contra el reloj', loosenSub:'la nota baja',
-    tighten:'Apretar', tightenTurn:'gira con el reloj', tightenSub:'la nota sube',
-    pluck:'Tocar otra vez', keys:'Teclas: ← contra el reloj (aflojar) · → con el reloj (apretar)',
+    loosen:'Aflojar', loosenTurn:'gira con el reloj', loosenSub:'la nota baja',
+    tighten:'Apretar', tightenTurn:'gira contra el reloj', tightenSub:'la nota sube',
+    pluck:'Tocar otra vez', keys:'Teclas: ← contra el reloj (apretar) · → con el reloj (aflojar)',
     score:'Nivel {l} de {m} · Cuerdas afinadas: {n} · Nombradas bien: {k} seguidas',
     chip1:'Nómbrala', chip2:'Lee el afinador', chip3:'Gira la clavija',
     p1:'¿Qué cuerda es esta?', h1a:'Busca la cuerda en el dibujo. Toca su nombre.', h1b:'Nombra la cuerda de memoria.',
     p2:'¿Hacia dónde?', h2:'Mira la aguja. ¿Está a la izquierda o a la derecha del centro?',
-    h2n:'El afinador muestra una letra distinta a la de la cuerda. Busca las dos letras en el círculo. Con el reloj ↻ es subir. Contra el reloj ↺ es bajar.',
+    h2n:'El afinador muestra una letra distinta a la de la cuerda. Busca las dos letras en el círculo. Contra el reloj ↺ es subir. Con el reloj ↻ es bajar.',
     p3:'Gira la clavija hasta que el afinador muestre {y} en verde.', h3:'Mantén presionado Apretar o Aflojar. Deja la aguja en verde durante un segundo.',
     h3n:'Mantén presionado Apretar o Aflojar. La nota se desliza. Detente cuando el afinador muestre {y} y la aguja esté en verde durante un segundo.',
     p4:'Afinada. Sigue la siguiente cuerda…',
@@ -393,7 +393,7 @@ const I = {
     done:'La cuerda {a} está afinada.',
     levelUp:'Nivel {l}. Ahora una cuerda puede empezar hasta {m} pasos lejos de su nota. Usa el círculo para encontrar el camino.',
     ringLabel:'Círculo de notas', legStr:'cuerda', legTun:'el afinador muestra',
-    step1:'{n} paso', stepN:'{n} pasos', ringUp:'↻ sube', ringDown:'↺ baja', ringUpWord:'sube', ringDownWord:'baja'
+    step1:'{n} paso', stepN:'{n} pasos', ringUp:'↺ sube', ringDown:'↻ baja', ringUpWord:'sube', ringDownWord:'baja'
   }
 };
 function T(k, p){
@@ -516,12 +516,12 @@ function followPitch(){
 }
 
 /* ═══ THE CIRCLE OF NOTES ═══
-   The 12 notes round a ring. Going UP is clockwise, the same way the peg turns to tighten.
+   The 12 notes round a ring. Going UP is counterclockwise, the same way the peg turns to tighten.
    Purple = the string's note, amber = the note the tuner shows now; both on one note = green.
    After the student answers Up or Down, an arrow shows the short way round from where the tuner started. */
 const RC = 112, RR = 88, RA = 58;
 const ringNodes = [];
-function ringPt(i, r){ const a = i * Math.PI / 6; return [RC + r * Math.sin(a), RC - r * Math.cos(a)]; }
+function ringPt(i, r){ const a = -i * Math.PI / 6; return [RC + r * Math.sin(a), RC - r * Math.cos(a)]; }
 function ringInit(){
   let h = '<defs><marker id="ahead" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="ahead"/></marker></defs>';
   h += '<circle class="rguide" cx="' + RC + '" cy="' + RC + '" r="' + RR + '"/>';
@@ -539,7 +539,7 @@ function ringRender(){
   if (known && r.steps > 0 && (S.state === 'turn' || S.state === 'between')) {
     const a = NOTES.indexOf(r.letter), b = NOTES.indexOf(r.target), up = r.answer === 'up';
     const [x1, y1] = ringPt(a, RA), [x2, y2] = ringPt(b, RA);
-    arc.setAttribute('d', 'M' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' A' + RA + ' ' + RA + ' 0 0 ' + (up ? 1 : 0) + ' ' + x2.toFixed(1) + ' ' + y2.toFixed(1));
+    arc.setAttribute('d', 'M' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' A' + RA + ' ' + RA + ' 0 0 ' + (up ? 0 : 1) + ' ' + x2.toFixed(1) + ' ' + y2.toFixed(1));
     arc.setAttribute('marker-end', 'url(#ahead)');
     c1.textContent = stepsText(r.steps); c2.textContent = T(up ? 'ringUp' : 'ringDown');
   } else {
@@ -671,8 +671,7 @@ function finishRound(){
 }
 
 /* ═══ THE PEG ═══
-   Tighten turns the peg CLOCKWISE and the note goes up; Loosen turns it COUNTERCLOCKWISE and the note goes down
-   (a peg always turns counterclockwise to loosen on the class guitars, 3 + 3 headstocks; Jonathan, 2026-11-07).
+   Tighten turns the peg COUNTERCLOCKWISE and the note goes up; Loosen turns it CLOCKWISE and the note goes down.
    (CSS rotate(): positive = clockwise.) Holding speeds up, in bigger steps for a string that starts several
    notes away; letting go and pressing again starts slow again, for the last bit. */
 const DEG_PER_CENT = 4;
@@ -681,7 +680,7 @@ function tick(dir, size){
   if (S.state !== 'turn') return;
   const c = size || TICK_CENTS;
   S.cents = Math.max(-PEG_LIMIT, Math.min(PEG_LIMIT, S.cents + dir * c));
-  S.pegAngle += dir * c * DEG_PER_CENT;
+  S.pegAngle -= dir * c * DEG_PER_CENT;
   el.pegRot.style.transform = 'rotate(' + S.pegAngle + 'deg)';
   followPitch();
   updateDisplay();
@@ -805,8 +804,8 @@ el.namesSw.addEventListener('click', () => {
 ['pointerup','pointercancel'].forEach(ev => window.addEventListener(ev, stopHold));
 window.addEventListener('blur', stopHold);
 
-/* Keyboard — keydown only. Right turns the peg clockwise (tighten, note up), Left
-   counterclockwise (loosen, note down), like the picture. Holding a key keeps turning (the browser's
+/* Keyboard — keydown only. Left turns the peg counterclockwise (tighten, note up), Right
+   clockwise (loosen, note down), like the picture. Holding a key keeps turning (the browser's
    key repeat, paced by the same speed-up as the buttons). Every other repeat is ignored.
    Ignored while focus is in an input. */
 function onKey(e){
@@ -815,7 +814,7 @@ function onKey(e){
   if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
   e.preventDefault();
   if (S.state !== 'turn') return;
-  const dir = e.key === 'ArrowRight' ? 1 : -1, now = performance.now();
+  const dir = e.key === 'ArrowLeft' ? 1 : -1, now = performance.now();
   if (!e.repeat || dir !== keyDir || now - keyLast > 700) { keyStart = now; }
   keyDir = dir; keyLast = now;
   ensureCtx();

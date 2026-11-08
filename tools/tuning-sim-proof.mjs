@@ -13,7 +13,7 @@
        at most 20 cents; the tuner shows ANOTHER letter; the difference is never more
        than 5 notes (a 4th), and the smallest and largest of each level are both drawn
      - the right answer is Up for every flat start and Down for every sharp start,
-       and the circle of notes (ringMove, up = clockwise) gives the same way
+       and the circle of notes (ringMove, up = counterclockwise) gives the same way
        and the same number of steps, for every round
      - no string comes twice in a row
      - turning the peg toward the right answer reaches the tuner showing the string's
