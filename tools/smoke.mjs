@@ -987,7 +987,7 @@ async function strumWalk(page, run, events, stats) {
           if (!rec || rec.clicks.length < 2 || rec.clicks[0] !== true || rec.clicks[1] !== false) fail(w, '▶ Play strum clicks were ' + JSON.stringify(rec && rec.clicks) + ', expected a click on 1 (higher) then on 2 in the first 1.8 s');
           else if (gset.length !== 2 || Math.abs(gset[0] / gset[1] - 1.25 / 0.8) > 0.02 || rec.gains[0] !== gset[0]) fail(w, 'down/up strum loudness was ' + JSON.stringify(rec.gains) + ', expected a louder first (down) strum and quieter up strums, ratio 1.56');
           /* ▶ Play clicks opens the site's Metronome at the card's slider tempo (60 by default), in 4/4, running (2026-11-04, tempo 2026-11-06). */
-          await run('strum:metro-set:' + w, `(() => { const s = document.getElementById('bpm-slider'); s.value = 100; onBpmSlider('100'); if (metroRunning) stopMetro(); })()`, 100);
+          await run('strum:metro-set:' + w, `(() => { const s = document.getElementById('bpm-slider'); s.value = 100; onBpmSlider('100'); setMetroMeter(3); if (metroRunning) stopMetro(); })()`, 100);
           await run('strum:clicks:' + w, `document.querySelector('.ca-card[open] .ca-step[data-idx="${st.i}"] .tab--strum .strum-clicks-btn').click()`, 400);
           const mt = await run('strum:metro-state:' + w, `({ open: document.getElementById('metro-popup').classList.contains('open'), bpm: +document.getElementById('bpm-slider').value, shown: document.getElementById('bpm-display').textContent, running: metroRunning, meter: getMetroMeter(), strumStopped: !document.querySelector('.tab--strum .play-seq-btn.playing') })`, 10);
           if (!mt || !mt.open || mt.bpm !== 60 || mt.shown !== '60' || !mt.running || mt.meter !== 4 || !mt.strumStopped) fail(w, '▶ Play clicks did not open a running metronome at 60 BPM in 4/4: ' + JSON.stringify(mt));
@@ -1001,10 +1001,17 @@ async function strumWalk(page, run, events, stats) {
             s.value = String(to); s.dispatchEvent(new Event('input', { bubbles: true })); return { was, to, readout: s.parentNode.querySelector('.bpm-readout').textContent }; })()`, 50);
           if (!moved || moved.readout !== moved.to + ' BPM') fail(w, 'could not move the strum card\'s tempo slider off its default: ' + JSON.stringify(moved));
           else {
-            await run('strum:metro-set2:' + w, `(() => { const s = document.getElementById('bpm-slider'); s.value = 100; onBpmSlider('100'); if (metroRunning) stopMetro(); })()`, 100);
+            await run('strum:metro-set2:' + w, `(() => { const s = document.getElementById('bpm-slider'); s.value = 100; onBpmSlider('100'); setMetroMeter(3); if (metroRunning) stopMetro(); })()`, 100);
             await run('strum:clicks2:' + w, `document.querySelector('.ca-card[open] .ca-step[data-idx="${st.i}"] .tab--strum .strum-clicks-btn').click()`, 400);
             const mt2 = await run('strum:metro-state2:' + w, `({ bpm: +document.getElementById('bpm-slider').value, shown: document.getElementById('bpm-display').textContent, running: metroRunning, meter: getMetroMeter() })`, 10);
             if (!mt2 || mt2.bpm !== moved.to || mt2.shown !== String(moved.to) || !mt2.running || mt2.meter !== 4) fail(w, '▶ Play clicks did not follow the card\'s tempo slider (' + moved.to + ' BPM; the Metronome was parked at 100): ' + JSON.stringify(mt2));
+            /* ▶ Play strum at the moved tempo: the gap between its first two clicks follows the slider (60000 / BPM ms), not the default 60 (review 2026-11-08: the Play strum checks above pass at any tempo). */
+            await run('strum:rec2-on:' + w, `(() => { window.__sc = { ts: [] }; window.__pcClick0 = window.pcClick; window.pcClick = function(at, accent, countIn, gain){ window.__sc.ts.push(performance.now()); return window.__pcClick0.apply(this, arguments); }; })()`, 10);
+            await run('strum:rec2-play:' + w, `document.querySelector('.ca-card[open] .ca-step[data-idx="${st.i}"] .tab--strum .play-seq-btn').click()`, 1700);
+            const rec2 = await run('strum:rec2-read:' + w, `(() => { const r = window.__sc; window.pcClick = window.__pcClick0; return r; })()`, 10);
+            await run('strum:rec2-stop:' + w, `document.querySelector('.ca-card[open] .ca-step[data-idx="${st.i}"] .tab--strum .play-seq-btn').click()`, 300);
+            const gap2 = rec2 && rec2.ts.length >= 2 ? rec2.ts[1] - rec2.ts[0] : null;
+            if (gap2 == null || Math.abs(gap2 - 60000 / moved.to) > 90) fail(w, '▶ Play strum at the card\'s ' + moved.to + ' BPM clicked ' + (gap2 == null ? 'fewer than twice' : Math.round(gap2) + ' ms apart') + ', expected about ' + Math.round(60000 / moved.to) + ' ms');
             await run('strum:metro-off2:' + w, `(() => { if (metroRunning) stopMetro(); closePopup('metro'); const s = document.querySelector('${SL}'); s.value = ${JSON.stringify(String(moved.was))}; s.dispatchEvent(new Event('input', { bubbles: true })); })()`, 100);
           }
         }

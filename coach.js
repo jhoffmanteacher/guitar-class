@@ -4047,6 +4047,10 @@ function ccFinish(complete){
   cc.timeouts.forEach(clearTimeout);
   cc.timeouts = [];
   if (ccRaf){ cancelAnimationFrame(ccRaf); ccRaf = null; }
+  /* The Stop click is a sound too, and ccLoop may already have matched it to a change as an open check (at "Every beat" and "Every 2 beats" any moment is
+     inside some change's window). An open check whose onset arrived in the last 300 ms before a Stop is that click, as in lastOnsetEff below: drop it, so
+     the change counts as never played and not as a strum (review round 3). pend.t is the onset's arrival time, the clock of cc.lastOnsetT. */
+  if (!ended){ const nowT = performance.now(); cc.changes.forEach(c => { if (c.pend && c.pend.t > nowT - 300) c.pend = null; }); }
   /* Stop once every change has been played or graded is the natural "I'm
      done" — after the last change the round only runs on to the end of the
      last chord plus one beat (ccLoop) — so that counts as a finished round.
@@ -4071,6 +4075,8 @@ function ccFinish(complete){
     : cc.changes.filter((c, i) => i > lastHeard && c.t > lastStrumT && ((c.result === null && !c.pend) || (c.result === 'miss' && stopT - c.t < CC_STOP_REACH_MS)));
   neverReached.forEach(c => { c.neverReached = true; });   // ccRenderDone draws these as "not reached", not as "no strum heard", when everything the student did reach was right
   cc.unreached = neverReached.length;
+  /* Nothing had fallen due yet at the Stop (no earlier round either): "before the first change" is true. Otherwise changes went by in silence (ccRenderDone). */
+  cc.noneDue = (cc.stageLog || []).length === 0 && (cc.phase === 'countin' || cc.changes.every(c => c.t > stopT));
   /* A Stop early in a later round, before any strum of it was heard: the hand may have left in the round before (the count-in has no Stop button, so the
      click waits for this round's play screen). The count-in is not reach time. */
   if (!ended && cc.ladder && cc.phase === 'play' && cc.stage > 0 && lastHeard < 0 && cc.stageLog.length && cc.roundEndT != null){
@@ -4149,11 +4155,11 @@ function ccRenderDone(){
      heard", and the row stays at the same tempo. At 85% or better of ALL the changes the "great" screen is still right, so it keeps that. */
   const reachedN = total - (cc.unreached || 0);
   const allReachedRight = (cc.unreached || 0) > 0 && ok === reachedN;   // the chips, the breakdown and the rounds line follow this at any score (also true when nothing was reached)
-  const noneReached = (cc.unreached || 0) > 0 && reachedN === 0;        // a Stop before the first change (Jonathan, 2026-11-07: a neutral screen, no tempo advice)
+  const noneReached = (cc.unreached || 0) > 0 && reachedN === 0;        // a Stop before the first change (Jonathan, 2026-11-07: a neutral screen, no tempo advice); if changes fell due in silence first, "No strum was heard before you stopped." (Jonathan, 2026-11-08), same advice
   const stoppedClean = allReachedRight && !noneReached && r < 0.85;     // the headline and advice only below 85%: from there on the "great" screen is right
   let verdict, advice;
   if (noneReached){
-    verdict = '&#x1F3B8; ' + t('games.cc.verdict.stoppedEarly');
+    verdict = '&#x1F3B8; ' + t(cc.noneDue ? 'games.cc.verdict.stoppedEarly' : 'games.cc.verdict.stoppedSilent');
     advice = t('games.cc.advice.stoppedEarly');
   } else if (stoppedClean){
     verdict = '&#x1F44D; ' + t(reachedN === 1 ? 'games.cc.verdict.stoppedOne' : 'games.cc.verdict.stopped', { ok, reached: reachedN });

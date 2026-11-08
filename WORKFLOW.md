@@ -152,13 +152,16 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
     again, to the end." (`games.cc.verdict.stopped`/`stoppedOne`, `games.cc.advice.stopped`, EN + ES): no "too fast", no "Drop 5 BPM" (Change Up: "Drop 10 BPM"). At 85% or
     better of all changes the good-score headline stays. At ANY score the never-reached changes are grey (`coach-chip notreached`, opacity .45, no mark), the breakdown's
     "no strum heard" leaves them out and ends with "· N not reached" (`games.cc.breakdown.left`), a song switch's rounds line counts only the changes reached (a round with none
-    is not listed), and the tempo row stays on the tempo played. **A Stop before the first change** (nothing reached; Jonathan chose the neutral screen): "You stopped before the first
+    is not listed), and below 85% the tempo row stays on the tempo played (at 85% or better it shows the usual "Level up" step). **A Stop before the first change** (nothing reached; Jonathan chose the neutral screen): "You stopped before the first
     change." / "Play it again, to the end." (`games.cc.verdict.stoppedEarly`, `advice.stoppedEarly`; ES "Paraste antes del primer cambio." / "Tócalo otra vez, hasta el final."), no tempo
     advice, no XP or best, row unchanged. NOT changed: a Stop where any reached change was wrong or not heard (its fraction, chips and breakdown count the never-reached ones as
     before), a game played to the end, a Stop in a later round's count-in.
     **How "never reached" is decided** (`ccFinish`, `c.neverReached`): a change waiting, or a miss that fell due in the 4 s (`CC_STOP_REACH_MS`) before the Stop, after the last
     graded strum, AND after the last strum the mic heard (`cc.lastOnsetT`; a late strum outside every window means the student tried that change). A sound in the last 300 ms before the
-    Stop is the Stop click and is ignored (`cc.prevOnsetT` is the onset before it). A song switch's previous round uses its own last strum (`cc.prevLastOnsetT`, saved in `ccStageEnd`) and
+    Stop is the Stop click and is ignored (`cc.prevOnsetT` is the onset before it); an open pitch check that click started is dropped in `ccFinish` too (review round 3, 2026-11-08: at
+    "Every beat" and "Every 2 beats" `ccLoop` had matched the click to a change, so a Stop after 4 right read "5 of 5" or "5 of 15, too fast"; 1ck runs the real `ccLoop` for it).
+    **Changes that fell due in silence** (2026-11-08, Jonathan): if any change had fallen due at the Stop and none was reached, the headline is "No strum was heard before you stopped."
+    (`games.cc.verdict.stoppedSilent`; ES "No se oyó ningún rasgueo antes de que pararas."; `cc.noneDue` false), same advice; "You stopped before the first change." only when none had fallen due. A song switch's previous round uses its own last strum (`cc.prevLastOnsetT`, saved in `ccStageEnd`) and
     is skipped when a strum was already heard in the new round.
     **Open product call (Jonathan, not decided):** any OTHER sound after a change fell due (room noise, a neighbour's guitar, a hand muting the strings) also counts as "the student tried it",
     so in a noisy room the clean screen gives way to the old "too fast" one. The round-2 reviewer measured one noise onset per second at Every bar / Every 2 beats: the clean screen survives in 72-76
@@ -341,7 +344,7 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
     seconds, pm-e2e pins 1 s / 59 s cases (red on the old comparison). R1-2 FIXED —
     checks 1cg: `weeklyGoalMinutes` must be ≤ 7 × `dailyCapMinutes` (else every
     week says "can't"). Jonathan chose (a) "hide Longest at 0" — DONE 2026-11-02 (the empty line keeps
-    its height; "No streak yet" over "Longest: 5 weeks" after a lost streak stays).
+    its height; "No streak yet" over "Longest: 5 weeks" after a lost streak stays; changed 2026-11-07, 93cb1dc: it now reads "No streak right now").
     (b) an old tab still running 70ef823 could keep rewriting `pm:q:<uid>`, which a
     new page adopts and deletes (those seconds could count 2–3 times) — CLOSED
     2026-11-02, Jonathan: nobody opened the site on Sunday 11/1, so no tab ran that

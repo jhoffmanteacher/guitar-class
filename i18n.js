@@ -648,7 +648,7 @@
     // (Jonathan, 2026-11-03, STOP B): the strip says "12/60 min" with no "this week"; the ring and the My progress tile say the rest.
     'pm.weekMin':         { en: '{done}/{goal} min', es: '{done}/{goal} min' },
     'pm.weekMinBreak':    { en: '{done} min', es: '{done} min' },
-    // Streak of 0: the flame's label and the My progress tile say this instead of "0-week streak".
+    // Streak of 0 and no longest streak yet: the flame's label and the My progress tile say this instead of "0-week streak". After a streak has ended ('pm.streakNoneNow') they say that instead.
     'pm.streakNone':      { en: 'No streak yet', es: 'Aún no tienes racha' },
     // A streak that was lost (longest is above 0): "yet" would be wrong.
     'pm.streakNoneNow':   { en: 'No streak right now', es: 'Ahora no tienes racha' },
@@ -1889,6 +1889,8 @@
       es: '{ok} de {reached} cambios funcionaron antes de que pararas.' },
     'games.cc.verdict.stoppedEarly': { en: 'You stopped before the first change.',
       es: 'Paraste antes del primer cambio.' },
+    'games.cc.verdict.stoppedSilent': { en: 'No strum was heard before you stopped.',
+      es: 'No se oyó ningún rasgueo antes de que pararas.' },
     'games.cc.verdict.stoppedOne': { en: '{ok} of {reached} change worked before you stopped.',
       es: '{ok} de {reached} cambio funcionó antes de que pararas.' },
     'games.cc.breakdown.left': { en: ' \u00b7 {left} not reached',
