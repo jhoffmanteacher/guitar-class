@@ -161,7 +161,8 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
     10 BPM, 8 s at 15, 6 s at 20, 4.8 s at 25, 4 s at 30, 3 s at 40, 2.2 s at 55; 4 s at 60, 2.7 s at 90, 1.7 s at 140
     (was 4 beats everywhere: 24 s at 10, 8 s at 30). A song switch counts in each round at that round's tempo. The
     Listening Coach, Strum Radar and Note Runner keep 4. A saved take lists each round's clicks (`countInBeats`); the
-    console's evaluator reads it (4 for a take without it) and a 2-click round's one measured beep gives no mic delay.
+    console's evaluator reads it (4 for a take without it; a missing or odd entry is guessed, no delay) and measures a 2-click
+    round's mic delay from beeps 1 and 2 (none when only beep 2 is heard).
     Checks: 1ck (the real count-in run on a fake clock), 1cl (five count-in takes).
   - [ ] **Product calls:** Follow steps pass by tapping every 250 ms; "Play strum" does not stop a running Metronome and
     still accents beat 1 after "every click the same"; the Tuning Simulator's "Which way?" screen shows the answer ("Too

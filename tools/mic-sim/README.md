@@ -96,11 +96,14 @@ tuning pass — ideally on the real classroom recordings the teacher console's
   — against the site's verdict: agree / detector-missed / false-hit /
   off-window (just outside the window, or near the beat the student heard) /
   silent-miss. Each round's own count-in (up to three rounds, each at its
-  own tempo) gives the mic delay: beeps 2..N, N from the take's
-  `countInBeats` (2 below 60 BPM since 2026-11-09; 4 for a take without the
-  field). A 2-click round's one measured beep is reported as heard but gives
-  no delay (one onset has nothing to agree with); its windows use the other
-  rounds' lag, else the site's beat, else the setting. Changes past the end of the audio (the
+  own tempo) gives the mic delay: N clicks from the take's `countInBeats`
+  (2 below 60 BPM since 2026-11-09; 4 for a take without the field; a
+  missing or odd entry is guessed from the tempo and gives no delay), beeps
+  2-4 of a 4-click count-in and beeps 1-2 of a 2-click one, which must all
+  be heard and line up within 40 ms. A 2-click round whose beep 1 is not
+  heard reports beep 2 alone and gives no delay. A round without a delay has
+  its windows on the site's own beat when the strums give the map, else on
+  the other rounds' lag, else on the delay setting alone. Changes past the end of the audio (the
   30 s cap, Stop) are counted as `dropped`, not judged; changes with an
   impossible time, round or tempo as `ignored`. Which chord was strummed is
   not checked. **Strum what-if** (2026-11-04, measurement only): the same
@@ -111,15 +114,16 @@ tuning pass — ideally on the real classroom recordings the teacher console's
   stop with them. eval-takes.mjs prints it after the tables and `--json`
   carries it as `strumWhatIf`. A Coach / Note Runner note whose window runs
   past the end of the audio is `dropped` there too (`micEvalTake`).
-- `fake-pw-take.mjs <out-folder>` — twenty-five synthetic Power Chord Switch
+- `fake-pw-take.mjs <out-folder>` — twenty-eight synthetic Power Chord Switch
   takes (two of them for the what-if, with answers measured on the audio: room
   noise and no strums, and soft real strums over a loud room; then loud, quiet, 50 and 250 ms mic delay, cut by the 30 s cap, a pair
   with a neighbour's guitar, every 2 beats and Stopped, no beeps with the
   setting right and wrong, 140 BPM every beat and every bar with strums at
   the window's edges, a site that hears nothing, three wrong-setting / late
-  cases, drifting strums, and five count-in takes below 60 BPM: 2-click
-  pairs, a 50 / 55 / 60 song switch heard and deaf, and a take saved before
-  `countInBeats` with 4 clicks) plus `truth.json`. Each round's count-in has
+  cases, drifting strums, and eight count-in takes below 60 BPM: a 2-click
+  pair, one in a loud room, a 50 / 55 / 60 song switch heard and deaf, a muted pair, a 660 Hz
+  hum that drowns beep 1, an E5 / B5 at the beep pitches out of line, and a
+  take saved before `countInBeats` with 4 clicks) plus `truth.json`. Each round's count-in has
   coach.js ccCountInBeats clicks (read from coach.js); `legacyCountIn: true`
   plants the old 4-click take without the field. The site's verdicts are not planted: ccLoop's
   rule is run on the strums the site hears. checks.mjs 1cl builds the same
