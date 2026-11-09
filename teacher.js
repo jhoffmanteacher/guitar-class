@@ -174,7 +174,8 @@ async function showTeacherApp(user){
      above the content (index.html's static three plus ten injected here).
      Same data-view values, same setTeacherView; a delegated click on the
      shell (below) does the switching. Guarded so re-entering teacher mode
-     doesn't build it twice. */
+     doesn't build it twice. Its units tree (#t-side-tree) is empty here and
+     is filled by teacherPaintSideTree once the class settings have loaded. */
   const side=document.getElementById('t-side');
   if(side && !side.querySelector('[data-view]')) side.innerHTML=teacherNavHtml();
   /* Class-period filter and Refresh, in the slim top bar beside Student
@@ -215,6 +216,10 @@ async function showTeacherApp(user){
   if(shell && !shell.dataset.delegated){
     shell.dataset.delegated='1';
     shell.addEventListener('click', e=>{
+      // The units tree under Class activities: a row shows that unit, the arrow folds the tree.
+      const sideUnit=e.target.closest('#t-side [data-side-unit]');
+      if(sideUnit){ teacherOpenUnitFromSide(sideUnit.dataset.sideUnit); return; }
+      if(e.target.closest('#t-side [data-side-fold]')){ teacherToggleSideTree(); return; }
       const navBtn=e.target.closest('#t-side [data-view]');
       if(navBtn){ setTeacherView(navBtn.dataset.view); return; }
       // ── Class activities: the list + tabbed detail ──
@@ -1023,7 +1028,8 @@ let taFocusPreviewPath={};   // id -> path key picked in the preview (paths acti
    Four groups, in Jonathan's order. Every entry is a view renderTeacherBody
    already knows; nothing here decides what a view shows. There is no
    "Modules" item (his call). The icons are the ones the old top-bar buttons
-   carried; Skills grid had none and got a small grid. */
+   carried; Skills grid had none and got a small grid. Class activities
+   alone has a tree of units under it (teacherSideTreeRows, 2026-11-09). */
 const TEACHER_NAV_ICON={
   activities:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="m9 13 2 2 4-4"/>',
   songs:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
@@ -1045,10 +1051,66 @@ const TEACHER_NAV=[
   {group:'Set up', items:[['manage','Manage'],['games','Games']]},
   {group:'Tools', items:[['mic','Mic recordings'],['reports','Reports']]},
 ];
+/* The units tree under Class activities (2026-11-09). One row per group the
+   Class activities list shows: "Built, not assigned" first, then the units
+   newest first, then Unsorted. A click shows that unit in the list
+   (teacherOpenUnitFromSide). It is the only item with a tree and it writes
+   nothing. Open or folded is remembered per browser; it starts open. */
+let teacherSideTreeOpen=true;
+try{ teacherSideTreeOpen=localStorage.getItem('teacherSideTree')!=='0'; }catch(e){}
+function teacherNavItemHtml(v, label){
+  const btn=`<button type="button" class="t-vt t-side-item" data-view="${v}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${TEACHER_NAV_ICON[v]||''}</svg><span class="t-side-label">${escHtml(label)}</span></button>`;
+  if(v!=='activities') return btn;
+  // The fold arrow sits beside the item, never inside it (a button in a button is invalid).
+  return `<div class="t-side-row">${btn}<button type="button" class="t-side-fold" data-side-fold aria-controls="t-side-tree" aria-expanded="${teacherSideTreeOpen}" aria-label="${teacherSideTreeOpen?'Hide units':'Show units'}" title="${teacherSideTreeOpen?'Hide units':'Show units'}"><span class="t-side-caret" aria-hidden="true"></span></button></div>`
+    +`<div class="t-side-tree" id="t-side-tree" role="group" aria-label="Units"${teacherSideTreeOpen?'':' hidden'}></div>`;
+}
 function teacherNavHtml(){
   return TEACHER_NAV.map(g=>`<div class="t-side-group" role="group" aria-label="${escAttr(g.group)}"><div class="t-side-head" aria-hidden="true">${escHtml(g.group)}</div>`
-    +g.items.map(([v,label])=>`<button type="button" class="t-vt t-side-item" data-view="${v}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${TEACHER_NAV_ICON[v]||''}</svg><span class="t-side-label">${escHtml(label)}</span></button>`).join('')
+    +g.items.map(([v,label])=>teacherNavItemHtml(v, label)).join('')
     +`</div>`).join('');
+}
+/* The tree's rows, from the list's own groups so the two cannot disagree:
+   Built first, then every other group in the list's order, each with the
+   count the list's heading shows. */
+function teacherSideTreeRows(model){
+  const groups=model.groups;
+  return groups.filter(g=>g.key==='built').concat(groups.filter(g=>g.key!=='built')).map(g=>({
+    key:g.key,
+    label:g.key==='built' ? 'Built, not assigned' : String(g.label).replace(' — ', ' · '),
+    title:g.label,
+    n:g.ids.length,
+  }));
+}
+let teacherSideTreeLast=null;
+/* Repaints the rows. Cheap to call often: it writes only when the HTML
+   changed. The highlighted row is the one group the list shows open on its
+   Units screen with nothing typed in the search box. */
+function teacherPaintSideTree(model){
+  const host=document.getElementById('t-side-tree');
+  if(!host || !teacherClassConfigLoaded || !teacherClassConfig) return;
+  if(!model) model=teacherActivityListModel(teacherClassConfig);
+  let on=null;
+  if(teacherView==='activities' && teacherActivityScreen()==='split' && activityListFilter==='units' && !activityListQuery.trim()){
+    const open=teacherUnitOpenMap(model, '');
+    const shown=model.groups.filter(g=>open[g.key]);
+    if(shown.length===1) on=shown[0].key;
+  }
+  const html=teacherSideTreeRows(model).map(r=>`<button type="button" class="t-side-sub${r.key===on?' on':''}" data-side-unit="${escAttr(r.key)}" title="${escAttr(r.title)}"${r.key===on?' aria-current="true"':''}><span class="t-side-sub-name">${escHtml(r.label)}</span><span class="t-side-sub-n">${r.n}</span></button>`).join('');
+  if(html===teacherSideTreeLast && host.childNodes.length) return;
+  teacherSideTreeLast=html;
+  host.innerHTML=html;
+}
+function teacherToggleSideTree(){
+  teacherSideTreeOpen=!teacherSideTreeOpen;
+  try{ localStorage.setItem('teacherSideTree', teacherSideTreeOpen?'1':'0'); }catch(e){}
+  const tree=document.getElementById('t-side-tree'); if(tree) tree.hidden=!teacherSideTreeOpen;
+  const f=document.querySelector('#t-side [data-side-fold]');
+  if(f){
+    f.setAttribute('aria-expanded', String(teacherSideTreeOpen));
+    f.setAttribute('aria-label', teacherSideTreeOpen?'Hide units':'Show units');
+    f.title=teacherSideTreeOpen?'Hide units':'Show units';
+  }
 }
 /* Marks the sidebar item for view v: .on for the look, aria-current="page"
    for screen readers (only the current item carries it). */
@@ -1064,8 +1126,12 @@ function applyTeacherViewChrome(v){
   const classWide = v!=='skills';
   const tabs=document.getElementById('t-week-tabs'); if(tabs) tabs.style.display = classWide ? 'none' : '';
   const summ=document.getElementById('t-summary'); if(summ) summ.style.display = classWide ? 'none' : '';
+  // Which tree row is lit depends on the view.
+  teacherPaintSideTree();
 }
 function setTeacherView(v){
+  // A jump to a unit that never got painted must not fire on a later visit.
+  if(v!=='activities') activityListJump=null;
   // The Teacher view songs card plays the record — leaving the tab stops it.
   if(teacherView==='tsongs' && v!=='tsongs' && typeof stopCardAudio==='function') stopCardAudio();
   teacherView=v;
@@ -1969,6 +2035,8 @@ function renderTeacherActivities(opts){
       +`<strong>Pin</strong> puts an assigned card on the <strong>Keep practicing</strong> row at the top of students' In-Class Activities page, up to ${TEACHER_PINS_MAX} cards, in the order you pinned them — for a card you reuse on many days, so you don't have to re-date it. A pin needs no release date. It never blocks the site and never counts as one of today's activities, and a pinned card stays on the row on the days it is also one of today's activities. Hidden, Archive and Delete still win (Archive and Delete also unpin, and Restore does not pin it again). Students' Done marks are untouched.<br><br>`
       +`<strong>Un-assign</strong> sends a card back to Built without clearing anything. The &#x270E; renames an activity for everyone, in both languages, until the Spanish twin ships. Copy link gives you a URL that opens the site straight to that one activity, card already open — paste it into Classroom. Type over a <strong>#number</strong> to move a card to that position; a number inside a title, like Finger Gym 2, is part of the name and stays put.</div></details>`
       +`<div class="t-board">${builtHtml}${assignedHtml}</div>`;
+    // A move, an assign or an archive changes the tree's counts.
+    teacherPaintSideTree();
     // Before the rename box's focus() below, so focus can still scroll it into view.
     if(builtTop){ const nb=box.querySelector('[data-board-built]'); if(nb) nb.scrollTop=builtTop; }
     // Opening the editor is a full re-render, so focus has to be re-placed
@@ -2015,6 +2083,7 @@ function teacherBoardArchToggle(key, open){ boardArchOpen[key]=!!open; }
 let activityListFilter='units';      // 'units' | 'week' | 'pins' | 'undated' | 'all'
 let activityListQuery='';            // the search box
 let activityUnitOpen={};             // unit key -> true/false; unset = only the newest unit is open
+let activityListJump=null;           // a group key: the next list paint scrolls to that unit's heading, then clears this
 let activityDetailTab='preview';     // the tab the next activity opens on: the last one used
 const TA_FILTERS=[['units','Units'],['week','This week'],['pins','Keep practicing'],['undated','Not dated'],['all','All']];
 const TA_TABS=['preview','students','settings'];
@@ -2134,16 +2203,25 @@ function teacherActivityRowHtml(r){
     +tags.map(([t,k])=>`<span class="ta-tag${k?' ta-tag-'+k:''}">${t}</span>`).join('')+`</span>`
     +`<span class="ta-row-title">${escHtml(r.title)}</span>${bar}</span></button>`;
 }
-function teacherActivityListBodyHtml(cfg){
-  const model=teacherActivityListModel(cfg);
+/* Which groups the Units screen shows open: every one while a search is
+   typed, else the teacher's own fold, else only the newest unit that holds
+   a live card. The list and the sidebar tree's lit row both read this. */
+function teacherUnitOpenMap(model, q){
+  const R=model.rows, out={};
+  const newest=(model.groups.find(g=>g.key!=='built' && g.ids.some(id=>!R[id].archived && !R[id].deleted))||model.groups[0]||{}).key;
+  model.groups.forEach(g=>{ out[g.key]=q ? true : (activityUnitOpen[g.key]!==undefined ? activityUnitOpen[g.key] : g.key===newest); });
+  return out;
+}
+function teacherActivityListBodyHtml(cfg, model){
+  if(!model) model=teacherActivityListModel(cfg);
   const q=activityListQuery.trim();
   const R=model.rows;
   if(activityListFilter==='units'){
-    const newest=(model.groups.find(g=>g.key!=='built' && g.ids.some(id=>!R[id].archived && !R[id].deleted))||model.groups[0]||{}).key;
+    const openMap=teacherUnitOpenMap(model, q);
     const html=model.groups.map(g=>{
       const ids=g.ids.filter(id=>teacherActivityMatches(R[id], q));
       if(q && !ids.length) return '';
-      const open=q ? true : (activityUnitOpen[g.key]!==undefined ? activityUnitOpen[g.key] : g.key===newest);
+      const open=openMap[g.key];
       return `<div class="ta-unit" data-unit="${escAttr(g.key)}"><button type="button" class="ta-unit-head" data-ta-unit="${escAttr(g.key)}" aria-expanded="${open}">`
         +`<span class="ta-caret" aria-hidden="true"></span><span class="ta-unit-name">${escHtml(g.label)}</span><span class="ta-unit-count">${ids.length}</span></button>`
         +(open?`<div class="ta-unit-rows">${ids.map(id=>teacherActivityRowHtml(R[id])).join('')}</div>`:'')+`</div>`;
@@ -2167,11 +2245,44 @@ function teacherActivityListHeadHtml(){
    new filter or search is a new list; a repaint after a write is not. */
 function teacherPaintActivityList(top){
   const body=document.querySelector('#t-grid-container [data-ta-list-body]');
-  if(!body) return;
+  if(!body) return false;
   const y=body.scrollTop;
-  body.innerHTML=teacherActivityListBodyHtml(teacherClassConfig);
+  // One model for the rows and the sidebar tree: they cannot disagree.
+  const model=teacherActivityListModel(teacherClassConfig);
+  body.innerHTML=teacherActivityListBodyHtml(teacherClassConfig, model);
   body.scrollTop=top?0:y;
   document.querySelectorAll('#t-grid-container [data-ta-filter]').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.taFilter===activityListFilter)));
+  teacherPaintSideTree(model);
+  /* A click on the sidebar tree: bring that unit's heading to the top of
+     the list. Returns true when it did, so the caller does not scroll the
+     picked row into view over it. */
+  if(activityListJump!==null){
+    const key=activityListJump; activityListJump=null;
+    const head=body.querySelector(`[data-ta-unit="${CSS.escape(key)}"]`);
+    if(head){ body.scrollTop+=head.getBoundingClientRect().top-body.getBoundingClientRect().top; return true; }
+  }
+  return false;
+}
+/* A click on a row of the sidebar tree: show that one unit. Units screen,
+   search cleared, every other unit folded, that unit at the top of the
+   list. Nothing is written. On the list already, only the list's rows
+   repaint, so the Preview (a song may be playing there) is never rebuilt;
+   from any other page or screen it is the same trip as clicking Class
+   activities. */
+function teacherOpenUnitFromSide(key){
+  key=String(key);
+  activityListFilter='units'; activityListQuery='';
+  activityUnitOpen={};
+  if(teacherClassConfigLoaded && teacherClassConfig) teacherActivityListModel(teacherClassConfig).groups.forEach(g=>{ activityUnitOpen[g.key]=(g.key===key); });
+  else activityUnitOpen[key]=true;
+  activityListJump=key;
+  const split=teacherView==='activities' && teacherActivityScreen()==='split' && document.querySelector('#t-grid-container [data-ta-split]');
+  if(split){
+    const s=split.querySelector('[data-ta-search]'); if(s) s.value='';
+    teacherPaintActivityList(true);
+    return;
+  }
+  setTeacherView('activities');
 }
 function teacherSetActivityFilter(f){
   if(!TA_FILTERS.some(([k])=>k===f)) return;
@@ -2415,7 +2526,8 @@ function teacherRenderActivityScreen(screen, opts){
   if(screen==='detail'){
     if(!box.querySelector(`[data-ta-head][data-id="${CSS.escape(activityDetailId)}"]`)) renderTeacherActivityDetail(activityDetailId);
     else teacherSoftRepaintDetail();
-    if(!cached) loadTeacherClassConfig().then(cfg=>{ if(cfg && teacherView==='activities' && teacherActivityScreen()==='detail') teacherSoftRepaintDetail(); });
+    teacherPaintSideTree();
+    if(!cached) loadTeacherClassConfig().then(cfg=>{ if(cfg && teacherView==='activities' && teacherActivityScreen()==='detail'){ teacherSoftRepaintDetail(); teacherPaintSideTree(); } });
     return;
   }
   if(!(window.CLASS_ACTIVITIES||[]).length){
@@ -2449,10 +2561,10 @@ function teacherRenderActivityScreen(screen, opts){
     box.innerHTML=`<div class="ta-split" data-ta-split>`
       +`<aside class="ta-list" data-ta-list aria-label="Class activities list">${teacherActivityListHeadHtml()}<div class="ta-list-body" data-ta-list-body></div></aside>`
       +`<section class="ta-detail" data-ta-detail aria-label="Picked activity"></section></div>`;
-    teacherPaintActivityList(true);
-    // The picked row in view inside the list's own scroller (never the window).
+    const jumped=teacherPaintActivityList(true);
+    // The picked row in view inside the list's own scroller (never the window). A sidebar-tree jump already placed the list.
     const body=box.querySelector('[data-ta-list-body]'), sel=box.querySelector('[data-ta-pick].is-sel');
-    if(body && sel){ const off=sel.getBoundingClientRect().top-body.getBoundingClientRect().top; if(off>body.clientHeight-40) body.scrollTop=off-body.clientHeight/3; }
+    if(body && sel && !jumped){ const off=sel.getBoundingClientRect().top-body.getBoundingClientRect().top; if(off>body.clientHeight-40) body.scrollTop=off-body.clientHeight/3; }
     if(activityDetailId) renderTeacherActivityDetail(activityDetailId);
     else box.querySelector('[data-ta-detail]').innerHTML='<div class="t-loading">Pick an activity on the left.</div>';
   });
@@ -3573,6 +3685,8 @@ function renderTeacherSongs(){
   loadTeacherClassConfig().then(cfg=>{
     if(teacherView!=='songs') return;   // switched views mid-flight
     if(!cfg) return;                    // superseded by a newer read
+    // Moving a song here or back changes the tree's counts.
+    teacherPaintSideTree();
     const songs=(window.CLASS_ACTIVITIES||[]).filter(a=>caIsLibraryCard(a, cfg.songLibrary||{}));
     if(!songs.length){ box.innerHTML=intro+'<div class="t-loading">No songs here yet. Use <strong>Move to Songs</strong> on a song in Class activities, or push a card with <code>library: true</code>.</div>'; return; }
     const hidden=cfg.hiddenActivities||{};
@@ -3667,6 +3781,8 @@ function renderTeacherViewSongs(){
   loadTeacherClassConfig().then(cfg=>{
     if(teacherView!=='tsongs') return;   // switched views mid-flight
     if(!cfg) return;                     // superseded by a newer read
+    // Sharing a teacher-only song moves it on or off the board: the tree's counts follow.
+    teacherPaintSideTree();
     const raw=songs.find(a=>a.id===teacherViewSongId);
     const a=typeof caView==='function'?caView(raw):raw;
     const picker=songs.length>1

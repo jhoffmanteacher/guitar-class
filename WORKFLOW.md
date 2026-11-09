@@ -1168,6 +1168,32 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-09 — Console sidebar: a units tree under Class activities (Jonathan's request, shipped Fast).**
+      Console only; students see nothing (no CHANGELOG entry). Writes nothing and touches no config plumbing. Why: the
+      activities he builds ahead of time but has not assigned sit in the list's last group ("Built — not assigned yet"),
+      below every unit. **What:** Class activities is the only sidebar item with a tree (`#t-side-tree`, rows from
+      `teacherSideTreeRows(model)`): **Built, not assigned first**, then the units newest first, then Unsorted, each with
+      the count the list's heading shows (same `teacherActivityListModel` groups, so the two cannot disagree). A row click
+      (`teacherOpenUnitFromSide`) shows that one unit: Units screen, search cleared, every other unit folded, the list
+      scrolled to that unit's heading (`activityListJump`, consumed by `teacherPaintActivityList`). On the list already it
+      repaints the list rows only, so the Preview (a song may be playing) is not rebuilt; from any other page, or from
+      Arrange board, it is the same trip as clicking Class activities. The lit row is the one group open on the Units
+      screen with nothing typed (`teacherUnitOpenMap`, the rule the list uses, now one helper). **Always shown, with a
+      fold arrow** on the Class activities row; it starts open and the choice is kept per browser
+      (`localStorage.teacherSideTree`, try/catch). Hidden below 900px. English only. The tree repaints from
+      `teacherPaintActivityList`, `applyTeacherViewChrome`, the board paint, the detail screen, `renderTeacherSongs` and
+      `renderTeacherViewSongs` (a song moved to the Songs page, or shared, changes the counts); it writes the DOM only
+      when its HTML changed. **Decisions (Jonathan, 2026-11-08):** a click shows the unit and keeps the Preview; always
+      visible with a fold arrow; Built first. He also said the Chromebook 1366×657 screen does not bind the teacher
+      console. **Proof:** `tools/console-layout-smoke.mjs` now boots through `bootConsole()` and has a units-tree block
+      (rows = the stub board's own count, 6 rows adding up to 40 cards; clicks from Songs, from the list with a search
+      typed, from Arrange board; counts after an assign, an Un-assign and a song moved to Songs and back; the fold across
+      two reloads; hidden at 390px; dark mode). `checks.mjs` runs `teacherSideTreeRows` on a fake model and pins the
+      open default. 12 deliberate breaks, each red on its own check: count off by one, Built last, other units not
+      folded, Preview rebuilt, search not cleared, fold not saved, no repaint from the list / the Songs view / the board,
+      no scroll to the unit, and both `checks.mjs` pins. Check 1ch's Songs-view sandbox got a no-op
+      `teacherPaintSideTree` stub (it runs `renderTeacherSongs` on its own).
+
 - [x] **2026-11-08 — Teacher console redesign, Layout A (work order `OPUSPLAN-teacher-console-layout-2026-11-08.md`).**
       Console only; students see nothing new (no CHANGELOG entry). Config plumbing untouched (hard rule 2): every new
       control carries the same `data-*` attribute as its twin on the board, so the same delegated listener calls the same

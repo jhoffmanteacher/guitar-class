@@ -29,6 +29,13 @@
        stub's config/class changed and the Preview pane was NOT rebuilt;
      - opens an activity from a student's "Blocked by" row and from Songs and
        checks Back returns there;
+     - the units tree under Class activities (2026-11-09): open by default with Built first,
+       then the units newest first, then Unsorted; each row's count equals the board's (worked
+       out from the stub's board entries) and the list heading's; a click from Songs, from the
+       list with a search typed, and from Arrange board shows that one unit with the search
+       cleared, the Preview element not rebuilt, and the right row lit; the counts follow an
+       assign, an Un-assign and a song moved to the Songs page and back; the fold survives a
+       reload (both ways); the tree is hidden at 390 px;
      - measures sideways scroll at 390 px.
    Needs Node 22+ (global WebSocket) and Chrome or Chromium; serves the repo
    itself. Takes about 20 seconds. */
@@ -202,13 +209,18 @@ async function main() {
     const js = (expr) => page.evalJs(expr);
     const errsSince = (n) => pageErrors.slice(n).filter(t => !NOISE.test(t || ''));
     await size(1366, 768);
-    await page.send('Page.navigate', { url: `http://127.0.0.1:${port}/index.html?teacher=true` });
-    for (let i = 0; i < 80; i++) { await sleep(150); if (await js(`typeof ensureTeacherJs === 'function' && typeof CLASS_ACTIVITIES !== 'undefined'`).catch(() => false)) break; }
-    await js(`ensureTeacherJs()`);
-    for (let i = 0; i < 80; i++) { await sleep(100); if (await js(`typeof showTeacherApp === 'function'`)) break; }
-    const nStu = await js(STUB);
-    await js(`showTeacherApp({ uid: 'stub-teacher', email: TEACHER_EMAIL, displayName: 'Teacher' }).catch(e => { window.__showErr = e.message; })`);
-    for (let i = 0; i < 80; i++) { await sleep(100); if (await js(`!!document.querySelector('#t-grid-container [data-ta-list]')`)) break; }
+    // Loads the console fresh against a new stub. Run again to prove what survives a reload (the units tree's fold).
+    const bootConsole = async () => {
+      await page.send('Page.navigate', { url: `http://127.0.0.1:${port}/index.html?teacher=true` });
+      for (let i = 0; i < 80; i++) { await sleep(150); if (await js(`typeof ensureTeacherJs === 'function' && typeof CLASS_ACTIVITIES !== 'undefined'`).catch(() => false)) break; }
+      await js(`ensureTeacherJs()`);
+      for (let i = 0; i < 80; i++) { await sleep(100); if (await js(`typeof showTeacherApp === 'function'`)) break; }
+      const n = await js(STUB);
+      await js(`showTeacherApp({ uid: 'stub-teacher', email: TEACHER_EMAIL, displayName: 'Teacher' }).catch(e => { window.__showErr = e.message; })`);
+      for (let i = 0; i < 80; i++) { await sleep(100); if (await js(`!!document.querySelector('#t-grid-container [data-ta-list]')`)) break; }
+      return n;
+    };
+    const nStu = await bootConsole();
     const boot = await js(`({ err: window.__showErr || null, view: teacherView, side: document.querySelectorAll('#t-side [data-view]').length,
       current: [...document.querySelectorAll('#t-side [aria-current="page"]')].map(b => b.dataset.view),
       list: !!document.querySelector('[data-ta-list]'), rows: document.querySelectorAll('[data-ta-pick]').length,
@@ -495,6 +507,134 @@ async function main() {
       const e = errsSince(n0); if (e.length) fail('from-elsewhere', 'page error: ' + e[0]);
     }
 
+    // ── The units tree under Class activities (2026-11-09) ──
+    {
+      const n0 = pageErrors.length;
+      const treeState = () => js(`(() => { const t = document.getElementById('t-side-tree'), f = document.querySelector('#t-side [data-side-fold]');
+        return { hidden: t.hidden, height: Math.round(t.getBoundingClientRect().height), exp: f.getAttribute('aria-expanded'), label: f.getAttribute('aria-label'),
+          stored: (() => { try { return localStorage.getItem('teacherSideTree'); } catch (e) { return 'ERR'; } })(),
+          rows: [...t.querySelectorAll('[data-side-unit]')].map(b => ({ key: b.dataset.sideUnit, n: Number(b.querySelector('.t-side-sub-n').textContent), on: b.classList.contains('on'),
+            cur: b.getAttribute('aria-current'), text: b.innerText.replace(/\\s+/g, ' ').trim() })),
+          page: [...document.querySelectorAll('#t-side [aria-current="page"]')].map(b => b.dataset.view) }; })()`);
+      const listState = () => js(`(() => { const body = document.querySelector('[data-ta-list-body]'); if (!body) return null;
+        const heads = [...body.querySelectorAll('[data-ta-unit]')].map(h => ({ key: h.dataset.taUnit, open: h.getAttribute('aria-expanded') === 'true', n: Number(h.querySelector('.ta-unit-count').textContent) }));
+        const bt = body.getBoundingClientRect().top;
+        return { view: teacherView, screen: teacherActivityScreen(), filter: activityListFilter, query: activityListQuery, input: document.querySelector('[data-ta-search]').value,
+          heads, open: heads.filter(h => h.open).map(h => h.key), scrollTop: Math.round(body.scrollTop),
+          offsets: Object.fromEntries(heads.map(h => [h.key, Math.round(body.querySelector('[data-ta-unit="' + h.key + '"]').getBoundingClientRect().top - bt)])),
+          atEnd: body.scrollTop + body.clientHeight >= body.scrollHeight - 2, board: !!document.querySelector('.t-board') }; })()`);
+      // The board's own numbers, worked out from the stub's board entries and nothing the list or the tree computes.
+      const expected = await js(`(() => { const cfg = teacherClassConfig, board = cfg.activityBoard || {}, by = {}; let all = 0;
+        CLASS_ACTIVITIES.filter(a => !caIsLibraryCard(a, cfg.songLibrary || {}) && !caIsTeacherSong(a, cfg.classSongs || {})).forEach(a => {
+          const e = board[a.id], k = e ? String(Number(e.module) || 0) : 'built'; by[k] = (by[k] || 0) + 1; all++; });
+        return { by, all }; })()`);
+      const sum = t => t.rows.reduce((x, r) => x + r.n, 0);
+      const countOf = (t, k) => (t.rows.find(r => r.key === k) || {}).n;
+      const litKeys = t => JSON.stringify(t.rows.filter(r => r.on).map(r => r.key));
+      const sameAsList = (step, t, L) => {
+        for (const r of t.rows) { const h = L.heads.find(x => x.key === r.key); if (!h || h.n !== r.n) fail(step, `tree row ${r.key} says ${r.n}, the list heading says ${h ? h.n : 'nothing'}`); }
+        if (L.heads.length !== t.rows.length) fail(step, `the tree has ${t.rows.length} rows, the list ${L.heads.length} headings`);
+      };
+
+      // Default: open, Built first, then the units newest first, then Unsorted; counts are the board's and the list's.
+      await js(`setTeacherView('activities')`); await sleep(500);
+      // Earlier blocks leave the list on another filter or a search: compare against the Units screen with nothing typed.
+      await js(`(() => { const s = document.querySelector('[data-ta-search]'); s.value = ''; s.dispatchEvent(new Event('input', { bubbles: true })); document.querySelector('[data-ta-filter="units"]').click(); })()`); await sleep(200);
+      let t = await treeState(), L = await listState();
+      const wantKeys = ['built', ...Object.keys(expected.by).filter(k => k !== 'built' && k !== '0').sort((a, b) => Number(b) - Number(a)), ...(expected.by['0'] ? ['0'] : [])];
+      if (t.hidden || t.exp !== 'true' || t.height <= 0) fail('tree:default', 'the tree is not open by default: ' + JSON.stringify({ hidden: t.hidden, exp: t.exp, height: t.height }));
+      if (JSON.stringify(t.rows.map(r => r.key)) !== JSON.stringify(wantKeys)) fail('tree:default', 'rows are ' + JSON.stringify(t.rows.map(r => r.key)) + ', expected ' + JSON.stringify(wantKeys));
+      for (const r of t.rows) if (r.n !== expected.by[r.key]) fail('tree:counts', `row ${r.key} says ${r.n}, the board has ${expected.by[r.key]}`);
+      if (sum(t) !== expected.all) fail('tree:counts', `the rows add up to ${sum(t)}, the board holds ${expected.all} cards`);
+      if (!/^Built, not assigned/.test((t.rows[0] || {}).text || '') || t.rows.some(r => /Module/.test(r.text)) || t.rows.slice(1).some(r => !/^(Unit \d|Unsorted)/.test(r.text))) fail('tree:labels', JSON.stringify(t.rows.map(r => r.text)));
+      if (JSON.stringify(t.page) !== '["activities"]') fail('tree:default', 'current page items ' + JSON.stringify(t.page));
+      sameAsList('tree:default', t, L);
+      stats.tree = { rows: t.rows.length, cards: expected.all, clicks: 0, repaints: 0, reloads: 0 };
+
+      // From another page: the tree is there on Songs too, and Built opens the list on Built alone, scrolled to it.
+      await js(`setTeacherView('songs')`); await sleep(500);
+      const tSongs = await treeState();
+      if (tSongs.rows.length !== t.rows.length || tSongs.height <= 0) fail('tree:songs', 'the tree on Songs has ' + tSongs.rows.length + ' rows, height ' + tSongs.height);
+      await js(`document.querySelector('#t-side-tree [data-side-unit="built"]').click()`); await sleep(500);
+      L = await listState(); t = await treeState(); stats.tree.clicks++;
+      if (!L || L.view !== 'activities' || L.screen !== 'split' || L.filter !== 'units') fail('tree:built', 'after the click: ' + JSON.stringify(L && { view: L.view, screen: L.screen, filter: L.filter }));
+      else {
+        if (L.query !== '' || L.input !== '') fail('tree:built', 'the search was not cleared: ' + JSON.stringify([L.query, L.input]));
+        if (JSON.stringify(L.open) !== '["built"]') fail('tree:built', 'open units are ' + JSON.stringify(L.open) + ', expected only built');
+        if (L.scrollTop <= 0 || !(L.offsets.built <= 2 || L.atEnd)) fail('tree:built', 'the list is not scrolled to Built: scrollTop ' + L.scrollTop + ', heading at ' + L.offsets.built + ', at end ' + L.atEnd);
+      }
+      if (litKeys(t) !== '["built"]' || t.rows.filter(r => r.cur === 'true').length !== 1) fail('tree:built', 'lit rows ' + litKeys(t));
+      if (JSON.stringify(t.page) !== '["activities"]') fail('tree:built', 'current page items ' + JSON.stringify(t.page));
+      await shot('15-tree-built-1366');
+
+      // On the list with a search typed and another filter on: a unit row clears both and leaves the Preview alone.
+      await js(`document.querySelector('[data-ta-filter="all"]').click()`); await sleep(100);
+      await js(`(() => { const s = document.querySelector('[data-ta-search]'); s.value = 'chord'; s.dispatchEvent(new Event('input', { bubbles: true })); })()`); await sleep(150);
+      const pre = await js(`({ rows: document.querySelectorAll('[data-ta-list-body] [data-ta-pick]').length, q: activityListQuery, f: activityListFilter })`);
+      if (pre.f !== 'all' || pre.q !== 'chord' || !pre.rows) fail('tree:unit-2', 'the setup failed: ' + JSON.stringify(pre));
+      await js(`window.__prevEl = document.querySelector('[data-ta-pane="preview"]').firstElementChild; window.__prevList = document.querySelector('[data-ta-list]'); window.__prevId = activityDetailId`);
+      await js(`document.querySelector('#t-side-tree [data-side-unit="2"]').click()`); await sleep(300);
+      L = await listState(); t = await treeState(); stats.tree.clicks++;
+      const kept = await js(`({ preview: document.querySelector('[data-ta-pane="preview"]').firstElementChild === window.__prevEl, list: document.querySelector('[data-ta-list]') === window.__prevList, id: activityDetailId === window.__prevId })`);
+      if (L.filter !== 'units' || L.query !== '' || L.input !== '' || JSON.stringify(L.open) !== '["2"]') fail('tree:unit-2', 'filter ' + L.filter + ', search ' + JSON.stringify([L.query, L.input]) + ', open ' + JSON.stringify(L.open));
+      if (!kept.preview || !kept.list || !kept.id) fail('tree:unit-2', 'the click rebuilt something it should not have: ' + JSON.stringify(kept));
+      if (litKeys(t) !== '["2"]') fail('tree:unit-2', 'lit rows ' + litKeys(t));
+
+      // From Arrange board: the tree is still drawn there, and a unit row returns to the list on that unit.
+      await js(`document.querySelector('[data-ta-board-open]').click()`);
+      for (let i = 0; i < 30; i++) { await sleep(100); if (await js(`!!document.querySelector('.t-board')`)) break; }
+      const tBoard = await treeState();
+      if (JSON.stringify(tBoard.rows.map(r => [r.key, r.n])) !== JSON.stringify(t.rows.map(r => [r.key, r.n])) || litKeys(tBoard) !== '[]') fail('tree:board', 'the tree on the board: ' + JSON.stringify(tBoard.rows.map(r => r.key + ':' + r.n + (r.on ? '*' : ''))));
+      await js(`document.querySelector('#t-side-tree [data-side-unit="1"]').click()`); await sleep(500);
+      L = await listState(); t = await treeState(); stats.tree.clicks++;
+      if (!L || L.board || L.screen !== 'split' || L.filter !== 'units' || JSON.stringify(L.open) !== '["1"]') fail('tree:board', 'after the click: ' + JSON.stringify(L && { board: L.board, screen: L.screen, filter: L.filter, open: L.open }));
+      if (litKeys(t) !== '["1"]') fail('tree:board', 'lit rows ' + litKeys(t));
+
+      // Counts follow a write: assign a Built card to Unit 4 and send it back, then move a song to the Songs page and back.
+      const before = await treeState();
+      const cardId = await js(`teacherActivityListModel(teacherClassConfig).groups.find(g => g.key === 'built').ids.find(i => !teacherActivityRetired(i, teacherClassConfig))`);
+      if (!cardId) fail('tree:assign', 'the stub has no live Built card');
+      else {
+        await js(`teacherMoveActivity(${JSON.stringify(cardId)}, 4, null)`); await sleep(700);
+        const mid = await treeState(); L = await listState(); stats.tree.repaints++;
+        if (countOf(mid, 'built') !== countOf(before, 'built') - 1 || countOf(mid, '4') !== countOf(before, '4') + 1) fail('tree:assign', `Built ${countOf(before, 'built')} -> ${countOf(mid, 'built')}, Unit 4 ${countOf(before, '4')} -> ${countOf(mid, '4')}`);
+        sameAsList('tree:assign', mid, L);
+        await js(`teacherUnassignActivity(${JSON.stringify(cardId)})`); await sleep(700);
+        const end = await treeState(); L = await listState(); stats.tree.repaints++;
+        if (JSON.stringify(end.rows.map(r => [r.key, r.n])) !== JSON.stringify(before.rows.map(r => [r.key, r.n]))) fail('tree:unassign', 'counts after Un-assign ' + JSON.stringify(end.rows.map(r => r.key + ':' + r.n)) + ', before ' + JSON.stringify(before.rows.map(r => r.key + ':' + r.n)));
+        sameAsList('tree:unassign', end, L);
+      }
+      const songId = await js(`(() => { const cfg = teacherClassConfig; const a = CLASS_ACTIVITIES.find(x => caIsSongCard(x) && !caIsLibraryCard(x, cfg.songLibrary || {}) && !caIsTeacherSong(x, cfg.classSongs || {})); return a ? a.id : null; })()`);
+      if (!songId) fail('tree:song', 'the stub has no song card on the board');
+      else {
+        const s0 = await treeState();
+        await js(`setTeacherView('songs')`); await sleep(500);
+        await js(`teacherSetSongPlace(${JSON.stringify(songId)}, 'songs')`); await sleep(700);
+        const s1 = await treeState(); stats.tree.repaints++;
+        if (sum(s1) !== sum(s0) - 1) fail('tree:song', `moving a song to the Songs page left the rows adding up to ${sum(s1)}, was ${sum(s0)}`);
+        await js(`teacherSetSongPlace(${JSON.stringify(songId)}, 'activities')`); await sleep(700);
+        const s2 = await treeState(); stats.tree.repaints++;
+        if (JSON.stringify(s2.rows.map(r => [r.key, r.n])) === JSON.stringify(s1.rows.map(r => [r.key, r.n])) || sum(s2) !== sum(s0)) fail('tree:song', `moving it back left ${sum(s2)} cards, was ${sum(s0)}`);
+        await js(`setTeacherView('activities')`); await sleep(400);
+      }
+
+      // Fold: the arrow hides the tree, the choice survives a reload, and so does opening it again.
+      await js(`document.querySelector('#t-side [data-side-fold]').click()`); await sleep(100);
+      t = await treeState();
+      if (!t.hidden || t.exp !== 'false' || t.label !== 'Show units' || t.stored !== '0' || t.height !== 0) fail('tree:fold', 'after folding: ' + JSON.stringify({ hidden: t.hidden, exp: t.exp, label: t.label, stored: t.stored, height: t.height }));
+      await shot('16-tree-folded-1366');
+      await bootConsole(); await sleep(400); stats.tree.reloads++;
+      t = await treeState();
+      if (!t.hidden || t.exp !== 'false' || t.height !== 0) fail('tree:fold-reload', 'after a reload the tree is ' + JSON.stringify({ hidden: t.hidden, exp: t.exp, height: t.height }) + ', expected still folded');
+      await js(`document.querySelector('#t-side [data-side-fold]').click()`); await sleep(100);
+      t = await treeState();
+      if (t.hidden || t.exp !== 'true' || t.label !== 'Hide units' || t.stored !== '1' || t.height <= 0) fail('tree:unfold', 'after opening: ' + JSON.stringify({ hidden: t.hidden, exp: t.exp, label: t.label, stored: t.stored, height: t.height }));
+      await bootConsole(); await sleep(400); stats.tree.reloads++;
+      t = await treeState();
+      if (t.hidden || t.exp !== 'true' || t.rows.length !== wantKeys.length) fail('tree:unfold-reload', 'after a reload the tree is ' + JSON.stringify({ hidden: t.hidden, exp: t.exp, rows: t.rows.length }) + ', expected open with ' + wantKeys.length + ' rows');
+      const e = errsSince(n0); if (e.length) fail('tree', 'page error: ' + e[0]);
+    }
+
     // ── 1920×1080 and 390 px ──
     await js(`setTeacherView('activities')`); await sleep(400);
     await js(`document.querySelector('[data-ta-filter="units"]').click()`); await sleep(100);
@@ -521,6 +661,11 @@ async function main() {
     }
     await js(`setTeacherView('activities')`); await sleep(400);
     await shot('12-console-390');
+    {
+      // The sideways strip has no room for a tree: only the 13 items stay.
+      const r = await js(`({ tree: getComputedStyle(document.getElementById('t-side-tree')).display, fold: getComputedStyle(document.querySelector('#t-side [data-side-fold]')).display, items: document.querySelectorAll('#t-side [data-view]').length })`);
+      if (r.tree !== 'none' || r.fold !== 'none' || r.items !== 13) fail('390', 'the units tree at 390px: ' + JSON.stringify(r));
+    }
     for (const tab of ['preview', 'students', 'settings']) {
       await js(`document.querySelector('[data-ta-tab="${tab}"]').click()`); await sleep(120);
       const sw = await js(`document.documentElement.scrollWidth - document.documentElement.clientWidth`);
@@ -531,7 +676,7 @@ async function main() {
     await size(1366, 768);
     await page.send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: 'dark' }] });
     await sleep(200);
-    const dark = await js(`['[data-ta-list]', '#t-side', '[data-ta-pane]:not([hidden])'].map(q => { const c = getComputedStyle(document.querySelector(q)); return q + ' ' + c.backgroundColor + ' / ' + c.color; })`);
+    const dark = await js(`['[data-ta-list]', '#t-side', '#t-side-tree .t-side-sub:not(.on)', '[data-ta-pane]:not([hidden])'].map(q => { const c = getComputedStyle(document.querySelector(q)); return q + ' ' + c.backgroundColor + ' / ' + c.color; })`);
     // Light text on a dark ground: the text channel average must beat the background's (a transparent pane reads as the dark body).
     for (const line of dark) {
       const [bg, fg] = line.split(' ').slice(1).join(' ').split(' / ').map(c => (c.match(/\d+(\.\d+)?/g) || []).slice(0, 3).map(Number));
@@ -550,6 +695,7 @@ async function main() {
     try { rmSync(prof, { recursive: true, force: true }); } catch { /* best effort */ }
   }
   console.log(`console-layout-smoke: ${stats.views} sidebar views, ${stats.activities} activities opened (practice card, focus, paths, exit check) x ${stats.tabs / Math.max(stats.activities, 1)} tabs = ${stats.tabs} tab switches, ${stats.filters} filters, ${stats.folds} folds, ${stats.searches} searches, ${stats.writes} Settings writes with the Preview kept, ${stats.repaint} Students repaint, ${stats.counts || 0} list counts equal to the board's (All + P4), ${stats.refreshes || 0} refreshes with the Preview and list scroll kept, ${stats.board} board round trip, ${stats.backs} Backs`);
+  if (stats.tree) console.log(`  units tree: ${stats.tree.rows} rows adding up to the board's ${stats.tree.cards} cards, ${stats.tree.clicks} row clicks (Songs, list with a search, Arrange board), ${stats.tree.repaints} repaints after a write, ${stats.tree.reloads} reloads with the fold kept`);
   if (stats.widths) console.log(`  column widths at 1366: sidebar ${Math.round(stats.widths.at1366.side)}, list ${Math.round(stats.widths.at1366.list)}, detail ${Math.round(stats.widths.at1366.detail)}; at 1920: ${Math.round(stats.widths.at1920.side)}, ${Math.round(stats.widths.at1920.list)}, ${Math.round(stats.widths.at1920.detail)}`);
   if (stats.shots.length) console.log('  screenshots:\n    ' + stats.shots.join('\n    '));
   if (fails.length) { console.log(`\x1b[31m✗ ${fails.length} problem(s):\x1b[0m\n  ` + fails.join('\n  ')); process.exit(1); }

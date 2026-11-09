@@ -8914,6 +8914,8 @@ async function checkSongPopularity(ctx) {
       let teacherView = 'songs', activityEditId = null;
       const cfg = { archived: { 'u-arch': true } };
       const loadTeacherClassConfig = () => ({ then: f => f(cfg) });
+      // The sidebar's units tree repaints from renderTeacherSongs; the tree is not what this check is about.
+      const teacherPaintSideTree = () => {};
       const allStudentsRaw = [
         { uid: 'u-a', songOpens: { 'ca-36': 5, 'ca-42': 1 }, classActivities: {} },
         { uid: 'u-b', songOpens: { 'ca-36': 3 }, classActivities: {} },
@@ -13972,6 +13974,28 @@ function checkPracticeMinutes(i18nTable) {
     if (!/\nlet teacherPmSort='week';/.test(tsrc)) fail("teacher.js: the Practice minutes view must open sorted by This week (let teacherPmSort='week';)");
     const bodyFn = /\nfunction renderTeacherBody\(\)\{[\s\S]*?\n\}\n/.exec(tsrc);
     if (!bodyFn || !/else if\(teacherView==='minutes'\) renderTeacherMinutes\(\);/.test(bodyFn[0])) fail('teacher.js renderTeacherBody(): the minutes view is not dispatched to renderTeacherMinutes()');
+    /* The units tree under Class activities (2026-11-09). Its rows come from the Class activities list's own groups, so the two cannot
+       disagree: "Built, not assigned" FIRST (Jonathan's call, it is the row he comes for), then every other group in the list's
+       order with the count the list's heading shows, and no Built row when nothing is unassigned. The real function runs here on a
+       fake model; the browser walk (tools/console-layout-smoke.mjs) checks the rest against the stub's board. It starts open. */
+    {
+      const rowsM = /\nfunction teacherSideTreeRows\(model\)\{[\s\S]*?\n\}\n/.exec(tsrc);
+      if (!rowsM) fail('teacher.js: teacherSideTreeRows(model) is missing (the units tree under Class activities)');
+      else {
+        let rows = null;
+        try { rows = vm.runInNewContext(rowsM[0] + '\nteacherSideTreeRows', {}, { timeout: 1000 }); } catch (e) { fail('teacher.js teacherSideTreeRows() does not run: ' + e.message); }
+        if (typeof rows === 'function') {
+          const grp = (key, label, n) => ({ key, label, ids: Array.from({ length: n }, (_, i) => key + i) });
+          const flat = r => r.map(x => x.key + ':' + x.n).join(',');
+          const full = rows({ groups: [grp('4', 'Unit 4 — Open Chords', 2), grp('3', 'Unit 3 — Power Chords', 1), grp('0', 'Unsorted', 1), grp('built', 'Built — not assigned yet', 3)] });
+          if (flat(full) !== 'built:3,4:2,3:1,0:1') fail('teacher.js teacherSideTreeRows(): the rows must be Built first, then the list\'s groups in order, each with the list\'s count; got ' + flat(full));
+          else if (full[0].label !== 'Built, not assigned' || full[1].label !== 'Unit 4 · Open Chords' || full[3].label !== 'Unsorted') fail('teacherSideTreeRows(): labels are ' + JSON.stringify(full.map(x => x.label)));
+          const none = rows({ groups: [grp('4', 'Unit 4 — Open Chords', 2)] });
+          if (flat(none) !== '4:2') fail('teacher.js teacherSideTreeRows(): with nothing unassigned there must be no Built row; got ' + flat(none));
+        }
+      }
+      if (!/\nlet teacherSideTreeOpen=true;\ntry\{ teacherSideTreeOpen=localStorage\.getItem\('teacherSideTree'\)!=='0'; \}catch\(e\)\{\}/.test(tsrc)) fail('teacher.js: the units tree must start open: let teacherSideTreeOpen=true; then try{ … localStorage.getItem(\'teacherSideTree\')!==\'0\' }');
+    }
     /* The WHOLE of teacher.js, not just the block (N3: a helper defined elsewhere could read days): exactly one collection('minutes'),
        no minutes/… path string, and no collection/doc call naming days, meta, rankBoard or weekBoard. */
     {
