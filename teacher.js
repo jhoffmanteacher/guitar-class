@@ -2598,7 +2598,13 @@ function teacherRenderActivityScreen(screen, opts){
         return;
       }
     }
-    if(!activityDetailId || !(window.CLASS_ACTIVITIES||[]).some(a=>a.id===activityDetailId)) activityDetailId=teacherDefaultActivityPick(cfg);
+    // Against the list's own cards: one just moved to Songs (or Teacher view
+    // songs) is still in CLASS_ACTIVITIES but has no row here any more. Its
+    // Preview goes, so its sound does too.
+    if(!activityDetailId || !teacherActivityListActivities(cfg).some(a=>a.id===activityDetailId)){
+      if(activityDetailId && typeof stopCardAudio==='function') stopCardAudio();
+      activityDetailId=teacherDefaultActivityPick(cfg);
+    }
     activityListPickId=activityDetailId;
     if(box.querySelector('[data-ta-split]')){
       teacherPaintActivityList(false);
