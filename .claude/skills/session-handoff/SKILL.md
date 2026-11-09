@@ -4,34 +4,37 @@ description: Which kind of cloud session can push (web vs Cowork), the patch-pai
 ---
 
 **There are two kinds of cloud session and only one of them can push.** Work
-out which one you're in before planning a handoff: the old blanket "cloud
-can't push" rule was written for Cowork and would send a web session into a
+out which one you're in before planning a handoff. The old blanket "cloud
+can't push" rule was written for Cowork; it would send a web session into a
 patch-pair handoff it doesn't need.
 
 - **Claude Code on the web pushes normally.** It runs in its own ephemeral
   container with a writable clone and authenticated HTTPS to `origin`, so the
   ordinary "push to GitHub" workflow applies, `main` included. Three limits:
-  there is no `gh` CLI (use the GitHub MCP tools instead); the sandbox proxy
-  blocks the live site, so `checks.mjs --live` comes back HTTP 403 — the
-  deploy has to be confirmed from a local machine; and **the credentials push
-  commits but cannot delete refs**, so branch cleanup is a local job. A
-  `git push origin --delete` fails with a bare `RPC failed; HTTP 403` from
-  GitHub itself, and the GitHub MCP server has `create_branch` but no
-  delete-branch tool — there is no way around it from a web session, so hand
-  Jonathan the command (or the repo's Branches page) instead of retrying.
+  - There is no `gh` CLI; use the GitHub MCP tools instead.
+  - The sandbox proxy blocks the live site, so `checks.mjs --live` comes back
+    HTTP 403. The deploy has to be confirmed from a local machine.
+  - **The credentials push commits but cannot delete refs**, so branch
+    cleanup is a local job. A `git push origin --delete` fails with a bare
+    `RPC failed; HTTP 403` from GitHub itself, and the GitHub MCP server has
+    `create_branch` but no delete-branch tool. There is no way around it from
+    a web session: hand Jonathan the command (or the repo's Branches page)
+    instead of retrying.
+
   (Pushing verified 2026-09-04, shipping the Journey tab-card restyle; the
   delete limit 2026-09-09, cleaning up six merged branches.)
 - **Cowork sessions can't push** — GitHub access is read-only and git writes
   through the device-bridge folder fail on lock files. Never attempt them.
-  Instead: run full `node tools/checks.mjs`, commit, `git format-patch`, and
-  ship **every patch as a pair with its own `APPLY-<name>.md`** stating the
-  base commit, apply order, and steps (`git status` → `git am` → `checks.mjs
-  --check --skip-links` → `git push` → `checks.mjs --live`). Afterwards,
-  hard-reset the cloud clone to origin — never re-merge.
+  Instead:
+  1. Run full `node tools/checks.mjs`, commit, `git format-patch`.
+  2. Ship **every patch as a pair with its own `APPLY-<name>.md`** stating
+     the base commit, apply order, and steps (`git status` → `git am` →
+     `checks.mjs --check --skip-links` → `git push` → `checks.mjs --live`).
+  3. Afterwards, hard-reset the cloud clone to origin. Never re-merge.
 
   **Deliver the pair as ONE zip** (Jonathan, 2026-10-05: "package multiple
-  files as zips in the future"). Any handoff of two or more files — a patch
-  and its `APPLY-<name>.md`, several patches, any other set — goes out as a
+  files as zips in the future"). Any handoff of two or more files (a patch
+  and its `APPLY-<name>.md`, several patches, any other set) goes out as a
   single `<name>.zip`, never as separate attachments. A single file is sent
   as it is. The one exception is the phone workflow, which stays one plain
   `CHANGES.md`.
@@ -40,26 +43,30 @@ patch-pair handoff it doesn't need.
   expected, not a problem.** That line is a fingerprint of every cached
   file, so every patch touches it, and it conflicts whenever `main` moved
   between cutting the patch and applying it (Windows line endings make it
-  likelier). Keep either side of that one line, finish the `git am`, then
-  run the FULL `node tools/checks.mjs` once (not `--check`) to recompute it
-  and commit the one-line change before pushing. Don't stop to ask. Any
-  conflict in another file is a real conflict — stop and report it.
+  likelier). Keep either side of that one line and finish the `git am`.
+  Then run the FULL `node tools/checks.mjs` once (not `--check`) to
+  recompute it, and commit the one-line change before pushing. Don't stop
+  to ask. Any conflict in another file is a real conflict: stop and report
+  it.
   (2026-09-24: the Watchtower/Modules 4–6 pair landed this way, `69ac805`.)
 
 **Stop hook (2026-10-25).** `.claude/settings.json` runs
 `.claude/hooks/stop-checks.mjs` whenever Claude finishes a turn. If code files
 are changed (`.js .mjs .css .html .json`, outside `.claude/` and `audio/`) and
 the working-tree state differs from the last one it checked, it runs
-`node tools/checks.mjs --check --skip-links` (about 10 s). A real failure
-**blocks the stop** and sends the output back, so you fix it in the same turn.
-**If it blocks, fix the cause — never loosen a check or add an allowlist entry.**
-The expected "shell cache stale" line is ignored (only
-the full `node tools/checks.mjs` before a push recomputes it). It gives up
-after 3 tries per turn, never re-blocks the same file state, and fails open on
-any internal error. Off switch: `GC_STOP_CHECKS=0` in the environment. It does
-not replace the git hooks, the full checks run, or `tools/smoke.mjs`. On
-Windows, Git Bash may not have `node` on PATH; the hook then silently doesn't
-run (a non-blocking error) and the git hooks remain the gate.
+`node tools/checks.mjs --check --skip-links` (about 10 s).
+- A real failure **blocks the stop** and sends the output back, so you fix it
+  in the same turn. **If it blocks, fix the cause — never loosen a check or
+  add an allowlist entry.**
+- The expected "shell cache stale" line is ignored (only the full
+  `node tools/checks.mjs` before a push recomputes it).
+- It gives up after 3 tries per turn, never re-blocks the same file state,
+  and fails open on any internal error.
+- Off switch: `GC_STOP_CHECKS=0` in the environment.
+- It does not replace the git hooks, the full checks run, or
+  `tools/smoke.mjs`.
+- On Windows, Git Bash may not have `node` on PATH. The hook then silently
+  doesn't run (a non-blocking error) and the git hooks remain the gate.
 
 A tracked pre-commit hook at `.githooks/pre-commit` runs the fast offline checks
 on every commit. Per-machine setup, once: `git config core.hooksPath .githooks`
@@ -68,7 +75,7 @@ on every commit. Per-machine setup, once: `git config core.hooksPath .githooks`
 A second tracked hook, `.githooks/pre-push`, runs the same fast offline checks
 again at push time. Not redundant: **git doesn't run `pre-commit` on merge
 commits at all**, so a merge can carry a stale `sw.js` past every per-commit
-check — on 2026-08-20 one reached `main` that way. Pre-push is the last moment
+check (on 2026-08-20 one reached `main` that way). Pre-push is the last moment
 anything is still local. Both hooks skip the network; the full
 `node tools/checks.mjs` is still the real gate.
 
