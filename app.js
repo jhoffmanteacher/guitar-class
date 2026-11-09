@@ -290,7 +290,7 @@ let classSongIds = {};
    ONLY: the card still has to be placed on the board, not Hidden, not
    archived/deleted, and not an exit check (caPinReachable). It is not read
    by caIsVisible or by any blocker rule, so a pin never puts a card on the
-   dated list, never counts toward CA_TODAY_MAX and never gates anyone; it
+   dated list, never counts as one of Today's activities and never gates anyone; it
    writes no completion data. Cached like the other maps. */
 let activityPins = [];
 const CA_PINS_MAX = 4;
@@ -13443,21 +13443,20 @@ function caScrollToActivity(id){
 // Which activity card is expanded, so a re-render (Mark complete, language
 // switch) doesn't collapse the one the student is looking at.
 let caOpenId = null;
-/* The id of the Today hero: the first PENDING card of Today's activities,
-   which are ordered by release date, newest first (Jonathan, 2026-11-09 —
-   see pendingPool in renderClassActivities()); null when nothing is pending.
+/* The id of the Today hero: the first required PENDING card of Today's
+   activities (today's and yesterday's cards — see pendingPool in
+   renderClassActivities()), or with none there the newest pending card;
+   null only when nothing at all is pending.
    Set fresh by renderClassActivities() each render. Read by the resume
    card (hidden while a hero is pending) and the "next up" toast. The card
    stays COLLAPSED by default like every other card (Jonathan, 2026-09-15)
    — nothing here forces it open. */
 let caStartHereId = null;
-/* Today's group can hold more than one card (Jonathan, 2026-09-29: "in
-   case there are multiple ones"): up to CA_TODAY_MAX PENDING cards in
-   release-date order, across days (2026-11-09), then, outside that cap,
-   every finished card dated on the newest visible date, shown done.
+/* Today's group: every visible card released today or yesterday
+   (caTodayWindow; Jonathan, 2026-11-09, evening), pending ones first, then
+   finished ones, shown done. No cap (CA_TODAY_MAX, 3, went with this rule).
    caTodayIds is every card in the group, the finished ones included; the
    hero is the first required pending one, not always the first card. */
-const CA_TODAY_MAX = 3;   // was 2 until Jonathan, 2026-10-07
 let caTodayIds = [];
 // Non-interactive whole-activity progress dots, drawn only for the Today
 // cards — distinct from repDotsHtml (a TAPPABLE rep counter under one
@@ -13629,11 +13628,10 @@ function caHeroThumbHtml(a){
    than the heading's carries that date as a chip (2026-11-09, the chipIso
    argument of caHeroCardHtml/caHeroCheckHtml), drawn just above this tag.
 
-   The group always holds a card of the newest visible date (2026-11-09:
-   pending cards by date, then that day's finished ones), so the heading is
-   always "Today's activity". The OLDER wording it had until then
-   ("Unfinished · From <day>", a quieter band) could no longer appear and
-   was removed with its CSS and strings. */
+   The heading is always "Today's activity", dated today (2026-11-09,
+   evening: the group is today's and yesterday's cards). The OLDER wording
+   it had until 2026-11-09 ("Unfinished · From <day>", a quieter band) was
+   removed with its CSS and strings. */
 function caStartHereTagHtml(a){
   return a.kind === 'check'
     ? `<span class="ca-start-tag ca-start-tag--check" data-i18n="check.prefix">${escHtml(t('check.prefix'))}</span>`
@@ -13647,9 +13645,8 @@ function caHeroChipHtml(iso){
 }
 /* The heading over the Today group (2026-10-31): the same words a hero
    card's tag used to carry, said once for the whole group. `day` is the
-   newest visible release date (2026-11-09): the group can span several
-   days, and a card from another day wears its own date chip. No date set
-   (dev bypass only) → no date. */
+   date today (2026-11-09, evening): the group holds today's and
+   yesterday's cards, and yesterday's wear their own date chip. */
 function caTodayHeadHtml(day){
   const dateLabel = caFormatDate(day);
   const date = dateLabel ? `<span class="ca-today-date">${escHtml(dateLabel)}</span>` : '';
@@ -16722,6 +16719,19 @@ function caToggleComplete(id){
 // see activityDates in loadClassConfig(). class-activities.js entries carry
 // no date field of their own anymore; this is the only place that resolves one.
 function caDate(a){ return activityDates[a.id] || null; }
+/* Today's date, 'YYYY-MM-DD' on this device's clock — the day the release
+   date gate (caIsVisible) and Today's activities (caTodayWindow) both read.
+   One function so 1cq can set the day. */
+function caTodayStr(){ return dayStr(new Date()); }
+/* [today, yesterday] for Today's activities (Jonathan, 2026-11-09, evening:
+   cards dated "the current day or the day before"). Yesterday is the
+   CALENDAR day before (on a Monday, Sunday), worked out at noon so a
+   daylight-saving change can't land it on the wrong day. */
+function caTodayWindow(){
+  const today = caTodayStr();
+  const [y, m, d] = today.split('-').map(Number);
+  return [today, dayStr(new Date(y, m - 1, d - 1, 12))];
+}
 /* The activity's display title, with a teacher rename applied if one is live.
    Renames are typed in the console (teacher.js) and land in
    config/class.activityTitles as { en, base } — see loadClassConfig().
@@ -16935,7 +16945,7 @@ function caIsVisible(a){
   if(!caForMe(a)) return false;   // given to other students only
   if(isDevBypassUser()) return true;
   const d = caDate(a);
-  return d ? d <= dayStr(new Date()) : false;
+  return d ? d <= caTodayStr() : false;
 }
 /* A practice card the Songs page lists although caIsVisible() says no —
    the console's "Play Along now" switch (playAlongActivityIds). The switch
@@ -17241,8 +17251,8 @@ function refreshOpenClassActivitiesScreen(){
   if(screen && !screen.hidden) renderClassActivities();
 }
 /* In-Class Activities — three groups, in this order (Today-first work order, Phase 1):
-     1. Do now      — up to CA_TODAY_MAX pending cards by release date,
-                       newest first, then today's finished ones (2026-11-09,
+     1. Do now      — every card released today or yesterday, pending
+                       first, then finished (2026-11-09, evening,
                        see pendingPool). Collapsed like every
                        other card (Jonathan, 2026-09-15): the whole point of the
                        page is seeing the day's work at a glance, and a
@@ -17357,54 +17367,59 @@ function renderClassActivities(){
       .map(g => ({ sec: g.sec, cards: g.cards.filter(a => classActivities[a.id] !== true) }))
       .filter(g => g.cards.length);
     const pendingCount = pendingGroups.reduce((n, g) => n + g.cards.length, 0);
-    /* Today's activities (Jonathan, 2026-11-09: "newest date leads", "by
-       date"). Picked by RELEASE DATE, not by board position, so a card the
-       teacher re-dates for today moves to the top even when its #N is lower
-       than a card posted earlier in the week.
-       1. The PENDING cards fill it first, up to CA_TODAY_MAX: newest date
-          first, undated last; within one date required before optional, then
-          the lowest board position (#11 above #12, the 2026-11-02 rule).
-       2. Then every FINISHED card dated on the newest visible date, below
-          them, lowest board position first, outside that cap: re-dating a
-          card puts it back in Today for everyone, and a student who already
-          did it sees it done and can play it again (Jonathan, 2026-11-09).
-          A finished card never takes a pending card's place, so the next
-          thing to do is always at the top. An older finished card stays in
-          the Completed fold only.
-       The two folds below keep their board order and lose only the Today
-       cards. */
+    /* Today's activities (Jonathan, 2026-11-09, evening: "everything with a
+       date either for the current day or dated the day before; everything
+       else is unfinished work"). The group is EVERY visible card released
+       TODAY or YESTERDAY by the calendar (caTodayWindow) — yesterday is the
+       calendar day before, not the last class day, so on a Monday only
+       Monday's cards are here and Friday's are Unfinished (his pick, same
+       day). No cap: it replaces "up to CA_TODAY_MAX pending cards across
+       days" (the 2026-11-09 morning rule) and its "finished cards of the
+       newest date only".
+       1. The PENDING cards of those two days first: today before yesterday;
+          within one date required before optional, then the lowest board
+          position (#11 above #12, the 2026-11-02 rule).
+       2. Then the FINISHED cards of those two days, below them, today
+          before yesterday, lowest board position first: re-dating a card
+          puts it back in Today for everyone, and a student who already did
+          it sees it done and can play it again (2026-11-09). A finished card
+          never takes a pending card's place.
+       Every other pending card is in the Unfinished fold and every other
+       finished one in Completed; both keep their board order. */
     const isDone = a => classActivities[a.id] === true;
-    const todayDay = list.reduce((d, a) => { const x = caDate(a); return x && (!d || x > d) ? x : d; }, null);
+    const [todayDay, yesterDay] = caTodayWindow();
+    const inToday = a => { const d = caDate(a); return d === todayDay || d === yesterDay; };
     const boardPos = {};
     let posN = 0;
     view.sections.forEach(sec => sec.ids.forEach(id => { boardPos[id] = posN++; }));
+    const byDate = (x, y) => {
+      const dx = caDate(x) || '', dy = caDate(y) || '';
+      return dx !== dy ? (dx < dy ? 1 : -1) : 0;
+    };
     const pendingPool = list.filter(a => !isDone(a))
-      .sort((x, y) => {
-        const dx = caDate(x) || '', dy = caDate(y) || '';
-        if(dx !== dy) return dx < dy ? 1 : -1;
-        return (Number(caIsOptional(x)) - Number(caIsOptional(y))) || (boardPos[x.id] - boardPos[y.id]);
-      });
-    /* The hero (caStartHereId) is the first PENDING card in that order. It
-       stays COLLAPSED like every other card (Jonathan, 2026-09-15). A card
-       that doesn't block the site shouldn't be the one "Start" points at
-       while one that does is still pending, so it is the first REQUIRED
-       pending card, and an optional one only when nothing required is left. */
-    const heroPick = pendingPool.find(a => !caIsOptional(a)) || pendingPool[0] || null;
+      .sort((x, y) => byDate(x, y) || (Number(caIsOptional(x)) - Number(caIsOptional(y))) || (boardPos[x.id] - boardPos[y.id]));
+    const todayPending = pendingPool.filter(inToday);
+    /* The hero (caStartHereId) stays COLLAPSED like every other card
+       (Jonathan, 2026-09-15). It is the first REQUIRED pending card of
+       Today, an optional one only when nothing required is left there. With
+       nothing pending in Today it is still the newest pending card (in the
+       Unfinished fold): caStartHereId answers "is anything left to do?" for
+       the "next up" toast and the resume card, so it is null only when
+       nothing at all is pending. */
+    const firstOf = arr => arr.find(a => !caIsOptional(a)) || arr[0] || null;
+    const heroPick = firstOf(todayPending) || firstOf(pendingPool);
     caStartHereId = heroPick ? heroPick.id : null;
-    let todayPending = pendingPool.slice(0, CA_TODAY_MAX);
-    // Newer optional cards never push the hero out of its own group.
-    if(heroPick && !todayPending.includes(heroPick)) todayPending = pendingPool.slice(0, CA_TODAY_MAX - 1).concat(heroPick);
-    const todayDone = todayDay ? list.filter(a => isDone(a) && caDate(a) === todayDay).sort((x, y) => boardPos[x.id] - boardPos[y.id]) : [];
+    const todayDone = list.filter(a => isDone(a) && inToday(a)).sort((x, y) => byDate(x, y) || (boardPos[x.id] - boardPos[y.id]));
     const todayCards = todayPending.concat(todayDone);
     // Every card in the group, the finished ones below included.
     caTodayIds = todayCards.map(a => a.id);
-    /* One heading over the group (caTodayHeadHtml), dated with the newest
-       visible date: the group always holds a card of that day, pending
-       (first) or finished (appended). A card dated on another day wears its
-       own date chip (the Unfinished fold's .ca-chip); one of the heading's
-       day wears none. A finished card is drawn exactly as the Completed fold
-       draws it (caActivityCardHtml: its ✓, its Completed button), minus the
-       chip. */
+    /* One heading over the group (caTodayHeadHtml), dated TODAY. A card
+       released yesterday wears its own date chip (the Unfinished fold's
+       .ca-chip); today's wear none. A finished card is drawn exactly as the
+       Completed fold draws it (caActivityCardHtml: its ✓, its Completed
+       button), minus the chip. No card dated today or yesterday → no
+       heading at all; the Unfinished fold (open by default, caTodoOpen) is
+       then the top of the page. */
     const chipOf = a => { const d = caDate(a); return d && d !== todayDay ? d : ''; };
     const todayHtml = todayCards.length
       ? caTodayHeadHtml(todayDay)

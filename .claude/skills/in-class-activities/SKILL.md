@@ -60,23 +60,29 @@ Easy to break without noticing:
 The resume card (`renderResumeCard()`, `#resume-card`) sits at the end of
 this page when nothing is blocking, never in the module/set view.
 
-**Today's activity: up to three PENDING cards by RELEASE DATE, then today's
-finished ones** (`CA_TODAY_MAX`, Jonathan 2026-10-07; by date since Jonathan,
-2026-11-09: "newest date leads", "by date"). In `renderClassActivities()`:
+**Today's activity: EVERY card released TODAY or YESTERDAY, pending first,
+then finished** (Jonathan, 2026-11-09, evening: "everything with a date either
+for the current day or dated the day before; everything else is unfinished
+work"). Yesterday is the CALENDAR day before (`caTodayWindow()`), not the last
+class day: on a Monday, Friday's cards are Unfinished (his pick). No cap
+(`CA_TODAY_MAX` is gone). `caTodayStr()` is the one "today" the release-date
+gate (`caIsVisible`) and Today both read; 1cq stubs it. In
+`renderClassActivities()`:
 - `pendingPool`: every pending visible card, newest `caDate` first, undated
   last; within one date required before optional, then lowest board position
-  (#11 above #12). A card re-dated for today leads whatever its #N. The first
-  three fill Today (`todayPending`).
-- The hero (`caStartHereId`) is the first PENDING required card in that order
-  (an optional one only when nothing required is left); newer optional cards
-  never push it out of the three.
-- `todayDone`: every FINISHED card dated on the newest visible date, appended
-  BELOW the pending ones, outside the cap, lowest board position first
-  (Jonathan, 2026-11-09: "In Today, marked done" — re-dating puts a card back
-  in Today for everyone; nothing is reset or written). A finished card never
-  takes a pending card's place, so the next thing to do is always at the top
-  and "Your next activity is at the top." stays true. An older finished card
-  stays in Completed only.
+  (#11 above #12). `todayPending` = the ones dated today or yesterday.
+- The hero (`caStartHereId`) is the first PENDING required card of Today (an
+  optional one only when nothing required is left there); with nothing
+  pending in Today it is the newest pending card in the Unfinished fold, so it
+  is null only when nothing at all is pending.
+- `todayDone`: every FINISHED card dated today or yesterday, appended BELOW
+  the pending ones, today's first, then lowest board position (2026-11-09:
+  "In Today, marked done" — re-dating puts a card back in Today for everyone;
+  nothing is reset or written). A finished card never takes a pending card's
+  place. An older finished card stays in Completed only.
+- The heading is dated today; yesterday's cards wear a `.ca-chip`. No card of
+  either day → no heading, and the Unfinished fold (open by default) is the
+  top of the page.
 - `caTodayIds` = pending + finished Today cards. Pending ones draw with
   `caHeroCardHtml`; finished ones with the Completed fold's own row
   (`caActivityCardHtml`: ✓, no hero dots), not repeated in the Completed fold
@@ -534,7 +540,7 @@ reuses on many days (the play-along cards, ca-23).
   pin-only card (`caIsPinOnly`: undated, or Play Along now) renders under the
   row while it is the open card.
 - The pin stands in for the release date for the ROW only. **Don't fold it
-  into `caIsVisible()`**; no blocker rule or `CA_TODAY_MAX` reads it.
+  into `caIsVisible()`**; no blocker rule or Today's activities reads it.
 - Hidden, Archive, Delete (both unpin; Restore does not re-pin) and "not
   assigned" still win (`caPinReachable`). Exit checks are never pinnable.
   Cached as `caPins`.

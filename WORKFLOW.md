@@ -353,6 +353,16 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 Detail lives in git log and `CHANGELOG.md`; entries keep what still binds.
 
+- [x] **2026-11-09 (evening) — Today's activities = every card dated today or yesterday (Jonathan: "everything with a
+      date either for the current day or dated the day before; everything else is unfinished work").** Supersedes the
+      cap and the "newest visible date" parts of the entry below. Yesterday is the CALENDAR day before
+      (`caTodayWindow()`); asked "on a Monday?", he chose calendar yesterday over the last class day, so Friday's cards
+      are Unfinished on a Monday. No cap (`CA_TODAY_MAX` removed). Pending cards first (today, then yesterday; required
+      before optional; lowest #N), then finished ones of both days as ✓ rows. Heading dated today; yesterday's cards
+      wear a chip; neither day has a card → no heading. The hero is the first required pending Today card, else the
+      newest pending card anywhere (null only when nothing is pending — the toast and the resume card read it). The
+      gate, the console's Pending count, the board, #N, pins and the folds' order are unchanged. 1cq rewritten for it
+      (16 renders per language, `caTodayStr()` stubbed to a Monday; 7 mutations each turned it red).
 - [x] **2026-11-09 — Today's activities by release date (Jonathan, 2026-11-09: "newest date leads", "by date").**
       Replaces the board-order hero rule of 2026-09-17 for the Today group ONLY: up to `CA_TODAY_MAX` PENDING cards by
       release date, newest first (one date: required before optional, then lowest #N); the hero (`caStartHereId`) is the
@@ -492,7 +502,7 @@ Detail lives in git log and `CHANGELOG.md`; entries keep what still binds.
       assigned, non-check card (`teacherSetActivityPin`); a 5th pin is refused; the strip above the board is the only way
       to unpin an archived card. Delete unpins; Archive keeps the pin. The writer is cell-checked on the whole array;
       1ai `CONFIG_WRITERS` 20 → 21. The pin stands in for the release date for that row only:
-      `caIsVisible`, the three blocker rules and `CA_TODAY_MAX` never read it; it writes no completion data;
+      `caIsVisible`, the three blocker rules and Today's activities never read it; it writes no completion data;
       Hidden / Archive / Delete / unassigned still win (`caPinReachable`). Since 2026-10-13 pins stay put even when one is
       today's card (Jonathan). No `firestore.rules` change.
 

@@ -37,7 +37,7 @@
    practicando») above Today's activity — one button per pin, in pin order,
    opening the card exactly as a tap on it would. A pin stands in for the
    release date for THAT ROW ONLY: the card stays off the dated list, never
-   counts toward CA_TODAY_MAX, never blocks and writes no completion data
+   counts as one of Today's activities, never blocks and writes no completion data
    (caPinReachable / caIsPinOnly / caPinRowHtml in app.js). It must still be
    assigned on the board, not Hidden, not archived/deleted, and not an exit
    check. A pinned card that is also one of today's cards stays in the row

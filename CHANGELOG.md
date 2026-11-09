@@ -16,6 +16,12 @@ see `WORKFLOW.md` and the git commit log.
 - **On levels 2–4 a string now always starts on one of those seven letters**, so you can find where the tuner starts on the circle. The steps on the circle count letters: "E is 3 steps down from A". While you turn the peg the tuner can still pass through a sharp (like G#); the circle has no spot for it, so the "tuner shows" mark goes away until the next letter. The level-up message says up to 1, 2 or 3 steps (before: 2, 4 or 5).
 - **The Tuning Simulator asks a clear question.** After you name the string it asks: "Look at the tuner and the circle of notes. Is the G string too low or too high?" The two answers are **Too low — tighten** and **Too high — loosen** (before: "Up — tighten" / "Down — loosen"). Then it tells you what to do: "Tune the G string: turn the peg until the tuner shows G in green." Spanish: "¿La cuerda Sol está muy baja o muy alta?", **Muy baja — aprieta** / **Muy alta — afloja**, "Afina la cuerda Sol: …".
 
+## 2026-11-09 (evening) — Today's activities: today's and yesterday's
+
+- **Today's activities now shows every activity your teacher dated today or yesterday**, with no limit of 3. Activities you still need to do come first (today's, then yesterday's), then the ones you already finished, with their ✓.
+- **Everything older is in Unfinished activities.** "Yesterday" means the day before on the calendar, so on a Monday, Friday's activities are in Unfinished activities.
+- **Yesterday's activities show their date** on their row. If your teacher dated nothing today or yesterday, there is no Today's activity heading and Unfinished activities is at the top.
+
 ## 2026-11-09 (evening) — Fairer taps, a real "Which way?" question, and tempo advice that fits
 
 - **Call the chord, Follow: a tap in the beat before the change's own beat now counts as a miss** ("Too early, so G5 is a miss. Tap in the last beat before the change."). Before, an early tap cost nothing, so tapping the space bar over and over could pass a round. A quick second tap right after a change still costs nothing. The done screen lists these changes as "early". Call mode is unchanged.
