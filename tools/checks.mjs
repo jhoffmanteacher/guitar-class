@@ -11520,6 +11520,7 @@ async function checkBackingLoudness() {
    Every total is pinned, so a renamed function cannot turn this into a
    check of nothing.
    ════════════════════════════════════════════════════════════════════ */
+let COACH_SANDBOX = null;   // 1ca's loaded site scripts (checkCoachVerdicts), reused by checkCountIn
 function checkCoachVerdicts() {
   head('1ca. Coach and arcade verdict lines are true at 0, 1 and many');
   const EXPECT = { reports: 20, descs: 20, nrLevels: 15, doneScreens: 88, pwLoops: 12, pwHints: 44, pwViews: 34, pwMemory: 6, pwGates: 3, pwBack: 16 };
@@ -11587,6 +11588,7 @@ function checkCoachVerdicts() {
     for (const f of FILES) vm.runInContext(readFileSync(join(ROOT, f), 'utf8'), ctx, { filename: f });
   } catch (e) { flag(`1ca: could not load coach.js with the site's scripts (${e.message}) — verdict lines NOT checked`); return; }
   const run = code => vm.runInContext(code, ctx);
+  COACH_SANDBOX = { run, els };   // checkCountIn (1ck, the count-in) runs the real coachCountIn in these same scripts after this check
   const text = id => (bodies[id] || '').replace(/<[^>]+>/g, ' ').replace(/&[#\w]+;/g, ' ').replace(/\s+/g, ' ');
   const rep = (n, s) => Array(n).fill(s);
   const right = s => s === 'ok' || s === 'oct';
@@ -13238,6 +13240,174 @@ function checkCoachVerdicts() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1ck, THE COUNT-IN (2026-11-09). Jonathan: the count-in before Power Chord
+   Switch and Change Up (coach.js ccBeginStage) is 2 clicks below 60 BPM and 4
+   at 60 and above; the Listening Coach, Strum Radar and Note Runner keep 4.
+   RUN, not read: the REAL coachCountIn (1ck's game tests stub it), in 1ca's
+   loaded scripts, on a fake clock (setTimeout, performance.now) and a fake
+   AudioContext that records every beep's pitch and time, through both of its
+   branches (Web Audio running, with the 0.1 s lead and a recording's 0.4 s;
+   a context that will not start: the timer path through app.js beep()).
+   Each game is started its own way: ccPrepare + ccBeginStage (a pair in each
+   game at tempos either side of 60), coachStartCheck, srStart and nrStart
+   (the microphone stubbed), below 60 BPM and above. Per count-in: the number
+   of beeps (the rule is written out here, not read from coach.js), only the
+   last one high (990 Hz), one beat apart at the round's tempo, the digits
+   ("3", "4" for two; "1".."4" for four), and play (listenStart, the callback,
+   the first change's due time) exactly that many beats after the first beep
+   plus the lead. A song switch is run through its three rounds at 50 / 55 / 60
+   (2, 2, 4), 55 / 60 / 65 (2, 4, 4) and 55 / 60 / 65 with "Next round −5"
+   pressed in round 1 (55 / 55 / 60: 2, 2, 4). The saved take (ccRecMeta,
+   and the document the real micRecSaveNow writes) lists each round's clicks:
+   what was scheduled, one per stageBpms entry, also for rounds a Stop never
+   reached (their planned count). The setup tip names the clicks and the
+   −5 / +5 and the slider redraw it (EN + ES). Totals pinned (COUNTIN_PIN).
+   ════════════════════════════════════════════════════════════════════ */
+const COUNTIN_PIN = { runs: 44, beeps: 140, rounds: 9, takes: 6, tips: 16 };
+async function checkCountIn() {
+  head('1ck. The count-in: 2 clicks below 60 BPM in Power Chord Switch and Change Up, 4 from 60 and in every other game (the real coachCountIn, run)');
+  let bad = 0;
+  const fail = m => { err('1ck (count-in): ' + m); problems++; bad++; };
+  if (!COACH_SANDBOX) { fail("1ca's sandbox did not load, so the real count-in was NOT run"); return; }
+  const { run } = COACH_SANDBOX;
+  const tot = { runs: 0, beeps: 0, rounds: 0, takes: 0, tips: 0 };
+  const near = (a, b, tol) => typeof a === 'number' && Math.abs(a - b) <= tol;
+  run(`globalThis.__ciKeep = { st: setTimeout, ct: clearTimeout, pn: performance.now, ga: getAudioCtx, ci: coachCountIn, loop: ccLoop, cl: coachLoop, sl: srLoop, nl: nrLoop, rs: micRecStart, ask: micRecShouldAsk,
+      er: coachEnsureRunning, am: coachAcquireMic, cs: coachStream, mr: micRec, sg: saveGames };
+    globalThis.__ci = { now: 1000, q: [], beeps: [], digits: [], seq: 0, calls: [], goAt: null, t0: 1000 };
+    setTimeout = (fn, ms) => { const id = ++__ci.seq; __ci.q.push({ id, fn, at: __ci.now + Math.max(0, +ms || 0) }); return id; };
+    clearTimeout = id => { __ci.q = __ci.q.filter(x => x.id !== id); };
+    performance.now = () => __ci.now;
+    __ci.ac = { state: 'running', currentTime: 100, destination: {}, resume(){},
+      createOscillator(){ const o = { frequency: { value: 0 }, connect(){}, start(at){ __ci.beeps.push({ f: o.frequency.value, at: at === undefined ? null : at, now: __ci.now }); }, stop(){} }; return o; },
+      createGain(){ return { connect(){}, gain: { setValueAtTime(){}, exponentialRampToValueAtTime(){} } }; } };
+    getAudioCtx = () => __ci.ac;
+    coachCountIn = function(st, id, cb){ __ci.calls.push({ id, n: arguments.length }); __ci.t0 = __ci.now; const go = function(){ __ci.goAt = __ci.now; return cb.apply(this, arguments); };
+      return __ciKeep.ci.apply(this, [st, id, go].concat([].slice.call(arguments, 3))); };
+    globalThis.__ciStream = () => ({ getAudioTracks: () => [], getTracks: () => [] });
+    coachStream = __ciStream(); coachAcquireMic = async () => { coachStream = __ciStream(); return true; }; coachEnsureRunning = async () => {};
+    // the games' detection loops need a real microphone: the count-in does not
+    ccLoop = () => {}; coachLoop = () => {}; srLoop = () => {}; nrLoop = () => {}; micRecStart = () => false; micRecShouldAsk = () => false; micRec = null; saveGames = () => {};
+    ['cc-count', 'coach-count', 'sr-count', 'nr-count'].forEach(id => { const el = document.getElementById(id); let v = '';
+      Object.defineProperty(el, 'textContent', { configurable: true, get(){ return v; }, set(x){ v = x; if (/^\\d$/.test(String(x))) __ci.digits.push(String(x)); } }); });
+    globalThis.__ciReset = web => { __ci.q = []; __ci.beeps = []; __ci.digits = []; __ci.calls = []; __ci.goAt = null; __ci.now = 1000; __ci.ac.currentTime = 100; __ci.ac.state = web ? 'running' : 'suspended'; };
+    globalThis.__ciRun = until => { let g = 0; for (;;){ __ci.q.sort((a, b) => a.at - b.at || a.id - b.id); if (!__ci.q.length || __ci.q[0].at > until || g++ > 500) break; const x = __ci.q.shift(); __ci.now = x.at; x.fn(); } };
+    globalThis.__ciRead = st => { const ls = st.listenStart, t0 = __ci.t0; __ciRun(ls + 1);
+      return { ls: ls - t0, beatMs: st.beatMs, beeps: __ci.beeps.map(b => ({ f: b.f, at: b.at, now: b.now - t0 })), digits: __ci.digits.slice(), go: __ci.goAt == null ? null : __ci.goAt - t0, calls: __ci.calls.slice() }; };`);
+  /* One count-in against the rule: `want` clicks at `beatMs`, with `lead` seconds before the first (Web Audio) or none (the timer path). */
+  const judge = (what, r, want, web, lead) => {
+    tot.runs++;
+    const lag = web ? lead * 1000 : 0, problemsHere = [];
+    if (r.beeps.length !== want) problemsHere.push(`${r.beeps.length} clicks, want ${want}`);
+    const tones = r.beeps.map(b => b.f).join(','), wantTones = Array.from({ length: want }, (_, i) => (i === want - 1 ? 990 : 660)).join(',');
+    if (tones !== wantTones) problemsHere.push(`pitches ${tones}, want ${wantTones} (only the last one high)`);
+    r.beeps.forEach((b, i) => {
+      tot.beeps++;
+      const at = web ? (b.at - 100) * 1000 : b.now, wantAt = lag + i * r.beatMs;
+      if (!near(at, wantAt, web ? 1e-6 : 1)) problemsHere.push(`click ${i + 1} at ${Math.round(at * 10) / 10} ms, want ${Math.round(wantAt * 10) / 10}`);
+    });
+    const wantDigits = want === 2 ? '3,4' : '1,2,3,4';
+    if (r.digits.join(',') !== wantDigits) problemsHere.push(`the counter shows ${r.digits.join(',') || 'nothing'}, want ${wantDigits}`);
+    const playAt = lag + want * r.beatMs;
+    if (!near(r.ls, playAt, web ? 1e-6 : 1)) problemsHere.push(`play starts (listenStart) ${Math.round(r.ls)} ms after the first click's call, want ${Math.round(playAt)} (${want} beats${web ? ' + the ' + lead + ' s lead' : ''})`);
+    if (!near(r.go, r.ls, 1)) problemsHere.push(`the count-in's callback ran at ${r.go} ms, not at the play start ${Math.round(r.ls)}`);
+    if (problemsHere.length) fail(`${what}: ${problemsHere.join('; ')}`);
+  };
+  const branches = [['Web Audio', true, 0.1, false], ['Web Audio, recording', true, 0.4, true], ['the timer path', false, 0, false]];
+  try {
+    /* (a) (b) (d) A pair in each game, both sides of 60. */
+    for (const [game, tempos] of [['power', [10, 30, 55, 60, 140]], ['open', [40, 55, 60, 90]]]) {
+      for (const bpm of tempos) {
+        for (const [bn, web, lead, rec] of branches) {
+          if (rec && game !== 'power') continue;   // Change Up never records
+          const want = bpm < 60 ? 2 : 4, what = `${game === 'power' ? 'Power Chord Switch' : 'Change Up'} at ${bpm} BPM (${bn})`;
+          const r = JSON.parse(run(`(() => { __ciReset(${web}); setLang('en'); ccSetup(${JSON.stringify(game)}); ccPickRate(2); ccPickProg(${game === 'power' ? 1 : 0}); cc.bpm = ${bpm}; ccPrepare(false);
+            micRec = ${rec ? "{ live: true, mode: 'pw' }" : 'null'}; ccBeginStage(); micRec = null;
+            const due = cc.changes[0].t - cc.listenStart - cc.changes[0].beat * cc.beatMs, out = __ciRead(cc); out.due = due; out.phase = cc.phase; out.countIns = cc.countIns.slice(); return JSON.stringify(out); })()`));
+          judge(what, r, want, web, lead);
+          if (!near(r.due, 0, 1e-6) || r.phase !== 'play' || JSON.stringify(r.countIns) !== `[${want}]`) fail(`${what}: the first change is due ${r.due} ms off its beat after the count-in, phase "${r.phase}", cc.countIns ${JSON.stringify(r.countIns)} (want [${want}])`);
+        }
+      }
+    }
+    /* (c) The Listening Coach, Strum Radar and Note Runner count 4 at every tempo, below 60 too. */
+    const others = [
+      ['the Listening Coach at 30 BPM', `coach = { mode: 'melody', bpm: 30, beatMs: 2000, events: [], streakKey: 'k', drillId: null, skillIds: [], timeouts: [], phase: 'ready', card: { isConnected: true, remove(){} }, slots: [{ label: 'A', midi: 57 }, { label: 'B', midi: 59 }] }; await coachStartCheck();`, 'coach', 2000],
+      ['the Listening Coach at 90 BPM', `coach = { mode: 'chords', bpm: 90, beatMs: 60000 / 90, events: [], streakKey: 'k', drillId: null, skillIds: [], timeouts: [], phase: 'ready', card: { isConnected: true, remove(){} }, slots: [{ label: 'C', chordName: 'C', midi: 48 }, { label: 'G', chordName: 'G', midi: 43 }] }; await coachStartCheck();`, 'coach', 60000 / 90],
+      ['Strum Radar at 50 BPM', `srSetup(); sr.bpm = 50; await srStart();`, 'sr', 1200],
+      ['Strum Radar at 90 BPM', `srSetup(); sr.bpm = 90; await srStart();`, 'sr', 60000 / 90],
+      ['Note Runner at 30 BPM', `nrSetup(); nr.level = 0; nr.lv = Object.assign({}, NR_LEVELS[0], { bpm: 30 }); nr.phase = 'ready'; await nrStart();`, 'nr', 2000],
+      ['Note Runner at its first level', `nrSetup(); nr.level = 0; nr.phase = 'ready'; await nrStart();`, 'nr', 60000 / 72]
+    ];
+    for (const [what, start, st, beatMs] of others) {
+      for (const [bn, web, lead, rec] of branches) {
+        if (rec) continue;
+        await run(`(async () => { __ciReset(${web}); setLang('en'); micRec = null; coachStopAll(); cc = null; coach = null; sr = null; nr = null; ${start} })()`);
+        const r = JSON.parse(run(`JSON.stringify(__ciRead(${st}))`));
+        if (!near(r.beatMs, beatMs, 1e-6) || r.calls.length !== 1) { fail(`${what} (${bn}): ${r.calls.length} count-ins at ${r.beatMs} ms a beat, want one at ${beatMs} (the start path changed: this run no longer tests it)`); continue; }
+        judge(`${what} (${bn})`, r, 4, web, lead);
+      }
+    }
+    /* (e) (f) A song switch, every round's count-in at the round's own tempo, and the saved take lists them. */
+    const SW = +run('CC_POWER_PROGRESSIONS.findIndex(p => p.ladder)');
+    for (const [base, nudge, wantBpms, wantClicks] of [[50, false, [50, 55, 60], [2, 2, 4]], [55, false, [55, 60, 65], [2, 4, 4]], [55, true, [55, 55, 60], [2, 2, 4]]]) {
+      const what = `a song switch from ${base} BPM${nudge ? ' with "Next round −5" pressed in round 1' : ''}`;
+      run(`__ciReset(true); setLang('en'); ccSetup('power'); ccPickRate(2); ccPickProg(${SW}); cc.bpm = ${base}; ccPrepare(false); ccBeginStage();`);
+      const seen = [];
+      for (let k = 0; k < 3; k++) {
+        const r = JSON.parse(run(`JSON.stringify(Object.assign(__ciRead(cc), { stage: cc.stage, bpm: cc.stageBpms[cc.stage], phase: cc.phase }))`));
+        tot.rounds++;
+        judge(`${what}, round ${k + 1}`, r, wantClicks[k], true, 0.1);
+        seen.push(r.beeps.length);
+        if (r.stage !== k || r.bpm !== wantBpms[k] || r.phase !== 'play') fail(`${what}: round ${k + 1} is stage ${r.stage} at ${r.bpm} BPM, phase "${r.phase}" (want ${wantBpms[k]}, play)`);
+        if (k === 0 && nudge) run('ccNudgeNext(-5);');
+        if (k < 2) run(`cc.changes.forEach(c => { c.result = 'ok'; }); __ci.beeps = []; __ci.digits = []; __ci.calls = []; __ci.goAt = null; ccStageEnd();`);
+      }
+      const meta = JSON.parse(run('JSON.stringify(ccRecMeta(true).fields)'));
+      tot.takes++;
+      if (JSON.stringify(meta.countInBeats) !== JSON.stringify(seen) || JSON.stringify(seen) !== JSON.stringify(wantClicks) || !Array.isArray(meta.stageBpms) || meta.countInBeats.length !== meta.stageBpms.length)
+        fail(`${what}: scheduled ${JSON.stringify(seen)} clicks (want ${JSON.stringify(wantClicks)}); the saved take says countInBeats ${JSON.stringify(meta.countInBeats)} for stageBpms ${JSON.stringify(meta.stageBpms)}`);
+    }
+    /* (f) Rounds a Stop never reached carry their planned count; a pair has one entry; the document micRecSaveNow writes carries the field. */
+    {
+      const r = JSON.parse(run(`(() => { __ciReset(true); ccSetup('power'); ccPickRate(2); ccPickProg(${SW}); cc.bpm = 50; ccPrepare(false); ccBeginStage(); __ciRead(cc); return JSON.stringify(ccRecMeta(false).fields); })()`));
+      tot.takes++;
+      if (JSON.stringify(r.countInBeats) !== '[2,2,4]' || JSON.stringify(r.stageBpms) !== '[50,55,60]') fail(`a song switch from 50 Stopped in round 1 saves countInBeats ${JSON.stringify(r.countInBeats)} for ${JSON.stringify(r.stageBpms)}; want [2,2,4] (the rounds not reached at their planned tempos)`);
+      for (const [bpm, want] of [[30, '[2]'], [60, '[4]']]) {
+        const doc = JSON.parse(run(`(() => { const keep = { p: micRecPcm16, n: micRecMicName, ci: console.info, cu: currentUser }; currentUser = { uid: 'dev-user', displayName: 'x' }; micRecPcm16 = () => new Int16Array(4); micRecMicName = () => 'mic';
+          let seen = null; console.info = (a, d) => { seen = d; };
+          try { __ciReset(true); ccSetup('power'); ccPickRate(2); ccPickProg(1); cc.bpm = ${bpm}; ccPrepare(false); ccBeginStage(); __ciRead(cc);
+            micRecSaveNow({ n: 48000, srcRate: 48000, perf0: 900, ctx0: 0, firstPlay: 0, mode: 'pw', frames: 0, frameSum: 0, frameMax: 0, track: null }, ccRecMeta(true)); }
+          finally { micRecPcm16 = keep.p; micRecMicName = keep.n; console.info = keep.ci; currentUser = keep.cu; }
+          return JSON.stringify({ got: seen !== null, cib: seen && seen.countInBeats, sched: __ci.beeps.length }); })()`));
+        tot.takes++;
+        if (!doc.got || JSON.stringify(doc.cib) !== want || `[${doc.sched}]` !== want) fail(`a pair at ${bpm} BPM: the document micRecSaveNow writes has countInBeats ${JSON.stringify(doc.cib)} (${doc.got ? 'written' : 'NOT written'}), ${doc.sched} clicks were scheduled; want ${want}`);
+      }
+    }
+    /* The setup tip names the clicks for the setup tempo, and −5 / +5 and the slider redraw it (the screen itself is not redrawn: ccSetBpm). */
+    for (const lang of ['en', 'es']) {
+      const word = lang === 'en' ? 'count-in clicks' : 'clics de cuenta';
+      for (const [game, start, steps] of [['power', 55, [['ccNudgeBpm(5)', 60], ['ccNudgeBpm(-5)', 55], ['ccSetBpm(140)', 140], ['ccSetBpm(10)', 10]]], ['open', 60, [['ccNudgeBpm(-5)', 55], ['ccNudgeBpm(5)', 60]]]]) {
+        run(`setLang(${JSON.stringify(lang)}); ccSetup(${JSON.stringify(game)}); ccPickRate(2); ccPickProg(${game === 'power' ? 1 : 0}); ccSetBpm(${start}); ccRenderSetup();`);
+        const first = run(`(document.getElementById('cc-body').innerHTML.match(/id="cc-tip">([\\s\\S]*?)<\\/div>/) || [])[1] || ''`);
+        const states = [[`${game} setup at ${start}`, first, start]];
+        for (const [call, bpm] of steps) { run(call); states.push([`${game} after ${call}`, run(`document.getElementById('cc-tip').innerHTML`), bpm]); }
+        for (const [what, html, bpm] of states) {
+          tot.tips++;
+          const n = bpm < 60 ? 2 : 4, other = n === 2 ? 4 : 2;
+          if (!html.includes(`${n} ${word}`) || html.includes(`${other} ${word}`) || /\{clicks\}/.test(html)) fail(`(${lang}) the tip on the ${what} reads "${html.replace(/<[^>]+>/g, '').slice(0, 90)}…"; want "${n} ${word}"`);
+        }
+      }
+    }
+  } catch (e) { fail(`the count-in run threw (${e.message})`); }
+  finally {
+    run(`setTimeout = __ciKeep.st; clearTimeout = __ciKeep.ct; performance.now = __ciKeep.pn; getAudioCtx = __ciKeep.ga; coachCountIn = __ciKeep.ci; ccLoop = __ciKeep.loop; coachLoop = __ciKeep.cl; srLoop = __ciKeep.sl; nrLoop = __ciKeep.nl; micRecStart = __ciKeep.rs;
+      micRecShouldAsk = __ciKeep.ask; coachEnsureRunning = __ciKeep.er; coachAcquireMic = __ciKeep.am; coachStream = __ciKeep.cs; micRec = __ciKeep.mr; saveGames = __ciKeep.sg; setLang('en'); cc = null; coach = null; sr = null; nr = null;`);
+  }
+  for (const [k, n] of Object.entries(COUNTIN_PIN)) if (tot[k] !== n) fail(`${tot[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin COUNTIN_PIN on purpose)`);
+  if (bad === 0) ok(`${tot.runs} real count-ins (${tot.beeps} clicks, each at its beat): Power Chord Switch at 10 / 30 / 55 / 60 / 140 and Change Up at 40 / 55 / 60 / 90 BPM count 2 below 60 and 4 from 60, the Listening Coach (30, 90), Strum Radar (50, 90) and Note Runner (30, 72) always 4, through Web Audio (0.1 s and a recording's 0.4 s lead) and the timer path; only the last click high, the counter 3-4 or 1-4, play exactly that many beats after the first click; ${tot.rounds} song-switch rounds count at their own tempo (2/2/4, 2/4/4, and 2/2/4 after "Next round −5"); ${tot.takes} saved takes list each round's clicks as scheduled (rounds a Stop never reached at their planned tempo, and in the document micRecSaveNow writes); ${tot.tips} setup tips name the clicks after −5 / +5 and the slider (EN + ES)`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1cl. POWER CHORD SWITCH TAKES ARE MEASURED (2026-11-04) — teacher.js
    micEvalTakePw, what the console's "Evaluate all recordings" does with a
    saved Power Chord Switch take (coach.js ccRecMeta): per change, is there a
@@ -14145,6 +14315,7 @@ function checkPracticeMinutes(i18nTable) {
   checkLiveQuizTimerRepaint();
   await checkLiveQuizNoNames();
   checkCoachVerdicts();
+  await checkCountIn();
   await checkPwTakeEvaluator();
   checkPracticeMinutes(i18nTable);
   await checkBackingLoudness();

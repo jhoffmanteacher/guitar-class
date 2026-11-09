@@ -969,8 +969,12 @@ function coachUpdateMicLevel(rms){
   for (let i = 0; i < bars.length; i++) bars[i].classList.toggle('lit', i < level);
 }
 
-/* Shared 4-click count-in: schedules the beeps + count digits on state's
-   beat grid, sets state.listenStart, and fires onGo after beat 4.
+/* Shared count-in: schedules the beeps + count digits on state's beat
+   grid, sets state.listenStart, and fires onGo after the last beat.
+   `beats` clicks (optional, 4 by default), the last one high = "go". Power
+   Chord Switch and Change Up pass ccCountInBeats (2 below 60 BPM, 2026-11-09);
+   the Listening Coach, Strum Radar and Note Runner count 4. The digits are
+   the END of a bar: 2 clicks show 3, 4.
 
    The beeps are on the AUDIO clock (2026-10-12). They were four setTimeouts,
    and the graders (the Coach, Change Up, Strum Radar, Note Runner) time the
@@ -980,10 +984,10 @@ function coachUpdateMicLevel(rms){
    handed to Web Audio COACH_COUNTIN_AHEAD before it is due, at its exact
    time, so a stall shorter than that moves nothing. listenStart is still a
    performance.now() time, as every caller expects: the audio-clock moment
-   one beat after beat 4, converted through one (performance.now(),
+   one beat after the last click, converted through one (performance.now(),
    currentTime) pair read back to back — the clock bridge Strum Hero uses.
    Beat 1 is queued COACH_COUNTIN_LEAD ahead so it is never in the past.
-   Each beep is queued just in time rather than all four up front so that
+   Each beep is queued just in time rather than all up front so that
    clearing state.timeouts (every stop path does) still cancels the beeps
    not yet queued — at most the one due within COACH_COUNTIN_AHEAD can
    still sound. A context that isn't running yet (its clock stands still)
@@ -1007,20 +1011,21 @@ function coachBeepAt(ac, at, freq, dur){
   g.gain.exponentialRampToValueAtTime(0.001, at + dur);
   o.start(at); o.stop(at + dur);
 }
-function coachCountIn(state, countElId, onGo){
+function coachCountIn(state, countElId, onGo, beats){
+  const n = Number.isInteger(beats) && beats >= 1 && beats <= 4 ? beats : 4;
   const ac = typeof getAudioCtx === 'function' ? getAudioCtx() : null;
   if (ac && ac.state === 'suspended') ac.resume();
   state.timeouts.forEach(clearTimeout);
   state.timeouts = [];
-  const showCount = i => { const el = document.getElementById(countElId); if (el) el.textContent = String(i + 1); };
+  const showCount = i => { const el = document.getElementById(countElId); if (el) el.textContent = String(4 - n + i + 1); };
   if (ac && ac.state === 'running'){
     const perf0 = performance.now(), ctx0 = ac.currentTime;
     const lead = micRec && micRec.live ? COACH_COUNTIN_REC_LEAD : COACH_COUNTIN_LEAD;
     const beat = state.beatMs / 1000, a0 = ctx0 + lead;
-    state.listenStart = perf0 + (a0 + 4 * beat - ctx0) * 1000;
-    for (let i = 0; i < 4; i++){
+    state.listenStart = perf0 + (a0 + n * beat - ctx0) * 1000;
+    for (let i = 0; i < n; i++){
       const at = a0 + i * beat, dueMs = (at - ctx0) * 1000;
-      const queue = () => coachBeepAt(ac, at, i === 3 ? 990 : 660, 0.08);
+      const queue = () => coachBeepAt(ac, at, i === n - 1 ? 990 : 660, 0.08);
       if (dueMs <= COACH_COUNTIN_AHEAD * 1000) queue();
       else state.timeouts.push(setTimeout(queue, dueMs - COACH_COUNTIN_AHEAD * 1000));
       state.timeouts.push(setTimeout(() => showCount(i), dueMs));
@@ -1029,14 +1034,14 @@ function coachCountIn(state, countElId, onGo){
     return;
   }
   const t0 = performance.now();
-  state.listenStart = t0 + 4 * state.beatMs;
-  for (let i = 0; i < 4; i++){
+  state.listenStart = t0 + n * state.beatMs;
+  for (let i = 0; i < n; i++){
     state.timeouts.push(setTimeout(() => {
-      beep(i === 3 ? 990 : 660, 0.08);
+      beep(i === n - 1 ? 990 : 660, 0.08);
       showCount(i);
     }, Math.round(i * state.beatMs)));
   }
-  state.timeouts.push(setTimeout(onGo, Math.round(4 * state.beatMs)));
+  state.timeouts.push(setTimeout(onGo, Math.round(n * state.beatMs)));
 }
 
 /* Listening screen, 2026-07-26 redesign — ONE moving thing.
@@ -3061,7 +3066,7 @@ window.addEventListener('gc-langchange', function(){
 
 /* ════════════════════════════════════════════════════════════════════
    CHANGE UP — chord-change game. Pick a chord loop and a tempo; after a
-   4-click count-in you strum ON EVERY BEAT (silent visual pulse, same as
+   count-in (4 clicks; 2 below 60 BPM, ccCountInBeats) you strum ON EVERY BEAT (silent visual pulse, same as
    the Coach — a speaker click would bleed into the mic). Chords switch
    every bar; the game grades each CHANGE: did a strum land on beat 1 of
    the new bar, and does it ring like the new chord's notes (hedged, never
@@ -3108,6 +3113,11 @@ function ccBpmMin(){ return ccIsPower() ? CC_POWER_BPM_MIN : CC_BPM_MIN; }
    rounds start from it (30 / 35 / 40); Change Up still opens on 60. A tempo the student already picked this session
    (sessionStorage pwBpm) wins. */
 const CC_POWER_START_BPM = 30;
+/* The clicks of the count-in before each round of Power Chord Switch and Change Up (Jonathan, 2026-11-09): 2 below 60 BPM, 4 at 60 and
+   above. Four clicks were 24 s of waiting at 10 BPM and 8 s at 30; two are 12 s and 4 s, still on the beat so the tempo is heard. The
+   Listening Coach, Strum Radar and Note Runner keep 4. ccBeginStage passes it the round's own tempo; a saved take lists it per round
+   (ccRecMeta countInBeats), and the console's evaluator reads that (teacher.js micEvalTakePw). checks.mjs 1ck runs the real count-in. */
+function ccCountInBeats(bpm){ return bpm < 60 ? 2 : 4; }
 /* A song switch (CC_POWER_PROGRESSIONS, `ladder`) is 3 rounds, each CC_LADDER_STEP
    BPM faster than the last, of CC_LADDER_SLOTS chords each: 4 back-and-forths.
    The step was 15 until 2026-11-05 (Jonathan: "don't increase it so quickly"). */
@@ -3396,6 +3406,17 @@ function ccSetBpm(v){
   if (sl){ sl.value = String(cc.bpm); sl.setAttribute('aria-valuetext', cc.bpm + ' BPM'); }
   const ln = document.getElementById('cc-ladder-note');
   if (ln) ln.innerHTML = ccLadderNoteText(cc.bpm);
+  // the tip names the count-in's clicks, which change at 60 BPM
+  const tip = document.getElementById('cc-tip');
+  if (tip) tip.innerHTML = ccTipHtml();
+}
+/* The setup's tip: the speed the chord switches at, and the count-in's clicks at the setup tempo (ccCountInBeats; a song switch's round 1). */
+function ccTipHtml(){
+  const rate = CC_RATES[cc.rateIdx] || CC_RATES[0];
+  const tipRate = t(rate.bpc === 4 ? 'games.cc.tipRate.bar'
+    : rate.bpc === 2 ? 'games.cc.tipRate.half'
+    : 'games.cc.tipRate.beat');
+  return `&#x1F92B; ${t(ccIsPower() ? 'games.pw.tip' : 'games.cc.tip', { rate: tipRate, clicks: ccCountInBeats(cc.bpm) })}`;
 }
 /* "Round 1: 60 BPM · Round 2: 75 BPM · Round 3: 90 BPM" — the setup's line for a song switch. */
 function ccLadderNoteText(base){
@@ -3491,9 +3512,6 @@ function ccRenderSetup(msg){
   );
   if (ccIsPower()) rateBtns.reverse();
   const rateBtnsHtml = rateBtns.join('');
-  const tipRate = t(rate.bpc === 4 ? 'games.cc.tipRate.bar'
-    : rate.bpc === 2 ? 'games.cc.tipRate.half'
-    : 'games.cc.tipRate.beat');
   /* The chord charts of Power Chord Switch are drawn larger (styles.css,
      .cc-power, two columns); Change Up and the Coach card share
      ccDiagramsHtml. */
@@ -3541,7 +3559,7 @@ function ccRenderSetup(msg){
     ? `<div class="coach-note">&#x1F3B2; ${t(power ? 'games.pw.randomNote' : 'games.cc.randomNote')}</div>`
     : ccDiagramsHtml(prog.chords, null, undefined, prog.shapes);
   const ladderNote = prog.ladder ? `<div class="coach-note"><strong>${t('games.pw.ladder.intro', { rounds: CC_LADDER_ROUNDS })}</strong><br><span id="cc-ladder-note">${ccLadderNoteText(cc.bpm)}</span></div>` : '';
-  const tip = `<div class="coach-tip">&#x1F92B; ${t(power ? 'games.pw.tip' : 'games.cc.tip', { rate: tipRate })}</div>`;
+  const tip = `<div class="coach-tip" id="cc-tip">${ccTipHtml()}</div>`;
   const note = msg ? `<div class="coach-note">${escHtml(msg)}</div>` : '';
   /* Power Chord Switch uses the width of the games screen: the settings (speed,
      tempo, the pairs, Start) in the left column, the two charts and the tip in
@@ -3639,6 +3657,7 @@ function ccPrepare(again){
   cc.evLog = [];   // every strum heard, for a recorded take (ccRecMeta)
   cc.onsetCount = 0;   // every sound ccLoop took for a strum, in all rounds of this game (ccFinish: was anything heard at all?)
   cc.tempoLog = []; cc.startBpms = []; cc.retimedStages = [];   // the live tempo changes of this game (ccLiveBpm)
+  cc.countIns = [];   // the count-in clicks each round was given (ccBeginStage), for a recorded take
 }
 
 /* Starts the round cc.stage: its changes, its tempo, a count-in at that tempo,
@@ -3668,13 +3687,17 @@ function ccBeginStage(){
     ? `<div class="cc-cols cc-cols-play${cc.ladder ? ' cc-ladder-play' : ''}"><div class="cc-col-set">${ccRecBadge()}${stageLabel}<div class="coach-count" id="cc-count">&nbsp;</div></div>` +
       `<div class="cc-col-pic">${ccDiagramsHtml(prog, prog[0], undefined, cc.shapes)}</div></div>`
     : `<div class="coach-count" id="cc-count">&nbsp;</div>` + ccDiagramsHtml(prog, prog[0]);
+  /* The round's own tempo sets its count-in (a song switch's later rounds can be at 60 or more, and the play screen's buttons move them). */
+  const countIn = ccCountInBeats(cc.stageBpms[cc.stage]);
+  cc.countIns = (cc.countIns || []).slice();
+  cc.countIns[cc.stage] = countIn;
   coachCountIn(cc, 'cc-count', () => {
     if (cc && cc.phase === 'countin'){
       cc.phase = 'play';
       if (cc.firstPlayAt == null) cc.firstPlayAt = performance.now();   // the first round's count-in is over: ccFinish measures play time from here
       ccRenderPlay();
     }
-  });
+  }, countIn);
   /* When each change is due on the performance.now() clock (listenStart is set by
      coachCountIn), for a recorded take. */
   cc.changes.forEach(c => { c.t = cc.listenStart + c.beat * cc.beatMs; c.stage = cc.stage; c.bpm = cc.stageBpms[cc.stage]; });
@@ -3685,7 +3708,8 @@ function ccBeginStage(){
 /* The red "Recording this take for your teacher" label, drawn on every screen of a
    take (each screen replaces #cc-body), and only while a Power Chord Switch capture
    is really running. A capture ends at micRec's 30 s cap, and the label goes with it: a three-round game at the default speed (30 BPM) is
-   recorded until inside round 2's count-in, a slower game for less. */
+   recorded until about 4 s into round 2's play (2-click count-ins since 2026-11-09; with 4 clicks the cap fell inside round 2's count-in),
+   a slower game for less. */
 function ccRecBadge(){
   return micRec && micRec.live && micRec.mode === 'pw' ? micRecBadgeHtml() : '';
 }
@@ -3700,6 +3724,7 @@ function ccRecMeta(complete){
               bpm: ccStartBpms()[0], stageBpms: ccStartBpms(), bpc: cc.bpc, eventTimes: 'played (arrival - micLatencyMs)',
               onsetRatio: CC_POWER_ONSET_RATIO, hfRatio: CC_POWER_HF_RATIO,
               gridStepCapMs: CC_GRID_STEP_CAP_MS,   // the console replays the grid with this cap; a take without it was graded on the uncapped grid
+              countInBeats: ccCountInList(),   // each round's count-in clicks, one per stageBpms entry; a take without it counted 4 in every round (before 2026-11-09)
               changeReadings: 'per change: null = no strum in its window; [] = a strum but no pitch could be read; else the midi readings its chord check used (under 3 passes on timing alone)' },
     expected: cc.changes.map((c, i) => Object.assign({ i, t: c.t, from: c.from, to: c.to, stage: c.stage == null ? 0 : c.stage, bpm: c.bpm, verdict: c.result,
       readings: c.readings ? c.readings.map(r2) : null }, (cc.retimedStages || []).indexOf(c.stage == null ? 0 : c.stage) >= 0 ? { retimed: true } : {})),
@@ -3708,6 +3733,10 @@ function ccRecMeta(complete){
   };
 }
 
+/* The count-in clicks of each round, for a saved take: what ccBeginStage gave a round it started, else what its planned tempo would give. */
+function ccCountInList(){
+  return ccStartBpms().map((b, k) => cc.countIns && cc.countIns[k] != null ? cc.countIns[k] : ccCountInBeats(b));
+}
 /* The tempo each round STARTED at, for a saved take: the live changes (ccLiveBpm) move cc.stageBpms. A round not reached yet has its planned tempo. */
 function ccStartBpms(){
   return cc.stageBpms.map((b, k) => cc.startBpms && cc.startBpms[k] != null ? cc.startBpms[k] : b);
@@ -4128,7 +4157,7 @@ function ccFinish(complete){
      — marked complete:false in the take. A Stopped one needs MICREC_MIN_STOPPED_SEC of play after the first count-in: each student
      has ONE take per game and a new take overwrites it, so an accidental Stop must not replace a full take
      (or use up the collection counter) with two seconds of count-in. Leaving the screen still drops it. */
-  const playedSec = cc.firstPlayAt == null ? 0 : (performance.now() - cc.firstPlayAt) / 1000;   // time played, not audio length: the audio starts at the count-in, which lasts 24 s at 10 BPM
+  const playedSec = cc.firstPlayAt == null ? 0 : (performance.now() - cc.firstPlayAt) / 1000;   // time played, not audio length: the audio starts at the count-in, which lasts 12 s at 10 BPM
   if (rec && (complete || playedSec >= MICREC_MIN_STOPPED_SEC)) micRecSave(rec, ccRecMeta(complete));
 }
 
