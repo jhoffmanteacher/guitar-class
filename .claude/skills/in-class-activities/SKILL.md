@@ -507,9 +507,8 @@ Normal (Jonathan, 2026-10-09: "just below the normal speed of each song").
   `slowestApplyRate()` sets both.
 
 **Each Core song row links its whole-song practice card** (Jonathan,
-2026-10-05). The Core list is the only place: it replaced the 2026-10-01 "Play
-Along with the TAB/Chords" section that listed every part card atop the Songs
-page ("too much going on").
+2026-10-05). The Core list is the only place; there is no "Play Along" section
+listing part cards atop the Songs page ("too much going on").
 - A Core row shows exactly three links, in this order: **Play Along · Backing
   track for solos · Song Journey**. No Tutorial or Original on Core rows
   (Choice rows keep theirs).
@@ -523,25 +522,23 @@ page ("too much going on").
   greyed placeholder).
 - Part cards (The Riff, Intro and Verse…) are not on the Songs page at all.
 - **A tap opens the card where it lives** (`songsHubOpenCard()` →
-  `goExploreHash('class-activities/<id>')`), so there is one copy of each card
-  and one set of ticks; Back returns to Songs. Don't render the card a second
-  time on the Songs page: the practice-card engine (`pc*`) and the open-card
-  state (`caOpenId`, `caSyncHash`, the sticky bar) all belong to In-Class
-  Activities.
+  `goExploreHash('class-activities/<id>')`): one copy of each card, one set of
+  ticks; Back returns to Songs. Don't render the card a second time on the
+  Songs page: the `pc*` engine and the open-card state (`caOpenId`,
+  `caSyncHash`, the sticky bar) belong to In-Class Activities.
 - `songsPlayAlongBtn(slug)` builds the link inside a `.sh-play-slot`
   (`display:contents`). `refreshSongsPlayAlong()` (end of `loadClassConfig()`)
   refills only the changed slots when the board or dates land after the page
   is open.
 - Songs stays a gated page.
 
-**One way round the date: "Play Along now"** (Jonathan, 2026-10-02 — "can we
-set some visible even if they don't have a release date?"). Every assigned
-practice card on the console board has a **Play Along by date / Play Along
-now** switch (`teacherSetActivityPlayAlong`, cell-checked write to
+**One way round the date: "Play Along now"** (Jonathan, 2026-10-02). Every
+assigned practice card on the console board has a **Play Along by date / Play
+Along now** switch (`teacherSetActivityPlayAlong`, cell-checked write to
 `config/class.playAlongActivities`, `{ id: true }`).
 - "Now" lets the card be opened from the Songs page without a release date.
-  **Only a whole-song card has a Songs link since 2026-10-05**, so the switch on
-  a part card does nothing a student can reach.
+  Only a whole-song card has a Songs link, so the switch on a part card does
+  nothing a student can reach.
 - It changes **nothing else**. `caIsVisible()` does not read the map, so the
   card stays off In-Class Activities and can never be a blocker (none of the
   three blocker rules reads it either).
@@ -550,80 +547,67 @@ now** switch (`teacherSetActivityPlayAlong`, cell-checked write to
   `songsPlayAlongCard()` (the Core row link), `caFocusActivity()` (so the tap
   opens it instead of "not posted"), and `renderClassActivities()`, which
   renders that ONE card under the Songs section's own title **only while it is
-  the open card** — close it and the next render drops it.
+  the open card**.
 - Don't fold the flag into `caIsVisible()`: that would put the card on
-  In-Class Activities and behind the gate, exactly what Jonathan chose against.
-  He was offered "date it and mark it Optional" and "list every assigned card"
-  and picked this.
+  In-Class Activities and behind the gate. Jonathan chose this over "date it
+  and mark it Optional" and "list every assigned card".
 - Cached in `localStorage` (`caPlayAlong`). Delete clears the flag, Archive
-  keeps it.
-- No `firestore.rules` change (comment only). checks.mjs 1ai's writer count
-  went 16 → 17.
+  keeps it. No `firestore.rules` change (comment only).
 
 **The "Keep practicing" row — pins (Jonathan, 2026-10-10).** For cards he
 reuses on many days (the play-along cards, ca-23).
 - `config/class.activityPins` is an ORDERED array of up to 4 ids, set by the
   board's **Not pinned / Pinned n of 4** switch (`teacherSetActivityPin`,
-  cell-checked on the whole array; 1ai 20 → 21) and listed, with Unpin
-  buttons, in a strip above the board.
+  cell-checked on the whole array) and listed, with Unpin buttons, in a strip
+  above the board.
 - Students get one button per pin above Today's activity (`caPinRowHtml`), in
   pin order; no pins, no row.
 - A pin that is also one of today's cards STAYS in the row (Jonathan,
-  2026-10-13 — it was dropped from the row until then; don't bring that filter
-  back).
+  2026-10-13 — don't bring back the filter that dropped it).
 - A tap (`caOpenPin` → `caFocusActivity`) opens a dated card where it sits. A
   pin-only card (`caIsPinOnly`: undated, or Play Along now) renders under the
   row while it is the open card.
-- Same shape as Play Along now: the pin stands in for the release date for the
-  ROW only. **Don't fold it into `caIsVisible()`**, and no blocker rule or
-  `CA_TODAY_MAX` reads it.
+- The pin stands in for the release date for the ROW only. **Don't fold it
+  into `caIsVisible()`**, and no blocker rule or `CA_TODAY_MAX` reads it.
 - Hidden, Archive, Delete (both unpin; Restore does not re-pin) and "not
   assigned" still win (`caPinReachable`). Exit checks are never pinnable.
 - Cached as `caPins`.
 
-**There was an Assessments page (2026-09-12–2026-09-20)**: a rail button and
-`#assessments` screen listing every module's in-person assessment items in one
-accordion, read-only. Removed 2026-09-20 (Jonathan: redundant with the Module Review's
-box; rubrics/assignments go on Canvas) — rail button, `#assessments`
-screen/route/i18n/CSS all deleted.
-**The Module Review's per-module assessment box is a separate, still-live
-feature**: `.mr-assess-box` at the bottom of `buildModuleReview()`, and its
-heads-up pop (`buildMrAssessPop`), reading the same
-`MODULE_REVIEWS[n].assessItems`. Don't confuse the two.
+**There is no Assessments page** (removed 2026-09-20, Jonathan: redundant with
+the Module Review's box; rubrics/assignments go on Canvas). **The Module
+Review's per-module assessment box is a separate, live feature**:
+`.mr-assess-box` at the bottom of `buildModuleReview()`, and its heads-up pop
+(`buildMrAssessPop`), reading `MODULE_REVIEWS[n].assessItems`. Don't confuse
+the two.
 
-**Phase 2 (nav collapse), shipped 2026-09-12:** the rail is five items —
-In-Class Activities · Practice · Songs · Games · My progress, no "Explore"
-heading.
-- The `nav.explore` i18n key stays: it's the rail `<nav>`'s aria-label, no
-  longer a visible span.
-- Keep practicing and Daily Review are sections inside My progress now, not
-  their own pages. `renderKeepPracticing()` and `renderDailyReview()` are
-  UNCHANGED; only their host div moved in `index.html`.
-  `openMyProgressScreen()` calls all three renderers (Daily Review first, then
-  Keep practicing, then the module tally).
+**The rail (nav collapse)** is five items — In-Class Activities · Practice ·
+Songs · Games · My progress, no "Explore" heading.
+- The `nav.explore` i18n key stays: it's the rail `<nav>`'s aria-label.
+- Keep practicing and Daily Review are sections inside My progress, not their
+  own pages. `renderKeepPracticing()` and `renderDailyReview()` are UNCHANGED;
+  only their host div moved in `index.html`. `openMyProgressScreen()` calls
+  all three renderers (Daily Review, then Keep practicing, then the module
+  tally).
 - `#keep-practicing` and `#daily-review` stay in `EXPLORE_HASHES`, but
   `routeExploreHash()` canonicalizes both to `#my-progress` before anything
   else runs (the gate check, the dedup guard, the scroll stash), so an old
   bookmark or Journey link lands on the merged page.
-- Mood Chart lost its rail button, and its row at the top of the Songs page
-  was removed 2026-10-02 (Jonathan). `mood-chart.html` still ships (no longer
-  precached since 2026-10-12 — `SHELL_NOT_PRECACHED` in checks.mjs), but
-  nothing on the site links to it. Don't add a link back without asking.
+- Mood Chart has no rail button and no Songs-page row (Jonathan, 2026-10-02).
+  `mood-chart.html` still ships (not precached — `SHELL_NOT_PRECACHED` in
+  checks.mjs), but nothing on the site links to it. Don't add a link back
+  without asking.
 
-**Phase 3 (render-time hiding), shipped 2026-09-12** (Module 2 piloted, then
-every module tagged, per the work order's "Order of work"). Four section
-`kind`s beyond the pre-existing `tuning-warmup` (ratchet 1r):
-- `take-to-song` renders a Journey link card (`journeyLinkCardHtml()`) in place
-  of its steps — **but only when this module has a Journey layer to link to**
-  (see the 2026-09-12 correction below).
+**Render-time hiding.** Four section `kind`s beyond the pre-existing
+`tuning-warmup` (ratchet 1r):
+- `take-to-song` — switched off in every module (`TAKE_TO_SONG_ENABLED`; the
+  rule and its on-state are under "Play-along first" below).
 - `routine`/`ear-spark`/`reflection`: the section is skipped entirely ("My
   Practice Routine", "Ear Spark — optional ear bonus", "Checkpoint"/"Wrap-Up").
 - **Kind-ONLY matching, deliberately NOT kind-or-title like
   `isTuningWarmupSection`.** `isEarSparkSection`/`isRoutineSection`/
   `isReflectionSection`/`isTakeToSongSection` in app.js check `sec.kind` alone.
-  These four titles repeat across nearly every module, so a title fallback
-  would hide every module's copy the moment the code shipped, not just
-  Module 2's.
+  These titles repeat across nearly every module, so a title fallback would
+  hide every module's copy at once.
 - A step-level `hidden: true` flag (song previews now taught by a class
   activity) works the same way, no title involved.
 
@@ -633,141 +617,65 @@ every module tagged, per the work order's "Order of work"). Four section
 `moduleStepsFlat()` (the Daily 5 candidate pool). checks.mjs **1ac** requires
 the call.
 - The one deliberate exception is teacher.js's `setShortResponses()`. It walks
-  `storageSections()` (every section but tuning-warmup) because it's an audit
-  of what students actually wrote: the Checkpoint / Wrap-Up / Practice Routine
-  answers from Modules 1–2 are still real after those sections left the
-  ladder. A slot in a non-renderable section or on a `hidden` step is tagged
-  `retired` and its label says "(retired)". 1ac requires `storageSections(`
-  there and fails on `visibleSections(`.
+  `storageSections()` (every section but tuning-warmup) because it audits what
+  students actually wrote: the Checkpoint / Wrap-Up / Practice Routine answers
+  from Modules 1–2 are still real. A slot in a non-renderable section or on a
+  `hidden` step is tagged `retired` and its label says "(retired)". 1ac
+  requires `storageSections(` there and fails on `visibleSections(`.
 - `visibleSteps` returns `{st, idx}` pairs. `idx` is the step's real position
   in `sec.steps` — what every storage key (doneKey, responses, bpm, drills) is
-  built from — so a hidden step earlier in the array can never shift a later
-  one's saved progress. The pair's position in the *returned array* is the
-  visible step number and the only thing "which step is current" compares
-  against.
+  built from — so a hidden step can never shift a later one's saved progress.
+  The pair's position in the *returned array* is the visible step number and
+  the only thing "which step is current" compares against.
 - `visibleSections` returns `{sec, gi}` pairs the same way. **`gi` is the
   STORAGE index and comes from `storageSections()`: the section's position
-  after excluding ONLY tuning-warmup sections.** Every Firestore key has been
-  written under that convention since July 2026 (pre-semester, so that one
-  hide is baked into the keys).
-- Every other hide — routine / ear-spark / reflection, a section with zero
-  visible steps — is render-only and never renumbers `gi`. The pair's position
-  in the returned array is its DOM position and nothing else.
-- Failure on record: the first cut (066dc05, one day live) numbered `gi` over
-  the survivors and moved Module 2 Set 1 station B's "Play along with the note
-  map" from `b-sec2` to `b-sec1`. "Safe because it's a first rollout" was true
-  for tuning-warmup in July, not mid-semester.
+  after excluding ONLY tuning-warmup sections.** Every Firestore key is
+  written under that convention.
+- Every other hide — routine / ear-spark / reflection / take-to-song, a section
+  with zero visible steps — is render-only and never renumbers `gi`. Numbering
+  `gi` over the survivors would move saved progress (it did once: Module 2 Set
+  1 station B's "Play along with the note map", `b-sec2` → `b-sec1`).
 - checks.mjs **1af** rebuilds the expected `data-ns` list for all 36 sets from
   raw module data, compares it to what `buildSet()` renders, and pins the
-  Module 2 Set 1 sections by title.
+  Module 2 Set 1 sections by title. `tools/smoke.mjs` walks every set in both
+  languages in a real browser.
 
-**The Journey link card (3b):** `JOURNEY_LAYERS` in app.js (`{slug: {moduleNum:
-layerNum}}`) is authored from the six pages' real `.layer-unit` spans — today
-uniformly Module 1→Layer 1 … 5→5, anything past 5 an unnumbered "Extra".
+**`JOURNEY_LAYERS`** in app.js (`{slug: {moduleNum: layerNum}}`) is authored
+from the six pages' real `.layer-unit` spans — today Module 1→Layer 1 … 5→5,
+anything past 5 an unnumbered "Extra".
 - checks.mjs **1ab** rebuilds the map from those spans and fails on drift.
-- **1ab2** (2026-10-12, when Modules 4 and 5 swapped and the pages swapped
-  Layers 4 and 5 with them — Layer 4 is Open Chords, Layer 5 the Pentatonic
-  Solo) checks the module files against the same map: every `songThread`
-  layer, every "Layer N of 5" in module-N.js, every `#layer-N` link. It ties the
-  numbers to the skill: a layer titled Power Chords / Pentatonic / Open Chords
-  must say the Module whose `MODULE_MANIFEST` name teaches it.
-- **The box is one button per song** that calls `openSongLink(slug, layer)`
-  (2026-10-06, play-along first — see that section): the song's whole-song
-  card for this module's layer if students can open it, else
-  `tabs/<slug>.html#layer-<n>`.
-- The render rule (Modules 1–5 only, via `journeySongsFor`) is unchanged, and
-  `JOURNEY_LAYERS` is still what 1ab and 1af read.
-
-### ⚠️ SUPERSEDED 2026-10-18: take-to-song is switched off in EVERY module
-`TAKE_TO_SONG_ENABLED = false` in app.js (Jonathan: "remove take it to a song
-from the steps of the modules"). `visibleSteps()` returns nothing for a
-take-to-song section and `isRenderableSection()` says no, in all of Modules
-2–12: neither the Journey card nor the Module 6–12 Challenge steps render.
-- Switched off, not deleted (the Daily 5 pattern): flip it to `true` and
-  everything below applies again exactly as written.
-- Nothing in the data moved, so no progress key did. 1af / 1ao / 1w-t read the
-  switch through `readTakeToSongSwitch()`.
-- The 6–12 fallback below was Jonathan's 2026-09-12 call, reversed here
-  knowingly: seven skills lost their only teaching step (listed in the
-  summer-reset entry that removes the sections for good).
-- The song links moved to the skills: `skill.journey` → `skillJourneyHtml()` in
-  buildChecklist, checks.mjs 1ab3 (pinned 14 skills / 16 links).
-- Full rule: "Take It to a Song" is gone from the module ladders, under
-  "Play-along first" below.
-
-### ⚠️ No Journey layer → the take-to-song section renders its OWN STEPS
-**Correction, 2026-09-12 (same day as Phase 3, found by an error sweep).**
-The first cut swapped a `take-to-song` section's steps for the Journey card
-*unconditionally* and dropped the section when the card came back empty. `JOURNEY_LAYERS` stops at Module 5, so **every one of the 20
-take-to-song sections in Modules 6–12 rendered nothing at all**. That silently
-deleted ~26 challenge cards, Module 12's only graded assessment-piece card
-("Full-Verse Rehearsal") among them, plus the sole teaching step for 7 skills
-(m9w1-s5, m9w2-s5, m10w1-s4, m10w3-s6, m11w3-s6, m12w1-s6, m12w3-s6). The
-tagging was mechanical and title-matched, so it hit sections whose content was
-never a mere song pointer.
-
-The rule now: **the card replaces the steps only when `journeySongsFor(
-moduleNum)` is non-empty.**
-- With no layer (module 6+) there is no card: the section renders as a normal
-  section (its own steps and heading), "empty" only if those steps are.
-- It lives in three places that must agree: `visibleSteps()`,
-  `isRenderableSection()`, and `buildLesson()`'s `hasJourneyCard` branch (which
-  also decides whether the section heading is suppressed, since the card
-  carries its own title).
-- checks.mjs **1af** keeps its own independent copy of the rule and caught the
-  drift the moment app.js changed — update both together.
-- Render-only as ever: `gi` is untouched, so no progress key moved.
-- Jonathan's call was to restore the steps rather than keep the card-or-nothing
-  rule. **Don't re-simplify this back to an unconditional swap.**
-- If a Journey page ever grows a Module 6+ layer, adding it to
-  `JOURNEY_LAYERS` flips that module to the card automatically.
+- **1ab2** checks the module files against the same map: every `songThread`
+  layer, every "Layer N of 5" in module-N.js, every `#layer-N` link. A layer
+  titled Power Chords / Pentatonic / Open Chords must say the Module whose
+  `MODULE_MANIFEST` name teaches it (Layer 4 is Open Chords, Layer 5 the
+  Pentatonic Solo, since Modules 4 and 5 swapped).
+- 1ab and 1af read `JOURNEY_LAYERS`.
 
 **Ratchets:**
 - 1ab — JOURNEY_LAYERS parity.
 - **1ac** — the four callers above must still call
-  `visibleSteps(`/`visibleSections(`. A positive assertion, not an exhaustive
-  raw-iteration scan, so it can't catch a raw `.steps.forEach` added
-  *alongside* a leftover unrelated call.
-- **1ad** — kind ↔ title, full two-way now that every module is tagged (same
-  shape as 1r): a tagged section's title must match, and a section titled like
-  one of these must carry the kind. `KIND_TITLE_COUNTS` pins the total per kind
-  at `{take-to-song:29, routine:5, ear-spark:7, reflection:62}` across all 36
-  sets.
+  `visibleSteps(`/`visibleSections(`. A positive assertion, not a raw-iteration
+  scan, so it can't catch a raw `.steps.forEach` added *alongside* a leftover
+  unrelated call.
+- **1ad** — kind ↔ title, both ways (same shape as 1r): a tagged section's
+  title must match, and a section titled like one of these must carry the
+  kind. `KIND_TITLE_COUNTS` pins the total per kind at
+  `{take-to-song:29, routine:5, ear-spark:7, reflection:62}` across all 36 sets.
 - **1ae** — every `hidden: true` step needs a `// ... ca-<n>` comment on the
-  line above it; still just the 3 from Module 2 (see below).
+  line above it; still just the 3 from Module 2.
 
-**All 13 modules are section-kind-tagged** (mechanical, title-matched,
-2026-09-12). Every "Checkpoint"/"Wrap-Up"/"Take It to a Song"/"My Practice
-Routine…"/"Ear Spark…" section in the course carries its `kind`. So
-`isEarSparkSection()`'s brief kind-only/no-icon gap (modules not yet tagged
-showing Ear Spark without its bolt) is gone too. Module 1 has only one such
-section (its own "session check-in" `routine` variant — it predates the
-take-to-song/Checkpoint/Wrap-Up pattern entirely); Module 13 (single-flow) has
-none.
+**All 13 modules are section-kind-tagged**: every "Checkpoint"/"Wrap-Up"/"Take
+It to a Song"/"My Practice Routine…"/"Ear Spark…" section carries its `kind`.
+Module 1 has only one such section (its "session check-in" `routine`
+variant); Module 13 (single-flow) has none.
 
-**Step-level `hidden: true` (song previews a class activity now teaches) stays
-at Module 2's original 3.** Modules 3–8 were checked against every shipped
-`ca-<n>`; no genuine duplicates to add:
-- The Finger Gym activities (ca-2…ca-7) are generic dexterity drills, not song
-  previews.
-- "Notes on the Low E String" (ca-11) and "Sub Day Circuit" (ca-12) are
-  Module 1/2-era content.
-- `"the cure" — The Verse Root Line` (ca-13) teaches a single-note bass line,
-  but Modules 3–8's own "the cure" steps each teach a *different* technique on
-  it — power chords (Module 3), open-chord strumming (Module 4), soloing
-  (Module 5), fingerpicking (Module 8) — so none of them duplicate ca-13's
-  single-note reading.
-- Module 7's Seven Nation Army "real rhythm" step doesn't duplicate ca-10
-  either — different skill, rhythm notation vs. frets.
-- Verified by a search across every Module 3–8 "the cure"/"Seven Nation Army"
-  mention.
-- Leave these for Phase 4 (see the work order): a new class activity that comes
-  to duplicate a module step would be the trigger to hide it then.
-
-Verified 2026-09-12: a full walk of all 36 sets in both languages (pill
-step-total == rendered `<li>` count, zero orphan section headings, no
-exceptions) — the closest this repo gets to the work order's "headless walk,"
-since there's no Playwright harness to run one for real.
+**Step-level `hidden: true` stays at Module 2's original 3.** Modules 3–8 were
+checked against every shipped `ca-<n>` (2026-09-12); none duplicates a module
+step: the Finger Gym activities (ca-2…ca-7) are generic drills; ca-11 and ca-12
+are Module 1/2-era; ca-13's single-note "the cure" line and ca-10's Seven
+Nation Army frets teach a different skill than the module steps on those songs.
+A new class activity that comes to duplicate a module step is the trigger to
+hide that step.
 
 ---
 
