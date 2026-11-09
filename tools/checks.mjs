@@ -13021,6 +13021,10 @@ function checkCoachVerdicts() {
       for (const [what, mode, prog, bpm, rate, afterBeats, readout] of [['Power Chord Switch pair, Every beat, 30 BPM, 4.4 s after change 1', 'power', PAIR, 30, 2, 2.2, '30'], ['Change Up, Every bar, 60 BPM, 6 s after change 1', 'open', 0, 60, 0, 6, '60']]) {
         const sg = loopGame(mode, prog, bpm, rate, `const c0 = cc.changes[0], b = cc.beatMs; quiet(c0.t - b, c0.t + ${afterBeats} * b, b / 2); stopAt(c0.t + ${afterBeats} * b);`);
         const bpmShown = (/id="cc-done-bpm">(\d+) BPM</.exec(sg.html) || [])[1];
+        const sgChips = chipsOf(sg.html);
+        const sgTotal = Number(run('cc.changes.length'));
+        if (sgChips.miss !== 0 || sgChips.ok !== 0 || sgChips.pending !== sgTotal || !sg.txt.includes(`· ${sgTotal} not reached`) || /– [1-9]\d* no strum heard/.test(sg.txt) || /Round \d/.test(sg.txt))
+          flag(`1ck silent-stop: ${what}: the silent screen must draw every change grey "not reached" and count them so in the breakdown, never red "no strum heard" (review 2026-11-09): chips ${JSON.stringify(sgChips)}: ${sg.txt.slice(0, 220)}`);
         if (!sg.txt.includes(SILENT) || sg.txt.includes(TOOFAST) || sg.txt.includes(DROP) || !sg.txt.includes('Play it again, to the end.') || (mode === 'power' && bpmShown !== readout))
           flag(`1ck silent-stop: ${what}, nothing heard, then Stop must read "${SILENT}" with no tempo advice${mode === 'power' ? ` and the tempo row on ${readout}` : ''}: ${sg.txt.slice(0, 220)} (row ${bpmShown})`);
       }

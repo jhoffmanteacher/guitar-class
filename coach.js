@@ -4207,13 +4207,16 @@ function ccRenderDone(){
     verdict = '&#x1F3B8; ' + t(firmer ? 'games.cc.verdict.ok' : 'games.cc.verdict.low', { ok, total });
     advice = firmer ? t('games.pw.advice.firmer') : t(ccIsPower() ? 'games.pw.advice.low' : 'games.cc.advice.low');
   }
-  const chips = cc.changes.map(c => allReachedRight && c.neverReached
+  /* The silent screen (silentStop) draws EVERY change like the nothing-reached one does: grey 'not reached', never a red 'no strum heard' under a headline that says nothing was heard (review 2026-11-09). */
+  const greyRest = allReachedRight || silentStop;
+  const chips = cc.changes.map(c => (greyRest && c.neverReached) || silentStop
     ? `<span class="coach-chip notreached">${escHtml(pwChordName(c.to))}</span>`
     : `<span class="coach-chip ${c.result === 'ok' ? 'ok' : c.result === 'off' ? 'wrong' : 'miss'}">${escHtml(ccChipText(c))}</span>`
   ).join('');
   /* What the chips mean, in numbers: right, on time but the chord sounded wrong, no strum heard. */
-  const nMiss = total - ok - off - (allReachedRight ? cc.unreached : 0);
-  const breakdown = noneReached && !cc.noneDue ? '' : `<div class="cc-breakdown">${escHtml(t('games.cc.breakdown', { ok, off, miss: nMiss }) + (allReachedRight ? t('games.cc.breakdown.left', { left: cc.unreached }) : ''))}</div>`;
+  const nLeft = silentStop ? total : (cc.unreached || 0);
+  const nMiss = total - ok - off - (greyRest ? nLeft : 0);
+  const breakdown = noneReached && !cc.noneDue ? '' : `<div class="cc-breakdown">${escHtml(t('games.cc.breakdown', { ok, off, miss: nMiss }) + (greyRest ? t('games.cc.breakdown.left', { left: nLeft }) : ''))}</div>`;
   const rec = firmer || stoppedClean || noneReached || silentStop ? 'same' : r >= 0.85 ? 'up' : r >= 0.5 ? 'same' : 'down';
   /* A song switch: how each round went, at its own tempo. */
   /* Power Chord Switch (2026-11-05, Jonathan: the button should take more than one click and show the tempo): a −5 / +5 row
@@ -4237,7 +4240,7 @@ function ccRenderDone(){
        <button type="button" class="${rec === 'up' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(10)">&#x2B06; ${t('games.common.bpmUp10')}</button>
      </div>`;
   /* When everything reached was right, a round counts only the changes reached in it, and a round with none left is not listed ("4 of 4" next to "Round 1: 4 of 7" read as a contradiction). */
-  const roundRows = cc.ladder ? cc.stageLog.map((sg, k) => ({ k, sg, shown: allReachedRight ? sg.changes.filter(c => !c.neverReached) : sg.changes })).filter(x => x.shown.length) : [];
+  const roundRows = cc.ladder ? cc.stageLog.map((sg, k) => ({ k, sg, shown: silentStop ? [] : greyRest ? sg.changes.filter(c => !c.neverReached) : sg.changes })).filter(x => x.shown.length) : [];
   const rounds = cc.ladder && roundRows.length ? '<div class="cc-rounds">' + roundRows.map(({ k, sg, shown }) =>
     `<span>${escHtml(t('games.pw.ladder.roundResult', { n: k + 1, bpm: sg.bpm, ok: shown.filter(c => c.result === 'ok').length, total: shown.length }))}</span>`).join('') + '</div>' : '';
   /* The way back to the setup: Power Chord Switch's is the first thing on the screen (pwBackBtnHtml); Change Up keeps its button at the bottom. */
