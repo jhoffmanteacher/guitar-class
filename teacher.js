@@ -5226,7 +5226,8 @@ async function teacherMicDelete(i){
    recording's start; event times are "played" = arrival - micLatencyMs.
 
    The four count-in beeps (660, 660, 660, 990 Hz, 80 ms, through the
-   Chromebook's own speaker) are in the recording. A student who plays on
+   Chromebook's own speaker; a Power Chord Switch round below 60 BPM has two,
+   660 and 990, since 2026-11-09: micEvalTakePw) are in the recording. A student who plays on
    the click they HEAR lands in the recording exactly where the click
    landed, because both went speaker/guitar -> air -> mic. So the clicks
    give, per device:
@@ -5802,11 +5803,14 @@ function micEvalStrumHits(frames, rule, ratio, hfRatio){
    A song switch is three rounds (`stage` 0..2), each at its own tempo (`bpm`
    on every change) and with its own count-in; a pair is one round. Round k's
    listen start is its first change's due time minus `bpc` beats (coach.js
-   ccBeginStage: change s is due s x bpc beats after it, from s = 1); its four
-   beeps were scheduled 4..1 beats before that.
-     - Mic delay: beeps 2-4 of each round, found the way micEvalTake finds them
+   ccBeginStage: change s is due s x bpc beats after it, from s = 1); its N
+   beeps were scheduled N..1 beats before that: N = the take's countInBeats
+   for the round (2 below 60 BPM since 2026-11-09), 4 for a take without it.
+     - Mic delay: beeps 2..N of each round, found the way micEvalTake finds them
        (each > CLICK_EACH x its own tone's background, onsets within
-       CLICK_JITTER), give where they landed (lag); the site's events against
+       CLICK_JITTER), give where they landed (lag). A 2-click round has one
+       such beep: it is reported as heard, but gives no lag (the count-in
+       section below says why). The site's events against
        the audio's attacks give the site's clock vs the recording's (map, the
        whole take); ideal = lag + map, as in micEvalTake; skew = ideal - the
        saved micLatencyMs. Beeps can be missing: speaker muted, headphones, or
@@ -5915,20 +5919,32 @@ function micEvalTakePw(pcm, R, d, deps){
   });
 
   /* ── each round's count-in ── */
-  const CLICK_EACH = 4, CLICK_JITTER = 40;
+  /* Its clicks: coach.js ccCountInBeats, saved per round in `countInBeats` since 2026-11-09 (2 below 60 BPM, else 4). A take without the
+     field counted 4 in every round, as every take saved before did; an entry that is not 2 or 4 (the browser wrote it) is read as 4.
+     Beeps 2..N are measured, as micEvalTake does (beep 1 can fall in the capture's first, near-silent buffers: never required). Each must
+     stand > CLICK_EACH x its own tone's background, and their onsets agree within CLICK_JITTER: that agreement is what rejects a played
+     E5/B5 (659/988 Hz) taken for a beep. A 2-click count-in has ONE such beep. It is measured and reported (`heard`: beeps found N of M),
+     but gives no lag: one onset has nothing to agree with, so a strum near the beep pitch could stand in for it unseen. Such a round's
+     windows go on the site's own beat when the strums give the map, else on the lag of the take's other rounds, else on the delay setting
+     alone ('setting'), the same fallbacks as a round whose beeps were not heard. */
+  const CLICK_EACH = 4, CLICK_JITTER = 40, CLICK_MIN_FOR_LAG = 2;
   const halfS = ms2s(20), stepS = ms2s(4);
-  const fOf = j => j === 3 ? 990 : 660;
+  const countIns = Array.isArray(d.countInBeats) ? d.countInBeats : [];
   rounds.forEach(rd => {
-    const B = ms2s(rd.beat), c1 = rd.listen - 4 * rd.beat;
+    const nb = countIns[rd.stage] === 2 ? 2 : 4;
+    rd.countIn = nb;
+    const fOf = j => j === nb - 1 ? 990 : 660, used = Array.from({ length: nb - 1 }, (_, k) => k + 1);   // beeps 2..N (j counts from 0)
+    const B = ms2s(rd.beat), c1 = rd.listen - nb * rd.beat;
+    rd.clicks = { found: false, beeps: nb, used: used.length, heard: 0 };
     // each tone's background over this count-in only (the last round's chord may still ring into it)
     const bgA = Math.max(0, ms2s(c1 - 200)), bgB = Math.min(N, ms2s(rd.listen + 200));
     const bg = [660, 990].map(f => { const v = []; for (let s = bgA; s + 2 * halfS < bgB; s += ms2s(20)) v.push(tone(f, s + halfS, halfS)); return med(v) || 1e-9; });
-    const bgOf = j => j === 3 ? bg[1] : bg[0];
+    const bgOf = j => j === nb - 1 ? bg[1] : bg[0];
     // beep 1's arrival: 100 ms early to 600 ms late on its schedule
-    const lo = Math.max(ms2s(c1 - 100), -B + 1), hi = Math.min(ms2s(c1 + 600), N - 3 * B - 2 * halfS);
+    const lo = Math.max(ms2s(c1 - 100), -B + 1), hi = Math.min(ms2s(c1 + 600), N - (nb - 1) * B - 2 * halfS);
     let best = null;
     for (let c = lo; c <= hi; c += stepS){
-      const k = [1, 2, 3].map(j => tone(fOf(j), c + j * B + halfS, halfS) / bgOf(j));
+      const k = used.map(j => tone(fOf(j), c + j * B + halfS, halfS) / bgOf(j));
       const v = Math.min(...k);
       if (!best || v > best.v) best = { c, v, k };
     }
@@ -5941,13 +5957,13 @@ function micEvalTakePw(pcm, R, d, deps){
       const hit = prof.find(p => p[1] >= pk * 0.5);
       return s2ms(hit ? hit[0] : c0) - j * rd.beat;
     };
-    const ons = [1, 2, 3].map(onsetOf);
+    const ons = used.map(onsetOf);
     const jitter = Math.max(...ons) - Math.min(...ons);
-    rd.clicks = { found: false, snrDb: r1(dB(best.v)), each: best.k.map(r1), jitterMs: r1(jitter) };
-    if (best.k.every(v => v > CLICK_EACH) && jitter <= CLICK_JITTER){
+    rd.clicks = { found: false, beeps: nb, used: used.length, heard: best.k.filter(v => v > CLICK_EACH).length, snrDb: r1(dB(best.v)), each: best.k.map(r1), jitterMs: r1(jitter) };
+    if (used.length >= CLICK_MIN_FOR_LAG && best.k.every(v => v > CLICK_EACH) && jitter <= CLICK_JITTER){
       rd.clicks.found = true;
       rd.clicks.lagMs = r1(med(ons) - c1);
-      rd.clicks.ampDb = r1(dB(Math.max(...[1, 2, 3].map(j => tone(fOf(j), best.c + j * B + halfS, halfS)))));
+      rd.clicks.ampDb = r1(dB(Math.max(...used.map(j => tone(fOf(j), best.c + j * B + halfS, halfS)))));
     }
   });
 
@@ -6050,7 +6066,7 @@ function micEvalTakePw(pcm, R, d, deps){
     const frameMs = num(d.frameMeanMs) && d.frameMeanMs > 0 ? Math.min(150, Math.max(1000 / 60, d.frameMeanMs)) : 50;
     const frames = micEvalStrumFrames(x, R, srcRate, frameMs, rule);
     // a round's play phase on the site's clock: from its listen start to the next round's count-in
-    rounds.forEach((rd, k) => { rd.end = k + 1 < rounds.length ? rounds[k + 1].listen - 4 * rounds[k + 1].beat : Infinity; });
+    rounds.forEach((rd, k) => { rd.end = k + 1 < rounds.length ? rounds[k + 1].listen - rounds[k + 1].countIn * rounds[k + 1].beat : Infinity; });
     const ratios = [rule.RATIO].concat([1.8, 2.2, 2.6].filter(v => v > rule.RATIO));
     const candidates = ratios.map(ratio => {
       const hfRatio = Math.round(rule.HF_RATIO * ratio / rule.RATIO * 100) / 100;
@@ -6080,6 +6096,8 @@ function micEvalTakePw(pcm, R, d, deps){
     const out = { stage: rd.stage, bpm: rd.bpm, n: ns.length, dropped: rd.dropped, centre: rd.centre,
       agree: c('agree'), detectorMissed: c('detector-missed'), falseHit: c('false-hit'), offWindow: c('off-window'), silentMiss: c('silent-miss'),
       clickFound: rd.clicks.found, clickSnrDb: rd.clicks.snrDb == null ? null : rd.clicks.snrDb,
+      // the count-in's clicks, and of its beeps 2..N (the ones measured) how many were heard: a 2-click count-in's one beep gives no lag
+      clickBeeps: rd.clicks.beeps, clickUsed: rd.clicks.used, clickHeard: rd.clicks.heard,
       clickLagMs: rd.clicks.found ? rd.clicks.lagMs : null, clickDiag: rd.clicks.each ? { each: rd.clicks.each, jitterMs: rd.clicks.jitterMs } : null,
       idealMs: null, skewMs: null };
     if (out.clickLagMs != null && mapMs != null){ out.idealMs = r1(out.clickLagMs + mapMs); out.skewMs = r1(out.clickLagMs + mapMs - lat); }
@@ -6122,14 +6140,14 @@ function micEvalTakePw(pcm, R, d, deps){
     medianAbsOnsetMs: r1(med(notes.filter(n => n.onsetMs != null).map(n => Math.abs(n.onsetMs)))),
     lowH1H2Db: null, lowN: 0
   };
-  // strums and beeps on no beat of the student's grid (other guitars, noise); at most every beat of every change
+  // strums and beeps on no beat of the student's grid (other guitars, noise), from the round's first count-in click; at most every beat of every change
   const grid = [];
   rounds.forEach(rd => {
     const last = rd.list[rd.list.length - 1].e.t, tol = Math.max(150, rd.beat * 0.35), maxM = rd.list.length * bpc + 4;
-    for (let m = -4; m <= maxM && rd.listen + m * rd.beat <= last + (bpc - 0.5) * rd.beat; m++) grid.push([rd.listen + m * rd.beat + rd.offs, tol]);
+    for (let m = -rd.countIn; m <= maxM && rd.listen + m * rd.beat <= last + (bpc - 0.5) * rd.beat; m++) grid.push([rd.listen + m * rd.beat + rd.offs, tol]);
   });
   const extra = onsets.filter(on => !grid.some(g => Math.abs(g[0] - on.ms) < g[1])).length;
-  const startMs = rounds.length ? rounds[0].listen - 4 * rounds[0].beat + rounds[0].offs : 0;
+  const startMs = rounds.length ? rounds[0].listen - rounds[0].countIn * rounds[0].beat + rounds[0].offs : 0;
   const playMs = Math.max(1, endMs - startMs);
   return {
     kind: 'pw', level, latency, notes: summary, perNote: notes, rounds: roundRows, whatIf, whatIfSkipped, strumRatio, pitch,
@@ -6256,7 +6274,7 @@ function micEvalText(rows){
   ].map((v, k) => pad(v, cols[k][1])).join(' '));
   // Power Chord Switch rows (micEvalTakePw) get a second table, one line per round
   const pw = rows.filter(r => r.kind === 'pw');
-  const pwCols = [['take', 5], ['game', 16], ['round', 5], ['bpm', 4], ['chg', 4], ['agree', 5], ['detMiss', 7], ['false', 5], ['offWin', 6], ['silent', 6], ['drop', 4],
+  const pwCols = [['take', 5], ['game', 16], ['round', 5], ['bpm', 4], ['cin', 3], ['chg', 4], ['agree', 5], ['detMiss', 7], ['false', 5], ['offWin', 6], ['silent', 6], ['drop', 4],
     ['centre', 7], ['click', 6], ['lag', 5], ['ideal', 6], ['skew', 6], ['map', 5]];
   const pwOdd = pw.filter(r => r.notes.ignored || r.notes.retimed || r.notes.replayMismatch).map(r => r.take + ': ' +
     [r.notes.ignored ? r.notes.ignored + (r.notes.ignored === 1 ? ' change' : ' changes') + ' ignored (impossible time, round or tempo in the saved data)' : '',
@@ -6264,10 +6282,11 @@ function micEvalText(rows){
       r.notes.replayMismatch ? r.notes.replayMismatch + (r.notes.replayMismatch === 1 ? ' change' : ' changes') + " where the site's rule, run again on its own strums, does not give its saved verdict" : ''].filter(Boolean).join('; '));
   const pwText = !pw.length ? '' : '\n\nPower Chord Switch, one line per round (in the table above, its "notes" are chord changes; inAud = a strum in the site\'s window):\n' +
     [pwCols.map(c => pad(c[0], c[1])).join(' ')].concat(...pw.map(r => (r.rounds || []).map(g => [
-      r.take, r.game, g.stage + 1, g.bpm, g.n, g.agree, g.detectorMissed, g.falseHit, g.offWindow, g.silentMiss, g.dropped,
-      g.centre, g.clickFound ? g.clickSnrDb : 'none', g.clickLagMs, g.idealMs, g.skewMs, r.latency.mapMs
+      r.take, r.game, g.stage + 1, g.bpm, g.clickBeeps, g.n, g.agree, g.detectorMissed, g.falseHit, g.offWindow, g.silentMiss, g.dropped,
+      g.centre, g.clickFound ? g.clickSnrDb : g.clickUsed === 1 && g.clickHeard === 1 ? '1beep' : 'none', g.clickLagMs, g.idealMs, g.skewMs, r.latency.mapMs
     ].map((v, k) => pad(v, pwCols[k][1])).join(' ')))).concat(pwOdd).join('\n') + `
 
+cin         the count-in's clicks (2 below 60 BPM since 2026-11-09; a take saved before then has 4 in every round)
 chg         changes judged (the site's verdict against the recording)
 agree       the site heard a strum (right or wrong chord) and there is one in its window
 detMiss     the site said no strum, but there is one in its window
@@ -6277,7 +6296,8 @@ silent      no strum near the change (not played, or further off)
 drop        changes past the end of the recording (the 30 s cap, or Stop): not judged
 centre      where the site's window was put on the recording: site = its own beat, replayed from the strums it heard
             (needs 3 strums found in the audio); beeps = the count-in's lag; setting = the delay setting alone
-click/lag/ideal/skew  as above, from this round's own count-in ("none": speaker muted, headphones, or strums over the count-in);
+click/lag/ideal/skew  as above, from this round's own count-in ("none": speaker muted, headphones, or strums over the count-in;
+            "1beep": a 2-click count-in, its one measured beep heard: too few beeps to give the lag, so no lag, ideal or skew);
             map = the site's clock vs the recording's, whole take`;
   return [head].concat(lines).join('\n') + `
 
@@ -6337,6 +6357,11 @@ async function teacherMicEvaluate(){
   const live = document.getElementById('t-mic-eval');
   if(live) live.innerHTML = teacherMicEvalHtml() + (fails.length ? `<div class="tg-note">Could not measure: ${escHtml(fails.join('; '))}</div>` : '');
 }
+/* "4 clicks (beeps 2-4 heard: 3 of 3)" / "2 clicks (beep 2 heard: 1 of 1)": a Power Chord Switch round's count-in in the console's hover (micEvalTakePw rounds[]). */
+function micEvalBeepsText(g){
+  const n = g.clickBeeps || 4, used = g.clickUsed == null ? n - 1 : g.clickUsed;
+  return n + ' clicks (' + (used === 1 ? 'beep 2' : 'beeps 2-' + n) + ' heard: ' + (g.clickHeard || 0) + ' of ' + used + ')';
+}
 function teacherMicEvalHtml(){
   const rows = teacherMicEvalRows;
   if(!rows.length) return '<div class="t-loading">No recordings to measure.</div>';
@@ -6347,6 +6372,8 @@ function teacherMicEvalHtml(){
   const n = sum(r => r.notes.n), right = sum(r => r.notes.siteRight), inAud = sum(r => r.notes.replayPresent);
   const detMiss = sum(r => r.notes.detectorMissed), silent = sum(r => r.notes.silentMiss);
   const withClicks = rows.filter(r => r.latency.idealMs != null);
+  // Power Chord Switch recordings whose every round counted in with 2 clicks (below 60 BPM): their one beep per round gives no delay (micEvalTakePw)
+  const shortOnly = pwRows.filter(r => (r.rounds || []).length && r.rounds.every(g => g.clickUsed === 1)).length;
   const cbooks = rows.filter(r => r.device.chromebook).length;
   const clipped = rows.filter(r => r.level.clipPct > 0.01).length;
   const v = x => x == null ? '—' : escHtml(String(x));
@@ -6373,7 +6400,7 @@ function teacherMicEvalHtml(){
   lines.push(
     withClicks.length
       ? `Mic delay: the count-in beeps were heard in ${withClicks.length} recordings. The delay setting in use was ${v(med(withClicks.map(r => r.latency.settingMs)))} ms; the recordings say it should be about <b>${v(med(withClicks.map(r => r.latency.idealMs)))} ms</b>.`
-      : `Mic delay: the count-in beeps were not heard in any recording (speaker muted or headphones${pwRows.length ? ', or in Power Chord Switch strumming over the count-in' : ''}), so the delay could not be measured.`,
+      : `Mic delay: no recording could measure it: the count-in beeps were not heard (speaker muted or headphones${pwRows.length ? ', or in Power Chord Switch strumming over the count-in' : ''})${shortOnly ? `, or ${shortOnly === 1 ? 'a Power Chord Switch recording was' : shortOnly + ' Power Chord Switch recordings were'} below 60 BPM in every round, where the count-in has 2 clicks and one beep is too few to measure the delay` : ''}.`,
     `Loudest notes: ${v(med(rows.map(r => r.level.loudDb)))} dB (0 is the maximum). ${clipped ? `<b>${clipped}</b> recordings were too loud and clipped.` : 'None clipped.'}`
   );
   // micEvalWhy's categories, summed — why the notes the site did not count weren't counted
@@ -6393,8 +6420,12 @@ function teacherMicEvalHtml(){
     // a Power Chord Switch row: each round's own "should be" and where its windows were put, on hover; the strums the site heard that the
     // recording does not have; the strums just outside the site's window
     const placed = { site: "the site's own beat", beeps: 'the beeps', setting: 'the delay setting alone' };
-    const perRound = isPw ? ` title="${escAttr((r.rounds || []).map(g => 'Round ' + (g.stage + 1) + ': ' +
-      (g.idealMs != null ? 'should be ' + g.idealMs + ' ms' : g.clickFound ? 'beeps found, delay not measured' : 'no beeps found (speaker muted, headphones, or strums over the count-in)') +
+    // and its count-in: how many clicks, and of the beeps measured (2..N) how many were heard; a 2-click count-in's one beep gives no delay
+    const perRound = isPw ? ` title="${escAttr((r.rounds || []).map(g => 'Round ' + (g.stage + 1) + ', ' + micEvalBeepsText(g) + ': ' +
+      (g.idealMs != null ? 'should be ' + g.idealMs + ' ms' : g.clickFound ? 'beeps found, delay not measured'
+        : g.clickUsed === 1 && g.clickHeard === 1 ? 'one beep is too few to measure the delay'
+        : g.clickHeard && g.clickHeard === g.clickUsed ? 'the beeps do not line up in time, delay not measured'
+        : 'no beeps found (speaker muted, headphones, or strums over the count-in)') +
       '; windows placed by ' + (placed[g.centre] || '?')).join(' · '))}"` : '';
     const falseHit = isPw && nb.falseHit ? ` · <b>${nb.falseHit}</b> heard, not there` : '';
     const offWin = isPw && nb.offWindow ? ` · <b>${nb.offWindow}</b> off the beat` : '';
@@ -6409,7 +6440,7 @@ function teacherMicEvalHtml(){
     <div class="t-grid-wrap"><table><thead><tr><th class="nc">Take</th><th>Game</th><th>Device</th><th>Loud / room (dB)</th><th>Delay set → should be (ms)</th><th>Site counted right</th><th>In the recording</th><th>Played, not counted</th><th>Not played</th><th>Heard instead</th><th>Low strings (dB)</th></tr></thead><tbody>${tr}</tbody></table></div>${teacherMicWhatIfHtml(rows)}${teacherMicPitchHtml(rows)}
     <div class="tg-note"><button class="tp-btn primary" style="flex:none;padding:8px 16px;margin-right:10px" onclick="teacherMicEvalDownload()">Download results</button>
       The file has the measurements only — no audio and no names. <br>
-      <i>In the recording</i>: the site's own pitch detection, run again on the saved audio, finds the note clearly. <i>Played, not counted</i>: a loud, clear note the site did not count right. <i>Not played</i>: the site said missed and there is no note there. <i>Heard instead</i>: notes that rang clearly but at a different pitch — "−1 ×6" means six notes came out one semitone low (the same number again and again usually means the guitar is out of tune). <i>Delay</i>: "?" means the count-in beeps were not in the recording (speaker muted or headphones). <i>Low strings</i>: the low note's own pitch against the octave above it — very negative means this mic loses the low end.${pwRows.length ? `<br>
+      <i>In the recording</i>: the site's own pitch detection, run again on the saved audio, finds the note clearly. <i>Played, not counted</i>: a loud, clear note the site did not count right. <i>Not played</i>: the site said missed and there is no note there. <i>Heard instead</i>: notes that rang clearly but at a different pitch — "−1 ×6" means six notes came out one semitone low (the same number again and again usually means the guitar is out of tune). <i>Delay</i>: "?" means the count-in beeps were not in the recording (speaker muted or headphones)${pwRows.length ? ', or every round of a Power Chord Switch recording was below 60 BPM, where the count-in has 2 clicks: one beep is too few to measure the delay' : ''}. <i>Low strings</i>: the low note's own pitch against the octave above it — very negative means this mic loses the low end.${pwRows.length ? `<br>
       <i>Power Chord Switch</i> rows count chord changes, not notes. <i>In the recording</i>: a strum inside the site's own window for the change (about half a beat around the beat as the site was tracking it; which chord was strummed is not checked); "heard, not there": the site heard a strum its window in the recording does not have. <i>Played, not counted</i>: a strum in the site's window that the site did not hear; "off the beat": a strum just outside the window, or near the beat the student heard, so the site said missed (played early or late, or the delay setting is off). <i>Not played</i>: no strum near the change. <i>Delay</i>: hover it to see each round's, and how its windows were placed; "no beeps found" can also mean the student strummed over the count-in.` : ''}</div>`;
 }
 /* The strum what-if as a small table (micEvalWhatIfSummary): per Power Chord Switch take and ratio, "-N" false hits that would not fire and "lost M" real strums that would stop firing. */

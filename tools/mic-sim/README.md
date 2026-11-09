@@ -96,7 +96,11 @@ tuning pass — ideally on the real classroom recordings the teacher console's
   — against the site's verdict: agree / detector-missed / false-hit /
   off-window (just outside the window, or near the beat the student heard) /
   silent-miss. Each round's own count-in (up to three rounds, each at its
-  own tempo) gives the mic delay. Changes past the end of the audio (the
+  own tempo) gives the mic delay: beeps 2..N, N from the take's
+  `countInBeats` (2 below 60 BPM since 2026-11-09; 4 for a take without the
+  field). A 2-click round's one measured beep is reported as heard but gives
+  no delay (one onset has nothing to agree with); its windows use the other
+  rounds' lag, else the site's beat, else the setting. Changes past the end of the audio (the
   30 s cap, Stop) are counted as `dropped`, not judged; changes with an
   impossible time, round or tempo as `ignored`. Which chord was strummed is
   not checked. **Strum what-if** (2026-11-04, measurement only): the same
@@ -107,13 +111,17 @@ tuning pass — ideally on the real classroom recordings the teacher console's
   stop with them. eval-takes.mjs prints it after the tables and `--json`
   carries it as `strumWhatIf`. A Coach / Note Runner note whose window runs
   past the end of the audio is `dropped` there too (`micEvalTake`).
-- `fake-pw-take.mjs <out-folder>` — eighteen synthetic Power Chord Switch
+- `fake-pw-take.mjs <out-folder>` — twenty-five synthetic Power Chord Switch
   takes (two of them for the what-if, with answers measured on the audio: room
   noise and no strums, and soft real strums over a loud room; then loud, quiet, 50 and 250 ms mic delay, cut by the 30 s cap, a pair
   with a neighbour's guitar, every 2 beats and Stopped, no beeps with the
   setting right and wrong, 140 BPM every beat and every bar with strums at
   the window's edges, a site that hears nothing, three wrong-setting / late
-  cases) plus `truth.json`. The site's verdicts are not planted: ccLoop's
+  cases, drifting strums, and five count-in takes below 60 BPM: 2-click
+  pairs, a 50 / 55 / 60 song switch heard and deaf, and a take saved before
+  `countInBeats` with 4 clicks) plus `truth.json`. Each round's count-in has
+  coach.js ccCountInBeats clicks (read from coach.js); `legacyCountIn: true`
+  plants the old 4-click take without the field. The site's verdicts are not planted: ccLoop's
   rule is run on the strums the site hears. checks.mjs 1cl builds the same
   takes in memory and pins the evaluator's answers to the truth.
 - `yin-eq.mjs <old coach.js> <new coach.js>` — proves coachDetectPitch

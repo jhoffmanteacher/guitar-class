@@ -7,9 +7,12 @@
 
    The timeline (ms on the recording's clock, the way micRecSaveNow makes the
    times relative):
-     · round (stage) k at its own tempo: four count-in beeps (660, 660, 660,
-       990 Hz) at C_k + 0..3 beats, listen start L_k = C_k + 4 beats, the
-       graded changes at L_k + s × bpc beats (s = 1 .. slots-1), the round's
+     · round (stage) k at its own tempo: N_k count-in beeps (660 ... 660,
+       990 Hz) at C_k + 0..N_k-1 beats, listen start L_k = C_k + N_k beats
+       (N_k = coach.js ccCountInBeats of the round's tempo, read from coach.js:
+       2 below 60 BPM, else 4, saved in the take as `countInBeats`; a take
+       marked `legacyCountIn` is one saved before 2026-11-09: 4 in every round,
+       no such field), the graded changes at L_k + s × bpc beats (s = 1 .. slots-1), the round's
        end one beat after its last chord; the next count-in starts 0.4 s later
        (0.1 s once the 30 s capture has stopped: COACH_COUNTIN_REC_LEAD);
      · beeps and strums land `lag` ms after they were scheduled (one number,
@@ -95,8 +98,13 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 /* The most the site's grid moves for one strum: read from coach.js, so this stand-in for ccLoop cannot drift from it (2026-11-07). */
-const GRID_STEP_CAP_MS = Number((/^const CC_GRID_STEP_CAP_MS = (\d+);/m.exec(fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'coach.js'), 'utf8')) || [])[1]);
+const COACH_SRC = fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'coach.js'), 'utf8');
+const GRID_STEP_CAP_MS = Number((/^const CC_GRID_STEP_CAP_MS = (\d+);/m.exec(COACH_SRC) || [])[1]);
 if (!(GRID_STEP_CAP_MS > 0)) throw new Error('coach.js has no CC_GRID_STEP_CAP_MS (fake-pw-take reads it)');
+/* The count-in's clicks per round (2026-11-09): coach.js's own ccCountInBeats, its one-line body run here, so a new take is planted the way the site counts in. */
+const ccBody = /^function ccCountInBeats\(bpm\)\{([^\n]*)\}$/m.exec(COACH_SRC);
+if (!ccBody) throw new Error('coach.js has no one-line function ccCountInBeats(bpm){ ... } (fake-pw-take runs it)');
+export const ccCountInBeats = new Function('bpm', ccBody[1]);
 
 const R = 24000, CAP_MS = 30000;
 // Root midi of each three-finger shape (coach.js CC_POWER_PROGRESSIONS): root, +7, +12.
@@ -158,7 +166,18 @@ export const PW_FIXTURES = [
     plan: { 0: 'burst:1.6', 1: 'burst:2.0', 2: 'burst:2.38', 3: 'burst:2.9', 5: 'burst:2.9', 6: 'burst:2.38', 8: 'burst:2.0', 9: 'burst:1.6', 11: 'burst:2.38', 12: 'burst:2.9', 14: 'burst:1.6' } },
   { ...base, name: 'pw-soft-strums', desc: 'soft real strums over a loud room: pick attacks the evaluator finds, about 2.5 / 2.9 / 3.5 x the room on the attack channel, 1.2 to 1.6 x on the full band', bpms: [140], bpc: 2, slots: 16, chords: ['A5', 'D5'], song: null, start: 1000,
     lag: 300, map: 25, lat: 335, clickAmp: 0, noise: 0.004, rumble: 0.03, tau: 0.25, pf: 0.1, onlyChanges: true, skipFirst: true, frameMs: 50, tailMs: 8000, seed: 32,
-    plan: { 0: 'soft:0.01219', 1: 'soft:0.01467', 2: 'soft:0.01876', 3: 'soft:0.01262', 4: 'soft:0.01303', 5: 'soft:0.01896', 6: 'soft:0.01231', 7: 'soft:0.01561', 8: 'soft:0.01665', 9: 'soft:0.01239', 10: 'soft:0.01471', 11: 'soft:0.01911', 12: 'soft:0.01179', 13: 'soft:0.01568', 14: 'soft:0.01790' } }
+    plan: { 0: 'soft:0.01219', 1: 'soft:0.01467', 2: 'soft:0.01876', 3: 'soft:0.01262', 4: 'soft:0.01303', 5: 'soft:0.01896', 6: 'soft:0.01231', 7: 'soft:0.01561', 8: 'soft:0.01665', 9: 'soft:0.01239', 10: 'soft:0.01471', 11: 'soft:0.01911', 12: 'soft:0.01179', 13: 'soft:0.01568', 14: 'soft:0.01790' } },
+  /* The 2-click count-in (2026-11-09): below 60 BPM a round counts in with 2 clicks (ccCountInBeats), and its one measured beep (beep 2) gives no lag. */
+  { ...base, readings: true, name: 'pw-slow-pair', desc: 'a pair at 30 BPM: a 2-click count-in, its beep heard but no lag; windows on the site\'s own beat', bpms: [30], slots: 10, chords: ['G5', 'C5'], song: null,
+    lag: 130, map: 25, lat: 120, seed: 41, plan: { 2: 'detmiss', 4: 'silent', 6: 'late:-150', 8: 'held' } },
+  { ...base, name: 'pw-slow-ladder', desc: 'a song switch at 50 / 55 / 60: 2, 2 and 4 clicks; only round 3 gives the lag (its beeps end 340 ms before the 30 s cap, its changes come after it); a neighbour\'s pluck where a 4-click count-in\'s second click would land before round 2 (13069 ms): off the grid of a 2-click one', bpms: [50, 55, 60], chords: ['A5', 'D5'],
+    lag: 120, map: 30, lat: 140, seed: 42, extras: [13069], plan: { 1: 'off', 3: 'detmiss', 5: 'silent', 9: 'late:110', 12: 'held' } },
+  { ...base, name: 'pw-slow-deaf', desc: 'the same 50 / 55 / 60 song switch, the site hearing nothing (no map), the beeps landing 180 / 200 / 140 ms late: rounds 1 and 2 are centred on round 3\'s lag', bpms: [50, 55, 60], chords: ['F5', 'G5'],
+    lag: [180, 200, 140], lat: 100, deaf: true, seed: 43, plan: { 4: 'silent', 10: 'silent' } },
+  { ...base, name: 'pw-slow-setting', desc: 'a pair at 40 BPM that the site does not hear: a 2-click count-in, no lag anywhere, so the windows go on the delay setting alone', bpms: [40], slots: 10, chords: ['B5', 'D5'], song: null,
+    lag: 120, lat: 110, deaf: true, seed: 44, plan: { 3: 'silent', 6: 'silent' } },
+  { ...base, name: 'pw-slow-legacy', desc: 'a pair at 30 BPM saved before 2026-11-09: 4 clicks and no countInBeats field; the evaluator must look for 4 beeps', bpms: [30], slots: 8, chords: ['E5', 'A5'], song: null,
+    lag: 150, map: 25, lat: 130, legacyCountIn: true, seed: 45, plan: { 1: 'detmiss', 3: 'silent', 5: 'held' } }
 ];
 // The candidate ratios the strum what-if tries: the shared ones older takes were graded with (coach.js CHK_ONSET_RATIO 1.4, CHK_HF_RATIO 1.7; Power Chord Switch grades with its own stricter CC_POWER_* since 2026-11-05, and takes graded with those are left out of the what-if) and stricter ones; the attack-channel ratio scales the same way
 export const PW_WHATIF = { full: [1.4, 1.8, 2.2, 2.6], hfBase: 1.7, fullBase: 1.4, floor: 0.003, hfFloor: 0.0008, margin: 0.06 };
@@ -176,8 +195,9 @@ export function makePwTake(o){
   const rounds = [];
   let c1 = o.start || 420, gi = 0, stopMs = null;
   for (let k = 0; k < o.bpms.length; k++){
-    const beat = 60000 / o.bpms[k], L = c1 + 4 * beat;
-    const rd = { stage: k, bpm: o.bpms[k], beat, c1, listen: L, lag: lagOf(k), win: pwWin(beat, o.bpc), changes: [] };
+    const nb = o.legacyCountIn ? 4 : ccCountInBeats(o.bpms[k]);
+    const beat = 60000 / o.bpms[k], L = c1 + nb * beat;
+    const rd = { stage: k, bpm: o.bpms[k], beat, nb, c1, listen: L, lag: lagOf(k), win: pwWin(beat, o.bpc), changes: [] };
     for (let s = 1; s < o.slots; s++) rd.changes.push({ i: gi++, s, t: L + s * o.bpc * beat, from: o.chords[(s - 1) % 2], to: o.chords[s % 2], stage: k, bpm: o.bpms[k], kind: o.plan[gi - 1] || 'ok' });
     rounds.push(rd);
     const end = L + (o.slots * o.bpc + 1) * beat;
@@ -326,8 +346,8 @@ export function makePwTake(o){
   }
   const clickMs = [];
   if (o.clickAmp > 0) rounds.forEach(rd => {
-    for (let j = 0; j < 4; j++){
-      const at = rd.c1 + j * rd.beat + rd.lag, s0 = S(at), f = j === 3 ? 990 : 660;
+    for (let j = 0; j < rd.nb; j++){
+      const at = rd.c1 + j * rd.beat + rd.lag, s0 = S(at), f = j === rd.nb - 1 ? 990 : 660;
       if (at < audioEnd) clickMs.push(at);
       for (let i = 0; i < S(80) && s0 + i < N; i++) x[s0 + i] += o.clickAmp * Math.exp(-i / R / 0.03) * Math.sin(2 * Math.PI * f * i / R);
     }
@@ -341,11 +361,18 @@ export function makePwTake(o){
   // the map is measurable when 3+ heard strums are real attacks (micEvalTakePw matches events to onsets within 120 ms)
   const realHeard = events.filter(ev => attacks.some(a => Math.abs(ev.t + o.lat - o.map - a.ms) < 20)).length;
   const mapKnown = realHeard >= 3;
+  /* The beeps the evaluator measures are 2..N; their lag needs two or more of them (micEvalTakePw: one onset has nothing to agree with), so a
+     2-click round gives no lag. Its windows go on the take's lag from the rounds that have one (the median, as micEvalTakePw takes it). */
+  const lastBeepIn = rd => rd.c1 + (rd.nb - 1) * rd.beat + rd.lag + 80 < audioEnd;
+  const measurable = rd => o.clickAmp > 0 && rd.nb >= 3 && lastBeepIn(rd);
+  const lagRounds = rounds.filter(measurable).map(rd => rd.lag).sort((a, b) => a - b);
+  const takeLag = lagRounds.length ? lagRounds[Math.floor(lagRounds.length / 2)] : null;
+  const beepOffs = rd => measurable(rd) ? rd.lag : takeLag;
   const tooClose = (d, edge, what, deliberate) => { if (!deliberate && Math.abs(Math.abs(d) - edge) < 8) throw new Error(o.name + ': ' + what + ' ' + Math.round(d) + ' ms from a ' + Math.round(edge) + ' ms edge (too close to call)'); };
   rounds.forEach(rd => {
     let n = 0, dropped = 0;
     const gap = o.bpc * rd.beat, reach = Math.min(gap / 2, rd.win + rd.beat / 4);
-    const centreKind = mapKnown ? 'site' : o.clickAmp > 0 ? 'beeps' : 'setting';
+    const centreKind = mapKnown ? 'site' : takeLag != null ? 'beeps' : 'setting';
     rd.changes.forEach(ch => {
       const after = stopMs != null && ch.t > stopMs;
       ch.verdict = after || !ch.match ? 'miss' : ch.match.sharp ? 'off' : 'ok';
@@ -358,7 +385,7 @@ export function makePwTake(o){
       // the gridOffset the site's window had: the one its strum was judged with, else the one after every onset before the window opened
       const prior = rd.onsets.filter(on => on.played < ch.t - rd.win);
       const goff = ch.match ? ch.match.goff : prior.length ? prior[prior.length - 1].goffAfter : 0;
-      const centre = centreKind === 'site' ? ch.t + goff + o.lat - o.map : centreKind === 'beeps' ? ch.t + rd.lag : ch.t + o.lat;
+      const centre = centreKind === 'site' ? ch.t + goff + o.lat - o.map : centreKind === 'beeps' ? ch.t + beepOffs(rd) : ch.t + o.lat;
       if (Math.abs(centre + rd.win - audioEnd) < 40) throw new Error(o.name + ': change ' + ch.i + "'s window ends " + Math.round(centre + rd.win - audioEnd) + ' ms from the audio end (too close to call)');
       if (centre + rd.win > audioEnd){ dropped++; truth.changes.push({ i: ch.i, stage: ch.stage, cat: 'dropped', windowPastEndMs: Math.round(centre + rd.win - audioEnd) }); return; }
       n++;
@@ -366,8 +393,8 @@ export function makePwTake(o){
       const inWin = attacks.some(a => Math.abs(a.ms - centre) <= rd.win);
       const heard = ch.verdict !== 'miss';
       const siteCentre = ch.t + goff;
-      // where the student heard the beat (the beeps): a strum late or early on THAT beat is near too
-      const heardBeat = o.clickAmp > 0 ? ch.t + rd.lag : null;
+      // where the student heard the beat (the beeps, as far as their lag is known): a strum late or early on THAT beat is near too
+      const heardBeat = takeLag != null ? ch.t + beepOffs(rd) : null;
       if (heardBeat != null) attacks.forEach(a => tooClose(a.ms - heardBeat, reach, 'a strum near change ' + ch.i + ' (on the beeps) is', a.deliberate));
       const out = d => Math.abs(d) > rd.win && Math.abs(d) <= reach;
       const near = attacks.some(a => Math.abs(a.ms - centre) > rd.win && (out(a.ms - centre) || (heardBeat != null && Math.abs(a.ms - heardBeat) <= reach))) ||
@@ -376,15 +403,16 @@ export function makePwTake(o){
         readingsN: ch.readings ? ch.readings.length : null,
         cat: inWin ? (heard ? 'agree' : 'detector-missed') : heard ? 'false-hit' : near ? 'off-window' : 'silent-miss' });
     });
-    truth.rounds.push({ stage: rd.stage, bpm: rd.bpm, n, dropped, clicks: o.clickAmp > 0 && rd.c1 + 3 * rd.beat + rd.lag + 80 < audioEnd, centre: centreKind,
+    // clicks: the lag can be measured (beeps 2..N, two or more, all in the audio); heard: how many of beeps 2..N are in the audio
+    truth.rounds.push({ stage: rd.stage, bpm: rd.bpm, n, dropped, beeps: rd.nb, clicks: measurable(rd), heard: o.clickAmp > 0 && lastBeepIn(rd) ? rd.nb - 1 : 0, centre: centreKind,
       lagMs: rd.lag, idealMs: rd.lag + o.map, skewMs: rd.lag + o.map - o.lat });
   });
-  // onsets on no beat of the student's grid (micEvalTakePw room.extra): the beeps' lag, else the setting less the map
+  // onsets on no beat of the student's grid (micEvalTakePw room.extra), from the round's first count-in click: the beeps' lag, else the setting less the map
   const tol = rd => Math.max(150, rd.beat * 0.35);
   const grid = [];
   rounds.forEach(rd => {
-    const offs = o.clickAmp > 0 ? rd.lag : mapKnown ? o.lat - o.map : o.lat, last = rd.changes[rd.changes.length - 1].t;
-    for (let m = -4; rd.listen + m * rd.beat <= last + (o.bpc - 0.5) * rd.beat; m++) grid.push([rd.listen + m * rd.beat + offs, tol(rd)]);
+    const offs = takeLag != null ? beepOffs(rd) : mapKnown ? o.lat - o.map : o.lat, last = rd.changes[rd.changes.length - 1].t;
+    for (let m = -rd.nb; rd.listen + m * rd.beat <= last + (o.bpc - 0.5) * rd.beat; m++) grid.push([rd.listen + m * rd.beat + offs, tol(rd)]);
   });
   truth.extra = attacks.concat(clickMs.map(ms => ({ ms }))).filter(a => a.ms < audioEnd).filter(a => {
     const d = Math.min(...grid.map(g => Math.abs(g[0] - a.ms) - g[1]));
@@ -437,6 +465,7 @@ export function makePwTake(o){
     game: 'pw', complete: stopMs == null, progression: o.chords.join('-'), song: o.song, ladder: o.bpms.length > 1,
     bpm: o.bpms[0], stageBpms: o.bpms.slice(), bpc: o.bpc, eventTimes: 'played (arrival - micLatencyMs)',
     ...(o.uncapped ? {} : { gridStepCapMs: o.capMs || GRID_STEP_CAP_MS }),   // an `uncapped` take is one saved before 2026-11-07: no such field, graded on the uncapped grid
+    ...(o.legacyCountIn ? {} : { countInBeats: o.bpms.map(b => ccCountInBeats(b)) }),   // a `legacyCountIn` take is one saved before 2026-11-09: no such field, 4 clicks every round
     ...(o.readings ? { changeReadings: 'per change: null = no strum in its window; [] = a strum but no pitch could be read; else the midi readings its chord check used (under 3 passes on timing alone)' } : {}),
     expected, events, uid: 'fake', name: 'Fake Student', period: '3', mode: 'pw',
     micLatencyMs: o.lat, sampleRate: R, srcSampleRate: 48000, durationSec: Math.round(N / R * 100) / 100,
