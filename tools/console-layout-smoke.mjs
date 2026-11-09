@@ -575,7 +575,7 @@ async function main() {
       if (back.edit !== 'ca-21' || back.value !== DRAFT) fail('rename-refresh', 'back on Settings after a Refresh the rename box is ' + JSON.stringify(back) + ', expected the box open with ' + JSON.stringify(DRAFT));
       // A save that fails keeps the box and the text; a Refresh after it (from another tab) still does.
       const failed = await js(`(async () => { const real = db.runTransaction; db.runTransaction = async () => { throw new Error('offline (smoke)'); };
-        try { document.querySelector('[data-ta-pane="settings"] [data-rename-save]').click(); await new Promise(r => setTimeout(r, 300)); } finally { db.runTransaction = real; }
+        try { const save = document.querySelector('[data-ta-pane="settings"] [data-rename-save]'); if (!save) return 'no rename box to save'; save.click(); await new Promise(r => setTimeout(r, 300)); } finally { db.runTransaction = real; }
         window.__alerts = []; const box = document.querySelector('[data-ta-pane="settings"] .t-act-title-edit'); return box ? box.value : null; })()`);
       if (failed !== DRAFT) fail('rename-refresh', 'after a failed save the rename box holds ' + JSON.stringify(failed));
       await js(`document.querySelector('[data-ta-tab="students"]').click()`); await sleep(60);
@@ -586,7 +586,7 @@ async function main() {
       // Rename open again (on screen): Refresh is held, then Cancel and the minute refresh: the note goes.
       await js(`document.querySelector('[data-refresh-students]').click()`); await sleep(300);
       const held2 = await bar();
-      await js(`document.querySelector('[data-ta-pane="settings"] [data-rename-cancel]').click()`); await sleep(150);
+      await js(`document.querySelector('[data-ta-pane="settings"] [data-rename-cancel]')?.click()`); await sleep(150);
       await finishOne();
       await js(`(async () => { document.activeElement && document.activeElement.blur && document.activeElement.blur(); teacherStudentsAt -= 70000; await teacherRefreshStudents(); })()`); await sleep(300);
       const b2 = await bar();
@@ -956,6 +956,15 @@ async function main() {
       const p = await js(state);
       if (p.sel !== 'ca-6' || !p.open.includes('1')) fail('tree+pick', 'ca-6 picked under All, then Units: ' + JSON.stringify({ open: p.open, sel: p.sel }) + ', expected Unit 1 open with ca-6 selected');
       if (p.open.length < 2 || JSON.stringify(p.lit) !== '["1"]') fail('tree+pick', 'with units ' + JSON.stringify(p.open) + ' open and ca-6 (Unit 1) picked, the tree lights ' + JSON.stringify(p.lit) + ', expected ["1"] (and two units open to test it)');
+      // A row click in the other open unit moves the lit row with it (nothing else repaints the tree).
+      const other = p.open.find(k => k !== '1');
+      const oid = other && await js(`document.querySelector('[data-ta-list-body] .ta-unit[data-unit="${other}"] [data-ta-pick]')?.dataset.id || null`);
+      if (!oid) fail('tree+pick', 'no row in the other open unit ' + other);
+      else {
+        await js(`document.querySelector('[data-ta-pick][data-id="${oid}"]').click()`); await sleep(150);
+        const p2 = await js(state);
+        if (JSON.stringify(p2.lit) !== JSON.stringify([other])) fail('tree+pick', 'picked ' + oid + ' in Unit ' + other + ' with ' + JSON.stringify(p2.open) + ' open: the tree lights ' + JSON.stringify(p2.lit));
+      }
       // The newest choice wins: the tree's Built row, then a pick under All in Unit 3, then Units.
       await js(`document.querySelector('#t-side-tree [data-side-unit="built"]').click()`); await sleep(300);
       await js(`(() => { document.querySelector('[data-ta-filter="all"]').click(); document.querySelector('[data-ta-pick][data-id="ca-24"]').click(); document.querySelector('[data-ta-filter="units"]').click(); })()`); await sleep(200);
