@@ -1223,7 +1223,17 @@ function openActivityDetail(id){
   activityDetailFromUid = from==='student' ? studentDetailUid : null;
   activityBoardMode=false; activityEditId=null;
   teacherView='activities'; activityDetailId=id;
-  if(from==='activities') activityListPickId=id;
+  if(from==='activities'){
+    activityListPickId=id;
+    /* From the board's Preview: the list shows the card's unit, the way a
+       sidebar tree click shows one unit (every unit set, only this one open),
+       so a fold the tree or the teacher set can't hide the card's row and the
+       tree's lit row follows it. */
+    if(teacherClassConfigLoaded && teacherClassConfig){
+      const groups=teacherActivityListModel(teacherClassConfig).groups, g=groups.find(x=>x.ids.includes(id));
+      if(g){ groups.forEach(x=>{ activityUnitOpen[x.key]=(x.key===g.key); }); }
+    }
+  }
   applyTeacherViewChrome(from==='songs' ? 'songs' : from==='student' ? 'students' : 'activities');
   renderTeacherBody();
   window.scrollTo({top:0});
