@@ -229,13 +229,17 @@ A review is due when a change is Always-Reviewed ("Fast by default"), Jonathan s
 - **Treat agent output as claims.** Read every quoted line yourself. Make a fixer prove each new guard by breaking the code and pasting the red line. Send product choices found in a review to Jonathan with AskUserQuestion.
 
 **Triggers.** Review trigger = 3+ files, a danger-zone file (`teacher.js` config plumbing,
-`sw.js` code, `coach.js` detection, `app.js` save path, `firestore.rules`), or 50+ strings.
+`sw.js` code, `coach.js` detection (the onset and pitch detectors and the grading rules: ratios, gates,
+windows; not a game's screens, wording, tempo controls or count-in), `app.js` save path, `firestore.rules`), or 50+ strings.
 Not counted: `CHANGELOG.md`, `sw.js` version lines, a string's Spanish twin, pin-only
 `checks.mjs` edits. A guard on a new default, or extending what a check reads: break-it proof only (paste output). A new KIND of check, or changed logic/matching, is a trigger (`site-reviewer`, high) plus break-it. Reviewer: `site-reviewer-deep`
 (xhigh) for danger-zone / 50+ strings (failing scenario first), else `site-reviewer`. Agent claim → read its quoted lines yourself; agent fix → make it re-derive it on the real code.
 
-**Fast by default** (2026-10-31) — a trigger no longer asks. After the build and every "Start here" step, ship **Fast**: no reviewer, and every Fast commit ends with the trailer line `Review: Fast` (above any Co-Authored-By); the report starts "Fast — reviewer skipped; Friday check will review it." **Always Reviewed, same day, never Fast:** danger-zone file, new kind of check, sub-agent
-sweep, moving/adding/removing a section or step. Jonathan says "review this" / "Reviewed" → review same day. No trigger → no trailer.
+**Fast by default** (2026-10-31) — a trigger no longer asks. After the build and every "Start here" step, ship **Fast**: no reviewer, and every Fast commit ends with the trailer line `Review: Fast` (above any Co-Authored-By); the report starts "Fast — reviewer skipped; Friday check will review it." **Always Reviewed, same day, never Fast:** danger-zone file, a new kind of check that ships on its own
+(a ratchet or detector; a check that guards the feature it ships with gets break-it proof only), sub-agent
+sweep, moving/adding/removing a section or step. A product change Jonathan asks for (a renderer, a game's
+flow, a console view) ships Fast unless it touches one of those (Jonathan, 2026-11-09, about the 2-click
+count-in and Today's activities by date: "these should have been fast changes"). Jonathan says "review this" / "Reviewed" → review same day. No trigger → no trailer.
 Both splits are unproven. A Friday check finds a Fast change that hurt students → move that
 kind of change to Always-Reviewed. A high review lets a real bug through → move that kind of
 change to `site-reviewer-deep`.
