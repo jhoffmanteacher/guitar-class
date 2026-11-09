@@ -8492,6 +8492,180 @@ function checkPracticeCards(ctx) {
   if (bad === 0) ok(`${cards} practice card${cards === 1 ? '' : 's'} — sections add up to their bars and land inside the track, one Level up each, both renderers and every silencer wired`);
 }
 
+/* 1cq. TODAY'S ACTIVITIES BY RELEASE DATE (Jonathan, 2026-11-09: "newest
+   date leads", "they should both be in the Today's activities section", "by
+   date"; and "In Today, marked done" for a re-dated card a student already
+   finished). renderClassActivities() picks Today's activities by RELEASE
+   DATE, newest first, ties required before optional then lowest board
+   position, undated last; a card dated on the newest visible date stays in
+   the group once finished (drawn done, not repeated in Completed); an older
+   card is in it only while pending; up to CA_TODAY_MAX. The hero
+   (caStartHereId) is the first pending required card in that order. A card
+   dated on another day than the heading wears its own .ca-chip. The two
+   folds keep their old board order. Before this, Today was the first
+   pending card in BOARD order plus its same-day cards, so a lower-numbered
+   card re-dated to today stayed below an older #N (live, 2026-11-09).
+   Run through the REAL renderClassActivities() in the 0b render context,
+   with stubbed board / dates / completions, EN and ES. Every scenario
+   restores the context's state afterwards. Pinned: 10 scenarios. */
+function checkTodayByDate(ctx) {
+  head('1cq. Today\'s activities: newest release date first, a finished card re-dated to today shows done, the folds keep board order');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  if (!ctx) { flag('1cq cannot run — the 0b render context is unavailable'); return; }
+  const run = x => vm.runInContext(x, ctx);
+  const J = JSON.stringify;
+  const EXPECT_SCENARIOS = 10;
+  let scenarios = 0, asserts = 0;
+  const STATE = ['activityDates', 'classActivities', 'activityBoard', 'activityBoardOn', 'optionalActivityIds', 'hiddenActivityIds',
+    'retiredActivityIds', 'activityForMe', 'activityPins', 'caOpenId', 'caSwap', 'studentPeriod', 'periodOverride', 'currentUser',
+    'songLibraryIds', 'classSongIds', 'caTodoOpen', 'caFinishedOpen'];
+  let saved;
+  try { saved = run('[' + STATE.join(',') + ']'); } catch (e) { flag('1cq cannot read the In-Class Activities state it stubs: ' + e.message); return; }
+  const origGet = ctx.document.getElementById;
+  // The page body: one stub element (the 0b stub's own shape), kept across renders.
+  const body = origGet('class-activities-body');
+  /* The real ids, so the cards are real cards: ordinary activities (no
+     check, library song, teacher-only song or data-optional card), and one
+     exit check. */
+  const pool = run(`(window.CLASS_ACTIVITIES || []).filter(a => a && a.kind !== 'check' && a.optional !== true && !a.teacherOnly && !caIsLibraryCard(a, {})).map(a => a.id)`);
+  const chk = run(`((window.CLASS_ACTIVITIES || []).find(a => a && a.kind === 'check') || {}).id || null`);
+  if (pool.length < 7 || !chk) { flag(`1cq needs 7 ordinary activities and an exit check to stub a board, found ${pool.length} and ${chk ? 1 : 0}`); return; }
+  const mods = run('MODULE_MANIFEST.map(m => m.num)');
+  const MA = mods[3], MB = mods[4];   // two real modules; MB is the newer one
+  const D = { d9: '2025-11-10', d5: '2025-11-06', d2: '2025-11-03', d29: '2025-10-30' };
+  const LABEL = { en: { [D.d9]: 'Mon, 11/10', [D.d5]: 'Thu, 11/6', [D.d2]: 'Mon, 11/3', [D.d29]: 'Thu, 10/30' },
+                  es: { [D.d9]: 'lun, 10/11', [D.d5]: 'jue, 6/11', [D.d2]: 'lun, 3/11', [D.d29]: 'jue, 30/10' } };
+  /* One render. `cards`: [id, module, date, done, optional] in board order
+     (pos = index). Returns the page split into its three groups. */
+  const render = (cards, lang) => {
+    const board = {}, dates = {}, done = {}, opt = {};
+    cards.forEach(([id, mod, date, isDone, isOpt], pos) => {
+      board[id] = { module: mod, pos };
+      if (date) dates[id] = date;
+      if (isDone) done[id] = true;
+      if (isOpt) opt[id] = true;
+    });
+    ctx.__s = { board, dates, done, opt };
+    run(`activityBoard = __s.board; activityBoardOn = true; activityDates = __s.dates; classActivities = __s.done; optionalActivityIds = __s.opt;
+      hiddenActivityIds = {}; retiredActivityIds = {}; activityForMe = {}; activityPins = []; caOpenId = null; caSwap = null;
+      studentPeriod = '4'; periodOverride = ''; currentUser = null; songLibraryIds = {}; classSongIds = {}; caTodoOpen = true; caFinishedOpen = false;
+      setLang(${J(lang)});`);
+    body.innerHTML = '';
+    ctx.document.getElementById = id => id === 'class-activities-body' ? body : origGet(id);
+    try { run('renderClassActivities()'); }
+    finally { ctx.document.getElementById = origGet; }
+    const html = String(body.innerHTML);
+    const todoAt = html.indexOf('<details class="ca-todo-group"'), finAt = html.indexOf('<details class="ca-finished-group"');
+    const headAt = html.indexOf('<div class="ca-today-head');
+    const cut = (from, ...ends) => { if (from < 0) return ''; const e = ends.filter(x => x > from); return html.slice(from, e.length ? Math.min(...e) : html.length); };
+    const today = cut(headAt, todoAt, finAt);
+    const todo = cut(todoAt, finAt), fin = cut(finAt);
+    const ids = seg => [...seg.matchAll(/<details class="ca-card[^"]*"[^>]*data-id="([^"]+)"/g)].map(m => m[1]);
+    // Each card's <summary>: its chip, its ✓, its dots.
+    const summaries = seg => Object.fromEntries([...seg.matchAll(/<details class="(ca-card[^"]*)"[^>]*data-id="([^"]+)"[^>]*>([\s\S]*?)<\/summary>/g)]
+      .map(m => [m[2], { cls: m[1], chip: (/<span class="ca-chip">([^<]*)<\/span>/.exec(m[3]) || [])[1] || null,
+        tick: /class="ca-done-mark"/.test(m[3]), dots: /class="ca-hero-dots"/.test(m[3]), hero: /ca-card--hero/.test(m[1]) }]));
+    const headM = /<div class="ca-today-head([^"]*)"><span class="ca-today-label" data-i18n="([^"]+)">[^<]*<\/span>(?:<span class="ca-today-date[^"]*">([^<]*)<\/span>)?<\/div>/.exec(today);
+    const count = seg => { const m = /<summary class="ca-(?:todo|finished)-summary">[^<]*?\((\d+)\)/.exec(seg); return m ? Number(m[1]) : null; };
+    return { html, today: ids(today), todo: ids(todo), fin: ids(fin), sum: summaries(today), head: headM ? { older: !!headM[1].trim(), key: headM[2], date: headM[3] || null } : null,
+      todoN: count(todo), finN: count(fin), hero: run('caStartHereId'), todayIds: run('caTodayIds.slice()'), freePlay: /ca-freeplay-hero/.test(html) };
+  };
+  /* The folds' old order, rebuilt here from scratch (not from app.js): newest
+     module first, highest board position first, and the current day (the
+     first card's date in that order) lowest position first. */
+  const oldOrder = cards => {
+    const byMod = new Map();
+    cards.forEach(([id, mod, date], pos) => { if (!byMod.has(mod)) byMod.set(mod, []); byMod.get(mod).push({ id, date, pos }); });
+    const secs = [...byMod.keys()].sort((x, y) => mods.indexOf(y) - mods.indexOf(x)).map(m => byMod.get(m).slice().sort((x, y) => y.pos - x.pos));
+    const cur = secs.length ? secs[0][0].date : null;
+    if (cur) secs.forEach(s => { const t = s.filter(c => c.date === cur).reverse(); if (t.length > 1) s.forEach((c, i) => { if (c.date === cur) s[i] = t.shift(); }); });
+    return secs.flat().map(c => c.id);
+  };
+  const want = (cond, msg) => { asserts++; if (!cond) flag('1cq: ' + msg); };
+  const [A, B, C, Dd, E, F, G] = pool;
+  try {
+    for (const lang of ['en', 'es']) {
+      const L = LABEL[lang];
+      /* 1. The live case (2026-11-09): #1 ca-30 10/29, #2 ca-43 11/2, #3 ca-33 11/9, #4 ca-46 11/5, all pending.
+         The lower-numbered card dated last leads; the three newest dates, newest first; the oldest in the fold. */
+      const live = [[A, MA, D.d29], [B, MA, D.d2], [C, MA, D.d9], [Dd, MA, D.d5]];
+      let r = render(live, lang); scenarios++;
+      want(J(r.today) === J([C, Dd, B]), `${lang} live case: Today holds ${J(r.today)}, expected ${J([C, Dd, B])} (#3 dated ${D.d9}, then #4 ${D.d5}, then #2 ${D.d2})`);
+      want(r.hero === C, `${lang} live case: the hero is ${r.hero}, expected ${C} (newest date)`);
+      want(J(r.todayIds) === J([C, Dd, B]), `${lang} live case: caTodayIds is ${J(r.todayIds)}`);
+      want(r.head && !r.head.older && r.head.key === 'ca.startHere' && r.head.date === L[D.d9], `${lang} live case: heading ${J(r.head)}, expected ca.startHere dated ${L[D.d9]}`);
+      want(r.sum[C] && r.sum[C].chip === null, `${lang} live case: ${C} (the heading's date) wears a chip ${J(r.sum[C] && r.sum[C].chip)}`);
+      want(r.sum[Dd] && r.sum[Dd].chip === L[D.d5], `${lang} live case: ${Dd} chip is ${J(r.sum[Dd] && r.sum[Dd].chip)}, expected ${L[D.d5]}`);
+      want(r.sum[B] && r.sum[B].chip === L[D.d2], `${lang} live case: ${B} chip is ${J(r.sum[B] && r.sum[B].chip)}, expected ${L[D.d2]}`);
+      want([C, Dd, B].every(id => r.sum[id] && r.sum[id].hero && !r.sum[id].tick), `${lang} live case: every pending Today card is a hero card with no ✓`);
+      want(J(r.todo) === J([A]) && r.todoN === 1, `${lang} live case: the Unfinished fold holds ${J(r.todo)} (${r.todoN}), expected ${J([A])} (1)`);
+      /* 2. One date: three cards dated the same day — lowest number first, no chips, the plain heading. */
+      const one = [[A, MA, D.d2], [B, MA, D.d9], [C, MA, D.d9], [Dd, MA, D.d9]];
+      r = render(one, lang); scenarios++;
+      want(J(r.today) === J([B, C, Dd]), `${lang} one date: Today holds ${J(r.today)}, expected ${J([B, C, Dd])} (lowest number first)`);
+      want(r.hero === B, `${lang} one date: the hero is ${r.hero}, expected ${B}`);
+      want([B, C, Dd].every(id => r.sum[id] && r.sum[id].chip === null), `${lang} one date: a chip on ${J([B, C, Dd].filter(id => !r.sum[id] || r.sum[id].chip !== null))}`);
+      want(r.head && !r.head.older && r.head.date === L[D.d9], `${lang} one date: heading ${J(r.head)}`);
+      want(J(r.todo) === J([A]), `${lang} one date: the fold holds ${J(r.todo)}, expected ${J([A])}`);
+      /* 3. Optional: the newest card is optional — it still leads by date, but the hero is the required one;
+         within one date the required card comes first. */
+      const opt = [[A, MA, D.d9, false, true], [B, MA, D.d9], [C, MA, D.d5], [Dd, MA, D.d2]];
+      r = render(opt, lang); scenarios++;
+      want(J(r.today) === J([B, A, C]), `${lang} optional: Today holds ${J(r.today)}, expected ${J([B, A, C])} (same date: required before optional)`);
+      want(r.hero === B, `${lang} optional: the hero is ${r.hero}, expected the required ${B}`);
+      const opt2 = [[A, MA, D.d9, false, true], [B, MA, D.d5], [C, MA, D.d2]];
+      r = render(opt2, lang); scenarios++;
+      want(J(r.today) === J([A, B, C]) && r.hero === B, `${lang} optional newer: Today ${J(r.today)}, hero ${r.hero}; expected ${J([A, B, C])}, hero ${B} (an optional card is not the hero while a required one is pending)`);
+      /* 4. A finished card re-dated to the newest date: in Today, marked done (the Completed fold's own ✓ row,
+         no chip, no hero dots), not in the Completed fold, not counted as unfinished; the hero is the first
+         pending card. An older finished card stays in Completed only. */
+      const redated = [[A, MA, D.d29, true], [B, MA, D.d2], [C, MA, D.d9, true], [Dd, MA, D.d5], [E, MA, D.d29]];
+      r = render(redated, lang); scenarios++;
+      want(J(r.today) === J([C, Dd, B]), `${lang} re-dated done: Today holds ${J(r.today)}, expected ${J([C, Dd, B])}`);
+      want(r.hero === Dd, `${lang} re-dated done: the hero is ${r.hero}, expected the first pending card ${Dd}`);
+      want(r.sum[C] && r.sum[C].tick && !r.sum[C].hero && r.sum[C].chip === null && !r.sum[C].dots, `${lang} re-dated done: ${C} is drawn ${J(r.sum[C])}, expected the Completed row (✓, not a hero card, no chip, no dots)`);
+      want(r.head && !r.head.older && r.head.date === L[D.d9], `${lang} re-dated done: heading ${J(r.head)}, expected ca.startHere dated ${L[D.d9]}`);
+      want(r.sum[Dd] && r.sum[Dd].chip === L[D.d5] && r.sum[B] && r.sum[B].chip === L[D.d2], `${lang} re-dated done: chips ${J([r.sum[Dd] && r.sum[Dd].chip, r.sum[B] && r.sum[B].chip])}`);
+      want(!r.fin.includes(C) && J(r.fin) === J([A]) && r.finN === 1, `${lang} re-dated done: the Completed fold holds ${J(r.fin)} (${r.finN}), expected ${J([A])} (1)`);
+      want(J(r.todo) === J([E]) && r.todoN === 1, `${lang} re-dated done: the Unfinished fold holds ${J(r.todo)} (${r.todoN}), expected ${J([E])} (1)`);
+      /* 5. Everything finished, the newest card included: the caught-up box, then the finished card in Today. */
+      const allDone = [[A, MA, D.d2, true], [B, MA, D.d9, true]];
+      r = render(allDone, lang); scenarios++;
+      want(r.freePlay && r.hero === null, `${lang} all done: free play ${r.freePlay}, hero ${r.hero}; expected the caught-up box and no hero`);
+      want(J(r.today) === J([B]) && r.sum[B] && r.sum[B].tick, `${lang} all done: Today holds ${J(r.today)}, expected ${J([B])} marked done`);
+      want(J(r.fin) === J([A]), `${lang} all done: the Completed fold holds ${J(r.fin)}, expected ${J([A])}`);
+      /* 6. Two modules, seven cards: the fold keeps the old order (modules newest first, highest number
+         first, the current day lowest first) minus the Today cards. */
+      const two = [[A, MA, D.d29], [B, MA, D.d5], [C, MA, D.d2], [Dd, MB, D.d29], [E, MB, D.d9], [F, MB, D.d2], [G, MB, D.d2]];
+      r = render(two, lang); scenarios++;
+      want(J(r.today) === J([E, B, C]), `${lang} two modules: Today holds ${J(r.today)}, expected ${J([E, B, C])}`);
+      const restWant = oldOrder(two).filter(id => ![E, B, C].includes(id));
+      want(J(r.todo) === J(restWant) && r.todoN === restWant.length, `${lang} two modules: the fold holds ${J(r.todo)} (${r.todoN}), expected the old order ${J(restWant)}`);
+      /* 7. An exit check dated on another day than the heading: its hero card wears the chip too. */
+      const withChk = [[A, MA, D.d9], [chk, MA, D.d5]];
+      r = render(withChk, lang); scenarios++;
+      want(J(r.today) === J([A, chk]) && r.sum[chk] && r.sum[chk].chip === L[D.d5] && r.sum[A] && r.sum[A].chip === null, `${lang} exit check: Today ${J(r.today)}, chips ${J([r.sum[A] && r.sum[A].chip, r.sum[chk] && r.sum[chk].chip])}; expected ${J([A, chk])} with ${L[D.d5]} on the check only`);
+      /* 8. Four newer finished-or-optional cards cannot push the hero out of the group. */
+      const crowd = [[A, MA, D.d9, true], [B, MA, D.d9, true], [C, MA, D.d9, true], [Dd, MA, D.d2]];
+      r = render(crowd, lang); scenarios++;
+      want(r.hero === Dd && r.today.length === 3 && r.today[2] === Dd && J(r.today.slice(0, 2)) === J([A, B]), `${lang} crowded: Today ${J(r.today)}, hero ${r.hero}; expected ${J([A, B, Dd])} with hero ${Dd}`);
+      want(J(r.fin) === J([C]), `${lang} crowded: the Completed fold holds ${J(r.fin)}, expected ${J([C])}`);
+      /* 9. Nothing dated (no card visible): the empty page, no hero. */
+      r = render([[A, MA, null]], lang); scenarios++;
+      want(r.hero === null && r.today.length === 0, `${lang} undated: hero ${r.hero}, Today ${J(r.today)}; expected nothing`);
+    }
+  } catch (e) {
+    flag('1cq: renderClassActivities threw — ' + e.message);
+  } finally {
+    ctx.__r = saved;
+    try { run(STATE.map((k, i) => `${k} = __r[${i}]`).join('; ') + '; setLang("en");'); } catch (e) { flag('1cq could not restore the state it stubbed: ' + e.message); }
+    delete ctx.__r; delete ctx.__s;
+  }
+  if (scenarios !== EXPECT_SCENARIOS * 2) flag(`1cq ran ${scenarios} scenario renders, pinned ${EXPECT_SCENARIOS * 2} (${EXPECT_SCENARIOS} x EN + ES)`);
+  if (!bad) ok(`${scenarios} renders of the real renderClassActivities (${EXPECT_SCENARIOS} scenarios x EN + ES), ${asserts} assertions: the newest date leads Today whatever its #N, three newest across dates, one date lowest number first, an optional card never the hero over a required one, a date chip exactly where the date differs from the heading, a finished card re-dated to today shows done in Today and not in Completed or the counts, the folds keep the old board order`);
+}
+
 /* 1cc. RECORDING VERSIONS (Jonathan, 2026-10-30 — ca-26, ca-29, ca-40; caView
    in app.js). A card can play another RECORDING of its song: the Jimi
    Hendrix / Neil Young switch on the Watchtower play-alongs. The other
@@ -14366,6 +14540,7 @@ function checkPracticeMinutes(i18nTable) {
   await checkSongPopularity(rcCtx);
   checkPowerChordPopups(rcSets, rcCtx);
   checkPendingFileSwitch(rcCtx);
+  checkTodayByDate(rcCtx);
   checkCardCaptionWords();
   checkJourneyRetired();
   checkSongLibrary();
