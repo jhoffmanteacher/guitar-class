@@ -9,153 +9,148 @@ An exit check is a class activity with `kind: 'check'` (schema at the top of
 `class-activities.js`).
 - Five auto-graded questions, one try. Two item types: `nextNote` and `noteName`.
 - The result goes to `progress/{uid}.exitChecks[id]` plus `classActivities[id] = true`.
+  No `firestore.rules` change was needed: the teacher already reads the progress doc whole.
 - Engine: the `ec*` functions in `app.js`.
 - The student card and the console preview share `caCheckBodyHtml()` **on
-  purpose** — don't fork it. The two-renderers rule exists for a step FIELD
-  going invisible in the teacher's copy; a whole new card has no such split.
-- Console: the Activities table shows the turned-in count and average. The
-  activity's detail page shows the per-student, per-question grid and a
-  "Missed by" row.
+  purpose** — don't fork it. (The two-renderers rule is about a step FIELD; a
+  whole card has no such split.)
+- Console: the Activities table shows the turned-in count and average; the
+  detail page shows the per-student, per-question grid and a "Missed by" row.
 - checks.mjs **1y** guards the data (`1x` is the orphaned-assets check). It
-  recomputes every answer key from the fretboard rather than shape-checking
-  it: a wrong `answer` doesn't look broken, it just marks a correct student wrong.
-- Checks take no `#N` number. `caBoardOrder()` skips them when it hands out
-  1..N, which covers the student card and the console board at once. The board
-  renders "Check" where the `#` box goes.
-- No `firestore.rules` change was needed: the result is a field on the
-  progress doc the teacher already reads whole.
+  recomputes every answer key from the fretboard: a wrong `answer` doesn't look
+  broken, it just marks a correct student wrong.
+- Checks take no `#N` number: `caBoardOrder()` skips them when it hands out
+  1..N (student card and console board at once). The board renders "Check"
+  where the `#` box goes.
 - Pace: about one check per week (Jonathan, 2026-09-09).
 
-**Post one with its own link:** `#class-activities/<id>` (e.g.
-`…/index.html#class-activities/ca-15`) opens the Class activities page with
-that card expanded and scrolled to (`caFocusActivity()` in `app.js`). The
-console's Class activities table has a **Copy link** button per row, and each
-detail page spells the same link out, so the URL never has to be typed. The
-hash router splits on `/` (`exploreHashBase` / `exploreHashTail`): a new deep
-link takes that shape, not a query param. An id that isn't published yet gets
-`ca.linkMissing` above the archive, not a dead end.
+**Post one with its own link:** `#class-activities/<id>` opens the Class
+activities page with that card expanded and scrolled to (`caFocusActivity()` in
+`app.js`). The console's Class activities table has a **Copy link** button per
+row, and each detail page spells the link out. The hash router splits on `/`
+(`exploreHashBase` / `exploreHashTail`): a new deep link takes that shape, not
+a query param. An id that isn't published yet gets `ca.linkMissing` above the
+archive, not a dead end.
 
 Easy to break without noticing:
 
 - **Stored exit-check picks are POSITIONAL — editing a shipped check's
-  `items` silently re-grades every result.** `res.picks` is an array indexed
-  by item position, and `ecGrade()` re-grades it against whatever `items` says
-  now. Inserting, removing or reordering an item in a check students have taken
-  leaves their stored `score` (which the console prints) beside recomputed
-  per-question cells for different questions; the "Missed by" row becomes
-  fiction. checks.mjs 1y recomputes the answer KEYS from the fretboard and
-  passes straight through this. Same hazard as rewording a keyed MC's choices,
-  one layer down. Edit a check before students reach it, or treat its `items`
-  as frozen once they have.
+  `items` silently re-grades every result.** `res.picks` is indexed by item
+  position, and `ecGrade()` re-grades it against whatever `items` says now. An
+  inserted, removed or reordered item leaves the stored `score` (which the
+  console prints) beside per-question cells for different questions. 1y passes
+  straight through this. Edit a check before students reach it, or treat its
+  `items` as frozen once they have.
 - **Seed the MC shuffle on language-stable data.** `ecChoicesHtml` seeds on
-  the `fret·note` pairs, never the rendered chip labels: "fret 5 · A" and
-  "traste 5 · A" would hash differently and deal one student a different
-  order per language.
+  the `fret·note` pairs, never the rendered chip labels ("fret 5 · A" and
+  "traste 5 · A" would deal a different order per language).
 - **The `noteName` board is drawn with `theme:'web'` plus the dark-mode
-  invert**, not on CSS variables. Its fretted-note circle is a hardcoded
-  light green, so a variable-themed `?` would be light-on-light in dark mode.
+  invert**, not on CSS variables: its fretted-note circle is a hardcoded light
+  green, so a variable-themed `?` would be light-on-light in dark mode.
 
 ## In-Class Activities page & the activity gate
-Work order "Today-first site simplification," Phase 1, shipped 2026-09-12.
-The page was renamed **In-Class Activities → Today** for that work order, then
-**back to In-Class Activities** 2026-09-17 (Jonathan's call). `nav.classActivities`
-was the i18n key both times, so the hash `#class-activities`, every deep link
-and the console's Copy-link URLs never moved.
+The page is **In-Class Activities** (Jonathan, 2026-09-17); its i18n key is
+`nav.classActivities` and its hash `#class-activities`.
 
 It is the site's home page: `showApp()` opens it whenever the URL carries no
-explore hash at all, gated or not. `renderClassActivities()` (app.js) builds
-three groups, named by Jonathan 2026-09-23:
-- **Today's activity** — the hero card's tag (`ca.startHere`). The hero is the
-  first pending card, collapsed like every other card, not forced open
-  (Jonathan, 2026-09-15). An older undone hero is tagged **Unfinished** instead.
-- **Unfinished activities** (`ca.stillToDoGroup`) — one fold, open by default
-  since 2026-10-02, newest first, module headings when cards are placed. No
-  nested "Older" fold any more.
-- **Completed activities** (`ca.finishedGroup`; was "Earlier", before that
-  "Finished").
+explore hash. `renderClassActivities()` (app.js) builds three groups, named by
+Jonathan 2026-09-23:
+- **Today's activity** (`ca.startHere`) — the hero card: the first pending card,
+  collapsed like every other card, not forced open (Jonathan, 2026-09-15). An
+  older undone hero is tagged **Unfinished** instead.
+- **Unfinished activities** (`ca.stillToDoGroup`) — one fold, open by default,
+  newest first, module headings when cards are placed. No nested "Older" fold.
+- **Completed activities** (`ca.finishedGroup`).
 
 The resume card (`renderResumeCard()`) goes at the end when nothing is
-blocking. `#resume-card` moved in `index.html` from a sibling of
-`#week-panels` into this page's body; it no longer renders in the module/set
-view at all.
+blocking. `#resume-card` lives in this page's body; it does not render in the
+module/set view.
 
-**Today's activity holds up to three cards** (Jonathan, 2026-09-29; raised from
-two 2026-10-07): the hero plus up to two other pending cards released the SAME
-day (`CA_TODAY_MAX`, required ones first), all rendered with `caHeroCardHtml`.
-`caStartHereId` is still the first of them; `caTodayIds` is the whole group.
-All are tagged Today's activity when they share the newest visible card's
-date; an undated hero pairs with nothing.
+**Today's activity holds up to three cards** (Jonathan, 2026-10-07): the hero
+plus up to two other pending cards released the SAME day (`CA_TODAY_MAX`,
+required ones first), all rendered with `caHeroCardHtml`. `caStartHereId` is
+the first of them; `caTodayIds` is the whole group. All are tagged Today's
+activity when they share the newest visible card's date; an undated hero pairs
+with nothing.
 
 **Reading order is newest-first, not the teaching order** (Jonathan,
-2026-09-17), so a student lands on current work. The newest module's section
-renders at the top; within a module the most recently assigned card (highest
-board position) renders first.
-- `caBoardOrder()`/`caNumber()` still compute the true ascending course order
-  underneath; the teacher console, gating and deep links all key off it.
+2026-09-17): the newest module's section renders at the top; within a module
+the highest board position renders first.
+- `caBoardOrder()`/`caNumber()` still compute the true ascending course order;
+  the teacher console, gating and deep links key off it.
 - The "#N" a card carries never moves. Only `renderClassActivities()` reverses
-  `view.sections` and each section's ids for display.
-- The "Completed activities" order falls out of the same reversal, not a
-  second `.reverse()`.
+  `view.sections` and each section's ids for display; the "Completed
+  activities" order falls out of the same reversal, not a second `.reverse()`.
 - **Exception — the current day reads lowest number first** (Jonathan,
   2026-11-02). The cards sharing the newest visible card's date trade places
-  among themselves so #11 sits above #12. Every other card keeps its slot;
-  module grouping is untouched. It is applied once to `groups`, so the Today
-  group, the Unfinished fold and the Completed fold all agree. The hero
-  (`caStartHereId`) is the lowest-numbered pending required card of the day.
-  Older days stay highest first.
+  among themselves so #11 sits above #12; every other card and the module
+  grouping are untouched. It is applied once to `groups`, so the Today group,
+  the Unfinished fold and the Completed fold agree. The hero (`caStartHereId`)
+  is the lowest-numbered pending required card of the day. Older days stay
+  highest first.
 
-**Where the student is survives a reload** (navigability round 2, 2026-09-23).
-- The open card rides in the address. `caSyncHash()` (called from
-  `caSyncTopbar()`) `replaceState`s `#class-activities/<id>` while a card is
-  open and plain `#class-activities` when none is. A reload or a Back from
-  another page reopens it through `caFocusActivity()`.
+**Where the student is survives a reload.**
+- `caSyncHash()` (called from `caSyncTopbar()`) `replaceState`s
+  `#class-activities/<id>` while a card is open and plain `#class-activities`
+  when none is. A reload or a Back reopens it through `caFocusActivity()`.
 - Step ticks and practice-card checks (`caStepDone`, keys `<id>:<n>` /
   `<id>:c<n>`) are **saved to the student's progress doc as `caSteps`**
   (Jonathan, 2026-10-01: they must not reset each day or live on the
   Chromebook). Read by `loadProgress()`; written through `onCaStepChange()`
   with the same set/`FieldValue.delete()` shape as `classActivities`.
-- The old per-day `localStorage` copy (`caStepsToday`) is folded in once by
-  `caAdoptLocalTicks()` and removed.
+  `caAdoptLocalTicks()` folds in the old per-day `localStorage` copy
+  (`caStepsToday`) once and removes it.
 - Only the revealed-tab set still resets per student/day
   (`caResetRevealsIfNewDay()`).
-- **Mark complete** closes the card, scrolls to the top (where Today's
-  activity already shows the next one) and toasts `ca.doneNextToast` /
-  `ca.doneAllToast`. Un-marking keeps the card open.
-- A second tap on the current page's rail row scrolls to the top; it no longer
-  closes the page (In class, Songs, My progress).
+- **Mark complete** closes the card, scrolls to the top and toasts
+  `ca.doneNextToast` / `ca.doneAllToast`. Un-marking keeps the card open.
+- A second tap on the current page's rail row scrolls to the top; it does not
+  close the page.
 
 **⚠️ The LOCK is switched off (Jonathan, 2026-10-07: "stop locking the
 other parts of site if class activities aren't cleared… CA should still pop
 up as normal on login").** `const CA_GATE_LOCKS = false;` beside
 `applyActivityGate()` in app.js and `var JOURNEY_GATE_LOCKS = false;` in
 `tabs/journey.js` are the whole switch. Nothing was deleted: `true` restores
-everything below exactly as it was.
-- Still live: `caBlockers()` still computes, and `showApp()` lands a student
-  with any blocker on In-Class Activities at sign-in **whatever the hash**. A
-  gate-open hash such as a `#class-activities/ca-N` deep link is left alone.
-- Gone: the mid-session redirect, the hidden rail, the Journey gate card.
+the lock below exactly as it was.
+- Still live: `caBlockers()` computes, and `showApp()` lands a student with
+  any blocker on In-Class Activities at sign-in **whatever the hash** — except
+  a gate-open hash (`GATE_OPEN_HASHES`, e.g. a `#class-activities/ca-N` deep
+  link) or a return from a Song Journey page.
+- Dormant while off: with `CA_GATE_LOCKS` false, `applyActivityGate()` never
+  sets `body.ca-gated` (only `window.__forceGate` on localhost does), so the
+  hidden rail, `routeExploreHash()`'s redirect, the mid-session flip redirect
+  and the Journey gate card never run.
 - The console's Clear / "Blocked by N" tools now only decide who gets the
   sign-in landing.
-- The description below is the lock as it runs when switched on.
 
-**The gate:** `caBlockers()` — a visible (`caIsVisible`), undone
-(`classActivities[id]!==true`), uncleared activity or check — drives
-`body.ca-gated` via `applyActivityGate()`.
+**The gate, as it runs when switched on:** `caBlockers()` — a visible
+(`caIsVisible`), undone (`classActivities[id]!==true`), uncleared activity or
+check — drives `body.ca-gated` via `applyActivityGate()`.
 - Teacher/dev bypass are gate previewers (`isGatePreviewer()`) and never see it.
-- A failed progress load (`progressLoadFailed`) also reads as "nothing
-  blocking": never lock on a guess, same rule as the sequential set gate.
+- A failed progress load (`progressLoadFailed`) reads as "nothing blocking":
+  never lock on a guess.
 - `applyActivityGate()` runs from `showApp()`, at every exit of
-  `loadClassConfig()`, and inside `renderClassActivities()` itself, so a
-  completion or an exit-check submit lifts it live, no reload.
-- CSS dims every rail `.nav-btn` marked `data-gate="hide"` (all but In-Class
-  Activities and Live quiz, which carry `data-gate="keep"`) and also hides
-  `.g-module`/`.g-set`/`#resume-card`/`#week-panels`. checks.mjs **1aa** fails
-  the push on a nav button with neither.
-- `#search-btn` needs `!important` because `showApp()`/sign-out already toggle
-  its inline `style.display`.
-- While gated, `routeExploreHash()` rewrites any hash but
-  `#class-activities`/`#live-quiz` back to In-Class Activities with a
-  `gateToast()`. `returnToPractice()` gets the same guard.
+  `loadClassConfig()`, and inside `renderClassActivities()`, so a completion or
+  an exit-check submit lifts it live, no reload.
+- CSS dims every rail `.nav-btn` marked `data-gate="hide"` and hides
+  `.g-module`/`.g-set`/`#resume-card`/`#week-panels`. In class is the rail's
+  one `data-gate="keep"` button; Live quiz has no rail button. checks.mjs
+  **1aa** fails the push on a nav button with neither. `#search-btn` needs
+  `!important` because `showApp()`/sign-out already toggle its inline
+  `style.display`.
+- **What a gated student can still open is one list — `GATE_OPEN_HASHES`**
+  (`#class-activities`, `#live-quiz`). While gated, `routeExploreHash()`
+  rewrites any other hash back to In-Class Activities with a `gateToast()`;
+  `returnToPractice()` gets the same guard.
+- **The guard's redirect only ever lands on `#class-activities`** (an open
+  activity's `#class-activities/ca-N` included), never back on `#live-quiz`:
+  closing the quiz routes to `''`, and returning to the quiz locked a gated
+  student out of their activities (2026-09-29).
+- **Gate flips on mid-session → In-Class Activities.** `applyActivityGate()`
+  detects the off→on transition (the `visibilitychange` re-check) and, once
+  `appIsOnScreen()`, walks the student there with the same toast. The CSS
+  alone would leave an open screen open.
 - `window.__forceGate` (localhost only) forces the gate on for a session that
   can't otherwise trigger it (dev bypass, the teacher account).
 
@@ -163,10 +158,10 @@ everything below exactly as it was.
 visible, undone, uncleared activity blocks, however old, until finished or
 cleared per student. No blocking window, no activity-level
 "stop blocking everyone" toggle — don't propose one again. The tools are the
-per-student Clear and Hide (which also removes it from Earlier). One release
-date serves both periods, also by choice.
+per-student Clear and Hide (which takes the card off the page, "Completed
+activities" included). One release date serves both periods, also by choice.
 
-**"Open through Module N" — a per-student module skip (2026-10-02).**
+**"Open through Module N" — a per-student module skip.**
 `config/class.moduleOpenThrough` (`{ uid: N }`, N = 2..12) is set from the
 "Open through" select in the console's Manage table
 (`teacherSetStudentOpenThrough`; Auto deletes the key). The student app reads
@@ -183,10 +178,9 @@ it into `moduleOpenThrough`.
 - A change under an open app repaints the rail (`repaintModuleGate`), which
   also drops a now-open set's peek.
 
-**Optional activities (2026-09-22, Jonathan's ask):** a Required / Optional
-switch on every assigned card on the console board writes
-`config/class.optionalActivities` (`{ id: true }`, cell-checked, same shape as
-`hiddenActivities`; `teacherSetActivityOptional`).
+**Optional activities:** a Required / Optional switch on every assigned card
+on the console board writes `config/class.optionalActivities` (`{ id: true }`,
+cell-checked, same shape as `hiddenActivities`; `teacherSetActivityOptional`).
 - An optional card is still VISIBLE — `caIsVisible()` does not read the map —
   but it is never a blocker.
 - It renders an "Optional" tag (`caOptionalTagHtml()`, inside both meta-line
@@ -201,18 +195,17 @@ switch on every assigned card on the console board writes
 - Delete clears the flag with everything else; Archive keeps it.
 - No `firestore.rules` change (comment only).
 
-**CAS students: every activity is optional** (2026-09-22, Jonathan's ask —
-they must never be locked out of the modules).
+**CAS students: every activity is optional** (Jonathan — they must never be
+locked out of the modules).
 - Keyed off the EFFECTIVE period (`periodOverrides[uid] || progress.period`,
   same rule as the console's `teacherStudentPeriod`).
-- `caIsOptional()` returns true for every card when `caStudentIsCAS()`: a CAS
-  student sees every card tagged Optional and nothing ever blocks.
+- `caIsOptional()` returns true for every card when `caStudentIsCAS()`: every
+  card is tagged Optional and nothing ever blocks.
 - `teacherBlockersFor()` and `journeyBlockers()` return `[]` for a CAS student
   (journey.js reads `data.period` off the progress doc it already fetches).
-- Picking CAS in the period picker re-runs `applyActivityGate()`, so the gate
-  comes down without a reload.
+- Picking CAS in the period picker re-runs `applyActivityGate()`.
 - The console's per-student Gate column shows "CAS · optional" instead of a
-  Clear button for those students.
+  Clear button.
 - A student who hasn't picked a period yet is gated like anyone else until
   they do.
 
@@ -220,28 +213,24 @@ they must never be locked out of the modules).
 lets one student past a specific blocker without finishing it (a sub day, a
 connectivity problem, work done on paper).
 - Written by `teacherSetActivityClear`/`teacherClearAllBlockers` in teacher.js,
-  same merge-patch shape as `hiddenActivities`/`gameOverrides`.
-- No `firestore.rules` change (already teacher-write/student-read).
+  same merge-patch shape as `hiddenActivities`/`gameOverrides`. No
+  `firestore.rules` change (already teacher-write/student-read).
 - UI: a Clear toggle in the per-student grid on both
-  `renderTeacherActivityDetail` (new — regular activities had no such grid
-  before this) and `renderTeacherCheckDetail` (existing, gained a Gate column);
-  a "Blocked by N" badge and a per-student "Today's activity gate" section with
+  `renderTeacherActivityDetail` and `renderTeacherCheckDetail` (Gate column); a
+  "Blocked by N" badge and a per-student "Today's activity gate" section with
   Clear all on the Students views.
 - Cached in `localStorage` (`caClears`, restored by
-  `restoreClassConfigFromCache` — renamed from `restoreActivityDatesFromCache`)
-  with the same fail-to-cache (never fail open) rule as `activityDates`.
+  `restoreClassConfigFromCache`) with the same fail-to-cache (never fail open)
+  rule as `activityDates`.
 
-**Archive / Delete (2026-09-15, Jonathan's ask):** two buttons per row in the
-console's Class activities table, in a new **Archive** column beside
-Visible/Hidden.
+**Archive / Delete:** two buttons per row in the console's Class activities
+table, in the **Archive** column beside Visible/Hidden.
 - Data: `config/class.archivedActivities` and `.deletedActivities` (`{ id: true }`,
   same merge-patch shape and teacher-write/student-read rule as
-  `hiddenActivities`). No `firestore.rules` change; the rules edit that shipped
-  with this was comments only, so nothing needs pasting into Firebase.
-- Students merge the two maps into one `retiredActivityIds` set (they draw no
-  distinction). `caIsVisible()` fails on it **before** the dev-bypass line,
-  unlike the date gate: a retired activity isn't "not live yet", it's out of the
-  course, so there's nothing to preview.
+  `hiddenActivities`). No `firestore.rules` change.
+- Students merge the two maps into one `retiredActivityIds` set. `caIsVisible()`
+  fails on it **before** the dev-bypass line, unlike the date gate: a retired
+  activity is out of the course, so there's nothing to preview.
 - Downstream follows for free: off In-Class Activities, out of
   `caBlockers()`, a deep link reads as not-posted.
 - The visibility rule is mirrored in all three places — `caIsVisible`
@@ -252,49 +241,40 @@ What **Restore** gives back differs:
 - Archive keeps the release date, rename, board slot and per-student clears,
   so the card returns exactly where it was (minus any pin — Archive unpins).
 - Delete wipes all of that on the way out (behind a `confirm()`), **including
-  the board entry**. A restored one comes back in Built — unplaced and undated,
-  to be assigned and published from scratch.
-- The two flags are mutually exclusive by construction: each writer clears the
-  other.
+  the board entry**. A restored one comes back in Built — unplaced and undated.
+- The two flags are mutually exclusive: each writer clears the other.
 - Neither touches students' `classActivities` completion records (the teacher
   has no write on `progress/{uid}`, and it's grade data). Neither removes the
   entry from `class-activities.js` — only a push does.
-- **Retired cards hold no `#N`** (changed 2026-09-16 with the board —
-  Jonathan's call). The ones after them count down, so the list students read
-  is always 1,2,3 with no gaps.
+- **Retired cards hold no `#N`** (Jonathan's call). The ones after them count
+  down, so the list students read is always 1,2,3 with no gaps.
 - Console-side, an archived card folds into its module's own `Archived (N)`
   disclosure, and an archived-but-unplaced one into Built's
   `Archived / deleted (N)`.
 - Cached in `localStorage` (`caRetired`) with the same fail-to-cache rule as
   `activityDates` / `activityClears` / `hiddenActivities` (`caHidden`): a
   blocked read must not bring a retired or hidden activity back and let it
-  start gating the site again. **`hiddenActivities` joined that list
-  2026-09-18.** It used to fail open to `{}`, on the reasoning that a stray
-  visible card was cosmetic. That stopped being true when the gate shipped: an
-  activity the teacher pulled would come back on a flaky read and block the
-  whole site on work nobody could finish.
+  start gating the site again. Don't let `hiddenActivities` fail open to `{}`:
+  a pulled activity coming back would block work nobody can finish.
 
-**Journey pages gate too.** The six `tabs/*.html` pages also load
-`class-activities.js` (a plain data array, no dependency of its own), so
+**Journey pages gate too** (when `JOURNEY_GATE_LOCKS` is on). The six
+`tabs/*.html` pages also load `class-activities.js` (a plain data array), so
 `journey.js` can compute the same blockers after its own Firestore boot.
 - `journeyIsVisible`/`journeyBlockers` are deliberately NOT shared with app.js's
   `caIsVisible`/`caBlockers`, which read globals only the main app's boot path
   populates.
 - On a hit, the whole page is replaced with a `.ca-gate-card` linking back to
   `index.html#class-activities`. Styles are in `tabs/journey-theme.css`, with no
-  `styles.css` counterpart: the main app's gate stays on the existing In-Class
-  Activities page rather than a full-page swap.
+  `styles.css` counterpart.
 - Skipped for the teacher's own account by email. A failed config read fails
   open (no gate), never on a guess.
 - `mood-chart.html` is not one of the six and is never gated.
-- **The one exemption (2026-09-12):** a pending activity that names a Journey
-  page — `journey: '<slug>'` in `class-activities.js`, optional `journeyLayer` —
-  is sending the student there as part of the work. `journey.js` leaves THAT
-  page open while the activity blocks; every other Journey page stays gated.
-  Current carriers (read the file rather than trusting this line; the list is
-  whatever carries the field): ca-25 → seven-nation-army; ca-24, ca-30 →
-  the-cure; ca-27, ca-32 → luna; ca-26, ca-29 → all-along-the-watchtower;
-  ca-28, ca-33 → sweet-child-o-mine; ca-31 → seven-nation-army.
+- **The one exemption:** a pending activity that names a Journey page —
+  `journey: '<slug>'` in `class-activities.js`, optional `journeyLayer` — leaves
+  THAT page open while the activity blocks; every other Journey page stays
+  gated. Read the file for the carriers (today ca-25, ca-31 →
+  seven-nation-army; ca-24, ca-30 → the-cure; ca-27, ca-32 → luna; ca-26,
+  ca-29 → all-along-the-watchtower; ca-28, ca-33 → sweet-child-o-mine).
 - The card renders an "Open the … Song Journey page" button
   (`caJourneyLinkHtml()`). Never on a whole-song card, and not on another
   activity while its song has an openable whole-song card. `journey:` on a
@@ -533,24 +513,6 @@ other). Slowest is the SLOW file at `SLOWEST_RATE` (0.8) with `preservesPitch`
   (count-in spacing, click lookahead, output latency) scale by the rate.
 - A `load()` resets `playbackRate` to `defaultPlaybackRate`, which is why
   `slowestApplyRate()` sets both.
-
-**Gate flips on mid-session → In-Class Activities.** `applyActivityGate()`
-detects the off→on transition (a new activity going live under an open
-Games/Songs/My progress screen, via the `visibilitychange` re-check). Once the
-app is on screen (`appIsOnScreen()`), it walks the student to In-Class
-Activities with the same toast `routeExploreHash` uses. The CSS alone only hid
-the rail; an open screen stayed open.
-
-**What a gated student can still open is one list — `GATE_OPEN_HASHES`**
-(`#class-activities`, `#live-quiz`), read by `routeExploreHash`'s guard and the
-flip redirect. In class is the rail's one `data-gate="keep"` button (1aa); Live
-quiz has had no rail button since 2026-09-29.
-**The guard's redirect only ever lands on `#class-activities`** (an open
-activity's `#class-activities/ca-N` included), never back on `#live-quiz`.
-Why (2026-09-29): closing the quiz routes to `''`, which the gate refuses, and
-returning to "the last gate-open hash" reopened the quiz — a gated student who
-had joined a game could not get back to their activities at all, game over or
-not.
 
 **Each Core song row links its whole-song practice card** (Jonathan,
 2026-10-05). The Core list is the only place: it replaced the 2026-10-01 "Play
