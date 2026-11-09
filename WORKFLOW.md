@@ -27,11 +27,17 @@ Dates are the Pacific calendar date. `CACHE_VERSION` and commit timestamps may s
 
 ---
 
-## Where things stand (updated 2026-11-08)
+## Where things stand (updated 2026-11-09)
 
 Start here. Update this block whenever an item opens or closes; each line says where the detail is.
 
-**Shipped since 2026-11-07 (live as of `ab4aaae`)**
+**Shipped 2026-11-09 (live as of `c443261`)**
+- **Count-in:** 2 clicks below 60 BPM in Power Chord Switch and Change Up (Open work → 2026-11-06 Friday check →
+  "Decided (Jonathan, 2026-11-09)"). **Today's activities by date:** the group is ordered by release date, newest first;
+  a finished card re-dated to the newest date shows in Today marked done (CHANGELOG 2026-11-09; check 1cq). Both Fast;
+  the Friday check reviews them. Smoke watchdog `3af343f`. CLAUDE.md: a product change he asks for ships Fast (`c443261`).
+
+**Shipped 2026-11-07 to 2026-11-08 (live as of `ab4aaae`)**
 - **Stopped game, review rounds 3-6** (Power Chord Switch and Change Up; `4582bda`, `a8d2e55`, `df20fd1`, `3625df5`,
   `9c8d1bc`; CHANGELOG 2026-11-08 and 2026-11-08 (evening)): the Stop click is not graded; a Stop after changes fell due reads one of
   three headlines; a Stop in a game where nothing was heard is neutral (Jonathan, 2026-11-08). Rules and known gaps:
@@ -65,8 +71,6 @@ Start here. Update this block whenever an item opens or closes; each line says w
   takes (21 Power Chord Switch) are kept outside the repo (`~/Documents/mic-recordings-2026-11-07.zip`): they carry
   student names.
 - **Grid step cap number** (60 ms) and the other open product calls: Open work → the 2026-11-06 Friday check item.
-- ~~Live quiz: delete the `scores` field of `liveQuiz/current`~~ Done: Jonathan looked on 2026-11-09 and the doc has no `scores` field (a later game's full `set()` replaced it). Nothing left here.
-  being done; a later game probably overwrote it: confirm in the console or ignore.
 - **Optional:** the console's `heartbeats` composite index (Firestore → Indexes, the only index); nothing uses it.
 
 **Automatic:** the Friday check (Fridays 11 PM Pacific). The 2026-11-06 run (tag `friday-check-2026-11-06`) covered
