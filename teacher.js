@@ -675,7 +675,6 @@ function teacherRefreshBlocker(){
   if(sel && !sel.isCollapsed && grid && sel.anchorNode && grid.contains(sel.anchorNode)) return 'text is selected';
   return '';
 }
-function teacherRefreshSafe(){ return !teacherRefreshBlocker(); }
 /* A Refresh click that was held back says why, in the bar, for a few
    seconds. The minute timer is held back silently, as before. */
 let teacherRefreshHeld='', teacherRefreshHeldTimer=null;
@@ -693,7 +692,6 @@ async function teacherRefreshStudents(opts){
   if(!teacherStudentsAt){ if(manual) loadAllStudents(); return; }
   const why=teacherRefreshBlocker();
   if(why){ if(manual) teacherNoteRefreshHeld(why); return; }
-  if(manual && teacherRefreshHeld){ teacherRefreshHeld=''; clearTimeout(teacherRefreshHeldTimer); }
   teacherRefreshing=true; teacherPaintRefreshBar();
   let fresh=null;
   try{ fresh=await teacherFetchStudents(); }
@@ -707,6 +705,8 @@ async function teacherRefreshStudents(opts){
   allStudentsRaw=fresh;
   teacherApplyRosterFilter();
   teacherStudentsAt=Date.now();
+  // A refresh that landed (the button's or the timer's) ends any "Not refreshed" note.
+  teacherRefreshHeld=''; clearTimeout(teacherRefreshHeldTimer);
   try{
     renderTeacherSummary();
     if(teacherView==='activities'){
@@ -997,8 +997,8 @@ let studentDetailUid=null;
 // flag of its own either.
 let activityDetailId=null;
 // Which row (if any) currently has its rename box open. Purely local view
-// state, cleared on every save/cancel, whenever the tab is re-entered, and
-// when the detail's Settings tab is left (teacherSetDetailTab).
+// state, cleared on every save/cancel and whenever the tab is re-entered. It
+// stays open, typed text and all, while another detail tab is up.
 let activityEditId=null;
 /* Focus-view activities (view:'focus') default their preview to a full step
    list — a fast pre-class read of everything at once. "Preview as student"
@@ -1114,6 +1114,8 @@ function teacherPaintSideTree(model){
     const open=teacherUnitOpenMap(model, '');
     const shown=model.groups.filter(g=>open[g.key]);
     if(shown.length===1) on=shown[0].key;
+    // Several open: the picked card's unit, if it is one of them.
+    else { const pg=activityDetailId && shown.find(g=>g.ids.includes(activityDetailId)); if(pg) on=pg.key; }
   }
   const html=teacherSideTreeRows(model).map(r=>`<button type="button" class="t-side-sub${r.key===on?' on':''}" data-side-unit="${escAttr(r.key)}" title="${escAttr(r.title)}"${r.key===on?' aria-current="true"':''}><span class="t-side-sub-name">${escHtml(r.label)}</span><span class="t-side-sub-n">${r.n}</span></button>`).join('');
   if(html===teacherSideTreeLast && host.childNodes.length) return;
@@ -1153,7 +1155,10 @@ function setTeacherView(v){
   if(v!=='activities') activityListJump=null;
   // The Teacher view songs card plays the record — leaving the tab stops it.
   // So does an activity's Preview (a song, a snippet, a TAB sequence).
-  if(((teacherView==='tsongs' && v!=='tsongs') || (teacherView==='activities' && v!=='activities')) && typeof stopCardAudio==='function') stopCardAudio();
+  // So does the detail screen (opened from Songs or a student's page) when
+  // the sidebar or a tree row brings back the list.
+  const leavingDetail = teacherView==='activities' && teacherActivityScreen()==='detail';
+  if(((teacherView==='tsongs' && v!=='tsongs') || (teacherView==='activities' && v!=='activities') || leavingDetail) && typeof stopCardAudio==='function') stopCardAudio();
   teacherView=v;
   if(v==='students') studentDetailUid=null; // clicking the tab always starts back at the roster
   // Songs always starts back at its list, nothing mid-rename. An activity
@@ -1813,7 +1818,7 @@ function renderTeacherActivities(opts){
   // The way back is on screen while the board loads (or fails to).
   const backBar=`<div class="ta-board-bar"><button type="button" class="stu-back" data-ta-board-back>&#x2190; Back to list</button></div>`;
   if(!cached && keepY===null) box.innerHTML=backBar+'<div class="t-loading">Loading…</div>';
-  (cached ? Promise.resolve(teacherClassConfig) : loadTeacherClassConfig()).then(async cfg=>{
+  (cached ? Promise.resolve(teacherClassConfig) : teacherReadConfigAndRoster()).then(async cfg=>{
     if(teacherView!=='activities') return;   // switched views mid-flight
     if(!cfg) return;                         // superseded by a newer toggle
     // Back to the list (or an activity opened) mid-flight: this read would
@@ -2362,12 +2367,20 @@ function teacherPickActivity(id){
   // leaving it already stopped its card (setTeacherView).
   if(typeof stopCardAudio==='function') stopCardAudio();
   activityDetailId=id; activityEditId=null;
+  /* Picked under a flat filter or a search, where every unit's fold is out
+     of sight: the card's unit opens for the way back to Units. The newest
+     choice wins — a tree click after this pick still decides. */
+  if((activityListFilter!=='units' || activityListQuery.trim()) && teacherClassConfigLoaded && teacherClassConfig){
+    const g=teacherActivityListModel(teacherClassConfig).groups.find(x=>x.ids.includes(id));
+    if(g) activityUnitOpen[g.key]=true;
+  }
   document.querySelectorAll('#t-grid-container [data-ta-pick]').forEach(r=>{
     const on=r.dataset.id===id;
     r.classList.toggle('is-sel', on);
     if(on) r.setAttribute('aria-current','true'); else r.removeAttribute('aria-current');
   });
   renderTeacherActivityDetail(id);
+  teacherPaintSideTree();
   // A row picked low on a long page: bring the top of the detail into view.
   const det=document.querySelector('#t-grid-container [data-ta-detail]');
   if(det){
@@ -2380,13 +2393,6 @@ function teacherSetDetailTab(tab, focus){
   if(!TA_TABS.includes(tab)) return;
   activityDetailTab=tab;
   const box=document.getElementById('t-grid-container');
-  /* Leaving Settings with the rename box open closes it, unsaved — the same
-     as picking another activity. Left open on a hidden tab it held back
-     every refresh. The repaint is the soft one: the Preview is untouched. */
-  if(tab!=='settings' && activityEditId && teacherView==='activities' && box.querySelector('[data-ta-settings] .t-act-title-edit')){
-    activityEditId=null;
-    teacherSoftRepaintDetail();
-  }
   box.querySelectorAll('[data-ta-tab]').forEach(b=>{
     const on=b.dataset.taTab===tab;
     b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); b.tabIndex=on?0:-1;
@@ -2567,24 +2573,35 @@ function teacherSoftRepaintDetail(){
   // An open More menu is closed by the repaint — it was the click that wrote.
   head.innerHTML=teacherActivityHeadHtml(a,cfg);
   const set=host.querySelector('[data-ta-settings]');
-  if(set) set.innerHTML=teacherActivitySettingsHtml(a,cfg);
+  if(set){
+    // An open rename box keeps what was typed (a failed save, then a Refresh,
+    // would otherwise put the server's title back in it).
+    const old=set.querySelector('.t-act-title-edit');
+    const typed=old ? {id:old.dataset.id, value:old.value} : null;
+    set.innerHTML=teacherActivitySettingsHtml(a,cfg);
+    const box=typed && set.querySelector('.t-act-title-edit');
+    if(box && box.dataset.id===typed.id) box.value=typed.value;
+  }
   teacherRepaintActivityStudents(a.id);
   if(activityEditId){ const inp=host.querySelector('.t-act-title-edit'); if(inp){ inp.focus(); inp.select(); } }
+}
+/* A fresh read can carry another console's archive or un-archive of a
+   student: re-filter the roster from it, or the rows, the Students tab and
+   its roll keep counting the old cfg's roster until the minute refresh. The
+   board, the split and the detail all read through this. */
+function teacherReadConfigAndRoster(){
+  return loadTeacherClassConfig().then(cfg=>{ if(cfg) teacherApplyRosterFilter(); return cfg; });
 }
 /* The Class activities screens other than the board: the split, and the
    detail alone. Same `cached` contract as the board (see its comment). */
 function teacherRenderActivityScreen(screen, opts){
   const cached = !!(opts && opts.cached) && teacherClassConfigLoaded;
   const box=document.getElementById('t-grid-container');
-  /* A fresh read can carry another console's archive or un-archive of a
-     student: re-filter the roster from it, or the rows, the Students tab and
-     its roll keep counting the old cfg's roster until the minute refresh. */
-  const read=()=>loadTeacherClassConfig().then(cfg=>{ if(cfg) teacherApplyRosterFilter(); return cfg; });
   if(screen==='detail'){
     if(!box.querySelector(`[data-ta-head][data-id="${CSS.escape(activityDetailId)}"]`)) renderTeacherActivityDetail(activityDetailId);
     else teacherSoftRepaintDetail();
     teacherPaintSideTree();
-    if(!cached) read().then(cfg=>{ if(cfg && teacherView==='activities' && teacherActivityScreen()==='detail'){ teacherSoftRepaintDetail(); teacherPaintSideTree(); } });
+    if(!cached) teacherReadConfigAndRoster().then(cfg=>{ if(cfg && teacherView==='activities' && teacherActivityScreen()==='detail'){ teacherSoftRepaintDetail(); teacherPaintSideTree(); } });
     return;
   }
   if(!(window.CLASS_ACTIVITIES||[]).length){
@@ -2592,7 +2609,7 @@ function teacherRenderActivityScreen(screen, opts){
     return;
   }
   if(!cached && !box.querySelector('[data-ta-split]')) box.innerHTML='<div class="t-loading">Loading…</div>';
-  (cached ? Promise.resolve(teacherClassConfig) : read()).then(async cfg=>{
+  (cached ? Promise.resolve(teacherClassConfig) : teacherReadConfigAndRoster()).then(async cfg=>{
     if(teacherView!=='activities' || teacherActivityScreen()!=='split') return;   // switched away mid-flight
     if(!cfg) return;
     // First ever paint on a class with no board yet: the same one-time
@@ -2897,7 +2914,7 @@ function teacherBoardDragEnd(){
    the card being dragged. Its dragend then fires on a node that is no longer
    in the page, so it reaches neither the shell nor the document, and a drop
    outside a target fires no drop either — boardDragId stayed set, and with
-   it teacherRefreshSafe skipped every auto-refresh (and a stray text drag
+   it teacherRefreshBlocker skipped every auto-refresh (and a stray text drag
    over the board would carry that card) until the next successful drop.
    The browser sends no mouse events while a drag runs, so a mouse event
    that arrives with no .t-board-dragging card left in the page means the
