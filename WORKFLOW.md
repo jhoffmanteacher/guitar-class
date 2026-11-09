@@ -23,25 +23,27 @@
 
 **Status legend:** [ ] not started · [~] in progress · [x] done
 
+Dates are the Pacific calendar date. `CACHE_VERSION` and commit timestamps may show the UTC date, one day later in the evening.
+
 ---
 
-## Where things stand (updated 2026-11-09)
+## Where things stand (updated 2026-11-08)
 
 Start here. Update this block whenever an item opens or closes; each line says where the detail is.
 
 **Shipped since 2026-11-07 (live as of `ab4aaae`)**
 - **Stopped game, review rounds 3-6** (Power Chord Switch and Change Up; `4582bda`, `a8d2e55`, `df20fd1`, `3625df5`,
-  `9c8d1bc`; CHANGELOG 2026-11-08 and 2026-11-09): the Stop click is not graded; a Stop after changes fell due reads one of
-  three headlines; a Stop in a game where nothing was heard is neutral (Jonathan, 2026-11-09). Rules and known gaps:
+  `9c8d1bc`; CHANGELOG 2026-11-08 and 2026-11-08 (evening)): the Stop click is not graded; a Stop after changes fell due reads one of
+  three headlines; a Stop in a game where nothing was heard is neutral (Jonathan, 2026-11-08). Rules and known gaps:
   Open work → "Stopped-game headline".
 - **Tuning Simulator:** green only when the string is done, keyboard on Tighten/Loosen, Module 1 note circle goes up
   counterclockwise and says "3+ steps" (CHANGELOG 2026-11-08); guards in check 1cp (21 pins) and a smoke walk; a
-  **"Start over"** button that clears the saved level (Jonathan, 2026-11-09; `3625df5`). Peg: counterclockwise tightens
+  **"Start over"** button that clears the saved level (Jonathan, 2026-11-08; `3625df5`). Peg: counterclockwise tightens
   (Jonathan, 2026-11-07, `bf7c927`); it has flipped three times, so ask him to check a real guitar before changing it.
 - **Teacher console Layout A** (`4950e86`, `fff71ec`, `6e64a62`; review round 1 `c562e7d`; rounds 2-3 `79c48a9`..`b04f201`)
-  and the **units tree** (`890eae7`, Fast): "Recently shipped" → 2026-11-08 and 2026-11-09 entries.
+  and the **units tree** (`890eae7`, Fast): "Recently shipped" → the two 2026-11-08 entries.
 - **Docs tightening (2026-11-08):** CLAUDE.md, every skill and every `.claude/rules` file cut or split into lists
-  (`337437b`..`ab4aaae`).
+  (`7ba94ba`..`ab4aaae`).
 
 **Waiting on Jonathan**
 - **Practice minutes console view** (`997df22`, `07a4e04`): he pasted the rules on 2026-11-06 (memory
@@ -62,6 +64,8 @@ Start here. Update this block whenever an item opens or closes; each line says w
   takes (21 Power Chord Switch) are kept outside the repo (`~/Documents/mic-recordings-2026-11-07.zip`): they carry
   student names.
 - **Grid step cap number** (60 ms) and the other open product calls: Open work → the 2026-11-06 Friday check item.
+- Live quiz: the one-time delete of `liveQuiz/current.scores` after the 2026-11-05 deploy (`54ef545`) has no record of
+  being done; a later game probably overwrote it: confirm in the console or ignore.
 - **Optional:** the console's `heartbeats` composite index (Firestore → Indexes, the only index); nothing uses it.
 
 **Automatic:** the Friday check (Fridays 11 PM Pacific). The 2026-11-06 run (tag `friday-check-2026-11-06`) covered
@@ -73,8 +77,9 @@ emulator cases since 2026-11-06 (179 before); needs Java 21 (on Jonathan's Mac a
 the file's header); one leniency pinned, not fixed: a chunk with no `i` field is accepted.
 
 **Settled, don't re-raise:** the 30 s take cap, the real-guitar mic check, the three "chord sounded wrong" wordings, no
-Note Runner mic check ("Later (not chosen yet)"); room noise after a change counts as a try in the Stopped-game rule
-(Jonathan, 2026-11-07); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave both (Jonathan, 2026-11-09).
+Note Runner mic check ("Later (not chosen yet)"); Stopped-game room-noise rule: room noise after a change counts as a try
+(Jonathan, after review round 2, 2026-11-07; recorded in memory `stopped-game-headline-2026-11-07`; `f47a730` had left it
+open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave both (Jonathan, 2026-11-08).
 
 ---
 
@@ -116,18 +121,20 @@ Note Runner mic check ("Later (not chosen yet)"); room noise after a change coun
       3-4, 2026-11-08). Changes due, none reached: "No strum was heard before you stopped." (`cc.noStrum`,
       `games.cc.verdict.stoppedSilent`) or "No change was heard before you stopped." (`stoppedNoChange`), no breakdown
       (2026-11-08, Jonathan chose the first wording).
-    - **Silent Stop (R5-2, Jonathan, 2026-11-09):** `cc.silentStop = !ended && cc.noStrum`, no change graded
+    - **Silent Stop (R5-2, Jonathan, 2026-11-08):** `cc.silentStop = !ended && cc.noStrum`, no change graded
       (`ok === 0 && off === 0`) → "No strum was heard before you stopped." even past the 4 s window (it read "too fast"
       in 4-16 of 64-116 simulated Power Chord Switch Stops, 32-108 in Change Up). Power Chord Switch keeps "strum a
       little firmer" for two or more unheard changes. Not covered: a silent game run to the END (Change Up still says
       "too fast" for a dead mic).
-    - **Room noise counts as a try** (Jonathan, 2026-11-07, `f47a730`): any sound after a change fell due means "tried
+    - **Room noise counts as a try** (Jonathan, after review round 2, 2026-11-07; recorded in memory
+      `stopped-game-headline-2026-11-07`; `f47a730` had left it open): any sound after a change fell due means "tried
       it". With one noise onset a second, the clean screen survives in 72-76 of 96 games (89-93 without the rule);
       without it a student who strums late and gives up reads "4 of 4 worked".
     - **Known, left alone:** a Stop within about 300 ms of the final strum's arrival counts that strum as the click
       (R4-2: loses XP, "complete" and best in 120 of 420 simulated Stops at 150 and 250 ms; the alternative credits a click
       as a played change, 56 of 56). A song switch whose round 1 was silent, Stopped within about 0.2 s of round 2 at
-      130 BPM, reads the neutral screen (R2-3). The done screen at 1366x657 was reasoned, not measured (+20 px if the
+      130 BPM, reads the neutral screen (R2-3). A song switch's rounds line counts only the changes reached (a round
+      with none is not listed). The done screen at 1366x657 was reasoned, not measured (+20 px if the
       breakdown wraps).
     - **Song-switch setup** stops at 130 (`ccSetupMaxBpm`); a pair's 135/140 comes back unless a tempo was set on the
       song switch (`cc.heldPairBpm`). Check `1ck` runs about 23 real games plus a setup walk.
@@ -142,6 +149,7 @@ Note Runner mic check ("Later (not chosen yet)"); room noise after a change coun
     11 / 17; 30 BPM 0.4 beat 10 / 15; almost no difference at 60 BPM and up. A player 1.5% off ends 250 ms short at
     10 BPM every beat (1085 old / 838 capped); grading was unchanged in the reviewer's 224 drift games at 10-40 BPM. Not decided: the Listening Coach (`coachMatchEvent`) grid is uncapped
     (up to 270 ms at 30 BPM); left alone.
+    - [ ] Grid step cap number: Jonathan's call (40 / 50 / 60 / 100 ms table above; 60 is live).
   - [x] **Top-tempo advice** (`0b5c611`, `82fb6fa`, `95afba0`, 2026-11-07): "The tempo cannot go higher. Play it again."
     (`games.pw.advice.top`). Not changed (product call): a pair sped up live past its counted tempo still says "Level
     up". Same shape, not fixed (not asked for): Change Up says "try it 10 BPM faster" at 140, and both games say "Drop 5
@@ -158,7 +166,8 @@ Note Runner mic check ("Later (not chosen yet)"); room noise after a change coun
   about 4 hours, headless Chrome 157); Jonathan had to force quit Chrome. Not the profile, port or machine load.
   Same family as the 2026-11-04 hang (Chrome 156; Chrome 157 fixed that one). Workaround in CLAUDE.md step 3 (an
   outside time limit, `pkill -f gc-smoke-chrome`). Still open: a watchdog inside
-  `smoke.mjs` that prints the step it is on and exits non-zero. Decided 2026-11-07 (Jonathan): the 1.8 / 2.19 ratio
+  `smoke.mjs` that prints the step it is on and exits non-zero. Until then, run it only with Chrome closed (the
+  2026-11-07 hang froze Jonathan's own Chrome). Decided 2026-11-07 (Jonathan): the 1.8 / 2.19 ratio
   shipped without a smoke run.
 
 - [ ] **2026-11-02 — `tools/smoke.mjs` flakes after its page reload (cause unknown).** About 4 of 9 runs reported errors
@@ -197,13 +206,14 @@ Note Runner mic check ("Later (not chosen yet)"); room noise after a change coun
 
 - [ ] **2026-10-31 — Friday check (first run, `1c1e6c6`..`59e7915`).** R2-1, R2-4, R2-6, R1-1, R1-3 done 2026-10-31.
   Binding: the console skips the signed-in account's own empty document (Jonathan chose this over a local-only trainer
-  profile; check 1cf); Change Up's Start sits in the sticky bar (1ca); trainer `dayStr` is the local date (fails under
+  profile; check 1cf); Change Up's Start sits in the sticky bar (1ca; the −5/+5 row is still below the first screen, only Start is pinned); trainer `dayStr` is the local date (fails under
   `TZ=Pacific/Auckland`). A mic hit on ca-43's two-fret power cards names and marks both frets ("fret 0 / 12"; 1cd). `639248b`,
   `6871747`, `b3a351c`, `cb3dc5e` (mic detection) and `5e2061e` (new check 1cc) should not have shipped Fast; reviewed
   then. **Still open:** check 1cd sees only strings asked for through `ncK()`; a direct `t('nc.*')` on a power screen is
   invisible to it.
 
-- [x] **2026-10-31 — Pushed without a reviewer (after `66266c9`)** — reviewed by `friday-check-2026-10-31`. Binding:
+- [x] **2026-10-31 — Pushed without a reviewer (after `66266c9`)** — reviewer pass covered by `friday-check-2026-10-31`;
+  the live-site look is the open item under 2026-10-30. Binding:
   **Note Call no longer accepts the 5th** (Jonathan, 2026-10-31): kept, a wrong chord a 5th above counted right 7.7% /
   28.9% / 100% at std / mid / weak; dropped, 0 of 1040, no right-strum row changed. Left alone: at std a root-quiet
   strum is heard 67.1%, a two-string root + 5th 65.4%; Riff Runner's Wait Mode still takes the 5th. Branch
@@ -214,8 +224,12 @@ Note Runner mic check ("Later (not chosen yet)"); room noise after a change coun
 
 - [x] **2026-10-30 — Everything pushed in a hurry** (`d4544a3`, `1c3062b`, the Watchtower switch) — covered by the
   Friday checks (tags `friday-check-2026-10-31`, `-11-01`, `-11-01b`, `-11-06`). Branch `wip/main-folder-2026-10-30`
-  (based on `6b120f8`) shipped as `158015d`; the main folder's commit `5634815` is `5e2061e`; the branch and the
-  worktrees `guitar-class-pcs` / `guitar-class-wt` are gone (checked 2026-11-09).
+  (based on `6b120f8`) shipped as `158015d`; the main folder's commit `5634815` is `5e2061e`. Branch
+  `wip/main-folder-2026-10-30` deleted on GitHub (only `main` remains, checked 2026-11-08). On the **Windows** machine,
+  not checkable from the Mac: remove worktrees `guitar-class-pcs` / `guitar-class-wt` if still there; the main folder
+  may still hold the old uncommitted Watchtower edits on a stale base (they shipped as `158015d`):
+  `git stash; git fetch; git reset --hard origin/main`.
+  - [ ] Live-site look still not done (the 2026-10-31 Friday check left it open): Power Chord Switch (random round, Every bar / Every 2 beats, −5/+5, a fixed pair, done screen, Change Up unchanged) and the Watchtower Hendrix/Neil Young switch on ca-26/ca-29/ca-40 (survives a reload, both recordings play, Guitar on/off on both, lyric card stays on Hendrix), EN + ES, 1366×657.
 
 - [x] **2026-09-15 — "the cure" both-strings root line** (`6e73cd9`). Jonathan chose extending the diagram library
   (`localStringMultiNotesSvg`); the low-E-only verse is the Level up.
@@ -248,7 +262,7 @@ Note Runner mic check ("Later (not chosen yet)"); room noise after a change coun
 
 Detail lives in git log and `CHANGELOG.md`; entries keep what still binds.
 
-- [x] **2026-11-09 — Console sidebar: a units tree under Class activities (Jonathan's request, shipped Fast).**
+- [x] **2026-11-08 — Console sidebar: a units tree under Class activities (Jonathan's request, shipped Fast).**
       Console only (no CHANGELOG entry). Rows from `teacherSideTreeRows(model)`, the list's own groups, so the counts
       cannot disagree; fold kept per browser, starts open (pinned in `checks.mjs`); hidden below 900px; English only.
       **Decisions (Jonathan, 2026-11-08):** a click shows the unit and keeps the Preview; always visible with a fold
@@ -712,14 +726,16 @@ The rule and the `d0cd004` proof are in CLAUDE.md; removing `swap45`: skill
   old-numbered key that reappeared (an old id coming back, any `m5w4-*`, or
   `chords-m5`).
 - **`moduleOpenThrough` is per module NUMBER**; the move didn't touch it. A
-  student set to 4 before the swap now has Open Chords open, not Pentatonic.
+  student set to 4 before the swap now has Open Chords open, not Pentatonic: set them to 5 if Pentatonic should be
+  open.
+- The 1ao and 1az pins follow the content.
 - **Course order lives in the module number**: reordering again means a
   renumber like this one. Notes dated before 2026-10-12 may use the old numbers.
 - `rule-zero-proof.mjs` against the pre-swap `1a1f6cc` fails by design.
 
 ### Stop hook and git hooks
 
-Skill `session-handoff`; the "audio hash map" block: skill `audio-and-snippets`.
+Skill `session-handoff` (example: `69ac805`, a `CACHE_VERSION` conflict); the "audio hash map" block: skill `audio-and-snippets`.
 
 ### Cloud sessions and patch handoff
 
@@ -749,12 +765,12 @@ CLAUDE.md "How to work with Jonathan" → **Effort**.
 
 ## Moved from CLAUDE.md (trim 2)
 
-Verbatim copies (2026-10-28) of the CLAUDE.md sections that were shortened. CLAUDE.md keeps the operative rule; this is the full text with dates, incidents and reasoning.
+Cut on 2026-11-08 to the dated decisions, reasons and rules found only here; the verbatim 2026-10-28 copies are in `git show ab4aaae:WORKFLOW.md`.
 
 ### Project: what this is (old CLAUDE.md lines 61,97)
 
 ## Project: what this is
-Cut to the dated decisions, the reasons and the rules found nowhere else (Jonathan, 2026-11-09: "is everything necessary anymore?"). The operative rule is in CLAUDE.md; "Moved from CLAUDE.md (2026-10-28)" points back here for the Stations B/C and Daily 5 text, kept in full below.
+Asked for by Jonathan, 2026-11-08: "is everything necessary anymore?". The operative rule is in CLAUDE.md; "Moved from CLAUDE.md (2026-10-28)" points back here for the Stations B/C and Daily 5 text, kept in full below.
 
 - **Stations B and C are merged in DISPLAY ONLY** (2026-08-27). A set renders as ONE step ladder (B's sections, a seam divider, then C's), but `stations.b` / `stations.c` and every progress key (`${w.id}-b-sec{gi}-{i}` / `-c-sec{gi}-{i}`) are unchanged — never "simplify" the data to match the display. **`gi` is the section's position after excluding only tuning-warmup sections (`storageSections()`); render-time hiding never renumbers it** (checks.mjs 1af; it must stay green with no change to its expected `data-ns` lists). Renderer: `buildLesson()`; tab-panel suffix `LESSON_TAB` (still `'station-b'`, so old deep links resolve); sections are addressed by `data-ns`, never by DOM position. No "Station B/C" wording in student text — the mid-set card is **Checkpoint / Punto de control**, the end one **Wrap-Up / Cierre** (1n). **Only `m4w2` is shown as Part 1 / Part 2** (`partOne`, `partBreak`; 1ao pins the count at 1); display only, no key moves, a set is complete when the SET is (the sets gate, checklist, Module Review, search and `resumeLessonCounts()` never see a part). In focus mode the B→C seam hides once the open step is in Part 2. Resolvers `lessonParts()` / `lessonGroups()`; field docs in the schema comment at the top of `module-2.js`.
 - **Module 13** (String Changing) also has custom tab labels, and its checklist is the graded assessment.
@@ -804,9 +820,11 @@ Rule: CLAUDE.md "Keyed MCs". Called "graded MC" before 2026-10-26 (old notes and
 ## Play-along first; Song Journey pages are the back door (2026-10-06)
 Rule: CLAUDE.md "Play-along first" (1bn) and skill `in-class-activities` (same heading; door table, layer matching). Journey pages also get no Stuck?/Level up folds, and a page's text is not synced to a card.
 
-**`firestore.rules`:** console paste (CLAUDE.md). Until it is pasted, the live quiz's answer writes are rejected and the game looks broken with no error students see.
+### ⚠️ Editing `firestore.rules` changes nothing until it's pasted into Firebase
+Console paste (CLAUDE.md). Until it is pasted, the live quiz's answer writes are rejected and the game looks broken with no error students see.
 
-**The Daily 5 is retired — switched off, not deleted** (Jonathan, 2026-09-19). The "Tune and warm up first" banner at the top of every ladder was the **only** entry point to the Daily 5 overlay, so turning the banner off retires the Daily 5. `const DAILY5_ENABLED = false;` in `app.js`, beside `buildDaily5()`, is the whole switch; `ladderHtml()` is its one reader. **Nothing was deleted**: `buildDaily5()`, `openDaily5Here()`, `moduleStepsFlat()`, the `.daily5-*` CSS (including `.dp.focus.pd-showing .daily5-inline`) and every `daily5.*` i18n key stay, so flipping the constant to `true` brings the banner back as it was. Not part of the switch: `WARMUP_BANK` (see "Moved from CLAUDE.md (2026-10-28)") and `kind:'tuning-warmup'` sections, which stay hidden exactly as before because `storageSections()` depends on that and every `gi` in Firestore was written under it. The one student-facing mention (`module-13.js`, "one lap of the Daily 5") was reworded in the same push to "a few bars of anything you know".
+### ⚠️ The Daily 5 is retired — switched off, not deleted
+Jonathan, 2026-09-19. The "Tune and warm up first" banner at the top of every ladder was the **only** entry point to the Daily 5 overlay, so turning the banner off retires the Daily 5. `const DAILY5_ENABLED = false;` in `app.js`, beside `buildDaily5()`, is the whole switch; `ladderHtml()` is its one reader. **Nothing was deleted**: `buildDaily5()`, `openDaily5Here()`, `moduleStepsFlat()`, the `.daily5-*` CSS (including `.dp.focus.pd-showing .daily5-inline`) and every `daily5.*` i18n key stay, so flipping the constant to `true` brings the banner back as it was. Not part of the switch: `WARMUP_BANK` (see "Moved from CLAUDE.md (2026-10-28)") and `kind:'tuning-warmup'` sections, which stay hidden exactly as before because `storageSections()` depends on that and every `gi` in Firestore was written under it. The one student-facing mention (`module-13.js`, "one lap of the Daily 5") was reworded in the same push to "a few bars of anything you know".
 
 ## How to work with Jonathan
 
@@ -821,7 +839,7 @@ Rule: CLAUDE.md "How to work with Jonathan". Dated decisions and what only this 
 
 ## Power Chord Switch: where we stopped (moved here from NEXT-STEPS-power-chord-switch.md, 2026-11-05)
 
-Moved from its own file on 2026-11-05 (original title "Power Chord Switch — where we stopped (2026-11-03)"). The Stopped-game rules (rounds 1–6, the silent Stop of 2026-11-09, R4-2) are in Open work → "Stopped-game headline".
+Moved from its own file on 2026-11-05 (original title "Power Chord Switch — where we stopped (2026-11-03)"). The Stopped-game rules (rounds 1–6, the silent Stop of 2026-11-08, R4-2) are in Open work → "Stopped-game headline".
 
 **Status.** The branch `pcs-pending-smoke` was merged into `main` on 2026-11-03 (merge commit ca932f2; smoke clean against the origin/main baseline, full checks passed); Jonathan published `firestore.rules` (take id `(coach|nr|pw)`). The branch can be deleted on GitHub. Same day, e5e0bef: a Stopped game with at least 10 s of audio is saved too, with `complete:false` (2026-11-07: 10 s of PLAY after the first count-in ends); a shorter Stop, or leaving the screen, drops it. The room-noise call is decided (a stricter strum ratio for Power Chord Switch only: "Decision (2026-11-07)", then "Decision (2026-11-05)"). Settled, not to be re-raised: "Later (not chosen yet)".
 
@@ -857,12 +875,12 @@ This list is the plan (the separate plan file was deleted 2026-11-04 at Jonathan
 
 1. **Saved takes arrive: DONE** (2026-11-04: 25 takes, 12 Power Chord Switch). If a class shows none, check in order: the rules paste (`micTakes` and `chunks` say `(coach|nr|pw)`), mic collection on in the console, the student's consent (once per device).
 2. **The evaluator: DONE.** `micEvalTakePw` (teacher.js, check 1cl), built 2026-11-04, proven on `tools/mic-sim/fake-pw-take.mjs`, run on the 12 real takes. Per round: strums the game missed, "right" changes with no strum, mic delay from the count-ins (about -73 ms on Chromebook internal mics).
-3. **DECIDED 2026-11-05: room noise scores a right chord.** Stricter strum ratio for Power Chord Switch only (2.2 / 2.67 from 2026-11-05, 1.8 / 2.19 from 2026-11-07). Not chosen: "no readable pitch, no tick". To do: look at the next takes ("Where things stand" → to watch). Any further change to how a strum is heard is `coach.js` detection: xhigh, Always Reviewed, run `tools/mic-sim/power-switch.mjs` first.
+3. **DECIDED 2026-11-05 (finding: room noise scored a right chord): a stricter strum ratio for Power Chord Switch only** (2.2 / 2.67 from 2026-11-05, 1.8 / 2.19 from 2026-11-07). Not chosen: "no readable pitch, no tick". To do: look at the next takes ("Where things stand" → to watch). Any further change to how a strum is heard is `coach.js` detection: xhigh, Always Reviewed, run `tools/mic-sim/power-switch.mjs` first.
 4. **Nothing else is waiting** (see "Later (not chosen yet)").
 
 ### Practice-minutes heartbeat removal (not Power Chord Switch): DONE 2026-11-05
 
-Full history: "PICK UP HERE" under "Practice minutes" (Open work). "N playing" is gone and no `heartbeats/{sessionId}` record is written.
+Full history: `git show ab4aaae:WORKFLOW.md`, "PICK UP HERE" in Recently shipped → the 2026-11-01 Practice minutes entry. "N playing" is gone and no `heartbeats/{sessionId}` record is written.
 - **Code (live 2026-11-04):** writer, `pollLive()`, `S.live` / `S.liveAt`, `liveMinCount` gone from `practice-minutes.js`; counting, `flush()`, queue and keepalive unchanged (`5144c6c` + review fixes).
 - **Repo (2026-11-05):** the `heartbeats` rules block, its `firestore.indexes.json` index and its `tools/pm-rules-test.mjs` section are gone; 1cg requires them to stay gone, exactly one `match /databases/{database}/documents` wrapper, and no shipped file naming a `heartbeats` collection. Reviewed same day (`site-reviewer-deep`).
 - **Console (2026-11-05):** Jonathan published the rules; the emulator test passed (49 passed, 0 failed; 179 cases in the file); the old `heartbeats` and `minutesBoard` collections were deleted.
