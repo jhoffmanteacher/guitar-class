@@ -9526,7 +9526,12 @@ function checkNoteCallPower(ctx) {
      the changes are exactly the lyric sheet's own (pcSheetMap) on the same
      card — the drill reads the data the sheet reads;
    - the taps, on a fake clock through the real chcAct / chcFrame / chcPaint /
-     chcFinish: a tap before the window opens does nothing, a tap in it is a
+     chcFinish: in Follow a tap in the beat before the window is an early miss
+     (2026-11-09) and one before that beat does nothing; tapping every 250 ms
+     passes no Follow round (every drill, both speeds, 10 starting offsets), and
+     a player who taps 30 ms before each change and again 150 ms later (just
+     after it) passes every one; in
+     Call an early pick does nothing; a tap in the window is a
      hit (a wrong pick in Call a miss), one after the change is late, none is a
      miss when the next window opens; in Call the box says "?" until the change
      has come (sampled across every change, 20 ms apart) and names it after;
@@ -9535,7 +9540,7 @@ function checkNoteCallPower(ctx) {
      cancelled (so the page does not scroll);
    - every chc.* string the setup, play and done screens show exists in English
      and Spanish and none defined is unused.
-   Pinned: 8 drills, the change counts below, 38 chc.* keys. */
+   Pinned: 8 drills, the change counts below, 40 chc.* keys. */
 function checkChordCall(ctx) {
   head('1cn. Call the chord (ca-48, ca-50): windows, taps, the hidden chord, the space bar');
   let bad = 0;
@@ -9544,7 +9549,7 @@ function checkChordCall(ctx) {
   const J = JSON.stringify;
   const run = x => vm.runInContext(x, ctx);
   const EXPECT = {
-    keys: 38,
+    keys: 40,
     drills: [
       { id: 'ca-48', card: 'ca-29', section: 'Verse 1', mode: 'follow', n: 32, passAt: 32, chords: ['A5', 'G5', 'F5'] },
       { id: 'ca-48', card: 'ca-29', section: 'Verse 1', mode: 'call',   n: 10, passAt: 8,  chords: ['A5', 'G5', 'F5'] },
@@ -9644,10 +9649,15 @@ function checkChordCall(ctx) {
       const bad = m => R.bad.push(m);
       // Follow: early / hit / late / none.
       let st = mk('follow', 'ca-29', 'Verse 1');
-      setH(st, st.wins[0].open - 0.05); chcAct('chk', null); R.taps++;
-      if(st.k !== 0 || st.res.length) bad('Follow: a tap before the window opened was taken (k=' + st.k + ')');
+      setH(st, chcEarlyFrom(st.wins, 0) - 0.05); chcAct('chk', null); R.taps++;
+      if(st.k !== 0 || st.res.length) bad('Follow: a tap before the early beat was taken (k=' + st.k + ')');
       setH(st, st.wins[0].open + 0.01); chcAct('chk', null); R.taps++;
       if(st.res[0] !== 'hit' || st.k !== 1) bad('Follow: a tap just inside the window is ' + st.res[0]);
+      // The early beat (2026-11-09): a tap in the beat before change 2's window is a miss that uses up the change.
+      if(!(chcEarlyFrom(st.wins, 1) < st.wins[1].open - 0.02)) bad('Follow: change 2 of ca-29 Verse 1 has no early beat');
+      setH(st, st.wins[1].open - 0.02); chcAct('chk', null); R.taps++;
+      if(st.res[1] !== 'early' || st.k !== 2 || document.getElementById('chc-fb-chk').textContent !== t('chc.fbEarlyMiss', { chord: st.M.targets[1].name, pick: '' })) bad('Follow: a tap in the beat before the window is ' + st.res[1] + ' (k=' + st.k + '), expected an early miss');
+      st.k = 1; st.res = st.res.slice(0, 1);
       setH(st, st.wins[1].at + CHC_GRACE + 0.01); chcAct('chk', null); R.taps++;
       if(st.res[1] !== 'late' || st.k !== 2) bad('Follow: a tap after the change is ' + st.res[1] + ', expected late');
       setH(st, st.wins[2].at); chcAct('chk', null); R.taps++;
@@ -9662,6 +9672,28 @@ function checkChordCall(ctx) {
       st.k = st.n - 1;
       setH(st, st.wins[st.n - 1].at + st.wins[st.n - 1].beatSec + 0.01); chcFrame();
       if(st.res[st.n - 1] !== 'none') bad('Follow: the last change with no tap should be a miss, got ' + st.res[st.n - 1]);
+      // Mashing passes nothing; a real player with a double tap passes everything (2026-11-09). Every Follow drill, both speeds.
+      R.mash = { rounds: 0, passed: 0, earlies: 0 }; R.dbl = { rounds: 0, passed: 0 };
+      const follows = (window.CLASS_ACTIVITIES || []).flatMap(a => (a.steps || []).map(s => s.drill)).filter(d => d && d.type === 'chordcall' && d.mode === 'follow');
+      const mkAt = (d, slow) => { const s2 = mk('follow', d.card, d.section); s2.slow = slow;
+        s2.win = snippetWindow(s2.M.L.tr, { fromBar: s2.M.S.fromBar, bars: s2.M.S.bars * s2.M.S.reps }, slow); s2.wins = chcWindows(s2.win, s2.M.targets, s2.M.bpb); return s2; };
+      for(const d of follows) for(const slow of [true, false]){
+        for(let off = 0; off < 10; off++){
+          st = mkAt(d, slow);
+          for(let h = st.win.start + off * 0.025; h < st.win.end + 1 && st.phase === 'play'; h += 0.25){ setH(st, h); chcFrame(); if(st.phase === 'play'){ chcAct('chk', null); R.taps++; } }
+          R.mash.rounds++; if(st.res.length === st.n && st.res.every(r => r === 'hit')) R.mash.passed++; R.mash.earlies += st.res.filter(r => r === 'early').length;
+          chcStop('chk');
+        }
+        st = mkAt(d, slow);
+        for(let k = 0; k < st.n; k++){
+          const w = st.wins[k], tap = w.at - 0.03;
+          setH(st, tap); chcFrame(); chcAct('chk', null); setH(st, tap + 0.15); chcAct('chk', null); R.taps += 2;
+        }
+        R.dbl.rounds++; if(st.res.length === st.n && st.res.every(r => r === 'hit')) R.dbl.passed++; else bad('Follow ' + d.card + ' ' + d.section + (slow ? ' slower' : ' normal') + ': a player tapping 30 ms before each change and again 150 ms later got ' + JSON.stringify(st.res));
+        chcStop('chk');
+      }
+      if(R.mash.rounds !== 80 || R.mash.passed !== 0) bad('Follow: tapping every 250 ms passed ' + R.mash.passed + ' of ' + R.mash.rounds + ' rounds (4 drills x 2 speeds x 10 offsets; expected 0 of 80)');
+      if(R.dbl.rounds !== 8) bad('Follow: the double-tap player ran ' + R.dbl.rounds + ' rounds, expected 8');
       // Finish: every change resolved; a perfect round counts towards the streak, a miss resets it.
       chcStop('chk');
       st = mk('follow', 'ca-33', 'Verse 1'); st.res = st.M.targets.map(() => 'hit'); st.k = st.n; chcFinish('chk');
@@ -9704,11 +9736,11 @@ function checkChordCall(ctx) {
       if(!/id="chc-nextname-chk">\\?</.test(html)) bad('Call: the first play screen does not open with a "?" in the box');
       if(st.M.chords.some(c => html.indexOf('data-chc-pick="' + c + '"') < 0)) bad('Call: a chord button is missing from the play screen');
       delete chordCalls.chk; chcLive = null;
-      return JSON.stringify({ bad: R.bad, taps: R.taps, samples: R.samples });
+      return JSON.stringify({ bad: R.bad, taps: R.taps, samples: R.samples, mash: R.mash, dbl: R.dbl });
     })()`));
     for (const m of t.bad.slice(0, 8)) flag(m);
     if (t.bad.length > 8) flag('... and ' + (t.bad.length - 8) + ' more');
-    stats.taps = t.taps; stats.samples = t.samples;
+    stats.taps = t.taps; stats.samples = t.samples; stats.mash = t.mash; stats.dbl = t.dbl;
 
     // The defaults (tools/smoke.mjs clicks the speed switch and reloads): a drill opens on its setup screen, Slower pressed, no streak.
     const def = JSON.parse(run(`(function(){ const o = {}; ['follow', 'call'].forEach(m => { renderChordCall({ type: 'chordcall', card: 'ca-29', section: 'Verse 1', mode: m }, 'chk3'); const s = chordCalls.chk3; const h = chcSetupHtml('chk3');
@@ -9775,14 +9807,14 @@ function checkChordCall(ctx) {
             Object.assign(st, { phase: 'play', counting: true, goAt: Infinity, win: snippetWindow(st.M.L.tr, { fromBar: st.M.S.fromBar, bars: st.M.S.bars * st.M.S.reps }, true), k: 0, n: st.M.n, res: [], shown: '', timers: [], clicks: [], audio: { currentTime: 0, ended: false, pause(){} } });
             st.wins = chcWindows(st.win, st.M.targets, st.M.bpb);
             chcPlayHtml('chk2'); chcPaint(st);
-            ['hit', 'late', 'wrong', 'none'].forEach((r, i) => { st.k = i; st.counting = false; st.audio.currentTime = 0; chcResolve(st, r, 'F5'); });
+            ['hit', 'late', 'wrong', 'none', 'early'].forEach((r, i) => { st.k = i; st.counting = false; st.audio.currentTime = 0; chcResolve(st, r, 'F5'); });
             chcAct('chk2', null);
             st.k = st.n;
             // done: pass, fail, a streak of 1 and 2, more misses than the list shows
             const done = (res, streak) => { st.res = res; st.hits = res.filter(x => x === 'hit').length; st.streak = streak; chcDoneHtml('chk2'); };
             const n = st.M.n;
             done(Array(n).fill('hit'), 1); done(Array(n).fill('hit'), 2);
-            done(['late', 'wrong', 'none', 'late', 'none', 'wrong'].concat(Array(Math.max(0, n - 6)).fill('hit')), 0);
+            done(['late', 'wrong', 'none', 'early', 'none', 'wrong'].concat(Array(Math.max(0, n - 6)).fill('hit')), 0);
             done(Array(n).fill('none'), 0);
             chcStop('chk2'); delete chordCalls.chk2; chcLive = null;
           }
@@ -9806,7 +9838,7 @@ function checkChordCall(ctx) {
     ctx.document.getElementById = origGet; ctx.document.addEventListener = origAdd; ctx.document.removeEventListener = origRem; ctx.document.activeElement = origAct;
     if (origAct === undefined) delete ctx.document.activeElement;
   }
-  if (bad === 0) ok(stats.drills + ' drills; ' + stats.changes + ' of ' + stats.changes + ' changes walked at both speeds (' + (stats.windows - stats.cut) + ' windows of a full beat or more, ' + stats.cut + ' cut by a change closer than a beat); ' + stats.sheet + ' of ' + stats.drills + ' drills\' changes are the lyric sheet\'s own; ' + stats.taps + ' taps (early, in time, late, wrong, none) and ' + stats.samples + ' hidden-chord samples; ' + stats.keys + ' space-bar listeners added and all removed; ' + stats.screens + ' screen sets rendered, EN + ES, ' + EXPECT.keys + ' chc.* strings');
+  if (bad === 0) ok(stats.drills + ' drills; ' + stats.changes + ' of ' + stats.changes + ' changes walked at both speeds (' + (stats.windows - stats.cut) + ' windows of a full beat or more, ' + stats.cut + ' cut by a change closer than a beat); ' + stats.sheet + ' of ' + stats.drills + ' drills\' changes are the lyric sheet\'s own; ' + stats.taps + ' taps (early, in time, late, wrong, none; tapping every 250 ms passed ' + stats.mash.passed + ' of ' + stats.mash.rounds + ' Follow rounds with ' + stats.mash.earlies + ' early misses, a double-tapping player passed ' + stats.dbl.passed + ' of ' + stats.dbl.rounds + ') and ' + stats.samples + ' hidden-chord samples; ' + stats.keys + ' space-bar listeners added and all removed; ' + stats.screens + ' screen sets rendered, EN + ES, ' + EXPECT.keys + ' chc.* strings');
 }
 
 /* 1co. NAME THE POWER CHORD (step.drill 'pcname', ca-49, work order 2026-11-05).

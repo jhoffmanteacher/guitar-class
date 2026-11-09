@@ -1104,6 +1104,7 @@
     'chc.keyHint':       { en: 'Space bar = tap', es: 'Barra espaciadora = tocar' },
     'chc.countIn':       { en: 'Count in', es: 'Cuenta' },
     'chc.fbEarly':       { en: 'Too early. Wait for the last beat before the change.', es: 'Muy pronto. Espera el último tiempo antes del cambio.' },
+    'chc.fbEarlyMiss':  { en: 'Too early, so {chord} is a miss. Tap in the last beat before the change.', es: 'Muy pronto: {chord} cuenta como fallo. Toca en el último tiempo antes del cambio.' },
     'chc.fbHit':         { en: '✓ {chord}', es: '✓ {chord}' },
     'chc.fbLate':        { en: 'Late. The band was already on {chord}.', es: 'Tarde. La banda ya estaba en {chord}.' },
     'chc.fbWrong':       { en: 'The chord was {chord}, not {pick}.', es: 'El acorde era {chord}, no {pick}.' },
@@ -1118,6 +1119,7 @@
     'chc.rowChange':     { en: 'Change {n} · {chord}', es: 'Cambio {n} · {chord}' },
     'chc.moreMissed':    { en: '… and {n} more', es: '… y {n} más' },
     'chc.whyLate':       { en: 'late', es: 'tarde' },
+    'chc.whyEarly':      { en: 'early', es: 'pronto' },
     'chc.whyWrong':      { en: 'wrong chord', es: 'acorde equivocado' },
     'chc.whyNone':       { en: 'no tap', es: 'sin toque' },
 

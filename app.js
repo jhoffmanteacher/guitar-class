@@ -9638,9 +9638,14 @@ function ncMicActive(){ return !!(ncLive && noteCalls[ncLive] && noteCalls[ncLiv
            (all of them if there are fewer). Pass: 8 of 10.
 
    The window for change k runs from one beat before it to the change itself
-   (+ CHC_GRACE for the ear's and the screen's own slop). A tap before the window
-   opens is "too early" and does nothing; a tap after it, before the next window
-   opens, is late (a miss that still uses up the change); no tap is a miss. When
+   (+ CHC_GRACE for the ear's and the screen's own slop). In Follow, a tap in the
+   beat before the window opens is "early", a miss that uses up the change
+   (Jonathan, 2026-11-09: tapping every 250 ms used to pass every round); that
+   beat starts no sooner than half a beat after the change before it, so a quick
+   double tap after a hit costs nothing (chcEarlyFrom). A tap before that, and any
+   early pick in Call, is "too early" and does nothing. A tap after the window,
+   before the next window opens, is late (a miss that still uses up the change);
+   no tap is a miss. When
    a change is closer than a beat to the one before it, its window is cut so it
    opens CHC_GRACE after the previous change (chcWindows; checks.mjs 1ce walks
    every change). Times are the file's own clock (audio.currentTime) less the
@@ -9679,6 +9684,12 @@ function chcBeatSec(win, bpb, bar){
 /* Pure: { at, open, beatSec } for every target — `at` the change, `open` where
    its window opens: a beat before, but never earlier than CHC_GRACE after the
    change before it. */
+/* Pure: where Follow's "early" beat starts for change k (chcAct): a beat before
+   its window opens, but never sooner than half a beat after the change before. */
+function chcEarlyFrom(wins, k){
+  const w = wins[k];
+  return Math.max(w.open - w.beatSec, k > 0 ? wins[k - 1].at + w.beatSec / 2 : -Infinity);
+}
 function chcWindows(win, targets, bpb){
   const out = [];
   targets.forEach((tg, k) => {
@@ -9931,7 +9942,11 @@ function chcAct(key, pick){
   /* Call mode is answered by naming the chord: a tap on the "?" box with no pick is not an answer (Friday check 2026-11-06). */
   if(st.M.call && pick == null) return;
   const h = chcNow(st), w = st.wins[st.k], tg = st.M.targets[st.k];
-  if(h < w.open){ chcFeedback(st, '', t('chc.fbEarly')); return; }
+  if(h < w.open){
+    if(!st.M.call && h >= chcEarlyFrom(st.wins, st.k)) chcResolve(st, 'early', pick);
+    else chcFeedback(st, '', t('chc.fbEarly'));
+    return;
+  }
   if(h > w.at + CHC_GRACE) chcResolve(st, 'late', pick);
   else if(pick != null && pick !== tg.name) chcResolve(st, 'wrong', pick);
   else chcResolve(st, 'hit', pick);
@@ -9943,6 +9958,7 @@ function chcResolve(st, res, pick){
   const vars = { chord: tg.name, pick: pick || '' };
   if(res === 'hit') chcFeedback(st, 'hit', t('chc.fbHit', vars));
   else if(res === 'late') chcFeedback(st, 'miss', t('chc.fbLate', vars));
+  else if(res === 'early') chcFeedback(st, 'miss', t('chc.fbEarlyMiss', vars));
   else if(res === 'wrong') chcFeedback(st, 'miss', t('chc.fbWrong', vars));
   else chcFeedback(st, 'miss', t('chc.fbNone', vars));
   st.k++;
@@ -9969,7 +9985,7 @@ function chcDoneHtml(key){
   if(M.call) verdict = pass ? t('chc.verdictPassCall', { hits, total: M.n }) : t('chc.verdictAgainCall', { pass: M.passAt, total: M.n });
   else if(pass) verdict = st.streak >= CHC_PASS_STREAK ? t('chc.verdictDone', { n: CHC_PASS_STREAK }) : t('chc.verdictOne', { n: st.streak, total: CHC_PASS_STREAK });
   else verdict = t('chc.verdictAgain');
-  const why = r => t(r === 'late' ? 'chc.whyLate' : r === 'wrong' ? 'chc.whyWrong' : 'chc.whyNone');
+  const why = r => t(r === 'late' ? 'chc.whyLate' : r === 'early' ? 'chc.whyEarly' : r === 'wrong' ? 'chc.whyWrong' : 'chc.whyNone');
   /* The first few misses, not all of them: a round of 32 with a bad start would push Go again off a Chromebook screen. */
   const miss = [];
   st.res.forEach((r, i) => { if(r !== 'hit') miss.push(i); });
