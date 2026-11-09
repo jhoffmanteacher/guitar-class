@@ -9866,7 +9866,8 @@ function checkChordCall(ctx) {
    - the deal: 3000 seeded rounds, 10 cards each, never the same chord twice in
      a row, every card on a legal fret, Both ways really mixes both card kinds;
    - the pass line: 8 of 10 is done, 7 is not; a miss waits for Next, a hit moves
-     on by itself; Stop and a hidden tab clear the pending move on;
+     on by itself; Stop (pwnStopAll) clears the pending move on; a hidden tab
+     keeps the round (2026-11-09, tools/smoke.mjs);
    - the default: Show answer is ON for a new drill (tools/smoke.mjs clicks it
      and reloads);
    - every pwn.* string the setup, play and done screens show exists in English

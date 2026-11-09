@@ -447,6 +447,11 @@ async function powerNameWalk(page, run, events, stats, base) {
       const r2 = await run('pwn:wrong:' + w, click(false), 100);
       const a3 = await run('pwn:wrong-state:' + w, state(i), 10);
       if (!a3 || a3.res[1] !== 'miss' || a3.nextHidden !== false) fail(w, `a real click on a wrong answer (${r2}) scored ${a3 && a3.res[1]} with Next ${a3 && (a3.nextHidden ? 'hidden' : 'shown')}`);
+      // Another browser tab and back keeps the round: same card, same score (Jonathan, 2026-11-09).
+      await run('pwn:hide:' + w, `(() => { Object.defineProperty(document, 'hidden', { configurable: true, get: () => true }); document.dispatchEvent(new Event('visibilitychange'));
+        Object.defineProperty(document, 'hidden', { configurable: true, get: () => false }); document.dispatchEvent(new Event('visibilitychange')); return 1; })()`, 200);
+      const ah = await run('pwn:hide-state:' + w, state(i), 10);
+      if (!ah || ah.phase !== 'play' || ah.idx !== a3.idx || JSON.stringify(ah.res) !== JSON.stringify(a3.res) || ah.nextHidden !== false) fail(w, 'a hidden tab changed the round: ' + JSON.stringify(ah && { phase: ah.phase, idx: ah.idx, res: ah.res, next: ah.nextHidden }) + ' (expected play, card ' + (a3 && a3.idx) + ', ' + JSON.stringify(a3 && a3.res) + ', Next shown)');
       await run('pwn:next:' + w, `${q(i, '[data-pwn-next]')}.click()`, 150);
       const a4 = await run('pwn:next-state:' + w, state(i), 10);
       if (!a4 || a4.idx !== 2) fail(w, 'Next did not move on (card ' + (a4 && a4.idx) + ')');

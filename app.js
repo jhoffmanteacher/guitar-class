@@ -10355,7 +10355,8 @@ function pwnQuit(key){
   st.phase = 'setup';
   pwnRepaint(key, pwnSetupHtml(key));
 }
-/* Every running round back to its setup screen: stopCardAudio and the hidden-tab path call this, like ncStopAll. */
+/* Every running round back to its setup screen: stopCardAudio and a focus-view step change call this, like ncStopAll.
+   A hidden tab does not (2026-11-09): the round waits for the student. */
 function pwnStopAll(){
   Object.keys(powerNames).forEach(k => { if(powerNames[k].phase === 'play') pwnQuit(k); });
 }
@@ -16967,7 +16968,9 @@ document.addEventListener('visibilitychange', () => {
     if(!(IS_TEACHER_MODE && pcState && pcState.wholeSong)) pcStop();
     if(typeof ncStopAll === 'function') ncStopAll();
     if(typeof chcStopAll === 'function') chcStopAll();
-    if(typeof pwnStopAll === 'function') pwnStopAll();
+    /* Name the power chord is not stopped here (Jonathan, 2026-11-09): it has no
+       clock, no sound and no mic, so a student who looks something up in another
+       tab comes back to the same card and score. A hit's move-on timer just fires. */
     flushOnHide();
     return;
   }
