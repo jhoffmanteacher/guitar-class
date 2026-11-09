@@ -288,15 +288,13 @@ What **Restore** gives back differs:
 **Four steps, two lines a page** (Jonathan, 2026-09-25).
 - **Four steps is a SOFT rule** (Jonathan, 2026-10-01): aim for four or fewer,
   but go past it when Jonathan asks — ca-21 has six. checks.mjs **1bb** prints
-  one reminder line naming every card over four and never fails the push on it
-  (the old `FOUR_STEP_LEGACY` pin list is gone).
+  one reminder line naming every card over four and never fails the push on it.
 - Every class-activity tab longer than two rendered rows pages two rows at a
-  time with Previous / Next by default: `CA_TAB_LINES_PER_PAGE`, passed as
+  time with Previous / Next: `CA_TAB_LINES_PER_PAGE`, passed as
   `defaultLinesPerPage` by `caStepHtml()` and `renderTeacherActivityDetail()`
   (1bb pins both). Play tab and a sibling band snippet both turn the page as
   they play.
-- `revealDelay` is **seconds**; `wrapTabReveal()` converts to ms. Until
-  2026-09-25 it didn't, and every delayed tab appeared after 10 ms. It is per
+- `revealDelay` is **seconds**; `wrapTabReveal()` converts to ms. It is per
   tab and drops the Play tab button, so keep it off any tab whose Play is the
   answer key (ca-21) or the one demo of a held note's length.
 - A tab the student has waited out stays revealed across re-renders that
@@ -306,9 +304,8 @@ What **Restore** gives back differs:
 
 **The Journey button is in the LAST step only — every class activity, now
 and in future** (Jonathan, 2026-09-25). `caStepHtml()` adds it to the last
-step's body and nowhere else: not above Step 1 (where it sat until that day,
-sending students to the song page before the work), not in an earlier step
-that mentions the page.
+step's body and nowhere else: not above Step 1, not in an earlier step that
+mentions the page.
 - **Write a new activity with the Song Journey page named in its last step
   only.** An earlier listen-along goes on a `snippet` of the same backing
   track instead (ca-20 step 1 is the model).
@@ -317,41 +314,38 @@ that mentions the page.
   naming it in an activity with no `journey:`, and on any
   `caJourneyLinkHtml(a)` call other than the one last-step-gated one.
 
-**Practice cards — `view: 'card'` (Jonathan, 2026-09-27; ca-18, ca-10; ca-13,
-ca-19, ca-20 rebuilt to it 2026-10-01). The default for every song activity
-with a backing track — ca-18 is the model (Jonathan, 2026-10-01: the format
-"works much better for students"). Activities with no backing track stay
-Focus-view step ladders.**
-The slides teach the rungs (students did what was taught and stopped there);
-the activity is ONE screen:
+**Practice cards — `view: 'card'` (Jonathan, 2026-09-27; ca-18 is the model).
+The default for every song activity with a backing track (Jonathan,
+2026-10-01: the format "works much better for students"). Activities with no
+backing track stay Focus-view step ladders.**
+The slides teach the rungs; the activity is ONE screen:
 - The song's tab.
 - One "Play song" button that plays the real backing track and moves the tab
   note by note (`.beat-now`, honouring each note's `beats`).
 - One page per section, with tap-a-section-to-start: a four-click count-in,
   then the loop returns to that section. Exception: a `card.wholeSong` card
   (ca-24 to ca-33) stops at the end of the song (Jonathan 2026-10-02).
-- A Slower / Normal switch (the slow / fast files, starting on Slower).
-- The Guitar toggle where a full mix exists.
+- A speed control over the slow / fast files, starting on Slower (see
+  Slowest below), and the Guitar toggle where a full mix exists.
 - A Metronome: a click the SITE makes on every counted beat. There are no
-  metronome files; Moises clicked "the cure" at 144, twice the 72 the room
-  counts.
+  metronome files (Moises clicked "the cure" at 144, twice the 72 the room
+  counts).
 - Then three or four checkboxes.
 
 A looping card repeats with no seek: a second `<audio>` on the same file
 waits at the loop start and takes over at the window's end ("THE SPARE" in
-app.js, Jonathan 2026-10-07 — a seek left an audible hole on every lap). Anything new that touches a card's audio must handle
-`st.spare` and `st.leaving` as well as `st.audio`.
+app.js, Jonathan 2026-10-07 — a seek left an audible hole on every lap).
+Anything new that touches a card's audio must handle `st.spare` and
+`st.leaving` as well as `st.audio`.
 
 Level up and links:
 - **A whole-song card's Level up names no other page and renders no Journey
   button (it IS the play-along); a part card's Level up hands off to the
   whole-song card (`card: 'ca-N'`)** (2026-10-06, 1bn).
-- A Level up may carry `card: '<id>'` to open another practice card instead of
-  the Journey page. Every part card opens its song's whole-song card (ca-10 →
-  ca-25; ca-13, ca-18, ca-19 → ca-24; ca-20 → ca-27) — never a power-chord
-  version (Jonathan, same day: ca-25 keeps its Journey Level up). Jonathan,
-  2026-10-06: the whole-song cards are more useful than the Song Journey page
-  right now.
+- A Level up may carry `card: '<id>'` to open another practice card instead
+  of the Journey page. Every part card opens its song's whole-song card
+  (ca-10 → ca-25; ca-13, ca-18, ca-19 → ca-24; ca-20 → ca-27) — never a
+  power-chord version (ca-25 keeps its Journey Level up).
 - `caCardLinkHtml()` shows the link once the target is released or Play Along
   now; 1bf checks the id.
 - Before its date the target SWAPS INTO the linking card's slot (`caSwap`,
@@ -361,10 +355,11 @@ Level up and links:
   call sites).
 
 Checks and help:
-- **No practice card has a help ladder any more** (Jonathan, 2026-10-07: "it's
-  not needed"): `steps: []`, which 1d allows only on a `view: 'card'` activity,
-  so "More practice help" never renders (`pcHelpHtml` returns nothing for an
-  empty list).
+- **No practice card has a help ladder** (Jonathan, 2026-10-07: "it's not
+  needed"; 0 of the 25 `view: 'card'` activities has a step): `steps: []`,
+  which 1d allows only on a `view: 'card'` activity, so "More practice help"
+  never renders (`pcHelpHtml` returns nothing for an empty list). 1bf's
+  help-step rule below still runs, for a help step that comes back.
 - **A whole-song card has exactly two checks**: the whole song slower without
   stopping, then the Level up.
 - A check may carry `slot: n` to keep the tick key it had before earlier
@@ -392,7 +387,7 @@ Code and guards:
   under a Lap badge, "2 times" under a Time badge. 1bm fails the push on a mix.
 
 **Chord cards are drawn as a CHORD GRID (`card.chordGrid`, 2026-10-26).**
-Jonathan: the record's strumming is not consistent. So a chord card's TAB:
+The record's strumming is not consistent (Jonathan), so a chord card's TAB:
 - shows each chord once (consecutive same-name notes fold), at the beat or "+"
   where it really starts;
 - puts four bars to a row whatever the meter, with a bar line between bars;
@@ -403,11 +398,11 @@ Scope:
 - Opt-in per card; `chordGrid: false` per section (ca-41's single-note verses,
   ca-35's solo). ca-31 (the riff as chords) and every single-note card stay out.
 - `card.everyStrum` (ca-29 and the Neil Young power-chord cards) keeps every
-  strum as its own named event. Its directions say "each strum has its chord
-  name" (`ca.cardStrumDirections`) instead of "each chord is shown once". A
-  mixed grid + single-note card cannot be every-strum (1cc flags it).
+  strum as its own named event; its directions use `ca.cardStrumDirections`
+  ("each strum has its chord name"). A mixed grid + single-note card cannot be
+  every-strum (1cc flags it).
 - Display only — no `notes` array moved, so audio, `pcLayout`, 1bf / 1bf2 /
-  1az and the Journey whole-song tabs are as they were.
+  1az and the Journey whole-song tabs are unaffected.
 - `rows` without `rowLabels` are ignored. A lyric line keeps its row only
   where it starts on a bar line.
 - ca-38 (lyric sheet) stays the PDF: its dot fills on every beat and "This
@@ -423,16 +418,15 @@ beats, rest words, the column-0 label of every row, held labels pinned) and
 executes `pcLocate`/`pcLocKey`; `tools/smoke.mjs` walks the same cards in a
 real browser. Turning a card on or off means editing its pinned list.
 
-**Recording versions — `recordingVersions` (2026-10-30, ca-26 / ca-29 / ca-40).**
+**Recording versions — `recordingVersions` (ca-26 / ca-29 / ca-40).**
 A card can play another RECORDING of its song: a Jimi Hendrix / Neil Young
 switch at the top of the card, Jimi the default.
-- Unlike a key version (same record moved, same bar map), a recording has its
-  own track, bars, form and chord rhythm. So a version carries a `card`
-  (sections, caption…) that `caView` lays over the card's own, plus its `track`.
+- Unlike a key version (same record, same bar map), a recording has its own
+  track, bars, form and chord rhythm. So a version carries a `card` (sections,
+  caption…) that `caView` lays over the card's own, plus its `track`.
 - A version may carry its own `title` / `intro` (+`_es`) beside `label` and
-  `track` (ca-40: Jimi's "1 Strum per Chord", Neil's "Down-Up Strum"). `caView`
-  lays them over the activity, so `caTitle()`, the card, the board and the
-  console's list rows follow the recording on screen.
+  `track` (ca-40); `caView` lays them over the activity, so `caTitle()`, the
+  card, the board and the console's list rows follow the recording.
 - Data: `recording`, `recordingLabel(_es)`, `recordingGroup` (one stored choice,
   `localStorage.caRecordingModes`, for every card of the song),
   `recordingStart`, `recordingVersions: { neil: { label, label_es, track, card } }`.
@@ -445,12 +439,12 @@ switch at the top of the card, Jimi the default.
   virtual card). `tools/smoke.mjs` clicks the switch, reloads and flips back.
 - The Song Journey page has no switch yet.
 
-**A card note may be a chord** (2026-10-05, the power-chord whole songs
-ca-29–ca-33): `{ frets: [[string, fret], ...], note: 'A5', midi: [...] }`, the
-same shape Module 3's tabs use, in a card section or a help step's tab.
+**A card note may be a chord** (the power-chord whole songs ca-29–ca-33):
+`{ frets: [[string, fret], ...], note: 'A5', midi: [...] }`, the shape Module
+3's tabs use, in a card section or a help step's tab.
 - `caChordProblems()` in checks.mjs recomputes every pitch from the fretboard
   and requires a root-plus-5th pair to be named for its root.
-- No card-engine change: `renderTabSystem()` already draws a `frets` note.
+- `renderTabSystem()` already draws a `frets` note; no card-engine change.
 - Each power-chord card is its roots card (ca-24–ca-28) with the same sections
   and bars, every root turned into the Journey Layer 3 shape. Luna's is two
   strums per bar where its roots card is one.
@@ -463,21 +457,21 @@ same shape Module 3's tabs use, in a card section or a help step's tab.
   allows no CDN scripts).
 - The chord positions are read from the PDF's text: every word on a line made
   only of chord names, in reading order, column by column.
-- **Every page is read** (2026-11-03). The pages are cropped to their words and
-  stacked into one tall sheet, read page by page. A two-column page is read
-  left column first. **`card.sheetColumns: 1`** reads a one-column
-  chord-over-lyric sheet line by line with no gutter split (ca-44, "the cure",
-  3 pages — without it the wide gaps in a chord line would split it into two
+- **Every page is read**, cropped to its words and stacked into one tall
+  sheet. A two-column page is read left column first.
+  **`card.sheetColumns: 1`** reads a one-column chord-over-lyric sheet line by line with no gutter
+  split (ca-44 — without it the wide gaps in a chord line split it into two
   columns).
 - Three sheet cards: ca-38 (ca-29's sections, 224 names), ca-44 (ca-30's, 94),
   ca-45 (ca-33's, 143). Each shares its play-along card's sections by
-  reference, joined in one IIFE after the array.
+  reference, joined in one IIFE after the array, so a ca-29 rhythm edit moves
+  ca-38's dot too.
 - A chord still ringing at a line start gets NO name on the sheet (it is not a
   change) — unless its section is listed in **`card.sheetNamedAgain`**, which
   names the first chord of every lap of that section (ca-45: Intro, both
   verses, both riffs keep his D5s, 152 names for 143 changes).
-- Sweet Child's web copy (Jonathan, 2026-11-03) was fixed to ca-33's chords
-  from Solo 2 on, so it differs from his Drive handout on purpose.
+- Sweet Child's web copy (Jonathan, 2026-11-03) follows ca-33's chords from
+  Solo 2 on, so it differs from his Drive handout on purpose.
 - **Sheet chord n = the card's n-th chord CHANGE**, so the sheet needs exactly
   one name per change. `sheetChords` pins the count and **1bf2** holds the
   notes to it. The console preview says so if the PDF itself doesn't match
@@ -488,27 +482,25 @@ same shape Module 3's tabs use, in a card section or a help step's tab.
   `overflow:clip`, not hidden.
 - A tap on a chord starts from that lap (`pcStart(root, si, rep)`).
 - ca-38 has NO `journey` (1bn): it is another view of ca-29, not Layer 3's
-  play-along. It shares ca-29's sections by reference (joined after the
-  array), so a ca-29 rhythm edit moves its dot too.
+  play-along.
 - Engine: `pcSheet*` in app.js, beside caCardBodyHtml.
 
-**Slowest (2026-09-29).** A practice card with `card.slowest: true` (every card
-today) gets a Slowest / Slower / Normal control in place of the switch. Every
-step snippet gets a Slowest button beside the turtle (the two release each
-other). Slowest is the SLOW file at `SLOWEST_RATE` (0.8) with `preservesPitch`
-— no third export, and the tuner still agrees.
-- **Since 2026-10-09 the card control has four stops** — Slowest / Slower /
-  **Slow** / Normal (Jonathan: "just below the normal speed of each song").
+**Slowest.** A practice card with `card.slowest: true` (all 25 practice cards
+on 2026-11-08) gets a four-stop speed control: Slowest / Slower / **Slow** /
+Normal (Jonathan, 2026-10-09: "just below the normal speed of each song").
+- Slowest is the SLOW file at `SLOWEST_RATE` (0.8) with `preservesPitch` — no
+  third export, and the tuner still agrees.
 - Slow is the FAST file at `pcSlowRate(tr)`, halfway between the slow tier and
   normal for that song (the cure 66, Seven Nation Army ~112, Watchtower 110),
   so it always sits above Slower.
 - It is a stepped slider (`pcSpeed3Html`). The two ends read "Slower" and
   "Normal" as directions, not stop names (Jonathan, 2026-10-09). Every stop
-  shows how fast it plays against the record (`0.65×`, `pcSpeedFactor`), and
-  each stop's name (Slowest / Slower / Slow / Normal) is its accessible label.
+  shows its speed against the record (`0.65×`, `pcSpeedFactor`), and each
+  stop's name is its accessible label.
 - Each option carries its rate in `data-rate`; `pcRate()` reads the card's
   `data-rate`.
-- Step snippets keep their own Slowest/turtle buttons, unchanged.
+- Every step snippet keeps its own Slowest button beside the turtle (the two
+  release each other).
 - Anything reading the file's own clock is unchanged; only real-time amounts
   (count-in spacing, click lookahead, output latency) scale by the rate.
 - A `load()` resets `playbackRate` to `defaultPlaybackRate`, which is why
