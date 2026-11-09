@@ -233,7 +233,18 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
   not checkable from the Mac: remove worktrees `guitar-class-pcs` / `guitar-class-wt` if still there; the main folder
   may still hold the old uncommitted Watchtower edits on a stale base (they shipped as `158015d`):
   `git stash; git fetch; git reset --hard origin/main`.
-  - [ ] Live-site look still not done (the 2026-10-31 Friday check left it open): Power Chord Switch (random round, Every bar / Every 2 beats, −5/+5, a fixed pair, done screen, Change Up unchanged) and the Watchtower Hendrix/Neil Young switch on ca-26/ca-29/ca-40 (survives a reload, both recordings play, Guitar on/off on both, lyric card stays on Hendrix), EN + ES, 1366×657.
+  - [x] Live-site look, done 2026-11-09 on the live site (cache `guitar-class-2026-11-09-f86a139414`), signed in as
+    Jonathan, EN + ES. **Watchtower:** only ca-29 is posted to students (ca-26/ca-38/ca-40 checked in the console Preview).
+    ca-29 opens on Hendrix (7 sections), switches to Neil Young (8 parts, A G F G 10 laps, its own speed tiers and caption);
+    both recordings play (the player's own audio clock advancing on each full mix); Guitar off swaps to each recording's
+    rhythm-down mix mid-song; Neil survives a reload and a language switch (`caRecordingModes`); Guitar starts on at
+    every render (by design, not saved). ca-26 and ca-40 follow the group to Neil; ca-38 (the lyric chord chart) has no
+    switch and stays on the Hendrix track. **Power Chord Switch:** +5/−5 move readout and slider (30↔35); Every beat /
+    Every 2 beats / Every bar give 16 / 12 / 8 chords; a fixed pair (F5↔G5) and the random round (drew B5↔D5) start, show
+    "next: … slide up N frets", the live −5/+5 row works mid-game; an early Stop gives "You stopped before the first
+    change." with grey chips and the row unchanged; a Stop after a room sound at a change keeps the old "too fast"
+    screen (by design: keep strict). Change Up unchanged. **Not checked:** the 1366×657 page size (Jonathan's Chrome is
+    at 80% zoom in a maximized window; the headless smoke measures 1366×657 on every run).
 
 - [x] **2026-09-15 — "the cure" both-strings root line** (`6e73cd9`). Jonathan chose extending the diagram library
   (`localStringMultiNotesSvg`); the low-E-only verse is the Level up.
