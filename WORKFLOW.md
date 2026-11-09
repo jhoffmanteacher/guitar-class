@@ -312,9 +312,7 @@ Detail lives in git log and `CHANGELOG.md`; entries keep what still binds.
       `liveQuiz/current.scores` carries NO name (names live in the teacher-only `answers/{uid}` docs); its writers REPLACE
       the field (a plain merge is deep and kept old names); checks.mjs **1cm** runs them. The class rank moved from
       `minutesBoard/{uid}` to `rankBoard/{tag}`; `minutesBoard` has NO rules block and 1cg fails the push if one comes
-      back. Never publish a name next to a uid, or minutes next to a uid, again. **ONE-TIME after deploying: delete the
-      `scores` field of `liveQuiz/current` in the Firebase console; the old `minutesBoard` docs were DELETED in the console
-      on 2026-11-05 (the whole collection; Jonathan asked).** Still true: `config/class.periodOverrides[uid]` is readable
+      back. Never publish a name next to a uid, or minutes next to a uid, again. **The one-time delete of `liveQuiz/current.scores` after this deploy turned out moot (no such field by 2026-11-09).** Still true: `config/class.periodOverrides[uid]` is readable
       by every student (a period, never a name).
       Known limit: a tag cannot be proven unique, so any account can claim another's tag and lower/remove that entry (fix:
       a create-only `boardTags/{tag}` with `existsAfter`; not built; two cases in `tools/pm-rules-test.mjs` pin it so they
