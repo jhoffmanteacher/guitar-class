@@ -65,7 +65,7 @@ Start here. Update this block whenever an item opens or closes; each line says w
   takes (21 Power Chord Switch) are kept outside the repo (`~/Documents/mic-recordings-2026-11-07.zip`): they carry
   student names.
 - **Grid step cap number** (60 ms) and the other open product calls: Open work → the 2026-11-06 Friday check item.
-- Live quiz: delete the `scores` field of `liveQuiz/current` (Jonathan, 2026-11-09: do it). Firebase console → Firestore → `liveQuiz` → `current` → the `scores` field's delete icon. Harmless if a game since 2026-11-05 already rewrote it (those scores carry no names). Tick when done.
+- ~~Live quiz: delete the `scores` field of `liveQuiz/current`~~ Done: Jonathan looked on 2026-11-09 and the doc has no `scores` field (a later game's full `set()` replaced it). Nothing left here.
   being done; a later game probably overwrote it: confirm in the console or ignore.
 - **Optional:** the console's `heartbeats` composite index (Firestore → Indexes, the only index); nothing uses it.
 
