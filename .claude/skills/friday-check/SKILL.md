@@ -9,9 +9,10 @@ Since 2026-10-31, changes that hit a review trigger ship **Fast** (no reviewer)
 unless they are always-Reviewed (CLAUDE.md, "Fast by default"). Every Fast
 commit carries the trailer line `Review: Fast`. This check reviews those
 commits once a week. It runs unattended, Fridays at 11:00 PM Pacific, from a
-scheduled cloud session: **don't ask Jonathan anything** (no AskUserQuestion,
-no `/effort` request) — decide, act, and report. The agents in
-`.claude/agents/` pin their own effort.
+scheduled cloud session.
+- **Don't ask Jonathan anything** (no AskUserQuestion, no `/effort`
+  request). Decide, act, and report.
+- The agents in `.claude/agents/` pin their own effort.
 
 ## 1. Find the range
 
@@ -22,10 +23,11 @@ last=$(git tag -l 'friday-check-*' --sort=-creatordate | head -1)
 
 - `last` exists → range is `$last..origin/main`.
 - No tag yet (the first run) → range is every commit on `origin/main` since
-  `2026-10-30 00:00 -0700`. That also covers the commits WORKFLOW.md's Open
-  work item "2026-10-30 — Everything pushed in a hurry today" lists, which
-  shipped without a reviewer; review them all as if they carried the trailer.
-  If they pass (or once fixed), tick that Open work item.
+  `2026-10-30 00:00 -0700`. That also covers the commits listed in
+  WORKFLOW.md's Open work item "2026-10-30 — Everything pushed in a hurry
+  today", which shipped without a reviewer. Review them all as if they
+  carried the trailer. If they pass (or once fixed), tick that Open work
+  item.
 
 Fast commits = `git log --format='%H %s' --grep='^Review: Fast' $range`.
 None → skip to step 5 (tag) and report "Nothing shipped Fast this week."
@@ -36,12 +38,18 @@ Ignore `wip/*` branches — they aren't live.
 
 Run `site-reviewer` on the Fast commits (combined diff plus the list of
 commits). Use `site-reviewer-deep` instead if any of them touches a
-danger-zone file or a section/step order — those should never have shipped
-Fast, so also say so in the report. Brief the reviewer to find real problems
-students would hit: broken rendering at 1366×657, wrong Spanish twin, a
-control whose default isn't pinned, a pattern claim that isn't true across the
-data, progress-key risk. Settled decisions (skill `song-facts`, CLAUDE.md,
-WORKFLOW.md) are not findings.
+danger-zone file or a section/step order. Those should never have shipped
+Fast; say so in the report.
+
+Brief the reviewer to find real problems students would hit:
+- broken rendering at 1366×657;
+- wrong Spanish twin;
+- a control whose default isn't pinned;
+- a pattern claim that isn't true across the data;
+- progress-key risk.
+
+Settled decisions (skill `song-facts`, CLAUDE.md, WORKFLOW.md) are not
+findings.
 
 Every finding: read the quoted lines yourself before acting. Drop anything
 you can't confirm on the real code.
@@ -58,16 +66,17 @@ For each confirmed finding, decide:
 - **Fix on a branch, review it, then merge it — all in this run** — when the
   fix itself is always-Reviewed (a danger-zone file such as `coach.js`, a new
   kind of check, moving/adding/removing a section or step). Jonathan's
-  standing order (2026-11-07): these reviews happen automatically, he is not
-  asked to start them and the fix does not wait for him.
+  standing order (2026-11-07): these reviews happen automatically. He is not
+  asked to start them, and the fix does not wait for him.
   1. Work on branch `friday-check/<YYYY-MM-DD>` (a worktree if another session
      could be using the checkout), rebased on current `origin/main`.
   2. Run `site-reviewer-deep` on the fix commit, briefed to try to BREAK it
      (round 1 of the 2026-11-06 coach.js fix found a real regression and six
-     guards that did not bite). Read its quoted lines yourself, fix what you
-     confirm, prove each new guard goes red when its fix is broken, and run a
-     fresh `site-reviewer-deep` round on the new commit. Repeat until a round
-     finds nothing real, at most 3 rounds.
+     guards that did not bite). Then:
+     - read its quoted lines yourself and fix what you confirm;
+     - prove each new guard goes red when its fix is broken;
+     - run a fresh `site-reviewer-deep` round on the new commit.
+     Repeat until a round finds nothing real, at most 3 rounds.
   3. A clean round → rebase on `origin/main`, full `node tools/checks.mjs`,
      fast-forward push to `main`, and `checks.mjs --live` as in step 4.
      Commit trailer `Review: Friday check`.
@@ -81,11 +90,14 @@ For each confirmed finding, decide:
   a decision Jonathan made, or you're not sure it's a bug. Add it to
   WORKFLOW.md's Open work in the same push as any other fix.
 
-Never: touch student data (Firebase console, Firestore exports, rosters,
-teacher dashboard on live data); edit `firestore.rules`; hand-edit the `sw.js`
-version lines; reword a keyed MC in a frozen module.
+Never:
+- touch student data (Firebase console, Firestore exports, rosters, teacher
+  dashboard on live data);
+- edit `firestore.rules`;
+- hand-edit the `sw.js` version lines;
+- reword a keyed MC in a frozen module.
 
-`checks.mjs --live` returns 403 from a cloud session — say in the report that
+`checks.mjs --live` returns 403 from a cloud session. Say in the report that
 the deploy needs confirming from a local machine.
 
 ## 4. Re-check
