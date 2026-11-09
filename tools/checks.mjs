@@ -5993,7 +5993,8 @@ function checkAudioWorker(swPath) {
      (review R2-3). These are text pins: they catch a rename, a deleted or
      commented-out line and the listeners moving back inside "load"; they
      do not run the page code. What it does was proved in a real browser. */
-  const bare = t => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  /* CRLF first: a Windows checkout (autocrlf) turns every "\n" in these pins into "\r\n" and they all miss. */
+  const bare = t => t.replace(/\r\n/g, '\n').replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
   appSrc = bare(appSrc); swSrc2 = bare(swSrc2);
   const swBlock = appSrc.slice(appSrc.indexOf("if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {"));
   const loadAt = swBlock.indexOf("window.addEventListener('load', () => {\n    navigator.serviceWorker.register('sw.js')");
