@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-09 (evening) — Fairer taps, a real "Which way?" question, and tempo advice that fits
+
+- **Call the chord, Follow: a tap in the beat before the change's own beat now counts as a miss** ("Too early, so G5 is a miss. Tap in the last beat before the change."). Before, an early tap cost nothing, so tapping the space bar over and over could pass a round. A quick second tap right after a change still costs nothing. The done screen lists these changes as "early". Call mode is unchanged.
+- **Tuning Simulator: during "Which way?" the tuner no longer says "Too low — tighten the peg".** You read the needle to answer. The words come back after you pick Up or Down.
+- **"Play strum" stops the Metronome if it is running, and its clicks are all the same**, like the Metronome's (beat 1 used to be higher). Down strums are still a little louder than up strums.
+- **Name the Power Chord keeps your round when you switch to another browser tab.** You come back to the same card and score.
+- **Change Up at 140 BPM now says "The tempo cannot go higher. Play it again."** instead of "try it 10 BPM faster". **At the lowest tempo (Power Chord Switch 10 BPM, Change Up 40 BPM) a hard game no longer says "Drop 5 BPM" or "this speed is too fast";** it says "Try it again at this speed until it feels steady."
+
 ## 2026-11-09 — Today's activities, newest date first
 
 - **Today's activities now lists your unfinished activities newest first, by the date your teacher posted them (up to 3).** Before, the list followed the activity numbers, so a re-posted #19 stayed under #20 and out of Today's activities.

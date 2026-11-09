@@ -154,11 +154,12 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
     11 / 17; 30 BPM 0.4 beat 10 / 15; almost no difference at 60 BPM and up. A player 1.5% off ends 250 ms short at
     10 BPM every beat (1085 old / 838 capped); grading was unchanged in the reviewer's 224 drift games at 10-40 BPM. Not decided: the Listening Coach (`coachMatchEvent`) grid is uncapped
     (up to 270 ms at 30 BPM); left alone.
-    - [ ] Grid step cap number: Jonathan's call (40 / 50 / 60 / 100 ms table above; 60 is live).
+    - [x] Grid step cap number: **60 ms kept** (Jonathan, 2026-11-09; students' feedback can reopen it).
   - [x] **Top-tempo advice** (`0b5c611`, `82fb6fa`, `95afba0`, 2026-11-07): "The tempo cannot go higher. Play it again."
     (`games.pw.advice.top`). Not changed (product call): a pair sped up live past its counted tempo still says "Level
-    up". Same shape, not fixed (not asked for): Change Up says "try it 10 BPM faster" at 140, and both games say "Drop 5
-    BPM" (Change Up 10) at their floor (10 / 40 BPM).
+    up". **Fixed 2026-11-09 (Jonathan):** Change Up at 140 says the top line too; at the floor (10 / 40 BPM) neither game
+    says "Drop N BPM" or "too fast" ("Try it again at this speed until it feels steady."); the lit button never names a
+    step the tempo cannot take (`ccDoneAtTop` / `ccDoneAtFloor`, 1ck topChecks 64).
   - [x] **Decided (Jonathan, 2026-11-09): 2 clicks below 60 BPM instead; the Stop button is not built.** The count-in
     before each round of Power Chord Switch and Change Up (`ccCountInBeats`, coach.js) is 2 clicks below 60 BPM, 4 at 60
     and above, still on the beat; the counter shows 3, 4. Waits (plus a 0.1 s lead, 0.4 s while recording): 12 s at
@@ -168,10 +169,11 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
     console's evaluator reads it (4 for a take without it; a missing or odd entry is guessed, no delay) and measures a 2-click
     round's mic delay from beeps 1 and 2 (none when only beep 2 is heard).
     Checks: 1ck (the real count-in run on a fake clock), 1cl (five count-in takes).
-  - [ ] **Product calls:** Follow steps pass by tapping every 250 ms; "Play strum" does not stop a running Metronome and
-    still accents beat 1 after "every click the same"; the Tuning Simulator's "Which way?" screen shows the answer ("Too
-    low — tighten the peg"); Name the Power Chord resets its round when the tab is hidden; `.ca-paths-grid` adds a 760px
-    breakpoint; two devices can save different path picks.
+  - [x] **Product calls, decided 2026-11-09 (Jonathan):** Call the chord Follow: a tap in the beat before the window is an
+    early miss (`chcEarlyFrom`; no sooner than half a beat after the change before; tapping every 250 ms passed 24 of 80
+    rounds, now 0; 1cn). Tuning Simulator: the status line is blank during "Which way?" (smoke). Play strum stops a running
+    Metronome and clicks evenly (smoke). Name the Power Chord keeps its round on a hidden tab (smoke). Left alone: two
+    devices can save different path picks (rare, nothing lost); `.ca-paths-grid`'s 760px breakpoint (no effect at 1366).
 
 - [x] **2026-11-07 — `tools/smoke.mjs` hangs.** Two runs in the `guitar-class-ratio` worktree never finished (one sat
   about 4 hours, headless Chrome 157); Jonathan had to force quit Chrome. Not the profile, port or machine load.
@@ -193,11 +195,11 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 - [x] **2026-11-02 — Power Chord Switch setup overflowed with "Best today"** (`611503a`, `15eec92`): the score is its own
   line (`.cc-best-line`, 18px, always drawn so the pair buttons do not jump); the title's no-break space is pinned by 1ca; smoke checks it. Done.
 
-- [ ] **2026-11-01 — Song popularity counter** (`3a062bd`; Jonathan chose "students + total opens"). Counts start
+- [x] **2026-11-01 — Song popularity counter** (`3a062bd`; Jonathan chose "students + total opens"; marked done 2026-11-09). Counts start
   2026-11-01: a "More Play Along songs" click writes `songOpens` to the student's own `progress/{uid}`, outside
   `flushSave()` (1bo cannot reach it). Not counted: teacher, dev bypass, signed out, Core rows, opens from activities or
   a link. The console's Songs view shows "Opened: N students · M opens" (whole counts 1..1000 only: student-written).
-  Check 1ch. No open step is written down: ask Jonathan whether to tick it.
+  Check 1ch.
 
 - [ ] **2026-11-01 — Early Friday check** (range `friday-check-2026-11-01`..`dfcb8a7`). Fixed: `8a4376f`, `050017a`,
   practice minutes R2-1..R2-5 and PD-1..PD-5. Decided (Jonathan, 2026-11-01): count liberally, a rare double is fine; a
