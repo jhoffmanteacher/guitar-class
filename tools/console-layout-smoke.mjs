@@ -3,7 +3,8 @@
 
    Boots the real teacher console (index.html?teacher=true + teacher.js) in
    headless Chrome against a STUB Firestore — 30 fake students ("Test Student
-   01" …) over periods 4, 7 and CAS, and a seeded config/class board. It never
+   01" …, two of them named with markup) over periods 4, 7 and CAS, and a
+   seeded config/class board. It never
    signs in and never reads live data (work-order hard rule: no real student
    names, emails or ids anywhere — not in a log, not in a screenshot).
 
@@ -12,9 +13,9 @@
      node tools/console-layout-smoke.mjs --chrome <path> Chrome binary (or CHROME=…)
 
    What it does, and fails on:
-     - clicks every sidebar item and checks that view renders with no page
-       error, that exactly that item is marked current, and that no view
-       scrolls the page sideways at 1366 px;
+     - clicks every sidebar item (the 13 are pinned) and checks that view
+       renders its own element with no page error, that exactly that item is
+       marked current, and that no view scrolls the page sideways at 1366 px;
      - opens a practice card, a focus-view activity, a paths activity and an
        exit check from the list, and switches all three tabs on each
        (Preview is the default, the other two panes are hidden, the tab
@@ -22,13 +23,28 @@
      - switches every list filter, folds a unit shut and open again, searches
        by title and by #number, and uses Arrange board and Back to list;
      - checks that clicking a row does not rebuild the list (same element,
-       same scroll position) and that the Students tab repaints after
-       teacherRepaintActivityStudents (a student marked done in the stub shows
-       up in the tab's count and the roll);
-     - writes through the Settings tab (Hidden, Optional, Pin) and checks the
-       stub's config/class changed and the Preview pane was NOT rebuilt;
-     - opens an activity from a student's "Blocked by" row and from Songs and
-       checks Back returns there;
+       same scroll position), that "Unit" never reads "Module" in the
+       Students and Settings panes, and that the minute refresh repaints the
+       Students tab (a student marked done in the stub shows up in the tab's
+       count, the roll, the done chip and the list row);
+     - checks the chips (done + started + not started = the students a card
+       is for; a path pick alone is not a start) and an exit check's roll,
+       rows and chips against its Who picker;
+     - writes through the Settings tab (Hidden, Optional, Pin; then Who,
+       release date, Play Along, Move to, Archive, Delete under P4, P7 and
+       CAS with the card's song playing) and checks the stub's config/class
+       changed, Move to landed in the unit picked, and the Preview pane was
+       NOT rebuilt;
+     - a rename left open on Settings, then the Students tab: Refresh still
+       refreshes (and says why it waits while the box is on screen);
+     - picking a row stops the card's song; Arrange board and the sidebar
+       stop a TAB playing;
+     - Move to Songs re-picks a card the list holds; another console
+       archiving a student shows after this console's next write;
+     - opens an activity from the board's Preview (its row on screen in a
+       shut unit), from a student's "Blocked by" row and from Songs, checks
+       Back returns there and the list keeps its own pick;
+     - two stub names are markup: every view draws them as text;
      - the units tree under Class activities (2026-11-09): open by default with Built first,
        then the units newest first, then Unsorted; each row's count equals the board's (worked
        out from the stub's board entries) and the list heading's; a click from Songs, from the
@@ -38,7 +54,7 @@
        reload (both ways); the tree is hidden at 390 px;
      - measures sideways scroll at 390 px.
    Needs Node 22+ (global WebSocket) and Chrome or Chromium; serves the repo
-   itself. Takes about 20 seconds. */
+   itself. Takes about 40 seconds. */
 import { createServer } from 'node:http';
 import { spawn } from 'node:child_process';
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, statSync, rmSync } from 'node:fs';
@@ -109,6 +125,11 @@ const STUB = String.raw`(() => {
   const store = new Map();
   window.__store = store;
   const periods = ['4', '7', 'CAS'];
+  /* Two names that are markup and an inline-handler breakout: every place a
+     name is drawn must show them as text (window.__xss stays unset). Still
+     fake — no real student data. */
+  const HOSTILE = { '03': 'Evil "><img src=x onerror="window.__xss=(window.__xss||0)+1"> Three', '14': "O'Brien'); window.__xss=14; ('x" };
+  window.__hostile = HOSTILE;
   const ids = CLASS_ACTIVITIES.map(a => a.id);
   const has = id => ids.includes(id);
   const board = {};
@@ -131,6 +152,8 @@ const STUB = String.raw`(() => {
     const period = i <= 12 ? '4' : i <= 24 ? '7' : 'CAS';
     const done = {}, steps = {};
     Object.keys(dates).forEach((id, k) => { if ((i * 7 + k * 3) % 5 < 3) done[id] = true; else if ((i + k) % 3 === 0) steps[id + ':0'] = true; });
+    // A path pick alone (ca-46 is a paths activity) is not a start: the "started" chip must not count these.
+    if (has('ca-46') && !done['ca-46'] && !steps['ca-46:0'] && i % 2 === 0) steps['ca-46:path:a'] = true;
     const exitChecks = {};
     ['ca-14', 'ca-15'].filter(has).forEach((cid, ci) => {
       if (i % 4 === ci) return;
@@ -141,7 +164,7 @@ const STUB = String.raw`(() => {
       exitChecks[cid] = { score, total: items.length, at: day(-3), picks };
       delete done[cid];
     });
-    students.push({ uid: 'stub-uid-' + n, name: 'Test Student ' + n, email: 'student' + n + '@example.test', period,
+    students.push({ uid: 'stub-uid-' + n, name: HOSTILE[n] || 'Test Student ' + n, email: 'student' + n + '@example.test', period,
       classActivities: done, caSteps: steps, exitChecks, skills: {}, responses: {}, migrations: { swap45: true } });
   }
   students.forEach(s => store.set('progress/' + s.uid, s));
@@ -208,6 +231,12 @@ async function main() {
     };
     const js = (expr) => page.evalJs(expr);
     const errsSince = (n) => pageErrors.slice(n).filter(t => !NOISE.test(t || ''));
+    // The two stub names that are markup: drawn as text, they add no element and run nothing.
+    const xss = async (where) => {
+      const r = await js(`({ ran: window.__xss, imgs: document.querySelectorAll('img[src="x"]').length })`);
+      if (r.ran !== undefined || r.imgs) fail('names:' + where, 'a student name was drawn as markup (' + JSON.stringify(r) + ')');
+      stats.xss = (stats.xss || 0) + 1;
+    };
     await size(1366, 768);
     // Loads the console fresh against a new stub. Run again to prove what survives a reload (the units tree's fold).
     const bootConsole = async () => {
@@ -234,7 +263,14 @@ async function main() {
     await shot('01-console-on-load-1366');
 
     // ── Every sidebar item ──
+    /* Each view's own element (and, where the stub leaves a view empty, its
+       own words): a view name the body has no painter for leaves the last
+       view's content up, which a "rendered something" test can't tell apart. */
+    const MARKERS = { activities: ['[data-ta-split]'], songs: ['.t-songs'], tsongs: ['[data-tvs]'], livequiz: ['.lq-shell'], students: ['.stu-chart'],
+      skills: ['td.nc[data-open-student]'], trouble: ['.tr-meta', /least-mastered skills/], minutes: ['.pm-t-table'], responses: ['.t-loading', /written a response/],
+      manage: ['[data-set-open-through]'], games: ['[data-set-games]'], mic: ['.tg-class', /Collect mic recordings/], reports: ['.t-loading', /issue reports/] };
     const views = await js(`[...document.querySelectorAll('#t-side [data-view]')].map(b => b.dataset.view)`);
+    if (JSON.stringify(views.slice().sort()) !== JSON.stringify(Object.keys(MARKERS).sort())) fail('sidebar', 'the sidebar views are ' + JSON.stringify(views) + ', expected ' + JSON.stringify(Object.keys(MARKERS)));
     for (const v of views) {
       const n0 = pageErrors.length;
       await js(`document.querySelector('#t-side [data-view="${v}"]').click()`);
@@ -245,6 +281,12 @@ async function main() {
       if (r.view !== v) fail('view:' + v, 'teacherView is ' + r.view);
       if (JSON.stringify(r.cur) !== JSON.stringify([v])) fail('view:' + v, 'current item ' + JSON.stringify(r.cur));
       if (!r.text) fail('view:' + v, 'rendered nothing');
+      const mk = MARKERS[v];
+      if (!mk) fail('view:' + v, 'no such view (no marker for it)');
+      else {
+        const m = await js(`(() => { const box = document.getElementById('t-grid-container'); return { el: !!box.querySelector(${JSON.stringify(mk[0])}), text: box.innerText }; })()`);
+        if (!m.el || (mk[1] && !mk[1].test(m.text))) fail('view:' + v, 'its own content is not on screen (' + mk[0] + (mk[1] ? ' ' + mk[1] : '') + '): ' + JSON.stringify(m.text.slice(0, 80)));
+      }
       if (r.sideways > 0) fail('view:' + v, 'page scrolls sideways by ' + r.sideways + 'px at 1366');
       if ((v === 'skills') !== (r.legend !== 'none' && r.tabs !== 'none')) fail('view:' + v, 'the Skills grid legend/set tabs are ' + r.legend + '/' + r.tabs);
       const e = errsSince(n0); if (e.length) fail('view:' + v, 'page error: ' + e[0]);
@@ -252,6 +294,7 @@ async function main() {
       if (v === 'skills') await shot('05-skills-grid-1366');
       if (v === 'manage') await shot('06-manage-1366');
     }
+    await xss('every sidebar view');
     await js(`setTeacherView('activities')`); await sleep(400);
 
     // ── Filters, folds, search ──
@@ -325,10 +368,13 @@ async function main() {
         await js(`document.querySelector('[data-ta-tab="${tab}"]').click()`); await sleep(120);
         const t = await js(`(() => { const p = [...document.querySelectorAll('[data-ta-pane]')]; const vis = p.filter(x => !x.hidden);
           return { vis: vis.map(x => x.dataset.taPane), sel: [...document.querySelectorAll('[data-ta-tab][aria-selected="true"]')].map(x => x.dataset.taTab), len: vis[0] ? vis[0].innerText.length : 0,
+            module: vis[0] ? (/.{0,40}\bModule\b.{0,40}/.exec(vis[0].innerText) || [''])[0] : '',
             card: !!(vis[0] && vis[0].querySelector('.pc')), check: !!(vis[0] && vis[0].querySelector('[id^="ec-preview-body-"]')), live: vis[0] ? vis[0].querySelectorAll('[data-ta-live]').length : 0,
             sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth }; })()`);
         if (JSON.stringify(t.vis) !== JSON.stringify([tab]) || JSON.stringify(t.sel) !== JSON.stringify([tab])) fail(`tab:${kind}:${tab}`, 'visible ' + JSON.stringify(t.vis) + ', selected ' + JSON.stringify(t.sel));
         if (!t.len) fail(`tab:${kind}:${tab}`, 'the pane is empty');
+        // The console says Unit; Module is the student side's word.
+        if (tab !== 'preview' && t.module) fail(`tab:${kind}:${tab}`, 'the pane says Module: ' + JSON.stringify(t.module));
         if (tab === 'preview' && kind === 'card' && !t.card) fail('tab:card:preview', 'no practice card in the Preview');
         if (tab === 'preview' && kind === 'check' && !t.check) fail('tab:check:preview', 'no exit-check preview');
         if (tab === 'students' && !t.live) fail(`tab:${kind}:students`, 'no [data-ta-live] boxes in the Students pane');
@@ -340,32 +386,58 @@ async function main() {
       const e = errsSince(n0); if (e.length) fail('open:' + kind, 'page error: ' + e[0]);
       stats.activities++;
     }
+    await xss('four activities x three tabs');
     const remembered = await js(`(() => { document.querySelector('[data-ta-pick][data-id="ca-21"]').click(); return document.querySelector('[data-ta-tab][aria-selected="true"]')?.dataset.taTab; })()`);
     if (remembered !== 'settings') fail('tab-memory', 'the next activity opened on ' + remembered + ', not the last tab used (settings)');
 
-    // ── Students tab repaints after teacherRepaintActivityStudents ──
+    // ── The minute refresh repaints the Students tab (a student finishes in the stub) ──
     {
       await js(`document.querySelector('[data-ta-pick][data-id="ca-21"]').click()`); await sleep(150);
       await js(`document.querySelector('[data-ta-tab="students"]').click()`); await sleep(80);
-      const r = await js(`(() => {
-        const label = () => document.querySelector('[data-ta-tab="students"]').innerText.trim();
-        const doneCol = () => (document.querySelector('[data-ta-pane="students"] .ta-roll-done .ta-roll-head') || {}).innerText || '';
-        const before = { label: label(), done: doneCol() };
-        const s = allStudents.find(x => (x.classActivities || {})['ca-21'] !== true);
-        if (!s) return { skip: true };
-        s.classActivities = Object.assign({}, s.classActivities, { 'ca-21': true });
-        teacherRepaintActivityStudents('ca-21');
-        return { before, after: { label: label(), done: doneCol() }, name: s.name }; })()`);
-      if (r.skip) fail('repaint', 'every stub student already finished ca-21');
+      const read = `(() => { const pane = document.querySelector('[data-ta-pane="students"]');
+        const chips = Object.fromEntries([...pane.querySelectorAll('[data-ta-live="counts"] .ta-count')].map(c => [c.className.replace(/.*ta-count-(\\w+).*/, '$1'), Number((c.querySelector('b') || {}).innerText)]));
+        return { label: document.querySelector('[data-ta-tab="students"]').innerText.trim(), done: (pane.querySelector('.ta-roll-done .ta-roll-head') || {}).innerText || '',
+          row: (document.querySelector('[data-ta-pick][data-id="ca-21"] .ta-row-done') || {}).innerText || '', chips }; })()`;
+      const before = await js(read);
+      const uid = await js(`(() => { const s = allStudents.find(x => (x.classActivities || {})['ca-21'] !== true); if (!s) return null;
+        const d = __store.get('progress/' + s.uid); d.classActivities = Object.assign({}, d.classActivities, { 'ca-21': true }); __store.set('progress/' + s.uid, d); return s.uid; })()`);
+      if (!uid) fail('repaint', 'every stub student already finished ca-21');
       else {
+        // The timer's own path (not teacherRepaintActivityStudents called by hand).
+        const ran = await js(`(async () => { document.activeElement && document.activeElement.blur && document.activeElement.blur(); const at = teacherStudentsAt = teacherStudentsAt - 70000; await teacherRefreshStudents(); return teacherStudentsAt !== at; })()`);
+        await sleep(150);
+        const after = await js(read);
         const n = t => Number((/(\d+)\//.exec(t) || [])[1]);
         const d = t => Number((/\((\d+)\)/.exec(t) || [])[1]);
-        if (n(r.after.label) !== n(r.before.label) + 1) fail('repaint', 'tab label went ' + r.before.label + ' -> ' + r.after.label);
-        if (d(r.after.done) !== d(r.before.done) + 1) fail('repaint', 'Done column went ' + r.before.done + ' -> ' + r.after.done);
+        if (!ran) fail('repaint', 'the minute refresh did not run');
+        if (n(after.label) !== n(before.label) + 1) fail('repaint', 'after the minute refresh the tab label went ' + before.label + ' -> ' + after.label);
+        if (d(after.done) !== d(before.done) + 1) fail('repaint', 'after the minute refresh the Done column went ' + before.done + ' -> ' + after.done);
+        if (n(after.row) !== n(before.row) + 1) fail('repaint', 'after the minute refresh the list row went ' + before.row + ' -> ' + after.row);
+        if (after.chips.done !== before.chips.done + 1) fail('repaint', 'after the minute refresh the done chip went ' + before.chips.done + ' -> ' + after.chips.done);
         stats.repaint++;
       }
-      const rowAfter = await js(`(document.querySelector('[data-ta-pick][data-id="ca-21"] .ta-row-done') || {}).innerText || ''`);
-      if (!/\d+\/\d+ done/.test(rowAfter)) fail('repaint', 'the list row reads ' + JSON.stringify(rowAfter));
+      if (!/\d+\/\d+ done/.test(before.row)) fail('repaint', 'the list row reads ' + JSON.stringify(before.row));
+    }
+
+    // ── The Students tab's chips: done + started + not started = the students it is for ──
+    for (const id of ['ca-21', 'ca-46', 'ca-48']) {
+      await js(`document.querySelector('[data-ta-pick][data-id="${id}"]').click()`); await sleep(120);
+      const r = await js(`(() => { const a = CLASS_ACTIVITIES.find(x => x.id === ${JSON.stringify(id)}), cfg = teacherClassConfig, pre = a.id + ':';
+        const forIt = allStudents.filter(s => teacherActivityForStudent(a, s.uid, cfg));
+        const isDone = s => (s.classActivities || {})[a.id] === true;
+        const ticked = s => Object.keys(s.caSteps || {}).filter(k => s.caSteps[k] && k.startsWith(pre));
+        const want = { total: forIt.length, done: forIt.filter(isDone).length, started: forIt.filter(s => !isDone(s) && ticked(s).some(k => !k.startsWith(pre + 'path:'))).length,
+          pathOnly: forIt.filter(s => !isDone(s) && ticked(s).length && ticked(s).every(k => k.startsWith(pre + 'path:'))).length };
+        const pane = document.querySelector('[data-ta-pane="students"]');
+        const chip = k => { const c = pane.querySelector('[data-ta-live="counts"] .ta-count-' + k + ' b'); return c ? Number(c.innerText) : null; };
+        const tab = /(\\d+)\\/(\\d+)/.exec(document.querySelector('[data-ta-tab="students"]').innerText) || [];
+        return { want, got: { done: chip('done'), started: chip('started'), not: chip('not'), tabDone: +tab[1], tabTotal: +tab[2] } }; })()`);
+      const { want, got } = r;
+      if (got.done + got.started + got.not !== want.total) fail('chips:' + id, `done ${got.done} + started ${got.started} + not started ${got.not} != ${want.total} students it is for`);
+      if (got.done !== want.done || got.started !== want.started || got.not !== want.total - want.done - want.started) fail('chips:' + id, 'chips ' + JSON.stringify(got) + ', the stub says ' + JSON.stringify(want));
+      if (got.tabDone !== want.done || got.tabTotal !== want.total) fail('chips:' + id, 'tab label ' + got.tabDone + '/' + got.tabTotal + ', the stub says ' + want.done + '/' + want.total);
+      if (id === 'ca-46' && !want.pathOnly) fail('chips:ca-46', 'the stub has no student with only a path pick — the "a path pick is not a start" case is not tested');
+      stats.chips = (stats.chips || 0) + 1;
     }
 
     // ── Settings writes: the stub changes, the Preview is not rebuilt ──
@@ -421,10 +493,22 @@ async function main() {
       stats.counts = all.n + p4.n;
       // A Who-limited exit check: the tab, the chips and the note all count the same three students.
       await js(`document.querySelector('[data-ta-pick][data-id="ca-15"]').click()`); await sleep(200);
-      const chk = await js(`({ tab: document.querySelector('[data-ta-tab="students"]').innerText.trim(), note: document.querySelector('[data-ta-pane="students"] [data-ta-live="note"]').innerText,
-        rows: document.querySelectorAll('[data-ta-pane="students"] [data-ta-live="grid"] tbody tr').length })`);
+      await js(`document.querySelector('[data-ta-tab="students"]').click()`); await sleep(60);
+      const chk = await js(`(() => { const pane = document.querySelector('[data-ta-pane="students"]'), grid = pane.querySelector('[data-ta-live="grid"]');
+        const chip = k => { const c = pane.querySelector('[data-ta-live="counts"] .ta-count-' + k + ' b'); return c ? Number(c.innerText) : null; };
+        const head = k => Number((/\\((\\d+)\\)/.exec((grid.querySelector('.ta-roll-' + k + ' .ta-roll-head') || {}).innerText || '') || [])[1]);
+        return { tab: document.querySelector('[data-ta-tab="students"]').innerText.trim(), note: pane.querySelector('[data-ta-live="note"]').innerText,
+          rows: [...grid.querySelectorAll('tbody tr')].filter(tr => !/^Missed by/.test(tr.innerText.trim())).length,
+          names: [...grid.querySelectorAll('tbody tr td.nc')].map(td => td.innerText).filter(t => t !== 'Missed by'),
+          rollDone: head('done'), rollNot: head('not'), chipIn: chip('done'), chipOut: chip('not') }; })()`);
       const tabN = (/(\d+)\/(\d+)/.exec(chk.tab) || []), noteN = (/(\d+) of (\d+) turned in/.exec(chk.note) || []);
       if (tabN[2] !== '3' || noteN[2] !== '3' || tabN[1] !== noteN[1]) fail('counts:who-check', 'ca-15 tab ' + chk.tab + ', note "' + (noteN[0] || chk.note.slice(0, 80)) + '"');
+      // The roll, the result rows and the chips count the same three students the Who picker names.
+      if (chk.rows !== 3) fail('counts:who-check', 'ca-15 shows ' + chk.rows + ' student rows, the Who picker names 3');
+      if (chk.rollDone + chk.rollNot !== 3 || String(chk.rollDone) !== tabN[1]) fail('counts:who-check', `ca-15 roll Done (${chk.rollDone}) + Not done (${chk.rollNot}), the tab says ${chk.tab}`);
+      if (chk.chipIn + chk.chipOut !== 3 || String(chk.chipIn) !== tabN[1]) fail('counts:who-check', `ca-15 chips ${chk.chipIn} turned in + ${chk.chipOut} not, the tab says ${chk.tab}`);
+      const who15 = await js(`Object.keys(teacherClassConfig.activityStudents['ca-15']).map(u => allStudents.find(s => s.uid === u)).filter(Boolean).map(s => s.name).sort()`);
+      if (JSON.stringify(chk.names.slice().sort()) !== JSON.stringify(who15)) fail('counts:who-check', 'ca-15 rows name ' + JSON.stringify(chk.names) + ', the Who picker ' + JSON.stringify(who15));
     }
 
     // ── A write and a refresh keep the list's scroll and the Preview ──
@@ -450,6 +534,133 @@ async function main() {
       }
     }
 
+    // ── A rename left open on Settings, then the Students tab: the Refresh button still refreshes ──
+    {
+      const label = async () => js(`document.querySelector('[data-ta-tab="students"]').innerText.trim()`);
+      const n = t => Number((/(\d+)\//.exec(t) || [])[1]);
+      await js(`document.querySelector('[data-ta-filter="all"]').click()`); await sleep(80);
+      await js(`document.querySelector('[data-ta-pick][data-id="ca-21"]').click()`); await sleep(150);
+      const ed = await js(`(async () => { const d = document.querySelector('[data-ta-head] details[data-ta-more]'); d.open = true; d.querySelector('[data-ta-rename]').click();
+        await new Promise(r => setTimeout(r, 100)); return !!document.querySelector('[data-ta-pane="settings"]:not([hidden]) .t-act-title-edit'); })()`);
+      if (!ed) fail('rename-refresh', 'More > Rename… did not open the editor on the Settings tab');
+      // On screen, the editor holds a Refresh back, and the bar says why.
+      const held = await js(`(async () => { document.querySelector('[data-refresh-students]').click(); await new Promise(r => setTimeout(r, 300)); return document.querySelector('[data-refresh-when]').innerText; })()`);
+      if (!/^Not refreshed: a rename is open/.test(held)) fail('rename-refresh', 'Refresh with the rename box on screen: the bar says ' + JSON.stringify(held));
+      await js(`document.querySelector('[data-ta-tab="students"]').click()`); await sleep(80);
+      const lab0 = await label();
+      await js(`(() => { const s = allStudents.find(x => (x.classActivities || {})['ca-21'] !== true); const d = __store.get('progress/' + s.uid); d.classActivities = Object.assign({}, d.classActivities, { 'ca-21': true }); __store.set('progress/' + s.uid, d); })()`);
+      await js(`document.querySelector('[data-refresh-students]').click()`); await sleep(700);
+      const lab1 = await label();
+      const st = await js(`({ edit: activityEditId, bar: document.querySelector('[data-refresh-when]').innerText, editor: !!document.querySelector('.t-act-title-edit') })`);
+      if (n(lab1) !== n(lab0) + 1) fail('rename-refresh', 'rename opened, then the Students tab: Refresh left the tab at ' + lab0 + ' -> ' + lab1 + ' (bar: ' + JSON.stringify(st.bar) + ')');
+      if (st.edit || st.editor) fail('rename-refresh', 'leaving Settings left the rename editor open (activityEditId ' + st.edit + ')');
+      stats.renameRefresh = 1;
+    }
+
+    // ── Picking a row stops the song; Arrange board and the sidebar stop a TAB playing ──
+    {
+      await js(`document.querySelector('[data-ta-pick][data-id="ca-18"]').click()`); await sleep(150);
+      await js(`document.querySelector('[data-ta-tab="preview"]').click()`); await sleep(60);
+      const r = await js(`(() => { document.querySelector('[data-ta-pane="preview"] .pc-play').click(); const on = !!pcState;
+        document.querySelector('[data-ta-pick][data-id="ca-17"]').click(); return { on, after: !!pcState }; })()`);
+      if (!r.on) fail('audio:pick', 'the practice card ca-18 did not start its song');
+      else if (r.after) fail('audio:pick', 'picking another row left ca-18\'s song playing');
+      const tabAct = await js(`(() => { for (const id of ['ca-46', ...[...document.querySelectorAll('[data-ta-pick]')].map(x => x.dataset.id)]) {
+        const row = document.querySelector('[data-ta-pick][data-id="' + id + '"]'); if (!row) continue; row.click(); if (document.querySelector('[data-ta-pane="preview"] .play-seq-btn')) return id; } return null; })()`);
+      if (!tabAct) fail('audio:tab', 'no activity on the stub board has a TAB player in its Preview');
+      else {
+        for (const [name, code] of [['Arrange board', `document.querySelector('[data-ta-board-open]').click()`], ['the sidebar (Skills grid)', `document.querySelector('#t-side [data-view="skills"]').click()`]]) {
+          await js(`setTeacherView('activities')`); await sleep(400);
+          await js(`(() => { document.querySelector('[data-ta-filter="all"]').click(); document.querySelector('[data-ta-pick][data-id="${tabAct}"]').click(); document.querySelector('[data-ta-tab="preview"]').click(); })()`); await sleep(100);
+          await js(`document.querySelector('[data-ta-pane="preview"] .play-seq-btn').click()`); await sleep(400);
+          const on = await js(`!!playSeqState`);
+          await js(code); await sleep(300);
+          const left = await js(`!!playSeqState`);
+          if (!on) fail('audio:tab', tabAct + '\'s TAB did not start');
+          else if (left) fail('audio:tab', tabAct + '\'s TAB kept playing after ' + name);
+          await js(`typeof stopCardAudio === 'function' && stopCardAudio()`);
+        }
+        stats.audio = 3;
+      }
+      await js(`setTeacherView('activities')`); await sleep(400);
+    }
+
+    // ── Settings writes under P4, P7 and CAS with the song playing: the Preview is never rebuilt ──
+    {
+      const id = 'ca-18';
+      const day = await js(`(() => { const d = new Date(); d.setDate(d.getDate() - 40); return dayStr(d); })()`);
+      const S = `[data-ta-pane="settings"]`;
+      const steps = [
+        ['Who tick', '4', `(async () => { const d = document.querySelector('${S} details[data-board-who]'); if (!d) return false; d.open = true; await new Promise(r => setTimeout(r, 60)); const b = d.querySelector('[data-set-activity-student][data-uid="stub-uid-01"]'); b && b.click(); return !!b; })()`, `((__store.get('config/class').activityStudents || {})['${id}'] || {})['stub-uid-01'] === true`],
+        ['Who untick', '7', `(async () => { const d = document.querySelector('${S} details[data-board-who]'); if (!d) return false; d.open = true; await new Promise(r => setTimeout(r, 60)); const b = d.querySelector('[data-set-activity-student][data-uid="stub-uid-01"]'); b && b.click(); return !!b; })()`, `!((__store.get('config/class').activityStudents || {})['${id}'] || {})['stub-uid-01']`],
+        ['release date', 'CAS', `(() => { const b = document.querySelector('${S} [data-set-activity-date]'); if (!b) return false; b.value = '${day}'; b.dispatchEvent(new Event('change', { bubbles: true })); return true; })()`, `(__store.get('config/class').activityDates || {})['${id}'] === '${day}'`],
+        ['Play Along now', '4', `(() => { const b = document.querySelector('${S} [data-set-activity-playalong][data-state="now"]'); b && b.click(); return !!b; })()`, `(__store.get('config/class').playAlongActivities || {})['${id}'] === true`],
+        ['Play Along by date', '7', `(() => { const b = document.querySelector('${S} [data-set-activity-playalong][data-state="date"]'); b && b.click(); return !!b; })()`, `!(__store.get('config/class').playAlongActivities || {})['${id}']`],
+        ['Move to Unit 3', 'CAS', `(() => { const b = document.querySelector('${S} [data-move-activity]'); if (!b) return false; b.value = '3'; b.dispatchEvent(new Event('change', { bubbles: true })); return true; })()`, `((__store.get('config/class').activityBoard || {})['${id}'] || {}).module === 3`],
+        ['Move to Unit 2', '4', `(() => { const b = document.querySelector('${S} [data-move-activity]'); if (!b) return false; b.value = '2'; b.dispatchEvent(new Event('change', { bubbles: true })); return true; })()`, `((__store.get('config/class').activityBoard || {})['${id}'] || {}).module === 2`],
+        ['Archive', '7', `(() => { const b = document.querySelector('${S} [data-set-activity-archived][data-state="archive"]'); b && b.click(); return !!b; })()`, `(__store.get('config/class').archivedActivities || {})['${id}'] === true`],
+        ['Restore', 'CAS', `(() => { const b = document.querySelector('${S} [data-set-activity-archived][data-state="restore"]'); b && b.click(); return !!b; })()`, `!(__store.get('config/class').archivedActivities || {})['${id}']`],
+        ['Delete', '4', `(() => { const b = document.querySelector('${S} [data-delete-activity]'); b && b.click(); return !!b; })()`, `(__store.get('config/class').deletedActivities || {})['${id}'] === true`],
+        ['Restore after Delete', '7', `(() => { const b = document.querySelector('${S} [data-set-activity-archived][data-state="restore"]'); b && b.click(); return !!b; })()`, `!(__store.get('config/class').deletedActivities || {})['${id}']`],
+      ];
+      for (const [name, per, act, ok] of steps) {
+        const n0 = pageErrors.length;
+        await js(`teacherSetPeriodFilter(${JSON.stringify(per)})`); await sleep(250);
+        const there = await js(`(() => { if (activityDetailId !== '${id}') { const row = document.querySelector('[data-ta-pick][data-id="${id}"]'); if (!row) return 'no row for it in the list'; row.click(); }
+          const tab = document.querySelector('[data-ta-tab="settings"]'); if (!tab) return 'no Settings tab'; tab.click(); return ''; })()`); await sleep(60);
+        if (there) { fail('write:' + name, id + ': ' + there + ' (under ' + per + ', picked ' + await js(`activityDetailId`) + ', screen ' + await js(`teacherActivityScreen()`) + ')'); continue; }
+        const ready = await js(`(() => { const play = document.querySelector('[data-ta-pane="preview"] .pc-play'); if (!pcState && play) play.click();
+          window.__prevEl = document.querySelector('[data-ta-pane="preview"]').firstElementChild; window.__pc = pcState; return pcState ? '' : play ? 'its song did not start' : 'no Play button in its Preview (picked ' + activityDetailId + ')'; })()`);
+        if (ready) { fail('write:' + name, id + ': ' + ready + ' (under ' + per + ')'); continue; }
+        const found = await js(act);
+        if (!found) { fail('write:' + name, 'no control under ' + per); continue; }
+        await sleep(450);
+        const r = await js(`({ ok: ${ok}, same: document.querySelector('[data-ta-pane="preview"]').firstElementChild === window.__prevEl, playing: !!pcState && pcState === window.__pc && pcState.root.isConnected,
+          alerts: (window.__alerts || []).length, picked: activityDetailId })`);
+        if (!r.ok) fail('write:' + name, 'config/class in the stub did not change (under ' + per + ')');
+        if (!r.same) fail('write:' + name, 'the Preview pane was rebuilt under ' + per);
+        if (!r.playing) fail('write:' + name, 'the song stopped under ' + per);
+        if (r.picked !== id) fail('write:' + name, 'the pick moved to ' + r.picked);
+        if (r.alerts) fail('write:' + name, 'an alert: ' + await js(`window.__alerts.join(' | ')`));
+        const e = errsSince(n0); if (e.length) fail('write:' + name, 'page error: ' + e[0]);
+        stats.periodWrites = (stats.periodWrites || 0) + 1;
+      }
+      await js(`typeof stopCardAudio === 'function' && stopCardAudio()`);
+      await js(`teacherSetPeriodFilter('all')`); await sleep(300);
+    }
+
+    // ── Move to Songs from Settings: the split picks a card the list still holds ──
+    {
+      await js(`document.querySelector('[data-ta-filter="all"]').click()`); await sleep(80);
+      await js(`(() => { document.querySelector('[data-ta-pick][data-id="ca-41"]').click(); document.querySelector('[data-ta-tab="settings"]').click(); })()`); await sleep(100);
+      const moved = await js(`(() => { const b = document.querySelector('[data-ta-pane="settings"] [data-set-song-place][data-state="songs"]'); b && b.click(); return !!b; })()`);
+      await sleep(500);
+      const r = await js(`({ lib: (__store.get('config/class').songLibrary || {})['ca-41'], picked: activityDetailId, head: document.querySelector('[data-ta-head]')?.dataset.id,
+        row: !!document.querySelector('[data-ta-pick][data-id="' + activityDetailId + '"].is-sel'), gone: !document.querySelector('[data-ta-pick][data-id="ca-41"]') })`);
+      if (!moved) fail('to-songs', 'ca-41 has no Move to Songs in Settings');
+      else if (r.lib !== true || !r.gone) fail('to-songs', 'Move to Songs did not take ca-41 off the list (' + JSON.stringify(r) + ')');
+      else if (r.picked === 'ca-41' || !r.row || r.head !== r.picked) fail('to-songs', 'after Move to Songs the split shows ' + r.head + ', picked ' + r.picked + ', its row selected: ' + r.row);
+      await js(`teacherSetSongPlace('ca-41', 'activities')`); await sleep(500);
+      if (await js(`(__store.get('config/class').songLibrary || {})['ca-41'] === true`)) fail('to-songs', 'could not move ca-41 back');
+    }
+
+    // ── Another console archives a student: this console's next write shows it ──
+    {
+      await js(`(() => { document.querySelector('[data-ta-pick][data-id="ca-21"]').click(); document.querySelector('[data-ta-tab="settings"]').click(); })()`); await sleep(120);
+      const uid = await js(`(() => { const a = CLASS_ACTIVITIES.find(x => x.id === 'ca-21'); const s = allStudents.find(x => x.uid !== 'stub-uid-05' && teacherActivityForStudent(a, x.uid, teacherClassConfig)); return s.uid; })()`);
+      const t0 = await js(`document.querySelector('[data-ta-tab="students"]').innerText.trim()`);
+      await js(`(() => { const c = __store.get('config/class'); c.configVersion += 1; c.archived = Object.assign({}, c.archived, { ${JSON.stringify(uid)}: true }); __store.set('config/class', c); })()`);
+      const cur = await js(`(__store.get('config/class').optionalActivities || {})['ca-21'] === true ? 'required' : 'optional'`);
+      await js(`document.querySelector('[data-ta-pane="settings"] [data-set-activity-optional][data-state="${cur}"]').click()`); await sleep(600);
+      const r = await js(`({ tab: document.querySelector('[data-ta-tab="students"]').innerText.trim(), listed: allStudents.some(s => s.uid === ${JSON.stringify(uid)}) })`);
+      const tot = t => Number((/\/(\d+)/.exec(t) || [])[1]);
+      if (r.listed || tot(r.tab) !== tot(t0) - 1) fail('two-consoles', 'another console archived ' + uid + '; after this console\'s write the tab went ' + t0 + ' -> ' + r.tab + (r.listed ? ', still on the roster' : ''));
+      // Put it back the same way.
+      await js(`(() => { const c = __store.get('config/class'); c.configVersion += 1; const a = Object.assign({}, c.archived); delete a[${JSON.stringify(uid)}]; c.archived = a; __store.set('config/class', c); })()`);
+      await js(`document.querySelector('[data-ta-pane="settings"] [data-set-activity-optional][data-state="${cur === 'optional' ? 'required' : 'optional'}"]').click()`); await sleep(600);
+      if (!(await js(`allStudents.some(s => s.uid === ${JSON.stringify(uid)})`))) fail('two-consoles', uid + ' did not come back after the other console un-archived them');
+    }
+
     // ── Arrange board and back ──
     {
       const n0 = pageErrors.length;
@@ -468,32 +679,54 @@ async function main() {
       await js(`document.querySelector('[data-ta-board-back]').click()`); await sleep(300);
       const b = await js(`({ list: !!document.querySelector('[data-ta-list]'), picked: activityDetailId, sel: document.querySelector('[data-ta-pick].is-sel')?.dataset.id })`);
       if (!b.list || b.sel !== b.picked) fail('board', 'Back to list did not return to the list with the picked activity (' + JSON.stringify(b) + ')');
-      // A card's Preview button on the board opens it in the list.
+      // A card's Preview button on the board opens it in the list — with its
+      // row on screen, even in a unit the list had shut (Unit 2: only the
+      // newest unit starts open, and nothing has touched Unit 2's fold).
+      await js(`document.querySelector('[data-ta-filter="units"]').click()`); await sleep(80);
+      await js(`delete activityUnitOpen['2']`);
       await js(`document.querySelector('[data-ta-board-open]').click()`);
       for (let i = 0; i < 30; i++) { await sleep(100); if (await js(`!!document.querySelector('.t-board')`)) break; }
       await js(`document.querySelector('.t-board [data-open-activity][data-id="ca-13"]').click()`); await sleep(300);
-      const c = await js(`({ list: !!document.querySelector('[data-ta-list]'), picked: activityDetailId })`);
+      const c = await js(`({ list: !!document.querySelector('[data-ta-list]'), picked: activityDetailId, sel: document.querySelector('[data-ta-pick].is-sel')?.dataset.id || null })`);
       if (!c.list || c.picked !== 'ca-13') fail('board', 'Preview on the board did not open ca-13 in the list (' + JSON.stringify(c) + ')');
+      if (c.sel !== 'ca-13') fail('board', 'Preview on the board opened ca-13, but its row is not on screen in the list (selected row: ' + c.sel + ')');
       const e = errsSince(n0); if (e.length) fail('board', 'page error: ' + e[0]);
       stats.board++;
     }
 
-    // ── Opened from elsewhere: Back returns there ──
+    // ── Opened from elsewhere: Back returns there, and the list keeps its pick ──
     {
       const n0 = pageErrors.length;
-      const uid = await js(`(() => { const s = allStudents.find(x => teacherBlockersFor(x, teacherClassConfig).length); return s ? s.uid : null; })()`);
+      const LIST_PICK = 'ca-19';
+      const pickIs = async (where) => {
+        await js(`document.querySelector('#t-side [data-view="activities"]').click()`); await sleep(400);
+        const p = await js(`({ picked: activityDetailId, sel: document.querySelector('[data-ta-pick].is-sel')?.dataset.id || null })`);
+        if (p.picked !== LIST_PICK || p.sel !== LIST_PICK) fail('list-pick', 'after ' + where + ' and back to Class activities the list picks ' + JSON.stringify(p) + ', not ' + LIST_PICK);
+        else stats.listPicks = (stats.listPicks || 0) + 1;
+      };
+      await js(`setTeacherView('activities')`); await sleep(400);
+      await js(`(() => { document.querySelector('[data-ta-filter="all"]').click(); document.querySelector('[data-ta-pick][data-id="${LIST_PICK}"]').click(); })()`); await sleep(150);
+      await js(`document.querySelector('#t-side [data-view="songs"]').click()`); await sleep(300);
+      await pickIs('the Songs tab');
+      // A student named with markup: the Back label shows the name as text.
+      const uid = await js(`(() => { const has = x => x && teacherBlockersFor(x, teacherClassConfig).length; const by = u => allStudents.find(x => x.uid === u);
+        const s = [by('stub-uid-03'), by('stub-uid-14')].find(has) || allStudents.find(has); return s ? s.uid : null; })()`);
       if (!uid) fail('from-student', 'no stub student has a blocker');
       else {
         await js(`openStudentDetail(${JSON.stringify(uid)})`); await sleep(200);
         const opened = await js(`(() => { const r = document.querySelector('#t-grid-container [data-open-activity]'); if (!r) return null; r.click(); return r.dataset.id; })()`);
         await sleep(250);
-        const r = await js(`({ screen: teacherActivityScreen(), tabs: document.querySelectorAll('[data-ta-tab]').length, back: (document.querySelector('[data-back-to-activities]') || {}).innerText || '', cur: document.querySelector('#t-side [aria-current="page"]')?.dataset.view })`);
+        const r = await js(`({ screen: teacherActivityScreen(), tabs: document.querySelectorAll('[data-ta-tab]').length, back: (document.querySelector('[data-back-to-activities]') || {}).innerText || '', cur: document.querySelector('#t-side [aria-current="page"]')?.dataset.view,
+          name: allStudentsRaw.find(s => s.uid === ${JSON.stringify(uid)}).name, injected: document.querySelectorAll('img[src="x"]').length })`);
         if (!opened || r.screen !== 'detail' || r.tabs !== 3) fail('from-student', 'Blocked by row opened ' + JSON.stringify(r));
         if (r.cur !== 'students') fail('from-student', 'sidebar marks ' + r.cur);
+        if (!r.back.endsWith('Back to ' + r.name) || r.injected) fail('from-student', 'the Back label reads ' + JSON.stringify(r.back) + ' for the student ' + JSON.stringify(r.name) + (r.injected ? ' (' + r.injected + ' injected <img>)' : ''));
+        if (!/^stub-uid-(03|14)$/.test(uid)) fail('from-student', 'neither student named with markup has a blocker — the Back label is not tested with one');
         await js(`document.querySelector('[data-back-to-activities]').click()`); await sleep(200);
         const back = await js(`({ view: teacherView, uid: studentDetailUid })`);
         if (back.view !== 'students' || back.uid !== uid) fail('from-student', 'Back went to ' + JSON.stringify(back));
         else stats.backs++;
+        await pickIs('a Blocked by row and Back');
       }
       await js(`setTeacherView('songs')`);
       for (let i = 0; i < 30; i++) { await sleep(100); if (await js(`!!document.querySelector('#t-grid-container [data-open-activity]')`)) break; }
@@ -504,8 +737,11 @@ async function main() {
       await js(`document.querySelector('[data-back-to-activities]').click()`); await sleep(300);
       const back = await js(`teacherView`);
       if (back !== 'songs') fail('from-songs', 'Back went to ' + back); else stats.backs++;
+      await pickIs('a Songs row and Back');
       const e = errsSince(n0); if (e.length) fail('from-elsewhere', 'page error: ' + e[0]);
     }
+
+    await xss('after the writes, the board and the Back labels');
 
     // ── The units tree under Class activities (2026-11-09) ──
     {
@@ -688,13 +924,15 @@ async function main() {
     for (const tab of ['students', 'settings']) { await js(`document.querySelector('[data-ta-tab="${tab}"]').click()`); await sleep(120); await shot(`14-dark-${tab}-1366`); }
     await page.send('Emulation.setEmulatedMedia', { features: [] });
     stats.widths = { at1366, at1920: wide };
+    await xss('the end of the walk');
     const late = errsSince(0); if (late.length) fail('page', late.length + ' page error(s), first: ' + late[0]);
   } finally {
     try { if (page) await page.close(); } catch { /* gone */ }
     proc.kill('SIGKILL'); srv.close();
     try { rmSync(prof, { recursive: true, force: true }); } catch { /* best effort */ }
   }
-  console.log(`console-layout-smoke: ${stats.views} sidebar views, ${stats.activities} activities opened (practice card, focus, paths, exit check) x ${stats.tabs / Math.max(stats.activities, 1)} tabs = ${stats.tabs} tab switches, ${stats.filters} filters, ${stats.folds} folds, ${stats.searches} searches, ${stats.writes} Settings writes with the Preview kept, ${stats.repaint} Students repaint, ${stats.counts || 0} list counts equal to the board's (All + P4), ${stats.refreshes || 0} refreshes with the Preview and list scroll kept, ${stats.board} board round trip, ${stats.backs} Backs`);
+  console.log(`console-layout-smoke: ${stats.views} sidebar views, ${stats.activities} activities opened (practice card, focus, paths, exit check) x ${stats.tabs / Math.max(stats.activities, 1)} tabs = ${stats.tabs} tab switches, ${stats.filters} filters, ${stats.folds} folds, ${stats.searches} searches, ${stats.writes} Settings writes with the Preview kept, ${stats.repaint} Students repaint, ${stats.counts || 0} list counts equal to the board's (All + P4), ${stats.refreshes || 0} refreshes with the Preview and list scroll kept, ${stats.board} board round trip, ${stats.backs} Backs, `
+    + `${stats.chips || 0} chip checks, ${stats.periodWrites || 0} writes under P4/P7/CAS with the song playing, ${stats.renameRefresh || 0} Refresh past a hidden rename, ${stats.audio || 0} sound stops, ${stats.listPicks || 0} list picks kept, ${stats.xss || 0} markup-name checks`);
   if (stats.tree) console.log(`  units tree: ${stats.tree.rows} rows adding up to the board's ${stats.tree.cards} cards, ${stats.tree.clicks} row clicks (Songs, list with a search, Arrange board), ${stats.tree.repaints} repaints after a write, ${stats.tree.reloads} reloads with the fold kept`);
   if (stats.widths) console.log(`  column widths at 1366: sidebar ${Math.round(stats.widths.at1366.side)}, list ${Math.round(stats.widths.at1366.list)}, detail ${Math.round(stats.widths.at1366.detail)}; at 1920: ${Math.round(stats.widths.at1920.side)}, ${Math.round(stats.widths.at1920.list)}, ${Math.round(stats.widths.at1920.detail)}`);
   if (stats.shots.length) console.log('  screenshots:\n    ' + stats.shots.join('\n    '));
