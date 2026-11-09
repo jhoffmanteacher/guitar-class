@@ -19,11 +19,11 @@ What is open right now: `WORKFLOW.md` → "Where things stand" (top of the file)
    prints one line as each walk starts and nothing else until the end. A walk takes 3-4
    minutes on a quiet Mac and about 7 on a busy one. It serves the checkout it runs in, so run
    it from a detached worktree at the commit under test (`git worktree add --detach <dir>
-   <hash>`) and keep your own checkout free to edit. Run it with `run_in_background` behind a
-   time limit (macOS: `perl -e 'alarm 3000; exec @ARGV' node tools/smoke.mjs ...`; Windows Git
-   Bash: `/usr/bin/timeout 3000 node tools/smoke.mjs ...`). It has hung before (`WORKFLOW.md`
-   "Open work"); after a timeout run `pkill -f gc-smoke-chrome` (Windows: close the leftover
-   headless Chrome in Task Manager). Never run it while another smoke or `pm-e2e.mjs` runs
+   <hash>`) and keep your own checkout free to edit. Run it with `run_in_background`. It stops
+   itself: if no step starts for 120 s (`--stall`) or the run passes 40 minutes (`--timeout`),
+   it prints `smoke: ✗ HUNG … Stuck at "<walk>: <step>"`, closes its Chrome and exits 3. A hang
+   is a finding: report the step it names. Only a run killed from outside can leave Chrome
+   behind (`pkill -f gc-smoke-chrome`). Never run it while another smoke or `pm-e2e.mjs` runs
    (macOS: `pgrep -f 'tools/smoke.mjs|tools/pm-e2e.mjs'`; Windows Git Bash: `ps -W | grep -E
    'smoke|pm-e2e'`).
 4. Changed what a student SEES (a renderer, a colour, a new control, or

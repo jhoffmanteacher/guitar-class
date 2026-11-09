@@ -17,6 +17,8 @@
                                                then not blamed on you)
      node tools/smoke.mjs --chrome <path>      Chrome/Chromium binary (or CHROME=…)
      node tools/smoke.mjs --quiet              print only the verdict
+     node tools/smoke.mjs --stall <s>          stop if no step starts for <s> seconds (default 120)
+     node tools/smoke.mjs --timeout <s>        stop if the whole run passes <s> seconds (default 2400)
 
    It is a tool, not part of checks.mjs: it needs a browser, takes 3-4
    minutes per walk on a quiet Mac (about 7 on a busy one), and is for big changes (renderers, escaping, many files at once), not
@@ -24,13 +26,16 @@
    serves the repo itself, so Python and a separate server are not needed.
    Network noise (Firebase, Google, YouTube) is ignored — it is offline-safe.
 
-   If it seems hung (2026-11-04): it prints NOTHING until the walk ends (3-4
-   minutes on a quiet Mac), so do not pipe it through `tail`; redirect to a file
-   and read that. Do not run it while another session's pm-e2e.mjs or the Stop
-   hook's checks.mjs are running: the load starves it. On Chrome 156 it really
-   did hang (browser near idle, 10+ minutes); updating to Chrome 157 fixed it.
-   If it hangs again, suspect the browser version first. Kill leftovers with
-   `pkill -f gc-smoke-chrome`.
+   It prints one line as each walk starts and nothing else until the end, so do
+   not pipe it through `tail`; redirect to a file (`> file 2>&1`) and read that.
+   It cannot hang for hours any more: the watchdog (--stall, --timeout above)
+   prints `smoke: ✗ HUNG: … Stuck at "<walk>: <step>"`, closes its Chrome and
+   exits 3. Do not run it while another session's pm-e2e.mjs or the Stop hook's
+   checks.mjs are running: the load starves it. It hung on Chrome 156
+   (2026-11-04; Chrome 157 fixed it) and again on 2026-11-07, cause unknown: if
+   it hangs, suspect the browser version first, then the named step. Only if
+   the process was killed from outside are leftovers possible: `pkill -f
+   gc-smoke-chrome`.
 
    Proved to be able to fail: against 194696b it reports 60+ dead video-button
    handlers; against the fixed tree it reports none. */
@@ -48,6 +53,16 @@ const opt = (name) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1
 const QUIET = args.includes('--quiet');
 const BASELINE = opt('--baseline');
 const say = (...a) => { if (!QUIET) console.log(...a); };
+
+/* The watchdog (2026-11-09). The run hung twice (2026-11-04, 2026-11-07): it sat for hours, printed nothing, and
+   once froze Jonathan's own Chrome. Every walk step goes through run(), which marks where the walk is; the setup
+   between walks marks too. If no step starts for --stall seconds (default 120: the longest deliberate gap between
+   steps is a reload, about 18.5 s), or the whole run passes --timeout seconds (default 2400), the run prints the
+   step it was on, closes its Chrome and its servers, deletes its temp folders and exits 3. */
+const numOpt = (name, dflt) => { const v = opt(name); if (v == null) return dflt; const n = Number(v); if (!(n > 0)) { console.error(`smoke: ${name} needs a number of seconds, got "${v}"`); process.exit(2); } return n; };
+const STALL_S = numOpt('--stall', 120), TIMEOUT_S = numOpt('--timeout', 2400);
+const progress = { where: 'starting', at: Date.now() }, t0 = Date.now();
+const mark = (where) => { progress.where = where; progress.at = Date.now(); };
 
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg',
@@ -1444,7 +1459,9 @@ async function tuningSimWalk(page, run, events, stats, base) {
 }
 
 async function walk(base, chromePort, label) {
+  mark(`${label}: opening the page`);
   const page = await openPage(chromePort);
+  mark(`${label}: boot (loading index.html)`);
   let step = 'boot'; const events = []; const stats = { sets: 0, modules: 0, games: 0, buttons: 0 };
   page.on((method, p) => {
     if (method === 'Runtime.exceptionThrown') { const d = p.exceptionDetails; events.push({ step, kind: 'exception', text: (d.exception && (d.exception.description || d.exception.value)) || d.text }); }
@@ -1453,7 +1470,7 @@ async function walk(base, chromePort, label) {
   });
   await page.send('Runtime.enable'); await page.send('Log.enable'); await page.send('Page.enable');
   const run = async (name, expr, wait = 250) => {
-    step = name;
+    step = name; mark(`${label}: ${name}`);
     try { const v = await page.evalJs(expr); await sleep(wait); return v; }
     catch (e) { events.push({ step: name, kind: 'step-failed', text: String(e.message).split('\n')[0].slice(0, 300) }); return null; }
   };
@@ -1759,12 +1776,37 @@ if (typeof WebSocket === 'undefined') { console.error('smoke: needs Node 22+ (gl
 
 const cleanup = [];
 let exitCode = 0;
+/* Chrome is stopped FIRST and waited for (SIGKILL after 1 s, give up after 3 s): deleting its profile while it is still
+   shutting down left a small profile folder behind after every run (it writes Default/ and Local State on the way out). */
+let chromeProc = null;
+const stopChrome = () => new Promise(res => {
+  const p = chromeProc;
+  if (!p || p.exitCode !== null || p.signalCode !== null) return res();
+  let kill = null, cap = null;
+  const done = () => { clearTimeout(kill); clearTimeout(cap); res(); };
+  p.once('exit', done);
+  p.kill();
+  kill = setTimeout(() => { try { p.kill('SIGKILL'); } catch { /* gone */ } }, 1000);
+  cap = setTimeout(done, 3000);
+});
+const runCleanup = async () => { await stopChrome(); for (const f of cleanup.splice(0).reverse()) { try { f(); } catch { /* best effort */ } } };
+const watchdog = setInterval(() => {
+  const now = Date.now(), quiet = (now - progress.at) / 1000, total = (now - t0) / 1000;
+  if (quiet < STALL_S && total < TIMEOUT_S) return;
+  clearInterval(watchdog);
+  const why = quiet >= STALL_S ? `no step started for ${Math.round(quiet)} s (--stall ${STALL_S})` : `the whole run passed ${Math.round(total)} s (--timeout ${TIMEOUT_S})`;
+  console.error(`smoke: ✗ HUNG: ${why}. Stuck at "${progress.where}", which started ${Math.round(quiet)} s ago. Closing Chrome and exiting.`);
+  runCleanup().finally(() => process.exit(3));
+}, 1000);
+watchdog.unref();
 try {
+  mark('setup: starting Chrome');
   const prof = mkdtempSync(join(tmpdir(), 'gc-smoke-chrome-'));
   const cdp = await freePort();
   const proc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--use-fake-ui-for-media-stream',
     '--use-fake-device-for-media-stream', '--autoplay-policy=no-user-gesture-required', '--no-first-run', '--disable-gpu', 'about:blank'], { stdio: 'ignore' });
-  cleanup.push(() => proc.kill(), () => rmSync(prof, { recursive: true, force: true }));
+  chromeProc = proc;   // stopped and waited for by runCleanup() before the profile below is deleted
+  cleanup.push(() => rmSync(prof, { recursive: true, force: true }));
   for (let i = 0; i < 60; i++) { try { await fetch(`http://127.0.0.1:${cdp}/json/version`); break; } catch { await sleep(250); } }
 
   const here = await serve(ROOT); cleanup.push(() => here.srv.close());
@@ -1772,6 +1814,7 @@ try {
   const now = await walk(`http://127.0.0.1:${here.port}`, cdp, 'this checkout');
   let base = null;
   if (BASELINE) {
+    mark(`setup: extracting ${BASELINE}`);
     const dir = extractRef(BASELINE); cleanup.push(() => rmSync(dir, { recursive: true, force: true }));
     const bs = await serve(dir); cleanup.push(() => bs.srv.close());
     say(`smoke: walking ${BASELINE} for comparison …`);
@@ -1792,5 +1835,5 @@ try {
     if (report.length > 40) console.error(`  … and ${report.length - 40} more`);
   } else console.log(`smoke: ✓ no JavaScript errors${base ? ' beyond the baseline' : ''}`);
 } catch (e) { console.error('smoke: could not run —', e && e.message); exitCode = 2; }
-finally { for (const f of cleanup.reverse()) { try { f(); } catch { /* best effort */ } } }
+finally { clearInterval(watchdog); await runCleanup(); }
 process.exit(exitCode);

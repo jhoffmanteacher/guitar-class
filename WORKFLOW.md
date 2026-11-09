@@ -163,12 +163,15 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
     low — tighten the peg"); Name the Power Chord resets its round when the tab is hidden; `.ca-paths-grid` adds a 760px
     breakpoint; two devices can save different path picks.
 
-- [ ] **2026-11-07 — `tools/smoke.mjs` hangs.** Two runs in the `guitar-class-ratio` worktree never finished (one sat
+- [x] **2026-11-07 — `tools/smoke.mjs` hangs.** Two runs in the `guitar-class-ratio` worktree never finished (one sat
   about 4 hours, headless Chrome 157); Jonathan had to force quit Chrome. Not the profile, port or machine load.
-  Same family as the 2026-11-04 hang (Chrome 156; Chrome 157 fixed that one). Workaround in CLAUDE.md step 3 (an
-  outside time limit, `pkill -f gc-smoke-chrome`). Still open: a watchdog inside
-  `smoke.mjs` that prints the step it is on and exits non-zero. Until then, run it only with Chrome closed (the
-  2026-11-07 hang froze Jonathan's own Chrome). Decided 2026-11-07 (Jonathan): the 1.8 / 2.19 ratio
+  Same family as the 2026-11-04 hang (Chrome 156; Chrome 157 fixed that one). **Watchdog shipped 2026-11-09:** no step
+  started for `--stall` 120 s, or the run past `--timeout` 2400 s → it prints `smoke: ✗ HUNG … Stuck at "<walk>:
+  <step>"`, closes its Chrome (SIGKILL after 1 s) and exits 3 (CLAUDE.md step 3). The cause is still unknown: the next
+  hang names its step. Proved: a step that never settles was named after 20 s (`--stall 20`); the overall limit fired at
+  25 s; with the watchdog switched off the same hang ran until killed from outside; a healthy run did not trip it. Same
+  commit: every run used to leave a small Chrome profile folder in the temp dir (deleted while Chrome was still
+  writing it); cleanup now waits for Chrome to exit first. Still sensible: run it with your own Chrome closed. Decided 2026-11-07 (Jonathan): the 1.8 / 2.19 ratio
   shipped without a smoke run.
 
 - [ ] **2026-11-02 — `tools/smoke.mjs` flakes after its page reload (cause unknown).** About 4 of 9 runs reported errors
