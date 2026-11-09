@@ -241,6 +241,8 @@ changes name. `tools/checks.mjs` writes a hash per file in `audio/` into
 which hash it was stored under; at activate the worker evicts a file whose
 record differs or whose file is gone. A stored track is served as it is and
 never refetched.
+- **Never add audio to `sw.js`'s `ASSETS` precache list.** That would download
+  every jam track at install. Tracks are cached when first played.
 - **Never rename `AUDIO_CACHE` or `AUDIO_HASH_CACHE`.** Both names are pinned in
   `tools/sw-audio-map.mjs`; renaming either purges every student's tracks.
 - **`AUDIO_MIGRATION_FP`** adopts the tracks students already hold, once, and is
