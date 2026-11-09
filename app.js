@@ -17568,9 +17568,18 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
      install→skipWaiting→activate→clients.claim on every push). The cached
      shell that already loaded is now stale, so reload ONCE to pick up the
      fresh code automatically — no more reloading two or three times after a
-     deploy, and returning students stop sitting on old code. A first-ever
-     visit has no controller yet, so it must NOT reload (that would bounce
-     the very first load).
+     deploy, and returning students stop sitting on old code. A page that
+     came straight from the network (a first-ever visit, or a second tab
+     opened while the first worker was still installing) must NOT reload:
+     it already is the current version, and that would bounce the load.
+
+     "Controlled when it loaded" is read from the navigation's own timing,
+     not only from navigator.serviceWorker.controller (review R2-2): the
+     first worker can claim a page that is still waiting on its scripts, so
+     by the time this line runs there IS a controller, though no worker
+     served the page. workerStart is 0 when no worker handled the
+     navigation. Where the browser has no such entry, the controller alone
+     decides, as before.
 
      Read NOW, while this file runs, and both listeners attached now too
      (2026-11-09): sw.js installs only the shell before it takes over, so
@@ -17582,7 +17591,8 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
      message sw.js posts at the end of activate. The browser holds a
      message for a page that is still loading, so that one is heard even
      when the takeover came before this line ran. */
-  const hadController = !!navigator.serviceWorker.controller;
+  const navTiming = (typeof performance !== 'undefined' && performance.getEntriesByType) ? performance.getEntriesByType('navigation')[0] : null;
+  const hadController = !!navigator.serviceWorker.controller && !(navTiming && navTiming.workerStart === 0);
   /* Ask the worker for the files its install left for later (sw.js,
      precacheRest). Sent once the page has loaded, so those downloads don't
      compete with the page's own start-up. Harmless to send twice, and an

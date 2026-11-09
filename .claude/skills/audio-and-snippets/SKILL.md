@@ -257,7 +257,8 @@ never refetched.
   deploy changes that file's hash. After any rollback, edit the OLD worker's
   `AUDIO_CACHE_VERSION` by hand (a new name) before it deploys.
 - **Tools:** `node tools/sw-audio-proof.mjs` runs the real `sw.js` against a
-  stand-in cache and breaks it 21 ways; check 1ce pins its totals.
+  stand-in cache and breaks it on purpose, one way at a time (the count is
+  pinned: `SW_AUDIO_PROOF_PIN`); check 1ce pins its totals.
 - Adding a track while editing code in the same turn: the Stop hook blocks on
   "audio hash map in sw.js is stale" until the full `node tools/checks.mjs` has
   written the block. That is intended; run it.

@@ -345,7 +345,8 @@ self.addEventListener('install', event => {
            page. With every file in the install that wait was the whole
            list (92 files, about 2.9 MB compressed, up to half a minute on
            school Wi-Fi): long enough to start working and then be
-           reloaded mid-task (Jonathan, 2026-11-09). The shell is 16 files
+           reloaded mid-task (Jonathan, 2026-11-09). The shell is 16
+           requests (15 files: './' and './index.html' are the same one)
            and about 0.7 MB.
 
            addAll() is all-or-nothing, so the shell must land for the
@@ -367,8 +368,16 @@ self.addEventListener('install', event => {
    as it would be on a first visit, and tried again here on the next page
    load. A few at a time, to leave room for the page's own start-up (the
    Firebase SDK, the sign-in, the student's progress) on a weak connection.
-   One run at a time: a second call while one is out gets the same promise. */
+   One run at a time: a second call while one is out gets the same promise.
+
+   It stops as soon as a NEWER worker is installing or waiting (review R2-1).
+   A worker with work still pending cannot be replaced: the browser holds the
+   new one back until this one is idle (Chrome gives up waiting after 5
+   minutes). So an old worker still filling its cache would delay the very
+   takeover this file was changed to make fast, and everything it had
+   downloaded would be deleted by the new worker's activate anyway. */
 const PRECACHE_REST_AT_ONCE = 4;
+const newerWorkerComing = () => !!(self.registration && (self.registration.installing || self.registration.waiting));
 let precacheRestRun = null;
 function precacheRest(){
   if (precacheRestRun) return precacheRestRun;
@@ -376,7 +385,7 @@ function precacheRest(){
     const cache = await caches.open(CACHE_VERSION);
     const queue = ASSETS.filter(u => !PRECACHE_CRITICAL.includes(u));
     const worker = async () => {
-      while (queue.length) {
+      while (queue.length && !newerWorkerComing()) {
         const u = queue.shift();
         try {
           if (await cache.match(u)) continue;
@@ -403,8 +412,9 @@ self.addEventListener('activate', event => {
       ))
       .then(() => reconcileAudio().catch(() => {}))
       .then(() => self.clients.claim())
-      /* Tell every open page a new version just took over. claim() already
-         fires "controllerchange" on them, but a page only hears that if its
+      /* Tell every open page a new version just took over. The browser already
+         fires "controllerchange" on them (as this worker becomes the active
+         one, and from claim() for a page that had no worker), but a page only hears that if its
          listener was attached in time, and with the shell-first install the
          takeover can come before app.js has run. A message sent to a page
          that is still loading is held by the browser until the page is

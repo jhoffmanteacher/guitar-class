@@ -28,7 +28,7 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-11-09 — Updates arrive sooner, and you stay on the page you were on
 
-- **When the site has an update, the page now refreshes sooner after you open it.** Before, the site downloaded every file of the new version first (92 files), which could take half a minute on school Wi-Fi, so you could start working and then have the page refresh under you. Now it refreshes as soon as the 16 main files are in. The other files load after the refresh.
+- **When the site has an update, the page now refreshes sooner after you open it.** Before, the site downloaded every file of the new version first (92 files), which could take half a minute on school Wi-Fi, so you could start working and then have the page refresh under you. Now it refreshes as soon as the 15 main files are in. The other files load after the refresh.
 - **After an update the page comes back where you were.** Before, the refresh took you to In-Class Activities if you were on a lesson or had an activity to do. Now it opens the same page (your lesson or its checklist, In class, Songs, My progress), with the step you had open, at about the same place on the page (if the page comes back shorter, as far down as it goes). If you click or scroll while the page is still loading, it leaves you where you put yourself. The refresh still waits, up to 5 minutes, while a drill, a Listening Coach check, a recording, an exit check or a play-along card is running.
 - **Teacher console:** the same after an update. It comes back on the view you were on (the picked activity and its tab, the Arrange board, a student's page, the skills grid's set) instead of the Class activities list. A view you click while it is still loading stays.
 

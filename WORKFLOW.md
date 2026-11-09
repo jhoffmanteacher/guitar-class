@@ -45,9 +45,14 @@ Start here. Update this block whenever an item opens or closes; each line says w
   the file runs, not on `load`. (2) The reload leaves a one-use note in `sessionStorage` (`gcSwResume`: `swResumeSave` /
   `swResumeTake` in `app.js`, `teacherResumeSnapshot` / `teacherResumeApply` in `teacher.js`) and the next load opens the
   same page instead of the home page; a click or scroll before it lands cancels it. Guard: check 1ce runs the install,
-  the message and the fill (66 assertions, 35 breakages) and pins 6 wiring lines. Not covered by a check: the restore, and
-  what the page does with the two messages (both proved in a real browser; see the commit messages). Reviewed, round 1:
-  2 MAJOR + 11 MINOR fixed. Not seen yet on the live site or a school Chromebook. The first deploy of this change can
+  the message and the fill (72 assertions, 42 breakages) and pins 11 wiring lines as text (comments stripped). Not covered
+  by a check: the restore, and what the page does with the two messages (both proved in a real browser; see the commit
+  messages). Reviewed twice: round 1, 2 MAJOR + 11 MINOR fixed; round 2, no BLOCKER or MAJOR, 15 MINOR fixed or noted.
+  A fill stops when a newer worker is installing or waiting (an old worker with work pending holds the new one back).
+  Known trade-offs: on the first load after an update the module files and step images come from the network once; a
+  Journey page not yet in the new cache needs the network (no HTTP-cache fallback offline, the 2026-10-16 rule); a student
+  on a Module Review gets its assessment reminder right after the update reload. Not restored: In class's two folds, a
+  search, a card's open step, the board's sort. Not seen yet on the live site or a school Chromebook. The first deploy of this change can
   need one manual reload (pages still on the old `app.js` listen too late for the faster takeover).
   **A student with an unfinished activity now stays where they were after an update** instead of being sent to In-Class
   Activities (the "pops up on login" half of the gate, kept 2026-10-07, no longer fires on the update reload).

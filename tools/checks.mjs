@@ -5945,7 +5945,7 @@ function bumpServiceWorker() {
      until some unrelated shell file happens to change. */
   /* The AUDIO_HASHES block is blanked too, so an audio-only push keeps the shell
      cache's NAME. The worker still updates (its bytes changed) and its install
-     re-downloads ASSETS as on any worker update; what students keep is every
+     re-downloads the shell (PRECACHE_CRITICAL) as on any worker update; what students keep is every
      backing track that did not change. */
   const swCode = src.replace(/const CACHE_VERSION = '[^']*';/g, "const CACHE_VERSION = '';").replace(AUDIO_BLOCK_RE, '/* AUDIO_HASHES */');
   const shellFp = [...SHELL_FILES, ...IMG_FILES, ...SHEET_FILES, ...VENDOR_FILES, ...precachedExtraFiles(src)];
@@ -5963,10 +5963,10 @@ function bumpServiceWorker() {
    deploy that adds, re-exports and removes a track, the one-time migration, and
    the fetch paths, a rollback round trip, a 404 or foreign answer and the cache
    names, and the shell-first install with the fill that follows it (2026-11-09);
-   then breaks the worker 35 ways and needs every one to turn
+   then breaks the worker 42 ways and needs every one to turn
    the proof red. The totals are pinned, so deleting a scenario or a breakage to
    get green fails here too. */
-const SW_AUDIO_PROOF_PIN = { assertions: 66, scenarios: 11, mutations: 35 };
+const SW_AUDIO_PROOF_PIN = { assertions: 72, scenarios: 11, mutations: 42 };
 function checkAudioWorker(swPath) {
   head('1ce. sw.js keeps the audio cache (the worker is run, not read)');
   const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'sw-audio-proof.mjs'), swPath], { encoding: 'utf8', timeout: 120000 });
@@ -5989,7 +5989,20 @@ function checkAudioWorker(swPath) {
      sides, so a rename in one file cannot pass (review R1-3, 2026-11-09). */
   let appSrc = '', swSrc2 = '';
   try { appSrc = readFileSync(join(ROOT, 'app.js'), 'utf8'); swSrc2 = readFileSync(swPath, 'utf8'); } catch { /* reported below as missing */ }
+  /* Comments out first, so a line that is commented out does not count
+     (review R2-3). These are text pins: they catch a rename, a deleted or
+     commented-out line and the listeners moving back inside "load"; they
+     do not run the page code. What it does was proved in a real browser. */
+  const bare = t => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  appSrc = bare(appSrc); swSrc2 = bare(swSrc2);
+  const swBlock = appSrc.slice(appSrc.indexOf("if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {"));
+  const loadAt = swBlock.indexOf("window.addEventListener('load', () => {\n    navigator.serviceWorker.register('sw.js')");
   const wires = [
+    ['app.js reads hadController before "load", from the navigation timing', loadAt > 0 && /const hadController = !!navigator\.serviceWorker\.controller && !\(navTiming && navTiming\.workerStart === 0\);/.test(swBlock.slice(0, loadAt))],
+    ['app.js attaches both update listeners outside "load"', /\n    navigator\.serviceWorker\.addEventListener\('controllerchange', onNewWorker\);\s*\n    navigator\.serviceWorker\.addEventListener\('message', /.test(swBlock)],
+    ['app.js: a waiting tab asks for the rest once', /askedWhileWaiting = true; askForRest\(\);/.test(swBlock)],
+    ['app.js: a page no worker served never reloads', /if \(!hadController\) \{[^\n]*return; \}\n\s*if \(window\.__swReloading\) return;/.test(swBlock)],
+    ['sw.js: the fill stops when a newer worker is coming', /while \(queue\.length && !newerWorkerComing\(\)\) \{/.test(swSrc2)],
     ['app.js posts gc-precache-rest', /postMessage\(\{ type: 'gc-precache-rest' \}\)/.test(appSrc)],
     ['sw.js answers gc-precache-rest', /event\.data\.type === 'gc-precache-rest'\) event\.waitUntil\(precacheRest\(\)\)/.test(swSrc2)],
     ['sw.js posts gc-sw-activated', /postMessage\(\{ type: 'gc-sw-activated'/.test(swSrc2)],
