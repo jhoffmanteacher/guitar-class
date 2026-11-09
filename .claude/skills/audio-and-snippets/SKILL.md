@@ -12,8 +12,10 @@ of the same mp3s the Journey page uses (sw.js serves byte-Range requests for
 
 Count the window in **bars of the song, from bar 1, at the FELT pulse the
 course teaches** ("the cure" reads 144 BPM, the room counts 72, one chord per
-bar). Bar maps and section starts are in skill `song-facts`; place a window by
-measurement, never by the song map. Make the window agree with the step's own
+bar). Bar maps and measured section starts are in skill `song-facts` (the cure:
+chorus from bar 21; bar 13 is the second verse). Place any other window by
+measuring the mp3, never by a Journey page's song map (a section list, not a bar
+grid). Make the window agree with the step's own
 tab: an eight-bar tab wants an eight-bar window, or the loop comes round
 mid-phrase and the student concludes they're the one who's wrong.
 
@@ -95,9 +97,8 @@ A plain "mark this done" is neither, and **nor is leaving a screen**:
 `stopCardAudio()`, and the lesson-step path (`onCompleteChange()`) never
 takes the metronome either. `fab-tools.js` draws the same
 line for dismissing a popup, so nothing in `app.js` should be stricter. The
-full sweep has exactly five callers in `app.js` (`snipToggle()`, `erPlay()`,
-`ncStart()`, `pcStart()`, `ecPick()`, all "about to play", counted
-2026-10-26), plus the mic-opening ones in `coach.js` and `fab-tools.js`.
+full sweep has exactly six callers in `app.js` (`snipToggle()`, `erPlay()`,
+`ncStart()`, `pcStart()`, `ecPick()`, `chcStart()`, all "about to play"), plus the mic-opening ones in `coach.js` and `fab-tools.js`.
 New "silence it" call site → default to `stopCardAudio()`.
 
 **Which tempo a card OPENS on is per track — `defaultSlow` in

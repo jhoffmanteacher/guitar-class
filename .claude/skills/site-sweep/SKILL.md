@@ -92,5 +92,6 @@ general-purpose agent with `model: opus` and, for reviewers, `effort: xhigh`.
 ### At medium effort
 Follow the numbered flow literally and run the named commands. A sweep is
 always Reviewed the same day, never shipped Fast. Every other change follows
-"Fast by default" in CLAUDE.md: an ordinary trigger ships Fast with a
-`Review: Fast` trailer.
+"Fast by default" in CLAUDE.md: a danger-zone file, a new kind of check, or
+moving/adding/removing a section or step is always Reviewed the same day; any
+other trigger ships Fast with a `Review: Fast` trailer.

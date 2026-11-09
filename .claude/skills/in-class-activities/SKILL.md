@@ -94,8 +94,9 @@ they share the newest visible card's date; an undated hero pairs with nothing.
   (`caResetRevealsIfNewDay()`).
 - **Mark complete** closes the card, scrolls to the top and toasts
   `ca.doneNextToast` / `ca.doneAllToast`. Un-marking keeps the card open.
-- A second tap on the current rail row scrolls to the top; it does not close
-  the page.
+- A second tap on the current rail row (In class, Songs, My progress, Modules)
+  scrolls to the top; it does not close the page. Games is a dialog toggle: a
+  second tap closes it.
 
 **⚠️ The LOCK is switched off (Jonathan, 2026-10-07: "stop locking the
 other parts of site if class activities aren't cleared… CA should still pop
@@ -109,8 +110,9 @@ up as normal on login").** `const CA_GATE_LOCKS = false;` beside
   now only decide who gets that landing.
 - Dormant while off: `applyActivityGate()` never sets `body.ca-gated` (only
   `window.__forceGate` on localhost does), so the hidden rail,
-  `routeExploreHash()`'s redirect, the mid-session flip redirect and the
-  Journey gate card never run.
+  `routeExploreHash()`'s redirect, `returnToPractice()`'s guard and the
+  mid-session flip redirect never run; the Journey gate card is off through
+  `JOURNEY_GATE_LOCKS`.
 
 **The gate, as it runs when switched on:** `caBlockers()` — a visible
 (`caIsVisible`), undone (`classActivities[id]!==true`), uncleared activity or
@@ -511,12 +513,12 @@ reuses on many days (the play-along cards, ca-23).
 
 **There is no Assessments page** (removed 2026-09-20, Jonathan: rubrics and
 assignments go on Canvas). **The Module Review's per-module assessment box is
-a separate, live feature**: `.mr-assess-box` at the bottom of
+a separate, live feature; don't confuse the two**: `.mr-assess-box` at the bottom of
 `buildModuleReview()` and its heads-up pop (`buildMrAssessPop`), reading
 `MODULE_REVIEWS[n].assessItems`.
 
-**The rail** is five items — In-Class Activities · Practice · Songs · Games ·
-My progress, no "Explore" heading (`nav.explore` stays as the rail `<nav>`'s
+**The rail** is five buttons — In class · Modules · Songs · Games · My progress
+(layout: `.claude/rules/rail-layout.md`), no "Explore" heading (`nav.explore` stays as the rail `<nav>`'s
 aria-label).
 - Keep practicing and Daily Review are sections inside My progress.
   `renderKeepPracticing()` and `renderDailyReview()` are UNCHANGED;

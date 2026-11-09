@@ -51,8 +51,9 @@ re-decide it when the rest is reworded.
 end-of-period product" in skill `in-class-activities`).
 
 **`m2w2` Challenge 3's label, "(your low-E assessment piece)" → "(assessment
-preparation)".** The site's wording ("No teacher speak" in CLAUDE.md); the
-`label` is frozen by index. In the same edit:
+preparation)".** That is the site's wording everywhere else ("No teacher speak"
+and "Challenge cards" in CLAUDE.md); this `label` is frozen by index, so it waits
+for the reset. In the same edit:
 - remove the `module-2.js` / `'assessment piece'` entry from
   `TEACHER_PHRASE_ALLOW` in checks.mjs;
 - reword the hidden twin at `module-2.js`'s Seven Nation Army Challenge,

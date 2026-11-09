@@ -61,7 +61,7 @@ For each confirmed finding, decide:
      could be using the checkout), rebased on current `origin/main`.
   2. Run `site-reviewer-deep` on the fix commit, briefed to try to BREAK it.
      Then:
-     - fix what you confirm;
+     - read its quoted lines yourself and fix what you confirm;
      - prove each new guard goes red when its fix is broken;
      - run a fresh `site-reviewer-deep` round on the new commit.
 
@@ -79,7 +79,8 @@ For each confirmed finding, decide:
   WORKFLOW.md's Open work in the same push as any other fix.
 
 Never touch student data (Firebase console, Firestore exports, rosters,
-teacher dashboard on live data) or edit `firestore.rules`. CLAUDE.md's "Never,
+teacher dashboard on live data), edit `firestore.rules`, or hand-edit the `sw.js`
+version lines. CLAUDE.md's "Never,
 whatever the task says" list applies too.
 
 `checks.mjs --live` returns 403 from a cloud session. Say in the report that
