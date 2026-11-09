@@ -210,8 +210,11 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
   - [ ] The bar's flame is orange only when this week is hit, My progress's whenever the streak is above 0: pick one.
   - [ ] `weekReach` is covered by pm-e2e only, not checks.mjs.
   - [ ] The "goal reached" toast shows only on a practice card (never on a Journey page: `pendingToast` is per page).
-  - [ ] `tools/pm-e2e.mjs` seeds dates from the real date: it fails in 24 of 32 school weeks from the week of
-    2026-11-23. Make its dates fixed.
+  - [x] `tools/pm-e2e.mjs` and the real date: already fixed in the 2026-11-01 review (it clears the streak start, break
+    weeks and semester split before seeding; file lines 137-142). Proved 2026-11-09 with `--date`: 109 of 109 checks on
+    each of 12 dates (2026-11-09, -11-25 Thanksgiving, -11-30, -12-08, -12-23 winter break, 2027-01-05, -01-12, -02-17
+    mid-winter break, -02-23, -04-14 spring break, -04-20, -05-26); with those lines removed it fails (7 on 2026-11-09,
+    29 on 2026-11-30).
   - [ ] `tools/smoke.mjs` draws no practice-minutes UI; `tools/pm-rules-test.mjs` needs the emulator.
 
 - [x] **2026-11-01 — Friday check (Fast commits `a615925`..`65898ce`).** Done 2026-11-01/02. The grey "Optional" edge
