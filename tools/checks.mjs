@@ -14242,7 +14242,7 @@ async function checkPwTakeEvaluator() {
    The browser half (strip, recap, toast, My progress, 1366×657, both languages,
    a real <audio>) is tools/pm-e2e.mjs — it needs Chrome, so it is run by hand.
    ════════════════════════════════════════════════════════════════════ */
-const PM_SIM_PIN = 372;
+const PM_SIM_PIN = 390;
 function checkPracticeMinutes(i18nTable) {
   head('1cg. Practice minutes: the engine is run; the rules cap, no heartbeat, wiring and strings are pinned');
   let bad = 0;
@@ -14573,7 +14573,9 @@ function checkPracticeMinutes(i18nTable) {
         if (/pmWeekGoals\s*:/.test(tsrc.replace(w, ''))) fail('teacher.js: pmWeekGoals is named as a key outside teacherSetPmWeekGoal() — that function is the only writer of the field');
       }
       const hooks = [
-        [/const pmGoal=e\.target\.closest\('\[data-pm-goal\]'\);\s*if\(pmGoal\)\{ teacherSetPmWeekGoal\(pmGoal\.dataset\.week, pmGoal\.value\); return; \}/, "the shell's 'change' handler must save the goal box: teacherSetPmWeekGoal(pmGoal.dataset.week, pmGoal.value)"],
+        [/const pmGoal=e\.target\.closest\('\[data-pm-goal\]'\);\s*if\(pmGoal\)\{ if\(pmGoal\.isConnected\) teacherSetPmWeekGoal\(pmGoal\.dataset\.week, pmGoal\.value\); return; \}/, "the shell's 'change' handler must save the goal box, and only a box still on screen: if(pmGoal.isConnected) teacherSetPmWeekGoal(pmGoal.dataset.week, pmGoal.value)"],
+        [/else if\(e\.key==='Escape'\)\{ e\.preventDefault\(\); pmGoalBox\.value=pmGoalBox\.defaultValue; pmGoalBox\.blur\(\); \}/, "the shell's 'keydown' handler must put the saved value back on Escape (pmGoalBox.value=pmGoalBox.defaultValue) before it blurs, so no change is saved"],
+        [/function renderTeacherMinutes\(force\)\{[\s\S]*?if\(!force && typing && typeof typing\.matches==='function' && typing\.matches\('\[data-pm-goal\]'\) && typing\.value!==typing\.defaultValue\) return;/, 'renderTeacherMinutes(force): an unforced repaint must not paint away a half-typed goal (the focused box with unsaved text); only the goal box\'s own writer paints with force'],
         [/const pmGoalBox=e\.target\.closest\('\[data-pm-goal\]'\);\s*if\(pmGoalBox\)\{\s*if\(e\.key==='Enter'\)\{ e\.preventDefault\(\); pmGoalBox\.blur\(\); \}/, "the shell's 'keydown' handler must blur the goal box on Enter (that is what fires the save)"],
         [/\bflat=Math\.round\(c\.weeklyGoalMinutes\), own=calc\.weekGoalOf\(c, weekId\);/, 'teacherPmGoalBoxHtml(): the box\'s default number must come from the settings (flat = Math.round(c.weeklyGoalMinutes)), and the override from the engine (calc.weekGoalOf)'],
         [/placeholder="\$\{flat\}" value="\$\{own===null\?'':own\}" data-pm-goal data-week=/, 'teacherPmGoalBoxHtml(): blank = the normal goal — placeholder is the flat goal and the value is empty unless this week has an override'],

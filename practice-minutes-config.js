@@ -23,8 +23,9 @@ var PRACTICE_MINUTES_CONFIG = {
      both together.) */
   uiOn: true,
 
-  /* The weekly goal, in minutes. It is FLAT: the same number in every counted
-     week, for every student, whichever days they practise. (There is no
+  /* The weekly goal, in minutes. It is the same number in every counted week,
+     for every student, whichever days they practise, unless the console sets
+     another goal for ONE week (see "ONE WEEK ONLY" below). (There is no
      per-section schedule and no proration.) 60 since 2026-11-04 (30 before):
      with the 20-minute daily cap a week needs at least 3 days to reach it.
      checks.mjs 1cg fails a goal above 7 x dailyCapMinutes; tools/pm-sim.mjs

@@ -699,6 +699,42 @@ await shot('16-top5-phone-390-en');
 await send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false });
 await sleep(500);
 
+/* ── This week's goal (2026-11-09): the console sets another goal, or 0 = a break, for ONE week; the student's page hands the map to the
+   engine (PM.setWeekGoals) and everything a student sees reads it: the strip's "N/goal min" and ring, the My progress tile, the hit state.
+   Wed 2026-11-18 (week 2026-W47), 20 minutes in, two hit weeks behind (streak 2). A screenshot of each state to LOOK at. ── */
+console.log('this week\'s goal');
+await ev(`setLang('en'); PM.setWeekGoals(undefined)`);
+check('the clock moved to Wednesday 2026-11-18 (week 2026-W47)', await shiftClock('2026-11-18T10:00:00') === '2026-11-18' && await ev(`PM.calc.weekIdOf(PM.calc.ymd(new Date()))`) === '2026-W47');
+const goalCase = async (name, goals, weekMin, lang = 'en') => {
+  await ev(`PM.setWeekGoals(${JSON.stringify(goals)})`);
+  const tiles = await tilesAt(weekMin, 0, [3700, 3700], lang);
+  await ev(`PM.syncHeader(true); PM.refreshStrip(true); location.hash = '#my-progress'`); await sleep(500);
+  await ev(`document.getElementById('pm-progress').scrollIntoView({block:'start'})`); await sleep(250);
+  const r = await ev(`(() => { const h = document.getElementById('pm-header'), fg = h.querySelector('.pm-ring-fg'), cs = fg ? getComputedStyle(fg) : null;
+    return { strip: h.innerText.replace(/\\s+/g, ' ').trim().replace(/ TOP 5$/, ''), ring: cs && cs.stroke, dash: cs && parseFloat(cs.strokeDashoffset), overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth, barH: Math.round(document.querySelector('.header').getBoundingClientRect().height) }; })()`);
+  await shot(name);
+  return { tiles, ...r };
+};
+const BLUE = 'rgb(90, 169, 255)', YELLOW = 'rgb(255, 201, 60)', CIRC = 2 * Math.PI * 7;
+const g60 = await goalCase('g1-week-goal-60-en', undefined, 20);
+check('no override: the strip says "20/60 min 2" with a blue ring 20/60 full; My progress says "20 of 60 min", "40 more keeps your streak"', g60.strip === '20/60 min 2' && g60.ring === BLUE && Math.abs(g60.dash - CIRC * (1 - 20 / 60)) < 0.5 && /20 of 60 min 40 more keeps your streak$/.test(g60.tiles[0]), g60);
+const g30 = await goalCase('g2-week-goal-30-en', { '2026-W47': 30 }, 20);
+check('this week set to 30: the strip says "20/30 min 2", the ring is 20/30 full, My progress says "20 of 30 min", "10 more keeps your streak"', g30.strip === '20/30 min 2' && g30.ring === BLUE && Math.abs(g30.dash - CIRC * (1 - 20 / 30)) < 0.5 && /20 of 30 min 10 more keeps your streak$/.test(g30.tiles[0]), g30);
+const g30hit = await goalCase('g3-week-goal-30-hit-en', { '2026-W47': 30 }, 30);
+check('30 minutes against a goal of 30: the week is HIT: "30/30 min 3" (the streak counts it), yellow ring, My progress says "Week goal hit"', g30hit.strip === '30/30 min 3' && g30hit.ring === YELLOW && /30 of 30 min Week goal hit$/.test(g30hit.tiles[0]), g30hit);
+const g30up = await goalCase('g4-week-goal-raised-to-60-en', { '2026-W47': 60 }, 30);
+check('the teacher then RAISES it to 60: the week is not hit any more ("30/60 min 2", blue ring, "30 more keeps your streak")', g30up.strip === '30/60 min 2' && g30up.ring === BLUE && /30 of 60 min 30 more keeps your streak$/.test(g30up.tiles[0]), g30up);
+const g0 = await goalCase('g5-week-goal-0-break-en', { '2026-W47': 0 }, 20);
+check('this week set to 0 (a break): the strip shows "20 min" with no goal, My progress says "Break week: no goal", and the streak is untouched (2)', /^20 min 2$/.test(g0.strip) && /20 min Break week: no goal$/.test(g0.tiles[0]) && !/ of /.test(g0.tiles[0]), g0);
+const gEs = await goalCase('g6-week-goal-30-es', { '2026-W47': 30 }, 20, 'es');
+check('Spanish, this week set to 30: the strip says "20/30 min 2" and My progress "20 de 30 min"', gEs.strip === '20/30 min 2' && /20 de 30 min/.test(gEs.tiles[0]), gEs);
+const gNext = await goalCase('g7-week-goal-next-week-en', { '2026-W48': 5, '2026-W46': 5 }, 20);
+check('a goal set for NEXT week (or a past one) changes nothing this week: still "20/60 min 2"', gNext.strip === '20/60 min 2' && /20 of 60 min/.test(gNext.tiles[0]), gNext);
+check('with a goal of 30 the top bar stays ONE row (≤ 56px), nothing scrolls sideways, in English and Spanish', g30.barH <= 56 && gEs.barH <= 56 && !g30.overflow && !gEs.overflow && !g0.overflow, [g30.barH, gEs.barH, g30.overflow, gEs.overflow, g0.overflow]);
+await ev(`PM.setWeekGoals(undefined); setLang('en')`);
+check('clearing the map puts the flat goal back: "20/60 min 2" again', (await goalCase('g8-week-goal-cleared-en', undefined, 20)).strip === '20/60 min 2');
+check('the hand-in is kept on this device (localStorage pm:wg) and a bad entry is dropped: {2026-W47: 30, junk: 5, 2026-W48: 999} keeps only week 47', await ev(`(() => { PM.setWeekGoals({ '2026-W47': 30, junk: 5, '2026-W48': 999 }); const k = JSON.parse(localStorage.getItem('pm:wg')); PM.setWeekGoals(undefined); return JSON.stringify(k); })()`) === '{"2026-W47":30}');
+
 /* ── ?teacher: the console never shows the strip (PM_HOST.user() is null there). Real host, no fake. ── */
 console.log('?teacher');
 await send('Page.navigate', { url: `http://127.0.0.1:${port}/index.html?teacher` });

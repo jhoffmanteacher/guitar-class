@@ -1338,7 +1338,7 @@ body.rail-collapsed .rail-tools .tool-popup{
 .pm-t-goal-in:hover:not(:disabled){border-color:var(--blue-text)}
 .pm-t-goal-in:focus-visible{outline:2px solid var(--blue-text);outline-offset:1px}
 .pm-t-goal-in:disabled{opacity:0.6;cursor:default}
-.pm-t-goal-off{width:15em;text-align:left;opacity:1;color:var(--text2)}
+.pm-t-goal-in.pm-t-goal-off:disabled{width:15em;text-align:left;opacity:1;color:var(--text2)}
 .pm-t-goal-state{font-size:0.8125rem;color:var(--text2)}
 .pm-t-goal-state.ok{color:var(--green-text)}
 .pm-t-goal-state.err{color:var(--red-text)}

@@ -354,6 +354,16 @@ async function main() {
         if (b.value !== '30' || b.ph !== '60' || !/30 minutes, set for this week only \(usually 60\)/.test(b.foot)) fail('goalbox', 'after saving 30: ' + JSON.stringify([b.value, b.ph, b.foot.slice(0, 140)]));
         if (!/0 \/ 30 min/.test(b.table)) fail('goalbox', 'the table still judges this week by 60: ' + JSON.stringify(b.table.slice(0, 160)));
         await shot('08-minutes-goal-30-1366x657');
+        // Half-typed text survives a repaint (a load finishing, a tab return) and Escape puts the saved 30 back and writes nothing.
+        const vEsc = await version();
+        await js(`(() => { const i = document.querySelector('[data-pm-goal]'); i.focus(); i.select(); return true; })()`);
+        await page.send('Input.insertText', { text: '45' });
+        await js(`renderTeacherMinutes()`);
+        const typed = await js(`(() => { const i = document.querySelector('[data-pm-goal]'); return { v: i.value, focus: document.activeElement === i }; })()`);
+        if (typed.v !== '45' || !typed.focus) fail('goalbox', 'a repaint while typing ate the half-typed value: ' + JSON.stringify(typed));
+        await key('Escape', 'Escape', 27);
+        const esc = await js(`(() => { const i = document.querySelector('[data-pm-goal]'); return { v: i.value, focus: document.activeElement === i }; })()`);
+        if (esc.v !== '30' || (await version()) !== vEsc || (await cell()) !== 30) fail('goalbox', 'Escape must put the saved 30 back and write nothing: ' + JSON.stringify([esc, await version(), await cell()]));
         // A reload: the doc comes back from the stub's config/class and the box shows what was saved.
         const keep = await js(`JSON.stringify(__store.get('config/class'))`);
         await bootConsole(keep); await size(1366, 657); await fakeDay(2026, 10, 18); await openMinutes();

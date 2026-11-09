@@ -2150,14 +2150,14 @@ console.log('20. the console\'s This week\'s goal box (teacher.js teacherSetPmWe
   if (Object.values(parts).every(Boolean)) {
     const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     /* A console at a fixed moment (nowMs), with the engine of a world configured by `config`; `cfgInit` is what the one read of the class settings returned. */
-    function consoleAt(nowMs, { config, cfgInit = {}, fail = null } = {}) {
+    function consoleAt(nowMs, { config, cfgInit = {}, fail = null, readOk = true } = {}) {
       const world = makeWorld({ config });
-      const env = { writes: [], renders: [], saveFailed: [], notes: [] };
+      const env = { writes: [], renders: [], forced: [], saveFailed: [], notes: [] };
       class FakeD extends Date { constructor(...a) { if (a.length) super(...a); else super(nowMs); } static now() { return nowMs; } }
       const teacherClassConfig = JSON.parse(JSON.stringify(cfgInit));
       const make = new Function('PM', 'window', 'escHtml', 'escAttr', 'firebase', 'ensureDb', 'teacherWriteConfig', 'teacherConfigSaveFailed', 'env', 'teacherClassConfig', 'Date',
-        `let teacherPmGoalNote = null; let teacherView = 'minutes';
-         const renderTeacherMinutes = () => { env.renders.push(teacherPmGoalNote ? teacherPmGoalNote.kind : null); };
+        `let teacherPmGoalNote = null; let teacherView = 'minutes'; let teacherClassConfigReadOk = ${readOk};
+         const renderTeacherMinutes = (force) => { env.renders.push(teacherPmGoalNote ? teacherPmGoalNote.kind : null); env.forced.push(!!force); };
          ${parts.cfg}${parts.phrase}${parts.box}${parts.write}${parts.compute}
          return { write: teacherSetPmWeekGoal, box: teacherPmGoalBoxHtml, phrase: teacherPmGoalPhrase, cfg: teacherPmCfg, compute: teacherPmCompute, note: () => teacherPmGoalNote, setNote: (n) => { teacherPmGoalNote = n; } };`);
       const firebaseStub = { firestore: { FieldValue: { delete: () => ({ __del: true }) } } };
@@ -2211,6 +2211,21 @@ console.log('20. the console\'s This week\'s goal box (teacher.js teacherSetPmWe
       const k10 = consoleAt(MON, { config: { dailyCapMinutes: 10 } });
       await k10.api.write(W, '71'); await k10.api.write(W, '70');
       check('the largest value comes from the engine\'s cap, not a constant: with a 10-minute daily cap 71 is refused and 70 written', k10.env.writes.length === 1 && k10.env.writes[0].patch.pmWeekGoals[W] === 70 && /0 to 70/.test(consoleAt(MON, { config: { dailyCapMinutes: 10 } }).api.box(consoleAt(MON, { config: { dailyCapMinutes: 10 } }).api.cfg(), W, k10.calc, { week: W, kind: 'bad' })));
+    }
+
+    /* 2b. The 2026-11-09 review. A failed read of the class settings leaves a copy that is {} with version 0: nothing may be written from it. */
+    {
+      const bad = consoleAt(MON, { cfgInit: { pmWeekGoals: { [W]: 30 } }, readOk: false });
+      await bad.api.write(W, '45'); await bad.api.write(W, ''); await bad.api.write(W, '0');
+      check('after a FAILED read of the class settings the box writes nothing at all (a type, a clear, a 0) and only repaints, forced — it would have been refused as "another tab", or a clear would have done nothing and said nothing', bad.env.writes.length === 0 && bad.env.saveFailed.length === 0 && bad.env.renders.length === 3 && bad.env.forced.every(Boolean), JSON.stringify([bad.env.writes.length, bad.env.renders, bad.env.forced]));
+      const k = consoleAt(MON);
+      await k.api.write(W, '30'); await k.api.write(W, 'abc'); await k.api.write('2026-W46', '5'); await k.api.write(W, '30');
+      check('every repaint the box\'s own writer makes is FORCED (it is the answer to the box being committed); the view\'s other repaints are not', k.env.renders.length >= 4 && k.env.forced.every(Boolean), JSON.stringify(k.env.forced));
+      const html = (note, over) => { const c = consoleAt(MON, { cfgInit: over === undefined ? {} : { pmWeekGoals: { [W]: over } } }); return c.api.box(c.api.cfg(), W, c.calc, note); };
+      check('"Saved" is said only while the box still holds what was saved: shown when the cell is still 30; NOT shown when another console cleared it (cell absent) or set it to 0; shown for a saved 0 and for a saved clear', /Saved/.test(html({ week: W, kind: 'saved', value: 30 }, 30)) && !/Saved/.test(html({ week: W, kind: 'saved', value: 30 }, undefined)) && !/Saved/.test(html({ week: W, kind: 'saved', value: 30 }, 0)) && /Saved/.test(html({ week: W, kind: 'saved', value: 0 }, 0)) && /Saved/.test(html({ week: W, kind: 'saved', value: null }, undefined)) && !/Saved/.test(html({ week: W, kind: 'saved', value: null }, 30)));
+      check('…a "Not saved." and a "bad entry" note are shown whatever the cell holds (they are about the attempt)', /Not saved/.test(html({ week: W, kind: 'failed' }, 30)) && /whole number/.test(html({ week: W, kind: 'bad' }, undefined)));
+      const sv = consoleAt(MON); await sv.api.write(W, '30'); await sv.api.write(W, '');
+      check('the writer\'s "Saved" note carries the value it saved (30, then null for a clear) so the box can tell whether it is still true', sv.api.note().kind === 'saved' && sv.api.note().value === null);
     }
 
     /* 3. Failure rolls back; a stale week and a config break write nothing. */
@@ -2269,6 +2284,108 @@ console.log('20. the console\'s This week\'s goal box (teacher.js teacherSetPmWe
       check('…and without the overrides the same minutes are NOT this week\'s hit (1800 of 3600), so the box is what changes the table', !flat.a.status.week.hit && flat.a.status.week.goal === 3600);
       check('the console and a student page name the same week: weekIdOf of the same local day', k.calc.weekIdOf('2026-11-16') === student.PM.calc.weekIdOf('2026-11-16') && k.calc.weekIdOf('2026-11-22') === W && k.calc.weekIdOf('2026-11-23') === '2026-W48');
     }
+  }
+}
+
+/* ═══════════ 21. A goal that changes while the page is open (2026-11-09 review) ═══════════
+   Before pmWeekGoals a goal could not move under an open page. Three things a change must do, each broken in a scratch copy and seen red. */
+console.log('21. a goal that changes while the page is open');
+{
+  /* 1. The strip follows setWeekGoals() at once, not at the next tick. */
+  const w = makeWorld({ ui: true, config: { uiOn: true }, strip: true });
+  w.PM.syncHeader(true);
+  const wk = w.PM.status().week.id;
+  const a = w.track(); a.play(); await w.run(600, w.playing(a)); a.pause(); await w.run(3, w.playing(a));
+  const before = w.stripEl.innerHTML;
+  w.PM.setWeekGoals({ [wk]: 30 });
+  const after = w.stripEl.innerHTML;
+  check('setWeekGoals() repaints the strip at once (no tick in between): the ring after 10 minutes changes when this week\'s goal goes 60 → 30', !!before && !!after && before !== after, before.length + ' / ' + after.length);
+}
+{
+  /* 2. A goal hit that was held back (the strip covered) and then taken away is not toasted. A later real crossing still is, once. */
+  const opts = { ui: true, config: { uiOn: true }, strip: true, pills: false };
+  const w = makeWorld(opts);
+  w.PM.syncHeader(true);
+  const wk = w.PM.status().week.id;
+  w.PM.setWeekGoals({ [wk]: 30 });
+  const a = w.track(); a.play(); await w.run(19 * 60, w.playing(a)); a.pause(); await w.run(3, w.playing(a));
+  w.clock.ms += 24 * 3600 * 1000; w.clock.perf += 24 * 3600 * 1000;           // a second day: the 20-minute cap is per day
+  a.play(); await w.run(12 * 60, w.playing(a)); a.pause(); await w.run(3, w.playing(a));
+  const held = w.PM._state().pendingToast;
+  w.PM.setWeekGoals({ [wk]: 60 });                                          // the teacher raises it before the held toast could show
+  opts.pills = true;                                                        // the strip is on screen again
+  await w.run(3);
+  const toasts = () => w.pills().filter((p) => p.id === 'pm-toast' && !/top5/.test(p.className));
+  check('a held "week goal hit" toast is DROPPED when the goal was raised before it showed (the ring says not hit, so the pill must not say hit); it was queued first', held === wk && toasts().length === 0 && !w.PM.status().week.hit && w.PM._state().pendingToast === false, JSON.stringify({ held, pills: toasts().length, week: w.PM.status().week }));
+  check('…and the week is NOT stamped as toasted, so a real crossing later still toasts once', w.PM._state().toastWeek !== wk);
+  w.PM.setWeekGoals({ [wk]: 31 });                                          // lowered again, a minute past what the student has (31 min counted over two days)
+  const st = w.PM.status().week;
+  check('…lowered again to a goal the student already has, it shows as hit with no pill (owner decision: a toast only when a counted second crosses the goal)', st.hit && toasts().length === 0, JSON.stringify(st));
+}
+{
+  /* 3. Owner decision (2026-11-09): lowering a goal below what the student already has gives NO toast, even on their next counted seconds. */
+  const w = makeWorld({ ui: true, config: { uiOn: true, recapMinSeconds: 1e9 }, strip: true, pills: true });
+  w.PM.syncHeader(true);
+  const wk = w.PM.status().week.id;
+  const a = w.track(); a.play(); await w.run(15 * 60, w.playing(a)); a.pause(); await w.run(3, w.playing(a));
+  w.PM.setWeekGoals({ [wk]: 10 });                                          // lowered below the 15 minutes already counted
+  a.play(); await w.run(90, w.playing(a)); a.pause(); await w.run(3, w.playing(a));
+  check('a goal lowered below what the student has: more counted seconds give NO toast, nothing queued, the week shows as hit', !w.pills().some((p) => p.id === 'pm-toast') && w.PM._state().pendingToast === false && w.PM._state().toastWeek !== wk && w.PM.status().week.hit);
+}
+
+/* ═══════════ 22. The Practice minutes view as drawn (teacher.js renderTeacherMinutes, 2026-11-09 review) ═══════════
+   The REAL renderTeacherMinutes, teacherPmRowCells, teacherPmCompute and the goal-box helpers, with the view's state stubbed. The 2026-11-09
+   review deleted the failed-read gate, the box gate and the typing guard in scratch copies and every check stayed green: these run them. */
+console.log('22. the Practice minutes view as drawn (teacher.js renderTeacherMinutes)');
+{
+  const T = readFileSync(join(ROOT, 'teacher.js'), 'utf8').replace(/\r\n/g, '\n');
+  const grab = (re) => { const m = re.exec(T); return m ? m[0] : null; };
+  const parts = {
+    cfg: grab(/\nfunction teacherPmCfg\(\)\{[\s\S]*?\n}\n/), phrase: grab(/\nfunction teacherPmGoalPhrase\([\s\S]*?\n}\n/), box: grab(/\nfunction teacherPmGoalBoxHtml\([\s\S]*?\n}\n/),
+    compute: grab(/\nfunction teacherPmCompute\([\s\S]*?\n}\n/), cells: grab(/\nfunction teacherPmRowCells\(r\)\{[\s\S]*?\n}\n/), render: grab(/\nfunction renderTeacherMinutes\(force\)\{[\s\S]*?\n}\n/),
+  };
+  check('teacher.js has renderTeacherMinutes(force) and the helpers it draws with', Object.values(parts).every(Boolean), Object.keys(parts).filter((k) => !parts[k]).join());
+  if (Object.values(parts).every(Boolean)) {
+    const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    const MON = new Date(2026, 10, 16, 9, 0, 0).getTime(), W = '2026-W47';
+    function view({ readOk = true, data = true, loading = false, goals = {}, active = null, pm = null, error = '' } = {}) {
+      const world = makeWorld();
+      class FakeD extends Date { constructor(...a) { if (a.length) super(...a); else super(MON); } static now() { return MON; } }
+      const box = { innerHTML: 'KEEP' };
+      const doc = { getElementById: (id) => (id === 't-grid-container' ? box : null), activeElement: active };
+      const students = [{ uid: 'u1', name: 'Ana Test', period: '4' }, { uid: 'u2', name: 'Ben Test', period: '7' }];
+      const env = { loads: 0, loading, readOk, error, data: data ? { at: MON, weeks: { u1: { [W]: 600 }, u2: {} } } : null, cfg: { pmWeekGoals: goals }, students };
+      const make = new Function('PM', 'window', 'document', 'Date', 'escHtml', 'escAttr', 'env',
+        `let teacherStudentsAt = 1, teacherRefreshFailed = false, teacherPmLoading = env.loading, teacherPmError = env.error, teacherPmData = env.data, teacherPmSort = 'week';
+         let teacherClassConfigReadOk = env.readOk, teacherClassConfig = env.cfg, teacherPmGoalNote = null; const allStudents = env.students;
+         const teacherPmRoster = () => env.students, teacherPmIsTeacher = () => false, teacherStudentPeriod = (s) => s.period, teacherPmPeriod = (s) => s.period, teacherLoadMinutes = () => { env.loads++; };
+         ${parts.cfg}${parts.phrase}${parts.box}${parts.compute}${parts.cells}${parts.render}
+         return { render: renderTeacherMinutes };`);
+      const PM = pm || world.PM;
+      const api = make(PM, { PM }, doc, FakeD, esc, esc, env);
+      return { api, box, env };
+    }
+    const full = view(), v = full.api.render() || full.box.innerHTML;
+    check('the view as drawn with its settings read: the box (blank, placeholder 60), the table with both students at "10 / 60 min" and "0 / 60 min", the footnote "The goal this week: 60 minutes."', /data-pm-goal/.test(full.box.innerHTML) && /pm-t-table/.test(full.box.innerHTML) && /Ana Test/.test(full.box.innerHTML) && /10 \/ 60 min/.test(full.box.innerHTML) && /0 \/ 60 min/.test(full.box.innerHTML) && /The goal this week: 60 minutes\./.test(full.box.innerHTML) && full.env.loads === 0, full.box.innerHTML.slice(0, 300));
+    const g30 = view({ goals: { [W]: 30 } }); g30.api.render();
+    check('with this week set to 30 the SAME drawn table reads "10 / 30 min" and the footnote says "30 minutes, set for this week only (usually 60)", the box value is 30', /10 \/ 30 min/.test(g30.box.innerHTML) && /30 minutes, set for this week only \(usually 60\)/.test(g30.box.innerHTML) && /value="30"/.test(g30.box.innerHTML) && !/10 \/ 60 min/.test(g30.box.innerHTML));
+    const failed = view({ readOk: false }); failed.api.render();
+    check('the class settings could not be read: NO table, NO goal box, and the line says so (a table drawn with the flat goal would be a confident wrong answer)', /data-pm-settings-failed/.test(failed.box.innerHTML) && /Could not read the class settings/.test(failed.box.innerHTML) && !/pm-t-table/.test(failed.box.innerHTML) && !/data-pm-goal/.test(failed.box.innerHTML), failed.box.innerHTML.slice(0, 300));
+    const failedLoading = view({ readOk: false, loading: true }); failedLoading.api.render();
+    check('…while a Refresh is out it says "Reading the class settings…" instead of telling the teacher to press Refresh', /Reading the class settings…/.test(failedLoading.box.innerHTML) && !/Press Refresh/.test(failedLoading.box.innerHTML));
+    const noData = view({ data: false, loading: true }); noData.api.render();
+    const noDataBad = view({ data: false, loading: true, readOk: false }); noDataBad.api.render();
+    check('first load (no minutes yet): the box is already there when the settings were read, and not when they were not; neither draws a table', /data-pm-goal/.test(noData.box.innerHTML) && !/pm-t-table/.test(noData.box.innerHTML) && !/data-pm-goal/.test(noDataBad.box.innerHTML));
+    const typing = { matches: (s) => s === '[data-pm-goal]', value: '4', defaultValue: '' };
+    const t1 = view({ active: typing }); t1.api.render();
+    const t2 = view({ active: typing }); t2.api.render(true);
+    const t3 = view({ active: { ...typing, value: '' } }); t3.api.render();
+    const t4 = view({ active: { matches: () => false, value: 'x', defaultValue: '' } }); t4.api.render();
+    check('a half-typed goal is not painted away: an ordinary repaint leaves the view alone while the box has focus and unsaved text; a FORCED one (the box\'s own writer) paints; an untouched box or another field does not hold a repaint back', t1.box.innerHTML === 'KEEP' && t2.box.innerHTML !== 'KEEP' && t3.box.innerHTML !== 'KEEP' && t4.box.innerHTML !== 'KEEP');
+    const world2 = makeWorld(), oldPM = { calc: { rankPlace: world2.PM.calc.rankPlace }, cfg: world2.PM.cfg };
+    const old = view({ pm: oldPM }); let oldErr = '';
+    try { old.api.render(); } catch (e) { oldErr = e.message; }   // a throw is a red line here, not a crash of the whole simulation
+    check('an older engine on the page (no cleanWeekGoals / weekGoalOf / maxWeekGoalMinutes) draws "did not load, Reload" instead of throwing half way', !oldErr && /did not load on this page/.test(old.box.innerHTML) && !/pm-t-table/.test(old.box.innerHTML), oldErr);
   }
 }
 

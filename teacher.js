@@ -356,7 +356,7 @@ async function showTeacherApp(user){
       if(openSel){ teacherSetStudentOpenThrough(openSel.dataset.uid, openSel.value); return; }
       // Practice minutes: "This week's goal (minutes)" saves when Enter blurs the box or it is left.
       const pmGoal=e.target.closest('[data-pm-goal]');
-      if(pmGoal){ teacherSetPmWeekGoal(pmGoal.dataset.week, pmGoal.value); return; }
+      if(pmGoal){ if(pmGoal.isConnected) teacherSetPmWeekGoal(pmGoal.dataset.week, pmGoal.value); return; }   // a box a repaint removed saves nothing, like the release-date box
       const whoBox=e.target.closest('[data-set-activity-student]');
       if(whoBox){ teacherSetActivityStudent(whoBox.dataset.id, whoBox.dataset.uid, whoBox.checked); return; }
     });
@@ -6691,7 +6691,9 @@ function teacherPmGoalBoxHtml(c, weekId, calc, note){
   const mon=calc.weekMonday(weekId), sun=calc.addDays(mon, 6);
   const fmt=d=>d.toLocaleDateString([], {weekday:'short', month:'short', day:'numeric'});
   const noteText={saving:'Saving…', saved:'Saved', bad:`Use a whole number from 0 to ${max}, or leave the box blank.`, failed:'Not saved.', newweek:'A new week started, so the box now shows the new week.'};
-  const note1=note && note.week===weekId && noteText[note.kind] ? `<span class="pm-t-goal-state ${note.kind==='saved'?'ok':note.kind==='bad'||note.kind==='failed'?'err':''}" role="status">${escHtml(noteText[note.kind])}</span>` : '<span class="pm-t-goal-state" role="status"></span>';
+  // "Saved" is said only while the box still holds what was saved: another console may have changed or cleared it since.
+  const shown=note && note.week===weekId && noteText[note.kind] && (note.kind!=='saved' || note.value===(own===null?null:own));
+  const note1=shown ? `<span class="pm-t-goal-state ${note.kind==='saved'?'ok':note.kind==='bad'||note.kind==='failed'?'err':''}" role="status">${escHtml(noteText[note.kind])}</span>` : '<span class="pm-t-goal-state" role="status"></span>';
   const control = calc.skipSet(c)[weekId]
     ? `<input type="text" class="pm-t-goal-in pm-t-goal-off" id="pm-t-goal-in" value="Break week (set in config)" disabled>`
     : `<input type="text" class="pm-t-goal-in" id="pm-t-goal-in" inputmode="numeric" maxlength="3" autocomplete="off" placeholder="${flat}" value="${own===null?'':own}" data-pm-goal data-week="${escAttr(weekId)}"${note && note.week===weekId && note.kind==='saving' ? ' disabled' : ''}>`;   // switched off while its own save is out: no second edit on top of it
@@ -6711,6 +6713,7 @@ async function teacherLoadMinutes(){
   const gen=++teacherPmGen;
   const roster=teacherPmRoster();
   teacherPmLoading=true;
+  if(teacherPmGoalNote && teacherPmGoalNote.kind!=='saving') teacherPmGoalNote=null;   // "Saved" / "Not saved." belong to the moment they were said
   if(teacherView==='minutes') renderTeacherMinutes();
   // The class settings are read with the weeks, once per open / Refresh (this week's goal lives there). Its answer is awaited below.
   const settingsRead=loadTeacherClassConfig();
@@ -6774,10 +6777,16 @@ function teacherPmRowCells(r){
   const top5 = !r.top5 ? '' : r.top5.under ? '<span title="Under the Top 5 minimum this week">—</span>' : r.top5.top ? `<span class="pm-t-top5">#${r.top5.n}</span>` : '';
   return `<td class="pm-t-num">${week}</td><td class="pm-t-num">${mins(r.last)} min</td><td class="pm-t-num">${r.status.streak} ${r.status.streak===1?'week':'weeks'}</td><td class="pm-t-num">${mins(r.all)} min</td><td class="pm-t-num">${rank}</td><td class="pm-t-num">${top5}</td>`;
 }
-function renderTeacherMinutes(){
+function renderTeacherMinutes(force){
   const box=document.getElementById('t-grid-container');
   if(!box) return;
-  if(!(window.PM && PM.calc && PM.calc.rankPlace)){ box.innerHTML='<div class="t-loading">Practice minutes did not load on this page. Reload to try again.</div>'; return; }
+  /* A half-typed goal is not painted away (2026-11-09 review): a load finishing, a tab return or a sort click repainted the whole view and
+     took the text with it. The box is committed by Enter or by leaving it ('change' -> a save -> a repaint made with force), so a repaint
+     waits for that. Only the goal box's own writer paints with force. */
+  const typing=document.activeElement;
+  if(!force && typing && typeof typing.matches==='function' && typing.matches('[data-pm-goal]') && typing.value!==typing.defaultValue) return;
+  // The engine on this page may be an older copy (practice-minutes.js is precached, teacher.js is not): every function the view calls must be there.
+  if(!(window.PM && PM.calc && PM.calc.rankPlace && PM.calc.cleanWeekGoals && PM.calc.weekGoalOf && PM.calc.maxWeekGoalMinutes)){ box.innerHTML='<div class="t-loading">Practice minutes did not load on this page. Reload to try again.</div>'; return; }
   // The student list is not in yet (the first progress read is out): nothing to read minutes for. loadAllStudents repaints this view.
   if(!teacherStudentsAt){ box.innerHTML=`<div class="t-loading">${teacherRefreshFailed?'Could not load the student list.':'Loading the student list…'}</div>`; return; }
   const roster=teacherPmRoster();
@@ -6847,18 +6856,22 @@ function teacherSetMinutesSort(v){
    from 0 to the engine's PM.calc.maxWeekGoalMinutes (7 x the daily cap); anything else writes nothing. 0 = a break week.
    The week is the one the box was drawn for (data-week); if a new week has started since, nothing is written. */
 async function teacherSetPmWeekGoal(weekId, raw){
-  if(!(window.PM && PM.calc && PM.calc.cleanWeekGoals) || !/^\d{4}-W\d{2}$/.test(String(weekId))) return;
+  if(!(window.PM && PM.calc && PM.calc.cleanWeekGoals && PM.calc.maxWeekGoalMinutes && PM.calc.weekIdOf && PM.calc.skipSet) || !/^\d{4}-W\d{2}$/.test(String(weekId))) return;
   const calc=PM.calc, c=PM.cfg(), max=calc.maxWeekGoalMinutes(c), thisWeek=calc.weekIdOf(calc.ymd(new Date()));
-  const note=(kind, week)=>{ teacherPmGoalNote={week:week||weekId, kind}; if(teacherView==='minutes') renderTeacherMinutes(); };
+  // Every repaint made here is forced: it is the box's own answer to what was just typed, and the typed box is the one being committed.
+  const note=(kind, week, value)=>{ teacherPmGoalNote={week:week||weekId, kind, value}; if(teacherView==='minutes') renderTeacherMinutes(true); };
   if(weekId!==thisWeek){ note('newweek', thisWeek); return; }
   if(calc.skipSet(c)[weekId]) return;   // a break set in the settings file: the box is switched off
+  /* The last read of the class settings failed (the copy is {}, its version 0): a write worked out from it would be refused as "another tab" or,
+     for a clear, do nothing and say nothing. The view is about to draw its "Could not read the class settings" line; the box is gone with it. */
+  if(!teacherClassConfigReadOk){ if(teacherView==='minutes') renderTeacherMinutes(true); return; }
   const text=String(raw==null?'':raw).trim(), clear=text==='';
   if(!clear && !(/^[0-9]{1,3}$/.test(text) && Number(text)<=max)){ note('bad'); return; }
   const n=clear ? undefined : Number(text);
   const cfg=teacherClassConfig;
   if(!cfg.pmWeekGoals || typeof cfg.pmWeekGoals!=='object' || Array.isArray(cfg.pmWeekGoals)) cfg.pmWeekGoals={};
   const had=Object.prototype.hasOwnProperty.call(cfg.pmWeekGoals, weekId), prev=cfg.pmWeekGoals[weekId];
-  if(clear ? !had : (had && prev===n)){ teacherPmGoalNote=null; if(teacherView==='minutes') renderTeacherMinutes(); return; }   // nothing to change
+  if(clear ? !had : (had && prev===n)){ teacherPmGoalNote=null; if(teacherView==='minutes') renderTeacherMinutes(true); return; }   // nothing to change
   if(clear) delete cfg.pmWeekGoals[weekId]; else cfg.pmWeekGoals[weekId]=n;
   note('saving');
   try{
@@ -6866,7 +6879,7 @@ async function teacherSetPmWeekGoal(weekId, raw){
     const fv=firebase.firestore.FieldValue;
     const patch = clear ? {pmWeekGoals:{[weekId]:fv.delete()}} : {pmWeekGoals:{[weekId]:n}};
     await teacherWriteConfig(patch, {['pmWeekGoals.'+weekId]: had?prev:undefined});
-    note('saved');
+    note('saved', weekId, clear ? null : n);
   }catch(e){
     const goals=teacherClassConfig.pmWeekGoals || (teacherClassConfig.pmWeekGoals={});
     if(had) goals[weekId]=prev; else delete goals[weekId];

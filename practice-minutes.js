@@ -1317,9 +1317,11 @@
     if(!st || !st.pendingToast || !uiOn()) return;
     var bar = anchorRect();
     if(!bar) return;          // the header strip is not on screen (paused screen, signed out): show it when it is
-    var w = st.pendingToast;
+    var w = st.pendingToast, s = status();
+    /* A goal hit that was held back (the strip was covered) and then taken away while it waited — the teacher raised this week's goal, or made the
+       week a break — is not a hit any more: drop it WITHOUT stamping the week, so a real crossing later still toasts once (2026-11-09 review). */
+    if(s.week.id === w && !s.week.hit){ st.pendingToast = false; return; }
     st.pendingToast = false; st.toastWeek = w; ls('pm:t:' + st.uid, w);
-    var s = status();
     dropToast(bar, '', FLAME + '<span>' + esc(s.streak >= 2 ? tr('pm.toastHit', { n: s.streak }) : tr('pm.toastHit1')) + '</span>');
   }
   /* The pill under the strip, shared by the week-goal toast and the Top 5 toast (one id: a new one replaces the old). */

@@ -315,12 +315,21 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
       the weeks (once per open / Refresh, `teacherLoadMinutes`); if that read fails the table is not drawn (its goals would be a
       confident wrong answer). The table and its footnote use `teacherPmCfg()` = engine settings + the map cleaned by
       `PM.calc.cleanWeekGoals`, through `teacherPmCompute` and `PM.calc.status`: one maths path.
-      **Checks:** pm-sim 302 → 372 assertions (section 19: the engine, validation, the hand-in and cache; section 20: the REAL console
-      functions cut out of `teacher.js` and run against the real engine, over inputs 0..1000, rollback, week guard, defaults,
-      console-equals-student) — each guard broken in a scratch copy and seen red (8 engine mutations, 12 console mutations, 11 static pins,
-      3 on the real-browser walk). `console-layout-smoke.mjs` types 30 + Enter with real keys, reloads, clears, sets 0, tries bad entries
-      and a config break week. Open: the My progress panel redraws only when opened (the strip repaints at once); a half-typed box is
-      lost if the view repaints under it (sort click, a Refresh finishing).
+      **Checks:** pm-sim 302 → 390 assertions (19: the engine, validation, the hand-in and cache; 20: the REAL console functions cut out
+      of `teacher.js` and run against the real engine, over inputs 0..1000, rollback, week guard, defaults, console-equals-student;
+      21: a goal that changes under an open page; 22: the REAL `renderTeacherMinutes` as drawn, failed-read gate included) — each guard
+      broken in a scratch copy and seen red. `console-layout-smoke.mjs` types 30 + Enter with real keys, reloads, clears, sets 0, tries
+      bad entries, Escape, a repaint while typing, and a config break week. `pm-e2e.mjs` has a "this week's goal" section (strip and My
+      progress at 60, 30, 30-hit, raised, 0, Spanish, next-week-only; screenshots g1..g8).
+      **Review (Always Reviewed, round 1 on `3664e1d`): `site-reviewer-deep` on the console write path, `site-reviewer` on the engine and the
+      student-side read — no BLOCKER or MAJOR from either.** Their MINORs, all fixed with a break-it proof and no second round (the rule): a
+      held "Week goal hit" toast is now dropped, without stamping the week, if the goal was raised or set to 0 while it waited; the box does
+      nothing after a failed read of the class settings (it would have been refused as "another tab", or a clear would have done nothing
+      silently); a half-typed goal is not painted away by an unforced repaint and a removed box saves nothing; "Saved" is said only while the
+      box still holds what was saved; the view guards against an older engine on the page; two sim tests the engine reviewer showed could be
+      deleted without a red line (strip repaints at once; a lowered goal gives no toast); the disabled "Break week (set in config)" box was
+      drawn at 60%. **Product note for Jonathan:** 140 (7 × the cap) is allowed on any day, so typing it on a Wednesday gives every student
+      the "You can't reach the goal this week" line. Open: the My progress panel redraws only when opened (the strip repaints at once).
 
 Detail lives in git log and `CHANGELOG.md`; entries keep what still binds.
 
