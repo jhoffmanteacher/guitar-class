@@ -2560,11 +2560,15 @@ function teacherSoftRepaintDetail(){
 function teacherRenderActivityScreen(screen, opts){
   const cached = !!(opts && opts.cached) && teacherClassConfigLoaded;
   const box=document.getElementById('t-grid-container');
+  /* A fresh read can carry another console's archive or un-archive of a
+     student: re-filter the roster from it, or the rows, the Students tab and
+     its roll keep counting the old cfg's roster until the minute refresh. */
+  const read=()=>loadTeacherClassConfig().then(cfg=>{ if(cfg) teacherApplyRosterFilter(); return cfg; });
   if(screen==='detail'){
     if(!box.querySelector(`[data-ta-head][data-id="${CSS.escape(activityDetailId)}"]`)) renderTeacherActivityDetail(activityDetailId);
     else teacherSoftRepaintDetail();
     teacherPaintSideTree();
-    if(!cached) loadTeacherClassConfig().then(cfg=>{ if(cfg && teacherView==='activities' && teacherActivityScreen()==='detail'){ teacherSoftRepaintDetail(); teacherPaintSideTree(); } });
+    if(!cached) read().then(cfg=>{ if(cfg && teacherView==='activities' && teacherActivityScreen()==='detail'){ teacherSoftRepaintDetail(); teacherPaintSideTree(); } });
     return;
   }
   if(!(window.CLASS_ACTIVITIES||[]).length){
@@ -2572,7 +2576,7 @@ function teacherRenderActivityScreen(screen, opts){
     return;
   }
   if(!cached && !box.querySelector('[data-ta-split]')) box.innerHTML='<div class="t-loading">Loading…</div>';
-  (cached ? Promise.resolve(teacherClassConfig) : loadTeacherClassConfig()).then(async cfg=>{
+  (cached ? Promise.resolve(teacherClassConfig) : read()).then(async cfg=>{
     if(teacherView!=='activities' || teacherActivityScreen()!=='split') return;   // switched away mid-flight
     if(!cfg) return;
     // First ever paint on a class with no board yet: the same one-time
