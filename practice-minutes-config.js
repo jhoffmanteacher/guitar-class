@@ -28,7 +28,11 @@ var PRACTICE_MINUTES_CONFIG = {
      per-section schedule and no proration.) 60 since 2026-11-04 (30 before):
      with the 20-minute daily cap a week needs at least 3 days to reach it.
      checks.mjs 1cg fails a goal above 7 x dailyCapMinutes; tools/pm-sim.mjs
-     and tools/pm-e2e.mjs pin this value: change them with it. */
+     and tools/pm-e2e.mjs pin this value: change them with it.
+     ONE WEEK ONLY (2026-11-09): the console's Practice minutes view has a "This week's
+     goal (minutes)" box. It sets another goal, or 0 for a break, for the current week
+     and nothing else; it is kept in config/class.pmWeekGoals, never in this file, and
+     the week after it this number applies again. A skipWeeks entry below beats it. */
   weeklyGoalMinutes: 60,
 
   /* The most minutes counted in one day. Playing past it does not count.

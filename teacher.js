@@ -354,6 +354,9 @@ async function showTeacherApp(user){
       if(sortSel){ teacherBoardSetSort(sortSel.value); return; }
       const openSel=e.target.closest('[data-set-open-through]');
       if(openSel){ teacherSetStudentOpenThrough(openSel.dataset.uid, openSel.value); return; }
+      // Practice minutes: "This week's goal (minutes)" saves when Enter blurs the box or it is left.
+      const pmGoal=e.target.closest('[data-pm-goal]');
+      if(pmGoal){ teacherSetPmWeekGoal(pmGoal.dataset.week, pmGoal.value); return; }
       const whoBox=e.target.closest('[data-set-activity-student]');
       if(whoBox){ teacherSetActivityStudent(whoBox.dataset.id, whoBox.dataset.uid, whoBox.checked); return; }
     });
@@ -439,6 +442,13 @@ async function showTeacherApp(user){
         if(e.key==='Enter'){ e.preventDefault(); teacherCommitActivityDate(dateBox); }
         else if(e.key==='Escape'){ dateBox.value=teacherSavedActivityDate(dateBox.dataset.id); delete dateBox.dataset.typing; }
         else if(/^\d$/.test(e.key) || ['Backspace','Delete','ArrowUp','ArrowDown','PageUp','PageDown','Home','End'].includes(e.key)) dateBox.dataset.typing='1';
+        return;
+      }
+      // The Practice minutes goal box: Enter blurs it (which fires the 'change' above), Escape puts the saved value back.
+      const pmGoalBox=e.target.closest('[data-pm-goal]');
+      if(pmGoalBox){
+        if(e.key==='Enter'){ e.preventDefault(); pmGoalBox.blur(); }
+        else if(e.key==='Escape'){ e.preventDefault(); pmGoalBox.value=pmGoalBox.defaultValue; pmGoalBox.blur(); }
         return;
       }
       // A number box isn't in a form either, so Enter has nothing to submit —
@@ -6658,6 +6668,36 @@ let teacherPmData=null;        // { at, weeks: { uid: { 'YYYY-Www': seconds } } 
 let teacherPmLoading=false;
 let teacherPmError='';         // '' | 'denied' (rules not published) | 'failed'
 let teacherPmGen=0;            // a newer read drops an older one
+let teacherPmGoalNote=null;    // { week, kind: 'saving'|'saved'|'bad'|'failed'|'newweek' } — the line beside the "This week's goal" box
+/* THIS WEEK'S GOAL (2026-11-09): the engine's settings plus the per-week goals the console holds (pmWeekGoals, from the one
+   read of the class settings that the view makes with the weeks). PM.cfg() carries the flat goal and the cap; the map is
+   cleaned by the engine's own PM.calc.cleanWeekGoals, so the table, the box and the student pages read one set of numbers. */
+function teacherPmCfg(){
+  const base=PM.cfg();
+  return Object.assign({}, base, {weekGoals: PM.calc.cleanWeekGoals(teacherClassConfig.pmWeekGoals, base)});
+}
+// The goal in words, for the table's footnote. Pure: (cfg with weekGoals, week id, PM.calc).
+function teacherPmGoalPhrase(c, weekId, calc){
+  const flat=Math.round(c.weeklyGoalMinutes), secs=calc.goalSeconds(c, weekId), own=calc.weekGoalOf(c, weekId);
+  if(calc.skipSet(c)[weekId] || secs===0) return 'none: this is a break week';
+  return own===null ? `${flat} minutes` : `${secs/60} minutes, set for this week only (usually ${flat})`;
+}
+/* The "This week's goal (minutes)" box. Pure: (cfg with weekGoals, the week it is for, PM.calc, the note to show).
+   Blank = the normal goal (its number is the placeholder); 0 = a break week; a week that skipWeeks already makes a break
+   in the settings file shows that and is switched off. A text box with inputmode numeric, not type=number: no spinner
+   arrows, so a value is saved once, on Enter or when the box is left, never once per click. */
+function teacherPmGoalBoxHtml(c, weekId, calc, note){
+  const max=calc.maxWeekGoalMinutes(c), flat=Math.round(c.weeklyGoalMinutes), own=calc.weekGoalOf(c, weekId);
+  const mon=calc.weekMonday(weekId), sun=calc.addDays(mon, 6);
+  const fmt=d=>d.toLocaleDateString([], {weekday:'short', month:'short', day:'numeric'});
+  const noteText={saving:'Saving…', saved:'Saved', bad:`Use a whole number from 0 to ${max}, or leave the box blank.`, failed:'Not saved.', newweek:'A new week started, so the box now shows the new week.'};
+  const note1=note && note.week===weekId && noteText[note.kind] ? `<span class="pm-t-goal-state ${note.kind==='saved'?'ok':note.kind==='bad'||note.kind==='failed'?'err':''}" role="status">${escHtml(noteText[note.kind])}</span>` : '<span class="pm-t-goal-state" role="status"></span>';
+  const control = calc.skipSet(c)[weekId]
+    ? `<input type="text" class="pm-t-goal-in pm-t-goal-off" id="pm-t-goal-in" value="Break week (set in config)" disabled>`
+    : `<input type="text" class="pm-t-goal-in" id="pm-t-goal-in" inputmode="numeric" maxlength="3" autocomplete="off" placeholder="${flat}" value="${own===null?'':own}" data-pm-goal data-week="${escAttr(weekId)}"${note && note.week===weekId && note.kind==='saving' ? ' disabled' : ''}>`;   // switched off while its own save is out: no second edit on top of it
+  return `<div class="pm-t-goal"><label class="tg-class-lbl" for="pm-t-goal-in">This week’s goal (minutes)</label>${control}${note1}`+
+    `<div class="tr-meta pm-t-goal-note">Week of ${escHtml(fmt(mon))} to ${escHtml(fmt(sun))}. Blank = ${flat}. 0 = break week. Goes back to ${flat} next Monday.</div></div>`;
+}
 function teacherPmIsTeacher(s){
   const me=(typeof currentUser!=='undefined'&&currentUser)||null;
   return (typeof TEACHER_EMAIL!=='undefined' && s.email===TEACHER_EMAIL) || !!(me && me.uid && s.uid===me.uid);
@@ -6672,6 +6712,8 @@ async function teacherLoadMinutes(){
   const roster=teacherPmRoster();
   teacherPmLoading=true;
   if(teacherView==='minutes') renderTeacherMinutes();
+  // The class settings are read with the weeks, once per open / Refresh (this week's goal lives there). Its answer is awaited below.
+  const settingsRead=loadTeacherClassConfig();
   const out={};
   let next=0, stop=false;
   const worker=async()=>{
@@ -6689,6 +6731,8 @@ async function teacherLoadMinutes(){
     if(!db) throw new Error('no db');
     await Promise.all(Array.from({length:Math.min(TEACHER_PM_CONCURRENCY, roster.length)}, ()=>worker().catch(e=>{ stop=true; throw e; })));
   }catch(e){ err=e; }
+  // A failed read is recorded as teacherClassConfigReadOk=false and never rejects; one that stalls gets the weeks read's ceiling and ends the load like a stalled weeks read (Refresh retries).
+  try{ await withTimeout(settingsRead, TEACHER_PM_READ_MS); }catch(e){ err=err||e; }
   if(gen!==teacherPmGen) return;
   teacherPmLoading=false;
   if(err){
@@ -6751,12 +6795,19 @@ function renderTeacherMinutes(){
     : teacherPmData ? `Practice minutes as of ${at}` : '';
   const head=`<div class="pm-t-bar"><span class="tg-class-lbl">Sort</span><div class="tg-seg">${seg('week','This week')}${seg('all','All time')}${seg('name','Name')}</div>`+
     `<button type="button" class="tg-seg-btn pm-t-refresh" data-pm-refresh ${teacherPmLoading?'disabled':''}>Refresh</button><span class="pm-t-when" data-pm-when>${escHtml(when)}</span></div>`;
+  /* This week's goal: the engine's settings with the goals set from this console. The box is for the CURRENT week (the one a student
+     is in now), shown whenever the class settings were read; the table works every week out with the same tc, so a week with its own
+     goal is judged by it and the others by the flat one, exactly as each student's own page does. */
+  const tc=teacherPmCfg(), nowWeek=PM.calc.weekIdOf(nowYmd);
+  const goalBox=teacherClassConfigReadOk ? teacherPmGoalBoxHtml(tc, nowWeek, PM.calc, teacherPmGoalNote) : '';
   // Refused with nothing read yet: the rules are not published. A refusal AFTER a good read keeps the table ("Could not refresh").
-  if(teacherPmError==='denied' && !teacherPmData){ box.innerHTML=head+'<div class="t-loading" data-pm-denied>Publish the new Firestore rules to see practice minutes (Firebase console → Firestore → Rules).</div>'; return; }
-  if(!teacherPmData){ box.innerHTML=head; return; }
+  if(teacherPmError==='denied' && !teacherPmData){ box.innerHTML=head+goalBox+'<div class="t-loading" data-pm-denied>Publish the new Firestore rules to see practice minutes (Firebase console → Firestore → Rules).</div>'; return; }
+  if(!teacherPmData){ box.innerHTML=head+goalBox; return; }
+  // Without the class settings the goal of this week is unknown, and the table's goals, hits and streaks would be a confident wrong answer.
+  if(!teacherClassConfigReadOk){ box.innerHTML=head+`<div class="t-loading" data-pm-settings-failed>${teacherPmLoading?'Reading the class settings…':'Could not read the class settings, so this week’s goal is not known and the table is not shown. Press Refresh to try again.'}</div>`; return; }
   const shown=allStudents.filter(s=>s&&s.uid&&!teacherPmIsTeacher(s)&&teacherPmData.weeks[s.uid]);
-  if(!shown.length){ box.innerHTML=head+'<div class="t-loading">No students to show.</div>'; return; }
-  const rows=teacherPmCompute(roster.filter(s=>teacherPmData.weeks[s.uid]).map(s=>({uid:s.uid, period:teacherPmPeriod(s)})), teacherPmData.weeks, PM.cfg(), PM.calc.ymd(atD), PM.calc);   // as of the read, like the stamp
+  if(!shown.length){ box.innerHTML=head+goalBox+'<div class="t-loading">No students to show.</div>'; return; }
+  const rows=teacherPmCompute(roster.filter(s=>teacherPmData.weeks[s.uid]).map(s=>({uid:s.uid, period:teacherPmPeriod(s)})), teacherPmData.weeks, tc, PM.calc.ymd(atD), PM.calc);   // as of the read, like the stamp
   const nameOf=s=>s.name||s.email||s.uid.slice(0,8)+'…';
   const byName=(a,b)=>nameOf(a).localeCompare(nameOf(b), undefined, {sensitivity:'base'});
   const perOf=s=>String(teacherStudentPeriod(s)||'');   // a string always: a period stored as the number 4 joins '4', not a group of its own
@@ -6776,15 +6827,52 @@ function renderTeacherMinutes(){
     const name=nameOf(stu), p=g;
     return `${groupRow}<tr data-pm-uid="${escAttr(stu.uid)}"><td class="tg-name" title="${escAttr(name)}">${escHtml(name)}</td><td class="tg-eff">${p?escHtml(p==='CAS'?'CAS':'P'+p):'—'}</td>${teacherPmRowCells(rows[stu.uid])}</tr>`;
   }).join('');
-  const c=PM.cfg();
-  box.innerHTML=head+
+  const c=tc, tableWeek=PM.calc.weekIdOf(PM.calc.ymd(atD));   // the week the table's "This week" column is: the read's own day
+  box.innerHTML=head+goalBox+
     `<div class="tg-grid-wrap" data-tview="minutes"><table class="tg-table pm-t-table"><thead><tr><th>Student</th><th>Period</th><th>This week</th><th>Last week</th><th>Streak</th><th>All time</th><th>Class rank</th><th>Top 5</th></tr></thead><tbody>${body}</tbody></table></div>`+
-    `<div class="tr-meta" style="margin-top:10px">This week: minutes / the ${Math.round(c.weeklyGoalMinutes)}-minute goal (Monday to Sunday); ✓ = goal hit; "break" = a week off, no goal. Class rank counts every student with at least 1 minute, whatever the period filter shows. Top 5 is inside the student's period, this week; "—" = under ${Math.round(+c.top5MinMinutes||0)} minutes this week. A student's own screen reads the rank from a board that can trail by a few minutes and counts only students who have opened the site since Nov 5, so their rank may differ slightly from this one. This one is the true number.</div>`;
+    `<div class="tr-meta" style="margin-top:10px">This week: minutes / goal (Monday to Sunday). The goal this week: ${escHtml(teacherPmGoalPhrase(c, tableWeek, PM.calc))}. ✓ = goal hit; "break" = a week off, no goal. Class rank counts every student with at least 1 minute, whatever the period filter shows. Top 5 is inside the student's period, this week; "—" = under ${Math.round(+c.top5MinMinutes||0)} minutes this week. A student's own screen reads the rank from a board that can trail by a few minutes and counts only students who have opened the site since Nov 5, so their rank may differ slightly from this one. This one is the true number.</div>`;
 }
 function teacherSetMinutesSort(v){
   if(v!=='week' && v!=='all' && v!=='name') return;
   teacherPmSort=v;
   if(teacherView==='minutes') renderTeacherMinutes();
+}
+/* THIS WEEK'S GOAL — the one write the Practice minutes view makes (2026-11-09; Jonathan: "the edit would be for the week only,
+   then the next week would reset back to 60"). It stays OUTSIDE the view's read-only block on purpose: checks.mjs 1cg bans any
+   write inside that block and allows this one function, by name, to write config/class.pmWeekGoals and nothing else.
+   One cell, { pmWeekGoals: { '2026-W46': 30 } }, written through teacherWriteConfig() CELL-CHECKED on that cell (the same shape as
+   teacherSetStudentPeriod): another console's unrelated edit goes through, a change to this week's goal made elsewhere refuses.
+   A blank box clears the cell with FieldValue.delete(), so config/class gets no row for a week that was never changed. Old weeks
+   stay in the map on purpose: they are what keeps a past streak judged by the goal that week had. The value is a whole number
+   from 0 to the engine's PM.calc.maxWeekGoalMinutes (7 x the daily cap); anything else writes nothing. 0 = a break week.
+   The week is the one the box was drawn for (data-week); if a new week has started since, nothing is written. */
+async function teacherSetPmWeekGoal(weekId, raw){
+  if(!(window.PM && PM.calc && PM.calc.cleanWeekGoals) || !/^\d{4}-W\d{2}$/.test(String(weekId))) return;
+  const calc=PM.calc, c=PM.cfg(), max=calc.maxWeekGoalMinutes(c), thisWeek=calc.weekIdOf(calc.ymd(new Date()));
+  const note=(kind, week)=>{ teacherPmGoalNote={week:week||weekId, kind}; if(teacherView==='minutes') renderTeacherMinutes(); };
+  if(weekId!==thisWeek){ note('newweek', thisWeek); return; }
+  if(calc.skipSet(c)[weekId]) return;   // a break set in the settings file: the box is switched off
+  const text=String(raw==null?'':raw).trim(), clear=text==='';
+  if(!clear && !(/^[0-9]{1,3}$/.test(text) && Number(text)<=max)){ note('bad'); return; }
+  const n=clear ? undefined : Number(text);
+  const cfg=teacherClassConfig;
+  if(!cfg.pmWeekGoals || typeof cfg.pmWeekGoals!=='object' || Array.isArray(cfg.pmWeekGoals)) cfg.pmWeekGoals={};
+  const had=Object.prototype.hasOwnProperty.call(cfg.pmWeekGoals, weekId), prev=cfg.pmWeekGoals[weekId];
+  if(clear ? !had : (had && prev===n)){ teacherPmGoalNote=null; if(teacherView==='minutes') renderTeacherMinutes(); return; }   // nothing to change
+  if(clear) delete cfg.pmWeekGoals[weekId]; else cfg.pmWeekGoals[weekId]=n;
+  note('saving');
+  try{
+    await ensureDb();
+    const fv=firebase.firestore.FieldValue;
+    const patch = clear ? {pmWeekGoals:{[weekId]:fv.delete()}} : {pmWeekGoals:{[weekId]:n}};
+    await teacherWriteConfig(patch, {['pmWeekGoals.'+weekId]: had?prev:undefined});
+    note('saved');
+  }catch(e){
+    const goals=teacherClassConfig.pmWeekGoals || (teacherClassConfig.pmWeekGoals={});
+    if(had) goals[weekId]=prev; else delete goals[weekId];
+    note('failed');
+    teacherConfigSaveFailed(e, 'Could not save this week’s goal — check your connection and Firestore rules.');
+  }
 }
 
 function renderTeacherStudents(){

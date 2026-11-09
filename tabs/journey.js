@@ -30,6 +30,18 @@ window.PM_HOST = {
     return (known && fbUser && pmDocPeriodUid === fbUser.uid) ? pmDocPeriod : '';
   }
 };
+/* This week's practice-minutes goal (2026-11-09). The teacher can set it for one week from the console; it lives in
+   config/class.pmWeekGoals, which this page does not otherwise read (the gate read below is switched off). ONE get() of
+   that doc per page load, handed to the engine (PM.setWeekGoals, ../practice-minutes.js). Class data, not a student's, so
+   a student switch changes nothing here. A failed read, or no doc, leaves the engine's last known map (its localStorage copy).
+   Fire and forget: nothing on this page waits for it. */
+function pmLoadWeekGoals(db){
+  try {
+    db.collection('config').doc('class').get().then(function(snap){
+      if(snap && snap.exists && window.PM && typeof PM.setWeekGoals === 'function') PM.setWeekGoals((snap.data() || {}).pmWeekGoals);
+    }).catch(function(){});
+  } catch(e) {}
+}
 /* A rating clicked before Firebase auth resolved — flush it as soon as
    fbUser exists (see queueSave / the onAuthStateChanged handler).
 
@@ -1357,6 +1369,7 @@ window.addEventListener('load', function(){
          applyReady keeps the boot clicks over the saved state. Ratings from
          before a later sign-in are already gone (resetReadyUi above). */
       pendingSave = false;
+      pmLoadWeekGoals(fbDb);
       return fbDb.collection('progress').doc(user.uid).get();
     }).then(function(doc){
       /* A read that lands after a DIFFERENT student has signed in (shared

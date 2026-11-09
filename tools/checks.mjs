@@ -6861,7 +6861,7 @@ function checkChordBlitzRanks() {
    deliberately, after a look at whether it can pass a `base` or needs the
    strict default.
    ═════════════════════════════════════════════════════════════════ */
-const CONFIG_WRITERS = 26;   // teacherWriteConfig() call sites in teacher.js — 26th: teacherSetModuleHidden (cell-checked on each hiddenActivities row it writes), 2026-10-22; 25th: teacherSetClassSong (cell-checked on its classSongs row), 2026-10-22; 22nd/23rd: teacherSetActivityStudent (cell-checked on one student's tick) and teacherSetActivityWholeClass (strict), 2026-10-13; 24th: teacherSetSongPlace (cell-checked on its songLibrary row), 2026-10-20
+const CONFIG_WRITERS = 27;   // teacherWriteConfig() call sites in teacher.js — 27th: teacherSetPmWeekGoal (cell-checked on its pmWeekGoals week cell, one cell, the Practice minutes "This week's goal" box), 2026-11-09; 26th: teacherSetModuleHidden (cell-checked on each hiddenActivities row it writes), 2026-10-22; 25th: teacherSetClassSong (cell-checked on its classSongs row), 2026-10-22; 22nd/23rd: teacherSetActivityStudent (cell-checked on one student's tick) and teacherSetActivityWholeClass (strict), 2026-10-13; 24th: teacherSetSongPlace (cell-checked on its songLibrary row), 2026-10-20
 function checkConfigWriteGuard() {
   head('1ai. Every config/class write goes through the stale-write guard');
   let bad = 0;
@@ -14242,7 +14242,7 @@ async function checkPwTakeEvaluator() {
    The browser half (strip, recap, toast, My progress, 1366×657, both languages,
    a real <audio>) is tools/pm-e2e.mjs — it needs Chrome, so it is run by hand.
    ════════════════════════════════════════════════════════════════════ */
-const PM_SIM_PIN = 302;
+const PM_SIM_PIN = 372;
 function checkPracticeMinutes(i18nTable) {
   head('1cg. Practice minutes: the engine is run; the rules cap, no heartbeat, wiring and strings are pinned');
   let bad = 0;
@@ -14552,8 +14552,46 @@ function checkPracticeMinutes(i18nTable) {
       if (/collectionGroup|\.set\(|\.update\(|\.delete\(|\.add\(|runTransaction|\.batch\(|onSnapshot|teacherWriteConfig/.test(b)) fail('teacher.js Practice minutes: read only — no set/update/delete/add/transaction/batch/listener/config write');
       if (/setInterval|setTimeout/.test(b)) fail('teacher.js Practice minutes: no timer — it reads when the view opens and on Refresh only');
     }
+    /* THIS WEEK'S GOAL (2026-11-09; Jonathan: "the edit would be for the week only, then the next week would reset back to 60").
+       The "This week's goal (minutes)" box is this view's ONE write, kept OUTSIDE the read-only block above so that block's pin stays
+       absolute. What it writes (every value a whole number from 0 to 7 x the cap), what the box shows by default (blank = the flat
+       goal, its number as the placeholder), the rollback, the week guard and the console-equals-student maths are RUN in pm-sim
+       section 20 against the real functions (PM_SIM_PIN keeps that section from going quiet). Pinned here because a run cannot
+       see them: where the writer sits, that it is the only code that names the field as a key, the wiring on both sides. */
+    {
+      const wfn = /\nasync function teacherSetPmWeekGoal\([\s\S]*?\n}\n/.exec(tsrc);
+      if (!wfn) fail("teacher.js: teacherSetPmWeekGoal() is missing — the \"This week's goal\" box has no writer");
+      else {
+        const w = wfn[0], at = tsrc.indexOf(w), bEnd = blk ? tsrc.indexOf(blk[0]) + blk[0].length : -1;
+        if (!blk || at < bEnd) fail("teacher.js: teacherSetPmWeekGoal() must sit AFTER the read-only Practice minutes block: it is the one write, and the block's 'read only' pin stays absolute");
+        if ((w.match(/teacherWriteConfig\(/g) || []).length !== 1 || !/await teacherWriteConfig\(patch, \{\['pmWeekGoals\.'\+weekId\]: had\?prev:undefined\}\);/.test(w))
+          fail("teacher.js teacherSetPmWeekGoal(): exactly one teacherWriteConfig(patch, {['pmWeekGoals.'+weekId]: had?prev:undefined}) — cell-checked on the one cell it writes (never strict, never a whole map, never a bare .set())");
+        const patches = w.match(/\{pmWeekGoals:\{\[weekId\]:[^}]*\}\}/g) || [];
+        if (patches.length !== 2 || !patches.some(p => /:fv\.delete\(\)\}\}$/.test(p)) || !patches.some(p => /:n\}\}$/.test(p)))
+          fail('teacher.js teacherSetPmWeekGoal(): the patch must be { pmWeekGoals: { [weekId]: n } } or the same with fv.delete() — one key, one cell, nothing else (found ' + JSON.stringify(patches) + ')');
+        if (/\.set\(|\.update\(|runTransaction|\.batch\(|collectionGroup/.test(w)) fail('teacher.js teacherSetPmWeekGoal(): writes only through teacherWriteConfig()');
+        if (/pmWeekGoals\s*:/.test(tsrc.replace(w, ''))) fail('teacher.js: pmWeekGoals is named as a key outside teacherSetPmWeekGoal() — that function is the only writer of the field');
+      }
+      const hooks = [
+        [/const pmGoal=e\.target\.closest\('\[data-pm-goal\]'\);\s*if\(pmGoal\)\{ teacherSetPmWeekGoal\(pmGoal\.dataset\.week, pmGoal\.value\); return; \}/, "the shell's 'change' handler must save the goal box: teacherSetPmWeekGoal(pmGoal.dataset.week, pmGoal.value)"],
+        [/const pmGoalBox=e\.target\.closest\('\[data-pm-goal\]'\);\s*if\(pmGoalBox\)\{\s*if\(e\.key==='Enter'\)\{ e\.preventDefault\(\); pmGoalBox\.blur\(\); \}/, "the shell's 'keydown' handler must blur the goal box on Enter (that is what fires the save)"],
+        [/\bflat=Math\.round\(c\.weeklyGoalMinutes\), own=calc\.weekGoalOf\(c, weekId\);/, 'teacherPmGoalBoxHtml(): the box\'s default number must come from the settings (flat = Math.round(c.weeklyGoalMinutes)), and the override from the engine (calc.weekGoalOf)'],
+        [/placeholder="\$\{flat\}" value="\$\{own===null\?'':own\}" data-pm-goal data-week=/, 'teacherPmGoalBoxHtml(): blank = the normal goal — placeholder is the flat goal and the value is empty unless this week has an override'],
+        [/const settingsRead=loadTeacherClassConfig\(\);[\s\S]*?try\{ await withTimeout\(settingsRead, TEACHER_PM_READ_MS\); \}catch\(e\)\{ err=err\|\|e; \}/, 'teacherLoadMinutes(): the class settings must be read with the weeks (once per open / Refresh) and awaited, with the weeks read\'s time limit, before the view draws'],
+        [/const tc=teacherPmCfg\(\), nowWeek=PM\.calc\.weekIdOf\(nowYmd\);/, 'renderTeacherMinutes(): the box is for the current week, worked out with the engine\'s weekIdOf on the local date'],
+        [/teacherPmCompute\(roster\.filter\([^\n]*\), teacherPmData\.weeks, tc, PM\.calc\.ymd\(atD\), PM\.calc\)/, 'renderTeacherMinutes(): the table must be worked out with tc (the settings plus this week\'s goals), through the engine, so the console and a student page share one set of numbers'],
+        [/\nfunction teacherPmCfg\(\)\{\s*const base=PM\.cfg\(\);\s*return Object\.assign\(\{\}, base, \{weekGoals: PM\.calc\.cleanWeekGoals\(teacherClassConfig\.pmWeekGoals, base\)\}\);/, 'teacherPmCfg(): the goals must pass through PM.calc.cleanWeekGoals (the engine\'s own validation)'],
+      ];
+      for (const [re, msg] of hooks) if (!re.test(tsrc)) fail('teacher.js ' + msg);
+      /* The student side: the main page hands the map over from its one read of the class settings, a Journey page makes its own single read, the engine offers the hand-in. */
+      if ((app.match(/PM\.setWeekGoals\(/g) || []).length !== 1 || !/const d = doc\.data\(\)\|\|\{\};\s*try\{ if\(window\.PM && PM\.setWeekGoals\) PM\.setWeekGoals\(d\.pmWeekGoals\); \}catch\(e\)\{/.test(app))
+        fail('app.js loadClassConfig(): right after const d = doc.data()||{}; it must hand the map to the engine, once, inside its own try/catch (a decoration must never abort the class config load, which also drives the activity gate): try{ if(window.PM && PM.setWeekGoals) PM.setWeekGoals(d.pmWeekGoals); }catch(e){ … }');
+      if (!/function pmLoadWeekGoals\(db\)\{[\s\S]*?db\.collection\('config'\)\.doc\('class'\)\.get\(\)\.then\(function\(snap\)\{\s*if\(snap && snap\.exists && window\.PM && typeof PM\.setWeekGoals === 'function'\) PM\.setWeekGoals\(\(snap\.data\(\) \|\| \{\}\)\.pmWeekGoals\);/.test(jr) || (jr.match(/pmLoadWeekGoals\(fbDb\);/g) || []).length !== 1)
+        fail("tabs/journey.js: pmLoadWeekGoals(db) must read config/class once and hand pmWeekGoals to PM.setWeekGoals, and be called once, with fbDb, when Firebase lands (one read per page load)");
+      if (!/window\.PM = \{[\s\S]*?setWeekGoals: setWeekGoals,/.test(eng) || !/o\.weekGoals = liveWeekGoals;/.test(eng)) fail('practice-minutes.js: PM.setWeekGoals must be offered, and cfg() must carry only the handed-in map (o.weekGoals = liveWeekGoals), never one from the settings file');
+    }
   }
-  if (!bad) ok(`engine run: ${m[1]} simulation assertions pass (pinned; incl. the teacher console's Practice minutes maths); console view pinned (button after Students, This week default, weeks-only server read, no write); rules cap = config cap (${cfg ? cfg.dailyCapMinutes * 60 : '?'} s); no heartbeat or "N playing" query in the engine or config, the heartbeats rules block and index gone; minutes rules owner-only, no delete; older rules untouched; hooks, script order and strings in place`);
+  if (!bad) ok(`engine run: ${m[1]} simulation assertions pass (pinned; incl. the teacher console's Practice minutes maths and the This week's goal box); console view pinned (button after Students, This week default, weeks-only server read, the view's block read-only, its one write — the goal box — a single cell-checked pmWeekGoals patch, blank = the flat goal); rules cap = config cap (${cfg ? cfg.dailyCapMinutes * 60 : '?'} s); no heartbeat or "N playing" query in the engine or config, the heartbeats rules block and index gone; minutes rules owner-only, no delete; older rules untouched; hooks, script order and strings in place`);
 }
 
 (async function main() {

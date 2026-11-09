@@ -246,12 +246,14 @@ async function main() {
     };
     await size(1366, 768);
     // Loads the console fresh against a new stub. Run again to prove what survives a reload (the units tree's fold).
-    const bootConsole = async () => {
+    // keepConfig (JSON text of a config/class doc): put THAT doc in the new stub, so a setting survives the reload like it does on the server.
+    const bootConsole = async (keepConfig) => {
       await page.send('Page.navigate', { url: `http://127.0.0.1:${port}/index.html?teacher=true` });
       for (let i = 0; i < 80; i++) { await sleep(150); if (await js(`typeof ensureTeacherJs === 'function' && typeof CLASS_ACTIVITIES !== 'undefined'`).catch(() => false)) break; }
       await js(`ensureTeacherJs()`);
       for (let i = 0; i < 80; i++) { await sleep(100); if (await js(`typeof showTeacherApp === 'function'`)) break; }
       const n = await js(STUB);
+      if (keepConfig) await js(`__store.set('config/class', ${keepConfig})`);
       await js(`showTeacherApp({ uid: 'stub-teacher', email: TEACHER_EMAIL, displayName: 'Teacher' }).catch(e => { window.__showErr = e.message; })`);
       for (let i = 0; i < 80; i++) { await sleep(100); if (await js(`!!document.querySelector('#t-grid-container [data-ta-list]')`)) break; }
       return n;
@@ -302,6 +304,101 @@ async function main() {
       if (v === 'manage') await shot('06-manage-1366');
     }
     await xss('every sidebar view');
+
+    // ── Practice minutes: the "This week's goal (minutes)" box (2026-11-09) ──
+    /* Real keys (Input.insertText, Backspace, Enter) in the real console against the stub: type 30 and Enter saves ONE cell of
+       config/class.pmWeekGoals; a reload shows 30; a blank box + Enter clears it back to the placeholder 60 (the default is pinned
+       here); 0 makes this week a break in the table; a bad entry writes nothing; a week the settings file already makes a break
+       shows the box switched off. A fixed day (Wed 2026-11-18, week 2026-W47) so a real Thanksgiving week cannot switch the box
+       off under the test; the page's Date is put back at the end. 1366x657, the Chromebook. */
+    {
+      const n0 = pageErrors.length, WK = '2026-W47';
+      const fakeDay = (y, m, d) => js(`(() => { window.__RealDate = window.__RealDate || Date; const R = window.__RealDate, t = new R(${y}, ${m}, ${d}, 9, 0, 0).getTime();
+        window.Date = class extends R { constructor(...a) { if (a.length) super(...a); else super(t); } static now() { return t; } }; return true; })()`);
+      const realDay = () => js(`(() => { if (window.__RealDate) window.Date = window.__RealDate; return true; })()`);
+      const waitFor = async (expr, ms = 4000) => { for (let t = 0; t < ms; t += 100) { if (await js(expr).catch(() => false)) return true; await sleep(100); } return false; };
+      const openMinutes = async () => { await js(`setTeacherView('minutes')`); await waitFor(`!!document.querySelector('.pm-t-goal') && !!document.querySelector('.pm-t-table')`, 8000); };
+      const key = async (k, code, vk) => { for (const type of ['keyDown', 'keyUp']) await page.send('Input.dispatchKeyEvent', { type, key: k, code, windowsVirtualKeyCode: vk }); };
+      // Focus the box, replace what is in it with `text` (blank = Backspace over the selection) and press Enter: the real path, Enter blurs, blur fires change.
+      const typeGoal = async (text) => {
+        await js(`(() => { const i = document.querySelector('[data-pm-goal]'); i.focus(); i.select(); return true; })()`);
+        if (text === '') await key('Backspace', 'Backspace', 8); else await page.send('Input.insertText', { text });
+        await key('Enter', 'Enter', 13);
+      };
+      const cell = () => js(`(__store.get('config/class').pmWeekGoals || {})[${JSON.stringify(WK)}]`);
+      const version = () => js(`__store.get('config/class').configVersion`);
+      const boxInfo = () => js(`(() => { const i = document.querySelector('[data-pm-goal]'), t = document.querySelector('.pm-t-table'), b = document.querySelector('.pm-t-goal');
+        return { value: i && i.value, ph: i && i.placeholder, week: i && i.dataset.week, off: i ? i.disabled : null, label: b ? b.querySelector('label').textContent : null, help: b ? b.querySelector('.pm-t-goal-note').textContent : null,
+          state: b ? b.querySelector('.pm-t-goal-state').textContent : null, above: !!(b && t && b.getBoundingClientRect().bottom <= t.getBoundingClientRect().top + 1),
+          foot: [...document.querySelectorAll('.tr-meta')].map(x => x.textContent).find(x => /The goal this week/.test(x)) || '', table: t ? t.innerText : '',
+          sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth }; })()`);
+      await size(1366, 657);
+      await fakeDay(2026, 10, 18);
+      await openMinutes();
+      const a = await boxInfo(), v0 = await version();
+      if (a.value === null || a.value === undefined) fail('goalbox', 'no goal box on the Practice minutes view');
+      else {
+        if (a.value !== '' || a.ph !== '60') fail('goalbox', 'the default must be blank with the placeholder 60 (the flat goal): value ' + JSON.stringify(a.value) + ', placeholder ' + JSON.stringify(a.ph));
+        if (a.week !== WK) fail('goalbox', 'the box is for ' + a.week + ', expected ' + WK + ' (Wed 2026-11-18)');
+        if (a.label !== 'This week’s goal (minutes)' || !/Blank = 60\. 0 = break week\. Goes back to 60 next Monday\./.test(a.help) || !/Nov(ember)? 16/.test(a.help) || !/Nov(ember)? 22/.test(a.help)) fail('goalbox', 'label or help line: ' + JSON.stringify([a.label, a.help]));
+        if (!a.above) fail('goalbox', 'the box is not above the minutes table');
+        if (a.sideways > 0) fail('goalbox', 'page scrolls sideways by ' + a.sideways + 'px at 1366');
+        if (!/The goal this week: 60 minutes\./.test(a.foot)) fail('goalbox', 'footnote: ' + JSON.stringify(a.foot.slice(0, 120)));
+        await shot('07-minutes-goal-blank-1366x657');
+        await typeGoal('30');
+        if (!(await waitFor(`document.querySelector('.pm-t-goal-state')?.textContent === 'Saved'`))) fail('goalbox', 'typing 30 + Enter never reached "Saved": ' + JSON.stringify((await boxInfo()).state));
+        const b = await boxInfo();
+        if ((await cell()) !== 30) fail('goalbox', 'the stub holds ' + JSON.stringify(await cell()) + ' for ' + WK + ', expected 30');
+        if ((await version()) !== v0 + 1) fail('goalbox', 'one save moved configVersion ' + v0 + ' -> ' + (await version()));
+        if (await js(`Object.keys(__store.get('config/class').pmWeekGoals || {}).length`) !== 1) fail('goalbox', 'the map must hold exactly one week after one save');
+        if (b.value !== '30' || b.ph !== '60' || !/30 minutes, set for this week only \(usually 60\)/.test(b.foot)) fail('goalbox', 'after saving 30: ' + JSON.stringify([b.value, b.ph, b.foot.slice(0, 140)]));
+        if (!/0 \/ 30 min/.test(b.table)) fail('goalbox', 'the table still judges this week by 60: ' + JSON.stringify(b.table.slice(0, 160)));
+        await shot('08-minutes-goal-30-1366x657');
+        // A reload: the doc comes back from the stub's config/class and the box shows what was saved.
+        const keep = await js(`JSON.stringify(__store.get('config/class'))`);
+        await bootConsole(keep); await size(1366, 657); await fakeDay(2026, 10, 18); await openMinutes();
+        const c = await boxInfo();
+        if (c.value !== '30') fail('goalbox', 'after a reload the box shows ' + JSON.stringify(c.value) + ', expected 30');
+        // Clear it: blank + Enter takes the cell out of the doc (never null, never ""), and the box is back to the placeholder 60.
+        await typeGoal('');
+        await waitFor(`document.querySelector('.pm-t-goal-state')?.textContent === 'Saved'`);
+        if ((await js(`'${WK}' in (__store.get('config/class').pmWeekGoals || {})`))) fail('goalbox', 'a blank box left ' + JSON.stringify(await cell()) + ' in config/class');
+        const keep2 = await js(`JSON.stringify(__store.get('config/class'))`);
+        await bootConsole(keep2); await size(1366, 657); await fakeDay(2026, 10, 18); await openMinutes();
+        const d = await boxInfo();
+        if (d.value !== '' || d.ph !== '60' || !/The goal this week: 60 minutes\./.test(d.foot)) fail('goalbox', 'after clearing and a reload: ' + JSON.stringify([d.value, d.ph, d.foot.slice(0, 80)]));
+        // 0 = a break week: the table says so for every student, and the footnote too.
+        await typeGoal('0');
+        await waitFor(`document.querySelector('.pm-t-goal-state')?.textContent === 'Saved'`);
+        const z = await boxInfo();
+        if ((await cell()) !== 0 || z.value !== '0') fail('goalbox', '0 saved as ' + JSON.stringify(await cell()) + ', box ' + JSON.stringify(z.value));
+        if (!/break/.test(z.table) || !/none: this is a break week/.test(z.foot)) fail('goalbox', 'a goal of 0 does not read as a break week in the table: ' + JSON.stringify([z.table.slice(0, 120), z.foot.slice(0, 100)]));
+        await shot('09-minutes-goal-0-break-1366x657');
+        // A bad entry writes nothing and says why; a value over the cap (7 x 20 = 140) too.
+        for (const bad of ['abc', '141', '1.5']) {
+          const vb = await version();
+          await typeGoal(bad);
+          await waitFor(`/whole number/.test(document.querySelector('.pm-t-goal-state')?.textContent || '')`);
+          const zb = await boxInfo();
+          if ((await version()) !== vb || (await cell()) !== 0) fail('goalbox', JSON.stringify(bad) + ' wrote something (cell ' + JSON.stringify(await cell()) + ', version ' + vb + ' -> ' + (await version()) + ')');
+          if (!/whole number from 0 to 140/.test(zb.state || '')) fail('goalbox', JSON.stringify(bad) + ' gave no explanation: ' + JSON.stringify(zb.state));
+        }
+        await shot('10-minutes-goal-bad-entry-1366x657');
+        await typeGoal('');
+        await waitFor(`document.querySelector('.pm-t-goal-state')?.textContent === 'Saved'`);
+        // A week the settings file already makes a break (Thanksgiving, Tue 2026-11-24 = W48): the box says so and is switched off.
+        await fakeDay(2026, 10, 24);
+        await js(`renderTeacherMinutes()`);
+        await waitFor(`!!document.querySelector('.pm-t-goal-off')`, 8000);
+        const e = await js(`(() => { const i = document.querySelector('.pm-t-goal-off'); return i ? { value: i.value, off: i.disabled, hook: !!document.querySelector('[data-pm-goal]') } : null; })()`);
+        if (!e || e.value !== 'Break week (set in config)' || !e.off || e.hook) fail('goalbox', 'a config break week must show "Break week (set in config)", switched off, with no save hook: ' + JSON.stringify(e));
+        await shot('11-minutes-goal-config-break-1366x657');
+        stats.goalbox = { saves: 4, reloads: 2 };
+      }
+      await realDay();
+      await size(1366, 768);
+      const er = errsSince(n0); if (er.length) fail('goalbox', 'page error: ' + er[0]);
+    }
     await js(`setTeacherView('activities')`); await sleep(400);
 
     // ── Filters, folds, search ──
@@ -1049,6 +1146,7 @@ async function main() {
   }
   console.log(`console-layout-smoke: ${stats.views} sidebar views, ${stats.activities} activities opened (practice card, focus, paths, exit check) x ${stats.tabs / Math.max(stats.activities, 1)} tabs = ${stats.tabs} tab switches, ${stats.filters} filters, ${stats.folds} folds, ${stats.searches} searches, ${stats.writes} Settings writes with the Preview kept, ${stats.repaint} Students repaint, ${stats.counts || 0} list counts equal to the board's (All + P4), ${stats.refreshes || 0} refreshes with the Preview and list scroll kept, ${stats.board} board round trip, ${stats.backs} Backs, `
     + `${stats.chips || 0} chip checks, ${stats.periodWrites || 0} writes under P4/P7/CAS with the song playing, ${stats.renameRefresh || 0} Refresh past a hidden rename, ${stats.audio || 0} sound stops, ${stats.listPicks || 0} list picks kept, ${stats.xss || 0} markup-name checks, ${stats.treePick || 0} tree Built row + board pick, ${stats.twoConsoles || 0} two-console archives (All/P4, write/board)`);
+  if (stats.goalbox) console.log(`  Practice minutes goal box: blank = 60, 30 saved as one cell and read back after a reload, cleared with a blank box, 0 = a break week, 3 bad entries wrote nothing, a config break week switched off`);
   if (stats.tree) console.log(`  units tree: ${stats.tree.rows} rows adding up to the board's ${stats.tree.cards} cards, ${stats.tree.clicks} row clicks (Songs, list with a search, Arrange board), ${stats.tree.repaints} repaints after a write, ${stats.tree.reloads} reloads with the fold kept`);
   if (stats.widths) console.log(`  column widths at 1366: sidebar ${Math.round(stats.widths.at1366.side)}, list ${Math.round(stats.widths.at1366.list)}, detail ${Math.round(stats.widths.at1366.detail)}; at 1920: ${Math.round(stats.widths.at1920.side)}, ${Math.round(stats.widths.at1920.list)}, ${Math.round(stats.widths.at1920.detail)}`);
   if (stats.shots.length) console.log('  screenshots:\n    ' + stats.shots.join('\n    '));

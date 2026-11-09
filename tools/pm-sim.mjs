@@ -2018,5 +2018,259 @@ console.log('18. My progress rules: can\'t-reach in seconds, "No streak yet" / "
   check('59 min 59 s: not lit', eq(lit(at(WED, 3599, 0, streak3)), { tile: false, strip: false }));
 }
 
+/* ═══════════ 19. This week's goal: config/class.pmWeekGoals (2026-11-09) ═══════════
+   An override is { 'YYYY-Www': whole minutes } for ONE week. 0 = a break. n = n minutes. A skipWeeks week wins. Past weeks keep the goal
+   they had. The maths is calc.goalSeconds(c, weekId), a pure function of c.weekGoals; the host hands the map in with PM.setWeekGoals(). */
+console.log('19. this week\'s goal (pmWeekGoals)');
+{
+  const w = makeWorld();
+  const calc = w.PM.calc;
+  const base = { ...w.PM.cfg(), skipWeeks: [], semester2Start: '', streakStartWeek: '', weekGoals: {} };
+  const wk = (n) => calc.weekAdd('2026-W36', n);
+  const T = (n) => calc.ymd(calc.addDays(calc.weekMonday(wk(n)), 2));
+  const withGoals = (goals, extra = {}) => ({ ...base, ...extra, weekGoals: goals });
+
+  /* 1. n minutes: hit and miss, only in that week. */
+  const c30 = withGoals({ [wk(1)]: 30 });
+  check('an override of 30 makes that week\'s goal 1800 s; the weeks next to it keep 3600 s', calc.goalSeconds(c30, wk(1)) === 1800 && calc.goalSeconds(c30, wk(0)) === 3600 && calc.goalSeconds(c30, wk(2)) === 3600);
+  let s = calc.status(c30, { [wk(0)]: 3600, [wk(1)]: 1800 }, T(2));
+  check('override 30: 1800 s is a HIT (streak 2, the week shows "hit" with goal 1800)', s.streak === 2 && s.history.find((h) => h.id === wk(1)).state === 'hit' && s.history.find((h) => h.id === wk(1)).goal === 1800, JSON.stringify(s.history.find((h) => h.id === wk(1))));
+  s = calc.status(c30, { [wk(0)]: 3600, [wk(1)]: 1799 }, T(2));
+  check('override 30: 1799 s is a MISS (the free miss keeps streak 1; the week shows "missed")', s.streak === 1 && s.history.find((h) => h.id === wk(1)).state === 'missed', JSON.stringify(s.history.find((h) => h.id === wk(1))));
+  s = calc.status(withGoals({ [wk(2)]: 30 }), { [wk(2)]: 1800 }, T(2));
+  check('override for THIS week: 1800 s hits it (ring/message: week.hit, week.goal 1800)', s.week.hit && s.week.goal === 1800 && !s.week.isBreak);
+  s = calc.status(withGoals({ [wk(2)]: 30 }), { [wk(2)]: 1799 }, T(2));
+  check('…and 1799 s does not (goal 1800 shows, not 3600)', !s.week.hit && s.week.goal === 1800);
+
+  /* 2. 0 = break week: same as a skipWeeks entry, everywhere. */
+  const brk0 = withGoals({ [wk(1)]: 0 }), brkSkip = { ...base, skipWeeks: [calc.ymd(calc.weekMonday(wk(1)))] };
+  const mid = { [wk(0)]: 3600, [wk(1)]: 100, [wk(2)]: 3600 };
+  s = calc.status(brk0, mid, T(3));
+  check('override 0 in the middle of a streak: neither counts nor breaks it (hit, break with 100 s, hit → streak 2, the break row keeps its 100 s)', s.streak === 2 && s.history.find((h) => h.id === wk(1)).state === 'break' && s.history.find((h) => h.id === wk(1)).secs === 100, JSON.stringify(s.history.find((h) => h.id === wk(1))));
+  const afterBrk = { [wk(0)]: 3600, [wk(1)]: 100, [wk(2)]: 600, [wk(3)]: 3600 };
+  check('…and it spends no free miss: hit, break, MISS, hit → streak 2 (the miss is still forgiven); the same minutes in an ordinary week (a miss, then a second miss) → streak 1', calc.status(brk0, afterBrk, T(4)).streak === 2 && calc.status(base, afterBrk, T(4)).streak === 1, calc.status(brk0, afterBrk, T(4)).streak + ' / ' + calc.status(base, afterBrk, T(4)).streak);
+  check('…and it equals a skipWeeks break to the byte: status() of the same data (streak, longest, 8-week row, this week) is identical', eq(calc.status(brk0, mid, T(3)), calc.status(brkSkip, mid, T(3))));
+  check('…the same when the break week is THIS week (4200 s, above the normal goal: never a hit, goal shown is the normal 3600, isBreak)', eq(calc.status(withGoals({ [wk(2)]: 0 }), { [wk(2)]: 4200 }, T(2)), calc.status({ ...base, skipWeeks: [calc.ymd(calc.weekMonday(wk(2)))] }, { [wk(2)]: 4200 }, T(2))) && calc.status(withGoals({ [wk(2)]: 0 }), { [wk(2)]: 4200 }, T(2)).week.isBreak);
+  check('…and goalSeconds is 0 for it, so the stored week doc and the console table read it as a break too', calc.goalSeconds(brk0, wk(1)) === 0);
+
+  /* 3. Past weeks keep their own goal; an override applies to its week only. */
+  const allShort = withGoals({ [wk(0)]: 30, [wk(1)]: 30, [wk(2)]: 30 });
+  const mShort = { [wk(0)]: 1800, [wk(1)]: 1800, [wk(2)]: 1800 };
+  check('three weeks of 1800 s with an override of 30 each: streak 3', calc.status(allShort, mShort, T(3)).streak === 3);
+  check('…the flat goal raised to 90 LATER does not re-judge them: still streak 3 (they keep the goal they had)', calc.status({ ...allShort, weeklyGoalMinutes: 90 }, mShort, T(3)).streak === 3);
+  check('…while the same minutes with NO override miss under the flat 60: streak 0 (the free miss keeps it at 0, never 3) — so the override is what held the streak', calc.status(base, mShort, T(3)).streak === 0);
+  s = calc.status(withGoals({ [wk(1)]: 90 }, { weeklyGoalMinutes: 30 }), { [wk(0)]: 1800, [wk(1)]: 3600 }, T(2));
+  check('an override of 90 in a past week stays a MISS at 3600 s when the flat goal is lowered to 30; the week before it (no override) is judged by the flat 30 → hit', s.history.find((h) => h.id === wk(1)).state === 'missed' && s.history.find((h) => h.id === wk(0)).state === 'hit', JSON.stringify(s.history.slice(5, 7)));
+  const next = withGoals({ [wk(3)]: 1 });
+  s = calc.status(next, { [wk(2)]: 1800 }, T(2));
+  check('an override for NEXT week has no effect this week: goal 3600, 1800 s is not a hit; next week alone is 60 s', s.week.goal === 3600 && !s.week.hit && calc.goalSeconds(next, wk(2)) === 3600 && calc.goalSeconds(next, wk(3)) === 60);
+  check('an override for a PAST week has no effect on this one either', calc.goalSeconds(withGoals({ [wk(1)]: 5 }), wk(2)) === 3600);
+
+  /* 4. skipWeeks wins. */
+  const both = withGoals({ [wk(2)]: 30 }, { skipWeeks: [calc.ymd(calc.weekMonday(wk(2)))] });
+  s = calc.status(both, { [wk(2)]: 1800 }, T(2));
+  check('a skipWeeks week with an override of 30 is still a BREAK: goal 0, never a hit at 1800 s', calc.goalSeconds(both, wk(2)) === 0 && s.week.isBreak && !s.week.hit);
+
+  /* 5. Validation: a bad entry is dropped, never guessed. */
+  const raw = { '2026-W46': 30, '2026-W45': 140, '2026-W44': 0, bad: 5, '2026-W47': 1.5, '2026-W48': -1, '2026-W49': 141, '2026-W50': '30', '2026-W51': null, '2026-W52': NaN, '2026-W43': Infinity, '2026-W42': true, '26-W41': 30, constructor: 3, toString: 3 };
+  const cleaned = calc.cleanWeekGoals(raw, base);
+  check(`cleanWeekGoals keeps exactly the 3 valid entries of ${Object.keys(raw).length} (30, 140 = 7 x the 20-minute cap, and 0) and drops fractions, negatives, 141, strings, null, NaN, Infinity, booleans, a bad week id and own-key look-alikes`, eq(Object.keys(cleaned).sort(), ['2026-W44', '2026-W45', '2026-W46']) && cleaned['2026-W45'] === 140 && cleaned['2026-W44'] === 0 && cleaned['2026-W46'] === 30, JSON.stringify(cleaned));
+  check('cleanWeekGoals of nothing, a list, a string or a number is {}', [undefined, null, [], [30], 'x', 7].every((v) => eq(calc.cleanWeekGoals(v, base), {})));
+  check('the largest override comes from the cap, not a constant: with a 10-minute daily cap 70 is the most (70 kept, 71 dropped); 140 at the shipped 20', eq(calc.cleanWeekGoals({ '2026-W46': 70, '2026-W47': 71 }, { dailyCapMinutes: 10 }), { '2026-W46': 70 }) && calc.maxWeekGoalMinutes(base) === 140 && calc.maxWeekGoalMinutes({ dailyCapMinutes: 10 }) === 70);
+  check('goalSeconds does not trust the map it is given: 141 (over the maximum), 1.5, "30" and -5 all fall back to the flat 3600; the lookup reads own keys only (a map with none answers null for "constructor" and "toString")', [141, 1.5, '30', -5].every((v) => calc.goalSeconds(withGoals({ [wk(1)]: v }), wk(1)) === 3600) && calc.weekGoalOf(withGoals({}), 'constructor') === null && calc.weekGoalOf(withGoals({}), 'toString') === null);
+  const inherited = Object.create({ [wk(1)]: 30 });   // a number on the prototype chain, not an own entry
+  check('…and a number that is only INHERITED (not an own entry of the map) is no override: goal stays 3600', calc.weekGoalOf(withGoals(inherited), wk(1)) === null && calc.goalSeconds(withGoals(inherited), wk(1)) === 3600 && eq(calc.cleanWeekGoals(inherited, base), {}));
+  check('a goal that is written to the week doc is never under a minute: an override of 1 is 60 s', calc.goalSeconds(withGoals({ [wk(1)]: 1 }), wk(1)) === 60);
+}
+{
+  /* The hand-in: PM.setWeekGoals() and the page's own copy in localStorage. */
+  const w = makeWorld();
+  const stored = (world) => { try { return JSON.parse(world.store['pm:wg']); } catch (e) { return 'no readable copy'; } };   // a missing copy is a red line, never a crash
+  check('a fresh page has no overrides, and the config FILE cannot carry them (a weekGoals key in practice-minutes-config.js is ignored)', eq(w.PM.cfg().weekGoals, {}) && eq(makeWorld({ config: { weekGoals: { '2026-W47': 5 } } }).PM.cfg().weekGoals, {}));
+  check('setWeekGoals({2026-W47: 30}) reports a change, and cfg() carries it; the same map again reports no change', w.PM.setWeekGoals({ '2026-W47': 30 }) === true && eq(w.PM.cfg().weekGoals, { '2026-W47': 30 }) && w.PM.setWeekGoals({ '2026-W47': 30 }) === false);
+  check('…it is kept in this device\'s localStorage (pm:wg), once, as the cleaned map', eq(stored(w), { '2026-W47': 30 }));
+  const w2 = makeWorld({ store: w.store });
+  check('a second page on the same device starts with it (no flash of 60 before the live read lands)', eq(w2.PM.cfg().weekGoals, { '2026-W47': 30 }) && w2.PM.calc.goalSeconds(w2.PM.cfg(), '2026-W47') === 1800);
+  check('bad entries in the stored copy (hand-edited) are dropped at load', eq(makeWorld({ store: { 'pm:wg': JSON.stringify({ '2026-W47': 999, '2026-W48': 15, nope: 1 }) } }).PM.cfg().weekGoals, { '2026-W48': 15 }));
+  check('a stored copy that is not JSON, or not an object, is {}', eq(makeWorld({ store: { 'pm:wg': '{oops' } }).PM.cfg().weekGoals, {}) && eq(makeWorld({ store: { 'pm:wg': '[30]' } }).PM.cfg().weekGoals, {}));
+  check('a read with the field ABSENT (the teacher cleared the box) replaces the map with nothing, and the copy follows', w.PM.setWeekGoals(undefined) === true && eq(w.PM.cfg().weekGoals, {}) && eq(stored(w), {}));
+  check('setWeekGoals ignores a bad map as nothing (a list, a string): no throw, no change from {}', w.PM.setWeekGoals([30]) === false && w.PM.setWeekGoals('x') === false && eq(w.PM.cfg().weekGoals, {}));
+  const noStore = makeWorld();
+  Object.defineProperty(noStore.ctx, 'localStorage', { get() { throw new Error('blocked'); } });
+  check('with localStorage blocked it still works in memory (no throw)', noStore.PM.setWeekGoals({ '2026-W47': 30 }) === true && noStore.PM.calc.goalSeconds(noStore.PM.cfg(), '2026-W47') === 1800);
+}
+{
+  /* End to end: a real counted week with this week's goal at 30. Two 16-minute days = 1920 s. */
+  const run = async (goal) => {
+    const w = makeWorld();
+    if (goal !== undefined) w.PM.setWeekGoals({ '2026-W47': goal });
+    const a = w.track(); a.play();
+    const seen = [];
+    for (let day = 0; day < 2; day++) {
+      await w.run(16 * 60, w.playing(a));
+      a.pause();
+      await w.run(5, w.playing(a));
+      seen.push({ secs: w.PM.status().week.secs, pending: w.PM._state().pendingToast });
+      w.clock.ms += 24 * 3600 * 1000; w.clock.perf += 24 * 3600 * 1000;
+      a.play();
+    }
+    await w.run(3, w.playing(a));
+    await w.PM.flush(); await w.settle();
+    return { w, seen, doc: w.server.weeks['2026-W47'] };
+  };
+  const o = await run(30), plain = await run(undefined);
+  check('this week at 30 min: after day 1 (960 s) the goal is not reached and no toast is waiting; day 2 crosses 1800 s and the week-goal toast is queued for this week', o.seen[0].pending === false && o.seen[1].pending === '2026-W47', JSON.stringify(o.seen));
+  check('…the week doc written to the server says goalSeconds 1800 and hit true', !!o.doc && o.doc.goalSeconds === 1800 && o.doc.hit === true && o.doc.seconds >= 1800, JSON.stringify(o.doc));
+  check('…and status() says this week is hit with goal 1800 and a streak of 1', o.w.PM.status().week.hit && o.w.PM.status().week.goal === 1800 && o.w.PM.status().streak === 1);
+  check('the same two days with NO override: not hit at 1920 s, goalSeconds 3600 in the doc, no toast', plain.seen[1].pending === false && !plain.w.PM.status().week.hit && plain.doc.goalSeconds === 3600 && plain.doc.hit === false, JSON.stringify([plain.seen, plain.doc]));
+  o.w.PM.setWeekGoals({ '2026-W47': 60 });
+  check('the teacher RAISES it to 60 after the student hit 30: the week is no longer hit (the ring and message recompute from the seconds); goal shows 3600', !o.w.PM.status().week.hit && o.w.PM.status().week.goal === 3600 && o.w.PM.status().streak === 0);
+  o.w.PM.setWeekGoals({ '2026-W47': 30 });
+  check('…and LOWERING it again gives the hit back', o.w.PM.status().week.hit && o.w.PM.status().streak === 1);
+  o.w.PM.setWeekGoals({ '2026-W47': 0 });
+  check('the teacher sets 0 (break) for the week a student already played in: isBreak, never hit, minutes kept', o.w.PM.status().week.isBreak && !o.w.PM.status().week.hit && o.w.PM.status().week.secs >= 1800);
+}
+
+/* ═══════════ 20. The console's "This week's goal" box (teacher.js, 2026-11-09) ═══════════
+   The REAL teacherSetPmWeekGoal / teacherPmGoalBoxHtml / teacherPmGoalPhrase / teacherPmCfg are cut out of teacher.js and run against
+   the REAL engine, with a fake teacherWriteConfig that records every patch and base. What can be written, what the box shows by
+   default, the rollback, the week guard, and that the console and a student page work one set of numbers out. */
+console.log('20. the console\'s This week\'s goal box (teacher.js teacherSetPmWeekGoal)');
+{
+  const T = readFileSync(join(ROOT, 'teacher.js'), 'utf8').replace(/\r\n/g, '\n');
+  const grab = (re) => { const m = re.exec(T); return m ? m[0] : null; };
+  const parts = {
+    cfg: grab(/\nfunction teacherPmCfg\(\)\{[\s\S]*?\n}\n/),
+    phrase: grab(/\nfunction teacherPmGoalPhrase\([\s\S]*?\n}\n/),
+    box: grab(/\nfunction teacherPmGoalBoxHtml\([\s\S]*?\n}\n/),
+    write: grab(/\nasync function teacherSetPmWeekGoal\([\s\S]*?\n}\n/),
+    compute: grab(/\nfunction teacherPmCompute\([\s\S]*?\n}\n/),
+  };
+  check('teacher.js has teacherPmCfg, teacherPmGoalPhrase, teacherPmGoalBoxHtml, teacherSetPmWeekGoal and teacherPmCompute', Object.values(parts).every(Boolean), Object.keys(parts).filter((k) => !parts[k]).join());
+  if (Object.values(parts).every(Boolean)) {
+    const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    /* A console at a fixed moment (nowMs), with the engine of a world configured by `config`; `cfgInit` is what the one read of the class settings returned. */
+    function consoleAt(nowMs, { config, cfgInit = {}, fail = null } = {}) {
+      const world = makeWorld({ config });
+      const env = { writes: [], renders: [], saveFailed: [], notes: [] };
+      class FakeD extends Date { constructor(...a) { if (a.length) super(...a); else super(nowMs); } static now() { return nowMs; } }
+      const teacherClassConfig = JSON.parse(JSON.stringify(cfgInit));
+      const make = new Function('PM', 'window', 'escHtml', 'escAttr', 'firebase', 'ensureDb', 'teacherWriteConfig', 'teacherConfigSaveFailed', 'env', 'teacherClassConfig', 'Date',
+        `let teacherPmGoalNote = null; let teacherView = 'minutes';
+         const renderTeacherMinutes = () => { env.renders.push(teacherPmGoalNote ? teacherPmGoalNote.kind : null); };
+         ${parts.cfg}${parts.phrase}${parts.box}${parts.write}${parts.compute}
+         return { write: teacherSetPmWeekGoal, box: teacherPmGoalBoxHtml, phrase: teacherPmGoalPhrase, cfg: teacherPmCfg, compute: teacherPmCompute, note: () => teacherPmGoalNote, setNote: (n) => { teacherPmGoalNote = n; } };`);
+      const firebaseStub = { firestore: { FieldValue: { delete: () => ({ __del: true }) } } };
+      const writeConfig = async (patch, base) => { env.writes.push({ patch: JSON.parse(JSON.stringify(patch)), base: { ...base }, baseKeys: Object.keys(base || {}) }); if (fail) throw fail; };
+      const api = make(world.PM, { PM: world.PM }, esc, esc, firebaseStub, async () => ({}), writeConfig, (e, msg) => env.saveFailed.push({ e, msg }), env, teacherClassConfig, FakeD);
+      return { api, env, world, calc: world.PM.calc, cfg: teacherClassConfig };
+    }
+    const MON = new Date(2026, 10, 16, 9, 0, 0).getTime();            // Mon 16 Nov 2026 = 2026-W47
+    const W = '2026-W47', maxMin = 140;
+    const goalsOf = (k) => k.api.cfg().weekGoals;
+
+    /* 1. A typed value is written as one cell, cell-checked, and the console reads it back through the engine. */
+    {
+      const k = consoleAt(MON);
+      await k.api.write(W, '30');
+      const wr = k.env.writes;
+      check('typing 30 writes exactly one config patch: { pmWeekGoals: { "2026-W47": 30 } } — one key, one cell', wr.length === 1 && eq(wr[0].patch, { pmWeekGoals: { [W]: 30 } }), JSON.stringify(wr));
+      check('…cell-checked on that one cell, "was absent" (a base, never the strict default)', wr[0].baseKeys.length === 1 && wr[0].baseKeys[0] === 'pmWeekGoals.' + W && wr[0].base['pmWeekGoals.' + W] === undefined);
+      check('…the note goes Saving… then Saved, and the box is redrawn for each', eq(k.env.renders, ['saving', 'saved']) && k.api.note().kind === 'saved' && k.api.note().week === W, JSON.stringify(k.env.renders));
+      check('…and the console\'s own numbers use it: goalSeconds is 1800 for this week and 3600 for the weeks around it', k.calc.goalSeconds(k.api.cfg(), W) === 1800 && k.calc.goalSeconds(k.api.cfg(), '2026-W46') === 3600 && k.calc.goalSeconds(k.api.cfg(), '2026-W49') === 3600);
+      await k.api.write(W, '45');
+      check('changing it 30 → 45 names the OLD value in the base (the write refuses if another console moved the cell)', k.env.writes.length === 2 && k.env.writes[1].base['pmWeekGoals.' + W] === 30 && k.env.writes[1].patch.pmWeekGoals[W] === 45);
+      await k.api.write(W, '45');
+      check('the same value again writes nothing', k.env.writes.length === 2);
+      await k.api.write(W, '');
+      const del = k.env.writes[2];
+      check('a blank box clears the cell with FieldValue.delete() (never null, never ""), naming the old value in the base', !!del && eq(del.patch, { pmWeekGoals: { [W]: { __del: true } } }) && del.base['pmWeekGoals.' + W] === 45, JSON.stringify(del));
+      check('…and the console goes back to the flat goal: 3600 s, nothing left in the map', k.calc.goalSeconds(k.api.cfg(), W) === 3600 && eq(k.cfg.pmWeekGoals, {}));
+      await k.api.write(W, '  ');
+      check('clearing a week that has no override writes nothing', k.env.writes.length === 3);
+      await k.api.write(W, '0');
+      check('0 is written as 0 (a break week), and the engine reads it as no goal', eq(k.env.writes[3].patch, { pmWeekGoals: { [W]: 0 } }) && k.calc.goalSeconds(k.api.cfg(), W) === 0 && k.calc.status(k.api.cfg(), { [W]: 4200 }, '2026-11-18').week.isBreak);
+    }
+
+    /* 2. Every value the console can write is a whole number from 0 to 7 x the cap; anything else writes nothing. */
+    {
+      let wrote = 0, bad = [], refused = 0, tried = 0;
+      for (let n = 0; n <= 1000; n++) {
+        const k = consoleAt(MON);
+        await k.api.write(W, String(n)); tried++;
+        k.env.writes.forEach((x) => { wrote++; const v = x.patch.pmWeekGoals[W]; if (!(Number.isInteger(v) && v >= 0 && v <= maxMin && v === n)) bad.push(n + '→' + v); });
+        if (n > maxMin && !k.env.writes.length) refused++;
+      }
+      check(`over the inputs 0..1000 the console wrote ${wrote} values, every one a whole number from 0 to ${maxMin} equal to what was typed; the ${refused} above ${maxMin} wrote nothing`, wrote === maxMin + 1 && refused === 1000 - maxMin && bad.length === 0, bad.slice(0, 5).join() + ' wrote=' + wrote + ' refused=' + refused);
+      const garbage = ['abc', '1.5', '-1', '-0', '+30', '1e1', '0x1F', '3 0', '٣٠', '１２', '1,5', '99999', '1000', '30%', '30m', 'NaN', 'Infinity', '--', '.', '０'];
+      let leaked = 0; const kinds = new Set();
+      for (const g of garbage) { const k = consoleAt(MON); await k.api.write(W, g); leaked += k.env.writes.length; kinds.add(k.api.note() && k.api.note().kind); }
+      check(`${garbage.length} malformed entries (fractions, signs, exponents, hex, non-ASCII digits, units, words) write nothing and say "bad"`, leaked === 0 && eq([...kinds], ['bad']), 'leaked ' + leaked + ' ' + [...kinds]);
+      const lead = consoleAt(MON); await lead.api.write(W, '007');
+      check('"007" is the number 7 (leading zeros are fine, the value written is 7)', lead.env.writes.length === 1 && lead.env.writes[0].patch.pmWeekGoals[W] === 7);
+      const k10 = consoleAt(MON, { config: { dailyCapMinutes: 10 } });
+      await k10.api.write(W, '71'); await k10.api.write(W, '70');
+      check('the largest value comes from the engine\'s cap, not a constant: with a 10-minute daily cap 71 is refused and 70 written', k10.env.writes.length === 1 && k10.env.writes[0].patch.pmWeekGoals[W] === 70 && /0 to 70/.test(consoleAt(MON, { config: { dailyCapMinutes: 10 } }).api.box(consoleAt(MON, { config: { dailyCapMinutes: 10 } }).api.cfg(), W, k10.calc, { week: W, kind: 'bad' })));
+    }
+
+    /* 3. Failure rolls back; a stale week and a config break write nothing. */
+    {
+      const k = consoleAt(MON, { cfgInit: { pmWeekGoals: { [W]: 20 } }, fail: new Error('offline') });
+      await k.api.write(W, '30');
+      check('a failed write puts the old value back (20), says "Not saved.", and reports through teacherConfigSaveFailed', k.cfg.pmWeekGoals[W] === 20 && k.api.note().kind === 'failed' && k.env.saveFailed.length === 1 && /Could not save/.test(k.env.saveFailed[0].msg), JSON.stringify([k.cfg, k.env.saveFailed.length]));
+      const k2 = consoleAt(MON, { fail: Object.assign(new Error('moved'), { staleConfig: true }) });
+      await k2.api.write(W, '30');
+      check('a refused (stale) write on a week with no override removes the optimistic cell again, and is reported once', !(W in k2.cfg.pmWeekGoals) && k2.env.saveFailed.length === 1 && k2.env.saveFailed[0].e.staleConfig === true);
+      const k3 = consoleAt(MON, { cfgInit: { pmWeekGoals: { [W]: 20 } }, fail: new Error('offline') });
+      await k3.api.write(W, '');
+      check('a failed CLEAR puts the override back', k3.cfg.pmWeekGoals[W] === 20);
+      const k4 = consoleAt(MON);
+      await k4.api.write('2026-W46', '30');
+      check('a box drawn for an earlier week (the console sat open over a Monday) writes nothing and says a new week started', k4.env.writes.length === 0 && k4.api.note().kind === 'newweek' && k4.api.note().week === W);
+      const TUE_BREAK = new Date(2026, 10, 24, 9, 0, 0).getTime();     // Tue 24 Nov = 2026-W48, a skipWeeks week (Thanksgiving)
+      const k5 = consoleAt(TUE_BREAK);
+      await k5.api.write('2026-W48', '30');
+      const html5 = k5.api.box(k5.api.cfg(), '2026-W48', k5.calc, null);
+      check('a week that skipWeeks already makes a break writes nothing, and its box reads "Break week (set in config)", switched off, with no data-pm-goal hook', k5.env.writes.length === 0 && /Break week \(set in config\)/.test(html5) && /disabled/.test(html5) && !/data-pm-goal/.test(html5), html5.slice(0, 260));
+      const bad = ['<', '"', 'x'].map((s) => consoleAt(MON));
+      await bad[0].api.write('2026-W47"><script>', '30'); await bad[1].api.write('../config/class', '30'); await bad[2].api.write(undefined, '30');
+      check('a week id that is not "YYYY-Www" writes nothing', bad.every((b) => b.env.writes.length === 0));
+    }
+
+    /* 4. What the box shows. Blank = the normal goal; the number comes from the settings, not from this file. */
+    {
+      const k = consoleAt(MON), box = k.api.box(k.api.cfg(), W, k.calc, null);
+      check('default box: label "This week’s goal (minutes)", EMPTY value, placeholder "60" (the flat goal), and the help line says Blank = 60. 0 = break week. Goes back to 60 next Monday.', /This week’s goal \(minutes\)/.test(box) && /value=""/.test(box) && /placeholder="60"/.test(box) && /Blank = 60\. 0 = break week\. Goes back to 60 next Monday\./.test(box), box.slice(0, 400));
+      check('…the week it is for is named by its Monday and Sunday (Nov 16 to Nov 22), and the box carries the week id the save will use', /Nov(ember)? 16/.test(box) && /Nov(ember)? 22/.test(box) && new RegExp('data-week="' + W + '"').test(box) && /data-pm-goal/.test(box) && !/disabled/.test(box));
+      const k45 = consoleAt(MON, { config: { weeklyGoalMinutes: 45 } });
+      const b45 = k45.api.box(k45.api.cfg(), W, k45.calc, null);
+      check('with the flat goal at 45 the placeholder and the help line say 45 (derived from the settings, never a hard-coded 60)', /placeholder="45"/.test(b45) && /Blank = 45\./.test(b45) && /back to 45 next Monday/.test(b45) && !/60/.test(b45.replace(/2026-W47/g, '')));
+      const ks = consoleAt(MON, { cfgInit: { pmWeekGoals: { [W]: 30 } } }), bs = ks.api.box(ks.api.cfg(), W, ks.calc, null);
+      const kz = consoleAt(MON, { cfgInit: { pmWeekGoals: { [W]: 0 } } }), bz = kz.api.box(kz.api.cfg(), W, kz.calc, null);
+      check('a week set to 30 shows value="30" (placeholder still 60); a week set to 0 shows value="0"; neither is disabled', /value="30"/.test(bs) && /placeholder="60"/.test(bs) && /value="0"/.test(bz) && !/disabled/.test(bs + bz));
+      const kj = consoleAt(MON, { cfgInit: { pmWeekGoals: { [W]: 999, '2026-W48': 30, 'x': 5 } } }), bj = kj.api.box(kj.api.cfg(), W, kj.calc, null);
+      check('a stored value that is not valid (999) is no override: the box is blank and the goal is 3600', /value=""/.test(bj) && kj.calc.goalSeconds(kj.api.cfg(), W) === 3600);
+      const saving = k.api.box(k.api.cfg(), W, k.calc, { week: W, kind: 'saving' });
+      check('while its own save is out the box is switched off (no second edit on top of it); an old note for another week shows nothing', / disabled>/.test(saving) && /Saving…/.test(saving) && !/Saving/.test(k.api.box(k.api.cfg(), W, k.calc, { week: '2026-W46', kind: 'saving' })));
+      check('the footnote phrase: "60 minutes"; for an override "30 minutes, set for this week only (usually 60)"; for a break (0 or skipWeeks) "none: this is a break week"',
+        k.api.phrase(k.api.cfg(), W, k.calc) === '60 minutes' && ks.api.phrase(ks.api.cfg(), W, ks.calc) === '30 minutes, set for this week only (usually 60)' && kz.api.phrase(kz.api.cfg(), W, kz.calc) === 'none: this is a break week' && consoleAt(MON).api.phrase(consoleAt(MON).api.cfg(), '2026-W48', k.calc) === 'none: this is a break week');
+    }
+
+    /* 5. One maths path: the console's row for a student is the status the student's own page works out. */
+    {
+      const goals = { [W]: 30, '2026-W45': 0, '2026-W44': 25 };
+      const k = consoleAt(MON, { cfgInit: { pmWeekGoals: goals } });
+      const student = makeWorld(); student.PM.setWeekGoals(goals);
+      const weeks = { '2026-W44': 1500, '2026-W45': 100, '2026-W46': 3600, [W]: 1800 };
+      const rows = k.api.compute([{ uid: 'a', period: '4' }], { a: weeks }, k.api.cfg(), '2026-11-16', k.calc);
+      const mine = student.PM.calc.status(student.PM.cfg(), weeks, '2026-11-16');
+      check('the console\'s status for a student equals the student page\'s own status, week by week (this week at 30 min hit; W45 a break; W44 judged by its own 25)', eq(rows.a.status, mine) && mine.week.hit && mine.week.goal === 1800 && mine.history.find((h) => h.id === '2026-W45').state === 'break' && mine.history.find((h) => h.id === '2026-W44').state === 'hit', JSON.stringify(mine.history.slice(4)));
+      const flat = k.api.compute([{ uid: 'a', period: '4' }], { a: weeks }, { ...k.api.cfg(), weekGoals: {} }, '2026-11-16', k.calc);
+      check('…and without the overrides the same minutes are NOT this week\'s hit (1800 of 3600), so the box is what changes the table', !flat.a.status.week.hit && flat.a.status.week.goal === 3600);
+      check('the console and a student page name the same week: weekIdOf of the same local day', k.calc.weekIdOf('2026-11-16') === student.PM.calc.weekIdOf('2026-11-16') && k.calc.weekIdOf('2026-11-22') === W && k.calc.weekIdOf('2026-11-23') === '2026-W48');
+    }
+  }
+}
+
 console.log(`\n${failed ? '✗' : '✓'} pm-sim: ${passed} passed, ${failed} failed`);
 if (failed) { console.log('failed: ' + fails.join(' | ')); process.exit(1); }

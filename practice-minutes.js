@@ -146,12 +146,23 @@
     uiOn: false, weeklyGoalMinutes: 60, dailyCapMinutes: 20,
     skipWeeks: [], semester2Start: '', streakStartWeek: '',
     recapMinSeconds: 60, recapGapSeconds: 180, recapShowSeconds: 6, toastSeconds: 3,
-    top5MinMinutes: 10
+    top5MinMinutes: 10,
+    weekGoals: {}
   };
+  /* THIS WEEK ONLY goals (2026-11-09): config/class.pmWeekGoals, { 'YYYY-Www': minutes }, set from the
+     teacher console's Practice minutes view. The host hands the map in with PM.setWeekGoals() (the main
+     site from loadClassConfig(), a Journey page from its own config/class read); it is validated, replaced
+     as a whole each time (an override the teacher cleared disappears) and kept in this device's
+     localStorage so a slow or offline page does not flash the flat goal before the live one. It is class
+     data, not a student's: one key for everyone on the device. The config FILE never carries it (cfg()
+     ignores a weekGoals key there). */
+  var liveWeekGoals = {};
+  var WEEK_GOALS_KEY = 'pm:wg';
   function cfg(){
     var c = (typeof PRACTICE_MINUTES_CONFIG !== 'undefined' && PRACTICE_MINUTES_CONFIG) || {};
     var o = {};
     for(var k in DEFAULTS) o[k] = (c[k] === undefined || c[k] === null) ? DEFAULTS[k] : c[k];
+    o.weekGoals = liveWeekGoals;
     return o;
   }
 
@@ -184,11 +195,41 @@
     (c.skipWeeks || []).forEach(function(d){ if(/^\d{4}-\d{2}-\d{2}$/.test(d)) set[calc.weekIdOf(d)] = true; });
     return set;
   };
-  /* The goal is flat: weeklyGoalMinutes, in whole seconds, in every counted week for every
-     student, whichever days they practise. 0 = a skipped week (no goal: it neither counts
-     nor breaks a streak). */
+  /* THIS WEEK ONLY overrides (c.weekGoals, { 'YYYY-Www': whole minutes }). The most one can be is a
+     full week at the daily cap (7 x dailyCapMinutes): more could never be reached. 0 = a break week. */
+  calc.maxWeekGoalMinutes = function(c){
+    var cap = +c.dailyCapMinutes;
+    return 7 * Math.round(cap > 0 ? cap : DEFAULTS.dailyCapMinutes);
+  };
+  /* The override for ONE week in whole minutes (0 = break), or null when the week has none or the entry is
+     not valid (not an own key, not a whole number, below 0 or above the maximum). Never a guess. */
+  calc.weekGoalOf = function(c, weekId){
+    var wg = c.weekGoals;
+    if(!wg || typeof wg !== 'object' || !Object.prototype.hasOwnProperty.call(wg, weekId)) return null;
+    var m = wg[weekId];
+    return (typeof m === 'number' && m % 1 === 0 && m >= 0 && m <= calc.maxWeekGoalMinutes(c)) ? (m === 0 ? 0 : m) : null;
+  };
+  /* A map from outside (config/class.pmWeekGoals) with every bad entry dropped, silently: a key that is not
+     a week id, a value that is not a whole number from 0 to the maximum. Always a fresh plain object. */
+  calc.cleanWeekGoals = function(raw, c){
+    var out = {};
+    if(!raw || typeof raw !== 'object' || Array.isArray(raw)) return out;
+    var probe = { dailyCapMinutes: c && c.dailyCapMinutes, weekGoals: raw };
+    Object.keys(raw).forEach(function(k){
+      if(/^\d{4}-W\d{2}$/.test(k) && calc.weekGoalOf(probe, k) !== null) out[k] = calc.weekGoalOf(probe, k);
+    });
+    return out;
+  };
+  /* The goal of one week in whole seconds. In order: a skipped week (skipWeeks in the config file) is 0 and
+     wins over everything; else this week's override (0 = a break, n = n minutes); else the flat goal,
+     weeklyGoalMinutes, the same in every other week for every student, whichever days they practise. 0 means no
+     goal: the week neither counts nor breaks a streak. A pure function of (c, weekId): an override for week X
+     is read for week X and for no other week. */
   calc.goalSeconds = function(c, weekId){
-    return calc.skipSet(c)[weekId] ? 0 : Math.max(60, Math.round(c.weeklyGoalMinutes) * 60);
+    if(calc.skipSet(c)[weekId]) return 0;
+    var o = calc.weekGoalOf(c, weekId);
+    if(o !== null) return o * 60;
+    return Math.max(60, Math.round(c.weeklyGoalMinutes) * 60);
   };
   /* The free miss is per semester: semester 2 starts on semester2Start (a week belongs to
      semester 2 when its Monday is on or after that date). With no date, there is one. */
@@ -415,6 +456,23 @@
     return S;
   }
   function cacheServer(){ if(S) ls('pm:c:' + S.uid, JSON.stringify({ days: S.days, weeks: S.weeks })); }
+
+  /* ── THIS WEEK ONLY goals: the hand-in (see liveWeekGoals above) ──
+     The host calls PM.setWeekGoals(config/class.pmWeekGoals) after every SUCCESSFUL read of that doc, an absent field as {}.
+     A failed or offline read must not call it: the last known map (this page's, from localStorage) stays. The map
+     is replaced whole, so a cleared override goes away. Returns true when the map changed. */
+  function sameGoals(a, b){
+    var ka = Object.keys(a), kb = Object.keys(b);
+    return ka.length === kb.length && ka.every(function(k){ return Object.prototype.hasOwnProperty.call(b, k) && a[k] === b[k]; });
+  }
+  function setWeekGoals(raw){
+    var next = calc.cleanWeekGoals(raw, cfg());
+    if(sameGoals(next, liveWeekGoals)) return false;
+    liveWeekGoals = next;
+    ls(WEEK_GOALS_KEY, JSON.stringify(next));
+    refreshStrip();   // the ring and the "N / goal" text follow at once; My progress is drawn again each time it opens
+    return true;
+  }
 
   /* ── Totals: what the server holds plus what is still queued ── */
   function dayTotal(d){ return (S.days[d] || 0) + queued(d); }
@@ -1421,9 +1479,13 @@
     });
   }
 
+  /* The last known map for this page's first second (see liveWeekGoals): cleaned like a live one, so a hand-edited key is dropped. */
+  liveWeekGoals = calc.cleanWeekGoals(lsJson(WEEK_GOALS_KEY), cfg());
+
   /* ── Public surface ── */
   window.PM = {
     calc: calc, cfg: cfg,
+    setWeekGoals: setWeekGoals,
     setHost: function(h){ host = h; },
     track: note,
     stripHtml: stripHtml, refreshStrip: refreshStrip, syncHeader: syncHeader,

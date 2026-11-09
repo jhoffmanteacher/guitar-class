@@ -1186,6 +1186,10 @@ async function loadClassConfig(){
     const doc = await db.collection('config').doc('class').get();
     if(!doc.exists){ restoreClassConfigFromCache(); applyActivityGate(); return; }
     const d = doc.data()||{};
+    /* Practice minutes: this week's goal set from the console (config/class.pmWeekGoals, { 'YYYY-Www': minutes }).
+       Handed to the engine on every SUCCESSFUL read, an absent field as nothing; a failed read never gets here, so
+       the engine keeps its last known map (its own localStorage copy). The engine repaints the strip if it changed. */
+    try{ if(window.PM && PM.setWeekGoals) PM.setWeekGoals(d.pmWeekGoals); }catch(e){ console.warn('[guitar-class] practice minutes: this week\'s goal not applied', e); }
     // Teacher-set hold (teacher.js Manage view). Classroom management, not
     // security — the real boundary is the Firestore rules, which already
     // stop a student reading or writing anyone else's doc.

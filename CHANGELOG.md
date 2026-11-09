@@ -19,6 +19,13 @@ see `WORKFLOW.md` and the git commit log.
 - **Name the Power Chord keeps your round when you switch to another browser tab.** You come back to the same card and score.
 - **Change Up at 140 BPM now says "The tempo cannot go higher. Play it again."** instead of "try it 10 BPM faster". **At the lowest tempo (Power Chord Switch 10 BPM, Change Up 40 BPM) a hard game no longer says "Drop 5 BPM" or "this speed is too fast";** it says "Try it again at this speed until it feels steady." Change Up no longer shows "+10 BPM" at 140 or "−10 BPM" at 40, since neither can be played.
 
+## 2026-11-09 — A different practice-minutes goal for one week
+
+- **On a short week, your teacher can change the practice-minutes goal for just that week.** The ring, the "N / goal min" number at the top, the "more minutes" line, your streak and the "Week goal hit" pop-up all use that week's goal. For example, after a holiday week the goal might be 30 minutes instead of 60. The next Monday it is back to the usual goal.
+- **Your teacher can also make a week a break week.** Then there is no goal that week: your minutes still count, and your streak is not broken.
+- **Weeks that are over keep the goal they had.** Changing one week's goal never changes how an earlier week counts toward your streak.
+- If the goal goes up after you already reached it, the week shows as not reached until you pass the new goal. If it goes down, the full ring and "Week goal hit" show right away; the pop-up appears only when your practice crosses the goal.
+
 ## 2026-11-09 — Today's activities, newest date first
 
 - **Today's activities now lists your unfinished activities newest first, by the date your teacher posted them (up to 3).** Before, the list followed the activity numbers, so a re-posted #19 stayed under #20 and out of Today's activities.

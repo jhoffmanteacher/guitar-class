@@ -290,6 +290,38 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-09 — "This week's goal (minutes)" box on the console's Practice minutes view (work order `WORK-ORDER-weekly-goal-box.md`;
+      Jonathan: "the edit would be for the week only, then the next week would reset back to 60"). Always Reviewed (danger-zone file).**
+      **Behaviour (his, settled):** blank = the flat goal (`weeklyGoalMinutes`, the placeholder); 1..140 (7 × `dailyCapMinutes`,
+      derived by `PM.calc.maxWeekGoalMinutes`) = that week's goal; 0 = a break week (same as a `skipWeeks` entry); blank again clears it;
+      a `skipWeeks` week shows "Break week (set in config)", switched off, and wins over an override. Per week and kept for ever:
+      `config/class.pmWeekGoals = { '2026-W47': 30 }`; an override applies to its own week only, so a past week keeps the goal it had
+      (`calc.goalSeconds(c, weekId)`: skipWeeks → override → flat). Past weeks WITHOUT an override are still judged by the current flat
+      goal, as before (not changed). **Students see it live:** ring, strip, "N more minutes", streak, toast, recap, My progress all read
+      `calc.goalSeconds`. Raising it after a student hit it un-hits the week (recomputed from seconds; the stored week doc's `hit` is an old
+      best-effort snapshot and stays true, nothing displays it). Lowering it below what a student has shows the full ring and "goal hit" at
+      once but NO toast: the toast fires only when a counted second crosses the goal, once per week (Jonathan chose this, 2026-11-09).
+      **Where students get it (read cost):** the main page adds NO read (`loadClassConfig()` already reads `config/class` at sign-in and on
+      every tab return; it hands `d.pmWeekGoals` to `PM.setWeekGoals()`); a Journey page makes ONE `get()` of `config/class` per page load
+      (`pmLoadWeekGoals`, Jonathan's pick over cache-only; before this the Journey pages read that doc nowhere, the gate read is off).
+      The engine keeps the last map in localStorage `pm:wg` (class data, one key per device, no uid) so a slow or offline page does not flash
+      60 then 30; a failed read never calls the hand-in. `firestore.rules`: NO change (every signed-in student already reads
+      `config/class`; a week doc's `goalSeconds` may be up to 86400, the largest override is 8400).
+      **Console:** the box sits above the table (`teacherPmGoalBoxHtml`), a text box with inputmode numeric (no spinner: one save, not one
+      per click), saved on Enter or leaving it, Escape puts the saved value back. The writer `teacherSetPmWeekGoal` is the view's ONE write
+      and sits OUTSIDE the read-only block (1cg keeps that block absolute): one cell through `teacherWriteConfig()`, cell-checked on
+      `pmWeekGoals.<week>` (27th writer, `CONFIG_WRITERS` 27), `fv.delete()` to clear, optimistic copy rolled back on failure, nothing
+      written when the box was drawn in an earlier week (a console left open over a Monday). The view now reads the class settings with
+      the weeks (once per open / Refresh, `teacherLoadMinutes`); if that read fails the table is not drawn (its goals would be a
+      confident wrong answer). The table and its footnote use `teacherPmCfg()` = engine settings + the map cleaned by
+      `PM.calc.cleanWeekGoals`, through `teacherPmCompute` and `PM.calc.status`: one maths path.
+      **Checks:** pm-sim 302 → 372 assertions (section 19: the engine, validation, the hand-in and cache; section 20: the REAL console
+      functions cut out of `teacher.js` and run against the real engine, over inputs 0..1000, rollback, week guard, defaults,
+      console-equals-student) — each guard broken in a scratch copy and seen red (8 engine mutations, 12 console mutations, 11 static pins,
+      3 on the real-browser walk). `console-layout-smoke.mjs` types 30 + Enter with real keys, reloads, clears, sets 0, tries bad entries
+      and a config break week. Open: the My progress panel redraws only when opened (the strip repaints at once); a half-typed box is
+      lost if the view repaints under it (sort click, a Refresh finishing).
+
 Detail lives in git log and `CHANGELOG.md`; entries keep what still binds.
 
 - [x] **2026-11-09 — Today's activities by release date (Jonathan, 2026-11-09: "newest date leads", "by date").**
