@@ -12,7 +12,7 @@ byte-Range requests for `audio/`), so no new files and no export.
 
 Count the window in **bars of the song, from bar 1, at the FELT pulse the
 course teaches**. "the cure" reads 144 BPM and the room counts 72, one chord
-per bar, so its 20-bar form is intro 1–4, verse 5–12, chorus 13–20.
+per bar, so the form is intro 1–4, verse 5–12, the verse again 13–20, chorus 21–28 (measured off the mp3 2026-09-18; the settled layout is in skill `song-facts`, and bar 13 is the second verse, not the chorus).
 Make the window agree with the step's own tab: an eight-bar tab wants an
 eight-bar window. Otherwise the loop comes round mid-phrase and the student
 concludes they're the one who's wrong.
