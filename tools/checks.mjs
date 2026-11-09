@@ -12739,7 +12739,8 @@ function checkCoachVerdicts() {
     if (stopLong.saves.length !== 1 || stopLong.saves[0].fields.complete !== false) flag(`1ck: a game Stopped after 20 s of play saved ${stopLong.saves.length} takes (complete:${stopLong.saves[0] && stopLong.saves[0].fields.complete}), expected 1 with complete:false`);
     run('globalThis.__recSec = 3; globalThis.__playSec = 3;');
     if (take('power', 'ccFinish(false);').saves.length !== 0) flag('1ck: a game Stopped after 3 s of play was saved (it would overwrite the last full take with a stub)');
-    /* The audio runs from the count-in, which is 24 s at 10 BPM: 30 s of audio can hold under 2 s of play (Friday check 2026-11-06). */
+    /* The audio runs from the count-in, which was 24 s at 10 BPM (12 s since the 2-click count-in, 2026-11-09): 30 s of audio could hold under 2 s of play
+       (Friday check 2026-11-06). The rule is play time, not audio length, whatever the count-in. */
     run('globalThis.__recSec = 30; globalThis.__playSec = 1.6;');
     if (take('power', 'ccFinish(false);').saves.length !== 0) flag('1ck: a game Stopped 1.6 s into play was saved because its audio was 30 s long (the audio is mostly count-in; it would overwrite the last full take with a stub)');
     run('globalThis.__recSec = 30; globalThis.__playSec = 0;');
@@ -12761,7 +12762,7 @@ function checkCoachVerdicts() {
       song.stopChecks++;
       return { saves: JSON.parse(run('JSON.stringify(__saves)')), txt: text('cc-body').replace(/\s+/g, ' '), html: bodies['cc-body'] || '' };
     };
-    // the count-in ends at 25 s (the 24 s count-in of 10 BPM), play runs from there; results[i] null = a change the student never got to
+    // a stubbed 24 s count-in (10 BPM's before 2026-11-09; the real one is run in checkCountIn) ends at 25 s, play runs from there; results[i] null = a change the student never got to
     const play = (results, playSec) => `__t = 25000; __cbs[0](); cc.changes.forEach((c, i) => { c.result = ${JSON.stringify(results)}[i] === undefined ? null : ${JSON.stringify(results)}[i]; }); __t = ${25000 + playSec * 1000}; ccFinish(false);`;
     const HINT = 'Strum a little firmer';
     const n4 = Array(4).fill('ok');
