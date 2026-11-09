@@ -197,6 +197,7 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
     <div class="top-r">
       <button type="button" class="sw" id="sound-sw" role="switch" aria-checked="true"><span class="knob" aria-hidden="true"></span><span id="sound-lbl"></span></button>
       <button type="button" class="sw" id="names-sw" role="switch" aria-checked="true"><span class="knob" aria-hidden="true"></span><span data-t="showNames">Show the string names</span></button>
+      <button type="button" class="sw" id="restart-btn" data-t="startOver">Start over</button>
     </div>
   </header>
 
@@ -374,7 +375,7 @@ const I = {
     wayWrong:'Other way. ',
     done:'The {a} string is in tune.',
     levelUp:'Level {l}. Now a string can start up to {m} steps from its own note. Use the circle to choose Up or Down.',
-    ringLabel:'Circle of notes', legStr:'string', legTun:'tuner shows', secTuner:'Tuner', secQuestion:'Question',
+    ringLabel:'Circle of notes', startOver:'Start over', legStr:'string', legTun:'tuner shows', secTuner:'Tuner', secQuestion:'Question',
     step1:'{n} step', stepN:'{n} steps', ringUp:'↺ up', ringDown:'↻ down'
   },
   es: {
@@ -407,7 +408,7 @@ const I = {
     wayWrong:'Al revés. ',
     done:'La cuerda {a} está afinada.',
     levelUp:'Nivel {l}. Ahora una cuerda puede empezar a un máximo de {m} pasos de su propia nota. Usa el círculo para elegir Sube o Baja.',
-    ringLabel:'Círculo de notas', legStr:'cuerda', legTun:'el afinador muestra', secTuner:'Afinador', secQuestion:'Pregunta',
+    ringLabel:'Círculo de notas', startOver:'Empezar de nuevo', legStr:'cuerda', legTun:'el afinador muestra', secTuner:'Afinador', secQuestion:'Pregunta',
     step1:'{n} paso', stepN:'{n} pasos', ringUp:'↺ sube', ringDown:'↻ baja'
   }
 };
@@ -457,7 +458,7 @@ S.showNames = S.phase === 1 ? DEFAULTS.namesShownPhase1 : DEFAULTS.namesShownPha
 const $ = id => document.getElementById(id);
 const el = { ring:$('ring'), score:$('score'), chips:$('chips'), prompt:$('prompt'), hint:$('hint'), strings:$('strings'), answers:$('answers'),
   feedback:$('feedback'), note2:$('note2'), snark:$('snark'), lcd:$('lcd'), note:$('note'), needle:$('needle'), status:$('status'), hz:$('hz'),
-  pegRot:$('peg-rot'), pegUp:$('peg-up'), pegDown:$('peg-down'), pluck:$('pluck'), soundSw:$('sound-sw'), namesSw:$('names-sw') };
+  pegRot:$('peg-rot'), pegUp:$('peg-up'), pegDown:$('peg-down'), pluck:$('pluck'), soundSw:$('sound-sw'), namesSw:$('names-sw'), restart:$('restart-btn') };
 
 function namesVisible(){ return S.phase === 1 || S.showNames || S.missRound; }
 
@@ -823,6 +824,15 @@ el.namesSw.addEventListener('click', () => {
   if (S.phase === 1) return;                               // the names are part of Phase 1
   S.showNames = !S.showNames;
   render();
+});
+/* Start over: level 1 and Phase 1 again, and both saved keys cleared. On a shared Chromebook the next student would otherwise start at the last student's level
+   (a saved level never goes down on its own: saveLevel). Jonathan, 2026-11-09. */
+el.restart.addEventListener('click', () => {
+  try { localStorage.removeItem(LEVEL_KEY); localStorage.removeItem(PHASE2_KEY); } catch(e){}
+  stopHold();
+  S.level = 1; S.clean = 0; S.phase = 1; S.streak = 0; S.tuned = 0; S.prev = -1;
+  S.showNames = DEFAULTS.namesShownPhase1;
+  newRound();
 });
 [el.pegUp, el.pegDown].forEach(b => {
   b.addEventListener('pointerdown', e => { e.preventDefault(); startHold(+b.dataset.dir); });

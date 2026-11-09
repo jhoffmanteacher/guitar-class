@@ -41,17 +41,17 @@ What is open right now: `WORKFLOW.md` → "Where things stand" (top of the file)
 7. Hit a review trigger? Always-Reviewed → spawn a fresh reviewer now, one per independent
    area ("Delegate site review work to agents by default"). Anything else ships **Fast**
    with a `Review: Fast` trailer — see "Fast by default".
-8. Right before pushing: `git fetch`, then `git log HEAD..origin/main`. If it lists commits,
-   others' work is in the way: tell Jonathan and ask before you merge or rebase (the
-   `friday-check` and `site-sweep` skills rebase without asking, as written there; a conflict
-   still stops them). After he agrees, `git rebase origin/main`. A conflict that is only the
-   `CACHE_VERSION` line or inside the `AUDIO_HASHES` block of `sw.js`: edit just that hunk
-   (delete the markers, keep either side; never `git checkout --ours/--theirs sw.js`, which
-   replaces the whole file), then `git rebase --continue`. Any other conflict in `sw.js`, a
-   `module-N.js`, or another danger-zone file: `git rebase --abort` and ask Jonathan. When the
-   rebase ends, run the full `node tools/checks.mjs` (plus `rule-zero-proof.mjs origin/main`
-   if a `module-N.js` changed), commit the `sw.js` it rewrote, and push only when `git status`
-   is clean. After pushing: `node tools/checks.mjs --live`.
+8. Right before pushing: `git fetch`, then `git log HEAD..origin/main`. If it lists commits
+   (another session pushed), run `git rebase origin/main` yourself; this is not a fork. Say what
+   you rebased onto in your report. A conflict that is only the `CACHE_VERSION` line or inside
+   the `AUDIO_HASHES` block of `sw.js`: edit just that hunk (delete the markers, keep either
+   side; never `git checkout --ours/--theirs sw.js`, which replaces the whole file), then
+   `git rebase --continue`. Any other conflict (another `sw.js` hunk, a `module-N.js`, a
+   danger-zone file): `git rebase --abort` and ask Jonathan. Never force-push, and never make a
+   merge commit without asking. When the rebase ends, run the full `node tools/checks.mjs` on
+   the rebased tip (plus `rule-zero-proof.mjs origin/main` if a `module-N.js` changed, and the
+   smoke when those commits touch files you changed), commit the `sw.js` it rewrote, and push
+   only when `git status` is clean. After pushing: `node tools/checks.mjs --live`.
 
 **Never, whatever the task says:** move or renumber a section or step (progress
 keys); reword a keyed MC's choices — or its English prompt — in a frozen module
@@ -102,8 +102,8 @@ commit) until the full `node tools/checks.mjs` rewrites `sw.js`. Any other ✗, 
 hash map in sw.js is stale", is a real failure. **Stop hook** (`GC_STOP_CHECKS=0` turns it off)
 and `.githooks/*` (`git config core.hooksPath .githooks`): if a hook prints "node not found —
 skipping checks", it checked nothing, so run `node tools/checks.mjs` by hand. **Parallel
-sessions share one `origin`:** fetch first and never push a merge you didn't intend (step 8 of
-"Start here").
+sessions share one `origin`:** fetch first, rebase onto `origin/main`, and never push a merge you
+didn't intend (step 8 of "Start here").
 
 ### ⚠️ Three regimes decide what may change in a module
 Key `${setId}-${station}-sec${gi}-${i}`: a step that changes INDEX loses its tick. Run
@@ -186,7 +186,7 @@ Every new student-facing shell string goes in `i18n.js` (read its header for wir
 
 ## How to work with Jonathan
 **AskUserQuestion, not free text** (2–4 options). **Don't ask "should I proceed?"**: do the obvious, reversible work; "can you…/how do I…/should this be…" about code = do it. In doubt: pick a default, proceed, say why. Pause only for a real fork, irreversible / outward-facing actions. **Pushing to `main` is not one of those:** checks pass and a
-fast-forward is what you'd recommend → push, say what landed, `checks.mjs --live`. Ask for a merge, others' commits in the way, failing checks, or unready work.
+fast-forward is what you'd recommend → push, say what landed, `checks.mjs --live`. Ask for a merge commit, a conflict you cannot resolve mechanically (step 8), failing checks, or unready work.
 
 **Sweeps (50+ items)**: a second agent told to *find problems*, auditing the FIXES (`site-sweep`).
 

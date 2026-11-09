@@ -1428,6 +1428,15 @@ async function tuningSimWalk(page, run, events, stats, base) {
     if (!d1 || !d1.tgtCur || d1.inTune || d1.done.length || d1.green) fail(W + 'green-early', `level 1 before tuning: ${JSON.stringify(d1)} (expected the string's note marked tgt and cur, not done and not green)`);
     if (!d2 || !d2.inTune || d2.done.join() !== d2.target || !d2.green) fail(W + 'green-done', `level 1 once in tune: ${JSON.stringify(d2)} (expected the string's note marked done and green)`);
     checks++;
+    /* Start over (Jonathan, 2026-11-09): from a saved level 4 and Phase 2 (a shared Chromebook's last student), one click puts the page back at level 1 and Phase 1 and clears both saved keys. */
+    await run(`tsim:${lang}:restart:save`, `(localStorage.setItem('gc-tuningsim-level', '4'), localStorage.setItem('gc-tuningsim-phase2', '1'), true)`, 10);
+    await go('');
+    const r0 = await run(`tsim:${lang}:restart:before`, `({ level: ${S}.level, phase: ${S}.phase })`, 10);
+    await clickAt(`tsim:${lang}:restart:click`, '#restart-btn');
+    const r1 = await run(`tsim:${lang}:restart:after`, `({ level: ${S}.level, phase: ${S}.phase, state: ${S}.state, savedLevel: localStorage.getItem('gc-tuningsim-level'), savedPhase: localStorage.getItem('gc-tuningsim-phase2'), label: document.getElementById('restart-btn').textContent.trim() })`, 10);
+    if (!r0 || r0.level !== 4 || r0.phase !== 2) fail(W + 'start-over-before', `a saved level 4 and Phase 2 opened as ${JSON.stringify(r0)}, expected level 4, phase 2 (the Start over test has nothing to undo)`);
+    else if (!r1 || r1.level !== 1 || r1.phase !== 1 || r1.state !== 'name' || r1.savedLevel !== null || r1.savedPhase !== null || r1.label !== (lang === 'en' ? 'Start over' : 'Empezar de nuevo')) fail(W + 'start-over', `after Start over: ${JSON.stringify(r1)} (expected level 1, phase 1, state name, both saved keys gone, the label ${lang === 'en' ? '"Start over"' : '"Empezar de nuevo"'})`);
+    checks++;
   }
   try { await page.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: gum.identifier }); } catch { /* best effort */ }
   await run('tsim:cleanup', `(() => { try { localStorage.removeItem('gc-tuningsim-phase2'); localStorage.removeItem('gc-tuningsim-level'); localStorage.setItem('gc-lang', 'en'); } catch (e) {} return true; })()`, 10);

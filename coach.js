@@ -4086,6 +4086,7 @@ function ccFinish(complete){
   /* Nothing had fallen due yet at the Stop (no earlier round either): "before the first change" is true. Otherwise changes went by in silence (ccRenderDone). */
   cc.noneDue = (cc.stageLog || []).length === 0 && (cc.phase === 'countin' || cc.changes.every(c => c.t > stopT));
   cc.noStrum = (cc.onsetCount || 0) - (clickOnsetT !== null ? 1 : 0) <= 0;   // no strum at all in the whole game, the Stop click not counted
+  cc.silentStop = !ended && cc.noStrum;   // a Stop in a game where the mic heard nothing at all (ccRenderDone: no tempo advice)
   /* A Stop early in a later round, before any strum of it was heard: the hand may have left in the round before (the count-in has no Stop button, so the
      click waits for this round's play screen). The count-in is not reach time. */
   if (!ended && cc.ladder && cc.phase === 'play' && cc.stage > 0 && lastHeard < 0 && cc.stageLog.length && cc.roundEndT != null){
@@ -4165,10 +4166,17 @@ function ccRenderDone(){
   const reachedN = total - (cc.unreached || 0);
   const allReachedRight = (cc.unreached || 0) > 0 && ok === reachedN;   // the chips, the breakdown and the rounds line follow this at any score (also true when nothing was reached)
   const noneReached = (cc.unreached || 0) > 0 && reachedN === 0;        // a Stop before the first change (Jonathan, 2026-11-07: a neutral screen, no tempo advice); if changes fell due in silence first, "No strum was heard before you stopped." (Jonathan, 2026-11-08), same advice
+  /* A Stop in a game where the mic heard nothing at all, once a change is more than CC_STOP_REACH_MS past due (so noneReached is false): the speed was never
+     tried, so "this speed is too fast" and "Drop 5 BPM" are false (Jonathan, 2026-11-09: a neutral screen, as for noneReached). Power Chord Switch with two or
+     more unheard changes keeps its "strum a little firmer" screen (firmer): that is the useful advice for a strum the mic cannot hear. */
+  const silentStop = !!cc.silentStop && ok === 0 && off === 0 && !noneReached && !firmer;   // ok / off > 0 means a strum WAS graded (never in a real silent game)
   const stoppedClean = allReachedRight && !noneReached && r < 0.85;     // the headline and advice only below 85%: from there on the "great" screen is right
   let verdict, advice;
   if (noneReached){
     verdict = '&#x1F3B8; ' + (cc.noneDue ? t('games.cc.verdict.stoppedEarly') : cc.noStrum ? t('games.cc.verdict.stoppedSilent') : t('games.cc.verdict.stoppedNoChange'));
+    advice = t('games.cc.advice.stoppedEarly');
+  } else if (silentStop){
+    verdict = '&#x1F3B8; ' + t('games.cc.verdict.stoppedSilent');
     advice = t('games.cc.advice.stoppedEarly');
   } else if (stoppedClean){
     verdict = '&#x1F44D; ' + t(reachedN === 1 ? 'games.cc.verdict.stoppedOne' : 'games.cc.verdict.stopped', { ok, reached: reachedN });
@@ -4206,7 +4214,7 @@ function ccRenderDone(){
   /* What the chips mean, in numbers: right, on time but the chord sounded wrong, no strum heard. */
   const nMiss = total - ok - off - (allReachedRight ? cc.unreached : 0);
   const breakdown = noneReached && !cc.noneDue ? '' : `<div class="cc-breakdown">${escHtml(t('games.cc.breakdown', { ok, off, miss: nMiss }) + (allReachedRight ? t('games.cc.breakdown.left', { left: cc.unreached }) : ''))}</div>`;
-  const rec = firmer || stoppedClean || noneReached ? 'same' : r >= 0.85 ? 'up' : r >= 0.5 ? 'same' : 'down';
+  const rec = firmer || stoppedClean || noneReached || silentStop ? 'same' : r >= 0.85 ? 'up' : r >= 0.5 ? 'same' : 'down';
   /* A song switch: how each round went, at its own tempo. */
   /* Power Chord Switch (2026-11-05, Jonathan: the button should take more than one click and show the tempo): a −5 / +5 row
      with the tempo between, as on the setup screen, and one big "Again at N BPM" that plays it. The row opens on the tempo the

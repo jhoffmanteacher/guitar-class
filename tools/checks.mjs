@@ -5688,6 +5688,8 @@ function checkTuningSim() {
   pins += pin(/if \(e\.key !== 'Enter' && e\.key !== ' '\) return;\s*if \(!e\.repeat\) keyOn = e\.target;\s*else if \(e\.target !== keyOn\) e\.preventDefault\(\);/, 'a held Enter OR Space must count only on the control it went down on (else it answers the next question by itself: a Space held through the pause clicks the first name button on keyup)');
   pins += pin(/document\.addEventListener\('keydown', e => \{\s*lastKey = true;/, 'every keydown must set lastKey (focusFirst moves the focus only after a key press)');
   pins += pin(/function saveLevel\(\)\{\s*try \{ if \(S\.level > clampLevel\(localStorage\.getItem\(LEVEL_KEY\)\)\) localStorage\.setItem\(LEVEL_KEY, String\(S\.level\)\); \} catch\(e\)\{\}/, 'saveLevel() must never lower the saved level (a ?level=2 look must not undo a level 4)');
+  pins += pin(/<button type="button" class="sw" id="restart-btn" data-t="startOver">Start over<\/button>/, 'the "Start over" button (#restart-btn, data-t startOver) must be in the top bar');
+  pins += pin(/el\.restart\.addEventListener\('click', \(\) => \{\s*try \{ localStorage\.removeItem\(LEVEL_KEY\); localStorage\.removeItem\(PHASE2_KEY\); \} catch\(e\)\{\}\s*stopHold\(\);\s*S\.level = 1; S\.clean = 0; S\.phase = 1; S\.streak = 0; S\.tuned = 0; S\.prev = -1;\s*S\.showNames = DEFAULTS\.namesShownPhase1;\s*newRound\(\);/, 'Start over must clear both saved keys and go back to level 1, Phase 1, names shown, then deal a new round');
   pins += pin(/levelUp:'Level \{l\}\. Now a string can start up to \{m\} steps from its own note\. Use the circle to choose Up or Down\.'/, 'the English level-up line (steps, like the rest of the page)');
   pins += pin(/levelUp:'Nivel \{l\}\. Ahora una cuerda puede empezar a un máximo de \{m\} pasos de su propia nota\. Usa el círculo para elegir Sube o Baja\.'/, 'the Spanish level-up line (a un máximo de {m} pasos)');
   /* Green on the circle only once the string is done: every .rn rule that paints green also needs .done. */
@@ -5710,7 +5712,7 @@ function checkTuningSim() {
     if (WAY[lang][w].every(re => re.test(s)) && !WAY[lang][other].some(re => re.test(s))) ways++;
     else { dirBad++; err(`tuning-sim.html ${lang} ${k} is "${s}" — it must say ${w} with ${w === 'up' ? 'Tighten / Aprieta' : 'Loosen / Afloja'}, and none of the ${other} words`); }
   }
-  if (pins !== 19 || ways !== 8) { dirBad++; err(`tuning-sim.html: ${pins} of 19 drawing/peg/keyboard pins and ${ways} of 8 answer sentences held (every one must)`); }
+  if (pins !== 21 || ways !== 8) { dirBad++; err(`tuning-sim.html: ${pins} of 21 drawing/peg/keyboard pins and ${ways} of 8 answer sentences held (every one must)`); }
   /* The Module 1 note-circle figure and its step ("Right needle, wrong letter") turn the same way as this page. */
   const FIG = { en: ['HIGHER = tighten ↺', '↻ LOWER = loosen', '3+ steps away? stop and ask'], es: ['MÁS AGUDA = aprieta ↺', '↻ MÁS GRAVE = afloja', '¿3+ pasos de distancia? detente y pregunta'] };
   const CIRCLE = ['E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'C', 'C#', 'D', 'D#'];
@@ -5747,7 +5749,7 @@ function checkTuningSim() {
   if (!/S\.level\+\+; S\.clean = 0; saveLevel\(\); leveled = true;\s*S\.note = T\('levelUp', \{ l: S\.level, m: LEVELS\[S\.level - 1\]\.max \}\);/.test(code) || !I || !['en', 'es'].every(l => /\{l\}/.test(I[l].levelUp) && /\{m\}/.test(I[l].levelUp))) { bad++; problems++; err("tuning-sim.html: the level-up line must be T('levelUp', { l: S.level, m: LEVELS[S.level - 1].max }) right after S.level++, and both languages' levelUp must use {l} and {m}"); }
   if (figs !== 2 || m1ok !== 4) { dirBad++; err(`the Module 1 note circle: ${figs} of 2 figures and ${m1ok} of 4 alt/hint texts go counterclockwise (every one must)`); }
   if (dirBad) { problems++; bad++; }
-  if (bad === 0) ok(`tuning-sim.html: defaults pinned (sound on; string names shown in Phase 1, off in Phase 2; level 1 first; the four levels), no mic, no script files, and a card on the Games page with the no-guitar games; the circle runs counterclockwise (12 of 12 notes, 120 of 120 arrows), ${words} of ${dirWordCount} direction words (EN + ES), ${ways} of 8 answer sentences say the way with its verb, and the arrow keys pinned; ${pins} of 19 drawing/peg/keyboard/wording lines pinned (notes drawn at ringPt(i), one arrow, the peg's turn and icons, Space/Enter, focus, green only when done, the peg-foot layout); the Module 1 figure (${figs} of 2) and its step (${m1ok} of 4 alt/hint) go counterclockwise; ${twins} data-t/data-tl uses have both languages; a miss restarts the clean count, from the wrong branch of each answer; the level-up line names the new level`);
+  if (bad === 0) ok(`tuning-sim.html: defaults pinned (sound on; string names shown in Phase 1, off in Phase 2; level 1 first; the four levels), no mic, no script files, and a card on the Games page with the no-guitar games; the circle runs counterclockwise (12 of 12 notes, 120 of 120 arrows), ${words} of ${dirWordCount} direction words (EN + ES), ${ways} of 8 answer sentences say the way with its verb, and the arrow keys pinned; ${pins} of 21 drawing/peg/keyboard/wording lines pinned (notes drawn at ringPt(i), one arrow, the peg's turn and icons, Space/Enter, focus, green only when done, the peg-foot layout); the Module 1 figure (${figs} of 2) and its step (${m1ok} of 4 alt/hint) go counterclockwise; ${twins} data-t/data-tl uses have both languages; a miss restarts the clean count, from the wrong branch of each answer; the level-up line names the new level`);
 }
 
 /* Journey pages are referenced by ~30 hand-typed 'tabs/*.html' strings across
@@ -12953,6 +12955,7 @@ function checkCoachVerdicts() {
               coachPitchReadings = () => []; coachAnalyser = {}; coachHfRms = 0; cc.smoothRms = 0.01; cc.smoothHf = 0;
               const hit = t => { __t = t + lat; cc.smoothRms = 0.01; coachReadFrame = () => 0.05; coachOnsetAt = __t; __ccLoop(); };
               const stopAt = t => { __t = t + lat; ccFinish(false); };
+              const quiet = (from, to, step) => { for (let t = from; t <= to; t += step){ if (!cc || cc.phase !== 'play') break; __t = t + lat; coachReadFrame = () => 0.01; coachOnsetAt = 0; __ccLoop(); } };   // frames with no sound: ccLoop sweeps overdue changes
               ${body}
             } finally { coachReadFrame = keep.rf; coachAnalyser = keep.an; coachHfRms = keep.hf; coachOnsetAt = keep.at; coachPitchReadings = keep.pr; }
           })();`);
@@ -13012,6 +13015,25 @@ function checkCoachVerdicts() {
         run("setLang('es'); ccRenderDone();");
         if (!text('cc-body').replace(/\s+/g, ' ').includes('No se oyó ningún cambio antes de que pararas.')) flag('1ck R5-1 (Spanish): "No se oyó ningún cambio antes de que pararas." is missing from the first-chord-then-frozen screen');
         run("setLang('en');"); }
+      // ---- 2026-11-09 (Jonathan): a Stop in a game where the mic heard NOTHING at all is neutral even when a change is more than 4 s past due (it used to read "this speed is too fast", "Drop 5 BPM"):
+      // quiet frames sweep the overdue changes the way a real silent game does. Power Chord Switch with two or more unheard changes keeps its "strum a little firmer" screen.
+      const SILENT = 'No strum was heard before you stopped.';
+      for (const [what, mode, prog, bpm, rate, afterBeats, readout] of [['Power Chord Switch pair, Every beat, 30 BPM, 4.4 s after change 1', 'power', PAIR, 30, 2, 2.2, '30'], ['Change Up, Every bar, 60 BPM, 6 s after change 1', 'open', 0, 60, 0, 6, '60']]) {
+        const sg = loopGame(mode, prog, bpm, rate, `const c0 = cc.changes[0], b = cc.beatMs; quiet(c0.t - b, c0.t + ${afterBeats} * b, b / 2); stopAt(c0.t + ${afterBeats} * b);`);
+        const bpmShown = (/id="cc-done-bpm">(\d+) BPM</.exec(sg.html) || [])[1];
+        if (!sg.txt.includes(SILENT) || sg.txt.includes(TOOFAST) || sg.txt.includes(DROP) || !sg.txt.includes('Play it again, to the end.') || (mode === 'power' && bpmShown !== readout))
+          flag(`1ck silent-stop: ${what}, nothing heard, then Stop must read "${SILENT}" with no tempo advice${mode === 'power' ? ` and the tempo row on ${readout}` : ''}: ${sg.txt.slice(0, 220)} (row ${bpmShown})`);
+      }
+      { const sw12 = loopGame('power', SW, 120, 2, `cc.changes.forEach(c => { c.result = 'miss'; }); __t = cc.listenStart + 9 * cc.beatMs; ccStageEnd(); __t = cc.listenStart; __cbs[1](); stopAt(cc.listenStart + 0.2 * cc.beatMs);`);
+        if (!sw12.txt.includes(SILENT) || sw12.txt.includes(TOOFAST) || sw12.txt.includes(DROP)) flag(`1ck silent-stop: a song switch at 120 BPM whose round 1 went by in silence, Stopped 0.2 beats into round 2, must read "${SILENT}" with no tempo advice: ${sw12.txt.slice(0, 240)}`); }
+      { const fm = loopGame('power', PAIR, 30, 2, `const c0 = cc.changes[0], b = cc.beatMs; quiet(c0.t - b, c0.t + 3.2 * b, b / 2); stopAt(c0.t + 3.2 * b);`);
+        if (fm.txt.includes(SILENT) || !fm.txt.includes(HINT) || fm.txt.includes(TOOFAST)) flag(`1ck silent-stop: Power Chord Switch with two unheard changes more than 4 s past due must keep the "strum a little firmer" screen, not the silent line or "too fast": ${fm.txt.slice(0, 240)}`); }
+      // a strum WAS heard (late, outside every window, so no change was graded) and the Stop comes long after: the student tried, so the old "too fast" screen stays; only total silence is neutral
+      { const lt = loopGame('power', PAIR, 30, 0, `const c0 = cc.changes[0], b = cc.beatMs; quiet(c0.t - b, c0.t + b, b / 2); hit(c0.t + 1.5 * b); stopAt(c0.t + 3 * b);`);
+        if (lt.txt.includes(SILENT) || !lt.txt.includes(TOOFAST)) flag(`1ck silent-stop: a strum heard 1.5 beats after change 1 fell due (no change graded), then Stop 3 beats after it, must keep the "too fast" screen, not the silent one: ${lt.txt.slice(0, 240)}`); }
+      // a game that RUNS TO THE END in silence (nobody pressed Stop) never says "before you stopped": Change Up keeps its old screen there
+      { const en = loopGame('open', 0, 60, 0, `const b = cc.beatMs; quiet(cc.listenStart, cc.listenStart + 80 * b, b / 2);`);   // ccLoop ends the game itself when the time runs out
+        if (en.txt.includes(SILENT) || en.txt.includes('before you stopped')) flag(`1ck silent-stop: a Change Up game that ran to its end in silence reads "before you stopped" although nobody pressed Stop: ${en.txt.slice(0, 240)}`); }
       // R3-1 (review round 3): the same Stop click, heard by the REAL ccLoop. When the click lands inside a change's window (always at "Every beat", half the time at "Every 2 beats", a quarter at "Every bar") ccLoop matches the
       // click to a change as an open check and ccFinish used to grade it (a ✓ on a change never played; "5 of 15, too fast" after 4 right). R2-1 above sets the onset times by hand and
       // never runs ccLoop. 4 right, then the click 120 ms before the Stop, `beatsAfter` beats after change 4's strum.
@@ -13189,7 +13211,7 @@ function checkCoachVerdicts() {
     if (pk !== 'ccBest:F5-G5:beat') flag(`1ck: a pair's best-score key changed to "${pk}" (a student's saved bests would be lost)`);
     const pairPlan = JSON.parse(run(`JSON.stringify(ccRoundPlan(CC_POWER_PROGRESSIONS[1], CC_POWER_PROGRESSIONS[1].chords, CC_RATES[1]))`));
     if (pairPlan.slots !== 12 || pairPlan.ladder || pairPlan.rounds !== 1) flag(`1ck: a pair's round changed (${pairPlan.slots} slots at "Every 2 beats", expected 12, one round)`);
-    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, gridChecks: 60, hintChecks: 20, topChecks: 50, stopChecks: 93, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
+    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, gridChecks: 60, hintChecks: 20, topChecks: 50, stopChecks: 99, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
     for (const [k, n] of Object.entries(SONG_PIN)) if (song[k] !== n) flag(`1ck: ${song[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
     songCounts = song;
     run(`setLang('en'); cc = null; ccStop();`);

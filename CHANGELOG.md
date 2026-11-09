@@ -5,6 +5,11 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-09 — Stop after a silent game, and "Start over" in the Tuning Simulator
+
+- **If the mic heard nothing at all and you press Stop, Power Chord Switch and Change Up no longer say "this speed is too fast" or "Drop 5 BPM".** Before, that happened when a change was more than a few seconds past due at the Stop. Now the screen says "No strum was heard before you stopped." and "Play it again, to the end.", and the tempo stays the same. Power Chord Switch still says "Strum a little firmer" when two or more changes went unheard. Spanish: "No se oyó ningún rasgueo antes de que pararas."
+- **The Tuning Simulator has a "Start over" button in the top bar** (Spanish: "Empezar de nuevo"). It puts the simulator back at level 1 with the string names showing, and forgets the saved level, so the next student on a shared Chromebook starts fresh.
+
 ## 2026-11-08 — Power Chord Switch and Change Up: the Stop click, and a Stop after a silent stretch
 
 - **The click of the Stop button is no longer counted as a strum.** Before, pressing Stop could count the click as a change (at "Every beat" every time): after 4 right changes the screen could read "5 of 5 changes worked" with a check on a change you never played, or "5 of 15 — this speed is too fast" with "Drop 5 BPM". Now it reads "4 of 4 changes worked before you stopped."
