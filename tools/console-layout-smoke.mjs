@@ -537,26 +537,56 @@ async function main() {
       }
     }
 
-    // ── A rename left open on Settings, then the Students tab: the Refresh button still refreshes ──
+    // ── A rename left open on Settings, then the Students tab: Refresh still refreshes, and the typed name stays ──
     {
       const label = async () => js(`document.querySelector('[data-ta-tab="students"]').innerText.trim()`);
+      const bar = async () => js(`document.querySelector('[data-refresh-when]').innerText`);
       const n = t => Number((/(\d+)\//.exec(t) || [])[1]);
+      const finishOne = () => js(`(() => { const s = allStudents.find(x => (x.classActivities || {})['ca-21'] !== true); const d = __store.get('progress/' + s.uid); d.classActivities = Object.assign({}, d.classActivities, { 'ca-21': true }); __store.set('progress/' + s.uid, d); })()`);
+      const DRAFT = 'Typed draft name';
       await js(`document.querySelector('[data-ta-filter="all"]').click()`); await sleep(80);
       await js(`document.querySelector('[data-ta-pick][data-id="ca-21"]').click()`); await sleep(150);
       const ed = await js(`(async () => { const d = document.querySelector('[data-ta-head] details[data-ta-more]'); d.open = true; d.querySelector('[data-ta-rename]').click();
-        await new Promise(r => setTimeout(r, 100)); return !!document.querySelector('[data-ta-pane="settings"]:not([hidden]) .t-act-title-edit'); })()`);
+        await new Promise(r => setTimeout(r, 100)); const box = document.querySelector('[data-ta-pane="settings"]:not([hidden]) .t-act-title-edit'); if (box) box.value = ${JSON.stringify(DRAFT)}; return !!box; })()`);
       if (!ed) fail('rename-refresh', 'More > Rename… did not open the editor on the Settings tab');
-      // On screen, the editor holds a Refresh back, and the bar says why.
-      const held = await js(`(async () => { document.querySelector('[data-refresh-students]').click(); await new Promise(r => setTimeout(r, 300)); return document.querySelector('[data-refresh-when]').innerText; })()`);
+      // On screen, the editor holds a Refresh back; the bar says why, for 8 seconds.
+      await js(`document.querySelector('[data-refresh-students]').click()`); await sleep(300);
+      const held = await bar();
       if (!/^Not refreshed: a rename is open/.test(held)) fail('rename-refresh', 'Refresh with the rename box on screen: the bar says ' + JSON.stringify(held));
+      await sleep(8200);
+      const expired = await bar();
+      if (/Not refreshed/.test(expired)) fail('rename-refresh', '8 seconds after a held-back Refresh the bar still says ' + JSON.stringify(expired));
+      // Hidden on the Students tab, the editor no longer holds a refresh back.
+      await js(`document.querySelector('[data-refresh-students]').click()`); await sleep(300);
       await js(`document.querySelector('[data-ta-tab="students"]').click()`); await sleep(80);
       const lab0 = await label();
-      await js(`(() => { const s = allStudents.find(x => (x.classActivities || {})['ca-21'] !== true); const d = __store.get('progress/' + s.uid); d.classActivities = Object.assign({}, d.classActivities, { 'ca-21': true }); __store.set('progress/' + s.uid, d); })()`);
+      await finishOne();
       await js(`document.querySelector('[data-refresh-students]').click()`); await sleep(700);
-      const lab1 = await label();
-      const st = await js(`({ edit: activityEditId, bar: document.querySelector('[data-refresh-when]').innerText, editor: !!document.querySelector('.t-act-title-edit') })`);
-      if (n(lab1) !== n(lab0) + 1) fail('rename-refresh', 'rename opened, then the Students tab: Refresh left the tab at ' + lab0 + ' -> ' + lab1 + ' (bar: ' + JSON.stringify(st.bar) + ')');
-      if (st.edit || st.editor) fail('rename-refresh', 'leaving Settings left the rename editor open (activityEditId ' + st.edit + ')');
+      const lab1 = await label(), b1 = await bar();
+      if (n(lab1) !== n(lab0) + 1) fail('rename-refresh', 'rename open on the hidden Settings tab: Refresh left the Students tab at ' + lab0 + ' -> ' + lab1 + ' (bar: ' + JSON.stringify(b1) + ')');
+      if (/Not refreshed/.test(b1)) fail('rename-refresh', 'after a Refresh that ran the bar still says ' + JSON.stringify(b1));
+      // Back on Settings: the same editor, with what was typed.
+      await js(`document.querySelector('[data-ta-tab="settings"]').click()`); await sleep(80);
+      const back = await js(`({ edit: activityEditId, value: (document.querySelector('[data-ta-pane="settings"] .t-act-title-edit') || {}).value })`);
+      if (back.edit !== 'ca-21' || back.value !== DRAFT) fail('rename-refresh', 'back on Settings after a Refresh the rename box is ' + JSON.stringify(back) + ', expected the box open with ' + JSON.stringify(DRAFT));
+      // A save that fails keeps the box and the text; a Refresh after it (from another tab) still does.
+      const failed = await js(`(async () => { const real = db.runTransaction; db.runTransaction = async () => { throw new Error('offline (smoke)'); };
+        try { document.querySelector('[data-ta-pane="settings"] [data-rename-save]').click(); await new Promise(r => setTimeout(r, 300)); } finally { db.runTransaction = real; }
+        window.__alerts = []; const box = document.querySelector('[data-ta-pane="settings"] .t-act-title-edit'); return box ? box.value : null; })()`);
+      if (failed !== DRAFT) fail('rename-refresh', 'after a failed save the rename box holds ' + JSON.stringify(failed));
+      await js(`document.querySelector('[data-ta-tab="students"]').click()`); await sleep(60);
+      await js(`document.querySelector('[data-refresh-students]').click()`); await sleep(700);
+      await js(`document.querySelector('[data-ta-tab="settings"]').click()`); await sleep(60);
+      const after = await js(`(document.querySelector('[data-ta-pane="settings"] .t-act-title-edit') || {}).value`);
+      if (after !== DRAFT) fail('rename-refresh', 'a failed save, then a Refresh: the rename box went from ' + JSON.stringify(DRAFT) + ' to ' + JSON.stringify(after));
+      // Rename open again (on screen): Refresh is held, then Cancel and the minute refresh: the note goes.
+      await js(`document.querySelector('[data-refresh-students]').click()`); await sleep(300);
+      const held2 = await bar();
+      await js(`document.querySelector('[data-ta-pane="settings"] [data-rename-cancel]').click()`); await sleep(150);
+      await finishOne();
+      await js(`(async () => { document.activeElement && document.activeElement.blur && document.activeElement.blur(); teacherStudentsAt -= 70000; await teacherRefreshStudents(); })()`); await sleep(300);
+      const b2 = await bar();
+      if (!/^Not refreshed/.test(held2) || /Not refreshed/.test(b2)) fail('rename-refresh', 'held ' + JSON.stringify(held2) + ', then Cancel and the minute refresh ran: the bar says ' + JSON.stringify(b2));
       stats.renameRefresh = 1;
     }
 
@@ -564,10 +594,15 @@ async function main() {
     {
       await js(`document.querySelector('[data-ta-pick][data-id="ca-18"]').click()`); await sleep(150);
       await js(`document.querySelector('[data-ta-tab="preview"]').click()`); await sleep(60);
-      const r = await js(`(() => { document.querySelector('[data-ta-pane="preview"] .pc-play').click(); const on = !!pcState;
-        document.querySelector('[data-ta-pick][data-id="ca-17"]').click(); return { on, after: !!pcState }; })()`);
+      // Clicking the row of the card already playing keeps its song; another row stops it.
+      const r = await js(`(() => { document.querySelector('[data-ta-pane="preview"] .pc-play').click(); const on = pcState;
+        document.querySelector('[data-ta-pick][data-id="ca-18"]').click(); const same = !!pcState && pcState === on;
+        document.querySelector('[data-ta-pick][data-id="ca-17"]').click(); return { on: !!on, same, after: !!pcState }; })()`);
       if (!r.on) fail('audio:pick', 'the practice card ca-18 did not start its song');
-      else if (r.after) fail('audio:pick', 'picking another row left ca-18\'s song playing');
+      else {
+        if (!r.same) fail('audio:pick', 'clicking ca-18\'s own row again stopped its song');
+        if (r.after) fail('audio:pick', 'picking another row left ca-18\'s song playing');
+      }
       const tabAct = await js(`(() => { for (const id of ['ca-46', ...[...document.querySelectorAll('[data-ta-pick]')].map(x => x.dataset.id)]) {
         const row = document.querySelector('[data-ta-pick][data-id="' + id + '"]'); if (!row) continue; row.click(); if (document.querySelector('[data-ta-pane="preview"] .play-seq-btn')) return id; } return null; })()`);
       if (!tabAct) fail('audio:tab', 'no activity on the stub board has a TAB player in its Preview');
@@ -584,6 +619,23 @@ async function main() {
           await js(`typeof stopCardAudio === 'function' && stopCardAudio()`);
         }
         stats.audio = 3;
+        // The same TAB on the detail screen, opened from a student's page (as a Blocked by row does): Back to the
+        // student, the sidebar's Class activities and a tree row each stop it.
+        const uid = await js(`allStudents[0].uid`);
+        for (const [name, code] of [['Back to the student', `document.querySelector('[data-back-to-activities]').click()`], ['the sidebar\'s Class activities', `document.querySelector('#t-side [data-view="activities"]').click()`],
+          ['a tree row', `document.querySelector('#t-side-tree [data-side-unit="1"]').click()`]]) {
+          await js(`openStudentDetail(${JSON.stringify(uid)})`); await sleep(200);
+          await js(`openActivityDetail(${JSON.stringify(tabAct)})`); await sleep(300);
+          const scr = await js(`teacherActivityScreen()`);
+          await js(`(() => { document.querySelector('[data-ta-tab="preview"]').click(); document.querySelector('[data-ta-pane="preview"] .play-seq-btn').click(); })()`); await sleep(400);
+          const on = await js(`!!playSeqState`);
+          await js(code); await sleep(300);
+          const left = await js(`!!playSeqState`);
+          if (scr !== 'detail' || !on) fail('audio:detail', tabAct + ' opened from a student: screen ' + scr + ', TAB playing ' + on);
+          else if (left) fail('audio:detail', tabAct + '\'s TAB on the detail screen kept playing after ' + name);
+          else stats.audio++;
+          await js(`typeof stopCardAudio === 'function' && stopCardAudio()`);
+        }
       }
       await js(`setTeacherView('activities')`); await sleep(400);
     }
@@ -610,7 +662,7 @@ async function main() {
       for (const [name, per, act, ok] of steps) {
         const n0 = pageErrors.length;
         await js(`teacherSetPeriodFilter(${JSON.stringify(per)})`); await sleep(250);
-        const there = await js(`(() => { if (activityDetailId !== '${id}') { const row = document.querySelector('[data-ta-pick][data-id="${id}"]'); if (!row) return 'no row for it in the list'; row.click(); }
+        const there = await js(`(() => { if (activityDetailId !== '${id}') { if (!document.querySelector('[data-ta-pick][data-id="${id}"]')) document.querySelector('[data-ta-filter="all"]').click(); const row = document.querySelector('[data-ta-pick][data-id="${id}"]'); if (!row) return 'no row for it in the list'; row.click(); }
           const tab = document.querySelector('[data-ta-tab="settings"]'); if (!tab) return 'no Settings tab'; tab.click(); return ''; })()`); await sleep(60);
         if (there) { fail('write:' + name, id + ': ' + there + ' (under ' + per + ', picked ' + await js(`activityDetailId`) + ', screen ' + await js(`teacherActivityScreen()`) + ')'); continue; }
         const ready = await js(`(() => { const play = document.querySelector('[data-ta-pane="preview"] .pc-play'); if (!pcState && play) play.click();
@@ -648,22 +700,35 @@ async function main() {
       if (await js(`(__store.get('config/class').songLibrary || {})['ca-41'] === true`)) fail('to-songs', 'could not move ca-41 back');
     }
 
-    // ── Another console archives a student: this console's next write shows it ──
-    {
-      await js(`(() => { document.querySelector('[data-ta-pick][data-id="ca-21"]').click(); document.querySelector('[data-ta-tab="settings"]').click(); })()`); await sleep(120);
-      const uid = await js(`(() => { const a = CLASS_ACTIVITIES.find(x => x.id === 'ca-21'); const s = allStudents.find(x => x.uid !== 'stub-uid-05' && teacherActivityForStudent(a, x.uid, teacherClassConfig)); return s.uid; })()`);
+    // ── Another console archives a student: this console's next write, or Arrange board, shows it (under All and P4) ──
+    for (const [per, via] of [['all', 'write'], ['4', 'write'], ['all', 'board'], ['4', 'board']]) {
+      await js(`teacherSetPeriodFilter(${JSON.stringify(per)})`); await sleep(300);
+      await js(`(() => { document.querySelector('[data-ta-filter="all"]').click(); document.querySelector('[data-ta-pick][data-id="ca-21"]').click(); document.querySelector('[data-ta-tab="settings"]').click(); })()`); await sleep(120);
+      const uid = await js(`(() => { const a = CLASS_ACTIVITIES.find(x => x.id === 'ca-21'); const s = allStudents.find(x => x.uid !== 'stub-uid-05' && teacherStudentPeriod(x) === '4' && teacherActivityForStudent(a, x.uid, teacherClassConfig)); return s.uid; })()`);
       const t0 = await js(`document.querySelector('[data-ta-tab="students"]').innerText.trim()`);
-      await js(`(() => { const c = __store.get('config/class'); c.configVersion += 1; c.archived = Object.assign({}, c.archived, { ${JSON.stringify(uid)}: true }); __store.set('config/class', c); })()`);
-      const cur = await js(`(__store.get('config/class').optionalActivities || {})['ca-21'] === true ? 'required' : 'optional'`);
-      await js(`document.querySelector('[data-ta-pane="settings"] [data-set-activity-optional][data-state="${cur}"]').click()`); await sleep(600);
+      const archive = on => js(`(() => { const c = __store.get('config/class'); c.configVersion += 1; const a = Object.assign({}, c.archived); if (${on}) a[${JSON.stringify(uid)}] = true; else delete a[${JSON.stringify(uid)}]; c.archived = a; __store.set('config/class', c); })()`);
+      const nudge = async () => {
+        if (via === 'write') {
+          const cur = await js(`(__store.get('config/class').optionalActivities || {})['ca-21'] === true ? 'required' : 'optional'`);
+          await js(`document.querySelector('[data-ta-pane="settings"] [data-set-activity-optional][data-state="${cur}"]').click()`); await sleep(600);
+        } else {
+          // The board's own read, then Back to list (which paints from that copy without reading again).
+          await js(`document.querySelector('[data-ta-board-open]').click()`);
+          for (let i = 0; i < 30; i++) { await sleep(100); if (await js(`!!document.querySelector('.t-board')`)) break; }
+          await sleep(200);
+          await js(`document.querySelector('[data-ta-board-back]').click()`); await sleep(300);
+          await js(`document.querySelector('[data-ta-pick][data-id="ca-21"]')?.click()`); await sleep(100);
+        }
+      };
+      await archive(true); await nudge();
       const r = await js(`({ tab: document.querySelector('[data-ta-tab="students"]').innerText.trim(), listed: allStudents.some(s => s.uid === ${JSON.stringify(uid)}) })`);
       const tot = t => Number((/\/(\d+)/.exec(t) || [])[1]);
-      if (r.listed || tot(r.tab) !== tot(t0) - 1) fail('two-consoles', 'another console archived ' + uid + '; after this console\'s write the tab went ' + t0 + ' -> ' + r.tab + (r.listed ? ', still on the roster' : ''));
-      // Put it back the same way.
-      await js(`(() => { const c = __store.get('config/class'); c.configVersion += 1; const a = Object.assign({}, c.archived); delete a[${JSON.stringify(uid)}]; c.archived = a; __store.set('config/class', c); })()`);
-      await js(`document.querySelector('[data-ta-pane="settings"] [data-set-activity-optional][data-state="${cur === 'optional' ? 'required' : 'optional'}"]').click()`); await sleep(600);
-      if (!(await js(`allStudents.some(s => s.uid === ${JSON.stringify(uid)})`))) fail('two-consoles', uid + ' did not come back after the other console un-archived them');
+      if (r.listed || tot(r.tab) !== tot(t0) - 1) fail('two-consoles', `${per === 'all' ? 'All' : 'P' + per}, via ${via === 'write' ? "this console's write" : 'Arrange board'}: another console archived ${uid}; the tab went ${t0} -> ${r.tab}${r.listed ? ', still on the roster' : ''}`);
+      await archive(false); await nudge();
+      if (!(await js(`allStudents.some(s => s.uid === ${JSON.stringify(uid)})`))) fail('two-consoles', `${per}, via ${via}: ${uid} did not come back after the other console un-archived them`);
+      stats.twoConsoles = (stats.twoConsoles || 0) + 1;
     }
+    await js(`teacherSetPeriodFilter('all')`); await sleep(300);
 
     // ── Arrange board and back ──
     {
@@ -684,10 +749,8 @@ async function main() {
       const b = await js(`({ list: !!document.querySelector('[data-ta-list]'), picked: activityDetailId, sel: document.querySelector('[data-ta-pick].is-sel')?.dataset.id })`);
       if (!b.list || b.sel !== b.picked) fail('board', 'Back to list did not return to the list with the picked activity (' + JSON.stringify(b) + ')');
       // A card's Preview button on the board opens it in the list — with its
-      // row on screen, even in a unit the list had shut (Unit 2: only the
-      // newest unit starts open, and nothing has touched Unit 2's fold).
+      // row on screen, on whatever folds the walk so far has left.
       await js(`document.querySelector('[data-ta-filter="units"]').click()`); await sleep(80);
-      await js(`delete activityUnitOpen['2']`);
       await js(`document.querySelector('[data-ta-board-open]').click()`);
       for (let i = 0; i < 30; i++) { await sleep(100); if (await js(`!!document.querySelector('.t-board')`)) break; }
       await js(`document.querySelector('.t-board [data-open-activity][data-id="ca-13"]').click()`); await sleep(300);
@@ -883,10 +946,17 @@ async function main() {
         return { open: heads.filter(h => h.open).map(h => h.key), rows: Object.fromEntries(heads.map(h => [h.key, h.rows])), sel: document.querySelector('[data-ta-pick].is-sel')?.dataset.id || null,
           lit: [...document.querySelectorAll('#t-side-tree [data-side-unit].on')].map(b => b.dataset.sideUnit), picked: activityDetailId }; })()`;
       await js(`setTeacherView('activities')`); await sleep(400);
-      // A card picked under All in a unit the Units list has shut (Unit 1; no fold set by hand): back on Units, its unit is open.
-      await js(`(() => { activityUnitOpen = {}; document.querySelector('[data-ta-filter="all"]').click(); document.querySelector('[data-ta-pick][data-id="ca-6"]').click(); document.querySelector('[data-ta-filter="units"]').click(); })()`); await sleep(200);
+      // A card picked under All in a unit the Units list has shut (Unit 1, folded by the tree clicks above): back on
+      // Units, its unit is open, and with two units open the tree lights the picked card's.
+      await js(`(() => { document.querySelector('[data-ta-filter="all"]').click(); document.querySelector('[data-ta-pick][data-id="ca-6"]').click(); document.querySelector('[data-ta-filter="units"]').click(); })()`); await sleep(200);
       const p = await js(state);
       if (p.sel !== 'ca-6' || !p.open.includes('1')) fail('tree+pick', 'ca-6 picked under All, then Units: ' + JSON.stringify({ open: p.open, sel: p.sel }) + ', expected Unit 1 open with ca-6 selected');
+      if (p.open.length < 2 || JSON.stringify(p.lit) !== '["1"]') fail('tree+pick', 'with units ' + JSON.stringify(p.open) + ' open and ca-6 (Unit 1) picked, the tree lights ' + JSON.stringify(p.lit) + ', expected ["1"] (and two units open to test it)');
+      // The newest choice wins: the tree's Built row, then a pick under All in Unit 3, then Units.
+      await js(`document.querySelector('#t-side-tree [data-side-unit="built"]').click()`); await sleep(300);
+      await js(`(() => { document.querySelector('[data-ta-filter="all"]').click(); document.querySelector('[data-ta-pick][data-id="ca-24"]').click(); document.querySelector('[data-ta-filter="units"]').click(); })()`); await sleep(200);
+      const q = await js(state);
+      if (q.sel !== 'ca-24' || !q.open.includes('3') || JSON.stringify(q.lit) !== '["3"]') fail('tree+pick', 'tree Built, then ca-24 (Unit 3) picked under All, then Units: ' + JSON.stringify({ open: q.open, sel: q.sel, lit: q.lit }) + ', expected Unit 3 open, ca-24 selected, the Unit 3 row lit');
       await js(`document.querySelector('#t-side-tree [data-side-unit="built"]').click()`); await sleep(400);
       const a = await js(state);
       if (JSON.stringify(a.open) !== '["built"]' || !a.rows.built || JSON.stringify(a.lit) !== '["built"]') fail('tree+pick', 'the tree\'s Built row shows units ' + JSON.stringify(a.open) + ' (' + a.rows.built + ' Built rows), lit ' + JSON.stringify(a.lit));
@@ -965,7 +1035,7 @@ async function main() {
     try { rmSync(prof, { recursive: true, force: true }); } catch { /* best effort */ }
   }
   console.log(`console-layout-smoke: ${stats.views} sidebar views, ${stats.activities} activities opened (practice card, focus, paths, exit check) x ${stats.tabs / Math.max(stats.activities, 1)} tabs = ${stats.tabs} tab switches, ${stats.filters} filters, ${stats.folds} folds, ${stats.searches} searches, ${stats.writes} Settings writes with the Preview kept, ${stats.repaint} Students repaint, ${stats.counts || 0} list counts equal to the board's (All + P4), ${stats.refreshes || 0} refreshes with the Preview and list scroll kept, ${stats.board} board round trip, ${stats.backs} Backs, `
-    + `${stats.chips || 0} chip checks, ${stats.periodWrites || 0} writes under P4/P7/CAS with the song playing, ${stats.renameRefresh || 0} Refresh past a hidden rename, ${stats.audio || 0} sound stops, ${stats.listPicks || 0} list picks kept, ${stats.xss || 0} markup-name checks, ${stats.treePick || 0} tree Built row + board pick`);
+    + `${stats.chips || 0} chip checks, ${stats.periodWrites || 0} writes under P4/P7/CAS with the song playing, ${stats.renameRefresh || 0} Refresh past a hidden rename, ${stats.audio || 0} sound stops, ${stats.listPicks || 0} list picks kept, ${stats.xss || 0} markup-name checks, ${stats.treePick || 0} tree Built row + board pick, ${stats.twoConsoles || 0} two-console archives (All/P4, write/board)`);
   if (stats.tree) console.log(`  units tree: ${stats.tree.rows} rows adding up to the board's ${stats.tree.cards} cards, ${stats.tree.clicks} row clicks (Songs, list with a search, Arrange board), ${stats.tree.repaints} repaints after a write, ${stats.tree.reloads} reloads with the fold kept`);
   if (stats.widths) console.log(`  column widths at 1366: sidebar ${Math.round(stats.widths.at1366.side)}, list ${Math.round(stats.widths.at1366.list)}, detail ${Math.round(stats.widths.at1366.detail)}; at 1920: ${Math.round(stats.widths.at1920.side)}, ${Math.round(stats.widths.at1920.list)}, ${Math.round(stats.widths.at1920.detail)}`);
   if (stats.shots.length) console.log('  screenshots:\n    ' + stats.shots.join('\n    '));
