@@ -1555,11 +1555,11 @@ async function walk(base, chromePort, label) {
        (hero) card, and both exit-check cards — the list card alone missed the
        Today and check cards on 2026-11-01. Each must agree with the list card. */
     const chk = (window.CLASS_ACTIVITIES || []).find(a => a.kind === 'check');
-    const cls = a => { const r = read(caActivityCardHtml(a)), h = read(caHeroCardHtml(a, true));
+    const cls = a => { const r = read(caActivityCardHtml(a)), h = read(caHeroCardHtml(a));
       if (h.edge !== r.edge || h.tag !== r.tag) return { edge: 'today card ' + JSON.stringify(h), tag: 'list card ' + JSON.stringify(r) };
       if (chk) { const was = optionalActivityIds[chk.id], wasDone = classActivities[chk.id]; optionalActivityIds = Object.assign({}, optionalActivityIds, { [chk.id]: r.tag });
         if (classActivities[a.id] === true) classActivities = Object.assign({}, classActivities, { [chk.id]: true });
-        const c1 = read(caCheckCardHtml(chk)), c2 = read(caHeroCheckHtml(chk, true));
+        const c1 = read(caCheckCardHtml(chk)), c2 = read(caHeroCheckHtml(chk));
         optionalActivityIds = Object.assign({}, optionalActivityIds, { [chk.id]: was }); if (was === undefined) delete optionalActivityIds[chk.id];
         classActivities = Object.assign({}, classActivities, { [chk.id]: wasDone }); if (wasDone === undefined) delete classActivities[chk.id];
         if (c1.edge !== r.edge || c2.edge !== r.edge) return { edge: 'check cards ' + JSON.stringify([c1, c2]), tag: 'list card ' + JSON.stringify(r) }; }

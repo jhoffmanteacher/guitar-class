@@ -379,19 +379,10 @@
     // gated) until 2026-09-23; now the first of the page's three group
     // names, gated or not.
     'ca.startHere':            { en: "Today's activity", es: 'Actividad de hoy' },
-    /* The same slot when the hero ISN'T today's work — the newest few are
-       finished and an older activity is still undone, so it rises to the
-       top (the Today group's heading, caTodayHeadHtml, 2026-09-20). It says
-       what it is instead of "Today's activity", and carries its date at full
-       weight beside it.
-       "Unfinished" (was "Not finished") so it matches the Unfinished
-       activities group it came from. */
-    'ca.notFinished':          { en: 'Unfinished', es: 'Sin terminar' },
     // A card the teacher marked Optional in the console (caOptionalTagHtml)
     // — it shows like any other but never locks the rest of the site.
     'ca.optional':             { en: 'Optional', es: 'Opcional' },
     'ca.optionalTitle':        { en: 'You can skip this one. It does not lock the rest of the site.', es: 'Puedes saltarte esta. No bloquea el resto del sitio.' },
-    'ca.heroFromDate':         { en: 'From {date}', es: 'Del {date}' },
     // The Today hero's own call-to-action (caHeroCardHtml/caHeroCheckHtml)
     // — the arrow is appended in app.js, matching "Go to practice →".
     'ca.heroStart':            { en: 'Start', es: 'Empezar' },

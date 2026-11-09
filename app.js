@@ -13152,16 +13152,17 @@ function caFocusActivity(id){
   const found = (window.CLASS_ACTIVITIES || []).find(a => a.id === id && (caIsVisible(a) || caIsPlayAlongOnly(a) || caPinReachable(a)));
   caLinkMissingId = found ? null : id;
   caOpenId = found ? id : caOpenId;
-  /* The card itself opening isn't enough any more (item 2f) — unless it's
-     the Today hero, it also lives inside a closed "Unfinished activities"
-     or "Completed activities" <details>, and scrollIntoView on something inside a closed
-     <details> is a silent no-op. Force whichever fold it's actually in;
-     forcing the wrong one (the hero needs neither) is harmless. */
-  if(found){
-    if(classActivities[id] === true) caFinishedOpen = true; else caTodoOpen = true;
-  }
   renderClassActivities();
   if(!found) return;
+  /* Unless it's one of Today's cards, the card lives inside the "Unfinished
+     activities" or "Completed activities" <details>. The render above
+     already opened that fold around the open card (caOpenId); this keeps it
+     open after the card closes. Decided after the render, from caTodayIds,
+     so a finished card shown in Today (2026-11-09) doesn't open a Completed
+     fold it isn't in. */
+  if(!caTodayIds.includes(id)){
+    if(classActivities[id] === true) caFinishedOpen = true; else caTodoOpen = true;
+  }
   caScrollToActivity(id);
 }
 /* Bring one card to the top of whatever is actually scrolling — the .main
@@ -13193,17 +13194,18 @@ function caScrollToActivity(id){
 let caOpenId = null;
 /* The id of the Today hero: the first PENDING card of Today's activities,
    which are ordered by release date, newest first (Jonathan, 2026-11-09 —
-   see todayPool in renderClassActivities()); null when nothing is pending.
+   see pendingPool in renderClassActivities()); null when nothing is pending.
    Set fresh by renderClassActivities() each render. Read by the resume
    card (hidden while a hero is pending) and the "next up" toast. The card
    stays COLLAPSED by default like every other card (Jonathan, 2026-09-15)
    — nothing here forces it open. */
 let caStartHereId = null;
 /* Today's group can hold more than one card (Jonathan, 2026-09-29: "in
-   case there are multiple ones"): the hero plus the next cards in release-
-   date order, up to CA_TODAY_MAX in all, across days (2026-11-09).
-   caTodayIds is every card in the group, a finished one dated on the newest
-   day included (it shows done); the hero need not be the first of them. */
+   case there are multiple ones"): up to CA_TODAY_MAX PENDING cards in
+   release-date order, across days (2026-11-09), then, outside that cap,
+   every finished card dated on the newest visible date, shown done.
+   caTodayIds is every card in the group, the finished ones included; the
+   hero is the first required pending one, not always the first card. */
 const CA_TODAY_MAX = 3;   // was 2 until Jonathan, 2026-10-07
 let caTodayIds = [];
 // Non-interactive whole-activity progress dots, drawn only for the Today
@@ -13376,13 +13378,11 @@ function caHeroThumbHtml(a){
    than the heading's carries that date as a chip (2026-11-09, the chipIso
    argument of caHeroCardHtml/caHeroCheckHtml), drawn just above this tag.
 
-   The group is ordered by release date, newest first (2026-11-09), and a
-   finished card dated on the newest visible date stays in it, done. So
-   the group is CURRENT when it holds a card dated on the newest visible
-   date, and OLDER only when it doesn't (which, with that rule, leaves only
-   undated cards, i.e. dev bypass); caTodayHeadHtml words the heading for
-   each. (The per-card tag with its own "From <day>" row that the heading
-   replaced is gone; the page's one caller always grouped.) */
+   The group always holds a card of the newest visible date (2026-11-09:
+   pending cards by date, then that day's finished ones), so the heading is
+   always "Today's activity". The OLDER wording it had until then
+   ("Unfinished · From <day>", a quieter band) could no longer appear and
+   was removed with its CSS and strings. */
 function caStartHereTagHtml(a){
   return a.kind === 'check'
     ? `<span class="ca-start-tag ca-start-tag--check" data-i18n="check.prefix">${escHtml(t('check.prefix'))}</span>`
@@ -13395,22 +13395,14 @@ function caHeroChipHtml(iso){
   return label ? `<span class="ca-chip">${escHtml(label)}</span>` : '';
 }
 /* The heading over the Today group (2026-10-31): the same words a hero
-   card's tag used to carry, said once for the whole group. The group can
-   span several days (2026-11-09); the heading takes the group's NEWEST
-   date, which is its first card's (the group is in date order), and a card
-   from another day wears its own date chip. CURRENT: "Today's activity"
-   and the day. OLDER: "Unfinished" and "From <day>", the date at full
-   weight. The day is the first card's own, even when another card stands
-   in its slot (caSwap) — the heading names the slot, not the guest's
-   release date. No date set → no date. */
-function caTodayHeadHtml(first, isCurrent){
-  if(!first) return '';
-  const dateLabel = caFormatDate(caDate(first));
-  const key = isCurrent ? 'ca.startHere' : 'ca.notFinished';
-  const date = !dateLabel ? ''
-    : isCurrent ? `<span class="ca-today-date">${escHtml(dateLabel)}</span>`
-    : `<span class="ca-today-date ca-today-date--from">${escHtml(t('ca.heroFromDate', {date: dateLabel}))}</span>`;
-  return `<div class="ca-today-head${isCurrent ? '' : ' ca-today-head--older'}"><span class="ca-today-label" data-i18n="${key}">${escHtml(t(key))}</span>${date}</div>`;
+   card's tag used to carry, said once for the whole group. `day` is the
+   newest visible release date (2026-11-09): the group can span several
+   days, and a card from another day wears its own date chip. No date set
+   (dev bypass only) → no date. */
+function caTodayHeadHtml(day){
+  const dateLabel = caFormatDate(day);
+  const date = dateLabel ? `<span class="ca-today-date">${escHtml(dateLabel)}</span>` : '';
+  return `<div class="ca-today-head"><span class="ca-today-label" data-i18n="ca.startHere">${escHtml(t('ca.startHere'))}</span>${date}</div>`;
 }
 /* "#16" ahead of a card's title, quiet (2026-10-31): was "#16 - " in the
    title's own weight, which put a hyphen beside the title's em dash
@@ -13444,8 +13436,8 @@ function caCardBodyBlockHtml(a, done, focus, card){
 /* The card sits under caTodayHeadHtml, which carries the label and the date —
    see caStartHereTagHtml. No 🖨 on the collapsed row any more
    (2026-10-31): the open card's bar has it (caSyncTopbar). */
-function caHeroCardHtml(a, isCurrent = true, chipIso = ''){
-  if(a.kind === 'check') return caHeroCheckHtml(a, isCurrent, chipIso);
+function caHeroCardHtml(a, chipIso = ''){
+  if(a.kind === 'check') return caHeroCheckHtml(a, chipIso);
   a = caView(a);   // power-chord version when the switch says so — see caView
   const open = caOpenId === a.id;
   const done = classActivities[a.id] === true;
@@ -13465,7 +13457,7 @@ function caHeroCardHtml(a, isCurrent = true, chipIso = ''){
      nothing left in the right-hand column, so the column goes too rather
      than holding a 210px hole open. */
   const thumbHtml = caHeroThumbHtml(a);
-  return `<details class="ca-card ca-card--hero${isCurrent ? '' : ' ca-card--hero-older'}${focus ? ' ca-card--focus' : ''}${card ? ' ca-card--practice' : ''}${caQuietOptional(a, done) ? ' ca-card--optional' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
+  return `<details class="ca-card ca-card--hero${focus ? ' ca-card--focus' : ''}${card ? ' ca-card--practice' : ''}${caQuietOptional(a, done) ? ' ca-card--optional' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary ca-hero-summary" onclick="caCardMarkOpening(this)">
       <div class="ca-hero-main">
         ${caHeroChipHtml(chipIso)}${caStartHereTagHtml(a)}
@@ -13484,11 +13476,11 @@ function caHeroCardHtml(a, isCurrent = true, chipIso = ''){
 // The check variant carries its own "Exit check" tag + blue band (item 2)
 // rather than caCheckCardHtml's "Exit check · Title" prefix — the pill
 // already says it, so the hero title is just the plain title.
-function caHeroCheckHtml(a, isCurrent = true, chipIso = ''){
+function caHeroCheckHtml(a, chipIso = ''){
   const open = caOpenId === a.id;
   const blurb = caFirstSentence(tf(a, 'intro'));
   const done = classActivities[a.id] === true;
-  return `<details class="ca-card ec-card ca-card--hero ca-card--hero-check${isCurrent ? '' : ' ca-card--hero-older'}${caQuietOptional(a, done) ? ' ca-card--optional' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
+  return `<details class="ca-card ec-card ca-card--hero ca-card--hero-check${caQuietOptional(a, done) ? ' ca-card--optional' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary ca-hero-summary" onclick="caCardMarkOpening(this)">
       <div class="ca-hero-main">
         ${caHeroChipHtml(chipIso)}${caStartHereTagHtml(a)}
@@ -16996,8 +16988,9 @@ function refreshOpenClassActivitiesScreen(){
   if(screen && !screen.hidden) renderClassActivities();
 }
 /* In-Class Activities — three groups, in this order (Today-first work order, Phase 1):
-     1. Do now      — up to CA_TODAY_MAX cards by release date, newest
-                       first (2026-11-09, see todayPool). Collapsed like every
+     1. Do now      — up to CA_TODAY_MAX pending cards by release date,
+                       newest first, then today's finished ones (2026-11-09,
+                       see pendingPool). Collapsed like every
                        other card (Jonathan, 2026-09-15): the whole point of the
                        page is seeing the day's work at a glance, and a
                        forced-open first card pushed the rest below the fold.
@@ -17044,7 +17037,7 @@ function renderClassActivities(){
      card keeps its slot, and module grouping is untouched. Done here, on
      `groups`, so the Unfinished fold and the Completed fold read the same
      order. The Today group is picked by release date instead (2026-11-09,
-     see todayPool below). */
+     see pendingPool below). */
   const byId = {};
   (window.CLASS_ACTIVITIES || []).forEach(a => { byId[a.id] = a; });
   const view = caBoardView();
@@ -17114,21 +17107,25 @@ function renderClassActivities(){
     /* Today's activities (Jonathan, 2026-11-09: "newest date leads", "by
        date"). Picked by RELEASE DATE, not by board position, so a card the
        teacher re-dates for today moves to the top even when its #N is lower
-       than a card posted earlier in the week. Order: newest date first,
-       undated last; within one date required before optional, then the
-       lowest board position (#11 above #12, the 2026-11-02 rule). A card
-       dated on the NEWEST visible date stays in the group once the student
-       has finished it, shown done, so re-dating a card puts it back in Today
-       for everyone and a student who already did it can play it again
-       (Jonathan, 2026-11-09); an older card is in the group only while it
-       is pending. The group is the first CA_TODAY_MAX of that order. The two
-       folds below keep their board order and lose only the Today cards. */
+       than a card posted earlier in the week.
+       1. The PENDING cards fill it first, up to CA_TODAY_MAX: newest date
+          first, undated last; within one date required before optional, then
+          the lowest board position (#11 above #12, the 2026-11-02 rule).
+       2. Then every FINISHED card dated on the newest visible date, below
+          them, lowest board position first, outside that cap: re-dating a
+          card puts it back in Today for everyone, and a student who already
+          did it sees it done and can play it again (Jonathan, 2026-11-09).
+          A finished card never takes a pending card's place, so the next
+          thing to do is always at the top. An older finished card stays in
+          the Completed fold only.
+       The two folds below keep their board order and lose only the Today
+       cards. */
     const isDone = a => classActivities[a.id] === true;
     const todayDay = list.reduce((d, a) => { const x = caDate(a); return x && (!d || x > d) ? x : d; }, null);
     const boardPos = {};
     let posN = 0;
     view.sections.forEach(sec => sec.ids.forEach(id => { boardPos[id] = posN++; }));
-    const todayPool = list.filter(a => !isDone(a) || (!!todayDay && caDate(a) === todayDay))
+    const pendingPool = list.filter(a => !isDone(a))
       .sort((x, y) => {
         const dx = caDate(x) || '', dy = caDate(y) || '';
         if(dx !== dy) return dx < dy ? 1 : -1;
@@ -17139,27 +17136,26 @@ function renderClassActivities(){
        that doesn't block the site shouldn't be the one "Start" points at
        while one that does is still pending, so it is the first REQUIRED
        pending card, and an optional one only when nothing required is left. */
-    const pendingPool = todayPool.filter(a => !isDone(a));
     const heroPick = pendingPool.find(a => !caIsOptional(a)) || pendingPool[0] || null;
     caStartHereId = heroPick ? heroPick.id : null;
-    let todayCards = todayPool.slice(0, CA_TODAY_MAX);
-    // Newer done or optional cards never push the hero out of its own group.
-    if(heroPick && !todayCards.includes(heroPick)) todayCards = todayPool.slice(0, CA_TODAY_MAX - 1).concat(heroPick);
+    let todayPending = pendingPool.slice(0, CA_TODAY_MAX);
+    // Newer optional cards never push the hero out of its own group.
+    if(heroPick && !todayPending.includes(heroPick)) todayPending = pendingPool.slice(0, CA_TODAY_MAX - 1).concat(heroPick);
+    const todayDone = todayDay ? list.filter(a => isDone(a) && caDate(a) === todayDay).sort((x, y) => boardPos[x.id] - boardPos[y.id]) : [];
+    const todayCards = todayPending.concat(todayDone);
+    // Every card in the group, the finished ones below included.
     caTodayIds = todayCards.map(a => a.id);
-    /* One heading over the group (caTodayHeadHtml), dated with the group's
-       newest date: its first card's, since the group is in date order. The
-       group is CURRENT when it holds a card dated on the newest visible
-       date, OLDER otherwise. A card dated on another day wears its own date
-       chip (the Unfinished fold's .ca-chip); one sharing the heading's date
-       wears none. A finished card in the group is drawn exactly as the
-       Completed fold draws it (caActivityCardHtml: its ✓, its Completed
-       button), minus the chip. */
-    const headDay = todayCards.length ? caDate(todayCards[0]) : null;
-    const groupCurrent = !todayDay || headDay === todayDay;
-    const chipOf = a => { const d = caDate(a); return d && d !== headDay ? d : ''; };
+    /* One heading over the group (caTodayHeadHtml), dated with the newest
+       visible date: the group always holds a card of that day, pending
+       (first) or finished (appended). A card dated on another day wears its
+       own date chip (the Unfinished fold's .ca-chip); one of the heading's
+       day wears none. A finished card is drawn exactly as the Completed fold
+       draws it (caActivityCardHtml: its ✓, its Completed button), minus the
+       chip. */
+    const chipOf = a => { const d = caDate(a); return d && d !== todayDay ? d : ''; };
     const todayHtml = todayCards.length
-      ? caTodayHeadHtml(todayCards[0], groupCurrent)
-        + todayCards.map(a => isDone(a) ? caActivityCardHtml(swapIn(a), chipOf(a)) : caHeroCardHtml(swapIn(a), groupCurrent, chipOf(a))).join('')
+      ? caTodayHeadHtml(todayDay)
+        + todayCards.map(a => isDone(a) ? caActivityCardHtml(swapIn(a), chipOf(a)) : caHeroCardHtml(swapIn(a), chipOf(a))).join('')
       : '';
     let pendingHtml;
     if(!pendingCount){
