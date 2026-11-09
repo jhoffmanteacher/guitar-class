@@ -71,11 +71,11 @@ function meterKeydown(e){
 }
 /* ── Shared "selected button" ARIA helpers ──
    Several button groups on the site show which option is picked with a CSS
-   class only (.active on the tuner's string locks, .on on the teacher view
-   toggle, .sel on the timer presets) — invisible to a screen reader. These two
-   helpers mirror that class onto ARIA, and are wired from a delegated onclick /
+   class only (.active on the tuner's string locks, .sel on the timer presets)
+   — invisible to a screen reader. These helpers mirror that class onto ARIA
+   as a radiogroup, and are wired from a delegated onclick /
    onkeydown on the GROUP element in index.html, so they run after the button's
-   own handler has bubbled and the owning script (tuner.js, teacher.js) needs no
+   own handler has bubbled and the owning script (tuner.js, the timer) needs no
    change. Both no-op on any page that doesn't have the group. */
 /* Radiogroup flavour (WAI-ARIA roving tabindex, same as the meter buttons
    above): only the selected option is tabbable; radioGroupKeydown moves the
@@ -112,17 +112,6 @@ function radioGroupKeydown(e, groupSel, itemSel, onClass){
   items[next].click();   // let the group's own onclick do the real work
   syncRadioGroupAria(groupSel, itemSel, onClass);
   items[next].focus();
-}
-/* Toggle-button flavour: aria-pressed, every button stays tabbable. For a
-   group that gains buttons at runtime, where a roving tabindex would leave
-   those unmanaged siblings out of step. (Its one caller, the teacher
-   console's old row of view buttons, became a sidebar on 2026-11-08 that
-   marks the current view with aria-current instead.) */
-function syncPressedGroup(groupSel, itemSel, onClass){
-  const g = document.querySelector(groupSel);
-  if(!g) return;
-  g.querySelectorAll(itemSel).forEach(b =>
-    b.setAttribute('aria-pressed', b.classList.contains(onClass) ? 'true' : 'false'));
 }
 
 /* The click runs on the AUDIO clock, not on a timer (2026-10-12). It was
