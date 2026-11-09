@@ -997,7 +997,8 @@ let studentDetailUid=null;
 // flag of its own either.
 let activityDetailId=null;
 // Which row (if any) currently has its rename box open. Purely local view
-// state, cleared on every save/cancel and whenever the tab is re-entered.
+// state, cleared on every save/cancel, whenever the tab is re-entered, and
+// when the detail's Settings tab is left (teacherSetDetailTab).
 let activityEditId=null;
 /* Focus-view activities (view:'focus') default their preview to a full step
    list — a fast pre-class read of everything at once. "Preview as student"
