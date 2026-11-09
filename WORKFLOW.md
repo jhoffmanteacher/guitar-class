@@ -42,8 +42,9 @@ Start here. Update this block whenever an item opens or closes; each line says w
   (Jonathan, 2026-11-07, `bf7c927`); it has flipped three times, so ask him to check a real guitar before changing it.
 - **Teacher console Layout A** (`4950e86`, `fff71ec`, `6e64a62`; review round 1 `c562e7d`; rounds 2-3 `79c48a9`..`b04f201`)
   and the **units tree** (`890eae7`, Fast): "Recently shipped" → the two 2026-11-08 entries.
-- **Docs tightening (2026-11-08):** CLAUDE.md, every skill and every `.claude/rules` file cut or split into lists
-  (`7ba94ba`..`ab4aaae`).
+- **Docs tightening (2026-11-08):** CLAUDE.md rewritten for a model reader (`cdeac85`, `3625df5`); every skill and every
+  `.claude/rules` file split into one-rule bullets, then cut 20-35% (`7ba94ba`..`ab4aaae`); WORKFLOW.md cut from 47k to 14k words
+  and its orphaned rules moved into the binding files (this push).
 
 **Waiting on Jonathan**
 - **Practice minutes console view** (`997df22`, `07a4e04`): he pasted the rules on 2026-11-06 (memory
