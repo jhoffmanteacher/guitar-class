@@ -1159,9 +1159,10 @@ function setTeacherView(v){
   if(v==='songs'){ if(activityDetailFrom!=='activities') activityDetailId=null; activityEditId=null; }
   /* Class activities opens on its list + detail split. The activity picked
      there stays picked when you come back to the tab; one opened from
-     somewhere else (Songs, a student's page) does not. */
+     somewhere else (Songs, a student's page) does not — the list's own pick
+     (activityListPickId) comes back instead. */
   if(v==='activities'){
-    if(activityDetailFrom!=='activities') activityDetailId=null;
+    activityDetailId=activityListPickId;
     activityDetailFrom='activities'; activityBoardMode=false; activityEditId=null;
   }
   applyTeacherViewChrome(v);
@@ -1185,8 +1186,12 @@ function backToStudentsRoster(){ studentDetailUid=null; renderTeacherBody(); }
               opened from somewhere else (a Songs row, a student's "Blocked
               by" row), so Back returns there.
    activityDetailId is the picked activity in 'split' and the one shown in
-   'detail'. It survives a trip to the board, so Back to list lands on it. */
+   'detail'. It survives a trip to the board, so Back to list lands on it.
+   activityListPickId is the split's pick alone: opening a card from Songs
+   or a student's page overwrites activityDetailId, not this, so the list
+   still has its pick when the teacher comes back to it. */
 let activityBoardMode=false;
+let activityListPickId=null;
 let activityDetailFromUid=null;    // the student page an activity was opened from
 /* Which list the detail page was opened from: 'activities' (the list or the
    board), 'songs' (the Songs view) or 'student' (a "Blocked by" row on
@@ -1214,6 +1219,7 @@ function openActivityDetail(id){
   activityDetailFromUid = from==='student' ? studentDetailUid : null;
   activityBoardMode=false; activityEditId=null;
   teacherView='activities'; activityDetailId=id;
+  if(from==='activities') activityListPickId=id;
   applyTeacherViewChrome(from==='songs' ? 'songs' : from==='student' ? 'students' : 'activities');
   renderTeacherBody();
   window.scrollTo({top:0});
@@ -1231,7 +1237,7 @@ function backToActivitiesList(){
    kept for the way back. */
 function teacherOpenArrangeBoard(){
   // From an activity opened elsewhere (Songs, a student): the board belongs to Class activities.
-  if(activityDetailFrom!=='activities'){ activityDetailFrom='activities'; activityDetailFromUid=null; applyTeacherViewChrome('activities'); }
+  if(activityDetailFrom!=='activities'){ activityDetailFrom='activities'; activityDetailFromUid=null; activityDetailId=activityListPickId; applyTeacherViewChrome('activities'); }
   activityBoardMode=true; activityEditId=null;
   if(activityListScrollY) restoreActivityScroll=true;
   renderTeacherActivities();
@@ -2578,6 +2584,7 @@ function teacherRenderActivityScreen(screen, opts){
       }
     }
     if(!activityDetailId || !(window.CLASS_ACTIVITIES||[]).some(a=>a.id===activityDetailId)) activityDetailId=teacherDefaultActivityPick(cfg);
+    activityListPickId=activityDetailId;
     if(box.querySelector('[data-ta-split]')){
       teacherPaintActivityList(false);
       if(activityDetailId) teacherSoftRepaintDetail();
@@ -3109,7 +3116,7 @@ function renderTeacherActivityDetail(id){
   const box=document.getElementById('t-grid-container');
   if(teacherView==='activities' && teacherActivityScreen()==='board'){ renderTeacherActivities({cached:true}); return; }
   if(teacherView==='activities' && teacherActivityScreen()==='split'){
-    activityDetailId=id;
+    activityDetailId=id; activityListPickId=id;
     if(!box.querySelector('[data-ta-detail]')){ renderTeacherActivities({cached:true}); return; }
   }
   const host=teacherDetailHost();
