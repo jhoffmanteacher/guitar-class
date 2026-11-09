@@ -146,7 +146,7 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
 .bubble.wrong{background:var(--red-bg);border-color:var(--red-text);color:var(--red-text)}
 .strings.nonames .bubble{opacity:0;pointer-events:none}
 
-/* ── the circle of notes: the seven letters round a ring, A at the top, going UP counterclockwise (the way the peg turns to raise the note) ── */
+/* ── the circle of notes: the seven letters round a ring, A at the top, going UP clockwise (A, B, C… like a clock; Jonathan, 2026-11-09) ── */
 .ringbox{display:flex;flex-direction:column;align-items:center;gap:2px}
 #ring{width:224px;height:224px;display:block;overflow:visible}
 .rguide{fill:none;stroke:var(--border2);stroke-width:1.5;stroke-dasharray:2 5}
@@ -170,6 +170,19 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
 .legend .dot{width:12px;height:12px;border-radius:50%;border:3px solid var(--purple-accent);background:var(--purple-bg);display:inline-block}
 .legend .dot.cur{border-color:var(--amber-text);background:var(--amber-bg)}
 
+/* "Too low or too high?" pops up over the strings picture (the string is already named) and goes away once answered,
+   so it reads as a question; the tuner and the circle of notes stay in view beside it (Jonathan, 2026-11-09). */
+.board{position:relative}
+.board>.strings,.board>.qpop{grid-column:1;grid-row:1}
+.qpop{z-index:2;align-self:stretch;display:flex;flex-direction:column;gap:8px;background:var(--bg);border:2.5px solid var(--purple-accent);border-radius:var(--radius);box-shadow:0 10px 28px rgba(0,0,0,.18);padding:14px 16px;animation:qpopIn .18s ease-out}
+.qpop[hidden]{display:none}
+.qpop-tag{margin:0;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--purple-text)}
+.qpop-q{margin:0;font-size:1.125rem;font-weight:700;line-height:1.3;color:var(--text)}
+.qpop-h{margin:0;font-size:.875rem;color:var(--text2)}
+.qpop-ans{display:flex;gap:10px;margin-top:auto}
+.qpop-ans .ans{flex:1 1 0;padding:0 8px;font-size:.9375rem}
+@keyframes qpopIn{from{opacity:0;transform:translateY(6px) scale(.97)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.qpop{animation:none}}
 .answers{min-height:52px;margin-top:10px;display:flex;gap:10px;align-items:center}
 .ans{flex:0 1 auto;min-height:44px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg2);font-size:1rem;font-weight:600;cursor:pointer;padding:0 18px}
 .ans:hover:not(:disabled){background:var(--bg3)}
@@ -245,6 +258,7 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
       <p class="hint" id="hint"></p>
       <div class="board">
         <div class="strings" id="strings"></div>
+        <div class="qpop" id="qpop" role="dialog" aria-labelledby="qpop-q" hidden><p class="qpop-tag" data-t="secQuestion">Question</p><p class="qpop-q" id="qpop-q"></p><p class="qpop-h" id="qpop-h"></p><div class="qpop-ans" id="qpop-ans"></div></div>
         <div class="ringbox">
           <svg id="ring" viewBox="0 0 224 224" role="img" data-tl="ringLabel"></svg>
           <div class="legend"><span class="lg"><i class="dot" aria-hidden="true"></i><span data-t="legStr">string</span></span><span class="lg"><i class="dot cur" aria-hidden="true"></i><span data-t="legTun">tuner shows</span></span></div>
@@ -263,7 +277,7 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
    and window references. ═══ */
 /* ROUND-LOGIC-START */
 const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];   // what the tuner can show
-/* The circle of notes has only the seven letters (Jonathan, 2026-11-09), A at the top, going up counterclockwise.
+/* The circle of notes has only the seven letters (Jonathan, 2026-11-09), A at the top, going up CLOCKWISE (A, B, C…).
    On levels 2-4 a string always starts on one of these letters, never a sharp, and a step is one letter. */
 const WHEEL = ['A','B','C','D','E','F','G'];
 /* The same six values as STRING_TARGETS in tuner.js, low E first. */
@@ -314,7 +328,7 @@ function pickDetune(rnd, level){
 }
 function rightWay(cents){ return cents < 0 ? 'up' : 'down'; }
 /* The circle of notes: from the letter the tuner shows to the string's letter, the short way round, in letters.
-   Up is counterclockwise, the way the peg turns to tighten. Seven letters, so the short way is never a tie. */
+   Up is clockwise on the circle. Seven letters, so the short way is never a tie. */
 function ringMove(from, to){
   const d = ((WHEEL.indexOf(to) - WHEEL.indexOf(from)) % 7 + 7) % 7;
   if (d === 0) return { n: 0, way: '' };
@@ -330,13 +344,14 @@ function makeRound(prev, rnd, level){
    leave only outside +-11. */
 function stickyInTune(was, shown){ return was ? Math.abs(shown) <= 11 : Math.abs(shown) < 8; }
 /* Where the circle draws letter i of WHEEL (0 = A) in the 224x224 ring: A at the top, each next letter 360/7 degrees
-   COUNTERCLOCKWISE (going up = the way the peg turns to tighten). The proof tool and checks.mjs 1cp check the direction. */
+   CLOCKWISE (going up; Jonathan, 2026-11-09 — before that the circle went up counterclockwise, like the peg). The peg is
+   separate: Tighten still turns it counterclockwise. The proof tool and checks.mjs 1cp check the direction. */
 const RC = 112, RR = 88, RA = 58;
-function ringPt(i, r){ const a = -i * 2 * Math.PI / 7; return [RC + r * Math.sin(a), RC - r * Math.cos(a)]; }
-/* The arrow from note a to note b, the short way: SVG sweep flag 0 turns counterclockwise on screen (up), 1 clockwise (down). */
+function ringPt(i, r){ const a = i * 2 * Math.PI / 7; return [RC + r * Math.sin(a), RC - r * Math.cos(a)]; }
+/* The arrow from note a to note b, the short way: SVG sweep flag 1 turns clockwise on screen (up), 0 counterclockwise (down). */
 function ringArc(a, b, up){
   const [x1, y1] = ringPt(a, RA), [x2, y2] = ringPt(b, RA);
-  return 'M' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' A' + RA + ' ' + RA + ' 0 0 ' + (up ? 0 : 1) + ' ' + x2.toFixed(1) + ' ' + y2.toFixed(1);
+  return 'M' + x1.toFixed(1) + ' ' + y1.toFixed(1) + ' A' + RA + ' ' + RA + ' 0 0 ' + (up ? 1 : 0) + ' ' + x2.toFixed(1) + ' ' + y2.toFixed(1);
 }
 /* ROUND-LOGIC-END */
 
@@ -366,7 +381,7 @@ const I = {
     chip1:'Name it', chip2:'Read the tuner', chip3:'Turn the peg',
     p1:'Which string is this?', h1a:'Find the string on the picture. Tap its name.', h1b:'Name the string from memory.',
     p2:'Look at the tuner and the circle of notes. Is the {a} string too low or too high?', h2:'Look at the needle. Is it left or right of the center?',
-    h2n:'The tuner shows a different letter than the string. Find both letters on the circle. Counterclockwise ↺ is up. Clockwise ↻ is down.',
+    h2n:'The tuner shows a different letter than the string. Find both letters on the circle. Clockwise ↻ is up. Counterclockwise ↺ is down.',
     p3:'Tune the {a} string: turn the peg until the tuner shows {y} in green.', h3:'Hold Tighten or Loosen. Keep the needle green for one second.',
     h3n:'Hold Tighten or Loosen. The note slides. Stop when the tuner shows {y} and the needle is green for one second.',
     p4:'In tune. Next string…',
@@ -383,7 +398,7 @@ const I = {
     done:'The {a} string is in tune.',
     levelUp:'Level {l}. Now a string can start up to {m} steps from its own note. Use the circle to choose Too low or Too high.',
     ringLabel:'Circle of notes', startOver:'Start over', legStr:'string', legTun:'tuner shows', secTuner:'Tuner', secQuestion:'Question',
-    step1:'{n} step', stepN:'{n} steps', ringUp:'↺ up', ringDown:'↻ down'
+    step1:'{n} step', stepN:'{n} steps', ringUp:'↻ up', ringDown:'↺ down'
   },
   es: {
     back:'Volver al sitio de la clase', title:'Simulador de afinación',
@@ -399,7 +414,7 @@ const I = {
     chip1:'Nómbrala', chip2:'Lee el afinador', chip3:'Gira la clavija',
     p1:'¿Qué cuerda es esta?', h1a:'Busca la cuerda en el dibujo. Toca su nombre.', h1b:'Nombra la cuerda de memoria.',
     p2:'Mira el afinador y el círculo de notas. ¿La cuerda {a} está muy baja o muy alta?', h2:'Mira la aguja. ¿Está a la izquierda o a la derecha del centro?',
-    h2n:'El afinador muestra una letra distinta a la de la cuerda. Busca las dos letras en el círculo. En sentido antihorario ↺ es subir. En sentido horario ↻ es bajar.',
+    h2n:'El afinador muestra una letra distinta a la de la cuerda. Busca las dos letras en el círculo. En sentido horario ↻ es subir. En sentido antihorario ↺ es bajar.',
     p3:'Afina la cuerda {a}: gira la clavija hasta que el afinador muestre {y} en verde.', h3:'Mantén presionado Apretar o Aflojar. Deja la aguja en verde durante un segundo.',
     h3n:'Mantén presionado Apretar o Aflojar. La nota se desliza. Detente cuando el afinador muestre {y} y la aguja esté en verde durante un segundo.',
     p4:'Afinada. Ahora la siguiente cuerda…',
@@ -416,7 +431,7 @@ const I = {
     done:'La cuerda {a} está afinada.',
     levelUp:'Nivel {l}. Ahora una cuerda puede empezar a un máximo de {m} pasos de su propia nota. Usa el círculo para elegir Muy baja o Muy alta.',
     ringLabel:'Círculo de notas', startOver:'Empezar de nuevo', legStr:'cuerda', legTun:'el afinador muestra', secTuner:'Afinador', secQuestion:'Pregunta',
-    step1:'{n} paso', stepN:'{n} pasos', ringUp:'↺ sube', ringDown:'↻ baja'
+    step1:'{n} paso', stepN:'{n} pasos', ringUp:'↻ sube', ringDown:'↺ baja'
   }
 };
 function T(k, p){
@@ -463,7 +478,7 @@ const S = {
 S.level = loadLevel();
 S.showNames = S.phase === 1 ? DEFAULTS.namesShownPhase1 : DEFAULTS.namesShownPhase2;
 const $ = id => document.getElementById(id);
-const el = { ring:$('ring'), score:$('score'), chips:$('chips'), prompt:$('prompt'), hint:$('hint'), strings:$('strings'), answers:$('answers'),
+const el = { ring:$('ring'), score:$('score'), chips:$('chips'), prompt:$('prompt'), hint:$('hint'), strings:$('strings'), answers:$('answers'), qpop:$('qpop'), qpopQ:$('qpop-q'), qpopH:$('qpop-h'), qpopAns:$('qpop-ans'),
   feedback:$('feedback'), note2:$('note2'), snark:$('snark'), lcd:$('lcd'), note:$('note'), needle:$('needle'), status:$('status'), hz:$('hz'),
   pegRot:$('peg-rot'), pegUp:$('peg-up'), pegDown:$('peg-down'), pluck:$('pluck'), soundSw:$('sound-sw'), namesSw:$('names-sw'), restart:$('restart-btn') };
 
@@ -546,7 +561,7 @@ function followPitch(){
 }
 
 /* ═══ THE CIRCLE OF NOTES ═══
-   The seven letters round a ring, A at the top. Going UP is counterclockwise, the same way the peg turns to tighten.
+   The seven letters round a ring, A at the top. Going UP is clockwise (A, B, C…); the peg still tightens counterclockwise.
    Purple = the string's note, amber = the note the tuner shows now (no mark while it shows a sharp); green = on the string's note AND in tune (done).
    After the student answers Up or Down, an arrow shows the short way round from where the tuner started. */
 const ringNodes = [];
@@ -760,8 +775,16 @@ function render(){
   // prompt + hint
   const p = st === 'name' ? 'p1' : st === 'read' ? 'p2' : st === 'turn' ? 'p3' : 'p4';
   const far = !!S.round && S.round.steps > 0, y = S.round ? S.round.target : '';
-  el.prompt.textContent = T(p, { y, a: S.round ? nameOf(S.round.idx) : '' });
-  el.hint.textContent = st === 'name' ? (S.phase === 1 ? T('h1a') : T('h1b')) : st === 'read' ? T(far ? 'h2n' : 'h2') : st === 'turn' ? T(far ? 'h3n' : 'h3', { y }) : '';
+  const a = S.round ? nameOf(S.round.idx) : '';
+  /* "Read the tuner": the question itself is in the pop-up (below), so the heading only names the step. */
+  el.prompt.textContent = st === 'read' ? T('chip2') : T(p, { y, a });
+  el.hint.textContent = st === 'name' ? (S.phase === 1 ? T('h1a') : T('h1b')) : st === 'turn' ? T(far ? 'h3n' : 'h3', { y }) : '';
+  el.qpop.hidden = st !== 'read';
+  if (st === 'read') {
+    el.qpopQ.textContent = T('p2', { a });
+    el.qpopH.textContent = T(far ? 'h2n' : 'h2');
+    el.qpopAns.innerHTML = '<button type="button" class="ans" data-way="up">' + esc(T('up')) + '</button><button type="button" class="ans" data-way="down">' + esc(T('down')) + '</button>';
+  } else el.qpopAns.innerHTML = '';
   // strings picture
   const show = namesVisible();
   const th = [5.5, 4.5, 3.6, 2.8, 2.2, 1.6];
@@ -783,9 +806,7 @@ function render(){
     if (!show) {
       for (let i = 0; i < 6; i++) ah += '<button type="button" class="ans six" data-name="' + i + '">' + esc(nameOf(i)) + '</button>';
     }
-  } else if (st === 'read') {
-    ah = '<button type="button" class="ans" data-way="up">' + esc(T('up')) + '</button><button type="button" class="ans" data-way="down">' + esc(T('down')) + '</button>';
-  }   // while turning there are no answer buttons: the only controls are Tighten and Loosen
+  }   // "Too low or too high?" is answered in the pop-up; while turning there are no answer buttons: the only controls are Tighten and Loosen
   el.answers.innerHTML = ah;
   el.feedback.className = 'feedback ' + S.fbClass;
   el.feedback.textContent = S.fb;
@@ -808,7 +829,7 @@ let lastKey = false;
 function focusFirst(){
   const a = document.activeElement, lost = !a || a === document.body;
   if (lost ? !lastKey : a.closest('.top')) return;
-  const b = el.answers.querySelector('button:not(:disabled)') || (S.state === 'name' && el.strings.querySelector('.bubble:not(:disabled)')) ||
+  const b = el.qpopAns.querySelector('button:not(:disabled)') || el.answers.querySelector('button:not(:disabled)') || (S.state === 'name' && el.strings.querySelector('.bubble:not(:disabled)')) ||
     (S.state === 'turn' && (S.round.answer === 'up' ? el.pegUp : el.pegDown));
   if (b) { try { b.focus({ preventScroll: true }); } catch(e){} }
 }

@@ -5,6 +5,11 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-09 (night) — Tuning Simulator: the question pops up, and the letters go clockwise
+
+- **"Too low or too high?" is now a pop-up.** After you name the string, a box marked **Question** covers the string picture with the question, the hint and the two answers (**Too low — tighten** / **Too high — loosen**). The tuner and the circle of notes stay in view next to it. The box goes away as soon as you answer. Spanish: **Pregunta**.
+- **The letters on the circle now go clockwise: A at the top, then B, C, D… to the right, like a clock.** So on the circle, going up is now clockwise ↻ and going down is counterclockwise ↺, and the arrow turns that way. The peg has not changed: Tighten still turns it counterclockwise and the note goes up.
+
 ## 2026-11-09 (late evening) — Tuning Simulator: seven letters on the circle, and a clear question
 
 - **The circle of notes in the Tuning Simulator now shows only A, B, C, D, E, F and G, with A at the top.** Going up is still counterclockwise (A, B, C…), the way the peg turns to tighten. The sharps (C#, F#…) are gone from the circle.

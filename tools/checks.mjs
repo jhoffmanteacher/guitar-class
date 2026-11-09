@@ -5617,8 +5617,8 @@ function checkTuningSim() {
   /* 2026-11-08: the direction (Jonathan, settled: Tighten = counterclockwise = the note goes up = Left key;
      Loosen = clockwise = down = Right key). The circle is drawn from ringPt/ringArc in the ROUND-LOGIC
      block, run here: the seven letters A-G only (Jonathan, 2026-11-09), each next one 360/7 degrees
-     counterclockwise on the screen, A at the top, and the
-     arrow's SVG sweep flag 0 (counterclockwise on screen) for Up, 1 for Down, small arc, from the tuner's
+     CLOCKWISE on the screen (A, B, C…; Jonathan, 2026-11-09 — before that it went up counterclockwise), A at the
+     top, and the arrow's SVG sweep flag 1 (clockwise on screen) for Up, 0 for Down, small arc, from the tuner's
      note to the string's. tools/tuning-sim-proof.mjs works the arcs out in full; tools/smoke.mjs measures
      the drawn arrow. The words that say the direction are pinned as one set, EN and ES. */
   let dirBad = 0, lvl = null;
@@ -5631,7 +5631,7 @@ function checkTuningSim() {
     if (W7.join() !== 'A,B,C,D,E,F,G') { dirBad++; err(`tuning-sim.html WHEEL is [${W7}] — the circle has only the seven letters A B C D E F G, A at the top (Jonathan, 2026-11-09)`); }
     for (let i = 0; i < 7; i++) {
       const step = ((ang(lvl.ringPt((i + 1) % 7, 88)) - ang(lvl.ringPt(i, 88))) % 360 + 540) % 360 - 180;
-      if (Math.abs(step - STEP) > 0.01) { dirBad++; if (dirBad < 3) err(`tuning-sim.html ringPt: ${W7[(i + 1) % 7]} is ${step.toFixed(1)} degrees from ${W7[i]} on screen — each next letter must be ${STEP.toFixed(1)} degrees COUNTERCLOCKWISE (going up = the way the peg turns to tighten)`); }
+      if (Math.abs(step + STEP) > 0.01) { dirBad++; if (dirBad < 3) err(`tuning-sim.html ringPt: ${W7[(i + 1) % 7]} is ${step.toFixed(1)} degrees from ${W7[i]} on screen (+ = counterclockwise) — each next letter must be ${STEP.toFixed(1)} degrees CLOCKWISE (A, B, C… going up)`); }
     }
     const top = lvl.ringPt(0, 88);
     if (Math.abs(top[0] - lvl.RC) > 0.01 || top[1] >= lvl.RC) { dirBad++; err(`tuning-sim.html ringPt: ${W7[0]} is not at the top of the circle`); }
@@ -5641,8 +5641,8 @@ function checkTuningSim() {
       if (mv.n < 1) continue;
       const n = (lvl.ringArc(a, b, mv.way === 'up').match(/-?[\d.]+/g) || []).map(Number), p1 = lvl.ringPt(a, lvl.RA), p2 = lvl.ringPt(b, lvl.RA);
       const same = (u, v) => Math.abs(u - v) < 0.06;
-      if (n.length === 9 && same(n[0], p1[0]) && same(n[1], p1[1]) && n[2] === lvl.RA && n[3] === lvl.RA && n[5] === 0 && n[6] === (mv.way === 'up' ? 0 : 1) && same(n[7], p2[0]) && same(n[8], p2[1])) arcs++;
-      else { dirBad++; if (dirBad < 3) err(`tuning-sim.html ringArc ${W7[a]}->${W7[b]} (${mv.way}) draws "${lvl.ringArc(a, b, mv.way === 'up')}" — expected a small arc of radius RA from the tuner's note to the string's, sweep flag ${mv.way === 'up' ? 0 : 1} (${mv.way === 'up' ? 'counterclockwise' : 'clockwise'} on screen)`); }
+      if (n.length === 9 && same(n[0], p1[0]) && same(n[1], p1[1]) && n[2] === lvl.RA && n[3] === lvl.RA && n[5] === 0 && n[6] === (mv.way === 'up' ? 1 : 0) && same(n[7], p2[0]) && same(n[8], p2[1])) arcs++;
+      else { dirBad++; if (dirBad < 3) err(`tuning-sim.html ringArc ${W7[a]}->${W7[b]} (${mv.way}) draws "${lvl.ringArc(a, b, mv.way === 'up')}" — expected a small arc of radius RA from the tuner's note to the string's, sweep flag ${mv.way === 'up' ? 1 : 0} (${mv.way === 'up' ? 'clockwise' : 'counterclockwise'} on screen)`); }
     }
     if (arcs !== 42) { dirBad++; err(`tuning-sim.html: ${arcs} of 42 circle arrows are drawn the right way`); }
   }
@@ -5652,10 +5652,10 @@ function checkTuningSim() {
   try { I = vm.runInContext('(' + im[1] + ')', vm.createContext({})); } catch (e) { err(`tuning-sim.html: could not read the en/es word table (${e && e.message})`); problems++; bad++; }
   const DIR_WORDS = {
     en: { tightenTurn: 'turn counterclockwise', loosenTurn: 'turn clockwise', keys: 'Keys: ← counterclockwise (tighten) · → clockwise (loosen)',
-      h2n: 'The tuner shows a different letter than the string. Find both letters on the circle. Counterclockwise ↺ is up. Clockwise ↻ is down.', ringUp: '↺ up', ringDown: '↻ down',
+      h2n: 'The tuner shows a different letter than the string. Find both letters on the circle. Clockwise ↻ is up. Counterclockwise ↺ is down.', ringUp: '↻ up', ringDown: '↺ down',
       up: 'Too low — tighten', down: 'Too high — loosen' },
     es: { tightenTurn: 'gira en sentido antihorario', loosenTurn: 'gira en sentido horario', keys: 'Teclas: ← en sentido antihorario (apretar) · → en sentido horario (aflojar)',
-      h2n: 'El afinador muestra una letra distinta a la de la cuerda. Busca las dos letras en el círculo. En sentido antihorario ↺ es subir. En sentido horario ↻ es bajar.', ringUp: '↺ sube', ringDown: '↻ baja',
+      h2n: 'El afinador muestra una letra distinta a la de la cuerda. Busca las dos letras en el círculo. En sentido horario ↻ es subir. En sentido antihorario ↺ es bajar.', ringUp: '↻ sube', ringDown: '↺ baja',
       up: 'Muy baja — aprieta', down: 'Muy alta — afloja' }
   };
   const dirWordCount = Object.values(DIR_WORDS).reduce((n, o) => n + Object.keys(o).length, 0);

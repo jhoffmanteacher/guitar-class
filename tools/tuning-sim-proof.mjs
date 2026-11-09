@@ -14,7 +14,7 @@
        a sharp: the circle has only the seven letters, 2026-11-09); the difference is never
        more than 5 notes (a 4th), and the smallest and largest of each level are both drawn
      - the right answer is Up for every flat start and Down for every sharp start,
-       and the circle of notes (ringMove, up = counterclockwise) gives the same way,
+       and the circle of notes (ringMove, up = clockwise on the circle) gives the same way,
        and as many steps as letters between the two notes (worked out here from the
        pitch, not from the circle), for every round; the most letters a level draws is
        its LEVEL_LETTERS (the "up to {m} steps" message)
@@ -24,9 +24,9 @@
        tuner.js) from every start, and never starts already done
    and, for all 42 pairs of different letters on the circle, that the short way gives
    the same way as the pitch (the note it calls "up" is at most a tritone higher). The drawing:
-   ringPt puts A at the top and each next letter 360/7 degrees COUNTERCLOCKWISE on the
+   ringPt puts A at the top and each next letter 360/7 degrees CLOCKWISE on the
    screen (up = the way the peg turns to tighten), and for every pair the arrow
-   ringArc draws turns counterclockwise for Up and clockwise for Down, through
+   ringArc draws turns clockwise for Up and counterclockwise for Down, through
    exactly the steps ringMove counts, round the ring's centre (the SVG arc worked out the way the SVG spec
    does, endpoint to centre). tools/smoke.mjs measures the arrow in a real browser.
 
@@ -132,9 +132,9 @@ must(pairs === 42, `only ${pairs} of 42 letter pairs were right on the circle`);
 /* The drawing's direction. Screen angle of a point: counterclockwise on the screen is positive (y points down in SVG). */
 const scrAng = ([x, y]) => Math.atan2(L.RC - y, x - L.RC) * 180 / Math.PI;
 const norm = d => ((d % 360) + 540) % 360 - 180;
-let ccw = 0;
+let cw = 0;
 const STEP = 360 / 7;
-for (let i = 0; i < 7; i++) { const step = norm(scrAng(L.ringPt((i + 1) % 7, 88)) - scrAng(L.ringPt(i, 88))); if (Math.abs(step - STEP) < 0.01) ccw++; else fails.push(`ringPt: ${L.WHEEL[(i + 1) % 7]} sits ${step.toFixed(1)} degrees from ${L.WHEEL[i]} (expected +${STEP.toFixed(1)}, counterclockwise)`); }
+for (let i = 0; i < 7; i++) { const step = norm(scrAng(L.ringPt((i + 1) % 7, 88)) - scrAng(L.ringPt(i, 88))); if (Math.abs(step + STEP) < 0.01) cw++; else fails.push(`ringPt: ${L.WHEEL[(i + 1) % 7]} sits ${step.toFixed(1)} degrees from ${L.WHEEL[i]} (expected -${STEP.toFixed(1)}, clockwise)`); }
 const top = L.ringPt(0, 88);
 must(Math.abs(top[0] - L.RC) < 0.01 && top[1] < L.RC, `ringPt: ${L.WHEEL[0]} is not at the top (${top})`);
 /* An SVG arc "M x1 y1 A r r 0 large sweep x2 y2", turned into a signed screen angle (counterclockwise positive), the way SVG 1.1 F.6.5 does it. */
@@ -151,12 +151,12 @@ let arcs = 0;
 for (let a = 0; a < 7; a++) for (let b = 0; b < 7; b++) {
   const mv = L.ringMove(L.WHEEL[a], L.WHEEL[b]);
   if (mv.n < 1) continue;
-  const { turn, cx, cy } = arcTurn(L.ringArc(a, b, mv.way === 'up')), want = (mv.way === 'up' ? 1 : -1) * mv.n * STEP;
+  const { turn, cx, cy } = arcTurn(L.ringArc(a, b, mv.way === 'up')), want = (mv.way === 'up' ? -1 : 1) * mv.n * STEP;
   const centred = Math.hypot(cx - L.RC, cy - L.RC) < 1;   // round the ring's own centre, not bulging the other way
   if (centred && Math.abs(turn - want) < 1) arcs++; else fails.push(`ringArc ${L.WHEEL[a]}->${L.WHEEL[b]} (${mv.n} ${mv.way}): the arrow turns ${turn.toFixed(1)} degrees on screen round (${cx.toFixed(1)}, ${cy.toFixed(1)}), expected ${want} (+ = counterclockwise) round the ring's centre (${L.RC}, ${L.RC})`);
 }
-console.log(`the drawing: ${ccw} of 7 letters sit ${STEP.toFixed(1)} degrees counterclockwise of the one before, A at the top; ${arcs} of 42 arrows turn counterclockwise for Up and clockwise for Down through the right number of steps`);
-must(ccw === 7 && arcs === 42, `the circle is drawn the wrong way round (${ccw} of 7 letters, ${arcs} of 42 arrows)`);
+console.log(`the drawing: ${cw} of 7 letters sit ${STEP.toFixed(1)} degrees clockwise of the one before, A at the top; ${arcs} of 42 arrows turn clockwise for Up and counterclockwise for Down through the right number of steps`);
+must(cw === 7 && arcs === 42, `the circle is drawn the wrong way round (${cw} of 7 letters, ${arcs} of 42 arrows)`);
 
 // Pinned numbers from the work order.
 must(L.MIN_DETUNE === 12 && L.MAX_DETUNE === 45, `detune range is ${L.MIN_DETUNE}..${L.MAX_DETUNE}, the work order says 12..45`);
