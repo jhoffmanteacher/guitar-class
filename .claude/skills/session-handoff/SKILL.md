@@ -68,3 +68,24 @@ Both hooks resolve `node` themselves rather than trusting PATH (Git Bash on
 Windows lacks the Node installer's PATH entry). If you ever see the "skipping
 checks" warning, the hook is a no-op — run `node tools/checks.mjs` by hand.
 Keep the candidate-path list identical in both hooks.
+
+**Machines and local setup.**
+- `.gitignore` ignores everything under `.claude/` except the folders it names
+  (`skills/`, `rules/`, `hooks/`, `agents/`, plus `settings.json`). A new
+  `.claude/<folder>` must be un-ignored there, or it is never committed.
+- On a new machine: clone, run `git config core.hooksPath .githooks`, install
+  Node 22+ (`tools/smoke.mjs` needs its global `WebSocket`) and Chrome or
+  Chromium (`tools/smoke.mjs --chrome <path>` if it is not found).
+- Live preview: VS Code Live Server (right-click `index.html` → "Open with Live
+  Server"). No commit needed.
+- The dev bypass (a button on the auth wall, uid `dev-user`) never writes to
+  Firestore: the save path skips it. Test a save with a real account.
+
+**Cloud-sandbox notes.**
+- Clone read-only: `git clone --depth 1
+  https://github.com/jhoffmanteacher/guitar-class.git`.
+- Firebase does not load in the sandbox; use the dev bypass.
+- `.week-panel` and `.tab-panel` are `display:none` until active, so an element
+  screenshot of a set times out silently. Open it first: `devBypass()` →
+  `onModuleChange(N)` → `switchTabById('<setId>', 'station-b')`. The lesson
+  panel's suffix is `LESSON_TAB` (`'station-b'`); there is no `station-c` panel.
