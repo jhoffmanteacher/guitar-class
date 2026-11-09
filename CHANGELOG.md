@@ -26,6 +26,12 @@ see `WORKFLOW.md` and the git commit log.
 - **Weeks that are over keep the goal they had.** Changing one week's goal never changes how an earlier week counts toward your streak.
 - If the goal goes up after you already reached it, the week shows as not reached until you pass the new goal. If it goes down, the full ring and "Week goal hit" show right away; the pop-up appears only when your practice crosses the goal.
 
+## 2026-11-09 — Updates arrive sooner, and you stay on the page you were on
+
+- **When the site has an update, the page now refreshes sooner after you open it.** Before, the site downloaded every file of the new version first (92 files), which could take half a minute on school Wi-Fi, so you could start working and then have the page refresh under you. Now it refreshes as soon as the 10 main files are in. The other files load after the refresh.
+- **After an update the page comes back where you were.** Before, the refresh always opened In-Class Activities. Now it opens the same page (your lesson or its checklist, In class, Songs, My progress), scrolled to about the same place. The refresh still waits for a drill, a recording, an exit check or a song that is playing to finish.
+- **Teacher console:** the same after an update. It comes back on the view you were on (the picked activity and its tab, the Arrange board, a student's page, the skills grid's set) instead of the Class activities list.
+
 ## 2026-11-09 — Today's activities, newest date first
 
 - **Today's activities now lists your unfinished activities newest first, by the date your teacher posted them (up to 3).** Before, the list followed the activity numbers, so a re-posted #19 stayed under #20 and out of Today's activities.

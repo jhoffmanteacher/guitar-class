@@ -71,7 +71,7 @@ class FakeCache {
   async put(r, res) { this.m.set(keyOf(r), res.clone()); }
   async delete(r) { return this.m.delete(keyOf(r)); }
   async keys() { return [...this.m.keys()].map(u => new FakeRequest(u)); }
-  async add(r) { this.m.set(keyOf(r), new FakeResponse('x', { type: 'basic' })); }
+  async add(r) { (this.adds = this.adds || []).push(keyOf(r)); if (this.failAdd && this.failAdd(keyOf(r))) throw new Error('add failed'); this.m.set(keyOf(r), new FakeResponse('x', { type: 'basic' })); }
   async addAll(rs) { for (const r of rs) await this.add(r); }
   has(r) { return this.m.has(keyOf(r)); }
 }
@@ -86,7 +86,8 @@ class FakeStorage {
 /* ── one service-worker "version" running against a shared storage ────── */
 function boot(swSrc, storage, server) {
   const handlers = {}, calls = [];
-  const self = { location: new URL('sw.js', BASE), addEventListener: (t, f) => { handlers[t] = f; }, skipWaiting: async () => {}, clients: { claim: async () => {} } };
+  const posted = [];
+  const self = { location: new URL('sw.js', BASE), addEventListener: (t, f) => { handlers[t] = f; }, skipWaiting: async () => { calls.push({ skipWaiting: true }); }, clients: { claim: async () => {}, matchAll: async () => [{ postMessage: m => posted.push(m) }, { postMessage: m => posted.push(m) }] } };
   const fetchStub = async (req, init = {}) => {
     const url = new URL(typeof req === 'string' ? req : req.url, BASE);
     const range = typeof req !== 'string' && req.headers && req.headers.has('range');
@@ -100,7 +101,8 @@ function boot(swSrc, storage, server) {
   vm.runInContext(swSrc, ctx);
   const read = expr => vm.runInContext(expr, ctx);
   return {
-    read, calls,
+    read, calls, posted,
+    async message(data) { const ps = []; handlers.message({ data, waitUntil: p => ps.push(p) }); await Promise.all(ps); return ps.length; },
     async activate() { const ps = []; handlers.activate({ waitUntil: p => ps.push(p) }); await Promise.all(ps); },
     async install() { const ps = []; handlers.install({ waitUntil: p => ps.push(p) }); await Promise.all(ps); },
     async get(path, { range = false, mode = 'no-cors' } = {}) {
@@ -314,14 +316,51 @@ async function runScenarios(swSrcOf) {
     const sw = boot(swSrcOf(mapOf(all), ''), st, {});
     await sw.install();
     const shell = await st.open(sw.read('CACHE_VERSION'));
-    check('install fills the shell cache', shell.m.size > 80);
+    /* Shell first (2026-11-09): the install stores the critical list and nothing
+       else, then takes over; the page asks for the rest with a message. */
+    const critical = sw.read('PRECACHE_CRITICAL'), assets = sw.read('ASSETS');
+    const rest = assets.filter(u => !critical.includes(u));
+    check('install stores exactly the critical shell files', shell.m.size === new Set(critical.map(keyOf)).size && critical.every(u => shell.has(u)));
+    check('install takes over without waiting for the rest', sw.calls.some(c => c.skipWaiting) && rest.length > 60 && !rest.some(u => shell.has(u)));
     check('install leaves the audio caches alone', !st.names().includes(sw.read('AUDIO_CACHE')) || (await st.open(sw.read('AUDIO_CACHE'))).m.size === 0);
+    await sw.activate();
+    check('activate tells every open page a new version took over', sw.posted.length === 2 && sw.posted.every(m => m && m.type === 'gc-sw-activated'));
+    check('activate does not download the rest itself (it would hold every fetch)', !rest.some(u => shell.has(u)));
+    /* The reloaded page has already fetched one of the rest; one other fails. */
+    await shell.put(rest[0], new FakeResponse('page', { type: 'basic' }));
+    shell.adds = [];
+    shell.failAdd = k => k === keyOf(rest[1]);
+    check('an unrelated message starts nothing', (await sw.message({ type: 'something-else' })) === 0 && shell.adds.length === 0);
+    const held = await sw.message({ type: 'gc-precache-rest' });
+    check('the page\'s message is kept alive until the rest is in', held === 1);
+    check('the rest is filled, a failed file is skipped and does not stop the others', rest.slice(2).every(u => shell.has(u)) && !shell.has(rest[1]));
+    check('a file the page already fetched is not downloaded again', !shell.adds.includes(keyOf(rest[0])) && (await (await shell.match(rest[0])).text()) === 'page');
+    check('the shell is not downloaded a second time', !critical.some(u => shell.adds.includes(keyOf(u))));
+    shell.adds = []; shell.failAdd = null;
+    await sw.message({ type: 'gc-precache-rest' });
+    check('the next page load retries only what is missing', shell.adds.length === 1 && shell.adds[0] === keyOf(rest[1]) && shell.has(rest[1]));
+    /* Two messages at once (two tabs): one run, nothing fetched twice. */
+    const st2 = new FakeStorage(), sw2 = boot(swSrcOf(mapOf(all), ''), st2, {});
+    await sw2.install();
+    await Promise.all([sw2.message({ type: 'gc-precache-rest' }), sw2.message({ type: 'gc-precache-rest' })]);
+    const shell2 = await st2.open(sw2.read('CACHE_VERSION'));
+    const restAdds = (shell2.adds || []).filter(k => !critical.map(keyOf).includes(k));
+    check('two pages asking at once download each file once', restAdds.length === rest.length && new Set(restAdds).size === rest.length);
   }
   return out;
 }
 
 /* ── deliberate breakages: each must turn at least one assertion red ──── */
 const MUTATIONS = [
+  /* Shell-first install and the fill that follows it (2026-11-09). */
+  ['the install downloads every file again before taking over', "return cache.addAll(PRECACHE_CRITICAL.map(u => new Request(u, { cache: 'reload' })));", "return cache.addAll(ASSETS.map(u => new Request(u, { cache: 'reload' })));"],
+  ['the install never takes over', ".then(() => self.skipWaiting())", ""],
+  ['the open pages are not told', "for (const c of list) c.postMessage({ type: 'gc-sw-activated', version: CACHE_VERSION });", ""],
+  ['the fill answers any message', "if (event.data && event.data.type === 'gc-precache-rest') event.waitUntil(precacheRest());", "event.waitUntil(precacheRest());"],
+  ['the fill is not kept alive', "if (event.data && event.data.type === 'gc-precache-rest') event.waitUntil(precacheRest());", "if (event.data && event.data.type === 'gc-precache-rest') precacheRest();"],
+  ['the fill downloads files the page already has', "          if (await cache.match(u)) continue;\n", ""],
+  ['one failed file stops the fill', "        } catch { /* offline, a 404, a full disk: first use fetches it, the next page load retries */ }", "        } finally { }"],
+  ['two fills run at once', "  if (precacheRestRun) return precacheRestRun;\n", ""],
   ['a stale record never evicts', "if (rec) keep = (await rec.text()) === info.hash;", "if (rec) keep = true;"],
   ['the migration does not adopt', "else if (migrating) { await hashes.put(req.url, new Response(info.hash)); keep = true; }", "else if (false) { keep = true; }"],
   ['nothing is ever evicted', "if (!keep) { await audio.delete(req); await hashes.delete(req.url); }", "if (!keep) { }"],

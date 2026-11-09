@@ -184,10 +184,13 @@ async function storeAudio(info, res){
 }
 
 /* The subset of ASSETS whose absence means the app cannot render at all.
-   These must land for an install to count (see the install handler); the
-   rest of ASSETS is best-effort. Keep this list SHORT — every entry is one
-   more chance for a flaky network to block the update. checks.mjs asserts
-   every entry here also appears in ASSETS. */
+   These ARE the install: they must all land for it to count, and the new
+   worker takes over as soon as they have (see the install handler). The
+   rest of ASSETS is best-effort and comes afterwards (precacheRest()).
+   Keep this list SHORT — every entry is one more chance for a flaky
+   network to block the update, and one more file an open page waits for
+   before it reloads onto the new version. checks.mjs asserts every entry
+   here also appears in ASSETS. */
 const PRECACHE_CRITICAL = [
   './',
   './index.html',
@@ -317,28 +320,64 @@ self.addEventListener('install', event => {
       // that looks current and is stale. That is exactly how a pushed fix
       // fails to reach the class.
       .then(cache => {
-        /* Two tiers, because addAll() is all-or-nothing: ONE failed request
-           out of 93 used to reject the whole install, so the new service
-           worker never activated and that student silently stayed on the
-           old build — no retry, no error they could see. On school Wi-Fi
-           with ~90 requests in flight that is not a rare event.
+        /* Shell first (2026-11-09). The install downloads ONLY the shell
+           (PRECACHE_CRITICAL: what the app needs to render at all) and the
+           worker takes over as soon as those files are in. The other files
+           in ASSETS are fetched afterwards by precacheRest() below.
 
-           So the shell (what the app needs to render at all) still uses
-           addAll and must succeed; everything else — module content, the
-           games, images, icons, the Journey pages — is precached
-           best-effort with allSettled. Anything that misses is
-           simply fetched and cached on first use by the fetch handler
-           below, exactly as it would be on a first visit. */
-        const critical = ASSETS.filter(u => PRECACHE_CRITICAL.includes(u));
-        const rest = ASSETS.filter(u => !PRECACHE_CRITICAL.includes(u));
-        return cache.addAll(critical.map(u => new Request(u, { cache: 'reload' })))
-          .then(() => Promise.allSettled(
-            rest.map(u => cache.add(new Request(u, { cache: 'reload' })))
-          ));
+           Why: an open page reloads itself when the new worker takes over
+           (app.js, bottom), and until then the student is using the OLD
+           page. With every file in the install that wait was the whole
+           list (92 files, about 2.9 MB compressed, up to half a minute on
+           school Wi-Fi): long enough to start working and then be
+           reloaded mid-task (Jonathan, 2026-11-09). The shell is 10 files
+           and about 0.6 MB.
+
+           addAll() is all-or-nothing, so the shell must land for the
+           install to count: one failed request and this worker never
+           activates (the browser retries the install on the next visit).
+           That is why the list is short. */
+        return cache.addAll(PRECACHE_CRITICAL.map(u => new Request(u, { cache: 'reload' })));
       })
       // New SW takes over without waiting for all tabs to close.
       .then(() => self.skipWaiting())
   );
+});
+
+/* The rest of ASSETS (module content, the games, images, icons, the Journey
+   pages): best-effort, after the worker has taken over. A file that is
+   already in this version's cache is skipped: the page that just reloaded
+   has fetched what it needed through the fetch handler below, which stored
+   it. A file that fails is simply fetched and cached on first use, exactly
+   as it would be on a first visit, and tried again here on the next page
+   load. A few at a time, so the page's own start-up (the Firebase SDK, the
+   sign-in, the student's progress) is not starved on a weak connection.
+   One run at a time: a second call while one is out gets the same promise. */
+const PRECACHE_REST_AT_ONCE = 4;
+let precacheRestRun = null;
+function precacheRest(){
+  if (precacheRestRun) return precacheRestRun;
+  precacheRestRun = (async () => {
+    const cache = await caches.open(CACHE_VERSION);
+    const queue = ASSETS.filter(u => !PRECACHE_CRITICAL.includes(u));
+    const worker = async () => {
+      while (queue.length) {
+        const u = queue.shift();
+        try {
+          if (await cache.match(u)) continue;
+          await cache.add(new Request(u, { cache: 'reload' }));
+        } catch { /* offline, a 404, a full disk: first use fetches it, the next page load retries */ }
+      }
+    };
+    await Promise.all(Array.from({ length: PRECACHE_REST_AT_ONCE }, worker));
+  })().finally(() => { precacheRestRun = null; });
+  return precacheRestRun;
+}
+/* The page asks for the rest once it has loaded (app.js, bottom): a message
+   event can keep the worker alive until the downloads finish, which nothing
+   started from `activate` can do without holding every fetch behind it. */
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'gc-precache-rest') event.waitUntil(precacheRest());
 });
 
 self.addEventListener('activate', event => {
@@ -349,6 +388,16 @@ self.addEventListener('activate', event => {
       ))
       .then(() => reconcileAudio().catch(() => {}))
       .then(() => self.clients.claim())
+      /* Tell every open page a new version just took over. claim() already
+         fires "controllerchange" on them, but a page only hears that if its
+         listener was attached in time, and with the shell-first install the
+         takeover can come before app.js has run. A message sent to a page
+         that is still loading is held by the browser until the page is
+         ready for it, so this one cannot be missed. app.js treats the two
+         signals as one and reloads once. Never fails the activate. */
+      .then(() => self.clients.matchAll({ type: 'window' }))
+      .then(list => { for (const c of list) c.postMessage({ type: 'gc-sw-activated', version: CACHE_VERSION }); })
+      .catch(() => {})
   );
 });
 

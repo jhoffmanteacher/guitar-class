@@ -36,6 +36,16 @@ Start here. Update this block whenever an item opens or closes; each line says w
   "Decided (Jonathan, 2026-11-09)"). **Today's activities by date:** the group is ordered by release date, newest first;
   a finished card re-dated to the newest date shows in Today marked done (CHANGELOG 2026-11-09; check 1cq). Both Fast;
   the Friday check reviews them. Smoke watchdog `3af343f`. CLAUDE.md: a product change he asks for ships Fast (`c443261`).
+- **Faster update reload, and back where you were** (Jonathan, 2026-11-09: "sometimes i start doing something and then it
+  reloads back to a different view"; CHANGELOG 2026-11-09). Two parts. (1) `sw.js` is shell first: the install is
+  `PRECACHE_CRITICAL` only (10 files, about 0.6 MB compressed, was all 92 files, about 2.9 MB), the worker takes over, and
+  the other 82 files are filled by `precacheRest()` when the page asks (`gc-precache-rest`, sent on `load`). The worker also
+  posts `gc-sw-activated` to open pages, so a takeover that beats `app.js` is still heard; `app.js` wires both signals when
+  the file runs, not on `load`. (2) The reload leaves a one-use note in `sessionStorage` (`gcSwResume`: `swResumeSave` /
+  `swResumeTake` in `app.js`, `teacherResumeSnapshot` / `teacherResumeApply` in `teacher.js`) and the next load opens the
+  same page instead of the home page. Guard: check 1ce runs the install, the message and the fill (60 assertions, 29
+  breakages). Not covered by a check: the restore itself (proved once in a real browser; see the commit message).
+  Not seen yet on the live site or a school Chromebook.
 
 **Shipped 2026-11-07 to 2026-11-08 (live as of `ab4aaae`)**
 - **Stopped game, review rounds 3-6** (Power Chord Switch and Change Up; `4582bda`, `a8d2e55`, `df20fd1`, `3625df5`,

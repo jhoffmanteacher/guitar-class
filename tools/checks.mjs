@@ -5498,8 +5498,9 @@ function checkSwAssets(src) {
   for (const f of SHELL_NOT_PRECACHED) {
     if (!SHELL_FILES.includes(f)) { err(`checks.mjs SHELL_NOT_PRECACHED lists '${f}', which is not in SHELL_FILES — delete the entry`); problems++; bad++; }
   }
-  /* PRECACHE_CRITICAL is the must-succeed tier of the install (sw.js splits
-     the rest into a best-effort allSettled pass). An entry that isn't in
+  /* PRECACHE_CRITICAL is the whole install since 2026-11-09 (shell first: the
+     rest of ASSETS is filled best-effort after the worker takes over, by
+     precacheRest() in sw.js). An entry that isn't in
      ASSETS would be fetched by the install but skipped by every check above,
      including the ASSETS→disk one — so a typo there could hard-fail the
      install for the whole class with nothing to show for it. */
@@ -5955,10 +5956,11 @@ function bumpServiceWorker() {
    activate, fetch) against a stand-in CacheStorage and counts what survives a
    deploy that adds, re-exports and removes a track, the one-time migration, and
    the fetch paths, a rollback round trip, a 404 or foreign answer and the cache
-   names; then breaks the worker 21 ways and needs every one to turn
+   names, and the shell-first install with the fill that follows it (2026-11-09);
+   then breaks the worker 29 ways and needs every one to turn
    the proof red. The totals are pinned, so deleting a scenario or a breakage to
    get green fails here too. */
-const SW_AUDIO_PROOF_PIN = { assertions: 50, scenarios: 11, mutations: 21 };
+const SW_AUDIO_PROOF_PIN = { assertions: 60, scenarios: 11, mutations: 29 };
 function checkAudioWorker(swPath) {
   head('1ce. sw.js keeps the audio cache (the worker is run, not read)');
   const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'sw-audio-proof.mjs'), swPath], { encoding: 'utf8', timeout: 120000 });

@@ -475,9 +475,59 @@ async function showTeacherApp(user){
   renderTeacherSetTabs();
   const firstSet=SETS.find(w=>!w.locked&&w.skills&&w.skills.length>0);
   if(firstSet){ teacherSetId=firstSet.id; activateTeacherSetTab(firstSet.id); }
-  // Mark the view the console opens on (Class activities) in the sidebar.
+  /* The site's own reload for an update: open the view the console was on,
+     not the default one (app.js "Back where you were after an update").
+     Before the first paint, so nothing is drawn twice. */
+  teacherResumeApply(typeof swResumeTake==='function' ? swResumeTake(user, true) : null);
+  // Mark the view the console opens on (Class activities, or the one just restored) in the sidebar.
   applyTeacherViewChrome(teacherView);
   loadAllStudents();
+}
+/* ── Back where you were after an update (2026-11-09) ─────────────────────
+   app.js writes a note just before the site reloads itself for a new version
+   and hands it back on the next load (swResumeSave / swResumeTake). These two
+   are the console's half: which view, which student or activity, which of
+   the three Class activities screens, the detail tab, the list filter, the
+   skills grid's set, the Teacher view song, and the scroll position.
+   Everything read back is checked against what exists now; anything that
+   does not fit is dropped and that part opens as it normally would. It
+   restores what is on screen only: nothing here writes to Firestore. */
+function teacherResumeSnapshot(){
+  return {
+    view: teacherView, uid: studentDetailUid,
+    act: activityDetailId, pick: activityListPickId, from: activityDetailFrom, fromUid: activityDetailFromUid,
+    board: activityBoardMode, tab: activityDetailTab, filter: activityListFilter,
+    song: teacherViewSongId, set: teacherSetId, y: Math.round(window.scrollY) || 0
+  };
+}
+function teacherResumeApply(t){
+  if(!t || typeof t!=='object') return;
+  const views=TEACHER_NAV.flatMap(g=>g.items.map(i=>i[0]));
+  if(!views.includes(t.view)) return;
+  const acts=window.CLASS_ACTIVITIES||[];
+  const actId=id=>(typeof id==='string' && acts.some(a=>a.id===id)) ? id : null;
+  const str=v=>(typeof v==='string' && v) ? v : null;
+  teacherView=t.view;
+  // A student's page. An unknown uid is safe: renderTeacherStudentDetail says so and offers the roster.
+  studentDetailUid = t.view==='students' ? str(t.uid) : null;
+  if(TA_TABS.includes(t.tab)) activityDetailTab=t.tab;
+  if(TA_FILTERS.some(([k])=>k===t.filter)) activityListFilter=t.filter;
+  if(t.view==='activities'){
+    activityListPickId=actId(t.pick);
+    activityDetailId=actId(t.act);
+    activityBoardMode=t.board===true;
+    /* An activity opened from Songs or from a student's page shows alone with
+       a Back button (teacherActivityScreen 'detail'); Back needs to know
+       where it came from. Anything that does not add up is the plain list. */
+    const from=(t.from==='songs' || (t.from==='student' && str(t.fromUid))) && activityDetailId ? t.from : 'activities';
+    activityDetailFrom=from;
+    activityDetailFromUid = from==='student' ? str(t.fromUid) : null;
+    if(from==='activities' && !activityBoardMode) activityDetailId=activityListPickId || activityDetailId;
+  }
+  const set=str(t.set) && SETS.find(w=>w.id===t.set && !w.locked && w.skills && w.skills.length>0);
+  if(set){ teacherSetId=set.id; renderTeacherSetTabs(); }
+  if(str(t.song)) teacherViewSongId=t.song;   // renderTeacherViewSongs falls back to the first song if it is gone
+  if(typeof swResumeScroll==='function') swResumeScroll(()=>window, Number(t.y)||0);
 }
 
 // A prior version stacked all 13 modules as one row each — always tall,

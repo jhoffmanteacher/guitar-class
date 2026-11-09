@@ -767,6 +767,106 @@ const SW_UPDATE_BOOT = (()=>{
 })();
 if(SW_UPDATE_BOOT) setAuthWallChecking('auth.updating');
 
+/* ── Back where you were after an update (2026-11-09) ─────────────────────
+   The site reloads itself when a new version takes over (bottom of this
+   file). A reload used to open the home page — In-Class Activities, or the
+   console's Class activities list — whatever the tab had been showing
+   ("it reloads back to a different view", Jonathan). So the reload leaves a
+   note of where the tab was (swResumeSave), and the next load reads it once
+   and opens the same place (showApp here, showTeacherApp in teacher.js).
+
+   What comes back: the page (lesson, In class, Songs, My progress: the
+   address keeps those), the lesson or checklist panel of the set, how far
+   down the page was scrolled, and on the console the view, the picked
+   activity or student, its tab and the board. What does not: anything the
+   reload already waits for (a drill, a recording, an exit check: see
+   busyReason below) and text typed into a box but not yet saved.
+
+   The note is only ever used by the load it was written for:
+     - it is read and deleted while this file runs, on every load, and is
+       dropped unless that load is the update's own reload (SW_UPDATE_BOOT);
+     - it names the account, and the first sign-in of the load takes it, so
+       the next student on a shared Chromebook can never open someone
+       else's place (signOut() also clears sessionStorage);
+     - it is per tab (sessionStorage) and goes stale after 10 minutes.
+   It sets nothing a student could not reach by clicking: the set and module
+   still come from the saved progress, and the activity gate still runs. */
+const SW_RESUME_KEY = 'gcSwResume';
+let swResumeNote = (()=>{
+  try{
+    const raw = sessionStorage.getItem(SW_RESUME_KEY);
+    sessionStorage.removeItem(SW_RESUME_KEY);
+    if(!SW_UPDATE_BOOT || !raw) return null;
+    const v = JSON.parse(raw);
+    return (v && typeof v === 'object' && typeof v.uid === 'string' && Date.now() - v.at < 10 * 60 * 1000) ? v : null;
+  }catch(e){ return null; }
+})();
+/* The note for this sign-in, or null. One use: whoever signs in first after
+   the reload takes it, and it only fits the same account on the same kind of
+   page (the site or the ?teacher console). */
+function swResumeTake(user, teacher){
+  const v = swResumeNote;
+  swResumeNote = null;
+  if(!v || !user || v.uid !== user.uid || !!v.teacher !== !!teacher) return null;
+  const part = teacher ? v.t : v.s;
+  return (part && typeof part === 'object') ? part : null;
+}
+function swResumeSave(){
+  try{
+    // Nobody signed in, or the app is not on screen (the sign-in wall, a paused account): nothing to come back to.
+    if(!currentUser || accountPaused) return;
+    const note = { at: Date.now(), uid: currentUser.uid, teacher: IS_TEACHER_MODE };
+    if(IS_TEACHER_MODE){
+      if(typeof teacherResumeSnapshot !== 'function') return;
+      note.t = teacherResumeSnapshot();
+    } else {
+      if(document.getElementById('app').style.display !== 'block') return;
+      const panel = activeWeekPanel();
+      // A locked set opened to preview is never restored (activateSet: a peek leaves nothing behind).
+      const peek = !!(panel && panel.classList.contains('set-peek'));
+      note.s = {
+        hash: location.hash,
+        set: (panel && !peek) ? panel.dataset.id : null,
+        checklist: !!(panel && !peek && panel.classList.contains('on-checklist')),
+        y: Math.round(paneScrollTop()) || 0,
+        py: Math.round(practiceScrollTop) || 0
+      };
+    }
+    sessionStorage.setItem(SW_RESUME_KEY, JSON.stringify(note));
+  }catch(e){ /* storage blocked or full: the reload still happens, onto the home page as before */ }
+}
+/* Put a scroll position back. The page is still filling in when this runs
+   (a module file, images, the console's roster), so it is set again twice
+   as the page grows, and never after the person has touched the page: their
+   own scroll wins. getPane is read fresh each time (scrollPane() changes
+   with the page height). */
+function swResumeScroll(getPane, y){
+  if(!(y > 0)) return;
+  let touched = false;
+  const stop = () => { touched = true; };
+  ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach(ev => window.addEventListener(ev, stop, { once: true, passive: true, capture: true }));
+  const go = () => { if(touched) return; try { getPane().scrollTo({ top: y }); } catch(e) { /* pane gone: leave the page where it is */ } };
+  go(); setTimeout(go, 300); setTimeout(go, 1200);
+}
+/* The student half. Runs after showApp has drawn the saved set and routed
+   the address, once the module's panels exist (renderAll → onModuleChange is
+   async: it may still be fetching the module file). */
+function swResumeApply(s){
+  Promise.resolve(_bootModuleChange).then(() => {
+    const panel = activeWeekPanel();
+    const sameSet = !!panel && typeof s.set === 'string' && panel.dataset.id === s.set && !panel.classList.contains('set-peek');
+    if(sameSet && s.checklist === true && document.getElementById(`${s.set}-checklist`)) switchTabById(s.set, 'checklist', true);
+    // A different set came back (the saved place moved, or the set is locked now): its top is the right place.
+    if(!sameSet) return;
+    const y = Number(s.y) || 0, py = Number(s.py) || 0;
+    /* An in-column page (In class, Songs, My progress) has swapped the lesson
+       out: y is that page's scroll, and py is the lesson's place for the way
+       back (syncExploreNav puts practiceScrollTop back when the page closes). */
+    if(document.body.classList.contains('explore-open')) practiceScrollTop = py;
+    swResumeScroll(scrollPane, y);
+  }).catch(() => { /* never let a restore break the page it is restoring */ });
+}
+
 let _authRevealTimer = firebaseReady ? setTimeout(revealAuthWallSignIn, 6000) : null;
 if(!firebaseReady) revealAuthWallSignIn();   // wall content is being replaced anyway — don't strand the checking note
 
@@ -924,11 +1024,20 @@ function showApp(user){
     journeyReturnSeen = true;
     try { const r = new URL(document.referrer); fromJourney = r.origin === location.origin && /\/tabs\/[^/]+\.html$/.test(r.pathname); } catch(e) {}
   }
-  if(!location.hash ||
-     (caBlockers().length > 0 && !fromJourney && !GATE_OPEN_HASHES.includes(exploreHashBase(location.hash)))){
+  /* Except the site's own reload for an update (swResumeTake, 2026-11-09):
+     that is not a visit or a sign-in, so the student stays on the page they
+     were on, the lesson included (a bare address). The address is the same
+     one the note recorded, or the note is ignored. With the gate's lock on,
+     routeExploreHash below still sends a gated student to In-Class
+     Activities. */
+  let resume = swResumeTake(user, false);
+  if(resume && resume.hash !== location.hash) resume = null;
+  if(!resume && (!location.hash ||
+     (caBlockers().length > 0 && !fromJourney && !GATE_OPEN_HASHES.includes(exploreHashBase(location.hash))))){
     goExploreHash('class-activities');
   }
   routeExploreHash();
+  if(resume) swResumeApply(resume);
   // The period question blocks the whole app, so it still gets first crack
   // at the screen on sign-in.
   maybeShowPeriodPicker();
@@ -1751,13 +1860,16 @@ let songReady = {};
 let songReadyAt = {};
 
 let _fullModuleDataQueued = false;
+/* The module change renderAll started, so swResumeApply can wait for the set
+   to be on screen. Nothing else reads it. */
+let _bootModuleChange = null;
 function renderAll(){
   // Class-wide start module (CLASS_OPEN_THROUGH): a saved place in a skipped
   // module lands on the start module instead. Module 13 sits outside the chain.
   const startNum = classOpenThrough();
   if(startNum > 1 && (lastModuleNum||1) < startNum){ lastModuleNum = startNum; lastSetId = null; }
   populateModuleDropdown();
-  onModuleChange(lastModuleNum||1, lastSetId);
+  _bootModuleChange = onModuleChange(lastModuleNum||1, lastSetId);
   syncPreviewNote();
   // The dropdown's 🔒 lock marker (isModuleGateLocked) judges "previous
   // module complete" from that module's own SETS/MODULE_REVIEWS data — lazy-
@@ -17340,19 +17452,44 @@ function caOnFinishedToggle(details){
    when the file is opened directly via file://. See sw.js + CLAUDE.md.
    ════════════════════════════════════════════════ */
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  /* Was this page already controlled by a service worker when it loaded?
+     If so, a new worker taking over means a NEW version is live (see sw.js:
+     install→skipWaiting→activate→clients.claim on every push). The cached
+     shell that already loaded is now stale, so reload ONCE to pick up the
+     fresh code automatically — no more reloading two or three times after a
+     deploy, and returning students stop sitting on old code. A first-ever
+     visit has no controller yet, so it must NOT reload (that would bounce
+     the very first load).
+
+     Read NOW, while this file runs, and both listeners attached now too
+     (2026-11-09): sw.js installs only the shell before it takes over, so
+     the takeover can come a second or two after the page opens. Wired from
+     the window "load" event, as this used to be, a takeover that beat the
+     event (it waits for the Firebase scripts and every image) was missed
+     and the tab stayed on the old page with the new cache behind it.
+     Two signals, one reload: "controllerchange", and the "gc-sw-activated"
+     message sw.js posts at the end of activate. The browser holds a
+     message for a page that is still loading, so that one is heard even
+     when the takeover came before this line ran. */
+  const hadController = !!navigator.serviceWorker.controller;
+  /* Ask the worker for the files its install left for later (sw.js,
+     precacheRest). Sent once the page has loaded, so those downloads don't
+     compete with the page's own start-up. Harmless to send twice, and an
+     older worker simply ignores it. */
+  const askForRest = () => {
+    try { if (navigator.serviceWorker.controller) navigator.serviceWorker.controller.postMessage({ type: 'gc-precache-rest' }); }
+    catch(e) { /* best-effort: the fetch handler caches each file on first use anyway */ }
+  };
   window.addEventListener('load', () => {
-    /* Was this page already controlled by a service worker when it loaded?
-       If so, a later "controllerchange" means a NEW version just took over
-       (see sw.js: install→skipWaiting→activate→clients.claim on every push).
-       The cached shell that already loaded is now stale, so reload ONCE to
-       pick up the fresh code automatically — no more reloading two or three
-       times after a deploy, and returning students stop sitting on old code.
-       A first-ever visit has no controller yet, so it must NOT reload (that
-       would bounce the very first load). */
-    const hadController = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.register('sw.js').catch(() => {/* offline support is best-effort */});
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (!hadController || window.__swReloading) return;
+    askForRest();
+  });
+  {
+    const onNewWorker = () => {
+      // A first visit: the worker just took control for the first time. No
+      // reload, but it has only the shell so far.
+      if (!hadController) { if (document.readyState === 'complete') askForRest(); else window.addEventListener('load', askForRest, { once: true }); return; }
+      if (window.__swReloading) return;
       window.__swReloading = true;
       /* Everything the reload must not walk over. Jonathan pushes during
          class, so this fires while students are mid-task — and a reload here
@@ -17413,9 +17550,24 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
            wall says "Updating…" rather than walking the student back through
            the sign-in screens it shows after a real sign-in. */
         try { sessionStorage.setItem('gcSwUpdating', '1'); } catch(e) { /* storage blocked — reload anyway, just without the message */ }
+        /* ...and where this tab was, so the next load can open the same
+           page instead of the home page (swResumeSave, near SW_UPDATE_BOOT). */
+        swResumeSave();
         location.reload();
       };
       reload();
+    };
+    navigator.serviceWorker.addEventListener('controllerchange', onNewWorker);
+    /* One guard on the message: a page that IS the update's own reload ignores
+       it for its first few seconds. The worker posts it once, as it takes
+       over, to the pages open at that moment; the reloaded page is not one
+       of them (its request waits for the takeover to finish). If a browser
+       ever did hand the reloaded page that same message it would reload
+       again, and this makes sure that cannot become a second reload.
+       "controllerchange" is never ignored. */
+    const swMsgQuietUntil = SW_UPDATE_BOOT ? Date.now() + 5000 : 0;
+    navigator.serviceWorker.addEventListener('message', e => {
+      if (e.data && e.data.type === 'gc-sw-activated' && Date.now() >= swMsgQuietUntil) onNewWorker();
     });
-  });
+  }
 }
