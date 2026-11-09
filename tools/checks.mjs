@@ -5646,10 +5646,10 @@ function checkTuningSim() {
   const DIR_WORDS = {
     en: { tightenTurn: 'turn counterclockwise', loosenTurn: 'turn clockwise', keys: 'Keys: ← counterclockwise (tighten) · → clockwise (loosen)',
       h2n: 'The tuner shows a different letter than the string. Find both letters on the circle. Counterclockwise ↺ is up. Clockwise ↻ is down.', ringUp: '↺ up', ringDown: '↻ down',
-      up: 'Up — tighten', down: 'Down — loosen' },
+      up: 'Too low — tighten', down: 'Too high — loosen' },
     es: { tightenTurn: 'gira en sentido antihorario', loosenTurn: 'gira en sentido horario', keys: 'Teclas: ← en sentido antihorario (apretar) · → en sentido horario (aflojar)',
       h2n: 'El afinador muestra una letra distinta a la de la cuerda. Busca las dos letras en el círculo. En sentido antihorario ↺ es subir. En sentido horario ↻ es bajar.', ringUp: '↺ sube', ringDown: '↻ baja',
-      up: 'Sube — aprieta', down: 'Baja — afloja' }
+      up: 'Muy baja — aprieta', down: 'Muy alta — afloja' }
   };
   const dirWordCount = Object.values(DIR_WORDS).reduce((n, o) => n + Object.keys(o).length, 0);
   let words = 0;
@@ -5693,8 +5693,8 @@ function checkTuningSim() {
   pins += pin(/function saveLevel\(\)\{\s*try \{ if \(S\.level > clampLevel\(localStorage\.getItem\(LEVEL_KEY\)\)\) localStorage\.setItem\(LEVEL_KEY, String\(S\.level\)\); \} catch\(e\)\{\}/, 'saveLevel() must never lower the saved level (a ?level=2 look must not undo a level 4)');
   pins += pin(/<button type="button" class="sw" id="restart-btn" data-t="startOver">Start over<\/button>/, 'the "Start over" button (#restart-btn, data-t startOver) must be in the top bar');
   pins += pin(/el\.restart\.addEventListener\('click', \(\) => \{\s*try \{ localStorage\.removeItem\(LEVEL_KEY\); localStorage\.removeItem\(PHASE2_KEY\); \} catch\(e\)\{\}\s*stopHold\(\);\s*S\.level = 1; S\.clean = 0; S\.phase = 1; S\.streak = 0; S\.tuned = 0; S\.prev = -1;\s*S\.showNames = DEFAULTS\.namesShownPhase1;\s*newRound\(\);/, 'Start over must clear both saved keys and go back to level 1, Phase 1, names shown, then deal a new round');
-  pins += pin(/levelUp:'Level \{l\}\. Now a string can start up to \{m\} steps from its own note\. Use the circle to choose Up or Down\.'/, 'the English level-up line (steps, like the rest of the page)');
-  pins += pin(/levelUp:'Nivel \{l\}\. Ahora una cuerda puede empezar a un máximo de \{m\} pasos de su propia nota\. Usa el círculo para elegir Sube o Baja\.'/, 'the Spanish level-up line (a un máximo de {m} pasos)');
+  pins += pin(/levelUp:'Level \{l\}\. Now a string can start up to \{m\} steps from its own note\. Use the circle to choose Too low or Too high\.'/, 'the English level-up line (steps, like the rest of the page)');
+  pins += pin(/levelUp:'Nivel \{l\}\. Ahora una cuerda puede empezar a un máximo de \{m\} pasos de su propia nota\. Usa el círculo para elegir Muy baja o Muy alta\.'/, 'the Spanish level-up line (a un máximo de {m} pasos)');
   /* Green on the circle only once the string is done: every .rn rule that paints green also needs .done. */
   const css = (code.match(/<style>([\s\S]*?)<\/style>/) || [])[1] || '';
   const greenRn = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([, sel, body]) => /\.rn\b/.test(sel) && /var\(--green-(?:bg|text)\)/.test(body));

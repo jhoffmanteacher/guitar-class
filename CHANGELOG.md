@@ -5,10 +5,11 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
-## 2026-11-09 (late evening) — The Tuning Simulator's circle has only the seven letters
+## 2026-11-09 (late evening) — Tuning Simulator: seven letters on the circle, and a clear question
 
 - **The circle of notes in the Tuning Simulator now shows only A, B, C, D, E, F and G, with A at the top.** Going up is still counterclockwise (A, B, C…), the way the peg turns to tighten. The sharps (C#, F#…) are gone from the circle.
 - **On levels 2–4 a string now always starts on one of those seven letters**, so you can find where the tuner starts on the circle. The steps on the circle count letters: "E is 3 steps down from A". While you turn the peg the tuner can still pass through a sharp (like G#); the circle has no spot for it, so the "tuner shows" mark goes away until the next letter. The level-up message says up to 1, 2 or 3 steps (before: 2, 4 or 5).
+- **The Tuning Simulator asks a clear question.** After you name the string it asks: "Look at the tuner and the circle of notes. Is the G string too low or too high?" The two answers are **Too low — tighten** and **Too high — loosen** (before: "Up — tighten" / "Down — loosen"). Then it tells you what to do: "Tune the G string: turn the peg until the tuner shows G in green." Spanish: "¿La cuerda Sol está muy baja o muy alta?", **Muy baja — aprieta** / **Muy alta — afloja**, "Afina la cuerda Sol: …".
 
 ## 2026-11-09 (evening) — Fairer taps, a real "Which way?" question, and tempo advice that fits
 

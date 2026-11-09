@@ -365,12 +365,12 @@ const I = {
     score:'Level {l} of {m} · Strings tuned: {n} · Named right: {k} in a row',
     chip1:'Name it', chip2:'Read the tuner', chip3:'Turn the peg',
     p1:'Which string is this?', h1a:'Find the string on the picture. Tap its name.', h1b:'Name the string from memory.',
-    p2:'Which way?', h2:'Look at the needle. Is it left or right of the center?',
+    p2:'Look at the tuner and the circle of notes. Is the {a} string too low or too high?', h2:'Look at the needle. Is it left or right of the center?',
     h2n:'The tuner shows a different letter than the string. Find both letters on the circle. Counterclockwise ↺ is up. Clockwise ↻ is down.',
-    p3:'Turn the peg until the tuner shows {y} in green.', h3:'Hold Tighten or Loosen. Keep the needle green for one second.',
+    p3:'Tune the {a} string: turn the peg until the tuner shows {y} in green.', h3:'Hold Tighten or Loosen. Keep the needle green for one second.',
     h3n:'Hold Tighten or Loosen. The note slides. Stop when the tuner shows {y} and the needle is green for one second.',
     p4:'In tune. Next string…',
-    up:'Up — tighten', down:'Down — loosen',
+    up:'Too low — tighten', down:'Too high — loosen',
     names:['low E','A','D','G','B','high e'],
     nameOk:'That is the {a} string.', nameBad:'That is the {a} string, not {b}.',
     nameBadBack:'That is the {a} string, not {b}. The names are back for this string.',
@@ -381,7 +381,7 @@ const I = {
     wayDownN:'At the start the tuner showed {x}. The string is {y}. On the circle, {y} is {s} down from {x}. Loosen to go down.',
     wayWrong:'Other way. ',
     done:'The {a} string is in tune.',
-    levelUp:'Level {l}. Now a string can start up to {m} steps from its own note. Use the circle to choose Up or Down.',
+    levelUp:'Level {l}. Now a string can start up to {m} steps from its own note. Use the circle to choose Too low or Too high.',
     ringLabel:'Circle of notes', startOver:'Start over', legStr:'string', legTun:'tuner shows', secTuner:'Tuner', secQuestion:'Question',
     step1:'{n} step', stepN:'{n} steps', ringUp:'↺ up', ringDown:'↻ down'
   },
@@ -398,12 +398,12 @@ const I = {
     score:'Nivel {l} de {m} · Cuerdas afinadas: {n} · Nombradas bien: {k} seguidas',
     chip1:'Nómbrala', chip2:'Lee el afinador', chip3:'Gira la clavija',
     p1:'¿Qué cuerda es esta?', h1a:'Busca la cuerda en el dibujo. Toca su nombre.', h1b:'Nombra la cuerda de memoria.',
-    p2:'¿Hacia dónde?', h2:'Mira la aguja. ¿Está a la izquierda o a la derecha del centro?',
+    p2:'Mira el afinador y el círculo de notas. ¿La cuerda {a} está muy baja o muy alta?', h2:'Mira la aguja. ¿Está a la izquierda o a la derecha del centro?',
     h2n:'El afinador muestra una letra distinta a la de la cuerda. Busca las dos letras en el círculo. En sentido antihorario ↺ es subir. En sentido horario ↻ es bajar.',
-    p3:'Gira la clavija hasta que el afinador muestre {y} en verde.', h3:'Mantén presionado Apretar o Aflojar. Deja la aguja en verde durante un segundo.',
+    p3:'Afina la cuerda {a}: gira la clavija hasta que el afinador muestre {y} en verde.', h3:'Mantén presionado Apretar o Aflojar. Deja la aguja en verde durante un segundo.',
     h3n:'Mantén presionado Apretar o Aflojar. La nota se desliza. Detente cuando el afinador muestre {y} y la aguja esté en verde durante un segundo.',
     p4:'Afinada. Ahora la siguiente cuerda…',
-    up:'Sube — aprieta', down:'Baja — afloja',
+    up:'Muy baja — aprieta', down:'Muy alta — afloja',
     names:['Mi grave','La','Re','Sol','Si','mi aguda'],
     nameOk:'Esa es la cuerda {a}.', nameBad:'Esa es la cuerda {a}, no la cuerda {b}.',
     nameBadBack:'Esa es la cuerda {a}, no la cuerda {b}. Los nombres vuelven para esta cuerda.',
@@ -414,7 +414,7 @@ const I = {
     wayDownN:'Al principio el afinador mostraba {x}. La cuerda es {y}. En el círculo, {y} está {s} abajo de {x}. Afloja para bajar.',
     wayWrong:'Al revés. ',
     done:'La cuerda {a} está afinada.',
-    levelUp:'Nivel {l}. Ahora una cuerda puede empezar a un máximo de {m} pasos de su propia nota. Usa el círculo para elegir Sube o Baja.',
+    levelUp:'Nivel {l}. Ahora una cuerda puede empezar a un máximo de {m} pasos de su propia nota. Usa el círculo para elegir Muy baja o Muy alta.',
     ringLabel:'Círculo de notas', startOver:'Empezar de nuevo', legStr:'cuerda', legTun:'el afinador muestra', secTuner:'Afinador', secQuestion:'Pregunta',
     step1:'{n} paso', stepN:'{n} pasos', ringUp:'↺ sube', ringDown:'↻ baja'
   }
@@ -760,7 +760,7 @@ function render(){
   // prompt + hint
   const p = st === 'name' ? 'p1' : st === 'read' ? 'p2' : st === 'turn' ? 'p3' : 'p4';
   const far = !!S.round && S.round.steps > 0, y = S.round ? S.round.target : '';
-  el.prompt.textContent = T(p, { y });
+  el.prompt.textContent = T(p, { y, a: S.round ? nameOf(S.round.idx) : '' });
   el.hint.textContent = st === 'name' ? (S.phase === 1 ? T('h1a') : T('h1b')) : st === 'read' ? T(far ? 'h2n' : 'h2') : st === 'turn' ? T(far ? 'h3n' : 'h3', { y }) : '';
   // strings picture
   const show = namesVisible();
