@@ -1151,7 +1151,8 @@ function setTeacherView(v){
   // A jump to a unit that never got painted must not fire on a later visit.
   if(v!=='activities') activityListJump=null;
   // The Teacher view songs card plays the record — leaving the tab stops it.
-  if(teacherView==='tsongs' && v!=='tsongs' && typeof stopCardAudio==='function') stopCardAudio();
+  // So does an activity's Preview (a song, a snippet, a TAB sequence).
+  if(((teacherView==='tsongs' && v!=='tsongs') || (teacherView==='activities' && v!=='activities')) && typeof stopCardAudio==='function') stopCardAudio();
   teacherView=v;
   if(v==='students') studentDetailUid=null; // clicking the tab always starts back at the roster
   // Songs always starts back at its list, nothing mid-rename. An activity
@@ -1171,6 +1172,8 @@ function setTeacherView(v){
 // Jumps straight to a student's detail page — from a roster row or a name
 // cell in the skills grid — without going through the Students tab click.
 function openStudentDetail(uid){
+  // Back from an activity opened on this student's page: its Preview may be playing.
+  if(teacherView==='activities' && typeof stopCardAudio==='function') stopCardAudio();
   teacherView='students'; studentDetailUid=uid;
   applyTeacherViewChrome('students');
   renderTeacherBody();
@@ -1236,6 +1239,8 @@ function backToActivitiesList(){
    renderTeacherActivities exactly as before; the list's picked activity is
    kept for the way back. */
 function teacherOpenArrangeBoard(){
+  // The board has no Preview: whatever the picked card was playing stops.
+  if(typeof stopCardAudio==='function') stopCardAudio();
   // From an activity opened elsewhere (Songs, a student): the board belongs to Class activities.
   if(activityDetailFrom!=='activities'){ activityDetailFrom='activities'; activityDetailFromUid=null; activityDetailId=activityListPickId; applyTeacherViewChrome('activities'); }
   activityBoardMode=true; activityEditId=null;
