@@ -1436,7 +1436,7 @@ async function tuningSimWalk(page, run, events, stats, base) {
     await run(`tsim:${lang}:lvl:wait`, waitFor(`${S}.state === 'between'`, 3500), 10);
     const sv = await run(`tsim:${lang}:lvl:saved`, `({ level: ${S}.level, saved: localStorage.getItem('gc-tuningsim-level'), note: document.getElementById('note2').textContent })`, 10);
     if (!sv || sv.level !== 3 || sv.saved !== '4') fail(W + 'level-not-lowered', `a ?level=2 look that levels up: now level ${sv && sv.level}, saved "${sv && sv.saved}" (expected 3, and the saved 4 kept)`);
-    else if (!sv.note.includes(lang === 'en' ? 'up to 4 steps' : 'máximo de 4 pasos')) fail(W + 'level-up-line', `the level-up line is "${sv.note}" (expected it to say ${lang === 'en' ? '"up to 4 steps"' : '"máximo de 4 pasos"'})`);
+    else if (!sv.note.includes(lang === 'en' ? 'up to 2 steps' : 'máximo de 2 pasos')) fail(W + 'level-up-line', `the level-up line is "${sv.note}" (expected it to say ${lang === 'en' ? '"up to 2 steps"' : '"máximo de 2 pasos"'})`);
     /* The saved level is 3 (not 4, the highest) so "falls through to the saved level" can be told from "clamps to the top level". */
     await run(`tsim:${lang}:lvl:save3`, `localStorage.setItem('gc-tuningsim-level', '3')`, 10);
     await go('?level=9');
