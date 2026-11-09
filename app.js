@@ -2167,8 +2167,10 @@ function strumSequence(spec){
 const STRUM_METRO_BPM = 60;
 /* ▶ Play strum (Jonathan, 2026-11-04: "the play strum should have clicks going
    the whole time too to make it clear. the downstrums could have slight
-   accents as well"): a click on every beat (the 1 higher) from the button's
-   data-clicks count, and each down strum a little louder than each up strum. */
+   accents as well"): a click on every beat from the button's data-clicks
+   count, every click the same like the Metronome's (2026-11-09; beat 1 was
+   higher until then), and each down strum a little louder than each up strum.
+   A running Metronome stops when it starts (playSequence). */
 const STRUM_DOWN_GAIN = 1.25;
 const STRUM_UP_GAIN = 0.8;
 const STRUM_CLICK_GAIN = 1.2;
@@ -11376,6 +11378,11 @@ function playSequence(midis, bpm, btnEl){
   if(window.coachMicLive) return;  // but no NEW demo audio while the Coach listens
   snipStop();                      // one sound at a time — the band yields to the tab
   pcStop();                        // …and so does a practice card's song
+  /* ▶ Play strum brings its own clicks, so a running Metronome stops first
+     (Jonathan, 2026-11-09); the student's popup shows Start again. Not in the
+     console: that Metronome is the room's. */
+  const ownClicks = btnEl && btnEl.dataset && parseInt(btnEl.dataset.clicks, 10) > 0;
+  if(ownClicks && !(typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE) && typeof metroRunning !== 'undefined' && metroRunning && typeof stopMetro === 'function') stopMetro();
   /* Recorded notes not all here yet (a first press on a new device): show
      the Stop state straight away, wait for THIS line's notes, then play — so
      a line never starts on the synth and switches voice halfway. A second
@@ -11466,11 +11473,11 @@ function startPlaySequence(midis, bpm, btnEl, synthOnly){
       }
     }, at);
   });
-  /* A button with data-clicks (▶ Play strum) also clicks on every beat the whole time. */
+  /* A button with data-clicks (▶ Play strum) also clicks on every beat the whole time, every click the same (the Metronome's rule since 2026-11-06). */
   const nClicks = btnEl && btnEl.dataset ? parseInt(btnEl.dataset.clicks, 10) : 0;
   if(nClicks > 0){
     for(let k = 0; k < nClicks; k++){
-      timeouts.push(setTimeout(() => { pcClick(getAudioCtx().currentTime, k % 4 === 0, false, STRUM_CLICK_GAIN); }, k * interval));
+      timeouts.push(setTimeout(() => { pcClick(getAudioCtx().currentTime, false, false, STRUM_CLICK_GAIN); }, k * interval));
     }
   }
   timeouts.push(setTimeout(() => stopPlaySeq(true), cursor));

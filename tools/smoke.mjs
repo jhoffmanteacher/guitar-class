@@ -990,16 +990,18 @@ async function strumWalk(page, run, events, stats) {
           await run('strum:stop:' + w, `document.querySelector('.ca-card[open] .ca-step[data-idx="${st.i}"] .tab--strum .play-seq-btn').click()`, 300);
           const idle = await run('strum:idle:' + w, `(() => { const b = document.querySelector('.ca-card[open] .ca-step[data-idx="${st.i}"] .tab--strum .play-seq-btn'); return !b.classList.contains('playing') && b.textContent.includes(t('strum.play')); })()`, 10);
           if (!idle) fail(w, 'Stop did not put ▶ Play strum back');
-          /* ▶ Play strum clicks on every beat the whole time (the 1 higher) and sounds a down
-             strum louder than an up strum (2026-11-04). pcClick/playNote are recorded, not muted. */
+          /* ▶ Play strum clicks on every beat the whole time, every click the same (2026-11-09; the 1 was higher before), sounds a down
+             strum louder than an up strum (2026-11-04), and stops a running Metronome first (2026-11-09). pcClick/playNote are recorded, not muted. */
+          await run('strum:metro-pre:' + w, `(() => { if (!metroRunning) startMetro(); return metroRunning; })()`, 100);
           await run('strum:rec-on:' + w, `(() => { window.__sc = { clicks: [], gains: [] }; window.__pcClick0 = window.pcClick; window.__playNote0 = window.playNote;
             window.pcClick = function(at, accent, countIn, gain){ window.__sc.clicks.push(!!accent); return window.__pcClick0.apply(this, arguments); };
             window.playNote = function(m, g){ window.__sc.gains.push(+g.toFixed(4)); return window.__playNote0.apply(this, arguments); }; })()`, 10);
           await run('strum:rec-play:' + w, `document.querySelector('.ca-card[open] .ca-step[data-idx="${st.i}"] .tab--strum .play-seq-btn').click()`, 1800);
-          const rec = await run('strum:rec-read:' + w, `(() => { const r = window.__sc; window.pcClick = window.__pcClick0; window.playNote = window.__playNote0; return r; })()`, 10);
+          const rec = await run('strum:rec-read:' + w, `(() => { const r = window.__sc; r.metro = metroRunning; window.pcClick = window.__pcClick0; window.playNote = window.__playNote0; return r; })()`, 10);
           await run('strum:rec-stop:' + w, `document.querySelector('.ca-card[open] .ca-step[data-idx="${st.i}"] .tab--strum .play-seq-btn').click()`, 300);
           const gset = rec ? [...new Set(rec.gains)].sort((x, y) => y - x) : [];
-          if (!rec || rec.clicks.length < 2 || rec.clicks[0] !== true || rec.clicks[1] !== false) fail(w, '▶ Play strum clicks were ' + JSON.stringify(rec && rec.clicks) + ', expected a click on 1 (higher) then on 2 in the first 1.8 s');
+          if (!rec || rec.metro !== false) fail(w, '▶ Play strum left the Metronome running under its own clicks');
+          if (!rec || rec.clicks.length < 2 || rec.clicks.some(a => a !== false)) fail(w, '▶ Play strum clicks were ' + JSON.stringify(rec && rec.clicks) + ' (true = a higher beat 1), expected at least two clicks, all the same, in the first 1.8 s');
           else if (gset.length !== 2 || Math.abs(gset[0] / gset[1] - 1.25 / 0.8) > 0.02 || rec.gains[0] !== gset[0]) fail(w, 'down/up strum loudness was ' + JSON.stringify(rec.gains) + ', expected a louder first (down) strum and quieter up strums, ratio 1.56');
           /* ▶ Play clicks opens the site's Metronome at the card's slider tempo (60 by default), in 4/4, running (2026-11-04, tempo 2026-11-06). */
           await run('strum:metro-set:' + w, `(() => { const s = document.getElementById('bpm-slider'); s.value = 100; onBpmSlider('100'); setMetroMeter(3); if (metroRunning) stopMetro(); })()`, 100);
