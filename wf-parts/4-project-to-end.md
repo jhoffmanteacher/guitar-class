@@ -1,470 +1,68 @@
 ## Project: what this is
-Plain static HTML/JS/CSS — no build step, no framework. Content lives in
-`index.html` and per-module JS (`module-1.js`…`module-13.js`, `config-main.js`).
-Firebase auth + Firestore progress. Deployed by pushing to GitHub.
-`live-quiz.js` holds the whole live-quiz feature (student + teacher) — see
-`.claude/rules/live-quiz.md`.
-Module 13 (String Changing) is a *single-flow* module — `stations.b` only,
-custom tab labels, checklist = graded assessment.
+Cut to the dated decisions, the reasons and the rules found nowhere else (Jonathan, 2026-11-09: "is everything necessary anymore?"). The operative rule is in CLAUDE.md; the older verbatim text is under "Moved from CLAUDE.md (2026-10-28)".
 
-**Stations B and C are merged in DISPLAY ONLY** (2026-08-27). A set renders as ONE step ladder (B's sections, a seam divider, then C's), but `stations.b` / `stations.c` and every progress key (`${w.id}-b-sec{gi}-{i}` / `-c-sec{gi}-{i}`) are unchanged — never "simplify" the data to match the display. **`gi` is the section's position after excluding only tuning-warmup sections (`storageSections()`); render-time hiding never renumbers it** (checks.mjs 1af). Renderer: `buildLesson()`; tab-panel suffix `LESSON_TAB` (still `'station-b'`); sections are addressed by `data-ns`. No "Station B/C" wording in student text — the mid-set card is **Checkpoint / Punto de control**, the end one **Wrap-Up / Cierre** (1n). **Only `m4w2` is shown as Part 1 / Part 2** (`partOne`, `partBreak`; 1ao pins the count at 1); display only, no key moves, a set is complete when the SET is. Resolvers `lessonParts()` / `lessonGroups()`; field docs in the schema comment at the top of `module-2.js`. Full text: `WORKFLOW.md` → "Moved from CLAUDE.md (2026-10-28)".
+- **Stations B and C merged in DISPLAY ONLY** (2026-08-27): rule in CLAUDE.md "Project" (1af, 1n, 1ao). Renderer `buildLesson()`; tab-panel suffix `LESSON_TAB` (still `'station-b'`); sections addressed by `data-ns`; `m4w2`'s parts via `partOne` / `partBreak`, resolvers `lessonParts()` / `lessonGroups()`; field docs in the schema comment at the top of `module-2.js`. A set is complete when the SET is.
+- **Module 13** (String Changing) also has custom tab labels, and its checklist is the graded assessment.
+- **No student tour:** `tour.html` + `tour-img/` were deleted 2026-08-27 (they taught the retired B/C model; every screenshot was stale). Jonathan is building a new one; don't restore the old file from git.
+- **No in-panel tab bar:** `switchTabById()` drives `.tab-panel`; a set is exactly two panels (lesson ladder, checklist). The per-set Songs tab was removed 2026-08-27 (unreachable once the rail took over; the Songs hub lists the same songs, Module 1's included).
+- **Chromebook 1366×657** (Jonathan, 2026-10-26: nobody uses the site on a phone): rule in CLAUDE.md. Don't spend time deleting the phone CSS; 1o also guards narrow Chromebook windows.
+- **Live preview:** VS Code Live Server (right-click `index.html` → "Open with Live Server"); no commit needed. **Dev bypass:** a button on the auth wall loads a mock user; progress doesn't save to Firestore.
+- **Shell:** match command syntax to the platform the session reports.
 
-**There is no student tour.** `tour.html` + `tour-img/` were deleted 2026-08-27
-(they taught the retired B/C model and every screenshot was stale). Jonathan is
-building a new one — don't resurrect the old file from git.
+### Pre-push checks, hooks, parallel sessions
+Rule: CLAUDE.md "Pre-push checks" and "Start here"; hooks: skill `session-handoff`. What CLAUDE.md doesn't say: the ~240-link check stays on full pushes even when no link changed (it catches videos taken down since). `CACHE_VERSION` is a content fingerprint of the cached shell and everything in `audio/`; since 2026-10-16 also `sw.js`'s own code (version lines blanked), since 2026-10-25 every file in `sw.js`'s `ASSETS` (font, PNG icons), and 1bt fails a push that leaves a precached file out. `--live`: run it a minute after pushing. Smoke test needs Node 22+ and Chrome (`--chrome <path>`). `pre-push` exists because git skips pre-commit on merge commits.
 
-**The set has no in-panel tab bar.** The rail is the only switcher;
-`switchTabById()` drives `.tab-panel` directly. A set is exactly two panels,
-the lesson ladder and the checklist — the per-set Songs tab was removed
-2026-08-27 (unreachable since the rail took over, and the Songs hub already
-lists the same songs, Module 1's included).
+Parallel sessions live in `.claude/worktrees/*` (gitignored). Worktrees isolate files, not `origin`: on 2026-08-20 a worktree session pushed a merge of `main` straight onto `origin/main`. The lesson is *don't push a merge you didn't intend*, not *don't push to main*; a clean fast-forward (`git push origin HEAD:main`) is how worktree work ships.
 
-**Target screen: a school Chromebook, 1366×657** (Jonathan, 2026-10-26: nobody
-uses the site on a phone). Design, test and measure at that size. Phone width is
-out of scope: don't audit, test or fix phone-only layout, and don't add phone
-breakpoints, unless Jonathan asks. Leave the phone CSS that's already there
-alone (don't spend time deleting it), and keep checks.mjs 1o — it costs nothing
-and also guards narrow Chromebook windows.
+### Three regimes, ratchet, board, config writer
+Rule: CLAUDE.md "Three regimes" and "Other standing rules". Dated decisions: the regimes date from 2026-09-20; `FROZEN_THROUGH` raised 2 → 3 on 2026-10-01 (Jonathan: "nobody is in Module 3 yet, but students are about to"); no renames in frozen modules because a rename would hide an insertion from the check; raise both numbers a module AHEAD because nobody tells Claude when the first student passes the gate. Since 2026-10-19 a keyed MC may be ADDED to a frozen step (it prints) and reworded via `response.renamedChoices` (the proof checks the map covers every old choice and keeps the keyed one keyed); since 2026-10-16 (Jonathan) a section title may be reworded in frozen modules too. A fix the regimes block is never worked around and never shipped as a rename that "prints rather than failing": it goes on the Summer reset list.
 
-**Live preview:** VS Code Live Server — right-click `index.html` → "Open with
-Live Server". No commit needed.
+Why the module ABOUT to be entered counts as frozen: until 2026-10-01 a locked set's preview (`set-peek`) refused ticks but still SAVED ANSWERS (`onResponseChange`, `onStepMcSelect`, `onPracticeMcSelect` had no peek guard), so a few `responses` keys may exist in the module above the class. It unlocked nothing (`hasProgressIn()` reads guarded data). `isPeekedResponseKey()` closed it; 1bl pins the guard.
 
-**Dev bypass:** a button on the auth wall loads a mock user for UI testing.
-Progress won't save to Firestore in that mode.
-
-**Shell:** Jonathan works on Windows *and* macOS. Match command syntax to
-whatever platform the current session reports — don't assume.
-
-
-### Pre-push checks (old CLAUDE.md lines 110,141)
-
-### ⚠️ Run the pre-push checks before EVERY code push
-
-Before any push touching `index.html`, `styles.css`, `app.js`, `tuner.js`,
-`teacher.js`, `config-main.js`, or a `module-N.js`:
-
-```
-node tools/checks.mjs
-```
-
-Exits non-zero if anything's wrong — don't push until it passes. It:
-
-1. **Syntax-checks every shipped `.js`** (no build step, so a typo would ship).
-2. **Validates module data** — every Set has the fields the app needs.
-3. **Link-checks** ~240 external YouTube / Google-Docs URLs. Keep this on full
-   pushes even when no links changed — it catches videos taken down since.
-4. **Bumps `CACHE_VERSION`** in `sw.js` automatically. It's a content
-   fingerprint of the cached shell *and* everything in `audio/`, so it can't be
-   forgotten and re-exported audio gets cache-busted too. Since 2026-10-16 it
-   also covers `sw.js`'s own code (version lines blanked), so a change to how
-   the worker caches rebuilds every visitor's cache. Since 2026-10-25 it also
-   covers every file listed in `sw.js`'s `ASSETS` (the font and the PNG icons
-   included), and check 1bt fails the push if a precached file is ever left
-   out of the fingerprint.
-
-**Flags:** `--skip-links` (fast), `--check` (verify without changing files),
-`--live` (fetch the live `sw.js` and confirm the deploy landed — run it a minute
-after pushing; local sessions only, cloud can't reach the live site).
-
-**Real-browser smoke test.** `node tools/smoke.mjs --baseline origin/main` boots the site in headless Chrome, walks every module and set in English and Spanish, and fails on any new JS error or inline handler that does not compile (Node 22+, Chrome; `--chrome <path>`). For renderer, escaping or many-file changes. Full text: `WORKFLOW.md`.
-
-**Stop hook, git hooks.** `.claude/settings.json` runs `.claude/hooks/stop-checks.mjs` at the end of every turn that changed code; a real failure blocks the stop — **fix the cause, never loosen a check or add an allowlist entry**. Off switch `GC_STOP_CHECKS=0`. `.githooks/pre-commit` and `.githooks/pre-push` run the fast offline checks (`git config core.hooksPath .githooks`, done on both machines; pre-push exists because git skips pre-commit on merge commits). If a hook prints "skipping checks" it is a no-op — run `node tools/checks.mjs` by hand. Details: skill `session-handoff`.
-
-
-### Parallel sessions (old CLAUDE.md lines 142,154)
-
-### ⚠️ Parallel sessions: worktrees share one `origin`
-Jonathan runs several sessions at once in `.claude/worktrees/*` (gitignored, so
-they never leak into a commit). Worktrees isolate *files* — they still share one
-repository and one `origin`, so isolation ends at the push. On 2026-08-20 a
-worktree session merged `main` into its branch and pushed that merge straight
-onto `origin/main`, which is how a feature-branch commit became `main`'s tip.
-The lesson there is *don't push a merge you didn't intend* — not *don't push to
-main*. A clean fast-forward (`git push origin HEAD:main`) is the normal way work
-ships from a worktree; see the push rule under "How to work with Jonathan".
-Before pushing, always `git fetch` and check
-`git log --oneline HEAD..origin/main` — another session may have moved things
-since the turn began.
-
-
-### Three regimes (old CLAUDE.md lines 155,210)
-
-### ⚠️ Three regimes decide what may change in a module
-**2026-09-20.** A step's progress key is
-`${setId}-${station}-sec${gi}-${i}`, so a step that changes INDEX takes a
-student's tick with it and a section that moves takes every step after it.
-What that permits depends on how far the class has got, and
-`tools/rule-zero-proof.mjs` enforces exactly three regimes:
-
-- **Modules 1–`FROZEN_THROUGH` (3 today — raised from 2 on 2026-10-01,
-  Jonathan: "nobody is in Module 3 yet, but students are about to")** —
-  students are in here. Step
-  labels must match BY INDEX; a new step may only be **appended** to the
-  tail of a section. No renames: a rename here would hide an insertion
-  from the check. Keyed-MC choices are frozen too (checks.mjs 1ap) —
-  but since 2026-10-19 a keyed MC may be ADDED to an existing step
-  (nothing to orphan; it prints) and an existing one reworded through
-  `response.renamedChoices`, which maps each old saved text to its new
-  choice (the renderer applies it; the proof checks the map covers every
-  old choice and keeps the keyed one keyed). Re-pin 1ap either way.
-- **Modules `FROZEN_THROUGH`+1–`OPEN_THROUGH` (4–6 today)** — **nobody has
-  reached Module 4.** A step may be
-  **inserted anywhere inside** an existing section, and a step's
-  `response` may be removed or changed. Old labels must still appear in
-  the same relative order; every added step prints. **Raise
-  `FROZEN_THROUGH` as the class advances** — it is the same number
-  checks.mjs pins as `FROZEN_MC_THROUGH_MODULE`. **Raise both a module
-  AHEAD of the class, when students are about to reach it, not after**:
-  the first student through the gate is the moment a structural edit
-  starts costing someone their ticks, and nobody tells Claude when that
-  happens.
-- **Above that** — step count and order are fixed; a rename prints.
-
-In every regime the SECTIONS are fixed: same count, same order, same
-kind. A section TITLE may be reworded (it moves no key) and the rename
-prints rather than failing — **in frozen modules too since 2026-10-16**
-(Jonathan), except a section with a `kind` or the tuning warm-up title,
-which code reads and which still fail. Run it as
-`node tools/rule-zero-proof.mjs <base-ref>` and paste the output into the
-report before any content push.
-
-A fix that these regimes block goes on the **Summer reset list** (the `summer-reset` skill) —
-never worked around, never shipped as a rename that "prints rather than
-failing."
-
-**"Nobody has reached Module N" was not strictly true before 2026-10-01.**
-A locked set opens as a read-only preview (`set-peek`), and until that day
-the preview refused skill ticks and Done buttons but still SAVED ANSWERS:
-`onResponseChange`, `onStepMcSelect` and `onPracticeMcSelect` had no peek
-guard, so a student locked out of Module 3 could tap a keyed quiz choice
-there and it was written to their progress under a Module 3 key. It
-unlocked nothing (`hasProgressIn()` reads skills and completed steps, both
-guarded) but it means a few `responses` keys may already exist in the
-module above the class. `isPeekedResponseKey()` closes it and checks.mjs
-**1bl** pins the guard on every writer. Practical consequence: treat the
-module the class is ABOUT to enter as frozen — which is why the numbers
-above were raised a day early.
-
-
-### Ratchet, activity board, config writer, manifest (old CLAUDE.md lines 214,236)
-
-### ⚠️ Sweep findings ratchet into checks.mjs
-Any sweep or audit that finds **3+ instances of a mechanically-detectable error class** must add a permanent detector to `checks.mjs` in the same session — never leave one in a session scratchpad. Hand each parallel agent its check label before it starts (`grep -o "head('1b[a-z0-9]*\." tools/checks.mjs | sort | tail -3`). A check that only finds a call in the source proves nothing: make it render or execute the thing. A phrase detector must match the UNESCAPED string (`unescapeJs()`). Prefer a whitelist over a blacklist when the banned word has an innocent twin. **A ratchet that can't fail is not a ratchet:** break the guarded thing in a scratch copy and watch the check go red, then restore; pin meaningful totals. Worked examples: `WORKFLOW.md` → "Moved from CLAUDE.md (2026-10-28)".
-
-### ⚠️ Activity order and module placement live on the console board
-**Not in `class-activities.js`:** order, module headings and the `#N` prefix live in
-`config/class.activityBoard`, written only by the console's Class activities board.
-`caBoardOrder()` (app.js) is the one resolver and every move goes through
-`teacherMoveActivity()`. Live for students = assigned + dated-and-arrived + not
-Hidden + not archived/deleted (`caIsVisible`). **Never write `progress/{uid}` from any
-of it.** `number` in `class-activities.js` is legacy; a digit in a title is a SERIES
-number (checks 1d, 1l). Full rules: skill `in-class-activities`.
-
-### ⚠️ Every write to `config/class` goes through `teacherWriteConfig()`
-Strict by default (omit `base`); pass `base` only for a single-cell toggle
-(cell-checked). A bare `.set()` on the doc fails check 1ai, which pins the writer
-count (`CONFIG_WRITERS`) — add a writer and bump it on purpose. The full rule, why
-there are two modes, and the read-side rules: `.claude/rules/teacher-console.md`
-(loads with `teacher.js`).
-
-### ⚠️ Editing a module's skills? Update `MODULE_MANIFEST` in `config-main.js`
-Add or remove a `skills:` entry and you must bump that module's `skillCount`.
-`checks.mjs` fails the push if they drift — fix `config-main.js` when flagged.
-
-
-### i18n (old CLAUDE.md lines 243,280)
+Ratchet extras (CLAUDE.md has the rule; hand-out command in skill `site-sweep`): prefer a whitelist over a blacklist when the banned word has an innocent twin; pin meaningful totals. Board: live for students = assigned + dated-and-arrived + not Hidden + not archived/deleted (`caIsVisible`); `number` in `class-activities.js` is legacy (1d, 1l; skill `in-class-activities`). `config/class`: 1ai pins the writer count `CONFIG_WRITERS` (`.claude/rules/teacher-console.md`). `MODULE_MANIFEST` drift fails `checks.mjs`.
 
 ## i18n — hand-written Spanish everywhere
 
-Google Translate is gone. The Español button is `setLang()`; four layers hang off
-it: the app shell (`i18n.js` `I18N` keys via `t()` / `data-i18n`), module content
-(`_es` twins read through `tf()`), the games arcade + Listening Coach (rendered
-through `t()` at render time), and the Song Journey pages (`data-es` attributes
-swapped by `journey.js`).
+Rule: CLAUDE.md "i18n". Google Translate is gone; `setLang()` drives four layers: the shell (`i18n.js` via `t()` / `data-i18n`), module content (`_es` via `tf()`), the games arcade + Listening Coach (`t()` at render time), the Song Journey pages (`data-es`, swapped by `journey.js`).
 
-- **Every new student-facing shell string goes into `i18n.js` in BOTH `en` and
-  `es`, in the same edit.** Never ship English-only "to translate later" —
-  Jonathan doesn't speak Spanish, so nothing catches it afterward.
-- **Reuse the glossary** at the top of `i18n.js` rather than inventing a fresh
-  Spanish word each time.
-- **String names are solfège; chord symbols and key names are not.**
-  `cuerda Mi grave`, `cuerda La`, `cuerda Sol` — but `tonalidad de G`, `G/B`,
-  `Am`. Most-repeated ES convention on the site, nothing enforces it. A 2026-07-31
-  sweep found and fixed the last 2 remaining `module-9.js` violations (a much
-  older ~30-instance count had already been mostly cleaned up before then) —
-  still worth a check whenever you touch module Spanish, since nothing enforces
-  it.
-- **How to wire a string** — mechanics are documented at the top of `i18n.js`;
-  read that before adding one. Short version: static HTML gets
-  `data-i18n="key"` (or `-attr` / `-html`); dynamic strings call
-  `t('key', {param})` and carry `data-i18n-params`, because most shell HTML is
-  built once and would otherwise stay stuck in its first language.
-- **Authoritative Spanish is the code** — `i18n.js`, the `_es` twins, and the
-  `data-es` attributes on the six `tabs/*.html` pages. No review sheet is
-  maintained; don't recreate one.
-- **Review policy:** routine proofread sweeps are **retired**. The 2026-07-23
-  full-site sweep found essentially no meaning errors across ~4,300 strings.
-  Write new Spanish carefully against the glossary and ship it. Sweep only when
-  Jonathan asks or a specific string is flagged.
-- `i18n.js` must load **before** `app.js`, `fab-tools.js`, `tuner.js`, and
-  (synchronously, on Journey pages) `journey.js`.
-
-Standing glossary, loanword policy and settled ES terms: `claude/spanish-terminology.md`
-in the Claude project.
-
-
-### Content rules (old CLAUDE.md lines 281,364)
+- Never "translate later": Jonathan doesn't speak Spanish, so nothing catches it afterward.
+- The solfège rule is not enforced by any check; a 2026-07-31 sweep fixed the last 2 `module-9.js` violations. Check it whenever you touch module Spanish.
+- Proofread sweeps retired: the 2026-07-23 sweep found essentially no meaning errors in ~4,300 strings. Sweep only when Jonathan asks or a string is flagged. No review sheet; don't recreate one.
+- Glossary, loanword policy and settled ES terms: `claude/spanish-terminology.md` in the Claude project.
 
 ## Content rules
 
-**Student-facing text uses the simplest direct wording that is still
-accurate** — short sentences, plain verbs, one idea per sentence, no idioms
-or figures of speech, and every music term defined the first time it
-appears. checks.mjs 1w catches a relapse of specific retired phrases; it
-can't catch a new idiom on its own, so this rule is the standing instruction
-new content has to be written against. Not every figurative-sounding phrase
-is a violation — an established, deliberately-defined site term (Module
-5/7/11's "two homes" for a chord's two fretboard positions; the metronome
-ladder's "top of the ladder") is a real teaching device, not confusing
-prose; don't flag or "fix" those. Define "root" once, in the first visible
-Module 2 step that uses it: the note a chord is named after.
+Rule: CLAUDE.md "Content rules". Dates, reasons and the parts stated only here:
 
-**No teacher speak.** No lesson-plan words (self-assessment, reflect,
-benchmark, objective, demonstrate/apply/identify), no poster lines ("slow and
-clean is better than…", "don't worry", "trust the…"), no reassurance or
-praise padding in feedback, and no sentence about why a step matters. Say the
-action and the standard. The word "assessment" names the test and appears as
-"(assessment preparation)" in Challenge titles. checks.mjs 1w-t guards the
-retired phrases (2026-09-23 jargon-cut work order, 433 findings across the
-site).
+- **Wording (1w):** 1w catches only retired phrases, not a new idiom. Site terms like "two homes" (Modules 5/7/11) and the metronome ladder's "top of the ladder" are teaching devices; don't flag them.
+- **No teacher speak (1w-t):** from the 2026-09-23 jargon-cut work order (433 findings).
+- **Typed answers (1ar):** Modules 3–6 went from 82 typed answers to 8 on 2026-09-20. 1ar pins a per-module budget and fails only UPWARD: removing one is always fine; adding one is a decision made in the same edit. 41 of the 82 were already unreachable, so count what `visibleSteps()` renders, not raw `response:{type:'short'}`.
+- **Lists:** applies to step `text:` and practice `prompt`s; short lead-in before the list. Leave alone: single actions, hints, `gotItWhen` strings, placeholders (except Challenge cards, whose body is always a list). The renderer wraps "You've got it when" in `<span class="got-it">`.
+- **Challenge cards:** the `label` title is verbatim, escaped plain text. "(assessment preparation)" since 2026-09-23 (was "(your assessment piece)").
+- **Presentation at render time:** reach for the renderer first when a change is about how something looks or is ordered.
+- **Strings named (Jonathan, 2026-08-06; 1j):** chord shorthand like `xx4432` is notation and stays; the only digits left are Module 7's two root-naming MCs, each anchored "string 6 (the low E)".
+- **Paper drills:** no paper-fallback line. `notecall` (2026-09-27, ca-23) is not a paper drill: a note name on the beat, played on the guitar. It opens in "Show answer" (a play-along: the fret lights 2 beats after the name, speeds up every 8 notes, Slower / Faster step it, nothing scored); turned off, five scored levels answered by the mic ("Play it on the guitar", off by default) or by tapping the fret (`drill: { type:'notecall', strings:['lowE','A'], minFret:5, maxFret:8 }`; engine `renderNoteCall` in `app.js`, progress `games.nc`, `gamesStopMic()` stops it). Wiring a deck is content: `drill: { type:'deck', deck:'numerals-C', skill:'m11w1-s3' }`.
 
-**A typed answer is for when writing IS the task.** Goal-setting,
-composing, and describing what you heard in a listening step keep their
-box; everything else asks the student to play something and tells them
-exactly when they have got it — a countable line ("two laps up and back
-with every note ringing clean"), not a feeling ("feels intentional").
-Modules 3–6 went from 82 typed answers to 8 on 2026-09-20; checks.mjs
-**1ar** pins the per-module budget and only fails UPWARD, so removing one
-more is always fine and adding one back is a decision you make in the
-same edit. Note that **41 of those 82 were already unreachable** — sitting
-in reflection / routine / ear-spark sections and in take-to-song sections
-that render a Journey card — so a raw count of `response:{type:'short'}`
-overstates the typing by about double. Count what `visibleSteps()` would
-render.
-
-**Multi-step directions get lists, not paragraphs.** `<ol>` for sequential steps,
-`<ul>` for parallel points, short lead-in before the list. Applies to step
-`text:` and practice `prompt`s. Mirror the structure in the `_es` twin. Roughly:
-a card over ~200 characters with more than one thing the student *does* is a
-list. Leave alone: single actions, hints, `gotItWhen` strings, placeholders.
-
-**A trailing "You've got it when: …" stays plain text AFTER `</ol>`** — never a
-final `<li>`. The renderer wraps it in `<span class="got-it">`; **do not put the
-span in module data.** Same for other trailing matter: "No score —" notes,
-partner bonuses, Journey links, and `<span class="step-figure">` images (always
-dead last).
-
-**Challenge cards** (any step that opened `Challenge N — Title:`): the full title
-lives in `label`, verbatim, escaped plain text, under ~70 chars; the `text` opens
-straight into directions; **the body is always a list** — the one place the
-"single actions stay prose" carve-out does not apply. A defining parenthetical
-(*a fill is…*) moves into the text; an identifying one (*(assessment
-preparation)*, 2026-09-23 — was *(your assessment piece)*) stays in the title.
-**A card that already had a list keeps it byte-for-byte.**
-
-**Presentation belongs at render time, not in content.** MC answer order and
-got-it-when styling are both render-time, so new cards inherit them and neither
-can regress. Reach for the renderer first whenever a change is about how
-something looks or is ordered rather than what it says.
-
-**Strings are named, never numbered, in student-facing text** (Jonathan,
-2026-08-06): low E · A · D · G · B · high e; ES uses solfège (cuerda Mi grave …
-cuerda mi aguda). Chord-chart shorthand like `xx4432` is notation and stays.
-The only surviving digits are Module 7's two root-naming MCs, each anchored
-"string 6 (the low E)". Enforced by checks.mjs (1j) — new numbered-string prose
-fails the push.
-
-**Paper drills get a digital deck.** Nothing student-facing should ask for
-scissors, index cards or a pen. Three `step.drill` types share one dispatcher:
-`shuffle` (frets on one string, timed), `deck` (any card pile, optional back),
-`ear` (hidden note sequence, played aloud) — plus `notecall` (2026-09-27, ca-23),
-which isn't a paper drill: a note name on the beat, played on the guitar. It opens
-in "Show answer" (a play-along: the fret lights up 2 beats after the name, speeds up
-every 8 notes, Slower backs it off and Faster steps it up, nothing scored); turned off, it runs five scored
-levels answered by the mic (the "Play it on the guitar" button, off by default) or by tapping the fret
-(`drill: { type:'notecall',
-strings:['lowE','A'], minFret:5, maxFret:8 }`; engine `renderNoteCall` in
-`app.js`, progress in `games.nc`, and `gamesStopMic()` stops it). Wiring one is content, not code:
-`drill: { type:'deck', deck:'numerals-C', skill:'m11w1-s3' }`. Decks live in
-`DECKS` in `app.js`; ear pools in `EAR_POOLS`. Drop the "Got someone around?"
-partner line from any card that gets a deck; no paper-fallback line.
-
-
-### Quiz answers and keyed MCs (old CLAUDE.md lines 373,412)
-
-### ⚠️ Quiz answers and keyed MCs
-A **keyed MC** is an on-site multiple-choice with an answer key — a
-`response:{type:'mc'}` on a lesson step. Nothing on the site is graded; the
-graded quizzes are the Canvas ones. (Called "graded MC" before 2026-10-26;
-older notes and code comments may still say that.)
-**Quiz answers are shuffled at render time** by `mcOrder(choices, seed)` —
-deterministic, catch-alls pinned via `MC_PINNED`, fewer than 3 choices left
-alone. The two MC paths store differently: the keyed step persists the choice
-**text**, the practice panel persists the **index**. Don't "simplify" that
-away. Write `answer: 0` freely — students never see it that way.
-
-- **The seed is the prompt PLUS the joined choices** (`mcSeed`), so order is
-  stable across re-renders, languages and students, but **rewording any choice
-  re-rolls the display order**. Never name an option by its position in an
-  `explain` ("the last option") — name it by content. m11w2-s3 was right only
-  by luck after a 2026-09-05 reword.
-- **Rewording a KEYED MC's choices after students reach it orphans their
-  stored picks** — the keyed path persists the choice text, so an old string
-  renders as "answered, nothing selected". Reword before they get there, or
-  map old→new in the renderer. The 2026-09-05 m8w1 reword was safe only
-  because the live roster's furthest student was in Module 1.
-
-**That rule is now a ratchet — `FROZEN_MC_THROUGH_MODULE` in checks.mjs**
-(2026-09-19). Every keyed MC in Modules 1..N is pinned by a fingerprint of
-its `choices` + `choices_es` + `answer`, and **1ap** fails the push when one
-of them changes by a single character — including a keyed MC that goes
-missing. N is *the furthest module a student has reached or is about to*; it
-is **3** today (Jonathan, 2026-10-01; 2 from 2026-09-19). **Raise it as the class advances** — ask which module
-they're in, bump the constant, re-run and paste the printed fingerprints back
-in, same commit. Lowering it is almost never right: a module the class has
-passed keeps its stored answers forever. The practice-panel MC on a skill is
-deliberately NOT pinned — it stores the index, so its wording is free and its
-ORDER is the thing to hold.
-
-Modules 3–6 giveaway rewording history (2026-09-19) and the full write-ups of the MC-giveaway ratchets **1at / 1au / 1av** and the 1w field-reader fix: `WORKFLOW.md` → "Moved from CLAUDE.md (2026-10-28)". Short version: the detectors live in `tools/checks.mjs` (each documented by its comment), **check a video's watch range before writing a question about it**, and a new authoring field needs adding to `STUDENT_VALUE_NAME_RE`.
-
-The three Module 1 Set 2 keyed-MC rewords, Module 3 Set 2's Challenge
-numbers, and `ca-14`'s Happy Birthday exit check are all frozen mid-year fixes —
-see the **Summer reset list** (the `summer-reset` skill).
-
-
-### Play-along first, firestore.rules, Daily 5 (old CLAUDE.md lines 413,432)
+### Quiz answers and keyed MCs
+Rule: CLAUDE.md "Keyed MCs". Called "graded MC" before 2026-10-26 (old notes and comments may say that); nothing on the site is graded, the graded quizzes are on Canvas. Fewer than 3 choices are not shuffled; write `answer: 0` freely. History: m11w2-s3's explain was right only by luck after a 2026-09-05 reword; the 2026-09-05 m8w1 reword was safe only because the furthest student was in Module 1. `FROZEN_MC_THROUGH_MODULE` (2026-09-19; 2 then, 3 since 2026-10-01, Jonathan) fingerprints `choices` + `choices_es` + `answer`, and 1ap also fails when a keyed MC goes missing. Don't lower it: a module the class has passed keeps its stored answers forever. To raise it, ask Jonathan which module the class is in. The 1at / 1au / 1av ratchets and the 1w field-reader fix: "Moved from CLAUDE.md (2026-10-28)". Frozen mid-year fixes (Module 1 Set 2's three keyed-MC rewords, Module 3 Set 2's Challenge numbers, `ca-14`'s Happy Birthday exit check): skill `summer-reset`.
 
 ## Play-along first; Song Journey pages are the back door (2026-10-06)
-**One rule for every link to a song: if students can open a play-along (whole-song)
-card for it, the link opens that card; if not, it opens the Song Journey page**
-(`songsPlayAlongCard()` decides — no list to maintain — and it decides at the click:
-don't fold "Play Along now" into `caIsVisible()`). "Take It to a Song" is **switched
-off, not deleted** (`TAKE_TO_SONG_ENABLED = false`): never delete those
-`kind:'take-to-song'` sections, they hold `gi`. Journey pages: no per-song retire
-list or "moved" card (check 1bn), no Stuck?/Level up folds, and don't sync a page's
-text to a card. The door table, layer matching and the rest: skill
-`in-class-activities` and `.claude/rules/journey-pages.md` (loads with `tabs/**`).
+Rule: CLAUDE.md "Play-along first" (1bn) and skill `in-class-activities` (same heading; door table, layer matching). Journey pages also get no Stuck?/Level up folds, and a page's text is not synced to a card.
 
-### ⚠️ Editing `firestore.rules` changes nothing until it's pasted into Firebase
-GitHub Pages doesn't deploy Firestore rules. After any push that touches
-`firestore.rules`, open Firebase console → Firestore Database → Rules, paste
-the file, Publish. Until that happens the live quiz's answer writes are
-rejected and the game looks broken with no error students can see.
+**`firestore.rules`:** console paste (CLAUDE.md). Until it is pasted, the live quiz's answer writes are rejected and the game looks broken with no error students see.
 
-### ⚠️ The Daily 5 is retired — switched off, not deleted
-`const DAILY5_ENABLED = false;` in `app.js` (read only by `ladderHtml()`) is the whole switch (Jonathan, 2026-09-19). Nothing was deleted — `buildDaily5()`, the `.daily5-*` CSS and the `daily5.*` i18n keys stay; `kind:'tuning-warmup'` sections stay hidden because `storageSections()` and every saved `gi` depend on it. History: `WORKFLOW.md` → "Moved from CLAUDE.md (2026-10-28)".
-
-
-### How to work with Jonathan (triggers, Fast or Reviewed, effort) (old CLAUDE.md lines 459,556)
+**Daily 5** (Jonathan, 2026-09-19): `DAILY5_ENABLED = false` in `app.js`, read only by `ladderHtml()`; `buildDaily5()`, the `.daily5-*` CSS and `daily5.*` keys stay; `kind:'tuning-warmup'` sections stay hidden because `storageSections()` and every `gi` depend on them.
 
 ## How to work with Jonathan
 
-**Use AskUserQuestion, not free-text questions** — he'd rather click than type.
-2–4 mutually exclusive options, one question per turn unless truly independent.
+Rule: CLAUDE.md "How to work with Jonathan". Dated decisions and what only this file holds:
 
-**Don't ask "should I proceed?" — just proceed.** Do the work and report back.
-Never pause for "want me to do this?", "ready for the next step?", "shall I
-implement it?".
-
-- **Just do it:** the obvious next step, multi-step work, refactors, fixes,
-  edits, local tests, anything reversible. **All code and HTML edits** — git
-  tracks everything. Treat "can you…", "how do I…", "should this be…" about code
-  as *do it*, not *ask first*.
-- **Still pause for:** a genuine fork where the choice changes the outcome (use
-  AskUserQuestion), irreversible / outward-facing actions — deleting files,
-  touching the live site. A review trigger no longer asks — see "Fast by
-  default" under Triggers.
-- **Pushing to `main` is NOT one of those** (Jonathan, 2026-08-28). When the
-  checks pass and a fast-forward onto `main` is what you'd recommend anyway,
-  just push it — don't ask first, and never offer "push the branch instead" as
-  a coin flip. Push, say what landed, then confirm with `checks.mjs --live`.
-  Still ask when main is *not* what you'd recommend: a merge rather than a
-  fast-forward, another session's commits in the way, checks failing, or work
-  you don't think is ready for students.
-- When in doubt: pick the sensible default, proceed, say what you did and why.
-
-**Sub-agent sweeps need an adversarial audit budgeted in — and it audits the
-FIXES, not just the findings.** On any content sweep over ~50 items, run a
-second agent told to *find problems, not confirm the work* — the structural pass
-and the audit catch disjoint failure classes. Lead every sweep prompt with the
-calibration line ("convert EVERY card; do NOT skip one because the actions flow
-naturally — re-stitch it"), or agents go timid. Sonnet for mechanical work, the
-big model for design and verification. Every review round of the 2026-10-25
-sweep found real regressions that the fixers' own proofs missed. Playbook and
-the auditor / fixer / reviewer brief templates: skill `site-sweep`.
-
-**Triggers, so this doesn't depend on how hard you are thinking** (they hold at
-any effort level): a change hits a **review trigger** — an adversarial
-reviewer on a pinned commit, subject to "Fast by default" below — whenever it
-touches 3+ files, a danger-zone file (`teacher.js` config plumbing,
-`sw.js`, `coach.js` detection, the `app.js` save path, `firestore.rules`),
-or 50+ strings. **Mechanical files don't count toward the 3**
-(Jonathan, 2026-10-26): `CHANGELOG.md`, the `sw.js` version lines that
-`checks.mjs` rewrites (that rewrite doesn't make `sw.js` a danger-zone edit —
-a change to its code does), and the Spanish twin (`_es` field or `i18n.js`
-key) of a string changed in the same edit.
-
-**A pin-only `checks.mjs` edit is mechanical too** (Jonathan, 2026-10-27,
-after a play-along edit sat behind a 30-minute deep review). An edit that
-only updates pinned values a content change forces — a count, a fingerprint,
-an expected list, a `FROZEN_*` number — doesn't make the change danger-zone
-and doesn't count toward the 3. The checks themselves are the gate for it.
-A guard that pins a new default or extends what an existing check reads (a
-new field, a new colour, a new click in `tools/smoke.mjs`) needs only the
-break-it proof — break the guarded thing in a scratch copy, watch the check go
-red, restore — with the output pasted into the report; it doesn't count toward
-the 3 either. A new KIND of check (a detector for a new error class, or a
-change to an existing check's logic or matching) is a review trigger, for
-`site-reviewer` (high), plus the break-it proof. None of this makes
-`checks.mjs` a deep-review file. **Which reviewer** (2026-10-26):
-`site-reviewer-deep` (extra high) for a danger-zone file or a 50+-string
-sweep, `site-reviewer` (high) for everything else. For a danger-zone file
-write the failing scenario before the fix. When a rule says "run the tool", run it — don't
-substitute your own reading of the code. When an agent hands you a claim, read
-the quoted lines yourself before acting; when it hands you a fix, make it
-re-derive it on the real code.
-
-**Fast by default; a Friday check reviews it** (2026-10-31; replaces the
-2026-10-27 "Fast or Reviewed" question, which replaced the 2026-10-26 "quick
-change" keyword). When a change hits a review trigger, finish the build and
-every "Start here" step — checks, rule-zero proof, smoke test, the item-4
-screenshot checklist — then:
-- **Always Reviewed, same day, never Fast:** a danger-zone file, a new kind of
-  check, a sub-agent sweep, or moving / adding / removing a section or step.
-  Run the reviewer named above. These are the changes that can lose student
-  progress or break the live site, where a week's wait means the damage is
-  already done.
-- **Everything else ships Fast — don't ask.** No reviewer. Every Fast commit
-  ends with the trailer line `Review: Fast` (above any Co-Authored-By), and
-  the report starts "Fast — reviewer skipped; Friday check will review it."
-- Jonathan says "review this" / "Reviewed" in the request → review same day.
-- **No trigger → no trailer.** Ship as usual.
-- **Friday check:** a scheduled cloud task, Fridays 11:00 PM Pacific, runs
-  skill `friday-check` — `site-reviewer` on every `Review: Fast` commit since
-  the last `friday-check-*` tag, fixes pushed to `main`; an always-Reviewed fix (e.g. coach.js)
-  goes on a branch, gets `site-reviewer-deep` rounds automatically (2026-11-07, Jonathan: reviews
-  happen on their own) and is merged to `main` in the same run once a round finds nothing real
-  (it waits only after 3 rounds or on a product call); content calls to Open work, then a new dated tag.
-
-**Effort per task.** Agents in `.claude/agents/` pin their own effort (auditor, fixer, `site-reviewer` high; `site-reviewer-deep` extra high). For a general-purpose agent pass `effort: "xhigh"` for a review the Triggers send to `site-reviewer-deep`, `"high"` for any other review, auditor or fixer; never `max`. Your own session: `medium` routine edits, `high` bug fixes / shipped JS / keyed-MC content, `xhigh` danger-zone files and sweeps — if the task is a tier higher than the session, say so and ask for `/effort`. Full text: `WORKFLOW.md`.
-
-**Report the real numbers instead of accepting the premise**, and name the prior
-decision a request would reverse — both have produced better calls than fixing
-the literal complaint would have.
-
-
-
+- AskUserQuestion: one question per turn unless truly independent.
+- Pushing to `main` is not a pause point (Jonathan, 2026-08-28): never offer "push the branch instead" as a coin flip.
+- Sweeps: lead every sweep prompt with the calibration line ("convert EVERY card; do NOT skip one because the actions flow naturally — re-stitch it"), or agents go timid. Sonnet for mechanical work, the big model for design and verification. Every review round of the 2026-10-25 sweep found regressions the fixers' own proofs missed. Playbook: skill `site-sweep`.
+- Triggers hold at any effort level. Mechanical files don't count toward the 3 (Jonathan, 2026-10-26); the `sw.js` version rewrite doesn't make `sw.js` a danger-zone edit, a change to its code does. Pin-only `checks.mjs` edits too (Jonathan, 2026-10-27, after a play-along edit sat behind a 30-minute deep review); the checks are the gate for them, and none of this makes `checks.mjs` a deep-review file. Which reviewer: 2026-10-26.
+- Fast by default (2026-10-31) replaced the 2026-10-27 "Fast or Reviewed" question, which replaced the 2026-10-26 "quick change" keyword. Always-Reviewed changes are the ones that can lose student progress or break the live site, where a week's wait means the damage is done. Friday check: always-Reviewed fixes get `site-reviewer-deep` rounds and merge on their own (2026-11-07, Jonathan: reviews happen on their own); skill `friday-check`.
+- Effort tiers: CLAUDE.md "Effort".
 
 ## Power Chord Switch: where we stopped (moved here from NEXT-STEPS-power-chord-switch.md, 2026-11-05)
 
