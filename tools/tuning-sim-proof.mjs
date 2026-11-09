@@ -10,18 +10,21 @@
      - level 1: the detune is 12..45 cents, flat or sharp, and the tuner's letter is
        the string's own letter (never already green, never a new letter)
      - levels 2-4: the string starts whole notes away (1-2, 2-4, 3-5), plus or minus
-       at most 20 cents; the tuner shows ANOTHER letter; the difference is never more
-       than 5 notes (a 4th), and the smallest and largest of each level are both drawn
+       at most 20 cents; the tuner shows ANOTHER letter, always a plain letter (A-G, never
+       a sharp: the circle has only the seven letters, 2026-11-09); the difference is never
+       more than 5 notes (a 4th), and the smallest and largest of each level are both drawn
      - the right answer is Up for every flat start and Down for every sharp start,
-       and the circle of notes (ringMove, up = counterclockwise) gives the same way
-       and the same number of steps, for every round
+       and the circle of notes (ringMove, up = counterclockwise) gives the same way,
+       and as many steps as letters between the two notes (worked out here from the
+       pitch, not from the circle), for every round; the most letters a level draws is
+       its LEVEL_LETTERS (the "up to {m} steps" message)
      - no string comes twice in a row
      - turning the peg toward the right answer reaches the tuner showing the string's
        own letter AND the sticky green band (the same +-8 in / +-11 out numbers as
        tuner.js) from every start, and never starts already done
-   and, for all 132 pairs of different notes on the circle, that a pair 1-5 steps
-   apart gives the same way as the pitch (the higher note is "up"). The drawing:
-   ringPt puts C at the top and each next note 30 degrees COUNTERCLOCKWISE on the
+   and, for all 42 pairs of different letters on the circle, that the short way gives
+   the same way as the pitch (the note it calls "up" is at most a tritone higher). The drawing:
+   ringPt puts A at the top and each next letter 360/7 degrees COUNTERCLOCKWISE on the
    screen (up = the way the peg turns to tighten), and for every pair the arrow
    ringArc draws turns counterclockwise for Up and clockwise for Down, through
    exactly the steps ringMove counts, round the ring's centre (the SVG arc worked out the way the SVG spec
@@ -53,14 +56,18 @@ const m = html.match(/\/\* ROUND-LOGIC-START \*\/([\s\S]*?)\/\* ROUND-LOGIC-END 
 if (!m) { console.error('tuning-sim-proof: no ROUND-LOGIC block in ' + FILE); process.exit(1); }
 // The block is plain `const`s and functions; return them from one expression.
 const ctx = vm.createContext({});
-const L = vm.runInContext(`(function(){ ${m[1]}\n return { NOTES, STRINGS, MIN_DETUNE, MAX_DETUNE, LEVELS, JITTER, CLEAN_TO_LEVEL_UP, TICK_CENTS, PEG_LIMIT, STREAK_TO_PHASE2, DONE_MS, DEFAULTS, nearestNote, centsToFreq, makeRound, rightWay, ringMove, stickyInTune, RC, RA, ringPt, ringArc }; })()`, ctx);
+const L = vm.runInContext(`(function(){ ${m[1]}\n return { NOTES, WHEEL, LEVEL_LETTERS, STRINGS, MIN_DETUNE, MAX_DETUNE, LEVELS, JITTER, CLEAN_TO_LEVEL_UP, TICK_CENTS, PEG_LIMIT, STREAK_TO_PHASE2, DONE_MS, DEFAULTS, nearestNote, centsToFreq, makeRound, rightWay, ringMove, stickyInTune, RC, RA, ringPt, ringArc }; })()`, ctx);
 
+/* Letters from the pitch alone: a note's place on the white keys (C D E F G A B, octave after octave). */
+const midiOf = f => Math.round(12 * Math.log2(f / 440)) + 69;
+const WHITE = { 0: 0, 2: 1, 4: 2, 5: 3, 7: 4, 9: 5, 11: 6 };
+const diat = m => WHITE[((m % 12) + 12) % 12] === undefined ? NaN : Math.floor(m / 12) * 7 + WHITE[((m % 12) + 12) % 12];
 const mulberry = a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 
 function run(name, rnd, level, N = 1000) {
   const tag = `${name} level ${level}`, LV = L.LEVELS[level - 1];
   const c = { rounds: 0, rangeOk: 0, letterOk: 0, wayOk: 0, ringOk: 0, noRepeat: 0, doneReach: 0, notDoneAtStart: 0, flat: 0, sharp: 0 };
-  const seen = new Set(), notes = new Set(); let prev = -1, minK = 99, maxK = 0;
+  const seen = new Set(), notes = new Set(); let prev = -1, minK = 99, maxK = 0, maxLetters = 0, plain = 0;
   for (let n = 0; n < N; n++) {
     const r = L.makeRound(prev, rnd, level);
     c.rounds++;
@@ -73,8 +80,10 @@ function run(name, rnd, level, N = 1000) {
     if (LV.max ? r.letter !== tl : r.letter === tl) c.letterOk++;
     if (r.cents < 0) c.flat++; else c.sharp++;
     if (r.answer === (r.cents < 0 ? 'up' : 'down')) c.wayOk++;
-    const mv = L.ringMove(r.letter, tl);
-    if (mv.n === Math.abs(k) && r.steps === mv.n && (mv.n === 0 || mv.way === r.answer)) c.ringOk++;
+    const mv = L.ringMove(r.letter, tl), sm = midiOf(L.STRINGS[r.idx].freq), letters = Math.abs(diat(sm + k) - diat(sm));
+    if (L.WHEEL.includes(r.letter)) plain++;
+    maxLetters = Math.max(maxLetters, letters);
+    if (mv.n === letters && r.steps === mv.n && (mv.n === 0 || mv.way === r.answer) && (mv.n === 0) === (k === 0)) c.ringOk++;
     if (r.idx !== prev) c.noRepeat++;
     seen.add(r.idx); prev = r.idx;
     const startShown = L.nearestNote(L.centsToFreq(r.idx, r.cents));
@@ -90,11 +99,13 @@ function run(name, rnd, level, N = 1000) {
     }
     if (done) c.doneReach++;
   }
-  console.log(`${tag}: ${c.rounds} rounds — ${LV.max ? `${LV.min}-${LV.max} notes off (saw ${minK}..${maxK}, all of ${[...notes].sort().join(',')} drawn)` : `12..45 cents`}: ${c.rangeOk} of ${c.rounds}; tuner letter ${LV.max ? 'differs from ' : '= '}the string's: ${c.letterOk} of ${c.rounds}; Up for flat / Down for sharp: ${c.wayOk} of ${c.rounds} (${c.flat} flat, ${c.sharp} sharp); circle gives the same way and steps: ${c.ringOk} of ${c.rounds}; no string twice in a row: ${c.noRepeat} of ${c.rounds}; never done at the start: ${c.notDoneAtStart} of ${c.rounds}; the peg reaches the letter in green: ${c.doneReach} of ${c.rounds}; strings seen: ${seen.size} of 6`);
+  console.log(`${tag}: ${c.rounds} rounds — ${LV.max ? `${LV.min}-${LV.max} notes off (saw ${minK}..${maxK}, all of ${[...notes].sort().join(',')} drawn)` : `12..45 cents`}: ${c.rangeOk} of ${c.rounds}; tuner letter ${LV.max ? 'differs from ' : '= '}the string's: ${c.letterOk} of ${c.rounds}; Up for flat / Down for sharp: ${c.wayOk} of ${c.rounds} (${c.flat} flat, ${c.sharp} sharp); starts on a plain letter: ${plain} of ${c.rounds}; circle gives the same way and letters: ${c.ringOk} of ${c.rounds} (most ${maxLetters}, message says ${L.LEVEL_LETTERS[level - 1]}); no string twice in a row: ${c.noRepeat} of ${c.rounds}; never done at the start: ${c.notDoneAtStart} of ${c.rounds}; the peg reaches the letter in green: ${c.doneReach} of ${c.rounds}; strings seen: ${seen.size} of 6`);
   must(c.rangeOk === c.rounds, `${tag}: ${c.rounds - c.rangeOk} starts outside the level's range`);
   must(c.letterOk === c.rounds, `${tag}: the tuner letter was wrong in ${c.rounds - c.letterOk} rounds`);
   must(c.wayOk === c.rounds, `${tag}: the right answer was wrong in ${c.rounds - c.wayOk} rounds`);
   must(c.ringOk === c.rounds, `${tag}: the circle disagreed with the answer in ${c.rounds - c.ringOk} rounds`);
+  must(plain === c.rounds, `${tag}: ${c.rounds - plain} rounds started on a sharp, which the circle does not have`);
+  must(maxLetters === L.LEVEL_LETTERS[level - 1], `${tag}: the most letters drawn is ${maxLetters}, but the level-up message says up to ${L.LEVEL_LETTERS[level - 1]}`);
   must(c.noRepeat === c.rounds, `${tag}: a string came twice in a row ${c.rounds - c.noRepeat} times`);
   must(c.notDoneAtStart === c.rounds, `${tag}: ${c.rounds - c.notDoneAtStart} rounds started already done`);
   must(c.doneReach === c.rounds, `${tag}: the peg never reached the letter in green in ${c.rounds - c.doneReach} rounds`);
@@ -104,25 +115,28 @@ function run(name, rnd, level, N = 1000) {
 }
 for (let lv = 1; lv <= 4; lv++) { run('seeded', mulberry(20261106 + lv), lv); run('Math.random', Math.random, lv); }
 
-// The circle against the pitch itself: for every pair of different notes 1-5 steps apart either way round, "up" means the other note is higher.
+// The circle against the pitch itself: for every pair of different letters, the short way agrees with the pitch and counts the letters.
+must(L.WHEEL.join() === 'A,B,C,D,E,F,G', `the circle has [${L.WHEEL}], Jonathan's call is A B C D E F G (A at the top)`);
 let pairs = 0;
-for (let a = 0; a < 12; a++) for (let b = 0; b < 12; b++) {
+for (let a = 0; a < 7; a++) for (let b = 0; b < 7; b++) {
   if (a === b) continue;
-  const mv = L.ringMove(L.NOTES[a], L.NOTES[b]), up = (b - a + 12) % 12;                // semitones from a up to b
-  if (mv.n === 0 || mv.n > 6) { fails.push(`ringMove ${L.NOTES[a]}->${L.NOTES[b]} gave ${mv.n} steps`); continue; }
-  if (up >= 1 && up <= 5) { if (mv.way !== 'up' || mv.n !== up) fails.push(`ringMove ${L.NOTES[a]}->${L.NOTES[b]}: ${up} up, got ${mv.n} ${mv.way}`); else pairs++; }
-  if (up >= 7 && up <= 11) { if (mv.way !== 'down' || mv.n !== 12 - up) fails.push(`ringMove ${L.NOTES[a]}->${L.NOTES[b]}: ${12 - up} down, got ${mv.n} ${mv.way}`); else pairs++; }
+  const A = L.WHEEL[a], B = L.WHEEL[b], mv = L.ringMove(A, B);
+  const ma = 60 + L.NOTES.indexOf(A), mb = 60 + L.NOTES.indexOf(B), upB = mb > ma ? mb : mb + 12, dnB = mb < ma ? mb : mb - 12;   // B the nearest above and below A
+  const lu = diat(upB) - diat(ma), ld = diat(ma) - diat(dnB);                                  // letters up, letters down
+  const want = lu < ld ? { n: lu, way: 'up' } : { n: ld, way: 'down' };
+  if (lu === ld || mv.n !== want.n || mv.way !== want.way) fails.push(`ringMove ${A}->${B}: ${lu} letters up, ${ld} down, got ${mv.n} ${mv.way}`); else pairs++;
 }
-console.log(`circle of notes: ${pairs} of 120 pairs 1-5 steps apart give the right way and count (the 12 pairs 6 apart are never drawn)`);
-must(pairs === 120, `only ${pairs} of 120 note pairs were right on the circle`);
+console.log(`circle of notes: ${pairs} of 42 pairs of letters give the short way and the right number of letters`);
+must(pairs === 42, `only ${pairs} of 42 letter pairs were right on the circle`);
 
 /* The drawing's direction. Screen angle of a point: counterclockwise on the screen is positive (y points down in SVG). */
 const scrAng = ([x, y]) => Math.atan2(L.RC - y, x - L.RC) * 180 / Math.PI;
 const norm = d => ((d % 360) + 540) % 360 - 180;
 let ccw = 0;
-for (let i = 0; i < 12; i++) { const step = norm(scrAng(L.ringPt((i + 1) % 12, 88)) - scrAng(L.ringPt(i, 88))); if (Math.abs(step - 30) < 0.01) ccw++; else fails.push(`ringPt: ${L.NOTES[(i + 1) % 12]} sits ${step.toFixed(1)} degrees from ${L.NOTES[i]} (expected +30, counterclockwise)`); }
+const STEP = 360 / 7;
+for (let i = 0; i < 7; i++) { const step = norm(scrAng(L.ringPt((i + 1) % 7, 88)) - scrAng(L.ringPt(i, 88))); if (Math.abs(step - STEP) < 0.01) ccw++; else fails.push(`ringPt: ${L.WHEEL[(i + 1) % 7]} sits ${step.toFixed(1)} degrees from ${L.WHEEL[i]} (expected +${STEP.toFixed(1)}, counterclockwise)`); }
 const top = L.ringPt(0, 88);
-must(Math.abs(top[0] - L.RC) < 0.01 && top[1] < L.RC, `ringPt: C is not at the top (${top})`);
+must(Math.abs(top[0] - L.RC) < 0.01 && top[1] < L.RC, `ringPt: ${L.WHEEL[0]} is not at the top (${top})`);
 /* An SVG arc "M x1 y1 A r r 0 large sweep x2 y2", turned into a signed screen angle (counterclockwise positive), the way SVG 1.1 F.6.5 does it. */
 function arcTurn(d) {
   const n = d.match(/-?[\d.]+/g).map(Number), [x1, y1, r, , , fA, fS, x2, y2] = n;
@@ -134,15 +148,15 @@ function arcTurn(d) {
   return { turn: -dt * 180 / Math.PI, cx, cy };   // SVG angles grow clockwise on the screen
 }
 let arcs = 0;
-for (let a = 0; a < 12; a++) for (let b = 0; b < 12; b++) {
-  const mv = L.ringMove(L.NOTES[a], L.NOTES[b]);
-  if (mv.n < 1 || mv.n > 5) continue;
-  const { turn, cx, cy } = arcTurn(L.ringArc(a, b, mv.way === 'up')), want = (mv.way === 'up' ? 1 : -1) * mv.n * 30;
+for (let a = 0; a < 7; a++) for (let b = 0; b < 7; b++) {
+  const mv = L.ringMove(L.WHEEL[a], L.WHEEL[b]);
+  if (mv.n < 1) continue;
+  const { turn, cx, cy } = arcTurn(L.ringArc(a, b, mv.way === 'up')), want = (mv.way === 'up' ? 1 : -1) * mv.n * STEP;
   const centred = Math.hypot(cx - L.RC, cy - L.RC) < 1;   // round the ring's own centre, not bulging the other way
-  if (centred && Math.abs(turn - want) < 1) arcs++; else fails.push(`ringArc ${L.NOTES[a]}->${L.NOTES[b]} (${mv.n} ${mv.way}): the arrow turns ${turn.toFixed(1)} degrees on screen round (${cx.toFixed(1)}, ${cy.toFixed(1)}), expected ${want} (+ = counterclockwise) round the ring's centre (${L.RC}, ${L.RC})`);
+  if (centred && Math.abs(turn - want) < 1) arcs++; else fails.push(`ringArc ${L.WHEEL[a]}->${L.WHEEL[b]} (${mv.n} ${mv.way}): the arrow turns ${turn.toFixed(1)} degrees on screen round (${cx.toFixed(1)}, ${cy.toFixed(1)}), expected ${want} (+ = counterclockwise) round the ring's centre (${L.RC}, ${L.RC})`);
 }
-console.log(`the drawing: ${ccw} of 12 notes sit 30 degrees counterclockwise of the one before, C at the top; ${arcs} of 120 arrows turn counterclockwise for Up and clockwise for Down through the right number of steps`);
-must(ccw === 12 && arcs === 120, `the circle is drawn the wrong way round (${ccw} of 12 notes, ${arcs} of 120 arrows)`);
+console.log(`the drawing: ${ccw} of 7 letters sit ${STEP.toFixed(1)} degrees counterclockwise of the one before, A at the top; ${arcs} of 42 arrows turn counterclockwise for Up and clockwise for Down through the right number of steps`);
+must(ccw === 7 && arcs === 42, `the circle is drawn the wrong way round (${ccw} of 7 letters, ${arcs} of 42 arrows)`);
 
 // Pinned numbers from the work order.
 must(L.MIN_DETUNE === 12 && L.MAX_DETUNE === 45, `detune range is ${L.MIN_DETUNE}..${L.MAX_DETUNE}, the work order says 12..45`);

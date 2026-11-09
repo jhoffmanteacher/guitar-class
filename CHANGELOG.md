@@ -5,6 +5,11 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-09 (late evening) — The Tuning Simulator's circle has only the seven letters
+
+- **The circle of notes in the Tuning Simulator now shows only A, B, C, D, E, F and G, with A at the top.** Going up is still counterclockwise (A, B, C…), the way the peg turns to tighten. The sharps (C#, F#…) are gone from the circle.
+- **On levels 2–4 a string now always starts on one of those seven letters**, so you can find where the tuner starts on the circle. The steps on the circle count letters: "E is 3 steps down from A". While you turn the peg the tuner can still pass through a sharp (like G#); the circle has no spot for it, so the "tuner shows" mark goes away until the next letter. The level-up message says up to 1, 2 or 3 steps (before: 2, 4 or 5).
+
 ## 2026-11-09 (evening) — Fairer taps, a real "Which way?" question, and tempo advice that fits
 
 - **Call the chord, Follow: a tap in the beat before the change's own beat now counts as a miss** ("Too early, so G5 is a miss. Tap in the last beat before the change."). Before, an early tap cost nothing, so tapping the space bar over and over could pass a round. A quick second tap right after a change still costs nothing. The done screen lists these changes as "early". Call mode is unchanged.

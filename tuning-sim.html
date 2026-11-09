@@ -146,7 +146,7 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
 .bubble.wrong{background:var(--red-bg);border-color:var(--red-text);color:var(--red-text)}
 .strings.nonames .bubble{opacity:0;pointer-events:none}
 
-/* ── the circle of notes: the 12 notes round a ring, going UP counterclockwise (the way the peg turns to raise the note) ── */
+/* ── the circle of notes: the seven letters round a ring, A at the top, going UP counterclockwise (the way the peg turns to raise the note) ── */
 .ringbox{display:flex;flex-direction:column;align-items:center;gap:2px}
 #ring{width:224px;height:224px;display:block;overflow:visible}
 .rguide{fill:none;stroke:var(--border2);stroke-width:1.5;stroke-dasharray:2 5}
@@ -262,7 +262,10 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
    between these two markers and runs it 1,000 times. Keep it free of document
    and window references. ═══ */
 /* ROUND-LOGIC-START */
-const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];   // what the tuner can show
+/* The circle of notes has only the seven letters (Jonathan, 2026-11-09), A at the top, going up counterclockwise.
+   On levels 2-4 a string always starts on one of these letters, never a sharp, and a step is one letter. */
+const WHEEL = ['A','B','C','D','E','F','G'];
 /* The same six values as STRING_TARGETS in tuner.js, low E first. */
 const STRINGS = [
   { id:'E2', freq:82.41,  note:'E' },
@@ -274,9 +277,12 @@ const STRINGS = [
 ];
 const MIN_DETUNE = 12, MAX_DETUNE = 45;   // level 1: cents, flat or sharp; never already green, never a new letter
 /* Levels 2-4: the string starts whole notes away (one note = one fret = 100 cents), flat or sharp, so the tuner
-   shows another letter. Level 4 goes up to 5 notes, a 4th. A 5th (7 notes) is not drawn: round the circle it is a
-   4th the other way, so the student would tune it from the other side. */
+   shows another letter, always a plain letter (makeRound draws again when the start would be a sharp). Level 4 goes up
+   to 5 notes, a 4th: 3 letters. A 5th (7 notes) is not drawn: round the circle it is a 4th the other way, so the
+   student would tune it from the other side. On the circle that is 1 letter on level 2, 1-2 on level 3, 2-3 on level 4
+   (LEVEL_LETTERS, the "up to {m} steps" in the level-up message; tools/tuning-sim-proof.mjs checks it). */
 const LEVELS = [ { min:0, max:0 }, { min:1, max:2 }, { min:2, max:4 }, { min:3, max:5 } ];
+const LEVEL_LETTERS = [0, 1, 2, 3];
 const JITTER = 20;                        // levels 2-4: plus or minus this many cents on top, so the needle is not always centred
 const CLEAN_TO_LEVEL_UP = 3;              // rounds in a row with no wrong name and no wrong way
 const TICK_CENTS = 2;                     // one peg tick
@@ -307,25 +313,26 @@ function pickDetune(rnd, level){
   return (rnd() < 0.5 ? -1 : 1) * notes * 100 + jit;
 }
 function rightWay(cents){ return cents < 0 ? 'up' : 'down'; }
-/* The circle of notes: from the letter the tuner shows to the string's letter, the short way round.
-   Up is counterclockwise, the way the peg turns to tighten. */
+/* The circle of notes: from the letter the tuner shows to the string's letter, the short way round, in letters.
+   Up is counterclockwise, the way the peg turns to tighten. Seven letters, so the short way is never a tie. */
 function ringMove(from, to){
-  const d = ((NOTES.indexOf(to) - NOTES.indexOf(from)) % 12 + 12) % 12;
+  const d = ((WHEEL.indexOf(to) - WHEEL.indexOf(from)) % 7 + 7) % 7;
   if (d === 0) return { n: 0, way: '' };
-  return d <= 6 ? { n: d, way: 'up' } : { n: 12 - d, way: 'down' };
+  return d <= 3 ? { n: d, way: 'up' } : { n: 7 - d, way: 'down' };
 }
 function makeRound(prev, rnd, level){
-  const idx = pickString(prev, rnd), cents = pickDetune(rnd, level);
-  const letter = nearestNote(centsToFreq(idx, cents)).name, target = STRINGS[idx].note;
+  const idx = pickString(prev, rnd), target = STRINGS[idx].note;
+  let cents, letter;
+  do { cents = pickDetune(rnd, level); letter = nearestNote(centsToFreq(idx, cents)).name; } while (WHEEL.indexOf(letter) < 0);
   return { idx, cents, answer: rightWay(cents), letter, target, steps: ringMove(letter, target).n };
 }
 /* Sticky in-tune band, same numbers as tuner.js: enter green inside +-8 cents,
    leave only outside +-11. */
 function stickyInTune(was, shown){ return was ? Math.abs(shown) <= 11 : Math.abs(shown) < 8; }
-/* Where the circle draws note i (0 = C) in the 224x224 ring: C at the top, each next note COUNTERCLOCKWISE
-   (going up = the way the peg turns to tighten). The proof tool and checks.mjs 1cp check the direction. */
+/* Where the circle draws letter i of WHEEL (0 = A) in the 224x224 ring: A at the top, each next letter 360/7 degrees
+   COUNTERCLOCKWISE (going up = the way the peg turns to tighten). The proof tool and checks.mjs 1cp check the direction. */
 const RC = 112, RR = 88, RA = 58;
-function ringPt(i, r){ const a = -i * Math.PI / 6; return [RC + r * Math.sin(a), RC - r * Math.cos(a)]; }
+function ringPt(i, r){ const a = -i * 2 * Math.PI / 7; return [RC + r * Math.sin(a), RC - r * Math.cos(a)]; }
 /* The arrow from note a to note b, the short way: SVG sweep flag 0 turns counterclockwise on screen (up), 1 clockwise (down). */
 function ringArc(a, b, up){
   const [x1, y1] = ringPt(a, RA), [x2, y2] = ringPt(b, RA);
@@ -539,14 +546,14 @@ function followPitch(){
 }
 
 /* ═══ THE CIRCLE OF NOTES ═══
-   The 12 notes round a ring. Going UP is counterclockwise, the same way the peg turns to tighten.
-   Purple = the string's note, amber = the note the tuner shows now; green = on the string's note AND in tune (done).
+   The seven letters round a ring, A at the top. Going UP is counterclockwise, the same way the peg turns to tighten.
+   Purple = the string's note, amber = the note the tuner shows now (no mark while it shows a sharp); green = on the string's note AND in tune (done).
    After the student answers Up or Down, an arrow shows the short way round from where the tuner started. */
 const ringNodes = [];
 function ringInit(){
   let h = '<defs><marker id="ahead" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" class="ahead"/></marker></defs>';
   h += '<circle class="rguide" cx="' + RC + '" cy="' + RC + '" r="' + RR + '"/>';
-  NOTES.forEach((n, i) => { const [x, y] = ringPt(i, RR); h += '<g class="rn" data-note="' + n + '"><circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="18"/><text x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '">' + n + '</text></g>'; });
+  WHEEL.forEach((n, i) => { const [x, y] = ringPt(i, RR); h += '<g class="rn" data-note="' + n + '"><circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="18"/><text x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '">' + n + '</text></g>'; });
   h += '<path id="rarc" class="rarc" d=""/><text id="rc1" class="rc1" x="' + RC + '" y="' + (RC - 4) + '"></text><text id="rc2" class="rc2" x="' + RC + '" y="' + (RC + 16) + '"></text>';
   el.ring.innerHTML = h;
   el.ring.querySelectorAll('.rn').forEach(g => ringNodes.push(g));
@@ -559,7 +566,7 @@ function ringRender(){
   const arc = $('rarc'), c1 = $('rc1'), c2 = $('rc2');
   if (known && r.steps > 0 && (S.state === 'turn' || S.state === 'between')) {
     const up = r.answer === 'up';
-    arc.setAttribute('d', ringArc(NOTES.indexOf(r.letter), NOTES.indexOf(r.target), up));
+    arc.setAttribute('d', ringArc(WHEEL.indexOf(r.letter), WHEEL.indexOf(r.target), up));
     arc.setAttribute('marker-end', 'url(#ahead)');
     c1.textContent = stepsText(r.steps); c2.textContent = T(up ? 'ringUp' : 'ringDown');
   } else {
@@ -686,7 +693,7 @@ function finishRound(){
   let leveled = false;
   if (S.clean >= CLEAN_TO_LEVEL_UP && S.level < LEVELS.length) {
     S.level++; S.clean = 0; saveLevel(); leveled = true;
-    S.note = T('levelUp', { l: S.level, m: LEVELS[S.level - 1].max });
+    S.note = T('levelUp', { l: S.level, m: LEVEL_LETTERS[S.level - 1] });
   }
   stopHold();
   render();
@@ -911,7 +918,7 @@ $('back-link').addEventListener('click', e => {
 });
 
 /* A hook for tools/smoke.mjs and the proof tool; reads only. */
-window.TuningSim = { S, DEFAULTS, LEVELS, makeRound, nearestNote, ringMove, STRINGS, MIN_DETUNE, MAX_DETUNE, tick, newRound,
+window.TuningSim = { S, DEFAULTS, LEVELS, WHEEL, makeRound, nearestNote, ringMove, STRINGS, MIN_DETUNE, MAX_DETUNE, tick, newRound,
   setLevel(n){ S.level = clampLevel(n); S.clean = 0; return S.level; } };   // setLevel does not save
 
 ringInit();

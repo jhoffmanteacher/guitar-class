@@ -5609,34 +5609,37 @@ function checkTuningSim() {
   if (!/key:'tuningsim'[^}]*guitar:false[^}]*href:'tuning-sim\.html'/.test(coachSrc)) { err("coach.js GAMES_META has no { key:'tuningsim', …, guitar:false, …, href:'tuning-sim.html' } card — the Tuning Simulator lives on the Games page, with the games that need no guitar"); problems++; bad++; }
   /* 2026-11-08: the direction (Jonathan, settled: Tighten = counterclockwise = the note goes up = Left key;
      Loosen = clockwise = down = Right key). The circle is drawn from ringPt/ringArc in the ROUND-LOGIC
-     block, run here: each next note 30 degrees counterclockwise on the screen, C at the top, and the
+     block, run here: the seven letters A-G only (Jonathan, 2026-11-09), each next one 360/7 degrees
+     counterclockwise on the screen, A at the top, and the
      arrow's SVG sweep flag 0 (counterclockwise on screen) for Up, 1 for Down, small arc, from the tuner's
      note to the string's. tools/tuning-sim-proof.mjs works the arcs out in full; tools/smoke.mjs measures
      the drawn arrow. The words that say the direction are pinned as one set, EN and ES. */
   let dirBad = 0, lvl = null;
   const rl = src.match(/\/\* ROUND-LOGIC-START \*\/([\s\S]*?)\/\* ROUND-LOGIC-END \*\//);
-  try { lvl = vm.runInContext(`(function(){ ${rl[1]}\n return { NOTES, RC, RA, ringPt, ringArc, ringMove }; })()`, vm.createContext({})); }
+  try { lvl = vm.runInContext(`(function(){ ${rl[1]}\n return { WHEEL, RC, RA, ringPt, ringArc, ringMove }; })()`, vm.createContext({})); }
   catch (e) { err(`tuning-sim.html: could not run the ROUND-LOGIC block for ringPt / ringArc (${e.message})`); problems++; bad++; }
   if (lvl) {
     const ang = ([x, y]) => Math.atan2(lvl.RC - y, x - lvl.RC) * 180 / Math.PI;
-    for (let i = 0; i < 12; i++) {
-      const step = ((ang(lvl.ringPt((i + 1) % 12, 88)) - ang(lvl.ringPt(i, 88))) % 360 + 540) % 360 - 180;
-      if (Math.abs(step - 30) > 0.01) { dirBad++; if (dirBad < 3) err(`tuning-sim.html ringPt: ${lvl.NOTES[(i + 1) % 12]} is ${step.toFixed(1)} degrees from ${lvl.NOTES[i]} on screen — each next note must be 30 degrees COUNTERCLOCKWISE (going up = the way the peg turns to tighten)`); }
+    const W7 = lvl.WHEEL, STEP = 360 / 7;
+    if (W7.join() !== 'A,B,C,D,E,F,G') { dirBad++; err(`tuning-sim.html WHEEL is [${W7}] — the circle has only the seven letters A B C D E F G, A at the top (Jonathan, 2026-11-09)`); }
+    for (let i = 0; i < 7; i++) {
+      const step = ((ang(lvl.ringPt((i + 1) % 7, 88)) - ang(lvl.ringPt(i, 88))) % 360 + 540) % 360 - 180;
+      if (Math.abs(step - STEP) > 0.01) { dirBad++; if (dirBad < 3) err(`tuning-sim.html ringPt: ${W7[(i + 1) % 7]} is ${step.toFixed(1)} degrees from ${W7[i]} on screen — each next letter must be ${STEP.toFixed(1)} degrees COUNTERCLOCKWISE (going up = the way the peg turns to tighten)`); }
     }
     const top = lvl.ringPt(0, 88);
-    if (Math.abs(top[0] - lvl.RC) > 0.01 || top[1] >= lvl.RC) { dirBad++; err('tuning-sim.html ringPt: C is not at the top of the circle'); }
+    if (Math.abs(top[0] - lvl.RC) > 0.01 || top[1] >= lvl.RC) { dirBad++; err(`tuning-sim.html ringPt: ${W7[0]} is not at the top of the circle`); }
     let arcs = 0;
-    for (let a = 0; a < 12; a++) for (let b = 0; b < 12; b++) {
-      const mv = lvl.ringMove(lvl.NOTES[a], lvl.NOTES[b]);
-      if (mv.n < 1 || mv.n > 5) continue;
+    for (let a = 0; a < 7; a++) for (let b = 0; b < 7; b++) {
+      const mv = lvl.ringMove(W7[a], W7[b]);
+      if (mv.n < 1) continue;
       const n = (lvl.ringArc(a, b, mv.way === 'up').match(/-?[\d.]+/g) || []).map(Number), p1 = lvl.ringPt(a, lvl.RA), p2 = lvl.ringPt(b, lvl.RA);
       const same = (u, v) => Math.abs(u - v) < 0.06;
       if (n.length === 9 && same(n[0], p1[0]) && same(n[1], p1[1]) && n[2] === lvl.RA && n[3] === lvl.RA && n[5] === 0 && n[6] === (mv.way === 'up' ? 0 : 1) && same(n[7], p2[0]) && same(n[8], p2[1])) arcs++;
-      else { dirBad++; if (dirBad < 3) err(`tuning-sim.html ringArc ${lvl.NOTES[a]}->${lvl.NOTES[b]} (${mv.way}) draws "${lvl.ringArc(a, b, mv.way === 'up')}" — expected a small arc of radius RA from the tuner's note to the string's, sweep flag ${mv.way === 'up' ? 0 : 1} (${mv.way === 'up' ? 'counterclockwise' : 'clockwise'} on screen)`); }
+      else { dirBad++; if (dirBad < 3) err(`tuning-sim.html ringArc ${W7[a]}->${W7[b]} (${mv.way}) draws "${lvl.ringArc(a, b, mv.way === 'up')}" — expected a small arc of radius RA from the tuner's note to the string's, sweep flag ${mv.way === 'up' ? 0 : 1} (${mv.way === 'up' ? 'counterclockwise' : 'clockwise'} on screen)`); }
     }
-    if (arcs !== 120) { dirBad++; err(`tuning-sim.html: ${arcs} of 120 circle arrows are drawn the right way`); }
+    if (arcs !== 42) { dirBad++; err(`tuning-sim.html: ${arcs} of 42 circle arrows are drawn the right way`); }
   }
-  if (!/arc\.setAttribute\('d', ringArc\(NOTES\.indexOf\(r\.letter\), NOTES\.indexOf\(r\.target\), up\)\)/.test(code) || !/const up = r\.answer === 'up';/.test(code)) { dirBad++; err("tuning-sim.html ringRender must draw the arrow with ringArc(letter, target, r.answer === 'up') (the checked function)"); }
+  if (!/arc\.setAttribute\('d', ringArc\(WHEEL\.indexOf\(r\.letter\), WHEEL\.indexOf\(r\.target\), up\)\)/.test(code) || !/const up = r\.answer === 'up';/.test(code)) { dirBad++; err("tuning-sim.html ringRender must draw the arrow with ringArc(letter, target, r.answer === 'up') (the checked function)"); }
   let I = null;
   const im = src.match(/const I = (\{[\s\S]*?\n\});/);
   try { I = vm.runInContext('(' + im[1] + ')', vm.createContext({})); } catch (e) { err(`tuning-sim.html: could not read the en/es word table (${e && e.message})`); problems++; bad++; }
@@ -5672,8 +5675,8 @@ function checkTuningSim() {
      tools/smoke.mjs measures the drawn notes and arrow in a real browser; these fail without one. */
   const pin = (re, what) => { if (!re.test(code)) { dirBad++; err(`tuning-sim.html: ${what}`); return 0; } return 1; };
   let pins = 0;
-  if (lvl && lvl.NOTES.join() === 'C,C#,D,D#,E,F,F#,G,G#,A,A#,B') pins++; else { dirBad++; err(`tuning-sim.html NOTES is [${lvl && lvl.NOTES}], expected C,C#,D,D#,E,F,F#,G,G#,A,A#,B`); }
-  pins += pin(/NOTES\.forEach\(\(n, i\) => \{ const \[x, y\] = ringPt\(i, RR\); h \+= '<g class="rn" data-note="' \+ n \+ '"><circle cx="' \+ x\.toFixed\(1\) \+ '" cy="' \+ y\.toFixed\(1\)/, "ringInit must draw note i (data-note n) at ringPt(i, RR), the checked function");
+  if (lvl && lvl.WHEEL.join() === 'A,B,C,D,E,F,G') pins++; else { dirBad++; err(`tuning-sim.html WHEEL is [${lvl && lvl.WHEEL}], expected A,B,C,D,E,F,G`); }
+  pins += pin(/WHEEL\.forEach\(\(n, i\) => \{ const \[x, y\] = ringPt\(i, RR\); h \+= '<g class="rn" data-note="' \+ n \+ '"><circle cx="' \+ x\.toFixed\(1\) \+ '" cy="' \+ y\.toFixed\(1\)/, "ringInit must draw letter i of WHEEL (data-note n) at ringPt(i, RR), the checked function");
   const dSets = (code.match(/\.setAttribute\('d',/g) || []).length, arcSets = (code.match(/arc\.setAttribute\('d', ringArc\(/g) || []).length;
   if (dSets !== 2 || arcSets !== 1 || !/arc\.setAttribute\('d', ''\)/.test(code)) { dirBad++; err(`tuning-sim.html: the arrow's path must be set in exactly two places, once from ringArc(…, up) and once to '' (found ${arcSets} ringArc, ${dSets} in all)`); } else pins++;
   pins += pin(/S\.pegAngle -= dir \* c \* DEG_PER_CENT;/, 'tick() must turn the peg S.pegAngle -= dir * c * DEG_PER_CENT (Tighten, dir 1, turns it counterclockwise: CSS rotate() is clockwise for positive degrees)');
@@ -5746,7 +5749,7 @@ function checkTuningSim() {
     if (M1[lang].yes.test(s) && !M1[lang].no.test(s)) m1ok++;
     else { dirBad++; err(`module-1.js "Right needle, wrong letter" ${lang} ${part === 'alt' ? `figure alt (img/m1-note-circle-${lang}.svg)` : part} is "${s.slice(0, 90)}…" — it must say the circle goes ${lang === 'en' ? 'counterclockwise' : 'en sentido antihorario'}, and never the plain other word`); }
   }
-  if (!/S\.level\+\+; S\.clean = 0; saveLevel\(\); leveled = true;\s*S\.note = T\('levelUp', \{ l: S\.level, m: LEVELS\[S\.level - 1\]\.max \}\);/.test(code) || !I || !['en', 'es'].every(l => /\{l\}/.test(I[l].levelUp) && /\{m\}/.test(I[l].levelUp))) { bad++; problems++; err("tuning-sim.html: the level-up line must be T('levelUp', { l: S.level, m: LEVELS[S.level - 1].max }) right after S.level++, and both languages' levelUp must use {l} and {m}"); }
+  if (!/S\.level\+\+; S\.clean = 0; saveLevel\(\); leveled = true;\s*S\.note = T\('levelUp', \{ l: S\.level, m: LEVEL_LETTERS\[S\.level - 1\] \}\);/.test(code) || !I || !['en', 'es'].every(l => /\{l\}/.test(I[l].levelUp) && /\{m\}/.test(I[l].levelUp))) { bad++; problems++; err("tuning-sim.html: the level-up line must be T('levelUp', { l: S.level, m: LEVEL_LETTERS[S.level - 1] }) right after S.level++ (the most LETTERS a level starts away; tools/tuning-sim-proof.mjs checks the numbers), and both languages' levelUp must use {l} and {m}"); }
   if (figs !== 2 || m1ok !== 4) { dirBad++; err(`the Module 1 note circle: ${figs} of 2 figures and ${m1ok} of 4 alt/hint texts go counterclockwise (every one must)`); }
   if (dirBad) { problems++; bad++; }
   if (bad === 0) ok(`tuning-sim.html: defaults pinned (sound on; string names shown in Phase 1, off in Phase 2; level 1 first; the four levels), no mic, no script files, and a card on the Games page with the no-guitar games; the circle runs counterclockwise (12 of 12 notes, 120 of 120 arrows), ${words} of ${dirWordCount} direction words (EN + ES), ${ways} of 8 answer sentences say the way with its verb, and the arrow keys pinned; ${pins} of 21 drawing/peg/keyboard/wording lines pinned (notes drawn at ringPt(i), one arrow, the peg's turn and icons, Space/Enter, focus, green only when done, the peg-foot layout); the Module 1 figure (${figs} of 2) and its step (${m1ok} of 4 alt/hint) go counterclockwise; ${twins} data-t/data-tl uses have both languages; a miss restarts the clean count, from the wrong branch of each answer; the level-up line names the new level`);
