@@ -11,7 +11,7 @@ see `WORKFLOW.md` and the git commit log.
 - **Tuning Simulator: during "Which way?" the tuner no longer says "Too low — tighten the peg".** You read the needle to answer. The words come back after you pick Up or Down.
 - **"Play strum" stops the Metronome if it is running, and its clicks are all the same**, like the Metronome's (beat 1 used to be higher). Down strums are still a little louder than up strums.
 - **Name the Power Chord keeps your round when you switch to another browser tab.** You come back to the same card and score.
-- **Change Up at 140 BPM now says "The tempo cannot go higher. Play it again."** instead of "try it 10 BPM faster". **At the lowest tempo (Power Chord Switch 10 BPM, Change Up 40 BPM) a hard game no longer says "Drop 5 BPM" or "this speed is too fast";** it says "Try it again at this speed until it feels steady."
+- **Change Up at 140 BPM now says "The tempo cannot go higher. Play it again."** instead of "try it 10 BPM faster". **At the lowest tempo (Power Chord Switch 10 BPM, Change Up 40 BPM) a hard game no longer says "Drop 5 BPM" or "this speed is too fast";** it says "Try it again at this speed until it feels steady." Change Up no longer shows "+10 BPM" at 140 or "−10 BPM" at 40, since neither can be played.
 
 ## 2026-11-09 — Today's activities, newest date first
 

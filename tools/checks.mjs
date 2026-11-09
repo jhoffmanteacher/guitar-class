@@ -12938,7 +12938,7 @@ function checkCoachVerdicts() {
         } finally { performance.now = keep.pn; coachReadFrame = keep.rf; coachAnalyser = keep.an; coachHfRms = keep.hf; }
       })()`);
       const html = bodies['cc-body'] || '';
-      return { big: (/class="coach-start" onclick="ccAgain\((-?\d+)\)"/.exec(html) || [])[1], txt: text('cc-body').replace(/\s+/g, ' '), advice: ((/class="coach-crit-note">([^<]*)</.exec(html) || [])[1] || '').replace(/&#39;|&apos;/g, "'"), shown: +((/id="cc-done-bpm">(\d+) BPM</.exec(html) || [])[1]), played: +run('ccDonePlayedBpm()'), stages: JSON.parse(run('JSON.stringify(cc.stageBpms)')) };
+      return { steps: [...html.matchAll(/onclick="ccAgain\((-?\d+)\)"/g)].map(m => m[1]).join(), big: (/class="coach-start" onclick="ccAgain\((-?\d+)\)"/.exec(html) || [])[1], txt: text('cc-body').replace(/\s+/g, ' '), advice: ((/class="coach-crit-note">([^<]*)</.exec(html) || [])[1] || '').replace(/&#39;|&apos;/g, "'"), shown: +((/id="cc-done-bpm">(\d+) BPM</.exec(html) || [])[1]), played: +run('ccDonePlayedBpm()'), stages: JSON.parse(run('JSON.stringify(cc.stageBpms)')) };
     };
     /* [game, song switch?, start BPM, changes right (of 15, or of 7 per round), what the rest are, the line it must say, why]. The lines: top = the top-tempo line;
        up = "Level up: try it N BPM faster"; low = "Drop 5 BPM"; hint = "Strum a little firmer"; none = the practice-this-switch line. The 85% boundary
@@ -12981,7 +12981,10 @@ function checkCoachVerdicts() {
         // "this speed is too fast" goes with "Drop N BPM" only, never with the lowest tempo's line
         if (r.txt.includes(W.fast) !== (want === 'low')) flag(`1ck (${lang}): ${what}: the headline says "${W.fast}": ${r.txt.includes(W.fast)}, want ${want === 'low'}`);
         // Change Up lights the button its advice names: +10 for its "Level up", -10 for "Drop 10 BPM", the same tempo otherwise (never a step the tempo cannot take)
-        if (mode === 'open') { const wantBig = want === 'upCU' ? '10' : want === 'low' ? '-10' : '0'; if (r.big !== wantBig) flag(`1ck (${lang}): ${what}: Change Up lights ccAgain(${r.big}), want ccAgain(${wantBig})`); }
+        if (mode === 'open') { const wantBig = want === 'upCU' ? '10' : want === 'low' ? '-10' : '0'; if (r.big !== wantBig) flag(`1ck (${lang}): ${what}: Change Up lights ccAgain(${r.big}), want ccAgain(${wantBig})`);
+          // and shows only the steps the tempo can take: no +10 at 140, no -10 at 40 (2026-11-09)
+          const wantSteps = (bpm <= 40 ? ['0', '10'] : bpm >= 140 ? ['-10', '0'] : ['-10', '0', '10']).join();
+          if (r.steps !== wantSteps) flag(`1ck (${lang}): ${what}: Change Up's buttons are ccAgain(${r.steps}), want ccAgain(${wantSteps})`); }
         // Power Chord Switch's row opens on the tempo the advice names: the tempo played for top, hint, steady and the practice line; 5 more for "Level up"; 5 fewer for "Drop 5 BPM"
         if (mode === 'power') {
           const wantShown = want === 'up' ? r.played + 5 : want === 'low' ? r.played - 5 : r.played;

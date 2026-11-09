@@ -4271,10 +4271,11 @@ function ccRenderDone(){
        <div class="coach-actions">
          <button type="button" class="coach-start" id="cc-done-again" onclick="ccAgain(0)">&#x21BB; ${ccDoneAgainText()}</button>
        </div>`
+    /* Change Up: no −10 at its lowest tempo and no +10 at its top (Jonathan, 2026-11-09): they did nothing there. */
     : `<div class="coach-actions">
-       <button type="button" class="${rec === 'down' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(-10)">&#x2B07; ${t('games.common.bpmDown10')}</button>
+       ${ccDoneAtFloor() ? '' : `<button type="button" class="${rec === 'down' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(-10)">&#x2B07; ${t('games.common.bpmDown10')}</button>`}
        <button type="button" class="${rec === 'same' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(0)">&#x21BB; ${t('games.common.again', { bpm: cc.bpm })}</button>
-       <button type="button" class="${rec === 'up' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(10)">&#x2B06; ${t('games.common.bpmUp10')}</button>
+       ${ccDoneAtTop() ? '' : `<button type="button" class="${rec === 'up' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(10)">&#x2B06; ${t('games.common.bpmUp10')}</button>`}
      </div>`;
   /* When everything reached was right, a round counts only the changes reached in it, and a round with none left is not listed ("4 of 4" next to "Round 1: 4 of 7" read as a contradiction). */
   const roundRows = cc.ladder ? cc.stageLog.map((sg, k) => ({ k, sg, shown: silentStop ? [] : greyRest ? sg.changes.filter(c => !c.neverReached) : sg.changes })).filter(x => x.shown.length) : [];
