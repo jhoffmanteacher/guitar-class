@@ -85,6 +85,13 @@ Static HTML/JS/CSS, no build; Firebase + Firestore; GitHub deploy. Module 13 is 
   render-time hiding never renumbers it (1af). No "Station B/C" in student text: use
   **Checkpoint / Punto de control**, **Wrap-Up / Cierre** (1n). Only `m4w2` shows Part 1/2
   (1ao).
+- Sections are addressed by `data-ns`, never by DOM position. The lesson panel's suffix
+  `LESSON_TAB` stays `'station-b'` so old deep links resolve.
+- A set is complete when the SET is: the sets gate, checklist, Module Review, search and
+  `resumeLessonCounts()` never see a part.
+- **Module 13** has custom tab labels (`stations.b.tabSub`, `checklistSub`), and its
+  checklist is the graded assessment. A set is exactly two panels, lesson ladder and
+  checklist (the per-set Songs tab was removed 2026-08-27).
 - **No student tour** — don't resurrect. **No in-panel tab bar**: the rail is the only switcher.
 - **Target screen: Chromebook 1366×657.** Phone width out of scope (no phone work or breakpoints unless asked; keep existing phone CSS and 1o).
 - Shell: Windows *and* macOS.
@@ -122,6 +129,13 @@ Key `${setId}-${station}-sec${gi}-${i}`: a step that changes INDEX loses its tic
 
 ### ⚠️ Modules 4 and 5 swapped
 Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `app.js`): no `migrations.swap45` = OLD only, with it NEW only; keep all halves (`flushSave()`, `journey.js`, `teacher.js` remap). Prove with `rule-zero-proof.mjs d0cd004`.
+- `moduleOpenThrough` is per module NUMBER; the swap didn't touch it.
+- Course order lives in the module number: reordering again means another renumber.
+- `rule-zero-proof.mjs` against the pre-swap `1a1f6cc` fails by design.
+- Notes dated before 2026-10-12 may use the old numbers.
+- Open (no record it was done): a tab that loaded a doc before the move and saved after it
+  merges old-numbered keys back. Re-scan by hand the 3 docs the 2026-10-12 scan found with
+  Module 4/5 work, for an old id coming back, any `m5w4-*`, or `chords-m5`.
 
 ### ⚠️ Other standing rules
 - **Sweep ratchet**: 3+ instances of a mechanically-detectable error class → permanent `checks.mjs` detector, same session; it must render/execute, match UNESCAPED strings (`unescapeJs()`); break it in a scratch copy and watch it fail.
@@ -133,7 +147,7 @@ Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `ap
 - **Practice minutes** (`practice-minutes-config.js` + `practice-minutes.js`): counts always; the display
   is on (`uiOn: true` since 2026-11-01; the pin is in `tools/pm-sim.mjs`). Its `firestore.rules` blocks must be published BEFORE the code
   that writes them; `dailyCapMinutes` and the rules' `dailyCapSeconds()` move together (1cg). Entry:
-  `WORKFLOW.md` → "Practice minutes".
+  `WORKFLOW.md` → "Recently shipped" → the 2026-11-01 "Practice minutes" entry.
 - **Play-along first**: a song link opens its play-along card if one is openable
   (`songsPlayAlongCard()`, at the click), else the Journey page; no per-song retire list (1bn).
   `TAKE_TO_SONG_ENABLED`/`DAILY5_ENABLED` false: switched off, never deleted.
@@ -141,6 +155,9 @@ Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `ap
 
 ## i18n
 Every new student-facing shell string goes in `i18n.js` (read its header for wiring: `data-i18n` / `t()` + `data-i18n-params`) in BOTH `en` and `es`, same edit; never English-only. Module text gets `_es`; Journey pages `data-es`. Reuse its glossary. String names are solfège (`cuerda Mi grave`); chord symbols/keys are not (`tonalidad de G`, `G/B`). The code is the authoritative Spanish: no review sheet; no proofread sweeps unless asked. `i18n.js` loads before `app.js`, `fab-tools.js`, `tuner.js`, `journey.js`.
+- Glossary, loanword policy and settled ES terms: `claude/spanish-terminology.md` in the
+  Claude project (not in this repo).
+- No check enforces the solfège rule: check it by eye whenever you touch module Spanish.
 
 ## Content rules
 - **Simplest direct wording**: short sentences, plain verbs, no idioms, define each music term at first use (1w); defined site terms ("two homes") aren't idioms. Define "root" once, in the first visible Module 2 step using it: the note a chord is named after.
@@ -148,22 +165,34 @@ Every new student-facing shell string goes in `i18n.js` (read its header for wir
   demonstrate/apply/identify), poster lines, praise padding, or "why this matters" sentences;
   "assessment" only as "(assessment preparation)" in Challenge titles (1w-t).
 - **Typed answers only when writing IS the task**; else play something with a countable
-  "got it" line (1ar).
+  "got it" line (1ar). 1ar's per-module budget (Modules 3–6) fails only UPWARD; it counts
+  every `response:{type:'short'}` in the data, rendered or not.
 - **Multi-step directions are lists** (`<ol>`/`<ul>`, `_es` mirrors; >~200 chars, 2+ actions). "You've got it when: …" is plain text AFTER `</ol>`, never an `<li>` or a
   hand-written span; "No score —" notes, partner bonuses, Journey links, then `step-figure`, all last.
+  Scope: step `text:` and practice `prompt`s. Leave alone single actions, hints, `gotItWhen`,
+  placeholders. Preserve the author's words; never rewrite the voice (Jonathan, 2026-07-25).
 - **Challenge cards** (`Challenge N — Title:`): full title in `label` (<~70 chars), `text`
   opens into directions, body always a list; defining parentheticals go in text, identifying ones stay in the title; existing lists byte-for-byte.
 - **Presentation is render-time.** **Strings named, never
-  numbered** (low E · A · D · G · B · high e; 1j). **No paper drills** (scissors/cards/pen): `step.drill` (`shuffle`/`deck`/`ear`/`notecall`; `DECKS`, `EAR_POOLS`); drop "Got someone around?" from deck cards.
+  numbered** (low E · A · D · G · B · high e; 1j). Chord shorthand like `xx4432` is notation
+  and stays. The only numbers allowed are anchored to the name: Module 7's two root-naming
+  MCs ("string 6 (the low E)") and the `diagram.string*` labels in `i18n.js` ("Low E (6th
+  string)"); 1j pins the count. **No paper drills** (scissors/cards/pen): `step.drill` (`shuffle`/`deck`/`ear`/`notecall`; `DECKS`, `EAR_POOLS`); drop "Got someone around?" from deck cards.
 - **TWO step renderers**: `caStepHtml()` (app.js) and `renderTeacherActivityDetail()`
   (teacher.js) — a step-field change edits both (1v); practice cards/exit checks: `caCardBodyHtml` (1bf).
 - **Keyed MCs** (`response:{type:'mc'}`, ungraded): shuffled at
   render (`mcOrder`, `MC_PINNED`); keyed step stores choice **text**, practice panel the
-  **index** (not pinned by 1ap: wording free, ORDER held) — don't unify. Seed = prompt + choices (a reword re-rolls order); never name an option by position; rewording after students arrive orphans picks. **1ap** pins Modules
+  **index** (not pinned by 1ap: wording free, ORDER held) — don't unify. Seed = ENGLISH prompt + choices, so both languages and every student (the projector) see one
+  order; a reword re-rolls it. Fewer than 3 choices are not shuffled. `MC_PINNED` is narrow on
+  purpose (catch-alls only). `answer: 0` is fine (the shuffle hides the slot). Never name an option by position; rewording after students arrive orphans picks. **1ap** pins Modules
   1..`FROZEN_MC_THROUGH_MODULE` (**3**) by fingerprint — raise with the class (re-run, paste
   fingerprints, same commit); don't lower. Check a video's watch range
   before writing a question about it; new authoring fields go in `STUDENT_VALUE_NAME_RE`.
-- **Videos**: never invent YouTube IDs; `WebSearch` + oEmbed verify, else drop.
+- **Videos**: never invent YouTube IDs; `WebSearch` + oEmbed verify, else drop. In a cloud
+  session, reach oEmbed through `WebFetch` (`curl` is blocked).
+- Prefer diverse creators: before settling on Marty Music / JustinGuitar / Andy Guitar, spend
+  one search on a comparable lesson from a woman, a creator of colour or a Spanish-language
+  channel. Lesson quality still wins.
 
 ## Lazy-loaded guidance — read before touching these areas
 **Read the matching file first** — its ⚠️ rules bind.
@@ -185,7 +214,7 @@ Every new student-facing shell string goes in `i18n.js` (read its header for wir
 | "Hear It First" ear trainer (`trainer-*.js`, `tools/trainer-sim.mjs`) | the header of `trainer-core.js` and of `tools/trainer-sim.mjs` | Hidden from students (direct link only); after any `trainer-core.js` change run `node tools/trainer-sim.mjs` (it is NOT in `checks.mjs`); only the adapter file touches site globals; never edit `coach.js`/`tuner.js` behaviour for it |
 
 ## How to work with Jonathan
-**AskUserQuestion, not free text** (2–4 options). **Don't ask "should I proceed?"**: do the obvious, reversible work; "can you…/how do I…/should this be…" about code = do it. In doubt: pick a default, proceed, say why. Pause only for a real fork, irreversible / outward-facing actions. **Pushing to `main` is not one of those:** checks pass and a
+**AskUserQuestion, not free text** (2–4 options), one question per turn unless truly independent. **Don't ask "should I proceed?"**: do the obvious, reversible work; "can you…/how do I…/should this be…" about code = do it. In doubt: pick a default, proceed, say why. Pause only for a real fork, irreversible / outward-facing actions. **Pushing to `main` is not one of those:** checks pass and a
 fast-forward is what you'd recommend → push, say what landed, `checks.mjs --live`. Ask for a merge commit, a conflict you cannot resolve mechanically (step 8), failing checks, or unready work.
 
 **Sweeps (50+ items)**: a second agent told to *find problems*, auditing the FIXES (`site-sweep`).
@@ -207,6 +236,9 @@ Not counted: `CHANGELOG.md`, `sw.js` version lines, a string's Spanish twin, pin
 
 **Fast by default** (2026-10-31) — a trigger no longer asks. After the build and every "Start here" step, ship **Fast**: no reviewer, and every Fast commit ends with the trailer line `Review: Fast` (above any Co-Authored-By); the report starts "Fast — reviewer skipped; Friday check will review it." **Always Reviewed, same day, never Fast:** danger-zone file, new kind of check, sub-agent
 sweep, moving/adding/removing a section or step. Jonathan says "review this" / "Reviewed" → review same day. No trigger → no trailer.
+Both splits are unproven. A Friday check finds a Fast change that hurt students → move that
+kind of change to Always-Reviewed. A high review lets a real bug through → move that kind of
+change to `site-reviewer-deep`.
 **Friday check** — a scheduled task, Fridays 11:00 PM Pacific, reviews every `Review: Fast` commit since the last `friday-check-*` tag, fixes and pushes (skill `friday-check`).
 
 **Effort**: agent `xhigh` for deep review, else `high`; never `max`. Session: `medium` routine, `high` bug fixes / JS / keyed-MC, `xhigh` danger-zone and sweeps; a tier above the session → ask for `/effort`. Report real numbers, not the premise; name the prior decision a request reverses.
@@ -215,4 +247,6 @@ sweep, moving/adding/removing a section or step. Jonathan says "review this" / "
 
 New unrelated topic → AskUserQuestion once: fresh chat or continue?
 
-Full text of trimmed rules: `WORKFLOW.md` → "(trim 2)".
+Dated decisions and reasons behind these rules: `WORKFLOW.md` → "Rationale behind the
+CLAUDE.md rules" and "Moved from CLAUDE.md (trim 2)" (cut to the decisions, the reasons and a
+few rules stated only there; not the full old text).
