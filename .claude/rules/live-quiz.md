@@ -39,6 +39,9 @@ projected stage (`?teacher=true` → **Live quiz**). One game runs at a time, in
     game full of names, and fails the push if a name gets back in.
   - Open: names with points on the wall can be lined up in the room with the
     public uid -> points.
+- **A `firestore.rules` change for the quiz ships with a console paste.** Until
+  Jonathan pastes it, the answer writes are rejected and the game looks broken,
+  with no error a student sees.
 - **Nothing on the stage may reveal the answer before the reveal.** During a
   question the projector shows the prompt and an answered-count, nothing else.
 - **New quiz = a new entry in `LIVE_QUIZZES`**, with its student-facing text
