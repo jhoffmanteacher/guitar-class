@@ -2233,6 +2233,12 @@ function teacherActivityRowHtml(r){
 function teacherUnitOpenMap(model, q){
   const R=model.rows, out={};
   const newest=(model.groups.find(g=>g.key!=='built' && g.ids.some(id=>!R[id].archived && !R[id].deleted))||model.groups[0]||{}).key;
+  /* The picked card's unit opens, unless the teacher has folded or opened
+     it by hand (a sidebar tree click sets every unit, so it is never
+     undone here): a card picked from the board's Preview in a shut unit had
+     no row on screen. Stored, so a later pick elsewhere doesn't shut it. */
+  const pickGroup=activityDetailId && model.groups.find(g=>g.ids.includes(activityDetailId));
+  if(pickGroup && activityUnitOpen[pickGroup.key]===undefined && pickGroup.key!==newest) activityUnitOpen[pickGroup.key]=true;
   model.groups.forEach(g=>{ out[g.key]=q ? true : (activityUnitOpen[g.key]!==undefined ? activityUnitOpen[g.key] : g.key===newest); });
   return out;
 }
