@@ -106,4 +106,4 @@ When unsure whether a change is safe, run the tool instead of reasoning it out:
 `node tools/checks.mjs --check --skip-links`, `node tools/rule-zero-proof.mjs
 origin/main` (any `module-N.js` change), `node tools/smoke.mjs --baseline
 origin/main` (a real-browser walk of every set, both languages, every game
-view — about a minute; use it for renderer, escaping or many-file changes).
+view — about 7 minutes per walk; use it for renderer, escaping or many-file changes).

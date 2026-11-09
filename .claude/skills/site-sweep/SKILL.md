@@ -26,7 +26,7 @@ authorizes that pin.) This skill itself pins `effort: xhigh` while it is active.
 ### The flow
 0. **Baseline.** `git fetch origin`; fast-forward main; `git worktree list`;
    `node tools/checks.mjs --check --skip-links`; `node tools/smoke.mjs` (a
-   real-browser walk, about a minute). Note what already fails so nobody is
+   real-browser walk, about 7 minutes per walk). Note what already fails so nobody is
    blamed for it.
 1. **Audit (read-only, Opus).** Split by file range or area, ≤ ~6,000 lines
    each, plus one tool-driven agent for dead code and duplication. Say what each

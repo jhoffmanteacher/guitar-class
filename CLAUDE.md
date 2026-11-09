@@ -13,8 +13,19 @@ What is open right now: `WORKFLOW.md` → "Where things stand" (top of the file)
 2. Touched a `module-N.js`? `node tools/rule-zero-proof.mjs origin/main`, and
    paste its summary into your report.
 3. Touched a renderer, escaping, or 3+ files (counted as in "Triggers" below)?
-   `node tools/smoke.mjs --baseline origin/main` — a real browser walks every set
-   in English and Spanish (about a minute).
+   Run `node tools/smoke.mjs --baseline <ref> > file 2>&1`: a real browser walks every set in
+   English and Spanish, once for your tree and once for `<ref>`. Use `origin/main` as `<ref>`;
+   if your work is already on `origin/main`, use the commit before your first change. It
+   prints one line as each walk starts and nothing else until the end. A walk takes 3-4
+   minutes on a quiet Mac and about 7 on a busy one. It serves the checkout it runs in, so run
+   it from a detached worktree at the commit under test (`git worktree add --detach <dir>
+   <hash>`) and keep your own checkout free to edit. Run it with `run_in_background` behind a
+   time limit (macOS: `perl -e 'alarm 3000; exec @ARGV' node tools/smoke.mjs ...`; Windows Git
+   Bash: `/usr/bin/timeout 3000 node tools/smoke.mjs ...`). It has hung before (`WORKFLOW.md`
+   "Open work"); after a timeout run `pkill -f gc-smoke-chrome` (Windows: close the leftover
+   headless Chrome in Task Manager). Never run it while another smoke or `pm-e2e.mjs` runs
+   (macOS: `pgrep -f 'tools/smoke.mjs|tools/pm-e2e.mjs'`; Windows Git Bash: `ps -W | grep -E
+   'smoke|pm-e2e'`).
 4. Changed what a student SEES (a renderer, a colour, a new control, or
    directions that describe the music)? Before reporting:
    - Screenshot every state at 1366×657 — before, during and after any
@@ -27,10 +38,20 @@ What is open right now: `WORKFLOW.md` → "Where things stand" (top of the file)
 5. New student-facing text → its Spanish twin, same edit. A new step field →
    both step renderers.
 6. A student can see the change → a `CHANGELOG.md` entry, same push.
-7. Hit a review trigger? Always-Reviewed → run the reviewer now. Anything else
-   ships **Fast** with a `Review: Fast` trailer — see "Fast by default".
-8. Right before pushing: `git fetch`, then `git log HEAD..origin/main`. After
-   pushing: `node tools/checks.mjs --live`.
+7. Hit a review trigger? Always-Reviewed → spawn a fresh reviewer now, one per independent
+   area ("Delegate site review work to agents by default"). Anything else ships **Fast**
+   with a `Review: Fast` trailer — see "Fast by default".
+8. Right before pushing: `git fetch`, then `git log HEAD..origin/main`. If it lists commits,
+   others' work is in the way: tell Jonathan and ask before you merge or rebase (the
+   `friday-check` and `site-sweep` skills rebase without asking, as written there; a conflict
+   still stops them). After he agrees, `git rebase origin/main`. A conflict that is only the
+   `CACHE_VERSION` line or inside the `AUDIO_HASHES` block of `sw.js`: edit just that hunk
+   (delete the markers, keep either side; never `git checkout --ours/--theirs sw.js`, which
+   replaces the whole file), then `git rebase --continue`. Any other conflict in `sw.js`, a
+   `module-N.js`, or another danger-zone file: `git rebase --abort` and ask Jonathan. When the
+   rebase ends, run the full `node tools/checks.mjs` (plus `rule-zero-proof.mjs origin/main`
+   if a `module-N.js` changed), commit the `sw.js` it rewrote, and push only when `git status`
+   is clean. After pushing: `node tools/checks.mjs --live`.
 
 **Never, whatever the task says:** move or renumber a section or step (progress
 keys); reword a keyed MC's choices — or its English prompt — in a frozen module
@@ -50,11 +71,13 @@ sections); resurrect the deleted student tour.
   "looks fine". A script that finds 0 in both the old and new tree proves nothing.
 - Product calls, and rules that contradict each other, go to Jonathan through
   AskUserQuestion — don't pick silently.
+- A review is due (see "Delegate site review work to agents by default") → spawn the
+  reviewers yourself, in parallel, without asking. A change that ships Fast gets none.
 
 Which file to read before touching an area: the table under "Lazy-loaded guidance".
 
 ## Project
-Jonathan: plain English; Claude handles git.
+Write to Jonathan in plain English. Claude handles all git.
 Static HTML/JS/CSS, no build; Firebase + Firestore; GitHub deploy. Module 13 is single-flow (`stations.b` only).
 - **Stations B and C are merged in DISPLAY ONLY.** `stations.b`/`.c` and every progress key
   (`${w.id}-b-sec{gi}-{i}` / `-c-sec{gi}-{i}`) are unchanged — never "simplify" the data.
@@ -71,9 +94,16 @@ Static HTML/JS/CSS, no build; Firebase + Firestore; GitHub deploy. Module 13 is 
 
 ### ⚠️ Pre-push checks before EVERY code push
 Touching `index.html`, `styles.css`, `app.js`, `tuner.js`, `teacher.js`, `config-main.js` or a
-`module-N.js`: `node tools/checks.mjs` must exit 0 (syntax, data, ~240 links (keep)  auto `CACHE_VERSION` bump; 1bt). Flags `--skip-links`, `--check`, `--live`. **Stop hook** (`GC_STOP_CHECKS=0` = off) and
-`.githooks/*` (`git config core.hooksPath .githooks`); "skipping checks" = no-op, run checks by hand. **Parallel sessions share one `origin`:** never push a merge you
-didn't intend; fetch first.
+`module-N.js`: `node tools/checks.mjs` must exit 0. It covers syntax, data, about 240 links (run
+it before every push, even when no link changed) and the automatic `CACHE_VERSION` bump (1bt).
+Flags: `--skip-links`, `--check`, `--live`. `--check` changes nothing. After you edit a cached
+file, "shell cache stale" is expected and makes it exit 1 (the pre-commit hook then refuses the
+commit) until the full `node tools/checks.mjs` rewrites `sw.js`. Any other ✗, including "audio
+hash map in sw.js is stale", is a real failure. **Stop hook** (`GC_STOP_CHECKS=0` turns it off)
+and `.githooks/*` (`git config core.hooksPath .githooks`): if a hook prints "node not found —
+skipping checks", it checked nothing, so run `node tools/checks.mjs` by hand. **Parallel
+sessions share one `origin`:** fetch first and never push a merge you didn't intend (step 8 of
+"Start here").
 
 ### ⚠️ Three regimes decide what may change in a module
 Key `${setId}-${station}-sec${gi}-${i}`: a step that changes INDEX loses its tick. Run
@@ -99,7 +129,7 @@ Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `ap
   `caBoardOrder()`, `teacherMoveActivity()`); a digit in a title is a SERIES number (1d, 1l). **`config/class`** writes only via `teacherWriteConfig()` (1ai; omit `base` unless a single-cell toggle).
 - **`firestore.rules` change** → tell Jonathan: Firebase console → Firestore → Rules → paste →
   Publish (GitHub Pages doesn't deploy it).
-- **Skills edit** → bump `skillCount` in `MODULE_MANIFEST` .
+- **Skills edit** → bump `skillCount` in `MODULE_MANIFEST`.
 - **Practice minutes** (`practice-minutes-config.js` + `practice-minutes.js`): counts always; the display
   is on (`uiOn: true` since 2026-11-01; the pin is in `tools/pm-sim.mjs`). Its `firestore.rules` blocks must be published BEFORE the code
   that writes them; `dailyCapMinutes` and the rules' `dailyCapSeconds()` move together (1cg). Entry:
@@ -160,6 +190,15 @@ fast-forward is what you'd recommend → push, say what landed, `checks.mjs --li
 
 **Sweeps (50+ items)**: a second agent told to *find problems*, auditing the FIXES (`site-sweep`).
 
+**Delegate site review work to agents by default.** Standing permission (Jonathan, 2026-11-08): when a review is due, spawn the reviewers yourself and at once. Do not ask first and do not wait to be told to use agents. This overrides the Agent tool's "when in doubt, don't spawn" for review work only.
+A review is due when a change is Always-Reviewed ("Fast by default"), Jonathan says "review this" / "Reviewed", it is the Friday check, or it is a sub-agent sweep. This does not change "Fast by default": a change that hits only an ordinary trigger still ships Fast with no reviewer, and a change with no trigger has no trailer.
+- **Parallel by area.** One reviewer per independent area (for example the `coach.js` stop path, the Tuning Simulator, small Fast commits), all spawned in a single message. Use `site-reviewer-deep` for a danger-zone file, 50+ strings or any sub-agent sweep, otherwise `site-reviewer`. Set `model: 'opus'`.
+- **Re-review every fix round with a fresh agent.** After fixes, spawn a new reviewer; never reuse the one that found the bug. On 2026-11-08 every `coach.js` round found a real major bug in the previous round's fixes. Stop after the first round with no BLOCKER or MAJOR finding (severity words as in `.claude/skills/site-sweep/reviewer.md`); fix its MINOR findings with a break-it proof and start no new round for them. At most 3 rounds: if round 3 still finds a BLOCKER or MAJOR, stop and ask Jonathan (AskUserQuestion) whether to ship, revert or keep going.
+- **Fixers.** Fix findings in one file family yourself. Spawn `site-fixer` only when they span two or more independent file families: create its worktree first, spawn it there, then cherry-pick its commits. Before spawning more than 3 agents, read skill `site-sweep`.
+- **Brief each agent with the limits.** Its own worktree only; no push; no `tools/smoke.mjs` or `tools/pm-e2e.mjs`; no Chrome while a smoke run is going (check with the `pgrep` command in step 3, because another session's run counts).
+- **Smoke and reviews run at the same time**, smoke in its own detached worktree (step 3), so your checkout stays free for your own area.
+- **Treat agent output as claims.** Read every quoted line yourself. Make a fixer prove each new guard by breaking the code and pasting the red line. Send product choices found in a review to Jonathan with AskUserQuestion.
+
 **Triggers.** Review trigger = 3+ files, a danger-zone file (`teacher.js` config plumbing,
 `sw.js` code, `coach.js` detection, `app.js` save path, `firestore.rules`), or 50+ strings.
 Not counted: `CHANGELOG.md`, `sw.js` version lines, a string's Spanish twin, pin-only
@@ -172,7 +211,7 @@ sweep, moving/adding/removing a section or step. Jonathan says "review this" / "
 
 **Effort**: agent `xhigh` for deep review, else `high`; never `max`. Session: `medium` routine, `high` bug fixes / JS / keyed-MC, `xhigh` danger-zone and sweeps; a tier above the session → ask for `/effort`. Report real numbers, not the premise; name the prior decision a request reverses.
 
-**"Next steps for Power Chord Switch"** → read the `WORKFLOW.md` section "Power Chord Switch: where we stopped" first: what shipped 2026-11-03, the room-noise decision (made 2026-11-05: a stricter strum ratio, 2.2 / 2.67, for Power Chord Switch only; the strum what-if numbers on the 12 real takes and how to roll it back are recorded there), the pitch readings saved in takes since 2026-11-05 and the console's Pitch-rule table (waiting on new recordings), and what is settled. The practice-minutes heartbeat removal is finished.
+**"Next steps for Power Chord Switch"** → read the `WORKFLOW.md` section "Power Chord Switch: where we stopped" first: what shipped 2026-11-03, the room-noise decision (a stricter strum ratio for Power Chord Switch only: 2.2 / 2.67 from 2026-11-05, lowered to 1.8 / 2.19 on 2026-11-07; the strum what-if numbers on the real takes and how to roll it back are recorded there), the pitch readings saved in takes since 2026-11-05 and the console's Pitch-rule table (read 2026-11-07: the pitch rule was rejected; do not build it), and what is settled. The practice-minutes heartbeat removal is finished.
 
 New unrelated topic → AskUserQuestion once: fresh chat or continue?
 

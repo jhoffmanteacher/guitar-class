@@ -18,8 +18,8 @@
      node tools/smoke.mjs --chrome <path>      Chrome/Chromium binary (or CHROME=…)
      node tools/smoke.mjs --quiet              print only the verdict
 
-   It is a tool, not part of checks.mjs: it needs a browser, takes about a
-   minute, and is for big changes (renderers, escaping, many files at once), not
+   It is a tool, not part of checks.mjs: it needs a browser, takes 3-4
+   minutes per walk on a quiet Mac (about 7 on a busy one), and is for big changes (renderers, escaping, many files at once), not
    every commit. Needs Node 22+ (global WebSocket) and Chrome or Chromium; it
    serves the repo itself, so Python and a separate server are not needed.
    Network noise (Firebase, Google, YouTube) is ignored — it is offline-safe.
