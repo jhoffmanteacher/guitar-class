@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-10 — A new Play Along song: "Perdón Mamá"
+
+- **"Perdón Mamá" by Chuy Montana is on the Songs page under "More Play Along songs."** You play along with the real recording for the whole song, from the intro to the last chord. It uses four chords in one six-bar loop: C#m, B, F#m and A.
+- **Pick Power chords or Full chords at the top of the card.** It opens on Power chords (C#5, B5, F#5, A5, all between frets 2 and 7). Full chords are C#m, B and F#m as barre chords, and open A. The chords and the beat counts are the same either way.
+- It has the same speed slider, Metronome and "Tap a section to start there" as the other Play Along songs. There are no lyrics on the card.
+
 ## 2026-11-09 (later that night) — Tuning Simulator: less on the page
 
 - **No more strings picture and no more "Which string is this?"** A card next to the tuner now says the two things you need: **Tune this string** (for example "G string", or "low E string (E)") and **The tuner shows** (the letter on the tuner right now; it changes as you turn the peg). Spanish: **Afina esta cuerda** / **El afinador muestra**.

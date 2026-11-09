@@ -3176,6 +3176,37 @@ const SNIPPET_TRACKS = {
     anchorVerified: true,
     defaultSlow: true,
   },
+  /* Perdón Mamá — Chuy Montana, the Rembeats version (Jonathan uploaded the
+     record, 2026-11-09). Like Ella this is the RECORD itself: no rhythm-down
+     mix, so `src` IS the full mix and there is no Guitar toggle. Tuning
+     within 5 cents of A=440 (left alone). Both files are the record
+     re-encoded at 320k, 48 kHz, then levelled with tools/loudness.py (+3.50
+     dB, no spread). The slow tier is rubberband, pitch held, 115/96 =
+     1.198x (its grid fits 4 ms off the scaled one, steady).
+
+     A STEADY GRID: the record is made to a click. An onset-strength fit over
+     the whole file gives exactly 115.000 a minute, first beat 0.100 s, and
+     holds its phase within 4 ms from 0 to 180 s. Counted in 4, one bar
+     2.087 s. Which beat is 1 came from the chords (Moises' chart for the
+     record: C#m B F#m A): the chord changes land on beats 1 and 3 of a bar
+     and the loop's first chord, C#m, starts in bar 1; Jonathan to confirm by
+     ear with ?snipcal=1. The harmony is ONE 6-bar loop (24 beats) the whole
+     way through: 80% of the beats agree from one lap to the next. Song map
+     in these bars, read off the loop and the mid-band (voice) energy: band
+     alone 1-13, singing from bar 14 to about 37, band alone 38-49, singing
+     50-76, band alone 77-84, the last chord at 85 ringing to the end of the
+     file (bar 87). */
+  'perdon-mama': {
+    src:     'audio/chuy-montana-perdon-mama-backing-E-115bpm-440hz-full.mp3',
+    srcSlow: 'audio/chuy-montana-perdon-mama-backing-E-96bpm-440hz-full.mp3',
+    trackBpm: 115, trackBpmSlow: 96,    // what the FILES are (quarter notes), for the slow-tier rescale
+    feltBpm: 115,                       // counted in 4 at record speed
+    beatsPerBar: 4,
+    durationSec: 181,
+    anchor: 0.100,
+    anchorVerified: true,
+    defaultSlow: true,
+  },
   /* Smells Like Teen Spirit — Nirvana (Jonathan uploaded the record — the
      music-video audio, 278.4 s — 2026-10-25). Unlike the other uploaded
      records this one HAS a Guitar toggle: the guitar-out mix was made here,

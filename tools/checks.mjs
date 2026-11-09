@@ -10282,8 +10282,8 @@ function checkSheetCards() {
 const CHORD_GRID_BASS_CARDS = ['ca-35'];   // practice cards with an alternating-bass switch (bassNotes) — see BASS NOTES in 1bv
 const CHORD_GRID_BASS_START = { 'ca-35': 'on' };   // how each opens (Jonathan, 2026-10-27: start on Alternating bass) — a decision, not a default
 const CHORD_GRID_BASS_MARKS = 160;          // bass notes drawn, every bass card x chord view, bass on — see BASS NOTES in 1bv
-const CHORD_GRID_HELD_LABELS = 54;   // rows (both views) that open on a held "(Chord)" — see the column-0 check below
-const CHORD_GRID_CARDS = ['ca-29', 'ca-30', 'ca-32', 'ca-33', 'ca-35', 'ca-36', 'ca-37', 'ca-39', 'ca-40', 'ca-41', 'ca-42'];
+const CHORD_GRID_HELD_LABELS = 76;   // rows (both views) that open on a held "(Chord)" — see the column-0 check below
+const CHORD_GRID_CARDS = ['ca-29', 'ca-30', 'ca-32', 'ca-33', 'ca-35', 'ca-36', 'ca-37', 'ca-39', 'ca-40', 'ca-41', 'ca-42', 'ca-51'];
 function checkChordGridCards(ctx) {
   head('1bv. Chord-grid practice cards');
   let bad = 0;
