@@ -13264,7 +13264,7 @@ function checkCoachVerdicts() {
    reached (their planned count). The setup tip names the clicks and the
    −5 / +5 and the slider redraw it (EN + ES). Totals pinned (COUNTIN_PIN).
    ════════════════════════════════════════════════════════════════════ */
-const COUNTIN_PIN = { runs: 44, beeps: 140, rounds: 9, takes: 6, tips: 16 };
+const COUNTIN_PIN = { runs: 44, beeps: 140, rounds: 9, takes: 6, tips: 28 };   // tips 16 -> 28 (2026-11-09 review R1-1: a song switch from 50, crossing 60)
 async function checkCountIn() {
   head('1ck. The count-in: 2 clicks below 60 BPM in Power Chord Switch and Change Up, 4 from 60 and in every other game (the real coachCountIn, run)');
   let bad = 0;
@@ -13384,18 +13384,25 @@ async function checkCountIn() {
         if (!doc.got || JSON.stringify(doc.cib) !== want || `[${doc.sched}]` !== want) fail(`a pair at ${bpm} BPM: the document micRecSaveNow writes has countInBeats ${JSON.stringify(doc.cib)} (${doc.got ? 'written' : 'NOT written'}), ${doc.sched} clicks were scheduled; want ${want}`);
       }
     }
-    /* The setup tip names the clicks for the setup tempo, and −5 / +5 and the slider redraw it (the screen itself is not redrawn: ccSetBpm). */
+    /* The setup tip names the clicks for the setup tempo, and −5 / +5 and the slider redraw it (the screen itself is not redrawn: ccSetBpm). A song
+       switch counts every round: from 50 (50 / 55 / 60) or 55 (55 / 60 / 65) its rounds cross 60, and the tip says 2 with 4 before a round at 60 or faster.
+       The texts are written out here, not read from i18n.js. */
+    const TIP = { en: { two: '2 count-in clicks,', four: '4 count-in clicks,', mixed: '2 count-in clicks (4 before a round at 60 BPM or faster),' },
+      es: { two: '2 clics de cuenta,', four: '4 clics de cuenta,', mixed: '2 clics de cuenta (4 antes de una ronda a 60 BPM o más),' } };
+    const kindOf = (ladder, bpm) => { const r = (ladder ? [0, 5, 10].map(d => Math.min(bpm, 130) + d) : [bpm]).map(b => (b < 60 ? 'two' : 'four')); return r.every(k => k === r[0]) ? r[0] : 'mixed'; };
     for (const lang of ['en', 'es']) {
-      const word = lang === 'en' ? 'count-in clicks' : 'clics de cuenta';
-      for (const [game, start, steps] of [['power', 55, [['ccNudgeBpm(5)', 60], ['ccNudgeBpm(-5)', 55], ['ccSetBpm(140)', 140], ['ccSetBpm(10)', 10]]], ['open', 60, [['ccNudgeBpm(-5)', 55], ['ccNudgeBpm(5)', 60]]]]) {
-        run(`setLang(${JSON.stringify(lang)}); ccSetup(${JSON.stringify(game)}); ccPickRate(2); ccPickProg(${game === 'power' ? 1 : 0}); ccSetBpm(${start}); ccRenderSetup();`);
+      for (const [game, prog, ladder, start, steps] of [['power', 1, false, 55, [['ccNudgeBpm(5)', 60], ['ccNudgeBpm(-5)', 55], ['ccSetBpm(140)', 140], ['ccSetBpm(10)', 10]]],
+        ['open', 0, false, 60, [['ccNudgeBpm(-5)', 55], ['ccNudgeBpm(5)', 60]]],
+        ['power', SW, true, 50, [['ccNudgeBpm(5)', 55], ['ccNudgeBpm(5)', 60], ['ccSetBpm(30)', 30], ['ccSetBpm(45)', 45], ['ccSetBpm(130)', 130]]]]) {
+        const label = `${game}${ladder ? ' song switch' : ''}`;
+        run(`setLang(${JSON.stringify(lang)}); ccSetup(${JSON.stringify(game)}); ccPickRate(2); ccPickProg(${prog}); ccSetBpm(${start}); ccRenderSetup();`);
         const first = run(`(document.getElementById('cc-body').innerHTML.match(/id="cc-tip">([\\s\\S]*?)<\\/div>/) || [])[1] || ''`);
-        const states = [[`${game} setup at ${start}`, first, start]];
-        for (const [call, bpm] of steps) { run(call); states.push([`${game} after ${call}`, run(`document.getElementById('cc-tip').innerHTML`), bpm]); }
+        const states = [[`${label} setup at ${start}`, first, start]];
+        for (const [call, bpm] of steps) { run(call); states.push([`${label} after ${call}`, run(`document.getElementById('cc-tip').innerHTML`), bpm]); }
         for (const [what, html, bpm] of states) {
           tot.tips++;
-          const n = bpm < 60 ? 2 : 4, other = n === 2 ? 4 : 2;
-          if (!html.includes(`${n} ${word}`) || html.includes(`${other} ${word}`) || /\{clicks\}/.test(html)) fail(`(${lang}) the tip on the ${what} reads "${html.replace(/<[^>]+>/g, '').slice(0, 90)}…"; want "${n} ${word}"`);
+          const kind = kindOf(ladder, bpm), want = TIP[lang][kind], others = Object.keys(TIP[lang]).filter(k => k !== kind).map(k => TIP[lang][k]);
+          if (!html.includes(want) || others.some(o => html.includes(o)) || /\{(clicks|n)\}/.test(html)) fail(`(${lang}) the tip on the ${what} reads "${html.replace(/<[^>]+>/g, '').slice(0, 110)}…"; want "${want}"`);
         }
       }
     }
@@ -13405,7 +13412,7 @@ async function checkCountIn() {
       micRecShouldAsk = __ciKeep.ask; coachEnsureRunning = __ciKeep.er; coachAcquireMic = __ciKeep.am; coachStream = __ciKeep.cs; micRec = __ciKeep.mr; saveGames = __ciKeep.sg; setLang('en'); cc = null; coach = null; sr = null; nr = null;`);
   }
   for (const [k, n] of Object.entries(COUNTIN_PIN)) if (tot[k] !== n) fail(`${tot[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin COUNTIN_PIN on purpose)`);
-  if (bad === 0) ok(`${tot.runs} real count-ins (${tot.beeps} clicks, each at its beat): Power Chord Switch at 10 / 30 / 55 / 60 / 140 and Change Up at 40 / 55 / 60 / 90 BPM count 2 below 60 and 4 from 60, the Listening Coach (30, 90), Strum Radar (50, 90) and Note Runner (30, 72) always 4, through Web Audio (0.1 s and a recording's 0.4 s lead) and the timer path; only the last click high, the counter 3-4 or 1-4, play exactly that many beats after the first click; ${tot.rounds} song-switch rounds count at their own tempo (2/2/4, 2/4/4, and 2/2/4 after "Next round −5"); ${tot.takes} saved takes list each round's clicks as scheduled (rounds a Stop never reached at their planned tempo, and in the document micRecSaveNow writes); ${tot.tips} setup tips name the clicks after −5 / +5 and the slider (EN + ES)`);
+  if (bad === 0) ok(`${tot.runs} real count-ins (${tot.beeps} clicks, each at its beat): Power Chord Switch at 10 / 30 / 55 / 60 / 140 and Change Up at 40 / 55 / 60 / 90 BPM count 2 below 60 and 4 from 60, the Listening Coach (30, 90), Strum Radar (50, 90) and Note Runner (30, 72) always 4, through Web Audio (0.1 s and a recording's 0.4 s lead) and the timer path; only the last click high, the counter 3-4 or 1-4, play exactly that many beats after the first click; ${tot.rounds} song-switch rounds count at their own tempo (2/2/4, 2/4/4, and 2/2/4 after "Next round −5"); ${tot.takes} saved takes list each round's clicks as scheduled (rounds a Stop never reached at their planned tempo, and in the document micRecSaveNow writes); ${tot.tips} setup tips name the clicks after −5 / +5 and the slider (EN + ES), a song switch whose rounds cross 60 BPM saying 2 with 4 before a round at 60 or faster`);
 }
 
 /* ════════════════════════════════════════════════════════════════════

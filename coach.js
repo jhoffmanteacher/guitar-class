@@ -3410,13 +3410,16 @@ function ccSetBpm(v){
   const tip = document.getElementById('cc-tip');
   if (tip) tip.innerHTML = ccTipHtml();
 }
-/* The setup's tip: the speed the chord switches at, and the count-in's clicks at the setup tempo (ccCountInBeats; a song switch's round 1). */
+/* The setup's tip: the speed the chord switches at, and the count-in's clicks (ccCountInBeats) of every round the setup tempo gives. A song switch
+   whose rounds cross 60 BPM (from 50: 50 / 55 / 60, 2 / 2 / 4 clicks) says so (games.cc.clicksMixed); else the one count (games.cc.clicksN). */
 function ccTipHtml(){
   const rate = CC_RATES[cc.rateIdx] || CC_RATES[0];
   const tipRate = t(rate.bpc === 4 ? 'games.cc.tipRate.bar'
     : rate.bpc === 2 ? 'games.cc.tipRate.half'
     : 'games.cc.tipRate.beat');
-  return `&#x1F92B; ${t(ccIsPower() ? 'games.pw.tip' : 'games.cc.tip', { rate: tipRate, clicks: ccCountInBeats(cc.bpm) })}`;
+  const counts = ((ccProgs()[cc.progIdx] || {}).ladder ? ccLadderBpms(cc.bpm) : [cc.bpm]).map(ccCountInBeats);
+  const clicks = counts.every(n => n === counts[0]) ? t('games.cc.clicksN', { n: counts[0] }) : t('games.cc.clicksMixed');
+  return `&#x1F92B; ${t(ccIsPower() ? 'games.pw.tip' : 'games.cc.tip', { rate: tipRate, clicks })}`;
 }
 /* "Round 1: 60 BPM · Round 2: 75 BPM · Round 3: 90 BPM" — the setup's line for a song switch. */
 function ccLadderNoteText(base){
