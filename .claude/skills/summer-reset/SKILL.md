@@ -5,7 +5,7 @@ description: The guitar site's Summer reset list: fixes blocked by frozen module
 
 ## Summer reset list
 Every fix below is blocked only because the module it touches is frozen (see
-"Three regimes," above), not because it's a bad idea. **Add any fix blocked
+"Three regimes decide what may change in a module" in CLAUDE.md), not because it's a bad idea. **Add any fix blocked
 by a frozen module here the same day**, not to a session scratchpad or a PR
 that never merges.
 
@@ -25,9 +25,9 @@ above.
 
 **Practice-panel MCs don't need to be on this list.** A skill's practice MC
 stores the choice INDEX, not its text, so its wording may change any time,
-even in Modules 1–2. Only the choice ORDER is locked (see "Quiz answers are
-shuffled at render time," below). Don't confuse them with the keyed MCs
-below, which store the choice text and are genuinely frozen.
+even in Modules 1–2. Only the choice ORDER is locked (see the "Keyed MCs"
+bullet under "Content rules" in CLAUDE.md). Don't confuse them with the keyed MCs
+in the list that follows, which store the choice text and are genuinely frozen.
 
 **Reword next summer, when progress resets for the new year.** These three
 keyed Module 1 Set 2 cards are frozen mid-year only because students have
@@ -51,12 +51,12 @@ when the rest is reworded.
 - Items 1 and 3 play the same four notes, differing only by their "Line 1" /
   "Line 2" label.
 
-`items` is positional and frozen once students have taken the check (see the
-exit-check rules below), so nothing changes here until progress resets.
+`items` is positional and frozen once students have taken the check (see "exit checks" in
+skill `in-class-activities`), so nothing changes here until progress resets.
 
 **`m2w2` Challenge 3's label, "(your low-E assessment piece)" → "(assessment
 preparation)".** The rest of the site already uses "(assessment
-preparation)" (see "Challenge cards," below). This is the one graded card
+preparation)" (see the "Challenge cards" bullet under "Content rules" in CLAUDE.md). This is the one graded card
 Decision 1's retitle couldn't reach: Module 2 is frozen, and a step `label`
 must match its base commit byte-for-byte by index. In the same edit:
 - remove the `module-2.js` / `'assessment piece'` entry from
