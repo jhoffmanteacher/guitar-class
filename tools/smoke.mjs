@@ -1272,10 +1272,15 @@ async function tuningSimWalk(page, run, events, stats, base) {
     // Round 1, played for real: letter, Up/Down, hold the peg until green.
     await run(`tsim:${lang}:r1:name`, nameRight, 200);
     if ((await run(`tsim:${lang}:r1:state1`, `({ s: ${S}.state, lcd: document.getElementById('lcd').dataset.mode, note: document.getElementById('note').textContent, letter: TuningSim.STRINGS[${S}.round.idx].note })`, 10)) ) {
-      const r = await run(`tsim:${lang}:r1:read`, `({ s: ${S}.state, lcd: document.getElementById('lcd').dataset.mode, note: document.getElementById('note').textContent, letter: TuningSim.STRINGS[${S}.round.idx].note, voice: ${S}.soundOn })`, 10);
+      const r = await run(`tsim:${lang}:r1:read`, `({ s: ${S}.state, lcd: document.getElementById('lcd').dataset.mode, note: document.getElementById('note').textContent, letter: TuningSim.STRINGS[${S}.round.idx].note, voice: ${S}.soundOn, status: document.getElementById('status').textContent })`, 10);
       if (r.s !== 'read' || r.lcd === 'off' || r.note !== r.letter) fail(W + 'r1:read', `after naming the string: state ${r.s}, LCD ${r.lcd}, letter "${r.note}" vs "${r.letter}"`);
+      // "Which way?" is the student's to answer: the status line stays blank until then (Jonathan, 2026-11-09).
+      if (r.status !== '') fail(W + 'r1:read-status', `during "Which way?" the tuner's status line says "${r.status}" (it gives the answer away; expected blank)`);
     }
     await run(`tsim:${lang}:r1:way`, wayRight, 150);
+    const st1 = await run(`tsim:${lang}:r1:way-status`, `({ s: ${S}.state, status: document.getElementById('status').textContent, sharp: ${S}.disp.shown > 0 })`, 10);
+    const words = { en: ['Too high', 'Too low'], es: ['Muy alta', 'Muy baja'] }[lang];
+    if (st1.s !== 'turn' || !st1.status.startsWith(words[st1.sharp ? 0 : 1])) fail(W + 'r1:way-status', `after the Up/Down answer: state ${st1.s}, status "${st1.status}" (expected turn and a line starting "${words[st1.sharp ? 0 : 1]}")`);
     const dir = await run(`tsim:${lang}:r1:dir`, `(${S}.round.answer === 'up' ? 'peg-up' : 'peg-down')`, 10);
     await run(`tsim:${lang}:r1:hold`, `document.getElementById('${dir}').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }))`, 10);
     const reached = await run(`tsim:${lang}:r1:green`, waitFor(`${S}.disp.inTune`, 9000), 10);

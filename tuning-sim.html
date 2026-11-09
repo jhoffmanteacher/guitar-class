@@ -607,7 +607,9 @@ function updateDisplay(){
   if (green && !D.green && onTarget) flashPop();
   D.green = green; D.inTune = green && onTarget;
   el.lcd.dataset.mode = green ? 'in' : (D.shown > 0 ? 'sharp' : 'flat');
-  el.status.textContent = !onTarget ? T('stOther', { x: nn.name, y: tLetter }) : green ? T('stInTune') : (D.shown > 0 ? T('stSharp') : T('stFlat'));
+  /* "Which way?" asks the student to read the needle, so the words that answer it ("Too low — tighten the peg") wait
+     until the answer is in (Jonathan, 2026-11-09). The needle, the letter and the colour stay. */
+  el.status.textContent = !onTarget ? T('stOther', { x: nn.name, y: tLetter }) : green ? T('stInTune') : S.state === 'read' ? '' : (D.shown > 0 ? T('stSharp') : T('stFlat'));
   ringRender();
   checkGreen();
 }
