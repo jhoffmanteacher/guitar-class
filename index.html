@@ -67,7 +67,8 @@
 <!-- module-N.js files are NO LONGER loaded here. They're fetched on demand
      the first time a student opens that module (see loadModuleData in app.js),
      so first load only parses one module's data instead of all eight. The
-     service worker still precaches every module file for offline use. -->
+     service worker still caches every module file for offline use (after the
+     first page load following an update: sw.js precacheRest). -->
 <header class="header">
   <div style="display:flex;align-items:center;gap:10px;min-width:0">
     <button type="button" class="rail-toggle" id="rail-toggle-btn" onclick="toggleRail()" aria-expanded="false" aria-controls="nav-rail" aria-label="Open navigation menu" data-i18n-attr="aria-label:header.railToggleAria">

@@ -301,8 +301,9 @@ let saveTimer   = null;
    fetched on demand the first time its module is opened, then its panels are
    built into the DOM. This keeps first load light on weak Wi-Fi / slow
    Chromebooks: we parse one module's data and build one module's panels
-   instead of all eight. The service worker still precaches every module file,
-   so opening a not-yet-loaded module while offline keeps working. */
+   instead of all eight. The service worker still caches every module file
+   (after the first page load following an update: sw.js precacheRest), so
+   opening a not-yet-loaded module while offline keeps working. */
 const _moduleLoads = {};           // num -> Promise (dedupes concurrent loads)
 const _modulesRendered = new Set();
 function loadModuleData(num){
@@ -328,7 +329,8 @@ function loadModuleData(num){
    with ?teacher). On a school Chromebook's first visit that is most of the
    wait, and it is spent on code the student may never run.
 
-   coach.js is still precached by the service worker, so its deferred fetch
+   coach.js is still cached by the service worker (sw.js precacheRest fills it
+   in after the first page load following an update), so its deferred fetch
    is a cache hit for anyone who has loaded the site before, online or off.
    teacher.js is NOT (2026-10-12 — sw.js ASSETS leaves it out so students
    don't re-download it on every deploy; checks.mjs SHELL_NOT_PRECACHED):
@@ -776,11 +778,18 @@ if(SW_UPDATE_BOOT) setAuthWallChecking('auth.updating');
    and opens the same place (showApp here, showTeacherApp in teacher.js).
 
    What comes back: the page (lesson, In class, Songs, My progress: the
-   address keeps those), the lesson or checklist panel of the set, how far
-   down the page was scrolled, and on the console the view, the picked
-   activity or student, its tab and the board. What does not: anything the
-   reload already waits for (a drill, a recording, an exit check: see
-   busyReason below) and text typed into a box but not yet saved.
+   address keeps those), the lesson or checklist panel of the set, the step
+   that was open in it with its Hint / Stuck? folds (the same snapshot a
+   language switch keeps: snapshotLessonState), where the page was scrolled,
+   and on the console the view, the picked activity or student, its tab and
+   the board. What does not: anything the reload already waits for (a
+   drill, a recording, an exit check: see busyReason below), text typed
+   into a box but not yet saved, and the small states inside a card (a
+   search, an In class card's open step or TAB page, the board's sort).
+
+   The person wins: the next load is slow (the new version's files are
+   still arriving), and anything they click, type or scroll before the
+   restore lands cancels the rest of it (swResumeWatch).
 
    The note is only ever used by the load it was written for:
      - it is read and deleted while this file runs, on every load, and is
@@ -824,10 +833,15 @@ function swResumeSave(){
       const panel = activeWeekPanel();
       // A locked set opened to preview is never restored (activateSet: a peek leaves nothing behind).
       const peek = !!(panel && panel.classList.contains('set-peek'));
+      // The row being read (null while an in-column page has the lesson swapped out: practiceScrollTop has its place).
+      const anchor = (panel && !peek) ? lessonScrollAnchor() : null;
       note.s = {
         hash: location.hash,
         set: (panel && !peek) ? panel.dataset.id : null,
         checklist: !!(panel && !peek && panel.classList.contains('on-checklist')),
+        lesson: (panel && !peek) ? snapshotLessonState(panel) : null,
+        key: (anchor && anchor.key) || null,
+        top: anchor ? Math.round(anchor.top) || 0 : 0,
         y: Math.round(paneScrollTop()) || 0,
         py: Math.round(practiceScrollTop) || 0
       };
@@ -835,36 +849,81 @@ function swResumeSave(){
     sessionStorage.setItem(SW_RESUME_KEY, JSON.stringify(note));
   }catch(e){ /* storage blocked or full: the reload still happens, onto the home page as before */ }
 }
+/* Did the person do anything since the reload? One watcher per restore,
+   started before any waiting: a click, a key, a wheel or a touch means they
+   have moved on, and the restore stops there. off() removes the listeners;
+   it runs on the first event and when the restore finishes. */
+function swResumeWatch(){
+  const evs = ['wheel', 'touchstart', 'keydown', 'pointerdown'];
+  const w = { touched: false, off(){ evs.forEach(ev => window.removeEventListener(ev, on, true)); } };
+  function on(){ w.touched = true; w.off(); }
+  evs.forEach(ev => window.addEventListener(ev, on, { passive: true, capture: true }));
+  return w;
+}
 /* Put a scroll position back. The page is still filling in when this runs
-   (a module file, images, the console's roster), so it is set again twice
-   as the page grows, and never after the person has touched the page: their
-   own scroll wins. getPane is read fresh each time (scrollPane() changes
-   with the page height). */
-function swResumeScroll(getPane, y){
-  if(!(y > 0)) return;
-  let touched = false;
-  const stop = () => { touched = true; };
-  ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach(ev => window.addEventListener(ev, stop, { once: true, passive: true, capture: true }));
-  const go = () => { if(touched) return; try { getPane().scrollTo({ top: y }); } catch(e) { /* pane gone: leave the page where it is */ } };
-  go(); setTimeout(go, 300); setTimeout(go, 1200);
+   (module files, Songs and My progress wait for every module, the console
+   waits for its roster), and a page that is still short clamps the scroll.
+   So: look every 250 ms for up to 8 s, set the position whenever the page is
+   tall enough and is not already there, and stop for good the moment the
+   person touches the page. getPane and target are read fresh each time
+   (scrollPane() changes with the page height; target() returns the wanted
+   scrollTop, or null for "not yet"). */
+const SW_RESUME_SCROLL_MS = 8000;
+function swResumeScroll(getPane, target, w){
+  const t0 = Date.now();
+  const tick = () => {
+    if(w.touched) return;
+    if(Date.now() - t0 > SW_RESUME_SCROLL_MS){ w.off(); return; }
+    try {
+      const pane = getPane();
+      const el = pane === window ? document.scrollingElement : pane;
+      const y = target();
+      if(el && y != null && y > 0 && el.scrollHeight - el.clientHeight >= y - 1 && Math.abs((pane === window ? window.scrollY : pane.scrollTop) - y) > 2) pane.scrollTo({ top: y });
+    } catch(e) { /* pane gone: leave the page where it is */ }
+    setTimeout(tick, 250);
+  };
+  tick();
+}
+/* The lesson snapshot as it came back from storage: the three lists
+   restoreLessonState reads, strings only, or null. */
+function swResumeLessonSnap(v){
+  if(!v || typeof v !== 'object') return null;
+  const strs = a => Array.isArray(a) ? a.filter(x => typeof x === 'string') : [];
+  return { open: strs(v.open), folds: strs(v.folds), tabs: strs(v.tabs), pdSeen: v.pdSeen === true, pdShowing: v.pdShowing === true };
 }
 /* The student half. Runs after showApp has drawn the saved set and routed
    the address, once the module's panels exist (renderAll → onModuleChange is
    async: it may still be fetching the module file). */
 function swResumeApply(s){
+  const w = swResumeWatch();
   Promise.resolve(_bootModuleChange).then(() => {
+    // They clicked or scrolled while the module was loading, or went to another page: leave everything as they have it.
+    if(w.touched || location.hash !== s.hash){ w.off(); return; }
     const panel = activeWeekPanel();
-    const sameSet = !!panel && typeof s.set === 'string' && panel.dataset.id === s.set && !panel.classList.contains('set-peek');
-    if(sameSet && s.checklist === true && document.getElementById(`${s.set}-checklist`)) switchTabById(s.set, 'checklist', true);
+    /* No set on screen: the module file did not arrive (onModuleChange said
+       so in a toast). A bare address would leave an empty lesson pane, so
+       open the home page, which needs no module, as a normal visit would. */
+    if(!panel){ w.off(); if(!location.hash) goExploreHash('class-activities'); return; }
     // A different set came back (the saved place moved, or the set is locked now): its top is the right place.
-    if(!sameSet) return;
-    const y = Number(s.y) || 0, py = Number(s.py) || 0;
+    if(typeof s.set !== 'string' || panel.dataset.id !== s.set || panel.classList.contains('set-peek')){ w.off(); return; }
+    restoreLessonState(panel, swResumeLessonSnap(s.lesson));
+    if(s.checklist === true && document.getElementById(`${s.set}-checklist`)) switchTabById(s.set, 'checklist', true);
+    const y = Number(s.y) || 0, py = Number(s.py) || 0, top = Number(s.top) || 0;
     /* An in-column page (In class, Songs, My progress) has swapped the lesson
        out: y is that page's scroll, and py is the lesson's place for the way
        back (syncExploreNav puts practiceScrollTop back when the page closes). */
-    if(document.body.classList.contains('explore-open')) practiceScrollTop = py;
-    swResumeScroll(scrollPane, y);
-  }).catch(() => { /* never let a restore break the page it is restoring */ });
+    if(document.body.classList.contains('explore-open')){ practiceScrollTop = py; swResumeScroll(scrollPane, () => y, w); return; }
+    /* The lesson itself: by the row that was being read, not by scrollTop
+       (restoreLessonScroll's rule: the same scrollTop lands somewhere else
+       when the rows above are a different height). Falls back to y. */
+    const key = typeof s.key === 'string' ? s.key : null;
+    swResumeScroll(scrollPane, () => {
+      const tp = key && document.querySelector('#week-panels .week-panel.active .tab-panel.active');
+      const li = tp ? [...tp.querySelectorAll('li.step')].find(x => x.dataset.key === key) : null;
+      if(!li || !li.getClientRects().length) return y;
+      return paneScrollTop() + li.getBoundingClientRect().top - top;
+    }, w);
+  }).catch(() => { w.off(); /* never let a restore break the page it is restoring */ });
 }
 
 let _authRevealTimer = firebaseReady ? setTimeout(revealAuthWallSignIn, 6000) : null;
@@ -905,7 +964,8 @@ if(auth) auth.onAuthStateChanged(async user=>{
     /* The sign-in is NOT over when the popup closes. __authPopupPending clears
        the instant signInWithPopup resolves, but showApp() is still a ~100 KB
        Firestore SDK download and two reads away — 5-15 s on school Wi-Fi, and
-       almost exactly how long a new service worker takes to precache the shell.
+       a new service worker takes over inside that time (a few seconds since
+       the shell-first install of 2026-11-09; it used to be 5-15 s itself).
        A post-deploy reload landing in that window throws the finished sign-in
        away and replays the whole sequence: the "it signed me in twice" report.
        The reload at the bottom of this file waits on this flag, bounded by its
@@ -1876,9 +1936,10 @@ function renderAll(){
   // loaded per module (ensureModuleRendered), so right after login only the
   // CURRENT module (if that) has loaded. An unloaded previous module reads
   // as "nothing built yet" and holds the gate, so a fresh page load can
-  // flash 🔒 on modules that are actually done. Every module-N.js is already
-  // service-worker precached, so loading them all costs no extra network
-  // round trip — queue it once and redraw the dropdown when it lands so any
+  // flash 🔒 on modules that are actually done. Every module-N.js is in the
+  // service worker's cache (except on the first load after an update, when
+  // they come from the network once: sw.js precacheRest), so loading them all
+  // normally costs no network round trip — queue it once and redraw the dropdown when it lands so any
   // wrong guess corrects itself without the student having to touch anything.
   if(!_fullModuleDataQueued){
     _fullModuleDataQueued = true;
@@ -5441,8 +5502,8 @@ function routeExploreHash(){
   if(h !== '#search') searchClosePanel();
   if(h === '#games'){
     /* coach.js owns the arcade and is loaded on demand — see ensureCoachJs().
-       It sits in sw.js's best-effort precache tier, so a first visit on school
-       Wi-Fi can legitimately finish install without it; swallowing the
+       It sits in sw.js's best-effort tier (precacheRest, after the install), so
+       on school Wi-Fi it can legitimately be missing from the cache; swallowing the
        rejection left the button looking broken AND made the second tap a
        no-op (goExploreHash returns early once the hash is already '#games').
        Say so, and drop the hash so pressing it again really retries. Same
@@ -12212,7 +12273,7 @@ function leaveTopPanelForSet(){
 }
 
 /* Load every module's data (not its panels) — the Songs hub and search
-   need the whole catalogue. Modules are small and the SW precaches them.
+   need the whole catalogue. Modules are small and the SW caches them.
    Resolves true only when EVERY module actually loaded — Daily Review uses
    that to avoid persisting a picks snapshot computed from a partial
    catalogue (a script that 404'd on flaky wifi). Other callers ignore it. */
@@ -17484,6 +17545,12 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     navigator.serviceWorker.register('sw.js').catch(() => {/* offline support is best-effort */});
     askForRest();
   });
+  /* ...and again when the connection or the tab comes back (review R1-6): a
+     lid closed mid-fill fails the downloads in flight, and a tab that stays
+     open all day has no second "load". Once the cache is complete this
+     costs the worker one lookup per file and no request. */
+  window.addEventListener('online', askForRest);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) askForRest(); });
   {
     const onNewWorker = () => {
       // A first visit: the worker just took control for the first time. No
@@ -17534,9 +17601,16 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
         if (pcState) return 'playing';
         return null;
       };
+      /* While this tab waits, the new worker holds only the shell. Ask it for
+         the rest now, once, so that whenever the reload does come (up to 5
+         minutes later, maybe with the Wi-Fi gone) the page it loads is all
+         in the cache (review R1-1). A tab that reloads at once asks from
+         its next "load" instead, after its own start-up requests. */
+      let askedWhileWaiting = false;
+      const waitMore = () => { if (!askedWhileWaiting) { askedWhileWaiting = true; askForRest(); } setTimeout(reload, 1500); };
       const reload = async () => {
-        if (window.__authPopupPending) { setTimeout(reload, 1500); return; }
-        if (busyReason() && Date.now() - startedWaiting < SW_RELOAD_MAX_WAIT) { setTimeout(reload, 1500); return; }
+        if (window.__authPopupPending) { waitMore(); return; }
+        if (busyReason() && Date.now() - startedWaiting < SW_RELOAD_MAX_WAIT) { waitMore(); return; }
         /* A step marked done half a second ago is still inside queueSave's
            800 ms debounce (or its retry backoff) and would simply vanish —
            pagehide's flush is a Firestore write started during unload and is
@@ -17558,16 +17632,13 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       reload();
     };
     navigator.serviceWorker.addEventListener('controllerchange', onNewWorker);
-    /* One guard on the message: a page that IS the update's own reload ignores
-       it for its first few seconds. The worker posts it once, as it takes
-       over, to the pages open at that moment; the reloaded page is not one
-       of them (its request waits for the takeover to finish). If a browser
-       ever did hand the reloaded page that same message it would reload
-       again, and this makes sure that cannot become a second reload.
-       "controllerchange" is never ignored. */
-    const swMsgQuietUntil = SW_UPDATE_BOOT ? Date.now() + 5000 : 0;
-    navigator.serviceWorker.addEventListener('message', e => {
-      if (e.data && e.data.type === 'gc-sw-activated' && Date.now() >= swMsgQuietUntil) onNewWorker();
-    });
+    /* No guard on the message. The worker posts it once, as it takes over,
+       to the pages open at that moment; the page this reload produces is not
+       one of them (its request waits for the takeover to finish). A "quiet
+       window" on the reloaded page was tried and removed (review R1-4): it
+       could swallow the only signal of a second deploy that took over
+       before this file ran. The worst case without it is one extra reload,
+       never a loop. */
+    navigator.serviceWorker.addEventListener('message', e => { if (e.data && e.data.type === 'gc-sw-activated') onNewWorker(); });
   }
 }

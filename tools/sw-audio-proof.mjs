@@ -60,6 +60,7 @@ class FakeRequest {
     this.url = new URL(typeof input === 'string' ? input : input.url, BASE).href;
     this.method = init.method || 'GET';
     this.mode = init.mode || 'no-cors';
+    this.cache = init.cache || 'default';
     const h = new Map(Object.entries(init.headers || {}).map(([k, v]) => [k.toLowerCase(), v]));
     this.headers = { has: k => h.has(String(k).toLowerCase()) };
   }
@@ -71,8 +72,9 @@ class FakeCache {
   async put(r, res) { this.m.set(keyOf(r), res.clone()); }
   async delete(r) { return this.m.delete(keyOf(r)); }
   async keys() { return [...this.m.keys()].map(u => new FakeRequest(u)); }
-  async add(r) { (this.adds = this.adds || []).push(keyOf(r)); if (this.failAdd && this.failAdd(keyOf(r))) throw new Error('add failed'); this.m.set(keyOf(r), new FakeResponse('x', { type: 'basic' })); }
-  async addAll(rs) { for (const r of rs) await this.add(r); }
+  async add(r) { (this.adds = this.adds || []).push(keyOf(r)); (this.addModes = this.addModes || []).push(typeof r === 'string' ? 'default' : r.cache); if (this.failAdd && this.failAdd(keyOf(r))) throw new Error('add failed'); this.m.set(keyOf(r), new FakeResponse('x', { type: 'basic' })); }
+  /* All or nothing, like the real one: one failure stores none of them. */
+  async addAll(rs) { const before = new Map(this.m); try { for (const r of rs) await this.add(r); } catch (e) { this.m = before; throw e; } }
   has(r) { return this.m.has(keyOf(r)); }
 }
 class FakeStorage {
@@ -321,6 +323,7 @@ async function runScenarios(swSrcOf) {
     const critical = sw.read('PRECACHE_CRITICAL'), assets = sw.read('ASSETS');
     const rest = assets.filter(u => !critical.includes(u));
     check('install stores exactly the critical shell files', shell.m.size === new Set(critical.map(keyOf)).size && critical.every(u => shell.has(u)));
+    check('every install download bypasses the HTTP cache', shell.addModes.length === critical.length && shell.addModes.every(m => m === 'reload'));
     check('install takes over without waiting for the rest', sw.calls.some(c => c.skipWaiting) && rest.length > 60 && !rest.some(u => shell.has(u)));
     check('install leaves the audio caches alone', !st.names().includes(sw.read('AUDIO_CACHE')) || (await st.open(sw.read('AUDIO_CACHE'))).m.size === 0);
     await sw.activate();
@@ -328,7 +331,7 @@ async function runScenarios(swSrcOf) {
     check('activate does not download the rest itself (it would hold every fetch)', !rest.some(u => shell.has(u)));
     /* The reloaded page has already fetched one of the rest; one other fails. */
     await shell.put(rest[0], new FakeResponse('page', { type: 'basic' }));
-    shell.adds = [];
+    shell.adds = []; shell.addModes = [];
     shell.failAdd = k => k === keyOf(rest[1]);
     check('an unrelated message starts nothing', (await sw.message({ type: 'something-else' })) === 0 && shell.adds.length === 0);
     const held = await sw.message({ type: 'gc-precache-rest' });
@@ -336,6 +339,7 @@ async function runScenarios(swSrcOf) {
     check('the rest is filled, a failed file is skipped and does not stop the others', rest.slice(2).every(u => shell.has(u)) && !shell.has(rest[1]));
     check('a file the page already fetched is not downloaded again', !shell.adds.includes(keyOf(rest[0])) && (await (await shell.match(rest[0])).text()) === 'page');
     check('the shell is not downloaded a second time', !critical.some(u => shell.adds.includes(keyOf(u))));
+    check('every fill download bypasses the HTTP cache', shell.addModes.length === rest.length - 1 && shell.addModes.every(m => m === 'reload'));
     shell.adds = []; shell.failAdd = null;
     await sw.message({ type: 'gc-precache-rest' });
     check('the next page load retries only what is missing', shell.adds.length === 1 && shell.adds[0] === keyOf(rest[1]) && shell.has(rest[1]));
@@ -346,6 +350,30 @@ async function runScenarios(swSrcOf) {
     const shell2 = await st2.open(sw2.read('CACHE_VERSION'));
     const restAdds = (shell2.adds || []).filter(k => !critical.map(keyOf).includes(k));
     check('two pages asking at once download each file once', restAdds.length === rest.length && new Set(restAdds).size === rest.length);
+    /* A page that is not in the cache yet (a Journey page before the fill reaches it) must not come from the HTTP cache (review R1-2). */
+    const nav = sw2.calls.length;
+    await (await st2.open(sw2.read('CACHE_VERSION'))).delete('tabs/the-cure.html');
+    await sw2.get('tabs/the-cure.html', { mode: 'navigate' });
+    const navCalls = sw2.calls.slice(nav).filter(c => c.path === 'tabs/the-cure.html');
+    check('a page that is not cached yet is revalidated, not read from the HTTP cache', navCalls.length === 1 && navCalls[0].cache === 'no-cache');
+    /* More failures than downloads at once (a school filter blocking a folder): every other file still lands. */
+    const st3 = new FakeStorage(), sw3 = boot(swSrcOf(mapOf(all), ''), st3, {});
+    await sw3.install();
+    const shell3 = await st3.open(sw3.read('CACHE_VERSION'));
+    const blocked = rest.slice(0, 9).map(keyOf);
+    shell3.failAdd = k => blocked.includes(k);
+    await sw3.message({ type: 'gc-precache-rest' });
+    check('nine failed files do not stop the other files', rest.slice(9).every(u => shell3.has(u)) && !rest.slice(0, 9).some(u => shell3.has(u)));
+    /* One shell file fails: the install must fail whole and must not take over (the browser retries it on the next visit). */
+    const st4 = new FakeStorage(), sw4 = boot(swSrcOf(mapOf(all), ''), st4, {});
+    const shell4 = await st4.open(sw4.read('CACHE_VERSION'));
+    shell4.failAdd = k => k === keyOf(critical[critical.length - 1]);
+    let rejected = false;
+    try { await sw4.install(); } catch { rejected = true; }
+    check('a shell file that fails to download fails the install, and the worker does not take over', rejected && !sw4.calls.some(c => c.skipWaiting) && shell4.m.size === 0);
+    /* Every script index.html loads on every page is in the install (review R1-1). */
+    const pageScripts = [...readFileSync(join(ROOT, 'index.html'), 'utf8').replace(/<!--[\s\S]*?-->/g, '').matchAll(/<script\b[^>]*\bsrc="(?!https?:|\/\/)(?:\.\/)?([^"?#]+)"/g)].map(x => './' + x[1]);
+    check('every script index.html loads on every page is in the install', pageScripts.length >= 12 && pageScripts.every(u => critical.includes(u)));
   }
   return out;
 }
@@ -357,6 +385,12 @@ const MUTATIONS = [
   ['the install never takes over', ".then(() => self.skipWaiting())", ""],
   ['the open pages are not told', "for (const c of list) c.postMessage({ type: 'gc-sw-activated', version: CACHE_VERSION });", ""],
   ['the fill answers any message', "if (event.data && event.data.type === 'gc-precache-rest') event.waitUntil(precacheRest());", "event.waitUntil(precacheRest());"],
+  ['the install reads through the HTTP cache', "return cache.addAll(PRECACHE_CRITICAL.map(u => new Request(u, { cache: 'reload' })));", "return cache.addAll(PRECACHE_CRITICAL.map(u => new Request(u)));"],
+  ['the shell is best-effort (a failed shell file still takes over)', "return cache.addAll(PRECACHE_CRITICAL.map(u => new Request(u, { cache: 'reload' })));", "return Promise.allSettled(PRECACHE_CRITICAL.map(u => cache.add(new Request(u, { cache: 'reload' }))));"],
+  ['the fill reads through the HTTP cache', "          await cache.add(new Request(u, { cache: 'reload' }));", "          await cache.add(new Request(u));"],
+  ['a failed file ends its download slot', "        } catch { /* offline, a 404, a full disk: first use fetches it, the next page load retries */ }", "        } catch { return; }"],
+  ['an every-page script is left out of the install', "  './trainer-site-adapter.js'\n];", "];"],
+  ['a page that is not cached yet is read through the HTTP cache', "const fresh = !cached;", "const fresh = !cached && req.mode !== 'navigate';"],
   ['the fill is not kept alive', "if (event.data && event.data.type === 'gc-precache-rest') event.waitUntil(precacheRest());", "if (event.data && event.data.type === 'gc-precache-rest') precacheRest();"],
   ['the fill downloads files the page already has', "          if (await cache.match(u)) continue;\n", ""],
   ['one failed file stops the fill', "        } catch { /* offline, a 404, a full disk: first use fetches it, the next page load retries */ }", "        } finally { }"],

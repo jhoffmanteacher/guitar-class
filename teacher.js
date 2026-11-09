@@ -169,6 +169,13 @@ async function showTeacherApp(user){
   document.getElementById('teacher-app').style.display='block';
   document.getElementById('user-area').innerHTML=userHeaderHtml(user);
   if(window.PM) PM.syncHeader(false);   // same: hidden on the console (PM_HOST.user() is null there too)
+  /* The site's own reload for an update: open the view the console was on,
+     not the default one (app.js "Back where you were after an update").
+     HERE, before the sidebar below goes live: the module files load for
+     several seconds further down, and a click made during that wait must
+     stand. Applied after it, the restore put the teacher back on the old
+     view a few seconds after they had picked a new one (review R1-1). */
+  const resumed=teacherResumeApply(typeof swResumeTake==='function' ? swResumeTake(user, true) : null);
   /* The sidebar (Layout A, 2026-11-08) — one button per view, grouped, built
      from TEACHER_NAV. It replaced the row of view buttons that used to sit
      above the content (index.html's static three plus ten injected here).
@@ -475,12 +482,14 @@ async function showTeacherApp(user){
   renderTeacherSetTabs();
   const firstSet=SETS.find(w=>!w.locked&&w.skills&&w.skills.length>0);
   if(firstSet){ teacherSetId=firstSet.id; activateTeacherSetTab(firstSet.id); }
-  /* The site's own reload for an update: open the view the console was on,
-     not the default one (app.js "Back where you were after an update").
-     Before the first paint, so nothing is drawn twice. */
-  teacherResumeApply(typeof swResumeTake==='function' ? swResumeTake(user, true) : null);
-  // Mark the view the console opens on (Class activities, or the one just restored) in the sidebar.
-  applyTeacherViewChrome(teacherView);
+  // The skills grid's set from before an update reload: only now do the sets exist to check it against.
+  const resumedSet=resumed && typeof resumed.set==='string' && SETS.find(w=>w.id===resumed.set && !w.locked && w.skills && w.skills.length>0);
+  if(resumedSet){ teacherSetId=resumedSet.id; renderTeacherSetTabs(); }
+  /* Mark the view the console is on in the sidebar: Class activities, the one
+     restored above, or one clicked while the modules loaded. An activity
+     opened from Songs or a student's page keeps THAT item lit
+     (openActivityDetail does the same). */
+  applyTeacherViewChrome(teacherView==='activities' && teacherActivityScreen()==='detail' ? (activityDetailFrom==='songs' ? 'songs' : 'students') : teacherView);
   loadAllStudents();
 }
 /* ── Back where you were after an update (2026-11-09) ─────────────────────
@@ -488,10 +497,14 @@ async function showTeacherApp(user){
    and hands it back on the next load (swResumeSave / swResumeTake). These two
    are the console's half: which view, which student or activity, which of
    the three Class activities screens, the detail tab, the list filter, the
-   skills grid's set, the Teacher view song, and the scroll position.
+   skills grid's set, the Teacher view song, and the scroll position (set
+   once the page is tall enough again, and dropped the moment the teacher
+   clicks or scrolls: swResumeScroll in app.js).
    Everything read back is checked against what exists now; anything that
    does not fit is dropped and that part opens as it normally would. It
-   restores what is on screen only: nothing here writes to Firestore. */
+   restores what is on screen only: nothing here writes to Firestore.
+   teacherResumeApply returns the note it used (or null) so showTeacherApp
+   can set the skills grid's set once the module data has loaded. */
 function teacherResumeSnapshot(){
   return {
     view: teacherView, uid: studentDetailUid,
@@ -501,9 +514,9 @@ function teacherResumeSnapshot(){
   };
 }
 function teacherResumeApply(t){
-  if(!t || typeof t!=='object') return;
+  if(!t || typeof t!=='object') return null;
   const views=TEACHER_NAV.flatMap(g=>g.items.map(i=>i[0]));
-  if(!views.includes(t.view)) return;
+  if(!views.includes(t.view)) return null;
   const acts=window.CLASS_ACTIVITIES||[];
   const actId=id=>(typeof id==='string' && acts.some(a=>a.id===id)) ? id : null;
   const str=v=>(typeof v==='string' && v) ? v : null;
@@ -524,10 +537,10 @@ function teacherResumeApply(t){
     activityDetailFromUid = from==='student' ? str(t.fromUid) : null;
     if(from==='activities' && !activityBoardMode) activityDetailId=activityListPickId || activityDetailId;
   }
-  const set=str(t.set) && SETS.find(w=>w.id===t.set && !w.locked && w.skills && w.skills.length>0);
-  if(set){ teacherSetId=set.id; renderTeacherSetTabs(); }
   if(str(t.song)) teacherViewSongId=t.song;   // renderTeacherViewSongs falls back to the first song if it is gone
-  if(typeof swResumeScroll==='function') swResumeScroll(()=>window, Number(t.y)||0);
+  const y=Number(t.y)||0;
+  if(y>0 && typeof swResumeScroll==='function') swResumeScroll(()=>window, ()=>y, swResumeWatch());
+  return t;
 }
 
 // A prior version stacked all 13 modules as one row each — always tall,

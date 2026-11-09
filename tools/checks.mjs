@@ -5491,7 +5491,13 @@ function checkSwAssets(src) {
     const idxHtml = readFileSync(join(ROOT, 'index.html'), 'utf8').replace(/<!--[\s\S]*?-->/g, '');
     pageScripts = [...idxHtml.matchAll(/<script\b[^>]*\bsrc="(?!https?:|\/\/)(?:\.\/)?([^"?#]+)"/g)].map(x => x[1]);
   } catch { err('index.html could not be read \u2014 the every-page scripts cannot be checked against ASSETS'); problems++; bad++; }
+  /* ...and since the shell-first install (2026-11-09, review R1-1) "precached"
+     has to mean PRECACHE_CRITICAL: the page reloads onto a new worker as soon
+     as that list is in, and an every-page script outside it is a network
+     request at that reload. */
+  const critNow = (src.match(/const PRECACHE_CRITICAL = \[([\s\S]*?)\];/) || ['', ''])[1];
   for (const f of pageScripts) {
+    if (!new RegExp(`'\\./${f.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}'`).test(critNow)) { err(`index.html loads '${f}' with <script src> on every page but sw.js PRECACHE_CRITICAL does not list it \u2014 the page reloads onto a new version before that script is in the cache`); problems++; bad++; }
     if (!assets.includes(f)) { err(`index.html loads '${f}' with <script src> on every page but sw.js ASSETS does not precache it${SHELL_NOT_PRECACHED.includes(f) ? ' (SHELL_NOT_PRECACHED keeps it out: that list is for files loaded on demand)' : ''} \u2014 offline, every page load would ask for a script the cache does not hold`); problems++; bad++; }
   }
   // An entry for a file that is no longer a shell file excuses nothing — remove it.
@@ -5957,10 +5963,10 @@ function bumpServiceWorker() {
    deploy that adds, re-exports and removes a track, the one-time migration, and
    the fetch paths, a rollback round trip, a 404 or foreign answer and the cache
    names, and the shell-first install with the fill that follows it (2026-11-09);
-   then breaks the worker 29 ways and needs every one to turn
+   then breaks the worker 35 ways and needs every one to turn
    the proof red. The totals are pinned, so deleting a scenario or a breakage to
    get green fails here too. */
-const SW_AUDIO_PROOF_PIN = { assertions: 60, scenarios: 11, mutations: 29 };
+const SW_AUDIO_PROOF_PIN = { assertions: 66, scenarios: 11, mutations: 35 };
 function checkAudioWorker(swPath) {
   head('1ce. sw.js keeps the audio cache (the worker is run, not read)');
   const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'sw-audio-proof.mjs'), swPath], { encoding: 'utf8', timeout: 120000 });
@@ -5978,7 +5984,22 @@ function checkAudioWorker(swPath) {
     problems++;
     return;
   }
-  ok(`${a} assertions in ${s} scenarios run against the real sw.js (add / re-export / remove a track, the one-time migration, every fetch path); ${c} of ${n} deliberate breakages each turned the proof red`);
+  /* The proof runs sw.js alone. The page's half of the two messages lives in
+     app.js, which nothing runs here: pin that each name is still used on both
+     sides, so a rename in one file cannot pass (review R1-3, 2026-11-09). */
+  let appSrc = '', swSrc2 = '';
+  try { appSrc = readFileSync(join(ROOT, 'app.js'), 'utf8'); swSrc2 = readFileSync(swPath, 'utf8'); } catch { /* reported below as missing */ }
+  const wires = [
+    ['app.js posts gc-precache-rest', /postMessage\(\{ type: 'gc-precache-rest' \}\)/.test(appSrc)],
+    ['sw.js answers gc-precache-rest', /event\.data\.type === 'gc-precache-rest'\) event\.waitUntil\(precacheRest\(\)\)/.test(swSrc2)],
+    ['sw.js posts gc-sw-activated', /postMessage\(\{ type: 'gc-sw-activated'/.test(swSrc2)],
+    ['app.js reloads on gc-sw-activated', /e\.data\.type === 'gc-sw-activated'\) onNewWorker\(\)/.test(appSrc)],
+    ['app.js reloads on controllerchange', /addEventListener\('controllerchange', onNewWorker\)/.test(appSrc)],
+    ['app.js asks for the rest on load', /register\('sw\.js'\)[^\n]*\n\s*askForRest\(\);/.test(appSrc)],
+  ];
+  const cut = wires.filter(w => !w[1]);
+  if (cut.length) { err(`the update wiring between app.js and sw.js is broken: ${cut.map(w => w[0]).join('; ')}`); problems++; return; }
+  ok(`${a} assertions in ${s} scenarios run against the real sw.js (add / re-export / remove a track, the one-time migration, every fetch path, the shell-first install and its fill; ${wires.length} of ${wires.length} update-wiring lines in app.js and sw.js pinned); ${c} of ${n} deliberate breakages each turned the proof red`);
 }
 
 /* Precached files that no list above fingerprints (2026-10-25). ASSETS also

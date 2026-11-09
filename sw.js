@@ -201,7 +201,19 @@ const PRECACHE_CRITICAL = [
   './guitar-diagrams.js',
   './app.js',
   './fab-tools.js',
-  './fonts/fraunces.woff2'
+  './fonts/fraunces.woff2',
+  /* The other scripts index.html loads on EVERY page (review R1-1,
+     2026-11-09). The page reloads onto this worker the moment the install
+     is done, and a script that is not in the cache yet is a network
+     request at that reload: one Wi-Fi blip and In-Class Activities (the
+     home page), the tuner or the live quiz is dead until a manual reload.
+     checks.mjs requires every <script src> of index.html to be here. */
+  './class-activities.js',
+  './practice-minutes-config.js',
+  './practice-minutes.js',
+  './tuner.js',
+  './live-quiz.js',
+  './trainer-site-adapter.js'
 ];
 
 // Static shell — everything needed to render the practice content offline.
@@ -215,6 +227,9 @@ const PRECACHE_CRITICAL = [
 // checks.mjs keeps them out on purpose (SHELL_NOT_PRECACHED).
 // trainer-site-adapter.js (15 KB) is NOT left out: index.html loads it on every
 // page, so offline it would be a failed script request (Friday check R2-4).
+// Since 2026-11-09 it and every other every-page script are in
+// PRECACHE_CRITICAL as well, so they are in the cache before a page can
+// reload onto a new version.
 const ASSETS = [
   './',
   './index.html',
@@ -330,8 +345,8 @@ self.addEventListener('install', event => {
            page. With every file in the install that wait was the whole
            list (92 files, about 2.9 MB compressed, up to half a minute on
            school Wi-Fi): long enough to start working and then be
-           reloaded mid-task (Jonathan, 2026-11-09). The shell is 10 files
-           and about 0.6 MB.
+           reloaded mid-task (Jonathan, 2026-11-09). The shell is 16 files
+           and about 0.7 MB.
 
            addAll() is all-or-nothing, so the shell must land for the
            install to count: one failed request and this worker never
@@ -350,8 +365,8 @@ self.addEventListener('install', event => {
    has fetched what it needed through the fetch handler below, which stored
    it. A file that fails is simply fetched and cached on first use, exactly
    as it would be on a first visit, and tried again here on the next page
-   load. A few at a time, so the page's own start-up (the Firebase SDK, the
-   sign-in, the student's progress) is not starved on a weak connection.
+   load. A few at a time, to leave room for the page's own start-up (the
+   Firebase SDK, the sign-in, the student's progress) on a weak connection.
    One run at a time: a second call while one is out gets the same promise. */
 const PRECACHE_REST_AT_ONCE = 4;
 let precacheRestRun = null;
@@ -466,9 +481,14 @@ self.addEventListener('fetch', event => {
     // is not precached — got the OLD copy pinned into the new cache
     // (2026-10-16: the console's new "Download all" button stayed missing
     // after the deploy landed). 'no-cache' revalidates instead: a 304 when
-    // unchanged, so it costs one small request. Navigations are left as
-    // they were.
-    const fresh = !cached && req.mode !== 'navigate';
+    // unchanged, so it costs one small request.
+    // A navigation miss revalidates too (review R1-2, 2026-11-09). It used
+    // to be left alone because the install had already stored every page
+    // with cache:'reload'. With the shell-first install a Journey page or
+    // tuning-sim.html is a miss until precacheRest() reaches it, and a plain
+    // fetch answered from the HTTP cache with the page as it was BEFORE the
+    // deploy, which was then stored and served as current.
+    const fresh = !cached;
     const network = (fresh ? fetch(req, { cache: 'no-cache' }) : fetch(req))
       .then(res => {
         // Only cache good, basic (same-origin) responses.

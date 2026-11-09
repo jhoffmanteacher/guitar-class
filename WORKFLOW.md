@@ -38,14 +38,19 @@ Start here. Update this block whenever an item opens or closes; each line says w
   the Friday check reviews them. Smoke watchdog `3af343f`. CLAUDE.md: a product change he asks for ships Fast (`c443261`).
 - **Faster update reload, and back where you were** (Jonathan, 2026-11-09: "sometimes i start doing something and then it
   reloads back to a different view"; CHANGELOG 2026-11-09). Two parts. (1) `sw.js` is shell first: the install is
-  `PRECACHE_CRITICAL` only (10 files, about 0.6 MB compressed, was all 92 files, about 2.9 MB), the worker takes over, and
-  the other 82 files are filled by `precacheRest()` when the page asks (`gc-precache-rest`, sent on `load`). The worker also
+  `PRECACHE_CRITICAL` only (16 files, about 0.7 MB compressed, was all 92 files, about 2.9 MB; every script `index.html`
+  loads is in it), the worker takes over, and the other 76 files are filled by `precacheRest()` when the page asks
+  (`gc-precache-rest`, sent on `load`, `online`, tab shown, and once by a tab that is waiting to reload). The worker also
   posts `gc-sw-activated` to open pages, so a takeover that beats `app.js` is still heard; `app.js` wires both signals when
   the file runs, not on `load`. (2) The reload leaves a one-use note in `sessionStorage` (`gcSwResume`: `swResumeSave` /
   `swResumeTake` in `app.js`, `teacherResumeSnapshot` / `teacherResumeApply` in `teacher.js`) and the next load opens the
-  same page instead of the home page. Guard: check 1ce runs the install, the message and the fill (60 assertions, 29
-  breakages). Not covered by a check: the restore itself (proved once in a real browser; see the commit message).
-  Not seen yet on the live site or a school Chromebook.
+  same page instead of the home page; a click or scroll before it lands cancels it. Guard: check 1ce runs the install,
+  the message and the fill (66 assertions, 35 breakages) and pins 6 wiring lines. Not covered by a check: the restore, and
+  what the page does with the two messages (both proved in a real browser; see the commit messages). Reviewed, round 1:
+  2 MAJOR + 11 MINOR fixed. Not seen yet on the live site or a school Chromebook. The first deploy of this change can
+  need one manual reload (pages still on the old `app.js` listen too late for the faster takeover).
+  **A student with an unfinished activity now stays where they were after an update** instead of being sent to In-Class
+  Activities (the "pops up on login" half of the gate, kept 2026-10-07, no longer fires on the update reload).
 
 **Shipped 2026-11-07 to 2026-11-08 (live as of `ab4aaae`)**
 - **Stopped game, review rounds 3-6** (Power Chord Switch and Change Up; `4582bda`, `a8d2e55`, `df20fd1`, `3625df5`,
