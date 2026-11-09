@@ -6889,7 +6889,8 @@ function checkConfigWriteGuard() {
   src.split('\n').forEach((line, li) => {
     const hits = [...line.matchAll(DOC_CLASS)];
     if (!hits.length) return;
-    const okGet = hits.every(m => /^\.get\(\)/.test(line.slice(m.index + m[0].length)));
+    // A read is fine; a write through the snapshot it returns (s.ref.set(…)) is a write.
+    const okGet = hits.every(m => /^\.get\(\)/.test(line.slice(m.index + m[0].length))) && !/\.ref\s*\.\s*(set|update|delete)\s*\(/.test(line);
     const okRef = hits.length === 1 && /const ref = dbh\.collection\('config'\)\.doc\('class'\);/.test(line) && guard.includes(line.trim());
     if (!okGet && !okRef)
       flag(`teacher.js:${li + 1}: config/class touched outside teacherWriteConfig() — a write here skips the version check and would silently overwrite another console's change. "${line.trim().slice(0, 80)}"`);
