@@ -65,7 +65,7 @@ Start here. Update this block whenever an item opens or closes; each line says w
   takes (21 Power Chord Switch) are kept outside the repo (`~/Documents/mic-recordings-2026-11-07.zip`): they carry
   student names.
 - **Grid step cap number** (60 ms) and the other open product calls: Open work → the 2026-11-06 Friday check item.
-- Live quiz: the one-time delete of `liveQuiz/current.scores` after the 2026-11-05 deploy (`54ef545`) has no record of
+- Live quiz: delete the `scores` field of `liveQuiz/current` (Jonathan, 2026-11-09: do it). Firebase console → Firestore → `liveQuiz` → `current` → the `scores` field's delete icon. Harmless if a game since 2026-11-05 already rewrote it (those scores carry no names). Tick when done.
   being done; a later game probably overwrote it: confirm in the console or ignore.
 - **Optional:** the console's `heartbeats` composite index (Firestore → Indexes, the only index); nothing uses it.
 
@@ -284,7 +284,7 @@ Detail lives in git log and `CHANGELOG.md`; entries keep what still binds.
       Songs get a Settings tab pointing back to their own tab; below 1100px the list stacks above the detail; Songs' "Opened:" label wraps below 900px. Round 3 (the
       lead's call): the rename box keeps typed text across tabs (reverses round 2's close-on-leave). Run `node
       tools/console-layout-smoke.mjs` after any console layout change. Reviewed, not Fast (Jonathan's call for this
-      order); round 3 on 24c7ccc. Not changed: `class-activities.js` ca-21's student text says "Unit 2 assessment" (students' word is Module).
+      order); round 3 on 24c7ccc. ca-21's student text says "Unit 2 assessment" on purpose (Jonathan, 2026-11-09: it should say Unit; settled, do not re-flag).
 - [x] **2026-11-06 — Practice minutes in the teacher console (needs a `firestore.rules` paste).** `renderTeacherMinutes()`
       (`teacher.js`): one row per student, grouped by period. Sort This week (default, pinned in 1cg) · All time · Name.
       English only. Jonathan picked the four defaults (STOP 0) and approved the layout (STOP 2).
