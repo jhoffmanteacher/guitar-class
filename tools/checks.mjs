@@ -5685,7 +5685,11 @@ function checkTuningSim() {
   pins += pin(/<div class="peg-foot">\s*<button type="button" class="btn" id="pluck"/, '"Pluck again" (#pluck, class btn) must be the first thing in .peg-foot');
   pins += pin(/\.peg-panel \.peg-btn\{align-self:stretch\}/, 'Tighten and Loosen must stay the same height: .peg-panel .peg-btn{align-self:stretch}');
   pins += pin(/if \(lost \? !lastKey : a\.closest\('\.top'\)\) return;/, 'focusFirst() must move the focus only after a key press, never after a mouse click or out of the top bar');
-  pins += pin(/if \(!e\.repeat\) keyOn = e\.target;\s*else if \(e\.target !== keyOn\) e\.preventDefault\(\);/, 'a held Enter must count only on the control it went down on (else it answers the next question by itself)');
+  pins += pin(/if \(e\.key !== 'Enter' && e\.key !== ' '\) return;\s*if \(!e\.repeat\) keyOn = e\.target;\s*else if \(e\.target !== keyOn\) e\.preventDefault\(\);/, 'a held Enter OR Space must count only on the control it went down on (else it answers the next question by itself: a Space held through the pause clicks the first name button on keyup)');
+  pins += pin(/document\.addEventListener\('keydown', e => \{\s*lastKey = true;/, 'every keydown must set lastKey (focusFirst moves the focus only after a key press)');
+  pins += pin(/function saveLevel\(\)\{\s*try \{ if \(S\.level > clampLevel\(localStorage\.getItem\(LEVEL_KEY\)\)\) localStorage\.setItem\(LEVEL_KEY, String\(S\.level\)\); \} catch\(e\)\{\}/, 'saveLevel() must never lower the saved level (a ?level=2 look must not undo a level 4)');
+  pins += pin(/levelUp:'Level \{l\}\. Now a string can start up to \{m\} steps from its own note\. Use the circle to choose Up or Down\.'/, 'the English level-up line (steps, like the rest of the page)');
+  pins += pin(/levelUp:'Nivel \{l\}\. Ahora una cuerda puede empezar a un máximo de \{m\} pasos de su propia nota\. Usa el círculo para elegir Sube o Baja\.'/, 'the Spanish level-up line (a un máximo de {m} pasos)');
   /* Green on the circle only once the string is done: every .rn rule that paints green also needs .done. */
   const css = (code.match(/<style>([\s\S]*?)<\/style>/) || [])[1] || '';
   const greenRn = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(([, sel, body]) => /\.rn\b/.test(sel) && /var\(--green-(?:bg|text)\)/.test(body));
@@ -5706,7 +5710,7 @@ function checkTuningSim() {
     if (WAY[lang][w].every(re => re.test(s)) && !WAY[lang][other].some(re => re.test(s))) ways++;
     else { dirBad++; err(`tuning-sim.html ${lang} ${k} is "${s}" — it must say ${w} with ${w === 'up' ? 'Tighten / Aprieta' : 'Loosen / Afloja'}, and none of the ${other} words`); }
   }
-  if (pins !== 15 || ways !== 8) { dirBad++; err(`tuning-sim.html: ${pins} of 15 drawing/peg/keyboard pins and ${ways} of 8 answer sentences held (every one must)`); }
+  if (pins !== 19 || ways !== 8) { dirBad++; err(`tuning-sim.html: ${pins} of 19 drawing/peg/keyboard pins and ${ways} of 8 answer sentences held (every one must)`); }
   /* The Module 1 note-circle figure and its step ("Right needle, wrong letter") turn the same way as this page. */
   const FIG = { en: ['HIGHER = tighten ↺', '↻ LOWER = loosen', '3+ steps away? stop and ask'], es: ['MÁS AGUDA = aprieta ↺', '↻ MÁS GRAVE = afloja', '¿3+ pasos de distancia? detente y pregunta'] };
   const CIRCLE = ['E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'C', 'C#', 'D', 'D#'];
@@ -5743,7 +5747,7 @@ function checkTuningSim() {
   if (!/S\.level\+\+; S\.clean = 0; saveLevel\(\); leveled = true;\s*S\.note = T\('levelUp', \{ l: S\.level, m: LEVELS\[S\.level - 1\]\.max \}\);/.test(code) || !I || !['en', 'es'].every(l => /\{l\}/.test(I[l].levelUp) && /\{m\}/.test(I[l].levelUp))) { bad++; problems++; err("tuning-sim.html: the level-up line must be T('levelUp', { l: S.level, m: LEVELS[S.level - 1].max }) right after S.level++, and both languages' levelUp must use {l} and {m}"); }
   if (figs !== 2 || m1ok !== 4) { dirBad++; err(`the Module 1 note circle: ${figs} of 2 figures and ${m1ok} of 4 alt/hint texts go counterclockwise (every one must)`); }
   if (dirBad) { problems++; bad++; }
-  if (bad === 0) ok(`tuning-sim.html: defaults pinned (sound on; string names shown in Phase 1, off in Phase 2; level 1 first; the four levels), no mic, no script files, and a card on the Games page with the no-guitar games; the circle runs counterclockwise (12 of 12 notes, 120 of 120 arrows), ${words} of ${dirWordCount} direction words (EN + ES), ${ways} of 8 answer sentences say the way with its verb, and the arrow keys pinned; ${pins} of 15 drawing/peg/keyboard lines pinned (notes drawn at ringPt(i), one arrow, the peg's turn and icons, Space/Enter, focus, green only when done, the peg-foot layout); the Module 1 figure (${figs} of 2) and its step (${m1ok} of 4 alt/hint) go counterclockwise; ${twins} data-t/data-tl uses have both languages; a miss restarts the clean count, from the wrong branch of each answer; the level-up line names the new level`);
+  if (bad === 0) ok(`tuning-sim.html: defaults pinned (sound on; string names shown in Phase 1, off in Phase 2; level 1 first; the four levels), no mic, no script files, and a card on the Games page with the no-guitar games; the circle runs counterclockwise (12 of 12 notes, 120 of 120 arrows), ${words} of ${dirWordCount} direction words (EN + ES), ${ways} of 8 answer sentences say the way with its verb, and the arrow keys pinned; ${pins} of 19 drawing/peg/keyboard/wording lines pinned (notes drawn at ringPt(i), one arrow, the peg's turn and icons, Space/Enter, focus, green only when done, the peg-foot layout); the Module 1 figure (${figs} of 2) and its step (${m1ok} of 4 alt/hint) go counterclockwise; ${twins} data-t/data-tl uses have both languages; a miss restarts the clean count, from the wrong branch of each answer; the level-up line names the new level`);
 }
 
 /* Journey pages are referenced by ~30 hand-typed 'tabs/*.html' strings across
@@ -12977,13 +12981,37 @@ function checkCoachVerdicts() {
         const cu = loopGame('open', 0, 60, rate, `cc.changes.forEach((c, i) => { c.result = i < 4 ? 'ok' : null; }); const c3 = cc.changes[3].t; cc.lastOnsetT = c3 + 40 + lat; hit(c3 + ${beatsAfter} * cc.beatMs - 120); stopAt(c3 + ${beatsAfter} * cc.beatMs);`);
         if (!cu.txt.includes('4 of 4 changes worked before you stopped.') || cu.txt.includes('too fast')) flag(`1ck R4-3: Change Up, speed ${rate}, 4 right then the Stop click ${beatsAfter} beats after the last strum: ${cu.txt.slice(0, 200)}`);
       }
-      // R4-5: the dropped click leaves the saved take too: the take's events hold only the real strums (the console replays them)
-      { const ev = loopGame('power', PAIR, 60, 2, `cc.changes.forEach((c, i) => { c.result = i < 4 ? 'ok' : null; }); const c3 = cc.changes[3].t; cc.lastOnsetT = c3 + 40 + lat; hit(c3 + 1000 + 300); hit(c3 + 1000 + 700); stopAt(c3 + 1000 + 800);`, true);
-        const m = ev.saves[0];
-        if (!m || !Array.isArray(m.events) || m.events.length !== 1) flag(`1ck R4-5: a take Stopped right after a real strum and the Stop click saves ${m && m.events ? m.events.length : 'no'} events, expected 1 (the click is not a strum in the saved take): ${JSON.stringify(m && m.events).slice(0, 160)}`); }
+      // R4-5: the dropped click leaves the saved take too: the take's events hold only the real strum (the console replays them), and it is the REAL strum that is left, in a pair and in a song switch
+      for (const [prog, bpm, what] of [[PAIR, 60, 'a pair'], [SW, 90, 'a song switch']]) {
+        const ev = loopGame('power', prog, bpm, 2, `cc.changes.forEach((c, i) => { c.result = i < 4 ? 'ok' : null; }); const c3 = cc.changes[3].t, b = cc.beatMs; cc.lastOnsetT = c3 + 40 + lat; hit(c3 + 1.3 * b); hit(c3 + 1.7 * b); stopAt(c3 + 1.8 * b);`, true);
+        const m = ev.saves[0], c3 = Number(run('cc.changes[3].t')), b = Number(run('cc.beatMs'));
+        if (!m || !Array.isArray(m.events) || m.events.length !== 1 || Math.abs(m.events[0].t - (c3 + 1.3 * b)) > 1)
+          flag(`1ck R4-5: ${what} Stopped right after a real strum (played at change 4 + 1.3 beats) and the Stop click saves ${m && m.events ? m.events.length : 'no'} events, expected exactly the real strum: ${JSON.stringify(m && m.events).slice(0, 200)}`);
+      }
       // R4-6 (M9): a song switch whose round 1 went by in silence (every change swept), Stopped 0.3 beats into round 2: changes HAD fallen due, so "before the first change" is false; no strum at all was heard
       { const m9 = loopGame('power', SW, 130, 2, `cc.changes.forEach(c => { c.result = 'miss'; }); __t = cc.listenStart + 9 * cc.beatMs; ccStageEnd(); __t = cc.listenStart; __cbs[1](); stopAt(cc.listenStart + 0.3 * cc.beatMs);`);
         if (!m9.txt.includes('No strum was heard before you stopped.') || m9.txt.includes('before the first change')) flag(`1ck R4-6: a song switch whose round 1 went by in silence, Stopped 0.3 beats into round 2, must read "No strum was heard before you stopped.": ${m9.txt.slice(0, 260)}`); }
+      // ---- review round 5 (R5-1): the paths the first round-4 cases did not reach.
+      // "Again": a second game on the SAME cc must not inherit the first game's strum count (loopGame starts every game with ccSetup, a fresh cc)
+      { const ag = loopGame('power', PAIR, 60, 2, `const c0 = cc.changes[0], b0 = cc.beatMs; hit(c0.t + 0.1 * b0); hit(c0.t + 1.1 * b0); hit(c0.t + 2.1 * b0); stopAt(c0.t + 4 * b0);
+          cc.phase = 'setup'; cc.micOn = true; cc.firstPlayAt = null; cc.unreached = 0; __cbs = []; __t = 200000; ccPrepare(true); ccBeginStage(); __t = 224000; __cbs[0](); stopAt(cc.listenStart + 2.5 * cc.beatMs);`);
+        if (!ag.txt.includes('No strum was heard before you stopped.')) flag(`1ck R5-1: a silent second game (Again) after a game with strums must read "No strum was heard before you stopped." (the strum count carried over): ${ag.txt.slice(0, 200)}`); }
+      // a song switch: round 1's first chord strummed, then silence; round 1's count must survive into round 2 (it is not reset per round): "No change was heard", not "No strum was heard"
+      { const a3 = loopGame('power', SW, 130, 2, `hit(cc.listenStart + 0.1 * cc.beatMs); cc.changes.forEach(c => { c.result = 'miss'; }); __t = cc.listenStart + 9 * cc.beatMs; ccStageEnd(); __t = cc.listenStart; __cbs[1](); stopAt(cc.listenStart + 0.3 * cc.beatMs);`);
+        if (!a3.txt.includes('No change was heard before you stopped.')) flag(`1ck R5-1: a song switch whose round 1 had a strum on its first chord, then silence, Stopped 0.3 beats into round 2, must read "No change was heard before you stopped.": ${a3.txt.slice(0, 220)}`); }
+      // the Stop click in a LATER round of a song switch is dropped too: round 1 all right (7), round 2 three right, the click inside change 4's window, the Stop 120 ms later = 10 of 10
+      { const lr = loopGame('power', SW, 130, 2, `cc.changes.forEach(c => { c.result = 'ok'; }); __t = cc.listenStart + 9 * cc.beatMs; ccStageEnd(); __t = cc.listenStart; __cbs[1](); cc.changes.forEach((c, i) => { c.result = i < 3 ? 'ok' : null; }); const c2 = cc.changes[2], c3 = cc.changes[3]; cc.lastOnsetT = c2.t + 40 + lat; hit(c3.t + 100); stopAt(c3.t + 220);`);
+        if (!lr.txt.includes('10 of 10 changes worked before you stopped.')) flag(`1ck R5-1: a song switch, round 1 all right and 3 right in round 2, then the Stop click inside change 4's window, must read "10 of 10 changes worked before you stopped.": ${lr.txt.slice(0, 220)}`); }
+      // the click window is on the ARRIVAL clock at any mic offset: a click 280 ms before the Stop with the Note Runner offset at 150 ms is still the click
+      { const keepOff = run('nrOffsetMs'); run('nrOffsetMs = 150;');
+        try { const l150 = loopGame('power', PAIR, 60, 2, `cc.changes.forEach((c, i) => { c.result = i < 4 ? 'ok' : null; }); const c3 = cc.changes[3].t, st = c3 + 1.5 * cc.beatMs; cc.lastOnsetT = c3 + 40 + lat; hit(st - 280); stopAt(st);`);
+          if (!l150.txt.includes('4 of 4 changes worked before you stopped.')) flag(`1ck R5-1: with the mic offset at 150 ms, a click 280 ms before the Stop must be dropped ("4 of 4 changes worked before you stopped."): ${l150.txt.slice(0, 200)}`);
+        } finally { run(`nrOffsetMs = ${keepOff === null || keepOff === undefined ? 'null' : keepOff};`); } }
+      // the new "No change was heard" headline in Spanish
+      { loopGame('power', PAIR, 60, 2, `const c0 = cc.changes[0], b = cc.beatMs; hit(cc.listenStart + 0.1 * b); stopAt(c0.t + 1.5 * b);`);
+        run("setLang('es'); ccRenderDone();");
+        if (!text('cc-body').replace(/\s+/g, ' ').includes('No se oyó ningún cambio antes de que pararas.')) flag('1ck R5-1 (Spanish): "No se oyó ningún cambio antes de que pararas." is missing from the first-chord-then-frozen screen');
+        run("setLang('en');"); }
       // R3-1 (review round 3): the same Stop click, heard by the REAL ccLoop. When the click lands inside a change's window (always at "Every beat", half the time at "Every 2 beats", a quarter at "Every bar") ccLoop matches the
       // click to a change as an open check and ccFinish used to grade it (a ✓ on a change never played; "5 of 15, too fast" after 4 right). R2-1 above sets the onset times by hand and
       // never runs ccLoop. 4 right, then the click 120 ms before the Stop, `beatsAfter` beats after change 4's strum.
@@ -13161,7 +13189,7 @@ function checkCoachVerdicts() {
     if (pk !== 'ccBest:F5-G5:beat') flag(`1ck: a pair's best-score key changed to "${pk}" (a student's saved bests would be lost)`);
     const pairPlan = JSON.parse(run(`JSON.stringify(ccRoundPlan(CC_POWER_PROGRESSIONS[1], CC_POWER_PROGRESSIONS[1].chords, CC_RATES[1]))`));
     if (pairPlan.slots !== 12 || pairPlan.ladder || pairPlan.rounds !== 1) flag(`1ck: a pair's round changed (${pairPlan.slots} slots at "Every 2 beats", expected 12, one round)`);
-    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, gridChecks: 60, hintChecks: 20, topChecks: 50, stopChecks: 87, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
+    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, gridChecks: 60, hintChecks: 20, topChecks: 50, stopChecks: 93, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
     for (const [k, n] of Object.entries(SONG_PIN)) if (song[k] !== n) flag(`1ck: ${song[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
     songCounts = song;
     run(`setLang('en'); cc = null; ccStop();`);

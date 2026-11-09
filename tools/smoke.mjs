@@ -1388,8 +1388,12 @@ async function tuningSimWalk(page, run, events, stats, base) {
     await run(`tsim:${lang}:kb:far`, `(${S}.cents = -300, TuningSim.tick(0), document.getElementById('peg-up').focus(), true)`, 10);
     const cents = w => run(`tsim:${lang}:kb:${w}`, `${S}.cents`, 10);
     const c0 = await cents('c0'); await press(' '); const c1 = await cents('space'); await press('Enter'); const c2 = await cents('enter');
+    /* A mouse press ticks once at pointerdown and keeps ticking while it is held past the hold delay (130 ms), so on a slow machine a "click" can hold a tick or two more.
+       What must hold: the press ticks (2 cents each), and the click event that follows the release adds NOTHING (the keyboard handler skips detail > 0). Cents are read at pointerup. */
+    await run(`tsim:${lang}:kb:upwatch`, `(window.__upC = null, window.addEventListener('pointerup', () => { window.__upC = ${S}.cents; }, { capture: true, once: true }), true)`, 10);
     await clickAt(`tsim:${lang}:kb:click`, '#peg-up'); const c3 = await cents('click');
-    if ([c1 - c0, c2 - c1, c3 - c2].join() !== '2,2,2') fail(W + 'peg-keys', `on Tighten: Space moved ${c1 - c0} cents, Enter ${c2 - c1}, one mouse click ${c3 - c2} (expected 2, 2 and 2: one tick each)`);
+    const upC = await run(`tsim:${lang}:kb:atup`, `window.__upC`, 10);
+    if ([c1 - c0, c2 - c1].join() !== '2,2' || upC == null || upC - c2 < 2 || (upC - c2) % 2 !== 0 || c3 - upC !== 0) fail(W + 'peg-keys', `on Tighten: Space moved ${c1 - c0} cents, Enter ${c2 - c1}; a mouse press moved ${upC == null ? 'unknown' : upC - c2} by its release and the click after it ${upC == null ? 'unknown' : c3 - upC} more (expected 2, 2, then at least 2 in steps of 2 and 0 from the click event itself)`);
     await run(`tsim:${lang}:mouse:new`, `(TuningSim.newRound(), document.activeElement && document.activeElement.blur(), true)`, 50);
     await clickAt(`tsim:${lang}:mouse:name`, await run(`tsim:${lang}:mouse:sel`, nameSel, 10));
     const ms = await run(`tsim:${lang}:mouse:focus`, `({ state: ${S}.state, focus: ${focusWhere} })`, 10);
@@ -1405,10 +1409,12 @@ async function tuningSimWalk(page, run, events, stats, base) {
     await run(`tsim:${lang}:lvl:wait`, waitFor(`${S}.state === 'between'`, 3500), 10);
     const sv = await run(`tsim:${lang}:lvl:saved`, `({ level: ${S}.level, saved: localStorage.getItem('gc-tuningsim-level'), note: document.getElementById('note2').textContent })`, 10);
     if (!sv || sv.level !== 3 || sv.saved !== '4') fail(W + 'level-not-lowered', `a ?level=2 look that levels up: now level ${sv && sv.level}, saved "${sv && sv.saved}" (expected 3, and the saved 4 kept)`);
-    else if (!sv.note.includes(lang === 'en' ? 'up to 4 steps' : 'hasta 4 pasos')) fail(W + 'level-up-line', `the level-up line is "${sv.note}" (expected it to say ${lang === 'en' ? '"up to 4 steps"' : '"hasta 4 pasos"'})`);
+    else if (!sv.note.includes(lang === 'en' ? 'up to 4 steps' : 'máximo de 4 pasos')) fail(W + 'level-up-line', `the level-up line is "${sv.note}" (expected it to say ${lang === 'en' ? '"up to 4 steps"' : '"máximo de 4 pasos"'})`);
+    /* The saved level is 3 (not 4, the highest) so "falls through to the saved level" can be told from "clamps to the top level". */
+    await run(`tsim:${lang}:lvl:save3`, `localStorage.setItem('gc-tuningsim-level', '3')`, 10);
     await go('?level=9');
     const l9 = await run(`tsim:${lang}:lvl:nine`, `${S}.level`, 10);
-    if (l9 !== 4) fail(W + 'level-9', `?level=9 opened on level ${l9}, expected the saved level 4`);
+    if (l9 !== 3) fail(W + 'level-9', `?level=9 opened on level ${l9}, expected the saved level 3`);
     checks++;
     /* Green on the circle only once the string is done: at level 1 the tuner shows the string's own letter, out of tune. */
     await go('?level=1');
