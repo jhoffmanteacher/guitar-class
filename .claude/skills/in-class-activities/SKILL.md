@@ -50,9 +50,9 @@ Easy to break without noticing:
 `showApp()` opens it whenever the URL carries no explore hash.
 `renderClassActivities()` (app.js) builds three groups (named by Jonathan
 2026-09-23):
-- **Today's activity** (`ca.startHere`) — the hero: the first pending card,
-  collapsed like every other card, not forced open (Jonathan, 2026-09-15). An
-  older undone hero is tagged **Unfinished** instead.
+- **Today's activity** (`ca.startHere`) — up to three cards by release date
+  (below), collapsed like every other card, not forced open (Jonathan,
+  2026-09-15).
 - **Unfinished activities** (`ca.stillToDoGroup`) — one fold, open by default,
   newest first, module headings when cards are placed. No nested "Older" fold.
 - **Completed activities** (`ca.finishedGroup`).
@@ -60,11 +60,29 @@ Easy to break without noticing:
 The resume card (`renderResumeCard()`, `#resume-card`) sits at the end of
 this page when nothing is blocking, never in the module/set view.
 
-**Today's activity holds up to three cards** (Jonathan, 2026-10-07): the hero
-plus up to two other pending cards released the SAME day (`CA_TODAY_MAX`,
-required ones first), all rendered with `caHeroCardHtml`. `caStartHereId` is
-the first; `caTodayIds` the whole group. All are tagged Today's activity when
-they share the newest visible card's date; an undated hero pairs with nothing.
+**Today's activity holds up to three cards, picked by RELEASE DATE**
+(`CA_TODAY_MAX`, Jonathan 2026-10-07; by date since Jonathan, 2026-11-09:
+"newest date leads", "by date"). In `renderClassActivities()` (`todayPool`):
+- Order: newest `caDate` first, undated last; within one date required before
+  optional, then lowest board position (#11 above #12). A card re-dated for
+  today leads whatever its #N.
+- In the pool: every pending visible card, plus a FINISHED card dated on the
+  newest visible date (Jonathan, 2026-11-09: "In Today, marked done" —
+  re-dating puts a card back in Today for everyone; nothing is reset or
+  written). An older finished card stays in Completed only.
+- The group is the first three of that order; `caTodayIds` is the whole group,
+  done cards included. The hero (`caStartHereId`) is the first PENDING required
+  card in that order (an optional one only when nothing required is left); it
+  is forced into the group if newer done/optional cards would push it out.
+- Pending cards draw with `caHeroCardHtml`; a finished one with the Completed
+  fold's own row (`caActivityCardHtml`: ✓, no hero dots) and it is not
+  repeated in the Completed fold or counted as unfinished. Nothing pending →
+  the caught-up box, then the finished Today cards.
+- One heading (`caTodayHeadHtml`) with the group's newest date; a card from
+  another day wears its own `.ca-chip` (`caHeroChipHtml` / the `chipIso`
+  argument). The OLDER wording ("Unfinished · From <day>") is left for a group
+  without the newest date, which with the rule above means undated cards only.
+- checks.mjs **1cq** renders the real page (10 scenarios × EN + ES).
 
 **Reading order is newest-first, not the teaching order** (Jonathan,
 2026-09-17): newest module on top, and within it the highest board position.
@@ -74,11 +92,11 @@ they share the newest visible card's date; an undated hero pairs with nothing.
   and the "Completed activities" order falls out of the same reversal (no
   second `.reverse()`).
 - **Exception — the current day reads lowest number first** (Jonathan,
-  2026-11-02): cards sharing the newest visible card's date trade places among
-  themselves so #11 sits above #12. Applied once to `groups`, so all three
-  groups agree; module grouping is untouched. The hero (`caStartHereId`) is the
-  lowest-numbered pending required card of the day. Older days stay highest
-  first.
+  2026-11-02): cards sharing the first card's date (in this order) trade places
+  among themselves so #11 sits above #12. Applied once to `groups`, so the
+  Unfinished and Completed folds agree; module grouping is untouched. Older
+  days stay highest first. The Today group is NOT read from this order since
+  2026-11-09 (by release date, above).
 
 **Where the student is survives a reload.**
 - `caSyncHash()` (from `caSyncTopbar()`) `replaceState`s

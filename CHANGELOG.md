@@ -5,6 +5,11 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-09 — Today's activities, newest date first
+
+- **Today's activities now lists your unfinished activities newest first, by the date your teacher posted them (up to 3).** An activity your teacher re-posts for today moves to the top, even if you already finished it: it shows as done (with its ✓), and you can open it and play it again. Before, the list followed the activity numbers, so a re-posted #19 stayed under #20 and out of Today's activities.
+- **An activity from another day shows its own date** on its row in Today's activities (for example "Thu, 11/5"; Spanish "jue, 5/11"). The heading shows the newest date once, as before.
+
 ## 2026-11-09 — A shorter count-in at slow tempos
 
 - **At slow tempos the count-in is shorter: 2 clicks below 60 BPM instead of 4, so 4 seconds at 30 BPM instead of 8.** This is in Power Chord Switch and Change Up, before every round. The clicks are still on the beat, so you still hear the tempo, and the counter shows 3, 4. At 10 BPM you wait 12 seconds instead of 24. At 60 BPM and faster you still hear 4 clicks. The tip under the chord charts says how many clicks you will hear at the tempo you pick. The Listening Coach, Strum Radar and Note Runner still count 4.
