@@ -155,9 +155,14 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
     (`games.pw.advice.top`). Not changed (product call): a pair sped up live past its counted tempo still says "Level
     up". Same shape, not fixed (not asked for): Change Up says "try it 10 BPM faster" at 140, and both games say "Drop 5
     BPM" (Change Up 10) at their floor (10 / 40 BPM).
-  - [ ] **Product call, not built:** no Stop button during the count-in (4 beats + 0.1 s lead, 0.4 s recording): 24 s
-    at 10 BPM, 16 s at 15, 12 s at 20, 9.6 s at 25, 8 s at 30, 6 s at 40, 4 s at 60, 2.7 s at 90, 1.7 s at 140; a song
-    switch has one count-in per round.
+  - [x] **Decided (Jonathan, 2026-11-09): 2 clicks below 60 BPM instead; the Stop button is not built.** The count-in
+    before each round of Power Chord Switch and Change Up (`ccCountInBeats`, coach.js) is 2 clicks below 60 BPM, 4 at 60
+    and above, still on the beat; the counter shows 3, 4. Waits (plus a 0.1 s lead, 0.4 s while recording): 12 s at
+    10 BPM, 8 s at 15, 6 s at 20, 4.8 s at 25, 4 s at 30, 3 s at 40, 2.2 s at 55; 4 s at 60, 2.7 s at 90, 1.7 s at 140
+    (was 4 beats everywhere: 24 s at 10, 8 s at 30). A song switch counts in each round at that round's tempo. The
+    Listening Coach, Strum Radar and Note Runner keep 4. A saved take lists each round's clicks (`countInBeats`); the
+    console's evaluator reads it (4 for a take without it) and a 2-click round's one measured beep gives no mic delay.
+    Checks: 1ck (the real count-in run on a fake clock), 1cl (five count-in takes).
   - [ ] **Product calls:** Follow steps pass by tapping every 250 ms; "Play strum" does not stop a running Metronome and
     still accents beat 1 after "every click the same"; the Tuning Simulator's "Which way?" screen shows the answer ("Too
     low — tighten the peg"); Name the Power Chord resets its round when the tab is hidden; `.ca-paths-grid` adds a 760px
@@ -859,7 +864,7 @@ Moved from its own file on 2026-11-05 (original title "Power Chord Switch — wh
 
 ### What shipped in this push
 
-1. **Song switches** (`CC_POWER_PROGRESSIONS`, group `song`), one per switch in the song's card: Sweet Child O' Mine 10 (ca-33), "the cure" 6 (ca-30). Each is a ladder: 3 rounds of 4 back-and-forths (8 chords), a 4-click count-in before each round. Rounds were 15 BPM apart (60 / 75 / 90); since 2026-11-05 5 BPM (30 / 35 / 40 from the new 30 BPM start; Jonathan: "don't increase it so quickly"). Jonathan: "practice the actual chord switches in the songs by going back and forth between each change 4 times at slower to faster tempos."
+1. **Song switches** (`CC_POWER_PROGRESSIONS`, group `song`), one per switch in the song's card: Sweet Child O' Mine 10 (ca-33), "the cure" 6 (ca-30). Each is a ladder: 3 rounds of 4 back-and-forths (8 chords), a 4-click count-in before each round (2 clicks below 60 BPM since 2026-11-09). Rounds were 15 BPM apart (60 / 75 / 90); since 2026-11-05 5 BPM (30 / 35 / 40 from the new 30 BPM start; Jonathan: "don't increase it so quickly"). Jonathan: "practice the actual chord switches in the songs by going back and forth between each change 4 times at slower to faster tempos."
 2. **BPM buttons on the play screen** (−5 / +5, under the beat dots) move the rounds still to come; off in round 3.
 3. **Choices layout:** five columns, the fifth (Songs) one button per song, which opens the songs view (all 16 beside the pairs was 881px tall).
 4. **Saved student audio** (`micRecStart('pw')`): the Listening Coach's consent flow and red "Recording this take" label; saved when played to the end or Stopped after 10 s of play (`MICREC_MIN_STOPPED_SEC`, 2026-11-04; audio length until 2026-11-07; a stub never overwrites a full take); never for Change Up. One capture covers all three rounds, cut at the 30-second cap. Jonathan said **no on/off button**. The small "Stop saving my takes" link stays; remove it from these screens only if Jonathan says so.

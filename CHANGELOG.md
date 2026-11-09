@@ -5,6 +5,10 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-09 — A shorter count-in at slow tempos
+
+- **At slow tempos the count-in is shorter: 2 clicks below 60 BPM instead of 4, so 4 seconds at 30 BPM instead of 8.** This is in Power Chord Switch and Change Up, before every round. The clicks are still on the beat, so you still hear the tempo, and the counter shows 3, 4. At 10 BPM you wait 12 seconds instead of 24. At 60 BPM and faster you still hear 4 clicks. The tip under the chord charts says how many clicks you will hear at the tempo you pick. The Listening Coach, Strum Radar and Note Runner still count 4.
+
 ## 2026-11-08 (evening) — Stop after a silent game, and "Start over" in the Tuning Simulator
 
 - **If the mic heard nothing at all and you press Stop, Power Chord Switch and Change Up no longer say "this speed is too fast" or "Drop 5 BPM".** Before, that happened when a change was more than a few seconds past due at the Stop. Now the screen says "No strum was heard before you stopped." and "Play it again, to the end.", every chord is shown grey as "not reached", and the tempo stays the same. Power Chord Switch still says "Strum a little firmer" when two or more changes went unheard. Spanish: "No se oyó ningún rasgueo antes de que pararas."
