@@ -62,6 +62,24 @@ not judgement calls.
 8. **Don't count a green run as proof.** Print the denominator ("checked 306
    handlers"), and distrust any script that finds 0 in both the old and new tree.
 
+### Detectors, allowlists and kept-on-purpose code
+
+- **A detector script never stays in a session scratchpad.** It goes into
+  `tools/checks.mjs` the same session.
+- **Reach for a whitelist over a blacklist whenever the banned word has an
+  innocent twin.** 1w2 pins the Journey lick labels positively because "the
+  reach" and "the climb" are fine elsewhere on the same pages.
+- **1av's `MC_LEAK_ALLOW` is keyed `<card key>|<n-gram>`, but an entry excuses
+  the whole card in that language.** Once one listed n-gram leaks, the card's
+  other leaked n-grams pass too (the check's own comment: one reviewed decision
+  per card).
+- **`MC_LEAK_ALLOW`'s entries are all Modules 1–6 and carried on purpose.** When
+  a module gets swept, delete its entries first and let the check say what is
+  left.
+- **`WARMUP_BANK` (`config-main.js`) and `buildModuleRoutine()` (`app.js`) are
+  kept on purpose.** Nothing calls `buildModuleRoutine()` since `52ae05f`, and
+  `WARMUP_BANK`'s other reader is the switched-off Daily 5. Don't delete either.
+
 ### A new renderer or layout
 
 Do these BEFORE the first review, not after it:
