@@ -45,6 +45,9 @@
        shut unit), from a student's "Blocked by" row and from Songs, checks
        Back returns there and the list keeps its own pick;
      - two stub names are markup: every view draws them as text;
+     - the tree's Built row shows the Built list (a refresh keeps it), then a
+       board Preview on a card in another unit shows that unit, the card's
+       row selected and its tree row lit;
      - the units tree under Class activities (2026-11-09): open by default with Built first,
        then the units newest first, then Unsorted; each row's count equals the board's (worked
        out from the stub's board entries) and the list heading's; a click from Songs, from the
@@ -872,6 +875,35 @@ async function main() {
       const e = errsSince(n0); if (e.length) fail('tree', 'page error: ' + e[0]);
     }
 
+    // ── The tree's Built row, then a card picked in another unit from Arrange board: they do not fight ──
+    {
+      const n0 = pageErrors.length;
+      const state = `(() => { const heads = [...document.querySelectorAll('[data-ta-list-body] [data-ta-unit]')].map(h => ({ key: h.dataset.taUnit, open: h.getAttribute('aria-expanded') === 'true',
+          rows: h.closest('.ta-unit').querySelectorAll('[data-ta-pick]').length }));
+        return { open: heads.filter(h => h.open).map(h => h.key), rows: Object.fromEntries(heads.map(h => [h.key, h.rows])), sel: document.querySelector('[data-ta-pick].is-sel')?.dataset.id || null,
+          lit: [...document.querySelectorAll('#t-side-tree [data-side-unit].on')].map(b => b.dataset.sideUnit), picked: activityDetailId }; })()`;
+      await js(`setTeacherView('activities')`); await sleep(400);
+      // A card picked under All in a unit the Units list has shut (Unit 1; no fold set by hand): back on Units, its unit is open.
+      await js(`(() => { activityUnitOpen = {}; document.querySelector('[data-ta-filter="all"]').click(); document.querySelector('[data-ta-pick][data-id="ca-6"]').click(); document.querySelector('[data-ta-filter="units"]').click(); })()`); await sleep(200);
+      const p = await js(state);
+      if (p.sel !== 'ca-6' || !p.open.includes('1')) fail('tree+pick', 'ca-6 picked under All, then Units: ' + JSON.stringify({ open: p.open, sel: p.sel }) + ', expected Unit 1 open with ca-6 selected');
+      await js(`document.querySelector('#t-side-tree [data-side-unit="built"]').click()`); await sleep(400);
+      const a = await js(state);
+      if (JSON.stringify(a.open) !== '["built"]' || !a.rows.built || JSON.stringify(a.lit) !== '["built"]') fail('tree+pick', 'the tree\'s Built row shows units ' + JSON.stringify(a.open) + ' (' + a.rows.built + ' Built rows), lit ' + JSON.stringify(a.lit));
+      // A repaint (the minute refresh) keeps the tree's choice: the pick's unit rule never reopens over it.
+      await js(`(async () => { teacherStudentsAt -= 70000; await teacherRefreshStudents(); })()`); await sleep(300);
+      const a2 = await js(state);
+      if (JSON.stringify(a2.open) !== '["built"]') fail('tree+pick', 'after a refresh the list shows ' + JSON.stringify(a2.open) + ', not the Built list the tree picked');
+      await js(`document.querySelector('[data-ta-board-open]').click()`);
+      for (let i = 0; i < 30; i++) { await sleep(100); if (await js(`!!document.querySelector('.t-board')`)) break; }
+      await js(`document.querySelector('.t-board [data-open-activity][data-id="ca-13"]').click()`); await sleep(400);
+      const b = await js(state);
+      if (b.picked !== 'ca-13' || b.sel !== 'ca-13' || JSON.stringify(b.open) !== '["2"]' || JSON.stringify(b.lit) !== '["2"]')
+        fail('tree+pick', 'after the Built row, Preview on ca-13 (Unit 2) from the board: ' + JSON.stringify({ open: b.open, sel: b.sel, lit: b.lit, picked: b.picked }) + ', expected Unit 2 open, ca-13 selected, the Unit 2 row lit');
+      const e = errsSince(n0); if (e.length) fail('tree+pick', 'page error: ' + e[0]);
+      stats.treePick = 1;
+    }
+
     // ── 1920×1080 and 390 px ──
     await js(`setTeacherView('activities')`); await sleep(400);
     await js(`document.querySelector('[data-ta-filter="units"]').click()`); await sleep(100);
@@ -933,7 +965,7 @@ async function main() {
     try { rmSync(prof, { recursive: true, force: true }); } catch { /* best effort */ }
   }
   console.log(`console-layout-smoke: ${stats.views} sidebar views, ${stats.activities} activities opened (practice card, focus, paths, exit check) x ${stats.tabs / Math.max(stats.activities, 1)} tabs = ${stats.tabs} tab switches, ${stats.filters} filters, ${stats.folds} folds, ${stats.searches} searches, ${stats.writes} Settings writes with the Preview kept, ${stats.repaint} Students repaint, ${stats.counts || 0} list counts equal to the board's (All + P4), ${stats.refreshes || 0} refreshes with the Preview and list scroll kept, ${stats.board} board round trip, ${stats.backs} Backs, `
-    + `${stats.chips || 0} chip checks, ${stats.periodWrites || 0} writes under P4/P7/CAS with the song playing, ${stats.renameRefresh || 0} Refresh past a hidden rename, ${stats.audio || 0} sound stops, ${stats.listPicks || 0} list picks kept, ${stats.xss || 0} markup-name checks`);
+    + `${stats.chips || 0} chip checks, ${stats.periodWrites || 0} writes under P4/P7/CAS with the song playing, ${stats.renameRefresh || 0} Refresh past a hidden rename, ${stats.audio || 0} sound stops, ${stats.listPicks || 0} list picks kept, ${stats.xss || 0} markup-name checks, ${stats.treePick || 0} tree Built row + board pick`);
   if (stats.tree) console.log(`  units tree: ${stats.tree.rows} rows adding up to the board's ${stats.tree.cards} cards, ${stats.tree.clicks} row clicks (Songs, list with a search, Arrange board), ${stats.tree.repaints} repaints after a write, ${stats.tree.reloads} reloads with the fold kept`);
   if (stats.widths) console.log(`  column widths at 1366: sidebar ${Math.round(stats.widths.at1366.side)}, list ${Math.round(stats.widths.at1366.list)}, detail ${Math.round(stats.widths.at1366.detail)}; at 1920: ${Math.round(stats.widths.at1920.side)}, ${Math.round(stats.widths.at1920.list)}, ${Math.round(stats.widths.at1920.detail)}`);
   if (stats.shots.length) console.log('  screenshots:\n    ' + stats.shots.join('\n    '));
