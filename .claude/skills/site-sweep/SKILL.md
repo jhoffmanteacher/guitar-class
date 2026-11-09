@@ -11,6 +11,11 @@ Use it for a whole-site audit, a many-file refactor, or a wording pass over
 Templates live next to this file: `auditor.md`, `fixer.md`, `reviewer.md`.
 Write the brief once to the session scratchpad and tell every agent to read it
 first; do not paste it into each prompt.
+- A conversion sweep's brief opens with the calibration line: "convert EVERY
+  card; do NOT skip one because the actions flow naturally — re-stitch it."
+  Without it agents go timid.
+- A cheaper model (Sonnet) only for mechanical work; the big model for design
+  and verification.
 
 **Spawn the project agents (`.claude/agents/`), not a general-purpose one:**
 - `site-auditor` (high effort);
