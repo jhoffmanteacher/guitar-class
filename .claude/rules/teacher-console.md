@@ -81,8 +81,9 @@ caller picks:
 
 Blanket-strict would fail hiding an activity here because a period was
 corrected there, and a false alarm every time two tabs are open teaches
-Jonathan to click through the one that matters. So **omitting `base` is the
-safe default**: a writer that forgets gets strict, not nothing.
+Jonathan to click through the one that matters. That is why cell-checked mode
+exists. Strict is still the **safe default**: a writer that omits `base` gets
+strict, not an unchecked write.
 
 - Failures report through `teacherConfigSaveFailed(e, msg)`, which tells a
   stale rejection ("nothing was saved, reloading") apart from a dropped

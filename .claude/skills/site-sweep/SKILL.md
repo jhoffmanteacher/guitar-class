@@ -20,8 +20,8 @@ first; do not paste it into each prompt.
   not the high-effort `site-reviewer`.
 
 Each pins its own model (Opus) and effort. The review, where the 2026-10-25
-sweep found its real regressions, always gets the deepest pass without anyone
-asking, and routine fixes don't pay for more than they need. A newly added
+sweep found its real regressions, always gets the deepest pass automatically,
+without anyone having to request it, and routine fixes don't pay for more than they need. A newly added
 agent file may need a restart or `/agents` before it is offered. If it isn't,
 fall back to a general-purpose agent with `model: opus` and, for reviewers,
 `effort: xhigh` (CLAUDE.md authorizes that pin). This skill itself pins

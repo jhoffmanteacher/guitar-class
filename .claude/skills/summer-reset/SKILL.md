@@ -51,12 +51,12 @@ when the rest is reworded.
 - Items 1 and 3 play the same four notes, differing only by their "Line 1" /
   "Line 2" label.
 
-`items` is positional and frozen once students have taken the check (see "exit checks" in
-skill `in-class-activities`), so nothing changes here until progress resets.
+`items` is positional and frozen once students have taken the check (see the "Stored exit-check picks are
+POSITIONAL" bullet under "Exit checks — the end-of-period product" in skill `in-class-activities`), so nothing changes here until progress resets.
 
 **`m2w2` Challenge 3's label, "(your low-E assessment piece)" → "(assessment
 preparation)".** The rest of the site already uses "(assessment
-preparation)" (see the "Challenge cards" bullet under "Content rules" in CLAUDE.md). This is the one graded card
+preparation)" (see "No teacher speak" and "Challenge cards" under "Content rules" in CLAUDE.md). This is the one graded card
 Decision 1's retitle couldn't reach: Module 2 is frozen, and a step `label`
 must match its base commit byte-for-byte by index. In the same edit:
 - remove the `module-2.js` / `'assessment piece'` entry from

@@ -107,8 +107,8 @@ single full-width column, and not conditional on screen height.**
 - Why: the work order's first draft asked for single-column ("In-Class
   Activities" wrapped to two lines and wanted fixing). Shipped and measured at
   1366×657 (the Chromebook viewport the *previous day's* rail work order was
-  written for), it cost back the two nav rows the 2026-09-19 packing had
-  bought: **106-132px of rail overflow, confirmed for essentially every
+  written for), it lost again the two nav rows the 2026-09-19 packing had
+  won back: **106-132px of rail overflow, confirmed for essentially every
   module**, not just the worst case. Five 44px-floor rows (the tap-target pass,
   unnegotiable) are simply taller than three.
 - Jonathan's call on seeing the real numbers: keep the grid, always.

@@ -12,7 +12,10 @@ byte-Range requests for `audio/`), so no new files and no export.
 
 Count the window in **bars of the song, from bar 1, at the FELT pulse the
 course teaches**. "the cure" reads 144 BPM and the room counts 72, one chord
-per bar, so the form is intro 1–4, verse 5–12, the verse again 13–20, chorus 21–28 (measured off the mp3 2026-09-18; the settled layout is in skill `song-facts`, and bar 13 is the second verse, not the chorus).
+per bar, so the form is intro 1–4, verse 5–12, the verse again 13–20, chorus from bar 21
+(21–28 is its first eight bars; with the tag lap it runs to 32). Measured off the
+mp3 2026-09-18; bar 13 is the second verse, not the chorus. The full bar map is in
+skill `song-facts`.
 Make the window agree with the step's own tab: an eight-bar tab wants an
 eight-bar window. Otherwise the loop comes round mid-phrase and the student
 concludes they're the one who's wrong.
@@ -120,7 +123,8 @@ A plain "mark this done" is neither, and **nor is leaving a screen**. Until
 2026-09-19 `caMarkStepDone()`, `caToggleComplete()` and `caClosePanel()` all
 used the full sweep, so a student practising to their own click lost it by
 ticking a box or navigating away, while the ordinary lesson-step path
-(`onCompleteChange()`) never did. `fab-tools.js` already draws this line for
+(`onCompleteChange()`) never did: the same gesture had a different outcome depending
+on the kind of card. `fab-tools.js` already draws this line for
 dismissing a popup ("the student shouldn't silently lose the click they're
 practicing to"), so nothing in `app.js` should be stricter. The full sweep
 now has exactly five callers in `app.js` (`snipToggle()`, `erPlay()`,
@@ -136,8 +140,8 @@ New "silence it" call site → default to `stopCardAudio()`.
   above the tempo the card had just asked for, with nothing pointing at the
   turtle.
 - Seven Nation Army deliberately does NOT set it: its slow tier is 100
-  against a taught 123, so neither tier matches a "play at N" line the way
-  "the cure"'s does.
+  against a taught 123, so neither tier matches a "play at N" line the way the
+cure's slow tier (60) matches its "play at 60" lines.
 - `buildSnippet()` writes `data-slow` (what the engine reads) AND the
   turtle's `aria-pressed`/`.on` (what the student sees) from the one value.
   Write only one and the button lies about what is playing.

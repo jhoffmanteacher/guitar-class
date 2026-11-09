@@ -40,8 +40,8 @@ Easy to break without noticing:
 - **Stored exit-check picks are POSITIONAL — editing a shipped check's
   `items` silently re-grades every result.** `res.picks` is an array indexed
   by item position, and `ecGrade()` re-grades it against whatever `items` says
-  now. Insert, remove or reorder an item in a check students have taken, and
-  their stored `score` (which the console prints) sits beside recomputed
+  now. Inserting, removing or reordering an item in a check students have taken
+  leaves their stored `score` (which the console prints) beside recomputed
   per-question cells for different questions; the "Missed by" row becomes
   fiction. checks.mjs 1y recomputes the answer KEYS from the fretboard and
   passes straight through this. Same hazard as rewording a keyed MC's choices,
@@ -147,8 +147,8 @@ everything below exactly as it was.
 - `applyActivityGate()` runs from `showApp()`, at every exit of
   `loadClassConfig()`, and inside `renderClassActivities()` itself, so a
   completion or an exit-check submit lifts it live, no reload.
-- CSS keys the hiding off `data-gate="hide"` on every rail `.nav-btn` except
-  In-Class Activities and Live quiz (`data-gate="keep"`), plus
+- CSS dims every rail `.nav-btn` marked `data-gate="hide"` (all but In-Class
+  Activities and Live quiz, which carry `data-gate="keep"`) and also hides
   `.g-module`/`.g-set`/`#resume-card`/`#week-panels`. checks.mjs **1aa** fails
   the push on a nav button with neither.
 - `#search-btn` needs `!important` because `showApp()`/sign-out already toggle
@@ -316,13 +316,13 @@ What **Restore** gives back differs:
   (1bb pins both). Play tab and a sibling band snippet both turn the page as
   they play.
 - `revealDelay` is **seconds**; `wrapTabReveal()` converts to ms. Until
-  2026-09-25 it didn't, and every delayed tab appeared after 10 ms.
+  2026-09-25 it didn't, and every delayed tab appeared after 10 ms. It is per
+  tab and drops the Play tab button, so keep it off any tab whose Play is the
+  answer key (ca-21) or the one demo of a held note's length.
 - A tab the student has waited out stays revealed across re-renders that
   aren't navigation (language switch, coming back to the browser tab, Done on
   the last step) via `caRevealedTabs`. A Focus step move, a new student or a
-  new day clears it. It is per tab and drops the Play tab button, so keep it
-  off any tab whose Play is the answer key (ca-21) or the one demo of a held
-  note's length.
+  new day clears it.
 
 **The Journey button is in the LAST step only — every class activity, now
 and in future** (Jonathan, 2026-09-25). `caStepHtml()` adds it to the last
@@ -563,8 +563,8 @@ page ("too much going on").
   rest are alphabetical.
 - Play Along opens the song's `view: 'card'` activity with `card.wholeSong`
   whose `journey:` matches the row's Journey slug, once it passes
-  `caIsVisible()` or `caIsPlayAlongOnly()`. When a song has two — the roots
-  card and the power-chord one — the newest (highest board `#N`) wins.
+  `caIsVisible()` or `caIsPlayAlongOnly()`. When two pass (the roots card and
+  the power-chord one), the newest (highest board `#N`) wins.
 - A song with no such card shows **no** Play Along link (Jonathan's call — no
   greyed placeholder).
 - Part cards (The Riff, Intro and Verse…) are not on the Songs page at all.

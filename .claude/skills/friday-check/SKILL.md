@@ -76,6 +76,7 @@ For each confirmed finding, decide:
      - read its quoted lines yourself and fix what you confirm;
      - prove each new guard goes red when its fix is broken;
      - run a fresh `site-reviewer-deep` round on the new commit.
+
      Repeat until a round finds nothing real, at most 3 rounds.
   3. A clean round → rebase on `origin/main`, full `node tools/checks.mjs`,
      fast-forward push to `main`, and `checks.mjs --live` as in step 4.
