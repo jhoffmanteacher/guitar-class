@@ -167,15 +167,23 @@ export const PW_FIXTURES = [
   { ...base, name: 'pw-soft-strums', desc: 'soft real strums over a loud room: pick attacks the evaluator finds, about 2.5 / 2.9 / 3.5 x the room on the attack channel, 1.2 to 1.6 x on the full band', bpms: [140], bpc: 2, slots: 16, chords: ['A5', 'D5'], song: null, start: 1000,
     lag: 300, map: 25, lat: 335, clickAmp: 0, noise: 0.004, rumble: 0.03, tau: 0.25, pf: 0.1, onlyChanges: true, skipFirst: true, frameMs: 50, tailMs: 8000, seed: 32,
     plan: { 0: 'soft:0.01219', 1: 'soft:0.01467', 2: 'soft:0.01876', 3: 'soft:0.01262', 4: 'soft:0.01303', 5: 'soft:0.01896', 6: 'soft:0.01231', 7: 'soft:0.01561', 8: 'soft:0.01665', 9: 'soft:0.01239', 10: 'soft:0.01471', 11: 'soft:0.01911', 12: 'soft:0.01179', 13: 'soft:0.01568', 14: 'soft:0.01790' } },
-  /* The 2-click count-in (2026-11-09): below 60 BPM a round counts in with 2 clicks (ccCountInBeats), and its one measured beep (beep 2) gives no lag. */
-  { ...base, readings: true, name: 'pw-slow-pair', desc: 'a pair at 30 BPM: a 2-click count-in, its beep heard but no lag; windows on the site\'s own beat', bpms: [30], slots: 10, chords: ['G5', 'C5'], song: null,
+  /* The 2-click count-in (2026-11-09): below 60 BPM a round counts in with 2 clicks (ccCountInBeats); beeps 1 AND 2 give the lag (2026-11-09 review R1-3). */
+  { ...base, readings: true, name: 'pw-slow-pair', desc: 'a pair at 30 BPM: a 2-click count-in, beeps 1 and 2 give the lag; windows on the site\'s own beat', bpms: [30], slots: 10, chords: ['G5', 'C5'], song: null,
     lag: 130, map: 25, lat: 120, seed: 41, plan: { 2: 'detmiss', 4: 'silent', 6: 'late:-150', 8: 'held' } },
-  { ...base, name: 'pw-slow-ladder', desc: 'a song switch at 50 / 55 / 60: 2, 2 and 4 clicks; only round 3 gives the lag (its beeps end 340 ms before the 30 s cap, its changes come after it); a neighbour\'s pluck where a 4-click count-in\'s second click would land before round 2 (13069 ms): off the grid of a 2-click one', bpms: [50, 55, 60], chords: ['A5', 'D5'],
+  { ...base, name: 'pw-slow-ladder', desc: 'a song switch at 50 / 55 / 60: 2, 2 and 4 clicks, each round gives the lag (round 3\'s beeps end 340 ms before the 30 s cap, its changes come after it); a neighbour\'s pluck where a 4-click count-in\'s second click would land before round 2 (13069 ms): off the grid of a 2-click one', bpms: [50, 55, 60], chords: ['A5', 'D5'],
     lag: 120, map: 30, lat: 140, seed: 42, extras: [13069], plan: { 1: 'off', 3: 'detmiss', 5: 'silent', 9: 'late:110', 12: 'held' } },
-  { ...base, name: 'pw-slow-deaf', desc: 'the same 50 / 55 / 60 song switch, the site hearing nothing (no map), the beeps landing 180 / 200 / 140 ms late: rounds 1 and 2 are centred on round 3\'s lag', bpms: [50, 55, 60], chords: ['F5', 'G5'],
+  { ...base, name: 'pw-slow-deaf', desc: 'the same 50 / 55 / 60 song switch, the site hearing nothing (no map), the beeps landing 180 / 200 / 140 ms late: every round is centred on its own beeps', bpms: [50, 55, 60], chords: ['F5', 'G5'],
     lag: [180, 200, 140], lat: 100, deaf: true, seed: 43, plan: { 4: 'silent', 10: 'silent' } },
-  { ...base, name: 'pw-slow-setting', desc: 'a pair at 40 BPM that the site does not hear: a 2-click count-in, no lag anywhere, so the windows go on the delay setting alone', bpms: [40], slots: 10, chords: ['B5', 'D5'], song: null,
-    lag: 120, lat: 110, deaf: true, seed: 44, plan: { 3: 'silent', 6: 'silent' } },
+  { ...base, name: 'pw-slow-muted', desc: 'a pair at 40 BPM that the site does not hear, the speaker muted: no beeps, no lag, so the windows go on the delay setting alone', bpms: [40], slots: 10, chords: ['B5', 'D5'], song: null,
+    lag: 120, lat: 110, deaf: true, clickAmp: 0, seed: 44, plan: { 3: 'silent', 6: 'silent' } },
+  { ...base, name: 'pw-slow-hum', desc: 'a pair at 30 BPM in a room humming at 660 Hz: beep 1 (660 Hz) drowns, beep 2 (990 Hz) alone is heard and gives no lag; the windows go on the site\'s own beat', bpms: [30], slots: 8, chords: ['A5', 'C5'], song: null,
+    lag: 140, map: 25, lat: 130, hum: { f: 660, amp: 0.04 }, seed: 46, plan: { 2: 'silent', 5: 'detmiss' } },
+  { ...base, name: 'pw-slow-decoy', desc: 'a pair at 30 BPM, the speaker muted, a played E5 (659 Hz) where beep 1 would be and a B5 (988 Hz) 100 ms after where beep 2 would be: they do not line up, so no lag', bpms: [30], slots: 8, chords: ['E5', 'B5'], song: null,
+    lag: 120, map: 25, lat: 120, clickAmp: 0, decoy: { offMs: 100, amp: 0.03 }, seed: 47, plan: { 3: 'silent' } },
+  /* A loud room (white noise at 0.05): each beep stands far above it at its own pitch (about 38 x), the other beep pitch does not (about 3 x), so a
+     search at the wrong pitch for beep 2 (660 Hz instead of 990) is caught here; in a quiet room the leakage of a beep into the other pitch passes too. */
+  { ...base, name: 'pw-slow-noisy', desc: 'a pair at 30 BPM in a loud room: beeps 1 and 2 each heard only at their own pitch (660, 990 Hz) and give the lag', bpms: [30], slots: 8, chords: ['G5', 'C5'], song: null,
+    lag: 130, map: 25, lat: 120, amp: 0.3, clickAmp: 0.06, noise: 0.05, seed: 51, plan: { 2: 'silent', 5: 'detmiss' } },
   { ...base, name: 'pw-slow-legacy', desc: 'a pair at 30 BPM saved before 2026-11-09: 4 clicks and no countInBeats field; the evaluator must look for 4 beeps', bpms: [30], slots: 8, chords: ['E5', 'A5'], song: null,
     lag: 150, map: 25, lat: 130, legacyCountIn: true, seed: 45, plan: { 1: 'detmiss', 3: 'silent', 5: 'held' } }
 ];
@@ -314,7 +322,7 @@ export function makePwTake(o){
   for (let i = 0; i < N; i++){
     const q = i < gameN ? 1 : 0.25;
     if (o.rumble) rum += ((rnd() - 0.5) * 2 * o.rumble * q - rum) * 0.05;
-    x[i] = strums[i] + (rnd() - 0.5) * o.noise * q + rum;
+    x[i] = strums[i] + (rnd() - 0.5) * o.noise * q + rum + (o.hum ? o.hum.amp * Math.sin(2 * Math.PI * o.hum.f * i / R) : 0);   // `hum`: a steady tone in the room
   }
   /* The what-if's truth: the room's level as the site's frames read it (the loudest of four 512-sample windows ending in each 50 ms frame), measured
      on a stretch with nothing played (200-2400 ms), then each planted event's jump over it. This file's own arithmetic, not micEvalStrumFrames'. */
@@ -352,6 +360,15 @@ export function makePwTake(o){
       for (let i = 0; i < S(80) && s0 + i < N; i++) x[s0 + i] += o.clickAmp * Math.exp(-i / R / 0.03) * Math.sin(2 * Math.PI * f * i / R);
     }
   });
+  /* `decoy` (a muted speaker, a 2-click count-in): a played E5 (659.26 Hz) where beep 1 would land and a B5 (987.77 Hz) offMs after where beep 2
+     would, ringing 0.3 s: each stands out at a beep's pitch, but the two do not line up in time. */
+  if (o.decoy) rounds.forEach(rd => {
+    if (rd.nb !== 2) throw new Error(o.name + ': a decoy needs 2-click rounds');
+    [[rd.c1 + rd.lag, 659.26], [rd.c1 + rd.beat + rd.lag + o.decoy.offMs, 987.77]].forEach(([at, f]) => {
+      const s0 = S(at); if (at < audioEnd) clickMs.push(at);
+      for (let i = 0; i < S(600) && s0 + i < N; i++) x[s0 + i] += o.decoy.amp * Math.exp(-i / R / 0.3) * Math.sin(2 * Math.PI * f * i / R);
+    });
+  });
   for (let i = 0; i < S(100) && i < N; i++) x[i] = 0;
   const pcm = new Int16Array(N);
   for (let i = 0; i < N; i++) pcm[i] = Math.max(-32768, Math.min(32767, Math.round(x[i] * 32767)));
@@ -361,10 +378,12 @@ export function makePwTake(o){
   // the map is measurable when 3+ heard strums are real attacks (micEvalTakePw matches events to onsets within 120 ms)
   const realHeard = events.filter(ev => attacks.some(a => Math.abs(ev.t + o.lat - o.map - a.ms) < 20)).length;
   const mapKnown = realHeard >= 3;
-  /* The beeps the evaluator measures are 2..N; their lag needs two or more of them (micEvalTakePw: one onset has nothing to agree with), so a
-     2-click round gives no lag. Its windows go on the take's lag from the rounds that have one (the median, as micEvalTakePw takes it). */
+  /* The beeps the evaluator measures are 1-2 of a 2-click round and 2-4 of a 4-click one; a round whose beeps are not all heard gives no lag.
+     Its windows go on the take's lag from the rounds that have one (the median, as micEvalTakePw takes it). */
   const lastBeepIn = rd => rd.c1 + (rd.nb - 1) * rd.beat + rd.lag + 80 < audioEnd;
-  const measurable = rd => o.clickAmp > 0 && rd.nb >= 3 && lastBeepIn(rd);
+  // the lag needs every beep measured heard (1-2 of a 2-click count-in, 2-4 of a 4-click one); a 660 Hz hum drowns beep 1 of a 2-click one
+  if (o.hum && rounds.some(rd => rd.nb !== 2)) throw new Error(o.name + ': a hum is only planted under 2-click rounds');
+  const measurable = rd => o.clickAmp > 0 && !o.hum && lastBeepIn(rd);
   const lagRounds = rounds.filter(measurable).map(rd => rd.lag).sort((a, b) => a - b);
   const takeLag = lagRounds.length ? lagRounds[Math.floor(lagRounds.length / 2)] : null;
   const beepOffs = rd => measurable(rd) ? rd.lag : takeLag;
@@ -403,8 +422,9 @@ export function makePwTake(o){
         readingsN: ch.readings ? ch.readings.length : null,
         cat: inWin ? (heard ? 'agree' : 'detector-missed') : heard ? 'false-hit' : near ? 'off-window' : 'silent-miss' });
     });
-    // clicks: the lag can be measured (beeps 2..N, two or more, all in the audio); heard: how many of beeps 2..N are in the audio
-    truth.rounds.push({ stage: rd.stage, bpm: rd.bpm, n, dropped, beeps: rd.nb, clicks: measurable(rd), heard: o.clickAmp > 0 && lastBeepIn(rd) ? rd.nb - 1 : 0, centre: centreKind,
+    // clicks: the lag can be measured (every beep measured in the audio and heard); heard: how many of the beeps measured stand out (1-2 or 2-4);
+    // oneBeep: a 2-click round whose beep 1 drowns, its beep 2 heard alone
+    truth.rounds.push({ stage: rd.stage, bpm: rd.bpm, n, dropped, beeps: rd.nb, clicks: measurable(rd), heard: o.decoy ? 2 : o.clickAmp > 0 && lastBeepIn(rd) ? (o.hum ? 1 : rd.nb === 2 ? 2 : rd.nb - 1) : 0, oneBeep: !!o.hum && o.clickAmp > 0, centre: centreKind,
       lagMs: rd.lag, idealMs: rd.lag + o.map, skewMs: rd.lag + o.map - o.lat });
   });
   // onsets on no beat of the student's grid (micEvalTakePw room.extra), from the round's first count-in click: the beeps' lag, else the setting less the map

@@ -13422,7 +13422,7 @@ async function checkCountIn() {
    strum where the SITE listened (its own window, replayed from the strums it
    logged: ccLoop's gridOffset and match), against its verdict; per round,
    its own count-in for the mic delay.
-   RUN, not read. tools/mic-sim/fake-pw-take.mjs builds 23 takes (the what-if's two are described below) whose site
+   RUN, not read. tools/mic-sim/fake-pw-take.mjs builds 26 takes (the what-if's two are described below) whose site
    verdicts come from ccLoop's rule run on the strums the site hears (not
    planted): loud and clipping; quiet; 50 and 250 ms mic delay (overtones on
    the beep pitch); cut by the 30 s cap with one window ending 100 ms past the
@@ -13436,12 +13436,17 @@ async function checkCountIn() {
    gridOffset grows far: N2/N7 of the second review), with site-heard noise
    between the raw and the shifted window edge; a strum 0.2 beat past a
    window's edge (the off-window reach); and one saved verdict flipped (the
-   replay must count it); and the count-in (2026-11-09): a pair at 30 BPM and
-   one at 40 (2 clicks: the one measured beep is heard, gives no lag; windows on
-   the site's beat, and on the setting alone), a song switch at 50 / 55 / 60
-   (2, 2, 4 clicks; only round 3 gives the lag) and the same deaf (rounds 1-2
-   on round 3's lag), and a pair at 30 saved before countInBeats (4 clicks:
-   the evaluator must read 4). Each goes through micEvalRow, lifted out of teacher.js
+   replay must count it); and the count-in (2026-11-09): a pair at 30 BPM
+   (2 clicks: beeps 1 and 2 give the lag), a song switch at 50 / 55 / 60 (2, 2,
+   4 clicks, every round its lag) and the same deaf (every round on its own
+   beeps), a muted pair at 40 (no beeps: the setting alone), a pair in a room
+   humming at 660 Hz (beep 1 drowned: beep 2, at 990 Hz, heard alone, no lag),
+   an E5 and a B5 at the beep pitches 100 ms out of line (heard, no lag), a pair
+   in a loud room (each beep heard only at its own pitch: 660, then 990 Hz), and a
+   pair at 30 saved before countInBeats (4 clicks: the evaluator must read 4);
+   then the song switch with its countInBeats cut short, with a string entry,
+   with a 3 and as a string (those rounds guessed from the tempo, no lag, the
+   others unchanged). Each goes through micEvalRow, lifted out of teacher.js
    with what it calls, and:
      · every change's category (agree / detector-missed / false-hit /
        off-window / silent-miss, or dropped past the audio's end) and every
@@ -13451,9 +13456,9 @@ async function checkCountIn() {
        except where the truth flipped one (replayMismatch, and the sentence
        saying so in the console and the terminal);
      · every round: tempo, changes judged and dropped, where its windows were
-       put (site / beeps / setting); its count-in clicks and how many of beeps
-       2..N were heard (the take's countInBeats is what was planted; none on the
-       legacy take); beeps found at the planted lag ± 10 ms,
+       put (site / beeps / setting); its count-in clicks and how many of the
+       beeps measured (1-2, or 2-4) were heard, and beep 2 alone (the take's
+       countInBeats is what was planted; none on the legacy take); beeps found at the planted lag ± 10 ms,
        ideal and skew ± 10 ms (none, and no skew, where they cannot be
        measured); the take's ideal and skew the same way; onsets off the
        student's grid counted exactly;
@@ -13493,12 +13498,14 @@ async function checkCountIn() {
    micEvalTake (Coach / Note Runner) is otherwise not run here: its rows were proved
    byte-identical by a differential when micEvalSignal was split out of it.
    ════════════════════════════════════════════════════════════════════ */
-/* Re-pinned 2026-11-09 for the five count-in takes (pw-slow-*): 2-click rounds below 60 BPM (6 rounds, each with its one beep heard and no lag:
-   oneBeepRounds), a song switch whose rounds count 2 / 2 / 4, the same deaf (rounds 1-2 centred on round 3's beeps), one centred on the setting
-   alone, and a legacy take (4 clicks, no countInBeats) at 30 BPM; one more off-grid onset (a pluck before round 2 of the slow song switch). */
-const PW_EVAL_PIN = { takes: 25, rounds: 48, changes: 382, judged: 359, dropped: 23, agree: 235, 'detector-missed': 56, 'false-hit': 25, 'off-window': 15, 'silent-miss': 28,
-  mismatch: 1, gridOffsets: 359, farGridOffsets: 57, clickRounds: 34, noClickRounds: 14, siteCentred: 40, beepCentred: 6, extra: 34, htmlChecks: 6, hovers: 48, textRounds: 48, evaluateRun: 2, evalTakesLines: 4, crafted: 4, uncappedTakes: 1,
-  whatIfTakes: 25, whatIfCandidates: 100, whatIfTruth: 8, whatIfRows: 57, dropNotes: 2, pitchTakes: 6, pitchNone: 19, pitchRight: 71, pitchTimingOnly: 44, pitchRows: 22, ratioRows: 17, legacyCountIn: 1, shortRounds: 6, oneBeepRounds: 6 };
+/* Re-pinned 2026-11-09 for the count-in takes (pw-slow-*), and again after that day's review (R1-2, R1-3, R1-5): a 2-click round's beeps 1 AND 2 give
+   the lag (6 such rounds measured: shortLagRounds, one in a loud room where only the right pitch for each beep passes); a muted one goes on the setting alone; a 660 Hz hum drowns beep 1, beep 2 is heard alone and gives
+   none (oneBeepRounds); an E5 and a B5 at the beep pitches 100 ms out of line give none; a 2 / 2 / 4 song switch heard and deaf; a legacy take (4 clicks,
+   no countInBeats) at 30 BPM; 7 rounds of a take whose countInBeats entry is missing or odd, guessed from the tempo with no lag (guessedRounds); one
+   more off-grid onset (a pluck before round 2 of the slow song switch). */
+const PW_EVAL_PIN = { takes: 28, rounds: 51, changes: 403, judged: 380, dropped: 23, agree: 251, 'detector-missed': 58, 'false-hit': 25, 'off-window': 15, 'silent-miss': 31,
+  mismatch: 1, gridOffsets: 380, farGridOffsets: 57, clickRounds: 40, noClickRounds: 11, siteCentred: 43, beepCentred: 6, extra: 34, htmlChecks: 6, hovers: 51, textRounds: 51, evaluateRun: 2, evalTakesLines: 4, crafted: 4, uncappedTakes: 1,
+  whatIfTakes: 28, whatIfCandidates: 112, whatIfTruth: 8, whatIfRows: 63, dropNotes: 2, pitchTakes: 6, pitchNone: 22, pitchRight: 71, pitchTimingOnly: 44, pitchRows: 22, ratioRows: 17, legacyCountIn: 1, shortRounds: 9, oneBeepRounds: 1, shortLagRounds: 6, guessedRounds: 7 };
 async function checkPwTakeEvaluator() {
   head('1cl. Power Chord Switch takes: the evaluator is run on takes whose site verdicts come from ccLoop\'s own rule');
   let bad = 0;
@@ -13524,7 +13531,7 @@ async function checkPwTakeEvaluator() {
       ['CHK_ONSET_FLOOR', 'CHK_ONSET_RATIO', 'CHK_HF_FLOOR', 'CHK_HF_RATIO', 'COACH_LVL_WIN', 'COACH_LVL_HOP', 'COACH_CATCHUP_MAX_MS'].map(n => `const ${n} = ${numOf(n)};`).join('\n') +
       // teacherMicEvaluate reads String(ccLoop / coachReadFrame / coachSmooth): the real coach.js functions, never called here
       '\n' + ['ccLoop', 'coachReadFrame', 'coachSmooth'].map(n => extract(cSrc, n)).join('\n');
-    const fns = lift(EVAL_FNS.concat(['micEvalWhatIfSummary', 'micEvalWhatIfText', 'micEvalPitchSummary', 'micEvalPitchText', 'micEvalText', 'micEvalBeepsText', 'teacherMicEvalHtml', 'teacherMicWhatIfHtml', 'teacherMicPitchHtml', 'teacherMicOffText', 'teacherMicEvaluate']));
+    const fns = lift(EVAL_FNS.concat(['micEvalWhatIfSummary', 'micEvalWhatIfText', 'micEvalPitchSummary', 'micEvalPitchText', 'micEvalText', 'micEvalBeepsText', 'micEvalNoDelayText', 'teacherMicEvalHtml', 'teacherMicWhatIfHtml', 'teacherMicPitchHtml', 'teacherMicOffText', 'teacherMicEvaluate']));
     /* teacherMicEvaluate's page: ctx gives the takes, their audio and the result box. */
     core = new Function('ctx', `${esc}\n${consts}\nconst coachDetectPitch = () => -1;\n` +
       'let teacherMicEvalRows = [], teacherMicEvalNames = [], teacherView = "mic", teacherMicTakes = ctx.takes || [];\n' +
@@ -13618,9 +13625,12 @@ async function checkPwTakeEvaluator() {
       tot.rounds++;
       if (r.centre === 'site') tot.siteCentred++; else if (r.centre === 'beeps') tot.beepCentred++;
       // the count-in's clicks and how many of beeps 2..N were heard (a 2-click round: its one beep, which gives no lag)
-      if (r.clickBeeps !== t.beeps || r.clickUsed !== t.beeps - 1 || r.clickHeard !== t.heard) fail(`${f.name} round ${k + 1}: a ${r.clickBeeps}-click count-in with ${r.clickHeard} of ${r.clickUsed} beeps heard; truth ${t.beeps} clicks, ${t.heard} of ${t.beeps - 1}`);
+      // beeps 1-2 of a 2-click count-in are measured, 2-4 of a 4-click one; oneBeep: beep 2 (990 Hz) heard alone, its beep 1 drowned by a 660 Hz hum
+      const usedT = t.beeps === 2 ? 2 : t.beeps - 1;
+      if (r.clickBeeps !== t.beeps || r.clickUsed !== usedT || r.clickHeard !== t.heard || r.clickOneBeep !== t.oneBeep || r.clickGuessed !== false) fail(`${f.name} round ${k + 1}: a ${r.clickBeeps}-click count-in with ${r.clickHeard} of ${r.clickUsed} beeps heard${r.clickOneBeep ? ' (beep 2 alone)' : ''}${r.clickGuessed ? ' (guessed)' : ''}; truth ${t.beeps} clicks, ${t.heard} of ${usedT}${t.oneBeep ? ' (beep 2 alone)' : ''}`);
       if (t.beeps === 2) tot.shortRounds++;
-      if (t.beeps === 2 && t.heard === 1 && !r.clickFound) tot.oneBeepRounds++;
+      if (t.beeps === 2 && t.clicks && r.clickFound) tot.shortLagRounds++;
+      if (t.oneBeep && !r.clickFound) tot.oneBeepRounds++;
       if (r.stage !== t.stage || r.bpm !== t.bpm || r.n !== t.n || r.dropped !== t.dropped || r.centre !== t.centre) fail(`${f.name} round ${k + 1}: ${r.n} judged / ${r.dropped} dropped at ${r.bpm} BPM, windows by ${r.centre}; truth ${t.n} / ${t.dropped} at ${t.bpm}, by ${t.centre}`);
       if (t.clicks) {
         if (r.clickFound) tot.clickRounds++;
@@ -13645,6 +13655,25 @@ async function checkPwTakeEvaluator() {
   if (!rows.length) { fail('no take was measured'); return; }
   const byName = nm => rows[names.indexOf(nm)];
 
+  // 1b. a take that HAS countInBeats but whose entry for a round is missing or odd (the browser wrote it; nothing checks it): that round's clicks are
+  // guessed from its tempo and it gives no lag (2026-11-09 review R1-2: the field cut to [2] made round 2 of a 2 / 2 / 4 take "lag 120" from a pluck).
+  // The other rounds are measured exactly as without the edit. A take with no field at all is the legacy case (4 every round), proved above.
+  {
+    const li = names.indexOf('pw-slow-ladder'), base = takes[li], baseRow = rows[li];
+    for (const [what, field, guessed] of [['cut to [2]', [2], [1, 2]], ['a string entry', ['2', 2, 4], [0]], ['a 3', [2, 3, 4], [1]], ['a string field', '2,2,4', [0, 1, 2]]]) {
+      const r = ev.micEvalRow('G01', Object.assign({}, base.meta, { countInBeats: field }), base.pcm, deps);
+      const h = ev.html([r], ['x']);   // the per-round hover is the delay cell's title attribute
+      r.rounds.forEach((g, k) => {
+        const want = guessed.includes(k), b0 = baseRow.rounds[k];
+        if (want) {
+          tot.guessedRounds++;
+          if (!g.clickGuessed || g.clickFound || g.clickLagMs != null || g.idealMs != null || g.clickBeeps !== (g.bpm < 60 ? 2 : 4) || !h.includes(`Round ${k + 1}, ${g.clickBeeps} clicks guessed from the tempo`))
+            fail(`pw-slow-ladder with countInBeats ${what}: round ${k + 1} is ${g.clickGuessed ? 'guessed' : 'not guessed'}, ${g.clickBeeps} clicks, lag ${g.clickLagMs} (want guessed from its ${g.bpm} BPM, no lag, said in the hover)`);
+        } else if (g.clickGuessed || g.clickBeeps !== b0.clickBeeps || g.clickLagMs !== b0.clickLagMs || g.clickHeard !== b0.clickHeard) fail(`pw-slow-ladder with countInBeats ${what}: round ${k + 1} changed (${g.clickBeeps} clicks, lag ${g.clickLagMs}; untouched ${b0.clickBeeps}, ${b0.clickLagMs})`);
+      });
+    }
+  }
+
   // 2. the console summary: all of them, three alone, and next to a Coach row
   const sum = (rs, k) => rs.reduce((a, r) => a + r.notes[k], 0);
   const flat = h => h.replace(/<[^>]+>/g, '').replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&');
@@ -13662,9 +13691,9 @@ async function checkPwTakeEvaluator() {
     notes: { n: 16, siteRight: 13, replayPresent: 14, detectorMissed: 1, silentMiss: 1, why: { counted: 13, wrong: 1, 'no-onset': 2 }, offPitch: {}, lowH1H2Db: null, secondLook: 0 } };
   const PLACED = { site: "the site's own beat", beeps: 'the beeps', setting: 'the delay setting alone' };
   // two takes below 60 BPM in every round (2-click count-ins): the mic-delay line says why they could not measure it
-  const slowOnly = ['pw-slow-pair', 'pw-slow-setting'];
+  const slowOnly = ['pw-slow-hum'];
   const renders = [['all', rows, names, []]].concat(['pw-pair', 'pw-fast-bar', 'pw-every2-stop'].map(nm => [nm + ' alone', [byName(nm)], [nm], []]),
-    [['the 2-click takes alone', slowOnly.map(byName), slowOnly, ['Mic delay: no recording could measure it', 'or 2 Power Chord Switch recordings were below 60 BPM in every round, where the count-in has 2 clicks and one beep is too few to measure the delay']]],
+    [['the 2-click takes alone', slowOnly.map(byName), slowOnly, ['Mic delay: no recording could measure it', 'or in a Power Chord Switch recording below 60 BPM only the second of the 2 count-in beeps was heard, and one beep is too few to measure the delay']]],
     [['next to a Coach row', [coachRow].concat(rows), ['coach'].concat(names), ['The site counted 13 of 16 notes right', 'for 14 of 16', 'Why 2 notes were not counted']]]);
   for (const [what, rs, nm, extra] of renders) {
     const h = ev.html(rs, nm), text = flat(h), pw = rs.filter(r => r.kind === 'pw');
@@ -13687,9 +13716,10 @@ async function checkPwTakeEvaluator() {
       const title = flat(cell);
       const tr = takes[rows.indexOf(r)].truth.rounds;
       r.rounds.forEach((g, k) => {
-        const t = tr[k], beeps = `${t.beeps} clicks (${t.beeps === 2 ? 'beep 2' : 'beeps 2-' + t.beeps} heard: ${t.heard} of ${t.beeps - 1})`;
+        const t = tr[k], usedT = t.beeps === 2 ? 2 : t.beeps - 1, beeps = `${t.beeps} clicks (beeps ${t.beeps === 2 ? '1-2' : '2-' + t.beeps} heard: ${t.heard} of ${usedT})`;
         const want = `Round ${g.stage + 1}, ${beeps}: ` + (g.idealMs != null ? `should be ${g.idealMs} ms` : g.clickFound ? 'beeps found, delay not measured'
-          : t.beeps === 2 && t.heard === 1 ? 'one beep is too few to measure the delay' : 'no beeps found (speaker muted, headphones, or strums over the count-in)') + `; windows placed by ${PLACED[g.centre]}`;
+          : t.oneBeep ? 'beep 1 not heard: one beep is too few to measure the delay' : t.heard && t.heard === usedT ? 'the beeps do not line up in time, delay not measured'
+          : 'no beeps found (speaker muted, headphones, or strums over the count-in)') + `; windows placed by ${PLACED[g.centre]}`;
         if (title.includes(want)) tot.hovers++; else fail(`${r.take}'s delay hover does not say "${want}" ("${title}")`);
       });
     });
@@ -13823,7 +13853,7 @@ async function checkPwTakeEvaluator() {
     const num = v => v === '-' ? null : +v;
     const ok = c.bpm === String(t.bpm) && c.cin === String(t.beeps) && c.chg === String(t.n) && c.drop === String(t.dropped) && c.centre === t.centre &&
       c.agree === cn('agree') && c.detMiss === cn('detector-missed') && c.false === cn('false-hit') && c.offWin === cn('off-window') && c.silent === cn('silent-miss') &&
-      (t.clicks ? near(num(c.lag), t.lagMs) : t.beeps === 2 && t.heard === 1 ? c.click === '1beep' && c.lag === '-' : c.click === 'none') && (t.clicks && take.truth.mapKnown ? near(num(c.ideal), t.idealMs) && near(num(c.skew), t.skewMs) : c.ideal === '-' && c.skew === '-');
+      (t.clicks ? near(num(c.lag), t.lagMs) : t.oneBeep ? c.click === '1beep' && c.lag === '-' : c.click === 'none') && (t.clicks && take.truth.mapKnown ? near(num(c.ideal), t.idealMs) && near(num(c.skew), t.skewMs) : c.ideal === '-' && c.skew === '-');
     if (ok) tot.textRounds++; else fail(`micEvalText's line for ${c.take} round ${c.round} reads "${l.trim()}"; truth: ${t.bpm} BPM, ${t.n} judged, ${['agree', 'detector-missed', 'false-hit', 'off-window', 'silent-miss'].map(cn).join('/')}, ${t.dropped} dropped, ${t.centre}, lag ${t.clicks ? t.lagMs : 'none'}, ideal ${t.idealMs}, skew ${t.skewMs}`);
   });
   rows.filter(r => r.notes.replayMismatch).forEach(r => { const want = `${r.take}: ${r.notes.replayMismatch} ${r.notes.replayMismatch === 1 ? 'change' : 'changes'} where the site's rule, run again on its own strums, does not give its saved verdict`; if (!part.split(String.fromCharCode(10)).includes(want)) fail(`micEvalText does not say "${want}"`); });
@@ -13922,7 +13952,7 @@ async function checkPwTakeEvaluator() {
   if (!noteHtml) fail('the console summary no longer says how many Coach / Note Runner notes came after the recording stopped');
 
   for (const [k, n] of Object.entries(PW_EVAL_PIN)) if (tot[k] !== n) fail(`${tot[k]} ${k}, pinned ${n} — the check went partly blind (or the fixtures changed: re-pin PW_EVAL_PIN on purpose)`);
-  if (bad === 0) ok(`${tot.takes} synthetic takes, ${tot.rounds} rounds, ${tot.changes} changes: all ${tot.judged} judged ones match the truth (${tot.agree} agree, ${tot['detector-missed']} detector-missed, ${tot['false-hit']} false-hit, ${tot['off-window']} off-window, ${tot['silent-miss']} silent-miss) and ${tot.dropped} past the end are dropped; windows on the site's own beat in ${tot.siteCentred} rounds, on the beeps in ${tot.beepCentred}; beeps found in ${tot.clickRounds} of ${tot.clickRounds} rounds that have them (lag, ideal and skew within 10 ms), no lag in the ${tot.noClickRounds} without (${tot.shortRounds} of them 2-click count-ins below 60 BPM, ${tot.oneBeepRounds} with their one beep heard; ${tot.legacyCountIn} take saved before countInBeats read as 4 clicks); ${tot.extra} off-grid onsets counted exactly; ${tot.htmlChecks} console renders, ${tot.hovers} round hovers and ${tot.textRounds} terminal round lines read; Evaluate-all run measures ${tot.evaluateRun} of 2 takes; eval-takes.mjs lists the pair's ${tot.evalTakesLines} changes that do not agree; ${tot.gridOffsets} replayed gridOffsets within 2 ms of the site's (${tot.farGridOffsets} over 100 ms); ${tot.mismatch} flipped saved verdict caught by the replay; ${tot.crafted} crafted takes finish fast in 128 MB; the limits match coach.js; strum what-if: ${tot.whatIfTakes} takes x 4 candidates (${tot.whatIfCandidates}) with counts equal to the rows', ${tot.whatIfTruth} candidates of the 2 measured room-noise / soft-strum takes equal the audio's truth, ${tot.whatIfRows} summary / table / terminal numbers re-summed; pitch rule: ${tot.pitchTakes} takes with saved readings match the planted counts (${tot.pitchRight} graded right, ${tot.pitchTimingOnly} on timing alone), ${tot.pitchNone} older takes get no column, ${tot.pitchRows} summary / table / terminal numbers re-summed; strum ratios: a take graded with Power Chord Switch's own ratios (1.8 / 2.19, and 2.2 / 2.67 from 2026-11-05) is told from the older ones, measured the same, left out of the strum what-if and counted in the console and the terminal (${tot.ratioRows} cases, crafted values refused); ${tot.dropNotes} of 2 Coach / Note Runner takes cut short drop the notes past the end`);
+  if (bad === 0) ok(`${tot.takes} synthetic takes, ${tot.rounds} rounds, ${tot.changes} changes: all ${tot.judged} judged ones match the truth (${tot.agree} agree, ${tot['detector-missed']} detector-missed, ${tot['false-hit']} false-hit, ${tot['off-window']} off-window, ${tot['silent-miss']} silent-miss) and ${tot.dropped} past the end are dropped; windows on the site's own beat in ${tot.siteCentred} rounds, on the beeps in ${tot.beepCentred}; beeps found in ${tot.clickRounds} of ${tot.clickRounds} rounds that have them (lag, ideal and skew within 10 ms), no lag in the ${tot.noClickRounds} without (2-click count-ins below 60 BPM: ${tot.shortRounds} rounds, ${tot.shortLagRounds} measured from beeps 1 and 2, ${tot.oneBeepRounds} with beep 2 heard alone and no lag, an E5 / B5 out of line rejected; ${tot.legacyCountIn} take saved before countInBeats read as 4 clicks; ${tot.guessedRounds} rounds with a missing or odd countInBeats entry guessed from the tempo, no lag); ${tot.extra} off-grid onsets counted exactly; ${tot.htmlChecks} console renders, ${tot.hovers} round hovers and ${tot.textRounds} terminal round lines read; Evaluate-all run measures ${tot.evaluateRun} of 2 takes; eval-takes.mjs lists the pair's ${tot.evalTakesLines} changes that do not agree; ${tot.gridOffsets} replayed gridOffsets within 2 ms of the site's (${tot.farGridOffsets} over 100 ms); ${tot.mismatch} flipped saved verdict caught by the replay; ${tot.crafted} crafted takes finish fast in 128 MB; the limits match coach.js; strum what-if: ${tot.whatIfTakes} takes x 4 candidates (${tot.whatIfCandidates}) with counts equal to the rows', ${tot.whatIfTruth} candidates of the 2 measured room-noise / soft-strum takes equal the audio's truth, ${tot.whatIfRows} summary / table / terminal numbers re-summed; pitch rule: ${tot.pitchTakes} takes with saved readings match the planted counts (${tot.pitchRight} graded right, ${tot.pitchTimingOnly} on timing alone), ${tot.pitchNone} older takes get no column, ${tot.pitchRows} summary / table / terminal numbers re-summed; strum ratios: a take graded with Power Chord Switch's own ratios (1.8 / 2.19, and 2.2 / 2.67 from 2026-11-05) is told from the older ones, measured the same, left out of the strum what-if and counted in the console and the terminal (${tot.ratioRows} cases, crafted values refused); ${tot.dropNotes} of 2 Coach / Note Runner takes cut short drop the notes past the end`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
