@@ -36,11 +36,15 @@
        changed, Move to landed in the unit picked, and the Preview pane was
        NOT rebuilt;
      - a rename left open on Settings, then the Students tab: Refresh still
-       refreshes (and says why it waits while the box is on screen);
-     - picking a row stops the card's song; Arrange board and the sidebar
-       stop a TAB playing;
+       refreshes, and the box comes back with what was typed (also after a
+       failed save); on screen, the box holds Refresh back and the bar says
+       why for 8 s, and a refresh that runs clears that note;
+     - picking a row stops the card's song (its own row again does not);
+       Arrange board and the sidebar stop a TAB playing, and so do Back, the
+       sidebar and a tree row from the detail screen;
      - Move to Songs re-picks a card the list holds; another console
-       archiving a student shows after this console's next write;
+       archiving a student shows after this console's next write or Arrange
+       board, under All and P4;
      - opens an activity from the board's Preview (its row on screen in a
        shut unit), from a student's "Blocked by" row and from Songs, checks
        Back returns there and the list keeps its own pick;

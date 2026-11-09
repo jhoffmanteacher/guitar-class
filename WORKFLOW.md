@@ -1251,8 +1251,8 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
       scroll through a write and both refreshes, and both refreshes keep the Preview element; plus the Who-limited exit
       check's tab and note agree. Each of those four turned red when its code was broken.
       **Review round 2 (`site-reviewer-deep`, fixed on branch fix-console):** a rename left open on Settings, then
-      another tab, froze every refresh, the Refresh button's too (R2-1: leaving Settings closes the box; only an editor
-      on screen holds a refresh back; a held-back Refresh says why in the bar for 8 s); the list lost its pick after an
+      another tab, froze every refresh, the Refresh button's too (R2-1: only an editor on screen holds a refresh back;
+      a held-back Refresh says why in the bar for 8 s); the list lost its pick after an
       activity opened from Songs or a Blocked-by row (R2-4, `activityListPickId`); a picked card in a shut unit had no
       row on screen (R2-5: `teacherUnitOpenMap` opens the pick's unit when nobody set its fold; a board Preview shows
       that unit alone, as a tree click does, so the tree's Built row and a pick don't fight); another console's student
@@ -1266,6 +1266,14 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
       label, no "Module" in Students/Settings, list pick, sound stops, the hidden rename, Move to Songs, two consoles,
       and the tree's Built row with a pick. Product note for Jonathan, not changed: `class-activities.js` ca-21's
       student text says "Unit 2 assessment" (students' word is Module).
+      **Review round 3 (fresh `site-reviewer-deep` on 24c7ccc, 7 minors, fixed):** a pick made under a flat filter or a
+      search opens its unit (R3-1: the "unset fold only" rule never fired again after any tree click; newest choice
+      wins), and with several units open the tree lights the picked card's (R3-7); a TAB on the detail screen stops on
+      the sidebar's Class activities or a tree row (R3-2); a refresh that lands clears the "Not refreshed" note (R3-3);
+      Arrange board's read re-filters the roster too (R3-4, `teacherReadConfigAndRoster`); the rename box stays open,
+      typed text and all, across tabs, and a repaint keeps what was typed (R3-5, the lead's call: keep the text; this
+      reverses round 2's close-on-leave); 1ai counts a write through a snapshot's `ref` (R3-6); the unused
+      `teacherRefreshSafe` is gone. The smoke no longer resets folds before its pick tests.
 - [x] **2026-11-06 — Practice minutes in the teacher console (needs a `firestore.rules` paste).** Jonathan: "where do I see
       students' minutes and rank?" A **Practice minutes** button after Students in the console's view toggle
       (`renderTeacherMinutes()`, `teacher.js`): one row per student, grouped by period like Manage (`perRank`), with This week
