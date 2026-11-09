@@ -658,18 +658,32 @@ let teacherAutoRefreshTimer=null;
 /* Would repainting now throw away something the teacher is in the middle
    of? A drag, the rename box, focus in any input/select (a release date
    half typed, a # box, a Move-to list), or a text selection in the body
-   (copying names out of a "who hasn't finished" list). */
-function teacherRefreshSafe(){
-  if(boardDragId) return false;
-  if(activityEditId) return false;
+   (copying names out of a "who hasn't finished" list). Returns what is in
+   the way, '' for nothing, so the Refresh button can say why it did nothing. */
+function teacherRefreshBlocker(){
+  if(boardDragId) return 'a card is being dragged';
+  // The rename box only while it is on screen: a box left open on a tab that
+  // is now hidden used to block every refresh, the button's too, unseen.
+  const edit=activityEditId ? document.querySelector('#t-grid-container .t-act-title-edit') : null;
+  if(edit && edit.getClientRects().length) return 'a rename is open (Save or Cancel it)';
   const ae=document.activeElement;
   // The list's search box is the exception: a refresh repaints the rows
   // under it, never the box itself.
-  if(ae && /^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName) && ae.closest('#teacher-app') && !ae.matches('[data-ta-search]')) return false;
+  if(ae && /^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName) && ae.closest('#teacher-app') && !ae.matches('[data-ta-search]')) return 'a box is being typed in (click outside it)';
   const sel=window.getSelection ? window.getSelection() : null;
   const grid=document.getElementById('t-grid-container');
-  if(sel && !sel.isCollapsed && grid && sel.anchorNode && grid.contains(sel.anchorNode)) return false;
-  return true;
+  if(sel && !sel.isCollapsed && grid && sel.anchorNode && grid.contains(sel.anchorNode)) return 'text is selected';
+  return '';
+}
+function teacherRefreshSafe(){ return !teacherRefreshBlocker(); }
+/* A Refresh click that was held back says why, in the bar, for a few
+   seconds. The minute timer is held back silently, as before. */
+let teacherRefreshHeld='', teacherRefreshHeldTimer=null;
+function teacherNoteRefreshHeld(why){
+  teacherRefreshHeld=why;
+  clearTimeout(teacherRefreshHeldTimer);
+  teacherRefreshHeldTimer=setTimeout(()=>{ teacherRefreshHeld=''; teacherPaintRefreshBar(); }, 8000);
+  teacherPaintRefreshBar();
 }
 async function teacherRefreshStudents(opts){
   const manual=!!(opts&&opts.manual);
@@ -677,7 +691,9 @@ async function teacherRefreshStudents(opts){
   if(!manual && (document.hidden || !TEACHER_AUTO_REFRESH_VIEWS.includes(teacherView))) return;
   // The first load never landed (it painted an error) — run it again, whole.
   if(!teacherStudentsAt){ if(manual) loadAllStudents(); return; }
-  if(!teacherRefreshSafe()) return;
+  const why=teacherRefreshBlocker();
+  if(why){ if(manual) teacherNoteRefreshHeld(why); return; }
+  if(manual && teacherRefreshHeld){ teacherRefreshHeld=''; clearTimeout(teacherRefreshHeldTimer); }
   teacherRefreshing=true; teacherPaintRefreshBar();
   let fresh=null;
   try{ fresh=await teacherFetchStudents(); }
@@ -686,7 +702,8 @@ async function teacherRefreshStudents(opts){
   teacherRefreshFailed=!fresh;
   // Failed, or something started while the read was out: keep the screen
   // (and its "as of" time) exactly as it is.
-  if(!fresh || !teacherRefreshSafe()){ teacherPaintRefreshBar(); return; }
+  const whyAfter = fresh ? teacherRefreshBlocker() : '';
+  if(!fresh || whyAfter){ if(manual && whyAfter) teacherNoteRefreshHeld(whyAfter); else teacherPaintRefreshBar(); return; }
   allStudentsRaw=fresh;
   teacherApplyRosterFilter();
   teacherStudentsAt=Date.now();
@@ -759,6 +776,7 @@ function teacherPaintRefreshBar(){
   when.textContent = !teacherStudentsAt
     ? (teacherRefreshing ? 'Loading student progress…' : teacherRefreshFailed ? 'Could not load student progress.' : '')
     : teacherRefreshing ? `Student progress as of ${at} · refreshing…`
+    : teacherRefreshHeld ? `Not refreshed: ${teacherRefreshHeld} · showing progress as of ${at}`
     : teacherRefreshFailed ? `Could not refresh — showing progress as of ${at}`
     : `Student progress as of ${at}` + (teacherView==='activities' ? ' · refreshes every minute' : '');
 }
@@ -2334,6 +2352,13 @@ function teacherSetDetailTab(tab, focus){
   if(!TA_TABS.includes(tab)) return;
   activityDetailTab=tab;
   const box=document.getElementById('t-grid-container');
+  /* Leaving Settings with the rename box open closes it, unsaved — the same
+     as picking another activity. Left open on a hidden tab it held back
+     every refresh. The repaint is the soft one: the Preview is untouched. */
+  if(tab!=='settings' && activityEditId && teacherView==='activities' && box.querySelector('[data-ta-settings] .t-act-title-edit')){
+    activityEditId=null;
+    teacherSoftRepaintDetail();
+  }
   box.querySelectorAll('[data-ta-tab]').forEach(b=>{
     const on=b.dataset.taTab===tab;
     b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); b.tabIndex=on?0:-1;
