@@ -60,29 +60,39 @@ Easy to break without noticing:
 The resume card (`renderResumeCard()`, `#resume-card`) sits at the end of
 this page when nothing is blocking, never in the module/set view.
 
-**Today's activity holds up to three cards, picked by RELEASE DATE**
-(`CA_TODAY_MAX`, Jonathan 2026-10-07; by date since Jonathan, 2026-11-09:
-"newest date leads", "by date"). In `renderClassActivities()` (`todayPool`):
-- Order: newest `caDate` first, undated last; within one date required before
-  optional, then lowest board position (#11 above #12). A card re-dated for
-  today leads whatever its #N.
-- In the pool: every pending visible card, plus a FINISHED card dated on the
-  newest visible date (Jonathan, 2026-11-09: "In Today, marked done" —
-  re-dating puts a card back in Today for everyone; nothing is reset or
-  written). An older finished card stays in Completed only.
-- The group is the first three of that order; `caTodayIds` is the whole group,
-  done cards included. The hero (`caStartHereId`) is the first PENDING required
-  card in that order (an optional one only when nothing required is left); it
-  is forced into the group if newer done/optional cards would push it out.
-- Pending cards draw with `caHeroCardHtml`; a finished one with the Completed
-  fold's own row (`caActivityCardHtml`: ✓, no hero dots) and it is not
-  repeated in the Completed fold or counted as unfinished. Nothing pending →
-  the caught-up box, then the finished Today cards.
-- One heading (`caTodayHeadHtml`) with the group's newest date; a card from
+**Today's activity: up to three PENDING cards by RELEASE DATE, then today's
+finished ones** (`CA_TODAY_MAX`, Jonathan 2026-10-07; by date since Jonathan,
+2026-11-09: "newest date leads", "by date"). In `renderClassActivities()`:
+- `pendingPool`: every pending visible card, newest `caDate` first, undated
+  last; within one date required before optional, then lowest board position
+  (#11 above #12). A card re-dated for today leads whatever its #N. The first
+  three fill Today (`todayPending`).
+- The hero (`caStartHereId`) is the first PENDING required card in that order
+  (an optional one only when nothing required is left); newer optional cards
+  never push it out of the three.
+- `todayDone`: every FINISHED card dated on the newest visible date, appended
+  BELOW the pending ones, outside the cap, lowest board position first
+  (Jonathan, 2026-11-09: "In Today, marked done" — re-dating puts a card back
+  in Today for everyone; nothing is reset or written). A finished card never
+  takes a pending card's place, so the next thing to do is always at the top
+  and "Your next activity is at the top." stays true. An older finished card
+  stays in Completed only.
+- `caTodayIds` = pending + finished Today cards. Pending ones draw with
+  `caHeroCardHtml`; finished ones with the Completed fold's own row
+  (`caActivityCardHtml`: ✓, no hero dots), not repeated in the Completed fold
+  or counted as unfinished. Nothing pending → the caught-up box, then the
+  finished Today cards. The toast and the resume card read `caStartHereId`,
+  never the group's size. A deep link to a finished Today card leaves the
+  Completed fold shut (`caFocusActivity` decides the fold after the render).
+- One heading (`caTodayHeadHtml(day)`) with the newest visible date; a card from
   another day wears its own `.ca-chip` (`caHeroChipHtml` / the `chipIso`
-  argument). The OLDER wording ("Unfinished · From <day>") is left for a group
-  without the newest date, which with the rule above means undated cards only.
-- checks.mjs **1cq** renders the real page (10 scenarios × EN + ES).
+  argument). The group always holds a card of that day, so the heading is always
+  "Today's activity": the OLDER wording ("Unfinished · From <day>", the quieter
+  `--ca-accent-soft` band) could no longer appear and was deleted with its CSS
+  and its `ca.notFinished` / `ca.heroFromDate` strings.
+- Only visible cards count: a future date, Hidden or another student's card
+  never sets the newest date or takes a slot.
+- checks.mjs **1cq** runs the real page (17 runs × EN + ES).
 
 **Reading order is newest-first, not the teaching order** (Jonathan,
 2026-09-17): newest module on top, and within it the highest board position.

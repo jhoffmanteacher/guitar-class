@@ -284,14 +284,15 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 Detail lives in git log and `CHANGELOG.md`; entries keep what still binds.
 
 - [x] **2026-11-09 — Today's activities by release date (Jonathan, 2026-11-09: "newest date leads", "by date").**
-      Replaces the board-order hero rule of 2026-09-17 for the Today group ONLY: the group is the visible cards by
-      release date, newest first (one date: required before optional, then lowest #N), up to `CA_TODAY_MAX`; the hero
-      (`caStartHereId`) is the first pending required card in that order. A card dated on the newest date stays in Today
-      once finished, drawn done and not repeated in Completed (Jonathan, same day: "In Today, marked done" — re-dating
-      puts it back for everyone, nothing is reset or written); an older card is in Today only while pending. A card from
-      another day wears its own `.ca-chip`. The Unfinished and Completed folds, the board, #N, gating and deep links are
-      unchanged. Consequence: the OLDER heading ("Unfinished · From <day>") can no longer appear with dated cards (the
-      newest-date card is always in the group). checks.mjs 1cq (real `renderClassActivities`, 10 scenarios x EN + ES).
+      Replaces the board-order hero rule of 2026-09-17 for the Today group ONLY: up to `CA_TODAY_MAX` PENDING cards by
+      release date, newest first (one date: required before optional, then lowest #N); the hero (`caStartHereId`) is the
+      first pending required card in that order. Below them, outside the cap, every FINISHED card dated on the newest
+      visible date, drawn done and not repeated in Completed (Jonathan, same day: "In Today, marked done" — re-dating
+      puts it back for everyone, nothing is reset or written); a finished card never takes a pending card's place (review
+      R1-1, the lead's rule). A card from another day wears its own `.ca-chip`. The Unfinished and Completed folds, the
+      board, #N, gating and deep links are unchanged. The OLDER heading ("Unfinished · From <day>") could no longer
+      appear and was deleted with its CSS, its band colour and its two strings. checks.mjs 1cq (real
+      `renderClassActivities`, `caToggleComplete`, `caFocusActivity`, 17 runs x EN + ES).
 
 - [x] **2026-11-08 — Console sidebar: a units tree under Class activities (Jonathan's request, shipped Fast).**
       Console only (no CHANGELOG entry). Rows from `teacherSideTreeRows(model)`, the list's own groups, so the counts
