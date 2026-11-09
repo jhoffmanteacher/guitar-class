@@ -74,10 +74,10 @@ three groups, named by Jonathan 2026-09-23:
 - **Completed activities** (`ca.finishedGroup`; was "Earlier", before that
   "Finished").
 
-It appends the resume card (`renderResumeCard()`) at the end when nothing is
-blocking. The `#resume-card` element moved in `index.html` from a sibling of
-`#week-panels` into this page's own body; it no longer renders in the
-module/set view at all.
+The resume card (`renderResumeCard()`) goes at the end when nothing is
+blocking. `#resume-card` moved in `index.html` from a sibling of
+`#week-panels` into this page's body; it no longer renders in the module/set
+view at all.
 
 **Today's activity holds up to three cards** (Jonathan, 2026-09-29; raised from
 two 2026-10-07): the hero plus up to two other pending cards released the SAME
@@ -87,15 +87,15 @@ All are tagged Today's activity when they share the newest visible card's
 date; an undated hero pairs with nothing.
 
 **Reading order is newest-first, not the teaching order** (Jonathan,
-2026-09-17), so a student lands on current work without scrolling past
-everything behind them. The newest module's section renders at the top; within
-a module the most recently assigned card (highest board position) renders first.
+2026-09-17), so a student lands on current work. The newest module's section
+renders at the top; within a module the most recently assigned card (highest
+board position) renders first.
 - `caBoardOrder()`/`caNumber()` still compute the true ascending course order
   underneath; the teacher console, gating and deep links all key off it.
 - The "#N" a card carries never moves. Only `renderClassActivities()` reverses
   `view.sections` and each section's ids for display.
-- The "Completed activities" group's order falls out of the same reversal now,
-  not a second `.reverse()`.
+- The "Completed activities" order falls out of the same reversal, not a
+  second `.reverse()`.
 - **Exception — the current day reads lowest number first** (Jonathan,
   2026-11-02). The cards sharing the newest visible card's date trade places
   among themselves so #11 sits above #12. Every other card keeps its slot;
@@ -121,8 +121,8 @@ a module the most recently assigned card (highest board position) renders first.
 - **Mark complete** closes the card, scrolls to the top (where Today's
   activity already shows the next one) and toasts `ca.doneNextToast` /
   `ca.doneAllToast`. Un-marking keeps the card open.
-- A second tap on the rail row of the page you're on scrolls to the top. It no
-  longer closes the page (In class, Songs, My progress).
+- A second tap on the current page's rail row scrolls to the top; it no longer
+  closes the page (In class, Songs, My progress).
 
 **⚠️ The LOCK is switched off (Jonathan, 2026-10-07: "stop locking the
 other parts of site if class activities aren't cleared… CA should still pop
@@ -134,8 +134,8 @@ everything below exactly as it was.
   with any blocker on In-Class Activities at sign-in **whatever the hash**. A
   gate-open hash such as a `#class-activities/ca-N` deep link is left alone.
 - Gone: the mid-session redirect, the hidden rail, the Journey gate card.
-- The console's Clear / "Blocked by N" tools still work, but now only decide
-  who gets the sign-in landing.
+- The console's Clear / "Blocked by N" tools now only decide who gets the
+  sign-in landing.
 - The description below is the lock as it runs when switched on.
 
 **The gate:** `caBlockers()` — a visible (`caIsVisible`), undone
@@ -156,12 +156,12 @@ everything below exactly as it was.
 - While gated, `routeExploreHash()` rewrites any hash but
   `#class-activities`/`#live-quiz` back to In-Class Activities with a
   `gateToast()`. `returnToPractice()` gets the same guard.
-- `window.__forceGate` (localhost only) forces the gate on, to check the UI from
-  a session that can't otherwise trigger it (dev bypass, the teacher account).
+- `window.__forceGate` (localhost only) forces the gate on for a session that
+  can't otherwise trigger it (dev bypass, the teacher account).
 
 **Absent students stay blocked — by design** (Jonathan, 2026-09-12). Every
-visible, undone, uncleared activity blocks, however old, until the student
-finishes it or is cleared per student. No blocking window, no activity-level
+visible, undone, uncleared activity blocks, however old, until finished or
+cleared per student. No blocking window, no activity-level
 "stop blocking everyone" toggle — don't propose one again. The tools are the
 per-student Clear and Hide (which also removes it from Earlier). One release
 date serves both periods, also by choice.
@@ -217,8 +217,8 @@ they must never be locked out of the modules).
   they do.
 
 **Per-student clears:** `config/class.activityClears` (`{ uid: { id: true } }`)
-lets a teacher let one student past a specific blocker without finishing it —
-a sub day, a connectivity problem, work done on paper.
+lets one student past a specific blocker without finishing it (a sub day, a
+connectivity problem, work done on paper).
 - Written by `teacherSetActivityClear`/`teacherClearAllBlockers` in teacher.js,
   same merge-patch shape as `hiddenActivities`/`gameOverrides`.
 - No `firestore.rules` change (already teacher-write/student-read).
@@ -242,13 +242,13 @@ Visible/Hidden.
   distinction). `caIsVisible()` fails on it **before** the dev-bypass line,
   unlike the date gate: a retired activity isn't "not live yet", it's out of the
   course, so there's nothing to preview.
-- Everything downstream follows for free: off In-Class Activities, out of
-  `caBlockers()`, and a deep link reads as not-posted.
-- The visibility rule is mirrored in all three places as ever — `caIsVisible`
+- Downstream follows for free: off In-Class Activities, out of
+  `caBlockers()`, a deep link reads as not-posted.
+- The visibility rule is mirrored in all three places — `caIsVisible`
   (app.js), `teacherActivityVisible` (teacher.js), `journeyIsVisible`
   (journey.js).
 
-The two differ in what **Restore** gives back:
+What **Restore** gives back differs:
 - Archive keeps the release date, rename, board slot and per-student clears,
   so the card returns exactly where it was (minus any pin — Archive unpins).
 - Delete wipes all of that on the way out (behind a `confirm()`), **including
@@ -342,8 +342,8 @@ ca-19, ca-20 rebuilt to it 2026-10-01). The default for every song activity
 with a backing track — ca-18 is the model (Jonathan, 2026-10-01: the format
 "works much better for students"). Activities with no backing track stay
 Focus-view step ladders.**
-Students did what was taught directly and stopped there, so the slides now
-teach the rungs and the activity is ONE screen:
+The slides teach the rungs (students did what was taught and stopped there);
+the activity is ONE screen:
 - The song's tab.
 - One "Play song" button that plays the real backing track and moves the tab
   note by note (`.beat-now`, honouring each note's `beats`).
@@ -357,10 +357,9 @@ teach the rungs and the activity is ONE screen:
   counts.
 - Then three or four checkboxes.
 
-A looping card repeats with no seek: the player keeps a second `<audio>` on
-the same file parked at the loop start and hands off to it at the end of the
-window ("THE SPARE" in app.js, Jonathan 2026-10-07 — a seek left an audible
-hole on every lap). Anything new that touches a card's audio must handle
+A looping card repeats with no seek: a second `<audio>` on the same file
+waits at the loop start and takes over at the window's end ("THE SPARE" in
+app.js, Jonathan 2026-10-07 — a seek left an audible hole on every lap). Anything new that touches a card's audio must handle
 `st.spare` and `st.leaving` as well as `st.audio`.
 
 Level up and links:
@@ -471,8 +470,7 @@ ca-29–ca-33): `{ frets: [[string, fret], ...], note: 'A5', midi: [...] }`, the
 same shape Module 3's tabs use, in a card section or a help step's tab.
 - `caChordProblems()` in checks.mjs recomputes every pitch from the fretboard
   and requires a root-plus-5th pair to be named for its root.
-- The card engine needed no change: `renderTabSystem()` already draws a
-  `frets` note.
+- No card-engine change: `renderTabSystem()` already draws a `frets` note.
 - Each power-chord card is its roots card (ca-24–ca-28) with the same sections
   and bars, every root turned into the Journey Layer 3 shape. Luna's is two
   strums per bar where its roots card is one.
@@ -555,9 +553,9 @@ had joined a game could not get back to their activities at all, game over or
 not.
 
 **Each Core song row links its whole-song practice card** (Jonathan,
-2026-10-05). This replaced the 2026-10-01 "Play Along with the TAB/Chords"
-section that listed every part card at the top of the Songs page ("too much
-going on"); the Core list is now the only place.
+2026-10-05). The Core list is the only place: it replaced the 2026-10-01 "Play
+Along with the TAB/Chords" section that listed every part card atop the Songs
+page ("too much going on").
 - A Core row shows exactly three links, in this order: **Play Along · Backing
   track for solos · Song Journey**. No Tutorial or Original on Core rows
   (Choice rows keep theirs).
@@ -578,8 +576,8 @@ going on"); the Core list is now the only place.
   Activities.
 - `songsPlayAlongBtn(slug)` builds the link inside a `.sh-play-slot`
   (`display:contents`). `refreshSongsPlayAlong()` (end of `loadClassConfig()`)
-  refills just the slots that changed when the board or dates land after the
-  page is open.
+  refills only the changed slots when the board or dates land after the page
+  is open.
 - Songs stays a gated page.
 
 **One way round the date: "Play Along now"** (Jonathan, 2026-10-02 — "can we
@@ -615,7 +613,7 @@ reuses on many days (the play-along cards, ca-23).
   cell-checked on the whole array; 1ai 20 → 21) and listed, with Unpin
   buttons, in a strip above the board.
 - Students get one button per pin above Today's activity (`caPinRowHtml`), in
-  pin order, and no row at all with no pins.
+  pin order; no pins, no row.
 - A pin that is also one of today's cards STAYS in the row (Jonathan,
   2026-10-13 — it was dropped from the row until then; don't bring that filter
   back).
@@ -629,11 +627,11 @@ reuses on many days (the play-along cards, ca-23).
   assigned" still win (`caPinReachable`). Exit checks are never pinnable.
 - Cached as `caPins`.
 
-**There was an Assessments page (2026-09-12–2026-09-20).** A rail button and
-standalone `#assessments` screen listed every module's in-person assessment
-items in one accordion, read-only. Removed 2026-09-20 (Jonathan: redundant
-with the Module Review's own assessment box, and he posts rubrics/assignments
-on Canvas) — rail button, `#assessments` screen/route/i18n/CSS all deleted.
+**There was an Assessments page (2026-09-12–2026-09-20)**: a rail button and
+`#assessments` screen listing every module's in-person assessment items in one
+accordion, read-only. Removed 2026-09-20 (Jonathan: redundant with the Module Review's
+box; rubrics/assignments go on Canvas) — rail button, `#assessments`
+screen/route/i18n/CSS all deleted.
 **The Module Review's per-module assessment box is a separate, still-live
 feature**: `.mr-assess-box` at the bottom of `buildModuleReview()`, and its
 heads-up pop (`buildMrAssessPop`), reading the same
@@ -642,8 +640,8 @@ heads-up pop (`buildMrAssessPop`), reading the same
 **Phase 2 (nav collapse), shipped 2026-09-12:** the rail is five items —
 In-Class Activities · Practice · Songs · Games · My progress, no "Explore"
 heading.
-- The `nav.explore` i18n key stays: it's still the rail `<nav>`'s aria-label,
-  just not a visible span any more.
+- The `nav.explore` i18n key stays: it's the rail `<nav>`'s aria-label, no
+  longer a visible span.
 - Keep practicing and Daily Review are sections inside My progress now, not
   their own pages. `renderKeepPracticing()` and `renderDailyReview()` are
   UNCHANGED; only their host div moved in `index.html`.
@@ -651,17 +649,16 @@ heading.
   Keep practicing, then the module tally).
 - `#keep-practicing` and `#daily-review` stay in `EXPLORE_HASHES`, but
   `routeExploreHash()` canonicalizes both to `#my-progress` before anything
-  else runs (the gate check, the dedup guard, the scroll stash). An old
-  bookmark or Journey link still resolves, onto the merged page.
+  else runs (the gate check, the dedup guard, the scroll stash), so an old
+  bookmark or Journey link lands on the merged page.
 - Mood Chart lost its rail button, and its row at the top of the Songs page
   was removed 2026-10-02 (Jonathan). `mood-chart.html` still ships (no longer
   precached since 2026-10-12 — `SHELL_NOT_PRECACHED` in checks.mjs), but
   nothing on the site links to it. Don't add a link back without asking.
 
-**Phase 3 (render-time hiding), shipped 2026-09-12 — Module 2 piloted first
-(step 1), then the section-kind tagging rolled out to every other module
-(step 2), per the work order's own "Order of work."** Four section `kind`s
-beyond the pre-existing `tuning-warmup` (ratchet 1r):
+**Phase 3 (render-time hiding), shipped 2026-09-12** (Module 2 piloted, then
+every module tagged, per the work order's "Order of work"). Four section
+`kind`s beyond the pre-existing `tuning-warmup` (ratchet 1r):
 - `take-to-song` renders a Journey link card (`journeyLinkCardHtml()`) in place
   of its steps — **but only when this module has a Journey layer to link to**
   (see the 2026-09-12 correction below).
@@ -747,8 +744,7 @@ take-to-song section and `isRenderableSection()` says no, in all of Modules
 ### ⚠️ No Journey layer → the take-to-song section renders its OWN STEPS
 **Correction, 2026-09-12 (same day as Phase 3, found by an error sweep).**
 The first cut swapped a `take-to-song` section's steps for the Journey card
-*unconditionally*, and dropped the whole section when the card came back
-empty. `JOURNEY_LAYERS` stops at Module 5, so **every one of the 20
+*unconditionally* and dropped the section when the card came back empty. `JOURNEY_LAYERS` stops at Module 5, so **every one of the 20
 take-to-song sections in Modules 6–12 rendered nothing at all**. That silently
 deleted ~26 challenge cards, Module 12's only graded assessment-piece card
 ("Full-Verse Rehearsal") among them, plus the sole teaching step for 7 skills
@@ -758,9 +754,8 @@ never a mere song pointer.
 
 The rule now: **the card replaces the steps only when `journeySongsFor(
 moduleNum)` is non-empty.**
-- With no layer (module 6+) there is no card, so the section falls back to a
-  normal section — its own steps, its own heading — and is "empty" only if
-  those steps are.
+- With no layer (module 6+) there is no card: the section renders as a normal
+  section (its own steps and heading), "empty" only if those steps are.
 - It lives in three places that must agree: `visibleSteps()`,
   `isRenderableSection()`, and `buildLesson()`'s `hasJourneyCard` branch (which
   also decides whether the section heading is suppressed, since the card
@@ -810,8 +805,8 @@ at Module 2's original 3.** Modules 3–8 were checked against every shipped
   single-note reading.
 - Module 7's Seven Nation Army "real rhythm" step doesn't duplicate ca-10
   either — different skill, rhythm notation vs. frets.
-- Real content, not a shortcut: verified with a search across every Module 3–8
-  "the cure"/"Seven Nation Army" mention.
+- Verified by a search across every Module 3–8 "the cure"/"Seven Nation Army"
+  mention.
 - Leave these for Phase 4 (see the work order): a new class activity that comes
   to duplicate a module step would be the trigger to hide it then.
 
@@ -876,9 +871,9 @@ wired into one is silently invisible in the other. Failure on record
 (2026-08-31): the ca-11 drills shipped student-side and the teacher preview
 showed nothing, because only `caStepHtml()` learned about `drill`.
 
-**Adding or changing a step field means editing both, in the same edit.** The
-preview is where Jonathan checks the day's activity before class, so it has to
-show what the room will see. Nothing enforces this yet — grep both functions
+**Adding or changing a step field means editing both, in the same edit.** Jonathan
+checks the day's activity in the preview before class, so it must show what the
+room will see. Nothing enforces this yet — grep both functions
 whenever you touch either.
 
 Legitimate differences are only about what can't work outside `#app`:
@@ -927,8 +922,8 @@ renderer has them. Everything else is still grep-both-by-hand.
 ### Play-along first; Song Journey pages are the back door (2026-10-06)
 **One rule for every link to a song: if students can open a play-along
 (whole-song) card for it, the link opens that card; if not, it opens the Song
-Journey page.** The site works that out from what Jonathan has released or set
-to "Play Along now" (`songsPlayAlongCard()`) — there is no list to maintain.
+Journey page.** `songsPlayAlongCard()` works it out from what Jonathan has released or set to
+"Play Along now" — no list to maintain.
 Why: the play-along cards cover Layer 2 (single notes) and Layer 3 (power
 chords) only; the Journey pages also hold Layers 4–5 and the bonus layers, and
 Modules 4 and 5 send students there.
