@@ -4,53 +4,46 @@ description: How to run a whole-site audit-and-fix sweep on the guitar site with
 effort: xhigh
 ---
 
-## Site sweep playbook (from the 2026-10-25 sweep: 11 auditors, 7 fixers, 4 reviewers, 130 commits)
+## Site sweep playbook
 
 Use it for a whole-site audit, a many-file refactor, or a wording pass over
-50+ strings. Do NOT use it for a normal fix — one agent or none is cheaper.
+50+ strings. Do NOT use it for a normal fix.
 Templates live next to this file: `auditor.md`, `fixer.md`, `reviewer.md`.
 Write the brief once to the session scratchpad and tell every agent to read it
 first; do not paste it into each prompt.
 
-**Spawn the project agents, not a general-purpose one** (defined in
-`.claude/agents/`):
+**Spawn the project agents (`.claude/agents/`), not a general-purpose one:**
 - `site-auditor` (high effort);
 - `site-fixer` (high);
 - `site-reviewer-deep` (extra high). A sweep always gets the deep reviewer,
   not the high-effort `site-reviewer`.
 
-Each pins its own model (Opus) and effort. The review, where the 2026-10-25
-sweep found its real regressions, always gets the deepest pass automatically,
-without anyone having to request it, and routine fixes don't pay for more than they need. A newly added
-agent file may need a restart or `/agents` before it is offered. If it isn't,
-fall back to a general-purpose agent with `model: opus` and, for reviewers,
-`effort: xhigh` (CLAUDE.md authorizes that pin). This skill itself pins
-`effort: xhigh` while it is active.
+Each pins its own model (Opus) and effort. A newly added agent file may need a
+restart or `/agents` before it is offered. If it isn't, fall back to a
+general-purpose agent with `model: opus` and, for reviewers, `effort: xhigh`.
 
 ### The flow
 0. **Baseline.** `git fetch origin`; fast-forward main; `git worktree list`;
-   `node tools/checks.mjs --check --skip-links`; `node tools/smoke.mjs` (a
-   real-browser walk, about 7 minutes per walk). Note what already fails so
-   nobody is blamed for it.
+   `node tools/checks.mjs --check --skip-links`; `node tools/smoke.mjs`. Note
+   what already fails.
 1. **Audit (read-only, Opus).** Split by file range or area, ≤ ~6,000 lines
    each, plus one tool-driven agent for dead code and duplication. Say what
-   each range actually contains: a wrong description misleads the agent (it
-   will tell you). Template: `auditor.md`.
+   each range actually contains. Template: `auditor.md`.
 2. **Verify before you fix.** For every HIGH finding, open the file and read the
-   quoted lines yourself (grep the quoted code). Decide, per finding: fix / skip
+   quoted lines yourself. Decide, per finding: fix / skip
    (settled, product call, untestable) / ask Jonathan. Product calls and
    anything that changes a rule go to him via AskUserQuestion, not to an agent.
 3. **Fix.** Create the worktrees yourself *first*
    (`git worktree add .claude/worktrees/fix-X -b fix/X-<date> main`) and tell
-   each fixer to work only there; parallel `isolation:"worktree"` launches
-   raced.
+   each fixer to work only there (parallel `isolation:"worktree"` launches
+   race).
    - One fixer per file family, so two never edit the same file.
    - Give each a numbered FIX list and a DO-NOT-FIX list with reasons.
    - Fixers commit with `git -c core.hooksPath=/dev/null commit`, never touch
      `sw.js` versions or `CHANGELOG.md`, and must re-derive any suggested fix
      rather than paste it.
    - Hand out new check numbers in advance (`grep -o "head('1b[a-z0-9]*\."
-     tools/checks.mjs | sort | tail -3`); three agents once all picked `1br`.
+     tools/checks.mjs | sort | tail -3`).
    - Refactors come after the bug fixes and only if provably
      behaviour-identical.
 4. **Integrate.** New branch from main; for each fixer
@@ -60,8 +53,7 @@ fall back to a general-purpose agent with `model: opus` and, for reviewers,
    -d` must print nothing); `node --check` every .js; `node tools/checks.mjs
    --check --skip-links` (only the stale cache line may fail);
    `node tools/rule-zero-proof.mjs origin/main`.
-5. **Adversarial review — not optional.** Template: `reviewer.md`. Every
-   round on 2026-10-25 found real regressions in the fixes.
+5. **Adversarial review — not optional.** Template: `reviewer.md`.
    - Review a *pinned commit* through `git show <hash>:file`, with a
      differential harness wherever logic changed (old vs new over many
      inputs/schedules).
@@ -69,8 +61,6 @@ fall back to a general-purpose agent with `model: opus` and, for reviewers,
      message.
    - Send findings back to the same fixer on a new branch cut from the
      integration tip, then cherry-pick again.
-   - A reviewer's suggested fix can be wrong in the real code; the fixer
-     re-derives it.
 6. **Smoke.** `node tools/smoke.mjs --baseline origin/main` — must report no
    errors beyond the baseline.
 7. **Ship.**
@@ -78,33 +68,29 @@ fall back to a general-purpose agent with `model: opus` and, for reviewers,
    2. Full `node tools/checks.mjs` (links); commit the recomputed `sw.js`
       *with hooks on*.
    3. `git fetch` and `git rev-list --left-right --count origin/main...HEAD`.
-      If origin moved (another session pushed), `git rebase origin/main` and
-      re-run the checks.
+      If origin moved, `git rebase origin/main` and re-run the checks.
    4. `git push origin HEAD:main`.
-   5. `node tools/checks.mjs --live` (a big audio push takes several minutes;
-      retry).
+   5. `node tools/checks.mjs --live` (retry: a big audio push takes several
+      minutes).
 8. **Clean up.** Fast-forward the main checkout (`git merge --ff-only
    origin/main`; leave Jonathan's untracked files alone). Delete a fix branch only
    after `git cherry origin/main <branch>` shows no `+` lines; remove the
-   worktrees (each holds hundreds of MB of audio).
+   worktrees.
 9. **Remember.** Save open items and process lessons to memory
    (`site-sweep-<date>`), and add a WORKFLOW.md entry.
 
 ### Pitfalls this sweep hit
-- Fixes were the riskiest code: a mid-line `//` swallowed object fields; a
-  simplified Coach tip became false; a console rewrite left views on "Loading…".
-- Vacuous verification: a script that finds 0 in both trees proves nothing.
+- Fixes are the riskiest code (see `.claude/rules/code-hygiene.md`).
+- A script that finds 0 in both trees proves nothing.
 - A usage-limit 429 kills running agents; `SendMessage` resumes them with their
   work intact.
-- `origin/main` moved mid-sweep. Fetch immediately before pushing.
-- Pasted rules can contradict themselves (one gain per song vs every file within
-  ±1 LU). Ask before an irreversible push (it was a 267 MB audio change).
+- `origin/main` moves mid-sweep. Fetch immediately before pushing.
+- Pasted rules can contradict themselves. Ask before an irreversible push.
 - Word counts are a poor benefit measure for wording passes; sentences get
   shorter, cards do not.
 
 ### At medium effort
-Don't rely on remembering the above. Follow the numbered flow literally, run
-the named commands, and treat the triggers as rules. A review is **required** for
-any change that touches 3+ files, a danger-zone file (teacher.js config
-plumbing, sw.js code, coach.js detection, app.js save path, firestore.rules),
-or 50+ strings of text. A sweep is always Reviewed the same day, never shipped Fast.
+Follow the numbered flow literally and run the named commands. A sweep is
+always Reviewed the same day, never shipped Fast. Every other change follows
+"Fast by default" in CLAUDE.md: an ordinary trigger ships Fast with a
+`Review: Fast` trailer.
