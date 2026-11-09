@@ -4215,9 +4215,9 @@ function ccRenderDone(){
     advice = t('games.cc.advice.stopped');
   } else if (r >= 0.85){
     verdict = '&#x1F31F; ' + t('games.cc.verdict.great', { ok, total });
-    /* Power Chord Switch: at the top tempo the "5 BPM faster" line is false (the row below cannot go up), so it says that instead
-       (2026-11-07). The test is the done row's own: the step up lands on the tempo just played. */
-    advice = t(ccIsPower() ? (ccDoneUpBpm() <= ccDonePlayedBpm() ? 'games.pw.advice.top' : 'games.pw.advice.great') : 'games.cc.advice.great');
+    /* At the top tempo the "N BPM faster" line is false (the tempo cannot go up), so it says that instead: Power Chord Switch since
+       2026-11-07 (the test is the done row's own: the step up lands on the tempo just played), Change Up at 140 since 2026-11-09. */
+    advice = t(ccDoneAtTop() ? 'games.pw.advice.top' : ccIsPower() ? 'games.pw.advice.great' : 'games.cc.advice.great');
     try {
       const k = ccBestKey(prog, cc.rateIdx);
       const best = parseInt(sessionStorage.getItem(k), 10) || 0;
@@ -4236,8 +4236,11 @@ function ccRenderDone(){
     verdict = '&#x1F4AA; ' + (off ? t(off === 1 ? 'games.cc.verdict.okMessyOne' : 'games.cc.verdict.okMessy', { ok, total, off }) : t('games.cc.verdict.ok', { ok, total }));
     advice = firmer ? t('games.pw.advice.firmer') : worst ? t('games.cc.advice.practiceWorst', { worst, early }) : t('games.cc.advice.tryAgainSteady');
   } else {
-    verdict = '&#x1F3B8; ' + t(firmer ? 'games.cc.verdict.ok' : 'games.cc.verdict.low', { ok, total });
-    advice = firmer ? t('games.pw.advice.firmer') : t(ccIsPower() ? 'games.pw.advice.low' : 'games.cc.advice.low');
+    /* At the lowest tempo (Power Chord Switch 10, Change Up 40) "Drop N BPM" cannot be done and "too fast" is no help, so the
+       headline is the plain count and the advice is to play it again at this speed (Jonathan, 2026-11-09). */
+    const floor = !firmer && ccDoneAtFloor();
+    verdict = '&#x1F3B8; ' + t(firmer || floor ? 'games.cc.verdict.ok' : 'games.cc.verdict.low', { ok, total });
+    advice = firmer ? t('games.pw.advice.firmer') : floor ? t('games.cc.advice.tryAgainSteady') : t(ccIsPower() ? 'games.pw.advice.low' : 'games.cc.advice.low');
   }
   /* The silent screen (silentStop) draws EVERY change like the nothing-reached one does: grey 'not reached', never a red 'no strum heard' under a headline that says nothing was heard (review 2026-11-09). */
   const greyRest = allReachedRight || silentStop;
@@ -4249,7 +4252,9 @@ function ccRenderDone(){
   const nLeft = silentStop ? total : (cc.unreached || 0);
   const nMiss = total - ok - off - (greyRest ? nLeft : 0);
   const breakdown = noneReached && !cc.noneDue ? '' : `<div class="cc-breakdown">${escHtml(t('games.cc.breakdown', { ok, off, miss: nMiss }) + (greyRest ? t('games.cc.breakdown.left', { left: nLeft }) : ''))}</div>`;
-  const rec = firmer || stoppedClean || noneReached || silentStop ? 'same' : r >= 0.85 ? 'up' : r >= 0.5 ? 'same' : 'down';
+  const rec0 = firmer || stoppedClean || noneReached || silentStop ? 'same' : r >= 0.85 ? 'up' : r >= 0.5 ? 'same' : 'down';
+  /* Never recommend a step the tempo cannot take (Change Up's lit button; Power Chord Switch's row clamps on its own). */
+  const rec = (rec0 === 'up' && ccDoneAtTop()) || (rec0 === 'down' && ccDoneAtFloor()) ? 'same' : rec0;
   /* A song switch: how each round went, at its own tempo. */
   /* Power Chord Switch (2026-11-05, Jonathan: the button should take more than one click and show the tempo): a −5 / +5 row
      with the tempo between, as on the setup screen, and one big "Again at N BPM" that plays it. The row opens on the tempo the
@@ -4301,6 +4306,9 @@ function ccDonePlayedBpm(){ return cc.ladder ? (cc.stageLog.length ? cc.stageLog
 /* Where "Level up" would go: one step above the tempo played, but never above the top the row allows. When that is the tempo just
    played, there is no step up to recommend. */
 function ccDoneUpBpm(){ return Math.min(ccDoneMaxBpm(), ccDonePlayedBpm() + CC_POWER_AGAIN_STEP); }
+/* The tempo just played is the highest / lowest the done screen can offer: no "faster" or "slower" advice there. */
+function ccDoneAtTop(){ return ccIsPower() ? ccDoneUpBpm() <= ccDonePlayedBpm() : cc.bpm >= CC_BPM_MAX; }
+function ccDoneAtFloor(){ return ccIsPower() ? ccDonePlayedBpm() <= CC_POWER_BPM_MIN : cc.bpm <= CC_BPM_MIN; }
 function ccDoneNudge(d){
   if (!cc || cc.phase !== 'done' || !ccIsPower() || cc.nextBpm == null) return;
   cc.nextBpm = Math.min(ccDoneMaxBpm(), Math.max(CC_POWER_BPM_MIN, cc.nextBpm + d));

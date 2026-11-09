@@ -12887,8 +12887,8 @@ function checkCoachVerdicts() {
     };
     const times = (n, r) => Array(n).fill(r);
     /* Power Chord Switch's tempo steps are 5 (2026-11-05), Change Up's 10. */
-    const WORDS = { en: { hint: 'Strum a little firmer, and keep the guitar close to the mic', low: n => `Drop ${n} BPM and try again`, fast: 'this speed is too fast for now', up: n => `Level up: try it ${n} BPM faster`, top: 'The tempo cannot go higher. Play it again.' },
-      es: { hint: 'Rasguea un poco más fuerte y mantén la guitarra cerca del micrófono', low: n => `Baja ${n} BPM e inténtalo de nuevo`, fast: 'esta velocidad es demasiado rápida por ahora', up: n => `Sube de nivel: pruébalo ${n} BPM más rápido`, top: 'El tempo no puede subir más. Tócalo otra vez.' } };
+    const WORDS = { en: { hint: 'Strum a little firmer, and keep the guitar close to the mic', low: n => `Drop ${n} BPM and try again`, fast: 'this speed is too fast for now', up: n => `Level up: try it ${n} BPM faster`, top: 'The tempo cannot go higher. Play it again.', steady: 'Try it again at this speed until it feels steady.' },
+      es: { hint: 'Rasguea un poco más fuerte y mantén la guitarra cerca del micrófono', low: n => `Baja ${n} BPM e inténtalo de nuevo`, fast: 'esta velocidad es demasiado rápida por ahora', up: n => `Sube de nivel: pruébalo ${n} BPM más rápido`, top: 'El tempo no puede subir más. Tócalo otra vez.', steady: 'Inténtalo de nuevo a esta velocidad hasta que se sienta estable.' } };
     // [game, results, shows the hint, shows "Drop N BPM", the recommended step (Change Up: the highlighted ccAgain(-10/0/10); Power Chord Switch: the done row's tempo minus 60: -5/0/5), why]
     const hintCases = [
       ['power', [...times(4, 'ok'), ...times(12, 'miss')], true, false, '0', '4 right, 12 not heard'],
@@ -12938,7 +12938,7 @@ function checkCoachVerdicts() {
         } finally { performance.now = keep.pn; coachReadFrame = keep.rf; coachAnalyser = keep.an; coachHfRms = keep.hf; }
       })()`);
       const html = bodies['cc-body'] || '';
-      return { txt: text('cc-body').replace(/\s+/g, ' '), advice: ((/class="coach-crit-note">([^<]*)</.exec(html) || [])[1] || '').replace(/&#39;|&apos;/g, "'"), shown: +((/id="cc-done-bpm">(\d+) BPM</.exec(html) || [])[1]), played: +run('ccDonePlayedBpm()'), stages: JSON.parse(run('JSON.stringify(cc.stageBpms)')) };
+      return { big: (/class="coach-start" onclick="ccAgain\((-?\d+)\)"/.exec(html) || [])[1], txt: text('cc-body').replace(/\s+/g, ' '), advice: ((/class="coach-crit-note">([^<]*)</.exec(html) || [])[1] || '').replace(/&#39;|&apos;/g, "'"), shown: +((/id="cc-done-bpm">(\d+) BPM</.exec(html) || [])[1]), played: +run('ccDonePlayedBpm()'), stages: JSON.parse(run('JSON.stringify(cc.stageBpms)')) };
     };
     /* [game, song switch?, start BPM, changes right (of 15, or of 7 per round), what the rest are, the line it must say, why]. The lines: top = the top-tempo line;
        up = "Level up: try it N BPM faster"; low = "Drop 5 BPM"; hint = "Strum a little firmer"; none = the practice-this-switch line. The 85% boundary
@@ -12961,18 +12961,28 @@ function checkCoachVerdicts() {
       ['power', true, 130, 6, 'miss', 'top', 'a song switch from 130 Stopped late: 18 of 21 right, the 3 never reached', { unreached: 3 }],
       ['power', true, 125, 7, 'off', 'up', 'a song switch from 125, all right'], ['power', true, 125, 6, 'off', 'up', 'a song switch from 125, 6 of 7 right in each round'],
       ['power', true, 130, 1, 'off', 'low', 'a song switch from 130, under half right'],
-      ['open', false, 140, 15, 'off', 'upCU', 'Change Up at 140, all right (untouched: its own "Level up" line)']];
+      // 2026-11-09 (Jonathan): Change Up at its top (140) says the top line too, and neither game says "Drop N BPM" or "too fast" at its lowest tempo
+      // (Power Chord Switch 10, Change Up 40): "Try it again at this speed until it feels steady." under the plain count; one step above, both lines are unchanged.
+      ['open', false, 140, 15, 'off', 'top', 'Change Up at 140, all right'], ['open', false, 140, 13, 'off', 'top', 'Change Up at 140, 13 of 15 right'],
+      ['open', false, 130, 15, 'off', 'upCU', 'Change Up at 130, all right (its own "Level up" line)'],
+      ['open', false, 40, 3, 'off', 'steady', 'Change Up at 40 (its lowest), under half right'], ['open', false, 50, 3, 'off', 'low', 'Change Up at 50, under half right'],
+      ['power', false, 10, 3, 'off', 'steady', 'a pair at 10 (the lowest), under half right'], ['power', false, 15, 3, 'off', 'low', 'a pair at 15, under half right'],
+      ['power', false, 10, 3, 'miss', 'hint', 'a pair at 10, 3 right and 12 not heard (the firmer hint wins)']];
     for (const lang of ['en', 'es']) {
       const W = WORDS[lang];
       for (const [mode, ladder, bpm, ok, bad, want, what, opt] of topCases) {
         const r = topScreen(lang, mode, ladder, bpm, ok, bad, opt), step = mode === 'power' ? 5 : 10, up = W.up(step), low = W.low(step);
         const nz = x => x.replace(/\.$/, ''), adv = nz(r.advice);   // the advice line is compared whole, without its closing full stop
-        const got = adv === nz(W.top) ? 'top' : adv === nz(up) ? (mode === 'power' ? 'up' : 'upCU') : adv === nz(low) ? 'low' : r.advice.includes(W.hint) ? 'hint' : 'none';
+        const got = adv === nz(W.top) ? 'top' : adv === nz(up) ? (mode === 'power' ? 'up' : 'upCU') : adv === nz(low) ? 'low' : adv === nz(W.steady) ? 'steady' : r.advice.includes(W.hint) ? 'hint' : 'none';
         if (got !== want) flag(`1ck (${lang}): the ${mode === 'power' ? 'Power Chord Switch' : 'Change Up'} done screen after ${what} says "${r.advice}" (= "${got}"; top = "${W.top}", up = "${up}", low = "${low}"), want "${want}"`);
         // the top line is the WHOLE advice, never followed or preceded by another line, and no other element of the screen carries the Level up line
         if (want === 'top' && r.txt.includes(nz(up))) flag(`1ck (${lang}): ${what}: the screen says the top-tempo line and also "${up}"`);
         if (r.txt.includes(nz(W.top)) && adv !== nz(W.top)) flag(`1ck (${lang}): ${what}: the top-tempo line appears with other text in the advice ("${r.advice}")`);
-        // Power Chord Switch's row opens on the tempo the advice names: the tempo played for top, hint and the practice line; 5 more for "Level up"; 5 fewer for "Drop 5 BPM"
+        // "this speed is too fast" goes with "Drop N BPM" only, never with the lowest tempo's line
+        if (r.txt.includes(W.fast) !== (want === 'low')) flag(`1ck (${lang}): ${what}: the headline says "${W.fast}": ${r.txt.includes(W.fast)}, want ${want === 'low'}`);
+        // Change Up lights the button its advice names: +10 for its "Level up", -10 for "Drop 10 BPM", the same tempo otherwise (never a step the tempo cannot take)
+        if (mode === 'open') { const wantBig = want === 'upCU' ? '10' : want === 'low' ? '-10' : '0'; if (r.big !== wantBig) flag(`1ck (${lang}): ${what}: Change Up lights ccAgain(${r.big}), want ccAgain(${wantBig})`); }
+        // Power Chord Switch's row opens on the tempo the advice names: the tempo played for top, hint, steady and the practice line; 5 more for "Level up"; 5 fewer for "Drop 5 BPM"
         if (mode === 'power') {
           const wantShown = want === 'up' ? r.played + 5 : want === 'low' ? r.played - 5 : r.played;
           if (r.shown !== wantShown) flag(`1ck (${lang}): ${what}: the done row opens on ${r.shown} BPM, want ${wantShown} (the tempo played is ${r.played})`);
@@ -13477,7 +13487,7 @@ function checkCoachVerdicts() {
     if (pk !== 'ccBest:F5-G5:beat') flag(`1ck: a pair's best-score key changed to "${pk}" (a student's saved bests would be lost)`);
     const pairPlan = JSON.parse(run(`JSON.stringify(ccRoundPlan(CC_POWER_PROGRESSIONS[1], CC_POWER_PROGRESSIONS[1].chords, CC_RATES[1]))`));
     if (pairPlan.slots !== 12 || pairPlan.ladder || pairPlan.rounds !== 1) flag(`1ck: a pair's round changed (${pairPlan.slots} slots at "Every 2 beats", expected 12, one round)`);
-    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, gridChecks: 60, hintChecks: 20, topChecks: 50, stopChecks: 99, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
+    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, gridChecks: 60, hintChecks: 20, topChecks: 64, stopChecks: 99, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
     for (const [k, n] of Object.entries(SONG_PIN)) if (song[k] !== n) flag(`1ck: ${song[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
     songCounts = song;
     run(`setLang('en'); cc = null; ccStop();`);
