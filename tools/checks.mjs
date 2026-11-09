@@ -6880,11 +6880,17 @@ function checkConfigWriteGuard() {
   if (!/teacherConfigVersion = Number\(cfg\.configVersion\)/.test(src))
     flag('teacher.js loadTeacherClassConfig(): does not record cfg.configVersion — the guard would compare against a version this tab never read');
 
-  // Every mention of the doc, and the two that are allowed to be there.
+  /* Every mention of the doc, and the two that are allowed to be there. Any
+     quote style, and the path form db.doc('config/class'): matching only
+     doc('class') let a doc("class").set(…) through (review 2026-11-08).
+     Each mention on a line is judged on its own, so a read beside a write
+     doesn't excuse the write. */
+  const DOC_CLASS = /\bdoc\(\s*(['"`])(?:config\/)?class\1\s*\)/g;
   src.split('\n').forEach((line, li) => {
-    if (!line.includes("doc('class')")) return;
-    const okGet = /\.doc\('class'\)\.get\(\)/.test(line);
-    const okRef = /const ref = dbh\.collection\('config'\)\.doc\('class'\);/.test(line) && guard.includes(line.trim());
+    const hits = [...line.matchAll(DOC_CLASS)];
+    if (!hits.length) return;
+    const okGet = hits.every(m => /^\.get\(\)/.test(line.slice(m.index + m[0].length)));
+    const okRef = hits.length === 1 && /const ref = dbh\.collection\('config'\)\.doc\('class'\);/.test(line) && guard.includes(line.trim());
     if (!okGet && !okRef)
       flag(`teacher.js:${li + 1}: config/class touched outside teacherWriteConfig() — a write here skips the version check and would silently overwrite another console's change. "${line.trim().slice(0, 80)}"`);
   });
