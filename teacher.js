@@ -490,7 +490,16 @@ async function showTeacherApp(user){
      opened from Songs or a student's page keeps THAT item lit
      (openActivityDetail does the same). */
   applyTeacherViewChrome(teacherView==='activities' && teacherActivityScreen()==='detail' ? (activityDetailFrom==='songs' ? 'songs' : 'students') : teacherView);
-  loadAllStudents();
+  const firstPaint=loadAllStudents();
+  /* The scroll position from before an update reload. Its 8 seconds start
+     only now that the roster is on screen (the module files and the roster
+     can take longer than that on their own: review R2-4); the watcher has
+     been running since the top, so a click or scroll during the load has
+     already cancelled it. */
+  if(resumed && resumed.watch){
+    const y=Number(resumed.y)||0, w=resumed.watch;
+    Promise.resolve(firstPaint).catch(()=>{}).then(()=>{ if(y>0 && !w.touched) swResumeScroll(()=>window, ()=>y, w, null); else w.off(); });
+  }
 }
 /* ── Back where you were after an update (2026-11-09) ─────────────────────
    app.js writes a note just before the site reloads itself for a new version
@@ -498,13 +507,16 @@ async function showTeacherApp(user){
    are the console's half: which view, which student or activity, which of
    the three Class activities screens, the detail tab, the list filter, the
    skills grid's set, the Teacher view song, and the scroll position (set
-   once the page is tall enough again, and dropped the moment the teacher
-   clicks or scrolls: swResumeScroll in app.js).
+   after the first paint, once the page is tall enough again, for up to 8
+   seconds, and dropped the moment the teacher clicks or scrolls:
+   swResumeScroll in app.js).
    Everything read back is checked against what exists now; anything that
    does not fit is dropped and that part opens as it normally would. It
    restores what is on screen only: nothing here writes to Firestore.
    teacherResumeApply returns the note it used (or null) so showTeacherApp
-   can set the skills grid's set once the module data has loaded. */
+   can set the skills grid's set once the module data has loaded, and start
+   the scroll after the first paint (note.watch: the "did they touch the
+   page" watcher, started here so it covers the whole load). */
 function teacherResumeSnapshot(){
   return {
     view: teacherView, uid: studentDetailUid,
@@ -538,8 +550,7 @@ function teacherResumeApply(t){
     if(from==='activities' && !activityBoardMode) activityDetailId=activityListPickId || activityDetailId;
   }
   if(str(t.song)) teacherViewSongId=t.song;   // renderTeacherViewSongs falls back to the first song if it is gone
-  const y=Number(t.y)||0;
-  if(y>0 && typeof swResumeScroll==='function') swResumeScroll(()=>window, ()=>y, swResumeWatch());
+  if(typeof swResumeWatch==='function' && typeof swResumeScroll==='function') t.watch=swResumeWatch();
   return t;
 }
 

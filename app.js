@@ -785,7 +785,9 @@ if(SW_UPDATE_BOOT) setAuthWallChecking('auth.updating');
    the board. What does not: anything the reload already waits for (a
    drill, a recording, an exit check: see busyReason below), text typed
    into a box but not yet saved, and the small states inside a card (a
-   search, an In class card's open step or TAB page, the board's sort).
+   search, an In class card's open step or TAB page, the board's sort) and
+   In class's two folds ("Completed activities" opens closed again; the
+   scroll then goes as far down as the shorter page reaches).
 
    The person wins: the next load is slow (the new version's files are
    still arriving), and anything they click, type or scroll before the
@@ -864,22 +866,43 @@ function swResumeWatch(){
    (module files, Songs and My progress wait for every module, the console
    waits for its roster), and a page that is still short clamps the scroll.
    So: look every 250 ms for up to 8 s, set the position whenever the page is
-   tall enough and is not already there, and stop for good the moment the
-   person touches the page. getPane and target are read fresh each time
+   tall enough and is not already there (or, once the page has stopped
+   growing, as far down as it reaches), and stop for good the moment the
+   person touches the page, moves it themselves, or the address changes
+   (hash: the address this position belongs to; null on the console). getPane and target are read fresh each time
    (scrollPane() changes with the page height; target() returns the wanted
    scrollTop, or null for "not yet"). */
 const SW_RESUME_SCROLL_MS = 8000;
-function swResumeScroll(getPane, target, w){
+function swResumeScroll(getPane, target, w, hash){
   const t0 = Date.now();
+  // What this loop last set, and how tall the page was then; and how long the page has been the same height.
+  let setTo = null, setAtHeight = 0, lastHeight = -1, steadySince = t0;
   const tick = () => {
     if(w.touched) return;
-    if(Date.now() - t0 > SW_RESUME_SCROLL_MS){ w.off(); return; }
+    // Another page now (the browser's Back button fires no click or key): this position belongs to the page that was left.
+    if(hash != null && location.hash !== hash){ w.off(); return; }
+    const late = Date.now() - t0 > SW_RESUME_SCROLL_MS;
     try {
       const pane = getPane();
       const el = pane === window ? document.scrollingElement : pane;
       const y = target();
-      if(el && y != null && y > 0 && el.scrollHeight - el.clientHeight >= y - 1 && Math.abs((pane === window ? window.scrollY : pane.scrollTop) - y) > 2) pane.scrollTo({ top: y });
+      if(el && y != null && y > 0){
+        const cur = pane === window ? window.scrollY : pane.scrollTop;
+        const max = el.scrollHeight - el.clientHeight;
+        if(el.scrollHeight !== lastHeight){ lastHeight = el.scrollHeight; steadySince = Date.now(); }
+        /* The position moved off what was set here while the page stayed the
+           same height: the person moved it some way this watcher cannot see
+           (dragging the window's scrollbar fires no pointer event). Theirs. */
+        if(setTo != null && el.scrollHeight === setAtHeight && Math.abs(cur - setTo) > 2){ w.off(); return; }
+        /* Reachable: go there. Not reachable and the page has stopped growing
+           for a second (or time is up): the page came back shorter (a fold
+           that is closed again), so go as far as it reaches. */
+        const to = max >= y - 1 ? y : ((late || Date.now() - steadySince >= 1000) ? Math.max(0, max) : null);
+        if(to != null && Math.abs(cur - to) > 2){ pane.scrollTo({ top: to }); setTo = to; setAtHeight = el.scrollHeight; }
+        else if(to != null && setTo == null){ setTo = cur; setAtHeight = el.scrollHeight; }
+      }
     } catch(e) { /* pane gone: leave the page where it is */ }
+    if(late){ w.off(); return; }
     setTimeout(tick, 250);
   };
   tick();
@@ -896,23 +919,46 @@ function swResumeLessonSnap(v){
    async: it may still be fetching the module file). */
 function swResumeApply(s){
   const w = swResumeWatch();
-  Promise.resolve(_bootModuleChange).then(() => {
-    // They clicked or scrolled while the module was loading, or went to another page: leave everything as they have it.
-    if(w.touched || location.hash !== s.hash){ w.off(); return; }
-    const panel = activeWeekPanel();
+  const y = Number(s.y) || 0, py = Number(s.py) || 0, top = Number(s.top) || 0;
+  // They clicked or scrolled while something was loading, or went to another page: leave everything as they have it.
+  const gone = () => w.touched || location.hash !== s.hash;
+  const sameSet = panel => !!panel && typeof s.set === 'string' && panel.dataset.id === s.set;
+  (async () => {
+    await _bootModuleChange;
+    if(gone()){ w.off(); return; }
+    let panel = activeWeekPanel();
     /* No set on screen: the module file did not arrive (onModuleChange said
        so in a toast). A bare address would leave an empty lesson pane, so
        open the home page, which needs no module, as a normal visit would. */
-    if(!panel){ w.off(); if(!location.hash) goExploreHash('class-activities'); return; }
-    // A different set came back (the saved place moved, or the set is locked now): its top is the right place.
-    if(typeof s.set !== 'string' || panel.dataset.id !== s.set || panel.classList.contains('set-peek')){ w.off(); return; }
-    restoreLessonState(panel, swResumeLessonSnap(s.lesson));
-    if(s.checklist === true && document.getElementById(`${s.set}-checklist`)) switchTabById(s.set, 'checklist', true);
-    const y = Number(s.y) || 0, py = Number(s.py) || 0, top = Number(s.top) || 0;
+    if(!panel && !location.hash){ w.off(); goExploreHash('class-activities'); return; }
+    /* Their own set came up as a locked preview. At boot that can be a wrong
+       guess: the gate holds while the module BEFORE this one has not loaded
+       (isModuleGateLocked), and the catch-up in renderAll corrects it once
+       every module is in. Wait for that, once, before giving up on the set. */
+    if(sameSet(panel) && panel.classList.contains('set-peek') && _bootCatchUp){
+      try { await _bootCatchUp; } catch(e) { /* a module failed to load: the set stays a preview */ }
+      if(gone()){ w.off(); return; }
+      panel = activeWeekPanel();
+    }
+    // A different set came back (the saved place moved, or the set really is locked now): the lesson opens at its top.
+    const lessonBack = sameSet(panel) && !panel.classList.contains('set-peek');
+    if(lessonBack){
+      const snap = swResumeLessonSnap(s.lesson);
+      // One-at-a-time view shows one step: a note written in list view (the pref was flipped in another tab) keeps its first.
+      if(snap && panel.querySelector('.dp.focus')) snap.open = snap.open.slice(0, 1);
+      restoreLessonState(panel, snap);
+      if(s.checklist === true && document.getElementById(`${s.set}-checklist`)) switchTabById(s.set, 'checklist', true);
+    }
     /* An in-column page (In class, Songs, My progress) has swapped the lesson
-       out: y is that page's scroll, and py is the lesson's place for the way
-       back (syncExploreNav puts practiceScrollTop back when the page closes). */
-    if(document.body.classList.contains('explore-open')){ practiceScrollTop = py; swResumeScroll(scrollPane, () => y, w); return; }
+       out: y is that page's scroll and does not depend on the set behind it;
+       py is the lesson's place for the way back (syncExploreNav puts
+       practiceScrollTop back when the page closes). */
+    if(document.body.classList.contains('explore-open')){
+      if(lessonBack) practiceScrollTop = py;
+      swResumeScroll(scrollPane, () => y, w, s.hash);
+      return;
+    }
+    if(!lessonBack){ w.off(); return; }
     /* The lesson itself: by the row that was being read, not by scrollTop
        (restoreLessonScroll's rule: the same scrollTop lands somewhere else
        when the rows above are a different height). Falls back to y. */
@@ -922,8 +968,8 @@ function swResumeApply(s){
       const li = tp ? [...tp.querySelectorAll('li.step')].find(x => x.dataset.key === key) : null;
       if(!li || !li.getClientRects().length) return y;
       return paneScrollTop() + li.getBoundingClientRect().top - top;
-    }, w);
-  }).catch(() => { w.off(); /* never let a restore break the page it is restoring */ });
+    }, w, s.hash);
+  })().catch(() => { w.off(); /* never let a restore break the page it is restoring */ });
 }
 
 let _authRevealTimer = firebaseReady ? setTimeout(revealAuthWallSignIn, 6000) : null;
@@ -1923,6 +1969,10 @@ let _fullModuleDataQueued = false;
 /* The module change renderAll started, so swResumeApply can wait for the set
    to be on screen. Nothing else reads it. */
 let _bootModuleChange = null;
+/* ...and the catch-up run below (every module loaded, the gate re-checked):
+   swResumeApply waits for it when the set first came up as a locked preview
+   only because the module before it had not loaded yet. */
+let _bootCatchUp = null;
 function renderAll(){
   // Class-wide start module (CLASS_OPEN_THROUGH): a saved place in a skipped
   // module lands on the start module instead. Module 13 sits outside the chain.
@@ -1943,7 +1993,7 @@ function renderAll(){
   // wrong guess corrects itself without the student having to touch anything.
   if(!_fullModuleDataQueued){
     _fullModuleDataQueued = true;
-    ensureAllModuleData().then(()=>{
+    _bootCatchUp = ensureAllModuleData().then(()=>{
       populateModuleDropdown();
       // The dropdown redraw only fixes the 🔒 marker there — the visible
       // panel for the module already on screen was gated on the same stale
@@ -1951,7 +2001,7 @@ function renderAll(){
       // back on the same set when the guess was already right). Quiet: when
       // it lands back on what's already showing, it must not re-run
       // activateSet's side effects — see onModuleChange.
-      onModuleChange(lastModuleNum, lastSetId, {quiet:true});
+      return onModuleChange(lastModuleNum, lastSetId, {quiet:true});
     });
   }
 }
