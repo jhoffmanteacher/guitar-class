@@ -774,8 +774,8 @@ function checkMcShoutedAnswer(allSets) {
    a two-choice one. The 2026-09-20 sweep found 30 across 26 MCs.
 
    ── WHY THIS ONE HAS AN ALLOWLIST AND 1at DOESN'T ──
-   CLAUDE.md: "Reach for a whitelist over a blacklist whenever the
-   banned word has an innocent twin." Several of these are real beginner
+   .claude/rules/code-hygiene.md: "Reach for a whitelist over a blacklist
+   whenever the banned word has an innocent twin." Several of these are real beginner
    beliefs, not filler — m5w1-s6's "Never repeating anything" is the
    plausible OPPOSITE of its keyed "repeat an idea, vary it, leave
    space", and m11w2-s6's "Can't tell from chords alone" is what a
