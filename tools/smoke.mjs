@@ -11,10 +11,21 @@
    or inline handler that does not compile.
 
      node tools/smoke.mjs                      walk this checkout
-     node tools/smoke.mjs --baseline <ref>     also walk git <ref> and report only
-                                               what this checkout ADDS (use it for
-                                               a big change: a pre-existing bug is
-                                               then not blamed on you)
+     node tools/smoke.mjs --baseline <ref>     if this checkout has errors, also walk
+                                               git <ref> and report only what this
+                                               checkout ADDS (a pre-existing bug is
+                                               then not blamed on you). A clean
+                                               checkout skips the <ref> walk: it
+                                               could only remove errors, and there
+                                               are none (2026-11-09).
+     node tools/smoke.mjs --en-only            walk English only (2026-11-09: a change's
+                                               smoke; the end-of-day and Friday walks
+                                               do both languages). A step that SWITCHES
+                                               language mid-round still switches.
+     node tools/smoke.mjs --only <areas>       walk only these areas, comma-separated:
+                                               sets, games, activities,
+                                               practice-minutes, tuning-sim (below).
+                                               Boot and the four screens always run.
      node tools/smoke.mjs --chrome <path>      Chrome/Chromium binary (or CHROME=…)
      node tools/smoke.mjs --quiet              print only the verdict
      node tools/smoke.mjs --stall <s>          stop if no step starts for <s> seconds (default 120)
@@ -37,6 +48,22 @@
    the process was killed from outside are leftovers possible: `pkill -f
    gc-smoke-chrome`.
 
+   Areas (--only, Jonathan 2026-11-09: "it's taking forever to make new
+   changes"). A change walks the areas it touches; the full walk (no --only)
+   is for the Friday check, a big change, or a change whose reach is unclear.
+     sets              every module and set, EN + ES; every lesson handler compiled
+                       (module-N.js, lesson renderers, i18n.js, escaping)
+     games             the Games screen and exits, every game view, Power Chord
+                       Switch, Change Up, Chord Blitz / Fret Zap, the tuner (coach.js,
+                       games-*.js, tuner.js, fab-tools.js)
+     activities        In-Class Activities cards: the Optional edge, chord grids,
+                       Note Call, Call the chord, Name the power chord, recording
+                       switches, strum patterns, paths (class-activities.js, the ca*
+                       renderers in app.js)
+     practice-minutes  the practice-minutes strip (practice-minutes*.js)
+     tuning-sim        the Tuning Simulator
+   app.js or styles.css touched broadly, or unsure → no --only.
+
    Proved to be able to fail: against 194696b it reports 60+ dead video-button
    handlers; against the fixed tree it reports none. */
 import { createServer } from 'node:http';
@@ -52,6 +79,18 @@ const args = process.argv.slice(2);
 const opt = (name) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : null; };
 const QUIET = args.includes('--quiet');
 const BASELINE = opt('--baseline');
+// --en-only (2026-11-09): every per-language loop walks English only. No flag = English and Spanish, as before.
+const LANGS = args.includes('--en-only') ? ['en'] : ['en', 'es'];
+// --only (2026-11-09): which areas walk() takes. No --only = all of them, as before.
+const AREAS = ['sets', 'games', 'activities', 'practice-minutes', 'tuning-sim'];
+const ONLY = args.includes('--only') ? (opt('--only') || '') : null;
+const ON = Object.fromEntries(AREAS.map(a => [a, ONLY === null]));
+if (ONLY !== null) {
+  const picked = ONLY.split(',').map(x => x.trim()).filter(Boolean);
+  const bad = picked.filter(a => !AREAS.includes(a));
+  if (!picked.length || bad.length) { console.error(`smoke: --only takes ${AREAS.join(', ')} (comma-separated)${bad.length ? `; not an area: ${bad.join(', ')}` : ''}`); process.exit(2); }
+  picked.forEach(a => { ON[a] = true; });
+}
 const say = (...a) => { if (!QUIET) console.log(...a); };
 
 /* The watchdog (2026-11-09). The run hung twice (2026-11-04, 2026-11-07): it sat for hours, printed nothing, and
@@ -306,7 +345,7 @@ async function chordCallWalk(page, run, events, stats, base) {
              picks: b.querySelectorAll('[data-chc-pick]').length, chords: s.M.chords.length, box: (b.querySelector('.chc-next') || {}).id || null,
              nextName: (document.getElementById('chc-nextname-${K(i)}') || {}).textContent || null, hasAudio: !!s.audio, head: b.querySelector('.sdr-head').textContent }; })()`;
   let rounds = 0;
-  for (const lang of ['en', 'es']) {
+  for (const lang of LANGS) {
     await run('chc:' + lang, `setLang('${lang}')`, 600);
     await run('chc:focus:' + lang, "caFocusActivity('ca-48')", 700);
     for (let i = 0; i < list.length; i++) {
@@ -399,7 +438,7 @@ async function powerNameWalk(page, run, events, stats, base) {
              cardMode: s.cards ? s.cards[s.idx].mode : null, note: s.cards ? s.cards[s.idx].note : null, nextHidden: (document.getElementById('pwn-next-${K(i)}') || { hidden: null }).hidden }; })()`;
   let steps = 0;
   const NAMES12 = ['E5', 'F5', 'F♯5', 'G5', 'G♯5', 'A5', 'A♯5', 'B5', 'C5', 'C♯5', 'D5', 'D♯5'];
-  for (const lang of ['en', 'es']) {
+  for (const lang of LANGS) {
     await run('pwn:clear:' + lang, `(function(){ try { localStorage.removeItem('pwnAnswer'); } catch (e) {} return 1; })()`, 10);   // a language's first pcname step opens on the default
     await run('pwn:' + lang, `setLang('${lang}')`, 600);
     await run('pwn:focus:' + lang, "caFocusActivity('ca-49')", 700);
@@ -594,7 +633,7 @@ async function noteCallWalk(page, run, events, stats, base) {
     for (let i = 0; i < tries; i++) { const st = await run(step, state(k), 150); if (st && ok(st)) return st; }
     return null;
   };
-  for (const lang of ['en', 'es']) {
+  for (const lang of LANGS) {
     await run('nc:' + lang, `setLang('${lang}')`, 600);
     await run('nc:focus:' + lang, "caFocusActivity('ca-43')", 700);
     for (let i = 0; i < drills.length; i++) {
@@ -707,7 +746,7 @@ async function powerSwitchWalk(page, run, events, stats, base) {
   const wantTempo = ['30', '35', '40', '35', '75', '140', '140'];   // the slider is dragged to 77 and lands on 75 (steps of 5)
   if (!tempoSteps || tempoSteps.out.some((o, k) => o.readout !== wantTempo[k] + ' BPM' || o.slider !== wantTempo[k])) fail('tempo-setup', `the setup tempo went ${tempoSteps && tempoSteps.out.map(o => o.readout + '/' + o.slider).join(', ')}, expected ${wantTempo.join(', ')} (readout / slider), the last after leaving and reopening the game`);
   if (!tempoSteps || tempoSteps.aria !== 'Tempo, beats per minute') fail('tempo-setup', `the slider's label reads "${tempoSteps && tempoSteps.aria}"`);
-  for (const lang of ['en', 'es']) {
+  for (const lang of LANGS) {
     for (const [name, expr] of [['a fixed pair', `setLang('${lang}'); gamesShow('power'); ccPickProg(1); ccSetBpm(140)`], ['a song switch', `setLang('${lang}'); gamesShow('power'); ccPickProg(${songViews[0] != null ? songViews[0] : 1}); ccSetBpm(100)`]]) {
       await run(`pw:tempo:${lang}:${name}`, expr, 400);
       check(`${name} with the tempo controls (${lang})`, await run(`pw:tempo:measure:${lang}:${name}`, measure, 10));
@@ -768,7 +807,7 @@ async function powerSwitchWalk(page, run, events, stats, base) {
     best = document.querySelector('#cc-body .cc-best'), foot = document.querySelector('#cc-body .coach-foot'), f = foot && foot.getBoundingClientRect(), b = best && best.getBoundingClientRect();
     return { shown: sc.clientHeight > 0, innerH: window.innerHeight, scrollH: sc.scrollHeight, clientH: sc.clientHeight, groupTops: g, best: best ? best.textContent.trim() : null, bestVisible: !!(b && b.width > 0 && b.bottom <= window.innerHeight),
       foot: f && { top: Math.round(f.top), bottom: Math.round(f.bottom) }, groupsTop: Math.round(document.querySelector('#cc-body .cc-groups').getBoundingClientRect().top) }; })()`;
-  for (const lang of ['en', 'es']) {
+  for (const lang of LANGS) {
     await run('pw:lang:' + lang, `setLang(${JSON.stringify(lang)})`, 400);
     for (const [name, expr] of views) {
       const step = `${name} with a best score (${lang})`;
@@ -803,7 +842,7 @@ async function powerSwitchWalk(page, run, events, stats, base) {
       const n = title.firstChild, txt = n.textContent, m = txt.match(/(low)[\\s\\u00a0](E)|(Mi)[\\s\\u00a0](grave)/), a = m.index, mid = a + (m[1] || m[3]).length, end = mid + 1 + (m[2] || m[4]).length;
       const top = (x, y) => { const r = document.createRange(); r.setStart(n, x); r.setEnd(n, y); return Math.round(r.getBoundingClientRect().top); };
       return { found: true, words: txt.slice(a, end).replace(/\\u00a0/g, '<nbsp>'), broken: top(a, mid) !== top(mid + 1, end) }; })()`;
-  for (const lang of ['en', 'es']) {
+  for (const lang of LANGS) {
     await run('pw:cosmetic:lang:' + lang, `setLang(${JSON.stringify(lang)})`, 400);
     let widths = 0, brokenAt = [], missing = false, words = '';
     for (let w = 1366; w >= 920; w -= 6) {
@@ -961,7 +1000,7 @@ async function strumWalk(page, run, events, stats) {
   const fail = (w, text) => events.push({ step: 'strum:' + w, kind: 'strum', text });
   const metrics = (w, h) => page.send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: false });
   await run('strum:open', 'openClassActivitiesScreen()', 600);
-  for (const lang of ['en', 'es']) {
+  for (const lang of LANGS) {
     await run('strum:' + lang, `setLang('${lang}')`, 600);
     for (const a of list) {
       await run('strum:focus:' + a.id, `caFocusActivity('${a.id}')`, 700);
@@ -1068,7 +1107,7 @@ async function pathsWalk(page, run, events, stats) {
       steps: c.querySelectorAll('.ca-step').length, shown: [...c.querySelectorAll('.ca-step:not(.ca-step-collapsed)')].map(li => +li.dataset.idx), head: (c.querySelector('.ca-step:not(.ca-step-collapsed) .ca-step-label') || {}).textContent || '',
       dots: document.querySelectorAll('.ca-bar-steps .ca-focus-dot').length, row: (c.querySelector('.ca-path-current') || {}).textContent || '', change: !!c.querySelector('.ca-path-change'), mark: !!c.querySelector('.ca-mark-btn'),
       picks: Object.keys(caStepDone).filter(k => k.startsWith('${id}:path:')), ticks: Object.keys(caStepDone).filter(k => /^${id}:\\d+$/.test(k)).map(k => +k.split(':')[1]).sort((x, y) => x - y) }; })()`;
-  for (const lang of ['en', 'es']) {
+  for (const lang of LANGS) {
     await run('paths:' + lang, `setLang('${lang}')`, 600);
     for (const a of list) {
       const w = `${a.id} ${lang}`;
@@ -1150,7 +1189,7 @@ async function pmHeaderWalk(page, run, events, stats) {
       over: document.documentElement.scrollWidth - document.documentElement.clientWidth, hdrH: Math.round(document.querySelector('.header').getBoundingClientRect().height), tip: h.title }; })()`;
   for (const [w, h] of [[1366, 657], [390, 844]]) {
     await metrics(w, h); await sleep(300);
-    for (const lang of ['en', 'es']) {
+    for (const lang of LANGS) {
       await run(`pm-header:${lang}`, `setLang('${lang}')`, 500);
       for (const [name, call] of views) {
         const label = `${name} ${lang} ${w}px`;
@@ -1262,7 +1301,7 @@ async function tuningSimWalk(page, run, events, stats, base) {
   const names = { en: ['low E', 'A', 'D', 'G', 'B', 'high e'], es: ['Mi grave', 'La', 'Re', 'Sol', 'Si', 'mi aguda'] };   // the glossary's "mi aguda" (lower case, as fret.stringHighE; 9c6f642)
   const titles = { en: 'Tuning Simulator', es: 'Simulador de afinación' };
   let rounds = 0, checks = 0;
-  for (const lang of ['en', 'es']) {
+  for (const lang of LANGS) {
     const W = lang + ': ';
     await run(`tsim:${lang}:prep`, `(() => { try { localStorage.setItem('gc-lang', '${lang}'); localStorage.removeItem('gc-tuningsim-phase2'); localStorage.removeItem('gc-tuningsim-level'); } catch (e) {} return true; })()`, 10);
     await go();
@@ -1496,8 +1535,8 @@ async function walk(base, chromePort, label) {
 
   const sets = (await run('list-sets', `SETS.map(s => ({ id: s.id, m: s.moduleNum || s.module || null }))`, 50)) || [];
   const modules = [...new Set(sets.map(s => s.m).filter(Boolean))].sort((a, b) => a - b);
-  stats.sets = sets.length; stats.modules = modules.length;
-  for (const lang of ['en', 'es']) {
+  if (ON.sets) { stats.sets = sets.length; stats.modules = modules.length; }
+  if (ON.sets) for (const lang of LANGS) {
     await run(`${lang}:lang`, `setLang('${lang}')`, 600);
     for (const m of modules) {
       await run(`${lang}:module-${m}`, `onModuleChange(${m})`, 350);
@@ -1513,6 +1552,7 @@ async function walk(base, chromePort, label) {
   await run('lang-en', `setLang('en')`, 600);
   await run('load-coach', `ensureCoachJs()`, 1500);   // coach.js (the games) is lazy-loaded
   for (const [name, expr] of [['songs', `openSongsScreen()`], ['class-activities', `openClassActivitiesScreen()`], ['my-progress', `openMyProgressScreen()`], ['games-hub', `openGamesScreen()`]]) await run(name, expr, 900);
+  if (ON.games) {   // ── area: games (to the optional edge) ──
   /* The Games top bar has two exits (2026-11-01): "Main site" always, "All games"
      only inside a game. Clicked for real: hub shows one button, a game shows two,
      "All games" returns to the hub (still open), "Main site" closes the games. */
@@ -1553,6 +1593,8 @@ async function walk(base, chromePort, label) {
      Back pill stretched across the whole grid column (84px → 306px). */
   const lqBack = await run('lq-back-width', `(() => { const s = document.getElementById('live-quiz-screen'); const was = s.hidden; s.hidden = false; const b = s.querySelector('.games-topbar > .games-exit'); const w = b ? b.getBoundingClientRect().width : -1; s.hidden = was; return w; })()`, 50);
   if (typeof lqBack === 'number' && (lqBack < 0 || lqBack > 160)) events.push({ step: 'lq-back-width', kind: 'lq-back-width', text: `Live quiz Back button is ${Math.round(lqBack)}px wide (want it sized to its text, ≤160px)` });
+  }   // ── end area: games ──
+  if (ON.activities) {   // ── area: activities (the optional edge) ──
   /* The quiet "optional" edge (2026-11-01): every card that shows the Optional tag
      gets it — teacher flag, optional-in-its-data, or the board's Who picker — and
      a CAS student, for whom every card is optional, gets none. Cards are rendered
@@ -1592,6 +1634,8 @@ async function walk(base, chromePort, label) {
     const want = { data: [true, true], req: [false, false], flag: [true, true], switchedRequired: [false, false], who: [true, true], done: [false, true], cas: [false, true], casReq: [false, true] };
     for (const [k, [e, t]] of Object.entries(want)) if (!edge[k] || edge[k].edge !== e || edge[k].tag !== t) events.push({ step: 'optional-edge', kind: 'optional-edge', text: `${k}: grey edge ${edge[k] && edge[k].edge} (want ${e}), Optional tag ${edge[k] && edge[k].tag} (want ${t})` });
   }
+  }   // ── end area: activities ──
+  if (ON.games) {   // ── area: games (game views, Power Chord Switch, the tuner) ──
   const views = (await run('games-meta', `(typeof GAMES_META !== 'undefined') ? GAMES_META.filter(g => !g.href).map(g => g.view || g.id || g.key) : []`, 50)) || [];
   stats.games = views.length;
   for (const v of views) await run(`game:${v}`, `gamesShow(${JSON.stringify(v)})`, 300);
@@ -1765,19 +1809,24 @@ async function walk(base, chromePort, label) {
   const tunerShut = await run('tuner-close', `(() => { togglePopup('tuner'); return !document.getElementById('tuner-popup').classList.contains('open') && tunerRunning === false; })()`, 500);
   if (tunerShut === false) tunerFail('tuner-close', 'a second togglePopup(\'tuner\') did not close the popup and stop the mic');
   await run('click-away', `document.body.click()`, 300);
-  await chordGridWalk(page, run, events, stats);
+  }   // ── end area: games ──
+  if (ON.activities) await chordGridWalk(page, run, events, stats);
   // Before Note Call's walk: that one reloads a fresh page with no coach.js, and this one needs gamesShow (coach.js) to be there.
-  await powerSwitchWalk(page, run, events, stats, base);
-  await changeUpWalk(page, run, events, stats);
-  await twoColumnQuizWalk(page, run, events, stats);
-  await noteCallWalk(page, run, events, stats, base);
-  await chordCallWalk(page, run, events, stats, base);
-  await powerNameWalk(page, run, events, stats, base);
-  await recordingWalk(page, run, events, stats, base);
-  await strumWalk(page, run, events, stats);
-  await pathsWalk(page, run, events, stats);
-  await pmHeaderWalk(page, run, events, stats);
-  await tuningSimWalk(page, run, events, stats, base);
+  if (ON.games) {
+    await powerSwitchWalk(page, run, events, stats, base);
+    await changeUpWalk(page, run, events, stats);
+    await twoColumnQuizWalk(page, run, events, stats);
+  }
+  if (ON.activities) {
+    await noteCallWalk(page, run, events, stats, base);
+    await chordCallWalk(page, run, events, stats, base);
+    await powerNameWalk(page, run, events, stats, base);
+    await recordingWalk(page, run, events, stats, base);
+    await strumWalk(page, run, events, stats);
+    await pathsWalk(page, run, events, stats);
+  }
+  if (ON['practice-minutes']) await pmHeaderWalk(page, run, events, stats);
+  if (ON['tuning-sim']) await tuningSimWalk(page, run, events, stats, base);
   await page.close();
   return { label, stats, errors: events.filter(e => !NOISE.test(e.text || '')) };
 }
@@ -1825,7 +1874,9 @@ try {
   say(`smoke: walking this checkout on http://127.0.0.1:${here.port} …`);
   const now = await walk(`http://127.0.0.1:${here.port}`, cdp, 'this checkout');
   let base = null;
-  if (BASELINE) {
+  // The baseline walk only sorts errors into "yours" and "already there": a clean checkout has nothing to sort (2026-11-09).
+  if (BASELINE && !now.errors.length) say(`smoke: this checkout is clean, so ${BASELINE} is not walked`);
+  else if (BASELINE) {
     mark(`setup: extracting ${BASELINE}`);
     const dir = extractRef(BASELINE); cleanup.push(() => rmSync(dir, { recursive: true, force: true }));
     const bs = await serve(dir); cleanup.push(() => bs.srv.close());
@@ -1837,8 +1888,10 @@ try {
   const norm = e => `${e.kind}|${e.step.replace(/^(en|es):/, '')}|${e.kind === 'bad-handler' ? '' : e.text}`;
   const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
   const report = base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
-  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (EN + ES), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.pwnSteps ? `, ${now.stats.pwnSteps} Name the power chord steps (EN + ES: Note Call frets 5-12; Show answer on by default and clicked both ways; the 12 buttons in fret order and a real click on a right and a wrong answer on the buttons and the board; Next, Stop, another step, a language switch; the choice remembered after a reload)` : ''}${now.stats.chordCallRounds ? `, ${now.stats.chordCallRounds} Call the chord steps (EN + ES: Slower by default, the speed switch both ways, Start, a space bar that is cancelled, Stop, a round ended by another step and by a language switch, the default after a reload)` : ''}${now.stats.powerLayouts ? `, a pair play screen says its BPM and its live tempo buttons are clicked (${now.stats.pairPlay || 0} run), the setup's \u22125 / +5 and slider are clicked and measured, EN + ES (${now.stats.tempoSetup || 0} run), the done screen's −5/+5 row clicked twice and Again (${now.stats.doneRow || 0} run), Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} song-switch rounds (16 switches x 3) run on a fake clock: round tempos, the BPM buttons, the play screen fitting 657px, one lit chart per chord, the done screen with 21 changes, ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''}${now.stats.powerBack ? `; the way back to the chords measured and clicked on ${now.stats.powerBack} screens (a pair's and a song switch's done screen and the songs view, EN + ES)` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}${now.stats.pmHeaderViews ? `, practice-minutes strip in the top bar: ${now.stats.pmHeaderViews} view checks (6 views x EN/ES x 1366 and 390 px: a shown button, exactly one strip on top, the Games bar's own on Games, no sideways scroll), ${now.stats.pmHeaderClicks} clicks open My progress, back after a reload, hidden when signed out` : ''}${now.stats.strumSteps ? `, ${now.stats.strumSteps} strum-pattern steps (EN + ES: cells, arrows, chord names, columns, 1366 and 390 px; Play strum lights an arrow, clicks every beat and sounds down strums louder; Play clicks opens the Metronome at 60 BPM, and again at the card's slider once it is dragged; Stop resets)` : ''}${now.stats.pathsActivities ? `, ${now.stats.pathsActivities} paths-activity walks (EN + ES: chooser with a silent preview and step list per path, Start, route length, Got it, Change path, ticks kept across a switch, one saved pick)` : ''}`);
+  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (${LANGS.join(' + ').toUpperCase()}), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.pwnSteps ? `, ${now.stats.pwnSteps} Name the power chord steps (EN + ES: Note Call frets 5-12; Show answer on by default and clicked both ways; the 12 buttons in fret order and a real click on a right and a wrong answer on the buttons and the board; Next, Stop, another step, a language switch; the choice remembered after a reload)` : ''}${now.stats.chordCallRounds ? `, ${now.stats.chordCallRounds} Call the chord steps (EN + ES: Slower by default, the speed switch both ways, Start, a space bar that is cancelled, Stop, a round ended by another step and by a language switch, the default after a reload)` : ''}${now.stats.powerLayouts ? `, a pair play screen says its BPM and its live tempo buttons are clicked (${now.stats.pairPlay || 0} run), the setup's \u22125 / +5 and slider are clicked and measured, EN + ES (${now.stats.tempoSetup || 0} run), the done screen's −5/+5 row clicked twice and Again (${now.stats.doneRow || 0} run), Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} song-switch rounds (16 switches x 3) run on a fake clock: round tempos, the BPM buttons, the play screen fitting 657px, one lit chart per chord, the done screen with 21 changes, ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''}${now.stats.powerBack ? `; the way back to the chords measured and clicked on ${now.stats.powerBack} screens (a pair's and a song switch's done screen and the songs view, EN + ES)` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}${now.stats.pmHeaderViews ? `, practice-minutes strip in the top bar: ${now.stats.pmHeaderViews} view checks (6 views x EN/ES x 1366 and 390 px: a shown button, exactly one strip on top, the Games bar's own on Games, no sideways scroll), ${now.stats.pmHeaderClicks} clicks open My progress, back after a reload, hidden when signed out` : ''}${now.stats.strumSteps ? `, ${now.stats.strumSteps} strum-pattern steps (EN + ES: cells, arrows, chord names, columns, 1366 and 390 px; Play strum lights an arrow, clicks every beat and sounds down strums louder; Play clicks opens the Metronome at 60 BPM, and again at the card's slider once it is dragged; Stop resets)` : ''}${now.stats.pathsActivities ? `, ${now.stats.pathsActivities} paths-activity walks (EN + ES: chooser with a silent preview and step list per path, Start, route length, Got it, Change path, ticks kept across a switch, one saved pick)` : ''}`);
   if (now.stats.tuningSimRounds) say(`smoke: Tuning Simulator (EN + ES): ${now.stats.tuningSimRounds} rounds played (round 1 with a real held peg button), ${now.stats.tuningSimChecks} checkpoints — defaults (sound on, string names shown and locked in Phase 1, level 1), the arrow keys (Left = counterclockwise = tighten) and a hidden tab, three clean rounds per level (saved), the sound and string-names switches, Phase 2 after six right (saved, six plain buttons in string order), a Phase 2 miss, a reload, level 4 (another letter on the tuner, the circle of notes and its arrow, which turns counterclockwise for Up and clockwise for Down, Tighten turns counterclockwise, the held button speeds up, green on the wrong letter does not finish), the notes and arrow as drawn, real keys and clicks (a held Enter answers once, focus after a key, Space/Enter/click = one tick), the saved level never lowered, green on the circle only when done, and no getUserMedia call`);
+  if (LANGS.length === 1) say('smoke: --en-only — Spanish not walked (the end-of-day / Friday full walk does it); "EN + ES" below means English only');
+  if (ONLY !== null) say(`smoke: --only ${AREAS.filter(a => ON[a]).join(', ')} — not walked: ${AREAS.filter(a => !ON[a]).join(', ')}`);
   if (base) say(`smoke: ${BASELINE} had ${base.errors.length} error event(s); this checkout has ${now.errors.length}`);
   if (report.length) {
     exitCode = 1;

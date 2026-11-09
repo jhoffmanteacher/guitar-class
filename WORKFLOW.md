@@ -353,6 +353,20 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 Detail lives in git log and `CHANGELOG.md`; entries keep what still binds.
 
+- [x] **2026-11-09 (evening) — Faster smoke for changes (Jonathan: "it's taking forever to make new changes given the
+      new rules"; "skip the smoke in spanish and add that to the first friday smoke test").** He chose three of four
+      offered speed-ups (not running EN and ES side by side): (1) `--baseline <ref>` walks `<ref>` only when this
+      checkout has errors; (2) `--only <areas>` (`sets`, `games`, `activities`, `practice-minutes`, `tuning-sim`;
+      boot and the four screens always run); (3) a Fast change pushes after the full `checks.mjs` and runs its smoke
+      AFTER the push, fixing a failure in the next push. Plus `--en-only` for every change smoke. The full walk (EN +
+      ES, every area) moved to the Friday check's new step 1b (first thing, every week anything landed) and to the
+      end-of-day smoke. Trade-off he accepted: a bug outside the areas a change walked can be live until the next full
+      walk. CLAUDE.md "Start here" step 3 and "Fast by default", skill `friday-check`.
+      Same evening, also his call: `site-reviewer-deep` runs at `high` effort, not `xhigh` (reverses the 2026-10-25
+      choice; every xhigh round of that sweep found real regressions). It keeps its own brief (try to break it,
+      failing scenario first) and its danger-zone / 50+-string scope. A deep review that lets a real bug through →
+      put `xhigh` back. The Friday check's reviewers run at `xhigh` (his call, same evening: they pass
+      `effort: 'xhigh'`; skill `friday-check`).
 - [x] **2026-11-09 (evening) — Today's activities = every card dated today or yesterday (Jonathan: "everything with a
       date either for the current day or dated the day before; everything else is unfinished work").** Supersedes the
       cap and the "newest visible date" parts of the entry below. Yesterday is the CALENDAR day before
@@ -867,7 +881,9 @@ part you're not in" is the same rule the part marks follow.
 
 ### Real-browser smoke test
 
-CLAUDE.md "Start here" item 3. Needs Node 22+ and Chrome (`--chrome <path>`).
+CLAUDE.md "Start here" item 3. Needs Node 22+ and Chrome (`--chrome <path>`). In a cloud
+container running as root, Chrome needs `--no-sandbox`: point `--chrome` at a two-line
+wrapper (`exec <chrome> --no-sandbox "$@"`), not at a change to the tool.
 
 ### Effort per task
 

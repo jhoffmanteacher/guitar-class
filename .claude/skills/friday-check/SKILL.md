@@ -9,7 +9,10 @@ Reviews the week's `Review: Fast` commits (CLAUDE.md, "Fast by default").
 Runs unattended, Fridays at 11:00 PM Pacific, from a scheduled cloud session.
 - **Don't ask Jonathan anything** (no AskUserQuestion, no `/effort`
   request). Decide, act, and report.
-- The agents in `.claude/agents/` pin their own effort.
+- **Every reviewer this check spawns runs at `xhigh`** (Jonathan, 2026-11-09:
+  "friday review can run at xhigh"): pass `effort: 'xhigh'` on each Agent
+  call, `site-reviewer` and `site-reviewer-deep` alike. Their own files say
+  `high`; that is for reviews during the week.
 
 ## 1. Find the range
 
@@ -23,7 +26,24 @@ last=$(git tag -l 'friday-check-*' --sort=-creatordate | head -1)
   `origin/main` since `2026-10-30 00:00 -0700`.
 
 Fast commits = `git log --format='%H %s' --grep='^Review: Fast' $range`.
-None → skip to step 5 (tag) and report "Nothing shipped Fast this week."
+None → still run step 1b if anything at all landed in the range, then skip to
+step 5 (tag) and report "Nothing shipped Fast this week."
+
+## 1b. Full smoke (start it first)
+
+Since 2026-11-09 a change's own smoke is English-only and walks only the
+areas it touched (CLAUDE.md "Start here" step 3), so this is the walk that
+catches the rest. Start it now, in the background, from a detached worktree
+at `origin/main`, and let it run while the reviewer works:
+
+```
+node tools/smoke.mjs --baseline <range start> > smoke-friday.log 2>&1
+```
+
+No `--only`, no `--en-only`: every area, English and Spanish. Every error
+it reports (new since the range start) is a finding for step 3: find the
+commit that caused it (`--only <area>` against the commits in the range is
+quick), fix it, and say so in the report. A hang is a finding too.
 
 Ignore `wip/*` branches (not live).
 

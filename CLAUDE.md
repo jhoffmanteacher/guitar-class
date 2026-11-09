@@ -12,14 +12,26 @@ What is open right now: `WORKFLOW.md` → "Where things stand" (top of the file)
    `node tools/checks.mjs`. Never hand-edit the version lines in `sw.js`.
 2. Touched a `module-N.js`? `node tools/rule-zero-proof.mjs origin/main`, and
    paste its summary into your report.
-3. Touched a renderer, escaping, or 3+ files (counted as in "Triggers" below)?
-   Run `node tools/smoke.mjs --baseline <ref> > file 2>&1`: a real browser walks every set in
-   English and Spanish, once for your tree and once for `<ref>`. Use `origin/main` as `<ref>`;
-   if your work is already on `origin/main`, use the commit before your first change. It
-   prints one line as each walk starts and nothing else until the end. A walk takes 3-4
-   minutes on a quiet Mac and about 7 on a busy one. It serves the checkout it runs in, so run
-   it from a detached worktree at the commit under test (`git worktree add --detach <dir>
-   <hash>`) and keep your own checkout free to edit. Run it with `run_in_background`. It stops
+3. Touched a renderer, escaping, or 3+ files (counted as in "Triggers" below)? Run the
+   **change smoke**: `node tools/smoke.mjs --en-only --only <areas> --baseline <ref> > file 2>&1`.
+   A real browser walks the areas your change touches, in English (Jonathan, 2026-11-09: "it's
+   taking forever"). Areas (`sets`, `games`, `activities`, `practice-minutes`, `tuning-sim`) and
+   which files belong to each: the header of `tools/smoke.mjs`. Unsure, or `app.js`/`styles.css`
+   touched broadly → leave out `--only`. `<ref>` = the commit before your first change; it is
+   walked only when your tree has errors, to sort out which are yours.
+   - **A Fast change does not wait for it:** push once the full `checks.mjs` passes, then run
+     the change smoke on the pushed commit and report its result. A failure is fixed in the
+     next push, same session.
+   - **An Always-Reviewed change** runs it before the push and waits.
+   - **The full walk** (both languages, every area, no `--only`/`--en-only`) runs in the
+     Friday check and when Jonathan asks for **"the end-of-day smoke"** (no nightly task: his
+     call, 2026-11-09). End-of-day smoke: `node tools/smoke.mjs --baseline $(git rev-list -1
+     --before='today 00:00' origin/main)` on `origin/main`; for each new error find the commit
+     (`--only <area>`), fix it, push, and report.
+   It prints one line as each walk starts and nothing else until the end. It serves the
+   checkout it runs in, so run it from a detached worktree at the commit under test
+   (`git worktree add --detach <dir> <hash>`) and keep your own checkout free to edit. Run it
+   with `run_in_background`. It stops
    itself: if no step starts for 120 s (`--stall`) or the run passes 40 minutes (`--timeout`),
    it prints `smoke: ✗ HUNG … Stuck at "<walk>: <step>"`, closes its Chrome and exits 3. A hang
    is a finding: report the step it names. Only a run killed from outside can leave Chrome
@@ -231,11 +243,11 @@ A review is due when a change is Always-Reviewed ("Fast by default"), Jonathan s
 **Triggers.** Review trigger = 3+ files, a danger-zone file (`teacher.js` config plumbing,
 `sw.js` code, `coach.js` detection (the onset and pitch detectors and the grading rules: ratios, gates,
 windows; not a game's screens, wording, tempo controls or count-in), `app.js` save path, `firestore.rules`), or 50+ strings.
-Not counted: `CHANGELOG.md`, `sw.js` version lines, a string's Spanish twin, pin-only
+Not counted: `CHANGELOG.md`, `sw.js` version lines and its `AUDIO_HASHES` block (both written by `checks.mjs`, never by hand; a new song's audio is not a danger-zone change), a string's Spanish twin, pin-only
 `checks.mjs` edits. A guard on a new default, or extending what a check reads: break-it proof only (paste output). A new KIND of check, or changed logic/matching, is a trigger (`site-reviewer`, high) plus break-it. Reviewer: `site-reviewer-deep`
-(xhigh) for danger-zone / 50+ strings (failing scenario first), else `site-reviewer`. Agent claim → read its quoted lines yourself; agent fix → make it re-derive it on the real code.
+for danger-zone / 50+ strings (failing scenario first), else `site-reviewer`. Agent claim → read its quoted lines yourself; agent fix → make it re-derive it on the real code.
 
-**Fast by default** (2026-10-31) — a trigger no longer asks. After the build and every "Start here" step, ship **Fast**: no reviewer, and every Fast commit ends with the trailer line `Review: Fast` (above any Co-Authored-By); the report starts "Fast — reviewer skipped; Friday check will review it." **Always Reviewed, same day, never Fast:** danger-zone file, a new kind of check that ships on its own
+**Fast by default** (2026-10-31) — a trigger no longer asks. After the build and every "Start here" step (the change smoke runs AFTER a Fast push, step 3), ship **Fast**: no reviewer, and every Fast commit ends with the trailer line `Review: Fast` (above any Co-Authored-By); the report starts "Fast — reviewer skipped; Friday check will review it." **Always Reviewed, same day, never Fast:** danger-zone file, a new kind of check that ships on its own
 (a ratchet or detector; a check that guards the feature it ships with gets break-it proof only), sub-agent
 sweep, moving/adding/removing a section or step. A product change Jonathan asks for (a renderer, a game's
 flow, a console view) ships Fast unless it touches one of those (Jonathan, 2026-11-09, about the 2-click
@@ -245,7 +257,7 @@ kind of change to Always-Reviewed. A high review lets a real bug through → mov
 change to `site-reviewer-deep`.
 **Friday check** — a scheduled task, Fridays 11:00 PM Pacific, reviews every `Review: Fast` commit since the last `friday-check-*` tag, fixes and pushes (skill `friday-check`).
 
-**Effort**: agent `xhigh` for deep review, else `high`; never `max`. Session: `medium` routine, `high` bug fixes / JS / keyed-MC, `xhigh` danger-zone and sweeps; a tier above the session → ask for `/effort`. Report real numbers, not the premise; name the prior decision a request reverses.
+**Effort**: every agent `high`, the deep reviewer included (Jonathan, 2026-11-09; it was `xhigh`), except the Friday check's reviewers: `xhigh` (skill `friday-check`); never `max`. Session: `medium` routine, `high` bug fixes / JS / keyed-MC, `xhigh` danger-zone and sweeps; a tier above the session → ask for `/effort`. Report real numbers, not the premise; name the prior decision a request reverses.
 
 **"Next steps for Power Chord Switch"** → read the `WORKFLOW.md` section "Power Chord Switch: where we stopped" first: what shipped 2026-11-03, the room-noise decision (a stricter strum ratio for Power Chord Switch only: 2.2 / 2.67 from 2026-11-05, lowered to 1.8 / 2.19 on 2026-11-07; the strum what-if numbers on the real takes and how to roll it back are recorded there), the pitch readings saved in takes since 2026-11-05 and the console's Pitch-rule table (read 2026-11-07: the pitch rule was rejected; do not build it), and what is settled. The practice-minutes heartbeat removal is finished.
 
