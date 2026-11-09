@@ -1250,6 +1250,22 @@ wordings, no Note Runner mic check (see "Later (not chosen yet)").
       doneSummary under All and P4 (62 compared, incl. a Who-limited card and an archived student), the list keeps its
       scroll through a write and both refreshes, and both refreshes keep the Preview element; plus the Who-limited exit
       check's tab and note agree. Each of those four turned red when its code was broken.
+      **Review round 2 (`site-reviewer-deep`, fixed on branch fix-console):** a rename left open on Settings, then
+      another tab, froze every refresh, the Refresh button's too (R2-1: leaving Settings closes the box; only an editor
+      on screen holds a refresh back; a held-back Refresh says why in the bar for 8 s); the list lost its pick after an
+      activity opened from Songs or a Blocked-by row (R2-4, `activityListPickId`); a picked card in a shut unit had no
+      row on screen (R2-5: `teacherUnitOpenMap` opens the pick's unit when nobody set its fold; a board Preview shows
+      that unit alone, as a tree click does, so the tree's Built row and a pick don't fight); another console's student
+      archive showed only after the minute refresh (R2-6, the roster re-filters after the list's fresh read); a TAB kept
+      playing after Arrange board, a sidebar switch or Back to a student (R2-7, `stopCardAudio()`); Move to Songs left
+      the split on a card the list no longer holds (R2-8); 1ai missed `doc("class")`, backticks and
+      `db.doc('config/class')` (R2-3). `syncPressedGroup` (fab-tools.js, no caller) removed. The console smoke went from
+      5 to 17 of the reviewer's 18 mutants caught (R2-2; the 18th, nulling the pick on Songs, is no longer a bug since
+      R2-4, and its adapted twin is caught; the two writer mutants are 1ai's): per-view markers, the minute refresh,
+      chips and roll sums, two stub names that are markup, writes under P4/P7/CAS with the song playing, Move to by
+      label, no "Module" in Students/Settings, list pick, sound stops, the hidden rename, Move to Songs, two consoles,
+      and the tree's Built row with a pick. Product note for Jonathan, not changed: `class-activities.js` ca-21's
+      student text says "Unit 2 assessment" (students' word is Module).
 - [x] **2026-11-06 — Practice minutes in the teacher console (needs a `firestore.rules` paste).** Jonathan: "where do I see
       students' minutes and rank?" A **Practice minutes** button after Students in the console's view toggle
       (`renderTeacherMinutes()`, `teacher.js`): one row per student, grouped by period like Manage (`perRank`), with This week
