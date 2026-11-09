@@ -702,7 +702,7 @@ Journey pages also hold Layers 4–5 and the bonus layers.
 | Resume card song row | all six songs |
 | The Journey page itself | open for every student (`JOURNEY_GATE_LOCKS = false`) |
 
-**"Take It to a Song" is gone from the module ladders (2026-10-18)**
+**⚠️ "Take It to a Song" is gone from the module ladders (2026-10-18)**
 (Jonathan: "remove take it to a song from the steps of the modules").
 `const TAKE_TO_SONG_ENABLED = false;` in `app.js`, beside
 `isTakeToSongSection()`, is the whole switch: `visibleSteps()` and
@@ -722,7 +722,7 @@ Journey pages also hold Layers 4–5 and the bonus layers.
   song via `openSongLink(slug, layer)`: the whole-song card for this module's
   layer if students can open it, else `tabs/<slug>.html#layer-<n>`) **only
   when `journeySongsFor(moduleNum)` is non-empty** (Modules 1–5). With no
-  layer (Module 6+) the section renders its OWN steps and heading. **Don't
+  layer (Module 6+) the section renders its OWN steps and heading. **⚠️ Don't
   re-simplify this to an unconditional swap**: those sections hold real
   Challenge cards. The rule lives in `visibleSteps()`, `isRenderableSection()`,
   `buildLesson()`'s `hasJourneyCard` branch (which also suppresses the
