@@ -612,9 +612,10 @@ activity that duplicates a module step is the trigger to hide that step.
 written by the console's **Class activities board** (`teacher.js`): Built on
 the left (pushed, not placed), Assigned on the right (by module, in reading
 order). It decides the order, the module headings and the `#N` prefix.
-- A card with no entry is invisible to everyone. **Assigned +
-  dated-and-arrived + not Hidden + not archived/deleted** is the full
-  live-for-students rule (`caIsVisible`).
+- A card with no entry is invisible to everyone. **Not archived/deleted +
+  assigned + not Hidden + given to this student (`caForMe`) +
+  dated-and-arrived** is the full live-for-students rule (`caIsVisible`, in
+  that order; the dev bypass skips only the date).
 - `caBoardOrder()` in `app.js` is the one resolver, read by students
   (`caBoardView`/`caNumber`) and by the console (`teacherBoardView`), so the
   two can't disagree.
@@ -683,6 +684,23 @@ same shape as an exit check: ONE renderer, `caCardBodyHtml(a, opts)` in
 app.js. Students reach it from `caActivityCardHtml`/`caHeroCardHtml` through
 `caCardBodyBlockHtml(a, …)`; `renderTeacherActivityDetail` reaches it with
 `{preview:true}`. 1bf pins all three and renders both student builders.
+
+### Step drills replace paper (`step.drill`)
+- A card that gets a drill has **no paper-fallback line**.
+- **`notecall`** (ca-23; power-chord mode in ca-43) is a guitar drill, not a paper one: a note name comes
+  up on the beat and the student plays it. "Show answer" (on by default) is an
+  unscored play-along; turned off, it is five scored levels (`NC_LEVELS`),
+  answered by the mic (off by default) or by tapping the fret. Engine and
+  schema: the comment above `NC_LEVELS` in `app.js`; progress in `games.nc`;
+  `gamesStopMic()` stops it.
+- **`deck`** design calls (Jonathan, 2026-07-26), kept as they are:
+  - Self-report, not auto-grading: the app cannot hear whether the chord was
+    played, and a 4-choice deck turns recall into recognition.
+  - A two-sided deck hides the back until tapped.
+  - "Put it back" re-deals the card 3 later; only first-try hits score.
+  - The ear sequence is never shown before the reveal.
+- `DECKS` lives in `app.js`, not module data, so its Spanish comes from
+  `i18n.js`. Storage: `games.dk`.
 
 ### Play-along first; Song Journey pages are the back door (2026-10-06)
 **One rule for every link to a song: if students can open a play-along
