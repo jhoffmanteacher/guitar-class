@@ -4434,6 +4434,8 @@ a.jl-song-btn{display:inline-block;text-decoration:none}
    its ring at ~1.45:1 against the page. */
 .rep-dot:not(.on){color:var(--text3)}
 .rep-dots-done .rep-dot{width:auto;height:auto;font-size:1rem}
+/* A finished step's dots are plain glyphs, not 26px buttons: no pull back to the line. */
+.rep-dots-done.rep-dots-line{margin-left:0}
 .rep-dot-reset{font-family:inherit;font-size:0.8125rem;color:var(--text2);background:none;border:none;text-decoration:underline;cursor:pointer;padding:0;margin-left:4px}
 
 /* ── "Pick up where you left off" resume card (renderResumeCard, app.js) ──

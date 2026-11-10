@@ -1192,7 +1192,7 @@ window.CLASS_ACTIVITIES = [
         label:    'The circuit',
         label_es: 'El circuito',
         text: 'Play two clean sets in a row (skip Spider, wide Reach, across strings), the second 10 BPM faster.',
-        text_es: 'Toca dos series limpias seguidas (Araña, Estiramiento y entre cuerdas), la segunda 10 BPM más rápida.',
+        text_es: 'Toca dos series limpias seguidas: Araña con salto, Estiramiento ancho, entre cuerdas; luego sube 10 BPM.',
       },
     ],
   },

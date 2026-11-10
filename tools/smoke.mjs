@@ -1171,8 +1171,9 @@ async function pathsWalk(page, run, events, stats) {
    Focus step whose line names a count shows that many dots; tapping them
    fills them one by one and the last tap ticks the step and moves to the
    next one (repDotFinish → caFocusGotIt); on that next step "Got it — next
-   step" ticks it and moves on again. A checkout without one-line steps (no
-   wholeLine in app.js) skips it. */
+   step" ticks it and moves on again. A checkout whose activity steps still
+   carry a got-it label skips it; a one-line checkout with no step to walk
+   fails. */
 async function dotsWalk(page, run, events, stats) {
   /* An older tree still writes "You've got it when:" in its activity steps: nothing to walk there. On a one-line tree,
      finding no step to walk is itself a failure (the walk must not switch itself off). */

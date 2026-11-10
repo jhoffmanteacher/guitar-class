@@ -8741,11 +8741,25 @@ function checkOneLineDirections(ctx, i18nTable) {
     if (!dispatch || !ncSetup || !pwnSetup) flag('renderShuffleDrill / ncSetupHtml / pwnSetupHtml not found in app.js — update 1cs with a rename');
     else for (const lang of ['en', 'es']) {
       vm.runInContext(`setLang(${JSON.stringify(lang)})`, ctx);
-      const screen = (where, html) => {
+      const screen = (where, html, want) => {
         screens++;
-        const intros = (String(html).match(/class="sdr-intro"/g) || []).length;
+        html = String(html);
+        const intros = (html.match(/class="sdr-intro"/g) || []).length;
         if (intros !== 1) flag(`${where} (${lang}): the screen before Start shows ${intros} direction lines (.sdr-intro), want exactly 1`);
         if (/nc-how/.test(html)) flag(`${where} (${lang}): a second paragraph of directions (.nc-how) is back`);
+        // The line itself: one short line (cap, no tags), and the one this state calls for.
+        const intro = (/<div class="sdr-intro">([\s\S]*?)<\/div>/.exec(html) || [])[1];
+        if (intro !== undefined) {
+          one(`${where} (${lang}) .sdr-intro`, unescapeJs(intro.replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&')), CAP_2C);
+          if (want !== undefined && intro.replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&') !== want) flag(`${where} (${lang}): the line before Start reads "${intro}", want "${want}"`);
+        }
+        /* Any OTHER sentence before Start is a second paragraph, whatever its class: take out the buttons, the
+           direction line, the pass line (.sdr-best), the level line (.nc-desc), a message (.nc-msg) and the head,
+           and no sentence may be left. */
+        const rest = html.replace(/<button\b[\s\S]*?<\/button>/g, ' ')
+          .replace(/<div class="(?:sdr-intro|sdr-best|nc-desc|sdr-head)[^"]*"[^>]*>[\s\S]*?<\/div>/g, ' ')
+          .replace(/<div class="coach-note nc-msg">[\s\S]*?<\/div>/g, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        if (/[A-Za-zÁÉÍÓÚáéíóúñ]{2,}[^.]{8,}\.(\s|$)/.test(rest)) flag(`${where} (${lang}): a second sentence of directions before Start: "${rest.slice(0, 120)}"`);
         const raw = /<div class="sdr-intro">((?:nc|ncp|pwn|chc|deck|drill|ear)\.[A-Za-z]+)<\/div>/.exec(html);
         if (raw) flag(`${where} (${lang}): the direction line shows the raw key ${raw[1]}`);
       };
@@ -8757,10 +8771,14 @@ function checkOneLineDirections(ctx, i18nTable) {
           screen(`${a.id} step ${si + 1} (${st.drill.type})`, dispatch(st.drill, key, null));
           if (st.drill.type === 'notecall') {
             const nc = vm.runInContext('noteCalls', ctx)[key];
+            const tt = vm.runInContext('t', ctx), pfx = nc.cfg.power ? 'ncp.' : 'nc.';
             for (const answer of [true, false]) for (const coach of [true, false]) {
               nc.answer = answer; nc.coach = coach;
-              screen(`${a.id} step ${si + 1} (notecall, Show answer ${answer ? 'on' : 'off'}, mic ${coach ? 'on' : 'off'})`, ncSetup(key));
+              // Show answer on: the play-along line; off: the tap line, or with the mic on the mic line (no tap asked for).
+              screen(`${a.id} step ${si + 1} (notecall, Show answer ${answer ? 'on' : 'off'}, mic ${coach ? 'on' : 'off'})`, ncSetup(key),
+                tt(pfx + (answer ? 'introAnswer' : coach ? 'introCoach' : 'intro')));
             }
+            if (tt(pfx + 'intro') === tt(pfx + 'introCoach')) flag(`${pfx}intro and ${pfx}introCoach say the same thing (${lang}) — the mic-on line must not ask for a tap`);
             vm.runInContext(`delete noteCalls[${JSON.stringify(key)}]`, ctx);
           }
           if (st.drill.type === 'pcname') {
@@ -9095,7 +9113,8 @@ function checkRecordingVersions(ctx) {
     {
       // Said once: an every-strum card must never tell the student each chord is shown once, in either language (the render read-back below compares with this table, so a wrong string in it needs its own guard).
       const I18Nt = loadI18nTable(), SD = I18Nt['ca.cardStrumDirections'], CD = I18Nt['ca.cardChordDirections'];
-      if (!SD || !CD || SD.es === CD.es || SD.en === CD.en || /shown once|where each chord name starts/i.test(SD.en) || /una sola vez|donde empieza cada nombre/i.test(SD.es)) flag('i18n ca.cardStrumDirections says each chord is shown once (or copies ca.cardChordDirections) \u2014 on an every-strum card every strum has its name');
+      if (!SD || !CD || SD.es === CD.es || SD.en === CD.en || /once|one time|each (chord )?name starts/i.test(SD.en) || /una (sola )?vez|solo una vez|donde empieza cada/i.test(SD.es)
+        || !/every strum shows its chord name/.test(SD.en) || !/cada rasgueo muestra el nombre de su acorde/.test(SD.es)) flag('i18n ca.cardStrumDirections says each chord is shown once (or copies ca.cardChordDirections) \u2014 on an every-strum card every strum has its name');
     }
     for (const a of acts.filter(x => x && x.recordingVersions)) {
       const g = a.recordingGroup;
@@ -11699,9 +11718,12 @@ function checkRepCountParity(sets, ctx) {
           const text = lang === 'es' && st.text_es ? st.text_es : st.text;
           if (typeof text !== 'string' || gotItRe.test(text)) return;
           const want = repCountFromGotIt(text);
-          let got;
-          try { got = dotsIn(stepHtml(a, st, si, true, false, { pos: si, total: a.steps.length })); }
+          let got, h;
+          try { h = String(stepHtml(a, st, si, true, false, { pos: si, total: a.steps.length })); got = dotsIn(h); }
           catch (e) { err(`1bg: caStepHtml threw on ${a.id} step ${si + 1} (${lang}): ${e.message}`); problems++; bad++; return; }
+          // Under a one-line step the dots start flush with it (.rep-dots-line), live or done.
+          const groups = h.match(/<div class="rep-dots[^"]*"/g) || [];
+          if (groups.some(g => !/rep-dots-line/.test(g))) { err(`1bg: ${a.id} step ${si + 1} (${lang}) draws its dots without .rep-dots-line`); problems++; bad++; }
           rendered++;
           if (got !== want) { err(`1bg: ${a.id} step ${si + 1} (${lang}) renders ${got} tap dots, its one line names ${want} — caStepHtml must pass wholeLine to wrapGotItWhen`); problems++; bad++; }
         });
@@ -11709,6 +11731,9 @@ function checkRepCountParity(sets, ctx) {
     }
   } finally { vm.runInContext(`setLang(${JSON.stringify(saveLang)})`, ctx); }
   const app = readFileSync(join(ROOT, 'app.js'), 'utf8'), teacher = readFileSync(join(ROOT, 'teacher.js'), 'utf8');
+  const css = cssRuleMap(readFileSync(join(ROOT, 'styles.css'), 'utf8'));
+  const cssDecl = (sel, prop) => { const m = css.get(sel); return m && m.get('') ? m.get('').get(prop) : undefined; };
+  if (cssDecl('.rep-dots.rep-dots-line', 'padding-left') !== '0' || cssDecl('.rep-dots-done.rep-dots-line', 'margin-left') !== '0') { err('1bg: styles.css lost .rep-dots.rep-dots-line { padding-left:0 } or .rep-dots-done.rep-dots-line { margin-left:0 } — one-line dots would sit off the line'); problems++; bad++; }
   const lessonCall = /const text2 = wrapGotItWhen\(text, \{([\s\S]*?)\}\);/.exec(app);
   if (!lessonCall) { err('1bg: the module step call (const text2 = wrapGotItWhen(text, {…})) was not found in app.js — update this check with it'); problems++; bad++; }
   else if (/wholeLine/.test(lessonCall[1])) { err('1bg: the module step call passes wholeLine — only In-Class Activity steps (caStepHtml) read a count from the whole text'); problems++; bad++; }
@@ -11725,7 +11750,11 @@ function checkRepCountParity(sets, ctx) {
     try {
       for (const lang of ['en', 'es']) {
         vm.runInContext(`setLang(${JSON.stringify(lang)})`, ctx);
-        for (const w of (sets || [])) { moduleDots += (String(buildSet(w)).match(/<div class="rep-dots[" ]/g) || []).length; setsRendered++; }
+        for (const w of (sets || [])) {
+          const h = String(buildSet(w));
+          moduleDots += (h.match(/<div class="rep-dots[" ]/g) || []).length; setsRendered++;
+          if (/rep-dots-line/.test(h)) { err(`1bg: ${w.id} (${lang}): a module step's dots carry .rep-dots-line — only one-line activity steps do`); problems++; bad++; }
+        }
       }
     } catch (e) { err('1bg: buildSet threw while counting module dot groups: ' + e.message); problems++; bad++; }
     finally { vm.runInContext(`setLang(${JSON.stringify(saveLang)})`, ctx); }
