@@ -34,8 +34,10 @@ of Cowork only.
   touches it). Keep either side of that one line and finish the `git am`.
   Then run the FULL `node tools/checks.mjs` once (not `--check`) to
   recompute it, and commit the one-line change before pushing. Don't stop
-  to ask. Any conflict in another file is a real conflict: stop and report
-  it.
+  to ask. Two new entries added at the same spot in `CHANGELOG.md` or
+  `WORKFLOW.md` are the other conflict you fix yourself: keep both, the
+  patch's on top (rule: `CLAUDE.md` "Start here" step 8). Any conflict in
+  another file is a real conflict: stop and report it.
 
 **Stop hook.** `.claude/settings.json` runs
 `.claude/hooks/stop-checks.mjs` whenever Claude finishes a turn. If code files

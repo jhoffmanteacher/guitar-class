@@ -58,7 +58,12 @@ What is open right now: `WORKFLOW.md` → "Where things stand" (top of the file)
    you rebased onto in your report. A conflict that is only the `CACHE_VERSION` line or inside
    the `AUDIO_HASHES` block of `sw.js`: edit just that hunk (delete the markers, keep either
    side; never `git checkout --ours/--theirs sw.js`, which replaces the whole file), then
-   `git rebase --continue`. Any other conflict (another `sw.js` hunk, a `module-N.js`, a
+   `git rebase --continue`. A conflict in `CHANGELOG.md` or `WORKFLOW.md` where each side only
+   ADDED new lines at the same spot (two new entries): keep both whole, yours on top with the
+   blank line between entries, delete the markers, `git add` the file, `git rebase --continue`.
+   If either side changed or removed a line that was already there, it is an "other conflict".
+   These cases and the `sw.js` ones may stop the same rebase: handle each; if any other file
+   conflicts too, abort the whole rebase. Any other conflict (another `sw.js` hunk, a `module-N.js`, a
    danger-zone file): `git rebase --abort` and ask Jonathan. Never force-push, and never make a
    merge commit without asking. When the rebase ends, run the full `node tools/checks.mjs` on
    the rebased tip (plus `rule-zero-proof.mjs origin/main` if a `module-N.js` changed, and the

@@ -325,6 +325,11 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-10 — Two new log entries no longer stop a push (work order "changelog conflicts"; Jonathan: he "frequently" hits conflicts running a second session). Fast.**
+      `CLAUDE.md` step 8 and skill `session-handoff` "Applying a patch": a rebase/`git am` conflict in `CHANGELOG.md` or
+      `WORKFLOW.md` where both sides only ADDED lines at the same spot is resolved by keeping both entries, yours on top.
+      A changed or removed existing line still goes to Jonathan. Reason and the rejected `merge=union`: "Pre-push checks,
+      hooks, parallel sessions". Docs only; no student-visible change.
 - [x] **2026-11-10 — An open activity fills the page (work order "open activities without the header and menu", Part 1;
       Jonathan, after a launcher-style layout he likes: "an open activity should fill the page"). Fast.**
       With a card open on In class, `caSyncSolo()` sets `body.ca-fold` and the header and the left menu fold away, full
@@ -949,6 +954,8 @@ Asked for by Jonathan, 2026-11-08: "is everything necessary anymore?". The opera
 Rule: CLAUDE.md "Pre-push checks" and "Start here"; hooks: skill `session-handoff`. What CLAUDE.md doesn't say: the ~240-link check stays on full pushes even when no link changed (it catches videos taken down since). `CACHE_VERSION` is a content fingerprint of the cached shell and everything in `audio/`; since 2026-10-16 also `sw.js`'s own code (version lines blanked), since 2026-10-25 every file in `sw.js`'s `ASSETS` (font, PNG icons), and 1bt fails a push that leaves a precached file out. `--live`: run it a minute after pushing. Smoke test needs Node 22+ and Chrome (`--chrome <path>`). `pre-push` exists because git skips pre-commit on merge commits.
 
 Parallel sessions live in `.claude/worktrees/*` (gitignored). Worktrees isolate files, not `origin`: on 2026-08-20 a worktree session pushed a merge of `main` straight onto `origin/main`. The lesson is *don't push a merge you didn't intend*, not *don't push to main*; a clean fast-forward (`git push origin HEAD:main`) is how worktree work ships.
+
+Two new log entries no longer stop a push (Jonathan, 2026-11-10: he often runs a second session in its own worktree and "frequently" hits conflicts; "you tell me what is best for the changelog or workflow since claudecode does the work"). Every session adds an entry at the top of `CHANGELOG.md` and of "Recently shipped", so the second rebase always stopped on both files and step 8 sent it to Jonathan; the answer was always "keep both". Rule (CLAUDE.md step 8, skill `session-handoff` "Applying a patch"): when each side only ADDED lines at the same spot, keep both entries whole, the one being rebased on top; a changed or removed existing line still goes to Jonathan. `merge=union` in `.gitattributes` was tried in a scratch copy and rejected: it resolves silently but puts the later entry under the earlier, drops the blank line between changelog entries, and would keep both versions of a line two sessions edited in place with nothing to show it. No other file joins the list.
 
 ### Three regimes, ratchet, board, config writer
 Rule: CLAUDE.md "Three regimes" and "Other standing rules". Dated decisions: the regimes date from 2026-09-20; `FROZEN_THROUGH` raised 2 → 3 on 2026-10-01 (Jonathan: "nobody is in Module 3 yet, but students are about to"); no renames in frozen modules because a rename would hide an insertion from the check; raise both numbers a module AHEAD because nobody tells Claude when the first student passes the gate. Since 2026-10-19 a keyed MC may be ADDED to a frozen step (it prints) and reworded via `response.renamedChoices` (the proof checks the map covers every old choice and keeps the keyed one keyed); since 2026-10-16 (Jonathan) a section title may be reworded in frozen modules too. A fix the regimes block is never worked around and never shipped as a rename that "prints rather than failing": it goes on the Summer reset list.
