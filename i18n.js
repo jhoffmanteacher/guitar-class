@@ -496,9 +496,8 @@
 
     // ── Practice card (`view: 'card'` — see caCardBodyHtml in app.js). One
     // Play song button drives the tab; a Slower / Normal switch picks the
-    // slow or full-speed file. "Meta" for one checkbox goal: "Paso" is
-    // already the step of a ladder, and a card's help ladder sits right
-    // under the checks. Button names in the Spanish directions are quoted
+    // slow or full-speed file. No checklist since 2026-11-10: the card ends
+    // in Mark complete. Button names in the Spanish directions are quoted
     // with «» like every other button name on the site (checks.mjs 1bc).
     'ca.cardPlay':             { en: 'Play song', es: 'Tocar la canción' },
     'ca.cardSlower':           { en: 'Slower', es: 'Más lento' },
@@ -518,8 +517,8 @@
                                  es: 'Sin guitarra baja la guitarra del disco, pero no la quita, para que tú toques la parte.' },
     'ca.cardGuitarOff':        { en: 'Guitar off', es: 'Sin guitarra' },
     'ca.cardSpeedAria':        { en: 'Speed: slower or normal', es: 'Velocidad: más lenta o normal' },
-    'ca.cardDirections':       { en: 'Press Play song, play along, and check a box when you can do it.',
-                                 es: 'Pulsa «Tocar la canción», toca con ella y marca una casilla cuando lo logres.' },
+    'ca.cardDirections':       { en: 'Press Play song and play along until you can do it.',
+                                 es: 'Pulsa «Tocar la canción» y toca con ella hasta que lo logres.' },
     // Chord-grid cards (card.chordGrid, 2026-10-26): the cursor moves on the beats and each chord name appears once.
     'ca.cardChordDirections':  { en: 'Strum the way the recording does and change chords where each chord name starts.',
                                  es: 'Rasguea como la grabación y cambia de acorde donde empieza cada nombre de acorde.' },
@@ -549,11 +548,6 @@
     'ca.sheetStartAt':         { en: 'Start at this {chord} ({section})', es: 'Empezar en este {chord} ({section})' },
     'ca.sheetMismatch':        { en: 'The sheet has {sheet} chord names and the card plays {card} chord changes (first difference: chord {at}). The dot stays off until they match.',
                                  es: 'La hoja tiene {sheet} acordes y la tarjeta toca {card} cambios de acorde (primera diferencia: acorde {at}). El punto no aparece hasta que coincidan.' },
-    'ca.cardCheckN':           { en: 'Check {n}', es: 'Meta {n}' },
-    'ca.cardLevelUp':          { en: 'Level up', es: 'Sube de nivel' },
-    'ca.cardProgress':         { en: '{done} of {total} checked', es: '{done} de {total} marcadas' },
-    'ca.cardCheckCount1':      { en: '1 check', es: '1 meta' },
-    'ca.cardCheckCount':       { en: '{n} checks', es: '{n} metas' },
     'ca.cardHelp':             { en: 'More practice help', es: 'Más ayuda para practicar' },
     'ca.chordVersion':         { en: 'Chord version', es: 'Versión de los acordes' },
     'ca.chordFull':            { en: 'Full chords', es: 'Acordes completos' },
@@ -565,10 +559,6 @@
     'ca.keyOf':                { en: 'Key of {key}', es: 'Tonalidad de {key}' },
     'ca.recordingVersion':     { en: 'Recording', es: 'Grabación' },
     'ca.cardHelpNote':         { en: 'The step-by-step help. Open any step.', es: 'La ayuda paso a paso. Abre cualquier paso.' },
-    'ca.cardNudgeText':        { en: 'You checked {ticks} of {total} boxes. Finish anyway?',
-                                 es: 'Marcaste {ticks} de {total} casillas. ¿Terminar de todos modos?' },
-    'ca.cardDoneToast':        { en: 'Activity complete. Level up is extra practice.',
-                                 es: 'Actividad completada. «Sube de nivel» es práctica extra.' },
 
     // ── Exit checks (kind:'check' class activities — see class-activities.js) ──
     // "Boleto de salida" is the everyday classroom term; "comprobación de

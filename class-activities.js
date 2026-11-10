@@ -168,12 +168,15 @@
    only visible words are "Slower" at the left end and "Normal" at the
    right, opening on the Slower stop; without it, a Slower / Normal
    switch), the Metronome (a click on every counted beat, made by the
-   site), a Guitar switch where the track has a full mix, and three or four
-   checkboxes. The slides teach the rungs; the card is what students
+   site), a Guitar switch where the track has a full mix, and a Mark
+   complete button (no checklist since 2026-11-10 — Jonathan: "get rid of the
+   checklists on the activities"; an extra song, `library`, has no Mark
+   complete either). The slides teach the rungs; the card is what students
    practise with. No practice card has a help ladder any more (Jonathan,
    2026-10-07): `steps: []`, which checks.mjs 1d allows only on a
    `view: 'card'` activity, so "More practice help" never renders.
-   Complete = every numbered check ticked; Level up is extra. Shape
+   Complete = the student pressed Mark complete (until 2026-11-10: every
+   numbered check ticked). Shape
    (caCardBodyHtml / pcLayout in app.js; checks.mjs 1bf):
      card: {
        track: 'the-cure',                  // a SNIPPET_TRACKS key
@@ -288,7 +291,11 @@
                                            // word "Stop"; restWord: false on the
                                            // card leaves the gap empty (ca-29)
        }],
-       checks: [
+       checks: [                           // NOT SHOWN since 2026-11-10 (Jonathan:
+                                           // "get rid of the checklists on the
+                                           // activities"): the card ends in Mark
+                                           // complete; only the Level up's card /
+                                           // Journey link still renders. Kept as data.
          { label, label_es, text, text_es },            // numbered checks
          { levelUp: true, text, text_es },               // last, exactly one;
          // slot: n (optional) keeps the tick key `<id>:c<n>` a check had

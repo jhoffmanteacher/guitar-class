@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+
+## 2026-11-10 (night) — No checklists on the activities
+
+- **The practice cards no longer have a list of checkboxes.** When you can play the part, press **Mark complete**. A step-by-step activity still has **Got it — next step** on each step and **Mark complete** at the end.
+- **The link to the next card stays:** for example "Open Seven Nation Army — The Whole Song" sits just above Mark complete.
+- **The extra songs on the Songs page ("More Play Along songs") have no Mark complete.** They are extra: play along as much as you like.
 ## 2026-11-10 (evening) — One short line for every direction in an activity
 
 - **Every step in an In-class activity is now one short line:** what to play and when you are done. For example: "Play Line 1 into Line 2 four times without stopping." The lists, the "You've got it when" line and the tips are gone. The tab, the drills and the videos are the same.

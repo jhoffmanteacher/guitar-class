@@ -1710,10 +1710,6 @@ function checkContrast() {
 const CONTRAST_STATES = [
   { name: 'Stuck? panel',             file: 'app.js',   chain: ['li.step', 'div.step-detail', 'div.step-body', 'div.step-folds', 'div.step-fold-panel', 'div.step-branch.step-stuck'] },
   { name: 'Level up panel',           file: 'app.js',   chain: ['li.step', 'div.step-detail', 'div.step-body', 'div.step-folds', 'div.step-fold-panel', 'div.step-branch.step-levelup'] },
-  { name: 'practice check head',      file: 'app.js',   chain: ['ul.pc-checks', 'li.pc-check', 'button.pc-check-btn', 'span.pc-check-body', 'span.pc-check-head'] },
-  { name: 'done check head',          file: 'app.js',   chain: ['ul.pc-checks', 'li.pc-check.is-done', 'button.pc-check-btn', 'span.pc-check-body', 'span.pc-check-head'] },
-  { name: 'Level up check head',      file: 'app.js',   chain: ['ul.pc-checks', 'li.pc-check.pc-check--lvl', 'button.pc-check-btn', 'span.pc-check-body', 'span.pc-check-head'] },
-  { name: 'done Level up check head', file: 'app.js',   chain: ['ul.pc-checks', 'li.pc-check.is-done.pc-check--lvl', 'button.pc-check-btn', 'span.pc-check-body', 'span.pc-check-head'] },
   { name: 'done step label (focus)',  file: 'app.js',   chain: ['div.dp.focus', 'div.stp-sec', 'ul.steps', 'li.step.step-done', 'button.step-head', 'span.step-label'] },
   { name: 'done step text (focus)',   file: 'app.js',   chain: ['div.dp.focus', 'div.stp-sec', 'ul.steps', 'li.step.step-done', 'div.step-detail', 'span.st-text'] },
   { name: 'done step label (list)',   file: 'app.js',   chain: ['div.dp', 'div.stp-sec', 'ul.steps', 'li.step.step-done', 'button.step-head', 'span.step-label'] },
@@ -1723,7 +1719,7 @@ const CONTRAST_STATES = [
   { name: 'done review card text',    file: 'app.js',   chain: ['div.sr-card.sr-done', 'div.sr-card-main', 'div.sr-card-text'] },
   { name: 'Note Runner unlock label', file: 'coach.js', chain: ['div.nr-race', 'div.nr-race-lane', 'div.nr-race-gate', '::after'], overStop: 0, offBox: [2] },
 ];
-const CONTRAST_STATES_PINNED = 14;
+const CONTRAST_STATES_PINNED = 10;   // 14 until 2026-11-10: the practice-card checklist (four check-head states) is gone
 const CONTRAST_STATE_ONLY = new Set(['hover', 'active', 'focus', 'focus-visible', 'focus-within', 'visited', 'disabled', 'checked', 'target', 'fullscreen']);
 /* Does at-rule context `m` apply at the 1366×657 target in this palette?
    true, false, or null = cannot tell. Known false: print alone, a width or
@@ -8567,6 +8563,50 @@ function checkPracticeCards(ctx) {
    that do the folding. tools/smoke.mjs (foldWalk) clicks it all in a real
    browser. Pinned: 22 assertions. */
 const FOLD_ASSERTS = 22;
+/* 1ct. NO CHECKLIST ON A PRACTICE CARD; NO MARK COMPLETE ON AN EXTRA SONG
+   (Jonathan, 2026-11-10: "get rid of the checklists on the activities. only
+   have mark complete or next step" and "remove mark complete from the extra
+   songs since they're extra"). Every practice card (view: 'card') is rendered
+   through the REAL caCardBodyBlockHtml in English and Spanish: no checklist
+   (.pc-checks / .pc-check / role="checkbox"), exactly one Mark complete
+   button, none at all on an extra song (caIsLibraryCard: the Songs page's
+   More Play Along songs), and the card counts no ticks (caTickKeys = [], so
+   no "n of m", no nudge). A Focus ladder still ends in "Got it — next step"
+   and Mark complete. Pinned card counts. */
+const NO_CHECKLIST_CARDS = 38, NO_CHECKLIST_EXTRA = 12;
+function checkNoChecklist(ctx) {
+  head('1ct. Practice cards have no checklist, only Mark complete; extra songs have neither');
+  let bad = 0, cards = 0, extra = 0;
+  const flag = m => { err('1ct: ' + m); problems++; bad++; };
+  if (!ctx) { flag('cannot run — the 0b render context is unavailable'); return; }
+  const run = x => vm.runInContext(x, ctx);
+  for (const fn of ['caCardBodyBlockHtml', 'caTickKeys', 'caIsLibraryCard', 'caIsCard']) if (run(`typeof ${fn}`) !== 'function') { flag(`${fn}() not found in app.js (renamed? update 1ct)`); return; }
+  const block = run('caCardBodyBlockHtml'), ticks = run('caTickKeys'), isExtra = run('caIsLibraryCard');
+  const acts = run('window.CLASS_ACTIVITIES || []');
+  const saveLang = run('getLang()');
+  try {
+    for (const lang of ['en', 'es']) {
+      run(`setLang(${JSON.stringify(lang)})`);
+      for (const a of acts) {
+        if (!a || a.view !== 'card' || a.teacherOnly) continue;
+        const html = String(block(a, false, false, true));
+        const marks = (html.match(/class="ca-mark-btn[ "]/g) || []).length;
+        if (/class="pc-checks?[ "]|role="checkbox"/.test(html)) flag(`${a.id} (${lang}) still draws a checklist`);
+        if (isExtra(a)) { extra++; if (marks) flag(`${a.id} (${lang}) is an extra song (More Play Along songs) but shows Mark complete`); }
+        else { cards++; if (marks !== 1) flag(`${a.id} (${lang}) shows ${marks} Mark complete buttons, want 1`); }
+        if (lang === 'en' && ticks(a).length) flag(`${a.id}: caTickKeys gives ${ticks(a).length} ticks for a practice card, want 0 (no checklist, no "n of m", no nudge)`);
+      }
+      const ladder = acts.find(x => x && x.view === 'focus' && !x.teacherOnly && !(x.paths && x.paths.length) && (x.steps || []).length > 1);
+      if (ladder) {
+        const html = String(block(ladder, false, true, false));
+        if (!/ca-focus-next/.test(html)) flag(`${ladder.id} (${lang}): a Focus ladder lost "Got it — next step"`);
+      }
+    }
+  } catch (e) { flag('rendering the cards threw: ' + e.message); }
+  finally { run(`setLang(${JSON.stringify(saveLang)})`); }
+  if (cards !== NO_CHECKLIST_CARDS || extra !== NO_CHECKLIST_EXTRA) flag(`rendered ${cards} practice cards and ${extra} extra songs (EN + ES), pinned ${NO_CHECKLIST_CARDS} / ${NO_CHECKLIST_EXTRA} — update the pins on purpose`);
+  if (!bad) ok(`1ct: ${cards} practice card renders end in one Mark complete and ${extra} extra-song renders in none, EN + ES; no checklist, no ticks counted`);
+}
 function checkFoldedActivity(ctx) {
   head('1cr. An open activity folds the header and the menu away (no full screen needed); the bar carries the four tools');
   let bad = 0, asserts = 0;
@@ -10818,7 +10858,7 @@ function checkChordGridCards(ctx) {
     let html = '';
     try { html = String(caCardBodyHtml(c10)); } catch (e) { flag(`caCardBodyHtml(ca-10) threw: ${e.message}`); }
     if (/data-beat|chord-grid/.test(html)) flag('ca-10 (a single-note card) renders chord-grid markup — single-note cards keep the note-by-note highlight');
-    if (!/Press Play song, play along/.test(html)) flag('ca-10 lost its own directions line');
+    if (!/Press Play song and play along until/.test(html)) flag('ca-10 lost its own directions line');
     const L = pcLayout(c10);
     const ks = new Set(); for (let i = 0; i < L.sections[0].bars * L.tr.beatsPerBar * 8; i++) ks.add(pcLocKey(L, pcLocate(L, i / 8 / L.tr.beatsPerBar)));
     if (ks.size !== L.sections[0].notes.length) flag(`ca-10: ${ks.size} repaint keys over ${L.sections[0].notes.length} notes — a single-note card must still step per note`);
@@ -15054,6 +15094,7 @@ function checkPracticeMinutes(i18nTable) {
   checkPendingFileSwitch(rcCtx);
   checkTodayByDate(rcCtx);
   checkFoldedActivity(rcCtx);
+  checkNoChecklist(rcCtx);
   checkOneLineDirections(rcCtx, i18nTable);
   checkCardCaptionWords();
   checkJourneyRetired();

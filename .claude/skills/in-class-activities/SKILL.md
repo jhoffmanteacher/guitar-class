@@ -384,7 +384,7 @@ The activity is ONE screen:
   Slowest), and the Guitar toggle where a full mix exists.
 - A Metronome: a click the SITE makes on every counted beat (no metronome
   files; Moises clicked "the cure" at 144, twice the 72 the room counts).
-- Then three or four checkboxes.
+- Then a Mark complete button. **No checklist** since 2026-11-10 (below).
 
 A looping card repeats with no seek: a second `<audio>` on the same file
 waits at the loop start and takes over at the window's end ("THE SPARE" in
@@ -404,10 +404,22 @@ Level up and links:
   now; 1bf checks the id. Before its date the target SWAPS INTO the linking
   card's slot (`caSwap`, `caOpenLinkedCard()`) — no Songs heading, no list
   entry; closing it puts the linking card back, open.
-- The card's Journey button is on its last check, the Level up (1ba pins both
-  call sites).
+- What the Level up carries — the link to the next card, or the Song Journey
+  button — renders as a plain button above Mark complete (`pcChecksHtml`,
+  `.pc-next`), with no checkbox and no text (1ba pins both call sites).
 
 Checks:
+- **No checklist on a card, no Mark complete on an extra song** (Jonathan,
+  2026-11-10: "get rid of the checklists on the activities. only have mark
+  complete or next step" / "remove mark complete from the extra songs since
+  they're extra"). A practice card ends in Mark complete (`caMarkRowHtml` →
+  `caToggleComplete`), a Focus ladder in "Got it — next step" and Mark
+  complete. `caTickKeys(card)` is `[]`, so a card shows no "n of m", no hero
+  dots, no check count on its row, and no nudge. An extra song
+  (`caIsLibraryCard`: the Songs page's More Play Along songs) shows no Mark
+  complete at all. The `checks` stay in the data (one-line text, 1cs) and
+  saved `<id>:c<n>` ticks stay in progress; nothing reads them. Guard:
+  checks.mjs **1ct** renders every card; `tools/smoke.mjs` `noChecklistWalk`.
 - **No practice card has a help ladder** (Jonathan, 2026-10-07: "it's not
   needed"; 0 of the 25 `view: 'card'` activities has a step): `steps: []`,
   which 1d allows only on a `view: 'card'` activity, so "More practice help"
@@ -419,12 +431,10 @@ Checks:
   Level up names the Whole Song card without "once it is posted" (2026-11-10).
 - A check may carry `slot: n` to keep its old tick key after earlier checks
   were removed (ca-25).
-- **Complete = every numbered check ticked; Level up is extra.** `pcCheck()`
-  writes it in place — NOT `caToggleComplete`, which closes the card and
-  re-renders, stopping the song and hiding Level up.
-- Check ticks live in `caStepDone` as `<id>:c<n>`. `caTickKeys`/
-  `caRequiredTickKeys` are what every "n of m" reader counts (meta line, hero
-  dots, sticky bar, the Mark-complete nudge).
+- Until 2026-11-10 a card was complete when every numbered check was ticked
+  (`pcCheck()`, removed); Level up was extra. `caTickKeys`/
+  `caRequiredTickKeys` are still what every "n of m" reader counts (meta line,
+  hero dots, sticky bar, the Mark-complete nudge) — for a ladder only.
 
 Code and guards:
 - Data shape: CARD note atop class-activities.js. Engine: `pc*` in app.js

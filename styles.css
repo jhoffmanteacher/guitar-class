@@ -3279,7 +3279,7 @@ span.tab-count-held{margin-left:4px}
 .pc-speed-range:active::-webkit-slider-thumb{cursor:grabbing}
 .pc-speed-range:focus{outline:none}
 .pc-speed-range:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px;border-radius:999px}
-.pc-play:focus-visible,.pc-speed:focus-visible,.pc-sec:focus-visible,.pc-check-btn:focus-visible,.pc-help-btn:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
+.pc-play:focus-visible,.pc-speed:focus-visible,.pc-sec:focus-visible,.pc-help-btn:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
 .pc-status{min-height:1.4em;margin:6px 0 2px;font-size:0.875rem;font-weight:600;color:var(--purple-text)}
 .pc-hint{margin:0 0 6px;font-size:0.8125rem;color:var(--text2)}
 .pc-secs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
@@ -3321,20 +3321,9 @@ span.tab-count-held{margin-left:4px}
 .pc-sheet-ghost{position:absolute;width:9px;height:9px;margin:-4.5px 0 0 -14px;border-radius:50%;border:1.5px solid rgba(24,95,165,0.45);pointer-events:none}
 .pc-sheet-paper:not(:has(canvas)) :is(.pc-sheet-pill,.pc-sheet-dot,.pc-sheet-ghost){display:none}
 .pc-rep{margin-left:8px;padding:1px 9px;border-radius:999px;background:var(--purple-accent);color:var(--bg);font-size:0.75rem;font-weight:700}
-.pc-progress{margin:12px 0 6px;font-size:0.8125rem;color:var(--text2)}
-.pc-checks{list-style:none;margin:12px 0 12px;padding:0}
-/* The console preview still prints "n of m checked" above them (pcChecksHtml). */
-.pc-progress + .pc-checks{margin-top:0}
-.pc-check{margin-bottom:8px;border:1px solid var(--border);border-radius:10px;background:var(--bg)}
-.pc-check.is-done{background:var(--green-bg);border-color:transparent}
-.pc-check-btn{display:flex;gap:12px;align-items:flex-start;width:100%;padding:12px;border:0;background:none;font:inherit;color:var(--text);text-align:left;cursor:pointer}
-.pc-box{flex:0 0 24px;height:24px;border:2px solid var(--border2);border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:0.875rem;font-weight:700;color:var(--bg)}
-.pc-check.is-done .pc-box{background:var(--green-text);border-color:var(--green-text)}
-.pc-check-head{display:block;font-size:0.75rem;font-weight:700;letter-spacing:0.02em;color:var(--text2)}
-.pc-check--lvl .pc-check-head{color:var(--ca-accent)}
-/* On the green done fill, --text2 (dark) and --ca-accent (light) drop under 4.5:1. */
-.pc-check.is-done .pc-check-head{color:var(--green-text)}
-.pc-check .ca-journey-row{margin:-4px 12px 12px 48px}
+/* What a practice card's Level up carried, as a plain button (pcChecksHtml): the link to the next
+   card or the Song Journey page. No checklist since 2026-11-10; the card ends with Mark complete. */
+.pc-next{margin:14px 0 6px}
 .pc-help-btn{width:100%;text-align:left;font-family:inherit;font-size:0.9375rem;font-weight:600;padding:10px 12px;border:1px solid var(--border2);border-radius:10px;background:var(--bg2);color:var(--text);cursor:pointer}
 .pc-help-btn:hover{background:var(--bg3)}
 .pc-help{margin-top:10px;padding-top:10px;border-top:1px dashed var(--border2)}

@@ -13592,6 +13592,11 @@ function caFreePlayGames(){
   ensureCoachJs().then(() => { if(typeof gamesShow === 'function') gamesShow('roulette'); }).catch(() => {});
 }
 function caMarkRowHtml(a, done, markLabel){
+  /* An extra song (the Songs page's "More Play Along songs", caIsLibraryCard)
+     has no Mark complete: it is extra, there is nothing to finish (Jonathan,
+     2026-11-10: "remove mark complete from the extra songs since they're
+     extra"). */
+  if(caIsLibraryCard(a)) return '';
   // Focus view: Mark complete waits for the last step (Jonathan, 2026-09-27).
   // An already-complete card keeps it on every step, so it can be un-marked.
   if(caIsFocus(a) && !done && caRoutePos(a, caFocusIdx(a)) < caRoute(a).length - 1) return '';
@@ -13606,7 +13611,7 @@ function caMarkRowHtml(a, done, markLabel){
   const total = req.length;
   const ticks = caTickCount(req);
   return `<div class="ca-nudge">
-    <p class="ca-nudge-text">${escHtml(caIsCard(a) ? t('ca.cardNudgeText', {ticks, total}) : t('ca.nudgeText', {ticks, total}))}</p>
+    <p class="ca-nudge-text">${escHtml(t('ca.nudgeText', {ticks, total}))}</p>
     <div class="ca-nudge-actions">
       <button type="button" class="btn-out" onclick="caNudgeKeepGoing()">${escHtml(t('ca.keepGoing'))}</button>
       <button type="button" class="ca-mark-btn ca-mark-btn--finish" onclick="caNudgeConfirm('${escAttr(a.id)}')">${escHtml(t('ca.markComplete'))}</button>
@@ -13620,13 +13625,12 @@ function caMarkRowHtml(a, done, markLabel){
    student's progress (see the declaration) — shown only once it's above zero so a fresh card doesn't
    claim "0 done". */
 function caChunkMetaHtml(a){
-  // A practice card is sized by its checks ("4 checks"), a ladder by its steps.
-  const card = caIsCard(a);
+  // A ladder is sized by its steps. A practice card has no checklist since
+  // 2026-11-10, so no count: just its Optional tag and minutes, if any.
   const n = caTickKeys(a).length;
-  if(!n) return '';
-  const head = [card ? (n === 1 ? t('ca.cardCheckCount1') : t('ca.cardCheckCount', {n}))
-                     : (n === 1 ? t('ca.stepCount1') : t('ca.stepCount', {n}))];
+  const head = n ? [n === 1 ? t('ca.stepCount1') : t('ca.stepCount', {n})] : [];
   if(a.minutes) head.push(t('ca.aboutMin', {n: a.minutes}));
+  if(!head.length) return caOptionalTagHtml(a) ? `<div class="ca-chunk-meta">${caOptionalTagHtml(a)}</div>` : '';
   const doneN = caTickCount(caTickKeys(a));
   const doneText = doneN > 0 ? (doneN === 1 ? t('ca.doneCount1') : t('ca.doneCount', {n: doneN})) : '';
   // The Today hero also draws progress dots (caHeroDotsHtml) between the
@@ -14278,11 +14282,13 @@ function caOpenLinkedCard(from, id){
    The speed control is a Slower / Normal switch (the slow and fast files),
    starting on Slower because every card's first checks are on Slower.
 
-   A card is COMPLETE when every numbered check is ticked — Level up is
-   extra (Jonathan, 2026-09-27). That write happens in place (pcCheck), not
-   through caToggleComplete, which closes the card and re-renders the page:
-   that would stop the song mid-play and hide Level up. Ticks live in
-   caStepDone under `<id>:c<n>` — saved to progress, like step ticks. */
+   A card is COMPLETE when the student presses its Mark complete button
+   (caToggleComplete, like a ladder's last step). Until 2026-11-10 it had a
+   checklist and was complete when every numbered check was ticked (pcCheck,
+   ticks under `<id>:c<n>` in caStepDone); Jonathan: "get rid of the
+   checklists on the activities. only have mark complete or next step". The
+   checks stay in the data, saved ticks stay in progress, nothing reads them
+   (caTickKeys). */
 /* ── Chord versions: one activity, two ways to play it ──
    Jonathan, 2026-10-16: "add power chords as an option to the las mananitas
    activities. don't add activities but make a toggle switch to switch
@@ -14597,16 +14603,19 @@ function caCardChecks(a){ return (a && a.card && Array.isArray(a.card.checks)) ?
    had before earlier checks were removed, so a saved tick stays on its own
    box (ca-25 lost its first two checks, 2026-10-07). */
 function caCheckKey(a, c, ci){ return `${a.id}:c${(c && Number.isInteger(c.slot)) ? c.slot : ci}`; }
-/* The ticks an activity counts: a card's checks, or a ladder's steps. Every
-   "n of m done" reader goes through these two so a card and a ladder can't
-   disagree about what finishing means. */
+/* The ticks an activity counts: a ladder's steps. Every "n of m done" reader
+   goes through these two so they can't disagree about what finishing means.
+   A practice card counts NONE since 2026-11-10 (Jonathan: "get rid of the
+   checklists on the activities. only have mark complete or next step"): it
+   has no checklist, and its Mark complete button finishes it outright (no
+   nudge, no "n of m"). Its checks stay in the data, and ticks a student saved
+   (`<id>:c<n>`) stay in their progress; nothing reads them now. */
 function caTickKeys(a){
-  if(caIsCard(a)) return caCardChecks(a).map((c, ci) => caCheckKey(a, c, ci));
+  if(caIsCard(a)) return [];
   // A paths activity counts the steps on the student's route (caRoute).
   return caRoute(a).map(si => `${a.id}:${si}`);
 }
 function caRequiredTickKeys(a){
-  if(caIsCard(a)) return caCardChecks(a).map((c, ci) => (c && c.levelUp) ? null : caCheckKey(a, c, ci)).filter(Boolean);
   return caTickKeys(a);
 }
 function caTickCount(keys){ return keys.filter(k => caStepDone[k] === true).length; }
@@ -15013,35 +15022,23 @@ function pcTabHtml(a, L){
   return `<div class="tab pc-tab${countsOn ? ' counts-on' : ''}"><div class="tab-head"><span class="tab-icon">${PC_TAB_ICON}</span><span class="tab-title">${escHtml(title)}</span>${countsSw}<span class="tab-kind">${t('tab.label')}</span></div>`
     + `<div class="tab-body"><p class="pc-status" aria-live="polite"></p>${chips}${pages}${pager}</div></div>`;
 }
+/* No checklist on a practice card (Jonathan, 2026-11-10: "get rid of the
+   checklists on the activities. only have mark complete or next step"). The
+   card ends with its Mark complete button (caMarkRowHtml), or with nothing on
+   an extra song. What its last check, the Level up, carried stays as a plain
+   button with no checkbox: the link to the next practice card (`card:
+   'ca-N'` on the Level up, ca-10 → ca-25, shown once that card can be opened)
+   or the Song Journey page. The Song Journey button lives here and only here
+   on a card — the card's equivalent of caStepHtml's last-step rule
+   (checks.mjs 1ba pins this call). The console preview shows its own link
+   row instead. */
 function pcChecksHtml(a, preview){
   const checks = caCardChecks(a);
-  let n = 0;
-  const items = checks.map((c, ci) => {
-    const done = !preview && caStepDone[caCheckKey(a, c, ci)] === true;
-    const head = c.levelUp ? t('ca.cardLevelUp') : t('ca.cardCheckN', {n: ++n}) + (c.label ? ' · ' + tf(c, 'label') : '');
-    /* The Song Journey button lives on the LAST check and only there — the
-       card's equivalent of caStepHtml's last-step rule (checks.mjs 1ba pins
-       this call). The console preview shows its own link row instead. */
-    let jl = '';
-    if(ci === checks.length - 1 && c.levelUp && !preview) jl = caJourneyLinkHtml(a);
-    /* A Level up may send the student to another practice card instead
-       (`card: 'ca-25'` on the check — ca-10's riff card hands off to the
-       whole-song card). Shown only once that card can be opened. */
-    if(ci === checks.length - 1 && c.levelUp && c.card && !preview) jl = caCardLinkHtml(a.id, c.card);
-    return `<li class="pc-check${done ? ' is-done' : ''}${c.levelUp ? ' pc-check--lvl' : ''}">`
-      + `<button type="button" class="pc-check-btn" role="checkbox" aria-checked="${done ? 'true' : 'false'}" onclick="pcCheck(this,'${escAttr(a.id)}',${ci})">`
-      + `<span class="pc-box" aria-hidden="true">${done ? '&#x2713;' : ''}</span>`
-      + `<span class="pc-check-body"><span class="pc-check-head">${escHtml(head)}</span><span class="pc-check-text">${tf(c, 'text')}</span></span>`
-      + `</button>${jl}</li>`;
-  }).join('');
-  /* "n of m checked" shows in the console preview only (2026-10-31). A
-     student's open card has the bar's "n of m done" (caSyncTopbar) pinned
-     at the top, so this second counter said the same thing twice. pcCheck
-     updates it only where it exists. */
-  const prog = preview
-    ? `<p class="pc-progress">${escHtml(t('ca.cardProgress', {done: 0, total: checks.length}))}</p>`
-    : '';
-  return `${prog}<ul class="pc-checks">${items}</ul>`;
+  const ci = checks.length - 1, c = checks[ci] || {};
+  let jl = '';
+  if(ci === checks.length - 1 && c.levelUp && !preview) jl = caJourneyLinkHtml(a);
+  if(ci === checks.length - 1 && c.levelUp && c.card && !preview) jl = caCardLinkHtml(a.id, c.card);
+  return jl ? `<div class="pc-next">${jl}</div>` : '';
 }
 /* The step ladder, read-only: each step a fold with its text and tab. No
    Mark done — the checks above are what a student ticks. */
@@ -16008,48 +16005,6 @@ function pcRetrack(root){
   pcSparePark(st);                     // the spare follows the file
   // ...and so does the twin, once the new file is playing.
   el.addEventListener('playing', () => { if(pcState === st && st.audio === el) pcParkTwin(st); }, { once: true });
-}
-function pcCheck(btn, id, ci){
-  const root = btn.closest('.pc');
-  const li = btn.closest('.pc-check');
-  const a = (window.CLASS_ACTIVITIES || []).find(x => x.id === id);
-  if(!root || !li || !a) return;
-  const preview = root.dataset.preview === '1';
-  const key = caCheckKey(a, caCardChecks(a)[ci], ci);
-  let nowDone;
-  if(preview){
-    nowDone = !li.classList.contains('is-done');   // the console preview saves nothing
-  } else {
-    nowDone = caStepDone[key] !== true;
-    onCaStepChange(key, nowDone);
-  }
-  li.classList.toggle('is-done', nowDone);
-  btn.setAttribute('aria-checked', nowDone ? 'true' : 'false');
-  const box = btn.querySelector('.pc-box');
-  if(box) box.innerHTML = nowDone ? '&#x2713;' : '';
-  const total = caCardChecks(a).length;
-  const doneN = preview ? root.querySelectorAll('.pc-check.is-done').length : caTickCount(caTickKeys(a));
-  const prog = root.querySelector('.pc-progress');
-  if(prog) prog.textContent = t('ca.cardProgress', {done: doneN, total});
-  if(preview) return;
-  caSyncTopbar();
-  const req = caRequiredTickKeys(a);
-  if(nowDone && classActivities[id] !== true && req.length && caTickCount(req) === req.length){
-    onClassActivityChange(id, true);
-    applyActivityGate();
-    const card = root.closest('.ca-card');
-    /* Under the Mark-complete nudge the card's only .ca-mark-btn is the nudge's
-       confirm button, which TOGGLES: relabelled "Completed" it un-marked the
-       card it had just completed. Put the plain completed button back instead. */
-    const nudge = card && caNudgeId === id ? card.querySelector('.ca-nudge') : null;
-    if(caNudgeId === id) caNudgeId = null;
-    if(nudge) nudge.outerHTML = caMarkRowHtml(a, true, t('ca.completed'));
-    else {
-      const mark = card && card.querySelector('.ca-mark-btn');
-      if(mark){ mark.classList.add('done'); mark.textContent = t('ca.completed'); }
-    }
-    gateToast(t('ca.cardDoneToast'));
-  }
 }
 function pcToggleHelp(btn){
   const box = btn.nextElementSibling;

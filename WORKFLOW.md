@@ -325,6 +325,13 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-10 — No checklists on the activities; no Mark complete on the extra songs (Jonathan, mid-session: "get rid of
+      the checklists on the activities. only have mark complete or next step" and "remove mark complete from the extra songs since
+      they're extra"). Fast.** A practice card ends in Mark complete (caToggleComplete); `caTickKeys(card)` is `[]` (no "n of m",
+      no hero dots, no nudge); what the Level up carried (the next card's link or the Song Journey button) stays as a plain button.
+      An extra song (`caIsLibraryCard`) shows no Mark complete. `pcCheck` is removed; `card.checks` and saved `<id>:c<n>` ticks
+      stay. **Reverses** "Complete = every numbered check ticked; Level up is extra" (2026-09-27) and the practice card's "three or
+      four checkboxes" (2026-09-27). Guard: checks.mjs 1ct, smoke `noChecklistWalk`.
 - [x] **2026-11-10 — Two new log entries no longer stop a push (work order "changelog conflicts"; Jonathan: he "frequently" hits conflicts running a second session). Fast.**
       `CLAUDE.md` step 8 and skill `session-handoff` "Applying a patch": a rebase/`git am` conflict in `CHANGELOG.md` or
       `WORKFLOW.md` where both sides only ADDED lines at the same spot is resolved by keeping both entries, yours on top.
