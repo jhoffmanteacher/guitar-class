@@ -96,6 +96,21 @@ Start here. Update this block whenever an item opens or closes; each line says w
 **Automatic:** the Friday check (Fridays 11 PM Pacific). The 2026-11-06 run (tag `friday-check-2026-11-06`) covered
 `b958165` and `ce5096e`. The next run (2026-11-13) takes `git log --grep='Review: Fast' friday-check-2026-11-06..`.
 
+**Handed to the Friday check (Jonathan, 2026-11-10: "let the friday check fix those things").** In the 2026-11-13 run,
+besides the usual range. Do not ask him; decide, fix, report.
+1. **Review the Tuning Simulator change by hand:** `e471fac` and `e2e58c3` (no strings picture, no naming step; a card
+   says the string to tune and what the tuner shows; CHANGELOG 2026-11-09 "later that night"). Neither commit has a
+   `Review: Fast` trailer, so the `--grep` skips them: add them to the reviewer's diff yourself. The full smoke (step 1b)
+   walks the Tuning Simulator; any error it names is yours to fix.
+2. **"Too fast" through `cc.prevOnsetT`** (`coach.js`, `ccFinish`: `lastOnsetEff`; written near the onset handler).
+   Two Fable reviewers, working separately, found that a press and release heard as two onsets can bring back the "too
+   fast" headline. It was NOT run against today's code (entry "Weekday reviewers are Fable at medium", Open work).
+   First build a failing case with `tools/mic-sim/power-switch.mjs` on the real code. Cannot fail it → drop the item and
+   say so in the report. Fails → this is `coach.js` detection: fix on branch `friday-check/2026-11-13` and run the
+   `site-reviewer-deep` rounds (skill `friday-check`, step 3).
+3. **Refresh this block:** it does not list the Tuning Simulator change or the reviewer-model change (2026-11-09 night).
+   Add both, move shipped items down, and set the "updated" date.
+
 **Finished (don't redo):** the practice-minutes heartbeat removal (2026-11-05; the old `minutesBoard` collection deleted
 too; the class rank and Top 5 are keyed by a private tag, so no uid sits next to minutes). `tools/pm-rules-test.mjs`: 191
 emulator cases since 2026-11-06 (179 before); needs Java 21 (on Jonathan's Mac at `~/tools/java`, not on PATH; recipe in
