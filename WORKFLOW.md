@@ -353,6 +353,17 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 Detail lives in git log and `CHANGELOG.md`; entries keep what still binds.
 
+- [x] **2026-11-09 (night) — Weekday reviewers are Fable at medium; Friday's are Opus at xhigh (Jonathan: "Fable was
+      much faster, so yes").** Test: four Fable-medium reviewers, one per round of the 2026-11-07/08 Stopped-game
+      reviews (`ebe88ca`, `432dd68`, `f47a730`, `4582bda`), each on a two-commit copy that could not see the later
+      fixes, scored against what the original Opus-xhigh rounds found (the fix commits' messages). Found 15 of 20,
+      1 partly, the main bug in every round, in 18-22 minutes each. Missed: a Stop before the first change saying
+      "too fast" (round 1), the Stop click left in the saved take and the breakdown contradicting the headline
+      (round 4). Found and not in the originals: Change Up untested, a run of missed changes before Stop reading
+      "every change worked", and (two rounds, independently) a press + release heard as two onsets bringing back
+      "too fast" through `cc.prevOnsetT` — NOT run against today's code; the two lines are unchanged; look at it
+      before the next Power Chord Switch change. Limits: one feature, one file, no timing for the Opus originals.
+      A weekday review that lets a real bug through → raise that reviewer's effort first.
 - [x] **2026-11-09 (evening) — Faster smoke for changes (Jonathan: "it's taking forever to make new changes given the
       new rules"; "skip the smoke in spanish and add that to the first friday smoke test").** He chose three of four
       offered speed-ups (not running EN and ES side by side): (1) `--baseline <ref>` walks `<ref>` only when this

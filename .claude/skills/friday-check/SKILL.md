@@ -9,10 +9,12 @@ Reviews the week's `Review: Fast` commits (CLAUDE.md, "Fast by default").
 Runs unattended, Fridays at 11:00 PM Pacific, from a scheduled cloud session.
 - **Don't ask Jonathan anything** (no AskUserQuestion, no `/effort`
   request). Decide, act, and report.
-- **Every reviewer this check spawns runs at `xhigh`** (Jonathan, 2026-11-09:
-  "friday review can run at xhigh"): pass `effort: 'xhigh'` on each Agent
-  call, `site-reviewer` and `site-reviewer-deep` alike. Their own files say
-  `high`; that is for reviews during the week.
+- **Every reviewer this check spawns is Opus at `xhigh`** (Jonathan,
+  2026-11-09): pass `model: 'opus'` and `effort: 'xhigh'` on each Agent call,
+  `site-reviewer` and `site-reviewer-deep` alike. Their own files say Fable at
+  `medium`; that is for reviews during the week. A different model on Friday
+  is the point: in the 2026-11-09 test each model caught bugs the other
+  missed.
 
 ## 1. Find the range
 
