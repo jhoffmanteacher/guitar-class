@@ -126,6 +126,30 @@ gate (`caIsVisible`) and Today both read; 1cq stubs it. In
   folds in the old per-day `localStorage` copy (`caStepsToday`) once.
 - Only the revealed-tab set still resets per student/day
   (`caResetRevealsIfNewDay()`).
+
+**An open card fills the page** (Jonathan, 2026-11-10: "an open activity
+should fill the page").
+- With a card open, `caSyncSolo()` sets `body.ca-fold`: the site header and
+  the left menu fold away, **full screen or not**. A reload on
+  `#class-activities/<id>` reopens the card folded. "◀ All activities"
+  (`caCloseOpen`) brings both back, and so does leaving for another page (the
+  CSS is scoped to `#class-activities-screen:not([hidden])`).
+- The **Full screen** button is unchanged: it adds `body.ca-full`, which only
+  zooms the column (`caSyncFullZoom`). The folded view stays at 1×.
+- The rail's Tuner / Timer / Metro / Record go with the rail, so the bar
+  carries four round copies (`caBarFabsHtml`, in `.ca-bar-tools` before Print
+  and Full screen). Each runs the dock's own `togglePopup()` and opens the
+  dock's own popup; styles.css un-hides an open popup and pins it under the
+  bar's buttons (`caPlaceToolPopups`). The rail is hidden by `visibility`, not
+  `display:none`, for that reason. `railCollapsed` is never touched.
+- The bar stays ONE row at 1366×657: when it would wrap (a Focus card with 6–7
+  step buttons, mostly in Spanish), `caFitBar()` measures it and
+  `.ca-bar-tight` drops the Full screen word (icon kept) and closes the gaps.
+- Hidden while a card is open: Find, Español, the account area and
+  `#pm-header`. Minutes still count; a practice-minutes pill waits for the
+  header (`anchorStrip()` finds no strip).
+- Guards: checks.mjs **1cr** (real `caSyncSolo`/`caSyncTopbar`/`caBarTool`
+  plus the CSS rules), `tools/smoke.mjs` `foldWalk`.
 - **Mark complete** closes the card, scrolls to the top and toasts
   `ca.doneNextToast` / `ca.doneAllToast`. Un-marking keeps the card open.
 - A second tap on the current rail row (In class, Songs, My progress, Modules)

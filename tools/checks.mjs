@@ -8555,6 +8555,119 @@ function checkPracticeCards(ctx) {
    stubbed board / dates / completions / today (caTodayStr), EN and ES. Every
    scenario restores the context's state afterwards. Pinned: 16 page renders
    per language. */
+/* 1cr. AN OPEN ACTIVITY FILLS THE PAGE (Jonathan, 2026-11-10: "an open
+   activity should fill the page"). With a card open on the In class page the
+   site header and the left menu fold away, full screen or not
+   (body.ca-fold); full screen adds only the zoom (body.ca-full). The rail's
+   tools go with the rail, so the open card's bar carries four round copies
+   of them (Tuner, Timer, Metro, Record) before Print and Full screen, each
+   running the dock's own togglePopup(). Runs the REAL caSyncSolo(),
+   caSyncTopbar() and caBarTool() in the 0b render context (a card open, a
+   card open in full screen, no card), and reads the real styles.css rules
+   that do the folding. tools/smoke.mjs (foldWalk) clicks it all in a real
+   browser. Pinned: 22 assertions. */
+const FOLD_ASSERTS = 22;
+function checkFoldedActivity(ctx) {
+  head('1cr. An open activity folds the header and the menu away (no full screen needed); the bar carries the four tools');
+  let bad = 0, asserts = 0;
+  const flag = m => { err('1cr: ' + m); problems++; bad++; };
+  if (!ctx) { flag('cannot run — the 0b render context is unavailable'); return; }
+  const want = (cond, msg) => { asserts++; if (!cond) flag(msg); };
+  const run = x => vm.runInContext(x, ctx);
+  for (const fn of ['caSyncSolo', 'caSyncTopbar', 'caBarTool', 'caBarFabsHtml']) {
+    if (run(`typeof ${fn}`) !== 'function') { flag(`${fn}() not found in app.js (renamed? update this check with it)`); return; }
+  }
+  const mkCls = () => { const s = new Set(); return { s, add: (...c) => c.forEach(x => s.add(x)), remove: (...c) => c.forEach(x => s.delete(x)), contains: c => s.has(c), toggle: (c, on) => { const v = on === undefined ? !s.has(c) : !!on; v ? s.add(c) : s.delete(c); return v; } }; };
+  const style = { setProperty() {}, removeProperty() {}, getPropertyValue: () => '' };
+  const pageBody = { classList: mkCls(), style };
+  const screen = { classList: mkCls(), hasAttribute: () => false };
+  const caBody = { contains: el => el === card, querySelectorAll: () => [] };
+  const card = { classList: mkCls(), parentElement: caBody };
+  const mkHtmlEl = () => ({ hidden: true, innerHTML: '', classList: mkCls(), children: [], contains: () => false, querySelector: () => null, querySelectorAll: () => [], getBoundingClientRect: () => ({ top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0 }) });
+  const bar = mkHtmlEl(), title = mkHtmlEl();
+  // The dock's own buttons: the bar must copy each one's icon.
+  const dock = w => ({ querySelector: s => (s === 'svg' ? { outerHTML: `<svg data-dock="${w}"></svg>` } : null) });
+  const doc = ctx.document;
+  const keep = { body: doc.body, gid: doc.getElementById, qs: doc.querySelector, fse: doc.fullscreenElement, fsen: doc.fullscreenEnabled, rfs: doc.documentElement.requestFullscreen, css: ctx.CSS };
+  const ids = { 'class-activities-screen': screen, 'class-activities-body': caBody, 'ca-bar-open': bar, 'ca-page-title': title,
+    'fab-tuner': dock('tuner'), 'fab-timer': dock('timer'), 'fab-metro': dock('metro'), 'fab-rec': dock('rec') };
+  const a = run(`((window.CLASS_ACTIVITIES || []).find(x => x && x.kind !== 'check' && !x.teacherOnly && x.view !== 'card') || {}).id || null`);
+  if (!a) { flag('no Focus/ladder activity to open'); return; }
+  let savedOpen, savedToggle;
+  try {
+    savedOpen = run('caOpenId'); savedToggle = run('typeof togglePopup === "function" ? togglePopup : null');
+    doc.body = pageBody;
+    doc.getElementById = id => (id in ids ? ids[id] : keep.gid(id));
+    doc.querySelector = s => (s.startsWith('.ca-card[open]') ? card : null);
+    doc.fullscreenEnabled = true; doc.documentElement.requestFullscreen = () => Promise.resolve();
+    if (!ctx.CSS) ctx.CSS = { escape: s => String(s) };
+    const classes = () => ({ fold: pageBody.classList.contains('ca-fold'), full: pageBody.classList.contains('ca-full'), solo: screen.classList.contains('ca-solo') });
+    // 1. A card open, normal window: folded, not full.
+    doc.fullscreenElement = null;
+    run('caSyncSolo')(card);
+    let c = classes();
+    want(c.solo, 'a card open did not set .ca-solo on the screen');
+    want(c.fold, 'a card open in the normal window did not set body.ca-fold — the header and the menu stay on screen');
+    want(!c.full, 'a card open in the normal window set body.ca-full — the activity would be zoomed without Full screen');
+    // 2. Full screen on top: folded and full.
+    doc.fullscreenElement = {};
+    run('caSyncSolo')(card);
+    c = classes();
+    want(c.fold && c.full, `a card open in full screen should be folded AND full, got ${JSON.stringify(c)}`);
+    // 3. No card: neither (the list, the header and the menu come back).
+    run('caSyncSolo')(null);
+    c = classes();
+    want(!c.fold && !c.full && !c.solo, `no open card left ${JSON.stringify(c)} on — "All activities" must bring the header and the menu back`);
+    // 4. The bar: four tool buttons, in order, before Print and Full screen.
+    doc.fullscreenElement = null;
+    run(`caOpenId = ${JSON.stringify(a)}`);
+    run('caSyncTopbar()');
+    const html = String(bar.innerHTML);
+    want(pageBody.classList.contains('ca-fold'), 'caSyncTopbar() with a card open did not fold the page');
+    const fabs = /<span class="fab-buttons ca-bar-fabs">([\s\S]*?)<\/span>/.exec(html);
+    want(!!fabs, 'the open card\'s bar has no .fab-buttons.ca-bar-fabs group (fab-tools.js\'s click-away listener needs .fab-buttons)');
+    const btns = fabs ? [...fabs[1].matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/g)] : [];
+    want(btns.length === 4, `the bar has ${btns.length} tool buttons, want 4 (Tuner, Timer, Metro, Record)`);
+    const tools = ['tuner', 'timer', 'metro', 'rec'];
+    btns.forEach((b, i) => {
+      const w = tools[i];
+      want(new RegExp(`data-tool="${w}"`).test(b[1]) && new RegExp(`aria-controls="${w}-popup"`).test(b[1]) && /aria-expanded="(true|false)"/.test(b[1]) && /\btitle="[^"]+"/.test(b[1]) && b[2].includes(`data-dock="${w}"`),
+        `tool button ${i + 1} should be ${w}: data-tool, aria-controls="${w}-popup", aria-expanded, a title and the dock's own icon — got <button${b[1]}>`);
+    });
+    const at = s => html.indexOf(s);
+    want(at('ca-bar-fabs') >= 0 && at('ca-bar-fabs') < at('ca-print-btn') && at('ca-print-btn') < at('class="ca-bar-full"') && at('<span class="ca-bar-tools">') >= 0 && at('<span class="ca-bar-tools">') < at('ca-bar-fabs'),
+      'the bar\'s order should be .ca-bar-tools: Tuner Timer Metro Record, then Print, then Full screen');
+    // 5. Each button runs the dock's togglePopup with its own tool.
+    const calls = [];
+    ctx.__fold = calls;
+    run('togglePopup = w => __fold.push(w)');
+    for (const w of tools) run(`caBarTool(${JSON.stringify(w)})`);
+    want(JSON.stringify(calls) === JSON.stringify(tools), `caBarTool() should call togglePopup with tuner, timer, metro, rec — called ${JSON.stringify(calls)}`);
+    want(btns.every((b, i) => b[1].includes(`onclick="caBarTool(&quot;${tools[i]}&quot;)"`)), 'each tool button\'s onclick should be caBarTool(<its tool>) via jsonAttrArg');
+  } catch (e) {
+    flag('the page threw — ' + e.message);
+  } finally {
+    doc.body = keep.body; doc.getElementById = keep.gid; doc.querySelector = keep.qs; doc.fullscreenElement = keep.fse; doc.fullscreenEnabled = keep.fsen;
+    doc.documentElement.requestFullscreen = keep.rfs; ctx.CSS = keep.css; delete ctx.__fold;
+    try { ctx.__r = [savedOpen, savedToggle]; run('caOpenId = __r[0]; if (__r[1]) togglePopup = __r[1]; delete window.__r;'); } catch (e) { flag('could not restore the state it stubbed: ' + e.message); }
+  }
+  // 6. The CSS that does the folding, read from styles.css.
+  const rules = cssRuleMap(readFileSync(join(ROOT, 'styles.css'), 'utf8'));
+  const on = 'body.ca-fold:has(#class-activities-screen:not([hidden]))';
+  const decl = (sel, prop) => { const m = rules.get(sel); const d = m && m.get(''); return d ? d.get(prop) : undefined; };
+  want(decl(on, '--hdr') === '0px', `${on} must set --hdr:0px (#app's height is worked out from it)`);
+  want(decl(on + ' .header', 'display') === 'none', `${on} .header must be display:none — the header stays when a card is open`);
+  want(decl(on + ' .rail', 'visibility') === 'hidden' && decl(on + ' .rail', 'width') === '0', `${on} .rail must be visibility:hidden and width:0 — the menu stays when a card is open`);
+  want(/^none/.test(decl(on + ' .rail-backdrop', 'display') || ''), `${on} .rail-backdrop must be display:none`);
+  want(decl(on + ' .rail-tools .tool-popup.open', 'visibility') === 'visible' && decl(on + ' .rail-tools .tool-popup.open', 'position') === 'fixed',
+    'an open tool popup must be visibility:visible and position:fixed in the folded view, or the bar\'s tool buttons open nothing a student can see');
+  want(/zoom/.test([...(rules.get('body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main') || new Map()).values()].map(d => [...d.keys()].join()).join()),
+    'the zoom must stay on body.ca-full (Full screen) — .app-layout .main');
+  const foldZoom = [...rules.keys()].filter(s => s.startsWith('body.ca-fold') && [...rules.get(s).values()].some(d => d.has('zoom')));
+  want(!foldZoom.length, `the folded view must stay at normal size (1×), but these rules zoom it: ${foldZoom.join(', ')}`);
+  if (asserts !== FOLD_ASSERTS) flag(`ran ${asserts} assertions, pinned ${FOLD_ASSERTS} — a branch stopped running (or update the pin with the change)`);
+  if (!bad) ok(`1cr: a card open folds the page with no full screen, full screen adds the zoom, no card unfolds it; the bar's 4 tool buttons run togglePopup; 7 CSS rules read (${asserts} assertions)`);
+}
 function checkTodayByDate(ctx) {
   head('1cq. Today\'s activities: every card dated today or yesterday (pending first, then finished), everything else in the folds by board order');
   let bad = 0;
@@ -14714,6 +14827,7 @@ function checkPracticeMinutes(i18nTable) {
   checkPowerChordPopups(rcSets, rcCtx);
   checkPendingFileSwitch(rcCtx);
   checkTodayByDate(rcCtx);
+  checkFoldedActivity(rcCtx);
   checkCardCaptionWords();
   checkJourneyRetired();
   checkSongLibrary();

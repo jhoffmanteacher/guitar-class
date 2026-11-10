@@ -7427,9 +7427,11 @@ function refreshRecUI(slot){
   host.innerHTML = renderRecBody(slot);
   // The rail recorder tile pulses red while its slot is recording, visible
   // even with the popup closed — mirrors the timer FAB's done-flash cue.
+  // The open card's bar has its own Record button while the rail is folded
+  // away (caBarFabsHtml), so it pulses too.
   if (slot === 'fab'){
-    const fab = document.getElementById('fab-rec');
-    if (fab) fab.classList.toggle('rec-live', !!(recState.fab && recState.fab.recording));
+    const live = !!(recState.fab && recState.fab.recording);
+    document.querySelectorAll('#fab-rec, .ca-bar-tool[data-tool="rec"]').forEach(b => b.classList.toggle('rec-live', live));
   }
 }
 
@@ -11858,7 +11860,13 @@ document.addEventListener('keydown',e=>{
    or an overlap. */
 function syncHeaderHeight(){
   const h = document.querySelector('.header');
-  if(h) document.documentElement.style.setProperty('--hdr', h.offsetHeight + 'px');
+  /* A hidden header (an open activity folds it away: body.ca-fold, which sets
+     its own --hdr:0px) measures 0. Writing that 0 here left #app sized for no
+     header for a frame when the card closed and the header came back: the
+     page overflowed, a scrollbar came and went, and the header resized again
+     inside this observer ("ResizeObserver loop", 2026-11-10). Keep the last
+     real height instead. */
+  if(h && h.offsetHeight) document.documentElement.style.setProperty('--hdr', h.offsetHeight + 'px');
 }
 window.addEventListener('resize', syncHeaderHeight);
 syncHeaderHeight();
@@ -15467,7 +15475,13 @@ function pcStop(){
    pcStart and pcStop show and hide it. */
 function pcSyncBarStop(){
   const b = document.querySelector('#ca-bar-open .ca-bar-stop');
-  if(b) b.hidden = !(pcState && pcState.root && pcState.root.isConnected && pcState.root.closest('.ca-card[open]'));
+  if(!b) return;
+  const hide = !(pcState && pcState.root && pcState.root.isConnected && pcState.root.closest('.ca-card[open]'));
+  if(b.hidden === hide) return;
+  b.hidden = hide;
+  // Stop takes ~90px of the bar while it shows (caFitBar).
+  caFitBar();
+  caPlaceToolPopups();
 }
 /* THE SPARE — a lap that comes round with no gap (Jonathan, 2026-10-07: "a
    slight delay when it starts to repeat"). The loop used to be one <audio>
@@ -16498,12 +16512,16 @@ function caSyncTopbar(){
      since 2026-10-31 (the collapsed rows dropped theirs). Exit checks carry
      no print button (see caPrintBtnHtml). */
   const optTag = caOptionalTagHtml(a);
-  // Print + Full screen as one unit, so a bar too narrow for one row moves
-  // them down TOGETHER, to the right end of the second row (styles.css).
-  const tools = (a.kind === 'check' ? '' : caPrintBtnHtml(a)) + caFullBtnHtml();
-  // The bar is rebuilt on every fullscreenchange, which would drop keyboard
-  // focus from the Full screen button the student just pressed.
-  const refocusFull = !!(document.activeElement && document.activeElement.classList.contains('ca-bar-full') && bar.contains(document.activeElement));
+  // Tuner / Timer / Metro / Record, Print and Full screen as one unit, so a
+  // bar too narrow for one row moves them down TOGETHER, to the right end of
+  // the second row (styles.css).
+  const tools = caBarFabsHtml() + (a.kind === 'check' ? '' : caPrintBtnHtml(a)) + caFullBtnHtml();
+  // The bar is rebuilt on every fullscreenchange (and every render), which
+  // would drop keyboard focus from the Full screen or tool button the
+  // student just pressed.
+  const act = document.activeElement && bar.contains(document.activeElement) ? document.activeElement : null;
+  const refocusFull = !!(act && act.classList.contains('ca-bar-full'));
+  const refocusTool = act && act.classList.contains('ca-bar-tool') ? act.dataset.tool : '';
   bar.innerHTML = `<button type="button" class="ca-bar-back" onclick="caCloseOpen()">&#x25C0; ${escHtml(t('ca.allActivities'))}</button>`
     + `<button type="button" class="ca-bar-name" onclick="caScrollToActivity('${escAttr(a.id)}')" title="${escAttr(t('ca.barTop'))}" data-i18n-attr="title:ca.barTop">${nameHtml}</button>`
     + optTag
@@ -16513,21 +16531,95 @@ function caSyncTopbar(){
   bar.hidden = false;
   title.hidden = true;
   if(refocusFull){ const b = bar.querySelector('.ca-bar-full'); if(b) b.focus({ preventScroll: true }); }
+  if(refocusTool){ const b = bar.querySelector(`.ca-bar-tool[data-tool="${refocusTool}"]`); if(b) b.focus({ preventScroll: true }); }
   pcSyncBarStop();
+  caFitBar();
+  caPlaceToolPopups();
 }
+/* One row at 1366×657 (Jonathan, 2026-11-10). The four tool buttons
+   (caBarFabsHtml) cost the bar ~150px, and a Focus card with six or seven
+   step buttons no longer fit on one row in Spanish, where "Todas las
+   actividades" and "Pantalla completa" are the bar's widest words (ca-17,
+   ca-21, ca-34, ca-46; ca-34 in English too, with its Optional tag). Only
+   when the row would wrap, .ca-bar-tight drops the Full screen WORD — the
+   icon stays, and the word stays the button's accessible name, as on a
+   phone — and closes the gaps up (styles.css). Measured after every build,
+   on resize and when the song's Stop comes and goes, never worked out from
+   the data. A phone's bar wraps on purpose (its own rules), so it is left
+   alone there. */
+function caFitBar(){
+  const bar = document.getElementById('ca-bar-open');
+  if(!bar) return;
+  bar.classList.remove('ca-bar-tight');
+  if(bar.hidden || window.matchMedia('(max-width:760px)').matches) return;
+  if(caBarRows(bar) > 1) bar.classList.add('ca-bar-tight');
+}
+// 1 when every item in the bar sits on the first row, 2 when any has
+// wrapped below it (0 when the bar is not on screen).
+function caBarRows(bar){
+  const kids = Array.from(bar.children).filter(k => k.getClientRects().length);
+  if(!kids.length) return 0;
+  const first = kids[0].getBoundingClientRect();
+  return kids.some(k => k.getBoundingClientRect().top >= first.bottom - 1) ? 2 : 1;
+}
+/* The rail's tools in the open card's bar (Jonathan, 2026-11-10). With a card
+   open the left menu folds away (caSyncSolo, body.ca-fold), and the Tuner /
+   Timer / Metronome / Recorder dock went with it, so the bar carries four
+   round copies of the dock's buttons. Each runs the dock's own
+   togglePopup() and opens the dock's own popup: one tuner, one metronome,
+   one timer whatever button was pressed. The icons and titles are read off
+   the dock buttons in index.html, so the two can't drift. The wrapper's
+   .fab-buttons class is what fab-tools.js's click-away listener looks for
+   (a click on these must not count as a click outside the popup it just
+   opened), and aria-controls is what setFabExpanded() keeps in step. */
+const CA_BAR_FABS = [['tuner', 'tools.tuner'], ['timer', 'tools.timer'], ['metro', 'tools.metronome'], ['rec', 'tools.recorder']];
+function caBarFabsHtml(){
+  return '<span class="fab-buttons ca-bar-fabs">' + CA_BAR_FABS.map(([w, key]) => {
+    const dock = document.getElementById('fab-' + w);
+    const svg = dock ? dock.querySelector('svg') : null;
+    const pop = document.getElementById(w + '-popup');
+    const open = !!(pop && pop.classList.contains('open'));
+    const live = w === 'rec' && typeof recState !== 'undefined' && recState.fab && recState.fab.recording;
+    return `<button type="button" class="ca-bar-tool ca-bar-tool-${w}${live ? ' rec-live' : ''}" data-tool="${w}" onclick="caBarTool(${jsonAttrArg(w)})"`
+      + ` aria-controls="${w}-popup" aria-expanded="${open}" title="${escAttr(t(key))}" aria-label="${escAttr(t(key))}"`
+      + ` data-i18n-attr="${escAttr(['title', 'aria-label'].map(at => at + ':' + key).join(';'))}">${svg ? svg.outerHTML : ''}</button>`;
+  }).join('') + '</span>';
+}
+function caBarTool(which){
+  caPlaceToolPopups();
+  togglePopup(which);
+}
+/* Where an opened tool shows while the rail is folded away: under the bar's
+   four tool buttons, its right edge on theirs (styles.css reads the two
+   custom properties, under body.ca-fold only). Measured, not worked out:
+   full screen zooms the bar (caSyncFullZoom) and a narrow bar wraps. */
+function caPlaceToolPopups(){
+  const fabs = document.querySelector('#ca-bar-open:not([hidden]) .ca-bar-fabs');
+  if(!fabs || !document.body.classList.contains('ca-fold')) return;
+  const r = fabs.getBoundingClientRect();
+  if(!r.width) return;
+  const vw = document.documentElement.clientWidth;
+  document.body.style.setProperty('--ca-tool-top', Math.round(r.bottom + 8) + 'px');
+  document.body.style.setProperty('--ca-tool-right', Math.max(8, Math.round(vw - r.right)) + 'px');
+}
+window.addEventListener('resize', () => { caFitBar(); caPlaceToolPopups(); });
 /* Full screen for an open activity (Jonathan, 2026-10-10: "maximize the
    view for class activities on chromebook screen"). A Chromebook's browser
    tabs and address bar take 111px of a 768px screen, and the site header
    another 48px, so a student playing from an open card saw 562px of it.
    The button in the sticky bar asks the browser for full screen (the
-   Fullscreen API — the same thing the video players do), and while the
-   page is full screen AND a card is open, styles.css also folds the site
-   header away (body.ca-full): 721px for the activity. "All activities"
-   leaves full screen too (Jonathan, 2026-10-29: it used to stay on, so the
-   next card opened full screen); Esc, or the button, leaves it. Nothing is
-   saved — a reload starts in the normal window, which is the browser's
-   own rule anyway (full screen needs a tap every time). Hidden where the
-   browser can't do it (an iPhone), so the button never does nothing. */
+   Fullscreen API — the same thing the video players do): 721px for the
+   activity, and styles.css scales it up to the screen's width (body.ca-full,
+   caSyncFullZoom). The site header and the left menu are NOT tied to full
+   screen any more: since 2026-11-10 they fold away whenever a card is open
+   (body.ca-fold, caSyncSolo — Jonathan: "an open activity should fill the
+   page"), because the browser won't enter full screen without a tap.
+   "All activities" leaves full screen too (Jonathan, 2026-10-29: it used to
+   stay on, so the next card opened full screen); Esc, or the button, leaves
+   it. Nothing is saved — a reload starts in the normal window, which is the
+   browser's own rule anyway (full screen needs a tap every time); it reopens
+   the card folded, at normal size. Hidden where the browser can't do it (an
+   iPhone), so the button never does nothing. */
 const CA_FULL_ICON_ON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
 const CA_FULL_ICON_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
 function caFullscreenNow(){ return !!document.fullscreenElement; }
@@ -16547,7 +16639,7 @@ function caToggleFullscreen(){
   } catch(e) { /* an old browser: the button simply does nothing */ }
 }
 // Esc, the button and the Chromebook's own key all land here. caSyncTopbar
-// redraws the button's label; caSyncSolo sets body.ca-full.
+// redraws the button's label; caSyncSolo sets body.ca-full (the zoom).
 document.addEventListener('fullscreenchange', () => { caSyncTopbar(); });
 /* Full screen also scales the activity up to fill the width (styles.css,
    body.ca-full .main): the 1000px column times screen width / 1000, so a
@@ -16578,7 +16670,11 @@ function caSyncSolo(card){
   body.querySelectorAll('.ca-solo-card, .ca-solo-path').forEach(el => el.classList.remove('ca-solo-card', 'ca-solo-path'));
   const on = !!(card && body.contains(card));
   screen.classList.toggle('ca-solo', on);
-  // Full screen + a card open = the site header folds away (caFullBtnHtml).
+  /* A card open = the site header and the left menu fold away (Jonathan,
+     2026-11-10: "an open activity should fill the page"), full screen or
+     not; styles.css body.ca-fold. Full screen on top of that also scales the
+     activity up (body.ca-full, caSyncFullZoom), and only then. */
+  document.body.classList.toggle('ca-fold', on);
   document.body.classList.toggle('ca-full', on && caFullscreenNow());
   caSyncFullZoom();
   if(!on) return;

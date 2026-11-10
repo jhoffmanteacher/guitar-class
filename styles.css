@@ -2921,10 +2921,8 @@ body.explore-open #week-panels{display:none}
 .ca-screen.ca-solo .ca-solo-card > .ca-card-body > .ca-focus-dots{display:none}
 /* 3. Full screen (caFullBtnHtml) at the bar's right end; when a practice
       card's Stop is showing, Stop takes the push and this sits beside it.
-      With a card open in full screen the site header folds away too
-      (body.ca-full, set by caSyncSolo) — scoped to the In class page being
-      the one on screen, so leaving for Modules brings the header straight
-      back. --hdr is what #app's height is worked out from. */
+      The header and the rail fold away with any open card, full screen or
+      not (5, below); full screen adds the zoom (6). */
 .ca-bar-full{position:relative;flex-shrink:0;align-self:center;display:inline-flex;align-items:center;gap:6px;
   font-family:inherit;font-size:0.875rem;font-weight:600;padding:6px 12px;border-radius:16px;
   border:1px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer;white-space:nowrap}
@@ -2942,15 +2940,59 @@ body.explore-open #week-panels{display:none}
 .ca-bar-stop:not([hidden]) ~ .ca-bar-tools{margin-left:0}
 .ca-bar-tools .ca-print-btn{width:32px;height:32px;border-radius:16px}
 .ca-bar-open .ca-optional-tag{flex-shrink:0;align-self:center;margin-right:0}
-body.ca-full:has(#class-activities-screen:not([hidden])){--hdr:0px}
-body.ca-full:has(#class-activities-screen:not([hidden])) .header{display:none}
-/* Full screen takes the left rail too (Jonathan, 2026-10-11), the mobile
-   drawer and its backdrop with it — the header's menu button is gone anyway.
-   "All activities" or Esc brings both back. */
-body.ca-full:has(#class-activities-screen:not([hidden])) .rail,
-body.ca-full:has(#class-activities-screen:not([hidden])) .rail-backdrop{display:none !important}
-/* …and the activity grows to fill the width (Jonathan, 2026-10-13: "make
-   everything bigger too", not just wider). With the rail gone the 1000px
+/*    The rail's four tools ride in the bar too (caBarFabsHtml), as 32px
+      round icon buttons before Print, because the rail folds away while a
+      card is open (5, below). Same icon colours as the dock. */
+.ca-bar-fabs{display:inline-flex;flex-direction:row;align-items:center;gap:4px}
+.ca-bar-tool{position:relative;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;
+  width:32px;height:32px;padding:0;border-radius:16px;border:1px solid var(--border2);background:var(--bg2);
+  color:var(--text);cursor:pointer;font-family:inherit}
+.ca-bar-tool svg{width:16px;height:16px;flex-shrink:0}
+.ca-bar-tool:hover{border-color:var(--text2)}
+.ca-bar-tool:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
+.ca-bar-tool[aria-expanded="true"]{background:var(--purple-bg);border-color:var(--purple-accent)}
+.ca-bar-tool-tuner svg{color:var(--purple-accent)}
+.ca-bar-tool-timer svg{color:var(--green-text)}
+.ca-bar-tool-metro svg{color:var(--blue-text)}
+.ca-bar-tool-rec svg{color:var(--red-text)}
+.ca-bar-tool.rec-live::after{content:'';position:absolute;top:1px;right:1px;width:7px;height:7px;border-radius:50%;background:#d63838;animation:mr-rec-pulse 1.2s infinite}
+@media(prefers-reduced-motion:reduce){.ca-bar-tool.rec-live::after{animation:none}}
+/*    …and when that would wrap the bar (caFitBar measures it: a Focus card
+      with six or seven step buttons, in Spanish above all), the Full screen
+      word goes — the icon stays and the word is still the button's
+      accessible name, as on a phone — and the gaps close up. */
+.ca-bar-open.ca-bar-tight{column-gap:8px}
+.ca-bar-tight .ca-bar-full{padding:6px 9px}
+.ca-bar-tight .ca-bar-full-lab{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* 5. An open activity fills the page (Jonathan, 2026-11-10: "an open
+      activity should fill the page"): with a card open on the In class page
+      the site header and the left menu fold away, full screen or not
+      (body.ca-fold, set by caSyncSolo). Scoped to the In class page being the
+      one on screen, so leaving for Modules brings both straight back, and
+      "All activities" (caCloseOpen) closes the card and brings them back.
+      --hdr is what #app's height is worked out from. Normal size: only Full
+      screen scales the activity up (body.ca-full, 6 below). Used to be
+      full-screen-only (2026-10-10 header, 2026-10-11 rail). The mobile
+      drawer and its backdrop fold with the rail; the header's menu button
+      is gone anyway. railCollapsed is not touched. */
+body.ca-fold:has(#class-activities-screen:not([hidden])){--hdr:0px}
+body.ca-fold:has(#class-activities-screen:not([hidden])) .header{display:none}
+body.ca-fold:has(#class-activities-screen:not([hidden])) .rail-backdrop{display:none !important}
+/*    The rail is hidden by visibility, not display:none, because the tool
+      popups live inside it (.rail-tools) and the bar's buttons open those
+      same popups: a display:none rail would take an opened tuner with it. It
+      gives up its width and stays out of focus order and the accessibility
+      tree; an open popup alone is made visible again and pinned under the
+      bar's tool buttons (caPlaceToolPopups sets the two properties), with
+      transform:none so the drawer's translate can't become its anchor. */
+body.ca-fold:has(#class-activities-screen:not([hidden])) .rail{visibility:hidden;width:0;flex:0 0 0;min-width:0;
+  border:0;overflow:hidden;transform:none;transition:none;box-shadow:none}
+body.ca-fold:has(#class-activities-screen:not([hidden])) .rail-tools .tool-popup.open{visibility:visible;position:fixed;
+  top:var(--ca-tool-top,64px);right:var(--ca-tool-right,16px);left:auto;bottom:auto;width:250px;
+  max-height:calc(100dvh - var(--ca-tool-top,64px) - 8px);overflow-y:auto;z-index:70}
+/* 6. Full screen also grows the activity to fill the width (Jonathan,
+   2026-10-13: "make everything bigger too", not just wider), on
+   body.ca-full only — the folded view (5) stays at 1×. With the rail gone the 1000px
    column sat centred with ~460px of empty page either side on a 1920
    monitor and ~180px on a Chromebook. The column keeps its layout and is
    zoomed by screen width / 1000 — text, buttons, boards and drills all

@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-10 (later) — An open activity fills the page
+
+- **When you open an activity on In class, the purple header and the left menu go away.** The activity has the whole page, and you do not need to press Full screen. Press **◀ All activities** to get the header and the menu back.
+- **The Tuner, Timer, Metronome and Recorder are now in the activity's top bar**, as four small round buttons next to Print. They open the same tools as the buttons at the bottom of the menu. A metronome or timer that is running keeps running when you open or close an activity.
+- **Full screen still works the same way:** it fills the whole screen and makes the activity bigger. If the top bar is short on room, the Full screen button shows only its icon.
+
 ## 2026-11-10 — A new Play Along song: "Perdón Mamá"
 
 - **"Perdón Mamá" by Chuy Montana is on the Songs page under "More Play Along songs."** You play along with the real recording for the whole song, from the intro to the last chord. It uses four chords in one eight-bar loop: C#m, B, F#m and A.

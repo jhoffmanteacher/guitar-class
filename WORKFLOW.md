@@ -325,6 +325,18 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-10 — An open activity fills the page (work order "open activities without the header and menu", Part 1;
+      Jonathan, after a launcher-style layout he likes: "an open activity should fill the page"). Fast.**
+      With a card open on In class, `caSyncSolo()` sets `body.ca-fold` and the header and the left menu fold away, full
+      screen or not (they used to fold only in browser full screen: 2026-10-10 header, 2026-10-11 rail). Full screen keeps
+      its zoom (`body.ca-full`), its "All activities leaves full screen" (2026-10-29) and its normal-window reload; the
+      folded view is 1×. The rail's Tuner / Timer / Metro / Record ride in the bar as four round buttons (his pick) that run
+      the dock's own `togglePopup()`; the rail is `visibility:hidden` so its popups can still show, pinned under the bar.
+      **Reverses** the 2026-10-10/11 note that tied hiding the header and rail to full screen. **My call, report it:** the
+      four buttons made 12 of 146 bar states wrap at 1366×657 (Focus cards with 6–7 step buttons, mostly Spanish:
+      "Todas las actividades" + "Pantalla completa"); when a row would wrap, `caFitBar()` drops the Full screen WORD
+      (icon kept, as on a phone) and closes the gaps, so all 146 are one row. Guards: checks.mjs 1cr, smoke `foldWalk`.
+
 - [x] **2026-11-09 — "This week's goal (minutes)" box on the console's Practice minutes view (work order `WORK-ORDER-weekly-goal-box.md`;
       Jonathan: "the edit would be for the week only, then the next week would reset back to 60"). Always Reviewed (danger-zone file).**
       **Behaviour (his, settled):** blank = the flat goal (`weeklyGoalMinutes`, the placeholder); 1..140 (7 × `dailyCapMinutes`,

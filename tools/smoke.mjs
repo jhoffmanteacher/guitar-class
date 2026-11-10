@@ -58,8 +58,8 @@
                        games-*.js, tuner.js, fab-tools.js)
      activities        In-Class Activities cards: the Optional edge, chord grids,
                        Note Call, Call the chord, Name the power chord, recording
-                       switches, strum patterns, paths (class-activities.js, the ca*
-                       renderers in app.js)
+                       switches, strum patterns, paths, the folded view and the bar's
+                       tool buttons (class-activities.js, the ca* renderers in app.js)
      practice-minutes  the practice-minutes strip (practice-minutes*.js)
      tuning-sim        the Tuning Simulator
    app.js or styles.css touched broadly, or unsure → no --only.
@@ -1165,6 +1165,65 @@ async function pathsWalk(page, run, events, stats) {
   await run('paths:close', `(document.querySelectorAll('.ca-card[open]').forEach(c => { c.open = false; }), 1)`, 100);
 }
 
+/* An open activity fills the page (Jonathan, 2026-11-10). checks.mjs 1cr runs
+   caSyncSolo / caSyncTopbar against stubs; this is the real page at 1366x657,
+   in each language: a Focus card and a practice card open with the header and
+   the left menu off screen and no full screen; each of the bar's four tool
+   buttons opens its own popup fully on screen and on top (and a second press
+   closes it); the bar is one row; "All activities" brings the header and the
+   menu back; a reload on #class-activities/<id> opens the card folded. A
+   checkout without the bar's tools (the baseline) skips it. */
+async function foldWalk(page, run, events, stats, base) {
+  const ids = await run('fold:list', `typeof caBarTool === 'function' ? [(CLASS_ACTIVITIES.find(a => a.view === 'focus' && !a.teacherOnly && !(a.paths && a.paths.length)) || {}).id, (CLASS_ACTIVITIES.find(a => a.view === 'card' && !a.teacherOnly) || {}).id].filter(Boolean) : []`, 10);
+  if (!ids || !ids.length) return;
+  const fail = (w, text) => events.push({ step: 'fold:' + w, kind: 'fold', text });
+  await page.send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false });
+  const state = `(() => { const shown = el => !!el && el.getClientRects().length > 0 && getComputedStyle(el).display !== 'none' && getComputedStyle(el).visibility !== 'hidden' && el.getBoundingClientRect().width > 0;
+    const bar = document.getElementById('ca-bar-open');
+    return { fold: document.body.classList.contains('ca-fold'), full: document.body.classList.contains('ca-full'), header: shown(document.querySelector('.header')), rail: shown(document.querySelector('.rail')),
+      open: !!document.querySelector('.ca-card[open]'), rows: bar && !bar.hidden && typeof caBarRows === 'function' ? caBarRows(bar) : 0, tools: document.querySelectorAll('#ca-bar-open .ca-bar-tool').length, hash: location.hash }; })()`;
+  const popup = (w) => `(() => { const p = document.getElementById('${w}-popup'); const r = p.getBoundingClientRect(); const b = document.querySelector('#ca-bar-open .ca-bar-tool[data-tool="${w}"]');
+    const top = document.elementFromPoint(r.left + r.width / 2, r.top + Math.min(20, r.height / 2));
+    return { open: p.classList.contains('open'), vis: getComputedStyle(p).visibility, r: [Math.round(r.left), Math.round(r.top), Math.round(r.right), Math.round(r.bottom)], vw: innerWidth, vh: innerHeight, onTop: !!top && p.contains(top), expanded: b && b.getAttribute('aria-expanded') }; })()`;
+  for (const lang of LANGS) {
+    await run('fold:' + lang, `setLang('${lang}')`, 600);
+    await run('fold:open-ca:' + lang, 'openClassActivitiesScreen()', 600);
+    for (const id of ids) {
+      const w = `${id} ${lang}`;
+      await run('fold:focus:' + w, `caFocusActivity('${id}')`, 700);
+      const s = await run('fold:state:' + w, state, 10);
+      if (!s || !s.open) { fail(w, 'the card did not open'); continue; }
+      if (!s.fold || s.full || s.header || s.rail) fail(w, `a card open in the normal window should fold the header and the menu away: ${JSON.stringify(s)}`);
+      if (s.rows !== 1) fail(w, `the bar is ${s.rows} rows at 1366x657, want 1`);
+      if (s.tools !== 4) fail(w, `the bar has ${s.tools} tool buttons, want 4`);
+      for (const tool of ['tuner', 'timer', 'metro', 'rec']) {
+        await run(`fold:press-${tool}:` + w, `document.querySelector('#ca-bar-open .ca-bar-tool[data-tool="${tool}"]').click()`, 400);
+        const p = await run(`fold:popup-${tool}:` + w, popup(tool), 10);
+        if (!p || !p.open || p.vis !== 'visible' || !p.onTop || p.r[0] < 0 || p.r[1] < 0 || p.r[2] > p.vw || p.r[3] > p.vh || p.r[2] - p.r[0] < 100) fail(w, `the ${tool} button's popup is not fully on screen and on top: ${JSON.stringify(p)}`);
+        if (p && p.expanded !== 'true') fail(w, `the ${tool} button's aria-expanded is ${p.expanded} with its popup open`);
+        await run(`fold:close-${tool}:` + w, `document.querySelector('#ca-bar-open .ca-bar-tool[data-tool="${tool}"]').click()`, 300);
+        const q = await run(`fold:closed-${tool}:` + w, popup(tool), 10);
+        if (!q || q.open || q.expanded !== 'false') fail(w, `a second press did not close the ${tool} popup: ${JSON.stringify(q)}`);
+      }
+      await run('fold:back:' + w, `document.querySelector('#ca-bar-open .ca-bar-back').click()`, 600);
+      const b = await run('fold:after-back:' + w, state, 10);
+      if (!b || b.fold || !b.header || !b.rail || b.open) fail(w, `"All activities" did not bring the header and the menu back: ${JSON.stringify(b)}`);
+      stats.foldCards = (stats.foldCards || 0) + 1;
+    }
+  }
+  await run('fold:en', "setLang('en')", 600);
+  // A reload on the card's own link reopens it folded, in the normal window.
+  await page.send('Page.navigate', { url: `${base}/index.html#class-activities/${ids[0]}` });
+  await sleep(3500);
+  await run('fold:devBypass', 'devBypass()', 3500);
+  for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'fold:devBypass' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
+  const r = await run('fold:after-reload', state, 10);
+  if (!r || !r.open || !r.fold || r.full || r.header || r.rail) fail('reload', `a reload on #class-activities/${ids[0]} should open the card folded, not full screen: ${JSON.stringify(r)}`);
+  else stats.foldReload = 1;
+  await run('fold:done', `(caCloseOpen(), 1)`, 300);
+  await page.send('Emulation.clearDeviceMetricsOverride');
+}
+
 /* The practice-minutes strip in the main top bar (2026-11-03). The site's own host has no Firebase user under the dev
    bypass, so the engine is given a fake signed-in student and a do-nothing Firestore (what tools/pm-e2e.mjs does, smaller:
    this walk is about WHERE the strip is, not what it counts). Looks at six views in both languages at 1366x657 and at
@@ -1789,6 +1848,7 @@ async function walk(base, chromePort, label) {
     await recordingWalk(page, run, events, stats, base);
     await strumWalk(page, run, events, stats);
     await pathsWalk(page, run, events, stats);
+    await foldWalk(page, run, events, stats, base);
   }
   if (ON['practice-minutes']) await pmHeaderWalk(page, run, events, stats);
   if (ON['tuning-sim']) await tuningSimWalk(page, run, events, stats, base);
@@ -1853,7 +1913,7 @@ try {
   const norm = e => `${e.kind}|${e.step.replace(/^(en|es):/, '')}|${e.kind === 'bad-handler' ? '' : e.text}`;
   const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
   const report = base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
-  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (${LANGS.join(' + ').toUpperCase()}), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.pwnSteps ? `, ${now.stats.pwnSteps} Name the power chord steps (EN + ES: Note Call frets 5-12; Show answer on by default and clicked both ways; the 12 buttons in fret order and a real click on a right and a wrong answer on the buttons and the board; Next, Stop, another step, a language switch; the choice remembered after a reload)` : ''}${now.stats.chordCallRounds ? `, ${now.stats.chordCallRounds} Call the chord steps (EN + ES: Slower by default, the speed switch both ways, Start, a space bar that is cancelled, Stop, a round ended by another step and by a language switch, the default after a reload)` : ''}${now.stats.powerLayouts ? `, a pair play screen says its BPM and its live tempo buttons are clicked (${now.stats.pairPlay || 0} run), the setup's \u22125 / +5 and slider are clicked and measured, EN + ES (${now.stats.tempoSetup || 0} run), the done screen's −5/+5 row clicked twice and Again (${now.stats.doneRow || 0} run), Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} song-switch rounds (16 switches x 3) run on a fake clock: round tempos, the BPM buttons, the play screen fitting 657px, one lit chart per chord, the done screen with 21 changes, ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''}${now.stats.powerBack ? `; the way back to the chords measured and clicked on ${now.stats.powerBack} screens (a pair's and a song switch's done screen and the songs view, EN + ES)` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}${now.stats.pmHeaderViews ? `, practice-minutes strip in the top bar: ${now.stats.pmHeaderViews} view checks (6 views x EN/ES x 1366 and 390 px: a shown button, exactly one strip on top, the Games bar's own on Games, no sideways scroll), ${now.stats.pmHeaderClicks} clicks open My progress, back after a reload, hidden when signed out` : ''}${now.stats.strumSteps ? `, ${now.stats.strumSteps} strum-pattern steps (EN + ES: cells, arrows, chord names, columns, 1366 and 390 px; Play strum lights an arrow, clicks every beat and sounds down strums louder; Play clicks opens the Metronome at 60 BPM, and again at the card's slider once it is dragged; Stop resets)` : ''}${now.stats.pathsActivities ? `, ${now.stats.pathsActivities} paths-activity walks (EN + ES: chooser with a silent preview and step list per path, Start, route length, Got it, Change path, ticks kept across a switch, one saved pick)` : ''}`);
+  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (${LANGS.join(' + ').toUpperCase()}), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.pwnSteps ? `, ${now.stats.pwnSteps} Name the power chord steps (EN + ES: Note Call frets 5-12; Show answer on by default and clicked both ways; the 12 buttons in fret order and a real click on a right and a wrong answer on the buttons and the board; Next, Stop, another step, a language switch; the choice remembered after a reload)` : ''}${now.stats.chordCallRounds ? `, ${now.stats.chordCallRounds} Call the chord steps (EN + ES: Slower by default, the speed switch both ways, Start, a space bar that is cancelled, Stop, a round ended by another step and by a language switch, the default after a reload)` : ''}${now.stats.powerLayouts ? `, a pair play screen says its BPM and its live tempo buttons are clicked (${now.stats.pairPlay || 0} run), the setup's \u22125 / +5 and slider are clicked and measured, EN + ES (${now.stats.tempoSetup || 0} run), the done screen's −5/+5 row clicked twice and Again (${now.stats.doneRow || 0} run), Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} song-switch rounds (16 switches x 3) run on a fake clock: round tempos, the BPM buttons, the play screen fitting 657px, one lit chart per chord, the done screen with 21 changes, ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''}${now.stats.powerBack ? `; the way back to the chords measured and clicked on ${now.stats.powerBack} screens (a pair's and a song switch's done screen and the songs view, EN + ES)` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}${now.stats.pmHeaderViews ? `, practice-minutes strip in the top bar: ${now.stats.pmHeaderViews} view checks (6 views x EN/ES x 1366 and 390 px: a shown button, exactly one strip on top, the Games bar's own on Games, no sideways scroll), ${now.stats.pmHeaderClicks} clicks open My progress, back after a reload, hidden when signed out` : ''}${now.stats.strumSteps ? `, ${now.stats.strumSteps} strum-pattern steps (EN + ES: cells, arrows, chord names, columns, 1366 and 390 px; Play strum lights an arrow, clicks every beat and sounds down strums louder; Play clicks opens the Metronome at 60 BPM, and again at the card's slider once it is dragged; Stop resets)` : ''}${now.stats.pathsActivities ? `, ${now.stats.pathsActivities} paths-activity walks (EN + ES: chooser with a silent preview and step list per path, Start, route length, Got it, Change path, ticks kept across a switch, one saved pick)` : ''}${now.stats.foldCards ? `, ${now.stats.foldCards} folded-card walks at 1366x657 (header and menu off screen with no full screen, a one-row bar, each of its 4 tool buttons opens its popup on screen and closes it, All activities brings both back${now.stats.foldReload ? '; a reload on the card\'s link reopens it folded' : ''})` : ''}`);
   if (now.stats.tuningSimRounds) say(`smoke: Tuning Simulator (EN + ES): ${now.stats.tuningSimRounds} rounds played (round 1 with a real held peg button), ${now.stats.tuningSimChecks} checkpoints — defaults (sound on, level 1, the question up, no naming step), the card (the string to tune and the tuner's letter), the arrow keys (Left = counterclockwise = tighten) and a hidden tab, three clean rounds per level (saved), the sound switch, a wrong way resetting the count, a reload, level 4 (another letter on the tuner, the circle of notes and its arrow, which turns clockwise for Up and counterclockwise for Down, Tighten turns counterclockwise, the held button speeds up, green on the wrong letter does not finish), the notes and arrow as drawn, real keys and clicks (a held Enter answers once, focus after a key, Space/Enter/click = one tick), the saved level never lowered, green on the circle only when done, and no getUserMedia call`);
   if (LANGS.length === 1) say('smoke: --en-only — Spanish not walked (the end-of-day / Friday full walk does it); "EN + ES" below means English only');
   if (ONLY !== null) say(`smoke: --only ${AREAS.filter(a => ON[a]).join(', ')} — not walked: ${AREAS.filter(a => !ON[a]).join(', ')}`);

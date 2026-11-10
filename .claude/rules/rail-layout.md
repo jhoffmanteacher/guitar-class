@@ -36,6 +36,10 @@ Test viewport: **1366×657** (a Chromebook with browser chrome).
     **`railCollapsed`** (try/catch, defaults to expanded).
   - They never both apply: the collapse button is `display:none` below the
     drawer breakpoint, and the narrow-layout block unwinds the collapsed rules.
+  - On top of either, **an open In class card folds the rail away**
+    (`body.ca-fold`, 2026-11-10; skill `in-class-activities`): `visibility:hidden`
+    and width 0, not `display:none`, because the tool popups live in
+    `.rail-tools` and the card's bar opens them. Neither class above changes.
   - Nav labels are **clipped, never `display:none`**: each is its button's
     accessible name. `index.html` gives every nav item and every tool a
     translated `title=`.

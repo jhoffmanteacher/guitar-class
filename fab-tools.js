@@ -335,12 +335,17 @@ function flashTimerDisplay(){ flashClass(document.getElementById('timer-display'
 // Pulse the floating timer button too — it's visible even when the popup is closed.
 // The timer FAB is now permanently docked in the rail, so this alone still
 // lands the classroom cue — no separate launcher to also flash.
-function flashTimerFab(){ flashClass(document.getElementById('fab-timer'),'fab-timer-done',3600); }
+function flashTimerFab(){ fabOpeners('timer').forEach(el=>flashClass(el,'fab-timer-done',3600)); }
 function resetTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; } timerSecs=timerSelected; updateTimerDisplay(); document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); }
 function toggleTimer(){ if(timerRunning){ /* pause: bank the true remaining seconds off the deadline (the last tick may be stale if the tab was hidden) */ timerSecs=Math.max(0,Math.ceil((timerEndAt-Date.now())/1000)); updateTimerDisplay(); clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); } else { if(timerSecs<=0){ timerSecs=timerSelected; updateTimerDisplay(); } /* already rang — Start means restart, not re-fire the alarm a second later */ timerRunning=true; timerEndAt=Date.now()+timerSecs*1000; document.getElementById('timer-btn').innerHTML=toolLabelHtml('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 5v14M15 5v14"/></svg>','tools.pause'); timerInterval=setInterval(()=>{ timerSecs=Math.max(0,Math.ceil((timerEndAt-Date.now())/1000)); updateTimerDisplay(); if(timerSecs<=0){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); [0,0.35,0.7].forEach(d=>setTimeout(()=>toolsBeep(660,0.3),d*1000)); flashTimerDisplay(); flashTimerFab(); } },1000); } }
 
 /* ── Popup logic ── */
-function setFabExpanded(which, isOpen){ const f=document.getElementById('fab-'+which); if(f) f.setAttribute('aria-expanded', isOpen?'true':'false'); }
+/* Every button that opens a tool's popup: the dock's #fab-<which> and, on the
+   main site's In class page while an activity is open, that card's bar copy
+   (app.js caBarFabsHtml — the rail is folded away then). A Journey page has
+   only the dock's, so nothing changes there. */
+function fabOpeners(which){ return Array.from(document.querySelectorAll('[aria-controls="'+which+'-popup"]')); }
+function setFabExpanded(which, isOpen){ fabOpeners(which).forEach(f=>f.setAttribute('aria-expanded', isOpen?'true':'false')); }
 function togglePopup(which){
   const open=document.getElementById(which+'-popup').classList.toggle('open');
   setFabExpanded(which, open);
@@ -416,7 +421,9 @@ function closePopup(which, stopAudio){
   // The tuner always stops: it's the one holding the mic.
   if(which==='tuner') stopTuner();
   if(which==='metro' && stopAudio) stopMetro();
-  if(hadFocus){ const fab = document.getElementById('fab-'+which); if(fab) fab.focus(); }
+  // Back to the opener the student can see (the dock's, or the card bar's
+  // while the rail is folded away); a hidden one can't take focus.
+  if(hadFocus){ const fab = fabOpeners(which).find(b=>b.getClientRects().length && getComputedStyle(b).visibility!=='hidden'); if(fab) fab.focus(); }
 }
 // Uses composedPath() (the propagation path captured at dispatch time), not
 // e.target.closest(): Start/Stop/Pause buttons replace their own innerHTML
