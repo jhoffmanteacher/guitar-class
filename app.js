@@ -3185,25 +3185,31 @@ const SNIPPET_TRACKS = {
      1.198x (its grid fits 4 ms off the scaled one, steady).
 
      A STEADY GRID: the record is made to a click. An onset-strength fit over
-     the whole file gives exactly 115.000 a minute, first beat 0.100 s, and
-     holds its phase within 4 ms from 0 to 180 s. Counted in 4, one bar
-     2.087 s. Which beat is 1 came from the chords (Moises' chart for the
-     record: C#m B F#m A): the chord changes land on beats 1 and 3 of a bar
-     and the loop's first chord, C#m, starts in bar 1; Jonathan to confirm by
-     ear with ?snipcal=1. The harmony is ONE 6-bar loop (24 beats) the whole
-     way through: 80% of the beats agree from one lap to the next. Song map
-     in these bars, read off the loop and the mid-band (voice) energy: band
-     alone 1-13, singing from bar 14 to about 37, band alone 38-49, singing
-     50-76, band alone 77-84, the last chord at 85 ringing to the end of the
-     file (bar 87). */
+     the whole file gives exactly 115.000 pulses a minute and holds its phase
+     within 4 ms from 0 to 180 s. It is 6/8 felt in two, like Arsenal
+     Efectivo and Luna (Jonathan, 2026-11-10, after a review measured the
+     accents: strong every 6 pulses, the bass cell root-root-fifth every 3):
+     the pulses are the 6/8's eighth notes in pairs, so the eighth note is
+     230 a minute, a bar is 3 pulses (1.565 s) and the room counts
+     230 / 3 = 76.7 big beats a minute, two to a bar. The first two pulses
+     are a near-silent lead-in; bar 1 is the first loud C#m, pulse 2 of the
+     file (0.100 + 2 x 60/115 = 1.143 s). Five signs agree on that pulse: the
+     first loud hit, the bass cell starts, every chord change, the strongest
+     accent and the final C#m (pulse 338, bar 113). Jonathan to confirm by ear
+     with ?snipcal=1. The harmony is ONE 8-bar loop (one chord a bar: C#m C#m
+     B B F#m F#m A B), the bass agreeing on 93% of the pulses. Song map in
+     these bars, read off the loop and the mid-band (voice) energy: band
+     alone 1-16, singing from about 18 to 49, band alone to 65, singing from
+     about 66 to 103, band alone to 112, the last C#m at bar 113 ringing to
+     the end of the file. */
   'perdon-mama': {
     src:     'audio/chuy-montana-perdon-mama-backing-E-115bpm-440hz-full.mp3',
     srcSlow: 'audio/chuy-montana-perdon-mama-backing-E-96bpm-440hz-full.mp3',
-    trackBpm: 115, trackBpmSlow: 96,    // what the FILES are (quarter notes), for the slow-tier rescale
-    feltBpm: 115,                       // counted in 4 at record speed
-    beatsPerBar: 4,
+    trackBpm: 115, trackBpmSlow: 96,    // what the FILES are (the 6/8's quarter-note pulses), for the slow-tier rescale
+    feltBpm: 230 / 3,                   // big beats: 3 eighth notes each
+    beatsPerBar: 2,                     // two big beats per 6/8 bar
     durationSec: 181,
-    anchor: 0.100,
+    anchor: 1.143,
     anchorVerified: true,
     defaultSlow: true,
   },

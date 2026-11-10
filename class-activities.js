@@ -7216,21 +7216,30 @@ window.CLASS_ACTIVITIES = [
      song activity for it with power chords and actual chords", with the
      Rembeats record and its Moises chord chart). A practice card on the
      RECORD (track 'perdon-mama' in app.js — its comment has how the grid and
-     the song map were found), bars 1-85, the whole song, and it loops (no
+     the song map were found), bars 1-113, the whole song, and it loops (no
      Song Journey page, so not `wholeSong`). No lyrics: the song is not public
      domain, so the rows carry no words. Four-bar rows, as ca-39.
 
+     6/8, COUNTED IN TWO BIG BEATS A BAR like Arsenal Efectivo and Luna
+     (Jonathan picked this over 3/4 and 4/4, 2026-11-10, after the review
+     measured the record's accents: strong every 6 pulses, the bass cell
+     root-root-fifth every 3 pulses). Every `beats` below is a big beat: one
+     bar = 2.
+
      THE CHORDS: Moises' chart for this record (key E major) gives C#m, B,
-     F#m and A, with C#m7, F#m7, Amaj7 and one E around them. The record
-     (chroma on every beat, bass under it) is ONE 6-bar loop, 24 beats, all
-     the way through, 80% of beats agreeing from lap to lap: B 2 · C#m 5 ·
-     A 1 · B 6 · F#m 6 · A 3 · B 1 beats. The A on the last beat of bar 2 and
-     the B on the last beat of bar 6 are the bass walking into the next
-     chord (A into B, B into the next lap's B), so that B joins the next
-     lap's B (3 beats). The sevenths and the E (Amaj7's top) are folded into
-     the plain chord. THE BAR GRID (which beat is 1) is read off the chord
-     changes; Jonathan to confirm it by ear (?snipcal=1). The song ends on
-     C#m, bar 85 (B for two beats, then C#m ringing out).
+     F#m and A, with C#m7, F#m7, Amaj7 and one E around them. The record is
+     ONE 8-bar loop all the way through, one chord per bar: C#m C#m | B B |
+     F#m F#m | A | B (16 big beats). The bass agrees with that on 93% of the
+     pulses; an A one pulse before the B, which the first build wrote, is
+     C#m with its fifth in the bass (G# 49% of laps, A 16%), so it is gone.
+     The sevenths and the E (Amaj7's top) are folded into the plain chord.
+     THE BAR GRID: bar 1 is the first loud C#m, pulse 2 of the file (the two
+     pulses before it are a near-silent lead-in); the five signs that agree
+     are the first loud hit, the bass cell starts, every chord change, the
+     strongest accent and the final C#m. Song map in these bars: band alone
+     1-16, singing from about bar 18 to 49, band alone to 65, singing from
+     about 66 to 103, band alone to 112, the last C#m at bar 113 ringing to
+     the end (the section edges sit on laps, so they are within a bar).
 
      Full chords / Power chords switch, like ca-39. Full chords are the
      record's key as barre chords (C#m and B on the A-string shape, F#m on
@@ -7252,10 +7261,10 @@ window.CLASS_ACTIVITIES = [
     },
     title:    '"Perdón Mamá" - Chuy Montana — Play Along',
     title_es: '"Perdón Mamá" - Chuy Montana — Toca con la canción',
-    intro:    'Perdón Mamá uses four chords, C#m, B, F#m and A, in the same six-bar loop all the way through. Today you play it with the band.',
-    intro_es: 'Perdón Mamá usa cuatro acordes, C#m, B, F#m y A, en la misma vuelta de seis compases de principio a fin. Hoy la tocas con la banda.',
-    intro_power:    'Perdón Mamá uses four power chords, C#5, B5, F#5 and A5, in the same six-bar loop all the way through. Today you play it with the band.',
-    intro_power_es: 'Perdón Mamá usa cuatro acordes de potencia, C#5, B5, F#5 y A5, en la misma vuelta de seis compases de principio a fin. Hoy la tocas con la banda.',
+    intro:    'Perdón Mamá uses four chords, C#m, B, F#m and A, in the same eight-bar loop all the way through. Today you play it with the band.',
+    intro_es: 'Perdón Mamá usa cuatro acordes, C#m, B, F#m y A, en la misma vuelta de ocho compases de principio a fin. Hoy la tocas con la banda.',
+    intro_power:    'Perdón Mamá uses four power chords, C#5, B5, F#5 and A5, in the same eight-bar loop all the way through. Today you play it with the band.',
+    intro_power_es: 'Perdón Mamá usa cuatro acordes de potencia, C#5, B5, F#5 y A5, en la misma vuelta de ocho compases de principio a fin. Hoy la tocas con la banda.',
     card: {
       track: 'perdon-mama',
       chordGrid: true,  // chord grid: each chord once, cursor on the beats only (2026-10-26) — see CARD above
@@ -7265,136 +7274,107 @@ window.CLASS_ACTIVITIES = [
       sections: [
         {
           label: 'Intro', label_es: 'Intro',
-          caption: 'Intro · the band plays alone · the six-bar loop, two times', caption_es: 'Intro · la banda toca sola · la vuelta de seis compases, dos veces',
-          fromBar: 1, bars: 12,
+          caption: 'Intro · the band plays alone · the eight-bar loop, two times', caption_es: 'Intro · la banda toca sola · la vuelta de ocho compases, dos veces',
+          fromBar: 1, bars: 16,
           notes: [
+            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 4 },
+            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 4 },
+            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 4 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 2 },
             { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 2 },
-            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 5 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 1 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 6 },
-            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 6 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 3 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 1 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 2 },
-            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 5 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 1 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 6 },
-            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 6 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 3 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 1 }
+            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 4 },
+            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 4 },
+            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 4 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 2 },
+            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 2 }
           ]
         },
         {
           label: 'Verse 1', label_es: 'Estrofa 1',
-          caption: 'Verse 1 · the same six bars, four times', caption_es: 'Estrofa 1 · los mismos seis compases, cuatro veces',
-          fromBar: 13, bars: 24,
+          caption: 'Verse 1 · the same eight bars, four times', caption_es: 'Estrofa 1 · los mismos ocho compases, cuatro veces',
+          fromBar: 17, bars: 32,
           notes: [
+            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 4 },
+            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 4 },
+            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 4 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 2 },
             { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 2 },
-            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 5 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 1 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 6 },
-            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 6 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 3 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 1 },
+            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 4 },
+            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 4 },
+            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 4 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 2 },
             { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 2 },
-            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 5 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 1 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 6 },
-            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 6 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 3 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 1 },
+            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 4 },
+            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 4 },
+            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 4 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 2 },
             { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 2 },
-            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 5 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 1 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 6 },
-            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 6 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 3 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 1 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 2 },
-            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 5 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 1 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 6 },
-            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 6 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 3 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 1 }
+            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 4 },
+            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 4 },
+            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 4 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 2 },
+            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 2 }
           ]
         },
         {
-          label: 'Break', label_es: 'Pausa',
-          caption: 'Break · the singing stops and the band keeps going · two times', caption_es: 'Pausa · se acaba el canto y la banda sigue · dos veces',
-          fromBar: 37, bars: 12,
+          label: 'Interlude', label_es: 'Interludio',
+          caption: 'Interlude · the singing stops and the band keeps going · two times', caption_es: 'Interludio · se acaba el canto y la banda sigue · dos veces',
+          fromBar: 49, bars: 16,
           notes: [
+            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 4 },
+            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 4 },
+            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 4 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 2 },
             { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 2 },
-            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 5 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 1 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 6 },
-            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 6 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 3 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 1 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 2 },
-            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 5 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 1 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 6 },
-            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 6 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 3 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 1 }
+            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 4 },
+            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 4 },
+            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 4 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 2 },
+            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 2 }
           ]
         },
         {
           label: 'Verse 2', label_es: 'Estrofa 2',
-          caption: 'Verse 2 · the same six bars, five times', caption_es: 'Estrofa 2 · los mismos seis compases, cinco veces',
-          fromBar: 49, bars: 30,
+          caption: 'Verse 2 · the same eight bars, five times', caption_es: 'Estrofa 2 · los mismos ocho compases, cinco veces',
+          fromBar: 65, bars: 40,
           notes: [
+            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 4 },
+            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 4 },
+            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 4 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 2 },
             { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 2 },
-            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 5 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 1 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 6 },
-            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 6 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 3 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 1 },
+            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 4 },
+            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 4 },
+            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 4 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 2 },
             { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 2 },
-            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 5 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 1 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 6 },
-            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 6 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 3 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 1 },
+            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 4 },
+            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 4 },
+            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 4 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 2 },
             { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 2 },
-            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 5 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 1 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 6 },
-            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 6 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 3 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 1 },
+            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 4 },
+            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 4 },
+            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 4 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 2 },
             { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 2 },
-            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 5 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 1 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 6 },
-            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 6 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 3 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 1 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 2 },
-            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 5 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 1 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 6 },
-            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 6 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 3 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 1 }
+            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 4 },
+            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 4 },
+            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 4 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 2 },
+            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 2 }
           ]
         },
         {
           label: 'Ending', label_es: 'Final',
           caption: 'Ending · one more time through · the song ends on C#m', caption_es: 'Final · una vuelta más · la canción termina en C#m',
           caption_power: 'Ending · one more time through · the song ends on C#5', caption_power_es: 'Final · una vuelta más · la canción termina en C#5',
-          fromBar: 79, bars: 7,
+          fromBar: 105, bars: 9,
           notes: [
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 2 },
-            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 5 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 1 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 6 },
-            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 6 },
-            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 3 },
-            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 1 },
+            { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 4 },
+            { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 4 },
+            { frets: [['E', 2], ['A', 4], ['D', 4], ['G', 2], ['B', 2], ['e', 2]], note: 'F#m', midi: [42, 49, 54, 57, 61, 66], beats: 4 },
+            { frets: [['A', 0], ['D', 2], ['G', 2], ['B', 2], ['e', 0]], note: 'A', midi: [45, 52, 57, 61, 64], beats: 2 },
             { frets: [['A', 2], ['D', 4], ['G', 4], ['B', 4], ['e', 2]], note: 'B', midi: [47, 54, 59, 63, 66], beats: 2 },
             { frets: [['A', 4], ['D', 6], ['G', 6], ['B', 5], ['e', 4]], note: 'C#m', midi: [49, 56, 61, 64, 68], beats: 2 }
           ]
