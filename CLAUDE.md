@@ -186,11 +186,11 @@ Every new student-facing shell string goes in `i18n.js` (read its header for wir
   every `response:{type:'short'}` in the data, rendered or not.
 - **In-Class Activities: one short line per direction** (Jonathan, 2026-11-10: "students don't read them anyway").
   Step `text`/`text_power`, `intro`/`intro_power`, practice-card check `text`, `bassDirections`, a recording
-  version's `intro`, and each drill's direction line before Start (i18n.js): ONE sentence, verb first, what to play
+  version's `intro`, each drill's direction line before Start and a practice card's directions line (i18n.js): ONE sentence, verb first, what to play
   and the finish line together, one rendered line at 1366×657 in both languages (1cs caps the length). Keep the
   count — the tap dots read it from the whole line (`caStepHtml` passes `wholeLine`; 1bg holds EN = ES). No list,
   no "You've got it when:", no fix-it line, no definition. `_es`: shorten the existing Spanish, reuse its words.
-  A drill that already says what to do takes no step text (ca-23). Exit checks (ca-14, ca-15) stay frozen. He asked
+  A drill that already says what to do and when it is done takes no step text (ca-23). Exit checks (ca-14, ca-15) stay frozen. He asked
   for the rewrite, so "preserve the author's words" below does not cover activity directions.
 - **Multi-step directions are lists (modules)** (`<ol>`/`<ul>`, `_es` mirrors; >~200 chars, 2+ actions). "You've got it when: …" is plain text AFTER `</ol>`, never an `<li>` or a
   hand-written span; "No score —" notes, partner bonuses, Journey links, then `step-figure`, all last.

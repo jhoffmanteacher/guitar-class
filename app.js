@@ -8547,7 +8547,9 @@ function sdCheckOff(key){
 const GOT_IT_RE = /(You&#39;ve got it when:|You've got it when:|You’ve got it when:|Lo tienes cuando:)/;
 /* ── Rep counter (practice-chunks work order, 2026-09-19) ──
    When the got-it-when BODY (not the whole step — a number earlier in the
-   directions shouldn't trigger this) names a small count — "three clean
+   directions shouldn't trigger this; an In-Class Activity step, which is one
+   line with no label since 2026-11-10, is read whole: wrapGotItWhen's
+   wholeLine) names a small count — "three clean
    reps in a row", "3 times", "four clean loops" — render N tap dots under
    it. "9 of 10" is a drill score, not a rep count, and is excluded first.
    Whatever it can't confidently parse renders with no dots, same as today. */
@@ -8587,7 +8589,7 @@ let repDotState = {};
 function repDotsHtml(rep, n){
   if(rep.isDone){
     const dots = Array.from({length:n}).map(() => '<span class="rep-dot on" aria-hidden="true">&#9679;</span>').join('');
-    return `<div class="rep-dots rep-dots-done">${dots}</div>`;
+    return `<div class="rep-dots rep-dots-done${rep.line ? ' rep-dots-line' : ''}">${dots}</div>`;
   }
   const filled = repDotState[rep.key] || 0;
   const extraArg = rep.extra !== undefined ? `,${rep.extra}` : '';
@@ -8596,7 +8598,7 @@ function repDotsHtml(rep, n){
     return `<button type="button" class="rep-dot${on ? ' on' : ''}" aria-pressed="${on}" aria-label="${escAttr(t('rep.dotAria', {n: i + 1}))}" onclick="repDotTap(this,'${escAttr(rep.key)}',${n},${i + 1});if(${i + 1}>=${n})repDotFinish(this,'${rep.closestSel}','${rep.btnSel}','${escAttr(rep.id)}'${extraArg})">${on ? '&#9679;' : '&#9675;'}</button>`;
   }).join('');
   const resetHtml = `<button type="button" class="rep-dot-reset"${filled ? '' : ' hidden'} onclick="repDotReset(this)">${escHtml(t('rep.startOver'))}</button>`;
-  return `<div class="rep-dots" data-rep-key="${escAttr(rep.key)}">${dots}${resetHtml}</div>`;
+  return `<div class="rep-dots${rep.line ? ' rep-dots-line' : ''}" data-rep-key="${escAttr(rep.key)}">${dots}${resetHtml}</div>`;
 }
 // Fills the tapped dot and every one before it, then — once every dot is
 // filled — drives the step's OWN Mark-done path (toggleStepDone /
@@ -8638,12 +8640,14 @@ function wrapGotItWhen(html, rep){
      label (Jonathan, 2026-11-10: "students don't read them anyway"): "Play
      Line 1 into Line 2 four times without stopping." caStepHtml() opts in
      (rep.wholeLine), so the count is read from the whole line and the dots
-     go after it. The module call does NOT opt in: a module step with a stray
-     "three times" outside its got-it sentence must not grow dots. checks.mjs
-     1bg runs both calls. */
+     go after it, flush with the line (rep-dots-line: there is no got-it rule
+     to sit under). The module call does NOT opt in: a module step with a
+     stray "three times" outside its got-it sentence must not grow dots.
+     checks.mjs 1bg renders both: every activity step's dots match its line,
+     and every module set draws the same number of dot groups as before. */
   if(!m){
     const n = (rep && rep.wholeLine) ? repCountFromGotIt(html) : 0;
-    return n ? html + repDotsHtml(rep, n) : html;
+    return n ? html + repDotsHtml(Object.assign({}, rep, { line: true }), n) : html;
   }
   const head = html.slice(0, m.index);
   const rest = html.slice(m.index + m[0].length);
@@ -9268,7 +9272,8 @@ function ncSetupHtml(key){
   }).join('');
   return ncHeadHtml(st, ncSetupMeta(st)) +
     `<div class="sdr-body">` +
-      `<div class="sdr-intro">${escHtml(t(ncK(st.cfg.power, 'intro')))}</div>` +
+      // One line before Start; with the mic on it says the mic listens instead of asking for a tap.
+      `<div class="sdr-intro">${escHtml(t(ncK(st.cfg.power, st.coach ? 'introCoach' : 'intro')))}</div>` +
       toggles +
       `<div class="sdr-pills nc-levels">${pills}</div>` +
       `<div class="nc-desc">${escHtml(ncLevelDesc(L, st.cfg.power))}</div>` +
@@ -13910,12 +13915,13 @@ function caStepHtml(a, step, si, isOpen, isDone, opts){
   // The Journey door lives in the LAST step and nowhere else (see caJourneyLinkHtml).
   if(si === (a.steps || []).length - 1) parts.push(caJourneyLinkHtml(a));
   // Step text is first-party authored HTML, same trust level as module step
-  // content — trusted (not escHtml'd) so <ol>/<ul> markup renders per the
-  // house list rule, and wrapGotItWhen() can style the got-it-when sentence.
+  // content — trusted (not escHtml'd). Since 2026-11-10 an activity step is
+  // one plain line (no list, no got-it label); wrapGotItWhen() reads its
+  // count and puts the tap dots under it.
   /* `|| ''`: a label + drill step (ca-23) has no text at all, and
      wrapGotItWhen passes a non-string straight through — so the template
      printed the word "undefined" under every step label (2026-09-30). */
-  // wholeLine: the step is one line with no got-it label; its count makes the dots (wrapGotItWhen).
+  // The one-line opt-in below: the step has no got-it label, so its whole line's count makes the dots.
   const detailHtml = `${wrapGotItWhen(tf(step,'text') || '', {
       key: `ca:${a.id}:${si}`, isDone, closestSel: '.ca-step', btnSel: focus ? '.ca-focus-next' : '.ca-step-donebtn', id: a.id, extra: si,
       wholeLine: true,

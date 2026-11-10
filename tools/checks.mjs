@@ -8671,7 +8671,8 @@ function checkFoldedActivity(ctx) {
 /* 1cs. ONE SHORT LINE PER DIRECTION IN AN IN-CLASS ACTIVITY (Jonathan,
    2026-11-10: "students don't read them anyway"). Every step text, intro,
    practice-card check, bass direction and recording-version intro (2A), and
-   every drill's direction line before Start (2C, i18n.js), is ONE rendered
+   every drill's direction line before Start and each practice card's own
+   directions line (2C, i18n.js), is ONE rendered
    line at 1366x657 in the folded view, in English and Spanish. That was
    measured in a real browser when the rule shipped; this keeps it: each is at
    most CAP_2A / CAP_2C characters (the longest string that measured one line,
@@ -8682,9 +8683,11 @@ function checkFoldedActivity(ctx) {
    are frozen and not read. Modules keep their lists (CLAUDE.md). Pinned
    counts, so a field that stops being read fails. */
 const CAP_2A = 105, CAP_2C = 110;
-const ONE_LINE_2A = 400, ONE_LINE_2C = 24;
-const DRILL_DIRECTION_KEYS = ['drill.intro', 'deck.introOne', 'deck.introTwo', 'nc.intro', 'nc.introAnswer', 'ncp.intro', 'ncp.introAnswer',
-  'chc.introFollow', 'chc.introCall', 'pwn.introName', 'pwn.introFret', 'pwn.introBoth'];
+const ONE_LINE_2A = 410, ONE_LINE_2C = 38, DRILL_SCREENS = 138;
+// Each drill's line before Start, and a practice card's own directions line (.pc-dir; Jonathan, 2026-11-10: shorten those too).
+const DRILL_DIRECTION_KEYS = ['drill.intro', 'deck.introOne', 'deck.introTwo', 'nc.intro', 'nc.introCoach', 'nc.introAnswer', 'ncp.intro', 'ncp.introCoach',
+  'ncp.introAnswer', 'chc.introFollow', 'chc.introCall', 'pwn.introName', 'pwn.introFret', 'pwn.introBoth',
+  'ca.cardDirections', 'ca.cardChordDirections', 'ca.cardStrumDirections', 'ca.cardChordMixedDirections', 'ca.sheetDirections'];
 const DRILL_DIRECTIONS_GONE = ['nc.descAnswer', 'nc.howCoachAnswer', 'nc.howCoach', 'nc.howTap', 'ncp.descAnswer', 'ncp.howCoachAnswer',
   'ncp.howCoach', 'ncp.howTap', 'pwn.howAnswer', 'pwn.howScored'];
 function checkOneLineDirections(ctx, i18nTable) {
@@ -8707,8 +8710,13 @@ function checkOneLineDirections(ctx, i18nTable) {
     const both = (where, o, f) => { for (const k of [f, f + '_es']) if (typeof o[k] === 'string') { n2a++; one(`${a.id}${where}.${k}`, o[k], CAP_2A); } };
     for (const f of ['intro', 'intro_power', 'bassDirections']) both('', a, f);
     (a.steps || []).forEach((st, si) => { both(`.steps[${si}]`, st, 'text'); both(`.steps[${si}]`, st, 'text_power'); });
-    ((a.card || {}).checks || []).forEach((c, ci) => both(`.card.checks[${ci}]`, c, 'text'));
-    for (const [k, rv] of Object.entries(a.recordingVersions || {})) both(`.recordingVersions.${k}`, rv, 'intro');
+    ((a.card || {}).checks || []).forEach((c, ci) => { both(`.card.checks[${ci}]`, c, 'text'); both(`.card.checks[${ci}]`, c, 'text_power'); });
+    for (const [k, rv] of Object.entries(a.recordingVersions || {})) {
+      both(`.recordingVersions.${k}`, rv, 'intro'); both(`.recordingVersions.${k}`, rv, 'intro_power');
+      ((rv.card || {}).checks || []).forEach((c, ci) => both(`.recordingVersions.${k}.card.checks[${ci}]`, c, 'text'));
+    }
+    // A paths activity's chooser (ca-46): each path's one-line blurb.
+    (a.paths || []).forEach((pa, pi) => both(`.paths[${pi}]`, pa, 'blurb'));
   }
   for (const key of DRILL_DIRECTION_KEYS) {
     const e = i18nTable[key];
@@ -8721,9 +8729,54 @@ function checkOneLineDirections(ctx, i18nTable) {
     const short = key.split('.')[1];
     if (new RegExp(`['"]${key.replace('.', '\\.')}['"]|ncK\\([^)]*['"]${short}['"]`).test(app)) flag(`app.js reads ${key} again`);
   }
+  /* The drill screens before Start, rendered for real: every drill in the activities (EN + ES), and Note Call in every
+     state (Show answer on/off x mic on/off) and Name the power chord with Show answer on/off. Each shows exactly ONE
+     direction line (.sdr-intro), no second paragraph (.nc-how) and no raw i18n key. */
+  let screens = 0;
+  const saveLang2 = vm.runInContext('getLang()', ctx);
+  try {
+    const dispatch = vm.runInContext('typeof renderShuffleDrill === "function" ? renderShuffleDrill : null', ctx);
+    const ncSetup = vm.runInContext('typeof ncSetupHtml === "function" ? ncSetupHtml : null', ctx);
+    const pwnSetup = vm.runInContext('typeof pwnSetupHtml === "function" ? pwnSetupHtml : null', ctx);
+    if (!dispatch || !ncSetup || !pwnSetup) flag('renderShuffleDrill / ncSetupHtml / pwnSetupHtml not found in app.js — update 1cs with a rename');
+    else for (const lang of ['en', 'es']) {
+      vm.runInContext(`setLang(${JSON.stringify(lang)})`, ctx);
+      const screen = (where, html) => {
+        screens++;
+        const intros = (String(html).match(/class="sdr-intro"/g) || []).length;
+        if (intros !== 1) flag(`${where} (${lang}): the screen before Start shows ${intros} direction lines (.sdr-intro), want exactly 1`);
+        if (/nc-how/.test(html)) flag(`${where} (${lang}): a second paragraph of directions (.nc-how) is back`);
+        const raw = /<div class="sdr-intro">((?:nc|ncp|pwn|chc|deck|drill|ear)\.[A-Za-z]+)<\/div>/.exec(html);
+        if (raw) flag(`${where} (${lang}): the direction line shows the raw key ${raw[1]}`);
+      };
+      for (const a of acts) {
+        if (!a || a.kind === 'check') continue;
+        (a.steps || []).forEach((st, si) => {
+          if (!st.drill) return;
+          const key = `1cs-${a.id}-${si}`;
+          screen(`${a.id} step ${si + 1} (${st.drill.type})`, dispatch(st.drill, key, null));
+          if (st.drill.type === 'notecall') {
+            const nc = vm.runInContext('noteCalls', ctx)[key];
+            for (const answer of [true, false]) for (const coach of [true, false]) {
+              nc.answer = answer; nc.coach = coach;
+              screen(`${a.id} step ${si + 1} (notecall, Show answer ${answer ? 'on' : 'off'}, mic ${coach ? 'on' : 'off'})`, ncSetup(key));
+            }
+            vm.runInContext(`delete noteCalls[${JSON.stringify(key)}]`, ctx);
+          }
+          if (st.drill.type === 'pcname') {
+            const pw = vm.runInContext('powerNames', ctx)[key];
+            for (const answer of [true, false]) { pw.answer = answer; screen(`${a.id} step ${si + 1} (pcname, Show answer ${answer ? 'on' : 'off'})`, pwnSetup(key)); }
+            vm.runInContext(`delete powerNames[${JSON.stringify(key)}]`, ctx);
+          }
+        });
+      }
+    }
+  } catch (e) { flag('rendering the drill screens threw: ' + e.message); }
+  finally { vm.runInContext(`setLang(${JSON.stringify(saveLang2)})`, ctx); }
+  if (screens !== DRILL_SCREENS) flag(`rendered ${screens} drill screens before Start (EN + ES), pinned ${DRILL_SCREENS} — a drill was added or removed, or a branch stopped rendering; update the pin on purpose`);
   if (n2a !== ONE_LINE_2A) flag(`read ${n2a} activity direction strings (EN + ES), pinned ${ONE_LINE_2A} — a field stopped being read or a string was added; update the pin on purpose`);
   if (n2c !== ONE_LINE_2C) flag(`read ${n2c} drill direction strings (EN + ES), pinned ${ONE_LINE_2C}`);
-  if (!bad) ok(`1cs: ${n2a} activity direction strings (cap ${CAP_2A}) and ${n2c} drill direction lines (cap ${CAP_2C}), EN + ES: one short line each, no list, no got-it label; the drills' second paragraphs stay gone`);
+  if (!bad) ok(`1cs: ${n2a} activity direction strings (cap ${CAP_2A}) and ${n2c} drill and card direction lines (cap ${CAP_2C}), EN + ES: one short line each, no list, no got-it label; ${screens} drill screens rendered before Start show one direction line each, no second paragraph`);
 }
 function checkTodayByDate(ctx) {
   head('1cq. Today\'s activities: every card dated today or yesterday (pending first, then finished), everything else in the folds by board order');
@@ -9042,7 +9095,7 @@ function checkRecordingVersions(ctx) {
     {
       // Said once: an every-strum card must never tell the student each chord is shown once, in either language (the render read-back below compares with this table, so a wrong string in it needs its own guard).
       const I18Nt = loadI18nTable(), SD = I18Nt['ca.cardStrumDirections'], CD = I18Nt['ca.cardChordDirections'];
-      if (!SD || !CD || SD.es === CD.es || SD.en === CD.en || /shown once/i.test(SD.en) || /una sola vez/i.test(SD.es)) flag('i18n ca.cardStrumDirections says each chord is shown once (or copies ca.cardChordDirections) \u2014 on an every-strum card every strum has its name');
+      if (!SD || !CD || SD.es === CD.es || SD.en === CD.en || /shown once|where each chord name starts/i.test(SD.en) || /una sola vez|donde empieza cada nombre/i.test(SD.es)) flag('i18n ca.cardStrumDirections says each chord is shown once (or copies ca.cardChordDirections) \u2014 on an every-strum card every strum has its name');
     }
     for (const a of acts.filter(x => x && x.recordingVersions)) {
       const g = a.recordingGroup;
@@ -9440,13 +9493,13 @@ async function checkSongPopularity(ctx) {
      screen are rendered under a spy on ncK; each key they ask for must exist
      in English and Spanish, none may be the English, and none defined may go
      unshown.
-   Pinned: 4 power steps, 14 ncp.* keys (18 until 2026-11-10, when the drill's second paragraph of directions went: descAnswer, howCoachAnswer, howCoach, howTap). */
+   Pinned: 4 power steps, 15 ncp.* keys (18 until 2026-11-10, when the drill's second paragraph of directions went: descAnswer, howCoachAnswer, howCoach, howTap; introCoach came in, the mic-on line). */
 function checkNoteCallPower(ctx) {
   head('1cd. Note Call power chords (ca-43): the mic takes a strum, every string it can show');
   let bad = 0;
   const flag = m => { err(m); problems++; bad++; };
   if (!ctx) { flag('1cd cannot run — the 0b render context is unavailable'); return; }
-  const EXPECT = { power: 4, ranges: [[0, 5], [5, 8], [8, 12], [0, 12]], keys: 14 };
+  const EXPECT = { power: 4, ranges: [[0, 5], [5, 8], [8, 12], [0, 12]], keys: 15 };
   const J = JSON.stringify;
   const run = x => vm.runInContext(x, ctx);
   let csrc = '';
@@ -10520,7 +10573,7 @@ function checkChordGridCards(ctx) {
     const attrs = (html.match(/data-beat="/g) || []).length;
     if (attrs !== 7 * 8 * 7) flag(`ca-29 renders ${attrs} data-beat attributes, expected ${7 * 8 * 7} (7 sections x 8 beats x (6 string cells + 1 count cell))`);
     if (/pc-counts/.test(html)) flag('ca-29 draws a Counts switch — a card made only of chord grids always shows its count and needs none');
-    if (!/Each strum has its chord name/.test(html) || /Each chord is shown once/.test(html)) flag('ca-29 does not show the every-strum directions (ca.cardStrumDirections) \u2014 every strum has its chord name, so "each chord is shown once" would be false');
+    if (!/every strum shows its chord name/.test(html) || /where each chord name starts/.test(html)) flag('ca-29 does not show the every-strum directions (ca.cardStrumDirections) \u2014 every strum has its chord name, so the each-chord-once line would be false');
     if (c29.card.restWord !== false) flag('ca-29 lost card.restWord:false — the bar-2 rest would draw the word "Stop" again');
     if (/class="tab-rest-lab"/.test(html)) flag('ca-29 draws a rest word — the bar-2 rest is left empty (card.restWord:false)');
     if (!c29.card.everyStrum) flag("ca-29 lost card.everyStrum — the grid would fold A5 x4 into one name again");
@@ -10729,8 +10782,8 @@ function checkChordGridCards(ctx) {
   const dirOf = id => { const a = acts.find(x => x.id === id); return a ? (/<p class="pc-dir">([^<]*)<\/p>/.exec(String(caCardBodyHtml(a))) || [])[1] : null; };
   if (!/single notes/.test(dirOf('ca-41') || '')) flag('ca-41 (grid + single-note sections) does not say what to do in a section of single notes');
   if (/single notes/.test(dirOf('ca-29') || '')) flag('ca-29 (all grid) shows the mixed-card directions');
-  if (!/Each chord is shown once/.test(dirOf('ca-40') || '')) flag('ca-40 on Jimi (one strum per chord, each chord shown once) does not show the each-chord-once directions (ca.cardChordDirections)');
-  if (/Each chord is shown once/.test(dirOf('ca-10') || '')) flag('ca-10 (single notes) shows the chord-card directions');
+  if (!/where each chord name starts/.test(dirOf('ca-40') || '')) flag('ca-40 on Jimi (one strum per chord, each chord shown once) does not show the each-chord-once directions (ca.cardChordDirections)');
+  if (/where each chord name starts/.test(dirOf('ca-10') || '')) flag('ca-10 (single notes) shows the chord-card directions');
   // The sheet's "This bar" strip is fed by the beat, and the narrow-screen guard is in the stylesheet (the real overflow test is smoke.mjs).
   try {
     const css = readFileSync(join(ROOT, 'styles.css'), 'utf8');
@@ -10746,7 +10799,7 @@ function checkChordGridCards(ctx) {
     let html = '';
     try { html = String(caCardBodyHtml(c10)); } catch (e) { flag(`caCardBodyHtml(ca-10) threw: ${e.message}`); }
     if (/data-beat|chord-grid/.test(html)) flag('ca-10 (a single-note card) renders chord-grid markup — single-note cards keep the note-by-note highlight');
-    if (!/Press Play song and play along/.test(html)) flag('ca-10 lost its own directions line');
+    if (!/Press Play song, play along/.test(html)) flag('ca-10 lost its own directions line');
     const L = pcLayout(c10);
     const ks = new Set(); for (let i = 0; i < L.sections[0].bars * L.tr.beatsPerBar * 8; i++) ks.add(pcLocKey(L, pcLocate(L, i / 8 / L.tr.beatsPerBar)));
     if (ks.size !== L.sections[0].notes.length) flag(`ca-10: ${ks.size} repaint keys over ${L.sections[0].notes.length} notes — a single-note card must still step per note`);
@@ -11546,7 +11599,9 @@ const REP_COUNT_FIELDS = 339;   // 2026-11-10: every In-Class Activity step is o
    them anyway"): no got-it label, so caStepHtml() passes wholeLine and the dots
    read the count from the whole line. Pinned like REP_COUNT_FIELDS: a step text
    added or removed (or gaining a label again) moves it. */
-const REP_COUNT_LINES = 81;
+const REP_COUNT_LINES = 84;
+// Tap-dot groups drawn by buildSet() over every module set, EN + ES (2026-11-10). Moves only with a module got-it sentence.
+const MODULE_DOT_GROUPS = 152;
 function checkRepCountParity(sets, ctx) {
   head('1bg. Rep-count dots agree between English and Spanish');
   if (!ctx) { err('1bg cannot run — render context unavailable'); problems++; return; }
@@ -11653,17 +11708,34 @@ function checkRepCountParity(sets, ctx) {
       }
     }
   } finally { vm.runInContext(`setLang(${JSON.stringify(saveLang)})`, ctx); }
-  const app = readFileSync(join(ROOT, 'app.js'), 'utf8');
+  const app = readFileSync(join(ROOT, 'app.js'), 'utf8'), teacher = readFileSync(join(ROOT, 'teacher.js'), 'utf8');
   const lessonCall = /const text2 = wrapGotItWhen\(text, \{([\s\S]*?)\}\);/.exec(app);
   if (!lessonCall) { err('1bg: the module step call (const text2 = wrapGotItWhen(text, {…})) was not found in app.js — update this check with it'); problems++; bad++; }
   else if (/wholeLine/.test(lessonCall[1])) { err('1bg: the module step call passes wholeLine — only In-Class Activity steps (caStepHtml) read a count from the whole text'); problems++; bad++; }
-  const optIns = (app.match(/\bwholeLine:\s*true\b/g) || []).length;
-  if (optIns !== 1) { err(`1bg: app.js passes wholeLine: true ${optIns} times, want exactly 1 (caStepHtml)`); problems++; bad++; }
+  // Any value, any spelling of the key: caStepHtml is the one opt-in; the console preview (teacher.js) shows no dots.
+  const optIns = (app.match(/\bwholeLine\s*:/g) || []).length, teacherOptIns = (teacher.match(/\bwholeLine\b/g) || []).length;
+  if (optIns !== 1 || teacherOptIns) { err(`1bg: app.js sets wholeLine ${optIns} times (want exactly 1, caStepHtml) and teacher.js ${teacherOptIns} (want 0)`); problems++; bad++; }
+  /* Every module set, rendered by the real buildSet() in English and Spanish:
+     the number of tap-dot groups is pinned, so a module step that starts
+     reading a whole line (any route into wrapGotItWhen) shows up here. */
+  const buildSet = vm.runInContext('typeof buildSet === "function" ? buildSet : null', ctx);
+  let moduleDots = 0, setsRendered = 0;
+  if (!buildSet) { err('1bg: buildSet() not found — cannot count the module dot groups'); problems++; bad++; }
+  else {
+    try {
+      for (const lang of ['en', 'es']) {
+        vm.runInContext(`setLang(${JSON.stringify(lang)})`, ctx);
+        for (const w of (sets || [])) { moduleDots += (String(buildSet(w)).match(/<div class="rep-dots[" ]/g) || []).length; setsRendered++; }
+      }
+    } catch (e) { err('1bg: buildSet threw while counting module dot groups: ' + e.message); problems++; bad++; }
+    finally { vm.runInContext(`setLang(${JSON.stringify(saveLang)})`, ctx); }
+    if (moduleDots !== MODULE_DOT_GROUPS) { err(`1bg: the ${setsRendered} module set renders (EN + ES) draw ${moduleDots} tap-dot groups, pinned ${MODULE_DOT_GROUPS} — a module step gained or lost dots (a whole-line count leaking into modules, or a got-it sentence changed); update the pin only on purpose`); problems++; bad++; }
+  }
   if (checked !== REP_COUNT_FIELDS) {
     err(`1bg: ${checked} got-it fields checked, but REP_COUNT_FIELDS pins ${REP_COUNT_FIELDS} — a got-it sentence was added, removed or reworded past GOT_IT_RE; bump the pin on purpose`);
     problems++; bad++;
   }
-  if (bad === 0) ok(`${checked} "You've got it when" field${checked === 1 ? '' : 's'} and ${lines} one-line activity step texts checked (both pinned) — English and Spanish always agree on the rep-count dots; ${rendered} activity steps rendered (EN + ES) draw the dots their line names, the module call reads no whole line`);
+  if (bad === 0) ok(`${checked} "You've got it when" field${checked === 1 ? '' : 's'} and ${lines} one-line activity step texts checked (both pinned) — English and Spanish always agree on the rep-count dots; ${rendered} activity steps rendered (EN + ES) draw the dots their line names; ${setsRendered} module set renders draw the pinned ${moduleDots} dot groups`);
 }
 
 /* 1bh. JOURNEY "SLOW (N BPM)" LABELS ↔ data-bpm-slow (2026-09-28 sweep). A

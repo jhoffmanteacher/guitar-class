@@ -221,17 +221,17 @@
                                            // rowLabels are ignored (four-bar rows);
                                            // a lyric line (rowLabels) keeps its row
                                            // where it starts on a bar line.
-                                           // Chord cards say "each chord is shown once,
-                                           // strum the way the recording does"
-                                           // (ca.cardChordDirections).
+                                           // Chord cards say "change chords where
+                                           // each chord name starts" — each name is
+                                           // drawn once (ca.cardChordDirections).
        everyStrum: true,                   // optional (ca-29 and its Neil Young
                                            // version, 2026-10-28 / 10-30): keep
                                            // consecutive same-name notes as
                                            // separate events, so every strum
                                            // shows its chord name. Such a card
-                                           // says "each strum has its chord name"
-                                           // (ca.cardStrumDirections), not "shown
-                                           // once".
+                                           // says "every strum shows its chord
+                                           // name" (ca.cardStrumDirections), never
+                                           // the each-name-once line.
        sheet: 'sheets/<song>.pdf',         // optional (ca-38, 2026-10-19): show
                                            // this chord sheet PDF instead of the
                                            // tab, drawn as is (lyrics included),
@@ -452,8 +452,11 @@
          // wrapGotItWhen; repCountFromGotIt reads a digit or two–five /
          // dos–cinco before "times / in a row / back to back / veces /
          // seguidas"), and 1bg holds English and Spanish to the same count.
-         // A step whose drill widget already says what to do carries no text
-         // (ca-23, and the "Name the fret" shuffle steps). Modules keep the
+         // A step whose drill widget already says what to do AND when it is
+         // done carries no text (ca-23: its pass line is under Start). The
+         // "Name the fret" shuffle steps keep one line, the finish line the
+         // drill does not show: "Get 7 of 10 on your first pass, then try for
+         // 9 of 10." Modules keep the
          // list and got-it rules (CLAUDE.md). The Learn / Practice labels
          // (2026-09-23: "Learn — " / "Aprende — ", "Practice — " /
          // "Practica — ") still name the steps of the newer ladders.
@@ -828,8 +831,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The Reach',
         label_es: 'El Estiramiento',
-        text: 'Reach with your pinky four times in a row without lifting finger 1; stop if it hurts.',
-        text_es: 'Estira el meñique cuatro veces seguidas sin levantar el dedo 1; si duele, detente.',
+        text: 'Reach with your pinky four times in a row, finger 1 down; one fret short counts, and stop if it hurts.',
+        text_es: 'Estira el meñique cuatro veces seguidas, dedo 1 abajo; un traste menos cuenta; si duele, detente.',
         tab: {
           caption: 'The Reach · finger 1 stays down',
           caption_es: 'El Estiramiento · el dedo 1 no se levanta',
@@ -1158,8 +1161,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The wide Reach',
         label_es: 'El Estiramiento ancho',
-        text: 'Reach the pinky one fret farther four times in a row without lifting finger 1; stop if your wrist hurts.',
-        text_es: 'Estira el meñique un traste más, cuatro veces seguidas, con el dedo 1 abajo; si duele la muñeca, detente.',
+        text: 'Reach one fret farther four times in a row, finger 1 down; a fret short counts; stop if it hurts.',
+        text_es: 'Estira un traste más cuatro veces seguidas, dedo 1 abajo; un traste menos cuenta; si duele, detente.',
         tab: {
           caption: 'Wide Reach · fret 1 to fret 6',
           caption_es: 'Estiramiento ancho · del traste 1 al 6',
@@ -1188,8 +1191,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'The circuit',
         label_es: 'El circuito',
-        text: 'Play two clean sets in a row of all three events, the second 10 BPM faster.',
-        text_es: 'Toca dos series limpias seguidas de los tres eventos, la segunda 10 BPM más rápida.',
+        text: 'Play two clean sets in a row (skip Spider, wide Reach, across strings), the second 10 BPM faster.',
+        text_es: 'Toca dos series limpias seguidas (Araña, Estiramiento y entre cuerdas), la segunda 10 BPM más rápida.',
       },
     ],
   },
@@ -1486,6 +1489,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Name the fret',
         label_es: 'Di la nota',
+        text:    'Get 7 of 10 on your first pass, then try for 9 of 10.',
+        text_es: 'Saca 7 de 10 en tu primera pasada y después intenta sacar 9 de 10.',
         drill: { type: 'shuffle', string: 'lowE', maxFret: 12, rounds: 10, seconds: 8, pile: 'naturals' },
       },
       {
@@ -1578,6 +1583,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Name the fret',
         label_es: 'Di la nota',
+        text:    'Get 7 of 10 on your first pass, then try for 9 of 10.',
+        text_es: 'Saca 7 de 10 en tu primera pasada y después intenta sacar 9 de 10.',
         drill: { type: 'shuffle', string: 'A', maxFret: 12, rounds: 10, seconds: 8, pile: 'naturals' },
       },
       {
@@ -1859,6 +1866,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Name the fret',
         label_es: 'Di la nota',
+        text:    'Get 7 of 10 on your first pass, then try for 9 of 10.',
+        text_es: 'Saca 7 de 10 en tu primera pasada y después intenta sacar 9 de 10.',
         drill: { type: 'shuffle', string: 'lowE', maxFret: 12, rounds: 10, seconds: 8, pile: 'naturals' },
       },
       {
@@ -1877,8 +1886,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Play it from memory',
         label_es: 'Tócala de memoria',
-        text: 'Play all four lines of Happy Birthday from memory, at any speed, without stopping.',
-        text_es: 'Toca las cuatro líneas de Happy Birthday de memoria, a cualquier velocidad, sin detenerte.',
+        text: 'Cover the screen and play all four lines of Happy Birthday from memory without stopping.',
+        text_es: 'Tapa la pantalla y toca las cuatro líneas de Happy Birthday de memoria, sin detenerte.',
         tab: {
           caption: 'Whole song · Lines 1–4 · low E string only',
           caption_es: 'Canción completa · Líneas 1–4 · solo la cuerda Mi grave',
@@ -1939,14 +1948,14 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Clean it up',
         label_es: 'Límpiala',
-        text: 'Play it from memory once more with no buzz and no extra string.',
-        text_es: 'Tócala de memoria una vez más, sin zumbido y sin cuerda de más.',
+        text: 'Play Happy Birthday from memory once more with no buzz and no extra string.',
+        text_es: 'Toca Happy Birthday de memoria una vez más, sin zumbido y sin cuerda de más.',
       },
       {
         label:    'Keep going',
         label_es: 'Sigue',
-        text: 'Play it from memory with the Metro tool from 60 BPM, adding 10 BPM each clean pass.',
-        text_es: 'Tócala de memoria con la herramienta Metro desde 60 BPM y súbele 10 BPM en cada pasada limpia.',
+        text: 'Play Happy Birthday from memory with the Metro tool from 60 BPM, adding 10 BPM each clean pass.',
+        text_es: 'Toca Happy Birthday de memoria con la herramienta Metro desde 60 BPM y súbele 10 en cada pasada limpia.',
       },
     ],
   },
@@ -5363,8 +5372,8 @@ window.CLASS_ACTIVITIES = [
       E5: { root: ['A', 7], fifth: ['D', 9] },
       D5: { root: ['A', 5], fifth: ['D', 7] },
     },
-    bassDirections:    'On beat 1 pick only the purple, underlined bass note, then strum on beats 2 and 3.',
-    bassDirections_es: 'En el tiempo 1 toca solo la nota de bajo morada y subrayada y luego rasguea en los tiempos 2 y 3.',
+    bassDirections:    'Pick only the purple, underlined bass note on beat 1, then strum on beats 2 and 3.',
+    bassDirections_es: 'Toca solo la nota de bajo morada y subrayada en el tiempo 1 y luego rasguea en los tiempos 2 y 3.',
     intro:    'Play Las Mañanitas with the band, from the first verse to the last chorus.',
     intro_es: 'Toca Las Mañanitas con la banda, de la primera estrofa al último coro.',
     intro_power:    'Play Las Mañanitas in power chords with the band, from the first verse to the last chorus.',
@@ -5646,7 +5655,7 @@ window.CLASS_ACTIVITIES = [
           text_es: 'Pulsa «Solo» y toca el solo del requinto con la banda, sin detenerte.' },
         { levelUp: true,
           text:    'Slide the speed to Normal and play the whole song with the band, singing the words.',
-          text_es: 'Desliza la velocidad a «Normal» y toca toda la canción con la banda cantando la letra.' }
+          text_es: 'Desliza la velocidad a «Normal» y toca toda la canción con la banda mientras cantas la letra.' }
       ]
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
@@ -6980,7 +6989,7 @@ window.CLASS_ACTIVITIES = [
         label:    'Practice — Muted strings',
         label_es: 'Practica — Cuerdas apagadas',
         text:    'Mute the strings and strum the pattern 8 times in a row without stopping.',
-        text_es: 'Apoya la mano sobre las cuerdas y rasguea el patrón 8 veces seguidas sin detener la mano.',
+        text_es: 'Apoya la mano de trastear sobre las cuerdas y rasguea el patrón 8 veces seguidas sin detenerte.',
         strum: {
           caption:    'Muted strings · count "1 and 2 and 3 and 4 and" (the + is "and")',
           caption_es: 'Cuerdas apagadas · cuenta «1 y 2 y 3 y 4 y» (el + es «y»)',
@@ -7013,7 +7022,7 @@ window.CLASS_ACTIVITIES = [
         label:    'Practice — 3 strums',
         label_es: 'Practica — 3 rasgueos',
         text:    'Mute the strings or hold D5, strum Down, Down-Up, then swing your hand past the strings until the next 1.',
-        text_es: 'Con cuerdas apagadas o D5, rasguea abajo, abajo-arriba y mueve la mano sin tocar las cuerdas hasta el 1.',
+        text_es: 'Apaga las cuerdas o toca D5, rasguea abajo, abajo-arriba y mueve la mano sin tocarlas hasta el 1.',
         strum: {
           caption:    '3 strums, then swing · count "1 and 2 and 3 and 4 and" (the + is "and")',
           caption_es: '3 rasgueos, luego mueve la mano · cuenta «1 y 2 y 3 y 4 y» (el + es «y»)',

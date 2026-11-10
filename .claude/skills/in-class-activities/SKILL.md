@@ -318,17 +318,28 @@ line before Start.
   the line when there is no "You've got it when:" label. Write a count it can
   read (a digit or two–five / dos–cinco, then "times", "in a row", "back to
   back", "veces", "seguidas"); "8 times" makes no dots. The module call does
-  NOT opt in. **1bg** holds EN = ES and executes both calls.
+  NOT opt in. **1bg** holds EN = ES, renders every activity step (its dots = its line's count) and every module set (the dot-group total is pinned), and counts the opt-ins in app.js and teacher.js.
 - Cut: fix-it lines, finger-by-finger lists, recaps, definitions (use the plain
   word), "then press Play tab to check". Strings named, never numbered.
   Spanish: shorten the existing `_es`, reuse its words, buttons in «».
-- A step whose drill widget already says what to do has NO text (ca-23; the
-  "Name the fret" shuffle steps of ca-11, ca-12, ca-17). A "Find the note" deck
-  step keeps one line, because the deck does not say "five in a row".
+- A step whose drill widget already says what to do AND when it is done has
+  NO text (ca-23: the pass line is under Start). The "Name the fret" shuffle
+  steps (ca-11, ca-12, ca-17) keep one line, "Get 7 of 10 on your first pass,
+  then try for 9 of 10.", and the "Find the note" deck steps keep theirs with
+  the count: neither drill shows its finish line before Start.
 - Each drill shows one direction line before Start (`.sdr-intro`); the
   second paragraphs (Note Call's `descAnswer` / `howTap` / `howCoach`, Name
   the power chord's `howAnswer` / `howScored`) were removed and 1cs keeps them
-  out. The header strip, switches, scores and pass lines are not directions.
+  out. Note Call's scored line has a mic-on twin (`nc.introCoach` /
+  `ncp.introCoach`, picked by `st.coach`): with the mic on no tap is asked
+  for. The header strip, switches, scores and pass lines are not directions.
+- A practice card's own directions line (`.pc-dir`: `ca.cardDirections`,
+  `ca.cardChordDirections`, `ca.cardStrumDirections`,
+  `ca.cardChordMixedDirections`, `ca.sheetDirections`) is one line too
+  (Jonathan, 2026-11-10). The chord/strum distinction stays: a chord card says
+  "where each chord name starts", an every-strum card "every strum shows its
+  chord name" (1cc / 1bv pin both). With Bass on (ca-35) `bassDirections`
+  follows it as a second sentence, by his choice.
 - Exit checks (ca-14, ca-15) are frozen and untouched. Modules keep the list
   and got-it rules (CLAUDE.md).
 

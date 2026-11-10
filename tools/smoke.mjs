@@ -1174,11 +1174,14 @@ async function pathsWalk(page, run, events, stats) {
    step" ticks it and moves on again. A checkout without one-line steps (no
    wholeLine in app.js) skips it. */
 async function dotsWalk(page, run, events, stats) {
-  const pick = await run('dots:pick', `(() => { if (!/wholeLine/.test(String(caStepHtml))) return null;
+  /* An older tree still writes "You've got it when:" in its activity steps: nothing to walk there. On a one-line tree,
+     finding no step to walk is itself a failure (the walk must not switch itself off). */
+  const pick = await run('dots:pick', `(() => { if (CLASS_ACTIVITIES.some(x => (x.steps || []).some(s => GOT_IT_RE.test(s.text || '')))) return { old: true };
     const a = CLASS_ACTIVITIES.find(x => x.view === 'focus' && !x.teacherOnly && !(x.paths && x.paths.length) && x.steps.length > 2 && x.steps[0].text && repCountFromGotIt(x.steps[0].text) >= 2);
-    return a ? { id: a.id, n: repCountFromGotIt(a.steps[0].text) } : null; })()`, 10);
-  if (!pick) return;
+    return a ? { id: a.id, n: repCountFromGotIt(a.steps[0].text) } : { none: true }; })()`, 10);
   const fail = (w, text) => events.push({ step: 'dots:' + w, kind: 'dots', text });
+  if (!pick || pick.old) return;
+  if (pick.none) { fail('pick', 'no Focus activity whose first one-line step names a count of 2-5: the tap-dot walk has nothing to walk'); return; }
   const { id, n } = pick;
   const state = `(() => { const c = document.querySelector('.ca-card[open][data-id="${id}"]'); if (!c) return null; const li = c.querySelector('.ca-step:not(.ca-step-collapsed)');
     return { idx: li ? +li.dataset.idx : -1, dots: li ? li.querySelectorAll('.rep-dot:not(.rep-dot-reset)').length : 0, on: li ? li.querySelectorAll('.rep-dot.on').length : 0,

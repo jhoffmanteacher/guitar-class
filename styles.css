@@ -4425,8 +4425,10 @@ a.jl-song-btn{display:inline-block;text-decoration:none}
 .step-done .got-it{border-left-color:var(--border2)}
 /* ── Rep-counter tap dots (repDotsHtml, app.js) ── sits right under the
    got-it-when rule it belongs to, same left offset so the two read as one
-   unit. */
+   unit. Under an In-Class Activity's one-line step (no rule since
+   2026-11-10) they start flush with the line instead (.rep-dots-line). */
 .rep-dots{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:8px;padding-left:11px}
+.rep-dots.rep-dots-line{padding-left:0;margin-left:-6px}
 .rep-dot{width:26px;height:26px;padding:0;border:none;border-radius:50%;background:none;color:var(--green-text);font-size:1.35rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center}
 /* --text3, not --border2: an empty dot is a tap target, and --border2 put
    its ring at ~1.45:1 against the page. */

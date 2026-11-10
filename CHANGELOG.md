@@ -9,8 +9,7 @@ see `WORKFLOW.md` and the git commit log.
 
 - **Every step in an In-class activity is now one short line:** what to play and when you are done. For example: "Play Line 1 into Line 2 four times without stopping." The lists, the "You've got it when" line and the tips are gone. The tab, the drills and the videos are the same.
 - **The tap dots are still there.** The line says how many times, and the dots count them. "Got it — next step" works as before.
-- **The practice cards' checks and the line at the top of each activity are one line too**, and so is the line before Start in Note Call, Call the chord, Name the power chord and the note decks.
-- **"Name the fret" steps have no text now:** the quiz on the step says what to do.
+- **The practice cards' checks, their directions line and the line at the top of each activity are one line too**, and so is the line before Start in Note Call, Call the chord, Name the power chord and the note decks.
 
 ## 2026-11-10 (later) — An open activity fills the page
 
