@@ -56,7 +56,7 @@ const m = html.match(/\/\* ROUND-LOGIC-START \*\/([\s\S]*?)\/\* ROUND-LOGIC-END 
 if (!m) { console.error('tuning-sim-proof: no ROUND-LOGIC block in ' + FILE); process.exit(1); }
 // The block is plain `const`s and functions; return them from one expression.
 const ctx = vm.createContext({});
-const L = vm.runInContext(`(function(){ ${m[1]}\n return { NOTES, WHEEL, LEVEL_LETTERS, STRINGS, MIN_DETUNE, MAX_DETUNE, LEVELS, JITTER, CLEAN_TO_LEVEL_UP, TICK_CENTS, PEG_LIMIT, STREAK_TO_PHASE2, DONE_MS, DEFAULTS, nearestNote, centsToFreq, makeRound, rightWay, ringMove, stickyInTune, RC, RA, ringPt, ringArc }; })()`, ctx);
+const L = vm.runInContext(`(function(){ ${m[1]}\n return { NOTES, WHEEL, LEVEL_LETTERS, STRINGS, MIN_DETUNE, MAX_DETUNE, LEVELS, JITTER, CLEAN_TO_LEVEL_UP, TICK_CENTS, PEG_LIMIT, DONE_MS, DEFAULTS, nearestNote, centsToFreq, makeRound, rightWay, ringMove, stickyInTune, RC, RA, ringPt, ringArc }; })()`, ctx);
 
 /* Letters from the pitch alone: a note's place on the white keys (C D E F G A B, octave after octave). */
 const midiOf = f => Math.round(12 * Math.log2(f / 440)) + 69;
@@ -160,7 +160,7 @@ must(cw === 7 && arcs === 42, `the circle is drawn the wrong way round (${cw} of
 
 // Pinned numbers from the work order.
 must(L.MIN_DETUNE === 12 && L.MAX_DETUNE === 45, `detune range is ${L.MIN_DETUNE}..${L.MAX_DETUNE}, the work order says 12..45`);
-must(L.STREAK_TO_PHASE2 === 6, `Phase 2 comes after ${L.STREAK_TO_PHASE2} in a row, the work order says 6`);
+must(JSON.stringify(L.DEFAULTS) === '{"soundOn":true}', `DEFAULTS is ${JSON.stringify(L.DEFAULTS)}; since 2026-11-09 the only default is sound on (no naming step, no string-names switch)`);
 must(L.DONE_MS === 1000, `done = green for ${L.DONE_MS} ms, the work order says 1000`);
 must(L.TICK_CENTS === 2, `a peg tick is ${L.TICK_CENTS} cents, the work order says about 2`);
 must(L.LEVELS.map(x => x.max).join() === '0,2,4,5', `level maximums are ${L.LEVELS.map(x => x.max)}, Jonathan's call is 0,2,4,5 (a 4th at the top)`);

@@ -5602,12 +5602,14 @@ function checkTuningSim() {
   const code = src.replace(/<!--[\s\S]*?-->/g, '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:\\'"`])\/\/[^\n]*/g, '$1');
   let bad = 0;
   const m = code.match(/const DEFAULTS = \{([^}]*)\};/);
-  const want = 'soundOn: true, namesShownPhase1: true, namesShownPhase2: false';
+  const want = 'soundOn: true';   // 2026-11-09: no naming step, so no string-names defaults
   if (!m || m[1].trim().replace(/\s+/g, ' ') !== want) { err(`tuning-sim.html DEFAULTS must be { ${want} } (found: ${m ? m[1].trim() : 'nothing'})`); problems++; bad++; }
   if (/getUserMedia|mediaDevices/.test(code)) { err('tuning-sim.html asks for the mic (getUserMedia / mediaDevices) — it must never'); problems++; bad++; }
   if (/<script\b[^>]*\bsrc=/i.test(code)) { err('tuning-sim.html loads a script file — it is standalone (no app.js, no tuner.js, no i18n.js)'); problems++; bad++; }
   if (!/S\.soundOn\s*=\s*DEFAULTS\.soundOn/.test(code) && !/soundOn:\s*DEFAULTS\.soundOn/.test(code)) { err('tuning-sim.html does not start its sound switch from DEFAULTS.soundOn'); problems++; bad++; }
-  if (!/S\.showNames\s*=\s*S\.phase === 1 \? DEFAULTS\.namesShownPhase1 : DEFAULTS\.namesShownPhase2/.test(code)) { err('tuning-sim.html does not start "Show the string names" from the two DEFAULTS'); problems++; bad++; }
+  /* 2026-11-09 (Jonathan): no strings picture and no "Which string is this?" — the page says which string to tune and what the tuner shows. */
+  if (/id="names-sw"|id="strings"|function answerName|data-name=/.test(code)) { err('tuning-sim.html still has the string-naming step (names-sw, the strings picture, answerName or data-name buttons) — removed 2026-11-09'); problems++; bad++; }
+  if (!/<b id="t-str"><\/b>/.test(code) || !/<b id="t-shows"[^>]*><\/b>/.test(code) || !/el\.tStr\.textContent = known \? stringLabel\(r\.idx\) : '';/.test(code) || !/el\.tShows\.textContent = S\.disp\.letter \|\| '—';/.test(code)) { err('tuning-sim.html must show the string to tune (#t-str, stringLabel) and the letter the tuner shows (#t-shows, S.disp.letter), filled in ringRender()'); problems++; bad++; }
   /* 2026-11-07: the levels (how many notes off a string can start: 0, up to 2, 4, 5 — a 4th at the top; a 5th is a 4th the other way round the circle),
      and a first visit starts on level 1. Games page: a card that goes to this page. */
   if (!/const LEVELS = \[ \{ min:0, max:0 \}, \{ min:1, max:2 \}, \{ min:2, max:4 \}, \{ min:3, max:5 \} \];/.test(code)) { err('tuning-sim.html LEVELS must be 0, 1-2, 2-4 and 3-5 notes off (a 4th at the top)'); problems++; bad++; }
@@ -5651,11 +5653,9 @@ function checkTuningSim() {
   const im = src.match(/const I = (\{[\s\S]*?\n\});/);
   try { I = vm.runInContext('(' + im[1] + ')', vm.createContext({})); } catch (e) { err(`tuning-sim.html: could not read the en/es word table (${e && e.message})`); problems++; bad++; }
   const DIR_WORDS = {
-    en: { tightenTurn: 'turn counterclockwise', loosenTurn: 'turn clockwise', keys: 'Keys: ← counterclockwise (tighten) · → clockwise (loosen)',
-      h2n: 'The tuner shows a different letter than the string. Find both letters on the circle. Clockwise ↻ is up. Counterclockwise ↺ is down.', ringUp: '↻ up', ringDown: '↺ down',
+    en: { tightenTurn: 'turn counterclockwise', loosenTurn: 'turn clockwise', ringUp: '↻ up', ringDown: '↺ down',
       up: 'Too low — tighten', down: 'Too high — loosen' },
-    es: { tightenTurn: 'gira en sentido antihorario', loosenTurn: 'gira en sentido horario', keys: 'Teclas: ← en sentido antihorario (apretar) · → en sentido horario (aflojar)',
-      h2n: 'El afinador muestra una letra distinta a la de la cuerda. Busca las dos letras en el círculo. En sentido horario ↻ es subir. En sentido antihorario ↺ es bajar.', ringUp: '↻ sube', ringDown: '↺ baja',
+    es: { tightenTurn: 'gira en sentido antihorario', loosenTurn: 'gira en sentido horario', ringUp: '↻ sube', ringDown: '↺ baja',
       up: 'Muy baja — aprieta', down: 'Muy alta — afloja' }
   };
   const dirWordCount = Object.values(DIR_WORDS).reduce((n, o) => n + Object.keys(o).length, 0);
@@ -5673,11 +5673,11 @@ function checkTuningSim() {
     for (const [, k, text] of html.matchAll(/data-t="([A-Za-z0-9]+)">([^<]*)</g)) if (I.en[k] !== undefined && ent(text) !== I.en[k]) { bad++; problems++; err(`tuning-sim.html: the no-script text of data-t="${k}" is "${ent(text)}" but the English word is "${I.en[k]}"`); }
     for (const [tag] of html.matchAll(/<[a-z][^>]*\b(?:aria-label|title)="[^"]*"[^>]*>/g)) if (!/\bdata-tl="[A-Za-z0-9]+"/.test(tag)) { bad++; problems++; err(`tuning-sim.html: ${tag.slice(0, 80)} has an aria-label/title with no data-tl (it stays English in Spanish)`); }
   }
-  /* A miss (wrong name or wrong way) restarts the three-clean-rounds count; the level-up line names the NEW level's top distance. */
-  const missOk = (code.match(/S\.roundClean = false;/g) || []).length === 2 && /S\.roundClean = true;/.test(code) && /S\.clean = S\.roundClean \? S\.clean \+ 1 : 0;/.test(code);
-  if (!missOk) { bad++; problems++; err('tuning-sim.html: a wrong name and a wrong way must each set S.roundClean = false, newRound() sets it true, and finishRound() does S.clean = S.roundClean ? S.clean + 1 : 0 (a miss starts the count again)'); }
+  /* A miss (a wrong way; the naming step is gone since 2026-11-09) restarts the three-clean-rounds count; the level-up line names the NEW level's top distance. */
+  const missOk = (code.match(/S\.roundClean = false;/g) || []).length === 1 && /S\.roundClean = true;/.test(code) && /S\.clean = S\.roundClean \? S\.clean \+ 1 : 0;/.test(code);
+  if (!missOk) { bad++; problems++; err('tuning-sim.html: a wrong way must set S.roundClean = false (once), newRound() sets it true, and finishRound() does S.clean = S.roundClean ? S.clean + 1 : 0 (a miss starts the count again)'); }
   /* WHERE the two misses are: the wrong branch of each answer, with the right/wrong test on the real answer. */
-  if (!/if \(i === right\) \{[^]*?\} else \{\s*S\.streak = 0; S\.roundClean = false;/.test(code) || !/if \(w === S\.round\.answer\) \{ S\.fb = sentence; S\.fbClass = 'ok'; \}\s*else \{ S\.fb = T\('wayWrong'\) \+ sentence; S\.fbClass = 'bad'; S\.roundClean = false; \}/.test(code)) { bad++; problems++; err("tuning-sim.html: S.roundClean = false must sit in the WRONG branch of answerName (if (i === right) … else { S.streak = 0; S.roundClean = false; …) and of answerWay (if (w === S.round.answer) { …'ok' } else { …'bad'; S.roundClean = false; })"); }
+  if (!/if \(w === S\.round\.answer\) \{ S\.fb = T\('wayOk'\); S\.fbClass = 'ok'; \}\s*else \{ S\.fb = T\('wayWrong'\) \+ sentence; S\.fbClass = 'bad'; S\.roundClean = false; \}/.test(code)) { bad++; problems++; err("tuning-sim.html: S.roundClean = false must sit in the WRONG branch of answerWay (if (w === S.round.answer) { …'ok' } else { …'bad'; S.roundClean = false; })"); }
   /* 2026-11-08 (review round 2): the circle as DRAWN and the peg as turned, pinned on the lines that do it.
      tools/smoke.mjs measures the drawn notes and arrow in a real browser; these fail without one. */
   const pin = (re, what) => { if (!re.test(code)) { dirBad++; err(`tuning-sim.html: ${what}`); return 0; } return 1; };
@@ -5699,7 +5699,7 @@ function checkTuningSim() {
   pins += pin(/document\.addEventListener\('keydown', e => \{\s*lastKey = true;/, 'every keydown must set lastKey (focusFirst moves the focus only after a key press)');
   pins += pin(/function saveLevel\(\)\{\s*try \{ if \(S\.level > clampLevel\(localStorage\.getItem\(LEVEL_KEY\)\)\) localStorage\.setItem\(LEVEL_KEY, String\(S\.level\)\); \} catch\(e\)\{\}/, 'saveLevel() must never lower the saved level (a ?level=2 look must not undo a level 4)');
   pins += pin(/<button type="button" class="sw" id="restart-btn" data-t="startOver">Start over<\/button>/, 'the "Start over" button (#restart-btn, data-t startOver) must be in the top bar');
-  pins += pin(/el\.restart\.addEventListener\('click', \(\) => \{\s*try \{ localStorage\.removeItem\(LEVEL_KEY\); localStorage\.removeItem\(PHASE2_KEY\); \} catch\(e\)\{\}\s*stopHold\(\);\s*S\.level = 1; S\.clean = 0; S\.phase = 1; S\.streak = 0; S\.tuned = 0; S\.prev = -1;\s*S\.showNames = DEFAULTS\.namesShownPhase1;\s*newRound\(\);/, 'Start over must clear both saved keys and go back to level 1, Phase 1, names shown, then deal a new round');
+  pins += pin(/el\.restart\.addEventListener\('click', \(\) => \{\s*try \{ localStorage\.removeItem\(LEVEL_KEY\); localStorage\.removeItem\('gc-tuningsim-phase2'\); \} catch\(e\)\{\}\s*stopHold\(\);\s*S\.level = 1; S\.clean = 0; S\.tuned = 0; S\.prev = -1;\s*newRound\(\);/, 'Start over must clear the saved level (and the old Phase 2 key) and go back to level 1, then deal a new round');
   pins += pin(/levelUp:'Level \{l\}\. Now a string can start up to \{m\} steps from its own note\. Use the circle to choose Too low or Too high\.'/, 'the English level-up line (steps, like the rest of the page)');
   pins += pin(/levelUp:'Nivel \{l\}\. Ahora una cuerda puede empezar a un máximo de \{m\} pasos de su propia nota\. Usa el círculo para elegir Muy baja o Muy alta\.'/, 'the Spanish level-up line (a un máximo de {m} pasos)');
   /* Green on the circle only once the string is done: every .rn rule that paints green also needs .done. */
@@ -5759,7 +5759,7 @@ function checkTuningSim() {
   if (!/S\.level\+\+; S\.clean = 0; saveLevel\(\); leveled = true;\s*S\.note = T\('levelUp', \{ l: S\.level, m: LEVEL_LETTERS\[S\.level - 1\] \}\);/.test(code) || !I || !['en', 'es'].every(l => /\{l\}/.test(I[l].levelUp) && /\{m\}/.test(I[l].levelUp))) { bad++; problems++; err("tuning-sim.html: the level-up line must be T('levelUp', { l: S.level, m: LEVEL_LETTERS[S.level - 1] }) right after S.level++ (the most LETTERS a level starts away; tools/tuning-sim-proof.mjs checks the numbers), and both languages' levelUp must use {l} and {m}"); }
   if (figs !== 2 || m1ok !== 4) { dirBad++; err(`the Module 1 note circle: ${figs} of 2 figures and ${m1ok} of 4 alt/hint texts go counterclockwise (every one must)`); }
   if (dirBad) { problems++; bad++; }
-  if (bad === 0) ok(`tuning-sim.html: defaults pinned (sound on; string names shown in Phase 1, off in Phase 2; level 1 first; the four levels), no mic, no script files, and a card on the Games page with the no-guitar games; the circle runs counterclockwise (12 of 12 notes, 120 of 120 arrows), ${words} of ${dirWordCount} direction words (EN + ES), ${ways} of 8 answer sentences say the way with its verb, and the arrow keys pinned; ${pins} of 21 drawing/peg/keyboard/wording lines pinned (notes drawn at ringPt(i), one arrow, the peg's turn and icons, Space/Enter, focus, green only when done, the peg-foot layout); the Module 1 figure (${figs} of 2) and its step (${m1ok} of 4 alt/hint) go counterclockwise; ${twins} data-t/data-tl uses have both languages; a miss restarts the clean count, from the wrong branch of each answer; the level-up line names the new level`);
+  if (bad === 0) ok(`tuning-sim.html: defaults pinned (sound on; level 1 first; the four levels; no naming step, the string to tune and the tuner's letter shown), no mic, no script files, and a card on the Games page with the no-guitar games; the circle runs clockwise (7 of 7 letters, 42 of 42 arrows), ${words} of ${dirWordCount} direction words (EN + ES), ${ways} of 8 answer sentences say the way with its verb, and the arrow keys pinned; ${pins} of 21 drawing/peg/keyboard/wording lines pinned (notes drawn at ringPt(i), one arrow, the peg's turn and icons, Space/Enter, focus, green only when done, the peg-foot layout); the Module 1 figure (${figs} of 2) and its step (${m1ok} of 4 alt/hint) go counterclockwise; ${twins} data-t/data-tl uses have both languages; a miss restarts the clean count, from the wrong branch of each answer; the level-up line names the new level`);
 }
 
 /* Journey pages are referenced by ~30 hand-typed 'tabs/*.html' strings across

@@ -115,36 +115,15 @@ h1{font-size:1.5rem;margin:0;letter-spacing:-0.01em;flex-basis:100%}
 .peg-svg{width:104px;height:104px;display:block}
 .peg-svg g.rot{transform-origin:52px 52px;transition:transform .12s linear}
 .peg-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}
-/* "Pluck again" stays on one line; the keys line wraps instead. */
 .peg-foot .btn{white-space:nowrap;flex-shrink:0}
-.keys{font-size:.8125rem;color:var(--text2)}
 .btn{min-height:44px;padding:0 16px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--bg2);font-size:.9375rem;cursor:pointer}
 .btn:hover:not(:disabled){background:var(--bg3)}
 .btn:disabled{opacity:.5;cursor:default}
 
 /* ── the question ── */
-.chips{display:flex;gap:8px;margin-bottom:10px}
-.chip{font-size:.8125rem;padding:4px 12px;border-radius:999px;border:1px solid var(--border2);color:var(--text2)}
-.chip.on{background:var(--purple-bg);border-color:var(--purple-accent);color:var(--purple-text);font-weight:600}
-.chip.past{opacity:.6}
-h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
-.hint{margin:0 0 10px;color:var(--text2);font-size:.9375rem;min-height:2.7em}
+h2{font-size:1.5rem;margin:0 0 12px;line-height:1.2;min-height:1.2em}
 .board{display:grid;grid-template-columns:minmax(0,1fr) 224px;gap:14px;align-items:start}
 
-.strings{display:flex;flex-direction:column;gap:2px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px}
-.srow{display:grid;grid-template-columns:1fr 112px;align-items:center;gap:12px;height:34px;border-radius:var(--radius-sm);padding:0 6px;transition:background .15s}
-.srow.on{background:var(--purple-bg)}
-.sline{height:var(--th);border-radius:3px;background:var(--string);position:relative}
-.sline.wound{background:var(--string-wound)}
-.srow.on .sline{background:var(--purple-accent);box-shadow:0 0 10px var(--purple-accent)}
-.slot{display:flex;justify-content:flex-start}
-.bubble{min-width:96px;height:30px;padding:0 12px;border-radius:999px;border:1px solid var(--border2);background:var(--bg);font-size:.875rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;transition:opacity .6s,border-color .15s}
-.bubble small{font-weight:400;color:var(--text2)}
-.bubble:hover:not(:disabled){background:var(--bg3)}
-.bubble:disabled{cursor:default}
-.bubble.right{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text)}
-.bubble.wrong{background:var(--red-bg);border-color:var(--red-text);color:var(--red-text)}
-.strings.nonames .bubble{opacity:0;pointer-events:none}
 
 /* ── the circle of notes: the seven letters round a ring, A at the top, going UP clockwise (A, B, C… like a clock; Jonathan, 2026-11-09) ── */
 .ringbox{display:flex;flex-direction:column;align-items:center;gap:2px}
@@ -165,16 +144,18 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
 .ahead{fill:var(--purple-accent)}
 .rc1{fill:var(--text);font-size:15px;font-weight:700;text-anchor:middle;font-family:inherit}
 .rc2{fill:var(--text2);font-size:13px;text-anchor:middle;font-family:inherit}
-.legend{display:flex;gap:14px;font-size:.8125rem;color:var(--text2)}
-.legend .lg{display:inline-flex;align-items:center;gap:5px}
-.legend .dot{width:12px;height:12px;border-radius:50%;border:3px solid var(--purple-accent);background:var(--purple-bg);display:inline-block}
-.legend .dot.cur{border-color:var(--amber-text);background:var(--amber-bg)}
+.dot{width:14px;height:14px;border-radius:50%;border:3px solid var(--purple-accent);background:var(--purple-bg);display:inline-block;flex-shrink:0}
+.dot.cur{border-color:var(--amber-text);background:var(--amber-bg)}
+/* The two facts the student needs: the string to tune (purple, like its circle on the ring) and what the tuner shows (amber). */
+.lhs{display:flex;flex-direction:column;gap:12px}
+.tcard{display:flex;flex-direction:column;gap:10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
+.trow{display:flex;align-items:center;gap:10px;font-size:1.0625rem;color:var(--text2)}
+.trow>span{white-space:nowrap}
+.trow b{font-size:1.375rem;color:var(--text);margin-left:auto;text-align:right}
 
-/* "Too low or too high?" pops up over the strings picture (the string is already named) and goes away once answered,
-   so it reads as a question; the tuner and the circle of notes stay in view beside it (Jonathan, 2026-11-09). */
-.board{position:relative}
-.board>.strings,.board>.qpop{grid-column:1;grid-row:1}
-.qpop{z-index:2;align-self:stretch;display:flex;flex-direction:column;gap:8px;background:var(--bg);border:2.5px solid var(--purple-accent);border-radius:var(--radius);box-shadow:0 10px 28px rgba(0,0,0,.18);padding:14px 16px;animation:qpopIn .18s ease-out}
+/* "Too low or too high?" pops up under the string/tuner card and goes away once answered, so it reads as a
+   question; the tuner and the circle of notes stay in view beside it (Jonathan, 2026-11-09). */
+.qpop{display:flex;flex-direction:column;gap:8px;background:var(--bg);border:2.5px solid var(--purple-accent);border-radius:var(--radius);box-shadow:0 10px 28px rgba(0,0,0,.18);padding:14px 16px;animation:qpopIn .18s ease-out}
 .qpop[hidden]{display:none}
 .qpop-tag{margin:0;font-size:.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--purple-text)}
 .qpop-q{margin:0;font-size:1.125rem;font-weight:700;line-height:1.3;color:var(--text)}
@@ -189,14 +170,13 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
 .ans.right{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text)}
 .ans.wrong{background:var(--red-bg);border-color:var(--red-text);color:var(--red-text)}
 .ans:focus-visible{outline:2px solid var(--purple-accent);outline-offset:2px}
-.ans.six{flex:1 1 0;min-height:48px;font-size:.9375rem;padding:0 4px}
 .plain{color:var(--text2);font-size:.9375rem;align-self:center}
 .feedback{margin:8px 0 0;min-height:2.6em;font-size:1rem;color:var(--text)}
 .feedback.note{margin-top:2px;min-height:1.4em}
 .feedback.bad{color:var(--red-text)}
 .feedback.ok{color:var(--green-text)}
 .feedback.note{color:var(--purple-text)}
-@media(prefers-reduced-motion:reduce){.lcd-note.pop{animation:none}.needle,.peg-svg g.rot,.bubble{transition:none}}
+@media(prefers-reduced-motion:reduce){.lcd-note.pop{animation:none}.needle,.peg-svg g.rot}}
 </style>
 </head>
 <body>
@@ -209,7 +189,6 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
     </div>
     <div class="top-r">
       <button type="button" class="sw" id="sound-sw" role="switch" aria-checked="true"><span class="knob" aria-hidden="true"></span><span id="sound-lbl"></span></button>
-      <button type="button" class="sw" id="names-sw" role="switch" aria-checked="true"><span class="knob" aria-hidden="true"></span><span data-t="showNames">Show the string names</span></button>
       <button type="button" class="sw" id="restart-btn" data-t="startOver">Start over</button>
     </div>
   </header>
@@ -248,23 +227,23 @@ h2{font-size:1.5rem;margin:0 0 2px;line-height:1.2}
       </div>
       <div class="peg-foot">
         <button type="button" class="btn" id="pluck" data-t="pluck">Pluck again</button>
-        <span class="keys" data-t="keys">Keys: &larr; counterclockwise (tighten) &middot; &rarr; clockwise (loosen)</span>
       </div>
     </section>
 
     <section class="right" aria-label="Question" data-tl="secQuestion">
-      <div class="chips" id="chips"></div>
       <h2 id="prompt"></h2>
-      <p class="hint" id="hint"></p>
       <div class="board">
-        <div class="strings" id="strings"></div>
-        <div class="qpop" id="qpop" role="dialog" aria-labelledby="qpop-q" hidden><p class="qpop-tag" data-t="secQuestion">Question</p><p class="qpop-q" id="qpop-q"></p><p class="qpop-h" id="qpop-h"></p><div class="qpop-ans" id="qpop-ans"></div></div>
+        <div class="lhs">
+          <div class="tcard">
+            <div class="trow"><i class="dot" aria-hidden="true"></i><span data-t="tTune">Tune this string</span><b id="t-str"></b></div>
+            <div class="trow"><i class="dot cur" aria-hidden="true"></i><span data-t="tShows">The tuner shows</span><b id="t-shows" class="notranslate" translate="no"></b></div>
+          </div>
+          <div class="qpop" id="qpop" role="dialog" aria-labelledby="qpop-q" hidden><p class="qpop-tag" data-t="secQuestion">Question</p><p class="qpop-q" id="qpop-q"></p><div class="qpop-ans" id="qpop-ans"></div></div>
+        </div>
         <div class="ringbox">
           <svg id="ring" viewBox="0 0 224 224" role="img" data-tl="ringLabel"></svg>
-          <div class="legend"><span class="lg"><i class="dot" aria-hidden="true"></i><span data-t="legStr">string</span></span><span class="lg"><i class="dot cur" aria-hidden="true"></i><span data-t="legTun">tuner shows</span></span></div>
         </div>
       </div>
-      <div class="answers" id="answers"></div>
       <p class="feedback" id="feedback" aria-live="polite"></p>
       <p class="feedback note" id="note2" aria-live="polite"></p>
     </section>
@@ -301,9 +280,8 @@ const JITTER = 20;                        // levels 2-4: plus or minus this many
 const CLEAN_TO_LEVEL_UP = 3;              // rounds in a row with no wrong name and no wrong way
 const TICK_CENTS = 2;                     // one peg tick
 const PEG_LIMIT = 650;                    // the peg stops here, either way
-const STREAK_TO_PHASE2 = 6;               // one full set of strings named right in a row
 const DONE_MS = 1000;                     // green for this long = tuned
-const DEFAULTS = { soundOn: true, namesShownPhase1: true, namesShownPhase2: false };
+const DEFAULTS = { soundOn: true };
 
 function nearestNote(freq){
   const n = Math.round(12 * Math.log2(freq / 440)) + 69;
@@ -369,68 +347,54 @@ try { LANG = localStorage.getItem('gc-lang') === 'es' ? 'es' : 'en'; } catch(e){
 const I = {
   en: {
     back:'Back to class site', title:'Tuning Simulator',
-    showNames:'Show the string names',
     soundOn:'Sound: on', soundOff:'Sound: off',
     flat:'flat', inTune:'in tune', sharp:'sharp',
     stInTune:'In tune ✓', stSharp:'Too high — loosen the peg (sharp)', stFlat:'Too low — tighten the peg (flat)',
     stOther:'The tuner shows {x}. You need {y}.',
     loosen:'Loosen', loosenTurn:'turn clockwise', loosenSub:'note goes down',
     tighten:'Tighten', tightenTurn:'turn counterclockwise', tightenSub:'note goes up',
-    pluck:'Pluck again', keys:'Keys: ← counterclockwise (tighten) · → clockwise (loosen)',
-    score:'Level {l} of {m} · Strings tuned: {n} · Named right: {k} in a row',
-    chip1:'Name it', chip2:'Read the tuner', chip3:'Turn the peg',
-    p1:'Which string is this?', h1a:'Find the string on the picture. Tap its name.', h1b:'Name the string from memory.',
-    p2:'Look at the tuner and the circle of notes. Is the {a} string too low or too high?', h2:'Look at the needle. Is it left or right of the center?',
-    h2n:'The tuner shows a different letter than the string. Find both letters on the circle. Clockwise ↻ is up. Counterclockwise ↺ is down.',
-    p3:'Tune the {a} string: turn the peg until the tuner shows {y} in green.', h3:'Hold Tighten or Loosen. Keep the needle green for one second.',
-    h3n:'Hold Tighten or Loosen. The note slides. Stop when the tuner shows {y} and the needle is green for one second.',
+    pluck:'Pluck again',
+    score:'Level {l} of {m} · Strings tuned: {n}',
+    tTune:'Tune this string', tShows:'The tuner shows', strName:'{a} string',
+    p2:'Is the {a} string too low or too high?',
+    p3:'Turn the peg until the tuner shows {y} in green.',
     p4:'In tune. Next string…',
     up:'Too low — tighten', down:'Too high — loosen',
     names:['low E','A','D','G','B','high e'],
-    nameOk:'That is the {a} string.', nameBad:'That is the {a} string, not {b}.',
-    nameBadBack:'That is the {a} string, not {b}. The names are back for this string.',
-    phase2:'Six in a row. The string names are hidden now. Name each string from memory.',
     wayFlat:'The needle is left of center: too low. Tighten to go up.',
     waySharp:'The needle is right of center: too high. Loosen to go down.',
     wayUpN:'At the start the tuner showed {x}. The string is {y}. On the circle, {y} is {s} up from {x}. Tighten to go up.',
     wayDownN:'At the start the tuner showed {x}. The string is {y}. On the circle, {y} is {s} down from {x}. Loosen to go down.',
-    wayWrong:'Other way. ',
+    wayWrong:'Other way. ', wayOk:'Right.',
     done:'The {a} string is in tune.',
     levelUp:'Level {l}. Now a string can start up to {m} steps from its own note. Use the circle to choose Too low or Too high.',
-    ringLabel:'Circle of notes', startOver:'Start over', legStr:'string', legTun:'tuner shows', secTuner:'Tuner', secQuestion:'Question',
+    ringLabel:'Circle of notes', startOver:'Start over', secTuner:'Tuner', secQuestion:'Question',
     step1:'{n} step', stepN:'{n} steps', ringUp:'↻ up', ringDown:'↺ down'
   },
   es: {
     back:'Volver al sitio de la clase', title:'Simulador de afinación',
-    showNames:'Mostrar los nombres de las cuerdas',
     soundOn:'Sonido: sí', soundOff:'Sonido: no',
     flat:'bemol', inTune:'afinado', sharp:'sostenido',
     stInTune:'Afinado ✓', stSharp:'Muy alta — afloja la clavija (sostenido)', stFlat:'Muy baja — aprieta la clavija (bemol)',
     stOther:'El afinador muestra {x}. Necesitas {y}.',
     loosen:'Aflojar', loosenTurn:'gira en sentido horario', loosenSub:'la nota baja',
     tighten:'Apretar', tightenTurn:'gira en sentido antihorario', tightenSub:'la nota sube',
-    pluck:'Tocar otra vez', keys:'Teclas: ← en sentido antihorario (apretar) · → en sentido horario (aflojar)',
-    score:'Nivel {l} de {m} · Cuerdas afinadas: {n} · Nombradas bien: {k} seguidas',
-    chip1:'Nómbrala', chip2:'Lee el afinador', chip3:'Gira la clavija',
-    p1:'¿Qué cuerda es esta?', h1a:'Busca la cuerda en el dibujo. Toca su nombre.', h1b:'Nombra la cuerda de memoria.',
-    p2:'Mira el afinador y el círculo de notas. ¿La cuerda {a} está muy baja o muy alta?', h2:'Mira la aguja. ¿Está a la izquierda o a la derecha del centro?',
-    h2n:'El afinador muestra una letra distinta a la de la cuerda. Busca las dos letras en el círculo. En sentido horario ↻ es subir. En sentido antihorario ↺ es bajar.',
-    p3:'Afina la cuerda {a}: gira la clavija hasta que el afinador muestre {y} en verde.', h3:'Mantén presionado Apretar o Aflojar. Deja la aguja en verde durante un segundo.',
-    h3n:'Mantén presionado Apretar o Aflojar. La nota se desliza. Detente cuando el afinador muestre {y} y la aguja esté en verde durante un segundo.',
+    pluck:'Tocar otra vez',
+    score:'Nivel {l} de {m} · Cuerdas afinadas: {n}',
+    tTune:'Afina esta cuerda', tShows:'El afinador muestra', strName:'cuerda {a}',
+    p2:'¿La cuerda {a} está muy baja o muy alta?',
+    p3:'Gira la clavija hasta que el afinador muestre {y} en verde.',
     p4:'Afinada. Ahora la siguiente cuerda…',
     up:'Muy baja — aprieta', down:'Muy alta — afloja',
     names:['Mi grave','La','Re','Sol','Si','mi aguda'],
-    nameOk:'Esa es la cuerda {a}.', nameBad:'Esa es la cuerda {a}, no la cuerda {b}.',
-    nameBadBack:'Esa es la cuerda {a}, no la cuerda {b}. Los nombres vuelven para esta cuerda.',
-    phase2:'Seis seguidas. Los nombres de las cuerdas ya no se muestran. Nombra cada cuerda de memoria.',
     wayFlat:'La aguja está a la izquierda del centro: muy baja. Aprieta para subir.',
     waySharp:'La aguja está a la derecha del centro: muy alta. Afloja para bajar.',
     wayUpN:'Al principio el afinador mostraba {x}. La cuerda es {y}. En el círculo, {y} está {s} arriba de {x}. Aprieta para subir.',
     wayDownN:'Al principio el afinador mostraba {x}. La cuerda es {y}. En el círculo, {y} está {s} abajo de {x}. Afloja para bajar.',
-    wayWrong:'Al revés. ',
+    wayWrong:'Al revés. ', wayOk:'Correcto.',
     done:'La cuerda {a} está afinada.',
     levelUp:'Nivel {l}. Ahora una cuerda puede empezar a un máximo de {m} pasos de su propia nota. Usa el círculo para elegir Muy baja o Muy alta.',
-    ringLabel:'Círculo de notas', startOver:'Empezar de nuevo', legStr:'cuerda', legTun:'el afinador muestra', secTuner:'Afinador', secQuestion:'Pregunta',
+    ringLabel:'Círculo de notas', startOver:'Empezar de nuevo', secTuner:'Afinador', secQuestion:'Pregunta',
     step1:'{n} paso', stepN:'{n} pasos', ringUp:'↻ sube', ringDown:'↺ baja'
   }
 };
@@ -443,11 +407,11 @@ function T(k, p){
    the tuner's big letter always stays a letter. */
 function nameOf(i){ return I[LANG].names[i]; }
 function letterOf(i){ return STRINGS[i].note; }
+/* "G string", "low E string (E)", "cuerda La (A)": the letter is added when the name is not just the letter. */
+function stringLabel(i){ const n = nameOf(i), l = letterOf(i); return T('strName', { a: n }) + (n === l ? '' : ' (' + l + ')'); }
 
-/* ── saved: whether this browser has reached Phase 2, and its level ── */
-const PHASE2_KEY = 'gc-tuningsim-phase2', LEVEL_KEY = 'gc-tuningsim-level';
-function loadPhase2(){ try { return localStorage.getItem(PHASE2_KEY) === '1'; } catch(e){ return false; } }
-function savePhase2(){ try { localStorage.setItem(PHASE2_KEY, '1'); } catch(e){} }
+/* ── saved: this browser's level ── */
+const LEVEL_KEY = 'gc-tuningsim-level';
 function clampLevel(n){ n = Math.round(+n); return n >= 1 && n <= LEVELS.length ? n : 1; }
 /* ?level=4 lets a teacher look at a level. Only a whole level 1-4 counts; anything else
    (?level=9, ?level=abc) falls through to the saved level. */
@@ -464,25 +428,19 @@ function saveLevel(){
 
 /* ── state ── */
 const S = {
-  phase: loadPhase2() ? 2 : 1,
-  level: 1, clean: 0, roundClean: true,   // level 1..4; rounds in a row with no miss
-  showNames: false,         // the "Show the string names" switch (Phase 2 only)
-  missRound: false,         // a Phase 2 miss brings the names back for this round only
+  level: 1, clean: 0, roundClean: true,   // level 1..4; rounds in a row with no wrong way
   soundOn: DEFAULTS.soundOn,
-  streak: 0, tuned: 0,
-  state: 'name',            // name | read | turn | between
+  tuned: 0,
+  state: 'read',            // read (the question) | turn | between
   prev: -1, round: null, cents: 0, pegAngle: 0,
-  picked: -1, wayPicked: '', fb: '', fbClass: '', note: '',
+  wayPicked: '', fb: '', fbClass: '', note: '',
   disp: { shown: null, letter: null, green: false, inTune: false }   // inTune = green on the string's own letter
 };
 S.level = loadLevel();
-S.showNames = S.phase === 1 ? DEFAULTS.namesShownPhase1 : DEFAULTS.namesShownPhase2;
 const $ = id => document.getElementById(id);
-const el = { ring:$('ring'), score:$('score'), chips:$('chips'), prompt:$('prompt'), hint:$('hint'), strings:$('strings'), answers:$('answers'), qpop:$('qpop'), qpopQ:$('qpop-q'), qpopH:$('qpop-h'), qpopAns:$('qpop-ans'),
+const el = { ring:$('ring'), score:$('score'), prompt:$('prompt'), tStr:$('t-str'), tShows:$('t-shows'), qpop:$('qpop'), qpopQ:$('qpop-q'), qpopAns:$('qpop-ans'),
   feedback:$('feedback'), note2:$('note2'), snark:$('snark'), lcd:$('lcd'), note:$('note'), needle:$('needle'), status:$('status'), hz:$('hz'),
-  pegRot:$('peg-rot'), pegUp:$('peg-up'), pegDown:$('peg-down'), pluck:$('pluck'), soundSw:$('sound-sw'), namesSw:$('names-sw'), restart:$('restart-btn') };
-
-function namesVisible(){ return S.phase === 1 || S.showNames || S.missRound; }
+  pegRot:$('peg-rot'), pegUp:$('peg-up'), pegDown:$('peg-down'), pluck:$('pluck'), soundSw:$('sound-sw'), restart:$('restart-btn') };
 
 /* ── timers: everything started here is stopped in stopAll() ── */
 let doneTimer = 0, nextTimer = 0, holdTimer = 0, popTimer = 0;
@@ -575,8 +533,11 @@ function ringInit(){
 }
 function stepsText(n){ return T(n === 1 ? 'step1' : 'stepN', { n }); }
 function ringRender(){
-  const r = S.round, known = !!r && S.state !== 'name';
+  const r = S.round, known = !!r;
   const tgt = known ? r.target : '', cur = known && S.disp.letter ? S.disp.letter : '';
+  /* The card: the string to tune and what the tuner shows now (it follows the peg). */
+  el.tStr.textContent = known ? stringLabel(r.idx) : '';
+  el.tShows.textContent = S.disp.letter || '—';
   ringNodes.forEach(g => { const n = g.getAttribute('data-note'); g.classList.toggle('tgt', n === tgt); g.classList.toggle('cur', n === cur); g.classList.toggle('done', n === tgt && n === cur && S.disp.inTune); });
   const arc = $('rarc'), c1 = $('rc1'), c2 = $('rc2');
   if (known && r.steps > 0 && (S.state === 'turn' || S.state === 'between')) {
@@ -650,35 +611,12 @@ function newRound(){
   S.prev = S.round.idx;
   S.cents = S.round.cents; S.pegAngle = 0;
   el.pegRot.style.transform = 'rotate(0deg)';
-  S.picked = -1; S.wayPicked = ''; S.missRound = false; S.roundClean = true;
-  S.state = 'name';
-  S.fb = ''; S.fbClass = '';
-  lcdOff();
-  render();
-  focusFirst();
-}
-function answerName(i){
-  if (S.state !== 'name') return;
-  ensureCtx();
-  const right = S.round.idx;
-  S.picked = i; S.note = '';
-  if (i === right) {
-    S.streak++;
-    S.fb = T('nameOk', { a: nameOf(right) }); S.fbClass = 'ok';
-    if (S.phase === 1 && S.streak >= STREAK_TO_PHASE2) {
-      S.phase = 2; S.showNames = DEFAULTS.namesShownPhase2; savePhase2();
-      S.note = T('phase2');
-    }
-  } else {
-    S.streak = 0; S.roundClean = false;
-    if (S.phase === 2) { S.missRound = true; S.fb = T('nameBadBack', { a: nameOf(right), b: nameOf(i) }); }
-    else S.fb = T('nameBad', { a: nameOf(right), b: nameOf(i) });
-    S.fbClass = 'bad';
-  }
+  S.wayPicked = ''; S.roundClean = true;
   S.state = 'read';
+  S.fb = ''; S.fbClass = '';
   updateDisplay();
   render();
-  pluck(S.round.idx, S.cents, 1);
+  if (ctx) pluck(S.round.idx, S.cents, 1);                // no sound before the first click: browsers need a click to start audio
   focusFirst();
 }
 /* What the student reads after answering Up or Down: the needle on level 1, the circle on the others. */
@@ -688,9 +626,10 @@ function waySentence(r){
 }
 function answerWay(w){
   if (S.state !== 'read') return;
+  ensureCtx();
   S.wayPicked = w;
   const sentence = waySentence(S.round);
-  if (w === S.round.answer) { S.fb = sentence; S.fbClass = 'ok'; }
+  if (w === S.round.answer) { S.fb = T('wayOk'); S.fbClass = 'ok'; }
   else { S.fb = T('wayWrong') + sentence; S.fbClass = 'bad'; S.roundClean = false; }
   S.state = 'turn';
   render();
@@ -766,48 +705,15 @@ function applyStatic(){
 }
 function render(){
   const st = S.state;
-  el.score.textContent = T('score', { l: S.level, m: LEVELS.length, n: S.tuned, k: S.streak });
-  // chips
-  const order = ['name', 'read', 'turn'];
-  const cur = st === 'between' ? 2 : order.indexOf(st);
-  el.chips.innerHTML = ['chip1','chip2','chip3'].map((k, i) =>
-    '<span class="chip' + (i === cur ? ' on' : (i < cur ? ' past' : '')) + '">' + (i + 1) + ' · ' + esc(T(k)) + '</span>').join('');
-  // prompt + hint
-  const p = st === 'name' ? 'p1' : st === 'read' ? 'p2' : st === 'turn' ? 'p3' : 'p4';
-  const far = !!S.round && S.round.steps > 0, y = S.round ? S.round.target : '';
-  const a = S.round ? nameOf(S.round.idx) : '';
-  /* "Read the tuner": the question itself is in the pop-up (below), so the heading only names the step. */
-  el.prompt.textContent = st === 'read' ? T('chip2') : T(p, { y, a });
-  el.hint.textContent = st === 'name' ? (S.phase === 1 ? T('h1a') : T('h1b')) : st === 'turn' ? T(far ? 'h3n' : 'h3', { y }) : '';
+  el.score.textContent = T('score', { l: S.level, m: LEVELS.length, n: S.tuned });
+  const y = S.round ? S.round.target : '', a = S.round ? nameOf(S.round.idx) : '';
+  /* While the question is up it is the only question on the page: the heading waits. */
+  el.prompt.textContent = st === 'read' ? '' : T(st === 'turn' ? 'p3' : 'p4', { y });
   el.qpop.hidden = st !== 'read';
   if (st === 'read') {
     el.qpopQ.textContent = T('p2', { a });
-    el.qpopH.textContent = T(far ? 'h2n' : 'h2');
     el.qpopAns.innerHTML = '<button type="button" class="ans" data-way="up">' + esc(T('up')) + '</button><button type="button" class="ans" data-way="down">' + esc(T('down')) + '</button>';
   } else el.qpopAns.innerHTML = '';
-  // strings picture
-  const show = namesVisible();
-  const th = [5.5, 4.5, 3.6, 2.8, 2.2, 1.6];
-  let sh = '';
-  for (let i = 0; i < 6; i++) {
-    const on = S.round && S.round.idx === i;
-    let cls = 'bubble';
-    if (S.picked >= 0 && S.round) { if (i === S.round.idx) cls += ' right'; else if (i === S.picked) cls += ' wrong'; }
-    const label = LANG === 'es' ? esc(nameOf(i)) + ' <small>' + esc(letterOf(i)) + '</small>' : esc(nameOf(i));
-    const canTap = st === 'name' && show;
-    sh += '<div class="srow' + (on ? ' on' : '') + '"><div class="sline' + (i < 3 ? ' wound' : '') + '" style="--th:' + th[i] + 'px"></div>' +
-      '<div class="slot"><button type="button" class="' + cls + '" data-name="' + i + '"' + (canTap ? '' : ' disabled') + (show ? '' : ' tabindex="-1" aria-hidden="true"') + '>' + label + '</button></div></div>';
-  }
-  el.strings.className = 'strings' + (show ? '' : ' nonames');
-  el.strings.innerHTML = sh;
-  // answers
-  let ah = '';
-  if (st === 'name') {
-    if (!show) {
-      for (let i = 0; i < 6; i++) ah += '<button type="button" class="ans six" data-name="' + i + '">' + esc(nameOf(i)) + '</button>';
-    }
-  }   // "Too low or too high?" is answered in the pop-up; while turning there are no answer buttons: the only controls are Tighten and Loosen
-  el.answers.innerHTML = ah;
   el.feedback.className = 'feedback ' + S.fbClass;
   el.feedback.textContent = S.fb;
   el.note2.textContent = S.note;
@@ -817,9 +723,6 @@ function render(){
   el.pluck.disabled = !(st === 'read' || st === 'turn');
   el.soundSw.setAttribute('aria-checked', S.soundOn ? 'true' : 'false');
   el.soundSw.querySelector('#sound-lbl').textContent = S.soundOn ? T('soundOn') : T('soundOff');
-  const p1 = S.phase === 1;
-  el.namesSw.setAttribute('aria-checked', namesVisible() ? 'true' : 'false');
-  el.namesSw.setAttribute('aria-disabled', p1 ? 'true' : 'false');
   ringRender();
 }
 /* After an answer the clicked button is re-rendered away and focus falls to <body>. A keyboard
@@ -829,7 +732,7 @@ let lastKey = false;
 function focusFirst(){
   const a = document.activeElement, lost = !a || a === document.body;
   if (lost ? !lastKey : a.closest('.top')) return;
-  const b = el.qpopAns.querySelector('button:not(:disabled)') || el.answers.querySelector('button:not(:disabled)') || (S.state === 'name' && el.strings.querySelector('.bubble:not(:disabled)')) ||
+  const b = el.qpopAns.querySelector('button:not(:disabled)') ||
     (S.state === 'turn' && (S.round.answer === 'up' ? el.pegUp : el.pegDown));
   if (b) { try { b.focus({ preventScroll: true }); } catch(e){} }
 }
@@ -837,7 +740,6 @@ function focusFirst(){
 /* ═══ EVENTS ═══ */
 document.addEventListener('click', e => {
   const t = e.target.closest('button'); if (!t) return;
-  if (t.dataset.name != null) { answerName(+t.dataset.name); return; }
   if (t.dataset.way) { ensureCtx(); answerWay(t.dataset.way); return; }
 });
 el.pluck.addEventListener('click', () => {
@@ -850,18 +752,12 @@ el.soundSw.addEventListener('click', () => {
   else ensureCtx();
   render();
 });
-el.namesSw.addEventListener('click', () => {
-  if (S.phase === 1) return;                               // the names are part of Phase 1
-  S.showNames = !S.showNames;
-  render();
-});
-/* Start over: level 1 and Phase 1 again, and both saved keys cleared. On a shared Chromebook the next student would otherwise start at the last student's level
+/* Start over: level 1 again, and the saved level cleared (plus the old Phase 2 key from before 2026-11-09). On a shared Chromebook the next student would otherwise start at the last student's level
    (a saved level never goes down on its own: saveLevel). Jonathan, 2026-11-09. */
 el.restart.addEventListener('click', () => {
-  try { localStorage.removeItem(LEVEL_KEY); localStorage.removeItem(PHASE2_KEY); } catch(e){}
+  try { localStorage.removeItem(LEVEL_KEY); localStorage.removeItem('gc-tuningsim-phase2'); } catch(e){}
   stopHold();
-  S.level = 1; S.clean = 0; S.phase = 1; S.streak = 0; S.tuned = 0; S.prev = -1;
-  S.showNames = DEFAULTS.namesShownPhase1;
+  S.level = 1; S.clean = 0; S.tuned = 0; S.prev = -1;
   newRound();
 });
 [el.pegUp, el.pegDown].forEach(b => {

@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-09 (later that night) — Tuning Simulator: less on the page
+
+- **No more strings picture and no more "Which string is this?"** A card next to the tuner now says the two things you need: **Tune this string** (for example "G string", or "low E string (E)") and **The tuner shows** (the letter on the tuner right now; it changes as you turn the peg). Spanish: **Afina esta cuerda** / **El afinador muestra**.
+- **Each round starts on the question:** "Is the G string too low or too high?" Answer it, then turn the peg until the tuner shows G in green. A right answer just says "Right."; a wrong one explains which way and why.
+- **Gone to make room:** the step chips (1 · 2 · 3), the "Show the string names" switch, the "Keys:" line under the peg (the arrow keys still work), the long hints and the circle's colour key (the card's two dots now match the circle's colours). The top line is now just your level and how many strings you tuned.
+
 ## 2026-11-09 (night) — Tuning Simulator: the question pops up, and the letters go clockwise
 
 - **"Too low or too high?" is now a pop-up.** After you name the string, a box marked **Question** covers the string picture with the question, the hint and the two answers (**Too low — tighten** / **Too high — loosen**). The tuner and the circle of notes stay in view next to it. The box goes away as soon as you answer. Spanish: **Pregunta**.

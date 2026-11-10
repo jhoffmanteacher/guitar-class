@@ -1238,17 +1238,15 @@ async function pmHeaderWalk(page, run, events, stats) {
 
 /* Tuning Simulator (tuning-sim.html, 2026-11-06; levels, the circle of notes and the
    counterclockwise peg 2026-11-07). tools/tuning-sim-proof.mjs runs the round logic
-   4,000 times; this is the real page, in English and Spanish: it opens on Phase 1
-   (string names shown) at level 1 with sound ON (the pinned defaults), one round is
-   played the way a student plays it (click the string's name, click Up or Down, HOLD
-   the peg button until the needle is green, then the round ends and the next one
-   starts), the keys turn the peg (Left = counterclockwise = tighten) and are
-   cancelled, hiding the tab stops the keys, three clean rounds move up a level (saved),
-   six named right reach Phase 2 (names faded out, the six plain buttons in string
-   order, the choice saved), a wrong name in Phase 2 brings the names back for that
-   round only, the sound switch and "Show the string names" switch are clicked both
-   ways, and after a reload Phase 2 and the level are still on with sound back on its
-   default. Level 4 is then played: the tuner shows ANOTHER letter, the circle of notes
+   4,000 times; this is the real page, in English and Spanish: it opens at level 1 with
+   sound ON (the pinned default) on the question, with the card saying which string to
+   tune and what the tuner shows (no strings picture and no naming step since
+   2026-11-09); one round is played the way a student plays it (click Too low or Too
+   high in the pop-up, HOLD the peg button until the needle is green, then the round
+   ends and the next one starts), the keys turn the peg (Left = counterclockwise =
+   tighten) and are cancelled, hiding the tab stops the keys, three clean rounds move
+   up a level (saved), a wrong way resets that count, the sound switch is clicked both
+   ways, and after a reload the level is still on with sound back on its default. Level 4 is then played: the tuner shows ANOTHER letter, the circle of notes
    has the seven letters A-G with the string and the tuner marked, the arrow appears after
    Up or Down and turns clockwise for Up, counterclockwise for Down (the letters go up clockwise; 2026-11-09), Tighten turns the peg counterclockwise and raises the note, there are no
    answer buttons while turning, and green on the wrong letter does not end the round.
@@ -1274,7 +1272,6 @@ async function tuningSimWalk(page, run, events, stats, base) {
   };
   const waitFor = (cond, ms = 6000) => `(async () => { const t0 = Date.now(); const ok = () => (${cond}); while (!ok() && Date.now() - t0 < ${ms}) await new Promise(r => setTimeout(r, 40)); return ok(); })()`;
   const S = 'TuningSim.S';
-  const nameRight = `(() => { const i = ${S}.round.idx; (document.querySelector('.ans.six[data-name="' + i + '"]') || document.querySelector('.bubble[data-name="' + i + '"]')).click(); return true; })()`;
   const wayRight = `(() => { document.querySelector('.ans[data-way="' + ${S}.round.answer + '"]').click(); return true; })()`;
   /* Turn toward the string's own note (cents 0) in big steps while far, 2-cent steps near, so a level 4 start (up to 550 cents) is reachable and never overshot. */
   const toGreen = `(() => { let n = 0; while (!${S}.disp.inTune && n++ < 600) { const c = ${S}.cents, d = c < 0 ? 1 : -1; TuningSim.tick(d, Math.abs(c) > 60 ? 24 : 2); } return ${S}.disp.inTune; })()`;
@@ -1297,7 +1294,6 @@ async function tuningSimWalk(page, run, events, stats, base) {
     await sleep(80); return true;
   };
   const focusWhere = `(() => { const a = document.activeElement; return !a || a === document.body ? 'body' : a.id || (a.dataset.way ? 'way:' + a.dataset.way : a.dataset.name != null ? 'name:' + a.dataset.name : a.className); })()`;
-  const nameSel = `(() => { const i = ${S}.round.idx; return document.querySelector('.ans.six[data-name="' + i + '"]') ? '.ans.six[data-name="' + i + '"]' : '.bubble[data-name="' + i + '"]'; })()`;
   const names = { en: ['low E', 'A', 'D', 'G', 'B', 'high e'], es: ['Mi grave', 'La', 'Re', 'Sol', 'Si', 'mi aguda'] };   // the glossary's "mi aguda" (lower case, as fret.stringHighE; 9c6f642)
   const titles = { en: 'Tuning Simulator', es: 'Simulador de afinación' };
   let rounds = 0, checks = 0;
@@ -1305,21 +1301,21 @@ async function tuningSimWalk(page, run, events, stats, base) {
     const W = lang + ': ';
     await run(`tsim:${lang}:prep`, `(() => { try { localStorage.setItem('gc-lang', '${lang}'); localStorage.removeItem('gc-tuningsim-phase2'); localStorage.removeItem('gc-tuningsim-level'); } catch (e) {} return true; })()`, 10);
     await go();
-    const d0 = await run(`tsim:${lang}:defaults`, `({ ok: typeof TuningSim === 'object', lang: document.documentElement.lang, h1: document.querySelector('h1').textContent, state: ${S}.state, phase: ${S}.phase, sound: ${S}.soundOn, soundSw: document.getElementById('sound-sw').getAttribute('aria-checked'), level: ${S}.level, circleSw: document.getElementById('names-sw').getAttribute('aria-checked'), circleLocked: document.getElementById('names-sw').getAttribute('aria-disabled'), nocircle: document.getElementById('strings').classList.contains('nonames'), bubbles: document.querySelectorAll('.bubble:not(:disabled)').length, six: document.querySelectorAll('.ans.six').length })`, 10);
+    const d0 = await run(`tsim:${lang}:defaults`, `({ ok: typeof TuningSim === 'object', lang: document.documentElement.lang, h1: document.querySelector('h1').textContent, state: ${S}.state, sound: ${S}.soundOn, soundSw: document.getElementById('sound-sw').getAttribute('aria-checked'), level: ${S}.level, old: !!document.getElementById('names-sw') || !!document.getElementById('strings') || document.querySelectorAll('[data-name]').length, pop: !document.getElementById('qpop').hidden, q: document.getElementById('qpop-q').textContent, str: document.getElementById('t-str').textContent, shows: document.getElementById('t-shows').textContent, lcd: document.getElementById('note').textContent, idx: ${S}.round.idx })`, 10);
     if (!d0 || !d0.ok) { fail(W + 'load', 'tuning-sim.html did not boot (no TuningSim)'); continue; }
     checks++;
     if (d0.lang !== lang || d0.h1 !== titles[lang]) fail(W + 'language', `lang "${d0.lang}", heading "${d0.h1}"`);
-    if (d0.state !== 'name' || d0.phase !== 1 || d0.level !== 1) fail(W + 'start', `opened in state ${d0.state}, phase ${d0.phase}, level ${d0.level} (expected name, 1, 1)`);
+    if (d0.state !== 'read' || d0.level !== 1 || !d0.pop) fail(W + 'start', `opened in state ${d0.state}, level ${d0.level}, question shown ${d0.pop} (expected read, 1, the question up)`);
     if (d0.sound !== true || d0.soundSw !== 'true') fail(W + 'default-sound', `sound is ${d0.sound} / aria-checked ${d0.soundSw}; the default is ON`);
-    if (d0.circleSw !== 'true' || d0.nocircle || d0.bubbles !== 6 || d0.six !== 0) fail(W + 'default-circle', `Phase 1 should show the string names: switch ${d0.circleSw}, hidden ${d0.nocircle}, ${d0.bubbles} tappable letters, ${d0.six} plain buttons`);
-    if (d0.circleLocked !== 'true') fail(W + 'circle-locked', 'the string-names switch should be locked on in Phase 1');
-    const labels = await run(`tsim:${lang}:labels`, `[...document.querySelectorAll('.bubble')].map(b => b.firstChild.textContent.trim())`, 10);
-    if (!labels || labels.join('|') !== names[lang].join('|')) fail(W + 'names', `the six string names are [${labels}], expected [${names[lang]}]`);
-    // Round 1, played for real: letter, Up/Down, hold the peg until green.
-    await run(`tsim:${lang}:r1:name`, nameRight, 200);
+    if (d0.old) fail(W + 'no-naming', 'the strings picture, the string-names switch or a name button is back (removed 2026-11-09)');
+    /* The card names the string to tune and the letter the tuner shows; the question names the string too. */
+    const nm = names[lang][d0.idx], lt = ['E', 'A', 'D', 'G', 'B', 'E'][d0.idx], wantStr = (lang === 'en' ? nm + ' string' : 'cuerda ' + nm) + (nm === lt ? '' : ' (' + lt + ')');
+    if (d0.str !== wantStr || d0.shows !== d0.lcd || !d0.q.includes(nm)) fail(W + 'card', `the card says "${d0.str}" / "${d0.shows}" (tuner "${d0.lcd}"), the question "${d0.q}"; expected "${wantStr}", the tuner's letter, and the string's name in the question`);
+    // Round 1, played for real: Too low / Too high, hold the peg until green.
+    await sleep(200);
     if ((await run(`tsim:${lang}:r1:state1`, `({ s: ${S}.state, lcd: document.getElementById('lcd').dataset.mode, note: document.getElementById('note').textContent, letter: TuningSim.STRINGS[${S}.round.idx].note })`, 10)) ) {
       const r = await run(`tsim:${lang}:r1:read`, `({ s: ${S}.state, lcd: document.getElementById('lcd').dataset.mode, note: document.getElementById('note').textContent, letter: TuningSim.STRINGS[${S}.round.idx].note, voice: ${S}.soundOn, status: document.getElementById('status').textContent })`, 10);
-      if (r.s !== 'read' || r.lcd === 'off' || r.note !== r.letter) fail(W + 'r1:read', `after naming the string: state ${r.s}, LCD ${r.lcd}, letter "${r.note}" vs "${r.letter}"`);
+      if (r.s !== 'read' || r.lcd === 'off' || r.note !== r.letter) fail(W + 'r1:read', `on the question: state ${r.s}, LCD ${r.lcd}, letter "${r.note}" vs "${r.letter}"`);
       // "Which way?" is the student's to answer: the status line stays blank until then (Jonathan, 2026-11-09).
       if (r.status !== '') fail(W + 'r1:read-status', `during "Which way?" the tuner's status line says "${r.status}" (it gives the answer away; expected blank)`);
     }
@@ -1337,7 +1333,6 @@ async function tuningSimWalk(page, run, events, stats, base) {
     rounds++;
     // Keys, on round 2.
     await run(`tsim:${lang}:r2:new`, `(TuningSim.newRound(), true)`, 100);
-    await run(`tsim:${lang}:r2:name`, nameRight, 100);
     await run(`tsim:${lang}:r2:way`, wayRight, 100);
     const k = await run(`tsim:${lang}:r2:keys`, `(() => { const c0 = ${S}.cents; const a0 = ${S}.pegAngle; const ev = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }); document.dispatchEvent(ev); const c1 = ${S}.cents; const a1 = ${S}.pegAngle; const rep = new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true, repeat: true }); document.dispatchEvent(rep); const c2 = ${S}.cents; const ev2 = new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true, cancelable: true }); document.dispatchEvent(ev2); const c3 = ${S}.cents; return { loosen: c1 - c0, loosenTurn: a1 - a0, prevented: ev.defaultPrevented && ev2.defaultPrevented, repeatMoved: Math.abs(c2 - c1), tighten: c3 - c2 }; })()`, 10);
     if (!k || k.loosen !== -2 || k.tighten !== 2 || !k.prevented || !(k.loosenTurn > 0)) fail(W + 'keys', `Right (clockwise, loosen) moved ${k && k.loosen} cents and turned the peg ${k && k.loosenTurn} degrees, Left (counterclockwise, tighten) moved ${k && k.tighten}, arrows cancelled: ${k && k.prevented} (expected -2 with a positive, clockwise turn; +2; true)`);
@@ -1347,15 +1342,12 @@ async function tuningSimWalk(page, run, events, stats, base) {
     await run(`tsim:${lang}:r2:green`, toGreen, 10);
     await run(`tsim:${lang}:r2:wait`, waitFor(`${S}.state === 'between'`, 3500), 10);
     rounds++;
-    // Sound switch and the locked circle switch.
+    // Sound switch.
     const sw = await run(`tsim:${lang}:sound`, `(() => { const b = document.getElementById('sound-sw'); b.click(); const off = [${S}.soundOn, b.getAttribute('aria-checked')]; b.click(); return { off, on: [${S}.soundOn, b.getAttribute('aria-checked')] }; })()`, 10);
     if (!sw || sw.off.join() !== 'false,false' || sw.on.join() !== 'true,true') fail(W + 'sound-switch', `sound switch: off ${sw && sw.off}, on again ${sw && sw.on}`);
-    const lock = await run(`tsim:${lang}:circle-locked`, `(() => { document.getElementById('names-sw').click(); return [${S}.showNames, document.getElementById('strings').classList.contains('nonames')]; })()`, 10);
-    if (!lock || lock[0] !== true || lock[1] !== false) fail(W + 'circle-locked', 'the string-names switch changed something in Phase 1');
-    // Rounds 3-6: six named right in a row -> Phase 2.
+    // Rounds 3-6: clean rounds move up a level every three.
     for (let i = 3; i <= 6; i++) {
       await run(`tsim:${lang}:r${i}:new`, `(TuningSim.newRound(), true)`, 80);
-      await run(`tsim:${lang}:r${i}:name`, nameRight, 80);
       await run(`tsim:${lang}:r${i}:way`, wayRight, 80);
       await run(`tsim:${lang}:r${i}:green`, toGreen, 10);
       await run(`tsim:${lang}:r${i}:wait`, waitFor(`${S}.state === 'between'`, 3500), 10);
@@ -1365,40 +1357,21 @@ async function tuningSimWalk(page, run, events, stats, base) {
       const wantLvl = i < 3 ? 1 : i < 6 ? 2 : 3;
       if (!lvl || lvl.level !== wantLvl) fail(W + 'level-up', `after ${i} clean rounds in a row the level is ${lvl && lvl.level}, expected ${wantLvl} (three clean rounds per level)`);
       else if (i === 3 && (lvl.saved !== '2' || !lvl.note)) fail(W + 'level-saved', `reaching level 2: saved "${lvl.saved}", message "${lvl.note}" (expected "2" and a message)`);
-      // Phase 2 must wait for the SIXTH right name: still Phase 1, names still there, after five.
-      if (i < 6) {
-        const early = await run(`tsim:${lang}:r${i}:still-phase1`, `({ phase: ${S}.phase, streak: ${S}.streak, nocircle: document.getElementById('strings').classList.contains('nonames') })`, 10);
-        if (!early || early.phase !== 1 || early.streak !== i || early.nocircle) fail(W + 'phase2-early', `after ${i} right in a row the page is in phase ${early && early.phase} (streak ${early && early.streak}, names hidden ${early && early.nocircle}); Phase 2 starts after six`);
-      }
     }
-    // The 6th name was right, so Phase 2 began at that click.
-    const p2 = await run(`tsim:${lang}:phase2`, `(TuningSim.newRound(), { phase: ${S}.phase, streak: ${S}.streak, saved: (() => { try { return localStorage.getItem('gc-tuningsim-phase2'); } catch (e) { return 'unreadable'; } })(), switchNote: document.getElementById('note2').textContent, nocircle: document.getElementById('strings').classList.contains('nonames'), six: [...document.querySelectorAll('.ans.six')].map(b => b.textContent), circleSw: document.getElementById('names-sw').getAttribute('aria-checked'), circleLocked: document.getElementById('names-sw').getAttribute('aria-disabled') })`, 200);
-    if (!p2 || p2.phase !== 2 || p2.streak !== 6) fail(W + 'phase2', `after six right: phase ${p2 && p2.phase}, streak ${p2 && p2.streak}`);
-    else {
-      checks++;
-      if (p2.saved !== '1') fail(W + 'phase2-saved', `localStorage gc-tuningsim-phase2 is "${p2.saved}", expected "1"`);
-      if (!p2.nocircle || p2.circleSw !== 'false' || p2.circleLocked !== 'false') fail(W + 'phase2-circle', `the string names should be hidden with their switch off and unlocked: hidden ${p2.nocircle}, switch ${p2.circleSw}, locked ${p2.circleLocked}`);
-      if (p2.six.join('|') !== names[lang].join('|')) fail(W + 'phase2-buttons', `the six plain buttons are [${p2.six}], expected [${names[lang]}] in string order`);
-    }
-    // Show the string names: on, then off.
-    const sc = await run(`tsim:${lang}:show-circle`, `(() => { const b = document.getElementById('names-sw'); b.click(); const on = [${S}.showNames, document.getElementById('strings').classList.contains('nonames'), document.querySelectorAll('.ans.six').length]; b.click(); return { on, off: [${S}.showNames, document.getElementById('strings').classList.contains('nonames'), document.querySelectorAll('.ans.six').length] }; })()`, 10);
-    if (!sc || sc.on.join() !== 'true,false,0' || sc.off.join() !== 'false,true,6') fail(W + 'show-circle', `"Show the string names": on gave [${sc && sc.on}], off gave [${sc && sc.off}] (expected [true,false,0] then [false,true,6])`);
-    // A wrong name in Phase 2: the names return for this round only, and the streak resets.
-    const miss = await run(`tsim:${lang}:miss`, `(() => { const r = ${S}.round.idx, w = (r + 1) % 6; document.querySelector('.ans.six[data-name="' + w + '"]').click(); return { phase: ${S}.phase, streak: ${S}.streak, clean: ${S}.clean, nocircle: document.getElementById('strings').classList.contains('nonames'), rightMarked: !!document.querySelector('.bubble.right'), wrongMarked: !!document.querySelector('.bubble.wrong') }; })()`, 10);
-    if (!miss || miss.phase !== 2 || miss.streak !== 0 || miss.nocircle || !miss.rightMarked || !miss.wrongMarked || miss.clean !== 0) fail(W + 'phase2-miss', `after a wrong name: ${JSON.stringify(miss)} (expected phase 2, streak 0, clean count 0, names shown with the right and the wrong one marked)`);
-    await run(`tsim:${lang}:miss:way`, wayRight, 80);
+    /* A wrong way: the question goes, the answer sentence starts "Other way", and the clean count starts again. */
+    const miss = await run(`tsim:${lang}:miss`, `(() => { TuningSim.newRound(); const w = ${S}.round.answer === 'up' ? 'down' : 'up'; document.querySelector('.ans[data-way="' + w + '"]').click(); return { state: ${S}.state, roundClean: ${S}.roundClean, fb: document.getElementById('feedback').textContent, pop: !document.getElementById('qpop').hidden }; })()`, 80);
     await run(`tsim:${lang}:miss:green`, toGreen, 10);
     await run(`tsim:${lang}:miss:wait`, waitFor(`${S}.state === 'between'`, 3500), 10);
-    const back = await run(`tsim:${lang}:miss:next`, `(TuningSim.newRound(), { phase: ${S}.phase, level: ${S}.level, nocircle: document.getElementById('strings').classList.contains('nonames') })`, 100);
-    if (!back || back.phase !== 2 || !back.nocircle) fail(W + 'miss-next', 'the round after a Phase 2 miss should hide the string names again and stay in Phase 2');
-    // Reload: Phase 2 and the level remembered, sound back on its default, names switch off.
+    const missClean = await run(`tsim:${lang}:miss:clean`, `${S}.clean`, 10);
+    if (!miss || miss.state !== 'turn' || miss.roundClean !== false || miss.pop || !miss.fb.startsWith(lang === 'en' ? 'Other way' : 'Al revés') || missClean !== 0) fail(W + 'way-miss', `after a wrong way: ${JSON.stringify(miss)}, clean count ${missClean} (expected turn, not clean, the question gone, "Other way…", count 0)`);
+    const back = { level: await run(`tsim:${lang}:miss:level`, `${S}.level`, 10) };
+    // Reload: the level remembered, sound back on its default.
     await go();
-    const rl = await run(`tsim:${lang}:reload`, `({ phase: ${S}.phase, level: ${S}.level, sound: ${S}.soundOn, soundSw: document.getElementById('sound-sw').getAttribute('aria-checked'), circleSw: document.getElementById('names-sw').getAttribute('aria-checked'), nocircle: document.getElementById('strings').classList.contains('nonames'), six: document.querySelectorAll('.ans.six').length })`, 10);
-    if (!rl || rl.phase !== 2 || rl.level !== (back && back.level) || rl.sound !== true || rl.soundSw !== 'true' || rl.circleSw !== 'false' || !rl.nocircle || rl.six !== 6) fail(W + 'reload', `after a reload: ${JSON.stringify(rl)} (expected Phase 2, level ${back && back.level}, sound on, names off, six plain buttons)`);
+    const rl = await run(`tsim:${lang}:reload`, `({ level: ${S}.level, sound: ${S}.soundOn, soundSw: document.getElementById('sound-sw').getAttribute('aria-checked') })`, 10);
+    if (!rl || rl.level !== back.level || rl.sound !== true || rl.soundSw !== 'true') fail(W + 'reload', `after a reload: ${JSON.stringify(rl)} (expected level ${back.level}, sound on)`);
     // Level 4, played for real: another letter on the tuner, the circle of notes, the arrow, the peg's direction.
     const word = lang === 'en' ? { ccw: 'counterclockwise', cw: 'clockwise', other: 'The tuner shows' } : { ccw: 'sentido antihorario', cw: 'sentido horario', other: 'El afinador muestra' };
     await run(`tsim:${lang}:lv4:new`, `(TuningSim.setLevel(4), TuningSim.newRound(), true)`, 100);
-    await run(`tsim:${lang}:lv4:name`, nameRight, 100);
     const rd = await run(`tsim:${lang}:lv4:read`, `(() => { const r = ${S}.round, g = q => [...document.querySelectorAll(q)].map(n => n.textContent); return { target: r.target, start: r.letter, steps: r.steps, lcd: document.getElementById('note').textContent, status: document.getElementById('status').textContent, ring: g('#ring .rn').join(), tgt: g('#ring .rn.tgt'), cur: g('#ring .rn.cur'), arc: document.getElementById('rarc').getAttribute('d'), ways: document.querySelectorAll('.ans[data-way]').length }; })()`, 10);
     if (!rd || rd.ring !== 'A,B,C,D,E,F,G') fail(W + 'ring', `the circle of notes has [${rd && rd.ring}], expected the seven letters A to G`);
     else {
@@ -1410,7 +1383,7 @@ async function tuningSimWalk(page, run, events, stats, base) {
       if (rd.steps < 2 || rd.steps > 3) fail(W + 'lv4:steps', `level 4 started ${rd.steps} letters away, expected 2 or 3`);
     }
     await run(`tsim:${lang}:lv4:way`, wayRight, 150);
-    const tn = await run(`tsim:${lang}:lv4:turn`, `(() => { const r = ${S}.round, up = document.getElementById('peg-up'), dn = document.getElementById('peg-down'); return { arc: document.getElementById('rarc').getAttribute('d'), c1: document.getElementById('rc1').textContent, buttons: document.querySelectorAll('.answers button').length, upLeft: up.getBoundingClientRect().left < dn.getBoundingClientRect().left, upText: up.textContent, dnText: dn.textContent, steps: r.steps, answer: r.answer, turn: ${arcTurn}, geom: ${ringGeom} }; })()`, 10);
+    const tn = await run(`tsim:${lang}:lv4:turn`, `(() => { const r = ${S}.round, up = document.getElementById('peg-up'), dn = document.getElementById('peg-down'); return { arc: document.getElementById('rarc').getAttribute('d'), c1: document.getElementById('rc1').textContent, buttons: document.querySelectorAll('.ans[data-way]').length + (document.getElementById('qpop').hidden ? 0 : 1), upLeft: up.getBoundingClientRect().left < dn.getBoundingClientRect().left, upText: up.textContent, dnText: dn.textContent, steps: r.steps, answer: r.answer, turn: ${arcTurn}, geom: ${ringGeom} }; })()`, 10);
     if (!tn || !tn.arc || !tn.c1.includes(String(tn.steps))) fail(W + 'lv4:arc', `after answering the circle's arrow is "${tn && tn.arc}" and its label "${tn && tn.c1}" (expected an arrow and ${tn && tn.steps} steps)`);
     if (tn && (!tn.turn || tn.turn.off > 2 || Math.abs(tn.turn.deg - (tn.answer === 'up' ? -1 : 1) * 360 / 7 * tn.steps) > 3)) fail(W + 'lv4:arc-direction', `the arrow for ${tn.answer} (${tn.steps} steps) turns ${tn.turn && tn.turn.deg} degrees round the circle and strays ${tn.turn && tn.turn.off} px off it; expected ${Math.round((tn.answer === 'up' ? -1 : 1) * 360 / 7 * tn.steps)} (+ = counterclockwise: Up turns clockwise, Down counterclockwise) along the circle`);
     if (tn && (!tn.geom || tn.geom.off.length || Math.abs(tn.geom.top - 90) > 1)) fail(W + 'ring-drawn', `the circle's letters as drawn: A at ${tn.geom && tn.geom.top} degrees (expected 90, the top); the letter after [${tn.geom && tn.geom.off}] is not 360/7 degrees clockwise`);
@@ -1435,20 +1408,14 @@ async function tuningSimWalk(page, run, events, stats, base) {
     const mic = await run(`tsim:${lang}:mic`, `window.__gumCalls`, 10);
     if (mic !== 0) fail(W + 'mic', `the page called getUserMedia ${mic} time(s) — it must never ask for the mic`);
     checks++;
-    /* The keyboard and the mouse, for real (review round 2, 2026-11-08). A held Enter on the string's name (1 press,
-       4 auto-repeats) answers the name only and the focus moves to the first answer; Enter on the right way moves it
-       to the peg button for that way; on Tighten, Space and Enter each turn one tick and one mouse click exactly one;
-       a mouse answer leaves the focus alone (no jump). */
+    /* The keyboard and the mouse, for real (review round 2, 2026-11-08). A held Enter on the right way (1 press, 4
+       auto-repeats) answers once, moves the focus to the peg button for that way and does not turn the peg; on Tighten,
+       Space and Enter each turn one tick and one mouse click exactly one; a mouse answer leaves the focus alone (no jump). */
     await go();
-    await run(`tsim:${lang}:kb:focus-name`, `(() => { const i = ${S}.round.idx; (document.querySelector('.ans.six[data-name="' + i + '"]') || document.querySelector('.bubble[data-name="' + i + '"]')).focus(); return true; })()`, 10);
+    await run(`tsim:${lang}:kb:focus-way`, `(window.__kc0 = ${S}.cents, document.querySelector('.ans[data-way="' + ${S}.round.answer + '"]').focus(), true)`, 10);
     await press('Enter', 4);
-    const kb1 = await run(`tsim:${lang}:kb:held-enter`, `({ state: ${S}.state, way: ${S}.wayPicked, focus: ${focusWhere} })`, 10);
-    if (!kb1 || kb1.state !== 'read' || kb1.way !== '') fail(W + 'held-enter', `a held Enter (1 press + 4 repeats) on the string's name: state ${kb1 && kb1.state}, Up/Down picked "${kb1 && kb1.way}" (expected read and nothing picked: a repeat must not answer the next question)`);
-    else if (kb1.focus !== 'way:up') fail(W + 'kb-focus-name', `after naming the string with Enter the focus is on ${kb1.focus}, expected the first answer (way:up)`);
-    await run(`tsim:${lang}:kb:focus-way`, `(document.querySelector('.ans[data-way="' + ${S}.round.answer + '"]').focus(), true)`, 10);
-    await press('Enter');
-    const kb2 = await run(`tsim:${lang}:kb:way`, `({ state: ${S}.state, way: ${S}.wayPicked, answer: ${S}.round.answer, focus: ${focusWhere} })`, 10);
-    if (!kb2 || kb2.state !== 'turn' || kb2.way !== kb2.answer) fail(W + 'kb-way', `Enter on the right way: state ${kb2 && kb2.state}, picked "${kb2 && kb2.way}" (expected turn and ${kb2 && kb2.answer})`);
+    const kb2 = await run(`tsim:${lang}:kb:way`, `({ state: ${S}.state, way: ${S}.wayPicked, answer: ${S}.round.answer, focus: ${focusWhere}, moved: ${S}.cents - window.__kc0 })`, 10);
+    if (!kb2 || kb2.state !== 'turn' || kb2.way !== kb2.answer || kb2.moved !== 0) fail(W + 'kb-way', `a held Enter (1 press + 4 repeats) on the right way: state ${kb2 && kb2.state}, picked "${kb2 && kb2.way}", the peg moved ${kb2 && kb2.moved} cents (expected turn, ${kb2 && kb2.answer}, 0: a repeat must not turn the peg)`);
     else if (kb2.focus !== (kb2.answer === 'up' ? 'peg-up' : 'peg-down')) fail(W + 'kb-focus-peg', `after answering ${kb2.answer} with Enter the focus is on ${kb2.focus}, expected ${kb2.answer === 'up' ? 'peg-up' : 'peg-down'} (the button that turns that way)`);
     // Far from green, so no tick can end the round.
     await run(`tsim:${lang}:kb:far`, `(${S}.cents = -300, TuningSim.tick(0), document.getElementById('peg-up').focus(), true)`, 10);
@@ -1461,15 +1428,14 @@ async function tuningSimWalk(page, run, events, stats, base) {
     const upC = await run(`tsim:${lang}:kb:atup`, `window.__upC`, 10);
     if ([c1 - c0, c2 - c1].join() !== '2,2' || upC == null || upC - c2 < 2 || (upC - c2) % 2 !== 0 || c3 - upC !== 0) fail(W + 'peg-keys', `on Tighten: Space moved ${c1 - c0} cents, Enter ${c2 - c1}; a mouse press moved ${upC == null ? 'unknown' : upC - c2} by its release and the click after it ${upC == null ? 'unknown' : c3 - upC} more (expected 2, 2, then at least 2 in steps of 2 and 0 from the click event itself)`);
     await run(`tsim:${lang}:mouse:new`, `(TuningSim.newRound(), document.activeElement && document.activeElement.blur(), true)`, 50);
-    await clickAt(`tsim:${lang}:mouse:name`, await run(`tsim:${lang}:mouse:sel`, nameSel, 10));
+    await clickAt(`tsim:${lang}:mouse:way`, '.ans[data-way="up"]');
     const ms = await run(`tsim:${lang}:mouse:focus`, `({ state: ${S}.state, focus: ${focusWhere} })`, 10);
-    if (!ms || ms.state !== 'read' || ms.focus !== 'body') fail(W + 'mouse-focus', `after naming the string with a mouse click: state ${ms && ms.state}, focus on ${ms && ms.focus} (expected read, and the focus not moved: body)`);
+    if (!ms || ms.state !== 'turn' || ms.focus !== 'body') fail(W + 'mouse-focus', `after answering with a mouse click: state ${ms && ms.state}, focus on ${ms && ms.focus} (expected turn, and the focus not moved: body)`);
     checks++;
     /* The saved level: a teacher's ?level=2 look plus a level-up never lowers a saved 4; ?level=9 opens on the saved level. */
     await run(`tsim:${lang}:lvl:save4`, `(localStorage.setItem('gc-tuningsim-level', '4'), true)`, 10);
     await go('?level=2');
     await run(`tsim:${lang}:lvl:two-clean`, `(${S}.clean = 2, ${S}.level)`, 10);   // CLEAN_TO_LEVEL_UP is 3: one clean round levels up
-    await run(`tsim:${lang}:lvl:name`, nameRight, 80);
     await run(`tsim:${lang}:lvl:way`, wayRight, 80);
     await run(`tsim:${lang}:lvl:green`, toGreen, 10);
     await run(`tsim:${lang}:lvl:wait`, waitFor(`${S}.state === 'between'`, 3500), 10);
@@ -1486,7 +1452,6 @@ async function tuningSimWalk(page, run, events, stats, base) {
     await go('?level=1');
     const greenFill = `(() => { const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.style.fill = 'var(--green-bg)'; document.getElementById('ring').appendChild(c); const v = getComputedStyle(c).fill; c.remove(); return v; })()`;
     const mark = `(() => { const t = document.querySelector('#ring .rn[data-note="' + ${S}.round.target + '"]'); return { tgtCur: t.classList.contains('tgt') && t.classList.contains('cur'), done: [...document.querySelectorAll('#ring .rn.done')].map(n => n.getAttribute('data-note')), green: getComputedStyle(t.querySelector('circle')).fill === ${greenFill}, inTune: ${S}.disp.inTune, target: ${S}.round.target }; })()`;
-    await run(`tsim:${lang}:done:name`, nameRight, 80);
     const d1 = await run(`tsim:${lang}:done:before`, mark, 10);
     await run(`tsim:${lang}:done:way`, wayRight, 80);
     await run(`tsim:${lang}:done:green`, toGreen, 10);
@@ -1494,14 +1459,14 @@ async function tuningSimWalk(page, run, events, stats, base) {
     if (!d1 || !d1.tgtCur || d1.inTune || d1.done.length || d1.green) fail(W + 'green-early', `level 1 before tuning: ${JSON.stringify(d1)} (expected the string's note marked tgt and cur, not done and not green)`);
     if (!d2 || !d2.inTune || d2.done.join() !== d2.target || !d2.green) fail(W + 'green-done', `level 1 once in tune: ${JSON.stringify(d2)} (expected the string's note marked done and green)`);
     checks++;
-    /* Start over (Jonathan, 2026-11-09): from a saved level 4 and Phase 2 (a shared Chromebook's last student), one click puts the page back at level 1 and Phase 1 and clears both saved keys. */
+    /* Start over (Jonathan, 2026-11-09): from a saved level 4 (a shared Chromebook's last student), one click puts the page back at level 1 and clears the saved level (and the old Phase 2 key). */
     await run(`tsim:${lang}:restart:save`, `(localStorage.setItem('gc-tuningsim-level', '4'), localStorage.setItem('gc-tuningsim-phase2', '1'), true)`, 10);
     await go('');
-    const r0 = await run(`tsim:${lang}:restart:before`, `({ level: ${S}.level, phase: ${S}.phase })`, 10);
+    const r0 = await run(`tsim:${lang}:restart:before`, `({ level: ${S}.level })`, 10);
     await clickAt(`tsim:${lang}:restart:click`, '#restart-btn');
-    const r1 = await run(`tsim:${lang}:restart:after`, `({ level: ${S}.level, phase: ${S}.phase, state: ${S}.state, savedLevel: localStorage.getItem('gc-tuningsim-level'), savedPhase: localStorage.getItem('gc-tuningsim-phase2'), label: document.getElementById('restart-btn').textContent.trim() })`, 10);
-    if (!r0 || r0.level !== 4 || r0.phase !== 2) fail(W + 'start-over-before', `a saved level 4 and Phase 2 opened as ${JSON.stringify(r0)}, expected level 4, phase 2 (the Start over test has nothing to undo)`);
-    else if (!r1 || r1.level !== 1 || r1.phase !== 1 || r1.state !== 'name' || r1.savedLevel !== null || r1.savedPhase !== null || r1.label !== (lang === 'en' ? 'Start over' : 'Empezar de nuevo')) fail(W + 'start-over', `after Start over: ${JSON.stringify(r1)} (expected level 1, phase 1, state name, both saved keys gone, the label ${lang === 'en' ? '"Start over"' : '"Empezar de nuevo"'})`);
+    const r1 = await run(`tsim:${lang}:restart:after`, `({ level: ${S}.level, state: ${S}.state, savedLevel: localStorage.getItem('gc-tuningsim-level'), savedPhase: localStorage.getItem('gc-tuningsim-phase2'), label: document.getElementById('restart-btn').textContent.trim() })`, 10);
+    if (!r0 || r0.level !== 4) fail(W + 'start-over-before', `a saved level 4 opened as ${JSON.stringify(r0)}, expected level 4 (the Start over test has nothing to undo)`);
+    else if (!r1 || r1.level !== 1 || r1.state !== 'read' || r1.savedLevel !== null || r1.savedPhase !== null || r1.label !== (lang === 'en' ? 'Start over' : 'Empezar de nuevo')) fail(W + 'start-over', `after Start over: ${JSON.stringify(r1)} (expected level 1, state read, both saved keys gone, the label ${lang === 'en' ? '"Start over"' : '"Empezar de nuevo"'})`);
     checks++;
   }
   try { await page.send('Page.removeScriptToEvaluateOnNewDocument', { identifier: gum.identifier }); } catch { /* best effort */ }
