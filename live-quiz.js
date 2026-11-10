@@ -61,11 +61,13 @@
    the app knew in advance would either have to be hidden from the room or
    would spoil the round. It also fits the first quiz exactly — Jonathan
    plays a string and only he knows which one until he says so.
-   `type:'fret'` quizzes are the one exception (see CLAUDE.md, "Live quiz"):
-   the app itself scores the round from LQ_NATURALS below, because the
-   target note is a fact of the fretboard, not something only the teacher
-   knows. The projector rule still holds — nothing on the stage shows the
-   answer before Reveal.
+   The app scores the round itself for every `type:'fret'` quiz — the three
+   Fretboard tap quizzes (from LQ_NATURALS) and "Find the power chord"
+   (`power:true`, from lqPcRootAt) — because the answer is a fact of the
+   fretboard, not something only the teacher knows (see
+   .claude/rules/live-quiz.md). Only `mc` quizzes are judged by the teacher.
+   The projector rule still holds — nothing on the stage shows the answer
+   before Reveal.
    ════════════════════════════════════════════════════════════════════ */
 
 /* ── The quiz bank ──
@@ -87,7 +89,13 @@
    teacher picks a target note per question from the control strip; the
    answer id is '<string>:<fret>'. A fret quiz has no `teacherHint`
    about marking — the app scores it at Reveal (see CLAUDE.md, "Live
-   quiz", for why this one type is allowed to know the answer). */
+   quiz", for why this one type is allowed to know the answer).
+   `power:true` on a fret quiz ("Find the power chord", 2026-11-10): the
+   target is a power chord's ROOT (target.note, sharps with ♯, e.g. 'F♯'),
+   the strip offers the eight LQ_PC_ROOTS as chord names, the prompt says
+   "Tap the root of {chord} on the {string} string", and the right frets
+   come from lqPcRootAt, not LQ_NATURALS (which has no F♯ and must not get
+   one: the three note quizzes would grow an F♯ button). */
 const LIVE_QUIZZES = {
   'string-id': {
     id: 'string-id',
@@ -128,6 +136,15 @@ const LIVE_QUIZZES = {
     promptKey: 'lq.prompt.fretTap',
     teacherHint: 'Pick a string and a note below to open the question. Students tap the fret; press Reveal when the count stops climbing.',
     strings: ['highE', 'B', 'G', 'D', 'A', 'lowE']
+  },
+  'pc-find': {
+    id: 'pc-find',
+    type: 'fret',
+    power: true,
+    titleKey:  'lq.title.pcFind',
+    promptKey: 'lq.prompt.pcFind',
+    teacherHint: 'Pick a string and a chord below to open the question. Students tap the chord\'s root; press Reveal when the count stops climbing.',
+    strings: ['lowE', 'A']
   }
 };
 const LQ_DEFAULT_QUIZ = 'string-id';
@@ -160,10 +177,79 @@ function lqFretIdsFor(string, note){
   const map = LQ_NATURALS[string] || {};
   return Object.keys(map).filter(f => map[f] === note).map(f => lqFretId(string, Number(f)));
 }
-// Params for the prompt: the note letter and the string's localized name.
-function lqTargetParams(target, langOrNull){
+/* ── Power chords (the "Find the power chord" round, 2026-11-10) ──
+   A power chord is named after its root, and its root sits on the low E or A
+   string. The eight names Jonathan picked: the seven naturals plus F♯, sharps
+   with the ♯ sign, never flats (the spelling app.js's SD_NOTE_NAMES and
+   renderPowerName use). Listed in fret order from the open low E string, the
+   order app.js's PWN_NAMES uses. */
+const LQ_PC_ROOTS = ['E','F','F♯','G','A','B','C','D'];
+// Mirrors app.js SD_NOTE_NAMES (this file must not depend on app.js).
+const LQ_CHROMATIC = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+const LQ_PC_OPEN = { lowE: 4, A: 9 };   // the open string's index in LQ_CHROMATIC
+/* The frets "Find the power chord" counts, both ends included. A planning-chat
+   default Jonathan has NOT ruled on (2026-11-10): 0 to 12, like the Fretboard
+   tap board, so an open string and fret 12 both count for the same name. */
+const LQ_PC_FIND_FRETS = [0, 12];
+// The note on `string` at `fret`, ♯ spelling; null off the two root strings.
+function lqPcRootAt(string, fret){
+  const open = LQ_PC_OPEN[string];
+  if(open == null || !Number.isInteger(fret) || fret < 0) return null;
+  return LQ_CHROMATIC[(open + fret) % 12];
+}
+function lqPcChord(root){ return root + '5'; }
+// Every fret in LQ_PC_FIND_FRETS on `string` that is `root` (E on low E: 0 and 12).
+function lqPcFindIds(string, root){
+  const ids = [];
+  for(let f = LQ_PC_FIND_FRETS[0]; f <= LQ_PC_FIND_FRETS[1]; f++) if(lqPcRootAt(string, f) === root) ids.push(lqFretId(string, f));
+  return ids;
+}
+/* The upright chord box (guitar-diagrams.js chordDiagramSVG's cfg) for the
+   three-finger power chord with its root at `fret` on `string`: root (finger
+   1), the 5th two frets up on the next string (3) and the octave on the string
+   after that (4), the other three strings muted — the shape CHORD_DIAGRAMS
+   draws for F5…D5. Fret 0 is the open shape (fingers 1 and 2 on the 5th and
+   octave), as CHORD_DIAGRAMS['E5']. Built here, not added to CHORD_DIAGRAMS. */
+function lqPcShape(string, fret){
+  const root = string === 'lowE' ? 6 : (string === 'A' ? 5 : 0);
+  if(!root || !Number.isInteger(fret) || fret < 0) return null;
+  const open = fret === 0;
+  const chord = [];
+  for(let n = 6; n >= 1; n--){
+    if(n === root)          chord.push([n, fret, open ? 0 : 1]);
+    else if(n === root - 1) chord.push([n, fret + 2, open ? 1 : 3]);
+    else if(n === root - 2) chord.push([n, fret + 2, open ? 2 : 4]);
+    else                    chord.push([n, 'x', '']);
+  }
+  return { position: fret, chord };
+}
+function lqPcBoxSvg(string, fret){
+  const cfg = lqPcShape(string, fret);
+  return (cfg && typeof chordDiagramSVG === 'function') ? chordDiagramSVG(cfg) : '';
+}
+// The right answer ids for a fret question, from the quiz's own note table.
+function lqTargetIds(quiz, target){
+  if(!target) return [];
+  return quiz.power ? lqPcFindIds(target.string, target.note) : lqFretIdsFor(target.string, target.note);
+}
+// The note names a fret quiz offers on `string`, in button order.
+function lqTargetNotes(quiz, string){
+  if(quiz.power) return LQ_PC_ROOTS.filter(r => lqPcFindIds(string, r).length);
+  const present = new Set(Object.values(LQ_NATURALS[string] || {}));
+  return ['A','B','C','D','E','F','G'].filter(n => present.has(n));
+}
+// Params for the prompt: the note letter (or, power quiz, the chord name) and
+// the string's localized name.
+function lqTargetParams(target, langOrNull, quiz){
   const key = LQ_STRING_KEY[target.string] || 'fret.stringLowE';
-  return { note: target.note, string: langOrNull ? tIn(key, langOrNull) : t(key) };
+  const string = langOrNull ? tIn(key, langOrNull) : t(key);
+  return (quiz && quiz.power) ? { chord: lqPcChord(target.note), string } : { note: target.note, string };
+}
+/* fgBoardSvg's marker labels for a power quiz: the note at every fret, F♯ and
+   the other sharps included (fgBoardSvg's own FG_NATURALS would draw ✕ on the
+   F♯ fret when it lights green). undefined for a note quiz = unchanged board. */
+function lqBoardOpts(quiz, opts){
+  return quiz.power ? Object.assign({ noteAt: (k, f) => lqPcRootAt(k, f) || '' }, opts) : opts;
 }
 // Speed scoring is the overall default — a fast, correct answer should beat
 // a slow, correct one. A quiz opts OUT with `speedBonus: false` (e.g.
@@ -726,12 +812,12 @@ function lqStudentFretQuestionHtml(s, quiz){
   const n = Number(s.qIndex) + 1;
   const head = `<div class="lq-qnum" data-i18n="lq.qLabel" data-i18n-params="${escAttr(JSON.stringify({n}))}">${escHtml(t('lq.qLabel',{n}))}</div>`;
   if(!s.target) return head + `<div class="lq-prompt" data-i18n="lq.noTapYet">${escHtml(t('lq.noTapYet'))}</div>`;
-  const params = lqTargetParams(s.target);
+  const params = lqTargetParams(s.target, null, quiz);
   const top = head
     + `<div class="lq-prompt" data-i18n="${escAttr(quiz.promptKey)}" data-i18n-params="${escAttr(JSON.stringify(params))}">${escHtml(t(quiz.promptKey, params))}</div>`
     + lqTimerHtml(s);
   const mine = (lqMyAnswer && lqMyAnswer.qIndex === s.qIndex) ? lqMyAnswer.choice : null;
-  const board = `<div class="lq-board" id="lq-board">${typeof fgBoardSvg === 'function' ? fgBoardSvg('lq', null, { strings: quiz.strings, clickFn: 'lqTap', hit: !mine }) : ''}</div>`;
+  const board = `<div class="lq-board" id="lq-board">${typeof fgBoardSvg === 'function' ? fgBoardSvg('lq', null, lqBoardOpts(quiz, { strings: quiz.strings, clickFn: 'lqTap', hit: !mine })) : ''}</div>`;
   if(mine){
     const p = lqParseFretId(mine);
     const bg = (p && LQ_STRING_COLOR[p.string]) || '#555';
@@ -794,24 +880,25 @@ function lqStudentFretRevealHtml(s, quiz){
   } else {
     verdict = `<div class="lq-verdict lq-v-no" data-i18n="lq.wrong">${escHtml(t('lq.wrong'))}</div>`;
   }
-  const board = `<div class="lq-board" id="lq-board">${typeof fgBoardSvg === 'function' ? fgBoardSvg('lq', null, { strings: quiz.strings, hit: false }) : ''}</div>`;
-  return verdict + lqFretAnswerHtml(correctIds) + board + lqTallyHtml(s, quiz, mine) + lqScoreLineHtml(s);
+  const board = `<div class="lq-board" id="lq-board">${typeof fgBoardSvg === 'function' ? fgBoardSvg('lq', null, lqBoardOpts(quiz, { strings: quiz.strings, hit: false })) : ''}</div>`;
+  return verdict + lqFretAnswerHtml(correctIds, quiz.power && s.target ? lqPcChord(s.target.note) : null) + board + lqTallyHtml(s, quiz, mine) + lqScoreLineHtml(s);
 }
 
 // One correct id (the common case) or two (an octave pair, e.g. E on the
 // low E string is fret 0 AND fret 12) — never more than two on a 12-fret
 // board, since a natural note repeats at most once in that span.
-function lqFretAnswerHtml(correctIds){
+// `chord` (a power quiz only): the line also names the chord, "G5: the root
+// is fret 3 on the low E string" (lq.answerPc / lq.answerPcAlso).
+function lqFretAnswerHtml(correctIds, chord){
   const first = lqParseFretId(correctIds[0]);
   if(!first) return '';
   const string = t(LQ_STRING_KEY[first.string] || 'fret.stringLowE');
-  if(correctIds.length < 2){
-    const params = { n: first.fret, string };
-    return `<div class="lq-answer" data-i18n="lq.answerFret" data-i18n-params="${escAttr(JSON.stringify(params))}">${escHtml(t('lq.answerFret', params))}</div>`;
-  }
-  const second = lqParseFretId(correctIds[1]);
-  const params = { n: first.fret, m: second ? second.fret : correctIds[1], string };
-  return `<div class="lq-answer" data-i18n="lq.answerFretAlso" data-i18n-params="${escAttr(JSON.stringify(params))}">${escHtml(t('lq.answerFretAlso', params))}</div>`;
+  const two = correctIds.length >= 2;
+  const second = two ? lqParseFretId(correctIds[1]) : null;
+  const params = two ? { n: first.fret, m: second ? second.fret : correctIds[1], string } : { n: first.fret, string };
+  if(chord) params.chord = chord;
+  const key = chord ? (two ? 'lq.answerPcAlso' : 'lq.answerPc') : (two ? 'lq.answerFretAlso' : 'lq.answerFret');
+  return `<div class="lq-answer" data-i18n="${key}" data-i18n-params="${escAttr(JSON.stringify(params))}">${escHtml(t(key, params))}</div>`;
 }
 
 // One leaderboard row: rank, name, points. The student's own screen marks
@@ -1171,7 +1258,7 @@ function lqStageFretQuestionHtml(s, quiz){
   const timer = Number(s.limitSec)
     ? `<div class="lq-st-timer" id="lq-st-timer">${escHtml(lqFmtLeft(Number(s.limitSec), Number(s.limitSec)))}</div>` : '';
   const prompt = s.target
-    ? lqBilingualParams(quiz.promptKey, 'lq-st-prompt', lqTargetParams(s.target, 'en'), lqTargetParams(s.target, 'es'))
+    ? lqBilingualParams(quiz.promptKey, 'lq-st-prompt', lqTargetParams(s.target, 'en', quiz), lqTargetParams(s.target, 'es', quiz))
     : lqBilingual('lq.noTapYet', 'lq-st-prompt');
   return lqBilingualParams('lq.qLabel', 'lq-st-qnum', {n}, {n})
     + prompt + timer
@@ -1191,26 +1278,32 @@ function lqStageRevealHtml(s, quiz){
 
 // Bilingual answer line for a fret reveal — mirrors lqFretAnswerHtml, one
 // correct id or the E/E-style octave pair, but both languages at once.
-function lqFretBilingualAnswer(correctIds){
+function lqFretBilingualAnswer(correctIds, chord){
   const first = lqParseFretId(correctIds[0]);
   if(!first) return '';
   const key = LQ_STRING_KEY[first.string] || 'fret.stringLowE';
   const stringEn = tIn(key, 'en'), stringEs = tIn(key, 'es');
-  if(correctIds.length < 2){
-    return lqBilingualParams('lq.answerFret', 'lq-st-answer', {n:first.fret, string:stringEn}, {n:first.fret, string:stringEs});
-  }
-  const second = lqParseFretId(correctIds[1]);
-  const m = second ? second.fret : correctIds[1];
-  return lqBilingualParams('lq.answerFretAlso', 'lq-st-answer', {n:first.fret, m, string:stringEn}, {n:first.fret, m, string:stringEs});
+  const two = correctIds.length >= 2;
+  const second = two ? lqParseFretId(correctIds[1]) : null;
+  const base = two ? { n: first.fret, m: second ? second.fret : correctIds[1] } : { n: first.fret };
+  const extra = chord ? { chord } : {};
+  const k = chord ? (two ? 'lq.answerPcAlso' : 'lq.answerPc') : (two ? 'lq.answerFretAlso' : 'lq.answerFret');
+  return lqBilingualParams(k, 'lq-st-answer', Object.assign({}, base, { string: stringEn }, extra), Object.assign({}, base, { string: stringEs }, extra));
 }
 
 // The board on the left (static, correct fret(s) green, every tapped marker
 // showing its count — nothing student-identifying), the tally bars and the
-// top-5 leaderboard stacked on the right.
+// top-5 leaderboard stacked on the right. A power quiz also draws the chord's
+// chart box beside the board, for the lowest right fret (the open shape for
+// E5 on low E and A5 on the A string) — after Reveal only.
 function lqStageFretRevealHtml(s, quiz){
   const correctIds = lqCorrectIds(s);
-  const answer = correctIds.length ? lqFretBilingualAnswer(correctIds) : '';
-  const board = `<div class="lq-board" id="lq-st-board">${typeof fgBoardSvg === 'function' ? fgBoardSvg('lqst', null, { strings: quiz.strings, hit: false }) : ''}</div>`;
+  const chord = quiz.power && s.target ? lqPcChord(s.target.note) : null;
+  const answer = correctIds.length ? lqFretBilingualAnswer(correctIds, chord) : '';
+  let board = `<div class="lq-board" id="lq-st-board">${typeof fgBoardSvg === 'function' ? fgBoardSvg('lqst', null, lqBoardOpts(quiz, { strings: quiz.strings, hit: false })) : ''}</div>`;
+  const first = chord ? lqParseFretId(correctIds[0]) : null;
+  const box = first ? lqPcBoxSvg(first.string, first.fret) : '';
+  if(box) board = `<div class="lq-st-pcwrap">${board}<div class="lq-pcbox lq-pcbox-side">${box}</div></div>`;
   const lb = lqRankedNamed(s).slice(0, 5).map(r => lqLbRowHtml(r)).join('');
   return lqBilingualParams('lq.stageAnswerLabel', 'lq-st-qnum', {n: Number(s.qIndex) + 1}, {n: Number(s.qIndex) + 1})
     + answer
@@ -1228,18 +1321,21 @@ function lqStageEndedHtml(s){
    after every question (reveal). One row of string chips (skipped for a
    one-string quiz; the selected one shown in `.go` instead of `.ghost` —
    existing classes, no new CSS for "highlighted") plus a row of the seven
-   natural notes (always all seven, drawn from LQ_NATURALS) plus Random.
-   Nothing here names a fret — the strip is on the projector too. */
+   natural notes (always all seven, drawn from LQ_NATURALS) plus Random —
+   or, for "Find the power chord", the eight chord names E5 … D5
+   (lqTargetNotes). Nothing here names a fret — the strip is on the
+   projector too. */
 function lqFretPickerHtml(quiz, busy){
   const cur = quiz.strings.includes(lqTFretString) ? lqTFretString : quiz.strings[0];
   const strings = quiz.strings.length > 1
     ? `<div class="lq-ctl-marks">${quiz.strings.map(k =>
         `<button type="button" class="lq-ctl${k === cur ? ' go' : ' ghost'}" onclick="lqTFretString='${k}';lqPaintControls()">${escHtml(tIn(LQ_STRING_KEY[k], 'en'))}</button>`).join('')}</div>`
     : '';
-  const present = new Set(Object.values(LQ_NATURALS[cur] || {}));
-  const notes = ['A','B','C','D','E','F','G'].filter(n => present.has(n));
+  // A power quiz names its buttons as chords (E5 … D5) in fret order; the
+  // note quizzes keep their seven letters A–G, unchanged.
+  const notes = lqTargetNotes(quiz, cur);
   const noteBtns = notes.map(n =>
-    `<button type="button" class="lq-ctl mark" style="--lq-c:${LQ_STRING_COLOR[cur] || '#555'}" onclick="lqTeacherOpenFret('${cur}','${n}')"${busy}>${n}</button>`).join('');
+    `<button type="button" class="lq-ctl mark" style="--lq-c:${LQ_STRING_COLOR[cur] || '#555'}" onclick="lqTeacherOpenFret('${cur}','${n}')"${busy}>${quiz.power ? lqPcChord(n) : n}</button>`).join('');
   const random = `<button type="button" class="lq-ctl go" onclick="lqTeacherOpenFret('${cur}','random')"${busy}>Random</button>`;
   return strings + `<div class="lq-ctl-marks">${noteBtns}${random}</div>`;
 }
@@ -1379,7 +1475,7 @@ async function lqTeacherOpenFret(string, note){
   const quiz = lqQuiz(s.quizId);
   if(!quiz.strings || !quiz.strings.includes(string)) return;
   if(note === 'random'){ ({ string, note } = lqRandomTarget(quiz, s.target)); }
-  if(!lqFretIdsFor(string, note).length) return;
+  if(!lqTargetIds(quiz, { string, note }).length) return;
   lqTFretString = string;
   await lqTeacherNext({ string, note });
 }
@@ -1388,11 +1484,10 @@ async function lqTeacherOpenFret(string, note){
 // repeat) — falls through to a repeat only if 20 tries can't avoid it,
 // which only happens on a one-string, one-note-left edge case.
 function lqRandomTarget(quiz, prev){
-  const notesAll = ['A','B','C','D','E','F','G'];
   let string, note, tries = 0;
   do {
     string = quiz.strings[Math.floor(Math.random() * quiz.strings.length)];
-    const present = notesAll.filter(n => new Set(Object.values(LQ_NATURALS[string] || {})).has(n));
+    const present = lqTargetNotes(quiz, string);
     note = present[Math.floor(Math.random() * present.length)];
     tries++;
   } while(prev && string === prev.string && note === prev.note && tries < 20);
@@ -1451,7 +1546,7 @@ async function lqTeacherRevealFret(){
   const s = lqTSession;
   if(!s || s.state !== 'question' || !s.target) return;
   const quiz = lqQuiz(s.quizId);
-  const ids = lqFretIdsFor(s.target.string, s.target.note);
+  const ids = lqTargetIds(quiz, s.target);
   if(!ids.length){ console.warn('[live-quiz] lqTeacherRevealFret: no frets for target', s.target); return; }
   const rows = lqRoundAnswers(s, s.qIndex);
   const isValidId = choice => { const p = lqParseFretId(choice); return !!p && quiz.strings.includes(p.string); };

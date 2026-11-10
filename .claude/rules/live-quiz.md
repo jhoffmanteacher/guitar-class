@@ -12,9 +12,19 @@ projected stage (`?teacher=true` → **Live quiz**). One game runs at a time, in
 - **The teacher is the only judge — for `mc` quizzes.** The bank has no answer
   key for those; Jonathan marks the correct choice at reveal. Deliberate: the
   stage is on the classroom projector.
-- **`type:'fret'` quizzes are the one exception**, because the answer is a fact
-  of the fretboard. The teacher picks a target note from the strip; the app
-  scores the round from `LQ_NATURALS` when Reveal is pressed.
+- **The app scores every `type:'fret'` quiz itself**, because the answer is a
+  fact of the fretboard: the three Fretboard tap quizzes and "Find the power
+  chord" (2026-11-10, Jonathan). Only `mc` quizzes are judged by the teacher.
+  The teacher picks a target from the strip; the app scores the round when
+  Reveal is pressed, from `LQ_NATURALS` (a note quiz) or `lqPcRootAt()` (a
+  `power:true` quiz).
+  - "Find the power chord" (`pc-find`, `power:true`): the target is a chord's
+    root (`target.note`, ♯ spelling, e.g. `'F♯'`), the strip offers
+    E5 F5 F♯5 G5 A5 B5 C5 D5 on the low E and A strings, and every fret in
+    `LQ_PC_FIND_FRETS` (0–12, an unconfirmed default) that is the root
+    counts. F♯ is NOT in `LQ_NATURALS`: adding it there would put an F♯
+    button into the three note quizzes. The stage reveal also draws the
+    chord's chart box (`lqPcShape()`), after Reveal only.
   - The stage never shows the board with a marker (stage rule below); the
     strip shows one Reveal button, never the fret.
   - Answer ids are `'<string>:<fret>'`; octaves both count (`correctIds`).

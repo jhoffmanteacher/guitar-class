@@ -2915,7 +2915,12 @@
     'lq.pickedOpen':         { en: 'Open · {string}', es: 'Al aire · {string}' },
     'lq.answerFret':         { en: 'The answer: fret {n} on the {string} string', es: 'La respuesta: traste {n} en la cuerda {string}' },
     'lq.answerFretAlso':     { en: 'The answer: fret {n} or fret {m} on the {string} string', es: 'La respuesta: traste {n} o traste {m} en la cuerda {string}' },
-    'lq.noTapYet':           { en: 'Waiting for the question…', es: 'Esperando la pregunta…' }
+    'lq.noTapYet':           { en: 'Waiting for the question…', es: 'Esperando la pregunta…' },
+    // "Find the power chord" (2026-11-10): {chord} is a chord symbol (E5, F♯5), the same in both languages; {string} is a fret.string* name.
+    'lq.title.pcFind':       { en: 'Find the power chord', es: 'Encuentra el acorde de potencia' },
+    'lq.prompt.pcFind':      { en: 'Tap the root of {chord} on the {string} string', es: 'Toca la raíz de {chord} en la cuerda {string}' },
+    'lq.answerPc':           { en: '{chord}: the root is fret {n} on the {string} string', es: '{chord}: la raíz está en el traste {n} de la cuerda {string}' },
+    'lq.answerPcAlso':       { en: '{chord}: the root is fret {n} or fret {m} on the {string} string', es: '{chord}: la raíz está en el traste {n} o en el traste {m} de la cuerda {string}' }
   };
 
   let lang = 'en';

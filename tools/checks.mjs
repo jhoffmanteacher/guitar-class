@@ -4933,12 +4933,14 @@ function checkMissingI18nKeys(I18N) {
           if (seen.has(k2)) { err(`live-quiz.js LIVE_QUIZZES['${id}'].strings has a duplicate entry '${k2}'`); problems++; dynamicBad++; }
           seen.add(k2);
         }
+        // A `power:true` fret quiz ("Find the power chord") names a chord, not a note: its prompt carries {chord} where the others carry {note}.
+        const want = q.power ? '{chord}' : '{note}';
         const entry = I18N && q.promptKey ? I18N[q.promptKey] : null;
         if (entry) {
           for (const lang of ['en', 'es']) {
             const str = entry[lang] || '';
-            if (!str.includes('{note}') || !str.includes('{string}')) {
-              err(`live-quiz.js LIVE_QUIZZES['${id}'].promptKey '${q.promptKey}' (${lang}) must contain both {note} and {string}`); problems++; dynamicBad++;
+            if (!str.includes(want) || !str.includes('{string}')) {
+              err(`live-quiz.js LIVE_QUIZZES['${id}'].promptKey '${q.promptKey}' (${lang}) must contain both ${want} and {string}`); problems++; dynamicBad++;
             }
           }
         }
@@ -5141,23 +5143,38 @@ async function checkLiveQuizNoNames() {
     const oldDoc = state => ({ sessionId: 'S0', quizId: mcId, state, qIndex: 0, correct: null, correctIds: null, tally: null, target: null, speedBonus: false, limitSec: 0,
       scores: { u1: { name: 'Alice Zebra', label: 'Alice Z.', pts: 500, right: 1, answered: 1, last: 500, lastRight: true }, u2: { name: 'Bob Yak', pts: 0, right: 0, answered: 1, last: 0, lastRight: false }, u9: { name: 'Old Leftover', pts: 100, right: 1, answered: 1 } } });
     const answers = [{ sessionId: 'S0', qIndex: 0, uid: 'u1', name: 'Alice Zebra', choice: mcChoice, ms: 900 }, { sessionId: 'S0', qIndex: 0, uid: 'u3', name: 'Cy Xu', choice: mcChoice, ms: 800 }];
-    const setup = (state, extra) => { data = Object.assign(oldDoc(state), extra || {}); run(`lqTSession = ${JSON.stringify(data)}; lqTAnswers = ${JSON.stringify(answers)}; lqTBusy = false;`); };
-    for (const [label, state, extra, call] of [
+    const setup = (state, extra, ans) => { data = Object.assign(oldDoc(state), extra || {}); run(`lqTSession = ${JSON.stringify(data)}; lqTAnswers = ${JSON.stringify(ans || answers)}; lqTBusy = false;`); };
+    // The power-chord rounds (2026-11-10) go through the same writers: "Find the power chord" is a fret quiz with `power: true`. Its F♯ target on
+    // the A string is fret 9 only, so u3's tap there must score and u1's (fret 2, a B) must not.
+    const pcFindId = run('Object.keys(LIVE_QUIZZES).find(k => LIVE_QUIZZES[k].type === "fret" && LIVE_QUIZZES[k].power) || ""');
+    if (!pcFindId) { flag('the bank has no "Find the power chord" quiz (a fret quiz with power: true) to test'); return; }
+    const pcAnswers = [{ sessionId: 'S0', qIndex: 0, uid: 'u1', name: 'Alice Zebra', choice: 'A:2', ms: 900 }, { sessionId: 'S0', qIndex: 0, uid: 'u3', name: 'Cy Xu', choice: 'A:9', ms: 800 }];
+    for (const [label, state, extra, call, ans] of [
       ['mc Reveal', 'question', {}, `lqTeacherReveal(${JSON.stringify(mcChoice)})`],
       ['fret Reveal', 'question', { quizId: fretId, target: { string: 'lowE', note: 'G' } }, 'lqTeacherRevealFret()'],
+      ['Find the power chord Reveal', 'question', { quizId: pcFindId, target: { string: 'A', note: 'F♯' } }, 'lqTeacherRevealFret()', pcAnswers],
       ['End', 'reveal', {}, 'lqTeacherEnd()'],
       ['Close', 'ended', {}, 'lqTeacherClose()']
     ]) {
-      setup(state, extra);
+      setup(state, extra, ans);
       try { run(`${call}.then(() => {})`); await new Promise(r => setImmediate(r)); await new Promise(r => setImmediate(r)); } catch (e) { flag(`${label}: the writer threw ${e.message}`); continue; }
       cases++;
       scan(`${label} writer (starting from an older game's doc)`, data.scores);
       if (!data.scores || !data.scores.u1 || data.scores.u1.pts < 500) flag(`${label}: the points were lost: ${JSON.stringify(data.scores)}`);
+      if (ans === pcAnswers) {
+        if (JSON.stringify(data.correctIds) !== '["A:9"]') flag(`${label}: F♯5 on the A string should be fret 9 only, the writer wrote correctIds ${JSON.stringify(data.correctIds)}`);
+        if (!(data.scores.u3 && data.scores.u3.lastRight === true && data.scores.u1.lastRight === false)) flag(`${label}: the round was scored wrong: ${JSON.stringify(data.scores)}`);
+      }
     }
-    setup('ended', {});
-    run('lqTeacherStart().then(() => {})'); await new Promise(r => setImmediate(r)); await new Promise(r => setImmediate(r));
-    cases++;
-    if (JSON.stringify(data.scores) !== '{}') flag(`Start did not replace the scores: ${JSON.stringify(data.scores)}`);
+    for (const startId of ['', pcFindId]) {
+      setup('ended', {});
+      const getEl = box.document.getElementById;
+      if (startId) box.document.getElementById = id => (id === 'lq-quiz-pick' ? { value: startId } : null);
+      try { run('lqTeacherStart().then(() => {})'); await new Promise(r => setImmediate(r)); await new Promise(r => setImmediate(r)); } finally { box.document.getElementById = getEl; }
+      cases++;
+      if (JSON.stringify(data.scores) !== '{}') flag(`Start${startId ? ' (' + startId + ')' : ''} did not replace the scores: ${JSON.stringify(data.scores)}`);
+      if (startId && data.quizId !== startId) flag(`Start with ${startId} picked wrote quizId ${data.quizId}`);
+    }
     // (5) the wall's views: names present; the lobby is NOT in uid order (the answer docs come back in uid order, which would line a name up with every uid in the public scores)
     const quizMc = run(`lqQuiz(${JSON.stringify(mcId)})`);
     run(`lqTSession = { sessionId: 'S1', state: 'lobby', quizId: ${JSON.stringify(mcId)}, scores: {} }; lqTAnswers = [ { sessionId: 'S1', uid: 'a1', name: 'Zed Zane', qIndex: -1 }, { sessionId: 'S1', uid: 'b2', name: 'Amy Ash', qIndex: -1 }, { sessionId: 'S1', uid: 'c3', name: 'Mia Moe', qIndex: -1 } ];`);
@@ -5188,8 +5205,8 @@ async function checkLiveQuizNoNames() {
     const reads = [...ablock.matchAll(/allow\s+([a-z, ]+?):/g)].map(m => m[1].replace(/\s/g, ''));
     if (reads.some(r => /(^|,)(read|list)(,|$)/.test(r) && r !== 'read,delete')) flag(`firestore.rules answers: an extra read/list rule (${reads.join(' | ')})`);
   }
-  if (cases !== 12) flag(`ran ${cases} cases, pinned at 12`);
-  if (bad === 0) ok(`no name reaches the public session doc: scoring, the mc + fret Reveal, End and Close writers (against a doc that merges like Firestore, starting from an older game full of names) and Start; the student's end screen shows no other player's name; the wall keeps its names, the lobby is sorted by name, and the answer docs stay teacher-only to list (${cases} cases)`);
+  if (cases !== 14) flag(`ran ${cases} cases, pinned at 14`);
+  if (bad === 0) ok(`no name reaches the public session doc: scoring, the mc + fret + Find-the-power-chord Reveal, End and Close writers (against a doc that merges like Firestore, starting from an older game full of names) and Start (the default quiz and Find the power chord); the student's end screen shows no other player's name; the wall keeps its names, the lobby is sorted by name, and the answer docs stay teacher-only to list (${cases} cases)`);
 }
 
 /* ════════════════════════════════════════════════════════════════════

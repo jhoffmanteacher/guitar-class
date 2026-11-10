@@ -4587,6 +4587,15 @@ a.jl-song-btn{display:inline-block;text-decoration:none}
 .fg-marker.fg-count{opacity:1}
 .fg-marker.fg-count text{fill:var(--text);font-weight:700}
 .lq-st-split .lq-board{margin:0;flex:1 1 55%}
+/* Power-chord rounds: the upright chord box (chordDiagramSVG, 96×104 user
+   units) scaled up. Beside the board on the Find reveal; on its own as the
+   prompt on a Name question. */
+.lq-pcbox{display:flex;justify-content:center}
+.lq-pcbox svg{display:block;height:auto}
+.lq-st-pcwrap{display:flex;align-items:center;gap:12px;min-width:0}
+.lq-st-pcwrap .lq-board{flex:1 1 auto;min-width:0}
+.lq-pcbox-side{flex:0 0 auto}
+.lq-pcbox-side svg{width:clamp(96px,9vw,150px)}
 
 .lq-lb{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:5px}
 .lq-lb li{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;

@@ -6,6 +6,12 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-10 (late night) — Live quiz: Find the power chord
+
+- **A new Live quiz round: "Find the power chord".** The question names a power chord and a string, for example "Tap the root of F♯5 on the A string". Tap the fret where its root is. Your first tap is your answer.
+- **The chords are E5, F5, F♯5, G5, A5, B5, C5 and D5, on the low E and A strings.** E5 on the low E string and A5 on the A string have two right frets: the open string and fret 12. Either one counts.
+- **After the reveal you see the right fret and the chord's name.** The big screen also shows the chord's chart.
+
 ## 2026-11-10 (night, latest) — 6/8 songs count to six
 
 - **On Perdón Mamá, Luna, Arsenal Efectivo and Ella, the count under the chords now reads 1 2 3 4 5 6 in every bar.** Before, it read "1 + 2 +".

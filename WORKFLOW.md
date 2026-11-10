@@ -325,6 +325,18 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-10 — Live quiz "Find the power chord" (work order "two power-chord rounds for the Live quiz", Part 1). Fast.**
+      New `LIVE_QUIZZES['pc-find']`: a `type:'fret'` quiz with `power:true`, strings low E + A. The strip offers E5 F5 F♯5 G5
+      A5 B5 C5 D5 per string (`LQ_PC_ROOTS`, fret order) + Random (never the same target twice); `target.note` is the root
+      (♯ spelling); the app scores it at Reveal from `lqPcRootAt()` over `LQ_PC_FIND_FRETS` = [0, 12] (an UNCONFIRMED
+      planning-chat default: Jonathan has not ruled on it; open string and fret 12 both count, so E5 on low E and A5 on A
+      have two right frets). `LQ_NATURALS` is unchanged (an F♯ there would give the note quizzes an F♯ button). The stage
+      reveal draws the chord's chart box beside the board (`lqPcShape()`, the three-finger shape, matches all 7
+      `CHORD_DIAGRAMS` power chords; open shape for fret 0); it fits at 1366×657. **Reverses** "`type:'fret'` quizzes are the
+      one exception" to the teacher judging: the app scores every fret quiz, only mc quizzes are the teacher's
+      (`.claude/rules/live-quiz.md`, the `live-quiz.js` header). Proof: 16 of 16 targets match `FG_NATURALS` + the two F♯
+      frets; 639 of 639 renders of the four existing quizzes byte-identical to origin/main. Guards: 1cm runs the Find
+      Reveal and a Find Start (14 cases), 1f wants {chord} in a power prompt. `tools/smoke.mjs` does not walk the Live quiz.
 - [x] **2026-11-10 — Today's activities side by side (work order "activity focus view and one-line directions", Part 3).
       Fast.** `renderClassActivities()` wraps the Today cards in one `.ca-today-grid` (two equal columns, same order, so
       reading order = Tab order); 2+ cards (`--multi`) are half-width tiles with no hero thumbnail, the title across the
