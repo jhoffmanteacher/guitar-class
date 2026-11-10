@@ -11860,12 +11860,13 @@ document.addEventListener('keydown',e=>{
    or an overlap. */
 function syncHeaderHeight(){
   const h = document.querySelector('.header');
-  /* A hidden header (an open activity folds it away: body.ca-fold, which sets
-     its own --hdr:0px) measures 0. Writing that 0 here left #app sized for no
-     header for a frame when the card closed and the header came back: the
-     page overflowed, a scrollbar came and went, and the header resized again
-     inside this observer ("ResizeObserver loop", 2026-11-10). Keep the last
-     real height instead. */
+  /* An open activity folds the header away (body.ca-fold, which sets its own
+     --hdr:0px on body). It is hidden by visibility there, so it still measures
+     its real height at every window width and this value is right the moment
+     it comes back; a header measuring 0 (display:none, or not laid out yet)
+     is never written, or #app is sized for no header for a frame, the page
+     overflows and the header resizes again inside this observer
+     ("ResizeObserver loop", 2026-11-10). */
   if(h && h.offsetHeight) document.documentElement.style.setProperty('--hdr', h.offsetHeight + 'px');
 }
 window.addEventListener('resize', syncHeaderHeight);

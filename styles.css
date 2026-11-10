@@ -2976,7 +2976,13 @@ body.explore-open #week-panels{display:none}
       drawer and its backdrop fold with the rail; the header's menu button
       is gone anyway. railCollapsed is not touched. */
 body.ca-fold:has(#class-activities-screen:not([hidden])){--hdr:0px}
-body.ca-fold:has(#class-activities-screen:not([hidden])) .header{display:none}
+/*    The header is hidden by visibility and taken out of the flow, not
+      display:none: it keeps its real height at every window width, so
+      syncHeaderHeight (app.js) always knows it, and nothing jumps when it
+      comes back (a stale height there tripped a ResizeObserver loop when the
+      window was resized with a card open). Out of the focus order and the
+      accessibility tree all the same. */
+body.ca-fold:has(#class-activities-screen:not([hidden])) .header{visibility:hidden;position:absolute;top:0;left:0;right:0}
 body.ca-fold:has(#class-activities-screen:not([hidden])) .rail-backdrop{display:none !important}
 /*    The rail is hidden by visibility, not display:none, because the tool
       popups live inside it (.rail-tools) and the bar's buttons open those

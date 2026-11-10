@@ -8656,7 +8656,7 @@ function checkFoldedActivity(ctx) {
   const on = 'body.ca-fold:has(#class-activities-screen:not([hidden]))';
   const decl = (sel, prop) => { const m = rules.get(sel); const d = m && m.get(''); return d ? d.get(prop) : undefined; };
   want(decl(on, '--hdr') === '0px', `${on} must set --hdr:0px (#app's height is worked out from it)`);
-  want(decl(on + ' .header', 'display') === 'none', `${on} .header must be display:none — the header stays when a card is open`);
+  want(decl(on + ' .header', 'visibility') === 'hidden' && decl(on + ' .header', 'position') === 'absolute', `${on} .header must be visibility:hidden and position:absolute (out of the flow, still measurable for --hdr) — the header stays when a card is open`);
   want(decl(on + ' .rail', 'visibility') === 'hidden' && decl(on + ' .rail', 'width') === '0', `${on} .rail must be visibility:hidden and width:0 — the menu stays when a card is open`);
   want(/^none/.test(decl(on + ' .rail-backdrop', 'display') || ''), `${on} .rail-backdrop must be display:none`);
   want(decl(on + ' .rail-tools .tool-popup.open', 'visibility') === 'visible' && decl(on + ' .rail-tools .tool-popup.open', 'position') === 'fixed',
