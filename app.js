@@ -2828,6 +2828,7 @@ const SNIPPET_TRACKS = {
     trackBpm: 128, trackBpmSlow: 100,
     feltBpm: 128 / 3,                   // big beats: 3 eighth-note clicks each
     beatsPerBar: 2,                     // two big beats per 6/8 bar
+    countSix: true,                     // chord grid counts the bar 1-6 — see COUNT IN SIX
     durationSec: 163,
     anchor: 12.658,
     anchorVerified: true,
@@ -3140,6 +3141,7 @@ const SNIPPET_TRACKS = {
     trackBpm: 119, trackBpmSlow: 100,   // what the FILES are (quarter notes), for the slow-tier rescale
     feltBpm: 238 / 3,                   // big beats: 3 eighth notes each
     beatsPerBar: 2,                     // two big beats per 6/8 bar
+    countSix: true,                     // chord grid counts the bar 1-6 — see COUNT IN SIX
     durationSec: 216,
     anchor: 1.369,
     anchorVerified: true,
@@ -3171,6 +3173,7 @@ const SNIPPET_TRACKS = {
     trackBpm: 185, trackBpmSlow: 155,   // what the FILES are (eighth notes), for the slow-tier rescale
     feltBpm: 185 / 3,                   // big beats: 3 eighth notes each
     beatsPerBar: 2,                     // two big beats per 6/8 bar
+    countSix: true,                     // chord grid counts the bar 1-6 — see COUNT IN SIX
     durationSec: 260,
     anchor: 0.864,
     anchorVerified: true,
@@ -3208,6 +3211,7 @@ const SNIPPET_TRACKS = {
     trackBpm: 115, trackBpmSlow: 96,    // what the FILES are (the 6/8's quarter-note pulses), for the slow-tier rescale
     feltBpm: 230 / 3,                   // big beats: 3 eighth notes each
     beatsPerBar: 2,                     // two big beats per 6/8 bar
+    countSix: true,                     // chord grid counts the bar 1-6 — see COUNT IN SIX
     durationSec: 181,
     anchor: 1.143,
     anchorVerified: true,
@@ -14700,16 +14704,24 @@ function pcGridRows(S, bpb){
    — string cells and count cell — and never on a "+" column: that is what
    the cursor lights (pcPaint). The count row is always on here: beats in
    ink, "+" faint, so a chord on a "+" has a label under it. */
-function renderChordGridRow(events, row, cols, bpb, seqOff, bass, restWord){
-  const barCols = bpb * 2;
-  const used = Math.round((row.b1 - row.b0) * 2);
+/* COUNT IN SIX (Jonathan, 2026-11-10): a 6/8 track (countSix) draws three
+   columns per big beat, every one a counted column numbered 1-6 across the
+   bar, and the cursor lights each of the six (data-beat is then the eighth
+   within the pass, not the big beat). The click stays on the big beats, 1
+   and 4 (pcScheduleClick still counts beatsPerBar). sub = columns per beat. */
+function renderChordGridRow(events, row, cols, bpb, seqOff, bass, restWord, sub){
+  sub = sub === 3 ? 3 : 2;
+  const barCols = bpb * sub;
+  const used = Math.round((row.b1 - row.b0) * sub);
   const bassAt = pcBassMarks(events, row, bpb, bass);   // alternating bass — see BASS NOTES
   const at = {};
   events.forEach(ev => {
     if(ev.start < row.b0 - 1e-6 || ev.start >= row.b1 - 1e-6) return;
-    at[Math.round((ev.start - row.b0) * 2)] = ev;
+    at[Math.round((ev.start - row.b0) * sub)] = ev;
   });
-  const beatOf = c => (c < used && c % 2 === 0) ? Math.round(row.b0 + c / 2) : null;
+  const beatOf = sub === 3
+    ? c => (c < used ? Math.round(row.b0 * 3) + c : null)
+    : c => (c < used && c % 2 === 0) ? Math.round(row.b0 + c / 2) : null;
   const strRows = TAB_STRINGS.map(lab => {
     const cells = [`<div class="tab-str-label">${lab}</div>`];
     for(let c = 0; c < cols; c++){
@@ -14736,7 +14748,7 @@ function renderChordGridRow(events, row, cols, bpb, seqOff, bass, restWord){
     if(!ev.rest) return;
     const end = ev.start + ev.beats;
     let col = -1;
-    if(ev.start >= row.b0 - 1e-6 && ev.start < row.b1 - 1e-6) col = Math.round((ev.start - row.b0) * 2);
+    if(ev.start >= row.b0 - 1e-6 && ev.start < row.b1 - 1e-6) col = Math.round((ev.start - row.b0) * sub);
     else if(ev.start < row.b0 && end > row.b0 + 1e-6) col = 0;
     if(col >= 0 && restWord !== false) names += `<span class="tab-rest-lab" style="grid-row:7;grid-column:${col + 2}">${escHtml(t('tab.restStop'))}</span>`;
   });
@@ -14765,7 +14777,7 @@ function renderChordGridRow(events, row, cols, bpb, seqOff, bass, restWord){
     const b = beatOf(c);
     const pos = `style="grid-row:8;grid-column:${c + 2}"`;
     if(c >= used) counts += `<div class="tab-count" ${pos} aria-hidden="true"></div>`;
-    else if(b !== null) counts += `<div class="tab-count" data-beat="${b}" ${pos} aria-hidden="true">${(c / 2) % bpb + 1}</div>`;
+    else if(b !== null) counts += `<div class="tab-count" data-beat="${b}" ${pos} aria-hidden="true">${sub === 3 ? c % barCols + 1 : (c / 2) % bpb + 1}</div>`;
     else counts += `<div class="tab-count tab-count-held" ${pos} aria-hidden="true">+</div>`;
   }
   return `
@@ -14779,12 +14791,13 @@ function renderChordGridRow(events, row, cols, bpb, seqOff, bass, restWord){
 }
 /* The grid rows of one section, with a lyric line (pc-row-label) over each
    row that starts one. */
-function pcChordGridHtml(S, bpb){
+function pcChordGridHtml(S, bpb, sub){
+  sub = sub === 3 ? 3 : 2;
   const events = pcChordGrid(S.notes, bpb, S.every);
-  const cols = Math.min(PC_GRID_BARS, S.bars) * bpb * 2;
+  const cols = Math.min(PC_GRID_BARS, S.bars) * bpb * sub;
   return pcGridRows(S, bpb).map(row =>
     (row.label ? `<div class="tab-phrase-label pc-row-label">${escHtml(String(row.label))}</div>` : '')
-    + renderChordGridRow(events, row, cols, bpb, S.seqOff, S.bass, !S.quietRest)
+    + renderChordGridRow(events, row, cols, bpb, S.seqOff, S.bass, !S.quietRest, sub)
   ).join('');
 }
 /* Sections with their tab offsets and running beat totals, plus the window
@@ -14833,6 +14846,10 @@ function pcLocate(L, barsIn){
     /* beat: the whole beat within this pass (0-based) — what a chord grid's
        cursor sits on. bar: the bar within the pass. */
     const bpb = L.tr.beatsPerBar > 0 ? L.tr.beatsPerBar : 4;
+    if(S.grid && L.tr.countSix){   // the cursor's six steps a bar — see COUNT IN SIX
+      const e8 = Math.max(0, Math.min(Math.round(repBeats * 3) - 1, Math.floor(local * 3 + 1e-6)));
+      return { si, rep, ni, seq: S.seqOff + ni, beat: e8, bar: Math.floor(e8 / (bpb * 3)) };
+    }
     const beat = Math.max(0, Math.min(Math.round(repBeats) - 1, Math.floor(local + 1e-6)));
     return { si, rep, ni, seq: S.seqOff + ni, beat, bar: Math.floor(beat / bpb) };
   }
@@ -14941,7 +14958,7 @@ function pcTabHtml(a, L){
     if(S.grid){
       return `<div class="tab-page pc-page" data-page="${si}"${si ? ' hidden' : ''}><div class="tab-phrase">`
         + `<div class="tab-phrase-label">${escHtml(tf(S.s, 'caption'))}<span class="pc-rep" hidden></span></div>`
-        + `<div class="tab-board">${pcChordGridHtml(S, L.tr.beatsPerBar > 0 ? L.tr.beatsPerBar : 4)}</div></div></div>`;
+        + `<div class="tab-board">${pcChordGridHtml(S, L.tr.beatsPerBar > 0 ? L.tr.beatsPerBar : 4, L.tr.countSix ? 3 : 2)}</div></div></div>`;
     }
     const counts = c.counts ? tabCounts(S.notes, L.tr.beatsPerBar) : null;   // card.counts — the Counts switch
     /* `rows` on a section — notes per tab row, e.g. [7, 9] — ends each row

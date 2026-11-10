@@ -10663,6 +10663,7 @@ function checkChordGridCards(ctx) {
       } catch (e) { flag(`caCardBodyHtml(${a.id}, ${mode}) threw: ${e.message}`); continue; }
       finally { try { vm.runInContext(`delete caChordModes[${JSON.stringify(a.id)}]`, ctx); } catch {} }
       const bpb = L.tr.beatsPerBar;
+      const sub = L.tr.countSix ? 3 : 2;   // columns per beat: 3 on a 6/8 track, every column counted (COUNT IN SIX)
       const pages = html.split('<div class="tab-page pc-page"').slice(1);
       if (pages.length !== L.sections.length) flag(`${a.id} (${mode}): ${pages.length} section pages for ${L.sections.length} sections`);
       pages.forEach((pg, si) => {
@@ -10671,23 +10672,27 @@ function checkChordGridCards(ctx) {
         const grids = pg.split('class="tab-grid chord-grid"').slice(1);
         const need = Math.ceil(S.bars / 4);
         if (grids.length < need) flag(`${a.id} · ${S.s.label} (${mode}): ${grids.length} rows for ${S.bars} bars — four bars to a row needs at least ${need}`);
-        const cols = Math.min(4, S.bars) * bpb * 2;
+        const cols = Math.min(4, S.bars) * bpb * sub;
         const beats = [];
         grids.forEach((g, gi) => {
           rowsSeen++;
           const head = /grid-template-columns:28px repeat\((\d+),1fr\)/.exec(g);
-          if (!head || +head[1] !== cols) flag(`${a.id} · ${S.s.label} row ${gi + 1}: ${head ? head[1] : '?'} columns, expected ${cols} (min(4, ${S.bars} bars) x ${bpb} beats x 2)`);
+          if (!head || +head[1] !== cols) flag(`${a.id} · ${S.s.label} row ${gi + 1}: ${head ? head[1] : '?'} columns, expected ${cols} (min(4, ${S.bars} bars) x ${bpb} beats x ${sub})`);
           const rowE = g.split('tab-str-label">e<')[1] || '';
           const cells = rowE.split('tab-str-label">B<')[0].match(/<div class="tab-cell[^"]*"[^>]*>/g) || [];
           if (cells.length !== cols) flag(`${a.id} · ${S.s.label} row ${gi + 1}: ${cells.length} string cells, expected ${cols}`);
           const used = cells.filter(c => !/tab-pad/.test(c)).length;
-          cells.forEach((c, i) => { const m = /data-beat="(\d+)"/.exec(c); if (m) beats.push(+m[1]); else if (i % 2 === 0 && !/tab-pad/.test(c)) flag(`${a.id} · ${S.s.label} row ${gi + 1}: beat column ${i} has no data-beat`); });
+          cells.forEach((c, i) => { const m = /data-beat="(\d+)"/.exec(c); if (m) beats.push(+m[1]); else if ((sub === 3 || i % 2 === 0) && !/tab-pad/.test(c)) flag(`${a.id} · ${S.s.label} row ${gi + 1}: beat column ${i} has no data-beat`); });
           const lines = (g.match(/class="tab-bar-line"/g) || []).length;
-          if (lines !== Math.ceil(used / (bpb * 2)) - 1) flag(`${a.id} · ${S.s.label} row ${gi + 1}: ${lines} bar lines for ${used / (bpb * 2)} bars — one between each pair`);
+          if (lines !== Math.ceil(used / (bpb * sub)) - 1) flag(`${a.id} · ${S.s.label} row ${gi + 1}: ${lines} bar lines for ${used / (bpb * sub)} bars — one between each pair`);
           if (!new RegExp(`class="tab-box" style="grid-column:2/${used + 2};`).test(g)) flag(`${a.id} · ${S.s.label} row ${gi + 1}: the staff does not end at the row's last bar (${used} columns)`);
           if (!/tab-chord-pad/.test(g)) flag(`${a.id} · ${S.s.label} row ${gi + 1}: no name-row pad — rows with no chord start would be shorter`);
+          if (sub === 3) {   // COUNT IN SIX: the count row reads 1-6 in every bar, with no "+"
+            const nums = [...g.matchAll(/<div class="tab-count"[^>]*data-beat="\d+"[^>]*>(\d)<\/div>/g)].map(m => m[1]).join('');
+            if (/tab-count-held/.test(g) || nums !== '123456'.repeat(used / 6)) flag(`${a.id} · ${S.s.label} row ${gi + 1}: a 6/8 count row reads "${nums}", expected 1-6 in each of ${used / 6} bars`);
+          }
         });
-        if (beats.join() !== Array.from({ length: S.bars * bpb }, (_, i) => i).join()) flag(`${a.id} · ${S.s.label} (${mode}): data-beat runs [${beats.slice(0, 20).join(',')}${beats.length > 20 ? '…' : ''}] over ${beats.length} beats, expected 0..${S.bars * bpb - 1} once each, in order`);
+        if (beats.join() !== Array.from({ length: S.bars * bpb * (sub === 3 ? 3 : 1) }, (_, i) => i).join()) flag(`${a.id} · ${S.s.label} (${mode}): data-beat runs [${beats.slice(0, 20).join(',')}${beats.length > 20 ? '…' : ''}] over ${beats.length} counted columns, expected 0..${S.bars * bpb * (sub === 3 ? 3 : 1) - 1} once each, in order`);
         const rests = S.notes.some(n => n.rest);
         const quiet = a.card.restWord === false;   // card.restWord:false — the rest is left empty, no word (ca-29)
         // The rest word sits at the rest's own column (or at column 1 of a row that starts inside it).
@@ -10695,7 +10700,7 @@ function checkChordGridCards(ctx) {
         pcGridRows(S, bpb).forEach((row, ri) => {
           const want = [];
           for (const e of quiet ? [] : restEvs) {
-            if (e.start >= row.b0 - 1e-6 && e.start < row.b1 - 1e-6) want.push(Math.round((e.start - row.b0) * 2) + 2);
+            if (e.start >= row.b0 - 1e-6 && e.start < row.b1 - 1e-6) want.push(Math.round((e.start - row.b0) * sub) + 2);
             else if (e.start < row.b0 && e.start + e.beats > row.b0 + 1e-6) want.push(2);
           }
           const got = [...(grids[ri] || '').matchAll(/class="tab-rest-lab" style="grid-row:7;grid-column:(\d+)"/g)].map(m => +m[1]);
@@ -10863,6 +10868,11 @@ function checkChordGridCards(ctx) {
     const ks = new Set(); for (let i = 0; i < L.sections[0].bars * L.tr.beatsPerBar * 8; i++) ks.add(pcLocKey(L, pcLocate(L, i / 8 / L.tr.beatsPerBar)));
     if (ks.size !== L.sections[0].notes.length) flag(`ca-10: ${ks.size} repaint keys over ${L.sections[0].notes.length} notes — a single-note card must still step per note`);
   }
+  // COUNT IN SIX: on a 6/8 card the cursor steps six times a bar (ca-51).
+  { const c51 = acts.find(a => a.id === 'ca-51'); const L = c51 && pcLayout(c51);
+    if (!L || !L.tr.countSix) flag('ca-51 lost countSix — the 6/8 chord grid would count 1 + 2 +');
+    else { const ks = new Set(); for (let i = 0; i < 8 * 24; i++) ks.add(pcLocKey(L, pcLocate(L, i / 24)));
+      if (ks.size !== 8 * 6) flag(`ca-51: ${ks.size} cursor steps over 8 bars, expected ${8 * 6} (six a bar)`); } }
   if (bad === 0) ok(`${CHORD_GRID_CARDS.length} chord-grid cards (pinned) — ${sections} grid sections, ${events} chord/rest onsets all on the eighth grid, ${labelled} lyric lines keep their row; ca-29 renders 98 chord names (one per strum) and 392 data-beat on beat columns only; ${rowsSeen} grid rows across both views each 4 bars wide with their bar lines, staff edge and 0..N beat run; ${col0Rows} rows open on a label at column 0 (${heldLabels} held "(Chord)", pinned); ${restWords} rest words; ${bassMarks} alternating-bass notes (pinned) on beat 1, root / 5th as worked out from the notes, across ${CHORD_GRID_BASS_CARDS.length} bass card(s) x chord views, none with the bass off, the directions in EN + ES; the cursor steps once per beat; ca-10 untouched`);
 }
 
