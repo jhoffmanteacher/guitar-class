@@ -105,8 +105,10 @@ gate (`caIsVisible`) and Today both read; 1cq stubs it. In
   thumbnail, the title across the whole tile and the Start button at the right
   beside the blurb (beside the title it left 299px and six Spanish titles took
   three lines). A finished card keeps its own row height. An open card takes
-  the whole width (`.ca-solo-path` → `display:block`); a phone (≤760px) gets one
-  column and the stacked hero. Nothing about WHICH cards are in Today, their
+  the whole width (`.ca-solo-path` → `display:block`). Two columns only when
+  each tile gets 440px (`repeat(auto-fit,minmax(min(100%,440px),1fr))`): two at
+  1366×657 and wider (the column stops at 944px), one at 125% zoom, in a narrow
+  window and on a phone (≤760px also keeps the stacked hero). Nothing about WHICH cards are in Today, their
   order, `caStartHereId`, the chips, the Optional tag or the caught-up box
   changed. `tools/smoke.mjs` `todayGridWalk` measures the three longest titles
   a student can be given, in both languages.

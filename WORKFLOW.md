@@ -330,10 +330,13 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
       reading order = Tab order); 2+ cards (`--multi`) are half-width tiles with no hero thumbnail, the title across the
       tile and the Start button at the right beside the blurb (beside the title, six Spanish "… La canción completa con
       acordes de potencia" titles ran to three lines); one card keeps the whole width; an open card takes the whole width
-      (`.ca-solo-path` → block); ≤760px is one column with the stacked hero. Which cards are in Today, their order and
+      (`.ca-solo-path` → block). Two columns only when each tile gets 440px: two at 1366 and wider, one at 125% zoom,
+      in a narrow window and on a phone (follow-up: the first push used a ≤760px breakpoint, which squeezed the tiles
+      to ~250px between 761 and 1000px; the smoke's walk ran at the headless window's size and caught it). Which cards are in Today, their order and
       `caStartHereId` are unchanged (1cq passed with no re-pin). Measured: 176 of 176 tiles (40 activities × pending and
       finished, plus the power-chord and recording titles, EN + ES) hold their title in two lines with nothing outside
-      the tile. Guard: smoke `todayGridWalk` (the three longest titles, both languages; five breaks shown red).
+      the tile. Guard: smoke `todayGridWalk` at 1366×657 and 390px (the three longest titles, both languages; seven breaks
+      shown red).
 - [x] **2026-11-10 — No checklists on the activities; no Mark complete on the extra songs (Jonathan, mid-session: "get rid of
       the checklists on the activities. only have mark complete or next step" and "remove mark complete from the extra songs since
       they're extra"). Fast.** A practice card ends in Mark complete (caToggleComplete); `caTickKeys(card)` is `[]` (no "n of m",
