@@ -10596,7 +10596,8 @@ function checkChordGridCards(ctx) {
       for (const ev of evs) if (ev.bar !== Math.floor(ev.start / bpb + 1e-6)) flag(`${w}: ${ev.name || 'a rest'} says it is in bar ${ev.bar}, but it starts at beat ${ev.start} (${bpb} to a bar)`);
       for (const ev of evs) {
         events++;
-        if (Math.abs(ev.start * 2 - Math.round(ev.start * 2)) > 1e-6) flag(`${w}: ${ev.rest ? 'a rest' : ev.name} starts at beat ${ev.start}, between two eighth-note columns — the grid cannot place it`);
+        const g = L.tr.countSix ? 3 : 2;   // grid columns per beat: three on a 6/8 track (COUNT IN SIX)
+        if (Math.abs(ev.start * g - Math.round(ev.start * g)) > 1e-6) flag(`${w}: ${ev.rest ? 'a rest' : ev.name} starts at beat ${ev.start}, between two eighth-note columns — the grid cannot place it`);
       }
       const rl = S.s.rowLabels;
       if (Array.isArray(rl) && Array.isArray(S.s.rows) && rl.length === S.s.rows.length) {

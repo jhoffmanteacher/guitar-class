@@ -6,6 +6,11 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-10 (night, latest) — 6/8 songs count to six
+
+- **On Perdón Mamá, Luna, Arsenal Efectivo and Ella, the count under the chords now reads 1 2 3 4 5 6 in every bar.** Before, it read "1 + 2 +".
+- **The moving highlight now lights each of the six counts.** The click still plays on 1 and 4, the two big beats.
+
 ## 2026-11-10 (night, later) — Today's activities side by side
 
 - **When there is more than one activity for today, they sit side by side**, two to a row, on In class. Read them left to right, then down. The order is the same as before.
