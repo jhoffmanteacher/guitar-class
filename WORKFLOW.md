@@ -756,6 +756,24 @@ for weeks with every check green. **`.gitignore` ignores everything under
 `.claude/` except named folders: a new `.claude/<folder>` must be un-ignored
 there, or it is never committed.**
 
+### In-Class Activity directions are one line (Jonathan, 2026-11-10)
+After looking at a launcher-style layout he likes: every direction inside an
+activity is one short line — "students don't read them anyway". The decisions
+(his, settled): In-Class Activities only (modules get their own work order
+later); one line per step, no "You've got it when:" line, no fix-it line, no
+list; keep the tap dots, built from the count in the one line; the default
+view does not scale things up. **Reverses for activities:** "Multi-step
+directions are lists" and "You've got it when: … after `</ol>`" (below, and
+CLAUDE.md; still true for modules); "Preserve the author's words; never
+rewrite the voice" (2026-07-25: he asked for this rewrite); "define each music
+term at first use" (1w: a one-line direction uses the plain word); the
+Learn / Practice rule's "exactly one You've got it when: line with one
+recovery move" (2026-09-23); and a part card's Level up naming the card "once
+it is posted" (2026-10-12). Guards: 1cs (caps), 1bg (EN = ES counts, the
+`wholeLine` opt-in executed). Every string before and after went to him as
+`Claude outputs/one-line-directions-before-after.md` with the session report
+(not committed).
+
 ### Multi-step directions get lists (Jonathan, 2026-07-25)
 
 *"anything that has multiple steps should have bullet points."* Don't skip a

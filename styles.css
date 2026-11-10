@@ -4224,7 +4224,6 @@ body.games-open{overflow:hidden}
 .nc-toggles{display:flex;gap:10px 22px;justify-content:center;flex-wrap:wrap;margin-bottom:8px}
 .nc-toggle{display:flex;align-items:center;gap:6px}
 .nc-toggle-label{font-size:0.8125rem;font-weight:600;color:var(--text2);margin-right:2px}
-.nc-how{font-size:0.8125rem;color:var(--text2);line-height:1.45;margin:0 auto 12px;max-width:440px}
 .nc-msg{margin:0 auto 12px;max-width:440px}
 .nc-play{padding-top:10px}
 .nc-stage{display:flex;align-items:center;justify-content:center;gap:22px;margin-bottom:6px;flex-wrap:wrap}

@@ -304,6 +304,34 @@ merge-patch shape as `hiddenActivities`).
 - checks.mjs 1d validates the slug against `tabs/<slug>.html` and the layer
   against that page's `layer-num` spans.
 
+**Every direction is ONE line** (Jonathan, 2026-11-10: "students don't read
+them anyway"). Step `text`/`text_power`, `intro`/`intro_power`, check `text`,
+`bassDirections`, a recording version's `intro`, and each drill's direction
+line before Start.
+- One sentence, verb first: what to play and the finish line together. "Play
+  Line 1 into Line 2 four times without stopping." One rendered line in the
+  folded view at 1366×657, English and Spanish. checks.mjs **1cs** caps the
+  length (`CAP_2A` for the data, `CAP_2C` for the drill lines in i18n.js) and
+  bans lists, line breaks and the got-it label in those fields.
+- **Keep the count.** The tap dots come from the whole line: `caStepHtml`
+  passes `wholeLine` to `wrapGotItWhen`, which reads `repCountFromGotIt` from
+  the line when there is no "You've got it when:" label. Write a count it can
+  read (a digit or two–five / dos–cinco, then "times", "in a row", "back to
+  back", "veces", "seguidas"); "8 times" makes no dots. The module call does
+  NOT opt in. **1bg** holds EN = ES and executes both calls.
+- Cut: fix-it lines, finger-by-finger lists, recaps, definitions (use the plain
+  word), "then press Play tab to check". Strings named, never numbered.
+  Spanish: shorten the existing `_es`, reuse its words, buttons in «».
+- A step whose drill widget already says what to do has NO text (ca-23; the
+  "Name the fret" shuffle steps of ca-11, ca-12, ca-17). A "Find the note" deck
+  step keeps one line, because the deck does not say "five in a row".
+- Each drill shows one direction line before Start (`.sdr-intro`); the
+  second paragraphs (Note Call's `descAnswer` / `howTap` / `howCoach`, Name
+  the power chord's `howAnswer` / `howScored`) were removed and 1cs keeps them
+  out. The header strip, switches, scores and pass lines are not directions.
+- Exit checks (ca-14, ca-15) are frozen and untouched. Modules keep the list
+  and got-it rules (CLAUDE.md).
+
 **Four steps, two lines a page** (Jonathan, 2026-09-25).
 - **Four steps is a SOFT rule** (Jonathan, 2026-10-01): aim for four or fewer,
   but go past it when Jonathan asks — ca-21 has six. checks.mjs **1bb** prints
@@ -375,7 +403,9 @@ Checks:
   never renders (`pcHelpHtml` returns nothing for an empty list). 1bf's
   help-step rule still runs, for a help step that comes back.
 - **A whole-song card has exactly two checks**: the whole song slower without
-  stopping, then the Level up.
+  stopping, then the Level up. Each check's text is one line ("Play the whole
+  song with the band, intro to the end, without stopping."); a part card's
+  Level up names the Whole Song card without "once it is posted" (2026-11-10).
 - A check may carry `slot: n` to keep its old tick key after earlier checks
   were removed (ca-25).
 - **Complete = every numbered check ticked; Level up is extra.** `pcCheck()`

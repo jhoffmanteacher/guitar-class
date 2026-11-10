@@ -8634,7 +8634,17 @@ function repDotFinish(dotEl, closestSel, btnSel, id, extra){
 function wrapGotItWhen(html, rep){
   if(typeof html !== 'string') return html;
   const m = GOT_IT_RE.exec(html);
-  if(!m) return html;
+  /* An In-Class Activity step is ONE line with no "You've got it when:"
+     label (Jonathan, 2026-11-10: "students don't read them anyway"): "Play
+     Line 1 into Line 2 four times without stopping." caStepHtml() opts in
+     (rep.wholeLine), so the count is read from the whole line and the dots
+     go after it. The module call does NOT opt in: a module step with a stray
+     "three times" outside its got-it sentence must not grow dots. checks.mjs
+     1bg runs both calls. */
+  if(!m){
+    const n = (rep && rep.wholeLine) ? repCountFromGotIt(html) : 0;
+    return n ? html + repDotsHtml(rep, n) : html;
+  }
   const head = html.slice(0, m.index);
   const rest = html.slice(m.index + m[0].length);
   /* Stop at the first sentence end that is followed by more content, or at
@@ -9244,8 +9254,6 @@ function ncSetupHtml(key){
         `<div class="sdr-intro">${escHtml(t(ncK(st.cfg.power, 'introAnswer')))}</div>` +
         toggles +
         `<div class="sdr-pills nc-pile">${pill(false, t(ncK(st.cfg.power, 'pileNaturals')))}${pill(true, t(ncK(st.cfg.power, 'pileAll')))}</div>` +
-        `<div class="nc-how">${escHtml(t(ncK(st.cfg.power, 'descAnswer'), { n: NC_ANS_EVERY }))}` +
-          (st.coach ? ' ' + escHtml(t(ncK(st.cfg.power, 'howCoachAnswer'))) : '') + `</div>` +
         msg +
         `<button type="button" class="sdr-start" onclick="ncStart('${key}')">&#x25B6; ${escHtml(t('nc.startPlain'))}</button>` +
       `</div>`;
@@ -9264,7 +9272,6 @@ function ncSetupHtml(key){
       toggles +
       `<div class="sdr-pills nc-levels">${pills}</div>` +
       `<div class="nc-desc">${escHtml(ncLevelDesc(L, st.cfg.power))}</div>` +
-      `<div class="nc-how">${escHtml(t(ncK(st.cfg.power, st.coach ? 'howCoach' : 'howTap')))}</div>` +
       msg +
       `<button type="button" class="sdr-start" onclick="ncStart('${key}')">&#x25B6; ${escHtml(t('nc.start', { n: st.level + 1 }))}</button>` +
       `<div class="sdr-best">${escHtml(t('nc.passLine', { pass: NC_PASS, total: NC_ROUND }))}</div>` +
@@ -10418,7 +10425,6 @@ function pwnSetupHtml(key){
     `<div class="sdr-body">` +
       `<div class="sdr-intro">${escHtml(t(st.cfg.mode === 'name' ? 'pwn.introName' : st.cfg.mode === 'fret' ? 'pwn.introFret' : 'pwn.introBoth'))}</div>` +
       `<div class="nc-toggles"><div class="nc-toggle"><span class="nc-toggle-label">${escHtml(t('pwn.answer'))}</span>${pill(true, t('pwn.on'))}${pill(false, t('pwn.off'))}</div></div>` +
-      `<div class="nc-how">${escHtml(t(on ? 'pwn.howAnswer' : 'pwn.howScored'))}</div>` +
       `<button type="button" class="sdr-start" data-pwn-start="1">&#x25B6; ${escHtml(t('pwn.start'))}</button>` +
       `<div class="sdr-best">${escHtml(t('pwn.passLine', { pass: PWN_PASS, total: PWN_ROUND }))}</div>` +
     `</div>`;
@@ -13909,8 +13915,10 @@ function caStepHtml(a, step, si, isOpen, isDone, opts){
   /* `|| ''`: a label + drill step (ca-23) has no text at all, and
      wrapGotItWhen passes a non-string straight through — so the template
      printed the word "undefined" under every step label (2026-09-30). */
+  // wholeLine: the step is one line with no got-it label; its count makes the dots (wrapGotItWhen).
   const detailHtml = `${wrapGotItWhen(tf(step,'text') || '', {
       key: `ca:${a.id}:${si}`, isDone, closestSel: '.ca-step', btnSel: focus ? '.ca-focus-next' : '.ca-step-donebtn', id: a.id, extra: si,
+      wholeLine: true,
     })}${parts.join('')}`
     + (focus ? caFocusNavHtml(a, si, isDone)
       : `<div class="ca-step-done-row"><button type="button" class="ca-step-donebtn${isDone ? ' is-done' : ''}" onclick="caMarkStepDone(this,'${escAttr(a.id)}',${si})">${stepDoneHtml(isDone)}</button></div>`);

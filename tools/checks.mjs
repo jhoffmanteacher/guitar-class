@@ -8668,6 +8668,63 @@ function checkFoldedActivity(ctx) {
   if (asserts !== FOLD_ASSERTS) flag(`ran ${asserts} assertions, pinned ${FOLD_ASSERTS} — a branch stopped running (or update the pin with the change)`);
   if (!bad) ok(`1cr: a card open folds the page with no full screen, full screen adds the zoom, no card unfolds it; the bar's 4 tool buttons run togglePopup; 7 CSS rules read (${asserts} assertions)`);
 }
+/* 1cs. ONE SHORT LINE PER DIRECTION IN AN IN-CLASS ACTIVITY (Jonathan,
+   2026-11-10: "students don't read them anyway"). Every step text, intro,
+   practice-card check, bass direction and recording-version intro (2A), and
+   every drill's direction line before Start (2C, i18n.js), is ONE rendered
+   line at 1366x657 in the folded view, in English and Spanish. That was
+   measured in a real browser when the rule shipped; this keeps it: each is at
+   most CAP_2A / CAP_2C characters (the longest string that measured one line,
+   rounded down to a multiple of 5), carries no list, no line break and no
+   "You've got it when:" / "Lo tienes cuando:" label, and the drills' second
+   paragraphs (nc/ncp descAnswer, howCoach, howTap, howCoachAnswer; pwn
+   howAnswer, howScored) stay gone. Exit checks (kind: 'check', ca-14, ca-15)
+   are frozen and not read. Modules keep their lists (CLAUDE.md). Pinned
+   counts, so a field that stops being read fails. */
+const CAP_2A = 105, CAP_2C = 110;
+const ONE_LINE_2A = 400, ONE_LINE_2C = 24;
+const DRILL_DIRECTION_KEYS = ['drill.intro', 'deck.introOne', 'deck.introTwo', 'nc.intro', 'nc.introAnswer', 'ncp.intro', 'ncp.introAnswer',
+  'chc.introFollow', 'chc.introCall', 'pwn.introName', 'pwn.introFret', 'pwn.introBoth'];
+const DRILL_DIRECTIONS_GONE = ['nc.descAnswer', 'nc.howCoachAnswer', 'nc.howCoach', 'nc.howTap', 'ncp.descAnswer', 'ncp.howCoachAnswer',
+  'ncp.howCoach', 'ncp.howTap', 'pwn.howAnswer', 'pwn.howScored'];
+function checkOneLineDirections(ctx, i18nTable) {
+  head('1cs. In-Class Activity directions are one short line (EN + ES)');
+  let bad = 0, n2a = 0, n2c = 0, longest = 0;
+  const flag = m => { err('1cs: ' + m); problems++; bad++; };
+  if (!ctx || !i18nTable) { flag('cannot run — the 0b render context or the i18n table is unavailable'); return; }
+  const gotItRe = vm.runInContext('typeof GOT_IT_RE !== "undefined" ? GOT_IT_RE : null', ctx);
+  if (!gotItRe) { flag('GOT_IT_RE not found in app.js'); return; }
+  const one = (where, v, cap) => {
+    if (typeof v !== 'string') return;
+    if (v.length > cap) flag(`${where} is ${v.length} characters, over the ${cap} that still fits one line at 1366x657 — say it in one short sentence: "${v}"`);
+    if (/<\/?(?:ol|ul|li|br|p|div)\b/i.test(v) || /\n/.test(v)) flag(`${where} has a list or a line break — one line only`);
+    if (gotItRe.test(v)) flag(`${where} has a "You've got it when:" / "Lo tienes cuando:" label — the finish line goes in the one sentence`);
+    longest = Math.max(longest, v.length);
+  };
+  const acts = vm.runInContext('typeof CLASS_ACTIVITIES !== "undefined" ? CLASS_ACTIVITIES : []', ctx) || [];
+  for (const a of acts) {
+    if (!a || a.kind === 'check') continue;
+    const both = (where, o, f) => { for (const k of [f, f + '_es']) if (typeof o[k] === 'string') { n2a++; one(`${a.id}${where}.${k}`, o[k], CAP_2A); } };
+    for (const f of ['intro', 'intro_power', 'bassDirections']) both('', a, f);
+    (a.steps || []).forEach((st, si) => { both(`.steps[${si}]`, st, 'text'); both(`.steps[${si}]`, st, 'text_power'); });
+    ((a.card || {}).checks || []).forEach((c, ci) => both(`.card.checks[${ci}]`, c, 'text'));
+    for (const [k, rv] of Object.entries(a.recordingVersions || {})) both(`.recordingVersions.${k}`, rv, 'intro');
+  }
+  for (const key of DRILL_DIRECTION_KEYS) {
+    const e = i18nTable[key];
+    if (!e) { flag(`i18n.js has no ${key} — a drill's direction line (update DRILL_DIRECTION_KEYS with a rename)`); continue; }
+    for (const lang of ['en', 'es']) { n2c++; one(`i18n.js ${key}.${lang}`, e[lang], CAP_2C); }
+  }
+  for (const key of DRILL_DIRECTIONS_GONE) if (i18nTable[key]) flag(`i18n.js has ${key} again — a drill shows one line of directions before Start, not a second paragraph`);
+  const app = readFileSync(join(ROOT, 'app.js'), 'utf8');
+  for (const key of DRILL_DIRECTIONS_GONE) {
+    const short = key.split('.')[1];
+    if (new RegExp(`['"]${key.replace('.', '\\.')}['"]|ncK\\([^)]*['"]${short}['"]`).test(app)) flag(`app.js reads ${key} again`);
+  }
+  if (n2a !== ONE_LINE_2A) flag(`read ${n2a} activity direction strings (EN + ES), pinned ${ONE_LINE_2A} — a field stopped being read or a string was added; update the pin on purpose`);
+  if (n2c !== ONE_LINE_2C) flag(`read ${n2c} drill direction strings (EN + ES), pinned ${ONE_LINE_2C}`);
+  if (!bad) ok(`1cs: ${n2a} activity direction strings (cap ${CAP_2A}) and ${n2c} drill direction lines (cap ${CAP_2C}), EN + ES: one short line each, no list, no got-it label; the drills' second paragraphs stay gone`);
+}
 function checkTodayByDate(ctx) {
   head('1cq. Today\'s activities: every card dated today or yesterday (pending first, then finished), everything else in the folds by board order');
   let bad = 0;
@@ -9383,13 +9440,13 @@ async function checkSongPopularity(ctx) {
      screen are rendered under a spy on ncK; each key they ask for must exist
      in English and Spanish, none may be the English, and none defined may go
      unshown.
-   Pinned: 4 power steps, 18 ncp.* keys. */
+   Pinned: 4 power steps, 14 ncp.* keys (18 until 2026-11-10, when the drill's second paragraph of directions went: descAnswer, howCoachAnswer, howCoach, howTap). */
 function checkNoteCallPower(ctx) {
   head('1cd. Note Call power chords (ca-43): the mic takes a strum, every string it can show');
   let bad = 0;
   const flag = m => { err(m); problems++; bad++; };
   if (!ctx) { flag('1cd cannot run — the 0b render context is unavailable'); return; }
-  const EXPECT = { power: 4, ranges: [[0, 5], [5, 8], [8, 12], [0, 12]], keys: 18 };
+  const EXPECT = { power: 4, ranges: [[0, 5], [5, 8], [8, 12], [0, 12]], keys: 14 };
   const J = JSON.stringify;
   const run = x => vm.runInContext(x, ctx);
   let csrc = '';
@@ -10029,7 +10086,7 @@ function checkChordCall(ctx) {
      and reloads);
    - every pwn.* string the setup, play and done screens show exists in English
      and Spanish, and none defined is unused.
-   Pinned: 4 steps, 34 pwn.* keys. */
+   Pinned: 4 steps, 32 pwn.* keys (34 until 2026-11-10, when howAnswer and howScored went: one line of directions before Start). */
 function checkPowerName(ctx) {
   head('1co. Name the power chord (ca-49): every answer recomputed, every card, the deal');
   let bad = 0;
@@ -10037,7 +10094,7 @@ function checkPowerName(ctx) {
   if (!ctx) { flag('1co cannot run — the 0b render context is unavailable'); return; }
   const J = JSON.stringify;
   const run = x => vm.runInContext(x, ctx);
-  const EXPECT = { keys: 34, steps: [
+  const EXPECT = { keys: 32, steps: [
     { type: 'notecall', strings: ['lowE', 'A'], minFret: 5, maxFret: 12 },
     { type: 'pcname', mode: 'name', minFret: 0, maxFret: 7 },
     { type: 'pcname', mode: 'fret', minFret: 0, maxFret: 7 },
@@ -11484,7 +11541,12 @@ function checkCardCaptionWords() {
    one-sided label is itself the bug (dots in one language, none in the
    other), so it fails outright now rather than being skipped. Bump when a
    card genuinely adds or removes a got-it sentence in both languages. */
-const REP_COUNT_FIELDS = 420;   // 2026-11-04: ca-47 merged into ca-46 as its chunks path (-3 ca-47, -3 old ca-46, +7: full 2, chunks 3, shared 2). 2026-11-04: ca-47 step 1 loses its got-it and tip (-1). 2026-11-03: ca-47 strum pattern in chunks, four Practice steps (+4). 2026-11-03: ca-46 strum pattern, three Practice steps (+3). 2026-10-21: m3w2 three-note power chords, two appended steps (+2). 2026-10-16: Module 5 clean-up, the Lauren Bateman watch step gets a countable got-it (+1). 2026-10-16: ca-34's three power-chord step texts (text_power, +3). 2026-10-14: ca-34 rebuilt — D chord and whole-song steps (+1), then requinto intro and outro steps (+2). 2026-10-13: ca-34 Las Mañanitas, four Practice steps (+4). 2026-10-12: m6-m8 Smoke on the Water watch step + A-shape watch card get a countable got-it (+2). 2026-10-12: 17 Challenge cards in Modules 9-11 get a countable got-it (+17, see 1ar2). 2026-10-07: part cards lose their help ladders too (-8). 2026-10-07: whole-song cards lose their help ladders (-13). 2026-10-06: m12w3 melody-on-top gets a countable got-it (+1). 2026-10-05: ca-27 Luna (+1) and ca-28 Sweet Child (+2) whole songs; ca-29..ca-33 power-chord whole songs (+6). 2026-10-01: ca-13/ca-19/ca-20 as practice cards (-7), ca-25 Seven Nation Army whole song (+2), ca-21 Lines 2 and 4 restored (+2), ca-26 Watchtower whole song (+1)
+const REP_COUNT_FIELDS = 339;   // 2026-11-10: every In-Class Activity step is one line with no got-it label (-81). 2026-11-04: ca-47 merged into ca-46 as its chunks path (-3 ca-47, -3 old ca-46, +7: full 2, chunks 3, shared 2). 2026-11-04: ca-47 step 1 loses its got-it and tip (-1). 2026-11-03: ca-47 strum pattern in chunks, four Practice steps (+4). 2026-11-03: ca-46 strum pattern, three Practice steps (+3). 2026-10-21: m3w2 three-note power chords, two appended steps (+2). 2026-10-16: Module 5 clean-up, the Lauren Bateman watch step gets a countable got-it (+1). 2026-10-16: ca-34's three power-chord step texts (text_power, +3). 2026-10-14: ca-34 rebuilt — D chord and whole-song steps (+1), then requinto intro and outro steps (+2). 2026-10-13: ca-34 Las Mañanitas, four Practice steps (+4). 2026-10-12: m6-m8 Smoke on the Water watch step + A-shape watch card get a countable got-it (+2). 2026-10-12: 17 Challenge cards in Modules 9-11 get a countable got-it (+17, see 1ar2). 2026-10-07: part cards lose their help ladders too (-8). 2026-10-07: whole-song cards lose their help ladders (-13). 2026-10-06: m12w3 melody-on-top gets a countable got-it (+1). 2026-10-05: ca-27 Luna (+1) and ca-28 Sweet Child (+2) whole songs; ca-29..ca-33 power-chord whole songs (+6). 2026-10-01: ca-13/ca-19/ca-20 as practice cards (-7), ca-25 Seven Nation Army whole song (+2), ca-21 Lines 2 and 4 restored (+2), ca-26 Watchtower whole song (+1)
+/* One-line In-Class Activity steps (Jonathan, 2026-11-10: "students don't read
+   them anyway"): no got-it label, so caStepHtml() passes wholeLine and the dots
+   read the count from the whole line. Pinned like REP_COUNT_FIELDS: a step text
+   added or removed (or gaining a label again) moves it. */
+const REP_COUNT_LINES = 81;
 function checkRepCountParity(sets, ctx) {
   head('1bg. Rep-count dots agree between English and Spanish');
   if (!ctx) { err('1bg cannot run — render context unavailable'); problems++; return; }
@@ -11534,11 +11596,74 @@ function checkRepCountParity(sets, ctx) {
   for (const w of (sets || [])) visit(w, w.id);
   const activities = vm.runInContext('typeof CLASS_ACTIVITIES !== "undefined" ? CLASS_ACTIVITIES : []', ctx) || [];
   for (const a of activities) visit(a, a.id);
+  /* The one-line activity steps (2026-11-10). A step text with no got-it label
+     in either language makes its dots from the WHOLE line (caStepHtml passes
+     wholeLine to wrapGotItWhen), so the whole English line and the whole
+     Spanish line must name the same count. Then the opt-in itself, run for
+     real: wrapGotItWhen reads a one-line count only when asked; caStepHtml
+     asks (every step's rendered dots = its line's count, both languages); the
+     module call (buildLesson) does not, or a module step with a stray "three
+     times" outside its got-it sentence would grow dots. */
+  let lines = 0;
+  const wrap = vm.runInContext('typeof wrapGotItWhen === "function" ? wrapGotItWhen : null', ctx);
+  const stepHtml = vm.runInContext('typeof caStepHtml === "function" ? caStepHtml : null', ctx);
+  if (!wrap || !stepHtml) { err('1bg cannot run — wrapGotItWhen / caStepHtml not found in app.js (renamed? update this check with it)'); problems++; return; }
+  const dotsIn = h => (String(h).match(/class="rep-dot(?: on)?"/g) || []).length;
+  for (const a of activities) {
+    if (!a || a.kind === 'check') continue;
+    (a.steps || []).forEach((st, si) => {
+      for (const f of ['text', 'text_power']) {
+        const en = st[f], es = st[f + '_es'];
+        if (typeof en !== 'string' && typeof es !== 'string') continue;
+        if (gotItRe.test(en || '') || gotItRe.test(es || '')) continue;   // the label rule above has it
+        lines++;
+        const enN = repCountFromGotIt(en || ''), esN = repCountFromGotIt(es || '');
+        if (enN !== esN) {
+          err(`${a.id}.steps[${si}].${f}: the one line gives ${enN} tap dot${enN === 1 ? '' : 's'} in English but ${esN} in Spanish — one language names a rep count the other doesn't`);
+          problems++; bad++;
+        }
+      }
+    });
+  }
+  if (lines !== REP_COUNT_LINES) {
+    err(`1bg: ${lines} one-line activity step texts checked, but REP_COUNT_LINES pins ${REP_COUNT_LINES} — a step text was added, removed or given a got-it label again; bump the pin on purpose`);
+    problems++; bad++;
+  }
+  const probe = 'Play the riff three times in a row.';
+  const rep = { key: '1bg', closestSel: '.x', btnSel: '.y', id: '1bg' };
+  const optIn = dotsIn(wrap(probe, { ...rep, wholeLine: true })), noOpt = dotsIn(wrap(probe, rep));
+  if (optIn !== 3 || noOpt !== 0) { err(`1bg: wrapGotItWhen on a one-line "three times in a row" gives ${optIn} dots with wholeLine (want 3) and ${noOpt} without (want 0)`); problems++; bad++; }
+  let rendered = 0;
+  const saveLang = vm.runInContext('getLang()', ctx);
+  try {
+    for (const lang of ['en', 'es']) {
+      vm.runInContext(`setLang(${JSON.stringify(lang)})`, ctx);
+      for (const a of activities) {
+        if (!a || a.kind === 'check' || !(a.steps || []).length) continue;
+        a.steps.forEach((st, si) => {
+          const text = lang === 'es' && st.text_es ? st.text_es : st.text;
+          if (typeof text !== 'string' || gotItRe.test(text)) return;
+          const want = repCountFromGotIt(text);
+          let got;
+          try { got = dotsIn(stepHtml(a, st, si, true, false, { pos: si, total: a.steps.length })); }
+          catch (e) { err(`1bg: caStepHtml threw on ${a.id} step ${si + 1} (${lang}): ${e.message}`); problems++; bad++; return; }
+          rendered++;
+          if (got !== want) { err(`1bg: ${a.id} step ${si + 1} (${lang}) renders ${got} tap dots, its one line names ${want} — caStepHtml must pass wholeLine to wrapGotItWhen`); problems++; bad++; }
+        });
+      }
+    }
+  } finally { vm.runInContext(`setLang(${JSON.stringify(saveLang)})`, ctx); }
+  const app = readFileSync(join(ROOT, 'app.js'), 'utf8');
+  const lessonCall = /const text2 = wrapGotItWhen\(text, \{([\s\S]*?)\}\);/.exec(app);
+  if (!lessonCall) { err('1bg: the module step call (const text2 = wrapGotItWhen(text, {…})) was not found in app.js — update this check with it'); problems++; bad++; }
+  else if (/wholeLine/.test(lessonCall[1])) { err('1bg: the module step call passes wholeLine — only In-Class Activity steps (caStepHtml) read a count from the whole text'); problems++; bad++; }
+  const optIns = (app.match(/\bwholeLine:\s*true\b/g) || []).length;
+  if (optIns !== 1) { err(`1bg: app.js passes wholeLine: true ${optIns} times, want exactly 1 (caStepHtml)`); problems++; bad++; }
   if (checked !== REP_COUNT_FIELDS) {
     err(`1bg: ${checked} got-it fields checked, but REP_COUNT_FIELDS pins ${REP_COUNT_FIELDS} — a got-it sentence was added, removed or reworded past GOT_IT_RE; bump the pin on purpose`);
     problems++; bad++;
   }
-  if (bad === 0) ok(`${checked} "You've got it when" field${checked === 1 ? '' : 's'} checked (pinned) — English and Spanish always agree on the rep-count dots`);
+  if (bad === 0) ok(`${checked} "You've got it when" field${checked === 1 ? '' : 's'} and ${lines} one-line activity step texts checked (both pinned) — English and Spanish always agree on the rep-count dots; ${rendered} activity steps rendered (EN + ES) draw the dots their line names, the module call reads no whole line`);
 }
 
 /* 1bh. JOURNEY "SLOW (N BPM)" LABELS ↔ data-bpm-slow (2026-09-28 sweep). A
@@ -14828,6 +14953,7 @@ function checkPracticeMinutes(i18nTable) {
   checkPendingFileSwitch(rcCtx);
   checkTodayByDate(rcCtx);
   checkFoldedActivity(rcCtx);
+  checkOneLineDirections(rcCtx, i18nTable);
   checkCardCaptionWords();
   checkJourneyRetired();
   checkSongLibrary();

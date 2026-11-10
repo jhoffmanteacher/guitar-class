@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-11-10 (evening) — One short line for every direction in an activity
+
+- **Every step in an In-class activity is now one short line:** what to play and when you are done. For example: "Play Line 1 into Line 2 four times without stopping." The lists, the "You've got it when" line and the tips are gone. The tab, the drills and the videos are the same.
+- **The tap dots are still there.** The line says how many times, and the dots count them. "Got it — next step" works as before.
+- **The practice cards' checks and the line at the top of each activity are one line too**, and so is the line before Start in Note Call, Call the chord, Name the power chord and the note decks.
+- **"Name the fret" steps have no text now:** the quiz on the step says what to do.
+
 ## 2026-11-10 (later) — An open activity fills the page
 
 - **When you open an activity on In class, the purple header and the left menu go away.** The activity has the whole page, and you do not need to press Full screen. Press **◀ All activities** to get the header and the menu back.
