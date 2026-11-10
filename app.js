@@ -3685,7 +3685,7 @@ function snipSyncTabPage(tabEl, spec, win, heard){
    snippet's own window. `lastBeat` drops back by itself when the loop comes
    round, so a lap never loses its first click. */
 function snipScheduleClick(st, now){
-  const bpb = st.tr.beatsPerBar;
+  const bpb = st.tr.beatsPerBar * clickSub(st.tr);   // clicks a bar — see CLICK IN SIX
   const nb = Math.ceil(snipBarsAt(st.win, now) * bpb - 1e-6);
   if(nb < st.lastBeat) st.lastBeat = nb - 1;
   if(nb <= st.lastBeat || nb < 0 || nb >= st.spec.bars * bpb) return;
@@ -3693,7 +3693,7 @@ function snipScheduleClick(st, now){
   if(ahead > 0.1) return;
   const ctx = getAudioCtx();
   const lat = snipLatency() - (ctx.outputLatency || ctx.baseLatency || 0);
-  pcClick(ctx.currentTime + Math.max(0, ahead + lat), nb % bpb === 0, false, (st.tr.clickGain || 1) * PLAYALONG_CLICK_GAIN);
+  pcClick(ctx.currentTime + Math.max(0, ahead + lat), clickAccent(st.tr, nb), false, (st.tr.clickGain || 1) * PLAYALONG_CLICK_GAIN);
   st.lastBeat = nb;
 }
 /* One of the snippet's <audio> elements failed. The PLAYING one stops the
@@ -14707,8 +14707,8 @@ function pcGridRows(S, bpb){
 /* COUNT IN SIX (Jonathan, 2026-11-10): a 6/8 track (countSix) draws three
    columns per big beat, every one a counted column numbered 1-6 across the
    bar, and the cursor lights each of the six (data-beat is then the eighth
-   within the pass, not the big beat). The click stays on the big beats, 1
-   and 4 (pcScheduleClick still counts beatsPerBar). sub = columns per beat. */
+   within the pass, not the big beat). The click sounds on all six too, 1 and
+   4 accented (see CLICK IN SIX). sub = columns per beat. */
 function renderChordGridRow(events, row, cols, bpb, seqOff, bass, restWord, sub){
   sub = sub === 3 ? 3 : 2;
   const barCols = bpb * sub;
@@ -15638,13 +15638,13 @@ function pcParkTwin(st){
   if(!snippetHasFull(st.L.tr) || !twinWanted(root)) return;
   twinPark(st, snippetSrc(st.L.tr, root.dataset.slow === '1', root.dataset.guitar !== '1'), el => pcAudioError(st, el));
 }
-/* Four clicks (one bar of the counted beat) before the song comes in, on
+/* One bar of clicks (four in 4/4, six in 6/8 — CLICK IN SIX) before the song comes in, on
    every start — otherwise the student is dropped in with no way to find
    beat 1. */
 function pcCountIn(st, si){
   const ctx = getAudioCtx();
   try { ctx.resume(); } catch(e) {}
-  const n = st.L.tr.beatsPerBar;
+  const n = st.L.tr.beatsPerBar * clickSub(st.L.tr);   // six on a 6/8 track — see CLICK IN SIX
   const beat = st.win.bar / n / pcRate(st.root);   // real seconds, not file seconds
   const t0 = ctx.currentTime + 0.1;
   /* All four clicks are scheduled on the AudioContext up front, so clearing
@@ -15653,7 +15653,7 @@ function pcCountIn(st, si){
      clicking (over the next count-in, at the old tempo). */
   st.clicks = [];
   for(let k = 0; k < n; k++){
-    st.clicks.push(pcClick(t0 + k * beat, k === 0, true));
+    st.clicks.push(pcClick(t0 + k * beat, clickAccent(st.L.tr, k), true));
     st.timers.push(setTimeout(() => { if(pcState === st) pcStatus(st.root, escHtml(t('ca.cardCountIn', {n: k + 1}))); }, (0.1 + k * beat) * 1000));
   }
   st.timers.push(setTimeout(() => { if(pcState === st) pcGo(st, si); }, (0.1 + n * beat) * 1000));
@@ -15664,6 +15664,16 @@ function pcCountIn(st, si){
 // it as pcClick's `gain`. Not the 4-click count-in, and not Note Calls
 // (ncClicks), which share pcClick and keep their old level.
 const PLAYALONG_CLICK_GAIN = Math.pow(10, 5 / 20);
+/* CLICK IN SIX (Jonathan, 2026-11-10: "it should click one through 6 ... one
+   and 4 can have a different sounding click"). On a countSix track the
+   click, and the count-in, sound every eighth, six to a bar; the big beats,
+   1 and 4, take the accented click. Any other track: one click a beat,
+   beat 1 accented. clickSub = clicks per counted beat. */
+function clickSub(tr){ return tr && tr.countSix ? 3 : 1; }
+function clickAccent(tr, nb){
+  const sub = clickSub(tr);
+  return sub === 3 ? nb % sub === 0 : nb % tr.beatsPerBar === 0;
+}
 function pcClick(at, accent, countIn, gain){
   const ctx = getAudioCtx();
   const o = ctx.createOscillator(), g = ctx.createGain();
@@ -15683,7 +15693,7 @@ function pcClick(at, accent, countIn, gain){
 /* The next counted beat, scheduled once it is under 100 ms away. `lastBeat`
    is reset on a loop or a track switch, so a jump back never skips beats. */
 function pcScheduleClick(st, now){
-  const bpb = st.L.tr.beatsPerBar;
+  const bpb = st.L.tr.beatsPerBar * clickSub(st.L.tr);   // clicks a bar — see CLICK IN SIX
   const beatPos = snipBarsAt(st.win, now) * bpb;
   const nb = Math.ceil(beatPos - 1e-6);
   if(nb < st.lastBeat) st.lastBeat = nb - 1;
@@ -15692,7 +15702,7 @@ function pcScheduleClick(st, now){
   if(ahead > 0.1) return;
   const ctx = getAudioCtx();
   const lat = snipLatency() - (ctx.outputLatency || ctx.baseLatency || 0);
-  pcClick(ctx.currentTime + Math.max(0, ahead + lat), nb % bpb === 0, false, (st.L.tr.clickGain || 1) * PLAYALONG_CLICK_GAIN);
+  pcClick(ctx.currentTime + Math.max(0, ahead + lat), clickAccent(st.L.tr, nb), false, (st.L.tr.clickGain || 1) * PLAYALONG_CLICK_GAIN);
   st.lastBeat = nb;
 }
 function pcFrame(){

@@ -10874,7 +10874,38 @@ function checkChordGridCards(ctx) {
     if (!L || !L.tr.countSix) flag('ca-51 lost countSix — the 6/8 chord grid would count 1 + 2 +');
     else { const ks = new Set(); for (let i = 0; i < 8 * 24; i++) ks.add(pcLocKey(L, pcLocate(L, i / 24)));
       if (ks.size !== 8 * 6) flag(`ca-51: ${ks.size} cursor steps over 8 bars, expected ${8 * 6} (six a bar)`); } }
-  if (bad === 0) ok(`${CHORD_GRID_CARDS.length} chord-grid cards (pinned) — ${sections} grid sections, ${events} chord/rest onsets all on the eighth grid, ${labelled} lyric lines keep their row; ca-29 renders 98 chord names (one per strum) and 392 data-beat on beat columns only; ${rowsSeen} grid rows across both views each 4 bars wide with their bar lines, staff edge and 0..N beat run; ${col0Rows} rows open on a label at column 0 (${heldLabels} held "(Chord)", pinned); ${restWords} rest words; ${bassMarks} alternating-bass notes (pinned) on beat 1, root / 5th as worked out from the notes, across ${CHORD_GRID_BASS_CARDS.length} bass card(s) x chord views, none with the bass off, the directions in EN + ES; the cursor steps once per beat; ca-10 untouched`);
+  // CLICK IN SIX: the in-song click, the snippet Metronome and the count-in
+  // sound six a bar on a countSix track, 1 and 4 accented; four a bar, 1
+  // accented, on a 4/4 card (ca-36). Executed with the audio stubbed.
+  { const run = src => vm.runInContext(src, ctx);
+    const saved = run('({ g: getAudioCtx, c: pcClick, r: pcRate, sr: snipRate, l: snipLatency, s: pcStatus })');
+    try {
+      run('globalThis.__clk = []; getAudioCtx = () => ({ currentTime: 0, resume(){}, outputLatency: 0 }); pcClick = (at, acc) => { __clk.push(acc ? "A" : "b"); return { stop(){} }; }; pcRate = () => 1; snipRate = () => 1; snipLatency = () => 0; pcStatus = () => {};');
+      const pattern = (id, how) => {
+        const act = acts.find(a => a.id === id); const L = act && pcLayout(act);
+        if (!L) return 'no card';
+        run('__clk.length = 0');
+        const win = vm.runInContext('pcWindow', ctx)(L, false);
+        if (how === 'countin') {
+          const st = { root: {}, L, win, timers: [] };
+          vm.runInContext('pcCountIn', ctx)(st, 0);
+          st.timers.forEach(clearTimeout);
+        } else {
+          const st = how === 'snip' ? { tr: L.tr, win, card: {}, spec: { bars: 2 }, lastBeat: -1 } : { L, win, root: {}, lastBeat: -1 };
+          const f = vm.runInContext(how === 'snip' ? 'snipScheduleClick' : 'pcScheduleClick', ctx);
+          for (let i = 0; i <= 2 * 480; i++) f(st, vm.runInContext('snipTimeAtBars', ctx)(win, i / 480) - 0.05);
+        }
+        return run('__clk.join("")');
+      };
+      const want = { 'ca-51': ['AbbAbbAbbAbb', 'AbbAbb'], 'ca-36': ['AbbbAbbb', 'Abbb'] };
+      for (const [id, [song, ci]] of Object.entries(want)) {
+        for (const how of ['song', 'snip']) { const got = pattern(id, how); if (!got.startsWith(song)) flag(`${id}: ${how === 'snip' ? 'snippet Metronome' : 'in-song click'} over 2 bars is "${got}", expected "${song}" (A = accented) — see CLICK IN SIX`); }
+        const got = pattern(id, 'countin'); if (got !== ci) flag(`${id}: count-in clicks "${got}", expected "${ci}" — see CLICK IN SIX`);
+      }
+    } catch (e) { flag(`CLICK IN SIX check could not run: ${e.message}`); }
+    finally { ctx.__saved = saved; run('getAudioCtx = __saved.g; pcClick = __saved.c; pcRate = __saved.r; snipRate = __saved.sr; snipLatency = __saved.l; pcStatus = __saved.s; delete globalThis.__saved; delete globalThis.__clk;'); }
+  }
+  if (bad === 0) ok(`${CHORD_GRID_CARDS.length} chord-grid cards (pinned) — ${sections} grid sections, ${events} chord/rest onsets all on the eighth grid, ${labelled} lyric lines keep their row; ca-29 renders 98 chord names (one per strum) and 392 data-beat on beat columns only; ${rowsSeen} grid rows across both views each 4 bars wide with their bar lines, staff edge and 0..N beat run; ${col0Rows} rows open on a label at column 0 (${heldLabels} held "(Chord)", pinned); ${restWords} rest words; ${bassMarks} alternating-bass notes (pinned) on beat 1, root / 5th as worked out from the notes, across ${CHORD_GRID_BASS_CARDS.length} bass card(s) x chord views, none with the bass off, the directions in EN + ES; the cursor steps once per beat; the 6/8 click and count-in sound six a bar (1 and 4 accented), 4/4 four; ca-10 untouched`);
 }
 
 /* 1by. POWER-CHORD NAMES OPEN NO POP-UP WHERE THE TWO-FINGER SHAPE IS TAUGHT

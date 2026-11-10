@@ -9,7 +9,7 @@ see `WORKFLOW.md` and the git commit log.
 ## 2026-11-10 (night, latest) — 6/8 songs count to six
 
 - **On Perdón Mamá, Luna, Arsenal Efectivo and Ella, the count under the chords now reads 1 2 3 4 5 6 in every bar.** Before, it read "1 + 2 +".
-- **The moving highlight now lights each of the six counts.** The click still plays on 1 and 4, the two big beats.
+- **The moving highlight now lights each of the six counts, and the click plays on all six.** The click on 1 and 4, the two big beats, is higher so you can hear where the bar is. The count-in before the song is six clicks too.
 
 ## 2026-11-10 (night, later) — Today's activities side by side
 
