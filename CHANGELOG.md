@@ -6,11 +6,18 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-10 (night, later) — Today's activities side by side
+
+- **When there is more than one activity for today, they sit side by side**, two to a row, on In class. Read them left to right, then down. The order is the same as before.
+- **Each one shows its name, a short sentence about it and its Start button.** The picture is left out so the two fit. One activity alone still uses the whole width.
+- **An open activity still fills the page.** Press **◀ All activities** to go back to the tiles.
+
 ## 2026-11-10 (night) — No checklists on the activities
 
 - **The practice cards no longer have a list of checkboxes.** When you can play the part, press **Mark complete**. A step-by-step activity still has **Got it — next step** on each step and **Mark complete** at the end.
 - **The link to the next card stays:** for example "Open Seven Nation Army — The Whole Song" sits just above Mark complete.
 - **The extra songs on the Songs page ("More Play Along songs") have no Mark complete.** They are extra: play along as much as you like.
+
 ## 2026-11-10 (evening) — One short line for every direction in an activity
 
 - **Every step in an In-class activity is now one short line:** what to play and when you are done. For example: "Play Line 1 into Line 2 four times without stopping." The lists, the "You've got it when" line and the tips are gone. The tab, the drills and the videos are the same.

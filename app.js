@@ -17524,9 +17524,16 @@ function renderClassActivities(){
        heading at all; the Unfinished fold (open by default, caTodoOpen) is
        then the top of the page. */
     const chipOf = a => { const d = caDate(a); return d && d !== todayDay ? d : ''; };
+    /* Side by side (Jonathan, 2026-11-10, work order Part 3): the Today cards
+       sit in ONE grid, two equal columns, same order, so they read left to
+       right, then down. One card keeps the full width; two or more are half
+       width (--multi) and drop the hero thumbnail (styles.css). An open card
+       takes the full width: the grid is on its .ca-solo-path. */
     const todayHtml = todayCards.length
       ? caTodayHeadHtml(todayDay)
+        + `<div class="ca-today-grid${todayCards.length > 1 ? ' ca-today-grid--multi' : ''}">`
         + todayCards.map(a => isDone(a) ? caActivityCardHtml(swapIn(a), chipOf(a)) : caHeroCardHtml(swapIn(a), chipOf(a))).join('')
+        + `</div>`
       : '';
     let pendingHtml;
     if(!pendingCount){

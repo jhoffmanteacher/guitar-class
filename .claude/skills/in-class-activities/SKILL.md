@@ -50,9 +50,9 @@ Easy to break without noticing:
 `showApp()` opens it whenever the URL carries no explore hash.
 `renderClassActivities()` (app.js) builds three groups (named by Jonathan
 2026-09-23):
-- **Today's activity** (`ca.startHere`) — up to three cards by release date
+- **Today's activity** (`ca.startHere`) — every card dated today or yesterday
   (below), collapsed like every other card, not forced open (Jonathan,
-  2026-09-15).
+  2026-09-15); two or more sit side by side as half-width tiles.
 - **Unfinished activities** (`ca.stillToDoGroup`) — one fold, open by default,
   newest first, module headings when cards are placed. No nested "Older" fold.
 - **Completed activities** (`ca.finishedGroup`).
@@ -98,6 +98,18 @@ gate (`caIsVisible`) and Today both read; 1cq stubs it. In
   and its `ca.notFinished` / `ca.heroFromDate` strings.
 - Only visible cards count: a future date, Hidden or another student's card
   never sets the newest date or takes a slot.
+- **Side by side** (Jonathan, 2026-11-10, work order Part 3): the Today cards
+  sit in ONE `.ca-today-grid`, two equal columns, in the order above, so they
+  read (and Tab) left to right, then down. One card keeps the whole width;
+  two or more (`.ca-today-grid--multi`) are half-width tiles with no hero
+  thumbnail, the title across the whole tile and the Start button at the right
+  beside the blurb (beside the title it left 299px and six Spanish titles took
+  three lines). A finished card keeps its own row height. An open card takes
+  the whole width (`.ca-solo-path` → `display:block`); a phone (≤760px) gets one
+  column and the stacked hero. Nothing about WHICH cards are in Today, their
+  order, `caStartHereId`, the chips, the Optional tag or the caught-up box
+  changed. `tools/smoke.mjs` `todayGridWalk` measures the three longest titles
+  a student can be given, in both languages.
 - checks.mjs **1cq** runs the real page (17 runs × EN + ES).
 
 **Reading order is newest-first, not the teaching order** (Jonathan,

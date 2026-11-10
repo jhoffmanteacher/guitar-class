@@ -325,6 +325,15 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-10 — Today's activities side by side (work order "activity focus view and one-line directions", Part 3).
+      Fast.** `renderClassActivities()` wraps the Today cards in one `.ca-today-grid` (two equal columns, same order, so
+      reading order = Tab order); 2+ cards (`--multi`) are half-width tiles with no hero thumbnail, the title across the
+      tile and the Start button at the right beside the blurb (beside the title, six Spanish "… La canción completa con
+      acordes de potencia" titles ran to three lines); one card keeps the whole width; an open card takes the whole width
+      (`.ca-solo-path` → block); ≤760px is one column with the stacked hero. Which cards are in Today, their order and
+      `caStartHereId` are unchanged (1cq passed with no re-pin). Measured: 176 of 176 tiles (40 activities × pending and
+      finished, plus the power-chord and recording titles, EN + ES) hold their title in two lines with nothing outside
+      the tile. Guard: smoke `todayGridWalk` (the three longest titles, both languages; five breaks shown red).
 - [x] **2026-11-10 — No checklists on the activities; no Mark complete on the extra songs (Jonathan, mid-session: "get rid of
       the checklists on the activities. only have mark complete or next step" and "remove mark complete from the extra songs since
       they're extra"). Fast.** A practice card ends in Mark complete (caToggleComplete); `caTickKeys(card)` is `[]` (no "n of m",

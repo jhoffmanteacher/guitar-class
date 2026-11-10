@@ -3389,6 +3389,37 @@ span.tab-count-held{margin-left:4px}
    2026-10-31) — the label and date every hero card used to carry. */
 .ca-today-head{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px;margin:4px 2px 10px}
 .ca-today-label{font:700 1.25rem var(--font-display);color:var(--ca-accent)}
+/* Today's cards side by side (Jonathan, 2026-11-10; renderClassActivities wraps
+   them in .ca-today-grid): two equal columns, a row's Start tiles the same
+   height, reading left to right, then down. One card keeps the full width. Two or more
+   are half width and drop the hero thumbnail (210px does not fit beside the
+   text), so the button stands alone at the tile's right. An open card takes the
+   full width (the grid is on its .ca-solo-path), and a phone gets one column.
+   The Unfinished and Completed folds stay full-width lists. */
+.ca-today-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:12px}
+.ca-today-grid > .ca-card{margin:0;min-width:0}
+/* A finished card in Today's list is a one-line row (caActivityCardHtml), not
+   a tile: it keeps its own height instead of stretching to a Start tile's. */
+.ca-today-grid > .ca-card:not(.ca-card--hero){align-self:start}
+.ca-today-grid:not(.ca-today-grid--multi) > .ca-card{grid-column:1/-1}
+.ca-today-grid--multi .ca-hero-thumb{display:none}
+.ca-today-grid--multi .ca-hero-side{width:auto;justify-content:center}
+.ca-screen.ca-solo .ca-today-grid.ca-solo-path{display:block}
+/* In a half-width tile the title takes the tile's whole width and the Start
+   button sits at the right beside the blurb and step dots: beside the title it
+   left 299px, and six Spanish titles ("… La canción completa con acordes de
+   potencia") ran to three lines. .ca-hero-main's children join the summary's
+   grid (display:contents); dense placement puts the button in the first free
+   right-hand cell, the row under the title. A phone keeps the stacked hero. */
+@media(min-width:761px){
+  .ca-today-grid--multi .ca-hero-summary{display:grid;grid-template-columns:minmax(0,1fr) auto;
+    grid-auto-flow:row dense;column-gap:16px;row-gap:4px;align-items:start}
+  .ca-today-grid--multi .ca-hero-main{display:contents}
+  .ca-today-grid--multi .ca-hero-main > *{grid-column:1/-1;justify-self:start}
+  .ca-today-grid--multi .ca-hero-main > .ca-hero-title ~ *{grid-column:1}
+  .ca-today-grid--multi .ca-hero-side{grid-column:2;grid-row:span 2;align-self:center}
+}
+@media(max-width:760px){.ca-today-grid{grid-template-columns:minmax(0,1fr)}}
 .ca-today-date{font-size:0.9375rem;font-weight:600;color:var(--text2)}
 .ca-hero-summary{align-items:stretch;gap:20px}
 /* align-items:flex-start (2f fix, found comparing to the mockup) — without it
