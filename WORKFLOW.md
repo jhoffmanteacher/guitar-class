@@ -41,6 +41,14 @@ Start here. Update this block whenever an item opens or closes; each line says w
   room or a class: 360 of 360 right chords said right. Thumb strummer: 0 of 180 missed at 30 and 60 BPM, 9 of 90 at 90,
   34 of 90 at 120. A chord that never moved was caught 28% of the time, a chord one fret high 93%. An empty quiet room:
   0 of 180 strums heard; a class with no guitar in hand: 47%.
+- **No-guitar cases (same day; Jonathan: "it's marking things right where there's nothing playing"):**
+  `node tools/mic-sim/closed-loop.mjs --no-guitar`, twelve cases with no chord played at all, pass = nothing marked
+  right. Current rule: 9 of 12 FAIL (288 games, 4,320 changes). Pass: dead mic, quiet room, fan (0 of 360 each).
+  Marked right: desk taps on the beat 360 of 360, strums on muted strings 360, typing 322, one voice 132, bumps 122,
+  a class talking 109, class guitars 68, loud class 54, partner's guitar 39. Of the 1,566 rights, 1,174 had under 3
+  pitch readings (right on timing alone). Nothing in `coach.js` changed: a fix is detection (Always Reviewed) and his
+  call, and "no readable pitch, no tick" was rejected on the real takes on 2026-11-07 (2 of 12 false hits removed, 10
+  of 46 real rights lost), where most false hits did have readings; the model's rooms are guesses and disagree.
 - **Next (in order):** (1) on Jonathan's Mac, where the takes are, fit the rooms and the touch to the 34 real takes;
   his thumb / finger take at 60 and 120 BPM ("His first step" below) tests the 120 BPM prediction directly. (2) Then
   pin a small scorecard in `checks.mjs` (a new kind of check around `coach.js` detection: Always Reviewed). (3) Then

@@ -53,6 +53,12 @@ tuning pass — ideally on the real classroom recordings the teacher console's
   the older tools here leave out. Synthetic. One number is fitted to the classroom takes (how long a string rings, `ringS`: the reason is in
   `student.mjs`); the touches, the rooms and the mics are guesses until the takes are run against them. Not in `checks.mjs`. Power Chord Switch only so far; `student.mjs` knows nothing about the site, so
   the next game needs only its own runner.
+  **`--no-guitar`** (2026-11-11, Jonathan: "it's marking things right where there's nothing playing"): twelve cases
+  in which no chord is played in the whole game (a dead mic, a quiet room, a fan, one voice, a class talking, bumps,
+  typing, a partner's guitar, a class of guitars, a loud class, desk taps on every beat, strums across muted
+  strings; `NO_GUITAR` in the file). A case passes only when nothing is marked right, and the run exits 1 when any
+  fails. On the current rule (1.8 / 2.19) 9 of 12 fail, which is the bug it was written to show, so it is not in
+  `checks.mjs`: it goes there when the game passes it.
 - `smoke.mjs <url>` — headless Chromium through the Dev bypass with the
   in-page harness: Coach, Note Runner, Note Hunt, Note Call, Change Up, PSG
   Hero, the consent prompt and the recording path. Start a static server on

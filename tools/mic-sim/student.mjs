@@ -18,7 +18,8 @@
      rhythm    every strum early or late by a spread (`sigmaMs`), a constant
                lean (`lateMs`), extra lateness on the change itself
                (`changeLateMs`: the hand is still moving), a drifting tempo.
-     room      steady noise, a low rumble, other guitars, bangs (a chair, a case).
+     room      steady noise, a low rumble, other guitars, bangs (a chair, a case),
+               people talking, key clicks, a fan's hum.
      device    the laptop mic: how loud it hears, how much of the low notes it
                loses (`hp`: a small mic hears little under about 200 Hz).
 
@@ -53,7 +54,16 @@ export const ROOMS = {
   quiet:   { noise: 0.002, rumble: 0.001, neighbours: 0,   nbLevel: 0,    bangs: 0 },
   pair:    { noise: 0.003, rumble: 0.002, neighbours: 0.8, nbLevel: 0.25, bangs: 0 },
   class:   { noise: 0.006, rumble: 0.004, neighbours: 1.5, nbLevel: 0.12, bangs: 0.05 },
-  loud:    { noise: 0.02,  rumble: 0.02,  neighbours: 3,   nbLevel: 0.3,  bangs: 0.15 }
+  loud:    { noise: 0.02,  rumble: 0.02,  neighbours: 3,   nbLevel: 0.3,  bangs: 0.15 },
+  /* Rooms with NO guitar in them at all, for the no-guitar cases (closed-loop.mjs --no-guitar): whatever the game marks right here, nobody played.
+     talk: syllables per second from people talking, talkLevel: how loud one is at the mic (raw, a strum is 0.12); keys: key or trackpad clicks per
+     second on this laptop; hum: a steady tone (a fan, a projector). */
+  dead:    { noise: 0,     rumble: 0,     neighbours: 0, nbLevel: 0, bangs: 0 },
+  fan:     { noise: 0.03,  rumble: 0.02,  neighbours: 0, nbLevel: 0, bangs: 0, hum: { f: 120, amp: 0.02 } },
+  talk:    { noise: 0.003, rumble: 0.002, neighbours: 0, nbLevel: 0, bangs: 0, talk: 3.5, talkLevel: 0.05 },
+  chatter: { noise: 0.008, rumble: 0.006, neighbours: 0, nbLevel: 0, bangs: 0.05, talk: 9, talkLevel: 0.02 },
+  bumps:   { noise: 0.004, rumble: 0.003, neighbours: 0, nbLevel: 0, bangs: 0.5 },
+  typing:  { noise: 0.002, rumble: 0.001, neighbours: 0, nbLevel: 0, bangs: 0, keys: 3 }
 };
 
 /* Laptop mics. hp: Hz below which the mic loses level (0 = a flat mic). */
@@ -85,7 +95,11 @@ export const STUDENTS = {
   changeOnly: { ...BASE, strums: 'change' },
   wrongFret:  { ...BASE, pWrong: 1 },
   neverMoves: { ...BASE, pHeld: 1 },
-  noGuitar:   { ...BASE, silent: true }
+  noGuitar:   { ...BASE, silent: true },
+  /* No chord sounds, but the hands are busy on the beat: a tap on the desk or the laptop beside the mic, and a strum across strings the left
+     hand is muting (a scratch with no note in it). The answer key says "no strum" for both: no chord was played. */
+  tapper:     { ...BASE, silent: true, tapBeats: true },
+  mutedStrum: { ...BASE, silent: true, mutedBeats: true }
 };
 
 /* One string. pluck() starts a note; lift() lets it die in about 30 ms. */
@@ -171,7 +185,7 @@ export class Student {
     this.r = rng(this.o.seed * 2654435761);
     this.guitar = new Guitar(this.r, this.p.ringS);
     this.others = Array.from({ length: 3 }, () => new Guitar(this.r, BASE.ringS));
-    this.roomAt = 0; this.rum = 0; this.nextNb = 0; this.nextBang = 0; this.bangs = [];
+    this.rum = 0; this.nextNb = 0; this.nextBang = 0; this.nextTalk = 0; this.nextKey = 0; this.hits = []; this.humPh = 0;
   }
   play(round){
     const { p, r } = this, touch = TOUCH[p.touch];
@@ -185,6 +199,8 @@ export class Student {
       const dev = gauss(r) * p.sigmaMs + p.lateMs + tempoErr + (isChange ? Math.abs(gauss(r)) * p.changeLateMs : 0);
       const at = round.listenStartMs + b * round.beatMs + this.o.lagMs + dev;
       let did = 'right';
+      if (p.tapBeats) this.hits.push({ s: Math.round(at / 1000 * SR), amp: p.amp * (0.8 + 0.6 * r()), kind: 'bang' });
+      if (p.mutedBeats){ this.guitar.strum(at, round.midis[want], p.amp, touch); this.guitar.lift(at + touch.spreadMs + 4); }
       if (isChange){
         const x = r();
         did = p.silent ? 'silent' : x < p.pSkip ? 'silent' : x < p.pSkip + p.pHeld ? 'held' : x < p.pSkip + p.pHeld + p.pWrong ? 'wrong' : 'right';
@@ -213,7 +229,7 @@ export class Student {
       this.nextNb = Math.max(this.nextNb, fromMs) - Math.log(1 - r()) * 1000 / room.neighbours;
     }
     while (room.bangs > 0 && this.nextBang < toMs){
-      if (this.nextBang >= fromMs) this.bangs.push({ s: Math.round(this.nextBang / 1000 * SR), amp: myAmp * (0.5 + r()) });
+      if (this.nextBang >= fromMs) this.hits.push({ s: Math.round(this.nextBang / 1000 * SR), amp: myAmp * (0.5 + r()), kind: 'bang' });
       this.nextBang = Math.max(this.nextBang, fromMs) - Math.log(1 - r()) * 1000 / room.bangs;
     }
     this.guitar.render(air, a, b);
@@ -222,11 +238,31 @@ export class Student {
       this.rum += ((r() * 2 - 1) * room.rumble * 12 - this.rum) * 0.004;
       air[s] += (r() * 2 - 1) * room.noise * 1.73 + this.rum;
     }
-    // a bang: 60 ms of low thump with a click on top
-    this.bangs = this.bangs.filter(bg => {
-      const n = Math.round(0.06 * SR);
-      for (let s = Math.max(a, bg.s); s < Math.min(b, bg.s + n); s++){ const k = s - bg.s; air[s] += bg.amp * Math.exp(-k / (0.015 * SR)) * (Math.sin(2 * Math.PI * 110 * k / SR) + 0.5 * (r() * 2 - 1)); }
-      return bg.s + n > b;
+    while (room.talk > 0 && this.nextTalk < toMs){
+      if (this.nextTalk >= fromMs) this.hits.push({ s: Math.round(this.nextTalk / 1000 * SR), amp: room.talkLevel * (0.4 + 1.2 * r()), kind: 'syllable', f0: 100 + 150 * r(), n: Math.round((0.1 + 0.15 * r()) * SR), f1: 400 + 500 * r() });
+      this.nextTalk = Math.max(this.nextTalk, fromMs) - Math.log(1 - r()) * 1000 / room.talk;
+    }
+    while (room.keys > 0 && this.nextKey < toMs){
+      if (this.nextKey >= fromMs) this.hits.push({ s: Math.round(this.nextKey / 1000 * SR), amp: 0.03 * (0.5 + r()), kind: 'key' });
+      this.nextKey = Math.max(this.nextKey, fromMs) - Math.log(1 - r()) * 1000 / room.keys;
+    }
+    if (room.hum) for (let s = a; s < b; s++){ air[s] += room.hum.amp * 1.41 * Math.sin(this.humPh); this.humPh += 2 * Math.PI * room.hum.f / SR; }
+    /* Sounds that are not a guitar. bang: 60 ms of low thump with a click on top (a chair, a case, a hand on the desk). syllable: a voiced
+       sound, harmonics of the voice's pitch with more level near one vowel pitch, rising in 20 ms. key: an 8 ms click. */
+    this.hits = this.hits.filter(h => {
+      const n = h.kind === 'bang' ? Math.round(0.06 * SR) : h.kind === 'key' ? Math.round(0.008 * SR) : h.n;
+      for (let s = Math.max(a, h.s); s < Math.min(b, h.s + n); s++){
+        const k = s - h.s;
+        if (h.kind === 'bang') air[s] += h.amp * Math.exp(-k / (0.015 * SR)) * (Math.sin(2 * Math.PI * 110 * k / SR) + 0.5 * (r() * 2 - 1));
+        else if (h.kind === 'key') air[s] += h.amp * (1 - k / n) * (r() * 2 - 1) * 1.73;
+        else {
+          const env = Math.min(1, k / (0.02 * SR)) * Math.min(1, (n - k) / (0.04 * SR));
+          let v = 0;
+          for (let hh = 1; hh * h.f0 < 3000; hh++){ const d = (hh * h.f0 - h.f1) / 250; v += Math.sin(2 * Math.PI * hh * h.f0 * k / SR) * (0.25 / hh + Math.exp(-d * d)); }
+          air[s] += h.amp * env * v * 0.7;
+        }
+      }
+      return h.s + n > b;
     });
   }
 }

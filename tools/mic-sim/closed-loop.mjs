@@ -15,6 +15,13 @@
        --seeds=2                      games per cell
        --coach=<file>                 another coach.js (git show <ref>:coach.js > file) for a before / after
        --json=<file>                  every game, every change
+       --no-guitar                    the no-guitar cases (below) instead of the table; exits 1 when any case fails
+
+   The no-guitar cases (Jonathan, 2026-11-11: "it's marking things right where there's nothing playing"). In each one NO
+   chord is played in the whole game, so every "right" the game gives is wrong. The cases are listed in NO_GUITAR below:
+   a dead mic, a quiet room, a fan, one person talking, a class talking, bumps, typing, a partner's guitar, a class of
+   guitars, a loud class, and two with busy hands (taps on the desk on every beat; strums across muted strings). A case
+   passes only when no change is marked right. --bpm, --pairs, --song, --rate, --fps and --seeds apply.
 
    What is real: the site's scripts run unchanged in a vm (the way tools/grid-sim.mjs
    loads them), and the game is started with its own ccPrepare / ccBeginStage. From
@@ -240,6 +247,22 @@ export function tally(changes){
   return t;
 }
 
+/* The no-guitar cases: [name, student, room, what it is]. No chord sounds in any of them. */
+export const NO_GUITAR = [
+  ['dead mic',        'noGuitar',   'dead',    'the mic gives exact silence'],
+  ['quiet room',      'noGuitar',   'quiet',   'an empty quiet room'],
+  ['fan',             'noGuitar',   'fan',     'steady loud hiss and a hum, nothing that starts or stops'],
+  ['one voice',       'noGuitar',   'talk',    'one person talking next to the laptop'],
+  ['class talking',   'noGuitar',   'chatter', 'a class talking, no guitars out'],
+  ['bumps',           'noGuitar',   'bumps',   'a chair or a case knocked every two seconds or so'],
+  ['typing',          'noGuitar',   'typing',  'key and trackpad clicks on this laptop'],
+  ['partner guitar',  'noGuitar',   'pair',    'only the partner is playing'],
+  ['class guitars',   'noGuitar',   'class',   'the class is playing, this student is not'],
+  ['loud class',      'noGuitar',   'loud',    'a loud class playing, this student is not'],
+  ['desk taps',       'tapper',     'quiet',   'a tap on the desk on every beat'],
+  ['muted strums',    'mutedStrum', 'quiet',   'strums on every beat across strings the hand is muting: a scratch, no chord']
+];
+
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]){
   const args = process.argv.slice(2);
   const opt = (k, d) => { const a = args.find(x => x.startsWith('--' + k + '=')); return a ? a.slice(k.length + 3) : d; };
@@ -260,6 +283,31 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]){
   const progs = song ? site.progs.filter(p => p.song === song)
     : site.progs.filter(p => !p.random && !p.song && (pairArg === 'all' || pairArg.split(',').includes(p.chords.join('-'))));
   if (!progs.length){ console.error('no such pair or song'); process.exit(2); }
+  if (args.includes('--no-guitar')){
+    console.log(`Power Chord Switch with NO guitar · ${progs.map(p => p.chords.join('-')).join(' ')} · ${bpms.join('/')} BPM · every ${rateArg} · ${fpss.join('/')} fps · ${seeds} games per cell · strum rule ${site.run('CC_POWER_ONSET_RATIO')} / ${site.run('CC_POWER_HF_RATIO')}`);
+    console.log('No chord is played in any of these games: every "right" is the game marking something nobody played.\n');
+    console.log('case             | said RIGHT | said wrong chord | said no strum | changes | games with a right | right, by BPM (' + bpms.join(' / ') + ')');
+    let failed = 0, seedBase = 0, total = 0;
+    const out = [];
+    for (const [name, st, room, what] of NO_GUITAR){
+      const t = { ok: 0, off: 0, miss: 0 }, byBpm = bpms.map(() => [0, 0]);
+      let n = 0, gamesN = 0, gamesRight = 0;
+      for (const fps of fpss) bpms.forEach((bpm, bi) => { for (const p of progs) for (let s = 1; s <= seeds; s++){
+        const g = playGame(site, { student: st, room, mic: mics[0], fps, bpm, progIdx: p.i, rateIdx, lagMs, seed: ++seedBase });
+        if (g.changes.some(c => c.did !== 'silent')) throw new Error('closed-loop: a no-guitar case played a chord (' + name + ')');
+        g.changes.forEach(c => { t[c.verdict]++; n++; byBpm[bi][1]++; if (c.verdict === 'ok') byBpm[bi][0]++; });
+        gamesN++; if (g.changes.some(c => c.verdict === 'ok')) gamesRight++;
+        out.push({ case: name, student: st, room, fps, bpm, pair: p.chords.join('-'), seed: seedBase, scoreBpm: g.scoreBpm, onsets: g.onsets, changes: g.changes });
+      } });
+      total += n;
+      const pct = k => (String(t[k]).padStart(4) + ' ' + String(Math.round(100 * t[k] / n)).padStart(3) + '%');
+      if (t.ok) failed++;
+      console.log(`${name.padEnd(16)} | ${pct('ok')}  |    ${pct('off')}     |   ${pct('miss')}   | ${String(n).padStart(7)} | ${String(gamesRight).padStart(8)} of ${String(gamesN).padEnd(6)} | ${byBpm.map(x => Math.round(100 * x[0] / x[1]) + '%').join(' / ').padEnd(22)} ${t.ok ? 'FAIL' : 'pass'}  ${what}`);
+    }
+    console.log(`\n${failed} of ${NO_GUITAR.length} cases FAIL (something marked right with no chord played) · ${out.length} games, ${total} graded changes`);
+    if (opt('json', null)) writeFileSync(opt('json'), JSON.stringify(out));
+    process.exit(failed ? 1 : 0);
+  }
   const games = students.length * rooms.length * mics.length * fpss.length * bpms.length * progs.length * seeds;
   console.log(`Power Chord Switch, closed loop · ${progs.length} ${song ? 'switches of ' + song : 'pairs'} (${progs.map(p => p.chords.join('-')).join(' ')}) · ${bpms.join('/')} BPM · every ${rateArg} · ${fpss.join('/')} fps · ${seeds} games per cell · ${games} games`);
   console.log(`strum rule ${site.run('CC_POWER_ONSET_RATIO')} / ${site.run('CC_POWER_HF_RATIO')} · mic chain x${site.chain.gain}, ${site.chain.hp}-${site.chain.lp} Hz · synthetic sound; only the ring time is fitted to classroom takes (student.mjs)\n`);
