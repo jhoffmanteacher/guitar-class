@@ -55,6 +55,55 @@ Started 2026-11-11. State (this branch, `rebuild/site`, worktree `.claude/worktr
   Jonathan on 2026-11-11 stay byte for byte or the mic-sim tool is updated in the same change; never touch
   `tools/mic-sim/takes/`; ask before changing `coachDetectPitch` or the mic filters.
 
+### The shape of the rebuild (planning pass 2026-11-11; cut lines come from section banners, not yet checked body by body)
+
+**Chosen: keep the one global scope and classic scripts; cut `app.js`, `coach.js` and `teacher.js` into feature
+files along their banners with a re-runnable script; then a short list of real clean-ups.** Not ES modules: the
+frozen browser tools assign to top-level `let`s bare (`classActivities = …`, `pcState = st`, `db = …`) and patch
+functions on `window` expecting the site's own calls to see the patch; modules break both. No build step.
+
+Why the three files: app.js 17,900 lines, coach.js 10,700, teacher.js 7,200; 64 / 55 / 51 commits touched them in
+14 days, so sessions collide and every session pays to read them. Main moves about 27 commits a day, so the cut
+must be a SCRIPT that can be re-run on a newer main, with the hand-made clean-ups a short stack on top.
+
+- **Phase 0 (first, no site code moves):**
+  - 0a `tools/site-src.mjs`: `siteSource('app.js'|'coach.js'|'teacher.js')` = the parts concatenated in load
+    order; every tool that reads those files by name calls it (checks.mjs about 51 reads + its file lists,
+    grid-sim, mic-sim closed-loop / eval-takes / fake-pw-take, pm-sim). Proof: every tool's output identical
+    before and after on the unsplit tree, denominators included. Always-Reviewed.
+  - 0b `tools/split-site.mjs`: writes the parts from a cut list; asserts concat(parts) = the source byte for
+    byte and that no cut falls inside a function.
+  - 0c two new tests, run on the old site first: `tools/slow-load.mjs` (each script delayed at random, signed
+    in, `?teacher=true`, a deep link; no exception in 20 loads: the load race nothing tests today), and a
+    checks.mjs section that every function an inline handler or a frozen tool calls resolves once all parts
+    are loaded (1bs only compiles handlers).
+- **Phase 1 (three slices, parallel in three worktrees, disjoint files; pure moves):**
+  - 1A app.js → `app/` (boot, save, tab, snippets, shell, lesson, review, drills, drills-call, audio-ui,
+    explore, activities, cards, start). The one non-pure edit: `auth.onAuthStateChanged` and the other
+    statements that START things move to `app/start.js`, loaded last. Save path moved verbatim: Always-Reviewed.
+  - 1B coach.js keeps lines 1-2326 unmoved (detection, `coachDetectPitch`, the mic-sim lines); the games go to
+    coach-hub / -chords / -ear / -strum / -runner / -more. Proof includes the mic-sim trio, numbers identical.
+  - 1C teacher.js → teacher (core), -activities, -songs, -config (verbatim), -manage, -mic, -students.
+  - 1Z integration by one session: index.html script block, loader lists, sw.js file lists (danger zone),
+    SHELL_FILES, CLAUDE.md and skill file lists; full checks, golden, smoke.
+- **Phase 2 (hand-made, each one commit, snapshot-compared):** 2a declarations next to their feature and the
+  switched-off code in one labelled file; 2b one shared "step plan" for the two step renderers (each keeps its
+  own markup) and check 1v rewritten to execute; 2c break up `buildLesson`; 2d break up `showTeacherApp` and
+  `renderTeacherActivities`; 2e (optional, Jonathan's call) move dated history comments out of the code:
+  comments are 43% of app.js's bytes.
+- **Phase 3:** final sync with main, full golden with screenshots, smoke, slow-load, pm-e2e, console smoke,
+  the mic-sim trio; then the A/B.
+- **Do not refactor:** inline `onclick` handlers and HTML-by-strings (golden freezes the attribute text); the
+  top-level state `let`s; `coachDetectPitch`, the mic filters, `ccLoop`, anything in coach.js 1-2326; the bodies
+  of the save path and `teacherWriteConfig`; firestore.rules, document shapes, storage keys, module and activity
+  data, i18n.js; the files the standalone pages load (their script tags are in the snapshot) and those pages;
+  practice-minutes.js, live-quiz.js, fab-tools.js, tuner.js, guitar-diagrams.js, trainer-*.js; styles.css;
+  sw.js logic; the frozen tools.
+- **Risks with no test yet:** the load race (0c); the service worker upgrading returning students from one
+  cached `app.js` to about 11 files in one all-or-nothing step (needs an old-lists → new-lists upgrade
+  simulation before the switch); first-load time with more requests (measure on main and on the rebuild for
+  the A/B report).
+
 Open questions for when this starts:
 
 - Where the new copy lives (a folder, a branch or a second repo) and how it is
