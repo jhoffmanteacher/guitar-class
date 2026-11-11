@@ -66,6 +66,12 @@ Start here. Update this block whenever an item opens or closes; each line says w
   Replay accuracy: the base rule at each take's own ratios gave the saved verdict on 161 of 210 (heard or not: 196 of
   210); no clock offset from strums on 6 takes. Not tried: a loudness check (students strum once before a game), and
   measuring how real strums ring in the takes before any new ring rule.
+- **Real takes without Jonathan (2026-11-11; "have your own closed loop system to evaluate without me").** Summaries of
+  the takes go in the repo (his yes: no audio, no names): `node tools/mic-sim/takes-in.mjs` is the one command on his
+  Mac (unzip, anonymize, evaluate, summarize, self-check, commit); then `node tools/mic-sim/replay-takes.mjs` runs
+  anywhere and prints "ASK JONATHAN" when new takes are worth downloading. **Waiting on him: the first intake** (the
+  folder `tools/mic-sim/takes/` does not exist until then). He may delete takes on the site after an intake and keeps
+  one copy of the audio outside the repo.
 - **Next (in order):** (1) on Jonathan's Mac, where the takes are, fit the rooms and the touch to the 34 real takes;
   his thumb / finger take at 60 and 120 BPM ("His first step" below) tests the 120 BPM prediction directly. (2) Then
   pin a small scorecard in `checks.mjs` (a new kind of check around `coach.js` detection: Always Reviewed). (3) Then

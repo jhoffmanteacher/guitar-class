@@ -61,8 +61,24 @@ import { applyRule, RULES } from './candidates.mjs';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 /* The site in a vm, on a clock this file moves. One site can play many games. */
-export function makeSite(coachFile, rule, ratio){
-  const coachSrc = applyRule(readFileSync(coachFile || join(ROOT, 'coach.js'), 'utf8'), rule || 'base', ratio || null);
+/* The two places coach.js reads SAMPLES, rewritten to read a take summary instead (replay-takes.mjs: a summary holds the energy of every 512-sample
+   block and the pitch coachDetectPitch read at every block end, and no audio). Everything else in coachReadFrame and coachPitchReadings runs as written. */
+function readSummaries(src){
+  const rep = (a, b) => { const n = src.split(a).length - 1; if (n !== 1) throw new Error(`closed-loop: expected this once in coach.js, found it ${n} times: ${a.slice(0, 80)}`); src = src.replace(a, () => b); };
+  rep(`    let sum = 0, dsum = 0;
+    for (let i = end - N; i < end; i++){
+      const v = buf[i];
+      sum += v * v;
+      const d = v - buf[i - 1];
+      dsum += d * d;
+    }`, `    const __e = __mic.energy(L - end, N); let sum = __e[0], dsum = __e[1];`);
+  rep('    const f = coachDetectPitch(buf, sr, clarity, end);', '    const f = __mic.pitch(L - end, clarity);');
+  return src;
+}
+export const SUM_HOP = 512;
+export function makeSite(coachFile, rule, ratio, fromSummary){
+  let coachSrc = applyRule(readFileSync(coachFile || join(ROOT, 'coach.js'), 'utf8'), rule || 'base', ratio || null);
+  if (fromSummary) coachSrc = readSummaries(coachSrc);
   const num = (re, what) => { const m = coachSrc.match(re); if (!m) throw new Error('closed-loop: coach.js no longer has ' + what); return Number(m[1]); };
   /* The site's mic chain, from coachAcquireMic's own lines. */
   const chain = {
@@ -102,7 +118,7 @@ export function makeSite(coachFile, rule, ratio){
     close(){}
   };
   /* offsetMs: how far the site's clock runs ahead of the audio's (0 when the virtual student plays; a real take's `map` in replay-takes.mjs). */
-  const mic = { proc: new Float32Array(0), upTo: 0, sr: SR, offsetMs: 0 };
+  const mic = { proc: new Float32Array(0), upTo: 0, sr: SR, offsetMs: 0, sum: null };
   const ctx = {
     console: { log(){}, warn(){}, error(){}, info(){} },
     document: { documentElement: el(''), head: el(''), body: el(''), getElementById(id){ return els[id] || (els[id] = el(id)); },
@@ -131,7 +147,22 @@ export function makeSite(coachFile, rule, ratio){
       analyser: { getFloatTimeDomainData(b){
         const end = Math.round((clock.now - mic.offsetMs) / 1000 * mic.sr), st = end - b.length;
         for (let i = 0; i < b.length; i++){ const s = st + i; b[i] = s >= 0 && s < mic.upTo ? mic.proc[s] : 0; }
-      } }
+      } },
+      seek(sample){ clock.now = sample / mic.sr * 1000 + mic.offsetMs; },
+      /* From a take summary (mic.sum = { E, D, pitch: { gate: Float32Array } }): the energy of the window of n samples that ends `back` samples before
+         the newest one, and the pitch read at that point. Window ends are moved to the nearest block end (at most 5.3 ms at 48 kHz). */
+      energy(back, n){
+        const g = Math.round((Math.round((clock.now - mic.offsetMs) / 1000 * mic.sr) - back) / SUM_HOP), k = Math.round(n / SUM_HOP), S = mic.sum;
+        let e = 0, d = 0;
+        for (let j = g - k; j < g; j++) if (j >= 0 && j < S.E.length){ e += S.E[j]; d += S.D[j]; }
+        return [e, d];
+      },
+      pitch(back, clarity){
+        const P = mic.sum.pitch[JSON.stringify(clarity)];
+        if (!P) throw new Error('closed-loop: the take summaries hold no pitch for the gate ' + JSON.stringify(clarity) + ' (run the intake again)');
+        const g = Math.round((Math.round((clock.now - mic.offsetMs) / 1000 * mic.sr) - back) / SUM_HOP);
+        return g >= 0 && g < P.length ? P[g] : 0;
+      }
     }
   };
   ctx.window = ctx; ctx.globalThis = ctx; ctx.self = ctx;
@@ -169,7 +200,7 @@ export function makeSite(coachFile, rule, ratio){
     }
   };`);
   return {
-    chain, clock, beeps, mic, run,
+    chain, clock, beeps, mic, run, coachSrc,
     progs: JSON.parse(run('__cl.list()')), rates: JSON.parse(run('__cl.rates()')),
     tick(){
       const due = timers.filter(x => x.at <= clock.now).sort((a, b) => a.at - b.at);
@@ -178,7 +209,7 @@ export function makeSite(coachFile, rule, ratio){
       const q = rafs; rafs = [];
       q.forEach(x => x.fn(clock.now));
     },
-    reset(){ timers = []; rafs = []; beeps.length = 0; clock.now = 0; mic.sr = SR; mic.offsetMs = 0; }
+    reset(){ timers = []; rafs = []; beeps.length = 0; clock.now = 0; mic.sr = SR; mic.offsetMs = 0; mic.sum = null; }
   };
 }
 

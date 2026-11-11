@@ -68,6 +68,18 @@ tuning pass — ideally on the real classroom recordings the teacher console's
   loses, at the take's own strum ratios and at today's. Its "reproduced" line (the base rule against the take's saved
   verdicts) says how far to trust the rest: 462 of 480 on model takes (`closed-loop.mjs --takes-out=`). The
   evaluator's "strum" is any attack in the audio, so a tap counts as a real strum there. Never commit takes.
+- **`takes-in.mjs` — ONE command brings new classroom takes in** (2026-11-11): `node tools/mic-sim/takes-in.mjs` (the
+  newest `mic-recordings*.zip` in Downloads, or a folder or zip you name). It unzips, anonymizes, evaluates, writes one
+  SUMMARY per Power Chord Switch take to `tools/mic-sim/takes/` (loudness and attack energy 94 times a second, the
+  detector's pitch at each point, the game's numbers, the evaluator's truth; no audio, no names), checks the
+  summaries against the audio, deletes its temporary copies and commits the summaries (it does not push). With
+  summaries in the repo, `node tools/mic-sim/replay-takes.mjs` (no folder) replays any rule on the real takes from any
+  session. On model takes the summary replay gave the audio replay's verdict on 924 of 960 changes (heard or not:
+  950 of 960). A summary cannot test a change to `coachDetectPitch`, the mic chain or the window sizes: keep the
+  audio (outside the repo) for those.
+- **When to ask Jonathan for new takes:** `replay-takes.mjs` prints "ASK JONATHAN" with the reasons (no summaries; the
+  detector changed; the newest take is older than the last change to how coach.js listens; fewer than 15; older than
+  30 days). Pass that on to him in the report; do not ask otherwise.
 - **Fitted rooms** `room7`, `room4` in `student.mjs` (Jonathan, 2026-11-11, fitted to the 21 real takes).
 - `smoke.mjs <url>` — headless Chromium through the Dev bypass with the
   in-page harness: Coach, Note Runner, Note Hunt, Note Call, Change Up, PSG
