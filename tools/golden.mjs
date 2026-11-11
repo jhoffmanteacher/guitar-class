@@ -232,9 +232,19 @@ const FREEZE = `(() => {
   function FakeDate(...a) { if (!new.target) return new RealDate(now()).toString(); return a.length ? new RealDate(...a) : new RealDate(now()); }
   FakeDate.prototype = RealDate.prototype; FakeDate.now = now; FakeDate.parse = RealDate.parse; FakeDate.UTC = RealDate.UTC;
   window.Date = FakeDate;
-  let s = 0x9e3779b9;
-  window.__goldSeed = () => { s = 0x9e3779b9; };
-  Math.random = () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  /* Math.random gives each CALLER its own fixed sequence: the value depends on the names of the three functions
+     nearest the call and on how many times that same chain has asked since the last __goldSeed(), not on how
+     many other things drew a number first. One shared sequence made "Keep it sharp" pick different skills from
+     run to run (whichever timer fired first got the first number). Function names, not file names or line
+     numbers, so the same code cut into other files draws the same numbers. */
+  const counts = new Map();
+  window.__goldSeed = () => { counts.clear(); };
+  const mix = t => { let a = 0x9e3779b9 ^ t.length; for (let i = 0; i < t.length; i++) { a = Math.imul(a ^ t.charCodeAt(i), 2654435761); a ^= a >>> 15; } a = Math.imul(a ^ a >>> 16, 2246822507); a = Math.imul(a ^ a >>> 13, 3266489909); return ((a ^ a >>> 16) >>> 0) / 4294967296; };
+  Math.random = () => {
+    const names = (new Error().stack || '').split('\\n').slice(2, 5).map(l => { const m = /^\\s*at (?:async )?(?:new )?([^\\s(]+) \\(/.exec(l); return m ? m[1] : '-'; }).join('<');
+    const n = (counts.get(names) || 0) + 1; counts.set(names, n);
+    return mix(names + '#' + n);
+  };
 })();`;
 
 /* One tag per line, so a difference points at a line and a diff tool can read it. */
@@ -325,6 +335,8 @@ try {
   const boot = async (tag) => {
     await page.send('Page.navigate', { url: `${base}/index.html` });
     await until(`${tag}: the page's scripts loading`, `typeof devBypass === 'function' && document.readyState === 'complete'`);
+    // Without the fixed clock and the per-caller random numbers nothing recorded can be compared: stop rather than record.
+    if (!(await page.evalJs(`typeof window.__goldSeed === 'function' && Date.now() === Date.now() && new Date().toISOString()`).catch(() => false))) throw new Error(`${tag}: the fixed clock did not install in the page`);
     await run(`${tag}:devBypass`, 'devBypass()', 500);
     await until(`${tag}: the sets loading after sign-in`, `typeof SETS !== 'undefined' ? SETS.length : 0`);
     await sleep(1500);
@@ -342,6 +354,8 @@ try {
   /* A screenshot is kept once two taken 150 ms apart are the same picture: a view whose HTML has settled can
      still be half way through a fade or a scroll. After 3 s it is kept as it is and noted in errors.json. */
   const shot = async (rel) => {
+    // Running animations are put at a fixed point first: one that ends is jumped to its end, one that loops is held at its start.
+    try { await page.evalJs(`(document.getAnimations ? document.getAnimations() : []).forEach(a => { try { a.finish(); } catch (e) { try { a.currentTime = 0; a.pause(); } catch (e2) {} } }); 1`); } catch { /* the page is between two documents */ }
     let prev = (await page.send('Page.captureScreenshot', { format: 'png' })).data;
     for (let i = 0; i < 20; i++) { await sleep(150); const cur = (await page.send('Page.captureScreenshot', { format: 'png' })).data; if (cur === prev) { prev = cur; put(rel, Buffer.from(prev, 'base64')); count('shots'); return; } prev = cur; }
     events.push({ step: 'shot ' + rel, kind: 'never-settled', text: 'the picture was still changing after 3 s' });
