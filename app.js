@@ -9072,6 +9072,9 @@ function erCheckOff(key){
      drill: { type:'notecall', strings:['lowE','A'], minFret:0, maxFret:5 }
    One chunk of the neck per step (0–5, 5–8, 8–12, then 0–12). The board
    always shows frets 0–12; outside the chunk is greyed and takes no taps.
+   Optional `board:'all'` (ca-49 step 1, 2026-11-11): the board draws all six
+   strings and takes taps on the drill's strings only. Without it a
+   single-note drill draws just its own strings (ca-23).
 
    Two modes, picked with the "Show answer" switch (ON by default):
 
@@ -9215,6 +9218,8 @@ function renderNoteCall(drill, key, wid){
   const cfg = {
     strings: drill.power ? strings.filter(k => NC_FIFTH_STR[k]) : strings,
     power: !!drill.power,
+    /* drill.board 'all' (ca-49 step 1, Jonathan 2026-11-11): draw all six strings, taps on the drill's strings only. */
+    allStrings: drill.board === 'all',
     minFret: drill.minFret != null ? drill.minFret : 0,
     maxFret: drill.maxFret != null ? drill.maxFret : 5,
     wid
@@ -9423,8 +9428,9 @@ function ncPlayHtml(key){
   const st = noteCalls[key], c = st.cfg;
   const board = fgBoardSvg(key, null, {
     // Power chords draw all six strings (the whole chord shape sits on them); only the root strings take taps.
-    strings: (c.power ? ['highE', 'B', 'G', 'D', 'A', 'lowE'] : c.strings.slice().sort((a, b) => SD_OPEN_MIDI[b] - SD_OPEN_MIDI[a])),   // high string on top
-    hitStrings: c.power ? c.strings : null,
+    // So does a step with drill.board 'all' (ca-49 step 1): the whole fretboard, taps on the drill's strings.
+    strings: (c.power || c.allStrings ? ['highE', 'B', 'G', 'D', 'A', 'lowE'] : c.strings.slice().sort((a, b) => SD_OPEN_MIDI[b] - SD_OPEN_MIDI[a])),   // high string on top
+    hitStrings: c.power || c.allStrings ? c.strings : null,
     clickFn: 'ncTap',
     noteAt: (k, f) => sdNoteAt(k, f),
     shade: [c.minFret, c.maxFret]
@@ -10344,26 +10350,31 @@ function chcStopAll(){
    chord is named after its root, the root sits on the low E or A string, so the
    chord's name is the note's name plus a 5. (Work order 2026-11-05, widget C.)
    It is Note Call's board and names with chord names in place of note names,
-   and it runs both ways.
+   and it runs both ways. The board draws ALL SIX strings and the whole
+   three-finger shape (root, 5th and octave: pwnShape), because students know
+   the full fretboard and the full shape, not a two-string cut of it (Jonathan,
+   2026-11-11). Only the root carries a label; only the root strings take taps.
 
    Module-data schema:
      drill: { type:'pcname', mode:'name'|'fret'|'both', minFret:0, maxFret:7 }
-   The strings are always the low E and A (the two root strings). The board
+   The roots are always on the low E and A (the two root strings). The board
    always shows frets 0-12 (fgBoardSvg); outside the step's range it is greyed
-   and takes no taps.
+   and takes no taps. A shape reaches two frets past its root, so a step's
+   maxFret is 10 at most (1co pins it): every shape fits on the board.
 
-   name:  a root lights on the board (a "?" on a low E or A string). The student
-          picks its chord name from 12 buttons laid out in fret order (E5 F5 F♯5
-          ... D♯5), not alphabetical.
+   name:  a chord's shape lights on the board: the root is a "?" on the low E or
+          A string, the 5th and the octave are plain dots. The student picks its
+          chord name from 12 buttons laid out in fret order (E5 F5 F♯5 ... D♯5),
+          not alphabetical.
    fret:  a chord name shows. The student taps its root on the board; the right
           fret on EITHER string is a hit (B5 is low E fret 7 and A string fret 2),
-          and after the tap every right fret lights green, so the student sees
-          the other one.
+          and after the tap every right root lights green with its whole shape,
+          so the student sees the other one.
    both:  each card is one or the other, shuffled.
 
    Show answer (ON by default, remembered per browser): a play-along, nothing
    scored. The right button (name) or the right frets (fret) are lit from the
-   start; the student taps the lit answer and the next card comes up. OFF: 10
+   start (the roots with their shapes); the student taps the lit answer and the next card comes up. OFF: 10
    cards, the first answer counts, 8 of 10 finishes the step. A miss shows the
    answer and waits for Next; a hit moves on by itself.
 
@@ -10388,6 +10399,12 @@ function pwnSpots(pool){
   const by = {};
   pool.forEach(p => { (by[p.note] = by[p.note] || []).push(...p.frets.map(f => ({ k: p.str, f }))); });
   return by;
+}
+/* Pure: the rest of the three-finger shape for a root at (string k, fret f) —
+   the 5th and the octave, two frets up on the next two strings toward the
+   floor (NC_POWER_UP, as Note Call's power reveal). [{ k, f }], root not included. */
+function pwnShape(k, f){
+  return (NC_POWER_UP[k] || []).map(s => ({ k: s, f: f + 2 }));
 }
 /* Pure: the cards of one round. Each is { mode, str, note, frets } — name cards
    are one string's root (the board lights those frets), fret cards are a chord
@@ -10441,11 +10458,11 @@ function pwnSetupHtml(key){
 function pwnBoardHtml(st, card){
   const c = st.cfg;
   return fgBoardSvg(st.key, null, {
-    strings: ['A', 'lowE'],                          // the A string above the low E, as on every two-string board
+    strings: ['highE', 'B', 'G', 'D', 'A', 'lowE'],   // the whole fretboard, high string on top (Jonathan, 2026-11-11)
     hit: card.mode === 'fret',                       // a name card takes no taps on the board: the answer is a button
     hitStrings: PWN_STRINGS,
     clickFn: 'pwnTap',
-    noteAt: (k, f) => card.mode === 'fret' ? sdNoteAt(k, f) + '5' : '',
+    noteAt: (k, f) => card.mode === 'fret' && PWN_STRINGS.indexOf(k) >= 0 ? sdNoteAt(k, f) + '5' : '',
     shade: [c.minFret, c.maxFret]
   });
 }
@@ -10506,13 +10523,23 @@ function pwnMark(key, k, f, cls, text){
   m.classList.add(cls);
   if(text != null){ const tx = m.querySelector('text'); if(tx) tx.textContent = text; }
 }
+/* Light a whole chord green: the root with the chord's name, the 5th and the
+   octave as plain dots (a shape dot on the A string must not read as that
+   fret's own chord). */
+function pwnLightChord(key, k, f, name){
+  pwnMark(key, k, f, 'pwn-lit', name);
+  pwnShape(k, f).forEach(s => pwnMark(key, s.k, s.f, 'pwn-lit', ''));
+}
 function pwnShowCard(st){
   const key = st.key, card = st.cards[st.idx];
   st.locked = false;
-  if(card.mode === 'name') card.frets.forEach(f => pwnMark(key, card.str, f, 'pwn-ask', '?'));
+  if(card.mode === 'name') card.frets.forEach(f => {
+    pwnMark(key, card.str, f, 'pwn-ask', '?');
+    pwnShape(card.str, f).forEach(s => pwnMark(key, s.k, s.f, 'pwn-ask', ''));
+  });
   if(st.answer){
     if(card.mode === 'name'){ const b = pwnBox(key).querySelector(`[data-pwn-pick="${card.note}"]`); if(b) b.classList.add('pwn-lit'); }
-    else pwnSpotsOf(st, card).forEach(s => pwnMark(key, s.k, s.f, 'pwn-lit'));
+    else pwnSpotsOf(st, card).forEach(s => pwnLightChord(key, s.k, s.f, card.note));
   }
   pwnPaintDots(st);
 }
@@ -10573,10 +10600,10 @@ function pwnResolveCard(st, res, pick, tap){
   const spots = pwnSpotsOf(st, card);
   const where = spots.map(s => t('pwn.spot', { string: ncStrName(s.k), fret: s.f })).join(' / ');
   if(card.mode === 'name'){
-    card.frets.forEach(f => pwnMark(key, card.str, f, 'pwn-lit', card.note));
+    card.frets.forEach(f => pwnLightChord(key, card.str, f, card.note));
     const btn = pwnBox(key).querySelector(`[data-pwn-pick="${card.note}"]`); if(btn) btn.classList.add('pwn-good');
   } else {
-    spots.forEach(s => { ncMark(key, s.k, s.f, 'fg-good'); pwnMark(key, s.k, s.f, 'pwn-lit'); });
+    spots.forEach(s => { ncMark(key, s.k, s.f, 'fg-good'); pwnLightChord(key, s.k, s.f, card.note); });
   }
   if(res === 'hit') pwnFeedback(st, 'hit', st.answer ? t('pwn.fbHitAnswer', { chord: card.note }) : t('pwn.fbHit', { chord: card.note, where }));
   else pwnFeedback(st, 'miss', t(card.mode === 'name' ? 'pwn.fbMissName' : 'pwn.fbMissFret', { chord: card.note, pick: pick || '', where }));

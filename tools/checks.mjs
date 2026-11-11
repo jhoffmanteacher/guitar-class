@@ -10354,9 +10354,17 @@ function checkChordCall(ctx) {
    as wrong (the 1y and 1bi lesson). So the answers are NOT read from the drill:
    they are recomputed here from the open strings, and the real code is EXECUTED
    in the 0b context against them:
-   - the data: ca-49 has four steps — Note Call on frets 5-12 (low E and A), then
-     pcname Fret to name 0-7, Name to fret 0-7, Both ways 0-12; no other
-     activity uses pcname; ca-23's four Note Call steps are as they were;
+   - the data: ca-49 has four steps — Note Call on frets 5-12 (low E and A, on
+     the six-string board: board 'all'), then pcname Fret to name 0-7, Name to
+     fret 0-7, Both ways 0-10; no other activity uses pcname or board 'all';
+     ca-23's four Note Call steps are as they were;
+   - the shape (Jonathan, 2026-11-11: all six strings, the whole three-finger
+     shape): for every root of every range, pwnShape is the 5th (root + 7
+     semitones) and the octave (root + 12) on the next two strings, both on the
+     board (fret 12 at most — so no step's roots pass fret 10), recomputed here
+     from all six open strings; the board draws six strings and takes taps on
+     the low E and A only; a name card lights three dots and only the root
+     carries a label;
    - the twelve buttons are the chord names in FRET order from the open low E
      string, sharps with the ♯ sign as Note Call writes them, never flats;
    - every (string, chord) card of every range the drills use: its name and its
@@ -10386,12 +10394,12 @@ function checkPowerName(ctx) {
   const J = JSON.stringify;
   const run = x => vm.runInContext(x, ctx);
   const EXPECT = { keys: 32, steps: [
-    { type: 'notecall', strings: ['lowE', 'A'], minFret: 5, maxFret: 12 },
+    { type: 'notecall', strings: ['lowE', 'A'], minFret: 5, maxFret: 12, board: 'all' },
     { type: 'pcname', mode: 'name', minFret: 0, maxFret: 7 },
     { type: 'pcname', mode: 'fret', minFret: 0, maxFret: 7 },
-    { type: 'pcname', mode: 'both', minFret: 0, maxFret: 12 },
+    { type: 'pcname', mode: 'both', minFret: 0, maxFret: 10 },
   ] };
-  const stats = { steps: 0, cards: 0, answers: 0, deals: 0, rounds: 0, screens: 0, hits: 0 };
+  const stats = { steps: 0, cards: 0, answers: 0, deals: 0, rounds: 0, screens: 0, hits: 0, shapes: 0 };
   // The oracle: the twelve names from the open strings, written here and not read from app.js.
   const NAMES = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
   const OPEN = { lowE: 40, A: 45 };
@@ -10403,6 +10411,9 @@ function checkPowerName(ctx) {
   if (!c49) { flag('ca-49 is gone — 1co checks its four steps'); return; }
   const uses = [];
   for (const a of acts) (a.steps || []).forEach(st => { if (st && st.drill && st.drill.type === 'pcname') uses.push(a.id); });
+  const allBoards = [];
+  for (const a of acts) (a.steps || []).forEach(st => { if (st && st.drill && st.drill.board != null) allBoards.push(a.id + ':' + st.drill.type + ':' + st.drill.board); });
+  if (J(allBoards) !== J(['ca-49:notecall:all'])) flag('drill.board is set on ' + J(allBoards) + ' — pinned at ca-49 step 1 only (a Note Call on the six-string board); give a new one its pin on purpose');
   if (uses.some(id => id !== 'ca-49')) flag('pcname drills outside ca-49 (' + [...new Set(uses)].join(', ') + ') — 1co pins ca-49 only; give the new one its pin on purpose');
   if (c49.view !== 'focus' || (c49.steps || []).length !== EXPECT.steps.length || c49.steps.some(s => s.text)) flag('ca-49 must be a Focus-view activity of exactly ' + EXPECT.steps.length + ' steps with no text on any step');
   EXPECT.steps.forEach((e, i) => {
@@ -10452,11 +10463,63 @@ function checkPowerName(ctx) {
     }
   }
 
+  // The shape: the 5th and the octave of every root, from all six open strings, and all of it on the board.
+  const OPEN6 = { lowE: 40, A: 45, D: 50, G: 55, B: 59, highE: 64 };
+  const BOARD_MAX = 12;
+  for (const [lo, hi] of ranges) {
+    if (hi > BOARD_MAX - 2) flag(lo + '-' + hi + ': a root at fret ' + hi + ' puts its shape past fret ' + BOARD_MAX + ', off the board — a pcname step stops at fret ' + (BOARD_MAX - 2));
+    for (const k of ['lowE', 'A']) for (let f = lo; f <= hi; f++) {
+      const sh = JSON.parse(run('JSON.stringify(pwnShape(' + J(k) + ',' + f + '))'));
+      stats.shapes++;
+      const root = OPEN6[k] + f;
+      const got = sh.map(d => (OPEN6[d.k] == null ? 'x' : OPEN6[d.k] + d.f - root)).join(',');
+      if (got !== '7,12') flag(k + ' fret ' + f + ': the shape is ' + J(sh) + ' (' + got + ' semitones above the root), expected the 5th and the octave (7,12)');
+      if (sh.some(d => d.f > BOARD_MAX || d.f < 0)) flag(k + ' fret ' + f + ': the shape ' + J(sh) + ' leaves the board');
+      if (sh.some(d => d.k === 'lowE')) flag(k + ' fret ' + f + ': a shape dot on the low E string');
+    }
+  }
+  // The board: six strings drawn, taps on the low E and A only; a name card lights three dots, one label.
+  {
+    const b = JSON.parse(run(`(function(){
+      renderPowerName({ type: 'pcname', mode: 'fret', minFret: 0, maxFret: 7 }, 'chkb');
+      const st = powerNames.chkb;
+      const fretHtml = pwnBoardHtml(st, { mode: 'fret', str: 'lowE', note: 'G5', frets: [3] });
+      const nameHtml = pwnBoardHtml(st, { mode: 'name', str: 'lowE', note: 'G5', frets: [3] });
+      delete powerNames.chkb;
+      const hitStr = {}; (fretHtml.match(/pwnTap\\('chkb','[A-Za-z]+',\\d+\\)/g) || []).forEach(h => { hitStr[/,'([A-Za-z]+)',/.exec(h)[1]] = 1; });
+      const lab = (html, k, f) => { const m = new RegExp('id="fgm-chkb-' + k + '-' + f + '">.*?<text[^>]*>([^<]*)</text>').exec(html); return m ? m[1] : null; };
+      return JSON.stringify({ rows: ['highE', 'B', 'G', 'D', 'A', 'lowE'].filter(k => fretHtml.indexOf('id="fgm-chkb-' + k + '-0"') >= 0).length,
+        nameRows: ['highE', 'B', 'G', 'D', 'A', 'lowE'].filter(k => nameHtml.indexOf('id="fgm-chkb-' + k + '-0"') >= 0).length,
+        hitStr: Object.keys(hitStr).sort(), nameHits: (nameHtml.match(/pwnTap\\(/g) || []).length,
+        rootLab: lab(fretHtml, 'lowE', 3), fifthLab: lab(fretHtml, 'D', 5), nameLab: lab(nameHtml, 'lowE', 3) });
+    })()`));
+    if (b.rows !== 6 || b.nameRows !== 6) flag('the pcname board draws ' + b.rows + ' strings on a fret card and ' + b.nameRows + ' on a name card, expected all six (Jonathan, 2026-11-11)');
+    if (J(b.hitStr) !== J(['A', 'lowE'])) flag('the pcname board takes taps on ' + J(b.hitStr) + ', expected the low E and A strings only');
+    if (b.nameHits !== 0) flag('a name card\'s board takes taps (' + b.nameHits + ' hit zones): its answer is a button');
+    if (b.rootLab !== 'G5' || b.fifthLab !== '' || b.nameLab !== '') flag('board labels: a fret card\'s low E fret 3 reads ' + J(b.rootLab) + ' (expected "G5"), its D string fret 5 reads ' + J(b.fifthLab) + ' and a name card\'s root reads ' + J(b.nameLab) + ' (both expected empty: only a root string names a chord, and a name card names nothing)');
+  }
+  // Step 1's Note Call draws six strings and takes taps on its own two; ca-23's does not.
+  {
+    const n = JSON.parse(run(`(function(){
+      const one = d => { renderNoteCall(d, 'chkn'); const st = noteCalls.chkn; st.mode = 'answer'; st.L = st.L || { bpm: 60 }; st.lvIdx = 0; let html = '';
+        try { html = ncPlayHtml('chkn'); } catch (e) { html = 'ERR ' + e.message; }
+        delete noteCalls.chkn;
+        const hs = {}; (html.match(/ncTap\\('chkn','[A-Za-z]+',\\d+\\)/g) || []).forEach(h => { hs[/,'([A-Za-z]+)',/.exec(h)[1]] = 1; });
+        return { err: html.indexOf('ERR ') === 0 ? html : '', rows: ['highE', 'B', 'G', 'D', 'A', 'lowE'].filter(k => html.indexOf('id="fgm-chkn-' + k + '-0"') >= 0).length, hits: Object.keys(hs).sort() }; };
+      return JSON.stringify({ all: one({ type: 'notecall', strings: ['lowE', 'A'], minFret: 5, maxFret: 12, board: 'all' }), two: one({ type: 'notecall', strings: ['lowE', 'A'], minFret: 5, maxFret: 12 }) });
+    })()`));
+    if (n.all.err || n.two.err) flag('the Note Call play screen threw in 1co: ' + (n.all.err || n.two.err));
+    else {
+      if (n.all.rows !== 6 || J(n.all.hits) !== J(['A', 'lowE'])) flag('a Note Call with board \'all\' draws ' + n.all.rows + ' strings and takes taps on ' + J(n.all.hits) + ', expected six strings and taps on the low E and A');
+      if (n.two.rows !== 2 || J(n.two.hits) !== J(['A', 'lowE'])) flag('a Note Call without board \'all\' draws ' + n.two.rows + ' strings (expected its own two, as ca-23 always has)');
+    }
+  }
+
   // The deal.
   const dealOut = JSON.parse(run(`(function(){
     let seed = 20261105; const rnd = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
     const R = { rounds: 0, cards: 0, repeats: 0, badFret: 0, modes: { name: 0, fret: 0 }, both: { name: 0, fret: 0 }, noRound: 0 };
-    for (const [mode, lo, hi, len] of [['name', 0, 7, 10], ['fret', 0, 7, 10], ['both', 0, 12, 10], ['both', 0, 7, 10], ['name', 0, 1, 10], ['fret', 5, 6, 10], ['name', 0, 7, 40], ['both', 0, 12, 40]]) {
+    for (const [mode, lo, hi, len] of [['name', 0, 7, 10], ['fret', 0, 7, 10], ['both', 0, 10, 10], ['both', 0, 7, 10], ['name', 0, 1, 10], ['fret', 5, 6, 10], ['name', 0, 7, 40], ['both', 0, 10, 40]]) {
       for (let r = 0; r < 750; r++) {
         const cards = pwnDeal({ mode, minFret: lo, maxFret: hi }, len, rnd);
         R.rounds++; if (cards.length !== len) R.noRound++;
@@ -10499,7 +10562,7 @@ function checkPowerName(ctx) {
         const st = powerNames.chk; st.answer = answer; st.phase = 'play'; st.res = []; st.locked = false; st.timer = 0;
         return st;
       };
-      for (const answer of [false, true]) for (const [lo, hi] of [[0, 7], [0, 12]]) {
+      for (const answer of [false, true]) for (const [lo, hi] of [[0, 7], [0, 10]]) {
         const pool = pwnPool(lo, hi);
         for (const p of pool) {
           // name card: every one of the 12 names
@@ -10596,7 +10659,7 @@ function checkPowerName(ctx) {
         run('setLang(' + J(lang) + ')');
         run(`(function(){
           for (const mode of ['name', 'fret', 'both']) for (const answer of [true, false]) {
-            renderPowerName({ type: 'pcname', mode, minFret: 0, maxFret: 12 }, 'chk2');
+            renderPowerName({ type: 'pcname', mode, minFret: 0, maxFret: 10 }, 'chk2');
             const st = powerNames.chk2; st.answer = answer; pwnSetupHtml('chk2');
             pwnStart('chk2');
             // every card kind on the play screen, then each answer message
@@ -10638,7 +10701,7 @@ function checkPowerName(ctx) {
     if (!hadFlash) delete ctx.flashClass;
     try { run('Object.keys(powerNames).forEach(k => { delete powerNames[k]; })'); } catch { /* best effort */ }
   }
-  if (bad === 0) ok(stats.steps + ' steps (Note Call 5-12 + 3 pcname) and ca-23 untouched; ' + stats.cards + ' cards over ' + ranges.map(r => r.join('-')).join(' / ') + ' match the open strings and cover every fret of both strings once; ' + stats.answers + ' answers (every name on every name card, every fret on every fret card, Show answer on and off, ' + stats.hits + ' right) match the oracle; ' + stats.deals + ' cards in ' + stats.rounds + ' seeded rounds never repeat a chord and stay in range; 8 of 10 passes, 7 does not; the move on, Next and Stop behave; Show answer on by default; ' + stats.screens + ' screen sets rendered, EN + ES, ' + EXPECT.keys + ' pwn.* strings');
+  if (bad === 0) ok(stats.steps + ' steps (Note Call 5-12 on six strings + 3 pcname) and ca-23 untouched; ' + stats.shapes + ' shapes are the 5th and the octave, all on the board; ' + stats.cards + ' cards over ' + ranges.map(r => r.join('-')).join(' / ') + ' match the open strings and cover every fret of both strings once; ' + stats.answers + ' answers (every name on every name card, every fret on every fret card, Show answer on and off, ' + stats.hits + ' right) match the oracle; ' + stats.deals + ' cards in ' + stats.rounds + ' seeded rounds never repeat a chord and stay in range; 8 of 10 passes, 7 does not; the move on, Next and Stop behave; Show answer on by default; ' + stats.screens + ' screen sets rendered, EN + ES, ' + EXPECT.keys + ' pwn.* strings');
 }
 
 

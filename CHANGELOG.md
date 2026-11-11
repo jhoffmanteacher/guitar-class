@@ -6,6 +6,12 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-11 — Name the Power Chord shows the whole fretboard and the whole chord
+
+- **"Name the Power Chord" now draws all six strings** on every step, like the fretboard you already know. You still tap only the low E and A strings, where the roots are.
+- **You see the whole power chord, three dots.** The root has a "?" (or the chord's name once it is answered). The other two dots are the rest of the shape.
+- **The last step is frets 0 to 10** (it was 0 to 12), so every chord's shape fits on the board.
+
 ## 2026-11-11 — Live quiz: Name the power chord
 
 - **A new Live quiz round: "Name the power chord".** You see a chord chart of a power chord. Tap its name. Your first tap is your answer.

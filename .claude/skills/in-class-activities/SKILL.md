@@ -815,7 +815,10 @@ app.js. Students reach it from `caActivityCardHtml`/`caHeroCardHtml` through
   unscored play-along; turned off, it is five scored levels (`NC_LEVELS`),
   answered by the mic (off by default) or by tapping the fret. Engine and
   schema: the comment above `NC_LEVELS` in `app.js`; progress in `games.nc`;
-  `gamesStopMic()` stops it.
+  `gamesStopMic()` stops it. Optional `board: 'all'` draws all six strings and still takes
+  taps on the drill's own strings (ca-49 step 1 only, pinned by 1co; Jonathan, 2026-11-11).
+- **`pcname`** (ca-49, Name the Power Chord) draws all six strings and the whole three-finger
+  shape; roots are on the low E and A, and a step's `maxFret` is 10 at most so the shape fits.
 - **`deck`** design calls (Jonathan, 2026-07-26), kept as they are:
   - Self-report, not auto-grading: the app cannot hear whether the chord was
     played, and a 4-choice deck turns recall into recognition.

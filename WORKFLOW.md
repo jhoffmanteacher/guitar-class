@@ -325,6 +325,25 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-11 — Name the Power Chord (ca-49): all six strings and the whole three-finger shape. Fast.**
+      Jonathan, 2026-11-11, from a chat session (no work order): "roots on E and A but the full 3 finger power chord
+      shape with the other strings there so it's not confusing. students haven't seen the partial fretboard layout".
+      His three calls: the same four steps, changed in place (no step added, moved or removed); roots stop at fret 10 so
+      the shape fits the 12-fret board (step 4 was 0-12, now 0-10); step 1's Note Call draws six strings too.
+      Code: `pwnBoardHtml()` draws six strings (taps on low E + A only, `hitStrings`); `pwnShape(k, f)` is the 5th and
+      the octave (`NC_POWER_UP`); `pwnLightChord()` lights root + shape, and only the root carries a label (a shape dot
+      on the A string must not read as that fret's own chord). New Note Call option `drill.board: 'all'`
+      (`cfg.allStrings`), set on ca-49 step 1 only; ca-23 is untouched. Layout: the six-string board is 79px taller at
+      the same width, so `.pwnr` got a narrower board (540px) and a shorter card and name buttons; "Got it" ends at
+      y=641 of 657 under a name card, EN + ES (measured; it was 621 before, and 700 with the board unscaled).
+      Wording: `pwn.introName`, `pwn.introBoth`, `pwn.fbWrongFret` no longer say "the lit dot" / "a lit fret" (three
+      dots are lit now); still 32 `pwn.*` keys. Guards: 1co extended (38 shapes = 5th + octave from six open strings,
+      all on the board; six rows, taps on two strings; labels; `board:'all'` pinned to ca-49 step 1; a plain Note Call
+      still draws its own strings). Break-it, 7 red: shape one fret up; board back to two strings; shape dots
+      labelled; roots to fret 12; `board:'all'` ignored; a plain Note Call drawing six; taps on every string.
+      `tools/smoke.mjs` powerNameWalk asserts six rows and three lit dots on a name card. Not changed: the Live quiz
+      `pc-name` round, ca-43, scoring, the pass line.
+
 - [x] **2026-11-11 — Live quiz "Name the power chord" (work order "two power-chord rounds for the Live quiz", Part 2). Fast.**
       New question shape, `type:'pcname'` (`LIVE_QUIZZES['pc-name']`, strings low E + A): the question is a chord box
       (`lqPcShape()` → `chordDiagramSVG`), the student taps one of eight fixed name buttons E5 F5 F♯5 G5 A5 B5 C5 D5

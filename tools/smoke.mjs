@@ -414,6 +414,8 @@ async function chordCallWalk(page, run, events, stats, base) {
 /* Name the power chord (ca-49, 2026-11-05). checks.mjs 1co recomputes every
    answer and runs the state machine; this is the real page, in English and
    Spanish: step 1 is a Note Call on frets 5-12, steps 2-4 are the pcname drill.
+   Every step's board draws all six strings (Jonathan, 2026-11-11); a name
+   card lights the three dots of the chord's shape.
    Each opens with Show answer ON on a language's first step (the pinned default; the choice is then remembered per browser), the switch clicks both
    ways, Start deals a card, a REAL click on the right chord button (name) or
    the right fret's hit zone (fret, either string) scores a hit and a wrong one
@@ -435,7 +437,7 @@ async function powerNameWalk(page, run, events, stats, base) {
   const q = (i, sel) => `document.querySelector('#pwn-${K(i)} ${sel}')`;
   const state = i => `(() => { const b = document.getElementById('pwn-${K(i)}'); const s = powerNames['${K(i)}']; if (!b || !s) return null;
     return { phase: s.phase, answer: s.answer, mode: s.cfg.mode, pressed: [...b.querySelectorAll('[data-pwn-answer]')].map(x => x.getAttribute('aria-pressed')), hasStart: !!b.querySelector('[data-pwn-start]'),
-             picks: [...b.querySelectorAll('[data-pwn-pick]')].map(x => x.getAttribute('data-pwn-pick')), hits: b.querySelectorAll('.fg-hit').length, idx: s.idx, res: s.res || [],
+             picks: [...b.querySelectorAll('[data-pwn-pick]')].map(x => x.getAttribute('data-pwn-pick')), hits: b.querySelectorAll('.fg-hit').length, rows: ['highE', 'B', 'G', 'D', 'A', 'lowE'].filter(k => document.getElementById('fgm-${K(i)}-' + k + '-0')).length, asked: b.querySelectorAll('.fg-marker.pwn-ask').length, idx: s.idx, res: s.res || [],
              cardMode: s.cards ? s.cards[s.idx].mode : null, note: s.cards ? s.cards[s.idx].note : null, nextHidden: (document.getElementById('pwn-next-${K(i)}') || { hidden: null }).hidden }; })()`;
   let steps = 0;
   const NAMES12 = ['E5', 'F5', 'F♯5', 'G5', 'G♯5', 'A5', 'A♯5', 'B5', 'C5', 'C♯5', 'D5', 'D♯5'];
@@ -445,8 +447,8 @@ async function powerNameWalk(page, run, events, stats, base) {
     await run('pwn:focus:' + lang, "caFocusActivity('ca-49')", 700);
     // Step 1: Note Call, frets 5-12.
     await run('pwn:go1:' + lang, `caFocusGo('ca-49', 0)`, 600);
-    const nc = await run('pwn:nc:' + lang, `(() => { const s = noteCalls['ca-49-s0']; return s ? { min: s.cfg.minFret, max: s.cfg.maxFret, strings: s.cfg.strings.join(','), power: s.cfg.power, box: !!document.getElementById('ncr-ca-49-s0') } : null; })()`, 10);
-    if (!nc || nc.min !== 5 || nc.max !== 12 || nc.strings !== 'lowE,A' || nc.power || !nc.box) fail(lang + ' step 1', 'the Note Call step is ' + JSON.stringify(nc) + ', expected frets 5-12 on the low E and A strings');
+    const nc = await run('pwn:nc:' + lang, `(() => { const s = noteCalls['ca-49-s0']; return s ? { min: s.cfg.minFret, max: s.cfg.maxFret, strings: s.cfg.strings.join(','), power: s.cfg.power, all: s.cfg.allStrings, box: !!document.getElementById('ncr-ca-49-s0') } : null; })()`, 10);
+    if (!nc || nc.min !== 5 || nc.max !== 12 || nc.strings !== 'lowE,A' || nc.power || nc.all !== true || !nc.box) fail(lang + ' step 1', 'the Note Call step is ' + JSON.stringify(nc) + ', expected frets 5-12 on the low E and A strings, on the six-string board');
     steps++;
     for (let i = 1; i < list.length; i++) {
       const w = lang + ' step ' + (i + 1);
@@ -469,6 +471,8 @@ async function powerNameWalk(page, run, events, stats, base) {
       const sp = await run('pwn:play:' + w, state(i), 10);
       if (!sp || sp.phase !== 'play' || sp.cardMode == null) { fail(w, 'Start did not deal a card: ' + JSON.stringify(sp)); continue; }
       const mode = list[i].mode;
+      if (sp.rows !== 6) fail(w, 'the board draws ' + sp.rows + ' strings, expected all six');
+      if (sp.cardMode === 'name' && sp.asked !== 3) fail(w, 'a name card lights ' + sp.asked + ' dots, expected the root, the 5th and the octave');
       if (mode === 'name' && (JSON.stringify(sp.picks) !== JSON.stringify(NAMES12) || sp.hits !== 0)) fail(w, `name step shows buttons ${JSON.stringify(sp.picks)} and ${sp.hits} board taps; expected the 12 names in fret order and none on the board`);
       if (mode === 'fret' && (sp.picks.length !== 0 || sp.hits !== 2 * (list[i].maxFret - list[i].minFret + 1))) fail(w, `fret step shows ${sp.picks.length} name buttons and ${sp.hits} board taps; expected none and ${2 * (list[i].maxFret - list[i].minFret + 1)}`);
       // A right answer, by a real click.

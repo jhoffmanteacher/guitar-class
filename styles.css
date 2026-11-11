@@ -4309,14 +4309,18 @@ body.games-open{overflow:hidden}
 .chcr .fret-dot{flex:none}
 /* ── Name the power chord (step.drill 'pcname') — Note Call's board with chord
    names, tapped or picked. Same purple drill frame (.sdr); the 12 names sit in
-   two rows of six so the card, board, names and feedback fit 1366x657. ── */
-.pwn-play{padding-top:8px}
-.pwn-card{margin:0 auto 6px;height:72px;min-width:200px;width:fit-content}
-.pwn-card .nc-note{font-size:2.25rem}
+   two rows of six so the card, board, names and feedback fit 1366x657.
+   The board draws all six strings (Jonathan, 2026-11-11), 79px taller than the
+   two-string one at the same width, so the card, the board and the name
+   buttons are each a little smaller: "Got it — next step" stays on screen
+   under a name card at 1366x657 (measured, EN + ES). ── */
+.pwn-play{padding-top:4px}
+.pwn-card{margin:0 auto 4px;height:60px;min-width:200px;width:fit-content}
+.pwn-card .nc-note{font-size:2rem}
 .pwn-fb{min-height:1.4em;margin-bottom:2px}
-.pwnr .pwn-board{max-width:640px}
-.pwn-names{display:grid;grid-template-columns:repeat(6,minmax(56px,84px));gap:6px;justify-content:center;margin:2px auto 8px}
-.pwn-name{min-height:40px;padding:0 6px;border-radius:10px;background:var(--bg);color:var(--text);
+.pwnr .pwn-board{max-width:540px}
+.pwn-names{display:grid;grid-template-columns:repeat(6,minmax(56px,84px));gap:5px;justify-content:center;margin:2px auto 6px}
+.pwn-name{min-height:36px;padding:0 6px;border-radius:10px;background:var(--bg);color:var(--text);
   border:2px solid var(--border2);font:inherit;font-size:1.0625rem;font-weight:700;cursor:pointer}
 .pwn-name:hover{border-color:var(--purple-accent)}
 .pwn-name.pwn-lit{border-color:var(--green-text);background:var(--green-bg)}

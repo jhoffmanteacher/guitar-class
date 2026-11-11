@@ -7156,9 +7156,19 @@ window.CLASS_ACTIVITIES = [
      mic. Step 1 is Note Call on frets 5 to 12 (the frets ca-23's first two
      steps do not reach together; ca-23 itself is untouched, its steps are
      keyed). Steps 2-4 are the new `pcname` drill: fret to name, name to fret,
-     both ways on the whole neck. Focus view, label + drill on every step, no
+     both ways. Focus view, label + drill on every step, no
      text: the widget carries its own directions and its pass line (8 of 10
-     with Show answer off). Engine: renderPowerName in app.js. */
+     with Show answer off). Engine: renderPowerName in app.js.
+
+     ALL SIX STRINGS, THE WHOLE SHAPE (Jonathan, 2026-11-11: "roots on E and A
+     but the full 3 finger power chord shape with the other strings there so
+     it's not confusing. students haven't seen the partial fretboard layout").
+     Every step's board draws the six strings; taps still count on the low E
+     and A only. Step 1 asks for that with `board: 'all'` (a Note Call option;
+     ca-23 does not set it). Steps 2-4 light the root, the 5th and the octave.
+     The shape reaches two frets past its root and the board ends at fret 12,
+     so the last step stops its roots at fret 10 (it was 0 to 12; his call,
+     same day). Step count and order are unchanged: ticks are keyed by index. */
   {
     id:    'ca-49',
     view:  'focus',   // one step at a time — see VIEW above
@@ -7168,7 +7178,7 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Practice — Notes, frets 5 to 12',
         label_es: 'Practica — Notas, trastes 5 a 12',
-        drill: { type: 'notecall', strings: ['lowE', 'A'], minFret: 5, maxFret: 12 },
+        drill: { type: 'notecall', strings: ['lowE', 'A'], minFret: 5, maxFret: 12, board: 'all' },
       },
       {
         label:    'Practice — Fret to name, frets 0 to 7',
@@ -7181,9 +7191,9 @@ window.CLASS_ACTIVITIES = [
         drill: { type: 'pcname', mode: 'fret', minFret: 0, maxFret: 7 },
       },
       {
-        label:    'Practice — Both ways, frets 0 to 12',
-        label_es: 'Practica — En los dos sentidos, trastes 0 a 12',
-        drill: { type: 'pcname', mode: 'both', minFret: 0, maxFret: 12 },
+        label:    'Practice — Both ways, frets 0 to 10',
+        label_es: 'Practica — En los dos sentidos, trastes 0 a 10',
+        drill: { type: 'pcname', mode: 'both', minFret: 0, maxFret: 10 },
       },
     ],
   },
