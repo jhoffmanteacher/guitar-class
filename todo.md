@@ -41,6 +41,16 @@ Started 2026-11-11. State (this branch, `rebuild/site`, worktree `.claude/worktr
   1bb. Outside checks.mjs the text readers are sw-audio-proof, tuning-sim-proof, pm-sim (lifts 7 teacher.js
   functions), grid-sim and the mic-sim tools; `diagram-parity-check.mjs` slices app.js by line number and is
   already unusable: leave it out of the frozen set.
+- **Decided (Jonathan, 2026-11-11): split the tests.** FROZEN = the tests of behaviour: `tools/golden.mjs`,
+  `tools/smoke.mjs`, `tools/console-layout-smoke.mjs`, `tools/pm-e2e.mjs`, `tools/pm-rules-test.mjs`,
+  `tools/rule-zero-proof.mjs`, the simulators, and the 66 `checks.mjs` sections that do not read code text.
+  NOT frozen = the 44 sections that read code text: each may be updated in the same change as the code it
+  reads, and every such update is listed for Jonathan in that change's report. The 44 (by the audit; verify a
+  section before relying on its class):
+  - mainly text (14): 1ac, 1g, 1u, Post-push, 1ah, 1ai, 1as, 1bb, 1bo, 1bl, 1cp, 1cg, 3, 1f
+  - data checks with text pins (18): 1o, 1s, 1v, 1d, 1ak, 1ba, 1bf, 1bf2, 1bq, 1bn, 1bk, 1bj, 1x, 1ab, 1bi, 1e,
+    1ag, 1bt
+  - executing checks with text pins (12): 1cm, 1ce, 0, 1cc, 1cf, 1ch, 1cd, 1bg, 1ca, 1ck, 1cl, 1cs
 - **Power Chord Switch listening code:** may be refactored, but the lines, constants and names listed by
   Jonathan on 2026-11-11 stay byte for byte or the mic-sim tool is updated in the same change; never touch
   `tools/mic-sim/takes/`; ask before changing `coachDetectPitch` or the mic filters.
