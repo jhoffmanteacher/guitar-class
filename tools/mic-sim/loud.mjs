@@ -1,6 +1,6 @@
-import fs from 'fs'; import {extract} from './extract.mjs';
+import fs from 'fs'; import {extract} from './extract.mjs'; import { readScriptArg } from '../site-src.mjs';
 const SR=48000, HWLAT=50; let vnow=0;
-const src=fs.readFileSync(process.argv[2],'utf8');
+const src=readScriptArg(process.argv[2]);
 function makeSignal({bpm, notes, played, room, seed}){
   let s=seed; const r=()=> (s=(s*1664525+1013904223)>>>0)/4294967296;
   const beat=60000/bpm, ev=[];

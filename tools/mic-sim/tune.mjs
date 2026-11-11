@@ -24,7 +24,7 @@
    right notes %, wrong notes counted right %, wrong notes caught %. */
 import fs from 'fs';
 import { Worker, isMainThread, parentPort, workerData } from 'worker_threads';
-import { extract } from './extract.mjs';
+import { extract } from './extract.mjs'; import { readScriptArg } from '../site-src.mjs';
 
 const SR = 48000, LAT = 50, GAIN = 3;
 const STUD = 0.16;                       // the student's mean pluck amplitude (pre-gain)
@@ -218,7 +218,7 @@ if (isMainThread){
   }
 } else {
   const { file, cells, prompts, fps, room, seed } = workerData;
-  const src = fs.readFileSync(file, 'utf8');
+  const src = readScriptArg(file);
   const roomBuf = makeRoom(room, seed, prompts * 6000 + 20000);
   const res = {};
   for (const [cell, over] of Object.entries(cells)){

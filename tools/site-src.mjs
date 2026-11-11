@@ -15,6 +15,9 @@
                              (callers keep whatever handling they have). Any other name throws.
      siteText(name, root)    for a loop over LOGICAL script names that mixes the three with other files:
                              siteSource for the three, readFileSync(join(root, name), 'utf8') for anything else.
+     readScriptArg(path)     for a tool given a script's path on its command line: the whole script when the
+                             path is one of the three inside a site folder, else the file as it is.
+     hasScript(name, root)   whether that script is there, whole or in parts.
      SPLIT_NAMES             ['app.js', 'coach.js', 'teacher.js']
    `root` defaults to the repo root (the parent of tools/).
 
@@ -48,10 +51,14 @@
    part that does not exist, or leaves a stale whole file behind (app.js still on disk but not one of its own
    parts) THROWS: a tool must never silently read half a script.
 
+   The array name must not appear anywhere else in the app code, comments included: a line that starts with
+   `const COACH_JS_PARTS = [` inside a block comment would be taken for the declaration (review R1-4), and any
+   other mention with no declaration line throws.
+
    The marker and array names above are the contract slices 0b / 1Z write to. To change the format, change
    declaredParts() below (the single function that reads declarations) and this header together. */
 import { readFileSync, existsSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const DEFAULT_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -88,10 +95,16 @@ function declaredParts(name, root) {
     return parts;
   }
   const arr = ARRAY_NAME[name];
+  // A folder with no app code at all (pm-sim's PM_ROOT copy holds four files) declares nothing (review R1-2).
+  if (!existsSync(join(root, 'app.js')) && declaredParts('app.js', root) === null) return null;
   const app = siteSource('app.js', root);
   const found = [...app.matchAll(new RegExp(`^const ${arr}\\s*=\\s*\\[([^\\]\\n]*)\\];`, 'gm'))];
   if (!found.length) {
     if (new RegExp(`^\\s*(?:const|let|var)\\s+${arr}\\b`, 'm').test(app)) throw new Error(`site-src: the app code declares ${arr} but not as one line "const ${arr} = ['…', '…'];" at the start of a line`);
+    /* The name is in the app code but not as the one-line declaration (window.X = …, a property, a
+       commented-out line): that must not read as "nothing declared", which would hand back part 1 alone
+       (review R1-3). */
+    if (new RegExp(`\\b${arr}\\b`).test(app)) throw new Error(`site-src: the app code mentions ${arr} but has no line "const ${arr} = ['…', '…'];" at the start of a line: write it that way, or remove the name`);
     return null;
   }
   if (found.length > 1) throw new Error(`site-src: the app code declares ${arr} ${found.length} times`);
@@ -107,6 +120,9 @@ export function siteParts(name, root = DEFAULT_ROOT) {
   const parts = declaredParts(name, root);
   if (parts === null) return [name];
   if (!parts.length) throw new Error(`site-src: the part list declared for ${name} is empty`);
+  // './coach.js', 'sub//x.js' and 'Coach.js' are the same file as their plain spelling on a Mac: one spelling only (review R1-5).
+  for (const p of parts) if (p !== p.replace(/^\.\//, '').replace(/\/+/g, '/') || /(^|\/)\.(\/|$)/.test(p)) throw new Error(`site-src: ${name} part ${JSON.stringify(p)} must be written plainly (no "./", no "//")`);
+  if (new Set(parts.map(p => p.toLowerCase())).size !== parts.length) throw new Error(`site-src: the part list declared for ${name} names a file twice (letter case aside): ${parts.join(', ')}`);
   if (new Set(parts).size !== parts.length) throw new Error(`site-src: the part list declared for ${name} names a file twice: ${parts.join(', ')}`);
   for (const p of parts) {
     if (/^(?:[a-z]+:|\/)|\\|(?:^|\/)\.\.(?:\/|$)/i.test(p)) throw new Error(`site-src: ${name} part ${JSON.stringify(p)} is not a plain repo-relative path`);
@@ -125,4 +141,19 @@ export function siteSource(name, root = DEFAULT_ROOT) {
 
 export function siteText(name, root = DEFAULT_ROOT) {
   return SPLIT_NAMES.includes(name) ? siteSource(name, root) : readFileSync(join(root, name), 'utf8');
+}
+
+/* For a tool that is GIVEN a script's path (node tools/mic-sim/power-wait.mjs coach.js): when the path is
+   app.js, coach.js or teacher.js inside a site folder (one with an index.html), the whole script is returned,
+   parts and all; any other path (an old copy saved with `git show`, a scratch file) is read as it is. After the
+   cut a file still called coach.js holds only the first part, and a tool that read it directly reported success
+   on a quarter of the code (review R1-1). */
+export function readScriptArg(path) {
+  const full = resolve(path), dir = dirname(full), name = basename(full);
+  if (SPLIT_NAMES.includes(name) && existsSync(join(dir, 'index.html'))) return siteSource(name, dir);
+  return readFileSync(full, 'utf8');
+}
+// Whether a site folder has that script at all, whole or in parts.
+export function hasScript(name, root = DEFAULT_ROOT) {
+  try { return siteParts(name, root).every(p => existsSync(join(root, p))); } catch { return false; }
 }

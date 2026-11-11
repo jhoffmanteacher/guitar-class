@@ -114,12 +114,24 @@ def songs():
     return out
 
 
+def app_source():
+    """The text of app.js: the file, or (after the rebuild's cut) its parts in the order index.html loads
+    them, between the site-parts:app.js markers. tools/site-src.mjs is the same rule for the Node tools."""
+    try:
+        return (ROOT / 'app.js').read_text(encoding='utf8')
+    except OSError:
+        pass
+    try:
+        html = (ROOT / 'index.html').read_text(encoding='utf8')
+        block = html.split('<!-- site-parts:app.js -->', 1)[1].split('<!-- /site-parts:app.js -->', 1)[0]
+        return ''.join((ROOT / p).read_text(encoding='utf8') for p in re.findall(r'<script defer src="([^"?#]+)"></script>', block))
+    except (OSError, IndexError):
+        return ''
+
+
 def level_file(files):
     """The record-tempo full mix (else rhythm-down), ties to app.js order."""
-    try:
-        app = (ROOT / 'app.js').read_text(encoding='utf8')
-    except OSError:
-        app = ''
+    app = app_source()
     for mix in ('full', 'rhythm-down'):
         cands = [p for p in files if parse_name(p)['mix'] == mix]
         if cands:

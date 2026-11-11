@@ -16,7 +16,7 @@
    strum detected on the beat. Synthetic audio only — NOT a guitar through a
    Chromebook mic; check against the console's Mic recordings before tuning. */
 import fs from 'fs';
-import { extract } from './extract.mjs';
+import { extract } from './extract.mjs'; import { readScriptArg } from '../site-src.mjs';
 
 const SR = 48000, LAT = 50, GAIN = 3;
 const args = process.argv.slice(2);
@@ -27,7 +27,7 @@ const HARMS = { std: [1, 0.5, 0.25], mid: [0.6, 1, 0.5], weak: [0.3, 1, 0.5] };
 const HARM = HARMS[opt('harm') || 'std'];
 if (!file || !HARM){ console.error('usage: node power-switch.mjs <coach.js> [trials] [--harm=std|mid|weak] [--clarity=json]'); process.exit(2); }
 
-const src = fs.readFileSync(file, 'utf8');
+const src = readScriptArg(file);
 const constLine = n => { const m = src.match(new RegExp('^const ' + n + '\\s*=\\s*([^;]+);', 'm')); return m ? `const ${n} = ${m[1]};` : ''; };
 const consts = ['COACH_LVL_WIN', 'COACH_LVL_HOP', 'COACH_CATCHUP_MAX_MS', 'COACH_ATTACK_SKIP', 'COACH_ONSET_REFRACT', 'COACH_EVENT_TAIL',
   'CHK_ONSET_FLOOR', 'CHK_ONSET_RATIO', 'CHK_HF_FLOOR', 'CHK_HF_RATIO', 'COACH_STANDOUT', 'COACH_PITCH_GATE',

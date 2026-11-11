@@ -108,6 +108,17 @@ must be a SCRIPT that can be re-run on a newer main, with the hand-made clean-up
   data, i18n.js; the files the standalone pages load (their script tags are in the snapshot) and those pages;
   practice-minutes.js, live-quiz.js, fab-tools.js, tuner.js, guitar-diagrams.js, trainer-*.js; styles.css;
   sw.js logic; the frozen tools.
+- **Left for the cut slices (from the review of 0a, 2026-11-11):**
+  - `tools/mic-sim/replay-takes.mjs` line 239 runs `git log … -- coach.js` from `tools/mic-sim`, so the pathspec
+    matches nothing TODAY and "the newest take is before the last listening change" can never print (from the
+    repo root it answers 2026-11-07). It is the listening work's tool: tell Jonathan, do not change its output
+    here. After the cut it must name every coach part (`ccLoop` and `ccResolvePend` leave `coach.js`).
+  - checks.mjs 1cg pins the literal `<script defer src="app.js">`; checks messages that print a line number
+    of the combined text (`teacher.js:123`) will be numbers in the concatenation, not in a part: fix both at 1Z.
+  - The vm loaders in checks.mjs, grid-sim and closed-loop run the CONCATENATION as one script, so they cannot
+    see a load-order fault between parts (one script hoists every function): that is what 0c is for.
+  - `index.html`'s part block, the two `*_JS_PARTS` arrays and the sw.js lists must land in ONE change: once
+    parts are declared, checks demand each app and coach part in sw.js ASSETS.
 - **Risks with no test yet:** the load race (0c); the service worker upgrading returning students from one
   cached `app.js` to about 11 files in one all-or-nothing step (needs an old-lists → new-lists upgrade
   simulation before the switch); first-load time with more requests (measure on main and on the rebuild for

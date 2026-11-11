@@ -23,7 +23,7 @@
    rest settled on ("judged +N" = a wrong-note hint N semitones from the
    root, "none" = nothing happened). Synthetic audio only — not a guitar. */
 import fs from 'fs';
-import { extract } from './extract.mjs';
+import { extract } from './extract.mjs'; import { readScriptArg, hasScript } from '../site-src.mjs';
 
 const SR = 48000, LAT = 50, GAIN = 3;
 const args = process.argv.slice(2);
@@ -36,7 +36,7 @@ const ONLY = opt('only');
 const FORCE_CLAR = opt('clarity');
 if (!file || !HARM){ console.error('usage: node power-wait.mjs <coach.js> [trials] [--harm=std|mid|weak] [--only=text] [--clarity=json]'); process.exit(2); }
 
-const src = fs.readFileSync(file, 'utf8');
+const src = readScriptArg(file);
 const constLine = n => { const m = src.match(new RegExp('^const ' + n + '\\s*=\\s*([^;]+);', 'm')); return m ? `const ${n} = ${m[1]};` : ''; };
 const consts = ['COACH_LVL_WIN', 'COACH_LVL_HOP', 'COACH_CATCHUP_MAX_MS', 'COACH_ATTACK_SKIP', 'COACH_ONSET_REFRACT',
   'CHK_ONSET_FLOOR', 'CHK_ONSET_RATIO', 'CHK_HF_FLOOR', 'CHK_HF_RATIO', 'COACH_STANDOUT', 'COACH_PITCH_GATE',
@@ -48,8 +48,10 @@ const hasPower = src.includes('function rnwIsPower(');
 const usesHelper = /coachPowerTargets\(/.test(src) && !src.includes('function coachPowerTargets(');
 let helperSrc = '';
 if (usesHelper) {
-  const appFile = opt('app') || (fs.existsSync(args[0].replace(/[^/\\]*$/, 'app.js')) ? args[0].replace(/[^/\\]*$/, 'app.js') : null);
-  try { helperSrc = extract(fs.readFileSync(appFile, 'utf8'), 'coachPowerTargets'); } catch { helperSrc = 'function coachPowerTargets(r){ return [r, r + 7, r + 12]; }'; }
+  // The app code beside the given coach file, whole or cut into parts (hasScript), or none.
+  const appDir = args[0].replace(/[^/\\]*$/, '') || './';
+  const appFile = opt('app') || ((fs.existsSync(appDir + 'app.js') || (fs.existsSync(appDir + 'index.html') && hasScript('app.js', appDir))) ? appDir + 'app.js' : null);
+  try { helperSrc = extract(readScriptArg(appFile), 'coachPowerTargets'); } catch { helperSrc = 'function coachPowerTargets(r){ return [r, r + 7, r + 12]; }'; }
 }
 const fns = ['coachReadFrame', 'coachDetectPitch', 'coachPitchReadings', 'coachSettlePitch', 'coachSmooth', 'coachOnsetTick', 'coachIdleTick']
   .concat(hasTargets ? ['rnwTargets'] : []).concat(hasPower ? ['rnwIsPower'] : [])

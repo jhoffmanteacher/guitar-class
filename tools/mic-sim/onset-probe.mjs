@@ -9,9 +9,9 @@
    ("Decision (2026-11-05)"). tools/mic-sim/power-switch.mjs is the other simulator: its strums carry a loud pick scrape,
    so it shows nothing about soft ones. */
 import fs from 'fs';
-import { extract } from './extract.mjs';
+import { extract } from './extract.mjs'; import { readScriptArg } from '../site-src.mjs';
 const file = process.argv[2];
-const src = fs.readFileSync(file, 'utf8');
+const src = readScriptArg(file);
 const constLine = n => { const m = src.match(new RegExp('^const ' + n + '\\s*=\\s*([^;]+);', 'm')); return m ? `const ${n} = ${m[1]};` : ''; };
 const consts = ['COACH_LVL_WIN', 'COACH_LVL_HOP', 'COACH_CATCHUP_MAX_MS', 'COACH_ONSET_REFRACT', 'CHK_ONSET_FLOOR', 'CHK_ONSET_RATIO', 'CHK_HF_FLOOR', 'CHK_HF_RATIO', 'CC_POWER_ONSET_RATIO', 'CC_POWER_HF_RATIO'].map(constLine).join('\n');
 const body = `let micRec=null,coachHfRms=0,coachBgRms=0,coachBgPrev=0,coachOnsetAt=0,coachReadCtx=null,coachReadCtxT=0,coachSmoothA=0.18;

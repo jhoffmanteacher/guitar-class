@@ -15031,7 +15031,8 @@ function checkPracticeMinutes(i18nTable) {
     {
       const shipped = [...new Set([...readdirSync(ROOT).filter(f => /\.(js|html)$/.test(f)), ...(existsSync(join(ROOT, 'tabs')) ? readdirSync(join(ROOT, 'tabs')).filter(f => /\.(js|html)$/.test(f)).map(f => `tabs/${f}`) : []), ...siteParts('app.js', ROOT), ...siteParts('coach.js', ROOT), ...siteParts('teacher.js', ROOT)])];
       for (const f of shipped) {
-        const code = (read(f) || '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/<!--[\s\S]*?-->/g, '').replace(/^\s*\/\/.*$/gm, '');
+        // A walk over shipped FILES: each is read as it is (after the cut, coach.js is one part, not the whole script).
+        const code = ((() => { try { return readFileSync(join(ROOT, f), 'utf8'); } catch { return null; } })() || '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/<!--[\s\S]*?-->/g, '').replace(/^\s*\/\/.*$/gm, '');
         if (/['"`\/]heartbeats\b/.test(code)) fail(`${f} names a heartbeats collection: it was deleted from the rules 2026-11-05, so a read or write there is refused with no error shown`);
       }
     }

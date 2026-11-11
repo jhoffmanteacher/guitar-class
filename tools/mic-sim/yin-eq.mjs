@@ -1,7 +1,7 @@
-import fs from 'fs'; import {extract} from './extract.mjs';
+import fs from 'fs'; import {extract} from './extract.mjs'; import { readScriptArg } from '../site-src.mjs';
 const [oldP,newP]=process.argv.slice(2);
-const oldF = new Function(extract(fs.readFileSync(oldP,'utf8'),'coachDetectPitch')+';return coachDetectPitch;')();
-const newF = new Function('let coachYinD=null;'+extract(fs.readFileSync(newP,'utf8'),'coachDetectPitch')+';return coachDetectPitch;')();
+const oldF = new Function(extract(readScriptArg(oldP),'coachDetectPitch')+';return coachDetectPitch;')();
+const newF = new Function('let coachYinD=null;'+extract(readScriptArg(newP),'coachDetectPitch')+';return coachDetectPitch;')();
 let n=0,diff=0, tOld=0,tNew=0;
 function rnd(seed){ return ()=> (seed = (seed*1664525+1013904223)>>>0)/4294967296; }
 const r=rnd(7);

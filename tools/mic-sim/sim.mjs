@@ -1,4 +1,4 @@
-import fs from 'fs'; import {extract} from './extract.mjs';
+import fs from 'fs'; import {extract} from './extract.mjs'; import { readScriptArg } from '../site-src.mjs';
 const [oldP,newP]=process.argv.slice(2);
 const SR=48000, HWLAT=70;  // ms the mic path delays the sound
 let vnow=0;
@@ -23,7 +23,7 @@ function makeSignal({bpm, notes, room, quiet, seed}){
   return {x, ev: ev.filter(e=>e.mine), beat};
 }
 function load(path, isNew){
-  const src=fs.readFileSync(path,'utf8');
+  const src=readScriptArg(path);
   const names=['coachReadFrame','coachDetectPitch'].concat(isNew?['coachPitchReadings','coachMicLatencyMs']:[]);
   const pre = isNew ? 'const COACH_LVL_WIN = 1024, COACH_LVL_HOP = 512; const COACH_CATCHUP_MAX_MS = 150; let micRec=null, coachHfRms=0, coachOnsetAt=0, coachReadCtx=null, coachReadCtxT=0, coachYinD=null;' : 'let coachHfRms=0;';
   const body = pre + names.map(n=>extract(src,n)).join('\n') +

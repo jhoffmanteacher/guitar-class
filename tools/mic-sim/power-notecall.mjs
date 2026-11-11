@@ -46,7 +46,7 @@
    by the root, the octave or the octave below, never by the 5th. A row that
    prints STOP now is a change to look at. */
 import fs from 'fs';
-import { extract } from './extract.mjs';
+import { extract } from './extract.mjs'; import { readScriptArg } from '../site-src.mjs';
 
 const SR = 48000, LAT = 50, GAIN = 3;
 const args = process.argv.slice(2);
@@ -61,7 +61,7 @@ const PER_ROOT = args.includes('--per-root');
 const OFFSETS = opt('offsets') ? opt('offsets').split(',').map(Number) : null;
 if (!coachFile || !appFile || !HARM){ console.error('usage: node power-notecall.mjs <coach.js> <app.js> [trials] [--harm=std|mid|weak] [--only=text] [--per-root]'); process.exit(2); }
 
-const csrc = fs.readFileSync(coachFile, 'utf8'), asrc = fs.readFileSync(appFile, 'utf8');
+const csrc = readScriptArg(coachFile), asrc = readScriptArg(appFile);
 const constLine = n => { const m = csrc.match(new RegExp('^const ' + n + '\\s*=\\s*([^;]+);', 'm')); return m ? `const ${n} = ${m[1]};` : ''; };
 const consts = ['COACH_LVL_WIN', 'COACH_LVL_HOP', 'COACH_CATCHUP_MAX_MS', 'COACH_ATTACK_SKIP', 'COACH_ONSET_REFRACT',
   'CHK_ONSET_FLOOR', 'CHK_ONSET_RATIO', 'CHK_HF_FLOOR', 'CHK_HF_RATIO', 'COACH_STANDOUT', 'COACH_PITCH_GATE',
