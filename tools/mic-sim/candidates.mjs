@@ -1,4 +1,6 @@
-/* Candidate grading rules for Power Chord Switch (2026-11-11), NOT in coach.js. Each is the site's coach.js with a few lines rewritten in memory,
+/* REJECTED on the real takes, 2026-11-11 (WORKFLOW.md, Where things stand: ring lost 55 of 150 real strums; half removed no false hears). Kept so
+   the result can be re-run and the next idea has a place to go; do not ship these two as they are.
+   Candidate grading rules for Power Chord Switch (2026-11-11), NOT in coach.js. Each is the site's coach.js with a few lines rewritten in memory,
    so a candidate can be played by the virtual student (closed-loop.mjs --rule=) and replayed on real takes (replay-takes.mjs) before anything
    ships. Change Up is not touched by any of them (every new line asks ccIsPower()).
 

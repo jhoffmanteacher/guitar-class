@@ -57,6 +57,15 @@ Start here. Update this block whenever an item opens or closes; each line says w
   said right fall 84% to 63% (room7) and 46% to 18% (room4); `ring` alone 69% / 31%, `half` alone 72% / 28%. Thumb
   barely moves (88% to 87%, 56% to 48%). Not run on the real takes: they are not reachable from the cloud session
   (`node tools/mic-sim/replay-takes.mjs "Claude outputs/takes-anon"` where they are). coach.js is unchanged.
+- **DECIDED 2026-11-11 (Jonathan): ship none of them; today's rule stays. Do not rebuild `ring` or `half`.** Replay on
+  the 21 real takes (Mac, branch commit `841d316`; 210 judged changes, 54 with no strum in the window, 150 real strums
+  the site heard), at 1.8 / 2.19: no-strum changes heard / real strums lost / marked right (86 saved): today 35 / 5 /
+  83; `ring` 13 / 55 / 58; `half` 35 / 5 / 62; `half3` 35 / 5 / 67; `both` 13 / 55 / 48; `both3` 13 / 55 / 49. `half`
+  removes no false hears and costs rights, as "no readable pitch, no tick" did on 2026-11-07. `ring` loses a third of
+  real strums, far more than the model said (a real strum through a Chromebook mic does not ring like the model's).
+  Replay accuracy: the base rule at each take's own ratios gave the saved verdict on 161 of 210 (heard or not: 196 of
+  210); no clock offset from strums on 6 takes. Not tried: a loudness check (students strum once before a game), and
+  measuring how real strums ring in the takes before any new ring rule.
 - **Next (in order):** (1) on Jonathan's Mac, where the takes are, fit the rooms and the touch to the 34 real takes;
   his thumb / finger take at 60 and 120 BPM ("His first step" below) tests the 120 BPM prediction directly. (2) Then
   pin a small scorecard in `checks.mjs` (a new kind of check around `coach.js` detection: Always Reviewed). (3) Then
