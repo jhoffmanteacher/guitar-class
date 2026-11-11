@@ -49,6 +49,14 @@ Start here. Update this block whenever an item opens or closes; each line says w
   pitch readings (right on timing alone). Nothing in `coach.js` changed: a fix is detection (Always Reviewed) and his
   call, and "no readable pitch, no tick" was rejected on the real takes on 2026-11-07 (2 of 12 false hits removed, 10
   of 46 real rights lost), where most false hits did have readings; the model's rooms are guesses and disagree.
+- **Candidate rules, NOT shipped (2026-11-11; Jonathan chose "ship the 7, keep the 5 open", then asked for real takes
+  and fitted rooms first).** `tools/mic-sim/candidates.mjs`: `ring` (a strum must still sound 100-240 ms on) and `half`
+  (half the pitch readings are notes of the new chord), alone and together. Guessed rooms: `both` passes 7 of the 12
+  no-guitar cases and costs a steady player 1-3 points. **Fitted rooms (room7 / room4, 40 and 60 BPM, 180 changes a
+  cell) say no:** no guitar marked right 36% / 34% today, 7% / 8% with `both`; but a steady pick player's right chords
+  said right fall 84% to 63% (room7) and 46% to 18% (room4); `ring` alone 69% / 31%, `half` alone 72% / 28%. Thumb
+  barely moves (88% to 87%, 56% to 48%). Not run on the real takes: they are not reachable from the cloud session
+  (`node tools/mic-sim/replay-takes.mjs "Claude outputs/takes-anon"` where they are). coach.js is unchanged.
 - **Next (in order):** (1) on Jonathan's Mac, where the takes are, fit the rooms and the touch to the 34 real takes;
   his thumb / finger take at 60 and 120 BPM ("His first step" below) tests the 120 BPM prediction directly. (2) Then
   pin a small scorecard in `checks.mjs` (a new kind of check around `coach.js` detection: Always Reviewed). (3) Then

@@ -14,7 +14,10 @@
        --lag=70                       ms from the site's click to the student's strum reaching the mic, beyond their own timing
        --seeds=2                      games per cell
        --coach=<file>                 another coach.js (git show <ref>:coach.js > file) for a before / after
+       --rule=base|ring|half|half3|both|both3   a candidate grading rule from candidates.mjs, applied in memory
        --json=<file>                  every game, every change
+       --takes-out=<folder>           also save every game as a take (V001.wav + V001.json, the console's download format, with the answer
+                                      key in the JSON) for eval-takes.mjs and replay-takes.mjs; these hold no student audio
        --no-guitar                    the no-guitar cases (below) instead of the table; exits 1 when any case fails
 
    The no-guitar cases (Jonathan, 2026-11-11: "it's marking things right where there's nothing playing"). In each one NO
@@ -49,16 +52,17 @@
 
    Synthetic sound. One number (how long a string rings) is fitted to the classroom takes; the rest is not (student.mjs header). */
 import vm from 'node:vm';
-import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Student, STUDENTS, ROOMS, MICS, SR, biquad, rng } from './student.mjs';
+import { applyRule, RULES } from './candidates.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 /* The site in a vm, on a clock this file moves. One site can play many games. */
-export function makeSite(coachFile){
-  const coachSrc = readFileSync(coachFile || join(ROOT, 'coach.js'), 'utf8');
+export function makeSite(coachFile, rule, ratio){
+  const coachSrc = applyRule(readFileSync(coachFile || join(ROOT, 'coach.js'), 'utf8'), rule || 'base', ratio || null);
   const num = (re, what) => { const m = coachSrc.match(re); if (!m) throw new Error('closed-loop: coach.js no longer has ' + what); return Number(m[1]); };
   /* The site's mic chain, from coachAcquireMic's own lines. */
   const chain = {
@@ -97,7 +101,8 @@ export function makeSite(coachFile){
     createDynamicsCompressor(){ return { connect(){}, threshold: param(), knee: param(), ratio: param(), attack: param(), release: param() }; },
     close(){}
   };
-  const mic = { proc: new Float32Array(0), upTo: 0 };
+  /* offsetMs: how far the site's clock runs ahead of the audio's (0 when the virtual student plays; a real take's `map` in replay-takes.mjs). */
+  const mic = { proc: new Float32Array(0), upTo: 0, sr: SR, offsetMs: 0 };
   const ctx = {
     console: { log(){}, warn(){}, error(){}, info(){} },
     document: { documentElement: el(''), head: el(''), body: el(''), getElementById(id){ return els[id] || (els[id] = el(id)); },
@@ -122,10 +127,10 @@ export function makeSite(coachFile){
     addEventListener(){}, removeEventListener(){}, dispatchEvent(){}, scrollTo(){}, innerWidth: 1366, innerHeight: 657, devicePixelRatio: 1,
     /* The microphone the site reads: the newest COACH_FFT samples of the processed stream, as an AnalyserNode gives them. */
     __mic: {
-      ctx: { sampleRate: SR, get currentTime(){ return clock.now / 1000; } },
+      ctx: { get sampleRate(){ return mic.sr; }, get currentTime(){ return clock.now / 1000; } },
       analyser: { getFloatTimeDomainData(b){
-        const end = Math.min(mic.upTo, Math.round(clock.now / 1000 * SR)), st = end - b.length;
-        for (let i = 0; i < b.length; i++){ const s = st + i; b[i] = s >= 0 ? mic.proc[s] : 0; }
+        const end = Math.round((clock.now - mic.offsetMs) / 1000 * mic.sr), st = end - b.length;
+        for (let i = 0; i < b.length; i++){ const s = st + i; b[i] = s >= 0 && s < mic.upTo ? mic.proc[s] : 0; }
       } }
     }
   };
@@ -145,6 +150,8 @@ export function makeSite(coachFile){
       coachAnalyser = __mic.analyser; coachCtx = __mic.ctx; coachFrameBuf = new Float32Array(COACH_FFT);
       coachReadCtx = null;
       ccPrepare(false); ccBeginStage();
+      /* A stand-in for a running capture, so ccLoop logs every strum it hears the way a saved take does (cc.evLog); nothing is recorded or saved. */
+      micRec = { live: true, mode: 'pw', lastFrameT: 0, frames: 0, frameSum: 0, frameMax: 0 };
     },
     key(){ return cc ? cc.phase + '|' + cc.stage + '|' + cc.listenStart : 'none'; },
     round(){
@@ -154,7 +161,9 @@ export function makeSite(coachFile){
     },
     result(){
       const out = { phase: cc.phase, onsets: cc.onsetCount, scoreBpm: cc.phase === 'done' ? ccScoreBpm() : null,
-        changes: cc.changes.map(c => ({ from: c.from, to: c.to, stage: c.stage || 0, bpm: c.bpm, verdict: c.result, readings: c.readings ? c.readings.length : null })) };
+        changes: cc.changes.map(c => ({ from: c.from, to: c.to, stage: c.stage || 0, bpm: c.bpm, verdict: c.result, readings: c.readings ? c.readings.length : null })),
+        meta: cc.phase === 'done' ? ccRecMeta(true) : null, lat: coachMicLatencyMs() };
+      micRec = null;
       ccStop(); cc = null;
       return JSON.stringify(out);
     }
@@ -169,7 +178,7 @@ export function makeSite(coachFile){
       const q = rafs; rafs = [];
       q.forEach(x => x.fn(clock.now));
     },
-    reset(){ timers = []; rafs = []; beeps.length = 0; clock.now = 0; }
+    reset(){ timers = []; rafs = []; beeps.length = 0; clock.now = 0; mic.sr = SR; mic.offsetMs = 0; }
   };
 }
 
@@ -182,9 +191,9 @@ export function playGame(site, g){
   const jit = rng(o.seed * 7919 + 13);
   site.reset();
   const START = 1000;
-  let air = new Float32Array(SR * 30), proc = new Float32Array(SR * 30);
+  let air = new Float32Array(SR * 30), proc = new Float32Array(SR * 30), raw = new Float32Array(SR * 30);
   site.mic.proc = proc; site.mic.upTo = 0;
-  const grow = s => { if (s <= air.length) return; const n = Math.max(s, air.length * 2); const a = new Float32Array(n), p = new Float32Array(n); a.set(air); p.set(proc); air = a; proc = p; site.mic.proc = proc; };
+  const grow = s => { if (s <= air.length) return; const n = Math.max(s, air.length * 2); const a = new Float32Array(n), p = new Float32Array(n), w = new Float32Array(n); a.set(air); p.set(proc); w.set(raw); air = a; proc = p; raw = w; site.mic.proc = proc; };
   const devHp = device.hp ? biquad('highpass', device.hp, 0.7) : x => x;
   const hp = biquad('highpass', site.chain.hp, site.chain.hpQ), lp = biquad('lowpass', site.chain.lp, site.chain.lpQ);
   let rendered = 0, beepsDone = 0;
@@ -201,6 +210,7 @@ export function playGame(site, g){
     for (let s = rendered; s < toS; s++){
       let v = devHp(air[s]) * device.gain;
       v = v > 1 ? 1 : v < -1 ? -1 : v;
+      raw[s] = v;
       proc[s] = lp(hp(v * site.chain.gain));
     }
     rendered = toS; site.mic.upTo = toS;
@@ -233,7 +243,20 @@ export function playGame(site, g){
     if (t.to !== c.to || t.from !== c.from) throw new Error(`closed-loop: change ${i} is ${c.from}>${c.to} in the game and ${t.from}>${t.to} for the student`);
     return { stage: c.stage, bpm: c.bpm, from: c.from, to: c.to, did: t.did, devMs: t.devMs == null ? null : Math.round(t.devMs), verdict: c.verdict, readings: c.readings };
   });
-  return { changes, onsets: res.onsets, scoreBpm: res.scoreBpm, phase: res.phase };
+  /* The game as a saved take (the console's Download WAV + Download data pair): the raw mic and what ccRecMeta would save. The site's clock and
+     the audio's are the same clock here, so the take's `map` is 0. */
+  const take = o.keepTake && res.meta ? { audio: raw.subarray(0, rendered), json: Object.assign({}, res.meta.fields, { expected: res.meta.expected, events: res.meta.events, tempoChanges: res.meta.tempoChanges,
+    mode: 'pw', micLatencyMs: res.lat, sampleRate: SR, srcSampleRate: SR, durationSec: Math.round(rendered / SR * 100) / 100, frameMeanMs: Math.round(frameMs * 10) / 10, micLabel: 'virtual student', userAgent: 'closed-loop.mjs',
+    savedAt: new Date(Date.UTC(2026, 10, 11, 0, 0, o.seed % 60, 0)).toISOString(), virtual: { student: o.student, room: o.room, mic: o.mic, key: changes.map(c => c.did) } }) } : null;
+  return { changes, onsets: res.onsets, scoreBpm: res.scoreBpm, phase: res.phase, take };
+}
+
+export function writeWav(file, x, sr){
+  const b = Buffer.alloc(44 + x.length * 2);
+  b.write('RIFF', 0); b.writeUInt32LE(36 + x.length * 2, 4); b.write('WAVEfmt ', 8); b.writeUInt32LE(16, 16); b.writeUInt16LE(1, 20); b.writeUInt16LE(1, 22);
+  b.writeUInt32LE(sr, 24); b.writeUInt32LE(sr * 2, 28); b.writeUInt16LE(2, 32); b.writeUInt16LE(16, 34); b.write('data', 36); b.writeUInt32LE(x.length * 2, 40);
+  for (let i = 0; i < x.length; i++) b.writeInt16LE(Math.max(-32768, Math.min(32767, Math.round(x[i] * 32768))), 44 + i * 2);
+  writeFileSync(file, b);
 }
 
 /* Counts for a list of games' changes: truth x verdict. */
@@ -270,7 +293,10 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]){
     console.log('students: ' + Object.keys(STUDENTS).join(', ') + '\nrooms:    ' + Object.keys(ROOMS).join(', ') + '\nmics:     ' + Object.keys(MICS).join(', '));
     process.exit(0);
   }
-  const site = makeSite(opt('coach', null));
+  const rule = opt('rule', 'base');
+  if (!RULES.includes(rule)){ console.error('--rule must be one of ' + RULES.join(', ')); process.exit(2); }
+  const site = makeSite(opt('coach', null), rule);
+  if (rule !== 'base') console.log('CANDIDATE RULE "' + rule + '" (tools/mic-sim/candidates.mjs), not the site\'s own coach.js');
   const students = opt('students', Object.keys(STUDENTS).join(',')).split(',');
   const rooms = opt('rooms', 'quiet,class').split(','), mics = opt('mics', 'chromebook').split(',');
   const bpms = opt('bpm', '30,60,90,120').split(',').map(Number), fpss = opt('fps', '60').split(',').map(Number);
@@ -312,18 +338,20 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]){
   console.log(`Power Chord Switch, closed loop · ${progs.length} ${song ? 'switches of ' + song : 'pairs'} (${progs.map(p => p.chords.join('-')).join(' ')}) · ${bpms.join('/')} BPM · every ${rateArg} · ${fpss.join('/')} fps · ${seeds} games per cell · ${games} games`);
   console.log(`strum rule ${site.run('CC_POWER_ONSET_RATIO')} / ${site.run('CC_POWER_HF_RATIO')} · mic chain x${site.chain.gain}, ${site.chain.hp}-${site.chain.lp} Hz · synthetic sound; only the ring time is fitted to classroom takes (student.mjs)\n`);
   const pc = (a, b) => b ? String(Math.round(100 * a / b)).padStart(3) + '%' : '   -';
-  console.log('student     room   mic        fps | right chord: said right / wrong / no strum | fret high: caught | never moved: caught | no strum: said strum |  changes');
-  const all = [], t0 = Date.now();
+  console.log('student     room   mic        fps | right chord: said right / wrong / no strum | fret high: caught | never moved: caught | no strum: said RIGHT (heard) |  changes');
+  const all = [], t0 = Date.now(), takesOut = opt('takes-out', null);
+  if (takesOut) mkdirSync(takesOut, { recursive: true });
   let seedBase = 0;
   for (const st of students) for (const room of rooms) for (const micName of mics) for (const fps of fpss){
     const cell = [];
     for (const bpm of bpms) for (const p of progs) for (let s = 1; s <= seeds; s++){
-      const g = playGame(site, { student: st, room, mic: micName, fps, bpm, progIdx: p.i, rateIdx, lagMs, seed: ++seedBase });
+      const g = playGame(site, { student: st, room, mic: micName, fps, bpm, progIdx: p.i, rateIdx, lagMs, seed: ++seedBase, keepTake: !!takesOut });
+      if (takesOut && g.take){ const b = join(takesOut, 'V' + String(seedBase).padStart(3, '0')); writeWav(b + '.wav', g.take.audio, SR); writeFileSync(b + '.json', JSON.stringify(g.take.json)); }
       g.changes.forEach(c => cell.push(c));
       all.push({ student: st, room, mic: micName, fps, bpm, pair: p.chords.join('-'), seed: seedBase, scoreBpm: g.scoreBpm, onsets: g.onsets, changes: g.changes });
     }
     const t = tally(cell);
-    console.log(`${st.padEnd(11)} ${room.padEnd(6)} ${micName.padEnd(10)} ${String(fps).padStart(3)} |        ${pc(t.right.ok, t.right.n)} (${pc(t.right.okTiming, t.right.n).trim()} on timing) / ${pc(t.right.off, t.right.n)} / ${pc(t.right.miss, t.right.n)}  |       ${pc(t.wrong.off, t.wrong.n)}        |        ${pc(t.held.off, t.held.n)}         |        ${pc(t.silent.ok + t.silent.off, t.silent.n)}          | ${String(cell.length).padStart(6)}`);
+    console.log(`${st.padEnd(11)} ${room.padEnd(6)} ${micName.padEnd(10)} ${String(fps).padStart(3)} |        ${pc(t.right.ok, t.right.n)} (${pc(t.right.okTiming, t.right.n).trim()} on timing) / ${pc(t.right.off, t.right.n)} / ${pc(t.right.miss, t.right.n)}  |       ${pc(t.wrong.off, t.wrong.n)}        |        ${pc(t.held.off, t.held.n)}         |     ${pc(t.silent.ok, t.silent.n)} (${pc(t.silent.ok + t.silent.off, t.silent.n).trim()})${t.silent.n ? ' of ' + t.silent.n : ''}`.padEnd(160) + `| ${String(cell.length).padStart(6)}`);
   }
   console.log(`\n${all.length} games, ${all.reduce((n, g) => n + g.changes.length, 0)} graded changes, ${((Date.now() - t0) / 1000).toFixed(1)} s`);
   if (opt('json', null)) writeFileSync(opt('json'), JSON.stringify(all));

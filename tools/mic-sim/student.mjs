@@ -63,7 +63,13 @@ export const ROOMS = {
   talk:    { noise: 0.003, rumble: 0.002, neighbours: 0, nbLevel: 0, bangs: 0, talk: 3.5, talkLevel: 0.05 },
   chatter: { noise: 0.008, rumble: 0.006, neighbours: 0, nbLevel: 0, bangs: 0.05, talk: 9, talkLevel: 0.02 },
   bumps:   { noise: 0.004, rumble: 0.003, neighbours: 0, nbLevel: 0, bangs: 0.5 },
-  typing:  { noise: 0.002, rumble: 0.001, neighbours: 0, nbLevel: 0, bangs: 0, keys: 3 }
+  typing:  { noise: 0.002, rumble: 0.001, neighbours: 0, nbLevel: 0, bangs: 0, keys: 3 },
+  /* FITTED rooms (Jonathan, 2026-11-11): fitted to the 21 real Power Chord Switch takes' level percentiles and to how often the strum rule fires
+     at 1.4 / 1.8 / 2.2 / 2.6. room7: the quieter period-7 takes, floor about -40 dBFS. room4: the loud period-4 takes, floor about -29. With no
+     guitar, room4 made the site's rule at 2.2 hear a strum in 70% of changes against 55% in the real takes: read room4 as a little harsher than
+     the room was. */
+  room7:   { noise: 0.006, rumble: 0.0042, neighbours: 1, nbLevel: 0.15, bangs: 0.05, talk: 7,   talkLevel: 0.045 },
+  room4:   { noise: 0.03,  rumble: 0.021,  neighbours: 2, nbLevel: 0.45, bangs: 0.03, talk: 5.5, talkLevel: 0.095 }
 };
 
 /* Laptop mics. hp: Hz below which the mic loses level (0 = a flat mic). */
@@ -268,8 +274,8 @@ export class Student {
 }
 
 /* A Web Audio biquad (the same formulas the browser uses), for the laptop mic and for the site's own filters. */
-export function biquad(type, freq, Q){
-  const w = 2 * Math.PI * freq / SR, cs = Math.cos(w), al = Math.sin(w) / (2 * Q);
+export function biquad(type, freq, Q, sr){
+  const w = 2 * Math.PI * freq / (sr || SR), cs = Math.cos(w), al = Math.sin(w) / (2 * Q);
   let b0, b1, b2;
   if (type === 'highpass'){ b0 = (1 + cs) / 2; b1 = -(1 + cs); b2 = (1 + cs) / 2; }
   else if (type === 'lowpass'){ b0 = (1 - cs) / 2; b1 = 1 - cs; b2 = (1 - cs) / 2; }

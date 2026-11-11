@@ -59,6 +59,16 @@ tuning pass — ideally on the real classroom recordings the teacher console's
   strings; `NO_GUITAR` in the file). A case passes only when nothing is marked right, and the run exits 1 when any
   fails. On the current rule (1.8 / 2.19) 9 of 12 fail, which is the bug it was written to show, so it is not in
   `checks.mjs`: it goes there when the game passes it.
+- **`candidates.mjs`** (2026-11-11): candidate Power Chord Switch grading rules (`ring`, `half`, `half3`, `both`,
+  `both3`; what each does is in its header), applied to coach.js IN MEMORY. None is in coach.js. `closed-loop.mjs
+  --rule=<name>` plays one; `replay-takes.mjs` replays them on real takes.
+- **`replay-takes.mjs <folder>`** (2026-11-11): each candidate rule on the REAL takes' audio, through the real `ccLoop`
+  (the recording goes back through the site's mic chain; nothing is replayed from the take's saved strums). Counts,
+  per rule, the changes with no strum in the window that the rule still hears / marks right, and the real strums it
+  loses, at the take's own strum ratios and at today's. Its "reproduced" line (the base rule against the take's saved
+  verdicts) says how far to trust the rest: 462 of 480 on model takes (`closed-loop.mjs --takes-out=`). The
+  evaluator's "strum" is any attack in the audio, so a tap counts as a real strum there. Never commit takes.
+- **Fitted rooms** `room7`, `room4` in `student.mjs` (Jonathan, 2026-11-11, fitted to the 21 real takes).
 - `smoke.mjs <url>` — headless Chromium through the Dev bypass with the
   in-page harness: Coach, Note Runner, Note Hunt, Note Call, Change Up, PSG
   Hero, the consent prompt and the recording path. Start a static server on
