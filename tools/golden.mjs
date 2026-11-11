@@ -12,6 +12,9 @@
                   left rail for every set, the Songs / In class / My progress /
                   Games screens, every game view and every In-Class Activity
                   card with each of its steps
+     pages/<lang>/ the pages that open on their own: every Song Journey page
+                  (tabs/*.html), the Tuning Simulator, the mood chart and the
+                  404 page, as rendered, each with a screenshot under --shots
      keys/        for every set: every control that saves something (done
                   buttons, checklist skills and levels, quiz choices, rep dots,
                   text boxes ...) is really used, and what it writes to the saved
@@ -27,7 +30,7 @@
                                                       (the old site, or the rebuild)
      node tools/golden.mjs --compare <dirA> <dirB>    exit 0 only if they are identical
      --en-only          English only
-     --only <parts>     comma-separated: data, sets, keys, screens, games, activities
+     --only <parts>     comma-separated: data, sets, keys, screens, games, activities, pages
      --shots            also write PNGs of every set (English)
      --chrome <path>    Chrome/Chromium binary (or CHROME=...)
 
@@ -104,7 +107,7 @@ const ROOT = resolve(opt('--root') || HERE);
 if (!existsSync(join(ROOT, 'index.html'))) { console.error(`golden: no index.html in ${ROOT}`); process.exit(2); }
 const LANGS = args.includes('--en-only') ? ['en'] : ['en', 'es'];
 const SHOTS = args.includes('--shots');
-const PARTS = ['data', 'sets', 'keys', 'screens', 'games', 'activities'];
+const PARTS = ['data', 'sets', 'keys', 'screens', 'games', 'activities', 'pages'];
 const ONLY = args.includes('--only') ? (opt('--only') || '').split(',').map(x => x.trim()).filter(Boolean) : null;
 if (ONLY && (!ONLY.length || ONLY.some(p => !PARTS.includes(p)))) { console.error(`golden: --only takes ${PARTS.join(', ')}`); process.exit(2); }
 const ON = Object.fromEntries(PARTS.map(p => [p, !ONLY || ONLY.includes(p)]));
@@ -368,6 +371,25 @@ try {
         }
       }
     }
+  }
+
+  if (ON.pages) {
+    /* The pages that are files of their own. Which ones exist is read from the site folder, so a page a rebuild
+       drops or adds shows up as a missing or extra file. They take their language from localStorage 'gc-lang'. */
+    const files = [...readdirSync(join(ROOT, 'tabs')).filter(f => f.endsWith('.html')).sort().map(f => 'tabs/' + f),
+      ...readdirSync(ROOT).filter(f => f.endsWith('.html') && f !== 'index.html').sort()];
+    for (const lang of LANGS) for (const f of files) {
+      const name = safe(f.replace(/\.html$/, ''));
+      await run(`${lang}:page-${name}:lang`, `(localStorage.setItem('gc-lang', '${lang}'), 1)`, 0);
+      await page.send('Page.navigate', { url: `${base}/${f}` });
+      try { await until(`${lang}: ${f} loading`, `document.readyState === 'complete' && location.pathname.endsWith(${JSON.stringify('/' + f)})`); }
+      catch (e) { events.push({ step: `${lang}:page-${name}`, kind: 'step-failed', text: e.message }); }
+      put(`pages/${lang}/${name}.html`, lines(await read(`${lang}:page-${name}:html`, 'body', 3))); count('pages');
+      if (SHOTS) await shot(`shots/${lang}-page-${name}.png`);
+    }
+    await page.send('Page.navigate', { url: `${base}/index.html` });
+    await sleep(500);
+    await run('pages:lang-back', `(localStorage.setItem('gc-lang', 'en'), 1)`, 0);
   }
 
   put('errors.json', JSON.stringify(events, null, 1) + '\n');
