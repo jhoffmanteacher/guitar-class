@@ -35,6 +35,7 @@
 
 import { readFileSync, writeFileSync, readdirSync, mkdtempSync, rmSync, existsSync, statSync } from 'node:fs';
 import { spawnSync, spawn } from 'node:child_process';
+import { siteParts, siteSource, siteText } from './site-src.mjs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -76,7 +77,7 @@ try {
 } catch { /* no tabs/ dir yet */ }
 
 const SHELL_FILES = [
-  'index.html', '404.html', 'mood-chart.html', 'tuning-sim.html', 'styles.css', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', 'app.js', 'practice-minutes-config.js', 'practice-minutes.js', 'fab-tools.js', 'tuner.js', 'coach.js', 'teacher.js', 'live-quiz.js', 'config-main.js',
+  'index.html', '404.html', 'mood-chart.html', 'tuning-sim.html', 'styles.css', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', ...siteParts('app.js', ROOT), 'practice-minutes-config.js', 'practice-minutes.js', 'fab-tools.js', 'tuner.js', ...siteParts('coach.js', ROOT), ...siteParts('teacher.js', ROOT), 'live-quiz.js', 'config-main.js',
   'trainer-core.js', 'trainer-audio.js', 'trainer-ui.js', 'trainer-site-adapter.js',
   'firebase-config.js', 'manifest.json', 'icon.svg',
   ...MODULE_FILES,
@@ -99,7 +100,7 @@ const SHELL_FILES = [
    (one of the two lists would be wrong), and checkPrecacheCoverage() still
    fails if a shipped page starts linking mood-chart.html again — at that
    point it is student-facing and goes back in ASSETS, off this list. */
-const SHELL_NOT_PRECACHED = ['teacher.js', 'mood-chart.html', 'trainer-core.js', 'trainer-audio.js', 'trainer-ui.js'];
+const SHELL_NOT_PRECACHED = [...siteParts('teacher.js', ROOT), 'mood-chart.html', 'trainer-core.js', 'trainer-audio.js', 'trainer-ui.js'];
 
 /* Backing-track audio isn't in sw.js's ASSETS precache list (they're large —
    precaching them at install would bloat the offline install). The SW's fetch
@@ -1339,7 +1340,7 @@ function checkTabNoScroll() {
 
   let css, appjs;
   try { css = readFileSync(join(ROOT, 'styles.css'), 'utf8'); } catch { css = ''; }
-  try { appjs = readFileSync(join(ROOT, 'app.js'), 'utf8'); } catch { appjs = ''; }
+  try { appjs = siteSource('app.js', ROOT); } catch { appjs = ''; }
 
   const rule = (src, selector) => {
     const i = src.indexOf(selector + '{');
@@ -1985,7 +1986,7 @@ function contrastStates(flag) {
     flag(`1s states: ${CONTRAST_STATES.length} rendered states listed, ${CONTRAST_STATES_PINNED} pinned — change the pin on purpose, in the same edit`);
   }
   for (const st of CONTRAST_STATES) {
-    if (!(st.file in emit)) { try { emit[st.file] = readFileSync(join(ROOT, st.file), 'utf8'); } catch { emit[st.file] = ''; } }
+    if (!(st.file in emit)) { try { emit[st.file] = siteText(st.file, ROOT); } catch { emit[st.file] = ''; } }
     const chain = st.chain.map(s => /^::(before|after)$/.test(s) ? { tag: null, cls: [], ids: [], pseudo: s } : contrastCompound(s));
     const gone = chain.flatMap(e => e.cls).filter(c => !new RegExp(`(?<![\\w-])${c}(?![\\w-])`).test(emit[st.file]));
     if (gone.length) { flag(`1s states: "${st.name}" — ${gone.join(', ')} no longer emitted in ${st.file}; update the chain to the real markup`); continue; }
@@ -2319,7 +2320,7 @@ function checkFigureDimensions() {
   /* The two renderers, by name, so this can say which one drifted. */
   for (const [f, fn] of [['app.js', 'caStepHtml'], ['teacher.js', 'renderTeacherActivityDetail']]) {
     let src;
-    try { src = readFileSync(join(ROOT, f), 'utf8'); } catch { flag(`${f} unreadable`); continue; }
+    try { src = siteText(f, ROOT); } catch { flag(`${f} unreadable`); continue; }
     // the <img> each renderer builds around escAttr(step.figure) / escAttr(s.figure)
     const emit = src.match(/<img src="\$\{escAttr\((?:step|s)\.figure\)\}"[^>]*>/);
     if (!emit) { flag(`${f}: no step-figure <img> found — ${fn}() is where class-activity figures are rendered; if it moved, update 1v`); continue; }
@@ -2388,7 +2389,7 @@ function checkOrphanAssets() {
   }
   for (const [name, field] of [['DECKS', 'deck'], ['EAR_POOLS', 'pool']]) {
     let obj;
-    try { obj = loadConstObject(readFileSync(join(ROOT, 'app.js'), 'utf8'), name); }
+    try { obj = loadConstObject(siteSource('app.js', ROOT), name); }
     catch (e) { warn(`could not enumerate ${name} from app.js: ${e.message}`); warnings++; continue; }
     for (const id of Object.keys(obj)) {
       pools++;
@@ -2564,7 +2565,7 @@ function checkJourneyLayers() {
   const flag = m => { err(m); problems++; bad++; };
   let JOURNEY_LAYERS;
   try {
-    JOURNEY_LAYERS = loadConstObject(readFileSync(join(ROOT, 'app.js'), 'utf8'), 'JOURNEY_LAYERS');
+    JOURNEY_LAYERS = loadConstObject(siteSource('app.js', ROOT), 'JOURNEY_LAYERS');
   } catch (e) { flag(`app.js: could not load JOURNEY_LAYERS — ${e.message}`); return; }
 
   const real = {};
@@ -2891,7 +2892,7 @@ function checkModuleJourneyLayers(sets, ctx) {
   }
   for (const file of [...MODULE_FILES, 'class-activities.js', 'i18n.js', 'app.js']) {
     let src;
-    try { src = stripJsComments(readFileSync(join(ROOT, file), 'utf8')); } catch { continue; }
+    try { src = stripJsComments(siteText(file, ROOT)); } catch { continue; }
     const lineOf = lineLookup(src);
     for (let i = 0; i < src.length; ) {
       if (!isQuote(src[i])) { i++; continue; }
@@ -2936,7 +2937,7 @@ function checkVisibleHelperUsage() {
   let bad = 0;
   for (const { file, fn } of VISIBLE_HELPER_CALLERS) {
     let src;
-    try { src = readFileSync(join(ROOT, file), 'utf8'); } catch { err(`${file} unreadable — 1ac cannot check ${fn}()`); problems++; bad++; continue; }
+    try { src = siteText(file, ROOT); } catch { err(`${file} unreadable — 1ac cannot check ${fn}()`); problems++; bad++; continue; }
     const decls = topLevelFunctionDecls(src).filter(d => d.name === fn);
     if (!decls.length) { err(`${file}: no top-level function '${fn}' found — 1ac's whitelist is stale`); problems++; bad++; continue; }
     /* 2026-10-12, two blind spots closed together:
@@ -4175,7 +4176,7 @@ function validateClassActivities() {
           Object.values(v).forEach(names);
         })(a);
         let tracks = null;
-        try { tracks = loadConstObject(readFileSync(join(ROOT, 'app.js'), 'utf8'), 'SNIPPET_TRACKS'); } catch {}
+        try { tracks = loadConstObject(siteSource('app.js', ROOT), 'SNIPPET_TRACKS'); } catch {}
         if (!hasVal(a.key) || !kv || typeof kv !== 'object' || !Object.keys(kv).length) { err(`${where}: key versions need "key" (the key the chords are written in) and a non-empty "keyVersions" map`); problems++; }
         else {
           if (kv[a.key]) { err(`${where}: keyVersions has '${a.key}', the key the data is already in`); problems++; }
@@ -4344,8 +4345,8 @@ function validateClassActivities() {
      wired into one renderer is invisible in the other (CLAUDE.md, "TWO step
      renderers"). Only checked while some step uses it. */
   if (strumSteps) {
-    const appSrc = readFileSync(join(ROOT, 'app.js'), 'utf8');
-    const tchSrc = readFileSync(join(ROOT, 'teacher.js'), 'utf8');
+    const appSrc = siteSource('app.js', ROOT);
+    const tchSrc = siteSource('teacher.js', ROOT);
     if (!/if\(step\.strum\) parts\.push\(buildStrum\(step\.strum,/.test(appSrc)) { err('1d: caStepHtml() in app.js no longer draws step.strum with buildStrum()'); problems++; }
     if (!/if\(s\.strum && typeof buildStrum==='function'\) media\.push\(buildStrum\(s\.strum,/.test(tchSrc)) { err('1d: renderTeacherActivityDetail() in teacher.js no longer draws step.strum with buildStrum()'); problems++; }
     /* ▶ Play clicks on every strum board (2026-11-04): it opens the rail Metronome at 60 BPM
@@ -4366,8 +4367,8 @@ function validateClassActivities() {
      preview in renderTeacherActivityDetail. A field wired into one side only
      is invisible on the other (CLAUDE.md, two renderers). */
   if (pathActivities) {
-    const appSrc = readFileSync(join(ROOT, 'app.js'), 'utf8');
-    const tchSrc = readFileSync(join(ROOT, 'teacher.js'), 'utf8');
+    const appSrc = siteSource('app.js', ROOT);
+    const tchSrc = siteSource('teacher.js', ROOT);
     if (!/\$\{chooser \? caPathChooserHtml\(a\) : caPathRowHtml\(a\)\}/.test(appSrc)) { err('1d: caCardBodyBlockHtml() in app.js no longer draws the path chooser / the "Change path" row'); problems++; }
     if (!/const stepsHtml = \(card \|\| chooser\) \? '' : route\.map\(\(si, pos\) => caStepHtml\(a, steps\[si\], si, si === openStepIdx/.test(appSrc)) { err('1d: caCardBodyBlockHtml() in app.js no longer walks caRoute(a) with the step\'s flat index as the key'); problems++; }
     if (!/caPathChooserHtml\(a,\{preview:true\}\)/.test(tchSrc) || !/caPathSteps\(a,pathKey\)\.concat\(caSharedSteps\(a\)\)/.test(tchSrc)) { err('1d: renderTeacherActivityDetail() in teacher.js no longer draws the path chooser and walks the route by path'); problems++; }
@@ -4394,7 +4395,7 @@ function validateClassActivities() {
 function checkActivityDeckAnswers(activities) {
   head('1bi. Class-activity decks show the answer');
   let DECKS;
-  try { DECKS = loadConstObject(readFileSync(join(ROOT, 'app.js'), 'utf8'), 'DECKS'); }
+  try { DECKS = loadConstObject(siteSource('app.js', ROOT), 'DECKS'); }
   catch (e) { err(`could not load DECKS from app.js — 1bi cannot check this: ${e.message}`); problems++; return; }
   let bad = 0, used = 0;
   activities.forEach(a => (a && a.steps || []).forEach((st, si) => {
@@ -4841,7 +4842,7 @@ const I18N_SCAN_JS_FILES = ['app.js', 'coach.js', 'fab-tools.js', 'tuner.js', 't
 // data-i18n="your.key" that would otherwise false-positive as a missing key.)
 function scanI18nRefs(file, KEYS, used, missing) {
   let src;
-  try { src = readFileSync(join(ROOT, file), 'utf8'); } catch { return; }
+  try { src = siteText(file, ROOT); } catch { return; }
   if (/\.js$/.test(file)) src = stripJsComments(src);
   const lines = src.split('\n');
   lines.forEach((ln, i) => {
@@ -4878,14 +4879,14 @@ function checkMissingI18nKeys(I18N) {
 
   let dynamicBad = 0;
   try {
-    const DECKS = loadConstObject(readFileSync(join(ROOT, 'app.js'), 'utf8'), 'DECKS');
+    const DECKS = loadConstObject(siteSource('app.js', ROOT), 'DECKS');
     for (const id of Object.keys(DECKS)) {
       const k = 'deck.' + id;
       if (!KEYS.has(k)) { err(`app.js DECKS['${id}'] has no matching i18n key '${k}'`); problems++; dynamicBad++; }
     }
   } catch (e) { warn(`could not enumerate DECKS from app.js: ${e.message}`); warnings++; }
   try {
-    const EAR_POOLS = loadConstObject(readFileSync(join(ROOT, 'app.js'), 'utf8'), 'EAR_POOLS');
+    const EAR_POOLS = loadConstObject(siteSource('app.js', ROOT), 'EAR_POOLS');
     for (const id of Object.keys(EAR_POOLS)) {
       const k = 'ear.' + id;
       if (!KEYS.has(k)) { err(`app.js EAR_POOLS['${id}'] has no matching i18n key '${k}'`); problems++; dynamicBad++; }
@@ -4971,7 +4972,7 @@ function checkMissingI18nKeys(I18N) {
     }
   } catch (e) { warn(`could not enumerate LIVE_QUIZZES from live-quiz.js: ${e.message}`); warnings++; }
   try {
-    const FRET_STRING_NAMES = loadConstObject(readFileSync(join(ROOT, 'coach.js'), 'utf8'), 'FRET_STRING_NAMES');
+    const FRET_STRING_NAMES = loadConstObject(siteSource('coach.js', ROOT), 'FRET_STRING_NAMES');
     for (const suffix of Object.values(FRET_STRING_NAMES)) {
       const k = 'games.fret.string.' + suffix;
       if (!KEYS.has(k)) { err(`coach.js FRET_STRING_NAMES has no matching i18n key '${k}'`); problems++; dynamicBad++; }
@@ -5388,7 +5389,7 @@ function checkDuplicateGlobals() {
   const byName = new Map();   // name → [{file, src, index}]
   for (const file of CLASSIC_SCRIPTS) {
     let src;
-    try { src = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
+    try { src = siteText(file, ROOT); } catch { continue; }
     for (const d of topLevelFunctionDecls(src)) {
       if (!byName.has(d.name)) byName.set(d.name, []);
       byName.get(d.name).push({ file, src, index: d.index });
@@ -5451,13 +5452,13 @@ function checkLazyHandlers() {
   for (const file of [...CLASSIC_SCRIPTS, 'i18n.js', 'firebase-config.js']) {
     if (LAZY_SCRIPTS[file]) continue;
     let src;
-    try { src = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
+    try { src = siteText(file, ROOT); } catch { continue; }
     for (const d of topLevelFunctionDecls(src)) eager.add(d.name);
   }
   const lazyOnly = new Map();   // name → script file
   const safeRanges = [];        // [start, end, file]
   for (const [file, rootIds] of Object.entries(LAZY_SCRIPTS)) {
-    for (const d of topLevelFunctionDecls(readFileSync(join(ROOT, file), 'utf8'))) {
+    for (const d of topLevelFunctionDecls(siteText(file, ROOT))) {
       if (!eager.has(d.name)) lazyOnly.set(d.name, file);
     }
     for (const id of rootIds) {
@@ -5727,7 +5728,7 @@ function checkPrecacheCoverage(src) {
   const re = /(?:^|['"(\s])(?:\.\/)?(img\/[A-Za-z0-9._-]+\.(?:svg|jpg|jpeg|png|gif|webp)|[A-Za-z0-9._-]+\.html)(?![A-Za-z0-9._-])/g;
   for (const file of ['index.html', 'app.js', 'teacher.js', 'class-activities.js', ...MODULE_FILES]) {
     let text;
-    try { text = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
+    try { text = siteText(file, ROOT); } catch { continue; }
     /* Comments masked first. class-activities.js documents its own schema in
        a 176-line header comment whose example figure path is deliberately
        fictional — reading it as a real reference would fail every push. */
@@ -5789,7 +5790,7 @@ function checkTuningSim() {
      and a first visit starts on level 1. Games page: a card that goes to this page. */
   if (!/const LEVELS = \[ \{ min:0, max:0 \}, \{ min:1, max:2 \}, \{ min:2, max:4 \}, \{ min:3, max:5 \} \];/.test(code)) { err('tuning-sim.html LEVELS must be 0, 1-2, 2-4 and 3-5 notes off (a 4th at the top)'); problems++; bad++; }
   if (!/function clampLevel\(n\)\{[^}]*\? n : 1;/.test(code) || !/S\.level\s*=\s*loadLevel\(\)/.test(code)) { err('tuning-sim.html must start a first visit on level 1 (clampLevel falls back to 1; S.level = loadLevel())'); problems++; bad++; }
-  let coachSrc = ''; try { coachSrc = readFileSync(join(ROOT, 'coach.js'), 'utf8'); } catch {}
+  let coachSrc = ''; try { coachSrc = siteSource('coach.js', ROOT); } catch {}
   if (!/key:'tuningsim'[^}]*guitar:false[^}]*href:'tuning-sim\.html'/.test(coachSrc)) { err("coach.js GAMES_META has no { key:'tuningsim', …, guitar:false, …, href:'tuning-sim.html' } card — the Tuning Simulator lives on the Games page, with the games that need no guitar"); problems++; bad++; }
   /* 2026-11-08: the direction (Jonathan, settled: Tighten = counterclockwise = the note goes up = Left key;
      Loosen = clockwise = down = Right key). The circle is drawn from ringPt/ringArc in the ROUND-LOGIC
@@ -5996,7 +5997,7 @@ function checkSdkVersion() {
   const found = new Map();   // version → Set(files)
   for (const file of FILES) {
     let src;
-    try { src = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
+    try { src = siteText(file, ROOT); } catch { continue; }
     for (const m of src.matchAll(/firebasejs\/(\d+\.\d+\.\d+)\//g)) {
       if (!found.has(m[1])) found.set(m[1], new Set());
       found.get(m[1]).add(file);
@@ -6163,7 +6164,7 @@ function checkAudioWorker(swPath) {
      app.js, which nothing runs here: pin that each name is still used on both
      sides, so a rename in one file cannot pass (review R1-3, 2026-11-09). */
   let appSrc = '', swSrc2 = '';
-  try { appSrc = readFileSync(join(ROOT, 'app.js'), 'utf8'); swSrc2 = readFileSync(swPath, 'utf8'); } catch { /* reported below as missing */ }
+  try { appSrc = siteSource('app.js', ROOT); swSrc2 = readFileSync(swPath, 'utf8'); } catch { /* reported below as missing */ }
   /* Comments out first, so a line that is commented out does not count
      (review R2-3). These are text pins: they catch a rename, a deleted or
      commented-out line and the listeners moving back inside "load"; they
@@ -6476,7 +6477,7 @@ function renderCheck() {
     ...MODULE_FILES, 'app.js'];
   try {
     vm.createContext(ctx);
-    for (const f of FILES) vm.runInContext(readFileSync(join(ROOT, f), 'utf8'), ctx, { filename: f });
+    for (const f of FILES) vm.runInContext(siteText(f, ROOT), ctx, { filename: f });
   } catch (e) {
     /* A hard failure, not a warning. On 2026-09-05 a new load-time
        URLSearchParams call in app.js dropped this harness, and because it
@@ -6940,7 +6941,7 @@ function checkVisibilityParity() {
   let bad = 0;
   for (const c of COPIES) {
     let src;
-    try { src = readFileSync(join(ROOT, c.file), 'utf8'); }
+    try { src = siteText(c.file, ROOT); }
     catch { err(`${c.file} is missing`); problems++; bad++; continue; }
     const start = src.indexOf(`function ${c.fn}(`);
     if (start < 0) { err(`${c.file}: ${c.fn}() not found — if it was renamed, update 1ah`); problems++; bad++; continue; }
@@ -6990,7 +6991,7 @@ function checkVisibilityParity() {
    ════════════════════════════════════════════════════════════════════ */
 function checkChordBlitzRanks() {
   head("1ag. Chord difficulty ranks cover both games' decks");
-  const src = readFileSync(join(ROOT, 'coach.js'), 'utf8');
+  const src = siteSource('coach.js', ROOT);
   const GAMES = [
     { decks: 'CB_DECKS', cards: 'CB_CARDS', every: 'CB_PROMOTE_EVERY', label: 'Chord Blitz' },
     { decks: 'CD_DECKS', cards: 'CD_CARDS', every: 'CD_PROMOTE_EVERY', label: 'Chord Detective' },
@@ -7079,7 +7080,7 @@ function checkConfigWriteGuard() {
   let bad = 0;
   const flag = m => { err(m); problems++; bad++; };
   let src;
-  try { src = readFileSync(join(ROOT, 'teacher.js'), 'utf8').replace(/\r\n/g, '\n'); }
+  try { src = siteSource('teacher.js', ROOT).replace(/\r\n/g, '\n'); }
   catch { flag('teacher.js unreadable — 1ai cannot check this'); return; }
 
   /* The guard itself, before anything is measured against it. Each piece is
@@ -7315,9 +7316,9 @@ function checkBackingSnippets() {
   const flag = m => { err(m); problems++; bad++; };
 
   let appSrc, teacherSrc, TRACKS;
-  try { appSrc = readFileSync(join(ROOT, 'app.js'), 'utf8'); }
+  try { appSrc = siteSource('app.js', ROOT); }
   catch { flag('app.js unreadable — 1ak cannot check this'); return; }
-  try { teacherSrc = readFileSync(join(ROOT, 'teacher.js'), 'utf8'); }
+  try { teacherSrc = siteSource('teacher.js', ROOT); }
   catch { flag('teacher.js unreadable — 1ak cannot check this'); return; }
   try { TRACKS = loadConstObject(appSrc, 'SNIPPET_TRACKS'); }
   catch (e) { flag(`app.js: could not load SNIPPET_TRACKS — ${e.message}`); return; }
@@ -7747,7 +7748,7 @@ function checkChallengeGotItBudget() {
 function checkDaily5Switch() {
   head('1as. Daily 5 is switched off, not broken');
   let src;
-  try { src = readFileSync(join(ROOT, 'app.js'), 'utf8'); }
+  try { src = siteSource('app.js', ROOT); }
   catch { err('app.js unreadable — 1as cannot check this'); problems++; return; }
   const m = src.match(/\bconst\s+DAILY5_ENABLED\s*=\s*([^;]+);/);
   if (!m) { err('DAILY5_ENABLED is gone from app.js — the Daily 5 is meant to be switched off, not deleted'); problems++; return; }
@@ -8208,7 +8209,7 @@ function checkJourneyButtonLastStep() {
   }
   // The renderer half: the button's one call site must be gated on the last step.
   let app = '';
-  try { app = readFileSync(join(ROOT, 'app.js'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, ''); } catch {}
+  try { app = siteSource('app.js', ROOT).replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, ''); } catch {}
   /* Two call sites, each gated: caStepHtml's last step, and a practice
      card's last check when it is the Level up (pcChecksHtml). */
   const calls = app.match(/(?<!function )caJourneyLinkHtml\(a\)/g) || [];
@@ -8258,7 +8259,7 @@ function checkFourStepsAndPaging() {
     if (routeLen > 4) over.push(`${a.id} (${routeLen})`);
   }
   if (over.length) warn(`1bb (soft rule): ${over.length} class activit${over.length === 1 ? 'y has' : 'ies have'} more than four steps — ${over.join(', ')}. Fine when Jonathan asked for it; keep new cards to four where you can.`);
-  const strip = f => { try { return readFileSync(join(ROOT, f), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, ''); } catch { return ''; } };
+  const strip = f => { try { return siteText(f, ROOT).replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, ''); } catch { return ''; } };
   const app = strip('app.js'), teacher = strip('teacher.js');
   if (!/const\s+CA_TAB_LINES_PER_PAGE\s*=\s*[1-9]/.test(app)) { err('app.js: CA_TAB_LINES_PER_PAGE is missing or not a positive number'); problems++; bad++; }
   if (!/buildTab\(\s*step\.tab\s*,\s*\{[^\n]*defaultLinesPerPage\s*:\s*CA_TAB_LINES_PER_PAGE/.test(app)) { err('app.js: caStepHtml no longer passes defaultLinesPerPage: CA_TAB_LINES_PER_PAGE to buildTab — long class-activity tabs would stop paging for students'); problems++; bad++; }
@@ -8535,8 +8536,8 @@ function checkPracticeCards(ctx) {
   let bad = 0, cards = 0;
   const flag = m => { err(m); problems++; bad++; };
   let appSrc = '', teacherSrc = '', TRACKS = {};
-  try { appSrc = readFileSync(join(ROOT, 'app.js'), 'utf8'); } catch { flag('app.js unreadable — 1bf cannot check this'); return; }
-  try { teacherSrc = readFileSync(join(ROOT, 'teacher.js'), 'utf8'); } catch { flag('teacher.js unreadable — 1bf cannot check this'); return; }
+  try { appSrc = siteSource('app.js', ROOT); } catch { flag('app.js unreadable — 1bf cannot check this'); return; }
+  try { teacherSrc = siteSource('teacher.js', ROOT); } catch { flag('teacher.js unreadable — 1bf cannot check this'); return; }
   try { TRACKS = loadConstObject(appSrc, 'SNIPPET_TRACKS'); } catch (e) { flag(`app.js: could not load SNIPPET_TRACKS — ${e.message}`); return; }
   let activities = [];
   try {
@@ -8943,7 +8944,7 @@ function checkOneLineDirections(ctx, i18nTable) {
     for (const lang of ['en', 'es']) { n2c++; one(`i18n.js ${key}.${lang}`, e[lang], CAP_2C); }
   }
   for (const key of DRILL_DIRECTIONS_GONE) if (i18nTable[key]) flag(`i18n.js has ${key} again — a drill shows one line of directions before Start, not a second paragraph`);
-  const app = readFileSync(join(ROOT, 'app.js'), 'utf8');
+  const app = siteSource('app.js', ROOT);
   for (const key of DRILL_DIRECTIONS_GONE) {
     const short = key.split('.')[1];
     if (new RegExp(`['"]${key.replace('.', '\\.')}['"]|ncK\\([^)]*['"]${short}['"]`).test(app)) flag(`app.js reads ${key} again`);
@@ -9262,7 +9263,7 @@ function checkRecordingVersions(ctx) {
   let bad = 0, n = 0, rendered = 0, strumRenders = 0, strumNames = 0, readbacks = 0, consoleReads = 0;
   const flag = m => { err(m); problems++; bad++; };
   let appSrc = '', TRACKS = {}, activities = [];
-  try { appSrc = readFileSync(join(ROOT, 'app.js'), 'utf8'); TRACKS = loadConstObject(appSrc, 'SNIPPET_TRACKS'); }
+  try { appSrc = siteSource('app.js', ROOT); TRACKS = loadConstObject(appSrc, 'SNIPPET_TRACKS'); }
   catch (e) { flag('app.js: could not read SNIPPET_TRACKS \u2014 ' + e.message); return; }
   try {
     const src = readFileSync(join(ROOT, 'class-activities.js'), 'utf8');
@@ -9429,7 +9430,7 @@ function checkRecordingVersions(ctx) {
      context), and the two renderers must draw the caView copy (a `const a=raw` there shows Jimi's intro over a Neil card). */
   {
     let tsrc = '';
-    try { tsrc = readFileSync(join(ROOT, 'teacher.js'), 'utf8'); } catch { flag('teacher.js could not be read \u2014 1cc cannot check the console'); }
+    try { tsrc = siteSource('teacher.js', ROOT); } catch { flag('teacher.js could not be read \u2014 1cc cannot check the console'); }
     if (tsrc) {
       for (const fn of ['renderTeacherViewSongs', 'renderTeacherActivityDetail']) {
         const tb = jsFunctionBody(tsrc, fn);
@@ -9484,7 +9485,7 @@ function checkRosterSkipsTrainerStub() {
   let bad = 0;
   const flag = m => { err(m); problems++; bad++; };
   let tsrc = '';
-  try { tsrc = readFileSync(join(ROOT, 'teacher.js'), 'utf8'); } catch { flag('teacher.js could not be read \u2014 1cf cannot check the roster'); return; }
+  try { tsrc = siteSource('teacher.js', ROOT); } catch { flag('teacher.js could not be read \u2014 1cf cannot check the roster'); return; }
   const at = tsrc.indexOf('async function teacherFetchStudents(');
   const body = at < 0 ? null : jsFunctionBody(tsrc, 'teacherFetchStudents');
   if (at < 0 || body === null) { flag('teacher.js: teacherFetchStudents() not found \u2014 1cf cannot run the roster (renamed? update this check with it)'); return; }
@@ -9615,7 +9616,7 @@ async function checkSongPopularity(ctx) {
   if (core.writes !== 0) flag(`clicking ${core.clicks} Core song Play Along button(s) wrote ${core.writes} count(s) \u2014 only "More Play Along songs" rows count`);
   // teacherFetchStudents keeps only sane counts.
   let tsrc = '';
-  try { tsrc = readFileSync(join(ROOT, 'teacher.js'), 'utf8'); } catch { flag('teacher.js unreadable'); return; }
+  try { tsrc = siteSource('teacher.js', ROOT); } catch { flag('teacher.js unreadable'); return; }
   const at = tsrc.indexOf('async function teacherFetchStudents(');
   const body = at < 0 ? null : jsFunctionBody(tsrc, 'teacherFetchStudents');
   if (body === null) { flag('teacherFetchStudents() not found'); return; }
@@ -9741,7 +9742,7 @@ function checkNoteCallPower(ctx) {
   const J = JSON.stringify;
   const run = x => vm.runInContext(x, ctx);
   let csrc = '';
-  try { csrc = readFileSync(join(ROOT, 'coach.js'), 'utf8'); } catch { flag('coach.js could not be read — 1cd cannot check the mic rule'); return; }
+  try { csrc = siteSource('coach.js', ROOT); } catch { flag('coach.js could not be read — 1cd cannot check the mic rule'); return; }
   const stats = { cards: 0, answers: 0, listens: 0, keys: 0, micHits: 0, fbRenders: 0 };
 
   // The data.
@@ -10768,7 +10769,7 @@ function checkSheetCards() {
     if (n && !existsSync(join(ROOT, f))) flag(`${f} is missing — no chord sheet can draw`);
   }
   let appSrc = '';
-  try { appSrc = readFileSync(join(ROOT, 'app.js'), 'utf8'); } catch { flag('app.js unreadable — 1bf2 cannot check the renderer'); return; }
+  try { appSrc = siteSource('app.js', ROOT); } catch { flag('app.js unreadable — 1bf2 cannot check the renderer'); return; }
   const body = fn => { const b = jsFunctionBody(appSrc, fn); return b === null ? null : stripJsComments(b); };
   const pins = [['caCardBodyHtml', /pcSheetHtml\(/, 'build the sheet (pcSheetHtml)'], ['pcFrame', /pcSheetStrip\(/, 'feed "This bar" (pcSheetStrip)'], ['pcPaint', /pcSheetPaint\(/, 'move the dot (pcSheetPaint)'], ['pcStop', /pcSheetStopped\(/, 'reset the sheet (pcSheetStopped)']];
   for (const [fn, re, what] of pins) {
@@ -11431,7 +11432,7 @@ function checkSongLibrary() {
   } catch { return; /* reported by 1d */ }
   let bad = 0;
   const flag = m => { err(m); problems++; bad++; };
-  const appSrc = readFileSync(join(ROOT, 'app.js'), 'utf8');
+  const appSrc = siteSource('app.js', ROOT);
   const block = /const SONG_JOURNEYS = \[([\s\S]*?)\n\];/.exec(appSrc);
   const core = block ? [...block[1].matchAll(/\bid:\s*'([^']+)'/g)].map(m => m[1]) : [];
   if (core.length !== 6) { flag(`1bq expects the six Core songs in SONG_JOURNEYS, found ${core.length}`); return; }
@@ -11486,7 +11487,7 @@ function checkJourneyRetired() {
   } catch { return; /* reported by 1d */ }
   let bad = 0;
   const flag = m => { err(m); problems++; bad++; };
-  const rd = f => readFileSync(join(ROOT, f), 'utf8');
+  const rd = f => siteText(f, ROOT);
   const appSrc = rd('app.js');
   const block = /const SONG_JOURNEYS = \[([\s\S]*?)\n\];/.exec(appSrc);
   const ids = block ? [...block[1].matchAll(/\bid:\s*'([^']+)'/g)].map(m => m[1]) : [];
@@ -11571,7 +11572,7 @@ function checkLoadFailedMaps() {
   let bad = 0;
   const flag = m => { err(m); problems++; bad++; };
   let src;
-  try { src = stripJsComments(readFileSync(join(ROOT, 'app.js'), 'utf8')); }
+  try { src = stripJsComments(siteSource('app.js', ROOT)); }
   catch { flag('app.js unreadable — 1bo cannot check this'); return; }
   const listOf = name => {
     const m = new RegExp(`const ${name}\\s*=\\s*(?:new Set\\()?\\[([^\\]]*)\\]`).exec(src);
@@ -12054,7 +12055,7 @@ function checkRepCountParity(sets, ctx) {
       }
     }
   } finally { vm.runInContext(`setLang(${JSON.stringify(saveLang)})`, ctx); }
-  const app = readFileSync(join(ROOT, 'app.js'), 'utf8'), teacher = readFileSync(join(ROOT, 'teacher.js'), 'utf8');
+  const app = siteSource('app.js', ROOT), teacher = siteSource('teacher.js', ROOT);
   const css = cssRuleMap(readFileSync(join(ROOT, 'styles.css'), 'utf8'));
   const cssDecl = (sel, prop) => { const m = css.get(sel); return m && m.get('') ? m.get('').get(prop) : undefined; };
   if (cssDecl('.rep-dots.rep-dots-line', 'padding-left') !== '0' || cssDecl('.rep-dots-done.rep-dots-line', 'margin-left') !== '0') { err('1bg: styles.css lost .rep-dots.rep-dots-line { padding-left:0 } or .rep-dots-done.rep-dots-line { margin-left:0 } — one-line dots would sit off the line'); problems++; bad++; }
@@ -12169,7 +12170,7 @@ function checkPeekSavesNothing() {
   let bad = 0;
   const flag = m => { err(m); problems++; bad++; };
   let src;
-  try { src = stripJsComments(readFileSync(join(ROOT, 'app.js'), 'utf8')); }
+  try { src = stripJsComments(siteSource('app.js', ROOT)); }
   catch { flag('app.js unreadable — 1bl cannot check this'); return; }
   if (!/function isPeekedResponseKey\s*\(/.test(src)) flag('app.js: isPeekedResponseKey() is gone — the read-only preview of a locked set can save answers again');
   for (const fn of RESPONSE_WRITERS) {
@@ -12220,7 +12221,7 @@ function checkSiteMadeClick() {
   let bad = 0, clickPages = 0;
   const flag = m => { err(m); problems++; bad++; };
   let TRACKS = {};
-  try { TRACKS = loadConstObject(readFileSync(join(ROOT, 'app.js'), 'utf8'), 'SNIPPET_TRACKS'); }
+  try { TRACKS = loadConstObject(siteSource('app.js', ROOT), 'SNIPPET_TRACKS'); }
   catch (e) { flag(`app.js: could not load SNIPPET_TRACKS — ${e.message}`); return; }
   const near = (a, b, tol) => Math.abs(a - b) <= tol;
   for (const page of TAB_PAGES.filter(p => p.endsWith('.html'))) {
@@ -12289,7 +12290,7 @@ function checkSiteMadeClick() {
      play the rhythm-down mix with the Guitar button lit — which is exactly
      what the two practice-card callers did in the working copy on
      2026-10-01, caught by a browser test before it was committed. */
-  const appSrc = stripJsComments(readFileSync(join(ROOT, 'app.js'), 'utf8'));
+  const appSrc = stripJsComments(siteSource('app.js', ROOT));
   const calls = [...appSrc.matchAll(/\bsnippetSrc\(([^()]*)\)/g)];
   if (!calls.length) flag('app.js: no snippetSrc() call found — 1bk cannot check its callers');
   for (const m of calls) {
@@ -12315,7 +12316,7 @@ function checkGuitarNotes() {
   const flag = m => { err(m); problems++; bad++; };
   let src, files;
   try {
-    src = readFileSync(join(ROOT, 'app.js'), 'utf8');
+    src = siteSource('app.js', ROOT);
     files = loadConstObject(src, 'GUITAR_NOTE_FILES');
   } catch (e) { flag(`could not read GUITAR_NOTE_FILES from app.js: ${e.message}`); return; }
   const range = /const GUITAR_NOTE_LOW = (\d+), GUITAR_NOTE_HIGH = (\d+);/.exec(src);
@@ -12338,7 +12339,7 @@ function checkGuitarNotes() {
      synth buffer until this change, which is exactly how one corner of the
      site would quietly keep the old sound. */
   let coach = '';
-  try { coach = stripJsComments(readFileSync(join(ROOT, 'coach.js'), 'utf8')); } catch { /* covered by 0 */ }
+  try { coach = stripJsComments(siteSource('coach.js', ROOT)); } catch { /* covered by 0 */ }
   if (/ksPluck(?:Cached|Buffer)\s*\(/.test(coach)) flag('coach.js builds its own synth buffer (ksPluckCached/ksPluckBuffer) — play notes through playNote() so they get the recorded guitar');
   const appCode = stripJsComments(src);
   const ksCalls = [...appCode.matchAll(/ksPluckCached\s*\(/g)].length;
@@ -12542,7 +12543,7 @@ function checkCoachVerdicts() {
     ...MODULE_FILES, 'app.js', 'fab-tools.js', 'tuner.js', 'coach.js'];
   try {
     vm.createContext(ctx);
-    for (const f of FILES) vm.runInContext(readFileSync(join(ROOT, f), 'utf8'), ctx, { filename: f });
+    for (const f of FILES) vm.runInContext(siteText(f, ROOT), ctx, { filename: f });
   } catch (e) { flag(`1ca: could not load coach.js with the site's scripts (${e.message}) — verdict lines NOT checked`); return; }
   const run = code => vm.runInContext(code, ctx);
   COACH_SANDBOX = { run, els };   // checkCountIn (1ck, the count-in) runs the real coachCountIn in these same scripts after this check
@@ -12823,7 +12824,7 @@ function checkCoachVerdicts() {
     if (run('globalThis.__arg') !== true) flag(`1ca: ccAgain starts the next round with ccStart(${run('globalThis.__arg')}), expected ccStart(true) \u2014 Again would draw a new random pair`);
     run(`ccSetup('power')`);
     if (!/onclick="ccStart\(\)"/.test(bodies['cc-body'])) flag('1ca: the setup screen\'s Start must call ccStart() with no argument \u2014 only Start draws a new pair');
-    const coachSrc = readFileSync(join(ROOT, 'coach.js'), 'utf8');
+    const coachSrc = siteSource('coach.js', ROOT);
     const startBody = jsFunctionBody(coachSrc, 'ccStart');
     /* ccStart hands `again === true` to ccPrepare, which takes the round's chords from ccRoundChords (split out 2026-11-03 so 1ck can run it without a microphone). */
     const prepBody = jsFunctionBody(coachSrc, 'ccPrepare');
@@ -13458,7 +13459,7 @@ function checkCoachVerdicts() {
        (CC_POWER_ONSET_RATIO 1.8 / CC_POWER_HF_RATIO 2.19), Change Up and every other loop with the shared CHK_* ones (1.4 / 1.7). The real ccLoop is RUN
        on scripted frames (the level jumps by a factor over its smoothed level, on one channel at a time) in both games, just below and just above each
        threshold, and the saved take must say which ratios it was graded with (the console tells those takes from the older ones by it). */
-    const cSrc2 = readFileSync(join(ROOT, 'coach.js'), 'utf8');
+    const cSrc2 = siteSource('coach.js', ROOT);
     const ratioConst = n => { const m = cSrc2.match(new RegExp('^const ' + n + '\\s*=\\s*([\\d.]+);', 'm')); return m ? Number(m[1]) : NaN; };
     const R = { cu: ratioConst('CHK_ONSET_RATIO'), cuHf: ratioConst('CHK_HF_RATIO'), pw: ratioConst('CC_POWER_ONSET_RATIO'), pwHf: ratioConst('CC_POWER_HF_RATIO') };
     if (R.pw !== 1.8 || R.pwHf !== 2.19 || R.cu !== 1.4 || R.cuHf !== 1.7) flag(`1ck: the strum ratios are Power Chord Switch ${R.pw} / ${R.pwHf}, shared ${R.cu} / ${R.cuHf}; pinned 1.8 / 2.19 and 1.4 / 1.7 (re-pin on purpose, with the real-take numbers in WORKFLOW.md)`);
@@ -13520,7 +13521,7 @@ function checkCoachVerdicts() {
     const GRID_CAP = Number((cSrc2.match(/^const CC_GRID_STEP_CAP_MS = (\d+);/m) || [])[1]);
     if (GRID_CAP !== 60) flag(`1ck: CC_GRID_STEP_CAP_MS is ${GRID_CAP}, pinned 60 (re-pin on purpose, with a tools/grid-sim.mjs run recorded in WORKFLOW.md)`);
     if (!/gridStepCapMs: CC_GRID_STEP_CAP_MS,/.test(jsFunctionBody(cSrc2, 'ccRecMeta') || '')) flag('1ck: ccRecMeta no longer saves "gridStepCapMs: CC_GRID_STEP_CAP_MS" in the take (the console replays the grid with it; a take without it is replayed uncapped)');
-    if (!/const gridCap = num\(d\.gridStepCapMs\) && d\.gridStepCapMs >= 0 && d\.gridStepCapMs <= 10000 \? d\.gridStepCapMs : Infinity;/.test(readFileSync(join(ROOT, 'teacher.js'), 'utf8'))) flag('1ck: teacher.js micEvalTakePw no longer takes its grid cap from the take (d.gridStepCapMs, none = uncapped), or reads it another way (re-pin on purpose)');
+    if (!/const gridCap = num\(d\.gridStepCapMs\) && d\.gridStepCapMs >= 0 && d\.gridStepCapMs <= 10000 \? d\.gridStepCapMs : Infinity;/.test(siteSource('teacher.js', ROOT))) flag('1ck: teacher.js micEvalTakePw no longer takes its grid cap from the take (d.gridStepCapMs, none = uncapped), or reads it another way (re-pin on purpose)');
     if (!/cc\.gridOffset \+= Math\.max\(-CC_GRID_STEP_CAP_MS, Math\.min\(CC_GRID_STEP_CAP_MS, dev \* 0\.25\)\);/.test(ccLoopSrc)) flag('1ck: ccLoop no longer moves the grid with exactly "cc.gridOffset += Math.max(-CC_GRID_STEP_CAP_MS, Math.min(CC_GRID_STEP_CAP_MS, dev * 0.25));" (the only place it moves; re-pin on purpose)');
     // "the only place it moves": exactly one assignment to cc.gridOffset in ccLoop (a second, uncapped one for one speed, one kind of game or one round would pass the line pin above)
     { const nAssign = (ccLoopSrc.match(/cc\.gridOffset\s*[-+*\/]?=(?!=)/g) || []).length; if (nAssign !== 1) flag(`1ck: ccLoop assigns cc.gridOffset ${nAssign} times, expected exactly 1 (the capped line)`); }
@@ -13714,7 +13715,7 @@ function checkCoachVerdicts() {
     run('globalThis.__recSec = 30; globalThis.__playSec = 1.6;');
     if (take('power', 'ccFinish(false);').saves.length !== 0) flag('1ck: a game Stopped 1.6 s into play was saved because its audio was 30 s long (the audio is mostly count-in; it would overwrite the last full take with a stub)');
     run('globalThis.__recSec = 30; globalThis.__playSec = 0;');
-    if (!/const MICREC_MIN_STOPPED_SEC = 10;/.test(readFileSync(join(ROOT, 'coach.js'), 'utf8'))) flag('1ck: MICREC_MIN_STOPPED_SEC is no longer 10');
+    if (!/const MICREC_MIN_STOPPED_SEC = 10;/.test(siteSource('coach.js', ROOT))) flag('1ck: MICREC_MIN_STOPPED_SEC is no longer 10');
     const cu = take('open', 'ccFinish(true);');
     if (cu.saves.length !== 0 || cu.starts !== 0) flag(`1ck: Change Up started ${cu.starts} captures and saved ${cu.saves.length} takes — it must never record`);
     /* Real games, Friday check 2026-11-06 (reviewed round 1: the hand-set fields above let six breaks of the Stop fixes through). A game is
@@ -14155,11 +14156,11 @@ function checkCoachVerdicts() {
     if (!/micRecConsent\(true,'pw'\)/.test(bodies['cc-body']) || run('cc.phase') !== 'setup') flag('1ck: Start with an unanswered consent does not ask first (or started anyway)');
     if (run('cc.pendingAgain') !== true) flag('1ck: a replay (Again) that has to ask the consent question forgets it was a replay');
     run('micRecShouldAsk = __orig.micRecShouldAsk;');
-    const consentBody = jsFunctionBody(readFileSync(join(ROOT, 'coach.js'), 'utf8'), 'micRecConsent'), startSrc = jsFunctionBody(readFileSync(join(ROOT, 'coach.js'), 'utf8'), 'ccStart');
+    const consentBody = jsFunctionBody(siteSource('coach.js', ROOT), 'micRecConsent'), startSrc = jsFunctionBody(siteSource('coach.js', ROOT), 'ccStart');
     if (!consentBody || !/game === 'pw'\) ccStart\(!!\(cc && cc\.pendingAgain\)\)/.test(consentBody)) flag("1ck: micRecConsent does not start Power Chord Switch for game 'pw' (passing on whether it was a replay)");
     const startCode = startSrc ? stripJsComments(startSrc) : '';
     if (!/if \(ccIsPower\(\) && micRecShouldAsk\(\) && ccBody\(\)\)\{/.test(startCode) || (startCode.match(/micRecShouldAsk/g) || []).length !== 1) flag('1ck: ccStart must ask the consent question for Power Chord Switch only, in one place (Change Up never records)');
-    const loopCode = stripJsComments(jsFunctionBody(readFileSync(join(ROOT, 'coach.js'), 'utf8'), 'ccLoop') || '');
+    const loopCode = stripJsComments(jsFunctionBody(siteSource('coach.js', ROOT), 'ccLoop') || '');
     if (!/if \(micRec && micRec\.live\) cc\.evLog\.push\(\{ t: at - lat, stage: cc\.stage \}\)/.test(loopCode)) flag('1ck: ccLoop no longer logs each strum heard (cc.evLog) while a take is recording');
     const rulesTxt = readFileSync(join(ROOT, 'firestore.rules'), 'utf8');
     if ((rulesTxt.match(/takeId\.matches\(request\.auth\.uid \+ '-\(coach\|nr\|pw\)'\)/g) || []).length !== 2 || /\(coach\|nr\|pw\)[^']/.test(rulesTxt.replace(/\(coach\|nr\|pw\)'\)/g, ''))) flag("1ck: firestore.rules must accept exactly the take id '<uid>-(coach|nr|pw)' on the take AND its chunks (two anchored matches, no wildcard after the id) — publish it in the console before the code writes");
@@ -14485,7 +14486,7 @@ async function checkPwTakeEvaluator() {
     fx = await import(pathToFileURL(join(ROOT, 'tools', 'mic-sim', 'fake-pw-take.mjs')).href);
     ({ extract } = await import(pathToFileURL(join(ROOT, 'tools', 'mic-sim', 'extract.mjs')).href));
   } catch (e) { fail(`could not load tools/mic-sim/fake-pw-take.mjs or extract.mjs (${e.message})`); return; }
-  const tSrc = readFileSync(join(ROOT, 'teacher.js'), 'utf8'), aSrc = readFileSync(join(ROOT, 'app.js'), 'utf8'), cSrc = readFileSync(join(ROOT, 'coach.js'), 'utf8');
+  const tSrc = siteSource('teacher.js', ROOT), aSrc = siteSource('app.js', ROOT), cSrc = siteSource('coach.js', ROOT);
   const constOf = n => { const m = cSrc.match(new RegExp('^const ' + n + '\\s*=\\s*([^;]+);', 'm')); if (!m) throw new Error('no ' + n + ' in coach.js'); return `const ${n} = ${m[1].trim()};`; };
   // a number from a (possibly several-per-line) `const A = 1, B = 2;` of coach.js
   const numOf = n => { const m = cSrc.match(new RegExp('^const [^\\n]*?\\b' + n + '\\s*=\\s*([\\d.]+)', 'm')); if (!m) throw new Error('no ' + n + ' in coach.js'); return Number(m[1]); };
@@ -14951,7 +14952,7 @@ function checkPracticeMinutes(i18nTable) {
   head('1cg. Practice minutes: the engine is run; the rules cap, no heartbeat, wiring and strings are pinned');
   let bad = 0;
   const fail = m => { err(m); problems++; bad++; };
-  const read = f => { try { return readFileSync(join(ROOT, f), 'utf8'); } catch { return null; } };
+  const read = f => { try { return siteText(f, ROOT); } catch { return null; } };
   const strip = t => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
   // 1. run the engine
@@ -15028,7 +15029,7 @@ function checkPracticeMinutes(i18nTable) {
        error shown. Comments are stripped; the pattern wants a quote or slash right before the word, so the singular prose "heartbeat" in
        module-11.js / mood-chart.html does not match. practice-minutes.js has its own, wider ban above. */
     {
-      const shipped = [...readdirSync(ROOT).filter(f => /\.(js|html)$/.test(f)), ...(existsSync(join(ROOT, 'tabs')) ? readdirSync(join(ROOT, 'tabs')).filter(f => /\.(js|html)$/.test(f)).map(f => `tabs/${f}`) : [])];
+      const shipped = [...new Set([...readdirSync(ROOT).filter(f => /\.(js|html)$/.test(f)), ...(existsSync(join(ROOT, 'tabs')) ? readdirSync(join(ROOT, 'tabs')).filter(f => /\.(js|html)$/.test(f)).map(f => `tabs/${f}`) : []), ...siteParts('app.js', ROOT), ...siteParts('coach.js', ROOT), ...siteParts('teacher.js', ROOT)])];
       for (const f of shipped) {
         const code = (read(f) || '').replace(/\/\*[\s\S]*?\*\//g, '').replace(/<!--[\s\S]*?-->/g, '').replace(/^\s*\/\/.*$/gm, '');
         if (/['"`\/]heartbeats\b/.test(code)) fail(`${f} names a heartbeats collection: it was deleted from the rules 2026-11-05, so a read or write there is refused with no error shown`);

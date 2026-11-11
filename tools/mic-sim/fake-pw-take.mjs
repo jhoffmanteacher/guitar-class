@@ -96,9 +96,10 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { siteSource } from '../site-src.mjs';
 
 /* The most the site's grid moves for one strum: read from coach.js, so this stand-in for ccLoop cannot drift from it (2026-11-07). */
-const COACH_SRC = fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'coach.js'), 'utf8');
+const COACH_SRC = siteSource('coach.js', path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..'));
 const GRID_STEP_CAP_MS = Number((/^const CC_GRID_STEP_CAP_MS = (\d+);/m.exec(COACH_SRC) || [])[1]);
 if (!(GRID_STEP_CAP_MS > 0)) throw new Error('coach.js has no CC_GRID_STEP_CAP_MS (fake-pw-take reads it)');
 /* The count-in's clicks per round (2026-11-09): coach.js's own ccCountInBeats, its one-line body run here, so a new take is planted the way the site counts in. */

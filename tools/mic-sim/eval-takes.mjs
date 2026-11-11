@@ -17,17 +17,18 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { extract } from './extract.mjs';
+import { siteSource } from '../site-src.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..', '..');
-const coachSrc = fs.readFileSync(path.join(root, 'coach.js'), 'utf8');
+const coachSrc = siteSource('coach.js', root);
 const constOf = n => { const m = coachSrc.match(new RegExp('^const ' + n + '\\s*=\\s*([^;]+);', 'm')); if (!m) throw new Error('no ' + n + ' in coach.js'); return m[1].trim(); };
 const pitchSrc = extract(coachSrc, 'coachDetectPitch');
 const depsSrc = `{ GATE: ${constOf('COACH_PITCH_GATE')}, GAIN: ${constOf('COACH_MIC_GAIN')},
   ATTACK_SKIP: ${constOf('COACH_ATTACK_SKIP')}, EVENT_TAIL: ${constOf('COACH_EVENT_TAIL')}, REFRACT: ${constOf('COACH_ONSET_REFRACT')},
   MATCH_FRAC: ${constOf('COACH_MATCH_FRAC')}, MATCH_MIN_MS: ${constOf('COACH_MATCH_MIN_MS')}, VOTE_TOL: ${constOf('COACH_VOTE_TOL')},
   detectPitch: (function(){ let coachYinD = null; ${pitchSrc}\n return coachDetectPitch; })() }`;
-const teacherSrc = fs.readFileSync(path.join(root, 'teacher.js'), 'utf8');
+const teacherSrc = siteSource('teacher.js', root);
 const core = new Function(['micEvalSignal', 'micEvalTake', 'micEvalTakePw', 'micEvalStrumRule', 'micEvalStrumFrames', 'micEvalStrumHits', 'micEvalMicName', 'micEvalDevice', 'micEvalRow',
   'micEvalWhatIfSummary', 'micEvalWhatIfText', 'micEvalPitchSummary', 'micEvalPitchText', 'micEvalText'].map(n => extract(teacherSrc, n)).join('\n') +
   '\nreturn { micEvalTake, micEvalDevice, micEvalRow, micEvalText, micEvalWhatIfSummary, micEvalPitchSummary };')();

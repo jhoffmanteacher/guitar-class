@@ -17,6 +17,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import vm from 'node:vm';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { siteSource } from './site-src.mjs';
 
 /* PM_ROOT points the simulation at another checkout (checks.mjs's break-it proofs use a scratch copy). */
 const ROOT = process.env.PM_ROOT || resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -1874,7 +1875,7 @@ console.log('17. the teacher console\'s Practice minutes view (teacher.js teache
          against a board that holds every student;
      (b) the same rosters: calc.rankPlace / calc.top5Place equal those old formulas on the student page's own inputs;
      (c) a sample of rosters run through the REAL engine, one student page per student (load, read the boards, place). */
-  const TEACHER_SRC = readFileSync(join(ROOT, 'teacher.js'), 'utf8').replace(/\r\n/g, '\n');   // a Windows (CRLF) checkout too
+  const TEACHER_SRC = siteSource('teacher.js', ROOT).replace(/\r\n/g, '\n');   // a Windows (CRLF) checkout too
   const fm = /\nfunction teacherPmCompute\([\s\S]*?\n}\n/.exec(TEACHER_SRC);
   check('teacher.js has teacherPmCompute (the console\'s Practice minutes maths)', !!fm);
   if (fm) {
@@ -2137,7 +2138,7 @@ console.log('19. this week\'s goal (pmWeekGoals)');
    default, the rollback, the week guard, and that the console and a student page work one set of numbers out. */
 console.log('20. the console\'s This week\'s goal box (teacher.js teacherSetPmWeekGoal)');
 {
-  const T = readFileSync(join(ROOT, 'teacher.js'), 'utf8').replace(/\r\n/g, '\n');
+  const T = siteSource('teacher.js', ROOT).replace(/\r\n/g, '\n');
   const grab = (re) => { const m = re.exec(T); return m ? m[0] : null; };
   const parts = {
     cfg: grab(/\nfunction teacherPmCfg\(\)\{[\s\S]*?\n}\n/),
@@ -2338,7 +2339,7 @@ console.log('21. a goal that changes while the page is open');
    review deleted the failed-read gate, the box gate and the typing guard in scratch copies and every check stayed green: these run them. */
 console.log('22. the Practice minutes view as drawn (teacher.js renderTeacherMinutes)');
 {
-  const T = readFileSync(join(ROOT, 'teacher.js'), 'utf8').replace(/\r\n/g, '\n');
+  const T = siteSource('teacher.js', ROOT).replace(/\r\n/g, '\n');
   const grab = (re) => { const m = re.exec(T); return m ? m[0] : null; };
   const parts = {
     cfg: grab(/\nfunction teacherPmCfg\(\)\{[\s\S]*?\n}\n/), phrase: grab(/\nfunction teacherPmGoalPhrase\([\s\S]*?\n}\n/), box: grab(/\nfunction teacherPmGoalBoxHtml\([\s\S]*?\n}\n/),

@@ -57,6 +57,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Student, STUDENTS, ROOMS, MICS, SR, biquad, rng } from './student.mjs';
 import { applyRule, RULES } from './candidates.mjs';
+import { siteSource, siteText } from '../site-src.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
@@ -77,7 +78,7 @@ function readSummaries(src){
 }
 export const SUM_HOP = 512;
 export function makeSite(coachFile, rule, ratio, fromSummary){
-  let coachSrc = applyRule(readFileSync(coachFile || join(ROOT, 'coach.js'), 'utf8'), rule || 'base', ratio || null);
+  let coachSrc = applyRule(coachFile ? readFileSync(coachFile, 'utf8') : siteSource('coach.js', ROOT), rule || 'base', ratio || null);
   if (fromSummary) coachSrc = readSummaries(coachSrc);
   const num = (re, what) => { const m = coachSrc.match(re); if (!m) throw new Error('closed-loop: coach.js no longer has ' + what); return Number(m[1]); };
   /* The site's mic chain, from coachAcquireMic's own lines. */
@@ -169,7 +170,7 @@ export function makeSite(coachFile, rule, ratio, fromSummary){
   vm.createContext(ctx);
   const MODULE_FILES = readdirSync(ROOT).filter(f => /^module-\d+\.js$/.test(f)).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
   for (const f of ['i18n.js', 'guitar-diagrams.js', 'class-activities.js', 'config-main.js', ...MODULE_FILES, 'app.js', 'fab-tools.js', 'tuner.js'])
-    vm.runInContext(readFileSync(join(ROOT, f), 'utf8'), ctx, { filename: f });
+    vm.runInContext(siteText(f, ROOT), ctx, { filename: f });
   vm.runInContext(coachSrc, ctx, { filename: 'coach.js' });
   const run = code => vm.runInContext(code, ctx);
   run(`globalThis.__cl = {

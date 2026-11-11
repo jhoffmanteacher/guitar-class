@@ -15,6 +15,7 @@ import vm from 'node:vm';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { siteText } from './site-src.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CAPS = (process.argv[2] || '40,50,60,80,100').split(',').map(Number);
@@ -72,7 +73,7 @@ function makeCtx(coachTransform) {
   ctx.window = ctx; ctx.globalThis = ctx; ctx.self = ctx;
   vm.createContext(ctx);
   for (const f of FILES) {
-    let src = readFileSync(join(ROOT, f), 'utf8');
+    let src = siteText(f, ROOT);
     if (f === 'coach.js') src = coachTransform(src);
     vm.runInContext(src, ctx, { filename: f });
   }
