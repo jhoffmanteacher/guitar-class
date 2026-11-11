@@ -42,7 +42,7 @@
    needs a function or a `let` from a LATER part. One file hoists every
    function; several files do not. That is found by loading the parts one by
    one (the slice 0c check and tools/golden.mjs), not here. */
-import { readFileSync, writeFileSync, mkdirSync, mkdtempSync, rmSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, mkdtempSync, rmSync, existsSync, realpathSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join, dirname, resolve } from 'node:path';
@@ -51,8 +51,9 @@ import { fileURLToPath } from 'node:url';
 const HERE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
 const opt = (name) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : null; };
-const SRC = resolve(opt('--src') || HERE);
-const OUT = opt('--out') ? resolve(opt('--out')) : (args.includes('--write') ? HERE : null);
+const real = d => { try { return realpathSync(d); } catch { return d; } };
+const SRC = real(resolve(opt('--src') || HERE));
+const OUT = opt('--out') ? real(resolve(opt('--out'))) : (args.includes('--write') ? real(HERE) : null);
 const PLAN_FILE = resolve(opt('--plan') || join(HERE, 'tools', 'split-plan.json'));
 const ONLY = opt('--only');
 
@@ -71,6 +72,9 @@ for (const [name, parts] of Object.entries(plan)) {
   const lines = text.match(/[^\n]*\n|[^\n]+$/g) || [];
   const starts = [];
   let ok = true;
+  // Part names tools/site-src.mjs can recognise on disk: app/<x>.js for the app, <stem>-<x>.js for the others, or the script's own name for a first part.
+  const stem = name.replace(/\.js$/, '');
+  for (const p of parts) if (!(p.file === name || (name === 'app.js' ? /^app\/[^/]+\.js$/.test(p.file) : new RegExp('^' + stem + '-[^/]+\\.js$').test(p.file)))) { fail(`${name}: part ${p.file} must be named ${name === 'app.js' ? 'app/<name>.js' : stem + '-<name>.js'} (see tools/site-src.mjs)`); ok = false; }
   parts.forEach((p, i) => {
     if (i === 0) { if (p.mark) { fail(`${name}: the first part (${p.file}) begins at line 1 and takes no mark`); ok = false; } starts.push(0); return; }
     if (!p.mark) { fail(`${name}: part ${p.file} has no mark`); ok = false; starts.push(-1); return; }
@@ -99,12 +103,16 @@ if (failed) { console.error(`split-site: ${failed} problem(s); nothing written`)
 /* Writing into the folder the sources came from replaces coach.js and teacher.js with their first parts. That
    is the cut itself, so it must be asked for by name (review R2-1: a plain --write left a tree whose coach.js
    was a quarter of the script and whose tools still ran). */
-if (OUT && OUT === SRC && !args.includes('--in-place')) { console.error('split-site: --write would cut the files of this very folder. Use --out <another folder> to look at the parts, or --write --in-place to make the cut here (then declare the part lists in the same change).'); process.exit(1); }
+/* "This very folder" is any folder that already holds a script the write would replace with its first part:
+   the source folder under another spelling, or this checkout when the sources come from elsewhere (--src
+   <newer main> --write), which the first form of this test let through (review R3-3). */
+const replaces = OUT ? results.filter(r => r.parts.some(p => p.file === r.name) && existsSync(join(OUT, r.name))).map(r => r.name) : [];
+if (OUT && (OUT === SRC || replaces.length) && !args.includes('--in-place')) { console.error('split-site: --write would cut the files of this very folder. Use --out <another folder> to look at the parts, or --write --in-place to make the cut here (then declare the part lists in the same change).'); process.exit(1); }
 for (const r of results) {
   console.log(`split-site: ${r.name} (${r.total} lines) → ${r.parts.length} parts, put back together = the source, each parses on its own`);
   r.parts.forEach((p, i) => { const end = i + 1 < r.starts.length ? r.starts[i + 1] : r.total; console.log(`  ${String(r.starts[i] + 1).padStart(6)}-${String(end).padEnd(6)} ${String(end - r.starts[i]).padStart(5)} lines  ${p.file}`); });
   if (OUT) for (const [i, p] of r.parts.entries()) { const f = join(OUT, p.file); mkdirSync(dirname(f), { recursive: true }); writeFileSync(f, r.bodies[i]); }
 }
 if (!results.length) { console.error('split-site: nothing to do (no source file matched)'); process.exit(1); }
-const replaced = OUT ? results.filter(r => OUT === SRC && r.parts.some(p => p.file === r.name)).map(r => r.name) : [];
+const replaced = replaces;
 console.log(OUT ? `split-site: ✓ parts written under ${OUT}` + (replaced.length ? ` (${replaced.join(' and ')} now ${replaced.length > 1 ? 'hold' : 'holds'} only the first part; any other source file is left as it is and must be deleted, and the part lists declared, in the same change: see tools/site-src.mjs)` : ' (the source files are left as they are)') : 'split-site: ✓ plan checks out (nothing written; --write or --out <dir> writes the parts)');

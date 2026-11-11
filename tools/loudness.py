@@ -117,22 +117,29 @@ def songs():
 def app_source():
     """The text of app.js: the file, or (after the rebuild's cut) its parts in the order index.html loads
     them, between the site-parts:app.js markers. tools/site-src.mjs is the same rule for the Node tools."""
-    try:
-        return (ROOT / 'app.js').read_text(encoding='utf8')
-    except OSError:
-        pass
-    # No app.js: the parts must be declared in index.html, every tag readable and every part there. A quiet '' here
-    # would make ties fall to name order and pick another level file for a song (review R2-4).
+    # index.html first: if it declares parts, they are the app, and an app.js still on disk beside them is stale
+    # (reading it picked another level file for a song: review R3-4). Only with no part block is app.js the app.
     try:
         html = (ROOT / 'index.html').read_text(encoding='utf8')
+    except OSError:
+        html = ''
+    if '<!-- site-parts:app.js -->' not in html:
+        try:
+            return (ROOT / 'app.js').read_text(encoding='utf8')
+        except OSError:
+            sys.exit('loudness.py: no app.js and no site-parts:app.js block in index.html: cannot read the order of the tracks')
+    try:
         block = html.split('<!-- site-parts:app.js -->', 1)[1].split('<!-- /site-parts:app.js -->', 1)[0]
-    except (OSError, IndexError):
-        sys.exit('loudness.py: no app.js and no site-parts:app.js block in index.html: cannot read the order of the tracks')
+    except IndexError:
+        sys.exit('loudness.py: index.html opens a site-parts:app.js block and never closes it')
     tag = r'<script defer src="([^"?#]+)"></script>'
     if re.sub(tag, '', block).strip():
         sys.exit('loudness.py: between the site-parts:app.js markers only <script defer src="..."></script> tags are allowed')
+    parts = re.findall(tag, block)
+    if 'app.js' not in parts and (ROOT / 'app.js').exists():
+        sys.exit('loudness.py: app.js is still on disk but index.html loads the parts: delete it or cut it again')
     try:
-        return ''.join((ROOT / p).read_text(encoding='utf8') for p in re.findall(tag, block))
+        return ''.join((ROOT / p).read_text(encoding='utf8') for p in parts)
     except OSError as e:
         sys.exit('loudness.py: an app part named in index.html cannot be read: %s' % e)
 

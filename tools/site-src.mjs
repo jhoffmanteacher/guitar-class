@@ -47,6 +47,11 @@
                  (the loaders load those arrays in order; this file reads them out of siteSource('app.js'), so the
                  arrays may sit in any app part).
 
+   Part files must be named app/<x>.js for the app and <stem>-<x>.js beside the script for the other two
+   (coach-hub.js, teacher-mic.js); the first part of coach.js / teacher.js may keep the script's own name.
+   tools/split-site.mjs refuses a plan that names a part any other way, because the "parts on disk that no
+   list names" test below only knows these two shapes (review R3-2).
+
    No declaration → the list is [name], which is the site as it is today. A declaration that is malformed, names a
    part that does not exist, or leaves a stale whole file behind (app.js still on disk but not one of its own
    parts) THROWS: a tool must never silently read half a script.
@@ -95,7 +100,7 @@ function declaredParts(name, root) {
     return parts;
   }
   const arr = ARRAY_NAME[name];
-  // A folder with no app code at all (pm-sim's PM_ROOT copy holds four files) declares nothing (review R1-2).
+  // A folder with no app code at all (pm-sim's PM_ROOT copy holds four files; after the cut such a copy needs index.html, the app parts and every teacher part) declares nothing (review R1-2).
   if (!existsSync(join(root, 'app.js')) && declaredParts('app.js', root) === null) {
     /* …but a SITE folder (it has an index.html) with neither app.js nor a part block has lost its app code:
        saying "nothing declared" there handed back part 1 of coach.js and teacher.js without a word (review R2-1). */
@@ -145,6 +150,8 @@ export function siteParts(name, root = DEFAULT_ROOT) {
   for (const p of parts) {
     if (/^(?:[a-z]+:|\/)|\\|(?:^|\/)\.\.(?:\/|$)/i.test(p)) throw new Error(`site-src: ${name} part ${JSON.stringify(p)} is not a plain repo-relative path`);
     if (!existsSync(join(root, p))) throw new Error(`site-src: ${name} part ${p} does not exist`);
+    // A Mac finds Coach-Hub.js when asked for coach-hub.js; GitHub Pages does not (review R3-6).
+    try { if (!readdirSync(dirname(join(root, p))).includes(basename(p))) throw new Error(`site-src: ${name} part ${p} is spelled with other capitals on disk`); } catch (e) { if (/capitals/.test(e.message)) throw e; }
   }
   if (!parts.includes(name) && existsSync(join(root, name))) throw new Error(`site-src: ${name} is still on disk but is not one of its own declared parts (${parts.join(', ')}): delete it or list it`);
   return parts;
@@ -152,9 +159,13 @@ export function siteParts(name, root = DEFAULT_ROOT) {
 
 export function siteSource(name, root = DEFAULT_ROOT) {
   assertSplitName(name, 'siteSource');
-  let out = '';
-  for (const p of siteParts(name, root)) out += readFileSync(join(root, p), 'utf8');
-  return out;
+  const parts = siteParts(name, root), texts = parts.map(p => readFileSync(join(root, p), 'utf8'));
+  /* A whole coach.js restored over its first part (a merge, `git checkout main -- coach.js`) holds every later
+     part's text already; joined with the parts it gave 19,132 lines and pm-sim still passed (review R3-1). */
+  for (let i = 1; i < texts.length; i++) for (let k = 0; k < i; k++) {
+    if (texts[i].length > 200 && texts[k].includes(texts[i])) throw new Error(`site-src: ${parts[k]} already contains all of ${parts[i]}: a whole ${name} seems to have been put back over its first part. Cut it again (tools/split-site.mjs) or restore the part.`);
+  }
+  return texts.join('');
 }
 
 export function siteText(name, root = DEFAULT_ROOT) {
