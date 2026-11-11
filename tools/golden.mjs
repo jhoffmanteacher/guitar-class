@@ -19,6 +19,11 @@
                   ladder), the timer (each preset) and the recorder popup, each
                   opened by a real click. The tuner is not opened: it shows
                   what the microphone hears.
+     livequiz/    the live quiz with a made-up game: for every quiz, the
+                  student screen (EN + ES) in the lobby, on a question, with an
+                  answer picked, on a reveal after a right and after a wrong
+                  answer, and at the end; and the projector stage in the console
+                  for the same four states. No clock is shown (limitSec 0).
      console/     the teacher console (index.html?teacher=true) against the fake
                   class of tools/console-layout-smoke.mjs (30 made-up students,
                   never live data): every sidebar view, every activity's
@@ -38,7 +43,7 @@
                                                       (the old site, or the rebuild)
      node tools/golden.mjs --compare <dirA> <dirB>    exit 0 only if they are identical
      --en-only          English only
-     --only <parts>     comma-separated: data, sets, keys, screens, games, activities, pages, console, tools
+     --only <parts>     comma-separated: data, sets, keys, screens, games, activities, pages, console, tools, livequiz
      --shots            also write PNGs of every set (English)
      --chrome <path>    Chrome/Chromium binary (or CHROME=...)
 
@@ -120,7 +125,7 @@ const ROOT = resolve(opt('--root') || HERE);
 if (!existsSync(join(ROOT, 'index.html'))) { console.error(`golden: no index.html in ${ROOT}`); process.exit(2); }
 const LANGS = args.includes('--en-only') ? ['en'] : ['en', 'es'];
 const SHOTS = args.includes('--shots');
-const PARTS = ['data', 'sets', 'keys', 'screens', 'games', 'activities', 'pages', 'console', 'tools'];
+const PARTS = ['data', 'sets', 'keys', 'screens', 'games', 'activities', 'pages', 'console', 'tools', 'livequiz'];
 const ONLY = args.includes('--only') ? (opt('--only') || '').split(',').map(x => x.trim()).filter(Boolean) : null;
 if (ONLY && (!ONLY.length || ONLY.some(p => !PARTS.includes(p)))) { console.error(`golden: --only takes ${PARTS.join(', ')}`); process.exit(2); }
 const ON = Object.fromEntries(PARTS.map(p => [p, !ONLY || ONLY.includes(p)]));
@@ -205,6 +210,30 @@ const STATE = `(() => { const ls = {}; for (let i = 0; i < localStorage.length; 
    purpose: anything that opens the mic, a video, a print dialog or another page. */
 const WRITERS = ['toggleStepDone', 'toggleSkill', 'setSkillLevel', 'onStepMcSelect', 'onPracticeMcSelect', 'toggleGotIt', 'setPerformanceLevel',
   'repDotTap', 'repDotReset', 'logCleanRep', 'finishModuleReview', 'toggleTabChoice'];
+
+/* A made-up live-quiz game for one quiz, built in the page with the site's own helpers (so a target is always
+   one the quiz can really ask): the four session docs a game goes through, a right answer and a wrong one. */
+const LQ_DEF = `window.__goldLq = function(quizId){
+  const quiz = lqQuiz(quizId), type = lqType(quiz);
+  let target = null, correct, correctIds = null, wrong;
+  if (type === 'mc') { correct = quiz.choices[0].id; wrong = quiz.choices[1].id; }
+  else if (type === 'fret') {
+    const string = quiz.strings[0], note = lqTargetNotes(quiz, string)[0];
+    target = { string, note }; correctIds = lqTargetIds(quiz, target); correct = correctIds[0];
+    for (let f = 0; f <= 12; f++) { const id = lqFretId(string, f); if (!correctIds.includes(id)) { wrong = id; break; } }
+  } else {
+    const p = lqPcNamePool(quiz.strings)[0];
+    target = { string: p.string, fret: p.fret }; correct = lqPcNameOf(target); wrong = lqPcNames().find(n => n !== correct);
+  }
+  const lobby = { sessionId: 'lq-gold', quizId, state: 'lobby', qIndex: -1, correct: null, correctIds: null, tally: null, scores: {}, target: null,
+    speedBonus: false, limitSec: 0, startedAt: null, askedAt: null, endedAt: null };
+  const scores = { 'dev-user': { pts: 1000, right: 1, answered: 1, last: 1000, lastRight: true }, 'stub-uid-01': { pts: 0, right: 0, answered: 1, last: 0, lastRight: false },
+    'stub-uid-02': { pts: 1000, right: 1, answered: 1, last: 1000, lastRight: true } };
+  const question = Object.assign({}, lobby, { state: 'question', qIndex: 0, target });
+  const reveal = Object.assign({}, question, { state: 'reveal', correct, correctIds, tally: { [correct]: 2, [wrong]: 1 }, scores });
+  const ended = Object.assign({}, reveal, { state: 'ended' });
+  return { correct, wrong, sessions: { lobby, question, reveal, ended } };
+}; 1`;
 
 const chrome = findChrome();
 if (!chrome) { console.error('golden: no Chrome or Chromium found (use --chrome <path>)'); process.exit(2); }
@@ -408,6 +437,25 @@ try {
     }
   }
 
+  if (ON.livequiz) {
+    await boot('livequiz');
+    await run('lq:def', LQ_DEF, 0);
+    const quizzes = (await run('lq:list', `Object.keys(LIVE_QUIZZES)`, 0)) || [];
+    await run('lq:open', `openLiveQuizScreen()`, 400);
+    // [file name, session state, the student's own pick: none, the right answer or the wrong one]
+    const VIEWS = [['lobby', 'lobby', null], ['question', 'question', null], ['question-picked', 'question', 'correct'], ['reveal-right', 'reveal', 'correct'],
+      ['reveal-wrong', 'reveal', 'wrong'], ['reveal-no-answer', 'reveal', null], ['ended', 'ended', null]];
+    for (const lang of LANGS) {
+      await run(`${lang}:lq-lang`, `setLang('${lang}')`, 600);
+      for (const q of quizzes) for (const [name, state, pick] of VIEWS) {
+        await run(`${lang}:lq-${q}-${name}`, `(() => { const g = __goldLq(${JSON.stringify(q)}); lqSession = g.sessions[${JSON.stringify(state)}];
+          lqMyAnswer = ${pick ? `{ qIndex: 0, choice: g.${pick} }` : 'null'}; lqRenderStudent(); return 1; })()`, 150);
+        put(`livequiz/${lang}/student-${safe(q)}-${name}.html`, lines(await read(`${lang}:lq-${q}-${name}:html`, '#live-quiz-screen'))); count('liveQuizStudent');
+      }
+    }
+    await run('lq:clear', `(lqSession = null, lqMyAnswer = null, lqRenderStudent(), 1)`, 100);
+  }
+
   if (ON.pages) {
     /* The pages that are files of their own. Which ones exist is read from the site folder, so a page a rebuild
        drops or adds shows up as a missing or extra file. They take their language from localStorage 'gc-lang'. */
@@ -427,7 +475,7 @@ try {
     await run('pages:lang-back', `(localStorage.setItem('gc-lang', 'en'), 1)`, 0);
   }
 
-  if (ON.console) {
+  if (ON.console || ON.livequiz) {
     /* The teacher console, against the fake class the console smoke test already uses: its STUB (an in-memory
        Firestore, 30 made-up students, a seeded board) is read out of that file, so there is one copy of it. */
     const src = readFileSync(join(HERE, 'tools', 'console-layout-smoke.mjs'), 'utf8');
@@ -441,6 +489,17 @@ try {
     await run('console:stub', m[1], 100);
     await run('console:show', `showTeacherApp({ uid: 'stub-teacher', email: TEACHER_EMAIL, displayName: 'Teacher' }).then(() => 1)`, 300);
     await until('console: the activities list', `!!document.querySelector('#t-grid-container [data-ta-list]')`);
+    if (ON.livequiz) {
+      // The projector stage, in the console's Live quiz view, for the same made-up game.
+      await run('lq-stage:def', LQ_DEF, 0);
+      await run('lq-stage:view', `document.querySelector('#t-side [data-view="livequiz"]').click()`, 500);
+      for (const q of (await run('lq-stage:list', `Object.keys(LIVE_QUIZZES)`, 0)) || []) for (const state of ['lobby', 'question', 'reveal', 'ended']) {
+        await run(`lq-stage:${q}-${state}`, `(() => { lqTSession = __goldLq(${JSON.stringify(q)}).sessions[${JSON.stringify(state)}]; lqTAnswers = []; lqPaintStage(); if (typeof lqPaintControls === 'function') lqPaintControls(); return 1; })()`, 150);
+        put(`livequiz/stage-${safe(q)}-${state}.html`, lines(await read(`lq-stage:${q}-${state}:html`, '.lq-shell'))); count('liveQuizStage');
+      }
+      await run('lq-stage:clear', `(lqTSession = null, lqPaintStage(), typeof lqPaintControls === 'function' && lqPaintControls(), 1)`, 150);
+    }
+    if (ON.console) {
     const views = (await run('console:views', `[...document.querySelectorAll('#t-side [data-view]')].map(b => b.dataset.view)`, 0)) || [];
     for (const v of views) {
       await run(`console:view-${v}`, `document.querySelector('#t-side [data-view=${JSON.stringify(v)}]').click()`, 300);
@@ -468,7 +527,8 @@ try {
       await run(`console:student-${uid}`, `document.querySelector('[data-open-student][data-uid="${uid}"]').click()`, 400);
       put(`console/student-${uid}.html`, lines(await read(`console:student-${uid}:html`, '#teacher-app', 3))); count('consoleStudents');
     }
-    put('console/store.json', (await run('console:store', `JSON.stringify([...__store.entries()].sort((a, b) => a[0] < b[0] ? -1 : 1), null, 1)`, 0)) + '\n');
+    }
+    if (ON.console) put('console/store.json', (await run('console:store', `JSON.stringify([...__store.entries()].sort((a, b) => a[0] < b[0] ? -1 : 1), null, 1)`, 0)) + '\n');
     await page.send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false });
   }
 

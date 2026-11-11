@@ -28,12 +28,12 @@ Started 2026-11-11. State (this branch, `rebuild/site`, worktree `.claude/worktr
   served locally and compared; nothing is deployed for the comparison.
 - **Step 1, done so far: `tools/golden.mjs`.** It records what a site folder shows and saves (sets, rails,
   screens, game views, activity cards and steps, the pages that open on their own, the floating tools, the
-  teacher console against the fake class, a screenshot of every set and page, and what every saving control
+  teacher console against the fake class, the live quiz with a made-up game (student screen and stage), a screenshot of every set and page, and what every saving control
   writes), and `--compare` fails on any difference. Proved: two runs of the same site identical (789 of 789
   files); a reworded label, a shifted progress key and a one-shade colour change each caught. Its header lists
   the names the rebuild must keep reachable (the driver contract).
-- **Step 1, not recorded yet:** the live quiz (student and stage, each quiz and each state), what games and
-  drills do after Start, the tuner, real sign-in and Firestore saves (the dev bypass never saves).
+- **Step 1, not recorded yet:** what games and drills do after Start, the tuner, the live quiz's clock and
+  its writes, real sign-in and Firestore saves (the dev bypass never saves).
 - **Finding (audit of `tools/checks.mjs`, 2026-11-11): 44 of its 110 sections depend on the TEXT of the code**
   (14 are mainly text checks, 18 data checks and 12 executing checks carry text pins). They fail when code only
   moves, so they cannot be frozen as they are. Before step 2 each one is either rewritten to test behaviour or
