@@ -121,12 +121,20 @@ def app_source():
         return (ROOT / 'app.js').read_text(encoding='utf8')
     except OSError:
         pass
+    # No app.js: the parts must be declared in index.html, every tag readable and every part there. A quiet '' here
+    # would make ties fall to name order and pick another level file for a song (review R2-4).
     try:
         html = (ROOT / 'index.html').read_text(encoding='utf8')
         block = html.split('<!-- site-parts:app.js -->', 1)[1].split('<!-- /site-parts:app.js -->', 1)[0]
-        return ''.join((ROOT / p).read_text(encoding='utf8') for p in re.findall(r'<script defer src="([^"?#]+)"></script>', block))
     except (OSError, IndexError):
-        return ''
+        sys.exit('loudness.py: no app.js and no site-parts:app.js block in index.html: cannot read the order of the tracks')
+    tag = r'<script defer src="([^"?#]+)"></script>'
+    if re.sub(tag, '', block).strip():
+        sys.exit('loudness.py: between the site-parts:app.js markers only <script defer src="..."></script> tags are allowed')
+    try:
+        return ''.join((ROOT / p).read_text(encoding='utf8') for p in re.findall(tag, block))
+    except OSError as e:
+        sys.exit('loudness.py: an app part named in index.html cannot be read: %s' % e)
 
 
 def level_file(files):

@@ -57,7 +57,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Student, STUDENTS, ROOMS, MICS, SR, biquad, rng } from './student.mjs';
 import { applyRule, RULES } from './candidates.mjs';
-import { siteSource, siteText } from '../site-src.mjs';
+import { siteSource, siteText, readScriptArg } from '../site-src.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
@@ -78,7 +78,7 @@ function readSummaries(src){
 }
 export const SUM_HOP = 512;
 export function makeSite(coachFile, rule, ratio, fromSummary){
-  let coachSrc = applyRule(coachFile ? readFileSync(coachFile, 'utf8') : siteSource('coach.js', ROOT), rule || 'base', ratio || null);
+  let coachSrc = applyRule(coachFile ? readScriptArg(coachFile) : siteSource('coach.js', ROOT), rule || 'base', ratio || null);
   if (fromSummary) coachSrc = readSummaries(coachSrc);
   const num = (re, what) => { const m = coachSrc.match(re); if (!m) throw new Error('closed-loop: coach.js no longer has ' + what); return Number(m[1]); };
   /* The site's mic chain, from coachAcquireMic's own lines. */

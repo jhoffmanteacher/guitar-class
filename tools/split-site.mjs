@@ -13,7 +13,8 @@
 
      node tools/split-site.mjs                    check tools/split-plan.json against this checkout
                                                   (writes nothing)
-     node tools/split-site.mjs --write            also write the part files (into this checkout)
+     node tools/split-site.mjs --write --in-place also write the part files into this checkout: the cut itself
+                                                  (coach.js and teacher.js become their first parts)
      node tools/split-site.mjs --src <dir>        read app.js / coach.js / teacher.js from another folder
      node tools/split-site.mjs --out <dir>        write the parts under another folder (implies --write)
      node tools/split-site.mjs --plan <file>      another plan file
@@ -95,10 +96,15 @@ for (const [name, parts] of Object.entries(plan)) {
 rmSync(tmp, { recursive: true, force: true });
 
 if (failed) { console.error(`split-site: ${failed} problem(s); nothing written`); process.exit(1); }
+/* Writing into the folder the sources came from replaces coach.js and teacher.js with their first parts. That
+   is the cut itself, so it must be asked for by name (review R2-1: a plain --write left a tree whose coach.js
+   was a quarter of the script and whose tools still ran). */
+if (OUT && OUT === SRC && !args.includes('--in-place')) { console.error('split-site: --write would cut the files of this very folder. Use --out <another folder> to look at the parts, or --write --in-place to make the cut here (then declare the part lists in the same change).'); process.exit(1); }
 for (const r of results) {
   console.log(`split-site: ${r.name} (${r.total} lines) → ${r.parts.length} parts, put back together = the source, each parses on its own`);
   r.parts.forEach((p, i) => { const end = i + 1 < r.starts.length ? r.starts[i + 1] : r.total; console.log(`  ${String(r.starts[i] + 1).padStart(6)}-${String(end).padEnd(6)} ${String(end - r.starts[i]).padStart(5)} lines  ${p.file}`); });
   if (OUT) for (const [i, p] of r.parts.entries()) { const f = join(OUT, p.file); mkdirSync(dirname(f), { recursive: true }); writeFileSync(f, r.bodies[i]); }
 }
 if (!results.length) { console.error('split-site: nothing to do (no source file matched)'); process.exit(1); }
-console.log(OUT ? `split-site: ✓ parts written under ${OUT} (the source files are left as they are)` : 'split-site: ✓ plan checks out (nothing written; --write or --out <dir> writes the parts)');
+const replaced = OUT ? results.filter(r => OUT === SRC && r.parts.some(p => p.file === r.name)).map(r => r.name) : [];
+console.log(OUT ? `split-site: ✓ parts written under ${OUT}` + (replaced.length ? ` (${replaced.join(' and ')} now ${replaced.length > 1 ? 'hold' : 'holds'} only the first part; any other source file is left as it is and must be deleted, and the part lists declared, in the same change: see tools/site-src.mjs)` : ' (the source files are left as they are)') : 'split-site: ✓ plan checks out (nothing written; --write or --out <dir> writes the parts)');

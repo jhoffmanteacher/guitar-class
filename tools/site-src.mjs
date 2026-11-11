@@ -57,7 +57,7 @@
 
    The marker and array names above are the contract slices 0b / 1Z write to. To change the format, change
    declaredParts() below (the single function that reads declarations) and this header together. */
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync, realpathSync } from 'node:fs';
 import { dirname, join, resolve, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -90,13 +90,18 @@ function declaredParts(name, root) {
     if (html.indexOf(open, a + open.length) >= 0) throw new Error(`site-src: index.html has "${open}" more than once`);
     const block = html.slice(a + open.length, b);
     const TAG = /<script defer src="([^"?#]+)"><\/script>/g;
-    const parts = [...block.matchAll(TAG)].map(m => m[1].replace(/^\.\//, ''));
+    const parts = [...block.matchAll(TAG)].map(m => m[1]);
     if (block.replace(TAG, '').trim() !== '') throw new Error('site-src: index.html: between the site-parts:app.js markers only <script defer src="…"></script> tags are allowed');
     return parts;
   }
   const arr = ARRAY_NAME[name];
   // A folder with no app code at all (pm-sim's PM_ROOT copy holds four files) declares nothing (review R1-2).
-  if (!existsSync(join(root, 'app.js')) && declaredParts('app.js', root) === null) return null;
+  if (!existsSync(join(root, 'app.js')) && declaredParts('app.js', root) === null) {
+    /* …but a SITE folder (it has an index.html) with neither app.js nor a part block has lost its app code:
+       saying "nothing declared" there handed back part 1 of coach.js and teacher.js without a word (review R2-1). */
+    if (existsSync(join(root, 'index.html'))) throw new Error(`site-src: ${root} has an index.html but no app.js and no site-parts:app.js block, so the part list of ${name} cannot be read`);
+    return null;
+  }
   const app = siteSource('app.js', root);
   const found = [...app.matchAll(new RegExp(`^const ${arr}\\s*=\\s*\\[([^\\]\\n]*)\\];`, 'gm'))];
   if (!found.length) {
@@ -115,9 +120,22 @@ function declaredParts(name, root) {
   return parts;
 }
 
+/* Files that look like parts of a script: app/*.js, coach-*.js, teacher-*.js beside the script. Every one of them
+   must be in the declared list, and with nothing declared there must be none: parts on disk that no list names
+   mean the cut was written but not declared (or a list is short), and the file still called coach.js is then
+   only its first part (review R2-1, R2-5). */
+function looseParts(name, root, listed) {
+  const stem = name.replace(/\.js$/, ''), found = [];
+  try { for (const f of readdirSync(root)) if (f.startsWith(stem + '-') && f.endsWith('.js')) found.push(f); } catch { /* no such folder: nothing to find */ }
+  if (name === 'app.js') { try { for (const f of readdirSync(join(root, 'app'))) if (f.endsWith('.js')) found.push('app/' + f); } catch { /* no app/ folder */ } }
+  return found.filter(f => !listed.includes(f)).sort();
+}
+
 export function siteParts(name, root = DEFAULT_ROOT) {
   assertSplitName(name, 'siteParts');
   const parts = declaredParts(name, root);
+  const loose = looseParts(name, root, parts || []);
+  if (loose.length) throw new Error(`site-src: ${loose.join(', ')} ${loose.length > 1 ? 'look' : 'looks'} like part${loose.length > 1 ? 's' : ''} of ${name} but ${parts ? 'the declared list does not name ' + (loose.length > 1 ? 'them' : 'it') : 'no part list is declared'}: declare the parts (see this file's header) or remove the file${loose.length > 1 ? 's' : ''}`);
   if (parts === null) return [name];
   if (!parts.length) throw new Error(`site-src: the part list declared for ${name} is empty`);
   // './coach.js', 'sub//x.js' and 'Coach.js' are the same file as their plain spelling on a Mac: one spelling only (review R1-5).
@@ -149,7 +167,9 @@ export function siteText(name, root = DEFAULT_ROOT) {
    cut a file still called coach.js holds only the first part, and a tool that read it directly reported success
    on a quarter of the code (review R1-1). */
 export function readScriptArg(path) {
-  const full = resolve(path), dir = dirname(full), name = basename(full);
+  // The real file behind a link: a link to a cut site's coach.js is that site's coach.js (review R2-2).
+  let full = resolve(path); try { full = realpathSync(full); } catch { /* not there: the read below says so */ }
+  const dir = dirname(full), name = basename(full);
   if (SPLIT_NAMES.includes(name) && existsSync(join(dir, 'index.html'))) return siteSource(name, dir);
   return readFileSync(full, 'utf8');
 }
