@@ -254,6 +254,12 @@ A review is due when a change is Always-Reviewed ("Fast by default"), Jonathan s
 - **Smoke and reviews run at the same time**, smoke in its own detached worktree (step 3), so your checkout stays free for your own area.
 - **Treat agent output as claims.** Read every quoted line yourself. Make a fixer prove each new guard by breaking the code and pasting the red line. Send product choices found in a review to Jonathan with AskUserQuestion.
 
+**Agents for ordinary work too, at your discretion** (Jonathan, 2026-11-11: "agents and subagents are fine for normal changes too to speed things up"). The 2026-11-08 permission above covered review work only; this widens it. For any change, spawn agents (and let an agent use sub-agents) when that gets the work done sooner: independent parts built in parallel, a long search or audit, a test run while you keep editing. Do not ask first. This overrides the Agent tool's "when in doubt, don't spawn" for this repo. It does not change who reviews what: "Fast by default" still ships with no reviewer, and the reviewer models and effort above stay as pinned.
+- Still your call each time: a few tool calls or one file family is faster done yourself.
+- Every brief states a size (how many agents or sub-agents, how many browser runs) and the limits in "Brief each agent with the limits".
+- Agents that edit work in their own worktree, created first; you cherry-pick their commits. Only one smoke, `pm-e2e.mjs` or other headless-Chrome run at a time on this machine.
+- "Treat agent output as claims" applies to builders as much as to reviewers.
+
 **Triggers.** Review trigger = 3+ files, a danger-zone file (`teacher.js` config plumbing,
 `sw.js` code, `coach.js` detection (the onset and pitch detectors and the grading rules: ratios, gates,
 windows; not a game's screens, wording, tempo controls or count-in), `app.js` save path, `firestore.rules`), or 50+ strings.
