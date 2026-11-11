@@ -1,0 +1,282 @@
+/* Closed-loop test of Power Chord Switch (2026-11-11): a virtual student
+   (student.mjs) plays whole games into the REAL site code, and the site's
+   verdicts are compared with what the student really played.
+
+     node tools/mic-sim/closed-loop.mjs [options]
+       --students=steady,beginner,…   (default: every student in student.mjs; `list` prints them)
+       --rooms=quiet,class,…          (default quiet,class)
+       --mics=chromebook,…            (default chromebook)
+       --bpm=30,60,90,120             tempos
+       --pairs=F5-G5,G5-C5 | all      chord pairs (default F5-G5,B5-C5,G5-C5: one per column; all = the 11 pairs)
+       --song=sweet-child-o-mine      play that song's switches instead (three rounds each)
+       --rate=beat|2|bar              how long each chord lasts (default beat)
+       --fps=60,20                    how fast the Chromebook draws (default 60)
+       --lag=70                       ms from the site's click to the student's strum reaching the mic, beyond their own timing
+       --seeds=2                      games per cell
+       --coach=<file>                 another coach.js (git show <ref>:coach.js > file) for a before / after
+       --json=<file>                  every game, every change
+
+   What is real: the site's scripts run unchanged in a vm (the way tools/grid-sim.mjs
+   loads them), and the game is started with its own ccPrepare / ccBeginStage. From
+   there coachCountIn, ccLoop, coachReadFrame, coachPitchReadings, coachDetectPitch,
+   ccResolvePend, ccStageEnd (a song switch's three rounds) and ccFinish all run as
+   written, on a virtual clock. Nothing is stubbed between the microphone and the
+   verdict.
+   What is modelled: the student, the room and the laptop mic (student.mjs), the
+   speaker playing the count-in clicks, and the site's mic chain (gain, 70 Hz
+   high-pass, 1500 Hz low-pass: the numbers are read from coach.js).
+   What is skipped: ccStart's microphone permission and consent screens, and the
+   screen itself (tools/smoke.mjs clicks through those in a real browser).
+
+   The loop is closed both ways: the student does not get a script of times. It is
+   told the round only after the game has set it up, hears the count-in the game
+   plays, and plays on that.
+
+   Reading the table: each graded change is one of four truths.
+     right   the new chord, strummed      -> the game should say right
+     wrong   the shape one fret high       -> should say wrong chord
+     held    the old chord, strummed again -> should say wrong chord
+     silent  no strum                      -> should say no strum
+   The game is lenient on purpose (coach.js, ccLoop's comment): a strum with fewer
+   than 3 pitch readings counts on timing alone.
+
+   Synthetic sound. One number (how long a string rings) is fitted to the classroom takes; the rest is not (student.mjs header). */
+import vm from 'node:vm';
+import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { join, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { Student, STUDENTS, ROOMS, MICS, SR, biquad, rng } from './student.mjs';
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+
+/* The site in a vm, on a clock this file moves. One site can play many games. */
+export function makeSite(coachFile){
+  const coachSrc = readFileSync(coachFile || join(ROOT, 'coach.js'), 'utf8');
+  const num = (re, what) => { const m = coachSrc.match(re); if (!m) throw new Error('closed-loop: coach.js no longer has ' + what); return Number(m[1]); };
+  /* The site's mic chain, from coachAcquireMic's own lines. */
+  const chain = {
+    gain: num(/^const COACH_MIC_GAIN = ([\d.]+);/m, 'COACH_MIC_GAIN'),
+    fft: num(/^const COACH_FFT\s*=\s*(\d+);/m, 'COACH_FFT'),
+    hp: num(/hp\.type = 'highpass'; hp\.frequency\.value = ([\d.]+);/, 'the high-pass line'),
+    hpQ: num(/hp\.type = 'highpass'; hp\.frequency\.value = [\d.]+; hp\.Q\.value = ([\d.]+);/, 'the high-pass Q'),
+    lp: num(/lp\.type = 'lowpass'; lp\.frequency\.value = ([\d.]+);/, 'the low-pass line'),
+    lpQ: num(/lp\.type = 'lowpass'; lp\.frequency\.value = [\d.]+; lp\.Q\.value = ([\d.]+);/, 'the low-pass Q')
+  };
+  const clock = { now: 0 };
+  let timers = [], rafs = [], tid = 1;
+  const beeps = [];
+  const el = id => ({
+    id, style: { setProperty(){}, removeProperty(){}, getPropertyValue(){ return ''; } }, dataset: {}, children: [], _h: '',
+    classList: { add(){}, remove(){}, toggle(){}, contains(){ return false; } },
+    get innerHTML(){ return this._h; }, set innerHTML(v){ this._h = v; },
+    textContent: '', value: '', hidden: false, checked: false, isConnected: true,
+    addEventListener(){}, removeEventListener(){}, appendChild(){}, removeChild(){}, remove(){},
+    setAttribute(){}, getAttribute(){ return null; }, removeAttribute(){}, hasAttribute(){ return false; },
+    querySelector(){ return null; }, querySelectorAll(){ return []; }, closest(){ return null; },
+    focus(){}, blur(){}, click(){}, scrollIntoView(){}, insertAdjacentHTML(){}, insertAdjacentElement(){},
+    cloneNode(){ return el(''); }, contains(){ return false; },
+    getBoundingClientRect(){ return { top: 0, left: 0, width: 0, height: 0, bottom: 0, right: 0 }; }
+  });
+  const els = {};
+  const storage = () => ({ _d: {}, getItem(k){ return this._d[k] ?? null; }, setItem(k, v){ this._d[k] = String(v); }, removeItem(k){ delete this._d[k]; }, clear(){ this._d = {}; } });
+  const param = () => ({ value: 1, setValueAtTime(){}, setTargetAtTime(){}, cancelScheduledValues(){}, linearRampToValueAtTime(){}, exponentialRampToValueAtTime(){} });
+  /* The page's sound output. Every oscillator the site starts is logged: the count-in clicks come out of here. */
+  const actx = {
+    get currentTime(){ return clock.now / 1000; }, state: 'running', resume(){ return Promise.resolve(); }, destination: {}, sampleRate: SR,
+    createOscillator(){ const o = { connect(){}, frequency: param(), start(at){ beeps.push({ atMs: (at == null ? actx.currentTime : at) * 1000, freq: o.frequency.value }); }, stop(){} }; return o; },
+    createGain(){ return { connect(){}, disconnect(){}, context: actx, gain: param() }; },
+    createBufferSource(){ return { connect(){}, playbackRate: param(), start(){}, stop(){} }; },
+    createBuffer(){ return { getChannelData(){ return new Float32Array(16); } }; },
+    createDynamicsCompressor(){ return { connect(){}, threshold: param(), knee: param(), ratio: param(), attack: param(), release: param() }; },
+    close(){}
+  };
+  const mic = { proc: new Float32Array(0), upTo: 0 };
+  const ctx = {
+    console: { log(){}, warn(){}, error(){}, info(){} },
+    document: { documentElement: el(''), head: el(''), body: el(''), getElementById(id){ return els[id] || (els[id] = el(id)); },
+      querySelector(){ return null; }, querySelectorAll(){ return []; }, createElement(){ return el(''); }, createDocumentFragment(){ return el(''); },
+      addEventListener(){}, removeEventListener(){}, fonts: { ready: Promise.resolve() }, hidden: false, visibilityState: 'visible' },
+    localStorage: storage(), sessionStorage: storage(),
+    location: { hostname: 'localhost', href: 'http://localhost/', pathname: '/', search: '', hash: '', reload(){} },
+    history: { scrollRestoration: 'auto', replaceState(){}, pushState(){} },
+    navigator: { userAgent: 'node', platform: 'node', language: 'en', onLine: true },
+    setTimeout: (fn, ms) => { const id = tid++; timers.push({ id, at: clock.now + (ms || 0), fn }); return id; },
+    clearTimeout: id => { timers = timers.filter(x => x.id !== id); },
+    setInterval: () => 0, clearInterval(){},
+    requestAnimationFrame: fn => { const id = tid++; rafs.push({ id, fn }); return id; },
+    cancelAnimationFrame: id => { rafs = rafs.filter(x => x.id !== id); },
+    matchMedia: () => ({ matches: false, addEventListener(){}, addListener(){} }),
+    getComputedStyle: () => ({ getPropertyValue: () => '' }),
+    fetch: () => Promise.reject(new Error('no network')),
+    CustomEvent: class { constructor(t, o){ this.type = t; Object.assign(this, o || {}); } },
+    Image: class {}, Audio: class { play(){ return Promise.resolve(); } pause(){} },
+    AudioContext: class { constructor(){ return actx; } },
+    performance: { now: () => clock.now }, URLSearchParams, URL, TextEncoder, TextDecoder,
+    addEventListener(){}, removeEventListener(){}, dispatchEvent(){}, scrollTo(){}, innerWidth: 1366, innerHeight: 657, devicePixelRatio: 1,
+    /* The microphone the site reads: the newest COACH_FFT samples of the processed stream, as an AnalyserNode gives them. */
+    __mic: {
+      ctx: { sampleRate: SR, get currentTime(){ return clock.now / 1000; } },
+      analyser: { getFloatTimeDomainData(b){
+        const end = Math.min(mic.upTo, Math.round(clock.now / 1000 * SR)), st = end - b.length;
+        for (let i = 0; i < b.length; i++){ const s = st + i; b[i] = s >= 0 ? mic.proc[s] : 0; }
+      } }
+    }
+  };
+  ctx.window = ctx; ctx.globalThis = ctx; ctx.self = ctx;
+  vm.createContext(ctx);
+  const MODULE_FILES = readdirSync(ROOT).filter(f => /^module-\d+\.js$/.test(f)).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  for (const f of ['i18n.js', 'guitar-diagrams.js', 'class-activities.js', 'config-main.js', ...MODULE_FILES, 'app.js', 'fab-tools.js', 'tuner.js'])
+    vm.runInContext(readFileSync(join(ROOT, f), 'utf8'), ctx, { filename: f });
+  vm.runInContext(coachSrc, ctx, { filename: 'coach.js' });
+  const run = code => vm.runInContext(code, ctx);
+  run(`globalThis.__cl = {
+    list(){ return JSON.stringify(CC_POWER_PROGRESSIONS.map((p, i) => ({ i, chords: p.chords, group: p.group, song: p.song || null, random: !!p.random }))); },
+    rates(){ return JSON.stringify(CC_RATES.map(r => r.id)); },
+    start(progIdx, bpm, rateIdx, lat){
+      setLang('en'); ccSetup('power'); ccPickRate(rateIdx); ccPickProg(progIdx); cc.bpm = bpm;
+      nrOffsetMs = lat;
+      coachAnalyser = __mic.analyser; coachCtx = __mic.ctx; coachFrameBuf = new Float32Array(COACH_FFT);
+      coachReadCtx = null;
+      ccPrepare(false); ccBeginStage();
+    },
+    key(){ return cc ? cc.phase + '|' + cc.stage + '|' + cc.listenStart : 'none'; },
+    round(){
+      const midis = {};
+      cc.chords.forEach(n => { midis[n] = chordMidis(pwBaseName(n, cc.shapes)); });
+      return JSON.stringify({ stage: cc.stage, listenStartMs: cc.listenStart, beatMs: cc.beatMs, bpc: cc.bpc, slots: cc.slots, seq: cc.seq, midis });
+    },
+    result(){
+      const out = { phase: cc.phase, onsets: cc.onsetCount, scoreBpm: cc.phase === 'done' ? ccScoreBpm() : null,
+        changes: cc.changes.map(c => ({ from: c.from, to: c.to, stage: c.stage || 0, bpm: c.bpm, verdict: c.result, readings: c.readings ? c.readings.length : null })) };
+      ccStop(); cc = null;
+      return JSON.stringify(out);
+    }
+  };`);
+  return {
+    chain, clock, beeps, mic, run,
+    progs: JSON.parse(run('__cl.list()')), rates: JSON.parse(run('__cl.rates()')),
+    tick(){
+      const due = timers.filter(x => x.at <= clock.now).sort((a, b) => a.at - b.at);
+      timers = timers.filter(x => x.at > clock.now);
+      due.forEach(x => x.fn());
+      const q = rafs; rafs = [];
+      q.forEach(x => x.fn(clock.now));
+    },
+    reset(){ timers = []; rafs = []; beeps.length = 0; clock.now = 0; }
+  };
+}
+
+/* One whole game. Returns { changes: [{ did, devMs, verdict, readings, bpm, stage, from, to }], ... }. */
+export function playGame(site, g){
+  const o = Object.assign({ student: 'steady', room: 'quiet', mic: 'chromebook', bpm: 60, rateIdx: site.rates.indexOf('beat'), fps: 60, lagMs: 70, lat: 50, seed: 1, clickAmp: 0.03 }, g);
+  const device = typeof o.mic === 'string' ? MICS[o.mic] : o.mic;
+  if (!device) throw new Error('no such mic: ' + o.mic);
+  const student = new Student(o.student, { room: o.room, lagMs: o.lagMs, seed: o.seed });
+  const jit = rng(o.seed * 7919 + 13);
+  site.reset();
+  const START = 1000;
+  let air = new Float32Array(SR * 30), proc = new Float32Array(SR * 30);
+  site.mic.proc = proc; site.mic.upTo = 0;
+  const grow = s => { if (s <= air.length) return; const n = Math.max(s, air.length * 2); const a = new Float32Array(n), p = new Float32Array(n); a.set(air); p.set(proc); air = a; proc = p; site.mic.proc = proc; };
+  const devHp = device.hp ? biquad('highpass', device.hp, 0.7) : x => x;
+  const hp = biquad('highpass', site.chain.hp, site.chain.hpQ), lp = biquad('lowpass', site.chain.lp, site.chain.lpQ);
+  let rendered = 0, beepsDone = 0;
+  const pump = () => {
+    const toS = Math.round(site.clock.now / 1000 * SR);
+    grow(toS + SR);
+    // the speaker: each count-in click the site queued, heard `lagMs` later
+    for (; beepsDone < site.beeps.length; beepsDone++){
+      const b = site.beeps[beepsDone], s0 = Math.round((b.atMs + o.lagMs) / 1000 * SR), n = Math.round(0.08 * SR);
+      grow(s0 + n + 1);
+      for (let i = 0; i < n; i++) if (s0 + i >= rendered) air[s0 + i] += o.clickAmp * Math.pow(0.0025, i / n) * Math.sin(2 * Math.PI * b.freq * i / SR);
+    }
+    student.render(air, rendered / SR * 1000, toS / SR * 1000);
+    for (let s = rendered; s < toS; s++){
+      let v = devHp(air[s]) * device.gain;
+      v = v > 1 ? 1 : v < -1 ? -1 : v;
+      proc[s] = lp(hp(v * site.chain.gain));
+    }
+    rendered = toS; site.mic.upTo = toS;
+  };
+  site.clock.now = START;
+  pump();
+  site.run(`__cl.start(${o.progIdx}, ${o.bpm}, ${o.rateIdx}, ${o.lat})`);
+  const key = [];
+  let seen = '', guard = 0;
+  const frameMs = 1000 / o.fps;
+  for (;;){
+    const k = site.run('__cl.key()');
+    if (k !== seen){
+      seen = k;
+      if (k.startsWith('countin|')){
+        const round = JSON.parse(site.run('__cl.round()'));
+        student.play(round).forEach(x => key.push(Object.assign(x, { stage: round.stage })));
+      }
+      if (k.startsWith('done|') || k === 'none') break;
+    }
+    site.clock.now += frameMs * (0.85 + 0.3 * jit());
+    pump();
+    site.tick();
+    if (++guard > 400000) throw new Error('closed-loop: the game never ended (' + k + ')');
+  }
+  const res = JSON.parse(site.run('__cl.result()'));
+  if (res.changes.length !== key.length) throw new Error(`closed-loop: the game graded ${res.changes.length} changes, the student played ${key.length}`);
+  const changes = res.changes.map((c, i) => {
+    const t = key[i];
+    if (t.to !== c.to || t.from !== c.from) throw new Error(`closed-loop: change ${i} is ${c.from}>${c.to} in the game and ${t.from}>${t.to} for the student`);
+    return { stage: c.stage, bpm: c.bpm, from: c.from, to: c.to, did: t.did, devMs: t.devMs == null ? null : Math.round(t.devMs), verdict: c.verdict, readings: c.readings };
+  });
+  return { changes, onsets: res.onsets, scoreBpm: res.scoreBpm, phase: res.phase };
+}
+
+/* Counts for a list of games' changes: truth x verdict. */
+export function tally(changes){
+  const t = {};
+  for (const d of ['right', 'wrong', 'held', 'silent']) t[d] = { n: 0, ok: 0, off: 0, miss: 0, okTiming: 0 };
+  for (const c of changes){
+    const row = t[c.did]; row.n++; row[c.verdict]++;
+    if (c.verdict === 'ok' && (c.readings == null || c.readings < 3)) row.okTiming++;
+  }
+  return t;
+}
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]){
+  const args = process.argv.slice(2);
+  const opt = (k, d) => { const a = args.find(x => x.startsWith('--' + k + '=')); return a ? a.slice(k.length + 3) : d; };
+  if (args.includes('list')){
+    console.log('students: ' + Object.keys(STUDENTS).join(', ') + '\nrooms:    ' + Object.keys(ROOMS).join(', ') + '\nmics:     ' + Object.keys(MICS).join(', '));
+    process.exit(0);
+  }
+  const site = makeSite(opt('coach', null));
+  const students = opt('students', Object.keys(STUDENTS).join(',')).split(',');
+  const rooms = opt('rooms', 'quiet,class').split(','), mics = opt('mics', 'chromebook').split(',');
+  const bpms = opt('bpm', '30,60,90,120').split(',').map(Number), fpss = opt('fps', '60').split(',').map(Number);
+  const seeds = +opt('seeds', 2), lagMs = +opt('lag', 70);
+  const rateArg = opt('rate', 'beat'), rateIdx = site.rates.indexOf(rateArg);
+  if (rateIdx < 0){ console.error('--rate must be one of ' + site.rates.join(', ')); process.exit(2); }
+  for (const [list, known, what] of [[students, STUDENTS, 'student'], [rooms, ROOMS, 'room'], [mics, MICS, 'mic']])
+    for (const n of list) if (!known[n]){ console.error(`no ${what} "${n}" (node tools/mic-sim/closed-loop.mjs list)`); process.exit(2); }
+  const song = opt('song', null), pairArg = opt('pairs', 'F5-G5,B5-C5,G5-C5');
+  const progs = song ? site.progs.filter(p => p.song === song)
+    : site.progs.filter(p => !p.random && !p.song && (pairArg === 'all' || pairArg.split(',').includes(p.chords.join('-'))));
+  if (!progs.length){ console.error('no such pair or song'); process.exit(2); }
+  const games = students.length * rooms.length * mics.length * fpss.length * bpms.length * progs.length * seeds;
+  console.log(`Power Chord Switch, closed loop · ${progs.length} ${song ? 'switches of ' + song : 'pairs'} (${progs.map(p => p.chords.join('-')).join(' ')}) · ${bpms.join('/')} BPM · every ${rateArg} · ${fpss.join('/')} fps · ${seeds} games per cell · ${games} games`);
+  console.log(`strum rule ${site.run('CC_POWER_ONSET_RATIO')} / ${site.run('CC_POWER_HF_RATIO')} · mic chain x${site.chain.gain}, ${site.chain.hp}-${site.chain.lp} Hz · synthetic sound; only the ring time is fitted to classroom takes (student.mjs)\n`);
+  const pc = (a, b) => b ? String(Math.round(100 * a / b)).padStart(3) + '%' : '   -';
+  console.log('student     room   mic        fps | right chord: said right / wrong / no strum | fret high: caught | never moved: caught | no strum: said strum |  changes');
+  const all = [], t0 = Date.now();
+  let seedBase = 0;
+  for (const st of students) for (const room of rooms) for (const micName of mics) for (const fps of fpss){
+    const cell = [];
+    for (const bpm of bpms) for (const p of progs) for (let s = 1; s <= seeds; s++){
+      const g = playGame(site, { student: st, room, mic: micName, fps, bpm, progIdx: p.i, rateIdx, lagMs, seed: ++seedBase });
+      g.changes.forEach(c => cell.push(c));
+      all.push({ student: st, room, mic: micName, fps, bpm, pair: p.chords.join('-'), seed: seedBase, scoreBpm: g.scoreBpm, onsets: g.onsets, changes: g.changes });
+    }
+    const t = tally(cell);
+    console.log(`${st.padEnd(11)} ${room.padEnd(6)} ${micName.padEnd(10)} ${String(fps).padStart(3)} |        ${pc(t.right.ok, t.right.n)} (${pc(t.right.okTiming, t.right.n).trim()} on timing) / ${pc(t.right.off, t.right.n)} / ${pc(t.right.miss, t.right.n)}  |       ${pc(t.wrong.off, t.wrong.n)}        |        ${pc(t.held.off, t.held.n)}         |        ${pc(t.silent.ok + t.silent.off, t.silent.n)}          | ${String(cell.length).padStart(6)}`);
+  }
+  console.log(`\n${all.length} games, ${all.reduce((n, g) => n + g.changes.length, 0)} graded changes, ${((Date.now() - t0) / 1000).toFixed(1)} s`);
+  if (opt('json', null)) writeFileSync(opt('json'), JSON.stringify(all));
+}

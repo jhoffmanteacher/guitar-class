@@ -31,6 +31,21 @@ Dates are the Pacific calendar date. `CACHE_VERSION` and commit timestamps may s
 
 Start here. Update this block whenever an item opens or closes; each line says where the detail is.
 
+**Closed-loop test, first piece (2026-11-11; Jonathan: "what we're lacking here is some form of closed loop testing")**
+- **What it is:** a virtual student (`tools/mic-sim/student.mjs`) plays whole Power Chord Switch games into the real
+  game code (`tools/mic-sim/closed-loop.mjs`; README there) and keeps an answer key, so each run prints truth against
+  verdict. No site file changed. Not in `checks.mjs` yet.
+- **Fitted to real takes:** one number, how long a string rings (1.0 s), from the 2026-11-04 strum what-if (1 of 132
+  real strums lost at 1.8, 4 at 2.2). The rooms, the thumb / finger touch and the mics are guesses.
+- **First numbers (432 games, 6,480 changes; the model says, not the classroom):** a steady pick strummer in a quiet
+  room or a class: 360 of 360 right chords said right. Thumb strummer: 0 of 180 missed at 30 and 60 BPM, 9 of 90 at 90,
+  34 of 90 at 120. A chord that never moved was caught 28% of the time, a chord one fret high 93%. An empty quiet room:
+  0 of 180 strums heard; a class with no guitar in hand: 47%.
+- **Next (in order):** (1) on Jonathan's Mac, where the takes are, fit the rooms and the touch to the 34 real takes;
+  his thumb / finger take at 60 and 120 BPM ("His first step" below) tests the 120 BPM prediction directly. (2) Then
+  pin a small scorecard in `checks.mjs` (a new kind of check around `coach.js` detection: Always Reviewed). (3) Then
+  the next game: `student.mjs` is game-neutral; each game needs its own runner.
+
 **Shipped 2026-11-09 (live as of `c443261`)**
 - **Count-in:** 2 clicks below 60 BPM in Power Chord Switch and Change Up (Open work → 2026-11-06 Friday check →
   "Decided (Jonathan, 2026-11-09)"). **Today's activities by date:** the group is ordered by release date, newest first;

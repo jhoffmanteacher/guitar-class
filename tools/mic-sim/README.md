@@ -40,6 +40,19 @@ tuning pass — ideally on the real classroom recordings the teacher console's
   Since 2026-10-30 the game's "Two random chords" draws only one of the 11 listed pairs (in either order), so
   every pair a student can get is one this tool covers; before, a pool of six chords could draw four
   jumps (F5-D5, G5-B5, A5-B5, A5-C5) it never tested.
+- **`closed-loop.mjs` + `student.mjs` (2026-11-11) — the closed-loop test.** A virtual student (`student.mjs`:
+  plucked-string guitar, pick / thumb / finger, wrong chords, held chords, skipped strums, loose or late rhythm, a
+  room, a laptop mic) plays WHOLE Power Chord Switch games into the real site code in a vm: `ccPrepare`,
+  `ccBeginStage`, `coachCountIn`, `ccLoop`, `coachReadFrame`, the pitch readings, `ccResolvePend`, a song switch's
+  three rounds and `ccFinish` all run as written, on a virtual clock, with nothing stubbed between the mic and the
+  verdict. The student keeps an answer key, so the table is truth against verdict: a right chord said right, a
+  chord one fret high caught, a chord that never moved caught, a strum heard where there was none.
+  `node tools/mic-sim/closed-loop.mjs` (options in its header; `list` names the students, rooms and mics;
+  `--coach=<file>` runs another coach.js for a before / after). Unlike `power-switch.mjs` (one change, sine sums, a
+  copy of ccLoop's logic) it plays every beat of every round and includes the site's 70-1500 Hz mic filters, which
+  the older tools here leave out. Synthetic. One number is fitted to the classroom takes (how long a string rings, `ringS`: the reason is in
+  `student.mjs`); the touches, the rooms and the mics are guesses until the takes are run against them. Not in `checks.mjs`. Power Chord Switch only so far; `student.mjs` knows nothing about the site, so
+  the next game needs only its own runner.
 - `smoke.mjs <url>` — headless Chromium through the Dev bypass with the
   in-page harness: Coach, Note Runner, Note Hunt, Note Call, Change Up, PSG
   Hero, the consent prompt and the recording path. Start a static server on
