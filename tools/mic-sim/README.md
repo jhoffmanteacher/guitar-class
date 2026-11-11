@@ -79,7 +79,8 @@ tuning pass — ideally on the real classroom recordings the teacher console's
   audio (outside the repo) for those.
 - **When to ask Jonathan for new takes:** `replay-takes.mjs` prints "ASK JONATHAN" with the reasons (no summaries; the
   detector changed; the newest take is older than the last change to how coach.js listens; fewer than 15; older than
-  30 days). Pass that on to him in the report; do not ask otherwise.
+  30 days). Pass that on to him in the report; do not ask otherwise. The Friday check runs it every week (skill
+  `friday-check`, step 5b), so he is told within a week without anyone working on listening.
 - **Fitted rooms** `room7`, `room4` in `student.mjs` (Jonathan, 2026-11-11, fitted to the 21 real takes).
 - `smoke.mjs <url>` — headless Chromium through the Dev bypass with the
   in-page harness: Coach, Note Runner, Note Hunt, Note Call, Change Up, PSG

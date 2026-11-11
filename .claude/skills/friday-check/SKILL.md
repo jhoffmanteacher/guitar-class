@@ -125,6 +125,18 @@ git push origin friday-check-<YYYY-MM-DD>
 Always create a new dated tag — never move or delete one (cloud credentials
 can't rewrite refs). Tag even when nothing shipped Fast.
 
+## 5b. Are the real takes still current? (every run, even when nothing shipped Fast)
+
+```
+node tools/mic-sim/replay-takes.mjs --rules=base
+```
+
+It reads the take summaries in `tools/mic-sim/takes/` (no audio; about a minute). Its second line is either "Takes are
+current" or "ASK JONATHAN for new takes" with the reasons. Copy an ASK line and its reasons into the report (step 6).
+Do not ask him any other way and do not try to fetch takes: only he can download them. If the command stops with an
+error that names a line of `coach.js` ("expected this once in coach.js"), a change this week moved code the listening
+tests read: that is a finding for step 3.
+
 ## 6. Report
 
 Plain language, short (he reads it on his phone):
@@ -132,4 +144,7 @@ Plain language, short (he reads it on his phone):
 - How many Fast commits were reviewed, and their one-line subjects.
 - What was fixed and pushed (one line each, what a student would have seen).
 - Anything on a branch or in Open work waiting for Jonathan.
+- **Takes:** if step 5b printed "ASK JONATHAN", say so first in the report, with its reasons in plain words and the one
+  thing to do: download the recordings from the console, then `node tools/mic-sim/takes-in.mjs` on the Mac and push.
+  If the takes are current, say nothing about them.
 - "Confirm the deploy from a local machine" if anything was pushed.
