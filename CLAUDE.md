@@ -281,6 +281,8 @@ change to `site-reviewer-deep`.
 
 **"Next steps for Power Chord Switch"** → read the `WORKFLOW.md` section "Power Chord Switch: where we stopped" first: what shipped 2026-11-03, the room-noise decision (a stricter strum ratio for Power Chord Switch only: 2.2 / 2.67 from 2026-11-05, lowered to 1.8 / 2.19 on 2026-11-07; the strum what-if numbers on the real takes and how to roll it back are recorded there), the pitch readings saved in takes since 2026-11-05 and the console's Pitch-rule table (read 2026-11-07: the pitch rule was rejected; do not build it), and what is settled. The practice-minutes heartbeat removal is finished.
 
+**Work for another session → give the blurb the first time** (Jonathan, 2026-11-11: "just give me the blurb the first time"). Whenever your answer means another Claude session has to do, avoid or know something (a fix you advise it to make, code it must leave alone, a merge it must pull), end that same message with the text to paste to it, in a code block, complete enough to act on alone. Do not wait to be asked, and give a new one when the facts change.
+
 New unrelated topic → AskUserQuestion once: fresh chat or continue?
 
 Dated decisions and reasons behind these rules: `WORKFLOW.md` → "Rationale behind the
