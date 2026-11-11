@@ -325,6 +325,26 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-11 — Live quiz "Name the power chord" (work order "two power-chord rounds for the Live quiz", Part 2). Fast.**
+      New question shape, `type:'pcname'` (`LIVE_QUIZZES['pc-name']`, strings low E + A): the question is a chord box
+      (`lqPcShape()` → `chordDiagramSVG`), the student taps one of eight fixed name buttons E5 F5 F♯5 G5 A5 B5 C5 D5
+      (`lqPcNames()`, each passing its index, `lqAnswerPcName(i)`); the answer id is the chord name; the app scores it at
+      Reveal (`lqTeacherRevealPcName`, name from `lqPcNameOf(target)`). The pool is `lqPcNamePool()`: roots on frets
+      `LQ_PC_NAME_FRETS` = [1, 10], only `LQ_PC_ROOTS` roots, 14 shapes (low E F5 F♯5 G5 A5 B5 C5 D5 at 1 2 3 5 7 8 10; A
+      B5 C5 D5 E5 F5 F♯5 G5 at 2 3 5 7 8 9 10). The strip: Low E / A / Both chips + one Random shape button, no name and no
+      shape buttons; Random never repeats a shape in a game until all in the pool were asked (this tab's memory; a console
+      reload still avoids the shape on screen). `target` is `{ string, fret }`, never the name; the doc holds the name only
+      from Reveal (`correct`). Stage question: big box beside timer + count (433px, same as the other quizzes); stage reveal:
+      name, then box | all 8 bars | top 5 in three columns (fits 1366×657); student question fits without scrolling
+      (two rows of four buttons). **Two UNCONFIRMED planning-chat defaults are now live, neither ruled on by Jonathan:**
+      `LQ_PC_FIND_FRETS` = [0, 12] (Part 1, Find) and `LQ_PC_NAME_FRETS` = [1, 10] (this part, Name; no open E5/A5 box).
+      Proof: 1170 of 1170 renders of the five existing quizzes byte-identical to origin/main once the quiz dropdown's new
+      option is set aside (156 renders carry it); headless-Chrome screenshots of every student and stage state, EN + ES,
+      0 page errors. Guards: new **1cu** (84 stage + strip renders, 14 shapes × lobby / question / all answered, 0 hits of
+      the name as a token; every Reveal's answer line names it; 14 Random opens write `{string, fret}` only and cover all
+      14); 1cb re-pinned 12 (stage + student pcname); 1cm re-pinned 16 (the Name Reveal writer + a Name Start); 1f
+      checks the pcname structure (lowE/A strings, no choices, a prompt with no {param}). 14 break-it mutations, 13 red,
+      one hex-colour control green (list in the commit message). `tools/smoke.mjs` does not walk the Live quiz.
 - [x] **2026-11-10 — Live quiz "Find the power chord" (work order "two power-chord rounds for the Live quiz", Part 1). Fast.**
       New `LIVE_QUIZZES['pc-find']`: a `type:'fret'` quiz with `power:true`, strings low E + A. The strip offers E5 F5 F♯5 G5
       A5 B5 C5 D5 per string (`LQ_PC_ROOTS`, fret order) + Random (never the same target twice); `target.note` is the root

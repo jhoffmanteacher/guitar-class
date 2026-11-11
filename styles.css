@@ -4596,6 +4596,22 @@ a.jl-song-btn{display:inline-block;text-decoration:none}
 .lq-st-pcwrap .lq-board{flex:1 1 auto;min-width:0}
 .lq-pcbox-side{flex:0 0 auto}
 .lq-pcbox-side svg{width:clamp(96px,9vw,150px)}
+/* Name the power chord: the box on the student's screen, the eight name
+   buttons four across (two rows, so the question fits a 657px-tall
+   Chromebook without scrolling), and the projector's big box. */
+.lq-pcbox-q{margin:10px 0 4px}
+.lq-pcbox-q svg{width:150px}
+.lq-pcbox-rev{margin:6px 0 0}
+.lq-pcbox-rev svg{width:104px}
+.lq-choices.lq-pcnames{grid-template-columns:repeat(4,minmax(0,1fr));margin-top:10px}
+.lq-pcnames .lq-choice{min-height:60px;font-size:1.375rem}
+.lq-pcbox-stage{margin:0}
+.lq-pcbox-stage svg{width:clamp(150px,min(16vw,32vh),320px)}
+.lq-st-pcrow{display:flex;align-items:center;justify-content:center;gap:clamp(24px,5vw,72px);min-width:0}
+.lq-st-pcside{display:flex;flex-direction:column;align-items:center;gap:10px}
+.lq-st-split > .lq-pcbox-stage{margin:0;align-self:center}
+@media(min-width:820px){.lq-st-split.lq-st-split3{grid-template-columns:auto minmax(0,1fr) minmax(0,1fr)}
+  .lq-st-split3 > .lq-tally,.lq-st-split3 > .lq-lb{margin-top:0}}
 
 .lq-lb{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:5px}
 .lq-lb li{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;

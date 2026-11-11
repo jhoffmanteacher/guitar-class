@@ -6,6 +6,12 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-11 — Live quiz: Name the power chord
+
+- **A new Live quiz round: "Name the power chord".** You see a chord chart of a power chord. Tap its name. Your first tap is your answer.
+- **There are eight name buttons: E5, F5, F♯5, G5, A5, B5, C5 and D5.** The chord's root is on the low E or the A string, somewhere from fret 1 to fret 10. The number beside the chart (for example "5fr") tells you the fret.
+- **After the reveal you see the right name and how the whole class answered.**
+
 ## 2026-11-10 (late night) — Live quiz: Find the power chord
 
 - **A new Live quiz round: "Find the power chord".** The question names a power chord and a string, for example "Tap the root of F♯5 on the A string". Tap the fret where its root is. Your first tap is your answer.

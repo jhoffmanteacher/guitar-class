@@ -25,6 +25,25 @@ projected stage (`?teacher=true` → **Live quiz**). One game runs at a time, in
     counts. F♯ is NOT in `LQ_NATURALS`: adding it there would put an F♯
     button into the three note quizzes. The stage reveal also draws the
     chord's chart box (`lqPcShape()`), after Reveal only.
+  - "Name the power chord" (`pc-name`, `type:'pcname'`, 2026-11-11) is the
+    app's too: the question is a chord box (`lqPcShape()`), the student taps
+    one of eight fixed names E5 … D5 (`lqPcNames()`), the answer id is the
+    name, scored at Reveal from `lqPcNameOf(target)`. The pool is 14 shapes,
+    roots on frets `LQ_PC_NAME_FRETS` (1–10, an unconfirmed default) on low E
+    and A. `target` is `{string, fret}` and NEVER the name: the doc first holds
+    the name at Reveal (`correct`). The strip has Low E / A / Both chips and
+    one Random shape button, never a name or shape button.
+  - **The stage shows the chord box as the prompt on a Name question.** It is
+    the one diagram on the stage before Reveal, and it is safe only because
+    it carries no name: no `label` to `chordDiagramSVG`, and
+    `gdChordAriaLabel` names strings and frets only. `checks.mjs` 1cu renders
+    the stage and strip for all 14 shapes (lobby, question, every student
+    answered) and fails on the name as a token. Don't add a caption, title or
+    aria-label with the chord in it.
+  - A new question type needs a sibling in every `lqType()` branch: student
+    question + reveal, stage question + reveal, `lqTallyRows`,
+    `lqPaintControls` (lobby / question / reveal), its Reveal writer,
+    `lqTeacherEnd`'s wording, and checks 1f, 1cb and 1cm (re-pin both).
   - The stage never shows the board with a marker (stage rule below); the
     strip shows one Reveal button, never the fret.
   - Answer ids are `'<string>:<fret>'`; octaves both count (`correctIds`).

@@ -2920,7 +2920,10 @@
     'lq.title.pcFind':       { en: 'Find the power chord', es: 'Encuentra el acorde de potencia' },
     'lq.prompt.pcFind':      { en: 'Tap the root of {chord} on the {string} string', es: 'Toca la raíz de {chord} en la cuerda {string}' },
     'lq.answerPc':           { en: '{chord}: the root is fret {n} on the {string} string', es: '{chord}: la raíz está en el traste {n} de la cuerda {string}' },
-    'lq.answerPcAlso':       { en: '{chord}: the root is fret {n} or fret {m} on the {string} string', es: '{chord}: la raíz está en el traste {n} o en el traste {m} de la cuerda {string}' }
+    'lq.answerPcAlso':       { en: '{chord}: the root is fret {n} or fret {m} on the {string} string', es: '{chord}: la raíz está en el traste {n} o en el traste {m} de la cuerda {string}' },
+    // "Name the power chord" (2026-11-10): the chord box is the question, so the prompt carries NO param (a {chord} would answer it).
+    'lq.title.pcName':       { en: 'Name the power chord', es: 'Nombra el acorde de potencia' },
+    'lq.prompt.pcName':      { en: 'Which power chord is this?', es: '¿Qué acorde de potencia es este?' }
   };
 
   let lang = 'en';

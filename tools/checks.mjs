@@ -4900,8 +4900,9 @@ function checkMissingI18nKeys(I18N) {
      (each with id/key/color); 'fret' needs `strings` instead (a valid,
      de-duped guitar-diagrams kind list) and no `choices`, plus a promptKey
      whose EN and ES text both carry {note} and {string} (the live quiz's
-     tIn() fills them in per-language on the projector). Any other `type`
-     is an error. Structural, not just key-existence — a fret quiz that
+     tIn() fills them in per-language on the projector); 'pcname' ("Name the
+     power chord") needs `strings` from lowE/A only, no `choices`, and a
+     prompt with no {param} at all. Any other `type` is an error. Structural, not just key-existence — a fret quiz that
      silently kept an mc `choices` array, or a prompt missing a param in
      just one language, wouldn't show up as a missing i18n key. */
   const LQ_VALID_STRINGS = new Set(['lowE', 'A', 'D', 'G', 'B', 'highE']);
@@ -4944,6 +4945,26 @@ function checkMissingI18nKeys(I18N) {
             }
           }
         }
+      } else if (type === 'pcname') {
+        /* "Name the power chord": the chord box is the question. It needs `strings` drawn only from the two root strings (lowE, A — a power
+           chord's root sits on one of them), no `choices` (the eight names are lqPcNames(), fixed) and no `power` flag (that is a fret quiz's),
+           and a prompt with NO {param} in either language: the only thing a param could carry is the name, and that is the answer. */
+        if (q.choices) { err(`live-quiz.js LIVE_QUIZZES['${id}'] is type 'pcname' but has choices (its eight names are fixed: lqPcNames)`); problems++; dynamicBad++; }
+        if (q.power) { err(`live-quiz.js LIVE_QUIZZES['${id}'] is type 'pcname' but has power:true (a fret-quiz flag)`); problems++; dynamicBad++; }
+        const strings = Array.isArray(q.strings) ? q.strings : [];
+        if (!strings.length) { err(`live-quiz.js LIVE_QUIZZES['${id}'] is type 'pcname' but has no strings`); problems++; dynamicBad++; }
+        const seen = new Set();
+        for (const k2 of strings) {
+          if (k2 !== 'lowE' && k2 !== 'A') { err(`live-quiz.js LIVE_QUIZZES['${id}'].strings has '${k2}': a pcname quiz's roots are on lowE or A only`); problems++; dynamicBad++; }
+          if (seen.has(k2)) { err(`live-quiz.js LIVE_QUIZZES['${id}'].strings has a duplicate entry '${k2}'`); problems++; dynamicBad++; }
+          seen.add(k2);
+        }
+        const entry = I18N && q.promptKey ? I18N[q.promptKey] : null;
+        if (entry) {
+          for (const lang of ['en', 'es']) {
+            if (/\{\w+\}/.test(entry[lang] || '')) { err(`live-quiz.js LIVE_QUIZZES['${id}'].promptKey '${q.promptKey}' (${lang}) carries a {param}: a Name prompt must not name the chord`); problems++; dynamicBad++; }
+          }
+        }
       } else {
         err(`live-quiz.js LIVE_QUIZZES['${id}'] has unknown type '${q.type}'`); problems++; dynamicBad++;
       }
@@ -4984,10 +5005,11 @@ function checkMissingI18nKeys(I18N) {
    its choice buttons enabled again. EXECUTES the real live-quiz.js in its own
    VM with a minimal fake DOM (the file must not depend on app.js, so none is
    loaded) and repaints every timed question view — stage mc, stage fret,
-   student mc, student fret — once mid-countdown and once after time-up.
-   Pinned at 8 cases so a view that stops rendering cannot drop out silently.
+   student mc, student fret, and (2026-11-10) stage + student "Name the power
+   chord" (type 'pcname') — once mid-countdown and once after time-up.
+   Pinned at 12 cases so a view that stops rendering cannot drop out silently.
    ════════════════════════════════════════════════════════════════════ */
-const LQ_TIMER_CASES = 8;
+const LQ_TIMER_CASES = 12;
 function checkLiveQuizTimerRepaint() {
   head('1cb. Live quiz: a repaint keeps the countdown\'s real time left');
   let bad = 0, cases = 0;
@@ -5032,16 +5054,20 @@ function checkLiveQuizTimerRepaint() {
   } catch (e) { flag(`live-quiz.js would not load in the test VM: ${e.message}`); return; }
   const fretId = vm.runInContext('Object.keys(LIVE_QUIZZES).find(k => LIVE_QUIZZES[k].type === "fret") || ""', box);
   const mcId = vm.runInContext('Object.keys(LIVE_QUIZZES).find(k => (LIVE_QUIZZES[k].type || "mc") === "mc") || ""', box);
-  if (!fretId || !mcId) { flag(`the bank needs one mc and one fret quiz to test (mc: ${mcId || 'none'}, fret: ${fretId || 'none'})`); return; }
+  const pcNameId = vm.runInContext('Object.keys(LIVE_QUIZZES).find(k => LIVE_QUIZZES[k].type === "pcname") || ""', box);
+  if (!fretId || !mcId || !pcNameId) { flag(`the bank needs one mc, one fret and one pcname quiz to test (mc: ${mcId || 'none'}, fret: ${fretId || 'none'}, pcname: ${pcNameId || 'none'})`); return; }
+  const FRET_T = { string: 'lowE', note: 'G' }, PC_T = { string: 'lowE', fret: 3 };
   const views = [
     { name: 'stage mc', quiz: mcId, limit: 20, stage: true },
-    { name: 'stage fret', quiz: fretId, limit: 2.5, stage: true },
+    { name: 'stage fret', quiz: fretId, limit: 2.5, stage: true, target: FRET_T },
     { name: 'student mc', quiz: mcId, limit: 20, stage: false },
-    { name: 'student fret', quiz: fretId, limit: 2.5, stage: false }
+    { name: 'student fret', quiz: fretId, limit: 2.5, stage: false, target: FRET_T },
+    { name: 'stage pcname', quiz: pcNameId, limit: 20, stage: true, target: PC_T },
+    { name: 'student pcname', quiz: pcNameId, limit: 2.5, stage: false, target: PC_T }
   ];
   for (const v of views) {
     for (const [when, goneMs, want] of [['mid-countdown', v.limit === 20 ? 7200 : 1000, v.limit === 20 ? '13' : '1.5'], ['after time-up', v.limit * 1000 + 3000, TIME_UP]]) {
-      const sess = JSON.stringify({ state: 'question', sessionId: `S-${v.name}-${when}`, qIndex: 0, quizId: v.quiz, limitSec: v.limit, target: { string: 'lowE', note: 'G' }, scores: {} });
+      const sess = JSON.stringify({ state: 'question', sessionId: `S-${v.name}-${when}`, qIndex: 0, quizId: v.quiz, limitSec: v.limit, target: v.target || null, scores: {} });
       const timerId = v.stage ? 'lq-st-timer' : 'lq-timer';
       try {
         vm.runInContext(v.stage
@@ -5053,14 +5079,14 @@ function checkLiveQuizTimerRepaint() {
       if (!el) { flag(`${v.name} ${when}: no #${timerId} on a timed question`); continue; }
       if (el.textContent !== want) flag(`${v.name} ${when}: the repainted timer reads "${el.textContent}", want "${want === TIME_UP ? "Time's up" : want}" — re-sync the tick right after the paint (lqStageSyncTick / lqSyncTick)`);
       if (want === TIME_UP && !el.classList.contains('out')) flag(`${v.name} ${when}: the repainted timer lost its "out" colour`);
-      if (want === TIME_UP && v.name === 'student mc') {
+      if (want === TIME_UP && (v.name === 'student mc' || v.name === 'student pcname')) {
         const b = byId['live-quiz-body'].buttons;
-        if (!b.length || b.some(x => !x.disabled)) flag(`student mc after time-up: ${b.filter(x => !x.disabled).length} of ${b.length} choice buttons are enabled again after the repaint`);
+        if (!b.length || b.some(x => !x.disabled)) flag(`${v.name} after time-up: ${b.filter(x => !x.disabled).length} of ${b.length} choice buttons are enabled again after the repaint`);
       }
     }
   }
   if (cases !== LQ_TIMER_CASES) flag(`ran ${cases} repaint cases, pinned at ${LQ_TIMER_CASES}`);
-  if (bad === 0) ok(`${cases} timed live-quiz repaints (stage + student, mc + fret, mid-countdown + after time-up) keep the real time left`);
+  if (bad === 0) ok(`${cases} timed live-quiz repaints (stage + student, mc + fret + pcname, mid-countdown + after time-up) keep the real time left`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -5149,10 +5175,15 @@ async function checkLiveQuizNoNames() {
     const pcFindId = run('Object.keys(LIVE_QUIZZES).find(k => LIVE_QUIZZES[k].type === "fret" && LIVE_QUIZZES[k].power) || ""');
     if (!pcFindId) { flag('the bank has no "Find the power chord" quiz (a fret quiz with power: true) to test'); return; }
     const pcAnswers = [{ sessionId: 'S0', qIndex: 0, uid: 'u1', name: 'Alice Zebra', choice: 'A:2', ms: 900 }, { sessionId: 'S0', qIndex: 0, uid: 'u3', name: 'Cy Xu', choice: 'A:9', ms: 800 }];
+    // "Name the power chord" (type 'pcname'): the A-string shape at fret 9 is F♯5, so u3's F♯5 scores and u1's B5 does not.
+    const pcNameId = run('Object.keys(LIVE_QUIZZES).find(k => LIVE_QUIZZES[k].type === "pcname") || ""');
+    if (!pcNameId) { flag('the bank has no "Name the power chord" quiz (type pcname) to test'); return; }
+    const pcNameAnswers = [{ sessionId: 'S0', qIndex: 0, uid: 'u1', name: 'Alice Zebra', choice: 'B5', ms: 900 }, { sessionId: 'S0', qIndex: 0, uid: 'u3', name: 'Cy Xu', choice: 'F♯5', ms: 800 }];
     for (const [label, state, extra, call, ans] of [
       ['mc Reveal', 'question', {}, `lqTeacherReveal(${JSON.stringify(mcChoice)})`],
       ['fret Reveal', 'question', { quizId: fretId, target: { string: 'lowE', note: 'G' } }, 'lqTeacherRevealFret()'],
       ['Find the power chord Reveal', 'question', { quizId: pcFindId, target: { string: 'A', note: 'F♯' } }, 'lqTeacherRevealFret()', pcAnswers],
+      ['Name the power chord Reveal', 'question', { quizId: pcNameId, target: { string: 'A', fret: 9 } }, 'lqTeacherRevealPcName()', pcNameAnswers],
       ['End', 'reveal', {}, 'lqTeacherEnd()'],
       ['Close', 'ended', {}, 'lqTeacherClose()']
     ]) {
@@ -5165,8 +5196,14 @@ async function checkLiveQuizNoNames() {
         if (JSON.stringify(data.correctIds) !== '["A:9"]') flag(`${label}: F♯5 on the A string should be fret 9 only, the writer wrote correctIds ${JSON.stringify(data.correctIds)}`);
         if (!(data.scores.u3 && data.scores.u3.lastRight === true && data.scores.u1.lastRight === false)) flag(`${label}: the round was scored wrong: ${JSON.stringify(data.scores)}`);
       }
+      if (ans === pcNameAnswers) {
+        if (data.correct !== 'F♯5') flag(`${label}: the A-string shape at fret 9 is F♯5, the writer wrote correct ${JSON.stringify(data.correct)}`);
+        if (!(data.scores.u3 && data.scores.u3.lastRight === true && data.scores.u1.lastRight === false)) flag(`${label}: the round was scored wrong: ${JSON.stringify(data.scores)}`);
+        const tk = Object.keys(data.tally || {});
+        if (tk.length !== 8 || data.tally['F♯5'] !== 1 || data.tally.B5 !== 1) flag(`${label}: the tally should hold all eight names with F♯5 1 and B5 1: ${JSON.stringify(data.tally)}`);
+      }
     }
-    for (const startId of ['', pcFindId]) {
+    for (const startId of ['', pcFindId, pcNameId]) {
       setup('ended', {});
       const getEl = box.document.getElementById;
       if (startId) box.document.getElementById = id => (id === 'lq-quiz-pick' ? { value: startId } : null);
@@ -5205,8 +5242,133 @@ async function checkLiveQuizNoNames() {
     const reads = [...ablock.matchAll(/allow\s+([a-z, ]+?):/g)].map(m => m[1].replace(/\s/g, ''));
     if (reads.some(r => /(^|,)(read|list)(,|$)/.test(r) && r !== 'read,delete')) flag(`firestore.rules answers: an extra read/list rule (${reads.join(' | ')})`);
   }
-  if (cases !== 14) flag(`ran ${cases} cases, pinned at 14`);
-  if (bad === 0) ok(`no name reaches the public session doc: scoring, the mc + fret + Find-the-power-chord Reveal, End and Close writers (against a doc that merges like Firestore, starting from an older game full of names) and Start (the default quiz and Find the power chord); the student's end screen shows no other player's name; the wall keeps its names, the lobby is sorted by name, and the answer docs stay teacher-only to list (${cases} cases)`);
+  if (cases !== 16) flag(`ran ${cases} cases, pinned at 16`);
+  if (bad === 0) ok(`no name reaches the public session doc: scoring, the mc + fret + Find-the-power-chord + Name-the-power-chord Reveal, End and Close writers (against a doc that merges like Firestore, starting from an older game full of names) and Start (the default quiz and both power-chord quizzes); the student's end screen shows no other player's name; the wall keeps its names, the lobby is sorted by name, and the answer docs stay teacher-only to list (${cases} cases)`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1cu. LIVE QUIZ — "Name the power chord" never shows the name before Reveal
+   (2026-11-10). The chord box is the question and the room reads the
+   projector, so the stage and the control strip must not carry the chord's
+   name anywhere — text, an attribute, an aria-label — until Reveal.
+   EXECUTES the real guitar-diagrams.js + live-quiz.js in a VM with a fake
+   stage and strip, and for EVERY shape in the pool (pinned at 14) renders
+   both in three states: lobby (a target left on the doc), question, and
+   question with every student answered (the answer docs hold names like
+   'G5'). Each render must hold 0 hits of the name, matched as a token so a
+   hex colour (#E5…, #3D5…) is not a hit, and the question stage must draw the
+   box (an <svg>). Positive control, so the matcher cannot go blind: the
+   Reveal stage of every shape MUST show its name. It also runs the real
+   Random writer (lqTeacherOpenPcName) 14 times against a fake doc: every
+   write's target is { string, fret } with no name, the shape just asked is
+   never asked again, and the 14 opens cover all 14 shapes.
+   ════════════════════════════════════════════════════════════════════ */
+const LQ_PCNAME_SHAPES = 14;
+async function checkLiveQuizPcNameNoLeak() {
+  head('1cu. Live quiz: "Name the power chord" shows no name before Reveal');
+  let bad = 0, renders = 0;
+  const flag = m => { err(`1cu: ${m}`); problems++; bad++; };
+  const mkEl = () => ({ innerHTML: '', querySelector: () => null, querySelectorAll: () => [], classList: { add() {}, remove() {}, toggle() {}, contains: () => false } });
+  const stage = mkEl(), controls = mkEl();
+  const box = {
+    console: { log() {}, warn() {}, error() {} },
+    performance: { now: () => 1e6 },
+    setInterval: () => 1, clearInterval() {}, setTimeout: () => 1, clearTimeout() {},
+    localStorage: { getItem: () => null, setItem() {} }, sessionStorage: { getItem: () => null, setItem() {} },
+    document: { hidden: false, documentElement: {}, getElementById: id => (id === 'lq-stage' ? stage : id === 'lq-controls' ? controls : null), querySelectorAll: () => [], addEventListener() {},
+      body: { classList: { add() {}, remove() {} }, appendChild() {} }, createElement: () => mkEl(), contains: () => false },
+    escHtml: x => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'), escAttr: x => String(x).replace(/&/g, '&amp;').replace(/"/g, '&quot;'),
+    applyI18n() {}, alert() {},
+    firebase: { firestore: { FieldValue: { serverTimestamp: () => '<ts>' } } }
+  };
+  box.window = { addEventListener() {}, confirm: () => true };
+  try {
+    vm.createContext(box);
+    vm.runInContext(readFileSync(join(ROOT, 'i18n.js'), 'utf8'), box, { filename: 'i18n.js' });
+    if (typeof box.t !== 'function' && box.window.t) { box.t = box.window.t; box.tIn = box.window.tIn; }
+    vm.runInContext(readFileSync(join(ROOT, 'guitar-diagrams.js'), 'utf8'), box, { filename: 'guitar-diagrams.js' });
+    vm.runInContext(readFileSync(join(ROOT, 'live-quiz.js'), 'utf8'), box, { filename: 'live-quiz.js' });
+    vm.runInContext('var teacherView = "livequiz";', box);
+  } catch (e) { flag(`i18n.js / guitar-diagrams.js / live-quiz.js would not load in the test VM: ${e.message}`); return; }
+  const run = code => vm.runInContext(code, box);
+  if (typeof box.t !== 'function' || typeof box.tIn !== 'function') { flag('i18n.js did not define t()/tIn() in the VM'); return; }
+  const quizId = run('Object.keys(LIVE_QUIZZES).find(k => LIVE_QUIZZES[k].type === "pcname") || ""');
+  if (!quizId) { flag('the bank has no "Name the power chord" quiz (type pcname)'); return; }
+  const pool = JSON.parse(run(`JSON.stringify(lqPcNamePool(LIVE_QUIZZES[${JSON.stringify(quizId)}].strings))`));
+  const names = JSON.parse(run('JSON.stringify(lqPcNames())'));
+  if (pool.length !== LQ_PCNAME_SHAPES) flag(`the shape pool has ${pool.length} shapes, pinned at ${LQ_PCNAME_SHAPES}`);
+  if (names.length !== 8) flag(`there are ${names.length} name buttons, want 8 (E5 F5 F♯5 G5 A5 B5 C5 D5)`);
+  const reEsc = x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // A token: not glued to a letter, digit or '#' on either side, so '#E5E5E5' and '3D5' never count, and 'F5' never matches inside 'F♯5'.
+  const tokenRe = name => new RegExp(`(?<![#0-9A-Za-z])${reEsc(name)}(?![0-9A-Za-z])`);
+  const nameOf = shape => run(`lqPcNameOf(${JSON.stringify(shape)})`);
+  const covered = new Set();
+  for (const shape of pool) {
+    const name = nameOf(shape);
+    if (!name || !names.includes(name)) { flag(`shape ${JSON.stringify(shape)} has no name among the eight buttons (${name})`); continue; }
+    covered.add(name);
+    const re = tokenRe(name);
+    const roster = [{ uid: 'u1', name: 'Ana Ruiz' }, { uid: 'u2', name: 'Ben Ode' }, { uid: 'u3', name: 'Cal Poe' }];
+    const others = names.filter(n => n !== name);
+    for (const [state, answered] of [['lobby', false], ['question', false], ['question', true]]) {
+      const sess = { sessionId: 'S1', quizId, state, qIndex: state === 'lobby' ? -1 : 0, correct: null, tally: null, target: shape, limitSec: 20, speedBonus: true, scores: {} };
+      const answers = roster.map((r, i) => (answered
+        ? { sessionId: 'S1', uid: r.uid, name: r.name, qIndex: 0, choice: i === 0 ? name : others[i], ms: 900 }
+        : { sessionId: 'S1', uid: r.uid, name: r.name, qIndex: -1, choice: null, ms: 0 }));
+      try { run(`lqTSession = ${JSON.stringify(sess)}; lqTAnswers = ${JSON.stringify(answers)}; lqTBusy = false; lqPaintStage(); lqPaintControls();`); }
+      catch (e) { flag(`${name} ${state}${answered ? ' (all answered)' : ''}: a render threw ${e.message}`); continue; }
+      const where = `${name} (${shape.string} fret ${shape.fret}) ${state}${answered ? ', every student answered' : ''}`;
+      for (const [part, html] of [['stage', stage.innerHTML], ['control strip', controls.innerHTML]]) {
+        renders++;
+        const m = re.exec(html);
+        if (m) flag(`${where}: the ${part} shows the name "${name}" before Reveal: …${html.slice(Math.max(0, m.index - 80), m.index + 40)}…`);
+      }
+      if (state === 'question' && !/<svg\b/.test(stage.innerHTML)) flag(`${where}: the stage draws no chord box (the box IS the question)`);
+      if (answered && !stage.innerHTML.includes('<span class="lq-st-big">3 / 3</span>')) flag(`${where}: the stage does not show 3 / 3 answered`);
+      if (/>\s*(?:E|F|F♯|G|A|B|C|D)5\s*</.test(controls.innerHTML)) flag(`${where}: the control strip has a chord-name button`);
+      if (!/Random shape/.test(controls.innerHTML) && state === 'lobby') flag(`${where}: the control strip has no Random shape button`);
+    }
+    // Positive control: the reveal stage MUST name it (a matcher that finds nothing proves nothing).
+    try {
+      run(`lqTSession = ${JSON.stringify({ sessionId: 'S1', quizId, state: 'reveal', qIndex: 0, correct: name, tally: { [name]: 1 }, target: shape, scores: { u1: { pts: 1000 } } })}; lqPaintStage();`);
+      // The answer line itself (the tally lists all eight names on every Reveal, so "the name is somewhere" would always pass).
+      const ans = /<div class="lq-st-answer">([^<]*)<\/div>/.exec(stage.innerHTML);
+      if (!ans || ans[1] !== name) flag(`${where0(name, shape)}: the Reveal stage's answer line reads ${ans ? JSON.stringify(ans[1]) : 'nothing'}, want "${name}"`);
+      if (!re.test(ans ? ans[0] : '')) flag(`${where0(name, shape)}: the name matcher cannot find "${name}" in the Reveal answer line: the matcher is blind`);
+      if (!/<svg\b/.test(stage.innerHTML)) flag(`${where0(name, shape)}: the Reveal stage draws no chord box`);
+    } catch (e) { flag(`${name} reveal: the render threw ${e.message}`); }
+  }
+  function where0(name, shape) { return `${name} (${shape.string} fret ${shape.fret})`; }
+  if (covered.size !== 8) flag(`the pool asks ${covered.size} of the 8 names (${[...covered].join(' ')})`);
+  // The Random writer: target has no name, never the shape just asked, all 14 shapes in 14 opens.
+  try {
+    let data = {};
+    const writes = [];
+    box.__fake = { set: async (patch, opts) => { writes.push(JSON.parse(JSON.stringify(patch))); if (opts && opts.merge) Object.assign(data, patch); else data = JSON.parse(JSON.stringify(patch)); } };
+    run('lqEnsureDb = async () => {}; lqDb = {}; lqDoc = () => __fake; lqPaintControls = () => {}; lqTPcStrings = "both";');
+    data = { sessionId: 'S2', quizId, state: 'lobby', qIndex: -1, target: null, scores: {} };
+    const seen = [];
+    for (let i = 0; i < LQ_PCNAME_SHAPES; i++) {
+      run(`lqTSession = ${JSON.stringify(data)}; lqTBusy = false;`);
+      run('lqTeacherOpenPcName().then(() => {})');
+      await new Promise(r => setImmediate(r)); await new Promise(r => setImmediate(r));
+      const w = writes[writes.length - 1];
+      if (!w || !w.target) { flag(`Random open ${i + 1}: nothing was written`); break; }
+      const tg = w.target, keys = Object.keys(tg).sort().join(',');
+      if (keys !== 'fret,string') flag(`Random open ${i + 1}: the target is ${JSON.stringify(tg)}, want exactly { string, fret }`);
+      const nm = nameOf(tg);
+      if (nm && tokenRe(nm).test(JSON.stringify(w))) flag(`Random open ${i + 1}: the question write names the chord: ${JSON.stringify(w)}`);
+      const k = tg.string + ':' + tg.fret;
+      if (seen.length && seen[seen.length - 1] === k) flag(`Random open ${i + 1}: the same shape twice running (${k})`);
+      seen.push(k);
+      data = Object.assign({}, data, { state: 'reveal' });
+    }
+    const distinct = new Set(seen).size;
+    if (distinct !== LQ_PCNAME_SHAPES) flag(`${LQ_PCNAME_SHAPES} Random opens asked ${distinct} distinct shapes, want all ${LQ_PCNAME_SHAPES} before a repeat`);
+  } catch (e) { flag(`the Random writer threw ${e.message}`); }
+  const want = LQ_PCNAME_SHAPES * 3 * 2;
+  if (renders !== want) flag(`ran ${renders} stage/strip renders, pinned at ${want}`);
+  if (bad === 0) ok(`"Name the power chord": ${renders} stage + control-strip renders (${pool.length} shapes × lobby / question / every student answered) show no chord name, every question stage draws the box, every Reveal names its chord, and ${LQ_PCNAME_SHAPES} Random opens wrote { string, fret } only and covered all ${LQ_PCNAME_SHAPES} shapes without a repeat`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -15167,6 +15329,7 @@ function checkPracticeMinutes(i18nTable) {
   checkSiteMadeClick();
   checkLiveQuizTimerRepaint();
   await checkLiveQuizNoNames();
+  await checkLiveQuizPcNameNoLeak();
   checkCoachVerdicts();
   await checkCountIn();
   await checkPwTakeEvaluator();
