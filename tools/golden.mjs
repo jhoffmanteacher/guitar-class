@@ -15,6 +15,10 @@
      pages/<lang>/ the pages that open on their own: every Song Journey page
                   (tabs/*.html), the Tuning Simulator, the mood chart and the
                   404 page, as rendered, each with a screenshot under --shots
+     console/     the teacher console (index.html?teacher=true) against the fake
+                  class of tools/console-layout-smoke.mjs (30 made-up students,
+                  never live data): every sidebar view, every activity's
+                  Preview / Students / Settings tab, and three students' pages
      keys/        for every set: every control that saves something (done
                   buttons, checklist skills and levels, quiz choices, rep dots,
                   text boxes ...) is really used, and what it writes to the saved
@@ -30,7 +34,7 @@
                                                       (the old site, or the rebuild)
      node tools/golden.mjs --compare <dirA> <dirB>    exit 0 only if they are identical
      --en-only          English only
-     --only <parts>     comma-separated: data, sets, keys, screens, games, activities, pages
+     --only <parts>     comma-separated: data, sets, keys, screens, games, activities, pages, console
      --shots            also write PNGs of every set (English)
      --chrome <path>    Chrome/Chromium binary (or CHROME=...)
 
@@ -41,7 +45,12 @@
    openMyProgressScreen, openGamesScreen, gamesShow, caFocusActivity,
    caFocusGo, and the data/state names SETS, CLASS_ACTIVITIES,
    MODULE_MANIFEST, GAMES_META, completed, progress, responses, caStepDone,
-   classActivities, exitChecks, practiceLog, games, streak. Everything else about the code is free.
+   classActivities, exitChecks, practiceLog, games, streak; for the console:
+   ensureTeacherJs, showTeacherApp, TEACHER_EMAIL, dayStr, db, ensureDb.
+   Everything else about the code is free.
+
+   No network: Chrome is started so that only 127.0.0.1 resolves. What the
+   site draws must not depend on whether Google's servers answered.
 
    Like smoke.mjs: Node 22+, Chrome or Chromium, no other dependency; never
    run it while a smoke.mjs or pm-e2e.mjs run is going. */
@@ -107,13 +116,14 @@ const ROOT = resolve(opt('--root') || HERE);
 if (!existsSync(join(ROOT, 'index.html'))) { console.error(`golden: no index.html in ${ROOT}`); process.exit(2); }
 const LANGS = args.includes('--en-only') ? ['en'] : ['en', 'es'];
 const SHOTS = args.includes('--shots');
-const PARTS = ['data', 'sets', 'keys', 'screens', 'games', 'activities', 'pages'];
+const PARTS = ['data', 'sets', 'keys', 'screens', 'games', 'activities', 'pages', 'console'];
 const ONLY = args.includes('--only') ? (opt('--only') || '').split(',').map(x => x.trim()).filter(Boolean) : null;
 if (ONLY && (!ONLY.length || ONLY.some(p => !PARTS.includes(p)))) { console.error(`golden: --only takes ${PARTS.join(', ')}`); process.exit(2); }
 const ON = Object.fromEntries(PARTS.map(p => [p, !ONLY || ONLY.includes(p)]));
 const outDir = resolve(OUT);
 rmSync(outDir, { recursive: true, force: true }); mkdirSync(outDir, { recursive: true });
-const put = (rel, text) => { const f = join(outDir, rel); mkdirSync(dirname(f), { recursive: true }); writeFileSync(f, text); };
+// The test server's port is different every run and the site prints its own address in places ("Student link"): written as http://site.
+const put = (rel, text) => { const f = join(outDir, rel); mkdirSync(dirname(f), { recursive: true }); writeFileSync(f, typeof text === 'string' ? text.replace(/http:\/\/127\.0\.0\.1:\d+/g, 'http://site') : text); };
 const safe = s => String(s).replace(/[^A-Za-z0-9._-]+/g, '_');
 
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8',
@@ -200,7 +210,7 @@ try {
   const prof = mkdtempSync(join(tmpdir(), 'gc-golden-chrome-'));
   const cdp = await freePort();
   chromeProc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--use-fake-ui-for-media-stream',
-    '--use-fake-device-for-media-stream', '--autoplay-policy=no-user-gesture-required', '--no-first-run', '--disable-gpu', '--hide-scrollbars', 'about:blank'], { stdio: 'ignore' });
+    '--use-fake-device-for-media-stream', '--autoplay-policy=no-user-gesture-required', '--no-first-run', '--disable-gpu', '--hide-scrollbars', '--host-resolver-rules=MAP * ~NOTFOUND , EXCLUDE 127.0.0.1', 'about:blank'], { stdio: 'ignore' });
   cleanup.push(() => rmSync(prof, { recursive: true, force: true }));
   for (let i = 0; i < 60; i++) { try { await fetch(`http://127.0.0.1:${cdp}/json/version`); break; } catch { await sleep(250); } }
   const site = await serve(ROOT); cleanup.push(() => site.srv.close());
@@ -245,7 +255,7 @@ try {
     await sleep(1500);
   };
   /* A view is recorded once it has stopped changing: two reads 200 ms apart must agree (a lyric sheet sets its
-     width a moment after it opens). A game view must hold still for 2 s (calm = 10): Note Hunt shows "Starting
+     width a moment after it opens; an activity card must hold still for 0.8 s, calm = 4). A game view must hold still for 2 s (calm = 10): Note Hunt shows "Starting
      the mic…" for a second or more, longer on a busy machine, before its real first screen. After 12 s a view
      is recorded as it is and the wobble is noted in errors.json. */
   const read = async (name, sel, calm = 1) => {
@@ -362,10 +372,10 @@ try {
         for (const a of acts) {
           await run(`${lang}:ca-${a.id}`, `caFocusActivity(${JSON.stringify(a.id)})`, 350);
           // A card that is not on the student page (teacher-only, hidden) leaves no open card: the marker is then the record.
-          put(`dom/${lang}/activity-${safe(a.id)}.html`, lines(await read(`${lang}:ca-${a.id}:html`, `.ca-card[open]`))); count('activities');
+          put(`dom/${lang}/activity-${safe(a.id)}.html`, lines(await read(`${lang}:ca-${a.id}:html`, `.ca-card[open]`, 4))); count('activities');
           for (let i = 1; i < a.steps; i++) {
             await run(`${lang}:ca-${a.id}-step${i}`, `caFocusGo(${JSON.stringify(a.id)}, ${i})`, 200);
-            put(`dom/${lang}/activity-${safe(a.id)}-step${i}.html`, lines(await read(`${lang}:ca-${a.id}-step${i}:html`, `.ca-card[open]`))); count('activitySteps');
+            put(`dom/${lang}/activity-${safe(a.id)}-step${i}.html`, lines(await read(`${lang}:ca-${a.id}-step${i}:html`, `.ca-card[open]`, 2))); count('activitySteps');
           }
           await run(`${lang}:ca-${a.id}:close`, `(document.querySelectorAll('.ca-card[open]').forEach(c => { c.open = false; }), 1)`, 50);
         }
@@ -390,6 +400,51 @@ try {
     await page.send('Page.navigate', { url: `${base}/index.html` });
     await sleep(500);
     await run('pages:lang-back', `(localStorage.setItem('gc-lang', 'en'), 1)`, 0);
+  }
+
+  if (ON.console) {
+    /* The teacher console, against the fake class the console smoke test already uses: its STUB (an in-memory
+       Firestore, 30 made-up students, a seeded board) is read out of that file, so there is one copy of it. */
+    const src = readFileSync(join(HERE, 'tools', 'console-layout-smoke.mjs'), 'utf8');
+    const m = /const STUB = String\.raw`([\s\S]*?)`;\n\nasync function main/.exec(src);
+    if (!m) throw new Error('could not find the STUB in tools/console-layout-smoke.mjs');
+    await page.send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 768, deviceScaleFactor: 1, mobile: false });
+    await page.send('Page.navigate', { url: `${base}/index.html?teacher=true` });
+    await until('console: the page loading', `typeof ensureTeacherJs === 'function' && typeof CLASS_ACTIVITIES !== 'undefined' && location.search === '?teacher=true'`);
+    await run('console:load', 'ensureTeacherJs()', 300);
+    await until('console: teacher.js loading', `typeof showTeacherApp === 'function'`);
+    await run('console:stub', m[1], 100);
+    await run('console:show', `showTeacherApp({ uid: 'stub-teacher', email: TEACHER_EMAIL, displayName: 'Teacher' }).then(() => 1)`, 300);
+    await until('console: the activities list', `!!document.querySelector('#t-grid-container [data-ta-list]')`);
+    const views = (await run('console:views', `[...document.querySelectorAll('#t-side [data-view]')].map(b => b.dataset.view)`, 0)) || [];
+    for (const v of views) {
+      await run(`console:view-${v}`, `document.querySelector('#t-side [data-view=${JSON.stringify(v)}]').click()`, 300);
+      put(`console/view-${safe(v)}.html`, lines(await read(`console:view-${v}:html`, '#teacher-app', 3))); count('consoleViews');
+      if (SHOTS) await shot(`shots/console-view-${safe(v)}.png`);
+    }
+    await run('console:activities', `document.querySelector('#t-side [data-view="activities"]').click()`, 400);
+    // Every way the list can be filtered, then "All" so every activity has a row to pick.
+    const filters = (await run('console:filters', `[...document.querySelectorAll('[data-ta-filter]')].map(b => b.dataset.taFilter)`, 0)) || [];
+    for (const f of [...filters.filter(x => x !== 'all'), 'all']) {
+      await run(`console:filter-${f}`, `document.querySelector('[data-ta-filter=${JSON.stringify(f)}]').click()`, 250);
+      put(`console/list-${safe(f)}.html`, lines(await read(`console:filter-${f}:html`, '[data-ta-list]'))); count('consoleLists');
+    }
+    const rows = (await run('console:rows', `[...new Set([...document.querySelectorAll('[data-ta-pick]')].map(r => r.dataset.id))]`, 0)) || [];
+    for (const id of rows) {
+      await run(`console:pick-${id}`, `document.querySelector('[data-ta-pick][data-id=${JSON.stringify(id)}]').click()`, 250);
+      const tabs = (await run(`console:tabs-${id}`, `[...document.querySelectorAll('[data-ta-tab]')].map(t => t.dataset.taTab)`, 0)) || [];
+      for (const tab of tabs) {
+        await run(`console:${id}:${tab}`, `document.querySelector('[data-ta-tab=${JSON.stringify(tab)}]').click()`, 150);
+        put(`console/activity-${safe(id)}-${safe(tab)}.html`, lines(await read(`console:${id}:${tab}:html`, '[data-ta-detail]', 4))); count('consoleActivityTabs');
+      }
+    }
+    for (const uid of ['stub-uid-01', 'stub-uid-13', 'stub-uid-25']) {
+      await run(`console:students`, `document.querySelector('#t-side [data-view="students"]').click()`, 400);
+      await run(`console:student-${uid}`, `document.querySelector('[data-open-student][data-uid="${uid}"]').click()`, 400);
+      put(`console/student-${uid}.html`, lines(await read(`console:student-${uid}:html`, '#teacher-app', 3))); count('consoleStudents');
+    }
+    put('console/store.json', (await run('console:store', `JSON.stringify([...__store.entries()].sort((a, b) => a[0] < b[0] ? -1 : 1), null, 1)`, 0)) + '\n');
+    await page.send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false });
   }
 
   put('errors.json', JSON.stringify(events, null, 1) + '\n');
