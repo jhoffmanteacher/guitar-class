@@ -28,8 +28,9 @@
    the old ones; the "detector" stamp is compared and a mismatch is printed), and any rule that needs more than loudness, attack and pitch.
 
    WHEN TO ASK JONATHAN FOR NEW TAKES: the first lines this tool prints say so ("ASK JONATHAN"). The reasons: no summaries yet; the pitch detector
-   or mic chain changed since they were made; the newest take is older than the last change to how coach.js listens (so nothing recorded shows the
-   current rule at work). Old takes or few takes alone are only a "Note" line, not a reason to ask (Jonathan, 2026-11-11). He downloads the
+   or mic chain changed since they were made; no take was graded at today's strum ratios (each summary holds the ratios its take was graded
+   with, so this needs no history); or, as a backup, the newest take is older than the last commit that changed a line DEFINING a listening
+   constant in coach.js (so nothing recorded shows the current rule at work). Old takes or few takes alone are only a "Note" line, not a reason to ask (Jonathan, 2026-11-11). He downloads the
    recordings from the console and runs ONE command: node tools/mic-sim/takes-in.mjs.
 
    Limits: frames are evenly spaced at the take's mean frame time (the real ones were not); a take with no clock offset (fewer than 3 strums found)
@@ -234,10 +235,21 @@ export function askReasons(takes, site){
   const stamp = detectorStamp(site), stale = takes.filter(t => t.detector !== stamp).length;
   if (stale) why.push(`${stale} of ${takes.length} summaries were measured before the pitch detector or the mic chain changed: their pitch is out of date`);
   const days = takes.map(t => t.day).filter(Boolean).sort(), newest = days[days.length - 1] || null;
-  const git = a => { const r = spawnSync('git', a, { cwd: HERE, encoding: 'utf8' }); return r.status === 0 ? r.stdout.trim() : ''; };
-  // the last commit that changed the strum rule's own numbers or ccLoop's listening lines
-  const lastListen = git(['log', '-1', '--format=%cs', '-G', 'CC_POWER_ONSET_RATIO|CC_POWER_HF_RATIO|CHK_ONSET_|CHK_HF_|COACH_EVENT_TAIL|COACH_ATTACK_SKIP|ccResolvePend', '--', 'coach.js']);
-  if (newest && lastListen && newest < lastListen) why.push(`the newest take is from ${newest}, before the last change to how coach.js listens (${lastListen}): no take shows today's rule at work`);
+  /* The main test, exact and without git (2026-11-11): every summary holds the strum ratios its take was graded with (truth.own). If no take was
+     graded at today's ratios, nothing recorded shows today's rule at work. */
+  const now = [Number(site.run('CC_POWER_ONSET_RATIO')), Number(site.run('CC_POWER_HF_RATIO'))];
+  const same = (x, y) => Math.abs(Number(x) - Number(y)) < 1e-6, at = r => `${r[0]} / ${r[1]}`;
+  const atNow = takes.filter(t => t.own && same(t.own[0], now[0]) && same(t.own[1], now[1])).length;
+  if (!atNow){
+    const last = takes.filter(t => t.day === newest && t.own)[0] || takes.filter(t => t.own)[0];
+    why.push(`no take was graded at today's strum ratios (${at(now)})` + (last ? `: the newest is from ${last.day}, graded at ${at(last.own)}` : ''));
+  }
+  /* The backup, for a change to the other listening constants (the ratios are covered above). It used to run in tools/mic-sim, where the path
+     "coach.js" matches nothing, so it could never fire; and its pattern matched any MENTION of a name, so a comment-only commit counted as a change.
+     Now: from the repo root, and only lines that DEFINE a constant. */
+  const git = a => { const r = spawnSync('git', a, { cwd: join(HERE, '..', '..'), encoding: 'utf8' }); return r.status === 0 ? r.stdout.trim() : ''; };
+  const lastListen = git(['log', '-1', '--format=%cs', '-G', '^const (CC_POWER_ONSET_RATIO|CC_POWER_HF_RATIO|CHK_ONSET_FLOOR|CHK_ONSET_RATIO|CHK_HF_FLOOR|CHK_HF_RATIO|COACH_EVENT_TAIL|COACH_ATTACK_SKIP)', '--', 'coach.js']);
+  if (atNow && newest && lastListen && newest < lastListen) why.push(`the newest take is from ${newest}, before the last change to a listening constant in coach.js (${lastListen}): no take shows today's rule at work`);
   return why;
 }
 /* Weaker reasons: worth a mention to a session that is working on listening, never a reminder to Jonathan by themselves (his call, 2026-11-11:
