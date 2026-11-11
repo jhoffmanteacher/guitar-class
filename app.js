@@ -360,8 +360,26 @@ function loadScriptOnce(src){
   });
   return _lazyScripts[src];
 }
-function ensureCoachJs(){ return loadScriptOnce('coach.js'); }
-function ensureTeacherJs(){ return loadScriptOnce('teacher.js'); }
+/* The files that make up the arcade script and the console script, in load order. One file each today. They are
+   lists because each script is to be cut into parts (tools/split-site.mjs); tools/site-src.mjs reads these two
+   lines, so each stays ONE line that starts the line, and neither name may appear in any other comment. */
+const COACH_JS_PARTS = ['coach.js'];
+const TEACHER_JS_PARTS = ['teacher.js'];
+/* One after another, each only when the one before it has run: a later part uses what an earlier part defines.
+   Every file keeps its own loadScriptOnce promise, so a part that failed to load is the only one fetched again
+   on the next try, and a part that already ran never runs twice (a second run would redeclare its consts). */
+const _lazyGroups = {};
+function loadScriptsInOrder(list){
+  const key = list.join('|');
+  /* One promise per list, handed to every caller (callers rely on their .then callbacks running in the order
+     they were attached: the Games router before Riff Roulette's own). A failed load forgets it, so the next
+     call tries again. */
+  if(!_lazyGroups[key]) _lazyGroups[key] = list.reduce((p, src) => p.then(() => loadScriptOnce(src)), Promise.resolve())
+    .catch(e => { delete _lazyGroups[key]; throw e; });
+  return _lazyGroups[key];
+}
+function ensureCoachJs(){ return loadScriptsInOrder(COACH_JS_PARTS); }
+function ensureTeacherJs(){ return loadScriptsInOrder(TEACHER_JS_PARTS); }
 /* Every ▶ Listening Coach button in generated markup calls this instead of
    coachOpen directly — it's the one entry point that exists before coach.js
    does. Keeps the element, not just its data, so coachOpen sees exactly what
@@ -975,98 +993,10 @@ function swResumeApply(s){
 let _authRevealTimer = firebaseReady ? setTimeout(revealAuthWallSignIn, 6000) : null;
 if(!firebaseReady) revealAuthWallSignIn();   // wall content is being replaced anyway — don't strand the checking note
 
-if(auth) auth.onAuthStateChanged(async user=>{
-  clearTimeout(_authRevealTimer);
-  if(user){
-    /* A DIFFERENT student, with no signed-out answer in between (Firebase
-       reports B straight over A — another tab's sign-in on a shared
-       Chromebook). Everything the null branch below guards against applies
-       here too, plus a pending save of A's that would now go out under B's
-       uid. Same hard reset, same loop guard: after the reload currentUser
-       starts null. Leave currentUser alone so no flush can write A's work
-       into B's doc.
-       This reloads even while signOut() is running. It used to stand aside
-       ("signOut reloads itself"), but signOut() no longer always does: when
-       its wait runs out unsaved it stays on A's screen with the "not saved"
-       notice — now with Firebase signed in as B, every later save of A's
-       refused under B's credentials, and "Sign out anyway" signing B out.
-       A's queued work can't be sent under B either way. _authUserSwapped
-       stops that signOut(), once its wait ends, from signing B out of every
-       tab in the moment before this page goes. */
-    if(currentUser && !isDevBypassUser() && currentUser.uid !== user.uid){
-      _authUserSwapped = true;
-      try { sessionStorage.clear(); } catch(e){}
-      location.reload();
-      return;
-    }
-    currentUser = user;
-    // They're in — but showApp() is still two Firestore round trips away.
-    // Take BOTH sign-in buttons off the screen NOW, before the awaits below,
-    // or the student spends that whole wait looking at a sign-in page they
-    // just came back from and signs in a second time. See setAuthWallChecking().
-    // The header goes straight to the real user header rather than blank: their
-    // own name appearing is the clearest possible "it worked, stop clicking",
-    // and it's the same markup showApp()/showTeacherApp() is about to write.
-    /* The sign-in is NOT over when the popup closes. __authPopupPending clears
-       the instant signInWithPopup resolves, but showApp() is still a ~100 KB
-       Firestore SDK download and two reads away — 5-15 s on school Wi-Fi, and
-       a new service worker takes over inside that time (a few seconds since
-       the shell-first install of 2026-11-09; it used to be 5-15 s itself).
-       A post-deploy reload landing in that window throws the finished sign-in
-       away and replays the whole sequence: the "it signed me in twice" report.
-       The reload at the bottom of this file waits on this flag, bounded by its
-       own 5-minute cap so a Firestore read that never returns still can't pin
-       a tab to the old build for the rest of the day. */
-    window.__authBootPending = true;
-    setAuthWallChecking(SW_UPDATE_BOOT ? 'auth.updating' : 'auth.loading');
-    document.getElementById('user-area').innerHTML = userHeaderHtml(user);
-    if(window.PM) PM.syncHeader(false);   // hidden until showApp: no app behind it yet, and never on the teacher console
-    startAuthStallTimer();   // ...but don't strand them there if the load never finishes
-    try{
-      if(IS_TEACHER_MODE){ await ensureTeacherJs(); showTeacherApp(user); clearAuthStallTimer(); }
-      else {
-        await loadProgress(); caAdoptLocalTicks(); await loadClassConfig();
-        clearAuthStallTimer();   // cleared here, not inside showApp/showPausedScreen, so every exit from the wait is covered
-        if(accountPaused) showPausedScreen(user); else showApp(user);
-      }
-    } finally {
-      // finally, not after the branch: a throw in there must not leave the flag
-      // set, or the tab would sit on old code until the 5-minute cap expires.
-      window.__authBootPending = false;
-    }
-  } else {
-    /* Signed out from ANOTHER tab (or the session ended under us) while this
-       one was showing a student. The resets below don't reach the built
-       #week-panels DOM (_modulesRendered keeps it), so the next student to
-       sign in on this tab would see — and, through toggleStepDone /
-       saveReflection reading that DOM, save into their own doc — the last
-       student's ticks and typed answers. Same hard reset signOut() does.
-       Can't loop: after the reload currentUser starts null. signOut()'s own
-       path skips this (it reloads itself), and so does the dev bypass, which
-       never signed in to Firebase. */
-    if(currentUser && !isDevBypassUser() && !_signOutReloading){
-      try { sessionStorage.clear(); } catch(e){}
-      location.reload();
-      return;
-    }
-    window.__authBootPending = false;
-    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Map(); classActivities = {}; classActivitiesDeletes = new Map(); caStepDone = {}; caStepDeletes = new Map(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; micSampling = { on: false, max: 0 }; micTakesCount = Infinity; studentPeriod = ''; periodOverride = ''; moduleOpenThrough = 0; hiddenActivityIds = {}; activityForMe = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; optionalActivityIds = {}; activityPins = []; songLibraryIds = {}; classSongIds = {}; progressLoadFailed = false;
-    document.body.classList.remove('ca-gated');   // next sign-in recomputes it fresh — don't leave a stale gate showing over the sign-in wall
-    if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
-    if(typeof lqStopListening === 'function') lqStopListening();       // and the live-quiz listener must not keep firing under the next student
-    practiceLog = loadLocalPracticeLog();   // per-skill rep history: back to the local copy on sign-out
-    _moduleStripStates = {};   // next user's first strip render is a first paint, not a celebration
-    revealAuthWallSignIn();   // a real "signed out" answer — checking is over, show the buttons
-    document.getElementById('auth-wall').style.display='block';
-    document.getElementById('app').style.display='none';
-    document.getElementById('teacher-app').style.display='none';
-    document.getElementById('teacher-denied').style.display='none';
-    document.getElementById('fab-group').style.display='none';
-    document.getElementById('search-btn').style.display='none';
-    document.getElementById('user-area').innerHTML=`<button class="btn-sign" onclick="signIn()" data-i18n="header.signIn">${t('header.signIn')}</button>`;
-    if(window.PM) PM.syncHeader(false);   // signed out: the practice-minutes strip goes with the student
-  }
-});
+/* Sign-in is started at the very END of this script (see the last lines of the file), not here: its callback
+   uses functions from the whole file (loadProgress, showApp, ensureTeacherJs…), and once the file is cut into
+   parts that load one after another, a session Firebase restores quickly could call back before the later
+   parts have run. Moved 2026-11-11; nothing between here and the end of the file depends on it. */
 
 /* Teacher put this student on hold — they authenticated fine, so this is a
    message, not an error. Progress is untouched and comes straight back when
@@ -13614,7 +13544,7 @@ function caFreePlayTimer(){
   if(typeof timerRunning !== 'undefined' && !timerRunning && typeof toggleTimer === 'function') toggleTimer();
 }
 // Riff Roulette specifically (Jonathan's ask) — goExploreHash('games') and
-// this both call the SAME cached ensureCoachJs() promise (loadScriptOnce),
+// this both call the SAME cached ensureCoachJs() promise (loadScriptsInOrder),
 // so their .then callbacks run in the order they were attached: the hash
 // router's openGamesScreen (which opens on 'hub') always resolves before
 // this one, so gamesShow('roulette') here reliably has the last word.
@@ -17881,3 +17811,100 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     navigator.serviceWorker.addEventListener('message', e => { if (e.data && e.data.type === 'gc-sw-activated') onNewWorker(); });
   }
 }
+
+/* ── Start sign-in: the LAST statement of the app script ──
+   Everything above is defined by now, so the callback can use any of it. See the note where this used to be
+   (above "Back where you were"). Keep it last: a statement added after it would be code the callback cannot
+   count on. */
+if(auth) auth.onAuthStateChanged(async user=>{
+  clearTimeout(_authRevealTimer);
+  if(user){
+    /* A DIFFERENT student, with no signed-out answer in between (Firebase
+       reports B straight over A — another tab's sign-in on a shared
+       Chromebook). Everything the null branch below guards against applies
+       here too, plus a pending save of A's that would now go out under B's
+       uid. Same hard reset, same loop guard: after the reload currentUser
+       starts null. Leave currentUser alone so no flush can write A's work
+       into B's doc.
+       This reloads even while signOut() is running. It used to stand aside
+       ("signOut reloads itself"), but signOut() no longer always does: when
+       its wait runs out unsaved it stays on A's screen with the "not saved"
+       notice — now with Firebase signed in as B, every later save of A's
+       refused under B's credentials, and "Sign out anyway" signing B out.
+       A's queued work can't be sent under B either way. _authUserSwapped
+       stops that signOut(), once its wait ends, from signing B out of every
+       tab in the moment before this page goes. */
+    if(currentUser && !isDevBypassUser() && currentUser.uid !== user.uid){
+      _authUserSwapped = true;
+      try { sessionStorage.clear(); } catch(e){}
+      location.reload();
+      return;
+    }
+    currentUser = user;
+    // They're in — but showApp() is still two Firestore round trips away.
+    // Take BOTH sign-in buttons off the screen NOW, before the awaits below,
+    // or the student spends that whole wait looking at a sign-in page they
+    // just came back from and signs in a second time. See setAuthWallChecking().
+    // The header goes straight to the real user header rather than blank: their
+    // own name appearing is the clearest possible "it worked, stop clicking",
+    // and it's the same markup showApp()/showTeacherApp() is about to write.
+    /* The sign-in is NOT over when the popup closes. __authPopupPending clears
+       the instant signInWithPopup resolves, but showApp() is still a ~100 KB
+       Firestore SDK download and two reads away — 5-15 s on school Wi-Fi, and
+       a new service worker takes over inside that time (a few seconds since
+       the shell-first install of 2026-11-09; it used to be 5-15 s itself).
+       A post-deploy reload landing in that window throws the finished sign-in
+       away and replays the whole sequence: the "it signed me in twice" report.
+       The reload at the bottom of this file waits on this flag, bounded by its
+       own 5-minute cap so a Firestore read that never returns still can't pin
+       a tab to the old build for the rest of the day. */
+    window.__authBootPending = true;
+    setAuthWallChecking(SW_UPDATE_BOOT ? 'auth.updating' : 'auth.loading');
+    document.getElementById('user-area').innerHTML = userHeaderHtml(user);
+    if(window.PM) PM.syncHeader(false);   // hidden until showApp: no app behind it yet, and never on the teacher console
+    startAuthStallTimer();   // ...but don't strand them there if the load never finishes
+    try{
+      if(IS_TEACHER_MODE){ await ensureTeacherJs(); showTeacherApp(user); clearAuthStallTimer(); }
+      else {
+        await loadProgress(); caAdoptLocalTicks(); await loadClassConfig();
+        clearAuthStallTimer();   // cleared here, not inside showApp/showPausedScreen, so every exit from the wait is covered
+        if(accountPaused) showPausedScreen(user); else showApp(user);
+      }
+    } finally {
+      // finally, not after the branch: a throw in there must not leave the flag
+      // set, or the tab would sit on old code until the 5-minute cap expires.
+      window.__authBootPending = false;
+    }
+  } else {
+    /* Signed out from ANOTHER tab (or the session ended under us) while this
+       one was showing a student. The resets below don't reach the built
+       #week-panels DOM (_modulesRendered keeps it), so the next student to
+       sign in on this tab would see — and, through toggleStepDone /
+       saveReflection reading that DOM, save into their own doc — the last
+       student's ticks and typed answers. Same hard reset signOut() does.
+       Can't loop: after the reload currentUser starts null. signOut()'s own
+       path skips this (it reloads itself), and so does the dev bypass, which
+       never signed in to Firebase. */
+    if(currentUser && !isDevBypassUser() && !_signOutReloading){
+      try { sessionStorage.clear(); } catch(e){}
+      location.reload();
+      return;
+    }
+    window.__authBootPending = false;
+    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Map(); classActivities = {}; classActivitiesDeletes = new Map(); caStepDone = {}; caStepDeletes = new Map(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; micSampling = { on: false, max: 0 }; micTakesCount = Infinity; studentPeriod = ''; periodOverride = ''; moduleOpenThrough = 0; hiddenActivityIds = {}; activityForMe = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; optionalActivityIds = {}; activityPins = []; songLibraryIds = {}; classSongIds = {}; progressLoadFailed = false;
+    document.body.classList.remove('ca-gated');   // next sign-in recomputes it fresh — don't leave a stale gate showing over the sign-in wall
+    if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
+    if(typeof lqStopListening === 'function') lqStopListening();       // and the live-quiz listener must not keep firing under the next student
+    practiceLog = loadLocalPracticeLog();   // per-skill rep history: back to the local copy on sign-out
+    _moduleStripStates = {};   // next user's first strip render is a first paint, not a celebration
+    revealAuthWallSignIn();   // a real "signed out" answer — checking is over, show the buttons
+    document.getElementById('auth-wall').style.display='block';
+    document.getElementById('app').style.display='none';
+    document.getElementById('teacher-app').style.display='none';
+    document.getElementById('teacher-denied').style.display='none';
+    document.getElementById('fab-group').style.display='none';
+    document.getElementById('search-btn').style.display='none';
+    document.getElementById('user-area').innerHTML=`<button class="btn-sign" onclick="signIn()" data-i18n="header.signIn">${t('header.signIn')}</button>`;
+    if(window.PM) PM.syncHeader(false);   // signed out: the practice-minutes strip goes with the student
+  }
+});
