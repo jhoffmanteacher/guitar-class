@@ -1,0 +1,38 @@
+{
+  "_about": "The cut list for tools/split-site.mjs. A part begins `back` lines above the ONE line that holds `mark`. See that tool's header.",
+  "app.js": [
+    { "file": "app/boot.js" },
+    { "file": "app/save.js", "mark": "/* ── Firestore ── */" },
+    { "file": "app/tab.js", "mark": "/* ── Render ── */" },
+    { "file": "app/snippets.js", "mark": "/* ── Backing-track snippets (a step's `snippet`) ──" },
+    { "file": "app/shell.js", "mark": "/* ══════════ Shared modal plumbing ══════════" },
+    { "file": "app/lesson.js", "mark": "/* ── Render-time hiding: which sections/steps a station actually shows ──" },
+    { "file": "app/review.js", "mark": "/* ── Module Review (self-assessment) ── */" },
+    { "file": "app/drills.js", "mark": "   Practice rep tracking, Find-the-Note fretboard game, chord/PR practice", "back": 1 },
+    { "file": "app/drills-call.js", "mark": "/* ── Note Call (step.drill, type 'notecall') ──" },
+    { "file": "app/audio-ui.js", "mark": "/* ── Toggle skill ── */" },
+    { "file": "app/explore.js", "mark": "   NAVIGATION — panel footers, back-to-top,", "back": 1 },
+    { "file": "app/activities.js", "mark": "/* ── Deep link to ONE activity: '#class-activities/ca-15' ──" },
+    { "file": "app/cards.js", "mark": "/* ══ CHORD GRID — a chord card's TAB without the strumming ══" },
+    { "file": "app/activities-2.js", "mark": "/* ── Exit checks (class activity, kind:'check') ──" },
+    { "file": "app/start.js", "mark": "   Service worker — light PWA / offline resilience.", "back": 1 }
+  ],
+  "coach.js": [
+    { "file": "coach.js" },
+    { "file": "coach-hub.js", "mark": "   NOTE HUNT — fretboard trainer game (lives in the", "back": 1 },
+    { "file": "coach-chords.js", "mark": "   CHANGE UP — chord-change game. Pick a chord loop and a tempo; after a", "back": 1 },
+    { "file": "coach-ear.js", "mark": "   NAME THAT RIFF — 60-second ear-training sprint over the 4 core songs", "back": 1 },
+    { "file": "coach-strum.js", "mark": "   STRUM HERO — one-button rhythm game for the curriculum's strumming", "back": 1 },
+    { "file": "coach-runner.js", "mark": "   RIFF RUNNER — the class songs as a scrolling-TAB lane game. Six lanes", "back": 1 },
+    { "file": "coach-more.js", "mark": "   FINGER GYM: THE LADDER — Finger Gym 1's first event (ca-2) as an arcade", "back": 1 }
+  ],
+  "teacher.js": [
+    { "file": "teacher.js" },
+    { "file": "teacher-activities.js", "mark": "/* ── Class activities (teacher-only) ── One row per In-Class Activity, dated" },
+    { "file": "teacher-songs.js", "mark": "/* ── Songs view (Jonathan, 2026-10-20: \"manage these songs from a different" },
+    { "file": "teacher-config.js", "mark": "/* ── Per-student activity-gate clears (Today-first work order, Phase 1) ──" },
+    { "file": "teacher-manage.js", "mark": "/* ── Manage view: pause + archive ──" },
+    { "file": "teacher-mic.js", "mark": "/* ── Mic recordings view ──" },
+    { "file": "teacher-students.js", "mark": "/* ── Students view (roster bar chart + per-student detail) ──" }
+  ]
+}
