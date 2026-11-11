@@ -133,6 +133,7 @@ node tools/mic-sim/replay-takes.mjs --rules=base
 
 It reads the take summaries in `tools/mic-sim/takes/` (no audio; about a minute). Its second line is either "Takes are
 current" or "ASK JONATHAN for new takes" with the reasons. Copy an ASK line and its reasons into the report (step 6).
+A line that starts "Note" (old takes, few takes) is not a reason to ask him: leave it out of the report.
 Do not ask him any other way and do not try to fetch takes: only he can download them. If the command stops with an
 error that names a line of `coach.js` ("expected this once in coach.js"), a change this week moved code the listening
 tests read: that is a finding for step 3.

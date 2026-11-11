@@ -78,8 +78,9 @@ tuning pass — ideally on the real classroom recordings the teacher console's
   950 of 960). A summary cannot test a change to `coachDetectPitch`, the mic chain or the window sizes: keep the
   audio (outside the repo) for those.
 - **When to ask Jonathan for new takes:** `replay-takes.mjs` prints "ASK JONATHAN" with the reasons (no summaries; the
-  detector changed; the newest take is older than the last change to how coach.js listens; fewer than 15; older than
-  30 days). Pass that on to him in the report; do not ask otherwise. The Friday check runs it every week (skill
+  detector changed; the newest take is older than the last change to how coach.js listens). Pass that on to him in
+  the report; do not ask otherwise. Old takes or few takes alone print a "Note" line, which is not a reason to ask
+  him (his call, 2026-11-11). The Friday check runs it every week (skill
   `friday-check`, step 5b), so he is told within a week without anyone working on listening.
 - **Fitted rooms** `room7`, `room4` in `student.mjs` (Jonathan, 2026-11-11, fitted to the 21 real takes).
 - `smoke.mjs <url>` — headless Chromium through the Dev bypass with the

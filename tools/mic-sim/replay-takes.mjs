@@ -27,10 +27,10 @@
    What a summary CANNOT test: a change to coachDetectPitch itself, to the mic chain, or to the 1024 / 512 window sizes (the summary was measured with
    the old ones; the "detector" stamp is compared and a mismatch is printed), and any rule that needs more than loudness, attack and pitch.
 
-   WHEN TO ASK JONATHAN FOR NEW TAKES: the first lines this tool prints say so ("ASK JONATHAN"). The reasons it knows: no summaries yet; the pitch
-   detector or mic chain changed since they were made; the newest take is older than the last change to how coach.js listens (so nothing recorded
-   shows the current rule at work); fewer than 15 takes; or the newest is more than 30 days old. He downloads the recordings from the console and
-   runs ONE command: node tools/mic-sim/takes-in.mjs.
+   WHEN TO ASK JONATHAN FOR NEW TAKES: the first lines this tool prints say so ("ASK JONATHAN"). The reasons: no summaries yet; the pitch detector
+   or mic chain changed since they were made; the newest take is older than the last change to how coach.js listens (so nothing recorded shows the
+   current rule at work). Old takes or few takes alone are only a "Note" line, not a reason to ask (Jonathan, 2026-11-11). He downloads the
+   recordings from the console and runs ONE command: node tools/mic-sim/takes-in.mjs.
 
    Limits: frames are evenly spaced at the take's mean frame time (the real ones were not); a take with no clock offset (fewer than 3 strums found)
    uses the count-in's lag, else 0, and is listed. */
@@ -238,9 +238,15 @@ export function askReasons(takes, site){
   // the last commit that changed the strum rule's own numbers or ccLoop's listening lines
   const lastListen = git(['log', '-1', '--format=%cs', '-G', 'CC_POWER_ONSET_RATIO|CC_POWER_HF_RATIO|CHK_ONSET_|CHK_HF_|COACH_EVENT_TAIL|COACH_ATTACK_SKIP|ccResolvePend', '--', 'coach.js']);
   if (newest && lastListen && newest < lastListen) why.push(`the newest take is from ${newest}, before the last change to how coach.js listens (${lastListen}): no take shows today's rule at work`);
-  if (takes.length < 15) why.push(`only ${takes.length} Power Chord Switch takes (15 or more make the counts steadier)`);
-  if (newest && (Date.now() - Date.parse(newest)) / 864e5 > 30) why.push(`the newest take is from ${newest}, more than 30 days ago`);
   return why;
+}
+/* Weaker reasons: worth a mention to a session that is working on listening, never a reminder to Jonathan by themselves (his call, 2026-11-11:
+   old takes alone would repeat every Friday). */
+export function softNotes(takes){
+  const notes = [], days = takes.map(t => t.day).filter(Boolean).sort(), newest = days[days.length - 1] || null;
+  if (takes.length && takes.length < 15) notes.push(`only ${takes.length} Power Chord Switch takes (15 or more make the counts steadier)`);
+  if (newest && (Date.now() - Date.parse(newest)) / 864e5 > 30) notes.push(`the newest take is from ${newest}, more than 30 days ago`);
+  return notes;
 }
 export function printReport(takes, rules, NOW, log){
   const heard = v => v && (v.verdict === 'ok' || v.verdict === 'off');
@@ -290,6 +296,8 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]){
     console.log(`${takes.length} Power Chord Switch take summaries (tools/mic-sim/takes/${days.length ? ', ' + days[0] + ' to ' + days[days.length - 1] : ''}) · rules ${rules.join(', ')} · today's strum ratios ${NOW.join(' / ')}`);
     const why = askReasons(takes, baseSite());
     console.log(why.length ? 'ASK JONATHAN for new takes (he downloads the recordings, then: node tools/mic-sim/takes-in.mjs):\n' + why.map(w => '  - ' + w).join('\n') : 'Takes are current: no need to ask Jonathan for new ones.');
+    const soft = softNotes(takes);
+    if (soft.length) console.log('Note (no need to ask him for this alone): ' + soft.join('; '));
     if (!takes.length) process.exit(1);
   }
   replayAll(takes, rules, NOW);
