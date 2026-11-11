@@ -15,6 +15,10 @@
      pages/<lang>/ the pages that open on their own: every Song Journey page
                   (tabs/*.html), the Tuning Simulator, the mood chart and the
                   404 page, as rendered, each with a screenshot under --shots
+     tools/<lang>/ the floating tools: the metronome (each meter, the tempo
+                  ladder), the timer (each preset) and the recorder popup, each
+                  opened by a real click. The tuner is not opened: it shows
+                  what the microphone hears.
      console/     the teacher console (index.html?teacher=true) against the fake
                   class of tools/console-layout-smoke.mjs (30 made-up students,
                   never live data): every sidebar view, every activity's
@@ -34,7 +38,7 @@
                                                       (the old site, or the rebuild)
      node tools/golden.mjs --compare <dirA> <dirB>    exit 0 only if they are identical
      --en-only          English only
-     --only <parts>     comma-separated: data, sets, keys, screens, games, activities, pages, console
+     --only <parts>     comma-separated: data, sets, keys, screens, games, activities, pages, console, tools
      --shots            also write PNGs of every set (English)
      --chrome <path>    Chrome/Chromium binary (or CHROME=...)
 
@@ -116,7 +120,7 @@ const ROOT = resolve(opt('--root') || HERE);
 if (!existsSync(join(ROOT, 'index.html'))) { console.error(`golden: no index.html in ${ROOT}`); process.exit(2); }
 const LANGS = args.includes('--en-only') ? ['en'] : ['en', 'es'];
 const SHOTS = args.includes('--shots');
-const PARTS = ['data', 'sets', 'keys', 'screens', 'games', 'activities', 'pages', 'console'];
+const PARTS = ['data', 'sets', 'keys', 'screens', 'games', 'activities', 'pages', 'console', 'tools'];
 const ONLY = args.includes('--only') ? (opt('--only') || '').split(',').map(x => x.trim()).filter(Boolean) : null;
 if (ONLY && (!ONLY.length || ONLY.some(p => !PARTS.includes(p)))) { console.error(`golden: --only takes ${PARTS.join(', ')}`); process.exit(2); }
 const ON = Object.fromEntries(PARTS.map(p => [p, !ONLY || ONLY.includes(p)]));
@@ -380,6 +384,27 @@ try {
           await run(`${lang}:ca-${a.id}:close`, `(document.querySelectorAll('.ca-card[open]').forEach(c => { c.open = false; }), 1)`, 50);
         }
       }
+    }
+  }
+
+  if (ON.tools) {
+    await boot('tools');
+    const click = sel => `(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) throw new Error('no ' + ${JSON.stringify(sel)}); e.click(); return 1; })()`;
+    for (const lang of LANGS) {
+      await run(`${lang}:tools-lang`, `setLang('${lang}')`, 600);
+      const rec = async name => { put(`tools/${lang}/${name}.html`, lines(await read(`${lang}:tools-${name}:html`, '#fab-group', 2))); count('tools'); };
+      await run(`${lang}:tools-metro`, click('#fab-metro'), 250); await rec('metro');
+      for (const id of (await run(`${lang}:tools-meters`, `[...document.querySelectorAll('#metro-popup [id^="meter-"]')].map(e => e.id)`, 0)) || []) {
+        await run(`${lang}:tools-${id}`, click('#' + id), 150); await rec('metro-' + id);
+      }
+      await run(`${lang}:tools-ladder`, click('#ladder-toggle'), 200); await rec('metro-ladder-on');
+      await run(`${lang}:tools-ladder-off`, click('#ladder-toggle'), 200); await rec('metro-ladder-off');
+      await run(`${lang}:tools-timer`, click('#fab-timer'), 250); await rec('timer');
+      for (const id of (await run(`${lang}:tools-presets`, `[...document.querySelectorAll('#timer-presets [id^="tp-"]')].map(e => e.id)`, 0)) || []) {
+        await run(`${lang}:tools-${id}`, click('#' + id), 150); await rec('timer-' + id);
+      }
+      await run(`${lang}:tools-rec`, click('#fab-rec'), 300); await rec('rec');
+      await run(`${lang}:tools-rec-close`, click('#fab-rec'), 200); await rec('closed');
     }
   }
 
