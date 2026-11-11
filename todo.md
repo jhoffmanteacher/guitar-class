@@ -32,8 +32,17 @@ Started 2026-11-11. State (this branch, `rebuild/site`, worktree `.claude/worktr
   writes), and `--compare` fails on any difference. Proved: two runs of the same site identical (789 of 789
   files); a reworded label, a shifted progress key and a one-shade colour change each caught. Its header lists
   the names the rebuild must keep reachable (the driver contract).
-- **Step 1, not recorded yet:** what games and drills do after Start, the tuner, the live quiz's clock and
-  its writes, real sign-in and Firestore saves (the dev bypass never saves).
+- **Review round 1 of the tool (2026-11-11): 8 broken copies, 0 caught.** It compared a never-clicked page for
+  the dev user only. Added in answer, and all 8 are now caught: what reaches the server after each click (a
+  made-up student on an in-memory Firestore), the gates for a real student at five stages, every set and My
+  progress in the filled state, Next / Back clicked through every step list, a fingerprint of what each click
+  drew, the saving controls of every In-Class Activity, the console's Settings switches with what each writes,
+  a screenshot of every recorded view, byte copies of the files the rebuild must not change, a fixed time
+  zone, and a compare that fails on unfinished or differently-taken snapshots and says PARTIAL otherwise.
+  A fresh reviewer goes over these additions next (cap: 8 mutations).
+- **Step 1, not recorded yet:** what games and drills do after Start; exit checks being taken and scored; the
+  search panel; the tuner; the live quiz's clock and writes; `loadProgress` and the swap45 move on sign-in;
+  the service worker; phone widths; the Spanish filled state.
 - **Finding (audit of `tools/checks.mjs`, 2026-11-11): 44 of its 110 sections depend on the TEXT of the code**
   (14 are mainly text checks, 18 data checks and 12 executing checks carry text pins). They fail when code only
   moves, so they cannot be frozen as they are. Before step 2 each one is either rewritten to test behaviour or

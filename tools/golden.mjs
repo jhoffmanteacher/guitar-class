@@ -47,16 +47,41 @@
      --shots            also write PNGs of every set (English)
      --chrome <path>    Chrome/Chromium binary (or CHROME=...)
 
-   THE DRIVER CONTRACT. The tool drives the page through these names and
-   nothing else, so a rebuild must keep them reachable from the page's global
-   scope (a thin shim is fine): devBypass, setLang, onModuleChange,
-   activateSet, ensureCoachJs, openSongsScreen, openClassActivitiesScreen,
-   openMyProgressScreen, openGamesScreen, gamesShow, caFocusActivity,
-   caFocusGo, and the data/state names SETS, CLASS_ACTIVITIES,
-   MODULE_MANIFEST, GAMES_META, completed, progress, responses, caStepDone,
-   classActivities, exitChecks, practiceLog, games, streak; for the console:
-   ensureTeacherJs, showTeacherApp, TEACHER_EMAIL, dayStr, db, ensureDb.
-   Everything else about the code is free.
+   THE CONTRACT: what a rebuild must keep for this tool to run on it.
+   1. The rendered HTML itself. Every recorded view is compared byte for byte,
+      so every class name, id, data- attribute and inline handler string
+      (onclick="toggleStepDone(this,'w1-b-sec0-0')") is frozen with it.
+   2. The page hooks the tool finds things by: .week-panel[data-id], .dp,
+      li.step(.collapsed), .step-label, .stp-part-go, #nav-rail, #songs-screen,
+      #class-activities-screen, #my-progress-screen, #games-screen,
+      #games-panel, .ca-card[open], #fab-group, #fab-metro, #fab-timer,
+      #fab-rec, #metro-popup [id^=meter-], #ladder-toggle, #timer-presets
+      [id^=tp-], #live-quiz-screen, .lq-shell, #teacher-app, #t-side
+      [data-view], #t-grid-container [data-ta-list], [data-ta-filter],
+      [data-ta-pick], [data-ta-tab], [data-ta-detail], [data-open-student]
+      [data-uid], the [data-set-activity-*] / [data-publish-activity] /
+      [data-unassign-activity] / [data-delete-activity] controls, the inline
+      handler names in WRITERS and CA_WRITERS and stationStepNav, and the
+      localStorage key gc-lang.
+   3. Names reachable from the page's global scope as classic-script globals
+      (the state names are ASSIGNED to, bare):
+      functions   devBypass, setLang, onModuleChange, activateSet,
+                  ensureCoachJs, openSongsScreen, openClassActivitiesScreen,
+                  openMyProgressScreen, openGamesScreen, openLiveQuizScreen,
+                  gamesShow, caFocusActivity, caFocusGo, setStationView,
+                  flushSave, isSetLocked, isSetComplete, isModuleGateLocked,
+                  isModuleReviewLocked, classOpenThrough, isGatePreviewer
+                  (replaced), ensureTeacherJs, showTeacherApp, dayStr, lqQuiz,
+                  lqType, lqTargetNotes, lqTargetIds, lqFretId, lqPcNamePool,
+                  lqPcNameOf, lqPcNames, lqRenderStudent, lqPaintStage,
+                  lqPaintControls
+      data        SETS, CLASS_ACTIVITIES, MODULE_MANIFEST, GAMES_META,
+                  LIVE_QUIZZES, TEACHER_EMAIL
+      state       completed, progress, responses, caStepDone, classActivities,
+                  exitChecks, practiceLog, games, streak, currentUser, db,
+                  ensureDb, firebase, lqSession, lqMyAnswer, lqTSession,
+                  lqTAnswers
+   The code behind all of that is free.
 
    No network: Chrome is started so that only 127.0.0.1 resolves. What the
    site draws must not depend on whether Google's servers answered.
@@ -72,6 +97,7 @@ import { fileURLToPath } from 'node:url';
 import net from 'node:net';
 
 const HERE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const ALL_PARTS = ['data', 'sets', 'keys', 'gates', 'save', 'screens', 'games', 'activities', 'pages', 'console', 'tools', 'livequiz'];
 const args = process.argv.slice(2);
 const opt = (name) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : null; };
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
@@ -86,6 +112,14 @@ function listFiles(dir, base = dir) {
   return out;
 }
 function compare(a, b) {
+  /* A snapshot that stopped half way, or two snapshots of different parts, must never earn a green tick
+     (review R1-10). meta.json is written last, so a folder without one is an unfinished run. */
+  const meta = d => { try { return JSON.parse(readFileSync(join(d, 'meta.json'), 'utf8')); } catch { return null; } };
+  const ma = meta(a), mb = meta(b);
+  if (!ma || !mb) { console.log(`golden: ✗ ${!ma ? a : b} has no meta.json: that snapshot did not finish, so there is nothing to compare`); return 1; }
+  const shape = m => JSON.stringify({ parts: m.parts, langs: m.langs, shots: !!m.shots });
+  if (shape(ma) !== shape(mb)) { console.log(`golden: ✗ the two snapshots were not taken the same way: A ${shape(ma)}, B ${shape(mb)}`); return 1; }
+  const partial = [ALL_PARTS.filter(p => !ma.parts.includes(p)).map(p => 'no ' + p), ma.langs.length < 2 ? ['English only'] : [], ma.shots ? [] : ['no screenshots']].flat();
   const A = listFiles(a).filter(f => f !== 'meta.json'), B = listFiles(b).filter(f => f !== 'meta.json'), setB = new Set(B), setA = new Set(A);
   const onlyA = A.filter(f => !setB.has(f)), onlyB = B.filter(f => !setA.has(f)), diff = [];
   let same = 0;
@@ -109,7 +143,9 @@ function compare(a, b) {
   if (diff.length > 40) console.log(`  ... and ${diff.length - 40} more`);
   if (!A.length || !B.length) { console.log('golden: ✗ an empty snapshot proves nothing: one of the two folders holds no files'); return 1; }
   const bad = diff.length + onlyA.length + onlyB.length;
-  console.log(bad ? `golden: ✗ the two snapshots differ in ${bad} file(s)` : `golden: ✓ the two snapshots are identical (${same} files)`);
+  console.log(bad ? `golden: ✗ the two snapshots differ in ${bad} file(s)` : partial.length
+    ? `golden: ✓ PARTIAL: the two snapshots are identical (${same} files), but this is not the whole comparison: ${partial.join(', ')}`
+    : `golden: ✓ the two snapshots are identical (${same} files; every part, both languages, with screenshots)`);
   return bad ? 1 : 0;
 }
 if (args.includes('--compare')) {
@@ -125,7 +161,7 @@ const ROOT = resolve(opt('--root') || HERE);
 if (!existsSync(join(ROOT, 'index.html'))) { console.error(`golden: no index.html in ${ROOT}`); process.exit(2); }
 const LANGS = args.includes('--en-only') ? ['en'] : ['en', 'es'];
 const SHOTS = args.includes('--shots');
-const PARTS = ['data', 'sets', 'keys', 'screens', 'games', 'activities', 'pages', 'console', 'tools', 'livequiz'];
+const PARTS = ALL_PARTS;
 const ONLY = args.includes('--only') ? (opt('--only') || '').split(',').map(x => x.trim()).filter(Boolean) : null;
 if (ONLY && (!ONLY.length || ONLY.some(p => !PARTS.includes(p)))) { console.error(`golden: --only takes ${PARTS.join(', ')}`); process.exit(2); }
 const ON = Object.fromEntries(PARTS.map(p => [p, !ONLY || ONLY.includes(p)]));
@@ -182,13 +218,16 @@ const NOISE = /firebase|firestore|googleapis|gstatic|google\.com|youtube|ytimg|n
 
 /* A fixed clock and a seeded Math.random, installed before any page script:
    two runs of the same site must write the same bytes. The clock stands still
-   at Wednesday 2026-11-11 10:00 local time (a running clock put a different
-   millisecond into every saved timestamp), and window.__goldSeed() puts
+   at Wednesday 2026-11-11 18:00 UTC (a running clock put a different
+   millisecond into every saved timestamp) and Chrome is started in the
+   America/Los_Angeles time zone whatever the machine's own is (review R1-9: the
+   same site gave 36 different files under TZ=UTC), so it is 10:00 in the
+   morning on a school day on every machine; and window.__goldSeed() puts
    Math.random back to its start: it is called before every view is opened, so
    what a view draws at random does not depend on how many animation frames
    ran before it. */
 const FREEZE = `(() => {
-  const RealDate = Date, start = new RealDate(2026, 10, 11, 10, 0, 0).getTime();
+  const RealDate = Date, start = RealDate.UTC(2026, 10, 11, 18, 0, 0);
   const now = () => start;
   function FakeDate(...a) { if (!new.target) return new RealDate(now()).toString(); return a.length ? new RealDate(...a) : new RealDate(now()); }
   FakeDate.prototype = RealDate.prototype; FakeDate.now = now; FakeDate.parse = RealDate.parse; FakeDate.UTC = RealDate.UTC;
@@ -208,6 +247,8 @@ const STATE = `(() => { const ls = {}; for (let i = 0; i < localStorage.length; 
 /* The controls of a set panel that save something. Each is really clicked (a
    text box is typed into) and what it writes is the record. Left out on
    purpose: anything that opens the mic, a video, a print dialog or another page. */
+// The same for an open In-Class Activity card.
+const CA_WRITERS = ['caFocusGotIt', 'caMarkClick', 'caPickPath', 'caSetChordMode', 'caSetRecordingMode', 'caSetKeyMode', 'caSetBassMode', 'pcSetCounts'];
 const WRITERS = ['toggleStepDone', 'toggleSkill', 'setSkillLevel', 'onStepMcSelect', 'onPracticeMcSelect', 'toggleGotIt', 'setPerformanceLevel',
   'repDotTap', 'repDotReset', 'logCleanRep', 'finishModuleReview', 'toggleTabChoice'];
 
@@ -243,7 +284,7 @@ try {
   const prof = mkdtempSync(join(tmpdir(), 'gc-golden-chrome-'));
   const cdp = await freePort();
   chromeProc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--use-fake-ui-for-media-stream',
-    '--use-fake-device-for-media-stream', '--autoplay-policy=no-user-gesture-required', '--no-first-run', '--disable-gpu', '--hide-scrollbars', '--host-resolver-rules=MAP * ~NOTFOUND , EXCLUDE 127.0.0.1', 'about:blank'], { stdio: 'ignore' });
+    '--use-fake-device-for-media-stream', '--autoplay-policy=no-user-gesture-required', '--no-first-run', '--disable-gpu', '--hide-scrollbars', '--host-resolver-rules=MAP * ~NOTFOUND , EXCLUDE 127.0.0.1', 'about:blank'], { stdio: 'ignore', env: { ...process.env, TZ: 'America/Los_Angeles' } });
   cleanup.push(() => rmSync(prof, { recursive: true, force: true }));
   for (let i = 0; i < 60; i++) { try { await fetch(`http://127.0.0.1:${cdp}/json/version`); break; } catch { await sleep(250); } }
   const site = await serve(ROOT); cleanup.push(() => site.srv.close());
@@ -257,7 +298,8 @@ try {
     let ev = null;
     if (method === 'Runtime.exceptionThrown') { const d = p.exceptionDetails; ev = { step, kind: 'exception', text: String((d.exception && (d.exception.description || d.exception.value)) || d.text).split('\n')[0] }; }
     else if (method === 'Runtime.consoleAPICalled' && p.type === 'error') ev = { step, kind: 'console.error', text: p.args.map(a => a.value ?? a.description ?? '').join(' ').slice(0, 300) };
-    if (ev && !NOISE.test(ev.text)) events.push(ev);
+    // Network noise is dropped, but never a broken name or type: "openYoutubeOverlay is not defined" holds a noise word and is a real fault (review R1-12).
+    if (ev && (!NOISE.test(ev.text) || (ev.kind === 'exception' && /ReferenceError|TypeError|SyntaxError|RangeError/.test(ev.text)))) events.push(ev);
   });
   await page.send('Runtime.enable'); await page.send('Page.enable');
   await page.send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false });
@@ -297,7 +339,14 @@ try {
     events.push({ step: name, kind: 'never-settled', text: 'the view was still changing after 12 s' });
     return prev;
   };
-  const shot = async (rel) => { const r = await page.send('Page.captureScreenshot', { format: 'png' }); put(rel, Buffer.from(r.data, 'base64')); count('shots'); };
+  /* A screenshot is kept once two taken 150 ms apart are the same picture: a view whose HTML has settled can
+     still be half way through a fade or a scroll. After 3 s it is kept as it is and noted in errors.json. */
+  const shot = async (rel) => {
+    let prev = (await page.send('Page.captureScreenshot', { format: 'png' })).data;
+    for (let i = 0; i < 20; i++) { await sleep(150); const cur = (await page.send('Page.captureScreenshot', { format: 'png' })).data; if (cur === prev) { prev = cur; put(rel, Buffer.from(prev, 'base64')); count('shots'); return; } prev = cur; }
+    events.push({ step: 'shot ' + rel, kind: 'never-settled', text: 'the picture was still changing after 3 s' });
+    put(rel, Buffer.from(prev, 'base64')); count('shots');
+  };
 
   await boot('boot');
   const sets = (await run('list-sets', `SETS.map(s => ({ id: s.id, m: s.moduleNum }))`, 0)) || [];
@@ -313,6 +362,17 @@ try {
     }
   }
 
+  if (ON.data) {
+    // The page's <head> as it stands after boot (title, manifest, font links, the scripts the page pulled in).
+    put('data/index-head.html', lines(await read('data:head', 'head', 3))); count('data');
+    /* The files the rebuild leaves alone (todo.md, "Do not refactor"), byte for byte: the tables every string,
+       style and rule comes from. A changed Spanish string that only shows after a click is caught here. */
+    const KEEP = ['i18n.js', 'styles.css', 'firestore.rules', 'class-activities.js', 'config-main.js', 'guitar-diagrams.js', 'practice-minutes-config.js', 'practice-minutes.js',
+      'live-quiz.js', 'fab-tools.js', 'tuner.js', 'manifest.json', ...readdirSync(ROOT).filter(f => /^module-\d+\.js$/.test(f) || /^trainer-.*\.js$/.test(f)).sort(),
+      ...readdirSync(join(ROOT, 'tabs')).sort().map(f => 'tabs/' + f)];
+    for (const f of KEEP) { put(`files/${f}`, existsSync(join(ROOT, f)) ? readFileSync(join(ROOT, f)) : '(missing)'); count('filesKept'); }
+  }
+
   if (ON.sets) for (const lang of LANGS) {
     await run(`${lang}:lang`, `setLang('${lang}')`, 600);
     for (const m of modules) {
@@ -323,6 +383,34 @@ try {
         put(`dom/${lang}/rail-${safe(id)}.html`, lines(await read(`${lang}:rail-${id}:html`, '#nav-rail')));
         count('panels'); count('rails');
         if (SHOTS && lang === 'en') await shot(`shots/set-${safe(id)}.png`);
+      }
+    }
+  }
+
+  if (ON.sets) {
+    /* Its own pass, on a fresh page, after every picture of a set is taken: the clicks below re-skin every card
+       on the page, and done between two screenshots they left the next one half way through a change. */
+    await boot('nav');
+    await run('nav:lang', `setLang('en')`, 600);
+    for (const m of modules) {
+      await run(`nav:module-${m}`, `onModuleChange(${m})`, 300);
+      for (const id of [...sets.filter(x => x.m === m).map(x => x.id), `mr${m}`]) {
+        await run(`nav:set-${id}`, `activateSet(${JSON.stringify(id)})`, 150);
+        /* Next to the end, Back to the start, then the One step / All steps switch both ways: which steps are
+           open after every click (review R1-5: a Next that went backwards changed no HTML at rest). */
+        const nav = await run(`nav:${id}`, `(() => { const p = document.querySelector('.week-panel[data-id=${JSON.stringify(id)}]'); if (!p) return null;
+          // One walk per step list (.dp) in the panel. The buttons are clicked whether or not their tab is the one showing.
+          return [...p.querySelectorAll('.dp')].map((dp, di) => {
+            const steps = () => [...dp.querySelectorAll('li.step')];
+            const open = () => steps().map((s, i) => s.classList.contains('collapsed') ? -1 : i).filter(i => i >= 0).join(',') + (dp.classList.contains('pd-showing') ? ' (part divider)' : '');
+            const go = dir => { if (dp.classList.contains('pd-showing')) { const k = dp.querySelector('.stp-part-go'); if (k) { k.click(); return true; } }
+              const b = dp.querySelector('[onclick^="stationStepNav(this,' + dir + ')"]'); if (!b) return false; b.click(); return true; };
+            const out = { list: di, steps: steps().length, hasNext: !!dp.querySelector('[onclick^="stationStepNav(this,1)"]'), start: open(), next: [], back: [] };
+            for (let k = 0; k < steps().length + 4; k++) { if (!go(1)) break; out.next.push(open()); }
+            for (let k = 0; k < steps().length + 4; k++) { if (!go(-1)) break; out.back.push(open()); }
+            if (typeof setStationView === 'function') { setStationView(false); out.allSteps = open(); setStationView(true); out.oneStep = open(); }
+            return out; }); })()`, 50);
+        put(`nav/set-${safe(id)}.json`, JSON.stringify(nav, null, 1) + '\n'); count('navWalks');
       }
     }
   }
@@ -341,6 +429,8 @@ try {
       if (!panel) return null;
       const flat = j => { const o = JSON.parse(j), out = {}; for (const c in o) for (const k in (o[c] || {})) out[c + '/' + k] = JSON.stringify(o[c][k]); return out; };
       const TOGGLES = /^(toggleStepDone|toggleSkill|toggleGotIt)\\(/;
+      const H = t => { let a = 0xdeadbeef ^ t.length, c = 0x41c6ce57 ^ t.length; for (let i = 0; i < t.length; i++) { const ch = t.charCodeAt(i); a = Math.imul(a ^ ch, 2654435761); c = Math.imul(c ^ ch, 1597334677); }
+        return (a >>> 0).toString(16).padStart(8, '0') + (c >>> 0).toString(16).padStart(8, '0') + ':' + t.length; };
       const SEL = ${JSON.stringify(WRITERS.map(w => `[onclick^="${w}("]`).join(', ') + ', textarea, input[type="text"]')};
       const n = panel.querySelectorAll(SEL).length, out = [];
       for (let i = 0; i < n; i++) {
@@ -365,6 +455,9 @@ try {
         for (const k in M) if (A[k] !== M[k]) wrote[k] = M[k];
         for (const k in A) if (!(k in M)) wrote[k] = '(removed)';
         rec.wrote = wrote; if (err) rec.error = err;
+        // What the click drew: a short fingerprint of the step (or the control's own block) as it stands right after it.
+        const box = (panel.querySelectorAll(SEL)[i] || b).closest('.step, .sk-row, .skill-row, .practice-panel, .tab-panel') || panel;
+        rec.drew = H(box.outerHTML);
         out.push(rec);
       }
       if (panel.querySelectorAll(SEL).length !== n) out.push({ note: 'the panel ended with ' + panel.querySelectorAll(SEL).length + ' controls, it began with ' + n });
@@ -381,6 +474,74 @@ try {
     }
   }
 
+  if (ON.keys) {
+    /* The filled state (review R1-3: saved ticks that never showed again changed nothing the tool looked at).
+       The page now holds every answer the pass above gave. Every on/off control is switched ON and left on, the
+       page is redrawn from its saved maps (a language switch there and back rebuilds every panel), and each set,
+       its rail and My progress are recorded as a student who has done the work sees them. */
+    for (const m of modules) {
+      await run(`filled:module-${m}`, `onModuleChange(${m})`, 250);
+      for (const id of [...sets.filter(x => x.m === m).map(x => x.id), `mr${m}`]) {
+        await run(`filled:set-${id}`, `activateSet(${JSON.stringify(id)})`, 100);
+        await run(`filled:on-${id}`, `(() => { const p = document.querySelector('.week-panel[data-id=${JSON.stringify(id)}]'); if (!p) return 0; const SEL = '[onclick^="toggleStepDone("], [onclick^="toggleSkill("], [onclick^="toggleGotIt("]';
+          const n = p.querySelectorAll(SEL).length; for (let i = 0; i < n; i++) { const b = p.querySelectorAll(SEL)[i]; if (b) b.click(); } return n; })()`, 50);
+      }
+    }
+    await run('filled:redraw-es', `setLang('es')`, 700);
+    await run('filled:redraw-en', `setLang('en')`, 700);
+    for (const m of modules) {
+      await run(`filled:module2-${m}`, `onModuleChange(${m})`, 300);
+      for (const id of [...sets.filter(x => x.m === m).map(x => x.id), `mr${m}`]) {
+        await run(`filled:set2-${id}`, `activateSet(${JSON.stringify(id)})`, 150);
+        put(`filled/set-${safe(id)}.html`, lines(await read(`filled:set-${id}:html`, `.week-panel[data-id="${id}"]`)));
+        put(`filled/rail-${safe(id)}.html`, lines(await read(`filled:rail-${id}:html`, '#nav-rail'))); count('filledPanels');
+        if (SHOTS) await shot(`shots/filled-set-${safe(id)}.png`);
+      }
+    }
+    await run('filled:my-progress', 'openMyProgressScreen()', 800);
+    put('filled/screen-my-progress.html', lines(await read('filled:my-progress:html', '#my-progress-screen', 2))); count('filledPanels');
+    if (SHOTS) await shot('shots/filled-my-progress.png');
+    put('filled/state.json', (await run('filled:state', `JSON.stringify(JSON.parse(${STATE}), null, 1)`, 0)) + '\n');
+  }
+
+  if (ON.gates) {
+    /* The gates, for a student who is NOT the dev user (review R1-2: the dev bypass skips every gate, so a set
+       gate that locked everyone changed nothing). isGatePreviewer is made to answer "no", the skills map is set
+       to five stages of a student's year, and for each stage the record is which sets, module gates and Module
+       Reviews are locked, and the rail of four modules around the gate as that student sees it. */
+    await boot('gates');
+    await run('gates:lang', `setLang('en')`, 600);
+    await run('gates:student', `(isGatePreviewer = () => false, 1)`, 0);
+    /* The class setting "open through Module K" leaves every set up to K open, so the stages are counted from
+       K: nothing done; everything through K done; then the first set of K+1; then all of K+1; and one skill
+       only started two modules further on (a set a student has started is never locked again). */
+    const STAGES = `(() => { const got = ws => Object.fromEntries(ws.flatMap(w => (w.skills || []).map(k => [k.id, 'gotit']))); const mod = n => SETS.filter(w => w.moduleNum === n);
+      const K = Math.max(1, classOpenThrough()), upTo = n => SETS.filter(w => w.moduleNum <= n);
+      return { 'new-student': {}, 'all-open-modules-done': got(upTo(K)), 'first-set-of-next-module-done': got([...upTo(K), ...mod(K + 1).slice(0, 1)]), 'next-module-done': got(upTo(K + 1)),
+        'one-skill-started-further-on': Object.assign(got(upTo(K)), Object.fromEntries(mod(K + 3).slice(0, 1).flatMap(w => (w.skills || []).slice(0, 1).map(k => [k.id, 'working'])))) }; })()`;
+    const gateModules = (await run('gates:modules', `(() => { const K = Math.max(1, classOpenThrough()); return [K, K + 1, K + 2, K + 3].filter(n => SETS.some(w => w.moduleNum === n)); })()`, 0)) || [];
+    for (const stage of (await run('gates:stages', `Object.keys(${STAGES})`, 0)) || []) {
+      await run(`gates:${stage}`, `(progress = ${STAGES}[${JSON.stringify(stage)}], completed = {}, 1)`, 0);
+      const locks = await run(`gates:${stage}:locks`, `(S => JSON.stringify({ sets: S.map(w => [w.id, isSetLocked(w)]), moduleGate: MODULE_MANIFEST.map(m => [m.num, isModuleGateLocked(m.num)]),
+        moduleReview: MODULE_MANIFEST.map(m => [m.num, isModuleReviewLocked(m.num)]), setComplete: S.map(w => [w.id, isSetComplete(w)]) }, null, 1))([...SETS].sort((a, b) => a.moduleNum - b.moduleNum))`, 0);
+      put(`gates/${stage}.json`, locks + '\n'); count('gateStages');
+      for (const m of gateModules) {
+        await run(`gates:${stage}:module-${m}`, `onModuleChange(${m})`, 300);
+        put(`gates/${stage}-rail-module-${m}.html`, lines(await read(`gates:${stage}:rail-${m}`, '#nav-rail'))); count('gateRails');
+      }
+      // A locked set, opened the two ways a student can: a plain click (bounced by the gate) and the read-only preview.
+      const firstLocked = await run(`gates:${stage}:first-locked`, `([...SETS].sort((a, b) => a.moduleNum - b.moduleNum).find(w => isSetLocked(w) && !(w.locked || w.comingSoon)) || {}).id || null`, 0);
+      if (firstLocked) {
+        await run(`gates:${stage}:module-of-locked`, `onModuleChange(SETS.find(w => w.id === ${JSON.stringify(firstLocked)}).moduleNum)`, 300);
+        const before = await run(`gates:${stage}:bounce`, `(() => { const was = (document.querySelector('.week-panel.active') || {}).dataset; activateSet(${JSON.stringify(firstLocked)}); const now = (document.querySelector('.week-panel.active') || {}).dataset;
+          return JSON.stringify({ asked: ${JSON.stringify(firstLocked)}, activeBefore: was && was.id, activeAfter: now && now.id }); })()`, 200);
+        await run(`gates:${stage}:peek`, `activateSet(${JSON.stringify(firstLocked)}, { peek: true })`, 250);
+        const peek = await run(`gates:${stage}:peek-state`, `(() => { const p = document.querySelector('.week-panel[data-id=${JSON.stringify(firstLocked)}]'); return JSON.stringify({ active: !!p && p.classList.contains('active'), peek: !!p && p.classList.contains('set-peek') }); })()`, 0);
+        put(`gates/${stage}-locked-set.json`, JSON.stringify({ bounce: JSON.parse(before || 'null'), peek: JSON.parse(peek || 'null') }, null, 1) + '\n'); count('gateStages');
+      }
+    }
+  }
+
   if (ON.screens || ON.games || ON.activities) {
     await boot('screens');
     await run('load-coach', `ensureCoachJs()`, 1500);
@@ -392,12 +553,14 @@ try {
         ['my-progress', 'openMyProgressScreen()', '#my-progress-screen'], ['games-hub', 'openGamesScreen()', '#games-screen']]) {
         await run(`${lang}:screen-${name}`, expr, 800);
         put(`dom/${lang}/screen-${name}.html`, lines(await read(`${lang}:screen-${name}:html`, sel))); count('screens');
+        if (SHOTS && lang === 'en') await shot(`shots/screen-${name}.png`);
       }
       if (ON.games) {
         await run(`${lang}:games-open`, 'openGamesScreen()', 500);
         for (const v of views) {
           await run(`${lang}:game-${v}`, `gamesShow(${JSON.stringify(v)})`, 350);
           put(`dom/${lang}/game-${safe(v)}.html`, lines(await read(`${lang}:game-${v}:html`, '#games-panel', 10))); count('games');
+          if (SHOTS && lang === 'en') await shot(`shots/game-${safe(v)}.png`);
         }
       }
       if (ON.activities) {
@@ -406,6 +569,7 @@ try {
           await run(`${lang}:ca-${a.id}`, `caFocusActivity(${JSON.stringify(a.id)})`, 350);
           // A card that is not on the student page (teacher-only, hidden) leaves no open card: the marker is then the record.
           put(`dom/${lang}/activity-${safe(a.id)}.html`, lines(await read(`${lang}:ca-${a.id}:html`, `.ca-card[open]`, 4))); count('activities');
+          if (SHOTS && lang === 'en') await shot(`shots/activity-${safe(a.id)}.png`);
           for (let i = 1; i < a.steps; i++) {
             await run(`${lang}:ca-${a.id}-step${i}`, `caFocusGo(${JSON.stringify(a.id)}, ${i})`, 200);
             put(`dom/${lang}/activity-${safe(a.id)}-step${i}.html`, lines(await read(`${lang}:ca-${a.id}-step${i}:html`, `.ca-card[open]`, 2))); count('activitySteps');
@@ -416,12 +580,100 @@ try {
     }
   }
 
+  if (ON.activities) {
+    /* What an In-Class Activity SAVES (review R1-4: a Got it tick saved under a key nothing reads changed
+       nothing the tool looked at). A fresh page, English: every activity is opened and each of its saving
+       controls is really clicked, 450 ms apart (Got it ignores a second click inside 400 ms); the record is
+       what each click writes and a fingerprint of the card as it stands afterwards. */
+    await boot('ca-keys');
+    await run('ca-keys:lang', `setLang('en')`, 600);
+    await run('ca-keys:open', 'openClassActivitiesScreen()', 700);
+    await run('ca-keys:def', `window.__goldCa = async function(id){
+      const S = () => (${STATE});
+      const flat = j => { const o = JSON.parse(j), out = {}; for (const c in o) for (const k in (o[c] || {})) out[c + '/' + k] = JSON.stringify(o[c][k]); return out; };
+      const H = t => { let a = 0xdeadbeef ^ t.length, c = 0x41c6ce57 ^ t.length; for (let i = 0; i < t.length; i++) { const ch = t.charCodeAt(i); a = Math.imul(a ^ ch, 2654435761); c = Math.imul(c ^ ch, 1597334677); }
+        return (a >>> 0).toString(16).padStart(8, '0') + (c >>> 0).toString(16).padStart(8, '0') + ':' + t.length; };
+      const SEL = ${JSON.stringify(CA_WRITERS.map(w => `[onclick^="${w}("]`).join(', '))};
+      const card = () => document.querySelector('.ca-card[open]');
+      if (!card()) return [{ note: 'no open card' }];
+      const out = [], n0 = card().querySelectorAll(SEL).length;
+      // A click may redraw the card and add or remove controls (Got it moves to the next step): walk by position, up to 60 clicks.
+      for (let i = 0; i < 60; i++) {
+        const c = card(); if (!c) { out.push({ i, note: 'the card closed' }); break; }
+        const list = c.querySelectorAll(SEL); if (i >= list.length) break;
+        const b = list[i], what = b.getAttribute('onclick'), before = S(); let err = null;
+        try { b.click(); } catch (e) { err = String(e && e.message); }
+        await new Promise(r => setTimeout(r, 450));
+        const A = flat(before), M = flat(S()), wrote = {};
+        for (const k in M) if (A[k] !== M[k]) wrote[k] = M[k];
+        for (const k in A) if (!(k in M)) wrote[k] = '(removed)';
+        const rec = { i, what, wrote, drew: card() ? H(card().outerHTML) : '(closed)' }; if (err) rec.error = err;
+        out.push(rec);
+      }
+      out.push({ note: 'began with ' + n0 + ' controls' });
+      return out;
+    }; 1`, 0);
+    for (const a of (await run('ca-keys:list', `CLASS_ACTIVITIES.map(a => ({ id: a.id }))`, 0)) || []) {
+      await run(`ca-keys:${a.id}`, `caFocusActivity(${JSON.stringify(a.id)})`, 400);
+      const r = await run(`ca-keys:${a.id}:click`, `window.__goldCa(${JSON.stringify(a.id)})`, 100);
+      put(`keys/activity-${safe(a.id)}.json`, JSON.stringify(r, null, 1) + '\n');
+      count('activityControlsUsed', (r || []).filter(x => x.what).length); count('activityWrites', (r || []).reduce((n, x) => n + Object.keys(x.wrote || {}).length, 0));
+      await run(`ca-keys:${a.id}:close`, `(document.querySelectorAll('.ca-card[open]').forEach(c => { c.open = false; }), 1)`, 50);
+    }
+    put('keys/activities-state.json', (await run('ca-keys:state', `JSON.stringify(JSON.parse(${STATE}), null, 1)`, 0)) + '\n');
+  }
+
+  if (ON.save) {
+    /* What reaches Firestore (review R1-1: the dev user never saves, so a payload written to the wrong field
+       changed nothing). The console smoke test's in-memory Firestore stands in for the server, the signed-in
+       user becomes a made-up student (not the dev user, so queueSave arms and flushSave sends), and after each
+       real click flushSave() is awaited and the student's document is recorded as the server would hold it. */
+    const src = readFileSync(join(HERE, 'tools', 'console-layout-smoke.mjs'), 'utf8');
+    const m = /const STUB = String\.raw`([\s\S]*?)`;\n\nasync function main/.exec(src);
+    if (!m) throw new Error('could not find the STUB in tools/console-layout-smoke.mjs');
+    await boot('save');
+    await run('save:lang', `setLang('en')`, 600);
+    await run('save:stub', m[1], 100);
+    await run('save:student', `(currentUser = { uid: 'gold-student', displayName: 'Gold Student', email: 'gold-student@example.test', photoURL: null }, 1)`, 0);
+    const doc = () => run('save:doc', `(async () => { await flushSave(); await new Promise(r => setTimeout(r, 50)); return JSON.stringify(__store.get('progress/gold-student') || null, null, 1); })()`, 50);
+    const log = [];
+    /* Each control is taken from the first set that has one (not every set has a rating row or a clean-rep
+       button); n picks the n-th such control in that set. The set it came from is part of the record. */
+    await run('save:def', `window.__goldClick = async function(sel, n){
+      // In course order (SETS itself fills in the order the module files arrive), each module's sets and then its Module Review.
+      const order = [...SETS].sort((a, b) => a.moduleNum - b.moduleNum), ids = [];
+      order.forEach((w, i) => { ids.push([w.moduleNum, w.id]); if (!order[i + 1] || order[i + 1].moduleNum !== w.moduleNum) ids.push([w.moduleNum, 'mr' + w.moduleNum]); });
+      // A module's panels are drawn a moment after the module is chosen: wait for it, as a student would.
+      let at = null;
+      for (const [m, id] of ids) {
+        if (m !== at) { onModuleChange(m); at = m; await new Promise(r => setTimeout(r, 300)); }
+        activateSet(id);
+        const b = document.querySelectorAll('.week-panel[data-id="' + id + '"] ' + sel)[n || 0];
+        if (b) { b.click(); return id + ': ' + b.getAttribute('onclick'); }
+      }
+      throw new Error('no set has ' + sel);
+    }; 1`, 0);
+    for (const [name, sel, n] of [['tick a step', '[onclick^="toggleStepDone("]', 0], ['tick a second step', '[onclick^="toggleStepDone("]', 1], ['un-tick the first step', '[onclick^="toggleStepDone("]', 0],
+      ['mark a skill', '[onclick^="toggleSkill("]', 0], ['rate a skill', '[onclick^="setSkillLevel("]', 0], ['answer a quiz question', '[onclick^="onStepMcSelect("]', 0],
+      ['answer a practice question', '[onclick^="onPracticeMcSelect("]', 0], ['log a clean rep', '[onclick^="logCleanRep("]', 0], ['finish a Module Review', '[onclick^="finishModuleReview("]', 0]]) {
+      const what = await run(`save:${name}`, `window.__goldClick(${JSON.stringify(sel)}, ${n})`, 200);
+      log.push({ action: name, control: what, serverDoc: JSON.parse((await doc()) || 'null') });
+    }
+    // An In-Class Activity tick and a finished activity, through the same save path.
+    await run('save:ca-open', 'openClassActivitiesScreen()', 700);
+    // The first activity whose open card has a Got it button.
+    const what = await run('save:ca-got-it', `(() => { for (const a of CLASS_ACTIVITIES) { caFocusActivity(a.id); const b = document.querySelector('.ca-card[open] [onclick^="caFocusGotIt("]');
+      if (b) { b.click(); return a.id + ': ' + b.getAttribute('onclick'); } document.querySelectorAll('.ca-card[open]').forEach(c => { c.open = false; }); } throw new Error('no activity has a Got it button'); })()`, 600);
+    log.push({ action: 'Got it on an activity step', control: what, serverDoc: JSON.parse((await doc()) || 'null') });
+    put('save/server-doc-after-each-action.json', JSON.stringify(log, null, 1) + '\n'); count('savesRecorded', log.length);
+  }
+
   if (ON.tools) {
     await boot('tools');
     const click = sel => `(() => { const e = document.querySelector(${JSON.stringify(sel)}); if (!e) throw new Error('no ' + ${JSON.stringify(sel)}); e.click(); return 1; })()`;
     for (const lang of LANGS) {
       await run(`${lang}:tools-lang`, `setLang('${lang}')`, 600);
-      const rec = async name => { put(`tools/${lang}/${name}.html`, lines(await read(`${lang}:tools-${name}:html`, '#fab-group', 2))); count('tools'); };
+      const rec = async name => { put(`tools/${lang}/${name}.html`, lines(await read(`${lang}:tools-${name}:html`, '#fab-group', 2))); count('tools'); if (SHOTS && lang === 'en') await shot(`shots/tools-${name}.png`); };
       await run(`${lang}:tools-metro`, click('#fab-metro'), 250); await rec('metro');
       for (const id of (await run(`${lang}:tools-meters`, `[...document.querySelectorAll('#metro-popup [id^="meter-"]')].map(e => e.id)`, 0)) || []) {
         await run(`${lang}:tools-${id}`, click('#' + id), 150); await rec('metro-' + id);
@@ -451,6 +703,7 @@ try {
         await run(`${lang}:lq-${q}-${name}`, `(() => { const g = __goldLq(${JSON.stringify(q)}); lqSession = g.sessions[${JSON.stringify(state)}];
           lqMyAnswer = ${pick ? `{ qIndex: 0, choice: g.${pick} }` : 'null'}; lqRenderStudent(); return 1; })()`, 150);
         put(`livequiz/${lang}/student-${safe(q)}-${name}.html`, lines(await read(`${lang}:lq-${q}-${name}:html`, '#live-quiz-screen'))); count('liveQuizStudent');
+        if (SHOTS && lang === 'en') await shot(`shots/livequiz-student-${safe(q)}-${name}.png`);
       }
     }
     await run('lq:clear', `(lqSession = null, lqMyAnswer = null, lqRenderStudent(), 1)`, 100);
@@ -496,6 +749,7 @@ try {
       for (const q of (await run('lq-stage:list', `Object.keys(LIVE_QUIZZES)`, 0)) || []) for (const state of ['lobby', 'question', 'reveal', 'ended']) {
         await run(`lq-stage:${q}-${state}`, `(() => { lqTSession = __goldLq(${JSON.stringify(q)}).sessions[${JSON.stringify(state)}]; lqTAnswers = []; lqPaintStage(); if (typeof lqPaintControls === 'function') lqPaintControls(); return 1; })()`, 150);
         put(`livequiz/stage-${safe(q)}-${state}.html`, lines(await read(`lq-stage:${q}-${state}:html`, '.lq-shell'))); count('liveQuizStage');
+        if (SHOTS) await shot(`shots/livequiz-stage-${safe(q)}-${state}.png`);
       }
       await run('lq-stage:clear', `(lqTSession = null, lqPaintStage(), typeof lqPaintControls === 'function' && lqPaintControls(), 1)`, 150);
     }
@@ -528,12 +782,37 @@ try {
       put(`console/student-${uid}.html`, lines(await read(`console:student-${uid}:html`, '#teacher-app', 3))); count('consoleStudents');
     }
     }
+    if (ON.console) {
+      /* What the console WRITES (review R1-7: an Optional switch that hid the activity instead changed nothing,
+         because the store was read once after read-only clicks). On one activity's Settings tab each control is
+         really clicked, and config/class is recorded after every click. */
+      const cid = 'ca-21', writes = [];
+      const cfg = () => run('console:cfg', `JSON.stringify(__store.get('config/class'))`, 0);
+      await run('console:w-view', `document.querySelector('#t-side [data-view="activities"]').click()`, 400);
+      await run('console:w-all', `document.querySelector('[data-ta-filter="all"]').click()`, 250);
+      const flatten = (o, pre = '', out = {}) => { for (const k of Object.keys(o || {})) { const v = o[k]; if (v && typeof v === 'object' && !Array.isArray(v)) flatten(v, pre + k + '.', out); else out[pre + k] = JSON.stringify(v); } return out; };
+      for (const [name, sel, how] of [['hide', `[data-set-activity-hidden][data-state="hide"]`], ['show', `[data-set-activity-hidden][data-state="show"]`], ['optional', `[data-set-activity-optional][data-state="optional"]`],
+        ['required', `[data-set-activity-optional][data-state="required"]`], ['pin', `[data-set-activity-pin][data-state="on"]`], ['unpin', `[data-set-activity-pin][data-state="off"]`],
+        ['clear the gate for one student', `[data-set-activity-clear]`], ['set the release date', `[data-set-activity-date]`, 'date'], ['unpublish', `[data-publish-activity]`],
+        ['archive', `[data-set-activity-archived]`], ['un-assign', `[data-unassign-activity]`], ['delete', `[data-delete-activity]`]]) {
+        // Re-open the activity's Settings tab each time: a write may redraw the detail or move the row.
+        await run(`console:w-pick:${name}`, `(() => { const r = document.querySelector('[data-ta-pick][data-id="${cid}"]'); if (r) r.click(); const t = document.querySelector('[data-ta-tab="settings"]'); if (t) t.click(); return !!r; })()`, 250);
+        const before = flatten(JSON.parse((await cfg()) || '{}'));
+        const did = await run(`console:w:${name}`, `(() => { const e = document.querySelector('[data-ta-detail] ' + ${JSON.stringify(sel)}); if (!e) return 'no such control';
+          ${how === 'date' ? `e.value = '2026-12-01'; e.dispatchEvent(new Event('change', { bubbles: true })); return 'set to 2026-12-01';` : `e.click(); return 'clicked';`} })()`, 500);
+        const after = flatten(JSON.parse((await cfg()) || '{}')), changed = {};
+        for (const k in after) if (before[k] !== after[k]) changed[k] = after[k];
+        for (const k in before) if (!(k in after)) changed[k] = '(removed)';
+        writes.push({ action: name, did, changed });
+      }
+      put('console/writes.json', JSON.stringify(writes, null, 1) + '\n'); count('consoleWrites', writes.length);
+    }
     if (ON.console) put('console/store.json', (await run('console:store', `JSON.stringify([...__store.entries()].sort((a, b) => a[0] < b[0] ? -1 : 1), null, 1)`, 0)) + '\n');
     await page.send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false });
   }
 
   put('errors.json', JSON.stringify(events, null, 1) + '\n');
-  put('meta.json', JSON.stringify({ root: ROOT, langs: LANGS, parts: PARTS.filter(p => ON[p]), counts, seconds: Math.round((Date.now() - t0) / 1000) }, null, 1) + '\n');
+  put('meta.json', JSON.stringify({ root: ROOT, langs: LANGS, parts: PARTS.filter(p => ON[p]), shots: SHOTS, counts, seconds: Math.round((Date.now() - t0) / 1000) }, null, 1) + '\n');
   console.log(`golden: ${sets.length} sets in ${modules.length} modules (${LANGS.join(' + ').toUpperCase()}): ` + Object.entries(counts).map(([k, v]) => `${v} ${k}`).join(', ') + `; ${events.length} error event(s) recorded; ${Math.round((Date.now() - t0) / 1000)} s`);
   console.log(`golden: written to ${outDir}`);
 } catch (e) { console.error('golden: could not run —', e && e.message); exitCode = 2; }
