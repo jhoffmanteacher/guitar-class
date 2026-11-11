@@ -72,6 +72,10 @@ Start here. Update this block whenever an item opens or closes; each line says w
   anywhere and prints "ASK JONATHAN" when new takes are worth downloading. **Waiting on him: the first intake** (the
   folder `tools/mic-sim/takes/` does not exist until then). He may delete takes on the site after an intake and keeps
   one copy of the audio outside the repo.
+  **First thing to do once `tools/mic-sim/takes/` is on `main` (any session):** `node tools/mic-sim/replay-takes.mjs`
+  and compare its ALL-takes rows at 1.8 / 2.19 with the Mac's audio replay in the DECIDED entry above (21 takes, 210
+  judged changes; today 35 of 54 heard and 5 of 150 lost; `ring` 13 and 55). Close numbers mean the summaries can
+  stand in for the audio; a clear gap means they cannot yet: say so, and do not judge a rule on them.
 - **Next (in order):** (1) on Jonathan's Mac, where the takes are, fit the rooms and the touch to the 34 real takes;
   his thumb / finger take at 60 and 120 BPM ("His first step" below) tests the 120 BPM prediction directly. (2) Then
   pin a small scorecard in `checks.mjs` (a new kind of check around `coach.js` detection: Always Reviewed). (3) Then
