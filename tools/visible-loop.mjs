@@ -16,7 +16,8 @@
      node tools/visible-loop.mjs --break-fake clock    self-test: the pages get the REAL clock, not the virtual day
    Exit 0 = every comparison held; 1 = a contradiction (each prints its seed, case and step); 3 = the watchdog
    (nothing moved for 120 s; it prints the step it was on). The time taken goes to stderr, so the same seed prints
-   the same stdout byte for byte. About 50-60 s for the default 60 cases. Node only: no browser, no network, no Firebase.
+   the same stdout byte for byte. About 40-50 s for the default 60 cases on a quiet machine (2026-11-12). Node only:
+   no browser, no network, no Firebase.
 
    When to run it: after a change to any of the visibility / blocker / optional rules (caIsVisible, caIsOptional,
    caBlockers, caReduceForMe, caBoardOrder in app/activities-2.js; teacherActivityVisible, teacherBlockersFor,
@@ -63,14 +64,17 @@
    * Names: three made-up students (stu-alpha / -bravo / -charlie, "Test Student A/B/C", @example.test), a new
      student with no progress doc yet (stu-delta), a teacher account teacher@example.test, and two special users:
      'dev-user' (dev bypass) and a student signed in with the teacher's email (a gate previewer).
-   * Rounds: one to three console changes land before the open page's tab comes back.
+   * Rounds: one to three console changes land before the open page's tab comes back. Change kinds rotate so each
+     runs at least 15 times in a full run (a floor that fails); half of Archive / Delete aim at a card that holds
+     Hidden, Who, Optional or Play Along (at least 5 each on a Hidden or Who card, also a floor).
 
    ── NOT modelled ──
    The rail repaint after an Open-through change (repaintModuleGate needs a rendered rail; only the value is
    compared);
    the two-console write race (tools/two-consoles-loop.mjs); screens and renders (only predicates and the
-   values they read); the Journey "sentHere" exemption (page-level, and unreachable while JOURNEY_GATE_LOCKS is
-   false); Today's activities (check 1cq); pins; renames; the legacy activityNumbers overrides (generated empty);
+   values they read: no probe reads rendered markup, so how the activity list is laid out — module folds, counts,
+   carets — cannot change a result here; only a render that throws would); the Journey "sentHere" exemption
+   (page-level, and unreachable while JOURNEY_GATE_LOCKS is false); Today's activities (check 1cq); pins; renames; the legacy activityNumbers overrides (generated empty);
    Pause; the Firestore listener-free console reading another console's writes; a failed read by the console
    (its views refuse to draw); the dev bypass's boot path beyond "no reads at boot".
 
@@ -170,25 +174,46 @@
    --root wants a folder holding index.html, app/, the teacher-*.js parts, class-activities.js, config-main.js,
    i18n.js, guitar-diagrams.js and tabs/journey.js (a full checkout works).
 
-   ── Break-it record (2026-11-11; each a scratch COPY of the site run with --root, 60 cases, all exit 1) ──
-   B1  journeyIsVisible forgets "not on the board" (the 2026-09-16 bug)          824 contradictions
-   B2  teacherActivityVisible forgets "not on the board" (2026-09-16)           1539
-   B3  teacherActivityVisible reads the raw board row (063508e)                  1156
-   B4  journeyIsVisible ignores Move to Songs / Teacher view songs (063508e)      764
-   B5  loadClassConfig blanks its globals before the read (2026-09-26 window)     157
-   B6  restoreClassConfigFromCache: the next student inherits the CAS override     31
-   B7  the Who cache ignores its uid (save.js:331)                                  36
-   B8  games not applied on tab return (save.js:369)                                15
-   B9  Hidden fails open to {} on a failed read                                    120
-   B10 journeyBlockers ignores the teacher's period override                       146
-   B11 caIsVisible: release date one day late (< for <=)                          1942
-   B12 teacherBlockersFor counts on the UTC day                                    217
-   B13 hiddenActivityIds left out of classConfigSignature                            4
-   B14 teacherActivityOptionalByDefault forgets Who                                515
-   B15 Delete does not re-pack the module it leaves                                  6
-   B16 Clear all also clears Optional cards                                         13
-   Fake-world self-tests: --break-fake merge (maps replaced, not merged) and --break-fake clock (pages on the
-   real clock) both exit 1. */
+   ── Break-it record (re-run 2026-11-12 on a9836dc's site; each a scratch COPY run with --root, 60 cases, all exit 1;
+      count = contradictions) ──
+   B1  journeyIsVisible forgets "not on the board" (the 2026-09-16 bug)          882
+   B2  teacherActivityVisible forgets "not on the board" (2026-09-16)           1974
+   B3  teacherActivityVisible reads the raw board row (063508e)                  1454
+   B4  journeyIsVisible ignores Move to Songs / Teacher view songs (063508e)      804
+   B5  loadClassConfig blanks its globals before the read (2026-09-26 window)     161
+   B6  restoreClassConfigFromCache: the next student inherits the CAS override     18
+   B7  the Who cache ignores its uid (save.js:331)                                  45
+   B8  games not applied on tab return (save.js:369)                                11
+   B9  Hidden fails open to {} on a failed read                                    157
+   B10 journeyBlockers ignores the teacher's period override                        94
+   B11 caIsVisible: release date one day late (< for <=)                          2004
+   B12 teacherBlockersFor counts on the UTC day                                    293
+   B13 hiddenActivityIds left out of classConfigSignature                            1  (thin: one hide in 60 cases)
+   B14 teacherActivityOptionalByDefault forgets Who                                665
+   B15 Delete does not re-pack the module it leaves                                 30
+   B16 Clear all also clears Optional cards                                         17
+   Round-1 review (2026-11-12):
+   N1  dayStr and journeyDayStr on a fixed UTC-8 offset (wrong on PDT evenings)    317
+   N2  loadClassConfig ignores a read whose configVersion jumped by more than 1    131
+   N3  K1 stays narrow: the Who cache ignores its uid                               45
+   N4  K1 fixed (per-uid cache keys) but its entry left behind: "matched nothing"     1
+   N12 K1 stays narrow: the override is never restored, even for its own student    18
+   N13 K1 stays narrow: Open through from cache read as 0 for its own student       21
+   N5  caIsPlayAlongOnly forgets Who                                                97
+   N6  Delete keeps Who and Hidden (patch and copy alike)                            7
+   N7  caBoardOrder sorts modules >= 7 by id number                               1367
+   N8  the per-kind floor raised to 30 (tool copy): "date ran 24 times"             18
+   N8b the Hidden-or-Who floor raised to 40 (tool copy)                              2
+   N9  marking complete does not set classActivities                               427
+   N10 picking CAS is not saved                                                     84
+   N11 a missing progress doc reads as a failed load                               353
+   M2  caIsVisible lets the teacher's email skip the date                           10
+   M3  Delete keeps Who in the console's copy only                                  24
+   M5  caOptionalByDefault: a Who card given to me blocks                          702
+   M6  clears restored only for the period-override slot's student                  23
+   M7  Open through 12 rejected (< 12)                                              34
+   Fake-world self-tests: --break-fake merge (maps replaced, not merged) 1547 and --break-fake clock (pages on the
+   real clock) 1949, both exit 1. */
 process.env.TZ = 'America/Los_Angeles';
 import vm from 'node:vm';
 import { readFileSync, existsSync } from 'node:fs';
