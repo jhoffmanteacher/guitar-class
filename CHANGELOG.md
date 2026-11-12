@@ -6,6 +6,10 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-12 — Live quiz: reloading the page keeps your countdown
+
+- **A reload in the middle of a question no longer starts your time again.** Your countdown carries on from where it was, and speed points still count from when the question first reached you. If your time had run out, it stays run out.
+
 ## 2026-11-12 — Cleaner activity list
 
 - **Activity names line up on the left.** In the activity list, each date now sits at the right end of its row.

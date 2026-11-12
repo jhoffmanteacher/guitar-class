@@ -96,3 +96,8 @@ projected stage (`?teacher=true` → **Live quiz**). One game runs at a time, in
   `lqUid()`, and an app-only helper only behind a guard or a fallback.
   The banner's CSS is mirrored in `tabs/journey-theme.css` (those pages don't
   load `styles.css`) — restyle both or neither.
+- **A reload keeps the round's clock** (2026-11-12): `lqRoundOpenedAt()` keeps the moment the tab first saw a
+  question in sessionStorage (`lq-q-opened`), so the countdown and the speed points carry on after a reload.
+  Not closed, on Jonathan's list: a NEW tab or another device starts a fresh clock, and two tabs open at once
+  can each answer (the last tap wins). After any change to `live-quiz.js`: `node tools/live-quiz-loop.mjs`
+  once that tool is on main.

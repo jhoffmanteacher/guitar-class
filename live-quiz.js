@@ -433,6 +433,26 @@ let lqInviteAnsweredId = null;
 // before it auto-popped. See lqSyncInvite().
 let _lqInviteReturnFocus = null;
 let lqQOpenedAt = 0;      // performance.now() when THIS round opened locally
+/* A reload keeps the round's clock (Jonathan, 2026-11-12). The moment this tab first saw a question is kept in
+   sessionStorage, which a reload does not clear, so the countdown and the speed points carry on from there. Until
+   then a reload started both again: a student whose time had run out could reload, answer and score
+   (tools/live-quiz-loop.mjs, case reload-after-timeout). Wall-clock time, because performance.now() starts again
+   with the page. Storage that throws or comes back empty leaves the old behaviour: the clock starts now. */
+const LQ_OPENED_KEY = 'lq-q-opened';
+function lqRoundOpenedAt(live){
+  const now = performance.now(), wall = Date.now();
+  /* Only where the student can answer. A Song Journey page listens too (for the "Live quiz running" banner), and its
+     Join button opens the site in the same tab, which keeps sessionStorage: a clock started there would cost the
+     student their answer time. The uid is in the key so a second student on a shared tab never gets the first's clock. */
+  if(!lqCanPlayHere()) return now;
+  const id = String(live.sessionId) + ':' + Number(live.qIndex) + ':' + lqUid();
+  try {
+    const was = JSON.parse(sessionStorage.getItem(LQ_OPENED_KEY) || 'null');
+    if(was && was.id === id && Number(was.at) > 0) return now - Math.max(0, wall - Number(was.at));
+    sessionStorage.setItem(LQ_OPENED_KEY, JSON.stringify({ id, at: wall }));
+  } catch(e){}
+  return now;
+}
 let lqSendError = false;
 let lqTick      = null;   // countdown interval, only while limitSec > 0
 // "sessionId:qIndex" whose answer doc is being read back after a reload —
@@ -472,7 +492,7 @@ function lqOnSession(data){
     if(live && (!prev || prev.sessionId !== live.sessionId)) lqInviteAnsweredId = null;
   }
   if(live && live.state === 'question' && (!prev || prev.sessionId !== live.sessionId || prev.qIndex !== live.qIndex)){
-    lqMyAnswer = null; lqSendError = false; lqQOpenedAt = performance.now();
+    lqMyAnswer = null; lqSendError = false; lqQOpenedAt = lqRoundOpenedAt(live);
   }
   // Arriving in the middle of a game we did not watch open — a reload, a
   // re-sign-in — means lqMyAnswer may only be null because memory was
