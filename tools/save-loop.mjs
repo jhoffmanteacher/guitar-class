@@ -159,6 +159,9 @@
      R15 The period picked replaces the stored one.
      R16 A PR entry appends {value, date} to that key's history (an old bare value becomes its first entry with no
          date) and keeps the last 8 (save.js:487-490: "a short history instead of a single overwritten value").
+     R17 Values are compared leaf by leaf; in addition an exit-check result, a practice-log entry and the streak (each
+         written whole) must equal ONE value some history gives, not a mix of leaves from two (an old attempts count
+         beside a new score), when only one tab acted on it.
 
    Reading a FAIL line: case index, family, the stored value, the values the oracle accepts, and the replay command. */
 import vm from 'node:vm';
@@ -850,6 +853,7 @@ function oracle(sc, world, tabs){
     for (const v of okVals.values()) flatten(v, rec, new Map()).forEach((c, k) => { if (!accept.has(k)) accept.set(k, new Set()); accept.get(k).add(c); });
     const allLeafKeys = new Set(accept.keys());
     for (const v of okVals.values()){ const f = flatten(v, rec, new Map()); for (const k of allLeafKeys) if (!f.has(k)) accept.get(k).add('∅'); }
+    accept.whole = new Set(okVals.keys());
     return accept;
   };
   let leaves = 0;
@@ -892,6 +896,19 @@ function oracle(sc, world, tabs){
       const wipedByFailedTab = rec[0] === 'responses' && g.startsWith('[') && effs.some(x => x.a.kind === 'pr') && tabs.some(t => !t.loadOk && viewsOf(t, rec, effs).has(g));
       fails.push({ msg: `${k}: stored ${g}, expected ${[...set].join(' or ')}` + (lastOwed ? ` (last owed: ${lastOwed.a.tab} ${describe(lastOwed.a)} at ${rel(lastOwed.a.t)})` : ' (no owed action: the value it started with)'), rule: wipedByFailedTab ? 'R16-wiped' : null });
     }
+  }
+  /* A record the site writes WHOLE (an exit-check result, a practice-log entry, the streak) must be one value some
+     history gives, not a mixture of leaves from different ones (an old attempts count beside a new score). Checked when
+     at most one tab acted on it (two tabs' whole records can legitimately merge, K1) and no leaf already failed. */
+  for (const { rec, effs } of recs.values()){
+    if (!['exitChecks', 'practiceLog', 'streak'].includes(rec[0])) continue;
+    if (new Set(effs.map(x => x.a.tab)).size > 1) continue;
+    const g = canon(getRec(stored, rec));
+    const whole = acceptOf(rec, effs, 'owed').whole;
+    if (whole.has(g) || fails.some(f => f.msg.startsWith(rec.join('.') + '.') || f.msg.startsWith(rec.join('.') + ':'))) continue;
+    if (acceptOf(rec, effs, 'owedLoose').whole.has(g)){ known.push({ kind: 'K3 unload write lost', leaf: rec.join('.'), stored: g, accept: [...whole] }); continue; }
+    leaves++;
+    fails.push({ msg: `${rec.join('.')}: stored ${g}, a mixture no history gives; expected one of ${[...whole].join(' or ')}` });
   }
   /* R7 invariant: an exit check marked done has a score behind it. */
   for (const id of Object.keys(sc.CHECKS)){
