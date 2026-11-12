@@ -1160,7 +1160,17 @@ window.addEventListener('gc-langchange', ()=>{ lqRenderStudent(); lqSyncBanner()
    how many students have answered, and the control strip's six buttons are
    just the plain choice names, which give nothing away.
    ══════════════════════════════════════════════════════════════ */
-let lqTSession = null;      // teacher's copy of liveQuiz/current
+let lqTSession = null;      // teacher's copy of liveQuiz/current (the PREVIEW game's local doc while one runs)
+/* Preview (2026-11-12, Jonathan: "how do I preview it without starting it?").
+   The console's Preview button runs the picked quiz on the stage and control
+   strip with NOTHING written to Firestore: lqWrite applies each patch to a
+   local doc instead, so no student is invited and no score is kept. Every
+   renderer and writer is the real one; only the write is redirected.
+   lqTReal holds the real liveQuiz/current meanwhile. Preview opens only when
+   no real game is live, and a real game going live (another tab or device)
+   ends the preview at once, so the console never hides a running game. */
+let lqTPreview = false;
+let lqTReal = null;
 let lqTAnswers = [];        // every answer doc, filtered by sessionId at use
 let lqTUnsubDoc = null, lqTUnsubAns = null;
 let lqTQOpenedAt = 0;       // performance.now() when THIS round opened, on the teacher's own clock
@@ -1250,8 +1260,13 @@ function lqTeacherListen(){
   lqEnsureDb().then(()=>{
     if(!lqDb) return;
     if(!lqTUnsubDoc) lqTUnsubDoc = lqDoc().onSnapshot(snap => {
+      lqTReal = snap.exists ? (snap.data() || null) : null;
+      if(lqTPreview){
+        if(!lqTRealIsLive()) return;          // keep previewing; the real doc waits in lqTReal
+        lqTPreview = false;                   // a real game went live: it wins the console
+      }
       const prev = lqTSession;
-      lqTSession = snap.exists ? (snap.data() || null) : null;
+      lqTSession = lqTReal;
       // Same rule as the student clock: never trust a server timestamp for
       // this, so a new question (or a new game) restarts the projector's
       // own local clock.
@@ -1502,7 +1517,13 @@ function lqPaintControls(){
   if(document.activeElement && document.activeElement.id === 'lq-limit' && !lqTBusy) return;
   const s = lqTSession;
   const busy = lqTBusy ? ' disabled' : '';
-  const full = `<button type="button" class="lq-ctl ghost" onclick="lqToggleFullscreen()">Full screen</button>`;
+  const full = `<button type="button" class="lq-ctl ghost" onclick="lqToggleFullscreen()">Full screen</button>`
+    + (lqTPreview ? `<button type="button" class="lq-ctl ghost" onclick="lqTeacherExitPreview()">Exit preview</button>` : '');
+  const pv = lqTPreview ? `<div class="lq-ctl-hint"><b>Preview</b>: only this screen sees it. No student is invited and nothing is saved.</div>` : '';
+  if(lqTPreview && s && s.state === 'ended'){
+    el.innerHTML = full + pv;
+    return;
+  }
   if(!s || !s.state || s.state === 'off' || s.state === 'ended'){
     const opts = Object.keys(LIVE_QUIZZES).map(id =>
       `<option value="${escAttr(id)}"${id === lqTPickedQuizId ? ' selected' : ''}>${escHtml(tIn(LIVE_QUIZZES[id].titleKey, 'en'))}</option>`).join('');
@@ -1515,8 +1536,9 @@ function lqPaintControls(){
     const closeBtn = (s && s.state === 'ended')
       ? `<button type="button" class="lq-ctl ghost" onclick="lqTeacherClose()"${busy}>Clear the board</button>` : '';
     el.innerHTML = `<label class="lq-ctl-lbl">Quiz <select id="lq-quiz-pick" onchange="lqTPickedQuizId=this.value;lqTScoring=lqDefaultScoring(this.value);lqPaintControls()">${opts}</select></label>${scoring}`
-      + `<button type="button" class="lq-ctl go" onclick="lqTeacherStart()"${busy}>Start game</button>${closeBtn}${full}`
-      + `<div class="lq-ctl-hint">${escHtml(lqQuiz(lqTPickedQuizId).teacherHint)} Time to answer: blank or 0 = no limit.</div>`;
+      + `<button type="button" class="lq-ctl go" onclick="lqTeacherStart()"${busy}>Start game</button>`
+      + `<button type="button" class="lq-ctl ghost" onclick="lqTeacherPreview()"${busy}>Preview</button>${closeBtn}${full}`
+      + `<div class="lq-ctl-hint">${escHtml(lqQuiz(lqTPickedQuizId).teacherHint)} Time to answer: blank or 0 = no limit. Preview runs the quiz on this screen only, without inviting students.</div>`;
     return;
   }
   const quiz = lqQuiz(s.quizId);
@@ -1528,7 +1550,7 @@ function lqPaintControls(){
       : `<button type="button" class="lq-ctl go" onclick="lqTeacherNext()"${busy}>First question</button>`;
     el.innerHTML = opener
       + `<button type="button" class="lq-ctl ghost" onclick="lqTeacherClose()"${busy}>Cancel</button>${full}`
-      + `<div class="lq-ctl-hint">${escHtml(quiz.teacherHint)}</div>`;
+      + `<div class="lq-ctl-hint">${escHtml(quiz.teacherHint)}</div>` + pv;
     return;
   }
   if(s.state === 'question'){
@@ -1545,14 +1567,14 @@ function lqPaintControls(){
     }
     el.innerHTML = head
       + `<button type="button" class="lq-ctl ghost" onclick="lqTeacherEnd()"${busy}>End game</button>${full}`
-      + `<div class="lq-ctl-hint">${escHtml(quiz.teacherHint)}</div>`;
+      + `<div class="lq-ctl-hint">${escHtml(quiz.teacherHint)}</div>` + pv;
     return;
   }
   const opener = fret ? lqFretPickerHtml(quiz, busy)
     : pcname ? lqPcNamePickerHtml(quiz, busy)
     : `<button type="button" class="lq-ctl go" onclick="lqTeacherNext()"${busy}>Next question</button>`;
   el.innerHTML = opener + lqLimitInputHtml(s.quizId)
-    + `<button type="button" class="lq-ctl ghost" onclick="lqTeacherEnd()"${busy}>End game</button>${full}`;
+    + `<button type="button" class="lq-ctl ghost" onclick="lqTeacherEnd()"${busy}>End game</button>${full}` + pv;
 }
 
 function lqToggleFullscreen(){
@@ -1571,6 +1593,7 @@ function lqToggleFullscreen(){
    otherwise → a merge, for the in-game updates. */
 async function lqWrite(patch, replace){
   if(lqTBusy) return false;
+  if(lqTPreview) return lqPreviewWrite(patch, replace);
   lqTBusy = true; lqPaintControls();
   try{
     await lqEnsureDb();
@@ -1605,6 +1628,40 @@ async function lqTeacherStart(){
     startedAt: firebase.firestore.FieldValue.serverTimestamp(),
     askedAt: null, endedAt: null
   }, true);
+}
+
+/* ── Preview: the picked quiz on this console only (see lqTPreview) ── */
+function lqTRealIsLive(){
+  return !!(lqTReal && (lqTReal.state === 'lobby' || lqTReal.state === 'question' || lqTReal.state === 'reveal'));
+}
+async function lqTeacherPreview(){
+  if(lqTBusy || lqTPreview || lqTRealIsLive()) return;
+  lqTPreview = true;
+  await lqTeacherStart();                 // the real opener; lqWrite keeps it local
+  if(lqTSession && lqTSession.sessionId) lqTSession.sessionId = 'preview-' + lqTSession.sessionId;   // never matches a real answer doc
+  lqPaintStage(); lqPaintControls();
+}
+function lqTeacherExitPreview(){
+  if(!lqTPreview) return;
+  lqTPreview = false;
+  lqTSession = lqTReal;
+  lqPaintStage(); lqPaintControls(); lqStageSyncTick();
+}
+// lqWrite's stand-in while previewing: the same three write shapes, applied to
+// the local doc. Server timestamps become null (the console reads its own
+// clock, lqTQOpenedAt). Closing the board (state 'off') ends the preview.
+function lqPreviewWrite(patch, replace){
+  const clean = {};
+  Object.keys(patch).forEach(k => {
+    const v = patch[k];
+    clean[k] = (v && typeof v === 'object' && firebase.firestore.FieldValue && v instanceof firebase.firestore.FieldValue) ? null : v;
+  });
+  const prev = lqTSession;
+  lqTSession = replace === true ? clean : Object.assign({}, prev || {}, clean);
+  if(lqTSession.state === 'off'){ lqTeacherExitPreview(); return true; }
+  if(lqTSession.state === 'question' && (!prev || prev.state !== 'question' || prev.qIndex !== lqTSession.qIndex)) lqTQOpenedAt = performance.now();
+  lqPaintStage(); lqPaintControls(); lqStageSyncTick();
+  return true;
 }
 
 // `target` is set only by lqTeacherOpenFret (a fret quiz's note picker); the
@@ -1759,7 +1816,7 @@ async function lqTeacherRevealPcName(){
 async function lqTeacherEnd(){
   const s = lqTSession;
   if(!s) return;
-  if(s.state === 'question'){
+  if(s.state === 'question' && !lqTPreview){   // a preview round scores nothing anyway
     const howToScore = lqType(lqQuiz(s.quizId)) !== 'mc' ? 'press Reveal' : 'mark the correct answer';   // fret and pcname: the app scores at Reveal
     if(!window.confirm('This question is still open. If you end the game now, this round is thrown away and nobody gets points for it.\n\n'
       + 'To count it: Cancel, ' + howToScore + ', then End game.\n\nEnd the game now anyway?')) return;
