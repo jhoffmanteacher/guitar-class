@@ -723,6 +723,8 @@ function oracle(sc, world, tabs){
       for (const x of effs){ if (!x.owed && !(mask & (1 << free.indexOf(x)))) continue; v = x.e.fn(v); }
       okVals.set(canon(v), v);
     }
+    /* Which owed effects changed the record (a deck best below the best, an un-tick of what is not ticked, change nothing). */
+    { let v = getRec(base, rec); for (const x of effs) if (x.owed){ const n = x.e.fn(v); x.changed = canon(n) !== canon(v); v = n; } }
     const accept = new Map();
     for (const v of okVals.values()) flatten(v, rec, new Map()).forEach((c, k) => { if (!accept.has(k)) accept.set(k, new Set()); accept.get(k).add(c); });
     const allLeafKeys = new Set(accept.keys());
@@ -738,13 +740,15 @@ function oracle(sc, world, tabs){
       if (lastOwed && lastOwed.e.path && g === 'true'){
         const y = lastOwed.a.tab;
         const yView = viewBefore(tabBy[y], rec, effs, lastOwed);
-        if (canon(yView) === '∅'){ known.push({ kind: 'K2 path picks', leaf: k, stored: g, accept: [...set] }); continue; }
+        /* ...and the pick that stands came from another tab that did hold it. */
+        const other = tabs.find(t => t.name !== y && viewsOf(t, rec, effs).has('true'));
+        if (canon(yView) === '∅' && other){ known.push({ kind: 'K2 path picks', leaf: k, stored: g, accept: [...set], by: other.name }); continue; }
       }
       /* R11 K1: a key both tabs hold. */
       const leafPath = k.split('.');
       const k1 = world.landed.find(w => {
         if (w.path !== 'progress/' + USER.uid || w.tx || canon(getRec(w.data, leafPath)) !== g) return false;
-        const lastOther = effs.filter(x => x.owed && x.a.tab !== w.tab).pop();
+        const lastOther = effs.filter(x => x.owed && x.changed && x.a.tab !== w.tab).pop();
         return !!lastOther && w.at >= lastOther.a.t && viewsOf(tabBy[w.tab], rec, effs).has(g);
       });
       if (k1){ known.push({ kind: 'K1 a key both tabs hold', leaf: k, stored: g, accept: [...set], by: k1.tab }); continue; }
@@ -1085,7 +1089,8 @@ async function runCase(seed, idx, famFilter){
       tab.openAt = s.openAt; tab.closeAt = s.closeAt; tab.killKind = s.killKind; tab.pokes = [];
       tabs.push(tab); s.tab = tab;
       world.log(`${s.name} opens on ${s.dev.name}; signs in`);
-      siteCall(tab, 'currentUser = __user; (async () => { await loadProgress(); caAdoptLocalTicks(); })()');
+      tab.ctx.__booted = () => { tab.booted = true; world.log(`${s.name} signed in (the app would now be on screen)`); };
+      siteCall(tab, 'currentUser = __user; (async () => { await loadProgress(); caAdoptLocalTicks(); })().finally(() => __booted())');
     }, null, 'script');
     for (const e of s.events){
       world.at(e.t, () => {
@@ -1127,22 +1132,34 @@ async function runCase(seed, idx, famFilter){
       from = p.until;
     }
   }
+  /* The student can act only once the app is on screen (after the sign-in read settles) and while the tab shows:
+     an action due earlier waits for it, 250 ms at a time; one due on a hidden or closed tab is not done. */
+  const whenUp = (s, fn) => {
+    const go = () => {
+      if (!s.tab || !s.tab.alive || s.tab.hidden) return;
+      if (!s.tab.booted){ world.at(world.now + 250, go, null, 'script'); return; }
+      fn();
+    };
+    go();
+  };
   for (const a of sc.actions){
     const s = sc.tabs.find(x => x.name === a.tab);
     if (a.kind === 'check'){
       const t0 = a.t - 500 * (a.picks.length + 1);
-      world.at(t0, () => { if (s.tab && s.tab.alive){ world.log(`${a.tab} starts exit check ${a.key}`); siteCall(s.tab, `ecStart(${JSON.stringify(a.key)})`); } }, null, 'script');
-      a.picks.forEach((p, i) => world.at(t0 + 500 * (i + 1), () => { if (s.tab && s.tab.alive) siteCall(s.tab, `ecPick(${JSON.stringify(a.key)}, { dataset: { pick: ${JSON.stringify(p)} } })`); }, null, 'script'));
-      world.at(a.t, () => { if (s.tab && s.tab.alive){ a.done = true; s.tab.pokes.push(world.now); world.log(`${a.tab} ${describe(a)} (submitted)`); } }, null, 'script');
+      world.at(t0, () => whenUp(s, () => {
+        world.log(`${a.tab} starts exit check ${a.key}`);
+        siteCall(s.tab, `ecStart(${JSON.stringify(a.key)})`);
+        a.picks.forEach((p, i) => world.at(world.now + 500 * (i + 1), () => { if (s.tab.alive) siteCall(s.tab, `ecPick(${JSON.stringify(a.key)}, { dataset: { pick: ${JSON.stringify(p)} } })`); }, null, 'script'));
+        world.at(world.now + 500 * (a.picks.length + 1), () => { if (s.tab.alive){ a.t = world.now; a.done = true; s.tab.pokes.push(world.now); world.log(`${a.tab} ${describe(a)} (submitted)`); } }, null, 'script');
+      }), null, 'script');
       continue;
     }
     const code = actionCode(a);
-    world.at(a.t, () => {
-      if (!s.tab || !s.tab.alive) return;
-      a.done = true; s.tab.pokes.push(world.now);
+    world.at(a.t, () => whenUp(s, () => {
+      a.t = world.now; a.done = true; s.tab.pokes.push(world.now);
       world.log(`${a.tab} ${describe(a)}`);
       siteCall(s.tab, code);
-    }, null, 'script');
+    }), null, 'script');
   }
   /* The settle: every open tab hidden at settleAt + 2 s (a clean point, R10). */
   world.at(sc.settleAt + 2000, () => {
