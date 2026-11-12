@@ -139,11 +139,31 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 /* ─────────────────────────── arguments ─────────────────────────── */
 const ARGV = process.argv.slice(2);
 const opt = (k, d) => { const a = ARGV.find(x => x === '--' + k || x.startsWith('--' + k + '=')); if (!a) return d; return a.includes('=') ? a.slice(a.indexOf('=') + 1) : true; };
+/* Bad arguments exit 2 before anything runs. */
+const argFail = msg => { console.error('save-loop: ' + msg + ' (see the header of tools/save-loop.mjs)'); process.exit(2); };
+{
+  const VALUED = ['cases', 'seed', 'case', 'family', 'root', 'fake-fault', 'json', 'stall'], BARE = ['verbose', 'list'];
+  for (const a of ARGV){
+    const m = /^--([a-z-]+)(=(.*))?$/.exec(a);
+    if (!m) argFail('not an option: ' + JSON.stringify(a));
+    if (BARE.includes(m[1])){ if (m[2]) argFail('--' + m[1] + ' takes no value'); continue; }
+    if (!VALUED.includes(m[1])) argFail('unknown option --' + m[1]);
+    if (!m[2] || m[3] === '') argFail('--' + m[1] + ' needs a value (--' + m[1] + '=…)');
+  }
+  const int = (k, min) => { const v = opt(k, null); if (v == null) return; if (!/^\d+$/.test(v) || Number(v) < min) argFail(`--${k} must be a whole number of at least ${min}, not ${JSON.stringify(v)}`); };
+  int('cases', 1); int('seed', 0); int('case', 0);
+  const st = opt('stall', null);
+  if (st != null && !(/^\d+(\.\d+)?$/.test(st) && Number(st) > 0)) argFail('--stall must be a number of seconds above 0, not ' + JSON.stringify(st));
+  if (opt('case', null) != null && Number(opt('case')) >= Number(opt('cases', 180))) argFail(`--case=${opt('case')} is not below --cases=${opt('cases', 180)}`);
+  if (opt('root', null) != null && !existsSync(resolve(opt('root')))) argFail('--root: no such folder ' + JSON.stringify(opt('root')));
+}
 const ROOT = resolve(opt('root', join(HERE, '..')));
 const VERBOSE = !!opt('verbose', false);
 const FAKE_FAULT = opt('fake-fault', '') || '';
 const BASE_SEED = Number(opt('seed', 1));
 const STALL_S = Number(opt('stall', 120));
+/* The world of the case running now: a rejected promise nobody handles, raised while it runs, is that case's fault (R12). */
+let CURRENT_WORLD = null;
 
 /* ─────────────────────────── seeded random ─────────────────────────── */
 function rng(seed){
@@ -165,7 +185,9 @@ const FAKE_FAULTS = {
   'late-copy': 'set() reads its data when the write lands, not when it is called (breaks F8)',
   'no-fifo': 'a client\'s writes land in latency order, not issue order (breaks F9)',
   'no-tx-retry': 'a transaction commits over a document that changed after it read it (breaks F10)',
-  'stall-survives-close': 'a write still queued in a closed tab lands anyway (breaks F11)'
+  'stall-survives-close': 'a write still queued in a closed tab lands anyway (breaks F11)',
+  'update-nested-delete': 'update() accepts a FieldValue.delete() nested inside a map value (breaks F4)',
+  'offline-rejects-writes': 'an offline set() is rejected instead of waiting for the reconnect (breaks F11)'
 };
 function clone(v){
   if (v instanceof FieldDelete) return v;
@@ -179,6 +201,19 @@ function validate(v, path, allowDelete){
   if (v instanceof FieldDelete){ if (!allowDelete) throw Object.assign(new Error(`FieldValue.delete() cannot be used with set() unless you pass {merge:true} (field ${path})`), { code: 'invalid-argument' }); return; }
   if (Array.isArray(v)) v.forEach((x, i) => { if (x instanceof FieldDelete) throw Object.assign(new Error('FieldValue.delete() inside an array'), { code: 'invalid-argument' }); validate(x, path + '.' + i, false); });
   else if (v && typeof v === 'object') for (const k of Object.keys(v)) validate(v[k], path ? path + '.' + k : k, allowDelete);
+}
+/* update(): a delete may only be a top-level value (a field path); nested in a map it is refused. */
+function validateUpdate(data){
+  for (const k of Object.keys(data)){
+    const v = data[k];
+    if (v instanceof FieldDelete) continue;
+    if (FAKE_FAULT === 'update-nested-delete') validate(v, k, true);
+    else {
+      validate(v, k, true);
+      const nested = x => isMap(x) && Object.values(x).some(y => y instanceof FieldDelete || nested(y));
+      if (nested(v)) throw Object.assign(new Error(`Function updateDoc() called with invalid data. FieldValue.delete() can only appear at the top level of your update data (found in field ${k})`), { code: 'invalid-argument' });
+    }
+  }
 }
 /* Does a merge map name any field that is not a delete? (a map holding only deletes creates nothing.) */
 const hasSetLeaf = v => isMap(v) ? (Object.keys(v).length === 0 || Object.values(v).some(hasSetLeaf)) : !(v instanceof FieldDelete);
@@ -213,7 +248,7 @@ class World {
     this.now = T0; this.seq = 0; this.events = [];
     this.docs = new Map();
     this.r = rng(seed);
-    this.landed = []; this.issued = 0; this.rejected = 0; this.lostOnClose = 0; this.txCommits = 0; this.txRetries = 0;
+    this.landed = []; this.issued = 0; this.rejected = 0; this.lostOnClose = 0; this.lostUnload = 0; this.txCommits = 0; this.txRetries = 0;
     this.gets = []; this.trace = [];
   }
   log(s){ if (VERBOSE) this.trace.push(`${((this.now - T0) / 1000).toFixed(3).padStart(9)}s  ${s}`); }
@@ -253,17 +288,22 @@ class World {
     }
     d.version++;
   }
-  /* One round trip on a device's network, starting now. Returns { ok, at } — when it settles, or ok:null (stall: settles at the phase end). */
-  trip(dev, slowRange){
+  /* A WRITE's round trip on a device's network, starting now. Returns { ok, at }: ok:null = queued in the SDK until the
+     phase ends (stall, offline: F11), ok:false = refused by the server. */
+  trip(dev){
     const ph = dev.phaseAt(this.now);
     const lat = (lo, hi) => Math.round(lo + (hi - lo) * this.r());
     if (ph.phase === 'up') return { ok: true, at: this.now + lat(40, 400) };
-    if (ph.phase === 'slow') return { ok: true, at: this.now + (ph.lat || lat(...(slowRange || [2000, 6000]))) };
-    if (ph.phase === 'fail') return { ok: false, at: this.now + lat(200, 800) };
+    if (ph.phase === 'slow') return { ok: true, at: this.now + (ph.lat || lat(2000, 6000)) };
+    if (ph.phase === 'refused') return { ok: false, at: this.now + lat(200, 800) };
+    if (ph.phase === 'offline' && FAKE_FAULT === 'offline-rejects-writes') return { ok: false, at: this.now + lat(200, 800) };
     return { ok: null, at: ph.until + lat(40, 400) };
   }
-  /* A read or a transaction round trip: a stall fails it after 10 s ("the client is offline"), or it goes through at the reconnect if that is sooner. */
+  /* A READ or a transaction round trip: offline fails it at once ("the client is offline"); a stall fails it after 10 s,
+     or it goes through at the reconnect if that is sooner; refused fails it. */
   readTrip(dev){
+    const ph = dev.phaseAt(this.now);
+    if (ph.phase === 'offline') return { ok: false, at: this.now + Math.round(200 + 600 * this.r()) };
     const tr = this.trip(dev);
     if (tr.ok !== null) return tr;
     return tr.at - this.now > 10000 ? { ok: false, at: this.now + 10000 } : { ok: true, at: tr.at };
@@ -274,15 +314,22 @@ class World {
 function makeClient(world, tab){
   const dev = tab.device;
   const issue = (path, op) => {
-    validate(op.data, '', op.kind === 'update' || op.merge);
+    if (op.kind === 'update') validateUpdate(op.data); else validate(op.data, '', op.merge);
     const sent = FAKE_FAULT === 'late-copy' ? op.data : clone(op.data);
     world.issued++;
     const tr = world.trip(dev);
     const rec = { from: world.now, to: Infinity };
     tab.net.push(rec);
-    world.log(`${tab.name} write #${world.issued} issued (${tr.ok === false ? 'will FAIL' : tr.ok === null ? 'STALLED until reconnect' : 'lands ~' + ((tr.at - world.now) / 1000).toFixed(2) + ' s'}): ${summarize(op.data)}`);
+    /* A write started while the page unloads (pagehide) is not reliably delivered (app/start.js's own comment): in a
+       scenario that says so, it never leaves the browser. */
+    if (tab.unloading && tab.dropUnload){
+      world.lostUnload++;
+      world.log(`${tab.name} write #${world.issued} started during unload: NOT DELIVERED: ${summarize(op.data)}`);
+      return new Promise(() => {});
+    }
+    world.log(`${tab.name} write #${world.issued} issued (${tr.ok === false ? 'will be REFUSED' : tr.ok === null ? 'QUEUED until reconnect' : 'lands ~' + ((tr.at - world.now) / 1000).toFixed(2) + ' s'}): ${summarize(op.data)}`);
     return new Promise((res, rej) => {
-      if (tr.ok === false){ world.at(tr.at, () => { rec.to = world.now; world.rejected++; world.log(`${tab.name} write REJECTED (unavailable)`); rej(Object.assign(new Error('unavailable'), { code: 'unavailable' })); }, tab, 'net'); return; }
+      if (tr.ok === false){ world.at(tr.at, () => { rec.to = world.now; world.rejected++; world.log(`${tab.name} write REFUSED by the server`); rej(Object.assign(new Error('Missing or insufficient permissions.'), { code: 'permission-denied' })); }, tab, 'net'); return; }
       const behindStall = tr.ok === null || tab.stallQueued > 0;
       let at = tr.at;
       if (FAKE_FAULT !== 'no-fifo') at = Math.max(at, tab.lastLandAt);
@@ -329,7 +376,7 @@ function makeClient(world, tab){
             }, tab, 'net');
           }),
           set(r, data, o){ validate(data, '', !!(o && o.merge)); writes.push([r.path, { kind: 'set', merge: !!(o && o.merge), data: clone(data) }]); return tx; },
-          update(r, data){ validate(data, '', true); writes.push([r.path, { kind: 'update', data: clone(data) }]); return tx; }
+          update(r, data){ validateUpdate(data); writes.push([r.path, { kind: 'update', data: clone(data) }]); return tx; }
         };
         const out = await fn(tx);
         const tr = world.readTrip(dev);
@@ -455,6 +502,23 @@ async function fakeSelfTest(){
     dev.phases = [];
     check('F11 a write queued behind a stall is lost when the tab closes, and lands on reconnect when it stays open', lost && s2.w.docs.get(P) && s2.w.docs.get(P).data.kept === true);
   }
+  {
+    const { db } = mk();
+    let threw = false; try { db.collection('progress').doc('u').update({ games: { dk: DELETE } }); } catch { threw = true; }
+    check('F4b update() refuses a FieldValue.delete() nested inside a map value', threw);
+  }
+  {
+    const { w, db } = mk();
+    dev.phases = [{ phase: 'offline', until: T0 + 4000 }];
+    let refused = false, readFailed = false;
+    db.collection('progress').doc('u').set({ queued: true }, { merge: true }).catch(() => { refused = true; });
+    db.collection('progress').doc('u').get().catch(() => { readFailed = true; });
+    await w.runUntil(T0 + 3000);
+    const before = !!w.docs.get(P);
+    await w.runUntil(T0 + 8000);
+    dev.phases = [];
+    check('F12 offline: a set() waits for the reconnect and then lands; a read fails at once', !before && !refused && readFailed && w.docs.get(P) && w.docs.get(P).data.queued === true);
+  }
   return out;
 }
 
@@ -494,7 +558,7 @@ function makeTab(world, name, device, opts){
   head.appendChild = s => {
     if (s && /firestore/.test(s.src || '')){
       tab.sdkAttempts++;
-      if (world.now < tab.sdkBlockedUntil) world.at(world.now + 400, () => { world.log(`${name} Firestore SDK blocked (onerror)`); callSite(tab, () => s.onerror && s.onerror()); }, tab, 'timer');
+      if (world.now < tab.sdkBlockedUntil || device.phaseAt(world.now).phase === 'offline') world.at(world.now + 400, () => { world.log(`${name} Firestore SDK blocked (onerror)`); callSite(tab, () => s.onerror && s.onerror()); }, tab, 'timer');
       else world.at(world.now + tab.sdkMs, () => {
         if (!ctx.firebase.firestore){ ctx.firebase.firestore = firestoreFn; }
         if (tab.sdkLoadedAt == null) tab.sdkLoadedAt = world.now;
@@ -593,14 +657,15 @@ const canon = v => {
 const pad2 = n => String(n).padStart(2, '0');
 function oDay(ms){ const d = new Date(ms); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
 function oYesterday(ms){ const d = new Date(ms); d.setDate(d.getDate() - 1); return oDay(d.getTime()); }
-const MODELLED = ['completed', 'caSteps', 'classActivities', 'responses', 'practiceLog', 'exitChecks', 'streak'];
+const MODELLED = ['completed', 'caSteps', 'classActivities', 'responses', 'practiceLog', 'exitChecks', 'streak', 'skills', 'period'];
 const HELD_ON_FAILED_LOAD = new Set(['streak', 'games', 'practiceLog', 'exitChecks']);
 /* A record: the unit an action changes. Keyed maps: [field, key]; the streak and the deck bests are one record each. */
 function recordsOfDoc(d){
   const out = [];
   if (!d) return out;
-  for (const f of ['completed', 'caSteps', 'classActivities', 'responses', 'practiceLog', 'exitChecks']) if (isMap(d[f])) for (const k of Object.keys(d[f])) out.push([f, k]);
+  for (const f of ['completed', 'caSteps', 'classActivities', 'responses', 'practiceLog', 'exitChecks', 'skills']) if (isMap(d[f])) for (const k of Object.keys(d[f])) out.push([f, k]);
   if ('streak' in d) out.push(['streak']);
+  if ('period' in d) out.push(['period']);
   if (isMap(d.games) && 'dk' in d.games) out.push(['games', 'dk']);
   return out;
 }
@@ -629,7 +694,22 @@ function oRemap(d){
   return o;
 }
 const isMarked = d => !!(d && d.migrations && d.migrations.swap45 === true);
-/* The effects of one action: [{ rec, fn(prev) -> next }], in the oracle's own words (R1-R7). */
+/* R5: the streak bump at time t. */
+const STREAK = t => prev => {
+  const day = oDay(t);
+  const s = isMap(prev) ? clone(prev) : { count: 0, lastDay: null };
+  if (s.lastDay === day) return prev;
+  s.count = s.lastDay === oYesterday(t) ? (s.count || 0) + 1 : 1; s.lastDay = day; return s;
+};
+/* A tab's own view of the doc, as the oracle models it: what it loaded (nothing after a failed read), then its own
+   actions. Used to keep the scripted student to what the screen offers (an action that changes nothing on that tab's
+   screen is not done) and for the K1/K2 rules. */
+function setRec(d, r, v){
+  let o = d;
+  for (let i = 0; i < r.length - 1; i++){ if (!isMap(o[r[i]])) o[r[i]] = {}; o = o[r[i]]; }
+  if (v === ABSENT) delete o[r[r.length - 1]]; else o[r[r.length - 1]] = clone(v);
+}
+/* The effects of one action: [{ rec, fn(prev) -> next }], in the oracle's own words (R1-R7, R14-R16). */
 function effectsOf(a, CHECKS){
   const day = oDay(a.t);
   switch (a.kind){
@@ -649,12 +729,25 @@ function effectsOf(a, CHECKS){
       if ((m[a.key] || 0) >= a.n) return prev;
       m[a.key] = a.n; m.at = day; return m;
     } }];
-    case 'streak': return [{ rec: ['streak'], fn: prev => {
-      const s = isMap(prev) ? clone(prev) : { count: 0, lastDay: null };
-      if (s.lastDay === day) return prev;
-      s.count = s.lastDay === oYesterday(a.t) ? (s.count || 0) + 1 : 1; s.lastDay = day; return s;
-    } }];
+    case 'streak': return [{ rec: ['streak'], fn: STREAK(a.t) }];
     case 'path': return a.keys.map(k => ({ rec: ['caSteps', `${a.key}:path:${k}`], fn: () => k === a.pick ? true : ABSENT, path: true }));
+    /* R14: the checklist cell and a Module Review rating set the value the student sees next (a.result, worked out from
+       that tab's own view when the student acts); a fresh "I've got it" also counts the day for the streak (R5). */
+    case 'skill': case 'rate': {
+      const out = [{ rec: ['skills', a.key], fn: () => a.result }];
+      if (a.bump) out.push({ rec: ['streak'], fn: STREAK(a.t) });
+      return out;
+    }
+    /* R15: the period picked replaces the stored one. */
+    case 'period': return [{ rec: ['period'], fn: () => a.value }];
+    /* R16: a PR entry appends {value, date} to that key's history (an old bare value becomes its first entry, with no
+       date), keeping the last 8 (save.js:487-490, "a short history instead of a single overwritten value"). */
+    case 'pr': return [{ rec: ['responses', a.key], fn: prev => {
+      const arr = Array.isArray(prev) ? clone(prev) : (prev != null && prev !== '' ? [{ value: prev, date: null }] : []);
+      arr.push({ value: a.value, date: new Date(a.t).toISOString() });
+      if (arr.length > 8) arr.shift();
+      return arr;
+    } }];
     case 'check': {
       const items = CHECKS[a.key];
       const score = items.reduce((n, ans, i) => n + (String(a.picks[i]) === String(ans) ? 1 : 0), 0);
@@ -672,13 +765,14 @@ function flatten(v, prefix, out){
   return out;
 }
 /* R10: is there a clean point for this tab at or after t? */
-function cleanAfter(tab, t, upOver){
+function cleanAfter(tab, t, upOver, loose){
   const B = tab.sdkBlockedUntil;
+  if (!tab.pokes) return false;
   const alive = s => tab.closeAt == null || tab.closeAt > s;
   for (const s of tab.pokes) if (s >= t && s >= B && alive(s + 6000) && upOver(s - 2000, s + 6000)) return true;
   /* Back online: the site re-arms the save (shell.js 'online' listener), provided none of this tab's writes is still on the wire. */
   for (const s of tab.onlines) if (s >= t && s >= B && alive(s + 6000) && upOver(s, s + 6000) && !tab.net.some(n => n.from < s && n.to > s)) return true;
-  if (tab.closeAt != null && tab.killKind !== 'die' && tab.closeAt >= t && tab.closeAt >= B && tab.sdkLoadedAt != null && tab.sdkLoadedAt <= tab.closeAt && !tab.unmarkedAtLoad && upOver(tab.closeAt - 2000, tab.closeAt + 1500)) return true;
+  if (tab.closeAt != null && tab.killKind !== 'die' && !(loose && tab.killKind === 'close' && tab.dropUnload) && tab.closeAt >= t && tab.closeAt >= B && tab.sdkLoadedAt != null && tab.sdkLoadedAt <= tab.closeAt && !tab.unmarkedAtLoad && upOver(tab.closeAt - 2000, tab.closeAt + 1500)) return true;
   return false;
 }
 function oracle(sc, world, tabs){
@@ -688,14 +782,9 @@ function oracle(sc, world, tabs){
   const initialMarked = isMarked(sc.initial);
   const base = sc.initial ? (initialMarked ? clone(sc.initial) : oRemap(sc.initial)) : null;
   const tabBy = Object.fromEntries(tabs.map(t => [t.name, t]));
-  /* What each tab loaded (a fact of the fake world), and whether the load failed. */
-  for (const t of tabs){
-    const g = world.gets.find(x => x.tab === t.name && x.path === 'progress/' + USER.uid);
-    t.loadOk = !!(g && g.ok);
-    t.loadSnap = t.loadOk ? (g.data && !isMarked(g.data) ? oRemap(g.data) : g.data) : null;
-    t.unmarkedAtLoad = t.loadOk && g.data ? !isMarked(g.data) : false;
-  }
-  /* The ledger, with owed flags (R8, R10). */
+  for (const t of tabs) loadFacts(world, t);
+  /* The ledger, with owed flags (R8, R10). `owed` counts a close as a clean point; `owedLoose` does not when that
+     scenario's unload writes are not delivered (K3). */
   const acts = sc.actions.filter(a => a.done).slice().sort((x, y) => x.t - y.t || x.i - y.i);
   const recs = new Map();
   const addRec = r => { if (!recs.has(rkey(r))) recs.set(rkey(r), { rec: r, effs: [] }); return recs.get(rkey(r)); };
@@ -704,37 +793,45 @@ function oracle(sc, world, tabs){
   let owedN = 0, notOwedN = 0;
   for (const a of acts){
     const tab = tabBy[a.tab];
-    const clean = cleanAfter(tab, a.t, (x, y) => tab.device.upOver(x, y));
+    const up = (x, y) => tab.device.upOver(x, y);
+    const clean = cleanAfter(tab, a.t, up, false), cleanLoose = cleanAfter(tab, a.t, up, true);
     for (const e of effectsOf(a, sc.CHECKS)){
       const held = !tab.loadOk && (HELD_ON_FAILED_LOAD.has(e.rec[0]) || e.checkMark);
       const owed = clean && !held;
       if (owed) owedN++; else notOwedN++;
-      addRec(e.rec).effs.push({ a, e, owed });
+      addRec(e.rec).effs.push({ a, e, owed, owedLoose: cleanLoose && !held });
     }
   }
-  let leaves = 0;
-  for (const { rec, effs } of recs.values()){
-    /* Every value the record may hold: owed effects always applied, each not-owed one applied or not. */
-    const free = effs.filter(x => !x.owed);
+  /* Every value a record may hold: owed effects always applied, each not-owed one applied or not. */
+  const acceptOf = (rec, effs, flag) => {
+    const free = effs.filter(x => !x[flag]);
     if (free.length > 12) throw new Error('oracle: more than 12 not-owed actions on one record; shorten the scenario');
     const okVals = new Map();
     for (let mask = 0; mask < (1 << free.length); mask++){
       let v = getRec(base, rec);
-      for (const x of effs){ if (!x.owed && !(mask & (1 << free.indexOf(x)))) continue; v = x.e.fn(v); }
+      for (const x of effs){ if (!x[flag] && !(mask & (1 << free.indexOf(x)))) continue; v = x.e.fn(v); }
       okVals.set(canon(v), v);
     }
-    /* Which owed effects changed the record (a deck best below the best, an un-tick of what is not ticked, change nothing). */
-    { let v = getRec(base, rec); for (const x of effs) if (x.owed){ const n = x.e.fn(v); x.changed = canon(n) !== canon(v); v = n; } }
     const accept = new Map();
     for (const v of okVals.values()) flatten(v, rec, new Map()).forEach((c, k) => { if (!accept.has(k)) accept.set(k, new Set()); accept.get(k).add(c); });
     const allLeafKeys = new Set(accept.keys());
     for (const v of okVals.values()){ const f = flatten(v, rec, new Map()); for (const k of allLeafKeys) if (!f.has(k)) accept.get(k).add('∅'); }
+    return accept;
+  };
+  let leaves = 0;
+  for (const { rec, effs } of recs.values()){
+    /* Which effects changed what their own tab showed (R11 K1 looks only at those). */
+    for (const x of effs){ const v = viewBefore(tabBy[x.a.tab], rec, effs, x); x.changed = canon(x.e.fn(v)) !== canon(v); }
+    const accept = acceptOf(rec, effs, 'owed');
+    const loose = acceptOf(rec, effs, 'owedLoose');
     const got = flatten(getRec(stored, rec), rec, new Map());
     for (const k of got.keys()) if (!accept.has(k)) accept.set(k, new Set(['∅']));
     for (const [k, set] of accept){
       leaves++;
       const g = got.has(k) ? got.get(k) : '∅';
       if (set.has(g)) continue;
+      /* R11 K3: the write sent while the tab unloaded never arrived. */
+      if (loose.has(k) && loose.get(k).has(g)){ known.push({ kind: 'K3 unload write lost', leaf: k, stored: g, accept: [...set] }); continue; }
       /* R11 K2: path picks. */
       const lastOwed = effs.filter(x => x.owed).pop();
       if (lastOwed && lastOwed.e.path && g === 'true'){
@@ -752,24 +849,43 @@ function oracle(sc, world, tabs){
         return !!lastOther && w.at >= lastOther.a.t && viewsOf(tabBy[w.tab], rec, effs).has(g);
       });
       if (k1){ known.push({ kind: 'K1 a key both tabs hold', leaf: k, stored: g, accept: [...set], by: k1.tab }); continue; }
-      fails.push(`${k}: stored ${g}, expected ${[...set].join(' or ')}` + (lastOwed ? ` (last owed: ${lastOwed.a.tab} ${describe(lastOwed.a)} at ${rel(lastOwed.a.t)})` : ' (no owed action: the value it started with)'));
+      /* The facts the second KNOWN entry is matched on: a PR history replaced by the one a tab whose read failed built
+         from nothing. */
+      const wipedByFailedTab = rec[0] === 'responses' && g.startsWith('[') && effs.some(x => x.a.kind === 'pr') && tabs.some(t => !t.loadOk && viewsOf(t, rec, effs).has(g));
+      fails.push({ msg: `${k}: stored ${g}, expected ${[...set].join(' or ')}` + (lastOwed ? ` (last owed: ${lastOwed.a.tab} ${describe(lastOwed.a)} at ${rel(lastOwed.a.t)})` : ' (no owed action: the value it started with)'), rule: wipedByFailedTab ? 'R16-wiped' : null });
     }
   }
   /* R7 invariant: an exit check marked done has a score behind it. */
   for (const id of Object.keys(sc.CHECKS)){
-    if (stored && stored.classActivities && stored.classActivities[id] === true && !(stored.exitChecks && stored.exitChecks[id] && typeof stored.exitChecks[id].score === 'number'))
-      fails.push(`classActivities.${id}: the exit check is filed as done with no score behind it (R7, activities-2.js:276-287)`);
+    if (stored && stored.classActivities && stored.classActivities[id] === true && !(stored.exitChecks && stored.exitChecks[id] && typeof stored.exitChecks[id].score === 'number')){
+      /* The facts KNOWN entries are matched on: a tab whose read failed took this check, and the stored score record is
+         exactly what the doc started with. */
+      const byFailed = acts.some(a => a.kind === 'check' && a.key === id && !tabBy[a.tab].loadOk);
+      const scoreAsStarted = canon(getRec(stored, ['exitChecks', id])) === canon(getRec(base, ['exitChecks', id]));
+      fails.push({ msg: `classActivities.${id}: the exit check is filed as done with no score behind it (R7, activities-2.js:276-287)`, rule: 'R7-mark', card: id, byFailed, scoreAsStarted });
+    }
   }
   /* R9: the doc ends marked. R13: name, email, and the fields not modelled. */
   if (stored){
-    if (!isMarked(stored) && (acts.length || !initialMarked)) fails.push('migrations.swap45: the stored doc is not marked (R9)');
-    if (stored.name !== USER.displayName || stored.email !== USER.email) fails.push(`name/email: stored ${JSON.stringify(stored.name)} / ${JSON.stringify(stored.email)}`);
+    if (!isMarked(stored) && (acts.length || !initialMarked)) fails.push({ msg: 'migrations.swap45: the stored doc is not marked (R9)' });
+    if (stored.name !== USER.displayName || stored.email !== USER.email) fails.push({ msg: `name/email: stored ${JSON.stringify(stored.name)} / ${JSON.stringify(stored.email)}` });
     const other = new Set(Object.keys(stored).concat(Object.keys(base || {})).filter(f => !MODELLED.includes(f) && !['name', 'email', 'migrations', 'games'].includes(f)));
-    if (isMap(stored.games) || (base && isMap(base.games))) for (const g of new Set(Object.keys((stored.games || {})).concat(Object.keys((base && base.games) || {})))) if (g !== 'dk'){ leaves++; if (canon(getRec(stored, ['games', g])) !== canon(getRec(base, ['games', g]))) fails.push(`games.${g}: stored ${canon(getRec(stored, ['games', g]))}, expected ${canon(getRec(base, ['games', g]))} (not touched by the student)`); }
-    for (const f of other){ leaves++; if (canon(stored[f]) !== canon(base ? base[f] : ABSENT)) fails.push(`${f}: stored ${canon(stored[f])}, expected ${canon(base ? base[f] : ABSENT)} (not touched by the student)`); }
-  } else if (acts.length) fails.push('progress doc: never written');
-  for (const t of tabs) for (const f of t.faults) fails.push(`${t.name}: site code ${f} (R12)`);
+    if (isMap(stored.games) || (base && isMap(base.games))) for (const g of new Set(Object.keys((stored.games || {})).concat(Object.keys((base && base.games) || {})))) if (g !== 'dk'){ leaves++; if (canon(getRec(stored, ['games', g])) !== canon(getRec(base, ['games', g]))) fails.push({ msg: `games.${g}: stored ${canon(getRec(stored, ['games', g]))}, expected ${canon(getRec(base, ['games', g]))} (not touched by the student)` }); }
+    /* A checklist tick or a rating also saves the place the student is on (saveProgress: skills + place). This tool
+       does not navigate between sets, so after one of those the place is not compared (not modelled). */
+    if (acts.some(a => a.kind === 'skill' || a.kind === 'rate')){ other.delete('lastModule'); other.delete('lastSet'); }
+    for (const f of other){ leaves++; if (canon(stored[f]) !== canon(base ? base[f] : ABSENT)) fails.push({ msg: `${f}: stored ${canon(stored[f])}, expected ${canon(base ? base[f] : ABSENT)} (not touched by the student)` }); }
+  } else if (acts.length) fails.push({ msg: 'progress doc: never written' });
+  for (const t of tabs) for (const f of t.faults) fails.push({ msg: `${t.name}: site code ${f} (R12)` });
+  for (const f of world.faults || []) fails.push({ msg: `site code: ${f} (R12)` });
   return { fails, known, leaves, owedN, notOwedN };
+}
+/* What a tab loaded (a fact of the fake world), and whether the load failed. */
+function loadFacts(world, t){
+  const g = world.gets.find(x => x.tab === t.name && x.path === 'progress/' + USER.uid);
+  t.loadOk = !!(g && g.ok);
+  t.loadSnap = t.loadOk ? (g.data && !isMarked(g.data) ? oRemap(g.data) : g.data) : null;
+  t.unmarkedAtLoad = t.loadOk && g.data ? !isMarked(g.data) : false;
 }
 function viewBefore(tab, rec, effs, upto){
   let v = tab.loadOk ? getRec(tab.loadSnap, rec) : ABSENT;
@@ -795,29 +911,60 @@ function describe(a){
     case 'streak': return 'streak bump';
     case 'path': return `path ${a.key}=${a.pick}`;
     case 'check': return `exit check ${a.key} picks ${a.picks.join(',')}`;
+    case 'skill': return `checklist ${a.which === 'gotit' ? "\"I've got it\"" : '"working on it"'} ${a.key} -> ${a.result}${a.bump ? ' (+streak)' : ''}`;
+    case 'rate': return `Module Review rating ${a.key} ${a.level} -> ${a.result}`;
+    case 'period': return `period ${a.value}`;
+    case 'pr': return `PR entry ${a.key}=${a.value}`;
   }
   return a.kind;
 }
 
 /* ─────────────────────────── the scripted student ─────────────────────────── */
 const DAY = 86400000;
+/* The exit checks' answers, choices and retake rule, and ca-46's paths, read from the class-activities.js DATA of the
+   site under test (data, not code). */
+const DATA = (() => {
+  const c = { window: {} }; c.window = c; vm.createContext(c);
+  vm.runInContext(readFileSync(join(ROOT, 'class-activities.js'), 'utf8'), c);
+  const all = c.CLASS_ACTIVITIES || [];
+  const out = { CHECKS: {}, CHOICES: {}, RETAKE: {}, PATHS: [] };
+  for (const id of ['ca-14', 'ca-15']){
+    const a = all.find(x => x.id === id);
+    if (!a || !a.check) throw new Error('save-loop: ' + id + ' is no longer an exit check in class-activities.js');
+    out.CHECKS[id] = a.check.items.map(it => a.check.type === 'nextNote' ? String(it.answer.fret) : String(it.answer));
+    /* nextNote items carry their choices (frets); a noteName row is the seven letters. */
+    out.CHOICES[id] = a.check.items.map(it => a.check.type === 'nextNote' ? (it.choices || []).map(ch => String(ch.fret)) : ['A', 'B', 'C', 'D', 'E', 'F', 'G']);
+    out.RETAKE[id] = !!a.check.retake;
+  }
+  const p46 = all.find(x => x.id === 'ca-46');
+  out.PATHS = p46 && p46.paths ? p46.paths.map(x => x.key) : [];
+  if (!out.PATHS.length) throw new Error('save-loop: ca-46 has no paths any more in class-activities.js');
+  return out;
+})();
 function device(name, phases){
   return { name, localStorage: null, phases,
     phaseAt(t){ for (const p of this.phases) if (t < p.until) return p; return { phase: 'up', until: Infinity }; },
     upOver(a, b){ let s = a; for (const p of this.phases){ if (p.until <= s) continue; if (p.phase !== 'up') return false; if (p.until > b) return true; s = p.until; } return true; } };
 }
+/* The doc a returning student starts with. Every map the save path can hold back or overwrite holds a NON-default
+   value, so a write that starts from zero (a streak of 1, an exit check with attempts 1, a history of one entry, an
+   empty map) can never look like the right answer. */
 function initialDoc(r, kind){
   const yesterday = oDay(T0 - DAY);
+  const ca14 = DATA.CHECKS['ca-14'];
   const d = {
     name: USER.displayName, email: USER.email, migrations: { swap45: true },
     completed: { 'm6w1-b-sec0-0': true, 'm6w1-b-sec0-1': true, 'm7w1-b-sec1-0': true },
     caSteps: { 'ca-18:0': true, 'ca-18:1': true },
-    classActivities: { 'ca-12': true },
-    responses: { 'm6w1-b-sec0-2': 'first finger on fret two', 'm6w2-b-sec0-0': 'G' },
+    classActivities: { 'ca-12': true, 'ca-14': true },
+    responses: { 'm6w1-b-sec0-2': 'first finger on fret two', 'm6w2-b-sec0-0': 'G',
+      'practice-m6w1-s2': [{ value: '72', date: new Date(T0 - 3 * DAY).toISOString() }, { value: '80', date: new Date(T0 - 2 * DAY).toISOString() }] },
     practiceLog: { 'm6w1-s1': { reps: 47, todayCount: 2, lastDay: yesterday, last: T0 - DAY + 3600000, best: 80 } },
+    exitChecks: { 'ca-14': { score: ca14.length - 1, total: ca14.length, picks: ca14.map((x, i) => i === 0 ? 'x' : x), at: oDay(T0 - 2 * DAY), attempts: 1 } },
     streak: { count: 15, lastDay: yesterday },
-    games: { dk: { 'chords-m6': 10, at: oDay(T0 - 2 * DAY) }, sd: { 'low-E:naturals': 7, at: yesterday } },
-    skills: { 'm6w1-s1': 'gotit' }, lastModule: 6, lastSet: 'm6w1', period: '4'
+    games: { dk: { 'chords-m6': 10, at: oDay(T0 - 2 * DAY) }, sd: { 'low-E:naturals': 7, at: yesterday }, drillSkill: { 'm6w1-s3': { best: 9, at: yesterday } } },
+    skills: { 'm6w1-s1': 'gotit', 'm6w1-s2': 'working', 'm7w1-s1': 'gotit', 'mr6-s1': '2', 'mr6-s3': '3' },
+    lastModule: 6, lastSet: 'm6w1', period: '4'
   };
   if (kind === 'unmarked'){
     delete d.migrations;
@@ -842,6 +989,10 @@ const POOL = {
   answerSwap: ['m4w1-b-sec0-1', 'mr5-s1'],
   words: ['the box shape', 'G', 'first finger', 'A minor', 'slow then fast', 'the low E', 'D', 'it buzzed'],
   rep: ['m6w1-s1', 'm6w2-s3', 'm7w1-s1'],
+  /* Checklist skills with no Coach or drill gate (a gated one opens a gate instead of saving). */
+  skill: [['m6w1-s1', 'm6w1'], ['m6w1-s2', 'm6w1'], ['m6w1-s4', 'm6w1'], ['m7w1-s1', 'm7w1'], ['m7w1-s2', 'm7w1']],
+  rate: ['mr6-s1', 'mr6-s3', 'mr6-s4'],
+  pr: ['practice-m6w1-s2', 'practice-m7w1-s3'],
   repSwap: ['m5w2-s1', 'practice-m4w1-s2'],
   dk: ['chords-m6', 'power-m7'],
   dkSwap: ['chords-m4']
@@ -872,7 +1023,11 @@ function genScenario(seed, idx, famFilter){
   const tabSpec = (name, dev, openAt, x) => { const s = Object.assign({ name, dev, openAt: T0 + openAt, events: [], sdkMs: ri(80, 300), sdkBlockedUntil: 0 }, x || {}); sc.tabs.push(s); return s; };
   const ev = (tab, t, what) => tab.events.push({ t: T0 + t, what });
   const randomAct = (tab, t, swap) => {
-    const k = ri(0, 9);
+    const k = ri(0, 13);
+    if (k === 10){ const [sid, wid] = pick(POOL.skill); act(tab, t, 'skill', { key: sid, wid, which: r() < 0.7 ? 'gotit' : 'working' }); return; }
+    if (k === 11){ act(tab, t, 'rate', { key: pick(POOL.rate), level: pick(['1', '2', '3']) }); return; }
+    if (k === 12){ act(tab, t, 'pr', { key: pick(POOL.pr), value: String(ri(60, 140)) }); return; }
+    if (k === 13){ act(tab, t, 'period', { value: pick(['4', '7', 'CAS']) }); return; }
     if (k <= 2){ const key = pick(swap && r() < 0.5 ? POOL.stepSwap : POOL.step); act(tab, t, 'step', { key, on: r() < 0.55 }); }
     else if (k === 3) act(tab, t, 'caStep', { key: pick(POOL.caStep), on: r() < 0.6 });
     else if (k === 4) act(tab, t, 'activity', { key: pick(POOL.activity), on: r() < 0.6 });
@@ -915,7 +1070,7 @@ function genScenario(seed, idx, famFilter){
     for (let n = ri(1, 3); n > 0; n--) randomAct('A', ri(2, 20) * S);
     settle = 25 * S;
   } else if (fam === 'failed-load'){
-    const mode = pick(['fail', 'fail', 'stall']);
+    const mode = pick(['refused', 'offline', 'stall']);
     /* A stalled read fails after 10 s, so a stall has to outlast that for the load to fail. */
     const failUntil = mode === 'stall' ? ri(11, 13) * S : ri(2, 4) * S;
     const slowLat = ri(1500, 3500);
@@ -939,23 +1094,24 @@ function genScenario(seed, idx, famFilter){
     settle = t1 + 22 * S;
   } else if (fam === 'dropped'){
     const segs = []; let t = 0;
-    while (t < 40 * S){ const len = ri(2, 12) * S; const ph = pick(['up', 'fail', 'fail', 'stall', 'slow']); segs.push(Object.assign({ phase: ph, until: T0 + t + len }, ph === 'fail' && r() < 0.5 ? { offline: true } : {})); t += len; }
+    while (t < 40 * S){ const len = ri(2, 12) * S; segs.push({ phase: pick(['up', 'refused', 'offline', 'stall', 'slow']), until: T0 + t + len }); t += len; }
     devA.phases = segs.filter(p => p.until > T0 + 2500);
     devA.phases.unshift({ phase: 'up', until: T0 + 2500 });
     const tA = tabSpec('A', devA, 0);
     for (let n = ri(4, 10); n > 0; n--) randomAct('A', ri(3, 38) * S + ri(0, 999));
     for (let n = ri(0, 2); n > 0; n--){ const h = ri(5, 35) * S; ev(tA, h, 'hide'); ev(tA, h + ri(1, 4) * S, 'show'); }
     settle = 45 * S;
-    /* One case in three: the Wi-Fi drops for longer than the retry budget (5 tries, 3 s apart), comes back, and the
-       battery dies 8-12 s later with no other action, hide or close in between. */
+    /* One case in three: the tab opens with the Wi-Fi down, so the Firestore SDK cannot load (and the read fails); the
+       student works; every save fails on the SDK until the retry budget (5 tries, 3 s apart) is spent; the Wi-Fi comes
+       back, and the battery dies 8-12 s later with no other action, hide or close in between. */
     if (r() < 0.34){
-      const off = ri(18, 24) * S, back = ri(8, 12) * S, t1 = ri(3, 6) * S;
-      devA.phases = [{ phase: 'up', until: T0 + t1 + 900 }, { phase: 'fail', offline: true, until: T0 + t1 + 900 + off }, { phase: 'up', until: Infinity }];
+      const off = ri(22, 26) * S, back = ri(8, 12) * S;
+      devA.phases = [{ phase: 'offline', until: T0 + off }, { phase: 'up', until: Infinity }];
       sc.actions = sc.actions.filter(a => a.tab !== 'A');
       tA.events.length = 0;
-      for (let n = ri(1, 3); n > 0; n--) realChange('A', t1 + ri(0, 800));
-      ev(tA, t1 + 900 + off + back, 'die');
-      settle = t1 + off + back + 5 * S;
+      for (let n = ri(1, 3); n > 0; n--) realChange('A', ri(2, 4) * S + ri(0, 800));
+      ev(tA, off + back, 'die');
+      settle = off + back + 5 * S;
     }
   } else if (fam === 'hide-close'){
     const tA = tabSpec('A', devA, 0);
@@ -965,7 +1121,7 @@ function genScenario(seed, idx, famFilter){
     realChange('A', t1 + 3100);
     const last = Math.max(...sc.actions.map(a => a.t - T0));
     const mode = pick(['close', 'lid', 'lid', 'hide']);
-    if (r() < 0.3) devA.phases = [{ phase: 'up', until: T0 + last + 100 }, { phase: pick(['fail', 'stall', 'slow']), until: T0 + last + ri(2, 8) * S }];
+    if (r() < 0.3) devA.phases = [{ phase: 'up', until: T0 + last + 100 }, { phase: pick(['refused', 'offline', 'stall', 'slow']), until: T0 + last + ri(2, 8) * S }];
     ev(tA, last + ri(50, 750), mode);
     if (mode === 'hide') ev(tA, last + ri(2, 6) * S, 'show');
     const day2 = r() < 0.6;
@@ -992,8 +1148,8 @@ function genScenario(seed, idx, famFilter){
       else randomAct(who, t);
     }
     if (fam === 'two-devices'){ act('A', ri(3, 6) * S, 'path', { key: 'ca-46', pick: 'full' }); act('B', oB + ri(7, 12) * S, 'path', { key: 'ca-46', pick: 'chunks' }); }
-    if (r() < 0.5) devA.phases = [{ phase: 'up', until: T0 + ri(5, 15) * S }, { phase: pick(['slow', 'fail', 'stall']), until: T0 + ri(16, 26) * S }];
-    if (devB !== devA && r() < 0.5) devB.phases = [{ phase: 'up', until: T0 + ri(5, 15) * S }, { phase: pick(['slow', 'fail', 'stall']), until: T0 + ri(16, 26) * S }];
+    if (r() < 0.5) devA.phases = [{ phase: 'up', until: T0 + ri(5, 15) * S }, { phase: pick(['slow', 'refused', 'offline', 'stall']), until: T0 + ri(16, 26) * S }];
+    if (devB !== devA && r() < 0.5) devB.phases = [{ phase: 'up', until: T0 + ri(5, 15) * S }, { phase: pick(['slow', 'refused', 'offline', 'stall']), until: T0 + ri(16, 26) * S }];
     settle = 45 * S;
   } else if (fam === 'swap45'){
     /* One case in three: a second tab on the same Chromebook opens with the first, so both move commits race (F10). */
@@ -1002,7 +1158,7 @@ function genScenario(seed, idx, famFilter){
     const sdkA = ri(60, 200);
     /* The read is issued when the SDK loads and takes at most 400 ms; the move commit after it meets the failure. */
     const failEnd = ri(3, 9) * S;
-    if (failCommit) devA.phases = [{ phase: 'up', until: T0 + sdkA + 401 }, { phase: pick(['fail', 'fail', 'stall']), until: T0 + failEnd }];
+    if (failCommit) devA.phases = [{ phase: 'up', until: T0 + sdkA + 401 }, { phase: pick(['refused', 'offline', 'stall']), until: T0 + failEnd }];
     tabSpec('A', devA, 0, { sdkMs: sdkA });
     /* Work saved soon after the failed move: it must not land on the doc while it is still in the old numbering. */
     if (failCommit) act('A', failEnd + ri(100, 2000), 'step', { key: pick(POOL.stepSwap), on: r() < 0.6 });
@@ -1019,7 +1175,7 @@ function genScenario(seed, idx, famFilter){
   } else {
     const nTabs = r() < 0.5 ? 1 : 2;
     const segs = []; let t = 0;
-    while (t < 50 * S){ const len = ri(2, 10) * S; segs.push({ phase: pick(['up', 'up', 'slow', 'fail', 'stall']), until: T0 + t + len }); t += len; }
+    while (t < 50 * S){ const len = ri(2, 10) * S; segs.push({ phase: pick(['up', 'up', 'slow', 'refused', 'offline', 'stall']), until: T0 + t + len }); t += len; }
     devA.phases = segs;
     const tA = tabSpec('A', devA, 0, r() < 0.2 ? { sdkBlockedUntil: T0 + ri(2, 8) * S } : {});
     for (let n = ri(3, 9); n > 0; n--) randomAct('A', ri(3, 45) * S + ri(0, 999));
@@ -1039,6 +1195,8 @@ function genScenario(seed, idx, famFilter){
     const kill = s.events.find(e => e.what === 'close' || e.what === 'lid' || e.what === 'die') || {};
     const closeAt = kill.t;
     s.closeAt = closeAt; s.killKind = kill.what;
+    /* Half the closes: the writes started while the page unloads never leave the browser (K3). */
+    if (kill.what === 'close') s.dropUnload = r() < 0.5;
     const hiddenSpans = [];
     let h = null;
     for (const e of s.events.slice().sort((a, b) => a.t - b.t)){ if (e.what === 'hide' || e.what === 'lid') h = e.t; else if (e.what === 'show' && h != null){ hiddenSpans.push([h, e.t]); h = null; } }
@@ -1063,24 +1221,13 @@ async function runCase(seed, idx, famFilter){
   const mkStorage = () => ({ _d: {}, getItem(k){ return Object.prototype.hasOwnProperty.call(this._d, k) ? this._d[k] : null; }, setItem(k, v){ this._d[k] = String(v); }, removeItem(k){ delete this._d[k]; }, clear(){ this._d = {}; }, key(i){ return Object.keys(this._d)[i] ?? null; }, get length(){ return Object.keys(this._d).length; } });
   for (const d of sc.devices) if (!shared.has(d)){ d.localStorage = mkStorage(); shared.set(d, true); }
   const tabs = [];
-  /* The exit checks' answers, read from the class-activities.js DATA of the site under test. */
-  const caCtx = { window: {} }; caCtx.window = caCtx; vm.createContext(caCtx);
-  vm.runInContext(readFileSync(join(ROOT, 'class-activities.js'), 'utf8'), caCtx);
-  sc.CHECKS = {};
-  for (const id of ['ca-14', 'ca-15']){
-    const a = (caCtx.CLASS_ACTIVITIES || []).find(x => x.id === id);
-    if (!a || !a.check) throw new Error('save-loop: ' + id + ' is no longer an exit check in class-activities.js');
-    sc.CHECKS[id] = a.check.items.map(it => a.check.type === 'nextNote' ? String(it.answer.fret) : String(it.answer));
-    sc.CHOICES = sc.CHOICES || {};
-    /* nextNote items carry their choices (frets); a noteName row is the seven letters. */
-    sc.CHOICES[id] = a.check.items.map(it => a.check.type === 'nextNote' ? (it.choices || []).map(c => String(c.fret)) : ['A', 'B', 'C', 'D', 'E', 'F', 'G']);
-    const paths = (caCtx.CLASS_ACTIVITIES || []).find(x => x.id === 'ca-46');
-    sc.PATHS = paths && paths.paths ? paths.paths.map(p => p.key) : [];
-  }
+  CURRENT_WORLD = world;
+  world.faults = [];
+  sc.CHECKS = DATA.CHECKS;
   const pr = rng(mix(seed, idx + 7));
   for (const a of sc.actions){
-    if (a.kind === 'check') a.picks = sc.CHOICES[a.key].map((ch, i) => pr() < 0.7 ? sc.CHECKS[a.key][i] : ch[Math.floor(pr() * ch.length)]);
-    if (a.kind === 'path') a.keys = sc.PATHS;
+    if (a.kind === 'check') a.picks = DATA.CHOICES[a.key].map((ch, i) => pr() < 0.7 ? DATA.CHECKS[a.key][i] : ch[Math.floor(pr() * ch.length)]);
+    if (a.kind === 'path') a.keys = DATA.PATHS;
   }
   /* Schedule the tabs, their events and the student. */
   for (const s of sc.tabs){
@@ -1089,7 +1236,13 @@ async function runCase(seed, idx, famFilter){
       tab.openAt = s.openAt; tab.closeAt = s.closeAt; tab.killKind = s.killKind; tab.pokes = [];
       tabs.push(tab); s.tab = tab;
       world.log(`${s.name} opens on ${s.dev.name}; signs in`);
-      tab.ctx.__booted = () => { tab.booted = true; world.log(`${s.name} signed in (the app would now be on screen)`); };
+      tab.dropUnload = !!s.dropUnload;
+      tab.ctx.__booted = () => {
+        tab.booted = true;
+        loadFacts(world, tab);
+        tab.view = tab.loadOk && tab.loadSnap ? clone(tab.loadSnap) : {};
+        world.log(`${s.name} signed in, load ${tab.loadOk ? 'ok' : 'FAILED'} (the app would now be on screen)`);
+      };
       siteCall(tab, 'currentUser = __user; (async () => { await loadProgress(); caAdoptLocalTicks(); })().finally(() => __booted())');
     }, null, 'script');
     for (const e of s.events){
@@ -1103,6 +1256,7 @@ async function runCase(seed, idx, famFilter){
         if (e.what === 'die'){ gone(); return; }
         if (e.what === 'hide' || e.what === 'close' || e.what === 'lid'){
           tab.hidden = true;
+          if (e.what === 'close') tab.unloading = true;
           if (e.what === 'hide') tab.pokes.push(world.now);
           for (const fn of (tab.docL.visibilitychange || []).slice()) callSite(tab, () => fn({ type: 'visibilitychange' }));
           if (e.what === 'close') for (const fn of (tab.winL.pagehide || []).slice()) callSite(tab, () => fn({ type: 'pagehide' }));
@@ -1118,7 +1272,7 @@ async function runCase(seed, idx, famFilter){
   for (const d of sc.devices){
     let from = T0;
     for (const p of d.phases){
-      if (p.offline){
+      if (p.phase === 'offline'){
         const fire = (type, on) => world.at(on, () => {
           d.offlineNow = type === 'offline';
           for (const t of tabs) if (t.device === d && t.alive){
@@ -1142,23 +1296,40 @@ async function runCase(seed, idx, famFilter){
     };
     go();
   };
+  /* The screen offers only what changes something on it: un-ticking what is not ticked, re-picking the path already
+     picked, a deck score under the best, the same answer again, are not actions (R1-5). The check is made on the oracle's
+     model of that tab's view; a one-try exit check that view already holds a result for offers no Start button. */
+  const offered = (tab, a) => {
+    a.t = world.now;
+    if (a.kind === 'skill' || a.kind === 'rate'){
+      const cur = getRec(tab.view, ['skills', a.key]) || 'none';
+      if (a.kind === 'rate') a.result = cur === a.level ? 'none' : a.level;
+      else if (a.which === 'working') a.result = cur === 'gotit' ? 'working' : cur === 'working' ? 'none' : 'working';
+      else a.result = cur === 'gotit' ? 'working' : 'gotit';
+      a.bump = a.kind === 'skill' && a.result === 'gotit';
+    }
+    if (a.kind === 'check') return !(DATA.RETAKE[a.key] === false && getRec(tab.view, ['exitChecks', a.key]));
+    return effectsOf(a, DATA.CHECKS).some(e => { const v = getRec(tab.view, e.rec); return canon(e.fn(v)) !== canon(v); });
+  };
+  const applyView = (tab, a) => { for (const e of effectsOf(a, DATA.CHECKS)) setRec(tab.view, e.rec, e.fn(getRec(tab.view, e.rec))); };
   for (const a of sc.actions){
     const s = sc.tabs.find(x => x.name === a.tab);
     if (a.kind === 'check'){
       const t0 = a.t - 500 * (a.picks.length + 1);
       world.at(t0, () => whenUp(s, () => {
+        if (!offered(s.tab, a)){ world.log(`${a.tab} (exit check ${a.key} already taken on this screen: no Start button)`); return; }
         world.log(`${a.tab} starts exit check ${a.key}`);
         siteCall(s.tab, `ecStart(${JSON.stringify(a.key)})`);
         a.picks.forEach((p, i) => world.at(world.now + 500 * (i + 1), () => { if (s.tab.alive) siteCall(s.tab, `ecPick(${JSON.stringify(a.key)}, { dataset: { pick: ${JSON.stringify(p)} } })`); }, null, 'script'));
-        world.at(world.now + 500 * (a.picks.length + 1), () => { if (s.tab.alive){ a.t = world.now; a.done = true; s.tab.pokes.push(world.now); world.log(`${a.tab} ${describe(a)} (submitted)`); } }, null, 'script');
+        world.at(world.now + 500 * (a.picks.length + 1), () => { if (s.tab.alive){ a.t = world.now; a.done = true; applyView(s.tab, a); s.tab.pokes.push(world.now); world.log(`${a.tab} ${describe(a)} (submitted)`); } }, null, 'script');
       }), null, 'script');
       continue;
     }
-    const code = actionCode(a);
     world.at(a.t, () => whenUp(s, () => {
-      a.t = world.now; a.done = true; s.tab.pokes.push(world.now);
+      if (!offered(s.tab, a)){ world.log(`${a.tab} (${describe(a)}: changes nothing on this screen, not done)`); return; }
+      a.done = true; applyView(s.tab, a); s.tab.pokes.push(world.now);
       world.log(`${a.tab} ${describe(a)}`);
-      siteCall(s.tab, code);
+      siteCall(s.tab, actionCode(a));
     }), null, 'script');
   }
   /* The settle: every open tab hidden at settleAt + 2 s (a clean point, R10). */
@@ -1171,6 +1342,8 @@ async function runCase(seed, idx, famFilter){
   }, null, 'script');
   await world.runUntil(sc.endAt, () => beat(`case ${idx} (${sc.fam}) at ${rel(world.now)}`));
   for (const t of tabs){ t.alive = false; }
+  await world.drain();
+  CURRENT_WORLD = null;
   const res = oracle(sc, world, tabs);
   return { sc, world, tabs, res };
 }
@@ -1185,6 +1358,10 @@ function actionCode(a){
     case 'dk': return `dkSaveBest(${j(a.key)}, ${a.n})`;
     case 'streak': return 'bumpPracticeStreak()';
     case 'path': return `caPickPath(${j(a.key)}, ${j(a.pick)})`;
+    case 'skill': return `toggleSkill(${j(a.key)}, ${j(a.wid)}, ${j(a.which)})`;
+    case 'rate': return `setSkillLevel(${j(a.key)}, 'mr6', ${j(a.level)})`;
+    case 'period': return `periodPick(${j(a.value)})`;
+    case 'pr': return `onResponseChange(${j(a.key)}, ${j(a.value)}, true); onResponsePRBlur(${j(a.key)})`;
   }
   throw new Error('no code for ' + a.kind);
 }
@@ -1208,7 +1385,10 @@ async function main(){
   if (selfBad.length){ console.log('save-loop: ✗ the fake no longer behaves like Firestore; no case was run'); return 1; }
   const single = opt('case', null);
   const N = Number(opt('cases', 180));
-  const idxs = single != null && single !== true ? [Number(single)] : Array.from({ length: N }, (_, i) => i);
+  const idxs = single != null ? [Number(single)] : Array.from({ length: N }, (_, i) => i);
+  /* A full default run: every family, the default number of cases or more. */
+  const fullRun = single == null && !famFilter.length && N >= 180;
+  const knownHits = Object.fromEntries(KNOWN.map(k => [k.id, []]));
   const fams = {};
   let failed = 0, leaves = 0, tabsN = 0, actsN = 0, owed = 0, notOwed = 0, issued = 0, landed = 0, rejected = 0, lost = 0, tx = 0, txRetry = 0, knownN = 0, knownCases = 0;
   const knownKinds = {};
@@ -1221,10 +1401,19 @@ async function main(){
     tabsN += tabs.length; actsN += sc.actions.filter(a => a.done).length; owed += res.owedN; notOwed += res.notOwedN; leaves += res.leaves;
     issued += world.issued; landed += world.landed.filter(w => !w.tx).length; rejected += world.rejected; lost += world.lostOnClose; tx += world.txCommits; txRetry += world.txRetries;
     if (res.known.length){ knownCases++; knownN += res.known.length; for (const k of res.known) knownKinds[k.kind] = (knownKinds[k.kind] || 0) + 1; }
+    lost += world.lostUnload;
+    /* KNOWN site faults (still open): a wrong value that matches an entry exactly is reported, not failed. */
+    const open = [];
+    for (const x of res.fails){
+      const k = KNOWN.find(e => e.match(x));
+      if (k){ knownHits[k.id].push(idx); console.log(`~ known, listed ${k.listed}: case ${idx} (seed ${BASE_SEED}, ${sc.fam}): ${x.msg} [${k.id}]`); }
+      else open.push(x);
+    }
+    res.fails = open;
     if (res.fails.length){
       failed++; f.fail++;
       console.log(`✗ FAIL case ${idx} (seed ${BASE_SEED}, ${sc.fam}): ${res.fails.length} wrong value${res.fails.length > 1 ? 's' : ''}`);
-      for (const x of res.fails.slice(0, 6)) console.log('    ' + x);
+      for (const x of res.fails.slice(0, 6)) console.log('    ' + x.msg);
       if (res.fails.length > 6) console.log(`    … ${res.fails.length - 6} more`);
       console.log(`    replay: node tools/save-loop.mjs --seed=${BASE_SEED} --case=${idx} --verbose${famFilter.length ? ' --family=' + famFilter.join(',') : ''}${opt('root', null) ? ' --root=' + ROOT : ''}`);
     }
@@ -1240,20 +1429,43 @@ async function main(){
       for (const k of res.known) console.log(`  known ${k.kind}: ${k.leaf} stored ${k.stored}, expected ${k.accept.join(' or ')}${k.by ? ' (carried by tab ' + k.by + ')' : ''}`);
       console.log(`  ${res.leaves} stored values compared; ${res.owedN} owed effects, ${res.notOwedN} not owed; ${res.fails.length} wrong`);
     }
-    json.push({ idx, fam: sc.fam, fails: res.fails, known: res.known, leaves: res.leaves });
+    json.push({ idx, fam: sc.fam, fails: res.fails.map(x => x.msg), known: res.known, leaves: res.leaves });
+  }
+  let staleKnown = 0;
+  for (const k of KNOWN){
+    const hits = knownHits[k.id];
+    console.log(`  KNOWN ${k.id} (listed ${k.listed}): ${k.what} — matched in ${hits.length} case${hits.length === 1 ? '' : 's'}${hits.length ? ' (' + hits.slice(0, 12).join(', ') + (hits.length > 12 ? ', …' : '') + ')' : ''}`);
+    if (fullRun && !hits.length){ staleKnown++; console.log(`✗ FAIL KNOWN ${k.id} matched nothing in a full run: the fault is fixed or the tool stopped reaching it; take the entry out of KNOWN`); }
   }
   const secs = ((Date.now() - t0) / 1000).toFixed(1);
-  console.log(`save-loop: ${idxs.length} cases (seed ${BASE_SEED}) · ${tabsN} tabs · ${actsN} student actions (${owed} owed effects, ${notOwed} not owed) · ${issued} writes issued, ${landed} landed, ${rejected} rejected, ${lost} lost with a closed tab · ${tx} move commits (${txRetry} transaction re-runs) · ${leaves} stored values compared`);
+  console.log(`save-loop: ${idxs.length} cases (seed ${BASE_SEED}) · ${tabsN} tabs · ${actsN} student actions (${owed} owed effects, ${notOwed} not owed) · ${issued} writes issued, ${landed} landed, ${rejected} rejected, ${lost} lost with a closed or unloading tab · ${tx} move commits (${txRetry} transaction re-runs) · ${leaves} stored values compared`);
   console.log('  by family: ' + Object.entries(fams).map(([k, v]) => `${k} ${v.n - v.fail}/${v.n}`).join(' · '));
   console.log(`  known exposures, not failed: ${knownN} values in ${knownCases} cases` + (knownN ? ' (' + Object.entries(knownKinds).map(([k, v]) => `${k}: ${v}`).join(', ') + ')' : ''));
-  console.log(failed ? `save-loop: ✗ ${failed} of ${idxs.length} cases FAIL` : `save-loop: ✓ ${idxs.length} of ${idxs.length} cases pass`);
+  console.log(failed || staleKnown ? `save-loop: ✗ ${failed} of ${idxs.length} cases FAIL${staleKnown ? `, ${staleKnown} KNOWN entr${staleKnown === 1 ? 'y' : 'ies'} matched nothing` : ''}` : `save-loop: ✓ ${idxs.length} of ${idxs.length} cases pass`);
   if (opt('json', null)) writeFileSync(String(opt('json')), JSON.stringify(json, null, 1));
   /* The run time goes to stderr, so stdout is the same byte for byte for the same seed. */
   console.error(`save-loop: ${secs} s`);
-  return failed ? 1 : 0;
+  return failed || staleKnown ? 1 : 0;
 }
+/* KNOWN: site faults found by this tool and still open. Each matches one kind of wrong value EXACTLY; anything else
+   fails, and a full default run in which an entry matches nothing fails too (so a fixed fault gets its entry removed). */
+const KNOWN = [
+  { id: 'K-exitcheck-mark-2026-11-12', listed: '2026-11-12',
+    what: 'after a failed sign-in read, an exit check\'s done mark rides out with the next classActivities save while its score stays held back (activities-2.js:276-287 + save.js flushSave)',
+    match: x => x.rule === 'R7-mark' && x.byFailed && x.scoreAsStarted },
+  { id: 'K-pr-history-2026-11-12', listed: '2026-11-12',
+    what: 'after a failed sign-in read, a new PR entry saves a one-entry history over the stored one (responses is not held back, and the array is replaced whole)',
+    match: x => x.rule === 'R16-wiped' }
+];
 const watchdog = setInterval(() => {
   if (Date.now() - BEAT.at > STALL_S * 1000){ console.log(`save-loop: ✗ HUNG — no progress for ${STALL_S} s. Stuck at "${BEAT.where}"`); process.exit(3); }
 }, Math.max(20, Math.min(2000, STALL_S * 500)));
 watchdog.unref();
-main().then(code => process.exit(code), e => { console.error('save-loop: crashed: ' + (e && e.stack || e)); process.exit(1); });
+/* R12: a rejection nobody handles while a case runs is that case's fault. Anything else thrown is the TOOL crashing: exit 2. */
+process.on('unhandledRejection', e => {
+  const msg = 'unhandled rejection: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : String(e));
+  if (CURRENT_WORLD){ CURRENT_WORLD.faults.push(msg); return; }
+  console.error('save-loop: the tool crashed (' + msg + ')'); process.exit(2);
+});
+process.on('uncaughtException', e => { console.error('save-loop: the tool crashed: ' + (e && e.stack || e)); process.exit(2); });
+main().then(code => process.exit(code), e => { console.error('save-loop: the tool crashed: ' + (e && e.stack || e)); process.exit(2); });
