@@ -8,7 +8,7 @@
 
    WHEN TO RUN IT. After any change to app/save.js (queueSave, flushSave, the delete queues, loadProgress, the
    Module 4/5 move), to logPracticeRep (app/drills.js), ecSubmit or flushOnHide (app/activities-2.js), or to
-   anything else that writes progress/{uid}. About 20 s for the default 180 cases. Node only: no browser, no network.
+   anything else that writes progress/{uid}. About 35 s for the default 180 cases. Node only: no browser, no network.
 
    FLAGS
      --cases=N          how many cases (default 180); each case is one scenario family (round robin) with its own seed
@@ -29,7 +29,8 @@
    replaced. The student acts through the site's own entry points: onCompleteChange, onCaStepChange,
    onClassActivityChange, onResponseChange, logPracticeRep, dkSaveBest, bumpPracticeStreak, caPickPath, ecStart +
    ecPick (which calls ecSubmit). Hiding or closing the tab fires the site's own visibilitychange listeners (which
-   call flushOnHide). queueSave's debounce, flushSave's retries, withTimeout, ensureDb's on-demand SDK load,
+   call flushOnHide) and pagehide listener (shell.js), and the browser's 'online' event its own re-save listener
+   (shell.js). queueSave's debounce, flushSave's retries, withTimeout, ensureDb's on-demand SDK load,
    swap45Commit's transaction and loadProgress all run as written, on the virtual clock.
    Sign-in: the tool sets currentUser and runs loadProgress() then caAdoptLocalTicks(), the first two steps of the
    site's own onAuthStateChanged callback (app/start.js); showApp() and loadClassConfig() are not run at sign-in
@@ -62,22 +63,30 @@
            then closes.
      The network, per device, is a list of phases: up (40-400 ms per round trip), slow (2-6 s), fail (the write or read
      is REJECTED after 200-800 ms and not applied), stall (nothing settles until the phase ends; queued writes then
-     land in order, if the tab is still open).
+     land in order, if the tab is still open; a read or a transaction fails after 10 s, "the client is offline", or
+     goes through at the reconnect if that comes sooner).
      A self-test of these rules runs before the cases; --fake-fault breaks one rule and the self-test must fail.
    - A scripted student (made-up uid and name), generated per case from the seed: ticks and un-ticks lesson steps,
      activity steps and activities, answers questions, logs reps (with a best), saves a deck best, bumps the
-     streak, picks a path, takes an exit check; tabs open, hide, show and close at chosen moments; a second tab on
-     the same device (shared localStorage and network) or a second device (its own).
+     streak, picks a path, takes an exit check; tabs open, hide and show at chosen moments; a second tab on the same
+     device (shared localStorage and network) or a second device (its own).
+     A tab ends in one of three ways: CLOSE (visibilitychange, then pagehide), LID (the lid shuts: visibilitychange
+     only, and the tab never runs again) or DIE (the battery dies: no event at all). Each kills the tab after its
+     pending microtasks run: its timers never fire, its queued writes are lost (F11), writes already sent still land.
+     A phase can be marked offline: the browser's 'offline' and 'online' events fire on that device's open tabs.
 
    NOT MODELLED. onSnapshot (the site does not listen to progress/{uid}); offline persistence (enablePersistence);
    the security rules (tools/pm-rules-test.mjs covers rules); the local cache's latency compensation on get(); a
    tab still running a build from before the Module 4/5 move; skills, place (lastModule/lastSet), period, songReady
    (tabs/journey.js has its own check, checks.mjs 1bw), PR-history responses, Module Review; showApp() and rendering;
-   rAF callbacks (never run). The watchdog cannot interrupt a synchronous infinite loop inside a timer callback (calls
-   the tool makes itself carry a 10 s vm timeout).
+   rAF callbacks (never run). Every call into site code carries a 10 s vm timeout, so an endless loop there is a fault
+   (R12), not a hang; the watchdog covers a run that stops making progress anywhere else.
 
    THE EXPECTED ANSWER is computed by this file alone (the "oracle" section), from a ledger of every student action
-   with its virtual time and the rules below. It never calls a function of the code under test.
+   with its virtual time and the rules below. It never calls a function of the code under test. Besides the ledger it
+   reads only facts of the fake world: the network schedule, when each tab's SDK loaded, what each tab's sign-in read
+   returned (or that it failed), when each tab's writes were on the wire (R10's 'online' rule), and the writes that
+   landed (only to classify a mismatch as K1, below).
      R1 A tick/un-tick of a step, an activity step or an activity is the student's last word on that key: true when
         ticked, gone when un-ticked (save.js:721-726: "un-marked ... cleared only after that write lands").
      R2 An answer replaces the stored answer for that key.
@@ -102,14 +111,16 @@
          action is owed when, at or after it, its tab reaches a CLEAN POINT: an action or a hide with the network up
          from 2 s before to 6 s after it and the tab open all that time and the CDN not blocked; or a close with the
          network up from 2 s before to 1.5 s after, the SDK loaded, and a doc that was already marked (R9) when the tab
-         loaded. Every scenario ends with a SETTLE: the network up everywhere, then every open tab hidden — a clean
-         point for every tab still open. An owed action must be in the stored doc; an action that is not owed may or
+         loaded (a DIE is never a clean point); or an 'online' event with the network up for the 6 s after it, the tab
+         open, and none of its writes or transactions on the wire at that moment (shell.js: "Back online ... Re-arm
+         the ordinary debounced save"). Every scenario ends with a SETTLE: the network up everywhere, then every open
+         tab hidden, a clean point for every tab still open. An owed action must be in the stored doc; an action that is not owed may or
          may not be (every subset is accepted), but nothing else may.
      R11 Known exposures, counted and not failed:
          K1 "a key both tabs hold" (save.js:608-616): a tab sends a whole category, so its older copy of a key another
-            tab changed can overwrite the newer value. Counted only when a write from that other tab, carrying exactly
-            the stored value, landed after the last owed action on the key, and that value is one the oracle's own
-            model of that tab held.
+            tab changed can overwrite the newer value. Counted only when a write from tab X, carrying exactly the stored
+            value, landed after the last owed action on that key by a DIFFERENT tab, and that value is one the oracle's
+            own model of tab X held (what X loaded, then X's own actions).
          K2 two devices can save different path picks (WORKFLOW.md, 2026-11-09 product calls: "rare, nothing lost").
      R12 Nothing the site runs may throw or leave a rejected promise unhandled (the global "Something went wrong"
          banner; save.js:644-650).
@@ -539,6 +550,7 @@ function makeTab(world, name, device, opts){
   };
   ctx.window = ctx; ctx.globalThis = ctx; ctx.self = ctx;
   vm.createContext(ctx);
+  tab.ctx = ctx;
   vm.runInContext(`(function(){
     const D = Date, clock = __clock;
     function FakeDate(...a){ if (!new.target) return new D(clock()).toString(); return a.length ? new D(...a) : new D(clock()); }
@@ -554,11 +566,14 @@ function makeTab(world, name, device, opts){
   tab.run = code => vm.runInContext(code, ctx, { timeout: 10000 });
   return tab;
 }
-/* Run site code from a timer or an event; a throw or a rejected promise is a fault (R12). */
+/* Run site code from a timer or an event; a throw or a rejected promise is a fault (R12). It runs through the vm with a
+   10 s timeout, so a synchronous endless loop is a fault too instead of a hang the watchdog cannot interrupt. */
+const CB_SCRIPT = new vm.Script('__cb()');
 function callSite(tab, fn){
   if (!tab.alive) return;
   try {
-    const r = fn();
+    tab.ctx.__cb = fn;
+    const r = tab.ctx.firebase ? CB_SCRIPT.runInContext(tab.ctx, { timeout: 10000 }) : fn();
     if (r && typeof r.then === 'function') r.then(null, e => tab.faults.push('unhandled rejection: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : String(e))));
   } catch (e){ tab.faults.push('threw: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : String(e))); }
 }
@@ -1222,6 +1237,6 @@ async function main(){
 }
 const watchdog = setInterval(() => {
   if (Date.now() - BEAT.at > STALL_S * 1000){ console.log(`save-loop: ✗ HUNG — no progress for ${STALL_S} s. Stuck at "${BEAT.where}"`); process.exit(3); }
-}, 2000);
+}, Math.max(20, Math.min(2000, STALL_S * 500)));
 watchdog.unref();
 main().then(code => process.exit(code), e => { console.error('save-loop: crashed: ' + (e && e.stack || e)); process.exit(1); });
