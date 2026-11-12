@@ -35,7 +35,7 @@
 
 import { readFileSync, writeFileSync, readdirSync, mkdtempSync, rmSync, existsSync, statSync } from 'node:fs';
 import { spawnSync, spawn } from 'node:child_process';
-import { siteParts, siteSource, siteText } from './site-src.mjs';
+import { siteParts, siteSource, siteText, SPLIT_NAMES } from './site-src.mjs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -6223,6 +6223,29 @@ function precachedExtraFiles(src) {
    a new kind of precached file, worth a look; one fewer means one moved.
    ════════════════════════════════════════════════════════════════════ */
 const PRECACHED_EXTRA_COUNT = 7;   // 6 + fonts/rubik-mono-one-top5.woff2 (the Top 5 medal, 2026-11-04): a font listed only in ASSETS, like fraunces.woff2
+/* 1cv. The parts stay parts (2026-11-11). app.js, coach.js and teacher.js reached 17,900, 10,700 and 7,200 lines
+   one reasonable addition at a time, and were cut into 29 files. Nothing but a number stops them growing back.
+   A part over PART_SOFT lines prints a warning naming it (never a reason to stop a quick change: splitting a
+   part is its own change at a quiet moment, CLAUDE.md "Where the code lives"); a part over PART_HARD lines
+   fails the push. The hard limit fails only UPWARD: raising it needs Jonathan's word. The three whole files must not
+   come back beside their parts (tools/site-src.mjs refuses that tree too; said here in the checks' own words). */
+const PART_SOFT = 2000, PART_HARD = 2600;
+function checkPartSizes() {
+  head('1cv. The app, arcade and console parts stay small');
+  let bad = 0; const sizes = [];
+  for (const name of SPLIT_NAMES) {
+    const parts = siteParts(name, ROOT);
+    if (parts.length > 1 && existsSync(join(ROOT, name))) { err(`${name} is on disk again beside its ${parts.length} parts: delete it (the parts are the script)`); problems++; bad++; }
+    for (const f of parts) sizes.push([f, readFileSync(join(ROOT, f), 'utf8').split('\n').length - 1, parts.length > 1]);
+  }
+  // A tree that is not cut (an old commit, a rolled-back site) has three whole files: nothing to hold to a size.
+  const cut = sizes.filter(x => x[2]);
+  for (const [f, n] of cut) if (n > PART_HARD) { err(`${f} is ${n} lines, over the limit of ${PART_HARD}: move one of its banner sections into a new part (CLAUDE.md, "Where the code lives": a new part file)`); problems++; bad++; }
+  const big = cut.filter(x => x[1] > PART_SOFT && x[1] <= PART_HARD).sort((x, y) => y[1] - x[1]);
+  if (big.length) { warn(`1cv (soft rule): ${big.length} part${big.length === 1 ? ' is' : 's are'} over ${PART_SOFT} lines: ${big.map(x => `${x[0]} (${x[1]})`).join(', ')}. Not a reason to stop a change: mention it in the report. Splitting a part is its own change at a quiet moment (CLAUDE.md, "Where the code lives").`); warnings++; }
+  if (!bad) ok(cut.length ? `${cut.length} parts, none over ${PART_HARD} lines (largest ${cut.slice().sort((x, y) => y[1] - x[1])[0].join(' at ').replace(/ at true$/, '')} lines, median ${cut.map(x => x[1]).sort((x, y) => x - y)[cut.length >> 1]}); no whole app.js, coach.js or teacher.js beside them` : 'the three scripts are whole files in this tree: no part sizes to hold');
+}
+
 function checkPrecacheFingerprinted(src, hashed) {
   head('1bt. Every precached file is part of the cache fingerprint');
   const set = new Set(hashed);
@@ -15403,6 +15426,7 @@ function checkPracticeMinutes(i18nTable) {
   await checkPwTakeEvaluator();
   checkPracticeMinutes(i18nTable);
   await checkBackingLoudness();
+  checkPartSizes();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

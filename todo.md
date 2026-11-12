@@ -3,6 +3,26 @@
 Things to do at some point. Not scheduled. What is open right now lives in
 `WORKFLOW.md` → "Where things stand".
 
+## Split the four parts that are already over 2,000 lines
+
+Added 2026-11-11 (Jonathan: "let's make sure we split those files at some point"). Not urgent, but do it in a
+quiet session before one of them reaches the 2,600-line limit that `checks.mjs` 1cv enforces, so the limit never
+blocks a quick change mid-week.
+
+| Part | Lines on 2026-11-11 | Where it could be cut (read the banners first; these are guesses) |
+|---|---|---|
+| `teacher-activities.js` | 2,400 | the board (arrange, drag and drop, the one move writer) apart from the list and detail screens |
+| `coach-runner.js` | 2,393 | Riff Runner apart from Note Runner and wait mode |
+| `coach-core.js` | 2,329 | only with Jonathan: it is the listening code. Mic recordings (`micRec*`) are the obvious section to move; the detectors, `coachDetectPitch` and every line `tools/mic-sim/` reads stay put |
+| `coach-chords.js` | 2,034 | Change Up / Power Chord Switch apart from Chord Blitz and Chord Detective. The busiest part (44 of the arcade's 55 commits in 14 days) |
+
+How: one part per change. Move a banner section, whole and unchanged, into a new part loaded right after the one
+it came from; list the new file in `COACH_JS_PARTS` / `TEACHER_JS_PARTS` (`app/boot.js`) and, for an arcade part,
+in `sw.js` ASSETS (`checks.mjs` says if one is missed). Prove it the way the cut was proved: `node tools/golden.mjs`
+before and after with `--compare` identical, `node tools/slow-load.mjs`, the full `node tools/checks.mjs`; for
+`coach-*` also the three mic-sim commands in `CLAUDE.md`. A split touches load order, so it is Always-Reviewed.
+Check `tools/mic-sim/` and `checks.mjs` for text they pin in the section being moved before moving it.
+
 ## Refactor the whole site (not ready yet)
 
 **Status (2026-11-11):** the cut went live on 2026-11-11: `app.js`, `coach.js` and `teacher.js` are now part files
