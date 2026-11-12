@@ -8,7 +8,7 @@
    override / CAS, Open through, class games, a board move), what does a student page show: one loaded BEFORE the
    change (before and after its tab comes back) and a fresh load?
 
-     node tools/visible-loop.mjs                       120 cases, seed 1
+     node tools/visible-loop.mjs                       60 cases, seed 1
      node tools/visible-loop.mjs --cases 400 --seed 7
      node tools/visible-loop.mjs --case 12 --verbose   replay one case alone, with a trace
      node tools/visible-loop.mjs --root <site folder>  run the code of another checkout (break-it copies)
@@ -16,7 +16,7 @@
      node tools/visible-loop.mjs --break-fake clock    self-test: the pages get the REAL clock, not the virtual day
    Exit 0 = every comparison held; 1 = a contradiction (each prints its seed, case and step); 3 = the watchdog
    (nothing moved for 120 s; it prints the step it was on). The time taken goes to stderr, so the same seed prints
-   the same stdout byte for byte. About 20-40 s for 150 cases. Node only: no browser, no network, no Firebase.
+   the same stdout byte for byte. About 50-60 s for the default 60 cases. Node only: no browser, no network, no Firebase.
 
    When to run it: after a change to any of the visibility / blocker / optional rules (caIsVisible, caIsOptional,
    caBlockers, caReduceForMe, caBoardOrder in app/activities-2.js; teacherActivityVisible, teacherBlockersFor,
@@ -127,7 +127,28 @@
    And one wording conflict, measured: teacher-config.js tells the teacher games change "the next time a student
    loads the site", save.js applies them on tab return.
 
-   ── Break-it record (each a scratch copy run with --root; see the commit message for the red lines) ── */
+   --root wants a folder holding index.html, app/, the teacher-*.js parts, class-activities.js, config-main.js,
+   i18n.js, guitar-diagrams.js and tabs/journey.js (a full checkout works).
+
+   ── Break-it record (2026-11-11; each a scratch COPY of the site run with --root, 60 cases, all exit 1) ──
+   B1  journeyIsVisible forgets "not on the board" (the 2026-09-16 bug)          824 contradictions
+   B2  teacherActivityVisible forgets "not on the board" (2026-09-16)           1539
+   B3  teacherActivityVisible reads the raw board row (063508e)                  1156
+   B4  journeyIsVisible ignores Move to Songs / Teacher view songs (063508e)      764
+   B5  loadClassConfig blanks its globals before the read (2026-09-26 window)     157
+   B6  restoreClassConfigFromCache: the next student inherits the CAS override     31
+   B7  the Who cache ignores its uid (save.js:331)                                  36
+   B8  games not applied on tab return (save.js:369)                                15
+   B9  Hidden fails open to {} on a failed read                                    120
+   B10 journeyBlockers ignores the teacher's period override                       146
+   B11 caIsVisible: release date one day late (< for <=)                          1942
+   B12 teacherBlockersFor counts on the UTC day                                    217
+   B13 hiddenActivityIds left out of classConfigSignature                            4
+   B14 teacherActivityOptionalByDefault forgets Who                                515
+   B15 Delete does not re-pack the module it leaves                                  6
+   B16 Clear all also clears Optional cards                                         13
+   Fake-world self-tests: --break-fake merge (maps replaced, not merged) and --break-fake clock (pages on the
+   real clock) both exit 1. */
 process.env.TZ = 'America/Los_Angeles';
 import vm from 'node:vm';
 import { readFileSync, existsSync } from 'node:fs';
@@ -141,7 +162,7 @@ const ARGV = process.argv.slice(2);
 const argVal = (name, dflt) => { const i = ARGV.indexOf(name); return i >= 0 && i + 1 < ARGV.length ? ARGV[i + 1] : dflt; };
 const ROOT = resolve(argVal('--root', join(HERE, '..')));
 const SEED = Number(argVal('--seed', '1'));
-const CASES = Number(argVal('--cases', '120'));
+const CASES = Number(argVal('--cases', '60'));
 const ONE_CASE = ARGV.includes('--case') ? Number(argVal('--case', '0')) : null;
 const VERBOSE = ARGV.includes('--verbose');
 const BREAK_FAKE = argVal('--break-fake', '');
@@ -784,7 +805,12 @@ const C = { cases: 0, pages: 0, comparisons: 0, changes: 0, writes: 0, threeWay:
 const FAILS = [];
 const TRUTH = {};
 const tally = (kind, col, ok) => { const r = (TRUTH[kind] = TRUTH[kind] || {}); const c = (r[col] = r[col] || [0, 0]); c[1]++; if (ok) c[0]++; };
-const noteNS = (cell, what) => { const r = (C.notStated[cell] = C.notStated[cell] || {}); r[what] = (r[what] || 0) + 1; };
+const NS_FIRST = {};
+const noteNS = (cell, what, where) => {
+  const r = (C.notStated[cell] = C.notStated[cell] || {});
+  r[what] = (r[what] || 0) + 1;
+  if (where && !NS_FIRST[cell + what]) NS_FIRST[cell + what] = `case ${CUR.idx}, ${where}`;
+};
 let CUR = { seed: SEED, idx: 0, label: '' };
 function fail(where, msg) { FAILS.push(`seed ${CUR.seed} case ${CUR.idx} [${CUR.label}] ${where}: ${msg}`); }
 function diffList(exp, got) {
@@ -816,14 +842,20 @@ function judgeStudent(where, got, S, open) {
   const matched = readings.filter(r => !answerDiff(r.ans, got).length);
   if (!matched.length) {
     const d = answerDiff(readings[0].ans, got);
-    fail(where, `matches no reading of the rules (open cells ${[...new Set(readings.flatMap(r => r.tags))].join(', ')}); against the first: ${d.join(' | ')}`);
+    fail(where, `matches none of the ${distinct.size} readings the prose leaves open; against the first: ${d.join(' | ')}`);
     return false;
   }
   const cells = [...new Set(readings.flatMap(r => r.tags.map(t => t.split(':')[0])))];
   cells.forEach(cell => {
     const vals = rs => new Set(rs.flatMap(r => r.tags.filter(t => t.startsWith(cell + ':')).map(t => t.slice(cell.length + 1))));
-    const all = vals(readings), got = vals(matched);
-    if (got.size < all.size) noteNS(cell, 'code = ' + [...got].join(' / '));
+    const all = vals(readings), hit = vals(matched);
+    if (hit.size < all.size) {
+      noteNS(cell, 'code = ' + [...hit].join(' / '), where);
+      if (VERBOSE) {
+        const other = readings.find(r => !matched.includes(r) && r.tags.some(t => t.startsWith(cell + ':') && !hit.has(t.slice(cell.length + 1))));
+        if (other) console.log(`    ${cell} at ${where}: the other reading (${other.tags.join(', ')}) would give ${answerDiff(other.ans, got).join(' | ').slice(0, 400)}`);
+      }
+    }
   });
   return true;
 }
@@ -886,14 +918,22 @@ function threeWay(where, studentGot, consolePage, uid, d, prog, today) {
   if (!agree) fail(`${where} — three-way`, `student / console / Journey disagree: vis ${diffList(studentGot.vis, con.vis) || '='} (student vs console), ${diffList(jny.vis, con.vis) || '='} (Journey vs console); blk ${diffList(studentGot.blk, con.blk) || '='} / ${diffList(jny.blk, con.blk) || '='}`);
 }
 const CHANGE_KINDS = ['date', 'hide', 'who', 'wholeClass', 'optional', 'songPlace', 'classSong', 'archive', 'delete', 'playAlong', 'clear', 'clearAll', 'period', 'openThrough', 'classGames', 'studentGames', 'move', 'unassign'];
-function pickChange(rng, d, today, progs) {
+/* Most changes aim at the student whose page is open (a card that student sees, that student's uid), so the
+   R12 checks see a change that moves that student's answer; the rest land anywhere. */
+function pickChange(rng, d, today, progs, openUid) {
+  const real = UIDS.includes(openUid);
+  const seen = real ? mDocAnswers(d, progs[openUid], openUid, today).vis : [];
   const board = mMap(d, 'activityBoard');
   const seeded = d.activityBoardSeeded === true;
   for (let tries = 0; tries < 40; tries++) {
     const kind = pick(rng, CHANGE_KINDS);
     const anyId = () => pick(rng, IDS);
-    const busy = () => { const ids = IDS.filter(id => board[id] || mMap(d, 'activityDates')[id]); return ids.length ? pick(rng, ids) : anyId(); };
-    const uid = pick(rng, UIDS);
+    const busy = () => {
+      if (seen.length && chance(rng, 0.7)) return pick(rng, seen);
+      const ids = IDS.filter(id => board[id] || mMap(d, 'activityDates')[id]);
+      return ids.length ? pick(rng, ids) : anyId();
+    };
+    const uid = real && chance(rng, 0.7) ? openUid : pick(rng, UIDS);
     switch (kind) {
       case 'date': return { kind, id: busy(), value: pick(rng, [today, modelAddDays(today, -1), modelAddDays(today, 1), modelAddDays(today, -9), '']) };
       case 'hide': { const id = busy(); return { kind, id, on: mMap(d, 'hiddenActivities')[id] !== true }; }
@@ -1013,7 +1053,7 @@ async function runCase(idx) {
     const opened = await fresh(openUid, special === 'dev' ? 'none' : (chance(rng, 0.85) ? 'ok' : readMode()), 'ok', special, `R${r}`);
     let prevS = opened.st.S;
     const before = store.read('config/class');
-    const ch = pickChange(rng, before, today, progs);
+    const ch = pickChange(rng, before, today, progs, openUid);
     const label = `R${r} ${chLabel(ch)}`;
     C.changes++;
     step(`${label}: console writes`);
@@ -1030,14 +1070,20 @@ async function runCase(idx) {
     exp.dontCare.forEach(p => {
       const was = getPath(normDoc(before), p), now = getPath(nGot, p);
       if (p.startsWith('hiddenActivities.') || p.startsWith('activityStudents.') || p.startsWith('activityNumbers.')) {
-        if (was !== undefined) noteNS('NS-del', `${p.split('.')[0]}: ${now === undefined ? 'cleared by Delete' : 'kept by Delete'}`);
+        if (was !== undefined) noteNS('NS-del', `${p.split('.')[0]}: ${now === undefined ? 'cleared by Delete' : 'kept by Delete'}`, label);
       }
       dropPath(nExp, p); dropPath(nGot, p);
     });
     C.comparisons++;
     if (canon(nExp) !== canon(nGot)) {
       const keys = sortU([...Object.keys(nExp), ...Object.keys(nGot)]).filter(k => canon(nExp[k]) !== canon(nGot[k]));
-      fail(`${label}: config/class after the write`, keys.map(k => `${k}: expected ${canon(nExp[k]).slice(0, 160)}, got ${canon(nGot[k]).slice(0, 160)}`).join(' | '));
+      const cell = k => {
+        const e = nExp[k], g = nGot[k];
+        if (!e || !g || typeof e !== 'object' || typeof g !== 'object' || Array.isArray(e) || Array.isArray(g)) return `${k}: expected ${canon(e).slice(0, 160)}, got ${canon(g).slice(0, 160)}`;
+        const sub = sortU([...Object.keys(e), ...Object.keys(g)]).filter(x => canon(e[x]) !== canon(g[x]));
+        return `${k}: ` + sub.map(x => `${x} expected ${canon(e[x])}, got ${canon(g[x])}`).join('; ');
+      };
+      fail(`${label}: config/class after the write`, keys.map(cell).join(' | '));
     }
     if (exp.effect) { const p = exp.effect(after); C.comparisons++; if (p) fail(`${label}: effect`, p); }
     const vExp = (Number(before.configVersion) || 0) + (exp.wrote ? 1 : 0);
@@ -1088,7 +1134,7 @@ async function runCase(idx) {
       const moved = answerDiff(oldAns, newAns, ['vis', 'opt', 'blk', 'pao', 'num', 'games']).length > 0;
       C.comparisons++;
       if (moved && got.sig === sigBefore) fail(`${label}: tab back`, 'the student\'s answer changed but classConfigSignature() did not, so the open In-Class Activities screen is not repainted');
-      if (ch.kind === 'classGames' || ch.kind === 'studentGames') noteNS('games-wording', `games applied on tab return: ${got.gamesBtn === (st2.S.games ? '' : 'none') ? 'yes' : 'no'}`);
+      if (ch.kind === 'classGames' || ch.kind === 'studentGames') noteNS('games-wording', `games applied on tab return: ${got.gamesBtn === (st2.S.games ? '' : 'none') ? 'yes' : 'no'}`, label);
     }
     prevS = st2.S;
 
@@ -1134,7 +1180,10 @@ noteNS('NS-jny', 'tabs/journey.js listens for visibilitychange (a re-read on tab
 const nsKeys = Object.keys(C.notStated).sort();
 if (nsKeys.length) {
   out.push('  NOT STATED by the prose — what the code does (counts):');
-  nsKeys.forEach(k => out.push(`    ${k}: ` + Object.entries(C.notStated[k]).sort().map(([w, n]) => `${w} ×${n}`).join('; ')));
+  nsKeys.forEach(k => {
+    out.push(`    ${k}: ` + Object.entries(C.notStated[k]).sort().map(([w, n]) => `${w} ×${n}`).join('; '));
+    Object.keys(C.notStated[k]).sort().forEach(w => { if (NS_FIRST[k + w]) out.push(`      first: ${NS_FIRST[k + w].slice(0, 200)}`); });
+  });
 }
 if (FAILS.length) {
   out.push(`  ✗ ${FAILS.length} contradiction${FAILS.length === 1 ? '' : 's'}${FAILS.length > 25 ? ' (first 25)' : ''}:`);
