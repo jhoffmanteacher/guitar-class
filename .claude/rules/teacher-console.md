@@ -34,11 +34,25 @@ section of this file. Each bullet below closed a real two-console failure.
   name, email, response and report text, mic-take metadata).
 - **Known limits — don't "fix" without a design.**
   - One console: about 7% of random schedules still show a false "Nothing was
-    saved" alert.
+    saved" alert. Measured 2026-11-12 by `tools/two-consoles-loop.mjs`: 8 of 105
+    (seed 1) and 12 of 105 (seed 2); the tool's latency is a guess.
   - Two consoles: writes that used to corrupt now refuse (more alerts, no
-    corrupt boards).
-  - Serializing this tab's writes corrupts two-console boards.
+    corrupt boards). Measured 2026-11-12 by `tools/two-consoles-loop.mjs`: no
+    race-made corrupt board in 2,000 schedules; 536 of 536 board moves refused
+    when the other console wrote in the gap; 36 of 1,790 two-console schedules
+    show a false alert.
+  - Serializing this tab's writes corrupts two-console boards. Measured
+    2026-11-12 by `tools/two-consoles-loop.mjs`: confirmed. With a queue around
+    `teacherWriteConfig`, 31 of 500 schedules had a strict board move land over
+    the other console's move or delete, and 1 had a duplicate position.
   - Counting queued writes as open deadlocks about half of two-console runs.
+    (Not measured by the tool.)
+  - Found by the tool 2026-11-12, on Jonathan's list, NOT fixed: this console's
+    own quick clicks can land out of order (a retry), and the older click then
+    undoes the newer one while the screen still shows the newer: pins,
+    Optional / Required, Archive's unpin, Hide all / Show all. Archive does not
+    unpin a card the other console pinned meanwhile. Today's code fails about
+    10 to 25 of 1,000 schedules on these; that is the baseline, not a regression.
 - **How to change this plumbing safely.** Before touching
   `loadTeacherClassConfig`/`teacherWriteConfig`:
   1. Write a randomized two-console simulation: fake Firestore with transactions
@@ -47,7 +61,10 @@ section of this file. Each bullet below closed a real two-console failure.
   2. Compare old vs new on: views left on "Loading…", boards with duplicate
      `pos`, false "Nothing was saved" counts, repaints during a burst.
 
-  The harness is **not** in the repo: rebuild it, and commit it to `tools/`.
+  The harness is `node tools/two-consoles-loop.mjs` (2026-11-12): it does the
+  two steps above. `--seed S --schedule K --verbose` replays one schedule;
+  `--console FILE` runs a changed copy of the console script for a before and
+  after. Run it before and after any change here and report both tables.
 
 ## Every write to `config/class` goes through `teacherWriteConfig()`
 

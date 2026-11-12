@@ -383,6 +383,28 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-12 — `tools/two-consoles-loop.mjs`: two teacher consoles at once, played as a race** (work order
+      `Claude outputs/WORK-ORDER-closed-loop-tests.md`, Part 3; Reviewed, three rounds, the last with no BLOCKER or MAJOR).
+      What it is: two real consoles (the whole `teacher-*.js` script, unchanged, one Node vm each) write `config/class`
+      on a fake Firestore with latency and transaction retries, on a virtual clock. A seeded generator clicks (14
+      families, 1,000 schedules in about 80 to 175 s on 4 threads) and the tool compares the doc and what each console
+      was told with an answer worked out from the rules. No site file changed. Not in `checks.mjs`: run it before and
+      after any change to `teacherWriteConfig()`, `loadTeacherClassConfig()` or a `config/class` writer.
+      Numbers (seeds 1 / 2, 1,000 schedules each; the latency is a guess, so the rates are not like for like with the
+      rule file's): 0 refusals left untold; two switches on different activities both landed 70 of 70 / 70 of 70; board
+      moves refused when the other console wrote in the gap 285 of 285 / 251 of 251; one-console false "Nothing was
+      saved" 8 of 105 / 12 of 105 (rule file: about 7%); two-console false alert 17 of 895 / 19 of 895.
+      Faults found on today's console, listed for Jonathan, NOT fixed (the write rule is a danger zone): (1) one
+      console's own quick clicks landing out of order let the older click undo the newer while the screen shows the
+      newer: pins (known), Optional / Required, Archive's unpin, Hide all / Show all, and a Delete that carries a
+      pending pin into the doc (`--seed 1 --schedule 643`, `--seed 3 --family random --schedule 347`); (2) Archive does
+      not unpin a card the other console pinned meanwhile (`--seed 2 --schedule 104`); (3) a song back from Songs
+      shares a board position (counted, 26 to 28 of 1,000; his call). Today's code therefore fails 10 to 19 of 1,000
+      schedules: that is the baseline.
+      Proof: 17 planted console faults and 2 fake-server faults turned it red (the work order's ten, four of the
+      builder's, three of the reviewers'); the same seed twice is identical. What it does not cover is in its header
+      (one seed doc, the board migration never runs, 24 of 27 writers, the model's "screen" is the console's own copy).
+
 - [x] **2026-11-11 — The three big scripts are cut into parts.**
       What was cut: `app.js` (17,900 lines) into 15 files under `app/` (script tags in `index.html`, in load order),
       `coach.js` (10,700) into 7 `coach-*.js` files and `teacher.js` (7,200) into 7 `teacher-*.js` files (both loaded on
