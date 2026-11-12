@@ -202,6 +202,14 @@ const BASE_SEED = Number(opt('seed', 1));
 const STALL_S = Number(opt('stall', 120));
 /* The world of the case running now: a rejected promise nobody handles, raised while it runs, is that case's fault (R12). */
 let CURRENT_WORLD = null;
+/* R12: a rejection nobody handles while a case runs is that case's fault. Anything else thrown is the TOOL crashing: exit 2.
+   Registered here, before the site's data is read below, so a crash while the tool sets up exits 2 as well. */
+process.on('unhandledRejection', e => {
+  const msg = 'unhandled rejection: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : String(e));
+  if (CURRENT_WORLD){ CURRENT_WORLD.faults.push(msg); return; }
+  console.error('save-loop: the tool crashed (' + msg + ')'); process.exit(2);
+});
+process.on('uncaughtException', e => { console.error('save-loop: the tool crashed: ' + (e && e.stack || e)); process.exit(2); });
 
 /* ─────────────────────────── seeded random ─────────────────────────── */
 function rng(seed){
@@ -1535,11 +1543,4 @@ const watchdog = setInterval(() => {
   if (Date.now() - BEAT.at > STALL_S * 1000){ console.log(`save-loop: ✗ HUNG — no progress for ${STALL_S} s. Stuck at "${BEAT.where}"`); process.exit(3); }
 }, Math.max(20, Math.min(2000, STALL_S * 500)));
 watchdog.unref();
-/* R12: a rejection nobody handles while a case runs is that case's fault. Anything else thrown is the TOOL crashing: exit 2. */
-process.on('unhandledRejection', e => {
-  const msg = 'unhandled rejection: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : String(e));
-  if (CURRENT_WORLD){ CURRENT_WORLD.faults.push(msg); return; }
-  console.error('save-loop: the tool crashed (' + msg + ')'); process.exit(2);
-});
-process.on('uncaughtException', e => { console.error('save-loop: the tool crashed: ' + (e && e.stack || e)); process.exit(2); });
 main().then(code => process.exit(code), e => { console.error('save-loop: the tool crashed: ' + (e && e.stack || e)); process.exit(2); });
