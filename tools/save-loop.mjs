@@ -29,7 +29,8 @@
    anything else fails (the exit-check entry also needs the carrier the fault needs: another activity saved by that tab);
    a full default run (every family, 180 cases or more) in which an entry matches nothing fails, so
    a fixed fault gets its entry taken out. Listed 2026-11-12: an exit check marked done with no score after a failed
-   sign-in read; a PR history replaced by a one-entry history after a failed sign-in read.
+   sign-in read. A FAIL line of a PR history replaced by a one-entry history after a failed sign-in read is tagged
+   R16-wiped (a site fault this tool found on 2026-11-12, not listed: it fails until it is fixed or listed).
 
    WHAT IS REAL. The site's own scripts, unmodified, each run as its own script in a Node vm context, one context per
    browser tab: i18n.js, guitar-diagrams.js, class-activities.js, config-main.js, every module-N.js and every app part
@@ -891,10 +892,10 @@ function oracle(sc, world, tabs){
         return world.landed.some(w2 => w2.tab === lastOther.a.tab && !w2.tx && w2.path === w.path && w2.at >= lastOther.a.t && w2.at <= w.at && sentLeaf(w2.data, leafPath) === after);
       });
       if (k1){ known.push({ kind: 'K1 a key both tabs hold', leaf: k, stored: g, accept: [...set], by: k1.tab }); continue; }
-      /* The facts the second KNOWN entry is matched on: a PR history replaced by the one a tab whose read failed built
-         from nothing. */
+      /* Tagged for a reader (and for a KNOWN entry, should one be listed): a PR history replaced by the one a tab whose
+         read failed built from nothing. */
       const wipedByFailedTab = rec[0] === 'responses' && g.startsWith('[') && effs.some(x => x.a.kind === 'pr') && tabs.some(t => !t.loadOk && viewsOf(t, rec, effs).has(g));
-      fails.push({ msg: `${k}: stored ${g}, expected ${[...set].join(' or ')}` + (lastOwed ? ` (last owed: ${lastOwed.a.tab} ${describe(lastOwed.a)} at ${rel(lastOwed.a.t)})` : ' (no owed action: the value it started with)'), rule: wipedByFailedTab ? 'R16-wiped' : null });
+      fails.push({ msg: `${k}: stored ${g}, expected ${[...set].join(' or ')}` + (lastOwed ? ` (last owed: ${lastOwed.a.tab} ${describe(lastOwed.a)} at ${rel(lastOwed.a.t)})` : ' (no owed action: the value it started with)') + (wipedByFailedTab ? ' [R16-wiped: a tab whose sign-in read failed sent a history it built from nothing over the stored one]' : ''), rule: wipedByFailedTab ? 'R16-wiped' : null });
     }
   }
   /* A record the site writes WHOLE (an exit-check result, a practice-log entry, the streak) must be one value some
@@ -907,6 +908,10 @@ function oracle(sc, world, tabs){
     const whole = acceptOf(rec, effs, 'owed').whole;
     if (whole.has(g) || fails.some(f => f.msg.startsWith(rec.join('.') + '.') || f.msg.startsWith(rec.join('.') + ':'))) continue;
     if (acceptOf(rec, effs, 'owedLoose').whole.has(g)){ known.push({ kind: 'K3 unload write lost', leaf: rec.join('.'), stored: g, accept: [...whole] }); continue; }
+    /* The leaves were excused as K1 (another tab sent its whole older copy of this record over the new one): the record
+       must then be that tab's whole copy, one value the oracle's model of that tab held, never a mix of the two. */
+    const k1By = new Set(known.filter(k => k.kind.startsWith('K1') && (k.leaf === rec.join('.') || k.leaf.startsWith(rec.join('.') + '.'))).map(k => k.by));
+    if ([...k1By].some(by => viewsOf(tabBy[by], rec, effs).has(g))) continue;
     leaves++;
     fails.push({ msg: `${rec.join('.')}: stored ${g}, a mixture no history gives; expected one of ${[...whole].join(' or ')}` });
   }
@@ -1524,10 +1529,7 @@ async function main(){
 const KNOWN = [
   { id: 'K-exitcheck-mark-2026-11-12', listed: '2026-11-12',
     what: 'after a failed sign-in read, an exit check\'s done mark rides out with the next classActivities save while its score stays held back (activities-2.js:276-287 + save.js flushSave)',
-    match: x => x.rule === 'R7-mark' && x.byFailed && x.scoreAsStarted && x.carrier },
-  { id: 'K-pr-history-2026-11-12', listed: '2026-11-12',
-    what: 'after a failed sign-in read, a new PR entry saves a one-entry history over the stored one (responses is not held back, and the array is replaced whole)',
-    match: x => x.rule === 'R16-wiped' }
+    match: x => x.rule === 'R7-mark' && x.byFailed && x.scoreAsStarted && x.carrier }
 ];
 const watchdog = setInterval(() => {
   if (Date.now() - BEAT.at > STALL_S * 1000){ console.log(`save-loop: ✗ HUNG — no progress for ${STALL_S} s. Stuck at "${BEAT.where}"`); process.exit(3); }
