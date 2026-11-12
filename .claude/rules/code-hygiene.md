@@ -1,8 +1,8 @@
 ---
 paths:
-  - "app.js"
-  - "teacher.js"
-  - "coach.js"
+  - "app/*.js"
+  - "teacher-*.js"
+  - "coach-*.js"
   - "live-quiz.js"
   - "fab-tools.js"
   - "tuner.js"
@@ -20,11 +20,11 @@ not judgement calls.
    - Write `onclick="fn(${jsonAttrArg(id)})"`, no quotes around it.
    - `jsonAttrArg` always passes a *string*; for a number or boolean use
      `escAttr(JSON.stringify(n))`.
-   - Better still: `data-*` plus a delegated listener (teacher.js never splices
+   - Better still: `data-*` plus a delegated listener (the `teacher-*.js` parts never splice
      an id into a JS string).
    - Check 1bs compiles every handler in every rendered set.
-   - 28 older handler lines still use the quoted form (27 in app.js, 1 in
-     live-quiz.js; `grep -cE " on[a-z]+=\"[^\"]*'\\$\{escAttr\(" app.js live-quiz.js`).
+   - 28 older handler lines still use the quoted form (27 in the `app/*.js` parts, 1 in
+     live-quiz.js; `grep -cE " on[a-z]+=\"[^\"]*'\\$\{escAttr\(" app/*.js live-quiz.js`, one count per file).
      The ones that carry text are the risk (openSongLink, sdAnswer, strumChord,
      caStepHtml's video `loadPanel`, a ca-card `window.open`): convert each when
      you touch it.
@@ -76,7 +76,7 @@ not judgement calls.
 - **`MC_LEAK_ALLOW`'s entries are all Modules 1–6 and carried on purpose.** When
   a module gets swept, delete its entries first and let the check say what is
   left.
-- **`WARMUP_BANK` (`config-main.js`) and `buildModuleRoutine()` (`app.js`) are
+- **`WARMUP_BANK` (`config-main.js`) and `buildModuleRoutine()` (`app/lesson.js`) are
   kept on purpose.** Nothing calls `buildModuleRoutine()` since `52ae05f`, and
   `WARMUP_BANK`'s other reader is the switched-off Daily 5. Don't delete either.
 

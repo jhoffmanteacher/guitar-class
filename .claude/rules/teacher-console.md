@@ -1,6 +1,6 @@
 ---
 paths:
-  - "teacher.js"
+  - "teacher-*.js"
 ---
 
 ## Teacher console — shared-config rules
@@ -28,7 +28,7 @@ section of this file. Each bullet below closed a real two-console failure.
 - **Visibility must match the students'.** Use `teacherBoardView(cfg).assigned`
   (computed once per student), never the raw `activityBoard[id]`: a card moved
   to Songs or Teacher view songs keeps its board slot. `tabs/journey.js` carries
-  a copy of `caIsLibraryCard`/`caIsTeacherSong` that must match app.js; check
+  a copy of `caIsLibraryCard`/`caIsTeacherSong` that must match the app's (`app/activities-2.js`); check
   1ah pins the guard in all three places.
 - **Escape every student-written value** at the interpolation point (period,
   name, email, response and report text, mic-take metadata).
@@ -42,7 +42,7 @@ section of this file. Each bullet below closed a real two-console failure.
 - **How to change this plumbing safely.** Before touching
   `loadTeacherClassConfig`/`teacherWriteConfig`:
   1. Write a randomized two-console simulation: fake Firestore with transactions
-     and latency, a virtual clock, the real teacher.js, ≥ 1000 schedules, view
+     and latency, a virtual clock, the real console code (the whole script: `siteSource('teacher.js')` from `tools/site-src.mjs`), ≥ 1000 schedules, view
      switches at many times.
   2. Compare old vs new on: views left on "Loading…", boards with duplicate
      `pos`, false "Nothing was saved" counts, repaints during a burst.

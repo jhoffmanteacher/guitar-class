@@ -47,7 +47,7 @@ projected stage (`?teacher=true` → **Live quiz**). One game runs at a time, in
   - The stage never shows the board with a marker (stage rule below); the
     strip shows one Reveal button, never the fret.
   - Answer ids are `'<string>:<fret>'`; octaves both count (`correctIds`).
-  - The board is `app.js`'s `fgBoardSvg(sid, kind, opts)` behind a `typeof`
+  - The board is the app's `fgBoardSvg(sid, kind, opts)` (`app/drills.js`) behind a `typeof`
     guard. The fret UI only ever renders on `index.html`, never on a Journey
     page.
 - **The public session doc carries NO player name** (2026-11-05, Jonathan: no
@@ -91,8 +91,8 @@ projected stage (`?teacher=true` → **Live quiz**). One game runs at a time, in
     returns exact seconds, not a ceiling.
 - **`live-quiz.js` also ships on the six `tabs/*.html` Journey pages**, where
   it shows the "a game is running" banner and nothing else (`lqCanPlayHere()`
-  gates the rest). Those pages have no `app.js`, so nothing in that file may
+  gates the rest). Those pages do not load the app script (`app/*.js`), so nothing in that file may
   come to depend on one: Firestore through `lqEnsureDb()`, the uid through
-  `lqUid()`, and an app.js-only helper only behind a guard or a fallback.
+  `lqUid()`, and an app-only helper only behind a guard or a fallback.
   The banner's CSS is mirrored in `tabs/journey-theme.css` (those pages don't
   load `styles.css`) — restyle both or neither.

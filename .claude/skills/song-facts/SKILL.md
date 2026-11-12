@@ -192,7 +192,7 @@ ear. This is chord *timing*, not BPM:
   "Core" means *threaded through the course with a `tabs/` Journey page*, not
   *the only songs a skill may name*. Don't flag it as a defect.
 - **Step `skills: [n]` resolves to the id SUFFIX, not the array position**
-  (`stepSkillIds` in `app.js`), and skill progress is keyed by `skill.id`. So
+  (`stepSkillIds` in `app/audio-ui.js`), and skill progress is keyed by `skill.id`. So
   removing a skill and leaving a numbering gap is SAFE; renumbering the
   survivors would silently reassign students' stored check-offs. Removing a
   *section* is the destructive one — `${setId}-${station}-sec${gi}-${i}` is

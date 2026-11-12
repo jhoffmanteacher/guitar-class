@@ -27,9 +27,15 @@ Dates are the Pacific calendar date. `CACHE_VERSION` and commit timestamps may s
 
 ---
 
-## Where things stand (updated 2026-11-09)
+## Where things stand (updated 2026-11-11)
 
 Start here. Update this block whenever an item opens or closes; each line says where the detail is.
+
+**The three big scripts are cut into parts (2026-11-11)**
+- There is no `app.js`, `coach.js` or `teacher.js` file any more: `app/*.js`, `coach-*.js`, `teacher-*.js`. The table
+  and the rules: CLAUDE.md → "Where the code lives". The entry, the two accepted risks and the rollback: "Recently
+  shipped" → 2026-11-11. Open: Phase 2 (the clean-ups) and "Step 1, not recorded yet" in `todo.md`. Lines below
+  written before the cut say `coach.js` for what is now `coach-core.js` / `coach-chords.js`.
 
 **Closed-loop test, first piece (2026-11-11; Jonathan: "what we're lacking here is some form of closed loop testing")**
 - **What it is:** a virtual student (`tools/mic-sim/student.mjs`) plays whole Power Chord Switch games into the real
@@ -376,6 +382,28 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 ---
 
 ## Recently shipped (post-archive)
+
+- [x] **2026-11-11 — The three big scripts are cut into parts.**
+      What was cut: `app.js` (17,900 lines) into 15 files under `app/` (script tags in `index.html`, in load order),
+      `coach.js` (10,700) into 7 `coach-*.js` files and `teacher.js` (7,200) into 7 `teacher-*.js` files (both loaded on
+      demand, in order, from `COACH_JS_PARTS` / `TEACHER_JS_PARTS` in `app/boot.js`). No `app.js`, `coach.js` or
+      `teacher.js` file is left. Each part is a run of whole lines: the parts joined in load order are the old file
+      byte for byte (`tools/split-site.mjs` + `tools/split-plan.json`, kept as the record of how the cut was made).
+      The part table and the rules for working in parts: CLAUDE.md → "Where the code lives".
+      Behaviour is unchanged. Proved by `tools/golden.mjs` (a snapshot of what the site shows and saves, old site
+      against new, `--compare`), `tools/slow-load.mjs` (every script held back at random, so parts arrive late and in
+      any order) and `tools/sw-upgrade-proof.mjs` (a returning student's service worker going from the old cache to
+      the new files).
+      RESULTS: <the lead fills in the final numbers>
+      Tools: every Node tool reads the three scripts through `tools/site-src.mjs`, where `app.js`, `coach.js` and
+      `teacher.js` are logical names for "the whole script". Notes dated before the cut use those names for files.
+      Two accepted risks: (1) a page that is open during the deploy and opens Games before its automatic reload gets
+      a load error until the reload; (2) a Chromebook whose update was interrupted and which is then fully offline
+      shows a blank page until it is online again.
+      Roll back: revert the cut commit and push. The whole scripts come back, and the tools keep working because
+      `site-src.mjs` falls back to the single file.
+      The plan and the record: `todo.md` → "Refactor the whole site". Still open there: Phase 2 (the clean-ups) and
+      the items under "Step 1, not recorded yet".
 
 - [x] **2026-11-11 — Name the Power Chord (ca-49): all six strings and the whole three-finger shape. Fast.**
       Jonathan, 2026-11-11, from a chat session (no work order): "roots on E and A but the full 3 finger power chord

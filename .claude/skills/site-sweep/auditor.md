@@ -31,7 +31,7 @@ of maybes.
 
 ## Dead-code warning
 UI is built as HTML strings with inline handlers, `data-*` dispatch, `window.x =`
-exports and cross-file calls (app.js ↔ teacher.js ↔ coach.js ↔ fab-tools.js ↔
+exports and cross-file calls (`app/*.js` ↔ `teacher-*.js` ↔ `coach-*.js` ↔ fab-tools.js ↔
 tabs/journey.js ↔ index.html), and `tools/checks.mjs` reads source text for
 specific names. Before calling anything dead, grep the WHOLE repo for the bare
 name, as a string, in an attribute and in a template literal; say which greps.

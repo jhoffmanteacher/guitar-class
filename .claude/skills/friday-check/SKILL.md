@@ -77,7 +77,7 @@ For each confirmed finding, decide:
   `Review: Fast`). Before pushing, `git fetch` and confirm it's a
   fast-forward.
 - **Fix on a branch, review it, then merge it — all in this run** — when the
-  fix itself is always-Reviewed (CLAUDE.md's list, e.g. `coach.js`). Jonathan,
+  fix itself is always-Reviewed (CLAUDE.md's list, e.g. `coach-core.js`). Jonathan,
   2026-11-07: these reviews run automatically; the fix does not wait for him.
   1. Work on branch `friday-check/<YYYY-MM-DD>` (a worktree if another session
      could be using the checkout), rebased on current `origin/main`.

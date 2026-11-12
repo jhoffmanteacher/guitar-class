@@ -106,16 +106,16 @@ set id (mid-year that needs a one-time move like `swap45`). Jonathan,
 m4w2's section count, so `rule-zero-proof.mjs` fails it by design. After the split,
 drop the 1ao pin (sets with parts: 1 → 0) unless another set uses parts.
 
-**Remove the Module 4/5 swap progress move (`swap45`):** app.js
+**Remove the Module 4/5 swap progress move (`swap45`):** `app/save.js`
 `swap45MapId` … `swap45OnLoad`, the `await swap45Commit()` gate in
-`flushSave()`, the display remap in teacher.js `teacherFetchStudents()`, and
+`flushSave()`, the display remap in `teacher-core.js` `teacherFetchStudents()`, and
 the `swap45` block in `tabs/journey.js`. All four halves go together: removing
 only some lets one writer save in a numbering another still reads differently.
 Delete the `migrations` field from the reset docs, or leave it: nothing else
 reads it.
 
 **Delete the 29 "Take It to a Song" sections and their card code.**
-Switched off (`TAKE_TO_SONG_ENABLED = false` in app.js), but still in the
+Switched off (`TAKE_TO_SONG_ENABLED = false` in `app/shell.js`), but still in the
 module files because each one counts toward its neighbours' `gi`. Removing
 them re-keys every section after them, so it is reset-only, and
 `rule-zero-proof.mjs` will fail it by design. With them go

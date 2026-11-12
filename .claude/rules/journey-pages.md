@@ -5,7 +5,7 @@ paths:
 
 ### ⚠️ Journey tabs are hand-typed copies of the app's tab card
 A tab on a `tabs/*.html` Journey page is hand-written HTML: those pages have
-no `app.js`, so no `buildTab()`.
+no app script (`app/*.js`), so no `buildTab()`.
 
 - **Markup.** The same markup the app emits: `.tab` > `.tab-head` (icon +
   `.tab-title` + "Tab" pill) > `.tab-body` > a board, with `.tab-ascii`
@@ -24,7 +24,7 @@ no `app.js`, so no `buildTab()`.
 
 ### Layer N is Module N
 A page's core layers follow the course order: layer N's `.layer-unit` says
-"Module N", `JOURNEY_LAYERS` in `app.js` is read from those spans, and
+"Module N", `JOURNEY_LAYERS` in `app/lesson.js` is read from those spans, and
 checks.mjs 1ab fails on drift. **Layer 4 is Open Chords and Layer 5 is
 Pentatonic Solo** on every page; layers 6 and up are bonus layers. Reordering
 modules again means moving these layers in the same change.

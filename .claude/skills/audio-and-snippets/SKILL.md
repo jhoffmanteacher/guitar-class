@@ -19,7 +19,7 @@ grid). Make the window agree with the step's own
 tab: an eight-bar tab wants an eight-bar window, or the loop comes round
 mid-phrase and the student concludes they're the one who's wrong.
 
-`SNIPPET_TRACKS` in `app.js` holds the mp3 paths, the tempo arithmetic and
+`SNIPPET_TRACKS` in `app/snippets.js` holds the mp3 paths, the tempo arithmetic and
 **one measured number per song: `anchor`, the track's first downbeat**.
 Everything else is derived. The slow tier is the same master time-stretched,
 so its grid is the fast file's scaled by `trackBpm/trackBpmSlow`. **Never
@@ -69,8 +69,8 @@ dots sit dead on the beat makes it worse. Watch instead whether the lead is
 CONSTANT across the four dots: a growing one is a wrong `win.bar` for that
 song, not latency.
 
-One builder, `buildSnippet()`, is called by `caStepHtml()` (app.js) and
-`renderTeacherActivityDetail()` (teacher.js), the same shape as `buildTab()`:
+One builder, `buildSnippet()`, is called by `caStepHtml()` (`app/activities.js`) and
+`renderTeacherActivityDetail()` (`teacher-activities.js`), the same shape as `buildTab()`:
 that is how a step field satisfies the two-renderers rule without two copies.
 1ak pins both calls **inside the function body and with comments stripped**
 (a comment naming the function must not count).
@@ -87,7 +87,7 @@ with it.**
   owns.
 
 The full sweep is only for the two cases that earn it:
-- **the mic is about to open** (every coach.js site; fab-tools.js when the
+- **the mic is about to open** (every `coach-*.js` site; fab-tools.js when the
   tuner opens);
 - **the site is about to play something that has to be heard clean** (a tab
   sequence, a snippet, an exit-check stimulus).
@@ -96,9 +96,9 @@ A plain "mark this done" is neither, and **nor is leaving a screen**:
 `caMarkStepDone()`, `caToggleComplete()` and `caClosePanel()` use
 `stopCardAudio()`, and the lesson-step path (`onCompleteChange()`) never
 takes the metronome either. `fab-tools.js` draws the same
-line for dismissing a popup, so nothing in `app.js` should be stricter. The
-full sweep has exactly six callers in `app.js` (`snipToggle()`, `erPlay()`,
-`ncStart()`, `pcStart()`, `ecPick()`, `chcStart()`, all "about to play"), plus the mic-opening ones in `coach.js` and `fab-tools.js`.
+line for dismissing a popup, so nothing in the `app/*.js` parts should be stricter. The
+full sweep has exactly six callers in the `app/*.js` parts (`snipToggle()`, `erPlay()`,
+`ncStart()`, `pcStart()`, `ecPick()`, `chcStart()`, all "about to play"), plus the mic-opening ones in `coach-*.js` and `fab-tools.js`.
 New "silence it" call site → default to `stopCardAudio()`.
 
 **Which tempo a card OPENS on is per track — `defaultSlow` in
@@ -132,7 +132,7 @@ record plays the part; turn it off and carry it yourself.
 2026-10-26: "a delay when I toggle the guitar"): a reload of the other ~14 MB
 mix goes quiet until it buffers.
 - THE TWIN (`twinPark` / `twinFollow` / `twinReady` / `twinSwap`, beside
-  `snippetSrc()` in `app.js`) keeps a second, muted element on the OTHER mix
+  `snippetSrc()` in `app/snippets.js`) keeps a second, muted element on the OTHER mix
   of the tier now playing, in step with the audible one. The toggle swaps
   which is muted.
 - Both engines use it: `snipState` (snippet cards) and `pcState` (practice /
@@ -150,7 +150,7 @@ mix goes quiet until it buffers.
 - **Whoever owns the state must stop the twin on every exit** (`twinStop`;
   `snipStop` and `pcStop` do).
 - The Song Journey player (`ensurePlayer` in `tabs/journey.js`) still
-  reloads; it has no app.js, so it needs its own port.
+  reloads; it does not load the app script (`app/*.js`), so it needs its own port.
 
 **Metronome and Guitar are independent on every track, because the
 Metronome is not a file.**
@@ -178,7 +178,7 @@ Two ways to declare it on `#playalong-frame`:
   or after the last. Luna is a steady track that uses this form anyway: four
   intro bars at 120 BPM, then the vamp from `anchor`, six clicks a bar.
 
-The page lists are hand-kept copies (those pages have no `app.js`).
+The page lists are hand-kept copies (those pages do not load the app script, `app/*.js`).
 checks.mjs **1bk** compares them to `SNIPPET_TRACKS` number for number, pins
 the count of pages making their own click, refuses a page that does both,
 and fails any metronome mix in `audio/` except the one on
@@ -206,7 +206,7 @@ below).
 ## Guitar notes — every Play button is a recording
 Every pluck the site makes (TAB Play buttons, chord strums, the ear and shuffle
 drills, game rewards, Riff Runner's "Hear it") goes through `playNote()` in
-`app.js` (Jonathan, 2026-10-01: the synth "doesn't sound like a guitar").
+`app/audio-ui.js` (Jonathan, 2026-10-01: the synth "doesn't sound like a guitar").
 `playNote()` plays a RECORDED steel-string acoustic note:
 `audio/guitar-note-<midi>-<note>.mp3`, one per semitone from 40 (low E) to 74
 (D5), listed in `GUITAR_NOTE_FILES`. Outside that range it re-pitches the
@@ -223,9 +223,9 @@ what the class set (ADM starters) sounds like.
   to `GUITAR_NOTE_WAIT_MS` (1.5 s) for its own line's notes, else plays the
   whole line on the synth; it never switches voice mid-line. A failed
   download isn't retried for 30 s.
-- **`playNote()` is the only door.** Riff Runner (`rnPluckAt` in coach.js)
+- **`playNote()` is the only door.** Riff Runner (`rnPluckAt` in `coach-runner.js`)
   calls it too. checks.mjs **1bj** fails a second `ksPluckCached(` call in
-  app.js or any in coach.js.
+  the app script (`app/*.js`) or any in the coach script (`coach-*.js`).
 - **`playSequence()` damps the previous note** when the next one sounds
   (25 ms time constant), or three-second notes turn a line into a wash. A held
   `{ midi, beats }` note still rings its full length, the last note rings out,

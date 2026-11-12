@@ -6,6 +6,20 @@ mic. Nothing on the site references this folder. Keep it for the next
 tuning pass — ideally on the real classroom recordings the teacher console's
 "Mic recordings" view now collects (Download WAV + Download data).
 
+**Since the 2026-11-11 cut** there is no `coach.js`, `app.js` or `teacher.js`
+file: each is a set of part files (`coach-core.js` and the other `coach-*.js`,
+`app/*.js`, `teacher-*.js`). In this README the three names mean the whole
+script.
+- **As an argument the old names still work inside the repo**:
+  `node tools/mic-sim/power-wait.mjs coach.js` reads the whole script
+  (`readScriptArg` in `tools/site-src.mjs` joins the parts in load order when
+  the path is one of the three names in a site folder, one with an
+  `index.html`). Any other path is read as the file it is.
+- **An export of an OLD version**: `git show <ref>:coach.js > file` works only
+  for a ref BEFORE the cut. For a ref after it: `mkdir <dir>`, then
+  `git archive <ref> | tar -x -C <dir>`, and pass `<dir>/coach.js` (and
+  `<dir>/app.js` where a tool takes both).
+
 - `tune.mjs <coach.js> '<json {cell: {CONST: value}}>' [prompts] [fps]` — the
   one-note games (Note Hunt, PSG Hero, Wait Mode, Note Call) through the real
   `coachReadFrame` / `coachSettlePitch` inside a copy of `fretLoop`'s

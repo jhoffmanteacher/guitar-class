@@ -5,6 +5,10 @@ Things to do at some point. Not scheduled. What is open right now lives in
 
 ## Refactor the whole site (not ready yet)
 
+**Status (2026-11-11):** the cut went live on 2026-11-11: `app.js`, `coach.js` and `teacher.js` are now part files
+(`WORKFLOW.md` → "Recently shipped" → 2026-11-11; CLAUDE.md → "Where the code lives"). Still open: Phase 2 (the
+clean-ups) and the items under "Step 1, not recorded yet". The text below is the record, left as written.
+
 Added 2026-11-11 (Jonathan). Idea only: nothing has started.
 
 The plan, in order:

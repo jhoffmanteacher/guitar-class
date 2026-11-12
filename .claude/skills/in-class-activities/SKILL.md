@@ -1,6 +1,6 @@
 ---
 name: in-class-activities
-description: How the guitar site's In-Class Activities page, activity gate, exit checks and practice cards work: caBlockers/caIsVisible, Today's activity, Open-through, optional/CAS, clears, archive/delete, Journey gating, four-step/two-line rules, view:'card' practice cards and whole-song cards, Play Along now, Songs Core rows, render-time hiding (visibleSteps/visibleSections, section kinds), the two step renderers (caStepHtml / renderTeacherActivityDetail), the activity board and numbering (activityBoard, caBoardOrder, teacherMoveActivity, series numbers in titles), and the play-along-first song links (openSongLink, songsPlayAlongCard, TAKE_TO_SONG_ENABLED). Read BEFORE editing class-activities.js, the ca*/ec*/pc* code in app.js, teacher.js activity/console code, or tabs/journey.js gating.
+description: How the guitar site's In-Class Activities page, activity gate, exit checks and practice cards work: caBlockers/caIsVisible, Today's activity, Open-through, optional/CAS, clears, archive/delete, Journey gating, four-step/two-line rules, view:'card' practice cards and whole-song cards, Play Along now, Songs Core rows, render-time hiding (visibleSteps/visibleSections, section kinds), the two step renderers (caStepHtml / renderTeacherActivityDetail), the activity board and numbering (activityBoard, caBoardOrder, teacherMoveActivity, series numbers in titles), and the play-along-first song links (openSongLink, songsPlayAlongCard, TAKE_TO_SONG_ENABLED). Read BEFORE editing class-activities.js, the ca*/ec*/pc* code in the app/*.js parts (app/activities.js, app/cards.js, app/activities-2.js), the teacher-*.js activity/console code, or tabs/journey.js gating.
 ---
 
 ## Exit checks — the end-of-period product
@@ -10,7 +10,7 @@ An exit check is a class activity with `kind: 'check'` (schema at the top of
 - Five auto-graded questions, one try. Two item types: `nextNote` and `noteName`.
 - The result goes to `progress/{uid}.exitChecks[id]` plus `classActivities[id] = true`.
   No `firestore.rules` change was needed: the teacher already reads the progress doc whole.
-- Engine: the `ec*` functions in `app.js`.
+- Engine: the `ec*` functions in `app/activities-2.js`.
 - The student card and the console preview share `caCheckBodyHtml()` **on
   purpose** — don't fork it.
 - Console: turned-in count and average in the Activities table; a
@@ -24,7 +24,7 @@ An exit check is a class activity with `kind: 'check'` (schema at the top of
 
 **Post one with its own link:** `#class-activities/<id>` opens the Class
 activities page with that card expanded and scrolled to (`caFocusActivity()` in
-`app.js`); the console has a **Copy link** button per row. The hash router splits on `/`
+`app/activities.js`); the console has a **Copy link** button per row. The hash router splits on `/`
 (`exploreHashBase` / `exploreHashTail`): a new deep link takes that shape, not
 a query param. An unpublished id gets `ca.linkMissing` above the archive.
 
@@ -48,7 +48,7 @@ Easy to break without noticing:
 **In-Class Activities** (the name since Jonathan, 2026-09-17; key
 `nav.classActivities`, hash `#class-activities`) is the site's home page:
 `showApp()` opens it whenever the URL carries no explore hash.
-`renderClassActivities()` (app.js) builds three groups (named by Jonathan
+`renderClassActivities()` (`app/activities-2.js`) builds three groups (named by Jonathan
 2026-09-23):
 - **Today's activity** (`ca.startHere`) — every card dated today or yesterday
   (below), collapsed like every other card, not forced open (Jonathan,
@@ -173,7 +173,7 @@ should fill the page").
 **⚠️ The LOCK is switched off (Jonathan, 2026-10-07: "stop locking the
 other parts of site if class activities aren't cleared… CA should still pop
 up as normal on login").** `const CA_GATE_LOCKS = false;` beside
-`applyActivityGate()` in app.js and `var JOURNEY_GATE_LOCKS = false;` in
+`applyActivityGate()` in `app/activities-2.js` and `var JOURNEY_GATE_LOCKS = false;` in
 `tabs/journey.js` are the whole switch; `true` restores the lock below exactly.
 - Still live: `caBlockers()` computes, and `showApp()` lands a student with
   any blocker on In-Class Activities at sign-in **whatever the hash** — except
@@ -243,8 +243,8 @@ card (`teacherSetActivityOptional`) writes `config/class.optionalActivities`
 - An optional card is still VISIBLE — `caIsVisible()` does not read the map —
   but never a blocker. It renders an "Optional" tag (`caOptionalTagHtml()`, in
   both meta-line builders: hero, plain card and check).
-- The rule lives in three places that must agree: `caBlockers()` (app.js, via
-  `caIsOptional()`), `teacherBlockersFor()` (teacher.js), `journeyBlockers()`
+- The rule lives in three places that must agree: `caBlockers()` (`app/activities-2.js`, via
+  `caIsOptional()`), `teacherBlockersFor()` (`teacher-config.js`), `journeyBlockers()`
   (tabs/journey.js).
 - The Today hero prefers the first REQUIRED pending card; an optional one only
   when nothing required is left.
@@ -264,7 +264,7 @@ locked out of the modules).
 **Per-student clears:** `config/class.activityClears` (`{ uid: { id: true } }`)
 lets one student past a specific blocker without finishing it (a sub day, a
 connectivity problem, work done on paper).
-- Written by `teacherSetActivityClear`/`teacherClearAllBlockers` (teacher.js),
+- Written by `teacherSetActivityClear`/`teacherClearAllBlockers` (`teacher-config.js`),
   same merge-patch shape as `hiddenActivities`/`gameOverrides`.
 - UI: a Clear toggle per student in `renderTeacherActivityDetail` and
   `renderTeacherCheckDetail` (Gate column); a "Blocked by N" badge and a
@@ -279,8 +279,8 @@ merge-patch shape as `hiddenActivities`).
   fails on it **before** the dev-bypass line, unlike the date gate (a retired
   activity has nothing to preview), so it is off In-Class Activities, out of
   `caBlockers()`, and a deep link reads as not-posted.
-- The visibility rule is mirrored in `caIsVisible` (app.js),
-  `teacherActivityVisible` (teacher.js) and `journeyIsVisible` (journey.js).
+- The visibility rule is mirrored in `caIsVisible` (`app/activities-2.js`),
+  `teacherActivityVisible` (`teacher-config.js`) and `journeyIsVisible` (journey.js).
 - **Restore** differs. Archive keeps the release date, rename, board slot and
   per-student clears (minus any pin — Archive unpins). Delete wipes all of that
   behind a `confirm()`, **including the board entry**; a restored one comes back
@@ -332,7 +332,7 @@ line before Start.
   the line when there is no "You've got it when:" label. Write a count it can
   read (a digit or two–five / dos–cinco, then "times", "in a row", "back to
   back", "veces", "seguidas"); "8 times" makes no dots. The module call does
-  NOT opt in. **1bg** holds EN = ES, renders every activity step (its dots = its line's count) and every module set (the dot-group total is pinned), and counts the opt-ins in app.js and teacher.js.
+  NOT opt in. **1bg** holds EN = ES, renders every activity step (its dots = its line's count) and every module set (the dot-group total is pinned), and counts the opt-ins in the app script and the console script (`app/*.js`, `teacher-*.js`).
 - Cut: fix-it lines, finger-by-finger lists, recaps, definitions (use the plain
   word), "then press Play tab to check". Strings named, never numbered.
   Spanish: shorten the existing `_es`, reuse its words, buttons in «».
@@ -402,7 +402,7 @@ The activity is ONE screen:
 
 A looping card repeats with no seek: a second `<audio>` on the same file
 waits at the loop start and takes over at the window's end ("THE SPARE" in
-app.js, Jonathan 2026-10-07 — a seek left an audible hole every lap).
+`app/cards.js`, Jonathan 2026-10-07 — a seek left an audible hole every lap).
 Anything new that touches a card's audio must handle `st.spare` and
 `st.leaving` as well as `st.audio`.
 
@@ -451,7 +451,7 @@ Checks:
   hero dots, sticky bar, the Mark-complete nudge) — for a ladder only.
 
 Code and guards:
-- Data shape: CARD note atop class-activities.js. Engine: `pc*` in app.js
+- Data shape: CARD note atop class-activities.js. Engine: `pc*` in `app/cards.js` (`pcBassMarks` alone is in `app/activities.js`)
   (`pcLayout` sections → tab offsets and beat totals; `pcLocate` position →
   note; the snippet window arithmetic, one `anchor` per song).
 - One sound at a time: `pcStop()` sits beside every `snipStop()` in
@@ -549,7 +549,7 @@ step's tab.
   on a chord starts from that lap (`pcStart(root, si, rep)`).
 - ca-38 has NO `journey` (1bn): it is another view of ca-29, not Layer 3's
   play-along.
-- Engine: `pcSheet*` in app.js, beside caCardBodyHtml.
+- Engine: `pcSheet*` in `app/cards.js`, beside caCardBodyHtml.
 
 **Slowest.** A practice card with `card.slowest: true` (all 25 practice cards
 on 2026-11-08) gets a four-stop speed control: Slowest / Slower / **Slow** /
@@ -604,7 +604,7 @@ now** switch (`teacherSetActivityPlayAlong`, cell-checked write to
   student can reach.
 - It changes **nothing else**: `caIsVisible()` and the three blocker rules do
   not read the map, so the card stays off In-Class Activities and never blocks.
-- `caIsPlayAlongOnly()` in `app.js` is the one predicate: practice card, flag
+- `caIsPlayAlongOnly()` in `app/activities-2.js` is the one predicate: practice card, flag
   on, assigned, not Hidden, not retired, and NOT already visible. Readers:
   `songsPlayAlongCard()` (the Core row link), `caFocusActivity()` (so the tap
   opens it instead of "not posted"), and `renderClassActivities()`, which
@@ -663,7 +663,7 @@ aria-label).
   Practice Routine", "Ear Spark — optional ear bonus", "Checkpoint"/"Wrap-Up").
 - **Kind-ONLY matching, deliberately NOT kind-or-title like
   `isTuningWarmupSection`.** `isEarSparkSection`/`isRoutineSection`/
-  `isReflectionSection`/`isTakeToSongSection` in app.js check `sec.kind` alone:
+  `isReflectionSection`/`isTakeToSongSection` in `app/shell.js` check `sec.kind` alone:
   these titles repeat across nearly every module.
 - A step-level `hidden: true` flag (song previews now taught by a class
   activity) works the same way.
@@ -672,10 +672,10 @@ aria-label).
   Module 1 has one (its "session check-in" `routine`); Module 13 has none.
 
 **`visibleSteps(sec, moduleNum)` / `visibleSections(station, moduleNum)`**
-(app.js) are the one gateway everything student-facing reads through:
+(`app/lesson.js`) are the one gateway everything student-facing reads through:
 `buildLesson()`, `resumeLessonCounts()`, `buildSearchIndex()`,
 `moduleStepsFlat()` (the Daily 5 pool).
-- The one deliberate exception is teacher.js's `setShortResponses()`: it walks
+- The one deliberate exception is `setShortResponses()` in `teacher-manage.js`: it walks
   `storageSections()` (every section but tuning-warmup) because it audits what
   students actually wrote, Modules 1–2's Checkpoint / Wrap-Up / Practice
   Routine answers included. A slot in a non-renderable section or on a
@@ -693,7 +693,7 @@ aria-label).
   over the survivors once moved Module 2 Set 1 station B's progress from
   `b-sec2` to `b-sec1`).
 
-**`JOURNEY_LAYERS`** in app.js (`{slug: {moduleNum: layerNum}}`) is authored
+**`JOURNEY_LAYERS`** in `app/lesson.js` (`{slug: {moduleNum: layerNum}}`) is authored
 from the six pages' real `.layer-unit` spans — today Module 1→Layer 1 … 5→5,
 anything past 5 an unnumbered "Extra". Layer 4 is Open Chords, Layer 5 the
 Pentatonic Solo (Modules 4 and 5 swapped).
@@ -732,14 +732,14 @@ activity that duplicates a module step is the trigger to hide that step.
 ### Activity order, numbering and the board
 **Not in `class-activities.js`.** `config/class.activityBoard`
 (`{ id -> { module, pos } }`, `module: 0` = the board's Unsorted pen) is
-written by the console's **Class activities board** (`teacher.js`): Built on
+written by the console's **Class activities board** (`teacher-activities.js`): Built on
 the left (pushed, not placed), Assigned on the right (by module, in reading
 order). It decides the order, the module headings and the `#N` prefix.
 - A card with no entry is invisible to everyone. **Not archived/deleted +
   assigned + not Hidden + given to this student (`caForMe`) +
   dated-and-arrived** is the full live-for-students rule (`caIsVisible`, in
   that order; the dev bypass skips only the date).
-- `caBoardOrder()` in `app.js` is the one resolver, read by students
+- `caBoardOrder()` in `app/activities-2.js` is the one resolver, read by students
   (`caBoardView`/`caNumber`) and by the console (`teacherBoardView`), so the
   two can't disagree.
 - Archived cards keep their slot but hold no `#N` (see Archive / Delete).
@@ -764,8 +764,8 @@ Gym is **Finger Gym 1** though the class meets it as **#3** (Jonathan,
 - Ids (`ca-<n>`) never move — student progress is keyed to them.
 
 ### There are TWO step renderers — patch both, or the teacher can't see it
-`caStepHtml()` (`app.js`, students) and `renderTeacherActivityDetail()`
-(`teacher.js`, the console preview) each have their own `if(step.figure)` /
+`caStepHtml()` (`app/activities.js`, students) and `renderTeacherActivityDetail()`
+(`teacher-activities.js`, the console preview) each have their own `if(step.figure)` /
 `video` / `tab` / `drill` chain, so a field wired into one is silently
 invisible in the other.
 
@@ -804,7 +804,7 @@ nav row, so anything added there must land in both of its branches too.
 
 **Practice card (`view: 'card'`) is a whole card body, not a step field** —
 same shape as an exit check: ONE renderer, `caCardBodyHtml(a, opts)` in
-app.js. Students reach it from `caActivityCardHtml`/`caHeroCardHtml` through
+`app/cards.js`. Students reach it from `caActivityCardHtml`/`caHeroCardHtml` through
 `caCardBodyBlockHtml(a, …)`; `renderTeacherActivityDetail` reaches it with
 `{preview:true}`. 1bf pins all three and renders both student builders.
 
@@ -814,7 +814,7 @@ app.js. Students reach it from `caActivityCardHtml`/`caHeroCardHtml` through
   up on the beat and the student plays it. "Show answer" (on by default) is an
   unscored play-along; turned off, it is five scored levels (`NC_LEVELS`),
   answered by the mic (off by default) or by tapping the fret. Engine and
-  schema: the comment above `NC_LEVELS` in `app.js`; progress in `games.nc`;
+  schema: the comment above `NC_LEVELS` in `app/drills-call.js`; progress in `games.nc`;
   `gamesStopMic()` stops it. Optional `board: 'all'` draws all six strings and still takes
   taps on the drill's own strings (ca-49 step 1 only, pinned by 1co; Jonathan, 2026-11-11).
 - **`pcname`** (ca-49, Name the Power Chord) draws all six strings and the whole three-finger
@@ -825,7 +825,7 @@ app.js. Students reach it from `caActivityCardHtml`/`caHeroCardHtml` through
   - A two-sided deck hides the back until tapped.
   - "Put it back" re-deals the card 3 later; only first-try hits score.
   - The ear sequence is never shown before the reveal.
-- `DECKS` lives in `app.js`, not module data, so its Spanish comes from
+- `DECKS` lives in `app/drills.js`, not module data, so its Spanish comes from
   `i18n.js`. Storage: `games.dk`.
 
 ### Play-along first; Song Journey pages are the back door (2026-10-06)
@@ -850,7 +850,7 @@ Journey pages also hold Layers 4–5 and the bonus layers.
 
 **⚠️ "Take It to a Song" is gone from the module ladders (2026-10-18)**
 (Jonathan: "remove take it to a song from the steps of the modules").
-`const TAKE_TO_SONG_ENABLED = false;` in `app.js`, beside
+`const TAKE_TO_SONG_ENABLED = false;` in `app/shell.js`, beside
 `isTakeToSongSection()`, is the whole switch: `visibleSteps()` and
 `isRenderableSection()` hide every `kind:'take-to-song'` section in Modules
 2–12 (the Journey card in 2–5, the Challenge steps in 6–12).

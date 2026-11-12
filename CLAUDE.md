@@ -16,13 +16,19 @@ What is open right now: `WORKFLOW.md` → "Where things stand" (top of the file)
    **change smoke**: `node tools/smoke.mjs --en-only --only <areas> --baseline <ref> > file 2>&1`.
    A real browser walks the areas your change touches, in English (Jonathan, 2026-11-09: "it's
    taking forever"). Areas (`sets`, `games`, `activities`, `practice-minutes`, `tuning-sim`) and
-   which files belong to each: the header of `tools/smoke.mjs`. Unsure, or `app.js`/`styles.css`
-   touched broadly → leave out `--only`. `<ref>` = the commit before your first change; it is
+   which files belong to each: the header of `tools/smoke.mjs` (`games` = the `coach-*.js` parts, `activities` = the `ca*`
+   renderers in `app/*.js`). Unsure, or `app/*.js`/`styles.css` touched broadly → leave out `--only`. `<ref>` = the commit before your first change; it is
    walked only when your tree has errors, to sort out which are yours.
    - **A Fast change does not wait for it:** push once the full `checks.mjs` passes, then run
      the change smoke on the pushed commit and report its result. A failure is fixed in the
      next push, same session.
    - **An Always-Reviewed change** runs it before the push and waits.
+   - **A risky or wide change** (load order, a shared renderer, the save path, a many-file refactor): also take a
+     golden snapshot of what the site shows and saves, on the commit before and on your tree, then compare:
+     `node tools/golden.mjs --out <dir> --shots` twice (`--root <site folder>` snapshots another checkout), then
+     `node tools/golden.mjs --compare <dirA> <dirB>`. About 20 minutes each; only one headless-browser run at a
+     time (no smoke, `pm-e2e.mjs` or `slow-load.mjs` beside it); it uses Chrome for Testing when `CHROME` is set.
+     A small change does not need it.
    - **The full walk** (both languages, every area, no `--only`/`--en-only`) runs in the
      Friday check and when Jonathan asks for **"the end-of-day smoke"** (no nightly task: his
      call, 2026-11-09). End-of-day smoke: `node tools/smoke.mjs --baseline $(git rev-list -1
@@ -113,11 +119,25 @@ Static HTML/JS/CSS, no build; Firebase + Firestore; GitHub deploy. Module 13 is 
 - **Target screen: Chromebook 1366×657.** Phone width out of scope (no phone work or breakpoints unless asked; keep existing phone CSS and 1o).
 - Shell: Windows *and* macOS.
 
+## Where the code lives (since the 2026-11-11 cut)
+There is no `app.js`, `coach.js` or `teacher.js` file: each was cut into parts, loaded in the order below. Find a function with `grep -n "function name" app/*.js coach-*.js teacher-*.js`.
+
+| Script | Its parts, in load order: what is in each |
+|---|---|
+| the app: `app/*.js`, the `site-parts:app.js` script tags in `index.html` | `boot.js` Firebase, the lazy loaders, module i18n, auth · `save.js` Firestore, `swap45*`, games access, the progress writer (`flushSave()`) · `tab.js` render, chord links, inline TAB, strum patterns · `snippets.js` backing-track snippets · `shell.js` modals, class picker, resume card, rail set switcher, explore pages · `lesson.js` render-time hiding, the lesson ladder, focus mode, parts, songs, Daily 5 (off) · `review.js` Module Review, Record Yourself, checklist, practice panel · `drills.js` practice log, tempo ladder, Find-the-Note, Shuffle, rep counter, MC shuffle, Card Deck, Ear Spark · `drills-call.js` Note Call, Call the chord, Name the power chord, "Keep it sharp" · `audio-ui.js` skill toggles, check-off gates, `playNote()`, BPM, Coach hooks, floating tools, nav drawer, resource viewer · `explore.js` navigation, Songs hub, Play Along, search, Keep practicing, Daily Review, My progress, the In-Class Activities page · `activities.js` activity deep link, Today hero, Focus view, paths, practice cards, versions, bass notes (`caStepHtml()`) · `cards.js` chord grid, lyric sheet (`caCardBodyHtml`) · `activities-2.js` exit checks, the activity board, pins, the activity gate · `start.js` service worker, the hash router, sign-in |
+| the arcade: `coach-*.js`, `COACH_JS_PARTS` in `app/boot.js` | `coach-core.js` the listening code: tunables, detection loop, onset, pitch, the scoring criteria, mic recordings · `coach-hub.js` Note Hunt, the Games hub · `coach-chords.js` Change Up and Power Chord Switch (`ccLoop()`), Chord Blitz, Chord Detective · `coach-ear.js` Name That Riff, Pentatonic Simon (both), Fret Zap · `coach-strum.js` Strum Hero, Riff Roulette, Strum Radar · `coach-runner.js` Riff Runner, Note Runner · `coach-more.js` Finger Gym: The Ladder, Pattern Detective, Build-a-Chord |
+| the console: `teacher-*.js`, `TEACHER_JS_PARTS` in `app/boot.js` | `teacher-core.js` dashboard, class period, keeping progress current, the views, sidebar, trouble spots · `teacher-activities.js` Class activities: board, list and detail, the one move writer, drag and drop, release dates, archive/delete (`renderTeacherActivityDetail()`) · `teacher-songs.js` Songs view · `teacher-config.js` gate clears, games access, the `config/class` reader and `teacherWriteConfig()` · `teacher-manage.js` Manage, Reports · `teacher-mic.js` Mic recordings and their evaluation · `teacher-students.js` Students view, Module Review ratings, practice minutes |
+
+- **The old names are LOGICAL names.** Tools and check messages still say `app.js` / `coach.js` / `teacher.js` for "the whole script" (`siteSource('app.js')` in `tools/site-src.mjs`, which every Node tool reads them through). Never recreate those three files.
+- **Load order matters now.** A new top-level statement that RUNS at load may only use what is defined in the same or an earlier part. Anything that starts things (a listener whose handler uses later parts, sign-in) is registered in `app/start.js`.
+- **After changing any part:** `node tools/checks.mjs`, as before. A change to load order, a loader, the `index.html` script tags or the `sw.js` lists: also `node tools/slow-load.mjs` and `node tools/sw-upgrade-proof.mjs`.
+- **A new part file** goes in `index.html`'s `site-parts:app.js` block (app) or the `COACH_JS_PARTS` / `TEACHER_JS_PARTS` array in `app/boot.js`, and in the `sw.js` lists (`checks.mjs` enforces it). Name it `app/<x>.js`, `coach-<x>.js` or `teacher-<x>.js`. Do not edit `tools/split-plan.json`: the cut is done, and that file and `tools/split-site.mjs` are kept only as the record of how it was made.
+
 ## Workflow
 "Push to GitHub" / "Save progress with a note: [msg]" → checks, fix flags, commit, push, confirm. **Cowork can't push** (patch + `APPLY-<name>.md` as ONE zip; skill `session-handoff`).
 
 ### ⚠️ Pre-push checks before EVERY code push
-Touching `index.html`, `styles.css`, `app.js`, `tuner.js`, `teacher.js`, `config-main.js` or a
+Touching `index.html`, `styles.css`, an `app/*.js` part, `tuner.js`, a `teacher-*.js` part, `config-main.js` or a
 `module-N.js`: `node tools/checks.mjs` must exit 0. It covers syntax, data, about 240 links (run
 it before every push, even when no link changed) and the automatic `CACHE_VERSION` bump (1bt).
 Flags: `--skip-links`, `--check`, `--live`. `--check` changes nothing. After you edit a cached
@@ -145,7 +165,7 @@ Key `${setId}-${station}-sec${gi}-${i}`: a step that changes INDEX loses its tic
   ABOUT to enter as frozen. A blocked fix → **Summer reset list** (skill `summer-reset`) same day.
 
 ### ⚠️ Modules 4 and 5 swapped
-Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `app.js`): no `migrations.swap45` = OLD only, with it NEW only; keep all halves (`flushSave()`, `journey.js`, `teacher.js` remap). Prove with `rule-zero-proof.mjs d0cd004`.
+Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `app/save.js`): no `migrations.swap45` = OLD only, with it NEW only; keep all halves (`flushSave()`, `journey.js`, the `teacherFetchStudents()` remap in `teacher-core.js`). Prove with `rule-zero-proof.mjs d0cd004`.
 - `moduleOpenThrough` is per module NUMBER; the swap didn't touch it.
 - Course order lives in the module number: reordering again means another renumber.
 - `rule-zero-proof.mjs` against the pre-swap `1a1f6cc` fails by design.
@@ -171,7 +191,7 @@ Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `ap
 - **Changelog**: student-facing change → dated top `CHANGELOG.md` entry, same push, student's view.
 
 ## i18n
-Every new student-facing shell string goes in `i18n.js` (read its header for wiring: `data-i18n` / `t()` + `data-i18n-params`) in BOTH `en` and `es`, same edit; never English-only. Module text gets `_es`; Journey pages `data-es`. Reuse its glossary. String names are solfège (`cuerda Mi grave`); chord symbols/keys are not (`tonalidad de G`, `G/B`). The code is the authoritative Spanish: no review sheet; no proofread sweeps unless asked. `i18n.js` loads before `app.js`, `fab-tools.js`, `tuner.js`, `journey.js`.
+Every new student-facing shell string goes in `i18n.js` (read its header for wiring: `data-i18n` / `t()` + `data-i18n-params`) in BOTH `en` and `es`, same edit; never English-only. Module text gets `_es`; Journey pages `data-es`. Reuse its glossary. String names are solfège (`cuerda Mi grave`); chord symbols/keys are not (`tonalidad de G`, `G/B`). The code is the authoritative Spanish: no review sheet; no proofread sweeps unless asked. `i18n.js` loads before the `app/*.js` parts, `fab-tools.js`, `tuner.js`, `journey.js`.
 - Glossary, loanword policy and settled ES terms: `claude/spanish-terminology.md` in the
   Claude project (not in this repo).
 - No check enforces the solfège rule: check it by eye whenever you touch module Spanish.
@@ -203,8 +223,8 @@ Every new student-facing shell string goes in `i18n.js` (read its header for wir
   and stays. The only numbers allowed are anchored to the name: Module 7's two root-naming
   MCs ("string 6 (the low E)") and the `diagram.string*` labels in `i18n.js` ("Low E (6th
   string)"); 1j pins the count. **No paper drills** (scissors/cards/pen): `step.drill` (`shuffle`/`deck`/`ear`/`notecall`; `DECKS`, `EAR_POOLS`); drop "Got someone around?" from deck cards.
-- **TWO step renderers**: `caStepHtml()` (app.js) and `renderTeacherActivityDetail()`
-  (teacher.js) — a step-field change edits both (1v); practice cards/exit checks: `caCardBodyHtml` (1bf).
+- **TWO step renderers**: `caStepHtml()` (`app/activities.js`) and `renderTeacherActivityDetail()`
+  (`teacher-activities.js`) — a step-field change edits both (1v); practice cards/exit checks: `caCardBodyHtml` (`app/cards.js`; 1bf).
 - **Keyed MCs** (`response:{type:'mc'}`, ungraded): shuffled at
   render (`mcOrder`, `MC_PINNED`); keyed step stores choice **text**, practice panel the
   **index** (not pinned by 1ap: wording free, ORDER held) — don't unify. Seed = ENGLISH prompt + choices, so both languages and every student (the projector) see one
@@ -232,12 +252,12 @@ Every new student-facing shell string goes in `i18n.js` (read its header for wir
 | Live quiz | `.claude/rules/live-quiz.md` (loads with `live-quiz.js`) | Nothing on the stage may reveal the answer before the reveal |
 | Set band, left rail, nav grid | `.claude/rules/rail-layout.md` (loads with `styles.css`/`index.html`) | The nav two-column grid is permanent — don't re-simplify; measure, don't do arithmetic |
 | Journey tab cards and Journey-page decisions | `.claude/rules/journey-pages.md` (loads with `tabs/**`) | Restyle `.tab` in both stylesheets or neither |
-| Writing any JS (`app.js`, `teacher.js`, `coach.js`, `live-quiz.js`, `fab-tools.js`, `tuner.js`, `tabs/journey.js`) | `.claude/rules/code-hygiene.md` (loads with those files) | Inline handler args use `jsonAttrArg(x)`, never `'${escAttr(x)}'`; never a mid-line `//`; grep sibling copies and old-behaviour comments before and after a fix; stop everything you start; escape student-written values |
-| Teacher console shared config, **`config/class` write rule** | `.claude/rules/teacher-console.md` (loads with `teacher.js`) | A superseded read returns the newest read, never `null`; a diverged write never marks the copy current; visibility via `teacherBoardView(cfg).assigned` |
+| Writing any JS (`app/*.js`, `teacher-*.js`, `coach-*.js`, `live-quiz.js`, `fab-tools.js`, `tuner.js`, `tabs/journey.js`) | `.claude/rules/code-hygiene.md` (loads with those files) | Inline handler args use `jsonAttrArg(x)`, never `'${escAttr(x)}'`; never a mid-line `//`; grep sibling copies and old-behaviour comments before and after a fix; stop everything you start; escape student-written values |
+| Teacher console shared config, **`config/class` write rule** | `.claude/rules/teacher-console.md` (loads with `teacher-*.js`) | A superseded read returns the newest read, never `null`; a diverged write never marks the copy current; visibility via `teacherBoardView(cfg).assigned` |
 | The weekly review of commits that shipped Fast | skill `friday-check` | Runs unattended Fridays 11 PM; new dated tag each run, never move one |
 | Whole-site audits, many-file refactors, 50+ string passes with sub-agents | skill `site-sweep` (playbook + auditor/fixer/reviewer briefs) | Pre-create the worktrees; cherry-pick to one linear branch; an adversarial review of the *fixes* is required; fetch before pushing |
-| Changing how a game LISTENS (`coach.js` onset, pitch, grading rules), or testing one | `tools/mic-sim/README.md` (the closed-loop entries) | Before proposing a listening rule: `node tools/mic-sim/closed-loop.mjs --no-guitar`, the fitted rooms (`--rooms=room7,room4`), and `node tools/mic-sim/replay-takes.mjs` on the real-take summaries; report all three. When it prints "ASK JONATHAN", tell him it is a good time to download takes and run `node tools/mic-sim/takes-in.mjs`. The `ring` and `half` rules were rejected on real takes (2026-11-11): do not rebuild them |
-| "Hear It First" ear trainer (`trainer-*.js`, `tools/trainer-sim.mjs`) | the header of `trainer-core.js` and of `tools/trainer-sim.mjs` | Hidden from students (direct link only); after any `trainer-core.js` change run `node tools/trainer-sim.mjs` (it is NOT in `checks.mjs`); only the adapter file touches site globals; never edit `coach.js`/`tuner.js` behaviour for it |
+| Changing how a game LISTENS (`coach-core.js` onset, pitch, grading rules; the `ccLoop()` grading lines in `coach-chords.js`), or testing one | `tools/mic-sim/README.md` (the closed-loop entries) | Before proposing a listening rule: `node tools/mic-sim/closed-loop.mjs --no-guitar`, the fitted rooms (`--rooms=room7,room4`), and `node tools/mic-sim/replay-takes.mjs` on the real-take summaries; report all three. When it prints "ASK JONATHAN", tell him it is a good time to download takes and run `node tools/mic-sim/takes-in.mjs`. The `ring` and `half` rules were rejected on real takes (2026-11-11): do not rebuild them |
+| "Hear It First" ear trainer (`trainer-*.js`, `tools/trainer-sim.mjs`) | the header of `trainer-core.js` and of `tools/trainer-sim.mjs` | Hidden from students (direct link only); after any `trainer-core.js` change run `node tools/trainer-sim.mjs` (it is NOT in `checks.mjs`); only the adapter file touches site globals; never edit `coach-*.js`/`tuner.js` behaviour for it |
 
 ## How to work with Jonathan
 **AskUserQuestion, not free text** (2–4 options), one question per turn unless truly independent. **Don't ask "should I proceed?"**: do the obvious, reversible work; "can you…/how do I…/should this be…" about code = do it. In doubt: pick a default, proceed, say why. Pause only for a real fork, irreversible / outward-facing actions. **Pushing to `main` is not one of those:** checks pass and a
@@ -247,7 +267,7 @@ fast-forward is what you'd recommend → push, say what landed, `checks.mjs --li
 
 **Delegate site review work to agents by default.** Standing permission (Jonathan, 2026-11-08): when a review is due, spawn the reviewers yourself and at once. Do not ask first and do not wait to be told to use agents. This overrides the Agent tool's "when in doubt, don't spawn" for review work only.
 A review is due when a change is Always-Reviewed ("Fast by default"), Jonathan says "review this" / "Reviewed", it is the Friday check, or it is a sub-agent sweep. This does not change "Fast by default": a change that hits only an ordinary trigger still ships Fast with no reviewer, and a change with no trigger has no trailer.
-- **Parallel by area.** One reviewer per independent area (for example the `coach.js` stop path, the Tuning Simulator, small Fast commits), all spawned in a single message. Use `site-reviewer-deep` for a danger-zone file, 50+ strings or any sub-agent sweep, otherwise `site-reviewer`. Leave `model` and `effort` unset: the agent files pin Fable at medium (Jonathan, 2026-11-09). Only the Friday check overrides them (Opus, `xhigh`).
+- **Parallel by area.** One reviewer per independent area (for example the coach stop path, the Tuning Simulator, small Fast commits), all spawned in a single message. Use `site-reviewer-deep` for a danger-zone file, 50+ strings or any sub-agent sweep, otherwise `site-reviewer`. Leave `model` and `effort` unset: the agent files pin Fable at medium (Jonathan, 2026-11-09). Only the Friday check overrides them (Opus, `xhigh`).
 - **Re-review every fix round with a fresh agent.** After fixes, spawn a new reviewer; never reuse the one that found the bug. On 2026-11-08 every `coach.js` round found a real major bug in the previous round's fixes. Stop after the first round with no BLOCKER or MAJOR finding (severity words as in `.claude/skills/site-sweep/reviewer.md`); fix its MINOR findings with a break-it proof and start no new round for them. At most 3 rounds: if round 3 still finds a BLOCKER or MAJOR, stop and ask Jonathan (AskUserQuestion) whether to ship, revert or keep going.
 - **Fixers.** Fix findings in one file family yourself. Spawn `site-fixer` only when they span two or more independent file families: create its worktree first, spawn it there, then cherry-pick its commits. Before spawning more than 3 agents, read skill `site-sweep`.
 - **Brief each agent with the limits.** Its own worktree only; no push; no `tools/smoke.mjs` or `tools/pm-e2e.mjs`; no Chrome while a smoke run is going (check with the `pgrep` command in step 3, because another session's run counts).
@@ -260,9 +280,9 @@ A review is due when a change is Always-Reviewed ("Fast by default"), Jonathan s
 - Agents that edit work in their own worktree, created first; you cherry-pick their commits. Only one smoke, `pm-e2e.mjs` or other headless-Chrome run at a time on this machine.
 - "Treat agent output as claims" applies to builders as much as to reviewers.
 
-**Triggers.** Review trigger = 3+ files, a danger-zone file (`teacher.js` config plumbing,
-`sw.js` code, `coach.js` detection (the onset and pitch detectors and the grading rules: ratios, gates,
-windows; not a game's screens, wording, tempo controls or count-in), `app.js` save path, `firestore.rules`), or 50+ strings.
+**Triggers.** Review trigger = 3+ files, a danger-zone file (the console's config plumbing: `teacher-config.js`, and a `config/class` reader or writer in any other `teacher-*.js` part,
+`sw.js` code, coach detection: `coach-core.js` and the `ccLoop()` grading lines in `coach-chords.js` (the onset and pitch detectors and the grading rules: ratios, gates,
+windows; not a game's screens, wording, tempo controls or count-in), the save path in `app/save.js`, `firestore.rules`), or 50+ strings.
 Not counted: `CHANGELOG.md`, `sw.js` version lines and its `AUDIO_HASHES` block (both written by `checks.mjs`, never by hand; a new song's audio is not a danger-zone change), a string's Spanish twin, pin-only
 `checks.mjs` edits. A guard on a new default, or extending what a check reads: break-it proof only (paste output). A new KIND of check, or changed logic/matching, is a trigger (`site-reviewer`, high) plus break-it. Reviewer: `site-reviewer-deep`
 for danger-zone / 50+ strings (failing scenario first), else `site-reviewer`. Agent claim → read its quoted lines yourself; agent fix → make it re-derive it on the real code.
@@ -279,7 +299,7 @@ change to `site-reviewer-deep`.
 
 **Effort**: both reviewers are Fable at `medium` during the week (Jonathan, 2026-11-09, after the test in WORKFLOW); the Friday check's reviewers are Opus at `xhigh` (skill `friday-check`); other agents `high`; never `max`. Session: `medium` routine, `high` bug fixes / JS / keyed-MC, `xhigh` danger-zone and sweeps; a tier above the session → ask for `/effort`. Report real numbers, not the premise; name the prior decision a request reverses.
 
-**"Next steps for Power Chord Switch"** → read the `WORKFLOW.md` section "Power Chord Switch: where we stopped" first: what shipped 2026-11-03, the room-noise decision (a stricter strum ratio for Power Chord Switch only: 2.2 / 2.67 from 2026-11-05, lowered to 1.8 / 2.19 on 2026-11-07; the strum what-if numbers on the real takes and how to roll it back are recorded there), the pitch readings saved in takes since 2026-11-05 and the console's Pitch-rule table (read 2026-11-07: the pitch rule was rejected; do not build it), and what is settled. The practice-minutes heartbeat removal is finished.
+**"Next steps for Power Chord Switch"** → read the `WORKFLOW.md` section "Power Chord Switch: where we stopped" first (the game is in `coach-chords.js`, its listening in `coach-core.js`; that section says `coach.js`): what shipped 2026-11-03, the room-noise decision (a stricter strum ratio for Power Chord Switch only: 2.2 / 2.67 from 2026-11-05, lowered to 1.8 / 2.19 on 2026-11-07; the strum what-if numbers on the real takes and how to roll it back are recorded there), the pitch readings saved in takes since 2026-11-05 and the console's Pitch-rule table (read 2026-11-07: the pitch rule was rejected; do not build it), and what is settled. The practice-minutes heartbeat removal is finished.
 
 **Work for another session → give the blurb the first time** (Jonathan, 2026-11-11: "just give me the blurb the first time"). Whenever your answer means another Claude session has to do, avoid or know something (a fix you advise it to make, code it must leave alone, a merge it must pull), end that same message with the text to paste to it, in a code block, complete enough to act on alone. Do not wait to be asked, and give a new one when the facts change.
 
