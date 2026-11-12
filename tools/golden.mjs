@@ -90,6 +90,7 @@
    run it while a smoke.mjs or pm-e2e.mjs run is going. */
 import { createServer } from 'node:http';
 import { spawn } from 'node:child_process';
+import { inflateSync } from 'node:zlib';
 import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, statSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir, platform } from 'node:os';
 import { join, extname, normalize, resolve, dirname, relative } from 'node:path';
@@ -111,6 +112,36 @@ function listFiles(dir, base = dir) {
   }
   return out;
 }
+/* Two screenshots of the same view are not always the same bytes: Chrome draws the soft edge of a letter one
+   colour step lighter or darker from run to run (measured 2026-11-11: 13 to 23 pixels of 897,000, each by 1 of
+   255, on four pictures of an unchanged site). Such a pair counts as the same picture: at most NOISE_PIXELS
+   pixels differ and none by more than NOISE_STEP. A real change is far outside that: one shade on a background
+   colour moves tens of thousands of pixels; a moved or reworded line moves thousands by large steps. The count
+   of pictures accepted this way is printed, never hidden. */
+const NOISE_PIXELS = 100, NOISE_STEP = 2;
+function decodePng(b) {
+  let p = 8, w = 0, h = 0, bd = 0, ct = 0; const idat = [];
+  while (p < b.length) { const len = b.readUInt32BE(p), type = b.toString('ascii', p + 4, p + 8), data = b.subarray(p + 8, p + 8 + len);
+    if (type === 'IHDR') { w = data.readUInt32BE(0); h = data.readUInt32BE(4); bd = data[8]; ct = data[9]; } else if (type === 'IDAT') idat.push(data); p += 12 + len; }
+  const ch = ct === 6 ? 4 : ct === 2 ? 3 : ct === 0 ? 1 : ct === 4 ? 2 : 0;
+  if (!ch || bd !== 8) throw new Error(`a PNG of colour type ${ct}, depth ${bd} is not one this tool reads`);
+  const raw = inflateSync(Buffer.concat(idat)), stride = w * ch, out = Buffer.alloc(h * stride);
+  for (let y = 0; y < h; y++) { const f = raw[y * (stride + 1)], row = raw.subarray(y * (stride + 1) + 1, (y + 1) * (stride + 1));
+    for (let x = 0; x < stride; x++) { const l = x >= ch ? out[y * stride + x - ch] : 0, u = y ? out[(y - 1) * stride + x] : 0, c = (x >= ch && y) ? out[(y - 1) * stride + x - ch] : 0; let v = row[x];
+      if (f === 1) v += l; else if (f === 2) v += u; else if (f === 3) v += (l + u) >> 1; else if (f === 4) { const pp = l + u - c, pa = Math.abs(pp - l), pb = Math.abs(pp - u), pc = Math.abs(pp - c); v += (pa <= pb && pa <= pc) ? l : (pb <= pc ? u : c); }
+      out[y * stride + x] = v & 255; } }
+  return { w, h, ch, out };
+}
+// How two pictures differ: { pixels, step, box } or { sizes } when they are not the same size, or { unreadable }.
+function pictureDiff(x, y) {
+  let A, B; try { A = decodePng(x); B = decodePng(y); } catch (e) { return { unreadable: e.message }; }
+  if (A.w !== B.w || A.h !== B.h) return { sizes: `${A.w}x${A.h} and ${B.w}x${B.h}` };
+  const n = Math.min(A.ch, B.ch, 3); let pixels = 0, step = 0, x0 = Infinity, y0 = Infinity, x1 = -1, y1 = -1;
+  for (let py = 0; py < A.h; py++) for (let px = 0; px < A.w; px++) { let d = 0; for (let c = 0; c < n; c++) d = Math.max(d, Math.abs(A.out[(py * A.w + px) * A.ch + c] - B.out[(py * B.w + px) * B.ch + c]));
+    if (d) { pixels++; if (d > step) step = d; if (px < x0) x0 = px; if (px > x1) x1 = px; if (py < y0) y0 = py; if (py > y1) y1 = py; } }
+  return { pixels, step, total: A.w * A.h, box: pixels ? `x ${x0}-${x1}, y ${y0}-${y1}` : '' };
+}
+
 function compare(a, b) {
   /* A snapshot that stopped half way, or two snapshots of different parts, must never earn a green tick
      (review R1-10). meta.json is written last, so a folder without one is an unfinished run. */
@@ -122,13 +153,17 @@ function compare(a, b) {
   const partial = [ALL_PARTS.filter(p => !ma.parts.includes(p)).map(p => 'no ' + p), ma.langs.length < 2 ? ['English only'] : [], ma.shots ? [] : ['no screenshots']].flat();
   const A = listFiles(a).filter(f => f !== 'meta.json'), B = listFiles(b).filter(f => f !== 'meta.json'), setB = new Set(B), setA = new Set(A);
   const onlyA = A.filter(f => !setB.has(f)), onlyB = B.filter(f => !setA.has(f)), diff = [];
-  let same = 0;
+  let same = 0; const noise = [];
   for (const f of A) {
     if (!setB.has(f)) continue;
     const x = readFileSync(join(a, f)), y = readFileSync(join(b, f));
     if (x.equals(y)) { same++; continue; }
     let where = '';
-    if (!f.endsWith('.png')) {
+    if (f.endsWith('.png')) {
+      const d = pictureDiff(x, y);
+      if (d.pixels !== undefined && d.pixels <= NOISE_PIXELS && d.step <= NOISE_STEP) { same++; noise.push(`${f} (${d.pixels} pixel${d.pixels === 1 ? '' : 's'} by ${d.step}/255)`); continue; }
+      where = d.unreadable ? `could not be read as a picture: ${d.unreadable}` : d.sizes ? `the two pictures are not the same size: ${d.sizes}` : `${d.pixels} of ${d.total} pixels differ, by up to ${d.step}/255, inside ${d.box}`;
+    } else {
       const lx = x.toString('utf8').split('\n'), ly = y.toString('utf8').split('\n');
       let i = 0; while (i < lx.length && i < ly.length && lx[i] === ly[i]) i++;
       let n = 0; for (let j = 0; j < Math.max(lx.length, ly.length); j++) if (lx[j] !== ly[j]) n++;
@@ -137,6 +172,7 @@ function compare(a, b) {
     diff.push({ f, where });
   }
   console.log(`golden: ${A.length} files in A, ${B.length} in B: ${same} identical, ${diff.length} different, ${onlyA.length} only in A, ${onlyB.length} only in B`);
+  if (noise.length) { console.log(`golden: of the identical, ${noise.length} picture${noise.length === 1 ? ' is' : 's are'} the same within drawing noise (at most ${NOISE_PIXELS} pixels, each by at most ${NOISE_STEP}/255):`); for (const n of noise.slice(0, 30)) console.log(`  noise:     ${n}`); if (noise.length > 30) console.log(`  ... and ${noise.length - 30} more`); }
   for (const f of onlyA.slice(0, 30)) console.log(`  only in A: ${f}`);
   for (const f of onlyB.slice(0, 30)) console.log(`  only in B: ${f}`);
   for (const d of diff.slice(0, 40)) console.log(`  differs:   ${d.f}${d.where ? '\n      ' + d.where : ''}`);
