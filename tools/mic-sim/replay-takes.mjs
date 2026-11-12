@@ -39,6 +39,8 @@ import { readFileSync, writeFileSync, mkdtempSync, readdirSync, existsSync } fro
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { join, dirname, resolve } from 'node:path';
+// coach.js may be cut into parts (tools/site-src.mjs): the git search below names the old file (its history before the cut) and every part.
+import { siteParts } from '../site-src.mjs';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { makeSite, SUM_HOP } from './closed-loop.mjs';
@@ -248,7 +250,7 @@ export function askReasons(takes, site){
      "coach.js" matches nothing, so it could never fire; and its pattern matched any MENTION of a name, so a comment-only commit counted as a change.
      Now: from the repo root, and only lines that DEFINE a constant. */
   const git = a => { const r = spawnSync('git', a, { cwd: join(HERE, '..', '..'), encoding: 'utf8' }); return r.status === 0 ? r.stdout.trim() : ''; };
-  const lastListen = git(['log', '-1', '--format=%cs', '-G', '^const (CC_POWER_ONSET_RATIO|CC_POWER_HF_RATIO|CHK_ONSET_FLOOR|CHK_ONSET_RATIO|CHK_HF_FLOOR|CHK_HF_RATIO|COACH_EVENT_TAIL|COACH_ATTACK_SKIP)', '--', 'coach.js']);
+  const lastListen = git(['log', '-1', '--format=%cs', '-G', '^const (CC_POWER_ONSET_RATIO|CC_POWER_HF_RATIO|CHK_ONSET_FLOOR|CHK_ONSET_RATIO|CHK_HF_FLOOR|CHK_HF_RATIO|COACH_EVENT_TAIL|COACH_ATTACK_SKIP)', '--', 'coach.js', ...siteParts('coach.js', join(HERE, '..', '..'))]);
   if (atNow && newest && lastListen && newest < lastListen) why.push(`the newest take is from ${newest}, before the last change to a listening constant in coach.js (${lastListen}): no take shows today's rule at work`);
   return why;
 }
