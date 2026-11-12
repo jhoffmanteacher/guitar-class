@@ -13,9 +13,9 @@
 
      node tools/split-site.mjs                    check tools/split-plan.json against this checkout
                                                   (writes nothing)
-     node tools/split-site.mjs --write --in-place the cut itself, in this checkout: writes the parts (coach.js and
-                                                  teacher.js become their first parts), deletes app.js, and
-                                                  wires the site to load the parts (THE WIRING, below)
+     node tools/split-site.mjs --write --in-place the cut itself, in this checkout: writes the parts, deletes
+                                                  the three whole scripts, and wires the site to load the
+                                                  parts (THE WIRING, below)
      node tools/split-site.mjs --src <dir>        read app.js / coach.js / teacher.js from another folder
      node tools/split-site.mjs --out <dir>        write the parts under another folder (implies --write)
      node tools/split-site.mjs --plan <file>      another plan file
@@ -116,7 +116,8 @@ if (OUT && (OUT === SRC || replaces.length) && !args.includes('--in-place')) { c
      the app code `const COACH_JS_PARTS = ['coach.js'];` and `const TEACHER_JS_PARTS = ['teacher.js'];`
      sw.js        './app.js' in PRECACHE_CRITICAL and in ASSETS, './coach.js' in ASSETS (the console's files
                   are left out of the precache on purpose: checks.mjs SHELL_NOT_PRECACHED)
-     app.js       deleted: no part keeps that name
+     the sources  app.js, coach.js and teacher.js are deleted: no part keeps a script's own name, so a page
+                  loaded before the deploy that asks for coach.js gets a 404 it can retry, never a first part
    Everything is worked out and checked BEFORE a byte is written; one target that is missing or appears twice
    stops the run. tools/site-src.mjs then reads the same declarations, and `node tools/checks.mjs` writes the
    new CACHE_VERSION. */
@@ -159,8 +160,10 @@ for (const r of results) {
 if (!results.length) { console.error('split-site: nothing to do (no source file matched)'); process.exit(1); }
 if (WIRE) {
   for (const [f, text] of wired) writeFileSync(f, text);
-  rmSync(join(OUT, 'app.js'), { force: true });
-  console.log('split-site: wired: index.html loads the app parts, COACH_JS_PARTS and TEACHER_JS_PARTS list theirs, sw.js precaches the app and arcade parts, app.js is deleted. Next: node tools/checks.mjs (it writes the new CACHE_VERSION).');
+  // A source whose name no part keeps is deleted: left beside its parts it would be a stale whole script (tools/site-src.mjs refuses that tree).
+  const gone = results.filter(r => !r.parts.some(p => p.file === r.name)).map(r => r.name);
+  for (const name of gone) rmSync(join(OUT, name), { force: true });
+  console.log(`split-site: wired: index.html loads the app parts, COACH_JS_PARTS and TEACHER_JS_PARTS list theirs, sw.js precaches the app and arcade parts, ${gone.join(', ')} deleted. Next: node tools/checks.mjs (it writes the new CACHE_VERSION).`);
 }
 const replaced = replaces;
 console.log(OUT ? `split-site: ✓ parts written under ${OUT}` + (replaced.length ? ` (${replaced.join(' and ')} now ${replaced.length > 1 ? 'hold' : 'holds'} only the first part; any other source file is left as it is and must be deleted, and the part lists declared, in the same change: see tools/site-src.mjs)` : ' (the source files are left as they are)') : 'split-site: ✓ plan checks out (nothing written; --write or --out <dir> writes the parts)');

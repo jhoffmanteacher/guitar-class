@@ -15102,8 +15102,11 @@ function checkPracticeMinutes(i18nTable) {
 
   // 4. wiring
   const idx = read('index.html') || '';
-  const a = idx.indexOf('<script defer src="app.js">'), b = idx.indexOf('<script defer src="practice-minutes-config.js">'), c = idx.indexOf('<script defer src="practice-minutes.js">');
-  if (!(a >= 0 && b > a && c > b)) fail('index.html must load app.js, then practice-minutes-config.js, then practice-minutes.js (the engine picks up window.PM_HOST from app.js and the config at load)');
+  /* "app.js" here is the whole app script, one file or its parts (tools/site-src.mjs): the LAST of its script
+     tags must come before the practice-minutes pair. A page that loads none of the app's files fails too. */
+  const appTags = siteParts('app.js', ROOT).map(f => idx.indexOf(`<script defer src="${f}">`));
+  const a = appTags.every(i => i >= 0) ? Math.max(...appTags) : -1, b = idx.indexOf('<script defer src="practice-minutes-config.js">'), c = idx.indexOf('<script defer src="practice-minutes.js">');
+  if (!(a >= 0 && b > a && c > b)) fail('index.html must load app.js (every part of it), then practice-minutes-config.js, then practice-minutes.js (the engine picks up window.PM_HOST from app.js and the config at load)');
   if (!/id="pm-progress"/.test(idx)) fail('index.html lost <div id="pm-progress"> (My progress panel host)');
   let tabs = 0;
   for (const f of readdirSync(join(ROOT, 'tabs')).filter(x => x.endsWith('.html'))) {

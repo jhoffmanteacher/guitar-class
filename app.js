@@ -5551,10 +5551,10 @@ document.querySelector('.skip-link')?.addEventListener('click', e => {
   const m = document.getElementById('main-content');
   if(m) m.focus();
 });
-window.addEventListener('hashchange', routeExploreHash);
-/* pushState/go() traversals fire popstate, not hashchange — listen for both
-   (the lastRoutedHash guard above absorbs the browsers that fire both). */
-window.addEventListener('popstate', routeExploreHash);
+/* routeExploreHash is registered for hashchange and popstate at the END of this script (beside the sign-in
+   registration), not here: it calls functions from the whole file (songsClosePanel, openSongsScreen…), and with
+   the file cut into parts a Back button or a # link pressed while the later parts were still loading threw
+   "songsClosePanel is not defined" (tools/slow-load.mjs, 5 of 5 loads; 2026-11-11). */
 
 /* "Practice" nav item: leave whatever explore page or panel is open and
    return to the practice view. Reuses the existing close-all helper. */
@@ -17811,6 +17811,12 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     navigator.serviceWorker.addEventListener('message', e => { if (e.data && e.data.type === 'gc-sw-activated') onNewWorker(); });
   }
 }
+
+/* ── The hash router listens from here on: every function it calls is defined by now ──
+   pushState/go() traversals fire popstate, not hashchange — listen for both (the lastRoutedHash guard in
+   routeExploreHash absorbs the browsers that fire both). */
+window.addEventListener('hashchange', routeExploreHash);
+window.addEventListener('popstate', routeExploreHash);
 
 /* ── Start sign-in: the LAST statement of the app script ──
    Everything above is defined by now, so the callback can use any of it. See the note where this used to be

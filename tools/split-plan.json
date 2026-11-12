@@ -1,5 +1,5 @@
 {
-  "_about": "The cut list for tools/split-site.mjs. A part begins `back` lines above the ONE line that holds `mark`. See that tool's header.",
+  "_about": "The cut list for tools/split-site.mjs. No part keeps its script's own name (coach.js becomes coach-core.js + …): a page loaded before a deploy that still asks for coach.js must get a 404 it can retry, not the first quarter of the script. A part begins `back` lines above the ONE line that holds `mark`. See that tool's header.",
   "app.js": [
     { "file": "app/boot.js" },
     { "file": "app/save.js", "mark": "/* ── Firestore ── */" },
@@ -18,7 +18,7 @@
     { "file": "app/start.js", "mark": "   Service worker — light PWA / offline resilience.", "back": 1 }
   ],
   "coach.js": [
-    { "file": "coach.js" },
+    { "file": "coach-core.js" },
     { "file": "coach-hub.js", "mark": "   NOTE HUNT — fretboard trainer game (lives in the", "back": 1 },
     { "file": "coach-chords.js", "mark": "   CHANGE UP — chord-change game. Pick a chord loop and a tempo; after a", "back": 1 },
     { "file": "coach-ear.js", "mark": "   NAME THAT RIFF — 60-second ear-training sprint over the 4 core songs", "back": 1 },
@@ -27,7 +27,7 @@
     { "file": "coach-more.js", "mark": "   FINGER GYM: THE LADDER — Finger Gym 1's first event (ca-2) as an arcade", "back": 1 }
   ],
   "teacher.js": [
-    { "file": "teacher.js" },
+    { "file": "teacher-core.js" },
     { "file": "teacher-activities.js", "mark": "/* ── Class activities (teacher-only) ── One row per In-Class Activity, dated" },
     { "file": "teacher-songs.js", "mark": "/* ── Songs view (Jonathan, 2026-10-20: \"manage these songs from a different" },
     { "file": "teacher-config.js", "mark": "/* ── Per-student activity-gate clears (Today-first work order, Phase 1) ──" },
