@@ -10,6 +10,8 @@ see `WORKFLOW.md` and the git commit log.
 
 - **Activity names line up on the left.** In the activity list, each date now sits at the right end of its row.
 - **No more "6 steps · 5 done" under activity names**, in the list or on Today's card. Today's card still shows its progress dots.
+- **No arrow at the start of each activity.** Clicking an activity opens it, as before.
+- **Each module's activities fold under its heading.** Only the newest module starts open. Click a module's heading to open or close it.
 
 ## 2026-11-11 — Name the Power Chord shows the whole fretboard and the whole chord
 

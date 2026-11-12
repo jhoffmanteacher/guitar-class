@@ -2228,7 +2228,6 @@ body.rail-collapsed .rail-tools .tool-popup{
   body.print-activity .ca-start-tag,body.print-activity .ca-hero-blurb,
   body.print-activity .ca-hero-side{display:none !important}
   body.print-activity .ca-card-summary{cursor:auto}
-  body.print-activity .ca-card-summary::before{display:none !important}
   /* Every step's body, not just the one the accordion had open on screen. */
   body.print-activity .ca-step-detail{display:block !important}
   body.print-activity .ca-step{break-inside:avoid;page-break-inside:avoid}
@@ -3047,8 +3046,8 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 .ca-card{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--ca-accent);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
 .ca-card-summary{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;list-style:none}
 .ca-card-summary::-webkit-details-marker{display:none}
-.ca-card-summary::before{content:'';width:8px;height:8px;border-right:2px solid var(--text3);border-bottom:2px solid var(--text3);transform:rotate(-45deg);transition:transform .15s;flex-shrink:0}
-.ca-card[open] .ca-card-summary::before{transform:rotate(45deg)}
+/* No caret on a row (Jonathan, 2026-11-12): a click opens the card in its
+   own view, it does not unfold in place. The group folds keep theirs. */
 .ca-card-titlewrap{display:flex;flex-direction:column;flex:1;min-width:0}
 .ca-card-title{font-weight:600}
 /* "#16" ahead of a title (caNumHtml, 2026-10-31) — present but quiet. */
@@ -3471,7 +3470,6 @@ span.tab-count-held{margin-left:4px}
 .ca-start-tag--check{background:var(--blue-bg);color:var(--blue-text)}
 /* The little disclosure triangle reads as redundant next to a full-width
    CTA — the hero's affordance to expand is the button itself. */
-.ca-hero-summary::before{display:none}
 .ca-hero-dots{display:inline-flex;gap:5px;margin-left:10px;vertical-align:middle}
 .ca-chunk-meta > .ca-hero-dots:first-child{margin-left:0}
 .ca-hero-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--border2);display:inline-block}
@@ -3531,6 +3529,15 @@ span.tab-count-held{margin-left:4px}
 .ca-mod-bar b{display:block;height:100%;background:var(--green-text)}
 .ca-mod-count{flex-shrink:0;font-family:var(--font-display);font-weight:400;
   font-size:0.8125rem;color:var(--text2)}
+/* A module's cards fold under its heading (caModFoldHtml, 2026-11-12). The
+   fold carries the gap between modules; the heading inside it starts flush. */
+.ca-mod-fold{margin-top:22px}
+.ca-mod-fold:first-child{margin-top:0}
+.ca-mod-fold > .ca-mod-head{margin-top:0;cursor:pointer;list-style:none}
+.ca-mod-fold:not([open]) > .ca-mod-head{margin-bottom:0}
+.ca-mod-summary::-webkit-details-marker{display:none}
+.ca-mod-summary::before{content:'';width:8px;height:8px;border-right:2px solid var(--text3);border-bottom:2px solid var(--text3);transform:rotate(-45deg);transition:transform .15s;flex-shrink:0}
+.ca-mod-fold[open] > .ca-mod-summary::before{transform:rotate(45deg)}
 
 /* ── The activity gate (Today-first work order, Phase 1) ──
    body.ca-gated is the one switch (app.js applyActivityGate) — a visible,

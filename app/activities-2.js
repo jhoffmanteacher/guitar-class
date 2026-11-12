@@ -1500,8 +1500,9 @@ function renderClassActivities(){
            2026-09-23, round 2). The nested "Older (n)" fold from round 1
            (item 5) is gone with its name; module headings, when any card
            is placed in a module, do the grouping instead. */
+        const restNewest = caNewestModNum(restGroups);
         const body = restGroups.some(g => g.sec.mod)
-          ? restGroups.map(g => headHtml(g.sec) + g.cards.map(a => caActivityCardHtml(swapIn(a))).join('')).join('')
+          ? restGroups.map(g => caModFoldHtml('todo', g.sec, headHtml(g.sec), g.cards.map(a => caActivityCardHtml(swapIn(a))).join(''), g.cards, restNewest, swap)).join('')
           : restFlat.map(a => caActivityCardHtml(swapIn(a))).join('');
         const openInside = restFlat.some(a => a.id === caOpenId || (swap && a.id === swap.from));
         restHtml = caTodoGroupHtml(body, restCount, openInside);
@@ -1576,6 +1577,31 @@ function caModuleHeadHtml(sec, byId){
     <span class="ca-mod-count" data-i18n="ca.moduleProgress" data-i18n-params="${escAttr(JSON.stringify(countParams))}">${escHtml(t('ca.moduleProgress', countParams))}</span>
   </div>`;
 }
+/* Each module's cards fold under its heading (Jonathan, 2026-11-12: "make
+   the modules expandable and collapse all but the most recent module").
+   Only the highest-numbered module in the fold starts open. A student's own
+   open/close sticks across re-renders (caModFoldOpen, keyed by fold and
+   module number), and a fold holding the open card (caOpenId) or a Level
+   up swap is forced open, so a deep link never lands on a hidden card.
+   Cards with no module (Unsorted) are never wrapped. */
+const caModFoldOpen = {};
+function caNewestModNum(groups){
+  return groups.reduce((m, g) => (g.sec.mod && g.sec.mod.num > m) ? g.sec.mod.num : m, -Infinity);
+}
+function caModFoldHtml(fold, sec, headHtml, cardsHtml, cards, newest, swap){
+  if(!sec.mod || !headHtml) return headHtml + cardsHtml;
+  const key = fold + ':' + sec.mod.num;
+  const holdsOpen = cards.some(a => a.id === caOpenId || (swap && a.id === swap.from));
+  const open = holdsOpen || (key in caModFoldOpen ? caModFoldOpen[key] : sec.mod.num === newest);
+  // The heading's own <div> becomes the <summary>: same class, same look.
+  const summary = headHtml.replace(/^<div class="ca-mod-head"/, '<summary class="ca-mod-head ca-mod-summary"').replace(/<\/div>$/, '</summary>');
+  return `<details class="ca-mod-fold" ${open ? 'open' : ''} data-fold-key="${escAttr(key)}" ontoggle="caOnModFoldToggle(this)">${summary}${cardsHtml}</details>`;
+}
+function caOnModFoldToggle(details){
+  caModFoldOpen[details.dataset.foldKey] = details.open;
+  if(!details.open && snipState && details.contains(snipState.card)) snipStop();
+  if(!details.open && pcState && details.contains(pcState.root)) pcStop();
+}
 /* ── "Unfinished activities" — every pending card except the Today hero,
    wrapped in ONE fold (item 2f). OPEN by default (Jonathan, 2026-10-02);
    a student who closes it keeps it closed across re-renders, same sticky
@@ -1604,8 +1630,9 @@ function caFinishedGroupHtml(finishedGroups, finishedFlat, byId, swap){
   // `swap`: a Level up's target showing in its card's slot — see caCardLinkHtml.
   const swapIn = a => (swap && a.id === swap.from) ? byId[swap.to] : a;
   const open = caFinishedOpen || finishedFlat.some(a => a.id === caOpenId || (swap && a.id === swap.from));
+  const newest = caNewestModNum(finishedGroups);
   const body = finishedGroups.some(g => g.sec.mod)
-    ? finishedGroups.map(g => caModuleHeadHtml(g.sec, byId) + g.cards.map(a => caActivityCardHtml(swapIn(a))).join('')).join('')
+    ? finishedGroups.map(g => caModFoldHtml('done', g.sec, caModuleHeadHtml(g.sec, byId), g.cards.map(a => caActivityCardHtml(swapIn(a))).join(''), g.cards, newest, swap)).join('')
     : finishedFlat.map(a => caActivityCardHtml(swapIn(a))).join('');
   return `<details class="ca-finished-group" ${open ? 'open' : ''} ontoggle="caOnFinishedToggle(this)">
     <summary class="ca-finished-summary">${escHtml(t('ca.finishedGroup', {n: finishedFlat.length}))}</summary>
