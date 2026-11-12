@@ -833,11 +833,14 @@ function genWorld(rng, today) {
    THE CHECKS
    ════════════════════════════════════════════════════════════════════════════ */
 const C = { cases: 0, pages: 0, comparisons: 0, changes: 0, writes: 0, threeWay: 0, tabReturns: 0, midRead: 0, freshLoads: 0, landings: 0, gatedSeen: 0, several: 0,
-  marked: 0, cas: 0, newStudent: 0, gamesTabReturn: [0, 0], gamesKeepLast: 0 };
+  marked: 0, cas: 0, newStudent: 0, richRetire: { archive: 0, delete: 0 }, gamesTabReturn: [0, 0], gamesKeepLast: 0 };
 const FAILS = [];
 const TRUTH = {};
 const KIND_COUNT = {};
 const KIND_FLOOR = 15;
+/* Archive must keep, and Delete must wipe, a card's Hidden and Who cells (R11): only a change on a card holding
+   them can show it, so a full run needs a few of each. */
+const RICH_FLOOR = 5;
 const KNOWN_HITS = { K1: 0 };
 const KNOWN_FIRST = {};
 const KNOWN_LISTED = { K1: '2026-11-12' };
@@ -963,6 +966,12 @@ function pickChange(rng, d, today, progs, openUid, slot) {
       const ids = IDS.filter(id => board[id] || mMap(d, 'activityDates')[id]);
       return ids.length ? pick(rng, ids) : anyId();
     };
+    /* A card that holds the cells Archive must keep and Delete must wipe (Hidden, Who, Optional, Play Along): a
+       busy() card is mostly one the open student SEES, so it is rarely Hidden or someone else's (R11). */
+    const rich = () => {
+      const ids = IDS.filter(id => !mMap(d, 'deletedActivities')[id] && (mMap(d, 'hiddenActivities')[id] === true || mMap(d, 'activityStudents')[id] || id in mMap(d, 'optionalActivities') || mMap(d, 'playAlongActivities')[id] === true));
+      return ids.length ? pick(rng, ids) : null;
+    };
     const uid = real && chance(rng, 0.7) ? openUid : pick(rng, UIDS);
     switch (kind) {
       case 'date': return { kind, id: busy(), value: pick(rng, [today, modelAddDays(today, -1), modelAddDays(today, 1), modelAddDays(today, -9), '']) };
@@ -972,8 +981,8 @@ function pickChange(rng, d, today, progs, openUid, slot) {
       case 'optional': { const id = busy(); return { kind, id, on: !mOptionalFlag(ACT[id], d, !!mTicked(d, id)) }; }
       case 'songPlace': { const ids = IDS.filter(id => mIsSongCard(ACT[id])); if (!ids.length) continue; const id = pick(rng, ids); return { kind, id, toSongs: !mOnSongs(ACT[id], d) }; }
       case 'classSong': { const ids = IDS.filter(id => ACT[id].teacherOnly === true); if (!ids.length) continue; const id = pick(rng, ids); return { kind, id, on: mMap(d, 'classSongs')[id] !== true }; }
-      case 'archive': { const id = busy(); return { kind, id, on: !mRetired(ACT[id], d) }; }
-      case 'delete': { const id = busy(); if (mMap(d, 'deletedActivities')[id]) continue; return { kind, id }; }
+      case 'archive': { const id = chance(rng, 0.5) ? (rich() || busy()) : busy(); return { kind, id, on: !mRetired(ACT[id], d) }; }
+      case 'delete': { const id = chance(rng, 0.5) ? (rich() || busy()) : busy(); if (mMap(d, 'deletedActivities')[id]) continue; return { kind, id }; }
       case 'playAlong': { const ids = IDS.filter(id => ACT[id].view === 'card'); const id = pick(rng, ids); return { kind, id, on: mMap(d, 'playAlongActivities')[id] !== true }; }
       case 'clear': {
         const blk = mDocAnswers(d, progs[uid], uid, today).blk;
@@ -1040,6 +1049,7 @@ async function consoleChange(con, store, ch, label, progs, today) {
   const before = store.read('config/class');
   C.changes++;
   KIND_COUNT[ch.kind] = (KIND_COUNT[ch.kind] || 0) + 1;
+  if ((ch.kind === 'delete' || ch.kind === 'archive') && (mMap(before, 'hiddenActivities')[ch.id] === true || mMap(before, 'activityStudents')[ch.id])) C.richRetire[ch.kind]++;
   step(`${label}: console writes`);
   const writesBefore = store.counts.writes;
   try { await con.run(`(async function(){ await ${writerCall(ch)}; })()`); }
@@ -1245,6 +1255,7 @@ for (const i of indices) {
 clearInterval(watchdog);
 if (FULL_RUN) {
   CHANGE_KINDS.forEach(k => { if ((KIND_COUNT[k] || 0) < KIND_FLOOR) { CUR = { seed: SEED, idx: '-', label: 'whole run' }; fail('sampling', `${k} ran ${KIND_COUNT[k] || 0} times, under the floor of ${KIND_FLOOR}`); } });
+  ['archive', 'delete'].forEach(k => { if (C.richRetire[k] < RICH_FLOOR) { CUR = { seed: SEED, idx: '-', label: 'whole run' }; fail('sampling', `${k} hit a Hidden or Who card ${C.richRetire[k]} times, under the floor of ${RICH_FLOOR}`); } });
   Object.keys(KNOWN_HITS).forEach(k => { if (!KNOWN_HITS[k]) { CUR = { seed: SEED, idx: '-', label: 'whole run' }; fail(`KNOWN ${k}`, `matched nothing in a full run — if the fault is fixed, delete its entry (header and KNOWN_HITS) in the same change`); } });
 }
 
@@ -1255,7 +1266,7 @@ out.push(`  ${C.changes} console changes through the real writers (${C.writes} w
 out.push(`  student events through the real save path: ${C.marked} cards marked complete, ${C.cas} CAS picks`);
 out.push(`  config/progress reads served: ${READS.ok} ok, ${READS.fail} failed, ${READS.empty} empty · ${C.comparisons} fields compared`);
 out.push(`  the lock (R6): body.ca-gated seen on ${C.gatedSeen} of ${C.freshLoads} sign-ins; ${C.landings} of ${C.freshLoads} sign-ins had a blocker, i.e. landed on In-Class Activities`);
-out.push(`  changes by kind (floor ${KIND_FLOOR}${FULL_RUN ? '' : ', checked on a full run only'}): ` + CHANGE_KINDS.map(k => `${k} ${KIND_COUNT[k] || 0}`).join(' · '));
+out.push(`  changes by kind (floor ${KIND_FLOOR}${FULL_RUN ? '' : ', checked on a full run only'}): ` + CHANGE_KINDS.map(k => `${k} ${KIND_COUNT[k] || 0}`).join(' · ') + ` (of them on a Hidden or Who card: archive ${C.richRetire.archive}, delete ${C.richRetire.delete})`);
 out.push('  WHEN a console change reaches a student (R12) — passed / run, by change and moment:');
 const COLS = ['open page, tab not back: old answer', 'during the tab-return read: old answer', 'tab back, read ok: new answer', 'tab back, read failed: old answer', 'fresh sign-in: rules for its read'];
 out.push('    ' + 'change'.padEnd(14) + ['open, not back', 'mid-read', 'back, ok read', 'back, failed', 'fresh'].map(x => x.padStart(15)).join(''));
