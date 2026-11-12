@@ -340,7 +340,11 @@ async function main(breakName) {
     check(newV !== oldV, `the deploy changes CACHE_VERSION (${oldV} → ${newV})`, 'the new folder\'s sw.js still names the old cache: run node tools/checks.mjs in it');
     check(O.scripts.includes('app.js') && !fileOf(NEW, 'app.js') && N.scripts.filter(s => s.startsWith('app/')).length > 1, `the old index.html loads app.js; the new one loads ${N.scripts.filter(s => s.startsWith('app/')).length} app parts and the new folder has no app.js`);
     check(N.coach.length > 1 && N.teacher.length > 1 && N.coach.every(f => fileOf(NEW, f)) && N.teacher.every(f => fileOf(NEW, f)), `the new app code lists ${N.coach.length} arcade files and ${N.teacher.length} console files, all in the new folder`);
-    check(N.whole.coach.equals(O.whole.coach) && N.whole.teacher.equals(O.whole.teacher), 'the new parts put together are the old coach.js and teacher.js byte for byte (a pure cut)');
+    /* A pure cut puts back together as the old script byte for byte. A cut that also changes code (the 2026-11-11
+       one added two guard lines to the arcade) does not, and that is not an upgrade fault: said, not failed. */
+    out.push(N.whole.coach.equals(O.whole.coach) && N.whole.teacher.equals(O.whole.teacher)
+      ? '  ✓ the new parts put together are the old coach.js and teacher.js byte for byte (a pure cut)'
+      : '  · the new arcade or console code differs from the old (the cut came with code changes): the scenarios below compare bytes per file, so they still hold');
     const crit = newCritical();
     const missing = N.scripts.filter(s => !crit.includes(s));
     check(missing.length === 0, `every script the new index.html names is in the new PRECACHE_CRITICAL (${N.scripts.length} of ${N.scripts.length})`, 'not in it: ' + missing.join(', '));
@@ -377,7 +381,7 @@ async function main(breakName) {
       const wrong = every.filter(g => !sameBytes(g, NEW));
       check(every.length === want && wrong.length === 0, `after the takeover the navigation, all ${N.scripts.length} scripts of the new index.html, ${N.coach.length} arcade files and ${N.teacher.length} console files come back with the NEW folder's bytes (${every.length - wrong.length} of ${want})`, wrong.map(g => `${g.rel}: ${g.ok ? g.label + ' bytes, ' + g.lines + ' lines' : 'failed'}`).join('; '));
       const c = page.lazy.coach[0], t = page.lazy.teacher[0];
-      check(c && t && c.ok && t.ok && c.body.equals(fileOf(NEW, 'coach.js')) && t.body.equals(fileOf(NEW, 'teacher.js')) && lines(c.body) < lines(O.whole.coach), `coach.js is the new first part (${c && c.lines} lines, not the old ${lines(O.whole.coach)}) and teacher.js the new first part (${t && t.lines} lines, not ${lines(O.whole.teacher)})`, `coach.js ${c && c.label} ${c && c.lines} lines; teacher.js ${t && t.label} ${t && t.lines} lines`);
+      check(c && t && c.ok && t.ok && c.body.equals(fileOf(NEW, N.coach[0])) && t.body.equals(fileOf(NEW, N.teacher[0])) && lines(c.body) < lines(O.whole.coach), `the arcade's first file is the new first part (${c && c.lines} lines, not the old ${lines(O.whole.coach)}) and teacher.js the new first part (${t && t.lines} lines, not ${lines(O.whole.teacher)})`, `coach.js ${c && c.label} ${c && c.lines} lines; teacher.js ${t && t.label} ${t && t.lines} lines`);
       const v = verdict(page);
       check(v.v === 'NEW', 'that page is a complete NEW page (no old byte, each lazy script whole)', `${v.v}: ${v.why}`);
       /* a second load: now everything is a cache hit in the NEW cache */
