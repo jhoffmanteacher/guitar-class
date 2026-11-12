@@ -351,14 +351,16 @@ try {
     events.push({ step: name, kind: 'never-settled', text: 'the view was still changing after 12 s' });
     return prev;
   };
-  /* A screenshot is kept once two taken 150 ms apart are the same picture: a view whose HTML has settled can
-     still be half way through a fade or a scroll. After 3 s it is kept as it is and noted in errors.json. */
+  /* A screenshot is kept once it has stopped changing: a view whose HTML has settled can still be half way
+     through a fade, a scroll or a drawing. After 8 s it is kept as it is and noted in errors.json. */
   const shot = async (rel) => {
     // Running animations are put at a fixed point first: one that ends is jumped to its end, one that loops is held at its start.
     try { await page.evalJs(`(document.getAnimations ? document.getAnimations() : []).forEach(a => { try { a.finish(); } catch (e) { try { a.currentTime = 0; a.pause(); } catch (e2) {} } }); 1`); } catch { /* the page is between two documents */ }
-    let prev = (await page.send('Page.captureScreenshot', { format: 'png' })).data;
-    for (let i = 0; i < 20; i++) { await sleep(150); const cur = (await page.send('Page.captureScreenshot', { format: 'png' })).data; if (cur === prev) { prev = cur; put(rel, Buffer.from(prev, 'base64')); count('shots'); return; } prev = cur; }
-    events.push({ step: 'shot ' + rel, kind: 'never-settled', text: 'the picture was still changing after 3 s' });
+    /* Four pictures in a row, 200 ms apart, must be the same (two in a row passed while a lyric sheet's PDF page
+       or a song page's figures were still being drawn: 6 pictures of 272 differed between two runs). Up to 8 s. */
+    let prev = (await page.send('Page.captureScreenshot', { format: 'png' })).data, same = 0;
+    for (let i = 0; i < 40; i++) { await sleep(200); const cur = (await page.send('Page.captureScreenshot', { format: 'png' })).data; if (cur === prev) { if (++same >= 3) { put(rel, Buffer.from(prev, 'base64')); count('shots'); return; } } else same = 0; prev = cur; }
+    events.push({ step: 'shot ' + rel, kind: 'never-settled', text: 'the picture was still changing after 8 s' });
     put(rel, Buffer.from(prev, 'base64')); count('shots');
   };
 
