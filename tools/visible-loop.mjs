@@ -1026,6 +1026,7 @@ async function runCase(idx) {
   step(`case ${idx}: console booted`);
   /* A fresh sign-in on this Chromebook, judged against the model; three-way when both reads succeeded. */
   const fresh = async (uid, cMode, pMode, special, label) => {
+    step(`${label}: signing in ${uid}${special ? ' (' + special + ')' : ''}, config ${cMode}, progress ${pMode}`);
     const page = await bootStudent(device, store, uid, cMode, pMode, special);
     C.freshLoads++;
     const d = store.read('config/class');
@@ -1033,7 +1034,6 @@ async function runCase(idx) {
     if (special === 'dev') st = { S: Object.assign(studentBase(uid, progs[uid] || {}, true, 'dev', today), { doc: {}, who: { mode: 'live' }, override: '', openThrough: 0, games: true }), open: {} };
     else st = mPageState(device, d || {}, uid, cMode === 'ok' && d ? 'ok' : (cMode === 'ok' ? 'empty' : cMode), null, studentBase(uid, progs[uid] || {}, pMode === 'ok', special, today));
     const got = probeStudent(page);
-    step(`${label}: fresh ${uid}${special ? ' (' + special + ')' : ''}, config ${cMode}, progress ${pMode}`);
     const ok = judgeStudent(`${label}: fresh sign-in ${uid}${special ? ' (' + special + ')' : ''} (config read ${cMode}, progress ${pMode})`, got, st.S, st.open);
     if (got.gated) C.gatedSeen++;
     if (got.blk.length) C.landings++;
@@ -1112,6 +1112,7 @@ async function runCase(idx) {
     const tMode = special === 'dev' ? 'ok' : readMode();
     page.client.plan.config.push({ mode: tMode, hold: true });
     const sigBefore = got.sig;
+    step(`${label}: tab comes back (read ${tMode})`);
     page.ctx.document.hidden = false;
     (page.docListeners.visibilitychange || []).forEach(fn => fn({}));
     await flush();
