@@ -32,6 +32,9 @@
      (applyGamesAccess, applyActivityGate) with #app shown. A tab return fires the real visibilitychange listener.
      Probed: caIsVisible, caIsOptional, caBlockers, caIsPlayAlongOnly, caNumber, periodOverride,
      moduleOpenThrough, gamesAccessOn, the Games button's display, body.ca-gated, classConfigSignature().
+     Student events through the real code: marking a card complete (onClassActivityChange, the data half of
+     caToggleComplete, then the real flushSave() that a tab hide runs) and picking CAS (periodPick('CAS')); the
+     progress doc they write is checked, and the console re-reads the roster (teacherFetchStudents) after each.
    * Console: the same base scripts with ?teacher=true, then the whole console (siteSource('teacher.js')).
      Boot = the real teacherFetchStudents() + loadTeacherClassConfig() + teacherApplyRosterFilter(). Changes go
      through the real writers: teacherSetActivityDate, teacherSetActivityHidden, teacherSetActivityStudent,
@@ -51,81 +54,118 @@
      semantics (Firestore's documented set-with-merge): nested maps merge key by key, FieldValue.delete() removes a
      key, arrays and scalars replace, an empty map in a merge replaces (as checks.mjs 1bw / 1bo encode it).
    * The clock: every page's Date is a subclass whose `new Date()` / `Date.now()` is the virtual instant. The
-     process runs in America/Los_Angeles (TZ), so daylight saving is real.
+     process runs in America/Los_Angeles (TZ) and the day list holds PST and PDT instants on both sides of
+     midnight (and the two daylight-saving changes), so a fixed-offset day is caught in either half of the year.
    * localStorage: one object per Chromebook, shared by every page loaded on it (uid B after uid A). A sign-out or
      another student's sign-in reloads the page (app/start.js), so each sign-in is a fresh page here.
    * The DOM: a stub. #class-activities-screen and #songs-screen are hidden (the page renders nothing); timers
      never fire; alert() is recorded (any alert in this single-console world is a failure).
-   * Names: three made-up students (stu-alpha / -bravo / -charlie, "Test Student A/B/C", @example.test), a
-     teacher account teacher@example.test, and two special users: 'dev-user' (dev bypass) and a student signed in
-     with the teacher's email (a gate previewer).
+   * Names: three made-up students (stu-alpha / -bravo / -charlie, "Test Student A/B/C", @example.test), a new
+     student with no progress doc yet (stu-delta), a teacher account teacher@example.test, and two special users:
+     'dev-user' (dev bypass) and a student signed in with the teacher's email (a gate previewer).
+   * Rounds: one to three console changes land before the open page's tab comes back.
 
    ── NOT modelled ──
-   The two-console write race (tools/two-consoles-loop.mjs); screens and renders (only predicates and the
+   The rail repaint after an Open-through change (repaintModuleGate needs a rendered rail; only the value is
+   compared);
+   the two-console write race (tools/two-consoles-loop.mjs); screens and renders (only predicates and the
    values they read); the Journey "sentHere" exemption (page-level, and unreachable while JOURNEY_GATE_LOCKS is
    false); Today's activities (check 1cq); pins; renames; the legacy activityNumbers overrides (generated empty);
    Pause; the Firestore listener-free console reading another console's writes; a failed read by the console
    (its views refuse to draw); the dev bypass's boot path beyond "no reads at boot".
 
    ── The independent answer: the RULES the model is written from (it never calls the code under test) ──
-   R1  Visible, in this order (skill in-class-activities, "Activity order, numbering and the board"; comments on
-       caIsVisible, app/activities-2.js): archived or deleted -> no; not on the board -> no; Hidden -> no; given
-       to other students only (Who) -> no; dev bypass -> yes; else the release date has arrived (local calendar
-       day, 'YYYY-MM-DD' <= today). No date -> no.
+   Each rule names its source. "Taken from the code, no prose" marks the few details no comment or skill states;
+   those are the model's weakest points, and a change there needs a word from Jonathan, not just a green run.
+   R1  Visible, in this order (skill in-class-activities, "Activity order, numbering and the board": "Not
+       archived/deleted + assigned + not Hidden + given to this student + dated-and-arrived is the full rule, in
+       that order; the dev bypass skips only the date"; caIsVisible's comment): archived or deleted -> no; not on
+       the board -> no; Hidden -> no; given to other students only (Who) -> no; dev bypass -> yes; else the release
+       date has arrived ('YYYY-MM-DD' <= today, "local calendar day", caIsVisible's comment). No date -> no.
    R2  "On the board": a seeded board (activityBoardSeeded true) assigns exactly the cards with a board entry; an
-       UNSEEDED board assigns every card (caIsVisible's comment: "never lock on a guess"). A card on the Songs
-       page (songLibrary true / its own `library: true`, the console's map winning) or a teacher-only card not
-       moved to Class activities (classSongs) is never assigned, whatever row it left (skill, Songs table;
-       teacher-console.md "Visibility must match the students'"). A song card = a non-check card with a `library`
-       field that is not tied to a Journey page, a whole-song card or a lyric sheet (caIsSongCard's comment).
-   R3  Who: a card whose activityStudents entry ticks anyone (true) is only for the ticked uids; none ticked =
-       whole class (caReduceForMe's comment).
-   R4  Optional: CAS (effective period = periodOverrides[uid] || the student's own answer) -> every card; else the
+       UNSEEDED board assigns every card (caIsVisible's comment: "never lock on a guess"). A Songs-page card and a
+       teacher-only card not moved to Class activities are never assigned, whatever row they left (skill, Songs
+       table: "Off the board"; teacher-console.md "a card moved to Songs or Teacher view songs keeps its board
+       slot"). Which cards are songs (skill, Songs table): "any non-check card with a `library` field ... is a
+       song"; the console's songLibrary map "wins over the field"; never a card tied to a Song Journey page, a
+       whole-song card or a lyric sheet (the comment above caIsSongCard: "anything tied to a Song Journey page, a
+       whole-song card or a lyric sheet is out").
+   R3  Who (the comment above caReduceForMe; skill "Individual activities" via the board's Who picker): a card
+       whose activityStudents entry ticks anyone (true) is only for the ticked uids; none ticked = whole class.
+   R4  Optional (skill "Optional activities" and "CAS students"; caOptionalByDefault's comment, 2026-10-14): a CAS
+       student (effective period = the teacher's override || the student's own answer) -> every card; else the
        console flag true/false wins; else Optional by default when the data says `optional: true` or the card has
-       a Who list (caOptionalByDefault's comment, 2026-10-14). The console and the Journey pages fold CAS into
-       their blocker rule instead (skill "CAS students").
-   R5  Blocks = visible, not optional, not done (classActivities[id] === true), not cleared for this uid
-       (activityClears[uid][id]). Never for a gate previewer (dev bypass, the teacher's email) and never after a
-       failed progress load ("never lock on a guess").
+       a Who list. The console and the Journey pages fold CAS into their blocker rule instead.
+   R5  Blocks = visible, not optional, not done (classActivities[id] === true), not cleared for this uid (skill
+       "The gate, as it runs when switched on"). Never for a gate previewer (dev bypass, the teacher's email) and
+       never after a failed progress load ("never lock on a guess"). A card the student marks complete stops
+       blocking at once, and picking CAS lifts every blocker (skill: "Picking CAS re-runs applyActivityGate()").
+       A student with no progress doc yet is gated like anyone else (skill: "A student who hasn't picked a period
+       yet is gated like anyone else"; save.js: "A brand-new student (no doc) and a failed read start from the
+       same empty state" — the empty STATE, not the failed-load flag).
    R6  The LOCK is off (Jonathan 2026-10-07, CA_GATE_LOCKS / JOURNEY_GATE_LOCKS): body.ca-gated is never set.
        Blocks still decide who LANDS on In-Class Activities at sign-in (counted, not judged).
-   R7  Play Along now (skill): a practice card (view 'card') with the flag, assigned, not Hidden, not retired, and
-       not already visible is reachable from Songs only; a Songs-page song is reachable when not Hidden and not
-       retired and not visible. The flag never makes a card visible or blocking.
-   R8  #N (caBoardOrder's comment; skill): Unsorted (module 0) first, then MODULE_MANIFEST order, then unknown
-       modules in numeric order; inside a module by pos, then the shipped `number`, then the id's number; 1..N over
-       the non-check, non-retired cards with no gaps. Unseeded: one Unsorted run in the shipped order.
-   R9  A failed or empty config read (save.js comments on every cached field; "A student who has NEVER loaded
-       config sees no activities"): the whole-class fields (dates, board, hidden, retired, clears, optional, Play
-       Along, songs, classSongs) come from the last successful read ON THIS CHROMEBOOK; the per-uid fields
-       (period override, Open through, the Who cards) carry the uid: the same uid gets its cached value, another
-       uid does not inherit it (save.js:258-259), and gets every cached Who card read as someone else's
-       (save.js:331-337). Games: a failed read at sign-in leaves games ON (save.js:225-226).
+   R7  Play Along now (skill; caIsPlayAlongOnly's comment: "The switch stands in for the RELEASE DATE and nothing
+       else"): a practice card (view 'card') with the flag that would be visible but for its date — assigned, not
+       Hidden, not retired, given to this student — and is not already visible is reachable from Songs only. A
+       Songs-page song is reachable when not Hidden, not retired and not visible ("Who does not hide it"). The
+       flag never makes a card visible or blocking.
+   R8  #N (caBoardOrder's comment; skill "Activity order, numbering and the board"): Unsorted (module 0) first,
+       then MODULE_MANIFEST order, then modules the manifest does not know in numeric order ("lands after the known
+       modules, in numeric order"); inside a module by pos, then the legacy number, then the id's number (the
+       comment in teacherBoardModuleIds: "pos, then the legacy number, then the id"); 1..N over the non-check,
+       non-retired cards with no gaps. Unseeded: everything in one Unsorted run "in the order students are reading
+       today" — the shipped `number`, then the id (that tie-break: taken from the code, no prose).
+   R9  A failed or empty config read (save.js comments on each cached field; restoreClassConfigFromCache's
+       comment: "A student who has NEVER loaded config sees no activities"):
+       * the whole-class fields (dates, board, hidden, retired, clears, optional, Play Along, songs, classSongs)
+         come from the last successful read on this Chromebook ("falls back to the last successfully loaded copy
+         in localStorage");
+       * the period override and Open through are the student's OWN last successful read: a CAS override "must
+         not fail open to ''" (save.js:254-259), Open through "fails open from cache ... never reset to 0 on a
+         failed read" (skill), and "on a shared Chromebook the next student must not inherit the last one's"
+         (save.js:258-259). A student with no read of their own gets none / 0;
+       * the Who cards: "the cache carries the uid ... the next student gets every individual card read as someone
+         else's" (save.js:331-337). For the student whose own read the cache holds, its cached answers (that exact
+         shape: taken from the code, no prose);
+       * games: a failed read at SIGN-IN leaves games on (the declared default); a failed tab-return read keeps the
+         last value (settled 2026-11-12: intended; the save.js:225 docstring "leave games ON" is stale).
    R10 Games: a per-student override wins, else the class switch, else ON (save.js:220-226). Open through: only a
-       whole number 2..12 counts (save.js:262-263). Period: the override, else none.
+       whole number 2..12 counts (save.js:262-263; skill "N = 2..12"). Period: the override, else none.
    R11 A console writer changes exactly the cells it names (each writer's comment; skill "Archive / Delete",
        "Per-student clears", "Optional activities", "Play Along now", Songs table), bumps configVersion by one, and
        its in-memory copy then equals the doc. Board moves re-pack pos 1..N in the module left and the module
-       joined, archived rows keeping their slot (skill: "re-packs pos 1..N in both"); Delete also takes the board
-       entry, date, rename, clears, pin, Optional and Play Along flags off; Archive keeps all but the pin; Clear
-       all clears exactly the student's current blockers ("Recomputed at click time").
+       joined, archived rows keeping their slot (skill: "re-packs pos 1..N in both"; "An archived card keeps its
+       slot"); a card moved to position k lands at min(k, N) and Songs-page / teacher-only rows are left as they
+       are (both taken from the code, no prose). Delete takes off the board entry, date, rename, clears, pin,
+       Optional and Play Along flags, Hidden, Who and the legacy number (skill: "Delete wipes all of that"; the
+       confirm text: "it comes back blank"; settled 2026-11-12). Archive keeps all but the pin. Clear all clears
+       exactly the student's current blockers ("Recomputed at click time").
    R12 WHEN a change reaches a student (truth table, printed at the end): loadClassConfig "reruns on every
-       tab-visibility return" (save.js:228-231), "A teacher's console clear (or a new activity going live) has to
-       reach a student tab that's just sitting open" (activities-2.js:1208-1212), games on tab return
-       (save.js:367-370), Open through repaints the rail (skill). So: an open page does not change before its tab
-       comes back; after a successful tab-return read it shows the new answer (and its classConfigSignature moves
-       whenever that answer moved, or the open screen is not repainted); after a FAILED tab-return read it keeps
-       the old answer; a fresh load shows the new answer. During the read the page keeps showing the last known
-       answer (save.js:228-238, the blank window found 2026-09-26).
-   Cells the prose does not settle are reported as NOT STATED with what the code does, never judged:
-   NS-slot  a uid whose own earlier successful read was overwritten in the Chromebook's per-uid cache by another
-            uid, then a failed read (R9's "must not fail open to ''" vs "must not inherit the last one's").
-   NS-games a failed tab-return read after games were turned off ("leave games ON" vs keep the last value).
-   NS-pao   Play Along now on a card given to other students only (R7 names no Who rule).
-   NS-del   whether Delete also clears Hidden, Who and the legacy number (the prose lists the others).
-   NS-jny   when an already-open Journey page picks up a change (no prose; measured: it decides once per load).
-   And one wording conflict, measured: teacher-config.js tells the teacher games change "the next time a student
-   loads the site", save.js applies them on tab return.
+       tab-visibility return" (save.js:228-231); "A teacher's console clear (or a new activity going live) has to
+       reach a student tab that's just sitting open" (activities-2.js:1208-1212); games on tab return
+       (save.js:367-370). So: an open page does not change before its tab comes back; after a successful
+       tab-return read it shows the answer for the doc as it is then, however many changes landed meanwhile (and
+       its classConfigSignature moves whenever that answer moved, or the open screen is not repainted); after a
+       FAILED tab-return read it keeps the old answer; a fresh load shows the new answer. During the read the page
+       keeps showing the last known answer (save.js:228-238, the blank window found 2026-09-26).
+   Still not stated, measured only: when an already-open Journey page picks up a change (journey.js has no
+   tab-return re-read; it decides once per load, and the lock is off).
+   Stale text, reported in one line each, not judged: the save.js:225 games docstring (R9) and the console's
+   games note, teacher-config.js:420, "the next time a student loads the site" (the code applies games on tab
+   return; settled 2026-11-12: the console text is stale).
+
+   ── KNOWN: faults this tool found, listed for Jonathan, not fixed ──
+   A contradiction that matches a KNOWN entry exactly — the same rule, the same shape of sequence, and the code's
+   answer equal to the one the entry describes, field for field — prints as "known, listed <date>" and does not
+   fail. Anything else fails. A full run (no --case, 60 cases or more) in which an entry matched nothing FAILS,
+   so a fixed fault cannot leave its entry behind: delete the entry in the same change as the fix.
+   K1 (listed 2026-11-12) R9 own last read. Shape: a fresh sign-in whose config read fails or comes back empty,
+      on a Chromebook whose per-uid cache now holds ANOTHER student, by a student who read OK on it earlier with
+      a different period override or Open through. The code gives no override and Open through 0 (the cache
+      keeps one student; restoreClassConfigFromCache restores only a matching uid). What the student sees: a
+      teacher-set CAS student loses the exemption (cards lose the Optional tag, lands on In-Class Activities); a
+      student corrected away from CAS becomes exempt; modules opened by Open through lock again.
 
    --root wants a folder holding index.html, app/, the teacher-*.js parts, class-activities.js, config-main.js,
    i18n.js, guitar-diagrams.js and tabs/journey.js (a full checkout works).
@@ -305,13 +345,13 @@ function mStudentBlockers(S) {
   const clears = mMap(mMap(S.doc, 'activityClears'), S.uid);
   return ACTS.filter(a => mVisible(a, S) && !mStudentOptional(a, S) && S.done[a.id] !== true && clears[a.id] !== true).map(a => a.id);
 }
-function mPlayAlongOnly(a, S, paoWho) {
+function mPlayAlongOnly(a, S) {
   const d = S.doc;
   const hidden = mMap(d, 'hiddenActivities')[a.id] === true;
   if (mIsSongCard(a) && mOnSongs(a, d)) return !mRetired(a, d) && !hidden && !mVisible(a, S);
   if (a.view !== 'card' || mMap(d, 'playAlongActivities')[a.id] !== true) return false;
   if (mRetired(a, d) || hidden) return false;
-  if (paoWho && !mForMe(a, S)) return false;
+  if (!mForMe(a, S)) return false;
   if (!mAssigned(a, d)) return false;
   return !mVisible(a, S);
 }
@@ -350,13 +390,13 @@ function mReduceWho(d, uid) {
   IDS.forEach(id => { const t = mTicked(d, id); if (t) out[id] = t.includes(uid); });
   return out;
 }
-/* What the student page should answer, from S. paoWho: R7 with or without a Who rule (NS-pao). */
-function mStudentAnswers(S, paoWho) {
+/* What the student page should answer, from S. */
+function mStudentAnswers(S) {
   return {
     vis: ACTS.filter(a => mVisible(a, S)).map(a => a.id),
     opt: ACTS.filter(a => mStudentOptional(a, S)).map(a => a.id),
     blk: mStudentBlockers(S),
-    pao: ACTS.filter(a => mPlayAlongOnly(a, S, paoWho)).map(a => a.id),
+    pao: ACTS.filter(a => mPlayAlongOnly(a, S)).map(a => a.id),
     num: mNumbers(S.doc),
     period: S.override, openThrough: S.openThrough, games: S.games,
     gamesBtn: S.games ? '' : 'none', gated: false,
@@ -379,45 +419,29 @@ function mDeviceRead(device, d, uid) {
   device.slot = { uid, override: mMap(d, 'periodOverrides')[uid] || '', openThrough: mOpenThrough(d, uid), who: mReduceWho(d, uid) };
   device.own[uid] = { override: device.slot.override, openThrough: device.slot.openThrough };
 }
-/* A student page's state after a load or a tab return. mode: 'ok' | 'fail' | 'empty'; prev: the page's state
-   before (null for a fresh page). Returns { S, variants } — variants lists the readings the prose leaves open. */
+/* A student page's state after a load or a tab return (R9). mode: 'ok' | 'fail' | 'empty'; prev: the page's
+   state before (null for a fresh page). Returns { S, known } — known: the KNOWN entries whose shape this state
+   has, each with the state the entry says the code produces instead. */
 function mPageState(device, d, uid, mode, prev, base) {
   const S = Object.assign({}, base, { uid });
   if (mode === 'ok') {
     mDeviceRead(device, d, uid);
     Object.assign(S, { doc: clone(d), who: { mode: 'live' }, override: mMap(d, 'periodOverrides')[uid] || '', openThrough: mOpenThrough(d, uid), games: mGames(d, uid) });
-    return { S, open: {} };
+    return { S, known: [] };
   }
-  const open = {};
+  const known = [];
   S.doc = device.wc ? clone(device.wc) : (prev ? prev.doc : {});
+  const own = device.own[uid];
+  S.override = own ? own.override : (prev ? prev.override : '');
+  S.openThrough = own ? own.openThrough : (prev ? prev.openThrough : 0);
   const slot = device.slot;
-  if (slot && slot.uid === uid) {
-    S.override = slot.override; S.openThrough = slot.openThrough; S.who = { mode: 'mine', map: clone(slot.who) };
-  } else {
-    S.override = prev ? prev.override : '';
-    S.openThrough = prev ? prev.openThrough : 0;
-    S.who = slot ? { mode: 'other', map: clone(slot.who) } : (prev ? prev.who : { mode: 'live' });
-    const own = device.own[uid];
-    if (!prev && own && (own.override !== S.override || own.openThrough !== S.openThrough)) open.slot = { override: own.override, openThrough: own.openThrough };
+  if (slot && slot.uid === uid) S.who = { mode: 'mine', map: clone(slot.who) };
+  else S.who = slot ? { mode: 'other', map: clone(slot.who) } : (prev ? prev.who : { mode: 'live' });
+  S.games = prev ? prev.games : true;
+  if (!prev && own && slot && slot.uid !== uid && (own.override !== '' || own.openThrough !== 0)) {
+    known.push({ id: 'K1', S: Object.assign({}, S, { override: '', openThrough: 0 }) });
   }
-  if (!prev) S.games = true;
-  else { S.games = prev.games; if (prev.games === false) open.games = true; }
-  return { S, open };
-}
-/* Every reading of the open cells; the code must match at least one, and is judged only when they all agree. */
-function mReadings(S, open) {
-  const out = [];
-  for (const slotOwn of open.slot ? [false, true] : [false]) {
-    for (const gamesOn of open.games ? [false, true] : [false]) {
-      for (const paoWho of [true, false]) {
-        const s = Object.assign({}, S);
-        if (slotOwn) { s.override = open.slot.override; s.openThrough = open.slot.openThrough; }
-        if (gamesOn) s.games = true;
-        out.push({ tags: [open.slot ? (slotOwn ? 'NS-slot:own last read' : 'NS-slot:default') : '', open.games ? (gamesOn ? 'NS-games:on' : 'NS-games:keep last') : '', paoWho ? 'NS-pao:Who applies' : 'NS-pao:Who ignored'].filter(Boolean), ans: mStudentAnswers(s, paoWho) });
-      }
-    }
-  }
-  return out;
+  return { S, known };
 }
 /* The doc a console change should leave (R11). Returns { doc, dontCare: [paths], effect(d) -> problem|null }. */
 function mModuleRun(d, module, board) {
@@ -455,8 +479,7 @@ function mExpectChange(d0, ch, progs, today) {
     }
     case 'delete': {
       m('deletedActivities')[ch.id] = true;
-      ['archivedActivities', 'optionalActivities', 'playAlongActivities', 'activityDates', 'activityTitles'].forEach(k => { delete m(k)[ch.id]; });
-      ['hiddenActivities.', 'activityStudents.', 'activityNumbers.'].forEach(p => dontCare.push(p + ch.id));
+      ['archivedActivities', 'optionalActivities', 'playAlongActivities', 'activityDates', 'activityTitles', 'hiddenActivities', 'activityStudents', 'activityNumbers'].forEach(k => { delete m(k)[ch.id]; });
       const board = m('activityBoard');
       if (board[ch.id]) {
         const from = Number(board[ch.id].module) || 0;
@@ -564,6 +587,8 @@ function makeClient(store) {
         if (!hold) return Promise.resolve().then(settle);
         return new Promise(res => { client.held.push(() => res(settle())); });
       },
+      /* A student's own save (flushSave, swap45Commit): set with merge, as Firestore documents it. */
+      set(data, opts) { return Promise.resolve().then(() => store.write(path, data, opts)); },
     };
   };
   client.collection = coll => ({
@@ -709,6 +734,8 @@ function probeJourney(page, cfg, prog, uid) {
    THE WORLD GENERATOR
    ════════════════════════════════════════════════════════════════════════════ */
 const UIDS = ['stu-alpha', 'stu-bravo', 'stu-charlie'];
+/* A student who has never saved anything: no progress doc until their first save. */
+const NEW_UID = 'stu-delta';
 const NAMES = { 'stu-alpha': 'Test Student A', 'stu-bravo': 'Test Student B', 'stu-charlie': 'Test Student C' };
 const LA = (y, mo, d, h, mi, s, offH) => Date.UTC(y, mo - 1, d, h + offH, mi, s);
 const DAYS = [
@@ -723,6 +750,10 @@ const DAYS = [
   ['DST starts: 03:30 PDT', LA(2026, 3, 8, 3, 30, 0, 7)],
   ['DST eve 23:59 PST', LA(2026, 3, 7, 23, 59, 0, 8)],
   ['new year 00:00:01', LA(2027, 1, 1, 0, 0, 1, 8)],
+  ['PDT just after midnight 00:15', LA(2026, 5, 10, 0, 15, 0, 7)],
+  ['PDT late evening 23:30', LA(2026, 9, 15, 23, 30, 0, 7)],
+  ['PDT first night 00:10', LA(2026, 3, 9, 0, 10, 0, 7)],
+  ['PDT month end 23:59', LA(2026, 6, 30, 23, 59, 0, 7)],
 ];
 const pick = (rng, arr) => arr[Math.floor(rng() * arr.length)];
 const chance = (rng, p) => rng() < p;
@@ -731,7 +762,7 @@ function genWorld(rng, today) {
   if (chance(rng, 0.88)) d.activityBoardSeeded = true;
   const inPlay = IDS.filter(() => chance(rng, 0.45));
   ['ca-14', 'ca-34', 'ca-41', 'ca-40', 'ca-24'].forEach(id => { if (ACT[id] && chance(rng, 0.6) && !inPlay.includes(id)) inPlay.push(id); });
-  const modules = [0, ...DATA.manifest.slice(0, 6)];
+  const modules = [0, ...DATA.manifest];
   const board = {};
   const perMod = {};
   inPlay.forEach(id => { if (chance(rng, 0.85)) { const mn = chance(rng, 0.03) ? 99 : pick(rng, modules); (perMod[mn] = perMod[mn] || []).push(id); } });
@@ -801,16 +832,16 @@ function genWorld(rng, today) {
 /* ════════════════════════════════════════════════════════════════════════════
    THE CHECKS
    ════════════════════════════════════════════════════════════════════════════ */
-const C = { cases: 0, pages: 0, comparisons: 0, changes: 0, writes: 0, threeWay: 0, tabReturns: 0, midRead: 0, freshLoads: 0, landings: 0, gatedSeen: 0, notStated: {} };
+const C = { cases: 0, pages: 0, comparisons: 0, changes: 0, writes: 0, threeWay: 0, tabReturns: 0, midRead: 0, freshLoads: 0, landings: 0, gatedSeen: 0, several: 0,
+  marked: 0, cas: 0, newStudent: 0, gamesTabReturn: [0, 0], gamesKeepLast: 0 };
 const FAILS = [];
 const TRUTH = {};
+const KIND_COUNT = {};
+const KIND_FLOOR = 15;
+const KNOWN_HITS = { K1: 0 };
+const KNOWN_FIRST = {};
+const KNOWN_LISTED = { K1: '2026-11-12' };
 const tally = (kind, col, ok) => { const r = (TRUTH[kind] = TRUTH[kind] || {}); const c = (r[col] = r[col] || [0, 0]); c[1]++; if (ok) c[0]++; };
-const NS_FIRST = {};
-const noteNS = (cell, what, where) => {
-  const r = (C.notStated[cell] = C.notStated[cell] || {});
-  r[what] = (r[what] || 0) + 1;
-  if (where && !NS_FIRST[cell + what]) NS_FIRST[cell + what] = `case ${CUR.idx}, ${where}`;
-};
 let CUR = { seed: SEED, idx: 0, label: '' };
 function fail(where, msg) { FAILS.push(`seed ${CUR.seed} case ${CUR.idx} [${CUR.label}] ${where}: ${msg}`); }
 function diffList(exp, got) {
@@ -819,45 +850,32 @@ function diffList(exp, got) {
   return (missing.length || extra.length) ? `expected but missing [${missing.join(' ')}]; extra [${extra.join(' ')}]` : '';
 }
 const FIELDS = ['vis', 'opt', 'blk', 'pao', 'num', 'period', 'openThrough', 'games', 'gamesBtn', 'gated'];
-function answerDiff(exp, got, fields = FIELDS) {
+/* Every field compared counts once in C.comparisons (count = false for a what-if that judges nothing). */
+function answerDiff(exp, got, fields = FIELDS, count = true) {
   const out = [];
   for (const f of fields) {
     if (!(f in exp)) continue;
+    if (count) C.comparisons++;
     if (Array.isArray(exp[f])) { const d = diffList(exp[f], got[f] || []); if (d) out.push(`${f}: ${d}`); }
     else if (canon(exp[f]) !== canon(got[f])) out.push(`${f}: expected ${canon(exp[f])}, got ${canon(got[f])}`);
   }
   return out;
 }
-/* Compare a student page with every reading of the model; judged only where the readings agree. */
-function judgeStudent(where, got, S, open) {
-  const readings = mReadings(S, open);
-  const distinct = new Map();
-  readings.forEach(r => { const k = canon(r.ans); if (!distinct.has(k)) distinct.set(k, r); });
-  C.comparisons += FIELDS.length;
-  if (distinct.size === 1) {
-    const d = answerDiff(readings[0].ans, got);
-    if (d.length) fail(where, d.join(' | '));
-    return !d.length;
-  }
-  const matched = readings.filter(r => !answerDiff(r.ans, got).length);
-  if (!matched.length) {
-    const d = answerDiff(readings[0].ans, got);
-    fail(where, `matches none of the ${distinct.size} readings the prose leaves open; against the first: ${d.join(' | ')}`);
-    return false;
-  }
-  const cells = [...new Set(readings.flatMap(r => r.tags.map(t => t.split(':')[0])))];
-  cells.forEach(cell => {
-    const vals = rs => new Set(rs.flatMap(r => r.tags.filter(t => t.startsWith(cell + ':')).map(t => t.slice(cell.length + 1))));
-    const all = vals(readings), hit = vals(matched);
-    if (hit.size < all.size) {
-      noteNS(cell, 'code = ' + [...hit].join(' / '), where);
-      if (VERBOSE) {
-        const other = readings.find(r => !matched.includes(r) && r.tags.some(t => t.startsWith(cell + ':') && !hit.has(t.slice(cell.length + 1))));
-        if (other) console.log(`    ${cell} at ${where}: the other reading (${other.tags.join(', ')}) would give ${answerDiff(other.ans, got).join(' | ').slice(0, 400)}`);
-      }
+/* Judge a student page against the rule. A contradiction that equals a KNOWN entry's answer for a state of that
+   entry's shape is counted as known; anything else fails. Returns 'ok' | 'known' | 'fail'. */
+function judgeStudent(where, got, S, known) {
+  const d = answerDiff(mStudentAnswers(S), got);
+  if (!d.length) return 'ok';
+  for (const k of known || []) {
+    if (!answerDiff(mStudentAnswers(k.S), got, FIELDS, false).length) {
+      KNOWN_HITS[k.id]++;
+      if (!KNOWN_FIRST[k.id]) KNOWN_FIRST[k.id] = `case ${CUR.idx}, ${where}: ${d.join(' | ').slice(0, 220)}`;
+      if (VERBOSE) console.log(`    known ${k.id} at ${where}: ${d.join(' | ').slice(0, 300)}`);
+      return 'known';
     }
-  });
-  return true;
+  }
+  fail(where, d.join(' | '));
+  return 'fail';
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
@@ -893,40 +911,52 @@ async function bootConsole(store) {
   await flush();
   return page;
 }
+/* The console's roster refresh after a student saved (the real fetch; the minute timer never fires here). */
+async function consoleRefetch(con) {
+  await con.run(`(async function(){ allStudentsRaw = await teacherFetchStudents(); teacherApplyRosterFilter(); })()`);
+  await flush();
+}
 let JOURNEY = null;
 function journeyPage() { if (!JOURNEY) { JOURNEY = makePage('journey', makeStorage(), makeClient(new Store())); C.pages++; } return JOURNEY; }
 
-/* A student's model state base (what the page knows apart from the config). */
+/* A student's model state base (what the page knows apart from the config). prog null = no progress doc. */
 function studentBase(uid, prog, progOk, special, today) {
+  const p = prog || {};
   return {
     uid, today, dev: special === 'dev', previewer: special === 'dev' || special === 'teacher-email',
-    progressOk: special === 'dev' ? true : progOk, ownPeriod: (progOk && special !== 'dev') ? (prog.period || '') : '',
-    done: (progOk && special !== 'dev') ? (prog.classActivities || {}) : {},
+    progressOk: special === 'dev' ? true : progOk, ownPeriod: (progOk && special !== 'dev') ? (p.period || '') : '',
+    done: (progOk && special !== 'dev') ? clone(p.classActivities || {}) : {},
   };
 }
-/* The three-way comparison: student page (fresh, successful reads), console, Journey, model. */
+/* The three-way comparison: student page (fresh, successful reads), console, Journey, model. A student with no
+   progress doc is not on the console's roster: student, Journey and the rules only. */
 function threeWay(where, studentGot, consolePage, uid, d, prog, today) {
-  const exp = mDocAnswers(d, prog, uid, today);
-  const con = probeConsole(consolePage, uid);
-  const jny = probeJourney(journeyPage(), clone(d), clone(prog), uid);
+  const p = prog || {};
+  const exp = mDocAnswers(d, p, uid, today);
+  const onRoster = !!prog;
+  const con = onRoster ? probeConsole(consolePage, uid) : null;
+  const jny = probeJourney(journeyPage(), clone(d), prog ? clone(prog) : null, uid);
   C.threeWay++;
-  C.comparisons += 3 * 4;
-  const cas = (mMap(d, 'periodOverrides')[uid] || prog.period || '') === 'CAS';
-  [['console', con, ['vis', 'opt', 'blk', 'num']], ['journey', jny, ['vis', 'opt', 'blk']], ['student', studentGot, cas ? ['vis', 'blk', 'num'] : ['vis', 'opt', 'blk', 'num']]]
-    .forEach(([who, got, fields]) => { const dd = answerDiff(exp, got, fields); if (dd.length) fail(`${where} — ${who} vs the rules`, dd.join(' | ')); });
-  const agree = ['vis', 'blk'].every(f => diffList(con[f], jny[f]) === '' && diffList(con[f], studentGot[f]) === '');
-  if (!agree) fail(`${where} — three-way`, `student / console / Journey disagree: vis ${diffList(studentGot.vis, con.vis) || '='} (student vs console), ${diffList(jny.vis, con.vis) || '='} (Journey vs console); blk ${diffList(studentGot.blk, con.blk) || '='} / ${diffList(jny.blk, con.blk) || '='}`);
+  const cas = (mMap(d, 'periodOverrides')[uid] || p.period || '') === 'CAS';
+  const sides = [['journey', jny, ['vis', 'opt', 'blk']], ['student', studentGot, cas ? ['vis', 'blk', 'num'] : ['vis', 'opt', 'blk', 'num']]];
+  if (con) sides.unshift(['console', con, ['vis', 'opt', 'blk', 'num']]);
+  sides.forEach(([who, got, fields]) => { const dd = answerDiff(exp, got, fields); if (dd.length) fail(`${where} — ${who} vs the rules`, dd.join(' | ')); });
+  const ref = con || jny;
+  const agree = ['vis', 'blk'].every(f => diffList(ref[f], jny[f]) === '' && diffList(ref[f], studentGot[f]) === '');
+  C.comparisons += 2;
+  if (!agree) fail(`${where} — three-way`, `student / console / Journey disagree: vis ${diffList(studentGot.vis, ref.vis) || '='} (student vs ${con ? 'console' : 'Journey'}), blk ${diffList(studentGot.blk, ref.blk) || '='}; Journey vs console vis ${diffList(jny.vis, ref.vis) || '='}`);
 }
 const CHANGE_KINDS = ['date', 'hide', 'who', 'wholeClass', 'optional', 'songPlace', 'classSong', 'archive', 'delete', 'playAlong', 'clear', 'clearAll', 'period', 'openThrough', 'classGames', 'studentGames', 'move', 'unassign'];
-/* Most changes aim at the student whose page is open (a card that student sees, that student's uid), so the
-   R12 checks see a change that moves that student's answer; the rest land anywhere. */
-function pickChange(rng, d, today, progs, openUid) {
+/* Which kind of change: a rotation over CHANGE_KINDS (slot = this case's start + the change's ordinal), so every
+   kind runs about as often as every other; a kind that does not apply to this doc passes to the next one. Most
+   changes aim at the student whose page is open (a card that student sees, that student's uid). */
+function pickChange(rng, d, today, progs, openUid, slot) {
   const real = UIDS.includes(openUid);
   const seen = real ? mDocAnswers(d, progs[openUid], openUid, today).vis : [];
   const board = mMap(d, 'activityBoard');
   const seeded = d.activityBoardSeeded === true;
-  for (let tries = 0; tries < 40; tries++) {
-    const kind = pick(rng, CHANGE_KINDS);
+  for (let tries = 0; tries < CHANGE_KINDS.length; tries++) {
+    const kind = CHANGE_KINDS[(slot + tries) % CHANGE_KINDS.length];
     const anyId = () => pick(rng, IDS);
     const busy = () => {
       if (seen.length && chance(rng, 0.7)) return pick(rng, seen);
@@ -959,7 +989,7 @@ function pickChange(rng, d, today, progs, openUid) {
         if (!seeded) continue;
         const ids = IDS.filter(id => !mOnSongs(ACT[id], d) && !mTeacherOnly(ACT[id], d) && !mRetired(ACT[id], d));
         const id = pick(rng, ids);
-        const module = pick(rng, [0, ...DATA.manifest.slice(0, 6)]);
+        const module = pick(rng, [0, ...DATA.manifest]);
         return { kind, id, module, pos: 1 + Math.floor(rng() * 6) };
       }
       case 'unassign': {
@@ -997,14 +1027,60 @@ function writerCall(ch) {
   throw new Error('no writer for ' + ch.kind);
 }
 const chLabel = ch => [ch.kind, ch.id, ch.uid, ch.value, ch.on === undefined ? undefined : (ch.on ? 'on' : 'off'), ch.state, ch.toSongs === undefined ? undefined : (ch.toSongs ? 'to Songs' : 'to Class'), ch.module === undefined ? undefined : `module ${ch.module} #${ch.pos}`].filter(x => x !== undefined && x !== '').join(' ');
-/* A path like 'activityStudents.ca-3' in a normalized doc. */
+const getPath = (d, path) => path.split('.').reduce((c, k) => (c && typeof c === 'object' ? c[k] : undefined), d);
 function dropPath(d, path) {
   const parts = path.split('.');
   let cur = d;
   for (let i = 0; i < parts.length - 1; i++) { if (!cur || typeof cur !== 'object') return; cur = cur[parts[i]]; }
   if (cur && typeof cur === 'object') delete cur[parts[parts.length - 1]];
 }
-const getPath = (d, path) => path.split('.').reduce((c, k) => (c && typeof c === 'object' ? c[k] : undefined), d);
+
+/* One console change through the real writer, then R11: the doc, the version, the console's copy, its answers. */
+async function consoleChange(con, store, ch, label, progs, today) {
+  const before = store.read('config/class');
+  C.changes++;
+  KIND_COUNT[ch.kind] = (KIND_COUNT[ch.kind] || 0) + 1;
+  step(`${label}: console writes`);
+  const writesBefore = store.counts.writes;
+  try { await con.run(`(async function(){ await ${writerCall(ch)}; })()`); }
+  catch (e) { fail(`${label}: console writer`, 'threw ' + (e && e.message)); }
+  await flush();
+  C.writes += store.counts.writes - writesBefore;
+  if (con.alerts.length) { fail(`${label}: console`, `alert: ${con.alerts.join(' / ').slice(0, 200)}`); con.alerts.length = 0; }
+  const after = store.read('config/class');
+  const exp = mExpectChange(before, ch, progs, today);
+  let nExp = normDoc(exp.doc), nGot = normDoc(after);
+  exp.dontCare.forEach(p => { dropPath(nExp, p); dropPath(nGot, p); });
+  nExp = normDoc(nExp); nGot = normDoc(nGot);
+  C.comparisons++;
+  if (canon(nExp) !== canon(nGot)) {
+    const keys = sortU([...Object.keys(nExp), ...Object.keys(nGot)]).filter(k => canon(nExp[k]) !== canon(nGot[k]));
+    const cell = k => {
+      const e = nExp[k], g = nGot[k];
+      const show = v => (v === undefined ? 'absent' : canon(v).slice(0, 160));
+      if (!e || !g || typeof e !== 'object' || typeof g !== 'object' || Array.isArray(e) || Array.isArray(g)) return `${k}: expected ${show(e)}, got ${show(g)}`;
+      const sub = sortU([...Object.keys(e), ...Object.keys(g)]).filter(x => canon(e[x]) !== canon(g[x]));
+      return `${k}: ` + sub.map(x => `${x} expected ${show(e[x])}, got ${show(g[x])}`).join('; ');
+    };
+    fail(`${label}: config/class after the write`, keys.map(cell).join(' | '));
+  }
+  if (exp.effect) { const p = exp.effect(after); C.comparisons++; if (p) fail(`${label}: effect`, p); }
+  const vExp = (Number(before.configVersion) || 0) + (exp.wrote ? 1 : 0);
+  C.comparisons++;
+  if ((Number(after.configVersion) || 0) !== vExp) fail(`${label}: configVersion`, `expected ${vExp}, got ${after.configVersion}`);
+  const copy = JSON.parse(con.run('JSON.stringify(teacherClassConfig)'));
+  C.comparisons++;
+  if (canon(normDoc(copy)) !== canon(normDoc(after))) {
+    const a = normDoc(copy), b = normDoc(after);
+    const keys = sortU([...Object.keys(a), ...Object.keys(b)]).filter(k => canon(a[k]) !== canon(b[k]));
+    fail(`${label}: the console's copy`, `differs from config/class at ${keys.join(', ')}`);
+  }
+  UIDS.forEach(u => {
+    const dd = answerDiff(mDocAnswers(after, progs[u], u, today), probeConsole(con, u), ['vis', 'blk']);
+    if (dd.length) fail(`${label}: console after the write, ${u}`, dd.join(' | '));
+  });
+  return after;
+}
 
 async function runCase(idx) {
   const rng = mulberry32(caseSeed(SEED, idx));
@@ -1016,11 +1092,13 @@ async function runCase(idx) {
   step(`case ${idx}: ${CUR.label}`);
   const store = new Store();
   const { doc, progs } = genWorld(rng, today);
+  progs[NEW_UID] = null;
   store.put('config/class', doc);
   UIDS.forEach(u => store.put('progress/' + u, progs[u]));
   const device = { storage: makeStorage(), wc: null, slot: null, own: {} };
   const readMode = () => { const r = rng(); return r < 0.66 ? 'ok' : r < 0.84 ? 'fail' : 'empty'; };
   const progMode = () => (chance(rng, 0.9) ? 'ok' : 'fail');
+  let slot = idx * 5;
 
   let con = await bootConsole(store);
   step(`case ${idx}: console booted`);
@@ -1029,85 +1107,91 @@ async function runCase(idx) {
     step(`${label}: signing in ${uid}${special ? ' (' + special + ')' : ''}, config ${cMode}, progress ${pMode}`);
     const page = await bootStudent(device, store, uid, cMode, pMode, special);
     C.freshLoads++;
+    if (uid === NEW_UID && !progs[uid]) C.newStudent++;
     const d = store.read('config/class');
     let st;
-    if (special === 'dev') st = { S: Object.assign(studentBase(uid, progs[uid] || {}, true, 'dev', today), { doc: {}, who: { mode: 'live' }, override: '', openThrough: 0, games: true }), open: {} };
-    else st = mPageState(device, d || {}, uid, cMode === 'ok' && d ? 'ok' : (cMode === 'ok' ? 'empty' : cMode), null, studentBase(uid, progs[uid] || {}, pMode === 'ok', special, today));
+    if (special === 'dev') st = { S: Object.assign(studentBase(uid, null, true, 'dev', today), { doc: {}, who: { mode: 'live' }, override: '', openThrough: 0, games: true }), known: [] };
+    else st = mPageState(device, d || {}, uid, cMode === 'ok' && d ? 'ok' : (cMode === 'ok' ? 'empty' : cMode), null, studentBase(uid, progs[uid], pMode === 'ok', special, today));
     const got = probeStudent(page);
-    const ok = judgeStudent(`${label}: fresh sign-in ${uid}${special ? ' (' + special + ')' : ''} (config read ${cMode}, progress ${pMode})`, got, st.S, st.open);
+    const verdict = judgeStudent(`${label}: fresh sign-in ${uid}${special ? ' (' + special + ')' : ''} (config read ${cMode}, progress ${pMode})`, got, st.S, st.known);
     if (got.gated) C.gatedSeen++;
     if (got.blk.length) C.landings++;
     if (cMode === 'ok' && pMode === 'ok' && !special) threeWay(`${label}: ${uid}`, got, con, uid, d, progs[uid], today);
-    return { page, st, got, ok };
+    const kS = verdict === 'known' ? st.known[0].S : null;
+    return { page, S: st.S, kS, got, ok: verdict !== 'fail' };
+  };
+  /* Student events on an open page (R5): mark a blocker complete, or pick CAS. The real save path writes the
+     progress doc; it is checked, the model's progress follows it, and the console re-reads its roster. */
+  const studentEvent = async (opened, uid, label) => {
+    const S = opened.S;
+    if (!S.progressOk || S.previewer || S.dev) return;
+    const blk = mStudentAnswers(S).blk;
+    const r = rng();
+    if (blk.length && r < 0.35) {
+      const id = pick(rng, blk);
+      step(`${label}: ${uid} marks ${id} complete`);
+      opened.page.ctx.__id = id;
+      await opened.page.run(`(async function(){ onClassActivityChange(__id, true); await flushSave(); })()`);
+      await flush();
+      C.marked++;
+      const saved = store.read('progress/' + uid);
+      C.comparisons++;
+      if (!saved || !saved.classActivities || saved.classActivities[id] !== true) fail(`${label}: ${uid} marked ${id} complete`, `progress/${uid}.classActivities.${id} is ${saved && saved.classActivities ? saved.classActivities[id] : 'absent'}, not true`);
+      const p = progs[uid] || (progs[uid] = { name: 'Fake User', email: `${uid}@example.test`, classActivities: {}, migrations: { swap45: true } });
+      p.classActivities = Object.assign({}, p.classActivities, { [id]: true });
+      S.done = Object.assign({}, S.done, { [id]: true });
+      if (opened.kS) opened.kS.done = S.done;
+      judgeStudent(`${label}: ${uid} marked ${id} complete — the same page at once`, probeStudent(opened.page), S, opened.kS ? [{ id: 'K1', S: opened.kS }] : []);
+      await consoleRefetch(con);
+    } else if (r < 0.5 && (S.override || S.ownPeriod) !== 'CAS') {
+      step(`${label}: ${uid} picks CAS`);
+      await opened.page.run(`(async function(){ await periodPick('CAS'); })()`);
+      await flush();
+      C.cas++;
+      const saved = store.read('progress/' + uid);
+      C.comparisons++;
+      if (!saved || saved.period !== 'CAS') fail(`${label}: ${uid} picked CAS`, `progress/${uid}.period is ${saved ? JSON.stringify(saved.period) : 'absent'}, not "CAS"`);
+      const p = progs[uid] || (progs[uid] = { name: 'Fake User', email: `${uid}@example.test`, classActivities: {}, migrations: { swap45: true } });
+      p.period = 'CAS';
+      S.ownPeriod = 'CAS';
+      if (opened.kS) opened.kS.ownPeriod = 'CAS';
+      judgeStudent(`${label}: ${uid} picked CAS — the same page at once`, probeStudent(opened.page), S, opened.kS ? [{ id: 'K1', S: opened.kS }] : []);
+      await consoleRefetch(con);
+    }
   };
 
-  /* Phase A — every student signs in once on the same Chromebook. */
+  /* Phase A — every student signs in once on the same Chromebook; sometimes the new student too. */
   for (const u of UIDS) await fresh(u, chance(rng, 0.8) ? 'ok' : readMode(), progMode(), null, 'A');
+  if (chance(rng, 0.4)) await fresh(NEW_UID, chance(rng, 0.8) ? 'ok' : readMode(), 'ok', null, 'A');
   if (chance(rng, 0.25)) await fresh('stu-teacher', 'ok', 'ok', 'teacher-email', 'A');
 
-  /* Phase B/C — console changes, an open page before and after its tab comes back, then fresh sign-ins. */
+  /* Phase B/C — one to three console changes, an open page before and after its tab comes back, then fresh
+     sign-ins. */
   const rounds = 3;
   for (let r = 0; r < rounds; r++) {
     const special = chance(rng, 0.12) ? 'dev' : null;
-    const openUid = special === 'dev' ? 'dev-user' : pick(rng, UIDS);
+    const openUid = special === 'dev' ? 'dev-user' : (chance(rng, 0.15) ? NEW_UID : pick(rng, UIDS));
     const opened = await fresh(openUid, special === 'dev' ? 'none' : (chance(rng, 0.85) ? 'ok' : readMode()), 'ok', special, `R${r}`);
-    let prevS = opened.st.S;
-    const before = store.read('config/class');
-    const ch = pickChange(rng, before, today, progs, openUid);
-    const label = `R${r} ${chLabel(ch)}`;
-    C.changes++;
-    step(`${label}: console writes`);
-    const writesBefore = store.counts.writes;
-    try { await con.run(`(async function(){ await ${writerCall(ch)}; })()`); }
-    catch (e) { fail(`${label}: console writer`, 'threw ' + (e && e.message)); }
-    await flush();
-    C.writes += store.counts.writes - writesBefore;
-    if (con.alerts.length) { fail(`${label}: console`, `alert: ${con.alerts.join(' / ').slice(0, 200)}`); con.alerts.length = 0; }
-    const after = store.read('config/class');
-    /* R11: the doc, the version and the console's own copy. */
-    const exp = mExpectChange(before, ch, progs, today);
-    const nExp = normDoc(exp.doc), nGot = normDoc(after);
-    exp.dontCare.forEach(p => {
-      const was = getPath(normDoc(before), p), now = getPath(nGot, p);
-      if (p.startsWith('hiddenActivities.') || p.startsWith('activityStudents.') || p.startsWith('activityNumbers.')) {
-        if (was !== undefined) noteNS('NS-del', `${p.split('.')[0]}: ${now === undefined ? 'cleared by Delete' : 'kept by Delete'}`, label);
-      }
-      dropPath(nExp, p); dropPath(nGot, p);
-    });
-    C.comparisons++;
-    if (canon(nExp) !== canon(nGot)) {
-      const keys = sortU([...Object.keys(nExp), ...Object.keys(nGot)]).filter(k => canon(nExp[k]) !== canon(nGot[k]));
-      const cell = k => {
-        const e = nExp[k], g = nGot[k];
-        if (!e || !g || typeof e !== 'object' || typeof g !== 'object' || Array.isArray(e) || Array.isArray(g)) return `${k}: expected ${canon(e).slice(0, 160)}, got ${canon(g).slice(0, 160)}`;
-        const sub = sortU([...Object.keys(e), ...Object.keys(g)]).filter(x => canon(e[x]) !== canon(g[x]));
-        return `${k}: ` + sub.map(x => `${x} expected ${canon(e[x])}, got ${canon(g[x])}`).join('; ');
-      };
-      fail(`${label}: config/class after the write`, keys.map(cell).join(' | '));
+    await studentEvent(opened, openUid, `R${r}`);
+    const prevS = opened.S;
+    const nCh = (() => { const x = rng(); return x < 0.25 ? 1 : x < 0.55 ? 2 : 3; })();
+    const labels = [];
+    let after = store.read('config/class');
+    for (let k = 0; k < nCh; k++) {
+      const ch = pickChange(rng, after, today, progs, openUid, slot++);
+      const lab = `R${r}.${k} ${chLabel(ch)}`;
+      labels.push(ch.kind);
+      after = await consoleChange(con, store, ch, lab, progs, today);
     }
-    if (exp.effect) { const p = exp.effect(after); C.comparisons++; if (p) fail(`${label}: effect`, p); }
-    const vExp = (Number(before.configVersion) || 0) + (exp.wrote ? 1 : 0);
-    C.comparisons++;
-    if ((Number(after.configVersion) || 0) !== vExp) fail(`${label}: configVersion`, `expected ${vExp}, got ${after.configVersion}`);
-    const copy = JSON.parse(con.run('JSON.stringify(teacherClassConfig)'));
-    C.comparisons++;
-    if (canon(normDoc(copy)) !== canon(normDoc(after))) {
-      const a = normDoc(copy), b = normDoc(after);
-      const keys = sortU([...Object.keys(a), ...Object.keys(b)]).filter(k => canon(a[k]) !== canon(b[k]));
-      fail(`${label}: the console's copy`, `differs from config/class at ${keys.join(', ')}`);
-    }
-    UIDS.forEach(u => {
-      const e = mDocAnswers(after, progs[u], u, today), g = probeConsole(con, u);
-      C.comparisons += 2;
-      const dd = answerDiff(e, g, ['vis', 'blk']);
-      if (dd.length) fail(`${label}: console after the write, ${u}`, dd.join(' | '));
-    });
+    const row = nCh === 1 ? labels[0] : 'several (2-3)';
+    if (nCh > 1) C.several++;
+    const label = `R${r} ${nCh === 1 ? labels[0] : nCh + ' changes: ' + labels.join(', ')}`;
+    const knownOpen = opened.kS ? [{ id: 'K1', S: opened.kS }] : [];
 
     /* R12: the open page before its tab comes back. */
     const page = opened.page;
     let got = probeStudent(page);
-    const okBefore = judgeStudent(`${label}: page open since before the change, tab not back yet`, got, prevS, opened.st.open);
-    tally(ch.kind, 'open page, tab not back: old answer', okBefore);
+    tally(row, 'open page, tab not back: old answer', judgeStudent(`${label}: page open since before the change, tab not back yet`, got, prevS, knownOpen) !== 'fail');
     /* Tab return: hold the read, look during it, release. */
     const tMode = special === 'dev' ? 'ok' : readMode();
     page.client.plan.config.push({ mode: tMode, hold: true });
@@ -1119,32 +1203,28 @@ async function runCase(idx) {
     C.tabReturns++;
     if (page.client.held.length) {
       C.midRead++;
-      const mid = probeStudent(page);
-      const okMid = judgeStudent(`${label}: during the tab-return read`, mid, prevS, opened.st.open);
-      tally(ch.kind, 'during the tab-return read: old answer', okMid);
+      tally(row, 'during the tab-return read: old answer', judgeStudent(`${label}: during the tab-return read`, probeStudent(page), prevS, knownOpen) !== 'fail');
       page.client.release();
       await flush();
     } else fail(`${label}: tab return`, 'the page did not read config/class when its tab came back');
     got = probeStudent(page);
-    const st2 = mPageState(device, after, openUid, tMode, prevS, studentBase(openUid, progs[openUid] || {}, true, special, today));
+    const st2 = mPageState(device, after, openUid, tMode, prevS, Object.assign(studentBase(openUid, progs[openUid], true, special, today), { done: prevS.done, ownPeriod: prevS.ownPeriod }));
     if (special === 'dev') st2.S.who = tMode === 'ok' ? { mode: 'live' } : prevS.who;
-    const okAfter = judgeStudent(`${label}: page open since before the change, tab back (read ${tMode})`, got, st2.S, st2.open);
-    tally(ch.kind, tMode === 'ok' ? 'tab back, read ok: new answer' : 'tab back, read failed: old answer', okAfter);
+    if (tMode !== 'ok' && opened.kS) st2.known.push({ id: 'K1', S: Object.assign({}, st2.S, { override: opened.kS.override, openThrough: opened.kS.openThrough }) });
+    tally(row, tMode === 'ok' ? 'tab back, read ok: new answer' : 'tab back, read failed: old answer', judgeStudent(`${label}: page open since before the change, tab back (read ${tMode})`, got, st2.S, st2.known) !== 'fail');
     if (tMode === 'ok') {
-      const oldAns = mStudentAnswers(prevS, true), newAns = mStudentAnswers(st2.S, true);
-      const moved = answerDiff(oldAns, newAns, ['vis', 'opt', 'blk', 'pao', 'num', 'games']).length > 0;
+      const moved = answerDiff(mStudentAnswers(prevS), mStudentAnswers(st2.S), ['vis', 'opt', 'blk', 'pao', 'num', 'games'], false).length > 0;
       C.comparisons++;
       if (moved && got.sig === sigBefore) fail(`${label}: tab back`, 'the student\'s answer changed but classConfigSignature() did not, so the open In-Class Activities screen is not repainted');
-      if (ch.kind === 'classGames' || ch.kind === 'studentGames') noteNS('games-wording', `games applied on tab return: ${got.gamesBtn === (st2.S.games ? '' : 'none') ? 'yes' : 'no'}`, label);
-    }
-    prevS = st2.S;
+      if (prevS.games !== st2.S.games) { C.gamesTabReturn[1]++; if (got.gamesBtn === (st2.S.games ? '' : 'none')) C.gamesTabReturn[0]++; }
+    } else if (prevS.games === false) C.gamesKeepLast++;
 
     /* The open page closes (another sign-in on this Chromebook reloads it); fresh sign-ins follow. */
     const n = 1 + Math.floor(rng() * 3);
-    const order = UIDS.slice().sort(() => rng() - 0.5).slice(0, n);
+    const order = [...UIDS, NEW_UID].sort(() => rng() - 0.5).slice(0, n);
     for (const u of order) {
       const res = await fresh(u, readMode(), progMode(), null, `${label} → fresh`);
-      tally(ch.kind, 'fresh sign-in: rules for its read', res.ok);
+      tally(row, 'fresh sign-in: rules for its read', res.ok);
     }
     if (chance(rng, 0.3)) { con = await bootConsole(store); step(`${label}: console re-read`); }
   }
@@ -1153,6 +1233,7 @@ async function runCase(idx) {
 /* ── Run ── */
 process.on('unhandledRejection', e => { fail('unhandled rejection', String(e && e.stack || e).split('\n').slice(0, 3).join(' / ')); });
 const indices = ONE_CASE !== null ? [ONE_CASE] : Array.from({ length: CASES }, (_, i) => i);
+const FULL_RUN = ONE_CASE === null && CASES >= 60;
 for (const i of indices) {
   const f0 = FAILS.length;
   try { await runCase(i); }
@@ -1162,30 +1243,33 @@ for (const i of indices) {
   if (FAILS.length > f0 && FAILS.length - f0 > 40) FAILS.splice(f0 + 40);
 }
 clearInterval(watchdog);
+if (FULL_RUN) {
+  CHANGE_KINDS.forEach(k => { if ((KIND_COUNT[k] || 0) < KIND_FLOOR) { CUR = { seed: SEED, idx: '-', label: 'whole run' }; fail('sampling', `${k} ran ${KIND_COUNT[k] || 0} times, under the floor of ${KIND_FLOOR}`); } });
+  Object.keys(KNOWN_HITS).forEach(k => { if (!KNOWN_HITS[k]) { CUR = { seed: SEED, idx: '-', label: 'whole run' }; fail(`KNOWN ${k}`, `matched nothing in a full run — if the fault is fixed, delete its entry (header and KNOWN_HITS) in the same change`); } });
+}
 
 const out = [];
 out.push(`visible-loop: root ${ROOT === resolve(join(HERE, '..')) ? '(this checkout)' : ROOT}, seed ${SEED}, ${indices.length === 1 ? 'case ' + indices[0] : indices.length + ' cases'}${BREAK_FAKE ? ', FAKE BROKEN: ' + BREAK_FAKE : ''}`);
-out.push(`  ${C.cases} cases over ${DAYS.length} kinds of day · ${C.pages} pages booted · ${C.freshLoads} fresh sign-ins · ${C.threeWay} three-way student/console/Journey comparisons`);
-out.push(`  ${C.changes} console changes through the real writers (${C.writes} writes) · ${C.tabReturns} tab returns (${C.midRead} looked at mid-read)`);
-out.push(`  config/progress reads served: ${READS.ok} ok, ${READS.fail} failed, ${READS.empty} empty · ${C.comparisons} comparisons`);
+out.push(`  ${C.cases} cases over ${DAYS.length} kinds of day · ${C.pages} pages booted · ${C.freshLoads} fresh sign-ins (${C.newStudent} with no progress doc) · ${C.threeWay} three-way student/console/Journey comparisons`);
+out.push(`  ${C.changes} console changes through the real writers (${C.writes} writes; ${C.several} tab returns came after 2-3 changes) · ${C.tabReturns} tab returns (${C.midRead} looked at mid-read)`);
+out.push(`  student events through the real save path: ${C.marked} cards marked complete, ${C.cas} CAS picks`);
+out.push(`  config/progress reads served: ${READS.ok} ok, ${READS.fail} failed, ${READS.empty} empty · ${C.comparisons} fields compared`);
 out.push(`  the lock (R6): body.ca-gated seen on ${C.gatedSeen} of ${C.freshLoads} sign-ins; ${C.landings} of ${C.freshLoads} sign-ins had a blocker, i.e. landed on In-Class Activities`);
+out.push(`  changes by kind (floor ${KIND_FLOOR}${FULL_RUN ? '' : ', checked on a full run only'}): ` + CHANGE_KINDS.map(k => `${k} ${KIND_COUNT[k] || 0}`).join(' · '));
 out.push('  WHEN a console change reaches a student (R12) — passed / run, by change and moment:');
 const COLS = ['open page, tab not back: old answer', 'during the tab-return read: old answer', 'tab back, read ok: new answer', 'tab back, read failed: old answer', 'fresh sign-in: rules for its read'];
-out.push('    ' + 'change'.padEnd(13) + ['open, not back', 'mid-read', 'back, ok read', 'back, failed', 'fresh'].map(s => s.padStart(15)).join(''));
-CHANGE_KINDS.forEach(k => {
+out.push('    ' + 'change'.padEnd(14) + ['open, not back', 'mid-read', 'back, ok read', 'back, failed', 'fresh'].map(x => x.padStart(15)).join(''));
+[...CHANGE_KINDS, 'several (2-3)'].forEach(k => {
   const r = TRUTH[k]; if (!r) return;
-  out.push('    ' + k.padEnd(13) + COLS.map(c => (r[c] ? `${r[c][0]}/${r[c][1]}` : '-').padStart(15)).join(''));
+  out.push('    ' + k.padEnd(14) + COLS.map(c => (r[c] ? `${r[c][0]}/${r[c][1]}` : '-').padStart(15)).join(''));
 });
-out.push('    prose: every cell above is stated (R12) except: games — teacher-config.js:420 says "the next time a student loads the site", save.js:367-370 applies them on tab return; an open Journey page — not stated (NS-jny).');
-noteNS('NS-jny', 'tabs/journey.js listens for visibilitychange (a re-read on tab return): ' + (/addEventListener\(\s*['"]visibilitychange['"]/.test(readFileSync(join(ROOT, 'tabs/journey.js'), 'utf8')) ? 'yes' : 'no — it decides once per page load'));
-const nsKeys = Object.keys(C.notStated).sort();
-if (nsKeys.length) {
-  out.push('  NOT STATED by the prose — what the code does (counts):');
-  nsKeys.forEach(k => {
-    out.push(`    ${k}: ` + Object.entries(C.notStated[k]).sort().map(([w, n]) => `${w} ×${n}`).join('; '));
-    Object.keys(C.notStated[k]).sort().forEach(w => { if (NS_FIRST[k + w]) out.push(`      first: ${NS_FIRST[k + w].slice(0, 200)}`); });
-  });
-}
+out.push('  measured, not judged:');
+out.push(`    an open Journey page: tabs/journey.js ${/addEventListener\(\s*['"]visibilitychange['"]/.test(readFileSync(join(ROOT, 'tabs/journey.js'), 'utf8')) ? 'listens for visibilitychange' : 'has no tab-return re-read — it decides once per page load'} (no prose says when)`);
+out.push(`    stale console text: teacher-config.js:420 says games change "the next time a student loads the site"; the Games button followed a games change on tab return ${C.gamesTabReturn[0]} of ${C.gamesTabReturn[1]} times`);
+out.push(`    stale comment: save.js:225 "Reads that fail ... leave games ON"; a failed tab-return read kept games off (intended) ${C.gamesKeepLast} times`);
+const knownLines = Object.keys(KNOWN_HITS).map(k => `    ${k}: known, listed ${KNOWN_LISTED[k]} — matched ${KNOWN_HITS[k]} times${KNOWN_FIRST[k] ? '; first: ' + KNOWN_FIRST[k] : ''}`);
+out.push('  KNOWN faults (listed for Jonathan, not fixed; header "KNOWN"):');
+knownLines.forEach(l => out.push(l.slice(0, 420)));
 if (FAILS.length) {
   out.push(`  ✗ ${FAILS.length} contradiction${FAILS.length === 1 ? '' : 's'}${FAILS.length > 25 ? ' (first 25)' : ''}:`);
   FAILS.slice(0, 25).forEach(f => out.push('    ' + f.slice(0, 600)));
