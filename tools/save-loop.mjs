@@ -20,6 +20,7 @@
      --json=FILE        every case's result
      --stall=SEC        watchdog: no case finished for SEC seconds (default 120) -> prints where it was, exit 3
      --list             the families and the fake faults
+   stdout is identical for the same seed and site; the run time is printed on stderr.
    Exit 0 = every case passed; 1 = a case failed (or the fake failed its self-test); 2 = bad arguments; 3 = watchdog.
 
    WHAT IS REAL. The site's own scripts, unmodified, each run as its own script in a Node vm context, one context per
@@ -266,15 +267,18 @@ function makeClient(world, tab){
     const sent = FAKE_FAULT === 'late-copy' ? op.data : clone(op.data);
     world.issued++;
     const tr = world.trip(dev);
+    const rec = { from: world.now, to: Infinity };
+    tab.net.push(rec);
     world.log(`${tab.name} write #${world.issued} issued (${tr.ok === false ? 'will FAIL' : tr.ok === null ? 'STALLED until reconnect' : 'lands ~' + ((tr.at - world.now) / 1000).toFixed(2) + ' s'}): ${summarize(op.data)}`);
     return new Promise((res, rej) => {
-      if (tr.ok === false){ world.at(tr.at, () => { world.rejected++; world.log(`${tab.name} write REJECTED (unavailable)`); rej(Object.assign(new Error('unavailable'), { code: 'unavailable' })); }, tab, 'net'); return; }
+      if (tr.ok === false){ world.at(tr.at, () => { rec.to = world.now; world.rejected++; world.log(`${tab.name} write REJECTED (unavailable)`); rej(Object.assign(new Error('unavailable'), { code: 'unavailable' })); }, tab, 'net'); return; }
       const behindStall = tr.ok === null || tab.stallQueued > 0;
       let at = tr.at;
       if (FAKE_FAULT !== 'no-fifo') at = Math.max(at, tab.lastLandAt);
       tab.lastLandAt = Math.max(tab.lastLandAt, at);
       if (behindStall) tab.stallQueued++;
       world.at(at, () => {
+        rec.to = world.now;
         if (behindStall) tab.stallQueued--;
         if (behindStall && !tab.alive && FAKE_FAULT !== 'stall-survives-close'){ world.lostOnClose++; world.log(`${tab.name} queued write LOST (tab closed before reconnect)`); return; }
         try { world.applyOp(path, op.kind === 'update' ? { kind: 'update', data: sent } : { kind: 'set', merge: op.merge, data: sent }); }
@@ -301,7 +305,7 @@ function makeClient(world, tab){
   });
   const db = {
     collection: c => ({ doc: id => ref(c + '/' + id) }),
-    runTransaction: fn => (async () => {
+    runTransaction: fn => { const rec = { from: world.now, to: Infinity }; tab.net.push(rec); return (async () => {
       for (let attempt = 0; attempt < 5; attempt++){
         const reads = new Map(), writes = [];
         const tx = {
@@ -330,7 +334,7 @@ function makeClient(world, tab){
         if (committed) return out;
       }
       throw Object.assign(new Error('Transaction failed after 5 attempts'), { code: 'aborted' });
-    })()
+    })().finally(() => { rec.to = world.now; }); }
   };
   return db;
 }
@@ -350,7 +354,7 @@ function summarize(d){
 async function fakeSelfTest(){
   const out = [];
   const dev = { phases: [], phaseAt(t){ for (const p of this.phases) if (t < p.until) return p; return { phase: 'up', until: Infinity }; } };
-  const mk = () => { const w = new World(7); const tab = { name: 'T', device: dev, alive: true, lastLandAt: 0, stallQueued: 0 }; return { w, tab, db: makeClient(w, tab) }; };
+  const mk = () => { const w = new World(7); const tab = { name: 'T', device: dev, alive: true, lastLandAt: 0, stallQueued: 0, net: [] }; return { w, tab, db: makeClient(w, tab) }; };
   const check = (name, ok, detail) => out.push({ name, ok: !!ok, detail });
   const P = 'progress/u';
   {
@@ -413,7 +417,7 @@ async function fakeSelfTest(){
   }
   {
     const { w, db, tab } = mk();
-    const tab2 = { name: 'T2', device: dev, alive: true, lastLandAt: 0, stallQueued: 0 };
+    const tab2 = { name: 'T2', device: dev, alive: true, lastLandAt: 0, stallQueued: 0, net: [] };
     const db2 = makeClient(w, tab2);
     w.docs.set(P, { data: { n: 0, list: {} }, version: 1 });
     const ref = db.collection('progress').doc('u'), ref2 = db2.collection('progress').doc('u');
@@ -456,7 +460,7 @@ function siteScripts(root){
 const USER = { uid: 'uid-test-a1', displayName: 'Test Student A', email: 'student.a@example.test', photoURL: null };
 
 function makeTab(world, name, device, opts){
-  const tab = { name, device, alive: true, hidden: false, docL: {}, winL: {}, lastLandAt: 0, stallQueued: 0, faults: [],
+  const tab = { name, device, alive: true, hidden: false, docL: {}, winL: {}, lastLandAt: 0, stallQueued: 0, faults: [], net: [], onlines: [],
     sdkBlockedUntil: opts.sdkBlockedUntil || 0, sdkMs: opts.sdkMs || 150, sdkLoadedAt: null, sdkAttempts: 0 };
   const els = {};
   const mkEl = id => {
@@ -508,7 +512,7 @@ function makeTab(world, name, device, opts){
     localStorage: device.localStorage, sessionStorage: storage(),
     location: { hostname: 'class.example.test', protocol: 'https:', href: 'https://class.example.test/', pathname: '/', search: '', hash: '', reload(){ tab.reloaded = true; } },
     history: { scrollRestoration: 'auto', replaceState(){}, pushState(){}, length: 1 },
-    navigator: { userAgent: 'save-loop', language: 'en', onLine: true },
+    navigator: { userAgent: 'save-loop', language: 'en', get onLine(){ return !device.offlineNow; } },
     setTimeout: (fn, ms, ...args) => world.at(world.now + Math.max(0, Number(ms) || 0), () => callSite(tab, () => fn(...args)), tab, 'timer'),
     clearTimeout: id => { if (id != null) world.cancel(id); },
     setInterval: (fn, ms, ...args) => {
@@ -657,7 +661,9 @@ function cleanAfter(tab, t, upOver){
   const B = tab.sdkBlockedUntil;
   const alive = s => tab.closeAt == null || tab.closeAt > s;
   for (const s of tab.pokes) if (s >= t && s >= B && alive(s + 6000) && upOver(s - 2000, s + 6000)) return true;
-  if (tab.closeAt != null && tab.closeAt >= t && tab.closeAt >= B && tab.sdkLoadedAt != null && tab.sdkLoadedAt <= tab.closeAt && !tab.unmarkedAtLoad && upOver(tab.closeAt - 2000, tab.closeAt + 1500)) return true;
+  /* Back online: the site re-arms the save (shell.js 'online' listener), provided none of this tab's writes is still on the wire. */
+  for (const s of tab.onlines) if (s >= t && s >= B && alive(s + 6000) && upOver(s, s + 6000) && !tab.net.some(n => n.from < s && n.to > s)) return true;
+  if (tab.closeAt != null && tab.killKind !== 'die' && tab.closeAt >= t && tab.closeAt >= B && tab.sdkLoadedAt != null && tab.sdkLoadedAt <= tab.closeAt && !tab.unmarkedAtLoad && upOver(tab.closeAt - 2000, tab.closeAt + 1500)) return true;
   return false;
 }
 function oracle(sc, world, tabs){
@@ -857,6 +863,13 @@ function genScenario(seed, idx, famFilter){
     else if (k === 8) act(tab, t, 'streak', {});
     else act(tab, t, 'path', { key: 'ca-46', pick: pick(['full', 'chunks']) });
   };
+  /* An action that always changes something (a random one is often a no-op: un-ticking what is not ticked). */
+  const realChange = (tab, t) => {
+    const k = ri(0, 2);
+    if (k === 0) act(tab, t, 'answer', { key: pick(POOL.answer), text: 'new answer ' + ri(1, 999) });
+    else if (k === 1) act(tab, t, 'rep', { key: pick(POOL.rep) });
+    else act(tab, t, 'step', { key: pick(POOL.step.filter(x => !(sc.initial && sc.initial.completed[x]))), on: true });
+  };
   let settle;
   if (fam === 'untick-retick'){
     const L = ri(1500, 4500);
@@ -907,19 +920,32 @@ function genScenario(seed, idx, famFilter){
     settle = t1 + 22 * S;
   } else if (fam === 'dropped'){
     const segs = []; let t = 0;
-    while (t < 40 * S){ const len = ri(2, 12) * S; segs.push({ phase: pick(['up', 'fail', 'fail', 'stall', 'slow']), until: T0 + t + len }); t += len; }
+    while (t < 40 * S){ const len = ri(2, 12) * S; const ph = pick(['up', 'fail', 'fail', 'stall', 'slow']); segs.push(Object.assign({ phase: ph, until: T0 + t + len }, ph === 'fail' && r() < 0.5 ? { offline: true } : {})); t += len; }
     devA.phases = segs.filter(p => p.until > T0 + 2500);
     devA.phases.unshift({ phase: 'up', until: T0 + 2500 });
     const tA = tabSpec('A', devA, 0);
     for (let n = ri(4, 10); n > 0; n--) randomAct('A', ri(3, 38) * S + ri(0, 999));
     for (let n = ri(0, 2); n > 0; n--){ const h = ri(5, 35) * S; ev(tA, h, 'hide'); ev(tA, h + ri(1, 4) * S, 'show'); }
     settle = 45 * S;
+    /* One case in three: the Wi-Fi drops for longer than the retry budget (5 tries, 3 s apart), comes back, and the
+       battery dies 8-12 s later with no other action, hide or close in between. */
+    if (r() < 0.34){
+      const off = ri(18, 24) * S, back = ri(8, 12) * S, t1 = ri(3, 6) * S;
+      devA.phases = [{ phase: 'up', until: T0 + t1 + 900 }, { phase: 'fail', offline: true, until: T0 + t1 + 900 + off }, { phase: 'up', until: Infinity }];
+      sc.actions = sc.actions.filter(a => a.tab !== 'A');
+      tA.events.length = 0;
+      for (let n = ri(1, 3); n > 0; n--) realChange('A', t1 + ri(0, 800));
+      ev(tA, t1 + 900 + off + back, 'die');
+      settle = t1 + off + back + 5 * S;
+    }
   } else if (fam === 'hide-close'){
     const tA = tabSpec('A', devA, 0);
     const t1 = ri(3, 6) * S;
-    for (let n = ri(1, 4); n > 0; n--) randomAct('A', t1 + ri(0, 3000));
+    for (let n = ri(0, 3); n > 0; n--) randomAct('A', t1 + ri(0, 3000));
+    /* The last thing before the tab goes is always a real change. */
+    realChange('A', t1 + 3100);
     const last = Math.max(...sc.actions.map(a => a.t - T0));
-    const mode = pick(['close', 'close', 'hide']);
+    const mode = pick(['close', 'lid', 'lid', 'hide']);
     if (r() < 0.3) devA.phases = [{ phase: 'up', until: T0 + last + 100 }, { phase: pick(['fail', 'stall', 'slow']), until: T0 + last + ri(2, 8) * S }];
     ev(tA, last + ri(50, 750), mode);
     if (mode === 'hide') ev(tA, last + ri(2, 6) * S, 'show');
@@ -951,15 +977,22 @@ function genScenario(seed, idx, famFilter){
     if (devB !== devA && r() < 0.5) devB.phases = [{ phase: 'up', until: T0 + ri(5, 15) * S }, { phase: pick(['slow', 'fail', 'stall']), until: T0 + ri(16, 26) * S }];
     settle = 45 * S;
   } else if (fam === 'swap45'){
-    const failCommit = r() < 0.6;
-    if (failCommit) devA.phases = [{ phase: 'up', until: T0 + 900 }, { phase: pick(['fail', 'fail', 'stall']), until: T0 + ri(3, 9) * S }];
-    tabSpec('A', devA, 0, { sdkMs: ri(60, 200) });
+    /* One case in three: a second tab on the same Chromebook opens with the first, so both move commits race (F10). */
+    const race = r() < 0.34;
+    const failCommit = !race && r() < 0.6;
+    const sdkA = ri(60, 200);
+    /* The read is issued when the SDK loads and takes at most 400 ms; the move commit after it meets the failure. */
+    const failEnd = ri(3, 9) * S;
+    if (failCommit) devA.phases = [{ phase: 'up', until: T0 + sdkA + 401 }, { phase: pick(['fail', 'fail', 'stall']), until: T0 + failEnd }];
+    tabSpec('A', devA, 0, { sdkMs: sdkA });
+    /* Work saved soon after the failed move: it must not land on the doc while it is still in the old numbering. */
+    if (failCommit) act('A', failEnd + ri(100, 2000), 'step', { key: pick(POOL.stepSwap), on: r() < 0.6 });
     for (let n = ri(3, 7); n > 0; n--) randomAct('A', ri(2, 20) * S + ri(0, 999), true);
     act('A', ri(2, 6) * S, 'step', { key: 'm5w1-b-sec0-0', on: false });
-    if (r() < 0.6){
-      const devB = r() < 0.5 ? devA : device('dev2', []);
+    if (race || r() < 0.6){
+      const devB = race || r() < 0.5 ? devA : device('dev2', []);
       if (devB !== devA) sc.devices.push(devB);
-      const oB = ri(1, 6) * S;
+      const oB = race ? ri(0, 300) : ri(1, 6) * S;
       tabSpec('B', devB, oB);
       for (let n = ri(1, 4); n > 0; n--) randomAct('B', oB + ri(2, 15) * S, true);
     }
@@ -972,7 +1005,7 @@ function genScenario(seed, idx, famFilter){
     const tA = tabSpec('A', devA, 0, r() < 0.2 ? { sdkBlockedUntil: T0 + ri(2, 8) * S } : {});
     for (let n = ri(3, 9); n > 0; n--) randomAct('A', ri(3, 45) * S + ri(0, 999));
     if (r() < 0.2) act('A', ri(5, 40) * S, 'check', { key: pick(['ca-14', 'ca-15']), picks: null });
-    if (r() < 0.4){ const h = ri(10, 40) * S; ev(tA, h, r() < 0.5 ? 'close' : 'hide'); if (tA.events[tA.events.length - 1].what === 'hide') ev(tA, h + ri(1, 5) * S, 'show'); }
+    if (r() < 0.4){ const h = ri(10, 40) * S; ev(tA, h, pick(['close', 'lid', 'die', 'hide', 'hide'])); if (tA.events[tA.events.length - 1].what === 'hide') ev(tA, h + ri(1, 5) * S, 'show'); }
     if (nTabs === 2){
       const devB = r() < 0.5 ? devA : device('dev2', segs.map(p => Object.assign({}, p, { phase: r() < 0.5 ? 'up' : p.phase })));
       if (devB !== devA) sc.devices.push(devB);
@@ -984,11 +1017,12 @@ function genScenario(seed, idx, famFilter){
   }
   /* Actions only while their tab is open and showing (the generator's own rule): drop the rest. */
   for (const s of sc.tabs){
-    const closeAt = (s.events.find(e => e.what === 'close') || {}).t;
-    s.closeAt = closeAt;
+    const kill = s.events.find(e => e.what === 'close' || e.what === 'lid' || e.what === 'die') || {};
+    const closeAt = kill.t;
+    s.closeAt = closeAt; s.killKind = kill.what;
     const hiddenSpans = [];
     let h = null;
-    for (const e of s.events.slice().sort((a, b) => a.t - b.t)){ if (e.what === 'hide') h = e.t; else if (e.what === 'show' && h != null){ hiddenSpans.push([h, e.t]); h = null; } }
+    for (const e of s.events.slice().sort((a, b) => a.t - b.t)){ if (e.what === 'hide' || e.what === 'lid') h = e.t; else if (e.what === 'show' && h != null){ hiddenSpans.push([h, e.t]); h = null; } }
     if (h != null) hiddenSpans.push([h, Infinity]);
     sc.actions = sc.actions.filter(a => a.tab !== s.name || (a.t >= s.openAt + 1500 && (closeAt == null || a.t < closeAt - 20) && !hiddenSpans.some(([x, y]) => a.t >= x - 20 && a.t <= y + 20)));
   }
@@ -1033,7 +1067,7 @@ async function runCase(seed, idx, famFilter){
   for (const s of sc.tabs){
     world.at(s.openAt, () => {
       const tab = makeTab(world, s.name, s.dev, { root: ROOT, seed: mix(seed, s.name.charCodeAt(0)), sdkMs: s.sdkMs, sdkBlockedUntil: s.sdkBlockedUntil });
-      tab.openAt = s.openAt; tab.closeAt = s.closeAt; tab.pokes = [];
+      tab.openAt = s.openAt; tab.closeAt = s.closeAt; tab.killKind = s.killKind; tab.pokes = [];
       tabs.push(tab); s.tab = tab;
       world.log(`${s.name} opens on ${s.dev.name}; signs in`);
       siteCall(tab, 'currentUser = __user; (async () => { await loadProgress(); caAdoptLocalTicks(); })()');
@@ -1043,16 +1077,39 @@ async function runCase(seed, idx, famFilter){
         const tab = s.tab;
         if (!tab || !tab.alive) return;
         world.log(`${s.name} ${e.what.toUpperCase()}`);
-        if (e.what === 'hide' || e.what === 'close'){
-          tab.hidden = true; tab.pokes.push(world.now);
+        /* close: the tab is closed (visibilitychange, then pagehide). lid: the lid shuts and the tab never runs again
+           (visibilitychange only). die: the battery dies (no event). Each kills the tab once its microtasks have run. */
+        const gone = () => world.at(world.now, () => { tab.alive = false; world.killTimers(tab); world.log(`${s.name} is gone`); }, null, 'script');
+        if (e.what === 'die'){ gone(); return; }
+        if (e.what === 'hide' || e.what === 'close' || e.what === 'lid'){
+          tab.hidden = true;
+          if (e.what === 'hide') tab.pokes.push(world.now);
           for (const fn of (tab.docL.visibilitychange || []).slice()) callSite(tab, () => fn({ type: 'visibilitychange' }));
-          for (const fn of (tab.winL.pagehide || []).slice()) callSite(tab, () => fn({ type: 'pagehide' }));
-          if (e.what === 'close'){ tab.pokes.pop(); world.at(world.now, () => { tab.alive = false; world.killTimers(tab); world.log(`${s.name} is gone`); }, null, 'script'); }
+          if (e.what === 'close') for (const fn of (tab.winL.pagehide || []).slice()) callSite(tab, () => fn({ type: 'pagehide' }));
+          if (e.what !== 'hide') gone();
         } else {
           tab.hidden = false;
           for (const fn of (tab.docL.visibilitychange || []).slice()) callSite(tab, () => fn({ type: 'visibilitychange' }));
         }
       }, null, 'script');
+    }
+  }
+  /* A phase marked offline: the browser fires 'offline' when it starts and 'online' when it ends, on every open tab of that device. */
+  for (const d of sc.devices){
+    let from = T0;
+    for (const p of d.phases){
+      if (p.offline){
+        const fire = (type, on) => world.at(on, () => {
+          d.offlineNow = type === 'offline';
+          for (const t of tabs) if (t.device === d && t.alive){
+            if (type === 'online') t.onlines.push(world.now);
+            world.log(`${t.name} '${type}' event`);
+            for (const fn of (t.winL[type] || []).slice()) callSite(t, () => fn({ type }));
+          }
+        }, null, 'script');
+        fire('offline', from); fire('online', p.until);
+      }
+      from = p.until;
     }
   }
   for (const a of sc.actions){
@@ -1154,11 +1211,13 @@ async function main(){
     json.push({ idx, fam: sc.fam, fails: res.fails, known: res.known, leaves: res.leaves });
   }
   const secs = ((Date.now() - t0) / 1000).toFixed(1);
-  console.log(`save-loop: ${idxs.length} cases (seed ${BASE_SEED}) · ${tabsN} tabs · ${actsN} student actions (${owed} owed effects, ${notOwed} not owed) · ${issued} writes issued, ${landed} landed, ${rejected} rejected, ${lost} lost with a closed tab · ${tx} move commits (${txRetry} transaction re-runs) · ${leaves} stored values compared · ${secs} s`);
+  console.log(`save-loop: ${idxs.length} cases (seed ${BASE_SEED}) · ${tabsN} tabs · ${actsN} student actions (${owed} owed effects, ${notOwed} not owed) · ${issued} writes issued, ${landed} landed, ${rejected} rejected, ${lost} lost with a closed tab · ${tx} move commits (${txRetry} transaction re-runs) · ${leaves} stored values compared`);
   console.log('  by family: ' + Object.entries(fams).map(([k, v]) => `${k} ${v.n - v.fail}/${v.n}`).join(' · '));
   console.log(`  known exposures, not failed: ${knownN} values in ${knownCases} cases` + (knownN ? ' (' + Object.entries(knownKinds).map(([k, v]) => `${k}: ${v}`).join(', ') + ')' : ''));
   console.log(failed ? `save-loop: ✗ ${failed} of ${idxs.length} cases FAIL` : `save-loop: ✓ ${idxs.length} of ${idxs.length} cases pass`);
   if (opt('json', null)) writeFileSync(String(opt('json')), JSON.stringify(json, null, 1));
+  /* The run time goes to stderr, so stdout is the same byte for byte for the same seed. */
+  console.error(`save-loop: ${secs} s`);
   return failed ? 1 : 0;
 }
 const watchdog = setInterval(() => {
