@@ -759,7 +759,7 @@ const pick = (rng, arr) => arr[Math.floor(rng() * arr.length)];
 const chance = (rng, p) => rng() < p;
 function genWorld(rng, today) {
   const d = {};
-  if (chance(rng, 0.88)) d.activityBoardSeeded = true;
+  if (chance(rng, 0.92)) d.activityBoardSeeded = true;
   const inPlay = IDS.filter(() => chance(rng, 0.45));
   ['ca-14', 'ca-34', 'ca-41', 'ca-40', 'ca-24'].forEach(id => { if (ACT[id] && chance(rng, 0.6) && !inPlay.includes(id)) inPlay.push(id); });
   const modules = [0, ...DATA.manifest];
