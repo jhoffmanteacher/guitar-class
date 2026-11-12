@@ -6,6 +6,10 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-12 — Live quiz: the answer shows when time runs out
+
+- **On the fretboard and power chord quizzes, the answer now comes up by itself when the clock runs out**, about a second after "Time's up". Your teacher can turn this off before the game starts. "Which string am I playing?" still waits for your teacher to mark the answer.
+
 ## 2026-11-12 — Live quiz: reloading the page keeps your countdown
 
 - **A reload in the middle of a question no longer starts your time again.** Your countdown carries on from where it was, and speed points still count from when the question first reached you. If your time had run out, it stays run out.

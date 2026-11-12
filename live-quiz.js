@@ -1223,6 +1223,50 @@ function lqLimitInputHtml(quizId){
   const v = lqTLimitFor(quizId);
   return `<label class="lq-ctl-lbl">Time to answer <input type="number" id="lq-limit" class="lq-limit" min="0" max="${LQ_LIMIT_MAX}" step="0.5" inputmode="decimal" value="${v ? escAttr(String(v)) : ''}" placeholder="none" onchange="lqTSetLimit('${escAttr(quizId)}',this.value);this.value=lqTLimitFor('${escAttr(quizId)}')||''"> sec</label>`;
 }
+/* Reveal when time runs out (Jonathan, 2026-11-12): when the countdown
+   reaches 0, the console presses Reveal itself. Only for quizzes the app
+   scores (fret, pcname). An mc quiz has no answer key, so the teacher still
+   marks it. Kept on this device (`gc-lq-autoreveal`), like the time box. On by
+   default. It waits LQ_AUTO_REVEAL_GRACE_MS past 0 so a tap made in a
+   student's last moment, on that student's slightly later clock, still lands
+   in the answer docs before scoring. */
+const LQ_AUTO_REVEAL_GRACE_MS = 1500;
+let lqTAutoReveal = true;
+try { lqTAutoReveal = localStorage.getItem('gc-lq-autoreveal') !== '0'; } catch(e){ lqTAutoReveal = true; }
+let lqTAutoTimer = null, lqTAutoKey = null;
+function lqTSetAutoReveal(on){
+  lqTAutoReveal = !!on;
+  try { localStorage.setItem('gc-lq-autoreveal', lqTAutoReveal ? '1' : '0'); } catch(e){}
+  lqTArmAutoReveal();
+}
+function lqAutoRevealInputHtml(quizId){
+  if(lqType(lqQuiz(quizId)) === 'mc') return '';
+  return `<label class="lq-ctl-lbl"><input type="checkbox" id="lq-autoreveal"${lqTAutoReveal ? ' checked' : ''} onchange="lqTSetAutoReveal(this.checked)"> Reveal when time runs out</label>`;
+}
+// Called after every change to lqTSession (snapshot, preview write, exiting
+// preview) and on the checkbox. One timer, keyed to the round; any other
+// state clears it.
+function lqTArmAutoReveal(){
+  const s = lqTSession;
+  const limit = s ? Number(s.limitSec) || 0 : 0;
+  const key = s ? s.sessionId + '#' + s.qIndex : null;
+  const want = !!(s && s.state === 'question' && limit && lqTAutoReveal && lqType(lqQuiz(s.quizId)) !== 'mc');
+  if(!want){ if(lqTAutoTimer){ clearTimeout(lqTAutoTimer); lqTAutoTimer = null; } lqTAutoKey = null; return; }
+  if(lqTAutoTimer && lqTAutoKey === key) return;
+  if(lqTAutoTimer) clearTimeout(lqTAutoTimer);
+  lqTAutoKey = key;
+  const wait = Math.max(0, limit * 1000 + LQ_AUTO_REVEAL_GRACE_MS - (performance.now() - lqTQOpenedAt));
+  lqTAutoTimer = setTimeout(lqTAutoRevealFire, wait);
+}
+function lqTAutoRevealFire(){
+  lqTAutoTimer = null;
+  const s = lqTSession;
+  if(!s || s.state !== 'question' || !lqTAutoReveal || (s.sessionId + '#' + s.qIndex) !== lqTAutoKey) return;
+  if(lqTBusy){ lqTAutoTimer = setTimeout(lqTAutoRevealFire, 250); return; }   // a write is in flight: try again shortly
+  const type = lqType(lqQuiz(s.quizId));
+  if(type === 'fret') lqTeacherRevealFret();
+  else if(type === 'pcname') lqTeacherRevealPcName();
+}
 let lqTBusy = false;        // one write at a time; the buttons gate on it
 let lqTFretString = null;   // fret quiz only — the string picked in the strip; defaults to quiz.strings[0]
 
@@ -1295,6 +1339,7 @@ function lqTeacherListen(){
       }
       if(typeof teacherView !== 'undefined' && teacherView === 'livequiz'){ lqPaintStage(); lqPaintControls(); }
       lqStageSyncTick();
+      lqTArmAutoReveal();
     }, e => { console.warn('[live-quiz] teacher session listener stopped', e); lqTUnsubDoc = null; });
     if(!lqTUnsubAns) lqTUnsubAns = lqDoc().collection('answers').onSnapshot(snap => {
       lqTAnswers = snap.docs.map(d => d.data() || {});
@@ -1552,13 +1597,13 @@ function lqPaintControls(){
         <option value="flat"${lqTScoring === 'flat' ? ' selected' : ''}>Every correct answer = 1000</option>
         <option value="speed"${lqTScoring === 'speed' ? ' selected' : ''}>Faster = more points</option>
       </select></label>`
-      + lqLimitInputHtml(lqTPickedQuizId);
+      + lqLimitInputHtml(lqTPickedQuizId) + lqAutoRevealInputHtml(lqTPickedQuizId);
     const closeBtn = (s && s.state === 'ended')
       ? `<button type="button" class="lq-ctl ghost" onclick="lqTeacherClose()"${busy}>Clear the board</button>` : '';
     el.innerHTML = `<label class="lq-ctl-lbl">Quiz <select id="lq-quiz-pick" onchange="lqTPickedQuizId=this.value;lqTScoring=lqDefaultScoring(this.value);lqPaintControls()">${opts}</select></label>${scoring}`
       + `<button type="button" class="lq-ctl go" onclick="lqTeacherStart()"${busy}>Start game</button>`
       + `<button type="button" class="lq-ctl ghost" onclick="lqTeacherPreview()"${busy}>Preview</button>${closeBtn}${full}`
-      + `<div class="lq-ctl-hint">${escHtml(lqQuiz(lqTPickedQuizId).teacherHint)} Time to answer: blank or 0 = no limit. Preview runs the quiz on this screen only, without inviting students.</div>`;
+      + `<div class="lq-ctl-hint">${escHtml(lqQuiz(lqTPickedQuizId).teacherHint)} Time to answer: blank or 0 = no limit. Reveal when time runs out: the app presses Reveal for you about a second after the clock hits 0 (only on quizzes the app scores). Preview runs the quiz on this screen only, without inviting students.</div>`;
     return;
   }
   const quiz = lqQuiz(s.quizId);
@@ -1593,7 +1638,7 @@ function lqPaintControls(){
   const opener = fret ? lqFretPickerHtml(quiz, busy)
     : pcname ? lqPcNamePickerHtml(quiz, busy)
     : `<button type="button" class="lq-ctl go" onclick="lqTeacherNext()"${busy}>Next question</button>`;
-  el.innerHTML = opener + lqLimitInputHtml(s.quizId)
+  el.innerHTML = opener + lqLimitInputHtml(s.quizId) + lqAutoRevealInputHtml(s.quizId)
     + `<button type="button" class="lq-ctl ghost" onclick="lqTeacherEnd()"${busy}>End game</button>${full}` + pv;
 }
 
@@ -1665,7 +1710,7 @@ function lqTeacherExitPreview(){
   if(!lqTPreview) return;
   lqTPreview = false;
   lqTSession = lqTReal;
-  lqPaintStage(); lqPaintControls(); lqStageSyncTick();
+  lqPaintStage(); lqPaintControls(); lqStageSyncTick(); lqTArmAutoReveal();
 }
 // lqWrite's stand-in while previewing: the same three write shapes, applied to
 // the local doc. Server timestamps become null (the console reads its own
@@ -1680,7 +1725,7 @@ function lqPreviewWrite(patch, replace){
   lqTSession = replace === true ? clean : Object.assign({}, prev || {}, clean);
   if(lqTSession.state === 'off'){ lqTeacherExitPreview(); return true; }
   if(lqTSession.state === 'question' && (!prev || prev.state !== 'question' || prev.qIndex !== lqTSession.qIndex)) lqTQOpenedAt = performance.now();
-  lqPaintStage(); lqPaintControls(); lqStageSyncTick();
+  lqPaintStage(); lqPaintControls(); lqStageSyncTick(); lqTArmAutoReveal();
   return true;
 }
 

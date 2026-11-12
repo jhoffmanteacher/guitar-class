@@ -5091,6 +5091,74 @@ function checkLiveQuizTimerRepaint() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1cw. LIVE QUIZ — "Reveal when time runs out" (Jonathan, 2026-11-12)
+   The console presses Reveal itself when a timed round's clock runs out, on
+   quizzes the app scores (fret, pcname). EXECUTES the real live-quiz.js in a
+   VM with a fake clock and timers and pins: the option is ON by default; a
+   timed fret and pcname round reveal once the timer fires and not before it
+   is due (limit + grace); an mc round never does (no answer key); switched
+   off, nothing fires; and the mc start strip shows no checkbox.
+   ════════════════════════════════════════════════════════════════════ */
+function checkLiveQuizAutoReveal() {
+  head('1cw. Live quiz: Reveal when time runs out');
+  let bad = 0, cases = 0;
+  const flag = m => { err(`1cw: ${m}`); problems++; bad++; };
+  let now = 1e6, timers = [];
+  const store = {};
+  const box = {
+    console: { log() {}, warn() {}, error() {} },
+    performance: { now: () => now },
+    setInterval: () => 1, clearInterval() {},
+    setTimeout: (f, ms) => { const t = { f, at: now + ms, live: true }; timers.push(t); return t; },
+    clearTimeout: t => { if (t) t.live = false; },
+    localStorage: { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); } },
+    sessionStorage: { getItem: () => null, setItem() {} },
+    document: { hidden: false, getElementById: () => null, querySelectorAll: () => [], addEventListener() {},
+      body: { classList: { add() {}, remove() {} }, appendChild() {} }, createElement: () => ({}), contains: () => false },
+    t: k => k, tIn: k => k, escHtml: x => String(x), escAttr: x => String(x), applyI18n() {}, alert() {},
+    firebase: { firestore: { FieldValue: function () {} } }
+  };
+  box.firebase.firestore.FieldValue.serverTimestamp = () => null;
+  box.window = { addEventListener() {} };
+  try {
+    vm.createContext(box);
+    vm.runInContext(readFileSync(join(ROOT, 'live-quiz.js'), 'utf8'), box, { filename: 'live-quiz.js' });
+  } catch (e) { flag(`live-quiz.js would not load in the test VM: ${e.message}`); return; }
+  if (vm.runInContext('lqTAutoReveal', box) !== true) flag('the option is not ON by default (lqTAutoReveal)');
+  const id = type => vm.runInContext(`Object.keys(LIVE_QUIZZES).find(k => (LIVE_QUIZZES[k].type || "mc") === "${type}") || ""`, box);
+  const fretId = id('fret'), pcId = id('pcname'), mcId = id('mc');
+  if (!fretId || !pcId || !mcId) { flag('the bank needs one mc, one fret and one pcname quiz to test'); return; }
+  if (vm.runInContext(`lqAutoRevealInputHtml(${JSON.stringify(mcId)})`, box) !== '') flag('the mc quiz shows a "Reveal when time runs out" box (it has no answer key)');
+  if (!/id="lq-autoreveal"[^>]* checked/.test(vm.runInContext(`lqAutoRevealInputHtml(${JSON.stringify(fretId)})`, box))) flag('the fret quiz\'s box is missing or not ticked by default');
+  const runDue = () => { let fired; do { fired = false; for (const t of timers) if (t.live && t.at <= now) { t.live = false; t.f(); fired = true; } } while (fired); };
+  const rounds = [
+    { name: 'fret', quiz: fretId, target: { string: 'lowE', note: 'G' }, on: true, want: true },
+    { name: 'pcname', quiz: pcId, target: { string: 'lowE', fret: 3 }, on: true, want: true },
+    { name: 'mc', quiz: mcId, target: null, on: true, want: false },
+    { name: 'fret, switched off', quiz: fretId, target: { string: 'lowE', note: 'G' }, on: false, want: false }
+  ];
+  for (const r of rounds) {
+    timers = [];
+    const sess = JSON.stringify({ state: 'question', sessionId: 'S-' + r.name, qIndex: 0, quizId: r.quiz, limitSec: 5, target: r.target, scores: {} });
+    try {
+      vm.runInContext(`lqTPreview = true; lqTAutoReveal = ${r.on}; lqTAnswers = []; lqTSession = ${sess}; lqTQOpenedAt = ${now}; lqTArmAutoReveal();`, box);
+      now += 5000; runDue();
+      const early = vm.runInContext('lqTSession.state', box);
+      if (early !== 'question') flag(`${r.name}: revealed at 0 s, before the grace for late taps`);
+      now += 2000; runDue();
+    } catch (e) { flag(`${r.name}: threw ${e.message}`); continue; }
+    cases++;
+    const st = vm.runInContext('lqTSession.state', box);
+    if (r.want && st !== 'reveal') flag(`${r.name}: time ran out and the round is still "${st}", want "reveal"`);
+    if (!r.want && st !== 'question') flag(`${r.name}: the round went to "${st}" on its own; it must wait for the teacher`);
+  }
+  vm.runInContext('lqTSetAutoReveal(false)', box);
+  if (store['gc-lq-autoreveal'] !== '0') flag('switching it off is not remembered (gc-lq-autoreveal)');
+  if (cases !== 4) flag(`ran ${cases} rounds, pinned at 4`);
+  if (bad === 0) ok(`${cases} timed rounds: fret and pcname reveal when time runs out (after the grace), mc and switched-off wait; default ON, mc shows no box`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1cm. LIVE QUIZ — the public session doc holds NO name (Jonathan, 2026-11-05)
    liveQuiz/current is read by every signed-in account, and its `scores` map is
    keyed by uid. A display name there ties every other uid-keyed doc on the site
@@ -15419,6 +15487,7 @@ function checkPracticeMinutes(i18nTable) {
   await checkJourneyReadySave();
   checkSiteMadeClick();
   checkLiveQuizTimerRepaint();
+  checkLiveQuizAutoReveal();
   await checkLiveQuizNoNames();
   await checkLiveQuizPcNameNoLeak();
   checkCoachVerdicts();
