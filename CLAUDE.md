@@ -94,6 +94,11 @@ sections); resurrect the deleted student tour.
   "looks fine". A script that finds 0 in both the old and new tree proves nothing.
 - Product calls, and rules that contradict each other, go to Jonathan through
   AskUserQuestion — don't pick silently.
+- **Browser checks run in Chrome for Testing by default** (Jonathan, 2026-11-12). Drive it
+  headless through `CHROME` with a small script, as `tools/smoke.mjs` and
+  `tools/console-layout-smoke.mjs` do (a stub Firestore reaches the teacher console, which the
+  dev bypass cannot). Use the Claude in Chrome extension only when the task needs a person-style
+  click-through of the real page.
 - A review is due (see "Delegate site review work to agents by default") → spawn the
   reviewers yourself, in parallel, without asking. A change that ships Fast gets none.
 
