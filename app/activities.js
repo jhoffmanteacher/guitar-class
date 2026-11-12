@@ -176,21 +176,13 @@ function caMarkRowHtml(a, done, markLabel){
    student's progress (see the declaration) — shown only once it's above zero so a fresh card doesn't
    claim "0 done". */
 function caChunkMetaHtml(a){
-  // A ladder is sized by its steps. A practice card has no checklist since
-  // 2026-11-10, so no count: just its Optional tag and minutes, if any.
-  // A list row (no Today dots) shows no step count or done count since
-  // 2026-11-12 (Jonathan: "remove steps"); the Today hero keeps both.
+  // No step count and no done count on any card since 2026-11-12 (Jonathan:
+  // "remove steps"). What is left: the Optional tag, minutes if any, and the
+  // Today card's progress dots (caHeroDotsHtml).
+  const head = a.minutes ? [t('ca.aboutMin', {n: a.minutes})] : [];
   const dotsHtml = caHeroDotsHtml(a);
-  const n = dotsHtml ? caTickKeys(a).length : 0;
-  const head = n ? [n === 1 ? t('ca.stepCount1') : t('ca.stepCount', {n})] : [];
-  if(a.minutes) head.push(t('ca.aboutMin', {n: a.minutes}));
-  if(!head.length) return caOptionalTagHtml(a) ? `<div class="ca-chunk-meta">${caOptionalTagHtml(a)}</div>` : '';
-  const doneN = caTickCount(caTickKeys(a));
-  const doneText = doneN > 0 ? (doneN === 1 ? t('ca.doneCount1') : t('ca.doneCount', {n: doneN})) : '';
-  // The Today hero also draws progress dots (caHeroDotsHtml) between the
-  // step count and the done text.
-  const doneHtml = doneText ? `<span class="ca-chunk-done">${dotsHtml ? '' : '&middot; '}${escHtml(doneText)}</span>` : '';
-  return `<div class="ca-chunk-meta">${caOptionalTagHtml(a)}${head.map(escHtml).join(' &middot; ')}${dotsHtml}${doneHtml}</div>`;
+  const inner = caOptionalTagHtml(a) + head.map(escHtml).join(' &middot; ') + dotsHtml;
+  return inner ? `<div class="ca-chunk-meta">${inner}</div>` : '';
 }
 function caCheckMetaHtml(a){
   const n = ecItems(a).length;

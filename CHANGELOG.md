@@ -9,7 +9,7 @@ see `WORKFLOW.md` and the git commit log.
 ## 2026-11-12 — Cleaner activity list
 
 - **Activity names line up on the left.** In the activity list, each date now sits at the right end of its row.
-- **No more "6 steps · 5 done" under each name** in the list. The Today card still shows its progress dots.
+- **No more "6 steps · 5 done" under activity names**, in the list or on Today's card. Today's card still shows its progress dots.
 
 ## 2026-11-11 — Name the Power Chord shows the whole fretboard and the whole chord
 

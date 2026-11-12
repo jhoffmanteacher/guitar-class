@@ -3473,9 +3473,9 @@ span.tab-count-held{margin-left:4px}
    CTA — the hero's affordance to expand is the button itself. */
 .ca-hero-summary::before{display:none}
 .ca-hero-dots{display:inline-flex;gap:5px;margin-left:10px;vertical-align:middle}
+.ca-chunk-meta > .ca-hero-dots:first-child{margin-left:0}
 .ca-hero-dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--border2);display:inline-block}
 .ca-hero-dot.f{background:var(--ca-accent);border-color:var(--ca-accent)}
-.ca-chunk-done{margin-left:8px}
 @media(max-width:640px){
   .ca-hero-summary{flex-direction:column;position:relative}
   .ca-hero-side{width:100%;flex-direction:row-reverse;align-items:center}

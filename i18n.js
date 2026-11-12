@@ -389,15 +389,12 @@
     'ca.heroKeepGoing':        { en: 'Keep going', es: 'Seguir' },
     'ca.heroStartCheck':       { en: 'Start the check', es: 'Empezar la prueba' },
     // ── Chunk-size meta line (practice-chunks work order, 2026-09-19) ──
-    // caChunkMetaHtml() joins whichever of these apply into one quiet line
-    // under the card title: step count, an optional authored `minutes`, and
-    // — once any step is ticked THIS SESSION (caStepDone is in-memory only,
-    // see app.js) — a running done count. n===1 gets its own key, same
-    // pattern as sr.daysAgo1, so English/Spanish don't read "1 steps".
+    // caChunkMetaHtml() shows `minutes` under a card title. The step and
+    // done counts left the cards 2026-11-12; ca.stepCount stays for the
+    // path heads (caPathHtml). n===1 gets its own key, so neither language
+    // reads "1 steps".
     'ca.stepCount1':           { en: '1 step', es: '1 paso' },
     'ca.stepCount':            { en: '{n} steps', es: '{n} pasos' },
-    'ca.doneCount1':           { en: '1 done', es: '1 hecho' },
-    'ca.doneCount':            { en: '{n} done', es: '{n} hechos' },
     'ca.aboutMin':             { en: 'about {n} min', es: 'unos {n} min' },
     'ca.checkMeta1':           { en: '1 question · one try', es: '1 pregunta · un intento' },
     'ca.checkMeta':            { en: '{n} questions · one try', es: '{n} preguntas · un intento' },
