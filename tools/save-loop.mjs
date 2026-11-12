@@ -21,14 +21,22 @@
      --stall=SEC        watchdog: no case finished for SEC seconds (default 120) -> prints where it was, exit 3
      --list             the families and the fake faults
    stdout is identical for the same seed and site; the run time is printed on stderr.
-   Exit 0 = every case passed; 1 = a case failed (or the fake failed its self-test); 2 = bad arguments; 3 = watchdog.
+   Exit 0 = every case passed (KNOWN faults below excepted); 1 = a case failed, the fake failed its self-test, or a full
+   default run matched nothing for a KNOWN entry; 2 = bad arguments or the tool itself crashed; 3 = watchdog.
+
+   KNOWN. Site faults this tool found that are still open, listed at the bottom of the file (const KNOWN) with the date
+   they were listed. A wrong value that matches an entry EXACTLY is printed as "~ known, listed <date>" and does not fail;
+   anything else fails; a full default run (every family, 180 cases or more) in which an entry matches nothing fails, so
+   a fixed fault gets its entry taken out. Listed 2026-11-12: an exit check marked done with no score after a failed
+   sign-in read; a PR history replaced by a one-entry history after a failed sign-in read.
 
    WHAT IS REAL. The site's own scripts, unmodified, each run as its own script in a Node vm context, one context per
    browser tab: i18n.js, guitar-diagrams.js, class-activities.js, config-main.js, every module-N.js and every app part
    in index.html's load order (tools/site-src.mjs siteParts). Nothing is lifted out with a regex and nothing in them is
    replaced. The student acts through the site's own entry points: onCompleteChange, onCaStepChange,
-   onClassActivityChange, onResponseChange, logPracticeRep, dkSaveBest, bumpPracticeStreak, caPickPath, ecStart +
-   ecPick (which calls ecSubmit). Hiding or closing the tab fires the site's own visibilitychange listeners (which
+   onClassActivityChange, onResponseChange (answers, and PR entries with onResponsePRBlur), logPracticeRep, dkSaveBest,
+   bumpPracticeStreak, caPickPath, toggleSkill (the checklist), setSkillLevel (Module Review ratings), periodPick,
+   ecStart + ecPick (which calls ecSubmit). Hiding or closing the tab fires the site's own visibilitychange listeners (which
    call flushOnHide) and pagehide listener (shell.js), and the browser's 'online' event its own re-save listener
    (shell.js). queueSave's debounce, flushSave's retries, withTimeout, ensureDb's on-demand SDK load,
    swap45Commit's transaction and loadProgress all run as written, on the virtual clock.
@@ -48,7 +56,8 @@
        F2 In a merge, a map value that is EMPTY is itself a field in the update mask, so it REPLACES the stored map
           with {} (the SDK's field mask names the empty map's own path).
        F3 Arrays and scalars are replaced whole, never merged element by element.
-       F4 FieldValue.delete() removes the field; it is allowed only in update() and set() with {merge:true}.
+       F4 FieldValue.delete() removes the field; it is allowed only in update() (as a top-level value: nested in a map
+          it is refused) and in set() with {merge:true}.
        F5 update(patch): each key is a field PATH ("games.dk"); its value replaces that field whole; the document
           must exist (else NOT_FOUND).
        F6 set() without merge replaces the whole document.
@@ -61,24 +70,39 @@
        F11 A write the SDK could not send stays queued in that tab's memory and is sent on reconnect; it is lost if
            the tab closes first (no enablePersistence on this site). A write already sent lands even if the tab
            then closes.
-     The network, per device, is a list of phases: up (40-400 ms per round trip), slow (2-6 s), fail (the write or read
-     is REJECTED after 200-800 ms and not applied), stall (nothing settles until the phase ends; queued writes then
-     land in order, if the tab is still open; a read or a transaction fails after 10 s, "the client is offline", or
-     goes through at the reconnect if that comes sooner).
+       F12 Offline, set() does not fail: it waits for the reconnect (F11); get() and transactions fail at once ("the
+           client is offline").
+     The network, per device, is a list of phases:
+       up       40-400 ms per round trip;
+       slow     2-6 s per round trip;
+       stall    the connection hangs: writes wait for the end of the phase (F11); a read or a transaction fails after
+                10 s, or goes through at the reconnect if that comes sooner;
+       offline  the browser knows it is offline: 'offline' / 'online' events fire on that device's open tabs at the
+                phase's ends; writes wait (F12); reads, transactions and the Firestore SDK's <script> fail at once;
+       refused  the server REFUSES the write or read after 200-800 ms (permission-denied, quota): nothing is applied.
+                This is the only phase in which set() rejects.
      A self-test of these rules runs before the cases; --fake-fault breaks one rule and the self-test must fail.
    - A scripted student (made-up uid and name), generated per case from the seed: ticks and un-ticks lesson steps,
      activity steps and activities, answers questions, logs reps (with a best), saves a deck best, bumps the
      streak, picks a path, takes an exit check; tabs open, hide and show at chosen moments; a second tab on the same
      device (shared localStorage and network) or a second device (its own).
+     It acts only once the app is on screen (the sign-in read has settled) and only where the screen offers an action:
+     the tool keeps its own model of each tab's view (what it loaded, then its own actions) and skips an action that
+     would change nothing there (un-ticking what is not ticked, re-picking the path already picked, a deck score under
+     the best, the same answer again, a one-try exit check that view already holds a result for).
      A tab ends in one of three ways: CLOSE (visibilitychange, then pagehide), LID (the lid shuts: visibilitychange
      only, and the tab never runs again) or DIE (the battery dies: no event at all). Each kills the tab after its
-     pending microtasks run: its timers never fire, its queued writes are lost (F11), writes already sent still land.
+     pending microtasks run: its timers never fire, its queued writes are lost (F11), writes already sent still land
+     — except that in half the CLOSE scenarios a write started while the page unloads never leaves the browser
+     (app/start.js: pagehide's flush "is a Firestore write started during unload and is not reliably delivered"; K3).
      A phase can be marked offline: the browser's 'offline' and 'online' events fire on that device's open tabs.
 
-   NOT MODELLED. onSnapshot (the site does not listen to progress/{uid}); offline persistence (enablePersistence);
+   NOT MODELLED. One clock is shared by every tab and device (no clock skew, the same day boundary everywhere); onSnapshot (the site does not listen to progress/{uid}); offline persistence (enablePersistence);
    the security rules (tools/pm-rules-test.mjs covers rules); the local cache's latency compensation on get(); a
-   tab still running a build from before the Module 4/5 move; skills, place (lastModule/lastSet), period, songReady
-   (tabs/journey.js has its own check, checks.mjs 1bw), PR-history responses, Module Review; showApp() and rendering;
+   tab still running a build from before the Module 4/5 move; songReady (tabs/journey.js has its own check, checks.mjs
+   1bw); Module Review beyond its ratings (reflection, performance, the mrN-complete key); place (lastModule/lastSet):
+   compared as untouched only when no checklist tick or rating happened, because a tick also saves the place the
+   student is on and this tool does not navigate between sets; showApp() and rendering;
    rAF callbacks (never run). Every call into site code carries a 10 s vm timeout, so an endless loop there is a fault
    (R12), not a hang; the watchdog covers a run that stops making progress anywhere else.
 
@@ -119,12 +143,21 @@
      R11 Known exposures, counted and not failed:
          K1 "a key both tabs hold" (save.js:608-616): a tab sends a whole category, so its older copy of a key another
             tab changed can overwrite the newer value. Counted only when a write from tab X, carrying exactly the stored
-            value, landed after the last owed action on that key by a DIFFERENT tab, and that value is one the oracle's
-            own model of tab X held (what X loaded, then X's own actions).
+            value, landed after the last owed change to that key by a DIFFERENT tab Y, a write from Y carrying Y's new
+            value landed before X's, and the value is one the oracle's own model of tab X held (what X loaded, then X's
+            own actions).
          K2 two devices can save different path picks (WORKFLOW.md, 2026-11-09 product calls: "rare, nothing lost").
+         K3 a write started while the page unloads was not delivered (the CLOSE scenarios that say so): the value is
+            what the doc would hold had that close not been a clean point.
      R12 Nothing the site runs may throw or leave a rejected promise unhandled (the global "Something went wrong"
-         banner; save.js:644-650).
+         banner; save.js:644-650). A rejection nobody handles while a case runs is filed against that case.
      R13 name and email are the signed-in user's; fields this tool does not model are left as they were.
+     R14 A checklist cell or a Module Review rating sets the value that tab shows next: "I've got it" on a skill not got
+         gives 'gotit' (and counts the day for the streak, R5), on one got gives 'working'; "working on it" cycles
+         gotit -> working, working -> none, else working; a rating gives that level, or 'none' when it was that level.
+     R15 The period picked replaces the stored one.
+     R16 A PR entry appends {value, date} to that key's history (an old bare value becomes its first entry with no
+         date) and keeps the last 8 (save.js:487-490: "a short history instead of a single overwritten value").
 
    Reading a FAIL line: case index, family, the stored value, the values the oracle accepts, and the replay command. */
 import vm from 'node:vm';
@@ -844,9 +877,13 @@ function oracle(sc, world, tabs){
       /* R11 K1: a key both tabs hold. */
       const leafPath = k.split('.');
       const k1 = world.landed.find(w => {
-        if (w.path !== 'progress/' + USER.uid || w.tx || canon(getRec(w.data, leafPath)) !== g) return false;
+        if (w.path !== 'progress/' + USER.uid || w.tx || sentLeaf(w.data, leafPath) !== g) return false;
         const lastOther = effs.filter(x => x.owed && x.changed && x.a.tab !== w.tab).pop();
-        return !!lastOther && w.at >= lastOther.a.t && viewsOf(tabBy[w.tab], rec, effs).has(g);
+        if (!lastOther || w.at < lastOther.a.t || !viewsOf(tabBy[w.tab], rec, effs).has(g)) return false;
+        /* ...and the other tab's newer value did reach the server before it was overwritten (otherwise nothing of the
+           other tab's was lost to this one: its own write went missing, which is a failure). */
+        const after = flatten(lastOther.e.fn(viewBefore(tabBy[lastOther.a.tab], rec, effs, lastOther)), rec, new Map()).get(k) || '∅';
+        return world.landed.some(w2 => w2.tab === lastOther.a.tab && !w2.tx && w2.path === w.path && w2.at >= lastOther.a.t && w2.at <= w.at && sentLeaf(w2.data, leafPath) === after);
       });
       if (k1){ known.push({ kind: 'K1 a key both tabs hold', leaf: k, stored: g, accept: [...set], by: k1.tab }); continue; }
       /* The facts the second KNOWN entry is matched on: a PR history replaced by the one a tab whose read failed built
@@ -879,6 +916,13 @@ function oracle(sc, world, tabs){
   for (const t of tabs) for (const f of t.faults) fails.push({ msg: `${t.name}: site code ${f} (R12)` });
   for (const f of world.faults || []) fails.push({ msg: `site code: ${f} (R12)` });
   return { fails, known, leaves, owedN, notOwedN };
+}
+/* What a merge write SAID about a leaf: its value, '∅' for a FieldValue.delete(), or null when it did not name the leaf
+   (an absent key in a merge leaves the stored value alone, so it carries nothing). */
+function sentLeaf(data, path){
+  let o = data;
+  for (const p of path){ if (!o || typeof o !== 'object' || o instanceof FieldDelete || !(p in o)) return null; o = o[p]; }
+  return canon(o);
 }
 /* What a tab loaded (a fact of the fake world), and whether the load failed. */
 function loadFacts(world, t){
