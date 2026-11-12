@@ -51,7 +51,19 @@ these; none was a guess.
 
 ## How we know it still works
 
-RESULTS-PLACEHOLDER
+Five separate proofs, each run on the exact code that went live:
+
+| Proof | Result |
+|---|---|
+| **Old site against new site** (`golden.mjs`): every set, screen, game, activity card, song page, console view and live-quiz screen in both languages; 2,755 real clicks on controls that save something, with what each one saved; what reaches the server; which sets are locked for a real student; the filled-in state; Next and Back; a picture of every view | **1,399 of 1,399 recorded files identical**, 0 errors. Four pictures differed by 13 to 23 pixels out of 897,000, each by one step of colour: text-edge drawing noise, listed by the tool, invisible to the eye |
+| **Slow loading** (`slow-load.mjs`): every file delayed at random, with clicks and Back presses fired while files were still arriving | 20 of 20 loads without an error. (Before the fixes it failed 5 of 5 in that case, which is how one real fault was found.) |
+| **Returning students' update** (`sw-upgrade-proof.mjs`): from this morning's site to tonight's | 35 of 35 checks; one known gap, which you accepted (below) |
+| **The everyday tests**: the pre-push checks, the smoke test in both languages, the console test, the practice-minutes and listening simulations | All pass. The listening simulations give the same numbers as before the cut; no student's saved ticks move |
+| **Independent reviews** by fresh reviewers who had not seen the work | Three rounds on the helper the test tools use, a deep review of the hand-made changes, and a final high-effort review of everything going live. No blocking or major problem was found in the code; every smaller finding was fixed and re-proved |
+
+One reviewer also checked the central claim directly: the 29 files put back together differ from this
+morning's code in 8 small places, all of them the intended ones, and nowhere does a file use something from a
+file that loads after it (2,146 statements checked).
 
 The reviews mattered. The first version of the snapshot tool looked thorough and was not: a reviewer broke
 the site eight different ways (saves going to the wrong place, sets locking for everyone, ticks vanishing on

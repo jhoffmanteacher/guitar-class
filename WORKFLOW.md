@@ -394,7 +394,14 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
       against new, `--compare`), `tools/slow-load.mjs` (every script held back at random, so parts arrive late and in
       any order) and `tools/sw-upgrade-proof.mjs` (a returning student's service worker going from the old cache to
       the new files).
-      RESULTS: <the lead fills in the final numbers>
+      RESULTS (on the pushed tree): `golden.mjs` old site vs new, 1,399 of 1,399 files identical, 0 errors (4
+      screenshots inside drawing noise: 13 to 23 pixels of 897,000, each by 1/255); `slow-load.mjs` 20 of 20
+      (5 of 5 FAILED before the hash router was registered last); `sw-upgrade-proof.mjs` from the morning's main,
+      35 assertions, 1 finding (accepted, below); full `checks.mjs`, `smoke.mjs` EN + ES (3,163 handlers), the
+      console smoke, pm-sim 390, the closed-loop cells and `replay-takes` (same numbers as before the cut),
+      `rule-zero-proof` all pass. Reviews: three rounds on `site-src.mjs`, a deep review of the wiring, an
+      independent high-effort review of the landing: no BLOCKER or MAJOR in the code. The parts rejoined differ
+      from the morning's code by 0 hunks (console), 2 (arcade: two guards) and 6 (app: the listed changes).
       Tools: every Node tool reads the three scripts through `tools/site-src.mjs`, where `app.js`, `coach.js` and
       `teacher.js` are logical names for "the whole script". Notes dated before the cut use those names for files.
       Two accepted risks: (1) a page that is open during the deploy and opens Games before its automatic reload gets
