@@ -23,6 +23,24 @@ before and after with `--compare` identical, `node tools/slow-load.mjs`, the ful
 `coach-*` also the three mic-sim commands in `CLAUDE.md`. A split touches load order, so it is Always-Reviewed.
 Check `tools/mic-sim/` and `checks.mjs` for text they pin in the section being moved before moving it.
 
+## Next session: start here
+
+Jonathan will say "read todo.md" in a fresh chat. Do this, in this order:
+
+1. **Ask him how the real-Chromebook check went** (AskUserQuestion: fine / a problem). The cut went live
+   2026-11-11 at 18:28. He was to sign in as a student on school Wi-Fi, open a set, an In-Class Activity and a
+   game, then the console. If he reports a blank page, a "couldn't load" or anything odd: stop and look at that
+   first. The rollback is two reverts and a push (WORKFLOW.md, 2026-11-11 entry). Do nothing else until it is
+   understood.
+2. **If it went fine: bring `tools/pm-e2e.mjs` up to date** (first bullet of the next section). Small, tools only.
+3. **Then the second adversarial review of `tools/golden.mjs`** (second bullet; cap 8 mutations; it needs the
+   headless browser for a long stretch, so nothing else that uses Chrome beside it; `CHROME` points at Chrome
+   for Testing).
+4. **Stop there and report.** Do NOT split any part in that session. The four big parts get a quiet session of
+   their own (the section after next), one part per change, and `coach-core.js` only with Jonathan present.
+
+Ordinary work does not wait for any of this: a Fast change or a new activity he asks for comes first.
+
 ## Follow-ups from the 2026-11-11 cut (none urgent)
 
 - **`tools/pm-e2e.mjs` is out of date, on the old site too.** It expects the practice-minutes strip to show while
