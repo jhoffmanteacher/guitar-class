@@ -13,8 +13,9 @@
 
      node tools/split-site.mjs                    check tools/split-plan.json against this checkout
                                                   (writes nothing)
-     node tools/split-site.mjs --write --in-place also write the part files into this checkout: the cut itself
-                                                  (coach.js and teacher.js become their first parts)
+     node tools/split-site.mjs --write --in-place the cut itself, in this checkout: writes the parts (coach.js and
+                                                  teacher.js become their first parts), deletes app.js, and
+                                                  wires the site to load the parts (THE WIRING, below)
      node tools/split-site.mjs --src <dir>        read app.js / coach.js / teacher.js from another folder
      node tools/split-site.mjs --out <dir>        write the parts under another folder (implies --write)
      node tools/split-site.mjs --plan <file>      another plan file
@@ -108,11 +109,58 @@ if (failed) { console.error(`split-site: ${failed} problem(s); nothing written`)
    <newer main> --write), which the first form of this test let through (review R3-3). */
 const replaces = OUT ? results.filter(r => r.parts.some(p => p.file === r.name) && existsSync(join(OUT, r.name))).map(r => r.name) : [];
 if (OUT && (OUT === SRC || replaces.length) && !args.includes('--in-place')) { console.error('split-site: --write would cut the files of this very folder. Use --out <another folder> to look at the parts, or --write --in-place to make the cut here (then declare the part lists in the same change).'); process.exit(1); }
+/* THE WIRING (--in-place only, and only when all three scripts are cut in the same run). Cutting the files is
+   half of the cut; the site must also be told to load the parts. Four places hold the names, each prepared
+   ahead of the cut so that this is a change of DATA:
+     index.html   the script tags between <!-- site-parts:app.js --> and <!-- /site-parts:app.js -->
+     the app code `const COACH_JS_PARTS = ['coach.js'];` and `const TEACHER_JS_PARTS = ['teacher.js'];`
+     sw.js        './app.js' in PRECACHE_CRITICAL and in ASSETS, './coach.js' in ASSETS (the console's files
+                  are left out of the precache on purpose: checks.mjs SHELL_NOT_PRECACHED)
+     app.js       deleted: no part keeps that name
+   Everything is worked out and checked BEFORE a byte is written; one target that is missing or appears twice
+   stops the run. tools/site-src.mjs then reads the same declarations, and `node tools/checks.mjs` writes the
+   new CACHE_VERSION. */
+const WIRE = !!OUT && args.includes('--in-place');
+const wired = [];
+if (WIRE) {
+  const by = Object.fromEntries(results.map(r => [r.name, r]));
+  if (!by['app.js'] || !by['coach.js'] || !by['teacher.js']) { console.error('split-site: --in-place cuts and wires all three scripts together (do not use --only with it)'); process.exit(1); }
+  const once = (text, find, what) => { const n = text.split(find).length - 1; if (n !== 1) { console.error(`split-site: ✗ wiring: ${what} is there ${n} times, it must be there exactly once: ${JSON.stringify(find)}`); process.exit(1); } };
+  const files = name => by[name].parts.map(p => p.file);
+  // index.html
+  const htmlFile = join(OUT, 'index.html'); let html = readFileSync(htmlFile, 'utf8');
+  const open = '<!-- site-parts:app.js -->', close = '<!-- /site-parts:app.js -->';
+  once(html, open, 'the opening marker in index.html'); once(html, close, 'the closing marker in index.html');
+  const nl = html.includes('\r\n') ? '\r\n' : '\n';
+  html = html.slice(0, html.indexOf(open) + open.length) + nl + files('app.js').map(f => `<script defer src="${f}"></script>`).join(nl) + nl + html.slice(html.indexOf(close));
+  wired.push([htmlFile, html]);
+  // the two arrays, in whichever app part holds them
+  for (const [arr, name] of [['COACH_JS_PARTS', 'coach.js'], ['TEACHER_JS_PARTS', 'teacher.js']]) {
+    const line = `const ${arr} = ['${name}'];`, r = by['app.js'];
+    once(r.bodies.join(''), line, `the line ${line} in app.js`);
+    const i = r.bodies.findIndex(b => b.includes(line));
+    r.bodies[i] = r.bodies[i].replace(line, `const ${arr} = [${files(name).map(f => `'${f}'`).join(', ')}];`);
+  }
+  // sw.js
+  const swFile = join(OUT, 'sw.js'); let sw = readFileSync(swFile, 'utf8');
+  const listOf = (text, constName) => { const a = text.indexOf(`const ${constName} = [`); if (a < 0) { console.error(`split-site: ✗ wiring: no "const ${constName} = [" in sw.js`); process.exit(1); } return [a, text.indexOf('\n];', a)]; };
+  for (const [constName, names] of [['PRECACHE_CRITICAL', ['app.js']], ['ASSETS', ['app.js', 'coach.js']]]) for (const name of names) {
+    const [a, b] = listOf(sw, constName), body = sw.slice(a, b), entry = `  './${name}',`;
+    once(body, entry, `${entry.trim()} in sw.js ${constName}`);
+    sw = sw.slice(0, a) + body.replace(entry, files(name).map(f => `  './${f}',`).join('\n')) + sw.slice(b);
+  }
+  wired.push([swFile, sw]);
+}
 for (const r of results) {
   console.log(`split-site: ${r.name} (${r.total} lines) → ${r.parts.length} parts, put back together = the source, each parses on its own`);
   r.parts.forEach((p, i) => { const end = i + 1 < r.starts.length ? r.starts[i + 1] : r.total; console.log(`  ${String(r.starts[i] + 1).padStart(6)}-${String(end).padEnd(6)} ${String(end - r.starts[i]).padStart(5)} lines  ${p.file}`); });
   if (OUT) for (const [i, p] of r.parts.entries()) { const f = join(OUT, p.file); mkdirSync(dirname(f), { recursive: true }); writeFileSync(f, r.bodies[i]); }
 }
 if (!results.length) { console.error('split-site: nothing to do (no source file matched)'); process.exit(1); }
+if (WIRE) {
+  for (const [f, text] of wired) writeFileSync(f, text);
+  rmSync(join(OUT, 'app.js'), { force: true });
+  console.log('split-site: wired: index.html loads the app parts, COACH_JS_PARTS and TEACHER_JS_PARTS list theirs, sw.js precaches the app and arcade parts, app.js is deleted. Next: node tools/checks.mjs (it writes the new CACHE_VERSION).');
+}
 const replaced = replaces;
 console.log(OUT ? `split-site: ✓ parts written under ${OUT}` + (replaced.length ? ` (${replaced.join(' and ')} now ${replaced.length > 1 ? 'hold' : 'holds'} only the first part; any other source file is left as it is and must be deleted, and the part lists declared, in the same change: see tools/site-src.mjs)` : ' (the source files are left as they are)') : 'split-site: ✓ plan checks out (nothing written; --write or --out <dir> writes the parts)');
