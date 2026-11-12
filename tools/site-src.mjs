@@ -1,9 +1,10 @@
 /* site-src.mjs — the ONE place a Node tool reads the text of app.js, coach.js or teacher.js (rebuild slice 0a, 2026-11-11).
 
-   Why: the rebuild (todo.md, "The shape of the rebuild") cuts those three scripts into part files that, concatenated
-   in load order, equal today's file byte for byte. Many tools read the three files by name as TEXT (checks.mjs pins,
-   pm-sim, grid-sim, the mic-sim tools). They all call this file, so after the cut they still see the same text.
-   Today nothing is cut: each part list is the single file, and siteSource(name) is readFileSync(name, 'utf8').
+   Why: on 2026-11-11 those three scripts were cut into part files (todo.md, "The shape of the rebuild") that,
+   concatenated in load order, are the whole script. Many tools read the three by name as TEXT (checks.mjs pins,
+   pm-sim, grid-sim, the mic-sim tools). They all call this file, so they still see one script each.
+   In a tree that is not cut (an old commit, a rolled-back site) each part list is the single file, and
+   siteSource(name) is readFileSync(name, 'utf8').
 
    Zero dependencies, Node 18+, Windows and macOS.
 

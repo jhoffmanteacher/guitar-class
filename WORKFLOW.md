@@ -400,8 +400,10 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
       Two accepted risks: (1) a page that is open during the deploy and opens Games before its automatic reload gets
       a load error until the reload; (2) a Chromebook whose update was interrupted and which is then fully offline
       shows a blank page until it is online again.
-      Roll back: revert the cut commit and push. The whole scripts come back, and the tools keep working because
-      `site-src.mjs` falls back to the single file.
+      Roll back: revert TWO commits and push: the one titled "The cut: app.js, coach.js and teacher.js become 29
+      part files" and the one titled "Docs for the cut…" (left in place, CLAUDE.md would say the three files do
+      not exist and the rule files would stop loading for them). Both revert cleanly (tried 2026-11-11); the
+      whole scripts come back and the tools keep working, because `site-src.mjs` falls back to the single file.
       The plan and the record: `todo.md` → "Refactor the whole site". Still open there: Phase 2 (the clean-ups) and
       the items under "Step 1, not recorded yet".
 

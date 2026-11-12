@@ -1,6 +1,6 @@
 ---
 name: site-reviewer-deep
-description: Adversarial reviewer for the guitar site, Fable at medium effort (Opus at xhigh, then high, until Jonathan, 2026-11-09). Use it instead of site-reviewer when the change touches a danger-zone file (the save path in app/save.js, the console's config plumbing in teacher-config.js, firestore.rules, sw.js code, coach detection in coach-core.js and the ccLoop grading lines in coach-chords.js) or is a sweep of 50+ strings. Tries to BREAK fixes on a pinned commit; never use it to confirm work. Every review round of the 2026-10-25 sweep (run at this level) found real regressions the fixers' own proofs missed.
+description: Adversarial reviewer for the guitar site, Fable at medium effort (Opus at xhigh, then high, until Jonathan, 2026-11-09). Use it instead of site-reviewer when the change touches a danger-zone file (the app's save path: app/save.js and any other direct write to progress/{uid}, the console's config plumbing in teacher-config.js, firestore.rules, sw.js code, coach detection in any coach-*.js part: the onset and pitch detectors and the grading rules, mostly coach-core.js and ccLoop / ccResolvePend / ccFinish in coach-chords.js) or is a sweep of 50+ strings. Tries to BREAK fixes on a pinned commit; never use it to confirm work. Every review round of the 2026-10-25 sweep (run at this level) found real regressions the fixers' own proofs missed.
 model: fable
 effort: medium
 ---

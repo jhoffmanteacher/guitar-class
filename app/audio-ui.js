@@ -465,6 +465,11 @@ function rebuildModuleContentPanels(){
   restoreLessonScroll(anchor);
 }
 window.addEventListener('gc-langchange', function(){
+  /* The app is fifteen files that run one after another, and the language button is on the sign-in wall. Until
+     the last file this handler reaches has run (refreshOpenClassActivitiesScreen lives there) nothing has been
+     built that would need redrawing, and going on would call pcStop() or scrollPane() before their files had
+     arrived (review RX-2, 2026-11-11). The language itself is switched by i18n.js before this runs. */
+  if(typeof refreshOpenClassActivitiesScreen !== 'function') return;
   // buildSearchIndex() now bakes in the CURRENT language via tf() — without
   // invalidating the cache here, a student who opened search before
   // switching to Spanish would keep matching only the stale English index.

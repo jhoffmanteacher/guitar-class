@@ -360,8 +360,8 @@ function loadScriptOnce(src){
   });
   return _lazyScripts[src];
 }
-/* The files that make up the arcade script and the console script, in load order. One file each today. They are
-   lists because each script is to be cut into parts (tools/split-site.mjs); tools/site-src.mjs reads these two
+/* The files that make up the arcade script and the console script, in load order (each script was cut
+   into parts on 2026-11-11, tools/split-site.mjs). tools/site-src.mjs reads these two
    lines, so each stays ONE line that starts the line, and neither name may appear in any other comment. */
 const COACH_JS_PARTS = ['coach-core.js', 'coach-hub.js', 'coach-chords.js', 'coach-ear.js', 'coach-strum.js', 'coach-runner.js', 'coach-more.js'];
 const TEACHER_JS_PARTS = ['teacher-core.js', 'teacher-activities.js', 'teacher-songs.js', 'teacher-config.js', 'teacher-manage.js', 'teacher-mic.js', 'teacher-students.js'];

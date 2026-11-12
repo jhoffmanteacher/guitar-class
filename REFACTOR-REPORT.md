@@ -10,8 +10,9 @@ Written for Jonathan. What was done, what it is worth, and what it is not.
   reason the cut could be made safely, and it stays useful for every risky change from now on.
 - Expect later changes to be somewhat quicker and cheaper for Claude to make, and two sessions working at once
   to get in each other's way less often. The honest size of that gain is below. It is real but not dramatic.
-- Students pay a very small price: the first visit downloads about 4% more and makes 14 more requests. After
-  the first visit the browser's saved copy is used, as before.
+- Students pay a very small price: the first visit downloads 4 to 5% more of this code and the page asks for
+  14 more files (opening Games asks for 7 where it asked for 1). After the first visit the browser's saved
+  copy is used, as before.
 
 ## What was actually done
 
@@ -27,13 +28,17 @@ Each new file holds one area: saving, lessons, In-Class Activities, practice car
 recordings view, and so on. A typical new file is about 1,200 lines. The largest is 2,400.
 
 Nothing was rewritten. Whole lines were moved by a script, and the script checks that the pieces put back
-together are the old files exactly. The listening code (how the games hear a guitar) was moved as one block
-with every line unchanged.
+together are the files it started from, exactly. The listening code (how the games hear a guitar) was moved
+as one block. Compared with the site as it was this morning, the pieces differ only by the small hand-made
+changes described next: the console's code is unchanged to the byte, the games' code differs by 7 lines, and
+the student site's by 6 small places.
 
 **2. A handful of small hand-made changes** so that many small files behave like one big one: the page and the
 service worker (the part that saves the site for offline use) list the new files; the games and the console
 load their files one after another; and three things that "start" the site (sign-in, the Back-button handler)
-now start last, after all the code has arrived. Tests found each of these; none was a guess.
+now start last, after all the code has arrived. Four one-line guards cover the split second while files are
+still arriving (the Tuner, Record or the language button pressed in that gap). Tests and reviews found each of
+these; none was a guess.
 
 **3. New test tools**, all in `tools/`:
 
@@ -59,7 +64,8 @@ All numbers below were measured from this repo's own history unless marked as an
 
 **A smaller working area for each change.** For the last 60 code changes to those three files, the file or
 files each change touched totalled a median of **10,700 lines**. The same changes, after the cut, would have
-touched files totalling a median of **2,100 lines**: about **4.6 times smaller (78% less)**.
+touched files totalling a median of **2,100 lines**. Change by change, the typical shrink was **78%**: the
+working area becomes about a fifth of what it was.
 
 Read that carefully. It is the size of the place Claude has to search and keep straight, not the cost of a
 session. Claude already avoids reading a whole 17,900-line file; it searches and reads sections. So the saving
@@ -88,8 +94,10 @@ sessions that change this code, and little or none on sessions that do not.** Th
 
 ## What it costs
 
-- **Students' first visit: about 4% more to download** (measured: 13,500 bytes more for the student site,
-  8,000 more for the games) **and 14 more requests.** No speed-up for students was intended or achieved.
+- **Students' first visit: 4 to 5% more of this code to download** (measured, compressed: about 13,500 bytes
+  more for the student site, 8,000 more for the games) **and 14 more files requested by the page**; opening
+  Games asks for 7 files where it asked for 1, and the offline copy holds 20 more entries. No speed-up for
+  students was intended or achieved.
 - **One accepted risk during an update.** If a Chromebook's update to a new version is interrupted and its
   very next visit has no internet at all, the page is blank until it is online again; then it repairs itself.
   Before today the same bad luck would have shown the old site. You chose to accept this on 2026-11-11.
@@ -111,8 +119,10 @@ sessions that change this code, and little or none on sessions that do not.** Th
 
 ## If something goes wrong
 
-Undo the commit titled "The cut" and push. The three big files come back, and every tool keeps working,
-because the helper falls back to the single file. The record of the whole job is in `todo.md` ("Refactor the
+Undo two commits and push: the one titled "The cut: app.js, coach.js and teacher.js become 29 part files" and
+the one titled "Docs for the cut…". The three big files come back, and every tool keeps working, because the
+helper falls back to the single file. A reviewer tried exactly this on a copy: both undo cleanly and the
+checks pass. The record of the whole job is in `todo.md` ("Refactor the
 whole site") and in `WORKFLOW.md` under 2026-11-11.
 
 ## One thing only you can check
