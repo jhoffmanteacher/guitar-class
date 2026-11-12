@@ -6,6 +6,11 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-12 — Cleaner activity list
+
+- **Activity names line up on the left.** In the activity list, each date now sits at the right end of its row.
+- **No more "6 steps · 5 done" under each name** in the list. The Today card still shows its progress dots.
+
 ## 2026-11-11 — Name the Power Chord shows the whole fretboard and the whole chord
 
 - **"Name the Power Chord" now draws all six strings** on every step, like the fretboard you already know. You still tap only the low E and A strings, where the roots are.
