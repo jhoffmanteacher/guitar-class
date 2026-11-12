@@ -26,7 +26,8 @@
 
    KNOWN. Site faults this tool found that are still open, listed at the bottom of the file (const KNOWN) with the date
    they were listed. A wrong value that matches an entry EXACTLY is printed as "~ known, listed <date>" and does not fail;
-   anything else fails; a full default run (every family, 180 cases or more) in which an entry matches nothing fails, so
+   anything else fails (the exit-check entry also needs the carrier the fault needs: another activity saved by that tab);
+   a full default run (every family, 180 cases or more) in which an entry matches nothing fails, so
    a fixed fault gets its entry taken out. Listed 2026-11-12: an exit check marked done with no score after a failed
    sign-in read; a PR history replaced by a one-entry history after a failed sign-in read.
 
@@ -899,7 +900,9 @@ function oracle(sc, world, tabs){
          exactly what the doc started with. */
       const byFailed = acts.some(a => a.kind === 'check' && a.key === id && !tabBy[a.tab].loadOk);
       const scoreAsStarted = canon(getRec(stored, ['exitChecks', id])) === canon(getRec(base, ['exitChecks', id]));
-      fails.push({ msg: `classActivities.${id}: the exit check is filed as done with no score behind it (R7, activities-2.js:276-287)`, rule: 'R7-mark', card: id, byFailed, scoreAsStarted });
+      /* ...and the mark had a carrier: that same tab also saved classActivities for another activity in that session. */
+      const carrier = acts.some(c => c.kind === 'check' && c.key === id && !tabBy[c.tab].loadOk && acts.some(a => a.kind === 'activity' && a.key !== id && a.tab === c.tab));
+      fails.push({ msg: `classActivities.${id}: the exit check is filed as done with no score behind it (R7, activities-2.js:276-287)`, rule: 'R7-mark', card: id, byFailed, scoreAsStarted, carrier });
     }
   }
   /* R9: the doc ends marked. R13: name, email, and the fields not modelled. */
@@ -1143,6 +1146,14 @@ function genScenario(seed, idx, famFilter){
     devA.phases.unshift({ phase: 'up', until: T0 + 2500 });
     const tA = tabSpec('A', devA, 0);
     for (let n = ri(4, 10); n > 0; n--) randomAct('A', ri(3, 38) * S + ri(0, 999));
+    /* An un-tick whose first save the server refuses: the delete must survive the refusal (save.js:680-687). */
+    {
+      let i = devA.phases.findIndex(p => p.phase === 'refused');
+      if (i < 0){ devA.phases = [{ phase: 'up', until: T0 + 10 * S }, { phase: 'refused', until: T0 + 16 * S }, ...devA.phases.filter(p => p.until > T0 + 16 * S)]; i = 1; }
+      const from = i ? devA.phases[i - 1].until : T0;
+      const kind = pick(['step', 'caStep']);
+      act('A', from - T0 + 100, kind, { key: kind === 'step' ? pick(['m6w1-b-sec0-0', 'm6w1-b-sec0-1', 'm7w1-b-sec1-0']) : pick(['ca-18:0', 'ca-18:1']), on: false });
+    }
     for (let n = ri(0, 2); n > 0; n--){ const h = ri(5, 35) * S; ev(tA, h, 'hide'); ev(tA, h + ri(1, 4) * S, 'show'); }
     settle = 45 * S;
     /* One case in three: the tab opens with the Wi-Fi down, so the Firestore SDK cannot load (and the read fails); the
@@ -1496,7 +1507,7 @@ async function main(){
 const KNOWN = [
   { id: 'K-exitcheck-mark-2026-11-12', listed: '2026-11-12',
     what: 'after a failed sign-in read, an exit check\'s done mark rides out with the next classActivities save while its score stays held back (activities-2.js:276-287 + save.js flushSave)',
-    match: x => x.rule === 'R7-mark' && x.byFailed && x.scoreAsStarted },
+    match: x => x.rule === 'R7-mark' && x.byFailed && x.scoreAsStarted && x.carrier },
   { id: 'K-pr-history-2026-11-12', listed: '2026-11-12',
     what: 'after a failed sign-in read, a new PR entry saves a one-entry history over the stored one (responses is not held back, and the array is replaced whole)',
     match: x => x.rule === 'R16-wiped' }
