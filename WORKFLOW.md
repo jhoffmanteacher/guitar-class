@@ -110,7 +110,7 @@ Start here. Update this block whenever an item opens or closes; each line says w
   Known trade-offs: on the first load after an update the module files and step images come from the network once; a
   Journey page not yet in the new cache needs the network (no HTTP-cache fallback offline, the 2026-10-16 rule); a student
   on a Module Review gets its assessment reminder right after the update reload. Not restored: In class's two folds, a
-  search, a card's open step, the board's sort. Not seen yet on the live site or a school Chromebook. The first deploy of this change can
+  search, a card's open step, the board's sort. The logic is proved in headless Chrome with a real service worker by `tools/update-reload-loop.mjs` (2026-11-12: lesson, checklist, In class, Songs, My progress, a deep link, Spanish, four console places, busy waits and the 5-minute limit, the person wins, another account, a stale note, a plain reload, a locked preview); one gap found there, a deep-linked activity page loses its scroll. Still not seen on a school Chromebook. The first deploy of this change can
   need one manual reload (pages still on the old `app.js` listen too late for the faster takeover).
   **A student with an unfinished activity now stays where they were after an update** instead of being sent to In-Class
   Activities (the "pops up on login" half of the gate, kept 2026-10-07, no longer fires on the update reload).
@@ -382,6 +382,30 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 ---
 
 ## Recently shipped (post-archive)
+
+- [x] **2026-11-12 — `tools/update-reload-loop.mjs`: the update reload lands where you were, played in a real browser**
+      (work order `Claude outputs/WORK-ORDER-closed-loop-tests.md`, Part 2; Reviewed, two rounds, the second with no
+      BLOCKER or MAJOR). What it is: it serves version 1 and version 2 of the site (one marker string apart, `checks.mjs`
+      run in the copy) to headless Chrome for Testing with a real service worker, goes to a place, triggers the update,
+      waits for the page's own reload and compares the place. No site file changed. Not in `checks.mjs` (about 16
+      minutes, one headless-browser run at a time): run it after a change to `sw.js`, the service-worker block in
+      `app/start.js`, `swResume*` in `app/boot.js` or `teacherResume*` in `teacher-core.js`.
+      29 cases: a lesson one step at a time, all steps, the checklist, a lesson behind Songs; In class, Songs, My
+      progress; a deep link; Spanish; four console places. Busy means wait (Shuffle, a card playing, an exit check, a
+      recording, and the eight other busy reasons), with the 5-minute limit checked at 4:50 and 5:01 on a fake clock.
+      The person wins, before the restore starts (press, key, wheel) and after it lands (a wheel, lesson and console).
+      Never another account's place, never a note 10:01 old (9:58 control), never on a plain reload, never a locked
+      preview. Every case: version 2 landed, one reload, the note gone, the saved maps unchanged and no save started,
+      the first visit did not reload.
+      Full run on 2026-11-12 (967 s): 28 of 29 cases, 354 of 355 checks, every scroll difference 0 px
+      but one. **The one red is a real fault on today's site, listed for Jonathan, NOT fixed:** after an update, a
+      deep-linked activity page (`#class-activities/<id>`) comes back with the card at the top, not where the student
+      had scrolled (456 px became 14 px). The hash router scrolls to the card (`caFocusActivity` →
+      `caScrollToActivity`, `app/activities.js`) and the restore's scroll gives way. The reviewer showed that skipping
+      that scroll on the update reload turns the case green. Until it is fixed the tool exits 1 on `deep-link`: that
+      is the baseline, never loosen the case.
+      Proof: 24 planted site faults turned it red (the work order's ten, eight from review round 1, six from round 2).
+      What it does not cover is in its header (a real Chromebook above all).
 
 - [x] **2026-11-12 — `tools/two-consoles-loop.mjs`: two teacher consoles at once, played as a race** (work order
       `Claude outputs/WORK-ORDER-closed-loop-tests.md`, Part 3; Reviewed, three rounds, the last with no BLOCKER or MAJOR).
