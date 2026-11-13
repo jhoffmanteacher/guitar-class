@@ -94,6 +94,14 @@ sections); resurrect the deleted student tour.
   "looks fine". A script that finds 0 in both the old and new tree proves nothing.
 - Product calls, and rules that contradict each other, go to Jonathan through
   AskUserQuestion — don't pick silently.
+- **Don't repeat verification that already passed** (Jonathan, 2026-11-12: "things that are overkill don't need to
+  run again if checks have already passed"; "apply this to the future too"). A proof that passed on the same code is
+  not re-run: not by you after an agent pasted it (spot-check one number at most), not by an agent whose change did
+  not touch what the proof covers. Brief a fixer to re-run only the planted faults and cases its change affects, plus
+  ONE final run. A low-stakes tool (an ungraded game's test, a small test fix) ships on its fixer's proof without
+  another review round; keep reviewers for the save path, load order, listening and anything a student's work or
+  screen depends on. This does not touch the push rules: the full `node tools/checks.mjs` and the hooks still run
+  before every push.
 - **Browser checks run in Chrome for Testing by default** (Jonathan, 2026-11-12). Drive it
   headless through `CHROME` with a small script, as `tools/smoke.mjs` and
   `tools/console-layout-smoke.mjs` do (a stub Firestore reaches the teacher console, which the
