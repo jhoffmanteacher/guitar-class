@@ -6291,6 +6291,27 @@ function precachedExtraFiles(src) {
    a new kind of precached file, worth a look; one fewer means one moved.
    ════════════════════════════════════════════════════════════════════ */
 const PRECACHED_EXTRA_COUNT = 7;   // 6 + fonts/rubik-mono-one-top5.woff2 (the Top 5 medal, 2026-11-04): a font listed only in ASSETS, like fraunces.woff2
+/* ════════════════════════════════════════════════════════════════════
+   1cx. THE PITCH DETECTORS AGAINST MADE-UP TONES (2026-11-13). tools/tone-test.mjs cuts the REAL coachDetectPitch
+   (coach-core.js) and the tuner's detectPitchYIN (tuner.js) out of the site, feeds them seeded tones (every note from
+   the low E to the high e's 12th fret as a sine, a 6-harmonic pluck and a pluck with a weak fundamental, at three
+   levels and at the YIN gate's edge, plus silence and white noise) and compares with what they read on 2026-11-13.
+   An accidental edit to the pitch code fails here at the next commit, not in class. Not a spec: a deliberate change
+   re-pins in the tool (--measure) with its reason. The deep listening tests stay in tools/mic-sim/.
+   ════════════════════════════════════════════════════════════════════ */
+function checkToneTest() {
+  head('1cx. The pitch detectors read made-up tones as they did (tools/tone-test.mjs)');
+  const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'tone-test.mjs')], { encoding: 'utf8', timeout: 120000 });
+  const lines = (r.stdout || '').trim().split('\n');
+  const last = lines[lines.length - 1] || '';
+  if (r.status !== 0 || !last.startsWith('tone-test: ✓')) {
+    err('tools/tone-test.mjs failed' + (r.error ? ': ' + r.error.message : '') + ' — replay: node tools/tone-test.mjs --verbose');
+    problems++;
+    for (const l of [...lines.slice(-8), ...(r.stderr || '').trim().split('\n').slice(-4)]) if (l) console.log(`${C.dim}      ${l}${C.reset}`);
+    return;
+  }
+  ok(last.replace(/^tone-test: ✓ — /, ''));
+}
 /* 1cv. The parts stay parts (2026-11-11). app.js, coach.js and teacher.js reached 17,900, 10,700 and 7,200 lines
    one reasonable addition at a time, and were cut into 29 files. Nothing but a number stops them growing back.
    A part over PART_SOFT lines prints a warning naming it (never a reason to stop a quick change: splitting a
@@ -15565,6 +15586,7 @@ function checkPracticeMinutes(i18nTable) {
   await checkLiveQuizNoNames();
   await checkLiveQuizPcNameNoLeak();
   checkCoachVerdicts();
+  checkToneTest();
   await checkCountIn();
   await checkPwTakeEvaluator();
   checkPracticeMinutes(i18nTable);

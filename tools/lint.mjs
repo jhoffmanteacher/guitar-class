@@ -389,5 +389,5 @@ for (const rule of RULE_ORDER) {
   }
 }
 if (flag('github')) console.log(`::notice title=lint (report-only)::${countLine}`);
-if (flag('strict') && strictBad) { console.log(`lint: --strict: ${strictBad} error-level finding(s) left (no-undef [guarded] lines aside)`); process.exit(1); }
-process.exit(0);
+/* exitCode, not process.exit(): see the same line in tools/tone-test.mjs (an exit during a background GC can hang Node 24). */
+if (flag('strict') && strictBad) { console.log(`lint: --strict: ${strictBad} error-level finding(s) left (no-undef [guarded] lines aside)`); process.exitCode = 1; }
