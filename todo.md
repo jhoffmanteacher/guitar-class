@@ -43,7 +43,7 @@ Check `tools/mic-sim/` and `checks.mjs` for text they pin in the section being m
 
 ## Follow-ups from the 2026-11-11 cut (none urgent)
 
-- **`tools/pm-e2e.mjs` is out of date, on the old site too.** It expects the practice-minutes strip to show while
+- [x] **DONE 2026-11-12** (`tools/pm-e2e.mjs` now expects the folded header on an open card; see its commit). **`tools/pm-e2e.mjs` is out of date, on the old site too.** It expects the practice-minutes strip to show while
   a practice card is open; since 2026-11-10 an open card folds the header away (checks 1cr, and smoke's own
   practice-minutes walk passes on that). On 2026-11-11 it failed 3 checks and then threw at line 187, identically
   on the uncut site and on the cut one. Bring it in line with the folded header, or retire the lines smoke covers.

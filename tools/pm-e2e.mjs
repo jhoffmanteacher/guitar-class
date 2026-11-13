@@ -12,6 +12,9 @@
      · the My progress tiles, bars and 8-week row, in English and Spanish
      · colours read back from the browser (getComputedStyle), not assumed
      · uiOn:false draws nothing at all
+     · an OPEN practice card folds the header, and the strip in it, away (2026-11-10, body.ca-fold):
+       the seconds still count there, the goal toast waits for the strip, and a play run is ended
+       with "All activities" so its recap has a strip to drop from (updated 2026-11-12)
 
    It writes a PNG per state into --out <dir> (default: a temp folder) so they
    can be LOOKED at. Needs Node 22+ and Chrome; not part of checks.mjs.
@@ -146,6 +149,16 @@ await ev(`PRACTICE_MINUTES_CONFIG.uiOn = false`);
 const card = await ev(`(() => { const a = CLASS_ACTIVITIES.find(x => x.view === 'card' && (caIsVisible(x) || caIsPlayAlongOnly(x)) && x.card && !x.card.wholeSong && x.card.track); return a ? a.id : null; })()`)
   || await ev(`(CLASS_ACTIVITIES.find(x => x.view === 'card' && (caIsVisible(x) || caIsPlayAlongOnly(x))) || {}).id`);
 check('found a practice card to open', !!card, card);
+/* Since 2026-11-10 an open card folds the header, and the strip in it, away (body.ca-fold; checks.mjs 1cr, smoke's
+   foldWalk and its pm-header walk). The minutes still count while it is folded; the goal toast waits for the strip,
+   and a recap opens only under a strip on screen. So the tests below end a play run with "All activities"
+   (caCloseOpen: it stops the card's audio and unfolds the header; the engine closes the run about 2 s later, with
+   the strip back), and they look at the strip on the In class list. */
+/* Opened as smoke's pm-header walk does: openClassActivitiesScreen(id) from another page can leave the screen hidden with the card open. */
+const openCard = async () => { await ev(`(goExploreHash('class-activities'), caFocusActivity(${JSON.stringify(card)}), 1)`);
+  await waitFor(`document.body.classList.contains('ca-fold') && !document.getElementById('class-activities-screen').hidden && !!document.querySelector('.ca-card[open] .pc-play')`, 6000); await sleep(500); };
+const leaveCard = () => ev(`(caCloseOpen(), true)`);
+const playCard = async (until = '!!PM._play()') => { await ev(`document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(until); };
 await ev(`openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1200);
 check('the card is open with its sticky bar', await ev(`!!document.querySelector('#ca-bar-open .ca-bar-name') && !document.getElementById('ca-bar-open').hidden`));
 await ev(`PM.syncHeader(true)`);
@@ -166,23 +179,42 @@ await waitFor(`PM._play() && PM._session().counted >= 6`);
 await waitFor(`PM.status().week.secs >= 53 * 60`, 15000);
 const st = await ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()); return { pend: s.pend[d], playing: !!(pcState && pcState.audio && !pcState.audio.paused), src: pcState && pcState.audio && pcState.audio.currentSrc, counted: PM._session() && PM._session().counted }; })()`);
 check('the real Play counted seconds from a real <audio> (detached element, wrapped play())', st.counted >= 6 && st.counted <= 12 && /-backing-/.test(st.src || ''), st);
+/* The open card folds the header away: no strip on screen, none in the card bar, and the seconds keep counting. */
+const foldProbe = `(() => { const h = document.getElementById('pm-header'); return { fold: document.body.classList.contains('ca-fold'), headerVis: getComputedStyle(document.querySelector('.header')).visibility, strips: [...document.querySelectorAll('.pm-strip')].filter(e => { if (e.hidden || !e.getClientRects().length) return false; const q = e.getBoundingClientRect(), t = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2); return t && e.contains(t); }).map(e => e.id), stripsInCardBar: document.querySelectorAll('#ca-bar-open .pm-strip').length, filled: [...h.children].map(c => c.textContent.replace(/\\s+/g, ' ').trim()).join(' '), secs: PM.status().week.secs }; })()`;
 await ev(`PM.refreshStrip(true)`); await sleep(300);
-const bar = await ev(`(() => { const b = document.querySelector('.header'), s = document.getElementById('pm-header'); const r = s.getBoundingClientRect(), br = b.getBoundingClientRect(); const items = [...s.children].map(c => c.className); return { barH: Math.round(br.height), stripTop: Math.round(r.top - br.top), stripH: Math.round(r.height), strips: [...document.querySelectorAll('.pm-strip')].filter(e => { if (e.hidden || !e.getClientRects().length) return false; const q = e.getBoundingClientRect(), t = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2); return t && e.contains(t); }).map(e => e.id).length, stripsInCardBar: document.querySelectorAll('#ca-bar-open .pm-strip').length, tag: s.tagName, items, text: s.innerText.replace(/\\s+/g, ' '), docOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth, barOverflow: b.scrollWidth > b.clientWidth }; })()`);
+const fold1 = await ev(foldProbe);
+await sleep(3000);
+const fold1b = await ev(foldProbe);
+check('an open practice card folds the header and its strip away (2026-11-10, body.ca-fold): no strip on screen, none in the card bar', fold1.fold && fold1.headerVis === 'hidden' && fold1.strips.length === 0 && fold1.stripsInCardBar === 0, fold1);
+check('…and the minutes still count while it is folded: the week went up while the song played, and the hidden strip holds "53/60 min 3"', fold1b.secs >= fold1.secs + 2 && fold1.filled === '53/60 min 3', [fold1, fold1b]);
+await shot('1-card-folded-en');
+/* "All activities": the header comes back with the strip in it. The run (about 10 s of real play) is under a minute: no recap. */
+await leaveCard(); await sleep(800);
+await ev(`PM.refreshStrip(true)`); await sleep(300);
+const bar = await ev(`(() => { const b = document.querySelector('.header'), s = document.getElementById('pm-header'); const r = s.getBoundingClientRect(), br = b.getBoundingClientRect(); const items = [...s.children].map(c => c.className); return { barH: Math.round(br.height), stripTop: Math.round(r.top - br.top), stripH: Math.round(r.height), strips: [...document.querySelectorAll('.pm-strip')].filter(e => { if (e.hidden || !e.getClientRects().length) return false; const q = e.getBoundingClientRect(), t = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2); return t && e.contains(t); }).map(e => e.id).length, fold: document.body.classList.contains('ca-fold'), cardOpen: !!document.querySelector('.ca-card[open]'), tag: s.tagName, items, text: s.innerText.replace(/\\s+/g, ' '), docOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth, barOverflow: b.scrollWidth > b.clientWidth }; })()`);
 check('the strip is in the main top bar (a button): one row (bar ≤ 56px), no horizontal overflow', bar.tag === 'BUTTON' && bar.barH <= 56 && !bar.docOverflow && !bar.barOverflow, bar);
-check('exactly ONE strip showing on an open practice card (the header one; the Games one is in a hidden screen), and none in the card bar', bar.strips === 1 && bar.stripsInCardBar === 0, bar);
+check('back on the In class list ("All activities"): the header unfolds and exactly ONE strip shows (the header one; the Games one is in a hidden screen)', !bar.fold && !bar.cardOpen && bar.strips === 1, bar);
 check('two items: week ring and streak flame — and only text "53/60 min 3" (no "N playing")', bar.items.join() === 'pm-week,pm-streak' && bar.text === '53/60 min 3', bar);
 const col1 = await ev(`(() => { const q = (s, p) => getComputedStyle(document.querySelector(s))[p]; return { ring: q('.pm-strip .pm-ring-fg', 'stroke'), flame: q('.pm-strip .pm-streak', 'color'), strip: q('.pm-strip', 'backgroundColor'), text: q('.pm-strip .pm-week span', 'color'), dash: q('.pm-strip .pm-ring-fg', 'strokeDashoffset') }; })()`);
 check('goal not hit: ring blue #5AA9FF, flame DIM (#7A5236)', col1.ring === 'rgb(90, 169, 255)' && col1.flame === 'rgb(122, 82, 54)', col1);
 check('the ring is 53/60 full (dashoffset = circumference × (1 − 53/60))', Math.abs(parseFloat(col1.dash) - 2 * Math.PI * 7 * (1 - 53 / 60)) < 0.5, col1.dash);
+check('no recap after a run under a minute', await ev(`!document.getElementById('pm-recap')`));
 await shot('1-strip-not-hit-en');
 
 /* "N playing" and its live count were removed (2026-11-04): the engine has no PM._pollLive and its state no live / liveAt */
-check('"N playing" is gone (2026-11-04): no .pm-live, no "playing" in either strip, and no live count in the engine', await ev(`PM.refreshStrip(true); !document.querySelector('.pm-live') && !/playing|tocando/.test(document.getElementById('pm-header').innerText + document.getElementById('pm-games').innerText) && PM._pollLive === undefined && !('live' in PM._state()) && !('liveAt' in PM._state())`));
+check('"N playing" is gone (2026-11-04): no .pm-live, no "playing" in either strip, and no live count in the engine', await ev(`PM.refreshStrip(true); !document.querySelector('.pm-live') && !/playing|tocando/.test(document.getElementById('pm-header').textContent + document.getElementById('pm-games').textContent) && PM._pollLive === undefined && !('live' in PM._state()) && !('liveAt' in PM._state())`));
 
-/* Cross the goal: 7 more minutes → toast + yellow ring + orange flame */
-await ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()); s.weeks[PM.calc.weekIdOf(d)].seconds += 7 * 60 - 5; return true; })()`);
+/* Cross the goal while a song plays on the open card: the strip is folded away, so the toast WAITS (pendingToast);
+   "All activities" brings the strip back and the toast drops from it. The week is set 4 s short of 60:00, counting
+   what the engine already holds for it, so the crossing happens inside a counted second (a jump past it is no crossing). */
+await openCard(); await playCard();
+await ev(`(() => { const s = PM._state(), w = PM.calc.weekIdOf(PM.calc.ymd(new Date())); s.weeks[w].seconds -= PM.status().week.secs - (3600 - 4); return true; })()`);
+await waitFor(`PM._state().pendingToast === PM.calc.weekIdOf(PM.calc.ymd(new Date()))`, 15000); await sleep(1500);
+const held = await ev(`({ toast: !!document.getElementById('pm-toast'), pending: PM._state().pendingToast, fold: document.body.classList.contains('ca-fold'), hit: PM.status().week.hit })`);
+check('crossing 60 min with the card open (header folded): the week is hit, and the toast waits instead of dropping from a hidden strip', held.hit && held.fold && !held.toast && held.pending === todayWeek, held);
+await leaveCard();
 await waitFor(`!!document.getElementById('pm-toast')`, 15000);
-check('crossing 60 min shows the "Week goal hit — 4 weeks in a row" pill', await ev(`(document.getElementById('pm-toast') || {}).innerText || ''`) === 'Week goal hit — 4 weeks in a row', await ev(`(document.getElementById('pm-toast') || {}).innerText`));
+check('…"All activities": the header is back and the "Week goal hit — 4 weeks in a row" pill drops from it', await ev(`(document.getElementById('pm-toast') || {}).innerText || ''`) === 'Week goal hit — 4 weeks in a row', await ev(`(document.getElementById('pm-toast') || {}).innerText`));
 await shot('2-toast-and-hit-en');
 const col2 = await ev(`(() => { const q = (s, p) => getComputedStyle(document.querySelector(s))[p]; const tf = document.querySelector('#pm-toast .pm-flame-svg'); return { ring: q('.pm-strip .pm-ring-fg', 'stroke'), flame: q('.pm-strip .pm-streak', 'color'), n: document.querySelector('.pm-strip .pm-streak b').textContent, toastFlame: getComputedStyle(tf).color, toastBg: getComputedStyle(document.getElementById('pm-toast')).backgroundColor }; })()`);
 check('goal hit: ring turns yellow #FFC93C, flame turns orange #FF8A3D, streak reads 4, toast flame yellow', col2.ring === 'rgb(255, 201, 60)' && col2.flame === 'rgb(255, 138, 61)' && col2.n === '4' && col2.toastFlame === 'rgb(255, 201, 60)', col2);
@@ -191,35 +223,45 @@ check('the toast is gone after about 3 s', await ev(`!document.getElementById('p
 const toastKept = await ev(`PM._state().toastWeek === PM.calc.weekIdOf(PM.calc.ymd(new Date()))`);
 check('…and is remembered for the week (once per week per student)', toastKept);
 
-/* Stop → recap (session ≥ 60 s needed: lift the session's counted seconds) */
+/* A play run ends → recap (session ≥ 60 s needed: lift the session's counted seconds). The run is ended with "All
+   activities", so the strip is on screen when the engine closes it. */
+await openCard(); await playCard();
 await ev(`PM._session().counted = 5 * 60 + 2; PM._play() && (PM._play().counted = 5 * 60 + 2)`);
-await ev(`pcStop()`); await sleep(3500);
+await leaveCard(); await sleep(3500);
 const recap = await ev(`(() => { const r = document.getElementById('pm-recap'); return r ? { text: r.innerText.replace(/\\s+/g, ' ').trim(), bg: getComputedStyle(r).backgroundColor, color: getComputedStyle(r.querySelector('.pm-recap-big')).color } : null; })()`);
-check('Stop shows the recap: "+5 min" and "This week: 60 of 60 min. That makes 4 weeks in a row."', recap && /^✕ \+5 min This week: 60 of 60 min\. That makes 4 weeks in a row\.$/.test(recap.text), recap);
+check('the song ends ("All activities"): the recap shows "+5 min" and "This week: 60 of 60 min. That makes 4 weeks in a row."', recap && /^✕ \+5 min This week: 60 of 60 min\. That makes 4 weeks in a row\.$/.test(recap.text), recap);
 await shot('3-recap-en');
 const bbox = await ev(`(() => { const r = document.getElementById('pm-recap').getBoundingClientRect(), b = document.getElementById('pm-header').getBoundingClientRect(); return { top: Math.round(r.top), barBottom: Math.round(b.bottom), right: Math.round(r.right), stripRight: Math.round(b.right), vw: innerWidth, fits: r.right <= innerWidth && r.left >= 0 }; })()`);
 check('the recap drops down under the header strip, right edge in line with the strip\'s, inside the window', bbox.fits && bbox.top >= bbox.barBottom && Math.abs(bbox.right - bbox.stripRight) <= 1, bbox);
 await sleep(6500);
 check('the recap closes itself after 6 s', await ev(`!document.getElementById('pm-recap')`));
-/* a second stop inside 3 minutes: no second recap */
-await ev(`document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`!!PM._play()`);
-await ev(`PM._session().counted = 120; PM._play() && (PM._play().counted = 120)`); await ev(`pcStop()`); await sleep(3500);
+/* a second run ending inside 3 minutes: no second recap */
+await openCard(); await playCard();
+await ev(`PM._session().counted = 120; PM._play() && (PM._play().counted = 120)`); await leaveCard(); await sleep(3500);
 check('at most one recap per 3 minutes', await ev(`!document.getElementById('pm-recap')`));
 /* a short session: none */
-await ev(`PM._state().lastRecapAt = 0; document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`!!PM._play()`);
-await ev(`PM._session().counted = 40; PM._play() && (PM._play().counted = 40)`); await ev(`pcStop()`); await sleep(3500);
+await ev(`PM._state().lastRecapAt = 0`); await openCard(); await playCard();
+await ev(`PM._session().counted = 40; PM._play() && (PM._play().counted = 40)`); await leaveCard(); await sleep(3500);
 check('a session under 60 s gets no recap', await ev(`!document.getElementById('pm-recap')`));
 /* the close button */
-await ev(`PM._state().lastRecapAt = 0; document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`!!PM._play()`);
-await ev(`PM._session().counted = 90; PM._play() && (PM._play().counted = 90)`); await ev(`pcStop()`); await sleep(3500);
+await ev(`PM._state().lastRecapAt = 0`); await openCard(); await playCard();
+await ev(`PM._session().counted = 90; PM._play() && (PM._play().counted = 90)`); await leaveCard(); await sleep(3500);
 await ev(`document.querySelector('#pm-recap .pm-recap-x').click()`);
 check('the close button dismisses the recap', await ev(`!document.getElementById('pm-recap')`));
+/* Stop pressed on the card itself: the header is folded, so no recap opens, then or later (the engine shows a recap only
+   under a strip on screen; it is not held like the toast). What the site does since the 2026-11-10 fold, pinned here. */
+await ev(`PM._state().lastRecapAt = 0`); await openCard(); await playCard();
+await ev(`PM._session().counted = 90; PM._play() && (PM._play().counted = 90)`); await ev(`pcStop()`); await sleep(3500);
+const stopOnCard = await ev(`({ recap: !!document.getElementById('pm-recap'), runEnded: !PM._play(), lastRecapAt: PM._state().lastRecapAt, fold: document.body.classList.contains('ca-fold') })`);
+await leaveCard(); await sleep(2500);
+stopOnCard.afterLeave = await ev(`!!document.getElementById('pm-recap')`);
+check('Stop on the open card (header folded): the run ends with no recap, and none appears after "All activities" either', stopOnCard.fold && stopOnCard.runEnded && !stopOnCard.recap && stopOnCard.lastRecapAt === 0 && !stopOnCard.afterLeave, stopOnCard);
 
 /* ── The recap line before the goal is hit: "7 more keeps your 3-week streak." ── */
 await seedWeeks([3700, 3700, 3700]);
 await ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()); s.loaded = true; s.weeks = JSON.parse(JSON.stringify(window.__fs.weeks)); s.pend = {}; s.days = {}; s.weeks[PM.calc.weekIdOf(d)] = { seconds: 53 * 60, goalSeconds: 3600, hit: false }; s.lastRecapAt = 0; PM.refreshStrip(true); return true; })()`);
-await ev(`document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`!!PM._play()`);
-await ev(`PM._session().counted = 5 * 60; PM._play() && (PM._play().counted = 5 * 60)`); await ev(`pcStop()`); await sleep(3500);
+await openCard(); await playCard();
+await ev(`PM._session().counted = 5 * 60; PM._play() && (PM._play().counted = 5 * 60)`); await leaveCard(); await sleep(3500);
 const r2 = await ev(`(document.getElementById('pm-recap') || {}).innerText`);
 check('before the goal: "This week: 53 of 60 min. 7 more keeps your 3-week streak."', /This week: 53 of 60 min\. 7 more keeps your 3-week streak\./.test(r2 || ''), r2);
 await shot('3b-recap-before-goal-en');
@@ -251,6 +293,7 @@ for (const lang of ['en', 'es']) {
 }
 check('the top bar is one row (≤ 56px) with the widest strip in EN and ES × names of 8, 15, 21 and 31 characters (35 fits in Spanish, 56 in English)', rows.every((r) => +r.split('=')[1] <= 56) && rows.length === 8, rows);
 const cardRows = [];
+await openCard();   // the strip checks above ran on the In class list; the card's own bar needs the card open
 for (const lang of ['en', 'es']) {
   await ev(`setLang('${lang}')`); await sleep(500);
   for (const stop of [false, true]) for (const opt of [false, true]) {
@@ -411,7 +454,7 @@ check('Spanish, a streak that was lost: "Ahora no tienes racha" over "La más la
 await ev(`setLang('en')`);
 check('the three tiles stay the same height with the Longest line empty', tileH.length === 3 && new Set(tileH).size === 1, tileH);
 check('a first hit week is still "1-week streak" / "Racha de 1 semana"', /^Streak 1-week streak /.test(one[1]) && /^Racha Racha de 1 semana /.test(oneEs[1]), [one, oneEs]);
-/* On the practice card: the flame's label, and the Stop recap. */
+/* On the practice card: the flame's label (the strip is folded away there, but it keeps its label), and the recap when the run ends. */
 await ev(`setLang('en'); openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1500);
 await tilesAt(5, 0, [], 'en'); await ev(`openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1200);
 await ev(`PM.syncHeader(true); caSyncTopbar(); PM.refreshStrip(true)`); await sleep(300);
@@ -421,10 +464,10 @@ await shiftClock('2026-11-29T10:00:00');
 await ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()), cur = PM.calc.weekIdOf(d); s.pend = {}; s.days = {}; s.weeks = {}; s.loaded = true; s.lastRecapAt = 0;
   for (let i = 1; i <= 3; i++) s.weeks[PM.calc.weekAdd(cur, -i)] = { seconds: 3700, goalSeconds: 3600, hit: true };
   s.weeks[cur] = { seconds: 50 * 60, goalSeconds: 3600, hit: false }; s.days[d] = 20 * 60; PM.refreshStrip(true); return true; })()`);
-await ev(`document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`!!PM._play()`);
-await ev(`PM._session().counted = 5 * 60; PM._play() && (PM._play().counted = 5 * 60)`); await ev(`pcStop()`); await sleep(3500);
+await playCard();
+await ev(`PM._session().counted = 5 * 60; PM._play() && (PM._play().counted = 5 * 60)`); await leaveCard(); await sleep(3500);
 const recapOut = await ev(`(document.getElementById('pm-recap') || {}).innerText`);
-check('Stop on a Sunday at the cap: the recap says "You can’t reach the goal this week. A new week starts Monday." (not "10 more keeps your 3-week streak.")', /^✕ \+5 min This week: 50 of 60 min\. You can.t reach the goal this week\. A new week starts Monday\.$/.test((recapOut || '').replace(/\s+/g, ' ').trim()), recapOut);
+check('a run ending on a Sunday at the cap: the recap says "You can’t reach the goal this week. A new week starts Monday." (not "10 more keeps your 3-week streak.")', /^✕ \+5 min This week: 50 of 60 min\. You can.t reach the goal this week\. A new week starts Monday\.$/.test((recapOut || '').replace(/\s+/g, ' ').trim()), recapOut);
 await ev(`document.getElementById('pm-recap') && document.getElementById('pm-recap').remove(); window.Date = window.__B; true`);
 await ev(`location.hash = '#my-progress'`); await sleep(600);
 
@@ -432,9 +475,10 @@ await ev(`location.hash = '#my-progress'`); await sleep(600);
 console.log('review follow-ups');
 await ev(`(() => { const s = PM._state(), cur = PM.calc.weekIdOf(PM.calc.ymd(new Date())); s.weeks = {}; for (let i = 1; i <= 12; i++) s.weeks[PM.calc.weekAdd(cur, -i)] = { seconds: 3700, goalSeconds: 3600, hit: true }; s.weeks[cur] = { seconds: 100 * 60, goalSeconds: 3600, hit: true }; s.days = {}; s.pend = {}; return true; })()`);
 await ev(`window.__period = ''; setLang('es'); location.hash = '#class-activities/${card}'; openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1000);
+await leaveCard(); await sleep(600);   // the open card folds the header away (2026-11-10): measure the strip on the In class list
 await ev(`(() => { caSyncTopbar(); PM.refreshStrip(true); document.querySelector('.user-name').textContent = 'Ana María Gómez'; return true; })()`); await sleep(300);
 const worst = await ev(`(() => ({ h: Math.round(document.querySelector('.header').getBoundingClientRect().height), text: document.querySelector('.pm-strip').innerText.replace(/\\s+/g, ' ') }))()`);
-check('widest strip (ES, 100+ min, 12-week streak, a 15-character name) keeps the top bar one row; the strip never shows more than the goal', worst.h <= 56 && /^60\/60 min 13$/.test(worst.text), worst);
+check('widest strip (ES, 100+ min, 12-week streak, a 15-character name, on the In class list) keeps the top bar one row; the strip never shows more than the goal', worst.h <= 56 && /^60\/60 min 13$/.test(worst.text), worst);
 await shot('7-widest-strip-es');
 await ev(`(() => { const cur = PM.calc.weekIdOf(PM.calc.ymd(new Date())), mon = PM.calc.weekMonday(cur), sun = PM.calc.addDays(mon, 6); PRACTICE_MINUTES_CONFIG.skipWeeks.push(PM.calc.ymd(mon)); PM._state().weeks[cur] = { seconds: 40 * 60, goalSeconds: 0, hit: false }; PM.refreshStrip(true); return true; })()`);
 await ev(`setLang('en'); PM.refreshStrip(true)`); await sleep(300);
@@ -462,7 +506,7 @@ console.log('pills on any page');
 await ev(`window.__period = ''; setLang('en'); PRACTICE_MINUTES_CONFIG.skipWeeks = []; PRACTICE_MINUTES_CONFIG.streakStartWeek = ''; PRACTICE_MINUTES_CONFIG.uiOn = true`);
 await seedWeeks([3700, 3700, 3700]);
 await ev(`window.__pills = []; new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) if (n.id === 'pm-recap' || n.id === 'pm-toast') window.__pills.push(n.id); }).observe(document.body, { childList: true }); true`);
-await ev(`openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1500);
+await openCard();
 await ev(`PM.syncHeader(true); caSyncTopbar(); (() => { const s = PM._state(); s.loaded = true; s.weeks = JSON.parse(JSON.stringify(window.__fs.weeks)); s.days = {}; s.pend = {}; s.lastRecapAt = 0; return true; })()`); await sleep(300);
 await ev(`document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`PM._play() && PM._session().counted >= 3`);
 const pillSrc = await ev(`pcState.audio.currentSrc`);
@@ -470,10 +514,10 @@ await ev(`PM._session().counted = 150; PM._play() && (PM._play().counted = 150);
 const lv = await ev(`({ lastRecapAt: PM._state().lastRecapAt, pills: window.__pills.slice(), onProgress: !document.getElementById('my-progress-screen').hasAttribute('hidden') })`);
 check('leaving the card for My progress while a song plays stops the song, and the recap drops down from the header there', lv.onProgress && lv.pills.includes('pm-recap') && lv.lastRecapAt > 0, lv);
 await ev(`document.getElementById('pm-recap') && document.getElementById('pm-recap').remove(); window.__pills = []; PM._state().lastRecapAt = 0; openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1500);
-await ev(`document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`PM._play() && PM._session().counted >= 2`);
-await ev(`PM._session().counted = 150; PM._play() && (PM._play().counted = 150); pcStop()`); await sleep(3500);
+await playCard(`PM._play() && PM._session().counted >= 2`);
+await ev(`PM._session().counted = 150; PM._play() && (PM._play().counted = 150)`); await leaveCard(); await sleep(3500);
 const recapUp = await ev(`!!document.getElementById('pm-recap')`);
-check('…and a recap after the next session on the card shows too', recapUp);
+check('…and a recap after the next run on the card (ended with "All activities", the header back) shows too', recapUp);
 await ev(`setLang('es')`); await sleep(400);
 check('…and a language switch removes it (it would stay in the old language)', recapUp && !(await ev(`!!document.getElementById('pm-recap')`)), recapUp ? 'still there' : 'no recap to remove');
 await ev(`setLang('en')`); await sleep(300);
@@ -496,19 +540,24 @@ await ev(`document.getElementById('pm-recap') && document.getElementById('pm-rec
 /* ── The strip on every view, and the click ── */
 console.log('every view');
 await ev(`setLang('en'); PM.refreshStrip(true)`);
-const views = [['Modules', `returnToPractice()`], ['In class', `toggleClassActivities()`], ['Songs', `toggleSongsHub()`], ['Games', `toggleGames()`], ['My progress', `toggleMyProgress()`], ['a practice card', `openClassActivitiesScreen(${JSON.stringify(card)})`]];
+/* As in smoke's pm-header walk: 'In class' is the LIST (a card left open would fold the header away), and 'a practice card'
+   really opens the card on In class, where the header and its strip fold away (2026-11-10, body.ca-fold). */
+const views = [['Modules', `returnToPractice()`], ['In class', `(toggleClassActivities(), caOpenId && caCloseOpen(), 1)`], ['Songs', `toggleSongsHub()`], ['Games', `toggleGames()`], ['My progress', `toggleMyProgress()`], ['a practice card', `(goExploreHash('class-activities'), caFocusActivity(${JSON.stringify(card)}), 1)`]];
 const seen = [];
 for (const lang of ['en', 'es']) {
   await ev(`setLang('${lang}')`); await sleep(400);
   for (const [name, call] of views) {
     await ev(call); await sleep(900);
-    const v = await ev(`(() => { const top = [...document.querySelectorAll('.pm-strip')].filter(e => { if (e.hidden || !e.getClientRects().length) return false; const q = e.getBoundingClientRect(), t = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2); return t && e.contains(t); }).map(e => e.id); const h = document.getElementById(${JSON.stringify(name === 'Games' ? 'pm-games' : 'pm-header')}); return { shown: !h.hidden && !!h.getClientRects().length, top, over: document.documentElement.scrollWidth > document.documentElement.clientWidth, title: h.title }; })()`);
-    /* Games is a full-screen layer (z 120) over the whole page, header included: its own bar carries #pm-games. Exactly one strip is on top in every view. */
-    seen.push(v.shown && v.top.length === 1 && v.top[0] === (name === 'Games' ? 'pm-games' : 'pm-header') && !v.over && v.title === (lang === 'en' ? 'Open My progress' : 'Abrir Mi progreso'));
+    const v = await ev(`(() => { const top = [...document.querySelectorAll('.pm-strip')].filter(e => { if (e.hidden || !e.getClientRects().length) return false; const q = e.getBoundingClientRect(), t = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2); return t && e.contains(t); }).map(e => e.id); const h = document.getElementById(${JSON.stringify(name === 'Games' ? 'pm-games' : 'pm-header')}); return { shown: !h.hidden && !!h.getClientRects().length && getComputedStyle(h).visibility !== 'hidden', top, inCardBar: document.querySelectorAll('#ca-bar-open .pm-strip').length, over: document.documentElement.scrollWidth > document.documentElement.clientWidth, title: h.title,
+      fold: document.body.classList.contains('ca-fold') && !document.getElementById('class-activities-screen').hidden && !!document.querySelector('.ca-card[open]') }; })()`);
+    /* Games is a full-screen layer (z 120) over the whole page, header included: its own bar carries #pm-games. Exactly one strip is on top in every
+       view but the open card, where none is (the header is folded away) and none is drawn in the card's bar. */
+    if (name === 'a practice card') seen.push(v.fold && !v.shown && v.top.length === 0 && v.inCardBar === 0 && !v.over);
+    else seen.push(v.shown && v.top.length === 1 && v.top[0] === (name === 'Games' ? 'pm-games' : 'pm-header') && !v.inCardBar && !v.over && v.title === (lang === 'en' ? 'Open My progress' : 'Abrir Mi progreso'));
     if (!seen[seen.length - 1]) console.log('    ✗ view', lang, name, JSON.stringify(v));
   }
 }
-check('exactly one strip is showing and on top (nothing covers it), with its tooltip and no sideways scroll, on Modules / In class / Songs / Games (the Games bar\'s own) / My progress / a practice card, EN + ES', seen.length === 12 && seen.every(Boolean), seen);
+check('exactly one strip is showing and on top (nothing covers it), with its tooltip and no sideways scroll, on Modules / In class / Songs / Games (the Games bar\'s own) / My progress; on an open practice card the header is folded away with no strip on screen or in the card bar; EN + ES', seen.length === 12 && seen.every(Boolean), seen);
 /* A goal crossed on the Games screen: the toast drops from the Games bar's strip, above the Games layer. */
 await ev(`setLang('en'); toggleGames()`); await sleep(1200);
 await ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()); s.weeks[PM.calc.weekIdOf(d)] = { seconds: 3600 - 4, goalSeconds: 3600, hit: false }; s.days = {}; s.pend = {}; s.toastWeek = ''; s.pendingToast = false; try { localStorage.removeItem('pm:t:e2e-student'); } catch(e) {} window.__a = new Audio(${JSON.stringify(pillSrc)}); window.__a.play(); return true; })()`);
@@ -521,9 +570,9 @@ await ev(`document.getElementById('pm-games').click()`); await sleep(1200);
 check('clicking the Games bar\'s strip closes Games and opens My progress', await ev(`document.getElementById('games-screen').hasAttribute('hidden') && !document.getElementById('my-progress-screen').hasAttribute('hidden')`));
 await ev(`document.getElementById('pm-toast') && document.getElementById('pm-toast').remove(); true`);
 await ev(`setLang('en')`); await sleep(300);
-await ev(`openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1200);
+await ev(`toggleClassActivities(); caOpenId && caCloseOpen(); true`); await sleep(1200);   // the In class list: on an open card the strip is folded away, nothing to click
 await ev(`document.getElementById('pm-header').click()`); await sleep(1000);
-check('clicking the strip (from a practice card) opens My progress', await ev(`!document.getElementById('my-progress-screen').hasAttribute('hidden')`));
+check('clicking the strip (from the In class list) opens My progress', await ev(`!document.getElementById('my-progress-screen').hasAttribute('hidden')`));
 await ev(`document.getElementById('my-progress-screen').scrollTop = 0; (document.getElementById('main-content') || {}).scrollTop = 300; document.getElementById('pm-header').click()`); await sleep(1200);
 check('clicking it again does not close My progress (it scrolls to the top)', await ev(`!document.getElementById('my-progress-screen').hasAttribute('hidden')`));
 await shot('9-my-progress-after-strip-click-en');
@@ -541,10 +590,10 @@ const swB = await ev(`(() => { window.__who = 'e2e-student-b'; PM.syncHeader(tru
 check('student B signs in on the same page: the very first paint is B\'s 10 minutes, not A\'s 23', !/23/.test(swB) && /(^|\s)10\/60 min/.test(swB), swB);
 /* signed out: no student → hidden. The tick alone hides it (a path that forgot to call syncHeader); then a pill goes with it. */
 await ev(`(() => { const s = PM._state(); s.lastRecapAt = 0; window.__pills = []; return true; })()`);
-await ev(`openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1500);
-await ev(`document.querySelector('.ca-card[open] .pc-play').click()`); await waitFor(`PM._play() && PM._session().counted >= 2`);
-await ev(`PM._session().counted = 150; PM._play() && (PM._play().counted = 150); pcStop()`); await sleep(3500);
-check('B stopped a song: the recap shows', await ev(`!!document.getElementById('pm-recap')`));
+await openCard();
+await playCard(`PM._play() && PM._session().counted >= 2`);
+await ev(`PM._session().counted = 150; PM._play() && (PM._play().counted = 150)`); await leaveCard(); await sleep(3500);
+check('B\'s song ended ("All activities"): the recap shows', await ev(`!!document.getElementById('pm-recap')`));
 await ev(`window.__who = null; true`); await sleep(2200);
 check('signed out (no student): both strips hide themselves within the next tick, empty, and the recap goes with it', await ev(`(() => { return ['pm-header', 'pm-games'].every((i) => { const h = document.getElementById(i); return h.hidden && h.innerHTML === ''; }) && !document.getElementById('pm-recap'); })()`));
 await ev(`PM.syncHeader(true)`);
