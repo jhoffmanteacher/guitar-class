@@ -1820,7 +1820,8 @@ function micRecStart(mode){
       cap: Math.ceil(MICREC_MAX_SEC * srcRate), live: true,
       perf0: performance.now(), ctx0: ctx.currentTime, firstPlay: null,
       frames: 0, frameSum: 0, frameMax: 0, lastFrameT: 0,
-      track: (coachStream.getAudioTracks()[0] || {}).label || '' };
+      track: (coachStream.getAudioTracks()[0] || {}).label || '',
+      settings: micRecTrackSettings(coachStream) };
     proc.onaudioprocess = e => {
       if (micRec !== rec || !rec.live) return;
       if (rec.firstPlay == null) rec.firstPlay = e.playbackTime;
@@ -1898,6 +1899,30 @@ function micRecPcm16(rec){
   }
   return out;
 }
+/* What the browser really gave the mic (2026-11-13, research-4 R4): the
+   site asks for echo cancellation, noise suppression, automatic gain and
+   voice isolation off (coachAcquireMicInner), but Chromium on ChromeOS may
+   force automatic gain on whatever a page asks. Saved with each take as one
+   map, `micSettings`, so a take made with processing on can be told apart.
+   Only these keys, and only a true/false or a number (Firestore refuses
+   `undefined`, and a browser may leave any of them out). Nothing that names
+   the device: getSettings() also returns deviceId and groupId, which stay
+   behind; the device is already in micLabel (micRecMicName). null when the
+   browser reports none of them. */
+const MICREC_SETTING_KEYS = ['echoCancellation', 'noiseSuppression', 'autoGainControl', 'voiceIsolation', 'sampleRate', 'channelCount', 'latency'];
+function micRecTrackSettings(stream){
+  try {
+    const tr = stream && stream.getAudioTracks()[0];
+    const got = tr && typeof tr.getSettings === 'function' ? tr.getSettings() : null;
+    if (!got) return null;
+    const out = {};
+    MICREC_SETTING_KEYS.forEach(k => {
+      const v = got[k];
+      if (typeof v === 'boolean' || (typeof v === 'number' && isFinite(v))) out[k] = v;
+    });
+    return Object.keys(out).length ? out : null;
+  } catch(e){ return null; }
+}
 /* Save a stopped capture with the take's metadata. Times in `meta` are
    performance.now() values; they are made relative to the recording's
    start here. Quiet on failure — a lost recording costs the student
@@ -1943,6 +1968,7 @@ async function micRecSaveNow(rec, meta){
     frameMaxMs: Math.round(rec.frameMax * 10) / 10,
     lang: typeof getLang === 'function' ? getLang() : ''
   });
+  if (rec.settings) doc.micSettings = rec.settings;   // left out when the browser reported none (micRecTrackSettings)
   const pcm = micRecPcm16(rec);
   if (isDevBypassUser()){ console.info('[micRec] dev bypass — not uploading', doc, pcm.length + ' samples'); return; }
   try {
