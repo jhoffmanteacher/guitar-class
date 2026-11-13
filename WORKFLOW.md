@@ -383,6 +383,25 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-12 — `tools/live-quiz-loop.mjs`: the Live quiz played by a teacher and a class, closed loop.** Tools only.
+      Three adversarial review rounds; the last round's findings are fixed and it ships without a further round
+      (Jonathan, 2026-11-12). What it is: one teacher console and about 30 students, each tab the real `live-quiz.js`
+      in its own Node vm, on a fake Firestore with lag (a hand copy of the answers rule, pinned to `firestore.rules`).
+      It checks: first tap wins; each student's own clock (a reload keeps it); points and verdicts; and that the
+      stage, the control strip, the student screens (Locked in too) and every question doc carry no answer before
+      Reveal (attribute, element and field whitelists). It covers Preview (nothing written, no student sees it, a real
+      game ends it) and "Reveal when time runs out". Run it after any change to `live-quiz.js`, its `lq.*` strings or
+      the answers rule: `node tools/live-quiz-loop.mjs` (seed 1: 39 cases, 133,134 checks, 0 failed, 15-35 s).
+      Proof: 49 of 49 planted faults red (`--prove=<dir>`); the same seed twice is identical.
+      Known and excused, on Jonathan's list: two tabs of one student give a second pick (the last tap wins); a new
+      tab after time-up gets a fresh clock.
+      Accepted (Jonathan, 2026-11-12: "let's not worry about it"), counted every run and never failed: a Reveal can
+      come before a slow or late student's own time is up. The automatic Reveal waits 1.5 s after time-up on the
+      console's clock, so a last-second tap is lost once a student's round trip passes about 1.5 s, and a student who
+      joins mid-question loses the rest of their own clock. Seed 1: 40 of 381 in-time taps lost to the automatic
+      Reveal, 42 of 714 to a teacher's click, 17 of 28 late joiners cut short.
+      It found the reload loophole fixed the same day (`c089f18`).
+
 - [x] **2026-11-12 — Power Chord Switch: the recorded student takes are inside the closed-loop check** (Jonathan: "it's hard
       for me to do that. we'll have to rely on recorded student takes. build that into the closed loop check"). Tools only
       (`tools/mic-sim/`); no site file and no listening rule changed. Shipped without a further review round (his call,
@@ -401,7 +420,7 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
       re-marks 17 real strums as wrong chord, which the takes cannot judge. `ring` and `half` stay rejected.
       The two sets of takes disagree (the 14 graded at 2.2 favour a stricter rule, the 7 graded at 1.4 lose 17 of 81
       strums to it), and NO take has been recorded at today's ratios. **What would settle it: about 40 more Power
-      Chord Switch takes at today's ratios, from three or more class periods** (the console's "stop after" number
+      Chord Switch takes at today's ratios, from both class periods (4th and 7th; the CAS period is remote users)** (the console's "stop after" number
       above the count; then `node tools/mic-sim/takes-in.mjs`). The tool prints "ASK JONATHAN" until then.
       Change Up, synthetic sound only: a wrong chord sharing no note with the new one is caught 68 of 75 times; one
       that rule 2 should catch 33 of 46; 9 of 12 no-guitar cases fail in both games.

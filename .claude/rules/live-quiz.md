@@ -100,4 +100,5 @@ projected stage (`?teacher=true` → **Live quiz**). One game runs at a time, in
   question in sessionStorage (`lq-q-opened`), so the countdown and the speed points carry on after a reload.
   Not closed, on Jonathan's list: a NEW tab or another device starts a fresh clock, and two tabs open at once
   can each answer (the last tap wins). After any change to `live-quiz.js`: `node tools/live-quiz-loop.mjs`
-  once that tool is on main.
+  (about 20-35 s, Node only; exit 0 required). It counts, and does not fail on, a Reveal that comes before a slow or
+  late student's own time is up (accepted by Jonathan, 2026-11-12).
