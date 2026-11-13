@@ -19,7 +19,9 @@
    because every field is also type-checked and a check on a missing field denies; hasAll stays as a second lock. (A "delete allowed" break is written as its own
    `allow delete:` line: request.resource is null on a delete, see pm-rules-test.mjs.)
 
-   --site <repo>: also runs the REAL logger (app/boot.js SITE_ERRORS) against the emulator. Firestore keeps one
+   --site <repo>: also runs the REAL logger (app/boot.js SITE_ERRORS) against the emulator (since review round 2
+   also: control characters land as U+FFFD and the progress save after them lands; the console's test entry
+   through SITE_ERRORS.test() is read back by the teacher from the server). Firestore keeps one
    write queue per client, and a string with a lone surrogate (half an emoji) is never accepted: the SDK retries
    it for ever, and the student's progress save queued behind it never lands. The case fires the logger with
    that input (message, file, stack) and then writes progress/{uid} from the same client: the save must land.
@@ -36,8 +38,10 @@
      npx firebase emulators:exec --only firestore --project demo-gc "node site-errors-rules-test.mjs firestore.rules --port 8091 --breaks --site <repo>"
    Exit 0 = every case passed on the real rules (and, with --breaks, every break was caught, and the real logger
    case passed).
-   Last run: 2026-11-13 (review round 1 fixes), firestore.rules: 99 passed, 0 failed; 14 of 14 breaks caught; the
-   real logger: 4 of 4 (the raw control held the save 8 s; through the logger the save landed). With clean() made
+   Last run: 2026-11-13 (review round 2 fixes; the rules unchanged since round 1), firestore.rules: 99 passed,
+   0 failed; 14 of 14 breaks caught; the real logger: 6 of 6 (the raw control held the save 8 s; through the
+   logger the save landed; control characters landed as U+FFFD with the save after them; the test entry read
+   back by the teacher). Round 1: the real logger 4 of 4. With clean() made
    to do nothing the logger case went red (the save stayed pending); with clean() taken out of scrub() only, fits()
    dropped both docs (red: nothing sent, the save landed). The first version's 83 cases on the rules before this
    block (cda3b92, the "not published yet" state): 67 passed, 16 failed, exactly the 16 allows; not re-run since. */
@@ -259,6 +263,37 @@ let logFail = 0;
     await env.withSecurityRulesDisabled(async c => { stored = (await c.firestore().collection('siteErrors').get()).docs.map(d => d.data()); });
     const strs = stored.flatMap(d => Object.values(d).filter(v => typeof v === 'string'));
     check('no stored field holds a lone surrogate; the halves read U+FFFD', stored.length === 2 && !strs.some(v => LONE.test(v)) && stored.some(d => d.message === 'Unexpected token in "great job \uFFFD"') && stored.some(d => d.message === 'a\uFFFDb'), stored.map(d => JSON.stringify(d.message)).join(' | '));
+
+    /* Review round 2: a fresh logger on a fresh client (the same boot.js slice). */
+    const loggerOn = (client, user) => {
+      const out = { sent: [], landed: [] };
+      const c2 = { console: { error() {}, warn() {}, log() {} }, setTimeout, clearTimeout, getLang: () => 'en', location: { origin: 'https://gc.example', hash: '#errors' },
+        auth: { currentUser: user },
+        db: { collection: n => ({ add: d => { const doc = { ...d }; out.sent.push(doc); const p = client.collection(n).add(doc); p.then(r => out.landed.push(r.id), () => {}); return p; } }) } };
+      vm.createContext(c2);
+      vm.runInContext('var lastSetId = "", IS_TEACHER_MODE = true;\n' + src.slice(L0, L1) + '\n;globalThis.__SE = SITE_ERRORS;', c2);
+      out.se = c2.__SE;
+      return out;
+    };
+    /* R2-8: C0 controls and U+FFFE / U+FFFF, which Node's transport takes, become U+FFFD before they are sent. */
+    const E = env.authenticatedContext('uidC0', { email: 'e@student.org', email_verified: true }).firestore();
+    const lc = loggerOn(E, { uid: 'uidC0', email: 'e@student.org', displayName: 'Eve Quill' });
+    lc.se.report('error', { message: 'a\u0000b\u0007c\u000Bd\u001Fe\uFFFEf\uFFFFg\th', filename: 'https://gc.example/app/x\u0001.js', lineno: 1, colno: 2 });
+    for (let i = 0; i < 50 && lc.sent.length < 1; i++) await new Promise(r => setTimeout(r, 100));
+    const saveC0 = await within(E.doc('progress/uidC0').set({ x: 3 }), 10000);
+    for (let i = 0; i < 50 && lc.landed.length < 1; i++) await new Promise(r => setTimeout(r, 100));
+    let c0 = null;
+    await env.withSecurityRulesDisabled(async c => { const snap = await c.firestore().collection('siteErrors').doc(lc.landed[0] || 'none').get(); c0 = snap.exists ? snap.data() : null; });
+    check('control characters (NUL, BEL, VT, US, U+FFFE, U+FFFF): the entry lands as U+FFFD, tab kept, and the progress save queued after it lands', c0 && c0.message === 'a\uFFFDb\uFFFDc\uFFFDd\uFFFDe\uFFFDf\uFFFDg\th' && c0.file === '/app/x\uFFFD.js' && saveC0 === 'landed', `${lc.sent.length} sent, stored ${c0 && JSON.stringify(c0.message)}, progress save ${saveC0}`);
+    /* R2-1: the console's test, from the teacher's own client: SITE_ERRORS.test() sends, the read-back the
+       console makes (get from the server, by the id add() gave) finds the same doc. */
+    const TT = env.authenticatedContext('teacher', { email: 'jhoffman@seq.org', email_verified: true }).firestore();
+    const lt = loggerOn(TT, { uid: 'teacher', email: 'jhoffman@seq.org', displayName: 'Jonathan Hoffman' });
+    const tr = await Promise.race([lt.se.test(), new Promise(r => setTimeout(() => r({ state: 'timeout' }), 15000))]);
+    let back = null;
+    if (tr.state === 'sent' && tr.id) { try { const snap = await TT.collection('siteErrors').doc(tr.id).get({ source: 'server' }); back = snap.exists ? snap.data() : 'missing'; } catch (e) { back = 'read failed: ' + (e.code || e.message); } }
+    const same = back && typeof back === 'object' && Object.keys(tr.doc).length === Object.keys(back).length && Object.keys(tr.doc).every(k => back[k] === tr.doc[k]);
+    check('"Send a test entry": test() answers "sent" with an id; the teacher reads it back from the server, field for field', tr.state === 'sent' && same && back.message === lt.se.TEST_MESSAGE, `${tr.state}, read back ${typeof back === 'object' ? JSON.stringify(back && back.message) : back}`);
   }
   console.log(`\n${logFail ? '✗' : '✓'} the real logger: ${logFail} failed`);
 }
