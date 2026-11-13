@@ -6730,6 +6730,61 @@ function checkTitleHeadings() {
   if (!bad) ok(`${titled} title boxes of ${HEADING_CLASSES.length} kinds in ${files.length} files all carry a heading role; ${roles} role="heading" in all (pinned), each with a level and on no control; the module fold's <summary> drops it`);
 }
 
+/* 1cz. Google sign-in always shows the account chooser (2026-11-13). Students share school Chromebooks. A popup made
+   without prompt 'select_account' can pass straight through as whichever Google account the browser is still signed
+   in to, so the next student could land in the last student's progress. This RUNS the real signIn() (app/boot.js)
+   in a vm with a stub Firebase and reads what its provider was given. Then it counts every place in the site's own
+   scripts and pages that makes a Google provider or opens a sign-in (pinned at 1 each, both inside signIn()), so a
+   second sign-in path cannot appear without this check reading it. */
+const SIGNIN_PROVIDER_SITES = 1, SIGNIN_CALL_SITES = 1;
+function checkSignInAccountChooser() {
+  head('1cz. Google sign-in always asks which account');
+  let bad = 0;
+  const flag = m => { err(`1cz: ${m}`); problems++; bad++; };
+  let appSrc = '';
+  try { appSrc = siteSource('app.js', ROOT); } catch { }
+  const body = jsFunctionBody(appSrc, 'signIn');
+  if (!body) { flag('no function signIn() in the app parts: this check went blind (renamed? update 1cz)'); return; }
+  const made = [], opened = [];
+  class GoogleAuthProvider {
+    constructor() { this.params = null; made.push(this); }
+    setCustomParameters(o) { this.params = Object.assign({}, o); }
+    addScope() {}
+  }
+  const open = p => { opened.push(p); return new Promise(() => {}); };
+  const sandbox = {
+    window: {}, currentUser: null, firebase: { auth: { GoogleAuthProvider } },
+    auth: { signInWithPopup: open, signInWithRedirect: open },
+    showAuthError() {}, loadFirestoreSdk: () => Promise.resolve(), t: k => k,
+  };
+  try { vm.runInNewContext(`(function signIn()${body})()`, sandbox, { timeout: 2000 }); }
+  catch (e) { flag(`signIn() threw in the stub: ${e.message}`); }
+  if (opened.length !== 1) flag(`signIn() opened ${opened.length} sign-ins in one click, expected 1`);
+  else {
+    const p = opened[0].params;
+    if (!p || p.prompt !== 'select_account') flag(`signIn() opens Google's popup with ${p ? JSON.stringify(p) : 'no custom parameters'}: it must set prompt 'select_account' (setCustomParameters), or a shared Chromebook can sign the next student in as the last one`);
+  }
+  // Every place that makes a provider or opens a sign-in, in the site's own scripts and pages (not tools/).
+  const files = [];
+  for (const d of ['', 'app', 'tabs']) {
+    let names = [];
+    try { names = readdirSync(join(ROOT, d)); } catch { }
+    for (const f of names) if (/\.(js|html)$/.test(f) && !/\.min\.js$/.test(f)) files.push(d ? `${d}/${f}` : f);
+  }
+  const PROVIDER_RE = /new\s+[\w.]*GoogleAuthProvider\s*\(/g, CALL_RE = /\.signInWith(?:Popup|Redirect|Credential)\s*\(/g;
+  const providers = [], calls = [];
+  for (const f of files) {
+    const src = readFileSync(join(ROOT, f), 'utf8');
+    for (const [re, out] of [[PROVIDER_RE, providers], [CALL_RE, calls]]) {
+      for (const m of src.matchAll(re)) out.push(`${f}:${src.slice(0, m.index).split('\n').length}`);
+    }
+  }
+  if (providers.length !== SIGNIN_PROVIDER_SITES) flag(`${providers.length} places make a Google provider (${providers.join(', ') || 'none'}), pinned at ${SIGNIN_PROVIDER_SITES}: a new sign-in path must ask which account too; run it here like signIn() and update the pin`);
+  if (calls.length !== SIGNIN_CALL_SITES) flag(`${calls.length} places open a Google sign-in (${calls.join(', ') || 'none'}), pinned at ${SIGNIN_CALL_SITES}: a new sign-in path must ask which account too; run it here like signIn() and update the pin`);
+  if (![...body.matchAll(PROVIDER_RE)].length || ![...body.matchAll(CALL_RE)].length) flag('the one provider and sign-in call are not inside signIn(), so the run above did not read them');
+  if (!bad) ok(`signIn() ran: 1 popup, prompt 'select_account'; ${files.length} site files read: ${providers.length} provider (${providers.join(', ')}), ${calls.length} sign-in call (${calls.join(', ')}), both inside signIn()`);
+}
+
 function checkPrecacheFingerprinted(src, hashed) {
   head('1bt. Every precached file is part of the cache fingerprint');
   const set = new Set(hashed);
@@ -16773,6 +16828,7 @@ function checkPracticeMinutes(i18nTable) {
   checkPartSizes();
   checkReviewLabels();
   checkTitleHeadings();
+  checkSignInAccountChooser();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

@@ -912,7 +912,15 @@ function signIn(){
   // waits for this.
   window.__authPopupPending = true;
   try{
-    auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+    /* The account chooser every time. Without prompt 'select_account', Google's
+       popup can pass straight through as whichever Google account the browser
+       is still signed in to, so on a shared Chromebook the next student could
+       land in the last student's progress. This is the only place a provider is
+       made (the console, Journey pages and live quiz all sign in through here
+       or read this sign-in); checks.mjs 1cz pins it. */
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    auth.signInWithPopup(provider)
       .catch(e=>{
         // The student just closed/cancelled the popup — not an error worth nagging about.
         if(e && (e.code==='auth/popup-closed-by-user' || e.code==='auth/cancelled-popup-request')) return;
