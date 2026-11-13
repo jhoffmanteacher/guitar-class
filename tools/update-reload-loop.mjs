@@ -166,7 +166,7 @@
    upgrade risk of 2026-11-11, recorded by tools/sw-upgrade-proof.mjs). */
 import { createServer } from 'node:http';
 import { spawn, execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, writeFileSync, existsSync, statSync, symlinkSync, rmSync, realpathSync } from 'node:fs';
+import { mkdtempSync, readFileSync, readdirSync, writeFileSync, existsSync, statSync, symlinkSync, rmSync, realpathSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, extname, normalize, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -197,6 +197,39 @@ const stopChrome = () => new Promise(res => {
   kill = setTimeout(() => { try { p.kill('SIGKILL'); } catch { /* gone */ } }, 1000);
   cap = setTimeout(done, 3000);
 });
+/* ── Removing a Chrome profile folder (2026-11-13) ──
+   On GitHub's Linux runner every case passed and one profile folder of 11 was still there at the end. The
+   browser process had exited, but Chrome's helpers (the crash handler, which runs outside the browser's
+   process group, and child processes still shutting down) can go on writing into the profile for a moment
+   after it, so a single rmSync right after the browser's exit removed the folder and a helper made it
+   again (or, on Windows, a helper still had a file open). So, per folder:
+     1. wait until no process has the folder in its command line (`pgrep -f`, macOS and Linux; every Chrome
+        process, the crash handler included, carries --user-data-dir or its --database under it), up to
+        --wait-ms; any still there after that are killed (SIGKILL) and waited for once more;
+     2. remove it, and look again after a pause: it counts as gone only when it is still gone then;
+        tried up to `tries` times (Windows: a file still open makes rmSync throw EBUSY / EPERM; it is retried).
+   It returns false when the folder is still there after all that: the run's end check then fails loudly,
+   as before. Windows has no pgrep: there step 1 is skipped and step 2's retries do the waiting. */
+// removeProfile: begin (tools/ci/chrome-cleanup-test.mjs runs the lines from here to "removeProfile: end" as they stand)
+const reEscape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const holders = (dir) => {
+  if (process.platform === 'win32') return [];
+  try { return execFileSync('pgrep', ['-f', reEscape(dir)], { encoding: 'utf8' }).split('\n').map(Number).filter(n => n > 0 && n !== process.pid); }
+  catch { return []; }
+};
+async function removeProfile(dir, { waitMs = 8000, tries = 12, gap = 250 } = {}) {
+  for (let t = Date.now(); holders(dir).length && Date.now() - t < waitMs;) await sleep(100);
+  const stuck = holders(dir);
+  for (const pid of stuck) { try { process.kill(pid, 'SIGKILL'); } catch { /* gone */ } }
+  for (let t = Date.now(); stuck.length && holders(dir).length && Date.now() - t < 3000;) await sleep(100);
+  for (let i = 0; i < tries; i++) {
+    try { rmSync(dir, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 }); } catch { /* still held: tried again below */ }
+    await sleep(gap);
+    if (!existsSync(dir)) return true;
+  }
+  return !existsSync(dir);
+}
+// removeProfile: end
 const runCleanup = async () => { if (buildProc) { try { buildProc.kill('SIGKILL'); } catch { /* gone */ } } await stopChrome(); for (const f of cleanup.splice(0).reverse()) { try { await f(); } catch { /* best effort */ } } };
 const watchdog = setInterval(() => {
   const quiet = (Date.now() - progress.at) / 1000;
@@ -679,7 +712,7 @@ async function runCase(cs, env) {
   const prof = mkdtempSync(join(tmpdir(), 'gc-update-reload-chrome-'));
   env.profiles.push(prof);
   // Also on the watchdog's way out (runCleanup stops Chrome first, then runs these).
-  const dropProfile = () => rmSync(prof, { recursive: true, force: true });
+  const dropProfile = () => removeProfile(prof);
   cleanup.push(dropProfile);
   const cdp = await freePort();
   chromeProc = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--no-first-run', '--disable-gpu',
@@ -999,7 +1032,8 @@ async function runCase(cs, env) {
     if (page) page.close();
     mark(`${cs.name}: closing Chrome`);
     await stopChrome();
-    dropProfile();
+    // Taken off the exit list only once it has run, so a signal arriving during the removal still removes it.
+    if (!(await dropProfile())) res.notes.push(`profile folder still there after Chrome closed: ${prof}`);
     cleanup.splice(cleanup.indexOf(dropProfile), 1);
   }
   res.ms = Date.now() - t0;
@@ -1060,7 +1094,16 @@ try {
   const nChecks = results.reduce((s, r) => s + r.checks.length, 0), nBad = results.reduce((s, r) => s + r.checks.filter(x => !x[1]).length, 0);
   const left = env.profiles.filter(p => existsSync(p));
   say(`update-reload: ${results.length - failed.length} of ${results.length} cases passed, ${nChecks - nBad} of ${nChecks} checks; ${env.profiles.length} Chrome profiles made, ${left.length} left behind; ${((Date.now() - tStart) / 1000).toFixed(0)} s`);
-  if (left.length) { say(`update-reload: ✗ profile folders left: ${left.join(', ')}`); exitCode = 1; }
+  if (left.length) {
+    say(`update-reload: ✗ profile folders left: ${left.join(', ')}`);
+    // What is in each, and who still has it open (the next fix starts from these).
+    for (const p of left) {
+      let inside = '';
+      try { inside = readdirSync(p).slice(0, 12).join(', '); } catch (e) { inside = `(cannot list: ${e.code || e.message})`; }
+      say(`      ${p}: ${inside || '(empty)'}; processes naming it: ${holders(p).join(', ') || 'none'}`);
+    }
+    exitCode = 1;
+  }
   if (failed.length) { say(`update-reload: ✗ failed: ${failed.map(r => r.name).join(', ')}`); exitCode = 1; }
 } catch (e) {
   if (e && e.built) exitCode = 0;
