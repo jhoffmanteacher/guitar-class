@@ -1181,11 +1181,25 @@ syncHeaderHeight();
 if(document.fonts && document.fonts.ready) document.fonts.ready.then(syncHeaderHeight);
 /* The header also changes height with no resize at all: sign-in swaps the
    button for the 32px avatar (49px vs a stale 48 — a 1px page scroll on every
-   desktop), and Español re-wraps the title. Setting --hdr can't resize the
-   header, so this can't loop. */
+   desktop), and Español re-wraps the title.
+   The observer writes --hdr on the NEXT frame, not inside its callback.
+   Setting --hdr does not change the header's height, but it can change its
+   WIDTH: with a stale --hdr the page overflows by that 1px, and where
+   scrollbars take room (Linux, Windows) a 15px page scrollbar comes and goes
+   as --hdr is put right, so the header's width changes again inside the
+   observer: the browser reports "ResizeObserver loop completed with
+   undelivered notifications" (seen after sign-in on GitHub's Linux runner,
+   2026-11-13; app/boot.js logs it as a warning). Writing in a rAF lets the
+   next frame's observer see that width change as a new one. One frame late,
+   at most one write per frame. */
+let syncHeaderRaf = 0;
+function syncHeaderHeightNextFrame(){
+  if(syncHeaderRaf) return;
+  syncHeaderRaf = requestAnimationFrame(() => { syncHeaderRaf = 0; syncHeaderHeight(); });
+}
 if(typeof ResizeObserver !== 'undefined'){
   const hdrEl = document.querySelector('.header');
-  if(hdrEl) new ResizeObserver(syncHeaderHeight).observe(hdrEl);
+  if(hdrEl) new ResizeObserver(syncHeaderHeightNextFrame).observe(hdrEl);
 }
 
 /* ── Mobile nav drawer: below 760px the rail slides in as an overlay instead
