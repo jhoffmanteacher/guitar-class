@@ -4833,6 +4833,11 @@ body.lq-invite-open{overflow:hidden}
 .pm-recap-x{position:absolute;top:6px;right:6px;width:32px;height:32px;border:0;border-radius:16px;background:transparent;
   color:var(--text2);font-size:1rem;cursor:pointer}
 .pm-recap-x:hover{background:var(--bg3)}
+/* The recap on an open practice card (2026-11-12): the header is folded away there, so it sits in the empty margin
+   beside the card's column (practice-minutes.js cardRoom sets its top, left and width, 150-320px). The close button
+   keeps the big line's right end; the week line below uses the card's full width. */
+.pm-recap.pm-recap-card{padding:10px 12px 12px}
+.pm-recap-card .pm-recap-big{padding-right:30px}
 @media (prefers-reduced-motion:reduce){.pm-toast,.pm-recap{animation:none}}
 /* Top 5 (2026-11-04): a round medal, "TOP" over a big "5". --rank (lavender) means "Top 5" and nothing else:
    yellow stays the week-goal moment's alone. 2026-11-06 (Jonathan: "too dark to see"): a SOLID lavender coin with

@@ -30,7 +30,10 @@
    mic on.
 
    One thing stays tied to SOUND, as before: the recap pill ("+N min") opens
-   when playback stops (a `play` run inside the counting session).
+   when playback stops (a `play` run inside the counting session). On an open
+   practice card the header is folded away (body.ca-fold), so it shows beside
+   the card instead, or waits for the strip when there is no room (2026-11-12,
+   see recapMaybe).
 
    HOW IT FINDS THE ELEMENTS. Practice and snippet cards play from detached
    `new Audio()` elements, which fire no event a document listener can see, so
@@ -332,7 +335,7 @@
   function freshState(uid){
     newestGen[uid] = ++stateGen;
     return { uid: uid, gen: stateGen, days: {}, weeks: {}, pend: {}, inflight: null, flushP: null, frac: 0, loaded: false, loading: null, flushing: false,
-             loadRetryAt: 0, toastWeek: '', pendingToast: false, lastRecapAt: 0,
+             loadRetryAt: 0, toastWeek: '', pendingToast: false, lastRecapAt: 0, heldRecap: null,
              boardReady: false, boardOwed: 0, boardBusy: false, boardAt: 0, boardRetryAt: 0, boardTimer: 0, board: null, boardLoading: null,
              wbSent: '', wbBusy: false, wbAt: 0, wbRetryAt: 0, wbTimer: 0, wb: null, wbLoading: null, wbLoadRetryAt: 0, top5Week: '', tag: '', tagP: null, tagRetryAt: 0 };
   }
@@ -625,7 +628,8 @@
       if(!session){ session = { counted: 0, startedAt: Date.now() }; refreshToken(); }   // the unload write needs a token under an hour old
       if(anyAudible){
         playIdle = 0;
-        if(!play) play = { counted: 0 };
+        /* A new run: a recap still up on the open card (or held for the strip) was about the last one. */
+        if(!play){ play = { counted: 0 }; cardRecapGone(); }
       }
       if(!st.loaded && !st.loading) load();
       addSeconds(dt);
@@ -1272,7 +1276,7 @@
     if(!stripPresent()) return;
     if(S && S.loaded && !S.wbLoading && document.visibilityState !== 'hidden') loadWeek();   // a resolved cache while fresh; one query when stale
     refreshStrip();
-    if(document.visibilityState !== 'hidden'){ toastMaybe(); top5ToastMaybe(); }
+    if(document.visibilityState !== 'hidden'){ toastMaybe(); heldRecapMaybe(); top5ToastMaybe(); }
   }
   function uiNow(){ uiTick(); }
 
@@ -1296,7 +1300,7 @@
   function pillZ(el){ var h = anchorStrip(); el.style.zIndex = h && h.id === 'pm-games' ? '130' : ''; }
   function removeEl(id){ var e = document.getElementById(id); if(e) e.remove(); }
   /* The toast and recap belong to the strip they dropped from: gone when it hides (sign-out)
-     or is covered, or the language changes. */
+     or is covered, or the language changes. (A recap shown on an open card follows the card: followCard.) */
   function stripShown(){ return !!anchorRect(); }
   function followStrip(el){
     var iv = setInterval(function(){
@@ -1357,14 +1361,60 @@
     dropToast(bar, 'pm-toast-top5', top5Mark('pm-top5-lg', tr('pm.top5Label')) + '<span>' + esc(tr('pm.top5Toast', { period: tr(PERIOD_KEYS[t.period]) })) + '</span>');
   }
 
+  /* ── The recap on an open card (2026-11-12, Jonathan: "it would be nice if it's always visible") ──
+     An open activity folds the header and its strip away (body.ca-fold, caSyncSolo in app/activities-2.js, which marks
+     the open card .ca-solo-card), so a run stopped on the card had no strip to drop from and its recap was never seen.
+     It now shows in the empty margin to the right of the card's column, level with the card's bar: the column is
+     centred there (183 px of margin either side at 1366 px), so the pill covers nothing (not the Play/Stop button, the
+     speed controls or the chart). Full screen zooms the column to the whole width, and a narrow window or a phone has no
+     margin: then nothing is drawn over the card and the recap is held, like the week-goal toast, until the strip is back
+     ("All activities", or leaving for another page). Same text, life and rules either way. */
+  function foldedCard(){
+    var b = document.body, scr = document.getElementById('class-activities-screen');
+    if(!b || !b.classList || !b.classList.contains('ca-fold') || !scr || scr.hidden) return null;
+    return document.querySelector('#class-activities-body .ca-solo-card');
+  }
+  function cardRoom(){
+    var m = document.getElementById('main-content');
+    if(!m || document.body.classList.contains('ca-full')) return null;
+    var right = m.getBoundingClientRect().right, gap = document.documentElement.clientWidth - right;
+    var w = Math.min(320, Math.floor(gap - 16));
+    if(w < 150) return null;      // narrower than this the week line wraps into a column of single words
+    return { w: w, top: 8, left: Math.round(right + (gap - w) / 2) };
+  }
+  /* Gone when the card closes or another one opens, at sign-out (uiOn() asks the host who is signed in), or the
+     language changes (the gc-langchange listener above); the next run's start removes it too (cardRecapGone). */
+  function followCard(el, id){
+    var st = S;
+    var iv = setInterval(function(){
+      if(!el.isConnected){ clearInterval(iv); return; }
+      var c = foldedCard();
+      if(!c || c.getAttribute('data-id') !== id || !uiOn() || S !== st){ el.remove(); clearInterval(iv); }
+    }, 250);
+  }
+  function cardRecapGone(){
+    if(S) S.heldRecap = null;
+    if(typeof document === 'undefined') return;
+    var e = document.getElementById('pm-recap');
+    if(e && String(e.className).indexOf('pm-recap-card') >= 0) e.remove();
+  }
+  /* A recap held while the card filled the window: shown under the strip once it is back (uiTick). */
+  function heldRecapMaybe(){
+    var st = S, h = st && st.heldRecap;
+    if(!h || !anchorRect()) return;
+    st.heldRecap = null;
+    recapMaybe(h);
+  }
+
   function recapMaybe(s){
     var c = cfg(), st = S;
     if(!uiOn() || !st || s.counted < c.recapMinSeconds) return;
     if(document.visibilityState === 'hidden') return;          // unseen: it would only start the gap and block the real one
-    var bar = anchorRect();
-    if(!bar) return;
+    var bar = anchorRect(), card = bar ? null : foldedCard(), room = card ? cardRoom() : null;
+    if(!bar && !card) return;
     if(Date.now() - st.lastRecapAt < c.recapGapSeconds * 1000) return;
-    st.lastRecapAt = Date.now();
+    if(!bar && !room){ st.heldRecap = s; return; }
+    st.lastRecapAt = Date.now(); st.heldRecap = null;
     var u = status(), w = u.week, reach = weekReach(w), need = reach.more;
     var line = (w.isBreak ? tr('pm.recapWeekBreak', { done: mins(w.secs) }) : tr('pm.recapWeek', { done: mins(w.secs), goal: mins(w.goal) })) + ' ';
     if(w.isBreak) line = line.trim();
@@ -1375,18 +1425,24 @@
       : tr('pm.recapMore0', { need: need });
     removeEl('pm-recap');
     var el = document.createElement('div');
-    el.id = 'pm-recap'; el.className = 'pm-recap'; el.setAttribute('role', 'status');
+    el.id = 'pm-recap'; el.className = 'pm-recap' + (room ? ' pm-recap-card' : ''); el.setAttribute('role', 'status');
     el.innerHTML = '<button type="button" class="pm-recap-x" aria-label="' + esc(tr('pm.close')) + '">&#x2715;</button>'
       + '<div class="pm-recap-big">' + esc(tr('pm.recapPlus', { n: Math.max(1, mins(s.counted)) })) + '</div>'
       + '<p class="pm-recap-sub">' + esc(line) + '</p>';
-    var toast = document.getElementById('pm-toast');
-    el.style.top = Math.round((toast ? toast.getBoundingClientRect().bottom : bar.bottom) + 8) + 'px';
-    document.body.appendChild(el);
-    pillZ(el);
-    /* Right edge in line with the strip's, kept inside the window. */
-    var rw = el.offsetWidth;
-    el.style.left = Math.max(8, Math.min(Math.round(bar.right - rw), window.innerWidth - 8 - rw)) + 'px';
-    followStrip(el);
+    if(room){
+      el.style.top = room.top + 'px'; el.style.left = room.left + 'px'; el.style.width = room.w + 'px';
+      document.body.appendChild(el);
+      followCard(el, card.getAttribute('data-id'));
+    } else {
+      var toast = document.getElementById('pm-toast');
+      el.style.top = Math.round((toast ? toast.getBoundingClientRect().bottom : bar.bottom) + 8) + 'px';
+      document.body.appendChild(el);
+      pillZ(el);
+      /* Right edge in line with the strip's, kept inside the window. */
+      var rw = el.offsetWidth;
+      el.style.left = Math.max(8, Math.min(Math.round(bar.right - rw), window.innerWidth - 8 - rw)) + 'px';
+      followStrip(el);
+    }
     var gone = function(){ el.remove(); };
     el.querySelector('.pm-recap-x').addEventListener('click', gone);
     setTimeout(gone, c.recapShowSeconds * 1000);
