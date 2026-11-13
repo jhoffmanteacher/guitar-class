@@ -502,8 +502,8 @@ function buildChecklist(w){
   if(!w.skills||w.skills.length===0) return `<p style="font-size:0.9375rem;color:var(--text2);padding:12px 0">${t('skill.noneListed')}</p>`;
   const done=w.skills.filter(s=>progress[s.id]==='gotit').length;
   const pct=Math.round(done/w.skills.length*100);
-  const wkSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="var(--amber-text)" stroke-width="1.5"/><path d="M6 4v2.2l1.4 1.4" stroke="var(--amber-text)" stroke-width="1.5" stroke-linecap="round"/></svg>`;
-  const giSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--green-text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const wkSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="4" stroke="var(--amber-text)" stroke-width="1.5"/><path d="M6 4v2.2l1.4 1.4" stroke="var(--amber-text)" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+  const giSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6l3 3 5-5" stroke="var(--green-text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const rows=w.skills.map((s,i)=>{
     const st=progress[s.id]||'none';
     const skillText = tf(s,'text');
