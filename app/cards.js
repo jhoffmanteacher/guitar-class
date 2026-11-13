@@ -254,7 +254,7 @@ function pcPlayBtnHtml(playing){
    data-rate; the card's data-rate is what pcRate() reads. */
 function pcSlowRate(tr){ return (1 + tr.trackBpmSlow / tr.trackBpm) / 2; }
 function pcSpeedSwitchHtml(){
-  return `<button type="button" class="pc-speed" role="switch" aria-checked="false" aria-label="${escAttr(t('ca.cardSpeedAria'))}" onclick="pcSetSpeed(this)">`
+  return `<button type="button" class="pc-speed" role="switch" aria-checked="false" aria-label="${escAttr(t('ca.cardSpeedAria'))}" title="${escAttr(t('pc.keys.speed'))}" onclick="pcSetSpeed(this)">`
     +   `<span class="pc-speed-lab on">${escHtml(t('ca.cardSlower'))}</span>`
     +   `<span class="pc-speed-track" aria-hidden="true"><span class="pc-speed-knob"></span></span>`
     +   `<span class="pc-speed-lab">${escHtml(t('ca.cardNormal'))}</span></button>`;
@@ -297,7 +297,7 @@ function pcSpeed3Html(tr){
     return `<span class="pc-speed-tick${i === START ? ' on' : ''}" style="--i:${i}" data-speed="${speed}" data-rate="${rate}" data-label="${escAttr(t(key) + ', ' + x)}"></span>`
       + `<span class="pc-speed-x${i === START ? ' on' : ''}" style="--i:${i}" aria-hidden="true">${x}</span>`;
   }).join('');
-  return `<span class="pc-speed4" role="group" aria-label="${escAttr(t('ca.cardSpeed4Aria'))}">`
+  return `<span class="pc-speed4" role="group" aria-label="${escAttr(t('ca.cardSpeed4Aria'))}" title="${escAttr(t('pc.keys.speed'))}">`
     + `<span class="pc-speed-end" aria-hidden="true">${escHtml(t('ca.cardSlower'))}</span>`
     + `<span class="pc-speed-rail"><span class="pc-speed-line" aria-hidden="true"></span>${ticks}`
     +   `<input type="range" class="pc-speed-range" min="0" max="3" step="1" value="${START}" aria-label="${escAttr(t('ca.cardSpeedLabel'))}" aria-valuetext="${escAttr(t(stops[START][1]) + ', ' + pcSpeedFactor(stops[START][3]))}" oninput="pcSpeedShow(this)" onchange="pcSetSpeedTo(this)"></span>`
@@ -310,7 +310,7 @@ function pcRate(root){ const r = root && parseFloat(root.dataset.rate); return r
 function pcPlayerHtml(a, L){
   const hasFull = snippetHasFull(L.tr);
   return `<div class="pc-player">`
-    + `<button type="button" class="pc-play" onclick="pcToggle(this)">${pcPlayBtnHtml(false)}</button>`
+    + `<button type="button" class="pc-play" title="${escAttr(t('pc.keys.play'))}" onclick="pcToggle(this)">${pcPlayBtnHtml(false)}</button>`
     + `<button type="button" class="snip-toggle pc-metro" aria-pressed="false" onclick="pcSetMetro(this)">&#x1F3B5; ${escHtml(t('tools.metronome'))}</button>`
     + (a.card.slowest ? pcSpeed3Html(L.tr) : pcSpeedSwitchHtml())
     /* The Guitar switch: only where a full mix exists, ON by default. */
@@ -322,7 +322,7 @@ function pcTabHtml(a, L){
   const many = L.sections.length > 1;
   const chips = many
     ? `<p class="pc-hint">${escHtml(t('ca.cardSectionHint'))}</p><div class="pc-secs">`
-      + L.sections.map((S, si) => `<button type="button" class="pc-sec${si === 0 ? ' cur' : ''}" data-sec="${si}" onclick="pcFromSection(this,${si})"><span class="pc-sec-play" aria-hidden="true">&#x25B6;</span>${escHtml(tf(S.s, 'label'))}</button>`).join('')
+      + L.sections.map((S, si) => `<button type="button" class="pc-sec${si === 0 ? ' cur' : ''}" data-sec="${si}" title="${escAttr(t('pc.keys.section'))}" onclick="pcFromSection(this,${si})"><span class="pc-sec-play" aria-hidden="true">&#x25B6;</span>${escHtml(tf(S.s, 'label'))}</button>`).join('')
       + `</div>`
     : '';
   const pages = L.sections.map((S, si) => {
@@ -383,9 +383,9 @@ function pcTabHtml(a, L){
   }).join('');
   const pager = many
     ? `<div class="tab-pager pc-pager">`
-      + `<button type="button" class="tab-pager-btn" onclick="pcPage(this,-1)" disabled>&#x25C0; ${escHtml(t('tab.pagePrev'))}</button>`
+      + `<button type="button" class="tab-pager-btn" title="${escAttr(t('pc.keys.prev'))}" onclick="pcPage(this,-1)" disabled>&#x25C0; ${escHtml(t('tab.pagePrev'))}</button>`
       + `<span class="tab-pager-label" aria-live="polite">${escHtml(t('ca.cardSectionOf', {a: 1, n: L.sections.length}))}</span>`
-      + `<button type="button" class="tab-pager-btn" onclick="pcPage(this,1)">${escHtml(t('tab.pageNext'))} &#x25B6;</button></div>`
+      + `<button type="button" class="tab-pager-btn" title="${escAttr(t('pc.keys.next'))}" onclick="pcPage(this,1)">${escHtml(t('tab.pageNext'))} &#x25B6;</button></div>`
     : '';
   const title = (c.caption && tf(c, 'caption')) || t('tab.defaultTitle');
   /* The status line ("Playing from Chorus", the count-in, "End of the
@@ -612,7 +612,7 @@ function pcSheetHtml(a, L){
   const c = a.card;
   const many = L.sections.length > 1;
   const chips = many
-    ? `<div class="pc-secs">` + L.sections.map((S, si) => `<button type="button" class="pc-sec${si === 0 ? ' cur' : ''}" data-sec="${si}" onclick="pcFromSection(this,${si})"><span class="pc-sec-play" aria-hidden="true">&#x25B6;</span>${escHtml(tf(S.s, 'label'))}</button>`).join('') + `</div>`
+    ? `<div class="pc-secs">` + L.sections.map((S, si) => `<button type="button" class="pc-sec${si === 0 ? ' cur' : ''}" data-sec="${si}" title="${escAttr(t('pc.keys.section'))}" onclick="pcFromSection(this,${si})"><span class="pc-sec-play" aria-hidden="true">&#x25B6;</span>${escHtml(tf(S.s, 'label'))}</button>`).join('') + `</div>`
     : '';
   const cells = ['1', '+', '2', '+', '3', '+', '4', '+'].slice(0, L.tr.beatsPerBar * 2)
     .map(n => `<span class="pc-strip-cell"><span class="pc-strip-ch"></span><span class="pc-strip-n">${n}</span></span>`).join('');
@@ -1443,6 +1443,104 @@ function pcToggleHelp(btn){
   btn.setAttribute('aria-expanded', open ? 'true' : 'false');
   const arrow = btn.querySelector('.pc-help-arrow');
   if(arrow) arrow.innerHTML = open ? '&#x25BE;' : '&#x25B8;';
+}
+/* ══ KEYS — the practice-card player from the keyboard (2026-11-13) ══════
+   A student holding a guitar can start and stop with a thumb on the space
+   bar instead of aiming the trackpad. Every key presses a control the card
+   already has, by calling the SAME function that control's onclick /
+   onchange calls; nothing here plays, seeks or times anything itself:
+     Space or K   the Play / Stop button        pcToggle(play button)
+     ← / →        stopped: the Previous / Next pager   pcPage(btn, ∓1)
+                  playing: the previous / next section chip   pcFromSection(chip, si)
+     < or ,       one speed stop slower         pcSetSpeedTo(range) / pcSetSpeed(switch)
+     > or .       one speed stop faster         (same, within the control's own ends)
+   A card with one section has no pager and no chips, so the arrows do
+   nothing there; a lyric-sheet card has chips but no pager, so its arrows
+   work only while it plays.
+   WHICH card answers: the one playing (pcState); else the one last touched
+   or focused (pcKeyLast, written by pcKeyNote); else, if exactly one card
+   is on screen, that one; else none. "On screen" = in the page, laid out
+   (no [hidden] or closed <details> above it), not inert (an open dialog
+   marks #app inert) and not the console's preview.
+   NOTHING happens while the student is typing (a field, a select, a slider,
+   contenteditable), with Ctrl / Cmd / Alt held, on a held-down repeat, when
+   another handler already took the key, in the teacher console, while the
+   nav drawer, a dialog (the games, the live quiz, the gates, Report a
+   problem), the search panel, the tuner or the recorder is open, while a mic
+   listens (coachMicLive) or a Call-the-chord round owns the space bar
+   (chcLive). Space on a focused button, link or <summary> keeps its own
+   meaning (it presses THAT control), so a Play button the student just
+   clicked is never toggled twice. A key that acts cancels its default, so
+   Space never scrolls the page. The listeners are registered once, in
+   app/start.js, for the page's life, like the site's other document keys;
+   they hold no timer, audio or element of their own (pcKeyLast is checked
+   for isConnected before use). */
+let pcKeyLast = null;
+function pcKeyNote(e){
+  const tg = e && e.target;
+  const r = tg && tg.closest ? tg.closest('.pc') : null;
+  if(r) pcKeyLast = r;
+}
+function pcKeyLive(root){
+  return !!(root && root.isConnected && root.dataset && root.dataset.preview !== '1'
+    && root.getClientRects().length && !root.closest('[inert], [hidden], details:not([open])'));
+}
+function pcKeyRoot(){
+  if(pcState && pcKeyLive(pcState.root)) return pcState.root;
+  if(pcKeyLive(pcKeyLast)) return pcKeyLast;
+  const live = Array.from(document.querySelectorAll('.pc')).filter(pcKeyLive);
+  return live.length === 1 ? live[0] : null;
+}
+function pcKeyBlocked(){
+  const b = document.body;
+  if(b && b.classList.contains('rail-open')) return true;
+  if(window.coachMicLive) return true;
+  if(typeof chcLive !== 'undefined' && chcLive) return true;
+  if(document.querySelector('#tuner-popup.open, #rec-popup.open, #search-panel:not([hidden])')) return true;
+  return Array.from(document.querySelectorAll('[aria-modal="true"]')).some(m => !m.closest('[hidden]') && m.getClientRects().length);
+}
+const PC_KEYS = { ' ': 'play', 'Spacebar': 'play', 'k': 'play', 'K': 'play', 'ArrowLeft': 'prev', 'ArrowRight': 'next', '<': 'slower', ',': 'slower', '>': 'faster', '.': 'faster' };
+function pcKeydown(e){
+  const act = Object.prototype.hasOwnProperty.call(PC_KEYS, e.key) ? PC_KEYS[e.key] : null;
+  if(!act || e.defaultPrevented || e.repeat || e.isComposing || e.ctrlKey || e.metaKey || e.altKey) return;
+  if(typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE) return;
+  const tg = e.target && e.target.closest ? e.target : null;
+  if(tg && (tg.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"])') || tg.isContentEditable)) return;
+  // Arrows inside a widget that uses them itself (the tool popups' radio groups, a tab strip).
+  if(tg && (act === 'prev' || act === 'next') && tg.closest('[role="radiogroup"], [role="tablist"], [role="listbox"], [role="menu"], [role="slider"]')) return;
+  if(act === 'play' && e.key !== 'k' && e.key !== 'K' && tg && tg.closest('button, a[href], summary, [role="button"], [role="switch"], [role="checkbox"], [role="radio"], [role="tab"], [role="menuitem"], [role="option"]')) return;
+  if(pcKeyBlocked()) return;
+  const root = pcKeyRoot();
+  if(!root) return;
+  const playing = !!(pcState && pcState.root === root);
+  let done = false;
+  if(act === 'play'){
+    const btn = root.querySelector('.pc-play');
+    if(btn){ pcToggle(btn); done = true; }
+  } else if(act === 'prev' || act === 'next'){
+    const dir = act === 'next' ? 1 : -1;
+    if(playing){
+      const cur = pcState.si >= 0 ? pcState.si : pcState.loopFrom;
+      const chip = root.querySelector(`.pc-sec[data-sec="${cur + dir}"]`);
+      if(chip){ pcFromSection(chip, cur + dir); done = true; }
+    } else {
+      const btn = root.querySelectorAll('.pc-pager .tab-pager-btn')[dir < 0 ? 0 : 1];
+      if(btn && !btn.disabled){ pcPage(btn, dir); done = true; }
+    }
+  } else {
+    const dir = act === 'faster' ? 1 : -1;
+    const range = root.querySelector('.pc-speed-range');
+    const sw = range ? null : root.querySelector('.pc-player .pc-speed:not(.pc-guitar)');
+    if(range){
+      const v = Number(range.value) + dir;
+      if(v >= Number(range.min) && v <= Number(range.max)){ range.value = String(v); pcSetSpeedTo(range); done = true; }
+    } else if(sw && (root.dataset.slow === '1') === (dir > 0)){
+      pcSetSpeed(sw); done = true;
+    }
+  }
+  if(!done) return;
+  pcKeyLast = root;
+  e.preventDefault();
 }
 /* The 🖨 button. It rides in the open card's bar only (caSyncTopbar) since
    2026-10-31 — Jonathan: the collapsed rows (plain card and Today hero) each

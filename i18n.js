@@ -564,6 +564,12 @@
     'ca.cardSongEnd':           { en: 'End of the song. Press Play song to go again.', es: 'Fin de la canción. Presiona «Tocar la canción» para empezar otra vez.' },
     'ca.cardPlayingFrom':      { en: 'Playing from: {section}', es: 'Tocando desde: {section}' },
     'ca.cardRepOf':            { en: '{what} {n} of {total}', es: '{what} {n} de {total}' },
+    // Practice-card keys (pcKeydown in app/cards.js, 2026-11-13): each control's tooltip names its key.
+    'pc.keys.play':            { en: 'Play or stop (space bar or K)', es: 'Tocar o detener (barra espaciadora o K)' },
+    'pc.keys.prev':            { en: 'Previous section (← key)', es: 'Sección anterior (tecla ←)' },
+    'pc.keys.next':            { en: 'Next section (→ key)', es: 'Sección siguiente (tecla →)' },
+    'pc.keys.section':         { en: 'Start here (while the song plays, the ← and → keys move between sections)', es: 'Empieza aquí (mientras suena la canción, las teclas ← y → cambian de sección)' },
+    'pc.keys.speed':           { en: 'Speed (< slower, > faster)', es: 'Velocidad (< más lenta, > más rápida)' },
     // Lyric-sheet practice card (card.sheet, ca-38 — 2026-10-19)
     'ca.sheetDirections':      { en: 'Press Play song, strum the way the recording does and change chords on the word under each name.',
                                  es: 'Presiona «Tocar la canción», rasguea como la grabación y cambia de acorde en la palabra bajo cada nombre.' },

@@ -155,6 +155,13 @@ window.addEventListener('popstate', routeExploreHash);
    comes back, at most once every 30 s: "Check back later" without a timer. */
 document.addEventListener('visibilitychange', () => { if(!document.hidden && accessLocked) accessRecheck(false); });
 
+/* ── The practice-card player's keys (KEYS in app/cards.js): one keydown listener, and the two that note which
+   card the student last touched or tabbed into. Registered after audio-ui.js's role="button" Space handler, so a
+   Space that handler took arrives here already cancelled. For the page's life, like the site's other keys. */
+document.addEventListener('keydown', pcKeydown);
+document.addEventListener('pointerdown', pcKeyNote, { capture: true, passive: true });
+document.addEventListener('focusin', pcKeyNote);
+
 /* ── Start sign-in: the LAST statement of the app script ──
    Everything above is defined by now, so the callback can use any of it. See the note where this used to be
    (above "Back where you were"). Keep it last: a statement added after it would be code the callback cannot
