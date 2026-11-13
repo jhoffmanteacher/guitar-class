@@ -39,7 +39,8 @@
    crashed; 3 = watchdog. stdout is identical for the same seed and site; the run time goes to stderr.
 
    WHAT IS REAL. The site's own scripts, unmodified, each page its own Node vm context, in index.html's order:
-   firebase-config.js (its config goes only to the fake initializeApp; TEACHER_EMAIL is read from it), config-main.js, class-activities.js, i18n.js, guitar-diagrams.js, every module-N.js, every app/*.js part
+   firebase-config.js (its config goes only to the fake initializeApp; TEACHER_EMAIL is read from it),
+   config-main.js, class-activities.js, i18n.js, guitar-diagrams.js, every module-N.js, every app/*.js part
    (tools/site-src.mjs siteParts), practice-minutes-config.js, practice-minutes.js, fab-tools.js, tuner.js,
    live-quiz.js. The console parts (teacher-*.js) and the arcade parts (coach-*.js) load when the site appends
    their <script> (ensureTeacherJs / ensureCoachJs), as in the browser. Sign-in is the site's own signIn() button
@@ -65,8 +66,9 @@
    - Firebase Auth, per device (A1-A4): the signed-in user is shared by every tab (A1: browserLocalPersistence,
      the web default); a sign-in or sign-out is delivered to the tab that made it at once and to every other tab
      20-300 ms later (A2: the Firebase SDK runs the listeners of the tab that called signOut() / signInWithPopup()
-     before that call's promise settles), in order — a FROZEN tab (a scenario option: a background tab the browser froze)
-     receives only the LATEST state when it thaws (A3); onAuthStateChanged fires on registration with the
+     before that call's promise settles), in order — a FROZEN tab (a scenario option: a background tab the browser
+     froze) runs nothing while frozen (no timer, no network answer) and receives only the LATEST state when it
+     thaws (A3); onAuthStateChanged fires on registration with the
      restored user and afterwards only when the user changes (A4). signInWithPopup takes 1.5-3 s; signOut 20-80 ms.
    - Firestore (F1-F9), one server per world and one client per page:
        F1 set(…,{merge:true}) merges maps key by key; an EMPTY map replaces; FieldValue.delete() removes a key;
@@ -162,6 +164,25 @@
         keys after the device signed B in). The pm:* keys follow Firebase's user by design (boot.js PM_HOST.user
         reads auth.currentUser), so for them only the seconds are judged.
      R7 Nothing the site runs throws, and no promise is left rejected with nobody to handle it.
+
+   THE FAMILIES (--list): last-action (A's last action of 8 kinds right before Sign out, network up / slow /
+   refused once / offline / stalled; the student who sees the not-saved notice either takes "Sign out anyway" or
+   waits for the network and tries again), first-screen (A works a whole session, then B — returning, new, or with
+   a failed progress read — and B's first screen is read; B is also asked the mic question, or not), two-tabs (A in
+   two tabs signs out from the other one; the first tab may be frozen and wake to B straight over A), round-trip
+   (A-B-A, A-A), teacher (the teacher's account after and before a student, on the student page and on the
+   console), playing (Sign out with a note playing and the mic open), failed-reads (B's progress and/or config
+   read refused, offline, or empty right after A), mix (seeded picks of the others). A live quiz is running in
+   every case, so each tab a student used holds that student's lq-q-opened session key.
+
+   BREAK-IT RECORD (2026-11-12; scratch copies given with --root, each one red): no flush before Sign out (R1); no
+   not-saved notice (R1); Sign out resets state instead of reloading (R5, mic still open); Sign out keeps
+   sessionStorage (R4 lq-q-opened); the signed-out-elsewhere branch does not reload (R5); the swap branch adopts B
+   without a reload (R4 + R5 + R6); _uidKey unscoped (R4 practiceLog, R1 legacy ticks); the cached period override
+   restored for any uid (R4); the mic-recording answer per device (R4 mic question); practice minutes adopting any
+   student's queue (R4 localStorage read); the Who-card cache read as anyone's (R4). Fake faults (--fake-fault, each
+   turns the self-test red and no case runs): auth-not-shared, token-of-current-user, queue-survives-reload,
+   session-cleared-on-reload, storage-per-tab, rules-open, frozen-sees-all.
 
    NOT MODELLED. Real rendering and layout (markup strings are scanned, not drawn); the service worker and the
    update reload; enablePersistence; two devices (save-loop.mjs covers them); the Song Journey pages (tabs/*.html:
