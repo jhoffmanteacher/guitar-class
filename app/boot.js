@@ -840,6 +840,10 @@ function swResumeTake(user, teacher){
   const part = teacher ? v.t : v.s;
   return (part && typeof part === 'object') ? part : null;
 }
+/* True only while showApp routes the address a note is about to put back
+   (2026-11-12): the page that opens leaves the scroll to swResumeApply
+   (caFocusActivity skips its scroll to the card). */
+let swResumeRouting = false;
 function swResumeSave(){
   try{
     // Nobody signed in, or the app is not on screen (the sign-in wall, a paused account): nothing to come back to.
@@ -1072,7 +1076,8 @@ function showApp(user){
      (caBlockers().length > 0 && !fromJourney && !GATE_OPEN_HASHES.includes(exploreHashBase(location.hash))))){
     goExploreHash('class-activities');
   }
-  routeExploreHash();
+  swResumeRouting = !!resume;
+  try { routeExploreHash(); } finally { swResumeRouting = false; }
   if(resume) swResumeApply(resume);
   // The period question blocks the whole app, so it still gets first crack
   // at the screen on sign-in.

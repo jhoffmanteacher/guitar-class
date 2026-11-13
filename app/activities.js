@@ -22,7 +22,11 @@ function caFocusActivity(id){
   if(!caTodayIds.includes(id)){
     if(classActivities[id] === true) caFinishedOpen = true; else caTodoOpen = true;
   }
-  caScrollToActivity(id);
+  /* Not on an update reload that is putting this address back
+     (swResumeRouting, app/boot.js): the restore scrolls the page to where
+     the student had it, and this scroll undid it, card back at the top
+     (456 px came back as 14 px, 2026-11-12). With no note, it still runs. */
+  if(!swResumeRouting) caScrollToActivity(id);
 }
 /* Bring one card to the top of whatever is actually scrolling — the .main
    pane on a laptop, the document on a phone — without this needing to know
