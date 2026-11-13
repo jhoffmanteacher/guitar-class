@@ -399,7 +399,15 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
       139,459 checks, 0 failed; 58 of 58 planted faults red. No further review (Jonathan: the stakes are low).
       Power Chord Switch closed loop: every number given to Jonathan reproduced; `--against` has three faults (it can
       say "same" when no take was compared or when the takes cannot see the change; it cannot rank a change to the
-      listening window). Read "marked right" with a bar of about 8, not 3. Fixes in progress when this was written.
+      listening window). Read "marked right" with a bar of about 8, not 3.
+      Fixed the same evening (no further review; no rule change is on the table until new takes arrive): `--against`
+      now refuses to compare when the takes differ or cannot see the change ("NOT THE SAME TAKES", "the real takes
+      cannot judge this change", exit 2), and the section prints CANNOT JUDGE around numbers it cannot vouch for. The
+      takes cannot rank a change to the miss window or the grid: that earlier claim is withdrawn. Noise, measured by
+      moving only each take's clock offset: heard about 2, marked right about 8, lost about 3. Read with those bars,
+      1.9 / 2.31 is no different from today, and the "marked right" gains at 2.0 and 2.1 are inside the noise while
+      their extra lost strums are not. The conclusion stands: no ratio change is supported. 4 of the 21 summaries
+      have no judged change, so 17 carry the 210 changes.
 
 - [x] **2026-11-12 — `tools/playalong-loop.mjs`: the 26 practice cards played end to end on a fake clock, and the
       Metronome fault it found, fixed** (work order `Claude outputs/WORK-ORDER-closed-loop-tests.md`, Part 1).
