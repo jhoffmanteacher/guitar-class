@@ -6,6 +6,10 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-12 — Practice cards: the Metronome clicks once per beat
+
+- **With the Metronome on, changing the speed, flipping the Guitar switch, turning the Metronome off or pressing Stop no longer adds an extra or early click.** Before, the next beat could click twice, and one more click could sound after Stop.
+
 ## 2026-11-12 — Live quiz: the answer shows when time runs out
 
 - **On the fretboard and power chord quizzes, the answer now comes up by itself when the clock runs out**, about a second after "Time's up". Your teacher can turn this off before the game starts. "Which string am I playing?" still waits for your teacher to mark the answer.
