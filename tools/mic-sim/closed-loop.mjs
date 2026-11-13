@@ -50,12 +50,21 @@
    when it applies. The code is replay-takes.mjs's, imported (realTakes below). --root, --coach and --rule apply to it; --json holds it per take
    and per change; --against compares it per change and prints it FIRST, ranked by the recording (no strum moving to "right" is WORSE, a real
    strum newly lost is WORSE). Real takes outrank the synthetic rooms when the two disagree: the rooms are guesses beside them.
-   What it can judge: the strum rule (onset ratios, refractory, the miss window), the grid and the grading rules in ccResolvePend, on what the
-   mic really heard. What it cannot: a change to coachDetectPitch, to the mic chain or to the 1024 / 512 window sizes (the summaries hold
-   energy and pitch measured with the old ones; a changed detector or chain makes an ASK line), any rule that needs more than loudness, attack
-   and pitch; and its frames are evenly spaced at each take's mean frame time (the real ones were not). The truth is only "was there a strum
-   in the recording where the game listened" (eval-takes.mjs): it says nothing about which chord was played. A difference of 3 or fewer
-   changes between two rules is no difference (the summary replay and the audio replay differ by up to 3, WORKFLOW 2026-11-11).
+   What it can judge: the strum rule (onset ratios, refractory) and the grading rules in ccResolvePend, on what the mic really heard.
+   What it can show but not rank: a change to the miss window or the grid. The truth, "a strum where the game listened", was worked out
+   (eval-takes.mjs, the console's evaluator) with the window the take was graded with, so a rule that moves or widens the window and now
+   hears a real late strum is counted as hearing "no strum" (a planted 150 ms shift: 10 worse, 7 better, 13 not rankable). The truth says
+   nothing about which chord was played either, so "right" <-> "wrong chord" on a real strum is never ranked; a comparison that is mostly
+   that says so ("the takes do not decide this change").
+   What it cannot judge at all: a change to coachDetectPitch, to the mic chain, to the level window or hop (COACH_LVL_WIN / COACH_LVL_HOP) or
+   to the analyser size (COACH_FFT). The summaries hold energy and pitch measured with the old ones (replay-takes.mjs staleReasons: the
+   detector stamp, and `measured`, or MEASURED_BEFORE for the 21 summaries made before it), so such a run prints "THE REAL TAKES CANNOT JUDGE
+   THIS SITE" above and below its numbers and --against refuses it (exit 2). Nor any rule that needs more than loudness, attack and pitch.
+   Its frames are evenly spaced at each take's mean frame time (the real ones were not).
+   --against compares the same takes only: a take in one run and not the other, or a different number of changes with a verdict, exits 2.
+   The noise (TAKE_BAR below, measured by moving only each take's clock offset 20 to 100 ms): about 2 for "no strum HEARD", 8 for "marked
+   RIGHT", 3 for LOST and 5 for real strums marked right. A difference between two rules smaller than that is no difference. (The earlier
+   "3 or fewer" came from the summary replay against the audio replay and is too tight for "marked RIGHT".)
 
    CHANGE UP (--game=changeup, 2026-11-11). The sister game on OPEN chords: ccSetup() with no mode, as the Games hub calls it, then the same
    ccPrepare / ccBeginStage / coachCountIn / ccLoop / coachReadFrame / coachPitchReadings / ccResolvePend / ccFinish as Power Chord Switch; ccLoop
@@ -120,7 +129,7 @@
    Synthetic sound. One number (how long a string rings) is fitted to the classroom takes; the rest is not (student.mjs header). */
 import vm from 'node:vm';
 import { createHash } from 'node:crypto';
-import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync, renameSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Student, STUDENTS, ROOMS, MICS, SR, biquad, rng, STUDENT_MODEL } from './student.mjs';
@@ -573,58 +582,81 @@ function compareRuns(now, was, file){
    askReasons, softNotes, replayAll, printReport. Imported when needed, because replay-takes.mjs imports makeSite from this file. */
 /* The cache: one file per (summary, site code) in tools/mic-sim/.replay-cache/ (gitignored, tools/mic-sim/.gitignore; delete it any time). The key
    is a hash of this file and replay-takes.mjs, of every script the site ran (makeSite's fingerprint: coach.js as rewritten for the rule and the
-   ratios included) and of the summary file itself, so any change to any of them replays again. */
+   ratios included) and of the summary file itself, so any change to any of them replays again. An entry is trusted as it is (nothing checks it
+   against a fresh replay); one that cannot be read (a run killed while writing) counts as missing and is written again. Writes go through a
+   temporary file and a rename, so a reader never sees half a file. */
 const CACHE_DIR = join(dirname(fileURLToPath(import.meta.url)), '.replay-cache');
 function replayCache(){
   const here = dirname(fileURLToPath(import.meta.url));
   const tools = createHash('sha1').update(readFileSync(join(here, 'closed-loop.mjs')) + '\0' + readFileSync(join(here, 'replay-takes.mjs'))).digest('hex');
-  const c = { hits: 0, runs: 0,
+  const c = { hits: 0, runs: 0, broken: 0,
     key: (site, tk) => createHash('sha1').update(tools + '|' + site.fingerprint + '|' + tk.hash).digest('hex'),
-    get(k){ const f = join(CACHE_DIR, k + '.json'); if (!existsSync(f)){ c.runs++; return null; } c.hits++; return JSON.parse(readFileSync(f, 'utf8')); },
-    set(k, v){ mkdirSync(CACHE_DIR, { recursive: true }); writeFileSync(join(CACHE_DIR, k + '.json'), JSON.stringify(v)); } };
+    get(k){
+      const f = join(CACHE_DIR, k + '.json');
+      if (existsSync(f)){ try { const v = JSON.parse(readFileSync(f, 'utf8')); if (v && typeof v === 'object'){ c.hits++; return v; } } catch (e){} c.broken++; }
+      c.runs++;
+      return null;
+    },
+    set(k, v){ mkdirSync(CACHE_DIR, { recursive: true }); const f = join(CACHE_DIR, k + '.json'), tmp = f + '.' + process.pid + '.tmp'; writeFileSync(tmp, JSON.stringify(v)); renameSync(tmp, f); } };
   return c;
 }
+/* The noise of the real-take counts, measured 2026-11-12 by moving only each take's clock offset (how far the site's clock ran ahead of the audio)
+   by -20 to +40 ms and -100 ms, and the 6 takes with no offset from strums to -70 ms, on today's rule: "no strum heard" 35-37 of 54, "marked right"
+   17-26, real strums lost 5-8 of 150, real strums marked right 80-85. A difference between two rules smaller than these is not a difference. */
+const TAKE_BAR = { heard: 2, right: 8, lost: 3, rightNow: 5 };
 async function realTakes(at, rule){
   const RT = await import('./replay-takes.mjs');
   const t0 = Date.now(), takes = RT.loadSummaries(RT.TAKES_DIR), NOW = RT.todayRatios(at), cache = replayCache();
-  const days = takes.map(t => t.day).filter(Boolean).sort();
-  console.log(`\nREAL TAKES · ${takes.length} Power Chord Switch take summaries (tools/mic-sim/takes/${days.length ? ', ' + days[0] + ' to ' + days[days.length - 1] : ''}: recorded students, no audio) · replayed through this site's ccLoop, rule ${rule}, at its strum ratios ${NOW.join(' / ')}`);
-  const why = RT.askReasons(takes, RT.baseSite(at)), soft = RT.softNotes(takes);
+  const days = takes.map(t => t.day).filter(Boolean).sort(), empty = takes.filter(t => !t.notes.length).length;
+  console.log(`\nREAL TAKES · ${takes.length} Power Chord Switch take summaries${empty ? ` (${empty} with no judged change)` : ''} (tools/mic-sim/takes/${days.length ? ', ' + days[0] + ' to ' + days[days.length - 1] : ''}: recorded students, no audio) · replayed through this site's ccLoop, rule ${rule}, at its strum ratios ${NOW.join(' / ')}`);
+  const site = RT.baseSite(at), unchecked = [], why = RT.askReasons(takes, site, unchecked), soft = RT.softNotes(takes).concat(unchecked);
+  const stale = takes.length ? RT.staleReasons(takes, site) : [];
   console.log(why.length ? 'ASK JONATHAN for new takes (he downloads the recordings, then: node tools/mic-sim/takes-in.mjs):\n' + why.map(w => '  - ' + w).join('\n') : 'Takes are current: no need to ask Jonathan for new ones.');
   if (soft.length) console.log('Note (no need to ask him for this alone): ' + soft.join('; '));
-  if (!takes.length) return { rule, ratios: NOW, takes: [] };
+  if (!takes.length) return { rule, ratios: NOW, stale, takes: [] };
+  const STALE = 'THE REAL TAKES CANNOT JUDGE THIS SITE: ' + stale.join('; ') + '. The numbers below replay readings made with the old ones: they are not this site\'s.';
+  if (stale.length) console.log(STALE);
   RT.replayAll(takes, [rule], NOW, at, cache);
   console.log('  "no strum" = no strum in the recording where the game listened: HEARD and marked RIGHT should be 0. "real strums" = strums the game heard when');
   console.log('  the take was made: LOST = no longer heard. "reproduced" is the error bar: at each take\'s own ratios, how often the replay gives the saved verdict.');
   RT.printReport(takes, [rule], NOW, l => console.log(l));
-  console.log(`  Cannot judge: a change to the pitch detector, the mic chain or the 1024 / 512 window sizes (the summaries hold readings made with the old ones;`);
-  console.log(`  a stale one is an ASK line above); frames are replayed evenly spaced. Treat 3 or fewer changes between two rules as no difference.`);
-  console.log(`  ${takes.length} takes in ${((Date.now() - t0) / 1000).toFixed(1)} s (${cache.runs} replays run, ${cache.hits} read from tools/mic-sim/.replay-cache/)`);
+  if (stale.length) console.log(STALE);
+  console.log(`  Noise: moving only each take's clock offset by 20 to 100 ms moves "no strum HEARD" by about ${TAKE_BAR.heard}, "marked RIGHT" by about ${TAKE_BAR.right}, LOST by about ${TAKE_BAR.lost}`);
+  console.log(`  and real strums marked right by about ${TAKE_BAR.rightNow}: a smaller difference between two rules is no difference.`);
+  console.log(`  Cannot judge: a change to the pitch detector, the mic chain, the level window or hop or the analyser size (the summaries hold readings made`);
+  console.log(`  with the old ones: such a run prints "CANNOT JUDGE" and --against refuses it); frames are replayed evenly spaced. Cannot rank: a change to the`);
+  console.log(`  miss window or the grid (the recording's truth, "a strum where the game listened", was worked out with the window the take was graded with).`);
+  console.log(`  ${takes.length} takes in ${((Date.now() - t0) / 1000).toFixed(1)} s (${cache.runs} replays run, ${cache.hits} read from tools/mic-sim/.replay-cache/${cache.broken ? `, ${cache.broken} unreadable entries replaced` : ''})`);
   const key = rule + '@now', own = rule + '@own';
-  return { rule, ratios: NOW, takes: takes.map(tk => ({ take: tk.take, id: tk.id, day: tk.day, own: tk.own, mapFrom: tk.mapFrom,
+  return { rule, ratios: NOW, stale, takes: takes.map(tk => ({ take: tk.take, id: tk.id, day: tk.day, own: tk.own, mapFrom: tk.mapFrom,
     changes: tk.notes.map(n => { const v = tk.res[key][n.i], o = tk.res[own][n.i]; return { i: n.i, stage: n.stage, strum: !!n.played, cat: n.why ? n.why.cat : null, saved: n.site,
       verdict: v ? v.verdict : null, readings: v ? v.readings : null, ownVerdict: o ? o.verdict : null }; }) })) };
 }
 /* --against for the real takes, per take (by fingerprint) and per change. The truth is only whether the recording has a strum where the game
    listened: no strum ranks like `silent` (no strum, then wrong chord, then right: a move to "right" is WORSE); a real strum ranks heard (right or
-   wrong chord, the take cannot say which chord was played) over not heard (newly LOST is WORSE). */
+   wrong chord, the take cannot say which chord was played) over not heard (newly LOST is WORSE). Refused (exit 2, nothing compared): either run's
+   site is one the takes cannot judge (`stale`), the two runs do not hold the same takes, or not the same number of changes have a verdict. */
 const TAKE_RANK = { strum: { ok: 1, off: 1, miss: 0 }, none: { miss: 2, off: 1, ok: 0 } };
 const TAKE_WORD = { ok: 'right', off: 'wrong chord', miss: 'no strum' };
 function compareTakes(now, was, file){
   if (!now && !was) return null;
-  if (!now || !was) return { code: 2, lines: [`against ${file}: NOT THE SAME COMMAND (the real takes are in ${was ? 'the earlier run and not in this one' : 'this run and not in the earlier one'}: --no-takes and --takes-only must match); nothing compared`] };
-  const byId = new Map(was.takes.map(t => [t.id, t]));
-  let n = 0, diff = 0, worse = 0, better = 0, other = 0, takesN = 0;
-  const split = { noneWorse: 0, noneBetter: 0, lost: 0, found: 0 };
-  const first = [], only = now.takes.filter(t => !byId.has(t.id)).length + was.takes.filter(t => !now.takes.some(u => u.id === t.id)).length;
+  const no = why => ({ code: 2, lines: [`against ${file}: ${why}; nothing compared`] });
+  if (!now || !was) return no(`NOT THE SAME COMMAND (the real takes are in ${was ? 'the earlier run and not in this one' : 'this run and not in the earlier one'}: --no-takes and --takes-only must match)`);
+  const stale = [...(now.stale || []).map(w => 'this run: ' + w), ...(was.stale || []).map(w => 'the earlier run: ' + w)];
+  if (stale.length) return no(`the real takes cannot judge this change (${stale.join('; ')})`);
+  const byId = new Map(was.takes.map(t => [t.id, t])), nowIds = new Set(now.takes.map(t => t.id));
+  const onlyNow = now.takes.filter(t => !byId.has(t.id)).length, onlyWas = was.takes.filter(t => !nowIds.has(t.id)).length;
+  if (!now.takes.length || !was.takes.length || onlyNow || onlyWas) return no(`NOT THE SAME TAKES (this run ${now.takes.length}, the earlier run ${was.takes.length}; ${onlyNow} only in this run, ${onlyWas} only in the earlier one)`);
+  const withVerdict = r => r.takes.reduce((k, t) => k + t.changes.filter(c => c.verdict != null).length, 0);
+  const total = now.takes.reduce((k, t) => k + t.changes.length, 0), vNow = withVerdict(now), vWas = withVerdict(was);
+  if (vNow !== vWas) return no(`NOT THE SAME TAKES (changes with a verdict: ${vNow} in this run, ${vWas} in the earlier one, of ${total}: a round one replay could run and the other could not)`);
+  let n = 0, diff = 0, worse = 0, better = 0, other = 0, skipped = 0;
+  const split = { noneWorse: 0, noneBetter: 0, lost: 0, found: 0 }, first = [];
   for (const t of now.takes){
-    const w = byId.get(t.id);
-    if (!w) continue;
-    takesN++;
-    const wi = new Map(w.changes.map(c => [c.i, c]));
+    const wi = new Map(byId.get(t.id).changes.map(c => [c.i, c]));
     for (const c of t.changes){
       const o = wi.get(c.i);
-      if (!o || c.verdict == null || o.verdict == null) continue;
+      if (!o || c.verdict == null || o.verdict == null){ skipped++; continue; }
       n++;
       if (o.verdict === c.verdict) continue;
       diff++;
@@ -636,8 +668,10 @@ function compareTakes(now, was, file){
       if (first.length < 10) first.push(`  take ${t.take} (${t.id}) change ${c.i}: ${c.strum ? 'a real strum' : 'no strum in the recording'}, was ${TAKE_WORD[o.verdict]}, now ${TAKE_WORD[c.verdict]}  ${kind}`);
     }
   }
+  const strums = now.takes.reduce((k, t) => k + t.changes.filter(c => c.strum).length, 0);
+  const undecided = diff && other >= worse + better ? '; MOSTLY right <-> wrong chord: the takes do not decide this change (they do not say which chord was played)' : '';
   return { code: diff ? 1 : 0, lines: ['Real takes first: they are recorded students; the rooms below are guesses. When the two disagree, the real takes win.',
-    `against ${file}: REAL TAKES ${diff} of ${n} replayed changes differ (${worse} worse by the recording, ${better} better, ${other} right <-> wrong chord on a real strum, which the takes cannot rank) in ${takesN} takes: no strum in the recording ${split.noneWorse} worse (now heard or marked right), ${split.noneBetter} better; real strums ${split.lost} newly LOST, ${split.found} heard again${only ? `; ${only} takes in only one of the runs, not compared` : ''}${diff ? '  RED' : '  same'}`, ...first] };
+    `against ${file}: REAL TAKES ${diff} of ${n} replayed changes differ (${worse} worse by the recording, ${better} better, ${other} right <-> wrong chord on a real strum, which the takes cannot rank) in ${now.takes.length} takes: no strum in the recording ${split.noneWorse} worse (now heard or marked right), ${split.noneBetter} better; real strums ${split.lost} newly LOST, ${split.found} heard again (of all ${strums} strums in the recordings, against the earlier run: not the section's LOST, which counts only the ${now.takes.reduce((k, t) => k + t.changes.filter(c => c.cat === 'agree').length, 0)} the game heard when the takes were made)${skipped ? `; ${skipped} changes skipped, no verdict in either run (a round the replay could not run)` : ''}${undecided}${diff ? '  RED' : '  same'}`, ...first] };
 }
 /* The whole comparison: the real takes first, then the synthetic games. Exit codes as compareRuns. */
 function compareAll(games, takes, was, file){

@@ -173,16 +173,31 @@ script.
   `--against` compares the takes per take and per change, prints them FIRST, and ranks them by the recording: no strum
   moving to "heard" or "right" is WORSE, a real strum newly lost is WORSE, "right" <-> "wrong chord" on a real strum
   is not ranked (the takes do not say which chord was played). A run with the takes against a file without them (or
-  the other way) is not the same command (exit 2). Real takes outrank the synthetic rooms when the two disagree: the
-  rooms are guesses beside them. Time: 4-6 s with nothing cached, under 1 s cached (one small file per summary and
-  site code in `tools/mic-sim/.replay-cache/`, gitignored; the key hashes this tool, `replay-takes.mjs`, every script
-  the site ran and the summary, so any change replays again). `replay-takes.mjs` alone takes 4-5 minutes because of
-  the three `ring` rules; base alone is 5 s.
-  What it can judge: the strum rule, the miss window, the grid and `ccResolvePend`'s grading, on what the mic really
-  heard. What it cannot: a change to `coachDetectPitch`, the mic chain or the 1024 / 512 window sizes (the summaries
-  hold readings made with the old ones; a changed detector or chain prints an ASK line), and its frames are evenly
-  spaced. It knows only whether there was a strum, never which chord: a change to the pitch grading shows in "marked
-  right" but cannot be ranked. Treat 3 or fewer changes between two rules as no difference.
+  the other way) is not the same command (exit 2), and so is a pair of runs that do not hold the same takes (a take in
+  only one of them, or a different number of changes with a verdict): "NOT THE SAME TAKES; nothing compared". Real
+  takes outrank the synthetic rooms when the two disagree: the rooms are guesses beside them. Time: 4-30 s with
+  nothing cached (it depends on the machine's load), about 1 s cached (one small file per summary and site code in
+  `tools/mic-sim/.replay-cache/`, gitignored; the key hashes this tool, `replay-takes.mjs`, every script the site ran
+  and the summary, so any change replays again). The cache is trusted as it is: nothing checks an entry against a
+  fresh replay, so delete the folder if in doubt; an entry that cannot be read is replayed and written again (through
+  a temporary file). `replay-takes.mjs` alone takes 4-5 minutes because of the three `ring` rules; base alone is 5 s.
+  What it can judge: the strum rule and `ccResolvePend`'s grading, on what the mic really heard. What it shows but
+  cannot rank: a change to the miss window or the grid, because the truth ("a strum where the game listened") was
+  worked out with the window the take was graded with; a rule that widens or moves the window and hears a real late
+  strum is counted as hearing "no strum" (a planted 150 ms shift: 10 worse, 7 better, 13 not rankable). It knows only
+  whether there was a strum, never which chord: a change to the pitch grading shows in "marked right" but cannot be
+  ranked, and a comparison that is mostly "right <-> wrong chord" says "the takes do not decide this change". What it
+  cannot judge at all: a change to `coachDetectPitch`, the mic chain, `COACH_LVL_WIN` / `COACH_LVL_HOP` or `COACH_FFT`
+  (the summaries hold readings made with the old ones; `staleReasons` in `replay-takes.mjs` compares the detector
+  stamp and the `measured` values, which the 21 summaries made before 2026-11-12 lack and are taken as 1024 / 512 /
+  4096, the values at `2fb5035`). Such a run prints "THE REAL TAKES CANNOT JUDGE THIS SITE" above and below its numbers,
+  and `--against` refuses it (exit 2). Frames are evenly spaced.
+  **Noise.** Moving only each take's clock offset (-20, +20, -40, +40, -100 ms, and the 6 takes without an offset from
+  strums to -70 ms) on today's rule moved "no strum heard" 35-37 of 54, "marked right" 17-26, lost 5-8 of 150 and real
+  strums marked right 80-85 (`TAKE_BAR`). Read a difference between two rules as real only when it is bigger than
+  about 2 (heard), 8 (marked right), 3 (lost) or 5 (real strums marked right). The earlier "3 or fewer" bar (the summary
+  replay against the audio replay) holds for heard and lost, not for marked right. 4 of the 21 summaries have no judged
+  change (17 carry the 210), which the section prints.
   Measured 2026-11-12 on the 21 summaries (210 judged changes; 54 with no strum in the window, 150 real strums the game
   heard), `node tools/mic-sim/closed-loop.mjs --takes-only` and `--root=<copy>` for the other ratios:
   no strum heard / marked right / real strums lost: today (1.8 / 2.19) 37 / 24 / 6; 1.5 / 1.83 50 / 32 / 1;
@@ -191,6 +206,13 @@ script.
   (heard or not: 200 of 210). Planted in a copy: a looser ratio (1.5 / 1.83) gave "no strum in the recording 15
   worse"; a stricter one (2.2 / 2.67) "1 worse, 18 better; real strums 14 newly LOST"; a stricter pitch rule
   (`anyNew > 0.6`) "0 worse, 11 better, 28 right <-> wrong chord on a real strum".
+  **What the sweep says, read with the noise bars:** 1.9 / 2.31 is no different from today (heard -2, marked right -2,
+  lost +3: all inside the bars). 2.0 / 2.43 and 2.1 / 2.55 hear 6-7 fewer empty windows (outside the bar), but
+  "marked right" falls only 4-5 (inside it), and they lose 8-10 more real strums (outside it). Only 2.2 / 2.67 cuts
+  "marked right" by more than the bar (-11), and it loses 12 more real strums. `half3`'s "marked right" drop (-5) is
+  inside the bar; its real strums marked right fall 17 (outside), which the takes cannot rank because they do not say
+  which chord was played. So no ratio change the takes support: every step that removes false rights beyond the noise
+  loses real strums beyond it.
 - **`candidates.mjs`** (2026-11-11): candidate Power Chord Switch grading rules (`ring`, `half`, `half3`, `both`,
   `both3`; what each does is in its header), applied to coach.js IN MEMORY. None is in coach.js. `closed-loop.mjs
   --rule=<name>` plays one; `replay-takes.mjs` replays them on real takes.

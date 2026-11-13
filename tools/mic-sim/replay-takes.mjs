@@ -24,13 +24,15 @@
                              and how many it no longer marks right. The evaluator's "strum" is any attack: a tap counts.
    Left out, as the evaluator leaves them out: changes past the end of the audio, rounds the student retimed, impossible data.
 
-   What a summary CANNOT test: a change to coachDetectPitch itself, to the mic chain, or to the 1024 / 512 window sizes (the summary was measured with
-   the old ones; the "detector" stamp is compared and a mismatch is printed), and any rule that needs more than loudness, attack and pitch.
+   What a summary CANNOT test: a change to coachDetectPitch itself, to the mic chain, or to COACH_LVL_WIN / COACH_LVL_HOP / COACH_FFT (the summary
+   was measured with the old ones; staleReasons compares the "detector" stamp and the `measured` values and prints a mismatch as an ASK reason;
+   closed-loop.mjs also refuses to compare such a run), and any rule that needs more than loudness, attack and pitch.
 
    WHEN TO ASK JONATHAN FOR NEW TAKES: the first lines this tool prints say so ("ASK JONATHAN"). The reasons: no summaries yet; the pitch detector
    or mic chain changed since they were made; no take was graded at today's strum ratios (each summary holds the ratios its take was graded
-   with, so this needs no history); or, as a backup, the newest take is older than the last commit that changed a line DEFINING a listening
-   constant in coach.js (so nothing recorded shows the current rule at work). Old takes or few takes alone are only a "Note" line, not a reason to ask (Jonathan, 2026-11-11). He downloads the
+   with, so this needs no history); or, as a backup, the newest take is older than the last commit that changed the VALUE of a listening
+   constant in coach.js or its parts (a commit that only moves a definition, like the 2026-11-11 cut, does not count; with no git history
+   this is not checked and a "Note" line says so) (so nothing recorded shows the current rule at work). Old takes or few takes alone are only a "Note" line, not a reason to ask (Jonathan, 2026-11-11). He downloads the
    recordings from the console and runs ONE command: node tools/mic-sim/takes-in.mjs.
 
    Limits: frames are evenly spaced at the take's mean frame time (the real ones were not); a take with no clock offset (fewer than 3 strums found)
@@ -39,8 +41,6 @@ import { readFileSync, writeFileSync, mkdtempSync, readdirSync, existsSync } fro
 import { createHash } from 'node:crypto';
 import { spawnSync } from 'node:child_process';
 import { join, dirname, resolve } from 'node:path';
-// coach.js may be cut into parts (tools/site-src.mjs): the git search below names the old file (its history before the cut) and every part.
-import { siteParts } from '../site-src.mjs';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { makeSite, SUM_HOP } from './closed-loop.mjs';
@@ -189,7 +189,7 @@ export function summarize(tk){
   KEEP.forEach(k => { if (tk.d[k] !== undefined) take[k] = tk.d[k]; });
   take.expected = (tk.d.expected || []).map(e => ({ i: e.i, t: e.t, from: e.from, to: e.to, stage: e.stage, bpm: e.bpm, verdict: e.verdict, readings: e.readings, retimed: e.retimed }));
   take.events = (tk.d.events || []).map(e => ({ t: e.t, stage: e.stage }));
-  return { summary: 1, id: tk.id, day: tk.day, period: tk.period, chromebook: tk.chromebook, hop: SUM_HOP, srcRate: tk.srcRate, detector: detectorStamp(site), take,
+  return { summary: 1, id: tk.id, day: tk.day, period: tk.period, chromebook: tk.chromebook, hop: SUM_HOP, srcRate: tk.srcRate, detector: detectorStamp(site), measured: measuredWith(site), take,
     truth: { mapMs: tk.mapMs, mapFrom: tk.mapFrom, own: tk.own, notes: tk.notes.map(n => ({ i: n.i, stage: n.stage, site: n.site, played: n.played, cat: n.why && n.why.cat })) },
     E: b64(E), D: b64(D), pitch };
 }
@@ -223,7 +223,7 @@ export function loadSummaries(dir){
   return readdirSync(dir).filter(f => /^[0-9a-f]{12}\.json$/.test(f)).sort().map(f => { const text = readFileSync(join(dir, f), 'utf8'); return Object.assign(JSON.parse(text), { __hash: createHash('sha1').update(text).digest('hex') }); }).filter(s => s.summary === 1)
     .sort((a, b) => String(b.day).localeCompare(String(a.day)) || a.id.localeCompare(b.id))
     .map((s, k) => ({ take: 'S' + String(k + 1).padStart(2, '0'), id: s.id, hash: s.__hash, day: s.day, period: s.period, d: s.take, srcRate: s.srcRate, own: s.truth.own, mapMs: s.truth.mapMs, mapFrom: s.truth.mapFrom,
-      notes: s.truth.notes.map(n => ({ i: n.i, stage: n.stage, site: n.site, played: n.played, why: { cat: n.cat } })), detector: s.detector,
+      notes: s.truth.notes.map(n => ({ i: n.i, stage: n.stage, site: n.site, played: n.played, why: { cat: n.cat } })), detector: s.detector, measured: s.measured || null,
       sum: { E: unb64(s.E), D: unb64(s.D), pitch: Object.fromEntries(Object.entries(s.pitch).map(([k, v]) => [k, unb64(v)])) } }));
 }
 /* Runs every rule on every take; res[rule@own|now] = { expected index: { verdict, readings } }. */
@@ -238,12 +238,44 @@ export function replayAll(takes, rules, now, at, cache){
     }
   });
 }
-/* Should Jonathan be asked for new takes? Reasons, from the summaries and the repo's history. */
-export function askReasons(takes, site){
-  const why = [];
-  if (!takes.length) return ['there are no take summaries in tools/mic-sim/takes/ yet'];
-  const stamp = detectorStamp(site), stale = takes.filter(t => t.detector !== stamp).length;
+/* What a summary's energy blocks and pitch were measured with besides the detector stamp: the level window and hop that the summary path sums
+   blocks for, and the analyser's buffer length. Summaries carry it as `measured` since 2026-11-12; the 21 made before (2fb5035, 2026-11-11)
+   carry none and were made with MEASURED_BEFORE (coach.js at 2fb5035: COACH_LVL_WIN = 1024, COACH_LVL_HOP = 512, COACH_FFT = 4096). */
+export const MEASURED_BEFORE = { COACH_LVL_WIN: 1024, COACH_LVL_HOP: 512, COACH_FFT: 4096 };
+export function measuredWith(site){ return Object.fromEntries(Object.keys(MEASURED_BEFORE).map(k => [k, Number(site.run(k))])); }
+/* Why the summaries cannot judge the loaded site: [] when they can. A pitch detector or mic chain other than the one the summaries were measured
+   with (the stamp), or another level window, hop or analyser size. Their pitch readings and energy blocks are then out of date: a replay shows
+   yesterday's numbers, not this site's. */
+export function staleReasons(takes, site){
+  const why = [], stamp = detectorStamp(site), now = measuredWith(site);
+  const stale = takes.filter(t => t.detector !== stamp).length;
   if (stale) why.push(`${stale} of ${takes.length} summaries were measured before the pitch detector or the mic chain changed: their pitch is out of date`);
+  const moved = Object.keys(now).filter(k => takes.some(t => (t.measured || MEASURED_BEFORE)[k] !== now[k]));
+  if (moved.length) why.push(`the summaries were measured with ${moved.map(k => k + ' ' + [...new Set(takes.map(t => (t.measured || MEASURED_BEFORE)[k]))].join('/')).join(', ')}; this site has ${moved.map(k => k + ' ' + now[k]).join(', ')}: their energy and pitch are out of date`);
+  return why;
+}
+/* The day of the last commit that CHANGED the value of a listening constant in coach.js or its parts, or { unchecked } when there is no git
+   history to read. A commit that only moves a definition (the 2026-11-11 cut into parts) is not a change: the sorted definitions after the
+   commit are compared with those before it. */
+const LISTEN_CONSTS = 'CC_POWER_ONSET_RATIO|CC_POWER_HF_RATIO|CHK_ONSET_FLOOR|CHK_ONSET_RATIO|CHK_HF_FLOOR|CHK_HF_RATIO|COACH_EVENT_TAIL|COACH_ATTACK_SKIP';
+export function lastListenChange(){
+  const repo = join(HERE, '..', '..');
+  const git = a => { const r = spawnSync('git', a, { cwd: repo, encoding: 'utf8' }); return r.status === 0 ? r.stdout : null; };
+  const paths = ['--', 'coach.js', 'coach-*.js'];
+  const log = git(['log', '--format=%H %cs', '-G', '^const (' + LISTEN_CONSTS + ')', ...paths]);
+  if (log == null) return { unchecked: `no git history at ${repo}` };
+  const defs = rev => { const out = git(['grep', '-h', '-E', '^const (' + LISTEN_CONSTS + ')[ =]', rev, ...paths]); return out == null ? '' : out.split('\n').map(l => l.replace(/\/\/.*$/, '').replace(/\s+/g, ' ').trim()).filter(Boolean).sort().join('\n'); };
+  for (const line of log.trim().split('\n').filter(Boolean)){
+    const [rev, day] = line.split(' ');
+    if (git(['rev-parse', '--verify', '--quiet', rev + '^']) == null || defs(rev) !== defs(rev + '^')) return { day };
+  }
+  return { day: null };
+}
+/* Should Jonathan be asked for new takes? Reasons, from the summaries and the repo's history. `notes`, when given, gets what could not be
+   checked. */
+export function askReasons(takes, site, notes){
+  if (!takes.length) return ['there are no take summaries in tools/mic-sim/takes/ yet'];
+  const why = staleReasons(takes, site);
   const days = takes.map(t => t.day).filter(Boolean).sort(), newest = days[days.length - 1] || null;
   /* The main test, exact and without git (2026-11-11): every summary holds the strum ratios its take was graded with (truth.own). If no take was
      graded at today's ratios, nothing recorded shows today's rule at work. */
@@ -254,12 +286,13 @@ export function askReasons(takes, site){
     const last = takes.filter(t => t.day === newest && t.own)[0] || takes.filter(t => t.own)[0];
     why.push(`no take was graded at today's strum ratios (${at(now)})` + (last ? `: the newest is from ${last.day}, graded at ${at(last.own)}` : ''));
   }
-  /* The backup, for a change to the other listening constants (the ratios are covered above). It used to run in tools/mic-sim, where the path
-     "coach.js" matches nothing, so it could never fire; and its pattern matched any MENTION of a name, so a comment-only commit counted as a change.
-     Now: from the repo root, and only lines that DEFINE a constant. */
-  const git = a => { const r = spawnSync('git', a, { cwd: join(HERE, '..', '..'), encoding: 'utf8' }); return r.status === 0 ? r.stdout.trim() : ''; };
-  const lastListen = git(['log', '-1', '--format=%cs', '-G', '^const (CC_POWER_ONSET_RATIO|CC_POWER_HF_RATIO|CHK_ONSET_FLOOR|CHK_ONSET_RATIO|CHK_HF_FLOOR|CHK_HF_RATIO|COACH_EVENT_TAIL|COACH_ATTACK_SKIP)', '--', 'coach.js', ...siteParts('coach.js', join(HERE, '..', '..'))]);
-  if (atNow && newest && lastListen && newest < lastListen) why.push(`the newest take is from ${newest}, before the last change to a listening constant in coach.js (${lastListen}): no take shows today's rule at work`);
+  /* The backup, for a change to the other listening constants (the ratios are covered above): the last commit that changed one's VALUE
+     (lastListenChange; a commit that only moved a definition, like the cut into parts, does not count). */
+  if (atNow && newest){
+    const L = lastListenChange();
+    if (L.unchecked){ if (notes) notes.push(`could not check whether a listening constant changed after the newest take (${L.unchecked})`); }
+    else if (L.day && newest < L.day) why.push(`the newest take is from ${newest}, before the last change to a listening constant in coach.js (${L.day}): no take shows today's rule at work`);
+  }
   return why;
 }
 /* Weaker reasons: worth a mention to a session that is working on listening, never a reminder to Jonathan by themselves (his call, 2026-11-11:
@@ -316,9 +349,9 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]){
     takes = loadSummaries(TAKES_DIR);
     const days = takes.map(t => t.day).filter(Boolean).sort();
     console.log(`${takes.length} Power Chord Switch take summaries (tools/mic-sim/takes/${days.length ? ', ' + days[0] + ' to ' + days[days.length - 1] : ''}) · rules ${rules.join(', ')} · today's strum ratios ${NOW.join(' / ')}`);
-    const why = askReasons(takes, baseSite());
+    const unchecked = [], why = askReasons(takes, baseSite(), unchecked);
     console.log(why.length ? 'ASK JONATHAN for new takes (he downloads the recordings, then: node tools/mic-sim/takes-in.mjs):\n' + why.map(w => '  - ' + w).join('\n') : 'Takes are current: no need to ask Jonathan for new ones.');
-    const soft = softNotes(takes);
+    const soft = softNotes(takes).concat(unchecked);
     if (soft.length) console.log('Note (no need to ask him for this alone): ' + soft.join('; '));
     if (!takes.length) process.exit(1);
   }
