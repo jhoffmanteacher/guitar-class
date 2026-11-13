@@ -350,6 +350,11 @@ function gamesClosePanel(){
    replaces the panel itself right after, so the hub isn't drawn only to be
    thrown away. */
 function gamesStopMic(keepPanel){
+  /* A "Turn on the microphone" panel still waiting (coach.js coachMicAsk)
+     belongs to the start being left: give it up, and free the mic start for
+     the next one. The games' own *Stop() reach coachMicOff() only once the
+     mic is live (review R1-4). */
+  coachMicAskCancel();
   /* Note Call (a class-activity drill, app.js) isn't a game, but it shares
      the mic and the same "someone else needs it / tab went to the
      background" exits, so it stops here too. */
