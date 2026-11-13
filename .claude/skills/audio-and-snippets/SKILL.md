@@ -373,6 +373,10 @@ After changing a `SNIPPET_TRACKS` timing field (`anchor`, `barTimes`, `trackBpm`
 - **Exit 0 does not mean the map is clean.** Bars it calls "cannot tell" (printed per file, with how many sit inside
   card sections) need listening: in the 2026-11-12 tests it caught 7 of 12 big planted faults there. A card section
   under 4 bars is never judged a bar off, and the two-file tracks (Madrecita, Las Mañanitas) can miss 100 ms.
+- **Core songs get the full pass; additional (Choice) songs a light one** (Jonathan, 2026-11-12: "i don't need it to
+  do as good a job on the additional songs"). Core: settle every counted line by ear and listen to the "cannot tell"
+  bars inside card sections. Additional: run it, report the counted lines, and leave the weak lines and the
+  "cannot tell" bars alone.
 - First run (2026-11-12): "the cure" rhythm-down files play about 25 ms (144) and about 50 ms (120) AFTER their full
   mixes (a file offset, not a map fault: settle it before touching that anchor); the record pushes Luna bar 10 about
   64 ms early (a steady grid: no number to edit).

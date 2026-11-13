@@ -383,6 +383,24 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-12 (evening) — Fable strategic checks of the three tools that shipped without a last review; two small
+      follow-ups.** Jonathan asked for the checks ("start the strategic check with fable now").
+      `tools/beat-audit.py`: clean (no BLOCKER, no MAJOR). Today's three counted lines were confirmed independently
+      (Luna bar 10; "the cure" 25 ms file offset in 14 of 14 windows; the slow offset is real but about 76 ms in a
+      player that ignores the slow rhythm-down file's encoder-delay tag). One logic slip fixed here: a slow-only
+      finding now escapes the "measuring quirk" dismissal only when NO record-tempo file can tell there (it was "any").
+      Still true: on the two-file tracks a half-beat section can show only as WEAK and exit 0. And for additional
+      (Choice) songs the tool is a light pass (skill `audio-and-snippets`).
+      `tools/live-quiz-loop.mjs`: scoring held; three answer-leak holes in the test (the question doc's values, the
+      Locked-in pick, plain words on a student's screen), all closed here by PINNING instead of exempting: before
+      Reveal the tool compares what the projector, every student screen (unlocked and Locked in, English and Spanish)
+      and every question doc show, word for word and field by field, with its own model; its header has a SURFACES
+      table. Not checked, by its own statement: the fretboard drawing itself and the lobby. Seed 1 on main: 39 cases,
+      139,459 checks, 0 failed; 58 of 58 planted faults red. No further review (Jonathan: the stakes are low).
+      Power Chord Switch closed loop: every number given to Jonathan reproduced; `--against` has three faults (it can
+      say "same" when no take was compared or when the takes cannot see the change; it cannot rank a change to the
+      listening window). Read "marked right" with a bar of about 8, not 3. Fixes in progress when this was written.
+
 - [x] **2026-11-12 — `tools/playalong-loop.mjs`: the 26 practice cards played end to end on a fake clock, and the
       Metronome fault it found, fixed** (work order `Claude outputs/WORK-ORDER-closed-loop-tests.md`, Part 1).
       The tool: Reviewed, three adversarial rounds; the last found one MAJOR (while red on a known fault a new one
