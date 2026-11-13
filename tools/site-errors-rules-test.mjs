@@ -5,7 +5,9 @@
 
    It tries every allow and deny of siteErrors/{autoId}: signed out, a student's create with the exact ten
    fields, an extra field, each field missing, each string at and over its cap, an empty message, each
-   wrong type, an out-of-range or fractional line/col, a kind, lang or day the rule does not know, a
+   wrong type, an out-of-range or fractional line/col, a kind, lang or day the rule does not know, a doc id
+   that is not 20 letters and digits, a day more than one day from the server's UTC date (two days ahead,
+   a month ago, 9999-99-99, 0000-00-00, Feb 30) against yesterday, today and tomorrow allowed, a
    student's get / list / update / delete, an account with the teacher's email but email_verified false,
    the teacher's get, list, the console's two queries (newest first; older than a cutoff) and delete, and
    the teacher's update (refused). Then one case on each OLDER path (progress, config/class, liveQuiz,
@@ -17,6 +19,13 @@
    because every field is also type-checked and a check on a missing field denies; hasAll stays as a second lock. (A "delete allowed" break is written as its own
    `allow delete:` line: request.resource is null on a delete, see pm-rules-test.mjs.)
 
+   --site <repo>: also runs the REAL logger (app/boot.js SITE_ERRORS) against the emulator. Firestore keeps one
+   write queue per client, and a string with a lone surrogate (half an emoji) is never accepted: the SDK retries
+   it for ever, and the student's progress save queued behind it never lands. The case fires the logger with
+   that input (message, file, stack) and then writes progress/{uid} from the same client: the save must land.
+   A control first sends the same input raw, to show the hazard is real on this emulator. Without --site that
+   part counts as one failure.
+
    Java 21: ~/tools/java/jdk-21.0.13+9-jre (see pm-rules-test.mjs):
      export JAVA_HOME=~/tools/java/jdk-21.0.13+9-jre/Contents/Home; export PATH="$JAVA_HOME/bin:$PATH"
    In an empty scratch folder (NOT inside the repo):
@@ -24,7 +33,7 @@
      npm i --cache <scratch>/npm-cache --legacy-peer-deps firebase-tools @firebase/rules-unit-testing firebase@10.12.2
      cp <repo>/tools/site-errors-rules-test.mjs <repo>/firestore.rules .
      # firebase.json:  { "firestore": { "rules": "firestore.rules" }, "emulators": { "firestore": { "port": 8091 }, "ui": { "enabled": false } } }
-     npx firebase emulators:exec --only firestore --project demo-gc "node site-errors-rules-test.mjs firestore.rules --port 8091 --breaks"
+     npx firebase emulators:exec --only firestore --project demo-gc "node site-errors-rules-test.mjs firestore.rules --port 8091 --breaks --site <repo>"
    Exit 0 = every case passed on the real rules (and, with --breaks, every break was caught).
    Last run: 2026-11-13, firestore.rules: 83 passed, 0 failed; 11 of 11 breaks caught. The same cases on the rules
    before this block (origin/main cda3b92, the "not published yet" state): 67 passed, 16 failed, and the 16 are
@@ -33,15 +42,20 @@ import { initializeTestEnvironment, assertSucceeds, assertFails } from '@firebas
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
 import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import vm from 'node:vm';
 
 const ARGV = process.argv.slice(2);
-const which = ARGV.find(a => !a.startsWith('--') && !/^\d+$/.test(a)) || 'firestore.rules';
+const SITE = ARGV.includes('--site') ? ARGV[ARGV.indexOf('--site') + 1] : null;
+const which = ARGV.find((a, i) => !a.startsWith('--') && !/^\d+$/.test(a) && ARGV[i - 1] !== '--site') || 'firestore.rules';
 const PORT = +(ARGV[ARGV.indexOf('--port') + 1] || 0) || 8089;
+/* The server checks the day against ITS UTC date: the cases are built from this machine's UTC date. */
+const utcDay = n => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);
 const RULES = readFileSync(which, 'utf8');
 
 const FIELDS = ['kind', 'message', 'file', 'line', 'col', 'stack', 'page', 'version', 'day', 'lang'];
 const good = extra => Object.assign({ kind: 'error', message: "Uncaught TypeError: Cannot read properties of undefined (reading 'length')", file: '/app/lesson.js', line: 412, col: 17,
-  stack: 'at caStepHtml (/app/activities.js:120:9)\nat /app/activities.js:300:5', page: '#class-activities/ca-23 set m4w2', version: '2026-11-13-f60507df73', day: '2026-11-13', lang: 'en' }, extra || {});
+  stack: 'at caStepHtml (/app/activities.js:120:9)\nat /app/activities.js:300:5', page: '#class-activities/ca-23 set m4w2', version: '2026-11-13-f60507df73', day: utcDay(0), lang: 'en' }, extra || {});
 const without = k => { const d = good(); delete d[k]; return d; };
 
 async function suite(rulesText, quiet) {
@@ -69,7 +83,19 @@ async function suite(rulesText, quiet) {
   await t('a signed-in student, the exact ten fields (add, the client\'s real write)', () => col(A).add(good()), true);
   await t('…an unhandledrejection doc, in Spanish, with an empty file and stack (line 0, col 0)', () => col(B).add(good({ kind: 'rejection', file: '', stack: '', line: 0, col: 0, lang: 'es', page: '#' })), true);
   await t('the teacher\'s own console may log too', () => col(T).add(good({ page: 'console #' })), true);
-  await t('a set() under a chosen id is a create too: allowed', () => col(A).doc('chosen-id').set(good()), true);
+  await t('a set() under a chosen id of 20 letters and digits (the form of an auto-id): allowed', () => col(A).doc('a1B2c3D4e5F6g7H8i9J0').set(good()), true);
+
+  say('== siteErrors: the doc id (the SDK\'s auto-ids are 20 letters and digits)');
+  await t('an id that carries a name and a period (AnaLopez-uidA-period4) refused', () => col(A).doc('AnaLopez-uidA-period4').set(good()), false);
+  await t('an id 1,400 characters long refused', () => col(A).doc('x'.repeat(1400)).set(good()), false);
+  await t('an id of 19 letters and digits refused', () => col(A).doc('a1B2c3D4e5F6g7H8i9J').set(good()), false);
+  await t('an id of 21 letters and digits refused', () => col(A).doc('a1B2c3D4e5F6g7H8i9J0x').set(good()), false);
+  await t('an id of 20 with a dash in it refused', () => col(A).doc('a1B2c3D4e5-6g7H8i9J0').set(good()), false);
+
+  say('== siteErrors: the day, against the server\'s UTC date (' + utcDay(0) + ')');
+  for (const n of [-1, 0, 1]) await t(`day ${utcDay(n)} (UTC date ${n < 0 ? n : '+' + n}) accepted`, () => col(A).add(good({ day: utcDay(n) })), true);
+  for (const [label, day] of [['two days ahead', utcDay(2)], ['two days back', utcDay(-2)], ['a month ago', utcDay(-30)], ['a year ahead', utcDay(366)], ['9999-99-99', '9999-99-99'], ['0000-00-00', '0000-00-00'], ['Feb 30', utcDay(0).slice(0, 4) + '-02-30'], ['month 13', utcDay(0).slice(0, 4) + '-13-01']])
+    await t(`day ${day} (${label}) refused`, () => col(A).add(good({ day })), false);
 
   say('== siteErrors: the shape (hasOnly + hasAll)');
   await t('an extra field (uid) refused', () => col(A).add(good({ uid: 'uidA' })), false);
@@ -164,6 +190,9 @@ const BREAKS = [
   ['the day check dropped', "request.resource.data.day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')", "request.resource.data.day.size() > 0"],
   ['a third language allowed', "request.resource.data.lang in ['en', 'es']", "request.resource.data.lang in ['en', 'es', 'fr']"],
   ['the kind check dropped', "request.resource.data.kind in ['error', 'rejection']", "true"],
+  ['the doc id check dropped', "            && errorId.matches('^[A-Za-z0-9]{20}$')\n", ''],
+  ['the day window dropped', '            && siteErrorDayNear(request.resource.data.day)\n', ''],
+  ['the day window two days wide', "&& stated <= utcDay + duration.value(1, 'd');", "&& stated <= utcDay + duration.value(2, 'd');"],
 ];
 
 console.log(`== site-errors-rules-test: ${which} on the emulator at 127.0.0.1:${PORT}`);
@@ -186,4 +215,48 @@ if (ARGV.includes('--breaks')) {
   }
   console.log(`\n${missed ? '✗' : '✓'} ${BREAKS.length - missed} of ${BREAKS.length} breaks caught`);
 }
-process.exit(real.fail || missed ? 1 : 0);
+
+/* ── The real logger writing through the emulator (last: the control leaves a write that never lands) ── */
+let logFail = 0;
+{
+  console.log('\n== the real logger (app/boot.js SITE_ERRORS): hostile text never holds up the progress save');
+  if (!SITE) { console.log('  ✗ not run: pass --site <repo> (the folder holding app/boot.js)'); logFail++; }
+  else {
+    firebase.firestore.setLogLevel('silent');
+    const env = await initializeTestEnvironment({ projectId: 'demo-gc', firestore: { rules: RULES, host: '127.0.0.1', port: PORT } });
+    await env.clearFirestore();
+    const within = (p, ms) => Promise.race([p.then(() => 'landed', e => 'refused: ' + (e.code || e.message)), new Promise(r => setTimeout(() => r('pending'), ms))]);
+    const LONE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/;
+    const check = (name, cond, detail) => { console.log((cond ? '  ✓ ' : '  ✗ ') + name + (detail ? '  (' + detail + ')' : '')); if (!cond) logFail++; };
+    const C = env.authenticatedContext('uidCtl', { email: 'c@student.org', email_verified: true }).firestore();
+    const ctl = C.collection('siteErrors').add(good({ message: 'Unexpected token in "great job \uD83D"' }));
+    const ctlSave = C.doc('progress/uidCtl').set({ x: 1 });
+    const cs = await within(ctlSave, 8000);
+    check('control: the same text sent RAW holds the progress save queued after it (the hazard is real here)', cs === 'pending', 'progress save ' + cs + ' after 8 s');
+    void ctl;
+
+    const D = env.authenticatedContext('uidLog', { email: 'd@student.org', email_verified: true }).firestore();
+    const src = readFileSync(join(SITE, 'app', 'boot.js'), 'utf8');
+    const L0 = src.indexOf('/* ── Error log (2026-11-13)'), L1 = src.indexOf('/* ── Global safety net ──');
+    const sent = [], landed = [];
+    const ctx = { console: { error() {}, warn() {}, log() {} }, setTimeout, clearTimeout, getLang: () => 'en', location: { origin: 'https://gc.example', hash: '#songs' },
+      auth: { currentUser: { uid: 'uidLog', email: 'd@student.org', displayName: 'Dee Test' } },
+      /* Copied into a plain object of THIS realm: the SDK refuses an object made in the vm's realm. */
+      db: { collection: n => ({ add: d => { const doc = { ...d }; sent.push(doc); const p = D.collection(n).add(doc); p.then(r => landed.push(r.id), () => {}); return p; } }) } };
+    vm.createContext(ctx);
+    vm.runInContext('var lastSetId = "m4w2", IS_TEACHER_MODE = false;\n' + src.slice(L0, L1) + '\n;globalThis.__SE = SITE_ERRORS;', ctx);
+    ctx.__SE.report('error', { message: 'Unexpected token in "great job \uD83D"', filename: 'https://gc.example/app/x\uD83D.js', lineno: 3, colno: 4, error: { stack: 'E\n    at f\uD83D (https://gc.example/app/a.js:1:2)' } });
+    ctx.__SE.report('rejection', { reason: 'a\uDE00b' });
+    for (let i = 0; i < 50 && sent.length < 1; i++) await new Promise(r => setTimeout(r, 100));
+    const save = await within(D.doc('progress/uidLog').set({ x: 2 }), 10000);
+    check('the logger sent its doc, then the progress save from the same client landed', sent.length >= 1 && save === 'landed', `${sent.length} sent, progress save ${save}`);
+    for (let i = 0; i < 100 && landed.length < 2; i++) await new Promise(r => setTimeout(r, 100));
+    check('both log docs landed', landed.length === 2, `${landed.length} landed`);
+    let stored = [];
+    await env.withSecurityRulesDisabled(async c => { stored = (await c.firestore().collection('siteErrors').get()).docs.map(d => d.data()); });
+    const strs = stored.flatMap(d => Object.values(d).filter(v => typeof v === 'string'));
+    check('no stored field holds a lone surrogate; the halves read U+FFFD', stored.length === 2 && !strs.some(v => LONE.test(v)) && stored.some(d => d.message === 'Unexpected token in "great job \uFFFD"') && stored.some(d => d.message === 'a\uFFFDb'), stored.map(d => JSON.stringify(d.message)).join(' | '));
+  }
+  console.log(`\n${logFail ? '✗' : '✓'} the real logger: ${logFail} failed`);
+}
+process.exit(real.fail || missed || logFail ? 1 : 0);
