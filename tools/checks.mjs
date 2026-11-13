@@ -16041,55 +16041,152 @@ async function checkCountIn() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
-   1cy. THE MIC START (2026-11-13, wave 1 s-mic). coach.js coachAcquireMic
-   asks the Permissions API first: granted -> straight to getUserMedia (no
-   extra click), prompt -> the "Turn on the microphone" panel and getUserMedia
-   only on its click, denied -> no getUserMedia and the same refusal as before
-   (false, NotAllowedError), no API / a throw -> as before. A refused mic says
-   the tuner's lock-icon steps everywhere (tools.micDenied). A recorded take
-   carries micSettings (only the seven keys, only true/false or numbers). Every
-   mic set-up screen carries the one set-up line (micpre.setup). mic-check.html
-   asks with exactly the site's constraints and saves or sends nothing.
+   1cy. THE MIC START (2026-11-13, wave 1 s-mic; review round 1 the same day).
+   coach.js coachAcquireMic asks the Permissions API first, and only `prompt`
+   changes anything: the "Turn on the microphone" panel, getUserMedia only on
+   its click. Every other answer (granted, denied, no API, a throw, no answer)
+   goes straight to getUserMedia, the only judge of a refusal (a policy can
+   allow the mic while the API says denied). Once getUserMedia has given the
+   mic, gc-mic-ok ('1', device-level) skips the panel for good; a refusal
+   removes it; storage that throws reads as no flag. A question that never
+   answers is asked once per page. A refusal says the tuner's lock-icon steps
+   (tools.micDenied), or micpre.again when the question is still open (the box
+   closed with X). The panel's line on a screen that can record is the one
+   always-true micpre.lineRec, elsewhere micpre.line, whatever micRecWanted()
+   says. coachMicOff(), gamesStopMic() and ncStopAll() each give up a waiting
+   panel and free the mic start. A recorded take (micRecStart -> micRecStop ->
+   micRecSaveNow) carries micSettings (only MICREC_SETTING_KEYS, pinned, as
+   true/false or numbers). Every mic set-up screen carries the one set-up line
+   (micpre.setup). mic-check.html asks with exactly the site's constraints,
+   saves or sends nothing (no fetch, beacon, socket, image or script load,
+   storage) and carries a CSP meta with default-src and connect-src 'none'.
    Run in 1ca's loaded scripts (COACH_SANDBOX); every total is pinned.
    ════════════════════════════════════════════════════════════════════ */
 async function checkMicStart() {
   head('1cy. The mic start: the panel before the browser asks, one blocked-mic message, the take\'s mic settings, the set-up line (run)');
-  const PIN = { states: 6, callersWithAsk: 8, trainerCalls: 2, failMsgs: 6, settings: 4, setupScreens: 8, micCheck: 4 };
-  const tot = { states: 0, callersWithAsk: 0, trainerCalls: 0, failMsgs: 0, settings: 0, setupScreens: 0, micCheck: 0 };
+  const PIN = { states: 7, flag: 4, lines: 12, exits: 4, tuner: 1, noteCall: 1, never: 1, callersWithAsk: 8, trainerCalls: 2, failMsgs: 8, settings: 4, keys: 1, takeDoc: 1, setupScreens: 8, micCheck: 5 };
+  const tot = { states: 0, flag: 0, lines: 0, exits: 0, tuner: 0, noteCall: 0, never: 0, callersWithAsk: 0, trainerCalls: 0, failMsgs: 0, settings: 0, keys: 0, takeDoc: 0, setupScreens: 0, micCheck: 0 };
   let bad = 0;
   const fail = m => { err('1cy: ' + m); problems++; bad++; };
   if (!COACH_SANDBOX) { fail('1ca did not load the site scripts — the mic start is NOT checked'); return; }
   const { run, els } = COACH_SANDBOX;
   const tick = async () => { for (let i = 0; i < 6; i++) await new Promise(r => setImmediate(r)); };
   run(`globalThis.__mpKeep = { ac: AudioContext, perm: navigator.permissions, md: navigator.mediaDevices, ask: micRecShouldAsk, stop: stopAllDemoAudio };
-    globalThis.__mp = { gum: 0, args: [] };
+    globalThis.__mp = { gum: 0, args: [], q: 0 };
     AudioContext = class { constructor(){ const n = () => ({ connect(){}, disconnect(){}, gain: { value: 1 }, frequency: { value: 0 }, Q: { value: 0 } });
       return { state: 'running', sampleRate: 48000, currentTime: 0, resume(){ return Promise.resolve(); }, close(){ return Promise.resolve(); }, destination: {},
         createMediaStreamSource: n, createGain: n, createBiquadFilter: n, createScriptProcessor: n, createAnalyser(){ return Object.assign(n(), { getFloatTimeDomainData(){} }); } }; } };
     globalThis.__mpTrack = { label: '', stop(){}, getSettings(){ return { echoCancellation: false, noiseSuppression: false, autoGainControl: true, sampleRate: 48000, channelCount: 1, latency: 0.01, voiceIsolation: undefined, deviceId: 'dev-1', groupId: 'grp-1' }; } };
     globalThis.__mpSet = (perm, gum) => {
-      __mp.gum = 0; __mp.args = []; coachMicOff(); coachStream = null;
+      __mp.gum = 0; __mp.args = []; __mp.q = 0; coachMicOff(); coachStream = null; coachMicPermSlow = false; localStorage.removeItem('gc-mic-ok');
       navigator.mediaDevices = { getUserMedia(c){ __mp.gum++; __mp.args.push(JSON.stringify(c));
         return gum === 'ok' ? Promise.resolve({ getAudioTracks(){ return [__mpTrack]; }, getTracks(){ return [__mpTrack]; } }) : Promise.reject(Object.assign(new Error(gum), { name: gum })); } };
       if (perm === 'missing') delete navigator.permissions;
-      else navigator.permissions = { query(){ if (perm === 'throws') throw new TypeError('no'); return Promise.resolve({ state: perm }); } };
+      else navigator.permissions = { query(){ __mp.q++; if (perm === 'throws') throw new TypeError('no'); if (perm === 'hangs') return new Promise(() => {}); return Promise.resolve({ state: __mp.state || perm }); } };
+      __mp.state = '';
     };
     micRecShouldAsk = () => false; stopAllDemoAudio = () => {};`);
   try {
     const CONSTRAINTS = '{"audio":{"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"voiceIsolation":false},"video":false}';
-    // [state, getUserMedia result, panel?, getUserMedia calls before the click, ok, fail name]
-    for (const [perm, gum, panel, before, okWant, nameWant] of [['granted', 'ok', false, 1, true, ''], ['prompt', 'ok', true, 0, true, ''],
-        ['prompt', 'NotAllowedError', true, 0, false, 'NotAllowedError'], ['denied', 'ok', false, 0, false, 'NotAllowedError'],
-        ['missing', 'ok', false, 1, true, ''], ['throws', 'ok', false, 1, true, '']]) {
+    const panelUp = id => /onclick="coachMicAskGo\(\)"/.test((els[id] || {}).innerHTML || '');
+    const start = (id, extra) => run(`document.getElementById(${JSON.stringify(id)}).innerHTML = ''; globalThis.__mpRes = undefined;
+        coachAcquireMic({ el: document.getElementById(${JSON.stringify(id)})${extra || ''} }).then(v => { __mpRes = v; });`);
+    // [state, getUserMedia result, panel?, getUserMedia calls before the click, ok, fail name, the question still open after a refusal]
+    // denied goes on to getUserMedia: the API is not the judge (review R1-1); 'prompt' after a NotAllowedError = the box closed with X
+    for (const [perm, gum, panel, before, okWant, nameWant, retryWant] of [['granted', 'ok', false, 1, true, '', false], ['prompt', 'ok', true, 0, true, '', false],
+        ['prompt', 'NotAllowedError', true, 0, false, 'NotAllowedError', true], ['denied', 'ok', false, 1, true, '', false], ['denied', 'NotAllowedError', false, 1, false, 'NotAllowedError', false],
+        ['missing', 'ok', false, 1, true, '', false], ['throws', 'ok', false, 1, true, '', false]]) {
       tot.states++;
-      run(`__mpSet(${JSON.stringify(perm)}, ${JSON.stringify(gum)}); document.getElementById('mp-host').innerHTML = ''; globalThis.__mpRes = undefined;
-        coachAcquireMic({ el: document.getElementById('mp-host') }).then(v => { __mpRes = v; });`);
+      run(`__mpSet(${JSON.stringify(perm)}, ${JSON.stringify(gum)})`); start('mp-host');
       await tick();
-      const shown = /onclick="coachMicAskGo\(\)"/.test(els['mp-host'] ? els['mp-host'].innerHTML : ''), g0 = run('__mp.gum');
+      const shown = panelUp('mp-host'), g0 = run('__mp.gum');
       if (shown) { run('coachMicAskGo()'); await tick(); }
-      const res = run('__mpRes'), name = res ? '' : run('coachMicFailName'), args = run('__mp.args.join("|")');
-      if (shown !== panel || g0 !== before || res !== okWant || name !== nameWant || (args && args.split('|').some(a => a !== CONSTRAINTS)))
-        fail(`permission "${perm}", getUserMedia ${gum}: panel ${shown} (want ${panel}), getUserMedia ${g0} before the click (want ${before}), result ${res} (want ${okWant}), fail name "${name}" (want "${nameWant}"), asked with ${args || 'nothing'}`);
+      const res = run('__mpRes'), name = res ? '' : run('coachMicFailName'), args = run('__mp.args.join("|")'), retry = run('coachMicRetry');
+      if (shown !== panel || g0 !== before || res !== okWant || name !== nameWant || retry !== retryWant || (args && args.split('|').some(a => a !== CONSTRAINTS)))
+        fail(`permission "${perm}", getUserMedia ${gum}: panel ${shown} (want ${panel}), getUserMedia ${g0} before the click (want ${before}), result ${res} (want ${okWant}), fail name "${name}" (want "${nameWant}"), question still open ${retry} (want ${retryWant}), asked with ${args || 'nothing'}`);
+    }
+    // gc-mic-ok: set by a success, removed by a refusal, skips the panel (and the question) whatever the API says; storage that throws = no flag
+    {
+      tot.flag++;
+      run(`__mpSet('prompt', 'ok'); localStorage.setItem('gc-mic-ok', '1');`); start('mp-host'); await tick();
+      if (panelUp('mp-host') || run('__mp.q') !== 0 || run('__mp.gum') !== 1 || run('__mpRes') !== true) fail(`"prompt" with gc-mic-ok set: panel ${panelUp('mp-host')}, ${run('__mp.q')} permission queries, getUserMedia ${run('__mp.gum')}, result ${run('__mpRes')} (want no panel, 0 queries, 1 getUserMedia, true)`);
+      tot.flag++;
+      run(`__mpSet('prompt', 'ok')`); start('mp-host'); await tick(); run('coachMicAskGo()'); await tick();
+      if (run(`localStorage.getItem('gc-mic-ok')`) !== '1') fail(`after "Turn on the microphone" and Allow, gc-mic-ok is ${run(`localStorage.getItem('gc-mic-ok')`)} (want '1')`);
+      tot.flag++;
+      run(`__mpSet('granted', 'NotAllowedError'); localStorage.setItem('gc-mic-ok', '1');`); start('mp-host'); await tick();
+      if (run(`localStorage.getItem('gc-mic-ok')`) !== null) fail(`after a NotAllowedError, gc-mic-ok is still ${run(`localStorage.getItem('gc-mic-ok')`)} (want removed)`);
+      tot.flag++;
+      run(`__mpSet('prompt', 'ok'); globalThis.__mpLs = { g: localStorage.getItem, s: localStorage.setItem, r: localStorage.removeItem };
+        localStorage.getItem = localStorage.setItem = localStorage.removeItem = () => { throw new Error('storage blocked'); };`);
+      try {
+        start('mp-host'); await tick(); const p = panelUp('mp-host'); run('coachMicAskGo()'); await tick();
+        if (!p || run('__mpRes') !== true) fail(`storage that throws: panel ${p}, result ${run('__mpRes')} (want the panel, as with no flag, then true)`);
+      } finally { run(`localStorage.getItem = __mpLs.g; localStorage.setItem = __mpLs.s; localStorage.removeItem = __mpLs.r;`); }
+    }
+    // the panel's line: one always-true line where a take can be recorded (records), "nothing is recorded" elsewhere, whatever micRecWanted() says
+    for (const lang of ['en', 'es']) for (const [records, wanted] of [[true, false], [true, true], [false, true]]) {
+      tot.lines++;
+      run(`setLang(${JSON.stringify(lang)}); __mpSet('prompt', 'ok'); globalThis.__mpW = micRecWanted; micRecWanted = () => ${wanted};`);
+      try { start('mp-host', `, records: ${records}`); await tick(); } finally { run('micRecWanted = __mpW;'); }
+      const want = run(`escHtml(t(${JSON.stringify(records ? 'micpre.lineRec' : 'micpre.line')}))`), h = (els['mp-host'] || {}).innerHTML || '';
+      if (!h.includes(want)) fail(`(${lang}) the panel with records ${records}, student said yes ${wanted}: want "${want}", drew ${h.replace(/\s+/g, ' ').slice(0, 200)}`);
+      run('coachMicAskCancel()'); await tick();
+    }
+    // ... and through the real callers: the Listening Coach and Power Chord Switch (they record; the student said no) and Change Up (never records; said yes)
+    for (const lang of ['en', 'es']) for (const [what, code, id, key, wanted] of [
+        ['Listening Coach', `coach = { mode: 'melody', bpm: 60, beatMs: 1000, events: [], streakKey: 'k', desc: 'x', timeouts: [], card: { isConnected: true }, phase: 'ready', slots: [{ label: 'A', midi: 57, state: 'pending' }] }; coachRenderReady(); coachStartCheck();`, 'coach-body', 'micpre.lineRec', false],
+        ['Power Chord Switch', `ccSetup('power'); ccStart();`, 'cc-body', 'micpre.lineRec', false], ['Change Up', `ccSetup(); ccStart();`, 'cc-body', 'micpre.line', true]]) {
+      tot.lines++;
+      run(`setLang(${JSON.stringify(lang)}); __mpSet('prompt', 'ok'); globalThis.__mpW = micRecWanted; micRecWanted = () => ${wanted};`);
+      try { run(code); await tick(); } finally { run('micRecWanted = __mpW;'); }
+      const want = run(`escHtml(t(${JSON.stringify(key)}))`), h = (els[id] || {}).innerHTML || '';
+      if (!panelUp(id) || !h.includes(want)) fail(`(${lang}) ${what}'s own Start: panel ${panelUp(id)}, want the line "${want}", drew ${h.replace(/\s+/g, ' ').slice(0, 200)}`);
+      run('coachMicAskCancel(); coach = null; ccStop();'); await tick();
+    }
+    run(`setLang('en')`);
+    // every way out gives up a waiting panel and frees the mic start
+    for (const [what, code] of [['coachMicOff()', 'coachMicOff()'], ['gamesStopMic()', 'gamesStopMic()'], ['ncStopAll() with a Note Call starting', `noteCalls.__mp = { starting: true }; try { ncStopAll(); } finally { delete noteCalls.__mp; }`]]) {
+      tot.exits++;
+      run(`__mpSet('prompt', 'ok')`); start('mp-host'); await tick();
+      const p = panelUp('mp-host'); run(code); await tick();
+      const st = run(`JSON.stringify([__mpRes, coachMicFailName, coachMicAsk === null, coachAcquirePending === null, __mp.gum])`);
+      if (!p || st !== '[false,"cancelled",true,true,0]') fail(`${what} with the panel up: panel ${p}; [result, fail name, wait over, mic start free, getUserMedia] = ${st} (want [false,"cancelled",true,true,0])`);
+    }
+    {
+      tot.exits++;
+      run(`__mpSet('prompt', 'ok'); document.getElementById('mp-gone').isConnected = false;`); start('mp-gone'); await tick();
+      const st = run(`JSON.stringify([__mpRes, coachMicFailName, coachMicAsk === null, coachAcquirePending === null, __mp.gum])`);
+      if (panelUp('mp-gone') || st !== '[false,"cancelled",true,true,0]') fail(`a place that left the page before the panel: panel ${panelUp('mp-gone')}; [result, fail name, wait over, mic start free, getUserMedia] = ${st} (want [false,"cancelled",true,true,0])`);
+    }
+    // the tuner opened while the panel waited: the click closes it before getUserMedia (one mic owner)
+    {
+      tot.tuner++;
+      run(`__mpSet('prompt', 'ok'); globalThis.__mpTu = { r: tunerRunning, c: closePopup, seen: '' };
+        tunerRunning = true; closePopup = x => { __mpTu.seen += x + '@' + __mp.gum; tunerRunning = false; };`);
+      try { start('mp-host'); await tick(); run('coachMicAskGo()'); await tick(); } finally { run('closePopup = __mpTu.c; tunerRunning = __mpTu.r;'); }
+      if (run('__mpTu.seen') !== 'tuner@0' || run('__mp.gum') !== 1) fail(`the tuner opened while the panel waited: closed "${run('__mpTu.seen')}" (want "tuner@0": closed before getUserMedia), getUserMedia ${run('__mp.gum')}`);
+    }
+    // Note Call's own refusal: the lock-icon steps and its tap line, as its Start goes on by tapping
+    {
+      tot.noteCall++;
+      run(`__mpSet('denied', 'NotAllowedError'); globalThis.__mpE = ensureCoachJs; ensureCoachJs = () => Promise.resolve();
+        renderNoteCall({ type: 'notecall', strings: ['lowE', 'A'] }, 'mpk', 'mpw'); noteCalls.mpk.coach = true; ncStart('mpk');`);
+      let msg = '';
+      try { await tick(); msg = run('noteCalls.mpk.msg'); } finally { run('ensureCoachJs = __mpE; delete noteCalls.mpk;'); }
+      if (msg !== run(`t('tools.micDenied') + ' ' + t('micpre.tapFrets')`)) fail(`Note Call refused the mic: its line is "${msg}" (want the lock-icon steps and "${run(`t('micpre.tapFrets')`)}")`);
+    }
+    // a permission question that never answers: the first start waits COACH_MIC_PERM_WAIT_MS (here at once), the next does not ask
+    {
+      tot.never++;
+      run(`__mpSet('hangs', 'ok'); globalThis.__mpST = setTimeout; setTimeout = (f, ms) => { if (ms === COACH_MIC_PERM_WAIT_MS) Promise.resolve().then(f); return 0; };`);
+      let got = '';
+      try {
+        start('mp-host'); await tick(); const a = run('JSON.stringify([__mpRes, __mp.q, __mp.gum])');
+        run(`coachMicOff(); coachStream = null; localStorage.removeItem('gc-mic-ok');`); start('mp-host'); await tick(); got = a + ' ' + run('JSON.stringify([__mpRes, __mp.q, __mp.gum])');
+      } finally { run('setTimeout = __mpST;'); }
+      if (got !== '[true,1,1] [true,1,2]' || panelUp('mp-host')) fail(`a permission question that never answers: [result, queries, getUserMedia] after start 1 and 2 = ${got} (want [true,1,1] [true,1,2]: start 2 does not ask again)`);
+      run('coachMicPermSlow = false;');
     }
     // a panel given up by a second start: the first returns false ('cancelled'), the second asks in its own place
     run(`__mpSet('prompt', 'ok'); globalThis.__mpA = undefined; globalThis.__mpB = undefined;
@@ -16100,16 +16197,18 @@ async function checkMicStart() {
     const panelB = /coachMicAskGo/.test((els['mp-b'] || {}).innerHTML || '');
     run('coachMicAskGo()'); await tick();
     if (JSON.stringify(run('__mpA')) !== '[false,"cancelled"]' || !panelB || run('__mpB') !== true || run('__mp.gum') !== 1) fail(`a second start while a panel waits: first ${JSON.stringify(run('__mpA'))} (want [false,"cancelled"]), second drew its panel ${panelB}, second ${run('__mpB')}, getUserMedia ${run('__mp.gum')} (want 1)`);
-    // one blocked-mic wording: the tuner's, in both languages; Note Call adds its tap line; a given-up start says nothing
+    // one blocked-mic wording: the tuner's, in both languages; Note Call adds its tap line; the box closed with X says "Start again" (not to Note
+    // Call, whose Start goes on by tapping); a given-up start says nothing
     for (const lang of ['en', 'es']) {
       run(`setLang(${JSON.stringify(lang)})`);
-      for (const [name, extra, want] of [['NotAllowedError', '', `t('tools.micDenied')`], ['NotAllowedError', 'micpre.tapFrets', `t('tools.micDenied') + ' ' + t('micpre.tapFrets')`], ['cancelled', '', `''`]]) {
+      for (const [name, retry, extra, want] of [['NotAllowedError', false, '', `t('tools.micDenied')`], ['NotAllowedError', false, 'micpre.tapFrets', `t('tools.micDenied') + ' ' + t('micpre.tapFrets')`],
+          ['NotAllowedError', true, '', `t('micpre.again')`], ['cancelled', false, '', `''`]]) {
         tot.failMsgs++;
-        const got = run(`coachMicFailName = ${JSON.stringify(name)}; coachMicFailMsg(${extra ? JSON.stringify(extra) : ''})`), want2 = run(want);
-        if (got !== want2 || (name !== 'cancelled' && !/(lock icon|candado)/.test(got))) fail(`(${lang}) coachMicFailMsg for ${name}${extra ? ' + ' + extra : ''} reads "${got}", want "${want2}"`);
+        const got = run(`coachMicFailName = ${JSON.stringify(name)}; coachMicRetry = ${retry}; coachMicFailMsg(${extra ? JSON.stringify(extra) : ''})`), want2 = run(want);
+        if (got !== want2 || (name !== 'cancelled' && !/(lock icon|candado|Allow|Permitir)/.test(got))) fail(`(${lang}) coachMicFailMsg for ${name}${retry ? ' (question still open)' : ''}${extra ? ' + ' + extra : ''} reads "${got}", want "${want2}"`);
       }
     }
-    run(`setLang('en'); coachMicFailName = '';`);
+    run(`setLang('en'); coachMicFailName = ''; coachMicRetry = false;`);
     // every caller passes its place for the panel; the hidden trainer (no panel) is the only one that does not
     const callSrc = stripJsComments(siteSource('coach.js', ROOT)) + stripJsComments(siteSource('app.js', ROOT));
     tot.callersWithAsk = (callSrc.match(/coachAcquireMic\(\{ el: /g) || []).length;
@@ -16123,6 +16222,25 @@ async function checkMicStart() {
       tot.settings++;
       const got = run(`JSON.stringify(micRecTrackSettings({ getAudioTracks(){ return [{ getSettings: ${gs} }]; } }), (k, v) => v === undefined ? 'UNDEFINED' : v)`);
       if (got !== want) fail(`micRecTrackSettings, ${what}: ${got}, want ${want}`);
+    }
+    // the seven names, never deviceId / groupId
+    tot.keys++;
+    if (run('MICREC_SETTING_KEYS.join()') !== 'echoCancellation,noiseSuppression,autoGainControl,voiceIsolation,sampleRate,channelCount,latency') fail(`MICREC_SETTING_KEYS is ${run('MICREC_SETTING_KEYS.join()')} (want the seven: echoCancellation,noiseSuppression,autoGainControl,voiceIsolation,sampleRate,channelCount,latency)`);
+    // the recording path itself: micRecStart -> micRecStop -> micRecSaveNow (run up to the dev-bypass log, which prints the document it would write)
+    {
+      tot.takeDoc++;
+      const doc = run(`(() => { const keep = { p: micRecPcm16, n: micRecMicName, ci: console.info, cu: currentUser, w: micRecWanted, cx: coachCtx, cs: coachStream };
+        let seen = null, started = false;
+        try {
+          currentUser = { uid: 'dev-user', displayName: 'x' }; micRecPcm16 = () => new Int16Array(4); micRecMicName = () => 'mic'; console.info = (a, d) => { seen = d; }; micRecWanted = () => true;
+          const node = () => ({ connect(){}, disconnect(){}, gain: { value: 1 } });
+          coachCtx = { sampleRate: 48000, currentTime: 0, destination: {}, createMediaStreamSource: node, createScriptProcessor: node, createGain: node };
+          coachStream = { getAudioTracks(){ return [__mpTrack]; }, getTracks(){ return [__mpTrack]; } };
+          started = micRecStart('coach'); if (micRec) micRec.n = 48000;
+          micRecSaveNow(micRecStop(), { fields: {}, expected: [], events: [] });
+        } finally { micRecPcm16 = keep.p; micRecMicName = keep.n; console.info = keep.ci; currentUser = keep.cu; micRecWanted = keep.w; coachCtx = keep.cx; coachStream = keep.cs; }
+        return JSON.stringify({ started, ms: seen ? seen.micSettings || null : 'NO DOCUMENT' }); })()`);
+      if (doc !== '{"started":true,"ms":{"echoCancellation":false,"noiseSuppression":false,"autoGainControl":true,"sampleRate":48000,"channelCount":1,"latency":0.01}}') fail(`a take recorded through micRecStart/micRecStop/micRecSaveNow: ${doc} (want started and micSettings with the six reported keys)`);
     }
     // the set-up line on every mic set-up screen (EN and ES)
     for (const lang of ['en', 'es']) {
@@ -16151,8 +16269,12 @@ async function checkMicStart() {
       let same = false; try { same = !!site && !!page && JSON.stringify(vm.runInNewContext('(' + site + ')')) === JSON.stringify(vm.runInNewContext('(' + page + ')')); } catch {}
       if (!same) fail(`mic-check.html CONSTRAINTS is not the request coach.js coachAcquireMicInner makes (page: ${page ? page.replace(/\s+/g, ' ') : 'not found'}; site: ${site ? site.replace(/\s+/g, ' ') : 'not found'})`);
       tot.micCheck++;
-      const sends = stripJsComments(code).match(/\bfetch\(|XMLHttpRequest|sendBeacon|localStorage|sessionStorage|indexedDB|firebase|WebSocket/g);
+      const sends = stripJsComments(code).match(/\bfetch\(|XMLHttpRequest|sendBeacon|localStorage|sessionStorage|indexedDB|firebase|WebSocket|EventSource|\bImage\(|\.src\s*=|\bimport\(|importScripts|\bwindow\.open\(|\blocation\s*=/g);
       if (sends) fail(`mic-check.html must save and send nothing; it uses ${[...new Set(sends)].join(', ')}`);
+      tot.micCheck++;
+      const csp = (mc.slice(0, mc.indexOf('<script>')).match(/<meta http-equiv="Content-Security-Policy" content="([^"]*)"/i) || [])[1] || '';
+      const dir = n => (csp.match(new RegExp('(?:^|;)\\s*' + n + '\\s+([^;]*)')) || [])[1];
+      if (dir('default-src') !== "'none'" || dir('connect-src') !== "'none'") fail(`mic-check.html needs a CSP meta before its script with default-src 'none' and connect-src 'none' (so "nothing is sent" is enforced); it has ${csp || 'none'}`);
       tot.micCheck++;
       if (/<script\b[^>]*\bsrc=/i.test(mc)) fail('mic-check.html loads a script file — it is standalone');
       tot.micCheck++;
@@ -16165,7 +16287,7 @@ async function checkMicStart() {
       if (__mpKeep.perm) navigator.permissions = __mpKeep.perm; else delete navigator.permissions; micRecShouldAsk = __mpKeep.ask; stopAllDemoAudio = __mpKeep.stop; setLang('en');`);
   }
   for (const [k, n] of Object.entries(PIN)) if (tot[k] !== n) fail(`${tot[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
-  if (bad === 0) ok(`${tot.states} permission states run through the real coachAcquireMic (granted: no panel; prompt: getUserMedia only on "Turn on the microphone", then Allow or Block; denied: no getUserMedia, NotAllowedError; no API or a throw: as before), always with the site's constraints; a waiting panel gives way to a second start; ${tot.failMsgs} blocked-mic lines are the tuner's lock-icon steps (EN + ES, Note Call adds its tap line); ${tot.callersWithAsk} callers pass their panel place and only the trainer's ${tot.trainerCalls} calls do not; ${tot.settings} micSettings cases keep only the seven keys as true/false or numbers; the set-up line appears once on each of ${tot.setupScreens} mic set-up screens (EN + ES); mic-check.html: ${tot.micCheck} pins (same constraints, sends nothing, no script file, linked from nowhere)`);
+  if (bad === 0) ok(`${tot.states} permission states run through the real coachAcquireMic (granted: no panel; prompt: getUserMedia only on "Turn on the microphone", then Allow or the box closed (question still open); denied: getUserMedia still judges, allowed or refused; no API or a throw: as before), always with the site's constraints; ${tot.flag} gc-mic-ok cases (skips the panel and the question, set by a success, removed by a refusal, storage that throws = no flag); ${tot.lines} panel lines (EN + ES, direct and through the Listening Coach, Power Chord Switch and Change Up starts: the always-true line where a take can be recorded, whatever micRecWanted() says; "nothing is recorded" elsewhere); ${tot.exits} ways out (coachMicOff, gamesStopMic, ncStopAll, the place gone) give up the panel and free the mic start; the tuner opened while it waited is closed before getUserMedia; Note Call's refusal keeps its tap line; a question that never answers is asked once; a waiting panel gives way to a second start; ${tot.failMsgs} blocked-mic lines (the tuner's lock-icon steps, Note Call's tap line, "Start again" when the box was closed; EN + ES); ${tot.callersWithAsk} callers pass their panel place and only the trainer's ${tot.trainerCalls} calls do not; ${tot.settings} micSettings cases keep only the seven keys (pinned) as true/false or numbers, and a take recorded through micRecStart/micRecStop/micRecSaveNow carries them; the set-up line appears once on each of ${tot.setupScreens} mic set-up screens (EN + ES); mic-check.html: ${tot.micCheck} pins (same constraints, sends nothing, CSP default-src and connect-src 'none', no script file, linked from nowhere)`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
