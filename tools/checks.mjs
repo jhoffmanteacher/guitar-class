@@ -9405,30 +9405,35 @@ const FOLD_ASSERTS = 22;
    Call-the-chord round; Space on a focused button / link / summary keeps its
    meaning; with two cards on screen only the playing one, else the last
    touched, answers; an untouched card answers only while its player is in
-   the window. After a POINTER press on a card control the focus is let go
-   once the press is over (pcKeyPointerUp), so Space then plays or stops
-   instead of pressing that control again; a control reached with Tab, a text
-   field, a control outside the cards and the preview keep it (the page's
-   blur() hands the focus back to <body>, as Chrome's does). The tick pop (TICK POP in
+   the window; Shift + Space / an arrow / K is the page's (< and > need
+   Shift). After a POINTER press on a card control the focus is let go once
+   the press is over, in the mouse order (focus, pointerup, click) and the
+   touchscreen order (pointerup, a turn, focus, click): pcKeyPointerUp and
+   pcKeyClick, so Space then plays or stops instead of pressing that control
+   again; a control reached with Tab (its Enter / Space click included), a
+   text field, a control outside the cards and the preview keep it (the
+   page's blur() hands the focus back to <body>, as Chrome's does). The tick pop (TICK POP in
    app/lesson.js): a lesson step's "Mark done" and a checklist "I've got it!"
    turned ON get .tick-pop on that one tick (the band's pill when One-step view
    hid the row), never on an untick, a peeked set, a refused Coach gate or
    under reduced motion, and it comes off on the element's own animationend or
-   TICK_POP_MS. Run on the REAL pcKeydown / toggleStepDone / toggleSkill /
+   TICK_POP_MS; a pop that throws comes after the tick was handed to the save
+   (checklist and step), and tickPop(null / {} / a throwing element) never
+   throws. Run on the REAL pcKeydown / toggleStepDone / toggleSkill /
    coachGateMarkAnyway in the 0b render context, on a small page (DB_PAGE_TEST
    below: elements, selectors, layout = not hidden / not in a closed details /
    not a collapsed step in One-step view) with the pc* control functions
    recorded and a fake clock. The same click sequence is run with the pop
    switched off: what is left to save must be identical. Also: the strings in
    both languages, the tooltips on a rendered card and on the two-way speed
-   switch (none in the console's preview, where the keys are off), the four
+   switch (none in the console's preview, where the keys are off), the five
    listeners in app/start.js, the CSS (keyframes transform and opacity only;
    every declaration of every .tick-pop rule pinned in DB_POP_CSS; off under
-   reduced motion), teacher mode (the real pcKeydown / pcKeyPointerUp text run
+   reduced motion), teacher mode (the real pcKeydown / pcKeyLetGo text run
    with IS_TEACHER_MODE true: nothing happens) and no set ever renders with the
    class. Pinned counts below; the page test was proved red by 28 mutations
    (2026-11-13, one per guard), the 2026-11-13 fix round's cases by more. */
-const DB_CASES = 672, DB_KEY_PRESSES = 311, DB_TICK_CHECKS = 31, DB_SEQ_CLICKS = 12;
+const DB_CASES = 701, DB_KEY_PRESSES = 318, DB_TICK_CHECKS = 36, DB_SEQ_CLICKS = 12;
 /* Every .tick-pop rule in styles.css and what it sets (position and display with their values): the pop scales and
    fades (the keyframes, checked apart), its ring is placed absolutely on ::after, and reduced motion turns both off. */
 const DB_POP_CSS = {
@@ -9702,7 +9707,12 @@ const DB_PAGE_TEST_SRC = String.raw`(function(){
       press({}, 'pcToggle:ca-18', 'Space, one card on screen');
       press({ key: 'Spacebar' }, 'pcToggle:ca-18', 'old-style Spacebar key');
       press({ key: 'k', code: 'KeyK' }, 'pcToggle:ca-18', 'k');
-      press({ key: 'K', code: 'KeyK', shiftKey: true }, 'pcToggle:ca-18', 'K');
+      press({ key: 'K', code: 'KeyK' }, 'pcToggle:ca-18', 'K (Caps Lock on, no Shift)');
+      // Shift belongs to the page (Shift+Space scrolls up, Shift+arrows select), except for < and >, which need it.
+      press({ key: 'K', code: 'KeyK', shiftKey: true }, '', 'Shift+K');
+      press({ key: ' ', code: 'Space', shiftKey: true }, '', 'Shift+Space');
+      press({ key: 'ArrowRight', code: 'ArrowRight', shiftKey: true }, '', 'Shift+Right');
+      press({ key: 'ArrowLeft', code: 'ArrowLeft', shiftKey: true }, '', 'Shift+Left');
       press({ key: 'ArrowRight', code: 'ArrowRight' }, 'pcPage:ca-18:1', 'Right, stopped');
       press({ key: 'ArrowLeft', code: 'ArrowLeft' }, '', 'Left, stopped, on the first page (Previous is disabled)');
       A.prev.disabled = false;
@@ -9839,8 +9849,12 @@ const DB_PAGE_TEST_SRC = String.raw`(function(){
       press({}, 'pcToggle:ca-18', 'Space once every overlay is closed again');
 
       // A mouse or touch press on a card control: the focus is let go once the press is over, so the keys reach the player.
+      /* A mouse press: pointerdown, the focus, pointerup, then its click (detail 1), all in one turn. */
       const pointer = (el, upOn) => { DOC.activeElement = body; pcKeyNote({ type: 'pointerdown', target: el }); el.focus();
-        pcKeyPointerUp({ type: 'pointerup', target: upOn || el }); const held = DOC.activeElement === el; advance(0); return held; };
+        pcKeyPointerUp({ type: 'pointerup', target: upOn || el }); pcKeyClick({ type: 'click', target: upOn || el, detail: 1 }); const held = DOC.activeElement === el; advance(0); return held; };
+      /* A touchscreen tap: pointerdown, pointerup, a turn later the focus (Chrome's compatibility mouse events), then the click. */
+      const tap = el => { DOC.activeElement = body; pcKeyNote({ type: 'pointerdown', target: el }); pcKeyPointerUp({ type: 'pointerup', target: el }); advance(0);
+        el.focus(); pcKeyClick({ type: 'click', target: el, detail: 1 }); const held = DOC.activeElement === el; advance(0); return held; };
       only(A); pcKeyLast = null;
       [['Play', A.play], ['Metronome', A.pc.querySelector('.pc-metro')], ['a section chip', A.chips[1]], ['the Guitar switch', A.pc.querySelector('.pc-guitar')],
        ['the speed slider', A.range], ['Next', A.next]].forEach(([w, el]) => {
@@ -9849,6 +9863,28 @@ const DB_PAGE_TEST_SRC = String.raw`(function(){
         check(DOC.activeElement === body, 'pointer on ' + w + ': the control kept the focus, so Space ' + (el === A.range ? 'and every key stay in the slider' : 'presses it again'));
         press({ target: DOC.activeElement }, 'pcToggle:ca-18', 'Space after a pointer press on ' + w);
       });
+      [['a section chip', A.chips[1]], ['Metronome', A.pc.querySelector('.pc-metro')], ['the speed slider', A.range]].forEach(([w, el]) => {
+        const held = tap(el);
+        check(held, 'a tap on ' + w + ': the focus went before the tap\'s click had run');
+        check(DOC.activeElement === body, 'a tap on ' + w + ' (touchscreen order: the focus comes after pointerup): the control kept the focus');
+        press({ target: DOC.activeElement }, 'pcToggle:ca-18', 'Space after a tap on ' + w);
+      });
+      // Enter or Space on a chip reached with Tab makes a click with no pointer press: the chip keeps its focus.
+      for (const k of ['Enter', ' ']) {
+        DOC.activeElement = body; A.chips[1].focus(); pcKeyNote({ type: 'focusin', target: A.chips[1] });
+        pcKeydown(ev({ key: k, code: k === ' ' ? 'Space' : 'Enter', target: A.chips[1] })); pcKeyClick({ type: 'click', target: A.chips[1], detail: 0 }); advance(0);
+        check(DOC.activeElement === A.chips[1], (k === ' ' ? 'Space' : 'Enter') + ' on a chip reached with Tab: its click took the focus away');
+      }
+      // ... even right after a pointer press that ended with no click of its own (a slider drag released off the card).
+      DOC.activeElement = body; pcKeyNote({ type: 'pointerdown', target: A.range }); A.range.focus(); pcKeyPointerUp({ type: 'pointerup', target: body }); advance(0);
+      A.chips[1].focus(); pcKeyNote({ type: 'focusin', target: A.chips[1] });
+      pcKeydown(ev({ key: 'Enter', code: 'Enter', target: A.chips[1] })); pcKeyClick({ type: 'click', target: A.chips[1], detail: 0 }); advance(0);
+      check(DOC.activeElement === A.chips[1], 'Enter on a chip after a pointer press with no click: its click took the focus away');
+      // ... and a click the page's own code makes (.click(), detail 0) before any key handler has run.
+      DOC.activeElement = body; pcKeyNote({ type: 'pointerdown', target: A.range }); A.range.focus(); pcKeyPointerUp({ type: 'pointerup', target: body }); advance(0);
+      A.chips[1].focus(); pcKeyClick({ type: 'click', target: A.chips[1], detail: 0 }); advance(0);
+      check(DOC.activeElement === A.chips[1], 'a click made by code (detail 0) after a pointer press with no click took the focus away');
+      DOC.activeElement = body;
       pointer(A.range, body);
       check(DOC.activeElement === body, 'a slider drag released outside the card kept the focus in the slider');
       press({ key: '>', code: 'Period', shiftKey: true, target: DOC.activeElement }, 'pcSetSpeedTo:ca-18:' + (Number(A.range.value) + 1), '> after a slider drag released outside the card');
@@ -9862,7 +9898,7 @@ const DB_PAGE_TEST_SRC = String.raw`(function(){
       pointer(plainBtn); check(DOC.activeElement === plainBtn, 'a button outside every card lost its focus after a click');
       A.pc.dataset.preview = '1'; pointer(A.chips[0]); check(DOC.activeElement === A.chips[0], 'a control in the console preview lost its focus'); delete A.pc._attrs['data-preview'];
       DOC.activeElement = body; pcKeyNote({ type: 'pointerdown', target: A.chips[2] }); A.chips[2].focus(); pcKeyPointerUp({ type: 'pointerup', target: A.chips[2] });
-      plainBtn.focus(); advance(0);
+      plainBtn.focus(); pcKeyClick({ type: 'click', target: A.chips[2], detail: 1 }); advance(0);
       check(DOC.activeElement === plainBtn, 'the focus the click moved outside the card (a dialog it opened) was taken away');
       DOC.activeElement = body;
     }
@@ -10010,6 +10046,23 @@ const DB_PAGE_TEST_SRC = String.raw`(function(){
         tick(!DOC.getElementById('coach-gate-overlay'), 'the gate stayed open');
         advance(TICK_POP_MS);
         tick(!has(gbox), 'checklist: the box kept the class');
+        /* The pop can never stand in the save's way: a pop that throws comes after the save was queued (a checklist
+           tick, a lesson step), and tickPop itself throws on nothing. */
+        const realPop = R.tickPop;
+        R.tickPop = () => { throw new Error('a broken pop'); };
+        wp.setAttribute('data-id', w.id); delete progress[plain.id]; qlog.length = 0;
+        let threw = false; try { toggleSkill(plain.id, w.id, 'gotit'); } catch(e){ threw = true; }
+        tick(progress[plain.id] === 'gotit' && qlog.length > 0, 'checklist: with a pop that throws, the tick was not handed to the save (the pop must come after saveProgress()) ' + JSON.stringify({ threw, q: qlog }));
+        resetData(); rows[0].li.classList.remove('step-done', 'collapsed');
+        threw = false; try { toggleStepDone(rows[0].btn, rows[0].key); } catch(e){ threw = true; }
+        tick(completed[rows[0].key] === true && qlog.indexOf('completed') >= 0, 'lesson step: with a pop that throws, the step was not handed to the save ' + JSON.stringify({ threw, q: qlog }));
+        R.tickPop = realPop;
+        const nasty = { classList: { add(){ throw new Error('x'); }, remove(){}, contains: () => false }, addEventListener(){ throw new Error('y'); }, removeEventListener(){} };
+        for (const [w2, el] of [['null', null], ['{}', {}], ['an element whose listeners throw', nasty]]) {
+          let t2 = ''; try { tickPop(el); } catch(e){ t2 = e.message; }
+          tick(!t2, 'tickPop(' + w2 + ') threw "' + t2 + '" (its body must swallow its own errors)');
+        }
+        advance(TICK_POP_MS);
         if(savedProg === undefined) delete progress[plain.id]; else progress[plain.id] = savedProg;
         if(savedGate === undefined) delete progress[gated.id]; else progress[gated.id] = savedGate;
         if(games && games.coachSkill && savedCoach) games.coachSkill = savedCoach;
@@ -10034,7 +10087,7 @@ function checkCardKeysAndTickPop(ctx, sets, i18nTable) {
   const flag = m => { err('1db: ' + m); problems++; bad++; };
   if (!ctx) { flag('cannot run — the 0b render context is unavailable'); return; }
   const run = x => vm.runInContext(x, ctx);
-  for (const fn of ['pcKeydown', 'pcKeyNote', 'pcKeyPointerUp', 'tickPop', 'toggleStepDone', 'toggleSkill', 'caCardBodyHtml']) if (run('typeof ' + fn) !== 'function') { flag(fn + '() not found in app.js (renamed? update 1db)'); return; }
+  for (const fn of ['pcKeydown', 'pcKeyNote', 'pcKeyPointerUp', 'pcKeyClick', 'pcKeyLetGo', 'tickPop', 'toggleStepDone', 'toggleSkill', 'caCardBodyHtml']) if (run('typeof ' + fn) !== 'function') { flag(fn + '() not found in app.js (renamed? update 1db)'); return; }
   // The key map.
   const map = JSON.parse(run('JSON.stringify(PC_KEYS)'));
   if (JSON.stringify(map) !== JSON.stringify(DB_KEYS)) flag('PC_KEYS is ' + JSON.stringify(map) + ', pinned ' + JSON.stringify(DB_KEYS));
@@ -10110,7 +10163,7 @@ function checkCardKeysAndTickPop(ctx, sets, i18nTable) {
   // The listeners: registered once, in app/start.js, after the role="button" Space handler (app/audio-ui.js).
   const startSrc = stripJsComments(readFileSync(join(ROOT, 'app/start.js'), 'utf8'));
   const app = stripJsComments(siteSource('app.js', ROOT));
-  for (const re of [/document\.addEventListener\('keydown', pcKeydown\);/, /document\.addEventListener\('pointerdown', pcKeyNote, \{ capture: true, passive: true \}\);/, /document\.addEventListener\('focusin', pcKeyNote\);/, /document\.addEventListener\('pointerup', pcKeyPointerUp, \{ capture: true, passive: true \}\);/]) {
+  for (const re of [/document\.addEventListener\('keydown', pcKeydown\);/, /document\.addEventListener\('pointerdown', pcKeyNote, \{ capture: true, passive: true \}\);/, /document\.addEventListener\('focusin', pcKeyNote\);/, /document\.addEventListener\('pointerup', pcKeyPointerUp, \{ capture: true, passive: true \}\);/, /document\.addEventListener\('click', pcKeyClick, \{ capture: true, passive: true \}\);/]) {
     if (!re.test(startSrc)) flag('app/start.js no longer registers ' + re.source.replace(/\\/g, ''));
     const all = app.match(new RegExp(re.source, 'g')) || [];
     if (all.length !== 1) flag(all.length + ' copies of ' + re.source.replace(/\\/g, '') + ' in the app script, want 1');
@@ -10140,8 +10193,8 @@ function checkCardKeysAndTickPop(ctx, sets, i18nTable) {
   if (!/@media \(prefers-reduced-motion:reduce\)\{\.tick-pop,\.tick-pop::after\{animation:none\}/.test(css)) flag('styles.css: .tick-pop is not switched off under prefers-reduced-motion');
   // Teacher mode (IS_TEACHER_MODE is a const in the page, so run the real function text with it true): no key acts, no focus is let go.
   try {
-    const kd = jsFunctionBody(app, 'pcKeydown'), pu = jsFunctionBody(app, 'pcKeyPointerUp');
-    if (!kd || !pu) flag('pcKeydown / pcKeyPointerUp not found for the teacher-mode run');
+    const kd = jsFunctionBody(app, 'pcKeydown'), pu = jsFunctionBody(app, 'pcKeyLetGo');
+    if (!kd || !pu) flag('pcKeydown / pcKeyLetGo not found for the teacher-mode run');
     else {
       const did = [];
       const btn = { tagName: 'BUTTON', classList: { contains: () => true }, blur: () => did.push('blur'), matches: () => false, getAttribute: () => null, closest: () => null };
@@ -10155,7 +10208,7 @@ function checkCardKeysAndTickPop(ctx, sets, i18nTable) {
         vm.runInNewContext('(function pcKeydown(e)' + kd + ')(e)', Object.assign({}, sb, { e }));
         pressed++;
       }
-      vm.runInNewContext('(function pcKeyPointerUp()' + pu + ')()', sb);
+      vm.runInNewContext('(function pcKeyLetGo(r)' + pu + ')(pcKeyPressRoot)', sb);
       if (did.length || cancelled) flag('teacher mode: ' + pressed + ' keys did ' + (did.join(', ') || 'nothing') + ' and cancelled ' + cancelled + ' (nothing may happen in the console)');
       else teacherKeys = pressed;
     }
@@ -10164,7 +10217,7 @@ function checkCardKeysAndTickPop(ctx, sets, i18nTable) {
   let setsSeen = 0;
   for (const w of sets || []) { let h = ''; try { h = String(run('buildSet')(w)); } catch { continue; } setsSeen++; if (/tick-pop/.test(h)) flag(w.id + ' renders with tick-pop on the page'); }
   if (!setsSeen) flag('no set rendered — the initial-paint check saw nothing');
-  if (!bad) ok('1db: ' + res.cases + ' checks on the real code (' + res.keyCases + ' key presses: the map, Space on a button, typing, media players, Ctrl/Cmd/Alt, repeats, the dialogs, drawer, tools, viewer, quiz banner, mic panel, a live mic and a Call-the-chord round, no card, two cards, scrolled out of view, after a pointer press; ' + res.tickCases + ' tick checks: on, off, One-step view, peeked, refused gate, Mark it anyway, reduced motion, animationend, fallback); the same ' + DB_SEQ_CLICKS + ' clicks leave identical data to save with and without the pop; 5 strings EN + ES; ' + tips + ' tooltips on 2 rendered cards and the two-way switch, none in ' + previews + ' console previews; 4 listeners in app/start.js; CSS transform/opacity only, ' + Object.keys(DB_POP_CSS).length + ' .tick-pop rules pinned, off under reduced motion; teacher mode: ' + teacherKeys + ' keys and a pointer press do nothing; ' + setsSeen + ' sets render without it');
+  if (!bad) ok('1db: ' + res.cases + ' checks on the real code (' + res.keyCases + ' key presses: the map, Space on a button, typing, media players, Ctrl/Cmd/Alt, repeats, the dialogs, drawer, tools, viewer, quiz banner, mic panel, a live mic and a Call-the-chord round, no card, two cards, scrolled out of view, after a pointer press; ' + res.tickCases + ' tick checks: on, off, One-step view, peeked, refused gate, Mark it anyway, reduced motion, animationend, fallback); the same ' + DB_SEQ_CLICKS + ' clicks leave identical data to save with and without the pop; 5 strings EN + ES; ' + tips + ' tooltips on 2 rendered cards and the two-way switch, none in ' + previews + ' console previews; 5 listeners in app/start.js; CSS transform/opacity only, ' + Object.keys(DB_POP_CSS).length + ' .tick-pop rules pinned, off under reduced motion; teacher mode: ' + teacherKeys + ' keys and a pointer press do nothing; ' + setsSeen + ' sets render without it');
 }
 /* 1ct. NO CHECKLIST ON A PRACTICE CARD; NO MARK COMPLETE ON AN EXTRA SONG
    (Jonathan, 2026-11-10: "get rid of the checklists on the activities. only

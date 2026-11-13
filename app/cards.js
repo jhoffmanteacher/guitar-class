@@ -1468,7 +1468,8 @@ function pcToggleHelp(btn){
    dialog marks #app inert) and not the console's preview.
    NOTHING happens while the student is typing (a field, a select, a slider,
    contenteditable) or is on an <audio> / <video> player, with Ctrl / Cmd /
-   Alt held, on a held-down repeat, when another handler already took the
+   Alt held, with Shift held (except for < and >, which need it), on a
+   held-down repeat, when another handler already took the
    key, in the teacher console, while the nav drawer, a dialog (the games,
    the live quiz, the gates, Report a problem), the search panel, a tool
    popup (metronome, timer, tuner, recorder), the video viewer or the live
@@ -1480,26 +1481,43 @@ function pcToggleHelp(btn){
    A MOUSE OR TOUCH press on a card control leaves Chrome's focus on it, and
    then Space would press that control again (a section chip restarts with a
    new count-in) and every key would stay in the speed slider. So once a
-   pointer press inside a card is over (its click and change have run),
-   pcKeyPointerUp lets the focus go, and the keys reach the player as the
-   Play tooltip says. A control reached with Tab is never touched (no
-   pointer), and a field that is typed in keeps its focus.
+   pointer press inside a card is over (its click and change have run), the
+   focus is let go (pcKeyLetGo), and the keys reach the player as the Play
+   tooltip says. Twice, because the order differs: a mouse focuses on its
+   press, so the pointerup's timer turn finds the focus; a touchscreen tap
+   focuses only with the mouse events Chrome sends after pointerup, so the
+   click that follows a pointer press lets it go again (pcKeyClick). A click
+   with no pointer press before it (Enter or Space on a control reached with
+   Tab) is never touched: any key press forgets the press. A field that is
+   typed in keeps its focus.
    A key that acts cancels its default, so Space never scrolls the page
    then. The listeners are registered once, in app/start.js, for the page's
    life, like the site's other document keys; they hold no audio or element
    of their own (pcKeyLast is checked for isConnected before use; the
    pointer's one-turn timer reads the focus and ends). */
-let pcKeyLast = null, pcKeyPressRoot = null;
+let pcKeyLast = null, pcKeyPressRoot = null, pcKeyClickRoot = null;
 function pcKeyNote(e){
   const tg = e && e.target;
   const r = tg && tg.closest ? tg.closest('.pc') : null;
   if(r) pcKeyLast = r;
   // The card a pointer press started in (null outside every card): pcKeyPointerUp reads it, wherever the press ends.
-  if(e && e.type === 'pointerdown') pcKeyPressRoot = r && r.dataset.preview !== '1' ? r : null;
+  if(e && e.type === 'pointerdown'){ pcKeyPressRoot = r && r.dataset.preview !== '1' ? r : null; pcKeyClickRoot = null; }
 }
 function pcKeyPointerUp(){
   const r = pcKeyPressRoot;
   pcKeyPressRoot = null;
+  // The click this press makes (a touch tap focuses only then) lets go once more: pcKeyClick.
+  pcKeyClickRoot = r;
+  pcKeyLetGo(r);
+}
+function pcKeyClick(e){
+  const r = pcKeyClickRoot;
+  pcKeyClickRoot = null;
+  // detail 0 = a click no pointer made (Enter / Space, or code calling .click()): never one to let go after.
+  if(e && e.detail === 0) return;
+  pcKeyLetGo(r);
+}
+function pcKeyLetGo(r){
   if(!r || (typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE)) return;
   setTimeout(() => {
     const a = document.activeElement;
@@ -1538,7 +1556,11 @@ function pcKeyBlocked(){
 const PC_KEYS = { ' ': 'play', 'Spacebar': 'play', 'k': 'play', 'K': 'play', 'ArrowLeft': 'prev', 'ArrowRight': 'next', '<': 'slower', ',': 'slower', '>': 'faster', '.': 'faster' };
 function pcKeydown(e){
   const act = Object.prototype.hasOwnProperty.call(PC_KEYS, e.key) ? PC_KEYS[e.key] : null;
+  // A key press forgets the last pointer press, so the click Enter or Space makes on a control keeps its focus.
+  pcKeyClickRoot = null;
   if(!act || e.defaultPrevented || e.repeat || e.isComposing || e.ctrlKey || e.metaKey || e.altKey) return;
+  // Shift + an arrow or the space bar belongs to the page (selecting, scrolling up); < and > need Shift.
+  if(e.shiftKey && act !== 'slower' && act !== 'faster') return;
   if(typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE) return;
   const tg = e.target && e.target.closest ? e.target : null;
   if(tg && (tg.closest('input, textarea, select, audio, video, [contenteditable]:not([contenteditable="false"])') || tg.isContentEditable)) return;
