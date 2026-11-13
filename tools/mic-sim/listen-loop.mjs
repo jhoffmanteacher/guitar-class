@@ -149,8 +149,10 @@ function keyCheck(game, key, clean){
     const notPlayed = game === 'radar' ? e.did === 'notPlayed' : !e.played;
     const at = e.checkAtMs != null ? e.checkAtMs : e.atMs;
     if (played){
-      const attack = hfOf(clean, S(at), S(at + 40)), before = hfOf(clean, S(at - 100), S(at - 20));
-      if (!(attack > 1.5 * before + 1e-6)) throw new Error(`fake-world check failed: key entry ${e.i} says played at ${Math.round(at)} ms, and the student's guitar has no attack there`);
+      /* the loudest 5 ms of the attack channel just after `at`, against the typical 5 ms just before it */
+      const W = Math.round(0.005 * SR), sub = (a, b) => { const v = []; for (let x = Math.round(a); x + W <= Math.round(b); x += W) v.push(hfOf(clean, x, x + W)); return v; };
+      const attack = Math.max(0, ...sub(S(at - 5), S(at + 70))), bv = sub(S(at - 150), S(at - 20)).sort((x, y) => x - y), before = bv.length ? bv[Math.floor(bv.length / 2)] : 0;
+      if (!(attack > 1.25 * before + 1e-6)) throw new Error(`fake-world check failed: key entry ${e.i} says played at ${Math.round(at)} ms, and the student's guitar has no attack there`);
       if (game === 'melody' || game === 'runner'){
         const f = acPitch(clean, S(at + 60));
         const want = e.played.map(pc);
@@ -412,6 +414,10 @@ function compare(o, now, was, file){
   if (was.takes.length !== now.takes.length || now.takes.some((t, i) => id(t) !== id(was.takes[i]))) return { code: 2, lines: [`against ${file}: NOT THE SAME COMMAND (other takes: ${was.takes.length} then, ${now.takes.length} now, or other students, rooms, mics, items or seeds); nothing compared`] };
   const g = now.game, kinds = GAMES[g];
   let n = 0, diff = 0, worse = 0, better = 0, design = 0, other = 0, gw = 0, gb = 0, gm = 0, siteDiff = 0;
+  /* The report (Coach): its level and its "Right notes" line, per take, ranked by what the kind should get (pass: higher is better; fail:
+     lower is better; either: not ranked). */
+  const lv = x => x === 'couldntHear' ? 0 : Number(x) || 0, rep = { level: [0, 0, 0], pitch: [0, 0, 0] };
+  const rankTake = (k, should, a, b) => { if (a === b) return; rep[k][0]++; if (should === 'either') return; const up = b > a; if ((should === 'pass') === up) rep[k][2]++; else rep[k][1]++; };
   const first = [];
   now.takes.forEach((t, ti) => {
     const w = was.takes[ti];
@@ -425,6 +431,10 @@ function compare(o, now, was, file){
       if (k === 'WORSE') worse++; else if (k === 'better') better++; else if (k === 'by design') design++; else other++;
       if (first.length < 12) first.push(`  take ${t.n} (${t.kind}, ${t.room}, ${t.item}) ${g === 'radar' ? 'strum' : 'note'} ${i + 1}: played ${it.did}${it.cls ? ' (' + it.cls + ')' : ''}, was ${v0}, now ${it.v}  ${k}   replay: --replay=${t.n}`);
     });
+    if (g === 'melody' || g === 'chords'){
+      rankTake('level', kinds[t.kind].gate, lv(w.overall), lv(t.overall));
+      rankTake('pitch', kinds[t.kind].gate, w.crits ? w.crits[0] : 0, t.crits ? t.crits[0] : 0);
+    }
     if (w.gateOpen !== t.gateOpen && t.gateOpen != null){
       gm++;
       const should = kinds[t.kind].gate, k = should === 'pass' ? (t.gateOpen ? 'better' : 'WORSE') : should === 'fail' ? (t.gateOpen ? 'WORSE' : 'better') : 'unranked';
@@ -432,8 +442,9 @@ function compare(o, now, was, file){
       if (first.length < 12) first.push(`  take ${t.n} (${t.kind}, ${t.room}, ${t.item}): the ${g === 'runner' ? 'level' : 'gate'} was ${w.gateOpen ? 'OPEN' : 'shut'}, now ${t.gateOpen ? 'OPEN' : 'shut'} (should ${should})  ${k}   replay: --replay=${t.n}`);
     }
   });
-  const lines = [`against ${file}: ${diff} of ${n} graded ${g === 'radar' ? 'strums' : 'notes'} differ (${worse} worse by the answer key, ${better} better${g === 'chords' ? `, ${design} a chord the Coach passes by design` : ''}, ${other} between two verdicts of the same rank) in ${now.takes.length - siteDiff} takes; ${g === 'radar' ? '' : `${g === 'runner' ? 'level cleared' : 'gate'} moved in ${gm} takes (${gw} worse, ${gb} better)`}${siteDiff ? `; ${siteDiff} takes NOT compared: the site set up a different round (other notes or slots) with the same student` : ''}${diff || gm || siteDiff ? '  RED' : '  same'}`, ...first];
-  return { code: diff || gm || siteDiff ? 1 : 0, lines };
+  const repLine = g === 'melody' || g === 'chords' ? `; the report's level moved in ${rep.level[0]} takes (${rep.level[1]} worse, ${rep.level[2]} better), its "Right notes" line in ${rep.pitch[0]} (${rep.pitch[1]} worse, ${rep.pitch[2]} better)` : '';
+  const lines = [`against ${file}: ${diff} of ${n} graded ${g === 'radar' ? 'strums' : 'notes'} differ (${worse} worse by the answer key, ${better} better${g === 'chords' ? `, ${design} a chord the Coach passes by design` : ''}, ${other} between two verdicts of the same rank) in ${now.takes.length - siteDiff} takes; ${g === 'radar' ? '' : `${g === 'runner' ? 'level cleared' : 'gate'} moved in ${gm} takes (${gw} worse, ${gb} better)`}${repLine}${siteDiff ? `; ${siteDiff} takes NOT compared: the site set up a different round (other notes or slots) with the same student` : ''}${diff || gm || siteDiff || rep.level[0] || rep.pitch[0] ? '  RED' : '  same'}`, ...first];
+  return { code: diff || gm || siteDiff || rep.level[0] || rep.pitch[0] ? 1 : 0, lines };
 }
 
 /* ── --fit: the model against the 8 real Coach melody takes ── */
