@@ -383,6 +383,37 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-13 — The listening bench: the Power Chord Switch work turned on every feature that listens.**
+      Jonathan, 2026-11-12: "i would like the audio detection from power chord switch to apply site-wide like to
+      listening coach, etc. power chord switch isn't a game we'll be playing after a month", and "the listening
+      aspect should be a priority change". The scout's plan and the full results are in `Claude outputs/`
+      (`listening-site-wide-plan-2026-11-12.md`, `listening-bench-results-2026-11-13.md`). Tools only, in
+      `tools/mic-sim/`; no review round yet (the numbers below are the builder's).
+      New: `listen-site.mjs` (the real Listening Coach, Note Runner and Strum Radar loops in the vm);
+      `room-onsets.mjs` (how often room sound counts as a hit, per game window); `no-guitar-listen.mjs` (what a round
+      earns with nothing played); `replay-listen.mjs` (recorded Coach and Note Runner takes through the real loops).
+      `takes-in.mjs` now KEEPS Coach and Note Runner takes (13 summaries added, no audio, no identity) and
+      `closed-loop.mjs`'s REAL TAKES section shows every game with takes.
+      **Finding 1 (C1): the Listening Coach's check-off gate opens with nothing played.** With room noise and no
+      guitar the report says "Good" and saves level 2, the gate's minimum: synthetic rooms 30 of 72 chord takes and
+      211 of 552 melody takes; the recorded classroom rooms (each take's sound where nobody played) 92 of 108 and 524
+      of 828. A dead mic, a quiet room and a fan never opened it. Two ways in: every slot "unclear" (chord mode scores
+      that as pitch 2), and "Good whenever two criteria are Great" (timing and completion are Great when noise lands
+      on every beat, whatever the pitch). 52 skills are gated on the Coach.
+      **Finding 2: room sound.** In the recorded rooms the shared onset rule took 133 sounds a minute where nobody
+      played (period 4: 134, period 7: 132). An empty slot gets a hit 87% of the time in Strum Radar "downs", 70% in
+      "eighths", 67% in Note Runner, 100% in the Coach at 60 BPM. Strum Radar with nothing played: median score 78%
+      in the recorded rooms, 70 of 72 rounds with a star (it has no pitch check).
+      **What the existing takes say:** Coach melody, 64 notes: 20 right, 10 wrong, 34 "unclear"; of the 34, the note
+      was clearly in the recording for 9 (too few pitch readings). Note Runner, 74 judged notes: 29 right, 19 half
+      credit, 26 missed; 13 of 39 notes clearly in the recording were not counted.
+      Error bars: the replay gives a take's own saved verdict on 46 of 64 (melody), 6 of 8 (chords), 51 of 74 (Note
+      Runner); about a quarter do not reproduce even on the site as it was that day.
+      Recordings wanted, periods 4 and 7 (each student keeps one take per game: download after each class): about 10
+      Coach chord takes per period plus 2 or 3 on a test STUDENT account with no guitar during normal class noise;
+      about 15 Coach melody takes per period (drills under 24 beats); about 5 short Note Runner takes per period.
+      Not built yet: the virtual student for single notes and strum patterns (step 4 of the plan).
+
 - [x] **2026-11-12 (late) — Two small things Jonathan asked for the same evening (both Fast).**
       (1) The practice-minutes recap after Stop on an open card ("i didn't choose for the recap to not be visible. it
       would be nice if it's always visibile if possible"). Since the 2026-11-10 header fold, `recapMaybe` found no
