@@ -303,7 +303,7 @@ export function makeSite(coachFile, rule, ratio, fromSummary, siteRoot){
     classes(names){ const out = Object.assign({}, cc ? cc.classes : null); names.forEach(n => { if (!out[n]) out[n] = chordMidis(n).map(m => ((m % 12) + 12) % 12); }); return JSON.stringify(out); },
     result(){
       const out = { phase: cc.phase, onsets: cc.onsetCount, scoreBpm: cc.phase === 'done' ? ccScoreBpm() : null,
-        changes: cc.changes.map(c => ({ from: c.from, to: c.to, stage: c.stage || 0, bpm: c.bpm, verdict: c.result, readings: c.readings ? c.readings.length : null })),
+        changes: cc.changes.map(c => ({ from: c.from, to: c.to, stage: c.stage || 0, bpm: c.bpm, verdict: c.result, readings: c.readings ? c.readings.length : null, dec: c.decDev == null ? null : Math.round(c.decDev) })),
         meta: cc.phase === 'done' ? ccRecMeta(true) : null, lat: coachMicLatencyMs() };
       micRec = null;
       ccStop(); cc = null;
@@ -395,7 +395,7 @@ export function playGame(site, g){
   const changes = res.changes.map((c, i) => {
     const t = key[i];
     if (t.to !== c.to || t.from !== c.from) throw new Error(`closed-loop: change ${i} is ${c.from}>${c.to} in the game and ${t.from}>${t.to} for the student`);
-    const rec = Object.assign({ stage: c.stage, bpm: c.bpm, from: c.from, to: c.to, did: t.did, devMs: t.devMs == null ? null : Math.round(t.devMs), verdict: c.verdict, readings: c.readings }, t.played ? { played: t.played } : {});
+    const rec = Object.assign({ stage: c.stage, bpm: c.bpm, from: c.from, to: c.to, did: t.did, devMs: t.devMs == null ? null : Math.round(t.devMs), verdict: c.verdict, readings: c.readings }, t.played ? { played: t.played } : {}, c.dec != null ? { dec: c.dec } : {});
     /* Change Up: whether the game may pass this mistake BY DESIGN (worked out here from the chord shapes, never by asking the game).
        wrong: wrongClass below ('none' / 'rule2' / 'design'); only 'design' (the played shape passes both of ccResolvePend's rules) is byDesign.
        held: old and new are one of the pairs ccResolvePend's comment says it cannot tell apart (E/Em, A/Am, C/Am, G/Em). */
@@ -701,7 +701,7 @@ const lenientPair = (a, b) => LENIENT.some(([x, y]) => (a === x && b === y) || (
 /* --replay: one game of the run, alone, every change printed. */
 function printReplay(g, what, where){
   console.log(`game ${what.seed}: ${what.case ? what.case + ' · ' : ''}${what.student} · ${what.room} · ${what.bpm} BPM · ${what.pair} · ${what.fps} fps · score ${g.scoreBpm} BPM · ${g.onsets} sounds taken for strums · ${where}`);
-  g.changes.forEach((c, i) => console.log(`  change ${String(i + 1).padStart(2)}  ${(c.from + '>' + c.to).padEnd(7)} played ${(c.did + (c.played ? ' (' + c.played + ')' : '')).padEnd(12)} said ${c.verdict.padEnd(4)} ${AGREES[c.did] === c.verdict ? 'agrees' : 'DISAGREES'}   timing ${c.devMs == null ? '-' : c.devMs + ' ms'}   pitch readings ${c.readings == null ? '-' : c.readings}`));
+  g.changes.forEach((c, i) => console.log(`  change ${String(i + 1).padStart(2)}  ${(c.from + '>' + c.to).padEnd(7)} played ${(c.did + (c.played ? ' (' + c.played + ')' : '')).padEnd(12)} said ${c.verdict.padEnd(4)} ${AGREES[c.did] === c.verdict ? 'agrees' : 'DISAGREES'}   timing ${c.devMs == null ? '-' : c.devMs + ' ms'}   pitch readings ${c.readings == null ? '-' : c.readings}${c.dec != null ? '   decided by the onset at ' + c.dec + ' ms (a window rule)' : ''}`));
 }
 
 /* The command line. Every argument must be one of these, each at most once: a valued option written --name=value as ONE argument (so
