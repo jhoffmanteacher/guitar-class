@@ -56,31 +56,55 @@
      node tools/golden.mjs --out <dir>                snapshot this checkout
      node tools/golden.mjs --out <dir> --root <site>  snapshot another site folder
      node tools/golden.mjs --compare <dirA> <dirB>    exit 0 only if they are identical
+     --same-site        (compare) allow two snapshots of the very same site files, or a folder with
+                        itself: the determinism test of the TOOL; without it such a compare is refused
      --en-only          English only
      --only <parts>     comma-separated: data, sets, keys, gates, save, screens, games, play,
                         activities, pages, console, tools, livequiz (snapshot one area while
                         iterating; a compare says PARTIAL)
      --shots            also write the PNGs
      --chrome <path>    Chrome/Chromium binary (or CHROME=...)
-     --coverage <file>  also write which top-level functions of every part ran (Chrome's
-                        precise coverage), as JSON, to <file> (outside the snapshot)
+     --no-coverage      leave Chrome's coverage off. It is ON by default (review R3-1): the run
+                        prints, for every script of the site, how many top-level functions it
+                        NEVER ran, and keeps the names in coverage.json in the snapshot (not
+                        compared file by file: moving a function changes it). Its cost: about
+                        120 s on a full --shots run (1,618 s with it, 1,497 s without, 2026-11-13).
+     --coverage <file>  also copy that coverage report to <file> (outside the snapshot)
      --stall <s>        the watchdog (review R2-6): stop if no step starts, or the page does
                         not answer one call, for this many seconds (default 180)
      --timeout <min>    stop if the whole run passes this many minutes (default 150)
 
    Exit codes: 0 the snapshot is written and passed its own checks; 1 it is written but
-   failed its own checks (failures.json; a compare refuses it); 2 could not run; 3 HUNG
-   (the watchdog stopped it: "golden: ✗ HUNG … Stuck at <step>"; its Chrome is killed).
+   failed its own checks (failures.json; a compare refuses it); 2 could not run (also any
+   crash before the snapshot starts, a Chrome path that does not exist …); 3 HUNG (the
+   watchdog stopped it: "golden: ✗ HUNG … Stuck at <step>"; its Chrome is killed).
+   "Passed its own checks" is always printed with the count of error events (exceptions,
+   console errors and warnings) in errors.json: read them.
+
+   --out is emptied first, so it must be a folder that does not exist, an empty one, or an
+   earlier snapshot (it holds meta.json or failures.json). The site, this checkout, any folder
+   above either, the home folder and the current folder are refused (review R3-5).
+
+   The compare (besides the files): it refuses two snapshots taken by different versions of
+   this tool (meta.tool is a hash of this file), and two snapshots of the very same site files
+   or a folder with itself unless --same-site says that is the point. For every file the two
+   SITES differ in, it prints how many top-level functions each run never ran there (from
+   coverage.json): an identical result says nothing about code the runs did not reach.
 
    The run fails (exit 1) when:
      - a recorded screen is not on screen: its root element (or a parent) has `hidden`, it
-       draws with no size, it lies outside the window or another element covers its centre
-       (review R2-2). A set picture is only taken once the set's panel is the active one and
+       draws with no size, has visibility:hidden or opacity 0 (on it or a parent), lies
+       outside the window or another element covers its centre (review R2-2, R3-10; checked
+       for every set, screen, activity, tool, console view, page, and each game's first
+       screen and end). A set picture is only taken once the set's panel is the active one and
        no page covers it; a dialog still open after Escape and its close button fails too;
      - two pictures that must differ are byte-identical (two sets, two filled sets, two live
        quiz screens, two activities, two games' first screens, two screens, two console views);
      - a listed write finds no control ("no such control"), in save/, console/writes.json and
        console/board.json (review R2-4), or a step of the tool itself fails (step-failed);
+     - a save action leaves the student's document on the server unchanged (review R3-2);
+       the made-up student has every Module 1 skill and all but one Module Review 1 row
+       rated first, so Module Review 1 is open and rating, finishing and the reflection write;
      - a navigation does not land (the set, the covering page, the live quiz screen).
 
    Determinism (review R2-3): a fixed clock (Wednesday 2026-11-11 10:00 in Los Angeles,
@@ -114,19 +138,42 @@
    melody and the first chord Coach button in course order that shows with the lesson on
    "All steps" (its step opened by its head when closed), Start pressed, up to 60 s, the
    report recorded.
-   Pictures in this pass: each game's first screen only. The end of a game, and the Listening
+   Pictures in this pass: each game's first screen only, with the games screen's top bar
+   also kept as HTML (play/<game>-topbar.html: "← All games" shows only inside a game). The end of a game, and the Listening
    Coach (inside a set), are recorded as HTML only: two runs gave identical HTML but drew a
    moving play field (tokens on sub-pixel positions, the runner) a few hundred pixels
    differently, and the Coach card's scroll position moved with figures loading above it.
    Games LEFT OUT: Tuning Simulator (a page of its own, tuning-sim.html: its first screen is
    recorded under pages/, but nothing is played: it is driven by dragging tuning pegs, which
    this student does not do). No other game is left out; the run prints the list it played.
-   Limits of the games pass (stated, not hidden): the student is fixed and simple. It does
-   not play the notes a game asks for (its input is the same whatever the game asks), it
-   does not press keys (Strum Hero's taps are keys or pointer presses on its lane), and it
-   presses buttons by position, so a game whose answer buttons are reordered by a refactor
-   (not by its data) shows as a difference. Its sounds are fake: a game that waits on a real
-   audio 'ended' event gets it at the fake clock's time of the scheduled stop.
+   WHAT THE GAMES PASS IS NOT (review R3-4). It is not a scoring check: its input is the same
+   whatever a game asks, so a changed listening rule can leave every record the same (the
+   reviewer moved Power Chord Switch's onset ratio from 1.8 to 2.6 and play/power.json did
+   not change). Listening rules have their own proof: tools/mic-sim. What it does catch: a
+   function that is missing or throws once the game starts, a game that draws, saves or
+   moves on differently, a doubled key listener. Of the 17 games, 7 write nothing to `games`
+   (Build-a-Chord, Finger Gym, Note Hunt, Riff Roulette, Riff Runner, Pentatonic Simon Guitar
+   Hero, Strum Hero); Note Hunt and Pentatonic Simon Guitar Hero stay on their first prompt
+   (the recording never plays what they ask); Riff Runner never finishes a round in 60 s.
+   The student also presses each tempo button (…NudgeBpm() once before Start and the key "1"
+   once, two seconds after Start (with the virtual clock's time stamp). It presses buttons by
+   position, so answer buttons a refactor reorders show as a difference. Sounds are fake: a
+   game that waits on an audio 'ended' event gets it at the fake clock's time of the stop.
+
+   NOT COVERED, by decision (each would need a new fake or real data; one line each):
+     - Riff Runner's Wait Mode (rnwStart … rnwAgain, 14 functions): it is graded by the mic
+       and waits for the right note; the fixed recording never plays it, so a round never moves.
+     - The mic-recording section of coach-core.js (consent, recording a take, upload; about
+       lines 1652-2049): it needs collection switched on and a storage server; neither is faked.
+     - The teacher console's made-up class has no real progress: views that count progress
+       (trouble spots, done rolls) show the stub's few made-up ticks only.
+     - No Spanish in the action passes (keys, save, play, the board): Spanish is recorded for
+       what is drawn (sets, screens, activities, tools, live quiz, pages), not for what is saved.
+     - No audio files are loaded: backing tracks, snippets and recorded guitar notes never play,
+       so the players' timing code (app/snippets.js, the practice-card player) is not run.
+     - Sign-out and a second student on the same browser (gamesResetForUser, the per-student
+       storage keys): tools/shared-chromebook-loop.mjs covers them; this tool does not.
+   Whatever a run never reached is printed at its end and kept in coverage.json (see below).
 
    THE CONTRACT: what a rebuild must keep for this tool to run on it.
    1. The rendered HTML itself. Every recorded view is compared byte for byte,
@@ -177,11 +224,11 @@
    Like smoke.mjs: Node 22+, Chrome or Chromium, no other dependency; one headless-Chrome
    run at a time (never beside smoke.mjs, pm-e2e.mjs, slow-load.mjs or another golden run). */
 import { createServer } from 'node:http';
-import { spawn } from 'node:child_process';
+import { spawn, execFileSync } from 'node:child_process';
 import { inflateSync } from 'node:zlib';
 import { createHash } from 'node:crypto';
-import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, statSync, readdirSync, rmSync } from 'node:fs';
-import { tmpdir, platform } from 'node:os';
+import { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync, statSync, readdirSync, rmSync, realpathSync } from 'node:fs';
+import { tmpdir, platform, homedir } from 'node:os';
 import { join, extname, normalize, resolve, dirname, relative, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import net from 'node:net';
@@ -241,7 +288,16 @@ function compare(a, b) {
   if (shape(ma) !== shape(mb)) { console.log(`golden: ✗ the two snapshots were not taken the same way: A ${shape(ma)}, B ${shape(mb)}`); return 1; }
   if (ma.tool !== mb.tool) { console.log(`golden: ✗ the two snapshots were taken by different versions of this tool (A ${ma.tool || 'before 2026-11-13'}, B ${mb.tool || 'before 2026-11-13'}): take both again with one`); return 1; }
   const partial = [ALL_PARTS.filter(p => !ma.parts.includes(p)).map(p => 'no ' + p), ma.langs.length < 2 ? ['English only'] : [], ma.shots ? [] : ['no screenshots']].flat();
-  const A = listFiles(a).filter(f => f !== 'meta.json'), B = listFiles(b).filter(f => f !== 'meta.json'), setB = new Set(B), setA = new Set(A);
+  /* The same site twice proves the tool repeats itself, never that a change is safe (review R3-8): a snapshot with
+     itself, or two of the very same site files, is refused unless --same-site says that is the point. */
+  const sameFolder = realpathSync(a) === realpathSync(b), sameSite = ma.siteHash && ma.siteHash === mb.siteHash;
+  if (sameFolder || sameSite) {
+    const why = sameFolder ? 'A and B are the same folder' : `A and B are snapshots of the very same site files (site hash ${ma.siteHash}${ma.commit ? ', commit ' + ma.commit.slice(0, 10) : ''})`;
+    if (!args.includes('--same-site')) { console.log(`golden: ✗ ${why}: that can only show the tool repeats itself. Add --same-site when that is the test (the determinism check); it proves nothing about a change`); return 1; }
+    console.log(`golden: NOTE ${why} (--same-site): this compare tests the TOOL, not a change to the site`);
+  }
+  const SKIP = new Set(['meta.json', 'coverage.json']);
+  const A = listFiles(a).filter(f => !SKIP.has(f)), B = listFiles(b).filter(f => !SKIP.has(f)), setB = new Set(B), setA = new Set(A);
   const onlyA = A.filter(f => !setB.has(f)), onlyB = B.filter(f => !setA.has(f)), diff = [];
   let same = 0; const noise = [];
   for (const f of A) {
@@ -276,6 +332,19 @@ function compare(a, b) {
     for (const f of list.slice(0, 15)) console.log(`  ${w} failed: ${f.step}: ${String(f.text).slice(0, 220)}`);
     if (list.length > 15) console.log(`  ... and ${list.length - 15} more`);
   }
+  /* For every script the two SITES differ in, how much of it each run never ran (review R3-1): "identical" covers
+     only the code a run reached. */
+  if (ma.siteFiles && mb.siteFiles) {
+    const cov = d => { try { return JSON.parse(readFileSync(join(d, 'coverage.json'), 'utf8')); } catch { return null; } };
+    const ca = cov(a), cb = cov(b);
+    const changed = [...new Set([...Object.keys(ma.siteFiles), ...Object.keys(mb.siteFiles)])].filter(f => ma.siteFiles[f] !== mb.siteFiles[f]).sort();
+    if (changed.length) {
+      console.log(`golden: the two sites differ in ${changed.length} file(s); what each run never reached in them (an identical result says nothing about it):`);
+      const say = (c, f) => !c ? 'no coverage recorded' : !c[f] ? (f.endsWith('.js') ? 'not in this site' : 'not a script') : c[f].loaded === false ? 'never loaded' : `${c[f].of - c[f].ran} of ${c[f].of} top-level functions never ran`;
+      for (const f of changed.slice(0, 60)) console.log(`  changed:   ${f}  (A: ${say(ca, f)}; B: ${say(cb, f)})`);
+      if (changed.length > 60) console.log(`  ... and ${changed.length - 60} more`);
+    }
+  }
   const bad = diff.length + onlyA.length + onlyB.length;
   console.log(bad ? `golden: ✗ the two snapshots differ in ${bad} file(s)` : own.length ? `golden: ✗ the files are identical (${same}), but ${own.map(x => x[0]).join(' and ')} failed its own checks` : partial.length
     ? `golden: ✓ PARTIAL: the two snapshots are identical (${same} files), but this is not the whole comparison: ${partial.join(', ')}`
@@ -289,7 +358,11 @@ if (args.includes('--compare')) {
 }
 
 /* ── snapshot ────────────────────────────────────────────────────────── */
-const TOOL_VERSION = '2026-11-13';
+// Which tool took a snapshot: a hash of this file (review R3-6: a date said nothing when the tool changed twice a day).
+const TOOL_VERSION = 'sha1:' + createHash('sha1').update(readFileSync(fileURLToPath(import.meta.url))).digest('hex').slice(0, 12);
+// Anything that throws before the snapshot's own try (a Chrome path that does not exist …) is "could not run" (review R3-7).
+process.on('uncaughtException', e => { console.error('golden: could not run —', e && e.message); process.exit(2); });
+process.on('unhandledRejection', e => { console.error('golden: could not run —', e && e.message); process.exit(2); });
 const OUT = opt('--out');
 if (!OUT) { console.error('golden: give --out <dir> (a snapshot) or --compare <dirA> <dirB>'); process.exit(2); }
 const ROOT = resolve(opt('--root') || HERE);
@@ -300,11 +373,37 @@ const PARTS = ALL_PARTS;
 const ONLY = args.includes('--only') ? (opt('--only') || '').split(',').map(x => x.trim()).filter(Boolean) : null;
 if (ONLY && (!ONLY.length || ONLY.some(p => !PARTS.includes(p)))) { console.error(`golden: --only takes ${PARTS.join(', ')}`); process.exit(2); }
 const ON = Object.fromEntries(PARTS.map(p => [p, !ONLY || ONLY.includes(p)]));
-const COVERAGE = opt('--coverage') ? resolve(opt('--coverage')) : null;
+const COVERAGE_FILE = opt('--coverage') ? resolve(opt('--coverage')) : null;
+// Coverage is on unless --no-coverage (review R3-1): every snapshot says what it never ran (coverage.json).
+const COVERAGE = !args.includes('--no-coverage');
 const STALL_S = Number(opt('--stall')) || 180, TIMEOUT_MIN = Number(opt('--timeout')) || 150;
 const outDir = resolve(OUT);
-if (COVERAGE && COVERAGE.startsWith(outDir + '/')) { console.error('golden: --coverage must write outside the snapshot folder'); process.exit(2); }
+if (COVERAGE_FILE && COVERAGE_FILE.startsWith(outDir + '/')) { console.error('golden: --coverage must write outside the snapshot folder'); process.exit(2); }
+/* --out is emptied before the run (review R3-5: it deleted whatever folder it was given). Allowed: a folder that does
+   not exist, an empty one, or an earlier snapshot (it holds meta.json or failures.json of its own). Never the site,
+   this checkout, a folder above either, the home folder or the current folder. */
+{
+  const real = p => { try { return realpathSync(p); } catch { return resolve(p); } };
+  const o = real(outDir), inside = (child, parent) => child === parent || child.startsWith(parent + '/');
+  const guarded = [real(ROOT), real(HERE), real(process.cwd()), real(homedir()), '/'];
+  const hit = guarded.find(g => inside(g, o));
+  if (hit) { console.error(`golden: --out ${outDir} is (or holds) ${hit}: refusing to empty it`); process.exit(2); }
+  if (existsSync(outDir)) {
+    if (!statSync(outDir).isDirectory()) { console.error(`golden: --out ${outDir} is a file, not a folder`); process.exit(2); }
+    const has = readdirSync(outDir);
+    if (has.length && !has.includes('meta.json') && !has.includes('failures.json')) { console.error(`golden: --out ${outDir} is not empty and is not a snapshot (no meta.json or failures.json): refusing to empty it`); process.exit(2); }
+  }
+}
 rmSync(outDir, { recursive: true, force: true }); mkdirSync(outDir, { recursive: true });
+/* The site's own files, by hash, for the compare: which files differ between the two sites, and whether two
+   snapshots are of the very same site (review R3-1, R3-8). Text files only; audio and the tools are left out. */
+const siteFiles = (() => {
+  const out = {}, skip = new Set(['.git', 'tools', 'node_modules', '.claude', 'audio', '.github']);
+  const walk = (d, rel) => { for (const n of readdirSync(d).sort()) { if (skip.has(n) || n.startsWith('.')) continue; const f = join(d, n), r = rel ? rel + '/' + n : n;
+    const st = statSync(f); if (st.isDirectory()) walk(f, r); else if (/\.(js|html|css|json|webmanifest)$/.test(n)) out[r] = createHash('sha1').update(readFileSync(f)).digest('hex').slice(0, 16); } };
+  walk(ROOT, ''); return out;
+})();
+const siteHash = createHash('sha1').update(JSON.stringify(siteFiles)).digest('hex').slice(0, 16);
 // The test server's port is different every run and the site prints its own address in places ("Student link"): written as http://site.
 const put = (rel, text) => { const f = join(outDir, rel); mkdirSync(dirname(f), { recursive: true }); writeFileSync(f, typeof text === 'string' ? text.replace(/http:\/\/127\.0\.0\.1:\d+/g, 'http://site') : text); };
 const safe = s => String(s).replace(/[^A-Za-z0-9._-]+/g, '_');
@@ -372,7 +471,10 @@ async function openPage(port) {
   };
   return { send, evalJs, on: h => handlers.push(h) };
 }
-const NOISE = /firebase|firestore|googleapis|gstatic|google\.com|youtube|ytimg|net::ERR|Failed to fetch|ERR_|auth\/|identitytoolkit|favicon|Content Security|websocket|WebChannel|Missing or insufficient|offline|Could not reach|NotAllowedError|play\(\) request|AbortError|NotSupportedError|The play\(\)|ResizeObserver loop/i;
+/* Console lines this harness itself causes (no network, a stub server), dropped by their exact start. Empty: with
+   console.warn recorded and nothing filtered by keyword, the save, games and console passes of 2026-11-13 logged no
+   such line. Add one only with its exact start and the reason, never a keyword. */
+const KNOWN = [];
 
 /* A fixed clock and a seeded Math.random, installed before any page script:
    two runs of the same site must write the same bytes. The clock stands still
@@ -383,6 +485,10 @@ const NOISE = /firebase|firestore|googleapis|gstatic|google\.com|youtube|ytimg|n
    to its start: it is called before every view is opened. */
 function pageFreeze() {
   const RealDate = Date, start = RealDate.UTC(2026, 10, 11, 18, 0, 0);
+  /* Two frames Chrome really painted (the browser's own requestAnimationFrame, kept before the games pass replaces
+     it with its virtual one): a picture taken after it shows a finished frame, not one half drawn. */
+  const paintRaf = window.requestAnimationFrame.bind(window);
+  window.__goldPaint = () => new Promise(r => paintRaf(() => paintRaf(() => r(1))));
   window.__goldDateOff = 0;
   const now = () => start + window.__goldDateOff;
   function FakeDate(...a) { if (!new.target) return new RealDate(now()).toString(); return a.length ? new RealDate(...a) : new RealDate(now()); }
@@ -418,6 +524,9 @@ function pageFreeze() {
     const hid = e.closest('[hidden]'); if (hid) return 'hidden (the hidden attribute on ' + desc(hid) + ')';
     if (!e.getClientRects().length) return 'not drawn (display: none on it or a parent)';
     const r = e.getBoundingClientRect(); if (!r.width || !r.height) return 'drawn with no size';
+    // Laid out but not visible (review R3-10): visibility:hidden on it, or opacity 0 on it or any parent.
+    if (getComputedStyle(e).visibility === 'hidden') return 'visibility: hidden';
+    for (let x = e; x && x.nodeType === 1; x = x.parentElement) if (getComputedStyle(x).opacity === '0') return 'opacity 0 (on ' + desc(x) + ')';
     const x0 = Math.max(r.left, 0), x1 = Math.min(r.right, innerWidth), y0 = Math.max(r.top, 0), y1 = Math.min(r.bottom, innerHeight);
     if (x1 <= x0 || y1 <= y0) return 'outside the window';
     const hit = document.elementFromPoint((x0 + x1) / 2, (y0 + y1) / 2);
@@ -431,7 +540,8 @@ function pageFreeze() {
   /* Still drawing: a lyric sheet whose PDF page is not on its canvas yet (it can take seconds; one run recorded
      the sheet drawn and another not). A sheet that failed shows its message and counts as done. */
   window.__goldBusy = sel => { const root = document.querySelector(sel); if (!root) return false;
-    return [...root.querySelectorAll('.pc-sheet-paper')].some(p => !p.querySelector('canvas') && !(p.querySelector('.pc-sheet-msg') && /fail|no se pudo|couldn/i.test(p.querySelector('.pc-sheet-msg').textContent))); };
+    // Only sheets a reader could see: one inside a closed card is never drawn (review R3-9: two 15 s waits a run).
+    return [...root.querySelectorAll('.pc-sheet-paper')].some(p => p.getClientRects().length && !p.closest('details:not([open])') && !p.querySelector('canvas') && !(p.querySelector('.pc-sheet-msg') && /fail|no se pudo|couldn/i.test(p.querySelector('.pc-sheet-msg').textContent))); };
   window.__goldOpen = id => { const el = document.getElementById(id); return !!el && !el.hasAttribute('hidden'); };
   // Open dialogs: the site's modal overlays and any other aria-modal box that is not one of the full pages.
   window.__goldDialogs = () => [...document.querySelectorAll('.daily5-overlay, [aria-modal="true"], .video-modal')]
@@ -676,12 +786,34 @@ function pagePlayer() {
     if (!root) { g.ended = 'its panel is gone'; return { done: true, why: g.ended }; }
     const list = [...root.querySelectorAll('button, [onclick]')].filter(b => shown(b) && !b.closest('.games-head'));
     let pick = null;
+    /* Once, before Start: each tempo button (…NudgeBpm() is pressed one time, in page order (review 3's fault B2:
+       Change Up's ccNudgeBpm never ran). One tick of its own. */
+    if (!g.started && !g.nudged) {
+      g.nudged = true;
+      const nudges = () => [...root.querySelectorAll('button, [onclick]')].filter(b => shown(b) && /NudgeBpm\(/.test(oc(b)));
+      const n = nudges().length;
+      for (let i = 0; i < n; i++) { const b = nudges()[i]; if (!b) break; g.clicks.push({ at: Math.round(performance.now() - g.t0), what: oc(b) }); b.click(); await window.__gv.advance(100); }
+      if (n) { await window.__gv.advance(500); g.tick++; const r = document.querySelector(g.rootSel); g.marks.push(r ? H(r.innerHTML) : '(gone)'); return { done: false }; }
+    }
+    /* Once, two seconds after Start: one key press, "1" (a string key in Riff Runner, a pad in Simon …), with the
+       virtual clock's time stamp (fault B3: a doubled key listener must show). */
+    if (g.started && !g.keyed && g.tick - g.startTick === 2) {
+      g.keyed = true;
+      const ev = new KeyboardEvent('keydown', { key: '1', code: 'Digit1', bubbles: true, cancelable: true });
+      Object.defineProperty(ev, 'timeStamp', { value: performance.now() });
+      g.clicks.push({ at: Math.round(performance.now() - g.t0), what: 'key 1' });
+      (document.activeElement || document.body).dispatchEvent(ev);
+      document.dispatchEvent(new KeyboardEvent('keyup', { key: '1', code: 'Digit1', bubbles: true }));
+    }
     if (!g.started) {
       pick = list.find(b => START.test(oc(b)));
       if (pick) { g.started = true; g.startTick = g.tick; }
       else if (g.pre < 4) { pick = list.find(b => !EXIT.test(oc(b))) || null; if (pick) g.pre++; }
     } else if (g.tick - g.startTick > 2 && list.some(b => /Again\(/.test(oc(b)))) {
       g.ended = 'results';
+    } else if (g.rootSel === '#coach-body' && g.tick - g.startTick > 2 && typeof coach !== 'undefined' && coach && coach.phase === 'report') {
+      // The Listening Coach's report is its end (review R3-4: its end file was recorded mid-round, a new check started).
+      g.ended = 'report';
     } else if (g.marks.length >= 2 && g.marks[g.marks.length - 1] === g.marks[g.marks.length - 2] && list.some(b => START.test(oc(b)))) {
       // Nothing moved for a second and a Start-like button shows (Riff Roulette's card after its spin, Simon's Play again): press it.
       pick = list.find(b => START.test(oc(b)));
@@ -706,7 +838,7 @@ function pagePlayer() {
 }
 
 const chrome = findChrome();
-if (!chrome) { console.error('golden: no Chrome or Chromium found (use --chrome <path>)'); process.exit(2); }
+if (!chrome || !existsSync(chrome)) { console.error(`golden: no Chrome or Chromium at ${chrome || '(none found)'} (use --chrome <path> or CHROME=…)`); process.exit(2); }
 try {
   const prof = mkdtempSync(join(tmpdir(), 'gc-golden-chrome-'));
   const cdp = await freePort();
@@ -725,9 +857,11 @@ try {
   page.on((method, p) => {
     let ev = null;
     if (method === 'Runtime.exceptionThrown') { const d = p.exceptionDetails; ev = { step: stepName, kind: 'exception', text: String((d.exception && (d.exception.description || d.exception.value)) || d.text).split('\n')[0] }; }
-    else if (method === 'Runtime.consoleAPICalled' && p.type === 'error') ev = { step: stepName, kind: 'console.error', text: p.args.map(a => a.value ?? a.description ?? '').join(' ').slice(0, 300) };
-    // Network noise is dropped, but never a broken name or type: "openYoutubeOverlay is not defined" holds a noise word and is a real fault (review R1-12).
-    if (ev && (!NOISE.test(ev.text) || (ev.kind === 'exception' && /ReferenceError|TypeError|SyntaxError|RangeError/.test(ev.text)))) events.push(ev);
+    else if (method === 'Runtime.consoleAPICalled' && (p.type === 'error' || p.type === 'warning')) ev = { step: stepName, kind: p.type === 'error' ? 'console.error' : 'console.warn', text: p.args.map(a => a.value ?? a.description ?? '').join(' ').slice(0, 300) };
+    /* Dropped: only the lines this harness itself causes, listed in KNOWN (no network, a stub server), by exact
+       start (review R3-11: a word list dropped every line that said firebase, firestore or offline). A broken name
+       or type is never dropped (review R1-12). */
+    if (ev && (/ReferenceError|TypeError|SyntaxError|RangeError/.test(ev.text) || !KNOWN.some(k => ev.text.startsWith(k)))) events.push(ev);
   });
   await page.send('Runtime.enable'); await page.send('Page.enable');
   let viewport = { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false };
@@ -816,8 +950,11 @@ try {
     // then the window one pixel wider and back, so what an earlier screen left in Chrome's drawing caches is redrawn
     // (identical HTML drew a few pixels differently after a dialog had closed over it).
     for (let i = 0; i < 25 && !(await run(`shot ${rel}:images`, `[...document.images].every(i => i.complete)`, 0)); i++) await sleep(200);
+    // Each size is really painted before the next (review R3-3: back to back, the two calls forced nothing).
     await page.send('Emulation.setDeviceMetricsOverride', { ...viewport, width: viewport.width + 1 });
+    await run(`shot ${rel}:paint`, '__goldPaint()', 0);
     await page.send('Emulation.setDeviceMetricsOverride', viewport);
+    await run(`shot ${rel}:paint2`, '__goldPaint()', 0);
     await sleep(100);
     await run(`shot ${rel}:scroll`, `__goldScroll(${JSON.stringify(scrollTo)})`, 0);
     try { await page.evalJs(`(document.getAnimations ? document.getAnimations() : []).forEach(a => { try { a.finish(); } catch (e) { try { a.pause(); a.currentTime = 0; } catch (e2) {} } }); 1`); } catch { /* the page is between two documents */ }
@@ -1174,6 +1311,19 @@ try {
     await run('save:lang', `setLang('en')`, 600);
     await run('save:stub', STUB, 100);
     await run('save:student', goldStudent, 0);
+    /* Module Review 1 open for this student (review R3-2: it was locked for them, so "rate a skill", "finish a
+       Module Review" and the reflection returned at their first line and wrote nothing): every Module 1 skill got,
+       and every Module Review 1 row but the first rated, so rating that row makes the review finishable. Saved
+       before the first action, so each action's record holds only what that action wrote. */
+    const opened = await run('save:open-mr1', `(async () => {
+      SETS.filter(w => w.moduleNum === 1).forEach(w => (w.skills || []).forEach(k => { progress[k.id] = 'gotit'; }));
+      const rows = ((typeof MODULE_REVIEWS !== 'undefined' && MODULE_REVIEWS[1]) || {}).skills || [];
+      rows.slice(1).forEach(k => { progress[k.id] = '2'; });
+      await onModuleChange(1); activateSet('mr1'); await new Promise(r => setTimeout(r, 300));
+      saveProgress(); await flushSave();
+      const p = document.querySelector('.week-panel[data-id="mr1"]');
+      return { rows: rows.length, locked: !p || p.classList.contains('mr-locked') }; })()`, 300);
+    if (!opened || opened.locked || !opened.rows) fail('save:open-mr1', `Module Review 1 is still locked for the made-up student (${JSON.stringify(opened)})`);
     const doc = () => run('save:doc', `(async () => { await flushSave(); await new Promise(r => setTimeout(r, 50)); return JSON.stringify(__store.get('progress/gold-student') || null, null, 1); })()`, 50);
     const log = [];
     /* Each control is taken from the first set that has one; n picks the n-th such control in that set. `how`
@@ -1192,22 +1342,32 @@ try {
       }
       return 'no such control: no set has ' + sel;
     }; 1`, 0);
+    /* The Module Review actions come before "mark a skill": that one marks Module 1's first skill "working", which
+       locks Module Review 1 again. */
     const ACTIONS = [['tick a step', '[onclick^="toggleStepDone("]', 0], ['tick a second step', '[onclick^="toggleStepDone("]', 1], ['un-tick the first step', '[onclick^="toggleStepDone("]', 0],
-      ['mark a skill', '[onclick^="toggleSkill("]', 0], ['rate a skill', '[onclick^="setSkillLevel("]', 0], ['answer a quiz question', '[onclick^="onStepMcSelect("]', 0],
-      ['answer a practice question', '[onclick^="onPracticeMcSelect("]', 0], ['log a clean rep', '[onclick^="logCleanRep("]', 0], ['finish a Module Review', '[onclick^="finishModuleReview("]', 0],
-      ['type an answer', 'textarea.step-resp-input', 0, 'type'], ['save a Module Review reflection', 'textarea.reflection-ta', 0, 'type']];
+      ['rate a skill', '[onclick^="setSkillLevel("]', 0], ['finish a Module Review', '[onclick^="finishModuleReview("]', 0], ['save a Module Review reflection', 'textarea.reflection-ta', 0, 'type'],
+      ['mark a skill', '[onclick^="toggleSkill("]', 0], ['answer a quiz question', '[onclick^="onStepMcSelect("]', 0],
+      ['answer a practice question', '[onclick^="onPracticeMcSelect("]', 0], ['log a clean rep', '[onclick^="logCleanRep("]', 0],
+      ['type an answer', 'textarea.step-resp-input', 0, 'type']];
+    /* Every action must change the student's document on the server (review R3-2: three of them wrote nothing and
+       the run still passed). An action meant to write nothing would be named here; none is. */
+    const WRITES_NOTHING = new Set([]);
+    let lastDoc = await doc();
+    const wrote = (name, now) => { if (now === lastDoc && !WRITES_NOTHING.has(name)) fail(`save:${name}`, 'the action left the student\'s document on the server unchanged'); lastDoc = now; };
     for (const [name, sel, n, how] of ACTIONS) {
       const what = await run(`save:${name}`, `window.__goldAct(${JSON.stringify(sel)}, ${n}, ${JSON.stringify(how || 'click')})`, 200);
       if (!what || /^no such control/.test(what)) fail(`save:${name}`, what || 'the action did not run');
       const d = await run(`save:${name}:dialogs`, `(d => { if (d.length) __goldCloseDialogs(); return d; })(__goldDialogs())`, 100);
-      log.push({ action: name, control: what, dialogs: d && d.length ? d : undefined, serverDoc: JSON.parse((await doc()) || 'null') });
+      const now = await doc(); wrote(name, now);
+      log.push({ action: name, control: what, dialogs: d && d.length ? d : undefined, serverDoc: JSON.parse(now || 'null') });
     }
     // An In-Class Activity step: ticked by Got it, and the last step ticked then unticked (a second Got it on the last step takes it back).
     await run('save:ca-open', clickExpr('#class-activities-btn'), 700);
     const caAct = async (name, expr) => {
       const what = await run(`save:${name}`, expr, 600);
       if (!what || /^no such control/.test(what)) fail(`save:${name}`, what || 'the action did not run');
-      log.push({ action: name, control: what, serverDoc: JSON.parse((await doc()) || 'null') });
+      const now = await doc(); wrote(name, now);
+      log.push({ action: name, control: what, serverDoc: JSON.parse(now || 'null') });
     };
     await caAct('Got it on an activity step', `(() => { for (const a of CLASS_ACTIVITIES) { caFocusActivity(a.id); const b = document.querySelector('.ca-card[open] [onclick^="caFocusGotIt("]');
       if (b) { b.click(); return a.id + ': ' + b.getAttribute('onclick'); } document.querySelectorAll('.ca-card[open]').forEach(c => { c.open = false; }); } return 'no such control: no activity has a Got it button'; })()`);
@@ -1254,12 +1414,19 @@ try {
     const serverGames = () => run('play:server', `(async () => { await flushSave(); return JSON.stringify(((__store.get('progress/gold-student') || {}).games) || null); })()`, 0);
     const playOne = async (name, rootSel, endSel) => {
       await run(`play:${name}:intro`, '__gv.advance(1500)', 0);
+      // On screen, first and last (review R3-10). The Coach sits inside a set: brought into view first.
+      const onScreen = async when => { const why = await run(`play:${name}:${when}:on-screen`, `((sel) => { const e = document.querySelector(sel); if (e && sel !== '#games-panel') e.scrollIntoView({ block: 'start', behavior: 'instant' }); return __goldSeen(sel); })(${JSON.stringify(rootSel)})`, 0);
+        if (why) fail(`play:${name}`, `${rootSel} is not on screen at its ${when}: ${why}`); };
+      await onScreen('first screen');
       put(`play/${name}-first-screen.html`, lines(await run(`play:${name}:first`, htmlExpr(rootSel), 0)));
+      // The games screen's top bar ("← All games" shows only inside a game), as HTML beside the picture.
+      if (rootSel === '#games-panel') put(`play/${name}-topbar.html`, lines(await run(`play:${name}:topbar`, htmlExpr('#games-screen .games-topbar'), 0)));
       if (SHOTS && rootSel === '#games-panel') await shot(`shots/play-${name}-first.png`, null, false);
       await run(`play:${name}:begin`, `__goldPlayBegin(${JSON.stringify(name)}, ${JSON.stringify(rootSel)})`, 0);
       let r = null;
       for (let s = 0; s < 60; s++) { r = await run(`play:${name}:${s}s`, '__goldPlayTick()', 0); if (!r || r.done) break; }
       put(`play/${name}-end.html`, lines(await run(`play:${name}:end`, htmlExpr(endSel || rootSel), 0)));
+      await onScreen('end');
       const res = await run(`play:${name}:result`, '__goldPlayEnd()', 0);
       if (res && !res.startedByItsCard && !res.clicks.some(c => /(Start|PlayAdaptive|GoReady|Spin)\(|coachStartCheck\(/.test(c.what))) fail(`play:${name}`, 'no Start-like button was ever pressed (clicks: ' + JSON.stringify(res.clicks.slice(0, 6)) + ')');
       return res;
@@ -1355,7 +1522,7 @@ try {
       await page.send('Page.navigate', { url: `${base}/${f}` });
       try { await until(`${lang}: ${f} loading`, `document.readyState === 'complete' && location.pathname.endsWith(${JSON.stringify('/' + f)})`); }
       catch (e) { events.push({ step: `${lang}:page-${name}`, kind: 'step-failed', text: e.message }); failures.push({ step: `${lang}:page-${name}`, text: e.message }); }
-      put(`pages/${lang}/${name}.html`, lines(await read(`${lang}:page-${name}:html`, 'body', 3, false))); count('pages');
+      put(`pages/${lang}/${name}.html`, lines(await read(`${lang}:page-${name}:html`, 'body', 3))); count('pages');
       if (SHOTS) await shot(`shots/${lang}-page-${name}.png`, null, false);
     }
     await covTake();
@@ -1458,6 +1625,11 @@ try {
       }; 1`, 0);
       const BOARD = [
         ['open the board', `(() => { const b = document.querySelector('[data-ta-board-open]'); if (!b) return 'no such control: [data-ta-board-open]'; b.click(); return 'clicked'; })()`],
+        ['sort the board by its second sort', `(() => { const s = document.querySelector('[data-board-sort]'); if (!s || s.options.length < 2) return 'no such control: [data-board-sort]'; s.value = s.options[1].value; s.dispatchEvent(new Event('change', { bubbles: true })); return 'sorted by ' + s.value; })()`],
+        ['reverse the order', `(() => { const b = document.querySelector('[data-board-flip]'); if (!b) return 'no such control: [data-board-flip]'; b.click(); return 'reversed'; })()`],
+        ['reverse it back', `(() => { const b = document.querySelector('[data-board-flip]'); if (!b) return 'no such control: [data-board-flip]'; b.click(); return 'reversed back'; })()`],
+        ['sort back to course order', `(() => { const s = document.querySelector('[data-board-sort]'); if (!s) return 'no such control: [data-board-sort]'; s.value = s.options[0].value; s.dispatchEvent(new Event('change', { bubbles: true })); return 'sorted by ' + s.value; })()`],
+        ['copy a card\'s student link', `(async () => { const b = document.querySelector('[data-board-card] [data-copy-activity-link]'); if (!b) return 'no such control: [data-copy-activity-link] on a card'; window.__gbCopied = []; try { navigator.clipboard.writeText = async t => { window.__gbCopied.push(t); }; } catch (e) {} b.click(); await new Promise(r => setTimeout(r, 150)); return 'copied the link of ' + b.dataset.id + ': ' + JSON.stringify(window.__gbCopied); })()`],
         ['bump a card down', `(() => { const sec = __goldBoard.sections().find(x => x.cards.length >= 3); const b = sec && sec.cards[0].querySelector('[data-board-bump][data-dir="down"]'); if (!b) return 'no such control: [data-board-bump][data-dir="down"]'; window.__gbId = b.dataset.id; b.click(); return 'bumped ' + b.dataset.id + ' down'; })()`],
         ['bump it back up', `(() => { const b = document.querySelector('[data-board-bump][data-dir="up"][data-id="' + window.__gbId + '"]'); if (!b) return 'no such control: [data-board-bump][data-dir="up"] on ' + window.__gbId; b.click(); return 'bumped ' + window.__gbId + ' up'; })()`],
         ['move a card to number 3', `(() => { const sec = __goldBoard.sections().find(x => x.cards.length >= 4); const i = sec && sec.cards[sec.cards.length - 1].querySelector('[data-board-number]'); if (!i) return 'no such control: [data-board-number]'; i.value = '3'; i.dispatchEvent(new Event('change', { bubbles: true })); return 'moved ' + i.dataset.id + ' to 3'; })()`],
@@ -1524,20 +1696,31 @@ try {
   }
 
   if (Object.keys(dialogLog).length) put('dialogs.json', JSON.stringify(dialogLog, null, 1) + '\n');
+  /* What this run never ran, for EVERY script of the site (review R3-1): an "identical" compare says nothing about
+     code the run did not reach. coverage.json sits in the snapshot but is not compared file by file (a pure move of
+     functions between files changes it); --compare prints it beside the verdict for each file the two sites differ in. */
   if (COVERAGE) {
     await covTake();
     const report = {};
-    for (const [file, all] of [...covAll].sort()) { const ran = covRan.get(file) || new Set(); report[file] = { ran: ran.size, of: all.size, notRun: [...all].filter(([k]) => !ran.has(k)).map(([, n]) => n).sort() }; }
-    writeFileSync(COVERAGE, JSON.stringify(report, null, 1) + '\n');
-    for (const f of ['teacher-activities.js', 'coach-runner.js', 'coach-chords.js', 'coach-core.js']) if (report[f]) console.log(`golden: coverage ${f}: ${report[f].ran} of ${report[f].of} top-level functions ran`);
-  }
+    for (const [file, all] of [...covAll].sort()) { const ran = covRan.get(file) || new Set(); report[file] = { ran: ran.size, of: all.size, neverRan: [...all].filter(([k]) => !ran.has(k)).map(([, n]) => n).sort() }; }
+    for (const f of Object.keys(siteFiles).filter(f => f.endsWith('.js')).sort()) if (!report[f]) report[f] = { loaded: false };
+    put('coverage.json', JSON.stringify(report, null, 1) + '\n');
+    if (COVERAGE_FILE) writeFileSync(COVERAGE_FILE, JSON.stringify(report, null, 1) + '\n');
+    const rows = Object.entries(report);
+    console.log(`golden: coverage: top-level functions this run NEVER ran, per script (all in ${join(outDir, 'coverage.json')}):`);
+    for (const [f, r] of rows) console.log(r.loaded === false ? `  ${f}: never loaded in this run` : `  ${f}: ${r.of - r.ran} of ${r.of} never ran`);
+  } else console.log('golden: coverage was off (--no-coverage): this snapshot cannot say what it never ran');
   put('errors.json', JSON.stringify(events, null, 1) + '\n');
   put('failures.json', JSON.stringify(failures, null, 1) + '\n');
-  put('meta.json', JSON.stringify({ tool: TOOL_VERSION, root: ROOT, langs: LANGS, parts: PARTS.filter(p => ON[p]), shots: SHOTS, failures: failures.length, counts, seconds: Math.round((Date.now() - t0) / 1000) }, null, 1) + '\n');
+  const commit = (() => { try { return execFileSync('git', ['-C', ROOT, 'rev-parse', 'HEAD'], { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch { return null; } })();
+  put('meta.json', JSON.stringify({ tool: TOOL_VERSION, root: ROOT, commit, siteHash, siteFiles, langs: LANGS, parts: PARTS.filter(p => ON[p]), shots: SHOTS, coverage: COVERAGE, failures: failures.length,
+    errorEvents: events.length, counts, seconds: Math.round((Date.now() - t0) / 1000) }, null, 1) + '\n');
   console.log(`golden: ${sets.length} sets in ${modules.length} modules (${LANGS.join(' + ').toUpperCase()}): ` + Object.entries(counts).map(([k, v]) => `${v} ${k}`).join(', ') + `; ${events.length} error event(s) recorded; ${Math.round((Date.now() - t0) / 1000)} s`);
   console.log(`golden: written to ${outDir}`);
   if (failures.length) { console.log(`golden: ✗ the snapshot failed ${failures.length} of its own checks (failures.json): a compare will refuse it`); exitCode = 1; }
-  else console.log('golden: ✓ the snapshot passed its own checks');
+  // Never a bare "passed" over exceptions (review R3-12): the count of error events goes with it.
+  else { const ex = events.filter(e => e.kind === 'exception').length;
+    console.log(`golden: ✓ the snapshot passed its own checks; ${events.length} error event(s) recorded (${ex} exception(s)) in errors.json${events.length ? ': read them' : ''}`); }
 } catch (e) { console.error('golden: could not run —', e && e.message); exitCode = 2; }
 finally {
   if (chromeProc) { await new Promise(res => { chromeProc.once('exit', res); chromeProc.kill(); setTimeout(() => { try { chromeProc.kill('SIGKILL'); } catch { /* gone */ } res(); }, 3000); }); }
