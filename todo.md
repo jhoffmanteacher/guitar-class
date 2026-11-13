@@ -69,37 +69,20 @@ no code was changed.
 
 ## Queued by Jonathan 2026-11-13: fill whatever monitor is being used
 
-Idea only: nothing was measured or changed.
+**Work order written, not started: `docs/WORK-ORDER-fill-big-screens.md`.** To build it, tell Claude Code:
+"Run the work order in docs/WORK-ORDER-fill-big-screens.md."
 
 - **What Jonathan said:** "the view should be maximized for whatever monitor is being used. so chromebooks but
-  also other displays (not phones) should be taken into account".
-- **What it means:** the site should use the whole screen on any laptop, desktop monitor or projector, not only
-  on the Chromebook. Phones stay out of scope (keep the existing phone CSS, add none).
-- **This widens a standing rule. Say so in the report:** `CLAUDE.md` → "Target screen: Chromebook 1366×657".
-  The Chromebook stays the screen that must not get worse; larger and differently-shaped displays join it. When
-  this ships, reword that line and the 1366×657 screenshot rule in "Start here" step 4 to name the extra sizes.
-- **Priority (Jonathan, 2026-11-13):** "chromebook is priority but the display is not good on my classroom
-  display." So the Chromebook must not get worse, and the classroom display is the first other screen to fix.
-- **What his screenshot of the classroom display showed** (In-Class Activities page, `#class-activities`, the
-  browser window about 2000 px wide by 1000 px tall in the screenshot; the real pixel size of the display is not
-  known, ask him or read it from `window.innerWidth` / `devicePixelRatio`):
-  - the page content is one narrow column, about 590 px of the roughly 1,845 px beside the rail (about a third),
-    centred, with empty space on both sides;
-  - the text is very small for a screen read from across a room: activity titles, the dates, the "Keep
-    practicing" chips, the rail labels and the floating tools (Tuner, Timer, Metro, Record) are all tiny;
-  - the list ends about halfway down; the lower half of the screen is empty;
-  - the left rail keeps its Chromebook width and its small icons.
-  Claude's reading, not his words: on this display the content has to GROW (bigger type and controls), not only
-  stretch to the edges. Confirm with him before building.
-- **Do first:** measure, do not reason. Start with the size of his classroom display. Screenshot a set, an In-Class Activity, a practice card (tab, chord grid
-  and lyric sheet), a game, My progress and the teacher console at 1366×657 and at a few larger sizes (for
-  example 1920×1080, 2560×1440, and a projector's 1280×720), and list where space is wasted (fixed max-widths,
-  fixed pixel heights, content that stays small in the middle) or where something breaks.
-- **Then ask him** (AskUserQuestion) which screens matter most and whether "maximized" means the content grows
-  (bigger tab and chord diagrams) or only that the layout stretches to the edges.
-- **Rules that apply:** `.claude/rules/rail-layout.md` (the nav two-column grid is permanent; measure, don't do
-  arithmetic); the one-rendered-line rule for activity directions is checked at 1366×657 and must still hold
-  there; `styles.css` touched broadly means the change smoke without `--only`; a `CHANGELOG.md` entry.
+  also other displays (not phones) should be taken into account"; "chromebook is priority but the display is not
+  good on my classroom display"; "it displays perfectly on chromebooks."
+- **The classroom display:** 4K at 150% scaling (about 2560 CSS px wide). On it the In class page was one narrow
+  column, small text, and an empty lower half.
+- **Decided (2026-11-13):** grow everything, so a big screen shows the Chromebook layout enlarged to fill it;
+  covers the student site, the Song Journey pages, the live quiz stage and the teacher console; phones out of
+  scope; nothing may change on the Chromebook.
+- **It widens a standing rule:** `CLAUDE.md` "Target screen: Chromebook 1366×657". The work order says how the
+  docs change.
+- **When it ships:** the work order's last part deletes this section and the work order file.
 
 ## Split the four parts that are already over 2,000 lines
 
