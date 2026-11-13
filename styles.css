@@ -2671,6 +2671,7 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 @keyframes stepFlash{0%,55%{background:var(--blue-bg);border-radius:8px}100%{background:transparent}}
 .search-input{width:100%;font-family:inherit;font-size:0.9375rem;padding:9px 14px;border:1px solid var(--border2);border-radius:20px;background:var(--bg2);color:var(--text);margin-bottom:10px}
 .search-input:focus{outline:none;border-color:var(--blue-text)}
+.search-input:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
 .search-results{display:flex;flex-direction:column;gap:6px;max-height:420px;overflow-y:auto}
 .search-hit{display:flex;flex-direction:column;gap:2px;text-align:left;font-family:inherit;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);cursor:pointer}
 .search-hit:hover{border-color:var(--blue-text);background:var(--blue-bg)}
@@ -4417,6 +4418,7 @@ a.jl-song-btn{display:inline-block;text-decoration:none}
 .pr-input-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .pr-input{width:110px;box-sizing:border-box;padding:7px 10px;font:inherit;font-size:0.9375rem;color:var(--text);background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius-sm)}
 .pr-input:focus{outline:none;border-color:var(--blue-text)}
+.pr-input:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
 .pr-unit{font-size:0.8125rem;color:var(--text2);font-weight:500}
 .pr-stats{font-size:0.8125rem;color:var(--text2);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;line-height:1.5}
 .pr-latest{font-weight:600;color:var(--text)}
