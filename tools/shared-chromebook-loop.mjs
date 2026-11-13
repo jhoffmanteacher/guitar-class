@@ -63,7 +63,8 @@
      The new page loads 300 ms later and its auth callback fires once Firebase has restored the session.
    - Firebase Auth, per device (A1-A4): the signed-in user is shared by every tab (A1: browserLocalPersistence,
      the web default); a sign-in or sign-out is delivered to the tab that made it at once and to every other tab
-     20-300 ms later (A2), in order — a FROZEN tab (a scenario option: a background tab the browser froze)
+     20-300 ms later (A2: the Firebase SDK runs the listeners of the tab that called signOut() / signInWithPopup()
+     before that call's promise settles), in order — a FROZEN tab (a scenario option: a background tab the browser froze)
      receives only the LATEST state when it thaws (A3); onAuthStateChanged fires on registration with the
      restored user and afterwards only when the user changes (A4). signInWithPopup takes 1.5-3 s; signOut 20-80 ms.
    - Firestore (F1-F9), one server per world and one client per page:
@@ -149,9 +150,11 @@
         here), no top-level variable of the page and no markup it wrote holds another student's marker, the tab's
         sessionStorage holds no key the previous student's session wrote, and the page never read a localStorage
         key named with another student's uid.
-     R5 Every page that showed a student is gone (reloaded) within 3 s of that student's sign-out reaching it, or the
+     R5 Every page whose sign-in callback ran for a student is gone (reloaded) within 3 s of that student leaving the
+        device's sign-in (boot.js: "Sign-out on a shared Chromebook has to be a hard reset, not a state reset"), or the
         student is still signed in with the not-saved notice on screen; so no page ever shows the next student or the
-        wall with the previous student's sound playing or mic open (a page's AudioContext sources / mic tracks).
+        wall with the previous student's sound playing or mic open (a page's mic tracks are also checked at every
+        first screen).
      R6 Practice minutes: no seconds are added to minutes/B while B made no input (the tool sends B none), and no
         page that shows one student (its currentUser) writes or removes a localStorage key named with another's uid
         (A's own dying page may still tidy A's keys after the device signed B in).
@@ -940,6 +943,8 @@ function deliverAuth(page, user, initial){
   if (page.tab.frozenUntil && page.world.now < page.tab.frozenUntil){ page.tab.missed = page.tab.missed || []; page.tab.missed.push(user); return; }
   page.authSeenKey = key;
   page.authUser = user;
+  if (user){ (page.sawUids = page.sawUids || new Set()).add(user.uid); (page.authAt = page.authAt || {})[user.uid] = page.world.now; }
+  (page.authLog = page.authLog || []).push({ at: page.world.now, uid: user ? user.uid : null });
   page.client.setUser(user);
   page.world.log(`${page.id} auth → ${user ? user.uid : 'signed out'}`);
   for (const cb of page.authCbs.slice()) callSite(page, () => cb(user));
@@ -953,13 +958,16 @@ function setDeviceAuth(world, dev, user, fromPage){
     const p = tab.page;
     if (!p || !p.alive) continue;
     if (FAKE_FAULT === 'auth-not-shared' && p !== fromPage) continue;
-    const delay = p === fromPage ? 0 : (tab.authDelay != null ? tab.authDelay : Math.round(20 + 280 * world.r()));
+    if (p === fromPage){ deliverAuth(p, user); continue; }
+    const delay = tab.authDelay != null ? tab.authDelay : Math.round(20 + 280 * world.r());
     world.at(world.now + delay, () => deliverAuth(p, user), null, 'auth');
   }
 }
 /* A tab that thaws gets the device's current sign-in (A3), or with the fake fault every state it missed. */
 function thaw(world, tab){
   tab.frozenUntil = 0;
+  /* R5's checks waited for the thaw: the page gets the same 3 s from the moment it can run again. */
+  for (const f of (tab.pendingChecks || []).splice(0)) world.at(world.now + 3300, f, null, 'script');
   for (const e of world.events) if (e.deferred && e.owner && e.owner.tab === tab && e.at > world.now){ e.at = world.now; e.deferred = false; }
   const p = tab.page;
   const missed = tab.missed || []; tab.missed = [];
@@ -1107,7 +1115,7 @@ function makeScenario(idx, famFilter){
   const r = rng(seed);
   const sc = { idx, fam, seed, r, actionKind: pick(r, ACTION_KINDS), net: pick(r, NET_KINDS), signOutAfter: pick(r, [150, 600, 1200, 2500]),
     noticeChoice: r() < 0.4 ? 'anyway' : 'wait', bKind: pick(r, ['returning', 'returning', 'new', 'failed-read']),
-    frozen: r() < 0.35, bOnOtherTab: r() < 0.5, teacherWhere: pick(r, ['student-page', 'console']), teacherOrder: pick(r, ['after', 'before']),
+    frozen: r() < 0.5, bOnOtherTab: r() < 0.5, teacherWhere: pick(r, ['student-page', 'console']), teacherOrder: pick(r, ['after', 'before']),
     roundKind: pick(r, ['A-B-A', 'A-A']), failKind: pick(r, ['progress-refused', 'progress-offline', 'config-refused', 'both', 'empty']),
     playKind: pick(r, ['mic', 'note', 'both']) };
   if (fam === 'mix'){
@@ -1165,7 +1173,6 @@ function buildWorld(sc){
   else world.seedDocs.B = null;
   world.docs.set('config/class', { data: classConfig(world), version: 1 });
   world.docs.set('micTakesMeta/count', { data: { n: 0 }, version: 1 });
-  if (sc.liveQuiz) world.docs.set('liveQuiz/current', { data: { sessionId: 'sess-' + sc.seed, state: 'question', qIndex: 0, startedAt: T0, limitSec: 0, questions: [] }, version: 1 });
   world.onDevice = new Set();
   return world;
 }
@@ -1186,6 +1193,9 @@ function appUp(page, P){
   if (!page || !page.alive) return false;
   refreshUid(page);
   if (page.siteUidCache !== P.uid) return false;
+  /* Up = the sign-in callback has finished for this person (start.js clears window.__authBootPending in its finally)
+     and the app or the console is showing. */
+  if (page.ctx.__authBootPending) return false;
   const app = page.els['app'], t = page.els['teacher-app'];
   return !!((app && app.style.display === 'block') || (t && t.style.display && t.style.display !== 'none'));
 }
@@ -1310,6 +1320,12 @@ function probe(world, page, P){
     if (!s) continue;
     for (const m of foreign) if (s.includes(m.text)) out.taint.push({ name: n, owner: m.owner, text: m.text });
   }
+  /* What is on the page NOW: markup written earlier (by a page that did not reload) counts as much as new markup. */
+  for (const id of Object.keys(page.els)){
+    const el = page.els[id];
+    const s = (el._h || '') + '\u0001' + (el._t || '');
+    for (const m of foreign) if (s.includes(m.text)) out.taint.push({ name: '#' + id + ' (markup on screen)', owner: m.owner, text: m.text });
+  }
   return out;
 }
 function plain(v, depth){
@@ -1354,6 +1370,9 @@ function seedDevice(world, dev, sc){
   ls['caOpenThrough'] = JSON.stringify({ uid: A, v: 9 });
   ls['caForMe'] = JSON.stringify({ uid: A, v: DATA.CARDS[1] ? { [DATA.CARDS[1]]: true } : {} });
   ls['stationView'] = 'list';
+  /* Practice seconds A left queued here yesterday on a page that is gone (practice-minutes.js: "a page takes over the
+     key of a page that is gone ... as soon as the student is known"): A's to adopt, never the next student's. */
+  ls['pm:q:' + A + ':p0ldpage0001'] = JSON.stringify({ days: { [oDay(T0 - DAY)]: 240 }, at: T0 - 5 * 3600000 });
   void sc;
 }
 async function runFamily(world, dev, sc, H){
@@ -1392,9 +1411,10 @@ async function runFamily(world, dev, sc, H){
     await settle();
     return;
   }
+  /* A live quiz is running in class: every page that signs a student in opens the round's clock (lq-q-opened in
+     the tab's sessionStorage, live-quiz.js), so every tab a student used holds a per-student session key. */
+  world.docs.set('liveQuiz/current', { data: { sessionId: 'sess-' + sc.seed, state: 'question', qIndex: 0, startedAt: world.now, limitSec: 30, questions: [{ type: 'mc', prompt: 'x', choices: ['a', 'b', 'c'], answer: 0 }] }, version: 1 });
   if (fam === 'first-screen' || fam === 'failed-reads'){
-    sc.liveQuiz = true;
-    world.docs.set('liveQuiz/current', { data: { sessionId: 'sess-' + sc.seed, state: 'question', qIndex: 0, startedAt: world.now, limitSec: 30, questions: [{ type: 'mc', prompt: 'x', choices: ['a', 'b', 'c'], answer: 0 }] }, version: 1 });
     if (!await H.signIn(tab1, A)) return;
     pokeInput(world, tab1.page, 75000);
     for (const k of ACTION_KINDS){ await H.act(tab1, A, actionFor(sc, k, sc.r, A)); await world.sleep(1500); }
@@ -1402,7 +1422,12 @@ async function runFamily(world, dev, sc, H){
     await H.act(tab1, A, dk);
     if (sc.r() < 0.5){ world.log('A switches the language to Spanish (a device setting)'); siteRun(tab1.page, 'setLang("es")'); }
     siteRun(tab1.page, 'ensureCoachJs()');
-    await world.sleep(70000);
+    await world.sleep(3000);
+    /* A answers the mic-recording question on this device ("Stop recording": the answer becomes "no", never asked
+       again — for A). Written by the site's own micRecRevoke(). */
+    world.log('A takes back the mic-recording consent (micRecRevoke)');
+    siteRun(tab1.page, 'micRecRevoke()');
+    await world.sleep(67000);
     await H.signOut(tab1, A, 'wait');
     await world.sleep(4000);
     if (fam === 'failed-reads'){
@@ -1448,17 +1473,25 @@ async function runFamily(world, dev, sc, H){
     await world.sleep(Math.min(sc.signOutAfter, 700));
     world.log('A switches to T2');
     await H.hide(tab1);
-    if (sc.frozen){ tab1.frozenUntil = world.now + Math.round(20000 + 40000 * sc.r()); world.log(`T1 frozen by the browser until ${rel(tab1.frozenUntil)}`); world.at(tab1.frozenUntil, () => thaw(world, tab1), null, 'script'); }
+    if (sc.frozen){ const until = tab1.frozenUntil = world.now + Math.round(20000 + 40000 * sc.r()); world.log(`T1 frozen by the browser until ${rel(until)}`); world.at(until, () => { if (tab1.frozenUntil === until) thaw(world, tab1); }, null, 'script'); }
     await H.show(tab2);
     await world.sleep(400);
     await H.signOut(tab2, A, sc.noticeChoice);
     await world.sleep(Math.round(2000 + 4000 * sc.r()));
-    const bTab = sc.bOnOtherTab ? tab1 : tab2;
+    /* A frozen T1 is left frozen while B signs in on T2, so it wakes to a DIFFERENT student straight over A (the
+       start.js swap branch: "Firebase reports B straight over A — another tab's sign-in on a shared Chromebook"). */
+    const bTab = sc.bOnOtherTab && !sc.frozen ? tab1 : tab2;
     if (bTab === tab1){ await H.hide(tab2); if (tab1.frozenUntil) thaw(world, tab1); await H.show(tab1); }
     if (await H.signIn(bTab, B)){
-      const other = bTab === tab1 ? tab2 : tab1;
-      if (await world.waitFor(() => appUp(other.page, B), 15000, 100)) H.firstScreen(other.page, B);
       await H.act(bTab, B, actionFor(sc, 'tick', sc.r, B));
+      await world.sleep(2000);
+      /* B clicks the other tab: a frozen one thaws, and whatever it shows now must be B's or the wall. */
+      const other = bTab === tab1 ? tab2 : tab1;
+      world.log(`B switches to ${other.name}`);
+      await H.hide(bTab);
+      if (other.frozenUntil) thaw(world, other);
+      await H.show(other);
+      if (await world.waitFor(() => appUp(other.page, B), 15000, 100)) H.firstScreen(other.page, B);
     }
     await settle();
     return;
@@ -1535,11 +1568,13 @@ function watchAuth(world, dev){
     for (const tab of dev.tabs){
       const p = tab.page;
       if (!p || !p.alive) continue;
-      if (tab.frozenUntil && world.now < tab.frozenUntil){ world.at(tab.frozenUntil + 3000, () => check(gone, at), null, 'script'); continue; }
+      if (tab.frozenUntil && world.now < tab.frozenUntil){ (tab.pendingChecks = tab.pendingChecks || []).push(() => check(gone, at)); continue; }
       refreshUid(p);
-      if (p.siteUidCache === gone && (!dev.authUser || dev.authUser.uid !== gone)){
+      /* The page showed the person who left (its auth callback ran for them) and is still alive: a state reset is
+         not the hard reset boot.js signOut asks for ("Reloading clears the lot in one move"). */
+      if (p.sawUids && p.sawUids.has(gone) && (!dev.authUser || dev.authUser.uid !== gone)){
         const live = p.audio.tracks.filter(t => t.live).length;
-        world.r5.push({ at: world.now, page: p.id, gone, since: at, mic: live, sound: p.audio.sources - p.audio.stopped });
+        world.r5.push({ at: world.now, page: p.id, gone, since: at, mic: live, sound: p.audio.sources - p.audio.stopped, now: p.siteUidCache });
       }
     }
   };
@@ -1741,15 +1776,17 @@ function oracle(sc, world, dev){
     }
     /* The tab's sessionStorage: nothing written before this person signed in, while someone else was. */
     const tab = page.tab;
-    const signedInAt = world.signInAt[fs.page] || fs.at;
+    const signedInAt = (page.authAt && page.authAt[P.uid] != null) ? page.authAt[P.uid] : fs.signInClick != null ? fs.signInClick : fs.at;
     for (const key of fs.session){
       const w = fs.sessionWho[key];
       if (w && w.at < signedInAt && w.authUid && w.authUid !== P.uid) fail('R4', `${fs.who}'s first screen on ${fs.page}: sessionStorage still holds "${key}", written in ${uidOwner[w.authUid] || w.authUid}'s session at ${rel(w.at)}`);
     }
     void tab;
-    /* localStorage keys named with another person's uid, read by this page. */
+    /* localStorage keys named with another person's uid, read by this page while it showed this person. */
+    const leftAt = ((page.authLog || []).find(x => x.at > signedInAt && x.uid !== P.uid) || {}).at;
+    const readsUntil = Math.min(fs.at + 60000, leftAt != null ? leftAt : Infinity);
     for (const e of dev.accessLog){
-      if (e.page !== fs.page || e.op !== 'get' || e.at > fs.at + 60000) continue;
+      if (e.page !== fs.page || e.op !== 'get' || e.at < signedInAt || e.at >= readsUntil) continue;
       for (const [k, Q] of Object.entries(world.people)) if (Q.uid !== P.uid && e.k.includes(Q.uid)) fail('R4', `${fs.page} (showing ${fs.who}) read localStorage "${e.k}", ${k}'s key, at ${rel(e.at)}`);
     }
     /* R5's other half: no live mic on the device at this person's first screen. */
@@ -1759,7 +1796,7 @@ function oracle(sc, world, dev){
     }
     if (page.audio.tracks.some(x => x.live)) fail('R5', `${fs.who}'s first screen on ${fs.page}: an open mic this student never started`);
   }
-  for (const h of world.r5) fail('R5', `${h.page} still shows ${uidOwner[h.gone] || h.gone} 3 s after that sign-out reached it (signed out at ${rel(h.since)}${h.mic ? '; mic still open' : ''})`);
+  for (const h of world.r5) fail('R5', `${h.page} showed ${uidOwner[h.gone] || h.gone} and is still alive 3 s after that student's sign-out (at ${rel(h.since)}; the page now shows ${h.now ? (uidOwner[h.now] || h.now) : 'nobody'}${h.mic ? '; its mic is still open' : ''}${h.sound > 0 ? '; ' + h.sound + ' sound source(s) never stopped' : ''})`);
   /* Marker hits in markup, per page: a page showing X drew someone else's marker. */
   for (const p of world.allPages){
     for (const h of p.markerHits.slice(0, 3)) fail('R4', `${p.id} drew ${h.owner}'s ${JSON.stringify(h.text)} into ${h.where} at ${rel(h.at)} (while showing ${uidOwner[h.shownAs] || h.shownAs || 'nobody'})`);
@@ -1797,7 +1834,7 @@ async function runCase(idx, famFilter){
   const world = buildWorld(sc);
   CURRENT_WORLD = world;
   const dev = makeDevice(world, []);
-  world.lsBefore = {}; world.signInAt = {};
+  world.lsBefore = {};
   watchAuth(world, dev);
   const origSet = setDeviceAuth;
   void origSet;
@@ -1814,8 +1851,10 @@ async function runCase(idx, famFilter){
     world.lsLatest = Object.assign({}, dev.localStorage._d);
     if (tab.page) world.lsBefore[tab.page.id] = world.lsLatest;
     const t = world.now;
+    const n0 = world.firstScreens.length;
     const ok = await signInOrig(tab, P);
-    if (tab.page){ world.signInAt[tab.page.id] = t; if (!world.lsBefore[tab.page.id]) world.lsBefore[tab.page.id] = {}; }
+    for (const fs of world.firstScreens.slice(n0)) fs.signInClick = t;
+    if (tab.page && !world.lsBefore[tab.page.id]) world.lsBefore[tab.page.id] = {};
     return ok;
   };
   const done = (async () => { try { await runFamily(world, dev, sc, H); } catch (e){ world.toolError = e; } })();
@@ -1826,6 +1865,7 @@ async function runCase(idx, famFilter){
     await world.runUntil(world.now + 5000, `case ${idx} (${sc.fam})`);
     beat(`case ${idx} (${sc.fam}) at ${rel(world.now)}`);
   }
+  if (finished) await world.runUntil(world.now + 4000, `case ${idx} (${sc.fam}) closing`);
   for (const t of dev.tabs) for (const p of t.pages) p.alive = false;
   await world.drain();
   CURRENT_WORLD = null;
@@ -1877,7 +1917,7 @@ async function fakeSelfTest(){
     setDeviceAuth(world, dev, ama, p1);
     await world.runUntil(world.now + 500, 'self-test');
     netWindow(world, dev, 'offline', 4000);
-    p1.client.db.collection('progress').doc(PEOPLE.A.uid).set({ x: 1 }, { merge: true });
+    p1.client.db.collection('progress').doc(PEOPLE.A.uid).set({ x: 1 }, { merge: true }).catch(() => {});
     await world.runUntil(world.now + 1000, 'self-test');
     setDeviceAuth(world, dev, bo, p1);
     await world.runUntil(world.now + 8000, 'self-test');
@@ -1894,7 +1934,7 @@ async function fakeSelfTest(){
     await world.runUntil(world.now + 500, 'self-test');
     t1.session.setItem('best', '7');
     netWindow(world, dev, 'offline', 3000);
-    p1.client.db.collection('progress').doc(PEOPLE.A.uid).set({ y: 1 }, { merge: true });
+    p1.client.db.collection('progress').doc(PEOPLE.A.uid).set({ y: 1 }, { merge: true }).catch(() => {});
     await world.runUntil(world.now + 500, 'self-test');
     requestReload(p1);
     await world.runUntil(world.now + 8000, 'self-test');
