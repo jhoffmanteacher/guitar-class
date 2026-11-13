@@ -6806,9 +6806,10 @@ function checkTitleHeadings() {
 /* 1cz. Google sign-in always shows the account chooser (2026-11-13). Students share school Chromebooks. A popup made
    without prompt 'select_account' can pass straight through as whichever Google account the browser is still signed
    in to, so the next student could land in the last student's progress. This RUNS the real signIn() (app/boot.js)
-   in a vm with a stub Firebase and reads what its provider was given. Then it counts every place in the site's own
-   scripts and pages that makes a Google provider or opens a sign-in (pinned at 1 each, both inside signIn()), so a
-   second sign-in path cannot appear without this check reading it. */
+   in a vm with a stub Firebase and reads what its provider was given. Then it counts, in every script and page of
+   the site (all folders but the tooling), the words GoogleAuthProvider and signInWith outside comments, however
+   the code is spelled (a bracket call, a provider passed in, a sign-in kept in a variable): pinned at 1 each, all
+   inside signIn(), so a second sign-in path cannot appear without this check reading it. */
 const SIGNIN_PROVIDER_SITES = 1, SIGNIN_CALL_SITES = 1;
 function checkSignInAccountChooser() {
   head('1cz. Google sign-in always asks which account');
@@ -6837,25 +6838,38 @@ function checkSignInAccountChooser() {
     const p = opened[0].params;
     if (!p || p.prompt !== 'select_account') flag(`signIn() opens Google's popup with ${p ? JSON.stringify(p) : 'no custom parameters'}: it must set prompt 'select_account' (setCustomParameters), or a shared Chromebook can sign the next student in as the last one`);
   }
-  // Every place that makes a provider or opens a sign-in, in the site's own scripts and pages (not tools/).
+  /* Every place that names a Google provider or a sign-in, in the site's own scripts and pages (every folder but
+     tools/ and the repo's own tooling), counted as the bare words outside comments (maskComments, which tells a regex
+     literal from a quote; stripJsComments loses its place at escAttr's /"/g in app/boot.js): a bracket call
+     (auth['signInWithPopup']), a provider passed in or a sign-in function kept in a variable still says them. */
   const files = [];
-  for (const d of ['', 'app', 'tabs']) {
+  const SKIP_DIRS = new Set(['.git', '.claude', '.github', 'tools', 'node_modules', 'audio', 'docs']);
+  const walk = d => {
     let names = [];
-    try { names = readdirSync(join(ROOT, d)); } catch { }
-    for (const f of names) if (/\.(js|html)$/.test(f) && !/\.min\.js$/.test(f)) files.push(d ? `${d}/${f}` : f);
-  }
-  const PROVIDER_RE = /new\s+[\w.]*GoogleAuthProvider\s*\(/g, CALL_RE = /\.signInWith(?:Popup|Redirect|Credential)\s*\(/g;
+    try { names = readdirSync(join(ROOT, d), { withFileTypes: true }); } catch { }
+    for (const e of names) {
+      const rel = d ? `${d}/${e.name}` : e.name;
+      if (e.isDirectory()) { if (!SKIP_DIRS.has(e.name)) walk(rel); }
+      else if (/\.(js|mjs|html)$/.test(e.name) && !/\.min\.js$/.test(e.name)) files.push(rel);
+    }
+  };
+  walk('');
+  const uncomment = (f, src) => f.endsWith('.html')
+    ? src.replace(/<!--[\s\S]*?-->/g, m => m.replace(/[^\n]/g, ' ')).replace(/(<script\b[^>]*>)([\s\S]*?)(<\/script>)/gi, (m, a, js, z) => a + maskComments(js) + z)
+    : maskComments(src);
+  const PROVIDER_RE = /GoogleAuthProvider/g, CALL_RE = /signInWith/g;
   const providers = [], calls = [];
   for (const f of files) {
-    const src = readFileSync(join(ROOT, f), 'utf8');
+    const src = uncomment(f, readFileSync(join(ROOT, f), 'utf8'));
     for (const [re, out] of [[PROVIDER_RE, providers], [CALL_RE, calls]]) {
       for (const m of src.matchAll(re)) out.push(`${f}:${src.slice(0, m.index).split('\n').length}`);
     }
   }
-  if (providers.length !== SIGNIN_PROVIDER_SITES) flag(`${providers.length} places make a Google provider (${providers.join(', ') || 'none'}), pinned at ${SIGNIN_PROVIDER_SITES}: a new sign-in path must ask which account too; run it here like signIn() and update the pin`);
-  if (calls.length !== SIGNIN_CALL_SITES) flag(`${calls.length} places open a Google sign-in (${calls.join(', ') || 'none'}), pinned at ${SIGNIN_CALL_SITES}: a new sign-in path must ask which account too; run it here like signIn() and update the pin`);
-  if (![...body.matchAll(PROVIDER_RE)].length || ![...body.matchAll(CALL_RE)].length) flag('the one provider and sign-in call are not inside signIn(), so the run above did not read them');
-  if (!bad) ok(`signIn() ran: 1 popup, prompt 'select_account'; ${files.length} site files read: ${providers.length} provider (${providers.join(', ')}), ${calls.length} sign-in call (${calls.join(', ')}), both inside signIn()`);
+  const inBody = maskComments(body);
+  if (providers.length !== SIGNIN_PROVIDER_SITES) flag(`${providers.length} places name GoogleAuthProvider outside comments (${providers.join(', ') || 'none'}), pinned at ${SIGNIN_PROVIDER_SITES}: a new sign-in path must ask which account too; run it here like signIn() and update the pin`);
+  if (calls.length !== SIGNIN_CALL_SITES) flag(`${calls.length} places name signInWith… outside comments (${calls.join(', ') || 'none'}), pinned at ${SIGNIN_CALL_SITES}: a new sign-in path must ask which account too; run it here like signIn() and update the pin`);
+  if ((inBody.match(PROVIDER_RE) || []).length !== SIGNIN_PROVIDER_SITES || (inBody.match(CALL_RE) || []).length !== SIGNIN_CALL_SITES) flag('the provider and sign-in call are not all inside signIn(), so the run above did not read them');
+  if (!bad) ok(`signIn() ran: 1 popup, prompt 'select_account'; ${files.length} site files read (comments left out): GoogleAuthProvider ${providers.length}x (${providers.join(', ')}), signInWith ${calls.length}x (${calls.join(', ')}), all inside signIn()`);
 }
 
 function checkPrecacheFingerprinted(src, hashed) {
