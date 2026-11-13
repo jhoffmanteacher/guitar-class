@@ -162,8 +162,12 @@
    swap clicked a count twice, a few ms apart; one click sounded after Stop (61 of 468 walks red). Fixed in
    app/cards.js (QUEUED CLICKS): the clicks are kept in st.clicks until they have sounded, and pcRetrack, the
    Metronome switch and Stop take back those whose count is still to come (a first cut that took back every click
-   not yet heard lost the click of a count the song had just reached: the due-count check caught it). The snippet player (snipScheduleClick, snipSetTier) and the
-   Journey pages (clickTick, the `seeked` reset) queue their clicks the same way and were not changed.
+   not yet heard lost the click of a count the song had just reached: the due-count check caught it). The snippet
+   player (snipScheduleClick, snipSetTier, snipStop) and the Journey pages (clickTick: a seek, a pause, a file switch,
+   the Metronome switch) had the same fault and got the same rule later that day (QUEUED CLICKS now lives in
+   app/snippets.js, queueClick / cancelQueuedClicks, shared by both app players; tabs/journey.js keeps its own copy).
+   This tool does not walk those two players (NOT COVERED); they were proved by a scripted check on the same fake
+   world, not kept in the repo.
 
    NOT COVERED: the six Song Journey pages (tabs/journey.js has its own player: ensurePlayer, switchSrc, clickTick,
    barNextBeat / barBeatTime, the data-click-bars / data-click-anchor lists; its tabs are static text with no

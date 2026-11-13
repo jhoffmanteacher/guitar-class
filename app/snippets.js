@@ -904,6 +904,7 @@ function snipStop(){
   const gone = snipState;
   snipState = null;                    // first, so the tick's own guard bails
   if(raf) cancelAnimationFrame(raf);
+  cancelQueuedClicks(gone);            // a click whose count is still to come — see QUEUED CLICKS
   try { audio.pause(); audio.src = ''; } catch(e) {}
   twinStop(gone);
   if(card && card.isConnected){
@@ -1049,8 +1050,41 @@ function snipScheduleClick(st, now){
   if(ahead > 0.1) return;
   const ctx = getAudioCtx();
   const lat = snipLatency() - (ctx.outputLatency || ctx.baseLatency || 0);
-  pcClick(ctx.currentTime + Math.max(0, ahead + lat), clickAccent(st.tr, nb), false, (st.tr.clickGain || 1) * PLAYALONG_CLICK_GAIN);
+  const at = ctx.currentTime + Math.max(0, ahead + lat);
+  queueClick(st, pcClick(at, clickAccent(st.tr, nb), false, (st.tr.clickGain || 1) * PLAYALONG_CLICK_GAIN), at, ctx.currentTime + Math.max(0, ahead));
   st.lastBeat = nb;
+}
+/* QUEUED CLICKS (fixed 2026-11-12, found by tools/playalong-loop.mjs). An
+   in-song click is queued up to ~0.18 s before it sounds (0.1 s ahead of its
+   count, plus the output latency). A speed change, the Guitar switch or the
+   Metronome switch resets lastBeat, so the same count is queued again: the
+   old click used to sound as well (early, in the silence while a new file
+   loads, or a few ms off the new one), and one more sounded after Stop.
+   Both players keep each click in st.clicks until its start time has passed
+   (queueClick: snipScheduleClick here, pcScheduleClick in app/cards.js);
+   cancelQueuedClicks stops the ones whose COUNT is still to come (they are
+   queued again), at a switch and at Stop (snipSetTier, snipStop; pcRetrack,
+   pcSetMetro, pcStop). A click whose count the song has already reached is
+   kept: it is only waiting out the output latency, and nothing queues that
+   count again. `at` is when the click sounds, `due` when its count is
+   reached, both on the AudioContext clock. The Song Journey pages
+   (tabs/journey.js) have their own copy of this rule. */
+function queueClick(st, o, at, due){
+  o._at = at;
+  o._due = due;
+  const now = getAudioCtx().currentTime;
+  st.clicks = (st.clicks || []).filter(x => x._at > now);
+  st.clicks.push(o);
+}
+function cancelQueuedClicks(st){
+  if(!st.clicks || !st.clicks.length) return;
+  const now = getAudioCtx().currentTime;
+  st.clicks = st.clicks.filter(o => {
+    if(!(o._due > now)) return true;
+    try { o.stop(0); } catch(e) {}
+    try { o.disconnect(); } catch(e) {}
+    return false;
+  });
 }
 /* One of the snippet's <audio> elements failed. The PLAYING one stops the
    card and says so; the twin is just dropped (the Guitar toggle falls back to
@@ -1122,8 +1156,12 @@ function snipSetTier(btn, which){
     else if(on) card.dataset.slowest = '';
   }
   // Metronome is the site's own click — the tick reads data-metro on its
-  // next frame, so there is no file to swap and nothing to re-seek.
-  if(which === 'metro') return;
+  // next frame, so there is no file to swap and nothing to re-seek. A click
+  // already queued is taken back (QUEUED CLICKS).
+  if(which === 'metro'){
+    if(snipState && snipState.card === card){ cancelQueuedClicks(snipState); snipState.lastBeat = -1; }
+    return;
+  }
   if(!snipState || snipState.card !== card) return;
   const { audio, spec, tr } = snipState;
   const slow = card.dataset.slow === '1';
@@ -1141,6 +1179,8 @@ function snipSetTier(btn, which){
   const at = snipTimeAtBars(win, isFinite(barsIn) && barsIn > 0 ? barsIn : 0);
   const src = snippetSrc(tr, slow, guitar);
   slowestApplyRate(audio, snipRate(card));   // Slowest <-> Slow is the same file, just the rate
+  // The count is queued again on the new clock: take back the one already queued (QUEUED CLICKS).
+  cancelQueuedClicks(snipState);
   snipState.lastBeat = -1;
   if(audio.getAttribute('src') === src || audio.src.endsWith(src)){
     // Same file: only the rate moved, and `at` is where it already is. A seek

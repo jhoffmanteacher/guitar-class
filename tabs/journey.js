@@ -343,6 +343,7 @@ function ensurePlayer(){
      and play state forward instead, and replaces its listener. */
   var pendingSwitch = null;
   var switchSrc = function(rescale){
+    clickTakeBack();                   // the file is about to change: see QUEUED CLICKS below
     var wasPlaying = pendingSwitch ? pendingSwitch.play : !a.paused;
     var t = pendingSwitch ? pendingSwitch.t : a.currentTime;
     if(pendingSwitch) a.removeEventListener('loadedmetadata', pendingSwitch.resume);
@@ -368,8 +369,28 @@ function ensurePlayer(){
   /* The page-made click (data-click-anchor or data-click-bars, above). One
      click per counted beat, the next one scheduled once it is under 100 ms
      away; a jump back (the loop, a seek, a Slow switch) resets lastBeat so no
-     beat is lost. */
-  var clickCtx = null, clickRaf = 0, lastBeat = -1;
+     beat is lost.
+     QUEUED CLICKS (fixed 2026-11-12; the same rule as QUEUED CLICKS in
+     app/snippets.js, which this page does not load). A click is queued up to
+     ~0.18 s before it sounds (0.1 s ahead of its count, plus the output
+     latency). A seek, a Slow or Guitar switch, a pause or the Metronome
+     switch used to leave it queued, so it sounded anyway: off the beat, in
+     the silence while a new file loads, or after the pause. Each click is
+     kept in clickQ until it has sounded, and clickTakeBack() stops the ones
+     whose COUNT is still to come (they are queued again once the music is
+     back). A click whose count the music has already reached is kept: it is
+     only waiting out the output latency. */
+  var clickCtx = null, clickRaf = 0, lastBeat = -1, clickQ = [];
+  var clickTakeBack = function(){
+    if(!clickCtx || !clickQ.length) return;
+    var now = clickCtx.currentTime;
+    clickQ = clickQ.filter(function(q){
+      if(!(q.due > now)) return true;
+      try { q.o.stop(0); } catch(e) {}
+      try { q.o.disconnect(); } catch(e) {}
+      return false;
+    });
+  };
   var clickBeats = parseInt(d.clickBeats, 10) || 4;
   /* The beat map (data-click-bars). Beat n is click n counted from the first
      listed downbeat; both helpers work in FAST-file seconds.
@@ -403,6 +424,7 @@ function ensurePlayer(){
     g.gain.exponentialRampToValueAtTime(0.0001, at + 0.08);
     o.connect(g); g.connect(clickCtx.destination);
     o.start(at); o.stop(at + 0.1);
+    return o;
   };
   var clickTick = function(){
     clickRaf = 0;
@@ -427,7 +449,11 @@ function ensurePlayer(){
       var ahead = due - now;
       if(ahead <= 0.1){
         var lat = 0.08 - (clickCtx.outputLatency || clickCtx.baseLatency || 0);
-        clickAt(clickCtx.currentTime + Math.max(0, ahead + lat), nb % clickBeats === 0);
+        var at = clickCtx.currentTime + Math.max(0, ahead + lat);
+        var cnow = clickCtx.currentTime;
+        // Kept until it has sounded, so a seek, a switch or a pause can take it back (QUEUED CLICKS).
+        clickQ = clickQ.filter(function(q){ return q.at > cnow; });
+        clickQ.push({ o: clickAt(at, nb % clickBeats === 0), at: at, due: cnow + Math.max(0, ahead) });
         lastBeat = nb;
       }
     }
@@ -442,6 +468,9 @@ function ensurePlayer(){
   };
   if(synthClick){
     a.addEventListener('play', startClicks);
+    // A seek (the loop's own one too) or a pause takes back a click whose count is still to come (QUEUED CLICKS).
+    a.addEventListener('seeking', clickTakeBack);
+    a.addEventListener('pause', clickTakeBack);
     a.addEventListener('seeked', function(){ lastBeat = -1; });
   }
 
@@ -470,7 +499,8 @@ function ensurePlayer(){
       metroOn = !metroOn;
       metroBtn.classList.toggle('on', metroOn);
       metroBtn.setAttribute('aria-pressed', metroOn ? 'true' : 'false');
-      if(synthClick){ if(metroOn) startClicks(); return; }   // our click — no file to swap
+      // Our click — no file to swap. A click already queued is taken back (QUEUED CLICKS).
+      if(synthClick){ clickTakeBack(); lastBeat = -1; if(metroOn) startClicks(); return; }
       switchSrc(false);
     };
     box.appendChild(metroBtn);

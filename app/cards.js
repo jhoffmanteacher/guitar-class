@@ -856,7 +856,7 @@ function pcStop(){
   pcState = null;                      // first, so the frame loop's guard bails
   if(st.raf) cancelAnimationFrame(st.raf);
   st.timers.forEach(clearTimeout);
-  // Every count-in click stops; an in-song click stops if its count is still to come (QUEUED CLICKS).
+  // Every count-in click stops; an in-song click stops if its count is still to come (QUEUED CLICKS, app/snippets.js).
   const clickNow = (st.clicks || []).length ? getAudioCtx().currentTime : 0;
   (st.clicks || []).forEach(o => { if(o._due != null && !(o._due > clickNow)) return; try { o.stop(0); } catch(e) {} try { o.disconnect(); } catch(e) {} });
   try { st.audio.pause(); st.audio.src = ''; } catch(e) {}
@@ -1080,33 +1080,9 @@ function pcScheduleClick(st, now){
   const ctx = getAudioCtx();
   const lat = snipLatency() - (ctx.outputLatency || ctx.baseLatency || 0);
   const at = ctx.currentTime + Math.max(0, ahead + lat);
-  const o = pcClick(at, clickAccent(st.L.tr, nb), false, (st.L.tr.clickGain || 1) * PLAYALONG_CLICK_GAIN);
-  o._at = at;
-  o._due = ctx.currentTime + Math.max(0, ahead);
-  // Kept until it has sounded, so a switch or Stop can take it back — see QUEUED CLICKS.
-  st.clicks = (st.clicks || []).filter(x => x._at > ctx.currentTime);
-  st.clicks.push(o);
+  // Kept until it has sounded, so a switch or Stop can take it back — see QUEUED CLICKS (app/snippets.js).
+  queueClick(st, pcClick(at, clickAccent(st.L.tr, nb), false, (st.L.tr.clickGain || 1) * PLAYALONG_CLICK_GAIN), at, ctx.currentTime + Math.max(0, ahead));
   st.lastBeat = nb;
-}
-/* QUEUED CLICKS (fixed 2026-11-12, found by tools/playalong-loop.mjs). An
-   in-song click is queued up to ~0.18 s before it sounds (0.1 s ahead of its
-   count, plus the output latency). A speed change, the Guitar switch or the
-   Metronome switch resets lastBeat, so the same count is queued again: the
-   old click used to sound as well (early, in the silence while a new file
-   loads, or a few ms off the new one), and one more sounded after Stop.
-   pcScheduleClick keeps each click in st.clicks until its start time has
-   passed; this stops the ones whose COUNT is still to come (they are queued
-   again). A click whose count the song has already reached is kept: it is
-   only waiting out the output latency, and nothing queues that count again.
-   pcStop's loop follows the same rule. */
-function pcCancelQueuedClicks(st){
-  const now = getAudioCtx().currentTime;
-  st.clicks = (st.clicks || []).filter(o => {
-    if(!(o._due > now)) return true;
-    try { o.stop(0); } catch(e) {}
-    try { o.disconnect(); } catch(e) {}
-    return false;
-  });
 }
 function pcFrame(){
   const st = pcState;
@@ -1303,7 +1279,7 @@ function pcSetMetro(btn){
   btn.setAttribute('aria-pressed', on ? 'true' : 'false');
   if(on){ try { getAudioCtx().resume(); } catch(e) {} }
   // No file swap — the click is ours. A click already queued is taken back (QUEUED CLICKS).
-  if(pcState && pcState.root === root){ pcCancelQueuedClicks(pcState); pcState.lastBeat = -1; }
+  if(pcState && pcState.root === root){ cancelQueuedClicks(pcState); pcState.lastBeat = -1; }
 }
 function pcSetSpeed(sw){
   const root = sw.closest('.pc');
@@ -1400,7 +1376,7 @@ function pcRetrack(root){
   const barsIn = pend ? pend.bars : snipBarsAt(st.win, st.audio.currentTime);
   st.win = pcWindow(st.L, slow);
   // The count is queued again on the new clock: take back the one already queued (QUEUED CLICKS).
-  pcCancelQueuedClicks(st);
+  cancelQueuedClicks(st);
   st.lastBeat = -1;
   const at = snipTimeAtBars(st.win, isFinite(barsIn) && barsIn > 0 ? barsIn : 0);
   const src = snippetSrc(st.L.tr, slow, guitar);
