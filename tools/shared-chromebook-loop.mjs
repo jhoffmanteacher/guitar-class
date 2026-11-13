@@ -192,6 +192,11 @@
    student's queue (R4 localStorage read); the Who-card cache read as anyone's (R4). Fake faults (--fake-fault, each
    turns the self-test red and no case runs): auth-not-shared, token-of-current-user, queue-survives-reload,
    session-cleared-on-reload, storage-per-tab, rules-open, frozen-sees-all.
+   Review round 1 (2026-11-13, on origin/main 4be4fa7, each red on a real line, not through KNOWN): the notice up for
+   16 ms then signed out anyway (R1); the notice shown after the student has left (R1); a "Not saving" flash with no
+   flush before Sign out (R1); flushOnHide that no longer sends (R1, no longer absorbed by K-TAB); an unscoped
+   gc-draft key showing the last typed answer to the next student (R4: the value read and the markup); the next
+   student's Google popup pre-filled with the last student's email (R4: the popup parameters).
 
    NOT COVERED (stated limits). Leak channels the stub DOM does not see: canvas and SVG drawn by script, CSS
    content, the clipboard, IndexedDB and Cache Storage, cookies, the browser's own autofill and history, anything
