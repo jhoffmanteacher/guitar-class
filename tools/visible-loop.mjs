@@ -239,6 +239,20 @@
    M5  caOptionalByDefault: a Who card given to me blocks                          702
    M6  clears restored only for the period-override slot's student                  23
    M7  Open through 12 rejected (< 12)                                              34
+   Round-2 review (2026-11-12, on the tree with "required and unfinished first"; only these were re-run):
+   P1  a student with one pending activity no longer lands (> 1 for > 0)                15
+   P2  a mid-session lock on a tab return                                               98
+   P3  the router sends a student with a blocker away, no class set                    540
+   P4  JOURNEY_GATE_LOCKS true                                                         545
+   P5  the last pending card first                                                     672
+   P5b the old first-card rule (Today first, clears ignored)                            80
+   P5c a cleared card may be first                                                      69
+   P7  Delete keeps the rename and the pin                                              12
+   P8  activityForMe out of classConfigSignature                                         2
+   P9  the period question ignores the teacher's override                               18
+   P10 the update reload lands like a visit                                             46
+   P11 coming back from a Journey page lands anyway                                     42
+   B13 again: now caught by the directed signature block (no rng, so on every seed); N6 9, N6b 6, M3 33.
    Fake-world self-tests: --break-fake merge (maps replaced, not merged) 1547 and --break-fake clock (pages on the
    real clock) 1949, both exit 1. */
 process.env.TZ = 'America/Los_Angeles';
