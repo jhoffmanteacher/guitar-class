@@ -534,7 +534,8 @@ function gamesBestChip(allTime, today, unit){
    LOAD_DEPENDENT_SAVE_KEYS, so no new Firestore plumbing). Uses app.js's
    dayStr() — the student's local calendar day, same as the site-wide streak
    — not the UTC date the per-game "at" fields use, since a streak has to
-   agree with the day the student actually experienced.
+   agree with the day the student actually experienced. Weekends never
+   break it (dayStreakContinues, app/boot.js; Jonathan, 2026-11-13).
    Call once per finished round, win or not: flat base XP for playing, plus
    a small bonus for a new personal best. Skipped in dev bypass, same as
    every other games.* write (Firestore rejects that uid) and
@@ -549,9 +550,7 @@ function awardArcadeXp(gotNewBest){
   m.xp = (m.xp || 0) + gained;
   m.xpToday += gained;
   if (m.streak.lastDay !== today){
-    const y = new Date();
-    y.setDate(y.getDate() - 1);
-    m.streak.count = m.streak.lastDay === dayStr(y) ? (m.streak.count || 0) + 1 : 1;
+    m.streak.count = dayStreakContinues(m.streak.lastDay, today) ? (m.streak.count || 0) + 1 : 1;
     m.streak.lastDay = today;
   }
   saveGames();
@@ -568,9 +567,7 @@ function gamesMetaBarHtml(){
   const goalMet = xpToday >= ARCADE_DAILY_XP_GOAL;
   let streakChip = '';
   if (m && m.streak && m.streak.count > 1 && m.streak.lastDay){
-    const y = new Date();
-    y.setDate(y.getDate() - 1);
-    const alive = m.streak.lastDay === today || m.streak.lastDay === dayStr(y);
+    const alive = dayStreakAlive(m.streak.lastDay, today);
     if (alive) streakChip = `<span class="games-meta-streak">&#x1F525; ${t('games.meta.streak', { n: m.streak.count })}</span>`;
   }
   return `

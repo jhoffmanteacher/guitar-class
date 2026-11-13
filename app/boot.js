@@ -516,6 +516,45 @@ let classActivities = {};   // In-Class Activities completion: id → true (own 
 let exitChecks  = {};   // Exit-check results: id -> { score, total, picks, at, attempts } (see caCheckBodyHtml / class-activities.js kind:'check')
 let games       = {};   // per-game bests from the games arcade (coach.js) — its own save category
 let streak      = { count:0, lastDay:null };   // site-wide practice streak, independent of any one game
+/* Day streaks never break over a weekend (Jonathan, 2026-11-13: a streak only
+   needs school days, Monday to Friday). Shared by the three day streaks: the
+   site-wide practice streak above (bumpPracticeStreak in app/save.js, the
+   Daily 5 chip in app/lesson.js), the arcade streak (games.meta.streak,
+   coach-hub.js) and Riff Roulette's (games.rr, coach-strum.js). Here, in the
+   first app part, because app/save.js is the earliest part that calls them
+   and the arcade parts load later. Pure: both arguments are the local
+   calendar-day strings dayStr() makes ('YYYY-MM-DD').
+   dayStreakContinues(lastDay, today): playing today adds a day to the streak,
+   because every day strictly between the two is a Saturday or Sunday.
+   Fri -> Mon continues; Fri -> Tue does not; Thu -> Mon does not (Friday was
+   missed). Playing on a weekend still adds a day: Fri, Sat, Mon is 3 days.
+   False for the same day (callers check that first), a last day after today
+   (a wrong clock) and a missing or malformed day. School holidays are NOT
+   skipped, only Saturdays and Sundays. Dates are built at local noon from
+   their parts, never by adding 86,400,000 ms to a midnight, so a
+   daylight-saving change cannot shift a day.
+   dayStreakAlive(lastDay, today): the streak is still winnable today (kept up
+   today, or playing today would continue it).
+   checks.mjs 1dj runs both over a table of dates and fails on any other
+   "yesterday or reset" copy. */
+function streakDayDate(s){
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(typeof s === 'string' ? s : '');
+  if(!m) return null;
+  const d = new Date(+m[1], +m[2] - 1, +m[3], 12);
+  return (d.getFullYear() === +m[1] && d.getMonth() === +m[2] - 1 && d.getDate() === +m[3]) ? d : null;
+}
+function dayStreakContinues(lastDay, today){
+  const a = streakDayDate(lastDay), b = streakDayDate(today);
+  if(!a || !b || a.getTime() >= b.getTime()) return false;
+  for(let d = new Date(a.getFullYear(), a.getMonth(), a.getDate() + 1, 12); d.getTime() < b.getTime(); d = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1, 12)){
+    const w = d.getDay();
+    if(w !== 0 && w !== 6) return false;
+  }
+  return true;
+}
+function dayStreakAlive(lastDay, today){
+  return (!!streakDayDate(today) && lastDay === today) || dayStreakContinues(lastDay, today);
+}
 let gamesAccessOn = true; // whether the Games arcade is available to THIS student (teacher-controlled; see loadClassConfig)
 /* Consented mic recordings (coach.js micRec*): the teacher's switch and
    how many takes are saved so far. Fail CLOSED — anything short of a

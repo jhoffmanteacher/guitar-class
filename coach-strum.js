@@ -623,12 +623,11 @@ function rrDayStr(d){
 }
 
 /* A streak is worth showing only while it's alive — kept up today or
-   still winnable today (last set was yesterday). */
+   still winnable today (the last set was on the last school day before
+   today: weekends never break it, dayStreakAlive in app/boot.js). */
 function rrStreakAlive(g, min){
   if (!g || !(g.streak >= (min || 2)) || !g.lastDay) return false;
-  const y = new Date();
-  y.setDate(y.getDate() - 1);
-  return g.lastDay === rrDayStr(new Date()) || g.lastDay === rrDayStr(y);
+  return dayStreakAlive(g.lastDay, rrDayStr(new Date()));
 }
 
 function rrPool(){
@@ -990,9 +989,7 @@ function rrSetDone(ptsTotal){
   const today = rrDayStr(new Date());
   const g = games.rr || {};
   if (g.lastDay !== today){
-    const y = new Date();
-    y.setDate(y.getDate() - 1);
-    g.streak = g.lastDay === rrDayStr(y) ? (g.streak || 0) + 1 : 1;
+    g.streak = dayStreakContinues(g.lastDay, today) ? (g.streak || 0) + 1 : 1;
     g.days = (g.days || 0) + 1;
     g.lastDay = today;
   }

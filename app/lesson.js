@@ -1159,8 +1159,7 @@ function buildDaily5(){
   items+=li(1,t('routine.tuneUp'),t('daily5.tuneUpBody'));
   items+=li(2,t('daily5.warmUp'),`&mdash; ${escHtml(tf(wu,'text'))}<br>${routinePlaySeq(wu,'bpm:daily5:wu')}`);
   if(pick) items+=li(2,t('daily5.todaysDrill'),`&mdash; ${t('daily5.fromModule',{num, set: tSetLabel(pick.set.label)})} ${escHtml(truncateText(stripTags(tf(pick.step,'text')),160))}<br>${routinePlaySeq(pick.step.playSeq,'bpm:daily5:drill')}`);
-  const y=new Date(); y.setDate(y.getDate()-1);
-  const streakAlive = streak.lastDay===dayStr(new Date()) || streak.lastDay===dayStr(y);
+  const streakAlive = dayStreakAlive(streak.lastDay, dayStr(new Date()));   // weekends never break it (app/boot.js)
   const streakChip = (streak.count > 1 && streakAlive)
     ? `<span class="games-card-best">&#x1F525; ${t('daily5.streak',{n:streak.count})}</span>` : '';
   return `<div class="daily5-head"><div style="display:flex;align-items:center;gap:8px"><h3 style="font:inherit;margin:0">${ICO_BOLT} ${t('daily5.title')}</h3>${streakChip}</div><button type="button" class="tp-close" onclick="closeDaily5()" aria-label="${escAttr(t('daily5.closeAria'))}">&#x2715;</button></div>
