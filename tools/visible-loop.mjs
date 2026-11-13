@@ -71,8 +71,9 @@
      student with no progress doc yet (stu-delta), a teacher account teacher@example.test, and two special users:
      'dev-user' (dev bypass) and a student signed in with the teacher's email (a gate previewer).
    * Rounds: one to three console changes land before the open page's tab comes back. Change kinds rotate so each
-     runs at least 15 times in a full run (a floor that fails); three quarters of Archive / Delete aim at a card that
-     holds Hidden or Who, a rename or a pin, or Optional or Play Along (floors: at least 5 each on a Hidden or Who card
+     runs at least 15 times in a full run (a floor that fails); Archive and Delete take turns aiming at a
+     card that holds Hidden or Who, a rename or a pin, or Optional or Play Along; every world holds at least one
+     Hidden card, one Who card, one rename and one pin (floors: at least 5 each on a Hidden or Who card
      and 5 each on a renamed or pinned card).
 
    ── NOT modelled ──
@@ -259,6 +260,7 @@ const VERBOSE = ARGV.includes('--verbose');
 const BREAK_FAKE = argVal('--break-fake', '');
 const STALL_MS = 120000;
 if (!existsSync(join(ROOT, 'index.html'))) { console.error(`visible-loop: no index.html in ${ROOT}`); process.exit(1); }
+if (!Number.isInteger(SEED) || !Number.isInteger(CASES) || (ONE_CASE !== null && !Number.isInteger(ONE_CASE))) { console.error('visible-loop: --seed, --cases and --case take whole numbers'); process.exit(1); }
 if (BREAK_FAKE && !['merge', 'clock'].includes(BREAK_FAKE)) { console.error('visible-loop: --break-fake takes merge or clock'); process.exit(1); }
 
 /* ── Watchdog: exit 3 when no step has started for STALL_MS ── */
@@ -907,8 +909,15 @@ function genWorld(rng, today) {
   /* Renames on about 10% of the cards in play, and 0-3 pins (R11: Delete wipes both, Archive drops the pin). */
   d.activityTitles = {};
   inPlay.forEach(id => { if (chance(rng, 0.1)) d.activityTitles[id] = { en: 'Renamed ' + id }; });
-  const nPins = Math.floor(rng() * 4);
-  if (nPins) d.activityPins = inPlay.filter(id => !d.deletedActivities[id]).sort(() => rng() - 0.5).slice(0, nPins);
+  const nPins = 1 + Math.floor(rng() * 3);
+  const live = inPlay.filter(id => !d.deletedActivities[id]);
+  d.activityPins = live.slice().sort(() => rng() - 0.5).slice(0, nPins);
+  /* At least one of each cell Archive / Delete must handle, so every case has a card to aim at. */
+  if (live.length) {
+    if (!Object.keys(d.activityTitles).length) { const id = pick(rng, live); d.activityTitles[id] = { en: 'Renamed ' + id }; }
+    if (!Object.keys(d.hiddenActivities).length) d.hiddenActivities[pick(rng, live)] = true;
+    if (!Object.keys(d.activityStudents).length) d.activityStudents[pick(rng, live)] = { [pick(rng, UIDS)]: true };
+  }
   d.configVersion = Math.floor(rng() * 40);
   const progs = {};
   UIDS.forEach((u, i) => {
@@ -1057,7 +1066,7 @@ const CHANGE_KINDS = ['date', 'hide', 'who', 'wholeClass', 'optional', 'songPlac
 /* Which kind of change: a rotation over CHANGE_KINDS (slot = this case's start + the change's ordinal), so every
    kind runs about as often as every other; a kind that does not apply to this doc passes to the next one. Most
    changes aim at the student whose page is open (a card that student sees, that student's uid). */
-function pickChange(rng, d, today, progs, openUid, slot) {
+function pickChange(rng, d, today, progs, openUid, slot, aim) {
   const real = UIDS.includes(openUid);
   const seen = real ? mDocAnswers(d, progs[openUid], openUid, today).vis : [];
   const board = mMap(d, 'activityBoard');
@@ -1071,9 +1080,10 @@ function pickChange(rng, d, today, progs, openUid, slot) {
       return ids.length ? pick(rng, ids) : anyId();
     };
     /* A card that holds the cells Archive must keep and Delete must wipe: a busy() card is mostly one the open
-       student SEES, so it is rarely Hidden or someone else's (R11). Tiers, first one that has a card: Hidden or Who
-       (60%), a rename or a pin (25%), Optional or Play Along. */
-    const rich = () => {
+       student SEES, so it is rarely Hidden or someone else's (R11). Three tiers: Hidden or Who; a rename or a pin;
+       Optional or Play Along. Archive and Delete take them in turn (aim.n counts per case, starting at the case's
+       index, so a case replays alone exactly as in the full run), and every third one is an ordinary busy() card. */
+    const rich = t => {
       const live = IDS.filter(id => !mMap(d, 'deletedActivities')[id]);
       const pins = Array.isArray(d.activityPins) ? d.activityPins : [];
       const tiers = [
@@ -1081,11 +1091,9 @@ function pickChange(rng, d, today, progs, openUid, slot) {
         live.filter(id => id in mMap(d, 'activityTitles') || pins.includes(id)),
         live.filter(id => id in mMap(d, 'optionalActivities') || mMap(d, 'playAlongActivities')[id] === true),
       ];
-      const r = rng();
-      const order = r < 0.6 ? [0, 1, 2] : r < 0.85 ? [1, 0, 2] : [2, 0, 1];
-      for (const t of order) if (tiers[t].length) return pick(rng, tiers[t]);
-      return null;
+      return tiers[t].length ? pick(rng, tiers[t]) : null;
     };
+    const aimed = () => { const t = (aim.n++) % 3; return t === 2 ? (chance(rng, 0.5) ? rich(2) || busy() : busy()) : rich(t) || busy(); };
     const uid = real && chance(rng, 0.7) ? openUid : pick(rng, UIDS);
     switch (kind) {
       case 'date': return { kind, id: busy(), value: pick(rng, [today, modelAddDays(today, -1), modelAddDays(today, 1), modelAddDays(today, -9), '']) };
@@ -1095,8 +1103,8 @@ function pickChange(rng, d, today, progs, openUid, slot) {
       case 'optional': { const id = busy(); return { kind, id, on: !mOptionalFlag(ACT[id], d, !!mTicked(d, id)) }; }
       case 'songPlace': { const ids = IDS.filter(id => mIsSongCard(ACT[id])); if (!ids.length) continue; const id = pick(rng, ids); return { kind, id, toSongs: !mOnSongs(ACT[id], d) }; }
       case 'classSong': { const ids = IDS.filter(id => ACT[id].teacherOnly === true); if (!ids.length) continue; const id = pick(rng, ids); return { kind, id, on: mMap(d, 'classSongs')[id] !== true }; }
-      case 'archive': { const id = chance(rng, 0.75) ? (rich() || busy()) : busy(); return { kind, id, on: !mRetired(ACT[id], d) }; }
-      case 'delete': { const id = chance(rng, 0.75) ? (rich() || busy()) : busy(); if (mMap(d, 'deletedActivities')[id]) continue; return { kind, id }; }
+      case 'archive': { const id = aimed(); return { kind, id, on: !mRetired(ACT[id], d) }; }
+      case 'delete': { const id = aimed(); if (mMap(d, 'deletedActivities')[id]) continue; return { kind, id }; }
       case 'playAlong': { const ids = IDS.filter(id => ACT[id].view === 'card'); const id = pick(rng, ids); return { kind, id, on: mMap(d, 'playAlongActivities')[id] !== true }; }
       case 'clear': {
         const blk = mDocAnswers(d, progs[uid], uid, today).blk;
@@ -1224,6 +1232,7 @@ async function runCase(idx) {
   const readMode = () => { const r = rng(); return r < 0.66 ? 'ok' : r < 0.84 ? 'fail' : 'empty'; };
   const progMode = () => (chance(rng, 0.9) ? 'ok' : 'fail');
   let slot = idx * 5;
+  const aim = { n: idx };
 
   let con = await bootConsole(store);
   step(`case ${idx}: console booted`);
@@ -1341,7 +1350,7 @@ async function runCase(idx) {
     const labels = [];
     let after = store.read('config/class');
     for (let k = 0; k < nCh; k++) {
-      const ch = pickChange(rng, after, today, progs, openUid, slot++);
+      const ch = pickChange(rng, after, today, progs, openUid, slot++, aim);
       const lab = `R${r}.${k} ${chLabel(ch)}`;
       labels.push(ch.kind);
       after = await consoleChange(con, store, ch, lab, progs, today);
