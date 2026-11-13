@@ -1194,7 +1194,8 @@ function flushSave(closing){
          not the next student's: re-marking it dirty would write the reset
          page into the new student's doc once their read lands. */
       if(gen !== loadGen) return;
-      dirty = true; setSaveMsg('journey.saveFailed');
+      /* Still only in the page: a reload would drop it, and the next tick retries. */
+      dirty = true; setSaveMsg('journey.saveRetry');
     });
 }
 

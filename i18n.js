@@ -1505,6 +1505,10 @@
     'journey.saved':         { en: 'Saved ✓', es: 'Guardado ✓' },
     'journey.saveFailed':    { en: 'Not saved — check the internet connection, then reload the page.',
                                es: 'No se guardó — revisa la conexión a internet y luego actualiza la página.' },
+    // A write was refused while the page is up: the ticks are only in the page, a reload would drop them, and the
+    // next tick retries (flushSave in tabs/journey.js keeps them dirty). saveFailed is for the Google scripts never loading.
+    'journey.saveRetry':     { en: 'Not saved yet — check the internet connection, then tick a box again.',
+                               es: 'Todavía no se guardó — revisa la conexión a internet y luego marca una casilla otra vez.' },
     'journey.signin':        { en: 'Sign in on the class site to save your progress',
                                es: 'Inicia sesión en el sitio de la clase para guardar tu progreso' },
     'journey.slow':          { en: 'Slow ({bpm} BPM)', es: 'Lento ({bpm} BPM)' },
