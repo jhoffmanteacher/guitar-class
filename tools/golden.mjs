@@ -90,7 +90,8 @@
    <script> tag until the one before it has run: SETS used to fill in network arrival order,
    which moved the Daily Review picks from run to run); the boot waits for the whole
    catalogue (_bootCatchUp) before it records anything; the scroll position is set before
-   every picture (the top, or the open card at the top).
+   every picture (the top, or the open card at the top) and focus is taken off the page (no
+   focus ring); a view holding a lyric sheet is read once the sheet is drawn.
 
    The games (play/). A page script replaces, for that pass only: setTimeout, setInterval,
    requestAnimationFrame, requestIdleCallback and performance.now (a virtual clock the tool
@@ -134,7 +135,7 @@
       #class-activities-btn, #games-btn, #songs-screen, #class-activities-screen,
       #my-progress-screen, #games-screen, #search-panel, #games-panel, the hub cards
       [onclick="gamesShow('<key>')"], .main (the scrolling pane), .daily5-overlay,
-      .tp-close, .ca-card[open], textarea.step-resp-input, textarea.reflection-ta,
+      .tp-close, .ca-card[open], .pc-sheet-paper, .pc-sheet-msg, textarea.step-resp-input, textarea.reflection-ta,
       #period-btn-4, #fab-group, #fab-metro, #fab-timer, #fab-rec,
       #metro-popup [id^=meter-], #ladder-toggle, #timer-presets [id^=tp-],
       #live-quiz-screen, .lq-shell, #teacher-app, #t-side [data-view],
@@ -424,6 +425,10 @@ function pageFreeze() {
   // Which full pages are covering the set panels right now.
   window.__goldCovering = () => ['games-screen', 'search-panel', 'songs-screen', 'my-progress-screen', 'class-activities-screen', 'live-quiz-screen']
     .filter(id => { const el = document.getElementById(id); return el && !el.hasAttribute('hidden'); }).join(',');
+  /* Still drawing: a lyric sheet whose PDF page is not on its canvas yet (it can take seconds; one run recorded
+     the sheet drawn and another not). A sheet that failed shows its message and counts as done. */
+  window.__goldBusy = sel => { const root = document.querySelector(sel); if (!root) return false;
+    return [...root.querySelectorAll('.pc-sheet-paper')].some(p => !p.querySelector('canvas') && !(p.querySelector('.pc-sheet-msg') && /fail|no se pudo|couldn/i.test(p.querySelector('.pc-sheet-msg').textContent))); };
   window.__goldOpen = id => { const el = document.getElementById(id); return !!el && !el.hasAttribute('hidden'); };
   // Open dialogs: the site's modal overlays and any other aria-modal box that is not one of the full pages.
   window.__goldDialogs = () => [...document.querySelectorAll('.daily5-overlay, [aria-modal="true"], .video-modal')]
@@ -437,7 +442,9 @@ function pageFreeze() {
     if (/^(games-screen|live-quiz-screen)$/.test(e.id) || e.closest('[hidden]')) return;
     const b = e.querySelector('.tp-close, [data-close], button[aria-label*="lose"], button[aria-label*="errar"]'); if (b) b.click(); }); return 1; };
   // The scroll position before a picture: the top, or the element at the top.
-  window.__goldScroll = sel => { const e = sel && document.querySelector(sel);
+  // No focus ring in a picture: which control keeps focus after a page closes depends on timing (two runs differed).
+  window.__goldScroll = sel => { if (document.activeElement && document.activeElement !== document.body && document.activeElement.blur) document.activeElement.blur();
+    const e = sel && document.querySelector(sel);
     if (e) e.scrollIntoView({ block: 'start', inline: 'nearest', behavior: 'instant' });
     else { document.querySelectorAll('.main').forEach(m => m.scrollTo({ top: 0, left: 0, behavior: 'instant' })); window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); }
     return 1; };
@@ -458,7 +465,8 @@ function pageVirtualWorld() {
     call(r.fn, r.args);
     if (!virtual && r.every != null && T.get(id) === r) arm(id, r);
   }
-  W.setTimeout = (fn, ms, ...a) => { const id = ++seq, r = { fn, args: a, at: now() + Math.max(0, Number(ms) || 0), every: null }; T.set(id, r); if (!virtual) arm(id, r); return id; };
+  const CTXS = [];
+  W.setTimeout = (fn, ms, ...a) => { const id = ++seq, r = { fn, args: a, ms: Math.max(0, Number(ms) || 0), at: now() + Math.max(0, Number(ms) || 0), every: null }; T.set(id, r); if (!virtual) arm(id, r); return id; };
   W.setInterval = (fn, ms, ...a) => { const id = ++seq, every = Math.max(4, Number(ms) || 0), r = { fn, args: a, at: now() + every, every }; T.set(id, r); if (!virtual) arm(id, r); return id; };
   W.clearTimeout = W.clearInterval = id => { const r = T.get(id); if (!r) return; if (r.real != null) R.ct(r.real); T.delete(id); };
   W.requestAnimationFrame = fn => { const id = ++seq; F.set(id, fn); if (!virtual) FR.set(id, R.raf(() => { FR.delete(id); if (F.get(id) !== fn) return; F.delete(id); call(fn, [now()]); })); return id; };
@@ -470,8 +478,12 @@ function pageVirtualWorld() {
   const FRAME = 1000 / 30;
   const gv = W.__gv = {
     get virtual() { return virtual; },
-    on() { if (virtual) return 1; vnow = now(); virtual = true; lastFrame = vnow;
-      for (const r of T.values()) if (r.real != null) { R.ct(r.real); r.real = null; }
+    /* Virtual from here. The clock starts at a fixed value (later than any real reading so far), every pending
+       timer is re-armed at its own full delay from it and every fake audio clock reads 100 s: how long the boot
+       took in real time must not shift anything that follows (two runs differed by one frame). */
+    on() { if (virtual) return 1; vnow = 1e8; virtual = true; lastFrame = vnow;
+      for (const r of T.values()) { if (r.real != null) { R.ct(r.real); r.real = null; } r.at = vnow + (r.every != null ? r.every : r.ms); }
+      for (const c of CTXS) c._t0 = vnow - 100000;
       for (const [id, h] of FR) { R.caf(h); FR.delete(id); }
       return 1; },
     /* Move the clock: due timers in order, a frame every 1/30 s, and after each a real turn of the event loop so every promise settles. */
@@ -549,7 +561,7 @@ function pageVirtualWorld() {
     getFloatFrequencyData(buf) { buf.fill(-120); } getByteFrequencyData(buf) { buf.fill(0); }
   }
   class FakeAudioContext {
-    constructor(o) { this.sampleRate = (o && o.sampleRate) || SR; this._t0 = now(); this.state = 'running'; this.destination = new Node0(this, { maxChannelCount: 2 });
+    constructor(o) { CTXS.push(this); this.sampleRate = (o && o.sampleRate) || SR; this._t0 = now(); this.state = 'running'; this.destination = new Node0(this, { maxChannelCount: 2 });
       this.listener = {}; this.onstatechange = null; this.audioWorklet = { addModule: () => Promise.resolve() }; this.baseLatency = 0.01; this.outputLatency = 0.02; }
     get currentTime() { return Math.max(0, (now() - this._t0) / 1000); }
     getOutputTimestamp() { return { contextTime: this.currentTime, performanceTime: now() }; }
@@ -772,6 +784,7 @@ try {
   /* A view is recorded once it has stopped changing: `calm` + 1 reads 200 ms apart must agree. After 12 s it is
      recorded as it is and the wobble is noted in errors.json. With `see` the view must also be on screen. */
   const read = async (name, sel, calm = 1, see = true) => {
+    for (let i = 0; i < 75 && (await run(name + ':drawing', `__goldBusy(${JSON.stringify(sel)})`, 0)); i++) { if (i === 74) events.push({ step: name, kind: 'never-settled', text: 'a lyric sheet was still drawing after 15 s' }); await sleep(200); }
     let prev = await run(name, htmlExpr(sel), 0), same = 0, settled = false;
     for (let i = 0; i < 60; i++) { await sleep(200); const cur = await run(name, htmlExpr(sel), 0); if (cur === prev) { if (++same >= calm) { settled = true; break; } } else same = 0; prev = cur; }
     if (!settled) events.push({ step: name, kind: 'never-settled', text: 'the view was still changing after 12 s' });
@@ -1231,12 +1244,12 @@ try {
     const playOne = async (name, rootSel, endSel) => {
       await run(`play:${name}:intro`, '__gv.advance(1500)', 0);
       put(`play/${name}-first-screen.html`, lines(await run(`play:${name}:first`, htmlExpr(rootSel), 0)));
-      if (SHOTS) await shot(`shots/play-${name}-first.png`, null, false);
+      if (SHOTS) await shot(`shots/play-${name}-first.png`, rootSel === '#games-panel' ? null : rootSel, false);
       await run(`play:${name}:begin`, `__goldPlayBegin(${JSON.stringify(name)}, ${JSON.stringify(rootSel)})`, 0);
       let r = null;
       for (let s = 0; s < 60; s++) { r = await run(`play:${name}:${s}s`, '__goldPlayTick()', 0); if (!r || r.done) break; }
       put(`play/${name}-end.html`, lines(await run(`play:${name}:end`, htmlExpr(endSel || rootSel), 0)));
-      if (SHOTS) await shot(`shots/play-${name}-end.png`, null, false);
+      if (SHOTS) await shot(`shots/play-${name}-end.png`, rootSel === '#games-panel' ? null : rootSel, false);
       const res = await run(`play:${name}:result`, '__goldPlayEnd()', 0);
       if (res && !res.startedByItsCard && !res.clicks.some(c => /(Start|PlayAdaptive|GoReady|Spin)\(|coachStartCheck\(/.test(c.what))) fail(`play:${name}`, 'no Start-like button was ever pressed (clicks: ' + JSON.stringify(res.clicks.slice(0, 6)) + ')');
       return res;
@@ -1418,8 +1431,8 @@ try {
 
       /* The Arrange board and the other activity writers, driven for real (review R2-1). Each action finds its
          control on the board as it stands (the first that fits), acts the way a teacher does (a click, a typed
-         number, a picked option, a drag), and the record is what config/class gained and a fingerprint of the
-         board after it. A control that is not there fails the run. */
+         number, a picked option, a drag), and the record is what config/class gained, the board's order, and
+         the console as it stands after it (console/board/NN-<action>.html). A control that is not there fails the run. */
       await run('console:board-view', clickExpr('#t-side [data-view="activities"]'), 400);
       await run('console:board-def', `window.__goldBoard = {
         H: t => { let a = 0xdeadbeef ^ t.length, c = 0x41c6ce57 ^ t.length; for (let i = 0; i < t.length; i++) { const ch = t.charCodeAt(i); a = Math.imul(a ^ ch, 2654435761); c = Math.imul(c ^ ch, 1597334677); }
@@ -1470,8 +1483,10 @@ try {
         const did = await run(`console:board:${name}`, expr, 700);
         if (!did || /^no such control/.test(did)) fail(`console:board:${name}`, did || 'the action did not run');
         const after = flatten(JSON.parse((await cfg()) || '{}'));
-        const seen = await run(`console:board:${name}:seen`, `({ order: __goldBoard.order(), board: __goldBoard.H((document.querySelector('#t-grid-container') || document.body).innerHTML) })`, 0);
-        board.push({ action: name, did, changed: changedSince(before, after), ...(seen || {}) });
+        const order = await run(`console:board:${name}:order`, `__goldBoard.order()`, 0);
+        board.push({ action: name, did, changed: changedSince(before, after), order });
+        // What the console shows after it, whole (a difference points at a line).
+        put(`console/board/${String(board.length).padStart(2, '0')}-${safe(name)}.html`, lines(await read(`console:board:${name}:html`, '#t-grid-container', 2)));
       }
       put('console/board.json', JSON.stringify(board, null, 1) + '\n'); count('boardActions', board.length);
       put('console/store.json', (await run('console:store', `JSON.stringify([...__store.entries()].sort((a, b) => a[0] < b[0] ? -1 : 1), null, 1)`, 0)) + '\n');
