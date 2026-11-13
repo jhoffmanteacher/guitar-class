@@ -13,14 +13,28 @@
        skipped note, the whole line a fret off; in a chord row: one bar of another chord, two strums skipped, one chord held the whole
        row; in a strum pattern: missed strums, extra strums, strums on the wrong eighths;
      - two numbers FITTED to the real Listening Coach melody takes (FIT below): how loud a single plucked note is, and how long it rings.
+   A chord row and a strum pattern strum with student.mjs's own level (0.12 per string) and ring (1.0 s), fitted on Power Chord Switch.
 
    THE FIT (2026-11-13). The 8 real Listening Coach melody takes in tools/mic-sim/takes/ (period 4, 60 BPM, low E and A string lines;
    summaries only, no audio) were measured by listen-loop.mjs --fit, which prints the same numbers for the model next to them. Per note
    with a pick attack in the recording (45 notes): how far the attack's 512-sample block rises over the room (the take's 20th
    percentile block: median 12 dB, quartiles 10-16), how far it has fallen 300 ms later (median -7 dB) and how many pitch readings the
-   site got for it (21 of 45 under 2). FIT.noteAmp and FIT.ringS were chosen so that the `right` student in room4 (the room fitted to
-   the loud period-4 takes) lands near those numbers; what each value gives is in listen-loop.mjs's --fit output and the README. The
-   other numbers here (the touches, the timing spreads, the mistakes' sizes) are stated guesses, not fitted.
+   site got for it (23 of 45 under 2). FIT.noteAmp 0.05 and FIT.ringS 0.45 were chosen so that the `right` student in room4 (the room
+   fitted to the loud period-4 Power Chord Switch takes) lands near those three numbers: attack 14 dB over the room (real 12), fallen
+   6 dB after 300 ms (real 7), under 2 readings for 96 of 192 notes (real 23 of 45). Values tried: noteAmp 0.04 to 0.1 and ringS 0.4
+   to 0.45; in room4 the attack measure barely moves with noteAmp (the room's own peaks set it), so 0.05 rests mostly on the readings.
+   WHAT THE FIT DOES NOT FIX (2026-11-13, measured with --fit): on what it DOES read, the Coach calls the room4 student's right notes
+   wrong far more than in the real takes: right 8% / unclear 58% / wrong 32% (192 notes) against, for real notes with a pick attack,
+   33% / 47% / 20% (45 notes, some of them really wrong notes) and, for real notes clearly in the recording, 67% / 33% / 0% (27). The
+   cause is room4's pitched sound: with its other guitars and its voices both turned off (--fit-room) the wrong share falls to 0%, with
+   only the voices off to 25%, with only the guitars off to 45%; and the share of the 300 ms before each attack holding a pitch that is
+   not the student's is 28% in room4 against 9% in the real takes. room4 and room7 were fitted on loudness and strum onsets with
+   strums at 0.12 per string, which drown such room sound; a single note at 0.05 does not. The synthetic `class` room is the one that
+   sits inside the real numbers for single notes: attack 15 dB, fallen 6 dB, pitch before the attack 9% (real 9%), under 2 readings
+   40% (real 51%), right 56% / unclear 40% / wrong 4% (192 notes). So for the single-note games (Coach melody, Note Runner) read
+   `class` as the closest room, room4 and room7 as harsher than the real rooms, and quiet as kinder; the floor of `class` is quieter
+   than the real takes' (-39 against -23 dBFS). The other numbers here (the touches, the timing spreads, the mistakes' sizes) are
+   stated guesses, not fitted.
    NOT modelled: fret buzz, a string not pressed down fully, string noise from the left hand, a finger muting the next string, bends,
    vibrato, the student's own voice counting along, OS gain control, room echo. Read every number this produces as "the model says",
    not "the classroom does": the real takes outrank it. */

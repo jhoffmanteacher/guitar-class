@@ -25,7 +25,8 @@
        --fit            melody only: play the 8 real Coach melody takes' own lines (tools/mic-sim/takes/, summaries) with the `right` student
                         and print the model next to the real takes (how loud an attack is over the room, how fast it falls, how many pitch
                         readings the site got, what the Coach said). --rooms default room4,room7,quiet; --seeds default 3.
-                        --fit-amp=<raw RMS> and --fit-ring=<seconds> try other values of note-student.mjs FIT (only with --fit).
+                        --fit-amp=<raw RMS> and --fit-ring=<seconds> try other values of note-student.mjs FIT; --fit-room=<json> plays
+                        the room "trial", room4 with the fields given changed (for example {"talkLevel":0}). Only with --fit.
        --break=key      the fake-world self-test: the tool corrupts its own answer key (one note's pitch, or one strum played <-> not
                         played, in every take) and the key check must stop the run (exit 2). Never use it for a measurement.
        list             the student kinds of --game, the rooms and the mics
@@ -76,13 +77,20 @@
    RANK (for --against; higher = closer to the key): Coach slot, played right: ok = oct (2) > dim = miss (1) > wrong (0); played wrong
    (catchable): wrong (2) > dim = miss (1) > ok (0); not played: miss (2) > dim = wrong (1) > ok (0); a wrong or held chord the Coach passes
    by design ("design" / "between"): ok <-> wrong is counted on its own, into miss is WORSE. The gate, per take: a "pass" kind newly shut is
-   WORSE, a "fail" kind newly open is WORSE. Strum Radar, per written strum: played: hit (1) > miss (0); not played: miss (1) > hit (0).
+   WORSE, a "fail" kind newly open is WORSE; the same for the report's level and its "Right notes" line (a pass kind scored lower, or a fail
+   kind scored higher, is WORSE; "either" kinds are counted, not ranked). Strum Radar, per written strum: played: hit (1) > miss (0); not played: miss (1) > hit (0).
    Note Runner, per note: right: perfect = good (2) > pitch (1) > miss (0); wrong: pitch (2) > miss (1) > right (0); not played or past the
    window: miss (2) > pitch (1) > right (0).
 
    THESE ARE A MODEL'S NUMBERS, NOT THE CLASSROOM'S. The guitar and rooms were fitted on Power Chord Switch strums (low strings, two rooms);
-   the single note has two numbers fitted to the 8 real Coach melody takes (note-student.mjs FIT; --fit shows how close). The real takes
-   (replay-listen.mjs, closed-loop.mjs REAL TAKES) outrank everything here. Not in checks.mjs. */
+   the single note has two numbers fitted to the 8 real Coach melody takes (note-student.mjs FIT; --fit shows how close). WHICH ROOM TO
+   READ (--fit, 2026-11-13): for a single note, the fitted room4 and room7 are HARSHER than the real period-4 rooms (their other guitars
+   and voices get read as the student's note: the Coach called 32% / 41% of a right player's notes wrong, against at most 20% of the real
+   attacked notes); the synthetic `class` room lands inside the real numbers (right 56% / unclear 40% / wrong 4%; real 33-67% / 33-47% /
+   0-20%); quiet is kinder than any classroom. For strums (chords, Strum Radar) the rooms are the ones fitted on strums. The real takes
+   (replay-listen.mjs, closed-loop.mjs REAL TAKES) outrank everything here. Not in checks.mjs.
+   Time (8 cores, one run at a time): melody default 600 takes about 10 min, chords 300 about 8 min, Strum Radar 160 about 4 min, Note
+   Runner 72 about 4 min, --fit about 2 min a room. */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -369,7 +377,7 @@ function report(o, takes, log){
     }
   } else {
     log('\nPer note. "right" = the charted note on time; "wrong" = a fret off; "nothing" = not played, or played past the game\'s window (veryLate).');
-    log('student          room    | rounds | right notes: right / half / unclear / missed | wrong notes: half (caught) / unclear / said RIGHT / missed | nothing: said RIGHT / half / missed | score (median) | cleared (80%)');
+    log('student          room    | rounds | right notes: right / half / unclear / missed | wrong notes: half (caught) / unclear / said RIGHT / missed | nothing: said RIGHT / half / unclear / missed | score (median) | cleared (80%)');
     for (const kind of Object.keys(kinds)) for (const room of o.rooms){
       const sel = takes.filter(t => t.kind === kind && t.room === room);
       if (!sel.length) continue;
@@ -378,7 +386,7 @@ function report(o, takes, log){
       const c = k => countBy(by[k]), R = c('right'), W = c('wrong'), N = c('none');
       const f = (C, n, keys) => n ? keys.map(k => C[k] || 0).join(' / ') + ` of ${n}` : '-';
       const acc = sel.map(t => t.acc).sort((a, b) => a - b);
-      log(`${kind.padEnd(16)} ${room.padEnd(7)} | ${String(sel.length).padStart(6)} | ${f(R, by.right.length, ['right', 'half', 'unclear', 'missed']).padEnd(44)} | ${f(W, by.wrong.length, ['half', 'unclear', 'right', 'missed']).padEnd(58)} | ${f(N, by.none.length, ['right', 'half', 'missed']).padEnd(35)} | ${String(acc[Math.floor(acc.length / 2)] + '%').padEnd(14)} | ${sel.filter(t => t.gateOpen).length} of ${sel.length}`);
+      log(`${kind.padEnd(16)} ${room.padEnd(7)} | ${String(sel.length).padStart(6)} | ${f(R, by.right.length, ['right', 'half', 'unclear', 'missed']).padEnd(44)} | ${f(W, by.wrong.length, ['half', 'unclear', 'right', 'missed']).padEnd(58)} | ${f(N, by.none.length, ['right', 'half', 'unclear', 'missed']).padEnd(35)} | ${String(acc[Math.floor(acc.length / 2)] + '%').padEnd(14)} | ${sel.filter(t => t.gateOpen).length} of ${sel.length}`);
     }
     log('\nBY ROOM: rounds played right that did not clear the level (80%), and rounds not played right (veryLate, silent) that cleared it.');
     for (const room of o.rooms){
@@ -434,6 +442,9 @@ function compare(o, now, was, file){
     if (g === 'melody' || g === 'chords'){
       rankTake('level', kinds[t.kind].gate, lv(w.overall), lv(t.overall));
       rankTake('pitch', kinds[t.kind].gate, w.crits ? w.crits[0] : 0, t.crits ? t.crits[0] : 0);
+    } else {
+      rankTake('level', kinds[t.kind].gate, w.acc || 0, t.acc || 0);
+      if (g === 'radar') rankTake('pitch', kinds[t.kind].gate, w.stars || 0, t.stars || 0);
     }
     if (w.gateOpen !== t.gateOpen && t.gateOpen != null){
       gm++;
@@ -442,7 +453,8 @@ function compare(o, now, was, file){
       if (first.length < 12) first.push(`  take ${t.n} (${t.kind}, ${t.room}, ${t.item}): the ${g === 'runner' ? 'level' : 'gate'} was ${w.gateOpen ? 'OPEN' : 'shut'}, now ${t.gateOpen ? 'OPEN' : 'shut'} (should ${should})  ${k}   replay: --replay=${t.n}`);
     }
   });
-  const repLine = g === 'melody' || g === 'chords' ? `; the report's level moved in ${rep.level[0]} takes (${rep.level[1]} worse, ${rep.level[2]} better), its "Right notes" line in ${rep.pitch[0]} (${rep.pitch[1]} worse, ${rep.pitch[2]} better)` : '';
+  const repLine = g === 'melody' || g === 'chords' ? `; the report's level moved in ${rep.level[0]} takes (${rep.level[1]} worse, ${rep.level[2]} better), its "Right notes" line in ${rep.pitch[0]} (${rep.pitch[1]} worse, ${rep.pitch[2]} better)`
+    : `; the score moved in ${rep.level[0]} rounds (${rep.level[1]} worse, ${rep.level[2]} better)${g === 'radar' ? `, the stars in ${rep.pitch[0]} (${rep.pitch[1]} worse, ${rep.pitch[2]} better)` : ''}`;
   const lines = [`against ${file}: ${diff} of ${n} graded ${g === 'radar' ? 'strums' : 'notes'} differ (${worse} worse by the answer key, ${better} better${g === 'chords' ? `, ${design} a chord the Coach passes by design` : ''}, ${other} between two verdicts of the same rank) in ${now.takes.length - siteDiff} takes; ${g === 'radar' ? '' : `${g === 'runner' ? 'level cleared' : 'gate'} moved in ${gm} takes (${gw} worse, ${gb} better)`}${repLine}${siteDiff ? `; ${siteDiff} takes NOT compared: the site set up a different round (other notes or slots) with the same student` : ''}${diff || gm || siteDiff || rep.level[0] || rep.pitch[0] ? '  RED' : '  same'}`, ...first];
   return { code: diff || gm || siteDiff || rep.level[0] || rep.pitch[0] ? 1 : 0, lines };
 }
