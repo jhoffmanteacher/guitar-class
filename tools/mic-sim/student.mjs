@@ -118,7 +118,7 @@ export const STUDENTS = {
 };
 
 /* One string. pluck() starts a note; lift() lets it die in about 30 ms. */
-class StringVoice {
+export class StringVoice {
   constructor(r){ this.r = r; this.buf = new Float32Array(2); this.L = 0; this.i = 0; this.on = false; this.rho = 0; this.prev = 0; this.ax = 0; this.ay = 0; this.C = 0; this.rise = 0; this.riseN = 1; }
   pluck(midi, amp, touch, ringS){
     const f = 440 * Math.pow(2, (midi - 69) / 12), D = SR / f;
@@ -155,7 +155,7 @@ class StringVoice {
 
 /* A guitar being played: a list of timed events rendered into `air` (Float32Array,
    sample 0 = time 0 ms). */
-class Guitar {
+export class Guitar {
   constructor(r, ringS){ this.r = r; this.ringS = ringS; this.voices = Array.from({ length: 6 }, () => new StringVoice(r)); this.ev = []; }
   strum(atMs, midis, amp, touch){
     midis.forEach((m, k) => this.ev.push({ s: Math.round((atMs + k * touch.spreadMs / Math.max(1, midis.length - 1)) / 1000 * SR), k, m, amp: amp * (0.85 + 0.3 * this.r()), touch }));

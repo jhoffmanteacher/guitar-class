@@ -67,8 +67,9 @@ const VM = `globalThis.__lb = {
       gated: skillIsCoachGated(sid), gateHolds: skillIsCoachGated(sid) && coachSkillBest(sid) < COACH_GATE_MIN_LEVEL }));
     const out = { mode: c.mode, phase: c.phase, listenStart: c.listenStart, beatMs: c.beatMs, overall, crits, skills, saved: __lb.saved,
       slots: c.slots.map(s => ({ state: s.state, chord: s.chordName || null, devMs: s.hit && s.hit.devMs != null ? Math.round(s.hit.devMs * 10) / 10 : null,
-        n: s.hit && s.hit.readings ? s.hit.readings.length : null, look: !!s.secondLook })),
-      events: c.events.map(e => ({ t: Math.round(e.t * 10) / 10, slot: e.slot, n: (e.readings || []).length })),
+        n: s.hit && s.hit.readings ? s.hit.readings.length : null, look: !!s.secondLook, heard: s.hit && s.hit.midi != null ? s.hit.midi : null })),
+      events: c.events.map(e => ({ t: Math.round(e.t * 10) / 10, slot: e.slot, n: (e.readings || []).length, midi: e.midi == null ? null : e.midi,
+        rd: (e.readings || []).map(r => Math.round(r * 10) / 10) })),
       gate: COACH_GATE_MIN_LEVEL, minHeard: coachMinHeard(c.slots.length), matchWinMs: coachMatchWinMs() };
     coachClose();
     return JSON.stringify(out);
@@ -124,6 +125,7 @@ const VM = `globalThis.__lb = {
   srOut(){
     const s = sr;
     return JSON.stringify({ phase: s.phase, acc: s.acc, win: s.win, extras: s.extras, hits: s.notes.filter(n => n.result === 'ok').length, total: s.notes.length,
+      notes: s.notes.map(n => ({ t: n.t, bar: n.bar, dir: n.dir, result: n.result })), lat: s.lat, gridOffset: Math.round(s.gridOffset * 10) / 10,
       listenStart: s.listenStart, beatMs: s.beatMs, stars: s.acc >= 85 ? 3 : s.acc >= 65 ? 2 : s.acc >= 40 ? 1 : 0 });
   },
   patterns(){ return JSON.stringify(SH_PATTERNS.map(p => ({ id: p.id, defBpm: p.defBpm, slots: p.slots.filter(Boolean).length }))); },
@@ -157,12 +159,14 @@ export function benchSite(at, fromSummary){
    take(proc | sum, srcRate, mapMs): a recording (already through the site's mic chain, replay-takes.mjs prepare) or its summary; the
      site's clock runs mapMs ahead of the recording's.
    world(student, room, mic, seed, lagMs): a student.mjs Student in a room, rendered as the clock moves, with the count-in clicks the site
-     queues coming out of the speaker lagMs late (closed-loop.mjs playGame's pump, the same steps). */
+     queues coming out of the speaker lagMs late (closed-loop.mjs playGame's pump, the same steps). o.player (2026-11-13, listen-loop.mjs):
+     any object with render(air, fromMs, toMs) in place of the Student, and o.onRound(round) in place of student.play(round); proc()
+     gives the sound after the site's mic chain, as the site's analyser reads it. */
 export function takeSource(src, srcRate, mapMs){
   return { kind: 'take', start(site){ if (src.E) site.mic.sum = src; else { site.mic.proc = src; site.mic.upTo = src.length; } site.mic.sr = srcRate; site.mic.offsetMs = mapMs; }, pump(){} };
 }
 export function worldSource(o){
-  const student = new Student(o.student, { room: o.room, lagMs: o.lagMs == null ? 70 : o.lagMs, seed: o.seed || 1 });
+  const student = o.player || new Student(o.student, { room: o.room, lagMs: o.lagMs == null ? 70 : o.lagMs, seed: o.seed || 1 });
   const device = MICS[o.mic || 'chromebook'];
   let air = null, proc = null, rendered = 0, beepsDone = 0, devHp = null, hp = null, lp = null, site = null;
   const grow = s => { if (s <= air.length) return; const n = Math.max(s, air.length * 2); const a = new Float32Array(n), p = new Float32Array(n); a.set(air); p.set(proc); air = a; proc = p; site.mic.proc = proc; };
@@ -175,7 +179,8 @@ export function worldSource(o){
       site.mic.proc = proc; site.mic.upTo = rendered; site.mic.sr = SR; site.mic.offsetMs = 0;
     },
     /* round: what the student is told once the game has set it up (closed-loop.mjs playGame does the same at the count-in). */
-    round(r){ return student.play(r); },
+    round(r){ return o.onRound ? o.onRound(r) : student.play(r); },
+    proc(){ return proc.subarray(0, rendered); },
     pump(){
       const toS = Math.round(site.clock.now / 1000 * SR);
       grow(toS + SR);
