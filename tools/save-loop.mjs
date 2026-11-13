@@ -170,9 +170,14 @@
             built from nothing, and X made no owed change to that record after sending that write. Otherwise it is
             X's own action lost, never K1. A path effect counts as a change when it changes that tab's view, the
             stored doc, or a write of that tab after it carried it.
-         K2 two devices can save different path picks (WORKFLOW.md, 2026-11-09 product calls: "rare, nothing lost"):
-            only when the tab that picked last had loaded the doc (its view lacked the other pick because the other
-            device had not saved it yet, not because its read failed).
+         K2 an old path pick left standing beside the latest one: since 2026-11-12 the later pick wins on every device
+            (caPickPath un-ticks every other path), so this is excused only when the tab that picked last had loaded
+            the doc, its un-tick of the old pick LANDED, and the tab holding the old pick re-sent it after that (its
+            stale copy, the K1 shape). A latest pick that never sent the un-tick fails.
+         M2 a whole record (a practice-log entry, an exit-check result, the streak) left as a mixture of two tabs'
+            writes: every leaf that differs was excused as K1 and every other leaf was carried by a landed write
+            (merge keeps a leaf the stale copy does not name). Counted on its own line, not failed: the student can see
+            a personal best beside rep counts from another tab's stale copy.
          K3 a write started while the page unloads was not delivered (the CLOSE scenarios that say so): the value is
             what the doc would hold had that close not been a clean point.
      R12 Nothing the site runs may throw or leave a rejected promise unhandled (the global "Something went wrong"
@@ -910,6 +915,7 @@ function oracle(sc, world, tabs){
     const allLeafKeys = new Set(accept.keys());
     for (const v of okVals.values()){ const f = flatten(v, rec, new Map()); for (const k of allLeafKeys) if (!f.has(k)) accept.get(k).add('∅'); }
     accept.whole = new Set(okVals.keys());
+    accept.wholeVals = [...okVals.values()];
     return accept;
   };
   let leaves = 0;
@@ -943,8 +949,12 @@ function oracle(sc, world, tabs){
         const yView = viewBefore(tabBy[y], rec, effs, lastOwed);
         /* ...and the pick that stands came from another tab that did hold it. */
         const other = tabs.find(t => t.name !== y && viewsOf(t, rec, effs).has('true'));
-        /* ...and Y's view lacked it because Y loaded before it was there, not because Y's read failed (R2-2). */
-        if (canon(yView) === '∅' && tabBy[y].loadOk && other){ known.push({ kind: 'K2 path picks', leaf: k, stored: g, accept: [...set], by: other.name }); continue; }
+        /* ...and Y's view lacked it because Y loaded before it was there, not because Y's read failed (R2-2); and the
+           tab holding the old pick re-sent it AFTER Y's un-tick of it landed (R4-3): Y's pick must always un-tick the
+           other paths, so a standing old pick is only ever another tab's stale copy landing later. */
+        const yUntick = world.landed.filter(w => w.tab === y && !w.tx && w.at >= lastOwed.a.t && sentLeaf(w.data, leafPath0(k)) === '∅').map(w => w.at);
+        const resent = other && yUntick.length && world.landed.some(w => w.tab === other.name && !w.tx && w.at > Math.min(...yUntick) && sentLeaf(w.data, leafPath0(k)) === 'true');
+        if (canon(yView) === '∅' && tabBy[y].loadOk && other && resent){ known.push({ kind: 'K2 path picks', leaf: k, stored: g, accept: [...set], by: other.name }); continue; }
       }
       /* R11 K1: a key both tabs hold. */
       const leafPath = k.split('.');
@@ -1001,6 +1011,20 @@ function oracle(sc, world, tabs){
        must then be that tab's whole copy, one value the oracle's model of that tab held, never a mix of the two. */
     const k1s = known.filter(k => k.kind.startsWith('K1') && (k.leaf === rec.join('.') || k.leaf.startsWith(rec.join('.') + '.')));
     if (k1s.some(k => canon(viewAt(tabBy[k.by], rec, effs, k.sentAt)) === g)) continue;
+    /* ...or a mixture of two tabs' writes (R4-2): against some accepted value, every leaf that differs was excused as K1,
+       and every leaf that agrees was carried by a landed write (merge kept a leaf the stale copy did not name). Counted
+       on its own line: the student can see a personal best beside rep counts from another tab's stale copy. */
+    const k1Leaves = new Set(k1s.map(k => k.leaf));
+    const gf = flatten(getRec(stored, rec), rec, new Map());
+    const mixed = k1s.length && acceptOf(rec, effs, 'owed').wholeVals.some(W => {
+      const wf = flatten(W, rec, new Map());
+      return [...new Set([...wf.keys(), ...gf.keys()])].every(kk => {
+        const gv = gf.has(kk) ? gf.get(kk) : '∅', wv = wf.has(kk) ? wf.get(kk) : '∅';
+        if (gv !== wv) return k1Leaves.has(kk);
+        return gv === '∅' || world.landed.some(w => !w.tx && w.path === 'progress/' + USER.uid && sentLeaf(w.data, kk.split('.')) === gv);
+      });
+    });
+    if (mixed){ known.push({ kind: "M2 a record left as a mixture of two tabs' writes", leaf: rec.join('.'), stored: g, accept: [...whole] }); continue; }
     leaves++;
     const onlineRetry = acceptOf(rec, effs, 'owedStrict').whole.has(g);
     fails.push({ msg: `${rec.join('.')}: stored ${g}, a mixture no history gives; expected one of ${[...whole].join(' or ')}` + (onlineRetry ? ` [R10-online-retry: ${TAGS['R10-online-retry']}]` : ''), rule: onlineRetry ? 'R10-online-retry' : null });
@@ -1042,13 +1066,14 @@ function oracle(sc, world, tabs){
        does not navigate between sets, so after one of those the place is not compared (not modelled). */
     if (acts.some(a => a.kind === 'skill' || a.kind === 'rate')){ other.delete('lastModule'); other.delete('lastSet'); }
     for (const f of other){ leaves++; if (canon(stored[f]) !== canon(base ? base[f] : ABSENT)) fails.push({ msg: `${f}: stored ${canon(stored[f])}, expected ${canon(base ? base[f] : ABSENT)} (not touched by the student)` }); }
-  } else if (acts.length) fails.push({ msg: 'progress doc: never written' });
+  } else if (owedN > 0) fails.push({ msg: 'progress doc: never written' });
   for (const t of tabs) for (const f of t.faults) fails.push({ msg: `${t.name}: site code ${f} (R12)` });
   for (const f of world.faults || []) fails.push({ msg: `site code: ${f} (R12)` });
   return { fails, known, leaves, owedN, notOwedN };
 }
 /* What a merge write SAID about a leaf: its value, '∅' for a FieldValue.delete(), or null when it did not name the leaf
    (an absent key in a merge leaves the stored value alone, so it carries nothing). */
+const leafPath0 = k => k.split('.');
 function sentLeaf(data, path){
   let o = data;
   for (const p of path){ if (!o || typeof o !== 'object' || o instanceof FieldDelete || !(p in o)) return null; o = o[p]; }
@@ -1653,6 +1678,7 @@ async function main(){
   console.log('  by family: ' + Object.entries(fams).map(([k, v]) => `${k} ${v.n - v.fail}/${v.n}`).join(' · '));
   const tagLine = ['R16-wiped', 'R6-both-picks', 'R18-told'].map(k => `${k} ${byTag[k] || 0}`).concat([`untagged ${byTag.untagged || 0}`]).join(' · ');
   console.log(`  failing values by tag: ${tagLine}`);
+  console.log(`  a record left as a mixture of two tabs' writes (M2, not failed): ${knownKinds["M2 a record left as a mixture of two tabs' writes"] || 0}`);
   console.log(`  known exposures, not failed: ${knownN} values in ${knownCases} cases` + (knownN ? ' (' + Object.entries(knownKinds).map(([k, v]) => `${k}: ${v}`).join(', ') + ')' : ''));
   console.log(failed || staleKnown ? `save-loop: ✗ ${failed} of ${idxs.length} cases FAIL (failing values: ${tagLine})${staleKnown ? `, ${staleKnown} KNOWN entr${staleKnown === 1 ? 'y' : 'ies'} matched nothing` : ''}` : `save-loop: ✓ ${idxs.length} of ${idxs.length} cases pass`);
   if (opt('json', null)) writeFileSync(String(opt('json')), JSON.stringify(json, null, 1));
