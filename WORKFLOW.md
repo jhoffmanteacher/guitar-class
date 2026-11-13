@@ -383,6 +383,31 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-13 — Three safeguards and a console button (Jonathan: "yes for 1-3"; "One button, top of page").**
+      **GitHub runs the checks** (`.github/workflows/checks.yml`, `efcde89`): every push to main runs
+      `node tools/checks.mjs --check --skip-links` on GitHub, a second net behind the local hooks (which check nothing
+      when they print "node not found"). Read-only, skips the outside links, does not block the Pages deploy; a failed
+      run emails the pusher. Trial in a fresh depth-1 clone with a bare environment: exit 0; the first real run passed.
+      **Console backup: "Download a backup" at the top of Manage** (`teacher-backup.js`, its own part). Saves
+      `guitar-class-backup-YYYY-MM-DD.json` to the teacher's computer: `config/class`, every `progress/{uid}` RAW (no
+      Module 4/5 remap), `minutes/{uid}/weeks/*` (key `minutesWeeks`, `<uid>/<weekId>`), `issueReports/*`, Firestore
+      types tagged (`teacherBackupEncode` / `teacherBackupDecode`), a header with counts and the left-out list.
+      Read-only: no Firestore write, no rules change. A failed read saves NO file and names the collection. "Last
+      backup: N days ago" is per browser (localStorage `gc-teacher-backup-last`), a reminder line past 7 days or never.
+      Left out: mic takes (their own download), `micTakesMeta`, `liveQuiz`, `weekBoard` / `rankBoard`, minutes days and
+      the board tag (the teacher cannot read them), `minutesBoard`. No restore button (the console never writes
+      `progress/{uid}`); the restore steps are in the file's header. The weeks read is now `teacherPmWeeksGet()` in
+      `teacher-students.js`, shared with Practice minutes, so 1cg's one-minutes-read pin holds. Proof:
+      `node tools/backup-proof.mjs` (60 checks, 801 of 801 docs round-trip, 0 writes, 10 planted faults red).
+      **Mic recordings: "Download everything"** above the table (`teacher-mic.js`). There had never been a one-click
+      button; the only "one step" was the Mac command. One click runs Evaluate all, then saves ONE zip (same name as
+      Download all, so `takes-in.mjs` finds it) with each take's WAV and data plus `mic-eval-<day>.json`; the intake's
+      anonymizer ignores that extra file. The results go in only when that click's evaluation finished. It reads and
+      saves only. Node proof 10 of 10 cases, three planted faults red; 1cl's results-file pins now read
+      `teacherMicEvalJson()` (five plants, five red).
+      **Owed:** none of the console changes has been seen in a browser (Chrome was busy with the golden rebuild):
+      look at Manage and Mic recordings, and do one real download of each. **Still being built, not shipped:** the
+      anonymous error log (`feat/error-log`; needs a `firestore.rules` paste first and a deep review).
 - [x] **2026-11-13 — Listening bench step 4: `tools/mic-sim/listen-loop.mjs` + `note-student.mjs`.** Tools and docs
       only; shipped on the builder's proof (planted faults in `--root` copies, the fake-world self-tests, same
       command twice = same output), no review round (a tool; "Don't repeat verification that already passed").
