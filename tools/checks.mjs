@@ -5338,6 +5338,149 @@ async function checkLiveQuizNoNames() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1dk. LIVE IN-CLASS GAMES — the teacher's games list (2026-11-13, Jonathan:
+   "delete and re-order and rename games"). config/class.liveGames holds his
+   order, names and removed games (teacher-livegames.js); the picker, the
+   stage, the student screen and the invite read them through lqPickerIds()
+   and lqCustomTitle() (live-quiz.js). EXECUTES both files in a VM with the
+   site's real escHtml/escAttr and pins: (1) nothing saved = the bank's own
+   order and built-in titles in the picker; (2) an unknown or repeated id in
+   the saved order is ignored and every game still shows once; (3) a game new
+   to the bank goes to the end; (4) a removed game is not offered, and all
+   removed leaves no picker and no Start; (5) a custom name with markup,
+   quotes and 200 characters is escaped (and capped) in the picker, the list,
+   the rename editor, the stage lobby and the student screen in both
+   languages, and goes into the invite as text; (6) Start copies the name into
+   the session only when there is one; (7) every move lands the game at the
+   asked number and keeps every game exactly once.
+   ════════════════════════════════════════════════════════════════════ */
+function checkLiveGamesList() {
+  head('1dk. Live In-Class Games: the teacher\'s order, names and removed games');
+  let bad = 0, cases = 0;
+  const flag = m => { err(`1dk: ${m}`); problems++; bad++; };
+  const app = siteSource('app.js', ROOT);
+  const escSrc = ['escAttr', 'escHtml'].map(n => (app.match(new RegExp(`^const ${n} = .*$`, 'm')) || [''])[0]).join('\n');
+  if (!/escAttr/.test(escSrc) || !/escHtml/.test(escSrc)) { flag('could not find the site\'s escAttr / escHtml in the app script'); return; }
+  const els = {};
+  const mk = tag => ({ tag, children: [], attrs: {}, className: '', textContent: '', innerHTML: '', classList: { add() {}, remove() {}, toggle() {} },
+    setAttribute(k, v) { this.attrs[k] = String(v); }, hasAttribute: () => false, append(...c) { this.children.push(...c); }, appendChild(c) { this.children.push(c); },
+    addEventListener() {}, querySelectorAll: () => [], querySelector: () => null, focus() {}, select() {}, remove() {}, contains: () => false });
+  ['lq-controls', 'lq-stage', 'live-quiz-body', 'lq-games'].forEach(id => { els[id] = mk('div'); });
+  const box = {
+    console: { log() {}, warn() {}, error() {} }, performance: { now: () => 1e6 },
+    setInterval: () => 1, clearInterval() {}, setTimeout: () => 1, clearTimeout() {},
+    localStorage: { getItem: () => null, setItem() {} }, sessionStorage: { getItem: () => null, setItem() {} },
+    document: { hidden: false, activeElement: null, getElementById: id => els[id] || null, querySelectorAll: () => [], querySelector: () => null, addEventListener() {},
+      body: { classList: { add() {}, remove() {} }, appendChild(c) { box.__invite = c; } }, createElement: mk, contains: () => false },
+    t: k => `[${box.__lang}]${k}`, tIn: (k, l) => `[${l}]${k}`, getLang: () => box.__lang, __lang: 'en', applyI18n() {}, alert() {},
+    firebase: { firestore: { FieldValue: { serverTimestamp: () => '<ts>' } } }, teacherView: 'livequiz'
+  };
+  box.window = { addEventListener() {}, confirm: () => true };
+  try {
+    vm.createContext(box);
+    vm.runInContext(escSrc, box);
+    vm.runInContext(readFileSync(join(ROOT, 'live-quiz.js'), 'utf8'), box, { filename: 'live-quiz.js' });
+    vm.runInContext(readFileSync(join(ROOT, 'teacher-livegames.js'), 'utf8'), box, { filename: 'teacher-livegames.js' });
+    vm.runInContext('var teacherClassConfig = {}; var currentUser = { uid: "me", displayName: "Test Me" };', box);
+  } catch (e) { flag(`live-quiz.js + teacher-livegames.js would not load in the test VM: ${e.message}`); return; }
+  const run = code => vm.runInContext(code, box);
+  const setCfg = g => run(`teacherClassConfig = ${JSON.stringify(g === null ? {} : { liveGames: g })}; lqTSession = null;`);
+  const bank = run('Object.keys(LIVE_QUIZZES)');
+  if (bank.length < 3) { flag(`the bank has ${bank.length} games; the cases need 3`); return; }
+  const builtIn = id => run(`escHtml(tIn(LIVE_QUIZZES[${JSON.stringify(id)}].titleKey, 'en'))`);
+  const picker = () => { run(`lqTPickedQuizId = ${JSON.stringify(bank[0])}; lqPaintControls();`); const h = els['lq-controls'].innerHTML;
+    const sel = (h.match(/<select id="lq-quiz-pick"[\s\S]*?<\/select>/) || [''])[0];
+    return { html: h, opts: [...sel.matchAll(/<option value="([^"]*)"[^>]*>([^<]*)<\/option>/g)].map(m => [m[1], m[2]]) }; };
+  try {
+    // (1) nothing saved
+    for (const g of [null, {}, { order: [] }]) {
+      setCfg(g); cases++;
+      const p = picker();
+      const want = JSON.stringify(bank.map(id => [id, builtIn(id)]));
+      if (JSON.stringify(p.opts) !== want) flag(`nothing saved (${JSON.stringify(g)}): the picker is ${JSON.stringify(p.opts)}, not the bank's own order and titles ${want}`);
+      if (JSON.stringify(run('lqPickerIds()')) !== JSON.stringify(bank)) flag('nothing saved: lqPickerIds() is not the bank order');
+    }
+    // (2) unknown and repeated ids
+    const last = bank[bank.length - 1];
+    setCfg({ order: ['no-such-game', last, 7, null, last, '__proto__'] }); cases++;
+    const ids2 = run('lqPickerIds()');
+    if (JSON.stringify(ids2) !== JSON.stringify([last, ...bank.slice(0, -1)])) flag(`an unknown or repeated id in the saved order was not ignored: ${JSON.stringify(ids2)}`);
+    if (picker().html.includes('no-such-game')) flag('an unknown id reached the picker');
+    // (3) a game new to the bank (not in a saved order) goes to the end
+    setCfg({ order: bank.slice(1).reverse() }); cases++;
+    const ids3 = run('lqPickerIds()');
+    if (ids3.length !== bank.length || ids3[ids3.length - 1] !== bank[0]) flag(`a game missing from the saved order should be last: ${JSON.stringify(ids3)}`);
+    // (4) removed games
+    setCfg({ removed: { [bank[1]]: true } }); cases++;
+    const p4 = picker();
+    if (p4.opts.some(o => o[0] === bank[1]) || p4.opts.length !== bank.length - 1) flag(`a removed game is still offered: ${JSON.stringify(p4.opts)}`);
+    const list4 = run('lqgListHtml(teacherClassConfig)');
+    const archAt = list4.indexOf('data-lqg-arch');
+    if (archAt < 0 || list4.indexOf(`data-id="${bank[1]}"`) < archAt) flag('a removed game is not in the "Removed games" section of the list');
+    setCfg({ removed: Object.fromEntries(bank.map(id => [id, true])) }); cases++;
+    const p5 = picker();
+    if (p5.opts.length || /lq-quiz-pick|lqTeacherStart|lqTeacherPreview/.test(p5.html)) flag('every game removed, yet the strip still has a picker, Start or Preview');
+    if (!/Every game is removed/.test(p5.html) || !/Every game is removed/.test(run('lqgListHtml(teacherClassConfig)'))) flag('every game removed: the strip or the list does not say so');
+    // (5) a custom name is escaped (and capped) everywhere it shows
+    const EVIL = '<img src=x onerror="alert(1)">\'&amp;' + 'é'.repeat(200);
+    const capped = EVIL.slice(0, run('LQ_TITLE_MAX'));
+    const escd = run(`escHtml(${JSON.stringify(capped)})`);
+    const raw = /<img/;
+    const id5 = bank[0];
+    setCfg({ names: { [id5]: { en: EVIL, es: EVIL + 'ES' } } });
+    const looks = {};
+    looks.picker = picker().html;
+    looks.list = run('lqgListHtml(teacherClassConfig)');
+    run(`lqgEditId = ${JSON.stringify(id5)};`); looks.editor = run('lqgListHtml(teacherClassConfig)'); run('lqgEditId = null;');
+    const sess = { sessionId: 'S1', quizId: id5, state: 'lobby', qIndex: -1, scores: {}, title: { en: EVIL, es: '' } };
+    looks.stage = run(`lqStageLobbyHtml(${JSON.stringify(sess)}, lqQuiz(${JSON.stringify(id5)}))`);
+    for (const lang of ['en', 'es']) {
+      box.__lang = lang;
+      run(`lqSession = ${JSON.stringify(sess)}; lqSessionIsLive = () => true; lqRenderStudent();`);
+      looks['student-' + lang] = els['live-quiz-body'].innerHTML;
+      box.__invite = null; run('lqInviteDismissed = () => null; lqSyncInvite();');
+      const which = box.__invite && box.__invite.children[0].children.find(c => c.className === 'lq-invite-quiz');
+      cases++;
+      if (!which || which.textContent !== capped || which.attrs['data-i18n']) flag(`the invite (${lang}) does not carry the custom name as plain text: ${JSON.stringify(which && [which.textContent.slice(0, 60), which.attrs])}`);
+    }
+    box.__lang = 'en';
+    for (const [where, h] of Object.entries(looks)) {
+      cases++;
+      if (raw.test(h)) flag(`${where}: the custom name reached the HTML unescaped`);
+      if (where !== 'editor' && !h.includes(escd)) flag(`${where}: the custom name (escaped, capped at LQ_TITLE_MAX) is not shown`);
+      if (where === 'editor' && !h.includes(run(`escAttr(${JSON.stringify(capped)})`))) flag('editor: the custom name is not in its box, escaped for the attribute');
+    }
+    // (6) Start: a title only when there is a custom name
+    let wrote = null;
+    run('lqWrite = async (patch) => { __wrote(patch); return true; };');
+    box.__wrote = p => { wrote = JSON.parse(JSON.stringify(p)); };
+    box.document.getElementById = id => (id === 'lq-quiz-pick' ? { value: id5 } : els[id] || null);
+    for (const [g, want] of [[null, undefined], [{ names: { [id5]: { en: 'Test Game', es: '' } } }, { en: 'Test Game', es: 'Test Game' }], [{ names: { [id5]: { en: '', es: 'Juego' } } }, { en: '', es: 'Juego' }]]) {
+      setCfg(g); wrote = null; run('lqTeacherStart()'); cases++;
+      if (!wrote || JSON.stringify(wrote.title) !== JSON.stringify(want)) flag(`Start with ${JSON.stringify(g)} wrote title ${JSON.stringify(wrote && wrote.title)}, expected ${JSON.stringify(want)}`);
+    }
+    box.document.getElementById = id => els[id] || null;
+    // (7) every move lands where asked and keeps every game once (with one removed game holding its slot)
+    setCfg({ removed: { [bank[2]]: true } });
+    const active = run('lqgView(teacherClassConfig).active');
+    let moves = 0;
+    for (const id of active) for (let n = 0; n <= active.length + 1; n++) {
+      const next = run(`lqgMovedOrder(teacherClassConfig, ${JSON.stringify(id)}, ${n})`);
+      const cur = active.indexOf(id) + 1;
+      moves++;
+      if (n < 1 || n > active.length || n === cur) { if (next !== null) flag(`moving ${id} to ${n} should do nothing, got ${JSON.stringify(next)}`); continue; }
+      if (!next || next.length !== bank.length || new Set(next).size !== bank.length) { flag(`moving ${id} to ${n} lost or doubled a game: ${JSON.stringify(next)}`); continue; }
+      const nowActive = next.filter(x => x !== bank[2]);
+      if (nowActive.indexOf(id) + 1 !== n) flag(`moving ${id} to ${n} put it at ${nowActive.indexOf(id) + 1}`);
+    }
+    cases++;
+    if (moves < 20) flag(`only ${moves} moves tried`);
+  } catch (e) { flag(`a list, picker or stage render threw: ${e.message}`); return; }
+  if (cases !== 19) flag(`ran ${cases} cases, pinned at 19`);
+  if (bad === 0) ok(`${cases} cases over ${bank.length} games: nothing saved = the bank's order and titles; unknown ids ignored; a new game last; removed games not offered (none left = no picker, no Start); a custom name escaped and capped in the picker, list, editor, stage and student screen, plain text in the invite; Start copies it only when set; every move lands where asked`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1cu. LIVE QUIZ — "Name the power chord" never shows the name before Reveal
    (2026-11-10). The chord box is the question and the room reads the
    projector, so the stage and the control strip must not carry the chord's
@@ -7213,7 +7356,7 @@ function checkChordBlitzRanks() {
    deliberately, after a look at whether it can pass a `base` or needs the
    strict default.
    ═════════════════════════════════════════════════════════════════ */
-const CONFIG_WRITERS = 27;   // teacherWriteConfig() call sites in teacher.js — 27th: teacherSetPmWeekGoal (cell-checked on its pmWeekGoals week cell, one cell, the Practice minutes "This week's goal" box), 2026-11-09; 26th: teacherSetModuleHidden (cell-checked on each hiddenActivities row it writes), 2026-10-22; 25th: teacherSetClassSong (cell-checked on its classSongs row), 2026-10-22; 22nd/23rd: teacherSetActivityStudent (cell-checked on one student's tick) and teacherSetActivityWholeClass (strict), 2026-10-13; 24th: teacherSetSongPlace (cell-checked on its songLibrary row), 2026-10-20
+const CONFIG_WRITERS = 28;   // teacherWriteConfig() call sites in teacher.js — 28th: lqgWrite (teacher-livegames.js, the Live In-Class Games list; cell-checked on the one liveGames cell each change was worked out from: the order array, one name, one removed flag), 2026-11-13; 27th: teacherSetPmWeekGoal (cell-checked on its pmWeekGoals week cell, one cell, the Practice minutes "This week's goal" box), 2026-11-09; 26th: teacherSetModuleHidden (cell-checked on each hiddenActivities row it writes), 2026-10-22; 25th: teacherSetClassSong (cell-checked on its classSongs row), 2026-10-22; 22nd/23rd: teacherSetActivityStudent (cell-checked on one student's tick) and teacherSetActivityWholeClass (strict), 2026-10-13; 24th: teacherSetSongPlace (cell-checked on its songLibrary row), 2026-10-20
 function checkConfigWriteGuard() {
   head('1ai. Every config/class write goes through the stale-write guard');
   let bad = 0;
@@ -15851,6 +15994,7 @@ function checkPracticeMinutes(i18nTable) {
   checkLiveQuizTimerRepaint();
   checkLiveQuizAutoReveal();
   await checkLiveQuizNoNames();
+  checkLiveGamesList();
   await checkLiveQuizPcNameNoLeak();
   checkLiveQuizHideNames();
   checkCoachVerdicts();

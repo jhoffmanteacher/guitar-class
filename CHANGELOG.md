@@ -6,6 +6,11 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-13 — Live In-Class Games: your teacher can name the games
+
+- **A live game can now have a name your teacher picked.** You see it at the top of the game screen and on the invite, in Spanish too when your teacher gives a Spanish name.
+
+
 ## 2026-11-13 — Live In-Class Games: your teacher can hide the names on the scoreboard
 
 - **Your teacher can now hide the names on the big screen.** Then the scoreboard shows only each place and its points, and the waiting screen shows only how many joined. Your own screen still shows your place and your points. Names show unless your teacher turns this on.

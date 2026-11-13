@@ -709,7 +709,7 @@ function loadScriptOnce(src){
    into parts on 2026-11-11, tools/split-site.mjs). tools/site-src.mjs reads these two
    lines, so each stays ONE line that starts the line, and neither name may appear in any other comment. */
 const COACH_JS_PARTS = ['coach-core.js', 'coach-hub.js', 'coach-chords.js', 'coach-ear.js', 'coach-strum.js', 'coach-runner.js', 'coach-more.js'];
-const TEACHER_JS_PARTS = ['teacher-core.js', 'teacher-activities.js', 'teacher-songs.js', 'teacher-config.js', 'teacher-manage.js', 'teacher-mic.js', 'teacher-students.js', 'teacher-backup.js', 'teacher-errors.js'];
+const TEACHER_JS_PARTS = ['teacher-core.js', 'teacher-activities.js', 'teacher-songs.js', 'teacher-config.js', 'teacher-manage.js', 'teacher-mic.js', 'teacher-students.js', 'teacher-backup.js', 'teacher-errors.js', 'teacher-livegames.js'];
 /* One after another, each only when the one before it has run: a later part uses what an earlier part defines.
    Every file keeps its own loadScriptOnce promise, so a part that failed to load is the only one fetched again
    on the next try, and a part that already ran never runs twice (a second run would redeclare its consts). */

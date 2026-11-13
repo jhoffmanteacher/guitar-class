@@ -186,6 +186,27 @@ const LIVE_QUIZZES = {
 };
 const LQ_DEFAULT_QUIZ = 'string-id';
 function lqQuiz(id){ return LIVE_QUIZZES[id] || LIVE_QUIZZES[LQ_DEFAULT_QUIZ]; }
+/* The teacher's games list (teacher-livegames.js, the console's Live In-Class Games view;
+   stored in config/class.liveGames, 2026-11-13): his order, his names, the games he removed.
+   Only the console has that part; anywhere else (a student's page, a Journey page, a test VM)
+   both helpers give the bank as it ships.
+   lqPickerIds(): the games the picker offers, in his order, removed ones left out.
+   lqCustomTitle(lang, s, id): his name for a game, '' for "use the built-in title". With a
+   session `s`, the name copied into it at Start (`title: {en, es}`, frozen for that game, so a
+   student needs no read of config/class); without one, the console's saved name for `id`.
+   An empty Spanish name falls back to the English one. Capped and trimmed here too, since a
+   student renders whatever the session doc holds. */
+const LQ_TITLE_MAX = 60;
+function lqPickerIds(){ return typeof lqgActiveIds === 'function' ? lqgActiveIds() : Object.keys(LIVE_QUIZZES); }
+function lqCustomTitle(lang, s, id){
+  let src = null;
+  if(s) src = s.title;
+  else if(typeof lqgName === 'function' && typeof teacherClassConfig !== 'undefined') src = lqgName(teacherClassConfig, id);
+  if(!src || typeof src !== 'object') return '';
+  const clean = v => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim().slice(0, LQ_TITLE_MAX) : '');
+  const en = clean(src.en), es = clean(src.es);
+  return lang === 'es' ? (es || en) : en;
+}
 function lqChoice(quiz, id){ return quiz.choices.find(c=>c.id===id) || null; }
 // The strings a fret quiz may ASK on; `strings` alone unless the board shows more (pc-find).
 function lqRootStrings(quiz){ return quiz.rootStrings || quiz.strings || []; }
@@ -706,8 +727,12 @@ function lqSyncInvite(){
   // Which quiz, so a student can tell one game from the next.
   const which = document.createElement('div');
   which.className = 'lq-invite-quiz';
-  which.setAttribute('data-i18n', quiz.titleKey);
-  which.textContent = t(quiz.titleKey);
+  const custom = lqCustomTitle(typeof getLang === 'function' ? getLang() : 'en', live);
+  if(custom) which.textContent = custom;
+  else {
+    which.setAttribute('data-i18n', quiz.titleKey);
+    which.textContent = t(quiz.titleKey);
+  }
 
   const join = document.createElement('button');
   join.type = 'button';
@@ -828,7 +853,9 @@ function lqRenderStudent(){
     return;
   }
   const quiz = lqQuiz(s.quizId);
-  const title = `<div class="lq-quiz-title" data-i18n="${escAttr(quiz.titleKey)}">${escHtml(t(quiz.titleKey))}</div>`;
+  const custom = lqCustomTitle(typeof getLang === 'function' ? getLang() : 'en', s);
+  const title = custom ? `<div class="lq-quiz-title">${escHtml(custom)}</div>`
+    : `<div class="lq-quiz-title" data-i18n="${escAttr(quiz.titleKey)}">${escHtml(t(quiz.titleKey))}</div>`;
   let html;
   if(s.state === 'lobby')        html = title + lqStudentLobbyHtml();
   else if(s.state === 'question') html = title + lqStudentQuestionHtml(s, quiz);
@@ -1395,6 +1422,7 @@ function renderTeacherLiveQuiz(){
   lqPaintStage();
   lqPaintControls();
   lqStageSyncTick();
+  if(typeof lqgRender === 'function') lqgRender();   // the games list under the strip (teacher-livegames.js)
 }
 
 /* One shared 250ms tick for the projector's own countdown circle — mirrors
@@ -1521,7 +1549,8 @@ function lqStageLobbyHtml(s, quiz){
   const here = lqRoster(s).slice().sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
   // Names hidden (lqTHideNames): no chips at all, only the count above them.
   const chips = lqTHideNames ? '' : here.map(r => `<span class="lq-chip">${escHtml(r.name || '—')}</span>`).join('');
-  return lqBilingual(quiz.titleKey, 'lq-st-title')
+  const custom = lqCustomTitle('en', s);
+  return (custom ? `<div class="lq-st-title">${escHtml(custom)}</div>` : lqBilingual(quiz.titleKey, 'lq-st-title'))
     + lqBilingual('lq.stageJoin', 'lq-st-join')
     + `<div class="lq-st-count"><span class="lq-st-big">${here.length}</span>`
     + `${lqBilingual('lq.stageInGame', 'lq-st-cap')}</div>`
@@ -1709,8 +1738,15 @@ function lqPaintControls(){
     return;
   }
   if(!s || !s.state || s.state === 'off' || s.state === 'ended'){
-    const opts = Object.keys(LIVE_QUIZZES).map(id =>
-      `<option value="${escAttr(id)}"${id === lqTPickedQuizId ? ' selected' : ''}>${escHtml(tIn(LIVE_QUIZZES[id].titleKey, 'en'))}</option>`).join('');
+    const ids = lqPickerIds();
+    if(ids.length && !ids.includes(lqTPickedQuizId)){ lqTPickedQuizId = ids[0]; lqTScoring = lqDefaultScoring(ids[0]); }
+    if(!ids.length){
+      el.innerHTML = ((s && s.state === 'ended') ? `<button type="button" class="lq-ctl ghost" onclick="lqTeacherClose()"${busy}>Clear the board</button>` : '') + full
+        + `<div class="lq-ctl-hint">Every game is removed, so there is nothing to start. Open "Removed games" in the list below and press Restore.</div>`;
+      return;
+    }
+    const opts = ids.map(id =>
+      `<option value="${escAttr(id)}"${id === lqTPickedQuizId ? ' selected' : ''}>${escHtml(lqCustomTitle('en', null, id) || tIn(LIVE_QUIZZES[id].titleKey, 'en'))}</option>`).join('');
     const scoring = `<label class="lq-ctl-lbl">Scoring
       <select id="lq-scoring" onchange="lqTScoring=this.value">
         <option value="flat"${lqTScoring === 'flat' ? ' selected' : ''}>Every correct answer = 1000</option>
@@ -1808,15 +1844,19 @@ async function lqTeacherStart(){
   const quiz = lqQuiz(quizId);
   const speed = lqTScoring === 'speed';
   const sessionId = 'lq-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
+  // The teacher's own name for the game, frozen into the session (see lqCustomTitle);
+  // no `title` field at all when he kept the built-in one.
+  const custom = { en: lqCustomTitle('en', null, quizId), es: lqCustomTitle('es', null, quizId) };
+  const named = custom.en || custom.es ? { title: custom } : {};
   // A full overwrite, not a merge: a new game must not inherit last game's
   // scores, tally or correct answer.
-  await lqWrite({
+  await lqWrite(Object.assign({
     sessionId, quizId, state: 'lobby', qIndex: -1,
     correct: null, correctIds: null, tally: null, scores: {}, target: null,
     speedBonus: speed, limitSec: lqTLimitFor(quizId), totalQ: lqTTotal,
     startedAt: firebase.firestore.FieldValue.serverTimestamp(),
     askedAt: null, endedAt: null
-  }, true);
+  }, named), true);
 }
 
 /* ── Preview: the picked quiz on this console only (see lqTPreview) ── */
