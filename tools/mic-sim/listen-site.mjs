@@ -195,6 +195,9 @@ export function worldSource(o){
   };
 }
 
+/* The count-in's lead before its first click on an unrecorded take: COACH_COUNTIN_LEAD, or 100 ms on a site from before it was named. */
+function leadMs(site){ return Number(site.run("typeof COACH_COUNTIN_LEAD === 'undefined' ? 0.1 : COACH_COUNTIN_LEAD")) * 1000; }
+
 /* Runs the clock until `done()` says so: each step moves the clock one frame, gives the sound source its audio, then runs the site's due
    timers and animation frames. A guard stops a round that never ends. */
 function drive(site, src, frameMs, done, what){
@@ -213,7 +216,7 @@ function drive(site, src, frameMs, done, what){
    the report shows, what coachRenderReport saved for each skill and whether the check-off gate still holds. */
 export async function coachTake(site, src, o){
   site.reset();
-  const beatMs = 60000 / o.bpm, lead = Number(site.run('COACH_COUNTIN_LEAD')) * 1000;
+  const beatMs = 60000 / o.bpm, lead = leadMs(site);
   const beat1 = o.beat1 != null ? o.beat1 : 1000 + lead + 4 * beatMs;
   site.clock.now = beat1 - lead - 4 * beatMs;
   src.start(site);
@@ -223,7 +226,13 @@ export async function coachTake(site, src, o){
   await site.run('__lb.p');
   const [phase, ls] = site.run('__lb.coachPhase()').split('|');
   if (phase !== 'countin') throw new Error('listen-site: the Coach did not start its count-in (' + phase + ')');
-  if (Math.abs(Number(ls) - beat1) > 0.01) throw new Error(`listen-site: the Coach put beat 1 at ${ls}, not ${beat1}`);
+  /* A site whose count-in lead is not COACH_COUNTIN_LEAD (an older one, replaying a take on the code of its day) puts beat 1 elsewhere: the
+     recording moves with it, so the take's beat 1 still meets the site's. A source that is not a recording must be told exactly. */
+  const shift = Number(ls) - beat1;
+  if (Math.abs(shift) > 0.01){
+    if (src.kind !== 'take') throw new Error(`listen-site: the Coach put beat 1 at ${ls}, not ${beat1}`);
+    site.mic.offsetMs += shift;
+  }
   if (src.round){
     const slots = JSON.parse(site.run('coach.slots.length'));
     src.round({ listenStartMs: Number(ls), beatMs, bpc: 1, slots, seq: Array(slots).fill('X'), midis: { X: [] } });
@@ -236,7 +245,7 @@ export async function coachTake(site, src, o){
    frameMs }. Beat 1 is notes[0].t. */
 export async function nrRound(site, src, o){
   site.reset();
-  const lead = Number(site.run('COACH_COUNTIN_LEAD')) * 1000, beat1 = o.notes[0].t;
+  const lead = leadMs(site), beat1 = o.notes[0].t;
   site.clock.now = beat1 - lead - 4 * o.beatMs;
   src.start(site);
   const last = o.notes[o.notes.length - 1].t;
@@ -247,7 +256,10 @@ export async function nrRound(site, src, o){
   const err = site.run('__lb.nrStart(__lbArg)');
   if (err) throw new Error('listen-site: ' + err);
   const sh = Number(site.run('nr.shift'));
-  if (Math.abs(sh) > 0.01) throw new Error('listen-site: Note Runner put beat 1 ' + sh + ' ms off the take\'s');
+  if (Math.abs(sh) > 0.01){
+    if (src.kind !== 'take') throw new Error('listen-site: Note Runner put beat 1 ' + sh + ' ms off the take\'s');
+    site.mic.offsetMs += sh;
+  }
   drive(site, src, o.frameMs || 1000 / 60, () => site.run('__lb.nrPhase()') === 'done', 'the Note Runner round');
   return JSON.parse(site.run('__lb.nrOut()'));
 }

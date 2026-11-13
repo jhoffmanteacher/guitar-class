@@ -31,6 +31,11 @@
    --noise      replays each take again with its clock offset moved by -20, +20, -40, +40 and -100 ms (the noise bar tonight's Power
                 Chord Switch work used) and prints how far each count moves: a difference between two sites smaller than that is none.
    --against    an earlier --json of this command: per note, ranked by the recording (RANK below); exit 0 same, 1 moved, 2 not comparable.
+   --own-day    (with a folder of audio only) also replays each take on the site as it was when the take was saved (the last commit on
+                origin/main before the take's savedAt, unpacked with git archive into a temporary folder and deleted after), and prints
+                that "reproduced" line: the replay's OWN error, with no listening change in between. Measured 2026-11-12 on the 13 takes:
+                Coach melody 47 of 64, Coach chords 4 of 8, Note Runner 53 of 74 (today's site: 43, 4, 51). The time of day is read to pick
+                the commit and never printed; a summary keeps only the day, so this needs the audio.
    What it can judge: the matcher, the onset rule, the readings' consensus and vote, the second look, the chord-tone share, the slot
    verdicts and Note Runner's grade, on what the mic really heard. What it cannot: a change to coachDetectPitch, the mic chain, the level
    window or hop or the analyser size (the summaries hold readings made with the old ones: printed as CANNOT JUDGE, refused by
@@ -273,10 +278,33 @@ export async function realListen(at, log){
   return { takes: listenJson(takes), stale };
 }
 
+/* --own-day: each take on the site of its own day (see the header). */
+async function ownDay(takes, log){
+  const { execFileSync } = await import('node:child_process'), { mkdtempSync, rmSync } = await import('node:fs'), { tmpdir } = await import('node:os');
+  const repo = join(HERE, '..', '..'), tmp = mkdtempSync(join(tmpdir(), 'replay-listen-day-')), roots = {}, tot = {};
+  try {
+    for (const tk of takes){
+      if (typeof tk.d.savedAt !== 'string'){ log(`   ${tk.take}: no savedAt, not replayed on its own day`); continue; }
+      const c = execFileSync('git', ['rev-list', '-1', '--before=' + tk.d.savedAt, 'origin/main'], { cwd: repo, encoding: 'utf8' }).trim();
+      if (!c){ log(`   ${tk.take}: no commit before it`); continue; }
+      if (!roots[c]){ const dir = join(tmp, c.slice(0, 10)); execFileSync('mkdir', ['-p', dir]); execFileSync('sh', ['-c', `git archive ${c} | tar -x -C "${dir}"`], { cwd: repo }); roots[c] = dir; }
+      const r = await replayOne(tk, { root: roots[c] }, 0);
+      if (r.error){ log(`   ${tk.take}: ${r.error}`); continue; }
+      let n = 0, same = 0;
+      for (const nt of tk.notes){ const v = r.notes[nt.i]; if (!v) continue; n++; if (v.v === SAVED(tk, tk.d.expected[nt.i])) same++; }
+      const T = tot[tk.kind] = tot[tk.kind] || { same: 0, n: 0, commits: new Set() };
+      T.same += same; T.n += n; T.commits.add(c.slice(0, 7));
+    }
+  } finally { rmSync(tmp, { recursive: true, force: true }); }
+  log(`\n--own-day: each take replayed on the site of the day it was saved (the replay's own error, no listening change in between):`);
+  for (const [kind, name] of MODES) if (tot[kind]) log(`   ${name}: the replay gives the saved verdict on ${tot[kind].same} of ${tot[kind].n} notes (commits ${[...tot[kind].commits].join(', ')})`);
+}
+
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]){
   const args = process.argv.slice(2), folder = args.find(a => !a.startsWith('--'));
   const opt = k => { const a = args.find(x => x.startsWith('--' + k + '=')); return a ? a.slice(k.length + 3) : null; };
-  for (const a of args.filter(x => x.startsWith('--'))) if (!/^--(root|coach|json|against)=.+$/.test(a) && a !== '--noise'){ console.error('replay-listen: unknown argument ' + a); process.exit(2); }
+  for (const a of args.filter(x => x.startsWith('--'))) if (!/^--(root|coach|json|against)=.+$/.test(a) && a !== '--noise' && a !== '--own-day'){ console.error('replay-listen: unknown argument ' + a); process.exit(2); }
+  if (args.includes('--own-day') && !folder){ console.error('replay-listen: --own-day needs the folder of audio (a summary keeps no time of day)'); process.exit(2); }
   const at = opt('root') || opt('coach') ? { root: opt('root') ? resolve(opt('root')) : null, coach: opt('coach') ? resolve(opt('coach')) : null } : null;
   let was = null;
   if (opt('against')){ try { was = JSON.parse(readFileSync(opt('against'), 'utf8')); } catch (e){ console.error('replay-listen: cannot read ' + opt('against')); process.exit(2); } }
@@ -296,6 +324,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]){
     const shifts = args.includes('--noise') ? [0, ...NOISE_SHIFTS] : [0];
     await replayAllListen(takes, at, shifts, !folder);
     const report = printListen(takes, shifts, l => console.log(l));
+    if (args.includes('--own-day')) await ownDay(takes, l => console.log(l));
     console.log(`\n${takes.length} takes, ${shifts.length} replay(s) each, ${((Date.now() - t0) / 1000).toFixed(1)} s`);
     const json = { tool: 'replay-listen', from: folder ? 'audio' : 'summaries', takes: listenJson(takes), report };
     if (opt('json')) writeFileSync(opt('json'), JSON.stringify(json));

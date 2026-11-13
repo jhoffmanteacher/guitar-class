@@ -266,8 +266,10 @@ export function makeSite(coachFile, rule, ratio, fromSummary, siteRoot){
   vm.runInContext(coachSrc, ctx, { filename: 'coach.js' });
   const run = code => vm.runInContext(code, ctx);
   run(`globalThis.__cl = {
-    list(){ return JSON.stringify(CC_POWER_PROGRESSIONS.map((p, i) => ({ i, chords: p.chords, group: p.group, song: p.song || null, random: !!p.random }))); },
-    rates(){ return JSON.stringify(CC_RATES.map(r => r.id)); },
+    /* An older site (before Power Chord Switch, 2026-10-30) has no CC_POWER_PROGRESSIONS: an empty list, so the bench (replay-listen.mjs)
+       can still load it to replay a take on the code of its own day. */
+    list(){ return typeof CC_POWER_PROGRESSIONS === 'undefined' ? '[]' : JSON.stringify(CC_POWER_PROGRESSIONS.map((p, i) => ({ i, chords: p.chords, group: p.group, song: p.song || null, random: !!p.random }))); },
+    rates(){ return typeof CC_RATES === 'undefined' ? '[]' : JSON.stringify(CC_RATES.map(r => r.id)); },
     start(progIdx, bpm, rateIdx, lat){
       setLang('en'); ccSetup('power'); ccPickRate(rateIdx); ccPickProg(progIdx); cc.bpm = bpm;
       nrOffsetMs = lat;
@@ -285,7 +287,7 @@ export function makeSite(coachFile, rule, ratio, fromSummary, siteRoot){
     },
     /* Change Up (--game=changeup): the same steps as start() with ccSetup() as the Games hub calls it (no mode), and no capture stand-in,
        because Change Up never records (ccStart, ccBeginStage): a live capture would also move the count-in's first click (coachCountIn). */
-    listCu(){ return JSON.stringify(CC_PROGRESSIONS.map((p, i) => ({ i, chords: p.chords, random: !!p.random }))); },
+    listCu(){ return typeof CC_PROGRESSIONS === 'undefined' ? '[]' : JSON.stringify(CC_PROGRESSIONS.map((p, i) => ({ i, chords: p.chords, random: !!p.random }))); },
     startCu(progIdx, bpm, rateIdx, lat){
       setLang('en'); ccSetup(); ccPickRate(rateIdx); ccPickProg(progIdx); cc.bpm = bpm;
       nrOffsetMs = lat;
