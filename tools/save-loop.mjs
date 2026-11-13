@@ -8,7 +8,7 @@
 
    WHEN TO RUN IT. After any change to app/save.js (queueSave, flushSave, the delete queues, loadProgress, the
    Module 4/5 move), to logPracticeRep (app/drills.js), ecSubmit or flushOnHide (app/activities-2.js), or to
-   anything else that writes progress/{uid}. About 35 s for the default 180 cases. Node only: no browser, no network.
+   anything else that writes progress/{uid}. About 7-10 s for the default 180 cases (30 s on a busy machine). Node only: no browser, no network.
 
    FLAGS
      --cases=N          how many cases (default 180); each case is one scenario family (round robin) with its own seed
@@ -162,7 +162,8 @@
          date) and keeps the last 8 (save.js:487-490: "a short history instead of a single overwritten value").
      R17 Values are compared leaf by leaf; in addition an exit-check result, a practice-log entry and the streak (each
          written whole) must equal ONE value some history gives, not a mix of leaves from two (an old attempts count
-         beside a new score), when only one tab acted on it.
+         beside a new score), when only one tab acted on it; when its leaves were excused as K1, it must be exactly a
+         whole copy the oracle's model of the tab that sent it held.
 
    Reading a FAIL line: case index, family, the stored value, the values the oracle accepts, and the replay command. */
 import vm from 'node:vm';
