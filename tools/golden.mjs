@@ -78,7 +78,8 @@
        (review R2-2). A set picture is only taken once the set's panel is the active one and
        no page covers it; a dialog still open after Escape and its close button fails too;
      - two pictures that must differ are byte-identical (two sets, two filled sets, two live
-       quiz screens, two activities, two games, two screens, two console views);
+       quiz screens, two activities, two games' first screens or end screens, two screens, two
+       console views);
      - a listed write finds no control ("no such control"), in save/, console/writes.json and
        console/board.json (review R2-4), or a step of the tool itself fails (step-failed);
      - a navigation does not land (the set, the covering page, the live quiz screen).
@@ -98,8 +99,8 @@
    recorded guitar note never loads, so playNote always uses its synthesized pluck);
    getUserMedia (always yes); MediaRecorder; media play(). The fixed recording: from 1 s after
    the microphone opens, every 0.55 s a plucked string or a strummed chord (E2 A2 D3 G3 B3 E4,
-   E5 and A5 power chords, G, C and Em chords, then a rest), each a decaying sum of three
-   harmonics, plus a faint fixed hiss. The same samples on every run.
+   E5 and A5 power chords, G, C and Em chords, then a rest), each a sum of three harmonics
+   dying away in about 0.2 s, plus a faint fixed hiss. The same samples on every run.
    Each game: its card on the Games screen is clicked; its first screen is recorded; then a
    fixed student: until the game has started, a Start-like button (…Start(, …PlayAdaptive(,
    …GoReady(, …Spin() is pressed, or else the first non-exit button (at most 4 times); once
@@ -110,8 +111,9 @@
    early when an Again button shows. Recorded: every click with its virtual time, a
    fingerprint of the game panel after every second, the panel at the end, and what the game
    wrote to the student's `games` map and to the (stub) server. The Listening Coach: the first
-   melody and the first chord Coach button in course order that shows when its set opens (in
-   an open step), Start pressed, up to 60 s, the report recorded.
+   melody and the first chord Coach button in course order that shows with the lesson on
+   "All steps" (its step opened by its head when closed), Start pressed, up to 60 s, the
+   report recorded.
    Games LEFT OUT: Tuning Simulator (a page of its own, tuning-sim.html: its first screen is
    recorded under pages/, but nothing is played: it is driven by dragging tuning pegs, which
    this student does not do). No other game is left out; the run prints the list it played.
@@ -501,12 +503,12 @@ function pageVirtualWorld() {
     for (let j = 0; j < SR; j++) {
       const t = t0 + j / SR; let v = 0;
       const kHi = Math.floor((t - 1) / 0.55);
-      for (let k = Math.max(0, kHi - 3); k <= kHi; k++) {
+      for (let k = Math.max(0, kHi - 2); k <= kHi; k++) {
         const notes = PLAN[k % PLAN.length];
         for (let s = 0; s < notes.length; s++) {
           const st = 1 + k * 0.55 + s * 0.012, dt = t - st;
-          if (dt < 0 || dt > 2.2) continue;
-          const env = 0.16 * Math.exp(-dt / 0.45) * Math.min(1, dt / 0.003), w = 2 * Math.PI * hz(notes[s]) * dt;
+          if (dt < 0 || dt > 1.2) continue;
+          const env = 0.16 * Math.exp(-dt / 0.2) * Math.min(1, dt / 0.003), w = 2 * Math.PI * hz(notes[s]) * dt;
           v += env * (Math.sin(w) + 0.5 * Math.sin(2 * w) + 0.25 * Math.sin(3 * w));
         }
       }
@@ -1195,7 +1197,8 @@ try {
     if (!ladder) fail('save:untick', 'no such control: no activity shows Got it on its last step');
     else {
       const lastGotIt = `(() => { const want = "caFocusGotIt('${ladder.id}',${ladder.last})"; const b = [...document.querySelectorAll('.ca-card[open] [onclick^="caFocusGotIt("]')].find(x => x.getAttribute('onclick') === want); if (!b) return 'no such control: no Got it on the last step of ${ladder.id}'; b.click(); return ${JSON.stringify(ladder.id)} + ': ' + b.getAttribute('onclick'); })()`;
-      await caAct('tick the last step of an activity', lastGotIt);
+      // The card may re-open on its first open step a moment after it is asked for: go to the last step first, as a student taps it.
+      await caAct('tick the last step of an activity', `(caFocusGo(${JSON.stringify(ladder.id)}, ${ladder.last}), ${lastGotIt})`);
       await caAct('untick that step', `(caFocusGo(${JSON.stringify(ladder.id)}, ${ladder.last}), ${lastGotIt})`);
     }
     // A class period, picked in the picker a student who has not answered sees.
@@ -1252,14 +1255,22 @@ try {
     await run('play:games-close-settle', '__gv.advance(1000)', 0);
     for (const [kind, sel] of [['melody', '.coach-btn[data-midis]'], ['chords', '.coach-btn[data-chords]']]) {
       const where = await run(`play:coach-${kind}:find`, `(async () => { const order = [...SETS].sort((a, b) => a.moduleNum - b.moduleNum);
-        for (const w of order) { if (lastModuleNum !== w.moduleNum) { onModuleChange(w.moduleNum); await __gv.advance(400); } activateSet(w.id); await __gv.advance(100);
-          const b = [...document.querySelectorAll('.week-panel[data-id="' + w.id + '"] ${sel}')].find(x => x.getClientRects().length); if (b) { b.scrollIntoView({ block: 'center', behavior: 'instant' }); b.click(); await __gv.advance(800); return w.id; } }
+        // "All steps" (the switch a student has at the top of the lesson), so a Coach button in a later step shows.
+        for (const w of order) { if (lastModuleNum !== w.moduleNum) { onModuleChange(w.moduleNum); await __gv.advance(400); } activateSet(w.id); setStationView(false); await __gv.advance(100);
+          let b = null;
+          for (const x of document.querySelectorAll('.week-panel[data-id="' + w.id + '"] ${sel}')) {
+            // A Coach button in a closed step: open the step by its head, as a student does.
+            const li = x.closest('li.step'), head = li && li.classList.contains('collapsed') && li.querySelector('.step-head');
+            if (!x.getClientRects().length && head) { head.click(); await __gv.advance(200); }
+            if (x.getClientRects().length) { b = x; break; }
+          }
+          if (b) { b.scrollIntoView({ block: 'center', behavior: 'instant' }); b.click(); await __gv.advance(800); return w.id; } }
         return null; })()`, 0);
       if (!where) { fail(`play:coach-${kind}`, `no set has ${sel}`); continue; }
       if (!(await run(`play:coach-${kind}:open`, `!!coachBody()`, 0))) { fail(`play:coach-${kind}`, 'the Coach did not open from its button in ' + where); continue; }
       const res = await playOne(`coach-${kind}`, '#coach-body');
       put(`play/coach-${kind}.json`, JSON.stringify({ set: where, ...res, phase: await run(`play:coach-${kind}:phase`, `coach ? coach.phase : null`, 0), serverGames: JSON.parse((await serverGames()) || 'null') }, null, 1) + '\n'); count('coachPlayed');
-      await run(`play:coach-${kind}:close`, `(typeof coachClose === 'function' && coachClose(), 1)`, 0);
+      await run(`play:coach-${kind}:close`, `(typeof coachClose === 'function' && coachClose(), setStationView(true), 1)`, 0);
       await run(`play:coach-${kind}:settle`, '__gv.advance(2000)', 0);
     }
     put('play/state.json', (await run('play:state', `JSON.stringify(JSON.parse(${STATE}), null, 1)`, 0)) + '\n');
@@ -1470,11 +1481,13 @@ try {
 
   /* Pictures that must differ (review R2-2: 49 set pictures were one picture of the In class screen). */
   if (SHOTS && existsSync(join(outDir, 'shots'))) {
-    const groups = [['set-', 'sets'], ['filled-set-', 'filled sets'], ['livequiz-student-', 'live quiz screens'], ['activity-', 'activities'], ['play-', 'games'], ['screen-', 'screens'], ['console-view-', 'console views']];
+    // Each group holds pictures of DIFFERENT things (two sets, two games' first screens …), never two states of one.
+    const groups = [[/^set-/, 'sets'], [/^filled-set-/, 'filled sets'], [/^livequiz-student-/, 'live quiz screens'], [/^activity-/, 'activities'],
+      [/^play-.*-first\.png$/, 'games (first screens)'], [/^play-.*-end\.png$/, 'games (end screens)'], [/^screen-/, 'screens'], [/^console-view-/, 'console views']];
     const files = readdirSync(join(outDir, 'shots')).filter(f => f.endsWith('.png'));
-    for (const [pre, what] of groups) {
+    for (const [re, what] of groups) {
       const byHash = new Map();
-      for (const f of files.filter(f => f.startsWith(pre))) {
+      for (const f of files.filter(f => re.test(f))) {
         const h = createHash('sha1').update(readFileSync(join(outDir, 'shots', f))).digest('hex');
         if (!byHash.has(h)) byHash.set(h, []); byHash.get(h).push(f);
       }
