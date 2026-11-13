@@ -1,0 +1,323 @@
+# The slow browser tests, on GitHub's computers instead of the Mac (2026-11-13).
+#
+# Each push to main runs tools/smoke.mjs in English as five jobs side by side, one
+# per area (the areas in the header of tools/smoke.mjs). Three slower tools run
+# only when the push changed the files they guard:
+#   tools/slow-load.mjs           index.html, sw.js, app/boot.js, app/start.js
+#   tools/update-reload-loop.mjs  sw.js, app/start.js, app/boot.js, teacher-core.js
+#   tools/playalong-loop.mjs      app/cards.js, app/snippets.js, class-activities.js
+# (and each when its own tool file, or this workflow, or tools/ci/ changed).
+# The full walk in both languages stays the Friday check's; here it is only a
+# manual run: Actions -> Browser tests -> Run workflow -> "full".
+#
+# Nothing here blocks a push or the Pages deploy (that is GitHub's separate
+# "pages build and deployment" run); a red run means "look at the last push".
+# Chrome is Chrome for Testing at a pinned version (CHROME_VERSION below), the
+# same one as on the Mac; change it here when the Mac's copy moves.
+#
+# Reading a failure without logging in: every tool runs through
+# tools/ci/run-and-annotate.mjs, which puts the failure and the last 40 lines of
+# the tool's output into the job's check-run annotations (served by GitHub's
+# public API) and keeps the whole output as a downloadable artifact.
+#
+# Pushing a branch named ci-try/<anything> runs this workflow too, to try a
+# change to it before it reaches main.
+name: Browser tests
+
+on:
+  push:
+    branches: [main, 'ci-try/**']
+  workflow_dispatch:
+    inputs:
+      full:
+        description: 'Run the full smoke walk (English and Spanish, every area) instead of the five English jobs'
+        type: boolean
+        default: false
+      slow:
+        description: 'Run slow-load, update-reload and playalong whatever changed'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+env:
+  CHROME_VERSION: '157.0.8103.78'
+  NODE_VERSION: '24'
+
+jobs:
+  # Which slow-lane tools this push needs. A push of several commits is compared
+  # with the commit before the push (github.event.before); a new branch, or a
+  # before-commit GitHub no longer has, falls back to the last commit alone.
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      slow_load: ${{ steps.pick.outputs.slow_load }}
+      update_reload: ${{ steps.pick.outputs.update_reload }}
+      playalong: ${{ steps.pick.outputs.playalong }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Which files changed
+        id: pick
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          RUN_SLOW: ${{ inputs.slow }}
+        run: |
+          set -u
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            all=false; [ "$RUN_SLOW" = "true" ] && all=true
+            echo "A manual run: slow lane = $all"
+            { echo "slow_load=$all"; echo "update_reload=$all"; echo "playalong=$all"; } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          base=""
+          if [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
+            if git cat-file -e "$BEFORE^{commit}" 2>/dev/null || git fetch --no-tags --depth=1 origin "$BEFORE"; then base="$BEFORE"; fi
+          fi
+          if [ -z "$base" ] && git rev-parse -q --verify 'HEAD~1^{commit}' >/dev/null; then base="HEAD~1"; fi
+          if [ -z "$base" ]; then
+            echo "No commit to compare with: the whole slow lane runs."
+            { echo "slow_load=true"; echo "update_reload=true"; echo "playalong=true"; } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          changed="$(git diff --name-only "$base" HEAD)"
+          echo "Compared with $base; changed files:"
+          printf '%s\n' "$changed"
+          self='^(\.github/workflows/browser\.yml|tools/ci/)'
+          # A here-string, not a pipe: under pipefail, grep -q closing the pipe early could fail the match.
+          pick() { if grep -Eq "$1|$self" <<< "$changed"; then echo true; else echo false; fi; }
+          slow_load="$(pick '^(index\.html|sw\.js|app/boot\.js|app/start\.js|tools/slow-load\.mjs)$')"
+          update_reload="$(pick '^(sw\.js|app/start\.js|app/boot\.js|teacher-core\.js|tools/update-reload-loop\.mjs)$')"
+          playalong="$(pick '^(app/cards\.js|app/snippets\.js|class-activities\.js|tools/playalong-loop\.mjs)$')"
+          echo "slow-load: $slow_load; update-reload: $update_reload; playalong: $playalong"
+          { echo "slow_load=$slow_load"; echo "update_reload=$update_reload"; echo "playalong=$playalong"; } >> "$GITHUB_OUTPUT"
+
+  # One English smoke walk per area, side by side. A newer push to the same
+  # branch cancels the older one's smoke jobs.
+  smoke:
+    name: smoke ${{ matrix.area }} (English)
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.full) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    concurrency:
+      group: browser-smoke-${{ github.ref }}-${{ matrix.area }}
+      cancel-in-progress: true
+    strategy:
+      fail-fast: false
+      matrix:
+        area: [sets, games, activities, practice-minutes, tuning-sim]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      # Ubuntu 24.04 stops a downloaded Chrome from using its sandbox (AppArmor
+      # blocks unprivileged user namespaces). Option 1 of Chromium's own note
+      # (docs/security/apparmor-userns-restrictions.md), on a throwaway runner,
+      # so no tool has to run Chrome with --no-sandbox.
+      - name: Let Chrome use its sandbox
+        run: if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns; fi
+      - uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
+        id: chrome
+        with:
+          chrome-version: ${{ env.CHROME_VERSION }}
+          install-dependencies: true
+      - name: Chrome starts
+        timeout-minutes: 3
+        env:
+          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          node tools/ci/run-and-annotate.mjs --title "Chrome start" --log ci-out/chrome-start.log --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
+      - name: node tools/smoke.mjs --en-only --only ${{ matrix.area }}
+        env:
+          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+          AREA: ${{ matrix.area }}
+        run: |
+          node tools/ci/run-and-annotate.mjs --title "smoke $AREA" --log "ci-out/smoke-$AREA.log" --summary '^smoke: (✓|✗|[0-9]+ sets)' --deadline 45 -- node tools/smoke.mjs --en-only --only "$AREA"
+      - name: Keep the output
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: smoke-${{ matrix.area }}
+          path: ci-out/
+          if-no-files-found: warn
+          retention-days: 14
+
+  # The full walk, English and Spanish, every area: a manual run only.
+  smoke-full:
+    name: smoke, full walk (English and Spanish)
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.full }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Let Chrome use its sandbox
+        run: if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns; fi
+      - uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
+        id: chrome
+        with:
+          chrome-version: ${{ env.CHROME_VERSION }}
+          install-dependencies: true
+      - name: Chrome starts
+        timeout-minutes: 3
+        env:
+          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          node tools/ci/run-and-annotate.mjs --title "Chrome start" --log ci-out/chrome-start.log --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
+      - name: node tools/smoke.mjs
+        env:
+          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          node tools/ci/run-and-annotate.mjs --title "smoke full walk" --log ci-out/smoke-full.log --summary '^smoke: (✓|✗|[0-9]+ sets|Tuning)' --deadline 45 -- node tools/smoke.mjs
+      - name: Keep the output
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: smoke-full
+          path: ci-out/
+          if-no-files-found: warn
+          retention-days: 14
+
+  # The slow lane. A newer push does NOT cancel a run already going: it may be
+  # the only run that saw a change to the files it guards. (A newer push still
+  # replaces one that is only waiting.)
+  slow-load:
+    name: slow-load
+    needs: changes
+    if: ${{ needs.changes.outputs.slow_load == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    concurrency:
+      group: browser-slow-load-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Let Chrome use its sandbox
+        run: if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns; fi
+      - uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
+        id: chrome
+        with:
+          chrome-version: ${{ env.CHROME_VERSION }}
+          install-dependencies: true
+      - name: Chrome starts
+        timeout-minutes: 3
+        env:
+          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          node tools/ci/run-and-annotate.mjs --title "Chrome start" --log ci-out/chrome-start.log --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
+      - name: node tools/slow-load.mjs
+        env:
+          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          node tools/ci/run-and-annotate.mjs --title "slow-load" --log ci-out/slow-load.log --summary 'slow-load' --deadline 55 -- node tools/slow-load.mjs
+      - name: Keep the output
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: slow-load
+          path: ci-out/
+          if-no-files-found: warn
+          retention-days: 14
+
+  update-reload:
+    name: update-reload-loop
+    needs: changes
+    if: ${{ needs.changes.outputs.update_reload == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    concurrency:
+      group: browser-update-reload-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Let Chrome use its sandbox
+        run: if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns; fi
+      - uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
+        id: chrome
+        with:
+          chrome-version: ${{ env.CHROME_VERSION }}
+          install-dependencies: true
+      - name: Chrome starts
+        timeout-minutes: 3
+        env:
+          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          node tools/ci/run-and-annotate.mjs --title "Chrome start" --log ci-out/chrome-start.log --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
+      - name: node tools/update-reload-loop.mjs
+        env:
+          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          node tools/ci/run-and-annotate.mjs --title "update-reload" --log ci-out/update-reload.log --summary '^update-reload: ([0-9]+ of|✗)' --deadline 95 -- node tools/update-reload-loop.mjs
+      - name: Keep the output
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: update-reload
+          path: ci-out/
+          if-no-files-found: warn
+          retention-days: 14
+
+  playalong:
+    name: playalong-loop
+    needs: changes
+    if: ${{ needs.changes.outputs.playalong == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    concurrency:
+      group: browser-playalong-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Let Chrome use its sandbox
+        run: if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns; fi
+      - uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
+        id: chrome
+        with:
+          chrome-version: ${{ env.CHROME_VERSION }}
+          install-dependencies: true
+      - name: Chrome starts
+        timeout-minutes: 3
+        env:
+          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          node tools/ci/run-and-annotate.mjs --title "Chrome start" --log ci-out/chrome-start.log --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
+      - name: node tools/playalong-loop.mjs
+        env:
+          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          node tools/ci/run-and-annotate.mjs --title "playalong" --log ci-out/playalong.log --summary '^playalong-loop: ' --deadline 40 -- node tools/playalong-loop.mjs --json ci-out/playalong.json
+      - name: Keep the output
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: playalong
+          path: ci-out/
+          if-no-files-found: warn
+          retention-days: 14
