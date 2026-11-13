@@ -1263,11 +1263,20 @@ async function noChecklistWalk(page, run, events, stats) {
    practice card ca-18 at 1366x657, in English: with the focus on the page body Space plays (the Play button shows its
    Stop state) and Space again stops; > then < move the speed control one stop and back; a MOUSE click on a section
    chip leaves the focus on <body> once the press is over, so Space then stops instead of restarting that section;
-   a reload brings the card back at its first speed (nothing persisted). checks.mjs 1db runs the same handlers on a
-   small page in Node; this is Chrome's own focus and key handling. A checkout without the keys skips it. */
+   a reload brings the card back at its first speed (nothing persisted). It starts from a fresh page and puts the
+   language back. checks.mjs 1db runs the same handlers on a small page in Node, the touchscreen event order
+   included; this is Chrome's own focus and key handling, with a mouse (this file sends no touch events). A
+   checkout without the keys skips it. */
 async function cardKeysWalk(page, run, events, stats, base) {
   const ID = 'ca-18';
+  /* A FRESH page, like noteCallWalk's: a state an earlier walk left behind (a Call-the-chord round still live, a tool
+     popup open, the rail open, a card playing) would make the first Space do nothing for a reason that is not the keys. */
+  await page.send('Page.navigate', { url: base + '/index.html' });
+  await sleep(3500);
+  await run('keys:devBypass', 'devBypass()', 3500);
+  for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'keys:devBypass' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
   if (!(await run('keys:present', `typeof pcKeydown === 'function' && typeof pcKeyPointerUp === 'function' && CLASS_ACTIVITIES.some(a => a.id === '${ID}')`, 10))) return;
+  const lang0 = await run('keys:lang', 'getLang()', 10);
   const fail = (w, text) => events.push({ step: 'keys:' + w, kind: 'card-keys', text });
   const KEYS = { ' ': ['Space', 32], '>': ['Period', 190, 8], '<': ['Comma', 188, 8] };
   const key = async k => { const [code, vk, mods = 0] = KEYS[k];
@@ -1324,7 +1333,10 @@ async function cardKeysWalk(page, run, events, stats, base) {
     if (!r || !r.open || r.playing || r.speed !== s0.speed) fail('reload', `after a reload ${ID} should open stopped at its first speed (${s0.speed}): ${JSON.stringify(r)}`);
     else stats.cardKeys = (stats.cardKeys || 0) + 1;
     await run('keys:done', `(caCloseOpen(), 1)`, 300);
-  } finally { await page.send('Emulation.clearDeviceMetricsOverride'); }
+  } finally {
+    if (lang0 && lang0 !== 'en') await run('keys:lang-back', `setLang(${JSON.stringify(lang0)})`, 500);
+    await page.send('Emulation.clearDeviceMetricsOverride');
+  }
 }
 
 /* Today's activities side by side (Jonathan, 2026-11-10, work order Part 3). In a real browser, in each language,
