@@ -85,6 +85,7 @@ jobs:
           RULES_TOOLS: |
             tools/pm-rules-test.mjs
             tools/rules-core-test.mjs --breaks
+            tools/site-errors-rules-test.mjs --breaks --site ${{ github.workspace }}
         run: |
           # GitHub runs this with -e and pipefail; one tool failing must not stop the others.
           set +e +o pipefail

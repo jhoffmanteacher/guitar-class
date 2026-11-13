@@ -383,6 +383,21 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-13 — The anonymous error log is live (Jonathan published the rules, chat). Reviewed (three rounds).**
+      A script error or a failed save on a student's page writes one small entry to `siteErrors/{auto id}`
+      (`SITE_ERRORS` in `app/boot.js`): the message, file and line, the page, the set, the site version, the day and
+      the browser; ten fields, no name, uid or email, capped per page load and per day. The console shows them under
+      Tools → Error log (`teacher-errors.js`), with "Send a test entry". The `siteErrors` rules block (create only,
+      teacher reads and deletes) was pasted by Jonathan on 2026-11-13 from
+      `Claude outputs/firestore-rules-to-paste-2026-11-13.txt` (the whole file, 77 lines added, none removed).
+      Proofs: `tools/site-errors-sim.mjs` (pinned by `checks.mjs` 1de), `tools/site-errors-rules-test.mjs --breaks
+      --site <repo>` on the emulator, now also in GitHub's `rules.yml`. Kept on his word until he says otherwise (P7):
+      the entry holds which lesson set the student was on. Left: he presses "Send a test entry" once.
+- [x] **2026-11-13 — "Live quiz" is now "Live In-Class Games" (Jonathan, chat). Fast (`7d77c4f`).** The name only, both
+      languages (Juegos de clase en vivo, after "Actividades de clase"); the address `#live-quiz`, the code names
+      and this file's older entries keep the old words. `checks.mjs` 1w: "live in" followed by a hyphen is the
+      adjective before "in-class" and is not a hit; the figurative verb still is.
+
 - [x] **2026-11-13 — Live quiz: the two power chord quizzes change, and a game gets a set length (Jonathan, chat). Fast.**
       His five asks, on `pc-find` and `pc-name` only unless noted. **(1) Change an answer** (`changeAnswer:true`): while
       the question is open and the student's time has not run out, a tap on another answer replaces the pick (the
