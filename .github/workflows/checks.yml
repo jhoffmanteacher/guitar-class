@@ -15,6 +15,13 @@
 # that touched one of those areas without its proof being run is still caught.
 # Each tool prints a replay command for any case that fails.
 #
+# The third job, lint, is the name checker (tools/lint.mjs + eslint.config.mjs):
+# ESLint, fetched by npx at a pinned version, finds names used that no script
+# on the page defines (the cbFmtTime outage fixed in 8f6b67b), a top-level name two
+# scripts declare, and top-level code that uses a name a later script defines.
+# REPORT-ONLY for now: it never fails the run (continue-on-error, and the tool
+# exits 0); its findings show as warnings on the run page.
+#
 # Every action is pinned to a full commit SHA, with its release in a comment
 # (GitHub's hardening guide: a tag can be moved, a SHA cannot). Dependabot
 # (.github/dependabot.yml) proposes new SHAs and updates the comment.
@@ -63,3 +70,15 @@ jobs:
       - name: Two students, one Chromebook (tools/shared-chromebook-loop.mjs)
         if: always()
         run: node tools/shared-chromebook-loop.mjs
+
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+      - name: The name checker, report-only (tools/lint.mjs)
+        run: node tools/lint.mjs --github
