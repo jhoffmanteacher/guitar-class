@@ -2253,6 +2253,9 @@ const POPUP_EMOJI_RE = /<span class="tp-title"[^>]*>\s*(?:&#x1F3B5;|&#x23F1;|&#x
 /* The tags compared with index.html's: the six tuner string buttons and the popup titles' opening tags. */
 const POPUP_A11Y_TAGS = [['a tuner string button', /<button class="ts-btn" data-string="(?!auto)[^"]*"[^>]*>/g], ['a popup title', /<span class="tp-title"[^>]*>/g]];
 const POPUP_A11Y_TAG_TOTAL = 54;
+/* Which string each tuner button is, and the i18n key of its screen-reader name: checked on the app's buttons (the
+   Journey pages must then equal them, above), with each static aria-label equal to that key's English. */
+const TUNER_STRING_KEYS = { E2: 'diagram.stringLowE', A2: 'diagram.stringA', D3: 'diagram.stringD', G3: 'diagram.stringG', B3: 'diagram.stringB', E4: 'diagram.stringHighE' };
 function checkJourneyPopupMarkup() {
   head('1t3. Journey popup markup (tool-popup HTML) matches the app');
   let bad = 0, pages = 0, tagsSeen = 0;
@@ -2279,8 +2282,19 @@ function checkJourneyPopupMarkup() {
       for (const tag of got) { tagsSeen++; if (!appSet.has(tag)) flag(`${file}: ${what} ${tag.slice(0, 160)} is not the app's (index.html has ${[...appSet].map(x => x.slice(0, 120)).join(' | ') || 'none'})`); }
     }
   }
+  let pairs = 0;
+  const i18n = loadI18nTable() || {};
+  for (const [code, key] of Object.entries(TUNER_STRING_KEYS)) {
+    const tag = (appHtml.match(new RegExp(`<button class="ts-btn" data-string="${code}"[^>]*>`)) || [])[0];
+    const en = i18n[key] && i18n[key].en;
+    if (!tag) { flag(`index.html: no tuner button for ${code}`); continue; }
+    if (!en) { flag(`i18n.js: ${key} has no English`); continue; }
+    if (!tag.includes(`data-i18n-attr="aria-label:${key}"`)) flag(`index.html: the ${code} tuner button is not named by ${key}: ${tag}`);
+    else if (!tag.includes(`aria-label="${en}"`)) flag(`index.html: the ${code} tuner button's aria-label is not ${key}'s English "${en}": ${tag}`);
+    else pairs++;
+  }
   if (tagsSeen !== POPUP_A11Y_TAG_TOTAL) flag(`1t3: compared ${tagsSeen} tuner-button and popup-title tags on the Journey pages, pinned ${POPUP_A11Y_TAG_TOTAL} (6 pages x (6 buttons + 3 titles))`);
-  if (!bad) ok(`${pages} Journey pages — no emoji tool-popup icons, all carry the Tempo ladder; ${tagsSeen} tuner-button and popup-title tags are the app's`);
+  if (!bad) ok(`${pages} Journey pages — no emoji tool-popup icons, all carry the Tempo ladder; ${tagsSeen} tuner-button and popup-title tags are the app's; the app's ${pairs} of 6 tuner buttons carry their own string's key and its English`);
 }
 
 /* Per-page tab-card counts, pinned. See the note where they're compared. */
