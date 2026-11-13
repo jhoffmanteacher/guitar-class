@@ -6,6 +6,11 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-12 — Your PR history and your path choice are kept
+
+- **If your saved work didn't load when you signed in** (for example, the Wi-Fi was down), typing a new PR no longer erases your earlier PRs. That one PR isn't saved, and the page says "Not saving" so you know.
+- **Picking a path on an activity always keeps your latest choice**, on every Chromebook.
+
 ## 2026-11-12 — After an update, a linked activity comes back where you were
 
 - **After the site updates itself, an In-Class activity you opened from a link now comes back where you had scrolled.** Before, it jumped back to the top of the card.

@@ -266,7 +266,7 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
     early miss (`chcEarlyFrom`; no sooner than half a beat after the change before; tapping every 250 ms passed 24 of 80
     rounds, now 0; 1cn). Tuning Simulator: the status line is blank during "Which way?" (smoke). Play strum stops a running
     Metronome and clicks evenly (smoke). Name the Power Chord keeps its round on a hidden tab (smoke). Left alone: two
-    devices can save different path picks (rare, nothing lost); `.ca-paths-grid`'s 760px breakpoint (no effect at 1366).
+    devices can save different path picks (rare, nothing lost; REVERSED 2026-11-12: the later pick now wins on every device, see "Recently shipped"); `.ca-paths-grid`'s 760px breakpoint (no effect at 1366).
 
 - [x] **2026-11-07 — `tools/smoke.mjs` hangs.** Two runs in the `guitar-class-ratio` worktree never finished (one sat
   about 4 hours, headless Chrome 157); Jonathan had to force quit Chrome. Not the profile, port or machine load.
@@ -382,6 +382,37 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 ---
 
 ## Recently shipped (post-archive)
+
+- [x] **2026-11-12 (evening) — Two ways student work was lost after a failed sign-in read, fixed; and
+      `tools/save-loop.mjs`.** Reviewed: the save path is a danger zone. Jonathan approved both fixes the same day;
+      the design is the one a deep Fable reviewer backed (it rejected a re-read inside the save), and a second, fresh
+      deep Fable review of the site change found no BLOCKER and no MAJOR ("safe to ship").
+      Both faults need a session where `progress/{uid}` failed to load at sign-in (`progressLoadFailed`: a blocked
+      SDK, Wi-Fi down as the page opens, a stalled read); the site never re-reads the doc in that session.
+      (1) PR history. A PR typed then was built into a history from nothing and, because Firestore replaces an array
+      whole under merge, replaced the stored history (up to 7 entries gone; the student saw nothing wrong). Now such
+      an entry is NOT sent (`flushSave` sends `responses` without its array-valued PR keys; `onResponseChange` shows
+      the existing "Not saving" message instead of a false "Saved"). The stored history is never touched; that one
+      entry is lost and the student is told. The reviewer checked: no other response is an array (mc 251, short 79,
+      pr 24), and the flag cannot turn false with that array still in memory.
+      (2) Path pick. `caPickPath` un-ticked the old path only if the screen showed it ticked, so the old pick stayed
+      stored beside the new one and the next sign-in showed the OLD pick. It now always un-ticks every other path.
+      **This reverses part of the 2026-11-09 decision that two devices can save different path picks: the later pick
+      now wins on every device** (Jonathan accepted that). Only ca-46 has paths today.
+      The tool: the site's real scripts in Node vm tabs (two tabs or two devices) on a fake Firestore (13 self-tested
+      rules) and a virtual clock, with refused, stalled, offline and slow networks, hides, closes and lid shuts; an
+      independent oracle. Three review rounds on the tool. Default run: 180 cases, about 8 s, 6,860 stored values;
+      both fixes were red before (R16-wiped, R6-both-picks) and are green now, and seven half-done versions of the
+      fix are red. Its last line counts failing values by tag and "untagged".
+      Known limits of the tool, being fixed when this was written: it can fail falsely on some seeds (13: a
+      failed-load tab whose only action is held back; 11: a two-tab mixture in one practice-log record that exists
+      on the old site too), and it does not yet prove "the later pick wins" for two loaded devices.
+      Still open after a failed sign-in read, on Jonathan's list, NOT fixed: nothing tells the student their saved
+      work did not load; a stored "got it" can become "working on it"; an exit check's done mark can be saved without
+      its score (KNOWN in the tool); a one-try exit check can be retaken; every set shows unlocked; if the Wi-Fi
+      returns during the LAST automatic retry the site stops retrying and shows "Not saving" until the next action
+      (KNOWN in the tool); "Not saving" for a held-back PR can be replaced by "Saved" from other work. The reviewer's
+      root fix (keep retrying the load in the background while the student has changed nothing) is not built.
 
 - [x] **2026-11-12 (evening) — In-Class Activities: the next activity is always required and unfinished; and
       `tools/visible-loop.mjs`.** Jonathan, same day: "the class activities aren't meant to block anyone anymore. they
