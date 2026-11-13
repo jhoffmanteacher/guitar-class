@@ -982,9 +982,10 @@ function sentLeaf(data, path){
   for (const p of path){ if (!o || typeof o !== 'object' || o instanceof FieldDelete || !(p in o)) return null; o = o[p]; }
   return canon(o);
 }
-/* What a tab loaded (a fact of the fake world), and whether the load failed. */
+/* What a tab loaded at sign-in (a fact of the fake world), and whether that load failed. Only a read settled by the
+   time the app came up counts: a later read of the doc (a site that re-reads before a save) is not the sign-in read. */
 function loadFacts(world, t){
-  const g = world.gets.find(x => x.tab === t.name && x.path === 'progress/' + USER.uid);
+  const g = world.gets.find(x => x.tab === t.name && x.path === 'progress/' + USER.uid && x.at <= (t.bootedAt == null ? Infinity : t.bootedAt));
   t.loadOk = !!(g && g.ok);
   t.loadSnap = t.loadOk ? (g.data && !isMarked(g.data) ? oRemap(g.data) : g.data) : null;
   t.unmarkedAtLoad = t.loadOk && g.data ? !isMarked(g.data) : false;
@@ -1358,7 +1359,7 @@ async function runCase(seed, idx, famFilter){
       world.log(`${s.name} opens on ${s.dev.name}; signs in`);
       tab.dropUnload = !!s.dropUnload;
       tab.ctx.__booted = () => {
-        tab.booted = true;
+        tab.booted = true; tab.bootedAt = world.now;
         loadFacts(world, tab);
         tab.view = tab.loadOk && tab.loadSnap ? clone(tab.loadSnap) : {};
         world.log(`${s.name} signed in, load ${tab.loadOk ? 'ok' : 'FAILED'} (the app would now be on screen)`);
