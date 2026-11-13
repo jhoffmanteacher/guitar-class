@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Mic check</title>
+<meta name="color-scheme" content="light dark">
+<link rel="icon" type="image/png" href="icon-192.png">
+<style>
+/* Mic check — a hidden one-page test for the teacher (2026-11-13, research-4 R4).
+   Open it on ONE class Chromebook, start the mic, ring one note and let it die.
+   It shows what the browser really granted for the request the site's games
+   make, a live level meter, and whether automatic gain (AGC) is acting on the
+   mic. Standalone like tuning-sim.html: no app.js, no coach.js, no i18n.js
+   (teacher-facing, English only). Not linked from anywhere, not in sw.js.
+   Nothing is saved or sent: no network, no storage. Palette tokens are copied
+   from tuning-sim.html (which copies styles.css). */
+:root{
+  --bg:#ffffff;--bg2:#faf9f5;--bg3:#f0eee6;
+  --text:#1a1a18;--text2:#5e5e58;
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);
+  --green-bg:#eaf3de;--green-text:#3b6d11;
+  --amber-bg:#faeeda;--amber-text:#854f0b;
+  --red-bg:#fbe9e7;--red-text:#b3372a;
+  --purple-accent:#5b52a8;
+  --radius:10px;--radius-sm:6px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1e1e1c;--bg2:#272724;--bg3:#313130;
+    --text:#e8e6df;--text2:#9a9a91;
+    --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+    --green-bg:#1e4208;--green-text:#a8d070;
+    --amber-bg:#4a2a04;--amber-text:#f0b84a;
+    --red-bg:#4a1710;--red-text:#f0968a;
+    --purple-accent:#8f85e8;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.4}
+.wrap{max-width:900px;margin:0 auto;padding:16px 20px 32px}
+h1{font-size:1.35rem;margin:0 0 4px}
+h2{font-size:1rem;margin:18px 0 6px}
+p{margin:6px 0}
+.lead{color:var(--text2)}
+.note{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px}
+button{font:inherit;color:inherit;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:7px 14px;cursor:pointer}
+button.primary{background:var(--purple-accent);border-color:var(--purple-accent);color:#fff;font-weight:600}
+button:disabled{opacity:.5;cursor:default}
+button:focus-visible{outline:2px solid var(--purple-accent);outline-offset:2px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{text-align:left;padding:4px 8px;border-bottom:1px solid var(--border)}
+th{color:var(--text2);font-weight:600}
+td.bad{color:var(--red-text);font-weight:600}
+.meter{position:relative;height:18px;background:var(--bg3);border-radius:999px;overflow:hidden;flex:1;min-width:200px}
+.meter i{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--green-text)}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+canvas{width:100%;height:240px;display:block;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm)}
+.verdict{border-radius:var(--radius-sm);padding:8px 12px;margin:8px 0;font-weight:600}
+.v-ok{background:var(--green-bg);color:var(--green-text)}
+.v-warn{background:var(--amber-bg);color:var(--amber-text)}
+.v-bad{background:var(--red-bg);color:var(--red-text)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Mic check</h1>
+  <p class="lead">For the teacher, on one class Chromebook. It asks for the mic exactly as the site's games do, shows what the browser really gave, and tests whether automatic volume control (AGC) is acting on the mic.</p>
+  <p class="note">Nothing is saved or sent anywhere. The numbers stay on this page until you press "Copy results", which puts them on this computer's clipboard only.</p>
+
+  <h2>1. Start the mic</h2>
+  <div class="row">
+    <button type="button" class="primary" id="btn-start">Start the mic</button>
+    <button type="button" id="btn-stop" disabled>Stop the mic</button>
+    <span id="status" role="status"></span>
+  </div>
+  <div id="granted" hidden>
+    <table>
+      <thead><tr><th>Setting</th><th>The site asks</th><th>The browser gave</th><th>Can it be turned off?</th></tr></thead>
+      <tbody id="settings"></tbody>
+    </table>
+    <p class="lead" id="device"></p>
+    <h2>Live level</h2>
+    <div class="row"><div class="meter" aria-hidden="true"><i id="meter"></i></div><span class="mono" id="meter-db">— dB</span></div>
+  </div>
+
+  <h2>2. Ring one note and let it die</h2>
+  <p>Quiet room. Press the button, then pluck ONE open string once, firmly, and let it ring. Do not touch the strings again until the 10 seconds are over.</p>
+  <div class="row">
+    <button type="button" class="primary" id="btn-ring" disabled>Ring one note (10 seconds)</button>
+    <span class="mono" id="ring-clock"></span>
+  </div>
+  <canvas id="plot" width="860" height="240" aria-label="Level in dB against time"></canvas>
+  <div id="verdict" class="verdict" hidden></div>
+  <table id="numbers" hidden><tbody></tbody></table>
+  <p class="lead">A guitar note should fall smoothly. If the level climbs back up while the note dies, or jumps in steps, automatic gain is acting. The thresholds below are provisional (first guesses, 2026-11-13): a rise of more than 6 dB inside 200 ms after the pluck, or a climb of more than 10 dB back up from the quietest point, reads as automatic gain; 3 to 6 dB is unclear (run it again).</p>
+
+  <div class="row">
+    <button type="button" id="btn-copy" disabled>Copy results</button>
+    <span id="copy-status" role="status"></span>
+  </div>
+</div>
+<script>
+'use strict';
+/* The SAME request the site's games make: coach-core.js, coachAcquireMicInner(),
+   the getUserMedia call. Keep the two identical (tools/checks.mjs 1cy compares them). */
+const CONSTRAINTS = {
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false,
+               voiceIsolation: false },
+      video: false
+    };
+const KEYS = ['echoCancellation', 'noiseSuppression', 'autoGainControl', 'voiceIsolation', 'sampleRate', 'channelCount', 'latency'];
+const BLOCK = 1024;            // samples per level reading (about 21 ms at 48 kHz)
+const BIN_MS = 50;             // the plot and the numbers use 50 ms bins
+const RING_MS = 10000;
+const RISE_WIN_MS = 200;
+const SKIP_AFTER_PEAK_MS = 150;   // the pluck's own attack wobbles: start looking after it
+const RISE_AGC_DB = 6, RISE_UNCLEAR_DB = 3, CLIMB_AGC_DB = 10;   // provisional
+const $ = id => document.getElementById(id);
+
+let stream = null, ctx = null, src = null, proc = null, mute = null, raf = 0, ringTimer = 0, clockTimer = 0;
+let lastMs = 0, capture = null, result = null, gotSettings = null, gotCaps = null, micName = '';
+
+/* The device label can carry its owner's name ("Maria's AirPods"): the same
+   scrub as coach-core.js micRecMicName. */
+function cleanLabel(label){
+  return String(label || '').replace(/^.*?['’]s\s+/i, '').replace(/\s+de\s+\p{Lu}[^\s()]*(?:\s+\p{Lu}[^\s()]*)*/gu, '');
+}
+function fmt(v){ return v === undefined ? 'not reported' : typeof v === 'number' ? String(Math.round(v * 10000) / 10000) : String(v); }
+function db(ms){ return 10 * Math.log10(ms + 1e-12); }
+
+async function start(){
+  if (stream) return;
+  $('status').textContent = 'Asking for the mic…';
+  try {
+    stream = await navigator.mediaDevices.getUserMedia(CONSTRAINTS);
+  } catch(e){
+    stream = null;
+    $('status').textContent = 'No mic: ' + ((e && e.name) || 'error') + '. If it was blocked: click the lock icon to the left of the address bar, set Microphone to Allow, then reload.';
+    return;
+  }
+  const tr = stream.getAudioTracks()[0];
+  gotSettings = tr && tr.getSettings ? tr.getSettings() : {};
+  gotCaps = tr && tr.getCapabilities ? tr.getCapabilities() : {};
+  micName = cleanLabel(tr && tr.label);
+  try {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx.state !== 'running') { try { await ctx.resume(); } catch(e){} }
+    src = ctx.createMediaStreamSource(stream);
+    proc = ctx.createScriptProcessor(BLOCK, 1, 1);
+    mute = ctx.createGain(); mute.gain.value = 0;
+    proc.onaudioprocess = onBlock;
+    src.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
+  } catch(e){
+    stop();
+    $('status').textContent = 'The mic opened but the audio could not start (' + ((e && e.message) || 'error') + '). Reload and try again.';
+    return;
+  }
+  renderSettings();
+  $('granted').hidden = false;
+  $('btn-start').disabled = true; $('btn-stop').disabled = false; $('btn-ring').disabled = false; $('btn-copy').disabled = false;
+  $('status').textContent = 'Mic on.';
+  raf = requestAnimationFrame(drawMeter);
+}
+
+/* Raw level, before any gain: the mean square of each block. */
+function onBlock(e){
+  const x = e.inputBuffer.getChannelData(0);
+  let s = 0;
+  for (let i = 0; i < x.length; i++) s += x[i] * x[i];
+  lastMs = s / x.length;
+  if (capture && capture.live){
+    capture.blocks.push(lastMs);
+    if (capture.blocks.length * BLOCK / ctx.sampleRate * 1000 >= RING_MS) finishRing();
+  }
+}
+
+function drawMeter(){
+  const d = db(lastMs);
+  $('meter').style.width = Math.max(0, Math.min(100, (d + 90) / 90 * 100)) + '%';
+  $('meter-db').textContent = (d < -120 ? '-∞' : d.toFixed(1)) + ' dBFS';
+  raf = requestAnimationFrame(drawMeter);
+}
+
+function renderSettings(){
+  const asked = CONSTRAINTS.audio;
+  $('settings').innerHTML = '';
+  KEYS.forEach(k => {
+    const row = document.createElement('tr');
+    const got = gotSettings[k], cap = gotCaps[k];
+    const offable = Array.isArray(cap) ? (cap.includes(false) ? 'yes' : 'no') : (cap === undefined ? 'not reported' : JSON.stringify(cap));
+    const bad = k in asked && got !== undefined && got !== asked[k];
+    [k, k in asked ? String(asked[k]) : '—', fmt(got), k in asked ? offable : '—'].forEach((v, i) => {
+      const td = document.createElement('td'); td.textContent = v;
+      if (i === 2 && bad) td.className = 'bad';
+      row.appendChild(td);
+    });
+    $('settings').appendChild(row);
+  });
+  $('device').textContent = 'Mic: ' + (micName || 'no name given') + ' · audio engine: ' + ctx.sampleRate + ' Hz, base latency ' + fmt(ctx.baseLatency) + ' s';
+}
+
+function ring(){
+  if (!ctx || (capture && capture.live)) return;
+  result = null;
+  $('verdict').hidden = true; $('numbers').hidden = true;
+  capture = { live: true, blocks: [], t0: performance.now() };
+  $('btn-ring').disabled = true;
+  clockTimer = setInterval(() => {
+    const left = Math.max(0, RING_MS - (performance.now() - capture.t0));
+    $('ring-clock').textContent = 'Listening… ' + (left / 1000).toFixed(1) + ' s left';
+  }, 100);
+  // Backstop: if the audio stops arriving, end the capture anyway.
+  ringTimer = setTimeout(finishRing, RING_MS + 3000);
+}
+
+function finishRing(){
+  if (!capture || !capture.live) return;
+  capture.live = false;
+  clearInterval(clockTimer); clearTimeout(ringTimer); clockTimer = 0; ringTimer = 0;
+  $('ring-clock').textContent = '';
+  $('btn-ring').disabled = !ctx;
+  result = analyse(capture.blocks, ctx ? ctx.sampleRate : 48000);
+  draw(result);
+  showResult(result);
+}
+
+/* The level in 50 ms bins (mean power in each), then the two numbers:
+   rise200 — the largest rise inside any 200 ms window, from 150 ms after the
+             peak to the end (a guitar note only falls, apart from small beats);
+   climb   — the largest climb back up from the quietest point reached so far
+             after the peak (automatic gain lifts the fading note and the
+             room back up). */
+function analyse(blocks, rate){
+  const blockMs = BLOCK / rate * 1000;
+  const per = Math.max(1, Math.round(BIN_MS / blockMs));
+  const bins = [];
+  for (let i = 0; i + per <= blocks.length; i += per){
+    let s = 0;
+    for (let k = 0; k < per; k++) s += blocks[i + k];
+    bins.push(db(s / per));
+  }
+  const binMs = per * blockMs;
+  let peak = 0;
+  bins.forEach((v, i) => { if (v > bins[peak]) peak = i; });
+  const sorted = bins.slice().sort((a, b) => a - b);
+  const floor = sorted[Math.floor(sorted.length * 0.05)] || -120;
+  const from = peak + Math.ceil(SKIP_AFTER_PEAK_MS / binMs), win = Math.max(1, Math.round(RISE_WIN_MS / binMs));
+  let rise = 0, riseAt = -1;
+  for (let i = from; i < bins.length; i++){
+    for (let j = i + 1; j <= i + win && j < bins.length; j++){
+      if (bins[j] - bins[i] > rise){ rise = bins[j] - bins[i]; riseAt = i; }
+    }
+  }
+  let lowest = Infinity, climb = 0, climbAt = -1;
+  for (let i = from; i < bins.length; i++){
+    if (bins[i] < lowest) lowest = bins[i];
+    if (bins[i] - lowest > climb){ climb = bins[i] - lowest; climbAt = i; }
+  }
+  const twoS = peak + Math.round(2000 / binMs);
+  const fell2s = twoS < bins.length ? bins[peak] - bins[twoS] : null;
+  const heard = bins.length > 0 && bins[peak] - floor >= 20 && bins[peak] > -60;
+  let verdict, cls;
+  if (!heard){ verdict = 'Not enough sound to judge. Pluck harder or bring the guitar closer, then run it again.'; cls = 'v-warn'; }
+  else if (rise > RISE_AGC_DB || climb > CLIMB_AGC_DB){ verdict = 'Automatic gain looks ON: the level climbed back up while the note died.'; cls = 'v-bad'; }
+  else if (rise > RISE_UNCLEAR_DB){ verdict = 'Unclear: a small rise while the note died. Run it again in a quiet room, one pluck only.'; cls = 'v-warn'; }
+  else { verdict = 'Smooth: the note fell without climbing back up. No sign of automatic gain.'; cls = 'v-ok'; }
+  return { bins, binMs, peak, floor, rise, riseAt, win, climb, climbAt, fell2s, heard, verdict, cls };
+}
+
+function css(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#888'; }
+function draw(r){
+  const cv = $('plot'), g = cv.getContext('2d');
+  const W = cv.width, H = cv.height, L = 44, B = 22, T = 8, R = 8;
+  g.clearRect(0, 0, W, H);
+  const lo = -90, hi = 0;
+  const x = ms => L + (W - L - R) * ms / RING_MS;
+  const y = d => T + (H - T - B) * (1 - (Math.max(lo, Math.min(hi, d)) - lo) / (hi - lo));
+  g.font = '11px sans-serif'; g.fillStyle = css('--text2'); g.strokeStyle = css('--border2'); g.lineWidth = 1;
+  for (let d = lo; d <= hi; d += 15){ g.beginPath(); g.moveTo(L, y(d)); g.lineTo(W - R, y(d)); g.stroke(); g.fillText(d + ' dB', 2, y(d) + 4); }
+  for (let s = 0; s <= 10; s += 2){ g.fillText(s + ' s', x(s * 1000) - 6, H - 6); }
+  if (r.riseAt >= 0 && r.rise > RISE_UNCLEAR_DB){
+    g.fillStyle = css('--amber-bg');
+    g.fillRect(x(r.riseAt * r.binMs), T, x((r.riseAt + r.win) * r.binMs) - x(r.riseAt * r.binMs), H - T - B);
+  }
+  g.strokeStyle = css('--purple-accent'); g.lineWidth = 2; g.beginPath();
+  r.bins.forEach((v, i) => { const px = x((i + 0.5) * r.binMs), py = y(v); if (i) g.lineTo(px, py); else g.moveTo(px, py); });
+  g.stroke();
+}
+
+function lines(){
+  const out = ['Mic check, ' + new Date().toLocaleString(), 'Browser: ' + navigator.userAgent, 'Mic: ' + (micName || 'no name given')];
+  if (gotSettings){
+    out.push('The site asks: ' + Object.keys(CONSTRAINTS.audio).map(k => k + ' ' + CONSTRAINTS.audio[k]).join(', '));
+    out.push('The browser gave: ' + KEYS.map(k => k + ' ' + fmt(gotSettings[k])).join(', '));
+    out.push('Can be turned off: ' + Object.keys(CONSTRAINTS.audio).map(k => k + ' ' + (Array.isArray(gotCaps[k]) ? (gotCaps[k].includes(false) ? 'yes' : 'no') : 'not reported')).join(', '));
+    if (ctx) out.push('Audio engine: ' + ctx.sampleRate + ' Hz, base latency ' + fmt(ctx.baseLatency) + ' s');
+  }
+  if (result){
+    out.push('Ring test: peak ' + result.bins[result.peak].toFixed(1) + ' dBFS at ' + (result.peak * result.binMs / 1000).toFixed(2) + ' s; floor ' + result.floor.toFixed(1) + ' dBFS; fell ' + (result.fell2s == null ? '?' : result.fell2s.toFixed(1)) + ' dB in the 2 s after the peak; largest rise in 200 ms ' + result.rise.toFixed(1) + ' dB; largest climb back from the quietest point ' + result.climb.toFixed(1) + ' dB');
+    out.push('Verdict: ' + result.verdict + ' (provisional thresholds: rise over ' + RISE_AGC_DB + ' dB or climb over ' + CLIMB_AGC_DB + ' dB = automatic gain; ' + RISE_UNCLEAR_DB + ' to ' + RISE_AGC_DB + ' dB = unclear)');
+    out.push('Levels, dBFS every ' + Math.round(result.binMs) + ' ms: ' + result.bins.map(v => v.toFixed(1)).join(','));
+  }
+  return out.join('\n');
+}
+function showResult(r){
+  $('verdict').textContent = r.verdict; $('verdict').className = 'verdict ' + r.cls; $('verdict').hidden = false;
+  const rows = [
+    ['Peak', r.bins.length ? r.bins[r.peak].toFixed(1) + ' dBFS at ' + (r.peak * r.binMs / 1000).toFixed(2) + ' s' : '—'],
+    ['Room floor', r.floor.toFixed(1) + ' dBFS'],
+    ['Fell in the 2 s after the peak', r.fell2s == null ? '—' : r.fell2s.toFixed(1) + ' dB'],
+    ['Largest rise inside 200 ms (after the pluck)', r.rise.toFixed(1) + ' dB'],
+    ['Largest climb back from the quietest point', r.climb.toFixed(1) + ' dB'],
+  ];
+  const tb = $('numbers').tBodies[0]; tb.innerHTML = '';
+  rows.forEach(([a, b]) => { const tr = document.createElement('tr'); [a, b].forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.appendChild(td); }); tb.appendChild(tr); });
+  $('numbers').hidden = false;
+}
+
+async function copy(){
+  const text = lines();
+  let ok = false;
+  try { await navigator.clipboard.writeText(text); ok = true; } catch(e){
+    const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+    try { ok = document.execCommand('copy'); } catch(e2){}
+    ta.remove();
+  }
+  $('copy-status').textContent = ok ? 'Copied. Paste it wherever you need it.' : 'Could not copy. Select the numbers on the page instead.';
+}
+
+/* Everything this page starts, stopped on the button and when the page goes away. */
+function stop(){
+  if (capture) capture.live = false;
+  clearInterval(clockTimer); clearTimeout(ringTimer); clockTimer = 0; ringTimer = 0;
+  if (raf){ cancelAnimationFrame(raf); raf = 0; }
+  if (proc){ proc.onaudioprocess = null; try { proc.disconnect(); } catch(e){} }
+  try { if (src) src.disconnect(); } catch(e){}
+  try { if (mute) mute.disconnect(); } catch(e){}
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  if (ctx) { try { ctx.close(); } catch(e){} }
+  stream = null; ctx = null; src = null; proc = null; mute = null;
+  $('btn-start').disabled = false; $('btn-stop').disabled = true; $('btn-ring').disabled = true;
+  $('ring-clock').textContent = '';
+  $('status').textContent = 'Mic off.';
+}
+
+$('btn-start').addEventListener('click', start);
+$('btn-stop').addEventListener('click', stop);
+$('btn-ring').addEventListener('click', ring);
+$('btn-copy').addEventListener('click', copy);
+window.addEventListener('pagehide', stop);
+</script>
+</body>
+</html>
