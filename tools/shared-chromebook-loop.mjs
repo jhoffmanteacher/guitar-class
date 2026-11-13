@@ -34,7 +34,8 @@
      --stall=SEC        watchdog: no progress for SEC seconds (default 120) -> prints where it was, exit 3
      --verbose          the timeline of each case run
      --list             the families and the fake faults
-   Exit 0 = every case held; 1 = a case failed or the fake failed its self-test; 2 = bad arguments or the tool
+   Exit 0 = every case held (KNOWN entries excepted, see const KNOWN); 1 = a case failed, the fake failed its
+   self-test, or a full default run matched nothing for a KNOWN entry; 2 = bad arguments or the tool
    crashed; 3 = watchdog. stdout is identical for the same seed and site; the run time goes to stderr.
 
    WHAT IS REAL. The site's own scripts, unmodified, each page its own Node vm context, in index.html's order:
@@ -155,9 +156,11 @@
         student is still signed in with the not-saved notice on screen; so no page ever shows the next student or the
         wall with the previous student's sound playing or mic open (a page's mic tracks are also checked at every
         first screen).
-     R6 Practice minutes: no seconds are added to minutes/B while B made no input (the tool sends B none), and no
-        page that shows one student (its currentUser) writes or removes a localStorage key named with another's uid
-        (A's own dying page may still tidy A's keys after the device signed B in).
+     R6 Practice minutes: no seconds are added to minutes/B, and no seconds are queued under a pm:q:B key, while B
+        made no input (only A gets input or sound from the tool). Every OTHER localStorage key named with a uid is
+        written or removed only by a page whose own currentUser is that student (A's dying page may still tidy A's
+        keys after the device signed B in). The pm:* keys follow Firebase's user by design (boot.js PM_HOST.user
+        reads auth.currentUser), so for them only the seconds are judged.
      R7 Nothing the site runs throws, and no promise is left rejected with nobody to handle it.
 
    NOT MODELLED. Real rendering and layout (markup strings are scanned, not drawn); the service worker and the
@@ -1250,6 +1253,7 @@ function hands(world, dev, sc){
         if (!page || !page.alive) break;
         const before = page.notices.length;
         world.log(`${P.key} clicks Sign out on ${page.id}`);
+        page.signOutClicked = true;
         siteRun(page, 'signOut()');
         const done = await world.waitFor(() => !dev.authUser || dev.authUser.uid !== P.uid || page.notices.length > before || !page.alive, 15000, 100);
         if (!dev.authUser || dev.authUser.uid !== P.uid) break;
@@ -1639,8 +1643,24 @@ function toldAbout(world, a){
   if (page.saveMsgs.some(m => m.at >= a.t && m.at <= a.t + 50 && m.key === 'save.notSaving')) return true;
   return false;
 }
+/* KNOWN site faults this tool found that are still open (listed with the date). A finding that matches an entry
+   EXACTLY prints as "~ known" and does not fail; anything else fails. A full default run (every family, 120 cases or
+   more) in which an entry matches nothing FAILS, so a fixed fault gets its entry taken out.
+   K-TAB (listed 2026-11-12): a student's work still unsaved in ANOTHER tab (its write queued offline or stalled,
+   refused and waiting for its retry, or not yet sent) is thrown away without a word when the student signs out from
+   this tab: signOut() (boot.js) waits only for its OWN tab's writes, and the other tab, told "signed out" by Firebase,
+   hard-resets at once (start.js, the null branch — or, when it was frozen, the swap branch). Matched only when the
+   lost action's page never had Sign out clicked on it, died by that reload after its sign-in moved away from the
+   student, and showed no not-saved notice. */
+const KNOWN = [{ id: 'K-TAB', listed: '2026-11-12' }];
+function knownTabLoss(world, a){
+  const page = world.allPages.find(p => p.id === a.page);
+  if (!page || page.signOutClicked || page.diedAt == null || page.notices.length) return false;
+  const last = (page.authLog || []).filter(x => x.at <= page.diedAt).pop();
+  return !!(page.reloadAsked && last && last.uid !== world.people[a.who].uid);
+}
 function oracle(sc, world, dev){
-  const fails = [];
+  const fails = [], known = [];
   const fail = (rule, msg) => fails.push({ rule, msg });
   world.allPages = dev.tabs.flatMap(t => t.pages);
   let compared = 0, actionsLanded = 0, actionsTold = 0, actionsLost = 0;
@@ -1683,17 +1703,25 @@ function oracle(sc, world, dev){
          the arcade XP) follows from the student's own reps; it may change in the doc of a student who acted on this
          device, never in anyone else's. Foreign VALUES in it are still caught by R3's marker scan. */
       if (!effs.length && acted && rec[0] === 'games' && (rec[1] === 'meta' || rec[1] === 'srBonusDay')) continue;
-      const free = effs.filter(x => x.told);
-      const ok = new Set();
-      for (let mask = 0; mask < (1 << Math.min(free.length, 10)); mask++){
-        let v = getRec(base, rec);
-        for (const x of effs){ if (x.told && !(mask & (1 << free.indexOf(x)))) continue; v = x.e.fn(v); }
-        ok.add(canonLoose(v, effs));
-      }
+      const accept = optional => {
+        const free = effs.filter(optional);
+        const ok = new Set();
+        for (let mask = 0; mask < (1 << Math.min(free.length, 10)); mask++){
+          let v = getRec(base, rec);
+          for (const x of effs){ if (optional(x) && !(mask & (1 << free.indexOf(x)))) continue; v = x.e.fn(v); }
+          ok.add(canonLoose(v, effs));
+        }
+        return ok;
+      };
+      const ok = accept(x => x.told);
       const got = canonLoose(getRec(fin, rec), effs);
       if (!ok.has(got)){
         const owner = effs.length ? `after ${effs.map(x => x.a.who + ' ' + describe(x.a) + (x.told ? ' (told)' : '')).join('; ')}` : 'no action touched it';
-        fail(effs.length ? 'R1' : 'R2', `progress/${P.uid} ${rec.join('.')} = ${short(got)}; wanted ${[...ok].map(short).join(' or ')} (${owner})`);
+        const msg = `progress/${P.uid} ${rec.join('.')} = ${short(got)}; wanted ${[...ok].map(short).join(' or ')} (${owner})`;
+        /* KNOWN K-TAB: the value is right once the actions K-TAB explains are allowed to be missing. */
+        const k = effs.some(x => !x.told && knownTabLoss(world, x.a)) && accept(x => x.told || knownTabLoss(world, x.a)).has(got);
+        if (k) known.push({ id: 'K-TAB', msg });
+        else fail(effs.length ? 'R1' : 'R2', msg);
       }
     }
     for (const a of acts){
@@ -1812,12 +1840,22 @@ function oracle(sc, world, dev){
     if (e.op !== 'set' && e.op !== 'remove') continue;
     for (const [k, Q] of Object.entries(world.people)){
       if (!e.k.includes(Q.uid)) continue;
+      if (/^pm:/.test(e.k)){
+        /* The practice-minutes engine follows Firebase's user, not the page's (boot.js PM_HOST.user reads
+           auth.currentUser) and settles a switch itself (pm-sim covers it). What must hold: a queue named for
+           someone who made no input never holds seconds. */
+        if (e.op === 'set' && /^pm:q:/.test(e.k) && k !== 'A'){
+          let secs = 0; try { const v = JSON.parse(e.v); for (const d of Object.values((v && v.days) || {})) secs += Number(d) || 0; } catch {}
+          if (secs > 0) fail('R6', `${e.page} queued ${secs} s of practice under "${e.k}" (${k}'s queue) at ${rel(e.at)}; ${k} made no input`);
+        }
+        continue;
+      }
       if (e.siteUid && e.siteUid !== Q.uid) fail('R6', `${e.page} ${e.op === 'set' ? 'wrote' : 'removed'} localStorage "${e.k}" (${k}'s key) while that page showed ${uidOwner[e.siteUid] || e.siteUid}, at ${rel(e.at)}`);
     }
   }
   /* R7 */
   for (const f of world.siteFaults.slice(0, 4)) fail('R7', f);
-  return { fails: dedupe(fails), compared, writesChecked, screens, actionsLanded, actionsTold, actionsLost, pmSeconds, crossRefused };
+  return { fails: dedupe(fails), known: dedupe(known), compared, writesChecked, screens, actionsLanded, actionsTold, actionsLost, pmSeconds, crossRefused };
 }
 function dedupe(fails){ const seen = new Set(); return fails.filter(f => { const k = f.rule + f.msg; if (seen.has(k)) return false; seen.add(k); return true; }); }
 /* A rep's `last` is the action's millisecond; the site stamps Date.now() when its handler runs (the same virtual
@@ -2001,6 +2039,7 @@ async function main(){
   const fams = {};
   const tot = { compared: 0, writesChecked: 0, screens: 0, landed: 0, told: 0, lost: 0, issued: 0, landedW: 0, refusedRules: 0, refusedServer: 0, lostPage: 0, lostUnload: 0, pages: 0, reloads: 0, reads: 0, readsFailed: 0, notices: 0, ledger: 0, crossRefused: 0 };
   const json = [];
+  const knownHits = {};
   let failed = 0;
   for (const idx of idxs){
     beat(`case ${idx}`);
@@ -2014,6 +2053,7 @@ async function main(){
     tot.lostPage += world.stats.lostWithPage; tot.lostUnload += world.stats.lostUnload; tot.pages += world.stats.pages; tot.reloads += world.stats.reloads;
     tot.reads += world.stats.reads; tot.readsFailed += world.stats.readsFailed; tot.notices += world.allPages.reduce((n, p) => n + p.notices.length, 0);
     const what = `${famName}, last action ${sc.actionKind}, network ${sc.net}`;
+    for (const k of res.known){ knownHits[k.id] = (knownHits[k.id] || 0) + 1; console.log(`~ known ${k.id}, listed ${KNOWN.find(x => x.id === k.id).listed}: case ${idx} (seed ${BASE_SEED}, ${what}): ${k.msg}`); }
     tot.crossRefused += res.crossRefused.length;
     if (res.crossRefused.length) console.log(`~ case ${idx} (seed ${BASE_SEED}, ${what}): ${res.crossRefused.length} write${res.crossRefused.length > 1 ? 's' : ''} refused by the rules for going out under the wrong sign-in: ${res.crossRefused.slice(0, 2).join('; ')}`);
     if (res.fails.length){
@@ -2031,8 +2071,11 @@ async function main(){
     }
     if (opt('json', null)) json.push({ idx, fam: famName, actionKind: sc.actionKind, net: sc.net, fails: res.fails, stats: world.stats });
   }
+  const fullRun = single == null && !famFilter.length && N >= 120;
+  for (const k of KNOWN) if (fullRun && !knownHits[k.id]){ failed++; console.log(`✗ FAIL KNOWN ${k.id} matched nothing in a full default run: if the site fault is fixed, take its entry out of KNOWN`); }
   const famLine = Object.entries(fams).map(([k, v]) => `${k} ${v.n - v.fail}/${v.n}`).join(', ');
   console.log(`shared-chromebook-loop: ${idxs.length - failed} of ${idxs.length} cases held (${famLine})`);
+  console.log(`  KNOWN: ${KNOWN.map(k => k.id + ' matched ' + (knownHits[k.id] || 0) + ' time(s)').join(', ')}`);
   console.log(`  ${tot.ledger} actions by the students: ${tot.landed} landed in their own doc, ${tot.told} told "not saved" and not landed, ${tot.lost} lost without a word`);
   console.log(`  ${tot.screens} first screens read (state, markup, sessionStorage, localStorage reads); ${tot.compared} records and values compared; ${tot.writesChecked} write items checked for token and markers`);
   console.log(`  ${tot.pages} page loads, ${tot.reloads} reloads; ${tot.issued} writes issued, ${tot.landedW} landed, ${tot.refusedRules} refused by the rules, ${tot.refusedServer} refused by the server (${tot.crossRefused} of the rules' refusals for the wrong sign-in), ${tot.lostPage} lost with their page, ${tot.lostUnload} started while unloading; ${tot.reads} reads (${tot.readsFailed} failed); ${tot.notices} not-saved notices shown`);
