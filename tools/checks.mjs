@@ -9306,6 +9306,648 @@ function checkPracticeCards(ctx) {
    that do the folding. tools/smoke.mjs (foldWalk) clicks it all in a real
    browser. Pinned: 22 assertions. */
 const FOLD_ASSERTS = 22;
+/* 1db. THE PRACTICE-CARD KEYS AND THE TICK POP (2026-11-13).
+   Keys (KEYS in app/cards.js): Space or K press the card's Play / Stop, the
+   arrows its Previous / Next pager (stopped) or the neighbouring section chip
+   (playing), < , > . one stop of its own speed control, each by calling the
+   function that control already calls. Nothing while typing, with Ctrl / Cmd
+   / Alt, on a repeat, in a dialog, the drawer, the tuner, the recorder, the
+   search panel, a live mic or a Call-the-chord round; Space on a focused
+   button / link / summary keeps its meaning; with two cards on screen only the
+   playing one, else the last touched, answers. The tick pop (TICK POP in
+   app/lesson.js): a lesson step's "Mark done" and a checklist "I've got it!"
+   turned ON get .tick-pop on that one tick (the band's pill when One-step view
+   hid the row), never on an untick, a peeked set, a refused Coach gate or
+   under reduced motion, and it comes off on the element's own animationend or
+   TICK_POP_MS. Run on the REAL pcKeydown / toggleStepDone / toggleSkill /
+   coachGateMarkAnyway in the 0b render context, on a small page (DB_PAGE_TEST
+   below: elements, selectors, layout = not hidden / not in a closed details /
+   not a collapsed step in One-step view) with the pc* control functions
+   recorded and a fake clock. The same click sequence is run with the pop
+   switched off: what is left to save must be identical. Also: the strings in
+   both languages, the tooltips on a rendered card, the three listeners in
+   app/start.js, the CSS (transform and opacity only, off under reduced
+   motion) and no set ever renders with the class. Pinned counts below; the
+   page test was proved red by 28 mutations (2026-11-13, one per guard). */
+const DB_CASES = 500, DB_KEY_PRESSES = 234, DB_TICK_CHECKS = 31, DB_SEQ_CLICKS = 12;
+const DB_KEYS = { ' ': 'play', 'Spacebar': 'play', 'k': 'play', 'K': 'play', 'ArrowLeft': 'prev', 'ArrowRight': 'next', '<': 'slower', ',': 'slower', '>': 'faster', '.': 'faster' };
+const DB_PAGE_TEST_SRC = String.raw`(function(){
+  /* A small page: elements, compound + descendant selectors, layout = "not hidden, not in a closed details,
+     not a collapsed step in One-step view". Enough for pcKeydown, toggleStepDone and toggleSkill. */
+  const out = { bad: [], cases: 0, keyCases: 0, tickCases: 0, saveSame: null };
+  const R = window;
+  const saved = {};
+  ['document', 'matchMedia', 'setTimeout', 'clearTimeout', 'requestAnimationFrame', 'CSS', 'coachMicLive'].forEach(k => { saved[k] = R[k]; });
+  const savedFns = {};
+  const stubFn = (name, fn) => { if(!(name in savedFns)) savedFns[name] = R[name]; R[name] = fn; };
+  const lsBefore = JSON.stringify(R.localStorage && R.localStorage._d || {});
+  // The app state this test moves, put back in finally.
+  const keep = { pcState, pcKeyLast: typeof pcKeyLast === 'undefined' ? null : pcKeyLast, chcLive, completed: JSON.stringify(completed), deletes: [...completedDeletes.entries()],
+    progress: JSON.stringify(progress), games: JSON.stringify(games) };
+
+  function splitTop(s, sep){
+    const outp = []; let d = 0, cur = '';
+    for(const ch of s){
+      if(ch === '[' || ch === '(') d++;
+      if(ch === ']' || ch === ')') d--;
+      if(d === 0 && (sep === ' ' ? /\s/.test(ch) : ch === sep)){ if(cur.trim()) outp.push(cur.trim()); cur = ''; continue; }
+      cur += ch;
+    }
+    if(cur.trim()) outp.push(cur.trim());
+    return outp;
+  }
+  function compound(s){
+    const tests = []; let rest = s;
+    while(rest.length){
+      let m;
+      if((m = /^(\*|[a-zA-Z][\w-]*)/.exec(rest))){ const tg = m[1].toUpperCase(); if(tg !== '*') tests.push(e => e.tagName === tg); }
+      else if((m = /^#([\w-]+)/.exec(rest))){ const id = m[1]; tests.push(e => e.getAttribute('id') === id); }
+      else if((m = /^\.([\w-]+)/.exec(rest))){ const c = m[1]; tests.push(e => e._cls.has(c)); }
+      else if((m = /^\[([\w-]+)(?:="([^"]*)")?\]/.exec(rest))){ const a = m[1], v = m[2]; tests.push(e => { const x = e.getAttribute(a); return x !== null && (v === undefined || x === v); }); }
+      else if((m = /^:not\(([^)]*)\)/.exec(rest))){ const inner = compound(m[1]); tests.push(e => !inner(e)); }
+      else throw new Error('mini DOM: selector not understood: ' + s);
+      rest = rest.slice(m[0].length);
+    }
+    return e => tests.every(f => f(e));
+  }
+  function matcher(sel){
+    const alts = splitTop(sel, ',').map(alt => splitTop(alt, ' ').map(compound));
+    return el => alts.some(chain => {
+      if(!chain[chain.length - 1](el)) return false;
+      let i = chain.length - 2, e = el.parentNode;
+      while(i >= 0 && e && e.tagName){ if(chain[i](e)) i--; e = e.parentNode; }
+      return i < 0;
+    });
+  }
+  let reflows = 0;
+  class El {
+    constructor(tag, cls, attrs){
+      this.tagName = tag.toUpperCase(); this.children = []; this.parentNode = null; this._attrs = {}; this._cls = new Set(cls || []);
+      this.style = {}; this._html = ''; this.textContent = ''; this._ls = {};
+      const cl = this._cls;
+      this.classList = { add: (...c) => c.forEach(x => cl.add(x)), remove: (...c) => c.forEach(x => cl.delete(x)), contains: c => cl.has(c),
+        toggle: (c, on) => { const v = on === undefined ? !cl.has(c) : !!on; if(v) cl.add(c); else cl.delete(c); return v; } };
+      const self = this;
+      this.dataset = new Proxy({}, {
+        get: (o, k) => { const v = self._attrs['data-' + String(k).replace(/[A-Z]/g, c => '-' + c.toLowerCase())]; return v === undefined ? undefined : v; },
+        set: (o, k, v) => { self._attrs['data-' + String(k).replace(/[A-Z]/g, c => '-' + c.toLowerCase())] = String(v); return true; },
+      });
+      for(const [k, v] of Object.entries(attrs || {})) this.setAttribute(k, v);
+    }
+    setAttribute(k, v){ if(k === 'class') { this._cls = new Set(String(v).split(/\s+/).filter(Boolean)); return; } this._attrs[k] = String(v); }
+    getAttribute(k){ if(k === 'class') return [...this._cls].join(' '); return k in this._attrs ? this._attrs[k] : null; }
+    hasAttribute(k){ return this.getAttribute(k) !== null; }
+    removeAttribute(k){ delete this._attrs[k]; }
+    get hidden(){ return this.hasAttribute('hidden'); } set hidden(v){ if(v) this._attrs.hidden = ''; else delete this._attrs.hidden; }
+    get disabled(){ return this.hasAttribute('disabled'); } set disabled(v){ if(v) this._attrs.disabled = ''; else delete this._attrs.disabled; }
+    get open(){ return this.hasAttribute('open'); } set open(v){ if(v) this._attrs.open = ''; else delete this._attrs.open; }
+    get inert(){ return this.hasAttribute('inert'); } set inert(v){ if(v) this._attrs.inert = ''; else delete this._attrs.inert; }
+    get id(){ return this._attrs.id || ''; } set id(v){ this._attrs.id = String(v); }
+    get className(){ return [...this._cls].join(' '); } set className(v){ this.setAttribute('class', v); }
+    get value(){ return this._attrs.value || ''; } set value(v){ this._attrs.value = String(v); }
+    get min(){ return this._attrs.min || ''; } get max(){ return this._attrs.max || ''; }
+    get isContentEditable(){ let e = this; while(e && e.tagName){ const c = e.getAttribute('contenteditable'); if(c !== null) return c !== 'false'; e = e.parentNode; } return false; }
+    get innerHTML(){ return this._html; } set innerHTML(v){ this._html = String(v); }
+    get offsetWidth(){ reflows++; return 10; }
+    get offsetHeight(){ return 10; }
+    get isConnected(){ let e = this; while(e){ if(e === DOC.documentElement) return true; e = e.parentNode; } return false; }
+    get nextElementSibling(){ const p = this.parentNode; if(!p) return null; return p.children[p.children.indexOf(this) + 1] || null; }
+    appendChild(c){ if(c.parentNode) c.remove(); c.parentNode = this; this.children.push(c); return c; }
+    remove(){ if(this.parentNode){ this.parentNode.children = this.parentNode.children.filter(x => x !== this); this.parentNode = null; } }
+    contains(o){ let e = o; while(e){ if(e === this) return true; e = e.parentNode; } return false; }
+    matches(sel){ return matcher(sel)(this); }
+    closest(sel){ const m = matcher(sel); let e = this; while(e && e.tagName){ if(m(e)) return e; e = e.parentNode; } return null; }
+    querySelectorAll(sel){ const m = matcher(sel), o = []; const walk = e => e.children.forEach(c => { if(m(c)) o.push(c); walk(c); }); walk(this); return o; }
+    querySelector(sel){ return this.querySelectorAll(sel)[0] || null; }
+    addEventListener(t, fn){ (this._ls[t] = this._ls[t] || []).push(fn); }
+    removeEventListener(t, fn){ this._ls[t] = (this._ls[t] || []).filter(f => f !== fn); }
+    fire(t, ev){ (this._ls[t] || []).slice().forEach(f => f(ev)); }
+    getClientRects(){
+      if(!this.isConnected) return [];
+      let e = this;
+      while(e && e.tagName){
+        if(e.hidden || e.style.display === 'none') return [];
+        if(e.parentNode && e.parentNode.tagName === 'DETAILS' && !e.parentNode.open && e.tagName !== 'SUMMARY') return [];
+        if(e.tagName === 'LI' && e._cls.has('step') && e._cls.has('collapsed') && e.closest('.dp.focus')) return [];
+        e = e.parentNode;
+      }
+      return [{ top: 0, left: 0, width: 10, height: 10 }];
+    }
+    getBoundingClientRect(){ return { top: 0, left: 0, width: 10, height: 10, bottom: 10, right: 10 }; }
+    focus(){ DOC.activeElement = this; } blur(){}
+    scrollIntoView(){} scrollBy(){}
+    click(){}
+  }
+  const E = (tag, cls, attrs, kids) => { const e = new El(tag, cls, attrs); (kids || []).forEach(k => e.appendChild(k)); return e; };
+  const html = E('html'), body = E('body');
+  html.appendChild(body);
+  const DOC = {
+    documentElement: html, body, head: E('head'), activeElement: body, _ls: {},
+    getElementById: id => html.querySelector('#' + id),
+    querySelector: s => html.querySelector(s), querySelectorAll: s => html.querySelectorAll(s),
+    contains: n => html.contains(n),
+    createElement: t => new El(t), addEventListener(t, f){ (this._ls[t] = this._ls[t] || []).push(f); }, removeEventListener(t, f){ this._ls[t] = (this._ls[t] || []).filter(x => x !== f); },
+  };
+  let reduce = false;
+  let clock = 0, tid = 0; const timers = [];
+  const fakeSet = (fn, ms) => { const id = ++tid; timers.push({ id, at: clock + (ms || 0), fn }); return id; };
+  const fakeClear = id => { const i = timers.findIndex(x => x.id === id); if(i >= 0) timers.splice(i, 1); };
+  const advance = ms => { clock += ms; timers.sort((a, b) => a.at - b.at); while(timers.length && timers[0].at <= clock){ const x = timers.shift(); x.fn(); } };
+  R.document = DOC;
+  R.matchMedia = q => ({ matches: reduce && /reduce/.test(q), addEventListener(){}, addListener(){} });
+  R.setTimeout = fakeSet; R.clearTimeout = fakeClear;
+  R.requestAnimationFrame = () => 0;
+  R.CSS = { escape: s => String(s) };
+  R.coachMicLive = false;
+  const check = (cond, msg) => { out.cases++; if(!cond) out.bad.push(msg); };
+
+  try {
+    /* ══ The save, byte for byte: one click sequence, what it leaves to be saved (window.__DB_SEQ) ══ */
+    if(R.__DB_SEQ){
+      ['renderPills', 'populateModuleDropdown', 'renderProgressStrip', 'refreshReviewCards'].forEach(n => stubFn(n, () => {}));
+      const qlog = [];
+      stubFn('queueSave', (...k) => qlog.push(k.join(',')));
+      // __DB_NOPOP: the same clicks with the pop switched off, to compare what is left to save.
+      if(R.__DB_NOPOP) stubFn('tickPop', () => {});
+      body.appendChild(E('div', [], { id: 'app' }));
+      const sets = SETS;
+      const w = sets.find(x => (x.skills || []).some(s => !skillIsCoachGated(s.id) && !skillIsDrillGated(s.id)));
+      const plain = w.skills.find(s => !skillIsCoachGated(s.id) && !skillIsDrillGated(s.id));
+      const gw = sets.find(x => (x.skills || []).some(s => skillIsCoachGated(s.id)));
+      const gated = gw.skills.find(s => skillIsCoachGated(s.id));
+      const wp = body.appendChild(E('div', ['week-panel', 'active'], { 'data-id': w.id }));
+      const pw = wp.appendChild(E('div', ['set-eyebrow'])).appendChild(E('span', ['se-chrome'])).appendChild(E('span', ['prog-pill-wrap']));
+      pw.appendChild(E('span', ['prog-pill'])); pw.appendChild(E('span', ['prog-mini'], {}, [E('i')]));
+      const dp = wp.appendChild(E('div', ['dp']));
+      const ul = dp.appendChild(E('ul', ['steps']));
+      const rows = [0, 1, 2].map(i => { const li = ul.appendChild(E('li', ['step'].concat(i ? ['collapsed'] : ['cur']), { 'data-num': String(i + 1) }));
+        const head = li.appendChild(E('div', ['step-head'])); head.appendChild(E('span', ['step-status'])); head.appendChild(E('span', ['step-label']));
+        const btn = li.appendChild(E('div', ['step-detail'])).appendChild(E('button', ['step-done-btn'])); return { li, btn, key: w.id + '-b-sec0-' + i }; });
+      const row = wp.appendChild(E('div', ['skill-row'], { 'data-sid': plain.id }));
+      row.appendChild(E('div', ['skchk-cell', 'working-col'], {}, [E('div', ['skbox'])])); row.appendChild(E('div', ['skchk-cell', 'gotit-col'], {}, [E('div', ['skbox'])]));
+      const gp = body.appendChild(E('div', ['week-panel'], { 'data-id': gw.id }));
+      const grow = gp.appendChild(E('div', ['skill-row'], { 'data-sid': gated.id }));
+      grow.appendChild(E('div', ['skchk-cell', 'working-col'], {}, [E('div', ['skbox'])])); grow.appendChild(E('div', ['skchk-cell', 'gotit-col'], {}, [E('div', ['skbox'])]));
+      for(const k of Object.keys(completed)) delete completed[k]; completedDeletes.clear();
+      delete progress[plain.id]; delete progress[gated.id]; if(games && games.coachSkill) delete games.coachSkill[gated.id];
+      const snap = () => JSON.stringify({ completed, deletes: [...completedDeletes.keys()], plain: progress[plain.id] || null, gated: progress[gated.id] || null, coach: (games && games.coachSkill && games.coachSkill[gated.id]) || null, q: qlog.slice() });
+      const steps = [];
+      toggleStepDone(rows[0].btn, rows[0].key); steps.push(snap());
+      toggleStepDone(rows[0].btn, rows[0].key); steps.push(snap());
+      rows[0].li.classList.remove('collapsed'); toggleStepDone(rows[0].btn, rows[0].key); steps.push(snap());
+      dp.classList.add('focus'); rows[1].li.classList.remove('collapsed'); toggleStepDone(rows[1].btn, rows[1].key); steps.push(snap());
+      rows[2].li.classList.remove('collapsed'); toggleStepDone(rows[2].btn, rows[2].key); steps.push(snap());
+      wp.classList.add('set-peek'); toggleStepDone(rows[0].btn, rows[0].key); toggleSkill(plain.id, w.id, 'gotit'); steps.push(snap()); wp.classList.remove('set-peek');
+      toggleSkill(plain.id, w.id, 'gotit'); steps.push(snap());
+      toggleSkill(plain.id, w.id, 'gotit'); steps.push(snap());
+      toggleSkill(plain.id, w.id, 'working'); steps.push(snap());
+      toggleSkill(plain.id, w.id, 'gotit'); steps.push(snap());
+      toggleSkill(gated.id, gw.id, 'gotit'); steps.push(snap());
+      coachGateMarkAnyway(gated.id, gw.id); steps.push(snap());
+      advance(5000);
+      out.seq = steps;
+      return JSON.stringify(out);
+    }
+    /* ══ B14: the keys ══ */
+    if(typeof pcKeydown !== 'function' || typeof pcKeyNote !== 'function'){ out.bad.push('pcKeydown / pcKeyNote are not defined'); }
+    else {
+      const app = body.appendChild(E('div', [], { id: 'app' }));
+      const screen = app.appendChild(E('div', ['page-screen', 'ca-screen'], { id: 'class-activities-screen' }));
+      const games = body.appendChild(E('div', ['games-screen'], { id: 'games-screen', role: 'dialog', 'aria-modal': 'true', hidden: '' }));
+      const lq = body.appendChild(E('div', ['games-screen', 'lq-screen'], { id: 'live-quiz-screen', role: 'dialog', 'aria-modal': 'true', hidden: '' }));
+      const tuner = body.appendChild(E('div', ['tool-popup'], { id: 'tuner-popup', role: 'dialog' }));
+      const rec = body.appendChild(E('div', ['tool-popup'], { id: 'rec-popup', role: 'dialog' }));
+      const search = body.appendChild(E('div', ['daily5-panel'], { id: 'search-panel', hidden: '' }));
+      const radios = body.appendChild(E('div', ['timer-presets'], { role: 'radiogroup' }));
+      const radioBtn = radios.appendChild(E('button'));
+      const textIn = body.appendChild(E('input', [], { type: 'text' }));
+      const area = body.appendChild(E('textarea'));
+      const sel = body.appendChild(E('select'));
+      const editable = body.appendChild(E('div', [], { contenteditable: 'true' }));
+      const editKid = editable.appendChild(E('span'));
+      const link = body.appendChild(E('a', [], { href: '#songs-hub' }));
+      const roleBtn = body.appendChild(E('div', ['skchk-cell'], { role: 'button', tabindex: '0' }));
+      const plainBtn = body.appendChild(E('button', ['tp-btn']));
+      // A card: player with the four-stop slider, three sections (chips + pager).
+      function card(id, kind){
+        const det = screen.appendChild(E('details', ['ca-card'], { 'data-id': id }));
+        det.appendChild(E('summary', ['ca-card-summary']));
+        const body2 = det.appendChild(E('div', ['ca-card-body']));
+        const pc = body2.appendChild(E('div', ['pc'], { 'data-id': id, 'data-slow': '1' }));
+        const player = pc.appendChild(E('div', ['pc-player']));
+        const play = player.appendChild(E('button', ['pc-play']));
+        player.appendChild(E('button', ['snip-toggle', 'pc-metro']));
+        let range = null, sw = null;
+        if(kind === 'switch'){ sw = player.appendChild(E('button', ['pc-speed'], { role: 'switch' })); player.appendChild(E('button', ['pc-speed', 'pc-guitar'], { role: 'switch' })); }
+        else {
+          const g = player.appendChild(E('span', ['pc-speed4'], { role: 'group' }));
+          const rail = g.appendChild(E('span', ['pc-speed-rail']));
+          range = rail.appendChild(E('input', ['pc-speed-range'], { type: 'range', min: '0', max: '3', value: '1' }));
+          player.appendChild(E('button', ['pc-speed', 'pc-guitar'], { role: 'switch' }));
+        }
+        const tab = pc.appendChild(E('div', ['tab', 'pc-tab']));
+        const tbody = tab.appendChild(E('div', ['tab-body']));
+        const chips = [], pages = [];
+        let prev = null, next = null;
+        if(kind !== 'single'){
+          const secs = tbody.appendChild(E('div', ['pc-secs']));
+          for(let i = 0; i < 3; i++) chips.push(secs.appendChild(E('button', ['pc-sec'].concat(i ? [] : ['cur']), { 'data-sec': String(i) })));
+          for(let i = 0; i < 3; i++) pages.push(tbody.appendChild(E('div', ['tab-page', 'pc-page'], i ? { 'data-page': String(i), hidden: '' } : { 'data-page': '0' })));
+          if(kind !== 'sheet'){
+            const pager = tbody.appendChild(E('div', ['tab-pager', 'pc-pager']));
+            prev = pager.appendChild(E('button', ['tab-pager-btn'], { disabled: '' }));
+            next = pager.appendChild(E('button', ['tab-pager-btn']));
+          }
+        } else pages.push(tbody.appendChild(E('div', ['tab-page', 'pc-page'], { 'data-page': '0' })));
+        const tabBody = tbody;
+        return { det, pc, play, range, sw, chips, prev, next, tabBody, id };
+      }
+      const A = card('ca-18');
+      const B = card('ca-24');
+      const S = card('ca-10', 'switch');
+      const One = card('ca-36', 'single');
+      const Sheet = card('ca-38', 'sheet');
+      const ALL = [A, B, S, One, Sheet];
+      const only = (...open) => { ALL.forEach(c => { c.det.open = open.includes(c); }); };
+      const log = [];
+      const who = el => { const c = ALL.find(x => x.pc.contains(el)); return c ? c.id : '?'; };
+      stubFn('pcToggle', b => log.push('pcToggle:' + who(b) + (b.classList.contains('pc-play') ? '' : ':NOT-THE-PLAY-BUTTON')));
+      stubFn('pcFromSection', (b, si) => log.push('pcFromSection:' + who(b) + ':' + si + (b.getAttribute('data-sec') === String(si) ? '' : ':WRONG-CHIP')));
+      stubFn('pcPage', (b, dir) => { const c = ALL.find(x => x.pc.contains(b)); log.push('pcPage:' + who(b) + ':' + dir + (c && b === (dir < 0 ? c.prev : c.next) ? '' : ':WRONG-BUTTON')); });
+      stubFn('pcSetSpeedTo', r => log.push('pcSetSpeedTo:' + who(r) + ':' + r.value));
+      stubFn('pcSetSpeed', b => log.push('pcSetSpeed:' + who(b) + (b.classList.contains('pc-guitar') ? ':GUITAR' : '')));
+      const ev = o => Object.assign({ key: ' ', code: 'Space', target: body, repeat: false, ctrlKey: false, metaKey: false, altKey: false, shiftKey: false, isComposing: false,
+        defaultPrevented: false, prevented: 0, preventDefault(){ this.prevented++; this.defaultPrevented = true; } }, o || {});
+      const press = (o, expect, what) => {
+        out.keyCases++;
+        log.length = 0;
+        const e = ev(o);
+        pcKeydown(e);
+        const got = log.join(' | ');
+        check(got === (expect || ''), what + ': expected [' + (expect || 'nothing') + '], got [' + (got || 'nothing') + ']');
+        check(expect ? e.prevented === 1 : e.prevented === 0, what + ': ' + (expect ? 'the key was not cancelled (Space would scroll the page)' : 'a key that did nothing was cancelled'));
+      };
+      pcState = null; pcKeyLast = null; chcLive = null;
+      only(A);
+      // The map: one card open, nothing touched → that card answers.
+      press({}, 'pcToggle:ca-18', 'Space, one card on screen');
+      press({ key: 'Spacebar' }, 'pcToggle:ca-18', 'old-style Spacebar key');
+      press({ key: 'k', code: 'KeyK' }, 'pcToggle:ca-18', 'k');
+      press({ key: 'K', code: 'KeyK', shiftKey: true }, 'pcToggle:ca-18', 'K');
+      press({ key: 'ArrowRight', code: 'ArrowRight' }, 'pcPage:ca-18:1', 'Right, stopped');
+      press({ key: 'ArrowLeft', code: 'ArrowLeft' }, '', 'Left, stopped, on the first page (Previous is disabled)');
+      A.prev.disabled = false;
+      press({ key: 'ArrowLeft', code: 'ArrowLeft' }, 'pcPage:ca-18:-1', 'Left, stopped, Previous enabled');
+      A.next.disabled = true;
+      press({ key: 'ArrowRight', code: 'ArrowRight' }, '', 'Right, stopped, on the last page (Next is disabled)');
+      A.next.disabled = false;
+      press({ key: '<', code: 'Comma', shiftKey: true }, 'pcSetSpeedTo:ca-18:0', '< from Slower');
+      check(A.range.value === '0', '< did not move the slider to Slowest');
+      press({ key: '<', code: 'Comma', shiftKey: true }, '', '< at Slowest (the slider\'s own end)');
+      press({ key: '.', code: 'Period' }, 'pcSetSpeedTo:ca-18:1', '. faster');
+      press({ key: '>', code: 'Period', shiftKey: true }, 'pcSetSpeedTo:ca-18:2', '> faster');
+      press({ key: '>', code: 'Period', shiftKey: true }, 'pcSetSpeedTo:ca-18:3', '> to Normal');
+      press({ key: '>', code: 'Period', shiftKey: true }, '', '> at Normal (the slider\'s own end)');
+      press({ key: ',', code: 'Comma' }, 'pcSetSpeedTo:ca-18:2', ', slower');
+      // Playing: the arrows go to the neighbouring section chip, from the section playing.
+      pcState = { root: A.pc, si: 1, loopFrom: 0 };
+      press({ key: 'ArrowRight', code: 'ArrowRight' }, 'pcFromSection:ca-18:2', 'Right while section 2 of 3 plays');
+      press({ key: 'ArrowLeft', code: 'ArrowLeft' }, 'pcFromSection:ca-18:0', 'Left while section 2 of 3 plays');
+      pcState = { root: A.pc, si: 2, loopFrom: 2 };
+      press({ key: 'ArrowRight', code: 'ArrowRight' }, '', 'Right while the last section plays');
+      pcState = { root: A.pc, si: -1, loopFrom: 0 };
+      press({ key: 'ArrowRight', code: 'ArrowRight' }, 'pcFromSection:ca-18:1', 'Right during the count-in (from the section counted in)');
+      press({}, 'pcToggle:ca-18', 'Space while playing (Stop)');
+      pcState = null;
+      // The two-way speed switch.
+      pcKeyLast = null; only(S);
+      press({ key: '<', code: 'Comma', shiftKey: true }, '', '< on the two-way switch already on Slower');
+      press({ key: '>', code: 'Period', shiftKey: true }, 'pcSetSpeed:ca-10', '> on the two-way switch (Slower → Normal)');
+      S.pc.dataset.slow = '';
+      press({ key: '>', code: 'Period', shiftKey: true }, '', '> on the two-way switch already on Normal');
+      press({ key: '<', code: 'Comma', shiftKey: true }, 'pcSetSpeed:ca-10', '< on the two-way switch (Normal → Slower)');
+      S.pc.dataset.slow = '1';
+      // One section: no pager, no chips → the arrows do nothing; Space still plays.
+      only(One);
+      press({ key: 'ArrowRight', code: 'ArrowRight' }, '', 'Right on a one-section card');
+      press({}, 'pcToggle:ca-36', 'Space on a one-section card');
+      // A lyric sheet: chips, no pager.
+      only(Sheet);
+      press({ key: 'ArrowRight', code: 'ArrowRight' }, '', 'Right on a stopped lyric sheet (no pager)');
+      pcState = { root: Sheet.pc, si: 0, loopFrom: 0 };
+      press({ key: 'ArrowRight', code: 'ArrowRight' }, 'pcFromSection:ca-38:1', 'Right on a playing lyric sheet');
+      pcState = null;
+
+      // The traps.
+      only(A); pcKeyLast = null;
+      const ALLKEYS = [{}, { key: 'k', code: 'KeyK' }, { key: 'ArrowRight', code: 'ArrowRight' }, { key: '<', code: 'Comma' }, { key: '>', code: 'Period' }, { key: ',', code: 'Comma' }, { key: '.', code: 'Period' }];
+      const none = (o, what) => ALLKEYS.forEach(k => press(Object.assign({}, k, o), '', what + ' [' + (k.key || ' ') + ']'));
+      [['an input', textIn], ['a textarea', area], ['a select', sel], ['contenteditable', editable], ['inside contenteditable', editKid], ['the speed slider', A.range]].forEach(([w, el]) => none({ target: el }, 'typing in ' + w));
+      none({ ctrlKey: true }, 'Ctrl held'); none({ metaKey: true }, 'Cmd held'); none({ altKey: true }, 'Alt held');
+      none({ repeat: true }, 'a held key (repeat)');
+      none({ isComposing: true }, 'mid-composition (IME)');
+      none({ defaultPrevented: true }, 'a key another handler already took');
+      // Space on a focused button / link / summary keeps its own meaning.
+      [['the card\'s own Play button', A.play], ['a section chip', A.chips[1]], ['another button', plainBtn], ['a link', link], ['a <summary>', A.det.querySelector('summary')], ['a role=button div', roleBtn]].forEach(([w, el]) => press({ target: el }, '', 'Space on ' + w));
+      press({ key: 'k', code: 'KeyK', target: plainBtn }, 'pcToggle:ca-18', 'K on a focused button (K has no meaning of its own)');
+      press({ key: 'ArrowRight', code: 'ArrowRight', target: radioBtn }, '', 'Right inside a radio group (the tool popups use the arrows)');
+      // Dialogs, the drawer, the tools, the mic.
+      const gate = (what, on, off) => { on(); none({}, what); off(); };
+      gate('the games screen open', () => { games.hidden = false; }, () => { games.hidden = true; });
+      gate('the live quiz open', () => { lq.hidden = false; }, () => { lq.hidden = true; });
+      let inv = null;
+      gate('the live-quiz invite', () => { inv = body.appendChild(E('div', ['lq-invite'], { role: 'dialog', 'aria-modal': 'true' })); }, () => inv.remove());
+      let ov = null;
+      gate('a check-off gate (#app inert)', () => { ov = body.appendChild(E('div', ['daily5-overlay'], {}, [E('div', ['daily5-modal'], { role: 'dialog', 'aria-modal': 'true' })])); app.inert = true; }, () => { ov.remove(); app.inert = false; });
+      gate('#app inert alone', () => { app.inert = true; }, () => { app.inert = false; });
+      gate('the nav drawer open', () => body.classList.add('rail-open'), () => body.classList.remove('rail-open'));
+      gate('the tuner open', () => tuner.classList.add('open'), () => tuner.classList.remove('open'));
+      gate('the recorder open', () => rec.classList.add('open'), () => rec.classList.remove('open'));
+      gate('the search panel open', () => { search.hidden = false; }, () => { search.hidden = true; });
+      gate('a mic listening', () => { R.coachMicLive = true; }, () => { R.coachMicLive = false; });
+      gate('a Call-the-chord round', () => { chcLive = 'chk'; }, () => { chcLive = null; });
+      press({}, 'pcToggle:ca-18', 'Space once every dialog, tool and mic is closed again');
+      // No player on screen.
+      only();
+      none({}, 'every card closed');
+      only(A); screen.hidden = true; none({}, 'In-Class Activities not the page on screen'); screen.hidden = false;
+      A.pc.dataset.preview = '1'; none({}, 'the console preview'); delete A.pc._attrs['data-preview'];
+      const detached = card('ca-99'); detached.det.open = true; detached.det.remove();
+      pcKeyLast = detached.pc; press({}, 'pcToggle:ca-18', 'last-touched card no longer in the page (falls back to the one on screen)');
+      pcState = { root: detached.pc, si: 0, loopFrom: 0 }; press({}, 'pcToggle:ca-18', 'pcState on a card no longer in the page'); pcState = null;
+      // Two cards on screen: which one answers.
+      only(A, B); pcKeyLast = null;
+      none({}, 'two cards, none playing, none touched');
+      pcKeyNote({ target: B.tabBody });
+      press({}, 'pcToggle:ca-24', 'two cards, B last touched (a pointerdown inside it)');
+      pcKeyNote({ target: A.chips[2] });
+      press({ key: 'k' }, 'pcToggle:ca-18', 'two cards, A last focused (a focusin on its chip)');
+      pcKeyNote({ target: plainBtn });
+      press({ key: 'k' }, 'pcToggle:ca-18', 'a touch outside every card keeps the last card');
+      pcState = { root: B.pc, si: 0, loopFrom: 0 };
+      press({ key: 'k' }, 'pcToggle:ca-24', 'two cards, B playing, A last touched: the playing one answers');
+      press({ key: 'ArrowRight' }, 'pcFromSection:ca-24:1', 'two cards, B playing: Right moves B');
+      pcState = null;
+      B.det.open = false;
+      press({ key: 'k' }, 'pcToggle:ca-18', 'B closed again');
+    }
+
+    /* ══ B15: the tick ══ */
+    if(typeof tickPop !== 'function') out.bad.push('tickPop is not defined');
+    else {
+      ['renderPills', 'populateModuleDropdown', 'renderProgressStrip', 'refreshReviewCards'].forEach(n => stubFn(n, () => {}));
+      const qlog = [];
+      stubFn('queueSave', (...k) => qlog.push(k.join(',')));
+      const wp = body.appendChild(E('div', ['week-panel', 'active'], { 'data-id': 'm1w1' }));
+      const band = wp.appendChild(E('div', ['set-eyebrow']));
+      const chrome = band.appendChild(E('span', ['se-chrome']));
+      const pillWrap = chrome.appendChild(E('span', ['prog-pill-wrap']));
+      pillWrap.appendChild(E('span', ['prog-pill']));
+      pillWrap.appendChild(E('span', ['prog-mini'], {}, [E('i')]));
+      const dp = wp.appendChild(E('div', ['dp'], { id: 'm1w1-dp-b' }));
+      const ul = dp.appendChild(E('ul', ['steps']));
+      const rows = [0, 1, 2].map(i => {
+        const li = ul.appendChild(E('li', ['step'].concat(i ? ['collapsed'] : ['cur']), { 'data-num': String(i + 1) }));
+        const head = li.appendChild(E('div', ['step-head']));
+        const status = head.appendChild(E('span', ['step-status']));
+        head.appendChild(E('span', ['step-label']));
+        const det = li.appendChild(E('div', ['step-detail']));
+        const btn = det.appendChild(E('button', ['step-done-btn']));
+        return { li, status, btn, key: 'm1w1-b-sec0-' + i };
+      });
+      const cl = wp.appendChild(E('div', ['checklist']));
+      const skill = sid => { const row = cl.appendChild(E('div', ['skill-row'], { 'data-sid': sid }));
+        const wk = row.appendChild(E('div', ['skchk-cell', 'working-col'])); wk.appendChild(E('div', ['skbox']));
+        const gi = row.appendChild(E('div', ['skchk-cell', 'gotit-col'])); const box = gi.appendChild(E('div', ['skbox'])); return box; };
+      const has = el => !!el && el.classList.contains('tick-pop');
+      const tick = (cond, msg) => { out.tickCases++; check(cond, msg); };
+      const resetData = () => { for(const k of Object.keys(completed)) delete completed[k]; completedDeletes.clear(); qlog.length = 0; };
+      resetData();
+      // Lesson step, All-steps view: the ✓ circle pops.
+      toggleStepDone(rows[0].btn, rows[0].key);
+      tick(has(rows[0].status), 'All-steps view: marking a step done did not pop its ✓ circle');
+      tick(!has(pillWrap), 'All-steps view: the pill popped too (one control only)');
+      tick(completed[rows[0].key] === true, 'the step was not saved as done');
+      // animationend from the ring (::after) or a child does not end it; the element's own does.
+      rows[0].status.fire('animationend', { target: rows[0].status, pseudoElement: '::after' });
+      tick(has(rows[0].status), 'the ring\'s animationend (::after) removed the class early');
+      rows[0].status.fire('animationend', { target: rows[0].status.parentNode, pseudoElement: '' });
+      tick(has(rows[0].status), 'another element\'s animationend removed the class');
+      rows[0].status.fire('animationend', { target: rows[0].status, pseudoElement: '' });
+      tick(!has(rows[0].status), 'the class stayed after the animation ended');
+      tick((rows[0].status._ls.animationend || []).length === 0, 'the animationend listener was not removed');
+      advance(1000);
+      // Untick: nothing.
+      toggleStepDone(rows[0].btn, rows[0].key);
+      tick(!has(rows[0].status) && !has(pillWrap), 'unticking a step popped something');
+      tick(!(rows[0].key in completed) && completedDeletes.has(rows[0].key), 'the untick was not saved as a delete');
+      // Timeout fallback (no animationend ever comes).
+      rows[0].li.classList.remove('collapsed');
+      toggleStepDone(rows[0].btn, rows[0].key);
+      tick(has(rows[0].status), 're-tick did not pop');
+      advance(TICK_POP_MS - 1);
+      tick(has(rows[0].status), 'the class went before the fallback time');
+      advance(1);
+      tick(!has(rows[0].status), 'the fallback timer did not remove the class');
+      // A quick on/off/on restarts it (and reads the width once to do so).
+      toggleStepDone(rows[0].btn, rows[0].key);
+      rows[0].li.classList.remove('collapsed');
+      const r0 = reflows;
+      toggleStepDone(rows[0].btn, rows[0].key);
+      tick(has(rows[0].status) && reflows === r0, 'first tick of the pair');
+      advance(100);
+      toggleStepDone(rows[0].btn, rows[0].key);
+      rows[0].li.classList.remove('collapsed');
+      toggleStepDone(rows[0].btn, rows[0].key);
+      tick(has(rows[0].status) && reflows === r0 + 1, 'a re-tick inside the animation did not restart it (reflows ' + (reflows - r0) + ')');
+      advance(TICK_POP_MS);
+      tick(!has(rows[0].status), 'the restarted pop was not cleaned up');
+      // One-step view: the row hides as the next step opens, so the pill pops instead.
+      dp.classList.add('focus');
+      rows.forEach(r => { r.li.classList.remove('step-done', 'cur'); r.li.classList.add('collapsed'); });
+      rows[1].li.classList.remove('collapsed');
+      toggleStepDone(rows[1].btn, rows[1].key);
+      tick(rows[1].status.getClientRects().length === 0, 'fixture: the done row should be hidden in One-step view');
+      tick(!has(rows[1].status) && has(pillWrap), 'One-step view: the pill did not pop when the ticked row hid (status ' + has(rows[1].status) + ', pill ' + has(pillWrap) + ')');
+      advance(TICK_POP_MS);
+      tick(!has(pillWrap), 'the pill kept the class');
+      // One-step view, last step: it stays open with its ✓, so the circle pops.
+      rows[2].li.classList.remove('collapsed');
+      rows[0].li.classList.add('step-done');
+      toggleStepDone(rows[2].btn, rows[2].key);
+      tick(has(rows[2].status) && !has(pillWrap), 'One-step view, last step: its own ✓ did not pop');
+      advance(TICK_POP_MS);
+      dp.classList.remove('focus');
+      // A peeked (read-only) set: nothing, not even a write.
+      wp.classList.add('set-peek');
+      resetData();
+      rows[0].li.classList.remove('step-done', 'collapsed');
+      toggleStepDone(rows[0].btn, rows[0].key);
+      tick(!has(rows[0].status) && !has(pillWrap) && !Object.keys(completed).length && !qlog.length, 'a peeked set popped or saved');
+      wp.classList.remove('set-peek');
+      // Reduced motion: never added.
+      reduce = true;
+      toggleStepDone(rows[0].btn, rows[0].key);
+      tick(!has(rows[0].status) && !has(pillWrap) && completed[rows[0].key] === true, 'reduced motion: the class was added (or the tick not saved)');
+      reduce = false;
+      advance(TICK_POP_MS);
+
+      // The checklist.
+      const sets = typeof SETS !== 'undefined' ? SETS : [];
+      const w = sets.find(x => (x.skills || []).some(s => !skillIsCoachGated(s.id) && !skillIsDrillGated(s.id)));
+      const plain = w && w.skills.find(s => !skillIsCoachGated(s.id) && !skillIsDrillGated(s.id));
+      const gw = sets.find(x => (x.skills || []).some(s => skillIsCoachGated(s.id)));
+      const gated = gw && gw.skills.find(s => skillIsCoachGated(s.id));
+      if(!plain || !gated) out.bad.push('no plain or Coach-gated skill in SETS to test with');
+      else {
+        wp.setAttribute('data-id', w.id);
+        const box = skill(plain.id);
+        const savedProg = progress[plain.id], savedGate = progress[gated.id];
+        const savedCoach = games && games.coachSkill;
+        delete progress[plain.id];
+        toggleSkill(plain.id, w.id, 'gotit');
+        tick(has(box) && progress[plain.id] === 'gotit', 'checklist: "I\'ve got it!" did not pop its box');
+        advance(TICK_POP_MS);
+        toggleSkill(plain.id, w.id, 'gotit');
+        tick(!has(box) && progress[plain.id] === 'working', 'checklist: unticking popped');
+        toggleSkill(plain.id, w.id, 'working');
+        toggleSkill(plain.id, w.id, 'working');
+        tick(!has(box), 'checklist: "Still working" popped the got-it box');
+        progress[plain.id] = 'working';
+        toggleSkill(plain.id, w.id, 'gotit');
+        tick(has(box), 'checklist: working → got it did not pop');
+        advance(TICK_POP_MS);
+        // Peeked set.
+        wp.classList.add('set-peek');
+        delete progress[plain.id];
+        tick(toggleSkill(plain.id, w.id, 'gotit') === false && !has(box) && !progress[plain.id], 'checklist: a peeked set ticked or popped');
+        wp.classList.remove('set-peek');
+        // The Coach gate refuses: nothing; "Mark it anyway": the pop, after the gate accepted.
+        wp.setAttribute('data-id', gw.id);
+        const gbox = skill(gated.id);
+        delete progress[gated.id];
+        if(games && games.coachSkill) delete games.coachSkill[gated.id];
+        const refused = toggleSkill(gated.id, gw.id, 'gotit');
+        tick(refused === false && !has(gbox) && !progress[gated.id], 'checklist: the Coach gate refused, but the box popped or ticked');
+        tick(!!DOC.getElementById('coach-gate-overlay'), 'fixture: the Coach gate did not open');
+        coachGateMarkAnyway(gated.id, gw.id);
+        tick(has(gbox) && progress[gated.id] === 'gotit', 'checklist: "Mark it anyway" did not pop after the gate accepted');
+        tick(!DOC.getElementById('coach-gate-overlay'), 'the gate stayed open');
+        advance(TICK_POP_MS);
+        tick(!has(gbox), 'checklist: the box kept the class');
+        if(savedProg === undefined) delete progress[plain.id]; else progress[plain.id] = savedProg;
+        if(savedGate === undefined) delete progress[gated.id]; else progress[gated.id] = savedGate;
+        if(games && games.coachSkill && savedCoach) games.coachSkill = savedCoach;
+      }
+    }
+  } catch(e) {
+    out.bad.push('the test threw: ' + (e && e.stack || e));
+  } finally {
+    Object.keys(saved).forEach(k => { R[k] = saved[k]; });
+    Object.keys(savedFns).forEach(k => { R[k] = savedFns[k]; });
+    pcState = keep.pcState; chcLive = keep.chcLive;
+    if(typeof pcKeyLast !== 'undefined') pcKeyLast = keep.pcKeyLast;
+    completed = JSON.parse(keep.completed); completedDeletes = new Map(keep.deletes);
+    progress = JSON.parse(keep.progress); games = JSON.parse(keep.games);
+  }
+  out.storageUntouched = JSON.stringify(R.localStorage && R.localStorage._d || {}) === lsBefore;
+  return JSON.stringify(out);
+})()`;
+function checkCardKeysAndTickPop(ctx, sets, i18nTable) {
+  head('1db. Practice-card keys (Space/K, arrows, < >) and the tick pop on a check-off');
+  let bad = 0;
+  const flag = m => { err('1db: ' + m); problems++; bad++; };
+  if (!ctx) { flag('cannot run — the 0b render context is unavailable'); return; }
+  const run = x => vm.runInContext(x, ctx);
+  for (const fn of ['pcKeydown', 'pcKeyNote', 'tickPop', 'toggleStepDone', 'toggleSkill', 'caCardBodyHtml']) if (run('typeof ' + fn) !== 'function') { flag(fn + '() not found in app.js (renamed? update 1db)'); return; }
+  // The key map.
+  const map = JSON.parse(run('JSON.stringify(PC_KEYS)'));
+  if (JSON.stringify(map) !== JSON.stringify(DB_KEYS)) flag('PC_KEYS is ' + JSON.stringify(map) + ', pinned ' + JSON.stringify(DB_KEYS));
+  // The page.
+  let res;
+  try { res = JSON.parse(run(DB_PAGE_TEST_SRC)); } catch (e) { flag('the page test threw: ' + e.message); return; }
+  for (const m of res.bad.slice(0, 20)) flag(m);
+  if (res.bad.length > 20) flag('... and ' + (res.bad.length - 20) + ' more');
+  if (res.cases !== DB_CASES || res.keyCases !== DB_KEY_PRESSES || res.tickCases !== DB_TICK_CHECKS) flag('ran ' + res.cases + ' checks (' + res.keyCases + ' key presses, ' + res.tickCases + ' tick checks), pinned ' + DB_CASES + ' (' + DB_KEY_PRESSES + ', ' + DB_TICK_CHECKS + ')');
+  if (!res.storageUntouched) flag('a key press or a tick wrote to localStorage (nothing may persist)');
+  // The save: the same clicks with and without the pop.
+  let seqA, seqB;
+  try {
+    ctx.__DB_SEQ = true;
+    seqA = JSON.parse(run(DB_PAGE_TEST_SRC));
+    ctx.__DB_NOPOP = true;
+    seqB = JSON.parse(run(DB_PAGE_TEST_SRC));
+  } catch (e) { flag('the save sequence threw: ' + e.message); }
+  finally { delete ctx.__DB_SEQ; delete ctx.__DB_NOPOP; }
+  if (seqA && seqB) {
+    for (const m of seqA.bad.concat(seqB.bad)) flag('save sequence: ' + m);
+    const n = (seqA.seq || []).length;
+    if (n !== DB_SEQ_CLICKS || (seqB.seq || []).length !== n) flag('the save sequence took ' + n + ' snapshots, pinned ' + DB_SEQ_CLICKS);
+    (seqA.seq || []).forEach((x, i) => { if (x !== (seqB.seq || [])[i]) flag('click ' + (i + 1) + ' leaves different data to save with the pop than without: ' + x + ' vs ' + (seqB.seq || [])[i]); });
+  }
+  // The strings, both languages.
+  const KEYS = { 'pc.keys.play': [/space bar/, /K/], 'pc.keys.prev': [/←/], 'pc.keys.next': [/→/], 'pc.keys.section': [/←/, /→/], 'pc.keys.speed': [/</, />/] };
+  const ES = { 'pc.keys.play': [/barra espaciadora/, /K/], 'pc.keys.prev': [/←/], 'pc.keys.next': [/→/], 'pc.keys.section': [/←/, /→/], 'pc.keys.speed': [/</, />/] };
+  for (const k of Object.keys(KEYS)) {
+    const e = i18nTable && i18nTable[k];
+    if (!e || !e.en || !e.es) { flag(k + ' is missing in English or Spanish'); continue; }
+    if (!KEYS[k].every(re => re.test(e.en))) flag(k + ' (en) "' + e.en + '" does not name its key');
+    if (!ES[k].every(re => re.test(e.es))) flag(k + ' (es) "' + e.es + '" does not name its key');
+  }
+  // The tooltips on a rendered card: a tab card with sections and the four-stop slider, and a lyric sheet.
+  const acts = run('window.CLASS_ACTIVITIES || []');
+  const tabCard = acts.find(a => a && a.view === 'card' && a.card && !a.card.sheet && a.card.slowest && (a.card.sections || []).length > 2 && !a.teacherOnly);
+  const sheetCard = acts.find(a => a && a.view === 'card' && a.card && a.card.sheet && (a.card.sections || []).length > 1);
+  const saveLang = run('getLang()');
+  let tips = 0;
+  try {
+    for (const lang of ['en', 'es']) {
+      run('setLang(' + JSON.stringify(lang) + ')');
+      const ta = k => run('escAttr(t(' + JSON.stringify(k) + '))');
+      for (const [a, kind] of [[tabCard, 'tab'], [sheetCard, 'lyric-sheet']]) {
+        if (!a) { flag('no ' + kind + ' practice card with sections to render'); continue; }
+        ctx.__dbCard = a;
+        const html = String(run('caCardBodyHtml(window.__dbCard)'));
+        const n = run('pcLayout(caView(window.__dbCard)).sections.length');
+        const esc = x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const want = [['class="pc-play" title="' + esc(ta('pc.keys.play')) + '"', 1], ['data-sec="\\d+" title="' + esc(ta('pc.keys.section')) + '"', n]];
+        if (a === tabCard) want.push(['title="' + esc(ta('pc.keys.prev')) + '" onclick="pcPage\\(this,-1\\)"', 1], ['title="' + esc(ta('pc.keys.next')) + '" onclick="pcPage\\(this,1\\)"', 1], ['class="pc-speed4"[^>]*title="' + esc(ta('pc.keys.speed')) + '"', 1]);
+        for (const [re, count] of want) {
+          const got = (html.match(new RegExp(re, 'g')) || []).length;
+          tips += got;
+          if (got !== count) flag(a.id + ' (' + lang + '): ' + got + ' controls carry ' + re.slice(0, 60) + '…, want ' + count);
+        }
+      }
+    }
+  } catch (e) { flag('rendering the tooltips threw: ' + e.message); }
+  finally { run('setLang(' + JSON.stringify(saveLang) + ')'); delete ctx.__dbCard; }
+  // The listeners: registered once, in app/start.js, after the role="button" Space handler (app/audio-ui.js).
+  const startSrc = stripJsComments(readFileSync(join(ROOT, 'app/start.js'), 'utf8'));
+  const app = stripJsComments(siteSource('app.js', ROOT));
+  for (const re of [/document\.addEventListener\('keydown', pcKeydown\);/, /document\.addEventListener\('pointerdown', pcKeyNote, \{ capture: true, passive: true \}\);/, /document\.addEventListener\('focusin', pcKeyNote\);/]) {
+    if (!re.test(startSrc)) flag('app/start.js no longer registers ' + re.source.replace(/\\/g, ''));
+    const all = app.match(new RegExp(re.source, 'g')) || [];
+    if (all.length !== 1) flag(all.length + ' copies of ' + re.source.replace(/\\/g, '') + ' in the app script, want 1');
+  }
+  const roleBtnAt = app.indexOf("const el=e.target.closest('[role=\"button\"]');"), keysAt = app.indexOf("document.addEventListener('keydown', pcKeydown);");
+  if (roleBtnAt < 0 || keysAt < roleBtnAt) flag('the keys listener must be registered after the role="button" Space handler, so a Space it took arrives cancelled');
+  // The CSS: one block, transform and opacity only, off under reduced motion.
+  const css = readFileSync(join(ROOT, 'styles.css'), 'utf8');
+  const kf = name => { const m = new RegExp('@keyframes ' + name + '\\{((?:[^{}]*\\{[^}]*\\})*)\\}').exec(css); return m ? m[1] : null; };
+  for (const name of ['tickPop', 'tickRing']) {
+    const body = kf(name);
+    if (!body) { flag('@keyframes ' + name + ' is gone from styles.css'); continue; }
+    const props = [...body.matchAll(/([a-z-]+)\s*:/g)].map(m => m[1]).filter(p => p !== 'from' && p !== 'to');
+    if (!props.length || props.some(p => p !== 'transform' && p !== 'opacity')) flag('@keyframes ' + name + ' animates ' + [...new Set(props)].join(', ') + ' — transform and opacity only (no layout shift)');
+  }
+  if (!/\.tick-pop\{[^}]*animation:tickPop /.test(css) || !/\.tick-pop::after\{[^}]*animation:tickRing /.test(css)) flag('styles.css: .tick-pop / .tick-pop::after no longer run tickPop / tickRing');
+  if (!/@media \(prefers-reduced-motion:reduce\)\{\.tick-pop,\.tick-pop::after\{animation:none\}/.test(css)) flag('styles.css: .tick-pop is not switched off under prefers-reduced-motion');
+  // No set ever renders with the class (a tick painted on page load never pops).
+  let setsSeen = 0;
+  for (const w of sets || []) { let h = ''; try { h = String(run('buildSet')(w)); } catch { continue; } setsSeen++; if (/tick-pop/.test(h)) flag(w.id + ' renders with tick-pop on the page'); }
+  if (!setsSeen) flag('no set rendered — the initial-paint check saw nothing');
+  if (!bad) ok('1db: ' + res.cases + ' checks on the real code (' + res.keyCases + ' key presses: the map, Space on a button, typing, Ctrl/Cmd/Alt, repeats, the dialogs, drawer, tools, a live mic and a Call-the-chord round, no card, two cards; ' + res.tickCases + ' tick checks: on, off, One-step view, peeked, refused gate, Mark it anyway, reduced motion, animationend, fallback); the same ' + DB_SEQ_CLICKS + ' clicks leave identical data to save with and without the pop; 5 strings EN + ES; ' + tips + ' tooltips on 2 rendered cards; 3 listeners in app/start.js; CSS transform/opacity only, off under reduced motion; ' + setsSeen + ' sets render without it');
+}
 /* 1ct. NO CHECKLIST ON A PRACTICE CARD; NO MARK COMPLETE ON AN EXTRA SONG
    (Jonathan, 2026-11-10: "get rid of the checklists on the activities. only
    have mark complete or next step" and "remove mark complete from the extra
@@ -16796,6 +17438,7 @@ function checkPracticeMinutes(i18nTable) {
   await checkSinceLastVisit(rcCtx);
   checkFoldedActivity(rcCtx);
   checkNoChecklist(rcCtx);
+  checkCardKeysAndTickPop(rcCtx, rcSets, i18nTable);
   checkOneLineDirections(rcCtx, i18nTable);
   checkCardCaptionWords();
   checkJourneyRetired();
