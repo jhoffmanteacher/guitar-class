@@ -6514,7 +6514,7 @@ function checkPartSizes() {
    print puts everything back to 1, and that a page with odd styles or no matchMedia does not throw. Then the wiring:
    index.html loads it as a plain script in <head> after styles.css, and no viewport unit in styles.css is left bare (each
    is divided by var(--site-fill,1), or it would be zoomed twice). Measured in a real browser: tools/smoke.mjs fillWalk. */
-const FILL_ASSERTS = 35;
+const FILL_ASSERTS = 36;
 function checkSiteFill() {
   head('1df. The page fills a big screen (site-fill.js)');
   let bad = 0, asserts = 0;
@@ -6613,14 +6613,18 @@ function checkSiteFill() {
   const html = readFileSync(join(ROOT, 'index.html'), 'utf8').replace(/<!--[\s\S]*?-->/g, '');
   const headEnd = html.indexOf('</head>'), css = html.indexOf('<link rel="stylesheet" href="styles.css">'), tag = html.indexOf('<script src="site-fill.js"></script>');
   want(tag > css && css >= 0 && tag < headEnd, 'index.html must load site-fill.js as a plain <script src="site-fill.js"></script> in <head>, after styles.css (not defer: the factor must be there before the first paint)');
-  // No bare viewport unit in styles.css.
+  // The six Song Journey pages (Part 2): the same plain script in <head>, after their two stylesheets.
+  const journeys = readdirSync(join(ROOT, 'tabs')).filter(f => f.endsWith('.html')).sort();
+  const unwired = journeys.filter(f => { const h = readFileSync(join(ROOT, 'tabs', f), 'utf8').replace(/<!--[\s\S]*?-->/g, ''); const e = h.indexOf('</head>'), c = h.indexOf('<link rel="stylesheet" href="fab-tools.css">'), t = h.indexOf('<script src="../site-fill.js"></script>'); return !(t > c && c >= 0 && t < e); });
+  want(journeys.length === 6 && !unwired.length, `each of the 6 Song Journey pages must load ../site-fill.js as a plain script in <head> after fab-tools.css (${journeys.length} pages found; not wired: ${unwired.join(', ') || 'none'})`);
+  // No bare viewport unit in the site's stylesheets.
   const bare = [];
-  readFileSync(join(ROOT, 'styles.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, m => m.replace(/[^\n]/g, ' ')).split('\n').forEach((l, i) => {
-    for (const m of l.matchAll(/(?<![\w.#-])-?(?:\d+\.?\d*|\.\d+)(?:dvh|svh|lvh|vh|vw|vmin|vmax)(?![\w-])(?!\s*\/\s*var\(--site-fill,1\))/g)) bare.push(`styles.css:${i + 1} ${m[0]}`);
+  for (const css of ['styles.css', 'tabs/journey-theme.css', 'tabs/fab-tools.css']) readFileSync(join(ROOT, css), 'utf8').replace(/\/\*[\s\S]*?\*\//g, m => m.replace(/[^\n]/g, ' ')).split('\n').forEach((l, i) => {
+    for (const m of l.matchAll(/(?<![\w.#-])-?(?:\d+\.?\d*|\.\d+)(?:dvh|svh|lvh|vh|vw|vmin|vmax)(?![\w-])(?!\s*\/\s*var\(--site-fill,1\))/g)) bare.push(`${css}:${i + 1} ${m[0]}`);
   });
-  want(!bare.length, `every viewport unit in styles.css must be divided by var(--site-fill,1) (the root zoom enlarges it already): ${bare.slice(0, 6).join(', ')}${bare.length > 6 ? ' …' : ''}`);
+  want(!bare.length, `every viewport unit in styles.css, tabs/journey-theme.css and tabs/fab-tools.css must be divided by var(--site-fill,1) (the root zoom enlarges it already): ${bare.slice(0, 6).join(', ')}${bare.length > 6 ? ' …' : ''}`);
   if (asserts !== FILL_ASSERTS) flag(`ran ${asserts} assertions, pinned ${FILL_ASSERTS} — a branch stopped running (or update the pin with the change)`);
-  if (!bad) ok(`1df: the factor is 1 at 1366x657, 1366x768, 1280x720 and 390x844 (nothing set), about 1.874 at 2560x1300 (root zoomed, the short-screen rule rewritten, page pixels for the script), 1 to 3 over 26,474 sizes; print, resize, browser zoom, the console and odd pages; wired in index.html's <head>; no bare viewport unit in styles.css (${asserts} assertions)`);
+  if (!bad) ok(`1df: the factor is 1 at 1366x657, 1366x768, 1280x720 and 390x844 (nothing set), about 1.874 at 2560x1300 (root zoomed, the short-screen rule rewritten, page pixels for the script), 1 to 3 over 26,474 sizes; print, resize, browser zoom, the console and odd pages; wired in the <head> of index.html and the ${journeys.length} Song Journey pages; no bare viewport unit in the 3 stylesheets (${asserts} assertions)`);
 }
 
 function checkPrecacheFingerprinted(src, hashed) {
