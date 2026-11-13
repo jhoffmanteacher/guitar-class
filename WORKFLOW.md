@@ -404,9 +404,10 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
       independent oracle. Three review rounds on the tool. Default run: 180 cases, about 8 s, 6,860 stored values;
       both fixes were red before (R16-wiped, R6-both-picks) and are green now, and seven half-done versions of the
       fix are red. Its last line counts failing values by tag and "untagged".
-      Known limits of the tool, being fixed when this was written: it can fail falsely on some seeds (13: a
-      failed-load tab whose only action is held back; 11: a two-tab mixture in one practice-log record that exists
-      on the old site too), and it does not yet prove "the later pick wins" for two loaded devices.
+      The tool passes on the fixed site for default seeds 1, 7, 11, 13, 17 and 23 with 0 untagged failures, and it
+      proves that the later path pick wins on two loaded devices (a half-fix that skips the un-tick goes red). A
+      whole record mixed from two tabs' writes (seen once in six seeds: a personal best beside another tab's stale
+      rep counts) is counted on its own line, M2, for Jonathan, not failed.
       Still open after a failed sign-in read, on Jonathan's list, NOT fixed: nothing tells the student their saved
       work did not load; a stored "got it" can become "working on it"; an exit check's done mark can be saved without
       its score (KNOWN in the tool); a one-try exit check can be retaken; every set shows unlocked; if the Wi-Fi
@@ -471,15 +472,18 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
       **The site fix (Fast, `app/cards.js`, QUEUED CLICKS):** with the Metronome on, an in-song click is queued up to
       about 0.18 s ahead and was never taken back. A speed change, the Guitar switch or the Metronome switch then
       queued the same count again (an extra or early click), and one more click sounded after Stop: 61 of 468 walks
-      were red. `pcCancelQueuedClicks()` now takes back the clicks whose count is still to come; a click whose count
+      were red. `cancelQueuedClicks()` (first shipped as `pcCancelQueuedClicks()`) now takes back the clicks whose count is still to come; a click whose count
       the song has already reached is kept (the first cut removed those too and the tool caught it: 17 walks lost a
       click). A half fix (switches but not Stop) is still red.
-      Listed for Jonathan, NOT fixed: the same queued-click fault in the step snippet player (`snipScheduleClick`,
-      `snipSetTier`) and on the Song Journey pages (`clickTick`), found by reading; the Las Mañanitas Solo highlight
-      steps back at line starts (`PC_ROW_LEAD` 0.15 s is longer than its quick notes); the count-in runs at the
-      window's average tempo, not the bar's (356 count-ins off, 183 by more than 3%, worst 16.9% fast at ca-36
-      Ending); a lyric sheet's "This bar" steps one past the end for the last 0.175 s. The last three are the tool's
-      KNOWN entries, matched narrowly; a KNOWN entry that stops occurring fails a full run.
+      Fixed the same evening (Fast, two more commits): the same queued-click fault in the step snippet player and on
+      the Song Journey pages (15 scripted runs red before, green after; before, 25 clicks for 19 counts), and the
+      count-in tempo (`pcCountIn` now uses the bar the song comes in on; worst before was 16.9% fast at ca-36 Ending).
+      Listed for Jonathan, NOT fixed, as the tool's three KNOWN entries: the Las Mañanitas Solo highlight steps back
+      at line starts (`PC_ROW_LEAD` 0.15 s is longer than its quick notes; places re-recorded after the count-in fix:
+      notes 17 and 66); a lyric sheet's "This bar" steps one past the end for the last 0.175 s; a lyric sheet's "This
+      bar" strip blinks empty for one frame where the music is 0.175 s before a repeat or a new section
+      (`sheetLapBoundary`, found 2026-11-12 once the count-in had its right length). A KNOWN entry that stops
+      occurring fails a full run. Full run after these fixes: 468 walks, 100,824 clicks, 0 mismatches.
       What a second tool for the six Song Journey pages would need is in the work-order report.
 
 - [x] **2026-11-12 — `tools/beat-audit.py`: a tool that listens to every backing track and lists where the beat map

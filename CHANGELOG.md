@@ -6,6 +6,11 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-12 — One Metronome click per beat everywhere, and a count-in at the right speed
+
+- **In a step's backing-track loop and on Song Journey pages, the Metronome now clicks once per beat.** There's no extra click when you change speed, switch the guitar, jump to another spot, pause or stop.
+- **The count-in before a practice card's song matches the speed of the part you're starting**, so the song comes in right after the last click. (Madrecita Querida's ending used to count in too fast.)
+
 ## 2026-11-12 — Your PR history and your path choice are kept
 
 - **If your saved work didn't load when you signed in** (for example, the Wi-Fi was down), typing a new PR no longer erases your earlier PRs. That one PR isn't saved, and the page says "Not saving" so you know.

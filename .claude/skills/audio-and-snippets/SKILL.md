@@ -387,9 +387,15 @@ practice-card player (`app/cards.js`, `app/snippets.js`): `node tools/playalong-
 headless Chrome for Testing, about 6½ minutes for all 26 cards, one browser run at a time). It walks every setting on
 a fake clock and checks the cursor, the drawing, the count-in and the Metronome against an answer worked out from the
 chart and the beat map. It has no ears: `tools/beat-audit.py` is the tool that listens.
-- **A queued click must be taken back when the clock changes** (QUEUED CLICKS in `app/cards.js`, fixed 2026-11-12:
-  `pcCancelQueuedClicks()` on a speed change, the Guitar switch, the Metronome switch and Stop). The step snippet
-  player (`snipScheduleClick` / `snipSetTier` in `app/snippets.js`) and the Song Journey pages (`clickTick` in
-  `tabs/journey.js`) queue clicks the same way and still have the fault: on Jonathan's list.
+- **A queued click must be taken back when the clock changes** (QUEUED CLICKS in `app/snippets.js`, fixed 2026-11-12:
+  `queueClick()` keeps each click until it has sounded and `cancelQueuedClicks()` takes back those whose count is still
+  to come, in both app players: practice cards at a speed change, the Guitar switch, the Metronome switch and Stop;
+  step snippets in `snipSetTier` and `snipStop`). The Song Journey pages keep their own copy in `tabs/journey.js`
+  (`clickQ` / `clickTakeBack()` on a seek, a pause, a Slow or Guitar switch and the Metronome switch). A click whose
+  count the music has already reached is kept: it is only waiting out the output latency.
+- The count-in clicks at the tempo of the bar the song comes in on (`pcCountIn`, fixed 2026-11-12; it used the
+  window's average bar, 16.9% too fast at Madrecita Querida's Ending).
 - Its three KNOWN entries are real faults on his list, not fixed: the Las Mañanitas Solo highlight steps back at line
-  starts; the count-in runs at the window's average tempo; a lyric sheet's "This bar" steps one past the end.
+  starts (`PC_ROW_LEAD` is longer than its quick notes); a lyric sheet's "This bar" steps one past the end in the
+  song's last 0.175 s (`sheetPastEnd`); a lyric sheet's "This bar" strip blinks empty for one frame where the music is
+  0.175 s before a repeat or a new section (`sheetLapBoundary`, the same strip code).
