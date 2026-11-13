@@ -1079,6 +1079,12 @@ function lqLbRowHtml(r, cls){
     + `<span class="lq-lb-name">${escHtml(r.name || '—')}</span>`
     + `<span class="lq-lb-pts">${escHtml(String(r.pts || 0))}</span></li>`;
 }
+// A row of the STAGE's leaderboard (the projector). With "Hide names on the projector" ticked it is built with no name
+// at all: the place, then the points in words.
+function lqStageLbRowHtml(r){
+  if(!lqTHideNames) return lqLbRowHtml(r);
+  return `<li><span class="lq-lb-rank">${r.rank}</span><span class="lq-lb-pts">${escHtml(tIn('lq.points', 'en', { n: r.pts || 0 }))}</span></li>`;
+}
 function lqStudentEndedHtml(s){
   const rows = lqRanked(s.scores);
   const me = rows.find(r => r.uid && r.uid === lqUid()) || null;
@@ -1355,6 +1361,23 @@ function lqLastQuestionDone(s){
   const total = s ? Number(s.totalQ) || 0 : 0;
   return total > 0 && Number(s.qIndex) + 1 >= total;
 }
+/* Hide names on the projector (Jonathan, 2026-11-13). A box in the strip, OFF by default. Ticked, every list of
+   names the stage draws (the lobby's chips, the Top 5 at Reveal, the final scores) is BUILT without them: the lobby
+   keeps only its count, a leaderboard row only its place and points ("1  3000 points"). The names are left out of
+   the HTML, not hidden with CSS: a name in the DOM of a projected page is still a name. Kept on this device
+   (`gc-lq-hidenames`), like the time box: the teacher's own display choice, never game state, so nothing reaches
+   liveQuiz/current and no student's screen changes. Stored rather than kept in memory so that a console reload in
+   the middle of a game, with the box ticked, does not put the names back on the projector. */
+let lqTHideNames = false;
+try { lqTHideNames = localStorage.getItem('gc-lq-hidenames') === '1'; } catch(e){ lqTHideNames = false; }
+function lqTSetHideNames(on){
+  lqTHideNames = !!on;
+  try { localStorage.setItem('gc-lq-hidenames', lqTHideNames ? '1' : '0'); } catch(e){}
+  lqPaintStage();
+}
+function lqHideNamesInputHtml(){
+  return `<label class="lq-ctl-lbl"><input type="checkbox" id="lq-hidenames"${lqTHideNames ? ' checked' : ''} onchange="lqTSetHideNames(this.checked)"> Hide names on the projector</label>`;
+}
 let lqTBusy = false;        // one write at a time; the buttons gate on it
 let lqTFretString = null;   // fret quiz only — the string picked in the strip; defaults to quiz.strings[0]
 
@@ -1496,7 +1519,8 @@ function lqBilingualParams(key, cls, paramsEn, paramsEs){
 function lqStageLobbyHtml(s, quiz){
   // Sorted by NAME: the answer docs come back in uid order, so chips in that order would line every uid in the public scores up with a name.
   const here = lqRoster(s).slice().sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
-  const chips = here.map(r => `<span class="lq-chip">${escHtml(r.name || '—')}</span>`).join('');
+  // Names hidden (lqTHideNames): no chips at all, only the count above them.
+  const chips = lqTHideNames ? '' : here.map(r => `<span class="lq-chip">${escHtml(r.name || '—')}</span>`).join('');
   return lqBilingual(quiz.titleKey, 'lq-st-title')
     + lqBilingual('lq.stageJoin', 'lq-st-join')
     + `<div class="lq-st-count"><span class="lq-st-big">${here.length}</span>`
@@ -1566,7 +1590,7 @@ function lqStageRightCountHtml(s){
 }
 function lqStagePcNameRevealHtml(s, quiz){
   const answer = s.correct ? `<div class="lq-st-answer">${escHtml(s.correct)}</div>` : '';
-  const lb = lqRankedNamed(s).slice(0, 5).map(r => lqLbRowHtml(r)).join('');
+  const lb = lqRankedNamed(s).slice(0, 5).map(r => lqStageLbRowHtml(r)).join('');
   if(quiz.countOnly) return lqBilingualParams('lq.stageAnswerLabel', 'lq-st-qnum', {n: Number(s.qIndex) + 1}, {n: Number(s.qIndex) + 1})
     + answer
     + `<div class="lq-st-split">${lqPcNameBoxHtml(s.target, 'lq-pcbox-stage')}<div>${lqStageRightCountHtml(s)}<ol class="lq-lb lq-lb-stage">${lb}</ol></div></div>`;
@@ -1580,7 +1604,7 @@ function lqStageRevealHtml(s, quiz){
   if(lqType(quiz) === 'pcname') return lqStagePcNameRevealHtml(s, quiz);
   const c = lqChoice(quiz, s.correct);
   const answer = c ? lqBilingual(c.key, 'lq-st-answer') : '';
-  const board = lqRankedNamed(s).slice(0, 5).map(r => lqLbRowHtml(r)).join('');
+  const board = lqRankedNamed(s).slice(0, 5).map(r => lqStageLbRowHtml(r)).join('');
   return lqBilingualParams('lq.stageAnswerLabel', 'lq-st-qnum', {n: Number(s.qIndex) + 1}, {n: Number(s.qIndex) + 1})
     + answer
     + `<div class="lq-st-split">${lqTallyHtml(s, quiz, null)}<ol class="lq-lb lq-lb-stage">${board}</ol></div>`;
@@ -1614,7 +1638,7 @@ function lqStageFretRevealHtml(s, quiz){
   const first = chord ? lqParseFretId(correctIds[0]) : null;
   const box = first ? lqPcBoxSvg(first.string, first.fret) : '';
   if(box) board = `<div class="lq-st-pcwrap">${board}<div class="lq-pcbox lq-pcbox-side">${box}</div></div>`;
-  const lb = lqRankedNamed(s).slice(0, 5).map(r => lqLbRowHtml(r)).join('');
+  const lb = lqRankedNamed(s).slice(0, 5).map(r => lqStageLbRowHtml(r)).join('');
   return lqBilingualParams('lq.stageAnswerLabel', 'lq-st-qnum', {n: Number(s.qIndex) + 1}, {n: Number(s.qIndex) + 1})
     + answer
     + `<div class="lq-st-split">${board}<div>${quiz.countOnly ? lqStageRightCountHtml(s) : lqTallyHtml(s, quiz, null)}<ol class="lq-lb lq-lb-stage">${lb}</ol></div></div>`;
@@ -1622,7 +1646,7 @@ function lqStageFretRevealHtml(s, quiz){
 
 function lqStageEndedHtml(s){
   const rows = lqRankedNamed(s);
-  const board = rows.slice(0, 10).map(r => lqLbRowHtml(r)).join('');
+  const board = rows.slice(0, 10).map(r => lqStageLbRowHtml(r)).join('');
   return lqBilingual('lq.finalTitle', 'lq-st-title') + `<ol class="lq-lb lq-lb-stage">${board}</ol>`;
 }
 
@@ -1677,7 +1701,7 @@ function lqPaintControls(){
   if(document.activeElement && (document.activeElement.id === 'lq-limit' || document.activeElement.id === 'lq-total') && !lqTBusy) return;
   const s = lqTSession;
   const busy = lqTBusy ? ' disabled' : '';
-  const full = `<button type="button" class="lq-ctl ghost" onclick="lqToggleFullscreen()">Full screen</button>`
+  const full = lqHideNamesInputHtml() + `<button type="button" class="lq-ctl ghost" onclick="lqToggleFullscreen()">Full screen</button>`
     + (lqTPreview ? `<button type="button" class="lq-ctl ghost" onclick="lqTeacherExitPreview()">Exit preview</button>` : '');
   const pv = lqTPreview ? `<div class="lq-ctl-hint"><b>Preview</b>: only this screen sees it. No student is invited and nothing is saved.</div>` : '';
   if(lqTPreview && s && s.state === 'ended'){

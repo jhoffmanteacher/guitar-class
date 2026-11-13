@@ -6,6 +6,11 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-13 — Live In-Class Games: your teacher can hide the names on the scoreboard
+
+- **Your teacher can now hide the names on the big screen.** Then the scoreboard shows only each place and its points, and the waiting screen shows only how many joined. Your own screen still shows your place and your points. Names show unless your teacher turns this on.
+
+
 ## 2026-11-13 — "Live quiz" is now "Live In-Class Games"
 
 - **The whole-class game has a new name: Live In-Class Games** (Spanish: Juegos de clase en vivo). The banner and the invite now say "Live in-class game". Nothing else about it changed.

@@ -67,6 +67,13 @@ projected stage (`?teacher=true` → **Live quiz**). One game runs at a time, in
   kept on the device as `gc-lq-total`). Labels read "Question 3 of 10". After
   the last question's Reveal the strip offers "Final scores" only; the game
   does not end by itself.
+- **"Hide names on the projector"** (Jonathan, 2026-11-13): a box in the control strip, in every state, OFF
+  by default. Ticked, the stage is BUILT with no player name (never hidden with CSS): the lobby keeps only its
+  count, a Top 5 / final row is its place and "N points" (`lqStageLbRowHtml`). It is the teacher's display
+  choice, kept on the console's device (`gc-lq-hidenames`, so a console reload does not bring the names back):
+  never in `liveQuiz/current`, and no student's screen changes. A new list of names on the stage must go
+  through it. `checks.mjs` 1di paints every stage state both ways; the loop's `hide-names-*` cases click it in
+  every state.
 - **The public session doc carries NO player name** (2026-11-05, Jonathan: no
   per-period minutes tied to a name, readable by anyone).
   `liveQuiz/current.scores` is `{uid: {pts, right, answered, last, lastRight}}`,

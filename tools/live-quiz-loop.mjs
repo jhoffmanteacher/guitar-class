@@ -39,7 +39,7 @@
        --fake-fault=<name>    break the fake world on purpose (rules-off | no-order | shallow-merge | no-local |
                               plain-fieldvalue); the fake-world probes must then fail (the self-test)
        --prove=<folder>       the break-it proof on the --root tree (default this checkout): a baseline run (must be
-                              green), then FAULTS + FIX_FAULTS + PREVIEW_FAULTS + AUTO_FAULTS + R3_FAULTS each planted in a copy of its live-quiz.js under <folder>/<fault>/ and the fake-world
+                              green), then FAULTS + FIX_FAULTS + NOV13_FAULTS + HIDE_FAULTS + PREVIEW_FAULTS + AUTO_FAULTS + R3_FAULTS + F4_FAULTS each planted in a copy of its live-quiz.js under <folder>/<fault>/ and the fake-world
                               faults, each a default run; a fault is caught when it adds a failing line (case + kind)
                               the baseline did not have;
                               --games=N per run (default 4), --jobs=N runs at a time (default 3), --only=a,b
@@ -212,6 +212,13 @@
    T   (2026-11-13, rule file) The Questions box before Start is the game's length: 10 on a device that never set it,
        blank = no set number, written as totalQ and unchanged for the whole game. Labels read "Question n of total".
        After the last question's Reveal the strip offers "Final scores" and no next question.
+   H   (2026-11-13, Jonathan: a "hide names" switch for the Top 5 on the projector, OFF by default) The strip carries a
+       "Hide names on the projector" box in every state, unticked on a device that never set it. Ticked on a console,
+       that console's stage holds no player's name and no uid anywhere in its HTML, in every state, from the paint right
+       after the click on: the lobby shows the title, the join line and the count only; a Reveal's top 5 and the final
+       top 10 are rows of place and "N points" in the rules' order. Unticked, the stage is today's (every R11 check
+       above). The box is the console's own (tab.hideNames is the tool's record of the clicks); the hide-names-* cases
+       click it in the lobby, during a question, at a Reveal and on the final scores.
    COVERAGE: a full run (no --case) fails when any rule above was exercised 0 times; the counts print every run.
 
    SURFACES readable before Reveal, and how each is held (round 4, 2026-11-12). PINNED = compared whole with what the
@@ -220,7 +227,7 @@
    - Stage (projector), each quiz type, timed or not: PINNED text, element order and count; WHITELIST attributes;
      chord box: WHITELIST elements and attributes, label PINNED to strings / frets.
    - Control strip during a question (projector): PINNED text, WHITELIST attributes (Preview's two controls only while
-     previewing). In the lobby and between questions: not checked, no question is open (the next target is picked
+     previewing; the "Hide names on the projector" box always, ticked as the teacher left it). In the lobby and between questions: not checked, no question is open (the next target is picked
      only by the click that opens it).
    - A dialog on the projector (End game's confirm): TOKEN.
    - Page title and body class (console and student tabs): PINNED unchanged.
@@ -238,7 +245,7 @@
    - answers/{uid}: a student may get only their own; its fields are pinned by R4 and the rules copy (keys).
    - Any other Firestore path or db method: flagged at access (F4-5), so a try/catch cannot hide it.
    - A student's localStorage / sessionStorage: WHITELIST keys (gc-lang; lq-q-opened), values TOKEN, checked at each
-     Reveal. The console's own storage (gc-lq-limits, gc-lq-autoreveal): teacher device only, not checked.
+     Reveal. The console's own storage (gc-lq-limits, gc-lq-autoreveal, gc-lq-total, gc-lq-hidenames): teacher device only, not checked.
    - A student tab's memory (lqSession): the session doc, PINNED above. Network timing: not modelled.
    The quiz bank (LIVE_QUIZZES: ids, types, choice ids and keys, strings, hints) and the i18n strings are read as
    DATA from a separate, untouched vm.
@@ -342,7 +349,7 @@ const BOX_GLYPH = /^(?:×|○|o|\d{1,2}|\d{1,2}fr)$/;
 const SVG_ELEMS = new Set(['circle', 'line', 'svg', 'text', 'title']);
 const SVG_ATTRS = new Set(['aria-label', 'cx', 'cy', 'dominant-baseline', 'fill', 'font-family', 'font-size', 'font-weight', 'height', 'lengthadjust', 'r', 'role', 'stroke', 'stroke-width', 'text-anchor', 'textlength', 'viewbox', 'width', 'x', 'x1', 'x2', 'xmlns', 'y', 'y1', 'y2']);
 /* The control strip during a question (it is on the projector too). */
-const STRIP_Q_ATTRS = { mc: new Set(['button class="lq-ctl ghost"', 'button class="lq-ctl mark"', 'button disabled=""', 'button onclick="lqTeacherEnd()"', 'button onclick="lqTeacherReveal(\'A\')"', 'button onclick="lqTeacherReveal(\'B\')"', 'button onclick="lqTeacherReveal(\'D\')"', 'button onclick="lqTeacherReveal(\'E6\')"', 'button onclick="lqTeacherReveal(\'G\')"', 'button onclick="lqTeacherReveal(\'e1\')"', 'button onclick="lqToggleFullscreen()"', 'button style="--lq-c:#0f6b64"', 'button style="--lq-c:#185fa5"', 'button style="--lq-c:#3b6d11"', 'button style="--lq-c:#5b3f96"', 'button style="--lq-c:#a2530b"', 'button style="--lq-c:#b3372a"', 'button type="button"', 'div class="lq-ctl-hint"', 'div class="lq-ctl-marks"', 'span class="lq-ctl-lbl"']), fret: new Set(['button class="lq-ctl ghost"', 'button class="lq-ctl go"', 'button disabled=""', 'button onclick="lqTeacherEnd()"', 'button onclick="lqTeacherRevealFret()"', 'button onclick="lqToggleFullscreen()"', 'button type="button"', 'div class="lq-ctl-hint"']), pcname: new Set(['button class="lq-ctl ghost"', 'button class="lq-ctl go"', 'button disabled=""', 'button onclick="lqTeacherEnd()"', 'button onclick="lqTeacherRevealPcName()"', 'button onclick="lqToggleFullscreen()"', 'button type="button"', 'div class="lq-ctl-hint"']) };
+const STRIP_Q_ATTRS = { mc: new Set(['input checked=""', 'input id="lq-hidenames"', 'input onchange="lqTSetHideNames(this.checked)"', 'input type="checkbox"', 'label class="lq-ctl-lbl"', 'button class="lq-ctl ghost"', 'button class="lq-ctl mark"', 'button disabled=""', 'button onclick="lqTeacherEnd()"', 'button onclick="lqTeacherReveal(\'A\')"', 'button onclick="lqTeacherReveal(\'B\')"', 'button onclick="lqTeacherReveal(\'D\')"', 'button onclick="lqTeacherReveal(\'E6\')"', 'button onclick="lqTeacherReveal(\'G\')"', 'button onclick="lqTeacherReveal(\'e1\')"', 'button onclick="lqToggleFullscreen()"', 'button style="--lq-c:#0f6b64"', 'button style="--lq-c:#185fa5"', 'button style="--lq-c:#3b6d11"', 'button style="--lq-c:#5b3f96"', 'button style="--lq-c:#a2530b"', 'button style="--lq-c:#b3372a"', 'button type="button"', 'div class="lq-ctl-hint"', 'div class="lq-ctl-marks"', 'span class="lq-ctl-lbl"']), fret: new Set(['input checked=""', 'input id="lq-hidenames"', 'input onchange="lqTSetHideNames(this.checked)"', 'input type="checkbox"', 'label class="lq-ctl-lbl"', 'button class="lq-ctl ghost"', 'button class="lq-ctl go"', 'button disabled=""', 'button onclick="lqTeacherEnd()"', 'button onclick="lqTeacherRevealFret()"', 'button onclick="lqToggleFullscreen()"', 'button type="button"', 'div class="lq-ctl-hint"']), pcname: new Set(['input checked=""', 'input id="lq-hidenames"', 'input onchange="lqTSetHideNames(this.checked)"', 'input type="checkbox"', 'label class="lq-ctl-lbl"', 'button class="lq-ctl ghost"', 'button class="lq-ctl go"', 'button disabled=""', 'button onclick="lqTeacherEnd()"', 'button onclick="lqTeacherRevealPcName()"', 'button onclick="lqToggleFullscreen()"', 'button type="button"', 'div class="lq-ctl-hint"']) };
 /* A student's screen before Reveal, outside the answer buttons and the chord box (data-i18n-params checked exactly first). */
 const STUDENT_Q_ATTRS = { mc: new Set(['div aria-live="off"', 'div class="lq-choices"', 'div class="lq-prompt"', 'div class="lq-qnum"', 'div class="lq-quiz-title"', 'div class="lq-timer"', 'div data-i18n-params=OK', 'div data-i18n="lq.prompt.stringId"', 'div data-i18n="lq.qLabel"', 'div data-i18n="lq.qLabelOf"', 'div data-i18n="lq.title.stringId"', 'div id="lq-timer"']), fret: new Set(['div aria-live="off"', 'div class="lq-board"', 'div class="lq-prompt"', 'div class="lq-qnum"', 'div class="lq-quiz-title"', 'div class="lq-timer"', 'div data-i18n-params=OK', 'div data-i18n="lq.prompt.fretTap"', 'div data-i18n="lq.prompt.pcFind"', 'div data-i18n="lq.qLabel"', 'div data-i18n="lq.qLabelOf"', 'div data-i18n="lq.title.fretAll"', 'div data-i18n="lq.title.fretLowE"', 'div data-i18n="lq.title.fretLowEA"', 'div data-i18n="lq.title.pcFind"', 'div id="lq-board"', 'div id="lq-timer"', 'p class="lq-note"', 'p data-i18n="lq.tapHint"', 'p data-i18n="lq.tapHintChange"']), pcname: new Set(['div aria-live="off"', 'div class="lq-choices lq-pcnames"', 'div class="lq-pcbox lq-pcbox-q"', 'div class="lq-prompt"', 'div class="lq-qnum"', 'div class="lq-quiz-title"', 'div class="lq-timer"', 'div data-i18n-params=OK', 'div data-i18n="lq.prompt.pcName"', 'div data-i18n="lq.qLabel"', 'div data-i18n="lq.qLabelOf"', 'div data-i18n="lq.title.pcName"', 'div id="lq-timer"']) };
 /* R3-1: the field names of liveQuiz/current while a question is open (pinned 2026-11-12 from main 7c1792e). */
@@ -357,6 +364,8 @@ const DOC_Q_FIELDS = new Set(['askedAt', 'correct', 'correctIds', 'endedAt', 'li
 const PREVIEW_STRIP_ATTRS = new Set(['button onclick="lqTeacherExitPreview()"']);
 const PREVIEW_STRIP_BUTTONS = ['Exit preview'];
 const PREVIEW_STRIP_HINT = ['Preview', ': only this screen sees it. No student is invited and nothing is saved.'];
+/* H: the "Hide names on the projector" box (2026-11-13), on the strip in every state, just before Full screen. */
+const HIDE_NAMES_LABEL = 'Hide names on the projector';
 /* What the strip shows: its markup with the boxes' values taken from the boxes themselves (typing in a box or picking
    from a select changes what the box holds, not the markup the strip was painted with). The Time box is left out: it
    shows the last time the teacher typed, remembered on the device (rule file: "a device convenience, not game
@@ -868,7 +877,9 @@ const COVERAGE = [
   ['Pwrites', 'P events checked during a preview (no write from that console)'], ['Pstudents', 'P student screens compared during a preview'],
   ['Pexit', 'P exits back to the real board'], ['Preal', 'P previews ended by a real game going live'],
   ['Pblocked', 'P Preview clicks while a real game was live'], ['Pnone', 'P strips painted during a real game (no Preview offered)'],
-  ['R11doc', 'R11 question docs scanned for an answer'], ['R11stext', 'R11 student screens read word for word'], ['R11storage', 'R11 student storage keys checked at Reveal'], ['Aauto', 'A reveals the console made by itself at time-up'], ['Aoff', 'A timed rounds with "Reveal when time runs out" off, revealed by the teacher']
+  ['R11doc', 'R11 question docs scanned for an answer'], ['R11stext', 'R11 student screens read word for word'], ['R11storage', 'R11 student storage keys checked at Reveal'], ['Aauto', 'A reveals the console made by itself at time-up'], ['Aoff', 'A timed rounds with "Reveal when time runs out" off, revealed by the teacher'],
+  ['Hdefault', 'H "Hide names" boxes found unticked on a device that never set it'], ['Hlobby', 'H lobby stages with names hidden'], ['Hq', 'H question stages with names hidden'],
+  ['Hreveal', 'H Reveal stages with names hidden'], ['Hend', 'H final stages with names hidden'], ['Htoggle', 'H stages checked right after the box was ticked']
 ];
 
 /* ════════════════ the world: tabs, drivers, checks ════════════════ */
@@ -1439,9 +1450,11 @@ class World {
     const tIn = this.tIn, quiz = this.model.quiz;
     this.stats.stageChecks++;
     const { texts, svgs } = this.stageTexts(html);
+    const hidden = !!tab.hideNames;
+    if (hidden) this.checkNoNames(tab, html, view);
     if (view.state === 'lobby') {
       const r = this.roster(tab);
-      const names = [...r].map(u => this.model.names[u] || '').sort((a, b) => a.localeCompare(b)).map(n => n || '—');
+      const names = hidden ? [] : [...r].map(u => this.model.names[u] || '').sort((a, b) => a.localeCompare(b)).map(n => n || '—');
       const want = [tIn(quiz.titleKey, 'en'), tIn('lq.stageJoin', 'en'), String(r.size), tIn('lq.stageInGame', 'en'), ...names];
       this.cover('R11lobby');
       this.check('R11 stage', JSON.stringify(texts) === JSON.stringify(want), () => `the lobby stage shows ${JSON.stringify(texts).slice(0, 300)}, want ${JSON.stringify(want).slice(0, 300)}`, 'lobby');
@@ -1479,13 +1492,33 @@ class World {
       const want = this.model.stageAnswer(view.qIndex);
       this.cover('R11reveal');
       this.check('R11 reveal names the answer', want != null && ans && unesc(ans[1]) === want, () => `question ${view.qIndex + 1}: the Reveal stage's answer line reads ${ans ? JSON.stringify(unesc(ans[1])) : 'nothing'}, want ${JSON.stringify(want)}`);
-      this.checkBoard(html, 5, `question ${view.qIndex + 1}'s Reveal stage`);
+      this.checkBoard(html, 5, `question ${view.qIndex + 1}'s Reveal stage`, hidden);
       this.checkCountOnly(html, view.qIndex, 'the stage', 'en', true);
     }
-    if (view.state === 'ended') this.checkBoard(html, 10, 'the final stage');
+    if (view.state === 'ended') this.checkBoard(html, 10, 'the final stage', hidden);
   }
-  checkBoard(html, k, where) {
+  /* H (Jonathan, 2026-11-13): with "Hide names on the projector" ticked on this console, the stage holds no player's name
+     and no uid anywhere in its HTML (text or attribute; not hidden with CSS), in every state. Read from the tool's own
+     record of the clicks (tab.hideNames), never from the vm. */
+  checkNoNames(tab, html, view) {
+    const key = view.state === 'lobby' ? 'Hlobby' : view.state === 'question' ? 'Hq' : view.state === 'reveal' ? 'Hreveal' : 'Hend';
+    this.cover(key);
+    if (tab.hideJustClicked) { this.cover('Htoggle'); tab.hideJustClicked = false; }
+    for (const tok of [...this.students.map(s => s.name), ...this.students.map(s => s.uid), ...this.oldNames]) {
+      const at = html.search(tokenRe(tok));
+      this.check('H names hidden', at < 0, () => `${tab.label}, ${view.state}${view.state === 'lobby' ? '' : ` (question ${view.qIndex + 1})`}: "Hide names on the projector" is ticked but the stage holds "${tok}": …${html.slice(Math.max(0, at - 60), at + 30)}…`, `hn|${tab.id}|${view.state}|${view.qIndex}|${tok}`);
+    }
+  }
+  checkBoard(html, k, where, hidden) {
     const ol = /<ol class="lq-lb lq-lb-stage">([\s\S]*?)<\/ol>/.exec(html);
+    if (hidden) {
+      /* Names hidden: each row is its place and "N points", nothing else, in the rules' points order. */
+      const rows = ol ? [...ol[1].matchAll(/<li>([\s\S]*?)<\/li>/g)].map(m => textsOf(m[1]).join(' | ')) : [];
+      const want = modelRank(this.model.scores, this.model.names).slice(0, k).map(r => `${r.rank} | ${this.tIn('lq.points', 'en', { n: r.pts })}`);
+      this.cover('R11lb');
+      this.check('H names hidden', JSON.stringify(rows) === JSON.stringify(want), () => `${where}, names hidden: leaderboard ${JSON.stringify(rows)}, want ${JSON.stringify(want)}`);
+      return;
+    }
     const rows = ol ? [...ol[1].matchAll(/<span class="lq-lb-rank">([^<]*)<\/span><span class="lq-lb-name">([^<]*)<\/span><span class="lq-lb-pts">([^<]*)<\/span>/g)].map(m => `${m[1]}. ${unesc(m[2])} ${m[3]}`) : [];
     const want = modelRank(this.model.scores, this.model.names).slice(0, k).map(r => `${r.rank}. ${r.name || '—'} ${r.pts}`);
     this.cover('R11lb');
@@ -1507,12 +1540,14 @@ class World {
     const extra = attrsOf(html).filter(a => !(STRIP_Q_ATTRS[quiz.kind] || new Set()).has(a) && !(tab.previewing && PREVIEW_STRIP_ATTRS.has(a)));
     this.check('R11 strip', !extra.length, () => `question ${view.qIndex + 1}: the control strip (on the projector) carries attributes it does not have today (an answer can hide there): ${extra.slice(0, 4).join(' | ')}`, `stripattr|${view.qIndex}`);
     const want = quiz.kind === 'mc'
-      ? ['Mark the correct answer:', ...quiz.choices.map(c => tIn(c.key, 'en')), 'End game', 'Full screen', quiz.teacherHint]
-      : ['Reveal', 'End game', 'Full screen', quiz.teacherHint];
+      ? ['Mark the correct answer:', ...quiz.choices.map(c => tIn(c.key, 'en')), 'End game', HIDE_NAMES_LABEL, 'Full screen', quiz.teacherHint]
+      : ['Reveal', 'End game', HIDE_NAMES_LABEL, 'Full screen', quiz.teacherHint];
     if (tab.previewing) want.splice(want.indexOf('Full screen') + 1, 0, ...PREVIEW_STRIP_BUTTONS), want.push(...PREVIEW_STRIP_HINT);
     this.cover('R11strip');
     this.check('R11 strip', JSON.stringify(texts) === JSON.stringify(want), () => `question ${view.qIndex + 1}: the control strip (on the projector) shows ${JSON.stringify(texts)}, want ${JSON.stringify(want)}`, `strip|${view.qIndex}`);
     for (const tok of this.answerTokens(view)) this.check('R11 strip', !html.includes(tok), () => `question ${view.qIndex + 1}: the control strip holds the answer "${tok}" before Reveal`, `striptok|${view.qIndex}`);
+    const hb = parseTags(html).find(t => t.name === 'input' && t.attrs.some(([k, v]) => k === 'id' && v === 'lq-hidenames'));
+    this.check('H hide names', !!hb && hb.attrs.some(([k]) => k === 'checked') === !!tab.hideNames, () => `question ${view.qIndex + 1}: the strip's "Hide names on the projector" box is ${hb ? (hb.attrs.some(([k]) => k === 'checked') ? 'ticked' : 'not ticked') : 'missing'}, the teacher left it ${tab.hideNames ? 'ticked' : 'unticked'}`, `hbox|${tab.id}|${view.qIndex}`);
   }
   /* R1-5 / R11: a student's screen before Reveal. The answer buttons differ only in label, handler argument and (mc)
      the colour the bank gives that choice; nothing else on the screen names the answer. */
@@ -1790,6 +1825,27 @@ class World {
     this.run(tab, `(function(){ ${el.onchangeText} }).call(__this)`, el);
     await drain(); this.afterEvent();
   }
+  /* H: the teacher ticks or unticks "Hide names on the projector" on `tab` (the console's own choice; another console is
+     another device). The stage must repaint at once: forceStage makes the next check read it right after the click. */
+  async tHideNames(on, tab) {
+    tab = tab || this.driver;
+    const box = parseTags(this.strip(tab).innerHTML).find(t => t.name === 'input' && t.attrs.some(([k, v]) => k === 'id' && v === 'lq-hidenames'));
+    const el = tab.dom.byId.get('lq-hidenames');
+    if (!box || !el || !el.onchangeText) { this.flag('R13 error', `${tab.label}'s strip has no "Hide names on the projector" box`); return; }
+    if (!tab.hideSet) { this.cover('Hdefault'); this.check('H hide names', !box.attrs.some(([k]) => k === 'checked'), () => `${tab.label}: the "Hide names on the projector" box is ticked on a device that never set it (off by default)`); }
+    el.checked = on;
+    this.vlog(`${tab.label} ${on ? 'ticks' : 'unticks'} "Hide names on the projector"`);
+    this.progress(`${tab.label}: hide names ${on ? 'on' : 'off'}`);
+    tab.hideNames = on; tab.hideSet = true; tab.forceStage = true; tab.hideJustClicked = on;
+    this.run(tab, `(function(){ ${el.onchangeText} }).call(__this)`, el);
+    await drain(); this.afterEvent();
+  }
+  /* The case's hide-names plan: spec.hide[key] is true / false or a list of them, clicked in order at that point. */
+  async hideHook(key) {
+    const sp = this.spec.hide;
+    if (!sp || !(key in sp)) return;
+    for (const on of [].concat(sp[key])) { await this.tHideNames(on); await this.until(this.loop.now + 400); }
+  }
   async until(t) {
     t = Math.round(t);
     const L = this.loop;
@@ -1872,7 +1928,7 @@ function namedSpec(name, quizId, speed, limits, who, teacher, extra = {}) {
     if (w.lateFor !== undefined) { s.lateFor = w.lateFor; s.lateDelay = w.lateDelay; s.arrive = null; }
     return s;
   });
-  return { name, quizId, speed, limits, Q: limits.length, games: extra.games ?? 1, second: extra.second, preview: extra.preview, autoReveal: extra.autoReveal, students, teacher, endDuringQuestion: !!extra.endDuringQuestion, lobbyMs: 6000, teacherNet: { down: () => 60, up: () => 60 }, teacherStorage: { local: new Map() }, note: extra.note };
+  return { name, quizId, speed, limits, Q: limits.length, games: extra.games ?? 1, second: extra.second, preview: extra.preview, autoReveal: extra.autoReveal, students, teacher, hide: extra.hide, endDuringQuestion: !!extra.endDuringQuestion, lobbyMs: 6000, teacherNet: { down: () => 60, up: () => 60 }, teacherStorage: { local: new Map() }, note: extra.note };
 }
 const NAMED = {
   'reload-after-timeout': () => namedSpec('reload-after-timeout', 'string-id', true, [10, 10], [
@@ -2019,6 +2075,25 @@ const NAMED = {
     { plans: [{ r: 4500 }], net: { up: 1200, down: 2500 } },
     { plans: [{ r: 6500 }] }
   ], [{ revealAfter: 15000, hold: 8000, pick: 0.4 }], { note: 'Brix is on slow wifi (2.5 s down, 1.2 s up): the question reaches him 2.4 s after the console; he taps 4.5 s into his own 5 s. Does the console wait for his time to run out before it reveals by itself?' }),
+  /* H: "Hide names on the projector" (2026-11-13), ticked and unticked in every state of a game, on all three Reveal
+     shapes (mc, a countOnly fret quiz, Name). Ticked: no name or uid anywhere on the stage, the lobby only counts, a
+     leaderboard row is its place and points. Unticked: today's stage, word for word (the R11 checks). */
+  'hide-names-mc': () => namedSpec('hide-names-mc', 'string-id', true, [10, 10, 10], [
+    { plans: [{ r: 1500 }, { r: 2000 }, { r: 2500 }] },
+    { plans: [{ r: 2500, right: false }, { r: 1500 }, { r: 3000 }] },
+    { plans: [{ r: 3000 }, { answer: false }, { r: 2000, right: false }] },
+    { plans: [{ r: 1800 }, { r: 2600 }, { r: 1200 }], lang: 'es' }
+  ], [{ revealAfter: 11000, hold: 6000, pick: 0.2 }, { revealAfter: 11000, hold: 6000, pick: 0.5 }, { revealAfter: 11000, hold: 6000, pick: 0.8 }],
+  { hide: { setup: true, lobby: [false, true], q0: false, r0: true, r1: false, q2: true, end: [false, true] }, note: 'the teacher ticks "Hide names on the projector" before Start and clicks it in the lobby, during a question, at a Reveal and on the final scores.' }),
+  'hide-names-find': () => namedSpec('hide-names-find', 'pc-find', true, [10, 10], [
+    { plans: [{ r: 1500 }, { r: 2500 }] },
+    { plans: [{ r: 3000, right: false }, { r: 2000 }] },
+    { plans: [{ r: 2000 }, { r: 4000 }] }
+  ], [{ revealAfter: 12000, hold: 6000, pick: 0.3 }, { revealAfter: 6000, hold: 6000, pick: 0.7 }], { hide: { lobby: true, r0: [false, true], q1: false, r1: true, end: false }, note: 'Find the power chord (countOnly): names hidden from the lobby, clicked at an automatic Reveal and a clicked one.' }),
+  'hide-names-name': () => namedSpec('hide-names-name', 'pc-name', false, [10], [
+    { plans: [{ r: 2000 }] },
+    { plans: [{ r: 3000, right: false }] }
+  ], [{ revealAfter: 6000, hold: 6000, pick: 0.5 }], { hide: { setup: true, end: [false, true] }, note: 'Name the power chord with names hidden from before Start to the end.' }),
   'end-during-question': () => namedSpec('end-during-question', 'string-id', true, [10, 10], [
     { plans: [{ r: 2000 }, { r: 2000 }] },
     { plans: [{ r: 3000, right: false }, { r: 2500 }] }
@@ -2074,6 +2149,7 @@ async function playQuestions(w, quiz, limits, plans, r, opts = {}) {
       await w.tClick(b => b.onclick === 'lqTeacherOpenPcName()', 'Random shape');
     }
     if (opts.stopAt === q) { await w.until(w.loop.now + opts.holdOpen); return false; }
+    await w.hideHook(`q${q}`);
     w.revealCommitted = false;
     const auto = quiz.kind !== 'mc' && limits[q] > 0 && w.intended.auto !== false;
     const last = opts.endDuringQuestion && q === limits.length - 1;
@@ -2081,7 +2157,7 @@ async function playQuestions(w, quiz, limits, plans, r, opts = {}) {
       /* the teacher waits: the console reveals by itself */
       await w.until(w.loop.now + limits[q] * 1000 + AUTO_GRACE_MS + 3000);
       w.check('A auto-reveal', w.revealCommitted, `question ${q + 1}: the "Reveal when time runs out" box is on, but the console had not revealed by itself 3 s after the ${limits[q]} s limit + grace`);
-      if (w.revealCommitted) { await w.until(w.loop.now + plan.hold); w.checkVerdicts(q); w.checkTotalStrip(q); continue; }
+      if (w.revealCommitted) { await w.hideHook(`r${q}`); await w.until(w.loop.now + plan.hold); w.checkVerdicts(q); w.checkTotalStrip(q); continue; }
     }
     if (quiz.kind !== 'mc' && limits[q] > 0 && w.intended.auto === false && plan.revealAfter >= limits[q] * 1000 + AUTO_GRACE_MS) w.cover('Aoff');
     await w.until(w.loop.now + (last && auto ? Math.min(plan.revealAfter, limits[q] * 500) : plan.revealAfter));
@@ -2096,6 +2172,7 @@ async function playQuestions(w, quiz, limits, plans, r, opts = {}) {
     if (quiz.kind === 'mc') await w.tClick(b => b.onclick === `lqTeacherReveal('${w.intended.mc[q]}')`, `Reveal: mark ${w.intended.mc[q]}`);
     else if (quiz.kind === 'fret') await w.tClick(b => b.onclick === 'lqTeacherRevealFret()', 'Reveal');
     else await w.tClick(b => b.onclick === 'lqTeacherRevealPcName()', 'Reveal');
+    await w.hideHook(`r${q}`);
     await w.until(w.loop.now + plan.hold);
     w.check('R7 reveal', w.revealCommitted, `question ${q + 1}: Reveal never reached the ${w.teacher.previewing ? 'console\'s preview copy' : 'doc'}`);
     w.checkVerdicts(q);
@@ -2157,7 +2234,7 @@ async function runPreview(w, spec) {
   if (!ended) await w.tClick(b => b.onclick === 'lqTeacherEnd()', 'End game (preview)');
   await w.until(w.loop.now + 3000);
   const texts = textsOf(w.strip(A).innerHTML);
-  const want = ['Full screen', ...PREVIEW_STRIP_BUTTONS, ...PREVIEW_STRIP_HINT];
+  const want = [HIDE_NAMES_LABEL, 'Full screen', ...PREVIEW_STRIP_BUTTONS, ...PREVIEW_STRIP_HINT];
   w.check('P preview', JSON.stringify(texts) === JSON.stringify(want), () => `the preview's end strip shows ${JSON.stringify(texts)}, want ${JSON.stringify(want)}`);
   w.previewExiting(A);
   await w.tClick(b => b.onclick === 'lqTeacherExitPreview()', 'Exit preview');
@@ -2199,6 +2276,7 @@ async function runCase(spec) {
   w.driver = starter;
   await setBoxes(w, starter, spec.quizId, spec.speed, spec.limits[0] ?? 0, spec.autoReveal);
   w.intended.total = await setTotal(w, starter, spec.limits.length);
+  if (!game) await w.hideHook('setup');
   if (spec.second === 'blocked') {
     /* The console's teacher is typing in its Time-to-answer box: lqPaintControls leaves the strip alone while that box
        has focus ("the next paint catches up"), so the strip still offers Preview after the real game goes live. */
@@ -2208,6 +2286,7 @@ async function runCase(spec) {
   }
   await w.tClick(b => b.onclick === 'lqTeacherStart()', 'Start game');
   await w.until(w.loop.now + spec.lobbyMs);
+  if (!game) await w.hideHook('lobby');
   if (spec.second === 'blocked') {
     const A = w.teacher;
     const offered = w.strip(A).buttons.some(b => b.onclick === 'lqTeacherPreview()' && !b.disabled);
@@ -2231,6 +2310,7 @@ async function runCase(spec) {
   if (!ended) await w.tClick(b => b.onclick === 'lqTeacherEnd()', 'End game');
   await w.until(w.loop.now + 9000);
   w.checkEnd();
+  if (!game) await w.hideHook('end');
   await w.tClick(b => b.onclick === 'lqTeacherClose()', 'Clear the board');
   await w.until(w.loop.now + 9000);
   w.checkCleared();
@@ -2355,6 +2435,17 @@ const NOV13_FAULTS = [
   { id: 'n13-total-not-written', why: 'T: Start writes no totalQ', from: 'limitSec: lqTLimitFor(quizId), totalQ: lqTTotal,', to: 'limitSec: lqTLimitFor(quizId), totalQ: 0,' },
   { id: 'n13-label-plain', why: 'T: the student label drops "of total"', from: "  const key = total ? 'lq.qLabelOf' : 'lq.qLabel', params = total ? { n, total } : { n };", to: "  const key = 'lq.qLabel', params = { n };" }
 ];
+/* H: "Hide names on the projector" (2026-11-13). */
+const HIDE_FAULTS = [
+  { id: 'h-final-leaks-one', why: 'H: with names hidden, the final scores still name the third row', from: "  const board = rows.slice(0, 10).map(r => lqStageLbRowHtml(r)).join('');", to: "  const board = rows.slice(0, 10).map((r, i) => i === 2 ? lqLbRowHtml(r) : lqStageLbRowHtml(r)).join('');" },
+  { id: 'h-lobby-chips', why: 'H: with names hidden, the lobby still draws the name chips', from: "const chips = lqTHideNames ? '' : here.map", to: "const chips = here.map" },
+  { id: 'h-no-repaint', why: 'H: ticking the box does not repaint the stage (the names stay until the next snapshot)', from: "  try { localStorage.setItem('gc-lq-hidenames', lqTHideNames ? '1' : '0'); } catch(e){}\n  lqPaintStage();\n", to: "  try { localStorage.setItem('gc-lq-hidenames', lqTHideNames ? '1' : '0'); } catch(e){}\n" },
+  { id: 'h-default-on', why: 'H: the box is ticked on a device that never set it', from: "lqTHideNames = localStorage.getItem('gc-lq-hidenames') === '1';", to: "lqTHideNames = localStorage.getItem('gc-lq-hidenames') !== '0';" },
+  { id: 'h-uid-attr', why: 'H: a hidden row carries the uid in an attribute', from: "  return `<li><span class=\"lq-lb-rank\">", to: "  return `<li data-u=\"${escAttr(r.uid)}\"><span class=\"lq-lb-rank\">" },
+  { id: 'h-reveal-shown', why: 'H: the mc Reveal ignores the box (names stay on the Top 5)', from: "  const board = lqRankedNamed(s).slice(0, 5).map(r => lqStageLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'", to: "  const board = lqRankedNamed(s).slice(0, 5).map(r => lqLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'" },
+  { id: 'h-strip-box-gone', why: 'H: the strip loses the box during a question', from: "  const full = lqHideNamesInputHtml() + `", to: "  const full = (s && s.state === 'question' ? '' : lqHideNamesInputHtml()) + `" },
+  { id: 'h-wrong-points', why: 'H: a hidden row shows the place twice and no points', from: "escHtml(tIn('lq.points', 'en', { n: r.pts || 0 }))", to: "escHtml(tIn('lq.points', 'en', { n: r.rank }))" }
+];
 const FIX_FAULTS = [
   { id: 'fix-no-canplay', why: 'review R2-5: a Journey page starts the clock (no lqCanPlayHere guard)', from: '  if(!lqCanPlayHere()) return now;\n', to: '', invisible: 'a Journey page has no currentUser global (tabs/journey.js reads firebase.auth().currentUser), so lqUid() is "" there and its clock key never matches the one index.html writes: the uid in the key already keeps the Journey clock out. The guard is a second line of defence; fix-journey-clock below removes both and is red' },
   { id: 'fix-journey-clock', why: 'review R2-5: a Journey page starts the clock (no lqCanPlayHere guard, no uid in the key)', from: "  if(!lqCanPlayHere()) return now;\n  const id = String(live.sessionId) + ':' + Number(live.qIndex) + ':' + lqUid();", to: "  const id = String(live.sessionId) + ':' + Number(live.qIndex);" },
@@ -2373,7 +2464,7 @@ const R3_FAULTS = [
   { id: 'r3-p6-correct-midq', why: 'R3-1: the answer written into the public doc 400 ms into the question (correct)', from: '  lqTAutoKey = key;\n', to: "  lqTAutoKey = key;\n  setTimeout(() => { const q = lqQuiz(s.quizId); if(lqTSession && lqTSession.state === 'question') lqWrite({ correct: lqType(q) === 'pcname' ? lqPcNameOf(s.target) : lqTargetIds(q, s.target)[0] }, 'fields'); }, 400);\n" },
   { id: 'r3-p2b-new-field', why: 'R3-1: the answer in a NEW doc field (autoAnswer) during the question', from: '  lqTAutoKey = key;\n', to: "  lqTAutoKey = key;\n  setTimeout(() => { const q = lqQuiz(s.quizId); if(lqTSession && lqTSession.state === 'question') lqWrite({ autoAnswer: lqType(q) === 'pcname' ? lqPcNameOf(s.target) : lqTargetIds(q, s.target)[0] }, 'fields'); }, 400);\n" },
   { id: 'r3-p1-locked-frets', why: 'R3-2: the right frets under the student\'s "Locked in" pick', from: '<div class="lq-locked-pick" style="background:${bg}">${escHtml(lqFretPickLabel(mine))}</div>`', to: '<div class="lq-locked-pick" style="background:${bg}">${escHtml(lqFretPickLabel(mine))}</div>` + `<p class="lq-note">${escHtml(lqTargetIds(quiz, s.target).join(\' \'))}</p>`' },
-  { id: 'r3-p4-board-reversed', why: 'R3-4: the mc Reveal leaderboard reversed (2 players, 20 s, question 2) inside a known case', from: "  const board = lqRankedNamed(s).slice(0, 5).map(r => lqLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'", to: "  let rk = lqRankedNamed(s).slice(0, 5); if(rk.length === 2 && Number(s.limitSec) === 20 && Number(s.qIndex) === 1) rk = rk.reverse();\n  const board = rk.map(r => lqLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'" },
+  { id: 'r3-p4-board-reversed', why: 'R3-4: the mc Reveal leaderboard reversed (2 players, 20 s, question 2) inside a known case', from: "  const board = lqRankedNamed(s).slice(0, 5).map(r => lqStageLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'", to: "  let rk = lqRankedNamed(s).slice(0, 5); if(rk.length === 2 && Number(s.limitSec) === 20 && Number(s.qIndex) === 1) rk = rk.reverse();\n  const board = rk.map(r => lqStageLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'" },
   { id: 'r3-p3-exit-writes', why: 'R3-5: Exit preview writes to the real doc', from: '  lqTPreview = false;\n  lqTSession = lqTReal;\n', to: "  lqTPreview = false;\n  lqTSession = lqTReal;\n  lqDoc().set({ lastPreview: { quizId: lqTPickedQuizId } }, { merge: true });\n" }
 ];
 /* Round 4 (the Fable check of 4175ee9, 2026-11-12): the reviewer's plants and the ones its brief asked for. */
@@ -2402,11 +2493,11 @@ function prove(dir) {
   dir = resolve(dir);
   const games = ARGS.games ?? 4, jobs = Math.max(1, Number(ARGS.jobs ?? 3));
   const base = readFileSync(join(ROOT, 'live-quiz.js'), 'utf8');
-  const all = [...FAULTS.map(f => ({ ...f, set: 'site' })), ...FIX_FAULTS.map(f => ({ ...f, set: 'reload fix' })), ...NOV13_FAULTS.map(f => ({ ...f, set: '2026-11-13' })), ...PREVIEW_FAULTS.map(f => ({ ...f, set: 'Preview' })), ...AUTO_FAULTS.map(f => ({ ...f, set: 'auto-reveal' })), ...R3_FAULTS.map(f => ({ ...f, set: 'round 3' })), ...F4_FAULTS.map(f => ({ ...f, set: 'round 4' }))];
+  const all = [...FAULTS.map(f => ({ ...f, set: 'site' })), ...FIX_FAULTS.map(f => ({ ...f, set: 'reload fix' })), ...NOV13_FAULTS.map(f => ({ ...f, set: '2026-11-13' })), ...HIDE_FAULTS.map(f => ({ ...f, set: 'hide names' })), ...PREVIEW_FAULTS.map(f => ({ ...f, set: 'Preview' })), ...AUTO_FAULTS.map(f => ({ ...f, set: 'auto-reveal' })), ...R3_FAULTS.map(f => ({ ...f, set: 'round 3' })), ...F4_FAULTS.map(f => ({ ...f, set: 'round 4' }))];
   const only = ARGS.only ? String(ARGS.only).split(',') : null;
   if (only) { for (const id of only) if (!all.some(f => f.id === id)) { console.log(`live-quiz-loop: ✗ --only: no fault ${id}`); return Promise.resolve(2); } all.splice(0, all.length, ...all.filter(f => only.includes(f.id))); }
   const FAKE = only ? [] : ['rules-off', 'no-order', 'shallow-merge', 'no-local', 'plain-fieldvalue'];
-  console.log(`break-it proof on ${ROOT}: ${FAULTS.length} site + ${FIX_FAULTS.length} reload-fix + ${NOV13_FAULTS.length} change-answer/count/total + ${PREVIEW_FAULTS.length} Preview + ${AUTO_FAULTS.length} auto-reveal + ${R3_FAULTS.length} round-3 + ${F4_FAULTS.length} round-4 faults planted in copies of its live-quiz.js, + ${FAKE.length} fake-world faults; each run is the default run (known site faults excused narrowly), seed ${SEED}, ${games} random games, ${jobs} at a time`);
+  console.log(`break-it proof on ${ROOT}: ${FAULTS.length} site + ${FIX_FAULTS.length} reload-fix + ${NOV13_FAULTS.length} change-answer/count/total + ${HIDE_FAULTS.length} hide-names + ${PREVIEW_FAULTS.length} Preview + ${AUTO_FAULTS.length} auto-reveal + ${R3_FAULTS.length} round-3 + ${F4_FAULTS.length} round-4 faults planted in copies of its live-quiz.js, + ${FAKE.length} fake-world faults; each run is the default run (known site faults excused narrowly), seed ${SEED}, ${games} random games, ${jobs} at a time`);
   const plans = [{ label: 'baseline: the site as it is (must be GREEN, the two known faults excused)', args: [`--root=${ROOT}`], baseline: true }];
   for (const f of all) {
     const pairs = [[f.from, f.to], ...(f.more || [])];

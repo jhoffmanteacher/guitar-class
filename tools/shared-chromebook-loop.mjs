@@ -119,7 +119,7 @@
        (coach-core.js: take ids "Remembered on this device"), pm:wg (practice-minutes.js: "class data, not a
        student's: one key for everyone on the device"), the class-config caches caDates / caClears / caRetired /
        caHidden / caOptional / caPlayAlong / caSongLib / caClassSongs / caPins / caBoard (save.js: whole-class
-       fields), the console's own preferences (gc-teacher-*, teacherSideTree, gc-lq-limits, gc-lq-autoreveal).
+       fields), the console's own preferences (gc-teacher-*, teacherSideTree, gc-lq-limits, gc-lq-autoreveal, gc-lq-hidenames).
      Per STUDENT (must never reach the next student):
        keys named with the uid: practiceLog:<uid>, gc-lastModule:<uid>, gc-lastSet:<uid>, gc-srPicks:<uid>,
        caStepsToday:<uid> (legacy), micRecConsent:<uid> (coach-core.js: "keyed by uid so the next student on a

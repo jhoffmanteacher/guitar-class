@@ -15246,6 +15246,141 @@ function checkMicZipsAnonymous() {
   if (!bad) ok('3 of 3 key patterns identical in teacher-mic.js and anon-takes.mjs; both zips are packed through teacherMicAnon() with the leak search; no zip entry is named from the student');
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   1di. LIVE IN-CLASS GAMES — "Hide names on the projector" (Jonathan,
+   2026-11-13). A box in the console's control strip, OFF by default. Ticked,
+   the stage (the projector) is BUILT with no player name: the lobby keeps
+   only its count, the Top 5 at Reveal and the final scores only place and
+   points. A teacher's display choice kept on the teacher's device
+   (gc-lq-hidenames): it never writes the session doc and never changes a
+   student's own screen. EXECUTES the real i18n.js + guitar-diagrams.js +
+   live-quiz.js in a VM and paints the stage through lqPaintStage() for made-up
+   players ("Test 0" …) in every state: lobby; question (mc, fret, Name);
+   Reveal (mc, fret, Find the power chord, Name the power chord); final. Off,
+   every name it should show is there (the matcher is not blind) and the rows
+   are today's; on, no name or uid is anywhere in the stage HTML, the rows
+   carry the right places and points, and the counts stay. Also: default off on
+   a device that never set it; the switch repaints the stage at once and is
+   remembered (a fresh VM with the key set starts on); it writes nothing to the
+   doc and leaves the session copy unchanged; the strip offers the box in every
+   state; a student's end screen is the same either way.
+   ════════════════════════════════════════════════════════════════════ */
+const LQ_HIDE_NAMES_RENDERS = 19;
+function checkLiveQuizHideNames() {
+  head('1di. Live In-Class Games: "Hide names on the projector" is off by default and leaves no name on the stage');
+  let bad = 0, renders = 0;
+  const flag = m => { err(`1di: ${m}`); problems++; bad++; };
+  const PLAYERS = [['uid-test-0', 'Test 0', 4200], ['uid-test-1', 'Test 1', 3900], ['uid-test-2', 'Test 2', 3900], ['uid-test-3', 'Test 3', 2500], ['uid-test-4', 'Test 4', 1800], ['uid-test-5', 'Test 5', 900], ['uid-test-6', 'Test 6', 0]];
+  const reEsc = x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const tokenRe = tok => new RegExp(`(?<![0-9A-Za-z-])${reEsc(tok)}(?![0-9A-Za-z])`);
+  const load = init => {
+    const store = Object.assign({}, init || {});
+    const mkEl = () => ({ innerHTML: '', querySelector: () => null, querySelectorAll: () => [], classList: { add() {}, remove() {}, toggle() {}, contains: () => false } });
+    const stage = mkEl(), controls = mkEl();
+    const box = {
+      console: { log() {}, warn() {}, error() {} },
+      performance: { now: () => 1e6 },
+      setInterval: () => 1, clearInterval() {}, setTimeout: () => 1, clearTimeout() {},
+      localStorage: { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); } }, sessionStorage: { getItem: () => null, setItem() {} },
+      document: { hidden: false, documentElement: {}, activeElement: null, getElementById: id => (id === 'lq-stage' ? stage : id === 'lq-controls' ? controls : null), querySelectorAll: () => [], addEventListener() {},
+        body: { classList: { add() {}, remove() {} }, appendChild() {} }, createElement: () => mkEl(), contains: () => false },
+      escHtml: x => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'), escAttr: x => String(x).replace(/&/g, '&amp;').replace(/"/g, '&quot;'),
+      applyI18n() {}, alert() {},
+      firebase: { firestore: { FieldValue: { serverTimestamp: () => '<ts>' } } }
+    };
+    box.window = { addEventListener() {}, confirm: () => true };
+    vm.createContext(box);
+    vm.runInContext(readFileSync(join(ROOT, 'i18n.js'), 'utf8'), box, { filename: 'i18n.js' });
+    if (typeof box.t !== 'function' && box.window.t) { box.t = box.window.t; box.tIn = box.window.tIn; }
+    vm.runInContext(readFileSync(join(ROOT, 'guitar-diagrams.js'), 'utf8'), box, { filename: 'guitar-diagrams.js' });
+    vm.runInContext(readFileSync(join(ROOT, 'live-quiz.js'), 'utf8'), box, { filename: 'live-quiz.js' });
+    box.__docCalls = 0;
+    vm.runInContext('var teacherView = "livequiz"; var currentUser = { uid: "uid-test-3", displayName: "Test 3" }; lqDb = {}; lqEnsureDb = async () => {}; lqDoc = () => { __docCalls++; return { set: async () => {}, collection: () => ({ onSnapshot() { return () => {}; } }), onSnapshot() { return () => {}; } }; };', box);
+    return { box, store, stage, controls, run: code => vm.runInContext(code, box) };
+  };
+  let W;
+  try { W = load(); } catch (e) { flag(`i18n.js / guitar-diagrams.js / live-quiz.js would not load in the test VM: ${e.message}`); return; }
+  const { run, stage, controls, store } = W;
+  // Default: OFF on a device that never set it.
+  if (run('lqTHideNames') !== false) flag('"Hide names on the projector" is not OFF by default (lqTHideNames)');
+  if (/id="lq-hidenames" checked\b/.test(run('lqHideNamesInputHtml()'))) flag('the box is drawn ticked on a device that never set it');
+  const id = type => run(`Object.keys(LIVE_QUIZZES).find(k => (LIVE_QUIZZES[k].type || "mc") === "${type}" && !LIVE_QUIZZES[k].power) || ""`);
+  const mcId = id('mc'), fretId = id('fret'), pcNameId = id('pcname');
+  const findId = run('Object.keys(LIVE_QUIZZES).find(k => LIVE_QUIZZES[k].type === "fret" && LIVE_QUIZZES[k].power) || ""');
+  if (!mcId || !fretId || !pcNameId || !findId) { flag('the bank needs an mc, a fret, a Find-the-power-chord and a Name-the-power-chord quiz'); return; }
+  const mcChoice = run(`LIVE_QUIZZES[${JSON.stringify(mcId)}].choices[0].id`);
+  const scores = Object.fromEntries(PLAYERS.map(([u, , pts]) => [u, { pts, right: pts ? 1 : 0, answered: 1, last: 0, lastRight: null }]));
+  const answers = PLAYERS.map(([uid, name]) => ({ sessionId: 'S1', uid, name, qIndex: 0, choice: mcChoice, ms: 900 }));
+  const base = { sessionId: 'S1', qIndex: 0, limitSec: 0, totalQ: 10, speedBonus: false, scores };
+  const STATES = [
+    ['lobby', { quizId: mcId, state: 'lobby', qIndex: -1, scores: {} }, 'all'],
+    ['mc question', { quizId: mcId, state: 'question' }, 'none'],
+    ['fret question', { quizId: fretId, state: 'question', target: { string: 'lowE', note: 'G' } }, 'none'],
+    ['Name question', { quizId: pcNameId, state: 'question', target: { string: 'A', fret: 9 } }, 'none'],
+    ['mc Reveal', { quizId: mcId, state: 'reveal', correct: mcChoice, tally: { [mcChoice]: 7 } }, 5],
+    ['fret Reveal', { quizId: fretId, state: 'reveal', target: { string: 'lowE', note: 'G' }, correct: 'lowE:3', correctIds: ['lowE:3'], tally: { 'lowE:3': 7 } }, 5],
+    ['Find Reveal', { quizId: findId, state: 'reveal', target: { string: 'A', note: 'F♯' }, correct: 'A:9', correctIds: ['A:9'], tally: { 'A:9': 7 } }, 5],
+    ['Name Reveal', { quizId: pcNameId, state: 'reveal', target: { string: 'A', fret: 9 }, correct: 'F♯5', tally: { 'F♯5': 7 } }, 5],
+    ['final scores', { quizId: mcId, state: 'ended' }, 10]
+  ];
+  // The places and points the board must show, from the players above (ties share the lower place, ties read by name).
+  const ranked = PLAYERS.map(([uid, name, pts]) => ({ uid, name, pts })).sort((a, b) => b.pts - a.pts || a.name.localeCompare(b.name));
+  ranked.forEach((r, i) => { r.rank = i && ranked[i - 1].pts === r.pts ? ranked[i - 1].rank : i + 1; });
+  const paint = (sess, hidden) => {
+    run(`lqTSetHideNames(${hidden}); lqTSession = ${JSON.stringify(Object.assign({}, base, sess))}; lqTAnswers = ${JSON.stringify(sess.state === 'lobby' ? answers.map(a => Object.assign({}, a, { qIndex: -1 })) : answers)};`);
+    run('lqPaintStage()');
+    renders++;
+    return stage.innerHTML;
+  };
+  const rowsOf = html => { const ol = /<ol class="lq-lb lq-lb-stage">([\s\S]*?)<\/ol>/.exec(html); return ol ? [...ol[1].matchAll(/<li>([\s\S]*?)<\/li>/g)].map(m => m[1].replace(/<[^>]*>/g, '|').replace(/\|+/g, '|').replace(/^\||\|$/g, '')) : null; };
+  try {
+    for (const [label, sess, want] of STATES) {
+      const shown = paint(sess, false), hidden = paint(sess, true);
+      // OFF: the names it should show are there, in today's rows (place|name|points).
+      if (want === 'all') {
+        for (const [, name] of PLAYERS) if (!shown.includes(`<span class="lq-chip">${name}</span>`)) flag(`${label}, names shown: the lobby lost "${name}"`);
+      } else if (typeof want === 'number') {
+        const exp = ranked.slice(0, want).map(r => `${r.rank}|${r.name}|${r.pts}`);
+        if (JSON.stringify(rowsOf(shown)) !== JSON.stringify(exp)) flag(`${label}, names shown: rows ${JSON.stringify(rowsOf(shown))}, want ${JSON.stringify(exp)}`);
+      }
+      // ON: no name, no uid, anywhere in the stage HTML.
+      for (const [uid, name] of PLAYERS) for (const tok of [name, uid]) { const at = hidden.search(tokenRe(tok)); if (at >= 0) flag(`${label}, names hidden: the stage still holds "${tok}": …${hidden.slice(Math.max(0, at - 60), at + 30)}…`); }
+      if (want === 'all') {
+        if (/class="lq-chip"/.test(hidden)) flag(`${label}, names hidden: the lobby still draws name chips`);
+        if (!hidden.includes(`<span class="lq-st-big">${PLAYERS.length}</span>`)) flag(`${label}, names hidden: the lobby lost its count of ${PLAYERS.length} players`);
+      } else if (typeof want === 'number') {
+        const exp = ranked.slice(0, want).map(r => `${r.rank}|${run(`tIn('lq.points', 'en', { n: ${r.pts} })`)}`);
+        if (JSON.stringify(rowsOf(hidden)) !== JSON.stringify(exp)) flag(`${label}, names hidden: rows ${JSON.stringify(rowsOf(hidden))}, want ${JSON.stringify(exp)} (place and points only)`);
+      } else if (hidden !== shown) flag(`${label}: the question stage changed with the box ticked (it shows no names either way)`);
+    }
+    // The switch repaints the stage at once, writes nothing, changes no game state, and is remembered on this device.
+    paint(STATES[4][1], false);
+    const before = run('JSON.stringify(lqTSession)'), calls = W.box.__docCalls;
+    run('lqTSetHideNames(true)');
+    if (PLAYERS.some(([, n]) => stage.innerHTML.includes(n))) flag('ticking the box does not repaint the stage at once: a name is still on it');
+    if (store['gc-lq-hidenames'] !== '1') flag('ticking the box is not remembered on this device (gc-lq-hidenames)');
+    run('lqTSetHideNames(false)');
+    if (!stage.innerHTML.includes('Test 0')) flag('unticking the box does not put the names back at once');
+    if (store['gc-lq-hidenames'] !== '0') flag('unticking the box is not remembered (gc-lq-hidenames)');
+    if (W.box.__docCalls !== calls) flag(`the switch touched the session doc (${W.box.__docCalls - calls} lqDoc() call(s)): it is the teacher's display choice, not game state`);
+    if (run('JSON.stringify(lqTSession)') !== before) flag('the switch changed the console\'s copy of the session');
+    const W2 = load({ 'gc-lq-hidenames': '1' });
+    if (W2.run('lqTHideNames') !== true || !/id="lq-hidenames" checked\b/.test(W2.run('lqHideNamesInputHtml()'))) flag('a console reload forgets that the box was ticked: the names would come back on the projector');
+    // The strip offers the box in every state.
+    for (const [label, sess] of [['no game', null], ['lobby', STATES[0][1]], ['question', STATES[1][1]], ['reveal', STATES[4][1]], ['last Reveal', Object.assign({}, STATES[4][1], { qIndex: 9 })], ['final scores', STATES[8][1]]]) {
+      run(`lqTSession = ${sess ? JSON.stringify(Object.assign({}, base, sess)) : 'null'}; lqTBusy = false; lqPaintControls();`);
+      if (!/<input type="checkbox" id="lq-hidenames"/.test(controls.innerHTML)) flag(`the control strip (${label}) has no "Hide names on the projector" box`);
+    }
+    // A student's own screen does not change.
+    const endSess = JSON.stringify(Object.assign({}, base, STATES[8][1]));
+    run('lqTSetHideNames(false)'); const stOff = run(`lqStudentEndedHtml(${endSess})`);
+    run('lqTSetHideNames(true)'); const stOn = run(`lqStudentEndedHtml(${endSess})`);
+    if (stOff !== stOn) flag("the box changed a student's own end screen");
+  } catch (e) { flag(`a stage render or the switch threw: ${e.message}`); return; }
+  if (renders !== LQ_HIDE_NAMES_RENDERS) flag(`painted the stage ${renders} times, pinned at ${LQ_HIDE_NAMES_RENDERS}`);
+  if (bad === 0) ok(`OFF by default; ${STATES.length} stage states painted with names shown and hidden (lobby, 3 questions, 4 Reveals, final; ${renders} paints): hidden, 0 of ${PLAYERS.length} made-up names or uids on the stage and the places and points kept; shown, today's rows; repaints at once, remembered on the device, no doc write, a student's screen unchanged`);
+}
+
 function checkPracticeMinutes(i18nTable) {
   head('1cg. Practice minutes: the engine is run; the rules cap, no heartbeat, wiring and strings are pinned');
   let bad = 0;
@@ -15701,6 +15836,7 @@ function checkPracticeMinutes(i18nTable) {
   checkLiveQuizAutoReveal();
   await checkLiveQuizNoNames();
   await checkLiveQuizPcNameNoLeak();
+  checkLiveQuizHideNames();
   checkCoachVerdicts();
   checkToneTest();
   await checkCountIn();
