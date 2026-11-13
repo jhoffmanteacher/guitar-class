@@ -513,11 +513,13 @@ function buildLesson(w){
       const bodyHtml = hasJourneyCard
         ? journeyLinkCardHtml(w)
         : `<ul class="steps">${stepsHtml(pairs, ns, numOffset, allowCur, openIfNoCur, dispOffset)}</ul>`;
+      // Under a Part heading (m4w2, level 3) a section heading is one level down.
+      const secHeadOpen = parts ? '<div class="stp-sec-label" role="heading" aria-level="4">' : '<div class="stp-sec-label" role="heading" aria-level="3">';
       // data-part goes AFTER data-ns on purpose: checks.mjs 1af reads the
       // rendered namespaces with a regex anchored on `class="stp-sec…"
       // data-ns="…"`, so anything new has to follow, never come between.
       const html = `<div class="stp-sec${(hasCur || openIfNoCur) ? ' sec-cur' : ''}${jlReady ? ' jl-ready' : ''}" data-ns="${escAttr(ns)}"${parts ? ` data-part="${partOfIdx(k)}"` : ''}>
-      ${title && !hasJourneyCard ? `<div class="stp-sec-label" role="heading" aria-level="3">${isEarSparkSection(sec) ? ICO_BOLT + ' ' : isSpicyLevelUpSection(sec) ? ICO_CHILI + ' ' : ''}${title}</div>` : ''}
+      ${title && !hasJourneyCard ? `${secHeadOpen}${isEarSparkSection(sec) ? ICO_BOLT + ' ' : isSpicyLevelUpSection(sec) ? ICO_CHILI + ' ' : ''}${title}</div>` : ''}
       ${bodyHtml}
     </div>`;
       if(hasCur) foundCur = true;

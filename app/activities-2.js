@@ -1586,7 +1586,7 @@ function caModuleHeadHtml(sec, byId){
   const labelParams = {n: sec.mod.num, mod: tf(sec.mod, 'name')};
   const countParams = {done: doneN, total};
   return `<div class="ca-mod-head" role="heading" aria-level="3">
-    <span data-i18n="ca.moduleHead" data-i18n-params="${escAttr(JSON.stringify(labelParams))}">${escHtml(t('ca.moduleHead', labelParams))}</span>
+    <span role="heading" aria-level="3" data-i18n="ca.moduleHead" data-i18n-params="${escAttr(JSON.stringify(labelParams))}">${escHtml(t('ca.moduleHead', labelParams))}</span>
     <span class="ca-mod-bar" aria-hidden="true"><b style="width:${pct}%"></b></span>
     <span class="ca-mod-count" data-i18n="ca.moduleProgress" data-i18n-params="${escAttr(JSON.stringify(countParams))}">${escHtml(t('ca.moduleProgress', countParams))}</span>
   </div>`;
@@ -1609,8 +1609,10 @@ function caModFoldHtml(fold, sec, headHtml, cardsHtml, cards, newest, swap){
   const open = holdsOpen || (key in caModFoldOpen ? caModFoldOpen[key] : sec.mod.num === newest);
   // The heading's own <div> becomes the <summary>: same class, same look.
   // Its heading role goes: a <summary> is the fold's button, and a role on it
-  // would hide that from a screen reader (check 1da reads this line).
-  const summary = headHtml.replace(/^<div class="ca-mod-head" role="heading" aria-level="3"/, '<summary class="ca-mod-head ca-mod-summary"').replace(/<\/div>$/, '</summary>');
+  // would hide that from a screen reader. In the Completed fold the module
+  // name is its own span with the heading role INSIDE the summary
+  // (caModuleHeadHtml), so the outline keeps it; check 1da runs both callers.
+  const summary = headHtml.replace(/^<div class="ca-mod-head"(?: role="heading" aria-level="\d")?/, '<summary class="ca-mod-head ca-mod-summary"').replace(/<\/div>$/, '</summary>');
   return `<details class="ca-mod-fold" ${open ? 'open' : ''} data-fold-key="${escAttr(key)}" ontoggle="caOnModFoldToggle(this)">${summary}${cardsHtml}</details>`;
 }
 function caOnModFoldToggle(details){

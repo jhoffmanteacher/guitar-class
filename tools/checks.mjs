@@ -6668,17 +6668,34 @@ function checkSiteFill() {
 /* 1da. Title boxes are headings for screen readers (2026-11-13, research 2 item 1). Most screen-reader users
    move through a page by its headings, and the site drew its titles as styled <div>/<span> boxes. They keep
    their tag and class (nothing looks different) and carry role="heading" aria-level="N": the header's <h1>
-   is level 1, a page, view or dialog title 2, its sections 3, the console's deeper sections 4 to 6.
+   is level 1, a page, view or dialog title 2, its sections 3 (4 under m4w2's Part headings), the console's
+   deeper sections 4 to 6.
    Ratchet: every element with a class in HEADING_CLASSES, in the app parts, coach-hub.js, the console parts
-   and index.html, is an <h1>..<h6> or has the role with a level, so a new title box of a listed kind fails.
-   Every role="heading" has a level 1..6, sits on no button, link, summary or form control (the role would
-   hide the control) and on no <h*> tag. The total is pinned both ways. caModFoldHtml turns a module's
-   heading <div> into its fold's <summary>; that is EXECUTED here, and the summary must lose the role. */
+   and index.html, is an <h1>..<h6> or has the role with a level, so a new title box of a listed kind fails;
+   so does a listed class set through the DOM (className / classList.add / setAttribute('class')) with no
+   heading role set right after it, since the scan cannot read that. Every role="heading" has one role
+   attribute and a level 1..6, sits on no button, link, summary or form control (the role would hide the
+   control), on nothing clickable or focusable (tabindex, onclick), not inside a <button> or <a> of the same
+   markup, and on no <h*> tag. Each kind's levels and counts are pinned (HEADING_ROLE_PINS: a lost heading, a
+   new one, a changed level or a swap between kinds all fail). The module folds are EXECUTED: caModFoldHtml
+   turns a module's heading <div> into its fold's <summary>, which must lose the role, for both callers (the
+   Completed fold, on the real caModuleHeadHtml, keeps the module name as one level-3 heading INSIDE the
+   summary; the Unfinished fold's tag from activities-2.js, which has no such span, keeps none: a wrapper there
+   would change what .ca-mod-head>span:first-child styles). */
 const HEADING_CLASSES = ['set-eyebrow-title', 'stp-sec-label', 'stp-part-title', 'jl-title', 'review-head',
   'mr-assess-head', 'ca-today-head', 'ca-hero-title', 'ca-card-title', 'ca-mod-head', 'resume-title', 'sh-sec-title',
   'rp-meta-title', 'games-logo', 'games-section-head', 'games-game-title', 'tp-title', 'rec-checklist-title',
   't-title', 'ta-list-title', 't-board-head', 'ta-roll-head', 'stu-section-head', 'stu-set-head', 'stu-detail-name'];
-const HEADING_ROLE_TOTAL = 54;
+/* Each kind (its listed class, else its first class, else its tag) -> 'levelxcount ...' in source order of levels. */
+const HEADING_ROLE_PINS = {
+  '<span>': '2x1 3x1 4x1', 'ca-card-title': '3x2', 'ca-hero-title': '3x2', 'ca-mod-head': '3x3', 'ca-today-head': '3x1',
+  'games-game-title': '3x1', 'games-logo': '2x2', 'games-section-head': '3x1', 'jl-title': '3x1', 'mr-assess-head': '3x1',
+  'rail-sec-label': '4x1', 'rec-checklist-title': '3x1', 'resume-title': '3x1', 'review-head': '3x1', 'rp-meta-title': '2x1',
+  'set-eyebrow-title': '2x2', 'sh-sec-title': '3x3', 'stp-part-title': '3x1', 'stp-sec-label': '3x1 4x1', 'stu-detail-name': '3x1',
+  'stu-section-head': '3x3 4x6 5x2', 'stu-set-head': '6x1', 't-board-head': '3x2', 't-scard-lbl': '3x2 5x2', 't-title': '2x1',
+  'ta-list-title': '3x1', 'ta-roll-head': '3x1', 'tp-title': '2x4',
+};
+const HEADING_ROLE_TOTAL = Object.values(HEADING_ROLE_PINS).reduce((n, v) => n + v.split(' ').reduce((m, x) => m + +x.split('x')[1], 0), 0);
 function a11yScanTags(src) {
   const out = [];
   for (const m of src.matchAll(/<([a-zA-Z][a-zA-Z0-9]*)\b/g)) {
@@ -6689,15 +6706,22 @@ function a11yScanTags(src) {
       if (depth) { if (c === '{') depth++; else if (c === '}') depth--; continue; }
       if (src.startsWith('${', i)) { depth = 1; i++; continue; }
       if (quote) { if (c === quote) quote = null; continue; }
-      if (c === '"') { quote = c; continue; }
+      if (c === '"' || (c === "'" && src[i - 1] === '=')) { quote = c; continue; }
       if (c === '>') break;
     }
     const text = src.slice(m.index, i + 1);
-    const cls = /\bclass="((?:[^"$]|\$\{[^}]*\})*)"/.exec(text);
-    out.push({ tag: m[1].toLowerCase(), text, line: src.slice(0, m.index).split('\n').length,
-      classes: cls ? cls[1].replace(/\$\{[^}]*\}/g, ' ').split(/\s+/).filter(Boolean) : [] });
+    const cls = /\bclass=(["'])((?:(?!\1)[^$]|\$\{[^}]*\})*)\1/.exec(text);
+    out.push({ tag: m[1].toLowerCase(), text, at: m.index, line: src.slice(0, m.index).split('\n').length,
+      classes: cls ? cls[2].replace(/\$\{[^}]*\}/g, ' ').split(/\s+/).filter(Boolean) : [] });
   }
   return out;
+}
+/* Is position `at` inside an open <button> or <a> of the same markup (a JS template or string, else the file)? */
+function a11yInsideControl(src, at, isJs) {
+  const from = isJs ? src.lastIndexOf('`', at - 1) + 1 : 0;
+  const seg = src.slice(from, at);
+  const last = re => { let k = -1; for (const m of seg.matchAll(re)) k = m.index; return k; };
+  return last(/<button\b/g) > last(/<\/button>/g) || last(/<a[\s>]/g) > last(/<\/a>/g);
 }
 function checkTitleHeadings() {
   head('1da. Title boxes carry a heading role (screen readers)');
@@ -6705,9 +6729,11 @@ function checkTitleHeadings() {
   const flag = m => { err(`1da: ${m}`); problems++; bad++; };
   const files = [...siteParts('app.js', ROOT), 'coach-hub.js', ...siteParts('teacher.js', ROOT), 'index.html'];
   const perClass = Object.fromEntries(HEADING_CLASSES.map(c => [c, 0]));
+  const kinds = {};
   for (const f of files) {
     let src;
     try { src = readFileSync(join(ROOT, f), 'utf8'); } catch { flag(`${f} is missing: title headings NOT checked there`); continue; }
+    const isJs = f.endsWith('.js');
     for (const tg of a11yScanTags(src)) {
       const isH = /^h[1-6]$/.test(tg.tag);
       const role = /\srole="heading"/.test(tg.text);
@@ -6721,30 +6747,60 @@ function checkTitleHeadings() {
       }
       if (role) {
         roles++;
+        const kind = hit[0] || tg.classes[0] || `<${tg.tag}>`;
+        kinds[kind] = kinds[kind] || {};
+        kinds[kind][lvl || '?'] = (kinds[kind][lvl || '?'] || 0) + 1;
         if (!lvl || +lvl < 1 || +lvl > 6) flag(`${f}:${tg.line}: role="heading" with no aria-level 1..6`);
+        if ((tg.text.match(/\srole=/g) || []).length > 1) flag(`${f}:${tg.line}: two role attributes on one tag (the browser keeps the first): ${tg.text.slice(0, 120)}`);
         if (isH) flag(`${f}:${tg.line}: <${tg.tag}> is already a heading; drop the role`);
         if (control)
           flag(`${f}:${tg.line}: role="heading" on a <${tg.tag}> control would hide it from a screen reader: put the role on the title text inside`);
+        if (/\s(?:tabindex|onclick)=/.test(tg.text))
+          flag(`${f}:${tg.line}: role="heading" on something clickable or focusable (tabindex / onclick): a screen reader would read a heading and never offer the control`);
+        if (a11yInsideControl(src, tg.at, isJs))
+          flag(`${f}:${tg.line}: role="heading" inside a <button> or <a>: a heading inside a control hides the control's role`);
       }
+    }
+    /* A title box made through the DOM cannot be read by the scan above: it must set its role right there. */
+    if (isJs) for (const m of src.matchAll(/(?:\.className\s*=\s*|\.classList\.add\(\s*|\.setAttribute\(\s*['"]class['"]\s*,\s*)(['"`])([^'"`]*)\1/g)) {
+      const hit = m[2].split(/[\s,'"]+/).filter(c => c in perClass);
+      if (hit.length && !/setAttribute\(\s*['"]role['"]\s*,\s*['"]heading['"]\s*\)/.test(src.slice(m.index, m.index + 400)))
+        flag(`${f}:${src.slice(0, m.index).split('\n').length}: a ${hit.join(' ')} title box made through the DOM with no setAttribute('role', 'heading') (and aria-level) right after it`);
     }
   }
   const none = HEADING_CLASSES.filter(c => !perClass[c]);
   if (none.length) flag(`no element found with class ${none.join(', ')}: renamed? Update HEADING_CLASSES (the ratchet went blind for it)`);
-  if (roles !== HEADING_ROLE_TOTAL) flag(`${roles} elements carry role="heading", HEADING_ROLE_TOTAL pins ${HEADING_ROLE_TOTAL}: one was ${roles < HEADING_ROLE_TOTAL ? 'lost (put it back)' : 'added (bump the pin on purpose)'}`);
-  /* The module fold: run the real caModFoldHtml on the real opening tag caModuleHeadHtml emits. */
+  const kindPins = Object.fromEntries(Object.entries(kinds).sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => [k, Object.keys(v).sort().map(l => `${l}x${v[l]}`).join(' ')]));
+  for (const k of new Set([...Object.keys(kindPins), ...Object.keys(HEADING_ROLE_PINS)]))
+    if (kindPins[k] !== HEADING_ROLE_PINS[k]) flag(`role="heading" on ${k}: levels x counts ${kindPins[k] || 'none'}, HEADING_ROLE_PINS pins ${HEADING_ROLE_PINS[k] || 'none'} (a heading lost, added, moved to another kind or given another level: fix it, or change the pin on purpose)`);
+  if (roles !== HEADING_ROLE_TOTAL) flag(`${roles} elements carry role="heading", HEADING_ROLE_PINS adds up to ${HEADING_ROLE_TOTAL}`);
+  /* The module folds: run the real caModFoldHtml on both callers' heading html. */
+  let foldsRun = 0;
   try {
     const a2 = siteSource('app.js', ROOT);
-    const fn = /function caModFoldHtml\([^)]*\)\{[\s\S]*?\n\}/.exec(a2);
-    const openTag = (/function caModuleHeadHtml[\s\S]*?return `(<div class="ca-mod-head"[^>]*>)/.exec(a2) || [])[1];
-    if (!fn || !openTag) flag('could not find caModFoldHtml or caModuleHeadHtml: the module fold NOT checked');
+    const fold = /function caModFoldHtml\([^)]*\)\{[\s\S]*?\n\}/.exec(a2);
+    const doneHead = /function caModuleHeadHtml\([^)]*\)\{[\s\S]*?\n\}/.exec(a2);
+    const todoTag = (/function headHtml\(sec\)\{[\s\S]*?\? `(<div class="ca-mod-head"[^>]*>)/.exec(a2) || [])[1];
+    if (!fold || !doneHead || !todoTag) flag('could not find caModFoldHtml, caModuleHeadHtml or headHtml\'s tag: the module folds NOT checked');
     else {
-      const out = vm.runInNewContext(`${fn[0]}; caModFoldHtml('todo', {mod:{num:4}}, ${JSON.stringify(openTag + 'Module 4</div>')}, '', [], 4, null)`,
-        { caOpenId: null, caModFoldOpen: {}, escAttr: s => String(s) });
-      if (!/^<details[^>]*><summary class="ca-mod-head ca-mod-summary">Module 4<\/summary><\/details>$/.test(out))
-        flag(`caModFoldHtml no longer turns the module heading into a clean <summary> (a <summary> with role="heading" stops being the fold's button): got ${out.slice(0, 160)}`);
+      const sb = { caOpenId: null, caModFoldOpen: {}, escAttr: x => String(x), escHtml: x => String(x), t: (k, p) => k === 'ca.moduleHead' ? `Module ${p.n} — ${p.mod}` : `${p.done} of ${p.total}`,
+        tf: (o, f) => o[f], caIsVisible: () => true, classActivities: { a: true } };
+      const sec = 'var sec = { mod: { num: 4, name: "Open Chords" }, ids: ["a", "b"] };';
+      const runs = [['the Completed fold (caModuleHeadHtml)', `${fold[0]}; ${doneHead[0]}; ${sec} caModFoldHtml('done', sec, caModuleHeadHtml(sec, { a: {}, b: {} }), '<CARDS/>', [], 4, null)`, 1],
+        ['the Unfinished fold (headHtml in activities-2.js)', `${fold[0]}; ${sec} caModFoldHtml('todo', sec, ${JSON.stringify(todoTag + 'Module 4 — Open Chords</div>')}, '<CARDS/>', [], 4, null)`, 0]];
+      for (const [what, code, inside] of runs) {
+        const out = String(vm.runInNewContext(code, sb));
+        foldsRun++;
+        const summary = (/<summary\b[^>]*>[\s\S]*<\/summary>/.exec(out) || [''])[0];
+        const heads = summary.match(/<span role="heading" aria-level="3"[^>]*>Module 4 — Open Chords<\/span>/g) || [];
+        if (!/^<details[^>]*><summary class="ca-mod-head ca-mod-summary"[^>]*>[\s\S]*<\/summary><CARDS\/><\/details>$/.test(out) || /<summary[^>]*\srole=/.test(out))
+          flag(`${what}: caModFoldHtml no longer turns the module heading into a clean <summary> (a <summary> with role="heading" stops being the fold's button): got ${out.slice(0, 200)}`);
+        else if (heads.length !== inside || (summary.match(/role="heading"/g) || []).length !== inside)
+          flag(`${what}: the <summary> holds ${(summary.match(/role="heading"/g) || []).length} heading(s), want ${inside}${inside ? ' (the module name, level 3)' : ''}: ${summary.slice(0, 240)}`);
+      }
     }
-  } catch (e) { flag(`running caModFoldHtml threw (${e.message}): the module fold NOT checked`); }
-  if (!bad) ok(`${titled} title boxes of ${HEADING_CLASSES.length} kinds in ${files.length} files all carry a heading role; ${roles} role="heading" in all (pinned), each with a level and on no control; the module fold's <summary> drops it`);
+  } catch (e) { flag(`running caModFoldHtml threw (${e.message}): the module folds NOT checked`); }
+  if (!bad) ok(`${titled} title boxes of ${HEADING_CLASSES.length} kinds in ${files.length} files all carry a heading role; ${roles} role="heading" in ${Object.keys(kindPins).length} kinds, levels and counts pinned, each with one level, on no control, nothing clickable, nothing inside a button or link; no title box made through the DOM; ${foldsRun} module folds run: clean <summary>, the Completed one keeps the module name as a heading inside`);
 }
 
 /* 1cz. Google sign-in always shows the account chooser (2026-11-13). Students share school Chromebooks. A popup made
