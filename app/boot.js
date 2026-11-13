@@ -15,40 +15,70 @@ if('scrollRestoration' in history) history.scrollRestoration = 'manual';
    device's date), lang ('en' | 'es'). No uid, name, email or class period
    FIELD, and no time finer than the day.
    What is scrubbed out of the text (scrub()), before it is cut to the rules'
-   cap: the signed-in account's OWN uid, email and the email's part before
-   the @ (any case) and its own display name and name words (only as written:
-   "Max" goes, "max" in Math.max stays); any email address (also written
-   %40); URL query strings; runs of 20+ letters and digits that hold both
-   (uids, Firestore ids, tags); runs of 6+ digits (timestamps, long student
-   numbers). What is NOT: anyone else's name, a class period ("period 7"), a
-   5-digit number, or what a student typed if an error message quotes it.
-   Every string is also made well-formed text (clean()), and a finished doc
-   the rules would refuse is dropped, never sent (fits()): the log shares
-   Firestore's one write queue with the progress save.
+   cap: the signed-in account's OWN uid and email (any case), the email's
+   part before the @ (any case) when it is 5+ characters or holds a digit,
+   its whole display name (as written), and each single word of that name
+   (split on anything not a letter or digit) as written when it is 5+
+   letters and not on NOT_NAMES; any email address (also written %40); URL
+   query strings; runs of 20+ letters and digits that hold both (uids,
+   Firestore ids, tags); runs of 6+ digits (timestamps, long student
+   numbers). A scrub never rewrites an earlier [user] / [email] / [id] / [n]
+   / [query], and the name is matched in NFC form with any accent mark
+   after it removed too.
+   What is NOT: anyone else's name, a class period ("period 7"), a 5-digit
+   number, what a student typed if an error message quotes it, and (since
+   2026-11-13, review round 2) a SHORT name word quoted alone: "Max", "Will",
+   "May", "Page" stay. That is the better trade: a short word scrubbed out of
+   ordinary text ("Will not load. [user] crashed", "Fri [user] 14",
+   "Math.[user]") is exactly what tells a reader whose error it was, while a
+   short first name alone in a site error is rare and names nobody without a
+   surname. NOT_NAMES are code and browser words a name can share ("Promise
+   King" must leave Promise.all alone), never scrubbed as single words.
+   Every string is also made well-formed text (clean(): half an emoji, the C0
+   control characters but tab and line breaks, U+FFFE and U+FFFF become
+   U+FFFD), and a finished doc the rules would refuse is dropped, never sent
+   (fits()): the log shares Firestore's one write queue with the progress
+   save.
    It must never make things worse for a student: every step is inside a
    try, nothing waits on it, it shows nothing, it writes only once the app
    itself has loaded Firestore (`db`) and someone is signed in (until then up
    to MAX entries wait in memory, re-checked every 5 s for at most 10
    minutes, then dropped), at most MAX writes and each message once per page
-   load, and the first refused or failed write (rules not published yet)
-   turns it off, silently, for the rest of the page load. Its own failures
-   are never logged. It never calls ensureDb() and never touches
-   progress/{uid} or the save code. Rules: firestore.rules "ERROR LOG".
+   load (after 100 different raw messages it stops looking at new ones), and
+   the first refused or failed write (rules not published yet) turns it off,
+   silently, for the rest of the page load. Its own failures are never
+   logged. It never calls ensureDb() and never touches progress/{uid} or the
+   save code. Rules: firestore.rules "ERROR LOG".
+   test() is the console's "Send a test entry" (teacher-errors.js): it sends
+   TEST_MESSAGE through this same path (scrub, caps, fits(), the one add())
+   and answers what happened to it; it is never called on a student's page.
    Not covered: the Journey pages (tabs/*.html) do not load this file.
-   Proof: tools/site-errors-sim.mjs (Node; run by checks.mjs 1cx) and
+   Proof: tools/site-errors-sim.mjs (Node; run by checks.mjs 1de) and
    tools/site-errors-rules-test.mjs (the Firestore emulator). */
 const SITE_ERRORS = (function(){
   const MAX = 5, POLL_MS = 5000, POLL_TRIES = 120, PRE = 1000, INT_MAX = 10000000;
   const CAP = { message: 300, file: 200, stack: 600, page: 120, version: 64 };
   const FIELDS = ['kind', 'message', 'file', 'line', 'col', 'stack', 'page', 'version', 'day', 'lang'];
+  const TEST_MESSAGE = 'Error log test (sent from the console)';
+  /* Single name words never scrubbed, whatever their length (lower case):
+     code and browser words a student's name can share. */
+  const NOT_NAMES = new Set(['promise', 'object', 'array', 'string', 'number', 'error', 'function', 'symbol', 'window', 'document', 'element', 'event', 'audio', 'image', 'storage', 'cache', 'request', 'response', 'worker', 'chrome', 'google', 'firebase', 'firestore', 'uncaught', 'cannot', 'failed', 'network', 'script', 'loading', 'module', 'chord', 'guitar', 'lesson', 'review', 'coach', 'tuner']);
+  /* What a scrub has already written: never scrubbed again (a name word
+     "user" must not make [user] into [[user]]). */
+  const TOKEN = /(\[(?:user|email|id|n|query)\])/;
+  /* Each entry: { d: the doc, late: no account was known when it was made,
+     done: test()'s answer, or null }. */
   const queue = [], seen = new Set(), rawSeen = new Set();
-  let used = 0, off = false, sending = false, pollT = null, polls = 0, verP = null;
+  let used = 0, off = false, offCode = '', sending = false, pollT = null, polls = 0, verP = null;
   /* Every unpaired surrogate (half an emoji, from code that sliced one)
      becomes U+FFFD. Firestore cannot store a string that is not well-formed:
      the SDK retries such a write for ever, and the student's progress save
-     queued behind it never lands. */
+     queued behind it never lands. The C0 controls (but tab, line feed and
+     carriage return) and U+FFFE / U+FFFF go too: Node's transport takes them,
+     a browser's was never tested. */
   function clean(s){
-    return String(s == null ? '' : s).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDFFF]/g, m => m.length === 2 ? m : '\uFFFD');
+    return String(s == null ? '' : s).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDFFF]/g, m => m.length === 2 ? m : '\uFFFD')
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g, '\uFFFD');
   }
   /* Cut to n characters, never splitting a surrogate pair. */
   function cut(s, n){
@@ -77,24 +107,39 @@ const SITE_ERRORS = (function(){
     s = s.replace(/\d{6,}/g, '[n]');
     return s;
   }
-  /* The signed-in account's own details, as whole words (3+ characters):
-     its uid, email and the email's part before the @ in any case; its display
-     name and each name word only exactly as written, so a student named Max
-     or Will never turns Math.max or "will" into [user] (which would tell whose
-     error it is). null when nobody is signed in. */
+  /* The signed-in account's own details, as whole words (3+ characters),
+     in NFC form: its uid and email in any case; the email's part before the
+     @ in any case when it is 5+ characters or holds a digit (so max@… leaves
+     Math.max alone, msmith27@… still goes); its whole display name as
+     written; each word of the name (split on anything not a letter or digit:
+     "Smith, Max", "Mary-Jane O'Brien") as written, only when it is 5+ letters
+     and not on NOT_NAMES, so a student named Will Page never turns "Will not
+     load. Page crashed" into a giveaway. An accent mark right after a match
+     goes with it. null when nobody is signed in. */
   function whoScrub(){
     try{
       const u = auth && auth.currentUser;
       if(!u) return null;
+      const nfc = w => String(w || '').normalize('NFC').trim();
       const anyCase = [], asWritten = [];
-      const add = (list, w) => { w = String(w || '').trim(); if(w.length >= 3) list.push(w); };
-      add(anyCase, u.uid); add(anyCase, u.email); add(anyCase, String(u.email || '').split('@')[0]);
-      add(asWritten, u.displayName);
-      String(u.displayName || '').split(/\s+/).forEach(w => add(asWritten, w));
-      const res = [[anyCase, 'giu'], [asWritten, 'gu']].filter(([list]) => list.length).map(([list, flags]) => new RegExp('(^|[^\\p{L}\\p{N}])(' + list.sort((a, b) => b.length - a.length).map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')(?![\\p{L}\\p{N}])', flags));
+      const add = (list, w) => { w = nfc(w); if(w.length >= 3) list.push(w); };
+      const local = nfc(String(u.email || '').split('@')[0]);
+      add(anyCase, u.uid); add(anyCase, u.email);
+      if(local.length >= 5 || /\d/.test(local)) add(anyCase, local);
+      const name = nfc(u.displayName);
+      add(asWritten, name);
+      name.split(/[^\p{L}\p{N}\p{M}]+/u).forEach(w => { if(w.replace(/\p{M}/gu, '').length >= 5 && !NOT_NAMES.has(w.toLowerCase())) add(asWritten, w); });
+      const res = [[anyCase, 'giu'], [asWritten, 'gu']].filter(([list]) => list.length).map(([list, flags]) => new RegExp('(^|[^\\p{L}\\p{N}\\p{M}])(' + list.sort((a, b) => b.length - a.length).map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\p{M}*(?![\\p{L}\\p{N}\\p{M}])', flags));
       if(!res.length) return null;
-      return s => res.reduce((t, re) => t.replace(re, (m, pre) => pre + '[user]'), s);
+      /* Odd parts of the split are earlier tokens, left as they are. */
+      return s => String(s).normalize('NFC').split(TOKEN).map((part, i) => i % 2 ? part : res.reduce((t, re) => t.replace(re, (m, pre) => pre + '[user]'), part)).join('');
     }catch(_){ return null; }
+  }
+  /* An entry cut while nobody was signed in can end in half a name
+     ("… Maxim…"), which the account scrub at send time cannot recognise: its
+     last, unfinished word goes. */
+  function dropCutWord(t){
+    return t.slice(-1) === '…' ? t.slice(0, -1).replace(/[\p{L}\p{N}\p{M}]+$/u, '') + '…' : t;
   }
   function int(n){
     const v = Math.floor(Number(n));
@@ -162,8 +207,14 @@ const SITE_ERRORS = (function(){
     }catch(_){ verP = Promise.resolve('unknown'); }
     return verP;
   }
-  function stop(){
-    off = true; queue.length = 0;
+  /* Gives test() its answer; a no-op for a real error's entry. */
+  function fin(e, r){
+    try{ if(e && e.done) e.done(r); }catch(_){}
+  }
+  function stop(er){
+    off = true;
+    try{ offCode = String((er && (er.code || er.message)) || 'error').slice(0, 80); }catch(_){ offCode = 'error'; }
+    for(const e of queue.splice(0)) fin(e, { state: 'off', code: offCode });
     if(pollT){ try{ clearTimeout(pollT); }catch(_){} pollT = null; }
   }
   function ready(){
@@ -177,7 +228,7 @@ const SITE_ERRORS = (function(){
       if(off || sending || !queue.length) return;
       if(!ready()){
         if(pollT) return;
-        if(polls >= POLL_TRIES){ queue.length = 0; return; }
+        if(polls >= POLL_TRIES){ for(const e of queue.splice(0)) fin(e, { state: 'not-ready' }); return; }
         pollT = setTimeout(() => { pollT = null; polls++; flush(); }, POLL_MS);
         return;
       }
@@ -186,28 +237,35 @@ const SITE_ERRORS = (function(){
          never hold the log. */
       Promise.race([version(), new Promise(r => setTimeout(() => r('unknown'), 3000))]).then(v => {
         const next = () => {
+          let e = null;
           try{
             if(off) return;
             if(!queue.length || !ready()){ sending = false; flush(); return; }
-            const d = queue.shift(), who = whoScrub();
-            if(who) for(const k of ['message', 'file', 'stack', 'page']) d[k] = cut(who(d[k]), CAP[k]);
+            e = queue.shift();
+            const d = e.d, who = whoScrub();
+            /* Re-cut after the scrub: [user] is longer than a 5-letter name. */
+            if(who) for(const k of ['message', 'file', 'stack', 'page']) d[k] = cut(who(e.late ? dropCutWord(d[k]) : d[k]), CAP[k]);
             if(!d.message) d.message = '(no message)';
             d.version = cut(clean(v), CAP.version);
             /* A doc the rules would refuse, or one that is not well-formed text,
                is dropped here, silently, and never sent: the log shares
                Firestore's one write queue with the progress save. */
-            if(!fits(d)){ next(); return; }
+            if(!fits(d)){ fin(e, { state: 'dropped' }); next(); return; }
             const p = db.collection('siteErrors').add(d);
-            if(p && typeof p.then === 'function') p.then(next, stop); else next();
-          }catch(_){ stop(); }
+            if(p && typeof p.then === 'function') p.then(ref => { fin(e, { state: 'sent', id: ref && ref.id, doc: d }); next(); }, er => { stop(er); fin(e, { state: 'failed', code: offCode }); });
+            else { fin(e, { state: 'sent', doc: d }); next(); }
+          }catch(er){ stop(er); fin(e, { state: 'failed', code: offCode }); }
         };
         next();
       }).then(null, stop);
     }catch(_){ stop(); }
   }
-  function report(kind, ev){
+  /* Builds the doc and queues it. '' when queued; otherwise why not: 'off',
+     'cap' (MAX used), 'repeat', 'storm' (100 raw messages seen), 'error'. */
+  function enqueue(kind, ev, done){
     try{
-      if(off || used >= MAX) return;
+      if(off) return 'off';
+      if(used >= MAX) return 'cap';
       kind = kind === 'error' ? 'error' : 'rejection';
       let msg = '', file = '', line = 0, col = 0, st = '';
       if(kind === 'error'){
@@ -224,10 +282,12 @@ const SITE_ERRORS = (function(){
         else msg = 'Rejected with ' + (r === null ? 'null' : typeof r);
       }
       /* A repeat is turned away on its raw text, before any scrubbing (a
-         long message costs the regexes a few ms each time). Kept small. */
+         long message costs the regexes a few ms each time). Kept small: after
+         100 different raw messages in one page load (a storm whose text keeps
+         changing) every new one is turned away unscrubbed. */
       const rawKey = kind + '|' + String(msg).slice(0, 500);
-      if(rawSeen.has(rawKey)) return;
-      if(rawSeen.size < 100) rawSeen.add(rawKey);
+      if(rawSeen.has(rawKey)) return 'repeat';
+      if(rawSeen.size < 100) rawSeen.add(rawKey); else return 'storm';
       st = stackTop(st);
       if(!file && st){
         const m = /\(?([^\s()]+):(\d+):(\d+)\)?\s*$/.exec(st.split('\n')[0]);
@@ -249,13 +309,34 @@ const SITE_ERRORS = (function(){
         lang: langNow(),
       };
       const key = kind + '|' + doc.message;
-      if(seen.has(key)) return;
+      if(seen.has(key)) return 'repeat';
       seen.add(key); used++;
-      queue.push(doc);
+      queue.push({ d: doc, late: !who, done: done || null });
       flush();
-    }catch(_){}
+      return '';
+    }catch(_){ return 'error'; }
   }
-  return { report };
+  function report(kind, ev){
+    try{ enqueue(kind, ev, null); }catch(_){}
+  }
+  /* The console's test: TEST_MESSAGE through the same path as a real error.
+     Resolves (never rejects) with { state }: 'sent' (with the Firestore id
+     and the doc as sent), 'failed' (refused or failed: the log is now off on
+     this page; code), 'dropped' (fits() refused it), 'not-ready', or why it
+     was not queued ('off' with the code that turned it off, 'cap', 'repeat',
+     'storm', 'error'). */
+  function test(){
+    return new Promise(resolve => {
+      let why = 'error';
+      try{ why = enqueue('error', { message: TEST_MESSAGE }, resolve); }catch(_){}
+      if(why) resolve({ state: why, code: offCode });
+    });
+  }
+  /* For tools/site-errors-sim.mjs: how much this page load has used. */
+  function stats(){
+    return { off, used, max: MAX, rawSeen: rawSeen.size, queued: queue.length };
+  }
+  return { report, test, stats, TEST_MESSAGE };
 })();
 
 /* ── Global safety net ──
