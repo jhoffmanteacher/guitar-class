@@ -734,7 +734,7 @@ async function loadAllStudents(){
 const TEACHER_REFRESH_MS=60000;
 const TEACHER_AUTO_REFRESH_VIEWS=['activities','students','skills','responses','trouble'];
 // Views where student progress isn't on screen at all — no Refresh bar.
-const TEACHER_NO_REFRESH_BAR_VIEWS=['livequiz','mic','reports','tsongs','minutes'];   // minutes: its own Refresh (renderTeacherMinutes)
+const TEACHER_NO_REFRESH_BAR_VIEWS=['livequiz','mic','reports','tsongs','minutes','errors'];   // minutes, errors: their own Refresh (renderTeacherMinutes, renderTeacherErrors)
 let teacherStudentsAt=0;          // when the roster on screen was read (ms); 0 = not yet
 let teacherRefreshing=false;      // a read is out — no overlapping fetches
 let teacherRefreshFailed=false;   // the last read failed; the screen shows the older roster
