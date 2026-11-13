@@ -777,9 +777,9 @@ function saveStreak(){ queueSave('streak'); }
 
 function saveProgress(){ queueSave('skills','place'); }
 
-/* Site-wide practice streak, independent of any one game (see coach.js's
-   rrSetDone for the same day-string / yesterday-comparison pattern applied
-   to the Riff Roulette game specifically). */
+/* Site-wide practice streak, independent of any one game (coach-strum.js's
+   rrSetDone applies the same day-string rule to Riff Roulette). Weekends never
+   break it: dayStreakContinues, app/boot.js (Jonathan, 2026-11-13). */
 function dayStr(d){
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
@@ -787,9 +787,7 @@ function bumpPracticeStreak(){
   if(!currentUser || isDevBypassUser()) return;
   const today = dayStr(new Date());
   if(streak.lastDay === today) return;
-  const y = new Date();
-  y.setDate(y.getDate() - 1);
-  streak.count = streak.lastDay === dayStr(y) ? (streak.count || 0) + 1 : 1;
+  streak.count = dayStreakContinues(streak.lastDay, today) ? (streak.count || 0) + 1 : 1;
   streak.lastDay = today;
   saveStreak();
 }
