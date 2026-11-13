@@ -1462,44 +1462,77 @@ function pcToggleHelp(btn){
    work only while it plays.
    WHICH card answers: the one playing (pcState); else the one last touched
    or focused (pcKeyLast, written by pcKeyNote); else, if exactly one card
-   is on screen, that one; else none. "On screen" = in the page, laid out
-   (no [hidden] or closed <details> above it), not inert (an open dialog
-   marks #app inert) and not the console's preview.
+   is on screen AND part of its player is inside the window, that one; else
+   none, and Space scrolls the page as always. "On screen" = in the page,
+   laid out (no [hidden] or closed <details> above it), not inert (an open
+   dialog marks #app inert) and not the console's preview.
    NOTHING happens while the student is typing (a field, a select, a slider,
-   contenteditable), with Ctrl / Cmd / Alt held, on a held-down repeat, when
-   another handler already took the key, in the teacher console, while the
-   nav drawer, a dialog (the games, the live quiz, the gates, Report a
-   problem), the search panel, the tuner or the recorder is open, while a mic
-   listens (coachMicLive) or a Call-the-chord round owns the space bar
-   (chcLive). Space on a focused button, link or <summary> keeps its own
-   meaning (it presses THAT control), so a Play button the student just
-   clicked is never toggled twice. A key that acts cancels its default, so
-   Space never scrolls the page. The listeners are registered once, in
-   app/start.js, for the page's life, like the site's other document keys;
-   they hold no timer, audio or element of their own (pcKeyLast is checked
-   for isConnected before use). */
-let pcKeyLast = null;
+   contenteditable) or is on an <audio> / <video> player, with Ctrl / Cmd /
+   Alt held, on a held-down repeat, when another handler already took the
+   key, in the teacher console, while the nav drawer, a dialog (the games,
+   the live quiz, the gates, Report a problem), the search panel, a tool
+   popup (metronome, timer, tuner, recorder), the video viewer or the live
+   quiz's join banner is open, while a "Turn on the microphone" panel is on
+   screen, a mic listens (coachMicLive) or a Call-the-chord round owns the
+   space bar (chcLive). Space on a focused button, link or <summary> keeps
+   its own meaning (it presses THAT control), so a Play button reached with
+   Tab is never toggled twice.
+   A MOUSE OR TOUCH press on a card control leaves Chrome's focus on it, and
+   then Space would press that control again (a section chip restarts with a
+   new count-in) and every key would stay in the speed slider. So once a
+   pointer press inside a card is over (its click and change have run),
+   pcKeyPointerUp lets the focus go, and the keys reach the player as the
+   Play tooltip says. A control reached with Tab is never touched (no
+   pointer), and a field that is typed in keeps its focus.
+   A key that acts cancels its default, so Space never scrolls the page
+   then. The listeners are registered once, in app/start.js, for the page's
+   life, like the site's other document keys; they hold no audio or element
+   of their own (pcKeyLast is checked for isConnected before use; the
+   pointer's one-turn timer reads the focus and ends). */
+let pcKeyLast = null, pcKeyPressRoot = null;
 function pcKeyNote(e){
   const tg = e && e.target;
   const r = tg && tg.closest ? tg.closest('.pc') : null;
   if(r) pcKeyLast = r;
+  // The card a pointer press started in (null outside every card): pcKeyPointerUp reads it, wherever the press ends.
+  if(e && e.type === 'pointerdown') pcKeyPressRoot = r && r.dataset.preview !== '1' ? r : null;
+}
+function pcKeyPointerUp(){
+  const r = pcKeyPressRoot;
+  pcKeyPressRoot = null;
+  if(!r || (typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE)) return;
+  setTimeout(() => {
+    const a = document.activeElement;
+    if(!a || a === document.body || !r.contains(a) || typeof a.blur !== 'function') return;
+    if(a.matches('textarea, select, [contenteditable]:not([contenteditable="false"])') || a.isContentEditable) return;
+    if(a.tagName === 'INPUT' && !/^(range|button|checkbox|radio|submit|reset)$/i.test(a.getAttribute('type') || 'text')) return;
+    a.blur();
+  }, 0);
 }
 function pcKeyLive(root){
   return !!(root && root.isConnected && root.dataset && root.dataset.preview !== '1'
     && root.getClientRects().length && !root.closest('[inert], [hidden], details:not([open])'));
 }
+function pcKeyInView(root){
+  const p = root.querySelector('.pc-player') || root;
+  const r = p.getBoundingClientRect();
+  const vh = window.innerHeight || document.documentElement.clientHeight || 0;
+  const vw = window.innerWidth || document.documentElement.clientWidth || 0;
+  return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < vh && r.right > 0 && r.left < vw;
+}
 function pcKeyRoot(){
   if(pcState && pcKeyLive(pcState.root)) return pcState.root;
   if(pcKeyLive(pcKeyLast)) return pcKeyLast;
   const live = Array.from(document.querySelectorAll('.pc')).filter(pcKeyLive);
-  return live.length === 1 ? live[0] : null;
+  return live.length === 1 && pcKeyInView(live[0]) ? live[0] : null;
 }
 function pcKeyBlocked(){
   const b = document.body;
   if(b && b.classList.contains('rail-open')) return true;
   if(window.coachMicLive) return true;
   if(typeof chcLive !== 'undefined' && chcLive) return true;
-  if(document.querySelector('#tuner-popup.open, #rec-popup.open, #search-panel:not([hidden])')) return true;
+  if(document.querySelector('.tool-popup.open, #search-panel:not([hidden]), #video-overlay:not([hidden]), #lq-banner')) return true;
+  if(Array.from(document.querySelectorAll('.micrec-ask')).some(m => m.getClientRects().length)) return true;
   return Array.from(document.querySelectorAll('[aria-modal="true"]')).some(m => !m.closest('[hidden]') && m.getClientRects().length);
 }
 const PC_KEYS = { ' ': 'play', 'Spacebar': 'play', 'k': 'play', 'K': 'play', 'ArrowLeft': 'prev', 'ArrowRight': 'next', '<': 'slower', ',': 'slower', '>': 'faster', '.': 'faster' };
@@ -1508,7 +1541,7 @@ function pcKeydown(e){
   if(!act || e.defaultPrevented || e.repeat || e.isComposing || e.ctrlKey || e.metaKey || e.altKey) return;
   if(typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE) return;
   const tg = e.target && e.target.closest ? e.target : null;
-  if(tg && (tg.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"])') || tg.isContentEditable)) return;
+  if(tg && (tg.closest('input, textarea, select, audio, video, [contenteditable]:not([contenteditable="false"])') || tg.isContentEditable)) return;
   // Arrows inside a widget that uses them itself (the tool popups' radio groups, a tab strip).
   if(tg && (act === 'prev' || act === 'next') && tg.closest('[role="radiogroup"], [role="tablist"], [role="listbox"], [role="menu"], [role="slider"]')) return;
   if(act === 'play' && e.key !== 'k' && e.key !== 'K' && tg && tg.closest('button, a[href], summary, [role="button"], [role="switch"], [role="checkbox"], [role="radio"], [role="tab"], [role="menuitem"], [role="option"]')) return;
