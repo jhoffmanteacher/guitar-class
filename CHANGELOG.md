@@ -6,6 +6,11 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-13 — The site fills a big screen
+
+- **On a screen bigger than a Chromebook, the whole page now grows to fill it.** The top bar, the menu, the text, the TAB and the buttons all get bigger together, so the page looks the way it does on a Chromebook, just larger. On a Chromebook nothing changes.
+- **Ctrl + plus and Ctrl + minus still make the page bigger or smaller** on top of that.
+
 ## 2026-11-13 — Weekends never break your streak
 
 - **Your day streaks only need school days now, Monday to Friday.** Play on Friday and again on Monday, and your streak keeps going. This counts for your Games streak and your Riff Roulette streak.

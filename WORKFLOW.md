@@ -383,6 +383,36 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-13 — The site fills a big screen the way it fills a Chromebook: Part 1, the student site (`docs/WORK-ORDER-fill-big-screens.md`). Always Reviewed (sw.js lists).**
+      Jonathan: "the view should be maximized for whatever monitor is being used"; on a bigger screen "grow everything".
+      **`site-fill.js` (new, the one copy of the formula):** s = min(width / 1366, height / 657), 1 to 3, 1 at 760 px
+      or less. A plain (blocking) script in `index.html`'s `<head>` after `styles.css`, so the first frame already has
+      it. While s > 1: CSS `zoom` on `<html>` and `--site-fill`; every width / height `@media` threshold of the site's
+      own stylesheets multiplied by s (media queries ignore CSS zoom; the two `max-height:800px` rules are the ones
+      that change anything); the page's script reads PAGE pixels (getBoundingClientRect, pointer coordinates,
+      innerWidth, elementFromPoint, the root's clientWidth / scroll size and the window scroll are all window pixels
+      under root zoom in Chrome 157, measured). At s = 1 it sets nothing; a print goes back to 1; the console
+      (`?teacher`) stays at 1 until Part 3. Browser zoom stays on top: the factor is worked out from the window at
+      100% (outerWidth / innerWidth snapped to Chrome's zoom steps; a step above 100% only if innerHeight × step still fits
+      in outerHeight, so a side panel is not read as zoom; a factor within 1% of 1 is 1, so a Chromebook at 125% sets
+      nothing: the two faults the deep review found). `styles.css`: the 51 viewport units divided by
+      `var(--site-fill,1)` (and the 2 in `tabs/journey-theme.css`, so `.lq-banner` matches, 1t). The lyric sheet
+      draws at devicePixelRatio × s and redraws when s changes. Full screen's `--ca-zoom` now sits on top of the fill
+      (page width / 1000: a 2560×1440 display in full screen gets the Chromebook's 1.366, enlarged). `sw.js`:
+      `./site-fill.js` in PRECACHE_CRITICAL and ASSETS (its own commit); `checks.mjs` SHELL_FILES.
+      **Proofs** (headless Chrome 157, dev bypass, 12 screens, EN + ES): unchanged at 1366×657, 1366×768, 1280×720
+      (18,092 of 18,092 boxes each, box and font size) and 390×844 (17,886 of 17,886); site-fill.js blocked = the old
+      site at 1366×657 and 2560×1300. Big screens: 0 of 18,092 elements missing and 0 with another font size at
+      2560×1300, 3200×1650 and 1920×950, but only 618 / 1,140 / 1,013 within 1 px of the 1366-wide page × s: CSS
+      zoom lays the page out at the bigger size, a 1px border is one screen pixel and line boxes round, and the
+      difference adds up down a page (about 100 px over the 4,000 px Songs page). The only way around it is a CSS
+      transform, which breaks fixed popups and scrolling. `checks.mjs` 1df (new) runs site-fill.js in a stub window;
+      `smoke.mjs` fillWalk walks 2560×1300. sw.js: `slow-load.mjs` 20 loads 0 errors, `update-reload-loop.mjs` 29 of 29
+      cases (359 checks), `kill-switch/proof.mjs` 14 of 14 mutations.
+      **What to watch:** a new `vh`/`vw` must be written `/ var(--site-fill,1)` (1df fails a bare one); a new script
+      that mixes window and page pixels is covered by the page-pixel view; the classroom display's real window size
+      is still unmeasured (Jonathan to say if it looks right).
+
 - [x] **2026-11-13 — Weekends never break a day streak (Jonathan's P2). Reviewed (deep, one round + fixes).**
       His answer to "count school days only?": "Weekends never break it"; weekend play still adds a day. One rule
       in `app/boot.js` (`dayStreakContinues` / `dayStreakAlive`, dates built at local noon): a streak continues when
