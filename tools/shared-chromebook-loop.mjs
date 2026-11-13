@@ -11,7 +11,7 @@
    flushBeforeLeaving / showUnsavedNotice / devBypass / _uidKey), to the save path (app/save.js flushSave,
    queueSave, loadProgress, restoreClassConfigFromCache, the local mirrors), to anything that keeps a student's
    data in localStorage or sessionStorage (a new per-student key, a new cache), or to the unload/hide flushes
-   (shell.js pagehide/online, activities-2.js flushOnHide). About 42 s for the default 120 cases (2026-11-13). Node only.
+   (shell.js pagehide/online, activities-2.js flushOnHide). About 75 s for the default 120 cases (2026-11-13). Node only.
 
    NODE, NOT A BROWSER, and why. The leak channels on a shared Chromebook are: (1) localStorage, shared by every
    tab and every student of the device; (2) sessionStorage, per tab, which survives a reload; (3) a tab that does
@@ -2257,7 +2257,7 @@ async function main(){
   }
   console.log(`  ${tot.ledger} actions by the students: ${tot.landed} landed in their own doc, ${tot.told} told "not saved" and not landed, ${tot.lost} lost without a word`);
   console.log(`  ${tot.screens} first screens read (state, markup, sessionStorage, localStorage reads and values); ${tot.compared} records and values compared; ${tot.writesChecked} sent and ${tot.issuedChecked} never-sent student writes checked for target and markers`);
-  console.log(`  ${tot.pages} page loads, ${tot.reloads} reloads; writes (a batch counts once): ${tot.issued} issued, ${tot.landedW} landed, ${tot.refusedRules} refused by the rules (${tot.crossRefused} of them for going out under the wrong sign-in), ${tot.refusedServer} refused by the server, ${tot.lostPage} lost with their page, ${tot.lostUnload} started while unloading and lost, ${tot.unloadSent} started while unloading and let through (${tot.unloadCases} cases deliver unload writes); ${tot.crossUnsent} never-sent writes issued under the wrong sign-in; ${tot.reads} reads (${tot.readsFailed} failed); ${tot.notices} not-saved notices shown`);
+  console.log(`  ${tot.pages} page loads, ${tot.reloads} reloads; writes (a batch counts once): ${tot.issued} issued, ${tot.landedW} landed, ${tot.refusedRules} refused by the rules (${tot.crossRefused} of them for going out under the wrong sign-in), ${tot.refusedServer} refused by the server, ${tot.lostPage} lost with their page, ${tot.lostUnload} started while unloading and lost, ${tot.unloadSent} started while unloading and let through (${tot.unloadCases} cases deliver unload writes); ${tot.crossUnsent} never-sent writes issued under another sign-in or none (a page already told "signed out"); ${tot.reads} reads (${tot.readsFailed} failed); ${tot.notices} not-saved notices shown`);
   console.error(`shared-chromebook-loop: ${((Date.now() - t0) / 1000).toFixed(1)} s`);
   if (opt('json', null)) writeFileSync(opt('json'), JSON.stringify(json, null, 1));
   return failed ? 1 : 0;
