@@ -218,7 +218,10 @@ Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `ap
 - **Activity order/placement** live on the console board (`config/class.activityBoard`,
   `caBoardOrder()`, `teacherMoveActivity()`); a digit in a title is a SERIES number (1d, 1l). **`config/class`** writes only via `teacherWriteConfig()` (1ai; omit `base` unless a single-cell toggle).
 - **`firestore.rules` change** → tell Jonathan: Firebase console → Firestore → Rules → paste →
-  Publish (GitHub Pages doesn't deploy it).
+  Publish (GitHub Pages doesn't deploy it). Before that: `tools/pm-rules-test.mjs` and
+  `tools/rules-core-test.mjs --breaks` on the Firestore emulator (their headers say how; GitHub runs both after
+  every push, `.github/workflows/rules.yml`). A case named "today: …" turning red means a rule was tightened:
+  make sure that was the point.
 - **Skills edit** → bump `skillCount` in `MODULE_MANIFEST`.
 - **Practice minutes** (`practice-minutes-config.js` + `practice-minutes.js`): counts always; the display
   is on (`uiOn: true` since 2026-11-01; the pin is in `tools/pm-sim.mjs`). Its `firestore.rules` blocks must be published BEFORE the code
