@@ -12,8 +12,20 @@
    later is impossible (a wrong clock, or written by hand before the rules
    checked the day): it is left out and counted in one line, so a pile of
    them can never hide the real ones. "Delete older than 30 days" removes
-   every doc whose day is before the cutoff, and every impossible one, after a
-   confirm. Every value here was written by a student's device: it is
+   every doc whose day is before the cutoff, every impossible one and every
+   test entry, after a confirm.
+
+   "Send a test entry" tells a dead log from a quiet one (both show "No
+   errors logged."): it sends SITE_ERRORS.TEST_MESSAGE through the logger's
+   own path (SITE_ERRORS.test() in app/boot.js: the same scrub, caps, fits()
+   and add() as a real error), reads the entry back from the server, and
+   says which of three things happened: the log works, it is NOT working
+   (the write was refused), or it could not be checked (and why). A refused
+   or failed write turns the logger off for this page load, so the answer
+   then says to reload the console before testing again. The test entry is
+   listed, marked as a test.
+
+   Every value here was written by a student's device: it is
    untrusted and escaped at the point it is drawn (escHtml / escAttr), and no
    value is ever put inside an inline handler.
 
@@ -22,7 +34,8 @@
 const TEACHER_ERRORS_READ_MAX = 1000;
 const TEACHER_ERRORS_KEEP_DAYS = 30;
 let teacherErrorsNote = '';      // one line shown above the list after a delete
-let teacherErrorsBusy = false;   // a delete is running: a second click does nothing
+let teacherErrorsBusy = false;   // a delete or a test is running: a second click does nothing
+const TEACHER_ERRORS_TEST_WAIT_MS = 20000;
 
 /* YYYY-MM-DD, this computer's date, n days before today. */
 function teacherErrorsDay(n){
@@ -75,17 +88,19 @@ function teacherErrorsHtml(docs, more, future, latest){
   const head = `<div class="tg-note">
       <button class="tg-seg-btn" onclick="renderTeacherErrors()">Refresh</button>
       <button class="tg-seg-btn" onclick="teacherErrorsDeleteOld()">Delete older than ${TEACHER_ERRORS_KEEP_DAYS} days</button>
+      <button class="tg-seg-btn" onclick="teacherErrorsSendTest()">Send a test entry</button>
     </div>
     <div class="tg-note">Errors the site hit on students' devices (and on this console), with no names: at most 5 per page load, each message once per load. A count is page loads that hit it.${more ? ` More than ${TEACHER_ERRORS_READ_MAX} are logged: only the newest ${TEACHER_ERRORS_READ_MAX} are counted here, so the counts on the oldest day shown may be low.` : ''}</div>`
     + (future ? `<div class="tg-note">${future >= TEACHER_ERRORS_READ_MAX ? `${TEACHER_ERRORS_READ_MAX} or more entries` : future === 1 ? '1 entry' : `${future} entries`} with an impossible date (after ${escHtml(latest || '')}) ${future === 1 ? 'was' : 'were'} hidden. "Delete older than ${TEACHER_ERRORS_KEEP_DAYS} days" deletes them too.</div>` : '')
-    + (teacherErrorsNote ? `<div class="tg-note"><b>${escHtml(teacherErrorsNote)}</b></div>` : '');
+    + teacherErrorsNoteHtml();
   if(!groups.length) return head + '<div class="t-loading">No errors logged.</div>';
   const rows = groups.map(g => {
     const stacks = [...g.stacks.entries()].sort((a, b) => b[1] - a[1]);
     const stackCell = stacks.length
       ? `<details><summary>Stack top (${stacks.length})</summary>${stacks.slice(0, 5).map(([s, n]) => `<pre style="white-space:pre-wrap;word-break:break-all;margin:6px 0;font-size:12px">${escHtml(s)}${stacks.length > 1 ? `\n<b>×${n}</b>` : ''}</pre>`).join('')}${stacks.length > 5 ? `<i>+${stacks.length - 5} more</i>` : ''}</details>`
       : '—';
-    return `<tr><td style="max-width:420px;word-break:break-word"><b>${escHtml(g.message)}</b><br><span class="tg-note">${g.kind === 'rejection' ? 'Unhandled promise rejection' : 'Error'} · ${teacherErrorsCounts(g.places, 3)}</span></td>`
+    const isTest = g.message === teacherErrorsTestMessage();
+    return `<tr><td style="max-width:420px;word-break:break-word"><b>${escHtml(g.message)}</b>${isTest ? ' <i>(a test entry, from "Send a test entry")</i>' : ''}<br><span class="tg-note">${g.kind === 'rejection' ? 'Unhandled promise rejection' : 'Error'} · ${teacherErrorsCounts(g.places, 3)}</span></td>`
       + `<td>${g.total}</td>`
       + `<td style="white-space:nowrap">${teacherErrorsCounts(g.days, 7, true).split(' · ').join('<br>')}</td>`
       + `<td style="word-break:break-word">${teacherErrorsCounts(g.pages, 5)}</td>`
@@ -93,6 +108,13 @@ function teacherErrorsHtml(docs, more, future, latest){
       + `<td style="max-width:360px">${stackCell}</td></tr>`;
   }).join('');
   return head + `<div class="t-grid-wrap"><table><thead><tr><th>Message</th><th>Total</th><th>Days</th><th>Pages</th><th>Versions · language</th><th>Stack</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+function teacherErrorsNoteHtml(){
+  return teacherErrorsNote ? `<div class="tg-note"><b>${escHtml(teacherErrorsNote)}</b></div>` : '';
+}
+/* The logger's test message ('' if the logger is missing: nothing is then marked). */
+function teacherErrorsTestMessage(){
+  try{ return (typeof SITE_ERRORS !== 'undefined' && SITE_ERRORS && SITE_ERRORS.TEST_MESSAGE) || ''; }catch(_){ return ''; }
 }
 /* A refused read or delete before the rules are published comes back as
    permission-denied; anything else is a connection problem. */
@@ -122,7 +144,8 @@ async function renderTeacherErrors(){
     future = fut.docs.length;
   }catch(e){
     // Same stale-view guard as the success path: a late failure must not paint over another view.
-    if(teacherView === 'errors') box.innerHTML = teacherErrorsFailHtml(e, 'load');
+    if(teacherView === 'errors') box.innerHTML = teacherErrorsNoteHtml() + teacherErrorsFailHtml(e, 'load');
+    teacherErrorsNote = '';
     return;
   }
   if(teacherView !== 'errors') return;
@@ -130,35 +153,95 @@ async function renderTeacherErrors(){
   teacherErrorsNote = '';   // said once
 }
 /* Deletes every doc whose day is before today minus 30 days, then every doc
-   dated after the latest day the rules accept (an impossible date), 400 at a
-   time (a batch holds at most 500), for at most 50 rounds (20,000 docs) each. */
+   dated after the latest day the rules accept (an impossible date), then
+   every test entry, 400 at a time (a batch holds at most 500), for at most
+   50 rounds (20,000 docs) each. */
 async function teacherErrorsDeleteOld(){
   if(teacherErrorsBusy) return;
-  const cutoff = teacherErrorsDay(TEACHER_ERRORS_KEEP_DAYS), latest = teacherErrorsLatestDay();
-  if(!confirm(`Delete every logged error from before ${cutoff}, and every one with an impossible date (after ${latest})? This cannot be undone.`)) return;
+  const cutoff = teacherErrorsDay(TEACHER_ERRORS_KEEP_DAYS), latest = teacherErrorsLatestDay(), testMsg = teacherErrorsTestMessage();
+  if(!confirm(`Delete every logged error from before ${cutoff}, every test entry, and every one with an impossible date (after ${latest})? This cannot be undone.`)) return;
   teacherErrorsBusy = true;
-  let n = 0;
+  let n = 0, nTest = 0;
   try{
     await ensureDb();
-    for(const [op, day] of [['<', cutoff], ['>', latest]]){
+    const passes = [['day', '<', cutoff], ['day', '>', latest]];
+    if(testMsg) passes.push(['message', '==', testMsg]);
+    for(const [field, op, value] of passes){
       for(let round = 0; round < 50; round++){
-        const snap = await db.collection('siteErrors').where('day', op, day).limit(400).get();
+        const snap = await db.collection('siteErrors').where(field, op, value).limit(400).get();
         if(snap.empty) break;
         const batch = db.batch();
         snap.docs.forEach(d => batch.delete(d.ref));
         await batch.commit();
         n += snap.docs.length;
+        if(field === 'message') nTest += snap.docs.length;
       }
     }
-    teacherErrorsNote = n ? `Deleted ${n} error${n === 1 ? '' : 's'} from before ${cutoff} or after ${latest}.` : `Nothing from before ${cutoff} or after ${latest} to delete.`;
+    const nOld = n - nTest;
+    teacherErrorsNote = !n ? `Nothing from before ${cutoff} or after ${latest}, and no test entry, to delete.`
+      : (nOld ? `Deleted ${nOld} error${nOld === 1 ? '' : 's'} from before ${cutoff} or after ${latest}.` : '')
+        + (nTest ? `${nOld ? ' ' : ''}Deleted ${nTest} test entr${nTest === 1 ? 'y' : 'ies'}.` : '');
   }catch(e){
     teacherErrorsBusy = false;
     teacherErrorsNote = n ? `Deleted ${n}, then the delete stopped. Press the button again to finish.` : '';
     const box = document.getElementById('t-grid-container');
-    if(teacherView === 'errors' && box) box.innerHTML = (teacherErrorsNote ? `<div class="tg-note"><b>${escHtml(teacherErrorsNote)}</b></div>` : '') + teacherErrorsFailHtml(e, 'delete from');
+    if(teacherView === 'errors' && box) box.innerHTML = teacherErrorsNoteHtml() + teacherErrorsFailHtml(e, 'delete from');
     teacherErrorsNote = '';
     return;
   }
   teacherErrorsBusy = false;
   if(teacherView === 'errors') renderTeacherErrors();
+}
+
+/* "Send a test entry": one entry through the logger's own path, then a read
+   from the server. The answer is shown above the list (teacherErrorsNote),
+   which is then re-read, so the test entry shows in it. Never says the log
+   works without the entry read back from the server, field for field. */
+async function teacherErrorsSendTest(){
+  if(teacherErrorsBusy) return;
+  teacherErrorsBusy = true;
+  let note;
+  try{ note = await teacherErrorsRunTest(); }
+  catch(e){ note = 'The log could not be checked: ' + String((e && (e.code || e.message)) || e) + '.'; }
+  teacherErrorsBusy = false;
+  teacherErrorsNote = note;
+  if(teacherView === 'errors') renderTeacherErrors();
+  else teacherErrorsNote = '';
+}
+async function teacherErrorsRunTest(){
+  const RELOAD = ' The error log is now off on this console page: reload the console before testing again.';
+  const cannot = why => 'The log could not be checked: ' + why + '.';
+  if(typeof SITE_ERRORS === 'undefined' || !SITE_ERRORS || typeof SITE_ERRORS.test !== 'function') return cannot('the error logger is not on this page (reload the console)');
+  try{ await ensureDb(); }catch(e){ return cannot('Firestore did not load (' + String((e && (e.code || e.message)) || e) + '), a connection problem'); }
+  let timer = null;
+  const r = await Promise.race([
+    SITE_ERRORS.test(),
+    new Promise(res => { timer = setTimeout(() => res({ state: 'timeout' }), TEACHER_ERRORS_TEST_WAIT_MS); }),
+  ]);
+  clearTimeout(timer);
+  const code = r && r.code ? String(r.code) : '';
+  switch(r && r.state){
+    case 'sent': break;
+    case 'failed':
+      if(code === 'permission-denied') return 'The log is NOT working: the test entry was refused (the rules for the error log are not published, or do not match this version of the site).' + RELOAD;
+      return cannot('the write failed (' + (code || 'no reason given') + '), a connection problem') + RELOAD;
+    case 'timeout': return cannot(`no answer from Firestore within ${TEACHER_ERRORS_TEST_WAIT_MS / 1000} seconds, a connection problem`) + ' The test entry may still be sent later; reload the console before testing again.';
+    case 'off': return cannot('the logger had already turned itself off on this page, after a write failed (' + (code || 'no reason given') + ')') + ' Reload the console before testing again.';
+    case 'cap': return cannot('this page has already sent the 5 entries one page load may send') + ' Reload the console before testing again.';
+    case 'repeat': return cannot('a test entry was already sent from this page') + ' Reload the console before testing again.';
+    case 'storm': return cannot('this page has seen too many different errors to log another') + ' Reload the console before testing again.';
+    case 'dropped': return cannot("the test entry was not sent: it would not fit the error log's rules (is this computer's date right?)");
+    case 'not-ready': return cannot('nobody is signed in, or Firestore never loaded');
+    default: return cannot('the logger gave no answer (' + String(r && r.state) + ')');
+  }
+  if(!r.id) return cannot('the test entry was sent, but Firestore gave no id to read it back by');
+  let snap;
+  try{ snap = await db.collection('siteErrors').doc(r.id).get({ source: 'server' }); }
+  catch(e){ return cannot('the test entry was saved, but reading it back failed (' + String((e && (e.code || e.message)) || e) + ')'); }
+  const got = snap && snap.exists ? snap.data() : null;
+  if(!got) return cannot('the test entry was saved, but it was not there when read back');
+  const sent = r.doc || {};
+  const same = Object.keys(sent).length === Object.keys(got).length && Object.keys(sent).every(k => got[k] === sent[k]);
+  if(!same) return cannot('the test entry read back is not the one sent');
+  return 'The log works: the test entry was saved and read back.';
 }
