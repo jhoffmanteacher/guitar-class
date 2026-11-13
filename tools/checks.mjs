@@ -6810,7 +6810,7 @@ function checkTitleHeadings() {
    the site (all folders but the tooling), the words GoogleAuthProvider and signInWith outside comments, however
    the code is spelled (a bracket call, a provider passed in, a sign-in kept in a variable): pinned at 1 each, all
    inside signIn(), so a second sign-in path cannot appear without this check reading it. */
-const SIGNIN_PROVIDER_SITES = 1, SIGNIN_CALL_SITES = 1;
+const SIGNIN_PROVIDER_SITES = 1, SIGNIN_CALL_SITES = 1, SIGNIN_PARAM_SITES = 1, SIGNIN_WORDS_RAW = 7;
 function checkSignInAccountChooser() {
   head('1cz. Google sign-in always asks which account');
   let bad = 0;
@@ -6825,7 +6825,8 @@ function checkSignInAccountChooser() {
     setCustomParameters(o) { this.params = Object.assign({}, o); }
     addScope() {}
   }
-  const open = p => { opened.push(p); return new Promise(() => {}); };
+  // What the provider holds AT the moment the popup opens: a chooser set after it is too late.
+  const open = p => { opened.push({ params: p && p.params ? Object.assign({}, p.params) : null }); return new Promise(() => {}); };
   const sandbox = {
     window: {}, currentUser: null, firebase: { auth: { GoogleAuthProvider } },
     auth: { signInWithPopup: open, signInWithRedirect: open },
@@ -6839,7 +6840,7 @@ function checkSignInAccountChooser() {
     if (!p || p.prompt !== 'select_account') flag(`signIn() opens Google's popup with ${p ? JSON.stringify(p) : 'no custom parameters'}: it must set prompt 'select_account' (setCustomParameters), or a shared Chromebook can sign the next student in as the last one`);
   }
   /* Every place that names a Google provider or a sign-in, in the site's own scripts and pages (every folder but
-     tools/ and the repo's own tooling), counted as the bare words outside comments (maskComments, which tells a regex
+     tools/ and the repo's own tooling; minified files too), counted as the bare words outside comments (maskComments, which tells a regex
      literal from a quote; stripJsComments loses its place at escAttr's /"/g in app/boot.js): a bracket call
      (auth['signInWithPopup']), a provider passed in or a sign-in function kept in a variable still says them. */
   const files = [];
@@ -6850,26 +6851,36 @@ function checkSignInAccountChooser() {
     for (const e of names) {
       const rel = d ? `${d}/${e.name}` : e.name;
       if (e.isDirectory()) { if (!SKIP_DIRS.has(e.name)) walk(rel); }
-      else if (/\.(js|mjs|html)$/.test(e.name) && !/\.min\.js$/.test(e.name)) files.push(rel);
+      else if (/\.(js|mjs|html)$/.test(e.name)) files.push(rel);
     }
   };
   walk('');
   const uncomment = (f, src) => f.endsWith('.html')
     ? src.replace(/<!--[\s\S]*?-->/g, m => m.replace(/[^\n]/g, ' ')).replace(/(<script\b[^>]*>)([\s\S]*?)(<\/script>)/gi, (m, a, js, z) => a + maskComments(js) + z)
     : maskComments(src);
-  const PROVIDER_RE = /GoogleAuthProvider/g, CALL_RE = /signInWith/g;
-  const providers = [], calls = [];
+  const PROVIDER_RE = /GoogleAuthProvider/g, CALL_RE = /signInWith/g, PARAMS_RE = /setCustomParameters/g;
+  const providers = [], calls = [], params = [];
+  let raw = 0;
   for (const f of files) {
-    const src = uncomment(f, readFileSync(join(ROOT, f), 'utf8'));
-    for (const [re, out] of [[PROVIDER_RE, providers], [CALL_RE, calls]]) {
+    const text = readFileSync(join(ROOT, f), 'utf8');
+    raw += (text.match(/GoogleAuthProvider|signInWith|setCustomParameters/g) || []).length;
+    const src = uncomment(f, text);
+    for (const [re, out] of [[PROVIDER_RE, providers], [CALL_RE, calls], [PARAMS_RE, params]]) {
       for (const m of src.matchAll(re)) out.push(`${f}:${src.slice(0, m.index).split('\n').length}`);
     }
   }
   const inBody = maskComments(body);
   if (providers.length !== SIGNIN_PROVIDER_SITES) flag(`${providers.length} places name GoogleAuthProvider outside comments (${providers.join(', ') || 'none'}), pinned at ${SIGNIN_PROVIDER_SITES}: a new sign-in path must ask which account too; run it here like signIn() and update the pin`);
   if (calls.length !== SIGNIN_CALL_SITES) flag(`${calls.length} places name signInWith… outside comments (${calls.join(', ') || 'none'}), pinned at ${SIGNIN_CALL_SITES}: a new sign-in path must ask which account too; run it here like signIn() and update the pin`);
-  if ((inBody.match(PROVIDER_RE) || []).length !== SIGNIN_PROVIDER_SITES || (inBody.match(CALL_RE) || []).length !== SIGNIN_CALL_SITES) flag('the provider and sign-in call are not all inside signIn(), so the run above did not read them');
-  if (!bad) ok(`signIn() ran: 1 popup, prompt 'select_account'; ${files.length} site files read (comments left out): GoogleAuthProvider ${providers.length}x (${providers.join(', ')}), signInWith ${calls.length}x (${calls.join(', ')}), all inside signIn()`);
+  /* One place sets the provider's parameters (the chooser): a second one, in a branch the run above never takes, could
+     replace it (setCustomParameters keeps only the last object). */
+  /* The same words counted with the comments IN: a statement the comment masker misreads (a regex literal holding a
+     slash-star, say) could hide a real call from the counts above, never from this one. A new comment naming them
+     needs this pin moved too. */
+  if (raw !== SIGNIN_WORDS_RAW) flag(`GoogleAuthProvider / signInWith / setCustomParameters appear ${raw} times in the site's files, comments included, pinned at ${SIGNIN_WORDS_RAW}: read each new one (a comment: move the pin; code: see above)`);
+  if (params.length !== SIGNIN_PARAM_SITES) flag(`${params.length} places call setCustomParameters (${params.join(', ') || 'none'}), pinned at ${SIGNIN_PARAM_SITES}: a second call can replace prompt 'select_account' on a path the run above does not take`);
+  if ((inBody.match(PROVIDER_RE) || []).length !== SIGNIN_PROVIDER_SITES || (inBody.match(CALL_RE) || []).length !== SIGNIN_CALL_SITES || (inBody.match(PARAMS_RE) || []).length !== SIGNIN_PARAM_SITES) flag('the provider, its parameters and the sign-in call are not all inside signIn(), so the run above did not read them');
+  if (!bad) ok(`signIn() ran: 1 popup, prompt 'select_account'; ${files.length} site files read (comments left out): GoogleAuthProvider ${providers.length}x (${providers.join(', ')}), signInWith ${calls.length}x (${calls.join(', ')}), setCustomParameters ${params.length}x (${params.join(', ')}), all inside signIn() (${raw} with comments, pinned); the chooser was set before the popup opened`);
 }
 
 function checkPrecacheFingerprinted(src, hashed) {
