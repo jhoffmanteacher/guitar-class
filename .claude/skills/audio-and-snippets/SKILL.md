@@ -362,3 +362,17 @@ and the audio fingerprint accept it, but keep one format and one bitrate
 across `audio/` (Jonathan's call) so the Guitar toggle never steps between
 codecs. (The existing rhythm-down set is 320k except "the cure" at 120bpm,
 which is 192k.)
+
+## Checking a beat map against the record: `tools/beat-audit.py`
+After changing a `SNIPPET_TRACKS` timing field (`anchor`, `barTimes`, `trackBpm`, `trackBpmSlow`, `feltBpm`,
+`beatsPerBar`), adding or re-exporting a backing track, or changing a practice card's sections: run
+`python3 tools/beat-audit.py --only <slug>` (add `--cache <scratch dir>` to rerun fast; Python with numpy, and ffmpeg).
+- It LISTS where the map disagrees with the sound. It never edits a map, an anchor, a chart or a file, and never
+  prints a number to paste: every line is settled by Jonathan's ear (`?snipcal=1`).
+- Counted lines (exit 1): THE LIST, FAR OFF, BEAT 1, STAGE 2 LIST. WEAK and "BASS DIFFERS" are not counted.
+- **Exit 0 does not mean the map is clean.** Bars it calls "cannot tell" (printed per file, with how many sit inside
+  card sections) need listening: in the 2026-11-12 tests it caught 7 of 12 big planted faults there. A card section
+  under 4 bars is never judged a bar off, and the two-file tracks (Madrecita, Las Mañanitas) can miss 100 ms.
+- First run (2026-11-12): "the cure" rhythm-down files play about 25 ms (144) and about 50 ms (120) AFTER their full
+  mixes (a file offset, not a map fault: settle it before touching that anchor); the record pushes Luna bar 10 about
+  64 ms early (a steady grid: no number to edit).

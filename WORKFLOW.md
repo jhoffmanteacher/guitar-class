@@ -383,6 +383,29 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-12 — `tools/beat-audit.py`: a tool that listens to every backing track and lists where the beat map
+      disagrees with the record** (Jonathan, 2026-11-12: "that is probably of highest priority"). Tools and docs only.
+      Three adversarial review rounds; the last round's findings are fixed and it ships without a further round (his
+      call). It reverses nothing: "don't verify BPM in audits" stands (it never lists a BPM label), and it never
+      edits a map, an anchor, a chart or an audio file.
+      What it is: Python + numpy and ffmpeg. For each of the 14 `SNIPPET_TRACKS` tracks and every file (42), it finds
+      the beats in three frequency bands and compares them with the map: a constant offset, a drift, one bar line, a
+      section, the slow file against the scaled fast grid, the full mix against rhythm-down, a missing or doubled
+      bar, beat 1, and a second pass for bars it is unsure of. Stage 2 lists card sections whose chart fits the
+      record a bar or two off. A finding is "strong" only when the bands agree in two files: the four files of one
+      take count as one method. Where it would have to guess it says "cannot tell".
+      Proof: a fake band with known beats (recovered within 4 ms; five planted detector breaks fail its self-test) and
+      45 planted map and chart faults: 37 counted, 2 weak only, 6 silent. Of 12 big faults (150 to 250 ms) planted in
+      bars it calls "cannot tell", 7 were counted. So exit 0 does NOT mean a map is clean: those bars, card sections
+      under 4 bars, and the two-file tracks (Madrecita, Las Mañanitas: a 100 ms fault can pass) still need ears.
+      Today's site, 5,026 bars, 3,892 measured: THE LIST has three lines. (1) and (2): "the cure" rhythm-down files
+      play 25 ms (144 BPM) and about 50 ms (120 BPM) AFTER their full mixes, steady through the song, so the Guitar
+      switch jumps by that much; a reviewer confirmed the 25 ms by an independent cross-correlation (it matches an
+      untrimmed mp3 encoder delay). (3): the record pushes Luna bar 10 (0:38) about 64 ms early; Luna is a steady
+      grid, so there is no number to edit. Weak, for his ear: "the cure" anchor reads about 38 ms early against the
+      full mix, ±15 ms (settle the file offset first). The confirmed Hendrix Watchtower map lists nothing.
+      Run: `python3 tools/beat-audit.py` (about 6 minutes cold, under 2 with `--cache <dir>`; `--only <slug>`).
+
 - [x] **2026-11-12 — `tools/live-quiz-loop.mjs`: the Live quiz played by a teacher and a class, closed loop.** Tools only.
       Three adversarial review rounds; the last round's findings are fixed and it ships without a further round
       (Jonathan, 2026-11-12). What it is: one teacher console and about 30 students, each tab the real `live-quiz.js`
