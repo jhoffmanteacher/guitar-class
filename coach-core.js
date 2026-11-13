@@ -549,48 +549,63 @@ function coachEvictTuner(){
    sent a student whose mic was simply missing, or held by another app (a
    video call), to a permission setting that was already on. */
 let coachMicFailName = '';
+let coachMicRetry = false;   // that refusal left the question open: the browser's box was closed with X
 /* The line for a failed coachAcquireMic(). A refusal — the student, or the
    browser's site setting, said no — gets the tuner's own lock-icon steps
    (tools.micDenied, one wording for every mic feature, 2026-11-13), plus
    the caller's `extraKey` when it has a way to go on without the mic (Note
-   Call: tap the frets). No mic, a busy mic, or a failed setup each say so
-   instead. A start whose "Turn on the microphone" panel was given up
+   Call: tap the frets). A refusal that left the question open (the
+   browser's box closed with X: coachMicRetry) says "Press Start again and
+   choose Allow" instead, except to a caller with `extraKey`, whose Start
+   goes on without the mic. No mic, a busy mic, or a failed setup each say
+   so instead. A start whose "Turn on the microphone" panel was given up
    ('cancelled', see coachMicAsk) has nothing to say: ''. */
 function coachMicFailMsg(extraKey){
   if (coachMicFailName === 'cancelled') return '';
-  if (/^(NotAllowedError|SecurityError|PermissionDeniedError)$/.test(coachMicFailName)) return t('tools.micDenied') + (extraKey ? ' ' + t(extraKey) : '');
+  if (/^(NotAllowedError|SecurityError|PermissionDeniedError)$/.test(coachMicFailName)) return t(coachMicRetry && !extraKey ? 'micpre.again' : 'tools.micDenied') + (extraKey ? ' ' + t(extraKey) : '');
   return t(coachMicFailName === 'setup' ? 'coach.mic.failed' : 'coach.mic.unavailable');
 }
 
 /* ── Before the browser asks (2026-11-13, research-6 rec. 1) ──
    The browser's own "Allow microphone?" box used to open straight from
-   Start, with nothing on the page saying why. Now coachAcquireMic first
-   asks the Permissions API what the browser would do:
-     granted  → straight on, exactly as before (no extra click);
-     prompt   → a small panel in the caller's status place (`ask.el`): one
-                line on what is listened for, and one button, "Turn on the
-                microphone" — only its click goes on to getUserMedia;
-     denied   → getUserMedia is not called; the caller gets the same refusal
-                as before (false, NotAllowedError), so it shows the
-                lock-icon steps;
-     anything else (no Permissions API, a browser that does not know
-     'microphone', a throw, no answer in COACH_MIC_PERM_WAIT_MS) → exactly
-     as before. A caller with no `ask` (the hidden trainer) never gets the
-     panel. Nothing here touches the constraints or the audio graph.
+   Start, with nothing on the page saying why. Now, for a caller that gives
+   a place for it (`ask.el`), coachAcquireMic first asks the Permissions API
+   what the browser would do. Only `prompt` changes anything: a small panel
+   in that place, one line on what is listened for and one button, "Turn on
+   the microphone"; only its click goes on to getUserMedia. Every other
+   answer (granted, denied, no API, a throw, no answer in
+   COACH_MIC_PERM_WAIT_MS) goes straight to getUserMedia, exactly as before.
+   getUserMedia stays the only judge of a refusal: on a managed Chromebook a
+   policy can allow the mic while the API answers otherwise (review R1-1). So
+   once getUserMedia has given this browser the mic, the panel is not shown
+   again whatever the API says (COACH_MIC_OK_KEY, cleared by a refusal), and
+   a question that once went unanswered is not asked again on this page. A
+   caller with no `ask` (the hidden trainer) never asks. Nothing here touches
+   the constraints or the audio graph.
    The panel holds no mic and starts nothing. Its wait ends with the click,
    or is given up ('cancelled') when another start asks for the mic, when
-   coachMicOff() runs (every game's and the Coach's way out), when Note Call
-   stops a card that is starting (ncStopAll), or when the caller's place left
-   the page before the panel could be drawn. A given-up start returns false
-   with coachMicFailName 'cancelled', and each caller's own "still mine?"
-   guard decides what, if anything, to draw (coachMicFailMsg gives ''). */
+   coachMicOff() runs (the games' and the Coach's own stops, once the mic is
+   live), when gamesStopMic() runs (leaving a game, the tuner opening, a
+   Coach check starting), when Note Call stops a card that is starting
+   (ncStopAll), or when the caller's place left the page before the panel
+   could be drawn. A hidden tab keeps it (it holds nothing). A given-up start
+   returns false with coachMicFailName 'cancelled', and each caller's own
+   "still mine?" guard decides what, if anything, to draw (coachMicFailMsg
+   gives ''). */
 const COACH_MIC_PERM_WAIT_MS = 1500;
-let coachMicAsk = null;   // the panel waiting for its click: { resolve }
+/* Device-level, not a student's: "this browser has given this site the mic"
+   ('1'), set by a getUserMedia success, removed by a refusal. */
+const COACH_MIC_OK_KEY = 'gc-mic-ok';
+let coachMicAsk = null;        // the panel waiting for its click: { resolve }
+let coachMicPermSlow = false;  // the question once went unanswered: skipped for the rest of this page
+function coachMicOkGet(){ try { return localStorage.getItem(COACH_MIC_OK_KEY) === '1'; } catch(e){ return false; } }
+function coachMicOkSet(on){ try { if (on) localStorage.setItem(COACH_MIC_OK_KEY, '1'); else localStorage.removeItem(COACH_MIC_OK_KEY); } catch(e){} }
 async function coachMicPermState(){
+  if (coachMicPermSlow) return '';
   let timer = null;
   try {
     if (!navigator.permissions || typeof navigator.permissions.query !== 'function') return '';
-    const late = new Promise(res => { timer = setTimeout(() => res(null), COACH_MIC_PERM_WAIT_MS); });
+    const late = new Promise(res => { timer = setTimeout(() => { coachMicPermSlow = true; res(null); }, COACH_MIC_PERM_WAIT_MS); });
     const st = await Promise.race([navigator.permissions.query({ name: 'microphone' }), late]);
     const s = st && st.state;
     return s === 'granted' || s === 'prompt' || s === 'denied' ? s : '';
@@ -632,10 +647,8 @@ function coachAcquireMic(ask){
   return p;
 }
 async function coachAcquireMicInner(ask){
-  coachMicFailName = '';
-  const perm = await coachMicPermState();
-  if (perm === 'denied'){ coachMicFailName = 'NotAllowedError'; return false; }
-  if (perm === 'prompt' && ask && ask.el){
+  coachMicFailName = ''; coachMicRetry = false;
+  if (ask && ask.el && !coachMicOkGet() && (await coachMicPermState()) === 'prompt'){
     if (!ask.el.isConnected){ coachMicFailName = 'cancelled'; return false; }
     const go = await new Promise(resolve => {
       coachMicAsk = { resolve };
@@ -665,8 +678,13 @@ async function coachAcquireMicInner(ask){
     });
   } catch(e) {
     coachMicFailName = (e && e.name) || 'Error';
+    if (coachMicFailName === 'NotAllowedError'){
+      coachMicOkSet(false);
+      if (ask) coachMicRetry = (await coachMicPermState()) === 'prompt';
+    }
     return false;
   }
+  coachMicOkSet(true);
   // getUserMedia already succeeded and coachStream is live at this point —
   // if any node construction below throws (e.g. a browser's audio-context
   // limit after many opens/closes in one session), fall through to the catch

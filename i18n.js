@@ -1689,6 +1689,8 @@
       es: 'Esto escucha tu guitarra con el micrófono. No se graba ni se envía nada.' },
     'micpre.lineRec': { en: 'This listens to your guitar through the mic. You said yes to saving takes, so your takes are saved for your teacher.',
       es: 'Esto escucha tu guitarra con el micrófono. Dijiste que sí a guardar tus tomas, así que tus tomas se guardan para tu maestro.' },
+    // A refusal that left the question open (the browser's box closed with X; coach.js coachMicRetry): its Start asks again
+    'micpre.again': { en: 'Press Start again and choose Allow.', es: 'Presiona Empezar otra vez y elige Permitir.' },
     'micpre.button': { en: 'Turn on the microphone', es: 'Encender el micrófono' },
     // After the tuner's lock-icon steps (tools.micDenied) when Note Call's mic is refused: its way on without the mic
     'micpre.tapFrets': { en: 'Tap the frets on the board instead.', es: 'Toca los trastes en el diagrama.' },
