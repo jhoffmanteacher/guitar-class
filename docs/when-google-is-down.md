@@ -24,8 +24,10 @@ on 2026-11-13; **[browser]** still needs a check in a real browser and is not pr
      `gstatic.com` looks the same.
    - Stuck on "Signed in — loading your progress…", then after 20 s "This is taking longer than usual…"
      with Try again **[code: app/start.js:205-208, app/boot.js:761-768, index.html:126]**.
-   - "Save failed — check connection", then "Not saving — check connection" while other websites work
-     **[code: app/save.js:714-726; i18n.js:782-783]**.
+   - "Not saved yet — trying again. Keep this tab open.", then "Not saving — your newest work is not saved. Check
+     the internet connection." while other websites work **[code: app/save.js:714-726; i18n.js:793-796]**. On a
+     Song Journey page: "Not saved yet — check the internet connection, then tick a box again."
+     **[code: tabs/journey.js:1198; i18n.js, journey.saveRetry]**.
 4. A Claude session can also run `node tools/checks.mjs --live`: it reads the live site from GitHub
    only, so a ✓ there means the site itself is deployed and reachable.
 
@@ -38,7 +40,7 @@ on 2026-11-13; **[browser]** still needs a check in a real browser and is not pr
 | The main site for a student who is **not** signed in yet | **No**: the sign-in wall covers everything | [code: app/start.js:240-246 hides the app and the tools when signed out] |
 | The main site for a student who **was** signed in before | Unknown: it depends on how Google fails | [browser] Firebase usually remembers a sign-in on the Chromebook, but the site then reads the student's saved work before it opens [code: app/start.js:208]. If that read fails quickly, the site opens with saving limited (next row). If it hangs, the student stays on "loading your progress" [code: app/boot.js:750-768] |
 | The site after the saved-work read failed | Opens; In-Class Activities are not locked; answers and ticks are sent if saving comes back, but scores, streaks, bests and exit-check results are held back and lost when the tab closes | [code: app/save.js:217 `progressLoadFailed`; app/activities-2.js:1164 no gate; app/activities-2.js:268-287 exit check marked not saved; app/save.js:565-585 the held-back list: streak, arcade bests, practice-rep history, exit checks] |
-| Work done after saving starts failing | Kept in the open tab only. A save Google refuses is retried 5 times, 3 s apart, then "Not saving" until the student does something new | [code: app/save.js:549, 714-726]. Sign out refuses to throw it away and offers "Sign out anyway" [code: app/boot.js:557-581]. Closing the tab or the lid loses it. [browser: whether a save that just hangs (no answer from Google) shows "Save failed" at all, and whether Google's library sends it by itself once Google is back, as the comment at app/boot.js:572-575 expects] |
+| Work done after saving starts failing | Kept in the open tab only. A save Google refuses is retried 5 times, 3 s apart, then "Not saving" until the student does something new | [code: app/save.js:549, 714-726]. Sign out refuses to throw it away and offers "Sign out anyway" [code: app/boot.js:557-581]. Closing the tab or the lid loses it. [browser: whether a save that just hangs (no answer from Google) shows "Not saved yet" at all, and whether Google's library sends it by itself once Google is back, as the comment at app/boot.js:572-575 expects] |
 | Teacher console | No (it reads the roster and settings from Google) | [code: teacher-core.js reads Firestore; not traced further] |
 | Live quiz, Games, practice minutes, mic recordings | Need sign-in, inside the main site | [code: they live in the main site behind the sign-in wall] |
 
