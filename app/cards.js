@@ -253,8 +253,11 @@ function pcPlayBtnHtml(playing){
    already 105 against 115. Each option carries its own playback rate in
    data-rate; the card's data-rate is what pcRate() reads. */
 function pcSlowRate(tr){ return (1 + tr.trackBpmSlow / tr.trackBpm) / 2; }
-function pcSpeedSwitchHtml(){
-  return `<button type="button" class="pc-speed" role="switch" aria-checked="false" aria-label="${escAttr(t('ca.cardSpeedAria'))}" title="${escAttr(t('pc.keys.speed'))}" onclick="pcSetSpeed(this)">`
+/* A control's tooltip naming its key (KEYS, below). None in the console's
+   preview (`preview`), where the keys are off. */
+function pcKeyTitle(key, preview){ return preview ? '' : ` title="${escAttr(t(key))}"`; }
+function pcSpeedSwitchHtml(preview){
+  return `<button type="button" class="pc-speed" role="switch" aria-checked="false" aria-label="${escAttr(t('ca.cardSpeedAria'))}"${pcKeyTitle('pc.keys.speed', preview)} onclick="pcSetSpeed(this)">`
     +   `<span class="pc-speed-lab on">${escHtml(t('ca.cardSlower'))}</span>`
     +   `<span class="pc-speed-track" aria-hidden="true"><span class="pc-speed-knob"></span></span>`
     +   `<span class="pc-speed-lab">${escHtml(t('ca.cardNormal'))}</span></button>`;
@@ -274,7 +277,7 @@ function pcGuitarSwitchHtml(){
     +   `<span class="pc-speed-track" aria-hidden="true"><span class="pc-speed-knob"></span></span>`
     +   `<span class="pc-speed-lab on">${escHtml(t('ca.cardGuitarOn'))}</span></button>`;
 }
-function pcSpeed3Html(tr){
+function pcSpeed3Html(tr, preview){
   /* A stepped slider (2026-10-08): the dot-row version left students unsure
      the middle dots were options at all. The ends read "Slower" and
      "Normal" (Jonathan, 2026-10-09) as directions, not stop names; every
@@ -297,7 +300,7 @@ function pcSpeed3Html(tr){
     return `<span class="pc-speed-tick${i === START ? ' on' : ''}" style="--i:${i}" data-speed="${speed}" data-rate="${rate}" data-label="${escAttr(t(key) + ', ' + x)}"></span>`
       + `<span class="pc-speed-x${i === START ? ' on' : ''}" style="--i:${i}" aria-hidden="true">${x}</span>`;
   }).join('');
-  return `<span class="pc-speed4" role="group" aria-label="${escAttr(t('ca.cardSpeed4Aria'))}" title="${escAttr(t('pc.keys.speed'))}">`
+  return `<span class="pc-speed4" role="group" aria-label="${escAttr(t('ca.cardSpeed4Aria'))}"${pcKeyTitle('pc.keys.speed', preview)}>`
     + `<span class="pc-speed-end" aria-hidden="true">${escHtml(t('ca.cardSlower'))}</span>`
     + `<span class="pc-speed-rail"><span class="pc-speed-line" aria-hidden="true"></span>${ticks}`
     +   `<input type="range" class="pc-speed-range" min="0" max="3" step="1" value="${START}" aria-label="${escAttr(t('ca.cardSpeedLabel'))}" aria-valuetext="${escAttr(t(stops[START][1]) + ', ' + pcSpeedFactor(stops[START][3]))}" oninput="pcSpeedShow(this)" onchange="pcSetSpeedTo(this)"></span>`
@@ -307,22 +310,22 @@ function pcSpeed3Html(tr){
 // 0.833 -> "0.85×": the nearest 0.05, YouTube's playback-speed style.
 function pcSpeedFactor(f){ return (Math.round(f * 20) / 20).toString() + '\u00d7'; }
 function pcRate(root){ const r = root && parseFloat(root.dataset.rate); return r > 0 ? r : 1; }
-function pcPlayerHtml(a, L){
+function pcPlayerHtml(a, L, preview){
   const hasFull = snippetHasFull(L.tr);
   return `<div class="pc-player">`
-    + `<button type="button" class="pc-play" title="${escAttr(t('pc.keys.play'))}" onclick="pcToggle(this)">${pcPlayBtnHtml(false)}</button>`
+    + `<button type="button" class="pc-play"${pcKeyTitle('pc.keys.play', preview)} onclick="pcToggle(this)">${pcPlayBtnHtml(false)}</button>`
     + `<button type="button" class="snip-toggle pc-metro" aria-pressed="false" onclick="pcSetMetro(this)">&#x1F3B5; ${escHtml(t('tools.metronome'))}</button>`
-    + (a.card.slowest ? pcSpeed3Html(L.tr) : pcSpeedSwitchHtml())
+    + (a.card.slowest ? pcSpeed3Html(L.tr, preview) : pcSpeedSwitchHtml(preview))
     /* The Guitar switch: only where a full mix exists, ON by default. */
     + (hasFull ? pcGuitarSwitchHtml() : '')
     + `</div>`;
 }
-function pcTabHtml(a, L){
+function pcTabHtml(a, L, preview){
   const c = a.card;
   const many = L.sections.length > 1;
   const chips = many
     ? `<p class="pc-hint">${escHtml(t('ca.cardSectionHint'))}</p><div class="pc-secs">`
-      + L.sections.map((S, si) => `<button type="button" class="pc-sec${si === 0 ? ' cur' : ''}" data-sec="${si}" title="${escAttr(t('pc.keys.section'))}" onclick="pcFromSection(this,${si})"><span class="pc-sec-play" aria-hidden="true">&#x25B6;</span>${escHtml(tf(S.s, 'label'))}</button>`).join('')
+      + L.sections.map((S, si) => `<button type="button" class="pc-sec${si === 0 ? ' cur' : ''}" data-sec="${si}"${pcKeyTitle('pc.keys.section', preview)} onclick="pcFromSection(this,${si})"><span class="pc-sec-play" aria-hidden="true">&#x25B6;</span>${escHtml(tf(S.s, 'label'))}</button>`).join('')
       + `</div>`
     : '';
   const pages = L.sections.map((S, si) => {
@@ -383,9 +386,9 @@ function pcTabHtml(a, L){
   }).join('');
   const pager = many
     ? `<div class="tab-pager pc-pager">`
-      + `<button type="button" class="tab-pager-btn" title="${escAttr(t('pc.keys.prev'))}" onclick="pcPage(this,-1)" disabled>&#x25C0; ${escHtml(t('tab.pagePrev'))}</button>`
+      + `<button type="button" class="tab-pager-btn"${pcKeyTitle('pc.keys.prev', preview)} onclick="pcPage(this,-1)" disabled>&#x25C0; ${escHtml(t('tab.pagePrev'))}</button>`
       + `<span class="tab-pager-label" aria-live="polite">${escHtml(t('ca.cardSectionOf', {a: 1, n: L.sections.length}))}</span>`
-      + `<button type="button" class="tab-pager-btn" title="${escAttr(t('pc.keys.next'))}" onclick="pcPage(this,1)">${escHtml(t('tab.pageNext'))} &#x25B6;</button></div>`
+      + `<button type="button" class="tab-pager-btn"${pcKeyTitle('pc.keys.next', preview)} onclick="pcPage(this,1)">${escHtml(t('tab.pageNext'))} &#x25B6;</button></div>`
     : '';
   const title = (c.caption && tf(c, 'caption')) || t('tab.defaultTitle');
   /* The status line ("Playing from Chorus", the count-in, "End of the
@@ -461,7 +464,7 @@ function caCardBodyHtml(a, opts){
     + `<p class="pc-dir">${escHtml(t(sheet ? 'ca.sheetDirections' : L.sections.some(S => S.grid) ? (L.sections.every(S => S.grid) ? (L.sections.every(S => S.every) ? 'ca.cardStrumDirections' : 'ca.cardChordDirections') : 'ca.cardChordMixedDirections') : 'ca.cardDirections'))}`
     + (caBassMode(a) === 'on' && tf(a, 'bassDirections') ? ' ' + escHtml(tf(a, 'bassDirections')) : '')   // alternating bass — see BASS NOTES
     + `</p>`
-    + pcPlayerHtml(a, L) + (sheet ? pcSheetHtml(a, L) : pcTabHtml(a, L)) + pcChecksHtml(a, preview) + pcHelpHtml(a, preview)
+    + pcPlayerHtml(a, L, preview) + (sheet ? pcSheetHtml(a, L, preview) : pcTabHtml(a, L, preview)) + pcChecksHtml(a, preview) + pcHelpHtml(a, preview)
     + `</div>`;
 }
 
@@ -608,11 +611,11 @@ function pcSheetMap(L){
   });
   return { tok, start, count: n + 1 };
 }
-function pcSheetHtml(a, L){
+function pcSheetHtml(a, L, preview){
   const c = a.card;
   const many = L.sections.length > 1;
   const chips = many
-    ? `<div class="pc-secs">` + L.sections.map((S, si) => `<button type="button" class="pc-sec${si === 0 ? ' cur' : ''}" data-sec="${si}" title="${escAttr(t('pc.keys.section'))}" onclick="pcFromSection(this,${si})"><span class="pc-sec-play" aria-hidden="true">&#x25B6;</span>${escHtml(tf(S.s, 'label'))}</button>`).join('') + `</div>`
+    ? `<div class="pc-secs">` + L.sections.map((S, si) => `<button type="button" class="pc-sec${si === 0 ? ' cur' : ''}" data-sec="${si}"${pcKeyTitle('pc.keys.section', preview)} onclick="pcFromSection(this,${si})"><span class="pc-sec-play" aria-hidden="true">&#x25B6;</span>${escHtml(tf(S.s, 'label'))}</button>`).join('') + `</div>`
     : '';
   const cells = ['1', '+', '2', '+', '3', '+', '4', '+'].slice(0, L.tr.beatsPerBar * 2)
     .map(n => `<span class="pc-strip-cell"><span class="pc-strip-ch"></span><span class="pc-strip-n">${n}</span></span>`).join('');
