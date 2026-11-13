@@ -1,0 +1,10 @@
+# Tells GitHub to open a pull request when one of the building blocks used by
+# .github/workflows/ (actions/checkout, actions/setup-node) has a newer version,
+# so the checks do not quietly rot. It covers GitHub Actions only: the site has
+# no packages, and the Firebase version in index.html is pinned by hand.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

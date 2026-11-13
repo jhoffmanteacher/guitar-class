@@ -159,7 +159,7 @@ it before every push, even when no link changed) and the automatic `CACHE_VERSIO
 Flags: `--skip-links`, `--check`, `--live`. `--check` changes nothing. After you edit a cached
 file, "shell cache stale" is expected and makes it exit 1 (the pre-commit hook then refuses the
 commit) until the full `node tools/checks.mjs` rewrites `sw.js`. Any other ✗, including "audio
-hash map in sw.js is stale", is a real failure. GitHub also runs `--check --skip-links` on every push to main (`.github/workflows/checks.yml`, 2026-11-13): a red run there means look at the last push. **Stop hook** (`GC_STOP_CHECKS=0` turns it off)
+hash map in sw.js is stale", is a real failure. GitHub also runs `--check --skip-links` and four Node proof tools (`save-loop`, `visible-loop`, `live-quiz-loop`, `shared-chromebook-loop`) on every push to main (`.github/workflows/checks.yml`, 2026-11-13): a red run there means look at the last push; it does not replace running a tool yourself after changing its area. **Stop hook** (`GC_STOP_CHECKS=0` turns it off)
 and `.githooks/*` (`git config core.hooksPath .githooks`): if a hook prints "node not found —
 skipping checks", it checked nothing, so run `node tools/checks.mjs` by hand. **Parallel
 sessions share one `origin`:** fetch first, rebase onto `origin/main`, and never push a merge you

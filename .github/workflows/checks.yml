@@ -8,6 +8,12 @@
 #
 # It does not block a push or the Pages deploy: a red run means "look at the
 # last push". GitHub emails the pusher when a run fails.
+#
+# The second job runs the quick Node-only proof tools that CLAUDE.md asks for
+# after a change to their area (the save path, what a student sees, the live
+# quiz, a shared Chromebook). On GitHub they run after EVERY push, so a change
+# that touched one of those areas without its proof being run is still caught.
+# Each tool prints a replay command for any case that fails.
 name: Site checks
 
 on:
@@ -33,3 +39,23 @@ jobs:
           node-version: 24
       - name: node tools/checks.mjs --check --skip-links
         run: node tools/checks.mjs --check --skip-links
+
+  proofs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: The progress save (tools/save-loop.mjs)
+        run: node tools/save-loop.mjs
+      - name: What a student sees and lands on (tools/visible-loop.mjs)
+        if: always()
+        run: node tools/visible-loop.mjs
+      - name: The live quiz (tools/live-quiz-loop.mjs)
+        if: always()
+        run: node tools/live-quiz-loop.mjs
+      - name: Two students, one Chromebook (tools/shared-chromebook-loop.mjs)
+        if: always()
+        run: node tools/shared-chromebook-loop.mjs
