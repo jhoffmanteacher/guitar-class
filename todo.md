@@ -67,6 +67,27 @@ no code was changed.
 - **When it ships:** delete this section, and update the "dots still lead the beat" part of skill
   `audio-and-snippets` and the comments above the three constants so they describe the new rule.
 
+## Queued by Jonathan 2026-11-13: fill whatever monitor is being used
+
+Idea only: nothing was measured or changed.
+
+- **What Jonathan said:** "the view should be maximized for whatever monitor is being used. so chromebooks but
+  also other displays (not phones) should be taken into account".
+- **What it means:** the site should use the whole screen on any laptop, desktop monitor or projector, not only
+  on the Chromebook. Phones stay out of scope (keep the existing phone CSS, add none).
+- **This widens a standing rule. Say so in the report:** `CLAUDE.md` → "Target screen: Chromebook 1366×657".
+  The Chromebook stays the screen that must not get worse; larger and differently-shaped displays join it. When
+  this ships, reword that line and the 1366×657 screenshot rule in "Start here" step 4 to name the extra sizes.
+- **Do first:** measure, do not reason. Screenshot a set, an In-Class Activity, a practice card (tab, chord grid
+  and lyric sheet), a game, My progress and the teacher console at 1366×657 and at a few larger sizes (for
+  example 1920×1080, 2560×1440, and a projector's 1280×720), and list where space is wasted (fixed max-widths,
+  fixed pixel heights, content that stays small in the middle) or where something breaks.
+- **Then ask him** (AskUserQuestion) which screens matter most and whether "maximized" means the content grows
+  (bigger tab and chord diagrams) or only that the layout stretches to the edges.
+- **Rules that apply:** `.claude/rules/rail-layout.md` (the nav two-column grid is permanent; measure, don't do
+  arithmetic); the one-rendered-line rule for activity directions is checked at 1366×657 and must still hold
+  there; `styles.css` touched broadly means the change smoke without `--only`; a `CHANGELOG.md` entry.
+
 ## Split the four parts that are already over 2,000 lines
 
 Added 2026-11-11 (Jonathan: "let's make sure we split those files at some point"). Not urgent, but do it in a
