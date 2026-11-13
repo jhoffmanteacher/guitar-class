@@ -4,12 +4,205 @@
    that. Same fix as tabs/journey.js: hand scroll restoration back to us. */
 if('scrollRestoration' in history) history.scrollRestoration = 'manual';
 
+/* ── Error log (2026-11-13) ──
+   Every error the safety net below shows its banner for (never the
+   ResizeObserver note it skips) is also written, ANONYMOUSLY, to Firestore
+   siteErrors/{autoId}, so the teacher console's Error log view
+   (teacher-errors.js) shows a classroom failure the same day.
+   A doc: kind ('error' | 'rejection'), message, file, line, col, stack (the
+   top 3 frames), page (the hash route and the set id, no query string),
+   version (the service worker's shell cache name), day (YYYY-MM-DD, this
+   device's date), lang ('en' | 'es'). NEVER a uid, name, email, class
+   period, or a time finer than the day. Every string is scrubbed (scrub())
+   and cut to the rules' cap before writing: email addresses (also written
+   %40), URL query strings, runs of 20+ letters and digits that hold both
+   (uids, Firestore ids, tags), runs of 6+ digits (timestamps, student
+   numbers), and the signed-in account's own uid, email and name words.
+   It must never make things worse for a student: every step is inside a
+   try, nothing waits on it, it shows nothing, it writes only once the app
+   itself has loaded Firestore (`db`) and someone is signed in (until then up
+   to MAX entries wait in memory, re-checked every 5 s for at most 10
+   minutes, then dropped), at most MAX writes and each message once per page
+   load, and the first refused or failed write (rules not published yet)
+   turns it off, silently, for the rest of the page load. Its own failures
+   are never logged. It never calls ensureDb() and never touches
+   progress/{uid} or the save code. Rules: firestore.rules "ERROR LOG".
+   Proof: tools/site-errors-sim.mjs (Node) and
+   tools/site-errors-rules-test.mjs (the Firestore emulator). */
+const SITE_ERRORS = (function(){
+  const MAX = 5, POLL_MS = 5000, POLL_TRIES = 120;
+  const CAP = { message: 300, file: 200, stack: 600, page: 120, version: 64 };
+  const queue = [], seen = new Set();
+  let used = 0, off = false, sending = false, pollT = null, polls = 0, verP = null;
+  /* Cut to n characters, never splitting a surrogate pair. */
+  function cut(s, n){
+    s = String(s == null ? '' : s);
+    if(s.length <= n) return s;
+    s = s.slice(0, n - 1);
+    if(/[\uD800-\uDBFF]$/.test(s)) s = s.slice(0, -1);
+    return s + '…';
+  }
+  function scrub(s, who){
+    s = String(s == null ? '' : s);
+    /* A huge message is cut first (keeping the regexes cheap), dropping the
+       word the cut landed in, so half an email can never survive it. */
+    if(s.length > 4000) s = s.slice(0, 4000).replace(/\S*$/, '');
+    try{ const o = location.origin; if(o && o !== 'null') s = s.split(o).join(''); }catch(_){}
+    if(who) s = who(s);
+    s = s.replace(/[A-Za-z0-9._%+-]+(?:@|%40)[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/g, '[email]');
+    s = s.replace(/\?(?=[^\s'"()<>]*=)[^\s'"()<>]*/g, m => { const tail = /(?::\d+){1,2}$/.exec(m); return '?[query]' + (tail ? tail[0] : ''); });
+    s = s.replace(/[A-Za-z0-9]{20,}/g, m => (/\d/.test(m) && /[A-Za-z]/.test(m)) ? '[id]' : m);
+    s = s.replace(/\d{6,}/g, '[n]');
+    return s;
+  }
+  /* The signed-in account's own uid, email (and its part before the @) and
+     name words of 3+ letters, as whole words, any case. null when nobody is
+     signed in. */
+  function whoScrub(){
+    try{
+      const u = auth && auth.currentUser;
+      if(!u) return null;
+      const words = [];
+      const add = w => { w = String(w || '').trim(); if(w.length >= 3) words.push(w); };
+      add(u.uid); add(u.email); add(String(u.email || '').split('@')[0]); add(u.displayName);
+      String(u.displayName || '').split(/\s+/).forEach(add);
+      if(!words.length) return null;
+      words.sort((a, b) => b.length - a.length);
+      const re = new RegExp('(^|[^\\p{L}\\p{N}])(' + words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')(?![\\p{L}\\p{N}])', 'giu');
+      return s => s.replace(re, (m, pre) => pre + '[user]');
+    }catch(_){ return null; }
+  }
+  function int(n){
+    const v = Math.floor(Number(n));
+    return (Number.isFinite(v) && v >= 0 && v <= 10000000) ? v : 0;
+  }
+  /* The top 3 frames of a stack (Chrome "at …" lines, Firefox/Safari "fn@url:line:col"). */
+  function stackTop(st){
+    return String(st || '').split('\n').map(l => l.trim()).filter(l => /^at\s/.test(l) || /@\S+:\d+/.test(l)).slice(0, 3).join('\n');
+  }
+  function pageNow(){
+    let p = '', set = '', con = false;
+    try{ p = String(location.hash || '').split(/[?&]/)[0].replace(/[^A-Za-z0-9_\-\/#.]/g, ''); }catch(_){}
+    try{ if(typeof lastSetId !== 'undefined' && lastSetId) set = String(lastSetId).replace(/[^A-Za-z0-9_\-]/g, ''); }catch(_){}
+    try{ con = IS_TEACHER_MODE === true; }catch(_){}
+    return (con ? 'console ' : '') + (p || '#') + (set ? ' set ' + set : '');
+  }
+  function dayNow(){
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function langNow(){
+    try{ return (typeof getLang === 'function' && getLang() === 'es') ? 'es' : 'en'; }catch(_){ return 'en'; }
+  }
+  /* The version this page runs: the newest "guitar-class-YYYY-MM-DD-hash"
+     shell cache, without its prefix; " +N" when N older ones are still there
+     (an update mid-way), "none" with no shell cache yet (a first visit),
+     "unknown" when the Cache API is missing or fails. Read once per load. */
+  function version(){
+    if(verP) return verP;
+    try{
+      verP = (typeof caches !== 'undefined' && caches && typeof caches.keys === 'function')
+        ? Promise.resolve(caches.keys()).then(keys => {
+            try{
+              const v = (keys || []).filter(k => /^guitar-class-\d{4}-\d{2}-\d{2}-[0-9a-f]+$/.test(k)).sort();
+              return v.length ? v[v.length - 1].slice(13) + (v.length > 1 ? ' +' + (v.length - 1) : '') : 'none';
+            }catch(_){ return 'unknown'; }
+          }, () => 'unknown')
+        : Promise.resolve('unknown');
+    }catch(_){ verP = Promise.resolve('unknown'); }
+    return verP;
+  }
+  function stop(){
+    off = true; queue.length = 0;
+    if(pollT){ try{ clearTimeout(pollT); }catch(_){} pollT = null; }
+  }
+  function ready(){
+    try{ return !!(db && auth && auth.currentUser); }catch(_){ return false; }
+  }
+  /* One write at a time: the next is sent only after the last one landed,
+     so a page whose write is refused (rules not published) makes exactly
+     one refused write, then stop() turns the log off. */
+  function flush(){
+    try{
+      if(off || sending || !queue.length) return;
+      if(!ready()){
+        if(pollT) return;
+        if(polls >= POLL_TRIES){ queue.length = 0; return; }
+        pollT = setTimeout(() => { pollT = null; polls++; flush(); }, POLL_MS);
+        return;
+      }
+      sending = true;
+      /* The Cache API answers at once; 3 s is only so a stuck one can
+         never hold the log. */
+      Promise.race([version(), new Promise(r => setTimeout(() => r('unknown'), 3000))]).then(v => {
+        v = cut(v, CAP.version);
+        const next = () => {
+          try{
+            if(off) return;
+            if(!queue.length || !ready()){ sending = false; flush(); return; }
+            const d = queue.shift(), who = whoScrub();
+            if(who) for(const k of ['message', 'file', 'stack', 'page']) d[k] = cut(who(d[k]), CAP[k]);
+            if(!d.message) d.message = '(no message)';
+            d.version = v;
+            const p = db.collection('siteErrors').add(d);
+            if(p && typeof p.then === 'function') p.then(next, stop); else next();
+          }catch(_){ stop(); }
+        };
+        next();
+      }).then(null, stop);
+    }catch(_){ stop(); }
+  }
+  function report(kind, ev){
+    try{
+      if(off || used >= MAX) return;
+      let msg = '', file = '', line = 0, col = 0, st = '';
+      if(kind === 'error'){
+        const er = ev && ev.error;
+        msg = (ev && ev.message) || (er && er.message) || '';
+        file = (ev && ev.filename) || ''; line = ev && ev.lineno; col = ev && ev.colno;
+        st = er && er.stack;
+      } else {
+        const r = ev && ev.reason;
+        if(r && typeof r === 'object' && typeof r.message === 'string'){
+          msg = (r.name ? String(r.name) + ': ' : '') + r.message + (r.code ? ' [' + String(r.code) + ']' : '');
+          st = r.stack;
+        } else if(typeof r === 'string') msg = r;
+        else msg = 'Rejected with ' + (r === null ? 'null' : typeof r);
+      }
+      st = stackTop(st);
+      if(!file && st){
+        const m = /\(?([^\s()]+):(\d+):(\d+)\)?\s*$/.exec(st.split('\n')[0]);
+        if(m){ file = m[1]; line = m[2]; col = m[3]; }
+      }
+      const doc = {
+        kind: kind === 'error' ? 'error' : 'rejection',
+        message: cut(scrub(msg), CAP.message) || '(no message)',
+        file: cut(scrub(String(file).replace(/[?#].*$/, '')), CAP.file),
+        line: int(line), col: int(col),
+        stack: cut(scrub(st), CAP.stack),
+        page: cut(scrub(pageNow()), CAP.page),
+        version: '',
+        day: dayNow(),
+        lang: langNow(),
+      };
+      const key = doc.kind + '|' + doc.message;
+      if(seen.has(key)) return;
+      seen.add(key); used++;
+      queue.push(doc);
+      flush();
+    }catch(_){}
+  }
+  return { report };
+})();
+
 /* ── Global safety net ──
    If a script throws or a promise rejects unhandled, a student shouldn't be
    left staring at a half-broken page with no idea what happened. Show one
    small, dismissable banner pointing them to a refresh (their saved progress
    lives in Firestore, so a reload is safe), and log details to the console
-   for troubleshooting. Guarded so the handler can never spiral on itself. */
+   for troubleshooting. Guarded so the handler can never spiral on itself.
+   Since 2026-11-13 each such error also goes, anonymously, to the error log
+   (SITE_ERRORS above), after the banner; the ResizeObserver note does not. */
 (function(){
   let shown = false;
   function showBanner(){
@@ -75,8 +268,12 @@ if('scrollRestoration' in history) history.scrollRestoration = 'manual';
   window.addEventListener('error', e => {
     if (!e.error && /ResizeObserver loop/.test(e.message || '')) { console.warn('[guitar-class]', e.message); return; }
     console.error('[guitar-class] error:', e.error || e.message); showBanner();
+    SITE_ERRORS.report('error', e);
   });
-  window.addEventListener('unhandledrejection', e => { console.error('[guitar-class] unhandled rejection:', e.reason); showBanner(); });
+  window.addEventListener('unhandledrejection', e => {
+    console.error('[guitar-class] unhandled rejection:', e.reason); showBanner();
+    SITE_ERRORS.report('rejection', e);
+  });
 })();
 
 /* ── Offline banner ──
