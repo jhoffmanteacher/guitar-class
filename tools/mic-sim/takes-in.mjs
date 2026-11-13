@@ -77,6 +77,11 @@ try {
   const listen = loaded.listen.filter(t => gamesArg.includes(t.kind === 'nr' ? 'nr' : 'coach'));
   console.log(`${total} takes in all: ${loaded.takes.length} Power Chord Switch, ${loaded.listen.filter(t => t.kind !== 'nr').length} Listening Coach, ${loaded.listen.filter(t => t.kind === 'nr').length} Note Runner; writing ${gamesArg.join(', ')}`);
   if (!takes.length && !listen.length) fail('no takes of those games in there: nothing to add');
+  /* Which summary is which row of the console's table (2026-11-13: "T02 is the one"). The console numbers its table newest first
+     (T01 = newest) and anon-takes.mjs numbers the same way, so a T-label here is the "Take" column of the download this run read.
+     A label is a row number, never a name; anything that is not T + digits is not printed. */
+  const labelled = listen.concat(takes).filter(t => /^T\d+$/.test(String(t.take))).sort((a, b) => String(a.take).localeCompare(String(b.take), 'en', { numeric: true }));
+  if (labelled.length) console.log('labels (the Take column of this download → summary): ' + labelled.map(t => t.take + ' ' + t.id + ' ' + (t.kind || 'pw')).join(' · '));
 
   mkdirSync(TAKES_DIR, { recursive: true });
   const before = new Set(loadSummaries(TAKES_DIR).map(t => t.id).concat(loadListenSummaries(TAKES_DIR).map(t => t.id)));
