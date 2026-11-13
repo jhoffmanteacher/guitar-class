@@ -34,10 +34,13 @@
      cp <repo>/tools/site-errors-rules-test.mjs <repo>/firestore.rules .
      # firebase.json:  { "firestore": { "rules": "firestore.rules" }, "emulators": { "firestore": { "port": 8091 }, "ui": { "enabled": false } } }
      npx firebase emulators:exec --only firestore --project demo-gc "node site-errors-rules-test.mjs firestore.rules --port 8091 --breaks --site <repo>"
-   Exit 0 = every case passed on the real rules (and, with --breaks, every break was caught).
-   Last run: 2026-11-13, firestore.rules: 83 passed, 0 failed; 11 of 11 breaks caught. The same cases on the rules
-   before this block (origin/main cda3b92, the "not published yet" state): 67 passed, 16 failed, and the 16 are
-   exactly the 16 allows (every create and every teacher read/delete is refused); all 11 older-path cases pass on both. */
+   Exit 0 = every case passed on the real rules (and, with --breaks, every break was caught, and the real logger
+   case passed).
+   Last run: 2026-11-13 (review round 1 fixes), firestore.rules: 99 passed, 0 failed; 14 of 14 breaks caught; the
+   real logger: 4 of 4 (the raw control held the save 8 s; through the logger the save landed). With clean() made
+   to do nothing the logger case went red (the save stayed pending); with clean() taken out of scrub() only, fits()
+   dropped both docs (red: nothing sent, the save landed). The first version's 83 cases on the rules before this
+   block (cda3b92, the "not published yet" state): 67 passed, 16 failed, exactly the 16 allows; not re-run since. */
 import { initializeTestEnvironment, assertSucceeds, assertFails } from '@firebase/rules-unit-testing';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
@@ -185,7 +188,7 @@ const BREAKS = [
   ['students may read', '      allow read, delete: if isTeacher();\n    }\n  }\n}', '      allow read, delete: if isTeacher();\n      allow read: if isSignedIn();\n    }\n  }\n}'],
   ['the teacher may update', '      allow read, delete: if isTeacher();\n    }\n  }\n}', '      allow read, delete: if isTeacher();\n      allow update: if isTeacher();\n    }\n  }\n}'],
   ['students may delete', '      allow read, delete: if isTeacher();\n    }\n  }\n}', '      allow read, delete: if isTeacher();\n      allow delete: if isSignedIn();\n    }\n  }\n}'],
-  ['signed-out create allowed', 'match /siteErrors/{errorId} {\n      allow create: if isSignedIn()', 'match /siteErrors/{errorId} {\n      allow create: if true'],
+  ['signed-out create allowed', 'allow create: if isSignedIn()\n            && errorId', 'allow create: if true\n            && errorId'],
   ['line may be any number', 'request.resource.data.line is int', 'request.resource.data.line is number'],
   ['the day check dropped', "request.resource.data.day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')", "request.resource.data.day.size() > 0"],
   ['a third language allowed', "request.resource.data.lang in ['en', 'es']", "request.resource.data.lang in ['en', 'es', 'fr']"],
