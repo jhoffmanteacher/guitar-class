@@ -113,12 +113,24 @@ let leaks = 0;
 pairs.forEach((p, k) => {
   const removed = [], stats = { n: 0 };
   const clean = scrub(p.d, removed, stats);
-  const hay = strings(clean, []).map(s => s.toLowerCase());
-  // Ignore needles that are ordinary values the eval keeps (a mode word,
-  // a number) — only a removed value of 3+ chars that is not itself a
-  // kept value counts.
-  const kept = new Set(hay);
-  const hit = needles(removed).some(n => !kept.has(n) ? hay.some(h => h.includes(n)) : false);
+  /* Where a removed value may NOT be left: as a key (a map keyed by uid), or as a whole word in a text value.
+     A short name inside a longer word is not a leak: "sam" is in the key sampleRate and "ann" in channelCount,
+     and matching those stopped the run for a student named Sam or Ann (review, 2026-11-13). A needle of 8 or
+     more characters (a uid, an email) still counts anywhere. The console's teacherMicAnonLeaks() is the same rule. */
+  const keys = [], vals = [];
+  (function walk(x){
+    if (typeof x === 'string') vals.push(x.toLowerCase());
+    else if (x && typeof x === 'object') Object.keys(x).forEach(k => { keys.push(k.toLowerCase()); walk(x[k]); });
+  })(clean);
+  const kept = new Set(keys.concat(vals));
+  // No regex lookbehind here: Safari before 16.4 cannot parse one (checks.mjs refuses it in a site file).
+  const wordCh = c => !!c && /[\p{L}\p{N}]/u.test(c);
+  const wholeWordIn = (v, n) => { for(let i = v.indexOf(n); i !== -1; i = v.indexOf(n, i + 1)){ if(!wordCh(v[i - 1]) && !wordCh(v[i + n.length])) return true; } return false; };
+  const hit = needles(removed).some(n => {
+    if (kept.has(n)) return keys.includes(n);
+    if (n.length >= 8) return keys.some(k => k.includes(n)) || vals.some(v => v.includes(n));
+    return vals.some(v => wholeWordIn(v, n));
+  });
   if (hit) leaks++;
   removedCounts.push(stats.n);
   out.push({ label: 'T' + String(k + 1).padStart(2, '0'), b: p.b, clean });

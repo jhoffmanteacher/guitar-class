@@ -272,20 +272,31 @@ function teacherMicAnon(v, removed){
 }
 // true when a removed value (3+ characters, or one word of it) is still somewhere in the cleaned data
 function teacherMicAnonLeaks(clean, removed){
-  const hay = [];
+  /* Where a removed value may NOT be left: as a key (a map keyed by uid), or as a whole word in a text value.
+     A short name inside a longer word is not a leak: "sam" is in the key sampleRate and "ann" in channelCount,
+     and matching those refused the whole download for a student named Sam or Ann (review, 2026-11-13). A
+     needle of 8 or more characters (a uid, an email) still counts anywhere, inside a word too. */
+  const keys = [], vals = [];
   const strings = x => {
-    if(typeof x === 'string') hay.push(x.toLowerCase());
-    else if(x && typeof x === 'object') Object.keys(x).forEach(k => { hay.push(k.toLowerCase()); strings(x[k]); });
+    if(typeof x === 'string') vals.push(x.toLowerCase());
+    else if(x && typeof x === 'object') Object.keys(x).forEach(k => { keys.push(k.toLowerCase()); strings(x[k]); });
   };
   strings(clean);
-  const kept = new Set(hay), needles = new Set();
+  const kept = new Set(keys.concat(vals)), needles = new Set();
   removed.forEach(r => {
     r = String(r).trim(); if(r.length < 3) return;
     needles.add(r.toLowerCase());
     const uidPart = r.replace(/-[a-z]+$/i, ''); if(uidPart.length >= 3) needles.add(uidPart.toLowerCase());
     r.split(/[\s@.]+/).forEach(w => { if(w.length >= 3) needles.add(w.toLowerCase()); });
   });
-  return [...needles].some(n => !kept.has(n) && hay.some(h => h.includes(n)));
+  // No regex lookbehind here: Safari before 16.4 cannot parse one (checks.mjs refuses it in a site file).
+  const wordCh = c => !!c && /[\p{L}\p{N}]/u.test(c);
+  const wholeWordIn = (v, n) => { for(let i = v.indexOf(n); i !== -1; i = v.indexOf(n, i + 1)){ if(!wordCh(v[i - 1]) && !wordCh(v[i + n.length])) return true; } return false; };
+  return [...needles].some(n => {
+    if(kept.has(n)) return keys.includes(n);
+    if(n.length >= 8) return keys.some(k => k.includes(n)) || vals.some(v => v.includes(n));
+    return vals.some(v => wholeWordIn(v, n));
+  });
 }
 /* Every take's WAV + data as zip entries, for "Download all" and "Download
    everything". `btn` (may be null) shows the count while it reads. Throws
