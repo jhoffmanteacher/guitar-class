@@ -50,7 +50,8 @@ Check `tools/mic-sim/` and `checks.mjs` for text they pin in the section being m
   2026-11-13 and said no: 3 of 8 planted faults caught; 140 of 281 screenshots were of the wrong screen; two runs
   of the same unchanged tree differed in 45 files; the games are never played. Jonathan approved all four splits
   (2026-11-12) only once golden is cleared, so no part is split until the tool is fixed and a fresh reviewer's
-  plants are caught. Fixing it is its own job, not started.
+  plants are caught. The rebuild started 2026-11-13 on branch `cl/golden-rebuild` (one builder against review
+  findings R2-1 to R2-6; a fresh reviewer plants its own faults when it reports).
 - **A `golden.mjs --compare` process once printed its result and never exited** (2026-11-11, 39 minutes, 0% CPU;
   the same command run again took 0.7 s). Cause unknown. Until it is understood, give a compare a time limit
   when it runs in a chain (`perl -e 'alarm 300; exec @ARGV' node tools/golden.mjs --compare A B`).

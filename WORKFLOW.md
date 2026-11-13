@@ -110,7 +110,7 @@ Start here. Update this block whenever an item opens or closes; each line says w
   Known trade-offs: on the first load after an update the module files and step images come from the network once; a
   Journey page not yet in the new cache needs the network (no HTTP-cache fallback offline, the 2026-10-16 rule); a student
   on a Module Review gets its assessment reminder right after the update reload. Not restored: In class's two folds, a
-  search, a card's open step, the board's sort. The logic is proved in headless Chrome with a real service worker by `tools/update-reload-loop.mjs` (2026-11-12: lesson, checklist, In class, Songs, My progress, a deep link, Spanish, four console places, busy waits and the 5-minute limit, the person wins, another account, a stale note, a plain reload, a locked preview); one gap found there, a deep-linked activity page loses its scroll. Still not seen on a school Chromebook. The first deploy of this change can
+  search, a card's open step, the board's sort. The logic is proved in headless Chrome with a real service worker by `tools/update-reload-loop.mjs` (2026-11-12: lesson, checklist, In class, Songs, My progress, a deep link, Spanish, four console places, busy waits and the 5-minute limit, the person wins, another account, a stale note, a plain reload, a locked preview); one gap found there, a deep-linked activity page lost its scroll (fixed the same day, `7af60f1`, with the tool now at 29 of 29). Still not seen on a school Chromebook. The first deploy of this change can
   need one manual reload (pages still on the old `app.js` listen too late for the faster takeover).
   **A student with an unfinished activity now stays where they were after an update** instead of being sent to In-Class
   Activities (the "pops up on login" half of the gate, kept 2026-10-07, no longer fires on the update reload).
@@ -705,8 +705,8 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
       newer: pins (known), Optional / Required, Archive's unpin, Hide all / Show all, and a Delete that carries a
       pending pin into the doc (`--seed 1 --schedule 643`, `--seed 3 --family random --schedule 347`); (2) Archive does
       not unpin a card the other console pinned meanwhile (`--seed 2 --schedule 104`); (3) a song back from Songs
-      shares a board position (counted, 26 to 28 of 1,000; his call). Today's code therefore fails 10 to 19 of 1,000
-      schedules: that is the baseline.
+      shares a board position (counted, 26 to 28 of 1,000; his call). Today's code therefore fails 10 and 19 of 1,000
+      schedules on seeds 1 and 2 (the rule file's "about 10 to 25" is the same baseline, stated as a band).
       Proof: 17 planted console faults and 2 fake-server faults turned it red (the work order's ten, four of the
       builder's, three of the reviewers'); the same seed twice is identical. What it does not cover is in its header
       (one seed doc, the board migration never runs, 24 of 27 writers, the model's "screen" is the console's own copy).
