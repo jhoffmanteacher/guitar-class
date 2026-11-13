@@ -376,3 +376,16 @@ After changing a `SNIPPET_TRACKS` timing field (`anchor`, `barTimes`, `trackBpm`
 - First run (2026-11-12): "the cure" rhythm-down files play about 25 ms (144) and about 50 ms (120) AFTER their full
   mixes (a file offset, not a map fault: settle it before touching that anchor); the record pushes Luna bar 10 about
   64 ms early (a steady grid: no number to edit).
+
+## Checking the practice-card player: `tools/playalong-loop.mjs`
+After touching a card's chart, `SNIPPET_TRACKS`, a lead (`PC_ROW_LEAD`, `PC_SHEET_LEAD`, `PC_TAB_LEAD`) or the
+practice-card player (`app/cards.js`, `app/snippets.js`): `node tools/playalong-loop.mjs` (`--only <id>` for one card;
+headless Chrome for Testing, about 6½ minutes for all 26 cards, one browser run at a time). It walks every setting on
+a fake clock and checks the cursor, the drawing, the count-in and the Metronome against an answer worked out from the
+chart and the beat map. It has no ears: `tools/beat-audit.py` is the tool that listens.
+- **A queued click must be taken back when the clock changes** (QUEUED CLICKS in `app/cards.js`, fixed 2026-11-12:
+  `pcCancelQueuedClicks()` on a speed change, the Guitar switch, the Metronome switch and Stop). The step snippet
+  player (`snipScheduleClick` / `snipSetTier` in `app/snippets.js`) and the Song Journey pages (`clickTick` in
+  `tabs/journey.js`) queue clicks the same way and still have the fault: on Jonathan's list.
+- Its three KNOWN entries are real faults on his list, not fixed: the Las Mañanitas Solo highlight steps back at line
+  starts; the count-in runs at the window's average tempo; a lyric sheet's "This bar" steps one past the end.

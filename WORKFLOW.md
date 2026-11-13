@@ -383,6 +383,29 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-12 — `tools/playalong-loop.mjs`: the 26 practice cards played end to end on a fake clock, and the
+      Metronome fault it found, fixed** (work order `Claude outputs/WORK-ORDER-closed-loop-tests.md`, Part 1).
+      The tool: Reviewed, three adversarial rounds; the last found one MAJOR (while red on a known fault a new one
+      could hide in the summary), closed here together with its minors, and Jonathan chose to fix the fault itself.
+      It plays every In-Class practice card in headless Chrome on a fake clock (fake audio elements, every
+      AudioContext click logged; the real player unmodified) and compares what is lit, drawn and clicked with an
+      answer worked out from each chart and beat map without the player's functions. Full run: 26 cards, 35 views,
+      468 walks, 85,666 places lit, 100,825 clicks, about 6½ minutes, 0 mismatches. 38 planted faults turn it red
+      (the work order's 12, 11 from round 1, 4 for the KNOWN entries, 4 from round 2, 7 from round 3).
+      **The site fix (Fast, `app/cards.js`, QUEUED CLICKS):** with the Metronome on, an in-song click is queued up to
+      about 0.18 s ahead and was never taken back. A speed change, the Guitar switch or the Metronome switch then
+      queued the same count again (an extra or early click), and one more click sounded after Stop: 61 of 468 walks
+      were red. `pcCancelQueuedClicks()` now takes back the clicks whose count is still to come; a click whose count
+      the song has already reached is kept (the first cut removed those too and the tool caught it: 17 walks lost a
+      click). A half fix (switches but not Stop) is still red.
+      Listed for Jonathan, NOT fixed: the same queued-click fault in the step snippet player (`snipScheduleClick`,
+      `snipSetTier`) and on the Song Journey pages (`clickTick`), found by reading; the Las Mañanitas Solo highlight
+      steps back at line starts (`PC_ROW_LEAD` 0.15 s is longer than its quick notes); the count-in runs at the
+      window's average tempo, not the bar's (356 count-ins off, 183 by more than 3%, worst 16.9% fast at ca-36
+      Ending); a lyric sheet's "This bar" steps one past the end for the last 0.175 s. The last three are the tool's
+      KNOWN entries, matched narrowly; a KNOWN entry that stops occurring fails a full run.
+      What a second tool for the six Song Journey pages would need is in the work-order report.
+
 - [x] **2026-11-12 — `tools/beat-audit.py`: a tool that listens to every backing track and lists where the beat map
       disagrees with the record** (Jonathan, 2026-11-12: "that is probably of highest priority"). Tools and docs only.
       Three adversarial review rounds; the last round's findings are fixed and it ships without a further round (his
