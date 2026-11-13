@@ -211,7 +211,7 @@ function rnRenderReady(msg){
      ${b ? `<div class="coach-tip rn-center">${t('games.riff.bestPercent', {pct: b.acc})}${b.tier >= 0 ? ' &middot; ' + t('games.riff.clearedTier', {tier: rnTierName(b.tier)}) : ''}.</div>` : ''}
      <div class="coach-tip rn-center">${t('games.riff.tipKeysLegend')}</div>`;
   const guitarUi =
-    `<div class="coach-tip rn-center">&#x1F3B8; ${t('games.wait.modeDescriptionHtml')}</div>`;
+    `<div class="coach-tip rn-center">&#x1F3B8; ${t('games.wait.modeDescriptionHtml')}</div>` + coachSetupLineHtml(true);
   body.innerHTML =
     (msg ? `<div class="coach-note">${escHtml(msg)}</div>` : '') +
     `<div class="rn-ready-title">${escHtml(song.title)}</div>
@@ -1425,6 +1425,7 @@ function nrRenderReady(msg){
      <div class="coach-tip rn-center"><strong>${t('games.nr.levelChip', {n: nr.level + 1})} — ${t(NR_LEVELS[nr.level].nameKey)}</strong><br>
        ${nrLevelMeta(lv)} &middot; ${t('games.nr.readyBars', {bars: lv.bars})}<br>
        ${t('games.nr.readyRhythms', {list: tiers, pct: NR_PASS})}</div>
+     ${coachSetupLineHtml(true)}
      ${b > 0 ? `<div class="coach-tip rn-center">${t('games.nr.bestPercent', {pct: b})}</div>` : ''}
      <div class="rn-center">
        <button type="button" class="tp-btn" id="nr-hear" onclick="nrHear()">&#x1F50A; ${t('games.nr.hearButton')}</button>

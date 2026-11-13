@@ -496,7 +496,7 @@ function ccRenderSetup(msg){
     ? `<div class="coach-note">&#x1F3B2; ${t(power ? 'games.pw.randomNote' : 'games.cc.randomNote')}</div>`
     : ccDiagramsHtml(prog.chords, null, undefined, prog.shapes);
   const ladderNote = prog.ladder ? `<div class="coach-note"><strong>${t('games.pw.ladder.intro', { rounds: CC_LADDER_ROUNDS })}</strong><br><span id="cc-ladder-note">${ccLadderNoteText(cc.bpm)}</span></div>` : '';
-  const tip = `<div class="coach-tip" id="cc-tip">${ccTipHtml()}</div>`;
+  const tip = `<div class="coach-tip" id="cc-tip">${ccTipHtml()}</div>` + coachSetupLineHtml();
   const note = msg ? `<div class="coach-note">${escHtml(msg)}</div>` : '';
   /* Power Chord Switch uses the width of the games screen: the settings (speed,
      tempo, the pairs, Start) in the left column, the two charts and the tip in

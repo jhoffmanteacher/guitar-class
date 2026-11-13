@@ -1116,6 +1116,7 @@ function srRenderSetup(msg){
      </div>
      <div class="coach-tip">&#x1F3B8; ${t('games.radar.tipHoldChord')}</div>
      <div class="coach-tip">&#x1F92B; ${t('games.radar.tipQuietRoom')}</div>
+     ${coachSetupLineHtml()}
      <button type="button" class="coach-start" onclick="srStart()">${t('games.radar.startBarsButton', {bars: SR_BARS})}</button>
      ${coachFootHtml()}`;
 }

@@ -480,6 +480,7 @@ function psgRenderSetup(){
   try { best = parseInt(sessionStorage.getItem('psgBest'), 10) || 0; } catch(e){}
   body.innerHTML =
     `<div class="coach-tip">${t('games.psg.tip')}</div>
+     ${coachSetupLineHtml()}
      <div class="psg-legend">${t('games.psg.legend')}</div>
      ${psgPadsHtml()}
      ${best ? `<div class="cb-setup-best">&#x1F3C6; ${t('games.common.bestTodayLabel')}: ${best}</div>` : ''}

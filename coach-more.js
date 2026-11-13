@@ -122,6 +122,7 @@ function fgRenderReady(msg){
        ${t('games.fg.readyLine', {notes: lv.bars * 4, step: lv.bpmStep, pct: NR_PASS})}</div>
      <div class="fg-ladder" aria-hidden="true">${[1, 2, 3, 4].map(f => `<span class="fg-step"><span class="fg-step-finger">${f}</span><span class="fg-step-fret">${f}</span></span>`).join('')}</div>
      <div class="coach-tip rn-center">${t('games.fg.readyHow')}</div>
+     ${coachSetupLineHtml(true)}
      ${b > 0 ? `<div class="coach-tip rn-center">${t('games.nr.bestPercent', {pct: b})}</div>` : ''}
      <div class="rn-center">
        <button type="button" class="tp-btn" id="nr-hear" onclick="nrHear()">&#x1F50A; ${t('games.nr.hearButton')}</button>

@@ -178,6 +178,18 @@ function coachFootHtml(records){ return '<div class="coach-foot"><svg viewBox="0
    Only on a screen that records (`records`); elsewhere it stays "nothing". */
 function coachFootText(records){ return t(records && typeof micRecWanted === 'function' && micRecWanted() ? 'coach.footRec' : 'coach.foot'); }
 
+/* The set-up line every mic game's set-up screen and the Coach's ready
+   screen carry (2026-11-13, research-4 R5: what Yousician, Simply Guitar,
+   Fender and MakeMusic all tell players): tune first, the guitar a hand to
+   an arm's length from the mic, the volume at half (the count-in click must
+   not drown the guitar). No link to the tuner: opening it from a game's
+   set-up sends the games screen back to the hub (fab-tools.js togglePopup →
+   gamesStopMic). `center` matches the rn-center tips of Riff Runner's Wait
+   Mode, Note Runner and Finger Gym. Not on In-Class Activity directions. */
+function coachSetupLineHtml(center){
+  return `<div class="coach-tip${center ? ' rn-center' : ''}">&#x1F39A;&#xFE0F; ${escHtml(t('micpre.setup'))}</div>`;
+}
+
 let coach = null;            // active check session (null = no card open)
 let coachStream = null, coachCtx = null, coachAnalyser = null, coachRaf = null,
     coachFrameBuf = null;
@@ -424,6 +436,7 @@ function coachRenderReady(msg){
        <button type="button" class="tp-btn" onclick="coachNudgeBpm(5)">+5</button>
      </div>
      <div class="coach-tip">&#x1F92B; ${t(coach.mode === 'chords' ? 'coach.tip.readyChords' : 'coach.tip.readyMelody')}</div>
+     ${coachSetupLineHtml()}
      <button type="button" class="coach-start" onclick="coachStartCheck()">&#x25B6; ${t('coach.start')}</button>`;
 }
 
