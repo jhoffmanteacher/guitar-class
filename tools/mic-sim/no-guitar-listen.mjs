@@ -21,9 +21,10 @@
                 bumps, typing, a partner's guitar, a class of guitars, a loud class, desk taps on every beat, strums across muted
                 strings), through student.mjs and its Chromebook mic. Guesses at rooms (student.mjs header);
      real       with --takes: each recorded take's ROOM sound (tools/mic-sim/takes-audio.mjs: the stretches with no attack in them, a
-                second after the last one, no count-in), spliced end to end with 30 ms cross-fades until it covers the round, through
+                second after the last one, no count-in), spliced end to end with slow cross-fades (takes-audio.mjs JOIN_FADE_MS) until it covers the round, through
                 the site's mic chain. Real rooms and real Chromebook mics; a take with under 1 s of room sound is left out. The joins
-                are new: the tool counts the onsets the site took within 150 ms of one (a join that made a sound would show there).
+                are new: the tool counts the onsets the site took within 150 ms of one against the share of the time that close to a
+                join (a join that made a sound would show as many more).
    Fake: the frames are evenly spaced (60 a second); the count-in's speaker clicks are added for the synthetic rooms (as closed-loop.mjs
    does) and not for the recorded ones (their own clicks are cut out with the count-ins).
    Exit: 0 when no case gave credit for nothing; 1 when one did (a Coach level of 2 or more, or a gate that opened); 2 on an error.
@@ -58,7 +59,10 @@ export async function noGuitar(o){
     for (const tk of loadTakeAudio(o.takes, at && at.root)){
       const snd = roomSound(tk, 60000, site.chain);
       if (!snd || snd.seconds < 1) continue;
-      rooms.push({ name: `${tk.take} room (${tk.game}, period ${tk.period}, ${snd.seconds.toFixed(1)} s)`, kind: 'real', take: tk.take, joins: snd.joins, make: () => takeSource(snd.proc, snd.srcRate, 0) });
+      /* the share of the sound's time that lies within 150 ms of a join: what the onsets near a join would be if joins made none */
+      let near = 0;
+      for (let t = 0; t < snd.ms; t += 10) if (snd.joins.some(j => Math.abs(j - t) < 150)) near++;
+      rooms.push({ name: `${tk.take} room (${tk.game}, period ${tk.period}, ${snd.seconds.toFixed(1)} s)`, kind: 'real', take: tk.take, joins: snd.joins, nearShare: near / (snd.ms / 10), make: () => takeSource(snd.proc, snd.srcRate, 0) });
     }
   }
   const rows = [];
@@ -84,7 +88,7 @@ export async function noGuitar(o){
     /* event times are "played" (arrival - the 50 ms mic delay); the recorded room sound starts at the site's clock 0 */
     const joinOnsets = room.joins ? r.events.filter(e => room.joins.some(j => Math.abs(e.t + 50 - j) < 150)).length : null;
     return { game, room: room.name, kind: room.kind, what: g.sid, bpm: g.bpm, slots: r.slots.length, states, overall: r.overall, crits: r.crits, saved: sk.saved, gateOpened: sk.gated && !sk.gateHolds,
-      events: r.events.length, joinOnsets, credit: r.overall === 2 || r.overall === 3 || (sk.gated && !sk.gateHolds) };
+      events: r.events.length, joinOnsets, nearShare: room.nearShare, credit: r.overall === 2 || r.overall === 3 || (sk.gated && !sk.gateHolds) };
   }
 }
 
@@ -133,7 +137,10 @@ function report(res, log){
     }
   }
   const real = rows.filter(r => r.joinOnsets != null);
-  if (real.length) log(`\nJoins in the recorded room sound: ${real.reduce((n, r) => n + r.joinOnsets, 0)} of the ${real.reduce((n, r) => n + r.events, 0)} sounds the Coach took sit within 150 ms of a join (a join that made a sound would show here).`);
+  if (real.length){
+    const ev = real.reduce((n, r) => n + r.events, 0), expect = real.reduce((n, r) => n + r.events * r.nearShare, 0);
+    log(`\nJoins in the recorded room sound: ${real.reduce((n, r) => n + r.joinOnsets, 0)} of the ${ev} sounds the Coach took sit within 150 ms of a join; if the joins made no sound, about ${Math.round(expect)} would (that share of the time lies that close to one). Many more than that means the splicing makes sounds.`);
+  }
   const credit = rows.filter(r => r.game !== 'radar' && r.credit).length;
   log(`\n${credit} of ${rows.filter(r => r.game !== 'radar').length} Coach takes with nothing played gave Good or better or opened the gate; ${rd.filter(r => r.credit).length} of ${rd.length} Strum Radar rounds scored a hit.`);
   return credit;

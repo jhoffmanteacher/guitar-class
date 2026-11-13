@@ -9,14 +9,20 @@
      1. unzips into a temporary folder (a .zip only);
      2. anonymizes into a second temporary folder (tools/mic-sim/anon-takes.mjs: names, ids and labels are removed, and it stops if one is left);
      3. evaluates every take (tools/mic-sim/eval-takes.mjs, the console's own evaluator) for the truth;
-     4. writes one SUMMARY per Power Chord Switch take into tools/mic-sim/takes/<fingerprint>.json: loudness and attack energy 94 times a second,
-        the pitch the site's detector reads at each of those points, the game's own numbers and the evaluator's truth. No audio, no name, no id, no
-        device label, no time of day (the day and the class period are kept). The fingerprint is a hash of the audio, so a take brought in twice is
-        one file;
-     5. checks itself: replays the base rule from the audio and from the new summaries and prints how often they agree, per take set;
+     4. writes one SUMMARY per take into tools/mic-sim/takes/<fingerprint>.json: loudness and attack energy 94 times a second, the pitch the
+        site's detector reads at each of those points, the game's own numbers and the evaluator's truth. No audio, no name, no id, no device
+        label, no time of day (the day and the class period are kept). The fingerprint is a hash of the audio, so a take brought in twice is
+        one file. Power Chord Switch: replay-takes.mjs summarize (pitch at RNW_POWER_CLARITY and 0.55), unchanged. Listening Coach and Note
+        Runner (since 2026-11-12): replay-listen.mjs summarizeListen, with `kind` (coach-melody / coach-chords / nr), pitch at the plain 0.22
+        gate the melody listeners use and at 0.55 (chords), the expected notes with the site's saved verdicts, its events with their pitch
+        readings, the evaluator's truth per note (an attack there, the note clearly in the recording, its reason), the detector stamp and the
+        measuring constants (`measured`);
+     5. checks itself: replays the base rule (Power Chord Switch) and the real Coach / Note Runner loops from the audio and from the new
+        summaries and prints how often they agree;
      6. deletes both temporary folders (the audio never enters the repo);
      7. commits the summaries, and only them (git commit -- tools/mic-sim/takes). It does not push: `git push` after it, or tell Claude.
-   --no-commit skips step 7. Other games' takes (Listening Coach, Note Runner) are counted and skipped: only Power Chord Switch has a replay so far.
+   --no-commit skips step 7. --games=pw,coach,nr (default all three) writes only those games' summaries: --games=coach,nr brings in the Coach and
+   Note Runner takes without rewriting the Power Chord Switch summaries already in the repo.
 
    It prints counts and fingerprints only: never a name, a file name from the console, or a path inside the recordings. */
 import { readdirSync, statSync, mkdtempSync, rmSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
@@ -25,10 +31,14 @@ import { join, dirname, resolve } from 'node:path';
 import { tmpdir, homedir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { loadAudio, loadSummaries, summarize, replayAll, todayRatios, askReasons, baseSite, TAKES_DIR } from './replay-takes.mjs';
+import { summarizeListen, loadListenSummaries, replayAllListen } from './replay-listen.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const fail = m => { console.error('takes-in: ' + m); process.exit(1); };
 const args = process.argv.slice(2);
+const gamesArg = (args.find(a => a.startsWith('--games=')) || '--games=pw,coach,nr').slice(8).split(',');
+for (const a of args.filter(x => x.startsWith('--'))) if (a !== '--no-commit' && !a.startsWith('--games=')) fail('unknown option ' + a);
+if (gamesArg.some(g => !['pw', 'coach', 'nr'].includes(g))) fail('--games takes pw, coach and nr');
 let what = args.find(a => !a.startsWith('--'));
 if (!what){
   const found = [];
@@ -62,13 +72,20 @@ try {
   if (an.status !== 0) fail('the anonymizer stopped, so nothing was written: ' + (an.stderr || '').trim());
   console.log('anonymized: ' + (an.stdout || '').trim().split('\n')[0]);
 
-  const { takes, total } = loadAudio(anon);
-  console.log(`${total} takes in all; ${takes.length} are Power Chord Switch (the others have no replay yet and are skipped)`);
-  if (!takes.length) fail('no Power Chord Switch takes in there: nothing to add');
+  const loaded = loadAudio(anon, true), total = loaded.total;
+  const takes = gamesArg.includes('pw') ? loaded.takes : [];
+  const listen = loaded.listen.filter(t => gamesArg.includes(t.kind === 'nr' ? 'nr' : 'coach'));
+  console.log(`${total} takes in all: ${loaded.takes.length} Power Chord Switch, ${loaded.listen.filter(t => t.kind !== 'nr').length} Listening Coach, ${loaded.listen.filter(t => t.kind === 'nr').length} Note Runner; writing ${gamesArg.join(', ')}`);
+  if (!takes.length && !listen.length) fail('no takes of those games in there: nothing to add');
 
   mkdirSync(TAKES_DIR, { recursive: true });
-  const before = new Set(loadSummaries(TAKES_DIR).map(t => t.id));
+  const before = new Set(loadSummaries(TAKES_DIR).map(t => t.id).concat(loadListenSummaries(TAKES_DIR).map(t => t.id)));
   let added = 0, same = 0;
+  for (const tk of listen){
+    writeFileSync(join(TAKES_DIR, tk.id + '.json'), JSON.stringify(summarizeListen(tk)));
+    if (before.has(tk.id)) same++; else added++;
+    process.stderr.write('.');
+  }
   for (const tk of takes){
     const s = summarize(tk);
     writeFileSync(join(TAKES_DIR, tk.id + '.json'), JSON.stringify(s));
@@ -80,7 +97,7 @@ try {
   // the self-check: the base rule, from the audio and from the summaries just written
   const NOW = todayRatios(), ids = new Set(takes.map(t => t.id));
   const fromSum = loadSummaries(TAKES_DIR).filter(t => ids.has(t.id));
-  replayAll(takes, ['base'], NOW); replayAll(fromSum, ['base'], NOW);
+  if (takes.length){ replayAll(takes, ['base'], NOW); replayAll(fromSum, ['base'], NOW); }
   let n = 0, eq = 0, eqHeard = 0;
   const heard = v => v.verdict !== 'miss';
   for (const a of takes){
@@ -90,9 +107,20 @@ try {
       n++; if (y && x.verdict === y.verdict) eq++; if (y && heard(x) === heard(y)) eqHeard++;
     }
   }
-  console.log(`self-check: the replay from the summaries gives the same verdict as the replay from the audio on ${eq} of ${n} changes (heard / not heard: ${eqHeard} of ${n})`);
-  const all = loadSummaries(TAKES_DIR);
-  console.log(`summaries: ${added} new, ${same} already there (rewritten) · ${all.length} in tools/mic-sim/takes/ now`);
+  if (takes.length) console.log(`self-check: the replay from the summaries gives the same verdict as the replay from the audio on ${eq} of ${n} changes (heard / not heard: ${eqHeard} of ${n})`);
+  if (listen.length){
+    const lids = new Set(listen.map(t => t.id)), lsum = loadListenSummaries(TAKES_DIR).filter(t => lids.has(t.id));
+    await replayAllListen(listen, null, [0], false); await replayAllListen(lsum, null, [0], false);
+    let ln = 0, leq = 0;
+    for (const a of listen){
+      const b = lsum.find(t => t.id === a.id), x = a.res[0], y = b && b.res[0];
+      if (!x || x.error || !y || y.error) continue;
+      x.notes.forEach((v, i) => { ln++; if (y.notes[i] && y.notes[i].v === v.v) leq++; });
+    }
+    console.log(`self-check (Listening Coach, Note Runner): the real loops replayed from the summaries give the same verdict as from the audio on ${leq} of ${ln} notes`);
+  }
+  const all = loadSummaries(TAKES_DIR), allListen = loadListenSummaries(TAKES_DIR);
+  console.log(`summaries: ${added} new, ${same} already there (rewritten) · ${all.length} Power Chord Switch and ${allListen.length} Listening Coach / Note Runner in tools/mic-sim/takes/ now`);
 
   cleanup();
   if (!args.includes('--no-commit')){
@@ -100,11 +128,11 @@ try {
     git(['add', '--', TAKES_DIR]);
     if (git(['diff', '--cached', '--quiet', '--', TAKES_DIR]).status === 0) console.log('git: nothing new to commit');
     else {
-      const c = git(['commit', '-m', `Take summaries: ${added} new Power Chord Switch takes (${all.length} in all)\n\nMade by tools/mic-sim/takes-in.mjs. No audio and no names: loudness, attack energy and detector pitch per 512 samples,\nthe game's numbers and the evaluator's truth.`, '--', TAKES_DIR]);
+      const c = git(['commit', '-m', `Take summaries: ${added} new takes (${all.length} Power Chord Switch, ${allListen.length} Listening Coach / Note Runner in all)\n\nMade by tools/mic-sim/takes-in.mjs. No audio and no names: loudness, attack energy and detector pitch per 512 samples,\nthe game's numbers and the evaluator's truth.`, '--', TAKES_DIR]);
       console.log(c.status === 0 ? 'git: committed the summaries (not pushed: run `git push`, or tell Claude)' : 'git: the commit did not go through; the files are written, commit them by hand:\n' + (c.stderr || c.stdout || '').trim().split('\n').slice(-3).join('\n'));
     }
   }
-  const why = askReasons(all, baseSite());
+  const why = all.length ? askReasons(all, baseSite()) : [];
   console.log(why.length ? 'still worth more takes later:\n' + why.map(w => '  - ' + w).join('\n') : 'the takes are current.');
   console.log('next: node tools/mic-sim/replay-takes.mjs   (any session can run it now)');
 } finally { cleanup(); }

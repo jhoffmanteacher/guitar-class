@@ -62,6 +62,13 @@
    THIS SITE" above and below its numbers and --against refuses it (exit 2). Nor any rule that needs more than loudness, attack and pitch.
    Its frames are evenly spaced at each take's mean frame time (the real ones were not).
    --against compares the same takes only: a take in one run and not the other, or a different number of changes with a verdict, exits 2.
+   LISTENING COACH AND NOTE RUNNER TAKES (2026-11-12, the listening bench): the same section then replays the Coach (melody and chords) and
+   Note Runner summaries in tools/mic-sim/takes/ through the loaded site's real coachLoop and nrLoop (replay-listen.mjs realListen, imported:
+   its header says what is real and what the takes can judge): per mode, real notes named right / half / unclear / wrong / missed, notes the
+   recording clearly holds that the site did not count (by the site's own reason), sounds counted where nothing was played, and its own
+   "reproduced" line. --json holds it as `realListen`; --against compares it per note, ranked by the recording (replay-listen.mjs RANK), and
+   refuses a run the summaries cannot judge (exit 2). A --json made before this section existed has no `realListen`: comparing a run that has
+   it with one that does not is not the same command (exit 2). --rule changes Power Chord Switch only; --root and --coach apply to both.
    The noise (TAKE_BAR below, measured by moving only each take's clock offset 20 to 100 ms): about 2 for "no strum HEARD", 8 for "marked
    RIGHT", 3 for LOST and 5 for real strums marked right. A difference between two rules smaller than that is no difference. (The earlier
    "3 or fewer" came from the summary replay against the audio replay and is too tight for "marked RIGHT".)
@@ -673,12 +680,17 @@ function compareTakes(now, was, file){
   return { code: diff ? 1 : 0, lines: ['Real takes first: they are recorded students; the rooms below are guesses. When the two disagree, the real takes win.',
     `against ${file}: REAL TAKES ${diff} of ${n} replayed changes differ (${worse} worse by the recording, ${better} better, ${other} right <-> wrong chord on a real strum, which the takes cannot rank) in ${now.takes.length} takes: no strum in the recording ${split.noneWorse} worse (now heard or marked right), ${split.noneBetter} better; real strums ${split.lost} newly LOST, ${split.found} heard again (of all ${strums} strums in the recordings, against the earlier run: not the section's LOST, which counts only the ${now.takes.reduce((k, t) => k + t.changes.filter(c => c.cat === 'agree').length, 0)} the game heard when the takes were made)${skipped ? `; ${skipped} changes skipped, no verdict in either run (a round the replay could not run)` : ''}${undecided}${diff ? '  RED' : '  same'}`, ...first] };
 }
-/* The whole comparison: the real takes first, then the synthetic games. Exit codes as compareRuns. */
-function compareAll(games, takes, was, file){
+/* The whole comparison: the real takes first (Power Chord Switch, then the Listening Coach and Note Runner), then the synthetic games.
+   Exit codes as compareRuns. */
+async function compareAll(games, takes, was, file, listen){
   const t = compareTakes(takes, was.realTakes || null, file), g = compareRuns(games, was.games, file);
-  const two = [t, g].filter(r => r && r.code === 2);
+  const wl = was.realListen || null;
+  const l = !listen && !wl ? null : !listen || !wl
+    ? { code: 2, lines: [`against ${file}: NOT THE SAME COMMAND (the Coach / Note Runner takes are in ${wl ? 'the earlier run and not in this one' : 'this run and not in the earlier one (a --json from before they were added)'}); nothing compared`] }
+    : (await import('./replay-listen.mjs')).compareListen(listen.takes, wl, file, [...(listen.stale || []).map(w => 'this run: ' + w), ...(wl.stale || []).map(w => 'the earlier run: ' + w)]);
+  const two = [t, l, g].filter(r => r && r.code === 2);
   if (two.length) return { code: 2, lines: two.flatMap(r => r.lines) };
-  return { code: Math.max(t ? t.code : 0, g.code), lines: [...(t ? t.lines : []), ...g.lines] };
+  return { code: Math.max(t ? t.code : 0, l ? l.code : 0, g.code), lines: [...(t ? t.lines : []), ...(l ? l.lines : []), ...g.lines] };
 }
 /* Change Up's lenient pairs (ccResolvePend's comment: "E/Em, A/Am, C/Am, G/Em ... cannot tell apart either way"). */
 const LENIENT = [['E', 'Em'], ['A', 'Am'], ['C', 'Am'], ['G', 'Em']];
@@ -761,11 +773,12 @@ async function main(){
   /* The end of every run: the real takes, the --json, the comparison (real takes first). */
   const finish = async (games, code) => {
     const rt = takesOn ? await realTakes(at, rule) : null;
-    if (opt('json', null)) writeFileSync(opt('json'), JSON.stringify({ tool: 'closed-loop', games, realTakes: rt }));
-    if (against){ const r = compareAll(games, rt, wasRun, against); r.lines.forEach(l => console.log(l)); process.exit(r.code); }
+    const rl = takesOn ? await (await import('./replay-listen.mjs')).realListen(at, l => console.log(l)) : null;
+    if (opt('json', null)) writeFileSync(opt('json'), JSON.stringify({ tool: 'closed-loop', games, realTakes: rt, realListen: rl }));
+    if (against){ const r = await compareAll(games, rt, wasRun, against, rl); r.lines.forEach(l => console.log(l)); process.exit(r.code); }
     process.exit(code);
   };
-  if (takesOnly){ console.log(`Power Chord Switch, the real takes only · ${where}`); await finish([], 0); }
+  if (takesOnly){ console.log(`The real takes only (Power Chord Switch, then the Listening Coach and Note Runner) · ${where}`); await finish([], 0); }
   const site = makeSite(coachArg, rule, null, false, siteRoot);
   if (rule !== 'base') console.log('CANDIDATE RULE "' + rule + '" (tools/mic-sim/candidates.mjs), not the site\'s own coach.js');
   const students = opt('students', Object.keys(STUDENTS).join(',')).split(',');

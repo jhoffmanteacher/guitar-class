@@ -90,24 +90,28 @@ export function roomRegions(tk){
   return regs.filter(([a, b]) => b - a >= ROOM_MIN_MS);
 }
 
-/* One take's room stretches spliced end to end (30 ms cross-fades), repeated until it lasts `ms`, through the site's mic chain at the
-   take's own capture rate. Returns { proc, srcRate, joins: [ms of each join in the result], seconds: room seconds the take gave }. */
+/* One take's room stretches spliced end to end, repeated until it lasts `ms`, through the site's mic chain at the take's own capture rate.
+   The joins are JOIN_FADE_MS equal-power cross-fades: two stretches of a room are seldom at the same level, and a short fade (30 ms, the
+   first version) turned that step into a sound the onset rule took (5,982 of 17,366 Coach onsets sat within 150 ms of a join); a slow fade
+   lets the site's smoothed level follow it. Returns { proc, srcRate, joins: [ms of each join in the result, at the middle of its fade],
+   seconds: room seconds the take gave, regions }. */
+export const JOIN_FADE_MS = 250;
 export function roomSound(tk, ms, chain){
-  const regs = roomRegions(tk), sr = tk.sr, x = tk.wav.x, fade = Math.round(0.03 * sr), need = Math.ceil(ms / 1000 * sr);
+  const regs = roomRegions(tk).filter(([a, b]) => b - a > JOIN_FADE_MS * 1.5), sr = tk.sr, x = tk.wav.x, fade = Math.round(JOIN_FADE_MS / 1000 * sr), need = Math.ceil(ms / 1000 * sr);
   const total = regs.reduce((n, [a, b]) => n + (b - a), 0);
   if (!regs.length) return null;
   const out = new Float32Array(need), joins = [];
   let o = 0, k = 0;
   while (o < need){
     const [a, b] = regs[k % regs.length], s0 = Math.round(a / 1000 * sr), s1 = Math.round(b / 1000 * sr);
-    if (o > 0) joins.push(o / sr * 1000);
     const start = o > 0 ? o - fade : 0;
+    if (o > 0) joins.push((start + fade / 2) / sr * 1000);
     for (let i = 0; i < s1 - s0 && start + i < need; i++){
       const v = x[s0 + i], j = start + i;
-      if (o > 0 && i < fade){ const w = i / fade; out[j] = out[j] * (1 - w) + v * w; } else out[j] = v;
+      if (o > 0 && i < fade){ const w = i / fade * Math.PI / 2; out[j] = out[j] * Math.cos(w) + v * Math.sin(w); } else out[j] = v;
     }
     o = Math.min(need, start + (s1 - s0));
     k++;
   }
-  return { proc: prepare({ x: out, sr }, tk.srcRate, chain), srcRate: tk.srcRate, joins: joins.map(j => j * 1), seconds: total / 1000, regions: regs.length };
+  return { proc: prepare({ x: out, sr }, tk.srcRate, chain), srcRate: tk.srcRate, joins, seconds: total / 1000, regions: regs.length, ms };
 }

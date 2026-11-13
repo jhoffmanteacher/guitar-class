@@ -194,15 +194,29 @@ export function summarize(tk){
     E: b64(E), D: b64(D), pitch };
 }
 
-/* Takes from a folder of audio (anonymized pairs). */
-export function loadAudio(folder){
+/* Takes from a folder of audio (anonymized pairs). `listen` (replay-listen.mjs, takes-in.mjs): also return the Listening Coach and Note
+   Runner takes, as `listen`, from the same evaluator run; the Power Chord Switch list is the same either way. */
+export function loadAudio(folder, listen){
   const tmp = join(mkdtempSync(join(tmpdir(), 'replay-takes-')), 'eval.json');
   // the evaluator names each take's file on stderr ("T01 = file.wav"): the table itself is not needed here
   const ev = spawnSync(process.execPath, [join(HERE, 'eval-takes.mjs'), resolve(folder), '--json', tmp], { encoding: 'utf8', maxBuffer: 1 << 28 });
   if (ev.status !== 0) throw new Error('eval-takes.mjs failed:\n' + ev.stderr);
   const fileOf = {};
   (ev.stderr + '\n' + ev.stdout).split('\n').forEach(l => { const m = l.match(/^(T\d+) = (.+\.wav)\s*$/i); if (m) fileOf[m[1]] = m[2]; });
-  const all = JSON.parse(readFileSync(tmp, 'utf8')).rows, chain = siteFor('base', null, false).chain, out = [];
+  const all = JSON.parse(readFileSync(tmp, 'utf8')).rows, chain = siteFor('base', null, false).chain, out = [], more = [];
+  if (listen) for (const row of all.filter(r => r.kind !== 'pw')){
+    const f = fileOf[row.take];
+    if (!f) continue;
+    const base = join(resolve(folder), f.replace(/\.wav$/i, ''));
+    const raw = readFileSync(base + '.wav'), d = JSON.parse(readFileSync(base + '.json', 'utf8')), wav = readWav(base + '.wav');
+    if (d.mode !== 'coach' && d.mode !== 'nr') continue;
+    const srcRate = Number(d.srcSampleRate) || wav.sr, lat = Number(d.micLatencyMs) || 0, L = row.latency || {};
+    more.push({ take: row.take, id: createHash('sha1').update(raw).digest('hex').slice(0, 12), day: typeof d.savedAt === 'string' ? d.savedAt.slice(0, 10) : null,
+      period: d.period == null ? null : String(d.period).slice(0, 4), chromebook: !!(row.device && row.device.chromebook), d, srcRate,
+      kind: d.mode === 'nr' ? 'nr' : 'coach-' + (d.coachMode === 'chords' ? 'chords' : 'melody'),
+      mapMs: L.mapMs != null ? L.mapMs : L.clickLagMs != null ? lat - L.clickLagMs : 0, mapFrom: L.mapMs != null ? 'notes' : L.clickLagMs != null ? 'count-in' : 'none',
+      notes: row.perNote, dropped: row.notes ? row.notes.dropped : 0, proc: prepare(wav, srcRate, chain) });
+  }
   for (const row of all.filter(r => r.kind === 'pw')){
     const f = fileOf[row.take];
     if (!f) continue;
@@ -215,12 +229,13 @@ export function loadAudio(folder){
       mapMs: L.mapMs != null ? L.mapMs : L.clickLagMs != null ? lat - L.clickLagMs : 0, mapFrom: L.mapMs != null ? 'strums' : L.clickLagMs != null ? 'count-in' : 'none',
       notes: row.perNote, proc: prepare(wav, srcRate, chain) });
   }
-  return { takes: out, total: all.length };
+  return listen ? { takes: out, total: all.length, listen: more } : { takes: out, total: all.length };
 }
 /* Takes from the summaries in the repo. */
 export function loadSummaries(dir){
   if (!existsSync(dir)) return [];
-  return readdirSync(dir).filter(f => /^[0-9a-f]{12}\.json$/.test(f)).sort().map(f => { const text = readFileSync(join(dir, f), 'utf8'); return Object.assign(JSON.parse(text), { __hash: createHash('sha1').update(text).digest('hex') }); }).filter(s => s.summary === 1)
+  /* Power Chord Switch summaries only: a Listening Coach or Note Runner summary (`kind`, replay-listen.mjs) is not one of these takes. */
+  return readdirSync(dir).filter(f => /^[0-9a-f]{12}\.json$/.test(f)).sort().map(f => { const text = readFileSync(join(dir, f), 'utf8'); return Object.assign(JSON.parse(text), { __hash: createHash('sha1').update(text).digest('hex') }); }).filter(s => s.summary === 1 && (s.kind == null || s.kind === 'pw'))
     .sort((a, b) => String(b.day).localeCompare(String(a.day)) || a.id.localeCompare(b.id))
     .map((s, k) => ({ take: 'S' + String(k + 1).padStart(2, '0'), id: s.id, hash: s.__hash, day: s.day, period: s.period, d: s.take, srcRate: s.srcRate, own: s.truth.own, mapMs: s.truth.mapMs, mapFrom: s.truth.mapFrom,
       notes: s.truth.notes.map(n => ({ i: n.i, stage: n.stage, site: n.site, played: n.played, why: { cat: n.cat } })), detector: s.detector, measured: s.measured || null,

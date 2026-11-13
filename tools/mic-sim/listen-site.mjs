@@ -66,7 +66,7 @@ const VM = `globalThis.__lb = {
     const skills = c.skillIds.map(sid => ({ sid, saved: games.coachSkill && games.coachSkill[sid] ? games.coachSkill[sid].level : 0,
       gated: skillIsCoachGated(sid), gateHolds: skillIsCoachGated(sid) && coachSkillBest(sid) < COACH_GATE_MIN_LEVEL }));
     const out = { mode: c.mode, phase: c.phase, listenStart: c.listenStart, beatMs: c.beatMs, overall, crits, skills, saved: __lb.saved,
-      slots: c.slots.map(s => ({ state: s.state, devMs: s.hit && s.hit.devMs != null ? Math.round(s.hit.devMs * 10) / 10 : null,
+      slots: c.slots.map(s => ({ state: s.state, chord: s.chordName || null, devMs: s.hit && s.hit.devMs != null ? Math.round(s.hit.devMs * 10) / 10 : null,
         n: s.hit && s.hit.readings ? s.hit.readings.length : null, look: !!s.secondLook })),
       events: c.events.map(e => ({ t: Math.round(e.t * 10) / 10, slot: e.slot, n: (e.readings || []).length })),
       gate: COACH_GATE_MIN_LEVEL, minHeard: coachMinHeard(c.slots.length), matchWinMs: coachMatchWinMs() };
