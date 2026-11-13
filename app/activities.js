@@ -570,10 +570,18 @@ function caPickPath(id, key){
   if(!a || !caHasPaths(a)) return;
   if(IS_TEACHER_MODE) return;   // the console preview picks nothing for real (its buttons are disabled too)
   stopCardAudio();
+  /* Every OTHER path is un-ticked whether or not this screen shows it ticked,
+     so the delete reaches the server either way (2026-11-12). A screen whose
+     saved work failed to load shows no pick; un-ticking only what it showed
+     left the stored pick standing beside the new one, and caPathKey reads
+     the first one in list order, so the new pick was lost at the next
+     sign-in. The last pick now wins on every device (this replaces the
+     2026-11-09 "two devices can keep different picks"); un-ticking a key
+     that is not stored changes nothing. */
   a.paths.forEach(p => {
     const k = `${id}:path:${p.key}`;
     const want = key !== null && key !== undefined && p.key === key;
-    if((caStepDone[k] === true) !== want) onCaStepChange(k, want);
+    if(!want || caStepDone[k] !== true) onCaStepChange(k, want);
   });
   delete caStepOpen[id];   // land on the route's first not-done step
   caRevealedTabs.clear();
