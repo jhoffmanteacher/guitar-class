@@ -271,6 +271,26 @@ script.
   REAL TAKES section replays them after the Power Chord Switch ones (`realListen` in `--json`; `--against` compares
   them). The Power Chord Switch summaries and their replay are unchanged (byte-identical output from the old and the
   new `takes-in.mjs` on the same folder).
+  **Measured 2026-11-12/13 (34 anonymized takes: 21 Power Chord Switch, 8 Coach melody, 1 Coach chords, 4 Note Runner):**
+  - Rooms: the shared onset rule took 194 sounds in 87 s of room sound with nobody playing (133 a minute; every period
+    and game alike, 107-143). An EMPTY window gets a hit: Strum Radar 70-87% (by pattern), the Coach at 60 BPM 656 of 656,
+    Note Runner 67%. Noisiest: T05, T12, T20, T01, T15 (Power Chord Switch), T28 (Coach).
+  - Nothing played (C1): the Coach's check-off gate opened in 30 of 72 chord takes and 211 of 552 melody takes in the
+    synthetic rooms, 92 of 108 and 524 of 828 in the recorded rooms (dead mic, quiet room and fan: never). Two ways in:
+    every slot "unclear" (pitch scored 2 by the chord-mode dim rule, completion 3: desk taps, typing, muted strums), and
+    pitch 1 with timing and completion Great ("Good" needs only two Greats, of any criteria). Strum Radar with nothing
+    played: median 29% (synthetic) and 78% (recorded rooms), 70 of 72 recorded-room rounds earn a star.
+  - Replay of the 13 Coach / Note Runner takes: reproduced 46 of 64 (melody), 6 of 8 (chords), 51 of 74 (Note Runner) from
+    the summaries; on the site of each take's own day (`--own-day`, audio) 47, 4 and 53. Noise (`--noise`, summaries):
+    melody real notes right 13-16, Note Runner 11-21.
+  - Proof: planted in `--root` copies, the halved Coach match window moved 2 of 146 notes, `COACH_PITCH_GATE` x10 2 (both
+    worse), the chord rule "wrong at 1 reading" 2, a flipped Note Runner grade 43 (29 worse); a changed clarity (0.22 ->
+    0.15) is refused (CANNOT JUDGE, exit 2). A fake microphone that refuses stops the run (exit 2); the take's clock
+    offset applied backwards drops Note Runner's reproduced 51 -> 23 (the Coach's, which follows the player, barely moves:
+    46 -> 45).
+  - What the takes cannot judge: Note Runner's timing window (the replay uses the window the take saved; `nrStart` is not
+    run), a changed pitch-detector clarity or mic chain (needs the audio), which note a student meant, and the report's
+    level (shown, never ranked: a take holds no level).
 - `smoke.mjs <url>` — headless Chromium through the Dev bypass with the
   in-page harness: Coach, Note Runner, Note Hunt, Note Call, Change Up, PSG
   Hero, the consent prompt and the recording path. Start a static server on
