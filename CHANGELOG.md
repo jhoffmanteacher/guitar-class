@@ -6,6 +6,11 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-12 — In-Class Activities: your next activity is always a required one
+
+- **The activity picked as your next one is always a required one you haven't finished**, even if an optional one is newer.
+- **An activity your teacher excused you from is never picked as your next one.**
+
 ## 2026-11-12 — Practice cards: the Metronome clicks once per beat
 
 - **With the Metronome on, changing the speed, flipping the Guitar switch, turning the Metronome off or pressing Stop no longer adds an extra or early click.** Before, the next beat could click twice, and one more click could sound after Stop.

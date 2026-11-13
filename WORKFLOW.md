@@ -383,6 +383,25 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-12 (evening) — In-Class Activities: the next activity is always required and unfinished; and
+      `tools/visible-loop.mjs`.** Jonathan, same day: "the class activities aren't meant to block anyone anymore. they
+      are meant to show up on first login though", and, asked which card comes first, "Required and unfinished first".
+      The site change (Fast, `app/activities-2.js`): the card picked as next (`caStartHereId`: the "next up" message,
+      the resume card) is the newest unfinished REQUIRED card from any date; an optional card only when no required
+      one is left; never a card the teacher cleared for that student. Before, an optional card dated today came ahead
+      of an older required one, and a cleared card could be picked. The Today group's order on the page is unchanged.
+      Landing is as before (his answer: keep it): every page load takes a student with an unfinished required
+      activity to In-Class Activities, except the update reload, an arrival from a Song Journey page and a
+      `#class-activities` / `#live-quiz` address.
+      The tool (two review rounds; the second round's findings fixed, no third round: low stakes): the real student
+      app, console and Journey predicates on a fake Firestore and a virtual clock; it runs the real `showApp()`
+      landing and the first card, and checks that nothing is ever locked (no `body.ca-gated`, no Journey gate card, no
+      router redirect). Default run: 60 cases, 748 sign-ins, 429 console changes, 27,688 fields compared; seeds 1 to 13
+      all pass; the site change was red on 71 comparisons before and green after.
+      KNOWN K1, on Jonathan's list, not fixed: on a shared Chromebook, a student whose settings read fails after
+      another student signed in there loses a teacher-set period override (practice minutes can go under the other
+      period for that session; the period question can show again) and "Open through" until the next good read.
+
 - [x] **2026-11-12 (evening) — Fable strategic checks of the three tools that shipped without a last review; two small
       follow-ups.** Jonathan asked for the checks ("start the strategic check with fable now").
       `tools/beat-audit.py`: clean (no BLOCKER, no MAJOR). Today's three counted lines were confirmed independently
