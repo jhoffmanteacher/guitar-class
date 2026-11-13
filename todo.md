@@ -13,9 +13,8 @@ Jonathan will say "read todo.md" in a fresh chat. Do this, in this order:
    first. The rollback is two reverts and a push (WORKFLOW.md, 2026-11-11 entry). Do nothing else until it is
    understood.
 2. **If it went fine: bring `tools/pm-e2e.mjs` up to date** (first bullet of the next section). Small, tools only.
-3. **Then the second adversarial review of `tools/golden.mjs`** (second bullet; cap 8 mutations; it needs the
-   headless browser for a long stretch, so nothing else that uses Chrome beside it; `CHROME` points at Chrome
-   for Testing).
+3. **The second adversarial review of `tools/golden.mjs` is done (2026-11-13): the tool failed it** (second
+   bullet of the next section). Rebuild the tool before any split.
 4. **Stop there and report.** Do NOT split any part in that session. The four big parts get a quiet session of
    their own (the section after next), one part per change, and `coach-core.js` only with Jonathan present.
 
@@ -47,9 +46,11 @@ Check `tools/mic-sim/` and `checks.mjs` for text they pin in the section being m
   a practice card is open; since 2026-11-10 an open card folds the header away (checks 1cr, and smoke's own
   practice-minutes walk passes on that). On 2026-11-11 it failed 3 checks and then threw at line 187, identically
   on the uncut site and on the cut one. Bring it in line with the folded header, or retire the lines smoke covers.
-- **A second adversarial review of `tools/golden.mjs`.** The first found 0 of 8 mutations caught; the tool was
-  rebuilt and now catches all 8, but the rebuilt parts (save, gates, filled state, nav, activity and console
-  writes, the picture-noise rule) have not had a reviewer of their own. Cap: 8 mutations.
+- **`tools/golden.mjs` is NOT proof for a split yet: rebuild it first.** The second adversarial review ran
+  2026-11-13 and said no: 3 of 8 planted faults caught; 140 of 281 screenshots were of the wrong screen; two runs
+  of the same unchanged tree differed in 45 files; the games are never played. Jonathan approved all four splits
+  (2026-11-12) only once golden is cleared, so no part is split until the tool is fixed and a fresh reviewer's
+  plants are caught. Fixing it is its own job, not started.
 - **A `golden.mjs --compare` process once printed its result and never exited** (2026-11-11, 39 minutes, 0% CPU;
   the same command run again took 0.7 s). Cause unknown. Until it is understood, give a compare a time limit
   when it runs in a chain (`perl -e 'alarm 300; exec @ARGV' node tools/golden.mjs --compare A B`).

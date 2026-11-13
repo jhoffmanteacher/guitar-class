@@ -383,6 +383,22 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-13 — Listening bench step 4: `tools/mic-sim/listen-loop.mjs` + `note-student.mjs`.** Tools and docs
+      only; shipped on the builder's proof (planted faults in `--root` copies, the fake-world self-tests, same
+      command twice = same output), no review round (a tool; "Don't repeat verification that already passed").
+      What it is: a virtual student with an answer key playing the real Coach (melody and chords), Strum Radar and
+      Note Runner: `node tools/mic-sim/listen-loop.mjs --game=melody|chords|radar|runner` (`--json`, `--against`,
+      `--root`, `--replay=N`, `--fit`).
+      Findings, MODEL ONLY (the real takes outrank them): the Coach's gate opens for a student who plays every
+      note a fret high (39 of 40 takes, quiet room included: pitch scores "Needs work" but "Good needs any two
+      Greats"; replay `--game=melody --students=allFretOff --rooms=quiet --replay=1`); chord false pass 15-21 of
+      21 by room; false fails are rare (0-11%). Strum Radar with nothing played scores a median 38-94% in the
+      class rooms. For single notes the fitted room4 / room7 are harsher than the real takes (32-41% of right
+      notes called wrong against at most 20%); the synthetic `class` room matches the real takes, so read `class`
+      for single notes. Candidate gate fix (branch `fix/coach-gate`, `149f1c0`, NOT shipped, Jonathan's call):
+      chords false pass 15-21 -> 1-12 of 21, but melody false fail class 9 -> 13 of 80 and room4 7 -> 74.
+      Wanted: right-playing Coach takes from periods 4 and 7. Not modelled: fret buzz, OS gain control, echo,
+      Note Runner's power-chord levels; Note Call and Note Hunt not reached.
 - [x] **2026-11-13 — `tools/shared-chromebook-loop.mjs`: two students, one Chromebook.** Tools and docs only. One
       adversarial review round (3 MAJOR, all fixed and proved with the reviewer's plants; no second round: Jonathan's
       rule for tools, "fix, state the limits, ship").
