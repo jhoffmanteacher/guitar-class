@@ -136,8 +136,9 @@ const VM = `globalThis.__lb = {
     for (const w of SETS) for (const sk of (w.skills || [])){
       if (!skillIsCoachGated(sk.id)) continue;
       const p = sk.practice, html = p.type === 'chord' ? coachChordBtnRowHtml(p.chords, sk.id) : playSeqControlsHtml(p, sk.id);
-      const ch = /data-chords="([^"]*)"/.exec(html), md = /class="coach-btn" data-midis="([^"]*)"/.exec(html);
-      out.push({ sid: sk.id, set: w.id, type: p.type, chords: ch ? unesc(ch[1]) : null, midis: md ? unesc(md[1]) : null });
+      const ch = /data-chords="([^"]*)"/.exec(html), md = /class="coach-btn" data-midis="([^"]*)"/.exec(html), sl = /class="bpm-slider"[^>]*value="(\d+)"/.exec(html);
+      /* The tempo the Coach opens at: the slider beside the button (readGroupBpm), else its default of 60 (a chord row has no slider). */
+      out.push({ sid: sk.id, set: w.id, type: p.type, chords: ch ? unesc(ch[1]) : null, midis: md ? unesc(md[1]) : null, bpm: sl ? Number(sl[1]) : 60 });
     }
     return JSON.stringify(out);
   }

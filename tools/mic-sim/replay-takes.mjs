@@ -124,7 +124,7 @@ const b64 = a => Buffer.from(a.buffer, a.byteOffset, a.byteLength).toString('bas
 const unb64 = s => { const b = Buffer.from(s, 'base64'); return new Float32Array(b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength)); };
 
 /* One take's audio as the site's analyser would hold it. */
-function prepare(wav, srcRate, chain){
+export function prepare(wav, srcRate, chain){
   let x = wav.x;
   if (wav.sr !== srcRate){
     const n = Math.floor(x.length * srcRate / wav.sr), y = new Float32Array(n), k = wav.sr / srcRate;
