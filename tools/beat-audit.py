@@ -1355,11 +1355,13 @@ def group_findings(res):
             if fast_fixed:
                 # review R2-2: the fast file had this stretch "put back"; the slow file is then the witness, not a quirk
                 g['note'] = 'the record-tempo file had these bars put back after a slip, so the slow file is not dismissed'
-            elif any(res['files'][fi]['scale'] == 1.0 and
-                     sum(1 for i in span if i < len(res['files'][fi]['j']['good']) and not res['files'][fi]['j']['good'][i])
-                     * 2 >= len(span) for fi in measured):
-                # review R3-6: the record-tempo file cannot tell here, so the slow file is not dismissed as a quirk
-                g['note'] = 'the record-tempo file cannot tell here, so the slow file is not dismissed'
+            elif (any(res['files'][fi]['scale'] == 1.0 for fi in measured) and
+                  all(sum(1 for i in span if i < len(res['files'][fi]['j']['good']) and not res['files'][fi]['j']['good'][i])
+                      * 2 >= len(span) for fi in measured if res['files'][fi]['scale'] == 1.0)):
+                # review R3-6: NO record-tempo file can tell here, so the slow file is not dismissed as a quirk.
+                # Every one of them, not any one (Fable check F-1, 2026-11-12): when another record-tempo file measures
+                # the bar on the map, the slow-only finding is still a quirk and must not reach THE LIST.
+                g['note'] = 'no record-tempo file can tell here, so the slow file is not dismissed'
             elif slow_clean and all(x.get('n_good', 0) >= 3 and not x.get('finding') and not x.get('stretch') for x in slow_clean):
                 # the onsets test (no map, no tracker) says the slow file IS the fast one scaled, here as everywhere
                 contra = contra + ['onsets']
