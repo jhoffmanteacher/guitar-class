@@ -6,6 +6,17 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-13 — Keys for practice cards, a clearer microphone start, and clearer save messages
+
+- **Practice cards have keyboard keys.** The space bar (or K) plays and stops the song. The ← and → keys move between sections. < and > change the speed. Each button's tooltip says its key. The keys work after you click or tap a button on the card too.
+- **Checking off a lesson step or "I've got it!" gives a short pop.** It is off if your device asks for less motion.
+- **Mic games and the Listening Coach say what the microphone is for before your browser asks.** You press one "Turn on the microphone" button, then your browser asks. Once this browser has allowed the mic, the panel does not come back.
+- **A blocked microphone shows the same steps everywhere:** click the lock icon next to the address bar and set Microphone to Allow. If you close the browser's box without choosing, the game says "Try again and choose Allow" next to a Start button.
+- **Mic games have one new set-up tip:** tune first, keep the guitar a hand to an arm's length from the mic, and set the volume at half.
+- **Save messages say whether your work is safe and what to do.** For example: "Not saved yet — trying again. Keep this tab open." On a Song Journey page, a save that did not go through tells you to check the connection and tick any box.
+- **Signing in with Google always asks which account to use,** so on a shared Chromebook you don't land in someone else's work.
+- **For screen readers:** titles are read as headings, each tuner string button says its string's name (low E and high e are told apart), and decorative icons are skipped. The search box keeps its focus ring when you use the keyboard.
+
 ## 2026-11-13 — Accounts that are not school accounts
 
 - **Signed in with an account that is not your school account (@seq.org), and Mr. Hoffman has not let it in?** You see one screen instead of the site. Sign in with your school account, or press **Ask your teacher to let me in**. Then press **Check again** later (or just come back to the tab). Once he says yes, the site opens.
