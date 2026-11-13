@@ -14,18 +14,24 @@
      nothing thrown when Firestore is missing, nobody is signed in, or the write is refused (rules not
      published: exactly ONE refused write, then silence); the queue waits for sign-in and is dropped after
      10 minutes; the stripping (emails, %40 emails, uid-like and Firestore ids, query strings, 6+ digit runs,
-     the signed-in account's own name, email and uid, a 5,000-character message); the ResizeObserver note
-     not logged and no banner for it; a logger whose parts throw never throws, never loops and leaves no
-     unhandled rejection; the banner shows exactly as before. And the console view: empty state, rules not
-     published, grouping and day counts, escaping of hostile values, delete older than 30 days.
+     the signed-in account's own name (only as written: a student named Max leaves Math.max alone), email and
+     uid, before the 300-character cut too, a 5,000-character message); no written field ever holds a lone
+     surrogate (half an emoji: Firestore retries such a write for ever and the progress save waits behind it);
+     a doc the rules would refuse (a device clock in the year 10000) is dropped, not sent; a repeat returns
+     before any scrubbing; the ResizeObserver note not logged and no banner for it; the banner before the
+     logger; a logger whose parts throw never throws, never loops and leaves no unhandled rejection; the banner
+     shows exactly as before. And the console view: empty state, rules not published (also when it lands after
+     the teacher left the view), grouping and day counts, escaping of hostile values, docs dated after the
+     latest day the rules accept hidden and counted, the "more than 1000" note only when more exist, delete
+     older than 30 days (a doc ON the cutoff stays) and of the impossible dates.
 
-   --faults plants 12 faults (one at a time, in memory) and shows each turns at least one case red.
+   --faults plants 21 faults (one at a time, in memory) and shows each turns at least one case red.
 
    Usage:  node tools/site-errors-sim.mjs [--faults] [--root <site folder>] [--verbose]
    Exit 0 = every case passed (and, with --faults, every fault was caught). Node 18+, no dependencies.
-   Last run: 2026-11-13, 76 passed, 0 failed; 12 of 12 planted faults caught.
-   Not part of checks.mjs (it is a proof for this feature; run it after any change to SITE_ERRORS,
-   the safety net's listeners, teacher-errors.js or the siteErrors rules). */
+   Last run: see the commit that last changed this file.
+   checks.mjs 1cx runs it (no flags) on every check and fails on a non-zero exit; run it with --faults after
+   any change to SITE_ERRORS, the safety net's listeners, teacher-errors.js or the siteErrors rules. */
 import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
@@ -44,6 +50,9 @@ const LOGGER = APP.slice(L0, L1);
 const ESC = (APP.match(/^const escAttr = .*$/m) || [''])[0] + '\n' + (APP.match(/^const escHtml = .*$/m) || [''])[0];
 if (!/escAttr/.test(ESC) || !/escHtml/.test(ESC)) { console.error('site-errors-sim: escHtml / escAttr not found in the app'); process.exit(2); }
 const VIEW = readFileSync(join(ROOT, 'teacher-errors.js'), 'utf8');
+/* The console's real list of views with no Refresh bar (teacher-core.js), so a view that drops out of it shows. */
+const NO_BAR = (/^const TEACHER_NO_REFRESH_BAR_VIEWS=(\[[^\]]*\]);/m.exec(readFileSync(join(ROOT, 'teacher-core.js'), 'utf8')) || [, 'null'])[1];
+if (NO_BAR === 'null') { console.error('site-errors-sim: TEACHER_NO_REFRESH_BAR_VIEWS not found in teacher-core.js'); process.exit(2); }
 
 /* ── A mirror of the siteErrors rule, parsed from firestore.rules (not typed in here) ── */
 const RULES = readFileSync(join(ROOT, 'firestore.rules'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
@@ -59,14 +68,21 @@ const R = {
   kinds: JSON.parse((/data\.kind in (\[[^\]]*\])/.exec(rb) || [, 'null'])[1].replace(/'/g, '"')),
   langs: JSON.parse((/data\.lang in (\[[^\]]*\])/.exec(rb) || [, 'null'])[1].replace(/'/g, '"')),
   day: new RegExp((/data\.day\.matches\('([^']*)'\)/.exec(rb) || [, '^$'])[1]),
+  dayNear: /&& siteErrorDayNear\(request\.resource\.data\.day\)/.test(rb) && /duration\.value\(1, 'd'\)[\s\S]*duration\.value\(1, 'd'\)/.test(rb),
+  createSignedIn: /allow create: if isSignedIn\(\)\n/.test(rb),
 };
-if (!R.only || !R.all || R.only.length !== 10 || !R.kinds || !R.langs || Object.keys(R.caps).length !== 5 || R.ints.length !== 2) { console.error('site-errors-sim: could not read the siteErrors rule (fields, caps, kinds, langs): ' + JSON.stringify(R)); process.exit(2); }
+if (!R.only || !R.all || R.only.length !== 10 || !R.kinds || !R.langs || Object.keys(R.caps).length !== 5 || R.ints.length !== 2 || R.strings.length !== 6 || !R.dayNear || !R.createSignedIn) { console.error('site-errors-sim: could not read the siteErrors rule (fields, caps, 6 string types, kinds, langs, the day window, a create for any signed-in account): ' + JSON.stringify(R)); process.exit(2); }
+const LONE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/;
+const utcDay = n => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);
 function rulesRefuse(doc) {
   const why = [];
   const keys = Object.keys(doc).sort();
   if (keys.join() !== [...R.only].sort().join()) why.push('fields ' + keys.join());
   for (const k of R.strings) if (typeof doc[k] !== 'string') why.push(k + ' not a string');
-  for (const [k, n] of Object.entries(R.caps)) if (typeof doc[k] === 'string' && [...doc[k]].length > n) why.push(`${k} ${[...doc[k]].length} > ${n}`);
+  /* size() in the rules counts UTF-16 units (an emoji is 2), as String.length does. */
+  for (const [k, n] of Object.entries(R.caps)) if (typeof doc[k] === 'string' && doc[k].length > n) why.push(`${k} ${doc[k].length} > ${n}`);
+  for (const k of R.strings) if (typeof doc[k] === 'string' && LONE.test(doc[k])) why.push(k + ' holds a lone surrogate (Firestore retries it for ever)');
+  if (typeof doc.day === 'string' && R.day.test(doc.day) && ![utcDay(-1), utcDay(0), utcDay(1)].includes(doc.day)) why.push('day ' + doc.day + ' not within a day of the UTC date');
   if (typeof doc.message === 'string' && !doc.message.length) why.push('message empty');
   for (const k of R.ints) if (!Number.isInteger(doc[k]) || doc[k] < 0 || doc[k] > (R.intMax[k] || 1e7)) why.push(k + ' not an int in range');
   if (!R.kinds.includes(doc.kind)) why.push('kind ' + doc.kind);
@@ -86,18 +102,20 @@ const USER = { uid: 'Xy7Qp2LmN8rT4vW1zA3bC5dE6fG9', email: 'ana.lopez@seq.org', 
 
 function makePage(code, o = {}) {
   const clock = { now: 0, seq: 0, timers: [] };
-  const p = { writes: [], adds: 0, banners: 0, listeners: {}, consoleErr: 0, consoleWarn: 0, consoleOther: 0, threw: 0, clock };
+  const p = { writes: [], adds: 0, banners: 0, listeners: {}, consoleErr: 0, consoleWarn: 0, consoleOther: 0, threw: 0, clock, order: [], originReads: 0, wallNow: o.wallNow };
   const el = () => ({ style: {}, setAttribute() {}, append() {}, remove() {}, textContent: '' });
   const ctx = {
     window: { addEventListener: (t, fn) => { p.listeners[t] = fn; } },
-    document: { createElement: el, body: { appendChild: () => { p.banners++; } }, documentElement: { appendChild: () => { p.banners++; } } },
+    document: { createElement: el, body: { appendChild: () => { p.banners++; p.order.push('banner'); } }, documentElement: { appendChild: () => { p.banners++; p.order.push('banner'); } } },
     console: { error: () => { p.consoleErr++; }, warn: () => { p.consoleWarn++; }, log: () => { p.consoleOther++; }, info: () => { p.consoleOther++; } },
     t: k => k,
     setTimeout: (fn, ms) => { const id = ++clock.seq; clock.timers.push({ id, at: clock.now + (ms || 0), fn }); return id; },
     clearTimeout: id => { clock.timers = clock.timers.filter(x => x.id !== id); },
-    getLang: o.getLang || (() => o.lang || 'en'),
+    getLang: () => { p.order.push('logger'); return (o.getLang || (() => o.lang || 'en'))(); },
   };
-  if (o.location !== undefined) Object.defineProperty(ctx, 'location', o.location); else ctx.location = { origin: 'https://gc.example', hash: o.hash !== undefined ? o.hash : '#class-activities/ca-23' };
+  /* The device's wall clock: real, unless p.wallNow is set (a device whose clock is wrong). */
+  ctx.Date = class extends Date { constructor(...a) { if (a.length) super(...a); else if (p.wallNow != null) super(p.wallNow); else super(); } static now() { return p.wallNow != null ? p.wallNow : Date.now(); } };
+  if (o.location !== undefined) Object.defineProperty(ctx, 'location', o.location); else ctx.location = { get origin() { p.originReads++; return 'https://gc.example'; }, hash: o.hash !== undefined ? o.hash : '#class-activities/ca-23' };
   ctx.caches = o.caches !== undefined ? o.caches : { keys: async () => ['guitar-class-2026-11-13-f60507df73', 'guitar-class-audio-2026-10-30-ff9e913a6d', 'guitar-class-audio-hashes'] };
   vm.createContext(ctx);
   vm.runInContext(`var auth = null, db = null, lastSetId = ${JSON.stringify(o.set === undefined ? 'm4w2' : o.set)}, IS_TEACHER_MODE = ${!!o.teacher};\n` + code, ctx, { filename: 'boot.js(error log)' });
@@ -252,8 +270,9 @@ async function runAll(LOG, VIEWSRC) {
       ['…but a long code name with no digit is kept', 'renderTeacherStudentDetailPanel is not defined', m => m === 'renderTeacherStudentDetailPanel is not defined'],
       ['a URL query string', 'Failed to fetch https://api.example.com/a?key=SECRETKEY&user=ana', m => m === 'Failed to fetch https://api.example.com/a?[query]'],
       ['a run of 6+ digits (a timestamp, a student number)', 'at 1731500000000 for student 4401234', m => m === 'at [n] for student [n]'],
-      ['the signed-in student\'s own name, any case, whole words only', "Unexpected 'Ana Lopez' in notes by lopez; banana stays", m => m === "Unexpected '[user]' in notes by [user]; banana stays"],
-      ['the signed-in student\'s email local part', 'key ana.lopez not found', m => m === 'key [user] not found'],
+      ['the signed-in student\'s own name, whole words, only as written', "Unexpected 'Ana Lopez' in notes by Lopez; lopez, banana and Banana stay", m => m === "Unexpected '[user]' in notes by [user]; lopez, banana and Banana stay"],
+      ['…a 3-letter name word alone (Ana)', "Unexpected 'Ana' in notes", m => m === "Unexpected '[user]' in notes"],
+      ['the signed-in student\'s email local part, any case', 'key ana.lopez not found, nor ANA.LOPEZ', m => m === 'key [user] not found, nor [user]'],
     ];
     for (const [name, input, test] of cases) {
       const p = makePage(LOG); p.err(input); await p.advance(10);
@@ -281,6 +300,95 @@ async function runAll(LOG, VIEWSRC) {
       const all = [p, s, h, u].flatMap(x => x.writes.map(w => JSON.stringify(w.doc)));
       ok('no written doc holds the uid, the email, or the name', all.every(j => !j.includes(USER.uid) && !j.includes('ana.lopez@') && !/Ana Lopez/i.test(j)), '');
     }
+  }
+
+  say('== a name that is also a word (the scrub must not tell whose error it is)');
+  {
+    const who = name => ({ auth: { currentUser: { uid: 'Xy7Qp2LmN8rT4vW1zA3bC5dE6fG9', email: 'x1@seq.org', displayName: name } } });
+    const run = async (name, msg, stack) => { const p = makePage(LOG, who(name)); p.err(msg, stack ? { error: { stack } } : undefined); await p.advance(10); return p.writes[0] && p.writes[0].doc; };
+    let d = await run('Max Rivera', "Cannot read properties of undefined (reading 'max')", 'TypeError: x\n    at Math.max (<anonymous>)\n    at songKey (https://gc.example/app/tab.js:1:2)');
+    ok("Max: 'max' in the message and Math.max in the stack are untouched", d && d.message === "Cannot read properties of undefined (reading 'max')" && d.stack === 'at Math.max (<anonymous>)\nat songKey (/app/tab.js:1:2)', d && JSON.stringify([d.message, d.stack]));
+    d = await run('Max Rivera', 'Unexpected Max in Rivera notes');
+    ok('…"Max" and "Rivera" as written are scrubbed', d && d.message === 'Unexpected [user] in [user] notes', d && d.message);
+    d = await run('Will Chen', 'The play() request will fail; Will Chen typed it');
+    ok('Will: the word "will" stays, the name "Will Chen" goes', d && d.message === 'The play() request will fail; [user] typed it', d && d.message);
+    d = await run('Amy Song', 'Bad Song row', 'TypeError: x\n    at songKey (https://gc.example/app/song.js:1:2)\n    at openSongLink (https://gc.example/app/explore.js:3:4)');
+    ok('Amy Song: songKey, /app/song.js and openSongLink stay; "Song" as written goes', d && d.message === 'Bad [user] row' && d.stack === 'at songKey (/app/song.js:1:2)\nat openSongLink (/app/explore.js:3:4)', d && JSON.stringify([d.message, d.stack]));
+  }
+
+  say('== half a name never survives the 300-character cut');
+  {
+    const p = makePage(LOG); p.err('y'.repeat(294) + ' Lopez tail'); await p.advance(10);
+    const m = p.writes[0] && p.writes[0].doc.message;
+    ok("'y'×294 + ' Lopez tail' → no 'Lop' left (the name is scrubbed before the cut)", m && m.length <= 300 && !/Lop/i.test(m), JSON.stringify(m && m.slice(-12)));
+    const q = makePage(LOG, { auth: { currentUser: null } }); q.err('Unexpected Lopez in notes'); await q.advance(10);
+    q.ctx.auth = { currentUser: USER }; await q.advance(6000);
+    ok('an error from before sign-in is scrubbed at send time, once someone signs in', q.writes[0] && q.writes[0].doc.message === 'Unexpected [user] in notes', q.writes[0] && q.writes[0].doc.message);
+  }
+
+  say('== a message over the 1,000-character pre-cut');
+  {
+    const p = makePage(LOG); p.err('q'.repeat(4500)); await p.advance(10);
+    const m = p.writes[0] && p.writes[0].doc.message;
+    ok("4,500 q's with no space → 299 q's and … (not \"(no message)\")", m === 'q'.repeat(299) + '…', JSON.stringify(m && m.slice(0, 20)));
+    const q = makePage(LOG); q.err('a'.repeat(990) + 'bob.smith@seq.org'); await q.advance(10);
+    const n = q.writes[0] && q.writes[0].doc.message;
+    ok('…an email cut in half at the pre-cut, with no space: none of it survives', n != null && !/bob|@/.test(n), JSON.stringify(n && n.slice(-20)));
+  }
+
+  say('== a repeat is turned away before any scrubbing');
+  {
+    const p = makePage(LOG);
+    p.err('a'.repeat(4000)); const once = p.originReads;
+    for (let i = 0; i < 50; i++) p.err('a'.repeat(4000));
+    await p.advance(10);
+    ok('the same long message 51 times: scrubbed once (the origin is read ' + once + ' times for the first, ' + (p.originReads - once) + ' more after)', once > 0 && p.originReads === once && p.adds === 1, `first ${once}, after ${p.originReads - once}, adds ${p.adds}`);
+  }
+
+  say('== no written field ever holds a lone surrogate (half an emoji)');
+  {
+    const all = [];
+    const run = async (o, msg, extra) => { const p = makePage(LOG, o); p.err(msg, extra); await p.advance(10); all.push(...p.writes.map(w => w.doc)); return p.writes[0] && p.writes[0].doc; };
+    let d = await run({}, 'Unexpected token in "great job \uD83D"');
+    ok('a lone high surrogate in the message → written, as U+FFFD', d && d.message === 'Unexpected token in "great job \uFFFD"', d && JSON.stringify(d.message));
+    d = await run({}, 'a\uDE00b and 😀 kept');
+    ok('a lone low surrogate → U+FFFD, a whole emoji kept', d && d.message === 'a\uFFFDb and 😀 kept', d && JSON.stringify(d.message));
+    d = await run({}, 'x', { error: { stack: 'E\n    at f\uD83D (https://gc.example/a.js:1:2)' } });
+    ok('…in the stack', d && d.stack === 'at f\uFFFD (/a.js:1:2)', d && JSON.stringify(d.stack));
+    d = await run({}, 'y'.repeat(298) + '😀😀');
+    ok('the 300 cut landing inside an emoji: 298 y\'s, …, no half emoji', d && d.message === 'y'.repeat(298) + '…', d && JSON.stringify(d.message.slice(-4)));
+    d = await run({}, ('z'.repeat(9) + ' ').repeat(99) + 'zzzzzzzzz😀 tail tail');
+    ok('the 1,000 pre-cut landing inside an emoji', d && !LONE.test(d.message), d && JSON.stringify(d.message.slice(-4)));
+    d = await run({}, 'q'.repeat(999) + '😀tail');
+    ok('…with no space in the text', d && !LONE.test(d.message), d && JSON.stringify(d.message.slice(-4)));
+    d = await run({}, 'x', { filename: 'https://gc.example/app/x\uD83D.js' });
+    ok('…in the file', d && d.file === '/app/x\uFFFD.js', d && JSON.stringify(d.file));
+    d = await run({ hash: '#songs/\uD83D', set: 'm4w2\uDE00' }, 'x');
+    ok('…in the page (hash and set id)', d && d.page === '#songs/ set m4w2', d && JSON.stringify(d.page));
+    d = await run({ caches: { keys: async () => ['guitar-class-2026-11-13-f60507df73\uD83D'] } }, 'x');
+    ok('…in the version (a cache name that is not ours is ignored)', d && d.version === 'none', d && JSON.stringify(d.version));
+    ok(`all ${all.length} docs written here: no field holds a lone surrogate, every one passes the rule mirror`, all.length === 9 && all.every(x => !Object.values(x).some(v => typeof v === 'string' && LONE.test(v)) && !rulesRefuse(x).length), all.map(x => rulesRefuse(x).join(',')).join(' | '));
+  }
+
+  say('== a doc the rules would refuse is dropped, never sent');
+  {
+    const p = makePage(LOG, { wallNow: Date.UTC(10000, 0, 2, 12) });
+    p.err('clock in the year 10000'); p.err('another one');
+    await p.advance(10);
+    ok('a device clock in the year 10000 (day "10000-01-02"): nothing sent, nothing thrown, banner shown', p.adds === 0 && p.threw === 0 && p.banners === 1, `adds ${p.adds}, threw ${p.threw}`);
+    p.wallNow = null; p.err('clock fixed');
+    await p.advance(10);
+    ok('…the log is not turned off by a drop: the next good doc is written', p.adds === 1 && p.writes[0].doc.message === 'clock fixed' && !rulesRefuse(p.writes[0].doc).length, `adds ${p.adds}`);
+    const q = makePage(LOG); q.err('x', { lineno: 99999999, colno: -0 }); await q.advance(10);
+    ok('line 99,999,999 and col -0 → written as 0 and 0 (inside the rules\' range, an int)', q.writes[0] && q.writes[0].doc.line === 0 && Object.is(q.writes[0].doc.col, 0), q.writes[0] && JSON.stringify([q.writes[0].doc.line, q.writes[0].doc.col]));
+    const r = makePage(LOG, { set: 'm4w2 <b>' }); r.err('x'); await r.advance(10);
+    ok('a set id with a space and a tag → only its letters, digits, - and _', r.writes[0] && r.writes[0].doc.page === '#class-activities/ca-23 set m4w2b', r.writes[0] && r.writes[0].doc.page);
+  }
+
+  say('== the banner comes first');
+  {
+    const p = makePage(LOG); p.err('first'); await p.advance(10);
+    ok('the banner is drawn before the logger runs', p.order[0] === 'banner' && p.order.includes('logger'), p.order.join(','));
   }
 
   say('== the ResizeObserver note is not logged (and still shows no banner)');
@@ -331,16 +439,30 @@ async function runAll(LOG, VIEWSRC) {
     const deleted = [];
     const mk = list => ({ empty: !list.length, docs: list.map((d, i) => ({ data: () => d, ref: { id: 'd' + i, d } })) });
     let store = docs.slice();
-    const db = { collection: () => ({
-      orderBy: () => ({ limit: n => ({ get: async () => { if (o.denied) throw Object.assign(new Error('denied'), { code: 'permission-denied' }); if (o.offline) throw new Error('unavailable'); return mk(store.slice().sort((a, b) => (a.day < b.day ? 1 : -1)).slice(0, n)); } }) }),
-      where: (f, op, v) => ({ limit: n => ({ get: async () => mk(store.filter(d => d.day < v).slice(0, n)) }) }),
-    }), batch: () => { const ops = []; return { delete: r => ops.push(r), commit: async () => { for (const r of ops) { store = store.filter(x => x !== r.d); deleted.push(r.d); } } }; } };
-    const ctx = { document: { getElementById: id => id === 't-grid-container' ? box : null }, teacherView: o.viewNow || 'errors', TEACHER_NO_REFRESH_BAR_VIEWS: ['mic'], ensureDb: async () => db, db, confirm: () => o.confirm !== false, console };
+    /* A query honours every where() operator, orderBy and limit, as Firestore does (a stub that ignored
+       the operator once let a "<=" delete pass). */
+    const OPS = { '<': (a, b) => a < b, '<=': (a, b) => a <= b, '>': (a, b) => a > b, '>=': (a, b) => a >= b, '==': (a, b) => a === b };
+    const query = (wh = [], ord = null) => ({
+      where: (f, op, v) => { if (!OPS[op]) throw new Error('stub: operator ' + op); return query([...wh, [f, op, v]], ord); },
+      orderBy: (f, dir) => query(wh, [f, dir]),
+      limit: n => ({ get: async () => {
+        reads.push(wh.map(w => w.join(' ')).join(' & ') + (ord ? ' order ' + ord.join(' ') : ''));
+        if (o.denied) throw Object.assign(new Error('denied'), { code: 'permission-denied' }); if (o.offline) throw new Error('unavailable');
+        let list = store.filter(d => wh.every(([f, op, v]) => typeof d[f] === typeof v && OPS[op](d[f], v)));
+        if (ord) list = list.slice().sort((a, b) => (a[ord[0]] < b[ord[0]] ? 1 : a[ord[0]] > b[ord[0]] ? -1 : 0) * (ord[1] === 'desc' ? 1 : -1));
+        return mk(list.slice(0, n));
+      } }),
+    });
+    const reads = [];
+    const db = { collection: () => query(), batch: () => { const ops = []; return { delete: r => ops.push(r), commit: async () => { for (const r of ops) { store = store.filter(x => x !== r.d); deleted.push(r.d); } } }; } };
+    const ctx = { document: { getElementById: id => id === 't-grid-container' ? box : null }, teacherView: o.viewNow || 'errors', ensureDb: async () => db, db, confirm: m => { confirms.push(m); return o.confirm !== false; }, console };
+    const confirms = [];
     vm.createContext(ctx);
-    vm.runInContext(ESC + '\nvar teacherView = ' + JSON.stringify(o.viewNow || 'errors') + ';\n' + VIEWSRC, ctx, { filename: 'teacher-errors.js' });
-    return { ctx, box, deleted, store: () => store };
+    vm.runInContext(ESC + '\nvar teacherView = ' + JSON.stringify(o.viewNow || 'errors') + ';\nconst TEACHER_NO_REFRESH_BAR_VIEWS = ' + NO_BAR + ';\n' + VIEWSRC, ctx, { filename: 'teacher-errors.js' });
+    return { ctx, box, deleted, store: () => store, reads, confirms };
   };
   const D = (o) => Object.assign({ kind: 'error', message: 'A', file: '/app/a.js', line: 1, col: 2, stack: 'at f (/app/a.js:1:2)', page: '#songs set m4w2', version: '2026-11-13-f60507df73', day: '2026-11-13', lang: 'en' }, o);
+  const latest = utcDay(1);
   {
     const v = view([]); await vm.runInContext('renderTeacherErrors()', v.ctx);
     ok('empty: "No errors logged."', v.box.innerHTML.includes('No errors logged.'));
@@ -349,6 +471,29 @@ async function runAll(LOG, VIEWSRC) {
     ok('rules not published (permission-denied): says so, with the paste steps', /rules are not published/.test(w.box.innerHTML) && /Rules → Publish/.test(w.box.innerHTML), w.box.innerHTML.slice(0, 120));
     const x = view([], { offline: true }); await vm.runInContext('renderTeacherErrors()', x.ctx);
     ok('any other read failure: "Could not load", with Refresh', /Could not load the error log/.test(x.box.innerHTML));
+    const y = view([], { offline: true, viewNow: 'mic' }); y.box.innerHTML = 'MIC VIEW'; await vm.runInContext('renderTeacherErrors()', y.ctx);
+    ok('a failed read that lands after the teacher switched views paints nothing over the other view', !/Could not load/.test(y.box.innerHTML), y.box.innerHTML.slice(0, 80));
+  }
+  {
+    const junk = Array.from({ length: 1000 }, (_, i) => D({ day: '9999-99-99', message: 'junk ' + (i % 3) }));
+    const real = [D({ message: 'REAL today', day: utcDay(0) }), D({ message: 'REAL tomorrow (the latest day the rules accept)', day: latest })];
+    const v = view([...junk, D({ message: 'two days ahead', day: utcDay(2) }), ...real]); await vm.runInContext('renderTeacherErrors()', v.ctx);
+    const h = v.box.innerHTML;
+    ok('1,001 docs dated after ' + latest + ' (a wrong clock, 9999-99-99): none shown, the real ones are', !/junk|two days ahead/.test(h) && h.includes('REAL today') && h.includes('REAL tomorrow'), h.slice(0, 200));
+    ok('…one plain line says they were hidden', h.includes('1000 or more entries with an impossible date (after ' + latest + ') were hidden.'), (h.match(/[^>]*impossible date[^<]*/) || [''])[0]);
+    ok('…the read is day <= ' + latest + ', newest first (one field: no composite index)', v.reads[0] === 'day <= ' + latest + ' order day desc', v.reads.join(' | '));
+    await vm.runInContext('teacherErrorsDeleteOld()', v.ctx); await tick();
+    ok('"Delete older than 30 days" also deletes the 1,001 impossible ones, and keeps both real ones', v.deleted.length === 1001 && v.store().length === 2, `deleted ${v.deleted.length}, left ${v.store().length}`);
+    ok('…its confirm says so', /and every one with an impossible date \(after /.test(v.confirms[0] || ''), v.confirms[0]);
+    ok('…the view then has no hidden-entries line', !/impossible date/.test(v.box.innerHTML), '');
+    const w = view([D({ day: utcDay(2), message: 'one ahead' }), D({})]); await vm.runInContext('renderTeacherErrors()', w.ctx);
+    ok('exactly one hidden: "1 entry … was hidden"', w.box.innerHTML.includes('1 entry with an impossible date (after ' + latest + ') was hidden.'), (w.box.innerHTML.match(/[^>]*impossible date[^<]*/) || [''])[0]);
+  }
+  {
+    const v = view(Array.from({ length: 1000 }, () => D({}))); await vm.runInContext('renderTeacherErrors()', v.ctx);
+    ok('exactly 1,000 logged: no "more than" note, the total reads 1000', !/More than/.test(v.box.innerHTML) && v.box.innerHTML.includes('<td>1000</td>'));
+    const w = view(Array.from({ length: 1001 }, () => D({}))); await vm.runInContext('renderTeacherErrors()', w.ctx);
+    ok('1,001 logged: the "more than 1000" note, and 1000 counted', /More than 1000 are logged/.test(w.box.innerHTML) && w.box.innerHTML.includes('<td>1000</td>'), (w.box.innerHTML.match(/More than[^<]*/) || [''])[0]);
   }
   {
     const docs = [D({}), D({}), D({}), D({ day: '2026-11-12', page: '#games', version: '2026-11-12-aaaaaaaaaa' }), D({ message: 'B', day: '2026-11-12', kind: 'rejection' }), D({ message: 'B', day: '2026-11-12', kind: 'rejection', lang: 'es' }), D({ message: 'C', day: '2026-11-01' })];
@@ -375,13 +520,13 @@ async function runAll(LOG, VIEWSRC) {
   }
   {
     const cutoff = vm.runInContext('teacherErrorsDay(30)', view([]).ctx);
-    const old = D({ day: '2020-01-01', message: 'old' }), recent = D({ day: today, message: 'new' });
+    const old = D({ day: '2020-01-01', message: 'old' }), recent = D({ day: today, message: 'new' }), onCutoff = D({ day: cutoff, message: 'exactly 30 days' });
     const many = Array.from({ length: 900 }, (_, i) => D({ day: '2021-02-03', message: 'bulk ' + i }));
-    const v = view([old, recent, ...many]);
+    const v = view([old, recent, onCutoff, ...many]);
     await vm.runInContext('teacherErrorsDeleteOld()', v.ctx);
-    ok(`delete older than 30 days (before ${cutoff}): the 901 old docs go, in batches of 400, the recent one stays`, v.deleted.length === 901 && v.store().length === 1 && v.store()[0] === recent, `deleted ${v.deleted.length}, left ${v.store().length}`);
+    ok(`delete older than 30 days (before ${cutoff}): the 901 old docs go, in batches of 400; the recent one and the one ON the cutoff stay`, v.deleted.length === 901 && v.store().length === 2 && v.store().includes(recent) && v.store().includes(onCutoff), `deleted ${v.deleted.length}, left ${v.store().map(d => d.day).join(',')}`);
     await tick();
-    ok('…the view then says how many', v.box.innerHTML.includes('Deleted 901 errors from before ' + cutoff), v.box.innerHTML.slice(0, 300));
+    ok('…the view then says how many', v.box.innerHTML.includes('Deleted 901 errors from before ' + cutoff + ' or after ' + latest + '.'), v.box.innerHTML.slice(0, 300));
     const w = view([old, recent], { confirm: false });
     await vm.runInContext('teacherErrorsDeleteOld()', w.ctx);
     ok('Cancel on the confirm deletes nothing', w.deleted.length === 0 && w.store().length === 2);
@@ -405,6 +550,15 @@ const FAULTS = [
   ['the 10-minute give-up removed', 'L', 'if(polls >= POLL_TRIES){ queue.length = 0; return; }', ''],
   ['several writes in flight at once', 'L', 'if(off || sending || !queue.length) return;', 'if(off || !queue.length) return;'],
   ['the view stops escaping the message', 'V', '<b>${escHtml(g.message)}</b>', '<b>${g.message}</b>'],
+  ['clean() keeps lone surrogates', 'L', "m => m.length === 2 ? m : '\\uFFFD'", 'm => m'],
+  ['clean() no longer called by scrub()', 'L', '    s = clean(s);\n', ''],
+  ['fits() never drops a doc', 'L', 'if(!fits(d)){ next(); return; }', ''],
+  ['the raw repeat check removed', 'L', 'if(rawSeen.has(rawKey)) return;', ''],
+  ['the display name matched in any case again', 'L', "[asWritten, 'gu']", "[asWritten, 'giu']"],
+  ['the account not scrubbed before the cut', 'L', 'const who = whoScrub();\n      const doc', 'const who = null;\n      const doc'],
+  ['the pre-cut drops the last "word" even with no space', 'L', 's = /\\s/.test(s) ?', 's = true ?'],
+  ['the view reads impossible dates too', 'V', ".where('day', '<=', latest).orderBy", '.orderBy'],
+  ['the delete skips impossible dates', 'V', "[['<', cutoff], ['>', latest]]", "[['<', cutoff]]"],
 ];
 
 console.log('site-errors-sim: the error log in app/boot.js (' + LOGGER.split('\n').length + ' lines) and teacher-errors.js (' + VIEW.split('\n').length + ' lines); rule mirror: ' + R.only.length + ' fields, ' + Object.keys(R.caps).length + ' caps, from ' + join(ROOT, 'firestore.rules'));
