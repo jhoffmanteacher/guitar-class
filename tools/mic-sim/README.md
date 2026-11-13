@@ -65,14 +65,132 @@ script.
   `--coach=<file>` runs another coach.js for a before / after). Unlike `power-switch.mjs` (one change, sine sums, a
   copy of ccLoop's logic) it plays every beat of every round and includes the site's 70-1500 Hz mic filters, which
   the older tools here leave out. Synthetic. One number is fitted to the classroom takes (how long a string rings, `ringS`: the reason is in
-  `student.mjs`); the touches, the rooms and the mics are guesses until the takes are run against them. Not in `checks.mjs`. Power Chord Switch only so far; `student.mjs` knows nothing about the site, so
-  the next game needs only its own runner.
+  `student.mjs`); the touches, the rooms and the mics are guesses until the takes are run against them. Not in `checks.mjs`. Power Chord Switch and Change Up (`--game=changeup`, below); `student.mjs` knows nothing
+  about the site, so the next game needs only its own runner.
+  **The `neverMoves` row before 2026-11-11 (late):** that student held chord 1 for the whole game, so on a two-chord
+  pair every second change it marked "held" was really the right chord (`--replay` showed all 7 G5>F5 changes of an
+  F5-G5 game as "held, said ok"). Every "never moved: caught" figure for `neverMoves` measured before then (WORKFLOW.md's
+  first-numbers entry: "caught 28%") was measured with that flawed student. A held change now always strums the old
+  chord of that change. The `beginner` student moves too, on a held change right after another held, a wrong or a
+  silent one (the hand used to keep what it last strummed: on a two-chord pair that can be the new chord; after a wrong
+  change, the chord one fret high); later changes of that game can then read differently, because the student's one
+  random stream also makes the pluck noise. Beginner figures from before then are close but not the same; students
+  who never hold (steady, wrongFret, thumb...) and the no-guitar cases are unchanged byte for byte. Virtual takes saved
+  with `--takes-out` before then carry the old key in `virtual.key` for those changes; nothing in this folder reads
+  `virtual.key` (replay-takes.mjs copies the field into a summary and does not use it; eval-takes.mjs ignores it), and
+  the 462 of 480 / 924 of 960 figures compare the site's replay with the site's own saved verdicts, not with the key.
   **`--no-guitar`** (2026-11-11, Jonathan: "it's marking things right where there's nothing playing"): twelve cases
   in which no chord is played in the whole game (a dead mic, a quiet room, a fan, one voice, a class talking, bumps,
   typing, a partner's guitar, a class of guitars, a loud class, desk taps on every beat, strums across muted
   strings; `NO_GUITAR` in the file). A case passes only when nothing is marked right, and the run exits 1 when any
   fails. On the current rule (1.8 / 2.19) 9 of 12 fail, which is the bug it was written to show, so it is not in
   `checks.mjs`: it goes there when the game passes it.
+  **The muted-strums case before 2026-11-12:** the "muted" strum plucked the RIGHT chord's strings and lifted them 4 ms
+  later; they still rang when the pitch readings began, so the game heard the right chord. Every muted-strums figure
+  before then, in both games, and the "9 of 12" headline, were measured with that strum. It is now a damped scratch
+  with no pitch (`student.mjs`, kind `mute`). Measured after the change (60 BPM, one seed): Power Chord Switch F5-G5
+  still said right 15 of 15 (before: 5 with 3+ pitch readings and 10 on timing alone; now 0 and 15), Change Up's three
+  default loops 21 of 21 (before 16 and 5; now 0 and 21). A strum with under 3 pitch readings counts on timing alone,
+  by design (ccLoop's comment), so a pitchless scratch on the beat is still marked right, and both runs still read
+  9 of 12 FAIL. Every other case and every table student gave byte-identical `--json` before and after.
+  **`--game=changeup`** (2026-11-11): the same test on CHANGE UP, the sister game on open chords (same `ccLoop`, but the
+  shared, looser strum ratios `CHK_ONSET_RATIO` / `CHK_HF_RATIO`, 1.4 / 1.7, and the 0.55 chord gate). Its defaults: 40, 60,
+  90, 120 BPM, a change every bar, the loops Am-Em, G-C-D, C-G-Am-F (`--pairs=all` = its 21 loops; Random 4 is left out,
+  it draws with `Math.random`). The student's wrong chord is another chord of the loop (a two-chord loop: one from
+  `CC_RANDOM_POOL`), and a held chord is the old chord strummed again. The chords in the student's hands are worked out
+  from `CHORD_DIAGRAMS` in the tool, not by the game's own `chordMidis`; a fake-world check stops the run when the two
+  disagree. `--no-guitar` works with it. `tools/grid-sim.mjs` Part 2 plays Change Up on scripted frames with no sound;
+  this one plays sound. Synthetic sound, not a classroom.
+  Its table splits two columns by what the game lets through BY DESIGN (worked out in the tool from the chord shapes'
+  pitch classes, never by asking the game; such a change has `byDesign: true` in `--json`):
+  - **other chord caught: no shared note / rule 2 / passes both (by design).** ccResolvePend grades with two rules:
+    rule 1, "some tone of the NEW chord" is heard; rule 2, notes only the OLD chord has must not outnumber notes only the
+    new one has. The tool applies both to the played shape, one ideal reading per string (`wrongClass`): "no shared
+    note" = rule 1 catches it; "rule 2" = it shares a note with the new chord but rule 2 should still catch it (Am>Em
+    playing C, Am>F playing A, Em>C playing G); "passes both" = the rules let it through by design (Em>Am playing Dm, G>C
+    playing Em; the old chord matters: F>Am playing Dm is a rule-2 one).
+    The first two columns measure a miss; only "passes both" is `byDesign` (`wrongClass` in `--json` says which).
+    `node tools/mic-sim/closed-loop.mjs list --game=changeup` counts every wrong chord a student can be given: 181
+    (loop, old, new, other), 129 different; 61 with no shared note, 120 sharing one, of which rule 2 should catch 31 and
+    89 pass both. The ideal readings are what the rules intend: real readings are fewer and lean on the bass string.
+  - **old chord again caught: rest / lenient pair.** The held chord (the chord the change leaves, strummed on the change;
+    `neverMoves` does this on every change, one chord behind). A "lenient pair" is old and new being one of the pairs the
+    same comment says it cannot tell apart ON PURPOSE (E/Em, A/Am, C/Am, G/Em).
+  Measured 2026-11-12, `--game=changeup --students=beginner,wrongFret,neverMoves --rooms=quiet,class --seeds=1` (72
+  games, the default loops and tempos): a wrong chord with no shared note was caught 68 of 75 times (7 said right, 3 of
+  them with under 3 pitch readings, on timing alone); a "rule 2" one 33 of 46 (13 said right: changes the game's rule 2
+  is written to catch, so they are misses too); one that passes both rules 41 of 75 (34 said right, by design). The
+  figure before 2026-11-12, "shares a note 74 of 121 (47 said right, by design)", lumped the rule-2 ones in with the
+  by-design ones and is withdrawn. The
+  old chord again (none of the default loops has a lenient pair) was caught 116 of 180 (64 said right). The lenient
+  pairs need loops that hold them: `--students=neverMoves --rooms=quiet --pairs=C-Am-F-G,G-Em-C-D,Am-C-G --bpm=60,90
+  --seeds=1` caught the rest 17 of 28 and the lenient pairs 5 of 14. The earlier "28 of 30 / 39 of 157" split by the
+  lenient pairs was the wrong split for a wrong chord and is withdrawn.
+  Power Chord Switch keeps its column name "never moved: caught", which means the same thing (the old chord strummed
+  again) since the d75f0ee fix.
+  Three options for any game: `--root=<folder>` (load the site from another folder: a checkout or a copy with a planted
+  fault), `--against=<file>` (compare with an earlier `--json` of the same command) and `--replay=<n>` (play game n
+  alone and print every change; n a positive whole number, anything else exits 2). `--against` ranks each verdict that
+  moved by the answer key: for a right chord, "right" beats the two wrong verdicts; for a wrong or held chord, "wrong
+  chord" beats "no strum", which beats "right"; for no strum, "no strum" beats "wrong chord", which beats "right". A
+  move down is WORSE (so "wrong chord" -> "right" with nothing played is worse), up is better, sideways is "between two
+  wrong verdicts". A by-design Change Up mistake (a "passes both" wrong chord, a lenient-pair held one) moving between
+  "wrong chord" and "right" is counted on its own; moving INTO "no strum" it is WORSE (the strum went unheard), out of
+  it better. A "rule 2" wrong chord is not by design: "wrong chord" -> "right" is WORSE.
+  With `--against` the exit code is about the comparison ALONE, in `--no-guitar` too: 0 = no verdict moved; 1 = one
+  moved, or the site graded a different set of changes with every world setting the same (a site change such as the
+  number of changes a round grades: "the SITE graded a different set of changes in ... games", those games not
+  compared); 2 = not the same command (game count, game, case, student, room, mic, rate, `--lag`, fps, tempo, loop or
+  seed differ; or a `--json` from another student model: every game records `model` = `STUDENT_MODEL` in
+  `student.mjs`, and files from before 2026-11-12 have none, so they are refused), the same file as `--json`, or a file
+  that is not a `--json` of this tool. The file is read before the run starts. Every option is one `--name=value`
+  argument: an unknown or misspelt option, a space instead of `=`, an option given twice or a number that is not one
+  exits 2 before anything runs, and so does any error in the run, so 1 always means the site graded differently (or,
+  without `--against`, a no-guitar case failed). `--replay` is refused with `--against` or `--json`. The first line
+  printed names the site folder the scripts came from.
+  **To see a change to the strum rule or the miss window, name the players who sit near them.** A steady player in a
+  quiet room is far from both, and a planted `CHK_ONSET_RATIO` 1.4 -> 1.7 or a miss window of 0.25 beat moved no verdict
+  there. What moves:
+  - the strum rule (onset ratios): the no-guitar cases with sound that is not a strum (one voice, a class talking, a
+    partner, class guitars). `--game=changeup --no-guitar --bpm=60 --pairs=Am-Em --seeds=1 --against=<today's --json>`
+    with the 1.7 ratio: "9 of 84 graded changes differ (5 worse by the answer key, 4 better, 0 a mistake the game may
+    pass by design, 0 between two wrong verdicts) in 12 games  RED" (the 5 worse: a class talking or a loud class, no
+    chord played, "wrong chord" -> "right"). Soft players in a class move only a little: `--students=softThumb,soft
+    --rooms=class --bpm=120` moved 1 of 42.
+  - the miss window: a student who is late ON THE CHANGE (`beginner`, `changeLateMs`), at a fast tempo. A student late on
+    every beat (`late`) is not enough: the grid follows them. `--game=changeup --students=late,loose,beginner
+    --rooms=quiet --bpm=120 --seeds=1` with 0.25 beat: "2 of 63 graded changes differ (2 worse by the answer key) RED",
+    both in `beginner` games (a right chord and a held chord, each now "no strum"; printed before the ranking above, and
+    both rank worse under it too).
+- **REAL TAKES in `closed-loop.mjs` (2026-11-12; Jonathan: "we'll have to rely on recorded student takes. build that
+  into the closed loop check").** Every Power Chord Switch run of `closed-loop.mjs`, the table and `--no-guitar`, ends
+  with the take summaries in `tools/mic-sim/takes/` replayed through the loaded site's real `ccLoop` with the run's
+  `--rule` at the site's own strum ratios: takes and changes, windows with no strum in the recording that the game
+  HEARD and marked RIGHT, real strums it LOST, the "reproduced" error bar, and the ASK JONATHAN lines. It is
+  `replay-takes.mjs`'s code, imported, not copied; `replay-takes.mjs` itself prints byte-identical text and `--json`
+  to before. `--no-takes` leaves it out, `--takes-only` runs only it; `--root`, `--coach` and `--rule` apply to it.
+  `--json` is `{ tool, games, realTakes }` (a bare list of games from before still reads as a run without takes), and
+  `--against` compares the takes per take and per change, prints them FIRST, and ranks them by the recording: no strum
+  moving to "heard" or "right" is WORSE, a real strum newly lost is WORSE, "right" <-> "wrong chord" on a real strum
+  is not ranked (the takes do not say which chord was played). A run with the takes against a file without them (or
+  the other way) is not the same command (exit 2). Real takes outrank the synthetic rooms when the two disagree: the
+  rooms are guesses beside them. Time: 4-6 s with nothing cached, under 1 s cached (one small file per summary and
+  site code in `tools/mic-sim/.replay-cache/`, gitignored; the key hashes this tool, `replay-takes.mjs`, every script
+  the site ran and the summary, so any change replays again). `replay-takes.mjs` alone takes 4-5 minutes because of
+  the three `ring` rules; base alone is 5 s.
+  What it can judge: the strum rule, the miss window, the grid and `ccResolvePend`'s grading, on what the mic really
+  heard. What it cannot: a change to `coachDetectPitch`, the mic chain or the 1024 / 512 window sizes (the summaries
+  hold readings made with the old ones; a changed detector or chain prints an ASK line), and its frames are evenly
+  spaced. It knows only whether there was a strum, never which chord: a change to the pitch grading shows in "marked
+  right" but cannot be ranked. Treat 3 or fewer changes between two rules as no difference.
+  Measured 2026-11-12 on the 21 summaries (210 judged changes; 54 with no strum in the window, 150 real strums the game
+  heard), `node tools/mic-sim/closed-loop.mjs --takes-only` and `--root=<copy>` for the other ratios:
+  no strum heard / marked right / real strums lost: today (1.8 / 2.19) 37 / 24 / 6; 1.5 / 1.83 50 / 32 / 1;
+  1.9 / 2.31 35 / 22 / 9; 2.0 / 2.43 31 / 20 / 14; 2.1 / 2.55 30 / 19 / 16; 2.2 / 2.67 22 / 13 / 18; `half3` at
+  today's ratios 37 / 19 / 6 (real strums marked right 81 -> 64). Error bar: 165 of 210 saved verdicts reproduced
+  (heard or not: 200 of 210). Planted in a copy: a looser ratio (1.5 / 1.83) gave "no strum in the recording 15
+  worse"; a stricter one (2.2 / 2.67) "1 worse, 18 better; real strums 14 newly LOST"; a stricter pitch rule
+  (`anyNew > 0.6`) "0 worse, 11 better, 28 right <-> wrong chord on a real strum".
 - **`candidates.mjs`** (2026-11-11): candidate Power Chord Switch grading rules (`ring`, `half`, `half3`, `both`,
   `both3`; what each does is in its header), applied to coach.js IN MEMORY. None is in coach.js. `closed-loop.mjs
   --rule=<name>` plays one; `replay-takes.mjs` replays them on real takes.
@@ -91,7 +209,8 @@ script.
   session. On model takes the summary replay gave the audio replay's verdict on 924 of 960 changes (heard or not:
   950 of 960). A summary cannot test a change to `coachDetectPitch`, the mic chain or the window sizes: keep the
   audio (outside the repo) for those.
-- **When to ask Jonathan for new takes:** `replay-takes.mjs` prints "ASK JONATHAN" with the reasons (no summaries; the
+- **When to ask Jonathan for new takes:** `closed-loop.mjs` (its REAL TAKES section) and `replay-takes.mjs` print
+  "ASK JONATHAN" with the reasons (no summaries; the
   detector changed; no take was graded at today's strum ratios; or, as a backup, the newest take is older than the
   last commit that changed a listening constant's own line in coach.js). Pass that on to him in
   the report; do not ask otherwise. Old takes or few takes alone print a "Note" line, which is not a reason to ask

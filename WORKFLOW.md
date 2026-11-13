@@ -383,6 +383,29 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-12 — Power Chord Switch: the recorded student takes are inside the closed-loop check** (Jonathan: "it's hard
+      for me to do that. we'll have to rely on recorded student takes. build that into the closed loop check"). Tools only
+      (`tools/mic-sim/`); no site file and no listening rule changed. Shipped without a further review round (his call,
+      after three rounds on the same branch).
+      What changed: `node tools/mic-sim/closed-loop.mjs` now ends every Power Chord Switch run with a REAL TAKES
+      section: the 21 take summaries in `tools/mic-sim/takes/` replayed through the real `ccLoop` (4 to 6 s, under 1 s
+      cached; `--no-takes`, `--takes-only`). `--against=<json>` compares a changed rule with today's and prints the
+      real takes FIRST: they outrank the synthetic rooms. The same tool can play Change Up (`--game=changeup`), with a
+      wrong chord split by both of `ccResolvePend`'s rules, and replays one game (`--replay`).
+      Today's rule (1.8 / 2.19) on the 21 takes, 210 changes: of 54 windows where nobody strummed the game hears 37
+      and marks 24 right; of 150 real strums it loses 6. The replay gives back the saved verdict on 165 of 210 changes
+      (heard or not: 200 of 210): that is the error bar. Read "3 or fewer" as no difference.
+      Sweep, measured not shipped (heard / marked right / real strums lost): 1.5 → 50 / 32 / 1; 1.8 today → 37 / 24 / 6;
+      1.9 → 35 / 22 / 9; 2.0 → 31 / 20 / 14; 2.2 → 22 / 13 / 18. **No ratio change is supported by the takes:** every
+      stricter step that removes false rights loses more real strums than it is worth. `half3` loses no strum but
+      re-marks 17 real strums as wrong chord, which the takes cannot judge. `ring` and `half` stay rejected.
+      The two sets of takes disagree (the 14 graded at 2.2 favour a stricter rule, the 7 graded at 1.4 lose 17 of 81
+      strums to it), and NO take has been recorded at today's ratios. **What would settle it: about 40 more Power
+      Chord Switch takes at today's ratios, from three or more class periods** (the console's "stop after" number
+      above the count; then `node tools/mic-sim/takes-in.mjs`). The tool prints "ASK JONATHAN" until then.
+      Change Up, synthetic sound only: a wrong chord sharing no note with the new one is caught 68 of 75 times; one
+      that rule 2 should catch 33 of 46; 9 of 12 no-guitar cases fail in both games.
+
 - [x] **2026-11-12 — `tools/update-reload-loop.mjs`: the update reload lands where you were, played in a real browser**
       (work order `Claude outputs/WORK-ORDER-closed-loop-tests.md`, Part 2; Reviewed, two rounds, the second with no
       BLOCKER or MAJOR). What it is: it serves version 1 and version 2 of the site (one marker string apart, `checks.mjs`

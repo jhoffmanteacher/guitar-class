@@ -109,9 +109,11 @@ const VM_HELPERS = `globalThis.__rp = {
 };`;
 
 const sites = {};
-function siteFor(rule, ratio, fromSummary){
-  const k = rule + '|' + (ratio ? ratio.join('/') : 'now') + '|' + (fromSummary ? 's' : 'a');
-  if (!sites[k]){ sites[k] = makeSite(null, rule, ratio, !!fromSummary); sites[k].run(VM_HELPERS); }
+/* `at`: { root, coach } loads the site from another folder or coach.js from a file (closed-loop.mjs --root / --coach); left out, this repo. */
+function siteFor(rule, ratio, fromSummary, at){
+  const o = at || {};
+  const k = rule + '|' + (ratio ? ratio.join('/') : 'now') + '|' + (fromSummary ? 's' : 'a') + '|' + (o.root || '') + '|' + (o.coach || '');
+  if (!sites[k]){ sites[k] = makeSite(o.coach || null, rule, ratio, !!fromSummary, o.root || null); sites[k].run(VM_HELPERS); }
   return sites[k];
 }
 /* What a summary's pitch and energy were measured with: coachDetectPitch's text and the mic chain. A summary made with another stamp is stale for pitch. */
@@ -218,16 +220,22 @@ export function loadAudio(folder){
 /* Takes from the summaries in the repo. */
 export function loadSummaries(dir){
   if (!existsSync(dir)) return [];
-  return readdirSync(dir).filter(f => /^[0-9a-f]{12}\.json$/.test(f)).sort().map(f => JSON.parse(readFileSync(join(dir, f), 'utf8'))).filter(s => s.summary === 1)
+  return readdirSync(dir).filter(f => /^[0-9a-f]{12}\.json$/.test(f)).sort().map(f => { const text = readFileSync(join(dir, f), 'utf8'); return Object.assign(JSON.parse(text), { __hash: createHash('sha1').update(text).digest('hex') }); }).filter(s => s.summary === 1)
     .sort((a, b) => String(b.day).localeCompare(String(a.day)) || a.id.localeCompare(b.id))
-    .map((s, k) => ({ take: 'S' + String(k + 1).padStart(2, '0'), id: s.id, day: s.day, period: s.period, d: s.take, srcRate: s.srcRate, own: s.truth.own, mapMs: s.truth.mapMs, mapFrom: s.truth.mapFrom,
+    .map((s, k) => ({ take: 'S' + String(k + 1).padStart(2, '0'), id: s.id, hash: s.__hash, day: s.day, period: s.period, d: s.take, srcRate: s.srcRate, own: s.truth.own, mapMs: s.truth.mapMs, mapFrom: s.truth.mapFrom,
       notes: s.truth.notes.map(n => ({ i: n.i, stage: n.stage, site: n.site, played: n.played, why: { cat: n.cat } })), detector: s.detector,
       sum: { E: unb64(s.E), D: unb64(s.D), pitch: Object.fromEntries(Object.entries(s.pitch).map(([k, v]) => [k, unb64(v)])) } }));
 }
 /* Runs every rule on every take; res[rule@own|now] = { expected index: { verdict, readings } }. */
-export function replayAll(takes, rules, now){
+/* `cache` (closed-loop.mjs passes one; this tool's own command line does not): { key(site, tk), get(key), set(key, result) }, so a replay already
+   made by the same site code on the same summary is read back instead of run again. */
+export function replayAll(takes, rules, now, at, cache){
   takes.forEach(tk => { tk.res = {};
-    for (const rule of rules) for (const [mode, ratio] of [['own', tk.own], ['now', now]]) tk.res[rule + '@' + mode] = replayTake(siteFor(rule, ratio, !!tk.sum), tk.d, tk.sum || tk.proc, tk.srcRate, tk.mapMs);
+    for (const rule of rules) for (const [mode, ratio] of [['own', tk.own], ['now', now]]){
+      const site = siteFor(rule, ratio, !!tk.sum, at), k = cache && tk.hash ? cache.key(site, tk) : null, hit = k ? cache.get(k) : null;
+      tk.res[rule + '@' + mode] = hit || replayTake(site, tk.d, tk.sum || tk.proc, tk.srcRate, tk.mapMs);
+      if (k && !hit) cache.set(k, tk.res[rule + '@' + mode]);
+    }
   });
 }
 /* Should Jonathan be asked for new takes? Reasons, from the summaries and the repo's history. */
@@ -291,8 +299,8 @@ export function printReport(takes, rules, NOW, log){
   if (noMap.length) log(`\nclock offset not from strums: ${noMap.map(t => t.take + ' (' + t.mapFrom + ')').join(', ')}`);
   return report;
 }
-export function todayRatios(){ const s = siteFor('base', null, false); return [Number(s.run('CC_POWER_ONSET_RATIO')), Number(s.run('CC_POWER_HF_RATIO'))]; }
-export function baseSite(){ return siteFor('base', null, false); }
+export function todayRatios(at){ const s = siteFor('base', null, false, at); return [Number(s.run('CC_POWER_ONSET_RATIO')), Number(s.run('CC_POWER_HF_RATIO'))]; }
+export function baseSite(at){ return siteFor('base', null, false, at); }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]){
   const args = process.argv.slice(2), folder = args.find(a => !a.startsWith('--'));

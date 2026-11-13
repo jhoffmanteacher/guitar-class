@@ -13,8 +13,11 @@
                it is plucked again or the hand lifts.
      hand      `touch`: pick (bright, a scrape, fast strum), thumb (dark, soft
                attack, slow strum), finger (between the two).
-     mistakes  per graded change: the wrong chord (the shape one fret high), a
-               chord that never changed (held), no strum at all (skip).
+     mistakes  per graded change: the wrong chord (the shape one fret high; or,
+               when the round gives a `wrongPool`, another chord from it: Change
+               Up's open chords), the old chord strummed again (held: the chord
+               the change leaves, so `neverMoves` is one chord behind on every
+               change), no strum at all (skip).
      rhythm    every strum early or late by a spread (`sigmaMs`), a constant
                lean (`lateMs`), extra lateness on the change itself
                (`changeLateMs`: the hand is still moving), a drifting tempo.
@@ -31,6 +34,10 @@
    classroom does". */
 
 export const SR = 48000;
+/* The version of what this student and its rooms PLAY. Bump it whenever a change here makes the same seed sound different or keep a
+   different answer key; closed-loop.mjs writes it into every --json game and refuses to compare games of two versions (--against).
+   2026-11-12: a held change strums the old chord (d75f0ee) and a muted strum has no pitch (7220c99). Earlier --json files have none. */
+export const STUDENT_MODEL = '2026-11-12';
 
 export function rng(seed){
   let a = seed >>> 0;
@@ -100,11 +107,13 @@ export const STUDENTS = {
   loose:      { ...BASE, sigmaMs: 90 },
   changeOnly: { ...BASE, strums: 'change' },
   wrongFret:  { ...BASE, pWrong: 1 },
+  /* Every change held: strums the old chord on each change, one chord behind (since 2026-11-11; before, it held chord 1 all game). */
   neverMoves: { ...BASE, pHeld: 1 },
   noGuitar:   { ...BASE, silent: true },
   /* No chord sounds, but the hands are busy on the beat: a tap on the desk or the laptop beside the mic, and a strum across strings the left
      hand is muting (a scratch with no note in it). The answer key says "no strum" for both: no chord was played. */
   tapper:     { ...BASE, silent: true, tapBeats: true },
+  /* mutedStrum's strings sound no pitch: a damped scratch (render, kind 'mute'). */
   mutedStrum: { ...BASE, silent: true, mutedBeats: true }
 };
 
@@ -206,12 +215,24 @@ export class Student {
       const at = round.listenStartMs + b * round.beatMs + this.o.lagMs + dev;
       let did = 'right';
       if (p.tapBeats) this.hits.push({ s: Math.round(at / 1000 * SR), amp: p.amp * (0.8 + 0.6 * r()), kind: 'bang' });
-      if (p.mutedBeats){ this.guitar.strum(at, round.midis[want], p.amp, touch); this.guitar.lift(at + touch.spreadMs + 4); }
+      if (p.mutedBeats) this.hits.push({ s: Math.round(at / 1000 * SR), amp: p.amp * (0.6 + 0.3 * r()), kind: 'mute', n: Math.round((touch.spreadMs + 40) / 1000 * SR), spreadN: Math.round(touch.spreadMs / 1000 * SR), scrape: touch.scrape });
       if (isChange){
         const x = r();
         did = p.silent ? 'silent' : x < p.pSkip ? 'silent' : x < p.pSkip + p.pHeld ? 'held' : x < p.pSkip + p.pHeld + p.pWrong ? 'wrong' : 'right';
-        this.cur = did === 'held' ? (this.cur || round.midis[prev]) : did === 'wrong' ? round.midis[want].map(m => m + 1) : did === 'right' ? round.midis[want] : this.cur;
-        key.push({ beat: b, from: prev, to: want, did, devMs: did === 'silent' ? null : dev, atMs: did === 'silent' ? null : at });
+        /* The wrong chord: one fret high (power chords), or, when the round names a `wrongPool` (Change Up's open chords), another chord
+           from that pool that is neither the old chord nor the new one, drawn at random. */
+        let other = null;
+        if (did === 'wrong' && round.wrongPool){
+          const c = round.wrongPool.filter(n => n !== want && n !== prev);
+          if (!c.length) throw new Error('student: no other chord to play wrong between ' + prev + ' and ' + want);
+          other = c[Math.floor(r() * c.length)];
+        }
+        /* held: the student strums the chord this change leaves (the old chord), so the answer key's "held" is always the old chord: a
+           never-moves student is one chord behind on every change. Until 2026-11-11 the hand kept whatever it held, so on a two-chord pair
+           the never-moves student stayed on chord 1 all game, which IS the new chord on every second change: half its "held" changes
+           were really right, and the old "never moved: caught" figures were measured with that flawed student. */
+        this.cur = did === 'held' ? round.midis[prev] : did === 'wrong' ? (other ? round.midis[other] : round.midis[want].map(m => m + 1)) : did === 'right' ? round.midis[want] : this.cur;
+        key.push(Object.assign({ beat: b, from: prev, to: want, did, devMs: did === 'silent' ? null : dev, atMs: did === 'silent' ? null : at }, other ? { played: other } : {}));
         if (did === 'silent'){ if (!p.silent) this.guitar.lift(at - p.liftMs); continue; }
         if (did !== 'held') this.guitar.lift(at - p.liftMs);   // the hand leaves the old chord before the new one sounds
       } else {
@@ -254,13 +275,22 @@ export class Student {
     }
     if (room.hum) for (let s = a; s < b; s++){ air[s] += room.hum.amp * 1.41 * Math.sin(this.humPh); this.humPh += 2 * Math.PI * room.hum.f / SR; }
     /* Sounds that are not a guitar. bang: 60 ms of low thump with a click on top (a chair, a case, a hand on the desk). syllable: a voiced
-       sound, harmonics of the voice's pitch with more level near one vowel pitch, rising in 20 ms. key: an 8 ms click. */
+       sound, harmonics of the voice's pitch with more level near one vowel pitch, rising in 20 ms. key: an 8 ms click. mute: a strum across
+       six strings the hand is damping, so no string rings: six noise bursts (one per string, spread over the touch's strum time), each
+       gone in about 6 ms; no pitch at all. (Until 2026-11-12 the muted strum plucked the RIGHT chord's strings and lifted them 4 ms after
+       the last one, which still rang when the pitch readings began, so the game heard the right chord.) */
     this.hits = this.hits.filter(h => {
       const n = h.kind === 'bang' ? Math.round(0.06 * SR) : h.kind === 'key' ? Math.round(0.008 * SR) : h.n;
+      const tau = 0.006 * SR;
       for (let s = Math.max(a, h.s); s < Math.min(b, h.s + n); s++){
         const k = s - h.s;
         if (h.kind === 'bang') air[s] += h.amp * Math.exp(-k / (0.015 * SR)) * (Math.sin(2 * Math.PI * 110 * k / SR) + 0.5 * (r() * 2 - 1));
         else if (h.kind === 'key') air[s] += h.amp * (1 - k / n) * (r() * 2 - 1) * 1.73;
+        else if (h.kind === 'mute'){
+          let e = 0;
+          for (let j = 0; j < 6; j++){ const o = Math.round(j * h.spreadN / 5); if (k >= o) e += Math.exp(-(k - o) / tau); }
+          air[s] += h.amp * (0.5 + 0.5 * h.scrape) * e / 2.5 * (r() * 2 - 1) * 1.73;
+        }
         else {
           const env = Math.min(1, k / (0.02 * SR)) * Math.min(1, (n - k) / (0.04 * SR));
           let v = 0;
