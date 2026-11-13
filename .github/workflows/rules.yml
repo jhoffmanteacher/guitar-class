@@ -1,0 +1,130 @@
+# Tests firestore.rules against the REAL Firestore emulator after every push to
+# main. firestore.rules guards every student's saved work (progress/{uid}) and
+# the class settings (config/class); before this, its tests ran only by hand.
+#
+#   tools/pm-rules-test.mjs    practice minutes, the boards, the mic takes
+#   tools/rules-core-test.mjs  progress, config/class, the teacher check, the
+#                              live quiz, issue reports (with --breaks: broken
+#                              copies of the rules, each must turn a case red)
+#
+# Nothing here touches the real Firebase project: the emulator runs on the
+# runner under a "demo-" project id, which needs no credentials and cannot
+# reach the network project. No deploy step: publishing rules is still the
+# Firebase console paste (CLAUDE.md, "firestore.rules change").
+#
+# The npm packages the tools need are NOT in the repo (no package.json). They
+# are installed on the runner only, at exact versions, into a folder outside
+# the checkout; each tool and firestore.rules are copied there and run from
+# there, the way the tools' headers say to run them by hand. (The tools are
+# ES modules, which ignore NODE_PATH, so copying is what makes the packages
+# resolvable.) Each tool runs in its own emulator, so one cannot leave data
+# behind for the next.
+#
+# It does not block a push or the Pages deploy: a red run means "look at the
+# last push". A failing case is printed as an ::error annotation (the summary
+# line as its title, the failing cases in the message); a passing tool prints
+# its summary line as a ::notice.
+#
+# To add a tool: one line under RULES_TOOLS below (the file, then its
+# arguments). The rules file and --port 8089 are passed to every tool.
+name: Firestore rules
+
+on:
+  push:
+    branches: [main, 'ci-try/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: firestore-rules-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      FIREBASE_TOOLS_VERSION: 15.36.0
+      RULES_UNIT_TESTING_VERSION: 6.0.0
+      FIREBASE_JS_VERSION: 10.12.2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          # @firebase/rules-unit-testing 6 needs Node 24.12 or later.
+          node-version: 24.16.0
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          distribution: temurin
+          java-version: '21'
+          java-package: jre
+      - name: Cache the emulator jar and the npm download cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/firebase/emulators
+            ~/.npm
+          key: rules-emu-${{ runner.os }}-ft${{ env.FIREBASE_TOOLS_VERSION }}-rut${{ env.RULES_UNIT_TESTING_VERSION }}-fb${{ env.FIREBASE_JS_VERSION }}
+      - name: Install the emulator and the test packages (outside the checkout)
+        run: |
+          EMU="$RUNNER_TEMP/rules-emu"
+          mkdir -p "$EMU" && cd "$EMU"
+          npm init -y > /dev/null
+          npm install --no-audit --no-fund --legacy-peer-deps --save-exact \
+            "firebase-tools@$FIREBASE_TOOLS_VERSION" \
+            "@firebase/rules-unit-testing@$RULES_UNIT_TESTING_VERSION" \
+            "firebase@$FIREBASE_JS_VERSION"
+          echo '{ "firestore": { "rules": "firestore.rules" }, "emulators": { "firestore": { "port": 8089 }, "ui": { "enabled": false } } }' > firebase.json
+          java -version
+          npx --no-install firebase --version
+      - name: Run the rules tests on the emulator
+        env:
+          # One line per tool: the file, then its own arguments.
+          RULES_TOOLS: |
+            tools/pm-rules-test.mjs
+            tools/rules-core-test.mjs --breaks
+        run: |
+          # GitHub runs this with -e and pipefail; one tool failing must not stop the others.
+          set +e +o pipefail
+          EMU="$RUNNER_TEMP/rules-emu"
+          # Workflow-command escaping: the message keeps only its first line unless newlines are
+          # escaped; a property (the title) also needs ':' and ','.
+          esc()  { printf '%s' "$1" | awk 'BEGIN { ORS = "" } { gsub(/%/, "%25"); gsub(/\r/, "%0D"); if (NR > 1) printf "%%0A"; print }'; }
+          escp() { esc "$1" | awk 'BEGIN { ORS = "" } { gsub(/:/, "%3A"); gsub(/,/, "%2C"); print }'; }
+          failed=0
+          # (stdin of each run is /dev/null so it cannot swallow the rest of this list)
+          while read -r tool args; do
+            [ -z "$tool" ] && continue
+            name="$(basename "$tool")"
+            log="$EMU/$name.log"
+            if [ ! -f "$tool" ]; then
+              echo "::error title=$(escp "$name")::$(esc "$tool is listed in RULES_TOOLS in .github/workflows/rules.yml but is not in the repo.")"
+              failed=1; continue
+            fi
+            echo "::group::$tool $args"
+            cp "$tool" firestore.rules "$EMU/"
+            ( cd "$EMU" && npx --no-install firebase emulators:exec --only firestore --project demo-gc \
+                "node $name firestore.rules --port 8089 $args" ) < /dev/null > "$log" 2>&1
+            code=$?
+            cat "$log"
+            echo "::endgroup::"
+            # The summary lines each tool prints: "✓ firestore.rules: N passed, 0 failed" and, with --breaks, "✓ K of K breaks caught".
+            summary="$(grep -E '^(✓|✗) .*(passed, [0-9]+ failed|breaks caught)$' "$log" | tr '\n' ' ' | sed 's/ *$//')"
+            # Each failing case: its "  ✗ " line, with the reason line the tools print just above it.
+            cases="$(awk '/^      / { reason = $0; next } /^  ✗ / { line = $0; sub(/^  ✗ /, "", line); sub(/^ +/, "", reason); print "✗ " line (reason != "" ? "  [" reason "]" : "") } { reason = "" }' "$log")"
+            if [ "$code" -eq 0 ] && [ -n "$summary" ]; then
+              echo "::notice title=$(escp "$name")::$(esc "$summary")"
+            else
+              failed=1
+              if [ -z "$cases" ]; then
+                body="exit code $code and no failing case printed: the install, the emulator or the tool itself failed. Last lines of the log:"$'\n'"$(tail -n 15 "$log")"
+              else
+                n="$(printf '%s\n' "$cases" | grep -c '^✗')"
+                body="$n failing (first 30 shown):"$'\n'"$(printf '%s\n' "$cases" | head -n 30)"
+              fi
+              echo "::error title=$(escp "$name: ${summary:-no summary line}")::$(esc "$body")"
+            fi
+          done <<< "$RULES_TOOLS"
+          exit $failed
