@@ -44,6 +44,8 @@ rules_version = '2';
      rankBoard/{tag}, weekBoard/{tag}  the class rank and the Top 5, keyed by a private
                       name tag (minutes/{uid}/meta/board), readable by every signed-in
                       account. minutesBoard/{uid} has NO block (denied).
+     siteErrors/*     the anonymous error log (2026-11-13): any signed-in
+                      account creates, the teacher reads and deletes
 
    Anything not matched below is denied by default. Do not add a catch-all.
    ══════════════════════════════════════════════════════════════════════ */
@@ -466,6 +468,62 @@ service cloud.firestore {
             && request.resource.data.seconds is number
             && request.resource.data.seconds >= 0
             && request.resource.data.seconds <= 400 * dailyCapSeconds();
+    }
+
+    /* ── ERROR LOG (2026-11-13; app/boot.js SITE_ERRORS, teacher-errors.js) ──
+       A NEW block; no rule above it was changed (only the path list at
+       the top of this file gained a line). When the site throws on a
+       student's Chromebook, the page writes one small ANONYMOUS doc here so
+       the teacher console's "Error log" view shows it the same day.
+
+       siteErrors/{autoId}  { kind, message, file, line, col, stack, page,
+                              version, day, lang }
+       No uid, no name, no email, no class period, no time finer than the day
+       (Jonathan, 2026-11-04: nothing readable by others may tie a name or
+       uid to a period). The client scrubs emails, query strings and id-like
+       strings out of the text before writing; these rules pin the SHAPE: the
+       exact ten fields (hasOnly + hasAll), each type, and a size cap on every
+       string, so a doc cannot carry anything else and stays under ~1.5 KB.
+
+       Any signed-in account may CREATE one (the logger runs only when someone
+       is signed in). Nobody may update one. Only the teacher reads (the
+       Error log view) and deletes ("Delete older than 30 days"); a student
+       cannot read the pile back.
+
+       HONEST LIMITS: a student at DevTools can create as many docs as they
+       like, with any text that fits the caps (rules cannot count writes); the
+       console escapes every value, and the teacher can delete them. Firestore
+       itself keeps a server create time on every doc (not a field, but the
+       Admin SDK and REST API show it); only the teacher can read these docs.
+       ⚠ Must be published BEFORE the site code that writes it. (Published
+       late, the client is refused once, silently, and stops trying for that
+       page load.) */
+    match /siteErrors/{errorId} {
+      allow create: if isSignedIn()
+            && request.resource.data.keys().hasOnly(['kind', 'message', 'file', 'line', 'col', 'stack', 'page', 'version', 'day', 'lang'])
+            && request.resource.data.keys().hasAll(['kind', 'message', 'file', 'line', 'col', 'stack', 'page', 'version', 'day', 'lang'])
+            && request.resource.data.kind in ['error', 'rejection']
+            && request.resource.data.message is string
+            && request.resource.data.message.size() > 0
+            && request.resource.data.message.size() <= 300
+            && request.resource.data.file is string
+            && request.resource.data.file.size() <= 200
+            && request.resource.data.line is int
+            && request.resource.data.line >= 0
+            && request.resource.data.line <= 10000000
+            && request.resource.data.col is int
+            && request.resource.data.col >= 0
+            && request.resource.data.col <= 10000000
+            && request.resource.data.stack is string
+            && request.resource.data.stack.size() <= 600
+            && request.resource.data.page is string
+            && request.resource.data.page.size() <= 120
+            && request.resource.data.version is string
+            && request.resource.data.version.size() <= 64
+            && request.resource.data.day is string
+            && request.resource.data.day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+            && request.resource.data.lang in ['en', 'es'];
+      allow read, delete: if isTeacher();
     }
   }
 }
