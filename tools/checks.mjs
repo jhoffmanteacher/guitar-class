@@ -14594,7 +14594,7 @@ async function checkPwTakeEvaluator() {
       ['CHK_ONSET_FLOOR', 'CHK_ONSET_RATIO', 'CHK_HF_FLOOR', 'CHK_HF_RATIO', 'COACH_LVL_WIN', 'COACH_LVL_HOP', 'COACH_CATCHUP_MAX_MS'].map(n => `const ${n} = ${numOf(n)};`).join('\n') +
       // teacherMicEvaluate reads String(ccLoop / coachReadFrame / coachSmooth): the real coach.js functions, never called here
       '\n' + ['ccLoop', 'coachReadFrame', 'coachSmooth'].map(n => extract(cSrc, n)).join('\n');
-    const fns = lift(EVAL_FNS.concat(['micEvalWhatIfSummary', 'micEvalWhatIfText', 'micEvalPitchSummary', 'micEvalPitchText', 'micEvalText', 'micEvalBeepsText', 'micEvalNoDelayText', 'teacherMicEvalHtml', 'teacherMicWhatIfHtml', 'teacherMicPitchHtml', 'teacherMicOffText', 'teacherMicEvaluate']));
+    const fns = lift(EVAL_FNS.concat(['micEvalWhatIfSummary', 'micEvalWhatIfText', 'micEvalPitchSummary', 'micEvalPitchText', 'micEvalText', 'micEvalBeepsText', 'micEvalNoDelayText', 'teacherMicEvalHtml', 'teacherMicWhatIfHtml', 'teacherMicPitchHtml', 'teacherMicOffText', 'teacherMicLabel', 'teacherMicEvaluate']));
     /* teacherMicEvaluate's page: ctx gives the takes, their audio and the result box. */
     core = new Function('ctx', `${esc}\n${consts}\nconst coachDetectPitch = () => -1;\n` +
       'let teacherMicEvalRows = [], teacherMicEvalNames = [], teacherView = "mic", teacherMicTakes = ctx.takes || [];\n' +
