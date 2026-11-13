@@ -383,6 +383,27 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-13 — `tools/shared-chromebook-loop.mjs`: two students, one Chromebook.** Tools and docs only. One
+      adversarial review round (3 MAJOR, all fixed and proved with the reviewer's plants; no second round: Jonathan's
+      rule for tools, "fix, state the limits, ship").
+      What it is: the real app in Node vm pages on one fake device (shared localStorage, per-tab sessionStorage,
+      Firebase Auth shared by every tab, a fake Firestore with per-user write queues and the progress rules) on a
+      virtual clock. It checks: a student's last action before Sign out lands in THEIR doc or they are told (the
+      notice must stay at least 1 s while they are still signed in); nothing of theirs is written under the next
+      student (sent writes and writes that never left the page); the next student's first screen is their own
+      (variables, markup, values, the title, the Google popup, sessionStorage, the localStorage keys and values it
+      reads, the mic question, practice minutes; what a student typed today counts as a marker).
+      Default run: 120 cases in about 75 s. 17 planted site faults and 7 fake-world faults turn it red.
+      On today's site: 120 of 120 hold; nothing of one student reaches the next.
+      **KNOWN K-TAB, a real fault, confirmed by the reviewer, on Jonathan's list, NOT fixed (sign-in is a danger
+      zone):** work still unsaved in ANOTHER tab (the network down, or a write refused once) is dropped without a
+      word when the student signs out from a different tab: `signOut` waits only for its own tab, and the other tab
+      reloads at once. 8 records in 6 of 120 cases (the run prints it against a band of 4 to 14). It needs two tabs
+      plus network trouble at sign-out. A fix needs a cross-tab "unsaved work" signal that `signOut` checks.
+      Replay: `node tools/shared-chromebook-loop.mjs --seed=1 --case=2 --verbose`.
+      Not covered (its header has the full list): the teacher console page, real rendering, the update reload, the
+      Song Journey pages.
+
 - [x] **2026-11-13 — The listening bench: the Power Chord Switch work turned on every feature that listens.**
       Jonathan, 2026-11-12: "i would like the audio detection from power chord switch to apply site-wide like to
       listening coach, etc. power chord switch isn't a game we'll be playing after a month", and "the listening
