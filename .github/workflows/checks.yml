@@ -1,0 +1,35 @@
+# Runs the site's checks on GitHub after every push to main, as a second
+# safety net behind the local git hooks (.githooks/). The hooks only run when
+# node is found on the machine that pushes; this run does not depend on that.
+#
+# It runs the read-only form (`--check --skip-links`): it changes no file, and
+# it skips the ~240 outside links, which the full `node tools/checks.mjs`
+# before every push already covers and which fail at random from a datacentre.
+#
+# It does not block a push or the Pages deploy: a red run means "look at the
+# last push". GitHub emails the pusher when a run fails.
+name: Site checks
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: site-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: node tools/checks.mjs --check --skip-links
+        run: node tools/checks.mjs --check --skip-links
