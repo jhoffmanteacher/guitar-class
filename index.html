@@ -328,12 +328,12 @@
                  handler bubbles up, which keeps tuner.js untouched. -->
             <div class="tuner-strings notranslate" id="tuner-strings" translate="no" role="radiogroup" aria-label="Which string to tune" data-i18n-attr="aria-label:tools.tunerStringAria" onclick="syncRadioGroupAria('#tuner-strings','.ts-btn','active')" onkeydown="radioGroupKeydown(event,'#tuner-strings','.ts-btn','active')">
               <button class="ts-btn active" data-string="auto" onclick="selectTunerString('auto')" data-i18n="tools.auto" role="radio" aria-checked="true" tabindex="0">Auto</button>
-              <button class="ts-btn" data-string="E2" onclick="selectTunerString('E2')" role="radio" aria-checked="false" tabindex="-1">E</button>
-              <button class="ts-btn" data-string="A2" onclick="selectTunerString('A2')" role="radio" aria-checked="false" tabindex="-1">A</button>
-              <button class="ts-btn" data-string="D3" onclick="selectTunerString('D3')" role="radio" aria-checked="false" tabindex="-1">D</button>
-              <button class="ts-btn" data-string="G3" onclick="selectTunerString('G3')" role="radio" aria-checked="false" tabindex="-1">G</button>
-              <button class="ts-btn" data-string="B3" onclick="selectTunerString('B3')" role="radio" aria-checked="false" tabindex="-1">B</button>
-              <button class="ts-btn" data-string="E4" onclick="selectTunerString('E4')" role="radio" aria-checked="false" tabindex="-1">e</button>
+              <button class="ts-btn" data-string="E2" onclick="selectTunerString('E2')" role="radio" aria-checked="false" tabindex="-1" aria-label="Low E (6th string)" data-i18n-attr="aria-label:diagram.stringLowE">E</button>
+              <button class="ts-btn" data-string="A2" onclick="selectTunerString('A2')" role="radio" aria-checked="false" tabindex="-1" aria-label="A (5th string)" data-i18n-attr="aria-label:diagram.stringA">A</button>
+              <button class="ts-btn" data-string="D3" onclick="selectTunerString('D3')" role="radio" aria-checked="false" tabindex="-1" aria-label="D (4th string)" data-i18n-attr="aria-label:diagram.stringD">D</button>
+              <button class="ts-btn" data-string="G3" onclick="selectTunerString('G3')" role="radio" aria-checked="false" tabindex="-1" aria-label="G (3rd string)" data-i18n-attr="aria-label:diagram.stringG">G</button>
+              <button class="ts-btn" data-string="B3" onclick="selectTunerString('B3')" role="radio" aria-checked="false" tabindex="-1" aria-label="B (2nd string)" data-i18n-attr="aria-label:diagram.stringB">B</button>
+              <button class="ts-btn" data-string="E4" onclick="selectTunerString('E4')" role="radio" aria-checked="false" tabindex="-1" aria-label="High E (1st string)" data-i18n-attr="aria-label:diagram.stringHighE">e</button>
             </div>
             <div class="tuner-note notranslate" id="tuner-note" translate="no">—</div>
             <div class="tuner-freq" id="tuner-freq" data-i18n="tools.playAString">Play a string&hellip;</div>
