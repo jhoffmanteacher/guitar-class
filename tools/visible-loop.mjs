@@ -29,10 +29,16 @@
    ── What is REAL (loaded whole and unmodified into Node vm contexts) ──
    * Student page: config-main.js, class-activities.js, i18n.js, guitar-diagrams.js, then the whole app script
      (siteSource('app.js'): every app/*.js part in index.html order). Boot = the real loadProgress() then
-     loadClassConfig() (what start.js's sign-in callback runs), then the two calls showApp() makes about this
-     (applyGamesAccess, applyActivityGate) with #app shown. A tab return fires the real visibilitychange listener.
+     loadClassConfig() (what start.js's sign-in callback runs), then the real showApp() from a start address
+     (bare, #songs, #my-progress, a lesson, #class-activities/ca-N, #live-quiz; sometimes from a Song Journey page,
+     sometimes the update reload's note), with renderAll and swResumeApply stubbed (they need a rendered lesson).
+     It routes through the real routeExploreHash / goExploreHash on a history stub that moves location.hash.
+     A tab return fires the real visibilitychange listener.
      Probed: caIsVisible, caIsOptional, caBlockers, caIsPlayAlongOnly, caNumber, periodOverride,
-     moduleOpenThrough, gamesAccessOn, the Games button's display, body.ca-gated, classConfigSignature().
+     moduleOpenThrough, gamesAccessOn, the Games button's display, body.ca-gated, classConfigSignature(); at each
+     sign-in also location.hash after showApp (the landing), caStartHereId after the real renderClassActivities
+     (the first card), whether maybeShowPeriodPicker asked, and, for a student with an unfinished required
+     activity, the address after goExploreHash to another page (the router does not lock).
      Student events through the real code: marking a card complete (onClassActivityChange, the data half of
      caToggleComplete, then the real flushSave() that a tab hide runs) and picking CAS (periodPick('CAS')); the
      progress doc they write is checked, and the console re-reads the roster (teacherFetchStudents) after each.
@@ -65,8 +71,9 @@
      student with no progress doc yet (stu-delta), a teacher account teacher@example.test, and two special users:
      'dev-user' (dev bypass) and a student signed in with the teacher's email (a gate previewer).
    * Rounds: one to three console changes land before the open page's tab comes back. Change kinds rotate so each
-     runs at least 15 times in a full run (a floor that fails); half of Archive / Delete aim at a card that holds
-     Hidden, Who, Optional or Play Along (at least 5 each on a Hidden or Who card, also a floor).
+     runs at least 15 times in a full run (a floor that fails); three quarters of Archive / Delete aim at a card that
+     holds Hidden or Who, a rename or a pin, or Optional or Play Along (floors: at least 5 each on a Hidden or Who card
+     and 5 each on a renamed or pinned card).
 
    ── NOT modelled ──
    The rail repaint after an Open-through change (repaintModuleGate needs a rendered rail; only the value is
@@ -75,7 +82,7 @@
    values they read: no probe reads rendered markup, so how the activity list is laid out — module folds, counts,
    carets — cannot change a result here; only a render that throws would); the Journey "sentHere" exemption
    (page-level, and unreachable while JOURNEY_GATE_LOCKS is false); Today's activities (check 1cq); pins; renames; the legacy activityNumbers overrides (generated empty);
-   Pause; the Firestore listener-free console reading another console's writes; a failed read by the console
+   the real update reload's restore (swResumeApply, stubbed); Pause; the Firestore listener-free console reading another console's writes; a failed read by the console
    (its views refuse to draw); the dev bypass's boot path beyond "no reads at boot".
 
    ── The independent answer: the RULES the model is written from (it never calls the code under test) ──
@@ -107,8 +114,22 @@
        A student with no progress doc yet is gated like anyone else (skill: "A student who hasn't picked a period
        yet is gated like anyone else"; save.js: "A brand-new student (no doc) and a failed read start from the
        same empty state" — the empty STATE, not the failed-load flag).
-   R6  The LOCK is off (Jonathan 2026-10-07, CA_GATE_LOCKS / JOURNEY_GATE_LOCKS): body.ca-gated is never set.
-       Blocks still decide who LANDS on In-Class Activities at sign-in (counted, not judged).
+   R6  The LOCK is off (Jonathan 2026-10-07, CA_GATE_LOCKS / JOURNEY_GATE_LOCKS; 2026-11-12: "the class
+       activities aren't meant to block anyone anymore"): body.ca-gated is never set, JOURNEY_GATE_LOCKS reads
+       false on the Journey page, and a student with an unfinished required activity who asks the router for
+       another page gets it.
+   R13 The landing (showApp's comment; Jonathan 2026-11-12: "they are meant to show up on first login", and, asked,
+       keep today's rule): every signed-in page load ends on In-Class Activities when the address is bare (it is the
+       home page) or when the student has an unfinished required activity (R5), EXCEPT the site's own update reload
+       (the note's address is kept), arriving from a Song Journey page, and a #class-activities or #live-quiz
+       address. Compared by page (a deep link's tail is the router's to resolve).
+   R14 The first card, caStartHereId (Jonathan 2026-11-12, "required and unfinished first"): a card this student
+       sees, not finished and not cleared for them; a required one whenever any such required card exists, the
+       newest-dated of them; else the newest-dated optional one; null when none is left. (Which of several cards
+       with the same newest date: not judged.)
+   R15 The period question at sign-in (maybeShowPeriodPicker's comments): asked when the student has no answer of
+       their own and no teacher override; never for the dev bypass or the teacher's email, never after a failed
+       progress load ("never ask a question we can't save the answer to").
    R7  Play Along now (skill; caIsPlayAlongOnly's comment: "The switch stands in for the RELEASE DATE and nothing
        else"): a practice card (view 'card') with the flag that would be visible but for its date — assigned, not
        Hidden, not retired, given to this student — and is not already visible is reachable from Songs only. A
@@ -153,6 +174,8 @@
        its classConfigSignature moves whenever that answer moved, or the open screen is not repainted); after a
        FAILED tab-return read it keeps the old answer; a fresh load shows the new answer. During the read the page
        keeps showing the last known answer (save.js:228-238, the blank window found 2026-09-26).
+   Not exercised (round-2 review R2-6): board ties on a seeded board (the writers always re-pack 1..N, so R8's
+   "pos, then the legacy number, then the id" runs only on the unseeded board); a student un-marking a card.
    Still not stated, measured only: when an already-open Journey page picks up a change (journey.js has no
    tab-return re-read; it decides once per load, and the lock is off).
    Stale text, reported in one line each, not judged: the save.js:225 games docstring (R9) and the console's
@@ -169,7 +192,10 @@
       a different period override or Open through. The code gives no override and Open through 0 (the cache
       keeps one student; restoreClassConfigFromCache restores only a matching uid). What the student sees: a
       teacher-set CAS student loses the exemption (cards lose the Optional tag, lands on In-Class Activities); a
-      student corrected away from CAS becomes exempt; modules opened by Open through lock again.
+      student corrected away from CAS becomes exempt; modules opened by Open through lock again; a student whose
+      period only the teacher set is asked the period question, which covers the whole app (R15, measured: the K1
+      state includes it); a 4th / 7th override is lost, so that session's practice minutes count under the
+      student's own answered period (app/boot.js PM_HOST.period; not probed). Ends at the next good read.
 
    --root wants a folder holding index.html, app/, the teacher-*.js parts, class-activities.js, config-main.js,
    i18n.js, guitar-diagrams.js and tabs/journey.js (a full checkout works).
@@ -554,6 +580,33 @@ function mExpectChange(d0, ch, progs, today) {
   if (!wrote) return { doc: d0, dontCare, effect, wrote };
   return { doc: d, dontCare, effect, wrote };
 }
+/* R13 the landing at sign-in. nav: { hash, fromJourney, resume }. Returns the address the page should end on. */
+function mLanding(S, nav) {
+  if (nav.resume) return nav.hash;
+  const base = nav.hash.includes('/') ? nav.hash.slice(0, nav.hash.indexOf('/')) : nav.hash;
+  const lands = nav.hash === '' || (mStudentBlockers(S).length > 0 && !nav.fromJourney && base !== '#class-activities' && base !== '#live-quiz');
+  return lands ? '#class-activities' : nav.hash;
+}
+/* R14 the first card (caStartHereId). Returns a problem, or null. */
+function mFirstProblem(S, got) {
+  const clears = mMap(mMap(S.doc, 'activityClears'), S.uid);
+  const dateOf = a => mMap(S.doc, 'activityDates')[a.id] || '';
+  const cands = ACTS.filter(a => mVisible(a, S) && S.done[a.id] !== true && clears[a.id] !== true);
+  const req = cands.filter(a => !mStudentOptional(a, S));
+  if (!cands.length) return got === null ? null : `${got} is first, but nothing unfinished and not cleared is left`;
+  const pool = req.length ? req : cands;
+  const g = pool.find(a => a.id === got);
+  if (!g) {
+    const why = !ACT[got] ? 'no card' : clears[got] === true ? 'a card cleared for this student' : S.done[got] === true ? 'a finished card'
+      : !mVisible(ACT[got], S) ? 'a card this student does not see' : req.length ? 'an optional card while a required one is unfinished' : 'not a candidate';
+    return `${got === null ? 'nothing' : got} is first: ${why} (expected one of [${pool.map(a => a.id).join(' ')}])`;
+  }
+  const newest = pool.reduce((m, a) => (dateOf(a) > m ? dateOf(a) : m), '');
+  if (dateOf(g) !== newest) return `${got} (dated ${dateOf(g) || 'none'}) is first, but a newer ${req.length ? 'required' : 'optional'} card is dated ${newest}`;
+  return null;
+}
+/* R15 the period question at sign-in. */
+function mPeriodAsked(S) { return !S.previewer && S.progressOk && !(S.ownPeriod || S.override); }
 /* MODEL-END */
 
 /* ════════════════════════════════════════════════════════════════════════════
@@ -662,9 +715,11 @@ const TEACHER_EMAIL = 'teacher@example.test';
 let VNOW = 0;
 let LOG = [];
 /* A page: a fresh vm context with the stub DOM, the device's localStorage and its own Firestore client. */
-function makePage(kind, storage, client) {
+function makePage(kind, storage, client, nav = {}) {
   const els = {};
-  const getEl = id => els[id] || (els[id] = makeEl(id));
+  /* Ids the page creates itself and tests for first (the period question's overlay): absent until created. */
+  const NULL_IDS = new Set(['period-overlay']);
+  const getEl = id => (NULL_IDS.has(id) ? (els[id] || null) : (els[id] || (els[id] = makeEl(id))));
   getEl('class-activities-screen').hidden = true;
   getEl('songs-screen').hidden = true;
   getEl('games-screen').setAttribute('hidden', '');
@@ -674,24 +729,28 @@ function makePage(kind, storage, client) {
   const head = makeEl('head');
   head.appendChild = s => { if (s && s.onload) queueMicrotask(() => s.onload()); return s; };
   const document = {
-    documentElement: makeEl('html'), head, body: makeEl('body'), readyState: 'complete', referrer: '',
+    documentElement: makeEl('html'), head, body: makeEl('body'), readyState: 'complete', referrer: nav.referrer || '',
     getElementById: getEl, querySelector: () => null, querySelectorAll: () => [], createElement: () => makeEl(''),
     createDocumentFragment: () => makeEl(''), createTextNode: () => makeEl(''),
     addEventListener: (ev, fn) => { (docListeners[ev] = docListeners[ev] || []).push(fn); }, removeEventListener() {},
     hidden: false, visibilityState: 'visible', fonts: { ready: Promise.resolve() },
   };
+  document.body.appendChild = c => { if (c && c.id) els[c.id] = c; return c; };
   const firestore = Object.assign(() => client, { FieldValue: { delete: () => DELETE } });
   const ctx = {
     console: { log: (...a) => LOG.push(['log', kind, a.join(' ')]), warn: (...a) => LOG.push(['warn', kind, a.join(' ')]), error: (...a) => LOG.push(['error', kind, a.join(' ')]), info() {}, debug() {} },
     document, localStorage: storage, sessionStorage: makeStorage(),
-    location: { protocol: 'https:', hostname: 'example.test', origin: 'https://example.test', href: 'https://example.test/' + (kind === 'console' ? '?teacher=true' : ''), pathname: '/', search: kind === 'console' ? '?teacher=true' : '', hash: '', reload() {}, replace() {} },
-    history: { scrollRestoration: 'auto', replaceState() {}, pushState() {}, length: 1 },
+    location: { protocol: 'https:', hostname: 'example.test', origin: 'https://example.test', href: 'https://example.test/' + (kind === 'console' ? '?teacher=true' : ''), pathname: '/', search: kind === 'console' ? '?teacher=true' : '', hash: nav.hash || '', reload() {}, replace() {} },
+    /* pushState / replaceState move location.hash as a browser does (the router reads it back at once). */
+    history: { scrollRestoration: 'auto', state: null, length: 1, back() {},
+      replaceState(st, _t, url) { this.state = st; ctx.location.hash = String(url || '').includes('#') ? String(url).slice(String(url).indexOf('#')) : ''; },
+      pushState(st, _t, url) { this.state = st; ctx.location.hash = String(url || '').includes('#') ? String(url).slice(String(url).indexOf('#')) : ''; } },
     navigator: { userAgent: 'node', platform: 'node', language: 'en', onLine: true },
     setTimeout: () => 0, clearTimeout() {}, setInterval: () => 0, clearInterval() {}, requestAnimationFrame: () => 0, cancelAnimationFrame() {},
     queueMicrotask, matchMedia: () => ({ matches: false, addEventListener() {}, addListener() {} }), getComputedStyle: () => ({ getPropertyValue: () => '', paddingLeft: '0', paddingRight: '0' }),
     fetch: () => Promise.reject(new Error('no network')), CustomEvent: class { constructor(t, o) { this.type = t; Object.assign(this, o || {}); } },
     Image: class {}, Audio: class { play() { return Promise.resolve(); } pause() {} }, ResizeObserver: class { observe() {} disconnect() {} },
-    performance: { now: () => VNOW }, URLSearchParams, URL, TextEncoder, TextDecoder,
+    performance: { now: () => VNOW }, CSS: { escape: x => String(x).replace(/[^A-Za-z0-9_-]/g, c => '\\' + c) }, URLSearchParams, URL, TextEncoder, TextDecoder,
     addEventListener() {}, removeEventListener() {}, dispatchEvent() {}, scrollTo() {}, innerWidth: 1366, innerHeight: 657, devicePixelRatio: 1,
     alert: m => alerts.push(String(m)), confirm: () => true, prompt: () => null,
     firebase: { initializeApp() {}, auth: () => ({ onAuthStateChanged() {}, currentUser: null, signOut: () => Promise.resolve() }), firestore },
@@ -748,6 +807,7 @@ function probeJourney(page, cfg, prog, uid) {
   return JSON.parse(page.run(`(function(){
     var i = JSON.parse(__in), A = window.CLASS_ACTIVITIES || [];
     return JSON.stringify({
+      locks: typeof JOURNEY_GATE_LOCKS === 'undefined' ? 'absent' : JOURNEY_GATE_LOCKS,
       vis: A.filter(function(a){ return journeyIsVisible(a, i.cfg, i.uid); }).map(function(a){ return a.id; }),
       opt: A.filter(function(a){ return journeyOptional(a, i.cfg); }).map(function(a){ return a.id; }),
       blk: journeyBlockers(i.cfg, (i.prog && i.prog.classActivities) || {}, i.uid, i.prog && i.prog.period).map(function(a){ return a.id; }),
@@ -844,6 +904,11 @@ function genWorld(rng, today) {
   IDS.filter(id => ACT[id].teacherOnly === true).forEach(id => { if (chance(rng, 0.35)) d.classSongs[id] = true; });
   d.playAlongActivities = {};
   IDS.filter(id => ACT[id].view === 'card').forEach(id => { if (chance(rng, 0.12)) d.playAlongActivities[id] = true; });
+  /* Renames on about 10% of the cards in play, and 0-3 pins (R11: Delete wipes both, Archive drops the pin). */
+  d.activityTitles = {};
+  inPlay.forEach(id => { if (chance(rng, 0.1)) d.activityTitles[id] = { en: 'Renamed ' + id }; });
+  const nPins = Math.floor(rng() * 4);
+  if (nPins) d.activityPins = inPlay.filter(id => !d.deletedActivities[id]).sort(() => rng() - 0.5).slice(0, nPins);
   d.configVersion = Math.floor(rng() * 40);
   const progs = {};
   UIDS.forEach((u, i) => {
@@ -857,8 +922,8 @@ function genWorld(rng, today) {
 /* ════════════════════════════════════════════════════════════════════════════
    THE CHECKS
    ════════════════════════════════════════════════════════════════════════════ */
-const C = { cases: 0, pages: 0, comparisons: 0, changes: 0, writes: 0, threeWay: 0, tabReturns: 0, midRead: 0, freshLoads: 0, landings: 0, gatedSeen: 0, several: 0,
-  marked: 0, cas: 0, newStudent: 0, richRetire: { archive: 0, delete: 0 }, gamesTabReturn: [0, 0], gamesKeepLast: 0 };
+const C = { cases: 0, pages: 0, comparisons: 0, sigSteps: 0, withBlocker: 0, landed: 0, landingChecks: 0, asked: 0, firstChecks: 0, routerChecks: 0, journeyLocks: 0, changes: 0, writes: 0, threeWay: 0, tabReturns: 0, midRead: 0, freshLoads: 0, landings: 0, gatedSeen: 0, several: 0,
+  marked: 0, cas: 0, newStudent: 0, richRetire: { archive: 0, delete: 0 }, namedRetire: { archive: 0, delete: 0 }, gamesTabReturn: [0, 0], gamesKeepLast: 0 };
 const FAILS = [];
 const TRUTH = {};
 const KIND_COUNT = {};
@@ -909,10 +974,10 @@ function judgeStudent(where, got, S, known) {
 /* ════════════════════════════════════════════════════════════════════════════
    THE CASE
    ════════════════════════════════════════════════════════════════════════════ */
-async function bootStudent(device, store, uid, cfgMode, progMode, special) {
+async function bootStudent(device, store, uid, cfgMode, progMode, special, nav = { hash: '' }) {
   const client = makeClient(store);
   if (special !== 'dev') { client.plan.config.push(cfgMode); client.plan.progress.push(progMode); }
-  const page = makePage('student', device.storage, client);
+  const page = makePage('student', device.storage, client, { hash: nav.hash, referrer: nav.fromJourney ? 'https://example.test/tabs/the-cure.html' : '' });
   C.pages++;
   const email = special === 'teacher-email' ? TEACHER_EMAIL : `${uid}@example.test`;
   page.ctx.__user = { uid, email, displayName: 'Fake User' };
@@ -922,7 +987,19 @@ async function bootStudent(device, store, uid, cfgMode, progMode, special) {
     await page.run(`(async function(){ currentUser = __user; await loadProgress(); try { caAdoptLocalTicks(); } catch(e) {} await loadClassConfig(); })()`);
   }
   await flush();
-  page.run(`document.getElementById('app').style.display = 'block'; applyGamesAccess(); applyActivityGate();`);
+  /* The real showApp() (what start.js's sign-in callback calls next). Stubbed, because they need a rendered lesson
+     or a module file this world does not load: renderAll (draws the sets) and swResumeApply (restores scroll and open
+     panels after an update reload; it routes nothing once a set is on screen). The period question is wrapped, not
+     stubbed, so the tool sees whether it was asked. An update reload is the real note swResumeTake reads. */
+  page.ctx.__resume = nav.resume ? { uid, s: { hash: nav.hash } } : null;
+  page.run(`renderAll = function(){}; swResumeApply = function(){};
+    var __pp = maybeShowPeriodPicker; window.__asked = false;
+    maybeShowPeriodPicker = function(){ var r = __pp(); if (r !== false) window.__asked = true; return r; };
+    if (__resume) swResumeNote = __resume;
+    showApp(__user);`);
+  await flush();
+  page.landed = page.ctx.location.hash;
+  page.asked = page.ctx.__asked === true;
   return page;
 }
 async function bootConsole(store) {
@@ -965,6 +1042,8 @@ function threeWay(where, studentGot, consolePage, uid, d, prog, today) {
   const con = onRoster ? probeConsole(consolePage, uid) : null;
   const jny = probeJourney(journeyPage(), clone(d), prog ? clone(prog) : null, uid);
   C.threeWay++;
+  C.comparisons++;
+  if (jny.locks !== false) fail(`${where} — journey`, `JOURNEY_GATE_LOCKS is ${canon(jny.locks)}: a Journey page would lock (R6)`); else C.journeyLocks++;
   const cas = (mMap(d, 'periodOverrides')[uid] || p.period || '') === 'CAS';
   const sides = [['journey', jny, ['vis', 'opt', 'blk']], ['student', studentGot, cas ? ['vis', 'blk', 'num'] : ['vis', 'opt', 'blk', 'num']]];
   if (con) sides.unshift(['console', con, ['vis', 'opt', 'blk', 'num']]);
@@ -991,11 +1070,21 @@ function pickChange(rng, d, today, progs, openUid, slot) {
       const ids = IDS.filter(id => board[id] || mMap(d, 'activityDates')[id]);
       return ids.length ? pick(rng, ids) : anyId();
     };
-    /* A card that holds the cells Archive must keep and Delete must wipe (Hidden, Who, Optional, Play Along): a
-       busy() card is mostly one the open student SEES, so it is rarely Hidden or someone else's (R11). */
+    /* A card that holds the cells Archive must keep and Delete must wipe: a busy() card is mostly one the open
+       student SEES, so it is rarely Hidden or someone else's (R11). Tiers, first one that has a card: Hidden or Who
+       (60%), a rename or a pin (25%), Optional or Play Along. */
     const rich = () => {
-      const ids = IDS.filter(id => !mMap(d, 'deletedActivities')[id] && (mMap(d, 'hiddenActivities')[id] === true || mMap(d, 'activityStudents')[id] || id in mMap(d, 'optionalActivities') || mMap(d, 'playAlongActivities')[id] === true));
-      return ids.length ? pick(rng, ids) : null;
+      const live = IDS.filter(id => !mMap(d, 'deletedActivities')[id]);
+      const pins = Array.isArray(d.activityPins) ? d.activityPins : [];
+      const tiers = [
+        live.filter(id => mMap(d, 'hiddenActivities')[id] === true || mMap(d, 'activityStudents')[id]),
+        live.filter(id => id in mMap(d, 'activityTitles') || pins.includes(id)),
+        live.filter(id => id in mMap(d, 'optionalActivities') || mMap(d, 'playAlongActivities')[id] === true),
+      ];
+      const r = rng();
+      const order = r < 0.6 ? [0, 1, 2] : r < 0.85 ? [1, 0, 2] : [2, 0, 1];
+      for (const t of order) if (tiers[t].length) return pick(rng, tiers[t]);
+      return null;
     };
     const uid = real && chance(rng, 0.7) ? openUid : pick(rng, UIDS);
     switch (kind) {
@@ -1006,8 +1095,8 @@ function pickChange(rng, d, today, progs, openUid, slot) {
       case 'optional': { const id = busy(); return { kind, id, on: !mOptionalFlag(ACT[id], d, !!mTicked(d, id)) }; }
       case 'songPlace': { const ids = IDS.filter(id => mIsSongCard(ACT[id])); if (!ids.length) continue; const id = pick(rng, ids); return { kind, id, toSongs: !mOnSongs(ACT[id], d) }; }
       case 'classSong': { const ids = IDS.filter(id => ACT[id].teacherOnly === true); if (!ids.length) continue; const id = pick(rng, ids); return { kind, id, on: mMap(d, 'classSongs')[id] !== true }; }
-      case 'archive': { const id = chance(rng, 0.5) ? (rich() || busy()) : busy(); return { kind, id, on: !mRetired(ACT[id], d) }; }
-      case 'delete': { const id = chance(rng, 0.5) ? (rich() || busy()) : busy(); if (mMap(d, 'deletedActivities')[id]) continue; return { kind, id }; }
+      case 'archive': { const id = chance(rng, 0.75) ? (rich() || busy()) : busy(); return { kind, id, on: !mRetired(ACT[id], d) }; }
+      case 'delete': { const id = chance(rng, 0.75) ? (rich() || busy()) : busy(); if (mMap(d, 'deletedActivities')[id]) continue; return { kind, id }; }
       case 'playAlong': { const ids = IDS.filter(id => ACT[id].view === 'card'); const id = pick(rng, ids); return { kind, id, on: mMap(d, 'playAlongActivities')[id] !== true }; }
       case 'clear': {
         const blk = mDocAnswers(d, progs[uid], uid, today).blk;
@@ -1075,6 +1164,7 @@ async function consoleChange(con, store, ch, label, progs, today) {
   C.changes++;
   KIND_COUNT[ch.kind] = (KIND_COUNT[ch.kind] || 0) + 1;
   if ((ch.kind === 'delete' || ch.kind === 'archive') && (mMap(before, 'hiddenActivities')[ch.id] === true || mMap(before, 'activityStudents')[ch.id])) C.richRetire[ch.kind]++;
+  if ((ch.kind === 'delete' || ch.kind === 'archive') && (ch.id in mMap(before, 'activityTitles') || (Array.isArray(before.activityPins) && before.activityPins.includes(ch.id)))) C.namedRetire[ch.kind]++;
   step(`${label}: console writes`);
   const writesBefore = store.counts.writes;
   try { await con.run(`(async function(){ await ${writerCall(ch)}; })()`); }
@@ -1139,8 +1229,13 @@ async function runCase(idx) {
   step(`case ${idx}: console booted`);
   /* A fresh sign-in on this Chromebook, judged against the model; three-way when both reads succeeded. */
   const fresh = async (uid, cMode, pMode, special, label) => {
-    step(`${label}: signing in ${uid}${special ? ' (' + special + ')' : ''}, config ${cMode}, progress ${pMode}`);
-    const page = await bootStudent(device, store, uid, cMode, pMode, special);
+    /* Where the sign-in starts (R13): a bare address, a page, a lesson, an activity's deep link, the live quiz;
+       sometimes back from a Song Journey page, sometimes the site's own update reload. */
+    const hash = pick(rng, ['', '', '#songs', '#my-progress', '#m4w2', `#class-activities/${pick(rng, IDS)}`, '#live-quiz']);
+    const nav = { hash, fromJourney: chance(rng, 0.2), resume: chance(rng, 0.1) };
+    const navLabel = `start ${hash || '(bare)'}${nav.fromJourney ? ', from a Journey page' : ''}${nav.resume ? ', update reload' : ''}`;
+    step(`${label}: signing in ${uid}${special ? ' (' + special + ')' : ''}, config ${cMode}, progress ${pMode}, ${navLabel}`);
+    const page = await bootStudent(device, store, uid, cMode, pMode, special, nav);
     C.freshLoads++;
     if (uid === NEW_UID && !progs[uid]) C.newStudent++;
     const d = store.read('config/class');
@@ -1150,9 +1245,39 @@ async function runCase(idx) {
     const got = probeStudent(page);
     const verdict = judgeStudent(`${label}: fresh sign-in ${uid}${special ? ' (' + special + ')' : ''} (config read ${cMode}, progress ${pMode})`, got, st.S, st.known);
     if (got.gated) C.gatedSeen++;
-    if (got.blk.length) C.landings++;
+    if (got.blk.length) C.withBlocker++;
     if (cMode === 'ok' && pMode === 'ok' && !special) threeWay(`${label}: ${uid}`, got, con, uid, d, progs[uid], today);
     const kS = verdict === 'known' ? st.known[0].S : null;
+    const SJ = kS || st.S;
+    const where = `${label}: fresh sign-in ${uid}${special ? ' (' + special + ')' : ''} (config read ${cMode}, progress ${pMode}, ${navLabel})`;
+    /* R13 the landing. */
+    const expHash = mLanding(SJ, nav);
+    C.landingChecks++; C.comparisons++;
+    if (page.landed === '#class-activities' && expHash === '#class-activities') C.landed++;
+    /* Compared by page: a deep link's tail is the router's to resolve (a card this student cannot open falls back
+       to the bare page with "link missing"). */
+    const pageOf = h => (h.includes('/') ? h.slice(0, h.indexOf('/')) : h);
+    if (pageOf(page.landed) !== pageOf(expHash)) fail(`${where}: landing`, `ended on ${page.landed || '(bare)'}, expected ${expHash || '(bare)'} (${mStudentBlockers(SJ).length} unfinished required activities)`);
+    /* R15 the period question. */
+    C.comparisons++;
+    if (page.asked) C.asked++;
+    if (page.asked !== mPeriodAsked(SJ)) fail(`${where}: period question`, page.asked ? 'asked, but the rules say this student is not asked' : 'not asked, but the rules say it is');
+    /* R14 the first card. */
+    let first;
+    try { first = page.run(`(function(){ renderClassActivities(); return caStartHereId; })()`); } catch (e) { fail(`${where}: first card`, 'renderClassActivities threw ' + (e && e.message)); }
+    if (first !== undefined) {
+      C.firstChecks++; C.comparisons++;
+      const prob = mFirstProblem(SJ, first);
+      if (prob) fail(`${where}: first card`, prob);
+    }
+    /* R6 no lock: a student with an unfinished required activity still opens another page. */
+    if (mStudentBlockers(SJ).length && !SJ.previewer) {
+      const to = page.ctx.location.hash === '#songs' ? 'my-progress' : 'songs';
+      page.ctx.__to = to;
+      try { page.run('goExploreHash(__to)'); } catch (e) { fail(`${where}: router`, 'goExploreHash threw ' + (e && e.message)); }
+      C.routerChecks++; C.comparisons++;
+      if (page.ctx.location.hash !== '#' + to) fail(`${where}: router`, `a student with a blocker asked for #${to} and was sent to ${page.ctx.location.hash || '(bare)'}`);
+    }
     return { page, S: st.S, kS, got, ok: verdict !== 'fail' };
   };
   /* Student events on an open page (R5): mark a blocker complete, or pick CAS. The real save path writes the
@@ -1180,7 +1305,10 @@ async function runCase(idx) {
       await consoleRefetch(con);
     } else if (r < 0.5 && (S.override || S.ownPeriod) !== 'CAS') {
       step(`${label}: ${uid} picks CAS`);
-      await opened.page.run(`(async function(){ await periodPick('CAS'); })()`);
+      /* The answer comes from the period question's buttons (periodPick reads its overlay): open it first. */
+      await opened.page.run(`(async function(){
+        if (!document.getElementById('period-overlay')) { var o = document.createElement('div'); o.id = 'period-overlay'; document.body.appendChild(o); }
+        await periodPick('CAS'); })()`);
       await flush();
       C.cas++;
       const saved = store.read('progress/' + uid);
@@ -1265,6 +1393,67 @@ async function runCase(idx) {
   }
 }
 
+/* R12 + the signature, directed (round-2 review R2-5): one change per input of classConfigSignature that the
+   student's answer reads, each aimed so that it ALONE moves stu-alpha's answer, then a tab return with a good read.
+   The answer must move (the model) and the signature must move with it, or an open In-Class Activities screen is
+   not repainted. Fixed, not seeded: the same 13 steps every run. */
+async function directedSignature() {
+  const uid = 'stu-alpha';
+  const nowMs = DAYS[0][1];
+  VNOW = nowMs;
+  const today = modelToday(VNOW), tomorrow = modelAddDays(today, 1);
+  CUR = { seed: SEED, idx: 'sig', label: `directed signature block, today ${today}` };
+  step('directed signature block');
+  const plain = ACTS.filter(a => !mIsSongCard(a) && a.teacherOnly !== true && a.optional !== true && a.kind !== 'check' && a.view !== 'card');
+  const P = ACTS.find(a => a.view === 'card' && !mIsSongCard(a) && a.teacherOnly !== true);
+  const G = ACTS.find(a => mIsSongCard(a));
+  const T = ACTS.find(a => a.teacherOnly === true && !mIsSongCard(a));
+  if (plain.length < 7 || !P || !G || !T) { fail('setup', `needs 7 plain cards, a practice card, a song card and a teacher-only card; found ${plain.length}, ${!!P}, ${!!G}, ${!!T}`); return; }
+  const c = plain.slice(0, 7).map(a => a.id);
+  const d = { activityBoardSeeded: true, activityBoard: {}, activityDates: {}, songLibrary: { [G.id]: false }, configVersion: 1 };
+  [...c, P.id, G.id, T.id].forEach((id, i) => { d.activityBoard[id] = { module: 1, pos: i + 1 }; d.activityDates[id] = today; });
+  d.activityDates[P.id] = tomorrow;
+  const progs = { [uid]: { name: NAMES[uid], email: 'stu1@example.test', period: '4', classActivities: {}, migrations: { swap45: true } } };
+  UIDS.filter(u => u !== uid).forEach((u, i) => { progs[u] = { name: NAMES[u], email: `stu${i + 2}@example.test`, period: '7', classActivities: {}, migrations: { swap45: true } }; });
+  const store = new Store();
+  store.put('config/class', d);
+  UIDS.forEach(u => store.put('progress/' + u, progs[u]));
+  const device = { storage: makeStorage(), wc: null, slot: null, own: {} };
+  const con = await bootConsole(store);
+  const page = await bootStudent(device, store, uid, 'ok', 'ok', null, { hash: '#class-activities' });
+  let prevS = mPageState(device, store.read('config/class'), uid, 'ok', null, studentBase(uid, progs[uid], true, null, today)).S;
+  const steps = [
+    ['dates', { kind: 'date', id: c[0], value: tomorrow }],
+    ['board', { kind: 'unassign', id: c[1] }],
+    ['hidden', { kind: 'hide', id: c[2], on: true }],
+    ['Who (activityForMe)', { kind: 'who', id: c[3], uid: 'stu-bravo', on: true }],
+    ['retired', { kind: 'archive', id: c[4], on: true }],
+    ['clears', { kind: 'clear', uid, id: c[5], on: true }],
+    ['optional', { kind: 'optional', id: c[6], on: true }],
+    ['Play Along now', { kind: 'playAlong', id: P.id, on: true }],
+    ['songLibrary', { kind: 'songPlace', id: G.id, toSongs: true }],
+    ['classSongs', { kind: 'classSong', id: T.id, on: true }],
+    ['period override', { kind: 'period', uid, value: 'CAS' }],
+    ['Open through', { kind: 'openThrough', uid, value: 5 }],
+    ['games', { kind: 'classGames', on: false }],
+  ];
+  for (const [input, ch] of steps) {
+    const label = `sig ${input}`;
+    const sigBefore = probeStudent(page).sig;
+    const after = await consoleChange(con, store, ch, `${label}: ${chLabel(ch)}`, progs, today);
+    page.client.plan.config.push('ok');
+    (page.docListeners.visibilitychange || []).forEach(fn => fn({}));
+    await flush();
+    const got = probeStudent(page);
+    const S = mPageState(device, after, uid, 'ok', prevS, Object.assign(studentBase(uid, progs[uid], true, null, today), { done: prevS.done, ownPeriod: prevS.ownPeriod })).S;
+    judgeStudent(`${label}: tab back (read ok)`, got, S, []);
+    C.sigSteps++; C.comparisons += 2;
+    if (!answerDiff(mStudentAnswers(prevS), mStudentAnswers(S), ['vis', 'opt', 'blk', 'pao', 'num', 'period', 'openThrough', 'games'], false).length) fail(`${label}`, 'the aimed change did not move the student\'s answer (the block is mis-aimed)');
+    if (got.sig === sigBefore) fail(`${label}: tab back`, `only ${input} changed and the student's answer moved, but classConfigSignature() did not, so the open In-Class Activities screen is not repainted`);
+    prevS = S;
+  }
+}
+
 /* ── Run ── */
 process.on('unhandledRejection', e => { fail('unhandled rejection', String(e && e.stack || e).split('\n').slice(0, 3).join(' / ')); });
 const indices = ONE_CASE !== null ? [ONE_CASE] : Array.from({ length: CASES }, (_, i) => i);
@@ -1277,9 +1466,13 @@ for (const i of indices) {
   LOG = [];
   if (FAILS.length > f0 && FAILS.length - f0 > 40) FAILS.splice(f0 + 40);
 }
+if (ONE_CASE === null) {
+  try { await directedSignature(); } catch (e) { fail('harness (signature block)', String(e && e.stack || e).split('\n').slice(0, 4).join(' / ')); }
+}
 clearInterval(watchdog);
 if (FULL_RUN) {
   CHANGE_KINDS.forEach(k => { if ((KIND_COUNT[k] || 0) < KIND_FLOOR) { CUR = { seed: SEED, idx: '-', label: 'whole run' }; fail('sampling', `${k} ran ${KIND_COUNT[k] || 0} times, under the floor of ${KIND_FLOOR}`); } });
+  ['archive', 'delete'].forEach(k => { if (C.namedRetire[k] < RICH_FLOOR) { CUR = { seed: SEED, idx: '-', label: 'whole run' }; fail('sampling', `${k} hit a renamed or pinned card ${C.namedRetire[k]} times, under the floor of ${RICH_FLOOR}`); } });
   ['archive', 'delete'].forEach(k => { if (C.richRetire[k] < RICH_FLOOR) { CUR = { seed: SEED, idx: '-', label: 'whole run' }; fail('sampling', `${k} hit a Hidden or Who card ${C.richRetire[k]} times, under the floor of ${RICH_FLOOR}`); } });
   Object.keys(KNOWN_HITS).forEach(k => { if (!KNOWN_HITS[k]) { CUR = { seed: SEED, idx: '-', label: 'whole run' }; fail(`KNOWN ${k}`, `matched nothing in a full run — if the fault is fixed, delete its entry (header and KNOWN_HITS) in the same change`); } });
 }
@@ -1290,8 +1483,11 @@ out.push(`  ${C.cases} cases over ${DAYS.length} kinds of day · ${C.pages} page
 out.push(`  ${C.changes} console changes through the real writers (${C.writes} writes; ${C.several} tab returns came after 2-3 changes) · ${C.tabReturns} tab returns (${C.midRead} looked at mid-read)`);
 out.push(`  student events through the real save path: ${C.marked} cards marked complete, ${C.cas} CAS picks`);
 out.push(`  config/progress reads served: ${READS.ok} ok, ${READS.fail} failed, ${READS.empty} empty · ${C.comparisons} fields compared`);
-out.push(`  the lock (R6): body.ca-gated seen on ${C.gatedSeen} of ${C.freshLoads} sign-ins; ${C.landings} of ${C.freshLoads} sign-ins had a blocker, i.e. landed on In-Class Activities`);
-out.push(`  changes by kind (floor ${KIND_FLOOR}${FULL_RUN ? '' : ', checked on a full run only'}): ` + CHANGE_KINDS.map(k => `${k} ${KIND_COUNT[k] || 0}`).join(' · ') + ` (of them on a Hidden or Who card: archive ${C.richRetire.archive}, delete ${C.richRetire.delete})`);
+out.push(`  the lock (R6): body.ca-gated seen on ${C.gatedSeen} of ${C.freshLoads} sign-ins (and after every tab return); JOURNEY_GATE_LOCKS read false on ${C.journeyLocks} Journey probes; ${C.routerChecks} students with an unfinished required activity asked the router for another page`);
+out.push(`  the landing (R13, the real showApp): ${C.landingChecks} sign-ins from a bare address, a page, a lesson, a deep link, the live quiz, a Journey page or an update reload; ${C.landed} ended on In-Class Activities (${C.withBlocker} had an unfinished required activity)`);
+out.push(`  the signature, directed: ${C.sigSteps} of 13 inputs changed alone, each followed by a tab return with a good read`);
+out.push(`  the first card (R14, caStartHereId after the real renderClassActivities): ${C.firstChecks} sign-ins checked · the period question (R15) asked at ${C.asked} sign-ins`);
+out.push(`  changes by kind (floor ${KIND_FLOOR}${FULL_RUN ? '' : ', checked on a full run only'}): ` + CHANGE_KINDS.map(k => `${k} ${KIND_COUNT[k] || 0}`).join(' · ') + ` (of them on a Hidden or Who card: archive ${C.richRetire.archive}, delete ${C.richRetire.delete}; on a renamed or pinned card: archive ${C.namedRetire.archive}, delete ${C.namedRetire.delete})`);
 out.push('  WHEN a console change reaches a student (R12) — passed / run, by change and moment:');
 const COLS = ['open page, tab not back: old answer', 'during the tab-return read: old answer', 'tab back, read ok: new answer', 'tab back, read failed: old answer', 'fresh sign-in: rules for its read'];
 out.push('    ' + 'change'.padEnd(14) + ['open, not back', 'mid-read', 'back, ok read', 'back, failed', 'fresh'].map(x => x.padStart(15)).join(''));
