@@ -239,6 +239,38 @@ script.
   him (his call, 2026-11-11). The Friday check runs it every week (skill
   `friday-check`, step 5b), so he is told within a week without anyone working on listening.
 - **Fitted rooms** `room7`, `room4` in `student.mjs` (Jonathan, 2026-11-11, fitted to the 21 real takes).
+- **THE LISTENING BENCH (2026-11-12; Jonathan: "i would like the audio detection from power chord switch to apply
+  site-wide like to listening coach, etc.").** The Power Chord Switch tools, widened to every feature that listens.
+  Four files, one job each; every one loads the site UNCHANGED in `closed-loop.mjs`'s vm and reads its verdicts from
+  the site itself:
+  - `listen-site.mjs` (not a command): the runners. The real Listening Coach (`coachOpen` with the button the site
+    renders, `coachStartCheck`, `coachLoop`, `coachFinish`, `coachRenderReport`: the level the student sees and the
+    level saved for the skill), Note Runner (`nrLoop` / `nrFinalizeEvent` / `nrFinish` on a take's own notes, set up
+    the way `nrStart` sets a round up) and Strum Radar (`srStart` / `srLoop` / `srFinish`). The mic opens through the
+    site's own `coachAcquireMic` against a fake `getUserMedia`; a fake signed-in student whose `saveGames` is only
+    counted. Sound from a recording, its summary, or a `student.mjs` room.
+  - `room-onsets.mjs <takes folder>` (step 1b): every recorded take, any game, through the real `coachLoop` as an
+    onset probe; the sounds the shared onset rule takes where the console evaluator finds no attack, per minute of
+    room sound and per EMPTY window of each game's own width (read from the site: Strum Radar `s.win`,
+    `coachMatchWinMs()`, Note Runner `goodMs`). About 1 minute.
+  - `no-guitar-listen.mjs [--takes=<folder>]` (the C1 test): nothing played, into the real Coach on every
+    Coach-gated chord and melody skill (its own button, its own tempo) and Strum Radar on every pattern; the level the
+    report shows, the level saved and whether the check-off gate opens (the site's own test from `toggleSkill`).
+    Synthetic rooms (`NO_GUITAR`) and, with `--takes`, each take's room sound (`takes-audio.mjs`: the stretches with no
+    attack, a second after the last one, no count-in, spliced with 250 ms equal-power fades; the tool prints how many
+    onsets sit near a join against how many would by chance). Exit 1 when anything gave credit for nothing (today: it
+    does), so it is not in `checks.mjs`. About 2 minutes for chords + radar, 25 with melody and the recorded rooms.
+  - `replay-listen.mjs [folder]` (step 3): the recorded Listening Coach (melody, chords) and Note Runner takes through
+    the real loops, from the summaries in `takes/` (no folder) or from audio: per mode, real notes named right / half
+    / unclear / wrong / missed, notes the recording clearly holds that the site did not count (by the site's own
+    reason), sounds counted where nothing was played, and the "reproduced" error bar. `--noise` moves each take's
+    clock offset 20 to 100 ms; `--own-day` (audio only) replays each take on the site of its own day, which is the
+    replay's own error; `--against` ranks per note by the recording. About 5 s from summaries.
+  `takes-in.mjs` now keeps the Coach and Note Runner takes as summaries too (`kind`, pitch at 0.22 and 0.55, the
+  saved verdicts and readings, the evaluator's truth; `--games=` picks which games to write), and `closed-loop.mjs`'s
+  REAL TAKES section replays them after the Power Chord Switch ones (`realListen` in `--json`; `--against` compares
+  them). The Power Chord Switch summaries and their replay are unchanged (byte-identical output from the old and the
+  new `takes-in.mjs` on the same folder).
 - `smoke.mjs <url>` — headless Chromium through the Dev bypass with the
   in-page harness: Coach, Note Runner, Note Hunt, Note Call, Change Up, PSG
   Hero, the consent prompt and the recording path. Start a static server on

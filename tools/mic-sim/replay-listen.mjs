@@ -148,11 +148,20 @@ export async function replayAllListen(takes, at, shifts, useCache){
     tk.res = {};
     for (const sh of shifts){
       const site = benchSite(at, !!tk.sum), k = cache && tk.hash ? cache.key(site, tk, sh) : null, hit = k ? cache.get(k) : null;
-      tk.res[sh] = hit || await replayOne(tk, at, sh);
+      /* A site that reads pitch at a gate the summaries were not measured at (a changed clarity) cannot be replayed from them: the
+         take is kept with the reason, and noGate() turns it into a CANNOT JUDGE. */
+      try { tk.res[sh] = hit || await replayOne(tk, at, sh); }
+      catch (e){ if (!/hold no pitch for the gate/.test(e.message)) throw e; tk.res[sh] = { error: e.message.replace(/^closed-loop: /, '') }; continue; }
       if (k && !hit) cache.set(k, tk.res[sh]);
     }
   }
   return cache;
+}
+
+/* Why the summaries cannot judge this site, beyond staleReasons: a take the site asked for pitch at a gate they do not hold. */
+export function noGate(takes){
+  const bad = takes.filter(t => Object.values(t.res || {}).some(r => r && r.error && /hold no pitch for the gate/.test(r.error)));
+  return bad.length ? [`${bad.length} of ${takes.length} Coach / Note Runner summaries hold no pitch at the gate this site reads (${[...new Set(bad.flatMap(t => Object.values(t.res).filter(r => r.error).map(r => r.error.replace(/ \(run the intake again\)/, ''))))].join('; ')}): a change to the pitch detector's clarity needs the audio`] : [];
 }
 
 /* ── Counting ── */
@@ -231,7 +240,7 @@ export function printListen(takes, shifts, log){
    played note with no readable pitch are not ranked: the recording does not say. */
 const RANK = { present: { right: 3, unclear: 2, missed: 2, half: 1, wrong: 1 }, other: { wrong: 3, half: 3, unclear: 2, missed: 2, right: 1 }, nothing: { missed: 3, unclear: 2, wrong: 2, half: 2, right: 1 } };
 export function listenJson(takes){
-  return takes.map(t => ({ take: t.take, id: t.id, kind: t.kind, error: t.res[0] && t.res[0].error || null,
+  return takes.map(t => ({ take: t.take, id: t.id, kind: t.kind, error: t.res[0] && t.res[0].error || null, overall: t.res[0] && t.res[0].overall != null ? t.res[0].overall : null,
     notes: t.notes.map(n => { const v = t.res[0] && t.res[0].notes ? t.res[0].notes[n.i] : null; return { i: n.i, played: !!n.played, present: n.present, v: v ? v.v : null }; }) }));
 }
 export function compareListen(now, was, file, stale){
@@ -268,11 +277,12 @@ export async function realListen(at, log){
   log(`\nREAL TAKES · ${takes.length} Listening Coach and Note Runner take summaries (${kinds.join(', ') || 'none'}; tools/mic-sim/takes/: recorded students, no audio) · replayed through this site's coachLoop and nrLoop`);
   if (!takes.length){ log('  none yet: bring them in with node tools/mic-sim/takes-in.mjs'); return { takes: [], stale: [] }; }
   const stale = staleReasons(takes, baseSite(at));
-  const STALE = 'THE REAL TAKES CANNOT JUDGE THIS SITE: ' + stale.join('; ') + '. The numbers below replay readings made with the old ones: they are not this site\'s.';
-  if (stale.length) log(STALE);
   const cache = await replayAllListen(takes, at, [0], true);
+  stale.push(...noGate(takes));
+  const STALE2 = 'THE REAL TAKES CANNOT JUDGE THIS SITE: ' + stale.join('; ') + '. The numbers below are not this site\'s.';
+  if (stale.length) log(STALE2);
   printListen(takes, [0], log);
-  if (stale.length) log(STALE);
+  if (stale.length) log(STALE2);
   log(`  Noise (node tools/mic-sim/replay-listen.mjs --noise moves each take's clock offset 20 to 100 ms): read a difference between two sites as real only past it.`);
   log(`  ${takes.length} takes in ${((Date.now() - t0) / 1000).toFixed(1)} s (${cache.runs} replays run, ${cache.hits} read from tools/mic-sim/.replay-cache/)`);
   return { takes: listenJson(takes), stale };
@@ -323,6 +333,8 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]){
     if (!takes.length) process.exit(1);
     const shifts = args.includes('--noise') ? [0, ...NOISE_SHIFTS] : [0];
     await replayAllListen(takes, at, shifts, !folder);
+    const gateWhy = noGate(takes);
+    if (gateWhy.length){ stale.push(...gateWhy); console.log('THE REAL TAKES CANNOT JUDGE THIS SITE: ' + gateWhy.join('; ')); }
     const report = printListen(takes, shifts, l => console.log(l));
     if (args.includes('--own-day')) await ownDay(takes, l => console.log(l));
     console.log(`\n${takes.length} takes, ${shifts.length} replay(s) each, ${((Date.now() - t0) / 1000).toFixed(1)} s`);
