@@ -447,8 +447,8 @@ async function coachStartCheck(){
   if (typeof gamesStopMic === 'function') gamesStopMic();
 
   const session = coach;
-  if (!coachStream && !(await coachAcquireMic())){
-    if (coach === session) coachRenderReady(coachMicFailMsg('coach.mic.denied'));
+  if (!coachStream && !(await coachAcquireMic({ el: coachBody(), records: true }))){
+    if (coach === session) coachRenderReady(coachMicFailMsg());
     return;
   }
   await coachEnsureRunning();
@@ -537,19 +537,102 @@ function coachEvictTuner(){
    video call), to a permission setting that was already on. */
 let coachMicFailName = '';
 /* The line for a failed coachAcquireMic(). A refusal — the student, or the
-   browser's site setting, said no — keeps the caller's own "access denied"
-   key; no mic, a busy mic, or a failed setup each say so instead. */
-function coachMicFailMsg(deniedKey){
-  if (/^(NotAllowedError|SecurityError|PermissionDeniedError)$/.test(coachMicFailName)) return t(deniedKey);
+   browser's site setting, said no — gets the tuner's own lock-icon steps
+   (tools.micDenied, one wording for every mic feature, 2026-11-13), plus
+   the caller's `extraKey` when it has a way to go on without the mic (Note
+   Call: tap the frets). No mic, a busy mic, or a failed setup each say so
+   instead. A start whose "Turn on the microphone" panel was given up
+   ('cancelled', see coachMicAsk) has nothing to say: ''. */
+function coachMicFailMsg(extraKey){
+  if (coachMicFailName === 'cancelled') return '';
+  if (/^(NotAllowedError|SecurityError|PermissionDeniedError)$/.test(coachMicFailName)) return t('tools.micDenied') + (extraKey ? ' ' + t(extraKey) : '');
   return t(coachMicFailName === 'setup' ? 'coach.mic.failed' : 'coach.mic.unavailable');
 }
-let coachAcquirePending = null;
-function coachAcquireMic(){
-  if (coachAcquirePending) return coachAcquirePending;
-  coachAcquirePending = coachAcquireMicInner().finally(() => { coachAcquirePending = null; });
-  return coachAcquirePending;
+
+/* ── Before the browser asks (2026-11-13, research-6 rec. 1) ──
+   The browser's own "Allow microphone?" box used to open straight from
+   Start, with nothing on the page saying why. Now coachAcquireMic first
+   asks the Permissions API what the browser would do:
+     granted  → straight on, exactly as before (no extra click);
+     prompt   → a small panel in the caller's status place (`ask.el`): one
+                line on what is listened for, and one button, "Turn on the
+                microphone" — only its click goes on to getUserMedia;
+     denied   → getUserMedia is not called; the caller gets the same refusal
+                as before (false, NotAllowedError), so it shows the
+                lock-icon steps;
+     anything else (no Permissions API, a browser that does not know
+     'microphone', a throw, no answer in COACH_MIC_PERM_WAIT_MS) → exactly
+     as before. A caller with no `ask` (the hidden trainer) never gets the
+     panel. Nothing here touches the constraints or the audio graph.
+   The panel holds no mic and starts nothing. Its wait ends with the click,
+   or is given up ('cancelled') when another start asks for the mic, when
+   coachMicOff() runs (every game's and the Coach's way out), when Note Call
+   stops a card that is starting (ncStopAll), or when the caller's place left
+   the page before the panel could be drawn. A given-up start returns false
+   with coachMicFailName 'cancelled', and each caller's own "still mine?"
+   guard decides what, if anything, to draw (coachMicFailMsg gives ''). */
+const COACH_MIC_PERM_WAIT_MS = 1500;
+let coachMicAsk = null;   // the panel waiting for its click: { resolve }
+async function coachMicPermState(){
+  let timer = null;
+  try {
+    if (!navigator.permissions || typeof navigator.permissions.query !== 'function') return '';
+    const late = new Promise(res => { timer = setTimeout(() => res(null), COACH_MIC_PERM_WAIT_MS); });
+    const st = await Promise.race([navigator.permissions.query({ name: 'microphone' }), late]);
+    const s = st && st.state;
+    return s === 'granted' || s === 'prompt' || s === 'denied' ? s : '';
+  } catch(e){ return ''; }
+  finally { clearTimeout(timer); }
 }
-async function coachAcquireMicInner(){
+/* `records`: the caller's screen can record a consented take (the Coach,
+   Note Runner, Power Chord Switch — coachFootHtml's same flag). Only then,
+   and only for a student who said yes, does the line say takes are saved;
+   everywhere else "nothing is recorded" is true. */
+function coachMicAskHtml(records){
+  const line = t(records && micRecWanted() ? 'micpre.lineRec' : 'micpre.line');
+  return `<div class="micrec-ask micpre-ask" role="group" aria-label="${escHtml(line)}">
+       <p class="micrec-q">&#x1F399;&#xFE0F; ${escHtml(line)}</p>
+       <div class="micrec-btns">
+         <button type="button" class="coach-start" onclick="coachMicAskGo()">${escHtml(t('micpre.button'))}</button>
+       </div>
+     </div>`;
+}
+function coachMicAskGo(){
+  const a = coachMicAsk;
+  if (a){ coachMicAsk = null; a.resolve(true); }
+}
+/* The acquisition waiting on the panel is over: a start that asks next must
+   not be handed that given-up promise, so the single-flight slot is freed
+   here, in the same tick (its own .finally only clears it if still its own). */
+function coachMicAskCancel(){
+  const a = coachMicAsk;
+  if (a){ coachMicAsk = null; coachAcquirePending = null; a.resolve(false); }
+}
+let coachAcquirePending = null;
+function coachAcquireMic(ask){
+  /* An older start still waiting on its panel gives way: it returns false
+     ('cancelled') and this start asks again in its own place. */
+  coachMicAskCancel();
+  if (coachAcquirePending) return coachAcquirePending;
+  const p = coachAcquireMicInner(ask).finally(() => { if (coachAcquirePending === p) coachAcquirePending = null; });
+  coachAcquirePending = p;
+  return p;
+}
+async function coachAcquireMicInner(ask){
+  coachMicFailName = '';
+  const perm = await coachMicPermState();
+  if (perm === 'denied'){ coachMicFailName = 'NotAllowedError'; return false; }
+  if (perm === 'prompt' && ask && ask.el){
+    if (!ask.el.isConnected){ coachMicFailName = 'cancelled'; return false; }
+    const go = await new Promise(resolve => {
+      coachMicAsk = { resolve };
+      ask.el.innerHTML = coachMicAskHtml(!!ask.records);
+    });
+    if (!go){ coachMicFailName = 'cancelled'; return false; }
+    // The panel may have waited a while: the tuner can have opened since the
+    // caller's own coachEvictTuner(). One mic owner at a time, as before.
+    coachEvictTuner();
+  }
   // One mic owner at a time: the rail/module recorder holds a plain
   // {audio:true} stream (all processing on) — stop it before opening this
   // processing-off stream, or two sessions with conflicting constraints
@@ -557,7 +640,6 @@ async function coachAcquireMicInner(){
   // Covers every coachAcquireMic call site (games included), not just
   // coachOpen's own stopAnyRec.
   if (typeof stopAnyRec === 'function') stopAnyRec();
-  coachMicFailName = '';
   try {
     /* voiceIsolation: ChromeOS (and Chrome on newer platforms) can run a
        speech-only filter on the built-in mic, which treats a held guitar
@@ -1640,6 +1722,7 @@ function coachRecMeta(){
 }
 
 function coachMicOff(){
+  coachMicAskCancel();          // a "Turn on the microphone" panel still waiting: that start is over too
   micRecAbort();                // a capture still running here was never finished: drop it
   window.coachMicLive = false;
   if (coachStream) coachStream.getTracks().forEach(t => t.stop());

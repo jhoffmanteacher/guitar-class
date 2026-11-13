@@ -40,9 +40,9 @@ async function fretStart(levelIdx){
   const body = document.getElementById('fret-body');
   if (!body) return;
   body.innerHTML = `<div class="coach-tip">${t('games.fret.startingMic')}</div>`;
-  if (!coachStream && !(await coachAcquireMic())){
+  if (!coachStream && !(await coachAcquireMic({ el: body }))){
     const b2 = document.getElementById('fret-body');
-    if (b2) b2.innerHTML = `<div class="coach-note">${coachMicFailMsg('games.fret.micDenied')}</div>`;
+    if (b2) b2.innerHTML = `<div class="coach-note">${coachMicFailMsg()}</div>`;
     return;
   }
   await coachEnsureRunning();

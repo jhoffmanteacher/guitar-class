@@ -557,8 +557,8 @@ async function ccStart(again){
   cc.nextBpm = null;   // the done screen's tempo row opens fresh after each game (ccRenderDone)
   cc.firstPlayAt = null;
   cc.unreached = 0;
-  if (!coachStream && !(await coachAcquireMic())){
-    if (cc === session){ cc.phase = 'setup'; ccRenderSetup(coachMicFailMsg('games.cc.micDenied')); }
+  if (!coachStream && !(await coachAcquireMic({ el: ccBody(), records: ccIsPower() }))){
+    if (cc === session){ cc.phase = 'setup'; ccRenderSetup(coachMicFailMsg()); }
     return;
   }
   await coachEnsureRunning();

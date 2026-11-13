@@ -260,7 +260,7 @@ async function ncStart(key){
     st.starting = true;
     st.cancelled = false;           // set by ncStopAll if the student leaves mid-start
     ncRepaint(key, ncHeadHtml(st, '') + `<div class="sdr-body"><div class="coach-tip">${escHtml(t('nc.startingMic'))}</div></div>`);
-    let ok = false;
+    let ok = false, given = false;
     try {
       await ensureCoachJs();
       if(!st.cancelled){            // left while coach.js loaded: touch no other mic owner
@@ -268,14 +268,20 @@ async function ncStart(key){
         if(typeof gamesStopMic === 'function') gamesStopMic();
         st.cancelled = false;       // gamesStopMic's own ncStopAll() just flagged THIS start
         coachEvictTuner();
-        ok = !!(coachStream || await coachAcquireMic());
+        const box = ncBox(key);
+        ok = !!(coachStream || await coachAcquireMic({ el: box && box.querySelector('.sdr-body') }));
+        given = !ok && coachMicFailName === 'cancelled';
         if(ok) await coachEnsureRunning();
       }
     } catch(e){ ok = false; }
     st.starting = false;
     /* The page was left (In class closed, the tab hidden…) while the mic was
        starting: the card is only hidden, so ncBox still finds it — without
-       this the round would run unseen with the mic open. */
+       this the round would run unseen with the mic open. A "Turn on the
+       microphone" panel that was given up (coach.js coachMicAsk: another
+       start, or ncStopAll below) is the same: back to the card's setup, not
+       to tapping. */
+    if(given) st.cancelled = true;
     if(st.cancelled){
       st.cancelled = false;
       if(ok) coachReleaseMicIfIdle();
@@ -285,10 +291,10 @@ async function ncStart(key){
     if(noteCalls[key] !== st || !ncBox(key)){ if(ok) coachReleaseMicIfIdle(); return; }
     if(!ok){
       st.coach = false;             // fall back to tapping for this card
-      // Why it failed — no mic, a busy mic, or a refusal (nc.micDenied) —
-      // from coach.js's record of the last acquisition. No coach.js (it
-      // failed to load) keeps the plain line.
-      st.msg = typeof coachMicFailMsg === 'function' ? coachMicFailMsg('nc.micDenied') : t('nc.micDenied');
+      // Why it failed — no mic, a busy mic, or a refusal (the lock-icon
+      // steps, then "tap the frets") — from coach.js's record of the last
+      // acquisition. No coach.js (it failed to load) keeps the plain line.
+      st.msg = typeof coachMicFailMsg === 'function' ? coachMicFailMsg('micpre.tapFrets') : t('nc.micDenied');
       ncRepaint(key, ncSetupHtml(key));
       return;
     }
@@ -829,7 +835,11 @@ function ncStop(key){
 function ncStopAll(){
   Object.keys(noteCalls).forEach(k => {
     const st = noteCalls[k];
-    if(st.starting){ st.cancelled = true; return; }   // mid mic-start: ncStart bails when its await returns
+    if(st.starting){   // mid mic-start: ncStart bails when its await returns
+      st.cancelled = true;
+      if(typeof coachMicAskCancel === 'function') coachMicAskCancel();   // its "Turn on the microphone" panel, if one is waiting, ends that await now
+      return;
+    }
     if(st.phase !== 'play') return;
     ncStop(k);
     st.phase = 'setup';

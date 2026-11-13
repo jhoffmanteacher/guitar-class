@@ -844,8 +844,8 @@ async function rnwStart(){
   const s = rn;
   s.phase = 'wait';
   body.innerHTML = `<div class="coach-tip rn-center">${t('games.common.startingMic')}</div>`;
-  if (!coachStream && !(await coachAcquireMic())){
-    if (rn === s){ s.phase = 'ready'; rnRenderReady(coachMicFailMsg('games.common.micAccessDenied')); }
+  if (!coachStream && !(await coachAcquireMic({ el: body }))){
+    if (rn === s){ s.phase = 'ready'; rnRenderReady(coachMicFailMsg()); }
     return;
   }
   await coachEnsureRunning();
@@ -1611,8 +1611,8 @@ async function nrStart(){
   coachEvictTuner();
   nrHearStop();
   body.innerHTML = `<div class="coach-tip rn-center">${t('games.common.startingMic')}</div>`;
-  if (!coachStream && !(await coachAcquireMic())){
-    if (nr === s){ s.phase = 'ready'; nrRenderReady(coachMicFailMsg('games.common.micAccessDenied')); }
+  if (!coachStream && !(await coachAcquireMic({ el: body, records: !s.gym }))){
+    if (nr === s){ s.phase = 'ready'; nrRenderReady(coachMicFailMsg()); }
     return;
   }
   await coachEnsureRunning();

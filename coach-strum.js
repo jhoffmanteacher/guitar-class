@@ -1138,8 +1138,8 @@ async function srStart(){
   const body = srBody();
   if (!body) return;
   body.innerHTML = `<div class="coach-tip sr-center">${t('games.common.startingMic')}</div>`;
-  if (!coachStream && !(await coachAcquireMic())){
-    if (sr === s) srRenderSetup(coachMicFailMsg('games.common.micAccessDenied'));
+  if (!coachStream && !(await coachAcquireMic({ el: body }))){
+    if (sr === s) srRenderSetup(coachMicFailMsg());
     return;
   }
   await coachEnsureRunning();

@@ -500,9 +500,9 @@ async function psgStart(){
   const body = psgBody();
   if (!body) return;
   body.innerHTML = `<div class="coach-tip">${t('games.psg.startingMic')}</div>`;
-  if (!coachStream && !(await coachAcquireMic())){
+  if (!coachStream && !(await coachAcquireMic({ el: body }))){
     const b2 = psgBody();
-    if (b2) b2.innerHTML = `<div class="coach-note">${coachMicFailMsg('games.psg.micDenied')}</div>`;
+    if (b2) b2.innerHTML = `<div class="coach-note">${coachMicFailMsg()}</div>`;
     return;
   }
   await coachEnsureRunning();
