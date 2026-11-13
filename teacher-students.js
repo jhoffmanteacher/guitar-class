@@ -193,6 +193,9 @@ function teacherPmRoster(){ return (allStudentsRaw||[]).filter(s=>s&&s.uid&&!tea
 // The period the student side ranks a Top 5 in: the same override-first value (PM_HOST.period), 4 / 7 / CAS only.
 // Own keys only: a period the student typed as 'constructor' or 'toString' is no period (hostPeriod() in the engine agrees).
 function teacherPmPeriod(s){ const p=String(teacherStudentPeriod(s)||''); return Object.prototype.hasOwnProperty.call(TEACHER_PM_PERIODS,p)?p:''; }
+/* The console's ONE read under minutes/: one student's weeks list, from the server. The Practice minutes view and the
+   Backup (teacher-backup.js) both read through it, so checks.mjs 1cg still finds the console's one minutes read here. */
+function teacherPmWeeksGet(s){ return db.collection('minutes').doc(s.uid).collection('weeks').get({source:'server'}); }
 async function teacherLoadMinutes(){
   const gen=++teacherPmGen;
   const roster=teacherPmRoster();
@@ -206,7 +209,7 @@ async function teacherLoadMinutes(){
   const worker=async()=>{
     while(!stop && next<roster.length){
       const s=roster[next++];
-      const snap=await withTimeout(db.collection('minutes').doc(s.uid).collection('weeks').get({source:'server'}), TEACHER_PM_READ_MS);
+      const snap=await withTimeout(teacherPmWeeksGet(s), TEACHER_PM_READ_MS);
       const m={};
       snap.forEach(d=>{ if(/^\d{4}-W\d{2}$/.test(d.id)) m[d.id]=Math.max(0, +((d.data()||{}).seconds)||0); });
       out[s.uid]=m;

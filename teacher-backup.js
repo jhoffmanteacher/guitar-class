@@ -22,7 +22,9 @@
      config/class              the class settings: board, dates, clears, pause,
                                archive, periods, games access, configVersion.
      minutes/{uid}/weeks/*     practice-minutes weeks, read once per progress
-                               uid (the teacher cannot list minutes/ itself).
+                               uid (the teacher cannot list minutes/ itself),
+                               through teacherPmWeeksGet (teacher-students.js),
+                               the console's one read under minutes/ (1cg).
      issueReports/*            students' problem reports.
    LEFT OUT, and why: TEACHER_BACKUP_LEFT_OUT below (also written into the file).
 
@@ -31,7 +33,7 @@
    the site's shell cache name, the Firebase project, counts (docs per
    collection), the encoding rules and the left-out list. Then `collections`:
      { "progress": { uid: fields }, "config": { "class": fields },
-       "minutes/{uid}/weeks": { "<uid>/<weekId>": fields },
+       "minutesWeeks": { "<uid>/<weekId>": fields },
        "issueReports": { id: fields } }
    A Firestore doc id never contains "/", so "<uid>/<weekId>" splits back
    unambiguously into minutes/<uid>/weeks/<weekId>.
@@ -87,11 +89,11 @@ const TEACHER_BACKUP_READ_MS = 30000;       // one read's ceiling
 const TEACHER_BACKUP_MAX_PAGES = 1000;      // a pager that never ends is a fault, not a big class
 const TEACHER_BACKUP_LAST_KEY = 'gc-teacher-backup-last';
 const TEACHER_BACKUP_DUE_DAYS = 7;          // more than this many days (or never) → the reminder line
-const TEACHER_BACKUP_WEEKS = 'minutes/{uid}/weeks';
+const TEACHER_BACKUP_WEEKS = 'minutesWeeks';
 const TEACHER_BACKUP_LABEL = {
   'config/class': 'the class settings (config/class)',
   'progress': 'students’ saved work (progress)',
-  [TEACHER_BACKUP_WEEKS]: 'practice minutes (minutes/…/weeks)',
+  [TEACHER_BACKUP_WEEKS]: 'practice minutes (each student’s weeks)',
   'issueReports': 'problem reports (issueReports)',
 };
 const TEACHER_BACKUP_LEFT_OUT = [
@@ -99,7 +101,7 @@ const TEACHER_BACKUP_LEFT_OUT = [
   {path:'micTakesMeta/count', why:'a counter Mic recordings can reset; not student work'},
   {path:'liveQuiz/current and liveQuiz/current/answers/*', why:'one live game’s state, written from scratch each game'},
   {path:'weekBoard/*, rankBoard/*', why:'the practice boards: each student’s own page rebuilds its entry from their minutes'},
-  {path:'minutes/{uid}/days/*, minutes/{uid}/meta/board', why:'the teacher’s account may not read them (firestore.rules); the weeks hold the totals'},
+  {path:'each student’s practice days and private board tag (under minutes, beside the weeks)', why:'the teacher’s account may not read them (firestore.rules); the weeks hold the totals'},
   {path:'minutesBoard/*', why:'no rules block: nobody can read it'},
 ];
 
@@ -289,8 +291,8 @@ async function teacherBackupReadAll(gen){
   const worker=async()=>{
     while(!failed && next<total){
       const uid=uids[next++];
-      const snap=await teacherBackupGet(gen, TEACHER_BACKUP_WEEKS, ()=>db.collection('minutes').doc(uid).collection('weeks').get({source:'server'}));
-      (snap.docs||[]).forEach(d=>{ teacherBackupSetKey(weeks, uid+'/'+d.id, teacherBackupEncodeDoc(TEACHER_BACKUP_WEEKS, d.id, d.data(), 'minutes/'+uid+'/weeks/'+d.id)); weekCount++; });
+      const snap=await teacherBackupGet(gen, TEACHER_BACKUP_WEEKS, ()=>teacherPmWeeksGet({uid}));
+      (snap.docs||[]).forEach(d=>{ teacherBackupSetKey(weeks, uid+'/'+d.id, teacherBackupEncodeDoc(TEACHER_BACKUP_WEEKS, d.id, d.data(), 'practice week '+uid+'/'+d.id)); weekCount++; });
       done++;
       teacherBackupSay(gen, 'running', `Reading practice minutes: ${done} of ${total} students…`);
     }
@@ -334,7 +336,7 @@ function teacherBackupFileText(read, now, site){
     site,
     project,
     counts:read.counts,
-    encoding:'Firestore types are tagged objects: {"__type":"timestamp",seconds,nanoseconds,iso}, {"__type":"bytes",base64}, {"__type":"geopoint",latitude,longitude}, {"__type":"reference",path}, {"__type":"number",value:"NaN"|"Infinity"|"-Infinity"|"-0"}, and {"__type":"map",value} for a stored map that has its own "__type" key. Docs are RAW, as stored (no Module 4/5 remap). "minutes/{uid}/weeks" keys are "<uid>/<weekId>". See teacher-backup.js for how to restore.',
+    encoding:'Firestore types are tagged objects: {"__type":"timestamp",seconds,nanoseconds,iso}, {"__type":"bytes",base64}, {"__type":"geopoint",latitude,longitude}, {"__type":"reference",path}, {"__type":"number",value:"NaN"|"Infinity"|"-Infinity"|"-0"}, and {"__type":"map",value} for a stored map that has its own "__type" key. Docs are RAW, as stored (no Module 4/5 remap). "minutesWeeks" holds each student’s practice weeks, keyed "<uid>/<weekId>" (that doc’s path is minutes, uid, weeks, weekId). See teacher-backup.js for how to restore.',
     leftOut:TEACHER_BACKUP_LEFT_OUT,
     collections:read.collections,
   };

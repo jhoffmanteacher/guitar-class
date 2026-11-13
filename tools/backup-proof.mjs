@@ -7,7 +7,7 @@
 
    WHAT IS REAL. teacher-backup.js exactly as it ships, found through tools/site-src.mjs (it must be a part of the
    console script, after teacher-mic.js), run in a Node vm context; with it the site's own escHtml / escAttr
-   (app/boot.js), withTimeout (app/save.js), the Module 4/5 helpers swap45MapId … swap45Remap (app/save.js, only so a
+   (app/boot.js), withTimeout (app/save.js), teacherPmWeeksGet (teacher-students.js: the console's one minutes read), the Module 4/5 helpers swap45MapId … swap45Remap (app/save.js, only so a
    break-it copy that remaps can be planted and seen) and teacherMicSaveFile (teacher-mic.js), unmodified.
    STUBBED: Firestore (below), the page (getElementById, an <a> whose click is the "download"), URL.createObjectURL
    (it keeps the Blob: that Blob IS the saved file), localStorage, caches.keys(). The clock: any timer of 1 s or more
@@ -70,7 +70,7 @@ const a = APP.indexOf('function swap45MapId('), b = APP.indexOf('function swap45
 if(a < 0 || b < a) throw new Error('swap45 block not found');
 const HELPERS = [
   extractLine(APP, 'const escHtml = '), extractLine(APP, 'const escAttr = '),
-  extractFn(APP, 'withTimeout'), APP.slice(a, b), extractFn(CONSOLE, 'teacherMicSaveFile'),
+  extractFn(APP, 'withTimeout'), APP.slice(a, b), extractFn(CONSOLE, 'teacherMicSaveFile'), extractFn(CONSOLE, 'teacherPmWeeksGet'),
 ].join('\n');
 const manageFn = extractFn(CONSOLE, 'renderTeacherManage');
 ok(/const head=`\s*\$\{teacherBackupPanelHtml\(\)\}/.test(manageFn), "Manage's head starts with ${teacherBackupPanelHtml()} (renderTeacherManage, teacher-manage.js)");
@@ -142,10 +142,10 @@ function collOf(path){
   if(path === 'config/class') return 'config';
   if(p.length === 2 && p[0] === 'progress') return 'progress';
   if(p.length === 2 && p[0] === 'issueReports') return 'issueReports';
-  if(p.length === 4 && p[0] === 'minutes' && p[2] === 'weeks') return 'minutes/{uid}/weeks';
+  if(p.length === 4 && p[0] === 'minutes' && p[2] === 'weeks') return 'minutesWeeks';
   return null;
 }
-function fileKeyOf(path){ const p = path.split('/'); return collOf(path) === 'minutes/{uid}/weeks' ? p[1] + '/' + p[3] : p[p.length - 1]; }
+function fileKeyOf(path){ const p = path.split('/'); return collOf(path) === 'minutesWeeks' ? p[1] + '/' + p[3] : p[p.length - 1]; }
 
 /* ── The stub db ── */
 function makeDb(S, plan = {}){
@@ -169,7 +169,7 @@ function makeDb(S, plan = {}){
     if(f) throw f;
     return fn();
   };
-  const collGroupOf = path => { const p = path.split('/'); return p.length === 3 && p[0] === 'minutes' && p[2] === 'weeks' ? 'minutes/{uid}/weeks' : path; };
+  const collGroupOf = path => { const p = path.split('/'); return p.length === 3 && p[0] === 'minutes' && p[2] === 'weeks' ? 'minutesWeeks' : path; };
   function collection(path){
     const childrenOf = () => [...S.keys()].filter(k => k.startsWith(path + '/') && k.split('/').length === path.split('/').length + 1).sort();
     const query = (q) => ({
@@ -250,7 +250,7 @@ console.log('\n1. A whole backup (300 students, issueReports empty, every Firest
   ok(j.date === f.name.slice(20, 30), `header date ${j.date} = the file name's`);
   ok(j.site === 'guitar-class-2026-11-13-abc123' && j.project === 'stub-project', `site ${j.site}, project ${j.project}`);
   // Counts vs the stub
-  const want = { config: 0, progress: 0, 'minutes/{uid}/weeks': 0, issueReports: 0 };
+  const want = { config: 0, progress: 0, 'minutesWeeks': 0, issueReports: 0 };
   for(const p of S.keys()){ const k = collOf(p); if(k) want[k]++; }
   let countOk = 0;
   for(const k of Object.keys(want)){ if(j.counts[k] === want[k] && Object.keys(j.collections[k] || {}).length === want[k]) countOk++; else console.log(`     ${k}: header ${j.counts[k]}, file ${Object.keys(j.collections[k] || {}).length}, stub ${want[k]}`); }
@@ -309,14 +309,14 @@ console.log('\n2. 405 problem reports, 3 students (paging past 200 twice)');
 console.log('\n3. Read failures: each collection in turn, never a file');
 for(const [coll, code, label] of [
   ['config/class', 'unavailable', 'class settings'], ['progress', 'unavailable', 'saved work'],
-  ['minutes/{uid}/weeks', 'unavailable', 'practice minutes'], ['issueReports', 'unavailable', 'problem reports'],
+  ['minutesWeeks', 'unavailable', 'practice minutes'], ['issueReports', 'unavailable', 'problem reports'],
   ['progress', 'permission-denied', 'saved work'], ['config/class', 'hang', 'class settings'],
 ]){
   const S = makeStore({ students: 40, reports: 3 });
   const c = makeConsole(S, { fail: { [coll]: code === 'hang' ? { hang: true } : { code } } });
   await c.run('teacherBackupStart()');
   const s = state(c);
-  const tries = c.st.reads.filter(p => coll === 'minutes/{uid}/weeks' ? /\/weeks$/.test(p) : p === coll).length;
+  const tries = c.st.reads.filter(p => coll === 'minutesWeeks' ? /\/weeks$/.test(p) : p === coll).length;
   const why = code === 'hang' ? 'timeout' : code;
   ok(s.kind === 'failed' && s.text.includes(label) && s.text.includes(why) && /Nothing was saved/.test(s.text) && c.saved.length === 0 && !c.store.has('gc-teacher-backup-last') && c.st.writes === 0,
     `${coll} ${code}: ${s.kind}, files ${c.saved.length}, tries ${tries}, writes ${c.st.writes} — "${s.text.slice(0, 90)}…"`);
