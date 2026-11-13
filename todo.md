@@ -20,6 +20,18 @@ Jonathan will say "read todo.md" in a fresh chat. Do this, in this order:
 
 Ordinary work does not wait for any of this: a Fast change or a new activity he asks for comes first.
 
+## Reported by Jonathan 2026-11-13: Power Chord Switch is not identifying chords correctly in a loud room
+
+- **What Jonathan said:** "the power chord switch is not identifying chords correctly at all. i just tried in a loud
+  room on a student computer. i can flag the specific recording later."
+- **Not looked at yet.** Nothing was run, measured or changed. Wait for him to flag the recording, then bring it in
+  with `node tools/mic-sim/takes-in.mjs` (names removed) and replay it; never open the raw download.
+- **Read first:** `WORKFLOW.md` → "Power Chord Switch: where we stopped" (the strum ratio is 1.8 / 2.19 since
+  2026-11-07; the pitch rule and the `ring` / `half` rules were rejected on real takes: do not rebuild them) and
+  `tools/mic-sim/README.md`. Any listening change is danger-zone: Always Reviewed, real takes first.
+- **Ask him when he flags it:** which chords it got wrong, and whether it marked right chords wrong, wrong chords
+  right, or heard nothing.
+
 ## Queued by Jonathan 2026-11-13: work out the right highlight timing for every Play Along
 
 **For Claude Code: this is a job to do, not only a warning.** Any session about to touch the practice-card player
