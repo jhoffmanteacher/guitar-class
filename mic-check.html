@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex">
+<!-- "Nothing is sent", enforced by the browser: no network request of any kind (connect-src 'none'), no script or style file, only this page's own inline code; the icon is the one thing loaded. tools/checks.mjs 1cy pins it. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self'; connect-src 'none'; form-action 'none'; base-uri 'none'">
 <title>Mic check</title>
 <meta name="color-scheme" content="light dark">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -69,7 +71,7 @@ canvas{width:100%;height:240px;display:block;background:var(--bg2);border:1px so
 <div class="wrap">
   <h1>Mic check</h1>
   <p class="lead">For the teacher, on one class Chromebook. It asks for the mic exactly as the site's games do, shows what the browser really gave, and tests whether automatic volume control (AGC) is acting on the mic.</p>
-  <p class="note">Nothing is saved or sent anywhere. The numbers stay on this page until you press "Copy results", which puts them on this computer's clipboard only.</p>
+  <p class="note">Nothing is saved or sent anywhere (the page itself forbids any network request). The numbers stay on this page until you press "Copy results", which puts them on this computer's clipboard only.</p>
 
   <h2>1. Start the mic</h2>
   <div class="row">
@@ -82,13 +84,14 @@ canvas{width:100%;height:240px;display:block;background:var(--bg2);border:1px so
       <thead><tr><th>Setting</th><th>The site asks</th><th>The browser gave</th><th>Can it be turned off?</th></tr></thead>
       <tbody id="settings"></tbody>
     </table>
+    <p class="note"><strong>This table is the answer.</strong> If "The browser gave" says autoGainControl false, automatic gain is off. The ring test below only backs it up: it can catch a gain that jumps or climbs fast, but not one that is steady or slow.</p>
     <p class="lead" id="device"></p>
     <h2>Live level</h2>
     <div class="row"><div class="meter" aria-hidden="true"><i id="meter"></i></div><span class="mono" id="meter-db">— dB</span></div>
   </div>
 
-  <h2>2. Ring one note and let it die</h2>
-  <p>Quiet room. Press the button, then pluck ONE open string once, firmly, and let it ring. Do not touch the strings again until the 10 seconds are over.</p>
+  <h2>2. Ring one note and let it die (a second opinion)</h2>
+  <p>Quiet room. Press the button, then pluck ONE open string once, firmly, right away (in the first 3 seconds), and let it ring. Do not touch the strings again until the 10 seconds are over.</p>
   <div class="row">
     <button type="button" class="primary" id="btn-ring" disabled>Ring one note (10 seconds)</button>
     <span class="mono" id="ring-clock"></span>
@@ -96,7 +99,7 @@ canvas{width:100%;height:240px;display:block;background:var(--bg2);border:1px so
   <canvas id="plot" width="860" height="240" aria-label="Level in dB against time"></canvas>
   <div id="verdict" class="verdict" hidden></div>
   <table id="numbers" hidden><tbody></tbody></table>
-  <p class="lead">A guitar note should fall smoothly. If the level climbs back up while the note dies, or jumps in steps, automatic gain is acting. The thresholds below are provisional (first guesses, 2026-11-13): a rise of more than 6 dB inside 200 ms after the pluck, or a climb of more than 10 dB back up from the quietest point, reads as automatic gain; 3 to 6 dB is unclear (run it again).</p>
+  <p class="lead">A guitar note should fall smoothly. If the level climbs back up while the note dies, or jumps in steps, automatic gain is acting, or another sound reached the mic. The test reads the note only while it is more than 15 dB above the room, and only a note that starts at least 25 dB above the room. The thresholds are provisional (first guesses, 2026-11-13): a climb of more than 6 dB on the level averaged over half a second, or a jump of more than 6 dB inside 200 ms that stays up, reads as "the level rose"; more than 3 dB is unclear (run it again). A steady or slow gain does not show here: the table above is the answer for that.</p>
 
   <div class="row">
     <button type="button" id="btn-copy" disabled>Copy results</button>
@@ -118,7 +121,13 @@ const BIN_MS = 50;             // the plot and the numbers use 50 ms bins
 const RING_MS = 10000;
 const RISE_WIN_MS = 200;
 const SKIP_AFTER_PEAK_MS = 150;   // the pluck's own attack wobbles: start looking after it
-const RISE_AGC_DB = 6, RISE_UNCLEAR_DB = 3, CLIMB_AGC_DB = 10;   // provisional
+const NOTE_DB = 25;            // a real note: it starts at least this far above the room floor
+const STOP_DB = 15;            // both scans stop where the note comes within this of the floor
+const PLUCK_BY_MS = 3000;      // the note must start in the first 3 seconds
+const ATTACK_MS = 300;         // the note's peak is looked for in this long after it starts
+const MIN_RING_MS = 750;       // a ringing note stays above STOP_DB at least this long (a cough does not)
+const SMOOTH_MS = 500;         // the climb is read on the level averaged over this long (string beats cancel)
+const RISE_AGC_DB = 6, RISE_UNCLEAR_DB = 3, CLIMB_AGC_DB = 6, CLIMB_UNCLEAR_DB = 3;   // provisional
 const $ = id => document.getElementById(id);
 
 let stream = null, ctx = null, src = null, proc = null, mute = null, raf = 0, ringTimer = 0, clockTimer = 0;
@@ -132,16 +141,28 @@ function cleanLabel(label){
 function fmt(v){ return v === undefined ? 'not reported' : typeof v === 'number' ? String(Math.round(v * 10000) / 10000) : String(v); }
 function db(ms){ return 10 * Math.log10(ms + 1e-12); }
 
+/* `gen` counts starts and stops: a start whose getUserMedia (or resume)
+   answers after a Stop, a hidden tab or another start closes what it got
+   and draws nothing. The button is off before the first await, so a
+   double-click cannot open two streams. */
+let gen = 0, starting = false;
 async function start(){
-  if (stream) return;
+  if (stream || starting) return;
+  const my = ++gen;
+  starting = true;
+  $('btn-start').disabled = true;
   $('status').textContent = 'Asking for the mic…';
+  let got = null;
   try {
-    stream = await navigator.mediaDevices.getUserMedia(CONSTRAINTS);
+    got = await navigator.mediaDevices.getUserMedia(CONSTRAINTS);
   } catch(e){
-    stream = null;
+    if (my !== gen) return;
+    starting = false; $('btn-start').disabled = false;
     $('status').textContent = 'No mic: ' + ((e && e.name) || 'error') + '. If it was blocked: click the lock icon to the left of the address bar, set Microphone to Allow, then reload.';
     return;
   }
+  if (my !== gen){ got.getTracks().forEach(t => t.stop()); return; }
+  stream = got;
   const tr = stream.getAudioTracks()[0];
   gotSettings = tr && tr.getSettings ? tr.getSettings() : {};
   gotCaps = tr && tr.getCapabilities ? tr.getCapabilities() : {};
@@ -149,6 +170,7 @@ async function start(){
   try {
     ctx = new (window.AudioContext || window.webkitAudioContext)();
     if (ctx.state !== 'running') { try { await ctx.resume(); } catch(e){} }
+    if (my !== gen) return;   // stopped while the audio woke up: stop() has already closed the stream and ctx
     src = ctx.createMediaStreamSource(stream);
     proc = ctx.createScriptProcessor(BLOCK, 1, 1);
     mute = ctx.createGain(); mute.gain.value = 0;
@@ -159,6 +181,7 @@ async function start(){
     $('status').textContent = 'The mic opened but the audio could not start (' + ((e && e.message) || 'error') + '). Reload and try again.';
     return;
   }
+  starting = false;
   renderSettings();
   $('granted').hidden = false;
   $('btn-start').disabled = true; $('btn-stop').disabled = false; $('btn-ring').disabled = false; $('btn-copy').disabled = false;
@@ -228,47 +251,72 @@ function finishRing(){
   showResult(result);
 }
 
-/* The level in 50 ms bins (mean power in each), then the two numbers:
-   rise200 — the largest rise inside any 200 ms window, from 150 ms after the
-             peak to the end (a guitar note only falls, apart from small beats);
-   climb   — the largest climb back up from the quietest point reached so far
-             after the peak (automatic gain lifts the fading note and the
-             room back up). */
+/* The level in 50 ms bins (mean power in each). The room floor is the 5th
+   percentile of the bins. The note starts at the first bin NOTE_DB above the
+   floor (no such bin: not enough sound; later than 3 s: run it again); its
+   peak is the loudest bin in the next 300 ms. Both scans run from 150 ms
+   after that peak to the first bin within STOP_DB of the floor, so the room
+   (its wander, a chair, a voice next door) once the note has died is never
+   read as the note. A note that rings less than MIN_RING_MS (a cough, a tap)
+   is not judged. The two numbers:
+   rise  — the largest rise inside any 200 ms window (a jump: a step in the
+           gain, a second pluck). On its own it is only "unclear": string
+           beats make short rises too. With a climb over CLIMB_UNCLEAR_DB
+           (the jump stayed up) it reads as "the level rose";
+   climb — the largest climb of the level averaged over 500 ms back up from
+           the quietest point reached so far (a gain that lifts the fading
+           note). Averaging cancels most string beating; a slow beat may still
+           read as unclear.
+   What this cannot see: a gain that is steady, or rises more slowly than the
+   note falls (the note still falls, only more slowly). The settings table
+   (autoGainControl) is the first answer; this plot only backs it up. */
 function analyse(blocks, rate){
   const blockMs = BLOCK / rate * 1000;
   const per = Math.max(1, Math.round(BIN_MS / blockMs));
-  const bins = [];
+  const pow = [], bins = [];
   for (let i = 0; i + per <= blocks.length; i += per){
     let s = 0;
     for (let k = 0; k < per; k++) s += blocks[i + k];
-    bins.push(db(s / per));
+    pow.push(s / per); bins.push(db(s / per));
   }
   const binMs = per * blockMs;
-  let peak = 0;
-  bins.forEach((v, i) => { if (v > bins[peak]) peak = i; });
+  const n = ms => Math.max(1, Math.round(ms / binMs));
   const sorted = bins.slice().sort((a, b) => a - b);
-  const floor = sorted[Math.floor(sorted.length * 0.05)] || -120;
-  const from = peak + Math.ceil(SKIP_AFTER_PEAK_MS / binMs), win = Math.max(1, Math.round(RISE_WIN_MS / binMs));
-  let rise = 0, riseAt = -1;
-  for (let i = from; i < bins.length; i++){
-    for (let j = i + 1; j <= i + win && j < bins.length; j++){
-      if (bins[j] - bins[i] > rise){ rise = bins[j] - bins[i]; riseAt = i; }
+  const floor = sorted.length ? sorted[Math.floor(sorted.length * 0.05)] : -120;
+  const r = { bins, binMs, floor, peak: 0, start: -1, stop: -1, rise: 0, riseAt: -1, win: n(RISE_WIN_MS), climb: 0, climbAt: -1, fell2s: null, heard: false, verdict: '', cls: 'v-warn' };
+  const start = bins.findIndex(v => v - floor >= NOTE_DB);
+  if (start < 0){ r.verdict = 'Not enough sound to judge (no note ' + NOTE_DB + ' dB above the room). Pluck harder or bring the guitar closer, then run it again.'; return r; }
+  r.start = start;
+  let peak = start;
+  for (let i = start; i < Math.min(bins.length, start + n(ATTACK_MS) + 1); i++) if (bins[i] > bins[peak]) peak = i;
+  r.peak = peak;
+  if (start * binMs > PLUCK_BY_MS){ r.verdict = 'Pluck one string right after you press Start, then let it ring.'; return r; }
+  let stop = bins.length;
+  for (let i = peak + 1; i < bins.length; i++) if (bins[i] - floor <= STOP_DB){ stop = i; break; }
+  r.stop = stop;
+  if ((stop - peak) * binMs < MIN_RING_MS){ r.verdict = 'That was too short for a ringing note. Pluck one open string firmly and let it ring, then run it again.'; return r; }
+  r.heard = true;
+  const from = peak + Math.ceil(SKIP_AFTER_PEAK_MS / binMs);
+  for (let i = from; i < stop; i++){
+    for (let j = i + 1; j <= i + r.win && j < stop; j++){
+      if (bins[j] - bins[i] > r.rise){ r.rise = bins[j] - bins[i]; r.riseAt = i; }
     }
   }
-  let lowest = Infinity, climb = 0, climbAt = -1;
-  for (let i = from; i < bins.length; i++){
-    if (bins[i] < lowest) lowest = bins[i];
-    if (bins[i] - lowest > climb){ climb = bins[i] - lowest; climbAt = i; }
+  const half = Math.floor(n(SMOOTH_MS) / 2);
+  let lowest = Infinity;
+  for (let i = from; i < stop; i++){
+    let s = 0, c = 0;
+    for (let k = Math.max(from, i - half); k <= Math.min(stop - 1, i + half); k++){ s += pow[k]; c++; }
+    const v = db(s / c);
+    if (v < lowest) lowest = v;
+    if (v - lowest > r.climb){ r.climb = v - lowest; r.climbAt = i; }
   }
-  const twoS = peak + Math.round(2000 / binMs);
-  const fell2s = twoS < bins.length ? bins[peak] - bins[twoS] : null;
-  const heard = bins.length > 0 && bins[peak] - floor >= 20 && bins[peak] > -60;
-  let verdict, cls;
-  if (!heard){ verdict = 'Not enough sound to judge. Pluck harder or bring the guitar closer, then run it again.'; cls = 'v-warn'; }
-  else if (rise > RISE_AGC_DB || climb > CLIMB_AGC_DB){ verdict = 'Automatic gain looks ON: the level climbed back up while the note died.'; cls = 'v-bad'; }
-  else if (rise > RISE_UNCLEAR_DB){ verdict = 'Unclear: a small rise while the note died. Run it again in a quiet room, one pluck only.'; cls = 'v-warn'; }
-  else { verdict = 'Smooth: the note fell without climbing back up. No sign of automatic gain.'; cls = 'v-ok'; }
-  return { bins, binMs, peak, floor, rise, riseAt, win, climb, climbAt, fell2s, heard, verdict, cls };
+  const twoS = peak + n(2000);
+  r.fell2s = twoS < stop ? bins[peak] - bins[twoS] : null;
+  if (r.climb > CLIMB_AGC_DB || (r.rise > RISE_AGC_DB && r.climb > CLIMB_UNCLEAR_DB)){ r.verdict = 'The level rose while the note died: automatic gain, or another sound in the room. Run it again.'; r.cls = 'v-bad'; }
+  else if (r.rise > RISE_UNCLEAR_DB || r.climb > CLIMB_UNCLEAR_DB){ r.verdict = 'Unclear: a small rise while the note died. Run it again in a quiet room, one pluck only.'; }
+  else { r.verdict = 'The note fell smoothly. This test cannot see a steady or slow gain: trust the table above (autoGainControl).'; r.cls = 'v-ok'; }
+  return r;
 }
 
 function css(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '#888'; }
@@ -300,8 +348,8 @@ function lines(){
     if (ctx) out.push('Audio engine: ' + ctx.sampleRate + ' Hz, base latency ' + fmt(ctx.baseLatency) + ' s');
   }
   if (result){
-    out.push('Ring test: peak ' + result.bins[result.peak].toFixed(1) + ' dBFS at ' + (result.peak * result.binMs / 1000).toFixed(2) + ' s; floor ' + result.floor.toFixed(1) + ' dBFS; fell ' + (result.fell2s == null ? '?' : result.fell2s.toFixed(1)) + ' dB in the 2 s after the peak; largest rise in 200 ms ' + result.rise.toFixed(1) + ' dB; largest climb back from the quietest point ' + result.climb.toFixed(1) + ' dB');
-    out.push('Verdict: ' + result.verdict + ' (provisional thresholds: rise over ' + RISE_AGC_DB + ' dB or climb over ' + CLIMB_AGC_DB + ' dB = automatic gain; ' + RISE_UNCLEAR_DB + ' to ' + RISE_AGC_DB + ' dB = unclear)');
+    out.push('Ring test: ' + (result.start >= 0 ? 'peak ' + result.bins[result.peak].toFixed(1) + ' dBFS at ' + (result.peak * result.binMs / 1000).toFixed(2) + ' s; ' : 'no note; ') + 'floor ' + result.floor.toFixed(1) + ' dBFS; fell ' + (result.fell2s == null ? '?' : result.fell2s.toFixed(1)) + ' dB in the 2 s after the peak; largest rise in 200 ms ' + result.rise.toFixed(1) + ' dB; largest climb back from the quietest point ' + result.climb.toFixed(1) + ' dB');
+    out.push('Verdict: ' + result.verdict + ' (provisional: a note ' + NOTE_DB + ' dB above the floor, read until it is ' + STOP_DB + ' dB above it; climb over ' + CLIMB_AGC_DB + ' dB, or a rise over ' + RISE_AGC_DB + ' dB with a climb over ' + CLIMB_UNCLEAR_DB + ' dB = the level rose; over ' + RISE_UNCLEAR_DB + ' dB = unclear)');
     out.push('Levels, dBFS every ' + Math.round(result.binMs) + ' ms: ' + result.bins.map(v => v.toFixed(1)).join(','));
   }
   return out.join('\n');
@@ -309,11 +357,12 @@ function lines(){
 function showResult(r){
   $('verdict').textContent = r.verdict; $('verdict').className = 'verdict ' + r.cls; $('verdict').hidden = false;
   const rows = [
-    ['Peak', r.bins.length ? r.bins[r.peak].toFixed(1) + ' dBFS at ' + (r.peak * r.binMs / 1000).toFixed(2) + ' s' : '—'],
+    ['Peak', r.start >= 0 ? r.bins[r.peak].toFixed(1) + ' dBFS at ' + (r.peak * r.binMs / 1000).toFixed(2) + ' s' : '—'],
     ['Room floor', r.floor.toFixed(1) + ' dBFS'],
     ['Fell in the 2 s after the peak', r.fell2s == null ? '—' : r.fell2s.toFixed(1) + ' dB'],
     ['Largest rise inside 200 ms (after the pluck)', r.rise.toFixed(1) + ' dB'],
-    ['Largest climb back from the quietest point', r.climb.toFixed(1) + ' dB'],
+    ['Largest climb back from the quietest point (500 ms average)', r.climb.toFixed(1) + ' dB'],
+    ['Read from / to', r.heard ? ((r.peak * r.binMs + SKIP_AFTER_PEAK_MS) / 1000).toFixed(2) + ' s to ' + (r.stop * r.binMs / 1000).toFixed(2) + ' s (where the note came within ' + STOP_DB + ' dB of the floor)' : '—'],
   ];
   const tb = $('numbers').tBodies[0]; tb.innerHTML = '';
   rows.forEach(([a, b]) => { const tr = document.createElement('tr'); [a, b].forEach(v => { const td = document.createElement('td'); td.textContent = v; tr.appendChild(td); }); tb.appendChild(tr); });
@@ -333,6 +382,7 @@ async function copy(){
 
 /* Everything this page starts, stopped on the button and when the page goes away. */
 function stop(){
+  gen++; starting = false;
   if (capture) capture.live = false;
   clearInterval(clockTimer); clearTimeout(ringTimer); clockTimer = 0; ringTimer = 0;
   if (raf){ cancelAnimationFrame(raf); raf = 0; }
@@ -352,6 +402,10 @@ $('btn-stop').addEventListener('click', stop);
 $('btn-ring').addEventListener('click', ring);
 $('btn-copy').addEventListener('click', copy);
 window.addEventListener('pagehide', stop);
+/* A hidden tab gives the mic back (the light goes off); press Start again on return. */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden && (stream || starting)){ stop(); $('status').textContent = 'Mic off: the tab was hidden. Press Start the mic again.'; }
+});
 </script>
 </body>
 </html>
