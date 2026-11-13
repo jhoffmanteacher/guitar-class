@@ -167,10 +167,15 @@
        (stage and student) has only today's SVG elements and attribute names, its label says only strings / frets
        (BOX_LABEL), its text only ×, finger digits and "Nfr", and no value holds the chord's name or its root note; a
        student's answer buttons differ only in label, handler argument and (mc) the bank's colour, inside as well as on
-       the tag; a student's "Locked in" screen (their own pick set aside) carries no attribute outside
-       STUDENT_LOCKED_ATTRS; every doc committed while a question is open has only the field names in DOC_Q_FIELDS and
-       no correct / correctIds / tally (any signed-in account reads it); no page title or body class changes; and the
-       answer (fret ids, the chord's name) appears nowhere on the stage, strip or student screen, locked or not, as a token. After Clear the board the doc is 'off', every console's stage idle,
+       the tag; a student's screen, unlocked or "Locked in", reads WORD FOR WORD what the model derives in that student's
+       language (quiz title, question label, prompt, countdown, then the tap hint or the answer labels, or "Locked in",
+       this student's OWN pick with its exact label and colour, the wait line, the save-failed line only after a refused
+       write) and carries no attribute outside STUDENT_Q_ATTRS / STUDENT_LOCKED_ATTRS; every doc committed while a
+       question is open has exactly the fields in DOC_Q_FIELDS, the target keys of its quiz type (TARGET_KEYS) and every
+       value pinned (target as opened, limitSec as typed, correct / correctIds / tally / endedAt null, quizId /
+       speedBonus / startedAt as at the lobby, scores as the last Reveal wrote them, askedAt the opening write's server
+       time); no page title or body class changes; and the answer's ids and name appear nowhere else as a token (see
+       SURFACES). After Clear the board the doc is 'off', every console's stage idle,
        every student screen empty.
    R12 A countdown on screen always shows the real time left right after any repaint (checks.mjs 1cb: "the
        projector flickered back to "20" on each answer"): whole seconds rounded up, tenths under 10 s, "Time!" at 0;
@@ -186,7 +191,7 @@
        the fixed hint line, and only while previewing); a real game going live on that console ends the preview in the
        same snapshot (no Exit preview, the real board on the stage) and the console then runs the real game; a
        Preview click while a real game is live opens nothing; a strip painted during a real game offers no Preview;
-       Exit preview writes nothing either and puts back exactly the board and strip that were there before (the Time
+       Exit preview writes nothing either (nor anything after it, until the teacher's next click) and puts back exactly the board and strip that were there before (the Time
        box keeps the last time typed: a device convenience, rule file). A student who signs in or reloads during the
        preview sees no game and no invite.
    A   Reveal when time runs out (7c1792e; its code comment and commit message, not yet in the rule file): on by default
@@ -199,6 +204,33 @@
        a change in the grace is visible: in-time taps (R3/R4) refused or scored "too late" because an AUTOMATIC Reveal
        came first, the same for a teacher's click, each over its in-time taps; late joiners whose own clock was cut short.
    COVERAGE: a full run (no --case) fails when any rule above was exercised 0 times; the counts print every run.
+
+   SURFACES readable before Reveal, and how each is held (round 4, 2026-11-12). PINNED = compared whole with what the
+   model derives; WHITELIST = only pinned names; TOKEN = searched for the answer's ids / name ("lowE:3", "G5"; it does
+   not catch "fret 3" in free text, so every free-text surface a student sees is PINNED instead).
+   - Stage (projector), each quiz type, timed or not: PINNED text, element order and count; WHITELIST attributes;
+     chord box: WHITELIST elements and attributes, label PINNED to strings / frets.
+   - Control strip during a question (projector): PINNED text, WHITELIST attributes (Preview's two controls only while
+     previewing). In the lobby and between questions: not checked, no question is open (the next target is picked
+     only by the click that opens it).
+   - A dialog on the projector (End game's confirm): TOKEN.
+   - Page title and body class (console and student tabs): PINNED unchanged.
+   - Student question screen, unlocked and Locked in, each quiz type, English and Spanish: PINNED text (R11, above);
+     the Locked-in pick's colour PINNED; WHITELIST attributes; answer buttons alike; the countdown PINNED by R12;
+     aria-live: WHITELIST attribute, its text PINNED. A fret question before its target is picked: PINNED ("no tap
+     yet") but never exercised (the driver always opens with a target). The lobby / waiting screen: not checked, no
+     question exists yet.
+   - The fret board's drawing (fgBoardSvg, app/drills.js): NOT checked, not rendered in a vm; its container's
+     attributes and lq-board-off are.
+   - The invite modal, the bottom banner (index.html) and the Journey page banner: TOKEN (text, HTML, attributes of
+     every element live-quiz.js creates).
+   - A student's browser console (devtools): TOKEN (log / info / debug / warn).
+   - liveQuiz/current while a question is open (any signed-in account): PINNED, every field and value (R11).
+   - answers/{uid}: a student may get only their own; its fields are pinned by R4 and the rules copy (keys).
+   - Any other Firestore path or db method: flagged at access (F4-5), so a try/catch cannot hide it.
+   - A student's localStorage / sessionStorage: WHITELIST keys (gc-lang; lq-q-opened), values TOKEN, checked at each
+     Reveal. The console's own storage (gc-lq-limits, gc-lq-autoreveal): teacher device only, not checked.
+   - A student tab's memory (lqSession): the session doc, PINNED above. Network timing: not modelled.
    The quiz bank (LIVE_QUIZZES: ids, types, choice ids and keys, strings, hints) and the i18n strings are read as
    DATA from a separate, untouched vm.
    ════════════════════════════════════════════════════════════════════ */
@@ -305,6 +337,10 @@ const STRIP_Q_ATTRS = { mc: new Set(['button class="lq-ctl ghost"', 'button clas
 /* A student's screen before Reveal, outside the answer buttons and the chord box (data-i18n-params checked exactly first). */
 const STUDENT_Q_ATTRS = { mc: new Set(['div aria-live="off"', 'div class="lq-choices"', 'div class="lq-prompt"', 'div class="lq-qnum"', 'div class="lq-quiz-title"', 'div class="lq-timer"', 'div data-i18n-params=OK', 'div data-i18n="lq.prompt.stringId"', 'div data-i18n="lq.qLabel"', 'div data-i18n="lq.title.stringId"', 'div id="lq-timer"']), fret: new Set(['div aria-live="off"', 'div class="lq-board"', 'div class="lq-prompt"', 'div class="lq-qnum"', 'div class="lq-quiz-title"', 'div class="lq-timer"', 'div data-i18n-params=OK', 'div data-i18n="lq.prompt.fretTap"', 'div data-i18n="lq.prompt.pcFind"', 'div data-i18n="lq.qLabel"', 'div data-i18n="lq.title.fretAll"', 'div data-i18n="lq.title.fretLowE"', 'div data-i18n="lq.title.fretLowEA"', 'div data-i18n="lq.title.pcFind"', 'div id="lq-board"', 'div id="lq-timer"', 'p class="lq-note"', 'p data-i18n="lq.tapHint"']), pcname: new Set(['div aria-live="off"', 'div class="lq-choices lq-pcnames"', 'div class="lq-pcbox lq-pcbox-q"', 'div class="lq-prompt"', 'div class="lq-qnum"', 'div class="lq-quiz-title"', 'div class="lq-timer"', 'div data-i18n-params=OK', 'div data-i18n="lq.prompt.pcName"', 'div data-i18n="lq.qLabel"', 'div data-i18n="lq.title.pcName"', 'div id="lq-timer"']) };
 /* R3-1: the field names of liveQuiz/current while a question is open (pinned 2026-11-12 from main 7c1792e). */
+/* F4-1: target's keys per quiz type (live-quiz.js header and rule file: a note quiz's target is {string, note}, a Name
+   question's {string, fret}, never the name; an mc question has none). */
+const STUDENT_LOCAL_KEYS = new Set(['gc-lang']), STUDENT_SESSION_KEYS = new Set(['lq-q-opened']);
+const TARGET_KEYS = { mc: null, fret: 'note,string', pcname: 'fret,string' };
 const DOC_Q_FIELDS = new Set(['askedAt', 'correct', 'correctIds', 'endedAt', 'limitSec', 'qIndex', 'quizId', 'scores', 'sessionId', 'speedBonus', 'startedAt', 'state', 'tally', 'target']);
 /* The preview's own controls on the strip (live-quiz.js lqPaintControls, 2026-11-12): an "Exit preview" button whose
    handler takes no argument, and a fixed hint line. Accepted ONLY while the console is previewing; they carry no answer
@@ -326,7 +362,11 @@ let HAS_PREVIEW = false, HAS_RELOAD_FIX = false;
    lands in the answer docs before scoring"). */
 const AUTO_GRACE_MS = 1500;
 /* R3-2: a student's "Locked in" screen before Reveal (their own pick set aside as #MINE#); pinned from main 7c1792e. */
-const LOCKED_EXTRA = ['div class="lq-locked"', 'div class="lq-locked-lbl"', 'div class="lq-locked-pick"', 'div class="lq-locked-wait"', 'div data-i18n="lq.locked"', 'div data-i18n="lq.lockedWait"', 'div style="#MINE#"'];
+const LOCKED_EXTRA = ['div class="lq-locked"', 'div class="lq-locked-lbl"', 'div class="lq-locked-pick"', 'div class="lq-locked-wait"', 'div data-i18n="lq.locked"', 'div data-i18n="lq.lockedWait"', 'div style=PICK'];
+/* F4-2: the Locked-in pick's colour: the bank's colour of an mc choice; one fixed colour for a Name; per string for a
+   fret pick. Hand copies of live-quiz.js LQ_PC_NAME_COLOR and LQ_STRING_COLOR (pinned 2026-11-12, main cc110dc). */
+const PC_NAME_COLOR = '#185fa5';
+const STRING_COLOR = { lowE: '#b3372a', A: '#a2530b', D: '#3b6d11', G: '#185fa5', B: '#5b3f96', highE: '#0f6b64' };
 const STUDENT_LOCKED_ATTRS = Object.fromEntries(Object.entries(STUDENT_Q_ATTRS).map(([k, set]) => [k, new Set([...[...set].filter(x => !x.startsWith('p ') && !x.includes('lq-choices')), ...LOCKED_EXTRA])]));
 /* The stage's elements during a question, in order (count and order, not only which ones). */
 const STAGE_Q_SEQ = {
@@ -470,7 +510,10 @@ class FakeFS {
   }
   firebaseFor(tab) {
     const fs = this;
-    const db = { collection(n) { if (n !== 'liveQuiz') throw new Error(`fake Firestore: no collection ${n}`); return { doc(id) { if (id !== 'current') throw new Error(`fake Firestore: no doc ${id}`); return fs.currentRef(tab); } }; } };
+    /* F4-5: live-quiz.js may touch liveQuiz/current and its answers only. Any other path, or any other method on the db,
+       is flagged at ACCESS (a try/catch around it cannot hide it), then throws as an unknown path would. */
+    const other = what => { fs.w.flag('R11 no answer in doc', `${tab.label}: live-quiz.js reached ${what} (it may touch liveQuiz/current and its answers only)`); throw new Error(`fake Firestore: no ${what}`); };
+    const db = new Proxy({ collection(n) { if (n !== 'liveQuiz') other(`collection ${n}`); return { doc(id) { if (id !== 'current') other(`doc liveQuiz/${id}`); return fs.currentRef(tab); } }; } }, { get: (o, k) => (k in o || typeof k === 'symbol' || k === 'then' ? o[k] : other(`db.${String(k)}`)) });
     return { firestore: Object.assign(() => db, { FieldValue: FAKE_FAULT === 'plain-fieldvalue' ? { serverTimestamp: () => SERVER_TS } : FakeFieldValue }) };
   }
   currentRef(tab) {
@@ -478,7 +521,7 @@ class FakeFS {
       onSnapshot: (next, err) => this.listen(tab, 'doc', next, err),
       set: (p, o) => this.setCurrent(tab, p, o),
       collection: n => {
-        if (n !== 'answers') throw new Error(`fake Firestore: no subcollection ${n}`);
+        if (n !== 'answers') { this.w.flag('R11 no answer in doc', `${tab.label}: live-quiz.js reached liveQuiz/current/${n} (it may touch the answers subcollection only)`); throw new Error(`fake Firestore: no subcollection ${n}`); }
         return { doc: uid => ({ get: () => this.getAnswer(tab, uid), set: (d, o) => this.setAnswer(tab, uid, d, o) }), onSnapshot: (next, err) => this.listen(tab, 'ans', next, err) };
       }
     };
@@ -611,7 +654,7 @@ function makeDom(tab, w) {
       children: [], listeners: {},
       append(...k) { el.children.push(...k); }, appendChild(k) { el.children.push(k); return k; }, remove() { el.removed = true; if (el.id) byId.delete(el.id); },
       addEventListener(type, fn) { (el.listeners[type] = el.listeners[type] || []).push(fn); }, removeEventListener() {}, focus() {}, contains: () => false,
-      requestFullscreen: () => Promise.resolve()
+      requestFullscreen: () => Promise.resolve(), _attrs: attrs
     };
     let value = '';
     Object.defineProperty(el, 'value', { get: () => value, set(v) { value = String(v); } });   /* a form box's value is always a string */
@@ -661,7 +704,8 @@ function makeDom(tab, w) {
   const reg = id => { const e = mkEl(id); byId.set(id, e); return e; };
   const findCreated = pred => created.find(e => !e.removed && pred(e)) || null;
   const createdCount = () => created.filter(e => !e.removed).length;
-  return { document, byId, reg, findCreated, createdCount };
+  const createdList = () => created.filter(e => !e.removed);
+  return { document, byId, reg, findCreated, createdCount, createdList };
 }
 function storage(map) { return { getItem: k => (map.has(k) ? map.get(k) : null), setItem: (k, v) => map.set(k, String(v)), removeItem: k => map.delete(k) }; }
 
@@ -796,7 +840,7 @@ const COVERAGE = [
   ['Pwrites', 'P events checked during a preview (no write from that console)'], ['Pstudents', 'P student screens compared during a preview'],
   ['Pexit', 'P exits back to the real board'], ['Preal', 'P previews ended by a real game going live'],
   ['Pblocked', 'P Preview clicks while a real game was live'], ['Pnone', 'P strips painted during a real game (no Preview offered)'],
-  ['R11doc', 'R11 question docs scanned for an answer'], ['Aauto', 'A reveals the console made by itself at time-up'], ['Aoff', 'A timed rounds with "Reveal when time runs out" off, revealed by the teacher']
+  ['R11doc', 'R11 question docs scanned for an answer'], ['R11stext', 'R11 student screens read word for word'], ['R11storage', 'R11 student storage keys checked at Reveal'], ['Aauto', 'A reveals the console made by itself at time-up'], ['Aoff', 'A timed rounds with "Reveal when time runs out" off, revealed by the teacher']
 ];
 
 /* ════════════════ the world: tabs, drivers, checks ════════════════ */
@@ -862,7 +906,7 @@ class World {
       id, kind, isTeacher: kind === 'teacher', uid: student ? student.uid : 'teacher-uid', student, alive: true, born: this.loop.now,
       label: kind === 'teacher' ? (this.tabs.some(t => t.isTeacher) ? 'second console (another device)' : 'teacher') : `${student.name} (${kind === 'journey' ? 'Journey page, ' : ''}${second ? 'second tab, ' : ''}tab ${student.tabs.length + 1})`, slot, second: !!second,
       timers: new Map(), tseq: 0, listeners: [], gets: 0, readBacks: [], pending: 0, dirty: new Set(), view: null, shown: null, lastCommit: 0,
-      delivered: new Map(), clockStart: {}, writes: 0, previewing: false, pview: null,
+      delivered: new Map(), clockStart: {}, writes: 0, previewing: false, pview: null, logs: [], logsSeen: 0,
       net: student ? student.net : this.spec.teacherNet
     };
     const jr = rngFor(SEED, this.spec.name, 'late', id), busy = !!(student && student.busy);
@@ -874,7 +918,7 @@ class World {
     const loop = this.loop, w = this;
     const st = kind === 'teacher' ? (this.tabs.some(t => t.isTeacher) ? { local: new Map() } : this.spec.teacherStorage) : student.storage;
     const g = {
-      console: { log() {}, info() {}, debug() {}, warn: (...a) => w.vlog(`${tab.label} console.warn ${a.map(String).join(' ').slice(0, 160)}`), error: (...a) => w.flag('R13 error', `${tab.label} console.error ${a.map(String).join(' ').slice(0, 200)}`) },
+      console: { log: (...a) => tab.logs.push(a.map(String).join(' ')), info: (...a) => tab.logs.push(a.map(String).join(' ')), debug: (...a) => tab.logs.push(a.map(String).join(' ')), warn: (...a) => { tab.logs.push(a.map(x => { try { return typeof x === 'object' ? JSON.stringify(x) : String(x); } catch (e) { return String(x); } }).join(' ')); w.vlog(`${tab.label} console.warn ${a.map(String).join(' ').slice(0, 160)}`); }, error: (...a) => w.flag('R13 error', `${tab.label} console.error ${a.map(String).join(' ').slice(0, 200)}`) },
       performance: { now: () => loop.now - tab.born },
       setTimeout: (fn, ms, ...a) => { const tid = ++tab.tseq; tab.timers.set(tid, loop.at(loop.now + Math.max(0, Math.round(Number(ms) || 0)) + tab.late(), () => { tab.timers.delete(tid); if (typeof fn === 'function') w.callIn(tab, fn, a); }, tab)); return tid; },
       clearTimeout: tid => { const ev = tab.timers.get(tid); if (ev) { ev.dead = true; tab.timers.delete(tid); } },
@@ -888,7 +932,7 @@ class World {
       clearInterval: tid => { const ev = tab.timers.get(tid); if (ev) { ev.dead = true; tab.timers.delete(tid); } },
       localStorage: storage(st.local), sessionStorage: storage(slot ? slot.session : new Map()),
       document: dom.document, location: { hash: '', get href() { return kind === 'journey' ? 'https://class.example.invalid/tabs/journey.html' : 'https://class.example.invalid/index.html'; }, set href(v) { w.navigate(tab, String(v)); } },
-      escHtml, escAttr, alert: m => w.flag('R13 error', `${tab.label}: alert("${String(m)}") — a teacher write failed`), confirm: () => true,
+      escHtml, escAttr, alert: m => w.flag('R13 error', `${tab.label}: alert("${String(m)}") — a teacher write failed`), confirm: m => { w.checkDialog(tab, String(m)); return true; },
       firebase: this.fs.firebaseFor(tab),
       addEventListener() {}, removeEventListener() {}, dispatchEvent() {}, CustomEvent: function () {},
       __now: () => EPOCH + loop.now, __rng: rngFor(SEED, this.spec.name, 'tabrng', id)
@@ -953,6 +997,7 @@ class World {
     }
   }
   onAnswerRefusedBack(tab, uid, data) {
+    tab.refused = tab.refused || new Set(); tab.refused.add(`${data.sessionId}|${data.qIndex}`);
     if (data.sessionId === this.model.sid && data.qIndex >= 0) this.model.outcome(uid, data.qIndex, data.choice, false);
   }
   /* A: Reveal when time runs out (7c1792e). A reveal write the driver did not click is the console's own: judge it
@@ -987,6 +1032,8 @@ class World {
     if (doc.state === 'lobby' && (!prev || prev.sessionId !== doc.sessionId)) {
       this.model.startGame(doc.sessionId, this.intended.quizId, this.intended.speed);
       this.vlog(`${preview ? 'preview (the console\'s own copy)' : 'server'}: game ${doc.sessionId} started (${this.intended.quizId}, ${this.intended.speed ? 'faster = more points' : 'every correct answer = 1000'}, limit ${this.intended.limit} s)`);
+      this.lobbyDoc = { quizId: doc.quizId, speedBonus: doc.speedBonus, startedAt: doc.startedAt };
+      this.scoresBefore = {};
       this.check('R6 scoring', doc.speedBonus === this.intended.speed, () => `Start wrote speedBonus ${doc.speedBonus}, the Scoring box said ${this.intended.speed ? 'speed' : 'flat'}`);
       this.check('R6 scoring', doc.quizId === this.intended.quizId && JSON.stringify(doc.scores) === '{}', () => `Start wrote quizId ${doc.quizId} / scores ${JSON.stringify(doc.scores)}`);
     }
@@ -1005,9 +1052,25 @@ class World {
     /* R3-1: every doc committed while a question is open (read by every signed-in account) carries no answer: only the
        field names a question doc has today (DOC_Q_FIELDS), and correct / correctIds / tally empty, target without a name. */
     if (doc.state === 'question' && doc.sessionId === this.model.sid) {
-      const q = doc.qIndex, extra = Object.keys(doc).filter(k => !DOC_Q_FIELDS.has(k));
+      /* F4-1: every field's VALUE is pinned to what the model says, on every commit while the question is open. */
+      const q = doc.qIndex, Q = this.model.q[q], L = this.lobbyDoc || {}, kind = this.model.quiz.kind, bad = [];
+      const keys = Object.keys(doc).sort().join(','), wantKeys = [...DOC_Q_FIELDS].sort().join(',');
+      if (keys !== wantKeys) bad.push(`fields ${keys} (want ${wantKeys})`);
+      const tk = doc.target ? Object.keys(doc.target).sort().join(',') : null, wantTk = TARGET_KEYS[kind];
+      if (tk !== wantTk) bad.push(`target keys ${tk} (want ${wantTk})`);
+      if (Q && JSON.stringify(doc.target ?? null) !== JSON.stringify(Q.target ?? null)) bad.push(`target ${JSON.stringify(doc.target)} changed since the question opened (${JSON.stringify(Q.target)})`);
+      for (const k of ['correct', 'correctIds', 'tally', 'endedAt']) if (doc[k] != null) bad.push(`${k} ${JSON.stringify(doc[k])} (want null)`);
+      if (doc.qIndex !== this.model.lastQ) bad.push(`qIndex ${doc.qIndex} (want ${this.model.lastQ})`);
+      if (Q && doc.limitSec !== Q.limit) bad.push(`limitSec ${doc.limitSec} (want ${Q.limit})`);
+      for (const k of ['quizId', 'speedBonus', 'startedAt']) if (JSON.stringify(doc[k] ?? null) !== JSON.stringify(L[k] ?? null)) bad.push(`${k} ${JSON.stringify(doc[k])} changed since the lobby (${JSON.stringify(L[k])})`);
+      const sc = o => JSON.stringify(Object.keys(o || {}).sort().map(u => [u, Object.keys(o[u]).sort().map(f => [f, o[u][f]])]));
+      /* scores: exactly what the last Reveal (or Start) wrote; whether those were right is R6-R8's check at that Reveal */
+      if (sc(doc.scores) !== sc(this.scoresBefore)) bad.push(`scores ${sc(doc.scores)} (want the scores before this round ${sc(this.scoresBefore)})`);
+      const at = JSON.stringify(doc.askedAt ?? null);
+      if (Q && Q.askedAt === undefined) Q.askedAt = preview ? 'null' : JSON.stringify({ __ts: this.loop.now });
+      if (Q && at !== Q.askedAt) bad.push(`askedAt ${at} (want ${Q.askedAt}: ${preview ? 'null in a preview' : 'the server time of the opening write'})`);
       this.cover('R11doc');
-      this.check('R11 no answer in doc', !extra.length && doc.correct == null && doc.correctIds == null && doc.tally == null && !(doc.target && Object.keys(doc.target).some(k => k !== 'string' && k !== 'note' && k !== 'fret')), () => `question ${q + 1}'s doc (read by every signed-in account) carries more than a question before Reveal: ${JSON.stringify({ extra, correct: doc.correct, correctIds: doc.correctIds, tally: doc.tally, target: doc.target })}`, `docq|${doc.sessionId}|${q}`);
+      this.check('R11 no answer in doc', !bad.length, () => `question ${q + 1}'s doc (read by every signed-in account) is not the question doc the rules give: ${bad.join('; ')}`, `docq|${doc.sessionId}|${q}`);
     }
     if (doc.state === 'reveal' && doc.sessionId === this.model.sid && prev && prev.state === 'question') {
       const q = doc.qIndex, exp = this.pendingReveal;
@@ -1017,6 +1080,8 @@ class World {
       this.revealHow[`${doc.sessionId}|${q}`] = { kind: this.pendingAuto ? 'auto' : 'click', t: this.loop.now };
       this.pendingAuto = false;
       this.revealCommitted = true;
+      if (!preview) this.checkStorage(q);
+      this.scoresBefore = cloneRaw(doc.scores || {});
       this.vlog(`server: question ${q + 1} revealed: ${doc.correct}`);
       this.check('R9 answer', doc.correct === exp.correct, () => `question ${q + 1}: Reveal wrote correct ${JSON.stringify(doc.correct)}, the right answer is ${JSON.stringify(exp.correct)}`);
       if (this.model.quiz.kind === 'fret') this.check('R9 answer', JSON.stringify(doc.correctIds) === JSON.stringify(exp.correctIds), () => `question ${q + 1}: Reveal wrote correctIds ${JSON.stringify(doc.correctIds)}, want ${JSON.stringify(exp.correctIds)}`);
@@ -1187,12 +1252,14 @@ class World {
         if (dec.q === q && this.once(key)) this.check('R2/R3 can answer', false, `${tab.label}, question ${q + 1}: the screen offers no way to answer (${screen}) but the rules let this student answer (${dec.ms} ms in, limit ${this.model.q[q].limit} s)`);
       } else this.check('R2/R3 can answer', !!wrote, () => `${tab.label}, question ${q + 1}: a tap the rules allow (${dec.ms} ms in) was refused by the screen`);
       if (wrote) {
+        tab.picks = tab.picks || {}; tab.picks[`${this.model.sid}|${q}`] = choice;
         this.model.tap(s.uid, q, choice, dec.ms, t, false);
         this.check('R4 the written answer', wrote.choice === choice && wrote.qIndex === q && wrote.sessionId === this.model.sid && wrote.uid === s.uid && wrote.name === s.name, () => `${tab.label}: wrote ${JSON.stringify({ choice: wrote.choice, qIndex: wrote.qIndex, uid: wrote.uid })}, tapped ${choice} on question ${q + 1}`);
         this.cover('R4');
         this.check('R4/R5 answer time', wrote.ms === dec.ms, () => `${tab.label}, question ${q + 1}: the answer doc says ms ${wrote.ms}, the student's own clock says ${dec.ms} (${this.model.mode === 'first' ? 'from the question\'s first arrival' : 'from this tab\'s arrival'})`);
       }
     } else if (wrote) {
+      tab.picks = tab.picks || {}; tab.picks[`${this.model.sid}|${q}`] = choice;
       this.check('R1-R3 refused tap', false, `${tab.label}, question ${q + 1}: a tap the rules refuse was ACCEPTED and written (${choice}, ms ${wrote.ms}): ${dec.why}`);
       if (!this.model.answerOf(s.uid, q) || this.model.answerOf(s.uid, q).state === 'rejected') this.model.tap(s.uid, q, choice, wrote.ms, t, true);
     } else this.stats.checks++;
@@ -1208,6 +1275,7 @@ class World {
     for (const tab of this.tabs) {
       if (!tab.alive) { tab.dirty.clear(); continue; }
       if (tab.isTeacher) this.checkTeacher(tab); else if (tab.kind === 'student') this.checkStudent(tab);
+      if (!tab.isTeacher) this.checkSideChannels(tab);
       tab.dirty.clear();
     }
   }
@@ -1231,6 +1299,7 @@ class World {
     this.cover('Pexit');
     /* R3-5: the Exit click itself writes nothing either. */
     this.check('P nothing written', tab.writes === b.writes, () => `${tab.label} wrote to Firestore ${tab.writes - b.writes} time(s) during a preview or on Exit preview (nothing may be written)`, `pvwx|${tab.id}`);
+    tab.pvWatch = true;   /* F4-4: and nothing until the teacher's next click */
     this.check('P preview', tab.dom.byId.get('lq-stage').innerHTML === b.stage, () => `${tab.label}: after Exit preview the stage does not show what it showed before the preview (the real board): ${stripTags(tab.dom.byId.get('lq-stage').innerHTML).slice(0, 160)}`);
     const box = tab.dom.byId.get('lq-limit'), lim = this.intended.limit ? String(this.intended.limit) : '';
     this.check('P preview', !!box && box.value === lim, () => `${tab.label}: after Exit preview the Time box shows "${box && box.value}", the teacher last set ${JSON.stringify(lim)}`);
@@ -1267,6 +1336,7 @@ class World {
         this.check('P preview', !strip.buttons.some(b => b.onclick === 'lqTeacherPreview()'), () => `${tab.label}: the strip painted during a live real game (${tab.shown.state}) offers Preview`, `pvoffer|${tab.id}|${tab.shown.sessionId}`);
       }
     }
+    if (tab.pvWatch && tab.pvBase) this.check('P nothing written', tab.writes === tab.pvBase.writes, () => `${tab.label} wrote to Firestore ${tab.writes - tab.pvBase.writes} time(s) after Exit preview, before the teacher's next click (nothing may be written)`, `pvwa|${tab.id}`);
     if (!tab.previewing || !tab.pvBase) return;
     const b = tab.pvBase;
     this.cover('Pwrites');
@@ -1432,8 +1502,39 @@ class World {
       this.cover('R11student');
       this.check('R11 student screen', buttons.length === want.length && canon.every(c => c === canon[0] && !c.startsWith('WRONG')), () => `${where}: the ${buttons.length} answer buttons are not ${want.length} buttons alike apart from label and handler before Reveal: ${[...new Set(canon)].slice(0, 3).join(' || ')}`, `btn|${tab.id}|${q}`);
     }
-    /* R3-2: on a locked screen the student's OWN pick (lq-locked-pick: its label and colour) is set aside; the rest is checked. */
-    const rest = html.replace(/<button\b[^>]*>[\s\S]*?<\/button>/g, '').replace(/<div class="lq-locked-pick" style="[^"]*">[^<]*<\/div>/, '<div class="lq-locked-pick" style="#MINE#">#MINE#</div>');
+    /* F4-3: the whole text of the screen, in the student's language, in order: question label, prompt, countdown (its
+       value pinned by R12), then the tap hint / the answer buttons' labels, or, locked, "Locked in", this student's OWN
+       pick (F4-2: label and colour derived from the pick this tab made, or the one read back after a reload), the wait
+       line and, only after a refused write, the save-failed line. */
+    const key = `${view.sessionId}|${q}`, tI = (k, p) => this.tIn(k, s.lang, p);
+    const pick = (tab.picks && tab.picks[key]) || ((this.model.answerOf(s.uid, q) || {}).choice) || null;
+    const pickLook = c => {
+      if (quiz.kind === 'mc') { const ch = quiz.choices.find(x => x.id === c); return ch ? [tI(ch.key), ch.color] : [c, '#555']; }
+      if (quiz.kind === 'pcname') return [c, PC_NAME_COLOR];
+      const [st, f] = String(c).split(':'), string = tI(STRING_KEY[st] || 'fret.stringLowE');
+      return [Number(f) === 0 ? tI('lq.pickedOpen', { string }) : tI('lq.pickedFret', { n: Number(f), string }), STRING_COLOR[st] || '#555'];
+    };
+    const exp = [tI(quiz.titleKey), tI('lq.qLabel', { n: q + 1 })];
+    if (quiz.kind !== 'mc' && !view.target) exp.push(tI('lq.noTapYet'));
+    else {
+      exp.push(quiz.kind === 'fret' ? tI(quiz.promptKey, quiz.power ? { chord: view.target.note + '5', string: tI(STRING_KEY[view.target.string]) } : { note: view.target.note, string: tI(STRING_KEY[view.target.string]) }) : tI(quiz.promptKey));
+      if (view.limitSec > 0) exp.push('#COUNTDOWN#');
+      if (locked) { exp.push(tI('lq.locked'), pick ? pickLook(pick)[0] : '(no pick of this student)', tI('lq.lockedWait')); if (tab.refused && tab.refused.has(key)) exp.push(tI('lq.saveFailed')); }
+      else if (quiz.kind === 'fret') exp.push(tI('lq.tapHint'));
+      else if (quiz.kind === 'mc') exp.push(...quiz.choices.map(c => tI(c.key)));
+      else exp.push(...PC_NAMES);
+    }
+    const gotTexts = textsOf(dropSvg(html)), timeUp = tI('lq.timeUp');
+    const same = gotTexts.length === exp.length && exp.every((x, i) => x === '#COUNTDOWN#' ? (/^\d+(\.\d)?$/.test(gotTexts[i]) || gotTexts[i] === timeUp) : gotTexts[i] === x);
+    this.cover('R11stext');
+    this.check('R11 student screen', same, () => `${where}: the screen reads ${JSON.stringify(gotTexts)}, want exactly ${JSON.stringify(exp)}`, `stext|${tab.id}|${q}|${locked}`);
+    let pickStyle = null;
+    if (locked) {
+      const m = /<div class="lq-locked-pick" style="([^"]*)">/.exec(html);
+      pickStyle = pick ? `background:${pickLook(pick)[1]}` : null;
+      this.check('R11 student screen', !!m && m[1] === pickStyle, () => `${where}: the Locked-in pick is coloured "${m && m[1]}", want "${pickStyle}" (this student's own pick ${pick})`, `spick|${tab.id}|${q}`);
+    }
+    const rest = html.replace(/<button\b[^>]*>[\s\S]*?<\/button>/g, '');
     for (const svg of rest.match(/<svg\b[\s\S]*?<\/svg>/g) || []) { const bad = boxProblems(svg, this.boxTokens(view)); this.check('R11 student screen', !bad.length, () => `${where}: the chord box says more than strings and frets: ${bad.slice(0, 3).join(' | ')}`, `sbox|${tab.id}|${q}`); }
     const outside = dropSvg(rest);
     const sdoc = tab.dom.document;
@@ -1442,12 +1543,46 @@ class World {
     const params = [{ n: q + 1 }];
     if (quiz.kind === 'fret' && view.target) params.push(quiz.power ? { chord: view.target.note + '5', string: this.tIn(STRING_KEY[view.target.string], s.lang) } : { note: view.target.note, string: this.tIn(STRING_KEY[view.target.string], s.lang) });
     const okParams = new Set(params.map(p => JSON.stringify(p)));
-    const attrs = attrsOf(outside).map(a => { const m = /^(\S+) data-i18n-params="(.*)"$/.exec(a); return m && okParams.has(m[2]) ? `${m[1]} data-i18n-params=OK` : a; });
+    const attrs = attrsOf(outside).map(a => { const m = /^(\S+) data-i18n-params="(.*)"$/.exec(a); return m && okParams.has(m[2]) ? `${m[1]} data-i18n-params=OK` : (pickStyle && a === `div style="${pickStyle}"`) ? 'div style=PICK' : a; });
     for (const a of attrs) dump(`student attr ${quiz.kind}${locked ? ' locked' : ''}`, a);
     const extra = attrs.filter(a => !(locked ? STUDENT_LOCKED_ATTRS : STUDENT_Q_ATTRS)[quiz.kind].has(a));
     this.cover('R11student');
     this.check('R11 student screen', !extra.length, () => `${where}: the screen carries attributes it does not have today (an answer can hide there): ${extra.slice(0, 4).join(' | ')}`, `sattr|${tab.id}|${q}`);
-    for (const tok of this.answerTokens(view)) { const at = outside.search(tokenRe(tok)); this.check('R11 student screen', at < 0, () => `${where}: the screen names the answer "${tok}" before Reveal: …${outside.slice(Math.max(0, at - 60), at + 30)}…`, `stok|${tab.id}|${q}`); }
+    /* the student's own pick, when it IS the right answer, may name it: only that exact pinned element is taken out */
+    const ownPick = locked && pick ? `<div class="lq-locked-pick" style="${pickStyle}">${escHtml(pickLook(pick)[0])}</div>` : null;
+    const scan = ownPick ? outside.split(ownPick).join('') : outside;
+    for (const tok of this.answerTokens(view)) { const at = scan.search(tokenRe(tok)); this.check('R11 student screen', at < 0, () => `${where}: the screen names the answer "${tok}" before Reveal: …${scan.slice(Math.max(0, at - 60), at + 30)}…`, `stok|${tab.id}|${q}`); }
+  }
+  /* Item 5: what else a student can read before Reveal: elements live-quiz.js creates outside the quiz screen (the
+     invite, the Journey banner), and the browser console (devtools). Token-checked for the open question's answer. */
+  checkSideChannels(tab) {
+    const v = tab.shown, live = this.model.sid && v && v.sessionId === this.model.sid && v.state === 'question' && this.model.q[v.qIndex];
+    const fresh = tab.logs.slice(tab.logsSeen); tab.logsSeen = tab.logs.length;
+    if (!live) return;
+    const toks = this.answerTokens(v);
+    if (!toks.length) return;
+    const created = tab.dom.createdList().map(e => `${e.className || ''} ${e.textContent || ''} ${e.innerHTML || ''} ${JSON.stringify(e._attrs || {})}`).join('\n');
+    for (const tok of toks) {
+      if (created) this.check('R11 student screen', !tokenRe(tok).test(created), () => `${tab.label}: an element live-quiz.js created (invite / banner) names the answer "${tok}" before Reveal`, `side|${tab.id}|${v.qIndex}`);
+      for (const l of fresh) this.check('R11 student screen', !tokenRe(tok).test(l), () => `${tab.label}: the browser console (devtools) shows the answer "${tok}" before Reveal: ${l.slice(0, 160)}`, `log|${tab.id}|${v.qIndex}`);
+    }
+  }
+  checkDialog(tab, m) {
+    const v = tab.pview || tab.shown;
+    if (!v || v.state !== 'question' || !this.model.q[v.qIndex]) return;
+    for (const tok of this.answerTokens(v)) this.check('R11 no answer on stage', !tokenRe(tok).test(m), () => `${tab.label}: a dialog on the projector names the answer "${tok}" before Reveal: ${m.slice(0, 160)}`);
+  }
+  /* Item 5: browser storage a student can read before Reveal, checked when a Reveal commits: only the keys the quiz
+     writes today (localStorage: none of its own; sessionStorage: lq-q-opened) and no answer in any value. */
+  checkStorage(q) {
+    const toks = this.answerTokens({ target: this.model.q[q].target });
+    for (const s of this.students) {
+      const maps = [['localStorage', s.storage.local, STUDENT_LOCAL_KEYS], ...s.slots.map(sl => ['sessionStorage', sl.session, STUDENT_SESSION_KEYS])];
+      for (const [nm, m, ok] of maps) for (const [k, val] of m) {
+        this.cover('R11storage');
+        this.check('R11 no answer in storage', ok.has(k) && !toks.some(t => tokenRe(t).test(String(val))), () => `${s.name}'s ${nm} holds "${k}" = ${String(val).slice(0, 120)} before question ${q + 1}'s Reveal (keys allowed: ${[...ok].join(', ') || 'none'}; no answer in a value)`, `stor|${s.uid}|${nm}|${k}|${this.model.sid}`);
+      }
+    }
   }
   checkStudent(tab) {
     const view = tab.shown, s = tab.student;
@@ -1565,6 +1700,7 @@ class World {
         this.vlog(`${tab.label} clicks ${what} [${b.onclick}]`);
         this.progress(`${tab.label}: ${what}`);
         tab.dom.document.activeElement = null;
+        tab.pvWatch = false;
         this.run(tab, b.onclick);
         await drain(); this.afterEvent();
         return b.onclick;
@@ -1790,7 +1926,7 @@ const NAMED = {
   ], [{ revealAfter: 15000, hold: 8000, pick: 0.3 }, { revealAfter: 15000, hold: 8000, pick: 0.7 }], { note: 'the box is on (the default): the console reveals by itself 1.5 s after time-up; Brix taps in his last 0.1 s and must still score; Cimo taps 2 s after his time and after the reveal.' }),
   'auto-reveal-off': () => namedSpec('auto-reveal-off', 'pc-name', false, [5, 5], [
     { plans: [{ r: 2000 }, { r: 4800 }] },
-    { plans: [{ r: 3000, right: false }, { r: 2500 }] }
+    { plans: [{ r: 3000, right: false }, { r: 2500 }], lang: 'es' }
   ], [{ revealAfter: 12000, hold: 8000, pick: 0.3 }, { revealAfter: 9000, hold: 8000, pick: 0.6 }], { autoReveal: false, note: 'the teacher unticks "Reveal when time runs out": nothing reveals until the teacher presses Reveal, 7 s and 4 s after time-up.' }),
   'auto-reveal-slow-wifi': () => namedSpec('auto-reveal-slow-wifi', 'fret-lowE-A', true, [5], [
     { plans: [{ r: 2000 }] },
@@ -2124,6 +2260,19 @@ const R3_FAULTS = [
   { id: 'r3-p4-board-reversed', why: 'R3-4: the mc Reveal leaderboard reversed (2 players, 20 s, question 2) inside a known case', from: "  const board = lqRankedNamed(s).slice(0, 5).map(r => lqLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'", to: "  let rk = lqRankedNamed(s).slice(0, 5); if(rk.length === 2 && Number(s.limitSec) === 20 && Number(s.qIndex) === 1) rk = rk.reverse();\n  const board = rk.map(r => lqLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'" },
   { id: 'r3-p3-exit-writes', why: 'R3-5: Exit preview writes to the real doc', from: '  lqTPreview = false;\n  lqTSession = lqTReal;\n', to: "  lqTPreview = false;\n  lqTSession = lqTReal;\n  lqDoc().set({ lastPreview: { quizId: lqTPickedQuizId } }, { merge: true });\n" }
 ];
+/* Round 4 (the Fable check of 4175ee9, 2026-11-12): the reviewer's plants and the ones its brief asked for. */
+const ANS = "(lqType(lqQuiz(s.quizId)) === 'pcname' ? lqPcNameOf(s.target) : lqTargetIds(lqQuiz(s.quizId), s.target)[0])";
+const F4_FAULTS = [
+  { id: 'f4-target-fret', why: "F4-1: the right fret added to a fret quiz's public target", from: '  await lqTeacherNext({ string, note });', to: "  await lqTeacherNext({ string, note, fret: Number(lqTargetIds(quiz, { string, note })[0].split(':')[1]) });" },
+  { id: 'f4-endedAt', why: 'F4-1: the answer written into endedAt during the question', from: '  lqTAutoKey = key;\n', to: `  lqTAutoKey = key;\n  setTimeout(() => { if(lqTSession && lqTSession.state === 'question') lqWrite({ endedAt: ${ANS} }, 'fields'); }, 400);\n` },
+  { id: 'f4-locked-colour', why: 'F4-2: the fret Locked-in pick green when right, red when wrong', from: "const bg = (p && LQ_STRING_COLOR[p.string]) || '#555';", to: "const bg = lqTargetIds(quiz, s.target).includes(mine) ? '#3b6d11' : '#b3372a';" },
+  { id: 'f4-locked-tick', why: 'F4-2: a tick or cross (and colour) on the Name Locked-in pick', from: '<div class="lq-locked-pick" style="background:${LQ_PC_NAME_COLOR}">${escHtml(mine)}</div>', to: '<div class="lq-locked-pick" style="background:${mine === lqPcNameOf(s.target) ? \'#3b6d11\' : \'#b3372a\'}">${escHtml(mine)}${mine === lqPcNameOf(s.target) ? \' ✓\' : \' ✗\'}</div>' },
+  { id: 'f4-wait-fret', why: 'F4-3: "(fret N)" inside the fret Locked-in wait line', from: "${escHtml(t('lq.lockedWait'))}</div>${err}</div>`\n      + board;", to: "${escHtml(t('lq.lockedWait'))} (fret ${lqTargetIds(quiz, s.target).map(id => id.split(':')[1]).join(' or ')})</div>${err}</div>`\n      + board;" },
+  { id: 'f4-taphint', why: "F4-3: the frets inside the unlocked screen's tap hint", from: "return top + `<p class=\"lq-note\" data-i18n=\"lq.tapHint\">${escHtml(t('lq.tapHint'))}</p>` + board;", to: "return top + `<p class=\"lq-note\" data-i18n=\"lq.tapHint\">${escHtml(t('lq.tapHint'))} ${lqTargetIds(quiz, s.target).map(id => id.split(':')[1]).join('/')}</p>` + board;" },
+  { id: 'f4-spanish-root', why: "F4-3: in Spanish only, the chord's root after the Name prompt", from: "    + `<div class=\"lq-prompt\" data-i18n=\"${escAttr(quiz.promptKey)}\">${escHtml(t(quiz.promptKey))}</div>`\n    + lqTimerHtml(s);\n  const box", to: "    + `<div class=\"lq-prompt\" data-i18n=\"${escAttr(quiz.promptKey)}\">${escHtml(t(quiz.promptKey))}${t('lq.qLabel', {n: 1}) !== 'Question 1' ? ' (' + escHtml(lqPcNameOf(s.target).slice(0, -1)) + ')' : ''}</div>`\n    + lqTimerHtml(s);\n  const box" },
+  { id: 'f4-after-exit', why: 'F4-4: the real board cleared 0.3 s after Exit preview', from: "  lqPaintStage(); lqPaintControls(); lqStageSyncTick(); lqTArmAutoReveal();\n}\n// lqWrite's stand-in", to: "  lqPaintStage(); lqPaintControls(); lqStageSyncTick(); lqTArmAutoReveal();\n  setTimeout(() => { lqTeacherClose(); }, 300);\n}\n// lqWrite's stand-in" },
+  { id: 'f4-config-class', why: 'F4-5: the answer written into config/class inside a try/catch', from: '  lqTAutoKey = key;\n', to: `  lqTAutoKey = key;\n  try { lqDb.collection('config').doc('class').set({ lqHint: ${ANS} }, { merge: true }); } catch(e){}\n` }
+];
 /* Preview (f4fbe4e): the rule in the comment above lqTPreview. */
 const PREVIEW_FAULTS = [
   { id: 'pv-writes-real', why: 'a preview write ALSO goes to the real doc (students would be invited)', from: '  if(lqTPreview) return lqPreviewWrite(patch, replace);\n', to: '  if(lqTPreview) lqPreviewWrite(patch, replace);\n' },
@@ -2137,11 +2286,11 @@ function prove(dir) {
   dir = resolve(dir);
   const games = ARGS.games ?? 4, jobs = Math.max(1, Number(ARGS.jobs ?? 3));
   const base = readFileSync(join(ROOT, 'live-quiz.js'), 'utf8');
-  const all = [...FAULTS.map(f => ({ ...f, set: 'site' })), ...FIX_FAULTS.map(f => ({ ...f, set: 'reload fix' })), ...PREVIEW_FAULTS.map(f => ({ ...f, set: 'Preview' })), ...AUTO_FAULTS.map(f => ({ ...f, set: 'auto-reveal' })), ...R3_FAULTS.map(f => ({ ...f, set: 'round 3' }))];
+  const all = [...FAULTS.map(f => ({ ...f, set: 'site' })), ...FIX_FAULTS.map(f => ({ ...f, set: 'reload fix' })), ...PREVIEW_FAULTS.map(f => ({ ...f, set: 'Preview' })), ...AUTO_FAULTS.map(f => ({ ...f, set: 'auto-reveal' })), ...R3_FAULTS.map(f => ({ ...f, set: 'round 3' })), ...F4_FAULTS.map(f => ({ ...f, set: 'round 4' }))];
   const only = ARGS.only ? String(ARGS.only).split(',') : null;
   if (only) { for (const id of only) if (!all.some(f => f.id === id)) { console.log(`live-quiz-loop: ✗ --only: no fault ${id}`); return Promise.resolve(2); } all.splice(0, all.length, ...all.filter(f => only.includes(f.id))); }
   const FAKE = only ? [] : ['rules-off', 'no-order', 'shallow-merge', 'no-local', 'plain-fieldvalue'];
-  console.log(`break-it proof on ${ROOT}: ${FAULTS.length} site + ${FIX_FAULTS.length} reload-fix + ${PREVIEW_FAULTS.length} Preview + ${AUTO_FAULTS.length} auto-reveal + ${R3_FAULTS.length} round-3 faults planted in copies of its live-quiz.js, + ${FAKE.length} fake-world faults; each run is the default run (known site faults excused narrowly), seed ${SEED}, ${games} random games, ${jobs} at a time`);
+  console.log(`break-it proof on ${ROOT}: ${FAULTS.length} site + ${FIX_FAULTS.length} reload-fix + ${PREVIEW_FAULTS.length} Preview + ${AUTO_FAULTS.length} auto-reveal + ${R3_FAULTS.length} round-3 + ${F4_FAULTS.length} round-4 faults planted in copies of its live-quiz.js, + ${FAKE.length} fake-world faults; each run is the default run (known site faults excused narrowly), seed ${SEED}, ${games} random games, ${jobs} at a time`);
   const plans = [{ label: 'baseline: the site as it is (must be GREEN, the two known faults excused)', args: [`--root=${ROOT}`], baseline: true }];
   for (const f of all) {
     const pairs = [[f.from, f.to], ...(f.more || [])];
