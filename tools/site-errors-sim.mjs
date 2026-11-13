@@ -24,13 +24,21 @@
      the teacher left the view), grouping and day counts, escaping of hostile values, docs dated after the
      latest day the rules accept hidden and counted, the "more than 1000" note only when more exist, delete
      older than 30 days (a doc ON the cutoff stays) and of the impossible dates.
+   Review round 2 (2026-11-13): name words split on anything not a letter or digit, a single name word
+     scrubbed only at 5+ letters and never when it is on NOT_NAMES, the email local part only at 5+
+     characters or with a digit, no [[user]], NFC and accent marks; no half name left when the cut came
+     before sign-in (offsets 286..299); a field that grows at the send-time scrub re-cut and sent; an error
+     storm of 5,000 changing messages costs nothing after the first 100 and rawSeen stays at 100; control
+     characters; and "Send a test entry", the real logger and the real view in one page: works (read back
+     from the server), refused (NOT working, the log now off: reload), a failed write, no answer in 20 s, a
+     failed or empty read-back, the 5 entries already used, a clock fits() refuses: never a false "works".
 
-   --faults plants 21 faults (one at a time, in memory) and shows each turns at least one case red.
+   --faults plants 35 faults (one at a time, in memory) and shows each turns at least one case red.
 
    Usage:  node tools/site-errors-sim.mjs [--faults] [--root <site folder>] [--verbose]
    Exit 0 = every case passed (and, with --faults, every fault was caught). Node 18+, no dependencies.
-   Last run: 2026-11-13 (review round 1 fixes), 111 passed, 0 failed; 21 of 21 planted faults caught.
-   checks.mjs 1cx runs it (no flags) on every check and fails on a non-zero exit; run it with --faults after
+   Last run: 2026-11-13 (review round 2 fixes), 153 passed, 0 failed; 35 of 35 planted faults caught.
+   checks.mjs 1de runs it (no flags) on every check and fails on a non-zero exit; run it with --faults after
    any change to SITE_ERRORS, the safety net's listeners, teacher-errors.js or the siteErrors rules. */
 import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
@@ -271,7 +279,8 @@ async function runAll(LOG, VIEWSRC) {
       ['a URL query string', 'Failed to fetch https://api.example.com/a?key=SECRETKEY&user=ana', m => m === 'Failed to fetch https://api.example.com/a?[query]'],
       ['a run of 6+ digits (a timestamp, a student number)', 'at 1731500000000 for student 4401234', m => m === 'at [n] for student [n]'],
       ['the signed-in student\'s own name, whole words, only as written', "Unexpected 'Ana Lopez' in notes by Lopez; lopez, banana and Banana stay", m => m === "Unexpected '[user]' in notes by [user]; lopez, banana and Banana stay"],
-      ['…a 3-letter name word alone (Ana)', "Unexpected 'Ana' in notes", m => m === "Unexpected '[user]' in notes"],
+      ['…a 3-letter name word alone (Ana) now STAYS (review R2-4: only 5+ letter name words go alone)', "Unexpected 'Ana' in notes", m => m === "Unexpected 'Ana' in notes"],
+      ['…a 5-letter name word alone (Lopez) still goes', "Unexpected 'Lopez' in notes", m => m === "Unexpected '[user]' in notes"],
       ['the signed-in student\'s email local part, any case', 'key ana.lopez not found, nor ANA.LOPEZ', m => m === 'key [user] not found, nor [user]'],
     ];
     for (const [name, input, test] of cases) {
@@ -308,12 +317,12 @@ async function runAll(LOG, VIEWSRC) {
     const run = async (name, msg, stack) => { const p = makePage(LOG, who(name)); p.err(msg, stack ? { error: { stack } } : undefined); await p.advance(10); return p.writes[0] && p.writes[0].doc; };
     let d = await run('Max Rivera', "Cannot read properties of undefined (reading 'max')", 'TypeError: x\n    at Math.max (<anonymous>)\n    at songKey (https://gc.example/app/tab.js:1:2)');
     ok("Max: 'max' in the message and Math.max in the stack are untouched", d && d.message === "Cannot read properties of undefined (reading 'max')" && d.stack === 'at Math.max (<anonymous>)\nat songKey (/app/tab.js:1:2)', d && JSON.stringify([d.message, d.stack]));
-    d = await run('Max Rivera', 'Unexpected Max in Rivera notes');
-    ok('…"Max" and "Rivera" as written are scrubbed', d && d.message === 'Unexpected [user] in [user] notes', d && d.message);
+    d = await run('Max Rivera', 'Unexpected Max in Rivera notes; Max Rivera');
+    ok('…"Rivera" (6 letters) and "Max Rivera" as written are scrubbed; "Max" alone (3 letters) stays', d && d.message === 'Unexpected Max in [user] notes; [user]', d && d.message);
     d = await run('Will Chen', 'The play() request will fail; Will Chen typed it');
     ok('Will: the word "will" stays, the name "Will Chen" goes', d && d.message === 'The play() request will fail; [user] typed it', d && d.message);
-    d = await run('Amy Song', 'Bad Song row', 'TypeError: x\n    at songKey (https://gc.example/app/song.js:1:2)\n    at openSongLink (https://gc.example/app/explore.js:3:4)');
-    ok('Amy Song: songKey, /app/song.js and openSongLink stay; "Song" as written goes', d && d.message === 'Bad [user] row' && d.stack === 'at songKey (/app/song.js:1:2)\nat openSongLink (/app/explore.js:3:4)', d && JSON.stringify([d.message, d.stack]));
+    d = await run('Amy Songs', 'Bad Songs row', 'TypeError: x\n    at songsKey (https://gc.example/app/songs.js:1:2)\n    at openSongsLink (https://gc.example/app/explore.js:3:4)');
+    ok('Amy Songs: songsKey, /app/songs.js and openSongsLink stay; "Songs" as written goes', d && d.message === 'Bad [user] row' && d.stack === 'at songsKey (/app/songs.js:1:2)\nat openSongsLink (/app/explore.js:3:4)', d && JSON.stringify([d.message, d.stack]));
   }
 
   say('== half a name never survives the 300-character cut');
@@ -324,6 +333,85 @@ async function runAll(LOG, VIEWSRC) {
     const q = makePage(LOG, { auth: { currentUser: null } }); q.err('Unexpected Lopez in notes'); await q.advance(10);
     q.ctx.auth = { currentUser: USER }; await q.advance(6000);
     ok('an error from before sign-in is scrubbed at send time, once someone signs in', q.writes[0] && q.writes[0].doc.message === 'Unexpected [user] in notes', q.writes[0] && q.writes[0].doc.message);
+  }
+
+  say('== review round 2: name words, the stop-list, the email local part, tokens, accents (R2-3, R2-4, R2-7)');
+  {
+    const who = (name, email) => ({ auth: { currentUser: { uid: 'Xy7Qp2LmN8rT4vW1zA3bC5dE6fG9', email: email || 'x1@seq.org', displayName: name } } });
+    const cases = [
+      ['"Smith, Max": the comma no longer glues Smith to it (Smith goes, Max is 3 letters and stays)', 'Smith, Max', null, 'Smith typed it; Max too', '[user] typed it; Max too'],
+      ["\"Mary-Jane O'Brien\": split at - and ' (Brien goes; Mary and Jane are 4 letters and stay; the whole name goes)", "Mary-Jane O'Brien", null, "Mary and Jane and Brien; Mary-Jane O'Brien", 'Mary and Jane and [user]; [user]'],
+      ["\"Mariana-Isabel O'Donnell\": every 5+ letter part goes", "Mariana-Isabel O'Donnell", null, 'Mariana, Isabel, Donnell', '[user], [user], [user]'],
+      ['Will Page: "Will not load. Page crashed" unchanged', 'Will Page', null, 'Will not load. Page crashed', 'Will not load. Page crashed'],
+      ['May Long: "Fri May 14 2027" unchanged', 'May Long', null, 'Fri May 14 2027', 'Fri May 14 2027'],
+      ['Promise King: Promise.all stays (on the stop-list), the whole name goes', 'Promise King', null, 'Promise.all is not iterable; Promise King', 'Promise.all is not iterable; [user]'],
+      ['Audio Kingston: the stop-list is case-blind (Audio stays), Kingston goes', 'Audio Kingston', null, 'Audio failed for Kingston', 'Audio failed for [user]'],
+      ['max@…: Math.max stays (a 3-letter local part with no digit)', 'Zed Quill', 'max@seq.org', 'Math.max failed', 'Math.max failed'],
+      ['msmith27@…: a local part with a digit still goes, any case', 'Zed Quill', 'msmith27@seq.org', 'key msmith27 or MSMITH27 missing', 'key [user] or [user] missing'],
+      ['lopez@…: a 5-character local part still goes, any case', 'Zed Quill', 'lopez@seq.org', 'LOPEZ not found', '[user] not found'],
+      ['a lower-case name "max smith": smith and the whole name go, Math.max stays', 'max smith', null, 'Math.max of smith; max smith', 'Math.max of [user]; [user]'],
+      ['email local part "email": an earlier [email] is never rewritten (no [[user]])', 'Zed Quill', 'email@seq.org', 'bad email in [email] and [id]', 'bad [user] in [email] and [id]'],
+      ['display name "user": an earlier [user] is never rewritten, at report time or send time', 'user', null, 'user said [user] [n] [query]', '[user] said [user] [n] [query]'],
+      ['an NFC name, the text in NFD (José Peña): the whole name goes, no accent left', 'Jos\u00e9 Pe\u00f1a', null, 'by Jose\u0301 Pen\u0303a today', 'by [user] today'],
+      ['an NFD name, the text in NFC: the whole name goes', 'Jose\u0301 Pe\u00f1a', null, 'by Jos\u00e9 Pe\u00f1a today', 'by [user] today'],
+      ['a combining mark after a name word (Lopez + U+0308, no precomposed form): the mark goes with it', 'Maria Lopez', null, 'Lopez\u0308 x', '[user] x'],
+    ];
+    for (const [name, dn, email, msg, want] of cases) {
+      const p = makePage(LOG, who(dn, email)); p.err(msg); await p.advance(10);
+      const m = p.writes[0] && p.writes[0].doc.message;
+      if (!QUIET) console.log(`     ${JSON.stringify(dn)} ${JSON.stringify(msg)} → ${JSON.stringify(m)}`);
+      ok(name, m === want, JSON.stringify(m) + ' (want ' + JSON.stringify(want) + ')');
+    }
+  }
+
+  say('== review round 2: half a name never survives a cut made while signed out (R2-5), a field that grows is re-cut (R2-6c)');
+  {
+    const left = [];
+    for (let off = 286; off <= 299; off++) {
+      const p = makePage(LOG, { auth: { currentUser: null } });
+      p.err('y'.repeat(off) + ' Maximiliano Fernandez tail');
+      await p.advance(10);
+      p.ctx.auth = { currentUser: { uid: 'Xy7Qp2LmN8rT4vW1zA3bC5dE6fG9', email: 'x1@seq.org', displayName: 'Maximiliano Fernandez' } };
+      await p.advance(6000);
+      const m = p.writes[0] ? p.writes[0].doc.message.replace(/^y+/, '') : null;
+      const frag = m == null || ['Maximiliano', 'Fernandez'].some(w => { for (let k = 3; k <= w.length; k++) if (m.includes(w.slice(0, k))) return true; return false; });
+      if (frag) left.push(off + ': ' + JSON.stringify(m));
+    }
+    ok('"Maximiliano Fernandez" starting at each offset 286..299, reported signed out, sent after sign-in: 14 of 14 written with no fragment of 3+ letters of either word', !left.length, left.join(' | '));
+    const q = makePage(LOG, { auth: { currentUser: null } });
+    q.err('Lopez '.repeat(60));
+    await q.advance(10);
+    q.ctx.auth = { currentUser: USER };
+    await q.advance(6000);
+    const d = q.writes[0] && q.writes[0].doc;
+    ok("'Lopez ' x 60 reported signed out ([user] is longer than Lopez, so the scrub at send time grows it past 300): re-cut and SENT, not dropped", q.adds === 1 && d.message.length <= 300 && d.message.endsWith('…') && /\[user\]/.test(d.message) && !/Lop/.test(d.message) && !rulesRefuse(d).length, d ? `${d.message.length} chars, ${rulesRefuse(d).join('; ')}` : `adds ${q.adds}`);
+  }
+
+  say('== review round 2: an error storm whose text keeps changing (R2-2, R2-6b)');
+  {
+    const p = makePage(LOG);
+    const at = i => 'Failed to load audio/take-' + (1731500000000 + i) + '.mp3';
+    for (let i = 0; i < 49; i++) p.err(at(i));
+    p.err('A different failure');
+    for (let i = 50; i < 100; i++) p.err(at(i));
+    const after100 = p.originReads;
+    const t0 = process.hrtime.bigint();
+    for (let i = 100; i < 5000; i++) p.err(at(i));
+    const ms = Number(process.hrtime.bigint() - t0) / 1e6;
+    p.err('A third failure');
+    await p.advance(10);
+    const st = vm.runInContext('SITE_ERRORS.stats()', p.ctx);
+    if (!QUIET) console.log(`     the 4,900 events after the first 100: ${ms.toFixed(1)} ms in all; origin read ${after100} times for the first 100, ${p.originReads - after100} after`);
+    ok('the first 100 behave as before: the timestamps scrub to one entry, the different failure is a second (2 writes)', p.adds === 2 && p.writes[0].doc.message === 'Failed to load audio/take-[n].mp3' && p.writes[1].doc.message === 'A different failure', p.writes.map(w => w.doc.message).join(' | '));
+    ok('the 4,900 after them are never scrubbed (the origin is read 0 more times), and a new message after 100 is not logged', after100 > 0 && p.originReads === after100 && p.adds === 2, `origin reads: first 100 ${after100}, after ${p.originReads - after100}; adds ${p.adds}`);
+    ok('rawSeen holds 100 after 5,002 different raw messages, never more', st.rawSeen === 100, JSON.stringify(st));
+  }
+
+  say('== review round 2: control characters (R2-8)');
+  {
+    const p = makePage(LOG); p.err('a\u0000b\u0007c\u000Bd\u001Fe\uFFFEf\uFFFFg\th\ni\rj', { filename: 'https://gc.example/app/x\u0001.js' }); await p.advance(10);
+    const d = p.writes[0] && p.writes[0].doc;
+    ok('NUL, BEL, VT, US, U+FFFE, U+FFFF → U+FFFD; tab, line feed, carriage return kept; in the file too; the rule mirror accepts it', d && d.message === 'a\uFFFDb\uFFFDc\uFFFDd\uFFFDe\uFFFDf\uFFFDg\th\ni\rj' && d.file === '/app/x\uFFFD.js' && !rulesRefuse(d).length, d && JSON.stringify([d.message, d.file]));
   }
 
   say('== a message over the 1,000-character pre-cut');
@@ -516,7 +604,7 @@ async function runAll(LOG, VIEWSRC) {
     let threw = false; try { vm.runInContext(`teacherErrorsHtml(${JSON.stringify([{ message: 5, line: 'x', day: 7 }, null, 'junk', { kind: 'rejection' }])})`, v.ctx); } catch (e) { threw = String(e); }
     ok('docs of the wrong shape (numbers, null, a string, missing fields) do not throw', !threw, threw);
     const handlers = (h.match(/on[a-z]+="[^"]*"/g) || []);
-    ok('every inline handler in the view carries no value: ' + handlers.length + ' found, all from a fixed list', handlers.length > 0 && handlers.every(x => /^onclick="(renderTeacherErrors|teacherErrorsDeleteOld)\(\)"$/.test(x)), handlers.join(' '));
+    ok('every inline handler in the view carries no value: ' + handlers.length + ' found, all from a fixed list', handlers.length > 0 && handlers.every(x => /^onclick="(renderTeacherErrors|teacherErrorsDeleteOld|teacherErrorsSendTest)\(\)"$/.test(x)), handlers.join(' '));
   }
   {
     const cutoff = vm.runInContext('teacherErrorsDay(30)', view([]).ctx);
@@ -534,6 +622,101 @@ async function runAll(LOG, VIEWSRC) {
     await vm.runInContext('renderTeacherErrors()', x.ctx);
     ok('a read that lands after the teacher switched views paints nothing', !x.box.innerHTML.includes('<table'), x.box.innerHTML.slice(0, 80));
   }
+
+  say('== "Send a test entry" (R2-1): the real logger and the real view in one page');
+  /* The console page: the logger (its safety net too) and the view in one vm, sharing one stub Firestore that
+     stores what add() accepts, reads it back by id, and answers the view's queries. */
+  const consolePage = (o = {}) => {
+    const p = makePage(LOG, { teacher: true, hash: '#errors', set: null });
+    const box = { innerHTML: '' }, store = [], gets = [];
+    let n = 0;
+    const OPS = { '<': (a, b) => a < b, '<=': (a, b) => a <= b, '>': (a, b) => a > b, '==': (a, b) => a === b };
+    const query = (wh = [], ord = null) => ({
+      where: (f, op, v) => query([...wh, [f, op, v]], ord), orderBy: (f, dir) => query(wh, [f, dir]),
+      limit: k => ({ get: async () => {
+        if (o.denyRead) throw Object.assign(new Error('denied'), { code: 'permission-denied' });
+        let list = store.filter(x => wh.every(([f, op, v]) => typeof x.data[f] === typeof v && OPS[op](x.data[f], v)));
+        if (ord) list = list.slice().sort((a, b) => (a.data.day < b.data.day ? 1 : a.data.day > b.data.day ? -1 : 0));
+        list = list.slice(0, k);
+        return { empty: !list.length, docs: list.map(x => ({ data: () => x.data, ref: x })) };
+      } }),
+    });
+    p.ctx.db = {
+      collection: name => Object.assign(query(), {
+        add: doc => {
+          p.adds++; p.writes.push({ name, doc: JSON.parse(JSON.stringify(doc)) });
+          const mode = o.add || 'ok';
+          if (mode === 'refuse') return Promise.reject(Object.assign(new Error('Missing or insufficient permissions.'), { code: 'permission-denied' }));
+          if (mode === 'fail') return Promise.reject(Object.assign(new Error('Failed to get document because the client is offline.'), { code: 'unavailable' }));
+          if (mode === 'hang') return new Promise(() => {});
+          const id = 'Te5tId' + String(++n).padStart(14, '0');
+          if (mode !== 'lost') store.push({ id, data: JSON.parse(JSON.stringify(doc)) });
+          return Promise.resolve({ id });
+        },
+        doc: id => ({ get: async opts => { gets.push(opts); if (o.readFail) throw Object.assign(new Error('offline'), { code: 'unavailable' }); const x = store.find(d => d.id === id); return { exists: !!x, data: () => x && x.data }; } }),
+      }),
+      batch: () => { const ops = []; return { delete: r => ops.push(r), commit: async () => { for (const r of ops) store.splice(store.indexOf(r), 1); } }; },
+    };
+    Object.assign(p.ctx, { ensureDb: async () => p.ctx.db, confirm: () => true });
+    p.ctx.document.getElementById = id => id === 't-grid-container' ? box : null;
+    vm.runInContext(ESC + '\nvar teacherView = "errors";\n' + VIEWSRC, p.ctx, { filename: 'teacher-errors.js' });
+    p.press = async () => { const pr = vm.runInContext('teacherErrorsSendTest()', p.ctx); await p.advance(25000); await pr; await p.advance(10); return box.innerHTML; };
+    Object.assign(p, { box, store, gets });
+    return p;
+  };
+  const TEST_MSG = 'Error log test (sent from the console)';
+  {
+    const p = consolePage();
+    await vm.runInContext('renderTeacherErrors()', p.ctx);
+    ok('before the test: "No errors logged." and the "Send a test entry" button', p.box.innerHTML.includes('No errors logged.') && p.box.innerHTML.includes('onclick="teacherErrorsSendTest()">Send a test entry</button>'));
+    const h = await p.press();
+    ok('the log works: "The log works: the test entry was saved and read back."', h.includes('The log works: the test entry was saved and read back.'), h.slice(0, 300));
+    ok('…it went through the logger: ONE add(), the message as the logger sends it, the 10 fields, the rule mirror accepts it', p.adds === 1 && p.writes[0].name === 'siteErrors' && p.writes[0].doc.message === TEST_MSG && p.writes[0].doc.page === 'console #errors' && !rulesRefuse(p.writes[0].doc).length, JSON.stringify(p.writes[0] && p.writes[0].doc));
+    ok('…read back from the SERVER (source: server), by the id add() returned', p.gets.length === 1 && p.gets[0] && p.gets[0].source === 'server', JSON.stringify(p.gets));
+    ok('…the list then shows it, marked as a test entry', h.includes('<b>' + TEST_MSG + '</b> <i>(a test entry, from "Send a test entry")</i>'), h.slice(0, 600));
+    ok('…it used one of the 5 entries of this page load', vm.runInContext('SITE_ERRORS.stats().used', p.ctx) === 1);
+    const h2 = await p.press();
+    ok('a second press on the same page: "could not be checked: a test entry was already sent", reload; no second write', h2.includes('The log could not be checked: a test entry was already sent from this page.') && /Reload the console before testing again/.test(h2) && p.adds === 1, h2.slice(0, 300));
+    p.store.push({ id: 'realOne', data: { kind: 'error', message: 'A real one', file: '', line: 0, col: 0, stack: '', page: '#', version: 'v', day: utcDay(0), lang: 'en' } });
+    await vm.runInContext('teacherErrorsDeleteOld()', p.ctx); await p.advance(10);
+    ok('"Delete older than 30 days" deletes the test entry too (and keeps a real one from today)', p.store.length === 1 && p.store[0].id === 'realOne' && p.box.innerHTML.includes('Deleted 1 test entry.'), `left ${p.store.map(x => x.id).join(',')}; ` + (p.box.innerHTML.match(/Deleted[^<]*|Nothing[^<]*/) || [''])[0]);
+  }
+  {
+    const p = consolePage({ add: 'refuse', denyRead: true });
+    const h = await p.press();
+    ok('the rules refuse the write: "The log is NOT working: the test entry was refused (…not published, or do not match…)"', h.includes('The log is NOT working: the test entry was refused (the rules for the error log are not published, or do not match this version of the site).'), h.slice(0, 300));
+    ok('…and it says the log is now off on this console page: "reload the console before testing again"', h.includes('The error log is now off on this console page: reload the console before testing again.'), h.slice(0, 400));
+    ok('…the answer still shows when the list read is refused too', /rules are not published/.test(h), h.slice(0, 400));
+    p.err('a real console error after the refused test'); await p.advance(10);
+    ok('…which is true: a real error afterwards is not written (1 write in all)', p.adds === 1, `adds ${p.adds}`);
+    const h2 = await p.press();
+    ok('…a second press says the logger is off (permission-denied), never "works"', h2.includes('The log could not be checked: the logger had already turned itself off on this page, after a write failed (permission-denied).') && !/The log works/.test(h2), h2.slice(0, 300));
+  }
+  {
+    const p = consolePage({ add: 'fail' });
+    const h = await p.press();
+    ok('a connection failure on the write: "The log could not be checked: the write failed (unavailable)…", with the reload line', h.includes('The log could not be checked: the write failed (unavailable), a connection problem.') && h.includes('reload the console before testing again'), h.slice(0, 300));
+    const q = consolePage({ add: 'hang' });
+    const hq = await q.press();
+    ok('no answer at all (offline): after 20 s "could not be checked: no answer from Firestore within 20 seconds"', hq.includes('The log could not be checked: no answer from Firestore within 20 seconds, a connection problem.'), hq.slice(0, 300));
+    const r = consolePage({ readFail: true });
+    const hr = await r.press();
+    ok('saved, but the read-back fails: "could not be checked", never "works"', hr.includes('The log could not be checked: the test entry was saved, but reading it back failed (unavailable).') && !/The log works/.test(hr), hr.slice(0, 300));
+    const l = consolePage({ add: 'lost' });
+    const hl = await l.press();
+    ok('add() answers but the entry is not on the server: "could not be checked: … not there when read back", never "works"', hl.includes('The log could not be checked: the test entry was saved, but it was not there when read back.') && !/The log works/.test(hl), hl.slice(0, 300));
+  }
+  {
+    const p = consolePage();
+    for (let i = 0; i < 5; i++) p.err('console error ' + i);
+    await p.advance(10);
+    const h = await p.press();
+    ok('the 5 entries of this page load already used: no 6th write, "could not be checked: … already sent the 5 entries", reload — never "works"', p.adds === 5 && h.includes('The log could not be checked: this page has already sent the 5 entries one page load may send. Reload the console before testing again.') && !/The log works/.test(h), `adds ${p.adds}; ` + h.slice(0, 300));
+    const w = consolePage({});
+    w.wallNow = Date.UTC(10000, 0, 2, 12);
+    const hw = await w.press();
+    ok("this computer's clock in the year 10000: fits() drops the entry, nothing sent, \"could not be checked\"", w.adds === 0 && hw.includes("The log could not be checked: the test entry was not sent: it would not fit the error log's rules (is this computer's date right?)."), `adds ${w.adds}; ` + hw.slice(0, 300));
+  }
 }
 
 /* ── Planted faults: each must turn at least one case red ── */
@@ -541,24 +724,39 @@ const FAULTS = [
   ['the ResizeObserver note logged', 'L', "console.warn('[guitar-class]', e.message); return; }", "console.warn('[guitar-class]', e.message); SITE_ERRORS.report('error', e); return; }"],
   ['the cap raised from 5 to 50', 'L', 'const MAX = 5,', 'const MAX = 50,'],
   ['the email scrub removed', 'L', "s = s.replace(/[A-Za-z0-9._%+-]+(?:@|%40)", "if(0) s = s.replace(/[A-Za-z0-9._%+-]+(?:@|%40)"],
-  ['a refused write does not stop the log', 'L', 'p.then(next, stop)', 'p.then(next, next)'],
-  ['the once-per-message check removed', 'L', 'if(seen.has(key)) return;', ''],
+  ['a refused write does not stop the log', 'L', "er => { stop(er); fin(e, { state: 'failed', code: offCode }); });", "er => { fin(e, { state: 'failed', code: offCode }); next(); });"],
+  ['the once-per-message check removed', 'L', "if(seen.has(key)) return 'repeat';", ''],
   ['ready() no longer waits for Firestore', 'L', 'return !!(db && auth && auth.currentUser);', 'return !!(auth && auth.currentUser);'],
   ['the uid / id scrub removed', 'L', "s = s.replace(/[A-Za-z0-9]{20,}/g", "if(0) s = s.replace(/[A-Za-z0-9]{20,}/g"],
   ['the query-string scrub removed', 'L', "s = s.replace(/\\?(?=", "if(0) s = s.replace(/\\?(?="],
   ['the signed-in account scrub removed', 'L', "if(who) for(const k of", "if(0) for(const k of"],
-  ['the 10-minute give-up removed', 'L', 'if(polls >= POLL_TRIES){ queue.length = 0; return; }', ''],
+  ['the 10-minute give-up removed', 'L', "if(polls >= POLL_TRIES){ for(const e of queue.splice(0)) fin(e, { state: 'not-ready' }); return; }", ''],
   ['several writes in flight at once', 'L', 'if(off || sending || !queue.length) return;', 'if(off || !queue.length) return;'],
   ['the view stops escaping the message', 'V', '<b>${escHtml(g.message)}</b>', '<b>${g.message}</b>'],
   ['clean() keeps lone surrogates', 'L', "m => m.length === 2 ? m : '\\uFFFD'", 'm => m'],
   ['clean() no longer called by scrub()', 'L', '    s = clean(s);\n', ''],
-  ['fits() never drops a doc', 'L', 'if(!fits(d)){ next(); return; }', ''],
-  ['the raw repeat check removed', 'L', 'if(rawSeen.has(rawKey)) return;', ''],
+  ['fits() never drops a doc', 'L', "if(!fits(d)){ fin(e, { state: 'dropped' }); next(); return; }", ''],
+  ['the raw repeat check removed', 'L', "if(rawSeen.has(rawKey)) return 'repeat';", ''],
   ['the display name matched in any case again', 'L', "[asWritten, 'gu']", "[asWritten, 'giu']"],
   ['the account not scrubbed before the cut', 'L', 'const who = whoScrub();\n      const doc', 'const who = null;\n      const doc'],
   ['the pre-cut drops the last "word" even with no space', 'L', 's = /\\s/.test(s) ?', 's = true ?'],
   ['the view reads impossible dates too', 'V', ".where('day', '<=', latest).orderBy", '.orderBy'],
-  ['the delete skips impossible dates', 'V', "[['<', cutoff], ['>', latest]]", "[['<', cutoff]]"],
+  ['the delete skips impossible dates', 'V', "[['day', '<', cutoff], ['day', '>', latest]]", "[['day', '<', cutoff]]"],
+  /* Review round 2 (2026-11-13). */
+  ['R2-1 the test button says "works" without reading the entry back', 'V', "  if(!r.id) return cannot(", "  return 'The log works: the test entry was saved and read back.';\n  if(!r.id) return cannot("],
+  ['R2-1 the test is written by a console-only writer, not the logger', 'V', '    SITE_ERRORS.test(),', "    ensureDb().then(d => d.collection('siteErrors').add({ message: 'Error log test (sent from the console)' })).then(ref => ({ state: 'sent', id: ref.id, doc: { message: 'Error log test (sent from the console)' } })),"],
+  ['R2-2 a storm of changing messages is scrubbed for ever (no else return)', 'L', "if(rawSeen.size < 100) rawSeen.add(rawKey); else return 'storm';", 'if(rawSeen.size < 100) rawSeen.add(rawKey);'],
+  ['R2-6b rawSeen grows without a cap', 'L', "if(rawSeen.size < 100) rawSeen.add(rawKey); else return 'storm';", 'rawSeen.add(rawKey);'],
+  ['R2-3 the name split on spaces only', 'L', 'name.split(/[^\\p{L}\\p{N}\\p{M}]+/u)', 'name.split(/\\s+/)'],
+  ['R2-4 the 5-letter floor for a single name word removed', 'L', ".length >= 5 && !NOT_NAMES.has(", ".length >= 1 && !NOT_NAMES.has("],
+  ['R2-4 the NOT_NAMES stop-list ignored', 'L', '&& !NOT_NAMES.has(w.toLowerCase())', ''],
+  ['R2-4 the email local part scrubbed at any length again', 'L', "if(local.length >= 5 || /\\d/.test(local)) add(anyCase, local);", 'add(anyCase, local);'],
+  ['R2-5 the unfinished word before … kept at send time', 'L', 'who(e.late ? dropCutWord(d[k]) : d[k])', 'who(d[k])'],
+  ['R2-6c the send-time scrub not re-cut (fits() then drops the doc)', 'L', 'd[k] = cut(who(e.late ? dropCutWord(d[k]) : d[k]), CAP[k]);', 'd[k] = who(e.late ? dropCutWord(d[k]) : d[k]);'],
+  ['R2-7 earlier tokens scrubbed again ([[user]])', 'L', 'i % 2 ? part : res.reduce(', 'res.reduce('],
+  ['R2-7 the text not put in NFC before matching', 'L', "String(s).normalize('NFC').split(TOKEN)", 'String(s).split(TOKEN)'],
+  ['R2-7 an accent mark after a scrubbed name left behind', 'L', "')\\\\p{M}*(?![", "')(?!["],
+  ['R2-8 clean() keeps C0 controls and U+FFFE / U+FFFF', 'L', ".replace(/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\uFFFE\\uFFFF]/g, '\\uFFFD')", ".replace(/(?!)/g, '')"],
 ];
 
 console.log('site-errors-sim: the error log in app/boot.js (' + LOGGER.split('\n').length + ' lines) and teacher-errors.js (' + VIEW.split('\n').length + ' lines); rule mirror: ' + R.only.length + ' fields, ' + Object.keys(R.caps).length + ' caps, from ' + join(ROOT, 'firestore.rules'));
@@ -575,7 +773,7 @@ if (ARGV.includes('--faults')) {
     if (n !== 1) { console.log(`  ✗ ${name}: the text to break is found ${n} times (must be 1) — update the fault`); faultsMissed++; continue; }
     const bad = src.replace(from, () => to);
     await runAll(which === 'L' ? bad : LOGGER, which === 'V' ? bad : VIEW);
-    if (fail) console.log(`  ✓ caught: ${name} — ${fail} red, first: ✗ ${failed[0]}`);
+    if (fail) console.log(`  ✓ caught: ${name} — ${fail} red, first: ✗ ${failed[0].replace(/\s+/g, ' ').slice(0, 300)}`);
     else { console.log(`  ✗ NOT caught: ${name}`); faultsMissed++; }
   }
   console.log(`\n${faultsMissed ? '✗' : '✓'} ${FAULTS.length - faultsMissed} of ${FAULTS.length} planted faults caught`);
