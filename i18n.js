@@ -227,8 +227,8 @@
     'period.p7':           { en: 'Period 7', es: 'Periodo 7' },
     'period.pCAS':         { en: 'CAS', es: 'CAS' },
     'period.wrongAccount': { en: 'Not you? Sign out', es: '¿No eres tú? Cierra sesión' },
-    'period.failed':       { en: 'Could not save that. Check your connection and try again.',
-                             es: 'No se pudo guardar. Revisa tu conexión e intenta de nuevo.' },
+    'period.failed':       { en: 'Could not save that. Check the internet connection and try again.',
+                             es: 'No se pudo guardar. Revisa la conexión a internet e intenta de nuevo.' },
 
     'header.railToggleAria': { en: 'Open navigation menu', es: 'Abrir el menú de navegación' },
     'header.searchAria':     { en: 'Find it — search the whole site', es: 'Buscar — busca en todo el sitio' },
@@ -269,8 +269,8 @@
     // Shown via gateToast() when a module-N.js file never arrives (offline and
     // not precached, or blocked by a school content filter) — app.js bails back
     // to the module still on screen, and without this the click looked broken.
-    'module.loadFailed':  { en: 'Couldn\'t load that module — check your connection and try again.',
-      es: 'No se pudo cargar ese módulo — revisa tu conexión e inténtalo de nuevo.' },
+    'module.loadFailed':  { en: 'Couldn\'t load that module — check the internet connection and try again.',
+      es: 'No se pudo cargar ese módulo — revisa la conexión a internet e inténtalo de nuevo.' },
     'nav.explore':        { en: 'Explore', es: 'Explorar' },
     // Renamed from "Practice" 2026-09-20 (left rail nav cleanup) — the label
     // wasn't saying what pressing it does (open the module picker, headed
@@ -502,8 +502,8 @@
     'ca.snipKind':             { en: 'Track', es: 'Pista' },
     'ca.snipPlay':             { en: 'Play with the band', es: 'Toca con la banda' },
     'ca.snipStop':             { en: 'Stop', es: 'Detener' },
-    'ca.snipLoadFailed':       { en: 'The track didn\u2019t load. Check the connection and press play again.',
-                                 es: 'La pista no se cargó. Revisa la conexión y vuelve a darle play.' },
+    'ca.snipLoadFailed':       { en: 'The track didn\u2019t load. Check the internet connection and press play again.',
+                                 es: 'La pista no se cargó. Revisa la conexión a internet y vuelve a darle play.' },
     'ca.snipDefaultTitle':     { en: 'Play with the band', es: 'Toca con la banda' },
     'ca.snipLoopNote':         { en: '{n} bars of the record, looping — the same bars as the tab. Stop it when you want.',
                                  es: '{n} compases del disco, en bucle — los mismos compases que la tablatura. Detenlo cuando quieras.' },
@@ -811,8 +811,15 @@
     // module review — setSaveMsg() in app.js) ──
     'save.saving':           { en: 'Saving…', es: 'Guardando…' },
     'save.saved':            { en: 'Saved ✓', es: 'Guardado ✓' },
-    'save.failed':           { en: 'Save failed — check connection', es: 'No se pudo guardar — revisa tu conexión' },
-    'save.notSaving':        { en: 'Not saving — check connection', es: 'No se está guardando — revisa tu conexión' },
+    // Say only what save.js does (2026-11-13): save.failed = the work stays in
+    // memory and an automatic retry is armed (lost if the tab closes);
+    // save.notSaving = the newest work is not sent (a held-back category after
+    // a failed load, dev bypass, or out of automatic retries), so no "safe"
+    // and no "reload" (a reload drops work still waiting in memory).
+    'save.failed':          { en: 'Not saved yet — trying again. Keep this tab open.',
+                               es: 'Todavía no se guardó — se intentará otra vez. Deja esta pestaña abierta.' },
+    'save.notSaving':        { en: 'Not saving — your newest work is not saved. Check the internet connection.',
+                               es: 'No se está guardando — tu trabajo más reciente no está guardado. Revisa la conexión a internet.' },
     // Sign out / the error banner's Refresh with work still unsaved after the
     // bounded wait (showUnsavedNotice / the safety-net banner in app.js).
     'save.notSavedYet':      { en: 'Not saved yet — reconnect to the internet first, then try again.',
@@ -821,8 +828,8 @@
     'save.refreshAnyway':    { en: 'Refresh anyway', es: 'Actualizar de todos modos' },
 
     // ── Offline banner (app.js, near the top) ──
-    'offline.body':          { en: "You're offline — practice pages still work; videos and saving resume when you reconnect.",
-                                es: 'Estás sin conexión — las páginas de práctica siguen funcionando; los videos y el guardado se reanudan al reconectarte.' },
+    'offline.body':          { en: "You're offline — saving waits until you reconnect, so keep this tab open. Practice pages still work; videos do not.",
+                                es: 'Estás sin conexión — el guardado espera hasta que vuelvas a conectarte, así que deja esta pestaña abierta. Las páginas de práctica siguen funcionando; los videos no.' },
     'offline.dismiss':       { en: 'Dismiss', es: 'Cerrar' },
     /* The crash safety net (app.js). Separate from offline.* because it says
        something different: not "you're offline" but "something broke and your
@@ -1490,7 +1497,8 @@
     'journey.progPill':      { en: '{ready} of {n} layers ready', es: '{ready} de {n} capas listas' },
     'journey.saving':        { en: 'Saving…', es: 'Guardando…' },
     'journey.saved':         { en: 'Saved ✓', es: 'Guardado ✓' },
-    'journey.saveFailed':    { en: 'Save failed — check connection', es: 'No se pudo guardar — revisa tu conexión' },
+    'journey.saveFailed':    { en: 'Not saved — check the internet connection, then reload the page.',
+                               es: 'No se guardó — revisa la conexión a internet y luego actualiza la página.' },
     'journey.signin':        { en: 'Sign in on the class site to save your progress',
                                es: 'Inicia sesión en el sitio de la clase para guardar tu progreso' },
     'journey.slow':          { en: 'Slow ({bpm} BPM)', es: 'Lento ({bpm} BPM)' },
@@ -1528,8 +1536,8 @@
       es: 'Clase de guitarra · Sequoia HS' },
     'coach.close': { en: 'Close',
       es: 'Cerrar' },
-    'coach.loadFailed': { en: "The Listening Coach didn't load — check your connection and try again.",
-      es: 'El Entrenador de Escucha no se cargó — revisa tu conexión e inténtalo de nuevo.' },
+    'coach.loadFailed': { en: "The Listening Coach didn't load — check the internet connection and try again.",
+      es: 'El Entrenador de Escucha no se cargó — revisa la conexión a internet e inténtalo de nuevo.' },
     'coach.closeAria': { en: 'Close Listening Coach',
       es: 'Cerrar el Entrenador de Escucha' },
     'coach.compare': { en: 'Last time: {last} — This time: {now}',
@@ -2850,12 +2858,12 @@
     'issue.sending':         { en: 'Sending…', es: 'Enviando…' },
     'issue.sent':            { en: 'Thanks — got it! Mr. Hoffman will take a look.',
                                es: 'Gracias — ¡recibido! El Sr. Hoffman lo va a revisar.' },
-    'issue.failed':          { en: "Couldn't send that — check your connection and try again, or email jhoffman@seq.org directly.",
-                               es: 'No se pudo enviar — revisa tu conexión e intenta de nuevo, o escribe directamente a jhoffman@seq.org.' },
+    'issue.failed':          { en: "Couldn't send that — check the internet connection and try again, or email jhoffman@seq.org directly.",
+                               es: 'No se pudo enviar — revisa la conexión a internet e intenta de nuevo, o escribe directamente a jhoffman@seq.org.' },
     // Shown after 10 s with no answer. The report is queued and cannot be
     // cancelled, so the button stays off — a second press would send it twice.
-    'issue.stillSending':    { en: 'Still sending — it will go through when your connection is back.',
-                               es: 'Todavía se está enviando — se enviará cuando vuelva tu conexión.' },
+    'issue.stillSending':    { en: 'Still sending — it will go through when the internet is back. Don\'t close this box or this tab.',
+                               es: 'Todavía se está enviando — se enviará cuando vuelva la conexión a internet. No cierres este cuadro ni esta pestaña.' },
     'issue.emptyWarn':       { en: 'Type a quick description first.', es: 'Escribe una breve descripción primero.' },
 
     // ── Module-review recording widget (renderRecBody) ──

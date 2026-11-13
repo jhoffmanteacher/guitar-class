@@ -34,7 +34,7 @@
        activity saved by that tab); reached by any full default run;
      - R10-online-retry: the Wi-Fi comes back while the LAST automatic save retry is still loading the Firestore SDK.
        shell.js's 'online' listener finds nothing dirty (the flush in flight took the dirty keys), that flush fails past
-       SAVE_MAX_AUTO_RETRIES, and the page shows "Not saving — check connection" with the work unsent until the student
+       SAVE_MAX_AUTO_RETRIES, and the page shows "Not saving" (save.notSaving) with the work unsent until the student
        acts again (lost if the tab closes or the battery dies first). Reached by
        --seed=5 --family=failed-load,dropped,mixed,hide-close --cases=600 (cases 309, 573).
    TAGS. A failing value that is exactly what one of the site faults this tool found would leave carries its tag:
