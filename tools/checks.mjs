@@ -77,7 +77,7 @@ try {
 } catch { /* no tabs/ dir yet */ }
 
 const SHELL_FILES = [
-  'index.html', '404.html', 'mood-chart.html', 'tuning-sim.html', 'styles.css', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', ...siteParts('app.js', ROOT), 'practice-minutes-config.js', 'practice-minutes.js', 'fab-tools.js', 'tuner.js', ...siteParts('coach.js', ROOT), ...siteParts('teacher.js', ROOT), 'live-quiz.js', 'config-main.js',
+  'index.html', '404.html', 'mood-chart.html', 'tuning-sim.html', 'styles.css', 'site-fill.js', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', ...siteParts('app.js', ROOT), 'practice-minutes-config.js', 'practice-minutes.js', 'fab-tools.js', 'tuner.js', ...siteParts('coach.js', ROOT), ...siteParts('teacher.js', ROOT), 'live-quiz.js', 'config-main.js',
   'trainer-core.js', 'trainer-audio.js', 'trainer-ui.js', 'trainer-site-adapter.js',
   'firebase-config.js', 'manifest.json', 'icon.svg',
   ...MODULE_FILES,
@@ -6503,6 +6503,124 @@ function checkPartSizes() {
   const big = cut.filter(x => x[1] > PART_SOFT && x[1] <= PART_HARD).sort((x, y) => y[1] - x[1]);
   if (big.length) { warn(`1cv (soft rule): ${big.length} part${big.length === 1 ? ' is' : 's are'} over ${PART_SOFT} lines: ${big.map(x => `${x[0]} (${x[1]})`).join(', ')}. Not a reason to stop a change: mention it in the report. Splitting a part is its own change at a quiet moment (CLAUDE.md, "Where the code lives").`); warnings++; }
   if (!bad) ok(cut.length ? `${cut.length} parts, none over ${PART_HARD} lines (largest ${cut.slice().sort((x, y) => y[1] - x[1])[0].join(' at ').replace(/ at true$/, '')} lines, median ${cut.map(x => x[1]).sort((x, y) => x - y)[cut.length >> 1]}); no whole app.js, coach.js or teacher.js beside them` : 'the three scripts are whole files in this tree: no part sizes to hold');
+}
+
+/* 1df. THE PAGE FILLS A BIG SCREEN (Jonathan, 2026-11-13: "the view should be maximized for whatever monitor is being
+   used"; "grow everything"). site-fill.js holds the one copy of the factor: s = min(width / 1366, height / 657), never
+   below 1, at most 3, and 1 at 760 px wide or less. This runs the real file in a stub window: the factor at the pinned
+   sizes and over a grid, that 1366x657 and a phone set NOTHING on the page (no zoom, no --site-fill, no media rule
+   rewritten), that 2560x1300 zooms the root and rewrites a height rule to the scaled height, that the page's script reads
+   page pixels there (getBoundingClientRect, clientX, innerWidth, elementFromPoint) and window pixels again at 1, that a
+   print puts everything back to 1, and that a page with odd styles or no matchMedia does not throw. Then the wiring:
+   index.html loads it as a plain script in <head> after styles.css, and no viewport unit in styles.css is left bare (each
+   is divided by var(--site-fill,1), or it would be zoomed twice). Measured in a real browser: tools/smoke.mjs fillWalk. */
+const FILL_ASSERTS = 35;
+function checkSiteFill() {
+  head('1df. The page fills a big screen (site-fill.js)');
+  let bad = 0, asserts = 0;
+  const flag = m => { err(`1df: ${m}`); problems++; bad++; };
+  const want = (c, m) => { asserts++; if (!c) flag(m); };
+  const file = join(ROOT, 'site-fill.js');
+  if (!existsSync(file)) { flag('site-fill.js is missing'); return; }
+  const src = readFileSync(file, 'utf8');
+  /* A stub window: sizes are set per case; the stylesheet holds two rules, one of them a height rule. */
+  const boot = (w, h, opts = {}) => {
+    const props = new Map(), listeners = {};
+    const style = opts.oddStyle ? {} : { setProperty: (k, v) => props.set(k, String(v)), removeProperty: k => props.delete(k), getPropertyValue: k => props.get(k) || '' };
+    const rules = [
+      { media: { mediaText: '(min-width: 761px) and (max-height: 800px)' }, cssRules: [] },
+      { media: { mediaText: 'print' }, cssRules: [] },
+      { media: { mediaText: '(max-width: 760px)' }, cssRules: [{ cssText: '.x{}' }] },
+    ];
+    class DOMRect { constructor(x, y, w2, h2) { this.x = x; this.y = y; this.width = w2; this.height = h2; this.left = x; this.top = y; this.right = x + w2; this.bottom = y + h2; } }
+    class Element {} Element.prototype.getBoundingClientRect = function () { return new DOMRect(200, 100, 600, 50); };
+    Object.defineProperty(Element.prototype, 'clientWidth', { configurable: true, get() { return 2560; } });
+    class MouseEvent {} Object.defineProperty(MouseEvent.prototype, 'clientX', { configurable: true, get() { return 937; } });
+    class Document {} Document.prototype.elementFromPoint = function (x, y) { return [x, y]; };
+    const win = { outerWidth: w, outerHeight: h + 100, location: { search: opts.search || '' }, devicePixelRatio: 1, DOMRect, Element, MouseEvent, Document,
+      addEventListener: (t, f) => { (listeners[t] = listeners[t] || []).push(f); } };
+    Object.defineProperty(win, 'innerWidth', { configurable: true, enumerable: true, get() { return win.__w; } });
+    Object.defineProperty(win, 'innerHeight', { configurable: true, enumerable: true, get() { return win.__h; } });
+    win.__w = w; win.__h = h;
+    if (!opts.noMatchMedia) win.matchMedia = () => ({ addEventListener() {}, removeEventListener() {} });
+    const rootEl = Object.assign(Object.create(Element.prototype), { style });
+    win.window = win; win.document = { documentElement: rootEl, styleSheets: [{ get cssRules() { return rules; } }, { get cssRules() { throw new Error('SecurityError'); } }] };
+    const ctx = vm.createContext(win);
+    vm.runInContext(src, ctx, { filename: 'site-fill.js' });
+    return { ctx, win, props, rules, listeners, fire: t => (listeners[t] || []).forEach(f => f()) };
+  };
+  try {
+    const f = boot(1366, 657).ctx.siteFillScale;
+    want(typeof f === 'function', 'site-fill.js must define window.siteFillScale(width, height)');
+    const near = (a, b) => Math.abs(a - b) < 0.001;
+    want(f(1366, 657) === 1, `the factor at 1366x657 (a Chromebook) must be exactly 1, got ${f(1366, 657)}`);
+    want(f(1366, 768) === 1, `the factor at 1366x768 (a Chromebook in full screen) must be 1, got ${f(1366, 768)}`);
+    want(f(390, 844) === 1, `the factor at 390x844 (a phone) must be 1, got ${f(390, 844)}`);
+    want(f(760, 4000) === 1, `the factor at 760 px wide must be 1, got ${f(760, 4000)}`);
+    want(near(f(2560, 1300), 2560 / 1366), `the factor at 2560x1300 (the classroom display) must be about 1.874, got ${f(2560, 1300)}`);
+    want(near(f(3200, 1650), 3200 / 1366), `the factor at 3200x1650 must be about 2.343, got ${f(3200, 1650)}`);
+    want(near(f(1920, 950), 1920 / 1366), `the factor at 1920x950 must be about 1.406, got ${f(1920, 950)}`);
+    want(near(f(2560, 900), 900 / 657), `a short wide window must take the height's factor (2560x900: about 1.370), got ${f(2560, 900)}`);
+    want(f(20000, 20000) === 3, `the factor must stop at 3, got ${f(20000, 20000)} at 20000x20000`);
+    let lo = Infinity, hi = -Infinity;
+    for (let w = 0; w <= 8000; w += 37) for (let h = 0; h <= 5000; h += 41) { const s = f(w, h); lo = Math.min(lo, s); hi = Math.max(hi, s); }
+    want(lo === 1 && hi === 3, `over a grid of 217 x 122 window sizes the factor must stay between 1 and 3, got ${lo} to ${hi}`);
+    // 1366x657 and a phone: nothing is set on the page.
+    for (const [w, h] of [[1366, 657], [1366, 768], [390, 844], [1280, 720]]) {
+      const b = boot(w, h);
+      want(b.props.size === 0 && b.rules[0].media.mediaText === '(min-width: 761px) and (max-height: 800px)', `at ${w}x${h} site-fill.js must set nothing on the page, but it set ${JSON.stringify([...b.props])} / ${b.rules[0].media.mediaText}`);
+    }
+    // The classroom display: the root is zoomed, the height rule reads the scaled height, the script reads page pixels.
+    const big = boot(2560, 1300);
+    const s = 2560 / 1366;
+    want(Math.abs(+big.props.get('zoom') - s) < 0.001 && Math.abs(+big.props.get('--site-fill') - s) < 0.001, `at 2560x1300 the root must get zoom and --site-fill of about 1.874, got ${big.props.get('zoom')} / ${big.props.get('--site-fill')}`);
+    want(big.rules[0].media.mediaText === '(min-width: 1426.19px) and (max-height: 1499.28px)', `at 2560x1300 the short-screen rule must read the scaled sizes, got "${big.rules[0].media.mediaText}"`);
+    want(big.rules[1].media.mediaText === 'print', 'a print rule must not be touched');
+    const r = vm.runInContext('new Element().getBoundingClientRect()', big.ctx);
+    want(Math.abs(r.left - 200 / s) < 0.01 && Math.abs(r.width - 600 / s) < 0.01, `at 2560x1300 getBoundingClientRect must give page pixels (window pixels / 1.874), got left ${r.left}, width ${r.width}`);
+    want(Math.abs(vm.runInContext('new MouseEvent().clientX', big.ctx) - 937 / s) < 0.01, 'at 2560x1300 a pointer\'s clientX must be in page pixels');
+    want(Math.abs(vm.runInContext('innerWidth', big.ctx) - 1366) < 0.05, `at 2560x1300 innerWidth must read 1366 (page pixels), got ${vm.runInContext('innerWidth', big.ctx)}`);
+    want(Math.abs(vm.runInContext('document.documentElement.clientWidth', big.ctx) - 1366) < 0.05 && vm.runInContext('new Element().clientWidth', big.ctx) === 2560, 'at 2560x1300 the root element\'s clientWidth must read page pixels (about 1366) and any other element\'s its own value');
+    const efp = vm.runInContext('new Document().elementFromPoint(100, 50)', big.ctx);
+    want(Math.abs(efp[0] - 100 * s) < 0.01 && Math.abs(efp[1] - 50 * s) < 0.01, 'at 2560x1300 elementFromPoint must take page pixels (it looks at window pixels x 1.874)');
+    // A print goes back to 1, and comes back after.
+    big.fire('beforeprint');
+    want(!big.props.has('zoom') && !big.props.has('--site-fill') && big.rules[0].media.mediaText === '(min-width: 761px) and (max-height: 800px)', 'a print must put the zoom, --site-fill and the media rules back to 1');
+    big.fire('afterprint');
+    want(big.props.has('zoom') && big.rules[0].media.mediaText !== '(min-width: 761px) and (max-height: 800px)', 'after the print the fill must come back');
+    // A resize down to the Chromebook takes it all back off; window pixels again.
+    big.win.__w = 1366; big.win.__h = 657; big.win.outerWidth = 1366; big.fire('resize');
+    want(big.props.size === 0 && big.rules[0].media.mediaText === '(min-width: 761px) and (max-height: 800px)', 'a resize down to 1366x657 must take the zoom and the media rewrite back off');
+    want(vm.runInContext('new Element().getBoundingClientRect().left', big.ctx) === 200 && vm.runInContext('innerWidth', big.ctx) === 1366, 'at factor 1 the page must read window pixels unchanged');
+    // Browser zoom on top: Ctrl+plus at 125% on the classroom display makes the window 2048 css px wide, outerWidth stays 2560.
+    const bz = boot(2560, 1300); bz.win.outerWidth = 2560; bz.win.__w = 2048; bz.win.__h = 1040; bz.fire('resize');
+    want(Math.abs(+bz.props.get('zoom') - s) < 0.001, `with the browser at 125% the factor must stay the 100% one (about 1.874) so Ctrl+plus still enlarges the page, got ${bz.props.get('zoom')}`);
+    // A side panel is not browser zoom: 1920 outer, a 1560x950 page, outerHeight 1040 is the 1560x950 page's own factor.
+    const side = boot(1560, 950); side.win.outerWidth = 1920; side.win.outerHeight = 1040; side.win.__w = 1561; side.fire('resize'); side.win.__w = 1560; side.fire('resize');
+    want(Math.abs(+side.props.get('zoom') - 1560 / 1366) < 0.001, `a 360 px side panel beside a 1560x950 page must not read as 125% browser zoom: the factor must be about 1.142, got ${side.props.get('zoom')}`);
+    // A Chromebook at 125% and at 67% browser zoom (outerWidth 1366): about 1.0002, and within 1% of 1 is 1: nothing set.
+    for (const [w, h, ow] of [[1093, 526, 1366], [2049, 986, 1366]]) {
+      const cb = boot(w, h); cb.win.outerWidth = ow; cb.win.outerHeight = 768; cb.win.__w = w + 1; cb.fire('resize'); cb.win.__w = w; cb.fire('resize');
+      want(cb.props.size === 0, `a ${w}x${h} page in a ${ow}-wide window (a Chromebook at browser zoom) must set nothing, but it set ${JSON.stringify([...cb.props])}`);
+    }
+    // The console keeps its size in this part; odd pages do not throw.
+    want(boot(2560, 1300, { search: '?teacher=true' }).props.size === 0, 'the teacher console (?teacher) must keep factor 1 until the console part of the work order');
+    let threw = null;
+    try { boot(2560, 1300, { oddStyle: true }); boot(2560, 1300, { noMatchMedia: true }); } catch (e) { threw = e.message; }
+    want(threw === null, `site-fill.js must not throw on a page with odd root styles or no matchMedia: ${threw}`);
+  } catch (e) { flag('site-fill.js threw in the stub window — ' + e.message); }
+  // Wiring: a plain script in <head>, after styles.css.
+  const html = readFileSync(join(ROOT, 'index.html'), 'utf8').replace(/<!--[\s\S]*?-->/g, '');
+  const headEnd = html.indexOf('</head>'), css = html.indexOf('<link rel="stylesheet" href="styles.css">'), tag = html.indexOf('<script src="site-fill.js"></script>');
+  want(tag > css && css >= 0 && tag < headEnd, 'index.html must load site-fill.js as a plain <script src="site-fill.js"></script> in <head>, after styles.css (not defer: the factor must be there before the first paint)');
+  // No bare viewport unit in styles.css.
+  const bare = [];
+  readFileSync(join(ROOT, 'styles.css'), 'utf8').replace(/\/\*[\s\S]*?\*\//g, m => m.replace(/[^\n]/g, ' ')).split('\n').forEach((l, i) => {
+    for (const m of l.matchAll(/(?<![\w.#-])-?(?:\d+\.?\d*|\.\d+)(?:dvh|svh|lvh|vh|vw|vmin|vmax)(?![\w-])(?!\s*\/\s*var\(--site-fill,1\))/g)) bare.push(`styles.css:${i + 1} ${m[0]}`);
+  });
+  want(!bare.length, `every viewport unit in styles.css must be divided by var(--site-fill,1) (the root zoom enlarges it already): ${bare.slice(0, 6).join(', ')}${bare.length > 6 ? ' …' : ''}`);
+  if (asserts !== FILL_ASSERTS) flag(`ran ${asserts} assertions, pinned ${FILL_ASSERTS} — a branch stopped running (or update the pin with the change)`);
+  if (!bad) ok(`1df: the factor is 1 at 1366x657, 1366x768, 1280x720 and 390x844 (nothing set), about 1.874 at 2560x1300 (root zoomed, the short-screen rule rewritten, page pixels for the script), 1 to 3 over 26,474 sizes; print, resize, browser zoom, the console and odd pages; wired in index.html's <head>; no bare viewport unit in styles.css (${asserts} assertions)`);
 }
 
 function checkPrecacheFingerprinted(src, hashed) {
@@ -16243,6 +16361,7 @@ function checkPracticeMinutes(i18nTable) {
   checkSiteErrors();
   checkWeekendStreaks();
   await checkBackingLoudness();
+  checkSiteFill();
   checkPartSizes();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');

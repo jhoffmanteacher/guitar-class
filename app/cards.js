@@ -635,6 +635,13 @@ function pcSheetWhere(L, si, rep){
    on a width change — the card opening (a closed card is 0 wide), the
    window, the rail collapsing. */
 let pcSheetRO = null, pcSheetCols = [];
+/* The fill changing (a window resized onto or off a big screen) leaves the
+   column's CSS width alone, so the observer does not fire: redraw any sheet
+   drawn at another fill. */
+window.addEventListener('resize', () => {
+  const fill = typeof siteFill === 'function' ? siteFill() : 1;
+  pcSheetCols.forEach(col => { const p = col._sheetPaper; if(p && p.isConnected && p._sheetFill !== undefined && p._sheetFill !== fill) pcSheetDraw(p); });
+});
 function pcSheetScan(){
   /* Every renderClassActivities() builds a new sheet, and an observed column
      is never let go by itself: drop the ones that have left the page, and
@@ -675,7 +682,11 @@ async function pcSheetDraw(paperOrCol){
   if(!(avail > 0)) return;
   const { crop } = model;
   const scale = Math.min(avail / crop.w, PC_SHEET_MAX_SCALE);
-  const dpr = Math.min(window.devicePixelRatio || 1, 3);
+  /* Screen pixels per CSS pixel: the display's own ratio times the big-screen
+     fill (site-fill.js), which CSS zoom adds without changing
+     devicePixelRatio; without it the sheet is blurred on a big screen. */
+  const fill = typeof siteFill === 'function' ? siteFill() : 1;
+  const dpr = Math.min((window.devicePixelRatio || 1) * fill, 3);
   let canvas = paper.querySelector('canvas');
   if(!canvas){
     canvas = document.createElement('canvas');
@@ -704,6 +715,7 @@ async function pcSheetDraw(paperOrCol){
   canvas.width = off.width; canvas.height = off.height;
   canvas.getContext('2d').drawImage(off, 0, 0);
   paper.style.width = crop.w * scale + 'px';
+  paper._sheetFill = fill;
   msg('');
   const map = pcSheetMap(L);
   const ok = map.count === model.toks.length && model.toks.every((T, i) => T.name === map.start[i].name);

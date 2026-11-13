@@ -221,7 +221,7 @@ h1{font-family:var(--font-display);font-size:1.875rem;font-weight:650;margin:4px
    ladder open) and the Tuner ran off the top of the screen — title, close
    button, BPM and slider out of reach. Cap them to the room left and
    scroll inside. Journey-only, for the same 1t2 reason as above. */
-#fab-group .tool-popup{max-height:calc(100vh - 250px);overflow-y:auto}
+#fab-group .tool-popup{max-height:calc(100vh / var(--site-fill,1) - 250px);overflow-y:auto}
 /* No visual playing state by design — the pill always shows ▶ and keeps the
    same look; aria-pressed is maintained for assistive tech only. */
 footer{margin-top:36px;font-size:0.7813rem;color:var(--text3);border-top:1px solid var(--border);padding-top:14px}
@@ -324,7 +324,7 @@ footer{margin-top:36px;font-size:0.7813rem;color:var(--text3);border-top:1px sol
 .lq-banner{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:130;
   display:flex;align-items:center;gap:10px;padding:10px 12px 10px 16px;border-radius:999px;
   background:#2f2159;color:#fff;box-shadow:0 8px 28px rgba(0,0,0,0.35);
-  font-family:inherit;font-size:0.9375rem;max-width:calc(100vw - 24px)}
+  font-family:inherit;font-size:0.9375rem;max-width:calc(100vw / var(--site-fill,1) - 24px)}
 .lq-banner-dot{width:9px;height:9px;border-radius:50%;background:#7ee0a8;flex:none;
   animation:lq-blink 1.4s infinite}
 @keyframes lq-blink{0%,100%{opacity:1}50%{opacity:.3}}

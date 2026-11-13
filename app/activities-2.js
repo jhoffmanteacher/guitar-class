@@ -554,9 +554,14 @@ function caToggleFullscreen(){
 // redraws the button's label; caSyncSolo sets body.ca-full (the zoom).
 document.addEventListener('fullscreenchange', () => { caSyncTopbar(); });
 /* Full screen also scales the activity up to fill the width (styles.css,
-   body.ca-full .main): the 1000px column times screen width / 1000, so a
-   1366 Chromebook gets ~1.37× and a 1920 monitor ~1.9×. Never below 1×,
-   capped at 2× for a very wide screen. Re-measured on resize because the
+   body.ca-full .main): the 1000px column times page width / 1000, so a
+   1366 Chromebook gets ~1.37×. Never below 1×, capped at 2×. Since
+   2026-11-13 this zoom sits ON TOP of the big-screen fill (site-fill.js):
+   clientWidth reads page pixels there (window width / the fill), so a
+   2560×1440 display in full screen is a 1366-wide page, gets the same
+   ~1.37× and is then enlarged by the fill (about 1.87): the Chromebook's
+   full screen view, bigger. A window wider than 16:9 has a wider page and
+   gets a little more, up to the cap. Re-measured on resize because the
    fullscreenchange event can land before the window has finished growing. */
 function caSyncFullZoom(){
   const z = document.body.classList.contains('ca-full')
