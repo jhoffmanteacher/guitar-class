@@ -76,7 +76,7 @@ async function renderTeacherMic(){
                                  : 'Listening Coach' + (d.coachMode ? ' · ' + d.coachMode : '');
     const exp = micTakeExpected(d);
     const right = exp.filter(e => ['ok','oct','perfect','good'].indexOf(e.verdict) >= 0).length;
-    return `<tr><td class="nc" title="${escAttr(d.name || d.uid || '')}">${escHtml(d.name || (d.uid || '').slice(0,8))}</td>`+
+    return `<tr><td>${teacherMicLabel(i)}</td><td class="nc" title="${escAttr(d.name || d.uid || '')}">${escHtml(d.name || (d.uid || '').slice(0,8))}</td>`+
       `<td>${escHtml(d.period || '')}</td><td>${escHtml(game)}</td><td>${escHtml(String(d.bpm || ''))}</td>`+
       `<td>${escHtml(String(d.durationSec || ''))} s</td><td>${right} / ${exp.length}</td><td>${escHtml(when)}</td>`+
       `<td><button class="tg-seg-btn" onclick="teacherMicDownloadWav(${i})">Download WAV</button> `+
@@ -84,11 +84,11 @@ async function renderTeacherMic(){
       `<button class="tg-seg-btn" onclick="teacherMicDelete(${i})">Delete</button></td></tr>`;
   }).join('');
   box.innerHTML = ctl + `<div class="tg-note" style="margin:12px 0 16px"><button class="tp-btn primary" id="t-mic-dl-every" style="flex:none;padding:8px 16px;margin-right:10px" onclick="teacherMicDownloadEverything()">Download everything (${takes.length})</button>
-      One click: measures every recording, then saves ONE .zip with each recording's WAV and data plus the results. Nothing is changed or deleted. Then, on the Mac: <code>node tools/mic-sim/takes-in.mjs</code></div>
+      One click: measures every recording, then saves ONE .zip with each recording's WAV and data plus the results. <b>No names go in the zip:</b> the files are T01, T02… in the order of this table. Nothing is changed or deleted. Then, on the Mac: <code>node tools/mic-sim/takes-in.mjs</code></div>
     <div id="t-mic-every-note"></div>
-    <div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>Period</th><th>Game</th><th>BPM</th><th>Length</th><th>Counted right</th><th>Saved</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="t-grid-wrap"><table><thead><tr><th>Take</th><th class="nc">Student</th><th>Period</th><th>Game</th><th>BPM</th><th>Length</th><th>Counted right</th><th>Saved</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
     <div class="tg-note" style="margin-top:16px"><button class="tp-btn" id="t-mic-dl-all" style="flex:none;padding:8px 16px;margin-right:10px" onclick="teacherMicDownloadAll()">Download all (${takes.length})</button>
-      One .zip with every recording's WAV and data, named the same as the buttons above.</div>
+      One .zip with every recording's WAV and data, named T01, T02… in the order of this table, with no names inside. (The buttons in each row keep the student's name in the file name: those are for your own listening.)</div>
     <div class="tg-note" style="margin-top:8px"><button class="tp-btn primary" style="flex:none;padding:8px 16px;margin-right:10px" onclick="teacherMicEvaluate()">Evaluate all recordings</button>
       Measures every recording: how loud the mic is, the real mic delay, and whether each note the site missed is in the audio. About a minute; nothing is changed.</div>
     <div id="t-mic-eval">${teacherMicEvalRows.length ? teacherMicEvalHtml() : ''}</div>`;
@@ -175,9 +175,10 @@ async function teacherMicDownloadWav(i){
   }catch(e){ alert('Could not download that recording — ' + (e && e.message ? e.message : 'check your connection.')); }
 }
 
-/* "Download all": every take's WAV + data in ONE .zip, the same file names
-   the per-row buttons use, so tools/mic-sim/anon-takes.mjs reads the
-   unzipped folder as-is (pairs share a base name). One file instead of two
+/* "Download all": every take's WAV + data in ONE .zip, as T01.wav + T01.json,
+   T02… with the identity removed (teacherMicAnon, below), so
+   tools/mic-sim/anon-takes.mjs reads the unzipped folder as-is (pairs share a
+   base name) and finds nothing left to remove. One file instead of two
    clicks per row, and no "allow multiple downloads" prompt.
    The zip is "stored" (no compression — WAV barely compresses and it keeps
    this dependency-free): local header + data per file, then the central
@@ -221,20 +222,85 @@ function teacherMicZip(files){
   end.setUint32(12, cenLen, true); end.setUint32(16, off, true);
   return new Blob(out.concat(cen, [end.buffer]), { type: 'application/zip' });
 }
+/* The zips carry NO student identity (Jonathan, 2026-11-13: student data may be
+   stored in Google / Firestore but must never reach Claude, and these zips are
+   what the listening tools on the Mac work from). The same rules as
+   tools/mic-sim/anon-takes.mjs, which still runs on the Mac as the second lock
+   (checks.mjs 1dd keeps the three patterns below identical to its own):
+   - every key matching TEACHER_MIC_ID_KEY (name, uid, email, user, student,
+     displayName, photo) is dropped at any depth, except userAgent (the device
+     info, no person);
+   - `id`, the Firestore doc id, which is `<uid>-<mode>`;
+   - from micLabel, a leading "Maria's " / trailing " de Maria".
+   Then every string left is searched for each removed value: a hit means a
+   name is somewhere the rules do not know about, and NOTHING is saved.
+   The files are named T01, T02… in the order of the table on screen, which is
+   also the order of the results file's rows. The per-row "Download WAV" /
+   "Download data" buttons keep the student's name in the file name: they are
+   for the teacher's own ears, never for a tool. */
+const TEACHER_MIC_ID_KEY = /name|uid|email|user|student|displayName|photo/i;
+const TEACHER_MIC_KEEP_KEY = /^userAgent$/;
+const TEACHER_MIC_DROP_KEY = /^id$/;
+function teacherMicLabel(k){ return 'T' + String(k + 1).padStart(2, '0'); }
+function teacherMicAnonMicName(label){
+  return String(label || '')
+    .replace(/^.*?['’]s\s+/i, '')
+    .replace(/\s+de\s+\p{Lu}[^\s()]*(?:\s+\p{Lu}[^\s()]*)*/gu, '');
+}
+// One take's data with the identity removed; `removed` collects every dropped value for the leak search.
+function teacherMicAnon(v, removed){
+  if(Array.isArray(v)) return v.map(x => teacherMicAnon(x, removed));
+  if(!v || typeof v !== 'object') return v;
+  const collect = x => {
+    if(typeof x === 'string' || typeof x === 'number') removed.push(String(x));
+    else if(x && typeof x === 'object') Object.values(x).forEach(collect);
+  };
+  const o = {};
+  for(const k of Object.keys(v)){
+    if((TEACHER_MIC_ID_KEY.test(k) && !TEACHER_MIC_KEEP_KEY.test(k)) || TEACHER_MIC_DROP_KEY.test(k)){ collect(v[k]); continue; }
+    if(k === 'micLabel' && typeof v[k] === 'string'){
+      /* What was cut, for the leak search: the owner before "'s " and the name after " de ". (anon-takes.mjs
+         used to take the first N characters of the label for both forms, which for "Micrófono de Maria" is
+         part of the device name, so a Spanish label was reported as a leak. Fixed there the same day.) */
+      const lead = /^(.*?)['’]s\s+/i.exec(v[k]); if(lead && lead[1].trim()) removed.push(lead[1].trim());
+      const trail = /\s+de\s+(\p{Lu}[^\s()]*(?:\s+\p{Lu}[^\s()]*)*)/u.exec(v[k]); if(trail) removed.push(trail[1].trim());
+      o[k] = teacherMicAnonMicName(v[k]); continue;
+    }
+    o[k] = teacherMicAnon(v[k], removed);
+  }
+  return o;
+}
+// true when a removed value (3+ characters, or one word of it) is still somewhere in the cleaned data
+function teacherMicAnonLeaks(clean, removed){
+  const hay = [];
+  const strings = x => {
+    if(typeof x === 'string') hay.push(x.toLowerCase());
+    else if(x && typeof x === 'object') Object.keys(x).forEach(k => { hay.push(k.toLowerCase()); strings(x[k]); });
+  };
+  strings(clean);
+  const kept = new Set(hay), needles = new Set();
+  removed.forEach(r => {
+    r = String(r).trim(); if(r.length < 3) return;
+    needles.add(r.toLowerCase());
+    const uidPart = r.replace(/-[a-z]+$/i, ''); if(uidPart.length >= 3) needles.add(uidPart.toLowerCase());
+    r.split(/[\s@.]+/).forEach(w => { if(w.length >= 3) needles.add(w.toLowerCase()); });
+  });
+  return [...needles].some(n => !kept.has(n) && hay.some(h => h.includes(n)));
+}
 /* Every take's WAV + data as zip entries, for "Download all" and "Download
    everything". `btn` (may be null) shows the count while it reads. Throws
-   on the first take it cannot read, so no zip is ever saved with one missing. */
+   on the first take it cannot read, or whose data still holds a name after
+   cleaning, so no zip is ever saved with one missing or with a name in it. */
 async function teacherMicPackFiles(takes, btn){
-  const files = [], used = {};
+  const files = [];
   for(let i = 0; i < takes.length; i++){
     if(btn){ btn.disabled = true; btn.textContent = `Packing ${i + 1} of ${takes.length}…`; }
-    const d = takes[i];
-    let base = teacherMicFileBase(d), k = 2;
-    while(used[base]) base = teacherMicFileBase(d) + '-' + (k++);
-    used[base] = true;
+    const d = takes[i], label = teacherMicLabel(i), removed = [];
+    const clean = teacherMicAnon(teacherMicJsonable(d), removed);
+    if(teacherMicAnonLeaks(clean, removed)) throw new Error(`a name is still inside the data of take ${label} after cleaning. Tell Claude "the console's anonymizer found a leak in ${label}" (do not send the take)`);
     const wav = new Uint8Array(await (await teacherMicWavBlob(d)).arrayBuffer());
-    files.push({ name: base + '.wav', data: wav });
-    files.push({ name: base + '.json', data: new TextEncoder().encode(JSON.stringify(teacherMicJsonable(d), null, 2)) });
+    files.push({ name: label + '.wav', data: wav });
+    files.push({ name: label + '.json', data: new TextEncoder().encode(JSON.stringify(clean, null, 2)) });
   }
   return files;
 }
@@ -287,7 +353,7 @@ async function teacherMicDownloadEverything(){
        : short > 0 ? `Saved ${takes.length} recordings and the results for ${teacherMicEvalRows.length} of them (${short} could not be measured; see below the table).`
        : `Saved ${takes.length} recordings and their results in one .zip.`);
   }catch(e){
-    note('Nothing was saved: could not read every recording — ' + (e && e.message ? e.message : 'check your connection.'));
+    note('Nothing was saved: ' + (e && e.message ? e.message : 'could not read every recording; check your connection.'));
   }
   teacherMicEveryBusy = false;
   if(btn){ btn.disabled = false; btn.textContent = label; }
@@ -1451,7 +1517,7 @@ async function teacherMicEvaluate(){
   const takes = teacherMicTakes.slice();
   const rows = [], names = [], fails = [];
   for(let k = 0; k < takes.length; k++){
-    const d = takes[k], label = 'T' + String(k + 1).padStart(2, '0');
+    const d = takes[k], label = teacherMicLabel(k);
     const live = document.getElementById('t-mic-eval');
     if(teacherView !== 'mic' || !live) return false;      // left the view: stop
     live.innerHTML = `<div class="t-loading">Measuring recording ${k + 1} of ${takes.length}…</div>`;

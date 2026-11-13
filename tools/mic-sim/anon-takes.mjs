@@ -60,7 +60,14 @@ function scrub(v, removed, stats){
     }
     if (k === 'micLabel' && typeof v[k] === 'string'){
       const clean = micName(v[k]);
-      if (clean !== v[k]){ removed.push(v[k].slice(0, v[k].length - clean.length).replace(/['’]s\s*$/i, '').trim()); stats.n++; }
+      if (clean !== v[k]){
+        /* What was cut, for the leak check: the owner before "'s " and the name after " de ". Until 2026-11-13
+           this took the first N characters of the label for both forms; for "Micrófono de Maria" that is part
+           of the DEVICE name, which is kept, so a Spanish label stopped the run as a false leak. */
+        const lead = /^(.*?)['’]s\s+/i.exec(v[k]); if (lead && lead[1].trim()) removed.push(lead[1].trim());
+        const trail = /\s+de\s+(\p{Lu}[^\s()]*(?:\s+\p{Lu}[^\s()]*)*)/u.exec(v[k]); if (trail) removed.push(trail[1].trim());
+        stats.n++;
+      }
       o[k] = clean; continue;
     }
     o[k] = scrub(v[k], removed, stats);

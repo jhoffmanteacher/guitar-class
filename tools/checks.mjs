@@ -15076,6 +15076,39 @@ function checkNoStudentDataHook() {
   if (!bad && m) ok(`the hook's own ${m[1]} of ${m[2]} cases hold; wired once under PreToolUse on 7 tool families; 3 of 3 Read deny rules; 0 real-browser or Google-connector tools auto-allowed`);
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   1dd. THE CONSOLE'S RECORDING ZIPS CARRY NO NAMES (2026-11-13, with 1dc).
+   "Download all" and "Download everything" clean each take in the browser by
+   the same rules tools/mic-sim/anon-takes.mjs uses on the Mac. Two copies of
+   a rule drift, so the three key patterns must be identical in both files,
+   the zips must be packed through teacherMicAnon() with the leak search, and
+   a file in the zip may never be named from the student (teacherMicFileBase).
+   ════════════════════════════════════════════════════════════════════ */
+function checkMicZipsAnonymous() {
+  head('1dd. Console recording zips carry no names');
+  let bad = 0;
+  const fail = m => { err('1dd: ' + m); problems++; bad++; };
+  let tSrc = '', aSrc = '';
+  try { tSrc = siteSource('teacher.js', ROOT); aSrc = readFileSync(join(ROOT, 'tools', 'mic-sim', 'anon-takes.mjs'), 'utf8'); } catch (e) { fail('could not read the console or tools/mic-sim/anon-takes.mjs'); return; }
+  const lit = (src, name) => { const m = new RegExp('const ' + name + ' = (\\/.*\\/[a-z]*);').exec(src); return m ? m[1] : null; };
+  for (const [t, a] of [['TEACHER_MIC_ID_KEY', 'ID_KEY'], ['TEACHER_MIC_KEEP_KEY', 'KEEP_KEY'], ['TEACHER_MIC_DROP_KEY', 'DROP_KEY']]) {
+    const x = lit(tSrc, t), y = lit(aSrc, a);
+    if (!x || !y) fail(`${t} or anon-takes.mjs ${a} not found`);
+    else if (x !== y) fail(`${t} is ${x} but anon-takes.mjs ${a} is ${y}: the console and the Mac must remove the same keys`);
+  }
+  const pack = jsFunctionBody(tSrc, 'teacherMicPackFiles');
+  if (!pack) { fail('teacherMicPackFiles not found'); return; }
+  if (!/teacherMicAnon\(teacherMicJsonable\(d\), removed\)/.test(pack)) fail('teacherMicPackFiles does not clean each take with teacherMicAnon()');
+  if (!/if\s*\(teacherMicAnonLeaks\(clean, removed\)\)\s*throw/.test(pack)) fail('teacherMicPackFiles no longer refuses a take whose cleaned data still holds a removed value');
+  if (/teacherMicFileBase|\.name\b|\.uid\b|\.email\b/.test(pack)) fail('teacherMicPackFiles names a zip entry from the student (teacherMicFileBase, .name, .uid or .email)');
+  if (!/JSON\.stringify\(clean,/.test(pack) || /JSON\.stringify\(teacherMicJsonable\(d\)/.test(pack)) fail('teacherMicPackFiles writes the uncleaned data into the zip');
+  for (const fn of ['teacherMicDownloadAll', 'teacherMicDownloadEverything']) {
+    const b = jsFunctionBody(tSrc, fn);
+    if (!b || !/teacherMicPackFiles\(takes, btn\)/.test(b)) fail(`${fn} does not pack its zip through teacherMicPackFiles()`);
+  }
+  if (!bad) ok('3 of 3 key patterns identical in teacher-mic.js and anon-takes.mjs; both zips are packed through teacherMicAnon() with the leak search; no zip entry is named from the student');
+}
+
 function checkPracticeMinutes(i18nTable) {
   head('1cg. Practice minutes: the engine is run; the rules cap, no heartbeat, wiring and strings are pinned');
   let bad = 0;
@@ -15536,6 +15569,7 @@ function checkPracticeMinutes(i18nTable) {
   await checkPwTakeEvaluator();
   checkPracticeMinutes(i18nTable);
   checkNoStudentDataHook();
+  checkMicZipsAnonymous();
   await checkBackingLoudness();
   checkPartSizes();
   if (!SKIP_LINKS) await checkLinks();
