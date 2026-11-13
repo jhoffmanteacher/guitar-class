@@ -15070,6 +15070,91 @@ async function checkPwTakeEvaluator() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1cx. THE ANONYMOUS ERROR LOG (2026-11-13) — SITE_ERRORS in app/boot.js, the
+   siteErrors block of firestore.rules, the console's Error log view
+   (teacher-errors.js).
+   The logger and the view are RUN by tools/site-errors-sim.mjs (Node, about a
+   second: real code in a vm, a stub Firestore, a rule mirror parsed from
+   firestore.rules); its count of cases is pinned so deleting one to get green
+   fails here. The rest are source pins a run cannot see: the ten field names
+   are the same in the doc the logger builds, its FIELDS list, the rules'
+   hasOnly and hasAll, and the fields the view reads; the logger's caps, line
+   and col maximum, kinds, languages and day pattern equal the rules'; the
+   block allows only a create for any signed-in account and read + delete for
+   the teacher (no update, no write); and the logger never names the progress
+   save (progress, ensureDb, flushSave, queueSave): it shares Firestore's write
+   queue with the save, so it must stay a bystander. The emulator half is
+   tools/site-errors-rules-test.mjs (it needs Java; run by hand).
+   ════════════════════════════════════════════════════════════════════ */
+const SITE_ERRORS_SIM_PIN = 111;
+function checkSiteErrors() {
+  head('1cx. Error log: the logger and the view are run; fields, caps and the rules block are pinned');
+  let bad = 0;
+  const fail = m => { err('1cx: ' + m); problems++; bad++; };
+  const strip = t => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const read = f => { try { return readFileSync(join(ROOT, f), 'utf8'); } catch { return ''; } };
+  const sameSet = (a, b) => a.length === b.length && [...a].sort().join() === [...b].sort().join();
+
+  // 1. run the sim
+  const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'site-errors-sim.mjs')], { encoding: 'utf8', timeout: 120000 });
+  const m = /(\d+) passed, (\d+) failed/.exec(r.stdout || '');
+  if (r.status !== 0 || !m) {
+    fail('tools/site-errors-sim.mjs failed (exit ' + r.status + ')' + (r.error ? ': ' + r.error.message : ''));
+    for (const l of ((r.stdout || '') + (r.stderr || '')).trim().split('\n').filter(l => /✗|cannot|could not|Error/.test(l)).slice(0, 6)) console.log(`${C.dim}      ${l}${C.reset}`);
+  } else if (+m[1] !== SITE_ERRORS_SIM_PIN || +m[2] !== 0) fail(`site-errors-sim ran ${m[1]} cases (${m[2]} failed); pinned at ${SITE_ERRORS_SIM_PIN} — if you changed the simulation on purpose, re-pin SITE_ERRORS_SIM_PIN (never lower it to hide a deleted case)`);
+
+  // 2. the pieces
+  const boot = read('app/boot.js'), rules = strip(read('firestore.rules')), view = strip(read('teacher-errors.js'));
+  const L0 = boot.indexOf('/* ── Error log (2026-11-13)'), L1 = boot.indexOf('/* ── Global safety net ──');
+  const logger = L0 >= 0 && L1 > L0 ? strip(boot.slice(L0, L1)) : '';
+  if (!logger) { fail('the error log block is not in app/boot.js (its "Error log (2026-11-13)" / "Global safety net" markers moved?)'); return; }
+  const ri = rules.indexOf('match /siteErrors/{errorId} {');
+  let block = '';
+  if (ri >= 0) { let d = 0; for (let k = rules.indexOf('{', ri + 20); k < rules.length; k++) { if (rules[k] === '{') d++; else if (rules[k] === '}') { d--; if (!d) { block = rules.slice(ri, k + 1); break; } } } }
+  if (!block) { fail('no match /siteErrors/{errorId} block in firestore.rules'); return; }
+
+  // 3. the ten fields, everywhere
+  const list = re => { const x = re.exec(block); return x ? x[1].split(',').map(t => t.trim().replace(/^'|'$/g, '')) : null; };
+  const only = list(/keys\(\)\.hasOnly\(\[([^\]]*)\]\)/), all = list(/keys\(\)\.hasAll\(\[([^\]]*)\]\)/);
+  const fieldsLit = (/const FIELDS = \[([^\]]*)\]/.exec(logger) || [, ''])[1].split(',').map(t => t.trim().replace(/^'|'$/g, '')).filter(Boolean);
+  const docLit = (/const doc = \{([\s\S]*?)\n\s*\};/.exec(logger) || [, ''])[1];
+  const docKeys = [...docLit.matchAll(/(?:^|[,{]\s*|\n\s*)([a-z]+)\s*(?=:|,\s*$|,\s*\n)/gm)].map(x => x[1]);
+  const viewFn = (/function teacherErrorGroups\([\s\S]*?\n\}/.exec(view) || [''])[0];
+  const viewKeys = [...new Set([...viewFn.matchAll(/\bd\.([a-z]+)\b/g)].map(x => x[1]))];
+  if (!only || only.length !== 10) fail(`the rules' hasOnly lists ${only ? only.length : 'no'} fields; the error log has 10`);
+  else {
+    for (const [name, got] of [["the rules' hasAll", all || []], ['FIELDS in app/boot.js', fieldsLit], ['the doc app/boot.js builds', docKeys], ['the fields teacherErrorGroups() reads', viewKeys]])
+      if (!sameSet(got, only)) fail(`${name} (${got.join(', ')}) is not the rules' ten fields (${only.join(', ')})`);
+  }
+
+  // 4. the caps, the int maximum, the lists, the day pattern
+  const capLit = /const CAP = \{([^}]*)\}/.exec(logger);
+  const caps = capLit ? Object.fromEntries([...capLit[1].matchAll(/(\w+):\s*(\d+)/g)].map(x => [x[1], +x[2]])) : {};
+  const rcaps = Object.fromEntries([...block.matchAll(/data\.(\w+)\.size\(\) <= (\d+)/g)].map(x => [x[1], +x[2]]));
+  if (Object.keys(rcaps).length !== 5 || JSON.stringify(Object.entries(caps).sort()) !== JSON.stringify(Object.entries(rcaps).sort())) fail(`the logger's caps ${JSON.stringify(caps)} are not the rules' ${JSON.stringify(rcaps)} (a doc over a rules cap is dropped by fits(), or refused)`);
+  const intMax = +((/INT_MAX = (\d+)/.exec(logger) || [])[1]);
+  for (const f of ['line', 'col']) { const x = new RegExp(`data\\.${f} <= (\\d+)`).exec(block); if (!x || +x[1] !== intMax) fail(`the rules' ${f} maximum (${x ? x[1] : 'none'}) is not the logger's INT_MAX (${intMax})`); }
+  for (const f of ['kind', 'lang']) {
+    const rl = list(new RegExp(`data\\.${f} in \\[([^\\]]*)\\]`)) || [];
+    const cl = [...logger.matchAll(new RegExp(`d\\.${f} !== '(\\w+)'`, 'g'))].map(x => x[1]);
+    if (!rl.length || !sameSet(rl, cl)) fail(`the rules' ${f} list (${rl.join(', ')}) is not the one fits() accepts (${cl.join(', ')})`);
+  }
+  const rday = (/data\.day\.matches\('([^']*)'\)/.exec(block) || [])[1], cday = (/!\/(\^\[0-9\]\{4\}[^/]*)\/\.test\(day\)/.exec(logger) || [])[1];
+  if (!rday || rday !== cday) fail(`the rules' day pattern (${rday}) is not dayOk()'s (${cday})`);
+  if (!/&& siteErrorDayNear\(request\.resource\.data\.day\)/.test(block) || !/Math\.abs\(t - Date\.UTC\(/.test(logger)) fail('the day window (one day either side of the UTC date) is missing from the rules or from dayOk()');
+
+  // 5. who may do what
+  const allows = [...block.matchAll(/allow ([a-z, ]+):\s*if\s+([^\n;]*)/g)].map(x => [x[1].replace(/\s+/g, ''), x[2].trim()]);
+  const want = [['create', 'isSignedIn()'], ['read,delete', 'isTeacher()']];
+  if (JSON.stringify(allows) !== JSON.stringify(want)) fail(`the siteErrors block must allow exactly "create: if isSignedIn() && …" and "read, delete: if isTeacher()" — found ${JSON.stringify(allows)}`);
+
+  // 6. a bystander to the save
+  for (const w of ['progress', 'ensureDb', 'flushSave', 'queueSave']) if (new RegExp('\\b' + w + '\\b').test(logger)) fail(`the error log's code names ${w}: it must never touch the progress save or load Firestore itself (it shares the save's write queue)`);
+
+  if (!bad) ok(`site-errors-sim: ${m ? m[1] : '?'} cases pass (pinned ${SITE_ERRORS_SIM_PIN}); 10 fields match in 5 places, ${Object.keys(rcaps).length} caps + line/col + kind/lang + day agree, the block allows only create (signed in) and read/delete (teacher), the logger never names the save`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1cg. PRACTICE MINUTES (2026-11-01) — practice-minutes.js + its config + the
    rules blocks it writes under.
    The engine is RUN, not read: tools/pm-sim.mjs loads the real config and engine
@@ -15619,6 +15704,7 @@ function checkPracticeMinutes(i18nTable) {
   checkPracticeMinutes(i18nTable);
   checkNoStudentDataHook();
   checkMicZipsAnonymous();
+  checkSiteErrors();
   await checkBackingLoudness();
   checkPartSizes();
   if (!SKIP_LINKS) await checkLinks();
