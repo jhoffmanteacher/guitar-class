@@ -1017,12 +1017,20 @@ function pcParkTwin(st){
 }
 /* One bar of clicks (four in 4/4, six in 6/8 — CLICK IN SIX) before the song comes in, on
    every start — otherwise the student is dropped in with no way to find
-   beat 1. */
+   beat 1. The clicks run at the tempo of the bar the song comes in on (the
+   first bar of the section, or of the lap tapped on a lyric sheet), on the
+   file and speed being played, so the song's first beat lands one click
+   after the last. Not the window's average bar (st.win.bar), which on a
+   live-band beat map can be several per cent off that bar (2026-11-12).
+   chcBeatSec (app/drills-call.js) is the arithmetic Call the chord's own
+   count-in already uses for its first bar. */
 function pcCountIn(st, si){
   const ctx = getAudioCtx();
   try { ctx.resume(); } catch(e) {}
   const n = st.L.tr.beatsPerBar * clickSub(st.L.tr);   // six on a 6/8 track — see CLICK IN SIX
-  const beat = st.win.bar / n / pcRate(st.root);   // real seconds, not file seconds
+  const S = st.L.sections[si];
+  const bar = S.fromBar + (st.fromRep || 0) * S.bars - st.L.firstBar;   // the bar pcStart seeks to, in the window
+  const beat = chcBeatSec(st.win, n, bar) / pcRate(st.root);   // real seconds, not file seconds
   const t0 = ctx.currentTime + 0.1;
   /* All four clicks are scheduled on the AudioContext up front, so clearing
      the timers does not silence them: pcStop stops these nodes too, or a Stop,

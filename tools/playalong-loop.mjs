@@ -78,7 +78,7 @@
      R11 Before the song comes in the page counts one bar: as many clicks as the bar has counts (4, 3, or 6 in
          6/8), evenly spaced, the first of the bar on the higher pitch (in 6/8 the first and the fourth), at the
          tempo of the bar the song comes in on (the first bar of the section, or of the lap tapped on a sheet), at the
-         speed that is playing, within 1.5 ms a click (the page uses the window's AVERAGE tempo: KNOWN countInTempo); the song comes in one click-length
+         speed that is playing, within 1.5 ms a click; the song comes in one click-length
          after the last click. With the Metronome on, exactly one click on every count the song passes while it
          plays (taken back by the page's click latency, within 6 ms of the count; 30 ms at the lap's downbeat), the
          accented pitch being the count-in's higher one and the plain pitch its lower one; none doubled, none off its
@@ -150,11 +150,14 @@
    KNOWN below so that the run stays useful. An entry lists, walk by walk, the exact places where the fault shows; a
    walk whose mismatches of that kind and section are exactly those prints them as known. Any other mismatch fails,
    and so does a listed fault that shows one place more or one place fewer, or in a walk the entry does not list; a
-   full run that no longer sees an entry fails too (so a fixed fault cannot leave its entry behind). Two entries
-   apply to every card and are matched by the fault's exact FORM instead of a list of places: countInTempo (every
-   click and the song's entry on the window's average tempo, to the same 1.5 ms) and sheetPastEnd (exactly the first
-   cell lit, no chord names and the mark on the last chord name, only in the song's last PC_SHEET_LEAD); a count-in
-   or a sheet that is wrong in any other way fails.
+   full run that no longer sees an entry fails too (so a fixed fault cannot leave its entry behind). One entry
+   applies to every card and is matched by the fault's exact FORM instead of a list of places: sheetPastEnd (exactly
+   the first cell lit, no chord names and the mark on the last chord name, only in the song's last PC_SHEET_LEAD); a
+   sheet that is wrong in any other way fails.
+   FIXED 2026-11-12: the count-in tempo (KNOWN countInTempo until then). pcCountIn clicked at the window's AVERAGE
+   tempo (st.win.bar), not at the tempo of the bar the song comes in on: 356 count-ins of a full run were off the
+   bar's own tempo by more than 1.5 ms a click, the worst Madrecita Querida's Ending, 16.9% too fast. It now reads
+   the bar pcStart seeks to (R11).
    FOUND AND FIXED THE SAME DAY (2026-11-12): the queued Metronome click. pcScheduleClick queued each in-song click
    up to about 0.18 s ahead (0.1 s before its count plus the latency) and kept no handle; pcRetrack reset
    st.lastBeat and cancelled nothing, and pcStop stopped only the count-in clicks. So after a speed switch that loads
@@ -263,12 +266,6 @@ const KNOWN = [
       'power chords, strum only · song · slower': { neverLit: ['note 65'] },
       'power chords, strum only · song · normal': { back: ['note 1', 'note 66'], neverLit: ['note 65'] },
     } },
-  /* The count-in is clicked at the card's AVERAGE tempo over its whole window, not at the tempo of the bar the song
-     comes in on (R11). On a constant-tempo track the two are the same; on a beat-mapped track they are not. Matched by
-     its exact form: a count-in that misses the bar's own tempo is known only if every click, and the song's entry, sit
-     on the window's average tempo (the same 1.5 ms as the rule itself); a count-in that fits neither fails. */
-  { card: '*', kinds: ['countInTempo'], since: '2026-11-11',
-    why: (C, x) => `The count-in clicks at the card's average tempo over its whole window, not at the tempo of the bar the song comes in on. ${x.n} count-ins of this run were off the bar's own tempo by more than 1.5 ms a click, ${x.big} of them by more than 3%; the worst, ${x.worst}, is ${x.worstPct}% ${x.worstDir} than the bar it leads into.` },
   /* A lyric sheet's "This bar" in the song's last PC_SHEET_LEAD: the lead looks past the last bar, and the strip
      steps into a bar that does not exist (the first cell lit, no chord names) while the mark stays on the last chord name of
      the sheet. Matched by that exact state, and only in that last stretch; anything else there fails. */
@@ -1402,17 +1399,7 @@ function judge(M, W, res) {
       return '';
     };
     const off = misfit(beat);
-    if (off) {
-      /* KNOWN countInTempo: every click and the entry on the window's AVERAGE tempo instead, and nothing else. */
-      const KC = KNOWN.find(x => x.card === '*' && x.kinds.includes('countInTempo'));
-      const avg = (T.clock.time(ch.endBar - 1) - T.clock.time(ch.firstBar - 1)) / ch.totalBars / meter.steps / T.rate;
-      if (KC && !misfit(avg)) {
-        const pct = (avg / beat - 1) * 100;
-        KC.n = (KC.n || 0) + 1; if (Math.abs(pct) > 3) KC.big = (KC.big || 0) + 1;
-        if (!KC.worst || Math.abs(pct) > Math.abs(KC.worst.pct)) KC.worst = { pct, where: `${M.view.id} ${S0.label}${S0.reps > 1 ? ' lap ' + (s.rep + 1) : ''} (${s.stop})` };
-        known.push(`${M.view.id} count-in before ${S0.label} (${s.stop}): at the window's average tempo, ${pct >= 0 ? '+' : ''}${pct.toFixed(1)}% a click against the bar's own`);
-      } else bad(`${what}: ${off}; a count of the bar the song comes in on is ${beat.toFixed(4)} s at this speed${KC ? ` (and the count-in is not on the window's average, ${avg.toFixed(4)} s, either: ${misfit(avg)})` : ''}`);
-    }
+    if (off) bad(`${what}: ${off}; a count of the bar the song comes in on is ${beat.toFixed(4)} s at this speed`);
     const hi = Math.max(...mine.map(c => c.freq)), lo = Math.min(...mine.map(c => c.freq));
     const acc = mine.map(c => c.freq === hi ? 1 : 0).join(''), wantAcc = mine.map((c, j) => (meter.sub === 3 ? j % 3 === 0 : j === 0) ? 1 : 0).join('');
     if (acc !== wantAcc) bad(`${what}: the higher click is on ${acc.split('').map((x, j) => x === '1' ? j + 1 : '').filter(Boolean).join(', ')}; it belongs on ${wantAcc.split('').map((x, j) => x === '1' ? j + 1 : '').filter(Boolean).join(', ')}`);
@@ -1510,7 +1497,7 @@ function judge(M, W, res) {
     const t = e.t / 1000;
     if (!res.clicks.some(c => c.made <= t + 1e-9 && t < c.at)) bad(`the ${o.stop ? 'Stop' : o.sw} press at ${t.toFixed(3)} s met no queued click: this walk tested nothing`);
   });
-  /* The two KNOWN faults matched by their exact form, for every card ('*'): what this walk showed of them. */
+  /* The KNOWN fault matched by its exact form, for every card ('*'): what this walk showed of it. */
   for (const K of KNOWN) {
     if (K.card !== '*') continue;
     if (K.kinds.includes('sheetPastEnd') && stats.pastEnd) { K.n = (K.n || 0) + stats.pastEnd; K.walks = (K.walks || 0) + 1; known.push(`${M.view.id} "This bar" one past the end: ${stats.pastEnd} steps`); }
