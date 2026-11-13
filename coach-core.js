@@ -602,8 +602,8 @@ async function coachMicPermState(){
 }
 /* `records`: the screen can record a consented take (the Coach, Note
    Runner, Power Chord Switch). Its line holds whatever the student or the
-   teacher chooses while the panel waits (review R1-5); elsewhere "nothing
-   is recorded" is true. */
+   teacher chooses while the panel waits (review R1-5); elsewhere "no sound
+   is recorded" is true. Both say "sound": scores are saved (R2-5). */
 function coachMicAskHtml(records){
   const line = t(records ? 'micpre.lineRec' : 'micpre.line');
   return `<div class="micrec-ask micpre-ask" role="group" aria-label="${escHtml(line)}">

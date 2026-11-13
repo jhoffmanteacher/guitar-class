@@ -1685,10 +1685,10 @@
     'micrec.stopTitle': { en: 'Takes you already saved stay with your teacher', es: 'Las tomas que ya guardaste se quedan con tu maestro' },
     'micrec.recording': { en: 'Recording this take for your teacher', es: 'Grabando esta toma para tu maestro' },
     // Before the browser asks for the mic (coach.js coachMicAsk, 2026-11-13): the panel's line and button. lineRec on every screen that can save a consented take (coachMicAskHtml's `records`), whatever the student or the teacher chose: true either way
-    'micpre.line': { en: 'This listens to your guitar through the mic. Nothing is recorded or sent anywhere.',
-      es: 'Esto escucha tu guitarra con el micrófono. No se graba ni se envía nada.' },
-    'micpre.lineRec': { en: 'This listens to your guitar through the mic. Nothing is saved unless you said yes to saving takes for your teacher.',
-      es: 'Esto escucha tu guitarra con el micrófono. No se guarda nada, a menos que hayas dicho que sí a guardar tus tomas para tu maestro.' },
+    'micpre.line': { en: 'This listens to your guitar through the mic. No sound is recorded or sent anywhere.',
+      es: 'Esto escucha tu guitarra con el micrófono. No se graba ni se envía ningún sonido.' },
+    'micpre.lineRec': { en: 'This listens to your guitar through the mic. No sound is saved unless you said yes to saving takes for your teacher.',
+      es: 'Esto escucha tu guitarra con el micrófono. No se guarda ningún sonido, a menos que hayas dicho que sí a guardar tus tomas para tu maestro.' },
     // A refusal that left the question open (the browser's box closed with X; coach.js coachMicRetry): its Start asks again. No button named: the games' Start buttons differ ("Play it")
     'micpre.again': { en: 'Try again and choose Allow.', es: 'Inténtalo otra vez y elige Permitir.' },
     'micpre.button': { en: 'Turn on the microphone', es: 'Encender el micrófono' },
