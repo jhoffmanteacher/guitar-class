@@ -14821,11 +14821,14 @@ async function checkPwTakeEvaluator() {
       if (!/shared ratios \(first column\)/.test(ev.micEvalText(rows)) || !/first column is the shared ratios these takes were graded with/.test(ev.micEvalText(rows))) fail("the terminal what-if lost its note saying the first column is the shared ratios the takes were graded with");
     }
     // "Download results" carries it (and the rows, which have no names)
-    if (!/function teacherMicEvalDownload\(\)\{[\s\S]*?strumWhatIf: micEvalWhatIfSummary\(teacherMicEvalRows\)[\s\S]*?rows: teacherMicEvalRows/.test(tSrc)) fail('teacherMicEvalDownload does not put the what-if summary in the file');
-    if (!/function teacherMicEvalDownload\(\)\{[\s\S]*?pitchRule: micEvalPitchSummary\(teacherMicEvalRows\)[\s\S]*?rows: teacherMicEvalRows/.test(tSrc)) fail('teacherMicEvalDownload does not put the pitch-rule summary in the file');
+    // 2026-11-13: the results text moved to teacherMicEvalJson(); "Download results" and the zip of "Download everything" must both save that same text.
+    if (!/function teacherMicEvalDownload\(\)\{[^}]*teacherMicEvalJson\(\)/.test(tSrc)) fail('teacherMicEvalDownload does not save teacherMicEvalJson()');
+    if (!/async function teacherMicDownloadEverything\(\)\{[\s\S]*?mic-eval-\$\{day\}\.json[^\n]*teacherMicEvalJson\(\)/.test(tSrc)) fail('teacherMicDownloadEverything does not put teacherMicEvalJson() in its zip');
+    if (!/function teacherMicEvalJson\(\)\{[\s\S]*?strumWhatIf: micEvalWhatIfSummary\(teacherMicEvalRows\)[\s\S]*?rows: teacherMicEvalRows/.test(tSrc)) fail('teacherMicEvalDownload does not put the what-if summary in the file');
+    if (!/function teacherMicEvalJson\(\)\{[\s\S]*?pitchRule: micEvalPitchSummary\(teacherMicEvalRows\)[\s\S]*?rows: teacherMicEvalRows/.test(tSrc)) fail('teacherMicEvalDownload does not put the pitch-rule summary in the file');
     if (!/pitchRule: core\.micEvalPitchSummary\(rows\)/.test(readFileSync(join(ROOT, 'tools', 'mic-sim', 'eval-takes.mjs'), 'utf8'))) fail('eval-takes.mjs --json does not put the pitch-rule summary in the file');
     // the strum what-if summary is null once every take is graded with other ratios, so the count of takes it left out travels beside it
-    if (!/function teacherMicEvalDownload\(\)\{[\s\S]*?strumWhatIfSkipped: teacherMicEvalRows\.filter\(r => r\.kind === 'pw' && r\.whatIfSkipped\)\.length[\s\S]*?rows: teacherMicEvalRows/.test(tSrc)) fail('teacherMicEvalDownload does not carry how many takes the strum what-if left out');
+    if (!/function teacherMicEvalJson\(\)\{[\s\S]*?strumWhatIfSkipped: teacherMicEvalRows\.filter\(r => r\.kind === 'pw' && r\.whatIfSkipped\)\.length[\s\S]*?rows: teacherMicEvalRows/.test(tSrc)) fail('teacherMicEvalDownload does not carry how many takes the strum what-if left out');
     if (!/strumWhatIfSkipped: rows\.filter\(r => r\.kind === 'pw' && r\.whatIfSkipped\)\.length/.test(readFileSync(join(ROOT, 'tools', 'mic-sim', 'eval-takes.mjs'), 'utf8'))) fail('eval-takes.mjs --json does not carry how many takes the strum what-if left out');
 
     // 2c. the pitch rule, summed: the takes that saved readings, the older ones counted as left out, the same numbers in the console table, the terminal and the file

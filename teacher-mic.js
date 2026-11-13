@@ -83,7 +83,10 @@ async function renderTeacherMic(){
       `<button class="tg-seg-btn" onclick="teacherMicDownloadJson(${i})">Download data</button> `+
       `<button class="tg-seg-btn" onclick="teacherMicDelete(${i})">Delete</button></td></tr>`;
   }).join('');
-  box.innerHTML = ctl + `<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>Period</th><th>Game</th><th>BPM</th><th>Length</th><th>Counted right</th><th>Saved</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+  box.innerHTML = ctl + `<div class="tg-note" style="margin:12px 0 16px"><button class="tp-btn primary" id="t-mic-dl-every" style="flex:none;padding:8px 16px;margin-right:10px" onclick="teacherMicDownloadEverything()">Download everything (${takes.length})</button>
+      One click: measures every recording, then saves ONE .zip with each recording's WAV and data plus the results. Nothing is changed or deleted. Then, on the Mac: <code>node tools/mic-sim/takes-in.mjs</code></div>
+    <div id="t-mic-every-note"></div>
+    <div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>Period</th><th>Game</th><th>BPM</th><th>Length</th><th>Counted right</th><th>Saved</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
     <div class="tg-note" style="margin-top:16px"><button class="tp-btn" id="t-mic-dl-all" style="flex:none;padding:8px 16px;margin-right:10px" onclick="teacherMicDownloadAll()">Download all (${takes.length})</button>
       One .zip with every recording's WAV and data, named the same as the buttons above.</div>
     <div class="tg-note" style="margin-top:8px"><button class="tp-btn primary" style="flex:none;padding:8px 16px;margin-right:10px" onclick="teacherMicEvaluate()">Evaluate all recordings</button>
@@ -218,28 +221,75 @@ function teacherMicZip(files){
   end.setUint32(12, cenLen, true); end.setUint32(16, off, true);
   return new Blob(out.concat(cen, [end.buffer]), { type: 'application/zip' });
 }
+/* Every take's WAV + data as zip entries, for "Download all" and "Download
+   everything". `btn` (may be null) shows the count while it reads. Throws
+   on the first take it cannot read, so no zip is ever saved with one missing. */
+async function teacherMicPackFiles(takes, btn){
+  const files = [], used = {};
+  for(let i = 0; i < takes.length; i++){
+    if(btn){ btn.disabled = true; btn.textContent = `Packing ${i + 1} of ${takes.length}…`; }
+    const d = takes[i];
+    let base = teacherMicFileBase(d), k = 2;
+    while(used[base]) base = teacherMicFileBase(d) + '-' + (k++);
+    used[base] = true;
+    const wav = new Uint8Array(await (await teacherMicWavBlob(d)).arrayBuffer());
+    files.push({ name: base + '.wav', data: wav });
+    files.push({ name: base + '.json', data: new TextEncoder().encode(JSON.stringify(teacherMicJsonable(d), null, 2)) });
+  }
+  return files;
+}
 async function teacherMicDownloadAll(){
   const takes = teacherMicTakes.slice();
   if(!takes.length) return;
   const btn = document.getElementById('t-mic-dl-all');
   const label = btn ? btn.textContent : '';
-  const files = [], used = {};
   try{
-    for(let i = 0; i < takes.length; i++){
-      if(btn){ btn.disabled = true; btn.textContent = `Packing ${i + 1} of ${takes.length}…`; }
-      const d = takes[i];
-      let base = teacherMicFileBase(d), k = 2;
-      while(used[base]) base = teacherMicFileBase(d) + '-' + (k++);
-      used[base] = true;
-      const wav = new Uint8Array(await (await teacherMicWavBlob(d)).arrayBuffer());
-      files.push({ name: base + '.wav', data: wav });
-      files.push({ name: base + '.json', data: new TextEncoder().encode(JSON.stringify(teacherMicJsonable(d), null, 2)) });
-    }
+    const files = await teacherMicPackFiles(takes, btn);
     const day = new Date().toISOString().slice(0, 10);
     teacherMicSaveFile(`mic-recordings-${day}.zip`, teacherMicZip(files));
   }catch(e){
     alert('Could not download all the recordings — ' + (e && e.message ? e.message : 'check your connection.'));
   }
+  if(btn){ btn.disabled = false; btn.textContent = label; }
+}
+/* "Download everything": the one click. It runs "Evaluate all recordings",
+   then saves ONE .zip: every take's WAV + data (the same names "Download
+   all" uses, and the same zip name, so tools/mic-sim/takes-in.mjs picks it
+   up as before) plus the results file "Download results" would save
+   (mic-eval-<day>.json: no audio, no names). The intake's anonymizer
+   ignores a .json with no .wav partner, so the extra file is safe there.
+   The results go in only when THIS click's evaluation finished: if the
+   listening code did not load, a take could not be measured, or the view
+   was left, the zip still holds every recording and the note under the
+   button says the results are missing or partial. It reads, measures and
+   saves; it never writes to or deletes from Firestore. */
+let teacherMicEveryBusy = false;
+async function teacherMicDownloadEverything(){
+  const takes = teacherMicTakes.slice();
+  if(!takes.length || teacherMicEveryBusy) return;
+  teacherMicEveryBusy = true;
+  const btn = document.getElementById('t-mic-dl-every');
+  const label = btn ? btn.textContent : '';
+  const note = msg => { const n = document.getElementById('t-mic-every-note'); if(n) n.innerHTML = msg ? `<div class="tg-note">${escHtml(msg)}</div>` : ''; };
+  note('');
+  try{
+    if(btn){ btn.disabled = true; btn.textContent = 'Measuring…'; }
+    let measured = false;
+    try{ measured = (await teacherMicEvaluate()) === true; }catch(e){ measured = false; }
+    if(teacherView !== 'mic'){ teacherMicEveryBusy = false; return; }
+    const files = await teacherMicPackFiles(takes, btn);
+    const day = new Date().toISOString().slice(0, 10);
+    const withResults = measured && teacherMicEvalRows.length > 0;
+    if(withResults) files.push({ name: `mic-eval-${day}.json`, data: new TextEncoder().encode(teacherMicEvalJson()) });
+    teacherMicSaveFile(`mic-recordings-${day}.zip`, teacherMicZip(files));
+    const short = takes.length - teacherMicEvalRows.length;
+    note(!withResults ? `Saved ${takes.length} recordings. The results are NOT in the zip: the measuring did not finish. Try "Evaluate all recordings" below.`
+       : short > 0 ? `Saved ${takes.length} recordings and the results for ${teacherMicEvalRows.length} of them (${short} could not be measured; see below the table).`
+       : `Saved ${takes.length} recordings and their results in one .zip.`);
+  }catch(e){
+    note('Nothing was saved: could not read every recording — ' + (e && e.message ? e.message : 'check your connection.'));
+  }
+  teacherMicEveryBusy = false;
   if(btn){ btn.disabled = false; btn.textContent = label; }
 }
 async function teacherMicDelete(i){
@@ -1390,7 +1440,7 @@ async function teacherMicEvaluate(){
   const box = document.getElementById('t-mic-eval');
   if(!box) return;
   try{ await ensureCoachJs(); }
-  catch(e){ box.innerHTML = '<div class="t-loading">Could not load the listening code — check your connection and try again.</div>'; return; }
+  catch(e){ box.innerHTML = '<div class="t-loading">Could not load the listening code — check your connection and try again.</div>'; return false; }
   const deps = { detectPitch: coachDetectPitch, GATE: COACH_PITCH_GATE, GAIN: COACH_MIC_GAIN,
     ATTACK_SKIP: COACH_ATTACK_SKIP, EVENT_TAIL: COACH_EVENT_TAIL, REFRACT: COACH_ONSET_REFRACT,
     MATCH_FRAC: COACH_MATCH_FRAC, MATCH_MIN_MS: COACH_MATCH_MIN_MS, VOTE_TOL: COACH_VOTE_TOL,
@@ -1403,7 +1453,7 @@ async function teacherMicEvaluate(){
   for(let k = 0; k < takes.length; k++){
     const d = takes[k], label = 'T' + String(k + 1).padStart(2, '0');
     const live = document.getElementById('t-mic-eval');
-    if(teacherView !== 'mic' || !live) return;      // left the view: stop
+    if(teacherView !== 'mic' || !live) return false;      // left the view: stop
     live.innerHTML = `<div class="t-loading">Measuring recording ${k + 1} of ${takes.length}…</div>`;
     try{
       const parts = await teacherMicChunks(d);
@@ -1420,6 +1470,7 @@ async function teacherMicEvaluate(){
   teacherMicEvalRows = rows; teacherMicEvalNames = names;
   const live = document.getElementById('t-mic-eval');
   if(live) live.innerHTML = teacherMicEvalHtml() + (fails.length ? `<div class="tg-note">Could not measure: ${escHtml(fails.join('; '))}</div>` : '');
+  return true;      // finished (teacherMicDownloadEverything puts the results in its zip only then)
 }
 /* "4 clicks (beeps 2-4 heard: 3 of 3)" / "2 clicks (beeps 1-2 heard: 2 of 2)": a Power Chord Switch round's count-in in the console's hover (micEvalTakePw rounds[]).
    "guessed from the tempo": the take's own entry for the round was missing or not 2 or 4. */
@@ -1546,9 +1597,13 @@ function teacherMicOffText(h){
   if(!ks.length) return '—';
   return ks.slice(0, 2).map(k => (k > 0 ? '+' : k < 0 ? '−' : '') + Math.abs(k) + ' ×' + h[k]).join(', ');
 }
+// The results file's text: "Download results" and the zip of "Download everything" save the same thing.
+function teacherMicEvalJson(){
+  return JSON.stringify({ generated: new Date().toISOString(), takes: teacherMicEvalRows.length, strumWhatIf: micEvalWhatIfSummary(teacherMicEvalRows), strumWhatIfSkipped: teacherMicEvalRows.filter(r => r.kind === 'pw' && r.whatIfSkipped).length, pitchRule: micEvalPitchSummary(teacherMicEvalRows), rows: teacherMicEvalRows }, null, 1);
+}
 function teacherMicEvalDownload(){
   if(!teacherMicEvalRows.length) return;
   teacherMicSaveFile('mic-eval-' + new Date().toISOString().slice(0, 10) + '.json',
-    new Blob([JSON.stringify({ generated: new Date().toISOString(), takes: teacherMicEvalRows.length, strumWhatIf: micEvalWhatIfSummary(teacherMicEvalRows), strumWhatIfSkipped: teacherMicEvalRows.filter(r => r.kind === 'pw' && r.whatIfSkipped).length, pitchRule: micEvalPitchSummary(teacherMicEvalRows), rows: teacherMicEvalRows }, null, 1)], { type: 'application/json' }));
+    new Blob([teacherMicEvalJson()], { type: 'application/json' }));
 }
 
