@@ -41,13 +41,15 @@
        row restore moves the pane by 49 px and the row by 0.
      - deep-link: the browser keeps the address across a reload and the router
        opens the card from it, so only the scroll depends on the note; the case
-       picks a card whose page scrolls more than 300 px and scrolls it. RED on
-       the site of 2026-11-12 (275c0e7): the reload's deep link brings the card
-       back to the top (caFocusActivity → caScrollToActivity), so the scroll the
-       student had (456 px) comes back as 14 px; a note with no scroll at all
-       looks the same, so until that is fixed this case cannot tell the note
-       apart. busy-card's after-reload half compares the address and the card
-       only, for the same reason.
+       picks a card whose page scrolls more than 300 px and scrolls it. This
+       case found a real fault on 2026-11-12 (275c0e7), fixed the same day: the
+       reload's deep link brought the card back to the top (caFocusActivity →
+       caScrollToActivity), so the scroll the student had (456 px) came back as
+       14 px. The router now leaves the scroll to the restore when a note for
+       that address is being put back (swResumeRouting, app/boot.js), and with
+       no note the card comes into view as before (to 14 px), so the scroll
+       tells "note used" from "no note" (planted 2026-11-12: a save that skips
+       deep links turns it red, 456→14). busy-card compares the scroll too.
      - lesson-one sits at the very bottom of its pane, so a restore that only
        scrolled to the bottom would pass it; lesson-all and lesson-behind are
        scrolled part-way and would not.
@@ -153,7 +155,8 @@
    version 2 runs checks.mjs once (2 to 5 minutes, slower when the machine is
    busy); the cases 17 to 45 s each (busy-others 45 s, busy-card 40 s); a full
    run of the 29 cases about 16 minutes (967 s on 2026-11-12, the build 256 s
-   of it). On the site of 2026-11-12 it exits 1: deep-link (see above).
+   of it). Until 2026-11-12's fix it exited 1 on deep-link (see above); it
+   now exits 0 on the site.
    --build-only starts no Chrome; run it as `node ./tools/update-reload-loop.mjs`
    so the one-browser-at-a-time check (`ps ... grep "^node tools/..."`) does not
    make other sessions wait for a build.
@@ -643,7 +646,7 @@ const CASES = [
   // ── What must not happen ──
   ...['drill', 'card', 'check', 'recording', 'others'].map(k => ({ name: 'busy-' + k, what: 'busy means wait: ' + BUSY[k].what, busy: k,
     place: k === 'card' ? placeDeepLink(true) : k === 'check' ? placeExplore('toggleClassActivities()', 'class-activities-screen', 'In class', 0.3) : placeLessonOne,
-    fields: k === 'card' ? ['hash', 'cards'] : k === 'check' ? ['hash', 'page', 'paneY'] : LESSON_FIELDS })),
+    fields: k === 'card' ? ['hash', 'page', 'cards', 'paneY'] :k === 'check' ? ['hash', 'page', 'paneY'] : LESSON_FIELDS })),
   { name: 'busy-cap', what: 'busy for good (a Shuffle drill never ends): no reload at 4:50, the reload at the 5-minute cap (page clock moved on)', busy: 'drill', cap: true, clock: true, place: placeLessonOne, fields: LESSON_FIELDS },
   ...[['press', 'a pointer press'], ['key', 'a key'], ['wheel', 'a wheel turn']].map(([k, w]) => ({ name: 'person-' + k, person: k,
     what: `the person wins: ${w} after the reload, before the restore lands, stops it`, place: placeLessonOne })),
