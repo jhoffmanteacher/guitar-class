@@ -31,7 +31,8 @@
      --root=DIR         a site folder to test instead of this checkout (a scratch copy with a planted fault)
      --fake-fault=NAME  break the FAKE world on purpose (names: --list); its self-test must go red
      --json=FILE        every case's result
-     --stall=SEC        watchdog: no progress for SEC seconds (default 120) -> prints where it was, exit 3
+     --stall=SEC        watchdog: no progress for SEC seconds (default 120) -> prints where it was, exit 3 (a site
+                        script that never yields: a watchdog thread prints where after SEC+15 s and kills, 137)
      --verbose          the timeline of each case run
      --list             the families and the fake faults
    Exit 0 = every case held (KNOWN entries excepted, see const KNOWN); 1 = a case failed, the fake failed its
@@ -170,8 +171,8 @@
    waits for the network and tries again), first-screen (A works a whole session, then B — returning, new, or with
    a failed progress read — and B's first screen is read; B is also asked the mic question, or not), two-tabs (A in
    two tabs signs out from the other one; the first tab may be frozen and wake to B straight over A), round-trip
-   (A-B-A, A-A), teacher (the teacher's account after and before a student, on the student page and on the
-   console), playing (Sign out with a note playing and the mic open), failed-reads (B's progress and/or config
+   (A-B-A, A-A), teacher (the teacher's account after and before a student, on the student page: see NOT
+   MODELLED for the console), playing (Sign out with a note playing and the mic open), failed-reads (B's progress and/or config
    read refused, offline, or empty right after A), mix (seeded picks of the others). A live quiz is running in
    every case, so each tab a student used holds that student's lq-q-opened session key.
 
@@ -184,7 +185,10 @@
    turns the self-test red and no case runs): auth-not-shared, token-of-current-user, queue-survives-reload,
    session-cleared-on-reload, storage-per-tab, rules-open, frozen-sees-all.
 
-   NOT MODELLED. Real rendering and layout (markup strings are scanned, not drawn); the service worker and the
+   NOT MODELLED. The teacher console page (?teacher): in the stub DOM its activity list's async painter never
+   settles (it queries the markup it just wrote), so the teacher is modelled on the student page only; the console's
+   own data rules are tools/visible-loop.mjs's and tools/two-consoles-loop.mjs's. Real rendering and layout (markup
+   strings are scanned, not drawn); the service worker and the
    update reload; enablePersistence; two devices (save-loop.mjs covers them); the Song Journey pages (tabs/*.html:
    their own save, journey.js); a live-quiz ANSWER write (the listener and its session key are covered); the exact
    minutes arithmetic (tools/pm-sim.mjs, its "student switch" sections); the per-student class-config rules
@@ -193,6 +197,7 @@
 
    Reading a FAIL line: case index, family, rule, what was found, what the rule wanted, and the replay command. */
 import vm from 'node:vm';
+import { Worker } from 'node:worker_threads';
 import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -226,6 +231,7 @@ const VERBOSE = !!opt('verbose', false);
 const FAKE_FAULT = opt('fake-fault', '') || '';
 const BASE_SEED = Number(opt('seed', 1));
 const STALL_S = Number(opt('stall', 120));
+const STREAM = VERBOSE && opt('case', null) != null;
 let CURRENT_WORLD = null;
 process.on('unhandledRejection', e => {
   const msg = 'unhandled rejection: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : String(e));
@@ -235,8 +241,20 @@ process.on('unhandledRejection', e => {
 process.on('uncaughtException', e => { console.error('shared-chromebook-loop: the tool crashed: ' + (e && e.stack || e)); process.exit(2); });
 
 /* ─────────────────────────── watchdog ─────────────────────────── */
+/* Two halves. The timer below exits 3 when no step has started for --stall seconds. A site script that never
+   gives the event loop back (a promise chain that re-schedules itself forever) starves that timer too, so a
+   worker thread watches the same heartbeat through shared memory: it prints where the run was and kills the
+   process (exit code 137 then, not 3 — a thread cannot end the process any other way while the main thread spins). */
+const BEAT_MEM = new Int32Array(new SharedArrayBuffer(8 + 4 * 512));
 let LAST_BEAT = Date.now(), BEAT_WHERE = 'starting';
-const beat = where => { LAST_BEAT = Date.now(); BEAT_WHERE = where; };
+const beat = where => {
+  LAST_BEAT = Date.now(); BEAT_WHERE = where;
+  Atomics.store(BEAT_MEM, 0, Math.floor(LAST_BEAT / 1000) % 2147483647);
+  const w = String(where).slice(0, 500);
+  Atomics.store(BEAT_MEM, 1, w.length);
+  for (let i = 0; i < w.length; i++) BEAT_MEM[2 + i] = w.charCodeAt(i);
+};
+beat('starting');
 const WATCHDOG = setInterval(() => {
   if (Date.now() - LAST_BEAT > STALL_S * 1000){
     console.log(`shared-chromebook-loop: ✗ HUNG — no progress for ${STALL_S} s. Stuck at "${BEAT_WHERE}"`);
@@ -244,6 +262,21 @@ const WATCHDOG = setInterval(() => {
   }
 }, 1000);
 WATCHDOG.unref();
+{
+  const w = new Worker(`
+    const { workerData } = require('node:worker_threads');
+    const { writeSync } = require('node:fs');
+    const m = workerData.mem, limit = workerData.stall + 15;
+    setInterval(() => {
+      const last = Atomics.load(m, 0), now = Math.floor(Date.now() / 1000) % 2147483647;
+      if (now - last <= limit) return;
+      let where = ''; const n = Atomics.load(m, 1);
+      for (let i = 0; i < n; i++) where += String.fromCharCode(m[2 + i]);
+      writeSync(1, 'shared-chromebook-loop: \u2717 HUNG — the main thread has not come back for ' + limit + ' s (a script that never yields). Stuck at "' + where + '"\\n');
+      process.kill(process.pid, 'SIGKILL');
+    }, 1000);`, { eval: true, workerData: { mem: BEAT_MEM, stall: STALL_S } });
+  w.unref();
+}
 
 /* ─────────────────────────── seeded random ─────────────────────────── */
 function rng(seed){
@@ -330,7 +363,8 @@ class World {
     this.trace = [];
     this.stats = { issued: 0, landed: 0, refusedByRules: 0, refusedByServer: 0, lostWithPage: 0, lostUnload: 0, reads: 0, readsFailed: 0, pages: 0, reloads: 0 };
   }
-  log(s){ if (VERBOSE) this.trace.push(`${((this.now - T0) / 1000).toFixed(3).padStart(9)}s  ${s}`); }
+  /* With --case and --verbose the timeline streams as it happens (a slow or stuck case shows where it is). */
+  log(s){ if (!VERBOSE) return; const line = `${((this.now - T0) / 1000).toFixed(3).padStart(9)}s  ${s}`; if (STREAM) console.log('  ' + line); else this.trace.push(line); }
   at(t, fn, owner, kind){ const e = { at: Math.max(t, this.now), id: ++this.seq, fn, owner, kind }; this.events.push(e); return e.id; }
   cancel(id){ const i = this.events.findIndex(e => e.id === id); if (i >= 0) this.events.splice(i, 1); }
   killOwner(owner){ this.events = this.events.filter(e => !(e.owner === owner && e.kind === 'timer')); }
@@ -1139,7 +1173,7 @@ function makeScenario(idx, famFilter){
   const r = rng(seed);
   const sc = { idx, fam, seed, r, actionKind: pick(r, ACTION_KINDS), net: pick(r, NET_KINDS), signOutAfter: pick(r, [150, 600, 1200, 2500]),
     noticeChoice: r() < 0.4 ? 'anyway' : 'wait', bKind: pick(r, ['returning', 'returning', 'new', 'failed-read']),
-    frozen: r() < 0.5, bOnOtherTab: r() < 0.5, teacherWhere: pick(r, ['student-page', 'console']), teacherOrder: pick(r, ['after', 'before']),
+    frozen: r() < 0.5, bOnOtherTab: r() < 0.5, teacherWhere: pick(r, ['student-page', 'student-page']), teacherOrder: pick(r, ['after', 'before']),
     roundKind: pick(r, ['A-B-A', 'A-A']), failKind: pick(r, ['progress-refused', 'progress-offline', 'config-refused', 'both', 'empty']),
     playKind: pick(r, ['mic', 'note', 'both']) };
   if (fam === 'mix'){
@@ -1234,6 +1268,7 @@ function wallUp(page){
 function hands(world, dev, sc){
   const H = {
     async signIn(tab, P){
+      beat(`${world.caseLabel}: ${P.key} signs in on ${tab.name} at ${rel(world.now)}`);
       world.onDevice.add(P.key);
       for (let attempt = 0; attempt < 3; attempt++){
         await world.waitFor(() => tab.page && tab.page.alive && (wallUp(tab.page) || appUp(tab.page, P)), 20000, 100);
@@ -1253,6 +1288,7 @@ function hands(world, dev, sc){
       const page = tab.page;
       if (!appUp(page, P)) { world.log(`${P.key} cannot act: app not up on ${page ? page.id : '-'}`); return false; }
       a.t = world.now; a.who = P.key; a.page = page.id; a.done = true;
+      beat(`${world.caseLabel}: ${P.key} ${describe(a)} on ${page.id} at ${rel(world.now)}`);
       world.ledger.push(a);
       world.log(`${P.key} on ${page.id}: ${describe(a)}`);
       if (a.kind === 'check'){
@@ -1269,6 +1305,7 @@ function hands(world, dev, sc){
     /* Sign out from the header; if the not-saved notice comes up, the student either takes "Sign out anyway" or
        waits for the network and tries again (three tries, then anyway). Resolves when the device is signed out. */
     async signOut(tab, P, choice){
+      beat(`${world.caseLabel}: ${P.key} signs out on ${tab.name} at ${rel(world.now)}`);
       for (let attempt = 0; attempt < 4; attempt++){
         const page = tab.page;
         if (!page || !page.alive) break;
@@ -1543,7 +1580,11 @@ async function runFamily(world, dev, sc, H){
   }
   if (fam === 'teacher'){
     const T = world.people.T;
-    const onConsole = sc.teacherWhere === 'console';
+    /* The console (?teacher) is not driven here: its activity list paints with box.querySelector() on the markup it
+       just wrote, which the stub DOM cannot answer, and its async painter then never settles (2026-11-13). The
+       teacher signs in on the STUDENT page instead (a gate previewer: the same Firebase account on the same device),
+       which is the half that shares the student page's state, storage and save path. */
+    const onConsole = false;
     const teacherVisit = async () => {
       if (onConsole){ killPage(tab1.page); openPage(world, tab1, true); world.log('the teacher opens the console address in this tab'); }
       if (await H.signIn(tab1, T)){
@@ -1891,6 +1932,7 @@ const short = s => (String(s).length > 140 ? String(s).slice(0, 137) + '...' : S
 async function runCase(idx, famFilter){
   const sc = makeScenario(idx, famFilter);
   const world = buildWorld(sc);
+  world.caseLabel = `case ${idx} (${sc.fam})`;
   CURRENT_WORLD = world;
   const dev = makeDevice(world, []);
   world.lsBefore = {};
