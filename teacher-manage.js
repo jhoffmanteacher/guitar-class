@@ -56,6 +56,7 @@ function renderTeacherManage(){
     const archCount=allStudentsRaw.filter(s=>arch[s.uid]).length;
     const pausedCount=allStudentsRaw.filter(s=>paused[s.uid]).length;
     const head=`
+      ${teacherBackupPanelHtml()}
       <div class="tg-class">
         <div class="tg-class-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg> Student access</div>
         <div class="tg-seg">
