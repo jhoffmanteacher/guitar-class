@@ -265,6 +265,7 @@ function toggleSkill(sid, wid, which){
   const wkSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="4" stroke="var(--amber-text)" stroke-width="1.5"/><path d="M6 4v2.2l1.4 1.4" stroke="var(--amber-text)" stroke-width="1.5" stroke-linecap="round"/></svg>`;
   const giSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 6l3 3 5-5" stroke="var(--green-text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const w=SETS.find(x=>x.id===wid);
+  const popBoxes=[];
   document.querySelectorAll(`.week-panel[data-id="${wid}"] .skill-row[data-sid="${CSS.escape(sid)}"]`).forEach(row=>{
     const wkCell = row.querySelector('.working-col');
     const giCell = row.querySelector('.gotit-col');
@@ -276,8 +277,8 @@ function toggleSkill(sid, wid, which){
     giCell.setAttribute('aria-pressed', st==='gotit');
     wkCell.querySelector('.skbox').innerHTML = st==='working' ? wkSvg : '';
     giCell.querySelector('.skbox').innerHTML = st==='gotit'   ? giSvg : '';
-    // Just turned ON (not already got-it, not "still working"): the tick's pop — TICK POP, app/lesson.js.
-    if(st==='gotit' && cur!=='gotit') tickPop(giCell.querySelector('.skbox'));
+    // Just turned ON (not already got-it, not "still working"): the tick's pop — TICK POP, app/lesson.js, run after the save below.
+    if(st==='gotit' && cur!=='gotit') popBoxes.push(giCell.querySelector('.skbox'));
   });
   if(w){
     const done=w.skills.filter(s=>progress[s.id]==='gotit').length;
@@ -307,6 +308,8 @@ function toggleSkill(sid, wid, which){
   renderProgressStrip();
   refreshReviewCards();   // "Keep it sharp" card reacts to got-it changes
   saveProgress();
+  // The pop comes after the save is queued, so nothing it does can stand in the tick's way.
+  popBoxes.forEach(tickPop);
   return true;
 }
 
