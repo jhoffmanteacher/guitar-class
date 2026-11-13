@@ -502,8 +502,12 @@ async function psgStart(){
   if (!body) return;
   body.innerHTML = `<div class="coach-tip">${t('games.psg.startingMic')}</div>`;
   if (!coachStream && !(await coachAcquireMic({ el: body }))){
-    const b2 = psgBody();
-    if (b2) b2.innerHTML = `<div class="coach-note">${coachMicFailMsg()}</div>`;
+    /* Same as Note Hunt (fretStart): a newer start owns the screen; ours,
+       given up, goes back to the set-up screen (review R1-7). */
+    if (coachAcquirePending) return;
+    if (!psgBody()) return;
+    if (coachMicFailName === 'cancelled') psgSetup();
+    else psgBody().innerHTML = `<div class="coach-note">${coachMicFailMsg()}</div>`;
     return;
   }
   await coachEnsureRunning();
