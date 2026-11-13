@@ -15070,7 +15070,7 @@ async function checkPwTakeEvaluator() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
-   1cx. THE ANONYMOUS ERROR LOG (2026-11-13) — SITE_ERRORS in app/boot.js, the
+   1de. THE ANONYMOUS ERROR LOG (2026-11-13) — SITE_ERRORS in app/boot.js, the
    siteErrors block of firestore.rules, the console's Error log view
    (teacher-errors.js).
    The logger and the view are RUN by tools/site-errors-sim.mjs (Node, about a
@@ -15081,16 +15081,17 @@ async function checkPwTakeEvaluator() {
    hasOnly and hasAll, and the fields the view reads; the logger's caps, line
    and col maximum, kinds, languages and day pattern equal the rules'; the
    block allows only a create for any signed-in account and read + delete for
-   the teacher (no update, no write); and the logger never names the progress
+   the teacher (no update, no write), and the create still requires an SDK
+   auto-id (errorId 20 letters and digits); and the logger never names the progress
    save (progress, ensureDb, flushSave, queueSave): it shares Firestore's write
    queue with the save, so it must stay a bystander. The emulator half is
    tools/site-errors-rules-test.mjs (it needs Java; run by hand).
    ════════════════════════════════════════════════════════════════════ */
-const SITE_ERRORS_SIM_PIN = 111;
+const SITE_ERRORS_SIM_PIN = 153;
 function checkSiteErrors() {
-  head('1cx. Error log: the logger and the view are run; fields, caps and the rules block are pinned');
+  head('1de. Error log: the logger and the view are run; fields, caps and the rules block are pinned');
   let bad = 0;
-  const fail = m => { err('1cx: ' + m); problems++; bad++; };
+  const fail = m => { err('1de: ' + m); problems++; bad++; };
   const strip = t => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
   const read = f => { try { return readFileSync(join(ROOT, f), 'utf8'); } catch { return ''; } };
   const sameSet = (a, b) => a.length === b.length && [...a].sort().join() === [...b].sort().join();
@@ -15147,11 +15148,14 @@ function checkSiteErrors() {
   const allows = [...block.matchAll(/allow ([a-z, ]+):\s*if\s+([^\n;]*)/g)].map(x => [x[1].replace(/\s+/g, ''), x[2].trim()]);
   const want = [['create', 'isSignedIn()'], ['read,delete', 'isTeacher()']];
   if (JSON.stringify(allows) !== JSON.stringify(want)) fail(`the siteErrors block must allow exactly "create: if isSignedIn() && …" and "read, delete: if isTeacher()" — found ${JSON.stringify(allows)}`);
+  // the create's doc id: an SDK auto-id (20 letters and digits), so nobody can pick ids (review R2-6a)
+  const create = (/allow create: if ([\s\S]*?);/.exec(block) || [, ''])[1];
+  if (!/(?:^|\n)\s*&& errorId\.matches\('\^\[A-Za-z0-9\]\{20\}\$'\)\s*\n/.test(create)) fail("the siteErrors create no longer requires errorId.matches('^[A-Za-z0-9]{20}$') (an SDK auto-id) as one of its && lines");
 
   // 6. a bystander to the save
   for (const w of ['progress', 'ensureDb', 'flushSave', 'queueSave']) if (new RegExp('\\b' + w + '\\b').test(logger)) fail(`the error log's code names ${w}: it must never touch the progress save or load Firestore itself (it shares the save's write queue)`);
 
-  if (!bad) ok(`site-errors-sim: ${m ? m[1] : '?'} cases pass (pinned ${SITE_ERRORS_SIM_PIN}); 10 fields match in 5 places, ${Object.keys(rcaps).length} caps + line/col + kind/lang + day agree, the block allows only create (signed in) and read/delete (teacher), the logger never names the save`);
+  if (!bad) ok(`site-errors-sim: ${m ? m[1] : '?'} cases pass (pinned ${SITE_ERRORS_SIM_PIN}); 10 fields match in 5 places, ${Object.keys(rcaps).length} caps + line/col + kind/lang + day agree, the block allows only create (signed in, an auto-id) and read/delete (teacher), the logger never names the save`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
