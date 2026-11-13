@@ -70,7 +70,7 @@ canvas{width:100%;height:240px;display:block;background:var(--bg2);border:1px so
 <body>
 <div class="wrap">
   <h1>Mic check</h1>
-  <p class="lead">For the teacher, on one class Chromebook. It asks for the mic exactly as the site's games do, shows what the browser really gave, and tests whether automatic volume control (AGC) is acting on the mic.</p>
+  <p class="lead">For the teacher, on one class Chromebook. It asks for the mic exactly as the site's games do, shows what the browser really gave, and looks for automatic volume control (AGC) acting on the mic.</p>
   <p class="note">Nothing is saved or sent anywhere (the page itself forbids any network request). The numbers stay on this page until you press "Copy results", which puts them on this computer's clipboard only.</p>
 
   <h2>1. Start the mic</h2>
@@ -84,14 +84,14 @@ canvas{width:100%;height:240px;display:block;background:var(--bg2);border:1px so
       <thead><tr><th>Setting</th><th>The site asks</th><th>The browser gave</th><th>Can it be turned off?</th></tr></thead>
       <tbody id="settings"></tbody>
     </table>
-    <p class="note"><strong>This table is the answer.</strong> If "The browser gave" says autoGainControl false, automatic gain is off. The ring test below only backs it up: it can catch a gain that jumps or climbs fast, but not one that is steady or slow.</p>
+    <p class="note">This table shows what Chrome did. If it says autoGainControl false, Chrome's own automatic gain is off. It cannot show processing the Chromebook does before Chrome gets the sound. The ring test below catches only a gain that jumps, or climbs faster than the note falls.</p>
     <p class="lead" id="device"></p>
     <h2>Live level</h2>
     <div class="row"><div class="meter" aria-hidden="true"><i id="meter"></i></div><span class="mono" id="meter-db">— dB</span></div>
   </div>
 
   <h2>2. Ring one note and let it die (a second opinion)</h2>
-  <p>Quiet room. Press the button, then pluck ONE open string once, firmly, right away (in the first 3 seconds), and let it ring. Do not touch the strings again until the 10 seconds are over.</p>
+  <p>Quiet room. Wait one second after you press "Ring one note", then pluck ONE open string once, firmly (within 3 seconds), and let it ring. Do not touch the strings again until the 10 seconds are over.</p>
   <div class="row">
     <button type="button" class="primary" id="btn-ring" disabled>Ring one note (10 seconds)</button>
     <span class="mono" id="ring-clock"></span>
@@ -99,7 +99,7 @@ canvas{width:100%;height:240px;display:block;background:var(--bg2);border:1px so
   <canvas id="plot" width="860" height="240" aria-label="Level in dB against time"></canvas>
   <div id="verdict" class="verdict" hidden></div>
   <table id="numbers" hidden><tbody></tbody></table>
-  <p class="lead">A guitar note should fall smoothly. If the level climbs back up while the note dies, or jumps in steps, automatic gain is acting, or another sound reached the mic. The test reads the note only while it is more than 15 dB above the room, and only a note that starts at least 25 dB above the room. The thresholds are provisional (first guesses, 2026-11-13): a climb of more than 6 dB on the level averaged over half a second, or a jump of more than 6 dB inside 200 ms that stays up, reads as "the level rose"; more than 3 dB is unclear (run it again). A steady or slow gain does not show here: the table above is the answer for that.</p>
+  <p class="lead">A guitar note should fall smoothly. If the level climbs back up while the note dies, or jumps in steps, automatic gain is acting, or another sound reached the mic. The test reads the note only while it is more than 15 dB above the room, and only a note that starts at least 25 dB above the room. The thresholds are provisional (first guesses, 2026-11-13): a climb of more than 6 dB on the level averaged over half a second, or a jump of more than 6 dB inside 200 ms that stays up, reads as "the level rose"; more than 3 dB is unclear (run it again), and so is a note that fell less than 10 dB in the 2 seconds after its peak (a long-ringing note, or a gain holding it up). A steady or slow gain does not show here.</p>
 
   <div class="row">
     <button type="button" id="btn-copy" disabled>Copy results</button>
@@ -128,6 +128,7 @@ const ATTACK_MS = 300;         // the note's peak is looked for in this long aft
 const MIN_RING_MS = 750;       // a ringing note stays above STOP_DB at least this long (a cough does not)
 const SMOOTH_MS = 500;         // the climb is read on the level averaged over this long (string beats cancel)
 const RISE_AGC_DB = 6, RISE_UNCLEAR_DB = 3, CLIMB_AGC_DB = 6, CLIMB_UNCLEAR_DB = 3;   // provisional
+const FELL_MIN_DB = 10;        // a note that fell less than this in the 2 s after its peak reads unclear (a fast gain can hold it up)
 const $ = id => document.getElementById(id);
 
 let stream = null, ctx = null, src = null, proc = null, mute = null, raf = 0, ringTimer = 0, clockTimer = 0;
@@ -267,9 +268,11 @@ function finishRing(){
            the quietest point reached so far (a gain that lifts the fading
            note). Averaging cancels most string beating; a slow beat may still
            read as unclear.
+   A note that fell less than FELL_MIN_DB in the 2 s after its peak reads
+   unclear: a fast gain can hold a note up without ever making it climb.
    What this cannot see: a gain that is steady, or rises more slowly than the
    note falls (the note still falls, only more slowly). The settings table
-   (autoGainControl) is the first answer; this plot only backs it up. */
+   shows what Chrome did, not what the Chromebook did before Chrome. */
 function analyse(blocks, rate){
   const blockMs = BLOCK / rate * 1000;
   const per = Math.max(1, Math.round(BIN_MS / blockMs));
@@ -285,12 +288,12 @@ function analyse(blocks, rate){
   const floor = sorted.length ? sorted[Math.floor(sorted.length * 0.05)] : -120;
   const r = { bins, binMs, floor, peak: 0, start: -1, stop: -1, rise: 0, riseAt: -1, win: n(RISE_WIN_MS), climb: 0, climbAt: -1, fell2s: null, heard: false, verdict: '', cls: 'v-warn' };
   const start = bins.findIndex(v => v - floor >= NOTE_DB);
-  if (start < 0){ r.verdict = 'Not enough sound to judge (no note ' + NOTE_DB + ' dB above the room). Pluck harder or bring the guitar closer, then run it again.'; return r; }
+  if (start < 0){ r.verdict = 'Not enough sound to judge (no note ' + NOTE_DB + ' dB above the room). Wait one second after you press "Ring one note", then pluck harder or bring the guitar closer.'; return r; }
   r.start = start;
   let peak = start;
   for (let i = start; i < Math.min(bins.length, start + n(ATTACK_MS) + 1); i++) if (bins[i] > bins[peak]) peak = i;
   r.peak = peak;
-  if (start * binMs > PLUCK_BY_MS){ r.verdict = 'Pluck one string right after you press Start, then let it ring.'; return r; }
+  if (start * binMs > PLUCK_BY_MS){ r.verdict = 'Wait one second after you press "Ring one note", then pluck one string (within 3 seconds) and let it ring.'; return r; }
   let stop = bins.length;
   for (let i = peak + 1; i < bins.length; i++) if (bins[i] - floor <= STOP_DB){ stop = i; break; }
   r.stop = stop;
@@ -315,7 +318,8 @@ function analyse(blocks, rate){
   r.fell2s = twoS < stop ? bins[peak] - bins[twoS] : null;
   if (r.climb > CLIMB_AGC_DB || (r.rise > RISE_AGC_DB && r.climb > CLIMB_UNCLEAR_DB)){ r.verdict = 'The level rose while the note died: automatic gain, or another sound in the room. Run it again.'; r.cls = 'v-bad'; }
   else if (r.rise > RISE_UNCLEAR_DB || r.climb > CLIMB_UNCLEAR_DB){ r.verdict = 'Unclear: a small rise while the note died. Run it again in a quiet room, one pluck only.'; }
-  else { r.verdict = 'The note fell smoothly. This test cannot see a steady or slow gain: trust the table above (autoGainControl).'; r.cls = 'v-ok'; }
+  else if (r.fell2s != null && r.fell2s < FELL_MIN_DB){ r.verdict = 'The note fell very little. That can be a long-ringing note or a gain holding it up. Try a short, plucked note.'; }
+  else { r.verdict = 'The note fell smoothly. This test cannot see a steady or slow gain: see the table above (autoGainControl).'; r.cls = 'v-ok'; }
   return r;
 }
 
