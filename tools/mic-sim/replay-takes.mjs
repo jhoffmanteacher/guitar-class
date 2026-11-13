@@ -1,6 +1,7 @@
 /* Replay candidate Power Chord Switch rules on REAL takes (2026-11-11).
 
      node tools/mic-sim/replay-takes.mjs [folder] [--rules=base,ring,half,half3,both,both3] [--json=out.json]
+     (those six by default; the window / pick rules of candidates.mjs too, by name: tools/mic-sim/change-window.mjs reports them)
 
    With no folder it reads the take SUMMARIES in tools/mic-sim/takes/ (in the repo: no audio, no names; made by tools/mic-sim/takes-in.mjs), so any
    session can run it. Given a folder of takes (the console's Download WAV + Download data pairs after anon-takes.mjs: T01.wav + T01.json ...) it
@@ -46,7 +47,7 @@ import { fileURLToPath } from 'node:url';
 import { makeSite, SUM_HOP } from './closed-loop.mjs';
 import { extract } from './extract.mjs';
 import { biquad } from './student.mjs';
-import { RULES } from './candidates.mjs';
+import { RULES, DEFAULT_RULES } from './candidates.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const TAKES_DIR = join(HERE, 'takes');
@@ -101,8 +102,12 @@ const VM_HELPERS = `globalThis.__rp = {
   },
   gates(){ return JSON.stringify([RNW_POWER_CLARITY, 0.55]); },
   end(){
-    cc.changes.forEach(c => { if (c.pend) ccResolvePend(c); if (c.result === null) c.result = 'miss'; });
-    const out = cc.changes.map(c => ({ verdict: c.result, readings: c.readings ? c.readings.length : null }));
+    /* hold: a window / pick candidate's verdict still waiting (candidates.mjs WINDOW_RULES); dec and ons: what decided the change and every
+       onset within half the spacing of it, on the site's grid (only those rules record them; change-window.mjs reads them). */
+    cc.changes.forEach(c => { if (c.pend) ccResolvePend(c); if (c.result === null && c.hold) ccHoldFinal(c); if (c.result === null) c.result = 'miss'; });
+    const half = cc.beatMs * cc.bpc * 0.5;
+    const out = cc.changes.map(c => ({ verdict: c.result, readings: c.readings ? c.readings.length : null,
+      dec: c.decDev == null ? null : Math.round(c.decDev), go: Math.round(cc.gridOffset), ons: cc.__ons ? cc.__ons.map(r => Math.round(r - c.beat * cc.beatMs)).filter(d => Math.abs(d) <= half) : null }));
     ccStop(); cc = null;
     return JSON.stringify(out);
   }
@@ -110,7 +115,7 @@ const VM_HELPERS = `globalThis.__rp = {
 
 const sites = {};
 /* `at`: { root, coach } loads the site from another folder or coach.js from a file (closed-loop.mjs --root / --coach); left out, this repo. */
-function siteFor(rule, ratio, fromSummary, at){
+export function siteFor(rule, ratio, fromSummary, at){
   const o = at || {};
   const k = rule + '|' + (ratio ? ratio.join('/') : 'now') + '|' + (fromSummary ? 's' : 'a') + '|' + (o.root || '') + '|' + (o.coach || '');
   if (!sites[k]){ sites[k] = makeSite(o.coach || null, rule, ratio, !!fromSummary, o.root || null); sites[k].run(VM_HELPERS); }
@@ -353,7 +358,7 @@ export function baseSite(at){ return siteFor('base', null, false, at); }
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]){
   const args = process.argv.slice(2), folder = args.find(a => !a.startsWith('--'));
   const opt = (k, d) => { const a = args.find(x => x.startsWith('--' + k + '=')); return a ? a.slice(k.length + 3) : d; };
-  const rules = opt('rules', RULES.join(',')).split(',');
+  const rules = opt('rules', DEFAULT_RULES.join(',')).split(',');
   for (const r of rules) if (!RULES.includes(r)){ console.error('no rule "' + r + '" (' + RULES.join(', ') + ')'); process.exit(2); }
   const NOW = todayRatios();
   let takes;

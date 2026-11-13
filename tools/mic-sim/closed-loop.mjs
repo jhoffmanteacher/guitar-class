@@ -14,7 +14,8 @@
        --lag=70                       ms from the site's click to the student's strum reaching the mic, beyond their own timing
        --seeds=2                      games per cell
        --coach=<file>                 another coach.js (git show <ref>:coach.js > file) for a before / after
-       --rule=base|ring|half|half3|both|both3   a candidate grading rule from candidates.mjs, applied in memory
+       --rule=base|ring|half|half3|both|both3|<a window rule>   a candidate grading rule from candidates.mjs, applied in memory
+                                      (the window / pick rules, WINDOW_RULES there: w350, near, w350near, ...; Change Up takes these too)
        --json=<file>                  every game, every change
        --takes-out=<folder>           also save every game as a take (V001.wav + V001.json, the console's download format, with the answer
                                       key in the JSON) for eval-takes.mjs and replay-takes.mjs; these hold no student audio
@@ -140,7 +141,7 @@ import { readFileSync, readdirSync, writeFileSync, mkdirSync, existsSync, rename
 import { join, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { Student, STUDENTS, ROOMS, MICS, SR, biquad, rng, STUDENT_MODEL } from './student.mjs';
-import { applyRule, RULES } from './candidates.mjs';
+import { applyRule, RULES, WINDOW_RULES } from './candidates.mjs';
 import { siteSource, siteText, readScriptArg } from '../site-src.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
@@ -748,7 +749,8 @@ async function main(){
   }
   const rule = opt('rule', 'base');
   if (!RULES.includes(rule)) badArg('--rule must be one of ' + RULES.join(', '));
-  if (cu && rule !== 'base') badArg('--rule: the candidate rules are Power Chord Switch\'s; --game=changeup runs only the site\'s own code');
+  /* The window / pick rules (candidates.mjs WINDOW_RULES, 2026-11-13) rewrite ccLoop for BOTH games, so Change Up may play them too. */
+  if (cu && rule !== 'base' && !WINDOW_RULES.includes(rule)) badArg('--rule: the candidate rules are Power Chord Switch\'s (but the window / pick rules); --game=changeup runs only the site\'s own code');
   if (cu && (opt('song', null) || opt('takes-out', null))) badArg('--song and --takes-out are Power Chord Switch\'s (Change Up has no songs and never records)');
   const replayArg = opt('replay', null);
   if (replayArg != null && !/^[1-9]\d*$/.test(replayArg)) badArg(`--replay must be a game number (1, 2, ...), not "${replayArg}"`);
