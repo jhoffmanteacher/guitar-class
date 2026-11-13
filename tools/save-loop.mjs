@@ -22,15 +22,17 @@
      --list             the families and the fake faults
    stdout is identical for the same seed and site; the run time is printed on stderr.
    Exit 0 = every case passed (KNOWN faults below excepted); 1 = a case failed, the fake failed its self-test, or a full
-   default run matched nothing for a KNOWN entry; 2 = bad arguments or the tool itself crashed; 3 = watchdog.
+   default run matched nothing for a KNOWN entry, or a site script does not parse (a FAIL line names it); 2 = bad
+   arguments or the tool itself crashed; 3 = watchdog.
 
    KNOWN. Site faults this tool found that are still open, listed at the bottom of the file (const KNOWN) with the date
    they were listed. A wrong value that matches an entry EXACTLY is printed as "~ known, listed <date>" and does not fail;
    anything else fails (the exit-check entry also needs the carrier the fault needs: another activity saved by that tab);
    a full default run (every family, 180 cases or more) in which an entry matches nothing fails, so
    a fixed fault gets its entry taken out. Listed 2026-11-12: an exit check marked done with no score after a failed
-   sign-in read. A FAIL line of a PR history replaced by a one-entry history after a failed sign-in read is tagged
-   R16-wiped (a site fault this tool found on 2026-11-12, not listed: it fails until it is fixed or listed).
+   sign-in read. Two more site faults this tool found on 2026-11-12 are NOT listed (the owner decides): they fail, and
+   their FAIL lines are tagged [R16-wiped] (a PR history replaced by a one-entry history after a failed sign-in read)
+   and [R6-both-picks] (after a failed sign-in read, a new path pick leaves the stored pick ticked beside it).
 
    WHAT IS REAL. The site's own scripts, unmodified, each run as its own script in a Node vm context, one context per
    browser tab: i18n.js, guitar-diagrams.js, class-activities.js, config-main.js, every module-N.js and every app part
@@ -84,6 +86,8 @@
        refused  the server REFUSES the write or read after 200-800 ms (permission-denied, quota): nothing is applied.
                 This is the only phase in which set() rejects.
      A self-test of these rules runs before the cases; --fake-fault breaks one rule and the self-test must fail.
+   - The start doc (a returning student) holds a non-default value in every category the save path can hold back or
+     overwrite, including a path pick for ca-46 (half the two-devices cases start with none, so K2 stays reachable).
    - A scripted student (made-up uid and name), generated per case from the seed: ticks and un-ticks lesson steps,
      activity steps and activities, answers questions, logs reps (with a best), saves a deck best, bumps the
      streak, picks a path, takes an exit check; tabs open, hide and show at chosen moments; a second tab on the same
@@ -146,9 +150,12 @@
          K1 "a key both tabs hold" (save.js:608-616): a tab sends a whole category, so its older copy of a key another
             tab changed can overwrite the newer value. Counted only when a write from tab X, carrying exactly the stored
             value, landed after the last owed change to that key by a DIFFERENT tab Y, a write from Y carrying Y's new
-            value landed before X's, and the value is one the oracle's own model of tab X held (what X loaded, then X's
-            own actions).
-         K2 two devices can save different path picks (WORKFLOW.md, 2026-11-09 product calls: "rare, nothing lost").
+            value landed before X's, and the value is the one the oracle's own model of tab X held WHEN X SENT that
+            write (what X loaded, then X's own actions up to then). A write saying something X's view no longer held
+            is X's own action lost, never K1.
+         K2 two devices can save different path picks (WORKFLOW.md, 2026-11-09 product calls: "rare, nothing lost"):
+            only when the tab that picked last had loaded the doc (its view lacked the other pick because the other
+            device had not saved it yet, not because its read failed).
          K3 a write started while the page unloads was not delivered (the CLOSE scenarios that say so): the value is
             what the doc would hold had that close not been a clean point.
      R12 Nothing the site runs may throw or leave a rejected promise unhandled (the global "Something went wrong"
@@ -388,7 +395,7 @@ function makeClient(world, tab){
         if (behindStall && !tab.alive && FAKE_FAULT !== 'stall-survives-close'){ world.lostOnClose++; world.log(`${tab.name} queued write LOST (tab closed before reconnect)`); return; }
         try { world.applyOp(path, op.kind === 'update' ? { kind: 'update', data: sent } : { kind: 'set', merge: op.merge, data: sent }); }
         catch (e){ rej(e); return; }
-        world.landed.push({ tab: tab.name, at: world.now, path, kind: op.kind, data: clone(sent) });
+        world.landed.push({ tab: tab.name, at: world.now, sentAt: rec.from, path, kind: op.kind, data: clone(sent) });
         world.log(`${tab.name} write LANDED: ${summarize(sent)}`);
         res();
       }, tab, 'net');
@@ -575,7 +582,11 @@ function siteScripts(root){
   if (SCRIPT_CACHE.has(root)) return SCRIPT_CACHE.get(root);
   const mods = readdirSync(root).filter(f => /^module-\d+\.js$/.test(f)).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
   const files = ['i18n.js', 'guitar-diagrams.js', 'class-activities.js', 'config-main.js', ...mods, ...siteParts('app.js', root)];
-  const list = files.map(f => ({ f, s: new vm.Script(readFileSync(join(root, f), 'utf8'), { filename: f }) }));
+  /* A site script that does not parse is a SITE fault (exit 1 with a FAIL line naming it), not a crash of this tool. */
+  const list = files.map(f => {
+    try { return { f, s: new vm.Script(readFileSync(join(root, f), 'utf8'), { filename: f }) }; }
+    catch (e){ if (e && e.name === 'SyntaxError') throw Object.assign(new Error(`${f} does not parse: ${e.message}`), { siteFile: f }); throw e; }
+  });
   SCRIPT_CACHE.set(root, list);
   return list;
 }
@@ -887,24 +898,37 @@ function oracle(sc, world, tabs){
         const yView = viewBefore(tabBy[y], rec, effs, lastOwed);
         /* ...and the pick that stands came from another tab that did hold it. */
         const other = tabs.find(t => t.name !== y && viewsOf(t, rec, effs).has('true'));
-        if (canon(yView) === '∅' && other){ known.push({ kind: 'K2 path picks', leaf: k, stored: g, accept: [...set], by: other.name }); continue; }
+        /* ...and Y's view lacked it because Y loaded before it was there, not because Y's read failed (R2-2). */
+        if (canon(yView) === '∅' && tabBy[y].loadOk && other){ known.push({ kind: 'K2 path picks', leaf: k, stored: g, accept: [...set], by: other.name }); continue; }
       }
       /* R11 K1: a key both tabs hold. */
       const leafPath = k.split('.');
       const k1 = world.landed.find(w => {
         if (w.path !== 'progress/' + USER.uid || w.tx || sentLeaf(w.data, leafPath) !== g) return false;
         const lastOther = effs.filter(x => x.owed && x.changed && x.a.tab !== w.tab).pop();
-        if (!lastOther || w.at < lastOther.a.t || !viewsOf(tabBy[w.tab], rec, effs).has(g)) return false;
+        if (!lastOther || w.at < lastOther.a.t) return false;
+        /* ...and the value sent is what the sender's view held WHEN it sent the write (F8), not any value it once held
+           (R2-1). A write that says something its own tab's view no longer held at that moment is that tab's own action
+           lost (a pick not un-ticked), a failure. A sender's own later action computed from its stale copy (a rep on 0
+           instead of on the other tab's 3) does match its view at send time: that is K1 itself, the other tab's work
+           overwritten. */
+        if ((flatten(viewAt(tabBy[w.tab], rec, effs, w.sentAt), rec, new Map()).get(k) || '∅') !== g) return false;
         /* ...and the other tab's newer value did reach the server before it was overwritten (otherwise nothing of the
            other tab's was lost to this one: its own write went missing, which is a failure). */
         const after = flatten(lastOther.e.fn(viewBefore(tabBy[lastOther.a.tab], rec, effs, lastOther)), rec, new Map()).get(k) || '∅';
         return world.landed.some(w2 => w2.tab === lastOther.a.tab && !w2.tx && w2.path === w.path && w2.at >= lastOther.a.t && w2.at <= w.at && sentLeaf(w2.data, leafPath) === after);
       });
-      if (k1){ known.push({ kind: 'K1 a key both tabs hold', leaf: k, stored: g, accept: [...set], by: k1.tab }); continue; }
+      if (k1){ known.push({ kind: 'K1 a key both tabs hold', leaf: k, stored: g, accept: [...set], by: k1.tab, sentAt: k1.sentAt }); continue; }
       /* Tagged for a reader (and for a KNOWN entry, should one be listed): a PR history replaced by the one a tab whose
          read failed built from nothing. */
       const wipedByFailedTab = rec[0] === 'responses' && g.startsWith('[') && effs.some(x => x.a.kind === 'pr') && tabs.some(t => !t.loadOk && viewsOf(t, rec, effs).has(g));
-      fails.push({ msg: `${k}: stored ${g}, expected ${[...set].join(' or ')}` + (lastOwed ? ` (last owed: ${lastOwed.a.tab} ${describe(lastOwed.a)} at ${rel(lastOwed.a.t)})` : ' (no owed action: the value it started with)') + (wipedByFailedTab ? ' [R16-wiped: a tab whose sign-in read failed sent a history it built from nothing over the stored one]' : ''), rule: wipedByFailedTab ? 'R16-wiped' : null });
+      /* Tagged the same way: a path pick left standing beside a newer one, the newer one picked by a tab whose read
+         failed (its view held no pick, so its pick sent no delete for the old one). */
+      const pm = rec[0] === 'caSteps' && /^(.*):path:/.exec(rec[1] || '');
+      const bothPicks = !!pm && g === 'true' && isMap(stored && stored.caSteps) && Object.keys(stored.caSteps).filter(x => x.startsWith(pm[1] + ':path:') && stored.caSteps[x] === true).length > 1 && effs.some(x => x.a.kind === 'path' && !tabBy[x.a.tab].loadOk);
+      const tag = wipedByFailedTab ? 'R16-wiped' : bothPicks ? 'R6-both-picks' : null;
+      const why = { 'R16-wiped': 'a tab whose sign-in read failed sent a history it built from nothing over the stored one', 'R6-both-picks': 'a tab whose sign-in read failed picked a path and sent no delete for the stored pick' };
+      fails.push({ msg: `${k}: stored ${g}, expected ${[...set].join(' or ')}` + (lastOwed ? ` (last owed: ${lastOwed.a.tab} ${describe(lastOwed.a)} at ${rel(lastOwed.a.t)})` : ' (no owed action: the value it started with)') + (tag ? ` [${tag}: ${why[tag]}]` : ''), rule: tag });
     }
   }
   /* A record the site writes WHOLE (an exit-check result, a practice-log entry, the streak) must be one value some
@@ -919,8 +943,8 @@ function oracle(sc, world, tabs){
     if (acceptOf(rec, effs, 'owedLoose').whole.has(g)){ known.push({ kind: 'K3 unload write lost', leaf: rec.join('.'), stored: g, accept: [...whole] }); continue; }
     /* The leaves were excused as K1 (another tab sent its whole older copy of this record over the new one): the record
        must then be that tab's whole copy, one value the oracle's model of that tab held, never a mix of the two. */
-    const k1By = new Set(known.filter(k => k.kind.startsWith('K1') && (k.leaf === rec.join('.') || k.leaf.startsWith(rec.join('.') + '.'))).map(k => k.by));
-    if ([...k1By].some(by => viewsOf(tabBy[by], rec, effs).has(g))) continue;
+    const k1s = known.filter(k => k.kind.startsWith('K1') && (k.leaf === rec.join('.') || k.leaf.startsWith(rec.join('.') + '.')));
+    if (k1s.some(k => canon(viewAt(tabBy[k.by], rec, effs, k.sentAt)) === g)) continue;
     leaves++;
     fails.push({ msg: `${rec.join('.')}: stored ${g}, a mixture no history gives; expected one of ${[...whole].join(' or ')}` });
   }
@@ -970,6 +994,12 @@ function viewBefore(tab, rec, effs, upto){
   for (const x of effs){ if (x === upto) break; if (x.a.tab === tab.name) v = x.e.fn(v); }
   return v;
 }
+/* The oracle's model of a tab's value for a record at time t: what it loaded, then its own actions done by then. */
+function viewAt(tab, rec, effs, t){
+  let v = tab.loadOk ? getRec(tab.loadSnap, rec) : ABSENT;
+  for (const x of effs) if (x.a.tab === tab.name && x.a.t <= t) v = x.e.fn(v);
+  return v;
+}
 /* Every value the oracle's model of a tab held for a record: what it loaded, then its own actions (R11 K1). */
 function viewsOf(tab, rec, effs){
   const out = new Set();
@@ -1003,9 +1033,10 @@ const DAY = 86400000;
    site under test (data, not code). */
 const DATA = (() => {
   const c = { window: {} }; c.window = c; vm.createContext(c);
-  vm.runInContext(readFileSync(join(ROOT, 'class-activities.js'), 'utf8'), c);
-  const all = c.CLASS_ACTIVITIES || [];
   const out = { CHECKS: {}, CHOICES: {}, RETAKE: {}, PATHS: [] };
+  try { vm.runInContext(readFileSync(join(ROOT, 'class-activities.js'), 'utf8'), c, { filename: 'class-activities.js' }); }
+  catch (e){ if (e && e.name === 'SyntaxError'){ out.parseError = 'class-activities.js does not parse: ' + e.message; return out; } throw e; }
+  const all = c.CLASS_ACTIVITIES || [];
   for (const id of ['ca-14', 'ca-15']){
     const a = all.find(x => x.id === id);
     if (!a || !a.check) throw new Error('save-loop: ' + id + ' is no longer an exit check in class-activities.js');
@@ -1033,7 +1064,7 @@ function initialDoc(r, kind){
   const d = {
     name: USER.displayName, email: USER.email, migrations: { swap45: true },
     completed: { 'm6w1-b-sec0-0': true, 'm6w1-b-sec0-1': true, 'm7w1-b-sec1-0': true },
-    caSteps: { 'ca-18:0': true, 'ca-18:1': true },
+    caSteps: { 'ca-18:0': true, 'ca-18:1': true, 'ca-46:path:full': true },
     classActivities: { 'ca-12': true, 'ca-14': true },
     responses: { 'm6w1-b-sec0-2': 'first finger on fret two', 'm6w2-b-sec0-0': 'G',
       'practice-m6w1-s2': [{ value: '72', date: new Date(T0 - 3 * DAY).toISOString() }, { value: '80', date: new Date(T0 - 2 * DAY).toISOString() }] },
@@ -1055,6 +1086,9 @@ function initialDoc(r, kind){
     d.songReady = { 'the-cure': { 4: true, 5: false } };
   }
   if (kind === 'none') return null;
+  /* Half the two-devices cases start with no path picked, so two devices can each pick one the other never saw (K2);
+     with a stored pick and only two paths, that cannot happen. */
+  if (kind === 'nopick') delete d.caSteps['ca-46:path:full'];
   void r;
   return d;
 }
@@ -1093,7 +1127,7 @@ function genScenario(seed, idx, famFilter){
   const ri = (a, b) => a + Math.floor(r() * (b - a + 1));
   const pick = arr => arr[Math.floor(r() * arr.length)];
   const S = 1000;
-  const sc = { fam, seed, idx, actions: [], tabs: [], devices: [], initial: initialDoc(r, fam === 'swap45' ? 'unmarked' : fam === 'mixed' && r() < 0.15 ? 'none' : 'marked') };
+  const sc = { fam, seed, idx, actions: [], tabs: [], devices: [], initial: initialDoc(r, fam === 'swap45' ? 'unmarked' : fam === 'mixed' && r() < 0.15 ? 'none' : fam === 'two-devices' && r() < 0.5 ? 'nopick' : 'marked') };
   const devA = device('dev1', []);
   sc.devices.push(devA);
   let ai = 0;
@@ -1469,6 +1503,11 @@ async function main(){
   console.log(`save-loop: fake Firestore self-test ${self.length - selfBad.length} of ${self.length} rules hold${FAKE_FAULT ? ` (fake fault planted: ${FAKE_FAULT})` : ''}`);
   for (const x of selfBad) console.log(`  ✗ FAKE ${x.name}${x.detail ? ' — ' + x.detail : ''}`);
   if (selfBad.length){ console.log('save-loop: ✗ the fake no longer behaves like Firestore; no case was run'); return 1; }
+  {
+    let bad = DATA.parseError || null;
+    if (!bad) try { siteScripts(ROOT); } catch (e){ if (!e.siteFile) throw e; bad = e.message; }
+    if (bad){ console.log(`✗ FAIL site: ${bad}`); console.log('save-loop: ✗ a site script does not parse; no case was run'); return 1; }
+  }
   const single = opt('case', null);
   const N = Number(opt('cases', 180));
   const idxs = single != null ? [Number(single)] : Array.from({ length: N }, (_, i) => i);
