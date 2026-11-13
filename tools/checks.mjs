@@ -6294,8 +6294,10 @@ const PRECACHED_EXTRA_COUNT = 7;   // 6 + fonts/rubik-mono-one-top5.woff2 (the T
 /* ════════════════════════════════════════════════════════════════════
    1cx. THE PITCH DETECTORS AGAINST MADE-UP TONES (2026-11-13). tools/tone-test.mjs cuts the REAL coachDetectPitch
    (coach-core.js) and the tuner's detectPitchYIN (tuner.js) out of the site, feeds them seeded tones (every note from
-   the low E to the high e's 12th fret as a sine, a 6-harmonic pluck and a pluck with a weak fundamental, at three
-   levels and at the YIN gate's edge, plus silence and white noise) and compares with what they read on 2026-11-13.
+   the low E to the high e's 12th fret and four above, as a sine, a 6-harmonic pluck and a pluck with a weak
+   fundamental, at three levels and at the YIN gate's edge, plus silence and white noise), the ways the site calls
+   them (48 / 44.1 / 96 kHz; the single-note, chord and power-chord gates; a catch-up window through `end`; the
+   tuner's high-e silence bar) and compares with what they read on 2026-11-13.
    An accidental edit to the pitch code fails here at the next commit, not in class. Not a spec: a deliberate change
    re-pins in the tool (--measure) with its reason. The deep listening tests stay in tools/mic-sim/.
    ════════════════════════════════════════════════════════════════════ */
@@ -6307,7 +6309,10 @@ function checkToneTest() {
   if (r.status !== 0 || !last.startsWith('tone-test: ✓')) {
     err('tools/tone-test.mjs failed' + (r.error ? ': ' + r.error.message : '') + ' — replay: node tools/tone-test.mjs --verbose');
     problems++;
-    for (const l of [...lines.slice(-8), ...(r.stderr || '').trim().split('\n').slice(-4)]) if (l) console.log(`${C.dim}      ${l}${C.reset}`);
+    /* A crash prints its message on the first stderr line naming an Error; the stack's tail alone hides it. */
+    const errLines = (r.stderr || '').trim().split('\n');
+    const named = errLines.find(l => /^\s*(?:Uncaught )?\w*Error(?: \[\w+\])?: /.test(l)) || errLines.find(l => /\b\w*Error\b/.test(l));
+    for (const l of [...lines.slice(-8), ...(named ? [named] : []), ...errLines.slice(-4).filter(l => l !== named)]) if (l) console.log(`${C.dim}      ${l}${C.reset}`);
     return;
   }
   ok(last.replace(/^tone-test: ✓ — /, ''));
