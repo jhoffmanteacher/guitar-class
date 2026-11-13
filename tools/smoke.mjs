@@ -59,9 +59,9 @@
      activities        In-Class Activities cards: the Optional edge, chord grids,
                        Note Call, Call the chord, Name the power chord, recording
                        switches, strum patterns, paths, the folded view and the bar's
-                       tool buttons, Today's side-by-side tiles, the big-screen fill at
-                       2560x1300 (site-fill.js, styles.css; class-activities.js,
-                       the ca* renderers in app.js)
+                       tool buttons, Today's side-by-side tiles, the practice-card
+                       keys, the big-screen fill at 2560x1300 (site-fill.js,
+                       styles.css; class-activities.js, the ca* renderers in app.js)
      practice-minutes  the practice-minutes strip (practice-minutes*.js)
      tuning-sim        the Tuning Simulator
    app.js or styles.css touched broadly, or unsure → no --only.
@@ -1259,6 +1259,74 @@ async function noChecklistWalk(page, run, events, stats) {
   await run('nochk:en', "setLang('en')", 500);
 }
 
+/* The practice-card player's keys (KEYS in app/cards.js, 2026-11-13). Real key presses (CDP Input events) on
+   practice card ca-18 at 1366x657, in English: with the focus on the page body Space plays (the Play button shows its
+   Stop state) and Space again stops; > then < move the speed control one stop and back; a MOUSE click on a section
+   chip leaves the focus on <body> once the press is over, so Space then stops instead of restarting that section;
+   a reload brings the card back at its first speed (nothing persisted). checks.mjs 1db runs the same handlers on a
+   small page in Node; this is Chrome's own focus and key handling. A checkout without the keys skips it. */
+async function cardKeysWalk(page, run, events, stats, base) {
+  const ID = 'ca-18';
+  if (!(await run('keys:present', `typeof pcKeydown === 'function' && typeof pcKeyPointerUp === 'function' && CLASS_ACTIVITIES.some(a => a.id === '${ID}')`, 10))) return;
+  const fail = (w, text) => events.push({ step: 'keys:' + w, kind: 'card-keys', text });
+  const KEYS = { ' ': ['Space', 32], '>': ['Period', 190, 8], '<': ['Comma', 188, 8] };
+  const key = async k => { const [code, vk, mods = 0] = KEYS[k];
+    await page.send('Input.dispatchKeyEvent', { type: 'keyDown', key: k, code, windowsVirtualKeyCode: vk, nativeVirtualKeyCode: vk, modifiers: mods, text: k, unmodifiedText: k });
+    await page.send('Input.dispatchKeyEvent', { type: 'keyUp', key: k, code, windowsVirtualKeyCode: vk, nativeVirtualKeyCode: vk, modifiers: mods }); await sleep(250); };
+  const state = `(() => { const root = document.querySelector('.ca-card[open][data-id="${ID}"] .pc'); const r = root && root.querySelector('.pc-speed-range');
+    const a = document.activeElement;
+    return { open: !!root, playing: !!(root && pcState && pcState.root === root), stopLabel: !!(root && root.querySelector('.pc-play').classList.contains('playing')),
+      speed: r ? r.value : (root ? root.dataset.slow : null), focus: !a || a === document.body ? 'body' : a.className || a.tagName }; })()`;
+  const openCard = async w => {
+    await run('keys:open-ca:' + w, `(setLang('en'), openClassActivitiesScreen(), 1)`, 500);
+    await run('keys:open:' + w, `caFocusActivity('${ID}')`, 900);
+    await run('keys:body:' + w, `(() => { const p = document.querySelector('.ca-card[open][data-id="${ID}"] .pc-player'); if (p) p.scrollIntoView({ block: 'center' }); if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur(); return true; })()`, 200);
+  };
+  await page.send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false });
+  try {
+    await openCard('first');
+    const s0 = await run('keys:start', state, 10);
+    if (!s0 || !s0.open) { fail('open', `${ID} did not open`); return; }
+    await key(' ');
+    const s1 = await run('keys:space-play', state, 10);
+    if (!s1 || !s1.playing || !s1.stopLabel) fail('space-play', `Space with the focus on the page did not start ${ID} (the Play button should show Stop): ${JSON.stringify(s1)}`);
+    await key(' ');
+    const s2 = await run('keys:space-stop', state, 10);
+    if (!s2 || s2.playing || s2.stopLabel) fail('space-stop', `a second Space did not stop ${ID}: ${JSON.stringify(s2)}`);
+    await key('>');
+    const s3 = await run('keys:faster', state, 10);
+    if (!s3 || s3.speed === s0.speed) fail('faster', `> did not move the speed control: ${JSON.stringify(s0)} -> ${JSON.stringify(s3)}`);
+    await key('<');
+    const s4 = await run('keys:slower', state, 10);
+    if (!s4 || s4.speed !== s0.speed) fail('slower', `< did not bring the speed control back: ${JSON.stringify(s0)} -> ${JSON.stringify(s4)}`);
+    // R1-1: a mouse click on a section chip, then Space stops (not a restart of that section with a new count-in).
+    const at = await run('keys:chip-at', `(() => { const b = document.querySelectorAll('.ca-card[open][data-id="${ID}"] .pc-sec')[1]; if (!b) return null; b.scrollIntoView({ block: 'center' }); const q = b.getBoundingClientRect(); return { x: q.left + q.width / 2, y: q.top + q.height / 2 }; })()`, 100);
+    if (!at) fail('chip', `${ID} has no second section chip to click`);
+    else {
+      await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: at.x, y: at.y });
+      await page.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: at.x, y: at.y, button: 'left', buttons: 1, clickCount: 1 });
+      await page.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: at.x, y: at.y, button: 'left', buttons: 0, clickCount: 1 });
+      await sleep(300);
+      const c1 = await run('keys:chip-clicked', state, 10);
+      if (!c1 || !c1.playing || c1.focus !== 'body') fail('chip-click', `a mouse click on a section chip should play from it and leave the focus on the page: ${JSON.stringify(c1)}`);
+      await key(' ');
+      const c2 = await run('keys:chip-space', state, 10);
+      if (!c2 || c2.playing) fail('chip-space', `Space after a mouse click on a section chip did not stop the card (it pressed the chip again?): ${JSON.stringify(c2)}`);
+    }
+    await run('keys:stop', `(pcStop(), 1)`, 100);
+    // A reload: the card opens at its first speed, stopped.
+    await page.send('Page.navigate', { url: `${base}/index.html#class-activities/${ID}` });
+    await sleep(3500);
+    await run('keys:devBypass', 'devBypass()', 3500);
+    for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'keys:devBypass' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
+    await openCard('reload');
+    const r = await run('keys:after-reload', state, 10);
+    if (!r || !r.open || r.playing || r.speed !== s0.speed) fail('reload', `after a reload ${ID} should open stopped at its first speed (${s0.speed}): ${JSON.stringify(r)}`);
+    else stats.cardKeys = (stats.cardKeys || 0) + 1;
+    await run('keys:done', `(caCloseOpen(), 1)`, 300);
+  } finally { await page.send('Emulation.clearDeviceMetricsOverride'); }
+}
+
 /* Today's activities side by side (Jonathan, 2026-11-10, work order Part 3). In a real browser, in each language,
    with today stubbed, at 1366x657 (set here: between walks the page is at the headless window's own size, which is
    phone width): the three longest titles a student can be given plus a finished card make a two-column grid (equal
@@ -2083,6 +2151,7 @@ async function walk(base, chromePort, label) {
     await dotsWalk(page, run, events, stats);
     await noChecklistWalk(page, run, events, stats);
     await todayGridWalk(page, run, events, stats);
+    await cardKeysWalk(page, run, events, stats, base);
   }
   if (ON['practice-minutes']) await pmHeaderWalk(page, run, events, stats);
   if (ON['tuning-sim']) await tuningSimWalk(page, run, events, stats, base);
@@ -2147,7 +2216,7 @@ try {
   const norm = e => `${e.kind}|${e.step.replace(/^(en|es):/, '')}|${e.kind === 'bad-handler' ? '' : e.text}`;
   const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
   const report = base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
-  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (${LANGS.join(' + ').toUpperCase()}), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.pwnSteps ? `, ${now.stats.pwnSteps} Name the power chord steps (EN + ES: Note Call frets 5-12; Show answer on by default and clicked both ways; the 12 buttons in fret order and a real click on a right and a wrong answer on the buttons and the board; Next, Stop, another step, a language switch; the choice remembered after a reload)` : ''}${now.stats.chordCallRounds ? `, ${now.stats.chordCallRounds} Call the chord steps (EN + ES: Slower by default, the speed switch both ways, Start, a space bar that is cancelled, Stop, a round ended by another step and by a language switch, the default after a reload)` : ''}${now.stats.powerLayouts ? `, a pair play screen says its BPM and its live tempo buttons are clicked (${now.stats.pairPlay || 0} run), the setup's \u22125 / +5 and slider are clicked and measured, EN + ES (${now.stats.tempoSetup || 0} run), the done screen's −5/+5 row clicked twice and Again (${now.stats.doneRow || 0} run), Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} song-switch rounds (16 switches x 3) run on a fake clock: round tempos, the BPM buttons, the play screen fitting 657px, one lit chart per chord, the done screen with 21 changes, ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''}${now.stats.powerBack ? `; the way back to the chords measured and clicked on ${now.stats.powerBack} screens (a pair's and a song switch's done screen and the songs view, EN + ES)` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}${now.stats.pmHeaderViews ? `, practice-minutes strip in the top bar: ${now.stats.pmHeaderViews} view checks (6 views x EN/ES x 1366 and 390 px: a shown button, exactly one strip on top, the Games bar's own on Games, folded away with a practice card open and none in its bar, no sideways scroll), ${now.stats.pmHeaderClicks} clicks open My progress, back after a reload, hidden when signed out` : ''}${now.stats.strumSteps ? `, ${now.stats.strumSteps} strum-pattern steps (EN + ES: cells, arrows, chord names, columns, 1366 and 390 px; Play strum lights an arrow, clicks every beat and sounds down strums louder; Play clicks opens the Metronome at 60 BPM, and again at the card's slider once it is dragged; Stop resets)` : ''}${now.stats.pathsActivities ? `, ${now.stats.pathsActivities} paths-activity walks (EN + ES: chooser with a silent preview and step list per path, Start, route length, Got it, Change path, ticks kept across a switch, one saved pick)` : ''}${now.stats.noChecklist ? `, ${now.stats.noChecklist} no-checklist walks (a practice card opens with no checkbox and one Mark complete, which completes it and un-marks it; an extra song opens with none)` : ''}${now.stats.dotsWalks ? `, ${now.stats.dotsWalks} one-line step dot walks (EN + ES: the count's dots shown, each tap fills one, the last ticks the step and moves on, Got it on the next step moves on again)` : ''}${now.stats.todayGrid ? `, ${now.stats.todayGrid} Today tiles walked (EN + ES: at 1366x657 the three longest titles and a finished card side by side, two equal columns, reading order = Tab order, titles in two lines, nothing outside its tile; one column at 390px; one card and an open card take the whole width)` : ''}${now.stats.foldCards ? `, ${now.stats.foldCards} folded-card walks at 1366x657 (header and menu off screen with no full screen, a one-row bar, each of its 4 tool buttons opens its popup on screen and closes it, All activities brings both back${now.stats.foldReload ? '; a reload on the card\'s link reopens it folded' : ''})` : ''}${now.stats.fillViews ? `, the big-screen fill at 2560x1300 (the header across the window and the column over 1,400 px on screen, on the In class list and an open activity; factor 1 again at 1366x657)` : ''}`);
+  say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (${LANGS.join(' + ').toUpperCase()}), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.pwnSteps ? `, ${now.stats.pwnSteps} Name the power chord steps (EN + ES: Note Call frets 5-12; Show answer on by default and clicked both ways; the 12 buttons in fret order and a real click on a right and a wrong answer on the buttons and the board; Next, Stop, another step, a language switch; the choice remembered after a reload)` : ''}${now.stats.chordCallRounds ? `, ${now.stats.chordCallRounds} Call the chord steps (EN + ES: Slower by default, the speed switch both ways, Start, a space bar that is cancelled, Stop, a round ended by another step and by a language switch, the default after a reload)` : ''}${now.stats.powerLayouts ? `, a pair play screen says its BPM and its live tempo buttons are clicked (${now.stats.pairPlay || 0} run), the setup's \u22125 / +5 and slider are clicked and measured, EN + ES (${now.stats.tempoSetup || 0} run), the done screen's −5/+5 row clicked twice and Again (${now.stats.doneRow || 0} run), Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} song-switch rounds (16 switches x 3) run on a fake clock: round tempos, the BPM buttons, the play screen fitting 657px, one lit chart per chord, the done screen with 21 changes, ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''}${now.stats.powerBack ? `; the way back to the chords measured and clicked on ${now.stats.powerBack} screens (a pair's and a song switch's done screen and the songs view, EN + ES)` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}${now.stats.pmHeaderViews ? `, practice-minutes strip in the top bar: ${now.stats.pmHeaderViews} view checks (6 views x EN/ES x 1366 and 390 px: a shown button, exactly one strip on top, the Games bar's own on Games, folded away with a practice card open and none in its bar, no sideways scroll), ${now.stats.pmHeaderClicks} clicks open My progress, back after a reload, hidden when signed out` : ''}${now.stats.strumSteps ? `, ${now.stats.strumSteps} strum-pattern steps (EN + ES: cells, arrows, chord names, columns, 1366 and 390 px; Play strum lights an arrow, clicks every beat and sounds down strums louder; Play clicks opens the Metronome at 60 BPM, and again at the card's slider once it is dragged; Stop resets)` : ''}${now.stats.pathsActivities ? `, ${now.stats.pathsActivities} paths-activity walks (EN + ES: chooser with a silent preview and step list per path, Start, route length, Got it, Change path, ticks kept across a switch, one saved pick)` : ''}${now.stats.noChecklist ? `, ${now.stats.noChecklist} no-checklist walks (a practice card opens with no checkbox and one Mark complete, which completes it and un-marks it; an extra song opens with none)` : ''}${now.stats.dotsWalks ? `, ${now.stats.dotsWalks} one-line step dot walks (EN + ES: the count's dots shown, each tap fills one, the last ticks the step and moves on, Got it on the next step moves on again)` : ''}${now.stats.todayGrid ? `, ${now.stats.todayGrid} Today tiles walked (EN + ES: at 1366x657 the three longest titles and a finished card side by side, two equal columns, reading order = Tab order, titles in two lines, nothing outside its tile; one column at 390px; one card and an open card take the whole width)` : ''}${now.stats.foldCards ? `, ${now.stats.foldCards} folded-card walks at 1366x657 (header and menu off screen with no full screen, a one-row bar, each of its 4 tool buttons opens its popup on screen and closes it, All activities brings both back${now.stats.foldReload ? '; a reload on the card\'s link reopens it folded' : ''})` : ''}${now.stats.fillViews ? `, the big-screen fill at 2560x1300 (the header across the window and the column over 1,400 px on screen, on the In class list and an open activity; factor 1 again at 1366x657)` : ''}${now.stats.cardKeys ? `, practice-card keys on ca-18 (Space plays and stops, > and < move the speed and back, Space after a mouse click on a section chip stops, a reload keeps nothing)` : ''}`);
   if (now.stats.tuningSimRounds) say(`smoke: Tuning Simulator (EN + ES): ${now.stats.tuningSimRounds} rounds played (round 1 with a real held peg button), ${now.stats.tuningSimChecks} checkpoints — defaults (sound on, level 1, the question up, no naming step), the card (the string to tune and the tuner's letter), the arrow keys (Left = counterclockwise = tighten) and a hidden tab, three clean rounds per level (saved), the sound switch, a wrong way resetting the count, a reload, level 4 (another letter on the tuner, the circle of notes and its arrow, which turns clockwise for Up and counterclockwise for Down, Tighten turns counterclockwise, the held button speeds up, green on the wrong letter does not finish), the notes and arrow as drawn, real keys and clicks (a held Enter answers once, focus after a key, Space/Enter/click = one tick), the saved level never lowered, green on the circle only when done, and no getUserMedia call`);
   if (LANGS.length === 1) say('smoke: --en-only — Spanish not walked (the end-of-day / Friday full walk does it); "EN + ES" below means English only');
   if (ONLY !== null) say(`smoke: --only ${AREAS.filter(a => ON[a]).join(', ')} — not walked: ${AREAS.filter(a => !ON[a]).join(', ')}`);
