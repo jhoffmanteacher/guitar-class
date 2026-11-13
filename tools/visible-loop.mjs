@@ -16,7 +16,7 @@
      node tools/visible-loop.mjs --break-fake clock    self-test: the pages get the REAL clock, not the virtual day
    Exit 0 = every comparison held; 1 = a contradiction (each prints its seed, case and step); 3 = the watchdog
    (nothing moved for 120 s; it prints the step it was on). The time taken goes to stderr, so the same seed prints
-   the same stdout byte for byte. About 40-50 s for the default 60 cases on a quiet machine (2026-11-12). Node only:
+   the same stdout byte for byte. The default 60 cases: 16 s alone, about 70 s beside two other runs (2026-11-12). Node only:
    no browser, no network, no Firebase.
 
    When to run it: after a change to any of the visibility / blocker / optional rules (caIsVisible, caIsOptional,
