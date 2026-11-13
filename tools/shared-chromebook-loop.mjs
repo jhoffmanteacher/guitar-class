@@ -420,6 +420,13 @@ const rel = t => ((t - T0) / 1000).toFixed(2) + 's';
 
 /* D1: every page of the device gets the device's localStorage. */
 function localStorageFor(tab){ return FAKE_FAULT === 'storage-per-tab' ? (tab.ownLocal || (tab.ownLocal = storage('own'))) : tab.device.localStorage; }
+/* The page's own handle on a storage area: the same data, but every call is attributed to this page, also when the
+   site reaches storage from a promise continuation long after the event that started it. */
+function pageStorage(page, store){
+  const dev = page.tab.device;
+  const via = fn => function(...a){ const prev = dev.accessing; dev.accessing = page; try { return fn.apply(store, a); } finally { dev.accessing = prev; } };
+  return { getItem: via(store.getItem), setItem: via(store.setItem), removeItem: via(store.removeItem), clear: via(store.clear), key: via(store.key), get length(){ return store.length; } };
+}
 /* A device: the shared localStorage (D1), Firebase Auth (A1-A4), the network phases. */
 function storage(name, onAccess){
   return {
@@ -936,8 +943,8 @@ function makePage(world, tab, opts){
       fonts: { ready: Promise.resolve() }, activeElement: null, hasFocus(){ return !tab.hidden; },
       get hidden(){ return tab.hidden; }, get visibilityState(){ return tab.hidden ? 'hidden' : 'visible'; }
     },
-    localStorage: localStorageFor(tab),
-    sessionStorage: tab.session,
+    localStorage: pageStorage(page, localStorageFor(tab)),
+    sessionStorage: pageStorage(page, tab.session),
     location: { hostname: 'class.example.test', protocol: 'https:', host: 'class.example.test', origin: 'https://class.example.test', href: 'https://class.example.test/' + (opts.teacher ? '?teacher=true' : ''), pathname: '/', search: opts.teacher ? '?teacher=true' : '', hash: '',
       reload(){ requestReload(page); }, assign(){}, replace(){} },
     history: { scrollRestoration: 'auto', replaceState(){}, pushState(){}, back(){}, length: 1 },
@@ -1775,8 +1782,9 @@ function toldAbout(world, a){
    signed the student out (work never even sent is a different loss and fails). The count is printed beside the
    band a full default run gives on seed 1 (KTAB_BAND); a count outside it is printed as a warning to look at. */
 const KNOWN = [{ id: 'K-TAB', listed: '2026-11-12' }];
-/* What a full default run (120 cases, seed 1) gives for K-TAB on the site of 2026-11-13: records matched, in cases. */
-const KTAB_BAND = { records: [0, 0], cases: [0, 0] };
+/* What a full default run (120 cases, seed 1) gives for K-TAB on the site of 2026-11-13 (origin/main 4be4fa7: 8 records
+   in 6 cases), with room either side: records matched, in cases. */
+const KTAB_BAND = { records: [4, 14], cases: [3, 10] };
 function knownTabLoss(world, a){
   const page = world.allPages.find(p => p.id === a.page);
   if (!page || page.signOutClicked || page.diedAt == null || page.notices.length) return false;
