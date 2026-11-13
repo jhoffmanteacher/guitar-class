@@ -20,6 +20,38 @@ Jonathan will say "read todo.md" in a fresh chat. Do this, in this order:
 
 Ordinary work does not wait for any of this: a Fast change or a new activity he asks for comes first.
 
+## Queued by Jonathan 2026-11-13: lyric-sheet dot lead should follow the tempo (ca-45 feels off)
+
+**For any session working in the practice-card player (`app/cards.js`): read this before you touch `PC_SHEET_LEAD`,
+`PC_SHEET_SOLID`, `pcFrame()` or `pcSheetMark()`.** Written from a chat session that read the code only. Nothing was
+run or measured, and no code was changed.
+
+- **What Jonathan said:** on ca-45 (Sweet Child O' Mine, Lyrics and Chords) the highlights "feel off". Offered three
+  fixes, he chose the first: "i want to do number 1", which is to make the dot's lead a share of a beat instead of a
+  fixed time. The other two (the dot fills on the beat while the chord mark still moves early; a shorter lead for
+  ca-45 only) were not chosen.
+- **What exists:** `PC_SHEET_LEAD = 0.175` is real seconds at every tempo and speed (`pcFrame()` multiplies it by
+  `pcRate()`). It applies to all three sheet cards: ca-38 (Watchtower, 115 BPM), ca-44 ("the cure", counted 72) and
+  ca-45 (125 BPM). The dot stays filled for `PC_SHEET_SOLID = 0.42` of a beat (`pcSheetMark()`, which already gets
+  `beatSec`).
+- **Build:** the lead becomes a fraction of the counted beat (`st.win.bar / beatsPerBar`, the same number
+  `beatSec` is made from), still in real time at every speed. One constant, all sheet cards. The tab cursor
+  (`PC_TAB_LEAD`, `PC_ROW_LEAD`) is not part of this.
+- **Ask Jonathan for the fraction before building (AskUserQuestion).** He tuned 0.175 s by ear on 2026-10-19, on
+  ca-38. That is 0.34 of a Watchtower beat. Keeping 0.34 moves ca-45 by only about 14 ms (175 to 161 ms), which may
+  not be what he is feeling; a quarter of a beat gives 120 ms on ca-45 but also cuts ca-38 to 130 ms and changes
+  what he tuned. On ca-44 the two give 283 ms and 208 ms. A live override on the URL, like `?snipcal=1&lat=`, would
+  let him set it by eye in the room.
+- **Check first what "off" is.** He has not yet said whether the dot is early, late, or drifts in some sections.
+  If it drifts, look at the chart and `barTimes` for the song (`python3 tools/beat-audit.py --only sweet-child-o-mine`)
+  before changing any lead.
+- **A guess to test, not a finding:** with about 80 ms of speaker delay (`SNIP_OUTPUT_LATENCY`) the dot fills about
+  255 ms before the beat is heard and stays filled about 200 ms at Normal on ca-45, so it may be hollow again before
+  the beat sounds. Look at it in a browser before acting on it.
+- **Rules that apply:** skill `audio-and-snippets`; `node tools/playalong-loop.mjs --only ca-45` (then ca-38 and
+  ca-44) and report its summary line; a `CHANGELOG.md` entry, because students see it.
+- **When it ships:** delete this section.
+
 ## Split the four parts that are already over 2,000 lines
 
 Added 2026-11-11 (Jonathan: "let's make sure we split those files at some point"). Not urgent, but do it in a
