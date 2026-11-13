@@ -15176,10 +15176,15 @@ function checkSiteErrors() {
    asks for exists in English AND Spanish (and every one is used), and the three
    hooks into app.js / index.html / journey.js are still there (the strip is ONE hidden <button id="pm-header"> in the main top bar,
    shown by PM.syncHeader() on every #user-area paint path, and caSyncTopbar() must not draw it a second time).
+   Since 2026-11-13 the student's page has no class rank: it names no rankBoard and My progress draws the own-weeks line instead.
    The browser half (strip, recap, toast, My progress, 1366×657, both languages,
    a real <audio>) is tools/pm-e2e.mjs — it needs Chrome, so it is run by hand.
    ════════════════════════════════════════════════════════════════════ */
-const PM_SIM_PIN = 390;
+/* 390 → 381 on 2026-11-13, on purpose: the class rank left the student's page (Jonathan: compare a student with their own weeks), and its
+   30 cases (the rankBoard writer, its 3-hour read, the tile; pm-sim sections 13, 15, 16 and 17c) went with it. Section 13 now runs the
+   own-weeks line (25 cases: rankBoard never touched while the Top 5 works, the pm:b: clean-up, calc.ownWeeks on every edge case, the
+   wording keys, what My progress draws) and sections 16 and 17c check that no page touches rankBoard. */
+const PM_SIM_PIN = 381;
 /* ════════════════════════════════════════════════════════════════════
    1dc. STUDENT DATA NEVER GOES TO CLAUDE (Jonathan, 2026-11-13: "I am allowed to
         store data in google/firestore but not in claude"; "let's block student
@@ -15492,14 +15497,25 @@ function checkPracticeMinutes(i18nTable) {
     }
     /* The class rank (2026-11-05): ONE number per student keyed by the private Top 5 tag, never the uid. The uid-keyed minutesBoard (2026-11-04) is GONE:
        its all-time seconds were nearly equal to this week's, so joining it to the tag board by value linked tags to uids (and the live quiz links
-       uids to names). It must keep NO rules block at all (default deny), and rankBoard is pinned WHOLE below. */
+       uids to names). It must keep NO rules block at all (default deny), and rankBoard is pinned WHOLE below.
+       Since 2026-11-13 no student sees a class rank (Jonathan: a student is compared with their own weeks instead) and the student's page neither
+       writes nor reads rankBoard (pinned below, and run in pm-sim section 13). Its rules block stays exactly as published until it is removed on
+       purpose, which is a rules change Jonathan must paste: then drop RB_SHIPPED and make the count 0. */
     const mbMatches = (strip(rules).match(/match\s+\/minutesBoard\b/g) || []).length;
     if (mbMatches !== 0) fail(`firestore.rules has ${mbMatches} match block(s) for /minutesBoard: it must have none (a uid-keyed board next to the tag boards can be joined to them by value; Jonathan's rule, 2026-11-05)`);
     if (/['"`.]minutesBoard\b|collection\('minutesBoard'\)/.test(strip(read('practice-minutes.js') || ''))) fail("practice-minutes.js still reads or writes 'minutesBoard' (the class rank moved to rankBoard/{tag})");
+    /* The student's page names rankBoard nowhere (2026-11-13), and My progress has no rank tile or rank string: the tile, its four pm.tileRank*
+       strings and its .pm-rank style left together. Comments are stripped, so the header may tell the history. */
+    {
+      const engNoComments = strip(read('practice-minutes.js') || '').replace(/([;,{}()\]])[ \t]+\/\/.*$/gm, '$1');
+      if (/['"`.\/]rankBoard\b/.test(engNoComments)) fail("practice-minutes.js names 'rankBoard' again: since 2026-11-13 no student sees a class rank and the page neither writes nor reads that board (Jonathan: compare a student with their own weeks)");
+      if (/pm\.tileRank|pm-rank\b|rankInfo|rankTile/.test(engNoComments)) fail('practice-minutes.js draws a class rank on My progress again (pm.tileRank / .pm-rank / rankTile): removed 2026-11-13, the own-weeks line (pm.ownWeeks) took its place');
+      if (!/function ownWeeksHtml\(/.test(engNoComments) || !/\+ ownWeeksHtml\(w\.id\)/.test(engNoComments)) fail("practice-minutes.js: My progress must draw the own-weeks line (ownWeeksHtml(w.id) after the tiles) — this week against the student's own last and best week (2026-11-13)");
+    }
     const RB_SHIPPED = "match /rankBoard/{tag} { allow read: if isSignedIn(); allow create, update: if isSignedIn() && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id && request.resource.data.keys().hasOnly(['seconds']) && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 400 * dailyCapSeconds(); }";
     const rbMatches = (strip(rules).match(/match\s+\/rankBoard\b/g) || []).length;
     const rboard = block('rankBoard/{tag}');
-    if (rbMatches !== 1 || !rboard) fail(`firestore.rules has ${rbMatches} match blocks for /rankBoard (exactly one is allowed; practice-minutes.js reads and writes the class rank there)`);
+    if (rbMatches !== 1 || !rboard) fail(`firestore.rules has ${rbMatches} match blocks for /rankBoard (exactly one, as published: nothing uses it since 2026-11-13; removing it is a rules change for Jonathan to paste — then set this count to 0)`);
     else if (rboard.replace(/\s+/g, ' ').trim() !== RB_SHIPPED) fail('firestore.rules: the rankBoard block differs from the one shipped. If this is on purpose, change RB_SHIPPED here with it and tell Jonathan to paste the rules again');
     /* The Top 5 board (2026-11-04, redesigned the same day: Jonathan wants NO per-period minutes tied to a name, readable by anyone): two blocks,
        pinned WHOLE like minutesBoard. The board's docs are keyed by a private random tag, never a uid; the tag lives only in the student's own

@@ -45,13 +45,14 @@
    WHAT IT STORES (Firestore; firestore.rules has the matching blocks).
      minutes/{uid}/days/{YYYY-MM-DD}  { seconds }                 (capped per day)
      minutes/{uid}/weeks/{YYYY-Www}   { seconds, goalSeconds, hit }
-      rankBoard/{tag}                  { seconds }                 (the class rank, keyed by the private tag, not the uid; see CLASS RANK)
       weekBoard/{tag}                  { week, period, seconds }   (this week's Top 5, keyed by a private random tag, not the uid; see TOP 5)
       minutes/{uid}/meta/board         { id }                      (the tag: create-only, owner-only)
-  Nothing else: no heartbeat, no live count (see NO LIVE COUNT below).
+  Nothing else: no heartbeat, no live count (see NO LIVE COUNT below), and no class rank board any more
+  (rankBoard/{tag} is neither written nor read since 2026-11-13; see YOUR OWN WEEKS).
   Who else reads them: only the teacher console's Practice minutes view (teacher.js, 2026-11-06), which reads
   minutes/{uid}/weeks/* for every student (the one teacher grant under minutes/ in firestore.rules) and works the
-  rank and Top 5 out itself with calc.rankPlace / calc.top5Place; it never reads days, meta/board or either board.
+  rank and Top 5 out itself with calc.rankPlace / calc.top5Place; it never reads days, meta/board or any board.
+  The rank is the teacher's column only: no student sees a class rank (2026-11-13).
    Seconds are kept whole; the display floors to whole minutes. They are added
    with increment(), so two tabs or two devices never overwrite each other.
 
@@ -93,26 +94,18 @@
    checks.mjs 1cg and
    pm-sim sections 6 and 8 fail if a heartbeat or a live count comes back.
 
-   CLASS RANK (2026-11-04, Jonathan: "a ranking for students ... N/total"). My progress shows
-   "N/total": N = 1 + how many students have more whole minutes all time, total = how many students
-   have a board doc. rankBoard/{tag} holds ONE number, the student's all-time seconds the server
-   has confirmed: no name, no period, and (since 2026-11-05) NO UID: it is keyed by the student's private
-   random name tag (see boardTag), like the Top 5 board. It was minutesBoard/{uid} until then; Jonathan's rule
-   (no minutes tied to a name, readable by anyone) ruled the uid out: the live quiz kept each player's name under
-   the uid in liveQuiz/current.scores (names are gone from it too, 2026-11-05) and the wall's names with points can
-   still be lined up in the room with its public uid -> points, and this-week and all-time minutes are nearly the
-   same number while counting is young, so a uid-keyed board could be joined by value to the tag board. minutesBoard has no rules block
-   any more (nothing reads or writes it); its old docs can be deleted in the console. The student's own page writes it (see
-   publishBoard: created at the server's sum, then increments only), at most once per BOARD_MS; every
-   signed-in student may read the collection (that is the whole point), a write must be under the writer's own
-   tag, nobody deletes. The teacher's account is never written or ranked. It is a decoration like the rest
-   of this file: a failed write or read changes nothing about counting, and the rank tile stays away.
-   HONEST LIMITS: a student at DevTools can write any number up to the rules' cap for themselves; any
-   Google account that signs in once adds 1 to the total (no domain rule, Jonathan's call); a page
-   that closes within 2 minutes of its last confirmed seconds leaves them off the board (nothing adds
-   them later, so the board can run a little behind the minutes); two pages that both create a missing
-   doc in the same instant can undercount once. Reads cost one document per student, so the board is
-   kept 3 hours (memory and localStorage) per student.
+   YOUR OWN WEEKS (2026-11-13, Jonathan: the class rank goes; a student is compared with their own past weeks;
+   the weekly Top 5 stays). One line under the My progress tiles: this week's whole minutes, last week's, and the
+   best earlier week ("This week 42 min · last week 35 min · your best week 60 min"), worked out by calc.ownWeeks
+   from the student's own weeks docs, which load() already reads: no new read, no new collection, no rules change.
+   A lower week is just a number (no arrow, no colour). See calc.ownWeeks for the edge cases.
+   It replaced the CLASS RANK tile ("N/total" by all-time minutes, 2026-11-04 to 2026-11-13): a rank discourages
+   the students at the bottom, and an absent student can never climb. The page no longer writes or reads
+   rankBoard/{tag} (its rules block is still in firestore.rules, unused: it and the old docs can be removed
+   later, with a console paste), and the old 3-hour copy of the board (localStorage pm:b:<uid>) is removed
+   when a student's state is built (sync). minutesBoard/{uid}, the uid-keyed board before rankBoard, has had
+   no rules block since 2026-11-05. The teacher console's Practice minutes view keeps its own Class rank
+   column (calc.rankPlace), for the teacher only.
 
    TOP 5 (2026-11-04, Jonathan: "a top 5 icon for the top 5 minutes users per week, starting from
    each Monday, by class period"). A round "TOP 5" medal in the strip and on My progress, and a toast the
@@ -129,7 +122,7 @@
    only ever RAISES the number inside one week + period (a page with an older copy never lowers what another
    page wrote); a new week or a changed period overwrites it. At most one write per WB_MS. The class's docs for this week + period are read with one query
    (equality filters only: no composite index) and kept WB_KEEP_MS (15 min) in memory and localStorage,
-   so a period of 30 reads about 30 documents per student per 15 minutes on screen. Neither board has a uid (the class rank is keyed by the tag too, since 2026-11-05). The teacher's account is never written
+   so a period of 30 reads about 30 documents per student per 15 minutes on screen. The board has no uid. The teacher's account is never written
    or ranked. A failed write or read changes nothing about counting; the medal and the tile stay away.
    HONEST LIMITS: a student at DevTools can write any number up to the rules' week cap for themselves (and
    choose their period). A device whose clock is a week BEHIND replaces the doc with its own week when it loads, and
@@ -284,10 +277,26 @@
     };
   };
 
-  /* CLASS RANK and TOP 5 places — pure functions of numbers (2026-11-06). The student's page (rankInfo,
-     top5Info below) and the teacher console's Practice minutes view (teacher.js) both call these, so the
-     two can never work out a place two ways. Whole minutes decide: everyone who reads "12 min" shares a
-     place, and n = 1 + how many others have MORE whole minutes.
+  /* YOUR OWN WEEKS (2026-11-13; see the header) — a pure function of the student's own week totals.
+     weekSecs = { 'YYYY-Www': seconds }, curWeek = this week's id. Whole minutes, as the screen shows them:
+       now   this week;   last  the week before (0 when it has nothing);
+       best  the most minutes in any EARLIER week (this week left out; a week after curWeek, from a clock that ran
+             ahead, is ignored);
+       first true when no earlier week has a whole minute: nothing to compare with yet (the student's first week);
+       isBest true when this week has MORE whole minutes than every earlier week. A tie is not "best": the line
+             then shows the best week's number, which equals this week's. */
+  calc.ownWeeks = function(weekSecs, curWeek){
+    var m = function(s){ return Math.floor(Math.max(0, +s || 0) / 60); };
+    var ws = weekSecs || {}, top = 0;
+    Object.keys(ws).forEach(function(w){ if(w < curWeek){ var x = m(ws[w]); if(x > top) top = x; } });
+    var now = m(ws[curWeek]);
+    return { now: now, last: m(ws[calc.weekAdd(curWeek, -1)]), best: top, first: top === 0, isBest: top > 0 && now > top };
+  };
+  /* CLASS RANK and TOP 5 places — pure functions of numbers (2026-11-06). top5Place is called by the student's
+     page (top5Info below) and the teacher console's Practice minutes view (teacher.js), so the two can never
+     work out a place two ways. rankPlace is the console's Class rank column only since 2026-11-13 (no student
+     sees a rank). Whole minutes decide: everyone who reads "12 min" shares a place, and n = 1 + how many
+     others have MORE whole minutes.
      rankPlace(mySecs, othersSecs): n = null under one minute of practice; total = others + me. */
   calc.rankPlace = function(mySecs, othersSecs){
     var mine = Math.floor((mySecs || 0) / 60), higher = 0;
@@ -336,7 +345,6 @@
     newestGen[uid] = ++stateGen;
     return { uid: uid, gen: stateGen, days: {}, weeks: {}, pend: {}, inflight: null, flushP: null, frac: 0, loaded: false, loading: null, flushing: false,
              loadRetryAt: 0, toastWeek: '', pendingToast: false, lastRecapAt: 0, heldRecap: null,
-             boardReady: false, boardOwed: 0, boardBusy: false, boardAt: 0, boardRetryAt: 0, boardTimer: 0, board: null, boardLoading: null,
              wbSent: '', wbBusy: false, wbAt: 0, wbRetryAt: 0, wbTimer: 0, wb: null, wbLoading: null, wbLoadRetryAt: 0, top5Week: '', tag: '', tagP: null, tagRetryAt: 0 };
   }
   function ls(k, v){
@@ -447,6 +455,7 @@
         if(c){ S.days = c.days || {}; S.weeks = c.weeks || {}; }
         S.toastWeek = ls('pm:t:' + u) || '';
         S.top5Week = ls('pm:t5:' + u) || '';
+        ls('pm:b:' + u, null);         // the old class rank's 3-hour copy of the board (removed 2026-11-13): nothing reads it any more
         S.lastRecapAt = 0;
         idToken = ''; idTokenUid = '';
         refreshToken();
@@ -718,7 +727,6 @@
       cacheServer();
       trimToCap();
       st.loading = null;
-      publishBoard(st);
       publishWeek(st);
       if(!noFlush) flush();
       uiNow();
@@ -770,7 +778,6 @@
       if(o.kind === 'day') S.days[o.id] = (S.days[o.id] || 0) + o.inc;
       else {
         S.weeks[o.id] = { seconds: ((S.weeks[o.id] && S.weeks[o.id].seconds) || 0) + o.inc, goalSeconds: o.goalSeconds, hit: o.hit || !!(S.weeks[o.id] && S.weeks[o.id].hit) };
-        S.boardOwed += o.inc;          // the class board is owed these seconds (see publishBoard)
       }
     });
   }
@@ -814,7 +821,7 @@
       st.flushing = false; st.inflight = null;
       if(S !== st) settleAfterSwitch(st, snap, true);
       if(S === st){
-        applyConfirmed(ops); persist(); cacheServer(); uiNow(); refreshToken(); publishBoard(st); publishWeek(st);
+        applyConfirmed(ops); persist(); cacheServer(); uiNow(); refreshToken(); publishWeek(st);
         // Seconds counted while this commit was in flight (a stalled connection) go out now, not at the next Play. Not while still counting: that keeps the 60 s rhythm.
         if(!session && takePending()) setTimeout(function(){ if(S === st) flush(); }, 0);
       }
@@ -875,97 +882,10 @@
     });
   }
 
-  /* ── CLASS RANK (see the header): publish my number, read everyone's ── */
-  var BOARD_MS = 120000, BOARD_KEEP_MS = 10800000;
-  /* All-time seconds the SERVER has confirmed, as THIS page knows them: the sum of its weeks docs. Right straight after a
-     load; after that another page of the same student (a Journey tab) can have added seconds this page never saw. */
-  function confirmedSeconds(st){
-    var t = 0;
-    Object.keys(st.weeks).forEach(function(w){ t += st.weeks[w].seconds || 0; });
-    return t;
-  }
-  /* The teacher's own account is never on the board (a Journey page projected in class would otherwise rank first). */
+  /* The teacher's own account is never on the Top 5 board (a Journey page projected in class would otherwise rank first). */
   function isTeacherUser(){
     var u = hostUser();
     return !!(u && typeof TEACHER_EMAIL !== 'undefined' && u.email === TEACHER_EMAIL);
-  }
-  /* A page only ever ADDS to the board: increment(seconds the server confirmed since this page's last write), merged
-     into the student's one doc. Two pages of one student (the main tab and a Journey tab) therefore add up; with a plain
-     "write my total" the last page to write would replace the other's minutes with its own copy of the total.
-     The one exception is the very first write of a page, which looks at the doc: if it does not exist yet it is CREATED
-     at everything the server has confirmed (the minutes from before the board existed too); if it exists the page just adds.
-     At most one write in flight and one per BOARD_MS; a trailing timer (dropped with the state) writes what a throttled
-     call could not, so the end of a session is not left out. A refusal (the rules not published yet) backs off like the
-     minutes writes do and keeps what is owed; nothing else is affected. */
-  function publishBoard(st){
-    if(!st || S !== st || !st.loaded || isTeacherUser()) return;
-    if(st.boardReady && !(st.boardOwed > 0)) return;
-    if(Date.now() < st.boardRetryAt) return;
-    var wait = st.boardBusy ? BOARD_MS : BOARD_MS - (Date.now() - st.boardAt);
-    if(wait > 0){
-      if(!st.boardTimer && typeof setTimeout !== 'undefined') st.boardTimer = setTimeout(function(){ st.boardTimer = 0; publishBoard(st); }, wait + 50);
-      return;
-    }
-    st.boardAt = Date.now();
-    st.boardBusy = true;
-    var sent = 0;
-    boardTag(true).then(function(tag){
-      if(!tag) throw { code: 'unavailable' };     // no tag (offline, refused, no crypto): nothing is written, and never under the uid
-      return dbP().then(function(db){ return db.collection('rankBoard').doc(tag); });
-    }).then(function(ref){
-      var add = function(){
-        sent = st.boardOwed;
-        return sent > 0 ? ref.set({ seconds: FV().increment(sent) }, { merge: true }) : null;
-      };
-      if(st.boardReady) return add();
-      return ref.get().then(function(snap){
-        if(snap.exists) return add();
-        sent = st.boardOwed;
-        return ref.set({ seconds: confirmedSeconds(st) });
-      }).then(function(){ st.boardReady = true; });
-    }).then(function(){
-      st.boardBusy = false;
-      st.boardOwed = Math.max(0, st.boardOwed - sent);
-      if(st.boardOwed > 0) publishBoard(st);      // more was confirmed while this write was out: the timer takes it
-    }, function(err){
-      st.boardBusy = false;
-      st.boardRetryAt = Date.now() + (err && err.code === 'permission-denied' ? DENIED_BACKOFF_MS : LOAD_RETRY_MS);
-    });
-  }
-  /* Everyone else's seconds (my own doc is left out: my live total is used instead). Kept in
-     memory for BOARD_KEEP_MS (3 hours: a read is one document per student) and in localStorage
-     under this student's id, so reopening My progress does not read the whole class again.
-     Resolves to the cache, or null if unreadable. */
-  function loadBoard(){
-    var st = S;
-    if(!st || isTeacherUser()) return Promise.resolve(null);   // the teacher never makes a tag, reads or writes the rank
-    if(!st.board){
-      var c = lsJson('pm:b:' + st.uid);
-      if(c && c.others && typeof c.at === 'number' && Math.abs(Date.now() - c.at) < BOARD_KEEP_MS) st.board = c;
-    }
-    if(st.board && Math.abs(Date.now() - st.board.at) < BOARD_KEEP_MS) return Promise.resolve(st.board);
-    if(st.boardLoading) return st.boardLoading;
-    st.boardLoading = boardTag(true).then(function(tag){
-      if(!tag) throw { code: 'unavailable' };     // my own doc cannot be told from the others' without my tag
-      /* source 'server': an offline plain get() answers empty and the rank tile would vanish for 3 hours. */
-      return dbP().then(function(db){ return db.collection('rankBoard').get({ source: 'server' }); }).then(function(snap){ return { snap: snap, tag: tag }; });
-    }).then(function(x){
-      var snap = x.snap, others = [];
-      snap.forEach(function(doc){ if(doc.id !== x.tag) others.push(Math.max(0, +(doc.data() || {}).seconds || 0)); });
-      st.board = { at: Date.now(), others: others };
-      ls('pm:b:' + st.uid, JSON.stringify(st.board));
-      return st.board;
-    }).catch(function(){ return null; }).then(function(b){ st.boardLoading = null; return b; });
-    return st.boardLoading;
-  }
-  /* N/total for the student on screen, or null while the board is not known. total counts me.
-     The same whole minutes the screen shows decide a tie: two students who both read "12 min" share a
-     place (1 + the number with MORE whole minutes). Under a minute of practice there is no rank yet: n is
-     null, and the tile says so instead of "1/140" for every student on day one. */
-  function rankInfo(){
-    var b = S && S.loaded && S.board;
-    if(!b || isTeacherUser()) return null;
-    return calc.rankPlace(allTimeSeconds(), b.others);
   }
 
   /* ── TOP 5 (see the header): publish this week's number, read my period's, work out my place ── */
@@ -983,7 +903,7 @@
      could follow that board doc. One read per page load. The weekBoard's docs are keyed by it, never by the uid, so
      nothing readable by other accounts joins a name (the live quiz kept names under uids until 2026-11-05) to a period and minutes.
      Resolves to the tag, or '' (no crypto; offline and refused reject): then nothing is read or written for the
-     Top 5 or the class rank. create = make it when the student has none yet. */
+     Top 5. create = make it when the student has none yet. */
   var TAG_RE = /^[0-9a-f]{32}$/;
   function randomTag(){
     try {
@@ -1029,7 +949,7 @@
   /* weekBoard/{tag} = { week, period, seconds }: this week's total, as the SERVER holds it (see the header).
      A transaction reads the doc first and writes only when the number goes UP inside the same week and period (two
      pages of one student: the one with the older copy leaves the other's number alone), or the week or period changed.
-     Throttled like publishBoard: one write per WB_MS, a trailing timer for the last one; a refusal backs off. */
+     One write per WB_MS, a trailing timer for the last one; a refusal backs off. */
   function publishWeek(st){
     if(!st || S !== st || !st.loaded || isTeacherUser()) return;
     var p = hostPeriod();
@@ -1107,8 +1027,8 @@
     return st.wbLoading;
   }
   /* My place this week, from my live seconds (weekSecs, counted seconds not yet sent included) and the cached board,
-     or null while it is not known (no period, the board not read yet, the teacher). Whole minutes decide, like the
-     class rank: everyone who reads "12 min" shares a place, and n = 1 + how many have MORE. top = ranked (at least
+     or null while it is not known (no period, the board not read yet, the teacher). Whole minutes decide: everyone
+     who reads "12 min" shares a place, and n = 1 + how many have MORE. top = ranked (at least
      top5MinMinutes) and fewer than calc.TOP_N ahead (calc.top5Place does the counting). */
   function top5Info(weekSecs){
     var st = S, b = st && st.loaded && st.wb;
@@ -1456,19 +1376,25 @@
     host_el.hidden = false;
     var again = function(){ if(!host_el.hidden && host_el.isConnected) host_el.innerHTML = progressHtml(); };
     if(!S.loaded && !S.loading) load().then(again);
-    /* The rank tile needs the board AND the student's own numbers; draw again when the board arrives. */
+    /* The Top 5 tile needs the week board AND the student's own numbers; draw again when the board arrives. */
     var st0 = S;
-    loadBoard().then(function(b){ if(b && S === st0) again(); });
     loadWeek().then(function(b){ if(b && S === st0) again(); });
     host_el.innerHTML = progressHtml();
   }
-  /* "N/total" by all-time minutes; nothing at all until the board has been read (or when it cannot be). */
-  function rankTile(){
-    var r = rankInfo();
-    if(!r || r.total < 2) return '';
-    return '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.tileRank')) + '</div>'
-      + '<div class="pm-tile-row"><b class="pm-today pm-rank">' + esc(tr('pm.tileRankVal', { n: r.n === null ? '–' : r.n, total: r.total })) + '</b></div>'
-      + '<div class="pm-tile-sub">' + esc(tr(r.n === null ? 'pm.tileRankNone' : 'pm.tileRankSub')) + '</div></div>';
+  /* YOUR OWN WEEKS (see the header and calc.ownWeeks): one line, this week against the student's own last week and best week.
+     The student's first week (no earlier week with a whole minute): "no earlier weeks yet", nothing to compare.
+     This week above every earlier week: "this is your best week" in place of the best week's number. A week with 0
+     minutes, this one or last, is just "0 min". "min" is the same word for 1 and for many, in both languages. */
+  function ownWeeksLine(weekSecs, curWeek){
+    var o = calc.ownWeeks(weekSecs, curWeek);
+    if(o.first) return tr('pm.ownFirst', { now: o.now });
+    return tr(o.isBest ? 'pm.ownBest' : 'pm.ownWeeks', { now: o.now, last: o.last, best: o.best });
+  }
+  /* Only once the weeks are known (loaded, or the saved copy of them): before that an empty map would read as
+     "no earlier weeks yet" for a student who has many. */
+  function ownWeeksHtml(curWeek){
+    if(!S || !(S.loaded || Object.keys(S.weeks).length)) return '';
+    return '<p class="pm-own">' + esc(ownWeeksLine(weekTotals(), curWeek)) + '</p>';
   }
   /* My place in my period's Top 5 this week; nothing until the week board has been read (or when it cannot be). */
   function top5Tile(weekSecs){
@@ -1498,9 +1424,9 @@
       + '<div class="pm-tile"><div class="pm-tile-h">' + esc(tr('pm.tileToday')) + '</div>'
       +   '<div class="pm-tile-row"><b class="pm-today">' + mins(dayTotal(d)) + '</b><span class="pm-today-u">' + esc(tr('pm.min')) + '</span></div>'
       +   '<div class="pm-tile-sub">' + esc(tr('pm.tileAll', { n: mins(allTimeSeconds()) })) + '</div></div>'
-      + rankTile()
       + top5Tile(w.secs)
-      + '</div>';
+      + '</div>'
+      + ownWeeksHtml(w.id);
     /* This week by day: Monday to Sunday for every student. A day with no practice is an
        empty bar, never a miss marker (the goal is for the whole week). */
     var cap = Math.round(c.dailyCapMinutes * 60), mon = calc.weekMonday(w.id), dates = [];
@@ -1551,8 +1477,8 @@
     flush: flush, load: function(){ return sync() ? load() : Promise.resolve(); },
     status: function(){ return sync() ? status() : null; },
     _session: function(){ return session; }, _play: function(){ return play; },
-    _rank: function(){ return sync() ? rankInfo() : null; },
-    _top5: function(){ return sync() ? top5Info(status().week.secs) : null; }, _publishWeek: function(){ if(sync()) publishWeek(S); }, _loadWeek: function(){ return sync() ? loadWeek() : Promise.resolve(null); }, _loadBoard: function(){ return sync() ? loadBoard() : Promise.resolve(null); },
+    _ownWeeksLine: ownWeeksLine,
+    _top5: function(){ return sync() ? top5Info(status().week.secs) : null; }, _publishWeek: function(){ if(sync()) publishWeek(S); }, _loadWeek: function(){ return sync() ? loadWeek() : Promise.resolve(null); },
     _state: function(){ return S; }, _session: function(){ return session; }, _tick: tick, _media: media, _end: endSession, _buildOps: buildOps
   };
 })();

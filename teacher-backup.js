@@ -100,7 +100,7 @@ const TEACHER_BACKUP_LEFT_OUT = [
   {path:'micTakes/* and micTakes/*/chunks/*', why:'mic recordings: large audio, saved by Mic recordings → Download all (with each take’s data)'},
   {path:'micTakesMeta/count', why:'a counter Mic recordings can reset; not student work'},
   {path:'liveQuiz/current and liveQuiz/current/answers/*', why:'one live game’s state, written from scratch each game'},
-  {path:'weekBoard/*, rankBoard/*', why:'the practice boards: each student’s own page rebuilds its entry from their minutes'},
+  {path:'weekBoard/*, rankBoard/*', why:'the practice boards: the Top 5 board is rebuilt by each student’s own page from their minutes; the class rank board is no longer used (since 2026-11-13)'},
   {path:'each student’s practice days and private board tag (under minutes, beside the weeks)', why:'the teacher’s account may not read them (firestore.rules); the weeks hold the totals'},
   {path:'minutesBoard/*', why:'no rules block: nobody can read it'},
 ];

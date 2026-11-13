@@ -130,6 +130,8 @@ function teacherStudentCountHtml(tally, universe){
 /* ── Practice minutes (2026-11-06) ───────────────────────────────────────
    Every student's practice minutes, streak, class rank and Top 5 place, for
    the teacher only (Jonathan: "where do I see students' minutes and rank?").
+   The class rank is on this view ONLY: since 2026-11-13 no student sees one
+   (their My progress compares them with their own weeks instead).
    READ ONLY: it reads minutes/{uid}/weeks/* for each student on the roster
    (firestore.rules lets the teacher's account read those docs and nothing
    else under minutes/) and writes nothing anywhere. It never reads days,
@@ -142,7 +144,7 @@ function teacherStudentCountHtml(tally, universe){
    weeks doc, about (students × weeks since 2026-11-01) per open/Refresh.
    Server reads only (an offline get() answers empty from the cache).
    Ranks count the whole roster (archived students too: their pages still
-   publish to the student-side boards), whatever the period filter shows.
+   publish to the Top 5 board), whatever the period filter shows.
    The teacher's own account is never read or ranked. */
 const TEACHER_PM_CONCURRENCY=10;
 const TEACHER_PM_READ_MS=20000;   // one student's weeks read that has not answered by then fails the whole read (Refresh retries)
@@ -326,7 +328,7 @@ function renderTeacherMinutes(force){
   const c=tc, tableWeek=PM.calc.weekIdOf(PM.calc.ymd(atD));   // the week the table's "This week" column is: the read's own day
   box.innerHTML=head+goalBox+
     `<div class="tg-grid-wrap" data-tview="minutes"><table class="tg-table pm-t-table"><thead><tr><th>Student</th><th>Period</th><th>This week</th><th>Last week</th><th>Streak</th><th>All time</th><th>Class rank</th><th>Top 5</th></tr></thead><tbody>${body}</tbody></table></div>`+
-    `<div class="tr-meta" style="margin-top:10px">This week: minutes / goal (Monday to Sunday). The goal this week: ${escHtml(teacherPmGoalPhrase(c, tableWeek, PM.calc))}. ✓ = goal hit; "break" = a week off, no goal. Class rank counts every student with at least 1 minute, whatever the period filter shows. Top 5 is inside the student's period, this week; "—" = under ${Math.round(+c.top5MinMinutes||0)} minutes this week. A student's own screen reads the rank from a board that can trail by a few minutes and counts only students who have opened the site since Nov 5, so their rank may differ slightly from this one. This one is the true number.</div>`;
+    `<div class="tr-meta" style="margin-top:10px">This week: minutes / goal (Monday to Sunday). The goal this week: ${escHtml(teacherPmGoalPhrase(c, tableWeek, PM.calc))}. ✓ = goal hit; "break" = a week off, no goal. Class rank counts every student with at least 1 minute, whatever the period filter shows. Top 5 is inside the student's period, this week; "—" = under ${Math.round(+c.top5MinMinutes||0)} minutes this week. Students do not see a class rank (since Nov 13): their My progress compares this week with their own last week and best week.</div>`;
 }
 function teacherSetMinutesSort(v){
   if(v!=='week' && v!=='all' && v!=='name') return;

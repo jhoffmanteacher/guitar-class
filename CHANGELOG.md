@@ -9,6 +9,11 @@ see `WORKFLOW.md` and the git commit log.
 ## 2026-11-13 — Live In-Class Games: your teacher can hide the names on the scoreboard
 
 - **Your teacher can now hide the names on the big screen.** Then the scoreboard shows only each place and its points, and the waiting screen shows only how many joined. Your own screen still shows your place and your points. Names show unless your teacher turns this on.
+## 2026-11-13 — My progress compares you with your own weeks
+
+- **My progress no longer shows your class rank.** In its place, one line compares this week with your own weeks, like "This week 42 min · last week 35 min · your best week 60 min".
+- **When this week beats every week before it, the line says "this is your best week".** In your first week it says "no earlier weeks yet".
+- **The Top 5 of the week stays**, in your period, starting over every Monday.
 
 
 ## 2026-11-13 — "Live quiz" is now "Live In-Class Games"

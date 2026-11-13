@@ -9,7 +9,8 @@
 
      · the status strip in the MAIN top bar (index.html #pm-header, on every page; 2026-11-03)
      · the recap card and the week-goal toast, dropping down from it on any page
-     · the My progress tiles, bars and 8-week row, in English and Spanish
+     · the My progress tiles, the own-weeks line (this week / last week / best week; no class rank since 2026-11-13),
+       bars and 8-week row, in English and Spanish
      · colours read back from the browser (getComputedStyle), not assumed
      · uiOn:false draws nothing at all
      · an OPEN practice card folds the header, and the strip in it, away (2026-11-10, body.ca-fold):
@@ -122,7 +123,7 @@ await ev(`(() => {
     const writes = []; const tx = { get: (r) => { const [k, i] = r.path.split('/'); const d = k === 'weeks' ? window.__fs.weeks[i] : k === 'meta' ? window.__fs.meta : window.__fs.wb[i]; return Promise.resolve({ exists: d !== undefined, data: () => d }); }, set: (r, d) => { writes.push([r.path.split('/'), d]); return tx; } };
     return Promise.resolve(fn(tx)).then((out) => { writes.forEach(([[k, i], d]) => { if (k === 'meta') { if (window.__fs.meta) throw Object.assign(new Error('create-only'), { code: 'permission-denied' }); window.__fs.meta = Object.assign({}, d); }
       else { if (!window.__fs.meta || window.__fs.meta.id !== i) throw Object.assign(new Error('not your tag'), { code: 'permission-denied' }); window.__fs.wb[i] = Object.assign({}, d); window.__fs.wbWrites.push({ id: i, d: Object.assign({}, d) }); } }); return out; }); };
-  const db = { runTransaction, collection: (c) => c === 'weekBoard' ? wbCol : c === 'rankBoard' ? board : ({ doc: (uid) => ({ collection: (k) => { const o = col(k); const d = o.doc; o.doc = (i) => ({ path: k + '/' + i }); return o; } }), doc: (i) => ({ set: (d) => { window.__fs.hb.push({ id: i, d }); return Promise.resolve(); } }) }) ,
+  const db = { runTransaction, collection: (c) => c === 'weekBoard' ? wbCol : c === 'rankBoard' ? (window.__fs.rankTouched = (window.__fs.rankTouched || 0) + 1, board) : ({ doc: (uid) => ({ collection: (k) => { const o = col(k); const d = o.doc; o.doc = (i) => ({ path: k + '/' + i }); return o; } }), doc: (i) => ({ set: (d) => { window.__fs.hb.push({ id: i, d }); return Promise.resolve(); } }) }) ,
     batch: () => { const ops = []; return { set: (r, d) => ops.push([r.path, d]), commit: () => { ops.forEach(([p, d]) => { const [k, i] = p.split('/'); const cur = window.__fs[k][i] || {}; window.__fs[k][i] = Object.assign({}, cur, d, { seconds: (cur.seconds || 0) + d.seconds.__inc }); }); window.__fs.commits.push(ops.length); return Promise.resolve(); } }; } };
   window.__who = 'e2e-student';   // the signed-in student's uid; null = nobody (the tests below sign out and switch students)
   const fb = window.firebase || {};
@@ -403,43 +404,35 @@ const mpEs = await ev(`(() => { const p = document.getElementById('pm-progress')
 check('Spanish My progress: tiles, weekdays and caption are Spanish, no overflow', /^Esta semana .*53 de 60 min Con 7 más mantienes tu racha$/.test(mpEs.tiles[0]) && /^Racha Racha de 5 semanas La más larga: 5 semanas$/.test(mpEs.tiles[1]) && new RegExp(`^Hoy ${expDays[dowNow]} min En total: \\d+ min$`).test(mpEs.tiles[2]) && mpEs.bars.length === 7 && mpEs.bars.every((b, i) => b.startsWith(['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'][i] + ':')) && mpEs.cap === 'Llama = lograste la meta de la semana. Los descansos no cuentan.' && !mpEs.overflow, mpEs);
 await shot('6-my-progress-es');
 
-/* ── Class rank (2026-11-04): a 4th tile, "N/total" by all-time minutes ──
-   The board is seeded RELATIVE to the student's own seconds so the answer is known without the engine:
-   10 students with more, 5 with exactly the same (ties do not push me down), 20 with less, and a stale doc of my own
-   that must be ignored. So: 11th of 36. */
-console.log('class rank');
-await ev(`setLang('en')`); await sleep(500);
-await ev(`(() => { const s = PM._state(); let mine = 0; Object.values(s.weeks).forEach(w => mine += w.seconds || 0); Object.values(s.pend).forEach(n => mine += n);
-  const b = {}; for (let i = 0; i < 10; i++) b['more' + i] = { seconds: mine + 60 * (i + 1) }; for (let i = 0; i < 5; i++) b['same' + i] = { seconds: mine };
-  for (let i = 0; i < 20; i++) b['less' + i] = { seconds: Math.max(0, mine - 60 * (i + 1)) }; const meta = window.__fs.meta || (window.__fs.meta = { id: 'ab'.repeat(16) }); s.tag = meta.id; s.tagP = null;   // my own stale doc, under MY tag (the board is keyed by the private tag, never the uid): it must be ignored
-  b[meta.id] = { seconds: 999999 };
-  window.__fs.board = b; window.__mine = mine; s.board = null; s.boardLoading = null; try { localStorage.removeItem('pm:b:e2e-student'); } catch (e) {} renderMyProgress(); return mine; })()`);
-await sleep(700);
-await ev(`document.getElementById('pm-progress').scrollIntoView({block:'start'})`); await sleep(300);
-const rk = await ev(`(() => { const p = document.getElementById('pm-progress'), t = [...p.querySelectorAll('.pm-tile')]; const last = t[t.length - 1]; const r = last ? last.getBoundingClientRect() : null;
-  return { n: t.length, text: last ? last.innerText.replace(/\\s+/g, ' ').trim() : '', tops: t.map(x => Math.round(x.getBoundingClientRect().top)), right: r ? Math.round(r.right) : 0, panelRight: Math.round(p.getBoundingClientRect().right),
-    val: last ? { sw: last.querySelector('.pm-rank').scrollWidth, cw: last.clientWidth } : null, overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth }; })()`);
-console.log('    ', JSON.stringify(rk));
-check('Class rank: a 4th tile reading "Class rank 11/36 By all-time minutes" (10 above me, 5 tied, 20 below, my stale doc ignored)', rk.n === 4 && rk.text === 'Class rank 11/36 By all-time minutes', rk);
-check('…all four tiles sit on ONE row at 1366×657, the number fits its tile, nothing scrolls sideways', rk.tops.every((x) => x === rk.tops[0]) && rk.val.sw <= rk.val.cw && !rk.overflow && rk.right <= rk.panelRight, rk);
-await shot('7-my-progress-rank-en');
-await ev(`setLang('es')`); await sleep(700);
-await ev(`renderMyProgress(); document.getElementById('pm-progress').scrollIntoView({block:'start'})`); await sleep(500);
-const rkEs = await ev(`(() => { const t = [...document.querySelectorAll('#pm-progress .pm-tile')]; const tops = t.map(x => Math.round(x.getBoundingClientRect().top)); return { n: t.length, text: t[t.length - 1].innerText.replace(/\\s+/g, ' ').trim(), oneRow: tops.every((x) => x === tops[0]), overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth }; })()`);
-check('Spanish: "Lugar en la clase 11/36 Por minutos en total", one row, no sideways scroll', rkEs.n === 4 && rkEs.text === 'Lugar en la clase 11/36 Por minutos en total' && rkEs.oneRow && !rkEs.overflow, rkEs);
-await shot('8-my-progress-rank-es');
+/* ── Your own weeks (2026-11-13; the class rank tile, 2026-11-04 to 2026-11-13, was here) ──
+   One line under the tiles: this week against the student's OWN last week and best week. Seeded above: this week 53 min, last week
+   3700 s (61 min), the best earlier week 61 min. Then the best-week state (this week 70 min), the first week (no earlier week) and
+   a week with 0 minutes, each in English and Spanish, one line at 1366×657, a screenshot of each. No class rank anywhere. */
+console.log('your own weeks');
+const ownLine = () => ev(`(() => { const p = document.getElementById('pm-progress'), l = p.querySelector('.pm-own'); return { text: l ? l.innerText.trim() : null, lines: l ? (() => { const r = document.createRange(); r.selectNodeContents(l); return new Set([...r.getClientRects()].map((q) => Math.round(q.top))).size; })() : 0,
+  color: l ? getComputedStyle(l).color : null, rank: !!p.querySelector('.pm-rank') || /Class rank|Lugar en la clase/.test(p.innerText), tiles: p.querySelectorAll('.pm-tile').length, rankTouched: window.__fs.rankTouched || 0, overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth }; })()`);
+const ownSet = (cur, prior) => ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()), w = PM.calc.weekIdOf(d); s.pend = {}; s.weeks = {}; s.loaded = true;
+  ${JSON.stringify(prior)}.forEach((secs, i) => { if (secs !== null) s.weeks[PM.calc.weekAdd(w, -(i + 1))] = { seconds: secs, goalSeconds: 3600, hit: secs >= 3600 }; });
+  s.weeks[w] = { seconds: ${JSON.stringify(cur)}, goalSeconds: 3600, hit: ${JSON.stringify(cur)} >= 3600 }; renderMyProgress(); return true; })()`);
+const OWN = [
+  ['lower', 53 * 60, [3700, 3700, 3700, 400, 3700, 3700, 0], 'This week 53 min · last week 61 min · your best week 61 min', 'Esta semana 53 min · la semana pasada 61 min · tu mejor semana 61 min'],
+  ['best', 70 * 60, [3700, 2100], 'This week 70 min · last week 61 min · this is your best week', 'Esta semana 70 min · la semana pasada 61 min · esta es tu mejor semana'],
+  ['first', 12 * 60, [], 'This week 12 min · no earlier weeks yet', 'Esta semana 12 min · aún no tienes semanas anteriores'],
+  ['zero', 0, [2100, 3700], 'This week 0 min · last week 35 min · your best week 61 min', 'Esta semana 0 min · la semana pasada 35 min · tu mejor semana 61 min'],
+];
+for (const [name, cur, prior, en, es] of OWN) {
+  for (const [lang, want] of [['en', en], ['es', es]]) {
+    await ev(`setLang('${lang}')`); await sleep(500);
+    await ownSet(cur, prior); await sleep(400);
+    await ev(`document.getElementById('pm-progress').scrollIntoView({block:'start'})`); await sleep(300);
+    const o = await ownLine();
+    check(`own weeks, ${name}, ${lang.toUpperCase()}: "${want}" on ONE line, the three tiles, no class rank, nothing sideways`, o.text === want && o.lines === 1 && o.tiles === 3 && !o.rank && !o.overflow, o);
+    await shot(`7-my-progress-own-${name}-${lang}`);
+  }
+}
+const own0 = await ownLine();
+check('the page never named the rankBoard collection (no class rank read or write), and the line is plain text (no red for a lower week)', own0.rankTouched === 0 && own0.color !== 'rgb(255, 0, 0)', own0);
 await ev(`setLang('en')`); await sleep(400);
-/* 142 students and first place: the widest value the tile must hold. */
-await ev(`(() => { const s = PM._state(), b = {}; for (let i = 0; i < 141; i++) b['x' + i] = { seconds: 0 }; window.__fs.board = b; s.board = null; s.boardLoading = null; try { localStorage.removeItem('pm:b:e2e-student'); } catch (e) {} renderMyProgress(); return true; })()`);
-await sleep(700);
-const wide = await ev(`(() => { const t = [...document.querySelectorAll('#pm-progress .pm-tile')], last = t[t.length - 1], tops = t.map(x => Math.round(x.getBoundingClientRect().top)); return { text: last.innerText.replace(/\\s+/g, ' ').trim(), oneRow: tops.every((x) => x === tops[0]), fits: last.querySelector('.pm-rank').scrollWidth <= last.clientWidth }; })()`);
-check('1/142 (the widest the tile holds) reads "1/142", fits its tile and stays on the row', /^Class rank 1\/142 /.test(wide.text) && wide.oneRow && wide.fits, wide);
-/* Rules not published: the read is refused, the tile just is not there, the panel still draws. */
-await ev(`(() => { const s = PM._state(); window.__fs.boardDenied = true; s.board = null; s.boardLoading = null; try { localStorage.removeItem('pm:b:e2e-student'); } catch (e) {} renderMyProgress(); return true; })()`);
-await sleep(700);
-const denied = await ev(`[...document.querySelectorAll('#pm-progress .pm-tile')].length`);
-check('board unreadable (rules not published): back to the 3 tiles, no error on the page', denied === 3, denied);
-await ev(`window.__fs.boardDenied = false; window.__fs.board = {}; const st = PM._state(); st.board = null; st.boardLoading = null; try { localStorage.removeItem('pm:b:e2e-student'); } catch (e) {} true`);
 
 /* ── An impossible "N more" and "0-week streak" (2026-11-01) ──
    The goal is 60 min (30 until 2026-11-04) and a day counts at most 20. On a Sunday
@@ -689,10 +682,10 @@ await ev(`(() => {
       else { if (!window.__fs.meta || window.__fs.meta.id !== i) throw Object.assign(new Error('not your tag'), { code: 'permission-denied' }); window.__fs.wb[i] = Object.assign({}, d); window.__fs.wbWrites.push({ id: i, d: Object.assign({}, d) }); } }); return out; }); };
   const sub = (kind) => ({ get: () => Promise.resolve({ forEach: (fn) => Object.keys(window.__fs[kind]).forEach((k) => fn({ id: k, data: () => window.__fs[kind][k] })) }),
     where: () => ({ get: () => Promise.resolve({ forEach: (fn) => Object.keys(window.__fs.days).forEach((k) => fn({ id: k, data: () => window.__fs.days[k] })) }) }), doc: (i) => ({ path: kind + '/' + i }) });
-  /* rankBoard (the class rank, keyed by the private tag): 20 other students, so the Class rank tile is there and My progress has FIVE tiles. */
+  /* rankBoard (the class rank, unused since 2026-11-13): 20 other students on it, so a page that still read it would show a rank tile; My progress has FOUR tiles. */
   const bd = {}; for (let i = 0; i < 20; i++) bd['b' + i] = { seconds: 600 * (i + 1) };
   const board = { get: () => Promise.resolve({ forEach: (fn) => Object.keys(bd).forEach((k) => fn({ id: k, data: () => bd[k] })) }), doc: () => ({ set: () => Promise.resolve(), get: () => Promise.resolve({ exists: false }) }) };
-  const db = { runTransaction, collection: (c) => c === 'weekBoard' ? wbCol : c === 'rankBoard' ? board : ({ doc: (uid) => ({ collection: (k) => sub(k) }) }),
+  const db = { runTransaction, collection: (c) => c === 'weekBoard' ? wbCol : c === 'rankBoard' ? (window.__fs.rankTouched = (window.__fs.rankTouched || 0) + 1, board) : ({ doc: (uid) => ({ collection: (k) => sub(k) }) }),
     batch: () => { const ops = []; return { set: (r, d) => ops.push([r.path, d]), commit: () => Promise.resolve() }; } };
   const fb = window.firebase || {};
   if (!fb.firestore) { window.firebase = Object.assign(fb, { firestore: Object.assign(() => db, { FieldValue: { increment: (n) => ({ __inc: n }), serverTimestamp: () => ({}) }, FieldPath: { documentId: () => '__name__' } }) }); }
@@ -710,7 +703,7 @@ const t5Scenario = (mine, others, fresh = false) => ev(`(() => {
   f.weeks = {}; f.days = {}; f.weeks[w] = { seconds: ${mine} * 60, goalSeconds: 3600, hit: ${mine} >= 60 };
   PM.status(); const s = PM._state(); s.weeks = {}; s.days = {}; s.pend = {}; s.weeks[w] = { seconds: ${mine} * 60, goalSeconds: 3600, hit: ${mine} >= 60 }; s.loaded = true;
   s.wb = null; s.wbLoading = null; s.wbLoadRetryAt = 0; s.wbSent = ''; s.wbAt = 0; s.wbRetryAt = 0; s.top5Week = ''; s.toastWeek = ''; s.pendingToast = false;
-  s.board = null; s.boardLoading = null; s.tag = ''; s.tagP = null; s.tagRetryAt = 0;
+  s.tag = ''; s.tagP = null; s.tagRetryAt = 0;
   ['pm:w:', 'pm:t5:', 'pm:t:', 'pm:b:', 'pm:i:'].forEach((k) => { try { localStorage.removeItem(k + 'e2e-student'); } catch (e) {} });
   document.getElementById('pm-toast') && document.getElementById('pm-toast').remove(); return true; })()`);
 const medalInfo = (id) => ev(`(() => { const h = document.getElementById(${JSON.stringify(id)}), m = h && h.querySelector('.pm-top5'); if (!m) return null; const r = m.getBoundingClientRect(), hr = h.getBoundingClientRect(), cs = getComputedStyle(m);
@@ -777,7 +770,7 @@ for (const [name, mine, others, want] of states) {
     await ev(`setLang('${lang}'); PM.syncHeader(true); renderMyProgress(); location.hash = '#my-progress'`); await sleep(1200);
     await ev(`document.getElementById('pm-progress').scrollIntoView({block:'start'})`); await sleep(500);
     const ti = await tile();
-    check(`My progress, ${name}, ${lang.toUpperCase()}: the 5th tile reads "${want[lang]}", all five on one row, nothing sideways`, ti.n === 5 && ti.text === want[lang] && ti.oneRow && ti.off === want.off && !ti.overflow && ti.right <= ti.panelRight && ti.rowFits, ti);
+    check(`My progress, ${name}, ${lang.toUpperCase()}: the 4th tile reads "${want[lang]}", all four on one row, nothing sideways`, ti.n === 4 && ti.text === want[lang] && ti.oneRow && ti.off === want.off && !ti.overflow && ti.right <= ti.panelRight && ti.rowFits, ti);
     await shot(`15-top5-tile-${name}-${lang}`);
   }
 }
@@ -798,7 +791,7 @@ check('the board holds NO name: no doc id, no field and nothing the page wrote c
 /* Rules not published: the board cannot be read; no medal, no tile, no toast, no error on the page. */
 await t5Scenario(15, [20]); await ev(`window.__fs.wbDenied = true; PM.syncHeader(true); renderMyProgress(); location.hash = '#my-progress'`); await sleep(1500);
 const den = await ev(`({ tiles: document.querySelectorAll('#pm-progress .pm-tile').length, medal: !!document.querySelector('.pm-top5'), toast: !!document.getElementById('pm-toast') })`);
-check('rules not published (no private tag can be made): only the three minutes tiles, no Class rank and no Top 5 tile, no medal anywhere, no toast, no error on the page', den.tiles === 3 && !den.medal && !den.toast, den);
+check('rules not published (no private tag can be made): only the three minutes tiles, no Top 5 tile, no medal anywhere, no toast, no error on the page', den.tiles === 3 && !den.medal && !den.toast, den);
 
 /* Phone width is out of scope for new work, but the medal must not break what is already there: no sideways scroll, the strip and the medal inside the window, My progress readable. */
 await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
@@ -808,7 +801,7 @@ const ph = await ev(`(() => { const h = document.getElementById('pm-header'), m 
   const tiles = [...document.querySelectorAll('#pm-progress .pm-tile')].map((t) => { const q = t.getBoundingClientRect(); return { l: Math.round(q.left), r: Math.round(q.right) }; });
   const tp = document.getElementById('pm-toast'), tr = tp ? tp.getBoundingClientRect() : null;
   return { toastInside: !!tr && tr.left >= 0 && tr.right <= innerWidth, toast: tr ? [Math.round(tr.left), Math.round(tr.right)] : null, overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth, medal: !!m, medalInside: !!r && r.left >= hr.left && r.right <= hr.right && r.right <= innerWidth, stripRight: Math.round(hr.right), win: innerWidth, tiles: tiles.length, tilesInside: tiles.every((q) => q.l >= 0 && q.r <= innerWidth) }; })()`);
-check('phone width (390): the medal is in the strip and inside it, the toast is fully inside the window, nothing scrolls sideways, all five tiles inside the window', ph.toastInside && ph.medal && ph.medalInside && !ph.overflow && ph.stripRight <= ph.win && ph.tiles === 5 && ph.tilesInside, ph);
+check('phone width (390): the medal is in the strip and inside it, the toast is fully inside the window, nothing scrolls sideways, all four tiles inside the window', ph.toastInside && ph.medal && ph.medalInside && !ph.overflow && ph.stripRight <= ph.win && ph.tiles === 4 && ph.tilesInside, ph);
 await shot('16-top5-phone-390-en');
 await send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false });
 await sleep(500);
