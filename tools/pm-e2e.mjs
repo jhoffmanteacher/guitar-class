@@ -13,8 +13,9 @@
      · colours read back from the browser (getComputedStyle), not assumed
      · uiOn:false draws nothing at all
      · an OPEN practice card folds the header, and the strip in it, away (2026-11-10, body.ca-fold):
-       the seconds still count there, the goal toast waits for the strip, and a play run is ended
-       with "All activities" so its recap has a strip to drop from (updated 2026-11-12)
+       the seconds still count there, the goal toast waits for the strip, and a play run ended
+       with "All activities" drops its recap from the strip; Stop pressed ON the card shows the
+       recap on the card, beside it, or (no room) when the strip comes back (updated 2026-11-12)
 
    It writes a PNG per state into --out <dir> (default: a temp folder) so they
    can be LOOKED at. Needs Node 22+ and Chrome; not part of checks.mjs.
@@ -150,8 +151,9 @@ const card = await ev(`(() => { const a = CLASS_ACTIVITIES.find(x => x.view === 
   || await ev(`(CLASS_ACTIVITIES.find(x => x.view === 'card' && (caIsVisible(x) || caIsPlayAlongOnly(x))) || {}).id`);
 check('found a practice card to open', !!card, card);
 /* Since 2026-11-10 an open card folds the header, and the strip in it, away (body.ca-fold; checks.mjs 1cr, smoke's
-   foldWalk and its pm-header walk). The minutes still count while it is folded; the goal toast waits for the strip,
-   and a recap opens only under a strip on screen. So the tests below end a play run with "All activities"
+   foldWalk and its pm-header walk). The minutes still count while it is folded; the goal toast waits for the strip.
+   A run that ends with the card open shows its recap on the card (tested after the close button below), so the tests
+   of the strip's recap end a play run with "All activities"
    (caCloseOpen: it stops the card's audio and unfolds the header; the engine closes the run about 2 s later, with
    the strip back), and they look at the strip on the In class list. */
 /* Opened as smoke's pm-header walk does: openClassActivitiesScreen(id) from another page can leave the screen hidden with the card open. */
@@ -248,14 +250,69 @@ await ev(`PM._state().lastRecapAt = 0`); await openCard(); await playCard();
 await ev(`PM._session().counted = 90; PM._play() && (PM._play().counted = 90)`); await leaveCard(); await sleep(3500);
 await ev(`document.querySelector('#pm-recap .pm-recap-x').click()`);
 check('the close button dismisses the recap', await ev(`!document.getElementById('pm-recap')`));
-/* Stop pressed on the card itself: the header is folded, so no recap opens, then or later (the engine shows a recap only
-   under a strip on screen; it is not held like the toast). What the site does since the 2026-11-10 fold, pinned here. */
-await ev(`PM._state().lastRecapAt = 0`); await openCard(); await playCard();
+/* Stop pressed on the card itself (2026-11-12, Jonathan: "it would be nice if it's always visible"). The header is folded,
+   so there is no strip to drop from: the recap shows on the open card instead, once, with the same text, life and rules, and
+   it covers none of the card's controls or its chart. Until 2026-11-12 it never showed at all (this check pinned that). */
+const cardRecapProbe = `(() => { const r = document.getElementById('pm-recap'), card = document.querySelector('.ca-card[open]');
+  const R = (e) => { const q = e.getBoundingClientRect(); return { l: Math.round(q.left), t: Math.round(q.top), r: Math.round(q.right), b: Math.round(q.bottom) }; };
+  const guard = card ? [...card.querySelectorAll('.pc-player > *, .pc-tab, .pc-sheet-paper')].concat([...document.querySelectorAll('#ca-bar-open button, #ca-bar-open a')]).filter((e) => e.getClientRects().length) : [];
+  const vw = document.documentElement.clientWidth;
+  const out = { fold: document.body.classList.contains('ca-fold'), cardOpen: !!card, runEnded: !PM._play(), main: R(document.getElementById('main-content')), card: card ? R(card) : null, vw, guards: guard.length,
+    gutter: [60, 150, 300].map((y) => { const e = document.elementFromPoint(vw - 90, y); return e ? (e.id || String(e.className) || e.tagName) : null; }) };
+  if (!r) return out;
+  const p = R(r); out.pill = p; out.text = r.innerText.replace(/\\s+/g, ' ').trim();
+  out.covers = guard.filter((e) => { const g = e.getBoundingClientRect(); return g.right > p.l && g.left < p.r && g.bottom > p.t && g.top < p.b; }).map((e) => String(e.className) || e.tagName);
+  out.onTop = r.contains(document.elementFromPoint((p.l + p.r) / 2, (p.t + p.b) / 2));
+  out.inside = p.l >= 0 && p.r <= vw && p.t >= 0 && p.b <= innerHeight;
+  return out; })()`;
+await ev(`PM._state().lastRecapAt = 0; window.__cardPills = 0; window.__mo = new MutationObserver((ms) => { for (const m of ms) for (const n of m.addedNodes) if (n.id === 'pm-recap') window.__cardPills++; }); window.__mo.observe(document.body, { childList: true }); true`);
+await openCard(); await playCard();
+await shot('3c-0-card-before-stop-en');
 await ev(`PM._session().counted = 90; PM._play() && (PM._play().counted = 90)`); await ev(`pcStop()`); await sleep(3500);
-const stopOnCard = await ev(`({ recap: !!document.getElementById('pm-recap'), runEnded: !PM._play(), lastRecapAt: PM._state().lastRecapAt, fold: document.body.classList.contains('ca-fold') })`);
+const onCard = await ev(cardRecapProbe);
+onCard.pills = await ev(`window.__cardPills`);
+check('Stop on the open card (header folded): the recap shows on the card, once, with the run\'s "+1 min" and the week line', onCard.fold && onCard.cardOpen && onCard.runEnded && onCard.pills === 1 && /^✕ \+1 min This week: \d+ of 60 min\. That makes 4 weeks in a row\.$/.test(onCard.text || ''), onCard);
+check('…it covers none of the card\'s controls (Play/Stop, Metronome, speed, Guitar), its chart or the bar\'s buttons, and sits inside the window, on top', !!onCard.pill && onCard.guards >= 4 && onCard.covers.length === 0 && onCard.inside && onCard.onTop, onCard);
+await shot('3c-1-recap-on-card-en');
+await sleep(2000);
+const cardStill = await ev(`!!document.getElementById('pm-recap')`);
+await sleep(4000);
+const cardGone = await ev(`({ gone: !document.getElementById('pm-recap'), fold: document.body.classList.contains('ca-fold') })`);
+check('…it stays up for its life and closes itself after 6 s, the card still open', cardStill && cardGone.gone && cardGone.fold, { cardStill, cardGone });
+await shot('3c-2-card-after-recap-en');
 await leaveCard(); await sleep(2500);
-stopOnCard.afterLeave = await ev(`!!document.getElementById('pm-recap')`);
-check('Stop on the open card (header folded): the run ends with no recap, and none appears after "All activities" either', stopOnCard.fold && stopOnCard.runEnded && !stopOnCard.recap && stopOnCard.lastRecapAt === 0 && !stopOnCard.afterLeave, stopOnCard);
+check('…and no second recap drops from the header after "All activities"', await ev(`!document.getElementById('pm-recap') && window.__cardPills === 1`), await ev(`window.__cardPills`));
+/* It closes with the card. */
+await ev(`PM._state().lastRecapAt = 0; window.__cardPills = 0; true`); await openCard(); await playCard();
+await ev(`PM._session().counted = 90; PM._play() && (PM._play().counted = 90)`); await ev(`pcStop()`); await sleep(3500);
+const cl = { up: await ev(`!!document.getElementById('pm-recap')`) };
+await leaveCard(); await sleep(700);
+cl.afterClose = await ev(`!!document.getElementById('pm-recap')`);
+await sleep(2500);
+cl.later = await ev(`!!document.getElementById('pm-recap')`); cl.pills = await ev(`window.__cardPills`);
+check('…a recap on the card goes when the card closes ("All activities"), and none comes back from the header', cl.up && !cl.afterClose && !cl.later && cl.pills === 1, cl);
+/* It goes when another run starts on the card. */
+await ev(`PM._state().lastRecapAt = 0; window.__cardPills = 0; true`); await openCard(); await playCard();
+await ev(`PM._session().counted = 90; PM._play() && (PM._play().counted = 90)`); await ev(`pcStop()`); await sleep(3500);
+const nr = { up: await ev(`!!document.getElementById('pm-recap')`) };
+await playCard();
+nr.afterPlay = await ev(`!!document.getElementById('pm-recap')`);
+check('…and when the next run starts (Play again on the card)', nr.up && !nr.afterPlay, nr);
+await leaveCard(); await sleep(2500);
+/* No room beside the card (a window too narrow for the pill, as in full screen, where the card fills the width): nothing is
+   drawn over the card; the recap is held, like the goal toast, and drops from the strip when "All activities" brings it back. */
+await send('Emulation.setDeviceMetricsOverride', { width: 1100, height: 657, deviceScaleFactor: 1, mobile: false }); await sleep(600);
+await ev(`PM._state().lastRecapAt = 0; window.__cardPills = 0; true`); await openCard(); await playCard();
+await ev(`PM._session().counted = 90; PM._play() && (PM._play().counted = 90)`); await ev(`pcStop()`); await sleep(3500);
+const narrow = await ev(cardRecapProbe);
+await shot('3d-narrow-card-no-room-en');
+await leaveCard(); await waitFor(`!!document.getElementById('pm-recap')`, 6000);
+narrow.after = await ev(`(() => { const t = document.getElementById('pm-recap'), h = document.getElementById('pm-header'); if (!t) return null; const r = t.getBoundingClientRect(), hr = h.getBoundingClientRect(); return { text: t.innerText.replace(/\\s+/g, ' ').trim(), top: Math.round(r.top), headerBottom: Math.round(hr.bottom), rightDelta: Math.round(r.right - hr.right), fold: document.body.classList.contains('ca-fold') }; })()`);
+narrow.pills = await ev(`window.__cardPills`);
+check('no room beside the card (1100 px wide): nothing over the card; the recap is held and drops from the strip after "All activities", once, "+1 min"', narrow.fold && narrow.cardOpen && !narrow.pill && !!narrow.after && !narrow.after.fold && /^✕ \+1 min This week: /.test(narrow.after.text) && narrow.after.top >= narrow.after.headerBottom && Math.abs(narrow.after.rightDelta) <= 1 && narrow.pills === 1, narrow);
+await shot('3d-narrow-recap-after-leaving-en');
+await ev(`document.getElementById('pm-recap') && document.getElementById('pm-recap').remove(); window.__mo.disconnect(); true`);
+await send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false }); await sleep(600);
 
 /* ── The recap line before the goal is hit: "7 more keeps your 3-week streak." ── */
 await seedWeeks([3700, 3700, 3700]);
@@ -600,6 +657,14 @@ await ev(`PM.syncHeader(true)`);
 check('…and syncHeader(true) with nobody signed in keeps it hidden', await ev(`document.getElementById('pm-header').hidden`));
 await ev(`window.__who = 'e2e-student'; PM.syncHeader(true)`); await sleep(400);
 check('student A signs back in: the strip returns', await ev(`!document.getElementById('pm-header').hidden && !!document.getElementById('pm-header').innerHTML`));
+/* A recap on an open card (Stop pressed there, the header folded) goes at sign-out too. */
+await ev(`PM._state().lastRecapAt = 0; true`); await openCard(); await playCard(`PM._play() && PM._session().counted >= 2`);
+await ev(`PM._session().counted = 150; PM._play() && (PM._play().counted = 150); pcStop(); true`); await sleep(3500);
+const so = { up: await ev(`!!document.getElementById('pm-recap') && document.body.classList.contains('ca-fold')`) };
+await ev(`window.__who = null; true`); await sleep(800);
+so.gone = await ev(`!document.getElementById('pm-recap')`);
+await ev(`window.__who = 'e2e-student'; PM.syncHeader(true); caCloseOpen(); true`); await sleep(600);
+check('a recap shown on an open card goes at sign-out', so.up && so.gone, so);
 
 /* ── Top 5 of the week (2026-11-04) ──
    The student is in period 4 with 15 minutes this week. The week board is seeded so the answer is known without the engine:
