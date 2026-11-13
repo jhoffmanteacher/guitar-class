@@ -15823,6 +15823,134 @@ async function checkCountIn() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1cy. THE MIC START (2026-11-13, wave 1 s-mic). coach.js coachAcquireMic
+   asks the Permissions API first: granted -> straight to getUserMedia (no
+   extra click), prompt -> the "Turn on the microphone" panel and getUserMedia
+   only on its click, denied -> no getUserMedia and the same refusal as before
+   (false, NotAllowedError), no API / a throw -> as before. A refused mic says
+   the tuner's lock-icon steps everywhere (tools.micDenied). A recorded take
+   carries micSettings (only the seven keys, only true/false or numbers). Every
+   mic set-up screen carries the one set-up line (micpre.setup). mic-check.html
+   asks with exactly the site's constraints and saves or sends nothing.
+   Run in 1ca's loaded scripts (COACH_SANDBOX); every total is pinned.
+   ════════════════════════════════════════════════════════════════════ */
+async function checkMicStart() {
+  head('1cy. The mic start: the panel before the browser asks, one blocked-mic message, the take\'s mic settings, the set-up line (run)');
+  const PIN = { states: 6, callersWithAsk: 8, trainerCalls: 2, failMsgs: 6, settings: 4, setupScreens: 8, micCheck: 4 };
+  const tot = { states: 0, callersWithAsk: 0, trainerCalls: 0, failMsgs: 0, settings: 0, setupScreens: 0, micCheck: 0 };
+  let bad = 0;
+  const fail = m => { err('1cy: ' + m); problems++; bad++; };
+  if (!COACH_SANDBOX) { fail('1ca did not load the site scripts — the mic start is NOT checked'); return; }
+  const { run, els } = COACH_SANDBOX;
+  const tick = async () => { for (let i = 0; i < 6; i++) await new Promise(r => setImmediate(r)); };
+  run(`globalThis.__mpKeep = { ac: AudioContext, perm: navigator.permissions, md: navigator.mediaDevices, ask: micRecShouldAsk, stop: stopAllDemoAudio };
+    globalThis.__mp = { gum: 0, args: [] };
+    AudioContext = class { constructor(){ const n = () => ({ connect(){}, disconnect(){}, gain: { value: 1 }, frequency: { value: 0 }, Q: { value: 0 } });
+      return { state: 'running', sampleRate: 48000, currentTime: 0, resume(){ return Promise.resolve(); }, close(){ return Promise.resolve(); }, destination: {},
+        createMediaStreamSource: n, createGain: n, createBiquadFilter: n, createScriptProcessor: n, createAnalyser(){ return Object.assign(n(), { getFloatTimeDomainData(){} }); } }; } };
+    globalThis.__mpTrack = { label: '', stop(){}, getSettings(){ return { echoCancellation: false, noiseSuppression: false, autoGainControl: true, sampleRate: 48000, channelCount: 1, latency: 0.01, voiceIsolation: undefined, deviceId: 'dev-1', groupId: 'grp-1' }; } };
+    globalThis.__mpSet = (perm, gum) => {
+      __mp.gum = 0; __mp.args = []; coachMicOff(); coachStream = null;
+      navigator.mediaDevices = { getUserMedia(c){ __mp.gum++; __mp.args.push(JSON.stringify(c));
+        return gum === 'ok' ? Promise.resolve({ getAudioTracks(){ return [__mpTrack]; }, getTracks(){ return [__mpTrack]; } }) : Promise.reject(Object.assign(new Error(gum), { name: gum })); } };
+      if (perm === 'missing') delete navigator.permissions;
+      else navigator.permissions = { query(){ if (perm === 'throws') throw new TypeError('no'); return Promise.resolve({ state: perm }); } };
+    };
+    micRecShouldAsk = () => false; stopAllDemoAudio = () => {};`);
+  try {
+    const CONSTRAINTS = '{"audio":{"echoCancellation":false,"noiseSuppression":false,"autoGainControl":false,"voiceIsolation":false},"video":false}';
+    // [state, getUserMedia result, panel?, getUserMedia calls before the click, ok, fail name]
+    for (const [perm, gum, panel, before, okWant, nameWant] of [['granted', 'ok', false, 1, true, ''], ['prompt', 'ok', true, 0, true, ''],
+        ['prompt', 'NotAllowedError', true, 0, false, 'NotAllowedError'], ['denied', 'ok', false, 0, false, 'NotAllowedError'],
+        ['missing', 'ok', false, 1, true, ''], ['throws', 'ok', false, 1, true, '']]) {
+      tot.states++;
+      run(`__mpSet(${JSON.stringify(perm)}, ${JSON.stringify(gum)}); document.getElementById('mp-host').innerHTML = ''; globalThis.__mpRes = undefined;
+        coachAcquireMic({ el: document.getElementById('mp-host') }).then(v => { __mpRes = v; });`);
+      await tick();
+      const shown = /onclick="coachMicAskGo\(\)"/.test(els['mp-host'] ? els['mp-host'].innerHTML : ''), g0 = run('__mp.gum');
+      if (shown) { run('coachMicAskGo()'); await tick(); }
+      const res = run('__mpRes'), name = res ? '' : run('coachMicFailName'), args = run('__mp.args.join("|")');
+      if (shown !== panel || g0 !== before || res !== okWant || name !== nameWant || (args && args.split('|').some(a => a !== CONSTRAINTS)))
+        fail(`permission "${perm}", getUserMedia ${gum}: panel ${shown} (want ${panel}), getUserMedia ${g0} before the click (want ${before}), result ${res} (want ${okWant}), fail name "${name}" (want "${nameWant}"), asked with ${args || 'nothing'}`);
+    }
+    // a panel given up by a second start: the first returns false ('cancelled'), the second asks in its own place
+    run(`__mpSet('prompt', 'ok'); globalThis.__mpA = undefined; globalThis.__mpB = undefined;
+      coachAcquireMic({ el: document.getElementById('mp-a') }).then(v => { __mpA = [v, coachMicFailName]; });`);
+    await tick();
+    run(`coachAcquireMic({ el: document.getElementById('mp-b') }).then(v => { __mpB = v; });`);
+    await tick();
+    const panelB = /coachMicAskGo/.test((els['mp-b'] || {}).innerHTML || '');
+    run('coachMicAskGo()'); await tick();
+    if (JSON.stringify(run('__mpA')) !== '[false,"cancelled"]' || !panelB || run('__mpB') !== true || run('__mp.gum') !== 1) fail(`a second start while a panel waits: first ${JSON.stringify(run('__mpA'))} (want [false,"cancelled"]), second drew its panel ${panelB}, second ${run('__mpB')}, getUserMedia ${run('__mp.gum')} (want 1)`);
+    // one blocked-mic wording: the tuner's, in both languages; Note Call adds its tap line; a given-up start says nothing
+    for (const lang of ['en', 'es']) {
+      run(`setLang(${JSON.stringify(lang)})`);
+      for (const [name, extra, want] of [['NotAllowedError', '', `t('tools.micDenied')`], ['NotAllowedError', 'micpre.tapFrets', `t('tools.micDenied') + ' ' + t('micpre.tapFrets')`], ['cancelled', '', `''`]]) {
+        tot.failMsgs++;
+        const got = run(`coachMicFailName = ${JSON.stringify(name)}; coachMicFailMsg(${extra ? JSON.stringify(extra) : ''})`), want2 = run(want);
+        if (got !== want2 || (name !== 'cancelled' && !/(lock icon|candado)/.test(got))) fail(`(${lang}) coachMicFailMsg for ${name}${extra ? ' + ' + extra : ''} reads "${got}", want "${want2}"`);
+      }
+    }
+    run(`setLang('en'); coachMicFailName = '';`);
+    // every caller passes its place for the panel; the hidden trainer (no panel) is the only one that does not
+    const callSrc = stripJsComments(siteSource('coach.js', ROOT)) + stripJsComments(siteSource('app.js', ROOT));
+    tot.callersWithAsk = (callSrc.match(/coachAcquireMic\(\{ el: /g) || []).length;
+    const bare = (callSrc.match(/coachAcquireMic\(\)/g) || []).length;
+    tot.trainerCalls = (stripJsComments(readFileSync(join(ROOT, 'trainer-site-adapter.js'), 'utf8')).match(/coachAcquireMic\(\)/g) || []).length;
+    if (bare) fail(`${bare} coachAcquireMic() call(s) in the site scripts pass no { el } — that start would never show the "Turn on the microphone" panel`);
+    // the take's mic settings: only the seven keys, only true/false or numbers, never an id
+    for (const [what, gs, want] of [['all reported', `() => __mpTrack.getSettings()`, '{"echoCancellation":false,"noiseSuppression":false,"autoGainControl":true,"sampleRate":48000,"channelCount":1,"latency":0.01}'],
+        ['odd values', `() => ({ echoCancellation: 'no', sampleRate: NaN, channelCount: Infinity, autoGainControl: false, groupId: 'g' })`, '{"autoGainControl":false}'],
+        ['none reported', `() => ({ deviceId: 'x' })`, 'null'], ['getSettings throws', `() => { throw new Error('x'); }`, 'null']]) {
+      tot.settings++;
+      const got = run(`JSON.stringify(micRecTrackSettings({ getAudioTracks(){ return [{ getSettings: ${gs} }]; } }), (k, v) => v === undefined ? 'UNDEFINED' : v)`);
+      if (got !== want) fail(`micRecTrackSettings, ${what}: ${got}, want ${want}`);
+    }
+    // the set-up line on every mic set-up screen (EN and ES)
+    for (const lang of ['en', 'es']) {
+      run(`setLang(${JSON.stringify(lang)})`);
+      const line = run(`t('micpre.setup')`);
+      for (const [what, code, id] of [
+        ['Listening Coach', `coach = { mode: 'melody', bpm: 60, beatMs: 1000, events: [], streakKey: 'k', desc: 'x', timeouts: [], card: { isConnected: false }, phase: 'ready', slots: [{ label: 'A', midi: 57, state: 'pending' }] }; coachRenderReady();`, 'coach-body'],
+        ['Change Up', `ccSetup()`, 'cc-body'], ['Power Chord Switch', `ccSetup('power')`, 'cc-body'], ['Strum Radar', `srSetup()`, 'sr-body'],
+        ['Note Runner', `nrSetup(); nr.phase = 'ready'; nrRenderReady();`, 'nr-body'], ['Finger Gym', `fgSetup(); nr.phase = 'ready'; nrRenderReady();`, 'nr-body'],
+        ['Riff Runner, Wait Mode', `rnSetup(); rn.guitar = true; rn.phase = 'ready'; rnRenderReady();`, 'rn-body'], ['Pentatonic Simon (guitar)', `psgSetup()`, 'psg-body']]) {
+        if (lang === 'en') tot.setupScreens++;
+        run(`document.getElementById(${JSON.stringify(id)}).innerHTML = ''; ${code}`);
+        const h = (els[id] || {}).innerHTML || '';
+        if (h.split(line).length !== 2) fail(`(${lang}) the ${what} set-up screen carries the set-up line ${h.split(line).length - 1} times, want once`);
+      }
+    }
+    run(`setLang('en'); coach = null; ccStop(); srStop(); nrStop(); rnStop(); psgStop();`);
+    // mic-check.html: the site's constraints exactly, nothing saved or sent, no site script, linked from nowhere
+    let mc = '';
+    try { mc = readFileSync(join(ROOT, 'mic-check.html'), 'utf8'); } catch { fail('mic-check.html is missing'); }
+    if (mc) {
+      const code = (mc.match(/<script>([\s\S]*?)<\/script>/) || [])[1] || '';
+      const site = (siteSource('coach.js', ROOT).match(/coachStream = await navigator\.mediaDevices\.getUserMedia\((\{[\s\S]*?\})\);/) || [])[1];
+      const page = (code.match(/const CONSTRAINTS = (\{[\s\S]*?\});/) || [])[1];
+      tot.micCheck++;
+      let same = false; try { same = !!site && !!page && JSON.stringify(vm.runInNewContext('(' + site + ')')) === JSON.stringify(vm.runInNewContext('(' + page + ')')); } catch {}
+      if (!same) fail(`mic-check.html CONSTRAINTS is not the request coach.js coachAcquireMicInner makes (page: ${page ? page.replace(/\s+/g, ' ') : 'not found'}; site: ${site ? site.replace(/\s+/g, ' ') : 'not found'})`);
+      tot.micCheck++;
+      const sends = stripJsComments(code).match(/\bfetch\(|XMLHttpRequest|sendBeacon|localStorage|sessionStorage|indexedDB|firebase|WebSocket/g);
+      if (sends) fail(`mic-check.html must save and send nothing; it uses ${[...new Set(sends)].join(', ')}`);
+      tot.micCheck++;
+      if (/<script\b[^>]*\bsrc=/i.test(mc)) fail('mic-check.html loads a script file — it is standalone');
+      tot.micCheck++;
+      const linkers = ['index.html', 'app.js', 'coach.js', 'teacher.js'].filter(f => { try { return /mic-check\.html/.test(f.endsWith('.html') ? readFileSync(join(ROOT, f), 'utf8') : stripJsComments(siteSource(f, ROOT))); } catch { return false; } });
+      if (linkers.length) fail(`mic-check.html is hidden (teacher-only, direct address): ${linkers.join(', ')} links to it`);
+    }
+  } catch (e) { fail(`the mic-start run threw (${e.message})`); }
+  finally {
+    run(`coachMicAskCancel(); coachMicOff(); coachStream = null; coachMicFailName = ''; AudioContext = __mpKeep.ac; navigator.mediaDevices = __mpKeep.md;
+      if (__mpKeep.perm) navigator.permissions = __mpKeep.perm; else delete navigator.permissions; micRecShouldAsk = __mpKeep.ask; stopAllDemoAudio = __mpKeep.stop; setLang('en');`);
+  }
+  for (const [k, n] of Object.entries(PIN)) if (tot[k] !== n) fail(`${tot[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
+  if (bad === 0) ok(`${tot.states} permission states run through the real coachAcquireMic (granted: no panel; prompt: getUserMedia only on "Turn on the microphone", then Allow or Block; denied: no getUserMedia, NotAllowedError; no API or a throw: as before), always with the site's constraints; a waiting panel gives way to a second start; ${tot.failMsgs} blocked-mic lines are the tuner's lock-icon steps (EN + ES, Note Call adds its tap line); ${tot.callersWithAsk} callers pass their panel place and only the trainer's ${tot.trainerCalls} calls do not; ${tot.settings} micSettings cases keep only the seven keys as true/false or numbers; the set-up line appears once on each of ${tot.setupScreens} mic set-up screens (EN + ES); mic-check.html: ${tot.micCheck} pins (same constraints, sends nothing, no script file, linked from nowhere)`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1cl. POWER CHORD SWITCH TAKES ARE MEASURED (2026-11-04) — teacher.js
    micEvalTakePw, what the console's "Evaluate all recordings" does with a
    saved Power Chord Switch take (coach.js ccRecMeta): per change, is there a
@@ -17459,6 +17587,7 @@ function checkPracticeMinutes(i18nTable) {
   checkCoachVerdicts();
   checkToneTest();
   await checkCountIn();
+  await checkMicStart();
   await checkPwTakeEvaluator();
   checkPracticeMinutes(i18nTable);
   checkNoStudentDataHook();
