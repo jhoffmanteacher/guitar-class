@@ -1045,8 +1045,10 @@ function checkMcAnswerOnCard(allSets) {
    reversed "(6th string)" anchor used to accept any parenthesised ordinal
    with no string name in front of it, and a count that only prints can
    grow without anyone noticing. Bump on purpose when a card legitimately
-   adds one. */
-const NUMBERED_STRING_ANCHORS = 17;
+   adds one. 17 -> 53 on 2026-11-13: the six Journey pages' tuner buttons carry
+   the app's screen-reader names (aria-label="Low E (6th string)" .. "High E
+   (1st string)", the diagram.string* labels), 6 pages x 6. */
+const NUMBERED_STRING_ANCHORS = 53;
 function checkNumberedStrings() {
   head('1j. Numbered strings in student-facing text');
   const RE = /\b(?:string|strings|cuerda|cuerdas) [0-6]\b|\b[0-6](?:st|nd|rd|th)[\s-]+strings?\b|\b[0-6]\.?[ºª]\s+cuerdas?\b/gi;
@@ -2247,10 +2249,15 @@ function checkFabToolsThemeDrift() {
    glyph, so a future hand-edit that pastes the literal character instead
    of the entity still trips this — found as a gap in the first cut,
    2026-09-27 review. */
-const POPUP_EMOJI_RE = /<span class="tp-title">\s*(?:&#x1F3B5;|&#x23F1;|&#x1F3B8;|\u{1F3B5}|\u{23F1}️?|\u{1F3B8})/u;
+const POPUP_EMOJI_RE = /<span class="tp-title"[^>]*>\s*(?:&#x1F3B5;|&#x23F1;|&#x1F3B8;|\u{1F3B5}|\u{23F1}️?|\u{1F3B8})/u;
+/* The tags compared with index.html's: the six tuner string buttons and the popup titles' opening tags. */
+const POPUP_A11Y_TAGS = [['a tuner string button', /<button class="ts-btn" data-string="(?!auto)[^"]*"[^>]*>/g], ['a popup title', /<span class="tp-title"[^>]*>/g]];
+const POPUP_A11Y_TAG_TOTAL = 54;
 function checkJourneyPopupMarkup() {
   head('1t3. Journey popup markup (tool-popup HTML) matches the app');
-  let bad = 0, pages = 0;
+  let bad = 0, pages = 0, tagsSeen = 0;
+  let appHtml = '';
+  try { appHtml = readFileSync(join(ROOT, 'index.html'), 'utf8'); } catch { }
   const flag = m => { err(m); problems++; bad++; };
   for (const file of TAB_PAGES.filter(f => f.endsWith('.html'))) {
     let raw;
@@ -2262,8 +2269,18 @@ function checkJourneyPopupMarkup() {
     if (!metroPopup) { flag(`${file}: no metro-popup found — can't check for the Tempo ladder.`); continue; }
     if (!/class="ladder-toggle"/.test(metroPopup[0]) || !/class="ladder-box"/.test(metroPopup[0]))
       flag(`${file}: metro-popup is missing the Tempo ladder toggle/box that index.html's metronome popup has.`);
+    /* Screen-reader names (2026-11-13): each tuner string button's tag and each popup title's tag are the app's, byte for
+       byte (the string's name in aria-label, the heading role on the title). */
+    for (const [what, re] of POPUP_A11Y_TAGS) {
+      const want = appHtml.match(re) || [];
+      const got = raw.match(re) || [];
+      if (!got.length) { flag(`${file}: no ${what} found: the screen-reader markup NOT compared`); continue; }
+      const appSet = new Set(want);
+      for (const tag of got) { tagsSeen++; if (!appSet.has(tag)) flag(`${file}: ${what} ${tag.slice(0, 160)} is not the app's (index.html has ${[...appSet].map(x => x.slice(0, 120)).join(' | ') || 'none'})`); }
+    }
   }
-  if (!bad) ok(`${pages} Journey pages — no emoji tool-popup icons, all carry the Tempo ladder`);
+  if (tagsSeen !== POPUP_A11Y_TAG_TOTAL) flag(`1t3: compared ${tagsSeen} tuner-button and popup-title tags on the Journey pages, pinned ${POPUP_A11Y_TAG_TOTAL} (6 pages x (6 buttons + 3 titles))`);
+  if (!bad) ok(`${pages} Journey pages — no emoji tool-popup icons, all carry the Tempo ladder; ${tagsSeen} tuner-button and popup-title tags are the app's`);
 }
 
 /* Per-page tab-card counts, pinned. See the note where they're compared. */
