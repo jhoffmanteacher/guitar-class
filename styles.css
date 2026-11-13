@@ -2293,6 +2293,12 @@ body.rail-collapsed .rail-tools .tool-popup{
    unchanged everywhere else. */
 .micrec-btns .coach-start{flex:1 1 100%;margin-top:0;padding:13px 18px;font-size:1.0625rem;min-height:48px}
 .micrec-btns .tp-btn{flex:0 0 auto;padding:10px 24px}
+/* The Listening Coach card is at most 540px wide, so in a lesson or class
+   activity the question wrapped and Yes was less than half as wide as in
+   Power Chord Switch (Jonathan, 2026-11-12: "big and green like for power
+   chord"). While the question is up the card takes its step's full width;
+   once the student answers it goes back to 540px. */
+.coach-card:has(.micrec-ask){max-width:none}
 .micrec-stop{margin-left:6px;padding:0 2px;border:0;background:none;color:inherit;font:inherit;text-decoration:underline;cursor:pointer}
 .micrec-on{display:inline-flex;align-items:center;gap:6px;margin:0 0 6px 8px;padding:2px 8px;border-radius:999px;font-size:0.75rem;font-weight:600;background:var(--red-bg);color:var(--red-text)}
 .micrec-dot{width:8px;height:8px;border-radius:50%;background:currentColor}
