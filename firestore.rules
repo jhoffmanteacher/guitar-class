@@ -478,12 +478,20 @@ service cloud.firestore {
 
        siteErrors/{autoId}  { kind, message, file, line, col, stack, page,
                               version, day, lang }
-       No uid, no name, no email, no class period, no time finer than the day
+       No uid, name, email or class period field, no time finer than the day
        (Jonathan, 2026-11-04: nothing readable by others may tie a name or
-       uid to a period). The client scrubs emails, query strings and id-like
-       strings out of the text before writing; these rules pin the SHAPE: the
-       exact ten fields (hasOnly + hasAll), each type, and a size cap on every
-       string, so a doc cannot carry anything else and stays under ~1.5 KB.
+       uid to a period). Before writing, the client scrubs from the text the
+       signed-in account's own uid, email and name, any email address, query
+       strings, id-like runs of letters and digits, and runs of 6+ digits; it
+       cannot know anyone else's name, a class period or what a student typed,
+       so an error message that quotes those keeps them. These rules pin the
+       SHAPE: the exact ten fields (hasOnly + hasAll), each type, a size cap
+       on every string (1,284 UTF-16 units in all, at most about 4 KB), the
+       doc id (20 letters and digits, the form of the SDK's own auto-ids, so
+       an id cannot carry a name), and the day: a real date at most one day
+       either side of the server's UTC date (a device's local date is always
+       within that), so a wrong clock cannot write a day in the future that
+       would sort above every real entry.
 
        Any signed-in account may CREATE one (the logger runs only when someone
        is signed in). Nobody may update one. Only the teacher reads (the
@@ -499,7 +507,17 @@ service cloud.firestore {
        late, the client is refused once, silently, and stops trying for that
        page load.) */
     match /siteErrors/{errorId} {
+      /* The stated day (already checked to be YYYY-MM-DD) as a date, within one
+         day of request.time's UTC date. An impossible date (month 13, Feb 30,
+         year 0) is an evaluation error, which denies. */
+      function siteErrorDayNear(day) {
+        let stated = timestamp.date(int(day[0:4]), int(day[5:7]), int(day[8:10]));
+        let utcDay = request.time.date();
+        return stated >= utcDay - duration.value(1, 'd')
+            && stated <= utcDay + duration.value(1, 'd');
+      }
       allow create: if isSignedIn()
+            && errorId.matches('^[A-Za-z0-9]{20}$')
             && request.resource.data.keys().hasOnly(['kind', 'message', 'file', 'line', 'col', 'stack', 'page', 'version', 'day', 'lang'])
             && request.resource.data.keys().hasAll(['kind', 'message', 'file', 'line', 'col', 'stack', 'page', 'version', 'day', 'lang'])
             && request.resource.data.kind in ['error', 'rejection']
@@ -522,6 +540,7 @@ service cloud.firestore {
             && request.resource.data.version.size() <= 64
             && request.resource.data.day is string
             && request.resource.data.day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+            && siteErrorDayNear(request.resource.data.day)
             && request.resource.data.lang in ['en', 'es'];
       allow read, delete: if isTeacher();
     }
