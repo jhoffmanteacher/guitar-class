@@ -298,6 +298,10 @@ async function ncStart(key){
       ncRepaint(key, ncSetupHtml(key));
       return;
     }
+    // Sound started while the "Turn on the microphone" panel waited (a
+    // practice card, a snippet): silence it before the round listens, as
+    // every game does once its mic is on (review R1-6).
+    stopAllDemoAudio();
     window.coachMicLive = true;
     st.micOn = true;
   }
