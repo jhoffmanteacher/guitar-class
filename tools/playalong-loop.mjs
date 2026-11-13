@@ -94,7 +94,8 @@
          card.sheetNamedAgain counts its first chord again on every lap). "This bar" lights the cell of the
          beat that is sounding and shows each chord that starts in the bar at its eighth. In the song's last
          PC_SHEET_LEAD, when the lead looks past the last bar, the sheet should stay on the last bar (KNOWN
-         sheetPastEnd: the page steps "This bar" into the bar after it).
+         sheetPastEnd: the page steps "This bar" into the bar after it). Where the lead lands on a lap or section
+         start, "This bar" should show the bar it lands in (KNOWN sheetLapBoundary: for one step it shows nothing).
      R13 The other versions of a card: a recording version replaces the track and the card fields it carries; a
          key version replaces the track and renames each chord through its map (the power map when the card is
          on power chords); power chords rename each chord through chordVersions.power. A power chord keeps its
@@ -150,10 +151,12 @@
    KNOWN below so that the run stays useful. An entry lists, walk by walk, the exact places where the fault shows; a
    walk whose mismatches of that kind and section are exactly those prints them as known. Any other mismatch fails,
    and so does a listed fault that shows one place more or one place fewer, or in a walk the entry does not list; a
-   full run that no longer sees an entry fails too (so a fixed fault cannot leave its entry behind). One entry
-   applies to every card and is matched by the fault's exact FORM instead of a list of places: sheetPastEnd (exactly
-   the first cell lit, no chord names and the mark on the last chord name, only in the song's last PC_SHEET_LEAD); a
-   sheet that is wrong in any other way fails.
+   full run that no longer sees an entry fails too (so a fixed fault cannot leave its entry behind). Two entries
+   apply to every card and are matched by the fault's exact FORM instead of a list of places: sheetPastEnd (exactly
+   the first cell lit, no chord names and the mark on the last chord name, only in the song's last PC_SHEET_LEAD) and
+   sheetLapBoundary (no cell lit and no chord names, the mark on the right chord name, for one step only, only where
+   the file position plus PC_SHEET_LEAD is within one step of a lap or section start); a sheet that is wrong in any
+   other way fails.
    FIXED 2026-11-12: the count-in tempo (KNOWN countInTempo until then). pcCountIn clicked at the window's AVERAGE
    tempo (st.win.bar), not at the tempo of the bar the song comes in on: 356 count-ins of a full run were off the
    bar's own tempo by more than 1.5 ms a click, the worst Madrecita Querida's Ending, 16.9% too fast. It now reads
@@ -255,22 +258,33 @@ const SETTLED_RHYTHMS = [
    been told about. */
 const KNOWN = [
   { card: 'ca-35', section: 'Solo', kinds: ['back', 'neverLit'], since: '2026-11-11',
-    why: (C, x) => `PC_ROW_LEAD (${C.rowLead} s) is longer than the quick notes of the Las Mañanitas solo (the shortest is ${x.shortest.toFixed(3)} s at record tempo). At a line change the cursor shows the SECOND note of the new line first and then steps back to the first (Normal speed: notes 1 and 66), and the last note of a line (note 65) is never lit in a 20 ms walk at Slower, Slow and Normal.`,
+    why: (C, x) => `PC_ROW_LEAD (${C.rowLead} s) is longer than the quick notes of the Las Mañanitas solo (the shortest is ${x.shortest.toFixed(3)} s at record tempo). At a line change the cursor shows the SECOND note of the new line first and then steps back to the first (Normal speed: notes 17 and 66, both the first note of a tab row), and the last note of a line (note 65) is never lit in a 20 ms walk at Slower, Slow and Normal.`,
     expect: {
-      /* Every walk that shows it, as seen on 2026-11-12 (the song walks, 20 ms steps). Notes count from 1 within the Solo. */
+      /* Every walk that shows it, as seen on 2026-11-12 (the song walks, 20 ms steps). Notes count from 1 within the Solo;
+         its rows (card.sections rows: 9, 7, 8, ...) start at notes 1, 10, 17, 25, 29, 35, 40, 46, 50, 56, 61, 66, 74, 84.
+         Re-recorded 2026-11-12 after the count-in fix: the count-in now lasts the bar's own length, so the song walks'
+         20 ms steps fall at other points of the music and the step-back is seen at the row start note 17 instead of
+         note 1 (the same fault at another line start). */
       'power chords, bass notes (as it opens) · song · slower': { neverLit: ['note 65'] },
       'power chords, bass notes (as it opens) · song · slow': { neverLit: ['note 65'] },
-      'power chords, bass notes (as it opens) · song · normal': { back: ['note 1', 'note 66'], neverLit: ['note 65'] },
+      'power chords, bass notes (as it opens) · song · normal': { back: ['note 17', 'note 66'], neverLit: ['note 65'] },
       'full chords, bass notes · song · slower': { neverLit: ['note 65'] },
-      'full chords, bass notes · song · normal': { back: ['note 1', 'note 66'], neverLit: ['note 65'] },
+      'full chords, bass notes · song · normal': { back: ['note 17', 'note 66'], neverLit: ['note 65'] },
       'power chords, strum only · song · slower': { neverLit: ['note 65'] },
-      'power chords, strum only · song · normal': { back: ['note 1', 'note 66'], neverLit: ['note 65'] },
+      'power chords, strum only · song · normal': { back: ['note 17', 'note 66'], neverLit: ['note 65'] },
     } },
   /* A lyric sheet's "This bar" in the song's last PC_SHEET_LEAD: the lead looks past the last bar, and the strip
      steps into a bar that does not exist (the first cell lit, no chord names) while the mark stays on the last chord name of
      the sheet. Matched by that exact state, and only in that last stretch; anything else there fails. */
   { card: '*', kinds: ['sheetPastEnd'], since: '2026-11-11',
     why: (C, x) => `On a lyric sheet, for the last ${C.sheetLead} s (PC_SHEET_LEAD) of the song (before it stops or laps), "This bar" steps one bar past the end: it lights the bar's first cell and shows no chord names, a bar that does not exist (${x.n} steps of this run, in ${x.walks} walks, every one exactly that state).` },
+  /* A lyric sheet's "This bar" where the lead lands exactly on a lap or section start, mid-song: pcSheetStrip reads the
+     bar with a different rounding margin from pcLocate, so for one step it picks the bar after the last of the lap
+     (none exists: no chord names) and a cell before the first (none lit), while the chord mark is right. The same strip
+     code as sheetPastEnd. Matched by that exact state, for ONE step, and only where the file position plus
+     PC_SHEET_LEAD is within one step of a lap or section start; a blank strip anywhere else, or longer, fails. */
+  { card: '*', kinds: ['sheetLapBoundary'], since: '2026-11-12',
+    why: (C, x) => `On a lyric sheet, where the music is ${C.sheetLead} s (PC_SHEET_LEAD) before a repeat or a new section, the "This bar" strip blinks empty for one frame (no cell lit, no chord names; the chord mark on the sheet stays right). The same strip code as the past-the-end fault above (${x.n} steps of this run, in ${x.walks} walks, every one a single step exactly in that state).` },
 ];
 
 /* LEAD AND LATENCY PINS: the three leads and the click latency, as last confirmed by ear (Jonathan tuned the sheet's
@@ -1195,7 +1209,7 @@ function judge(M, W, res) {
   res.events.forEach(e => { const o = W.ops[e.i]; if (!evAt.has(e.run)) evAt.set(e.run, []); evAt.get(e.run).push({ e, o }); });
   res.events.forEach(e => { if (e.timedOut) bad(`${W.ops[e.i].op === 'untilAudible' ? 'no file started playing' : W.ops[e.i].op === 'untilBefore' ? 'the song never came ' + W.ops[e.i].lead + ' ms before a count' : 'the song never stopped'} (step ${e.i + 1} of the walk)`); });
   let phase = 'idle', lastLit = '', lastAud = null, pendStart = null, pendSwitch = null, laps = 0, expStop = W.stop, expGuitar = W.guitar;
-  let pendLoopFrom = 0, lastPlaceKey = null, order = -1, silentFrom = null, saidSilent = false;
+  let pendLoopFrom = 0, lastPlaceKey = null, order = -1, silentFrom = null, saidSilent = false, lapBlankRun = -1;
   const loadMs = W.loadMs || 40;
   const orderOf = (p) => { let n = 0; for (let i = 0; i < p.si; i++) n += ch.secs[i].reps * 1e6; return n + p.rep * 1e6 + p.at; };
   const litEmpty = (k) => k.lit === '';
@@ -1318,6 +1332,14 @@ function judge(M, W, res) {
           if (k.lit === wantNow && Number(pill) === wantTok && names === marks.join(',')) { hit = p; break; }
         }
         if (!hit) {
+          /* KNOWN sheetLapBoundary: the strip blank (no cell, no names) with the right chord marked, for one step, where
+             the lead lands within one step of a lap or section start. */
+          const KB = KNOWN.find(x => x.card === '*' && x.kinds.includes('sheetLapBoundary'));
+          if (KB && n === 1 && k.lit === '' && names.split(',').every(x => x === '') && real.some(p => Number(pill) === ch.tok[p.si][p.rep][p.ni])) {
+            const look = ct + lead0 * a1.rate, stepFile = (W.kind === 'song' ? STEP_MS : FINE_MS) / 1000 * a1.rate;
+            const onStart = ch.secs.some(S => { for (let r = 0; r < S.reps; r++) if (Math.abs(T1.clock.time(S.fromBar - 1 + r * S.bars) - look) <= stepFile) return true; return false; });
+            if (onStart) { if (lapBlankRun !== i) { lapBlankRun = i; stats.lapBlank = (stats.lapBlank || 0) + 1; } continue; }
+          }
           const p = real[0], S = ch.secs[p.si], bar = Math.floor(p.local / meter.beats + 1e-9), beat = Math.floor(p.local - bar * meter.beats + 1e-9);
           bad(`${where}: the chart is at ${secName(p)}: beat ${beat + 1} of the bar, chord name ${ch.tok[p.si][p.rep][p.ni] + 1} of the sheet (${M.scan.toks[ch.tok[p.si][p.rep][p.ni]]}); the page lights "This bar" cell ${k.lit === '' ? 'none' : k.lit}, marks chord name ${Number(pill) + 1} (${M.scan.toks[Number(pill)] || '?'}) and shows [${names}]`);
         } else {
@@ -1497,11 +1519,12 @@ function judge(M, W, res) {
     const t = e.t / 1000;
     if (!res.clicks.some(c => c.made <= t + 1e-9 && t < c.at)) bad(`the ${o.stop ? 'Stop' : o.sw} press at ${t.toFixed(3)} s met no queued click: this walk tested nothing`);
   });
-  /* The KNOWN fault matched by its exact form, for every card ('*'): what this walk showed of it. */
+  /* The two KNOWN faults matched by their exact form, for every card ('*'): what this walk showed of them. */
   for (const K of KNOWN) {
     if (K.card !== '*') continue;
     if (K.kinds.includes('sheetPastEnd') && stats.pastEnd) { K.n = (K.n || 0) + stats.pastEnd; K.walks = (K.walks || 0) + 1; known.push(`${M.view.id} "This bar" one past the end: ${stats.pastEnd} steps`); }
-    K.seen = K.kinds.includes('sheetPastEnd') ? (K.walks || 0) : (K.n || 0);
+    if (K.kinds.includes('sheetLapBoundary') && stats.lapBlank) { K.n = (K.n || 0) + stats.lapBlank; K.walks = (K.walks || 0) + 1; known.push(`${M.view.id} "This bar" blank for one step at a lap or section start: ${stats.lapBlank} time(s)`); }
+    K.seen = K.walks || 0;
   }
   /* KNOWN: this walk's mismatches in a listed section must be exactly the listed ones, no more and no fewer. */
   for (const K of KNOWN) {
