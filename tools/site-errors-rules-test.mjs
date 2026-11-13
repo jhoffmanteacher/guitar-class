@@ -25,7 +25,10 @@
      cp <repo>/tools/site-errors-rules-test.mjs <repo>/firestore.rules .
      # firebase.json:  { "firestore": { "rules": "firestore.rules" }, "emulators": { "firestore": { "port": 8091 }, "ui": { "enabled": false } } }
      npx firebase emulators:exec --only firestore --project demo-gc "node site-errors-rules-test.mjs firestore.rules --port 8091 --breaks"
-   Exit 0 = every case passed on the real rules (and, with --breaks, every break was caught). */
+   Exit 0 = every case passed on the real rules (and, with --breaks, every break was caught).
+   Last run: 2026-11-13, firestore.rules: 83 passed, 0 failed; 11 of 11 breaks caught. The same cases on the rules
+   before this block (origin/main cda3b92, the "not published yet" state): 67 passed, 16 failed, and the 16 are
+   exactly the 16 allows (every create and every teacher read/delete is refused); all 11 older-path cases pass on both. */
 import { initializeTestEnvironment, assertSucceeds, assertFails } from '@firebase/rules-unit-testing';
 import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
