@@ -15043,6 +15043,39 @@ async function checkPwTakeEvaluator() {
    a real <audio>) is tools/pm-e2e.mjs — it needs Chrome, so it is run by hand.
    ════════════════════════════════════════════════════════════════════ */
 const PM_SIM_PIN = 390;
+/* ════════════════════════════════════════════════════════════════════
+   1dc. STUDENT DATA NEVER GOES TO CLAUDE (Jonathan, 2026-11-13: "I am allowed to
+        store data in google/firestore but not in claude"; "let's block student
+        names from claude").
+   The guard is a Claude Code PreToolUse hook, .claude/hooks/no-student-data.mjs,
+   wired in .claude/settings.json. A hook that is missing, unwired or broken fails
+   SILENTLY (it fails open so it can never brick a session), so this check runs
+   its own test cases on every push and pins the wiring: the hook on the tools
+   that can read a file, the Read deny rules beside it, and no auto-allow for the
+   real-browser tools (a page with the roster may be on screen).
+   ════════════════════════════════════════════════════════════════════ */
+function checkNoStudentDataHook() {
+  head('1dc. Student data never goes to Claude (the hook and its wiring)');
+  let bad = 0;
+  const fail = m => { err('1dc: ' + m); problems++; bad++; };
+  const hook = join(ROOT, '.claude', 'hooks', 'no-student-data.mjs');
+  if (!existsSync(hook)) { fail('.claude/hooks/no-student-data.mjs is missing'); return; }
+  const r = spawnSync(process.execPath, [hook, '--self-test'], { encoding: 'utf8', timeout: 30000 });
+  const m = /no-student-data: ✓ (\d+) of (\d+) cases/.exec(r.stdout || '');
+  if (r.status !== 0 || !m) fail('the hook\'s own test failed: ' + ((r.stdout || '').trim().split('\n').slice(-3).join(' | ') || (r.error && r.error.message) || 'no output'));
+  else if (+m[2] < 32) fail(`the hook's own test has ${m[2]} cases; it had 32 (never remove a case to get green)`);
+  let cfg = null;
+  try { cfg = JSON.parse(readFileSync(join(ROOT, '.claude', 'settings.json'), 'utf8')); } catch (e) { fail('.claude/settings.json is not valid JSON (a broken file switches off EVERY hook in it)'); return; }
+  const pre = ((cfg.hooks || {}).PreToolUse || []).filter(h => (h.hooks || []).some(x => /no-student-data\.mjs/.test(x.command || '')));
+  if (pre.length !== 1) fail(`.claude/settings.json wires the hook ${pre.length} times under PreToolUse (expected 1)`);
+  else for (const t of ['Bash', 'Read', 'Grep', 'Glob', 'Edit', 'Write', 'mcp__']) if (!String(pre[0].matcher || '').includes(t)) fail(`the hook's matcher no longer covers ${t}`);
+  const deny = (cfg.permissions || {}).deny || [], allow = (cfg.permissions || {}).allow || [];
+  for (const need of ['mic-recordings-', 'guitar-class-backup-', 'guitar-class-' + 'private']) if (!deny.some(d => /^Read\(/.test(d) && d.includes(need))) fail(`permissions.deny has no Read rule for ${need}`);
+  const auto = allow.filter(a => /^mcp__claude-in-chrome|^mcp__claude_ai_(Google_Drive|Gmail|Google_Classroom)/i.test(a));
+  if (auto.length) fail(`permissions.allow lets ${auto.length} real-browser or Google-connector tool(s) run without asking: ${auto.join(', ')}`);
+  if (!bad && m) ok(`the hook's own ${m[1]} of ${m[2]} cases hold; wired once under PreToolUse on 7 tool families; 3 of 3 Read deny rules; 0 real-browser or Google-connector tools auto-allowed`);
+}
+
 function checkPracticeMinutes(i18nTable) {
   head('1cg. Practice minutes: the engine is run; the rules cap, no heartbeat, wiring and strings are pinned');
   let bad = 0;
@@ -15502,6 +15535,7 @@ function checkPracticeMinutes(i18nTable) {
   await checkCountIn();
   await checkPwTakeEvaluator();
   checkPracticeMinutes(i18nTable);
+  checkNoStudentDataHook();
   await checkBackingLoudness();
   checkPartSizes();
   if (!SKIP_LINKS) await checkLinks();

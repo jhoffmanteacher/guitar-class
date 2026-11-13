@@ -191,6 +191,23 @@ Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `ap
   Module 4/5 work, for an old id coming back, any `m5w4-*`, or `chords-m5`.
 
 ### ⚠️ Other standing rules
+- **Student data never goes to Claude** (Jonathan, 2026-11-13: "I am allowed to store data in google/firestore
+  but not in claude"; his own name is fine). Whatever a tool reads, lists, prints or screenshots is sent to
+  Anthropic. So never open, unzip, list the inside of, grep or print from: a raw recordings download
+  (`mic-recordings-<date>.zip`, its unzipped folder, the per-take `mic-<game>-<Name>-…` files), a console backup
+  (`guitar-class-backup-<date>.json`), or anything in `~/Documents/guitar-class-private/`. Bring recordings in only
+  with `node tools/mic-sim/takes-in.mjs` (it removes the names and prints counts); work on the anonymized
+  `T01…` copies. Never open the real teacher console, the Firebase console, Gmail, Drive or Classroom with the
+  Chrome extension or a Google connector; site checks use headless Chrome for Testing with the stub Firestore.
+  Never print a student's name, email or uid from a transcript or a log: count, don't quote. A tool's test data
+  is made up ("Test 0"). `.claude/hooks/no-student-data.mjs` blocks the file reads and makes the browser and
+  connector tools ask first (`checks.mjs` 1dc keeps it wired); it is a guard rail, this rule is what binds. A
+  Bash heredoc that merely NAMES one of those paths is blocked too: write that code with Edit / Write.
+- **A bad day** (the last push broke the site, students stuck on a broken cached copy, saved work lost): follow
+  `BREAK-GLASS.md`. Google sign-in or saving down: `docs/when-google-is-down.md`. After a change to `sw.js`, the
+  service-worker block in `app/start.js`, `swResume*`, or the audio cache names in `tools/sw-audio-map.mjs`: also
+  `node tools/kill-switch/proof.mjs` (Node, about 1 s; it must end "14 of 14 mutations caught").
+  `tools/kill-switch/kill-sw.js` is never loaded by the site and goes in no list.
 - **Sweep ratchet**: 3+ instances of a mechanically-detectable error class → permanent `checks.mjs` detector, same session; it must render/execute, match UNESCAPED strings (`unescapeJs()`); break it in a scratch copy and watch it fail.
 - **Activity order/placement** live on the console board (`config/class.activityBoard`,
   `caBoardOrder()`, `teacherMoveActivity()`); a digit in a title is a SERIES number (1d, 1l). **`config/class`** writes only via `teacherWriteConfig()` (1ai; omit `base` unless a single-cell toggle).

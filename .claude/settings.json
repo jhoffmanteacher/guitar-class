@@ -1,13 +1,6 @@
 {
   "permissions": {
     "allow": [
-      "mcp__claude-in-chrome__navigate",
-      "mcp__claude-in-chrome__find",
-      "mcp__claude-in-chrome__tabs_context_mcp",
-      "mcp__claude-in-chrome__read_console_messages",
-      "mcp__claude-in-chrome__get_page_text",
-      "mcp__claude-in-chrome__read_network_requests",
-      "mcp__claude-in-chrome__read_page",
       "Bash(node tools/checks.mjs --check --skip-links)",
       "Bash(node tools/checks.mjs)",
       "Bash(node tools/checks.mjs --skip-links)",
@@ -41,6 +34,18 @@
       "Edit(sw.js)",
       "Edit(CHANGELOG.md)",
       "Edit(WORKFLOW.md)"
+    ],
+    "deny": [
+      "Read(~/Documents/mic-recordings-*)",
+      "Read(~/Downloads/mic-recordings-*)",
+      "Read(~/Desktop/mic-recordings-*)",
+      "Read(~/Documents/guitar-class-backup-*)",
+      "Read(~/Downloads/guitar-class-backup-*)",
+      "Read(~/Desktop/guitar-class-backup-*)",
+      "Read(~/Documents/guitar-class-private/**)",
+      "Read(**/guitar-class-private/**)",
+      "Read(**/guitar-class-backup-*.json)",
+      "Read(**/mic-recordings-*.zip)"
     ]
   },
   "hooks": {
@@ -52,6 +57,18 @@
             "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/stop-checks.mjs\"",
             "timeout": 150,
             "statusMessage": "Running the repo's offline checks…"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell|Read|Edit|Write|NotebookEdit|Grep|Glob|Artifact|mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/no-student-data.mjs\"",
+            "timeout": 10
           }
         ]
       }
