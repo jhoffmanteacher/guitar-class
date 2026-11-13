@@ -21,18 +21,28 @@
      --stall=SEC        watchdog: no case finished for SEC seconds (default 120) -> prints where it was, exit 3
      --list             the families and the fake faults
    stdout is identical for the same seed and site; the run time is printed on stderr.
-   Exit 0 = every case passed (KNOWN faults below excepted); 1 = a case failed, the fake failed its self-test, or a full
-   default run matched nothing for a KNOWN entry, or a site script does not parse (a FAIL line names it); 2 = bad
-   arguments or the tool itself crashed; 3 = watchdog.
+   Exit 0 = every case passed (KNOWN faults below excepted); 1 = a case failed, the fake failed its self-test, a run
+   that reaches a KNOWN entry matched nothing for it, or a site script does not parse (a FAIL line names it); 2 = bad
+   arguments or the tool itself crashed; 3 = watchdog. The summary and the last line count the failing values by tag
+   (below); "untagged" is something new.
 
    KNOWN. Site faults this tool found that are still open, listed at the bottom of the file (const KNOWN) with the date
    they were listed. A wrong value that matches an entry EXACTLY is printed as "~ known, listed <date>" and does not fail;
-   anything else fails (the exit-check entry also needs the carrier the fault needs: another activity saved by that tab);
-   a full default run (every family, 180 cases or more) in which an entry matches nothing fails, so
-   a fixed fault gets its entry taken out. Listed 2026-11-12: an exit check marked done with no score after a failed
-   sign-in read. Two more site faults this tool found on 2026-11-12 are NOT listed (the owner decides): they fail, and
-   their FAIL lines are tagged [R16-wiped] (a PR history replaced by a one-entry history after a failed sign-in read)
-   and [R6-both-picks] (after a failed sign-in read, a new path pick leaves the stored pick ticked beside it).
+   anything else fails. Each entry names the run that reaches it (`reach`); such a run in which the entry matches nothing
+   fails, so a fixed fault gets its entry taken out. Listed 2026-11-12:
+     - an exit check marked done with no score after a failed sign-in read (needs the carrier the fault needs: another
+       activity saved by that tab); reached by any full default run;
+     - R10-online-retry: the Wi-Fi comes back while the LAST automatic save retry is still loading the Firestore SDK.
+       shell.js's 'online' listener finds nothing dirty (the flush in flight took the dirty keys), that flush fails past
+       SAVE_MAX_AUTO_RETRIES, and the page shows "Not saving — check connection" with the work unsent until the student
+       acts again (lost if the tab closes or the battery dies first). Reached by
+       --seed=5 --family=failed-load,dropped,mixed,hide-close --cases=600 (cases 309, 573).
+   TAGS. A failing value that is exactly what one of the site faults this tool found would leave carries its tag:
+   [R16-wiped] a PR history replaced by one a failed-read tab built from nothing (exactly that tab's final history);
+   [R6-both-picks] a stored path pick left beside a newer pick of a failed-read tab, no un-tick of it ever landed;
+   [R18-told] a PR entry after a failed read with no "Not saving" shown, or a "Saved" shown for it; both fixed in the site
+   on 2026-11-12 (caPickPath sends every other path's un-tick; a PR entry after a failed read is held back and the page
+   says "Not saving"), so they now fail as regressions.
 
    WHAT IS REAL. The site's own scripts, unmodified, each run as its own script in a Node vm context, one context per
    browser tab: i18n.js, guitar-diagrams.js, class-activities.js, config-main.js, every module-N.js and every app part
@@ -80,7 +90,9 @@
        up       40-400 ms per round trip;
        slow     2-6 s per round trip;
        stall    the connection hangs: writes wait for the end of the phase (F11); a read or a transaction fails after
-                10 s, or goes through at the reconnect if that comes sooner;
+                10 s, or goes through at the reconnect if that comes sooner. KINDER THAN THE REAL ONE: on a stalled
+                network a real get() "retries forever rather than rejecting" (app/boot.js, the auth stall timer), so a
+                site that puts a read in the save path cannot show its worst case here;
        offline  the browser knows it is offline: 'offline' / 'online' events fire on that device's open tabs at the
                 phase's ends; writes wait (F12); reads, transactions and the Firestore SDK's <script> fail at once;
        refused  the server REFUSES the write or read after 200-800 ms (permission-denied, quota): nothing is applied.
@@ -126,12 +138,15 @@
      R5 The streak: +1 when the last day was yesterday, unchanged when it is today, else 1 (save.js bumpPracticeStreak
         comment: "the same day-string / yesterday-comparison pattern").
      R6 A path pick leaves exactly one `<id>:path:<key>` tick, the one picked (activities.js, "The pick is saved with
-        the step ticks").
+        the step ticks"; since 2026-11-12 the un-tick of every other path is sent whatever the screen showed, so a path
+        effect counts as a change when it changes the STORED doc, not only that tab's view).
      R7 An exit check files {score, total, picks, at, attempts}: score = picks equal to the item answers (the fret for
         nextNote), attempts = the previous attempts + 1, at = today; and marks the activity done. The two go together:
         "hold both or neither" (activities-2.js:276-287).
      R8 After a FAILED load, streak, games, practiceLog and exitChecks (and an exit check's done mark, R7) are held back
         for the session (save.js:562-577); they may be missing, never a zero-based value written over the real one.
+     R8b After a FAILED load a PR entry is never sent (save.js, the PR exception above LOAD_DEPENDENT_SAVE_KEYS): the
+        stored history stays exactly as it was; the entry stays on that tab's screen.
      R9 A Module 4/5 doc with no migrations.swap45 is moved once: ids m4w*<->m5w* (also with a practice- prefix),
         mr4<->mr5, chords-m4<->chords-m5 in skills, responses, completed, practiceLog and games.coachSkill /
         drillSkill / dk; lastModule 4<->5; lastSet; songReady layers 4<->5; nothing else. The stored doc must end
@@ -151,8 +166,10 @@
             tab changed can overwrite the newer value. Counted only when a write from tab X, carrying exactly the stored
             value, landed after the last owed change to that key by a DIFFERENT tab Y, a write from Y carrying Y's new
             value landed before X's, and the value is the one the oracle's own model of tab X held WHEN X SENT that
-            write (what X loaded, then X's own actions up to then). A write saying something X's view no longer held
-            is X's own action lost, never K1.
+            write (what X loaded, then X's own actions up to then), the value is not a PR history a failed-read X
+            built from nothing, and X made no owed change to that record after sending that write. Otherwise it is
+            X's own action lost, never K1. A path effect counts as a change when it changes that tab's view, the
+            stored doc, or a write of that tab after it carried it.
          K2 two devices can save different path picks (WORKFLOW.md, 2026-11-09 product calls: "rare, nothing lost"):
             only when the tab that picked last had loaded the doc (its view lacked the other pick because the other
             device had not saved it yet, not because its read failed).
@@ -171,6 +188,9 @@
          written whole) must equal ONE value some history gives, not a mix of leaves from two (an old attempts count
          beside a new score), when only one tab acted on it; when its leaves were excused as K1, it must be exactly a
          whole copy the oracle's model of the tab that sent it held.
+     R18 A PR entry typed after a failed sign-in read: the save indicator (.save-ind, its data-i18n key) shows
+         "save.notSaving" right after it, and no "save.saved" before that tab's next action or its next landed write that
+         carries more than name and email (that one saves other work).
 
    Reading a FAIL line: case index, family, the stored value, the values the oracle accepts, and the replay command. */
 import vm from 'node:vm';
@@ -900,7 +920,10 @@ function oracle(sc, world, tabs){
     for (const x of effs){
       const v = viewBefore(tabBy[x.a.tab], rec, effs, x);
       const sv = x.e.path ? getRec(storedAt(x.a.t), rec) : v;
-      x.changed = canon(x.e.fn(v)) !== canon(v) || canon(x.e.fn(sv)) !== canon(sv);
+      /* ...or when a write of that tab after it said so (an un-tick sent for a path the doc did not hold yet: another
+         device's older pick may still be on its way). */
+      x.changed = canon(x.e.fn(v)) !== canon(v) || canon(x.e.fn(sv)) !== canon(sv)
+        || (!!x.e.path && world.landed.some(w => w.tab === x.a.tab && !w.tx && w.at >= x.a.t && sentLeaf(w.data, rec) === canon(x.e.fn(sv))));
     }
     const accept = acceptOf(rec, effs, 'owed');
     const loose = acceptOf(rec, effs, 'owedLoose');
@@ -935,10 +958,10 @@ function oracle(sc, world, tabs){
            instead of on the other tab's 3) does match its view at send time: that is K1 itself, the other tab's work
            overwritten. */
         if ((flatten(viewAt(tabBy[w.tab], rec, effs, w.sentAt), rec, new Map()).get(k) || '∅') !== g) return false;
-        /* ...and the sender had loaded the doc (a tab whose read failed holds no older copy: what it sends was built
-           from nothing), and did not change the record again after this write was sent (that later change is its own
-           action lost, R3-1). */
-        if (!tabBy[w.tab].loadOk) return false;
+        /* ...and, for a sender whose read failed, the value is not a PR history it built from nothing (its outright
+           answers and ticks are its own copy like any tab's; R3-4), and the sender did not change the record again
+           after this write was sent (that later change is its own action lost, R3-1). */
+        if (!tabBy[w.tab].loadOk && effs.some(x => x.a.tab === w.tab && x.a.kind === 'pr')) return false;
         if (effs.some(x => x.owed && x.changed && x.a.tab === w.tab && x.a.t > w.sentAt)) return false;
         /* ...and the other tab's newer value did reach the server before it was overwritten (otherwise nothing of the
            other tab's was lost to this one: its own write went missing, which is a failure). */
@@ -999,9 +1022,8 @@ function oracle(sc, world, tabs){
      write carrying anything but name and email (which would be saving other work). */
   for (const a of acts) if (a.kind === 'pr' && !tabBy[a.tab].loadOk){
     const t = tabBy[a.tab];
-    const atNow = t.msgs.filter(m => m.t === a.t);
-    const shown = atNow.length ? atNow[atNow.length - 1].key : null;
-    const nextAct = acts.find(b => b.tab === a.tab && b.t > a.t);
+    const shown = a.msgAfter;
+    const nextAct = acts.slice(acts.indexOf(a) + 1).find(b => b.tab === a.tab);
     const nextW = world.landed.find(w => w.tab === a.tab && !w.tx && w.at > a.t && Object.keys(w.data).some(f => f !== 'name' && f !== 'email'));
     const end = Math.min(nextAct ? nextAct.t : Infinity, nextW ? nextW.at : Infinity);
     const falseSaved = t.msgs.find(m => m.key === 'save.saved' && m.t > a.t && m.t < end);
@@ -1253,6 +1275,13 @@ function genScenario(seed, idx, famFilter){
       if (r() < 0.5) act('A', tc + ri(1, 4) * S, 'activity', { key: pick(['ca-18', 'ca-20']), on: r() < 0.7 });
     }
     for (let n = ri(0, 3); n > 0; n--) randomAct('A', t1 + ri(1, 15) * S);
+    /* A PR entry, then two answers saved apart: the PR must stay out of every later save of the answers (R8b). */
+    if (r() < 0.6){
+      const tp = t1 + ri(2, 3) * S;
+      act('A', tp, 'pr', { key: 'practice-m6w1-s2', value: String(ri(60, 140)) });
+      act('A', tp + 1500, 'answer', { key: pick(POOL.answer), text: 'answer one ' + ri(1, 999) });
+      act('A', tp + 3500, 'answer', { key: pick(POOL.answer), text: 'answer two ' + ri(1, 999) });
+    }
     if (r() < 0.3) ev(tA, t1 + ri(16, 18) * S, 'close');
     settle = t1 + 22 * S;
   } else if (fam === 'dropped'){
@@ -1501,6 +1530,8 @@ async function runCase(seed, idx, famFilter){
       a.done = true; applyView(s.tab, a); s.tab.pokes.push(world.now);
       world.log(`${a.tab} ${describe(a)}`);
       siteCall(s.tab, actionCode(a));
+      /* What the save indicator says the moment this action's own code has run (R18). */
+      a.msgAfter = s.tab.msgs.length ? s.tab.msgs[s.tab.msgs.length - 1].key : null;
     }), null, 'script');
   }
   /* The settle: every open tab hidden at settleAt + 2 s (a clean point, R10). */
