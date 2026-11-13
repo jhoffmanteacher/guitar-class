@@ -566,7 +566,8 @@ function renderResumeCard(){
   // a boot-time call (restoreLastSet) fires independently of that render
   // pass and would otherwise show the card out from under a Today hero the
   // very first time the page loads. caStartHereId is null exactly when
-  // there's nothing pending (see renderClassActivities).
+  // nothing is pending but cards the teacher cleared for this student (see
+  // renderClassActivities).
   if(document.body.classList.contains('ca-gated') || caStartHereId !== null){
     host.hidden = true; host.innerHTML = ''; return;
   }

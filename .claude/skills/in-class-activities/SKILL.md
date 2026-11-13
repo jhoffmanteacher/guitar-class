@@ -71,10 +71,11 @@ gate (`caIsVisible`) and Today both read; 1cq stubs it. In
 - `pendingPool`: every pending visible card, newest `caDate` first, undated
   last; within one date required before optional, then lowest board position
   (#11 above #12). `todayPending` = the ones dated today or yesterday.
-- The hero (`caStartHereId`) is the first PENDING required card of Today (an
-  optional one only when nothing required is left there); with nothing
-  pending in Today it is the newest pending card in the Unfinished fold, so it
-  is null only when nothing at all is pending.
+- The hero (`caStartHereId`): required and unfinished first (Jonathan,
+  2026-11-12, "required and unfinished first"): the newest pending REQUIRED
+  card whatever its date, an optional one only when no required card is
+  pending, never a card the teacher cleared for this student; null when
+  nothing but cleared cards is pending.
 - `todayDone`: every FINISHED card dated today or yesterday, appended BELOW
   the pending ones, today's first, then lowest board position (2026-11-09:
   "In Today, marked done" — re-dating puts a card back in Today for everyone;
@@ -246,8 +247,8 @@ card (`teacherSetActivityOptional`) writes `config/class.optionalActivities`
 - The rule lives in three places that must agree: `caBlockers()` (`app/activities-2.js`, via
   `caIsOptional()`), `teacherBlockersFor()` (`teacher-config.js`), `journeyBlockers()`
   (tabs/journey.js).
-- The Today hero prefers the first REQUIRED pending card; an optional one only
-  when nothing required is left.
+- The Today hero: required and unfinished first (2026-11-12), as stated under
+  `renderClassActivities()` above.
 - Cached as `caOptional`. Delete clears the flag; Archive keeps it.
 
 **CAS students: every activity is optional** (Jonathan — they must never be

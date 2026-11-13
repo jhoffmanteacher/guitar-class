@@ -51,10 +51,11 @@ function caScrollToActivity(id){
 // Which activity card is expanded, so a re-render (Mark complete, language
 // switch) doesn't collapse the one the student is looking at.
 let caOpenId = null;
-/* The id of the Today hero: the first required PENDING card of Today's
-   activities (today's and yesterday's cards — see pendingPool in
-   renderClassActivities()), or with none there the newest pending card;
-   null only when nothing at all is pending.
+/* The id of the Today hero: the newest REQUIRED pending card, whatever its
+   date, else the newest optional one; never a card the teacher cleared for
+   this student (Jonathan, 2026-11-12, "required and unfinished first" — see
+   pendingPool in renderClassActivities()); null when nothing but cleared
+   cards is pending.
    Set fresh by renderClassActivities() each render. Read by the resume
    card (hidden while a hero is pending) and the "next up" toast. The card
    stays COLLAPSED by default like every other card (Jonathan, 2026-09-15)
@@ -64,7 +65,8 @@ let caStartHereId = null;
    (caTodayWindow; Jonathan, 2026-11-09, evening), pending ones first, then
    finished ones, shown done. No cap (CA_TODAY_MAX, 3, went with this rule).
    caTodayIds is every card in the group, the finished ones included; the
-   hero is the first required pending one, not always the first card. */
+   hero (caStartHereId) is not always the first card, and may not be in the
+   group at all (an older required card beats an optional one dated today). */
 let caTodayIds = [];
 // Non-interactive whole-activity progress dots, drawn only for the Today
 // cards — distinct from repDotsHtml (a TAPPABLE rep counter under one

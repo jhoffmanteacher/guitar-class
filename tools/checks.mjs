@@ -8810,8 +8810,9 @@ function checkPracticeCards(ctx) {
    fold's ✓ row (today before yesterday, lowest board position first), not
    repeated in Completed or counted. The heading is dated today; a card from
    yesterday wears its own .ca-chip. No card of either day → no heading.
-   The hero (caStartHereId) is the first required pending Today card, else
-   the newest pending card anywhere, null only when nothing is pending: it
+   The hero (caStartHereId) is the newest required pending card anywhere,
+   else the newest optional one, never a card cleared for the student, null
+   when nothing but cleared cards is pending (2026-11-12): it
    decides the "next up" toast and the resume card. Only visible cards count
    (a future date, Hidden, or another student's card never draws). The folds
    keep their old board order. A deep link to a finished Today card does not

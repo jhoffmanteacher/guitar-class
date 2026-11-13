@@ -1445,14 +1445,16 @@ function renderClassActivities(){
       .sort((x, y) => byDate(x, y) || (Number(caIsOptional(x)) - Number(caIsOptional(y))) || (boardPos[x.id] - boardPos[y.id]));
     const todayPending = pendingPool.filter(inToday);
     /* The hero (caStartHereId) stays COLLAPSED like every other card
-       (Jonathan, 2026-09-15). It is the first REQUIRED pending card of
-       Today, an optional one only when nothing required is left there. With
-       nothing pending in Today it is still the newest pending card (in the
-       Unfinished fold): caStartHereId answers "is anything left to do?" for
-       the "next up" toast and the resume card, so it is null only when
-       nothing at all is pending. */
-    const firstOf = arr => arr.find(a => !caIsOptional(a)) || arr[0] || null;
-    const heroPick = firstOf(todayPending) || firstOf(pendingPool);
+       (Jonathan, 2026-09-15). Required and unfinished first (Jonathan,
+       2026-11-12): the newest REQUIRED pending card, whatever its date (an
+       older one in the Unfinished fold beats an optional card dated today);
+       an optional one only when no required card is pending. A card the
+       teacher cleared for this student is never the hero. caStartHereId
+       answers "is anything left to do?" for the "next up" toast and the
+       resume card, so it is null when nothing is pending but cleared cards. */
+    const myClears = (activityClears || {})[currentUser && currentUser.uid] || {};
+    const pickable = pendingPool.filter(a => myClears[a.id] !== true);
+    const heroPick = pickable.find(a => !caIsOptional(a)) || pickable[0] || null;
     caStartHereId = heroPick ? heroPick.id : null;
     const todayDone = list.filter(a => isDone(a) && inToday(a)).sort((x, y) => byDate(x, y) || (boardPos[x.id] - boardPos[y.id]));
     const todayCards = todayPending.concat(todayDone);
