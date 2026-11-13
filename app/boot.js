@@ -67,7 +67,7 @@ const SITE_ERRORS = (function(){
      "user" must not make [user] into [[user]]). */
   const TOKEN = /(\[(?:user|email|id|n|query)\])/;
   /* Each entry: { d: the doc, late: no account was known when it was made,
-     done: test()'s answer, or null }. */
+     cut: the fields cut at their cap, done: test()'s answer, or null }. */
   const queue = [], seen = new Set(), rawSeen = new Set();
   let used = 0, off = false, offCode = '', sending = false, pollT = null, polls = 0, verP = null;
   /* Every unpaired surrogate (half an emoji, from code that sliced one)
@@ -135,11 +135,13 @@ const SITE_ERRORS = (function(){
       return s => String(s).normalize('NFC').split(TOKEN).map((part, i) => i % 2 ? part : res.reduce((t, re) => t.replace(re, (m, pre) => pre + '[user]'), part)).join('');
     }catch(_){ return null; }
   }
-  /* An entry cut while nobody was signed in can end in half a name
-     ("… Maxim…"), which the account scrub at send time cannot recognise: its
-     last, unfinished word goes. */
+  /* A field cut at its cap while nobody was signed in can end in half a
+     name ("… Maxim…"), which the account scrub at send time cannot
+     recognise: its last, unfinished word goes, at most 40 letters (a field
+     that is one long run of letters keeps the rest). Only for a field that
+     was really cut (entry.cut), so "Loading…" stays "Loading…". */
   function dropCutWord(t){
-    return t.slice(-1) === '…' ? t.slice(0, -1).replace(/[\p{L}\p{N}\p{M}]+$/u, '') + '…' : t;
+    return t.slice(-1) === '…' ? t.slice(0, -1).replace(/[\p{L}\p{N}\p{M}]{1,40}$/u, '') + '…' : t;
   }
   function int(n){
     const v = Math.floor(Number(n));
@@ -244,7 +246,7 @@ const SITE_ERRORS = (function(){
             e = queue.shift();
             const d = e.d, who = whoScrub();
             /* Re-cut after the scrub: [user] is longer than a 5-letter name. */
-            if(who) for(const k of ['message', 'file', 'stack', 'page']) d[k] = cut(who(e.late ? dropCutWord(d[k]) : d[k]), CAP[k]);
+            if(who) for(const k of ['message', 'file', 'stack', 'page']) d[k] = cut(who(e.late && e.cut.includes(k) ? dropCutWord(d[k]) : d[k]), CAP[k]);
             if(!d.message) d.message = '(no message)';
             d.version = cut(clean(v), CAP.version);
             /* A doc the rules would refuse, or one that is not well-formed text,
@@ -293,17 +295,19 @@ const SITE_ERRORS = (function(){
         const m = /\(?([^\s()]+):(\d+):(\d+)\)?\s*$/.exec(st.split('\n')[0]);
         if(m){ file = m[1]; line = m[2]; col = m[3]; }
       }
+      /* cut() to the field's cap, noting which fields were really cut. */
+      const wasCut = [], cutAt = (k, t) => { t = String(t); if(t.length > CAP[k]) wasCut.push(k); return cut(t, CAP[k]); };
       /* The account's own details go BEFORE the cut too, so the cut can never
          leave half a name behind (send time scrubs again, for a sign-in that
          came later). */
       const who = whoScrub();
       const doc = {
         kind,
-        message: cut(scrub(msg, who), CAP.message) || '(no message)',
-        file: cut(scrub(String(file).replace(/[?#].*$/, ''), who), CAP.file),
+        message: cutAt('message', scrub(msg, who)) || '(no message)',
+        file: cutAt('file', scrub(String(file).replace(/[?#].*$/, ''), who)),
         line: int(line), col: int(col),
-        stack: cut(scrub(st, who), CAP.stack),
-        page: cut(scrub(pageNow(), who), CAP.page),
+        stack: cutAt('stack', scrub(st, who)),
+        page: cutAt('page', scrub(pageNow(), who)),
         version: '',
         day: dayNow(),
         lang: langNow(),
@@ -311,7 +315,7 @@ const SITE_ERRORS = (function(){
       const key = kind + '|' + doc.message;
       if(seen.has(key)) return 'repeat';
       seen.add(key); used++;
-      queue.push({ d: doc, late: !who, done: done || null });
+      queue.push({ d: doc, late: !who, cut: wasCut, done: done || null });
       flush();
       return '';
     }catch(_){ return 'error'; }
