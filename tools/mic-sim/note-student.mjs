@@ -21,7 +21,7 @@
    percentile block: median 12 dB, quartiles 10-16), how far it has fallen 300 ms later (median -7 dB) and how many pitch readings the
    site got for it (23 of 45 under 2). FIT.noteAmp 0.05 and FIT.ringS 0.45 were chosen so that the `right` student in room4 (the room
    fitted to the loud period-4 Power Chord Switch takes) lands near those three numbers: attack 14 dB over the room (real 12), fallen
-   6 dB after 300 ms (real 7), under 2 readings for 96 of 192 notes (real 23 of 45). Values tried: noteAmp 0.04 to 0.1 and ringS 0.4
+   6 dB after 300 ms (real 7), under 2 readings for 96 of the 188 notes it matched (real 23 of 45). Values tried: noteAmp 0.04 to 0.1 and ringS 0.4
    to 0.45; in room4 the attack measure barely moves with noteAmp (the room's own peaks set it), so 0.05 rests mostly on the readings.
    WHAT THE FIT DOES NOT FIX (2026-11-13, measured with --fit): on what it DOES read, the Coach calls the room4 student's right notes
    wrong far more than in the real takes: right 8% / unclear 58% / wrong 32% (192 notes) against, for real notes with a pick attack,

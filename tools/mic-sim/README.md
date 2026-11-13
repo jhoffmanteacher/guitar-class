@@ -291,6 +291,46 @@ script.
   - What the takes cannot judge: Note Runner's timing window (the replay uses the window the take saved; `nrStart` is not
     run), a changed pitch-detector clarity or mic chain (needs the audio), which note a student meant, and the report's
     level (shown, never ranked: a take holds no level).
+- **`listen-loop.mjs` + `note-student.mjs` (2026-11-13, the listening bench step 4): the closed loop for every game that listens to
+  single notes or strums.** A virtual student plays the REAL Listening Coach (melody on the Coach-gated playSeq skills, chords on the 6
+  gated chord skills, each from the button the site renders), Strum Radar (its four patterns) and Note Runner (real levels: `nrStart` builds
+  the round, `Math.random` seeded) in closed-loop.mjs's vm, and keeps an answer key written before any verdict.
+  `node tools/mic-sim/listen-loop.mjs --game=melody|chords|radar|runner` (options in its header; `list` names the student kinds with what
+  the gate SHOULD do for each: pass / fail / either). Kinds: right, late / early (150 ms), loose (200 ms spread), quiet (-10 dB), ring,
+  thumb, finger; one note a fret off, one on the wrong string, one skipped, the whole line a fret off; chords: one bar of another chord,
+  two strums skipped, the first chord held all the way; Strum Radar: missed strums, extra strums, strums on the wrong eighths; Note Runner:
+  every fourth note wrong or skipped, 100 ms late / early, 250 ms late; and nothing played, desk taps, muted strums. Rooms default quiet,
+  room7, room4, class; `--mics=chromebook,thin` for both mics. Same options as closed-loop.mjs: `--seeds`, `--json`, `--against` (ranked by
+  the key per note, plus the gate, the report's level, its "Right notes" line, Strum Radar's score and stars), `--replay=N` (one take with
+  its timeline and every sound the Coach took), `--root`. Every take's key is checked against the student's own guitar track (a pitch
+  written in the tool, an attack, no attack where nothing was played); `--break=key` corrupts it and the run stops (exit 2), in all four
+  games. The site's tuning, the Coach's chord row and Note Runner's chart are checked against the student's too.
+  **The fit (`--fit`).** The 8 real Coach melody takes' own lines, played by the `right` student, next to the real takes: attack over
+  the room, fallen after 300 ms, pitch before the attack, readings 0 / 1 / 2+, the Coach's verdicts. note-student.mjs FIT (noteAmp 0.05,
+  ringS 0.45) matches the loudness, the decay and the share of notes with under 2 readings in room4. It does NOT match the verdicts in
+  the fitted rooms: room4 right 8% / unclear 58% / wrong 32% (192 notes), room7 25% / 34% / 41%, against real attacked notes 33% / 47% /
+  20% (45) and real notes clearly in the recording 67% / 33% / 0% (27). Turning room4's voices and other guitars off (`--fit-room`) takes
+  the wrong share to 0%: those rooms were fitted on strums at 0.12 per string, and their pitched sound drowns a single note. The synthetic
+  `class` room lands inside the real numbers (56% / 40% / 4%; pitch before the attack 9%, real 9%). **For single notes read `class` as
+  the closest room, room4 / room7 as harsher than the real rooms, quiet as kinder.** Strums use the rooms as fitted.
+  **Measured 2026-11-13 (one seed; melody: the ten DEFAULT_MELODY skills; THE MODEL'S NUMBERS, the real takes outrank them):**
+  - Coach melody, false fail (a right-playing kind whose gate stays shut) / false pass (whole line a fret off, nothing, taps, muted
+    strums: the gate opens): quiet 0 of 80 / 30 of 40; room7 5 of 80 / 37 of 40; room4 7 of 80 / 34 of 40; class 9 of 80 / 29 of 40.
+    Every false fail said "Needs work", never "couldn't hear". Every note a fret high opened the gate in 39 of 40 takes, quiet room
+    included (85 of 85 notes called wrong there): pitch "Needs work", timing and completion Great, so Good.
+  - Coach chords: false fail quiet 0 of 42, room7 0, room4 2, class 0; false pass 15 of 21, 20, 21, 15 (one chord held all the way: 12
+    of 12; taps and muted strums: 47 of 48).
+  - Strum Radar: a right strummer loses 4 of 88 strums in quiet, 12 in room7, 28 in room4, 10 in class; a thumb strummer about 30 of 88
+    in every room. Nothing played: median 0% in quiet, 94% room7, 75% room4, 38% class (the recorded rooms of step 1b: 70-87% of empty
+    windows hit). Desk taps on the written strums: 74-88 of 88 hit (by design: no pitch).
+  - Note Runner (levels 1 and 3): a right player clears 80% in quiet 10 of 10 rounds (counting late / early / quiet / thumb), class 2 of
+    10, room7 and room4 0 of 10; a wrong note is never called right (0 of 32); a note played 250 ms late (past the 180 ms window) is called right 9 of 128
+    times (7 in room7: a room sound in the window, the late note's own readings) and half credit 22 times.
+  - Proof: planted in `--root` copies, each RED through `--against`: the Coach's match window halved ("2 worse": a loose player's notes
+    newly missed), `COACH_PITCH_GATE` x10 ("28 worse"), the chord dim rule at pitch 1 (the "Right notes" line "12 better", the gate 0
+    moved: two Greats still make Good), "two Greats make Good" removed (gate "14 better, 1 worse"), Strum Radar's window doubled ("65
+    worse"), a Note Runner verdict flipped ("32 of 32 worse"). Same seed twice: same text and `--json`. closed-loop.mjs, no-guitar-listen.mjs
+    and replay-listen.mjs give the same output as before the step (byte-identical `--json`).
 - `smoke.mjs <url>` — headless Chromium through the Dev bypass with the
   in-page harness: Coach, Note Runner, Note Hunt, Note Call, Change Up, PSG
   Hero, the consent prompt and the recording path. Start a static server on
