@@ -383,6 +383,26 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-12 (late) — Two small things Jonathan asked for the same evening (both Fast).**
+      (1) The practice-minutes recap after Stop on an open card ("i didn't choose for the recap to not be visible. it
+      would be nice if it's always visibile if possible"). Since the 2026-11-10 header fold, `recapMaybe` found no
+      strip to drop from and showed nothing, and kept nothing. Now the same "+N min" pill shows in the right margin
+      beside the card (167 px wide at 1366; it covers none of the card's controls), and where there is no margin
+      (full screen, a narrow window) it is held and drops from the strip when the header returns, as the goal toast
+      already did. Removed when the card closes, a new run starts, or at sign-out. No new string, no new write.
+      `tools/pm-e2e.mjs`: 132 checks pass (8 new ones were red on the old site); `pm-sim` still 390.
+      (2) The recording question's "Yes, save it" button ("make the permission button big and green like for power
+      chord"). Screenshots at 1366x657 found it: inside the Listening Coach card (`max-width:540px`) the button was
+      480 px wide, against 1126 px in Power Chord Switch and Note Runner; height, text size and green were already the
+      same. One CSS rule: `.coach-card:has(.micrec-ask){max-width:none}`, so the card takes its step's width while
+      the question is up (765 to 819 px) and goes back to 540 px once answered. Same in dark theme and Spanish.
+      Also in this push: the full checks found a dead link (HTTP 404, confirmed twice by oEmbed): the tutorial video
+      for the Choice song "Master of Puppets" in `module-3.js` (`FvVrCKgEu4s`). Its `tutorialUrl` is dropped, as the
+      videos rule says (never invent an id); the original-song link stays. A replacement lesson is on Jonathan's list.
+      Noticed, not changed: under that question the Listening Coach still shows its footer "Listening happens right
+      on this device — nothing is recorded or uploaded", which reads oddly beside a question about saving a
+      recording (on Jonathan's list).
+
 - [x] **2026-11-12 (evening) — Two ways student work was lost after a failed sign-in read, fixed; and
       `tools/save-loop.mjs`.** Reviewed: the save path is a danger zone. Jonathan approved both fixes the same day;
       the design is the one a deep Fable reviewer backed (it rejected a re-read inside the save), and a second, fresh

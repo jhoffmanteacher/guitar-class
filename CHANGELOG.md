@@ -6,6 +6,12 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-12 — Your practice recap shows on a practice card; a bigger "Yes, save it" button
+
+- **Pressed Stop on an open practice card? Your "+N min" practice recap now shows beside the card.** In full screen it shows as soon as you go back to All activities.
+- **In a lesson or class activity, the Listening Coach's "Save this take as a recording?" question now uses the whole width**, with the same big green "Yes, save it" button as Power Chord Switch.
+- **"Master of Puppets" (Module 3 songs) no longer has a Tutorial button.** The video it opened was taken down from YouTube. The button to hear the original song is still there.
+
 ## 2026-11-12 — One Metronome click per beat everywhere, and a count-in at the right speed
 
 - **In a step's backing-track loop and on Song Journey pages, the Metronome now clicks once per beat.** There's no extra click when you change speed, switch the guitar, jump to another spot, pause or stop.
