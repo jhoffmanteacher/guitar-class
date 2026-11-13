@@ -15087,7 +15087,7 @@ async function checkPwTakeEvaluator() {
    queue with the save, so it must stay a bystander. The emulator half is
    tools/site-errors-rules-test.mjs (it needs Java; run by hand).
    ════════════════════════════════════════════════════════════════════ */
-const SITE_ERRORS_SIM_PIN = 153;
+const SITE_ERRORS_SIM_PIN = 161;
 function checkSiteErrors() {
   head('1de. Error log: the logger and the view are run; fields, caps and the rules block are pinned');
   let bad = 0;

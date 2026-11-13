@@ -33,11 +33,15 @@
      from the server), refused (NOT working, the log now off: reload), a failed write, no answer in 20 s, a
      failed or empty read-back, the 5 entries already used, a clock fits() refuses: never a false "works".
 
-   --faults plants 35 faults (one at a time, in memory) and shows each turns at least one case red.
+   Review round 3: the unfinished word goes only from a field really cut, at most 40 letters ("Loading…",
+     400 letters, 400 CJK, a long file); the test's read-back compared field by field; the logger already off
+     after a refused entry answers "NOT working".
+
+   --faults plants 39 faults (one at a time, in memory) and shows each turns at least one case red.
 
    Usage:  node tools/site-errors-sim.mjs [--faults] [--root <site folder>] [--verbose]
    Exit 0 = every case passed (and, with --faults, every fault was caught). Node 18+, no dependencies.
-   Last run: 2026-11-13 (review round 2 fixes), 153 passed, 0 failed; 35 of 35 planted faults caught.
+   Last run: 2026-11-13 (review round 3 fixes), 161 passed, 0 failed; 39 of 39 planted faults caught.
    checks.mjs 1de runs it (no flags) on every check and fails on a non-zero exit; run it with --faults after
    any change to SITE_ERRORS, the safety net's listeners, teacher-errors.js or the siteErrors rules. */
 import vm from 'node:vm';
@@ -378,6 +382,18 @@ async function runAll(LOG, VIEWSRC) {
       if (frag) left.push(off + ': ' + JSON.stringify(m));
     }
     ok('"Maximiliano Fernandez" starting at each offset 286..299, reported signed out, sent after sign-in: 14 of 14 written with no fragment of 3+ letters of either word', !left.length, left.join(' | '));
+    /* R3-1: only a field that was really cut loses its unfinished word, and never more than 40 letters. */
+    const lateOne = async (msg, extra) => { const x = makePage(LOG, { auth: { currentUser: null } }); x.err(msg, extra); await x.advance(10); x.ctx.auth = { currentUser: USER }; await x.advance(6000); return x.writes[0] && x.writes[0].doc; };
+    let r3 = await lateOne('Loading…');
+    ok('R3-1 "Loading…" (never cut), reported signed out: sent as "Loading…"', r3 && r3.message === 'Loading…', r3 && JSON.stringify(r3.message));
+    r3 = await lateOne('a'.repeat(400));
+    ok('R3-1 400 letters with no space, cut while signed out: at most 40 letters go (259 a\'s and …)', r3 && r3.message === 'a'.repeat(259) + '…', r3 && `${r3.message.length} chars`);
+    r3 = await lateOne('\u4e2d'.repeat(400));
+    ok('R3-1 400 CJK characters, cut while signed out: at most 40 go (259 and …)', r3 && r3.message === '\u4e2d'.repeat(259) + '…', r3 && `${r3.message.length} chars`);
+    r3 = await lateOne('x', { filename: 'https://gc.example/' + 'a'.repeat(230) + '.js' });
+    ok('R3-1 a 234-character file (after the origin goes) cut while signed out: at most 40 letters go ("/", 158 a\'s and …)', r3 && r3.file === '/' + 'a'.repeat(158) + '…', r3 && `${r3.file.length} chars: ${JSON.stringify(r3.file.slice(0, 8))}`);
+    r3 = await lateOne('x', { filename: 'https://gc.example/app/lesson.js' });
+    ok('R3-1 a short file reported signed out keeps its whole name', r3 && r3.file === '/app/lesson.js', r3 && r3.file);
     const q = makePage(LOG, { auth: { currentUser: null } });
     q.err('Lopez '.repeat(60));
     await q.advance(10);
@@ -653,7 +669,7 @@ async function runAll(LOG, VIEWSRC) {
           if (mode !== 'lost') store.push({ id, data: JSON.parse(JSON.stringify(doc)) });
           return Promise.resolve({ id });
         },
-        doc: id => ({ get: async opts => { gets.push(opts); if (o.readFail) throw Object.assign(new Error('offline'), { code: 'unavailable' }); const x = store.find(d => d.id === id); return { exists: !!x, data: () => x && x.data }; } }),
+        doc: id => ({ get: async opts => { gets.push(opts); if (o.readFail) throw Object.assign(new Error('offline'), { code: 'unavailable' }); const x = store.find(d => d.id === id); return { exists: !!x, data: () => x && (o.alter ? Object.assign({}, x.data, { line: x.data.line + 1 }) : x.data) }; } }),
       }),
       batch: () => { const ops = []; return { delete: r => ops.push(r), commit: async () => { for (const r of ops) store.splice(store.indexOf(r), 1); } }; },
     };
@@ -690,7 +706,11 @@ async function runAll(LOG, VIEWSRC) {
     p.err('a real console error after the refused test'); await p.advance(10);
     ok('…which is true: a real error afterwards is not written (1 write in all)', p.adds === 1, `adds ${p.adds}`);
     const h2 = await p.press();
-    ok('…a second press says the logger is off (permission-denied), never "works"', h2.includes('The log could not be checked: the logger had already turned itself off on this page, after a write failed (permission-denied).') && !/The log works/.test(h2), h2.slice(0, 300));
+    ok('…a second press: the logger is off after a refused entry, so "The log is NOT working" again (R3-3), with the reload line, never "works"', h2.includes('The log is NOT working: an earlier entry from this console page (this test entry was not sent) was refused (the rules for the error log are not published, or do not match this version of the site).') && h2.includes('reload the console before testing again') && !/The log works/.test(h2) && p.adds === 1, h2.slice(0, 300));
+    const q = consolePage({ add: 'refuse', denyRead: true });
+    q.err('a real console error before the button'); await q.advance(10);
+    const hq = await q.press();
+    ok('R3-3 a real console error refused BEFORE the button is pressed: "The log is NOT working", reload — not "could not be checked"', hq.includes('The log is NOT working: an earlier entry from this console page (this test entry was not sent) was refused') && hq.includes('reload the console before testing again') && !/could not be checked/.test(hq) && q.adds === 1, `adds ${q.adds}; ` + hq.slice(0, 300));
   }
   {
     const p = consolePage({ add: 'fail' });
@@ -705,6 +725,11 @@ async function runAll(LOG, VIEWSRC) {
     const l = consolePage({ add: 'lost' });
     const hl = await l.press();
     ok('add() answers but the entry is not on the server: "could not be checked: … not there when read back", never "works"', hl.includes('The log could not be checked: the test entry was saved, but it was not there when read back.') && !/The log works/.test(hl), hl.slice(0, 300));
+    const a = consolePage({ alter: true });
+    const ha = await a.press();
+    ok('R3-2 the entry read back with one field changed (line + 1): "could not be checked: the test entry read back is not the one sent", never "works"', ha.includes('The log could not be checked: the test entry read back is not the one sent.') && !/The log works/.test(ha), ha.slice(0, 300));
+    const ha2 = await p.press();
+    ok('R3-3 the logger off after a write that failed for another reason (unavailable): still "could not be checked", with the code', ha2.includes('The log could not be checked: the logger had already turned itself off on this page, after a write failed (unavailable).') && !/NOT working/.test(ha2), ha2.slice(0, 300));
   }
   {
     const p = consolePage();
@@ -751,8 +776,13 @@ const FAULTS = [
   ['R2-4 the 5-letter floor for a single name word removed', 'L', ".length >= 5 && !NOT_NAMES.has(", ".length >= 1 && !NOT_NAMES.has("],
   ['R2-4 the NOT_NAMES stop-list ignored', 'L', '&& !NOT_NAMES.has(w.toLowerCase())', ''],
   ['R2-4 the email local part scrubbed at any length again', 'L', "if(local.length >= 5 || /\\d/.test(local)) add(anyCase, local);", 'add(anyCase, local);'],
-  ['R2-5 the unfinished word before … kept at send time', 'L', 'who(e.late ? dropCutWord(d[k]) : d[k])', 'who(d[k])'],
-  ['R2-6c the send-time scrub not re-cut (fits() then drops the doc)', 'L', 'd[k] = cut(who(e.late ? dropCutWord(d[k]) : d[k]), CAP[k]);', 'd[k] = who(e.late ? dropCutWord(d[k]) : d[k]);'],
+  ['R2-5 the unfinished word before … kept at send time', 'L', 'who(e.late && e.cut.includes(k) ? dropCutWord(d[k]) : d[k])', 'who(d[k])'],
+  ['R2-6c the send-time scrub not re-cut (fits() then drops the doc)', 'L', 'd[k] = cut(who(e.late && e.cut.includes(k) ? dropCutWord(d[k]) : d[k]), CAP[k]);', 'd[k] = who(e.late && e.cut.includes(k) ? dropCutWord(d[k]) : d[k]);'],
+  /* Review round 3 (2026-11-13). */
+  ['R3-1 the unfinished word dropped from a field that was never cut', 'L', 'e.late && e.cut.includes(k) ? dropCutWord', 'e.late ? dropCutWord'],
+  ['R3-1 the unfinished word dropped with no 40-letter limit', 'L', '[\\p{L}\\p{N}\\p{M}]{1,40}$/u', '[\\p{L}\\p{N}\\p{M}]+$/u'],
+  ['R3-2 the read-back not compared field by field', 'V', 'Object.keys(sent).every(k => got[k] === sent[k])', 'true'],
+  ['R3-3 the logger off after a refused entry reads "could not be checked"', 'V', "if(code === 'permission-denied') return REFUSED('an earlier entry", "if(false) return REFUSED('an earlier entry"],
   ['R2-7 earlier tokens scrubbed again ([[user]])', 'L', 'i % 2 ? part : res.reduce(', 'res.reduce('],
   ['R2-7 the text not put in NFC before matching', 'L', "String(s).normalize('NFC').split(TOKEN)", 'String(s).split(TOKEN)'],
   ['R2-7 an accent mark after a scrubbed name left behind', 'L', "')\\\\p{M}*(?![", "')(?!["],
