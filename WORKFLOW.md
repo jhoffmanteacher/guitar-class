@@ -383,6 +383,40 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-13 (later the same day) — Student data never goes to Claude; the emergency kit; name-free recording zips; two new checks on GitHub.**
+      **The rule and its guard** (Jonathan: "I am allowed to store data in google/firestore but not in claude";
+      "let's block student names from claude"; his own name is fine; no district letter is needed): CLAUDE.md
+      "Other standing rules". `.claude/hooks/no-student-data.mjs` (PreToolUse) refuses a tool call that would read a
+      raw recordings download, a per-take file, a console backup or the private folder, allows the intake tool and
+      `ls` / `mv` of the files themselves, and makes the Chrome extension and the Google connectors ask every time;
+      seven real-browser tools and the Drive read lost their auto-allow. `checks.mjs` 1dc runs the hook's own 32
+      cases and pins the wiring (the hook fails open). A count-only scan of the 101 past sessions on the Mac: 87 had
+      driven the real Chrome; one transcript holds a recording file name with a name that is not his, one a school
+      email that looks like a person's; nothing identifying is in the public repo.
+      **Console zips carry no names** (`teacher-mic.js`): "Download all" and "Download everything" clean each take
+      by `anon-takes.mjs`'s rules, name the files T01… in the table's order (a Take column was added), and save
+      nothing if a removed value is still found. The leak search matches a KEY whole or a WHOLE WORD in a value
+      (a needle of 8+ characters anywhere): substring matching refused the whole download for a student named Sam
+      (`sampleRate`) or Ann (`channelCount`); the same fix went into `anon-takes.mjs`, with its Spanish mic-label
+      false leak. `checks.mjs` 1dd pins both copies' key patterns equal.
+      **Emergency kit:** `BREAK-GLASS.md` (revert a bad push; the kill switch; restore from the console backup),
+      `tools/kill-switch/kill-sw.js` + `proof.mjs` (38 assertions, 14 of 14 mutations; the browser half is owed),
+      `docs/when-google-is-down.md` (the 2025-06-12 Google incident lasted about 3 hours for most services).
+      **GitHub:** `checks.yml` runs the four quick proof tools, a report-only name checker (`tools/lint.mjs`: ESLint
+      page by page through `npx`, inline handlers included, a load-order check; today 0 load-order, 1 latent bug at
+      `trainer-ui.js:188`) and has its actions pinned by commit; Dependabot watches the Actions versions.
+      `checks.mjs` 1cx runs `tools/tone-test.mjs`: the real pitch detectors against made-up tones, the four ways the
+      site calls them (369 of 369 at 48 kHz, 0 octave errors; 33 of 35 planted detector changes caught; a
+      deliberate detector change re-pins with `--measure`). `checks.mjs` gives `pm-sim` 10 minutes before calling
+      it hung (it was 3; a loaded Mac needed 3:40 and three pushes were refused by the limit alone).
+      **Built today, NOT shipped (each waits for something):** the anonymous error log (`feat/error-log`, three
+      review rounds, clean: waits for the `firestore.rules` paste, text in `Claude outputs/firestore-rules-to-paste-2026-11-13.txt`);
+      the student-visible wave (`wave/integration`: mic explanation and settings, sign-in account chooser, save
+      wording, practice-card keys, tick pop, heading roles; in its fix round after review; needs a browser pass);
+      GitHub browser tests and rules tests (`ci-try/browser`, `ci-try/rules`, on trial); the "known note" listening
+      candidate (`cl/loud-room`: his decision, after review and more recordings); the golden rebuild.
+      **The research behind it:** `Claude outputs/merged-recommendations-2026-11-13.md` and the seven reports beside it.
+
 - [x] **2026-11-13 — Three safeguards and a console button (Jonathan: "yes for 1-3"; "One button, top of page").**
       **GitHub runs the checks** (`.github/workflows/checks.yml`, `efcde89`): every push to main runs
       `node tools/checks.mjs --check --skip-links` on GitHub, a second net behind the local hooks (which check nothing

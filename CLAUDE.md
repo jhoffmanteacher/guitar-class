@@ -203,6 +203,12 @@ Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `ap
   is made up ("Test 0"). `.claude/hooks/no-student-data.mjs` blocks the file reads and makes the browser and
   connector tools ask first (`checks.mjs` 1dc keeps it wired); it is a guard rail, this rule is what binds. A
   Bash heredoc that merely NAMES one of those paths is blocked too: write that code with Edit / Write.
+- **The pitch detectors are pinned** (`checks.mjs` 1cx runs `tools/tone-test.mjs`: made-up tones through the real
+  `coachDetectPitch` and the tuner's detector). A deliberate detector change: the mic-sim closed loop first, then
+  re-pin with `node tools/tone-test.mjs --measure` in the same commit, with the reason. **GitHub's `lint` job**
+  (`node tools/lint.mjs`, report-only) lists names no script on a page defines and load-order slips; run it before
+  deleting or renaming a shared function; never add a name to `OUTSIDE_GLOBALS` in `eslint.config.mjs` unless it
+  exists at run time.
 - **A bad day** (the last push broke the site, students stuck on a broken cached copy, saved work lost): follow
   `BREAK-GLASS.md`. Google sign-in or saving down: `docs/when-google-is-down.md`. After a change to `sw.js`, the
   service-worker block in `app/start.js`, `swResume*`, or the audio cache names in `tools/sw-audio-map.mjs`: also
