@@ -134,19 +134,19 @@ jobs:
         env:
           CHROME: ${{ steps.chrome.outputs.chrome-path }}
         run: |
-          node tools/ci/run-and-annotate.mjs --title "Chrome start" --log ci-out/chrome-start.log --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
+          node tools/ci/run-and-annotate.mjs --title "Chrome start" --log "$RUNNER_TEMP/ci-out/chrome-start.log" --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
       - name: node tools/smoke.mjs --en-only --only ${{ matrix.area }}
         env:
           CHROME: ${{ steps.chrome.outputs.chrome-path }}
           AREA: ${{ matrix.area }}
         run: |
-          node tools/ci/run-and-annotate.mjs --title "smoke $AREA" --log "ci-out/smoke-$AREA.log" --summary '^smoke: (✓|✗|[0-9]+ sets)' --deadline 45 -- node tools/smoke.mjs --en-only --only "$AREA"
+          node tools/ci/run-and-annotate.mjs --title "smoke $AREA" --log "$RUNNER_TEMP/ci-out/smoke-$AREA.log" --summary '^smoke: (✓|✗|[0-9]+ sets)' --deadline 45 -- node tools/smoke.mjs --en-only --only "$AREA"
       - name: Keep the output
         if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: smoke-${{ matrix.area }}
-          path: ci-out/
+          path: ${{ runner.temp }}/ci-out/
           if-no-files-found: warn
           retention-days: 14
 
@@ -175,18 +175,18 @@ jobs:
         env:
           CHROME: ${{ steps.chrome.outputs.chrome-path }}
         run: |
-          node tools/ci/run-and-annotate.mjs --title "Chrome start" --log ci-out/chrome-start.log --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
+          node tools/ci/run-and-annotate.mjs --title "Chrome start" --log "$RUNNER_TEMP/ci-out/chrome-start.log" --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
       - name: node tools/smoke.mjs
         env:
           CHROME: ${{ steps.chrome.outputs.chrome-path }}
         run: |
-          node tools/ci/run-and-annotate.mjs --title "smoke full walk" --log ci-out/smoke-full.log --summary '^smoke: (✓|✗|[0-9]+ sets|Tuning)' --deadline 45 -- node tools/smoke.mjs
+          node tools/ci/run-and-annotate.mjs --title "smoke full walk" --log "$RUNNER_TEMP/ci-out/smoke-full.log" --summary '^smoke: (✓|✗|[0-9]+ sets|Tuning)' --deadline 45 -- node tools/smoke.mjs
       - name: Keep the output
         if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: smoke-full
-          path: ci-out/
+          path: ${{ runner.temp }}/ci-out/
           if-no-files-found: warn
           retention-days: 14
 
@@ -221,18 +221,18 @@ jobs:
         env:
           CHROME: ${{ steps.chrome.outputs.chrome-path }}
         run: |
-          node tools/ci/run-and-annotate.mjs --title "Chrome start" --log ci-out/chrome-start.log --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
+          node tools/ci/run-and-annotate.mjs --title "Chrome start" --log "$RUNNER_TEMP/ci-out/chrome-start.log" --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
       - name: node tools/slow-load.mjs
         env:
           CHROME: ${{ steps.chrome.outputs.chrome-path }}
         run: |
-          node tools/ci/run-and-annotate.mjs --title "slow-load" --log ci-out/slow-load.log --summary 'slow-load' --deadline 55 -- node tools/slow-load.mjs
+          node tools/ci/run-and-annotate.mjs --title "slow-load" --log "$RUNNER_TEMP/ci-out/slow-load.log" --summary 'slow-load' --deadline 55 -- node tools/slow-load.mjs
       - name: Keep the output
         if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: slow-load
-          path: ci-out/
+          path: ${{ runner.temp }}/ci-out/
           if-no-files-found: warn
           retention-days: 14
 
@@ -264,18 +264,18 @@ jobs:
         env:
           CHROME: ${{ steps.chrome.outputs.chrome-path }}
         run: |
-          node tools/ci/run-and-annotate.mjs --title "Chrome start" --log ci-out/chrome-start.log --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
+          node tools/ci/run-and-annotate.mjs --title "Chrome start" --log "$RUNNER_TEMP/ci-out/chrome-start.log" --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
       - name: node tools/update-reload-loop.mjs
         env:
           CHROME: ${{ steps.chrome.outputs.chrome-path }}
         run: |
-          node tools/ci/run-and-annotate.mjs --title "update-reload" --log ci-out/update-reload.log --summary '^update-reload: ([0-9]+ of|✗)' --deadline 95 -- node tools/update-reload-loop.mjs
+          node tools/ci/run-and-annotate.mjs --title "update-reload" --log "$RUNNER_TEMP/ci-out/update-reload.log" --summary '^update-reload: ([0-9]+ of|✗)' --deadline 95 -- node tools/update-reload-loop.mjs
       - name: Keep the output
         if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: update-reload
-          path: ci-out/
+          path: ${{ runner.temp }}/ci-out/
           if-no-files-found: warn
           retention-days: 14
 
@@ -307,17 +307,17 @@ jobs:
         env:
           CHROME: ${{ steps.chrome.outputs.chrome-path }}
         run: |
-          node tools/ci/run-and-annotate.mjs --title "Chrome start" --log ci-out/chrome-start.log --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
+          node tools/ci/run-and-annotate.mjs --title "Chrome start" --log "$RUNNER_TEMP/ci-out/chrome-start.log" --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
       - name: node tools/playalong-loop.mjs
         env:
           CHROME: ${{ steps.chrome.outputs.chrome-path }}
         run: |
-          node tools/ci/run-and-annotate.mjs --title "playalong" --log ci-out/playalong.log --summary '^playalong-loop: ' --deadline 40 -- node tools/playalong-loop.mjs --json ci-out/playalong.json
+          node tools/ci/run-and-annotate.mjs --title "playalong" --log "$RUNNER_TEMP/ci-out/playalong.log" --summary '^playalong-loop: ' --deadline 40 -- node tools/playalong-loop.mjs --json "$RUNNER_TEMP/ci-out/playalong.json"
       - name: Keep the output
         if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: playalong
-          path: ci-out/
+          path: ${{ runner.temp }}/ci-out/
           if-no-files-found: warn
           retention-days: 14
