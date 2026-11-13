@@ -119,6 +119,8 @@ function seedOf(s){ let h = 2166136261; for (let i = 0; i < s.length; i++){ h ^=
 
 /* ── the fake world's checks ── */
 function rmsOf(x, a, b){ a = Math.max(0, Math.round(a)); b = Math.min(x.length, Math.round(b)); let s = 0; for (let i = a; i < b; i++) s += x[i] * x[i]; return b > a ? Math.sqrt(s / (b - a)) : 0; }
+/* The attack channel: the RMS of the sample-to-sample difference (a new pluck is a burst of broadband noise; a ringing string is smooth). */
+function hfOf(x, a, b){ a = Math.max(1, Math.round(a)); b = Math.min(x.length, Math.round(b)); let s = 0; for (let i = a; i < b; i++){ const d = x[i] - x[i - 1]; s += d * d; } return b > a ? Math.sqrt(s / (b - a)) : 0; }
 /* A pitch, by normalized autocorrelation over 2048 samples, preferring the shortest period that is nearly as good as the best (so a
    note is not read an octave low). Written here for the key check; it shares nothing with coachDetectPitch. Returns a midi or null. */
 function acPitch(x, at){
@@ -147,8 +149,8 @@ function keyCheck(game, key, clean){
     const notPlayed = game === 'radar' ? e.did === 'notPlayed' : !e.played;
     const at = e.checkAtMs != null ? e.checkAtMs : e.atMs;
     if (played){
-      const attack = rmsOf(clean, S(at), S(at + 60)), before = rmsOf(clean, S(at - 120), S(at - 30));
-      if (!(attack > 1.3 * before + 1e-6)) throw new Error(`fake-world check failed: key entry ${e.i} says played at ${Math.round(at)} ms, and the student's guitar has no attack there`);
+      const attack = hfOf(clean, S(at), S(at + 40)), before = hfOf(clean, S(at - 100), S(at - 20));
+      if (!(attack > 1.5 * before + 1e-6)) throw new Error(`fake-world check failed: key entry ${e.i} says played at ${Math.round(at)} ms, and the student's guitar has no attack there`);
       if (game === 'melody' || game === 'runner'){
         const f = acPitch(clean, S(at + 60));
         const want = e.played.map(pc);
@@ -156,8 +158,8 @@ function keyCheck(game, key, clean){
       }
     } else if (notPlayed){
       const t = game === 'radar' ? e.wantMs : e.sched;
-      const now = rmsOf(clean, S(t - 150), S(t + 200)), was = rmsOf(clean, S(t - 400), S(t - 200));
-      if (now > 1.3 * was + 1e-5) throw new Error(`fake-world check failed: key entry ${e.i} says nothing was played near ${Math.round(t)} ms, and the student's guitar has an attack there`);
+      const now = hfOf(clean, S(t - 150), S(t + 200)), was = hfOf(clean, S(t - 400), S(t - 200));
+      if (now > 1.5 * was + 1e-5) throw new Error(`fake-world check failed: key entry ${e.i} says nothing was played near ${Math.round(t)} ms, and the student's guitar has an attack there`);
     }
   }
 }
