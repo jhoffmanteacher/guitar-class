@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /* lint.mjs — the site's "name checker": ESLint over every shipped script, page by page (2026-11-13).
 
-     node tools/lint.mjs              a short report; always exits 0 (report-only)
-     node tools/lint.mjs --strict     exit 1 when any error-level finding is left (see "Strict" below)
+     node tools/lint.mjs              a short report; exits 0 (report-only), even when the linter cannot run (it says so)
+     node tools/lint.mjs --strict     exit 1 when any error-level finding is left (see "Strict" below), 2 when it cannot run
      node tools/lint.mjs --verbose    also list every no-unused-vars warning
      node tools/lint.mjs --github     also print GitHub annotations (::warning per finding, ::notice with counts)
      node tools/lint.mjs --root=DIR   lint another site folder (a scratch copy with a planted fault)
@@ -30,18 +30,31 @@
    The site builds most of its buttons as HTML strings: `onclick="caOpen(${jsonAttrArg(id)})"`. ESLint cannot see
    inside a string, so this file pulls every on*="…" / on*='…' attribute value out of every script and HTML page,
    puts each `${…}` back as the placeholder $TPL$, undoes the HTML entities and JS escapes, and lints the result
-   as a function body on the same page. A name built from a placeholder (`pc${kind}Play()`) cannot be checked and
-   is counted as "dynamic". A value that does not parse after that (string concatenation across quotes) is
-   counted as "skipped".
+   as a function body on the same page. A value pasted in by string concatenation ('…go(\'' + id + '\')…') is a
+   placeholder too. A name built from a placeholder (`pc${kind}Play()`) cannot be checked and is counted as
+   "dynamic". A value that still does not parse is counted as "skipped" (listed with --verbose).
 
    ── Load order ──
    Its own check: a statement that runs when its script loads (not inside a function) and uses a name that only a
    LATER script on that page declares. Order = the page's non-deferred scripts in document order, then its
-   deferred ones, then the on-demand ones (arcade, console, Hear It First, modules). `typeof x` is not a use.
+   deferred ones, then the on-demand ones (arcade, console, Hear It First, modules). `typeof x` is not a use. Code
+   inside an IIFE ((function(){…})(), (() => {…})(), .call(this)) runs at load and is checked too.
 
-   ── Reading the no-undef list ──
-   Each line is `file:line name`, tagged when it applies:
-     [guarded]      the same file contains `typeof name` (the call is meant to be skipped when the name is absent)
+   ── What it cannot see ──
+     * Reachability. A name that only the console (teacher-*.js) or the arcade (coach-*.js) declares, called from
+       inside an app FUNCTION, is not flagged: on index.html those scripts share the page, and the app loads them
+       before calling in (ensureCoachJs / ensureTeacherJs). Calling one before its script loaded is a run-time bug
+       this tool cannot see (tools/slow-load.mjs and the smoke walk can).
+     * Load order through a call: top-level code that calls a function of its own, which then uses a later name.
+     * Handlers set any other way: el.setAttribute('onclick', '…'), el.onclick = '…' strings, a computed
+       attribute name (`on${k}="…"`), or a handler value split over lines.
+
+   ── Reading the report ──
+   load-order findings print first, then no-undef with the untagged lines first (GitHub shows only the first few
+   annotations of a step). Each no-undef line is `file:lines name`, tagged when it applies:
+     [guarded]      THIS use is protected by a `typeof name` test: inside the branch of an if / ?: whose test has it,
+                    on the right of an && / || whose left has it, or after `if (…typeof name…) return;` earlier in
+                    the same block (the call is meant to be skipped when the name is absent)
      [write]        the name is assigned, never declared: it becomes a global in sloppy mode (it works, but a typo
                     in such a name would silently make a second variable)
      [handler]      inside an inline on*="…" handler in an HTML string
@@ -63,7 +76,14 @@ const argv = process.argv.slice(2);
 const flag = n => argv.includes('--' + n);
 const opt = (n, d) => { const a = argv.find(x => x.startsWith('--' + n + '=')); return a ? a.slice(n.length + 3) : d; };
 const ROOT = resolve(opt('root', TOOL_ROOT));
-if (!existsSync(join(ROOT, 'index.html'))) { console.error(`lint: ${ROOT} has no index.html`); process.exit(2); }
+/* The linter could not run (no site, no network for npx, a wrong ESLint): say so, and still exit 0 unless --strict,
+   so the report-only job never fails for a reason that is not a finding. */
+function cannotRun(why) {
+  console.error('lint: the linter did not run: ' + why);
+  if (flag('github')) console.log(`::warning title=lint did not run::${why.replace(/\r?\n/g, ' ')}`);
+  process.exit(flag('strict') ? 2 : 0);
+}
+if (!existsSync(join(ROOT, 'index.html'))) cannotRun(`${ROOT} has no index.html`);
 
 const configMod = await import(pathToFileURL(join(TOOL_ROOT, 'eslint.config.mjs')).href);
 const { ESLINT_VERSION, GLOBALS_VERSION, scriptConfig } = configMod;
@@ -74,8 +94,11 @@ if (!flag('inner')) {
   const r = spawnSync(npx, ['--yes', '-p', `eslint@${ESLINT_VERSION}`, '-p', `globals@${GLOBALS_VERSION}`,
     'node', fileURLToPath(import.meta.url), '--inner', ...argv],
     { stdio: 'inherit', shell: process.platform === 'win32' });
-  if (r.error) { console.error('lint: could not run npx: ' + r.error.message); process.exit(flag('strict') ? 2 : 0); }
-  process.exit(r.status ?? (flag('strict') ? 2 : 0));
+  if (r.error) cannotRun('could not start npx: ' + r.error.message);
+  /* The inner run exits 0, or 3 for "--strict and findings are left". Any other code means npx or the inner run
+     broke (an npm outage exits 1). */
+  if (r.status !== 0 && r.status !== 3) cannotRun(`npx exited ${r.status ?? 'on signal ' + r.signal}`);
+  process.exit(r.status === 3 ? 1 : 0);
 }
 
 /* ── Inner run: ESLint and globals are on PATH (npx put their .bin there) ── */
@@ -86,14 +109,13 @@ function npxModules() {
       if (existsSync(join(nm, 'eslint', 'package.json')) && existsSync(join(nm, 'globals', 'package.json'))) return nm;
     }
   }
-  console.error('lint: --inner found no eslint + globals install on PATH (run it without --inner)');
-  process.exit(2);
+  cannotRun('--inner found no eslint + globals install on PATH (run it without --inner)');
 }
 const req = createRequire(join(npxModules(), 'noop.js'));
 const { Linter } = req('eslint');
 const GLOBALS = req('globals');
 const realVersion = req('eslint/package.json').version;
-if (realVersion !== ESLINT_VERSION) { console.error(`lint: npx gave ESLint ${realVersion}, pinned ${ESLINT_VERSION}`); process.exit(2); }
+if (realVersion !== ESLINT_VERSION) cannotRun(`npx gave ESLint ${realVersion}, pinned ${ESLINT_VERSION}`);
 
 const read = rel => readFileSync(join(ROOT, rel), 'utf8');
 const lineOf = (text, idx) => { let n = 1; for (let i = 0; i < idx; i++) if (text.charCodeAt(i) === 10) n++; return n; };
@@ -149,11 +171,14 @@ function handlerUnit(fileRel, text) {
         val += '$TPL$'; i = j + 1; continue;
       }
       if (esc ? (c === '\\' && text[i + 1] === q) : c === q) { ok = true; break; }
-      if (c === '\\' && i + 1 < text.length) { val += text[i + 1]; i += 2; continue; }
+      if (c === '\\' && i + 1 < text.length) { val += c + text[i + 1]; i += 2; continue; }
       val += c; i++;
     }
     if (!ok) continue;
     re.lastIndex = i + 1;
+    /* A handler built by string concatenation across the JS string's own quotes ('…onclick="go(\'' + id + '\')"…'):
+       an unescaped quote, `+ … +`, the same quote again is a value pasted in, like a ${…}. Then undo JS escapes. */
+    val = val.replace(/(?<!\\)(['"`])\s*\+[^\n]*?\+\s*(?<!\\)\1/g, '$TPL$').replace(/\\(.)/g, '$1');
     const body = val.replace(/&quot;/g, '"').replace(/&#0*39;|&#x0*27;|&apos;/gi, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
     if (!/[A-Za-z_$]/.test(body)) continue;
     HANDLER_STATS.found++;
@@ -215,6 +240,7 @@ function collectPlugin(decl, exp) {
   return { rules: { collect: { create(context) {
     const sc = context.sourceCode;
     const GLOBAL_OBJ = /\b(self|window|globalThis|this)\b/;
+    const declaredHere = (name, node) => { for (let s = sc.getScope(node); s; s = s.upper) if (s.set.has(name)) return true; return false; };
     function globalObject(id, node) {
       if (['window', 'self', 'globalThis'].includes(id.name)) return true;
       for (let s = sc.getScope(node); s; s = s.upper) {
@@ -231,6 +257,9 @@ function collectPlugin(decl, exp) {
       AssignmentExpression(node) {
         const l = node.left;
         if (l.type !== 'MemberExpression' || l.object.type !== 'Identifier' || !globalObject(l.object, node)) return;
+        /* `window.X = Y` with Y a name this script never declares exports nothing: that is the line left behind
+           when the function was deleted, and it must not hide every use of X elsewhere. */
+        if (node.right.type === 'Identifier' && !declaredHere(node.right.name, node)) return;
         if (!l.computed && l.property.type === 'Identifier') exp.add(l.property.name);
         else if (l.computed && l.property.type === 'Literal' && typeof l.property.value === 'string') exp.add(l.property.value);
       },
@@ -265,10 +294,57 @@ function loadOrderPlugin() {
           const p = ref.identifier.parent;
           if (p && p.type === 'UnaryExpression' && p.operator === 'typeof') continue;
           let s = ref.from, inFn = false;
-          for (; s; s = s.upper) if (s.type === 'function' || s.type.startsWith('class-')) { inFn = true; break; }
+          for (; s; s = s.upper) {
+            if (s.type.startsWith('class-')) { inFn = true; break; }
+            if (s.type !== 'function') continue;
+            /* An IIFE runs at load: (function(){…})(), (() => {…})(), (function(){…}).call(this), !function(){…}(). */
+            const fnNode = s.block, call = fnNode.parent;
+            const invoked = call && call.type === 'CallExpression' && (call.callee === fnNode
+              || (call.callee.type === 'MemberExpression' && call.callee.object === fnNode && ['call', 'apply'].includes(call.callee.property.name)));
+            if (!invoked) { inFn = true; break; }
+          }
           if (!inFn) context.report({ node: ref.identifier, message: `${v.name} is used while this script loads, but only ${later[v.name]} declares it, and that loads later` });
         }
       }
+    } };
+  } } } };
+}
+/* site/guarded: marks each use of an undefined name that a `typeof name` test protects, so [guarded] is per use:
+   inside the branch of an if / ?: whose test has `typeof name`, on the right of an && / || whose left has it, or
+   after an earlier `if (…typeof name…) return / throw / continue / break;` in the same block. */
+function guardPlugin() {
+  const hasTypeof = (node, name) => {
+    if (!node || typeof node.type !== 'string') return false;
+    if (node.type === 'UnaryExpression' && node.operator === 'typeof' && node.argument.type === 'Identifier' && node.argument.name === name) return true;
+    for (const k of Object.keys(node)) {
+      if (k === 'parent') continue;
+      const v = node[k];
+      if (Array.isArray(v)) { if (v.some(x => hasTypeof(x, name))) return true; }
+      else if (v && typeof v.type === 'string' && hasTypeof(v, name)) return true;
+    }
+    return false;
+  };
+  const exits = n => !!n && (['ReturnStatement', 'ThrowStatement', 'ContinueStatement', 'BreakStatement'].includes(n.type)
+    || (n.type === 'BlockStatement' && n.body.length > 0 && exits(n.body[n.body.length - 1])));
+  const inside = (outer, inner) => outer && outer.range[0] <= inner.range[0] && inner.range[1] <= outer.range[1];
+  function guarded(id) {
+    const name = id.name;
+    for (let child = id, n = id.parent; n; child = n, n = n.parent) {
+      if ((n.type === 'IfStatement' || n.type === 'ConditionalExpression') && child !== n.test && hasTypeof(n.test, name)) return true;
+      if (n.type === 'LogicalExpression' && child === n.right && hasTypeof(n.left, name)) return true;
+      if ((n.type === 'BlockStatement' || n.type === 'Program' || n.type === 'SwitchCase') && Array.isArray(n.body || n.consequent)) {
+        const list = n.body || n.consequent;
+        for (const st of list) {
+          if (inside(st, id)) break;
+          if (st.type === 'IfStatement' && exits(st.consequent) && hasTypeof(st.test, name)) return true;
+        }
+      }
+    }
+    return false;
+  }
+  return { rules: { guarded: { create(context) {
+    return { 'Program:exit'(node) {
+      for (const ref of context.sourceCode.getScope(node).through) if (guarded(ref.identifier)) context.report({ node: ref.identifier, message: 'guarded:' + ref.identifier.name });
     } };
   } } } };
 }
@@ -297,9 +373,15 @@ for (const page of pages) {
     /* The six Song Journey pages give a shared script the same names: lint it once per distinct name set. */
     const memoKey = k + '\n' + Object.keys(globals).sort().join(',') + '\n' + JSON.stringify(later);
     let msgs = memo.get(memoKey);
-    if (!msgs) { lintRuns++; msgs = linter.verify(u.code, scriptConfig(globals, loadOrderPlugin(), extra), { filename: join(ROOT, 'x.js') }); memo.set(memoKey, msgs); }
+    if (!msgs) {
+      lintRuns++;
+      const plugin = { rules: { ...loadOrderPlugin().rules, ...guardPlugin().rules } };
+      msgs = linter.verify(u.code, scriptConfig(globals, plugin, { ...extra, 'site/guarded': 'warn' }), { filename: join(ROOT, 'x.js') });
+      memo.set(memoKey, msgs);
+    }
+    const guardedAt = new Set(msgs.filter(m => m.ruleId === 'site/guarded').map(m => `${m.line}:${m.column}`));
     for (const msg of msgs) {
-      if (msg.fatal) continue;   // a script that does not parse is reported once, from pass 1
+      if (msg.fatal || msg.ruleId === 'site/guarded') continue;   // a script that does not parse is reported once, from pass 1
       const rule = msg.ruleId === 'site/load-order' ? 'load-order' : msg.ruleId;
       const line = u.lineMap ? u.lineMap[msg.line] : msg.line;
       let name = '';
@@ -313,7 +395,7 @@ for (const page of pages) {
         if (!other) continue;   // a browser global (name, status, …): a top-level `var name` here is the site's own choice
       }
       const dk = [u.file, line, msg.column, rule, text, u.kind === 'handlers'].join('|');
-      const f = findings.get(dk) || { file: u.file, line, rule, name, text, severity: msg.severity, kind: u.kind, pages: new Set() };
+      const f = findings.get(dk) || { file: u.file, line, rule, name, text, severity: msg.severity, kind: u.kind, pages: new Set(), guarded: guardedAt.has(`${msg.line}:${msg.column}`) };
       f.pages.add(page.name);
       findings.set(dk, f);
     }
@@ -329,8 +411,7 @@ const all = [...findings.values()].sort((a, b) => a.file.localeCompare(b.file) |
 const tags = f => {
   const t = [];
   if (f.rule === 'no-undef') {
-    const src = units.get(f.file)?.code ?? read(f.file);
-    if (new RegExp(`typeof\\s*\\(?\\s*${f.name.replace(/\$/g, '\\$')}\\b`).test(src)) t.push('guarded');
+    if (f.guarded) t.push('guarded');
     if (writes.has(f.name)) t.push('write');
   }
   if (f.kind === 'handlers') t.push('handler');
@@ -343,7 +424,7 @@ const tags = f => {
 };
 const count = {};
 for (const f of all) count[f.rule] = (count[f.rule] || 0) + 1;
-const RULE_ORDER = ['no-undef', 'load-order', 'no-redeclare', 'no-dupe-keys', 'no-unreachable', 'no-unused-vars'];
+const RULE_ORDER = ['load-order', 'no-undef', 'no-redeclare', 'no-dupe-keys', 'no-unreachable', 'no-unused-vars'];
 const scripts = [...units.values()].filter(u => u.kind === 'script').length;
 const inline = [...units.values()].filter(u => u.kind === 'inline').length;
 console.log(`lint: ESLint ${ESLINT_VERSION} over ${scripts} scripts + ${inline} inline <script> blocks + ${HANDLER_STATS.found} inline handlers (${HANDLER_STATS.dynamic.size} dynamic names not checkable, ${HANDLER_STATS.skipped.length} handlers did not parse), on ${pages.length} pages (${lintRuns} lint runs)`);
@@ -390,4 +471,4 @@ for (const rule of RULE_ORDER) {
 }
 if (flag('github')) console.log(`::notice title=lint (report-only)::${countLine}`);
 /* exitCode, not process.exit(): see the same line in tools/tone-test.mjs (an exit during a background GC can hang Node 24). */
-if (flag('strict') && strictBad) { console.log(`lint: --strict: ${strictBad} error-level finding(s) left (no-undef [guarded] lines aside)`); process.exitCode = 1; }
+if (flag('strict') && strictBad) { console.log(`lint: --strict: ${strictBad} error-level finding(s) left (no-undef [guarded] lines aside)`); process.exitCode = 3; }   // the outer run turns 3 into exit 1
