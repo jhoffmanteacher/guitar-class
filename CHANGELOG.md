@@ -9,6 +9,11 @@ see `WORKFLOW.md` and the git commit log.
 ## 2026-11-13 — Live In-Class Games: your teacher can name the games
 
 - **A live game can now have a name your teacher picked.** You see it at the top of the game screen and on the invite, in Spanish too when your teacher gives a Spanish name.
+## 2026-11-13 — Weekends never break your streak
+
+- **Your day streaks only need school days now, Monday to Friday.** Play on Friday and again on Monday, and your streak keeps going. This counts for your Games streak and your Riff Roulette streak.
+- **Playing on a Saturday or Sunday still adds a day** (Friday, Saturday and Monday is a 3-day streak). Missing a school day still starts it over.
+- School holidays are not skipped yet: only Saturdays and Sundays.
 
 
 ## 2026-11-13 — Live In-Class Games: your teacher can hide the names on the scoreboard

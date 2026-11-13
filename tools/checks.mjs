@@ -15529,6 +15529,150 @@ function checkLiveQuizHideNames() {
   if (bad === 0) ok(`OFF by default; ${STATES.length} stage states painted with names shown and hidden (lobby, 3 questions, 4 Reveals, final; ${renders} paints): hidden, 0 of ${PLAYERS.length} made-up names or uids on the stage and the places and points kept; shown, today's rows; repaints at once, remembered on the device, no doc write, a student's screen unchanged`);
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   1dj. WEEKENDS NEVER BREAK A DAY STREAK (Jonathan, 2026-11-13: a streak only
+        needs school days, Monday to Friday).
+   The three day streaks (the site-wide practice streak, the arcade streak,
+   Riff Roulette's) each used to carry their own "last day was yesterday, or
+   reset to 1" copy, so every weekend broke them. Now one pair of helpers in
+   app/boot.js decides: dayStreakContinues(lastDay, today) and
+   dayStreakAlive(lastDay, today). This check:
+   1. finds each helper defined exactly once, in app/boot.js;
+   2. RUNS the real helpers (their source, cut out of app/boot.js) in four time
+      zones (Los Angeles, UTC, London, Auckland) over a table: every weekday as
+      the last day x gaps of 0 to 10 days, starting at nine Mondays chosen so
+      the gaps cross a month end, a year end, 29 February 2028 and both
+      daylight-saving weekends of each of the three zones that have them; the
+      expected answer is worked out here in UTC arithmetic from the rule's
+      words, not from the site's code. Plus named cases (Fri -> Mon continues,
+      Fri -> Tue and Thu -> Mon do not, a wrong clock, malformed days) and
+      streak counts over a run of days (Fri, Sat, Mon = 3);
+   3. pins the six callers to the helpers;
+   4. fails on any "yesterday or reset" copy left anywhere in the site's
+      scripts: a lastDay compared with a day string other than today's, or a
+      "yesterday" built with setDate(getDate() - 1) near a streak or lastDay.
+   School holidays are not skipped (only Saturdays and Sundays): on purpose.
+   ════════════════════════════════════════════════════════════════════ */
+const WEEKEND_STREAK_CALLERS = [
+  ['bumpPracticeStreak', 'dayStreakContinues'], ['buildDaily5', 'dayStreakAlive'],
+  ['awardArcadeXp', 'dayStreakContinues'], ['gamesMetaBarHtml', 'dayStreakAlive'],
+  ['rrStreakAlive', 'dayStreakAlive'], ['rrSetDone', 'dayStreakContinues'],
+];
+function checkWeekendStreaks() {
+  head('1dj. Weekends never break a day streak (the helpers are run over a date table)');
+  let bad = 0;
+  const fail = m => { err('1dj: ' + m); problems++; bad++; };
+  const HELPERS = ['streakDayDate', 'dayStreakContinues', 'dayStreakAlive'];
+  const files = [];
+  try {
+    for (const n of ['app.js', 'coach.js', 'teacher.js']) for (const p of siteParts(n, ROOT)) files.push([p, readFileSync(join(ROOT, p), 'utf8')]);
+    for (const p of ['practice-minutes.js', 'practice-minutes-config.js', 'live-quiz.js', 'fab-tools.js', 'tuner.js', 'tabs/journey.js', 'trainer-core.js', 'trainer-ui.js', 'trainer-site-adapter.js'])
+      if (existsSync(join(ROOT, p))) files.push([p, readFileSync(join(ROOT, p), 'utf8')]);
+  } catch (e) { fail('could not read the site scripts: ' + e.message); return; }
+  // comments out, line breaks kept: a reported line number is the file's own
+  const strip = t => t.replace(/\/\*[\s\S]*?\*\//g, c => c.replace(/[^\n]/g, '')).replace(/^\s*\/\/.*$/gm, '');
+  // 1. each helper defined once, in app/boot.js
+  for (const h of HELPERS) {
+    const where = files.filter(([, t]) => new RegExp('function\\s+' + h + '\\s*\\(').test(strip(t))).map(([p]) => p);
+    if (where.length !== 1 || where[0] !== 'app/boot.js') fail(`${h} must be defined once, in app/boot.js (found in: ${where.join(', ') || 'nowhere'})`);
+  }
+  if (bad) return;
+  const boot = files.find(([p]) => p === 'app/boot.js')[1];
+  const fnSrc = name => { const body = jsFunctionBody(boot, name); const i = boot.search(new RegExp('function\\s+' + name + '\\s*\\(')); return body ? boot.slice(i, boot.indexOf(body, i) + body.length) : null; };
+  const helperSrc = HELPERS.map(fnSrc);
+  if (helperSrc.some(s => !s)) { fail('could not cut the helpers out of app/boot.js'); return; }
+
+  // 2. the date table, the named cases and the streak runs
+  const u = s => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(typeof s === 'string' ? s : ''); if (!m) return NaN; const x = Date.UTC(+m[1], +m[2] - 1, +m[3]); const d = new Date(x); return (d.getUTCFullYear() === +m[1] && d.getUTCMonth() === +m[2] - 1 && d.getUTCDate() === +m[3]) ? x : NaN; };
+  const fmt = x => new Date(x).toISOString().slice(0, 10);
+  const DAYMS = 86400000;
+  const expContinues = (a, b) => { const x = u(a), y = u(b); if (!(x < y)) return false; for (let z = x + DAYMS; z < y; z += DAYMS) { const w = new Date(z).getUTCDay(); if (w !== 0 && w !== 6) return false; } return true; };
+  const expAlive = (a, b) => (!isNaN(u(b)) && a === b) || expContinues(a, b);
+  const pairs = [];
+  /* Mondays: month end; year end; 29 Feb 2028; Los Angeles DST (Sun 2026-11-01, Sun 2027-03-14); London (Sun 2026-10-25,
+     Sun 2027-03-28); Auckland (Sun 2026-09-27, Sun 2027-04-04). Each gives 7 last days x gaps 0..10. */
+  const MONDAYS = ['2026-01-26', '2026-12-28', '2028-02-21', '2026-10-26', '2027-03-08', '2026-10-19', '2027-03-22', '2026-09-21', '2027-03-29'];
+  for (const mon of MONDAYS) {
+    if (new Date(u(mon)).getUTCDay() !== 1) { fail(`table anchor ${mon} is not a Monday`); return; }
+    for (let k = 0; k < 7; k++) for (let g = 0; g <= 10; g++) pairs.push([fmt(u(mon) + k * DAYMS), fmt(u(mon) + (k + g) * DAYMS)]);
+  }
+  /* Named cases, with the answer written by hand: [last, today, continues, alive]. 2026-11-13 is a Friday. */
+  const NAMED = [
+    ['2026-11-13', '2026-11-16', true, true],   ['2026-11-13', '2026-11-17', false, false], ['2026-11-12', '2026-11-16', false, false],
+    ['2026-11-13', '2026-11-14', true, true],   ['2026-11-13', '2026-11-15', true, true],   ['2026-11-14', '2026-11-16', true, true],
+    ['2026-11-15', '2026-11-16', true, true],   ['2026-11-14', '2026-11-15', true, true],   ['2026-11-16', '2026-11-17', true, true],
+    ['2026-11-16', '2026-11-18', false, false], ['2026-11-13', '2026-11-20', false, false], ['2026-11-13', '2026-11-13', false, true],
+    ['2026-11-17', '2026-11-16', false, false], ['2027-01-04', '2026-11-16', false, false], ['2026-12-31', '2027-01-01', true, true],
+    ['2027-01-01', '2027-01-04', true, true],   ['2027-01-01', '2027-01-05', false, false], ['2028-02-25', '2028-02-28', true, true],
+    ['2028-02-28', '2028-03-01', false, false], ['2026-10-30', '2026-11-02', true, true],   ['2027-03-12', '2027-03-15', true, true],
+    [null, '2026-11-16', false, false],         ['2026-11-13 ', '2026-11-16', false, false], ['', '2026-11-16', false, false],
+    ['2026-11-13T12:00', '2026-11-16', false, false], ['2026-13-01', '2026-11-16', false, false], ['2026-02-30', '2026-03-02', false, false],
+    [20261113, '2026-11-16', false, false],     ['2026-11-13', null, false, false],          [null, null, false, false],
+    ['2026-11-13', '', false, false],           ['', '', false, false],
+  ];
+  /* Runs of days played, and the streak count after the last: [days, count]. */
+  const RUNS = [
+    [['2026-11-13', '2026-11-14', '2026-11-16'], 3], [['2026-11-13', '2026-11-15'], 2], [['2026-11-13', '2026-11-17'], 1],
+    [['2026-11-12', '2026-11-16'], 1], [['2026-11-09', '2026-11-10', '2026-11-11', '2026-11-12', '2026-11-13', '2026-11-16'], 6],
+    [['2026-11-13', '2026-11-13', '2026-11-16'], 2], [['2026-11-13', '2026-11-16', '2026-11-23', '2026-11-24'], 2],
+  ];
+  const named = NAMED.map(([a, b]) => [a, b]);
+  const runner = helperSrc.join('\n') + `
+const input = JSON.parse(require('fs').readFileSync(0, 'utf8'));
+const out = { pairs: input.pairs.map(([a, b]) => [dayStreakContinues(a, b), dayStreakAlive(a, b)]), runs: input.runs.map(days => {
+  let s = { count: 0, lastDay: null };
+  for (const d of days) { if (s.lastDay === d) continue; s.count = dayStreakContinues(s.lastDay, d) ? s.count + 1 : 1; s.lastDay = d; }
+  return s.count; }) };
+process.stdout.write(JSON.stringify(out));`;
+  const input = JSON.stringify({ pairs: pairs.concat(named), runs: RUNS.map(r => r[0]) });
+  const ZONES = ['America/Los_Angeles', 'UTC', 'Europe/London', 'Pacific/Auckland'];
+  let cases = 0, passed = 0;
+  for (const tz of ZONES) {
+    const r = spawnSync(process.execPath, ['-e', runner], { input, encoding: 'utf8', timeout: 60000, env: { ...process.env, TZ: tz } });
+    let out = null;
+    try { out = JSON.parse(r.stdout); } catch { fail(`the helpers did not run in ${tz}: ${(r.stderr || '').trim().split('\n').slice(0, 3).join(' | ') || 'no output'}`); continue; }
+    const shown = [];
+    out.pairs.forEach(([c, al], i) => {
+      const [a, b] = i < pairs.length ? pairs[i] : named[i - pairs.length];
+      const ec = i < pairs.length ? expContinues(a, b) : NAMED[i - pairs.length][2];
+      const ea = i < pairs.length ? expAlive(a, b) : NAMED[i - pairs.length][3];
+      cases += 2;
+      if (c === ec) passed++; else if (shown.length < 4) shown.push(`dayStreakContinues(${JSON.stringify(a)}, ${JSON.stringify(b)}) is ${c}, expected ${ec}`);
+      if (al === ea) passed++; else if (shown.length < 4) shown.push(`dayStreakAlive(${JSON.stringify(a)}, ${JSON.stringify(b)}) is ${al}, expected ${ea}`);
+    });
+    out.runs.forEach((n, i) => { cases++; if (n === RUNS[i][1]) passed++; else if (shown.length < 4) shown.push(`a streak played on ${RUNS[i][0].join(', ')} counts ${n}, expected ${RUNS[i][1]}`); });
+    for (const s of shown) fail(`${tz}: ${s}`);
+  }
+  if (passed !== cases) fail(`${cases - passed} of ${cases} date cases are wrong (first ones above)`);
+  /* The table must stay this size: 9 Mondays x 77 pairs + 32 named, 2 answers each, + 7 runs, in 4 zones. */
+  const PINNED = 4 * (2 * (9 * 77 + 32) + 7);
+  if (cases !== PINNED) fail(`the date table ran ${cases} cases; it is pinned at ${PINNED} (never shrink it to get green)`);
+
+  // 3. the six callers use the helpers
+  const all = files.map(([, t]) => t).join('\n');
+  for (const [fn, helper] of WEEKEND_STREAK_CALLERS) {
+    const b = jsFunctionBody(all, fn);
+    if (!b) fail(`${fn} not found (a day-streak caller)`);
+    else if (!new RegExp('\\b' + helper + '\\(').test(strip(b))) fail(`${fn} no longer decides its streak with ${helper}() (app/boot.js): weekends would break it again`);
+  }
+
+  // 4. no "yesterday or reset" copy left
+  let copies = 0;
+  for (const [p, t] of files) {
+    const code = strip(t);
+    const lines = code.split('\n');
+    lines.forEach((l, i) => {
+      if (/lastDay\s*[!=]==?\s*(?:rr)?[dD]ayStr\(\s*(?!new Date\(\)\s*\))/.test(l) || /[dD]ayStr\(\s*(?!new Date\(\)\s*\))[^)]*\)\s*[!=]==?\s*[\w.]*lastDay\b/.test(l)
+          || /lastDay\s*[!=]==?\s*(?:y|yd|yday|yesterday\w*|prev\w*)\b/i.test(l)) { copies++; fail(`${p}:${i + 1}: a day streak compared with a day other than today ("yesterday or reset"); use dayStreakContinues / dayStreakAlive (app/boot.js): ${l.trim().slice(0, 120)}`); }
+      if (/\.setDate\(\s*[\w.]+\.getDate\(\)\s*-\s*1\s*\)/.test(l)) {
+        const win = lines.slice(Math.max(0, i - 6), i + 7).join('\n');
+        if (/lastDay|streak/i.test(win)) { copies++; fail(`${p}:${i + 1}: a "yesterday" built next to a streak; use dayStreakContinues / dayStreakAlive (app/boot.js): ${l.trim().slice(0, 120)}`); }
+      }
+    });
+  }
+  if (!bad) ok(`3 helpers defined once, in app/boot.js; ${passed} of ${cases} date cases hold in ${ZONES.length} time zones (9 Mondays x 7 last days x gaps 0-10, 32 named cases, 7 runs); ${WEEKEND_STREAK_CALLERS.length} of ${WEEKEND_STREAK_CALLERS.length} callers use the helpers; 0 "yesterday or reset" copies in ${files.length} scripts`);
+}
+
 function checkPracticeMinutes(i18nTable) {
   head('1cg. Practice minutes: the engine is run; the rules cap, no heartbeat, wiring and strings are pinned');
   let bad = 0;
@@ -16005,6 +16149,7 @@ function checkPracticeMinutes(i18nTable) {
   checkNoStudentDataHook();
   checkMicZipsAnonymous();
   checkSiteErrors();
+  checkWeekendStreaks();
   await checkBackingLoudness();
   checkPartSizes();
   if (!SKIP_LINKS) await checkLinks();

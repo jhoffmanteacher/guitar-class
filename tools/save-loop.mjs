@@ -135,8 +135,9 @@
      R3 A logged rep: reps +1; todayCount +1, reset when lastDay is not today; lastDay = today; last = the time;
         best = the larger of the old best and the new one (drills.js header, "Practice log").
      R4 A deck best keeps the larger number, and games.dk.at is the day of the last improvement.
-     R5 The streak: +1 when the last day was yesterday, unchanged when it is today, else 1 (save.js bumpPracticeStreak
-        comment: "the same day-string / yesterday-comparison pattern").
+     R5 The streak: +1 when every day between the last day and today is a Saturday or Sunday (yesterday, or a
+        weekend gap: weekends never break a streak, Jonathan 2026-11-13), unchanged when it is today, else 1
+        (save.js bumpPracticeStreak; the rule is dayStreakContinues in app/boot.js).
      R6 A path pick leaves exactly one `<id>:path:<key>` tick, the one picked (activities.js, "The pick is saved with
         the step ticks"; since 2026-11-12 the un-tick of every other path is sent whatever the screen showed, so a path
         effect counts as a change when it changes the STORED doc, not only that tab's view).
@@ -748,7 +749,15 @@ const canon = v => {
 };
 const pad2 = n => String(n).padStart(2, '0');
 function oDay(ms){ const d = new Date(ms); return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()); }
-function oYesterday(ms){ const d = new Date(ms); d.setDate(d.getDate() - 1); return oDay(d.getTime()); }
+/* R5's weekend rule, written from the rule's words in UTC arithmetic (not the site's local-noon walk): the streak
+   continues when the last day is before today and every day strictly between is a Saturday or Sunday. */
+function oStreakContinues(last, today){
+  const u = s => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(typeof s === 'string' ? s : ''); return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) : NaN; };
+  const a = u(last), b = u(today);
+  if (!(a < b)) return false;
+  for (let x = a + 86400000; x < b; x += 86400000){ const w = new Date(x).getUTCDay(); if (w !== 0 && w !== 6) return false; }
+  return true;
+}
 const MODELLED = ['completed', 'caSteps', 'classActivities', 'responses', 'practiceLog', 'exitChecks', 'streak', 'skills', 'period'];
 const HELD_ON_FAILED_LOAD = new Set(['streak', 'games', 'practiceLog', 'exitChecks']);
 /* A record: the unit an action changes. Keyed maps: [field, key]; the streak and the deck bests are one record each. */
@@ -791,7 +800,7 @@ const STREAK = t => prev => {
   const day = oDay(t);
   const s = isMap(prev) ? clone(prev) : { count: 0, lastDay: null };
   if (s.lastDay === day) return prev;
-  s.count = s.lastDay === oYesterday(t) ? (s.count || 0) + 1 : 1; s.lastDay = day; return s;
+  s.count = oStreakContinues(s.lastDay, day) ? (s.count || 0) + 1 : 1; s.lastDay = day; return s;
 };
 /* A tab's own view of the doc, as the oracle models it: what it loaded (nothing after a failed read), then its own
    actions. Used to keep the scripted student to what the screen offers (an action that changes nothing on that tab's
