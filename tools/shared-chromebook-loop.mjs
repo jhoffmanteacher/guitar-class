@@ -21,7 +21,8 @@
    are written down as rules below and self-tested), runs a seeded schedule on a virtual clock, and can freeze a
    tab, drop the network, refuse a write or stall it at a chosen millisecond — which a real browser on a shared
    machine cannot do repeatably, and other agents hold the browser for long runs today. What a browser would add
-   is real rendering; this tool reads the markup the site writes (every innerHTML / textContent) instead.
+   is real rendering; this tool reads what the site writes instead: innerHTML, textContent, insertAdjacentHTML,
+   element .value, attribute values, document.title, and the parameters it hands Google's sign-in popup.
 
    FLAGS
      --cases=N          how many cases (default 120); family round robin, each case its own seed
@@ -54,7 +55,10 @@
    listeners (flushOnHide), a reload its pagehide listeners, a reconnect its 'online' listeners. The practice-minutes
    engine counts on its own 1 s tick from pointer events the tool dispatches to the page's own listeners.
 
-   WHAT IS FAKE (each rule is self-tested before the cases run; --fake-fault breaks one and the run must go red).
+   WHAT IS FAKE. Seven of the rules below are self-tested before the cases run (A1/A2, A3, D1, D2, D3, F2, F6;
+   --fake-fault breaks one and the self-test goes red, no case runs). D4, A4, F1, F3-F5 and F7-F9 are NOT
+   self-tested: they are written from the SDK's documented behaviour (F1/F3-F5 as in tools/save-loop.mjs) and the
+   site's own comments, and only the cases exercise them.
    - A virtual clock (Date, performance.now, setTimeout/setInterval) per world; TZ America/Los_Angeles; seeded
      Math.random per page.
    - The device: ONE localStorage shared by every page of the Chromebook (D1); one sessionStorage per TAB that a
@@ -128,9 +132,10 @@
    scenario's ledger of what each person did and when, facts of the fake world (the server's docs, every write the
    server saw with the token it carried, which pages lived when, what each page drew), and these rules:
      R1 A student's action lands in that student's doc, UNLESS the student was told it did not save: the
-        #unsaved-notice appeared on that page after the action (boot.js signOut: "Say so and stay signed in"), or
-        the page's save indicator said 'save.notSaving' after it (queueSave's held-back categories after a failed
-        load). An action the student was told about may be in the doc or not. Effects (as save-loop.mjs words
+        #unsaved-notice appeared on that page after the action and STAYED at least 1 s while the device was still
+        signed in as that student (boot.js signOut: "Say so and stay signed in"; a notice that flashes, or comes up
+        after the student has left, tells nobody), or the save indicator said 'save.notSaving' at the action itself
+        and still said it 1 s later on a page still open (queueSave's held-back categories after a failed load). An action the student was told about may be in the doc or not. Effects (as save-loop.mjs words
         them): a tick sets completed[key] true, an un-tick removes it; an answer replaces responses[key]; a PR
         tempo appends {value, date} to the history (last 8); a rep adds 1 to practiceLog[skill].reps and keeps the
         larger best; an exit check files {score, total, picks, at, attempts} and marks the activity done (both or
@@ -141,7 +146,8 @@
         navigation the tool does not model; games.meta and games.srBonusDay excepted in the doc of a student who
         acted on the device: the XP layer's once-a-day bonus follows from that student's own reps).
      R3 No write to progress/X or minutes/X LANDED under another student's token, and no write the server saw (landed
-        or refused) carried another student's marker. (So nothing of A's is ever written under B's uid.) A write the
+        or refused) or a page issued and never sent (lost with the page or under D4) carried another student's
+        marker. (So nothing of A's is ever written under B's uid.) A write the
         rules REFUSED because it went out under the wrong sign-in is counted and printed, not failed: nothing was
         written (the work it carried is judged by R1).
      R4 The first screen of a student (the moment showApp has run): the in-memory state the screens draw from is
@@ -151,9 +157,11 @@
         never the previous student's set, periodOverride / moduleOpenThrough / activityForMe / gamesAccessOn are the
         config's answer for THIS uid (or the defaults '' / 0 / none / on when the read failed and the cache belongs
         to someone else — KNOWN K1 of tools/visible-loop.mjs is the other half of that rule and is not rebuilt
-        here), no top-level variable of the page and no markup it wrote holds another student's marker, the tab's
-        sessionStorage holds no key the previous student's session wrote, and the page never read a localStorage
-        key named with another student's uid.
+        here), no top-level variable of the page and nothing it wrote to the screen holds another student's marker
+        (markers: the seeded names, emails and answers AND everything a student typed during the case — answers and
+        8-digit PR tempos), the tab's sessionStorage holds no key the previous student's session wrote, the page
+        never read a localStorage key named with another student's uid nor a localStorage VALUE holding another
+        student's marker, and the Google popup it opens carries nothing of anyone but the student signing in.
      R5 Every page whose sign-in callback ran for a student is gone (reloaded) within 3 s of that student leaving the
         device's sign-in (boot.js: "Sign-out on a shared Chromebook has to be a hard reset, not a state reset"), or the
         student is still signed in with the not-saved notice on screen; so no page ever shows the next student or the
@@ -185,6 +193,14 @@
    turns the self-test red and no case runs): auth-not-shared, token-of-current-user, queue-survives-reload,
    session-cleared-on-reload, storage-per-tab, rules-open, frozen-sees-all.
 
+   NOT COVERED (stated limits). Leak channels the stub DOM does not see: canvas and SVG drawn by script, CSS
+   content, the clipboard, IndexedDB and Cache Storage, cookies, the browser's own autofill and history, anything
+   rendered from a <template> without a write the tool sees. A student's work from today shows up in the markers only
+   as typed text (answers, PR tempos): ticks, reps, exit-check picks and path picks are site ids or small numbers,
+   so they are judged by the per-variable compare of R4 (the next student's doc-backed state) and not by the marker
+   scan. The not-saved notice is judged by how long it is on the stub page, not whether it is visible on a real
+   screen.
+
    NOT MODELLED. The teacher console page (?teacher): in the stub DOM its activity list's async painter never
    settles (it queries the markup it just wrote), so the teacher is modelled on the student page only; the console's
    own data rules are tools/visible-loop.mjs's and tools/two-consoles-loop.mjs's. Real rendering and layout (markup
@@ -211,7 +227,7 @@ const ARGV = process.argv.slice(2);
 const opt = (k, d) => { const a = ARGV.find(x => x === '--' + k || x.startsWith('--' + k + '=')); if (!a) return d; return a.includes('=') ? a.slice(a.indexOf('=') + 1) : true; };
 const argFail = msg => { console.error('shared-chromebook-loop: ' + msg + ' (see the header of tools/shared-chromebook-loop.mjs)'); process.exit(2); };
 {
-  const VALUED = ['cases', 'seed', 'case', 'family', 'root', 'fake-fault', 'json', 'stall'], BARE = ['verbose', 'list'];
+  const VALUED = ['cases', 'seed', 'case', 'family', 'root', 'fake-fault', 'json', 'stall', 'unload'], BARE = ['verbose', 'list'];
   for (const a of ARGV){
     const m = /^--([a-z-]+)(=(.*))?$/.exec(a);
     if (!m) argFail('not an option: ' + JSON.stringify(a));
@@ -224,6 +240,7 @@ const argFail = msg => { console.error('shared-chromebook-loop: ' + msg + ' (see
   const st = opt('stall', null);
   if (st != null && !(/^\d+(\.\d+)?$/.test(st) && Number(st) > 0)) argFail('--stall must be a number of seconds above 0');
   if (opt('case', null) != null && Number(opt('case')) >= Number(opt('cases', 120))) argFail(`--case=${opt('case')} is not below --cases=${opt('cases', 120)}`);
+  if (opt('unload', null) != null && !['lost', 'delivered', 'mixed'].includes(opt('unload'))) argFail('--unload must be lost, delivered or mixed');
   if (opt('root', null) != null && !existsSync(resolve(opt('root')))) argFail('--root: no such folder ' + JSON.stringify(opt('root')));
 }
 const ROOT = resolve(opt('root', join(HERE, '..')));
@@ -232,6 +249,9 @@ const FAKE_FAULT = opt('fake-fault', '') || '';
 const BASE_SEED = Number(opt('seed', 1));
 const STALL_S = Number(opt('stall', 120));
 const STREAM = VERBOSE && opt('case', null) != null;
+/* D4: a write started while the page unloads is lost (the worst case), delivered (the best case), or either, drawn
+   per case (the default: half each). */
+const UNLOAD_MODE = opt('unload', 'mixed');
 let CURRENT_WORLD = null;
 process.on('unhandledRejection', e => {
   const msg = 'unhandled rejection: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : String(e));
@@ -359,6 +379,7 @@ class World {
     this.docs = new Map();
     this.r = rng(seed);
     this.writes = [];
+    this.issuedLog = [];
     this.siteFaults = [];
     this.trace = [];
     this.stats = { issued: 0, landed: 0, refusedByRules: 0, refusedByServer: 0, lostWithPage: 0, lostUnload: 0, reads: 0, readsFailed: 0, pages: 0, reloads: 0 };
@@ -403,7 +424,7 @@ function localStorageFor(tab){ return FAKE_FAULT === 'storage-per-tab' ? (tab.ow
 function storage(name, onAccess){
   return {
     _d: {}, _name: name,
-    getItem(k){ k = String(k); if (onAccess) onAccess('get', k); return Object.prototype.hasOwnProperty.call(this._d, k) ? this._d[k] : null; },
+    getItem(k){ k = String(k); if (onAccess) onAccess('get', k, Object.prototype.hasOwnProperty.call(this._d, k) ? this._d[k] : null); return Object.prototype.hasOwnProperty.call(this._d, k) ? this._d[k] : null; },
     setItem(k, v){ k = String(k); if (onAccess) onAccess('set', k, String(v)); this._d[k] = String(v); },
     removeItem(k){ k = String(k); if (onAccess) onAccess('remove', k); delete this._d[k]; },
     clear(){ if (onAccess) onAccess('clear', ''); this._d = {}; },
@@ -542,8 +563,10 @@ function makeClient(world, page){
     for (const w of items) if (w.kind !== 'delete') validate(w.data, '');
     world.stats.issued++;
     const op = { items: items.map(w => ({ path: w.path, kind: w.kind, merge: !!w.merge, data: clone(w.data) })), owner: client.user, issuedAt: world.now };
+    world.issuedLog.push({ page: page.id, at: world.now, owner: op.owner ? op.owner.uid : null, items: op.items, unloading: !!page.unloading });
     const p = new Promise((res, rej) => { op.resolve = res; op.reject = rej; });
-    if (page.unloading){
+    if (page.unloading && world.sc && world.sc.unloadDelivered) world.stats.unloadSent = (world.stats.unloadSent || 0) + 1;
+    if (page.unloading && !(world.sc && world.sc.unloadDelivered)){
       world.stats.lostUnload++;
       world.log(`${page.id} write started while unloading: NOT DELIVERED (D4): ${summarize(op)}`);
       page.lostOps.push(op);
@@ -767,14 +790,15 @@ function makePage(world, tab, opts){
       classList: { _s: new Set(), add(...c){ c.forEach(x => this._s.add(x)); }, remove(...c){ c.forEach(x => this._s.delete(x)); }, toggle(c, f){ const on = f === undefined ? !this._s.has(c) : !!f; if (on) this._s.add(c); else this._s.delete(c); return on; }, contains(c){ return this._s.has(c); } },
       get innerHTML(){ return this._h; }, set innerHTML(v){ this._h = String(v); scanText('#' + (this.id || this.tagName) + '.innerHTML', this._h); },
       get textContent(){ return this._t; }, set textContent(v){ this._t = String(v); scanText('#' + (this.id || this.tagName) + '.textContent', this._t); },
-      value: '', hidden: false, checked: false, isConnected: true, src: '', parentNode: null,
+      _v: '', get value(){ return this._v; }, set value(v){ this._v = String(v); scanText('#' + (this.id || this.tagName) + '.value', this._v); },
+      hidden: false, checked: false, isConnected: true, src: '', parentNode: null,
       addEventListener(){}, removeEventListener(){},
       appendChild(c){ if (c && typeof c === 'object'){ c.parentNode = e; e.children.push(c); } return c; },
-      removeChild(){}, remove(){ e.removed = true; if (e.parentNode){ e.parentNode.children = e.parentNode.children.filter(x => x !== e); } }, append(...cs){ cs.forEach(c => e.appendChild(c)); }, prepend(){},
-      setAttribute(k, v){ e.attrs[k] = String(v); if (k === 'data-i18n' && e.__saveInd) page.saveMsgs.push({ at: world.now, key: String(v) }); },
-      getAttribute(k){ return Object.prototype.hasOwnProperty.call(e.attrs, k) ? e.attrs[k] : null; }, removeAttribute(k){ delete e.attrs[k]; }, hasAttribute(k){ return Object.prototype.hasOwnProperty.call(e.attrs, k); }, toggleAttribute(){},
+      removeChild(){}, remove(){ if (!e.removed) e.removedAt = world.now; e.removed = true; if (e.parentNode){ e.parentNode.children = e.parentNode.children.filter(x => x !== e); } }, append(...cs){ cs.forEach(c => e.appendChild(c)); }, prepend(){},
+      setAttribute(k, v){ e.attrs[k] = String(v); scanText('#' + (e.id || e.tagName) + '[' + k + ']', e.attrs[k]); if (k === 'data-i18n' && e.__saveInd) page.saveMsgs.push({ at: world.now, key: String(v) }); },
+      getAttribute(k){ return Object.prototype.hasOwnProperty.call(e.attrs, k) ? e.attrs[k] : null; }, removeAttribute(k){ delete e.attrs[k]; if (k === 'data-i18n' && e.__saveInd) page.saveMsgs.push({ at: world.now, key: '' }); }, hasAttribute(k){ return Object.prototype.hasOwnProperty.call(e.attrs, k); }, toggleAttribute(){},
       querySelector(){ return null; }, querySelectorAll(){ return []; }, closest(){ return null; }, matches(){ return false; },
-      focus(){}, blur(){}, click(){}, scrollIntoView(){}, scrollTo(){}, insertAdjacentHTML(){}, insertAdjacentElement(){},
+      focus(){}, blur(){}, click(){}, scrollIntoView(){}, scrollTo(){}, insertAdjacentHTML(pos, html){ scanText('#' + (e.id || e.tagName) + '.insertAdjacentHTML', String(html)); }, insertAdjacentElement(){},
       cloneNode(){ return mkEl('', tag); }, contains(){ return false; }, play(){ return Promise.resolve(); }, pause(){}, load(){},
       getBoundingClientRect(){ return { top: 0, left: 0, width: 0, height: 0, bottom: 0, right: 0 }; }
     };
@@ -830,6 +854,10 @@ function makePage(world, tab, opts){
     signInWithPopup(){
       return new Promise((res, rej) => {
         const who = dev.pendingSignIn;
+        /* What the site hands Google's popup (setCustomParameters: a login_hint, say) must hold nothing of anyone
+           but the student now signing in. */
+        const params = JSON.stringify(page.providerParams || {});
+        for (const k of Object.keys(world.markers || {})) if (!who || world.people[k].uid !== who.uid) for (const t of world.markers[k]) if (params.includes(t)) page.markerHits.push({ at: world.now, where: 'the Google sign-in popup (setCustomParameters)', owner: k, text: t, shownAs: who ? who.uid : null });
         world.at(world.now + Math.round(1500 + 1500 * world.r()), () => {
           if (!who){ rej(Object.assign(new Error('closed'), { code: 'auth/popup-closed-by-user' })); return; }
           dev.pendingSignIn = null;
@@ -898,7 +926,8 @@ function makePage(world, tab, opts){
   const ctx = {
     console: { log(){}, info(){}, debug(){}, warn: (...a) => world.log(`${page.id} console.warn: ${a.map(x => x && x.message ? x.message : String(x)).join(' ').slice(0, 160)}`), error: (...a) => world.log(`${page.id} console.error: ${a.map(x => x && x.message ? x.message : String(x)).join(' ').slice(0, 160)}`) },
     document: {
-      documentElement: mkEl('html', 'html'), head, body, readyState: 'complete', referrer: '', title: '',
+      documentElement: mkEl('html', 'html'), head, body, readyState: 'complete', referrer: '',
+      _title: '', get title(){ return this._title; }, set title(v){ this._title = String(v); scanText('document.title', this._title); },
       getElementById(id){ return page.els[id] || (page.els[id] = mkEl(id)); },
       querySelector(){ return null; },
       querySelectorAll(sel){ return sel === '.save-ind' ? [saveInd] : []; },
@@ -940,7 +969,7 @@ function makePage(world, tab, opts){
     CSS: { escape: v => String(v).replace(/[^a-zA-Z0-9_-]/g, c => '\\' + c), supports: () => false },
     addEventListener(type, fn){ (page.winL[type] = page.winL[type] || []).push(fn); }, removeEventListener(type, fn){ page.winL[type] = (page.winL[type] || []).filter(f => f !== fn); }, dispatchEvent(){ return true; },
     scrollTo(){}, scrollBy(){}, innerWidth: 1366, innerHeight: 657, devicePixelRatio: 1, screen: { width: 1366, height: 768 },
-    firebase: { initializeApp(){}, auth: Object.assign(() => auth, { GoogleAuthProvider: class { setCustomParameters(){} } }), firestore: undefined, apps: [] },
+    firebase: { initializeApp(){}, auth: Object.assign(() => auth, { GoogleAuthProvider: class { setCustomParameters(o){ page.providerParams = Object.assign({}, o || {}); } addScope(){} } }), firestore: undefined, apps: [] },
     __clock: () => world.now, __rand: rng(mix(opts.seed || 1, tab.loads))
   };
   ctx.window = ctx; ctx.globalThis = ctx; ctx.self = ctx;
@@ -1155,7 +1184,7 @@ const FAMILIES = {
   'first-screen': 'A works a whole session (every kind, device settings, deck best, mic consent, practice minutes), signs out; B (returning, new, or a failed read) signs in: B\'s first screen',
   'two-tabs': 'A in two tabs: A acts in one and signs out from the other (network varies, the other tab may be frozen); B signs in',
   'round-trip': 'A, then B, then A again on the same tab, or the same student out and back in',
-  'teacher': 'the teacher\'s account after a student and a student after the teacher, on the student page and on the console',
+  'teacher': 'the teacher\'s account after a student and a student after the teacher, on the student page (the console is not driven: see NOT MODELLED)',
   'playing': 'Sign out with a sound playing and the mic open (a listening game\'s mic, a note playing)',
   'failed-reads': 'B\'s progress or config read fails or comes back empty right after A',
   'mix': 'seeded random mixes of all of the above'
@@ -1173,12 +1202,15 @@ function makeScenario(idx, famFilter){
   const r = rng(seed);
   const sc = { idx, fam, seed, r, actionKind: pick(r, ACTION_KINDS), net: pick(r, NET_KINDS), signOutAfter: pick(r, [150, 600, 1200, 2500]),
     noticeChoice: r() < 0.4 ? 'anyway' : 'wait', bKind: pick(r, ['returning', 'returning', 'new', 'failed-read']),
-    frozen: r() < 0.5, bOnOtherTab: r() < 0.5, teacherWhere: pick(r, ['student-page', 'student-page']), teacherOrder: pick(r, ['after', 'before']),
+    frozen: r() < 0.5, bOnOtherTab: r() < 0.5, teacherOrder: pick(r, ['after', 'before']),
     roundKind: pick(r, ['A-B-A', 'A-A']), failKind: pick(r, ['progress-refused', 'progress-offline', 'config-refused', 'both', 'empty']),
     playKind: pick(r, ['mic', 'note', 'both']) };
   if (fam === 'mix'){
     sc.sub = pick(r, ['last-action', 'two-tabs', 'round-trip', 'failed-reads', 'first-screen']);
   }
+  /* Drawn last, so the draws above stay what they were before these two options existed. */
+  sc.lastOnOut = r() < 0.5;
+  sc.unloadDelivered = UNLOAD_MODE === 'delivered' ? true : UNLOAD_MODE === 'lost' ? false : r() < 0.5;
   return sc;
 }
 function actionFor(sc, kind, r, P){
@@ -1190,7 +1222,8 @@ function actionFor(sc, kind, r, P){
     case 'rep': return { kind, key: P.key === 'A' ? 'm9w2-s1' : 'm2w1-s1', best: 80 + Math.floor(r() * 20) };
     case 'check': { const id = 'ca-15'; const ans = DATA.CHECKS[id] || []; return { kind, key: id, picks: ans.map((x, i) => (r() < 0.7 ? x : (DATA.CHOICES[id][i] || [x])[Math.floor(r() * 7) % (DATA.CHOICES[id][i] || [x]).length])) }; }
     case 'path': return { kind, key: 'ca-46', pick: DATA.PATHS.length > 1 ? DATA.PATHS[1] : DATA.PATHS[0], keys: DATA.PATHS };
-    case 'pr': return { kind, key: P.key === 'A' ? 'practice-m9w2-s1' : 'practice-m2w1-s1', value: String(100 + Math.floor(r() * 60)) };
+    /* An 8-digit tempo: long enough to be a marker of this student (R4 finds it wherever it leaks). */
+    case 'pr': return { kind, key: P.key === 'A' ? 'practice-m9w2-s1' : 'practice-m2w1-s1', value: String(80000000 + Math.floor(r() * 9999999)) };
     case 'card': return { kind, key: DATA.CARDS[0] };
   }
   throw new Error('no action ' + kind);
@@ -1216,6 +1249,8 @@ function buildWorld(sc){
   world.teacherEmail = DATA.TEACHER_EMAIL;
   world.snapListeners = [];
   world.authHistory = [];
+  world.issuedLog = [];
+  world.sc = sc;
   world.ledger = [];
   world.firstScreens = [];
   world.signIns = [];
@@ -1290,6 +1325,9 @@ function hands(world, dev, sc){
       a.t = world.now; a.who = P.key; a.page = page.id; a.done = true;
       beat(`${world.caseLabel}: ${P.key} ${describe(a)} on ${page.id} at ${rel(world.now)}`);
       world.ledger.push(a);
+      /* What a student types today is that student's marker from now on, as much as what their doc held. */
+      if (a.kind === 'answer') world.markers[P.key].push(a.text);
+      if (a.kind === 'pr') world.markers[P.key].push(a.value);
       world.log(`${P.key} on ${page.id}: ${describe(a)}`);
       if (a.kind === 'check'){
         siteRun(page, `ecStart(${JSON.stringify(a.key)})`);
@@ -1317,8 +1355,9 @@ function hands(world, dev, sc){
         if (!dev.authUser || dev.authUser.uid !== P.uid) break;
         if (page.notices.length > before){
           const n = page.notices[page.notices.length - 1];
+          /* The student reads the notice before doing anything about it. */
+          await world.sleep(1500);
           if (choice === 'anyway' || attempt >= 2){
-            await world.sleep(1500);
             world.log(`${P.key} takes "Sign out anyway"`);
             if (n.go && n.go.onclick) callSite(page, () => n.go.onclick());
             await world.waitFor(() => !dev.authUser || dev.authUser.uid !== P.uid, 10000, 100);
@@ -1531,13 +1570,15 @@ async function runFamily(world, dev, sc, H){
     if (appUp(tab2.page, A)) H.firstScreen(tab2.page, A);
     await H.act(tab1, A, actionFor(sc, pick(sc.r, ['answer', 'rep']), sc.r, A));
     await world.sleep(4000);
-    await lastAction(tab1, A);
-    await world.sleep(Math.min(sc.signOutAfter, 700));
+    /* Half the cases: the last action is in T1 and A signs out from T2 (K-TAB's shape); the other half: the last
+       action is in T2, the very tab A signs out from, while T1 is open beside it. */
+    if (!sc.lastOnOut){ await lastAction(tab1, A); await world.sleep(Math.min(sc.signOutAfter, 700)); }
     world.log('A switches to T2');
     await H.hide(tab1);
     if (sc.frozen){ const until = tab1.frozenUntil = world.now + Math.round(20000 + 40000 * sc.r()); world.log(`T1 frozen by the browser until ${rel(until)}`); world.at(until, () => { if (tab1.frozenUntil === until) thaw(world, tab1); }, null, 'script'); }
     await H.show(tab2);
     await world.sleep(400);
+    if (sc.lastOnOut){ await lastAction(tab2, A); await world.sleep(sc.signOutAfter); }
     await H.signOut(tab2, A, sc.noticeChoice);
     await world.sleep(Math.round(2000 + 4000 * sc.r()));
     /* A frozen T1 is left frozen while B signs in on T2, so it wakes to a DIFFERENT student straight over A (the
@@ -1584,7 +1625,7 @@ async function runFamily(world, dev, sc, H){
        just wrote, which the stub DOM cannot answer, and its async painter then never settles (2026-11-13). The
        teacher signs in on the STUDENT page instead (a gate previewer: the same Firebase account on the same device),
        which is the half that shares the student page's state, storage and save path. */
-    const onConsole = false;
+    const onConsole = false && sc;
     const teacherVisit = async () => {
       if (onConsole){ killPage(tab1.page); openPage(world, tab1, true); world.log('the teacher opens the console address in this tab'); }
       if (await H.signIn(tab1, T)){
@@ -1698,11 +1739,28 @@ function effectsOf(a){
   throw new Error('oracle: unknown action ' + a.kind);
 }
 /* Was the person told this action did not save? (R1) */
+/* Who the device had signed in at time t (the auth history of the fake). */
+function authUidAt(world, t){ let u = null; for (const h of world.authHistory){ if (h.at <= t) u = h.uid; else break; } return u; }
+/* R1's "told": a not-saved notice that stayed on that page for at least 1 s after the action while the device was
+   still signed in as that student (a notice that flashes, or that comes up after the student has left, tells nobody);
+   or "Not saving" shown at the action itself and still showing 1 s later on a page that is still alive. */
 function toldAbout(world, a){
   const page = world.allPages.find(p => p.id === a.page);
   if (!page) return false;
-  if (page.notices.some(n => n.at >= a.t)) return true;
-  if (page.saveMsgs.some(m => m.at >= a.t && m.at <= a.t + 50 && m.key === 'save.notSaving')) return true;
+  const uid = world.people[a.who].uid;
+  for (const n of page.notices){
+    if (n.at < a.t) continue;
+    const end = Math.min(n.el.removedAt != null ? n.el.removedAt : Infinity, page.diedAt != null ? page.diedAt : Infinity, world.endAt);
+    if (end - n.at < 1000) continue;
+    if (authUidAt(world, n.at) !== uid) continue;
+    if (world.authHistory.some(h => h.at > n.at && h.at <= n.at + 1000)) continue;
+    return true;
+  }
+  for (const m of page.saveMsgs){
+    if (!(m.at >= a.t && m.at <= a.t + 50 && m.key === 'save.notSaving')) continue;
+    const later = page.saveMsgs.filter(x => x.at <= m.at + 1000).pop();
+    if (later && later.key === 'save.notSaving' && (page.diedAt == null || page.diedAt > m.at + 1000)) return true;
+  }
   return false;
 }
 /* KNOWN site faults this tool found that are still open (listed with the date). A finding that matches an entry
@@ -1713,13 +1771,35 @@ function toldAbout(world, a){
    this tab: signOut() (boot.js) waits only for its OWN tab's writes, and the other tab, told "signed out" by Firebase,
    hard-resets at once (start.js, the null branch — or, when it was frozen, the swap branch). Matched only when the
    lost action's page never had Sign out clicked on it, died by that reload after its sign-in moved away from the
-   student, and showed no not-saved notice. */
+   student, showed no not-saved notice, AND had issued a progress write carrying that action before the device
+   signed the student out (work never even sent is a different loss and fails). The count is printed beside the
+   band a full default run gives on seed 1 (KTAB_BAND); a count outside it is printed as a warning to look at. */
 const KNOWN = [{ id: 'K-TAB', listed: '2026-11-12' }];
+/* What a full default run (120 cases, seed 1) gives for K-TAB on the site of 2026-11-13: records matched, in cases. */
+const KTAB_BAND = { records: [0, 0], cases: [0, 0] };
 function knownTabLoss(world, a){
   const page = world.allPages.find(p => p.id === a.page);
   if (!page || page.signOutClicked || page.diedAt == null || page.notices.length) return false;
+  const uid = world.people[a.who].uid;
   const last = (page.authLog || []).filter(x => x.at <= page.diedAt).pop();
-  return !!(page.reloadAsked && last && last.uid !== world.people[a.who].uid);
+  if (!(page.reloadAsked && last && last.uid !== uid)) return false;
+  /* K-TAB is work that WAS sent for: a progress write carrying the action, issued by that page after the action and
+     before the device signed the student out. A save that was never even issued is a different loss and fails. */
+  const out = world.authHistory.find(h => h.at > a.t && h.uid !== uid);
+  const outAt = out ? out.at : Infinity;
+  return world.issuedLog.some(w => w.page === page.id && w.at >= a.t && w.at < outAt && w.items.some(it => it.path === 'progress/' + uid && carriesAction(it.data, a)));
+}
+/* Does a write's data carry this action? Each of its records is in the payload (a delete sentinel counts), with the
+   typed text or the tempo where the action has one. */
+function carriesAction(data, a){
+  if (!data) return false;
+  return effectsOf(a).every(e => {
+    const v = getRec(data, e.rec);
+    if (v === undefined) return false;
+    if (a.kind === 'answer') return v === a.text;
+    if (a.kind === 'pr') return Array.isArray(v) && v.some(x => x && x.value === a.value);
+    return true;
+  });
 }
 function oracle(sc, world, dev){
   const fails = [], known = [];
@@ -1792,26 +1872,41 @@ function oracle(sc, world, dev){
       if (landed) actionsLanded++; else if (a.told) actionsTold++; else actionsLost++;
     }
   }
-  /* R3: every write the server saw. */
-  let writesChecked = 0;
-  const crossRefused = [];
+  /* R3: every write the server saw, and every write a page issued that never left it (queued and lost with the
+     page, or started while unloading under D4's worst case): its target and its markers. Counted in WRITES (a
+     batch of several documents is one write). */
+  let writesChecked = 0, issuedChecked = 0;
+  const crossRefused = [], crossUnsent = [];
   const uidOwner = Object.fromEntries(Object.entries(world.people).map(([k, P]) => [P.uid, k]));
-  for (const w of world.writes){
-    for (const it of w.items){
-      const seg = it.path.split('/');
-      if (seg[0] !== 'progress' && seg[0] !== 'minutes') continue;
-      writesChecked++;
-      const target = seg[1];
-      if (w.token !== target){
-        if (w.ok) fail('R3', `${w.page} wrote to ${it.path} under ${w.token || 'nobody'}'s sign-in and it LANDED, at ${rel(w.sentAt)}`);
-        else crossRefused.push(`${w.page} → ${it.path} under ${w.token || 'nobody'} at ${rel(w.sentAt)}`);
-      }
-      const s = flatString(it.data);
-      for (const [k, list] of Object.entries(world.markers)){
-        if (world.people[k].uid === target) continue;
-        for (const m of list) if (s.includes(m)) fail('R3', `${w.page} wrote ${JSON.stringify(m)} (${k}'s) into ${it.path} (${w.ok ? 'landed' : 'refused'}) at ${rel(w.sentAt)}`);
-      }
+  const markerScan = (where, path, data, how) => {
+    const target = path.split('/')[1];
+    const s = flatString(data);
+    for (const [k, list] of Object.entries(world.markers)){
+      if (world.people[k].uid === target) continue;
+      for (const m of list) if (s.includes(m)) fail('R3', `${where} wrote ${JSON.stringify(m)} (${k}'s) into ${path} (${how})`);
     }
+  };
+  const studentPath = it => { const seg = it.path.split('/'); return seg[0] === 'progress' || seg[0] === 'minutes'; };
+  for (const w of world.writes){
+    const items = w.items.filter(studentPath);
+    if (!items.length) continue;
+    writesChecked++;
+    const wrong = items.filter(it => it.path.split('/')[1] !== w.token);
+    if (wrong.length){
+      if (w.ok) for (const it of wrong) fail('R3', `${w.page} wrote to ${it.path} under ${w.token || 'nobody'}'s sign-in and it LANDED, at ${rel(w.sentAt)}`);
+      else crossRefused.push(`${w.page} → ${wrong[0].path} under ${w.token || 'nobody'} at ${rel(w.sentAt)}`);
+    }
+    for (const it of items) markerScan(w.page, it.path, it.data, `${w.ok ? 'landed' : 'refused'} at ${rel(w.sentAt)}`);
+  }
+  const sentKeys = new Set(world.writes.map(w => w.page + '|' + w.issuedAt + '|' + canon(w.items.map(it => it.path))));
+  for (const w of world.issuedLog){
+    if (sentKeys.has(w.page + '|' + w.at + '|' + canon(w.items.map(it => it.path)))) continue;
+    const items = w.items.filter(studentPath);
+    if (!items.length) continue;
+    issuedChecked++;
+    const wrong = items.filter(it => it.path.split('/')[1] !== w.owner);
+    if (wrong.length) crossUnsent.push(`${w.page} → ${wrong[0].path} under ${w.owner || 'nobody'} at ${rel(w.at)}`);
+    for (const it of items) markerScan(w.page, it.path, it.data, `issued at ${rel(w.at)}${w.unloading ? ' while unloading' : ''}, never sent`);
   }
   /* R4: every first screen. */
   let screens = 0;
@@ -1878,6 +1973,13 @@ function oracle(sc, world, dev){
     for (const e of dev.accessLog){
       if (e.page !== fs.page || e.op !== 'get' || e.at < signedInAt || e.at >= readsUntil) continue;
       for (const [k, Q] of Object.entries(world.people)) if (Q.uid !== P.uid && e.k.includes(Q.uid)) fail('R4', `${fs.page} (showing ${fs.who}) read localStorage "${e.k}", ${k}'s key, at ${rel(e.at)}`);
+      /* ...and the VALUE it read, whatever the key: nothing another student wrote (their markers, today's typing
+         included) may come back to this page. */
+      if (typeof e.v === 'string') for (const [k, list] of Object.entries(world.markers)){
+        if (world.people[k].uid === P.uid || !world.onDevice.has(k)) continue;
+        const hit = list.find(m => e.v.includes(m));
+        if (hit) fail('R4', `${fs.page} (showing ${fs.who}) read localStorage "${e.k}" holding ${k}'s ${JSON.stringify(hit)}, at ${rel(e.at)}`);
+      }
     }
     /* R5's other half: no live mic on the device at this person's first screen. */
     for (const t of dev.tabs) for (const p of t.pages) if (p.alive && p !== page){
@@ -1917,7 +2019,7 @@ function oracle(sc, world, dev){
   }
   /* R7 */
   for (const f of world.siteFaults.slice(0, 4)) fail('R7', f);
-  return { fails: dedupe(fails), known: dedupe(known), compared, writesChecked, screens, actionsLanded, actionsTold, actionsLost, pmSeconds, crossRefused };
+  return { fails: dedupe(fails), known: dedupe(known), compared, writesChecked, issuedChecked, screens, actionsLanded, actionsTold, actionsLost, pmSeconds, crossRefused, crossUnsent };
 }
 function dedupe(fails){ const seen = new Set(); return fails.filter(f => { const k = f.rule + f.msg; if (seen.has(k)) return false; seen.add(k); return true; }); }
 /* A rep's `last` is the action's millisecond; the site stamps Date.now() when its handler runs (the same virtual
@@ -1972,6 +2074,7 @@ async function runCase(idx, famFilter){
   CURRENT_WORLD = null;
   if (world.toolError) throw world.toolError;
   if (!finished) world.siteFaults.push('the scenario did not finish within 30 virtual minutes');
+  world.endAt = world.now;
   const res = oracle(sc, world, dev);
   return { sc, world, dev, res };
 }
@@ -2100,9 +2203,9 @@ async function main(){
   const N = Number(opt('cases', 120));
   const idxs = single != null ? [Number(single)] : Array.from({ length: N }, (_, i) => i);
   const fams = {};
-  const tot = { compared: 0, writesChecked: 0, screens: 0, landed: 0, told: 0, lost: 0, issued: 0, landedW: 0, refusedRules: 0, refusedServer: 0, lostPage: 0, lostUnload: 0, pages: 0, reloads: 0, reads: 0, readsFailed: 0, notices: 0, ledger: 0, crossRefused: 0 };
+  const tot = { compared: 0, writesChecked: 0, screens: 0, landed: 0, told: 0, lost: 0, issued: 0, landedW: 0, refusedRules: 0, refusedServer: 0, lostPage: 0, lostUnload: 0, pages: 0, reloads: 0, reads: 0, readsFailed: 0, notices: 0, ledger: 0, crossRefused: 0, crossUnsent: 0, issuedChecked: 0, unloadSent: 0, unloadCases: 0 };
   const json = [];
-  const knownHits = {};
+  const knownHits = {}, knownCases = new Set();
   let failed = 0;
   for (const idx of idxs){
     beat(`case ${idx}`);
@@ -2116,8 +2219,9 @@ async function main(){
     tot.lostPage += world.stats.lostWithPage; tot.lostUnload += world.stats.lostUnload; tot.pages += world.stats.pages; tot.reloads += world.stats.reloads;
     tot.reads += world.stats.reads; tot.readsFailed += world.stats.readsFailed; tot.notices += world.allPages.reduce((n, p) => n + p.notices.length, 0);
     const what = `${famName}, last action ${sc.actionKind}, network ${sc.net}`;
-    for (const k of res.known){ knownHits[k.id] = (knownHits[k.id] || 0) + 1; console.log(`~ known ${k.id}, listed ${KNOWN.find(x => x.id === k.id).listed}: case ${idx} (seed ${BASE_SEED}, ${what}): ${k.msg}`); }
-    tot.crossRefused += res.crossRefused.length;
+    for (const k of res.known){ knownHits[k.id] = (knownHits[k.id] || 0) + 1; knownCases.add(idx); console.log(`~ known ${k.id}, listed ${KNOWN.find(x => x.id === k.id).listed}: case ${idx} (seed ${BASE_SEED}, ${what}): ${k.msg}`); }
+    tot.crossRefused += res.crossRefused.length; tot.crossUnsent += res.crossUnsent.length; tot.issuedChecked += res.issuedChecked;
+    tot.unloadSent += world.stats.unloadSent || 0; if (sc.unloadDelivered) tot.unloadCases++;
     if (res.crossRefused.length) console.log(`~ case ${idx} (seed ${BASE_SEED}, ${what}): ${res.crossRefused.length} write${res.crossRefused.length > 1 ? 's' : ''} refused by the rules for going out under the wrong sign-in: ${res.crossRefused.slice(0, 2).join('; ')}`);
     if (res.fails.length){
       failed++; f.fail++;
@@ -2130,7 +2234,7 @@ async function main(){
       console.log(`\n── case ${idx} (seed ${BASE_SEED}, ${what}, notice choice ${sc.noticeChoice}, B ${sc.bKind})`);
       for (const line of world.trace) console.log('  ' + line);
       console.log('  ledger: ' + world.ledger.map(a => `${a.who}@${rel(a.t)} ${describe(a)}${a.told ? ' (told)' : ''}`).join(' | '));
-      console.log(`  checks: ${res.compared} compared, ${res.writesChecked} write items checked, ${res.screens} first screens`);
+      console.log(`  checks: ${res.compared} compared, ${res.writesChecked} writes and ${res.issuedChecked} never-sent writes checked, ${res.screens} first screens; unload writes ${sc.unloadDelivered ? 'delivered' : 'lost'}`);
     }
     if (opt('json', null)) json.push({ idx, fam: famName, actionKind: sc.actionKind, net: sc.net, fails: res.fails, stats: world.stats });
   }
@@ -2138,10 +2242,14 @@ async function main(){
   for (const k of KNOWN) if (fullRun && !knownHits[k.id]){ failed++; console.log(`✗ FAIL KNOWN ${k.id} matched nothing in a full default run: if the site fault is fixed, take its entry out of KNOWN`); }
   const famLine = Object.entries(fams).map(([k, v]) => `${k} ${v.n - v.fail}/${v.n}`).join(', ');
   console.log(`shared-chromebook-loop: ${idxs.length - failed} of ${idxs.length} cases held (${famLine})`);
-  console.log(`  KNOWN: ${KNOWN.map(k => k.id + ' matched ' + (knownHits[k.id] || 0) + ' time(s)').join(', ')}`);
+  {
+    const n = knownHits['K-TAB'] || 0, c = knownCases.size;
+    const band = fullRun && BASE_SEED === 1 && N === 120 ? (n < KTAB_BAND.records[0] || n > KTAB_BAND.records[1] || c < KTAB_BAND.cases[0] || c > KTAB_BAND.cases[1] ? ` — OUTSIDE the band of a full default run (${KTAB_BAND.records.join('-')} records in ${KTAB_BAND.cases.join('-')} cases): look at what changed` : ` (band of a full default run: ${KTAB_BAND.records.join('-')} records in ${KTAB_BAND.cases.join('-')} cases)`) : '';
+    console.log(`  KNOWN: K-TAB matched ${n} record(s) in ${c} case(s)${band}`);
+  }
   console.log(`  ${tot.ledger} actions by the students: ${tot.landed} landed in their own doc, ${tot.told} told "not saved" and not landed, ${tot.lost} lost without a word`);
-  console.log(`  ${tot.screens} first screens read (state, markup, sessionStorage, localStorage reads); ${tot.compared} records and values compared; ${tot.writesChecked} write items checked for token and markers`);
-  console.log(`  ${tot.pages} page loads, ${tot.reloads} reloads; ${tot.issued} writes issued, ${tot.landedW} landed, ${tot.refusedRules} refused by the rules, ${tot.refusedServer} refused by the server (${tot.crossRefused} of the rules' refusals for the wrong sign-in), ${tot.lostPage} lost with their page, ${tot.lostUnload} started while unloading; ${tot.reads} reads (${tot.readsFailed} failed); ${tot.notices} not-saved notices shown`);
+  console.log(`  ${tot.screens} first screens read (state, markup, sessionStorage, localStorage reads and values); ${tot.compared} records and values compared; ${tot.writesChecked} sent and ${tot.issuedChecked} never-sent student writes checked for target and markers`);
+  console.log(`  ${tot.pages} page loads, ${tot.reloads} reloads; writes (a batch counts once): ${tot.issued} issued, ${tot.landedW} landed, ${tot.refusedRules} refused by the rules (${tot.crossRefused} of them for going out under the wrong sign-in), ${tot.refusedServer} refused by the server, ${tot.lostPage} lost with their page, ${tot.lostUnload} started while unloading and lost, ${tot.unloadSent} started while unloading and let through (${tot.unloadCases} cases deliver unload writes); ${tot.crossUnsent} never-sent writes issued under the wrong sign-in; ${tot.reads} reads (${tot.readsFailed} failed); ${tot.notices} not-saved notices shown`);
   console.error(`shared-chromebook-loop: ${((Date.now() - t0) / 1000).toFixed(1)} s`);
   if (opt('json', null)) writeFileSync(opt('json'), JSON.stringify(json, null, 1));
   return failed ? 1 : 0;
