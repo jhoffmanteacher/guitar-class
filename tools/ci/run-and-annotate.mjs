@@ -103,7 +103,16 @@ const finish = (code, signal, spawnError) => {
     : signal ? `killed by ${signal} (cancelled, or the job ran out of time)`
     : `exit ${code}: ${MEANING[code] || 'failed'}`;
   const verdicts = lines.filter(l => /✗|HUNG|could not run|tool itself failed|no Chrome|refusing/.test(l)).slice(0, 12);
-  annotate('error', `${TITLE} failed (${why})`, verdicts.length ? verdicts : [`${TITLE}: ${why}; no ✗ line in the output, see the next annotation`]);
+  /* The one known reason the smoke was red on Linux (2026-11-13; browser.yml's header): its only ✗ is the error-event
+     list and every event in it is the site's own ResizeObserver note (app/boot.js logs it as a warning). Said so in
+     the title, so the red explains itself; the run still fails. */
+  const ro = /^\s*- \[[^\]]*\] console\.warning: \[guitar-class\] ResizeObserver loop completed with undelivered notifications\.?\s*$/;
+  const evHead = lines.findIndex(l => /^smoke: ✗ \d+ error event\(s\)/.test(l));
+  const evs = [];
+  for (let i = evHead + 1; evHead >= 0 && i < lines.length && /^\s*- \[/.test(lines[i]); i++) evs.push(lines[i]);
+  const roOnly = evHead >= 0 && verdicts.length === 1 && evs.length === Number(lines[evHead].match(/✗ (\d+)/)[1]) && evs.every(l => ro.test(l));
+  const head = roOnly ? `${TITLE} failed ONLY on the site's own ResizeObserver note, ${evs.length} time(s): the known Linux reason in browser.yml's header (${why})` : `${TITLE} failed (${why})`;
+  annotate('error', head, verdicts.length ? verdicts.concat(roOnly ? evs : []) : [`${TITLE}: ${why}; no ✗ line in the output, see the next annotation`]);
   const tail = lines.slice(-TAIL);
   annotate('error', `${TITLE}: last ${tail.length} lines of output`, tail.length ? tail : ['(no output)']);
   writeSummary(`### ${TITLE}: FAILED (${why}) after ${mins} min\n\n\`\`\`\n${tail.map(plain).join('\n')}\n\`\`\``);

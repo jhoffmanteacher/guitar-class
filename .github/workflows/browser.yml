@@ -22,6 +22,25 @@
 #
 # Pushing a branch named ci-try/<anything> runs this workflow too, to try a
 # change to it before it reaches main.
+#
+# Every job runs on ubuntu-24.04 by name, not ubuntu-latest: "latest" moves to
+# a new Ubuntu on GitHub's schedule, and a new image brings new fonts, which
+# move the layout under the smoke. Change it here, on purpose, in its own push.
+#
+# Known state (2026-11-13): the first run (Chrome for Testing 157) was green for
+# slow-load and playalong; every smoke area was red for ONE reason, a console
+# warning right after the dev-bypass sign-in: "ResizeObserver loop completed
+# with undelivered notifications" (Linux page scrollbars take 15px, so the
+# header observer in app/audio-ui.js changed the header's width inside its own
+# callback; on the Mac it showed only after the reload-then-sign-in steps that
+# tools/smoke.mjs already drops it from, in seven walks). The fix (the
+# observer writes --hdr on the next frame) shipped with this note. A smoke still
+# red with only that warning means the fix did not take (or another observer
+# loops): tools/ci/run-and-annotate.mjs names that case in its error title. It
+# stays red: the warning is never allow-listed without Jonathan.
+# update-reload-loop was red only on a profile folder left behind; its
+# clean-up now waits for Chrome's helpers (tools/ci/chrome-cleanup-test.mjs
+# proves it on this runner, in the same job).
 name: Browser tests
 
 on:
@@ -50,7 +69,7 @@ jobs:
   # with the commit before the push (github.event.before); a new branch, or a
   # before-commit GitHub no longer has, falls back to the last commit alone.
   changes:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:
       slow_load: ${{ steps.pick.outputs.slow_load }}
@@ -102,7 +121,7 @@ jobs:
   smoke:
     name: smoke ${{ matrix.area }} (English)
     if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.full) }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 50
     concurrency:
       group: browser-smoke-${{ github.ref }}-${{ matrix.area }}
@@ -154,7 +173,7 @@ jobs:
   smoke-full:
     name: smoke, full walk (English and Spanish)
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.full }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 50
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -197,7 +216,7 @@ jobs:
     name: slow-load
     needs: changes
     if: ${{ needs.changes.outputs.slow_load == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     concurrency:
       group: browser-slow-load-${{ github.ref }}
@@ -240,7 +259,7 @@ jobs:
     name: update-reload-loop
     needs: changes
     if: ${{ needs.changes.outputs.update_reload == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 100
     concurrency:
       group: browser-update-reload-${{ github.ref }}
@@ -270,6 +289,13 @@ jobs:
           CHROME: ${{ steps.chrome.outputs.chrome-path }}
         run: |
           node tools/ci/run-and-annotate.mjs --title "update-reload" --log "$RUNNER_TEMP/ci-out/update-reload.log" --summary '^update-reload: ([0-9]+ of|✗)' --deadline 95 -- node tools/update-reload-loop.mjs
+      # The profile clean-up alone, on this runner, with stand-ins for Chrome (about 15 s).
+      # It runs whatever the step before did, so a red there still gets this answer.
+      - name: node tools/ci/chrome-cleanup-test.mjs
+        if: ${{ !cancelled() }}
+        timeout-minutes: 3
+        run: |
+          node tools/ci/run-and-annotate.mjs --title "chrome-cleanup-test" --log "$RUNNER_TEMP/ci-out/chrome-cleanup-test.log" --summary '^chrome-cleanup-test: ' --deadline 2 -- node tools/ci/chrome-cleanup-test.mjs
       - name: Keep the output
         if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -283,7 +309,7 @@ jobs:
     name: playalong-loop
     needs: changes
     if: ${{ needs.changes.outputs.playalong == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     concurrency:
       group: browser-playalong-${{ github.ref }}
