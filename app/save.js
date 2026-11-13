@@ -506,6 +506,9 @@ function onResponseChange(key, value, isPR){
       _prEditingKeys.add(key);
     }
     responses[key] = arr;
+    /* After a failed load this history was built from nothing, so it is not
+       sent (flushSave filters it out too): say so instead of a false "Saved". */
+    if(progressLoadFailed){ setSaveMsg('save.notSaving'); return; }
   } else {
     responses[key] = value;
   }
@@ -566,7 +569,12 @@ function withTimeout(p, ms){
    1; a 10/10 arcade best → 4; 47 reps → 1). The other categories are safe to
    keep writing: skills, responses and completed are statements the student
    makes outright this session, and merge leaves every key they didn't touch
-   alone — PROVIDED the map has at least one key in it. An EMPTY map is the
+   alone — PROVIDED the map has at least one key in it. One exception inside
+   responses: a PR slot is a HISTORY built from its old value (onResponseChange),
+   and an array is replaced whole, so after a failed load a new PR entry would
+   replace the stored history with a one-entry one. Those keys are held back
+   instead (flushSave sends responses without them; onResponseChange says "Not
+   saving"). An EMPTY map is the
    exception: Firestore puts the bare field in the update mask and REPLACES
    the stored map with {} (every "I've got it", every rating, gone). After a
    failed load an empty map means "unknown", not "nothing", so flushSave drops
@@ -617,7 +625,12 @@ async function flushSave(){
   const payload = { name:currentUser.displayName||'', email:currentUser.email||'' };
   if(keys.has('skills'))    payload.skills    = progress;
   if(keys.has('place')){    payload.lastModule = lastModuleNum; payload.lastSet = lastSetId||null; }
-  if(keys.has('responses')) payload.responses = responses;
+  /* After a failed load a PR history (an array) was built from nothing:
+     sending it would replace the stored history whole, so it is held back.
+     The student's other answers in this save still go. */
+  if(keys.has('responses')) payload.responses = progressLoadFailed
+    ? Object.fromEntries(Object.entries(responses).filter(([, v])=>!Array.isArray(v)))
+    : responses;
   let sentDeletes = null;
   let sentCaDeletes = null;
   let sentStepDeletes = null;
