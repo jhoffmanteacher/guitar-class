@@ -252,7 +252,7 @@
         <div class="fab-group" id="fab-group" style="display:none">
           <div class="tool-popup" id="metro-popup" role="dialog" aria-label="Metronome" data-i18n-attr="aria-label:tools.metronome">
             <div class="tp-head">
-              <span class="tp-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 3 19 21 12 17 5 21 12 3"/><line x1="12" y1="10" x2="12" y2="17"/></svg> <span data-i18n="tools.metronome">Metronome</span></span>
+              <span class="tp-title" role="heading" aria-level="2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 3 19 21 12 17 5 21 12 3"/><line x1="12" y1="10" x2="12" y2="17"/></svg> <span data-i18n="tools.metronome">Metronome</span></span>
               <button class="tp-close" onclick="closePopup('metro')" aria-label="Close metronome" data-i18n-attr="aria-label:tools.closeMetroAria">&#x2715;</button>
             </div>
             <div class="metro-dot" id="metro-dot"></div>
@@ -295,7 +295,7 @@
           </div>
           <div class="tool-popup" id="timer-popup" role="dialog" aria-label="Practice Timer" data-i18n-attr="aria-label:tools.timerTitle">
             <div class="tp-head">
-              <span class="tp-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M9 3h6M12 3v2"/></svg> <span data-i18n="tools.timerTitle">Practice Timer</span></span>
+              <span class="tp-title" role="heading" aria-level="2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M9 3h6M12 3v2"/></svg> <span data-i18n="tools.timerTitle">Practice Timer</span></span>
               <button class="tp-close" onclick="closePopup('timer')" aria-label="Close timer" data-i18n-attr="aria-label:tools.closeTimerAria">&#x2715;</button>
             </div>
             <div class="timer-display" id="timer-display">0:30</div>
@@ -318,7 +318,7 @@
           </div>
           <div class="tool-popup" id="tuner-popup" role="dialog" aria-label="Tuner" data-i18n-attr="aria-label:tools.tuner">
             <div class="tp-head">
-              <span class="tp-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> <span data-i18n="tools.tuner">Tuner</span></span>
+              <span class="tp-title" role="heading" aria-level="2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> <span data-i18n="tools.tuner">Tuner</span></span>
               <button class="tp-close" onclick="closePopup('tuner')" aria-label="Close tuner" data-i18n-attr="aria-label:tools.closeTunerAria">&#x2715;</button>
             </div>
             <!-- role="radiogroup" + aria-checked + roving tabindex, as on the
@@ -349,11 +349,11 @@
           </div>
           <div class="tool-popup" id="rec-popup" role="dialog" aria-label="Recorder" data-i18n-attr="aria-label:tools.recorder">
             <div class="tp-head">
-              <span class="tp-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> <span data-i18n="tools.recorder">Recorder</span></span>
+              <span class="tp-title" role="heading" aria-level="2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> <span data-i18n="tools.recorder">Recorder</span></span>
               <button class="tp-close" onclick="closePopup('rec')" aria-label="Close recorder" data-i18n-attr="aria-label:tools.closeRecAria">&#x2715;</button>
             </div>
             <div class="mr-rec-body" id="mrfab-rec-body"></div>
-            <div class="rec-checklist-title" data-i18n="rec.checkTitle">Listen back and ask yourself:</div>
+            <div class="rec-checklist-title" role="heading" aria-level="3" data-i18n="rec.checkTitle">Listen back and ask yourself:</div>
             <ul class="rec-checklist">
               <li data-i18n="rec.checkBeat">Did every chord change land on the beat?</li>
               <li data-i18n="rec.checkBuzz">Any buzzing or muted strings?</li>
@@ -401,7 +401,7 @@
               <button type="button" class="games-exit" id="games-main-btn" onclick="closeGamesScreen(true)">&larr; <span data-i18n="btn.toMainSite">Main site</span></button>
               <button type="button" class="games-exit games-exit--games" id="games-all-btn" onclick="gamesShow('hub')" hidden>&larr; <span data-i18n="games.common.allGames">All games</span></button>
             </div>
-            <div class="games-logo" data-i18n="nav.gamesLogo">Guitar Games</div>
+            <div class="games-logo" role="heading" aria-level="2" data-i18n="nav.gamesLogo">Guitar Games</div>
             <button type="button" id="pm-games" class="pm-strip pm-strip-games" onclick="toggleMyProgress()" title="Open My progress" data-i18n-attr="title:pm.openProgress" hidden></button>
           </div>
           <div class="games-stage"><div class="games-panel" id="games-panel"></div></div>
@@ -417,7 +417,7 @@
         <div class="games-shell">
           <div class="games-topbar">
             <button type="button" class="games-exit" onclick="closeLiveQuizScreen(true)">&larr; <span data-i18n="btn.backToPractice">Back</span></button>
-            <div class="games-logo" data-i18n="lq.navTitle">Live In-Class Games</div>
+            <div class="games-logo" role="heading" aria-level="2" data-i18n="lq.navTitle">Live In-Class Games</div>
             <span class="games-topbar-spacer"></span>
           </div>
           <!-- aria-live: the screen repaints itself when the teacher opens a
@@ -536,7 +536,7 @@
     <div class="t-main">
       <div class="t-topbar">
         <div class="t-topbar-title">
-          <div class="t-title">Class progress</div>
+          <div class="t-title" role="heading" aria-level="2">Class progress</div>
           <div class="t-sub">Sequoia High School — Beginning Guitar · Year 1 · Teacher view</div>
         </div>
         <div class="t-topbar-tools" id="t-topbar-tools">

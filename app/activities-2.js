@@ -184,7 +184,7 @@ function caCheckCardHtml(a, chipIso){
   return `<details class="ca-card ec-card${caQuietOptional(a, done) ? ' ca-card--optional' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary" onclick="caCardMarkOpening(this)">
       ${dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : ''}
-      <span class="ca-card-titlewrap"><span class="ca-card-title"><span data-i18n="check.prefix">${escHtml(t('check.prefix'))}</span> &middot; ${escHtml(caTitle(a))}</span>${caCheckMetaHtml(a)}</span>
+      <span class="ca-card-titlewrap"><span class="ca-card-title" role="heading" aria-level="3"><span data-i18n="check.prefix">${escHtml(t('check.prefix'))}</span> &middot; ${escHtml(caTitle(a))}</span>${caCheckMetaHtml(a)}</span>
       ${done ? `<span class="ca-done-mark" aria-hidden="true">${TCK_CHECK_SVG_INLINE}</span>` : ''}
     </summary>
     <div class="ca-card-body" id="ec-body-${escAttr(a.id)}">${caCheckBodyHtml(a, {})}</div>
@@ -1387,7 +1387,7 @@ function renderClassActivities(){
   // A library song is headed with the Songs list it came from (caIsLibrarySong).
   const playOnlyHead = playOnly && caIsLibrarySong(playOnly) ? 'hub.libraryTitle' : 'hub.playAlongTitle';
   const playOnlyHtml = playOnly && !swap && !pinOpen
-    ? `<div class="ca-mod-head" data-i18n="${playOnlyHead}">${escHtml(t(playOnlyHead))}</div>${caActivityCardHtml(playOnly)}`
+    ? `<div class="ca-mod-head" role="heading" aria-level="3" data-i18n="${playOnlyHead}">${escHtml(t(playOnlyHead))}</div>${caActivityCardHtml(playOnly)}`
     : '';
   // The Keep practicing row (caPinRowHtml) plus, under it, a pin-only card
   // the student opened from it.
@@ -1532,7 +1532,7 @@ function renderClassActivities(){
        used above — hoisted, so the order here doesn't matter functionally.) */
     function headHtml(sec){
       return sec.mod
-        ? `<div class="ca-mod-head" data-i18n="ca.moduleHead" data-i18n-params="${escAttr(JSON.stringify({n: sec.mod.num, mod: tf(sec.mod, 'name')}))}">${escHtml(t('ca.moduleHead', {n: sec.mod.num, mod: tf(sec.mod, 'name')}))}</div>`
+        ? `<div class="ca-mod-head" role="heading" aria-level="3" data-i18n="ca.moduleHead" data-i18n-params="${escAttr(JSON.stringify({n: sec.mod.num, mod: tf(sec.mod, 'name')}))}">${escHtml(t('ca.moduleHead', {n: sec.mod.num, mod: tf(sec.mod, 'name')}))}</div>`
         : '';
     }
     // Names how many things are actually blocking (2f) instead of the flat
@@ -1585,7 +1585,7 @@ function caModuleHeadHtml(sec, byId){
   const pct = total ? Math.round(doneN / total * 100) : 0;
   const labelParams = {n: sec.mod.num, mod: tf(sec.mod, 'name')};
   const countParams = {done: doneN, total};
-  return `<div class="ca-mod-head">
+  return `<div class="ca-mod-head" role="heading" aria-level="3">
     <span data-i18n="ca.moduleHead" data-i18n-params="${escAttr(JSON.stringify(labelParams))}">${escHtml(t('ca.moduleHead', labelParams))}</span>
     <span class="ca-mod-bar" aria-hidden="true"><b style="width:${pct}%"></b></span>
     <span class="ca-mod-count" data-i18n="ca.moduleProgress" data-i18n-params="${escAttr(JSON.stringify(countParams))}">${escHtml(t('ca.moduleProgress', countParams))}</span>
@@ -1608,7 +1608,9 @@ function caModFoldHtml(fold, sec, headHtml, cardsHtml, cards, newest, swap){
   const holdsOpen = cards.some(a => a.id === caOpenId || (swap && a.id === swap.from));
   const open = holdsOpen || (key in caModFoldOpen ? caModFoldOpen[key] : sec.mod.num === newest);
   // The heading's own <div> becomes the <summary>: same class, same look.
-  const summary = headHtml.replace(/^<div class="ca-mod-head"/, '<summary class="ca-mod-head ca-mod-summary"').replace(/<\/div>$/, '</summary>');
+  // Its heading role goes: a <summary> is the fold's button, and a role on it
+  // would hide that from a screen reader (check 1da reads this line).
+  const summary = headHtml.replace(/^<div class="ca-mod-head" role="heading" aria-level="3"/, '<summary class="ca-mod-head ca-mod-summary"').replace(/<\/div>$/, '</summary>');
   return `<details class="ca-mod-fold" ${open ? 'open' : ''} data-fold-key="${escAttr(key)}" ontoggle="caOnModFoldToggle(this)">${summary}${cardsHtml}</details>`;
 }
 function caOnModFoldToggle(details){

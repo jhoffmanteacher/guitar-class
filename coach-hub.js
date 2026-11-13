@@ -402,7 +402,7 @@ function gamesSyncTopbar(inGame){
   if (b) b.hidden = !inGame;
 }
 function gamesHeadHtml(title){
-  return `<div class="games-game-head"><span class="games-game-title">${title}</span></div>`;
+  return `<div class="games-game-head"><span class="games-game-title" role="heading" aria-level="3">${title}</span></div>`;
 }
 
 /* Single source of truth for the hub grid, the guitar / no-guitar split AND
@@ -719,7 +719,7 @@ function gamesRenderHub(p){
          ${chips[g.key] || ''}
        </button>`;
   const section = (label, list) =>
-    `<div class="games-section-head">${label}</div>
+    `<div class="games-section-head" role="heading" aria-level="3">${label}</div>
      <div class="games-grid">${list.map(card).join('')}</div>`;
   p.innerHTML =
     `<div class="games-tagline">${t('games.hub.tagline')}</div>

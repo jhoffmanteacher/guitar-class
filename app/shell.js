@@ -594,7 +594,7 @@ function renderResumeCard(){
     </div>`);
   }
   host.innerHTML = `<div class="resume-head">
-      <span class="resume-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 2h6"/></svg> ${t('resume.title')}</span>
+      <span class="resume-title" role="heading" aria-level="3"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 2h6"/></svg> ${t('resume.title')}</span>
       <button type="button" class="resume-close" onclick="dismissResumeCard()" aria-label="${escAttr(t('resume.dismiss'))}" title="${escAttr(t('resume.dismiss'))}">&times;</button>
     </div>${rows.join('')}`;
   host.hidden = false;
@@ -1265,7 +1265,7 @@ function returnToPractice(){
 
 function buildComingSoon(w){
   const setTag = w.title ? `<span class="obj-set-tag" data-i18n-setlabel="${escAttr(w.title)}" translate="no">${escHtml(tSetLabel(w.title))}</span>` : '';
-  const titleSpan = w.unit ? `<span class="set-eyebrow-title">${tf(w,'unit')}</span>` : '';
+  const titleSpan = w.unit ? `<span class="set-eyebrow-title" role="heading" aria-level="2">${tf(w,'unit')}</span>` : '';
   const eyebrow = (setTag || titleSpan) ? `<div class="set-eyebrow">${setTag}${titleSpan}</div>` : '';
   const sub = w.subtitle ? `<p class="obj-sub">${tf(w,'subtitle')}</p>` : '';
   return `${eyebrow}${sub}
@@ -1278,7 +1278,7 @@ function buildSet(w){
   // (the old "I CAN…" objective line is no longer shown).
   const printBtn = `<button type="button" class="print-set-btn" onclick="printSet()" title="${escAttr(t('btn.printSetTitle'))}" aria-label="${escAttr(t('btn.printSet'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg></button>`;
   const setTag = w.title ? `<span class="obj-set-tag" data-i18n-setlabel="${escAttr(w.title)}" translate="no">${escHtml(tSetLabel(w.title))}</span>` : '';
-  const titleSpan = w.unit ? `<span class="set-eyebrow-title">${tf(w,'unit')}</span>` : '';
+  const titleSpan = w.unit ? `<span class="set-eyebrow-title" role="heading" aria-level="2">${tf(w,'unit')}</span>` : '';
   const items = (tf(w,'skillFocus')||'').split(' · ')
     .map(s => s.trim())
     .filter(Boolean)

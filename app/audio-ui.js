@@ -1347,7 +1347,7 @@ function loadPanel(type,url,title,subtitle){
   clampViewer(overlay);   // a drag on a bigger window could strand it off-screen
   content.classList.add('visible'); newtab.classList.add('visible'); close.classList.add('visible');
   newtab.href=url;
-  meta.innerHTML=`<div class="rp-meta-title">${title}</div><div class="rp-meta-sub">${subtitle}</div>`;
+  meta.innerHTML=`<div class="rp-meta-title" role="heading" aria-level="2">${title}</div><div class="rp-meta-sub">${subtitle}</div>`;
   if(type==='youtube'){
     let embedUrl=url;
     const ytMatch=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);

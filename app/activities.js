@@ -261,7 +261,7 @@ function caHeroChipHtml(iso){
 function caTodayHeadHtml(day){
   const dateLabel = caFormatDate(day);
   const date = dateLabel ? `<span class="ca-today-date">${escHtml(dateLabel)}</span>` : '';
-  return `<div class="ca-today-head"><span class="ca-today-label" data-i18n="ca.startHere">${escHtml(t('ca.startHere'))}</span>${date}</div>`;
+  return `<div class="ca-today-head" role="heading" aria-level="3"><span class="ca-today-label" data-i18n="ca.startHere">${escHtml(t('ca.startHere'))}</span>${date}</div>`;
 }
 /* "#16" ahead of a card's title, quiet (2026-10-31): was "#16 - " in the
    title's own weight, which put a hyphen beside the title's em dash
@@ -320,7 +320,7 @@ function caHeroCardHtml(a, chipIso = ''){
     <summary class="ca-card-summary ca-hero-summary" onclick="caCardMarkOpening(this)">
       <div class="ca-hero-main">
         ${caHeroChipHtml(chipIso)}${caStartHereTagHtml(a)}
-        <div class="ca-hero-title">${titleHtml}</div>
+        <div class="ca-hero-title" role="heading" aria-level="3">${titleHtml}</div>
         ${blurb ? `<p class="ca-hero-blurb">${escHtml(blurb)}</p>` : ''}
         ${caChunkMetaHtml(a)}
       </div>
@@ -343,7 +343,7 @@ function caHeroCheckHtml(a, chipIso = ''){
     <summary class="ca-card-summary ca-hero-summary" onclick="caCardMarkOpening(this)">
       <div class="ca-hero-main">
         ${caHeroChipHtml(chipIso)}${caStartHereTagHtml(a)}
-        <div class="ca-hero-title">${escHtml(caTitle(a))}</div>
+        <div class="ca-hero-title" role="heading" aria-level="3">${escHtml(caTitle(a))}</div>
         ${blurb ? `<p class="ca-hero-blurb">${escHtml(blurb)}</p>` : ''}
         ${caCheckMetaHtml(a)}
       </div>

@@ -130,7 +130,7 @@ function renderTeacherViewSongs(){
     box.innerHTML=`<div data-tvs="${escAttr(raw.id)}">`
       +`<div class="t-songs-intro">Songs only you can see, to play for the whole class. Students see one only after you move it to Class activities and assign it there.</div>`
       +picker
-      +`<div class="stu-section-head" style="margin-top:0">${escHtml(teacherActivityTitle(raw,cfg))} <span style="opacity:.55;font-size:.72em">(${escHtml(raw.id)})</span></div>`
+      +`<div class="stu-section-head" role="heading" aria-level="3" style="margin-top:0">${escHtml(teacherActivityTitle(raw,cfg))} <span style="opacity:.55;font-size:.72em">(${escHtml(raw.id)})</span></div>`
       +`<div data-tvs-ctl style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:0 2px 14px">${teacherViewSongShareHtml(raw, cfg)}</div>`
       +(a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:'')
       +caCardBodyHtml(a,{preview:true})

@@ -338,8 +338,8 @@ async function renderSongsHub(){
       ${tagHtml}</div>`;
   };
   const renderRows = list => list.map(row).join('');
-  const coreHtml = `<div class="sh-sec-title">${t('hub.coreTitle')}</div><div class="card">${renderRows(coreEntries)}</div>`;
-  const groupsHtml = `<div class="sh-sec-title">${t('hub.choiceTitle')}</div>` + groups.map((g, gi) =>
+  const coreHtml = `<div class="sh-sec-title" role="heading" aria-level="3">${t('hub.coreTitle')}</div><div class="card">${renderRows(coreEntries)}</div>`;
+  const groupsHtml = `<div class="sh-sec-title" role="heading" aria-level="3">${t('hub.choiceTitle')}</div>` + groups.map((g, gi) =>
     `<div class="sh-group${gi === 0 ? ' open' : ''}"><button type="button" class="sh-group-head" aria-expanded="${gi === 0}" onclick="toggleHubGroup(this)"><span>${g.title}</span><span class="sh-group-sub">${g.sub}</span><span class="sh-group-count">${t('hub.groupCount', {n: g.entries.length})}</span></button><div class="sh-group-body">${renderRows(g.entries)}</div></div>`).join('');
   const requestHtml = requestEntries.length ? `<div class="card">${renderRows(requestEntries)}</div>` : '';
   // The Mood Chart row that sat here was removed 2026-10-02 (Jonathan). The
@@ -370,7 +370,7 @@ function songsLibraryHtml(){
       <div class="song-name-col"><button type="button" class="sname sname-link" onclick="songsLibraryOpen(${jsonAttrArg(a.id)})">${escHtml(name(a))}</button></div>
       <div class="song-vids">${btn}</div></div>`;
   }).join('');
-  return `<div class="sh-sec-title">${t('hub.libraryTitle')}</div><div class="card">${rows}</div>`;
+  return `<div class="sh-sec-title" role="heading" aria-level="3">${t('hub.libraryTitle')}</div><div class="card">${rows}</div>`;
 }
 
 /* Songs-hub difficulty group open/close (header button). */
@@ -686,7 +686,7 @@ async function openSearchPanel(){
   closeTopPanels('search');
   p.removeAttribute('hidden');
   if(btn) btn.setAttribute('aria-expanded', 'true');
-  p.innerHTML = `<div class="daily5-head"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.7-4.7"/></svg> <span data-i18n="search.title">${escHtml(t('search.title'))}</span></span><button type="button" class="tp-close" onclick="toggleSearch()" aria-label="${escAttr(t('search.closeAria'))}" data-i18n-attr="aria-label:search.closeAria">&#x2715;</button></div>
+  p.innerHTML = `<div class="daily5-head"><span role="heading" aria-level="2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.7-4.7"/></svg> <span data-i18n="search.title">${escHtml(t('search.title'))}</span></span><button type="button" class="tp-close" onclick="toggleSearch()" aria-label="${escAttr(t('search.closeAria'))}" data-i18n-attr="aria-label:search.closeAria">&#x2715;</button></div>
     <input type="search" class="search-input" id="search-input" placeholder="${escAttr(t('search.placeholder'))}" oninput="onSearchInput(this.value)" onkeydown="if(event.key==='Escape'){event.preventDefault();closeSearchPanel();}" aria-label="${escAttr(t('search.ariaLabel'))}" data-i18n-attr="placeholder:search.placeholder;aria-label:search.ariaLabel">
     <div id="search-results" class="search-results" aria-live="polite"><div class="coach-tip" data-i18n="search.gettingReady">${escHtml(t('search.gettingReady'))}</div></div>`;
   const input = document.getElementById('search-input');
@@ -948,7 +948,7 @@ async function renderKeepPracticing(){
         <span class="search-hit-where">${escHtml(it.setLabel || '')}</span>
         <span class="search-hit-text">${escHtml(it.text)}</span>
       </button>`).join('');
-    return `<div class="rail-sec-label" style="margin:16px 0 6px">${t('nav.module')} ${mn}${m ? ` — ${escHtml(tf(m,'name'))}` : ''}</div>
+    return `<div class="rail-sec-label" role="heading" aria-level="4" style="margin:16px 0 6px">${t('nav.module')} ${mn}${m ? ` — ${escHtml(tf(m,'name'))}` : ''}</div>
       <div class="search-results" style="max-height:none">${rows}</div>`;
   }).join('');
 }

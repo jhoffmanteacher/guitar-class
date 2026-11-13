@@ -6648,6 +6648,88 @@ function checkSiteFill() {
   if (!bad) ok(`1df: the factor is 1 at 1366x657, 1366x768, 1280x720 and 390x844 (nothing set), about 1.874 at 2560x1300 (root zoomed, the short-screen rule rewritten, page pixels for the script), 1 to 3 over 26,474 sizes; print, resize, browser zoom, the console (it fills too) and odd pages; wired in the <head> of index.html and the ${journeys.length} Song Journey pages; no bare viewport unit in the 3 stylesheets (${asserts} assertions)`);
 }
 
+/* 1da. Title boxes are headings for screen readers (2026-11-13, research 2 item 1). Most screen-reader users
+   move through a page by its headings, and the site drew its titles as styled <div>/<span> boxes. They keep
+   their tag and class (nothing looks different) and carry role="heading" aria-level="N": the header's <h1>
+   is level 1, a page, view or dialog title 2, its sections 3, the console's deeper sections 4 to 6.
+   Ratchet: every element with a class in HEADING_CLASSES, in the app parts, coach-hub.js, the console parts
+   and index.html, is an <h1>..<h6> or has the role with a level, so a new title box of a listed kind fails.
+   Every role="heading" has a level 1..6, sits on no button, link, summary or form control (the role would
+   hide the control) and on no <h*> tag. The total is pinned both ways. caModFoldHtml turns a module's
+   heading <div> into its fold's <summary>; that is EXECUTED here, and the summary must lose the role. */
+const HEADING_CLASSES = ['set-eyebrow-title', 'stp-sec-label', 'stp-part-title', 'jl-title', 'review-head',
+  'mr-assess-head', 'ca-today-head', 'ca-hero-title', 'ca-card-title', 'ca-mod-head', 'resume-title', 'sh-sec-title',
+  'rp-meta-title', 'games-logo', 'games-section-head', 'games-game-title', 'tp-title', 'rec-checklist-title',
+  't-title', 'ta-list-title', 't-board-head', 'ta-roll-head', 'stu-section-head', 'stu-set-head', 'stu-detail-name'];
+const HEADING_ROLE_TOTAL = 54;
+function a11yScanTags(src) {
+  const out = [];
+  for (const m of src.matchAll(/<([a-zA-Z][a-zA-Z0-9]*)\b/g)) {
+    if (src[m.index - 1] === '^') continue;   // a regex source (caModFoldHtml's replace), not markup
+    let i = m.index + m[0].length, depth = 0, quote = null;
+    for (; i < src.length && i - m.index < 4000; i++) {
+      const c = src[i];
+      if (depth) { if (c === '{') depth++; else if (c === '}') depth--; continue; }
+      if (src.startsWith('${', i)) { depth = 1; i++; continue; }
+      if (quote) { if (c === quote) quote = null; continue; }
+      if (c === '"') { quote = c; continue; }
+      if (c === '>') break;
+    }
+    const text = src.slice(m.index, i + 1);
+    const cls = /\bclass="((?:[^"$]|\$\{[^}]*\})*)"/.exec(text);
+    out.push({ tag: m[1].toLowerCase(), text, line: src.slice(0, m.index).split('\n').length,
+      classes: cls ? cls[1].replace(/\$\{[^}]*\}/g, ' ').split(/\s+/).filter(Boolean) : [] });
+  }
+  return out;
+}
+function checkTitleHeadings() {
+  head('1da. Title boxes carry a heading role (screen readers)');
+  let bad = 0, roles = 0, titled = 0;
+  const flag = m => { err(`1da: ${m}`); problems++; bad++; };
+  const files = [...siteParts('app.js', ROOT), 'coach-hub.js', ...siteParts('teacher.js', ROOT), 'index.html'];
+  const perClass = Object.fromEntries(HEADING_CLASSES.map(c => [c, 0]));
+  for (const f of files) {
+    let src;
+    try { src = readFileSync(join(ROOT, f), 'utf8'); } catch { flag(`${f} is missing: title headings NOT checked there`); continue; }
+    for (const tg of a11yScanTags(src)) {
+      const isH = /^h[1-6]$/.test(tg.tag);
+      const role = /\srole="heading"/.test(tg.text);
+      const lvl = (/\saria-level="(\d)"/.exec(tg.text) || [])[1];
+      const control = /^(button|a|summary|input|select|textarea|label|details)$/.test(tg.tag) || /\srole="(button|link|checkbox|radio|tab)"/.test(tg.text);
+      const hit = tg.classes.filter(c => c in perClass);
+      /* A control wearing a title class (the module fold's <summary>) is checked the other way: no role. */
+      if (hit.length && !control) {
+        hit.forEach(c => perClass[c]++); titled++;
+        if (!isH && !(role && lvl)) flag(`${f}:${tg.line}: <${tg.tag} class="${hit.join(' ')}"> is a title box with no role="heading" aria-level="N" (add both; keep the tag and class so nothing looks different)`);
+      }
+      if (role) {
+        roles++;
+        if (!lvl || +lvl < 1 || +lvl > 6) flag(`${f}:${tg.line}: role="heading" with no aria-level 1..6`);
+        if (isH) flag(`${f}:${tg.line}: <${tg.tag}> is already a heading; drop the role`);
+        if (control)
+          flag(`${f}:${tg.line}: role="heading" on a <${tg.tag}> control would hide it from a screen reader: put the role on the title text inside`);
+      }
+    }
+  }
+  const none = HEADING_CLASSES.filter(c => !perClass[c]);
+  if (none.length) flag(`no element found with class ${none.join(', ')}: renamed? Update HEADING_CLASSES (the ratchet went blind for it)`);
+  if (roles !== HEADING_ROLE_TOTAL) flag(`${roles} elements carry role="heading", HEADING_ROLE_TOTAL pins ${HEADING_ROLE_TOTAL}: one was ${roles < HEADING_ROLE_TOTAL ? 'lost (put it back)' : 'added (bump the pin on purpose)'}`);
+  /* The module fold: run the real caModFoldHtml on the real opening tag caModuleHeadHtml emits. */
+  try {
+    const a2 = siteSource('app.js', ROOT);
+    const fn = /function caModFoldHtml\([^)]*\)\{[\s\S]*?\n\}/.exec(a2);
+    const openTag = (/function caModuleHeadHtml[\s\S]*?return `(<div class="ca-mod-head"[^>]*>)/.exec(a2) || [])[1];
+    if (!fn || !openTag) flag('could not find caModFoldHtml or caModuleHeadHtml: the module fold NOT checked');
+    else {
+      const out = vm.runInNewContext(`${fn[0]}; caModFoldHtml('todo', {mod:{num:4}}, ${JSON.stringify(openTag + 'Module 4</div>')}, '', [], 4, null)`,
+        { caOpenId: null, caModFoldOpen: {}, escAttr: s => String(s) });
+      if (!/^<details[^>]*><summary class="ca-mod-head ca-mod-summary">Module 4<\/summary><\/details>$/.test(out))
+        flag(`caModFoldHtml no longer turns the module heading into a clean <summary> (a <summary> with role="heading" stops being the fold's button): got ${out.slice(0, 160)}`);
+    }
+  } catch (e) { flag(`running caModFoldHtml threw (${e.message}): the module fold NOT checked`); }
+  if (!bad) ok(`${titled} title boxes of ${HEADING_CLASSES.length} kinds in ${files.length} files all carry a heading role; ${roles} role="heading" in all (pinned), each with a level and on no control; the module fold's <summary> drops it`);
+}
+
 function checkPrecacheFingerprinted(src, hashed) {
   head('1bt. Every precached file is part of the cache fingerprint');
   const set = new Set(hashed);
@@ -9517,7 +9599,7 @@ function checkTodayByDate(ctx) {
     const summaries = seg => Object.fromEntries([...seg.matchAll(/<details class="(ca-card[^"]*)"[^>]*data-id="([^"]+)"[^>]*>([\s\S]*?)<\/summary>/g)]
       .map(m => [m[2], { cls: m[1], chip: (/<span class="ca-chip">([^<]*)<\/span>/.exec(m[3]) || [])[1] || null,
         tick: /class="ca-done-mark"/.test(m[3]), dots: /class="ca-hero-dots"/.test(m[3]), hero: /ca-card--hero/.test(m[1]) }]));
-    const headM = /<div class="ca-today-head"><span class="ca-today-label" data-i18n="([^"]+)">[^<]*<\/span>(?:<span class="ca-today-date">([^<]*)<\/span>)?<\/div>/.exec(today);
+    const headM = /<div class="ca-today-head" role="heading" aria-level="3"><span class="ca-today-label" data-i18n="([^"]+)">[^<]*<\/span>(?:<span class="ca-today-date">([^<]*)<\/span>)?<\/div>/.exec(today);
     const count = seg => { const m = /<summary class="ca-(?:todo|finished)-summary">[^<]*?\((\d+)\)/.exec(seg); return m ? Number(m[1]) : null; };
     return { html, today: ids(today), todo: ids(todo), fin: ids(fin), all: ids(html), sum: summaries(today), head: headM ? { key: headM[1], date: headM[2] || null } : null,
       headCount: (html.match(/<div class="ca-today-head/g) || []).length,
@@ -16690,6 +16772,7 @@ function checkPracticeMinutes(i18nTable) {
   checkSiteFill();
   checkPartSizes();
   checkReviewLabels();
+  checkTitleHeadings();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

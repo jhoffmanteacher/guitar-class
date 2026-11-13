@@ -539,7 +539,7 @@ function renderTeacherActivities(opts){
     const builtLive=builtAll.filter(a=>!teacherActivityRetired(a.id,cfg));
     const builtRetired=builtAll.filter(a=>teacherActivityRetired(a.id,cfg));
     const builtHtml=`<section class="t-board-built" data-board-built>`
-      +`<div class="t-board-head">Built (${builtLive.length})</div>`
+      +`<div class="t-board-head" role="heading" aria-level="3">Built (${builtLive.length})</div>`
       +`<div class="t-board-hint">Pushed to the site, not placed in the course yet. Students see none of these.</div>`
       +(builtLive.length?builtLive.map(builtCard).join(''):`<div class="t-board-empty">Everything built has been placed.</div>`)
       +(builtRetired.length
@@ -643,7 +643,7 @@ function renderTeacherActivities(opts){
         : '';
       return `<div class="t-board-section${closed?' t-board-closed':''}" data-board-section data-module="${mn}">`
         +`<div class="t-board-sechead" data-board-fold data-module="${mn}">`
-        +`<span class="t-board-caret" aria-hidden="true"></span><span>${label}</span>`
+        +`<span class="t-board-caret" aria-hidden="true"></span><span role="heading" aria-level="4">${label}</span>`
         +`<span class="t-board-count">${sec.ids.length}</span>${groupBtn}</div>`
         +`<div class="t-board-secbody">`
         +(cards||`<div class="t-board-empty">Drop an activity here, or use “Assign to…”.</div>`)
@@ -668,7 +668,7 @@ function renderTeacherActivities(opts){
       +`<span class="t-board-sortnote">Your view only — students always read the course order.${boardCanReorder()?'':' Switch back to Course order to drag cards into position.'}</span>`
       +`</div>`;
     const assignedHtml=`<section class="t-board-assigned">`
-      +`<div class="t-board-head">Assigned to students (${assignedCount})</div>`
+      +`<div class="t-board-head" role="heading" aria-level="3">Assigned to students (${assignedCount})</div>`
       +`<div class="t-board-hint">This is the order students read them in, and where the #numbers come from.`
       +(hiddenModules>0?` ${hiddenModules} empty unit${hiddenModules===1?'' :'s'} not shown — use “Assign to…” on a card to put something in one.`:'')
       +`</div>`
@@ -934,7 +934,7 @@ function teacherActivityListBodyHtml(cfg, model){
 }
 function teacherActivityListHeadHtml(){
   return `<div class="ta-list-head">`
-    +`<div class="ta-list-top"><span class="ta-list-title">Class activities</span>`
+    +`<div class="ta-list-top"><span class="ta-list-title" role="heading" aria-level="3">Class activities</span>`
     +`<button type="button" class="tg-seg-btn ta-board-btn" data-ta-board-open title="The full board: drag cards into units, renumber, assign, archive">Arrange board</button></div>`
     +`<input type="search" class="ta-search" data-ta-search placeholder="Search title or #number" aria-label="Search activities by title or #number" value="${escAttr(activityListQuery)}" autocomplete="off" spellcheck="false">`
     +`<div class="ta-filters" role="group" aria-label="Show">${TA_FILTERS.map(([k,l])=>`<button type="button" class="ta-filter" data-ta-filter="${k}" aria-pressed="${k===activityListFilter}">${l}</button>`).join('')}</div>`
@@ -1772,7 +1772,7 @@ function teacherDoneRollHtml(a, students, isDone){
   };
   const done=students.filter(isDone);
   const not=students.filter(s=>!isDone(s));
-  const col=(cls,head,list,empty,cleared)=>`<div class="ta-roll-col ${cls}"><div class="ta-roll-head">${head} (${list.length})</div>`
+  const col=(cls,head,list,empty,cleared)=>`<div class="ta-roll-col ${cls}"><div class="ta-roll-head" role="heading" aria-level="3">${head} (${list.length})</div>`
     +(list.length?`<ul>${list.map(s=>name(s,cleared&&!!((clears[s.uid]||{})[a.id]))).join('')}</ul>`:`<div class="ta-roll-empty">${empty}</div>`)+'</div>';
   return `<div class="ta-roll">${col('ta-roll-done','Done',done,'Nobody yet.',false)}${col('ta-roll-not','Not done',not,'Everyone is done.',true)}</div>`;
 }
@@ -1894,11 +1894,11 @@ function renderTeacherActivityDetail(id){
       const chooser=`<div class="tg-note">Students pick a path first. This is the chooser they see (its buttons do nothing here):</div><div class="ca-prev-paths">${caPathChooserHtml(a,{preview:true})}</div>`;
       const groups=a.paths.map(p=>{
         const own=caPathSteps(a,p.key);
-        return `<div class="stu-section-head">Path: ${escHtml(p.label||p.key)} <span style="opacity:.55;font-size:.72em">(${own.length} step${own.length===1?'':'s'}, then the shared ones)</span></div>`
+        return `<div class="stu-section-head" role="heading" aria-level="3">Path: ${escHtml(p.label||p.key)} <span style="opacity:.55;font-size:.72em">(${own.length} step${own.length===1?'':'s'}, then the shared ones)</span></div>`
           +own.map((si,pos)=>stepCard(steps[si],si,pos)).join('');
       }).join('');
       const longest=Math.max(0,...a.paths.map(p=>caPathSteps(a,p.key).length));
-      const tail=shared.length?`<div class="stu-section-head">Then, on every path</div>`
+      const tail=shared.length?`<div class="stu-section-head" role="heading" aria-level="3">Then, on every path</div>`
         +shared.map((si,k)=>`<div class="tg-note" style="margin:0 0 4px">Step ${longest+k+1} on the longest path; ${a.paths.map(p=>`${escHtml(p.label||p.key)}: step ${caPathSteps(a,p.key).length+k+1}`).join(', ')}.</div>`+stepCard(steps[si],si,longest+k)).join(''):'';
       return chooser+groups+tail;
     })();

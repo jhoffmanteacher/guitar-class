@@ -1479,7 +1479,7 @@ function caActivityCardHtml(a, chipIso){
   return `<details class="ca-card${focus ? ' ca-card--focus' : ''}${card ? ' ca-card--practice' : ''}${quiet ? ' ca-card--optional' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary" onclick="caCardMarkOpening(this)">
       ${dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : ''}
-      <span class="ca-card-titlewrap"><span class="ca-card-title">${titleHtml}</span>${caChunkMetaHtml(a)}</span>
+      <span class="ca-card-titlewrap"><span class="ca-card-title" role="heading" aria-level="3">${titleHtml}</span>${caChunkMetaHtml(a)}</span>
       ${done ? `<span class="ca-done-mark" aria-hidden="true">${TCK_CHECK_SVG_INLINE}</span>` : ''}
     </summary>
     ${caCardBodyBlockHtml(a, done, focus, card)}

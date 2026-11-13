@@ -1634,7 +1634,7 @@ function reviewCardHtml(){
     </div>`;
   }).join('');
   return `<div class="review-card">
-    <div class="review-head"><span aria-hidden="true">&#x2726;</span><span data-i18n="review.title">${t('review.title')}</span></div>
+    <div class="review-head" role="heading" aria-level="3"><span aria-hidden="true">&#x2726;</span><span data-i18n="review.title">${t('review.title')}</span></div>
     <div class="review-explainer" data-i18n="review.explainer">${t('review.explainer')}</div>
     <div class="review-items">${items}</div>
     <button type="button" class="review-sr-link" onclick="goExploreHash('my-progress')"><span data-i18n="sr.title">${t('sr.title')}</span> &rarr;</button>

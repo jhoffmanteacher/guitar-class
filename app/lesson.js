@@ -99,7 +99,7 @@ function journeyLinkCardHtml(w){
   }).join('');
   if(!buttons) return '';
   return `<div class="jl-card">
-    <div class="jl-title">${escHtml(t('journey.takeItTitle'))}</div>
+    <div class="jl-title" role="heading" aria-level="3">${escHtml(t('journey.takeItTitle'))}</div>
     <p class="jl-sub">${escHtml(t('journey.takeItSub'))}</p>
     <div class="jl-songs">${buttons}</div>
   </div>`;
@@ -431,7 +431,7 @@ function buildLesson(w){
      inside Part 2 never gets a Part 1 heading over nothing. */
   const partMarkHtml = (n, title, cur) =>
     `<div class="stp-partmark stp-part${n === 2 ? 'break' : 'one'}${cur ? ' part-cur' : ''}" data-part="${n}">`
-    + `<div class="stp-part-band"><span class="stp-part-title">${escHtml(title)}</span></div>`
+    + `<div class="stp-part-band"><span class="stp-part-title" role="heading" aria-level="3">${escHtml(title)}</span></div>`
     + (n === 2
         ? `<p class="stp-part-stop">${escHtml(t('lesson.partStopHere'))}</p>`
           + `<button type="button" class="stp-part-go" onclick="dismissPartBreak(this)" data-i18n="lesson.partKeepGoing">${escHtml(t('lesson.partKeepGoing'))}</button>`
@@ -517,7 +517,7 @@ function buildLesson(w){
       // rendered namespaces with a regex anchored on `class="stp-sec…"
       // data-ns="…"`, so anything new has to follow, never come between.
       const html = `<div class="stp-sec${(hasCur || openIfNoCur) ? ' sec-cur' : ''}${jlReady ? ' jl-ready' : ''}" data-ns="${escAttr(ns)}"${parts ? ` data-part="${partOfIdx(k)}"` : ''}>
-      ${title && !hasJourneyCard ? `<div class="stp-sec-label">${isEarSparkSection(sec) ? ICO_BOLT + ' ' : isSpicyLevelUpSection(sec) ? ICO_CHILI + ' ' : ''}${title}</div>` : ''}
+      ${title && !hasJourneyCard ? `<div class="stp-sec-label" role="heading" aria-level="3">${isEarSparkSection(sec) ? ICO_BOLT + ' ' : isSpicyLevelUpSection(sec) ? ICO_CHILI + ' ' : ''}${title}</div>` : ''}
       ${bodyHtml}
     </div>`;
       if(hasCur) foundCur = true;

@@ -1397,7 +1397,7 @@ function renderTeacherTrouble(){
     const fill=pct>=70?'var(--green-text)':pct>=40?'var(--amber-text)':'#a32d2d';
     return `<div class="t-scard" style="margin-bottom:8px">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px">
-        <div class="t-scard-lbl" style="margin-bottom:0" title="${escAttr(m.name)}">Module ${m.num} — ${escHtml(abbreviate(m.name))}</div>
+        <div class="t-scard-lbl" role="heading" aria-level="3" style="margin-bottom:0" title="${escAttr(m.name)}">Module ${m.num} — ${escHtml(abbreviate(m.name))}</div>
         <span class="ppill ${pillClass}">${pct}%</span>
       </div>
       <div style="height:6px;border-radius:4px;background:var(--bg2);overflow:hidden">
@@ -1435,7 +1435,7 @@ function renderTeacherTrouble(){
   box.innerHTML = `
     <div class="tr-meta">Per-module average completion, then the class's least-mastered skills (lowest first) — skills no one has started yet are left out so the list stays focused.</div>
     ${modBars}
-    <div class="t-scard-lbl" style="margin:16px 0 8px">Least-mastered skills</div>
+    <div class="t-scard-lbl" role="heading" aria-level="3" style="margin:16px 0 8px">Least-mastered skills</div>
     ${skillTable}`;
 }
 

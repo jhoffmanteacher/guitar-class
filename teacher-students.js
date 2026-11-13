@@ -518,7 +518,7 @@ function renderTeacherStudentDetail(uid){
       anyResponse=true;
       moduleBlock+=`<div class="tr-card"><div class="tr-name">${escHtml(w.label)}</div>${items}</div>`;
     });
-    if(moduleBlock) responsesHtml+=`<div class="stu-section-head" style="margin-top:${responsesHtml?'22px':'0'}">Module ${m.num} — ${escHtml(m.name)}</div>${moduleBlock}`;
+    if(moduleBlock) responsesHtml+=`<div class="stu-section-head" role="heading" aria-level="5" style="margin-top:${responsesHtml?'22px':'0'}">Module ${m.num} — ${escHtml(m.name)}</div>${moduleBlock}`;
   });
   if(!anyResponse) responsesHtml=`<div class="stu-empty">Hasn't written anything yet.</div>`;
 
@@ -546,7 +546,7 @@ function renderTeacherStudentDetail(uid){
     const pillClass=done===0?'pp-none':(pct===100?'pp-hi':pct>=50?'pp-mid':'pp-lo');
     return `<div class="t-scard" style="margin-bottom:8px">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px">
-        <div class="t-scard-lbl" style="margin-bottom:0" title="${escAttr(m.name)}">Module ${m.num} — ${escHtml(abbreviate(m.name))}</div>
+        <div class="t-scard-lbl" role="heading" aria-level="5" style="margin-bottom:0" title="${escAttr(m.name)}">Module ${m.num} — ${escHtml(abbreviate(m.name))}</div>
         <span class="ppill ${pillClass}">${done} / ${total}</span>
       </div>
       <div class="stu-track" style="height:6px;border-radius:4px">
@@ -576,7 +576,7 @@ function renderTeacherStudentDetail(uid){
       `<div class="stu-skill-row">${trkSpanHtml(stu.skills[sk.id])}<span>${escHtml(sk.text)}</span></div>`).join('');
     reviewsHtml+=`<div class="t-scard" style="margin-bottom:8px">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px">
-        <div class="t-scard-lbl" style="margin-bottom:0" title="${escAttr(rm.name)}">Module ${rm.num} — ${escHtml(abbreviate(rm.name))}</div>
+        <div class="t-scard-lbl" role="heading" aria-level="5" style="margin-bottom:0" title="${escAttr(rm.name)}">Module ${rm.num} — ${escHtml(abbreviate(rm.name))}</div>
         <span class="ppill ${pillClass}">${tally.rated} / ${tally.total} rated</span>
       </div>
       ${flag}${rows}
@@ -592,10 +592,10 @@ function renderTeacherStudentDetail(uid){
   universe.modules.forEach(m=>{
     const touched=m.ids.some(id=>stu.skills[id]==='gotit'||stu.skills[id]==='working');
     if(!touched) return;
-    skillsHtml+=`<div class="stu-section-head">Module ${m.num} — ${escHtml(m.name)}</div>`;
+    skillsHtml+=`<div class="stu-section-head" role="heading" aria-level="5">Module ${m.num} — ${escHtml(m.name)}</div>`;
     SETS.forEach(w=>{
       if(w.moduleNum!==m.num || !w.skills || !w.skills.length) return;
-      skillsHtml+=`<div class="stu-set-head">${escHtml(w.label)}</div>`;
+      skillsHtml+=`<div class="stu-set-head" role="heading" aria-level="6">${escHtml(w.label)}</div>`;
       w.skills.forEach(sk=>{ skillsHtml+=`<div class="stu-skill-row">${tckSpanHtml(stu.skills[sk.id]||'none', stu.coachSkill&&stu.coachSkill[sk.id], stu.drillSkill&&stu.drillSkill[sk.id], sk.id)}<span>${escHtml(sk.text)}</span></div>`; });
     });
   });
@@ -611,7 +611,7 @@ function renderTeacherStudentDetail(uid){
     return {id, name:a?teacherActivityTitle(a,teacherClassConfig):id, r};
   }).sort((x,y)=>String(y.r.at||'').localeCompare(String(x.r.at||'')));
   const exitChecksHtml=ecEntries.length
-    ? `<div class="stu-section-head">Exit checks</div>`
+    ? `<div class="stu-section-head" role="heading" aria-level="4">Exit checks</div>`
       +ecEntries.map(e=>`<div class="tr-card"><div class="tr-name">Exit check &middot; ${escHtml(e.name)}</div>`
         +`${Number(e.r.score)||0}/${Number(e.r.total)||0}${e.r.at?` &mdash; ${escHtml(e.r.at)}`:''}`
         +`${Number(e.r.attempts)>1?` <span style="opacity:.6">(${Number(e.r.attempts)} attempts)</span>`:''}</div>`).join('')
@@ -624,7 +624,7 @@ function renderTeacherStudentDetail(uid){
   // activity/check detail pages use.
   const blockers=teacherBlockersFor(stu, teacherClassConfig);
   const gateHtml=blockers.length
-    ? `<div class="stu-section-head" style="margin-top:0">Today's activity</div>
+    ? `<div class="stu-section-head" role="heading" aria-level="4" style="margin-top:0">Today's activity</div>
        <div class="tg-note">${blockers.length} not yet done or cleared — In-Class Activities opens first when they sign in. Nothing else is locked.
          <button type="button" class="tg-seg-btn" data-clear-all-blockers data-uid="${escAttr(stu.uid)}" style="margin-left:8px">Clear all</button>
        </div>
@@ -646,7 +646,7 @@ function renderTeacherStudentDetail(uid){
 
   box.innerHTML = `
     ${back}
-    <div class="stu-detail-name">${escHtml(displayName)}${teacherPeriodPillHtml(stu)}${teacherBlockedBadgeHtml(stu)}</div>
+    <div class="stu-detail-name" role="heading" aria-level="3">${escHtml(displayName)}${teacherPeriodPillHtml(stu)}${teacherBlockedBadgeHtml(stu)}</div>
     <div class="stu-detail-email">${escHtml(email)}</div>
     ${openThrough?`<div class="tg-note" style="margin:6px 0 12px">Open through Module ${openThrough} (set in Manage).</div>`:''}
     ${gateHtml}
@@ -665,17 +665,17 @@ function renderTeacherStudentDetail(uid){
       <div class="tr-meta" style="margin:6px 0 0">${countCaption}</div>
     </div>
 
-    <div class="stu-section-head" style="margin-top:0">Written responses</div>
+    <div class="stu-section-head" role="heading" aria-level="4" style="margin-top:0">Written responses</div>
     ${responsesHtml}
     ${exitChecksHtml}
 
-    <div class="stu-section-head">Module-by-module progress</div>
+    <div class="stu-section-head" role="heading" aria-level="4">Module-by-module progress</div>
     ${modRows}
 
-    <div class="stu-section-head">Module Review self-ratings</div>
+    <div class="stu-section-head" role="heading" aria-level="4">Module Review self-ratings</div>
     ${reviewsNote}${reviewsHtml}
 
-    <div class="stu-section-head">Skills</div>
+    <div class="stu-section-head" role="heading" aria-level="4">Skills</div>
     ${skillsHtml}
   `;
   window.scrollTo({top:0});
