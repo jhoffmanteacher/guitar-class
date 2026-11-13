@@ -613,11 +613,13 @@ async function coachMicPermState(){
   finally { clearTimeout(timer); }
 }
 /* `records`: the caller's screen can record a consented take (the Coach,
-   Note Runner, Power Chord Switch — coachFootHtml's same flag). Only then,
-   and only for a student who said yes, does the line say takes are saved;
-   everywhere else "nothing is recorded" is true. */
+   Note Runner, Power Chord Switch — coachFootHtml's same flag). There the
+   line says nothing is saved unless the student said yes to saving takes:
+   true whatever happens while the panel waits (the teacher can switch
+   collection on in that time, review R1-5). Everywhere else "nothing is
+   recorded" is true. */
 function coachMicAskHtml(records){
-  const line = t(records && micRecWanted() ? 'micpre.lineRec' : 'micpre.line');
+  const line = t(records ? 'micpre.lineRec' : 'micpre.line');
   return `<div class="micrec-ask micpre-ask" role="group" aria-label="${escHtml(line)}">
        <p class="micrec-q">&#x1F399;&#xFE0F; ${escHtml(line)}</p>
        <div class="micrec-btns">
