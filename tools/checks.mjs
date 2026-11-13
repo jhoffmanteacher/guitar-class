@@ -15051,7 +15051,11 @@ function checkPracticeMinutes(i18nTable) {
   const strip = t => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
 
   // 1. run the engine
-  const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'pm-sim.mjs'), '--quiet'], { encoding: 'utf8', timeout: 180000 });
+  /* The time limit is only a guard against a hung run: the check itself is pm-sim's own exit code (its 390 cases).
+     It was 3 minutes. On 2026-11-13 the Mac was running many agents at once (load average about 30 on 8 cores),
+     pm-sim took 3:40 and three pushes in a row were refused by the limit alone, with every case passing when the
+     tool was run by itself. 10 minutes still stops a hang; nothing about what is checked changed. */
+  const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'pm-sim.mjs'), '--quiet'], { encoding: 'utf8', timeout: 600000 });
   const lines = (r.stdout || '').trim().split('\n');
   const m = /pm-sim: (\d+) passed, (\d+) failed/.exec(lines[lines.length - 1] || '') || /pm-sim: (\d+) passed, (\d+) failed/.exec((r.stdout || ''));
   if (r.status !== 0 || !m) {
