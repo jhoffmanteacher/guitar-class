@@ -2853,16 +2853,16 @@
        are keys here rather than text in live-quiz.js, so they get the same
        en/es parity check as the rest of the shell; tools/checks.mjs walks
        LIVE_QUIZZES and fails the push if one of them goes missing. ── */
-    'lq.navTitle':           { en: 'Live quiz', es: 'Concurso en vivo' },
-    'lq.screenAria':         { en: 'Live quiz', es: 'Concurso en vivo' },
-    'lq.bannerTitle':        { en: 'Live quiz in progress', es: 'Concurso en vivo en curso' },
+    'lq.navTitle':           { en: 'Live In-Class Games', es: 'Juegos de clase en vivo' },
+    'lq.screenAria':         { en: 'Live In-Class Games', es: 'Juegos de clase en vivo' },
+    'lq.bannerTitle':        { en: 'Live in-class game in progress', es: 'Juego de clase en vivo en curso' },
     'lq.bannerJoin':         { en: 'Join', es: 'Entrar' },
-    'lq.inviteTitle':        { en: 'Live quiz!', es: '¡Concurso en vivo!' },
+    'lq.inviteTitle':        { en: 'Live in-class game!', es: '¡Juego de clase en vivo!' },
     'lq.inviteBody':         { en: 'Your class is playing right now.', es: 'Tu clase está jugando ahora mismo.' },
     'lq.inviteJoin':         { en: 'Join the game', es: 'Entrar al juego' },
     'lq.inviteLater':        { en: 'Not now', es: 'Ahora no' },
     'lq.waiting':            { en: "You're in. Wait for the first question.", es: 'Ya estás dentro. Espera la primera pregunta.' },
-    'lq.noneTitle':          { en: 'No live quiz right now', es: 'No hay ningún concurso en vivo ahora' },
+    'lq.noneTitle':          { en: 'No live in-class game right now', es: 'No hay ningún juego de clase en vivo ahora' },
     'lq.noneBody':           { en: 'This page wakes up when your teacher starts a game in class.', es: 'Esta página se activa cuando tu maestro empieza un juego en clase.' },
     'lq.qLabel':             { en: 'Question {n}', es: 'Pregunta {n}' },
     'lq.qLabelOf':           { en: 'Question {n} of {total}', es: 'Pregunta {n} de {total}' },
@@ -2886,9 +2886,9 @@
        these go up in both languages through lqBilingual() like the quiz text
        itself — a student's phone saying "Pregunta 3" beside a projector
        saying "Question 3" is the thing to avoid. */
-    'lq.stageIdleTitle':     { en: 'Live quiz', es: 'Concurso en vivo' },
-    'lq.stageIdleSub':       { en: 'Nothing running. Pick a quiz below and press Start.',
-                               es: 'Nada en marcha. Elige un concurso abajo y pulsa Empezar.' },
+    'lq.stageIdleTitle':     { en: 'Live In-Class Games', es: 'Juegos de clase en vivo' },
+    'lq.stageIdleSub':       { en: 'Nothing running. Pick a game below and press Start.',
+                               es: 'Nada en marcha. Elige un juego abajo y pulsa Empezar.' },
     'lq.stageJoin':          { en: 'Open the class site and press Join',
                                es: 'Abre el sitio de la clase y pulsa Entrar' },
     'lq.stageInGame':        { en: 'in the game', es: 'en el juego' },
@@ -2897,7 +2897,7 @@
                                es: 'Pregunta {n} \u2014 la respuesta' },
     'lq.timeUp':             { en: 'Time!', es: '¡Tiempo!' },
     'lq.saveFailed':         { en: "That answer didn't send — tap again.", es: 'Esa respuesta no se envió: toca de nuevo.' },
-    'lq.devBypass':          { en: 'Dev bypass cannot join the live quiz — nothing saves.', es: 'El modo de prueba no puede entrar al concurso en vivo: nada se guarda.' },
+    'lq.devBypass':          { en: 'Dev bypass cannot join a live in-class game — nothing saves.', es: 'El modo de prueba no puede entrar a un juego de clase en vivo: nada se guarda.' },
     'lq.title.stringId':     { en: 'Which string am I playing?', es: '¿Qué cuerda estoy tocando?' },
     'lq.prompt.stringId':    { en: 'Which string did you hear?', es: '¿Qué cuerda escuchaste?' },
     'lq.string.lowE':        { en: 'low E', es: 'cuerda Mi grave' },

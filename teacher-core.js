@@ -1149,7 +1149,7 @@ const TEACHER_NAV_ICON={
   reports:'<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="0.6" fill="currentColor" stroke="none"/>',
 };
 const TEACHER_NAV=[
-  {group:'Teach', items:[['activities','Class activities'],['songs','Songs'],['tsongs','Teacher view songs'],['livequiz','Live quiz']]},
+  {group:'Teach', items:[['activities','Class activities'],['songs','Songs'],['tsongs','Teacher view songs'],['livequiz','Live In-Class Games']]},
   {group:'Students', items:[['students','Students'],['skills','Skills grid'],['trouble','Trouble spots'],['minutes','Practice minutes'],['responses','Responses']]},
   {group:'Set up', items:[['manage','Manage'],['games','Games']]},
   {group:'Tools', items:[['mic','Mic recordings'],['reports','Reports']]},

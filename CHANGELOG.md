@@ -6,6 +6,11 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-13 — "Live quiz" is now "Live In-Class Games"
+
+- **The whole-class game has a new name: Live In-Class Games** (Spanish: Juegos de clase en vivo). The banner and the invite now say "Live in-class game". Nothing else about it changed.
+
+
 ## 2026-11-13 — Live quiz: change your answer on the two power chord games
 
 - **In "Find the power chord" and "Name the power chord" you can change your answer.** Tap another fret or another name before time runs out. Your last tap is your answer.

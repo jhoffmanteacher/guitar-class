@@ -1695,7 +1695,7 @@ function lqPaintControls(){
       + lqTotalInputHtml() + lqLimitInputHtml(lqTPickedQuizId) + lqAutoRevealInputHtml(lqTPickedQuizId);
     const closeBtn = (s && s.state === 'ended')
       ? `<button type="button" class="lq-ctl ghost" onclick="lqTeacherClose()"${busy}>Clear the board</button>` : '';
-    el.innerHTML = `<label class="lq-ctl-lbl">Quiz <select id="lq-quiz-pick" onchange="lqTPickedQuizId=this.value;lqTScoring=lqDefaultScoring(this.value);lqPaintControls()">${opts}</select></label>${scoring}`
+    el.innerHTML = `<label class="lq-ctl-lbl">Game <select id="lq-quiz-pick" onchange="lqTPickedQuizId=this.value;lqTScoring=lqDefaultScoring(this.value);lqPaintControls()">${opts}</select></label>${scoring}`
       + `<button type="button" class="lq-ctl go" onclick="lqTeacherStart()"${busy}>Start game</button>`
       + `<button type="button" class="lq-ctl ghost" onclick="lqTeacherPreview()"${busy}>Preview</button>${closeBtn}${full}`
       + `<div class="lq-ctl-hint">${escHtml(lqQuiz(lqTPickedQuizId).teacherHint)} Questions: how many the game has (blank or 0 = no set number). Time to answer: blank or 0 = no limit. Reveal when time runs out: the app presses Reveal for you about a second after the clock hits 0 (only on quizzes the app scores). Preview runs the quiz on this screen only, without inviting students.</div>`;

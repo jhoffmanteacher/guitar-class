@@ -3203,8 +3203,12 @@ const SLANG_ALLOW_ES = [];   // none today — see SLANG_ALLOW
    exact same list — 1w's own FIELD_RE has no `label`, and widening it would
    re-scan every module step label. matchAll clones the regex, so sharing one
    /g instance across checks carries no lastIndex state between them. */
+/* "live in" is the figurative verb ("these notes live in the box"). The adjective "live" in front
+   of the compound "in-class" is not it: "Live In-Class Games" is the whole-class game's name
+   (Jonathan, 2026-11-13). So "live in" followed by a hyphen is not a hit; "live in the box",
+   "lives in" and every other entry match as before. */
 const SLANG_RE = new RegExp(
-  '\\b(?:' + SLANG_PHRASES.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\b',
+  '\\b(?:' + SLANG_PHRASES.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + (p === 'live in' ? '(?!-)' : '')).join('|') + ')\\b',
   'gi');
 /* Single-line field regexes. 1w and 1w-t no longer use these for module
    content (they read through readFieldStrings, below, since 2026-10-12);
