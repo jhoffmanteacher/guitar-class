@@ -42,6 +42,7 @@ Jonathan, 2026-11-13, after opening the In class page on his classroom display:
 1. **The site should fill whatever monitor it is on.** His words: "the view should be maximized for whatever monitor is being used. so chromebooks but also other displays (not phones) should be taken into account."
 2. **The Chromebook comes first and is already right.** His words: "chromebook is priority but the display is not good on my classroom display", and "it displays perfectly on chromebooks."
 3. **The classroom display is the screen that prompted this:** a 4K panel (he wrote 3940x2160; read it as 3840×2160) at 150% Windows scaling, so about 2560 CSS px wide and about 1,300 tall inside Chrome at 100% browser zoom. In his screenshot of `#class-activities` the content was one column using about a third of the width beside the left menu, the text was too small to read from across a room, and the lower half of the screen was empty.
+4. **The real window size on that display is not known.** Jonathan, 2026-11-13: Chrome was at 100% zoom and maximized ("chrome was not at 80% it was at full screen"). 4K at 150% should give a window about 2560 CSS px wide, but in his screenshot the 252 px left menu was drawn about 155 px wide in a 2000 px image, which would mean about 3,250 CSS px. The two do not agree and nobody has measured it. The factor in this work order adapts to any size, so the build does not depend on the answer; test at both 2560×1300 and 3200×1650, and when the fix is live ask him whether the classroom display now looks right.
 
 Three parts, three pushes, in order. Ship each one before starting the next.
 
@@ -114,7 +115,7 @@ Out of scope, list only: `tuning-sim.html`, `mood-chart.html`, the hidden ear tr
 Use headless Chrome for Testing with the stub Firestore, as `tools/smoke.mjs` does. One browser run at a time.
 
 - **The Chromebook did not move.** At 1366×657, before your change and after it, record the box (`getBoundingClientRect`) and computed font size of every visible element on: a set (lesson and checklist), the In class list, an open Focus activity, an open tab practice card, a chord-grid card, a lyric-sheet card, the Games hub, one game before Start, My progress, the Songs hub, sign-in. English and Spanish. Report "N of N boxes identical".
-- **The big screen is the Chromebook enlarged.** For the same screens at 2560×1300 (the classroom) and at 1920×950: every box divided by `s` equals the box in a window of `width / s` by `height / s` on the unchanged site, within 1 px. Report "N of N" for each size, and list every element that differs.
+- **The big screen is the Chromebook enlarged.** For the same screens at 2560×1300, 3200×1650 (the two candidate sizes of the classroom display) and 1920×950: every box divided by `s` equals the box in a window of `width / s` by `height / s` on the unchanged site, within 1 px. Report "N of N" for each size, and list every element that differs.
 - **No change where none is wanted:** the same box comparison at 1280×720 (a projector below Chromebook width) and at 390×844: identical before and after.
 - **Screenshots, each one looked at**, at 1366×657 and at 2560×1300: the In class list (his screenshot), an open activity folded, the same in Full screen, a lyric-sheet card playing (the canvas is sharp), each of the four floating tools open, a chord popup, a game in play, one in Spanish, one in the dark palette. Save the pairs for Jonathan.
 - **Pointer positions:** at 2560×1300, drag a floating tool to a corner and click a tab note, a fretboard target and a game's tap target with real mouse events. Report that each landed on the element under the pointer.
@@ -203,7 +204,7 @@ Fast unless a hard stop was reached. `CHANGELOG.md` only if a student can see a 
 - Which worktree you worked in, what you rebased onto, and every pushed commit hash.
 - Anything the overlap check found, and what you did about it.
 - The mechanism you chose for the fill, how first paint gets it, and where the one copy of the formula lives.
-- What you measured about browser zoom, and a plain sentence for Jonathan: Ctrl + plus and minus still work on top of the fill; does he want that, or should the page always fill? Also tell him that his screenshot's proportions (the 252 px left menu drawn about 155 px wide in a 2000 px image) suggest Chrome was at about 80% zoom on the site that day, and that Ctrl + 0 resets it.
+- What you measured about browser zoom, and a plain sentence for Jonathan: Ctrl + plus and minus still work on top of the fill; does he want that, or should the page always fill?
 - Part 1: the "N of N" for each window size, every element that differed, the pointer results, each break-it red line, the smoke summary, the screenshot pairs.
 - Part 2: the "N of N" per page and size, the break-it line.
 - Part 3: the "N of N" per view and size, the drag result, each tool's summary line, the break-it line, and whether a `CHANGELOG.md` entry was written.
