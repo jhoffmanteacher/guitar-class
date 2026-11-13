@@ -276,6 +276,8 @@ function toggleSkill(sid, wid, which){
     giCell.setAttribute('aria-pressed', st==='gotit');
     wkCell.querySelector('.skbox').innerHTML = st==='working' ? wkSvg : '';
     giCell.querySelector('.skbox').innerHTML = st==='gotit'   ? giSvg : '';
+    // Just turned ON (not already got-it, not "still working"): the tick's pop — TICK POP, app/lesson.js.
+    if(st==='gotit' && cur!=='gotit') tickPop(giCell.querySelector('.skbox'));
   });
   if(w){
     const done=w.skills.filter(s=>progress[s.id]==='gotit').length;

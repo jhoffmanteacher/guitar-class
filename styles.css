@@ -4934,3 +4934,20 @@ body.lq-invite-open{overflow:hidden}
 .pm-sq-now:not(.pm-sq-hit){background:var(--pm-grey)}
 .pm-tip{min-height:1.3em;margin-top:8px;font-size:0.8125rem;color:var(--pm-text)}
 .pm-cap{margin-top:6px;font-size:0.8125rem;color:var(--pm-muted)}
+
+/* ══ TICK POP — a ticked step or skill settles in (2026-11-13) ══════════
+   tickPop() in app/lesson.js adds .tick-pop to the one tick a student just
+   turned on (a lesson step's ✓ circle, else the set band's progress pill when
+   One-step view hid the row; a checklist "I've got it!" box) and removes it
+   when the animation ends. Transform and opacity only, so nothing around it
+   moves; position:relative only anchors the ring (no offset, no shift). The
+   ring is the success green every tick already uses (--green-text). Off under
+   reduced motion here AND in tickPop() (it never adds the class then): the
+   site's catch-all ("Design pass: honor the device's reduce-motion setting")
+   only shortens animations to 0.01ms, it does not remove them. */
+.tick-pop{position:relative;animation:tickPop .42s cubic-bezier(.2,.8,.3,1.25)}
+.tick-pop::after{content:'';position:absolute;inset:-1px;border-radius:inherit;border:2px solid var(--green-text);pointer-events:none;opacity:0;animation:tickRing .42s ease-out}
+.prog-pill-wrap.tick-pop::after{border-radius:12px}
+@keyframes tickPop{0%{transform:scale(1)}35%{transform:scale(1.22)}70%{transform:scale(.95)}100%{transform:scale(1)}}
+@keyframes tickRing{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.8);opacity:0}}
+@media (prefers-reduced-motion:reduce){.tick-pop,.tick-pop::after{animation:none}.tick-pop::after{display:none}}

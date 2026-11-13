@@ -678,6 +678,45 @@ function toggleStepDone(btn, key){
   if(nowDone) collapseAndAdvance(li);
   onCompleteChange(key, nowDone);
   updateProgressPill(li);
+  /* The tick's little pop, on the step's ✓ circle — or, when marking it done
+     hid the row (One-step view moved on to the next step), on the set band's
+     progress pill and bar, the one place the tick still shows. */
+  if(nowDone){
+    const status = li.querySelector('.step-status');
+    tickPop(status && status.getClientRects().length ? status : lessonChromeQ(li.closest('.dp'), '.prog-pill-wrap'));
+  }
+}
+/* ── TICK POP — the check-off feels done (2026-11-13) ─────────────────
+   A short scale-and-settle with a soft green ring on the one tick a student
+   just turned ON: a lesson step's "Mark done" (toggleStepDone, above) and a
+   checklist "I've got it!" (toggleSkill, app/audio-ui.js), both called only
+   after their own code has accepted the tick (a peeked set and a refused
+   Coach / deck gate return before it). No sound, nothing saved, nothing
+   waited on: it only adds the class .tick-pop, and takes it off again on the
+   animation's end, or after TICK_POP_MS if that never comes (reduced
+   motion turns the animation off, a hidden element never runs it). So a
+   later re-render, a language switch or the save's own repaint draws the
+   tick without it, and a tick painted on page load never has it. The CSS
+   is the TICK POP block at the end of styles.css; under
+   prefers-reduced-motion it is never added at all. */
+const TICK_POP_MS = 700;
+function tickPop(el){
+  if(!el || !el.classList) return;
+  try { if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; } catch(e){}
+  // A second tick inside the 400 ms (on, off, on) restarts it: reading the width makes the browser drop the old run first.
+  if(el._tickPopEnd){ el._tickPopEnd(); void el.offsetWidth; }
+  const end = () => {
+    clearTimeout(el._tickPopT);
+    el.removeEventListener('animationend', onEnd);
+    el.classList.remove('tick-pop');
+    el._tickPopEnd = null;
+  };
+  // The element's own run, not the ring's (::after reports on the same target) or a child's.
+  const onEnd = ev => { if(ev.target === el && !ev.pseudoElement) end(); };
+  el._tickPopEnd = end;
+  el.addEventListener('animationend', onEnd);
+  el._tickPopT = setTimeout(end, TICK_POP_MS);
+  el.classList.add('tick-pop');
 }
 
 /* ── Focus mode ("one at a time") ──────────────────────────────────────
