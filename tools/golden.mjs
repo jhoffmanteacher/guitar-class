@@ -45,7 +45,7 @@
                   Built, Un-assign, hide and show a unit, rename and undo, the Who
                   picker and back to the whole class, Play Along now and on its date
      shots/       with --shots: PNGs of the sets, the filled sets, the screens, the
-                  games (first screen and end), the activities, the pages, the tools, the
+                  games (first screens), the activities, the pages, the tools, the
                   live quiz and the console
      dialogs/     every dialog that was open where a set was reached or a picture was due (its HTML;
                   dialogs.json lists them), recorded and then closed by Escape or its close button
@@ -78,8 +78,7 @@
        (review R2-2). A set picture is only taken once the set's panel is the active one and
        no page covers it; a dialog still open after Escape and its close button fails too;
      - two pictures that must differ are byte-identical (two sets, two filled sets, two live
-       quiz screens, two activities, two games' first screens or end screens, two screens, two
-       console views);
+       quiz screens, two activities, two games' first screens, two screens, two console views);
      - a listed write finds no control ("no such control"), in save/, console/writes.json and
        console/board.json (review R2-4), or a step of the tool itself fails (step-failed);
      - a navigation does not land (the set, the covering page, the live quiz screen).
@@ -115,6 +114,10 @@
    melody and the first chord Coach button in course order that shows with the lesson on
    "All steps" (its step opened by its head when closed), Start pressed, up to 60 s, the
    report recorded.
+   Pictures in this pass: each game's first screen only. The end of a game, and the Listening
+   Coach (inside a set), are recorded as HTML only: two runs gave identical HTML but drew a
+   moving play field (tokens on sub-pixel positions, the runner) a few hundred pixels
+   differently, and the Coach card's scroll position moved with figures loading above it.
    Games LEFT OUT: Tuning Simulator (a page of its own, tuning-sim.html: its first screen is
    recorded under pages/, but nothing is played: it is driven by dragging tuning pegs, which
    this student does not do). No other game is left out; the run prints the list it played.
@@ -727,7 +730,8 @@ try {
     if (ev && (!NOISE.test(ev.text) || (ev.kind === 'exception' && /ReferenceError|TypeError|SyntaxError|RangeError/.test(ev.text)))) events.push(ev);
   });
   await page.send('Runtime.enable'); await page.send('Page.enable');
-  await page.send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false });
+  let viewport = { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false };
+  await page.send('Emulation.setDeviceMetricsOverride', viewport);
   await page.send('Page.addScriptToEvaluateOnNewDocument', { source: `(${pageFreeze.toString()})()` });
 
   /* Coverage (--coverage): which top-level functions of each part ran. Taken before every navigation, since a
@@ -808,8 +812,15 @@ try {
      the top), open dialogs are closed (recorded), running animations are put at a fixed point. Up to 8 s. */
   const shot = async (rel, scrollTo = null, dialogs = true) => {
     if (dialogs) await closeDialogs(rel);
+    // Pictures are laid out afresh: every image above the point first (a figure still loading moved a scroll by 43 px),
+    // then the window one pixel wider and back, so what an earlier screen left in Chrome's drawing caches is redrawn
+    // (identical HTML drew a few pixels differently after a dialog had closed over it).
+    for (let i = 0; i < 25 && !(await run(`shot ${rel}:images`, `[...document.images].every(i => i.complete)`, 0)); i++) await sleep(200);
+    await page.send('Emulation.setDeviceMetricsOverride', { ...viewport, width: viewport.width + 1 });
+    await page.send('Emulation.setDeviceMetricsOverride', viewport);
+    await sleep(100);
     await run(`shot ${rel}:scroll`, `__goldScroll(${JSON.stringify(scrollTo)})`, 0);
-    try { await page.evalJs(`(document.getAnimations ? document.getAnimations() : []).forEach(a => { try { a.finish(); } catch (e) { try { a.currentTime = 0; a.pause(); } catch (e2) {} } }); 1`); } catch { /* the page is between two documents */ }
+    try { await page.evalJs(`(document.getAnimations ? document.getAnimations() : []).forEach(a => { try { a.finish(); } catch (e) { try { a.pause(); a.currentTime = 0; } catch (e2) {} } }); 1`); } catch { /* the page is between two documents */ }
     stepStart('shot ' + rel);
     let prev = (await page.send('Page.captureScreenshot', { format: 'png' })).data, same = 0;
     for (let i = 0; i < 40; i++) { await sleep(200); const cur = (await page.send('Page.captureScreenshot', { format: 'png' })).data; if (cur === prev) { if (++same >= 3) { put(rel, Buffer.from(prev, 'base64')); count('shots'); return; } } else same = 0; prev = cur; }
@@ -1244,12 +1255,11 @@ try {
     const playOne = async (name, rootSel, endSel) => {
       await run(`play:${name}:intro`, '__gv.advance(1500)', 0);
       put(`play/${name}-first-screen.html`, lines(await run(`play:${name}:first`, htmlExpr(rootSel), 0)));
-      if (SHOTS) await shot(`shots/play-${name}-first.png`, rootSel === '#games-panel' ? null : rootSel, false);
+      if (SHOTS && rootSel === '#games-panel') await shot(`shots/play-${name}-first.png`, null, false);
       await run(`play:${name}:begin`, `__goldPlayBegin(${JSON.stringify(name)}, ${JSON.stringify(rootSel)})`, 0);
       let r = null;
       for (let s = 0; s < 60; s++) { r = await run(`play:${name}:${s}s`, '__goldPlayTick()', 0); if (!r || r.done) break; }
       put(`play/${name}-end.html`, lines(await run(`play:${name}:end`, htmlExpr(endSel || rootSel), 0)));
-      if (SHOTS) await shot(`shots/play-${name}-end.png`, rootSel === '#games-panel' ? null : rootSel, false);
       const res = await run(`play:${name}:result`, '__goldPlayEnd()', 0);
       if (res && !res.startedByItsCard && !res.clicks.some(c => /(Start|PlayAdaptive|GoReady|Spin)\(|coachStartCheck\(/.test(c.what))) fail(`play:${name}`, 'no Start-like button was ever pressed (clicks: ' + JSON.stringify(res.clicks.slice(0, 6)) + ')');
       return res;
@@ -1358,7 +1368,8 @@ try {
     /* The teacher console, against the fake class the console smoke test already uses: its STUB (an in-memory
        Firestore, 30 made-up students, a seeded board) is read out of that file, so there is one copy of it. */
     await covTake();
-    await page.send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 768, deviceScaleFactor: 1, mobile: false });
+    viewport = { width: 1366, height: 768, deviceScaleFactor: 1, mobile: false };
+    await page.send('Emulation.setDeviceMetricsOverride', viewport);
     stepStart('console: navigate');
     await page.send('Page.navigate', { url: `${base}/index.html?teacher=true` });
     await until('console: the page loading', `typeof ensureTeacherJs === 'function' && typeof CLASS_ACTIVITIES !== 'undefined' && location.search === '?teacher=true'`);
@@ -1491,14 +1502,15 @@ try {
       put('console/board.json', JSON.stringify(board, null, 1) + '\n'); count('boardActions', board.length);
       put('console/store.json', (await run('console:store', `JSON.stringify([...__store.entries()].sort((a, b) => a[0] < b[0] ? -1 : 1), null, 1)`, 0)) + '\n');
     }
-    await page.send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false });
+    viewport = { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false };
+    await page.send('Emulation.setDeviceMetricsOverride', viewport);
   }
 
   /* Pictures that must differ (review R2-2: 49 set pictures were one picture of the In class screen). */
   if (SHOTS && existsSync(join(outDir, 'shots'))) {
     // Each group holds pictures of DIFFERENT things (two sets, two games' first screens …), never two states of one.
     const groups = [[/^set-/, 'sets'], [/^filled-set-/, 'filled sets'], [/^livequiz-student-/, 'live quiz screens'], [/^activity-/, 'activities'],
-      [/^play-.*-first\.png$/, 'games (first screens)'], [/^play-.*-end\.png$/, 'games (end screens)'], [/^screen-/, 'screens'], [/^console-view-/, 'console views']];
+      [/^play-.*-first\.png$/, 'games (first screens)'], [/^screen-/, 'screens'], [/^console-view-/, 'console views']];
     const files = readdirSync(join(outDir, 'shots')).filter(f => f.endsWith('.png'));
     for (const [re, what] of groups) {
       const byHash = new Map();
