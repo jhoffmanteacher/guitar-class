@@ -6,6 +6,10 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-12 — After an update, a linked activity comes back where you were
+
+- **After the site updates itself, an In-Class activity you opened from a link now comes back where you had scrolled.** Before, it jumped back to the top of the card.
+
 ## 2026-11-12 — In-Class Activities: your next activity is always a required one
 
 - **The activity picked as your next one is always a required one you haven't finished**, even if an optional one is newer.

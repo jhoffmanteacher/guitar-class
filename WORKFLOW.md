@@ -531,12 +531,11 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
       preview. Every case: version 2 landed, one reload, the note gone, the saved maps unchanged and no save started,
       the first visit did not reload.
       Full run on 2026-11-12 (967 s): 28 of 29 cases, 354 of 355 checks, every scroll difference 0 px
-      but one. **The one red is a real fault on today's site, listed for Jonathan, NOT fixed:** after an update, a
+      but one. **The one red was a real fault, FIXED the same evening (Fast; `swResumeRouting`, `app/boot.js` + `caFocusActivity`; the full run is now 29 of 29 cases, 359 of 359 checks, and `busy-card` compares the scroll again). As found:** after an update, a
       deep-linked activity page (`#class-activities/<id>`) comes back with the card at the top, not where the student
       had scrolled (456 px became 14 px). The hash router scrolls to the card (`caFocusActivity` →
       `caScrollToActivity`, `app/activities.js`) and the restore's scroll gives way. The reviewer showed that skipping
-      that scroll on the update reload turns the case green. Until it is fixed the tool exits 1 on `deep-link`: that
-      is the baseline, never loosen the case.
+      that scroll on the update reload turns the case green. Never loosen the case.
       Proof: 24 planted site faults turned it red (the work order's ten, eight from review round 1, six from round 2).
       What it does not cover is in its header (a real Chromebook above all).
 
