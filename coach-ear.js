@@ -503,11 +503,13 @@ async function psgStart(){
   body.innerHTML = `<div class="coach-tip">${t('games.psg.startingMic')}</div>`;
   if (!coachStream && !(await coachAcquireMic({ el: body }))){
     /* Same as Note Hunt (fretStart): a newer start owns the screen; ours,
-       given up, goes back to the set-up screen (review R1-7). */
+       given up, goes back to the set-up screen (review R1-7); "Try again and
+       choose Allow" (coachMicRetry) comes with the Start button (R2-1). */
     if (coachAcquirePending) return;
     if (!psgBody()) return;
     if (coachMicFailName === 'cancelled') psgSetup();
-    else psgBody().innerHTML = `<div class="coach-note">${coachMicFailMsg()}</div>`;
+    else psgBody().innerHTML = `<div class="coach-note">${coachMicFailMsg()}</div>` +
+      (coachMicRetry ? `<button type="button" class="coach-start" onclick="psgStart()">&#x25B6; ${t('games.psg.startButton')}</button>` : '');
     return;
   }
   await coachEnsureRunning();

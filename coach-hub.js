@@ -44,12 +44,14 @@ async function fretStart(levelIdx){
     /* A newer start already owns the mic start (and the screen). A start of
        ours that was given up ('cancelled', coachMicAsk; or handed an older
        start's question that was) gets a Start button back, not an empty note
-       (review R1-7). */
+       (review R1-7); so does "Try again and choose Allow" (coachMicRetry: the
+       browser's box was closed), which needs a button to try with (R2-1). */
     if (coachAcquirePending) return;
     const b2 = document.getElementById('fret-body');
+    const again = `<button type="button" class="coach-start" onclick="fretStart(${Number.isInteger(levelIdx) ? levelIdx : ''})">&#x25B6; ${t('games.common.start')}</button>`;
     if (b2) b2.innerHTML = coachMicFailName === 'cancelled'
-      ? `<button type="button" class="coach-start" onclick="fretStart(${Number.isInteger(levelIdx) ? levelIdx : ''})">&#x25B6; ${t('games.common.start')}</button>`
-      : `<div class="coach-note">${coachMicFailMsg()}</div>`;
+      ? again
+      : `<div class="coach-note">${coachMicFailMsg()}</div>` + (coachMicRetry ? again : '');
     return;
   }
   await coachEnsureRunning();
