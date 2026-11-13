@@ -397,6 +397,8 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
       notes called wrong against at most 20%); the synthetic `class` room matches the real takes, so read `class`
       for single notes. Candidate gate fix (branch `fix/coach-gate`, `149f1c0`, NOT shipped, Jonathan's call):
       chords false pass 15-21 -> 1-12 of 21, but melody false fail class 9 -> 13 of 80 and room4 7 -> 74.
+      **DECIDED 2026-11-13 (Jonathan): "no on coach fix until we improve the audio detection in a loud room".**
+      The branch stays unshipped and unreviewed; loud-room detection comes first, then ask again.
       Wanted: right-playing Coach takes from periods 4 and 7. Not modelled: fret buzz, OS gain control, echo,
       Note Runner's power-chord levels; Note Call and Note Hunt not reached.
 - [x] **2026-11-13 — `tools/shared-chromebook-loop.mjs`: two students, one Chromebook.** Tools and docs only. One
