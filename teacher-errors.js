@@ -210,6 +210,7 @@ async function teacherErrorsSendTest(){
 }
 async function teacherErrorsRunTest(){
   const RELOAD = ' The error log is now off on this console page: reload the console before testing again.';
+  const REFUSED = what => `The log is NOT working: ${what} was refused (the rules for the error log are not published, or do not match this version of the site).`;
   const cannot = why => 'The log could not be checked: ' + why + '.';
   if(typeof SITE_ERRORS === 'undefined' || !SITE_ERRORS || typeof SITE_ERRORS.test !== 'function') return cannot('the error logger is not on this page (reload the console)');
   try{ await ensureDb(); }catch(e){ return cannot('Firestore did not load (' + String((e && (e.code || e.message)) || e) + '), a connection problem'); }
@@ -223,10 +224,15 @@ async function teacherErrorsRunTest(){
   switch(r && r.state){
     case 'sent': break;
     case 'failed':
-      if(code === 'permission-denied') return 'The log is NOT working: the test entry was refused (the rules for the error log are not published, or do not match this version of the site).' + RELOAD;
+      if(code === 'permission-denied') return REFUSED('the test entry') + RELOAD;
       return cannot('the write failed (' + (code || 'no reason given') + '), a connection problem') + RELOAD;
     case 'timeout': return cannot(`no answer from Firestore within ${TEACHER_ERRORS_TEST_WAIT_MS / 1000} seconds, a connection problem`) + ' The test entry may still be sent later; reload the console before testing again.';
-    case 'off': return cannot('the logger had already turned itself off on this page, after a write failed (' + (code || 'no reason given') + ')') + ' Reload the console before testing again.';
+    /* Off because an earlier entry on this page (a real console error) was
+       refused: the rules refuse, the same answer as a refused test (the test
+       entry itself was never sent, so the sentence names the earlier one). */
+    case 'off':
+      if(code === 'permission-denied') return REFUSED('an earlier entry from this console page (this test entry was not sent)') + RELOAD;
+      return cannot('the logger had already turned itself off on this page, after a write failed (' + (code || 'no reason given') + ')') + ' Reload the console before testing again.';
     case 'cap': return cannot('this page has already sent the 5 entries one page load may send') + ' Reload the console before testing again.';
     case 'repeat': return cannot('a test entry was already sent from this page') + ' Reload the console before testing again.';
     case 'storm': return cannot('this page has seen too many different errors to log another') + ' Reload the console before testing again.';
