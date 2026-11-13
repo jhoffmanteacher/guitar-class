@@ -12,12 +12,19 @@ if('scrollRestoration' in history) history.scrollRestoration = 'manual';
    A doc: kind ('error' | 'rejection'), message, file, line, col, stack (the
    top 3 frames), page (the hash route and the set id, no query string),
    version (the service worker's shell cache name), day (YYYY-MM-DD, this
-   device's date), lang ('en' | 'es'). NEVER a uid, name, email, class
-   period, or a time finer than the day. Every string is scrubbed (scrub())
-   and cut to the rules' cap before writing: email addresses (also written
-   %40), URL query strings, runs of 20+ letters and digits that hold both
-   (uids, Firestore ids, tags), runs of 6+ digits (timestamps, student
-   numbers), and the signed-in account's own uid, email and name words.
+   device's date), lang ('en' | 'es'). No uid, name, email or class period
+   FIELD, and no time finer than the day.
+   What is scrubbed out of the text (scrub()), before it is cut to the rules'
+   cap: the signed-in account's OWN uid, email and the email's part before
+   the @ (any case) and its own display name and name words (only as written:
+   "Max" goes, "max" in Math.max stays); any email address (also written
+   %40); URL query strings; runs of 20+ letters and digits that hold both
+   (uids, Firestore ids, tags); runs of 6+ digits (timestamps, long student
+   numbers). What is NOT: anyone else's name, a class period ("period 7"), a
+   5-digit number, or what a student typed if an error message quotes it.
+   Every string is also made well-formed text (clean()), and a finished doc
+   the rules would refuse is dropped, never sent (fits()): the log shares
+   Firestore's one write queue with the progress save.
    It must never make things worse for a student: every step is inside a
    try, nothing waits on it, it shows nothing, it writes only once the app
    itself has loaded Firestore (`db`) and someone is signed in (until then up
@@ -27,13 +34,22 @@ if('scrollRestoration' in history) history.scrollRestoration = 'manual';
    turns it off, silently, for the rest of the page load. Its own failures
    are never logged. It never calls ensureDb() and never touches
    progress/{uid} or the save code. Rules: firestore.rules "ERROR LOG".
-   Proof: tools/site-errors-sim.mjs (Node) and
+   Not covered: the Journey pages (tabs/*.html) do not load this file.
+   Proof: tools/site-errors-sim.mjs (Node; run by checks.mjs 1cx) and
    tools/site-errors-rules-test.mjs (the Firestore emulator). */
 const SITE_ERRORS = (function(){
-  const MAX = 5, POLL_MS = 5000, POLL_TRIES = 120;
+  const MAX = 5, POLL_MS = 5000, POLL_TRIES = 120, PRE = 1000, INT_MAX = 10000000;
   const CAP = { message: 300, file: 200, stack: 600, page: 120, version: 64 };
-  const queue = [], seen = new Set();
+  const FIELDS = ['kind', 'message', 'file', 'line', 'col', 'stack', 'page', 'version', 'day', 'lang'];
+  const queue = [], seen = new Set(), rawSeen = new Set();
   let used = 0, off = false, sending = false, pollT = null, polls = 0, verP = null;
+  /* Every unpaired surrogate (half an emoji, from code that sliced one)
+     becomes U+FFFD. Firestore cannot store a string that is not well-formed:
+     the SDK retries such a write for ever, and the student's progress save
+     queued behind it never lands. */
+  function clean(s){
+    return String(s == null ? '' : s).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDFFF]/g, m => m.length === 2 ? m : '\uFFFD');
+  }
   /* Cut to n characters, never splitting a surrogate pair. */
   function cut(s, n){
     s = String(s == null ? '' : s);
@@ -45,36 +61,45 @@ const SITE_ERRORS = (function(){
   function scrub(s, who){
     s = String(s == null ? '' : s);
     /* A huge message is cut first (keeping the regexes cheap), dropping the
-       word the cut landed in, so half an email can never survive it. */
-    if(s.length > 4000) s = s.slice(0, 4000).replace(/\S*$/, '');
+       word the cut landed in, so half an email can never survive it. With no
+       space at all there is no word to drop: only an email cut at the end goes. */
+    if(s.length > PRE){
+      s = s.slice(0, PRE);
+      s = /\s/.test(s) ? s.replace(/\S*$/, '') : s.replace(/[A-Za-z0-9._%+-]*(?:@|%40)[A-Za-z0-9.-]*$/, '');
+    }
+    s = clean(s);
     try{ const o = location.origin; if(o && o !== 'null') s = s.split(o).join(''); }catch(_){}
-    if(who) s = who(s);
     s = s.replace(/[A-Za-z0-9._%+-]+(?:@|%40)[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/g, '[email]');
+    /* After the emails, so a whole address still reads [email], not [user]@domain. */
+    if(who) s = who(s);
     s = s.replace(/\?(?=[^\s'"()<>]*=)[^\s'"()<>]*/g, m => { const tail = /(?::\d+){1,2}$/.exec(m); return '?[query]' + (tail ? tail[0] : ''); });
     s = s.replace(/[A-Za-z0-9]{20,}/g, m => (/\d/.test(m) && /[A-Za-z]/.test(m)) ? '[id]' : m);
     s = s.replace(/\d{6,}/g, '[n]');
     return s;
   }
-  /* The signed-in account's own uid, email (and its part before the @) and
-     name words of 3+ letters, as whole words, any case. null when nobody is
-     signed in. */
+  /* The signed-in account's own details, as whole words (3+ characters):
+     its uid, email and the email's part before the @ in any case; its display
+     name and each name word only exactly as written, so a student named Max
+     or Will never turns Math.max or "will" into [user] (which would tell whose
+     error it is). null when nobody is signed in. */
   function whoScrub(){
     try{
       const u = auth && auth.currentUser;
       if(!u) return null;
-      const words = [];
-      const add = w => { w = String(w || '').trim(); if(w.length >= 3) words.push(w); };
-      add(u.uid); add(u.email); add(String(u.email || '').split('@')[0]); add(u.displayName);
-      String(u.displayName || '').split(/\s+/).forEach(add);
-      if(!words.length) return null;
-      words.sort((a, b) => b.length - a.length);
-      const re = new RegExp('(^|[^\\p{L}\\p{N}])(' + words.map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')(?![\\p{L}\\p{N}])', 'giu');
-      return s => s.replace(re, (m, pre) => pre + '[user]');
+      const anyCase = [], asWritten = [];
+      const add = (list, w) => { w = String(w || '').trim(); if(w.length >= 3) list.push(w); };
+      add(anyCase, u.uid); add(anyCase, u.email); add(anyCase, String(u.email || '').split('@')[0]);
+      add(asWritten, u.displayName);
+      String(u.displayName || '').split(/\s+/).forEach(w => add(asWritten, w));
+      const res = [[anyCase, 'giu'], [asWritten, 'gu']].filter(([list]) => list.length).map(([list, flags]) => new RegExp('(^|[^\\p{L}\\p{N}])(' + list.sort((a, b) => b.length - a.length).map(w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')(?![\\p{L}\\p{N}])', flags));
+      if(!res.length) return null;
+      return s => res.reduce((t, re) => t.replace(re, (m, pre) => pre + '[user]'), s);
     }catch(_){ return null; }
   }
   function int(n){
     const v = Math.floor(Number(n));
-    return (Number.isFinite(v) && v >= 0 && v <= 10000000) ? v : 0;
+    /* `v || 0` turns -0 into 0: the SDK sends -0 as a double, which the rules' `is int` refuses. */
+    return (Number.isFinite(v) && v >= 0 && v <= INT_MAX) ? (v || 0) : 0;
   }
   /* The top 3 frames of a stack (Chrome "at …" lines, Firefox/Safari "fn@url:line:col"). */
   function stackTop(st){
@@ -90,6 +115,31 @@ const SITE_ERRORS = (function(){
   function dayNow(){
     const d = new Date();
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  /* The rules' day test: YYYY-MM-DD, a real date, at most one day from the
+     UTC date (the rules use the server's clock; here this device's stands in,
+     so this only refuses what the rules surely would). */
+  function dayOk(day){
+    if(typeof day !== 'string' || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(day)) return false;
+    const y = +day.slice(0, 4), m = +day.slice(5, 7), dd = +day.slice(8, 10);
+    const t = Date.UTC(y, m - 1, dd), back = new Date(t);
+    if(back.getUTCFullYear() !== y || back.getUTCMonth() !== m - 1 || back.getUTCDate() !== dd) return false;
+    const now = new Date();
+    return Math.abs(t - Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())) <= 86400000;
+  }
+  /* The finished doc against the same limits firestore.rules "ERROR LOG"
+     enforces (the ten fields, each type, each cap in UTF-16 units, the two
+     lists, the day), and well-formed text. */
+  function fits(d){
+    try{
+      const keys = Object.keys(d);
+      if(keys.length !== FIELDS.length || FIELDS.some(k => !keys.includes(k))) return false;
+      if((d.kind !== 'error' && d.kind !== 'rejection') || (d.lang !== 'en' && d.lang !== 'es')) return false;
+      for(const k in CAP) if(typeof d[k] !== 'string' || d[k].length > CAP[k] || clean(d[k]) !== d[k]) return false;
+      if(!d.message.length) return false;
+      for(const k of ['line', 'col']) if(!Number.isInteger(d[k]) || Object.is(d[k], -0) || d[k] < 0 || d[k] > INT_MAX) return false;
+      return dayOk(d.day);
+    }catch(_){ return false; }
   }
   function langNow(){
     try{ return (typeof getLang === 'function' && getLang() === 'es') ? 'es' : 'en'; }catch(_){ return 'en'; }
@@ -135,7 +185,6 @@ const SITE_ERRORS = (function(){
       /* The Cache API answers at once; 3 s is only so a stuck one can
          never hold the log. */
       Promise.race([version(), new Promise(r => setTimeout(() => r('unknown'), 3000))]).then(v => {
-        v = cut(v, CAP.version);
         const next = () => {
           try{
             if(off) return;
@@ -143,7 +192,11 @@ const SITE_ERRORS = (function(){
             const d = queue.shift(), who = whoScrub();
             if(who) for(const k of ['message', 'file', 'stack', 'page']) d[k] = cut(who(d[k]), CAP[k]);
             if(!d.message) d.message = '(no message)';
-            d.version = v;
+            d.version = cut(clean(v), CAP.version);
+            /* A doc the rules would refuse, or one that is not well-formed text,
+               is dropped here, silently, and never sent: the log shares
+               Firestore's one write queue with the progress save. */
+            if(!fits(d)){ next(); return; }
             const p = db.collection('siteErrors').add(d);
             if(p && typeof p.then === 'function') p.then(next, stop); else next();
           }catch(_){ stop(); }
@@ -155,6 +208,7 @@ const SITE_ERRORS = (function(){
   function report(kind, ev){
     try{
       if(off || used >= MAX) return;
+      kind = kind === 'error' ? 'error' : 'rejection';
       let msg = '', file = '', line = 0, col = 0, st = '';
       if(kind === 'error'){
         const er = ev && ev.error;
@@ -169,23 +223,32 @@ const SITE_ERRORS = (function(){
         } else if(typeof r === 'string') msg = r;
         else msg = 'Rejected with ' + (r === null ? 'null' : typeof r);
       }
+      /* A repeat is turned away on its raw text, before any scrubbing (a
+         long message costs the regexes a few ms each time). Kept small. */
+      const rawKey = kind + '|' + String(msg).slice(0, 500);
+      if(rawSeen.has(rawKey)) return;
+      if(rawSeen.size < 100) rawSeen.add(rawKey);
       st = stackTop(st);
       if(!file && st){
         const m = /\(?([^\s()]+):(\d+):(\d+)\)?\s*$/.exec(st.split('\n')[0]);
         if(m){ file = m[1]; line = m[2]; col = m[3]; }
       }
+      /* The account's own details go BEFORE the cut too, so the cut can never
+         leave half a name behind (send time scrubs again, for a sign-in that
+         came later). */
+      const who = whoScrub();
       const doc = {
-        kind: kind === 'error' ? 'error' : 'rejection',
-        message: cut(scrub(msg), CAP.message) || '(no message)',
-        file: cut(scrub(String(file).replace(/[?#].*$/, '')), CAP.file),
+        kind,
+        message: cut(scrub(msg, who), CAP.message) || '(no message)',
+        file: cut(scrub(String(file).replace(/[?#].*$/, ''), who), CAP.file),
         line: int(line), col: int(col),
-        stack: cut(scrub(st), CAP.stack),
-        page: cut(scrub(pageNow()), CAP.page),
+        stack: cut(scrub(st, who), CAP.stack),
+        page: cut(scrub(pageNow(), who), CAP.page),
         version: '',
         day: dayNow(),
         lang: langNow(),
       };
-      const key = doc.kind + '|' + doc.message;
+      const key = kind + '|' + doc.message;
       if(seen.has(key)) return;
       seen.add(key); used++;
       queue.push(doc);
