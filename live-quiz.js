@@ -49,6 +49,9 @@
                    answers/{uid}, teacher-only; lqNames() feeds the wall)
        speedBonus  false ⇒ every correct answer is worth the same
        limitSec    0 ⇒ no countdown
+       totalQ      how many questions the game has, set before Start
+                   (0 ⇒ no set number). Read for "Question 3 of 10" and
+                   for the strip's "Final scores" after the last one.
 
      liveQuiz/current/answers/{uid}  one doc per student, overwritten each
                                      round. Students write only their own;
@@ -106,7 +109,17 @@
    one Random button plus Low E / A / Both chips and NO name buttons; the
    session's `target` is { string, fret } and never the name, which
    appears in the doc only at Reveal, as `correct`. The answer id is the
-   chord name ('F♯5'). Scored by the app, like a fret quiz. */
+   chord name ('F♯5'). Scored by the app, like a fret quiz.
+   The two power chord quizzes also carry (Jonathan, 2026-11-13):
+   `rootStrings` (Find only): the strings a root may be asked on (the strip's
+   chips and Random). `strings` is then the BOARD: all six, high E on top and
+   low E at the bottom, so the student finds the string too.
+   `changeAnswer:true`: a student may tap another answer while the question
+   is open and their time has not run out; the last tap is the answer (and
+   its time is the one speed scoring reads). Every other quiz: first tap wins.
+   `countOnly:true`: the Reveal shows "n of m correct" (lqRightCount) and the
+   scores, and NOT the spread of picks: no tally bars on either side and no
+   tap counts on the stage board. */
 const LIVE_QUIZZES = {
   'string-id': {
     id: 'string-id',
@@ -155,7 +168,10 @@ const LIVE_QUIZZES = {
     titleKey:  'lq.title.pcFind',
     promptKey: 'lq.prompt.pcFind',
     teacherHint: 'Pick a string and a chord below to open the question. Students tap the chord\'s root; press Reveal when the count stops climbing.',
-    strings: ['lowE', 'A']
+    strings: ['highE', 'B', 'G', 'D', 'A', 'lowE'],
+    rootStrings: ['lowE', 'A'],
+    changeAnswer: true,
+    countOnly: true
   },
   'pc-name': {
     id: 'pc-name',
@@ -163,12 +179,16 @@ const LIVE_QUIZZES = {
     titleKey:  'lq.title.pcName',
     promptKey: 'lq.prompt.pcName',
     teacherHint: 'Pick Low E, A or Both, then press Random shape to open the question. Students tap the chord\'s name; press Reveal when the count stops climbing.',
-    strings: ['lowE', 'A']
+    strings: ['lowE', 'A'],
+    changeAnswer: true,
+    countOnly: true
   }
 };
 const LQ_DEFAULT_QUIZ = 'string-id';
 function lqQuiz(id){ return LIVE_QUIZZES[id] || LIVE_QUIZZES[LQ_DEFAULT_QUIZ]; }
 function lqChoice(quiz, id){ return quiz.choices.find(c=>c.id===id) || null; }
+// The strings a fret quiz may ASK on; `strings` alone unless the board shows more (pc-find).
+function lqRootStrings(quiz){ return quiz.rootStrings || quiz.strings || []; }
 function lqType(quiz){ return quiz.type === 'fret' ? 'fret' : (quiz.type === 'pcname' ? 'pcname' : 'mc'); }
 // Natural notes per string, fret → letter. Mirrors app.js FG_NATURALS; kept
 // here because this file must not depend on app.js (Journey pages).
@@ -206,6 +226,12 @@ const LQ_PC_ROOTS = ['E','F','F♯','G','A','B','C','D'];
 // Mirrors app.js SD_NOTE_NAMES (this file must not depend on app.js).
 const LQ_CHROMATIC = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
 const LQ_PC_OPEN = { lowE: 4, A: 9 };   // the open string's index in LQ_CHROMATIC
+// All six open strings, for the marker labels on "Find the power chord"'s six-string board only (never for scoring).
+const LQ_OPEN_ALL = { lowE: 4, A: 9, D: 2, G: 7, B: 11, highE: 4 };
+function lqNoteAt(string, fret){
+  const open = LQ_OPEN_ALL[string];
+  return (open == null || !Number.isInteger(fret) || fret < 0) ? '' : LQ_CHROMATIC[(open + fret) % 12];
+}
 /* The frets "Find the power chord" counts, both ends included. A planning-chat
    default Jonathan has NOT ruled on (2026-11-10): 0 to 12, like the Fretboard
    tap board, so an open string and fret 12 both count for the same name. */
@@ -294,11 +320,38 @@ function lqTargetParams(target, langOrNull, quiz){
   const string = langOrNull ? tIn(key, langOrNull) : t(key);
   return (quiz && quiz.power) ? { chord: lqPcChord(target.note), string } : { note: target.note, string };
 }
-/* fgBoardSvg's marker labels for a power quiz: the note at every fret, F♯ and
-   the other sharps included (fgBoardSvg's own FG_NATURALS would draw ✕ on the
+/* fgBoardSvg's marker labels for a power quiz: the note at every fret of all
+   six strings, F♯ and the other sharps included (fgBoardSvg's own FG_NATURALS would draw ✕ on the
    F♯ fret when it lights green). undefined for a note quiz = unchanged board. */
 function lqBoardOpts(quiz, opts){
-  return quiz.power ? Object.assign({ noteAt: (k, f) => lqPcRootAt(k, f) || '' }, opts) : opts;
+  return quiz.power ? Object.assign({ noteAt: (k, f) => lqNoteAt(k, f) }, opts) : opts;
+}
+/* "n of m correct" for a `countOnly` quiz, from the Reveal's tally: m = every answer the Reveal counted, n = those on a
+   right id. Numbers only, so it names nobody. */
+function lqRightCount(s){
+  const tally = s.tally || {}, ids = lqCorrectIds(s);
+  let n = 0, total = 0;
+  Object.keys(tally).forEach(k => { const c = Number(tally[k]) || 0; total += c; if(ids.includes(k)) n += c; });
+  return { n, total };
+}
+function lqRightCountHtml(s){
+  const p = lqRightCount(s);
+  return `<div class="lq-answer lq-rightcount" data-i18n="lq.rightCount" data-i18n-params="${escAttr(JSON.stringify(p))}">${escHtml(t('lq.rightCount', p))}</div>`;
+}
+/* The question label: "Question 3", or "Question 3 of 10" when the teacher set a total before Start (s.totalQ). */
+function lqQNumHtml(s){
+  const n = Number(s.qIndex) + 1, total = Number(s.totalQ) || 0;
+  const key = total ? 'lq.qLabelOf' : 'lq.qLabel', params = total ? { n, total } : { n };
+  return `<div class="lq-qnum" data-i18n="${key}" data-i18n-params="${escAttr(JSON.stringify(params))}">${escHtml(t(key, params))}</div>`;
+}
+function lqStageQNumHtml(s){
+  const n = Number(s.qIndex) + 1, total = Number(s.totalQ) || 0;
+  return total ? lqBilingualParams('lq.qLabelOf', 'lq-st-qnum', { n, total }, { n, total }) : lqBilingualParams('lq.qLabel', 'lq-st-qnum', { n }, { n });
+}
+// The line above a student's own pick: "Locked in", or on a `changeAnswer` quiz "Your answer. Tap another to change it."
+function lqLockedLblHtml(quiz){
+  const key = quiz.changeAnswer ? 'lq.lockedChange' : 'lq.locked';
+  return `<div class="lq-locked-lbl" data-i18n="${key}">${escHtml(t(key))}</div>`;
 }
 // Speed scoring is the overall default — a fast, correct answer should beat
 // a slow, correct one. A quiz opts OUT with `speedBonus: false` (e.g.
@@ -803,7 +856,8 @@ function lqRenderStudent(){
    also gets fg-bad on the student's own tap, but only if it ISN'T also
    correct, so a right answer never carries both classes. The stage board
    instead gets fg-count on every marker with at least one tap, its digit
-   replaced by that count — nothing student-identifying, just a number. */
+   replaced by that count — nothing student-identifying, just a number
+   (not on a `countOnly` quiz: its stage shows the right frets only). */
 function lqPaintMarkers(root, s, quiz, sid){
   if(!s || lqType(quiz) !== 'fret') return;
   sid = sid || 'lq';
@@ -826,7 +880,7 @@ function lqPaintMarkers(root, s, quiz, sid){
     if(sid === 'lq'){
       const mine = (lqMyAnswer && lqMyAnswer.qIndex === s.qIndex) ? lqMyAnswer.choice : null;
       if(mine && !correctIds.includes(mine)){ const m = markerFor(mine); if(m) m.classList.add('fg-bad'); }
-    } else {
+    } else if(!quiz.countOnly){
       const tally = s.tally || {};
       Object.keys(tally).forEach(id => {
         const n = Number(tally[id]) || 0;
@@ -851,8 +905,7 @@ function lqStudentLobbyHtml(){
 function lqStudentQuestionHtml(s, quiz){
   if(lqType(quiz) === 'fret') return lqStudentFretQuestionHtml(s, quiz);
   if(lqType(quiz) === 'pcname') return lqStudentPcNameQuestionHtml(s, quiz);
-  const n = Number(s.qIndex) + 1;
-  const head = `<div class="lq-qnum" data-i18n="lq.qLabel" data-i18n-params="${escAttr(JSON.stringify({n}))}">${escHtml(t('lq.qLabel',{n}))}</div>`
+  const head = lqQNumHtml(s)
     + `<div class="lq-prompt" data-i18n="${escAttr(quiz.promptKey)}">${escHtml(t(quiz.promptKey))}</div>`
     + lqTimerHtml(s);
   const mine = (lqMyAnswer && lqMyAnswer.qIndex === s.qIndex) ? lqMyAnswer.choice : null;
@@ -879,25 +932,25 @@ function lqFretPickLabel(id){
 }
 
 function lqStudentFretQuestionHtml(s, quiz){
-  const n = Number(s.qIndex) + 1;
-  const head = `<div class="lq-qnum" data-i18n="lq.qLabel" data-i18n-params="${escAttr(JSON.stringify({n}))}">${escHtml(t('lq.qLabel',{n}))}</div>`;
+  const head = lqQNumHtml(s);
   if(!s.target) return head + `<div class="lq-prompt" data-i18n="lq.noTapYet">${escHtml(t('lq.noTapYet'))}</div>`;
   const params = lqTargetParams(s.target, null, quiz);
   const top = head
     + `<div class="lq-prompt" data-i18n="${escAttr(quiz.promptKey)}" data-i18n-params="${escAttr(JSON.stringify(params))}">${escHtml(t(quiz.promptKey, params))}</div>`
     + lqTimerHtml(s);
   const mine = (lqMyAnswer && lqMyAnswer.qIndex === s.qIndex) ? lqMyAnswer.choice : null;
-  const board = `<div class="lq-board" id="lq-board">${typeof fgBoardSvg === 'function' ? fgBoardSvg('lq', null, lqBoardOpts(quiz, { strings: quiz.strings, clickFn: 'lqTap', hit: !mine })) : ''}</div>`;
+  const board = `<div class="lq-board" id="lq-board">${typeof fgBoardSvg === 'function' ? fgBoardSvg('lq', null, lqBoardOpts(quiz, { strings: quiz.strings, clickFn: 'lqTap', hit: !mine || !!quiz.changeAnswer })) : ''}</div>`;
   if(mine){
     const p = lqParseFretId(mine);
     const bg = (p && LQ_STRING_COLOR[p.string]) || '#555';
     const err = lqSendError ? `<p class="lq-note lq-note-bad" data-i18n="lq.saveFailed">${escHtml(t('lq.saveFailed'))}</p>` : '';
-    return top + `<div class="lq-locked"><div class="lq-locked-lbl" data-i18n="lq.locked">${escHtml(t('lq.locked'))}</div>`
+    return top + `<div class="lq-locked">` + lqLockedLblHtml(quiz)
       + `<div class="lq-locked-pick" style="background:${bg}">${escHtml(lqFretPickLabel(mine))}</div>`
       + `<div class="lq-locked-wait" data-i18n="lq.lockedWait">${escHtml(t('lq.lockedWait'))}</div>${err}</div>`
       + board;
   }
-  return top + `<p class="lq-note" data-i18n="lq.tapHint">${escHtml(t('lq.tapHint'))}</p>` + board;
+  const hint = quiz.changeAnswer ? 'lq.tapHintChange' : 'lq.tapHint';
+  return top + `<p class="lq-note" data-i18n="${hint}">${escHtml(t(hint))}</p>` + board;
 }
 
 /* "Name the power chord": the chord box is the question, the eight name
@@ -909,23 +962,25 @@ function lqPcNameBoxHtml(target, cls){
   return svg ? `<div class="lq-pcbox ${cls}">${svg}</div>` : '';
 }
 function lqStudentPcNameQuestionHtml(s, quiz){
-  const n = Number(s.qIndex) + 1;
-  const head = `<div class="lq-qnum" data-i18n="lq.qLabel" data-i18n-params="${escAttr(JSON.stringify({n}))}">${escHtml(t('lq.qLabel',{n}))}</div>`;
+  const head = lqQNumHtml(s);
   if(!s.target) return head + `<div class="lq-prompt" data-i18n="lq.noTapYet">${escHtml(t('lq.noTapYet'))}</div>`;
   const top = head
     + `<div class="lq-prompt" data-i18n="${escAttr(quiz.promptKey)}">${escHtml(t(quiz.promptKey))}</div>`
     + lqTimerHtml(s);
   const box = lqPcNameBoxHtml(s.target, 'lq-pcbox-q');
   const mine = (lqMyAnswer && lqMyAnswer.qIndex === s.qIndex) ? lqMyAnswer.choice : null;
-  if(mine){
-    const err = lqSendError ? `<p class="lq-note lq-note-bad" data-i18n="lq.saveFailed">${escHtml(t('lq.saveFailed'))}</p>` : '';
-    return top + box + `<div class="lq-locked"><div class="lq-locked-lbl" data-i18n="lq.locked">${escHtml(t('lq.locked'))}</div>`
-      + `<div class="lq-locked-pick" style="background:${LQ_PC_NAME_COLOR}">${escHtml(mine)}</div>`
-      + `<div class="lq-locked-wait" data-i18n="lq.lockedWait">${escHtml(t('lq.lockedWait'))}</div>${err}</div>`;
-  }
   const btns = lqPcNames().map((name, i) =>
     `<button type="button" class="lq-choice" style="--lq-c:${LQ_PC_NAME_COLOR}" onclick="lqAnswerPcName(${i})">${escHtml(name)}</button>`).join('');
-  return top + box + `<div class="lq-choices lq-pcnames">${btns}</div>`;
+  const choices = `<div class="lq-choices lq-pcnames">${btns}</div>`;
+  if(mine){
+    const err = lqSendError ? `<p class="lq-note lq-note-bad" data-i18n="lq.saveFailed">${escHtml(t('lq.saveFailed'))}</p>` : '';
+    // changeAnswer: the eight names stay under the pick, all alike (none marked), so another tap changes it.
+    return top + box + `<div class="lq-locked">` + lqLockedLblHtml(quiz)
+      + `<div class="lq-locked-pick" style="background:${LQ_PC_NAME_COLOR}">${escHtml(mine)}</div>`
+      + `<div class="lq-locked-wait" data-i18n="lq.lockedWait">${escHtml(t('lq.lockedWait'))}</div>${err}</div>`
+      + (quiz.changeAnswer ? choices : '');
+  }
+  return top + box + choices;
 }
 
 /* A right pick that the reveal never scored: the teacher's Reveal scores
@@ -980,7 +1035,7 @@ function lqStudentFretRevealHtml(s, quiz){
     verdict = `<div class="lq-verdict lq-v-no" data-i18n="lq.wrong">${escHtml(t('lq.wrong'))}</div>`;
   }
   const board = `<div class="lq-board" id="lq-board">${typeof fgBoardSvg === 'function' ? fgBoardSvg('lq', null, lqBoardOpts(quiz, { strings: quiz.strings, hit: false })) : ''}</div>`;
-  return verdict + lqFretAnswerHtml(correctIds, quiz.power && s.target ? lqPcChord(s.target.note) : null) + board + lqTallyHtml(s, quiz, mine) + lqScoreLineHtml(s);
+  return verdict + lqFretAnswerHtml(correctIds, quiz.power && s.target ? lqPcChord(s.target.note) : null) + board + (quiz.countOnly ? lqRightCountHtml(s) : lqTallyHtml(s, quiz, mine)) + lqScoreLineHtml(s);
 }
 
 function lqStudentPcNameRevealHtml(s, quiz){
@@ -997,7 +1052,7 @@ function lqStudentPcNameRevealHtml(s, quiz){
   const answer = s.correct
     ? `<div class="lq-answer" data-i18n="lq.answerIs" data-i18n-params="${escAttr(JSON.stringify({answer:s.correct}))}">${escHtml(t('lq.answerIs',{answer:s.correct}))}</div>`
     : '';
-  return verdict + answer + lqPcNameBoxHtml(s.target, 'lq-pcbox-rev') + lqTallyHtml(s, quiz, mine) + lqScoreLineHtml(s);
+  return verdict + answer + lqPcNameBoxHtml(s.target, 'lq-pcbox-rev') + (quiz.countOnly ? lqRightCountHtml(s) : lqTallyHtml(s, quiz, mine)) + lqScoreLineHtml(s);
 }
 
 // One correct id (the common case) or two (an octave pair, e.g. E on the
@@ -1136,11 +1191,19 @@ function lqUpdateTimer(){
 
 /* First tap wins — no changing your mind, same as Kahoot. Painted
    immediately and rolled back only if the write actually fails, so a
-   Chromebook on slow wifi still feels instant. */
+   Chromebook on slow wifi still feels instant.
+   The exception is a `changeAnswer` quiz (the two power chord quizzes,
+   Jonathan 2026-11-13): while the question is open and this student's time
+   has not run out, a tap on a DIFFERENT answer replaces the pick. The answer
+   doc is overwritten (the rules already allow it while state is 'question'),
+   so the teacher's Reveal scores the last tap that reached it, with that
+   tap's own `ms`. A change that fails to send goes back to the pick before
+   it, the one the server still holds. */
 function lqAnswer(choiceId){
   const s = lqSessionIsLive(lqSession) ? lqSession : null;
   if(!s || s.state !== 'question') return;
-  if(lqMyAnswer && lqMyAnswer.qIndex === s.qIndex) return;
+  const had = (lqMyAnswer && lqMyAnswer.qIndex === s.qIndex) ? lqMyAnswer : null;
+  if(had && (!lqQuiz(s.quizId).changeAnswer || had.choice === choiceId)) return;
   if(lqRestoring === s.sessionId + ':' + s.qIndex) return;   // still reading back a pick made before a reload
   if(Number(s.limitSec) && lqSecsLeft(s) === 0) return;
   if(!lqUid()) return;
@@ -1151,19 +1214,21 @@ function lqAnswer(choiceId){
   const ms = lqQOpenedAt ? Math.max(0, Math.round(performance.now() - lqQOpenedAt)) : 0;
   const qIndex = s.qIndex;
   lqSendError = false;
-  lqMyAnswer = { qIndex, choice: choiceId };
+  const mine = { qIndex, choice: choiceId };
+  lqMyAnswer = mine;
   lqRenderStudent();
   lqWriteAnswer(s, qIndex, choiceId, ms).catch(e => {
     console.warn('[live-quiz] answer did not send', e);
+    mine.failed = true;   // a later change that fails too must not roll back to this one
     if(lqMyAnswer && lqMyAnswer.qIndex === qIndex && lqMyAnswer.choice === choiceId){
-      lqMyAnswer = null; lqSendError = true; lqRenderStudent();
+      lqMyAnswer = (had && !had.failed) ? had : null; lqSendError = true; lqRenderStudent();
     }
   });
 }
 // A fret question's "choice" — the hit zones on fgBoardSvg's board call this
 // instead of lqAnswer directly, so the wire format stays one '<string>:<fret>'
-// id and every rule above (first tap wins, rollback on a failed write) is
-// reused as-is.
+// id and every rule above (first tap wins or changeAnswer, rollback on a
+// failed write) is reused as-is.
 function lqTap(sid, string, fret){ lqAnswer(lqFretId(string, fret)); }
 // A "Name the power chord" button: its index into lqPcNames() → the name.
 function lqAnswerPcName(i){ const name = lqPcNames()[Number(i)]; if(name) lqAnswer(name); }
@@ -1266,6 +1331,29 @@ function lqTAutoRevealFire(){
   const type = lqType(lqQuiz(s.quizId));
   if(type === 'fret') lqTeacherRevealFret();
   else if(type === 'pcname') lqTeacherRevealPcName();
+}
+/* How many questions the game has (Jonathan, 2026-11-13: "set the total question prior to starting game"). A box in
+   the strip before Start; blank or 0 = no set number. Written once, at Start, as `totalQ`. Remembered on this device
+   (`gc-lq-total`), like the time box. Default 10. After the last question's Reveal the strip offers "Final scores"
+   in place of the next-question buttons, and lqTeacherNext refuses to open one more. */
+const LQ_TOTAL_DEFAULT = 10, LQ_TOTAL_MAX = 50;
+function lqCleanTotal(v){
+  const n = Math.round(Number(v));
+  return Number.isFinite(n) && n > 0 ? Math.min(n, LQ_TOTAL_MAX) : 0;
+}
+let lqTTotal = LQ_TOTAL_DEFAULT;
+try { const v = localStorage.getItem('gc-lq-total'); if(v != null) lqTTotal = lqCleanTotal(v); } catch(e){ lqTTotal = LQ_TOTAL_DEFAULT; }
+function lqTSetTotal(v){
+  lqTTotal = lqCleanTotal(v);
+  try { localStorage.setItem('gc-lq-total', String(lqTTotal)); } catch(e){}
+}
+function lqTotalInputHtml(){
+  return `<label class="lq-ctl-lbl">Questions <input type="number" id="lq-total" class="lq-limit" min="0" max="${LQ_TOTAL_MAX}" step="1" inputmode="numeric" value="${lqTTotal ? escAttr(String(lqTTotal)) : ''}" placeholder="any" onchange="lqTSetTotal(this.value);this.value=lqTTotal||''"></label>`;
+}
+// True once the last of a set number of questions has been asked (its Reveal is the game's last).
+function lqLastQuestionDone(s){
+  const total = s ? Number(s.totalQ) || 0 : 0;
+  return total > 0 && Number(s.qIndex) + 1 >= total;
 }
 let lqTBusy = false;        // one write at a time; the buttons gate on it
 let lqTFretString = null;   // fret quiz only — the string picked in the strip; defaults to quiz.strings[0]
@@ -1419,12 +1507,11 @@ function lqStageLobbyHtml(s, quiz){
 function lqStageQuestionHtml(s, quiz){
   if(lqType(quiz) === 'fret') return lqStageFretQuestionHtml(s, quiz);
   if(lqType(quiz) === 'pcname') return lqStagePcNameQuestionHtml(s, quiz);
-  const n = Number(s.qIndex) + 1;
   const inCount = lqRoundAnswers(s, s.qIndex).length;
   const roster = lqRoster(s).length;
   const timer = Number(s.limitSec)
     ? `<div class="lq-st-timer" id="lq-st-timer">${escHtml(lqFmtLeft(Number(s.limitSec), Number(s.limitSec)))}</div>` : '';
-  return lqBilingualParams('lq.qLabel', 'lq-st-qnum', {n}, {n})
+  return lqStageQNumHtml(s)
     + lqBilingual(quiz.promptKey, 'lq-st-prompt')
     + timer
     + `<div class="lq-st-count"><span class="lq-st-big">${inCount}${roster ? ' / ' + roster : ''}</span>`
@@ -1439,7 +1526,6 @@ function lqStageQuestionHtml(s, quiz){
 // label, and gdChordAriaLabel names strings and frets only. checks.mjs 1cu
 // renders the stage and strip for all 14 shapes and fails on the name.
 function lqStageFretQuestionHtml(s, quiz){
-  const n = Number(s.qIndex) + 1;
   const inCount = lqRoundAnswers(s, s.qIndex).length;
   const roster = lqRoster(s).length;
   const timer = Number(s.limitSec)
@@ -1447,7 +1533,7 @@ function lqStageFretQuestionHtml(s, quiz){
   const prompt = s.target
     ? lqBilingualParams(quiz.promptKey, 'lq-st-prompt', lqTargetParams(s.target, 'en', quiz), lqTargetParams(s.target, 'es', quiz))
     : lqBilingual('lq.noTapYet', 'lq-st-prompt');
-  return lqBilingualParams('lq.qLabel', 'lq-st-qnum', {n}, {n})
+  return lqStageQNumHtml(s)
     + prompt + timer
     + `<div class="lq-st-count"><span class="lq-st-big">${inCount}${roster ? ' / ' + roster : ''}</span>`
     + `${lqBilingual('lq.stageAnswered', 'lq-st-cap')}</div>`;
@@ -1458,13 +1544,12 @@ function lqStageFretQuestionHtml(s, quiz){
 // name anywhere until Reveal (the doc does not even hold one: target is
 // { string, fret }).
 function lqStagePcNameQuestionHtml(s, quiz){
-  const n = Number(s.qIndex) + 1;
   const inCount = lqRoundAnswers(s, s.qIndex).length;
   const roster = lqRoster(s).length;
   const timer = Number(s.limitSec)
     ? `<div class="lq-st-timer" id="lq-st-timer">${escHtml(lqFmtLeft(Number(s.limitSec), Number(s.limitSec)))}</div>` : '';
   const prompt = s.target ? lqBilingual(quiz.promptKey, 'lq-st-prompt') : lqBilingual('lq.noTapYet', 'lq-st-prompt');
-  return lqBilingualParams('lq.qLabel', 'lq-st-qnum', {n}, {n})
+  return lqStageQNumHtml(s)
     + prompt
     + `<div class="lq-st-pcrow">${lqPcNameBoxHtml(s.target, 'lq-pcbox-stage')}<div class="lq-st-pcside">${timer}`
     + `<div class="lq-st-count"><span class="lq-st-big">${inCount}${roster ? ' / ' + roster : ''}</span>`
@@ -1473,9 +1558,18 @@ function lqStagePcNameQuestionHtml(s, quiz){
 
 // Reveal: the name, then three columns: the box, the tally of all eight, the
 // top 5 (stacked, eight bars and five rows ran the stage past 657px).
+// countOnly (pc-name today): two columns, the box and "n / m correct" over the
+// top 5; no bars, so the room does not see which wrong names were picked.
+function lqStageRightCountHtml(s){
+  const p = lqRightCount(s);
+  return `<div class="lq-st-count"><span class="lq-st-big">${p.n} / ${p.total}</span>${lqBilingual('lq.stageCorrect', 'lq-st-cap')}</div>`;
+}
 function lqStagePcNameRevealHtml(s, quiz){
   const answer = s.correct ? `<div class="lq-st-answer">${escHtml(s.correct)}</div>` : '';
   const lb = lqRankedNamed(s).slice(0, 5).map(r => lqLbRowHtml(r)).join('');
+  if(quiz.countOnly) return lqBilingualParams('lq.stageAnswerLabel', 'lq-st-qnum', {n: Number(s.qIndex) + 1}, {n: Number(s.qIndex) + 1})
+    + answer
+    + `<div class="lq-st-split">${lqPcNameBoxHtml(s.target, 'lq-pcbox-stage')}<div>${lqStageRightCountHtml(s)}<ol class="lq-lb lq-lb-stage">${lb}</ol></div></div>`;
   return lqBilingualParams('lq.stageAnswerLabel', 'lq-st-qnum', {n: Number(s.qIndex) + 1}, {n: Number(s.qIndex) + 1})
     + answer
     + `<div class="lq-st-split lq-st-split3">${lqPcNameBoxHtml(s.target, 'lq-pcbox-stage')}${lqTallyHtml(s, quiz, null)}<ol class="lq-lb lq-lb-stage">${lb}</ol></div>`;
@@ -1523,7 +1617,7 @@ function lqStageFretRevealHtml(s, quiz){
   const lb = lqRankedNamed(s).slice(0, 5).map(r => lqLbRowHtml(r)).join('');
   return lqBilingualParams('lq.stageAnswerLabel', 'lq-st-qnum', {n: Number(s.qIndex) + 1}, {n: Number(s.qIndex) + 1})
     + answer
-    + `<div class="lq-st-split">${board}<div>${lqTallyHtml(s, quiz, null)}<ol class="lq-lb lq-lb-stage">${lb}</ol></div></div>`;
+    + `<div class="lq-st-split">${board}<div>${quiz.countOnly ? lqStageRightCountHtml(s) : lqTallyHtml(s, quiz, null)}<ol class="lq-lb lq-lb-stage">${lb}</ol></div></div>`;
 }
 
 function lqStageEndedHtml(s){
@@ -1542,9 +1636,10 @@ function lqStageEndedHtml(s){
    (lqTargetNotes). Nothing here names a fret — the strip is on the
    projector too. */
 function lqFretPickerHtml(quiz, busy){
-  const cur = quiz.strings.includes(lqTFretString) ? lqTFretString : quiz.strings[0];
-  const strings = quiz.strings.length > 1
-    ? `<div class="lq-ctl-marks">${quiz.strings.map(k =>
+  const roots = lqRootStrings(quiz);
+  const cur = roots.includes(lqTFretString) ? lqTFretString : roots[0];
+  const strings = roots.length > 1
+    ? `<div class="lq-ctl-marks">${roots.map(k =>
         `<button type="button" class="lq-ctl${k === cur ? ' go' : ' ghost'}" onclick="lqTFretString='${k}';lqPaintControls()">${escHtml(tIn(LQ_STRING_KEY[k], 'en'))}</button>`).join('')}</div>`
     : '';
   // A power quiz names its buttons as chords (E5 … D5) in fret order; the
@@ -1579,7 +1674,7 @@ function lqPaintControls(){
   if(!el) return;
   // A snapshot landing mid-typing would wipe the half-typed number; the
   // input's own onchange (blur / Enter) saves it and the next paint catches up.
-  if(document.activeElement && document.activeElement.id === 'lq-limit' && !lqTBusy) return;
+  if(document.activeElement && (document.activeElement.id === 'lq-limit' || document.activeElement.id === 'lq-total') && !lqTBusy) return;
   const s = lqTSession;
   const busy = lqTBusy ? ' disabled' : '';
   const full = `<button type="button" class="lq-ctl ghost" onclick="lqToggleFullscreen()">Full screen</button>`
@@ -1597,13 +1692,13 @@ function lqPaintControls(){
         <option value="flat"${lqTScoring === 'flat' ? ' selected' : ''}>Every correct answer = 1000</option>
         <option value="speed"${lqTScoring === 'speed' ? ' selected' : ''}>Faster = more points</option>
       </select></label>`
-      + lqLimitInputHtml(lqTPickedQuizId) + lqAutoRevealInputHtml(lqTPickedQuizId);
+      + lqTotalInputHtml() + lqLimitInputHtml(lqTPickedQuizId) + lqAutoRevealInputHtml(lqTPickedQuizId);
     const closeBtn = (s && s.state === 'ended')
       ? `<button type="button" class="lq-ctl ghost" onclick="lqTeacherClose()"${busy}>Clear the board</button>` : '';
     el.innerHTML = `<label class="lq-ctl-lbl">Quiz <select id="lq-quiz-pick" onchange="lqTPickedQuizId=this.value;lqTScoring=lqDefaultScoring(this.value);lqPaintControls()">${opts}</select></label>${scoring}`
       + `<button type="button" class="lq-ctl go" onclick="lqTeacherStart()"${busy}>Start game</button>`
       + `<button type="button" class="lq-ctl ghost" onclick="lqTeacherPreview()"${busy}>Preview</button>${closeBtn}${full}`
-      + `<div class="lq-ctl-hint">${escHtml(lqQuiz(lqTPickedQuizId).teacherHint)} Time to answer: blank or 0 = no limit. Reveal when time runs out: the app presses Reveal for you about a second after the clock hits 0 (only on quizzes the app scores). Preview runs the quiz on this screen only, without inviting students.</div>`;
+      + `<div class="lq-ctl-hint">${escHtml(lqQuiz(lqTPickedQuizId).teacherHint)} Questions: how many the game has (blank or 0 = no set number). Time to answer: blank or 0 = no limit. Reveal when time runs out: the app presses Reveal for you about a second after the clock hits 0 (only on quizzes the app scores). Preview runs the quiz on this screen only, without inviting students.</div>`;
     return;
   }
   const quiz = lqQuiz(s.quizId);
@@ -1633,6 +1728,11 @@ function lqPaintControls(){
     el.innerHTML = head
       + `<button type="button" class="lq-ctl ghost" onclick="lqTeacherEnd()"${busy}>End game</button>${full}`
       + `<div class="lq-ctl-hint">${escHtml(quiz.teacherHint)}</div>` + pv;
+    return;
+  }
+  if(lqLastQuestionDone(s)){
+    el.innerHTML = `<button type="button" class="lq-ctl go" onclick="lqTeacherEnd()"${busy}>Final scores</button>${full}`
+      + `<div class="lq-ctl-hint">That was question ${Number(s.qIndex) + 1} of ${Number(s.totalQ)}, the last one.</div>` + pv;
     return;
   }
   const opener = fret ? lqFretPickerHtml(quiz, busy)
@@ -1689,7 +1789,7 @@ async function lqTeacherStart(){
   await lqWrite({
     sessionId, quizId, state: 'lobby', qIndex: -1,
     correct: null, correctIds: null, tally: null, scores: {}, target: null,
-    speedBonus: speed, limitSec: lqTLimitFor(quizId),
+    speedBonus: speed, limitSec: lqTLimitFor(quizId), totalQ: lqTTotal,
     startedAt: firebase.firestore.FieldValue.serverTimestamp(),
     askedAt: null, endedAt: null
   }, true);
@@ -1736,6 +1836,7 @@ async function lqTeacherNext(target){
   const s = lqTSession;
   if(!s) return;
   const next = s.state === 'lobby' ? 0 : Number(s.qIndex) + 1;
+  if(Number(s.totalQ) > 0 && next >= Number(s.totalQ)) return;   // the set number of questions has been asked
   // The time box between questions can change the limit mid-game; each new
   // question carries whatever it says now.
   return lqWrite({
@@ -1753,7 +1854,7 @@ async function lqTeacherNext(target){
 async function lqTeacherOpenFret(string, note){
   const s = lqTSession; if(!s) return;
   const quiz = lqQuiz(s.quizId);
-  if(!quiz.strings || !quiz.strings.includes(string)) return;
+  if(!lqRootStrings(quiz).includes(string)) return;
   if(note === 'random'){ ({ string, note } = lqRandomTarget(quiz, s.target)); }
   if(!lqTargetIds(quiz, { string, note }).length) return;
   lqTFretString = string;
@@ -1766,7 +1867,8 @@ async function lqTeacherOpenFret(string, note){
 function lqRandomTarget(quiz, prev){
   let string, note, tries = 0;
   do {
-    string = quiz.strings[Math.floor(Math.random() * quiz.strings.length)];
+    const roots = lqRootStrings(quiz);
+    string = roots[Math.floor(Math.random() * roots.length)];
     const present = lqTargetNotes(quiz, string);
     note = present[Math.floor(Math.random() * present.length)];
     tries++;

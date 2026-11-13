@@ -383,6 +383,27 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-13 — Live quiz: the two power chord quizzes change, and a game gets a set length (Jonathan, chat). Fast.**
+      His five asks, on `pc-find` and `pc-name` only unless noted. **(1) Change an answer** (`changeAnswer:true`): while
+      the question is open and the student's time has not run out, a tap on another answer replaces the pick (the
+      answer doc is overwritten; the rules already allowed it; the last tap's own `ms` is what speed scoring reads; a
+      change that fails to send goes back to the pick before it). Every other quiz is still first tap wins. **(2) The
+      Reveal shows a count, not the spread** (`countOnly:true`; his pick of three: "Count + top-5 scores"): stage =
+      the answer, "14 / 22 correct" and the named top 5; no tally bars and no tap counts on the board. A student's
+      screen = their own verdict and "14 of 22 correct", no bars. **(3) Find shows all six strings, flipped**:
+      `strings` is the board (high E on top, low E at the bottom); the new `rootStrings` (low E, A) is what the strip
+      asks on. **(4) Questions box before Start, every quiz** (`totalQ` on the doc, default 10, blank or 0 = no set
+      number, kept on the device as `gc-lq-total`): labels read "Question 3 of 10"; after the last Reveal the strip
+      shows "Final scores" and `lqTeacherNext` refuses one more. No `firestore.rules` change.
+      Interpretations to check: the count's "of 22" is the answers the Reveal counted, not the roster; a student still
+      sees their own "Correct / Not this time"; the game does not end by itself after the last question (he presses
+      Final scores, so the class sees the last answer).
+      `tools/live-quiz-loop.mjs` now models all of it (R1 per quiz, R7 with an earlier pick on the teacher's screen,
+      new rules C and T, `totalQ` pinned in the open-question doc): exit 0, 142,756 checks, 32 changed answers, 554
+      count-only Reveal screens. `checks.mjs` 1f pins the two flags to those two quizzes, the six-string order,
+      `rootStrings` and the default of 10. Screens looked at in headless Chrome at 1366×657 with made-up players
+      (14 states, EN + one ES). `tools/smoke.mjs` does not walk the Live quiz.
+
 - [x] **2026-11-13 (later the same day) — Student data never goes to Claude; the emergency kit; name-free recording zips; two new checks on GitHub.**
       **The rule and its guard** (Jonathan: "I am allowed to store data in google/firestore but not in claude";
       "let's block student names from claude"; his own name is fine; no district letter is needed): CLAUDE.md

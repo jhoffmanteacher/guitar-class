@@ -20,7 +20,9 @@ projected stage (`?teacher=true` → **Live quiz**). One game runs at a time, in
   `power:true` quiz).
   - "Find the power chord" (`pc-find`, `power:true`): the target is a chord's
     root (`target.note`, ♯ spelling, e.g. `'F♯'`), the strip offers
-    E5 F5 F♯5 G5 A5 B5 C5 D5 on the low E and A strings, and every fret in
+    E5 F5 F♯5 G5 A5 B5 C5 D5 on the low E and A strings (`rootStrings`; the
+    BOARD is `strings`, all six, high E on top and low E at the bottom,
+    Jonathan 2026-11-13, so a tap on another string is just a wrong answer), and every fret in
     `LQ_PC_FIND_FRETS` (0–12, an unconfirmed default) that is the root
     counts. F♯ is NOT in `LQ_NATURALS`: adding it there would put an F♯
     button into the three note quizzes. The stage reveal also draws the
@@ -50,6 +52,21 @@ projected stage (`?teacher=true` → **Live quiz**). One game runs at a time, in
   - The board is the app's `fgBoardSvg(sid, kind, opts)` (`app/drills.js`) behind a `typeof`
     guard. The fret UI only ever renders on `index.html`, never on a Journey
     page.
+- **The two power chord quizzes differ from the rest in two ways** (Jonathan,
+  2026-11-13; `checks.mjs` 1f pins both flags to `pc-find` and `pc-name`):
+  - `changeAnswer:true`: a student may tap another answer while the question
+    is open and their own time has not run out. The last tap that reaches the
+    teacher before Reveal is the one scored, with its own `ms`. The eight Name
+    buttons stay under the pick, all alike: never mark the picked one in a way
+    that could also mark the right one. Every other quiz: first tap wins.
+  - `countOnly:true`: the Reveal shows "n of m correct" (`lqRightCount`, from
+    the tally) and the scores, never the spread of picks: no tally bars on the
+    stage or a student's screen, no tap counts on the stage board.
+- **The teacher sets how many questions a game has, before Start** (the
+  Questions box, default 10, blank or 0 = no set number; `totalQ` on the doc;
+  kept on the device as `gc-lq-total`). Labels read "Question 3 of 10". After
+  the last question's Reveal the strip offers "Final scores" only; the game
+  does not end by itself.
 - **The public session doc carries NO player name** (2026-11-05, Jonathan: no
   per-period minutes tied to a name, readable by anyone).
   `liveQuiz/current.scores` is `{uid: {pts, right, answered, last, lastRight}}`,

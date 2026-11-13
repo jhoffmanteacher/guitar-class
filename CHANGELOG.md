@@ -6,6 +6,13 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-13 — Live quiz: change your answer on the two power chord games
+
+- **In "Find the power chord" and "Name the power chord" you can change your answer.** Tap another fret or another name before time runs out. Your last tap is your answer.
+- **"Find the power chord" now shows all six strings**, with low E at the bottom and high e at the top.
+- **After each question in those two games you see how many got it right** (like "14 of 22 correct"), not which wrong answers were picked.
+- **A game can have a set number of questions.** The question label then reads like "Question 3 of 10".
+
 ## 2026-11-12 — Your practice recap shows on a practice card; a bigger "Yes, save it" button
 
 - **Pressed Stop on an open practice card? Your "+N min" practice recap now shows beside the card.** In full screen it shows as soon as you go back to All activities.

@@ -115,7 +115,10 @@
    the teacher's screen, all taken from the fake world, and these rules (each from prose, not code). In a preview the
    "doc" is the console's own copy (lqTSession), READ as data after each event, the way a real game's doc is read from
    the fake Firestore (World.readSession); nothing in the model calls into a vm.
-   R1  First tap wins: a student's first accepted pick for a question is their answer; no second pick, also not
+   R1  (2026-11-13: on a `changeAnswer` quiz, the two power chord quizzes, a tap on a DIFFERENT answer while the
+       question is open and the student's time has not run out replaces the pick; the same answer again changes
+       nothing; a refused change leaves the pick before it. Rule file, "The two power chord quizzes differ".)
+       Every other quiz: First tap wins: a student's first accepted pick for a question is their answer; no second pick, also not
        after a reload or from a second tab (live-quiz.js, the comment above the student screen: "First tap wins — no
        changing your mind"; lqOnSession's comment: a reload "was a second pick", read the pick back first).
    R2  A tap counts only while that student's screen shows the question, and not while the tab is still reading
@@ -203,6 +206,12 @@
        automatic or clicked, may come before a slow-wifi or late-joining student's own time is up. Counted every run, so
        a change in the grace is visible: in-time taps (R3/R4) refused or scored "too late" because an AUTOMATIC Reveal
        came first, the same for a teacher's click, each over its in-time taps; late joiners whose own clock was cut short.
+   C   (2026-11-13, rule file) At the Reveal of a `countOnly` quiz neither the stage nor a student's screen shows the
+       spread of picks (no tally bars, no tap counts on the stage board); both show the count of right answers out of
+       the answers the Reveal counted. Every other quiz keeps its bars.
+   T   (2026-11-13, rule file) The Questions box before Start is the game's length: 10 on a device that never set it,
+       blank = no set number, written as totalQ and unchanged for the whole game. Labels read "Question n of total".
+       After the last question's Reveal the strip offers "Final scores" and no next question.
    COVERAGE: a full run (no --case) fails when any rule above was exercised 0 times; the counts print every run.
 
    SURFACES readable before Reveal, and how each is held (round 4, 2026-11-12). PINNED = compared whole with what the
@@ -335,13 +344,13 @@ const SVG_ATTRS = new Set(['aria-label', 'cx', 'cy', 'dominant-baseline', 'fill'
 /* The control strip during a question (it is on the projector too). */
 const STRIP_Q_ATTRS = { mc: new Set(['button class="lq-ctl ghost"', 'button class="lq-ctl mark"', 'button disabled=""', 'button onclick="lqTeacherEnd()"', 'button onclick="lqTeacherReveal(\'A\')"', 'button onclick="lqTeacherReveal(\'B\')"', 'button onclick="lqTeacherReveal(\'D\')"', 'button onclick="lqTeacherReveal(\'E6\')"', 'button onclick="lqTeacherReveal(\'G\')"', 'button onclick="lqTeacherReveal(\'e1\')"', 'button onclick="lqToggleFullscreen()"', 'button style="--lq-c:#0f6b64"', 'button style="--lq-c:#185fa5"', 'button style="--lq-c:#3b6d11"', 'button style="--lq-c:#5b3f96"', 'button style="--lq-c:#a2530b"', 'button style="--lq-c:#b3372a"', 'button type="button"', 'div class="lq-ctl-hint"', 'div class="lq-ctl-marks"', 'span class="lq-ctl-lbl"']), fret: new Set(['button class="lq-ctl ghost"', 'button class="lq-ctl go"', 'button disabled=""', 'button onclick="lqTeacherEnd()"', 'button onclick="lqTeacherRevealFret()"', 'button onclick="lqToggleFullscreen()"', 'button type="button"', 'div class="lq-ctl-hint"']), pcname: new Set(['button class="lq-ctl ghost"', 'button class="lq-ctl go"', 'button disabled=""', 'button onclick="lqTeacherEnd()"', 'button onclick="lqTeacherRevealPcName()"', 'button onclick="lqToggleFullscreen()"', 'button type="button"', 'div class="lq-ctl-hint"']) };
 /* A student's screen before Reveal, outside the answer buttons and the chord box (data-i18n-params checked exactly first). */
-const STUDENT_Q_ATTRS = { mc: new Set(['div aria-live="off"', 'div class="lq-choices"', 'div class="lq-prompt"', 'div class="lq-qnum"', 'div class="lq-quiz-title"', 'div class="lq-timer"', 'div data-i18n-params=OK', 'div data-i18n="lq.prompt.stringId"', 'div data-i18n="lq.qLabel"', 'div data-i18n="lq.title.stringId"', 'div id="lq-timer"']), fret: new Set(['div aria-live="off"', 'div class="lq-board"', 'div class="lq-prompt"', 'div class="lq-qnum"', 'div class="lq-quiz-title"', 'div class="lq-timer"', 'div data-i18n-params=OK', 'div data-i18n="lq.prompt.fretTap"', 'div data-i18n="lq.prompt.pcFind"', 'div data-i18n="lq.qLabel"', 'div data-i18n="lq.title.fretAll"', 'div data-i18n="lq.title.fretLowE"', 'div data-i18n="lq.title.fretLowEA"', 'div data-i18n="lq.title.pcFind"', 'div id="lq-board"', 'div id="lq-timer"', 'p class="lq-note"', 'p data-i18n="lq.tapHint"']), pcname: new Set(['div aria-live="off"', 'div class="lq-choices lq-pcnames"', 'div class="lq-pcbox lq-pcbox-q"', 'div class="lq-prompt"', 'div class="lq-qnum"', 'div class="lq-quiz-title"', 'div class="lq-timer"', 'div data-i18n-params=OK', 'div data-i18n="lq.prompt.pcName"', 'div data-i18n="lq.qLabel"', 'div data-i18n="lq.title.pcName"', 'div id="lq-timer"']) };
+const STUDENT_Q_ATTRS = { mc: new Set(['div aria-live="off"', 'div class="lq-choices"', 'div class="lq-prompt"', 'div class="lq-qnum"', 'div class="lq-quiz-title"', 'div class="lq-timer"', 'div data-i18n-params=OK', 'div data-i18n="lq.prompt.stringId"', 'div data-i18n="lq.qLabel"', 'div data-i18n="lq.qLabelOf"', 'div data-i18n="lq.title.stringId"', 'div id="lq-timer"']), fret: new Set(['div aria-live="off"', 'div class="lq-board"', 'div class="lq-prompt"', 'div class="lq-qnum"', 'div class="lq-quiz-title"', 'div class="lq-timer"', 'div data-i18n-params=OK', 'div data-i18n="lq.prompt.fretTap"', 'div data-i18n="lq.prompt.pcFind"', 'div data-i18n="lq.qLabel"', 'div data-i18n="lq.qLabelOf"', 'div data-i18n="lq.title.fretAll"', 'div data-i18n="lq.title.fretLowE"', 'div data-i18n="lq.title.fretLowEA"', 'div data-i18n="lq.title.pcFind"', 'div id="lq-board"', 'div id="lq-timer"', 'p class="lq-note"', 'p data-i18n="lq.tapHint"', 'p data-i18n="lq.tapHintChange"']), pcname: new Set(['div aria-live="off"', 'div class="lq-choices lq-pcnames"', 'div class="lq-pcbox lq-pcbox-q"', 'div class="lq-prompt"', 'div class="lq-qnum"', 'div class="lq-quiz-title"', 'div class="lq-timer"', 'div data-i18n-params=OK', 'div data-i18n="lq.prompt.pcName"', 'div data-i18n="lq.qLabel"', 'div data-i18n="lq.qLabelOf"', 'div data-i18n="lq.title.pcName"', 'div id="lq-timer"']) };
 /* R3-1: the field names of liveQuiz/current while a question is open (pinned 2026-11-12 from main 7c1792e). */
 /* F4-1: target's keys per quiz type (live-quiz.js header and rule file: a note quiz's target is {string, note}, a Name
    question's {string, fret}, never the name; an mc question has none). */
 const STUDENT_LOCAL_KEYS = new Set(['gc-lang']), STUDENT_SESSION_KEYS = new Set(['lq-q-opened']);
 const TARGET_KEYS = { mc: null, fret: 'note,string', pcname: 'fret,string' };
-const DOC_Q_FIELDS = new Set(['askedAt', 'correct', 'correctIds', 'endedAt', 'limitSec', 'qIndex', 'quizId', 'scores', 'sessionId', 'speedBonus', 'startedAt', 'state', 'tally', 'target']);
+const DOC_Q_FIELDS = new Set(['askedAt', 'correct', 'correctIds', 'endedAt', 'limitSec', 'qIndex', 'quizId', 'scores', 'sessionId', 'speedBonus', 'startedAt', 'state', 'tally', 'target', 'totalQ']);
 /* The preview's own controls on the strip (live-quiz.js lqPaintControls, 2026-11-12): an "Exit preview" button whose
    handler takes no argument, and a fixed hint line. Accepted ONLY while the console is previewing; they carry no answer
    (no argument, fixed text). */
@@ -362,12 +371,16 @@ let HAS_PREVIEW = false, HAS_RELOAD_FIX = false;
    lands in the answer docs before scoring"). */
 const AUTO_GRACE_MS = 1500;
 /* R3-2: a student's "Locked in" screen before Reveal (their own pick set aside as #MINE#); pinned from main 7c1792e. */
-const LOCKED_EXTRA = ['div class="lq-locked"', 'div class="lq-locked-lbl"', 'div class="lq-locked-pick"', 'div class="lq-locked-wait"', 'div data-i18n="lq.locked"', 'div data-i18n="lq.lockedWait"', 'div style=PICK'];
+const LOCKED_EXTRA = ['div class="lq-locked"', 'div class="lq-locked-lbl"', 'div class="lq-locked-pick"', 'div class="lq-locked-wait"', 'div data-i18n="lq.locked"', 'div data-i18n="lq.lockedChange"', 'div data-i18n="lq.lockedWait"', 'div style=PICK'];
 /* F4-2: the Locked-in pick's colour: the bank's colour of an mc choice; one fixed colour for a Name; per string for a
    fret pick. Hand copies of live-quiz.js LQ_PC_NAME_COLOR and LQ_STRING_COLOR (pinned 2026-11-12, main cc110dc). */
 const PC_NAME_COLOR = '#185fa5';
 const STRING_COLOR = { lowE: '#b3372a', A: '#a2530b', D: '#3b6d11', G: '#185fa5', B: '#5b3f96', highE: '#0f6b64' };
 const STUDENT_LOCKED_ATTRS = Object.fromEntries(Object.entries(STUDENT_Q_ATTRS).map(([k, set]) => [k, new Set([...[...set].filter(x => !x.startsWith('p ') && !x.includes('lq-choices')), ...LOCKED_EXTRA])]));
+/* 2026-11-13: on a changeAnswer quiz the eight Name buttons stay under the student's pick (all alike, none marked),
+   and a refused CHANGE leaves the pick before it on screen with the fixed save-failed line. */
+STUDENT_LOCKED_ATTRS.pcname.add('div class="lq-choices lq-pcnames"');
+for (const k of ['fret', 'pcname']) for (const a of ['p class="lq-note lq-note-bad"', 'p data-i18n="lq.saveFailed"']) STUDENT_LOCKED_ATTRS[k].add(a);
 /* The stage's elements during a question, in order (count and order, not only which ones). */
 const STAGE_Q_SEQ = {
   'fret': ['div.lq-st-qnum > div.lq-st-prompt > div.lq-st-count > span.lq-st-big > div.lq-st-cap'],
@@ -744,7 +757,10 @@ function modelRank(scores, names) {
 class Model {
   constructor(bank, tIn, mode) { this.bank = bank; this.tIn = tIn; this.mode = mode; this.sid = null; this.names = {}; this.reset(); }
   reset() { this.lastQ = -1; this.q = {}; this.scores = {}; this.ans = new Map(); this.first = new Map(); this.tabSeen = new Map(); this.scored = {}; this.reveals = {}; }
-  startGame(sid, quizId, speed) { this.sid = sid; this.quiz = this.bank[quizId]; this.speed = speed; this.reset(); }
+  startGame(sid, quizId, speed, total) { this.sid = sid; this.quiz = this.bank[quizId]; this.speed = speed; this.total = total || 0; this.reset(); }
+  /* The question label: "Question 3", or "Question 3 of 10" when the teacher set a number of questions before Start. */
+  qLabel(lang, q) { return this.total ? this.tIn('lq.qLabelOf', lang, { n: q + 1, total: this.total }) : this.tIn('lq.qLabel', lang, { n: q + 1 }); }
+  qParams(q) { return this.total ? { n: q + 1, total: this.total } : { n: q + 1 }; }
   openQuestion(q, target, limit, mcAnswer) { this.q[q] = { target, limit, mcAnswer, ...modelCorrect(this.quiz, target, mcAnswer) }; }
   isRight(q, choice) { return this.q[q].ids.includes(choice); }
   shown(uid, tabId, doc, t) {
@@ -754,26 +770,36 @@ class Model {
     if (!this.tabSeen.has(kt)) this.tabSeen.set(kt, t);
   }
   clock(uid, tabId, q) { return this.mode === 'tab' ? this.tabSeen.get(`${tabId}|${q}`) : this.first.get(`${uid}|${q}`); }
-  answerOf(uid, q) { return this.ans.get(`${uid}|${q}`) || null; }
-  eligible(uid, tabId, shownDoc, readingBack, t) {
+  /* The student's answer: their newest tap the rules did not refuse (R1; on a changeAnswer quiz a later tap replaces
+     an earlier one, and a refused change leaves the one before it standing). */
+  answerOf(uid, q) { let a = this.ans.get(`${uid}|${q}`) || null; while (a && a.state === 'rejected' && a.prev) a = a.prev; return a; }
+  chain(uid, q) { const out = []; for (let a = this.ans.get(`${uid}|${q}`) || null; a; a = a.prev) out.push(a); return out; }
+  eligible(uid, tabId, shownDoc, readingBack, t, choice) {
     if (!shownDoc || shownDoc.sessionId !== this.sid || shownDoc.state !== 'question') return { ok: false, why: 'no question on this screen' };
     const q = shownDoc.qIndex, Q = this.q[q];
     if (!Q) return { ok: false, why: `question ${q} never opened` };
     const a = this.answerOf(uid, q);
-    if (a && a.state !== 'rejected') return { ok: false, q, why: `already answered ${a.choice} (first tap wins)` };
+    const change = !!(a && a.state !== 'rejected' && this.quiz.changeAnswer && a.choice !== choice);
+    if (a && a.state !== 'rejected' && !change) return { ok: false, q, why: `already answered ${a.choice} (${this.quiz.changeAnswer ? 'the same answer again changes nothing' : 'first tap wins'})` };
     if (readingBack) return { ok: false, q, why: 'this tab is still reading back its own answer after a reload' };
     const start = this.clock(uid, tabId, q);
     const ms = t - start;
     if (Q.limit > 0 && ms >= Q.limit * 1000) return { ok: false, q, ms, why: `time is up: ${ms} ms since the question first reached this student${this.mode === 'tab' ? ' in this tab' : ''}, limit ${Q.limit} s` };
-    return { ok: true, q, ms };
+    return { ok: true, q, ms, change };
   }
-  tap(uid, q, choice, ms, t, rogue) { this.ans.set(`${uid}|${q}`, { choice, ms, t, state: rogue ? 'rogue' : 'pending' }); }
-  outcome(uid, q, choice, ok) { const a = this.answerOf(uid, q); if (a && a.choice === choice && a.state === 'pending') a.state = ok ? 'ok' : 'rejected'; }
+  tap(uid, q, choice, ms, t, rogue) { const k = `${uid}|${q}`; this.ans.set(k, { choice, ms, t, state: rogue ? 'rogue' : 'pending', prev: this.ans.get(k) || null }); }
+  /* A write's fate, matched to the OLDEST tap of that choice still on its way (a student's writes commit in order). */
+  outcome(uid, q, choice, ok) { const a = this.chain(uid, q).reverse().find(x => x.choice === choice && x.state === 'pending'); if (a) a.state = ok ? 'ok' : 'rejected'; }
   expectReveal(q, delivered) {
     const Q = this.q[q], rows = [], unexpected = [];
     for (const [uid, d] of delivered) {
       if (d.sessionId !== this.sid || d.qIndex !== q) continue;
-      const a = this.answerOf(uid, q);
+      /* R7: the Reveal scores the answer the teacher's screen holds. On a changeAnswer quiz that may be an earlier pick
+         than the student's last (the change had not reached the teacher yet): it counts when it IS a tap of this
+         student the rules accepted, with that tap's own time. */
+      const a = this.quiz.changeAnswer
+        ? this.chain(uid, q).find(x => x.choice === d.choice && x.ms === d.ms && (x.state === 'ok' || x.state === 'pending')) || null
+        : this.answerOf(uid, q);
       if (a && (a.state === 'ok' || a.state === 'pending')) rows.push({ uid, choice: a.choice, ms: a.ms });
       else unexpected.push(uid);
     }
@@ -796,7 +822,9 @@ class Model {
     const a = this.answerOf(uid, q);
     if (!a || a.state === 'rejected' || a.state === 'rogue') return { kind: 'none' };
     if (!this.isRight(q, a.choice)) return { kind: 'no' };
-    if (this.scored[q] && this.scored[q].has(uid)) return { kind: 'yes', pts: this.scores[uid].last };
+    /* scored AND scored right: on a changeAnswer quiz the Reveal may have scored an earlier, wrong pick; the right one
+       the student changed to then came too late. */
+    if (this.scored[q] && this.scored[q].has(uid) && this.reveals[q].scores[uid].lastRight) return { kind: 'yes', pts: this.reveals[q].scores[uid].last };
     return { kind: 'late' };
   }
   stagePrompt(target) {
@@ -827,7 +855,7 @@ const POINTS_BY_HAND = [[2500, true, 10, 875], [0, true, 10, 1000], [12000, true
 /* ════════════════ end of MODEL ════════════════ */
 /* Coverage (R1-2): in a full default run every rule must be exercised at least once; 0 fails the run. */
 const COVERAGE = [
-  ['R1', 'R1 second taps refused (first tap wins)'], ['R2', 'R2 taps refused during the read-back'], ['R3late', 'R3 taps refused after time-up'],
+  ['R1', 'R1 second taps refused (first tap wins)'], ['R1change', 'R1 answers changed while the question was open (changeAnswer quizzes)'], ['Ccount', 'C countOnly Reveal screens (a count, no spread of picks)'], ['Tlast', 'T strips after the last of a set number of questions'], ['Tmore', 'T strips between questions with more to come'], ['R2', 'R2 taps refused during the read-back'], ['R3late', 'R3 taps refused after time-up'],
   ['R3buzzer', 'R3 taps at the buzzer refused by the screen code'], ['R4', 'R4 answer times compared'], ['R5', 'R5 taps judged in a reloaded tab'],
   ['R6speed', 'R6 speed answers scored (with a limit)'], ['R6nolimit', 'R6 speed + no-limit answers scored'], ['R6flat', 'R6 flat answers scored'],
   ['R7late', 'R7 right answers too late for the Reveal'], ['R7refused', 'R7 answers refused by the rules'], ['R8names', 'R8 doc writes scanned for names'],
@@ -992,13 +1020,18 @@ class World {
       if (!why) {
         this.commits = this.commits || new Map();
         const n = (this.commits.get(k) || 0) + 1; this.commits.set(k, n);
-        this.check('R1 one pick', n === 1, () => `${tab.label}: a SECOND answer doc for question ${data.qIndex + 1} reached the server (now ${data.choice}): first tap must win`);
+        this.check('R1 one pick', n === 1 || !!this.model.quiz.changeAnswer, () => `${tab.label}: a SECOND answer doc for question ${data.qIndex + 1} reached the server (now ${data.choice}): first tap must win`);
       }
     }
   }
   onAnswerRefusedBack(tab, uid, data) {
     tab.refused = tab.refused || new Set(); tab.refused.add(`${data.sessionId}|${data.qIndex}`);
-    if (data.sessionId === this.model.sid && data.qIndex >= 0) this.model.outcome(uid, data.qIndex, data.choice, false);
+    if (data.sessionId === this.model.sid && data.qIndex >= 0) {
+      this.model.outcome(uid, data.qIndex, data.choice, false);
+      /* The tab goes back to the pick that still stands (changeAnswer: the one before the refused change), or to none. */
+      const k = `${data.sessionId}|${data.qIndex}`, a = this.model.answerOf(uid, data.qIndex);
+      if (tab.picks && tab.picks[k] === data.choice) { if (a && a.state !== 'rejected' && a.state !== 'rogue') tab.picks[k] = a.choice; else delete tab.picks[k]; }
+    }
   }
   /* A: Reveal when time runs out (7c1792e). A reveal write the driver did not click is the console's own: judge it
      and take the expectation from what that console's screen holds at that moment (R7). */
@@ -1030,9 +1063,9 @@ class World {
     this.cover('R8names');
     for (const n of [...this.students.map(s => s.name), ...this.oldNames]) this.check('R8 no names', !text.includes(n), () => `liveQuiz/current (read by every signed-in account) holds the name "${n}" after the ${doc.state} write`);
     if (doc.state === 'lobby' && (!prev || prev.sessionId !== doc.sessionId)) {
-      this.model.startGame(doc.sessionId, this.intended.quizId, this.intended.speed);
+      this.model.startGame(doc.sessionId, this.intended.quizId, this.intended.speed, this.intended.total);
       this.vlog(`${preview ? 'preview (the console\'s own copy)' : 'server'}: game ${doc.sessionId} started (${this.intended.quizId}, ${this.intended.speed ? 'faster = more points' : 'every correct answer = 1000'}, limit ${this.intended.limit} s)`);
-      this.lobbyDoc = { quizId: doc.quizId, speedBonus: doc.speedBonus, startedAt: doc.startedAt };
+      this.lobbyDoc = { quizId: doc.quizId, speedBonus: doc.speedBonus, startedAt: doc.startedAt, totalQ: doc.totalQ };
       this.scoresBefore = {};
       this.check('R6 scoring', doc.speedBonus === this.intended.speed, () => `Start wrote speedBonus ${doc.speedBonus}, the Scoring box said ${this.intended.speed ? 'speed' : 'flat'}`);
       this.check('R6 scoring', doc.quizId === this.intended.quizId && JSON.stringify(doc.scores) === '{}', () => `Start wrote quizId ${doc.quizId} / scores ${JSON.stringify(doc.scores)}`);
@@ -1062,7 +1095,8 @@ class World {
       for (const k of ['correct', 'correctIds', 'tally', 'endedAt']) if (doc[k] != null) bad.push(`${k} ${JSON.stringify(doc[k])} (want null)`);
       if (doc.qIndex !== this.model.lastQ) bad.push(`qIndex ${doc.qIndex} (want ${this.model.lastQ})`);
       if (Q && doc.limitSec !== Q.limit) bad.push(`limitSec ${doc.limitSec} (want ${Q.limit})`);
-      for (const k of ['quizId', 'speedBonus', 'startedAt']) if (JSON.stringify(doc[k] ?? null) !== JSON.stringify(L[k] ?? null)) bad.push(`${k} ${JSON.stringify(doc[k])} changed since the lobby (${JSON.stringify(L[k])})`);
+      if (doc.totalQ !== (this.intended.total || 0)) bad.push(`totalQ ${JSON.stringify(doc.totalQ)} (want ${this.intended.total || 0}, the Questions box at Start)`);
+      for (const k of ['quizId', 'speedBonus', 'startedAt', 'totalQ']) if (JSON.stringify(doc[k] ?? null) !== JSON.stringify(L[k] ?? null)) bad.push(`${k} ${JSON.stringify(doc[k])} changed since the lobby (${JSON.stringify(L[k])})`);
       const sc = o => JSON.stringify(Object.keys(o || {}).sort().map(u => [u, Object.keys(o[u]).sort().map(f => [f, o[u][f]])]));
       /* scores: exactly what the last Reveal (or Start) wrote; whether those were right is R6-R8's check at that Reveal */
       if (sc(doc.scores) !== sc(this.scoresBefore)) bad.push(`scores ${sc(doc.scores)} (want the scores before this round ${sc(this.scoresBefore)})`);
@@ -1185,7 +1219,7 @@ class World {
       return;
     }
     if (plan.answer) at(plan.r, () => this.tap(s, tab, q, 'plan', 'taps'));
-    if (plan.answer && plan.double) at(plan.r + plan.double, () => this.tap(s, tab, q, 'other', 'taps a second choice'));
+    if (plan.answer && plan.double) at(plan.r + plan.double, () => this.tap(s, tab, q, plan.doubleRight ? 'right' : 'other', plan.doubleRight ? 'taps a second choice (a right one)' : 'taps a second choice'));
     if (['midq', 'afterAnswer', 'afterTimeout', 'sendReload', 'newTab'].includes(plan.reload)) at(plan.reloadAt, () => this.reload(s, `during question ${q + 1}`, plan.reload === 'newTab'));
   }
   studentSeesReveal(s, tab, q) {
@@ -1195,7 +1229,7 @@ class World {
   choiceFor(s, q, mode) {
     const Q = this.model.q[q], quiz = this.model.quiz, r = s.rng;
     const plan = s.plans[q];
-    const right = mode === 'plan' ? plan.right : false;
+    const right = mode === 'plan' ? plan.right : mode === 'right';
     const pool = quiz.kind === 'mc' ? quiz.choices.map(c => c.id) : quiz.kind === 'pcname' ? PC_NAMES
       : quiz.strings.flatMap(k => Array.from({ length: 13 }, (_, f) => `${k}:${f}`));
     if (mode === 'plan' && plan.choice && pool.includes(plan.choice)) return plan.choice;
@@ -1211,7 +1245,7 @@ class World {
     if (!body || !shown || shown.state !== 'question' || shown.qIndex !== q) return null;
     const quiz = this.model.quiz;
     if (quiz.kind === 'fret') {
-      if (body.innerHTML.includes('lq-locked')) return null;
+      if (body.innerHTML.includes('lq-locked') && !quiz.changeAnswer) return null;
       const board = tab.dom.byId.get('lq-board');
       if (!board || board.classList.contains('lq-board-off')) return null;
       const [k, f] = choice.split(':');
@@ -1227,7 +1261,7 @@ class World {
     const choice = this.choiceFor(s, q, mode);
     const t = this.loop.now;
     const readingBack = tab.readBacks.some(rb => tab.shown && rb.sid === tab.shown.sessionId && rb.q === tab.shown.qIndex);
-    const dec = this.model.eligible(s.uid, tab.id, tab.shown, readingBack, t);
+    const dec = this.model.eligible(s.uid, tab.id, tab.shown, readingBack, t, choice);
     const offer = this.screenOffers(tab, q, choice);
     this.stats.taps++;
     let wrote = null;
@@ -1253,6 +1287,8 @@ class World {
       } else this.check('R2/R3 can answer', !!wrote, () => `${tab.label}, question ${q + 1}: a tap the rules allow (${dec.ms} ms in) was refused by the screen`);
       if (wrote) {
         tab.picks = tab.picks || {}; tab.picks[`${this.model.sid}|${q}`] = choice;
+        if (dec.change) this.cover('R1change');
+        if (tab.refused) tab.refused.delete(`${this.model.sid}|${q}`);   /* a new tap clears the save-failed line */
         this.model.tap(s.uid, q, choice, dec.ms, t, false);
         this.check('R4 the written answer', wrote.choice === choice && wrote.qIndex === q && wrote.sessionId === this.model.sid && wrote.uid === s.uid && wrote.name === s.name, () => `${tab.label}: wrote ${JSON.stringify({ choice: wrote.choice, qIndex: wrote.qIndex, uid: wrote.uid })}, tapped ${choice} on question ${q + 1}`);
         this.cover('R4');
@@ -1413,7 +1449,7 @@ class World {
     }
     if (view.state === 'question') {
       const q = view.qIndex, n = this.answersIn(tab, q), m = this.roster(tab).size;
-      const want = [tIn('lq.qLabel', 'en', { n: q + 1 }), this.model.stagePrompt(view.target), m ? `${n} / ${m}` : String(n), tIn('lq.stageAnswered', 'en')];
+      const want = [this.model.qLabel('en', q), this.model.stagePrompt(view.target), m ? `${n} / ${m}` : String(n), tIn('lq.stageAnswered', 'en')];
       if (texts[2] !== tab.lastCount) { tab.lastCount = texts[2]; this.vlog(`${tab.label}'s stage: question ${q + 1}, ${texts[2]} answered`); }
       this.check('R11 stage', JSON.stringify(texts) === JSON.stringify(want), () => `${tab.label}, question ${q + 1}: the stage shows ${JSON.stringify(texts)}, want only ${JSON.stringify(want)}`, `stage|${tab.id}|${view.sessionId}|${q}`);
       const wantSvgs = quiz.kind === 'pcname' && view.target ? 1 : 0;
@@ -1444,6 +1480,7 @@ class World {
       this.cover('R11reveal');
       this.check('R11 reveal names the answer', want != null && ans && unesc(ans[1]) === want, () => `question ${view.qIndex + 1}: the Reveal stage's answer line reads ${ans ? JSON.stringify(unesc(ans[1])) : 'nothing'}, want ${JSON.stringify(want)}`);
       this.checkBoard(html, 5, `question ${view.qIndex + 1}'s Reveal stage`);
+      this.checkCountOnly(html, view.qIndex, 'the stage', 'en', true);
     }
     if (view.state === 'ended') this.checkBoard(html, 10, 'the final stage');
   }
@@ -1484,7 +1521,8 @@ class World {
     const body = tab.dom.byId.get('live-quiz-body'), html = body.innerHTML;
     const locked = html.includes('lq-locked');
     const where = `${tab.label}, question ${q + 1}${locked ? ' (Locked in)' : ''}`;
-    const buttons = locked ? [] : [...html.matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/g)].map(m => ({ tag: parseTags(`<button${m[1]}>`)[0], inner: m[2] }))
+    const offers = !locked || (!!quiz.changeAnswer && quiz.kind === 'pcname');
+    const buttons = !offers ? [] : [...html.matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/g)].map(m => ({ tag: parseTags(`<button${m[1]}>`)[0], inner: m[2] }))
       .filter(b => b.tag && b.tag.cls.split(/\s+/).includes('lq-choice'));
     const want = quiz.kind === 'mc' ? quiz.choices.map(c => ({ label: this.tIn(c.key, s.lang), arg: `lqAnswer('${c.id}')`, style: `--lq-c:${c.color}`, key: c.key }))
       : quiz.kind === 'pcname' ? PC_NAMES.map((n, i) => ({ label: n, arg: `lqAnswerPcName(${i})`, style: null, key: null })) : [];
@@ -1498,7 +1536,7 @@ class World {
       if (w.key) inner = inner.split(`data-i18n="${w.key}"`).join('data-i18n=#KEY#');
       return `${ok ? '' : 'WRONG '}${b.tag.attrs.filter(([k]) => k !== 'onclick' && k !== 'style').map(([k, v]) => `${k}="${v}"`).join(' ')} | ${quiz.kind === 'pcname' ? `style="${a.style}"` : ''} | ${inner}`;
     });
-    if (want.length && !locked) {
+    if (want.length && offers) {
       this.cover('R11student');
       this.check('R11 student screen', buttons.length === want.length && canon.every(c => c === canon[0] && !c.startsWith('WRONG')), () => `${where}: the ${buttons.length} answer buttons are not ${want.length} buttons alike apart from label and handler before Reveal: ${[...new Set(canon)].slice(0, 3).join(' || ')}`, `btn|${tab.id}|${q}`);
     }
@@ -1514,13 +1552,13 @@ class World {
       const [st, f] = String(c).split(':'), string = tI(STRING_KEY[st] || 'fret.stringLowE');
       return [Number(f) === 0 ? tI('lq.pickedOpen', { string }) : tI('lq.pickedFret', { n: Number(f), string }), STRING_COLOR[st] || '#555'];
     };
-    const exp = [tI(quiz.titleKey), tI('lq.qLabel', { n: q + 1 })];
+    const exp = [tI(quiz.titleKey), this.model.qLabel(s.lang, q)];
     if (quiz.kind !== 'mc' && !view.target) exp.push(tI('lq.noTapYet'));
     else {
       exp.push(quiz.kind === 'fret' ? tI(quiz.promptKey, quiz.power ? { chord: view.target.note + '5', string: tI(STRING_KEY[view.target.string]) } : { note: view.target.note, string: tI(STRING_KEY[view.target.string]) }) : tI(quiz.promptKey));
       if (view.limitSec > 0) exp.push('#COUNTDOWN#');
-      if (locked) { exp.push(tI('lq.locked'), pick ? pickLook(pick)[0] : '(no pick of this student)', tI('lq.lockedWait')); if (tab.refused && tab.refused.has(key)) exp.push(tI('lq.saveFailed')); }
-      else if (quiz.kind === 'fret') exp.push(tI('lq.tapHint'));
+      if (locked) { exp.push(tI(quiz.changeAnswer ? 'lq.lockedChange' : 'lq.locked'), pick ? pickLook(pick)[0] : '(no pick of this student)', tI('lq.lockedWait')); if (tab.refused && tab.refused.has(key)) exp.push(tI('lq.saveFailed')); if (offers) exp.push(...PC_NAMES); }
+      else if (quiz.kind === 'fret') exp.push(tI(quiz.changeAnswer ? 'lq.tapHintChange' : 'lq.tapHint'));
       else if (quiz.kind === 'mc') exp.push(...quiz.choices.map(c => tI(c.key)));
       else exp.push(...PC_NAMES);
     }
@@ -1540,7 +1578,7 @@ class World {
     const sdoc = tab.dom.document;
     this.check('R11 student screen', sdoc.title === 'Guitar Class' && !sdoc.body.classList.list().length, () => `${where}: the page title / body class changed before Reveal: "${sdoc.title}" [${sdoc.body.classList.list().join(' ')}]`, `stitle|${tab.id}|${q}`);
     /* data-i18n-params must be exactly the question number and (fret quizzes) the prompt's note and string. */
-    const params = [{ n: q + 1 }];
+    const params = [this.model.qParams(q)];
     if (quiz.kind === 'fret' && view.target) params.push(quiz.power ? { chord: view.target.note + '5', string: this.tIn(STRING_KEY[view.target.string], s.lang) } : { note: view.target.note, string: this.tIn(STRING_KEY[view.target.string], s.lang) });
     const okParams = new Set(params.map(p => JSON.stringify(p)));
     const attrs = attrsOf(outside).map(a => { const m = /^(\S+) data-i18n-params="(.*)"$/.exec(a); return m && okParams.has(m[2]) ? `${m[1]} data-i18n-params=OK` : (pickStyle && a === `div style="${pickStyle}"`) ? 'div style=PICK' : a; });
@@ -1603,7 +1641,7 @@ class World {
        only where there was something live to switch off. */
     const tick = view.limitSec < 10 ? 100 : 250, deadline = start + view.limitSec * 1000;
     const liveBtns = body.buttons.filter(b => b.cls.split(/\s+/).includes('lq-choice') && !b.disabled).length;
-    const board = tab.dom.byId.get('lq-board'), boardLive = !!board && !body.innerHTML.includes('lq-locked') && !board.classList.contains('lq-board-off');
+    const board = tab.dom.byId.get('lq-board'), boardLive = !!board && (!!this.model.quiz.changeAnswer || !body.innerHTML.includes('lq-locked')) && !board.classList.contains('lq-board-off');
     tab.liveBefore = tab.liveBefore || {};
     if (this.loop.now < deadline && (liveBtns || boardLive)) tab.liveBefore[q] = true;
     if ((tab.liveBefore[q] || liveBtns || boardLive) && this.loop.now >= deadline + tick + (s.busy ? MAX_LATE_BUSY : MAX_LATE) + 1 && this.once(`off|${tab.id}|${q}`)) {
@@ -1635,6 +1673,22 @@ class World {
       if (f + Q.limit * 1000 > how.t) { this.acc.join.cut++; if (how.kind === 'auto') this.acc.join.auto++; }
     }
   }
+  /* T (Jonathan, 2026-11-13: "set the total question prior to starting game"): the Questions box at Start is the
+     game's length. After the Reveal of the last one the strip offers "Final scores" (End) and no way to open another
+     question; before that, or with no number set, it offers the next question as before. */
+  checkTotalStrip(q) {
+    const tab = this.driver, v = tab.pview || tab.shown, total = this.intended.total || 0;
+    if (!v || v.state !== 'reveal' || v.qIndex !== q) return;
+    const btns = this.strip(tab).buttons, opener = btns.filter(b => /^lqTeacher(Next|OpenFret|OpenPcName)\(/.test(b.onclick));
+    const fin = btns.find(b => b.onclick === 'lqTeacherEnd()');
+    if (total > 0 && q + 1 >= total) {
+      this.cover('Tlast');
+      this.check('T total', !opener.length && !!fin && fin.label === 'Final scores', () => `question ${q + 1} of ${total} was the last, but the strip reads: ${btns.map(b => b.label).join(' | ')} (want Final scores and no next question)`);
+    } else {
+      this.cover('Tmore');
+      this.check('T total', opener.length > 0 && !!fin && fin.label === 'End game', () => `question ${q + 1} (${total ? `of ${total}` : 'no number set'}): the strip offers no next question: ${btns.map(b => b.label).join(' | ')}`);
+    }
+  }
   checkVerdicts(q) {
     this.countCutoffs(q);
     for (const s of this.students) {
@@ -1648,8 +1702,25 @@ class World {
       this.cover('R10' + v.kind);
       if (v.kind === 'late') this.cover('R7late');
       this.check('R10 student verdict', got === want, () => `${tab.label}, question ${q + 1}: the student's screen says ${got}, the rules say ${want}${this.why(s.uid, q)}`);
+      this.checkCountOnly(html, q, tab.label, s.lang, false);
       }
     }
+  }
+  /* C (Jonathan, 2026-11-13: "it shouldn't reveal who got it right/wrong, just the scores"): at the Reveal of a
+     countOnly quiz (the two power chord quizzes) neither the stage nor a student's screen shows the spread of picks:
+     no tally bars, no tap counts on the stage board; they show "n of m correct" from the model's own tally (m = the
+     answers the Reveal counted, n = those on a right id). Every other quiz keeps its bars. */
+  checkCountOnly(html, q, where, lang, stage) {
+    const quiz = this.model.quiz, exp = this.model.reveals[q];
+    if (!exp) return;
+    const spread = /class="lq-tally"|class="lq-bar\b|\bfg-count\b/.test(html);
+    if (!quiz.countOnly) { this.check('C count only', /class="lq-tally"/.test(html), () => `${where}, question ${q + 1}: the Reveal shows no answer bars (only a countOnly quiz hides them)`, `cbars|${where}|${q}`); return; }
+    const total = Object.values(exp.tally).reduce((a, b) => a + b, 0), n = exp.correctIds.reduce((a, id) => a + (exp.tally[id] || 0), 0);
+    const want = stage ? `${n} / ${total}` : this.tIn('lq.rightCount', lang, { n, total });
+    const texts = textsOf(dropSvg(html));
+    this.cover('Ccount');
+    this.check('C count only', !spread, () => `${where}, question ${q + 1}: the Reveal of a countOnly quiz shows the spread of picks (tally bars or tap counts)`, `cspread|${where}|${q}`);
+    this.check('C count only', texts.includes(want) && (!stage || texts.includes(this.tIn('lq.stageCorrect', 'en'))), () => `${where}, question ${q + 1}: the Reveal does not show the count "${want}": ${JSON.stringify(texts).slice(0, 200)}`, `ccount|${where}|${q}`);
   }
   checkEnd() {
     const rows = modelRank(this.model.scores, this.model.names), total = rows.length;
@@ -1894,6 +1965,21 @@ const NAMED = {
     { plans: [{ r: 2000, double: 120 }, { r: 2000, double: 40 }] },
     { plans: [{ r: 2500, right: false, double: 200 }, { r: 2500 }] }
   ], [{ revealAfter: 8000, hold: 8000, pick: 0.5 }, { revealAfter: 8000, hold: 8000, pick: 0.2 }]),
+  /* R1 on a changeAnswer quiz (2026-11-13) + T: three questions with the Questions box typed to 3 (n % 3 = 0), so the
+     third Reveal is the last. Name: wrong then right, right then wrong, a change after the student's time is up
+     (refused: the first pick stands), with the console revealing question 2 by itself. */
+  'change-answer-name': () => namedSpec('change-answer-name', 'pc-name', true, [10, 10, 10], [
+    { plans: [{ r: 1500, right: false, double: 1500, doubleRight: true }, { r: 2000, double: 2000 }, { r: 1500 }] },
+    { plans: [{ r: 2000, double: 1000 }, { r: 2000, right: false, double: 9000, doubleRight: true }, { r: 2500, right: false }] },
+    { plans: [{ r: 2500 }, { r: 2500, right: false }, { r: 2000, right: false, double: 800, doubleRight: true }], lang: 'es' }
+  ], [{ revealAfter: 6000, hold: 8000, pick: 0.3 }, { revealAfter: 12000, hold: 8000, pick: 0.6 }, { revealAfter: 6000, hold: 8000, pick: 0.9 }], { note: 'changes of answer on Name the power chord; question 3 of 3 is the last (Final scores).' }),
+  /* Find, no time limit (a change counts until Reveal): one change reaches the teacher only after the Reveal read, so
+     the Reveal scores the pick before it (R7); one right-to-wrong change; one wrong-to-right. */
+  'change-answer-find': () => namedSpec('change-answer-find', 'pc-find', false, [0, 0, 0], [
+    { plans: [{ r: 2000, right: false, double: 1500, doubleRight: true }, { r: 2000, double: 1500 }, { r: 2000 }] },
+    { plans: [{ r: 2000, right: false, double: 2380, doubleRight: true }, { r: 3000 }, { r: 2000, double: 2420 }], net: { up: 100, down: 100 } },
+    { plans: [{ r: 2500, double: 1000 }, { r: 2500, right: false }, { r: 2500 }] }
+  ], [{ revealAfter: 4500, hold: 9000, pick: 0.3 }, { revealAfter: 8000, hold: 8000, pick: 0.7 }, { revealAfter: 4500, hold: 9000, pick: 0.1 }], { note: 'changes of answer on Find the power chord (six-string board), one landing around the Reveal.' }),
   /* P: Preview (the comment above lqTPreview). The students are signed in and listening the whole time. */
   'preview-mc': () => namedSpec('preview-mc', 'string-id', true, [], [
     { plans: [{ r: 1500 }, { r: 1500 }] },
@@ -1970,8 +2056,9 @@ async function playQuestions(w, quiz, limits, plans, r, opts = {}) {
       w.intended.mc[q] = quiz.choices[Math.floor(plan.pick * quiz.choices.length)].id;
       await w.tClick(b => b.onclick === 'lqTeacherNext()', q ? 'Next question' : 'First question');
     } else if (quiz.kind === 'fret') {
-      const str = quiz.strings[Math.floor(plan.pick * quiz.strings.length)];
-      if (quiz.strings.length > 1) await w.tClick(b => b.onclick === `lqTFretString='${str}';lqPaintControls()`, `string ${str}`);
+      const roots = quiz.rootStrings || quiz.strings;
+      const str = roots[Math.floor(plan.pick * roots.length)];
+      if (roots.length > 1) await w.tClick(b => b.onclick === `lqTFretString='${str}';lqPaintControls()`, `string ${str}`);
       if (r() < 0.25) await w.tClick(b => b.onclick === `lqTeacherOpenFret('${str}','random')`, 'Random');
       else {
         const notes = w.strip().buttons.filter(b => b.onclick.startsWith(`lqTeacherOpenFret('${str}','`) && !b.onclick.includes("'random'"));
@@ -1994,7 +2081,7 @@ async function playQuestions(w, quiz, limits, plans, r, opts = {}) {
       /* the teacher waits: the console reveals by itself */
       await w.until(w.loop.now + limits[q] * 1000 + AUTO_GRACE_MS + 3000);
       w.check('A auto-reveal', w.revealCommitted, `question ${q + 1}: the "Reveal when time runs out" box is on, but the console had not revealed by itself 3 s after the ${limits[q]} s limit + grace`);
-      if (w.revealCommitted) { await w.until(w.loop.now + plan.hold); w.checkVerdicts(q); continue; }
+      if (w.revealCommitted) { await w.until(w.loop.now + plan.hold); w.checkVerdicts(q); w.checkTotalStrip(q); continue; }
     }
     if (quiz.kind !== 'mc' && limits[q] > 0 && w.intended.auto === false && plan.revealAfter >= limits[q] * 1000 + AUTO_GRACE_MS) w.cover('Aoff');
     await w.until(w.loop.now + (last && auto ? Math.min(plan.revealAfter, limits[q] * 500) : plan.revealAfter));
@@ -2012,10 +2099,25 @@ async function playQuestions(w, quiz, limits, plans, r, opts = {}) {
     await w.until(w.loop.now + plan.hold);
     w.check('R7 reveal', w.revealCommitted, `question ${q + 1}: Reveal never reached the ${w.teacher.previewing ? 'console\'s preview copy' : 'doc'}`);
     w.checkVerdicts(q);
+    w.checkTotalStrip(q);
   }
   return false;
 }
 /* The teacher sets the three boxes on `tab` (another console's are its own: another device). */
+/* T: the Questions box. By the game's length n: n % 3 = 0 -> typed n (the game ends on its last question), 1 -> emptied
+   (no set number), 2 -> left alone on a device that never set it (must then read 10, the default; a game longer than
+   that, or a device that already typed one, types n + 2). Returns the number the game should carry. */
+async function setTotal(w, tab, n) {
+  const box = tab.dom.byId.get('lq-total');
+  if (!box) { w.flag('R13 error', `${tab.label}'s strip has no Questions box (lq-total)`); return 0; }
+  if (!tab.totalSet) w.check('T total', box.value === '10', () => `${tab.label}: the Questions box reads "${box.value}" on a device that never set it (default 10)`);
+  if (n % 3 === 2 && !tab.totalSet && n <= 10) return 10;
+  const v = n % 3 === 0 ? n : n % 3 === 1 ? 0 : n + 2;
+  await w.tChange('lq-total', v ? String(v) : '', 'Questions', tab);
+  tab.totalSet = true;
+  w.check('T total', box.value === (v ? String(v) : ''), () => `${tab.label}: the Questions box reads "${box.value}" after the teacher typed ${v || 'nothing'}`);
+  return v;
+}
 async function setBoxes(w, tab, quizId, speed, limit, auto) {
   await w.tChange('lq-quiz-pick', quizId, 'Quiz', tab);
   await w.tChange('lq-scoring', speed ? 'speed' : 'flat', 'Scoring', tab);
@@ -2042,8 +2144,9 @@ async function runPreview(w, spec) {
   const r = rngFor(SEED, spec.name, 'preview');
   w.driver = A;
   await setBoxes(w, A, P.quizId, P.speed, P.limits[0] ?? 0, P.autoReveal);
+  const pTotal = await setTotal(w, A, P.limits.length);
   await w.until(w.loop.now + 5000);
-  w.intended = { limit: P.limits[0] ?? 0, target: {}, mc: {}, speed: P.speed, quizId: P.quizId, auto: P.autoReveal !== false };
+  w.intended = { limit: P.limits[0] ?? 0, target: {}, mc: {}, speed: P.speed, quizId: P.quizId, auto: P.autoReveal !== false, total: pTotal };
   w.driverQ = -1;
   w.previewStart(A);
   await w.tClick(b => b.onclick === 'lqTeacherPreview()', 'Preview');
@@ -2095,6 +2198,7 @@ async function runCase(spec) {
   const starter = spec.second ? B : w.teacher;
   w.driver = starter;
   await setBoxes(w, starter, spec.quizId, spec.speed, spec.limits[0] ?? 0, spec.autoReveal);
+  w.intended.total = await setTotal(w, starter, spec.limits.length);
   if (spec.second === 'blocked') {
     /* The console's teacher is typing in its Time-to-answer box: lqPaintControls leaves the strip alone while that box
        has focus ("the next paint catches up"), so the strip still offers Preview after the real game goes live. */
@@ -2224,7 +2328,7 @@ const FAULTS = [
   { id: 'r5-hint-class', why: 'review R1-5: the right Name button carries an extra class', from: 'class="lq-choice" style="--lq-c:${LQ_PC_NAME_COLOR}" onclick="lqAnswerPcName(${i})"', to: 'class="lq-choice${name === lqPcNameOf(s.target) ? \' lq-hint-on\' : \'\'}" style="--lq-c:${LQ_PC_NAME_COLOR}" onclick="lqAnswerPcName(${i})"' },
   { id: 'no-restore', why: 'live-quiz.js:480-481 — a reload was a second pick', from: '  if(live && Number(live.qIndex) >= 0 && (!prev || prev.sessionId !== live.sessionId)) lqRestoreMyAnswer(live);\n', to: '' },
   { id: 'restore-race', why: 'taps slip in while the pick is read back', from: "  if(lqRestoring === s.sessionId + ':' + s.qIndex) return;   // still reading back a pick made before a reload\n", to: '' },
-  { id: 'no-first-tap', why: 'first tap wins', invisible: 'the same click redraws the screen locked (no buttons, a board with no hit zones), so a second tap cannot reach lqAnswer from the screen; the guard is a second line of defence', from: '  if(lqMyAnswer && lqMyAnswer.qIndex === s.qIndex) return;\n  if(lqRestoring', to: '  if(lqRestoring' },
+  { id: 'no-first-tap', why: 'first tap wins', invisible: 'the same click redraws the screen locked (no buttons, a board with no hit zones), so a second tap cannot reach lqAnswer from the screen; the guard is a second line of defence', from: '  if(had && (!lqQuiz(s.quizId).changeAnswer || had.choice === choiceId)) return;\n  if(lqRestoring', to: '  if(lqRestoring' },
   { id: 'no-time-check', why: 'a tap after time-up counts', from: '  if(Number(s.limitSec) && lqSecsLeft(s) === 0) return;\n', to: '' },
   { id: 'clock-not-restarted', why: "the student's clock is not restarted on a new question", from: '(!prev || prev.sessionId !== live.sessionId || prev.qIndex !== live.qIndex)){\n    lqMyAnswer = null; lqSendError = false;', to: '(!prev || prev.sessionId !== live.sessionId)){\n    lqMyAnswer = null; lqSendError = false;' },
   { id: 'stage-flicker', why: 'checks.mjs:5003 — the projector flickered back to "20" on each answer', from: 'answer, and an answer landing after "Time\'s up" left it stuck on "20".\n  lqStageSyncTick();', to: 'answer, and an answer landing after "Time\'s up" left it stuck on "20".' },
@@ -2239,6 +2343,18 @@ const FAULTS = [
   { id: 'tdz', why: 'the live-quiz.js:429 class (a temporal-dead-zone error at load), planted at lines 1178-1179', from: "let lqTLimits = {};\ntry { lqTLimits = JSON.parse(localStorage.getItem('gc-lq-limits') || '{}') || {}; } catch(e){ lqTLimits = {}; }", to: "try { lqTLimits = JSON.parse(localStorage.getItem('gc-lq-limits') || '{}') || {}; } catch(e){ lqTLimits = {}; }\nlet lqTLimits = {};" }
 ];
 /* The reload fix (lqRoundOpenedAt, 2026-11-12). */
+/* 2026-11-13: change an answer (R1 on a changeAnswer quiz), the count-only Reveal (C), the Questions box (T). */
+const NOV13_FAULTS = [
+  { id: 'n13-change-refused', why: 'R1: a changeAnswer quiz refuses a second, different tap', from: '  if(had && (!lqQuiz(s.quizId).changeAnswer || had.choice === choiceId)) return;', to: '  if(had) return;' },
+  { id: 'n13-change-old-ms', why: 'R4: a changed answer is written with time 0, not its own tap\'s time', from: '  const ms = lqQOpenedAt ? Math.max(0, Math.round(performance.now() - lqQOpenedAt)) : 0;', to: '  const ms = had ? 0 : (lqQOpenedAt ? Math.max(0, Math.round(performance.now() - lqQOpenedAt)) : 0);' },
+  { id: 'n13-student-bars', why: 'C: a student\'s Name Reveal shows the tally bars again', from: "lqPcNameBoxHtml(s.target, 'lq-pcbox-rev') + (quiz.countOnly ? lqRightCountHtml(s) : lqTallyHtml(s, quiz, mine))", to: "lqPcNameBoxHtml(s.target, 'lq-pcbox-rev') + lqTallyHtml(s, quiz, mine)" },
+  { id: 'n13-stage-bars', why: 'C: the stage\'s Find Reveal shows the tally bars again', from: '${quiz.countOnly ? lqStageRightCountHtml(s) : lqTallyHtml(s, quiz, null)}', to: '${lqTallyHtml(s, quiz, null)}' },
+  { id: 'n13-count-roster', why: 'C: the count is out of the scores map, not the answers counted', from: '  return { n, total };\n}\nfunction lqRightCountHtml', to: '  return { n, total: Math.max(total, Object.keys(s.scores || {}).length + 1) };\n}\nfunction lqRightCountHtml' },
+  { id: 'n13-no-final', why: 'T: after the last question the strip still offers the next one', from: '  if(lqLastQuestionDone(s)){\n    el.innerHTML', to: '  if(false){\n    el.innerHTML' },
+  { id: 'n13-default-8', why: 'T: the Questions box starts at 8', from: 'const LQ_TOTAL_DEFAULT = 10, ', to: 'const LQ_TOTAL_DEFAULT = 8, ' },
+  { id: 'n13-total-not-written', why: 'T: Start writes no totalQ', from: 'limitSec: lqTLimitFor(quizId), totalQ: lqTTotal,', to: 'limitSec: lqTLimitFor(quizId), totalQ: 0,' },
+  { id: 'n13-label-plain', why: 'T: the student label drops "of total"', from: "  const key = total ? 'lq.qLabelOf' : 'lq.qLabel', params = total ? { n, total } : { n };", to: "  const key = 'lq.qLabel', params = { n };" }
+];
 const FIX_FAULTS = [
   { id: 'fix-no-canplay', why: 'review R2-5: a Journey page starts the clock (no lqCanPlayHere guard)', from: '  if(!lqCanPlayHere()) return now;\n', to: '', invisible: 'a Journey page has no currentUser global (tabs/journey.js reads firebase.auth().currentUser), so lqUid() is "" there and its clock key never matches the one index.html writes: the uid in the key already keeps the Journey clock out. The guard is a second line of defence; fix-journey-clock below removes both and is red' },
   { id: 'fix-journey-clock', why: 'review R2-5: a Journey page starts the clock (no lqCanPlayHere guard, no uid in the key)', from: "  if(!lqCanPlayHere()) return now;\n  const id = String(live.sessionId) + ':' + Number(live.qIndex) + ':' + lqUid();", to: "  const id = String(live.sessionId) + ':' + Number(live.qIndex);" },
@@ -2268,7 +2384,7 @@ const F4_FAULTS = [
   { id: 'f4-locked-colour', why: 'F4-2: the fret Locked-in pick green when right, red when wrong', from: "const bg = (p && LQ_STRING_COLOR[p.string]) || '#555';", to: "const bg = lqTargetIds(quiz, s.target).includes(mine) ? '#3b6d11' : '#b3372a';" },
   { id: 'f4-locked-tick', why: 'F4-2: a tick or cross (and colour) on the Name Locked-in pick', from: '<div class="lq-locked-pick" style="background:${LQ_PC_NAME_COLOR}">${escHtml(mine)}</div>', to: '<div class="lq-locked-pick" style="background:${mine === lqPcNameOf(s.target) ? \'#3b6d11\' : \'#b3372a\'}">${escHtml(mine)}${mine === lqPcNameOf(s.target) ? \' ✓\' : \' ✗\'}</div>' },
   { id: 'f4-wait-fret', why: 'F4-3: "(fret N)" inside the fret Locked-in wait line', from: "${escHtml(t('lq.lockedWait'))}</div>${err}</div>`\n      + board;", to: "${escHtml(t('lq.lockedWait'))} (fret ${lqTargetIds(quiz, s.target).map(id => id.split(':')[1]).join(' or ')})</div>${err}</div>`\n      + board;" },
-  { id: 'f4-taphint', why: "F4-3: the frets inside the unlocked screen's tap hint", from: "return top + `<p class=\"lq-note\" data-i18n=\"lq.tapHint\">${escHtml(t('lq.tapHint'))}</p>` + board;", to: "return top + `<p class=\"lq-note\" data-i18n=\"lq.tapHint\">${escHtml(t('lq.tapHint'))} ${lqTargetIds(quiz, s.target).map(id => id.split(':')[1]).join('/')}</p>` + board;" },
+  { id: 'f4-taphint', why: "F4-3: the frets inside the unlocked screen's tap hint", from: "return top + `<p class=\"lq-note\" data-i18n=\"${hint}\">${escHtml(t(hint))}</p>` + board;", to: "return top + `<p class=\"lq-note\" data-i18n=\"${hint}\">${escHtml(t(hint))} ${lqTargetIds(quiz, s.target).map(id => id.split(':')[1]).join('/')}</p>` + board;" },
   { id: 'f4-spanish-root', why: "F4-3: in Spanish only, the chord's root after the Name prompt", from: "    + `<div class=\"lq-prompt\" data-i18n=\"${escAttr(quiz.promptKey)}\">${escHtml(t(quiz.promptKey))}</div>`\n    + lqTimerHtml(s);\n  const box", to: "    + `<div class=\"lq-prompt\" data-i18n=\"${escAttr(quiz.promptKey)}\">${escHtml(t(quiz.promptKey))}${t('lq.qLabel', {n: 1}) !== 'Question 1' ? ' (' + escHtml(lqPcNameOf(s.target).slice(0, -1)) + ')' : ''}</div>`\n    + lqTimerHtml(s);\n  const box" },
   { id: 'f4-after-exit', why: 'F4-4: the real board cleared 0.3 s after Exit preview', from: "  lqPaintStage(); lqPaintControls(); lqStageSyncTick(); lqTArmAutoReveal();\n}\n// lqWrite's stand-in", to: "  lqPaintStage(); lqPaintControls(); lqStageSyncTick(); lqTArmAutoReveal();\n  setTimeout(() => { lqTeacherClose(); }, 300);\n}\n// lqWrite's stand-in" },
   { id: 'f4-config-class', why: 'F4-5: the answer written into config/class inside a try/catch', from: '  lqTAutoKey = key;\n', to: `  lqTAutoKey = key;\n  try { lqDb.collection('config').doc('class').set({ lqHint: ${ANS} }, { merge: true }); } catch(e){}\n` }
@@ -2286,11 +2402,11 @@ function prove(dir) {
   dir = resolve(dir);
   const games = ARGS.games ?? 4, jobs = Math.max(1, Number(ARGS.jobs ?? 3));
   const base = readFileSync(join(ROOT, 'live-quiz.js'), 'utf8');
-  const all = [...FAULTS.map(f => ({ ...f, set: 'site' })), ...FIX_FAULTS.map(f => ({ ...f, set: 'reload fix' })), ...PREVIEW_FAULTS.map(f => ({ ...f, set: 'Preview' })), ...AUTO_FAULTS.map(f => ({ ...f, set: 'auto-reveal' })), ...R3_FAULTS.map(f => ({ ...f, set: 'round 3' })), ...F4_FAULTS.map(f => ({ ...f, set: 'round 4' }))];
+  const all = [...FAULTS.map(f => ({ ...f, set: 'site' })), ...FIX_FAULTS.map(f => ({ ...f, set: 'reload fix' })), ...NOV13_FAULTS.map(f => ({ ...f, set: '2026-11-13' })), ...PREVIEW_FAULTS.map(f => ({ ...f, set: 'Preview' })), ...AUTO_FAULTS.map(f => ({ ...f, set: 'auto-reveal' })), ...R3_FAULTS.map(f => ({ ...f, set: 'round 3' })), ...F4_FAULTS.map(f => ({ ...f, set: 'round 4' }))];
   const only = ARGS.only ? String(ARGS.only).split(',') : null;
   if (only) { for (const id of only) if (!all.some(f => f.id === id)) { console.log(`live-quiz-loop: ✗ --only: no fault ${id}`); return Promise.resolve(2); } all.splice(0, all.length, ...all.filter(f => only.includes(f.id))); }
   const FAKE = only ? [] : ['rules-off', 'no-order', 'shallow-merge', 'no-local', 'plain-fieldvalue'];
-  console.log(`break-it proof on ${ROOT}: ${FAULTS.length} site + ${FIX_FAULTS.length} reload-fix + ${PREVIEW_FAULTS.length} Preview + ${AUTO_FAULTS.length} auto-reveal + ${R3_FAULTS.length} round-3 + ${F4_FAULTS.length} round-4 faults planted in copies of its live-quiz.js, + ${FAKE.length} fake-world faults; each run is the default run (known site faults excused narrowly), seed ${SEED}, ${games} random games, ${jobs} at a time`);
+  console.log(`break-it proof on ${ROOT}: ${FAULTS.length} site + ${FIX_FAULTS.length} reload-fix + ${NOV13_FAULTS.length} change-answer/count/total + ${PREVIEW_FAULTS.length} Preview + ${AUTO_FAULTS.length} auto-reveal + ${R3_FAULTS.length} round-3 + ${F4_FAULTS.length} round-4 faults planted in copies of its live-quiz.js, + ${FAKE.length} fake-world faults; each run is the default run (known site faults excused narrowly), seed ${SEED}, ${games} random games, ${jobs} at a time`);
   const plans = [{ label: 'baseline: the site as it is (must be GREEN, the two known faults excused)', args: [`--root=${ROOT}`], baseline: true }];
   for (const f of all) {
     const pairs = [[f.from, f.to], ...(f.more || [])];

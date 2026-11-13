@@ -4946,6 +4946,14 @@ function checkMissingI18nKeys(I18N) {
             }
           }
         }
+        /* "Find the power chord" (Jonathan, 2026-11-13): the board shows all six strings, high E on top and low E at the bottom, and
+           the root is asked on low E or A only (`rootStrings`: the strip's chips and Random). Without `rootStrings` the strip would
+           offer a root on every board string, and lqPcRootAt knows only low E and A. */
+        if (q.power) {
+          const roots = Array.isArray(q.rootStrings) ? q.rootStrings : [];
+          if (strings.join(',') !== 'highE,B,G,D,A,lowE') { err(`live-quiz.js LIVE_QUIZZES['${id}'].strings must be all six strings, high E first and low E last (the board, low E at the bottom); got ${strings.join(',')}`); problems++; dynamicBad++; }
+          if (roots.join(',') !== 'lowE,A') { err(`live-quiz.js LIVE_QUIZZES['${id}'].rootStrings must be lowE, A (a power chord's root string); got ${roots.join(',') || 'none'}`); problems++; dynamicBad++; }
+        } else if (q.rootStrings) { err(`live-quiz.js LIVE_QUIZZES['${id}'] has rootStrings but is not a power quiz`); problems++; dynamicBad++; }
       } else if (type === 'pcname') {
         /* "Name the power chord": the chord box is the question. It needs `strings` drawn only from the two root strings (lowE, A — a power
            chord's root sits on one of them), no `choices` (the eight names are lqPcNames(), fixed) and no `power` flag (that is a fret quiz's),
@@ -4970,6 +4978,16 @@ function checkMissingI18nKeys(I18N) {
         err(`live-quiz.js LIVE_QUIZZES['${id}'] has unknown type '${q.type}'`); problems++; dynamicBad++;
       }
     }
+    /* Pins (Jonathan, 2026-11-13): the two power chord quizzes let a student change an answer while the question is open and
+       show a count, not the spread of picks, at Reveal; no other quiz does either. And the Questions box starts at 10. */
+    for (const id of Object.keys(LIVE_QUIZZES)) {
+      const q = LIVE_QUIZZES[id], pc = id === 'pc-find' || id === 'pc-name';
+      for (const flag of ['changeAnswer', 'countOnly']) {
+        if ((q[flag] === true) !== pc) { err(`live-quiz.js LIVE_QUIZZES['${id}'].${flag} is ${JSON.stringify(q[flag])}: it is true on pc-find and pc-name only (a product decision: ask Jonathan before changing it)`); problems++; dynamicBad++; }
+      }
+    }
+    if (!LIVE_QUIZZES['pc-find'] || !LIVE_QUIZZES['pc-name']) { err(`live-quiz.js LIVE_QUIZZES has no pc-find / pc-name: the changeAnswer / countOnly pin has nothing to read`); problems++; dynamicBad++; }
+    if (!/\bconst LQ_TOTAL_DEFAULT = 10, /.test(readFileSync(join(ROOT, 'live-quiz.js'), 'utf8'))) { err(`live-quiz.js: the Questions box no longer defaults to 10 (LQ_TOTAL_DEFAULT)`); problems++; dynamicBad++; }
   } catch (e) { warn(`could not enumerate LIVE_QUIZZES from live-quiz.js: ${e.message}`); warnings++; }
   try {
     const FRET_STRING_NAMES = loadConstObject(siteSource('coach.js', ROOT), 'FRET_STRING_NAMES');
