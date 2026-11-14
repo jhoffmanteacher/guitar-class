@@ -46,7 +46,7 @@ rules_version = '2';
      micTakesMeta/count  the public "how many takes so far" counter
      minutes/{uid}/*  practice minutes (days, weeks, meta/board) — the student
                       writes and reads their own; the teacher reads weeks
-                      only (2026-11-06)
+                      (2026-11-06) and days (2026-11-13), nothing else
      rankBoard/{tag}, weekBoard/{tag}  the class rank and the Top 5, keyed by a private
                       name tag (minutes/{uid}/meta/board), readable by every signed-in
                       account. minutesBoard/{uid} has NO block (denied).

@@ -18,7 +18,10 @@
    (X) cannot read the boards or the take counter. --port N (default 8089) picks the emulator's port.
    2026-11-13: the teacher may also READ minutes/{uid}/days/* (one line in the days block, in firestore.rules and
    firestore.rules.paste2 alike: the console's "Back from an absence" filter) — a "minutes/{uid}/days: the teacher
-   reads" section pins it, read only, and that a student still cannot read another's.
+   reads" section pins it, read only, and that a student or an outside account still cannot read another's. Last run
+   2026-11-13 (--port 8096): firestore.rules 212 passed, 0 failed; firestore.rules.paste2 212 passed, 0 failed; each
+   file without the line fails exactly the 3 new teacher-read cases. Scratch breaks (2026-11-13, on firestore.rules):
+   the teacher reading the whole minutes tree (4 red), a teacher write on days (4 red), any signed-in reader on days (5 red).
    Earlier: 2026-11-06, 191 passed, 0 failed (179 before the teacher-weeks section). Three scratch breaks of the
    2026-11-06 rule each turned cases red: the new read line dropped (2 red), a teacher read on the whole tree (6 red),
    a teacher write on weeks (3 red). Earlier (2026-11-05, 179 passed, 0 failed): The rules were also broken in scratch copies and every
