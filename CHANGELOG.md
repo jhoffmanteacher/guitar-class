@@ -9,7 +9,7 @@ see `WORKFLOW.md` and the git commit log.
 ## 2026-11-13 — Power Chord Switch and Change Up judge the strum closest to each change
 
 - **The game now judges the strum you play closest to each chord change.** Before, a sound a second or two early (a classmate's guitar, or your last chord still ringing) could be the one that counted, so a change you played right could show "wrong chord". This mattered most at slow speeds.
-- **The ✓ or ✗ for a change now shows about half a second after the change**, once the game is sure no closer strum is coming. Strumming on every beat still works the same way.
+- **A strum on time shows its ✓ or ✗ as quickly as before.** If you strum early, the ✓ or ✗ waits until just after the change (up to a second or two at slow speeds), until the game is sure no closer strum is coming. Strumming on every beat still works the same way.
 
 ## 2026-11-13 — Ask for a song
 
