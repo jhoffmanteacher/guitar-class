@@ -13,6 +13,7 @@ see `WORKFLOW.md` and the git commit log.
 
 - **Your day streaks only need school days now, Monday to Friday.** Play on Friday and again on Monday, and your streak keeps going. This counts for your Games streak and your Riff Roulette streak.
 - **Playing on a Saturday or Sunday still adds a day** (Friday, Saturday and Monday is a 3-day streak). Missing a school day still starts it over.
+- **Riff Roulette says "streak started today" only on the day you started it.** On the days after, the chip waits until your streak is 2 days or more.
 - School holidays are not skipped yet: only Saturdays and Sundays.
 
 

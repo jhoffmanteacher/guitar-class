@@ -8,10 +8,10 @@
 
    WHEN TO RUN IT. After any change to app/save.js (queueSave, flushSave, the delete queues, loadProgress, the
    Module 4/5 move), to logPracticeRep (app/drills.js), ecSubmit or flushOnHide (app/activities-2.js), or to
-   anything else that writes progress/{uid}. About 7-10 s for the default 180 cases (30 s on a busy machine). Node only: no browser, no network.
+   anything else that writes progress/{uid}. About 8-11 s for the default 200 cases (30-40 s on a busy machine). Node only: no browser, no network.
 
    FLAGS
-     --cases=N          how many cases (default 180); each case is one scenario family (round robin) with its own seed
+     --cases=N          how many cases (default 200: 20 per family); each case is one scenario family (round robin) with its own seed
      --seed=S           base seed (default 1); the same seed gives the same output byte for byte
      --case=I           run only case I (with --verbose: its whole timeline, every write, the stored doc, every compare)
      --family=a,b       only these families (names: --list)
@@ -226,7 +226,7 @@ const argFail = msg => { console.error('save-loop: ' + msg + ' (see the header o
   int('cases', 1); int('seed', 0); int('case', 0);
   const st = opt('stall', null);
   if (st != null && !(/^\d+(\.\d+)?$/.test(st) && Number(st) > 0)) argFail('--stall must be a number of seconds above 0, not ' + JSON.stringify(st));
-  if (opt('case', null) != null && Number(opt('case')) >= Number(opt('cases', 180))) argFail(`--case=${opt('case')} is not below --cases=${opt('cases', 180)}`);
+  if (opt('case', null) != null && Number(opt('case')) >= Number(opt('cases', 200))) argFail(`--case=${opt('case')} is not below --cases=${opt('cases', 200)}`);
   if (opt('root', null) != null && !existsSync(resolve(opt('root')))) argFail('--root: no such folder ' + JSON.stringify(opt('root')));
 }
 const ROOT = resolve(opt('root', join(HERE, '..')));
@@ -1225,7 +1225,8 @@ const FAMILIES = {
   'two-tabs': 'two tabs on one Chromebook, shared network and localStorage, interleaved on the same keys',
   'two-devices': 'two devices on their own networks, one picks a path the other never saw (WORKFLOW.md 2026-11-09)',
   'swap45': 'an unmarked Module 4/5 doc, a failed move commit, a second tab (save.js:11-58)',
-  'mixed': 'everything at random'
+  'mixed': 'everything at random',
+  'weekend-streak': 'the streak last counted on a Friday, Saturday, Sunday or Thursday; the next session on the Monday after (weekends never break a streak, Jonathan 2026-11-13; R5)'
 };
 function genScenario(seed, idx, famFilter){
   const names = famFilter.length ? famFilter : Object.keys(FAMILIES);
@@ -1406,6 +1407,19 @@ function genScenario(seed, idx, famFilter){
       for (let n = ri(1, 4); n > 0; n--) randomAct('B', oB + ri(2, 15) * S, true);
     }
     settle = 35 * S;
+  } else if (fam === 'weekend-streak'){
+    /* T0 is a Wednesday. The stored streak (15) was last counted on the Thursday, Friday, Saturday or Sunday after it,
+       in turn by case; the student comes back on the Monday (T0 + 5 days) and the day is counted. Friday, Saturday and
+       Sunday continue the streak (16); Thursday does not (Friday was missed: 1). The old "yesterday or reset" rule
+       gives 1 in all four. */
+    const off = [2, 3, 4, 1][Math.floor(idx / names.length) % 4];
+    if (sc.initial) sc.initial.streak = { count: 15, lastDay: oDay(T0 + off * DAY) };
+    const o = 5 * DAY + ri(0, 3600) * S;
+    tabSpec('A', devA, o);
+    for (let n = ri(0, 3); n > 0; n--) randomAct('A', o + ri(3, 10) * S);
+    act('A', o + 11 * S, 'streak', {});
+    if (r() < 0.3) devA.phases = [{ phase: 'up', until: T0 + o + 10 * S }, { phase: pick(['slow', 'refused', 'offline']), until: T0 + o + ri(13, 17) * S, lat: ri(1500, 3500) }];
+    settle = o + 20 * S;
   } else {
     const nTabs = r() < 0.5 ? 1 : 2;
     const segs = []; let t = 0;
@@ -1625,7 +1639,7 @@ async function main(){
     if (bad){ console.log(`✗ FAIL site: ${bad}`); console.log('save-loop: ✗ a site script does not parse; no case was run'); return 1; }
   }
   const single = opt('case', null);
-  const N = Number(opt('cases', 180));
+  const N = Number(opt('cases', 200));
   const idxs = single != null ? [Number(single)] : Array.from({ length: N }, (_, i) => i);
   /* A full default run: every family, the default number of cases or more. */
   /* The run each KNOWN entry is reached by (its `reach`): an entry that matches nothing in such a run is stale. */

@@ -15547,17 +15547,42 @@ function checkLiveQuizHideNames() {
       words, not from the site's code. Plus named cases (Fri -> Mon continues,
       Fri -> Tue and Thu -> Mon do not, a wrong clock, malformed days) and
       streak counts over a run of days (Fri, Sat, Mon = 3);
-   3. pins the six callers to the helpers;
-   4. fails on any "yesterday or reset" copy left anywhere in the site's
-      scripts: a lastDay compared with a day string other than today's, or a
-      "yesterday" built with setDate(getDate() - 1) near a streak or lastDay.
+   3. pins the callers to the helpers, and each caller's `today` to today's
+      day string. The arcade parts reach the helpers through
+      arcadeStreakContinues / arcadeStreakAlive (coach-hub.js): a tab on the
+      page from before the change can load the NEW arcade parts (they load on
+      first use), and there the guard falls back to the old "yesterday" rule
+      instead of throwing (review R1-4, 2026-11-13);
+   4. RUNS the arcade callers in a vm, with and without the helpers: without
+      them (an old page) nothing throws, saveGames is reached and the old rule
+      applies; with them the weekend rule applies. And Riff Roulette's chip:
+      "streak started today" only on the day the streak started (R1-3);
+   5. fails on any "yesterday or reset" copy left anywhere in the site's
+      scripts: a lastDay compared with anything but today's day string (or
+      null / undefined / ''), a "yesterday" built with setDate(getDate() - 1),
+      or a day's worth of milliseconds (864e5, 86400000), near a streak or a
+      lastDay. The one copy allowed is the fallback inside
+      arcadeStreakContinues in coach-hub.js (R1-1, R1-4).
    School holidays are not skipped (only Saturdays and Sundays): on purpose.
    ════════════════════════════════════════════════════════════════════ */
 const WEEKEND_STREAK_CALLERS = [
   ['bumpPracticeStreak', 'dayStreakContinues'], ['buildDaily5', 'dayStreakAlive'],
-  ['awardArcadeXp', 'dayStreakContinues'], ['gamesMetaBarHtml', 'dayStreakAlive'],
-  ['rrStreakAlive', 'dayStreakAlive'], ['rrSetDone', 'dayStreakContinues'],
+  ['arcadeStreakContinues', 'dayStreakContinues'], ['arcadeStreakAlive', 'dayStreakAlive'],
+  ['awardArcadeXp', 'arcadeStreakContinues'], ['gamesMetaBarHtml', 'arcadeStreakAlive'],
+  ['rrStreakAlive', 'arcadeStreakAlive'], ['rrSetDone', 'arcadeStreakContinues'], ['rrStreakChipText', 'rrStreakAlive'],
 ];
+/* Where each caller's `today` must come from (a "today" that is really yesterday would bring the old rule back). */
+const WEEKEND_STREAK_TODAY = [
+  ['bumpPracticeStreak', /const today = dayStr\(new Date\(\)\);/], ['awardArcadeXp', /const today = dayStr\(new Date\(\)\);/],
+  ['gamesMetaBarHtml', /const today = dayStr\(new Date\(\)\);/], ['rrSetDone', /const today = rrDayStr\(new Date\(\)\);/],
+  ['rrStreakChipText', /today = today \|\| rrDayStr\(new Date\(\)\);/], ['rrStreakAlive', /today \|\| rrDayStr\(new Date\(\)\)/],
+  ['buildDaily5', /dayStreakAlive\(streak\.lastDay, dayStr\(new Date\(\)\)\)/],
+];
+/* The arcade guard, statement for statement: the helper when it exists, else exactly the old rule. */
+const ARCADE_GUARD_SHAPE = {
+  arcadeStreakContinues: /^\{\s*if \(typeof dayStreakContinues === 'function'\) return dayStreakContinues\(lastDay, today\);\s*const y = new Date\(\);\s*y\.setDate\(y\.getDate\(\) - 1\);\s*return lastDay === dayStr\(y\);\s*\}$/,
+  arcadeStreakAlive: /^\{\s*if \(typeof dayStreakAlive === 'function'\) return dayStreakAlive\(lastDay, today\);\s*return lastDay === today \|\| arcadeStreakContinues\(lastDay, today\);\s*\}$/,
+};
 function checkWeekendStreaks() {
   head('1dj. Weekends never break a day streak (the helpers are run over a date table)');
   let bad = 0;
@@ -15648,29 +15673,96 @@ process.stdout.write(JSON.stringify(out));`;
   const PINNED = 4 * (2 * (9 * 77 + 32) + 7);
   if (cases !== PINNED) fail(`the date table ran ${cases} cases; it is pinned at ${PINNED} (never shrink it to get green)`);
 
-  // 3. the six callers use the helpers
+  // 3. the callers use the helpers; their `today` is today; the arcade guard has its exact shape, in coach-hub.js only
   const all = files.map(([, t]) => t).join('\n');
   for (const [fn, helper] of WEEKEND_STREAK_CALLERS) {
     const b = jsFunctionBody(all, fn);
     if (!b) fail(`${fn} not found (a day-streak caller)`);
-    else if (!new RegExp('\\b' + helper + '\\(').test(strip(b))) fail(`${fn} no longer decides its streak with ${helper}() (app/boot.js): weekends would break it again`);
+    else if (!new RegExp('\\b' + helper + '\\(').test(strip(b))) fail(`${fn} no longer decides its streak with ${helper}(): weekends would break it again`);
+  }
+  for (const [fn, re] of WEEKEND_STREAK_TODAY) { const b = jsFunctionBody(all, fn); if (b && !re.test(b)) fail(`${fn}: its "today" is no longer today's day string (expected ${re.source})`); }
+  for (const [g, re] of Object.entries(ARCADE_GUARD_SHAPE)) {
+    const where = files.filter(([, t]) => new RegExp('function\\s+' + g + '\\s*\\(').test(strip(t))).map(([p]) => p);
+    if (where.length !== 1 || where[0] !== 'coach-hub.js') fail(`${g} must be defined once, in coach-hub.js (found in: ${where.join(', ') || 'nowhere'})`);
+    const b = jsFunctionBody(all, g);
+    if (b && !re.test(strip(b).replace(/[ \t]*\/\/.*$/gm, '').trim())) fail(`${g} no longer has its exact shape (the helper when it exists, else the old "yesterday" rule and nothing more)`);
   }
 
-  // 4. no "yesterday or reset" copy left
-  let copies = 0;
+  // 4. the arcade callers run, with and without the helpers (an old page that loaded the new arcade parts), and Riff Roulette's chip
+  let vmCases = 0;
+  {
+    const cut = (src, name) => { const body = jsFunctionBody(src, name); const i = src.search(new RegExp('function\\s+' + name + '\\s*\\(')); return body ? src.slice(i, src.indexOf(body, i) + body.length) : null; };
+    const fnNames = ['dayStr', 'rrDayStr', 'arcadeStreakContinues', 'arcadeStreakAlive', 'awardArcadeXp', 'gamesMetaBarHtml', 'rrStreakAlive', 'rrSetDone', 'rrStreakChipText'];
+    const srcs = fnNames.map(n => cut(all, n));
+    const consts = /const ARCADE_XP_BASE = [^;]+;/.exec(all);
+    if (srcs.some(x => !x) || !consts) fail('could not cut the arcade streak code out of the site (' + fnNames.filter((n, i) => !srcs[i]).join(', ') + (consts ? '' : ' ARCADE_XP_BASE') + ')');
+    else {
+      const run = (withHelpers, now, setup, expr) => {
+        const NOW = now.getTime();
+        const sb = { saved: 0, Math, JSON, String, Number, Promise };
+        sb.Date = class extends Date { constructor(...a) { if (a.length) super(...a); else super(NOW); } static now() { return NOW; } };
+        vm.createContext(sb);
+        const pre = `var currentUser = { uid: 'test-0' }; function isDevBypassUser(){ return false; } function saveGames(){ saved++; }
+          function t(k, p){ return k + (p && p.n != null ? ':' + p.n : ''); } var games = {};`;
+        vm.runInContext(pre + '\n' + (withHelpers ? helperSrc.join('\n') : '') + '\n' + consts[0] + '\n' + srcs.join('\n') + '\n' + setup + '\nglobalThis.__out = (' + expr + ');', sb);
+        return { out: sb.__out, saved: sb.saved };
+      };
+      const MON = new Date(2026, 10, 16, 10), FRI = '2026-11-13', SUN = '2026-11-15';
+      const VM_CASES = [
+        // [what, helpers?, now, setup, expression, expected]
+        ['arcade XP after a Friday, old page', false, MON, `games.meta = { xp: 0, xpToday: 0, xpDay: null, streak: { count: 5, lastDay: '${FRI}' } }; awardArcadeXp(false);`, '[games.meta.streak.count, saved]', [1, 1]],
+        ['arcade XP after a Sunday, old page', false, MON, `games.meta = { xp: 0, xpToday: 0, xpDay: null, streak: { count: 5, lastDay: '${SUN}' } }; awardArcadeXp(false);`, '[games.meta.streak.count, saved]', [6, 1]],
+        ['arcade XP after a Friday', true, MON, `games.meta = { xp: 0, xpToday: 0, xpDay: null, streak: { count: 5, lastDay: '${FRI}' } }; awardArcadeXp(false);`, '[games.meta.streak.count, saved]', [6, 1]],
+        ['arcade bar after a Friday, old page', false, MON, `games.meta = { xp: 0, xpToday: 0, xpDay: null, streak: { count: 5, lastDay: '${FRI}' } };`, "/games\\.meta\\.streak:5/.test(gamesMetaBarHtml())", false],
+        ['arcade bar after a Friday', true, MON, `games.meta = { xp: 0, xpToday: 0, xpDay: null, streak: { count: 5, lastDay: '${FRI}' } };`, "/games\\.meta\\.streak:5/.test(gamesMetaBarHtml())", true],
+        ['Riff Roulette set after a Friday, old page', false, MON, `games.rr = { streak: 4, days: 9, lastDay: '${FRI}', best: 3 }; rrSetDone(2);`, '[games.rr.streak, saved]', [1, 1]],
+        ['Riff Roulette set after a Friday', true, MON, `games.rr = { streak: 4, days: 9, lastDay: '${FRI}', best: 3 }; rrSetDone(2);`, '[games.rr.streak, saved]', [5, 1]],
+        ['RR chip, first set today (Friday)', true, new Date(2026, 10, 13, 10), `var g = { streak: 1, lastDay: '${FRI}' };`, 'rrStreakChipText(g)', 'games.rr.streakStartedToday'],
+        ['RR chip, first set Friday, opened Saturday', true, new Date(2026, 10, 14, 10), `var g = { streak: 1, lastDay: '${FRI}' };`, 'rrStreakChipText(g)', ''],
+        ['RR chip, first set Friday, opened Sunday', true, new Date(2026, 10, 15, 10), `var g = { streak: 1, lastDay: '${FRI}' };`, 'rrStreakChipText(g)', ''],
+        ['RR chip, first set Friday, opened Monday', true, MON, `var g = { streak: 1, lastDay: '${FRI}' };`, 'rrStreakChipText(g)', ''],
+        ['RR chip, first set Friday, opened Tuesday', true, new Date(2026, 10, 17, 10), `var g = { streak: 1, lastDay: '${FRI}' };`, 'rrStreakChipText(g)', ''],
+        ['RR chip, 3 days to Friday, opened Monday', true, MON, `var g = { streak: 3, lastDay: '${FRI}' };`, 'rrStreakChipText(g)', 'games.rr.streakDays:3'],
+        ['RR chip, 1 day, old page, opened the next day', false, new Date(2026, 10, 13, 10), `var g = { streak: 1, lastDay: '2026-11-12' };`, 'rrStreakChipText(g)', ''],
+        ['RR chip, 1 day, old page, today', false, new Date(2026, 10, 13, 10), `var g = { streak: 1, lastDay: '${FRI}' };`, 'rrStreakChipText(g)', 'games.rr.streakStartedToday'],
+      ];
+      for (const [what, h, now, setup, expr, want] of VM_CASES) {
+        vmCases++;
+        let got;
+        try { got = run(h, now, setup, expr).out; } catch (e) { fail(`${what}: threw ${e.message}`); continue; }
+        if (JSON.stringify(got) !== JSON.stringify(want)) fail(`${what}: got ${JSON.stringify(got)}, expected ${JSON.stringify(want)}`);
+      }
+    }
+  }
+
+  // 5. no "yesterday or reset" copy left (the arcade guard's fallback is the one allowed)
+  const TODAY_FORM = /^(?:today\b|(?:rr)?dayStr\(\s*new Date\(\)\s*\)|null\b|undefined\b|''|"")/;
+  const DAY_MS = /\b864e5\b|\b86_?400_?000\b|24\s*\*\s*60\s*\*\s*60\s*\*\s*1000|1000\s*\*\s*60\s*\*\s*60\s*\*\s*24/;
   for (const [p, t] of files) {
     const code = strip(t);
     const lines = code.split('\n');
+    let allowFrom = -1, allowTo = -1;
+    if (p === 'coach-hub.js') {
+      const i = code.search(/function\s+arcadeStreakContinues\s*\(/), body = jsFunctionBody(code, 'arcadeStreakContinues');
+      if (i >= 0 && body) { allowFrom = code.slice(0, i).split('\n').length - 1; allowTo = allowFrom + code.slice(i, code.indexOf(body, i) + body.length).split('\n').length - 1; }
+    }
     lines.forEach((l, i) => {
-      if (/lastDay\s*[!=]==?\s*(?:rr)?[dD]ayStr\(\s*(?!new Date\(\)\s*\))/.test(l) || /[dD]ayStr\(\s*(?!new Date\(\)\s*\))[^)]*\)\s*[!=]==?\s*[\w.]*lastDay\b/.test(l)
-          || /lastDay\s*[!=]==?\s*(?:y|yd|yday|yesterday\w*|prev\w*)\b/i.test(l)) { copies++; fail(`${p}:${i + 1}: a day streak compared with a day other than today ("yesterday or reset"); use dayStreakContinues / dayStreakAlive (app/boot.js): ${l.trim().slice(0, 120)}`); }
-      if (/\.setDate\(\s*[\w.]+\.getDate\(\)\s*-\s*1\s*\)/.test(l)) {
-        const win = lines.slice(Math.max(0, i - 6), i + 7).join('\n');
-        if (/lastDay|streak/i.test(win)) { copies++; fail(`${p}:${i + 1}: a "yesterday" built next to a streak; use dayStreakContinues / dayStreakAlive (app/boot.js): ${l.trim().slice(0, 120)}`); }
+      if (i >= allowFrom && i <= allowTo) return;
+      const near = () => /lastDay|streak/i.test(lines.slice(Math.max(0, i - 6), i + 7).join('\n'));
+      let m;
+      const cmp = /\blastDay\s*[!=]==?\s*/g;
+      while ((m = cmp.exec(l))) {
+        if (!TODAY_FORM.test(l.slice(m.index + m[0].length))) { fail(`${p}:${i + 1}: a lastDay compared with something other than today's day string ("yesterday or reset"); use dayStreakContinues / dayStreakAlive (app/boot.js): ${l.trim().slice(0, 140)}`); break; }
       }
+      const rev = /([\w.$]+(?:\([^()]*(?:\([^()]*\))?[^()]*\))?)\s*[!=]==?\s*[\w.$]*\blastDay\b/g;
+      while ((m = rev.exec(l))) {
+        if (!TODAY_FORM.test(m[1]) && !/lastDay$/.test(m[1])) { fail(`${p}:${i + 1}: a lastDay compared with something other than today's day string ("yesterday or reset"); use dayStreakContinues / dayStreakAlive (app/boot.js): ${l.trim().slice(0, 140)}`); break; }
+      }
+      if (/\.setDate\(\s*[\w.]+\.getDate\(\)\s*-\s*1\s*\)/.test(l) && near()) fail(`${p}:${i + 1}: a "yesterday" built next to a streak; use dayStreakContinues / dayStreakAlive (app/boot.js): ${l.trim().slice(0, 140)}`);
+      if (DAY_MS.test(l) && near()) fail(`${p}:${i + 1}: a day's worth of milliseconds next to a streak or lastDay (a "yesterday" spelled another way); use dayStreakContinues / dayStreakAlive (app/boot.js): ${l.trim().slice(0, 140)}`);
     });
   }
-  if (!bad) ok(`3 helpers defined once, in app/boot.js; ${passed} of ${cases} date cases hold in ${ZONES.length} time zones (9 Mondays x 7 last days x gaps 0-10, 32 named cases, 7 runs); ${WEEKEND_STREAK_CALLERS.length} of ${WEEKEND_STREAK_CALLERS.length} callers use the helpers; 0 "yesterday or reset" copies in ${files.length} scripts`);
+  if (!bad) ok(`3 helpers defined once, in app/boot.js; ${passed} of ${cases} date cases hold in ${ZONES.length} time zones (9 Mondays x 7 last days x gaps 0-10, 32 named cases, 7 runs); ${WEEKEND_STREAK_CALLERS.length} of ${WEEKEND_STREAK_CALLERS.length} callers use the helpers, ${WEEKEND_STREAK_TODAY.length} of ${WEEKEND_STREAK_TODAY.length} with today's day; the arcade guard in its exact shape; ${vmCases} of ${vmCases} arcade runs with and without the helpers; 0 "yesterday or reset" copies in ${files.length} scripts (1 allowed: the guard's fallback)`);
 }
 
 function checkPracticeMinutes(i18nTable) {
