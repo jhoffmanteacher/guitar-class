@@ -152,6 +152,12 @@ section when it tags. If you read this after 2026-11-15 and the routine still sa
   `ci-try/<name>` push publishes `try-<name>` for 7 days at its own address (printed on the run page), with a real
   sign-in (the deploy adds the address to the practice project's sign-in domains) and its own browser storage, so a
   risky change can be signed into and clicked before it reaches main; no rules are published from a branch.
+  Follow-ups: (1) the next `firestore.rules` change also fixes its header comment (`firestore.rules:14`,
+  `firestore.rules.paste2:15`): "or run `firebase deploy --only firestore:rules`" now publishes to the PRACTICE
+  project only (`.firebaserc`); the class rules are the console paste. (2) Question for Jonathan: any school account
+  can sign in to the practice copy and save there (same rules as the class); keep the address quiet, accept it, or
+  make the practice copy refuse non-teacher sign-ins. (3) The Friday check may read a red "Practice copy" run: it
+  is not the live site.
 - **Practice minutes console view** (`997df22`, `07a4e04`): he pasted the rules on 2026-11-06 (memory
   `firestore-rules-published`; no hash check). Left: open **Practice minutes** in the console and check a student or two
   against their My progress (rank can differ slightly: "Recently shipped" → 2026-11-06 Practice minutes in the teacher console).

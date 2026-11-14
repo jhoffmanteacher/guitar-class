@@ -10,15 +10,17 @@
 #                          project's database (never the class's: that is still
 #                          the Firebase console paste, CLAUDE.md).
 #   push to ci-try/<name>  the files go to a PREVIEW channel of the practice
-#                          site, "try-<name>", for 7 days (its address is
-#                          printed on the run page); no rules are published.
+#                          site, "try-<name>-<6 hex>", for 7 days (its address
+#                          is printed on the run page); no rules are published.
 #   Actions -> Practice copy -> Run workflow  the same, for the branch picked.
 #
 # Which project a page talks to is decided by firebase-config.js from the
 # address (checks.mjs 1ed). Each deploy below checks the address it produced
-# against that very file: a preview address the file would NOT treat as the
-# practice copy (its pages would then talk to the class project) is deleted at
-# once and the run turns red.
+# against that very file: a preview channel whose address the file would NOT
+# treat as the practice copy (its pages would then talk to the class project),
+# or whose address cannot be read, is deleted at once and the run turns red.
+# The rules step never turns the run red (a key that can publish pages but not
+# rules leaves a warning naming the role to add).
 #
 # The key: the GitHub secret FIREBASE_PRACTICE_SA (a service-account key of the
 # practice project only; Jonathan's steps: "Claude outputs/practice-copy/
@@ -78,11 +80,13 @@ jobs:
           if [ "$REF" = "refs/heads/main" ]; then
             echo "kind=live" >> "$GITHUB_OUTPUT"
           elif [[ "$REF" == refs/heads/ci-try/* ]]; then
-            # The channel id from the branch: lower case, a-z 0-9 and '-', at most 20 characters.
-            ch="$(printf '%s' "${REF_NAME#ci-try/}" | tr 'A-Z' 'a-z' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//' | cut -c1-20 | sed -E 's/-+$//')"
+            # The channel id: "try-", the branch name (lower case, a-z 0-9 and '-', at most 16 characters), "-" and
+            # 6 hex characters of a hash of the WHOLE branch name, so two branches never share a channel.
+            ch="$(printf '%s' "${REF_NAME#ci-try/}" | tr 'A-Z' 'a-z' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//; s/-+$//' | cut -c1-16 | sed -E 's/-+$//')"
             [ -z "$ch" ] && ch="x"
+            sum="$(printf '%s' "$REF_NAME" | sha256sum | cut -c1-6)"
             echo "kind=preview" >> "$GITHUB_OUTPUT"
-            echo "channel=try-$ch" >> "$GITHUB_OUTPUT"
+            echo "channel=try-$ch-$sum" >> "$GITHUB_OUTPUT"
           else
             echo "kind=none" >> "$GITHUB_OUTPUT"
             echo "::notice title=Practice copy::not main or ci-try/*: nothing published"
@@ -106,8 +110,10 @@ jobs:
           node -e 'const k=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); if(k.project_id!=="guitar-class-practice"){console.error("::error title=Practice copy::the key in FIREBASE_PRACTICE_SA is not a key of guitar-class-practice: nothing published"); process.exit(1)}' "$RUNNER_TEMP/practice-sa.json"
           echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/practice-sa.json" >> "$GITHUB_ENV"
 
+      # Hosting first: on the first run the key may be able to publish pages but not rules.
       - name: Publish the site (live channel)
         if: env.HAS_KEY == 'true' && steps.kind.outputs.kind == 'live'
+        id: hosting
         run: firebase deploy --only hosting --project guitar-class-practice --non-interactive
 
       - name: Check the live copy serves this commit's firebase-config.js
@@ -120,35 +126,60 @@ jobs:
               vm.runInNewContext(fs.readFileSync("firebase-config.js", "utf8") + ";globalThis.__p = firebaseConfig.projectId;", c);
               if (c.__p !== "guitar-class-practice") { console.error("::error title=Practice copy::firebase-config.js does not choose the practice project on " + process.argv[1]); process.exit(1); }
             ' "$host"
-            curl -fsS "https://$host/firebase-config.js?v=$GITHUB_SHA" -o "$RUNNER_TEMP/served.js"
-            cmp -s "$RUNNER_TEMP/served.js" firebase-config.js || { echo "::error title=Practice copy::https://$host/firebase-config.js is not this commit's file"; exit 1; }
+            same=no
+            for try in 1 2 3 4 5 6; do
+              if curl -fsS --retry 5 --retry-delay 3 --retry-all-errors "https://$host/firebase-config.js?v=$GITHUB_SHA-$try" -o "$RUNNER_TEMP/served.js" && cmp -s "$RUNNER_TEMP/served.js" firebase-config.js; then same=yes; break; fi
+              sleep 10
+            done
+            [ "$same" = yes ] || { echo "::error title=Practice copy::https://$host/firebase-config.js is not this commit's file after 6 tries"; exit 1; }
           done
           echo "::notice title=Practice copy::live at https://guitar-class-practice.web.app"
 
+      # The rules only after the site went live, and only from main; a failure here never fails the run (a key
+      # without the role can publish pages but not rules): it leaves a warning saying what to add.
       - name: Publish firestore.rules to the practice database
-        if: env.HAS_KEY == 'true' && steps.kind.outputs.kind == 'live'
+        if: always() && env.HAS_KEY == 'true' && steps.kind.outputs.kind == 'live' && steps.hosting.outcome == 'success'
+        id: rules
+        continue-on-error: true
         run: firebase deploy --only firestore:rules --project guitar-class-practice --non-interactive
+
+      - name: Rules not published?
+        if: always() && steps.rules.outcome == 'failure'
+        run: |
+          echo "::warning title=Practice copy::firestore.rules was NOT published to the practice database (the site itself is live). If the log above says permission or serviceusage, the key needs the role Service Usage Consumer: Google Cloud console, IAM, the firebase-adminsdk row of guitar-class-practice, Edit principal, Add another role, Service Usage Consumer, Save (JONATHAN-STEPS.md steps 8-11). Then re-run the newest Practice copy run."
 
       - name: Publish the site (preview channel, 7 days)
         if: env.HAS_KEY == 'true' && steps.kind.outputs.kind == 'preview'
         env:
           CHANNEL: ${{ steps.kind.outputs.channel }}
         run: |
+          # The guard below runs whatever the deploy did: an address that cannot be read, or one firebase-config.js
+          # would not treat as the practice copy, takes THIS run's own channel down ($CHANNEL, always "try-…").
+          set +e
           firebase hosting:channel:deploy "$CHANNEL" --expires 7d --project guitar-class-practice --non-interactive --json > "$RUNNER_TEMP/channel.json"
-          url="$(node -e 'const j=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); const r=j.result||{}; const u=Object.values(r).map(x=>x&&x.url).filter(Boolean); console.log(u[0]||"")' "$RUNNER_TEMP/channel.json")"
+          deployed=$?
+          url="$(node -e 'try { const j=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")); const r=j.result||{}; const u=Object.values(r).map(x=>x&&x.url).filter(Boolean); console.log(u[0]||""); } catch (e) { console.log(""); }' "$RUNNER_TEMP/channel.json")"
           host="${url#https://}"; host="${host%%/*}"
-          ok="$(node -e '
-            const vm = require("vm"), fs = require("fs");
-            const c = { location: { hostname: process.argv[1] } };
-            vm.runInNewContext(fs.readFileSync("firebase-config.js", "utf8") + ";globalThis.__p = firebaseConfig.projectId;", c);
-            console.log(c.__p === "guitar-class-practice" ? "yes" : "no");
-          ' "$host")"
-          if [ -z "$host" ] || [ "$ok" != "yes" ]; then
-            firebase hosting:channel:delete "$CHANNEL" --project guitar-class-practice --force --non-interactive || true
-            echo "::error title=Practice copy::the preview address '$host' is not one firebase-config.js treats as the practice copy (its pages would talk to the class project), so the channel was deleted. Fix the preview pattern in firebase-config.js and checks.mjs 1ed."
-            exit 1
+          ok=no
+          if [ -n "$host" ]; then
+            ok="$(node -e '
+              const vm = require("vm"), fs = require("fs");
+              const c = { location: { hostname: process.argv[1] } };
+              vm.runInNewContext(fs.readFileSync("firebase-config.js", "utf8") + ";globalThis.__p = firebaseConfig.projectId;", c);
+              console.log(c.__p === "guitar-class-practice" ? "yes" : "no");
+            ' "$host" || echo no)"
           fi
-          echo "::notice title=Practice copy preview::$url (7 days)"
+          if [ "$deployed" -eq 0 ] && [ "$ok" = "yes" ]; then
+            echo "::notice title=Practice copy preview::$url (7 days)"
+            exit 0
+          fi
+          if [ -z "$host" ]; then why="its address could not be read from the deploy's answer (deploy exit $deployed)"; else why="its address '$host' is not one firebase-config.js treats as the practice copy (its pages would talk to the class project)"; fi
+          if firebase hosting:channel:delete "$CHANNEL" --project guitar-class-practice --force --non-interactive; then
+            echo "::error title=Practice copy::preview channel $CHANNEL: $why. The channel was deleted. If the address form is the reason, fix the preview pattern in firebase-config.js, privacy.html and checks.mjs 1ed together."
+          else
+            echo "::error title=Practice copy::preview channel $CHANNEL: $why. Deleting it FAILED: delete it by hand (Firebase console, guitar-class-practice, Hosting, preview channels) or wait for it to expire in 7 days."
+          fi
+          exit 1
 
       - name: Remove the key file
         if: always()

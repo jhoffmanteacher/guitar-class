@@ -5,6 +5,9 @@
   },
   "hosting": {
     "public": ".",
+    "predeploy": [
+      "node -e \"if (process.env.GITHUB_ACTIONS !== 'true') { console.error('The practice copy is published by GitHub only (.github/workflows/practice.yml), never by a firebase deploy typed on this computer: nothing was uploaded.'); process.exit(1); }\""
+    ],
     "ignore": [
       "**/.*",
       "**/.*/**",
@@ -25,7 +28,18 @@
       "package-lock.json",
       "eslint.config.mjs",
       "**/firebase-debug*.log",
-      "**/firestore-debug.log"
+      "**/firestore-debug.log",
+      "**/*.zip",
+      "**/guitar-class-backup-*",
+      "**/mic-recordings-*",
+      "**/mic-eval-*",
+      "**/mic-*-*-*",
+      "**/*.webm",
+      "**/*.wav",
+      "**/*.log",
+      "**/*.py",
+      "**/*.ps1",
+      "**/*.mjs"
     ],
     "headers": [
       {

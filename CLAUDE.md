@@ -229,14 +229,16 @@ Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `ap
   project by address (its two Hosting names and preview channels → practice, with a striped "PRACTICE COPY" strip
   and "[practice]" titles; every other address → the class project, unchanged); `checks.mjs` 1ed pins it.
   `.github/workflows/practice.yml` publishes it (main → live + `firestore.rules`; `ci-try/**` → 7-day preview) with
-  the secret `FIREBASE_PRACTICE_SA`. Never add a second project to `.firebaserc`, and never deploy to the class
+  the secret `FIREBASE_PRACTICE_SA`; only GitHub publishes it (a `firebase deploy` typed on a Mac stops at the
+  predeploy in `firebase.json`). Never add a second project to `.firebaserc`, and never deploy to the class
   project from this repo.
 - **Two guards that only report** (2026-11-13). `checks.mjs` 1dp warns when an English string changes and its Spanish twin does not (`tools/i18n-drift.mjs`): read each line it prints; a line printed in full is a changed fact, order or meaning. Removing twins on purpose (a Journey page, a game's strings) also lowers `DRIFT_FLOOR` in `tools/checks.mjs` (1dp) to the new count, as a pin-only edit in the same commit. The accessibility scan (`node tools/smoke.mjs --only a11y`, axe-core, vendored) runs report-only on GitHub after every push (`browser.yml`, job "a11y scan"); its ratchet against `tools/a11y-baseline.json` (`--a11y-ratchet`) stays OFF until a week of GitHub runs show 0 new signatures and a reviewer has passed the switch-on.
 - **Sweep ratchet**: 3+ instances of a mechanically-detectable error class → permanent `checks.mjs` detector, same session; it must render/execute, match UNESCAPED strings (`unescapeJs()`); break it in a scratch copy and watch it fail.
 - **Activity order/placement** live on the console board (`config/class.activityBoard`,
   `caBoardOrder()`, `teacherMoveActivity()`); a digit in a title is a SERIES number (1d, 1l). **`config/class`** writes only via `teacherWriteConfig()` (1ai; omit `base` unless a single-cell toggle).
 - **`firestore.rules` change** → tell Jonathan: Firebase console → Firestore → Rules → paste →
-  Publish (GitHub Pages doesn't deploy it). Before that: `tools/pm-rules-test.mjs` and
+  Publish (GitHub Pages doesn't deploy it). The class database's rules are only ever pasted by hand; `firebase
+  deploy` on this repo reaches the practice project only (`.firebaserc`), whatever the rules file's own comment says. Before that: `tools/pm-rules-test.mjs` and
   `tools/rules-core-test.mjs --breaks` on the Firestore emulator (and `tools/site-errors-rules-test.mjs --breaks --site <repo>` for the `siteErrors` block) (their headers say how; GitHub runs both after
   every push, `.github/workflows/rules.yml`). A case named "today: …" turning red means a rule was tightened:
   make sure that was the point.

@@ -92,7 +92,8 @@ const TEACHER_EMAIL = 'jhoffman@seq.org';
     var bar = document.createElement('div');
     bar.id = 'practice-copy-bar';
     bar.setAttribute('role', 'note');
-    bar.textContent = 'PRACTICE COPY: test data only. Nothing here is the real class.';
+    // Any school account can sign in here and save (same rules as the class): the strip says plainly it does not count.
+    bar.textContent = 'PRACTICE COPY: not the real class site. Work saved here does not count.';
     var place = function () {
       if (!document.body || bar.parentNode) return;
       document.body.appendChild(bar);
