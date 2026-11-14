@@ -30,6 +30,10 @@
      node tools/smoke.mjs --quiet              print only the verdict
      node tools/smoke.mjs --stall <s>          stop if no step starts for <s> seconds (default 120)
      node tools/smoke.mjs --timeout <s>        stop if the whole run passes <s> seconds (default 2400)
+     node tools/smoke.mjs --a11y               also run the accessibility scan (area a11y, below); --only a11y
+                                               runs it alone. --a11y-out <file> writes every finding as JSON,
+                                               --a11y-ratchet fails on a finding above tools/a11y-baseline.json
+                                               for this run, --a11y-write-baseline rewrites that file.
 
    It is a tool, not part of checks.mjs: it needs a browser, takes 3-4
    minutes per walk on a quiet Mac (about 7 on a busy one), and is for big changes (renderers, escaping, many files at once), not
@@ -64,6 +68,9 @@
                        the ca* renderers in app.js)
      practice-minutes  the practice-minutes strip (practice-minutes*.js)
      tuning-sim        the Tuning Simulator
+     a11y              the accessibility scan (axe-core) of the screens a student meets, report-only until
+                       its ratchet is switched on (2026-11-27 planned). NOT in a walk without --only unless
+                       --a11y is given. Details above a11yWalk().
    app.js or styles.css touched broadly, or unsure → no --only.
 
    Proved to be able to fail: against 194696b it reports 60+ dead video-button
@@ -75,6 +82,8 @@ import { tmpdir, platform } from 'node:os';
 import { join, extname, normalize, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import net from 'node:net';
+import { writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -84,7 +93,7 @@ const BASELINE = opt('--baseline');
 // --en-only (2026-11-09): every per-language loop walks English only. No flag = English and Spanish, as before.
 const LANGS = args.includes('--en-only') ? ['en'] : ['en', 'es'];
 // --only (2026-11-09): which areas walk() takes. No --only = all of them, as before.
-const AREAS = ['sets', 'games', 'activities', 'practice-minutes', 'tuning-sim'];
+const AREAS = ['sets', 'games', 'activities', 'practice-minutes', 'tuning-sim', 'a11y'];
 const ONLY = args.includes('--only') ? (opt('--only') || '') : null;
 const ON = Object.fromEntries(AREAS.map(a => [a, ONLY === null]));
 if (ONLY !== null) {
@@ -93,6 +102,8 @@ if (ONLY !== null) {
   if (!picked.length || bad.length) { console.error(`smoke: --only takes ${AREAS.join(', ')} (comma-separated)${bad.length ? `; not an area: ${bad.join(', ')}` : ''}`); process.exit(2); }
   picked.forEach(a => { ON[a] = true; });
 }
+if (ONLY === null) ON.a11y = false;   // the accessibility scan runs only when asked for (2026-11-13)
+if (args.includes('--a11y')) ON.a11y = true;
 const say = (...a) => { if (!QUIET) console.log(...a); };
 
 /* The watchdog (2026-11-09). The run hung twice (2026-11-04, 2026-11-07): it sat for hours, printed nothing, and
@@ -1763,6 +1774,156 @@ async function tuningSimWalk(page, run, events, stats, base) {
   stats.tuningSimRounds = rounds; stats.tuningSimChecks = checks;
 }
 
+/* ── area: a11y — the accessibility scan (2026-11-13, Jonathan: "an accessibility scan in the browser walk") ──
+   Off unless asked for (--a11y, or --only a11y): the normal smoke walks exactly as before. It runs LAST, on a page
+   it reloads itself, so it never changes what the other areas see. It scans, at 1366x657, the screens a student
+   meets: sign-in, a lesson set and its checklist, Songs, In-Class Activities and one open practice card,
+   My progress, the live game's student screen (no game, then a question), the Games hub and one game's set-up
+   (in every language of the walk), and one Song Journey page (English).
+
+   The engine is axe-core, vendored as ONE file under tools/vendor/axe-core/ with its licence (MPL-2.0) beside it.
+   It is a test-only file: never loaded by the site, in no sw.js list (checks.mjs fingerprints only the site's
+   files; tools/lint.mjs lints only the scripts a page loads). It is injected through the DevTools connection the
+   walk already has. Pinned: axe-core 4.14.0 (npm, published 2026-10-05), axe.min.js SHA-256 below (the same file
+   as axe-core's own sri-history.json entry sha256-IMCf4Veoo0ow4kGqofza3mV3NPCKs3ns++t9RcxG6Hg=). A file that does
+   not match is refused (an event): to move to a new axe, replace the file, its licence and both lines below.
+
+   Rules: axe's WCAG 2.0/2.1/2.2 A and AA rules and its best-practice rules, plus its two id rules that are off by
+   default (duplicate-id, duplicate-id-active: a label's `for` or an aria-* reference picks the first of two
+   elements with one id). That covers what was asked: names on images and icon buttons (image-alt, button-name,
+   link-name, svg-img-alt), form labels (label, select-name), duplicate ids, text contrast (color-contrast:
+   4.5:1, 3:1 for large text), focusable elements hidden from screen readers (aria-hidden-focus), the page
+   language (html-has-lang, html-lang-valid) and heading order (heading-order).
+
+   REPORT-ONLY until the ratchet is switched on (planned for 2026-11-27, two weeks after it shipped): it prints
+   one line per rule (its count and its first elements) and a summary line, and --a11y-out <file> writes every
+   finding as JSON; it never fails the run. The ratchet: tools/a11y-baseline.json pins today's findings (screen,
+   rule, count; and the elements, only to NAME a new one). Switched on (A11Y_RATCHET = true below, or
+   --a11y-ratchet for one run), a rule whose count on a screen went UP, or a rule new on a screen, is an error
+   event that names the screen, the rule and the new elements. A count that went DOWN prints "the baseline can be
+   lowered" and never fails; `--a11y-write-baseline` rewrites the file from the run (do it from a walk in both
+   languages, or the Spanish screens drop out of it). A screen this run did not scan (--en-only) is not compared.
+   The --baseline <ref> walk does not scan: the pinned file is the a11y baseline. */
+const A11Y_AXE = join(ROOT, 'tools', 'vendor', 'axe-core', 'axe.min.js');
+const A11Y_AXE_VERSION = '4.14.0';
+const A11Y_AXE_SHA256 = '20c09fe157a8a34a30e241aaa1fcdade657734f08ab379ecfbeb7d45cc46e878';   // of axe.min.js, LF line ends
+const A11Y_BASELINE = join(ROOT, 'tools', 'a11y-baseline.json');
+const A11Y_RATCHET = false;   // the switch: true from 2026-11-27 (Jonathan's call), then a new finding fails the smoke
+const A11Y_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'];
+const A11Y_RUN = `axe.run(document, { resultTypes: ['violations'], runOnly: { type: 'tag', values: ${JSON.stringify(A11Y_TAGS)} },
+  rules: { 'duplicate-id': { enabled: true }, 'duplicate-id-active': { enabled: true } } }).then(r => r.violations.map(v => ({ id: v.id, impact: v.impact, help: v.help,
+  nodes: v.nodes.map(n => ({ target: n.target.map(String).join(' '), html: String(n.html).slice(0, 240), why: String(n.failureSummary || '').replace(/\\s+/g, ' ').slice(0, 300) })) })))`;
+let a11ySrc = null;
+async function a11yWalk(page, run, events, stats, base) {
+  const fail = (step, text) => events.push({ step: 'a11y:' + step, kind: 'a11y-setup', text });
+  if (a11ySrc === null) {
+    let src = '';
+    try { src = readFileSync(A11Y_AXE, 'utf8'); } catch { fail('engine', `${A11Y_AXE} is missing: the scan cannot run`); return; }
+    const sha = createHash('sha256').update(src.replace(/\r\n/g, '\n')).digest('hex');
+    if (sha !== A11Y_AXE_SHA256) { fail('engine', `${A11Y_AXE} is not the pinned axe-core ${A11Y_AXE_VERSION} (SHA-256 ${sha}, want ${A11Y_AXE_SHA256})`); return; }
+    a11ySrc = src;
+  }
+  const found = stats.a11y = { screens: {}, axe: A11Y_AXE_VERSION };
+  await page.send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false });
+  const scan = async (key, what) => {
+    const ok = await run(`a11y:${key}:inject`, `typeof axe !== 'undefined' || ((0, eval)(${JSON.stringify(a11ySrc)}), typeof axe !== 'undefined')`, 10);
+    if (ok !== true) { fail(key, 'axe-core did not load on this page'); return; }
+    const v = await run(`a11y:${key}:scan`, A11Y_RUN, 10);
+    if (!Array.isArray(v)) { fail(key, 'the scan returned nothing'); return; }
+    found.screens[key] = { what, rules: v };
+  };
+  // Sign-in: a fresh page, not signed in (the dev bypass signs in below, as the walk's boot does).
+  await page.send('Page.navigate', { url: base + '/index.html' });
+  await sleep(3500);
+  await scan('en:sign-in', 'the sign-in screen');
+  await run('a11y:devBypass', 'devBypass()', 3500);
+  for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'a11y:devBypass' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
+  await run('a11y:load-coach', `ensureCoachJs()`, 1500);
+  const setId = await run('a11y:pick-set', `(SETS.find(s => s.id === 'm4w1') || SETS[0]).id`, 10);
+  const cardId = await run('a11y:pick-card', `(CLASS_ACTIVITIES.find(a => a.view === 'card' && !a.teacherOnly && (caIsVisible(a) || caIsPlayAlongOnly(a))) || {}).id || null`, 10);
+  if (!setId || !cardId) fail('pick', `no lesson set (${setId}) or no practice card (${cardId}) to scan`);
+  const J = JSON.stringify;
+  const screens = [
+    ['lesson', `a lesson set (${setId})`, `(() => { closeTopPanels(); const s = SETS.find(x => x.id === ${J(setId)}); onModuleChange(s.moduleNum); activateSet(s.id); switchTabById(s.id, LESSON_TAB, true); return 1; })()`],
+    ['checklist', `its checklist (${setId})`, `(switchTabById(${J(setId)}, 'checklist', true), 1)`],
+    ['songs', 'the Songs hub', `(openSongsScreen(), 1)`],
+    ['class-activities', 'the In-Class Activities list', `(openClassActivitiesScreen(), 1)`],
+    ['practice-card', `a practice card open (${cardId})`, `(caFocusActivity(${J(cardId)}), 1)`],
+    ['my-progress', 'My progress', `(openMyProgressScreen(), 1)`],
+    ['live-game', 'the live game, no game running', `(openLiveQuizScreen(), lqRenderStudent(), 1)`],
+    ['live-game-question', 'the live game, a question open', `(() => { lqSession = { sessionId: 'a11y-made-up', state: 'question', quizId: LQ_DEFAULT_QUIZ, qIndex: 0, totalQ: 5, limitSec: 20 }; lqMyAnswer = null; lqRenderStudent(); return 1; })()`],
+    ['games-hub', 'the Games hub', `(() => { lqSession = null; closeLiveQuizScreen(); openGamesScreen(); gamesShow('hub'); return 1; })()`],
+    ['game-setup', 'a game set-up (Change Up)', `(gamesShow('cc'), 1)`],
+  ];
+  for (const lang of LANGS) {
+    await run(`a11y:${lang}:lang`, `setLang('${lang}')`, 600);
+    for (const [name, what, expr] of screens) {
+      if (!setId && (name === 'lesson' || name === 'checklist')) continue;
+      if (!cardId && name === 'practice-card') continue;
+      if ((await run(`a11y:${lang}:${name}:open`, expr, 900)) == null) continue;   // a step that threw is already an event
+      await scan(`${lang}:${name}`, what);
+    }
+    await run(`a11y:${lang}:close`, `(document.getElementById('games-main-btn') && !document.getElementById('games-screen').hidden && document.getElementById('games-main-btn').click(), 1)`, 400);
+  }
+  await run('a11y:lang-en', `setLang('en')`, 400);
+  // One Song Journey page, English (the walk has no Spanish Journey pages).
+  const loaded = new Promise(r => page.on(m => { if (m === 'Page.loadEventFired') r(); }));
+  await page.send('Page.navigate', { url: base + '/tabs/luna.html' });
+  await Promise.race([loaded, sleep(15000)]);
+  await sleep(1500);
+  await scan('en:journey-luna', 'a Song Journey page (Luna)');
+  await page.send('Emulation.clearDeviceMetricsOverride');
+}
+/* After the walk: print the findings, write --a11y-out, compare with the pinned baseline. Returns the ratchet's
+   error events (none while the ratchet is off). */
+function a11yReport(found) {
+  const out = [], screens = Object.keys(found.screens);
+  const byRule = new Map();
+  for (const key of screens) for (const v of found.screens[key].rules) {
+    const r = byRule.get(v.id) || { id: v.id, impact: v.impact, help: v.help, count: 0, screens: new Set(), targets: [] };
+    r.count += v.nodes.length; r.screens.add(key);
+    for (const n of v.nodes) if (!r.targets.includes(n.target)) r.targets.push(n.target);
+    byRule.set(v.id, r);
+  }
+  const RANK = { critical: 0, serious: 1, moderate: 2, minor: 3 };
+  const rules = [...byRule.values()].sort((a, b) => (RANK[a.impact] ?? 4) - (RANK[b.impact] ?? 4) || b.count - a.count);
+  for (const r of rules) say(`a11y: ${r.id} (${r.impact}) — ${r.count} element${r.count === 1 ? '' : 's'} (${r.targets.length} distinct) on ${r.screens.size} screen${r.screens.size === 1 ? '' : 's'}: ${r.targets.slice(0, 3).join(' | ').slice(0, 300)}`);
+  const total = rules.reduce((s, r) => s + r.count, 0);
+  say(`a11y: ${rules.length} rules with findings, ${total} elements, on ${screens.filter(k => found.screens[k].rules.length).length} of ${screens.length} screens scanned (axe-core ${found.axe}${LANGS.length === 1 ? ', English only' : ''})`);
+  const A11Y_OUT = opt('--a11y-out');
+  if (A11Y_OUT) { try { writeFileSync(A11Y_OUT, JSON.stringify(found, null, 1)); say(`a11y: every finding written to ${A11Y_OUT}`); } catch (e) { console.error(`a11y: could not write ${A11Y_OUT}: ${e.message}`); } }
+  // This run, as the baseline holds it: screen → rule → { count, targets }.
+  const now = {};
+  for (const key of screens) { now[key] = {}; for (const v of found.screens[key].rules) now[key][v.id] = { count: v.nodes.length, targets: v.nodes.map(n => n.target) }; }
+  if (args.includes('--a11y-write-baseline')) {
+    const doc = { _about: `The accessibility scan's baseline (tools/smoke.mjs, area a11y): the findings on ${new Date().toLocaleDateString('en-CA')}, per screen and rule. The count decides; the targets only name a new element. Lower it with node tools/smoke.mjs --only a11y --a11y-write-baseline (both languages).`, axe: found.axe, screens: {} };
+    for (const key of screens.sort()) { doc.screens[key] = {}; for (const id of Object.keys(now[key]).sort()) doc.screens[key][id] = { count: now[key][id].count, targets: now[key][id].targets.slice(0, 50) }; }
+    writeFileSync(A11Y_BASELINE, JSON.stringify(doc, null, 1) + '\n');
+    say(`a11y: baseline written to ${A11Y_BASELINE} (${screens.length} screens)`);
+    return out;
+  }
+  let pinned = null;
+  try { pinned = JSON.parse(readFileSync(A11Y_BASELINE, 'utf8')); } catch { say(`a11y: no baseline at ${A11Y_BASELINE} — nothing to compare (write one with --a11y-write-baseline)`); return out; }
+  const ratchet = A11Y_RATCHET || args.includes('--a11y-ratchet');
+  let up = 0, down = 0;
+  for (const key of screens) {
+    const b = pinned.screens[key] || {};
+    for (const id of new Set([...Object.keys(b), ...Object.keys(now[key])])) {
+      const have = now[key][id] ? now[key][id].count : 0, allowed = b[id] ? b[id].count : 0;
+      if (have > allowed) {
+        up++;
+        const known = new Set((b[id] && b[id].targets) || []), fresh = now[key][id].targets.filter(x => !known.has(x));
+        const named = (fresh.length ? fresh : now[key][id].targets).slice(0, 4).join(' | ').slice(0, 400);
+        const text = `${id} on ${key}: ${have} element${have === 1 ? '' : 's'}, the baseline allows ${allowed}${fresh.length ? '; new: ' : '; e.g. '}${named}`;
+        if (ratchet) out.push({ step: `a11y:${key}`, kind: 'a11y-new', text });
+        else say(`a11y: (ratchet off until ${'2026-11-27'}) would fail: ${text}`);
+      } else if (have < allowed) { down++; say(`a11y: ${id} on ${key}: ${have}, the baseline has ${allowed} — the baseline can be lowered`); }
+    }
+  }
+  say(`a11y: against the baseline: ${up} count${up === 1 ? '' : 's'} above it, ${down} below it (ratchet ${ratchet ? 'ON: above = error' : 'off: report only'})`);
+  return out;
+}
+
 async function walk(base, chromePort, label) {
   mark(`${label}: opening the page`);
   const page = await openPage(chromePort);
@@ -2086,6 +2247,7 @@ async function walk(base, chromePort, label) {
   }
   if (ON['practice-minutes']) await pmHeaderWalk(page, run, events, stats);
   if (ON['tuning-sim']) await tuningSimWalk(page, run, events, stats, base);
+  if (ON.a11y && label === 'this checkout') await a11yWalk(page, run, events, stats, base);   // last: it reloads the page
   await page.close();
   return { label, stats, errors: events.filter(e => !NOISE.test(e.text || '')) };
 }
@@ -2151,6 +2313,7 @@ try {
   if (now.stats.tuningSimRounds) say(`smoke: Tuning Simulator (EN + ES): ${now.stats.tuningSimRounds} rounds played (round 1 with a real held peg button), ${now.stats.tuningSimChecks} checkpoints — defaults (sound on, level 1, the question up, no naming step), the card (the string to tune and the tuner's letter), the arrow keys (Left = counterclockwise = tighten) and a hidden tab, three clean rounds per level (saved), the sound switch, a wrong way resetting the count, a reload, level 4 (another letter on the tuner, the circle of notes and its arrow, which turns clockwise for Up and counterclockwise for Down, Tighten turns counterclockwise, the held button speeds up, green on the wrong letter does not finish), the notes and arrow as drawn, real keys and clicks (a held Enter answers once, focus after a key, Space/Enter/click = one tick), the saved level never lowered, green on the circle only when done, and no getUserMedia call`);
   if (LANGS.length === 1) say('smoke: --en-only — Spanish not walked (the end-of-day / Friday full walk does it); "EN + ES" below means English only');
   if (ONLY !== null) say(`smoke: --only ${AREAS.filter(a => ON[a]).join(', ')} — not walked: ${AREAS.filter(a => !ON[a]).join(', ')}`);
+  if (now.stats.a11y) report.push(...a11yReport(now.stats.a11y));   // prints the scan; ratchet events (none while it is off)
   if (base) say(`smoke: ${BASELINE} had ${base.errors.length} error event(s); this checkout has ${now.errors.length}`);
   if (report.length) {
     exitCode = 1;
