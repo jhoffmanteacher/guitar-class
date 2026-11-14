@@ -42,7 +42,7 @@ import { dirname, join, isAbsolute, relative } from 'node:path';
 import { audioHashMap, renderAudioBlock, AUDIO_BLOCK_RE, AUDIO_CACHE_NAME, AUDIO_HASH_CACHE_NAME } from './sw-audio-map.mjs';
 import { readSongFiles, resolveAudio, privateId, songFilesDir, localMismatch, SONG_FILE_PREFIX } from './song-files.mjs';
 import { reviewLabelReport } from './review-labels.mjs';
-import { checkKeysAgainstBase, checkFirestoreWrites, checkRulesPaste, checkKeptThings } from './never-blocks.mjs';
+import { checkKeysAgainstBase, checkFirestoreWrites, checkRulesPaste, checkKeptThings, LET_THROUGH } from './never-blocks.mjs';
 import { tmpdir, cpus } from 'node:os';
 import { driftReport } from './i18n-drift.mjs';
 import vm from 'node:vm';
@@ -605,11 +605,12 @@ function checkMcAnswerTells(allSets) {
    FROZEN_MC_THROUGH_MODULE is "the furthest module a student has
    reached". Ask Jonathan which module the class is in and raise it —
    then re-run with --check and paste the printed fingerprints in, in
-   the same commit. Lowering it is almost never right: a module the
-   class has already passed keeps its stored answers forever. The one
-   exception is the summer reset, which sets it to 0 (and empties
-   FROZEN_MC_FINGERPRINTS) on purpose — see CLAUDE.md's "Summer reset
-   list".
+   the same commit. It is NEVER lowered, and no fingerprint is ever
+   removed: module progress is never wiped (Jonathan, 2026-11-13:
+   "modules do not reset for students unless i do it. everything else
+   will reset"), so a module the class has passed keeps its stored
+   answers for good. checks.mjs 1dl refuses a push that lowers it or
+   drops a fingerprint the base had.
 
    Modules 3–6 were reworded on 2026-09-19 (the quiz-giveaways work
    order) precisely because nobody had reached them yet. Module 3 was
@@ -617,7 +618,9 @@ function checkMcAnswerTells(allSets) {
    locked-out student could tap a quiz choice in a set's read-only
    preview and have it saved (app.js, isPeekedResponseKey), so "nobody
    has answered these" could not be taken on trust for the next module
-   up. Pin a module when the class is about to reach it, not after.
+   up. Since 2026-11-13 that next module's keyed quizzes are frozen
+   automatically (rule-zero-proof's FREEZE_AHEAD, checks.mjs 1dl), so
+   raise this number when the class ENTERS a module.
    ════════════════════════════════════════════════════════════════════ */
 const FROZEN_MC_THROUGH_MODULE = 3;   // students are about to enter Module 3 (Jonathan, 2026-10-01); was 2 (2026-09-19)
 const FROZEN_MC_FINGERPRINTS = {
@@ -674,7 +677,7 @@ function checkFrozenGradedMcs(allSets) {
           err(`${key} — "${step.label}": keyed MC in Module ${w.moduleNum} is not pinned. Students may already have answered it; add its fingerprint to FROZEN_MC_FINGERPRINTS in checks.mjs.`);
           problems++; bad++;
         } else if (pinned !== fp) {
-          err(`${key} — "${step.label}": FROZEN keyed MC changed (${pinned} → ${fp}). Students store their pick as the choice TEXT, so every answer already given to this card is orphaned — it renders as "answered, nothing selected". Reword only with an old→new map in the renderer, or wait until progress resets for the new school year.`);
+          err(`${key} — "${step.label}": FROZEN keyed MC changed (${pinned} → ${fp}). Students store their pick as the choice TEXT, so every answer already given to this card is orphaned — it renders as "answered, nothing selected". Reword only with an old→new map in the renderer (response.renamedChoices); module progress is never wiped, so there is no reset to wait for (skill summer-reset).`);
           problems++; bad++;
         }
       }));
@@ -906,8 +909,9 @@ const MC_LEAK_GENERIC = new Set(('sound sounds same identical exactly also both 
   'forma potencia').split(' '));
 /* Every entry here is in Modules 1–6, which the 2026-09-20 sweep did not cover
    (it ran over 7–13). They are reviewed and deliberately carried, not tuned
-   away — Modules 1–2's keyed MCs are frozen for the year (1ap), so two of
-   them cannot be reworded until progress resets. Clearing the rest is a
+   away — Modules 1–2's keyed MCs are frozen for good (1ap; module progress
+   is never wiped), so two of them cannot be reworded without a one-time move
+   (skill summer-reset). Clearing the rest is a
    separate job; when a module gets swept, delete its entries here first and
    let the check tell you what is left. */
 const MC_LEAK_ALLOW = new Set([
@@ -3597,9 +3601,9 @@ const TEACHER_PHRASE_ALLOW = [
      Module 2 is in rule-zero-proof.mjs's FROZEN_THROUGH regime, where a step
      LABEL must match the base commit BYTE-FOR-BYTE by index (a rename would
      hide an insertion from that proof). Decision 1's "(assessment
-     preparation)" retitle can't ship here until progress resets: raising
-     FROZEN_THROUGH only freezes MORE modules, it never unlocks Module 2 —
-     see CLAUDE.md's "Summer reset list". Scoped to `label` (2026-10-12):
+     preparation)" retitle can't ship without a declared label → label map
+     (skill summer-reset): module progress is never wiped, and raising
+     FROZEN_THROUGH only freezes MORE modules, it never unlocks Module 2. Scoped to `label` (2026-10-12):
      the frozen use is a step label, and the phrase in any text, hint or
      got-it is new. (The Seven Nation Army Challenge's "(your A-string
      assessment piece)" sits in a take-to-song section, which Modules 1–5
@@ -22017,6 +22021,8 @@ function checkNeverRules(sets) {
   bumpServiceWorker();
 
   console.log('');
+  // A revert 1dl let through is said again here, beside the verdict, so it cannot be missed.
+  for (const l of LET_THROUGH) warn(l);
   if (problems > 0) {
     err(`${problems} problem${problems > 1 ? 's' : ''} found${warnings ? `, ${warnings} warning${warnings > 1 ? 's' : ''}${driftWarnings ? ` (${driftWarnings} from 1dp)` : ''}` : ''} — do not push until fixed.`);
     process.exit(1);

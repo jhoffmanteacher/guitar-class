@@ -890,8 +890,10 @@ Journey pages also hold Layers 4–5 and the bonus layers.
 2–12 (the Journey card in 2–5, the Challenge steps in 6–12).
 - **Switched off, not deleted**, the Daily 5 pattern: the section list is
   fixed in every rule-zero regime and each section counts toward its
-  neighbours' `gi` (1af proves no key moved). Deleting them for good is on
-  the Summer reset list.
+  neighbours' `gi` (1af proves no key moved). They stay for good: module
+  progress is never wiped (Jonathan, 2026-11-13: "modules do not reset for
+  students unless i do it. everything else will reset"), and checks.mjs 1do
+  pins every step.
 - It knowingly reverses Jonathan's 2026-09-12 call to keep the 6–12 steps. Seven
   skills (m9w1-s5, m9w2-s5, m10w1-s4, m10w3-s6, m11w3-s6, m12w1-s6, m12w3-s6)
   lost their only teaching step and sit on the checklist with no "Show me
