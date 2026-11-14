@@ -1832,9 +1832,19 @@ tempo at which 85% of changes are right: it is about changing in time). Measurem
 - **Numbers** (DETAILS: `Claude outputs/pcs-whole-slot/DETAILS.md`): the 33 real take summaries, 315 changes, at 1.8 / 2.19, each take's
   own grid cap: right / wrong / no strum 162 / 117 / 36 (nearest) -> 249 / 41 / 25; at today's 60 ms cap for every take (the measurement's
   conditions) 166 / 114 / 35 -> 250 / 40 / 25 (the measured `slotB` was 260 / 40 / 15: it could credit one strum to two changes). Every one of
-  the 249 rights has a strum the game heard inside its span. Nothing played (C5-D5, every beat, 12 cases): changes marked right 86 / 72 / 60
-  -> 108 / 84 / 69 of 180 at 20 / 60 / 100 BPM, games reaching 85% 3 / 3 / 3 -> 6 / 3 / 3 of 12. T02 (Jonathan's own take): 5 of 5 right
-  (nearest: 2 of 5).
+  the 249 rights has a strum the game heard inside its span. T02 (Jonathan's own take): 5 of 5 right (nearest: 2 of 5).
+- **Nothing played, at the default settings** (every beat, the three default pairs, 2 games each: `closed-loop.mjs --no-guitar --no-takes
+  --bpm=30,60,100`, nearest = `--rule=nearest`), games reaching 85% / changes marked right, nearest -> whole span:
+  | case | 30 BPM (the default) | 60 BPM | 100 BPM |
+  |---|---|---|---|
+  | quiet room | 0 / 6 games, 0 / 90 -> same | same | same |
+  | one voice | 0 -> 6 of 6 games, 37 -> 86 of 90 | 0 -> 3 of 6, 38 -> 73 | 0 -> 0 of 6, 24 -> 44 |
+  | class talking | 0 -> 4 of 6, 28 -> 76 of 90 | 0 -> 1 of 6, 28 -> 59 | 0 -> 0 of 6, 26 -> 45 |
+  | room sound alone (7 cases) | 6 -> 18 of 42, 270 -> 417 of 630 | 5 -> 10 of 42, 226 -> 309 | 3 -> 4 of 42, 170 -> 227 |
+  | all 12 cases | 18 -> 30 of 72, 450 -> 597 of 1,080 | 17 -> 22 of 72, 406 -> 489 | 15 -> 16 of 72, 350 -> 407 |
+  A student who plays nothing next to talking classmates now gets "you can play at that speed now", XP and a saved best in most games at
+  30 BPM. Two stricter variants were measured for Jonathan (2026-11-14, review R1, not built; `candidates.mjs` `spanFarReads`, `spanReads`):
+  DETAILS, "Step B".
 - **Roll back:** `ccSpanRule` returns false (Change Up's rule for both games), the tip, description and done-screen lines go back to the
   `games.cc.*` ones, and 1du's Power Chord Switch half goes back to the 2026-11-13 cases; takes saved meanwhile keep their `span` stamp and
   replay as such.
