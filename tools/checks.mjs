@@ -17805,16 +17805,21 @@ function checkPrivacyNotice(i18nTable) {
    this reads the table against today's code: every file must exist, every
    function be declared exactly once, every constant and block be found, every
    tool the table runs exist, and tools/plant-a-fault-known.json parse (each
-   entry an id, a region, a class harmless or accepted, a one-line
-   reason and a date). It plants nothing and runs no tool.
+   entry an id, a region of the table, a class harmless or accepted, a
+   one-line reason and a date). Names are matched in code tokens, so a
+   comment quoting a block opener, spacing, or const -> let passes. A file
+   the tool's own tokenizer cannot read is a WARNING only (the names are
+   then looked for in its plain text; a real removal still fails). It
+   plants nothing and runs no tool (review round 1, R1-3).
    ════════════════════════════════════════════════════════════════════ */
 async function checkPlantAFault() {
   head('1ea. Plant a fault: the region table names code that exists; the known file parses');
   let mod;
   try { mod = await import(pathToFileURL(join(ROOT, 'tools', 'plant-a-fault.mjs')).href); }
   catch (e) { err('1ea: tools/plant-a-fault.mjs does not load: ' + e.message); problems++; return; }
-  const probs = mod.tableProblems(ROOT);
+  const { problems: probs, warnings: warns } = mod.tableCheck(ROOT);
   for (const p of probs) { err('1ea: ' + p); problems++; }
+  for (const w of warns) { warn('1ea: ' + w); warnings++; }
   if (probs.length) return;
   const ts = mod.REGIONS.flatMap(r => r.targets);
   const n = k => ts.reduce((s, t) => s + (t[k] ? (Array.isArray(t[k]) ? t[k].length : 1) : 0), 0);

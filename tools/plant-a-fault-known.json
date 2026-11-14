@@ -202,7 +202,7 @@
    "before": "&& pieceId.matches('^[0-9]{1,2}$')",
    "after": "(nothing: the line is gone)",
    "class": "harmless",
-   "reason": "string(i) == pieceId with i an int in 0..39 already allows only the ids 0..39",
+   "reason": "with i an int (the next lines) in 0..39, string(i) == pieceId already allows only the ids 0..39; leans on the \"i is int\" line staying",
    "date": "2026-11-14"
   },
   {
@@ -238,7 +238,7 @@
    "before": "&& request.resource.data.i is int",
    "after": "(nothing: the line is gone)",
    "class": "harmless",
-   "reason": "string(i) == pieceId and i < 40 already refuse an i that is not a whole number",
+   "reason": "pieceId.matches(\"^[0-9]{1,2}$\") and string(i) == pieceId already refuse an i that is not a whole number; leans on the matches line staying",
    "date": "2026-11-14"
   },
   {
@@ -466,7 +466,7 @@
    "before": "if(d.i !== k || !bytes || bytes.length !== want) throw songFileErr('bad', 'piece ' + k + ' is not the right size');",
    "after": "if(d.i !== k || !bytes && bytes.length !== want) throw songFileErr('bad', 'piece ' + k + ' is not the right size');",
    "class": "harmless",
-   "reason": "a wrong-length piece is still refused, by the whole-file SHA-256, with the same bad code",
+   "reason": "a short piece is still refused, by the whole-file SHA-256 (code bad); a piece with no bytes or an over-long last piece now throws a TypeError / RangeError instead of bad: only a corrupted teacher upload (the rules require data is bytes)",
    "date": "2026-11-14"
   },
   {

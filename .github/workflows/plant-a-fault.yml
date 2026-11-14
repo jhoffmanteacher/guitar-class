@@ -12,8 +12,10 @@
 # tools/plant-a-fault-known.json; a real gap -> a test in the tool that should have caught it.
 #
 # One job per region, side by side, so no job passes about 40 minutes: the six Node regions, and the rules on
-# the Firestore emulator (the same install as rules.yml). Each job stops planting at --budget minutes and says
-# how many it did not plant. The browser tools (update-reload-loop, slow-load, smoke, playalong-loop) are NOT
+# the Firestore emulator (the same install as rules.yml). --budget 34 is a hard end for the whole run (clean check
+# included): no tool runs past it, a mistake still being judged then is counted "skipped for time" (never caught), the
+# report and the JSON are always written, and the job stays green; run-and-annotate's --deadline 41 is only the backstop.
+# Each job says how many it did not plant. The browser tools (update-reload-loop, slow-load, smoke, playalong-loop) are NOT
 # run here; the report names them as not exercised.
 #
 # When: Tuesdays 10:23 UTC = Tuesday 2:23 AM PST (winter) and 3:23 AM PDT (summer). Cron is UTC and ignores
@@ -81,8 +83,11 @@ jobs:
           node-version: 24
       - name: Plant small mistakes, one at a time (tools/plant-a-fault.mjs)
         run: |
-          if [ -n "$ONLY" ] && [ "$ONLY" != "$REGION" ]; then echo "Only $ONLY was asked for: $REGION not run."; exit 0; fi
+          case "$ONLY" in ''|save|cache|rules|listening|signin|songfiles|console-config) ;; *) echo "::error title=Plant a fault::no region named '$ONLY' (save, cache, rules, listening, signin, songfiles, console-config)"; exit 1;; esac
           SEED="${SEED_IN:-$(date -u +%G-W%V)}"
+          [[ "$SEED" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error title=Plant a fault::the seed may hold only letters, digits, dot, dash and underscore"; exit 1; }
+          [[ "$PER_REGION" =~ ^[0-9]+$ ]] || { echo "::error title=Plant a fault::per_region must be a whole number"; exit 1; }
+          if [ -n "$ONLY" ] && [ "$ONLY" != "$REGION" ]; then echo "Only $ONLY was asked for: $REGION not run."; exit 0; fi
           node tools/ci/run-and-annotate.mjs --title "Plant a fault: $REGION" --log "$RUNNER_TEMP/plant-a-fault.log" \
             --summary 'plant-a-fault: [0-9]+ planted' --deadline 41 -- \
             node tools/plant-a-fault.mjs --region "$REGION" --seed "$SEED" --per-region "$PER_REGION" --jobs 2 --budget 34 --max-load 16 \
@@ -142,14 +147,17 @@ jobs:
           npx --no-install firebase --version
       - name: Plant small mistakes in the rules, one at a time, on one emulator
         run: |
-          if [ -n "$ONLY" ] && [ "$ONLY" != "rules" ]; then echo "Only $ONLY was asked for: rules not run."; exit 0; fi
+          case "$ONLY" in ''|save|cache|rules|listening|signin|songfiles|console-config) ;; *) echo "::error title=Plant a fault::no region named '$ONLY' (save, cache, rules, listening, signin, songfiles, console-config)"; exit 1;; esac
           SEED="${SEED_IN:-$(date -u +%G-W%V)}"
+          [[ "$SEED" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error title=Plant a fault::the seed may hold only letters, digits, dot, dash and underscore"; exit 1; }
+          [[ "$PER_REGION" =~ ^[0-9]+$ ]] || { echo "::error title=Plant a fault::per_region must be a whole number"; exit 1; }
+          if [ -n "$ONLY" ] && [ "$ONLY" != "rules" ]; then echo "Only $ONLY was asked for: rules not run."; exit 0; fi
           EMU="$RUNNER_TEMP/rules-emu"
           cd "$EMU"
           node "$GITHUB_WORKSPACE/tools/ci/run-and-annotate.mjs" --title "Plant a fault: rules" --log "$RUNNER_TEMP/plant-a-fault.log" \
             --summary 'plant-a-fault: [0-9]+ planted' --deadline 41 -- \
             npx --no-install firebase emulators:exec --only firestore --project demo-gc \
-              "node $GITHUB_WORKSPACE/tools/plant-a-fault.mjs --root $GITHUB_WORKSPACE --region rules --emu $EMU --emu-port 8089 --seed $SEED --per-region $PER_REGION --jobs 2 --budget 34 --max-load 16 --json $RUNNER_TEMP/plant-a-fault.json"
+              "node $GITHUB_WORKSPACE/tools/plant-a-fault.mjs --root $GITHUB_WORKSPACE --region rules --emu $EMU --emu-port 8089 --seed '$SEED' --per-region '$PER_REGION' --jobs 2 --budget 34 --max-load 16 --json $RUNNER_TEMP/plant-a-fault.json"
       - name: Keep the full result
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
