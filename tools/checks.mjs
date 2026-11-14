@@ -40,6 +40,7 @@ import { createHash } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join } from 'node:path';
 import { audioHashMap, renderAudioBlock, AUDIO_BLOCK_RE, AUDIO_CACHE_NAME, AUDIO_HASH_CACHE_NAME } from './sw-audio-map.mjs';
+import { reviewLabelReport } from './review-labels.mjs';
 import { tmpdir, cpus } from 'node:os';
 import vm from 'node:vm';
 
@@ -6509,6 +6510,18 @@ function checkPartSizes() {
   const big = cut.filter(x => x[1] > PART_SOFT && x[1] <= PART_HARD).sort((x, y) => y[1] - x[1]);
   if (big.length) { warn(`1cv (soft rule): ${big.length} part${big.length === 1 ? ' is' : 's are'} over ${PART_SOFT} lines: ${big.map(x => `${x[0]} (${x[1]})`).join(', ')}. Not a reason to stop a change: mention it in the report. Splitting a part is its own change at a quiet moment (CLAUDE.md, "Where the code lives").`); warnings++; }
   if (!bad) ok(cut.length ? `${cut.length} parts, none over ${PART_HARD} lines (largest ${cut.slice().sort((x, y) => y[1] - x[1])[0].join(' at ').replace(/ at true$/, '')} lines, median ${cut.map(x => x[1]).sort((x, y) => x - y)[cut.length >> 1]}); no whole app.js, coach.js or teacher.js beside them` : 'the three scripts are whole files in this tree: no part sizes to hold');
+}
+
+/* 1dw. REVIEW LABELS (2026-11-13; CLAUDE.md "Fast by default"). A WARNING, never a failure: on the commits not yet on
+   origin/main (merge-base..HEAD), one change carrying both "Review: Fast" and "Review: Reviewed", or a Fast commit that
+   changes a danger-zone file (firestore.rules, app/save.js, sw.js code). The reading is tools/review-labels.mjs; the
+   fix is tools/review-trailer.mjs. Quiet on origin/main itself and in a clone with no origin/main. */
+function checkReviewLabels() {
+  head('1dw. Review labels on the commits not yet on origin/main (warning only)');
+  const r = reviewLabelReport(ROOT);
+  if (r.why) { ok(`1dw: nothing to read (${r.why})`); return; }
+  for (const w of r.warnings) { warn(`1dw: ${w}`); warnings++; }
+  if (!r.warnings.length) ok(r.commits ? `1dw: ${r.commits} commit${r.commits === 1 ? '' : 's'} since origin/main (${r.fast} Fast, ${r.reviewed} Reviewed, ${r.commits - r.fast - r.reviewed} with neither): one label, no danger-zone file shipped Fast` : '1dw: no commits since origin/main');
 }
 
 /* 1df. THE PAGE FILLS A BIG SCREEN (Jonathan, 2026-11-13: "the view should be maximized for whatever monitor is being
@@ -16676,6 +16689,7 @@ function checkPracticeMinutes(i18nTable) {
   await checkBackingLoudness();
   checkSiteFill();
   checkPartSizes();
+  checkReviewLabels();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

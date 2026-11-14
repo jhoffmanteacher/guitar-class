@@ -59,8 +59,9 @@ What is open right now: `WORKFLOW.md` → "Where things stand" (top of the file)
    both step renderers.
 6. A student can see the change → a `CHANGELOG.md` entry, same push.
 7. Hit a review trigger? Always-Reviewed → spawn a fresh reviewer now, one per independent
-   area ("Delegate site review work to agents by default"). Anything else ships **Fast**
-   with a `Review: Fast` trailer — see "Fast by default".
+   area ("Delegate site review work to agents by default"); after its last clean round, label the
+   change `Review: Reviewed (…)`. Anything else ships **Fast** with a `Review: Fast` trailer.
+   Both labels: "Fast by default".
 8. Right before pushing: `git fetch`, then `git log HEAD..origin/main`. If it lists commits
    (another session pushed), run `git rebase origin/main` yourself; this is not a fork. Say what
    you rebased onto in your report. A conflict that is only the `CACHE_VERSION` line or inside
@@ -337,7 +338,7 @@ Not counted: `CHANGELOG.md`, `sw.js` version lines and its `AUDIO_HASHES` block 
 `checks.mjs` edits. A guard on a new default, or extending what a check reads: break-it proof only (paste output). A new KIND of check, or changed logic/matching, is a trigger (`site-reviewer`, high) plus break-it. Reviewer: `site-reviewer-deep`
 for danger-zone / 50+ strings (failing scenario first), else `site-reviewer`. Agent claim → read its quoted lines yourself; agent fix → make it re-derive it on the real code.
 
-**Fast by default** (2026-10-31) — a trigger no longer asks. After the build and every "Start here" step (the change smoke runs AFTER a Fast push, step 3), ship **Fast**: no reviewer, and every Fast commit ends with the trailer line `Review: Fast` (above any Co-Authored-By); the report starts "Fast — reviewer skipped; Friday check will review it." **Always Reviewed, same day, never Fast:** danger-zone file, a new kind of check that ships on its own
+**Fast by default** (2026-10-31) — a trigger no longer asks. After the build and every "Start here" step (the change smoke runs AFTER a Fast push, step 3), ship **Fast**: no reviewer, and every Fast commit ends with the trailer line `Review: Fast` (above any Co-Authored-By); a change a reviewer agent read before it shipped ends `Review: Reviewed (<reviewer>, <N> round(s))` instead. A change is labelled as a whole, never some commits Fast and some Reviewed: the lead sets the label on its unpushed commits after the last clean round, `node tools/review-trailer.mjs <range> fast|reviewed "<reviewer>, <N> rounds"` (`checks.mjs` 1dw warns on a mixed range or a Fast danger-zone file). The Fast report starts "Fast — reviewer skipped; Friday check will review it." **Always Reviewed, same day, never Fast:** danger-zone file, a new kind of check that ships on its own
 (a ratchet or detector; a check that guards the feature it ships with gets break-it proof only), sub-agent
 sweep, moving/adding/removing a section or step. A product change Jonathan asks for (a renderer, a game's
 flow, a console view) ships Fast unless it touches one of those (Jonathan, 2026-11-09, about the 2-click
@@ -345,7 +346,7 @@ count-in and Today's activities by date: "these should have been fast changes").
 Both splits are unproven. A Friday check finds a Fast change that hurt students → move that
 kind of change to Always-Reviewed. A high review lets a real bug through → move that kind of
 change to `site-reviewer-deep`.
-**Friday check** — a scheduled task, Fridays 11:00 PM Pacific, reviews every `Review: Fast` commit since the last `friday-check-*` tag, fixes and pushes (skill `friday-check`).
+**Friday check** — a scheduled task, Fridays 11:00 PM Pacific, reviews every `Review: Fast` commit since the last `friday-check-*` tag (`Review: Reviewed` ones are skipped), fixes and pushes (skill `friday-check`).
 
 **Effort**: both reviewers are Fable at `medium` during the week (Jonathan, 2026-11-09, after the test in WORKFLOW); the Friday check's reviewers are Opus at `xhigh` (skill `friday-check`); other agents `high`; never `max`. Session: `medium` routine, `high` bug fixes / JS / keyed-MC, `xhigh` danger-zone and sweeps; a tier above the session → ask for `/effort`. Report real numbers, not the premise; name the prior decision a request reverses.
 

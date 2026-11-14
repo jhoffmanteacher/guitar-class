@@ -85,7 +85,9 @@ last=$(git tag -l 'friday-check-*' --sort=-creatordate | head -1)
   `origin/main` since `2026-10-30 00:00 -0700`.
 
 Fast commits = `git log --format='%H %s' --grep='^Review: Fast' $range`.
-None → still run step 1b if anything at all landed in the range, then skip to
+`Review: Reviewed` commits (`--grep='^Review: Reviewed'`) had their reviewer before they shipped: skip them, but
+count them for the report (step 6). A commit carrying both lines counts as Fast.
+None Fast → still do step 1b if anything at all landed in the range, then skip to
 step 5 (tag) and report "Nothing shipped Fast this week."
 
 ## 1b. Full smoke (start it first)
@@ -119,8 +121,8 @@ Brief the reviewer to find real problems students would hit:
 - a pattern claim that isn't true across the data;
 - progress-key risk.
 
-Settled decisions (skill `song-facts`, CLAUDE.md, WORKFLOW.md) are not
-findings.
+Settled decisions (skill `song-facts`, CLAUDE.md, WORKFLOW.md) are not findings, and neither is code a
+`Review: Reviewed` commit brought in (tell the reviewer which lines those are when they share a file).
 
 Read every finding's quoted lines yourself; drop anything you can't confirm
 on the real code.
@@ -199,7 +201,7 @@ tests read: that is a finding for step 3.
 
 Plain language, short (he reads it on his phone):
 
-- How many Fast commits were reviewed, and their one-line subjects.
+- How many Fast commits were reviewed, and their one-line subjects; "N Fast reviewed, M already Reviewed, skipped".
 - What was fixed and pushed (one line each, what a student would have seen).
 - Anything on a branch or in Open work waiting for Jonathan.
 - **Takes:** if step 5b printed "ASK JONATHAN", say so first in the report, with its reasons in plain words and the one
