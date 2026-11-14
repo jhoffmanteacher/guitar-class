@@ -1119,6 +1119,11 @@ function srRenderSetup(msg){
      ${coachSetupLineHtml()}
      <button type="button" class="coach-start" onclick="srStart()">${t('games.radar.startBarsButton', {bars: SR_BARS})}</button>
      ${coachFootHtml()}`;
+  /* The setup is wider than the play screen's 560px (styles.css .sr-setup-wide):
+     at 560px its tips wrap to three lines and, in Spanish, the four patterns to
+     two rows, and the screen scrolled at 1366x657 (690px tall, 2026-11-13).
+     srStart takes the class off, as ccStart does Change Up's .cc-open-setup. */
+  body.classList.add('sr-setup-wide');
 }
 
 /* The one bar of the pattern, big: the same D/U monospace notation as
@@ -1138,6 +1143,7 @@ async function srStart(){
   const s = sr;
   const body = srBody();
   if (!body) return;
+  body.classList.remove('sr-setup-wide');
   body.innerHTML = `<div class="coach-tip sr-center">${t('games.common.startingMic')}</div>`;
   if (!coachStream && !(await coachAcquireMic({ el: body }))){
     if (sr === s) srRenderSetup(coachMicFailMsg());

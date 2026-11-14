@@ -3808,6 +3808,8 @@ body.games-open{overflow:hidden}
 /* ── 📡 Strum Radar (coach.js) ── */
 .games-card.gc-radar::before{background:var(--green-text)}
 #sr-body{max-width:560px;margin:0 auto}
+/* The setup only (coach-strum.js srRenderSetup): one row of patterns and two-line tips, so it fits 1366x657 in Spanish too. */
+#sr-body.sr-setup-wide{max-width:760px}
 .sr-center{text-align:center}
 .sr-bar{margin-left:auto;font-size:0.8438rem;font-weight:600;color:var(--text2);font-variant-numeric:tabular-nums}
 .sr-strip{display:flex;gap:2px;font-family:'Courier New',ui-monospace,monospace;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;margin:8px 0}
