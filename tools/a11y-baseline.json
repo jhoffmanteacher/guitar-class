@@ -1,118 +1,107 @@
 {
- "_about": "The accessibility scan's baseline (tools/smoke.mjs, area a11y): the findings on 2026-11-13, per screen and rule. The count decides; the targets only name a new element. Lower it with node tools/smoke.mjs --only a11y --a11y-write-baseline (both languages).",
+ "_about": "The accessibility scan's baseline (tools/smoke.mjs, area a11y): the findings on 2026-11-13 as signatures (a rule and the element's selector without positions or attribute values; see a11ySig). A new signature fails once the ratchet is on; the screens and markup only name it. Rewrite with: node tools/smoke.mjs --only a11y --a11y-write-baseline (both languages).",
+ "version": 2,
  "axe": "4.14.0",
- "screens": {
-  "en:checklist": {},
-  "en:class-activities": {},
-  "en:game-setup": {
-   "color-contrast": {
-    "count": 3,
-    "targets": [
-     "button[onclick=\"ccPickRate(0)\"] > .cc-rate-sub",
-     "button[onclick=\"ccPickRate(1)\"] > .cc-rate-sub",
-     "button[onclick=\"ccPickRate(2)\"] > .cc-rate-sub"
-    ]
-   }
+ "screens": [
+  "en:checklist",
+  "en:class-activities",
+  "en:game-setup",
+  "en:games-hub",
+  "en:journey-luna",
+  "en:lesson",
+  "en:live-game",
+  "en:live-game-question",
+  "en:my-progress",
+  "en:practice-card",
+  "en:sign-in",
+  "en:songs",
+  "es:checklist",
+  "es:class-activities",
+  "es:game-setup",
+  "es:games-hub",
+  "es:lesson",
+  "es:live-game",
+  "es:live-game-question",
+  "es:my-progress",
+  "es:practice-card",
+  "es:songs"
+ ],
+ "findings": {
+  "color-contrast|#dev-bypass-btn": {
+   "screens": [
+    "en:sign-in"
+   ],
+   "html": "<button id=\"dev-bypass-btn\" onclick=\"devBypass()\" style=\"margin-top: 14px; padding: 7px 18px; font-size: 0.875"
   },
-  "en:games-hub": {},
-  "en:journey-luna": {
-   "landmark-one-main": {
-    "count": 1,
-    "targets": [
-     "html"
-    ]
-   },
-   "region": {
-    "count": 5,
-    "targets": [
-     "a",
-     ".playalong-note",
-     ".journey-note",
-     ".songmap",
-     "#layer-1-body"
-    ]
-   }
+  "color-contrast|button[onclick] > .cc-rate-sub": {
+   "screens": [
+    "en:game-setup",
+    "es:game-setup"
+   ],
+   "html": "<span class=\"cc-rate-sub\">4 beats each</span>"
   },
-  "en:lesson": {
-   "label-content-name-mismatch": {
-    "count": 1,
-    "targets": [
-     "li[data-key=\"m4w1-b-sec0-0\"] > .step-head[aria-current=\"step\"][onclick=\"toggleStepOpen(this)\"]"
-    ]
-   }
+  "label-content-name-mismatch|li[data-key] > .step-head[aria-current][onclick]": {
+   "screens": [
+    "en:lesson",
+    "es:lesson"
+   ],
+   "html": "<button type=\"button\" class=\"step-head\" aria-expanded=\"true\" onclick=\"toggleStepOpen(this)\" aria-label=\"Step 1"
   },
-  "en:live-game": {},
-  "en:live-game-question": {},
-  "en:my-progress": {},
-  "en:practice-card": {
-   "page-has-heading-one": {
-    "count": 1,
-    "targets": [
-     "html"
-    ]
-   }
+  "landmark-one-main|html": {
+   "screens": [
+    "en:journey-luna",
+    "en:sign-in"
+   ],
+   "html": "<html lang=\"en\" style=\"--hdr: 48px;\">"
   },
-  "en:sign-in": {
-   "color-contrast": {
-    "count": 1,
-    "targets": [
-     "#dev-bypass-btn"
-    ]
-   },
-   "landmark-one-main": {
-    "count": 1,
-    "targets": [
-     "html"
-    ]
-   },
-   "region": {
-    "count": 2,
-    "targets": [
-     "h2[data-i18n=\"auth.title\"]",
-     "p[data-i18n=\"auth.body\"]"
-    ]
-   }
+  "page-has-heading-one|html": {
+   "screens": [
+    "en:practice-card",
+    "es:practice-card"
+   ],
+   "html": "<html lang=\"en\" style=\"--hdr: 49px;\">"
   },
-  "en:songs": {},
-  "es:checklist": {},
-  "es:class-activities": {
-   "page-has-heading-one": {
-    "count": 1,
-    "targets": [
-     "html"
-    ]
-   }
+  "region|#layer-1-body": {
+   "screens": [
+    "en:journey-luna"
+   ],
+   "html": "<div class=\"layer-body\" id=\"layer-1-body\">"
   },
-  "es:game-setup": {
-   "color-contrast": {
-    "count": 3,
-    "targets": [
-     "button[onclick=\"ccPickRate(0)\"] > .cc-rate-sub",
-     "button[onclick=\"ccPickRate(1)\"] > .cc-rate-sub",
-     "button[onclick=\"ccPickRate(2)\"] > .cc-rate-sub"
-    ]
-   }
+  "region|.journey-note": {
+   "screens": [
+    "en:journey-luna"
+   ],
+   "html": "<p class=\"journey-note\" data-es=\"Una canción, cinco capas. Cada capa usa la destreza de un módulo. Tócalas en "
   },
-  "es:games-hub": {},
-  "es:lesson": {
-   "label-content-name-mismatch": {
-    "count": 1,
-    "targets": [
-     "li[data-key=\"m4w1-b-sec0-0\"] > .step-head[aria-current=\"step\"][onclick=\"toggleStepOpen(this)\"]"
-    ]
-   }
+  "region|.playalong-note": {
+   "screens": [
+    "en:journey-luna"
+   ],
+   "html": "<p class=\"playalong-note\" data-es=\"Esta pista es el disco a velocidad completa. El metrónomo suena seis veces "
   },
-  "es:live-game": {},
-  "es:live-game-question": {},
-  "es:my-progress": {},
-  "es:practice-card": {
-   "page-has-heading-one": {
-    "count": 1,
-    "targets": [
-     "html"
-    ]
-   }
+  "region|.songmap": {
+   "screens": [
+    "en:journey-luna"
+   ],
+   "html": "<div class=\"songmap\" data-es=\"<b>Mapa de la canció...\">"
   },
-  "es:songs": {}
+  "region|a[href=\"../index.html\"]": {
+   "screens": [
+    "en:journey-luna"
+   ],
+   "html": "<a href=\"../index.html\" data-es=\"← Volver al sitio de la clase\">← Back to class site</a>"
+  },
+  "region|h2[data-i18n=\"auth.title\"]": {
+   "screens": [
+    "en:sign-in"
+   ],
+   "html": "<h2 data-i18n=\"auth.title\" translate=\"no\" class=\"notranslate\">Welcome to Guitar Class</h2>"
+  },
+  "region|p[data-i18n=\"auth.body\"]": {
+   "screens": [
+    "en:sign-in"
+   ],
+   "html": "<p data-i18n=\"auth.body\" translate=\"no\" class=\"notranslate\">Sign in with your school Google account to use the"
+  }
  }
 }

@@ -1968,10 +1968,14 @@ const A11Y_BASELINE = join(ROOT, 'tools', 'a11y-baseline.json');
 const A11Y_RATCHET = false;   // the switch: on after a week of agreeing GitHub runs (planned 2026-11-27, Jonathan's call)
 const A11Y_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'];
 const A11Y_NOT_SCANNED = 'games mid-play, the tuner, the mic panel, the tool popups and other modals, the narrow-window drawer, Module Review, exit checks, 5 of 6 Song Journey pages, keyboard order and focus (axe does not test those)';
-/* Left out on purpose, each with its reason (R1-15). Matched on the rule and the element's markup. */
-const A11Y_EXCLUDE = [
-  { rule: 'color-contrast', html: /^<h1 [^>]*class="header-title"/, why: 'the page title in the header bar: axe cannot see its background (it reports the bar\'s own layout as covering it), and at phone widths it is clipped to 1 px on purpose as screen-reader-only text; white on the brand colour, not a contrast case' },
-];
+/* Left out on purpose, each with its reason (R1-15). Matched on the rule and the element's markup. EMPTY on purpose:
+   the review asked to leave out the header's page title (h1.header-title), which is clipped to 1 px as screen-reader
+   text below 480 px. The scan runs at 1366x657 only, where the title is visible, and with ignorePseudo on axe DECIDES
+   its contrast on all 20 app screens (it passes); the "partially obscured" undecided entries seen on 2026-11-13
+   came from a planted fault that gave the h1 its own background. Leaving it out would hide a real regression of
+   the most visible text on the site, so it stays in. Shape of an entry:
+     { rule: 'color-contrast', html: /^<h1 [^>]*class="header-title"/, why: '…' }   */
+const A11Y_EXCLUDE = [];
 /* Violations decide; "incomplete" (what axe could not decide, e.g. text over a picture) is kept in the JSON and
    counted on one line, never in the baseline. ignorePseudo: a ::before / ::after box (the fret numbers, the game
    cards' title bands) no longer stops axe deciding the text's contrast against its real background (R1-15). It is
