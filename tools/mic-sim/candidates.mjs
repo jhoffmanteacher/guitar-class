@@ -65,6 +65,9 @@ export function applyRule(src, rule, ratio){
     one('CC_POWER_ONSET_RATIO', ratio[0]); one('CC_POWER_HF_RATIO', ratio[1]);
   }
   if (rule === 'base') return src;
+  /* A site from before the nearest-strum change (closed-loop.mjs --root=<an older checkout>) IS the first-strum rule: `first` leaves it as it
+     is, so the "reproduced" line (replay-takes.mjs ownRule) still runs there. Any other window rule needs today's ccLoop. */
+  if (rule === 'first' && src.indexOf('function ccHoldFinal(') < 0) return src;
   const W = windowRule(rule);
   if (W) return applyWindow(src, W);
   if (src.indexOf('function ccHoldFinal(') >= 0) throw new Error(`candidates: "${rule}" was written for the first-strum ccLoop (before 2026-11-13) and is not ported to the nearest-strum one; run it with closed-loop.mjs --root=<a checkout from before that change>`);
