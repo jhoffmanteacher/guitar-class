@@ -16,7 +16,12 @@
      B. KEYED MCs in Modules 1..FROZEN_THROUGH are BYTE-IDENTICAL —
         `choices`, `choices_es` and `answer`. The keyed path persists the
         chosen choice's TEXT, so a reworded choice orphans every stored
-        pick. Students are in Module 2 (Jonathan, 2026-09-19).
+        pick. Students are in Module 2 (Jonathan, 2026-09-19). The English
+        `prompt` too (2026-11-13): it seeds the choice shuffle.
+
+   tools/checks.mjs 1dl runs this file against the push's base whenever a
+   module file changed, so A, B and D fail the commit, the push and
+   GitHub's run on their own.
 
      C. KEYED MCs in Modules above that MAY differ — every difference is
         printed in full, before and after, so it can be read rather than
@@ -297,7 +302,7 @@ function renameMapped(bm, hm) {
   return mapped[bm.answer] === hm.choices[hm.answer];
 }
 
-head(`B. Keyed MC choices frozen in Modules 1–${FROZEN_THROUGH}`);
+head(`B. Keyed MC choices and English prompts frozen in Modules 1–${FROZEN_THROUGH}`);
 {
   let frozen = 0, broken = 0;
   for (const [k, h] of headMc) {
@@ -308,6 +313,17 @@ head(`B. Keyed MC choices frozen in Modules 1–${FROZEN_THROUGH}`);
        instead of failing (Jonathan, 2026-10-19). */
     if (!b) { ok(`${k} — "${h.label}": keyed MC ADDED in a frozen module — no saved answer to orphan`); console.log(`   + ${q(h.mc.choices)}`); continue; }
     frozen++;
+    /* The ENGLISH prompt is frozen too (CLAUDE.md "Never": "reword a keyed MC's
+       choices — or its English prompt — in a frozen module"): it is half of the
+       shuffle's seed (mcSeed() in app/drills.js, read by mcOrder() in app/lesson.js), so a
+       reworded prompt deals every student a new choice order on a card they have
+       already answered. renamedChoices does not cover it. prompt_es may change
+       (it seeds nothing). Added 2026-11-13 with checks.mjs 1dl. */
+    if (q(b.mc.prompt) !== q(h.mc.prompt)) {
+      fail(`${k} — "${h.label}": FROZEN keyed MC's English prompt changed. The prompt seeds the choice shuffle, so every student would see this answered card's choices in a new order. Keep the old prompt; reword at the summer reset (skill summer-reset).`);
+      broken++;
+      console.log(`   - ${q(b.mc.prompt)}\n   + ${q(h.mc.prompt)}`);
+    }
     if (fp(b.mc) !== fp(h.mc) && renameMapped(b.mc, h.mc)) {
       frozen--; ok(`${k} — "${h.label}": keyed MC reworded with renamedChoices — every old pick maps to a new choice, the keyed one to the keyed one`);
       console.log(`   - ${q(b.mc.choices)}\n   + ${q(h.mc.choices)}`);
@@ -327,7 +343,7 @@ head(`B. Keyed MC choices frozen in Modules 1–${FROZEN_THROUGH}`);
     fail(`${k} — "${b.label}": FROZEN keyed MC is GONE in a module students are in. Its stored picks are orphaned.`);
     broken++;
   }
-  if (!broken) ok(`${frozen} keyed MCs in Modules 1–${FROZEN_THROUGH} are byte-identical (choices, choices_es, answer)`);
+  if (!broken) ok(`${frozen} keyed MCs in Modules 1–${FROZEN_THROUGH} are byte-identical (choices, choices_es, answer, English prompt)`);
 }
 
 head(`C. Keyed MC changes above Module ${FROZEN_THROUGH} (expected — nobody has reached them)`);
