@@ -1810,6 +1810,35 @@ Moved from its own file on 2026-11-05 (original title "Power Chord Switch — wh
 
 **Status.** The branch `pcs-pending-smoke` was merged into `main` on 2026-11-03 (merge commit ca932f2; smoke clean against the origin/main baseline, full checks passed); Jonathan published `firestore.rules` (take id `(coach|nr|pw)`). The branch can be deleted on GitHub. Same day, e5e0bef: a Stopped game with at least 10 s of audio is saved too, with `complete:false` (2026-11-07: 10 s of PLAY after the first count-in ends); a shorter Stop, or leaving the screen, drops it. The room-noise call is decided (a stricter strum ratio for Power Chord Switch only: "Decision (2026-11-07)", then "Decision (2026-11-05)"). Settled, not to be re-raised: "Later (not chosen yet)".
 
+### Decision (2026-11-14): grade the chord, not the timing (branch `fix/pcs-whole-slot`)
+
+Jonathan: "it should say correct for the right chord played at any time before the switch. power chord switching is measuring the right
+chord not correct on time. that should be for a different activity that is teaching tempo/rhythm." **This reverses, for Power Chord
+Switch only, the nearest-strum rule that went live 2026-11-13** (`00d4be4..402986d`: `ccLoop`'s nearest pick, `ccHoldFinal`, the held
+distance in `ccLiveBpm`, `matchRound`'s nearest replay in `teacher-mic.js`, check 1du). Change Up keeps the nearest rule (its score is the
+tempo at which 85% of changes are right: it is about changing in time). Measurement behind it: `Claude outputs/t02-known-good-2026-11-14.md`.
+- **The rule** (`coach-chords.js` `ccSpanRule`, `ccSpanOnset`, `ccSpanResolve`, `ccSpanSweep`): a change's span runs from `win` before it (the
+  early allowance every rule has had: half a beat, at most half the gap between changes) to the next change. Any strum in it that reads as the
+  new chord (`ccToneOk`, the unchanged chord-tone vote; under 3 readings passes on timing alone) makes the change right at once (the tick
+  about 340 ms after the strum). Wrong chord or no strum only when the span ends. One strum is credited to one change at most, the earliest
+  it passes (a strum that also fits the chord still current goes to it); a strum credited to a change gives no other change a wrong chord.
+  No new tunable; strum ratios, chord check, mic chain, 30 s cap, count-in and tempo controls unchanged.
+- **Takes** say `changePick: 'span'`; the console's evaluator judges such a take by the whole span and says so ("pick" column, "whole span"
+  in the Game column); `tools/mic-sim` replays each take under its own stamp (`ownRule`) and with its own `gridStepCapMs` (`capOf`).
+- **Student text** (EN + ES): the tip ("A strum of the new chord any time before the next switch counts."), the description (no "in time
+  with the beat"), and Power Chord Switch's own done-screen lines with no "on time" (`games.pw.verdict.great / okMessy / okMessyOne`,
+  `games.pw.breakdown`, `games.pw.advice.practiceWorst` without the "move early" hint). "This speed is too fast for now" / "Drop 5 BPM"
+  stay: a shorter span is less time to reach the chord.
+- **Numbers** (DETAILS: `Claude outputs/pcs-whole-slot/DETAILS.md`): the 33 real take summaries, 315 changes, at 1.8 / 2.19, each take's
+  own grid cap: right / wrong / no strum 162 / 117 / 36 (nearest) -> 249 / 41 / 25; at today's 60 ms cap for every take (the measurement's
+  conditions) 166 / 114 / 35 -> 250 / 40 / 25 (the measured `slotB` was 260 / 40 / 15: it could credit one strum to two changes). Every one of
+  the 249 rights has a strum the game heard inside its span. Nothing played (C5-D5, every beat, 12 cases): changes marked right 86 / 72 / 60
+  -> 108 / 84 / 69 of 180 at 20 / 60 / 100 BPM, games reaching 85% 3 / 3 / 3 -> 6 / 3 / 3 of 12. T02 (Jonathan's own take): 5 of 5 right
+  (nearest: 2 of 5).
+- **Roll back:** `ccSpanRule` returns false (Change Up's rule for both games), the tip, description and done-screen lines go back to the
+  `games.cc.*` ones, and 1du's Power Chord Switch half goes back to the 2026-11-13 cases; takes saved meanwhile keep their `span` stamp and
+  replay as such.
+
 ### What shipped in this push
 
 1. **Song switches** (`CC_POWER_PROGRESSIONS`, group `song`), one per switch in the song's card: Sweet Child O' Mine 10 (ca-33), "the cure" 6 (ca-30). Each is a ladder: 3 rounds of 4 back-and-forths (8 chords), a 4-click count-in before each round (2 clicks below 60 BPM since 2026-11-09). Rounds were 15 BPM apart (60 / 75 / 90); since 2026-11-05 5 BPM (30 / 35 / 40 from the new 30 BPM start; Jonathan: "don't increase it so quickly"). Jonathan: "practice the actual chord switches in the songs by going back and forth between each change 4 times at slower to faster tempos."

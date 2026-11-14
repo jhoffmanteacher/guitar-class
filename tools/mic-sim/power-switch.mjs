@@ -106,6 +106,8 @@ function trial(from, to, scenario, seed, gate, isPower){
       if (now - ch.pend.t > K.TAIL){ nReadings = ch.pend.readings.length; F.resolve(ch); break; }
     }
   }
+  // since the nearest-strum rule (2026-11-13) ccResolvePend HOLDS its verdict (ccHoldFinal shows it later): this one change's verdict is the held one
+  if (ch.result === null && ch.hold) ch.result = ch.hold.v;
   if (ch.result === null) return 'miss';
   return ch.result === 'off' ? 'off' : (nReadings >= 3 ? 'ok·tone' : 'ok·timing');
 }
