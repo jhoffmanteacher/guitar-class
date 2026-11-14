@@ -166,6 +166,8 @@ const SC_VM = `globalThis.__sc = {
     const btn = { dataset: { strumcheck: o.data, scWhere: 'bench' }, parentElement: group, closest(sel){ return sel === '.bpm-control-group' ? group : null; } };
     coachOpen(btn);
     if (!sc) return 'coachOpen opened no strum check';
+    /* The card stops at STRUM_CHECK_MAX_BPM (a student cannot start it faster); the bench may measure above it, as a what-if. */
+    sc.bpm = o.bpm;
     __lb.p = scStart();
     return '';
   },
@@ -332,6 +334,8 @@ async function main(){
     chords[n] = c.frets.map(([s, f]) => OPEN[s] + f);
     if (chords[n].join() !== spec.chords[n].midi.join()) throw new Error(`fake-world check failed: ${n} from its frets is ${chords[n]}, the button says ${spec.chords[n].midi}`);
   }
+  const lim = Number(site.run("typeof STRUM_CHECK_MAX_BPM === 'number' ? STRUM_CHECK_MAX_BPM : 125"));
+  if (o.bpm.some(b => b > lim)) console.log(`note: the site disables the check above ${lim} BPM; the takes above it are a what-if (the bench sets the card's tempo itself)`);
   console.log(`strum-check-loop · site ${o.root || 'this checkout'} · student model ${NOTE_MODEL} · pattern ${spec.pattern} · bars ${spec.bars.join(' ')} · chord rule shown to students: ${site.run('SC_CHORD_RULE')} · window ${site.run('SC_WIN_FRAC')} of an eighth`);
   const plan = [];
   for (const kind of o.students) for (const room of o.rooms) for (const mic of o.mics) for (const bpm of o.bpm) for (let s = 1; s <= o.seeds; s++)

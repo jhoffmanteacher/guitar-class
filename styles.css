@@ -3270,6 +3270,9 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 .sc-mark--wrong{color:var(--red-text)}
 .sc-mark--unheard{color:var(--text3)}
 .sc-card .sc-line{margin:2px 0}
+/* Over the check's tempo limit (STRUM_CHECK_MAX_BPM): the button greyed, one line under it in the BPM group. */
+.coach-btn[data-strumcheck]:disabled{opacity:.45;cursor:not-allowed;background:transparent}
+.sc-limit{flex-basis:100%;font-size:0.8125rem;color:var(--text2)}
 /* A step's video button (step.video) comes right after the step text in both
    renderers — on its own line, not glued to the last sentence (ca-46, the
    first activity with a video step, 2026-11-03). */

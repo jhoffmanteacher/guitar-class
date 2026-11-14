@@ -1244,17 +1244,20 @@ function srSlotTick(cur){
    every strum after the first here). The 140ms refractory still fits:
    eighths at the 100 BPM cap arrive every 300ms.
    `s` holds smoothRms / smoothHf / lastOnsetT / listenStart / gridOffset /
-   lat / slotMs. Returns null when this frame holds no new strum; else the
+   lat / slotMs, and may hold its own onsetRatio / hfRatio: only the strum-
+   pattern check sets them (SC_ONSET_RATIO / SC_HF_RATIO); Strum Radar sets
+   neither, so it reads the shared CHK_ONSET_RATIO / CHK_HF_RATIO as always. Returns null when this frame holds no new strum; else the
    strum's played time in ms from beat 1 on the grid as it was BEFORE this
    strum eased it (the time srLoop matches against). The caller still runs
    coachSmooth after it. */
 const SR_GRID_EASE = 0.2;          // how far one strum pulls the grid toward itself
 const SR_GRID_EASE_WITHIN = 0.45;  // ...only when it is this close (in eighths) to an eighth
 function srHearStrum(s, rms, hf){
+  const ratio = s.onsetRatio || CHK_ONSET_RATIO, hfRatio = s.hfRatio || CHK_HF_RATIO;
   if (!((rms > CHK_ONSET_FLOOR &&
-         rms > s.smoothRms * CHK_ONSET_RATIO ||
+         rms > s.smoothRms * ratio ||
          hf > CHK_HF_FLOOR &&
-         hf > s.smoothHf * CHK_HF_RATIO) &&
+         hf > s.smoothHf * hfRatio) &&
         coachOnsetAt - s.lastOnsetT > COACH_ONSET_REFRACT)) return null;
   s.lastOnsetT = coachOnsetAt;   // when it arrived, not when this frame ran
   const rel = coachOnsetAt - s.listenStart - s.gridOffset - s.lat;

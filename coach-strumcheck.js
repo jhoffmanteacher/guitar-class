@@ -18,10 +18,10 @@
        Slot 1 is a slot where the hand misses, so about a beat of sound is
        free after it: the readings run from COACH_ATTACK_SKIP after that
        strum to SC_TAIL_GAP before slot 2 is due.
-   What it reuses, unchanged: Strum Radar's strum detector and grid
-   (srHearStrum, coach-strum.js: the shared onset ratios CHK_ONSET_RATIO /
-   CHK_HF_RATIO, the 140 ms refractory, the grid that eases toward the
-   player), the Listening Coach's pitch readings for chords
+   What it reuses: Strum Radar's strum detector and grid (srHearStrum,
+   coach-strum.js: the 140 ms refractory, the grid that eases toward the
+   player) with this check's OWN ratios SC_ONSET_RATIO / SC_HF_RATIO, below,
+   in place of the shared CHK_ONSET_RATIO / CHK_HF_RATIO, the Listening Coach's pitch readings for chords
    (coachPitchReadings at the chord-mode clarity 0.55) and its chord-tone
    test (rule 'a' below: the test coachMatchEvent applies), the mic panel
    (coachAcquireMic, "Turn on the microphone"), the count-in (coachCountIn)
@@ -64,11 +64,23 @@
 
 const SC_RULE = 'strumcheck-1';     // bump when what is judged changes; saved with every take
 const SC_WIN_FRAC = 0.35;           // medium: a strum counts within 0.35 of an eighth of its slot
+/* This check's own strum ratios (the lead, 2026-11-14, after the virtual
+   student lost a right player's re-strums at the shared 1.4 / 1.7: 22% at
+   80 BPM, 37% at 100). A re-strum of the same chord an eighth after the last
+   lands on strings still ringing, so it raises the level less than a strum
+   over silence. srHearStrum reads these from the check's state; every other
+   game keeps CHK_ONSET_RATIO / CHK_HF_RATIO. HF = 1.7 x 1.2 / 1.4, the
+   scaling Power Chord Switch's ratios use. Numbers: the commit and
+   tools/mic-sim/strum-check-loop.mjs. */
+const SC_ONSET_RATIO = 1.2;
+const SC_HF_RATIO = 1.46;
 const SC_CHORD_RULE = 'c';          // 'a', 'b' or 'c' (header); every take saves all three
 const SC_CHORD_CLARITY = 0.55;      // the Listening Coach's chord-mode gate (coachLoop)
 const SC_TAIL_GAP = 60;             // ms: the chord readings stop this long before slot 2 is due
 const SC_MISS_GRACE = 60;           // ms after a slot's window before it is called (a frame, and the onset's dating)
-const SC_BPM_MIN = 40, SC_BPM_MAX = 125;   // the step's own slider (buildStrum)
+/* From the step's slider's floor to the check's tempo limit, STRUM_CHECK_MAX_BPM (app/tab.js, where the button is
+   drawn before this part loads): above it the button is disabled, and the card's -5 / +5 stop there too. */
+const SC_BPM_MIN = 40, SC_BPM_MAX = STRUM_CHECK_MAX_BPM;
 const SC_REC_MAX_SEC = 60;          // a recorded take: the whole round up to this (40 BPM: about 56 s)
 const SC_SLOTS = 8;                 // eighths in a bar (STRUM_SLOTS in app/tab.js)
 
@@ -256,6 +268,7 @@ async function scStart(){
   s.slotMs = s.beatMs / 2;
   s.win = SC_WIN_FRAC * s.slotMs;
   s.lat = coachMicLatencyMs();
+  s.onsetRatio = SC_ONSET_RATIO; s.hfRatio = SC_HF_RATIO;   // srHearStrum: this check's own ratios
   s.smoothRms = 0; s.smoothHf = 0; s.lastOnsetT = -1e9; s.gridOffset = 0; s.lastPitchT = 0;
   s.cur = -1; s.sweep = 0; s.cap = null; s.events = []; s.barsDone = 0; s.lines = [];
   s.slots = [];
@@ -460,7 +473,7 @@ function scRecMeta(){
     fields: { game: 'strumcheck', coachMode: 'strum', rule: SC_RULE, chordRule: SC_CHORD_RULE, winFrac: SC_WIN_FRAC, winMs: r1(s.win),
       bpm: s.bpm, beatMs: r1(s.beatMs), slotMs: r1(s.slotMs), pattern: s.pattern, bars: s.bars.slice(), activity: s.where,
       latMs: s.lat, gridEase: SR_GRID_EASE, gridEaseWithin: SR_GRID_EASE_WITHIN, gridStepCapMs: null, gridOffsetMs: r1(s.gridOffset),
-      onsetRatio: CHK_ONSET_RATIO, hfRatio: CHK_HF_RATIO, refractMs: COACH_ONSET_REFRACT, chordClarity: SC_CHORD_CLARITY,
+      onsetRatio: SC_ONSET_RATIO, hfRatio: SC_HF_RATIO, refractMs: COACH_ONSET_REFRACT, chordClarity: SC_CHORD_CLARITY,
       attackSkipMs: COACH_ATTACK_SKIP, tailAMs: COACH_EVENT_TAIL, tailGapMs: SC_TAIL_GAP, missGraceMs: SC_MISS_GRACE,
       recCapSec: s.recCapSec, roundSec: r1(s.roundSec), complete: !!s.complete, barsDone: s.barsDone,
       eventTimes: 'played (arrival - latMs)',

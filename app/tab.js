@@ -467,14 +467,32 @@ function strumOpenMetro(btn){
    coachOpenLazy like every Coach button. data-strumcheck carries the pattern,
    the bars and each chord's notes. Not in the teacher console's preview
    (IS_TEACHER_MODE): the console never opens the mic, as buildTab's
-   suppressCoach keeps the melody Coach out of it. */
-function strumCheckBtnHtml(spec, keyPrefix){
+   suppressCoach keeps the melody Coach out of it.
+   Above STRUM_CHECK_MAX_BPM the button is disabled and one line under it says
+   to slow down (the lead, 2026-11-14): faster than that, the virtual student
+   showed the check missing more than 5% of a right player's strums
+   (tools/mic-sim/strum-check-loop.mjs). strumCheckSync keeps both in step
+   with the slider (onBpmSliderChange); checks.mjs 1eh pins the number. */
+const STRUM_CHECK_MAX_BPM = 80;
+function strumCheckBtnHtml(spec, keyPrefix, bpm){
   if(!spec || spec.listen !== true) return '';
   if(typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE) return '';
   const chords = {};
   Object.keys(spec.chords || {}).forEach(n => { const c = spec.chords[n]; chords[n] = { midi: c && Array.isArray(c.midi) ? c.midi.map(Number) : [] }; });
   const data = JSON.stringify({ pattern: String(spec.pattern || ''), bars: spec.bars.map(String), chords });
-  return `<button type="button" class="coach-btn" data-strumcheck="${escAttr(data)}" data-sc-where="${escAttr(keyPrefix || '')}" onclick="coachOpenLazy(this)" title="${escAttr(t('coach.btnTitle'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> <span data-i18n="coach.btn">${t('coach.btn')}</span></button>`;
+  const over = Number(bpm) > STRUM_CHECK_MAX_BPM;
+  return `<button type="button" class="coach-btn" data-strumcheck="${escAttr(data)}" data-sc-where="${escAttr(keyPrefix || '')}"${over ? ' disabled' : ''} onclick="coachOpenLazy(this)" title="${escAttr(t('coach.btnTitle'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> <span data-i18n="coach.btn">${t('coach.btn')}</span></button>`
+    + `<span class="sc-limit"${over ? '' : ' hidden'}>${escHtml(t('sc.slowTo', { n: STRUM_CHECK_MAX_BPM }))}</span>`;
+}
+/* The slider moved (onBpmSliderChange): the strum check's button and its line follow it. */
+function strumCheckSync(slider){
+  const group = slider && slider.closest ? slider.closest('.bpm-control-group') : null;
+  const btn = group ? group.querySelector('.coach-btn[data-strumcheck]') : null;
+  if(!btn) return;
+  const over = Number(slider.value) > STRUM_CHECK_MAX_BPM;
+  btn.disabled = over;
+  const note = group.querySelector('.sc-limit');
+  if(note) note.hidden = !over;
 }
 function buildStrum(spec, opts){
   if(!spec || !Array.isArray(spec.bars) || !spec.bars.length) return '';
@@ -492,7 +510,7 @@ function buildStrum(spec, opts){
       + `<button type="button" class="play-seq-btn" data-midis="${escAttr(JSON.stringify(midis))}" data-clicks="${spec.bars.length * 4}" onclick="playSequenceFromGroup(this)" title="${escAttr(t('strum.playTitle'))}">&#x25B6; ${t('strum.play')}</button>`
       + `<button type="button" class="play-seq-btn strum-clicks-btn" onclick="strumOpenMetro(this)" title="${escAttr(t('strum.clicksTitle'))}">&#x25B6; ${t('strum.clicks')}</button>`
       + renderBpmControl(keyPrefix, bpm, spec.minBpm || 40, spec.maxBpm || 125)
-      + strumCheckBtnHtml(spec, keyPrefix)
+      + strumCheckBtnHtml(spec, keyPrefix, bpm)
       + `</span></div>`;
   }
   const pat = String(spec.pattern || '');

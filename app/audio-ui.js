@@ -1095,6 +1095,7 @@ function onBpmSliderChange(slider){
   if(key){
     try{ localStorage.setItem(key, slider.value); }catch(e){}
   }
+  if(typeof strumCheckSync === 'function') strumCheckSync(slider);   // the strum check's tempo limit (app/tab.js)
 }
 /* Read the BPM slider that shares a .bpm-control-group with this button.
    Single reader for the group markup contract — playSequenceFromGroup and
