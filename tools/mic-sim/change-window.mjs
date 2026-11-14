@@ -1,12 +1,15 @@
 /* Which strum decides a change in Power Chord Switch (and Change Up, same ccLoop): the window / pick candidates of candidates.mjs
-   (WINDOW_RULES) replayed on the REAL take summaries (2026-11-13). Since the nearest-strum change the same day `base` (the site) picks the
-   strum nearest the change; `first` is the rule before it.
+   (WINDOW_RULES, PICK_RULES) replayed on the REAL take summaries (2026-11-13). Since 2026-11-14 `base` (the site) is Power Chord Switch's
+   whole-span rule (coach-chords.js ccSpanRule: any strum in the chord's span that reads right); `nearest` is the rule of 2026-11-13 (the
+   strum nearest the change), `first` the one before it, `spanLate` the whole-span rule without the early allowance.
 
      node tools/mic-sim/change-window.mjs [--rules=same,w250,…] [--json=out.json] [--take=<summary id>]
 
    Every rule is replayed at the site's strum ratios of today (replay-takes.mjs replayTake: the real ccLoop in a vm, coach.js rewritten in
-   memory by candidates.mjs). `base` is also replayed at each take's OWN ratios and pick (replay-takes.mjs ownRule: `first` for a take
-   saved without changePick 'nearest'), for the "reproduced" line (how often the replay gives the take's saved verdict). `same` is the candidate machinery with nothing changed: it must give base's verdict on every change, or this exits 1.
+   memory by candidates.mjs). `base` is also replayed at each take's OWN ratios and pick (replay-takes.mjs ownRule: `span`, `nearest`, or
+   `first` for a take saved with no changePick), for the "reproduced" line (how often the replay gives the take's saved verdict). `same` is
+   the window machinery with nothing changed (cap none, pick near): it must give `nearest`'s verdict on every change, or this exits 1. Every
+   replay uses the grid step cap the take was graded with (replay-takes.mjs capOf: none saved = uncapped).
 
    The truth (eval-takes.mjs, the console's evaluator, kept in each summary): `played` = an attack in the recording within TODAY's window of
    the change (half a beat each side). A narrower window is inside today's, so "no strum within today's window" is "no strum" for every
@@ -17,20 +20,21 @@
    Prints counts only: take numbers (S01..), no names (the summaries hold none). */
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { loadSummaries, TAKES_DIR, replayTake, siteFor, todayRatios, ownRule } from './replay-takes.mjs';
-import { WINDOW_RULES } from './candidates.mjs';
+import { loadSummaries, TAKES_DIR, replayTake, siteFor, todayRatios, ownRule, capOf } from './replay-takes.mjs';
+import { WINDOW_RULES, PICK_RULES } from './candidates.mjs';
 
 const args = process.argv.slice(2);
 const opt = (k, d) => { const a = args.find(x => x.startsWith('--' + k + '=')); return a ? a.slice(k.length + 3) : d; };
-const DEFAULT = ['same', 'first', 'w250', 'w350', 'w500', 'w700', 'near', 'last', 'best', 'w250near', 'w350near', 'w500near', 'w700near', 'w350best', 'w500best', 'w350last'];
+const DEFAULT = ['same', 'nearest', 'spanLate', 'first', 'w250', 'w350', 'w500', 'w700', 'near', 'last', 'best', 'w250near', 'w350near', 'w500near', 'w700near', 'w350best', 'w500best', 'w350last'];
 const rules = opt('rules', DEFAULT.join(',')).split(',');
-for (const r of rules) if (!WINDOW_RULES.includes(r)){ console.error('no window rule "' + r + '" (' + WINDOW_RULES.join(', ') + ')'); process.exit(2); }
+for (const r of rules) if (!WINDOW_RULES.includes(r) && !PICK_RULES.includes(r)){ console.error('no window or pick rule "' + r + '" (' + WINDOW_RULES.concat(PICK_RULES).join(', ') + ')'); process.exit(2); }
+if (!rules.includes('nearest')) rules.unshift('nearest');
 if (!rules.includes('same')) rules.unshift('same');
 const NOW = todayRatios();
 const takes = loadSummaries(TAKES_DIR);
 const FOCUS = opt('take', '80ef56c6f7df');
 
-const run = (tk, rule, ratio) => replayTake(siteFor(rule, ratio, true), tk.d, tk.sum, tk.srcRate, tk.mapMs);
+const run = (tk, rule, ratio) => replayTake(siteFor(rule, ratio, true, null, capOf(tk)), tk.d, tk.sum, tk.srcRate, tk.mapMs);
 const rows = [];
 for (const tk of takes){
   const res = { 'base@own': run(tk, ownRule('base', tk), tk.own), base: run(tk, 'base', NOW) };
@@ -39,7 +43,7 @@ for (const tk of takes){
     const e = tk.d.expected.find(x => x.i === n.i);
     if (!e || !res.base[n.i]) continue;
     rows.push({ take: tk.take, id: tk.id, day: tk.day, bpm: Number(e.bpm) || tk.d.bpm, i: n.i, from: e.from, to: e.to, played: n.played, cat: n.why && n.why.cat, saved: n.site,
-      v: Object.fromEntries(Object.entries(res).map(([k, x]) => [k, x[n.i] ? { verdict: x[n.i].verdict, readings: x[n.i].readings, dec: x[n.i].dec, ons: x[n.i].ons } : null])) });
+      v: Object.fromEntries(Object.entries(res).map(([k, x]) => [k, x[n.i] ? { verdict: x[n.i].verdict, readings: x[n.i].readings, dec: x[n.i].dec, ons: x[n.i].ons, span: x[n.i].span, win: x[n.i].win, gap: x[n.i].gap } : null])) });
   }
 }
 const W = v => v === 'ok' ? 'right' : v === 'off' ? 'wrong' : 'miss';
@@ -50,16 +54,19 @@ console.log(`${takes.length} Power Chord Switch take summaries, ${rows.length} j
 const repro = rows.filter(r => W(r.v['base@own'].verdict) === r.saved).length;
 const reproHeard = rows.filter(r => (r.v['base@own'].verdict !== 'miss') === (r.saved !== 'miss')).length;
 console.log(`reproduced: base at each take's own ratios and pick (ownRule) gives the saved verdict on ${repro} of ${rows.length} changes (heard / not heard: ${reproHeard} of ${rows.length})`);
-const sameDiff = rows.filter(r => r.v.same.verdict !== r.v.base.verdict);
-console.log(`same (the candidate machinery, nothing changed) = base on ${rows.length - sameDiff.length} of ${rows.length} changes` + (sameDiff.length ? '  <-- HARNESS BROKEN' : ''));
-if (sameDiff.length){ sameDiff.slice(0, 5).forEach(r => console.log('   ', r.take, r.i, r.v.base.verdict, r.v.same.verdict)); process.exit(1); }
+const sameDiff = rows.filter(r => r.v.same.verdict !== r.v.nearest.verdict);
+console.log(`same (the window machinery, nothing changed) = nearest on ${rows.length - sameDiff.length} of ${rows.length} changes` + (sameDiff.length ? '  <-- HARNESS BROKEN' : ''));
+if (sameDiff.length){ sameDiff.slice(0, 5).forEach(r => console.log('   ', r.take, r.i, r.v.nearest.verdict, r.v.same.verdict)); process.exit(1); }
+/* The whole-span rule's guarantee (base): every change it marks right was decided by a strum the game heard inside the change's span. */
+{ const sp = rows.map(r => r.v.base).filter(v => v && v.span && v.verdict === 'ok'), bad = sp.filter(v => v.dec == null || v.dec < -v.win - 0.5 || v.dec >= v.gap + 0.5);
+  if (sp.length) console.log(`base (whole-span rule): ${sp.length} changes marked right, ${bad.length} with no strum the game heard inside the change's span (must be 0)` + (bad.length ? '  <-- BROKEN' : '')); }
 
-/* 2. When today's deciding onset came (same = base, with the offset recorded), and how often it was marked wrong chord. */
+/* 2. When the nearest rule's deciding onset came (same = nearest, with the offset recorded), and how often it was marked wrong chord. */
 const bucket = d => d == null ? 'none' : d < -600 ? '< -600' : d < -250 ? '-600..-250' : d <= 250 ? '-250..+250' : '> +250';
 const B = ['< -600', '-600..-250', '-250..+250', '> +250'];
 const decT = (pick, label) => {
   const rs = rows.filter(pick);
-  console.log(`\nThe site's rule (base = same), ${label}: the onset that decided each heard change, ms from the change on the game's grid (negative = early) · right / wrong chord`);
+  console.log(`\nThe nearest-strum rule (same = nearest; the site's rule until 2026-11-14), ${label}: the onset that decided each heard change, ms from the change on the game's grid (negative = early) · right / wrong chord`);
   for (const b of B){ const x = rs.filter(r => r.v.same.verdict !== 'miss' && bucket(r.v.same.dec) === b), w = x.filter(r => r.v.same.verdict === 'off').length; console.log(`   ${b.padEnd(11)} ${String(x.length).padStart(4)} changes · ${x.length - w} right / ${w} wrong chord (${pct(w, x.length)} wrong)`); }
 };
 decT(r => true, 'all takes');

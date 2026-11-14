@@ -4,7 +4,7 @@
    so a candidate can be played by the virtual student (closed-loop.mjs --rule=) and replayed on real takes (replay-takes.mjs) before anything
    ships. Change Up is not touched by any of them (every new line asks ccIsPower()).
 
-     base    coach.js as it is
+     base    coach.js as it is (Power Chord Switch: the whole-span rule since 2026-11-14)
      ring    a strum must RING: the quietest frame from 100 ms after it starts to 240 ms (or 0.45 beat, if shorter) must still be at least a quarter of
              its peak and 1.3 x the level just before it. A sound that does not ring (a tap, a click, a bump, muted strings) is dropped and the change
              stays open. With it: a louder strum (1.5 x the peak) may take a change whose check is still open, so a neighbour's quiet strum just before
@@ -38,11 +38,19 @@
                  beat moves it by a quarter of its offset, at most CC_GRID_STEP_CAP_MS = 60 ms, so room noise makes it wander)
      ...gd       (suffix, Power Chord Switch only) the grid adapts only to the onset that ends up DECIDING a change, by the same step, when
                  that change's verdict is final
-   Both games (Power Chord Switch and Change Up) take the window and the pick: the code is shared. */
+   Both games (Power Chord Switch and Change Up) take the window and the pick: the code is shared. On a site with the whole-span rule
+   (coach-chords.js ccSpanRule, Power Chord Switch from 2026-11-14) every window rule first turns that rule off (unSpan below), so they
+   rewrite the nearest-strum ccLoop exactly as before.
+   PICK candidates for Power Chord Switch (2026-11-14):
+     nearest     the nearest-strum rule the site used for Power Chord Switch from 2026-11-13 to 2026-11-14 (ccSpanRule off: the site's
+                 Change Up rule); on a site from before the whole-span rule it is the site as it is
+     spanLate    the whole-span rule with no early allowance: a change's span starts AT the change (the measured `slotA` of
+                 Claude outputs/t02-known-good-2026-11-14.md; the site's rule, with the allowance of `win` before it, is that file's `slotB`) */
 export const CAPS = [250, 350, 500, 700], PICKS = ['near', 'last', 'best'];
 export const WINDOW_RULES = ['same', 'first', ...CAPS.map(c => 'w' + c), ...PICKS, ...CAPS.flatMap(c => PICKS.map(p => 'w' + c + p)),
   ...['', ...CAPS.map(c => 'w' + c)].flatMap(w => ['g0', 'gd'].map(g => w + 'near' + g))];
-export const RULES = ['base', 'ring', 'half', 'half3', 'both', 'both3', ...WINDOW_RULES];
+export const PICK_RULES = ['nearest', 'spanLate'];
+export const RULES = ['base', 'ring', 'half', 'half3', 'both', 'both3', ...WINDOW_RULES, ...PICK_RULES];
 /* The rules replay-takes.mjs runs when no --rules is given (the window rules are many: change-window.mjs runs them). */
 export const DEFAULT_RULES = ['base', 'first'];
 function windowRule(rule){
@@ -65,11 +73,17 @@ export function applyRule(src, rule, ratio){
     one('CC_POWER_ONSET_RATIO', ratio[0]); one('CC_POWER_HF_RATIO', ratio[1]);
   }
   if (rule === 'base') return src;
+  if (rule === 'nearest') return unSpan(src);
+  if (rule === 'spanLate'){
+    if (src.indexOf('function ccSpanRule(') < 0) throw new Error('candidates: "spanLate" needs a site with the whole-span rule (coach-chords.js ccSpanRule, from 2026-11-14)');
+    rep('    if (c.result !== null || rel < c.beat * cc.beatMs - win || rel >= ccSpanHi(c)) return;', '    if (c.result !== null || rel < c.beat * cc.beatMs || rel >= ccSpanHi(c)) return;');
+    return src;
+  }
   /* A site from before the nearest-strum change (closed-loop.mjs --root=<an older checkout>) IS the first-strum rule: `first` leaves it as it
      is, so the "reproduced" line (replay-takes.mjs ownRule) still runs there. Any other window rule needs today's ccLoop. */
   if (rule === 'first' && src.indexOf('function ccHoldFinal(') < 0) return src;
   const W = windowRule(rule);
-  if (W) return applyWindow(src, W);
+  if (W) return applyWindow(unSpan(src), W);
   if (src.indexOf('function ccHoldFinal(') >= 0) throw new Error(`candidates: "${rule}" was written for the first-strum ccLoop (before 2026-11-13) and is not ported to the nearest-strum one; run it with closed-loop.mjs --root=<a checkout from before that change>`);
   rep('const COACH_ONSET_REFRACT = 140;', `const CC_RING_ON = ${ring};
 const CC_RING_FROM_MS = 100, CC_RING_TO_MS = 240, CC_RING_TO_BEAT = 0.45, CC_RING_PEAK_MS = 100;
@@ -104,6 +118,39 @@ function ccResolvePend(ch){
 `);
   rep('  if (p.readings.length >= 3){\n    const want = cc.classes[ch.to];', '  if (p.readings.length >= (ccIsPower() ? CC_POWER_TONE_MIN : 3)){\n    const want = cc.classes[ch.to];');
   rep('    toneOk = anyNew > 0.15 && !(oldHits > newHits && oldHits / n > 0.15);', '    toneOk = (ccIsPower() && CC_POWER_TONE_SHARE ? anyNew >= CC_POWER_TONE_SHARE : anyNew > 0.15) && !(oldHits > newHits && oldHits / n > 0.15);');
+  return src;
+}
+
+/* A site with the whole-span rule (coach-chords.js ccSpanRule, 2026-11-14) turned back into the nearest-strum ccLoop Power Chord Switch had
+   before: the rule is switched off, and ccLoop's pick and sweep lines are put back as they were, so applyWindow's lines below find their
+   text. A site without the rule is returned as it is. */
+function unSpan(src){
+  if (src.indexOf('function ccSpanRule(') < 0) return src;
+  const rep = (a, b) => { const n = src.split(a).length - 1; if (n !== 1) throw new Error(`candidates(unSpan): expected this line once in coach.js, found it ${n} times: ${a.slice(0, 90)}`); src = src.replace(a, () => b); };
+  rep('function ccSpanRule(){ return ccIsPower(); }', 'function ccSpanRule(){ return false; }');
+  rep('      const ch = ccSpanRule() ? ccSpanOnset(at, rel, win) : cc.changes.find(c => {', '      const ch = cc.changes.find(c => {');
+  rep(`    if (ccSpanRule()) ccSpanSweep(relNow);   // Power Chord Switch: a change ends with its span (ccSpanRule)
+    else {
+      cc.changes.forEach(c => {
+        if (c.result === null && !c.pend && c.hold && relNow > c.beat * cc.beatMs + Math.min(c.win, Math.abs(c.hold.dev))) ccHoldFinal(c);
+      });
+      cc.changes.forEach((c, i) => {
+        if (c.result === null && !c.pend && !c.hold && relNow > (c.beat + 0.85) * cc.beatMs){
+          c.result = 'miss';
+          ccChipRefresh(i);
+        }
+      });
+    }
+`, `    cc.changes.forEach(c => {
+      if (c.result === null && !c.pend && c.hold && relNow > c.beat * cc.beatMs + Math.min(c.win, Math.abs(c.hold.dev))) ccHoldFinal(c);
+    });
+    cc.changes.forEach((c, i) => {
+      if (c.result === null && !c.pend && !c.hold && relNow > (c.beat + 0.85) * cc.beatMs){
+        c.result = 'miss';
+        ccChipRefresh(i);
+      }
+    });
+`);
   return src;
 }
 

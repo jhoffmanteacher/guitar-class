@@ -8,6 +8,9 @@
    forth → 3 → 4. Pass a round (≥85%) and it offers +10 BPM (Power Chord
    Switch: +5, on its done screen's −5 / +5 row, not past the top tempo); best clean
    tempo per loop is remembered for the session.
+   Power Chord Switch grades the CHORD, not the timing (2026-11-14): a change
+   is right when any strum while that chord is the current one reads as it
+   (ccSpanRule, below ccHoldFinal).
    ════════════════════════════════════════════════════════════════════ */
 
 const CC_PROGRESSIONS = [
@@ -667,8 +670,10 @@ function ccRecMeta(complete){
               onsetRatio: CC_POWER_ONSET_RATIO, hfRatio: CC_POWER_HF_RATIO,
               gridStepCapMs: CC_GRID_STEP_CAP_MS,   // the console replays the grid with this cap; a take without it was graded on the uncapped grid
               countInBeats: ccCountInList(),   // each round's count-in clicks, one per stageBpms entry; a take without it counted 4 in every round (before 2026-11-09)
-              changeReadings: 'per change: null = no strum in its window; [] = a strum but no pitch could be read; else the midi readings its chord check used (under 3 passes on timing alone)',
-              changePick: 'nearest' },   // which strum decided a change: the one nearest it (from 2026-11-13); a take without it, the first in its window (teacher-mic.js micEvalTakePw)
+              changeReadings: ccSpanRule()
+                ? 'per change: null = no strum it could use in its span; [] = the strum that decided it had no pitch read; else the midi readings of that strum: for a right change the first strum that read right, for a wrong one the first strum heard (under 3 passes on timing alone)'
+                : 'per change: null = no strum in its window; [] = a strum but no pitch could be read; else the midi readings its chord check used (under 3 passes on timing alone)',
+              changePick: ccSpanRule() ? 'span' : 'nearest' },   // which strum decided a change: 'span' (Power Chord Switch from 2026-11-14) any strum in the chord's span that reads right; 'nearest' (2026-11-13) the one nearest it; none, the first in its window (teacher-mic.js micEvalTakePw)
     expected: cc.changes.map((c, i) => Object.assign({ i, t: c.t, from: c.from, to: c.to, stage: c.stage == null ? 0 : c.stage, bpm: c.bpm, verdict: c.result,
       readings: c.readings ? c.readings.map(r2) : null }, (cc.retimedStages || []).indexOf(c.stage == null ? 0 : c.stage) >= 0 ? { retimed: true } : {})),
     tempoChanges: (cc.tempoLog || []).slice(),
@@ -780,8 +785,8 @@ function ccRenderPlay(){
          <span class="coach-bpm-readout" id="cc-next-bpm">${escHtml(ccNextBpmText())}</span>
          <button type="button" class="tp-btn" onclick="ccNudgeNext(5)"${lastRound ? ' disabled' : ''}>+5</button>
        </div></div>` : '';
-  /* The last change, large: ✓ right, ✗ on time but the chord sounded wrong, – no strum heard. The row is always drawn (empty until the first change is
-     graded). Power Chord Switch only. It and the BPM buttons sit under the charts: the left column is already the taller one. */
+  /* The last change, large: ✓ right (shown as soon as a strum reads right), ✗ the chord sounded wrong, – no strum heard (both when the chord's span
+     ends, ccSpanRule). The row is always drawn (empty until the first change is graded). Power Chord Switch only. It and the BPM buttons sit under the charts: the left column is already the taller one. */
   const lastLine = ccIsPower() ? '<div class="cc-last" id="cc-last" aria-live="polite">&nbsp;</div>' : '';
   /* A pair's play screen says its tempo, between its live buttons (ccLiveBpm); a song switch's line above already does, per round. */
   const pairBpm = ccIsPower() && !cc.ladder ? `<div class="cc-play-bpm cc-live-bpm">${liveRow(`<span class="cc-stage" id="cc-stage">${cc.stageBpms ? cc.stageBpms[0] : cc.bpm} BPM</span>`)}</div>` : '';
@@ -828,7 +833,7 @@ function ccChipInner(c){
   const sym = c.result === 'off' ? '\u2717' : c.result === 'miss' ? '\u2013' : '\u2713';
   return `<span class="cc-sym${c.result ? '' : ' hid'}">${sym}</span>${escHtml(pwChordName(c.to))}`;
 }
-/* The done screen's chip: ✓ right, ✗ on time but the chord sounded wrong, – no strum heard (also a colour). */
+/* The done screen's chip: ✓ right, ✗ the chord sounded wrong (Change Up: on time but the chord sounded wrong), – no strum heard (also a colour). */
 function ccChipText(c){
   return (c.result === 'ok' ? '\u2713 ' : c.result === 'off' ? '\u2717 ' : c.result === 'miss' ? '\u2013 ' : '') + pwChordName(c.to);
 }
@@ -850,12 +855,22 @@ function ccShowLast(c){
 }
 
 function ccResolvePend(ch){
+  if (ccSpanRule()){ ccSpanResolve(ch.pend.readings); return; }
   const p = ch.pend;
   ch.pend = null;
   /* Kept for the saved take (ccRecMeta), not used for grading: the pitch readings this change's
      chord check had. [] = a strum was heard but no pitch could be read. A change that never got
      a pend (no strum in its window) keeps no readings at all. */
   ch.readings = p.readings.slice();
+  const toneOk = ccToneOk(ch, p.readings);
+  /* Percussive/unclear counts on timing alone. The verdict is HELD, not shown: a closer strum may still come (ccLoop), and ccHoldFinal
+     shows it once none can. Of two checks, the one closer to the change is kept. */
+  const h = { v: toneOk === false ? 'off' : 'ok', readings: ch.readings, dev: p.dev };
+  if (!ch.hold || Math.abs(h.dev) < Math.abs(ch.hold.dev)) ch.hold = h;
+}
+/* The chord check of one strum for one change: true = it reads as the change's new chord, false = it does not, null = under 3 pitch
+   readings (it passes on timing alone). */
+function ccToneOk(ch, readings){
   let toneOk = null;
   /* Chord-tone vote (same rule as the Coach's chord checks): a strum is
      polyphonic, so readings hop between chord tones — any single-pitch
@@ -881,32 +896,79 @@ function ccResolvePend(ch){
      note is shared and whose only difference is one string (E/Em, A/Am,
      C/Am, G/Em) — five readings cannot tell those apart either way, and
      marking a correct change wrong is the worse error in a room. */
-  if (p.readings.length >= 3){
+  if (readings.length >= 3){
     const want = cc.classes[ch.to];
     const from = cc.classes[ch.from] || [];
     const pcOf = r => ((Math.round(r) % 12) + 12) % 12;
-    const n = p.readings.length;
+    const n = readings.length;
     const newOnly = want.filter(c => from.indexOf(c) < 0);
     const oldOnly = from.filter(c => want.indexOf(c) < 0);
-    const anyNew = p.readings.filter(r => want.indexOf(pcOf(r)) >= 0).length / n;
-    const newHits = p.readings.filter(r => newOnly.indexOf(pcOf(r)) >= 0).length;
-    const oldHits = p.readings.filter(r => oldOnly.indexOf(pcOf(r)) >= 0).length;
+    const anyNew = readings.filter(r => want.indexOf(pcOf(r)) >= 0).length / n;
+    const newHits = readings.filter(r => newOnly.indexOf(pcOf(r)) >= 0).length;
+    const oldHits = readings.filter(r => oldOnly.indexOf(pcOf(r)) >= 0).length;
     toneOk = anyNew > 0.15 && !(oldHits > newHits && oldHits / n > 0.15);
   }
-  /* Percussive/unclear counts on timing alone. The verdict is HELD, not shown: a closer strum may still come (ccLoop), and ccHoldFinal
-     shows it once none can. Of two checks, the one closer to the change is kept. */
-  const h = { v: toneOk === false ? 'off' : 'ok', readings: ch.readings, dev: p.dev };
-  if (!ch.hold || Math.abs(h.dev) < Math.abs(ch.hold.dev)) ch.hold = h;
+  return toneOk;
 }
 /* A held verdict becomes the change's result (and its chip and big line turn). ccLoop calls it once no closer strum can come: the change
    time plus the held strum's distance from it (no later sound can be closer after that), at most the window; on time or late, that is
-   as soon as its check ends (340 ms), early by d, d after the change. ccStageEnd and ccFinish call it for what is still held. */
+   as soon as its check ends (340 ms), early by d, d after the change. ccStageEnd and ccFinish call it for what is still held. In Power
+   Chord Switch ccSpanSweep calls it when the change's span ends (a held wrong chord). */
 function ccHoldFinal(c){
   const h = c.hold;
   c.hold = null;
   c.result = h.v;
   c.readings = h.readings;
   ccChipRefresh(cc.changes.indexOf(c));
+}
+
+/* POWER CHORD SWITCH GRADES THE CHORD, NOT THE TIMING (2026-11-14, Jonathan: "it should say correct for the right chord played at any time
+   before the switch. power chord switching is measuring the right chord not correct on time. that should be for a different activity that
+   is teaching tempo/rhythm."). This reverses, for Power Chord Switch only, the nearest-strum rule of 2026-11-13. A change's SPAN runs from
+   `win` before it (the early allowance every rule has had: half a beat, at most half the gap between changes) to the next change; the last
+   one's ends where its chord's time ends. ANY strum in the span that reads as the new chord (ccToneOk; under 3 readings passes on timing
+   alone, as before) makes the change right at once, however early or late. A strum that reads as another chord is held, never shown: a
+   later right strum still wins. Only when the span ends is a change wrong (strums heard, none right) or missed (none heard). One strum is
+   credited to one change at most (the earliest it passes), and a strum credited to a change gives no other change a wrong chord: an early
+   strum of the next chord never turns the current one wrong.
+   Change Up keeps the nearest-strum rule: its score is the tempo at which 85% of changes are right, so it is about changing in time.
+   tools/mic-sim/change-window.mjs (the 33 real takes, 315 changes): right / wrong / no strum 166 / 114 / 35 under the nearest rule; the
+   numbers for this rule are in WORKFLOW.md, "Power Chord Switch: where we stopped". */
+function ccSpanRule(){ return ccIsPower(); }
+function ccSpanHi(c){ return (c.beat + cc.bpc) * cc.beatMs; }
+/* A strum at rel (ms on the grid, as ccLoop's) arrived at `at`: an earlier strum's check still open is finished first; then every change
+   still open whose span holds the strum gets a check of it, all sharing one list of readings (ccSpanResolve finds them by it). */
+function ccSpanOnset(at, rel, win){
+  cc.changes.forEach(c => { if (c.pend) ccResolvePend(c); });
+  let readings = null;
+  cc.changes.forEach(c => {
+    if (c.result !== null || rel < c.beat * cc.beatMs - win || rel >= ccSpanHi(c)) return;
+    c.win = win;
+    c.pend = { t: at, readings: readings || (readings = []), dev: rel - c.beat * cc.beatMs };
+  });
+  return null;
+}
+/* One strum's checks, finished together: the earliest change it passes is right now (its chip and big line turn at once); if it passes
+   none, each change it was heard in holds "wrong chord" until its span ends (ccSpanSweep), unless one is already held. */
+function ccSpanResolve(readings){
+  const group = cc.changes.filter(c => c.pend && c.pend.readings === readings).map(c => { const p = c.pend; c.pend = null; return { c, dev: p.dev }; });
+  const won = group.find(g => g.c.result === null && ccToneOk(g.c, readings) !== false);
+  if (won){
+    const c = won.c;
+    c.result = 'ok'; c.hold = null; c.readings = readings.slice(); c.decDev = won.dev;   // decDev: where the deciding strum was (the mic-sim tools read it)
+    ccChipRefresh(cc.changes.indexOf(c));
+    return;
+  }
+  group.forEach(({ c, dev }) => { if (c.result === null && !c.hold) c.hold = { v: 'off', readings: readings.slice(), dev }; });
+}
+/* A span that has ended, with no strum still being checked: wrong chord if a strum was heard in it, else no strum. On the played-time
+   clock, as ccLoop's sweep. */
+function ccSpanSweep(relNow){
+  cc.changes.forEach((c, i) => {
+    if (c.result !== null || c.pend || relNow < ccSpanHi(c)) return;
+    if (c.hold) ccHoldFinal(c);
+    else { c.result = 'miss'; ccChipRefresh(i); }
+  });
 }
 
 function ccLoop(){
@@ -949,6 +1011,7 @@ function ccLoop(){
       if (Math.abs(dev) < cc.beatMs * 0.5) cc.gridOffset += Math.max(-CC_GRID_STEP_CAP_MS, Math.min(CC_GRID_STEP_CAP_MS, dev * 0.25));
       // Cap the match window at half the spacing between changes (bpc beats) so a
       // single strum can't land inside two adjacent change windows at fast rates.
+      // (Power Chord Switch: its early allowance before a change; ccSpanOnset.)
       const win = Math.min(cc.beatMs * cc.bpc * 0.5, Math.max(220, cc.beatMs * 0.5));
       /* NEAREST WINS (2026-11-13, Jonathan: "the tempo should not matter as long as the student hits the chord within an allowable window"),
          as the Listening Coach's coachMatchEvent has since 2026-10-07. Until then the FIRST sound in the window opened the change's check and
@@ -958,8 +1021,9 @@ function ccLoop(){
          takes its place. The check it replaces is finished early with the readings it has (ccResolvePend keeps the closer of the two), so a
          Stop click that replaces a real strum and is then dropped (ccFinish) leaves that strum's verdict. tools/mic-sim/change-window.mjs:
          the 33 real takes, 315 changes: right / wrong / no strum 156 / 124 / 35 -> 166 / 114 / 35, no real strum lost, nothing-played
-         marked right 29 -> 30 of 65. */
-      const ch = cc.changes.find(c => {
+         marked right 29 -> 30 of 65.
+         Change Up only since 2026-11-14: Power Chord Switch takes any strum in the change's span instead (ccSpanRule, ccSpanOnset). */
+      const ch = ccSpanRule() ? ccSpanOnset(at, rel, win) : cc.changes.find(c => {
         const d = Math.abs(rel - c.beat * cc.beatMs);
         return c.result === null && d <= win && (!c.pend || d < Math.abs(c.pend.dev)) && (!c.hold || d < Math.abs(c.hold.dev));
       });
@@ -993,10 +1057,9 @@ function ccLoop(){
            strum gives under 3 readings, so it passes on timing alone, and a
            chord that never changed passes with it (45% of held strums); pairs
            that share a note (G5 to C5, A5 to D5) pass held on every mic.
-           That is why the tip promises a strum on every beat, and the chord
-           only "when I can hear the notes clearly, but two chords that share
-           a note can fool me". Check on the console's Mic recordings before
-           tuning. */
+           That is why the tip checks the chord only "when I can hear the
+           notes clearly, but two chords that share a note can fool me".
+           Check on the console's Mic recordings before tuning. */
         coachPitchReadings(cc.lastPitchT, p.t + COACH_ATTACK_SKIP, ccIsPower() ? RNW_POWER_CLARITY : 0.55).forEach(r => {
           cc.lastPitchT = r.t;
           if (r.midi != null && r.t - p.t <= COACH_EVENT_TAIL) p.readings.push(r.midi);
@@ -1008,15 +1071,18 @@ function ccLoop(){
     /* Overdue changes are misses — on the played-time clock, so a strum
        still on its way through the mic isn't swept before it arrives. */
     const relNow = now - lat - cc.listenStart - cc.gridOffset;
-    cc.changes.forEach(c => {
-      if (c.result === null && !c.pend && c.hold && relNow > c.beat * cc.beatMs + Math.min(c.win, Math.abs(c.hold.dev))) ccHoldFinal(c);
-    });
-    cc.changes.forEach((c, i) => {
-      if (c.result === null && !c.pend && !c.hold && relNow > (c.beat + 0.85) * cc.beatMs){
-        c.result = 'miss';
-        ccChipRefresh(i);
-      }
-    });
+    if (ccSpanRule()) ccSpanSweep(relNow);   // Power Chord Switch: a change ends with its span (ccSpanRule)
+    else {
+      cc.changes.forEach(c => {
+        if (c.result === null && !c.pend && c.hold && relNow > c.beat * cc.beatMs + Math.min(c.win, Math.abs(c.hold.dev))) ccHoldFinal(c);
+      });
+      cc.changes.forEach((c, i) => {
+        if (c.result === null && !c.pend && !c.hold && relNow > (c.beat + 0.85) * cc.beatMs){
+          c.result = 'miss';
+          ccChipRefresh(i);
+        }
+      });
+    }
 
     /* Same adapted-grid rule as the Coach's pulse: the chord/beat display
        must follow the grid the scoring uses, or it drifts off the player. */
@@ -1076,7 +1142,9 @@ function ccFinish(complete){
   /* Stop once every change has been played or graded is the natural "I'm
      done" — after the last change the round only runs on to the end of the
      last chord plus one beat (ccLoop) — so that counts as a finished round.
-     Stop with a change still ahead of the player stays an early Stop. */
+     Stop with a change still ahead of the player stays an early Stop. In Power
+     Chord Switch a change still open in its span with nothing heard (ccSpanRule)
+     is still ahead of the player too. */
   if (!complete && cc.phase === 'play' && (!cc.ladder || cc.stage >= CC_LADDER_ROUNDS - 1) &&
       cc.changes.every(c => c.result !== null || c.pend || c.hold)) complete = true;
   /* Changes the player never got to are 'miss' only in the data, not strums the mic missed: ccRenderDone leaves them out of the "strum firmer" count.
@@ -1197,7 +1265,7 @@ function ccRenderDone(){
     verdict = '&#x1F44D; ' + t(reachedN === 1 ? 'games.cc.verdict.stoppedOne' : 'games.cc.verdict.stopped', { ok, reached: reachedN });
     advice = t('games.cc.advice.stopped');
   } else if (r >= 0.85){
-    verdict = '&#x1F31F; ' + t('games.cc.verdict.great', { ok, total });
+    verdict = '&#x1F31F; ' + t(ccIsPower() ? 'games.pw.verdict.great' : 'games.cc.verdict.great', { ok, total });   // Power Chord Switch does not grade timing (ccSpanRule): no "on time"
     /* At the top tempo the "N BPM faster" line is false (the tempo cannot go up), so it says that instead: Power Chord Switch since
        2026-11-07 (the test is the done row's own: the step up lands on the tempo just played), Change Up at 140 since 2026-11-09. */
     advice = t(ccDoneAtTop() ? 'games.pw.advice.top' : ccIsPower() ? 'games.pw.advice.great' : 'games.cc.advice.great');
@@ -1216,8 +1284,10 @@ function ccRenderDone(){
     }
   } else if (r >= 0.5){
     const early = t(cc.bpc >= 4 ? 'games.cc.early.bar' : cc.bpc === 2 ? 'games.cc.early.half' : 'games.cc.early.beat');
-    verdict = '&#x1F4AA; ' + (off ? t(off === 1 ? 'games.cc.verdict.okMessyOne' : 'games.cc.verdict.okMessy', { ok, total, off }) : t('games.cc.verdict.ok', { ok, total }));
-    advice = firmer ? t('games.pw.advice.firmer') : worst ? t('games.cc.advice.practiceWorst', { worst, early }) : t('games.cc.advice.tryAgainSteady');
+    /* Power Chord Switch grades the chord, not the timing (ccSpanRule): its lines say nothing about being on time or moving early. */
+    const pw = ccIsPower() ? 'games.pw.' : 'games.cc.';
+    verdict = '&#x1F4AA; ' + (off ? t(off === 1 ? pw + 'verdict.okMessyOne' : pw + 'verdict.okMessy', { ok, total, off }) : t('games.cc.verdict.ok', { ok, total }));
+    advice = firmer ? t('games.pw.advice.firmer') : worst ? (ccIsPower() ? t('games.pw.advice.practiceWorst', { worst }) : t('games.cc.advice.practiceWorst', { worst, early })) : t('games.cc.advice.tryAgainSteady');
   } else {
     /* At the lowest tempo (Power Chord Switch 10, Change Up 40) "Drop N BPM" cannot be done and "too fast" is no help, so the
        headline is the plain count and the advice is to play it again at this speed (Jonathan, 2026-11-09). */
@@ -1231,10 +1301,10 @@ function ccRenderDone(){
     ? `<span class="coach-chip notreached">${escHtml(pwChordName(c.to))}</span>`
     : `<span class="coach-chip ${c.result === 'ok' ? 'ok' : c.result === 'off' ? 'wrong' : 'miss'}">${escHtml(ccChipText(c))}</span>`
   ).join('');
-  /* What the chips mean, in numbers: right, on time but the chord sounded wrong, no strum heard. */
+  /* What the chips mean, in numbers: right, (Change Up: on time but) the chord sounded wrong, no strum heard. */
   const nLeft = silentStop ? total : (cc.unreached || 0);
   const nMiss = total - ok - off - (greyRest ? nLeft : 0);
-  const breakdown = noneReached && !cc.noneDue ? '' : `<div class="cc-breakdown">${escHtml(t('games.cc.breakdown', { ok, off, miss: nMiss }) + (greyRest ? t('games.cc.breakdown.left', { left: nLeft }) : ''))}</div>`;
+  const breakdown = noneReached && !cc.noneDue ? '' : `<div class="cc-breakdown">${escHtml(t(ccIsPower() ? 'games.pw.breakdown' : 'games.cc.breakdown', { ok, off, miss: nMiss }) + (greyRest ? t('games.cc.breakdown.left', { left: nLeft }) : ''))}</div>`;
   const rec0 = firmer || stoppedClean || noneReached || silentStop ? 'same' : r >= 0.85 ? 'up' : r >= 0.5 ? 'same' : 'down';
   /* Never recommend a step the tempo cannot take (Change Up's lit button; Power Chord Switch's row clamps on its own). */
   const rec = (rec0 === 'up' && ccDoneAtTop()) || (rec0 === 'down' && ccDoneAtFloor()) ? 'same' : rec0;

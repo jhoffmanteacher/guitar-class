@@ -30,7 +30,14 @@
        gap between changes) takes the strum: 'off' if it was the wrong chord,
        else 'ok'; a change nothing took is 'miss'. A take marked `nearest` is one saved
        since 2026-11-13 (changePick 'nearest'): a strum also takes a change already
-       taken by one FARTHER from it (ccLoop's nearest rule); every other fixture is
+       taken by one FARTHER from it (ccLoop's nearest rule). A take marked `span` is one
+       saved since 2026-11-14 (changePick 'span', coach-chords.js ccSpanRule): every
+       change still open whose span (from win before it to the next change) holds the
+       strum hears it; the earliest one the strum passes takes it ('ok': the change's
+       own chord, or a sound with no chord in it, which passes on timing alone); a strum
+       that passes none ('off' chord, or another chord) is a wrong chord for each of
+       them; 'ok' if one was taken, else 'off' if one was heard, else 'miss'. Its
+       truth windows are those spans. Every other fixture is
        the first-strum rule of the takes saved before. Onsets are logged as events
        only while the capture runs (the 30 s cap, Stop).
    Per graded change, `plan` picks what the student does (default: the new
@@ -51,6 +58,7 @@
      early:N   a neighbour strums the WRONG chord N ms before the beat (the site hears
                it), then the student plays the new chord on time: the first-strum
                rule takes the neighbour's ('off'), the nearest rule the student's
+     swap:N    the OLD chord on the beat, then the new chord N ms later (span takes)
    `readings: true` saves the pitch readings the way coach.js ccRecMeta does (takes from 2026-11-05):
    per change null when the verdict is 'miss', 4 readings for 'off' (a wrong verdict needs 3+), and for 'ok'
    0, 1, 2, 3 or 5 readings by [0, 1, 2, 3, 5][change index % 5] (under 3 = passed on timing alone).
@@ -194,7 +202,9 @@ export const PW_FIXTURES = [
   { ...base, name: 'pw-slow-legacy', desc: 'a pair at 30 BPM saved before 2026-11-09: 4 clicks and no countInBeats field; the evaluator must look for 4 beeps', bpms: [30], slots: 8, chords: ['E5', 'A5'], song: null,
     lag: 150, map: 25, lat: 130, legacyCountIn: true, seed: 45, plan: { 1: 'detmiss', 3: 'silent', 5: 'held' } },
   { ...base, readings: true, nearest: true, name: 'pw-nearest', desc: 'a pair at 30 BPM saved since 2026-11-13 (changePick nearest): a neighbour strums the wrong chord 850 ms before four of the changes and the student plays on time; the site took the student\'s strum, nearest the change, and the console must replay it that way (the neighbour\'s pulled the grid first)', bpms: [30], slots: 10, chords: ['G5', 'C5'], song: null,
-    lag: 130, map: 25, lat: 120, seed: 61, plan: { 1: 'early:850', 3: 'early:850', 5: 'early:850', 7: 'early:850', 8: 'silent' } }
+    lag: 130, map: 25, lat: 120, seed: 61, plan: { 1: 'early:850', 3: 'early:850', 5: 'early:850', 7: 'early:850', 8: 'silent' } },
+  { ...base, readings: true, span: true, name: 'pw-span', desc: 'a pair at 30 BPM saved since 2026-11-14 (changePick span): the right chord 1200 ms late (outside half a beat, inside the span), a neighbour\'s wrong chord 850 ms early, the old chord on the beat then the new one 900 ms later, a wrong chord, a silent last change; the console must judge every change by its whole span', bpms: [30], slots: 10, chords: ['D5', 'C5'], song: null,
+    lag: 130, map: 25, lat: 120, seed: 62, plan: { 1: 'late:1200', 3: 'early:850', 5: 'swap:900', 6: 'off', 8: 'silent' } }
 ];
 // The candidate ratios the strum what-if tries: the shared ones older takes were graded with (coach.js CHK_ONSET_RATIO 1.4, CHK_HF_RATIO 1.7; Power Chord Switch grades with its own stricter CC_POWER_* since 2026-11-05, and takes graded with those are left out of the what-if) and stricter ones; the attack-channel ratio scales the same way
 export const PW_WHATIF = { full: [1.4, 1.8, 2.2, 2.6], hfBase: 1.7, fullBase: 1.4, floor: 0.003, hfFloor: 0.0008, margin: 0.06 };
@@ -257,11 +267,18 @@ export function makePwTake(o){
   rounds.forEach(rd => {
     let goff = 0;
     rd.onsets = [];
-    rd.siteHear = (played, sharp) => {
+    // chord: what the student strummed (a span take's change is right only for its own chord); none = a sound with no chord in it
+    rd.siteHear = (played, sharp, chord) => {
       const rel = played - rd.listen - goff;
       const bi = Math.round(rel / rd.beat), dev = rel - bi * rd.beat, before = goff;
       if (Math.abs(dev) < rd.beat * 0.5) goff += o.uncapped ? dev * 0.25 : Math.max(-(o.capMs || GRID_STEP_CAP_MS), Math.min(o.capMs || GRID_STEP_CAP_MS, dev * 0.25));
-      const ch = rd.changes.find(c => { const d = Math.abs(c.s * o.bpc * rd.beat - rel); return d <= rd.win && (!c.match || o.nearest && d < c.match.d); });
+      if (o.span){
+        const cands = rd.changes.filter(c => { const d = rel - c.s * o.bpc * rd.beat; return !c.credit && d >= -rd.win && d < o.bpc * rd.beat; });
+        cands.forEach(c => { if (!c.match) c.match = { played, goff: before }; });
+        const won = cands.find(c => !sharp && (chord == null || chord === c.to));
+        if (won) won.credit = true; else cands.forEach(c => { c.wrong = true; });
+      }
+      const ch = !o.span && rd.changes.find(c => { const d = Math.abs(c.s * o.bpc * rd.beat - rel); return d <= rd.win && (!c.match || o.nearest && d < c.match.d); });
       if (ch) ch.match = { played, sharp, goff: before, d: Math.abs(ch.s * o.bpc * rd.beat - rel) };
       rd.onsets.push({ played, goffAfter: goff });
       if (played + o.lat - o.map < audioEnd) events.push({ t: Math.round(played * 10) / 10, stage: rd.stage });
@@ -296,6 +313,13 @@ export function makePwTake(o){
         if (!o.deaf) rd.siteHear(ms + o.map - o.lat, true);
         kind = 'ok';
       }
+      const swapM = /^swap:(\d+)$/.exec(kind);
+      if (swapM){
+        strum(attack, ROOT[ch.from], o.amp); attacks.push({ ms: attack, deliberate: false });
+        if (!o.deaf) rd.siteHear(attack + o.map - o.lat, false, ch.from);
+        attack += +swapM[1];
+        kind = 'ok';
+      }
       if (kind === 'pre:in:late'){
         // noise the site hears after the raw window edge (due - win) but before its window opens (gridOffset is late), then a strum 25 ms inside its late edge
         if (rd.goffNow() < 80) throw new Error(o.name + ': change ' + ch.i + ' needs a gridOffset over 80 ms for pre:in:late (has ' + Math.round(rd.goffNow()) + ')');
@@ -327,7 +351,7 @@ export function makePwTake(o){
       if (stopMs != null && attack > stopMs) continue;
       strum(attack, ROOT[chord] + (kind === 'off' ? 1 : 0), o.amp);
       attacks.push({ ms: attack, deliberate });
-      if (kind !== 'detmiss' && !o.deaf) rd.siteHear(attack + o.map - o.lat, kind === 'off');
+      if (kind !== 'detmiss' && !o.deaf) rd.siteHear(attack + o.map - o.lat, kind === 'off', chord);
     }
   });
   extras.forEach(ms => pluck(ms, null));
@@ -410,7 +434,7 @@ export function makePwTake(o){
     const centreKind = mapKnown ? 'site' : takeLag != null ? 'beeps' : 'setting';
     rd.changes.forEach(ch => {
       const after = stopMs != null && ch.t > stopMs;
-      ch.verdict = after || !ch.match ? 'miss' : ch.match.sharp ? 'off' : 'ok';
+      ch.verdict = after || !ch.match ? 'miss' : o.span ? (ch.credit ? 'ok' : ch.wrong ? 'off' : 'miss') : ch.match.sharp ? 'off' : 'ok';
       // `flipVerdict`: a saved verdict that the rule of the site does not give (micEvalTakePw replayMismatch must notice)
       if (o.flipVerdict === ch.i) ch.verdict = ch.verdict === 'miss' ? 'ok' : 'miss';
       ch.readings = !o.readings ? undefined : ch.verdict === 'miss' ? null
@@ -421,19 +445,24 @@ export function makePwTake(o){
       const prior = rd.onsets.filter(on => on.played < ch.t - rd.win);
       const goff = ch.match ? ch.match.goff : prior.length ? prior[prior.length - 1].goffAfter : 0;
       const centre = centreKind === 'site' ? ch.t + goff + o.lat - o.map : centreKind === 'beeps' ? ch.t + beepOffs(rd) : ch.t + o.lat;
-      if (Math.abs(centre + rd.win - audioEnd) < 40) throw new Error(o.name + ': change ' + ch.i + "'s window ends " + Math.round(centre + rd.win - audioEnd) + ' ms from the audio end (too close to call)');
-      if (centre + rd.win > audioEnd){ dropped++; truth.changes.push({ i: ch.i, stage: ch.stage, cat: 'dropped', windowPastEndMs: Math.round(centre + rd.win - audioEnd) }); return; }
+      // where the site listened, from the change's time: +-win, or a span take's [-win, gap); and "just outside" it
+      const lateEdge = o.span ? gap : rd.win;
+      const inW = d => o.span ? d >= -rd.win && d < gap : Math.abs(d) <= rd.win;
+      const out = o.span ? d => (d < -rd.win && d >= -(rd.win + rd.beat / 4)) || (d >= gap && d < gap + rd.beat / 4) : d => Math.abs(d) > rd.win && Math.abs(d) <= reach;
+      const spanClose = (d, what, deliberate) => { if (!deliberate) [-rd.win, gap, -(rd.win + rd.beat / 4), gap + rd.beat / 4].forEach(e => { if (Math.abs(d - e) < 8) throw new Error(o.name + ': ' + what + ' ' + Math.round(d) + ' ms, ' + Math.round(d - e) + ' ms from a span edge (too close to call)'); }); };
+      if (Math.abs(centre + lateEdge - audioEnd) < 40) throw new Error(o.name + ': change ' + ch.i + "'s window ends " + Math.round(centre + lateEdge - audioEnd) + ' ms from the audio end (too close to call)');
+      if (centre + lateEdge > audioEnd){ dropped++; truth.changes.push({ i: ch.i, stage: ch.stage, cat: 'dropped', windowPastEndMs: Math.round(centre + lateEdge - audioEnd) }); return; }
       n++;
-      attacks.forEach(a => { tooClose(a.ms - centre, rd.win, 'a strum near change ' + ch.i + ' is', a.deliberate); if (reach > rd.win) tooClose(a.ms - centre, reach, 'a strum near change ' + ch.i + ' is', a.deliberate); });
-      const inWin = attacks.some(a => Math.abs(a.ms - centre) <= rd.win);
+      attacks.forEach(a => { if (o.span){ spanClose(a.ms - centre, 'a strum near change ' + ch.i + ' is', a.deliberate); return; } tooClose(a.ms - centre, rd.win, 'a strum near change ' + ch.i + ' is', a.deliberate); if (reach > rd.win) tooClose(a.ms - centre, reach, 'a strum near change ' + ch.i + ' is', a.deliberate); });
+      const inWin = attacks.some(a => inW(a.ms - centre));
       const heard = ch.verdict !== 'miss';
       const siteCentre = ch.t + goff;
       // where the student heard the beat (the beeps, as far as their lag is known): a strum late or early on THAT beat is near too
       const heardBeat = takeLag != null ? ch.t + beepOffs(rd) : null;
-      if (heardBeat != null) attacks.forEach(a => tooClose(a.ms - heardBeat, reach, 'a strum near change ' + ch.i + ' (on the beeps) is', a.deliberate));
-      const out = d => Math.abs(d) > rd.win && Math.abs(d) <= reach;
-      const near = attacks.some(a => Math.abs(a.ms - centre) > rd.win && (out(a.ms - centre) || (heardBeat != null && Math.abs(a.ms - heardBeat) <= reach))) ||
-        events.some(ev => ev.stage === rd.stage && Math.abs(ev.t - siteCentre) > rd.win && Math.abs(ev.t - siteCentre) <= reach);
+      // a span take has no "near the beat the student heard": the next change's own strum always sits at its span's end on that beat
+      if (heardBeat != null && !o.span) attacks.forEach(a => tooClose(a.ms - heardBeat, reach, 'a strum near change ' + ch.i + ' (on the beeps) is', a.deliberate));
+      const near = attacks.some(a => !inW(a.ms - centre) && (out(a.ms - centre) || (heardBeat != null && !o.span && Math.abs(a.ms - heardBeat) <= reach))) ||
+        events.some(ev => ev.stage === rd.stage && out(ev.t - siteCentre));
       truth.changes.push({ i: ch.i, stage: ch.stage, kind: after ? 'after-stop' : ch.kind, verdict: ch.verdict, replayHeard: !!ch.match && !after, goff,
         readingsN: ch.readings ? ch.readings.length : null,
         cat: inWin ? (heard ? 'agree' : 'detector-missed') : heard ? 'false-hit' : near ? 'off-window' : 'silent-miss' });
@@ -496,13 +525,14 @@ export function makePwTake(o){
     };
   }
   truth.mapKnown = mapKnown;
-  truth.mismatch = truth.changes.filter(c => c.cat !== 'dropped' && c.replayHeard !== (c.verdict !== 'miss')).length;
+  // a span take: only a change graded with no strum in its span is a mismatch (a strum in it may have gone to the next change)
+  truth.mismatch = truth.changes.filter(c => c.cat !== 'dropped' && (o.span ? c.verdict !== 'miss' && !c.replayHeard : c.replayHeard !== (c.verdict !== 'miss'))).length;
   const meta = {
     game: 'pw', complete: stopMs == null, progression: o.chords.join('-'), song: o.song, ladder: o.bpms.length > 1,
     bpm: o.bpms[0], stageBpms: o.bpms.slice(), bpc: o.bpc, eventTimes: 'played (arrival - micLatencyMs)',
     ...(o.uncapped ? {} : { gridStepCapMs: o.capMs || GRID_STEP_CAP_MS }),   // an `uncapped` take is one saved before 2026-11-07: no such field, graded on the uncapped grid
     ...(o.legacyCountIn ? {} : { countInBeats: o.bpms.map(b => ccCountInBeats(b)) }),
-    ...(o.nearest ? { changePick: 'nearest' } : {}),   // a `nearest` take is one saved since 2026-11-13: the strum nearest each change decided it   // a `legacyCountIn` take is one saved before 2026-11-09: no such field, 4 clicks every round
+    ...(o.nearest ? { changePick: 'nearest' } : o.span ? { changePick: 'span' } : {}),   // a `nearest` take is one saved since 2026-11-13: the strum nearest each change decided it   // a `legacyCountIn` take is one saved before 2026-11-09: no such field, 4 clicks every round
     ...(o.readings ? { changeReadings: 'per change: null = no strum in its window; [] = a strum but no pitch could be read; else the midi readings its chord check used (under 3 passes on timing alone)' } : {}),
     expected, events, uid: 'fake', name: 'Fake Student', period: '3', mode: 'pw',
     micLatencyMs: o.lat, sampleRate: R, srcSampleRate: 48000, durationSec: Math.round(N / R * 100) / 100,

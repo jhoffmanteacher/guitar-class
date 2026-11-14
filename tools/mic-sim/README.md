@@ -220,9 +220,19 @@ script.
   The window / pick rules (2026-11-13, `WINDOW_RULES`): which strum decides a change. Since 2026-11-13 the site's own
   rule (`base`) is the strum NEAREST the change; `first` is the rule before it (the first strum in the window), and
   every take saved before carries no `changePick` stamp, so the "reproduced" line replays those under `first`
-  (`replay-takes.mjs` `ownRule`). `same` must equal `base` on every change. Fixed caps (`w250`..`w700`), `last`,
+  (`replay-takes.mjs` `ownRule`). Fixed caps (`w250`..`w700`), `last`,
   `best` and the grid switches (`...g0`, `...gd`) were measured and NOT chosen. `change-window.mjs` prints the real-take
   table for any of them.
+  **Since 2026-11-14 Power Chord Switch grades the chord, not the timing** (Jonathan; `coach-chords.js` `ccSpanRule`):
+  `base` is the WHOLE-SPAN rule, any strum from half a window before a change to the next change that reads as the new
+  chord. Takes saved with it say `changePick: 'span'`; `ownRule` replays `span` takes under `base`, `nearest` takes under
+  `nearest` (the pick rule of 2026-11-13, `PICK_RULES`) and unstamped ones under `first`. `spanLate` is the span rule with
+  no early allowance. `same` (the window machinery, nothing changed) must equal `nearest` on every change. Every window
+  rule turns the span rule off first, so it measures what it did before. Change Up keeps the nearest rule. Every replay
+  uses the grid step cap the take was graded with (`capOf`; none saved = uncapped, as the console does). The closed loop
+  prints the rule's guarantee on every run that uses it ("N marked right; 0 with no strum the game heard inside the
+  change's span"), and its REAL TAKES truth is still the half-beat window the takes were graded with, so "no strum,
+  marked RIGHT" there can be a real strum later in the span.
 - **`replay-takes.mjs <folder>`** (2026-11-11): each candidate rule on the REAL takes' audio, through the real `ccLoop`
   (the recording goes back through the site's mic chain; nothing is replayed from the take's saved strums). Counts,
   per rule, the changes with no strum in the window that the rule still hears / marks right, and the real strums it

@@ -106,21 +106,31 @@ const VM_HELPERS = `globalThis.__rp = {
        onset within half the spacing of it, on the site's grid (only those rules record them; change-window.mjs reads them). */
     cc.changes.forEach(c => { if (c.pend) ccResolvePend(c); if (c.result === null && c.hold) ccHoldFinal(c); if (c.result === null) c.result = 'miss'; });
     const half = cc.beatMs * cc.bpc * 0.5;
-    const out = cc.changes.map(c => ({ verdict: c.result, readings: c.readings ? c.readings.length : null,
-      dec: c.decDev == null ? null : Math.round(c.decDev), go: Math.round(cc.gridOffset), ons: cc.__ons ? cc.__ons.map(r => Math.round(r - c.beat * cc.beatMs)).filter(d => Math.abs(d) <= half) : null }));
+    /* span: the site graded by the whole-span rule (coach-chords.js ccSpanRule); win / gap: the change's early allowance and its span after it, so a
+       right change's deciding strum (dec) can be checked to lie in [-win, gap) */
+    const span = typeof ccSpanRule === 'function' && ccSpanRule();
+    const out = cc.changes.map(c => Object.assign({ verdict: c.result, readings: c.readings ? c.readings.length : null,
+      dec: c.decDev == null ? null : Math.round(c.decDev), go: Math.round(cc.gridOffset), ons: cc.__ons ? cc.__ons.map(r => Math.round(r - c.beat * cc.beatMs)).filter(d => Math.abs(d) <= half) : null },
+      span ? { span: true, win: c.win == null ? null : Math.round(c.win * 10) / 10, gap: Math.round(cc.bpc * cc.beatMs * 10) / 10 } : {}));
     ccStop(); cc = null;
     return JSON.stringify(out);
   }
 };`;
 
 const sites = {};
-/* `at`: { root, coach } loads the site from another folder or coach.js from a file (closed-loop.mjs --root / --coach); left out, this repo. */
-export function siteFor(rule, ratio, fromSummary, at){
+/* `at`: { root, coach } loads the site from another folder or coach.js from a file (closed-loop.mjs --root / --coach); left out, this repo.
+   `gridCap`: the grid step cap to replay with (CC_GRID_STEP_CAP_MS rewritten; Infinity = uncapped); left out, the site's own. */
+export function siteFor(rule, ratio, fromSummary, at, gridCap){
   const o = at || {};
-  const k = rule + '|' + (ratio ? ratio.join('/') : 'now') + '|' + (fromSummary ? 's' : 'a') + '|' + (o.root || '') + '|' + (o.coach || '');
-  if (!sites[k]){ sites[k] = makeSite(o.coach || null, rule, ratio, !!fromSummary, o.root || null); sites[k].run(VM_HELPERS); }
+  const k = rule + '|' + (ratio ? ratio.join('/') : 'now') + '|' + (fromSummary ? 's' : 'a') + '|' + (o.root || '') + '|' + (o.coach || '') + '|' + (gridCap == null ? 'site' : gridCap);
+  if (!sites[k]){ sites[k] = makeSite(o.coach || null, rule, ratio, !!fromSummary, o.root || null, gridCap); sites[k].run(VM_HELPERS); }
   return sites[k];
 }
+/* The grid step cap a take was graded with: saved in the take since 2026-11-07 (coach-chords.js ccRecMeta gridStepCapMs); a take without it was
+   graded on the uncapped grid (the console's micEvalTakePw reads it the same way). Every replay of a take uses it: the student played against the
+   beat the game showed, which that grid drove (Claude outputs/t02-known-good-2026-11-14.md, section 3: with today's 60 ms cap T02's change 1 did
+   not reproduce). */
+export function capOf(tk){ const v = tk && tk.d ? tk.d.gridStepCapMs : undefined; return typeof v === 'number' && isFinite(v) && v >= 0 && v <= 10000 ? v : Infinity; }
 /* What a summary's pitch and energy were measured with: coachDetectPitch's text and the mic chain. A summary made with another stamp is stale for pitch. */
 export function detectorStamp(site){
   return createHash('sha1').update(extract(site.coachSrc, 'coachDetectPitch') + JSON.stringify(site.chain) + SUM_HOP).digest('hex').slice(0, 12);
@@ -160,7 +170,10 @@ export function replayTake(site, d, src, srcRate, mapMs){
     site.clock.now = listen - cin * beat;
     const r = JSON.parse(site.run(`__rp.start(${JSON.stringify({ lat: d.micLatencyMs, bpc, bpm, listenStart: listen, changes })})`));
     if (r.error) continue;
-    const end = listen + (changes[changes.length - 1].beat + 0.95) * beat;
+    /* The whole-span rule (Power Chord Switch from 2026-11-14) listens for the last change until its chord's time ends (bpc beats after it); the
+       nearest and first-strum rules were done 0.95 beat after it. */
+    const span = site.run('typeof ccSpanRule === "function" && ccSpanRule()') === true;
+    const end = listen + (changes[changes.length - 1].beat + (span ? bpc : 0.95)) * beat;
     let going = false;
     while (site.clock.now < end){
       site.clock.now += frameMs;
@@ -246,9 +259,14 @@ export function loadSummaries(dir){
       notes: s.truth.notes.map(n => ({ i: n.i, stage: n.stage, site: n.site, played: n.played, why: { cat: n.cat } })), detector: s.detector, measured: s.measured || null,
       sum: { E: unb64(s.E), D: unb64(s.D), pitch: Object.fromEntries(Object.entries(s.pitch).map(([k, v]) => [k, unb64(v)])) } }));
 }
-/* The rule a take was graded with, for `base`: a take saved since 2026-11-13 says changePick 'nearest' (coach-chords.js ccRecMeta) and was
-   graded by the site's rule; one without it by the first-strum rule (candidates.mjs `first`). Other rules are replayed as they are. */
-export function ownRule(rule, tk){ return rule === 'base' && !(tk.d && tk.d.changePick === 'nearest') ? 'first' : rule; }
+/* The rule a take was graded with, for `base`: a take saved since 2026-11-14 says changePick 'span' (coach-chords.js ccRecMeta) and was graded
+   by the site's rule (base); one saved 2026-11-13 says 'nearest' (candidates.mjs `nearest`; on a site from before the whole-span rule that is
+   the site as it is); one without it was graded by the first-strum rule (candidates.mjs `first`). Other rules are replayed as they are. */
+export function ownRule(rule, tk){
+  if (rule !== 'base') return rule;
+  const pick = tk.d && tk.d.changePick;
+  return pick === 'span' ? 'base' : pick === 'nearest' ? 'nearest' : 'first';
+}
 /* Runs every rule on every take; res[rule@own|now] = { expected index: { verdict, readings } }. */
 /* `cache` (closed-loop.mjs passes one; this tool's own command line does not): { key(site, tk), get(key), set(key, result) }, so a replay already
    made by the same site code on the same summary is read back instead of run again. */
@@ -256,7 +274,7 @@ export function ownRule(rule, tk){ return rule === 'base' && !(tk.d && tk.d.chan
 export function replayAll(takes, rules, now, at, cache){
   takes.forEach(tk => { tk.res = {};
     for (const rule of rules) for (const [mode, ratio] of [['own', tk.own], ['now', now]]){
-      const site = siteFor(mode === 'own' ? ownRule(rule, tk) : rule, ratio, !!tk.sum, at), k = cache && tk.hash ? cache.key(site, tk) : null, hit = k ? cache.get(k) : null;
+      const site = siteFor(mode === 'own' ? ownRule(rule, tk) : rule, ratio, !!tk.sum, at, capOf(tk)), k = cache && tk.hash ? cache.key(site, tk) : null, hit = k ? cache.get(k) : null;
       tk.res[rule + '@' + mode] = hit || replayTake(site, tk.d, tk.sum || tk.proc, tk.srcRate, tk.mapMs);
       if (k && !hit) cache.set(k, tk.res[rule + '@' + mode]);
     }

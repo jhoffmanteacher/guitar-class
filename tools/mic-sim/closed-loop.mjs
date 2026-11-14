@@ -164,9 +164,15 @@ function readSummaries(src){
 }
 export const SUM_HOP = 512;
 /* siteRoot: another site folder to load every script from (--root, for a before / after or a planted fault); ROOT when not given. */
-export function makeSite(coachFile, rule, ratio, fromSummary, siteRoot){
+/* gridCap: replay with this grid step cap instead of the site's (replay-takes.mjs capOf: a take's own; Infinity = uncapped). */
+export function makeSite(coachFile, rule, ratio, fromSummary, siteRoot, gridCap){
   const SITE = siteRoot || ROOT;
   let coachSrc = applyRule(coachFile ? readScriptArg(coachFile) : siteSource('coach.js', SITE), rule || 'base', ratio || null);
+  if (gridCap != null){
+    const re = /^const CC_GRID_STEP_CAP_MS = \d+;/m;
+    if (!re.test(coachSrc)) throw new Error('closed-loop: coach.js no longer has "const CC_GRID_STEP_CAP_MS = <n>;" to replay a take\'s own grid cap with');
+    coachSrc = coachSrc.replace(re, `const CC_GRID_STEP_CAP_MS = ${gridCap === Infinity ? 'Infinity' : Number(gridCap)};`);
+  }
   if (fromSummary) coachSrc = readSummaries(coachSrc);
   const num = (re, what) => { const m = coachSrc.match(re); if (!m) throw new Error('closed-loop: coach.js no longer has ' + what); return Number(m[1]); };
   /* The site's mic chain, from coachAcquireMic's own lines. */
@@ -304,7 +310,8 @@ export function makeSite(coachFile, rule, ratio, fromSummary, siteRoot){
     classes(names){ const out = Object.assign({}, cc ? cc.classes : null); names.forEach(n => { if (!out[n]) out[n] = chordMidis(n).map(m => ((m % 12) + 12) % 12); }); return JSON.stringify(out); },
     result(){
       const out = { phase: cc.phase, onsets: cc.onsetCount, scoreBpm: cc.phase === 'done' ? ccScoreBpm() : null,
-        changes: cc.changes.map(c => ({ from: c.from, to: c.to, stage: c.stage || 0, bpm: c.bpm, verdict: c.result, readings: c.readings ? c.readings.length : null, dec: c.decDev == null ? null : Math.round(c.decDev) })),
+        changes: cc.changes.map(c => Object.assign({ from: c.from, to: c.to, stage: c.stage || 0, bpm: c.bpm, verdict: c.result, readings: c.readings ? c.readings.length : null, dec: c.decDev == null ? null : Math.round(c.decDev) },
+          typeof ccSpanRule === 'function' && ccSpanRule() ? { span: true, win: c.win == null ? null : Math.round(c.win * 10) / 10, gap: Math.round(cc.bpc * cc.beatMs * 10) / 10 } : {})),
         meta: cc.phase === 'done' ? ccRecMeta(true) : null, lat: coachMicLatencyMs() };
       micRec = null;
       ccStop(); cc = null;
@@ -396,7 +403,11 @@ export function playGame(site, g){
   const changes = res.changes.map((c, i) => {
     const t = key[i];
     if (t.to !== c.to || t.from !== c.from) throw new Error(`closed-loop: change ${i} is ${c.from}>${c.to} in the game and ${t.from}>${t.to} for the student`);
-    const rec = Object.assign({ stage: c.stage, bpm: c.bpm, from: c.from, to: c.to, did: t.did, devMs: t.devMs == null ? null : Math.round(t.devMs), verdict: c.verdict, readings: c.readings }, t.played ? { played: t.played } : {}, c.dec != null ? { dec: c.dec } : {});
+    const rec = Object.assign({ stage: c.stage, bpm: c.bpm, from: c.from, to: c.to, did: t.did, devMs: t.devMs == null ? null : Math.round(t.devMs), verdict: c.verdict, readings: c.readings }, t.played ? { played: t.played } : {}, c.dec != null ? { dec: c.dec } : {},
+      /* The game's rule decides what the answer is. Power Chord Switch's whole-span rule (coach-chords.js ccSpanRule, 2026-11-14) hears the whole
+         chord's time: a change the student skipped and then strummed later in the same chord's time (every 2 beats, every bar) is graded on that
+         later strum, so its truth is what was strummed then (student.mjs inSpan: the old chord again = held, another = wrong, the new one = right). */
+      c.span ? { span: true, win: c.win, gap: c.gap } : {}, c.span && t.inSpan ? { truth: t.inSpan } : {});
     /* Change Up: whether the game may pass this mistake BY DESIGN (worked out here from the chord shapes, never by asking the game).
        wrong: wrongClass below ('none' / 'rule2' / 'design'); only 'design' (the played shape passes both of ccResolvePend's rules) is byDesign.
        held: old and new are one of the pairs ccResolvePend's comment says it cannot tell apart (E/Em, A/Am, C/Am, G/Em). */
@@ -488,12 +499,14 @@ export function writeWav(file, x, sr){
   writeFileSync(file, b);
 }
 
+/* The answer for a change under the game's rule: `truth` when the whole-span rule grades it on a later strum (playGame), else what the student did on the change. */
+export const truthOf = c => c.truth || c.did;
 /* Counts for a list of games' changes: truth x verdict. */
 export function tally(changes){
   const t = {};
   for (const d of ['right', 'wrong', 'held', 'silent']) t[d] = { n: 0, ok: 0, off: 0, miss: 0, okTiming: 0 };
   for (const c of changes){
-    const row = t[c.did]; row.n++; row[c.verdict]++;
+    const row = t[truthOf(c)]; row.n++; row[c.verdict]++;
     if (c.verdict === 'ok' && (c.readings == null || c.readings < 3)) row.okTiming++;
   }
   return t;
@@ -531,7 +544,7 @@ const CLASS_WORD = { none: 'no shared note', rule2: 'rule 2', design: 'passes bo
 const moveWhat = c => c.did === 'wrong' && c.wrongClass ? ` (${c.played}, ${CLASS_WORD[c.wrongClass]})` : c.played ? ` (${c.played})` : c.did === 'held' && c.byDesign ? ' (lenient pair)' : '';
 function moveKind(c, was){
   if (c.byDesign) return c.verdict === 'miss' ? 'WORSE' : was === 'miss' ? 'better' : 'by design';
-  const r0 = RANK[c.did][was], r1 = RANK[c.did][c.verdict];
+  const r0 = RANK[truthOf(c)][was], r1 = RANK[truthOf(c)][c.verdict];
   return r1 < r0 ? 'WORSE' : r1 > r0 ? 'better' : 'other';
 }
 /* The world a game was played in: the command's settings and the student model. Any of them different and the two runs are different
@@ -611,6 +624,14 @@ function replayCache(){
     set(k, v){ mkdirSync(CACHE_DIR, { recursive: true }); const f = join(CACHE_DIR, k + '.json'), tmp = f + '.' + process.pid + '.tmp'; writeFileSync(tmp, JSON.stringify(v)); renameSync(tmp, f); } };
   return c;
 }
+/* Power Chord Switch's whole-span rule (coach-chords.js ccSpanRule): a change marked right must have been decided by a strum the game heard inside
+   its span, from its early allowance (win before it) to the next change (gap after it). Counted on every change a run graded with the rule. */
+function spanProof(changes, what){
+  const sp = changes.filter(c => c && c.span), right = sp.filter(c => c.verdict === 'ok');
+  if (!sp.length) return;
+  const bad = right.filter(c => c.dec == null || c.win == null || c.dec < -c.win - 0.5 || c.dec >= c.gap + 0.5);
+  console.log(`  whole-span rule, ${what}: ${right.length} of ${sp.length} changes marked right; ${bad.length} of them with no strum the game heard inside the change's span (must be 0)` + (bad.length ? '  <-- BROKEN' : ''));
+}
 /* The noise of the real-take counts, measured 2026-11-12 by moving only each take's clock offset (how far the site's clock ran ahead of the audio)
    by -20 to +40 ms and -100 ms, and the 6 takes with no offset from strums to -70 ms, on today's rule: "no strum heard" 35-37 of 54, "marked right"
    17-26, real strums lost 5-8 of 150, real strums marked right 80-85. A difference between two rules smaller than these is not a difference. */
@@ -631,6 +652,15 @@ async function realTakes(at, rule){
   console.log('  "no strum" = no strum in the recording where the game listened: HEARD and marked RIGHT should be 0. "real strums" = strums the game heard when');
   console.log('  the take was made: LOST = no longer heard. "reproduced" is the error bar: at each take\'s own ratios, how often the replay gives the saved verdict.');
   RT.printReport(takes, [rule], NOW, l => console.log(l));
+  /* Power Chord Switch's whole-span rule (2026-11-14) listens over the whole chord's time, wider than the window the recording's truth was worked
+     out with (half a beat each side of the change): "no strum, marked RIGHT" can then be a real strum later in the span. What the rule guarantees
+     by construction is checked instead: no change is right without a strum the game heard inside its span. */
+  const spanRes = takes.flatMap(tk => Object.values(tk.res[rule + '@now'] || {}));
+  if (spanRes.some(v => v && v.span)){
+    console.log('  Whole-span rule: "no strum" above is no attack within half a beat of the change (the window the take was graded with); the rule hears the');
+    console.log('  whole chord\'s time, so some of those "marked RIGHT" are real strums later in the span (the takes cannot say which).');
+    spanProof(spanRes.filter(v => v && v.span), 'real takes');
+  }
   if (stale.length) console.log(STALE);
   console.log(`  Noise: moving only each take's clock offset by 20 to 100 ms moves "no strum HEARD" by about ${TAKE_BAR.heard}, "marked RIGHT" by about ${TAKE_BAR.right}, LOST by about ${TAKE_BAR.lost}`);
   console.log(`  and real strums marked right by about ${TAKE_BAR.rightNow}: a smaller difference between two rules is no difference.`);
@@ -777,6 +807,7 @@ async function main(){
   const at = { root: siteRoot, coach: coachArg ? resolve(coachArg) : null };
   /* The end of every run: the real takes, the --json, the comparison (real takes first). */
   const finish = async (games, code) => {
+    spanProof(games.flatMap(g => g.changes), 'virtual games');
     const rt = takesOn ? await realTakes(at, rule) : null;
     const rl = takesOn ? await (await import('./replay-listen.mjs')).realListen(at, l => console.log(l)) : null;
     if (opt('json', null)) writeFileSync(opt('json'), JSON.stringify({ tool: 'closed-loop', games, realTakes: rt, realListen: rl }));
@@ -866,7 +897,7 @@ async function main(){
     const head = `${st.padEnd(11)} ${room.padEnd(6)} ${micName.padEnd(10)} ${String(fps).padStart(3)} |        ${pc(t.right.ok, t.right.n)} (${pc(t.right.okTiming, t.right.n).trim()} on timing) / ${pc(t.right.off, t.right.n)} / ${pc(t.right.miss, t.right.n)}  |`;
     const tail = `${pc(t.silent.ok, t.silent.n)} (${pc(t.silent.ok + t.silent.off, t.silent.n).trim()})${t.silent.n ? ' of ' + t.silent.n : ''}`;
     if (cu){
-      const w = cell.filter(c => c.did === 'wrong'), h = cell.filter(c => c.did === 'held');
+      const w = cell.filter(c => truthOf(c) === 'wrong'), h = cell.filter(c => truthOf(c) === 'held');
       const caught = l => l.length ? `${pc(l.filter(c => c.verdict === 'off').length, l.length)} of ${String(l.length).padEnd(3)}` : '   -       ';
       console.log(`${head}      ${caught(w.filter(c => c.wrongClass === 'none'))}  /  ${caught(w.filter(c => c.wrongClass === 'rule2'))}  /  ${caught(w.filter(c => c.wrongClass === 'design'))}      |      ${caught(h.filter(c => !c.byDesign))} / ${caught(h.filter(c => c.byDesign))}      |     ${tail}`.padEnd(200) + `| ${String(cell.length).padStart(6)}`);
     }

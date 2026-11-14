@@ -1096,7 +1096,15 @@ function micEvalStrumHits(frames, rule, ratio, hfRatio){
        changePick 'nearest' (coach-chords.js ccRecMeta, from 2026-11-13) was
        graded by the strum NEAREST the change (a closer one replaces the one
        taken); a take without it by the FIRST strum in the window, as every
-       older take was. rel = played time -
+       older take was. A take that saves changePick 'span' (Power Chord Switch
+       from 2026-11-14, coach-chords.js ccSpanRule) was graded by ANY strum
+       from win before the change to the next change (bpc beats after it):
+       here that whole span is the change's window, on the site's clock and
+       on the recording, a change is dropped when its span runs past the
+       audio, and `replayMismatch` counts only a change graded with no strum
+       in its span (a strum in it may have gone to the next chord). The
+       result says which rule it judged with (`changePick`; the round table's
+       "pick" column). rel = played time -
        listenStart - gridOffset, win = half a beat, at least 220 ms, at most
        half the gap between changes; gridOffset moves a quarter of the way to
        each strum's nearest beat, by at most the take's gridStepCapMs (none saved = uncapped; from 0 each round), AFTER rel is taken. Every
@@ -1275,9 +1283,13 @@ function micEvalTakePw(pcm, R, d, deps){
 
   /* ── ccLoop's matching, replayed on the strums it heard ── */
   // evs = [{ t: played ms }] of one round, in time order; returns the strum each change took and the gridOffset after every strum
-  /* Which strum decides a change: the take's own rule (ccRecMeta changePick). Anything but 'nearest' is the first-strum rule every take saved
-     before 2026-11-13 was graded with. */
+  /* Which strum decides a change: the take's own rule (ccRecMeta changePick). 'span' (Power Chord Switch from 2026-11-14, coach-chords.js
+     ccSpanRule): any strum from half a window before the change to the next change, so a change's window here is that whole span, and a
+     strum may be heard in two spans (the early allowance of the next change overlaps the end of this one). 'nearest' (2026-11-13): the strum
+     nearest the change. Anything else is the first-strum rule every take saved before 2026-11-13 was graded with. */
+  const span = d.changePick === 'span';
   const nearest = d.changePick === 'nearest';
+  const pick = span ? 'span' : nearest ? 'nearest' : 'first';
   const matchRound = (rd, evs) => {
     const at = rd.list.map(c => c.e.t - rd.listen);        // each change's c.beat * beatMs
     const match = rd.list.map(() => null);
@@ -1289,8 +1301,12 @@ function micEvalTakePw(pcm, R, d, deps){
       // not taken yet; nearest rule (ccLoop's find), one not taken yet or taken by a strum farther from it
       let lo = 0, hi = at.length;
       while (lo < hi){ const m = (lo + hi) >> 1; if (at[m] < rel - rd.win) lo = m + 1; else hi = m; }
+      // span rule: every change whose span [its time - win, its time + bpc beats) holds the strum, the first strum heard in it (a change starts
+      // at most bpc beats before rel, so the search starts there)
+      if (span){ lo = 0; hi = at.length; while (lo < hi){ const m = (lo + hi) >> 1; if (at[m] + bpc * rd.beat <= rel) lo = m + 1; else hi = m; } }
       for (let k = lo, n = 0; k < at.length && at[k] <= rel + rd.win && n < 8; k++, n++){
         const dd = Math.abs(rel - at[k]);
+        if (span){ if (!match[k]) match[k] = { t: ev.t, goff, dd }; continue; }
         if (!match[k] || nearest && dd < match[k].dd){ match[k] = { t: ev.t, goff, dd }; break; }
       }
       const dev = rel - Math.round(rel / rd.beat) * rd.beat;
@@ -1313,7 +1329,11 @@ function micEvalTakePw(pcm, R, d, deps){
     rd.centre = mapMs != null ? 'site' : rd.clicks.found || takeLag != null ? 'beeps' : 'setting';
     rd.shift = rd.centre === 'site' ? lat - mapMs : rd.offs;       // recording ms = the site's played ms + shift
     const half = rd.win, gap = bpc * rd.beat, reach = Math.min(gap / 2, half + rd.beat / 4);
-    const out = dd => Math.abs(dd) > half && Math.abs(dd) <= reach;
+    // where the site listened for a change, from its time: +-half (nearest, first) or the span [-half, gap) (span), and "just outside" it
+    const lateEnd = span ? gap : half;
+    const inWin = dd => dd >= -half && (span ? dd < gap : dd <= half);
+    const out = span ? dd => (dd < -half && dd >= -(half + rd.beat / 4)) || (dd >= gap && dd < gap + rd.beat / 4)
+      : dd => Math.abs(dd) > half && Math.abs(dd) <= reach;
     rd.dropped = 0;
     rd.list.forEach(({ e, k }, idx) => {
       // the gridOffset the site judged this change with: its strum's, else the one after every strum before the window opened
@@ -1322,9 +1342,9 @@ function micEvalTakePw(pcm, R, d, deps){
       else for (const p of rd.timeline){ if (p[0] < e.t - half) goff = p[1]; else break; }
       const siteAt = e.t + goff;                            // the window's centre on the site's "played" clock
       const want = rd.centre === 'site' ? siteAt + lat - mapMs : e.t + rd.offs;
-      if (want + half > endMs){ rd.dropped++; return; }
+      if (want + lateEnd > endMs){ rd.dropped++; return; }
       let o = null;
-      for (const on of onsets){ const dd = on.ms - want; if (Math.abs(dd) <= half && (!o || Math.abs(dd) < Math.abs(o.ms - want))) o = on; }
+      for (const on of onsets){ const dd = on.ms - want; if (inWin(dd) && (!o || Math.abs(dd) < Math.abs(o.ms - want))) o = on; }
       const at = o ? o.ms : want;
       let pk = 0; for (let h = Math.floor(at / 5); h < Math.floor((at + 150) / 5) && h < nH; h++) if (h >= 0 && env[h] > pk) pk = env[h];
       const site = e.verdict === 'ok' ? 'right' : e.verdict === 'off' ? 'wrong' : 'miss';
@@ -1332,7 +1352,8 @@ function micEvalTakePw(pcm, R, d, deps){
       let cat = o ? (heard ? 'agree' : 'detector-missed') : heard ? 'false-hit' : 'silent-miss';
       if (cat === 'silent-miss'){
         const heardBeat = rd.clicks.found || takeLag != null ? e.t + rd.offs : null;
-        if (onsets.some(on => out(on.ms - want) || (heardBeat != null && Math.abs(on.ms - want) > half && Math.abs(on.ms - heardBeat) <= reach)) ||
+        // (a span take has no "near the beat the student heard": the next change's own strum always sits at the end of its span on that beat)
+        if (onsets.some(on => out(on.ms - want) || (heardBeat != null && !span && Math.abs(on.ms - want) > half && Math.abs(on.ms - heardBeat) <= reach)) ||
             rd.evs.some(ev => out(ev.t - siteAt))) cat = 'off-window';
       }
       judged.push({ rk, idx, cat, site, rn: Array.isArray(e.readings) ? e.readings.length : null, saved: 'readings' in e });
@@ -1429,7 +1450,8 @@ function micEvalTakePw(pcm, R, d, deps){
     dropped: rounds.reduce((a, rd) => a + rd.dropped, 0),
     ignored,
     retimed,
-    replayMismatch: cnt(n => n.siteHeard !== (n.site !== 'miss')),
+    // span rule: only "graded with no strum in its span" can be a mismatch (a strum in the span may have been credited to the next change)
+    replayMismatch: cnt(n => span ? n.site !== 'miss' && !n.siteHeard : n.siteHeard !== (n.site !== 'miss')),
     siteRightReplayNot: cnt(n => n.site === 'right' && !n.played),
     offPitch: {}, unclearSiteReadings: null, presentSiteReadings: null, secondLook: 0, lookWould: 0, lookWouldPresent: 0,
     why: notes.reduce((h, n) => { h[n.why.cat] = (h[n.why.cat] || 0) + 1; return h; }, {}),
@@ -1449,7 +1471,7 @@ function micEvalTakePw(pcm, R, d, deps){
   const startMs = rounds.length ? rounds[0].listen - rounds[0].countIn * rounds[0].beat + rounds[0].offs : 0;
   const playMs = Math.max(1, endMs - startMs);
   return {
-    kind: 'pw', level, latency, notes: summary, perNote: notes, rounds: roundRows, whatIf, whatIfSkipped, strumRatio, pitch,
+    kind: 'pw', changePick: pick, level, latency, notes: summary, perNote: notes, rounds: roundRows, whatIf, whatIfSkipped, strumRatio, pitch,
     room: { extraOnsetsPerMin: Math.round(extra / playMs * 60000), extra, onsets: onsets.length }
   };
 }
@@ -1573,7 +1595,7 @@ function micEvalText(rows){
   ].map((v, k) => pad(v, cols[k][1])).join(' '));
   // Power Chord Switch rows (micEvalTakePw) get a second table, one line per round
   const pw = rows.filter(r => r.kind === 'pw');
-  const pwCols = [['take', 5], ['game', 16], ['round', 5], ['bpm', 4], ['cin', 3], ['chg', 4], ['agree', 5], ['detMiss', 7], ['false', 5], ['offWin', 6], ['silent', 6], ['drop', 4],
+  const pwCols = [['take', 5], ['game', 16], ['pick', 7], ['round', 5], ['bpm', 4], ['cin', 3], ['chg', 4], ['agree', 5], ['detMiss', 7], ['false', 5], ['offWin', 6], ['silent', 6], ['drop', 4],
     ['centre', 7], ['click', 6], ['lag', 5], ['ideal', 6], ['skew', 6], ['map', 5]];
   const pwOdd = pw.filter(r => r.notes.ignored || r.notes.retimed || r.notes.replayMismatch).map(r => r.take + ': ' +
     [r.notes.ignored ? r.notes.ignored + (r.notes.ignored === 1 ? ' change' : ' changes') + ' ignored (impossible time, round or tempo in the saved data)' : '',
@@ -1581,10 +1603,13 @@ function micEvalText(rows){
       r.notes.replayMismatch ? r.notes.replayMismatch + (r.notes.replayMismatch === 1 ? ' change' : ' changes') + " where the site's rule, run again on its own strums, does not give its saved verdict" : ''].filter(Boolean).join('; '));
   const pwText = !pw.length ? '' : '\n\nPower Chord Switch, one line per round (in the table above, its "notes" are chord changes; inAud = a strum in the site\'s window):\n' +
     [pwCols.map(c => pad(c[0], c[1])).join(' ')].concat(...pw.map(r => (r.rounds || []).map(g => [
-      r.take, r.game, g.stage + 1, g.bpm, g.clickBeeps, g.n, g.agree, g.detectorMissed, g.falseHit, g.offWindow, g.silentMiss, g.dropped,
+      r.take, r.game, r.changePick || 'first', g.stage + 1, g.bpm, g.clickBeeps, g.n, g.agree, g.detectorMissed, g.falseHit, g.offWindow, g.silentMiss, g.dropped,
       g.centre, g.clickFound ? g.clickSnrDb : g.clickGuessed ? 'guess' : g.clickOneBeep ? '1beep' : 'none', g.clickLagMs, g.idealMs, g.skewMs, r.latency.mapMs
     ].map((v, k) => pad(v, pwCols[k][1])).join(' ')))).concat(pwOdd).join('\n') + `
 
+pick        the rule the take was graded with, and judged with here: span = any strum while the chord is the current one counts (Power Chord
+            Switch from 2026-11-14; its "window" below is that whole span, from half a beat before the change to the next change, so a strum
+            there may belong to the next chord); nearest = the strum nearest the change (2026-11-13); first = the first strum in the window
 cin         the count-in's clicks (2 below 60 BPM since 2026-11-09, beeps 1-2 measured; 4: beeps 2-4; a take saved before then has 4 in every round)
 chg         changes judged (the site's verdict against the recording)
 agree       the site heard a strum (right or wrong chord) and there is one in its window
@@ -1707,6 +1732,9 @@ function teacherMicEvalHtml(){
       `<b>${pMiss}</b> ${pMiss === 1 ? 'strum is' : 'strums are'} where the site listened, but the site heard no strum there. ` +
       `On <b>${pFalse}</b> ${pFalse === 1 ? 'change' : 'changes'} the site heard a strum that is not in the recording (a chord left ringing, or noise).` +
       (pOdd ? ` On ${pOdd} ${pOdd === 1 ? 'change' : 'changes'} the site's own rule, run again on the strums it heard, does not give the verdict it saved.` : ''));
+    // the rule each take was graded with is the rule it is judged by (micEvalTakePw changePick)
+    const spanN = pwRows.filter(r => r.changePick === 'span').length;
+    if (spanN) lines.push(`${spanN} of these ${spanN === 1 ? 'recording was' : 'recordings were'} graded by the whole-span rule (Power Chord Switch since 2026-11-14: any strum of the right chord from just before a change to the next change counts) and ${spanN === 1 ? 'is' : 'are'} judged by it here ("whole span" in the Game column): for ${spanN === 1 ? 'it' : 'them'}, the site's window is that whole span, and a strum there may belong to the next chord.`);
   }
   lines.push(
     withClicks.length
@@ -1738,7 +1766,7 @@ function teacherMicEvalHtml(){
     const falseHit = isPw && nb.falseHit ? ` · <b>${nb.falseHit}</b> heard, not there` : '';
     const offWin = isPw && nb.offWindow ? ` · <b>${nb.offWindow}</b> off the beat` : '';
     return `<tr><td class="nc" title="${escAttr(teacherMicEvalNames[i] || '')}">${escHtml(r.take + ' · ' + (teacherMicEvalNames[i] || ''))}</td>`+
-      `<td>${escHtml(r.game)}</td><td title="${escAttr(r.device.micLabel)}">${escHtml(r.device.chromebook ? 'Chromebook' : r.device.os)}</td>`+
+      `<td>${escHtml(r.game + (isPw && r.changePick === 'span' ? ' · whole span' : ''))}</td><td title="${escAttr(r.device.micLabel)}">${escHtml(r.device.chromebook ? 'Chromebook' : r.device.os)}</td>`+
       `<td>${v(r.level.loudDb)} / ${v(r.level.floorDb)}${r.level.clipPct > 0.01 ? ' <b>clipped</b>' : ''}</td>`+
       `<td${perRound}>${L.clickFound ? v(L.settingMs) + ' → ' + v(L.idealMs) : v(L.settingMs) + ' → ?'}</td>`+
       `<td>${nb.siteRight} / ${nb.n}</td><td>${nb.replayPresent} / ${nb.n}${falseHit}</td><td>${nb.detectorMissed}${offWin}</td><td>${nb.silentMiss}</td>`+
@@ -1749,7 +1777,7 @@ function teacherMicEvalHtml(){
     <div class="tg-note"><button class="tp-btn primary" style="flex:none;padding:8px 16px;margin-right:10px" onclick="teacherMicEvalDownload()">Download results</button>
       The file has the measurements only — no audio and no names. <br>
       <i>In the recording</i>: the site's own pitch detection, run again on the saved audio, finds the note clearly. <i>Played, not counted</i>: a loud, clear note the site did not count right. <i>Not played</i>: the site said missed and there is no note there. <i>Heard instead</i>: notes that rang clearly but at a different pitch — "−1 ×6" means six notes came out one semitone low (the same number again and again usually means the guitar is out of tune). <i>Delay</i>: "?" means the count-in beeps were not in the recording (speaker muted or headphones)${pwRows.length ? ', or in a Power Chord Switch recording below 60 BPM only the second of the 2 count-in beeps was heard: one beep is too few to measure the delay' : ''}. <i>Low strings</i>: the low note's own pitch against the octave above it — very negative means this mic loses the low end.${pwRows.length ? `<br>
-      <i>Power Chord Switch</i> rows count chord changes, not notes. <i>In the recording</i>: a strum inside the site's own window for the change (about half a beat around the beat as the site was tracking it; which chord was strummed is not checked); "heard, not there": the site heard a strum its window in the recording does not have. <i>Played, not counted</i>: a strum in the site's window that the site did not hear; "off the beat": a strum just outside the window, or near the beat the student heard, so the site said missed (played early or late, or the delay setting is off). <i>Not played</i>: no strum near the change. <i>Delay</i>: hover it to see each round's, and how its windows were placed; "no beeps found" can also mean the student strummed over the count-in.` : ''}</div>`;
+      <i>Power Chord Switch</i> rows count chord changes, not notes. <i>In the recording</i>: a strum inside the site's own window for the change (about half a beat around the beat as the site was tracking it, or for a "whole span" take from half a beat before the change to the next change; which chord was strummed is not checked); "heard, not there": the site heard a strum its window in the recording does not have. <i>Played, not counted</i>: a strum in the site's window that the site did not hear; "off the beat": a strum just outside the window, or near the beat the student heard, so the site said missed (played early or late, or the delay setting is off). <i>Not played</i>: no strum near the change. <i>Delay</i>: hover it to see each round's, and how its windows were placed; "no beeps found" can also mean the student strummed over the count-in.` : ''}</div>`;
 }
 /* The strum what-if as a small table (micEvalWhatIfSummary): per Power Chord Switch take and ratio, "-N" false hits that would not fire and "lost M" real strums that would stop firing. */
 function teacherMicWhatIfHtml(rows){

@@ -232,7 +232,12 @@ export class Student {
            the never-moves student stayed on chord 1 all game, which IS the new chord on every second change: half its "held" changes
            were really right, and the old "never moved: caught" figures were measured with that flawed student. */
         this.cur = did === 'held' ? round.midis[prev] : did === 'wrong' ? (other ? round.midis[other] : round.midis[want].map(m => m + 1)) : did === 'right' ? round.midis[want] : this.cur;
-        key.push(Object.assign({ beat: b, from: prev, to: want, did, devMs: did === 'silent' ? null : dev, atMs: did === 'silent' ? null : at }, other ? { played: other } : {}));
+        /* inSpan: a change skipped on its beat whose chord's later beats are still strummed (every 2 beats or every bar, strumming every beat) with
+           the chord in the hand: what a rule that hears the whole chord's time (Power Chord Switch since 2026-11-14) is given. The sound is the same. */
+        const later = did === 'silent' && !p.silent && p.strums === 'beat' && round.bpc > 1 && this.cur;
+        const same = (a, m) => !!a && !!m && a.length === m.length && a.every((x, k) => x === m[k]);
+        const inSpan = later ? (same(this.cur, round.midis[want]) ? 'right' : same(this.cur, round.midis[prev]) ? 'held' : 'wrong') : null;
+        key.push(Object.assign({ beat: b, from: prev, to: want, did, devMs: did === 'silent' ? null : dev, atMs: did === 'silent' ? null : at }, other ? { played: other } : {}, inSpan ? { inSpan } : {}));
         if (did === 'silent'){ if (!p.silent) this.guitar.lift(at - p.liftMs); continue; }
         if (did !== 'held') this.guitar.lift(at - p.liftMs);   // the hand leaves the old chord before the new one sounds
       } else {
