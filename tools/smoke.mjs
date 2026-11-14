@@ -1950,9 +1950,10 @@ async function tuningSimWalk(page, run, events, stats, base) {
    file is missing or not the pinned one, when a scan returns nothing, when a screen is not the one it claims, or
    when the page logs a console error. It prints one line per rule (its count and first elements), a summary line
    and the list of what is not scanned; --a11y-out <file> writes every finding as JSON.
-   The RATCHET: tools/a11y-baseline.json pins today's findings as SIGNATURES — a rule plus the element's selector
-   with positions (:nth-child) and attribute values taken out, so the same element has the same signature on every
-   screen and in both languages (a bare tag gets the element's own id, class or link target added). Switched on
+   The RATCHET: tools/a11y-baseline.json pins today's findings as SIGNATURES — a rule plus what the element is (its
+   tag, id or sorted classes, and a few language-free attribute values; see a11ySig), not where it sits, so the
+   same element has the same signature on every screen and in both languages; a page-wide finding (no h1, no main
+   landmark) is pinned per screen. A screen whose rule ERRORED is never judged "gone" for that rule. Switched on
    (A11Y_RATCHET = true below, or --a11y-ratchet for one run), a signature the baseline does not have is ONE error
    event, however many screens show it, naming those screens and the element's markup. A known signature on more
    screens or more often (a new card with the same markup) is not a failure; a baseline signature no longer seen on
@@ -1986,22 +1987,46 @@ const A11Y_RUN = `((() => { const c = axe._audit.checks['color-contrast']; if (!
   rules: { 'duplicate-id': { enabled: true }, 'duplicate-id-active': { enabled: true } } })).then(r => { const pick = list => list.map(v => ({ id: v.id, impact: v.impact, help: v.help,
   nodes: v.nodes.map(n => ({ target: n.target.map(String).join(' '), html: String(n.html).slice(0, 240), why: String(n.failureSummary || '').replace(/\\s+/g, ' ').slice(0, 300) })) }));
   return { rules: pick(r.violations), unsure: pick(r.incomplete) }; })`;
-/* The element's signature (R1-3): axe's selector with positions and attribute VALUES taken out (an aria-label or a
-   data-key differs by language or by set), so it is the same on every screen; the values in A11Y_SIG_KEEP stay
-   (an i18n key, a link target). A bare tag at the end gets the
-   element's own id, class, or link target (href value) from its markup, so `a` or `div` is not every a or div. */
-const A11Y_SIG_KEEP = ['data-i18n', 'href', 'for', 'name', 'type', 'role'];   // values that are the same in both languages and on every screen
-function a11ySig(target, html) {
-  let s = String(target).replace(/:nth-(?:child|of-type|last-child)\(\d+\)/g, '')
-    .replace(/\[([\w:-]+)(?:[~|^$*]?=("[^"]*"|'[^']*'|[^\]]*))?\]/g, (m, name, val) => A11Y_SIG_KEEP.includes(name) && val ? `[${name}=${val}]` : `[${name}]`).replace(/\s+/g, ' ').trim();
-  const last = s.split(/\s*[>+~ ]\s*/).pop();
-  const tag = /^<([a-z][a-z0-9-]*)([^>]*)>/i.exec(String(html || ''));
-  if (tag && /^[a-z][a-z0-9-]*$/i.test(last) && last !== 'html') {
-    const at = n => { const m = new RegExp(`\\s${n}="([^"]*)"`).exec(tag[2]); return m ? m[1] : null; };
-    const id = at('id'), cls = at('class'), href = at('href');
-    s += id ? `#${id}` : cls && cls.trim() ? '.' + cls.trim().split(/\s+/).join('.') : href ? `[href="${href}"]` : '';
+/* The element's signature (R1-3; review R2-2): what the element IS, not where it sits — the LAST compound of axe's
+   selector only (no path, so a wrapper added above it does not change it), rebuilt from the element's own markup:
+   tag, then its id, or else its classes sorted, then the attributes in A11Y_SIG_KEEP with their values (values that
+   are the same in both languages and on every screen: an i18n key, a link target, a type), sorted. Other attribute
+   values (aria-label, data-key, onclick) are dropped: they differ by language, by set or by position. A rule found on
+   the whole page (the target is `html`: no h1, no main landmark) is pinned PER SCREEN, `html@<screen>`, or one screen
+   without an h1 would let every screen lose its h1 unseen. */
+const A11Y_SIG_KEEP = ['data-i18n', 'href', 'for', 'name', 'type', 'role'];
+function a11yLastCompound(target) {
+  // Split on combinators outside [...] and quotes (an attribute value may hold spaces or ">").
+  let depth = 0, q = '', cur = '';
+  const parts = [];
+  for (const ch of String(target)) {
+    if (q) { cur += ch; if (ch === q) q = ''; continue; }
+    if (ch === '"' || ch === "'") { q = ch; cur += ch; continue; }
+    if (ch === '[') depth++; else if (ch === ']') depth--;
+    if (!depth && /[\s>+~]/.test(ch)) { if (cur) parts.push(cur); cur = ''; continue; }
+    cur += ch;
   }
-  return s;
+  if (cur) parts.push(cur);
+  return parts.pop() || '';
+}
+function a11ySig(target, html, screen) {
+  const last = a11yLastCompound(target);
+  if (last === 'html') return `html@${screen}`;
+  // From the markup's opening tag (it may be cut short at 240 characters: read what is there).
+  const head = /^<([a-z][a-z0-9-]*)([^>]*)/i.exec(String(html || ''));
+  const attr = (src, n) => { const m = new RegExp(`(?:^|\\s)${n}="([^"]*)"`).exec(src); return m ? m[1] : null; };
+  // From the selector: tag, #id, .classes, [attr=value] (positions and pseudo-classes dropped).
+  const sel = { tag: (/^[a-z][a-z0-9-]*/i.exec(last) || [''])[0].toLowerCase(), id: (/#([\w-]+)/.exec(last) || [])[1] || null,
+    cls: [...last.replace(/\[[^\]]*\]/g, '').matchAll(/\.([\w-]+)/g)].map(m => m[1]),
+    attrs: [...last.matchAll(/\[([\w:-]+)(?:[~|^$*]?=("[^"]*"|'[^']*'|[^\]]*))?\]/g)].map(m => [m[1], m[2] ? m[2].replace(/^["']|["']$/g, '') : null]) };
+  const tag = (head ? head[1] : sel.tag).toLowerCase();
+  const id = (head && attr(head[2], 'id')) || sel.id;
+  const cls = head && attr(head[2], 'class') !== null ? attr(head[2], 'class').trim().split(/\s+/).filter(Boolean) : sel.cls;
+  const kept = new Map();
+  for (const [n, v] of sel.attrs) if (A11Y_SIG_KEEP.includes(n) && v !== null) kept.set(n, v);
+  if (head) for (const n of A11Y_SIG_KEEP) { const v = attr(head[2], n); if (v !== null) kept.set(n, v); }
+  const keptS = [...kept].sort((a, b) => a[0] < b[0] ? -1 : 1).map(([n, v]) => `[${n}="${v}"]`).join('');
+  return tag + (id ? `#${id}` : [...new Set(cls)].sort().map(c => '.' + c).join('')) + keptS;
 }
 let a11ySrc = null;
 async function a11yWalk(page, run, events, stats, base) {
@@ -2025,7 +2050,7 @@ async function a11yWalk(page, run, events, stats, base) {
     const broke = [...new Set((v.unsure || []).filter(r => r.nodes.some(n => /Axe encountered an error/.test(n.why))).map(r => r.id))];
     if (broke.length) fail(key, `axe-core errored in ${broke.join(', ')} on this screen: those rules decided nothing`);
     const keep = list => list.map(r => ({ ...r, nodes: r.nodes.filter(n => { const x = A11Y_EXCLUDE.find(e => e.rule === r.id && e.html.test(n.html)); if (x) found.excluded.push({ screen: key, rule: r.id, target: n.target }); return !x; }) })).filter(r => r.nodes.length);
-    found.screens[key] = { what, rules: keep(v.rules), unsure: keep(v.unsure || []) };
+    found.screens[key] = { what, rules: keep(v.rules), unsure: keep(v.unsure || []), errored: broke };
   };
   // A clean start (R1-4): in a full walk the other areas leave storage behind (a picked path, a pinned card, a
   // remembered game choice). Nothing is restored afterwards: this area runs last.
@@ -2033,7 +2058,11 @@ async function a11yWalk(page, run, events, stats, base) {
   // Sign-in: a fresh page, not signed in (the dev bypass signs in below, as the walk's boot does).
   await page.send('Page.navigate', { url: base + '/index.html' });
   await sleep(3500);
-  await scan('en:sign-in', 'the sign-in screen');
+  // R2-6: sign-in has its identity check too: the sign-in panel shown, the app not.
+  const si = await run('a11y:en:sign-in:is', `(() => { const p = document.getElementById('auth-signin'), app = document.getElementById('app');
+    return { ok: !!p && !p.hidden && p.getClientRects().length > 0 && !!app && getComputedStyle(app).display === 'none', lang: document.documentElement.lang }; })()`, 10);
+  if (!si || !si.ok || si.lang !== 'en') fail('en:sign-in', `the screen is not the sign-in screen in en: ${JSON.stringify(si)}`);
+  else await scan('en:sign-in', 'the sign-in screen');
   await run('a11y:devBypass', 'devBypass()', 3500);
   for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'a11y:devBypass' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
   await run('a11y:load-coach', `ensureCoachJs()`, 1500);
@@ -2066,6 +2095,9 @@ async function a11yWalk(page, run, events, stats, base) {
       if (!cardId && name === 'practice-card') continue;
       if ((await run(`a11y:${lang}:${name}:open`, expr, 900)) == null) continue;   // a step that threw is already an event
       // No tool popup or other dialog may be open on top, and the page must be in this language.
+      // Limits (R2-8): it sees only .tool-popup.open and visible [role="dialog"] elements (the Games and live-game
+      // screens are dialogs by role and are judged by `want` instead); an overlay with neither (the resource viewer's
+      // backdrop, the nav drawer, a toast) is not seen, and it cannot tell a dialog that is on screen but behind.
       const st = await run(`a11y:${lang}:${name}:is`, `(() => { const ok = ${want}; const dlg = [...document.querySelectorAll('.tool-popup.open, [role="dialog"]:not([hidden]):not(.games-screen)')].filter(e => e.getClientRects().length).map(e => e.id || e.className);
         return { ok, lang: getLang(), htmlLang: document.documentElement.lang, dlg, tops: ${J(TOPS)}.filter(x => { const e = document.getElementById(x); return e && !e.hidden; }), card: typeof caOpenId === 'undefined' ? null : caOpenId }; })()`, 10);
       if (!st || !st.ok || st.lang !== lang || st.htmlLang !== lang || st.dlg.length) { fail(`${lang}:${name}`, `the screen is not "${what}" in ${lang}: ${J(st)}`); continue; }
@@ -2079,7 +2111,10 @@ async function a11yWalk(page, run, events, stats, base) {
   await page.send('Page.navigate', { url: base + '/tabs/luna.html' });
   await Promise.race([loaded, sleep(15000)]);
   await sleep(1500);
-  await scan('en:journey-luna', 'a Song Journey page (Luna)');
+  // R2-6: the Journey page has its identity check too: this page, and its Spanish-ready lines are there.
+  const jp = await run('a11y:en:journey-luna:is', `({ ok: location.pathname.endsWith('/tabs/luna.html') && !!document.querySelector('[data-es]'), lang: document.documentElement.lang, path: location.pathname })`, 10);
+  if (!jp || !jp.ok || jp.lang !== 'en') fail('en:journey-luna', `the screen is not the Luna Song Journey page in en: ${JSON.stringify(jp)}`);
+  else await scan('en:journey-luna', 'a Song Journey page (Luna)');
   await page.send('Emulation.clearDeviceMetricsOverride');
 }
 /* After the walk: print the findings, write --a11y-out, compare with the pinned baseline. Returns the ratchet's
@@ -2107,7 +2142,7 @@ function a11yReport(found) {
   // This run by signature: rule|signature → { rule, sig, screens: Set, html }.
   const now = new Map();
   for (const key of screens) for (const v of found.screens[key].rules) for (const n of v.nodes) {
-    const sig = a11ySig(n.target, n.html), id = `${v.id}|${sig}`;
+    const sig = a11ySig(n.target, n.html, key), id = `${v.id}|${sig}`;
     const e = now.get(id) || { rule: v.id, sig, screens: new Set(), html: n.html, target: n.target };
     e.screens.add(key); now.set(id, e);
   }
@@ -2143,6 +2178,9 @@ function a11yReport(found) {
   }
   for (const [id, b] of Object.entries(pinned.findings)) {
     if (now.has(id) || !b.screens.every(k => screens.includes(k))) continue;   // still there, or not every one of its screens was scanned
+    // R2-7: on a screen where this rule ERRORED it decided nothing, so "gone" there means nothing.
+    const rule = id.slice(0, id.indexOf('|'));
+    if (b.screens.some(k => (found.screens[k].errored || []).includes(rule))) { say(`a11y: ${id} not judged: ${rule} errored on ${b.screens.filter(k => (found.screens[k].errored || []).includes(rule)).join(', ')}`); continue; }
     gone++; say(`a11y: ${id} is gone from all ${b.screens.length} of its screens — the baseline can be lowered`);
   }
   say(`a11y: against the baseline: ${fresh} new signature${fresh === 1 ? '' : 's'}, ${gone} gone (ratchet ${ratchet ? 'ON: a new one is an error' : 'off: report only'})`);
