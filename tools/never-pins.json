@@ -85,9 +85,9 @@
  "SWITCH_READS": {
   "DAILY5_ENABLED": {
    "value": [
-    "0be385463dea"
+    "22bd70d1e9a6"
    ],
-   "why": "review round 3 (m3): a switch read is now pinned with its whole innermost function",
+   "why": "main 00d4be4: 6b6a97d / 0f878a6 gave the lesson ladder's section titles role=heading (accessibility); the DAILY5_ENABLED read is unchanged",
    "date": "2026-11-13"
   },
   "TAKE_TO_SONG_ENABLED": {
