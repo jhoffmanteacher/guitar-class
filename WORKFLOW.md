@@ -198,6 +198,17 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Open work
 
+- [ ] **School accounts: paste 2** (Jonathan, 2026-11-13: only school accounts, or outside accounts he allows, use
+  the class data). `firestore.rules` is always the PUBLISHED text: it holds paste 1 (the allow list `config/access`
+  and the requests `accessRequests`). Paste 2 waits in `firestore.rules.paste2` (first line "NOT PUBLISHED"; check
+  `1dt` pins it as the published rules plus the `isSchool()` gate; GitHub's rules run tests both files). Order:
+  paste 1 published; the console's Manage block, the access screen and the save-path flags shipped; Jonathan
+  allows every outside roster account (the count line must read "0 would be locked out" unless he means it); THEN
+  on paste-2 day ONE commit moves the text of `firestore.rules.paste2` (without its first line) into
+  `firestore.rules` and deletes the `.paste2` file, the full `node tools/checks.mjs` passes, and he pastes it.
+  The reads-only variant was dropped (it let a refused account write its progress before the screen); its draft
+  stays in `Claude outputs/` as a record.
+
 - [ ] **2026-11-06 — Friday check: left for Jonathan.** Done 2026-11-07: "No streak right now" (`93cb1dc`); the My
   progress pin gap (`pm-sim` section 18, `PM_SIM_PIN` 285 -> 302); ca-43 is a board limit at fret 12, not a drill bug
   (4 of 10 "Frets 8 to 12" cards and 2 of 24 on the whole neck light only the root; the 2026-11-02 changelog line says

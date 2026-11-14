@@ -81,9 +81,10 @@ const R = {
   langs: JSON.parse((/data\.lang in (\[[^\]]*\])/.exec(rb) || [, 'null'])[1].replace(/'/g, '"')),
   day: new RegExp((/data\.day\.matches\('([^']*)'\)/.exec(rb) || [, '^$'])[1]),
   dayNear: /&& siteErrorDayNear\(request\.resource\.data\.day\)/.test(rb) && /duration\.value\(1, 'd'\)[\s\S]*duration\.value\(1, 'd'\)/.test(rb),
-  createSignedIn: /allow create: if isSignedIn\(\)\n/.test(rb),
+  /* The create's gate: isSignedIn() today, isSchool() once the school-accounts paste 2 is published (it defines isSchool()). */
+  createSignedIn: new RegExp('allow create: if ' + (/function isSchool\(\)/.test(RULES) ? 'isSchool' : 'isSignedIn') + '\\(\\)\\n').test(rb),
 };
-if (!R.only || !R.all || R.only.length !== 10 || !R.kinds || !R.langs || Object.keys(R.caps).length !== 5 || R.ints.length !== 2 || R.strings.length !== 6 || !R.dayNear || !R.createSignedIn) { console.error('site-errors-sim: could not read the siteErrors rule (fields, caps, 6 string types, kinds, langs, the day window, a create for any signed-in account): ' + JSON.stringify(R)); process.exit(2); }
+if (!R.only || !R.all || R.only.length !== 10 || !R.kinds || !R.langs || Object.keys(R.caps).length !== 5 || R.ints.length !== 2 || R.strings.length !== 6 || !R.dayNear || !R.createSignedIn) { console.error('site-errors-sim: could not read the siteErrors rule (fields, caps, 6 string types, kinds, langs, the day window, a create for any school account, isSchool()): ' + JSON.stringify(R)); process.exit(2); }
 const LONE = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:^|[^\uD800-\uDBFF])[\uDC00-\uDFFF]/;
 const utcDay = n => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);
 function rulesRefuse(doc) {

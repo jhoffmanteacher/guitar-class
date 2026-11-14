@@ -14,6 +14,8 @@
    Then it re-checks one rule on each OLDER path to show they still behave.
    2026-11-06: the teacher may READ minutes/{uid}/weeks/* (the console's Practice minutes view) and
    nothing else under minutes/ — a "minutes/{uid}/weeks: the teacher reads" section pins it.
+   2026-11-13: the made-up students are @seq.org accounts (the school-accounts rule, isSchool()); an outside account
+   (X) cannot read the boards or the take counter. --port N (default 8089) picks the emulator's port.
    Last run: 2026-11-06, 191 passed, 0 failed (179 before the teacher-weeks section). Three scratch breaks of the
    2026-11-06 rule each turned cases red: the new read line dropped (2 red), a teacher read on the whole tree (6 red),
    a teacher write on weeks (3 red). Earlier (2026-11-05, 179 passed, 0 failed): The rules were also broken in scratch copies and every
@@ -48,7 +50,10 @@ import firebase from 'firebase/compat/app';
 import 'firebase/compat/firestore';
 import { readFileSync } from 'node:fs';
 
-const which = process.argv[2] || 'firestore.rules';
+const ARGV = process.argv.slice(2);
+const portAt = ARGV.indexOf('--port');
+const which = ARGV.find((a, i) => !a.startsWith('--') && i !== portAt + 1) || 'firestore.rules';
+const PORT = (portAt >= 0 && +ARGV[portAt + 1]) || 8089;   // GitHub passes --port 8089; a second emulator on this Mac can use another
 let pass = 0, fail = 0;
 const t = async (name, p, expectOk) => {
   let ok;
@@ -56,13 +61,17 @@ const t = async (name, p, expectOk) => {
   if (ok) pass++; else fail++;
   console.log((ok ? '  ✓ ' : '  ✗ ') + name);
 };
-const env = await initializeTestEnvironment({ projectId: 'demo-gc', firestore: { rules: readFileSync(which, 'utf8'), host: '127.0.0.1', port: 8089 } });
+/* firestore.rules (published, paste 1) or firestore.rules.paste2 (isSchool()): an outside account X is refused only by the second. */
+const SCHOOL = /function isSchool\(\)/.test(readFileSync(which, 'utf8'));
+const env = await initializeTestEnvironment({ projectId: 'demo-gc', firestore: { rules: readFileSync(which, 'utf8'), host: '127.0.0.1', port: PORT } });
 const FV = firebase.firestore.FieldValue, TS = firebase.firestore.Timestamp;
-const A = env.authenticatedContext('uidA', { email: 'a@student.org', email_verified: true }).firestore();
-const B = env.authenticatedContext('uidB', { email: 'b@student.org', email_verified: true }).firestore();
+const A = env.authenticatedContext('uidA', { email: 'a@seq.org', email_verified: true }).firestore();
+const B = env.authenticatedContext('uidB', { email: 'b@seq.org', email_verified: true }).firestore();
 const T = env.authenticatedContext('teacher', { email: 'jhoffman@seq.org', email_verified: true }).firestore();
-const C = env.authenticatedContext('uidC', { email: 'c@student.org', email_verified: true }).firestore();
+const C = env.authenticatedContext('uidC', { email: 'c@seq.org', email_verified: true }).firestore();
 const N = env.unauthenticatedContext().firestore();
+/* An outside account (not @seq.org, not on config/access): 2026-11-13, the boards and the take counter are school-only. */
+const X = env.authenticatedContext('outsideX', { email: 'test9@gmail.example', email_verified: true }).firestore();
 const day = (db, uid, d) => db.doc(`minutes/${uid}/days/${d}`);
 const wk = (db, uid, w) => db.doc(`minutes/${uid}/weeks/${w}`);
 
@@ -84,6 +93,8 @@ if (which.includes('orig')) {
   await t('another student\'s tree refused', () => day(B, 'uidA', '2026-11-16').set({ seconds: 60 }), false);
   await t('signed out refused', () => day(N, 'uidA', '2026-11-16').set({ seconds: 60 }), false);
   await t('the teacher cannot write it either', () => day(T, 'uidA', '2026-11-16').set({ seconds: 60 }), false);
+  await t((SCHOOL ? '' : 'today (paste 1), allowed: ') + 'an outside account (not @seq.org, not allowed) cannot write its OWN day (2026-11-13, isSchool())', () => day(X, 'outsideX', '2026-11-16').set({ seconds: 60 }), !SCHOOL);
+  await t((SCHOOL ? '' : 'today (paste 1), allowed: ') + '…nor read its own tree', () => X.collection('minutes/outsideX/days').get(), !SCHOOL);
   await t('no delete', () => day(A, 'uidA', '2026-11-16').delete(), false);
   console.log('== minutes/{uid}/weeks');
   await t('own week { seconds, goalSeconds, hit }', () => wk(A, 'uidA', '2026-W47').set({ seconds: 1800, goalSeconds: 1800, hit: true }), true);
@@ -152,6 +163,7 @@ if (which.includes('orig')) {
   await t('B cannot create a tag in uidC\'s tree', () => META(B, 'uidC').set({ id: TAGC }), false);
   await t('the teacher cannot create one for uidC', () => META(T, 'uidC').set({ id: TAGC }), false);
   await t('signed out cannot create one', () => META(N, 'uidC').set({ id: TAGC }), false);
+  await t((SCHOOL ? '' : 'today (paste 1), allowed: ') + 'an outside account (not allowed) cannot create its own tag (2026-11-13)', () => META(X, 'outsideX').set({ id: TAGC }), !SCHOOL);
 
   console.log('== weekBoard/{tag}  { week, period, seconds }');
   await t('A writes under its own tag', () => WB(A, TAGA).set({ week: '2026-W45', period: '7', seconds: 600 }), true);
@@ -199,6 +211,9 @@ if (which.includes('orig')) {
   await t('no delete', () => RB(A, TAGA).delete(), false);
   await t('every signed-in account reads the whole collection (how a rank is worked out)', () => C.collection('rankBoard').get(), true);
   await t('signed out cannot list it', () => N.collection('rankBoard').get(), false);
+  await t((SCHOOL ? '' : 'today (paste 1), allowed: ') + 'an outside account (not @seq.org, not allowed) cannot list the class rank (2026-11-13)', () => X.collection('rankBoard').get(), !SCHOOL);
+  await t((SCHOOL ? '' : 'today (paste 1), allowed: ') + '…nor the Top 5 board', () => X.collection('weekBoard').get(), !SCHOOL);
+  await t((SCHOOL ? '' : 'today (paste 1), allowed: ') + '…nor the site\'s Top 5 query', () => X.collection('weekBoard').where('week', '==', '2026-W46').where('period', '==', '7').get(), !SCHOOL);
 
   console.log('== minutesBoard/{uid} has no rules block any more (uid -> minutes must not exist)');
   await t('a write under the uid is refused', () => A.doc('minutesBoard/uidA').set({ seconds: 60 }), false);
@@ -239,6 +254,8 @@ if (which.includes('orig')) {
   await t('the id is right but uid in the doc is another student\'s refused', () => TAKE(A, 'uidA-pw').set(take('uidB')), false);
   await t('the id is right but the doc has no uid refused', () => TAKE(A, 'uidA-pw').set({ mode: 'pw' }), false);
   await t('signed out refused', () => TAKE(N, 'uidA-pw').set(take('uidA')), false);
+  await t((SCHOOL ? '' : 'today (paste 1), allowed: ') + 'an outside account (not allowed) cannot save its own take (2026-11-13)', () => TAKE(X, 'outsideX-pw').set(take('outsideX')), !SCHOOL);
+  await t((SCHOOL ? '' : 'today (paste 1), allowed: ') + '…nor a chunk of it', () => CHUNK(X, 'outsideX-pw', 0).set({ i: 0, pcm: bytes(10) }), !SCHOOL);
 
   console.log('== micTakes: the teacher switches collection on and off (config/class.micSampling.on)');
   await sampling({ on: false });
@@ -294,6 +311,7 @@ if (which.includes('orig')) {
   await env.withSecurityRulesDisabled(c => c.firestore().doc('micTakesMeta/count').delete());
   await t('every signed-in account reads it (when missing too)', () => A.doc('micTakesMeta/count').get(), true);
   await t('signed out cannot read it', () => N.doc('micTakesMeta/count').get(), false);
+  await t((SCHOOL ? '' : 'today (paste 1), allowed: ') + 'an outside account (not @seq.org, not allowed) cannot read it (2026-11-13)', () => X.doc('micTakesMeta/count').get(), !SCHOOL);
   await t('a student cannot create it at 5', () => A.doc('micTakesMeta/count').set({ n: 5 }), false);
   await t('a student cannot create it at 2', () => A.doc('micTakesMeta/count').set({ n: 2 }), false);
   await t('a student creates it at 1', () => A.doc('micTakesMeta/count').set({ n: 1 }), true);
@@ -303,6 +321,7 @@ if (which.includes('orig')) {
   await t('going back down to 1 refused', () => B.doc('micTakesMeta/count').set({ n: 1 }), false);
   await t('an extra field refused', () => B.doc('micTakesMeta/count').set({ n: 3, uid: 'uidB' }), false);
   await t('signed out cannot add', () => N.doc('micTakesMeta/count').set({ n: 3 }), false);
+  await t((SCHOOL ? '' : 'today (paste 1), allowed: ') + 'an outside account (not allowed) cannot add (2026-11-13)', () => X.doc('micTakesMeta/count').set({ n: 3 }), !SCHOOL);
   await t('the teacher sets it to 40 (any number)', () => T.doc('micTakesMeta/count').set({ n: 40 }), true);
   await t('the teacher resets it to 0 ("Reset counter")', () => T.doc('micTakesMeta/count').set({ n: 0 }), true);
 }

@@ -27,6 +27,11 @@
 #
 # To add a tool: one line under RULES_TOOLS below (the file, then its
 # arguments). The rules file and --port 8089 are passed to every tool.
+#
+# Two rules texts (2026-11-13): firestore.rules, the one PUBLISHED in the
+# Firebase console, and, while it exists, firestore.rules.paste2, the
+# school-accounts second paste that is not published yet (checks.mjs 1dt).
+# Every tool runs against each; the tools read which gate a text has.
 name: Firestore rules
 
 on:
@@ -96,18 +101,21 @@ jobs:
           escp() { esc "$1" | awk 'BEGIN { ORS = "" } { gsub(/:/, "%3A"); gsub(/,/, "%2C"); print }'; }
           failed=0
           # (stdin of each run is /dev/null so it cannot swallow the rest of this list)
+          RULES_FILES="firestore.rules"
+          [ -f firestore.rules.paste2 ] && RULES_FILES="$RULES_FILES firestore.rules.paste2"
           while read -r tool args; do
             [ -z "$tool" ] && continue
-            name="$(basename "$tool")"
-            log="$EMU/$name.log"
             if [ ! -f "$tool" ]; then
-              echo "::error title=$(escp "$name")::$(esc "$tool is listed in RULES_TOOLS in .github/workflows/rules.yml but is not in the repo.")"
+              echo "::error title=$(escp "$(basename "$tool")")::$(esc "$tool is listed in RULES_TOOLS in .github/workflows/rules.yml but is not in the repo.")"
               failed=1; continue
             fi
-            echo "::group::$tool $args"
-            cp "$tool" firestore.rules "$EMU/"
+            for rules in $RULES_FILES; do
+            name="$(basename "$tool") on $rules"
+            log="$EMU/$(basename "$tool").$rules.log"
+            echo "::group::$tool $args ($rules)"
+            cp "$tool" "$rules" "$EMU/"
             ( cd "$EMU" && npx --no-install firebase emulators:exec --only firestore --project demo-gc \
-                "node $name firestore.rules --port 8089 $args" ) < /dev/null > "$log" 2>&1
+                "node $(basename "$tool") $rules --port 8089 $args" ) < /dev/null > "$log" 2>&1
             code=$?
             cat "$log"
             echo "::endgroup::"
@@ -127,5 +135,6 @@ jobs:
               fi
               echo "::error title=$(escp "$name: ${summary:-no summary line}")::$(esc "$body")"
             fi
+            done
           done <<< "$RULES_TOOLS"
           exit $failed

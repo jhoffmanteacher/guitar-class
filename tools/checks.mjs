@@ -48,6 +48,10 @@ const args = new Set(process.argv.slice(2));
 const CHECK_ONLY = args.has('--check');
 const SKIP_LINKS = args.has('--skip-links');
 const LIVE_ONLY  = args.has('--live');
+/* The gate a student passes in a rules text: isSchool() once the school-accounts paste 2 is published (it defines the
+   function), isSignedIn() before. The pins below read the PUBLISHED firestore.rules with its own gate, so the day paste 2
+   moves into firestore.rules (firestore.rules.paste2, check 1dt) no pin has to change. */
+const rulesGate = text => /function isSchool\(\)/.test(text) ? 'isSchool()' : 'isSignedIn()';
 
 const LIVE_SW_URL = 'https://jhoffmanteacher.github.io/guitar-class/sw.js';
 
@@ -5329,7 +5333,9 @@ async function checkLiveQuizNoNames() {
   if (!ablock) flag('firestore.rules: the answers/{userId} block is missing');
   else {
     if (!/allow read, delete: if isTeacher\(\);/.test(ablock)) flag('firestore.rules answers: `allow read, delete: if isTeacher();` is gone (the answer docs hold every player\'s name; only the teacher may list them)');
-    if (!/allow get: if isSignedIn\(\) && request\.auth\.uid == userId;/.test(ablock)) flag('firestore.rules answers: a student may only `get` their own doc');
+    /* The rules' own gate (rulesGate): isSignedIn() today, isSchool() after the school-accounts paste 2. */
+    const gate = rulesGate(readFileSync(join(ROOT, 'firestore.rules'), 'utf8'));
+    if (!new RegExp('allow get: if ' + gate.replace(/[()]/g, '\\$&') + ' && request\\.auth\\.uid == userId;').test(ablock)) flag(`firestore.rules answers: a student may only \`get\` their own doc (allow get: if ${gate} && request.auth.uid == userId)`);
     const reads = [...ablock.matchAll(/allow\s+([a-z, ]+?):/g)].map(m => m[1].replace(/\s/g, ''));
     if (reads.some(r => /(^|,)(read|list)(,|$)/.test(r) && r !== 'read,delete')) flag(`firestore.rules answers: an extra read/list rule (${reads.join(' | ')})`);
   }
@@ -15578,7 +15584,8 @@ async function checkPwTakeEvaluator() {
    are the same in the doc the logger builds, its FIELDS list, the rules'
    hasOnly and hasAll, and the fields the view reads; the logger's caps, line
    and col maximum, kinds, languages and day pattern equal the rules'; the
-   block allows only a create for any signed-in account and read + delete for
+   block allows only a create for any school account (isSchool(), since
+   2026-11-13) and read + delete for
    the teacher (no update, no write), and the create still requires an SDK
    auto-id (errorId 20 letters and digits); and the logger never names the progress
    save (progress, ensureDb, flushSave, queueSave): it shares Firestore's write
@@ -15586,6 +15593,68 @@ async function checkPwTakeEvaluator() {
    tools/site-errors-rules-test.mjs (it needs Java; run by hand).
    ════════════════════════════════════════════════════════════════════ */
 const SITE_ERRORS_SIM_PIN = 161;
+/* ════════════════════════════════════════════════════════════════════
+   1dt. THE SCHOOL-ACCOUNTS PASTE 2, NOT PUBLISHED (2026-11-13, review R1-8) —
+   firestore.rules is always the text that is PUBLISHED in the Firebase
+   console. The second paste of the school-accounts change (isSchool(): only a
+   verified @seq.org address, or an account the teacher allowed, reads the
+   class-wide documents and writes as a student) waits in
+   firestore.rules.paste2 until Jonathan pastes it; that day one commit moves
+   its text into firestore.rules (without the first line) and deletes it.
+   Until then this pins: its first line says it is not published; it is the
+   published rules and nothing else, except that the student gate is
+   isSchool() (with the comments stripped, the isSchool() function taken out
+   and every isSchool() read as isSignedIn(), the two texts are equal); it
+   leaves isSignedIn() on exactly the two accessRequests lines (the one door
+   for an account that is not let in); and it uses isSchool() exactly
+   P2_SCHOOL_USES times. The emulator tools run against both files on GitHub
+   (.github/workflows/rules.yml). Once firestore.rules defines isSchool(),
+   the file must be gone, and the pins move to firestore.rules: the body of
+   isSchool() (P2_IS_SCHOOL_BODY: dropping email_verified, or "== true" read
+   as "!= false", fails), the P2_SCHOOL_USES count, isSignedIn() only on the
+   two accessRequests lines (review R2-4). A branch that changes the rules
+   before paste 2 is published changes BOTH files the same way (the failure
+   message says how).
+   ════════════════════════════════════════════════════════════════════ */
+const P2_SCHOOL_USES = 17;   // 6 class-wide reads + 11 student writes (progress counts once: read, write)
+const P2_IS_SCHOOL_BODY = "return request.auth != null && ((request.auth.token.get('email_verified', false) == true && request.auth.token.get('email', '').lower().matches('^[^@]+@seq[.]org$')) || (exists(/databases/$(database)/documents/config/access) && get(/databases/$(database)/documents/config/access).data.get('allow', {}).get(request.auth.uid, false) == true));";
+function checkRulesPaste2() {
+  head('1dt. School accounts: firestore.rules.paste2 (not published) is the published rules with isSchool() as the student gate; isSchool() itself is pinned');
+  let bad = 0;
+  const fail = m => { err('1dt: ' + m); problems++; bad++; };
+  const read = f => { try { return readFileSync(join(ROOT, f), 'utf8').replace(/\r\n/g, '\n'); } catch { return null; } };
+  const pub = read('firestore.rules'), p2 = read('firestore.rules.paste2');
+  const strip = t => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+  const fnSpan = (t, name) => { const i = t.indexOf('function ' + name + '()'); if (i < 0) return null; let d = 0, k = t.indexOf('{', i); const open = k; for (; k < t.length; k++) { if (t[k] === '{') d++; else if (t[k] === '}' && !--d) break; } return { i, open, end: k }; };
+  const dropFn = (t, name) => { const sp = fnSpan(t, name); return sp ? t.slice(0, sp.i) + t.slice(sp.end + 1) : t; };
+  /* The pins on the text that holds isSchool(): paste 2 while it waits, firestore.rules once it is published. */
+  const gatePins = (file, text) => {
+    const body = strip(text);
+    const sp = fnSpan(body, 'isSchool');
+    if (!sp) { fail(`${file} has no isSchool() function`); return; }
+    const fnBody = body.slice(sp.open + 1, sp.end).replace(/\s+/g, ' ').trim();
+    if (fnBody !== P2_IS_SCHOOL_BODY) fail(`${file}: the body of isSchool() is not the pinned one (P2_IS_SCHOOL_BODY: a verified email, lower case, the anchored @seq.org pattern, OR an allow-list entry that is exactly true behind exists()). Found: ${fnBody.slice(0, 220)}`);
+    const uses = (body.match(/isSchool\(\)/g) || []).length - 1;
+    if (uses !== P2_SCHOOL_USES) fail(`${file} uses isSchool() ${uses} times; pinned at ${P2_SCHOOL_USES} (6 class-wide reads + 11 student writes). A new student rule needs the gate too: add it, then re-pin P2_SCHOOL_USES on purpose`);
+    const ar = (() => { const i = body.indexOf('match /accessRequests/{userId} {'); if (i < 0) return ''; let d = 0, k = body.indexOf('{', i + 'match /accessRequests/{userId}'.length); for (; k < body.length; k++) { if (body[k] === '{') d++; else if (body[k] === '}' && !--d) break; } return body.slice(i, k + 1); })();
+    const signedAll = (body.match(/isSignedIn\(\)/g) || []).length - 1, signedAr = (ar.match(/isSignedIn\(\)/g) || []).length;
+    if (signedAll !== 2 || signedAr !== 2) fail(`${file} must leave isSignedIn() on exactly the two accessRequests lines (get, create): found ${signedAll} uses, ${signedAr} in that block`);
+    return uses;
+  };
+  if (p2 == null) {
+    if (pub && /function isSchool\(\)/.test(pub)) { const uses = gatePins('firestore.rules', pub); if (!bad) ok(`1dt: paste 2 is published (firestore.rules defines isSchool()): its body is the pinned one, used ${uses} times (pinned), isSignedIn() only on the 2 accessRequests lines; no paste-2 file left`); }
+    else warn('1dt: no firestore.rules.paste2 and firestore.rules has no isSchool(): the school-accounts paste 2 is neither prepared nor published');
+    return;
+  }
+  if (/function isSchool\(\)/.test(pub || '')) { fail('firestore.rules already defines isSchool() (paste 2 moved in): delete firestore.rules.paste2'); return; }
+  if (!/^\/\/ NOT PUBLISHED: paste 2 of the school-accounts change/.test(p2)) fail('firestore.rules.paste2 must start with the line "// NOT PUBLISHED: paste 2 of the school-accounts change …"');
+  const norm = t => dropFn(strip(t), 'isSchool').split('isSchool()').join('isSignedIn()').replace(/\s+/g, ' ').trim();
+  const a = norm(pub || ''), b = norm(p2);
+  if (a !== b) { let i = 0; while (i < a.length && a[i] === b[i]) i++; fail(`firestore.rules and firestore.rules.paste2 are out of step, near: firestore.rules "…${a.slice(Math.max(0, i - 40), i + 60)}…" / paste 2 "…${b.slice(Math.max(0, i - 40), i + 60)}…". A change to the rules must go into BOTH files the same way, until paste 2 is published: firestore.rules (published) with isSignedIn() where a student reads or writes, firestore.rules.paste2 with isSchool() there (a new class-wide read or student write: then re-pin P2_SCHOOL_USES); a teacher-only rule is the same text in both. Run node tools/checks.mjs --check again after.`); }
+  const uses = gatePins('firestore.rules.paste2', p2);
+  if (!bad) ok(`firestore.rules.paste2: marked NOT PUBLISHED; equal to firestore.rules once the gate is read as isSignedIn() (${b.length} characters compared); isSchool() body pinned, used ${uses} times (pinned); isSignedIn() only on the 2 accessRequests lines`);
+}
+
 function checkSiteErrors() {
   head('1de. Error log: the logger and the view are run; fields, caps and the rules block are pinned');
   let bad = 0;
@@ -15644,8 +15713,10 @@ function checkSiteErrors() {
 
   // 5. who may do what
   const allows = [...block.matchAll(/allow ([a-z, ]+):\s*if\s+([^\n;]*)/g)].map(x => [x[1].replace(/\s+/g, ''), x[2].trim()]);
-  const want = [['create', 'isSignedIn()'], ['read,delete', 'isTeacher()']];
-  if (JSON.stringify(allows) !== JSON.stringify(want)) fail(`the siteErrors block must allow exactly "create: if isSignedIn() && …" and "read, delete: if isTeacher()" — found ${JSON.stringify(allows)}`);
+  /* create: the rules' gate (rulesGate: isSignedIn() today, isSchool() after the school-accounts paste 2). */
+  const gate = rulesGate(read('firestore.rules'));
+  const want = [['create', gate], ['read,delete', 'isTeacher()']];
+  if (JSON.stringify(allows) !== JSON.stringify(want)) fail(`the siteErrors block must allow exactly "create: if ${gate} && …" and "read, delete: if isTeacher()" — found ${JSON.stringify(allows)}`);
   // the create's doc id: an SDK auto-id (20 letters and digits), so nobody can pick ids (review R2-6a)
   const create = (/allow create: if ([\s\S]*?);/.exec(block) || [, ''])[1];
   if (!/(?:^|\n)\s*&& errorId\.matches\('\^\[A-Za-z0-9\]\{20\}\$'\)\s*\n/.test(create)) fail("the siteErrors create no longer requires errorId.matches('^[A-Za-z0-9]{20}$') (an SDK auto-id) as one of its && lines");
@@ -16246,17 +16317,20 @@ function checkPracticeMinutes(i18nTable) {
       if (/pm\.tileRank|pm-rank\b|rankInfo|rankTile/.test(engNoComments)) fail('practice-minutes.js draws a class rank on My progress again (pm.tileRank / .pm-rank / rankTile): removed 2026-11-13, the own-weeks line (pm.ownWeeks) took its place');
       if (!/function ownWeeksHtml\(/.test(engNoComments) || !/\+ ownWeeksHtml\(w\.id\)/.test(engNoComments)) fail("practice-minutes.js: My progress must draw the own-weeks line (ownWeeksHtml(w.id) after the tiles) — this week against the student's own last and best week (2026-11-13)");
     }
-    const RB_SHIPPED = "match /rankBoard/{tag} { allow read: if isSignedIn(); allow create, update: if isSignedIn() && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id && request.resource.data.keys().hasOnly(['seconds']) && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 400 * dailyCapSeconds(); }";
+    /* read and create/update: the rules' gate (rulesGate: isSignedIn() today, isSchool() after the school-accounts paste 2). */
+    const GATE = rulesGate(rules);
+    const RB_SHIPPED = "match /rankBoard/{tag} { allow read: if isSchool(); allow create, update: if isSchool() && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id && request.resource.data.keys().hasOnly(['seconds']) && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 400 * dailyCapSeconds(); }";
     const rbMatches = (strip(rules).match(/match\s+\/rankBoard\b/g) || []).length;
     const rboard = block('rankBoard/{tag}');
     if (rbMatches !== 1 || !rboard) fail(`firestore.rules has ${rbMatches} match blocks for /rankBoard (exactly one, as published: nothing uses it since 2026-11-13; removing it is a rules change for Jonathan to paste — then set this count to 0)`);
-    else if (rboard.replace(/\s+/g, ' ').trim() !== RB_SHIPPED) fail('firestore.rules: the rankBoard block differs from the one shipped. If this is on purpose, change RB_SHIPPED here with it and tell Jonathan to paste the rules again');
+    else if (rboard.replace(/\s+/g, ' ').trim() !== RB_SHIPPED.split('isSchool()').join(GATE)) fail('firestore.rules: the rankBoard block differs from the one shipped. If this is on purpose, change RB_SHIPPED here with it and tell Jonathan to paste the rules again');
     /* The Top 5 board (2026-11-04, redesigned the same day: Jonathan wants NO per-period minutes tied to a name, readable by anyone): two blocks,
        pinned WHOLE like minutesBoard. The board's docs are keyed by a private random tag, never a uid; the tag lives only in the student's own
        owner-only doc minutes/{uid}/meta/board, and a write to the board must be to the doc whose id is the writer's own tag. A change to either
        block is a change Jonathan must re-paste. */
     const TAG_SHIPPED = "match /minutes/{userId}/meta/board { allow create: if pmOwner(userId) && request.resource.data.keys().hasOnly(['id']) && request.resource.data.id is string && request.resource.data.id.matches('^[0-9a-f]{32}$'); }";
-    const WB_SHIPPED = "match /weekBoard/{tag} { allow read: if isSignedIn(); allow create, update: if isSignedIn() && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id && request.resource.data.keys().hasOnly(['week', 'period', 'seconds']) && request.resource.data.keys().hasAll(['week', 'period', 'seconds']) && request.resource.data.week is string && request.resource.data.week.matches('^[0-9]{4}-W[0-9]{2}$') && request.resource.data.period in ['4', '7', 'CAS'] && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 7 * dailyCapSeconds(); }";
+    /* read and create/update: the rules' gate (GATE above). */
+    const WB_SHIPPED = "match /weekBoard/{tag} { allow read: if isSchool(); allow create, update: if isSchool() && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id && request.resource.data.keys().hasOnly(['week', 'period', 'seconds']) && request.resource.data.keys().hasAll(['week', 'period', 'seconds']) && request.resource.data.week is string && request.resource.data.week.matches('^[0-9]{4}-W[0-9]{2}$') && request.resource.data.period in ['4', '7', 'CAS'] && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 7 * dailyCapSeconds(); }";
     /* The rest of the minutes tree is pinned too (2026-11-04 review): a tree block of `allow read, update: if pmOwner(userId)` would let a
        student change their own tag and skip the day cap; a second `match /minutes/{u}/meta/{doc}` or a catch-all `match /{path=**}/meta/{doc}`
        would overlap the tag block. Exactly four `match /minutes/` blocks (tree read, days, weeks, the tag), the tree block whole, and no match
@@ -16275,7 +16349,7 @@ function checkPracticeMinutes(i18nTable) {
     const wbMatches = (strip(rules).match(/match\s+\/weekBoard\b/g) || []).length;
     const wboard = block('weekBoard/{tag}');
     if (wbMatches !== 1 || !wboard) fail(`firestore.rules has ${wbMatches} match blocks for /weekBoard (exactly one is allowed; practice-minutes.js reads and writes it for the Top 5)`);
-    else if (wboard.replace(/\s+/g, ' ').trim() !== WB_SHIPPED) fail('firestore.rules: the weekBoard block differs from the one shipped. If this is on purpose, change WB_SHIPPED here with it and tell Jonathan to paste the rules again');
+    else if (wboard.replace(/\s+/g, ' ').trim() !== WB_SHIPPED.split('isSchool()').join(GATE)) fail('firestore.rules: the weekBoard block differs from the one shipped. If this is on purpose, change WB_SHIPPED here with it and tell Jonathan to paste the rules again');
     /* Only for the change that INTRODUCES the blocks: while HEAD's rules do not
        have them yet, everything above them must be byte-for-byte HEAD's (the
        order was "new match blocks only"). Once they are committed this stands
@@ -16598,6 +16672,7 @@ function checkPracticeMinutes(i18nTable) {
   checkMicZipsAnonymous();
   checkSiteErrors();
   checkWeekendStreaks();
+  checkRulesPaste2();
   await checkBackingLoudness();
   checkSiteFill();
   checkPartSizes();
