@@ -12,6 +12,8 @@
      node tools/playalong-loop.mjs --root <dir>    test another copy of the site (a scratch copy with a planted fault)
      node tools/playalong-loop.mjs --step <ms>     the song walks' step in file time (default 20)
      node tools/playalong-loop.mjs --pins          print the clock pins of this site (see CLOCK PINS)
+     node tools/playalong-loop.mjs --only ca-51 --shots <dir>   also a PNG of each card view as it opens, at 1366x657
+                                                   (English; the look CLAUDE.md step 4 asks for on a new card)
      --chrome <path> (or CHROME=…), --stall <s> (default 120)
    Exit 0: nothing found. 1: a mismatch. 2: could not run, or nothing was walked (a --setting that matches no walk). 3: the watchdog (no step for --stall seconds).
 
@@ -187,7 +189,7 @@
 import { createServer } from 'node:http';
 import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdtempSync, readFileSync, existsSync, statSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, readFileSync, existsSync, statSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, extname, normalize, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -205,6 +207,7 @@ const STEP_MS = Number(opt('--step')) > 0 ? Number(opt('--step')) : 20;
 const FINE_MS = 5;
 const STALL_S = Number(opt('--stall')) > 0 ? Number(opt('--stall')) : 120;
 const PINS_ONLY = args.includes('--pins');
+const SHOTS = opt('--shots') ? resolve(opt('--shots')) : null;
 
 /* R6: how each song is counted. beats = `beatsPerBar` as the data counts them; steps = cursor steps and
    clicks in a bar; sub = cursor steps (and clicks) per beat. */
@@ -1757,6 +1760,11 @@ async function main() {
       let o = await openIt();
       if (!o.ok) { console.log(`✗ ${label}: could not open: ${o.why}`); totals.failed++; out.walks.push({ card: a.id, view: viewName(a, x.v), name: 'open', issues: [o.why] }); continue; }
       totals.views++;
+      if (SHOTS) {   // --shots: the card as it opens in this view, the viewport only (1366x657)
+        const png = await page.send('Page.captureScreenshot', { format: 'png' });
+        mkdirSync(SHOTS, { recursive: true });
+        writeFileSync(join(SHOTS, `${a.id}-${viewName(a, x.v).replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '')}.png`), Buffer.from(png.data, 'base64'));
+      }
       const M = { consts, tracks, files, meterOf, meter: x.meter, meterName: METER[x.view.track], tr: tracks[x.view.track], chart: x.chart, view: x.view, viewLabel: viewName(a, x.v), open: o, scan: o.scan, isBase: x.v.base, recAlt: !!x.v.recAlt, tables: [] };
       /* The drawing. */
       let drawIssues = [];
