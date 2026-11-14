@@ -242,6 +242,13 @@ Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `ap
   (`songsPlayAlongCard()`, at the click), else the Journey page; no per-song retire list (1bn).
   `TAKE_TO_SONG_ENABLED`/`DAILY5_ENABLED` false: switched off, never deleted.
 - **Changelog**: student-facing change → dated top `CHANGELOG.md` entry, same push, student's view.
+- **Plant a fault, weekly, report-only** (`tools/plant-a-fault.mjs`, `.github/workflows/plant-a-fault.yml`, Tuesdays
+  2:23 AM Pacific): GitHub plants small mistakes one at a time in the risky code (save, offline cache, rules,
+  listening, sign-in, song files, the console's config writer) and lists any no tool caught; one that got through
+  never fails the run. Look at one with `node tools/plant-a-fault.mjs --replay <id>` (plants it in a scratch copy and
+  runs its tools). Harmless or accepted → an entry with a one-line reason in `tools/plant-a-fault-known.json`; a real
+  gap → a test in the tool that should catch it. Renamed a function its table names? `checks.mjs` 1ea fails: update
+  the table.
 
 ## i18n
 Every new student-facing shell string goes in `i18n.js` (read its header for wiring: `data-i18n` / `t()` + `data-i18n-params`) in BOTH `en` and `es`, same edit; never English-only. Module text gets `_es`; Journey pages `data-es`. Reuse its glossary. String names are solfège (`cuerda Mi grave`); chord symbols/keys are not (`tonalidad de G`, `G/B`). The code is the authoritative Spanish: no review sheet; no proofread sweeps unless asked. `i18n.js` loads before the `app/*.js` parts, `fab-tools.js`, `tuner.js`, `journey.js`.

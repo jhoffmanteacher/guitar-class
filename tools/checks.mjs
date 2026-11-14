@@ -17797,6 +17797,31 @@ function checkPrivacyNotice(i18nTable) {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1ea. PLANT A FAULT (2026-11-14) — the weekly run that plants small
+   mistakes in the risky code (tools/plant-a-fault.mjs, run by
+   .github/workflows/plant-a-fault.yml; report-only) names that code in its
+   REGIONS table by file, function, top-level constant and block. A renamed
+   or deleted function would drop out of the weekly run without a word, so
+   this reads the table against today's code: every file must exist, every
+   function be declared exactly once, every constant and block be found, every
+   tool the table runs exist, and tools/plant-a-fault-known.json parse (each
+   entry an id, a region, a class harmless or accepted, a one-line
+   reason and a date). It plants nothing and runs no tool.
+   ════════════════════════════════════════════════════════════════════ */
+async function checkPlantAFault() {
+  head('1ea. Plant a fault: the region table names code that exists; the known file parses');
+  let mod;
+  try { mod = await import(pathToFileURL(join(ROOT, 'tools', 'plant-a-fault.mjs')).href); }
+  catch (e) { err('1ea: tools/plant-a-fault.mjs does not load: ' + e.message); problems++; return; }
+  const probs = mod.tableProblems(ROOT);
+  for (const p of probs) { err('1ea: ' + p); problems++; }
+  if (probs.length) return;
+  const ts = mod.REGIONS.flatMap(r => r.targets);
+  const n = k => ts.reduce((s, t) => s + (t[k] ? (Array.isArray(t[k]) ? t[k].length : 1) : 0), 0);
+  ok(`1ea: plant-a-fault's ${mod.REGIONS.length} regions name ${n('fns')} functions, ${n('consts')} constants, ${n('block')} blocks and ${n('whole') + n('rules')} whole files, all present; its known file parses (${mod.readKnown(ROOT).length} entries)`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1cg. PRACTICE MINUTES (2026-11-01) — practice-minutes.js + its config + the
    rules blocks it writes under.
    The engine is RUN, not read: tools/pm-sim.mjs loads the real config and engine
@@ -18761,6 +18786,7 @@ function checkPracticeMinutes(i18nTable) {
   checkSongRequests();
   checkSongFilesLoader();
   checkSongFilesConsole();
+  await checkPlantAFault();
   await checkBackingLoudness();
   checkSiteFill();
   checkPartSizes();

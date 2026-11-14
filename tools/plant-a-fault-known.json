@@ -1,0 +1,4 @@
+{
+ "about": "Mistakes planted by tools/plant-a-fault.mjs that got through every tool and were then read by a person. class: harmless = the change cannot change what the code does (an equivalent mistake); accepted = a real change that no tool needs to catch. A real hole in the tools is not listed here: it stays in the weekly report until a test catches it. The report lists only mistakes NOT in this file, counts these, and names an entry whose mistake no longer exists (stale) or that a tool now catches. One line of reason each; the date it was read.",
+ "entries": []
+}
