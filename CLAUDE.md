@@ -241,7 +241,7 @@ Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `ap
   deploy` on this repo reaches the practice project only (`.firebaserc`), whatever the rules file's own comment says. Before that: `tools/pm-rules-test.mjs` and
   `tools/rules-core-test.mjs --breaks` on the Firestore emulator (and `tools/site-errors-rules-test.mjs --breaks --site <repo>` for the `siteErrors` block) (their headers say how; GitHub runs both after
   every push, `.github/workflows/rules.yml`). A case named "today: …" turning red means a rule was tightened:
-  make sure that was the point.
+  make sure that was the point. A rules edit re-pins `RULES_FILE_SHA256` (`checks.mjs` 1dt) in the same commit.
 - **Skills edit** → bump `skillCount` in `MODULE_MANIFEST`.
 - **Practice minutes** (`practice-minutes-config.js` + `practice-minutes.js`): counts always; the display
   is on (`uiOn: true` since 2026-11-01; the pin is in `tools/pm-sim.mjs`). Its `firestore.rules` blocks must be published BEFORE the code

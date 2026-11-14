@@ -17883,7 +17883,24 @@ const SITE_ERRORS_SIM_PIN = 161;
    address, or an account the teacher allowed (config/access), reads the
    class-wide documents and writes as a student. The second paste waited in
    its own file until paste-2 day (2026-11-14), when one commit moved it
-   into firestore.rules and deleted that file. What this pins now:
+   into firestore.rules and deleted that file.
+   TWO LAYERS (Jonathan, 2026-11-14: "Add a fingerprint pin, then ship"):
+   1. THE FINGERPRINT, the guard that cannot be talked around:
+      RULES_FILE_SHA256 is the sha256 of firestore.rules exactly as on disk
+      (bytes; no git, no normalising, so it works in a shallow clone and on
+      a dirty tree, and a CRLF checkout fails with a line that says so; a
+      missing file fails). ANY change to the file fails until it is
+      re-pinned in the same commit, which is the moment the change is
+      Always Reviewed (site-reviewer-deep), runs the five emulator rules
+      tools, and is handed to Jonathan to paste.
+   2. THE TEXT READING below, a second layer that catches common slips and
+      explains them. It is known NOT to be a proof: it reads the text with
+      its own small lexer, and three review rounds found places where that
+      reading differs from the real rules compiler's (round 3: a keyword
+      glued to a number, an apostrophe or "&" inside a path, a path ending
+      in "." before a statement; those now fail closed, but the class of
+      hole is "1dt reads the text differently from the compiler"). It
+      checks:
      - the four gate functions are each defined ONCE in the whole file (a
        second one, or one inside a block that shadows it, fails) and each
        body is the pinned one: isSchool() (SCHOOL_GATE_BODY: dropping
@@ -17932,6 +17949,10 @@ const SITE_ERRORS_SIM_PIN = 161;
    which since 2026-11-14 refuse a rules text without isSchool().
    ════════════════════════════════════════════════════════════════════ */
 const SCHOOL_GATE_USES = 24;   // 6 class-wide reads + 11 student writes (progress counts once: read, write); 2026-11-13 +2: songRequests (a student's create, and the read of their own); 2026-11-14 +5: song files (read the files, read the pieces, read the month's counter, create it, raise it)
+/* The FINGERPRINT of firestore.rules: the sha256 of the file's bytes exactly as on disk (no line-ending or whitespace
+   normalising). Jonathan, 2026-11-14: "Add a fingerprint pin, then ship". Any change to the file fails 1dt until this
+   is re-pinned on purpose, in the same commit as the rules change. 2026-11-14: the school-accounts paste 2 (Paste B). */
+const RULES_FILE_SHA256 = '03960853bb96ce67e7ef3edfcdb051ac7736f56398d55909b6a3d48e89810b17';
 const TEACHER_GATE_BODY = "return request.auth != null && request.auth.token.email == 'jhoffman@seq.org' && request.auth.token.email_verified == true;";
 const SIGNED_IN_BODY = "return request.auth != null;";
 const SCHOOL_GATE_BODY = "return request.auth != null && ((request.auth.token.get('email_verified', false) == true && request.auth.token.get('email', '').lower().matches('^[^@]+@seq[.]org$')) || (exists(/databases/$(database)/documents/config/access) && get(/databases/$(database)/documents/config/access).data.get('allow', {}).get(request.auth.uid, false) == true));";
@@ -17984,6 +18005,16 @@ const SCHOOL_GATE_EXCEPTIONS = {
 };
 /* Names a rules file must never define as a function: the language's own functions and globals. */
 const RULES_BUILTIN_NAMES = ['exists', 'existsAfter', 'get', 'getAfter', 'debug', 'string', 'int', 'float', 'bool', 'path', 'math', 'timestamp', 'duration', 'latlng', 'hashing', 'request', 'resource', 'database', 'map', 'list', 'set', 'bytes', 'true', 'false', 'null'];
+/* 1dt, the guard that cannot be talked around: the bytes of firestore.rules against RULES_FILE_SHA256. No git, no
+   normalising: works in a shallow clone and on a dirty tree, and a CRLF checkout fails with a line that says so. */
+function checkRulesFingerprint(fail) {
+  let buf; try { buf = readFileSync(join(ROOT, 'firestore.rules')); } catch { fail('firestore.rules is missing: the database rules are gone from the repo. Restore it (git checkout -- firestore.rules)'); return; }
+  const got = createHash('sha256').update(buf).digest('hex');
+  if (got === RULES_FILE_SHA256) return;
+  const crlf = buf.includes('\r\n') && createHash('sha256').update(buf.toString('latin1').replace(/\r\n/g, '\n'), 'latin1').digest('hex') === RULES_FILE_SHA256;
+  if (crlf) { fail(`firestore.rules has Windows line endings (CRLF) in this checkout: its bytes differ from the pinned ones, although the text is the same. Check it out with LF endings (git config core.autocrlf false, then git checkout -- firestore.rules); do NOT re-pin`); return; }
+  fail(`firestore.rules changed (sha256 now ${got.slice(0, 12)}…, pinned ${RULES_FILE_SHA256.slice(0, 12)}…). A rules change is Always Reviewed (site-reviewer-deep), runs the five emulator rules tools, and needs Jonathan to paste the new text in the Firebase console. When that is the plan, set RULES_FILE_SHA256 in tools/checks.mjs to ${got} in the same commit`);
+}
 function checkRulesSchoolGate() {
   head('1dt. School accounts: firestore.rules gates every class-wide read and student write with isSchool(); isSchool() and the gated rules are pinned; no paste-2 file');
   let bad = 0;
@@ -18005,6 +18036,7 @@ function checkRulesSchoolGate() {
       if (hits.length) fail(`${hits.length} tracked file(s) still name the paste-2 file (${hits.join(', ')}): it is gone since 2026-11-14; say firestore.rules`);
     }
   }
+  checkRulesFingerprint(fail);
   let rules; try { rules = readFileSync(join(ROOT, 'firestore.rules'), 'utf8').replace(/\r\n/g, '\n'); } catch { fail('firestore.rules cannot be read'); return; }
   /* One quote-aware pass: comments out (a "//" or "/*" inside a string is text, not a comment), giving two texts of the
      SAME length: `kept` with the strings as written (for the pinned function bodies) and `blank` with every character
@@ -18022,15 +18054,18 @@ function checkRulesSchoolGate() {
     if (c === '/' && d === '/') { const e = rules.indexOf('\n', i); const n = (e < 0 ? rules.length : e) - i; kept += ' '.repeat(n); blank += ' '.repeat(n); i += n - 1; continue; }
     kept += c; blank += c;
   }
+  /* Review R3-2 / R3-3: the compiler reads an apostrophe or "&" inside a path, and a "." that ends a path before a
+     statement, as part of the path; 1dt would read them as a string or an "&&". Fail closed on those. */
+  { const p = /\/(?:[\w.\-]|\$\([^()]*\))*(?:['"&]|\.\s+(?:allow|match|function)\b)/.exec(blank); if (p) fail(`1dt cannot read a path in firestore.rules: "${p[0].replace(/\s+/g, ' ').slice(0, 80)}" (a quote or "&" inside a path, or a path that ends with "." before a statement: the rules compiler reads those as part of the path; fail closed. Put spaces around "&&" after a path)`); }
   const closeOf = (t, open) => { let d = 0, k = open; for (; k < t.length; k++) { if (t[k] === '{') d++; else if (t[k] === '}' && !--d) break; } return k; };
   /* Whitespace outside string literals taken out (a quote-aware pass), for comparing code that may be re-wrapped. */
   const squeeze = t => { let o = ''; for (let i = 0, q = null; i < t.length; i++) { const c = t[i]; if (q) { o += c; if (c === '\\') { o += t[++i] || ''; continue; } if (c === q) q = null; continue; } if (c === "'" || c === '"') { q = c; o += c; continue; } if (!/\s/.test(c)) o += c; } return o; };
   /* A keyword (outside comments and strings, so in `blank`) that is not a field name such as data.allow or data.\n allow. */
-  const kw = w => new RegExp('(?<![\\w$.])(?<!\\.\\s*)' + w + '\\b', 'g');
+  const kw = w => new RegExp('(?<![A-Za-z_$][\\w$]*)(?<![A-Za-z_$)\\]][\\w$]*\\s*\\.\\s*)' + w + '\\b', 'g');   // review R3-1: skipped only inside an identifier, or as a member name after identifier. / ). / ].
   /* Every function definition, anywhere in the file. */
   const fnDefs = [...blank.matchAll(/\bfunction\s+([A-Za-z_$][\w$]*)\s*\(([^)]*)\)\s*\{/g)].map(m => { const open = m.index + m[0].length - 1; return { name: m[1], body: kept.slice(open + 1, closeOf(blank, open)) }; });
   const fnKeywords = (blank.match(kw('function')) || []).length;
-  if (fnDefs.length !== fnKeywords) fail(`1dt read ${fnDefs.length} function definitions but the file has ${fnKeywords} "function" keywords: a definition 1dt cannot read (fail closed: write it as function name(args) { … })`);
+  if (fnDefs.length !== fnKeywords) fail(`1dt read ${fnDefs.length} function definitions but the file has ${fnKeywords} "function" keywords: a definition 1dt cannot read (fail closed: write it as function name(args) { … }) (a collection, wildcard or variable named exactly match, allow or function counts as the keyword too: rename it)`);
   const seen = {};
   for (const d of fnDefs) seen[d.name] = (seen[d.name] || 0) + 1;
   const twice = Object.keys(seen).filter(n => seen[n] > 1), builtin = Object.keys(seen).filter(n => RULES_BUILTIN_NAMES.includes(n));
@@ -18061,7 +18096,7 @@ function checkRulesSchoolGate() {
   };
   walk(0, blank.length, '');
   const matchKeywords = (blank.match(kw('match')) || []).length;
-  if (blocks.length - 1 !== matchKeywords) fail(`1dt read ${blocks.length - 1} match blocks but the file has ${matchKeywords} "match" keywords: a block 1dt cannot read (fail closed)`);
+  if (blocks.length - 1 !== matchKeywords) fail(`1dt read ${blocks.length - 1} match blocks but the file has ${matchKeywords} "match" keywords: a block 1dt cannot read (fail closed) (a collection, wildcard or variable named exactly match, allow or function counts as the keyword too: rename it)`);
   const splitTop = (e, op) => { const out = []; let d = 0, s = 0; for (let i = 0; i < e.length; i++) { const c = e[i]; if ('([{'.includes(c)) d++; else if (')]}'.includes(c)) d--; else if (!d && e.startsWith(op, i)) { out.push(e.slice(s, i)); s = i + op.length; i += op.length - 1; } } out.push(e.slice(s)); return out.map(x => x.trim()); };
   const wrapped = e => { if (e[0] !== '(') return false; let d = 0; for (let i = 0; i < e.length; i++) { if (e[i] === '(') d++; else if (e[i] === ')' && !--d) return i === e.length - 1; } return false; };
   /* The gate a condition (no "?" in it: checked before) puts in front of every account: 'school', 'teacher', 'signed',
@@ -18091,13 +18126,14 @@ function checkRulesSchoolGate() {
     if (end < 0 || /[?]/.test(cond)) { unread.push(`${key}: if ${cond.slice(0, 90)}`); continue; }
     if (kw('(?:allow|match|function)').test(cond)) { unread.push(`${key}: if ${cond.slice(0, 120)} (a missing ";" before the next statement?)`); continue; }
     const ex = SCHOOL_GATE_EXCEPTIONS[key];
-    if (ex) { if (squeeze(condKept) !== squeeze(ex.cond)) open.push(`${key}: if ${condKept.slice(0, 90)} (a stated exception, but not its pinned condition)`); continue; }
+    if (ex && (typeof ex !== 'object' || typeof ex.cond !== 'string' || typeof ex.why !== 'string')) { fail(`SCHOOL_GATE_EXCEPTIONS["${key}"] needs { why: '…', cond: '…' } (cond = the rule's whole condition as written, a string)`); continue; }
+    if (ex) { if (squeeze(condKept) !== squeeze(ex.cond)) open.push(`${key}: if ${condKept} (a stated exception, but not its pinned condition; if the change is meant, copy this whole condition into its cond)`); continue; }
     const g = gateOf(cond, b.vars);
     if (g && g.split('|').includes('school')) gated.push(key);
-    if (!g || g.split('|').includes('signed')) open.push(`${key}: if ${condKept.slice(0, 90)}`);
+    if (!g || g.split('|').includes('signed')) open.push(`${key}: if ${condKept}`);
   }
   const allowKeywords = (blank.match(kw('allow')) || []).length;
-  if (allows !== allowKeywords) fail(`1dt read ${allows} allow statements but the file has ${allowKeywords} "allow" keywords: a statement is not terminated (a missing ";" makes the next allow part of the previous condition, and the rules compiler accepts it)`);
+  if (allows !== allowKeywords) fail(`1dt read ${allows} allow statements but the file has ${allowKeywords} "allow" keywords: a statement is not terminated (a missing ";" makes the next allow part of the previous condition, and the rules compiler accepts it) (a collection, wildcard or variable named exactly match, allow or function counts as the keyword too: rename it)`);
   if (unread.length) fail(`1dt cannot read ${unread.length} allow rule(s): ${unread.join(' · ')}. It reads only "allow <ops>;" and "allow <ops>: if <condition>;" with no "?" (ternary) outside strings and no allow / match / function inside the condition: write the condition as gate && …, or pin this shape by hand in 1dt (it fails closed on purpose)`);
   for (const k of Object.keys(SCHOOL_GATE_EXCEPTIONS)) if (!keys.includes(k)) fail(`SCHOOL_GATE_EXCEPTIONS lists "${k}", which firestore.rules no longer has: take it off the list`);
   if (open.length) fail(`${open.length} allow rule(s) let an account through with no isSchool(), isTeacher() or pmOwner() in front: ${open.join(' · ')}. Every class-wide read and student write needs isSchool() (1dt does not look inside other helper functions); a rule that must be open goes in SCHOOL_GATE_EXCEPTIONS with its reason and its exact condition`);
