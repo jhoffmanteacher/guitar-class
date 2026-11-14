@@ -18,11 +18,20 @@ push's base) has no override. In-Class Activities and everything else
 
 **How a fix on this list gets made:**
 - **A module fix** (a keyed MC's choices or English prompt, a moved, removed
-  or relabelled frozen step, a section change) needs a one-time move of the
-  saved progress it touches, with the Modules 4/5 swap as the model
-  (`swap45*` in `app/save.js`, with its halves in `tabs/journey.js` and
-  `teacherFetchStudents()` in `teacher-core.js`): designed with Jonathan and
-  deep-reviewed (`site-reviewer-deep`). Until then it stays on this list.
+  or relabelled frozen step, a section change) **waits.** `checks.mjs` 1dl has
+  no override, and a refusal is never fixed by loosening a check. The only
+  honest route is a one-time move of the saved progress it touches (the Modules
+  4/5 swap, `swap45*` in `app/save.js`, is the model) that ships together with a
+  declared map of old key → new key which `rule-zero-proof.mjs` verifies, the
+  way it verifies `response.renamedChoices` for choices today: designed with
+  Jonathan and reviewed deep (`site-reviewer-deep`). **That map mechanism does
+  not exist yet**; it is built with the first such move. Until then the fix
+  stays on this list.
+- **A plain label fix in a frozen module moves no key at all**: a key is set
+  id, station, section number and step number, never the label. It is blocked
+  only because `rule-zero-proof.mjs` matches frozen step labels BY INDEX (that
+  is how it sees an insertion). The same declared map, label → label, would make
+  it safe: the proof would accept exactly the declared renames at the same index.
 - **An activity-side fix blocked only by work students already took** (an exit
   check's positional `items`, like `ca-14` below) can wait for the summer
   reset, which clears that work.
@@ -122,8 +131,7 @@ it. Remove it only with Jonathan, and then all four halves together: `app/save.j
 `flushSave()`, the display remap in `teacher-core.js` `teacherFetchStudents()`, and
 the `swap45` block in `tabs/journey.js`. All four halves go together: removing
 only some lets one writer save in a numbering another still reads differently.
-Delete the `migrations` field from the reset docs, or leave it: nothing else
-reads it.
+Keep the `migrations` field in progress docs: `swap45` reads it.
 
 **The 29 "Take It to a Song" sections stay.** Switched off
 (`TAKE_TO_SONG_ENABLED = false` in `app/shell.js`), never deleted (CLAUDE.md

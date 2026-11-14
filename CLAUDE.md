@@ -183,9 +183,11 @@ Key `${setId}-${station}-sec${gi}-${i}`: a step that changes INDEX loses its tic
 - **Above**: step count and order fixed; a rename prints.
 - Every regime: SECTIONS fixed (count, order, kind); a TITLE may be reworded (prints) unless
   it has a `kind` or is the tuning warm-up title.
-- **Raise `FROZEN_THROUGH` (= `FROZEN_MC_THROUGH_MODULE`) a module AHEAD of the class.** Locked
-  sets are read-only previews; every answer writer needs `isPeekedResponseKey()` (1bl). Module progress never resets
-  (Jonathan, 2026-11-13: "modules do not reset for students unless i do it"). A blocked fix → **Summer reset list** (skill `summer-reset`) same day.
+- **Raise `FROZEN_THROUGH` (= `FROZEN_MC_THROUGH_MODULE`) when the class ENTERS a module; the keyed quizzes of the
+  module after it are frozen automatically (1dl). Never lower either** (1dl): module progress never resets (Jonathan,
+  2026-11-13: "modules do not reset for students unless i do it"). A locked set is a read-only preview; every answer
+  writer needs `isPeekedResponseKey()` (1bl). A blocked fix → **Summer reset list** (skill `summer-reset`) same day; it
+  waits there until a declared old key → new key map that `rule-zero-proof` verifies exists (none yet).
 
 ### ⚠️ Modules 4 and 5 swapped
 Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `app/save.js`): no `migrations.swap45` = OLD only, with it NEW only; keep all halves (`flushSave()`, `journey.js`, the `teacherFetchStudents()` remap in `teacher-core.js`). Prove with `rule-zero-proof.mjs d0cd004`.
@@ -301,7 +303,7 @@ Every new student-facing shell string goes in `i18n.js` (read its header for wir
 | Cloud pushes, Cowork handoff, hook details | skill `session-handoff` | Cowork can't push; the web can |
 | The progress save (`app/save.js`, `logPracticeRep`, `ecSubmit` / `flushOnHide`, `caPickPath`, any other write to `progress/{uid}`) | the header of `tools/save-loop.mjs` | After any change: `node tools/save-loop.mjs` (about 10 s; it must end "untagged 0"; each FAIL prints its replay command). The change itself is still danger-zone: Always Reviewed |
 | Sign-in and sign-out (`app/start.js`, `signOut` / `_uidKey` in `app/boot.js`), the hide / unload flushes, any per-student localStorage or sessionStorage key | the header of `tools/shared-chromebook-loop.mjs` | After any change: `node tools/shared-chromebook-loop.mjs` (Node only, about 75 s; it should exit 0 with KNOWN K-TAB inside its printed band) |
-| Fixes blocked by frozen modules | skill `summer-reset` | Add any blocked fix there the same day; raising FROZEN_* never unlocks anything; module progress is never wiped, so a module fix needs a one-time move like `swap45*` |
+| Fixes blocked by frozen modules | skill `summer-reset` | Add any blocked fix there the same day; raising FROZEN_* never unlocks anything; module progress is never wiped, so a module fix waits for a declared key map (not built yet) |
 | Live quiz | `.claude/rules/live-quiz.md` (loads with `live-quiz.js`) | Nothing on the stage may reveal the answer before the reveal; after any change to `live-quiz.js`, its `lq.*` strings or the answers rule: `node tools/live-quiz-loop.mjs` (about 20-35 s; exit 1 = a rule broke, replay with `--case=<name> --verbose`) |
 | Set band, left rail, nav grid | `.claude/rules/rail-layout.md` (loads with `styles.css`/`index.html`) | The nav two-column grid is permanent — don't re-simplify; measure, don't do arithmetic |
 | Journey tab cards and Journey-page decisions | `.claude/rules/journey-pages.md` (loads with `tabs/**`) | Restyle `.tab` in both stylesheets or neither |

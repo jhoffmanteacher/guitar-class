@@ -36,6 +36,7 @@
    Inline handlers (onclick="…" in a page, or in a string a script builds) are
    code too: handlerSources() pulls them out so they are read like a script. */
 
+import { createHash } from 'node:crypto';
 import { tokenize, readChain, splitArgs, foldString, segments, matchClose, UNKNOWN } from './js-scan.mjs';
 
 export const WRITE_METHODS = new Set(['set', 'update', 'delete', 'add']);
@@ -165,7 +166,11 @@ export const pathString = p => p ? p.join('/') : '(none)';
 export function analyzeFile(file, src, consts, ctx = {}) {
   const toks = Array.isArray(src) ? src : tokenize(src);
   const out = { chains: [], refs: [], odd: [] };
-  for (const seg of segments(toks)) analyzeSegment(file, toks.slice(seg.from, seg.to), seg.name, consts, out, ctx);
+  for (const seg of segments(toks)) {
+    const body = toks.slice(seg.from, seg.to);
+    if (ctx.segmentMayReach && !ctx.segmentMayReach(body)) continue;   // nothing in it can name Firestore
+    analyzeSegment(file, body, seg.name, consts, out, ctx);
+  }
   return out;
 }
 
@@ -216,6 +221,8 @@ function analyzeSegment(file, toks, fn, consts, out, ctx) {
      A chain whose base is a variable holding a reference starts from that
      variable's path(s); one on the database handle starts at the root; a path
      link on anything else (a parameter, a call's result) starts at '?'. */
+  /* A member named in brackets from constant pieces (db['coll' + 'ection']) is that member. */
+  const linkName = L => { if (L.name) return L.name; if (!L.index) return null; const f = foldString(L.index, consts); return f && f.length === 1 && typeof f[0] === 'string' ? f[0] : null; };
   const chainPath = (c) => {
     let paths = null, li = 0, handle = false, unknownBase = false, last = -1;
     if (!c.baseCall && vars.has(c.base)) paths = vars.get(c.base).map(p => p.slice());
@@ -223,14 +230,14 @@ function analyzeSegment(file, toks, fn, consts, out, ctx) {
     else if (!c.baseCall && handles.has(c.base)) handle = true;
     else if (c.base === 'firebase' && c.links[0] && c.links[0].name === 'firestore' && c.links[0].call) { handle = true; li = 1; }
     for (let i = li; i < c.links.length; i++) {
-      const L = c.links[i];
-      if (L.name && PATH_LINKS.has(L.name) && L.call) {
+      const L = c.links[i], nm = linkName(L);
+      if (nm && PATH_LINKS.has(nm) && L.call) {
         const arg = splitArgs(L.call)[0];
         if (!paths) {
           const segs = pathSegments(arg, consts, true);
-          if (handle && i === li && L.name !== 'collectionGroup') paths = [segs];
+          if (handle && i === li && nm !== 'collectionGroup') paths = [segs];
           else { paths = [['?', ...segs]]; unknownBase = true; }
-        } else if (L.name === 'collectionGroup') {
+        } else if (nm === 'collectionGroup') {
           paths = [['?', ...pathSegments(arg, consts, true)]];
         } else {
           paths = paths.map(p => p.concat(pathSegments(arg, consts, p.length % 2 === 0)));
@@ -345,10 +352,11 @@ function analyzeSegment(file, toks, fn, consts, out, ctx) {
     const tail = c.links.slice(cp.tailFrom);
     let kind = null, detail = '';
     for (const L of tail) {
-      if (L.name && WRITE_METHODS.has(L.name) && L.call) { kind = 'write'; detail = `.${L.name}(…)`; break; }
-      if (L.name && READ_TERMINALS.has(L.name)) { kind = 'read'; break; }
-      if (L.name && BUILDERS.has(L.name)) continue;
-      kind = 'escape'; detail = L.name ? `.${L.name}` : '[…]'; break;
+      const nm = linkName(L);
+      if (nm && WRITE_METHODS.has(nm) && L.call) { kind = 'write'; detail = `.${nm}(…)`; break; }
+      if (nm && READ_TERMINALS.has(nm)) { kind = 'read'; break; }
+      if (nm && BUILDERS.has(nm)) continue;
+      kind = 'escape'; detail = nm ? `.${nm}` : '[…]'; break;
     }
     if (!kind) {
       const name = lhsOf(arr, k);
@@ -359,7 +367,8 @@ function analyzeSegment(file, toks, fn, consts, out, ctx) {
         detail = !pp ? 'used' : pp.t === 'id' && pp.v === 'return' ? 'returned' : pp.t === 'punc' && (pp.v === '(' || pp.v === ',') ? 'passed as an argument' : `used after "${pp.v}"`;
       }
     }
-    for (const p of cp.paths) out.chains.push({ file, fn, line: x.line, base: c.base, path: p, kind, detail, unknownBase: !!cp.paths.unknownBase });
+    const sig = statementSig(arr, k, c.end);
+    for (const p of cp.paths) out.chains.push({ file, fn, line: x.line, base: c.base, path: p, kind, detail, unknownBase: !!cp.paths.unknownBase, sig });
   }
 
   // A path link or .ref on something that is not an identifier chain: (db).collection(…), (await x()).doc(…), a[0].ref …
@@ -380,6 +389,31 @@ function analyzeSegment(file, toks, fn, consts, out, ctx) {
   // except inline handlers, which handlerSources() hands back to be read as code.
   const walkStr = (arr) => { for (const y of arr) { if (y.t === 'str' && /firestore\.googleapis\.com/.test(y.v)) out.odd.push({ file, fn, line: y.line, what: 'a string names the Firestore REST endpoint', todo: 'use the SDK (db.collection(…))' }); else if (y.t === 'tpl') { if (y.quasis.some(q => /firestore\.googleapis\.com/.test(q))) out.odd.push({ file, fn, line: y.line, what: 'a string names the Firestore REST endpoint', todo: 'use the SDK (db.collection(…))' }); y.exprs.forEach(walkStr); } } };
   walkStr(toks);
+}
+
+/* A fingerprint of the statement a chain sits in (from the `;`, `{` or `}` before
+   it to the one after it, at the same depth): the target, the payload and the
+   options all count, so dropping `merge` or changing the doc is a new fingerprint. */
+const tokSig = t => t.t === 'tpl' ? `tpl(${t.quasis.map(q => JSON.stringify(q)).join(',')};${t.exprs.map(e => e.map(tokSig).join(' ')).join(';')})` : `${t.t}:${t.v}`;
+export const tokenSignature = toks => toks.map(tokSig).join(' ');
+export function statementSig(arr, from, to) {
+  let a = from, d = 0, crossed = 0;
+  for (let j = from - 1; j >= 0; j--) {
+    const y = arr[j];
+    if (y.t === 'punc' && (y.v === ')' || y.v === ']' || y.v === '}')) { if (d === 0 && y.v === '}') break; d++; }
+    else if (y.t === 'punc' && (y.v === '(' || y.v === '[' || y.v === '{')) { if (d === 0) { if (y.v === '{') break; crossed++; } else d--; }
+    else if (d === 0 && y.t === 'punc' && y.v === ';') break;
+    a = j;
+  }
+  let b = to; d = 0;
+  for (let j = to; j < arr.length; j++) {
+    const y = arr[j];
+    if (y.t === 'punc' && (y.v === '(' || y.v === '[' || y.v === '{')) d++;
+    else if (y.t === 'punc' && (y.v === ')' || y.v === ']' || y.v === '}')) { if (d === 0) { if (crossed > 0 && y.v !== '}') crossed--; else break; } else d--; }
+    else if (d === 0 && crossed === 0 && y.t === 'punc' && y.v === ';') break;
+    b = j + 1;
+  }
+  return createHash('sha256').update(tokenSignature(arr.slice(a, b))).digest('hex').slice(0, 12);
 }
 
 /* Is the `{` that encloses toks[k] a destructuring pattern? `const {…} =`, `{…} = x`,

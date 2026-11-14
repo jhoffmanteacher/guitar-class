@@ -12,7 +12,7 @@ import { join, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
-import { checkKeysAgainstBase, checkFirestoreWrites, checkRulesPaste, checkKeptThings, clearBaseCache, rulesHash, PASTE_FILE, RULES_FILE } from './never-blocks.mjs';
+import { checkKeysAgainstBase, checkFirestoreWrites, checkRulesPaste, checkKeptThings, clearBaseCache, rulesHash, PASTE_FILE, RULES_FILE, LET_THROUGH } from './never-blocks.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const git = (cwd, args, env) => { const r = spawnSync('git', args, { cwd, encoding: 'utf8', maxBuffer: 1 << 28, env: env ? { ...process.env, ...env } : process.env }); return { ok: r.status === 0, out: (r.stdout || '').trim(), err: (r.stderr || '').trim() }; };
@@ -26,7 +26,7 @@ export function selfTest() {
   if (!add.ok) { console.log(`self-test: could not make a scratch worktree: ${add.err}`); process.exit(2); }
   /* The base is HEAD itself: the scratch tree starts equal to it. The tools under test are the CURRENT
      ones (copied in after every reset: this tree may have uncommitted edits to them). */
-  const TOOLS = ['tools/never-blocks.mjs', 'tools/never-blocks-selftest.mjs', 'tools/js-scan.mjs', 'tools/firestore-paths.mjs', 'tools/rule-zero-proof.mjs', 'tools/checks.mjs', PASTE_FILE].filter(f => existsSync(join(ROOT, f)));
+  const TOOLS = ['tools/never-blocks.mjs', 'tools/never-blocks-selftest.mjs', 'tools/js-scan.mjs', 'tools/firestore-paths.mjs', 'tools/rule-zero-proof.mjs', 'tools/checks.mjs', 'tools/never-pins.json', '.githooks/pre-push', '.githooks/pre-commit', PASTE_FILE].filter(f => existsSync(join(ROOT, f)));
   const head = git(wt, ['rev-parse', 'HEAD']).out;
   let pass = 0, fail = 0;
   const ENV0 = { ...process.env };
@@ -36,14 +36,18 @@ export function selfTest() {
     git(wt, ['reset', '-q', '--hard', head]); git(wt, ['clean', '-fdq']);
     for (const f of TOOLS) writeFileSync(join(wt, f), readFileSync(join(ROOT, f)));
     process.env.GC_CHECKS_BASE = head; process.env.GC_CHECKS_STAGE = 'push'; delete process.env.GITHUB_ACTIONS;
+    // git runs this scratch tree's own hooks (the real core.hooksPath points at the main checkout)
+    Object.assign(process.env, { GIT_CONFIG_COUNT: '1', GIT_CONFIG_KEY_0: 'core.hooksPath', GIT_CONFIG_VALUE_0: join(wt, '.githooks') });
     clearBaseCache();
   };
-  const commit = (msg) => { git(wt, ['add', '-A']); git(wt, ['-c', 'core.hooksPath=/dev/null', '-c', 'user.name=self-test', '-c', 'user.email=self-test@example.invalid', 'commit', '-qm', msg, '--no-verify']); return git(wt, ['rev-parse', 'HEAD']).out; };
+  const commit = (msg, env) => { git(wt, ['add', '-A']); git(wt, ['-c', 'user.name=self-test', '-c', 'user.email=self-test@example.invalid', 'commit', '-qm', msg, '--no-verify'], env); return git(wt, ['rev-parse', 'HEAD']).out; };
+  const hoursAgo = h => { const d = new Date(Date.now() - h * 3600e3).toISOString(); return { GIT_COMMITTER_DATE: d, GIT_AUTHOR_DATE: d }; };
+  const nb = (args, env) => spawnSync(process.execPath, [join(wt, 'tools', 'never-blocks.mjs'), ...args], { cwd: wt, encoding: 'utf8', env: { ...process.env, ...(env || {}) } });
   const read = f => readFileSync(join(wt, f), 'utf8');
   const write = (f, s) => { mkdirSync(dirname(join(wt, f)), { recursive: true }); writeFileSync(join(wt, f), s); };
   const edit = (f, from, to) => { const s = read(f); if (typeof from === 'string' ? !s.includes(from) : !from.test(s)) throw new Error(`"${String(from).slice(0, 60)}" not in ${f}`); write(f, s.replace(from, to)); };
   const append = (f, code) => write(f, (existsSync(join(wt, f)) ? read(f) : '') + '\n' + code + '\n');
-  const run = (check, root = wt) => ({ '1dl': () => checkKeysAgainstBase(root, { frozenMcThrough: 3 }), '1dm': () => checkFirestoreWrites(root), '1dn': () => checkRulesPaste(root), '1do': () => checkKeptThings(root) })[check]();
+  const run = (check, root = wt) => ({ '1dl': () => checkKeysAgainstBase(root), '1dm': () => checkFirestoreWrites(root), '1dn': () => checkRulesPaste(root), '1do': () => checkKeptThings(root) })[check]();
   const report = (name, check, wantRed, lines, extra) => {
     const red = lines.filter(l => l.kind === 'err');
     let okk = red.length > 0 === wantRed;
@@ -91,7 +95,7 @@ export function selfTest() {
       const bad = commit('an allowed append');
       git(wt, ['revert', '--no-edit', '--no-commit', bad]);
       process.env.GC_CHECKS_BASE = bad; clearBaseCache();
-      report('near-miss (R1-2A): git revert of an allowed tail append, measured against the reverted push', '1dl', false, run('1dl'), ls => ls.some(l => l.kind === 'warn' && /pure revert/.test(l.text)));
+      report('near-miss (R1-2A): git revert of an allowed tail append, measured against the reverted push', '1dl', false, run('1dl'), ls => ls.some(l => l.kind === 'warn' && /LET THROUGH/.test(l.text)));
       git(wt, ['reset', '-q', '--hard', bad]);
       { const w = loadSets().find(x => x.moduleNum === 3); const st = w.stations.b.sections.flatMap(x => x.steps || [])[0]; const hit = quoteIn('module-3.js', st.label); edit('module-3.js', hit, hit[0] + 'X' + hit.slice(1)); }
       process.env.GC_CHECKS_BASE = bad; clearBaseCache();
@@ -208,6 +212,88 @@ export function selfTest() {
     expect('near-miss: a NEW tour.html of Jonathan\'s own', '1do', false, () => write('tour.html', '<!doctype html><title>Guitar class — welcome</title><p>New tour.</p>'));
     expect('near-miss (R1-9): a new tour in tour-img/ with the old title', '1do', false, () => { write('tour.html', '<!doctype html><title>Website Tour — Beginning Guitar</title><img src="tour-img/new.webp">'); write('tour-img/new.webp', 'RIFF-self-test'); });
 
+    // ── review round 2 ──
+    // R2-1: the frozen numbers and 1ap's fingerprints only go up; the base's numbers judge the change
+    const lowerAll = () => {
+      edit('tools/rule-zero-proof.mjs', /const FROZEN_THROUGH_PINNED = 3;/, 'const FROZEN_THROUGH_PINNED = 0;');
+      edit('tools/checks.mjs', /const FROZEN_MC_THROUGH_MODULE = 3;/, 'const FROZEN_MC_THROUGH_MODULE = 0;');
+      edit('tools/checks.mjs', /const FROZEN_MC_FINGERPRINTS = \{[\s\S]*?\n\};/, 'const FROZEN_MC_FINGERPRINTS = {\n};');
+    };
+    expect('R2-1: FROZEN_THROUGH, FROZEN_MC_THROUGH_MODULE and the fingerprints lowered to 0 (the "summer reset" recipe)', '1dl', true, lowerAll, ls => ls.some(l => /only ever go up/.test(l.text)));
+    expect('R2-1: …then a Module 2 step moved and its quiz reworded, all in one push', '1dl', true, () => { lowerAll(); reword(2, 'choice', 'Maybe ')(); append('module-2.js', "SETS.forEach(w => { if (w.id === 'm2w1') w.stations.b.sections[0].steps.reverse(); });"); }, ls => ls.some(l => /step at this index changed|keyed MC changed/.test(l.text)));
+    expect('R2-1: one 1ap fingerprint removed', '1dl', true, () => edit('tools/checks.mjs', /\n  'w1·b·sec0·step2': '[0-9a-f]+',/, ''));
+    expect('R2-1: OPEN_THROUGH lowered', '1dl', true, () => edit('tools/rule-zero-proof.mjs', 'Math.max(6, flagNum', 'Math.max(3, flagNum'));
+    expect('R2-1: rule-zero-proof weakened to always pass, and a Module 7 step moved in the same push', '1dl', true, () => { edit('tools/rule-zero-proof.mjs', "if (problems) { err(", "if (false) { err("); append('module-7.js', "SETS.forEach(w => { if (w.moduleNum === 7) w.stations.b.sections[0].steps.reverse(); });"); });
+    expect('near-miss (R2-1): FROZEN_THROUGH raised to 4 (with 1ap raised too)', '1dl', false, () => { edit('tools/rule-zero-proof.mjs', /const FROZEN_THROUGH_PINNED = 3;/, 'const FROZEN_THROUGH_PINNED = 4;'); edit('tools/checks.mjs', /const FROZEN_MC_THROUGH_MODULE = 3;/, 'const FROZEN_MC_THROUGH_MODULE = 4;'); });
+    // R2-2: an insert above a keyed quiz in the next module is allowed; a real removal is not
+    const mod4KeyedSection = () => { for (const w of loadSets()) { if (w.moduleNum !== 4) continue; for (const [st, stn] of Object.entries(w.stations || {})) (stn.sections || []).forEach((sec, si) => { const i = (sec.steps || []).findIndex(x => x.response && x.response.type === 'mc'); if (i >= 0 && !globalThis.__m4) globalThis.__m4 = { id: w.id, st, si, i }; }); } const r = globalThis.__m4; delete globalThis.__m4; return r; };
+    expect('near-miss (R2-2): a plain step inserted in Module 4 ABOVE a keyed quiz', '1dl', false, () => { const m = mod4KeyedSection(); append('module-4.js', `SETS.forEach(w => { if (w.id === '${m.id}') w.stations['${m.st}'].sections[${m.si}].steps.splice(${m.i}, 0, { label: 'Self-test inserted above', text: 'Play it.' }); });`); });
+    expect('R2-2: a keyed quiz really removed from Module 4 (its step kept)', '1dl', true, () => { const m = mod4KeyedSection(); append('module-4.js', `SETS.forEach(w => { if (w.id === '${m.id}') delete w.stations['${m.st}'].sections[${m.si}].steps[${m.i}].response; });`); }, ls => ls.some(l => /GONE in Module 4/.test(l.text)));
+    { // R2-5: a revert is judged by AGE (24 hours) and per file
+      reset();
+      append('module-2.js', "(function(){ const w = SETS.find(x => x.id === 'm2w1'); const sec = w.stations.b.sections[w.stations.b.sections.length - 1]; sec.steps.push({ label: 'Self-test appended step', text: 'Play it.' }); })();");
+      const old = commit('an allowed append, 30 hours ago', hoursAgo(30));
+      git(wt, ['revert', '--no-edit', '--no-commit', old]);
+      process.env.GC_CHECKS_BASE = old; clearBaseCache();
+      report('R2-5: reverting a module change that has been live 30 hours', '1dl', true, run('1dl'), ls => ls.some(l => /live for 30 hours/.test(l.text)));
+      git(wt, ['reset', '-q', '--hard', head]);
+      append('module-2.js', "(function(){ const w = SETS.find(x => x.id === 'm2w1'); const sec = w.stations.b.sections[w.stations.b.sections.length - 1]; sec.steps.push({ label: 'Self-test A', text: 'Play it.' }); })();");
+      const a = commit('change A (module-2), 3 hours ago', hoursAgo(3));
+      append('module-5.js', "(function(){ const w = SETS.find(x => x.moduleNum === 5); const sec = w.stations.b.sections.find(s => !s.kind && (s.steps||[]).length > 1); sec.steps.splice(1, 0, { label: 'Self-test B', text: 'Play it.' }); })();");
+      const b = commit('change B (module-5), 1 hour ago', hoursAgo(1));
+      git(wt, ['revert', '--no-edit', '--no-commit', a]);
+      process.env.GC_CHECKS_BASE = b; clearBaseCache();
+      const before = LET_THROUGH.length;
+      report('near-miss (R2-5): git revert of the OLDER of two recent module commits', '1dl', false, run('1dl'), ls => ls.some(l => /LET THROUGH/.test(l.text)) && LET_THROUGH.length === before + 1);
+    }
+    // R2-7: a console saver handed on by name, any shape
+    [['setTimeout(flushSave, 0)', 'function teacherSt1(){ setTimeout(flushSave, 0); }'], ['.then(flushSave)', 'function teacherSt2(p){ return p.then(flushSave); }'], ['an alias', 'function teacherSt3(){ const f = flushSave; return f(); }'],
+     ["window['flushSave']()", "function teacherSt4(){ return window['flushSave'](); }"], ['flushSave.call()', 'function teacherSt5(){ return flushSave.call(null); }'], ['(0, flushSave)()', 'function teacherSt6(){ return (0, flushSave)(); }']]
+      .forEach(([what, code]) => expect(`R2-7: console hands on a saver: ${what}`, '1dm', true, T(CONSOLE, code)));
+    // R2-8: scripts no page names, and Firestore methods named in brackets from pieces
+    expect('R2-8: a tracked script no page loads by name (built in createElement) writes progress', '1dm', true, () => { write('extra-loader.js', "function extraLoaded(u){ db.collection('progress').doc(u).set({}); }\n"); git(wt, ['add', 'extra-loader.js']); });
+    expect("R2-8: an app part writes progress through db['coll' + 'ection'](…)", '1dm', true, T('app/tab.js', "function selfTestBr(u){ return db['coll' + 'ection']('progress').doc(u)['se' + 't']({}); }"));
+    // R2-9: the write statements themselves are pinned
+    expect('R2-9: flushSave drops { merge: true }', '1dm', true, () => edit('app/save.js', '.set(payload,{merge:true})', '.set(payload)'));
+    expect('R2-9: songsLibraryOpen writes another doc', '1dm', true, () => edit('app/explore.js', "db.collection('progress').doc(currentUser.uid)", "db.collection('progress').doc('class-shared')"));
+    // R2-10: hollowing around the kept functions
+    expect('R2-10: DAILY5_ENABLED && false && …', '1do', true, () => edit('app/lesson.js', 'const reminder = DAILY5_ENABLED &&', 'const reminder = DAILY5_ENABLED && false &&'));
+    expect('R2-10: (!TAKE_TO_SONG_ENABLED || true)', '1do', true, () => edit('app/lesson.js', '(!TAKE_TO_SONG_ENABLED ||', '(!TAKE_TO_SONG_ENABLED || true ||'));
+    expect('R2-10: an emptied .daily5 rule', '1do', true, () => edit('styles.css', /\.daily5-modal\{[^}]*\}/, '.daily5-modal{}'));
+    expect('R2-10: a second buildDaily5 declared in another part (shadowing)', '1do', true, T('app/tab.js', 'function buildDaily5(){ return ""; }'));
+    { reset(); edit('app/lesson.js', 'function daily5EscClose(e){', 'function daily5EscClose(e){ /* a11y */ void 0;');
+      const no = nb(['--pins']);
+      report('R2-10: --pins refuses to write a changed pin without --why', '1do', true, [{ kind: no.status !== 0 && /Not written/.test(no.stdout) ? 'err' : 'ok', text: no.stdout.split('\n').slice(-2).join(' ') }]);
+      const yes = nb(['--pins', '--why', 'self-test: an accessibility tweak Jonathan asked for']);
+      const pinned = JSON.parse(readFileSync(join(wt, 'tools', 'never-pins.json'), 'utf8')).DAILY5_FUNCTIONS.daily5EscClose;
+      clearBaseCache();
+      report('near-miss (R2-10): …and with --why it writes the value and the reason, and 1do is green', '1do', false, run('1do'), () => /accessibility tweak/.test(pinned.why) && yes.status === 0);
+    }
+    // R2-11: the record line must be the printed form, dated no earlier than the change
+    expect('R2-11: a record line that says the opposite', '1dn', true, () => { const t = rulesEdit(); append(PASTE_FILE, `- ${today} firestore.rules ${rulesHash(t)}: Jonathan was NOT told to paste it in the Firebase console`); });
+    expect('R2-11: a record line dated before the rules change', '1dn', true, () => { const t = rulesEdit(); append(PASTE_FILE, ack(rulesHash(t)).replace(new RegExp(today, 'g'), '2026-01-02')); });
+    // R2-3: the state, the hooks, the push stage
+    { reset();
+      const t = rulesEdit(); const b = commit('rules changed, no record line (pushed with --no-verify)');
+      process.env.GC_CHECKS_BASE = b; clearBaseCache();
+      report('R2-3: after such a push landed, the next push (rules unchanged since) stays red', '1dn', true, run('1dn'), ls => ls.some(l => /the rules on main are not acknowledged/.test(l.text)));
+      append(PASTE_FILE, ack(rulesHash(t))); clearBaseCache();
+      report('near-miss (R2-3): …until the record line is added', '1dn', false, run('1dn'));
+    }
+    expect('R2-3: the hooks git runs are an older copy (at the push)', '1dn', true, () => { write('old-hooks/pre-push', '#!/bin/sh\nexit 0\n'); write('old-hooks/pre-commit', read('.githooks/pre-commit')); process.env.GIT_CONFIG_VALUE_0 = join(wt, 'old-hooks'); }, ls => ls.some(l => /older copy/.test(l.text)));
+    expect('near-miss (R2-3): the same at a commit only warns', '1dn', false, () => { write('old-hooks/pre-push', '#!/bin/sh\nexit 0\n'); write('old-hooks/pre-commit', read('.githooks/pre-commit')); process.env.GIT_CONFIG_VALUE_0 = join(wt, 'old-hooks'); process.env.GC_CHECKS_STAGE = 'commit'; }, ls => ls.some(l => l.kind === 'warn' && /older copy/.test(l.text)));
+    { reset(); rulesEdit(); delete process.env.GC_CHECKS_STAGE;
+      write('stage/pre-push', `#!/bin/sh\n"${process.execPath}" "${join(wt, 'tools', 'never-blocks.mjs')}"\n`);
+      spawnSync('chmod', ['+x', join(wt, 'stage', 'pre-push')]);
+      const r = spawnSync(join(wt, 'stage', 'pre-push'), [], { cwd: wt, encoding: 'utf8', env: { ...process.env } });
+      report('R2-3: GC_CHECKS_STAGE unset, run by a pre-push hook (seen with ps): a rules change is refused', '1dn', true, [{ kind: /✗ 1dn 1dn: refused — firestore\.rules differs/.test(r.stdout) ? 'err' : 'ok', text: r.stdout.split('\n').filter(l => / 1dn /.test(l)).slice(-1)[0] || r.stdout.slice(-200) }]);
+    }
+    // R2-14: the pre-push hook refuses a push of a commit that is not the checked-out one
+    { reset();
+      const r = spawnSync('sh', [join(wt, '.githooks', 'pre-push'), 'origin', 'x'], { cwd: wt, encoding: 'utf8', input: `refs/heads/x ${git(wt, ['rev-parse', 'HEAD~1']).out} refs/heads/x 0000000000000000000000000000000000000000\n` });
+      report('R2-14: pre-push, pushing a commit that is not HEAD', 'hook', true, [{ kind: r.status === 1 && /vouch for the wrong commit/.test(r.stdout) ? 'err' : 'ok', text: r.stdout.trim().slice(0, 200) }]);
+    }
+
     // ── R1-1: CRLF copies of every text file the checks read ──
     expect('near-miss (R1-1): every text file in CRLF (a Windows checkout, core.autocrlf=true) — 1dl', '1dl', false, () => crlfAll(wt));
     for (const c of ['1dm', '1dn', '1do']) {
@@ -250,7 +336,7 @@ export function selfTest() {
 
 /* Every text file the checks read, rewritten with CRLF line endings; git is told core.autocrlf=true
    (as a Windows checkout is), so it still compares content, not line endings. */
-const CRLF_ENV = { GIT_CONFIG_COUNT: '1', GIT_CONFIG_KEY_0: 'core.autocrlf', GIT_CONFIG_VALUE_0: 'true' };
+const CRLF_ENV = { GIT_CONFIG_COUNT: '2', GIT_CONFIG_KEY_1: 'core.autocrlf', GIT_CONFIG_VALUE_1: 'true' };
 function crlfAll(root) {
   Object.assign(process.env, CRLF_ENV);
   const out = spawnSync('git', ['ls-files', '-z'], { cwd: root, encoding: 'utf8', maxBuffer: 1 << 26 }).stdout.split('\0').filter(Boolean);
@@ -263,4 +349,4 @@ function crlfAll(root) {
   spawnSync('git', ['update-index', '-q', '--refresh'], { cwd: root, env: { ...process.env } });
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) selfTest();
+if (process.argv[1] && /never-blocks-selftest\.mjs$/.test(process.argv[1])) selfTest();

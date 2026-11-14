@@ -69,15 +69,15 @@
    Zero dependencies, Node 18+, Windows and macOS.
    ════════════════════════════════════════════════════════════════════ */
 
-import { readFileSync, readdirSync, existsSync, statSync, writeFileSync, mkdtempSync, rmSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync, statSync, writeFileSync, mkdtempSync, rmSync, realpathSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, posix } from 'node:path';
 import { tmpdir } from 'node:os';
 import vm from 'node:vm';
-import { tokenize, segments } from './js-scan.mjs';
-import { analyzeFile, collectConstants, collectHandles, collectFactories, callGraph, realCalls, localNames, handlerSources, scriptHandlerSources, pathString } from './firestore-paths.mjs';
+import { tokenize, segments, matchClose as matchCloseTok, foldString } from './js-scan.mjs';
+import { analyzeFile, collectConstants, collectHandles, collectFactories, callGraph, realCalls, localNames, handlerSources, scriptHandlerSources, pathString, statementSig } from './firestore-paths.mjs';
 import { siteParts } from './site-src.mjs';
 import { fileHash } from './sw-audio-map.mjs';
 
@@ -147,31 +147,68 @@ const R = () => { const lines = []; return { lines, ok: t => lines.push({ kind: 
    ════════════════════════════════════════════════════════════════════ */
 const MODULE_FILE = /^(module-\d+\.js|config-main\.js)$/;
 const MODULE_SPECS = ['module-*.js', 'config-main.js'];
-/* A pure revert: every module file (the set of names and each one's bytes, as
-   git would store them) equals some ancestor of the base, at most 50 back. */
-function revertTarget(root, base) {
-  const names = readdirSync(root).filter(f => MODULE_FILE.test(f)).sort();
-  const h = git(root, ['hash-object', '--', ...names]);
-  if (!h.ok) return null;
-  const now = names.map((n, i) => `${n} ${h.out.split('\n')[i]}`).join('\n');
-  const list = git(root, ['rev-list', '--max-count=50', `${base}^`]);
-  if (!list.ok) return null;
-  for (const c of list.out.split('\n').filter(Boolean)) {
-    const t = git(root, ['ls-tree', c]);
-    if (!t.ok) continue;
-    const then = t.out.split('\n').map(l => l.match(/^\d+ blob ([0-9a-f]+)\t(.+)$/)).filter(m => m && MODULE_FILE.test(m[2])).map(m => `${m[2]} ${m[1]}`).sort().join('\n');
-    if (then === now) return { commit: c, subject: git(root, ['log', '-1', '--format=%s', c]).out };
+/* A REVERT is let through when, for each changed module file, the tree's copy
+   equals that file at some earlier commit on the base's history, AND every commit
+   it undoes landed less than REVERT_MAX_HOURS ago (judged by the oldest one): a
+   step that has been live longer may already hold students' ticks (Jonathan can
+   change the number; review R2-5, 2026-11-13). Per file, so reverting the older
+   of two pushes that touched different module files works. */
+export const REVERT_MAX_HOURS = 24;
+export const LET_THROUGH = [];   // loud lines checks.mjs repeats beside its final summary
+function revertCheck(root, base, changed) {
+  const now = Date.now();
+  let oldest = null, undone = [];
+  for (const f of changed) {
+    const here = existsSync(join(root, f)) ? git(root, ['hash-object', '--', f]).out : null;
+    const hist = git(root, ['log', '--format=%H %ct', '-n', '400', base, '--', f]);
+    if (!hist.ok) return { why: `git cannot list ${f}'s history` };
+    const commits = hist.out.split('\n').filter(Boolean).map(l => { const [h, t] = l.split(' '); return { h, t: Number(t) * 1000 }; });
+    let match = -1;
+    for (let i = 0; i < commits.length; i++) {
+      const before = git(root, ['rev-parse', '-q', '--verify', `${commits[i].h}^:${f}`]);
+      const blob = before.ok ? before.out : null;          // null: the file did not exist before that commit
+      if (blob === here) { match = i; break; }
+    }
+    if (match < 0) return { why: `${f} is not the same as at any earlier commit on main` };
+    const these = commits.slice(0, match + 1);
+    undone.push(...these.map(c => c.h));
+    const o = these[these.length - 1];
+    if (!oldest || o.t < oldest.t) oldest = { ...o, file: f };
   }
-  return null;
+  if (!oldest) return { why: 'nothing to undo' };
+  const hours = (now - oldest.t) / 3600e3;
+  const subject = git(root, ['log', '-1', '--format=%s', oldest.h]).out;
+  if (hours >= REVERT_MAX_HOURS) return { why: `the oldest change it undoes, ${oldest.h.slice(0, 7)} ("${subject}", ${oldest.file}), has been live for ${Math.floor(hours)} hours; students may have ticked it: ask Jonathan` };
+  return { ok: true, commits: [...new Set(undone)], oldest, hours, subject };
+}
+/* The numbers that say which modules are frozen, read from a source text. */
+const readNums = (rz, ck) => ({
+  frozen: rz ? Number((rz.match(/^const FROZEN_THROUGH(?:_PINNED)? = (\d+);/m) || [])[1]) : NaN,
+  open: rz ? Number((rz.match(/^const OPEN_THROUGH = (?:Math\.max\()?(\d+)/m) || [])[1]) : NaN,
+  mc: ck ? Number((ck.match(/^const FROZEN_MC_THROUGH_MODULE = (\d+);/m) || [])[1]) : NaN,
+  fps: ck ? Object.fromEntries([...((ck.match(/^const FROZEN_MC_FINGERPRINTS = \{([\s\S]*?)\n\};/m) || [])[1] || '').matchAll(/'([^']+)':\s*'([0-9a-f]+)'/g)].map(m => [m[1], m[2]])) : {},
+});
+/* Run a rule-zero-proof source against `base`: the tree's own file, or (when the
+   push changes the proof itself) the base's text, written to a temporary file that
+   points at this tree. */
+function runProof(root, base, nums, src) {
+  let file = join(root, 'tools', 'rule-zero-proof.mjs'), tmp = null;
+  if (src) {
+    const pinned = src.replace(/^const ROOT = .*$/m, `const ROOT = ${JSON.stringify(root)};`);
+    if (pinned === src) return { status: 2, out: "✗ the base's rule-zero-proof.mjs has no `const ROOT = …` line to point at this tree" };
+    tmp = mkdtempSync(join(tmpdir(), 'gc-rz-')); file = join(tmp, 'rule-zero-proof-base.mjs'); writeFileSync(file, pinned);
+  }
+  const p = spawnSync(process.execPath, [file, base, `--frozen-through=${nums.frozen}`, `--open-through=${nums.open}`], { cwd: root, encoding: 'utf8', maxBuffer: 1 << 26, timeout: 120000 });
+  if (tmp) { try { rmSync(tmp, { recursive: true, force: true }); } catch { /* best effort */ } }
+  return { status: p.status, out: strip((p.stdout || '') + (p.stderr || '')).replace(/\r\n?/g, '\n') };
 }
 export function checkKeysAgainstBase(root = DEFAULT_ROOT, { frozenMcThrough } = {}) {
   const r = R();
-  // The two FROZEN numbers are one setting (CLAUDE.md: FROZEN_THROUGH (= FROZEN_MC_THROUGH_MODULE)).
-  const rz = readText(root, 'tools/rule-zero-proof.mjs') || '';
-  const m = rz.match(/^const FROZEN_THROUGH = (\d+);/m);
-  if (!m) r.err('1dl: tools/rule-zero-proof.mjs has no `const FROZEN_THROUGH = <n>;` line, so nothing proves which modules are frozen');
-  else if (frozenMcThrough !== undefined && Number(m[1]) !== frozenMcThrough)
-    r.err(`1dl: rule-zero-proof.mjs freezes Modules 1–${m[1]} but checks.mjs 1ap freezes keyed quizzes in Modules 1–${frozenMcThrough}; they are one setting (CLAUDE.md "Three regimes"): raise both together, a module ahead of the class, and never lower either`);
+  const treeNums = readNums(readText(root, 'tools/rule-zero-proof.mjs'), readText(root, 'tools/checks.mjs'));
+  if (!Number.isFinite(treeNums.frozen)) r.err('1dl: tools/rule-zero-proof.mjs has no `const FROZEN_THROUGH_PINNED = <n>;` line, so nothing proves which modules are frozen');
+  const mcNow = frozenMcThrough !== undefined ? frozenMcThrough : treeNums.mc;
+  if (Number.isFinite(treeNums.frozen) && Number.isFinite(mcNow) && treeNums.frozen !== mcNow)
+    r.err(`1dl: rule-zero-proof.mjs freezes Modules 1–${treeNums.frozen} but checks.mjs 1ap freezes keyed quizzes in Modules 1–${mcNow}; they are one setting (CLAUDE.md "Three regimes"): raise both together when the class enters a module, and never lower either`);
   const base = resolveBase(root);
   if (base.missing) { r.err(`1dl: cannot compare with the push's base: ${base.missing}`); return r.lines; }
   if (base.none) {
@@ -180,28 +217,46 @@ export function checkKeysAgainstBase(root = DEFAULT_ROOT, { frozenMcThrough } = 
     else r.warn(`1dl: ${base.none}; no module file changed here (or this is not git), so there was nothing to compare`);
     return r.lines;
   }
+  /* The frozen numbers and 1ap's fingerprints may only go UP: module progress is never wiped
+     (Jonathan, 2026-11-13: "modules do not reset for students unless i do it"). */
+  const show = f => { const g = git(root, ['show', `${base.ref}:${f}`]); return g.ok ? lf(g.raw) : null; };
+  const baseProofSrc = show('tools/rule-zero-proof.mjs');
+  const baseNums = readNums(baseProofSrc, show('tools/checks.mjs'));
+  const lowered = [];
+  for (const [k, label] of [['frozen', 'FROZEN_THROUGH (tools/rule-zero-proof.mjs)'], ['open', 'OPEN_THROUGH (tools/rule-zero-proof.mjs)'], ['mc', 'FROZEN_MC_THROUGH_MODULE (tools/checks.mjs)']])
+    if (Number.isFinite(baseNums[k]) && !(treeNums[k] >= baseNums[k])) lowered.push(`${label} ${baseNums[k]} → ${Number.isFinite(treeNums[k]) ? treeNums[k] : 'gone'}`);
+  const fpGone = Object.entries(baseNums.fps).filter(([k, v]) => treeNums.fps[k] !== v).map(([k]) => k);
+  if (lowered.length || fpGone.length)
+    r.err(`1dl: refused — ${[...lowered, ...(fpGone.length ? [`${fpGone.length} of 1ap's FROZEN_MC_FINGERPRINTS removed or changed (${fpGone.slice(0, 3).join(', ')}${fpGone.length > 3 ? ', …' : ''})`] : [])].join('; ')}. These only ever go up: module progress is never wiped (Jonathan, 2026-11-13: "modules do not reset for students unless i do it"), so a module once frozen stays frozen (${NEVER}; "Three regimes"). Put them back.`);
+  const nums = { frozen: Math.max(treeNums.frozen || 0, baseNums.frozen || 0), open: Math.max(treeNums.open || 0, baseNums.open || 0) };
   const changed = changedSince(root, base.ref, MODULE_SPECS, f => MODULE_FILE.test(f));
-  if (!changed.length) { r.ok(`no module file differs from ${base.label}: no progress key can have moved`); return r.lines; }
-  const p = spawnSync(process.execPath, [join(root, 'tools', 'rule-zero-proof.mjs'), base.ref], { cwd: root, encoding: 'utf8', maxBuffer: 1 << 26, timeout: 120000 });
-  const out = strip((p.stdout || '') + (p.stderr || '')).replace(/\r\n?/g, '\n');
-  const lines = out.split('\n');
-  const crosses = lines.filter(l => /^✗ /.test(l)).map(l => l.slice(2));
-  const ticks = lines.filter(l => /^✓ /.test(l)).map(l => l.slice(2));
-  const rest = lines.filter(l => l.trim() && !/^[✓✗] /.test(l) && !/^\s*\(none\)\s*$/.test(l));
-  if (p.status === 0) {
-    r.ok(`${changed.length} module file${changed.length === 1 ? '' : 's'} changed since ${base.label} (${changed.join(', ')}); tools/rule-zero-proof.mjs passes: ${ticks.join('; ')}`);
+  if (!changed.length) { if (!r.lines.some(l => l.kind === 'err')) r.ok(`no module file differs from ${base.label}: no progress key can have moved; the frozen numbers (${nums.frozen}, open ${nums.open}) and ${Object.keys(treeNums.fps).length} fingerprints are no lower than the base's`); return r.lines; }
+  const proofChanged = baseProofSrc !== null && lf(readText(root, 'tools/rule-zero-proof.mjs') || '') !== baseProofSrc;
+  const runs = [runProof(root, base.ref, nums, null)];
+  if (proofChanged) runs.push(runProof(root, base.ref, nums, baseProofSrc));
+  const lines = runs.flatMap(x => x.out.split('\n'));
+  const crosses = [...new Set(lines.filter(l => /^✗ /.test(l)).map(l => l.slice(2)))];
+  const ticks = runs[0].out.split('\n').filter(l => /^✓ /.test(l)).map(l => l.slice(2));
+  const rest = runs[0].out.split('\n').filter(l => l.trim() && !/^[✓✗] /.test(l) && !/^\s*\(none\)\s*$/.test(l));
+  const passed = runs.every(x => x.status === 0);
+  const how = `run with the higher of the base's and the tree's numbers (frozen through ${nums.frozen}, open through ${nums.open})${proofChanged ? '; this push changes rule-zero-proof.mjs, so the base\'s copy was run too' : ''}`;
+  if (passed) {
+    r.ok(`${changed.length} module file${changed.length === 1 ? '' : 's'} changed since ${base.label} (${changed.join(', ')}); tools/rule-zero-proof.mjs passes, ${how}: ${ticks.join('; ')}`);
     rest.forEach(l => r.info(l));
     return r.lines;
   }
-  const rev = revertTarget(root, base.ref);
-  if (rev) {
-    r.warn(`1dl: this change puts every module file back exactly as it was in ${rev.commit.slice(0, 7)} ("${rev.subject}"), an ancestor of ${base.ref.slice(0, 7)}: a pure revert, let through (BREAK-GLASS.md step 4). rule-zero-proof against the base said: ${crosses.join(' | ') || `exit ${p.status}`}`);
+  const rev = revertCheck(root, base.ref, changed);
+  if (rev.ok) {
+    const msg = `1dl LET THROUGH: this change puts ${changed.join(', ')} back as ${changed.length === 1 ? 'it was' : 'they were'} before ${rev.commits.map(c => c.slice(0, 7)).join(', ')}; the oldest change undone (${rev.oldest.h.slice(0, 7)}, "${rev.subject}") landed ${rev.hours.toFixed(1)} hours ago, under ${REVERT_MAX_HOURS}: a revert, let through (BREAK-GLASS.md step 4). Without it, rule-zero-proof said: ${crosses.join(' | ') || 'not proved'}`;
+    r.warn(msg);
+    LET_THROUGH.push(msg);
+    if (process.env.GITHUB_ACTIONS === 'true') console.log(`::warning title=1dl let a revert through::${msg.replace(/[\r\n]+/g, ' ')}`);
     return r.lines;
   }
-  const crash = crosses.length ? null : (out.match(/^.*Error:.*$/m) || [null])[0];
-  r.err(`1dl: refused — this change ${crosses.length ? 'moves a saved place or rewords a frozen quiz' : 'could not be proved safe'} (${NEVER}: never move or renumber a section or step; never reword a keyed quiz's choices or English prompt in Modules 1–${m ? m[1] : '?'} or in Module ${m ? Number(m[1]) + 1 : '?'}, the one the class is about to enter; "Three regimes"). Module progress keys stay valid for good. Put it back as it was in ${base.ref.slice(0, 7)}; a fix a frozen module blocks goes on the list in skill summer-reset. tools/rule-zero-proof.mjs ${base.ref.slice(0, 7)} said:`);
+  const crash = crosses.length ? null : (lines.join('\n').match(/^.*Error:.*$/m) || [null])[0];
+  r.err(`1dl: refused — this change ${crosses.length ? 'moves a saved place or rewords a frozen quiz' : 'could not be proved safe'} (${NEVER}: never move or renumber a section or step; never reword a keyed quiz's choices or English prompt in Modules 1–${nums.frozen} or in Module ${nums.frozen + 1}, the one after them; "Three regimes"). Module progress keys stay valid for good. Put it back as it was in ${base.ref.slice(0, 7)}${rev.why && !/is not the same as at any earlier/.test(rev.why) ? ` (it is not a revert that can be let through: ${rev.why})` : ''}; a fix a frozen module blocks goes on the list in skill summer-reset. tools/rule-zero-proof.mjs ${base.ref.slice(0, 7)}, ${how}, said:`);
   if (crosses.length) crosses.forEach(c => r.err(`  ${c}`));
-  else r.err(`  (the proof did not finish, exit ${p.status}) ${crash || lines.filter(Boolean).slice(-2).join(' | ')}`);
+  else r.err(`  (the proof did not finish, exit ${runs.map(x => x.status).join('/')}) ${crash || lines.filter(Boolean).slice(-2).join(' | ')}`);
   rest.forEach(l => r.info(l));
   return r.lines;
 }
@@ -209,19 +264,17 @@ export function checkKeysAgainstBase(root = DEFAULT_ROOT, { frozenMcThrough } = 
 /* ════════════════════════════════════════════════════════════════════
    1dm. FIRESTORE WRITES, READ FROM THE CODE (rules 3, 4)
    ════════════════════════════════════════════════════════════════════ */
-/* The only places that may write progress/… directly (a write, or a
-   reference handed on), by file and function, with how many such chains each
-   has. A new one anywhere, or one more in a pinned function, fails until it is
-   added here with its reason: the save path is a danger zone (CLAUDE.md
-   "Triggers"), so that edit is Always Reviewed. A console part (teacher-*.js)
-   may never be listed. `node tools/never-blocks.mjs --pins` prints today's. */
-export const PROGRESS_WRITERS = {
-  'app/save.js|swap45Commit': { n: 3, why: 'the one-time Modules 4/5 move: its transaction reads and writes the signed-in student\'s own doc' },
-  'app/save.js|flushSave': { n: 1, why: 'the app\'s progress writer: the signed-in student\'s own doc' },
-  'app/explore.js|songsLibraryOpen': { n: 1, why: 'a Songs-page click counts one open in the student\'s own doc (checks.mjs 1ch)' },
-  'trainer-site-adapter.js|(top level)': { n: 1, why: 'Hear It First saves its profile in the signed-in account\'s own doc (mergeFields trainer)' },
-  'tabs/journey.js|flushSave': { n: 3, why: 'a Journey page\'s "I\'m ready" saves into the student\'s own doc' },
-};
+/* The pins of 1dm and 1do live in tools/never-pins.json, each with the reason
+   and date it was set. `node tools/never-blocks.mjs --pins` lists every value
+   that differs from today's code; with `--why "<reason>"` it writes the new
+   values and that reason beside them (a deliberate change Jonathan asked for).
+   PROGRESS_WRITERS: the only places that may write progress/… directly, by
+   file|function, with a fingerprint of each write's statement (target,
+   payload and options), so dropping `merge` or changing the doc is a change.
+   The save path is a danger zone (CLAUDE.md "Triggers"), so re-pinning one is
+   Always Reviewed. A console part (teacher-*.js) may never be listed. */
+export const PINS_FILE = 'tools/never-pins.json';
+export function loadPins(root) { try { return JSON.parse(readText(root, PINS_FILE)); } catch { return null; } }
 /* The code shapes in the console that the reader cannot follow, each the exact
    case, with its reason. Anything else of the same shape fails. */
 const UNFOLLOWABLE_TODAY = [
@@ -270,6 +323,11 @@ export function loadedScripts(root) {
     if (handlers.length) inline.push({ file: `${page} on…="" handlers`, src: handlers.map(h => `\n`.repeat(0) + `function __handler_line_${h.line}(event){ ${h.code}\n}`).join('\n') });
   }
   for (const rel of [...siteParts('coach.js', root), ...siteParts('teacher.js', root)]) add(rel);
+  /* Every tracked script outside tools/ and vendor/, so one loaded in a way this list cannot see (a built
+     name in createElement('script'), loadScriptOnce(variable), importScripts) is still read. Today that adds
+     eslint.config.mjs only. */
+  const tracked = git(root, ['ls-files', '-z', '--cached', '--others', '--exclude-standard', '--', '*.js', '*.mjs']);
+  if (tracked.ok) for (const f of tracked.out.split('\0').filter(Boolean)) if (!/^(tools|vendor|node_modules|\.claude|\.github|screens|song-journey-build)\//.test(f)) add(f);
   for (const f of readdirSync(root)) if (/^module-\d+\.js$/.test(f) || /^teacher-[\w-]+\.js$/.test(f)) add(f);
   add('sw.js');
   // literal lazy loads, in any script found so far (and in the ones they find)
@@ -311,20 +369,50 @@ function analyzeSite(root) {
     if (hs.length) handlerEntries.push({ file: `${e.file} on…="" handlers`, src: hs.map(h => `function __handler_line_${h.line}(event){ ${h.code}\n}`).join('\n'), console: e.console, handlersOf: e.file });
   }
   const all = [...entries, ...handlerEntries];
-  const relevant = all.filter(e => e.console || e.handlersOf || e.file.includes('handlers') || MAY_TOUCH_FIRESTORE.test(e.src));
-  const consts = collectConstants(relevant.map(tok));
-  const handles = collectHandles(relevant.map(tok));
-  const run = (factories) => {
+  /* Every script is tokenized (2026-11-13, review R2-8: a TEXT shortcut cannot see a member named in brackets
+     from pieces). The chain analysis then runs on a script that, as tokens, could reach Firestore itself: it
+     names a Firestore member (collection, doc, ref, set …) as an identifier, or in brackets as a string that
+     folds to one ('coll' + 'ection'), indexes a database handle (db[x]), names firestore, eval, Function or
+     the REST endpoint. Anything it is HANDED was made in a script that does, and is followed out of there.
+     Console parts and handler code are always analyzed. */
+  const consts = collectConstants(all.map(tok));
+  const handles = collectHandles(all.map(tok));
+  const FS_IDS = new Set(['collection', 'doc', 'collectionGroup', 'ref', 'firestore', 'runTransaction', 'batch', 'setDoc', 'updateDoc', 'addDoc', 'deleteDoc', 'writeBatch', 'getFirestore', 'eval', 'Function']);
+  const FS_MEMBERS = new Set(['collection', 'doc', 'collectionGroup', 'ref', 'set', 'update', 'add', 'delete', 'batch', 'runTransaction', 'firestore', 'parent']);
+  const mayReach = (arr) => {
+    for (let k = 0; k < arr.length; k++) {
+      const x = arr[k];
+      if (x.t === 'tpl') { if (x.quasis.some(q => q.includes('googleapis')) || x.exprs.some(mayReach)) return true; continue; }
+      if (x.t === 'id' && (FS_IDS.has(x.v) || (handles.has(x.v) && arr[k + 1] && arr[k + 1].v === '['))) return true;
+      if (x.t === 'str' && x.v.includes('googleapis')) return true;
+      if (x.t === 'punc' && x.v === '[' && arr[k - 1] && (arr[k - 1].t === 'id' || arr[k - 1].v === ')' || arr[k - 1].v === ']')) {
+        let d = 0, j = k + 1;
+        for (; j < arr.length; j++) { if (arr[j].t === 'punc' && /^[\[({]$/.test(arr[j].v)) d++; else if (arr[j].t === 'punc' && /^[\])}]$/.test(arr[j].v)) { if (d === 0) break; d--; } }
+        const f = foldString(arr.slice(k + 1, j), consts);
+        if (f && f.length === 1 && typeof f[0] === 'string' && FS_MEMBERS.has(f[0])) return true;
+      }
+    }
+    return false;
+  };
+  const relevant = all.filter(e => e.console || e.handlersOf || e.file.includes('handlers') || mayReach(tok(e)));
+  const run = (factories, list) => {
     const found = { chains: [], refs: [], odd: [] };
-    for (const e of relevant) {
-      const a = analyzeFile(e.file, tok(e), consts, { handles, factories });
+    for (const e of list) {
+      const segmentMayReach = arr => mayReach(arr) || arr.some(x => x.t === 'id' && (factories.has(x.v) || x.v === 'setTimeout' || x.v === 'setInterval'));
+      const a = analyzeFile(e.file, tok(e), consts, { handles, factories, segmentMayReach });
       for (const k of ['chains', 'refs', 'odd']) a[k].forEach(c => { c.console = e.console; c.handler = !!(e.handlersOf || e.file.includes('handlers')); found[k].push(c); });
     }
     return found;
   };
-  let found = run(new Map());
+  let found = run(new Map(), relevant);
   const factories = collectFactories(found.chains);
-  if (factories.size) found = run(factories);
+  if (factories.size) {
+    // a second pass only where a reference-returning function is called: those scripts' chains are replaced
+    const callsOne = e => tok(e).some((x, i, arr) => x.t === 'id' && factories.has(x.v) && arr[i + 1] && arr[i + 1].v === '(');
+    const again = relevant.filter(callsOne), names = new Set(again.map(e => e.file));
+    const second = run(factories, again);
+    for (const k of ['chains', 'refs', 'odd']) found[k] = [...found[k].filter(c => !names.has(c.file)), ...second[k]];
+  }
   return { entries: all, relevant, found, consoleFiles, tok, factories, ls };
 }
 
@@ -357,16 +445,25 @@ export function checkFirestoreWrites(root = DEFAULT_ROOT) {
   const cannot = (o) => `this check cannot tell where it writes: ${o.what}. ${o.todo ? o.todo[0].toUpperCase() + o.todo.slice(1) : 'Write the Firestore call out plainly'}, where 1dm can read it.`;
 
   // Rule 3a: the pinned direct writers of progress/…, across every script a page loads.
+  const pins = loadPins(root);
+  if (!pins) bad.push(`1dm: ${PINS_FILE} is missing or not valid JSON — the pins of 1dm and 1do live there`);
+  const PW = (pins && pins.PROGRESS_WRITERS) || {};
   const sites = progressWriteSites(found, false);
   for (const [k, list] of sites) {
-    const pin = PROGRESS_WRITERS[k];
-    if (!pin) bad.push(`1dm: refused — ${where(list[0])} ${list[0].kind === 'write' ? `writes ${list[0].path[0] === 'progress' ? 'progress/…' : `a path this check cannot name (${pathString(list[0].path)})`} with ${list[0].detail}` : `hands a reference to ${list[0].path[0] === 'progress' ? 'progress/…' : `a path this check cannot name (${pathString(list[0].path)})`} on (${list[0].detail})`}, and no new place may write a student's saved work (${NEVER}; the pinned writers are PROGRESS_WRITERS in tools/never-blocks.mjs). If it is deliberate and not console code, add it there with its reason — a save-path change, Always Reviewed.`);
-    else if (list.length > pin.n) bad.push(`1dm: refused — ${k.replace('|', ' ')}() now has ${list.length} chains that write progress/… or hand it on, ${pin.n} pinned (${pin.why}); the new one is at line ${list[list.length - 1].line}. If it is deliberate, raise n in PROGRESS_WRITERS (tools/never-blocks.mjs) with its reason — a save-path change, Always Reviewed.`);
+    const pin = PW[k];
+    const head = c => `${where(c)} ${c.kind === 'write' ? `writes ${c.path[0] === 'progress' ? 'progress/…' : `a path this check cannot name (${pathString(c.path)})`} with ${c.detail}` : `hands a reference to ${c.path[0] === 'progress' ? 'progress/…' : `a path this check cannot name (${pathString(c.path)})`} on (${c.detail})`}`;
+    if (!pin) { bad.push(`1dm: refused — ${head(list[0])}, and no new place may write a student's saved work (${NEVER}; the pinned writers are PROGRESS_WRITERS in ${PINS_FILE}). If it is deliberate and not console code: node tools/never-blocks.mjs --pins --why "<reason>" — a save-path change, Always Reviewed.`); continue; }
+    const want = [...pin.value];
+    for (const c of list) {
+      const i = want.indexOf(c.sig);
+      if (i >= 0) { want.splice(i, 1); continue; }
+      bad.push(`1dm: refused — ${head(c)}: a write to progress/… in a pinned writer that is new or changed (statement ${c.sig}, not among the ${pin.value.length} pinned for ${k}; ${pin.why}). A changed target, payload or option (merge) changes what students' saved work becomes. If it is deliberate: node tools/never-blocks.mjs --pins --why "<reason>" — a save-path change, Always Reviewed.`);
+    }
   }
-  for (const k of Object.keys(PROGRESS_WRITERS)) {
-    if (consoleFiles.has(k.split('|')[0])) bad.push(`1dm: PROGRESS_WRITERS lists ${k}, a console part — the console may never write progress/… (${RULE3}).`);
+  for (const k of Object.keys(PW)) {
+    if (consoleFiles.has(k.split('|')[0])) bad.push(`1dm: ${PINS_FILE} lists ${k} in PROGRESS_WRITERS, a console part — the console may never write progress/… (${RULE3}).`);
   }
-  const stalePins = Object.entries(PROGRESS_WRITERS).filter(([k, v]) => (sites.get(k) || []).length < v.n).map(([k, v]) => `${k} (${(sites.get(k) || []).length} of ${v.n})`);
+  const stalePins = Object.entries(PW).filter(([k, v]) => { const have = (sites.get(k) || []).map(c => c.sig); return v.value.some(x => !have.includes(x)); }).map(([k]) => k);
 
   // Rule 3b: the console never writes progress/… nor lets a reference to it out of a read.
   let progressReads = 0;
@@ -403,18 +500,39 @@ export function checkFirestoreWrites(root = DEFAULT_ROOT) {
   }
   const reach = new Set(writers);
   for (let grew = true; grew;) { grew = false; for (const [k, calls] of graph) if (!reach.has(k) && [...calls].some(c => reach.has(c))) { reach.add(k); grew = true; } }
-  let consoleCalls = 0;
+  /* Any mention of such a function in console code is refused, called or not: handed to setTimeout or
+     .then, aliased, .call()ed, (0, f)() or named in brackets all run it. Not a mention: a local of the same
+     name, someone else's member (obj.f), an object key or method of that name. The one exception that exists
+     today is the exact case below, with its reason. */
+  const MENTION_OK = [{ file: 'teacher-mic.js', name: 'ccLoop', ctx: 'String(', count: 1, why: "the mic evaluator reads ccLoop's TEXT (String(ccLoop)) to replay recorded takes; it never calls it" }];
+  let consoleCalls = 0, mentionOk = 0;
+  const okUsed = new Map();
   for (const e of entries.filter(e => e.console)) {
     const t = tok(e);
     for (const seg of segments(t)) {
       const body = t.slice(seg.from, seg.to);
       const locals = localNames(body); locals.delete(seg.name);
-      for (const c of realCalls(body, locals)) {
-        consoleCalls++;
-        if (reach.has(c.name)) bad.push(`1dm: refused — ${e.file}:${c.line} (${seg.name}) calls ${c.name}(), an app function that saves to progress/… (${writers.has(c.name) ? 'directly' : 'through the functions it calls'}) (${RULE3}). Show the student's work from the console's own read instead.`);
-      }
+      consoleCalls += realCalls(body, locals).length;
+      const walk = arr => arr.forEach((x, k) => {
+        if (x.t === 'tpl') { x.exprs.forEach(walk); return; }
+        if (x.t === 'str' && reach.has(x.v) && arr[k - 1] && arr[k - 1].v === '[' && arr[k + 1] && arr[k + 1].v === ']') {
+          bad.push(`1dm: refused — ${e.file}:${x.line} (${seg.name}) names ${x.v} in brackets (["${x.v}"]), an app function that saves to progress/… (${RULE3}). Show the student's work from the console's own read instead.`);
+          return;
+        }
+        if (x.t !== 'id' || !reach.has(x.v) || locals.has(x.v)) return;
+        const p = arr[k - 1], n = arr[k + 1];
+        if (p && p.t === 'punc' && (p.v === '.' || p.v === '?.') && !(arr[k - 2] && arr[k - 2].t === 'id' && /^(window|globalThis|self|this)$/.test(arr[k - 2].v) && !(arr[k - 3] && arr[k - 3].t === 'punc' && arr[k - 3].v === '.'))) return;
+        if (n && n.t === 'punc' && n.v === ':' && p && p.t === 'punc' && (p.v === '{' || p.v === ',')) return;                        // an object key
+        if (n && n.t === 'punc' && n.v === '(' && p && p.t === 'punc' && /^[{},;]$/.test(p.v)) { const close = matchCloseTok(arr, k + 1); if (arr[close + 1] && arr[close + 1].v === '{') return; }   // a method definition
+        if (p && p.t === 'id' && p.v === 'function') return;                                                                             // its own declaration (a local)
+        const ex = MENTION_OK.find(m => m.file === e.file && m.name === x.v && p && p.v === '(' && arr[k - 2] && arr[k - 2].v === 'String' && n && n.v === ')');
+        if (ex) { okUsed.set(ex, (okUsed.get(ex) || 0) + 1); mentionOk++; return; }
+        bad.push(`1dm: refused — ${e.file}:${x.line} (${seg.name}) ${n && n.v === '(' ? 'calls' : 'mentions'} ${x.v}, an app function that saves to progress/… (${writers.has(x.v) ? 'directly' : 'through the functions it calls'}); handed on, aliased or called, it would write the signed-in account's progress from the console (${RULE3}). Show the student's work from the console's own read instead.`);
+      });
+      walk(body);
     }
   }
+  for (const m of MENTION_OK) if ((okUsed.get(m) || 0) > m.count) bad.push(`1dm: refused — ${m.file} now mentions ${m.name} ${okUsed.get(m)} times as ${m.ctx}…), ${m.count} expected (${m.why}) (${RULE3}).`);
   for (const e of entries.filter(e => e.console && e.handlersOf)) {
     for (const c of realCalls(tok(e))) if (reach.has(c.name)) bad.push(`1dm: refused — ${e.handlersOf} writes an inline handler that calls ${c.name}(), which saves to progress/… (${RULE3}).`);
   }
@@ -451,9 +569,9 @@ export function checkFirestoreWrites(root = DEFAULT_ROOT) {
     bad.push('1dm: teacherWriteConfig() no longer names config/class in a way this check can read — the one allowed writer is gone or rewritten (checks.mjs 1ai pins its shape)');
 
   if (bad.length) { [...new Set(bad)].forEach(b => r.err(b)); return r.lines; }
-  if (stalePins.length) r.warn(`1dm: PROGRESS_WRITERS pins more than the code has: ${stalePins.join(', ')} — lower n (or drop the entry) in tools/never-blocks.mjs, so a new write there is caught`);
+  if (stalePins.length) r.warn(`1dm: PROGRESS_WRITERS pins writes the code no longer has: ${stalePins.join(', ')} — re-pin (node tools/never-blocks.mjs --pins --why "<reason>"), so a new write there is caught`);
   const consoleChains = found.chains.filter(c => c.console).length;
-  r.ok(`${entries.filter(e => !e.handlersOf).length} scripts from ${ls.pages.length} pages (${relevant.length} that can reach Firestore read as code, inline handlers included; ${[...consoleFiles].length} console parts): progress/… is written only where PROGRESS_WRITERS says (${sites.size} places, ${[...sites.values()].reduce((a, l) => a + l.length, 0)} chains); in the console ${consoleChains} Firestore chains, ${progressReads} on progress/… and every one a read, ${found.refs.filter(x => x.console).length} snapshot .refs traced to non-progress queries, ${consoleCalls} calls and none to the ${reach.size} app functions that save progress; config/class: ${configReads} reads, ${guardWrites} writes, all inside the one teacherWriteConfig(); ${factories.size} reference-returning functions followed; ${UNFOLLOWABLE_TODAY.length} console shapes it cannot follow, each the exact case named in tools/never-blocks.mjs`);
+  r.ok(`${entries.filter(e => !e.handlersOf).length} scripts from ${ls.pages.length} pages (${relevant.length} that can reach Firestore read as code, inline handlers included; ${[...consoleFiles].length} console parts): progress/… is written only where PROGRESS_WRITERS says (${sites.size} places, ${[...sites.values()].reduce((a, l) => a + l.length, 0)} write statements, each its pinned fingerprint); in the console ${consoleChains} Firestore chains, ${progressReads} on progress/… and every one a read, ${found.refs.filter(x => x.console).length} snapshot .refs traced to non-progress queries, ${consoleCalls} calls and no mention of the ${reach.size} app functions that save progress (${mentionOk} read as text: the named exception); config/class: ${configReads} reads, ${guardWrites} writes, all inside the one teacherWriteConfig(); ${factories.size} reference-returning functions followed; ${UNFOLLOWABLE_TODAY.length} console shapes it cannot follow, each the exact case named in tools/never-blocks.mjs`);
   return r.lines;
 }
 
@@ -461,67 +579,127 @@ export function checkFirestoreWrites(root = DEFAULT_ROOT) {
    1dn. A firestore.rules CHANGE IS PASTED BY JONATHAN (rule 5)
    GitHub Pages never publishes firestore.rules: until Jonathan pastes it in
    the Firebase console, the live rules are the old ones, and code that needs
-   the new ones fails with no error a student can see. So a change to the
-   file needs one more line in RULES-PASTE.md than the base had, naming the
-   first 12 hex of the sha256 of the new text (line endings as LF) and that
-   Jonathan was told. The hash ties the line to this exact text: a later edit,
-   or a revert to an older text, needs a line of its own (adding the printed
-   line again works even when the same words are already there). It blocks
-   at the push (GC_CHECKS_STAGE=push: the pre-push hook and GitHub); at a
+   the new ones fails with no error a student can see. Three parts:
+   - THE CHANGE: a push whose firestore.rules differs from the base needs one
+     more record line in RULES-PASTE.md than the base had, naming the first 12
+     hex of the sha256 of the new text (line endings as LF), in exactly the form
+     the check prints, dated no earlier than the rules' last change. Adding the
+     printed line again works even when the same words are already there.
+   - THE STATE: whatever the base, the current firestore.rules text must be named
+     by a record line. So a red on GitHub after a push has landed stays red on
+     the next push until the line is added: it cannot clear itself.
+   - THE HOOKS: the pre-push and pre-commit hooks git will run (core.hooksPath,
+     often an older checkout's .githooks/) must be this tree's copies, or a stale
+     hook could skip the block.
+   Record lines are append-only. It blocks at the push: GC_CHECKS_STAGE=push
+   (the pre-push hook, GitHub), or, when that is unset, a parent process that is
+   the pre-push hook (found with `ps`, which works on macOS and Linux; on Windows
+   Git Bash it may not, so there it relies on the hook's GC_CHECKS_STAGE). At a
    commit or a turn's end it warns, so work in progress is not stuck.
    ════════════════════════════════════════════════════════════════════ */
 export const RULES_FILE = 'firestore.rules';
 export const PASTE_FILE = 'RULES-PASTE.md';
 export const rulesHash = text => sha(lf(text));
-const PASTE_LINE = /^- (\d{4})-(\d{2})-(\d{2}) firestore\.rules ([0-9a-f]{12}): (.*)$/;
+const RECORD = /^- (\d{4}-\d{2}-\d{2}) firestore\.rules ([0-9a-f]{12}): (.*)$/;
+const ACK_TAIL = d => `Jonathan was told on ${d} to paste it in the Firebase console (Firestore → Rules → Publish)`;
+export const ackLine = (date, hash) => `- ${date} firestore.rules ${hash}: ${ACK_TAIL(date)}`;
 const todayLocal = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 const tally = lines => lines.reduce((m, l) => m.set(l, (m.get(l) || 0) + 1), new Map());
+export function pushStage() {
+  const st = process.env.GC_CHECKS_STAGE;
+  if (st === 'push') return { push: true, how: 'GC_CHECKS_STAGE=push' };
+  if (st) return { push: false, how: `GC_CHECKS_STAGE=${st}` };
+  for (let pid = process.ppid, i = 0; pid > 1 && i < 3; i++) {
+    const r = spawnSync('ps', ['-o', 'ppid=,args=', '-p', String(pid)], { encoding: 'utf8' });
+    if (r.status !== 0 || !r.stdout.trim()) break;
+    const m = r.stdout.trim().match(/^(\d+)\s+(.*)$/);
+    if (!m) break;
+    if (/(^|[\/\s])pre-push(\s|$)/.test(m[2])) return { push: true, how: 'run by the pre-push hook (seen with ps)' };
+    pid = Number(m[1]);
+  }
+  return { push: false, how: 'not at a push' };
+}
+/* The hooks git will run, compared with main's .githooks/ copies (the base's; this tree's when there is
+   no base). A hook older than main's could skip a block, so that is refused at the push. A push that itself
+   changes a hook is told to update the hooks folder after it lands (else no hook change could ever land). */
+export function staleHooks(root, baseRef) {
+  const hp = git(root, ['config', '--get', 'core.hooksPath']);
+  if (!hp.ok || !hp.out) return { unset: true, list: [], ahead: [] };
+  const top = git(root, ['rev-parse', '--show-toplevel']).out || root;
+  const dir = hp.out.startsWith('/') || /^[A-Za-z]:[\\/]/.test(hp.out) ? hp.out : join(top, hp.out);
+  const list = [], ahead = [];
+  for (const h of ['pre-push', 'pre-commit']) {
+    const mine = readText(root, `.githooks/${h}`);
+    const mainCopy = baseRef ? (g => g.ok ? lf(g.raw) : null)(git(root, ['show', `${baseRef}:.githooks/${h}`])) : mine;
+    const used = (() => { try { return lf(readFileSync(join(dir, h), 'utf8')); } catch { return null; } })();
+    if (used === mine) continue;
+    if (mainCopy !== null && used !== mainCopy) list.push(`${join(dir, h)}${used === null ? ' (missing)' : ''}`);
+    else ahead.push(h);
+  }
+  return { dir, list, ahead };
+}
 export function checkRulesPaste(root = DEFAULT_ROOT) {
   const r = R();
-  const atPush = process.env.GC_CHECKS_STAGE === 'push';
+  const stage = pushStage();
+  const atPush = stage.push;
   const block = t => atPush ? r.err(t) : r.warn(`${t} (a warning here; the push will refuse it)`);
+  // THE HOOKS (git's own runs only; GitHub has none)
+  const hookCheck = (baseRef) => {
+    if (process.env.GITHUB_ACTIONS === 'true') return;
+    const sh = staleHooks(root, baseRef);
+    if (sh.unset) r.warn(`1dn: git runs no hooks here (core.hooksPath is not set), so no check runs before a commit or a push. Run: git config core.hooksPath .githooks`);
+    else if (sh.list.length) block(`1dn: refused — the hooks this push runs are an older copy: ${sh.list.join(', ')} ${sh.list.length === 1 ? 'is' : 'are'} not main's, so a check may be skipped. Bring the folder they live in up to date: git -C "${dirname(sh.dir)}" pull --ff-only`);
+    else if (sh.ahead.length) r.warn(`1dn: this change updates ${sh.ahead.join(' and ')} in .githooks/; the copy git runs (${sh.dir}) is main's. After it lands, bring that folder up to date: git -C "${dirname(sh.dir)}" pull --ff-only`);
+  };
   const base = resolveBase(root);
+  hookCheck(base.ref || null);
   if (base.missing) { r.err(`1dn: cannot compare with the push's base: ${base.missing}`); return r.lines; }
+  const now = readText(root, RULES_FILE);
+  const nowLines = (readText(root, PASTE_FILE) || '').split('\n').filter(l => RECORD.test(l));
+  const today = todayLocal();
+  /* A record line counts only in the printed form, for this text, dated no earlier than the rules' last
+     change (the commit that last changed the file; today when it is changed and not committed). */
+  const uncommitted = !git(root, ['diff', '--quiet', 'HEAD', '--', RULES_FILE]).ok;
+  const changedOn = uncommitted ? today : (git(root, ['log', '-1', '--format=%cs', '--', RULES_FILE]).out || '0000-00-00');
+  const valid = (l, h) => {
+    const m = l.match(RECORD);
+    if (!m || m[2] !== h || m[3] !== ACK_TAIL(m[1])) return false;
+    const d = new Date(`${m[1]}T12:00:00`);
+    if (Number.isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== m[1]) return false;
+    if (m[1] > today && (new Date(`${m[1]}T00:00:00`) - new Date()) > 36 * 3600e3) return false;   // not in the future (a day's slack)
+    return m[1] >= changedOn;
+  };
+  const h = now === null ? null : rulesHash(now);
   if (base.none) {
     const t = touchesWithoutBase(root, [RULES_FILE], f => f === RULES_FILE);
-    if (t && t.length) block(`1dn: refused — firestore.rules changed, and ${base.none}, so this check cannot tell whether Jonathan was told (${NEVER}). Run git fetch origin (so origin/main exists) and check again.`);
-    else r.warn(`1dn: ${base.none}; firestore.rules did not change here (or this is not git), so there was nothing to compare`);
+    if (t && t.length && !(h && nowLines.some(l => valid(l, h)))) block(`1dn: refused — firestore.rules changed, and ${base.none}, so this check cannot tell whether Jonathan was told (${NEVER}). Run git fetch origin (so origin/main exists) and check again.`);
+    else r.warn(`1dn: ${base.none}; nothing to compare firestore.rules with`);
     return r.lines;
   }
-  /* The record is append-only: every record line the base had (the "- YYYY-MM-DD firestore.rules …"
-     lines) stays, unchanged. The explanation above them may be edited. */
+  // Record lines are append-only: every one the base had stays, unchanged.
   const baseLog = git(root, ['show', `${base.ref}:${PASTE_FILE}`]);
-  const isRecord = l => /^- \d{4}-\d{2}-\d{2} firestore\.rules /.test(l);
-  const beforeLines = baseLog.ok ? lf(baseLog.raw).split('\n').filter(isRecord) : [];
-  const nowLines = (readText(root, PASTE_FILE) || '').split('\n').filter(isRecord);
+  const beforeLines = baseLog.ok ? lf(baseLog.raw).split('\n').filter(l => RECORD.test(l)) : [];
   const nowTally = tally(nowLines), beforeTally = tally(beforeLines);
   const lost = [...beforeTally].filter(([l, n]) => (nowTally.get(l) || 0) < n).map(([l]) => l);
-  if (lost.length) block(`1dn: refused — ${PASTE_FILE} lost or changed ${lost.length} record line${lost.length === 1 ? '' : 's'} the base had ("${lost[0].slice(0, 90)}"${lost.length > 1 ? ', …' : ''}); it is the record of what Jonathan was told, so lines are only ever added (${NEVER}). Put ${lost.length === 1 ? 'it' : 'them'} back as ${lost.length === 1 ? 'it was' : 'they were'}.`);
-  const now = readText(root, RULES_FILE);
+  if (lost.length) block(`1dn: refused — ${PASTE_FILE} lost or changed ${lost.length} record line${lost.length === 1 ? '' : 's'} the base had ("${lost[0].slice(0, 90)}"${lost.length > 1 ? ', …' : ''}); it is the record of what Jonathan was told, so record lines are only ever added (${NEVER}). Put ${lost.length === 1 ? 'it' : 'them'} back as ${lost.length === 1 ? 'it was' : 'they were'}.`);
+  if (now === null) { block(`1dn: refused — firestore.rules is gone. The live rules stay whatever was last pasted; deleting the file changes nothing there and loses the record (${NEVER}). Put it back.`); return r.lines; }
+  const want = ackLine(today >= changedOn ? today : changedOn, h);
   const diff = git(root, ['diff', '--quiet', base.ref, '--', RULES_FILE]);
   if (diff.status !== 0 && diff.status !== 1) { r.err(`1dn: git could not compare firestore.rules with ${base.label}: ${diff.err}`); return r.lines; }
   const untracked = git(root, ['ls-files', '--others', '--exclude-standard', '--', RULES_FILE]).out;
   const thenText = git(root, ['show', `${base.ref}:${RULES_FILE}`]);
-  // git's own comparison applies the checkout's line-ending rules; the hash comparison covers a CRLF copy with none.
-  const same = (diff.status === 0 && !untracked) || (now !== null && thenText.ok && rulesHash(now) === rulesHash(thenText.raw));
-  if (same) { if (!lost.length) r.ok(`firestore.rules is the same as at ${base.label}: nothing for Jonathan to paste${baseLog.ok ? `; ${PASTE_FILE} keeps all ${beforeLines.length} lines the base had` : ''}`); return r.lines; }
-  if (now === null) { block(`1dn: refused — firestore.rules is gone. The live rules stay whatever was last pasted; deleting the file changes nothing there and loses the record (${NEVER}). Put it back.`); return r.lines; }
-  const h = rulesHash(now);
-  const today = todayLocal();
+  const same = (diff.status === 0 && !untracked) || (thenText.ok && rulesHash(now) === rulesHash(thenText.raw));
+  const acked = nowLines.filter(l => valid(l, h));
+  if (same) {
+    if (acked.length) { if (!lost.length) r.ok(`firestore.rules is unchanged since ${base.label}: nothing new for Jonathan to paste; its text (${h}) is on record in ${PASTE_FILE} ("${acked[acked.length - 1].slice(2, 60)}…")${baseLog.ok ? '' : ` (${PASTE_FILE} is new on this branch)`}`); }
+    else block(`1dn: refused — the rules on main are not acknowledged: firestore.rules (${h}) is not named by any record line in ${PASTE_FILE}${baseLog.ok ? '' : ` (the file is not on main yet)`}. If a push that changed the rules has already landed: tell Jonathan it needs pasting in the Firebase console, add this line to ${PASTE_FILE} and push:  ${want}`);
+    return r.lines;
+  }
   r.warn(`firestore.rules changed: Jonathan must paste it in the Firebase console (Firestore → Rules → paste → Publish); GitHub does not publish it.`);
-  const want = `- ${today} firestore.rules ${h}: Jonathan was told on ${today} to paste it in the Firebase console (Firestore → Rules → Publish)`;
-  const valid = l => {
-    const m = l.match(PASTE_LINE);
-    if (!m || m[4] !== h) return false;
-    const date = `${m[1]}-${m[2]}-${m[3]}`, d = new Date(`${date}T12:00:00`);
-    if (Number.isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== date) return false;
-    if (date > today && (new Date(`${date}T00:00:00`) - new Date()) > 36 * 3600e3) return false;   // no date in the future (a day's slack for time zones)
-    return /\btold\b/i.test(m[5]) && /\bpaste/i.test(m[5]) && /Firebase console/i.test(m[5]);
-  };
-  const added = [...nowTally].filter(([l, n]) => valid(l) && n > (beforeTally.get(l) || 0)).map(([l]) => l);
+  const added = acked.filter(l => (nowTally.get(l) || 0) > (beforeTally.get(l) || 0));
   if (added.length) { if (!lost.length) r.ok(`firestore.rules ${h} acknowledged by a new line in ${PASTE_FILE}: "${added[0].slice(2)}"`); return r.lines; }
-  const other = nowLines.filter(l => PASTE_LINE.test(l) && (nowTally.get(l) || 0) > (beforeTally.get(l) || 0));
-  block(`1dn: refused — firestore.rules differs from ${base.label} and ${PASTE_FILE} has no new line for this exact text (sha256 ${h}) (${NEVER}: never change firestore.rules without telling Jonathan it needs a console paste; the steps are under "Other standing rules"). Tell Jonathan first, then add this line to ${PASTE_FILE}:  ${want}${other.length ? `  (the new line there names ${other.map(l => l.match(PASTE_LINE)[4]).join(', ')}, another text of the file)` : ''}`);
+  const near = nowLines.filter(l => (nowTally.get(l) || 0) > (beforeTally.get(l) || 0) && !valid(l, h));
+  block(`1dn: refused — firestore.rules differs from ${base.label} and ${PASTE_FILE} has no new line for this exact text (sha256 ${h}) in the printed form (${NEVER}: never change firestore.rules without telling Jonathan it needs a console paste; the steps are under "Other standing rules"). Tell Jonathan first, then add this line to ${PASTE_FILE}:  ${want}${near.length ? `  (the new line there, "${near[0].slice(0, 80)}…", is not that form, names another text, or is dated before the rules changed on ${changedOn})` : ''}`);
   return r.lines;
 }
 
@@ -545,36 +723,23 @@ export const CURE_AUDIO = {
   'audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-rhythm-down.mp3': '7a658c5026',
 };
 /* Switched off, never deleted (CLAUDE.md "Play-along first" and "Other
-   standing rules"). Pinned at origin/main 2026-11-13 (0d973cf):
-   - each function's token fingerprint (comments, spacing and line endings do
-     not count; any change to its code does);
-   - how many times the app reads each switch, the .daily5 rules in styles.css,
-     the daily5 markup in index.html, the daily5 strings (English and Spanish,
-     not empty), WARMUP_BANK's entries;
-   - every Take It to a Song step, by a hash of its label, text, label_es and
-     text_es, per module. Adding sections, steps, rules or entries is fine. */
-const SWITCH_READS = { DAILY5_ENABLED: 1, TAKE_TO_SONG_ENABLED: 2 };   // app/lesson.js: ladderHtml() reads the first; visibleSteps() and visibleSections() the second
-export const DAILY5_FUNCTIONS = {
-  buildDaily5: '00eff2494800', openDaily5Here: 'e009f23fe6ee', closeDaily5: '2f57d98c568f', daily5EscClose: '095632226185',
-  dayOfYear: '3b1729df30c0', moduleStepsFlat: '114343a50a76', buildModuleRoutine: '3623c95a5044', isTakeToSongSection: '9e117490f7a0',
-};
+   standing rules"), and not hollowed out. The pins are in tools/never-pins.json,
+   each with its reason and date:
+   - DAILY5_FUNCTIONS: each function's token fingerprint (comments, spacing and
+     line endings do not count; any change to its code does); a second
+     declaration of one of those names anywhere also fails (it would shadow it);
+   - SWITCH_READS: a fingerprint of each statement that reads each switch, so
+     `DAILY5_ENABLED && false && …` is a change;
+   - DAILY5_CSS: every selector naming a .daily5 class, each with a non-empty rule;
+   - DAILY5_INDEX_MARKUP, WARMUP_BANK_MIN: counts; the daily5 strings must be
+     non-empty in English and Spanish;
+   - TAKE_TO_SONG_STEPS: every step, by a hash of its label, text, label_es and
+     text_es, per module.
+   Adding is fine. A change that keeps it working (a renamed helper, an
+   accessibility attribute) is re-pinned with its reason:
+   node tools/never-blocks.mjs --pins --why "<reason>". */
+const SWITCHES = ['DAILY5_ENABLED', 'TAKE_TO_SONG_ENABLED'];
 const DAILY5_KEYS = ['daily5.tuneWarmupHtml', 'daily5.openToday', 'daily5.title', 'daily5.closeAria', 'daily5.tuneUpBody', 'daily5.warmUp', 'daily5.todaysDrill', 'daily5.fromModule', 'daily5.streak'];
-const DAILY5_CSS_RULES = 12;   // selectors naming a .daily5 class in styles.css
-const DAILY5_INDEX_MARKUP = 1;   // the search panel reuses .daily5-panel
-const WARMUP_BANK_MIN = 3;
-export const TAKE_TO_SONG_STEPS = {
-  2: ['632e0618', '4b962563', '12e037b6', '3ff9522a', '6a052b9f', '9bccfa86', '7ba62b77', '4a29051a'],
-  3: ['94f1fb26', '4a56e7bb', '270e1454', '6d62106e'],
-  4: ['9014262e', '59628d20', '83c07e5d', 'a7c42178', 'd181121a', 'e12331e6'],
-  5: ['71e8b80d', '00bcc49e', '560c3e09', '6b992898', '1e8630a1', '563cfd38', '39c29dbb'],
-  6: ['b2a0a0f5', '235c75e2', 'fd15cb59', '18e825f1', 'e5a0b558', '85866425'],
-  7: ['746975a8', '0fd5ae96', 'e167ef7f', '84109771', '1b1fa0a1'],
-  8: ['80f8f729', 'ce998de6', '81192928'],
-  9: ['26745c8e', '55b0ebca'],
-  10: ['7d4df60a', 'be3911d4', 'cffb036a'],
-  11: ['6478eaa1', '12c4e71d', '09aeca5d'],
-  12: ['b5dfa4bf', '483cbd18', 'ade55e1a'],
-};
 /* The student tour (tour.html + 13 screenshots in tour-img/) was deleted
    2026-08-27 (5dc1ab8): it taught the retired three-station model. Jonathan is
    building a new one, so new files (in tour-img/ too, with any title) are
@@ -629,24 +794,41 @@ function loadSets(root) {
 const tokenSig = t => t.t === 'tpl' ? `tpl(${t.quasis.map(q => JSON.stringify(q)).join(',')};${t.exprs.map(e => e.map(tokenSig).join(' ')).join(';')})` : `${t.t}:${t.v}`;
 const stepHash = st => sha([st.label, st.text, st.label_es, st.text_es].map(x => x == null ? '' : String(x)).join('\u0001'), 8);
 
-/* Today's values of every 1do pin (also printed by --pins). */
-export function measureKept(root, sets) {
+/* Today's value of every 1do pin (also what --pins compares and writes). `fnNames` = the pinned functions. */
+export function measureKept(root, sets, fnNames) {
   const appFiles = siteParts('app.js', root);
-  const fnSig = {}, declared = {}, reads = {};
-  for (const s of Object.keys(SWITCH_READS)) { declared[s] = []; reads[s] = 0; }
+  const fnSig = {}, declared = {}, reads = {}, fnDecls = {};
+  for (const sw of SWITCHES) { declared[sw] = []; reads[sw] = []; }
+  for (const f of fnNames) fnDecls[f] = [];
   for (const f of appFiles) {
     const src = readText(root, f) || '';
     const t = tokensOf(`${root}::${f}`, src);
-    for (const seg of segments(t)) if (Object.prototype.hasOwnProperty.call(DAILY5_FUNCTIONS, seg.name) && t[seg.from].v !== 'const') fnSig[seg.name] = sha(t.slice(seg.from, seg.to).map(tokenSig).join(' '));
+    for (const seg of segments(t)) if (fnNames.includes(seg.name) && t[seg.from].v !== 'const') fnSig[seg.name] = sha(t.slice(seg.from, seg.to).map(tokenSig).join(' '));
     for (let k = 0; k < t.length; k++) {
       const x = t[k];
-      if (x.t !== 'id' || !Object.prototype.hasOwnProperty.call(reads, x.v)) continue;
+      if (x.t !== 'id' || !SWITCHES.includes(x.v)) continue;
       if (t[k - 1] && t[k - 1].t === 'id' && t[k - 1].v === 'const' && t[k + 1] && t[k + 1].v === '=') declared[x.v].push(t[k + 2] && t[k + 2].t === 'id' && t[k + 3] && t[k + 3].v === ';' ? t[k + 2].v : '(not a literal)');
-      else reads[x.v]++;
+      else if (!(t[k - 1] && t[k - 1].t === 'punc' && (t[k - 1].v === '.' || t[k - 1].v === '?.'))) reads[x.v].push(statementSig(t, k, k + 1));
     }
   }
+  // every declaration of a pinned function's name, in every script a page loads
+  for (const f of loadedScripts(root).scripts) {
+    if (/^module-\d+\.js$/.test(f)) continue;
+    const t = tokensOf(`${root}::${f}`, readText(root, f) || '');
+    for (let k = 0; k + 1 < t.length; k++) {
+      const x = t[k], n = t[k + 1];
+      if (x.t === 'id' && x.v === 'function' && n.t === 'id' && fnDecls[n.v]) fnDecls[n.v].push(`${f}:${n.line}`);
+      if (x.t === 'id' && /^(const|let|var)$/.test(x.v) && n.t === 'id' && fnDecls[n.v]) fnDecls[n.v].push(`${f}:${n.line}`);
+      if (x.t === 'id' && fnDecls[x.v] && n.t === 'punc' && n.v === '=' && t[k - 1] && t[k - 1].t === 'punc' && t[k - 1].v === '.' && t[k - 2] && /^(window|globalThis|self)$/.test(t[k - 2].v)) fnDecls[x.v].push(`${f}:${x.line} (window.)`);
+    }
+  }
+  // .daily5 selectors and whether each rule has a declaration
   const css = (readText(root, 'styles.css') || '').replace(/\/\*[\s\S]*?\*\//g, '');
-  const cssRules = css.split('}').map(c => c.split('{')[0]).reduce((n, sel) => n + (sel.match(/\.daily5[\w-]*/g) || []).length, 0);   // selectors naming a .daily5 class
+  const cssSel = {};
+  for (const m of css.matchAll(/([^{}]*)\{([^{}]*)\}/g)) {
+    const filled = /[\w-]+\s*:\s*[^;\s]/.test(m[2]);
+    for (const sel of m[1].split(',').map(x => x.replace(/\s+/g, ' ').trim()).filter(x => /\.daily5[\w-]*/.test(x))) cssSel[sel] = cssSel[sel] || filled;
+  }
   const indexMarkup = ((readText(root, 'index.html') || '').match(/class="[^"]*\bdaily5[\w-]*/g) || []).length;
   const i18n = readText(root, 'i18n.js') || '';
   const strings = {};
@@ -662,16 +844,32 @@ export function measureKept(root, sets) {
   const steps = {};
   for (const w of (sets || loadSets(root))) for (const st of Object.values(w.stations || {})) for (const sec of (st.sections || [])) {
     if (sec.kind !== 'take-to-song') continue;
-    const m = Number(w.moduleNum);
+    const m = String(Number(w.moduleNum));
     (steps[m] = steps[m] || []).push(...(sec.steps || []).map(stepHash));
   }
-  return { fnSig, declared, reads, cssRules, indexMarkup, strings, warmup, steps };
+  return { fnSig, fnDecls, declared, reads, cssSel, indexMarkup, strings, warmup, steps };
 }
+/* Every pinned value as today's code has it, in never-pins.json's shape. */
+export function currentPins(root, pins) {
+  const fnNames = Object.keys((pins && pins.DAILY5_FUNCTIONS) || {});
+  const k = measureKept(root, null, fnNames);
+  const { found } = analyzeSite(root);
+  const sites = progressWriteSites(found, false);
+  return {
+    PROGRESS_WRITERS: Object.fromEntries([...sites].sort().map(([key, list]) => [key, list.map(c => c.sig)])),
+    DAILY5_FUNCTIONS: Object.fromEntries(fnNames.map(f => [f, k.fnSig[f] || null])),
+    SWITCH_READS: Object.fromEntries(SWITCHES.map(sw => [sw, k.reads[sw]])),
+    DAILY5_CSS: Object.keys(k.cssSel).filter(x => k.cssSel[x]).sort(),
+    DAILY5_INDEX_MARKUP: k.indexMarkup,
+    WARMUP_BANK_MIN: k.warmup,
+    TAKE_TO_SONG_STEPS: k.steps,
+  };
+}
+const subsetOf = (want, have) => { const h = [...have]; for (const w of want) { const i = h.indexOf(w); if (i < 0) return false; h.splice(i, 1); } return true; };
 
 export function checkKeptThings(root = DEFAULT_ROOT, { sets } = {}) {
   const r = R();
   const bad = [];
-  const REPIN = 'If Jonathan asked for this change, re-pin it: node tools/never-blocks.mjs --pins, with the date and his reason beside the new value';
   // 6. the cure
   const sw = readText(root, 'sw.js') || '';
   for (const [f, pin] of Object.entries(CURE_AUDIO)) {
@@ -697,27 +895,41 @@ export function checkKeptThings(root = DEFAULT_ROOT, { sets } = {}) {
   } catch { /* no audio/ */ }
 
   // 7. switched off, never deleted — and not hollowed out
-  const k = measureKept(root, sets);
+  const pins = loadPins(root);
+  if (!pins) { bad.push(`1do: ${PINS_FILE} is missing or not valid JSON — the pins of 1do live there`); }
+  const P = pins || {};
+  const fnPins = P.DAILY5_FUNCTIONS || {};
+  const k = measureKept(root, sets, Object.keys(fnPins));
   const OFF = `(${NEVER}: never delete what is switched off — "switched off, never deleted", so flipping the switch brings it back)`;
-  for (const [s, n] of Object.entries(SWITCH_READS)) {
-    const d = k.declared[s];
-    if (d.length !== 1 || !/^(true|false)$/.test(d[0])) bad.push(`1do: refused — ${s} must be declared once in the app as \`const ${s} = true;\` or \`= false;\` (found ${d.length ? d.join(', ') : 'nothing'}) ${OFF}. On or off is Jonathan's call; deleting the switch is not.`);
-    if (k.reads[s] < n) bad.push(`1do: refused — the app reads ${s} ${k.reads[s]} time${k.reads[s] === 1 ? '' : 's'}, ${n} pinned: a place the switch turns on or off was deleted, so flipping it back would not bring that back ${OFF}. Put the line back. ${REPIN}.`);
+  const REPIN = `If it keeps the feature working (a renamed helper, an accessibility attribute) and Jonathan asked for it, re-pin it with its reason: node tools/never-blocks.mjs --pins --why "<reason>"`;
+  for (const sw of SWITCHES) {
+    const d = k.declared[sw];
+    if (d.length !== 1 || !/^(true|false)$/.test(d[0])) bad.push(`1do: refused — ${sw} must be declared once in the app as \`const ${sw} = true;\` or \`= false;\` (found ${d.length ? d.join(', ') : 'nothing'}) ${OFF}. On or off is Jonathan's call; deleting the switch is not.`);
+    const want = ((P.SWITCH_READS || {})[sw] || {}).value || [];
+    if (!subsetOf(want, k.reads[sw])) bad.push(`1do: refused — a statement that reads ${sw} was deleted or changed (${k.reads[sw].length} reads now, ${want.length} pinned): a place the switch turns on or off no longer works the same, so flipping it back would not bring it back ${OFF}. Put the statement back as it was. ${REPIN}.`);
   }
-  const goneFns = Object.keys(DAILY5_FUNCTIONS).filter(f => !k.fnSig[f]);
+  const goneFns = Object.keys(fnPins).filter(f => !k.fnSig[f]);
   if (goneFns.length) bad.push(`1do: refused — ${goneFns.map(f => `${f}()`).join(', ')} ${goneFns.length === 1 ? 'is' : 'are'} gone from the app parts; part of the switched-off Daily 5 / Take It to a Song ${OFF}. Put ${goneFns.length === 1 ? 'it' : 'them'} back from origin/main.`);
-  const changedFns = Object.keys(DAILY5_FUNCTIONS).filter(f => k.fnSig[f] && DAILY5_FUNCTIONS[f] && k.fnSig[f] !== DAILY5_FUNCTIONS[f]);
-  if (changedFns.length) bad.push(`1do: refused — the code of ${changedFns.map(f => `${f}() (now ${k.fnSig[f]}, pinned ${DAILY5_FUNCTIONS[f]})`).join(', ')} changed; it is part of the switched-off Daily 5 / Take It to a Song ${OFF}. Put it back from origin/main. ${REPIN}.`);
-  if (k.cssRules < DAILY5_CSS_RULES) bad.push(`1do: refused — styles.css has ${k.cssRules} selectors naming a .daily5 class, ${DAILY5_CSS_RULES} pinned: the Daily 5's look would be gone when it is switched back on ${OFF}. Put them back.`);
-  if (k.indexMarkup < DAILY5_INDEX_MARKUP) bad.push(`1do: refused — index.html has ${k.indexMarkup} daily5 elements, ${DAILY5_INDEX_MARKUP} pinned ${OFF}. Put the markup back.`);
+  const changedFns = Object.keys(fnPins).filter(f => k.fnSig[f] && k.fnSig[f] !== fnPins[f].value);
+  if (changedFns.length) bad.push(`1do: refused — the code of ${changedFns.map(f => `${f}() (now ${k.fnSig[f]}, pinned ${fnPins[f].value})`).join(', ')} changed; it is part of the switched-off Daily 5 / Take It to a Song ${OFF}. Put it back from origin/main. ${REPIN}.`);
+  const shadowed = Object.entries(k.fnDecls).filter(([, l]) => l.length > 1);
+  if (shadowed.length) bad.push(`1do: refused — ${shadowed.map(([f, l]) => `${f} is declared ${l.length} times (${l.join(', ')})`).join('; ')}: a second declaration replaces the switched-off code at run time ${OFF}. Rename the new one.`);
+  const cssWant = (P.DAILY5_CSS || {}).value || [];
+  const cssGone = cssWant.filter(x => !k.cssSel[x]);
+  if (cssGone.length) bad.push(`1do: refused — styles.css lost or emptied ${cssGone.length} of the ${cssWant.length} pinned .daily5 selectors (${cssGone.slice(0, 3).join(' | ')}${cssGone.length > 3 ? ' | …' : ''}): the Daily 5's look would be gone when it is switched back on ${OFF}. Put the rules back. ${REPIN}.`);
+  const im = ((P.DAILY5_INDEX_MARKUP || {}).value) || 0;
+  if (k.indexMarkup < im) bad.push(`1do: refused — index.html has ${k.indexMarkup} daily5 elements, ${im} pinned ${OFF}. Put the markup back.`);
   const emptyStr = Object.entries(k.strings).filter(([, v]) => !v.en || !v.es).map(([key, v]) => `${key} (${!v.en ? 'English' : ''}${!v.en && !v.es ? ' and ' : ''}${!v.es ? 'Spanish' : ''})`);
   if (emptyStr.length) bad.push(`1do: refused — the switched-off Daily 5's strings are gone or empty in i18n.js: ${emptyStr.join(', ')} ${OFF}. Put the words back.`);
-  if (k.warmup < WARMUP_BANK_MIN) bad.push(`1do: refused — config-main.js's WARMUP_BANK has ${k.warmup} warm-ups with text, ${WARMUP_BANK_MIN} pinned; the switched-off Daily 5 deals from it ${OFF}. Put them back.`);
-  for (const [m, pinned] of Object.entries(TAKE_TO_SONG_STEPS)) {
+  const wb = ((P.WARMUP_BANK_MIN || {}).value) || 0;
+  if (k.warmup < wb) bad.push(`1do: refused — config-main.js's WARMUP_BANK has ${k.warmup} warm-ups with text, ${wb} pinned; the switched-off Daily 5 deals from it ${OFF}. Put them back.`);
+  const tts = P.TAKE_TO_SONG_STEPS || {};
+  for (const [m, pin] of Object.entries(tts)) {
     const have = new Set(k.steps[m] || []);
-    const missing = pinned.filter(h => !have.has(h));
-    if (missing.length) bad.push(`1do: refused — Module ${m}'s Take It to a Song sections lost or changed ${missing.length} of their ${pinned.length} steps (a step's label, text or Spanish changed, it was removed, or its section was) ${OFF}; each section also holds the number that every later saved tick is keyed by. Put them back as they were; hide a step with hidden: true if it must not show. ${REPIN}.`);
+    const missing = pin.value.filter(h => !have.has(h));
+    if (missing.length) bad.push(`1do: refused — Module ${m}'s Take It to a Song sections lost or changed ${missing.length} of their ${pin.value.length} steps (a step's label, text or Spanish changed, it was removed, or its section was) ${OFF}; each section also holds the number that every later saved tick is keyed by. Put them back as they were; hide a step with hidden: true if it must not show. ${REPIN}.`);
   }
+  const ttsPinned = Object.values(tts).reduce((a, x) => a + x.value.length, 0);
 
   // 8. the deleted student tour
   const TOUR = `(${NEVER}: never resurrect the deleted student tour — it taught the retired Station B/C model; deleted 2026-08-27 in 5dc1ab8, and Jonathan is building a new one)`;
@@ -742,29 +954,37 @@ export function checkKeptThings(root = DEFAULT_ROOT, { sets } = {}) {
 
   if (bad.length) { bad.forEach(b => r.err(b)); return r.lines; }
   const secSteps = Object.values(k.steps).reduce((a, l) => a + l.length, 0);
-  r.ok(`"the cure": ${Object.keys(CURE_AUDIO).length} of ${Object.keys(CURE_AUDIO).length} files keep their pinned bytes (and sw.js's map agrees), and tools/loudness.py still takes it as the reference it refuses to level; switched off, never deleted: ${Object.keys(SWITCH_READS).join(' and ')} declared and read ${Object.values(k.reads).join(' and ')} times, ${Object.keys(DAILY5_FUNCTIONS).length} functions with their pinned code, ${k.cssRules} .daily5 selectors, ${k.indexMarkup} daily5 element${k.indexMarkup === 1 ? '' : 's'} in index.html, ${DAILY5_KEYS.length} daily5 strings in English and Spanish, ${k.warmup} warm-ups, ${Object.values(TAKE_TO_SONG_STEPS).reduce((a, l) => a + l.length, 0)} pinned Take It to a Song steps all present (${secSteps} today, in ${Object.keys(k.steps).length} modules); the deleted tour: none of its ${Object.keys(TOUR_BLOBS).length} files (${scanned} same-size files hashed) and no page with its slides' words`);
+  r.ok(`"the cure": ${Object.keys(CURE_AUDIO).length} of ${Object.keys(CURE_AUDIO).length} files keep their pinned bytes (and sw.js's map agrees), and tools/loudness.py still takes it as the reference it refuses to level; switched off, never deleted: ${SWITCHES.join(' and ')} declared once and their ${SWITCHES.map(sw => k.reads[sw].length).join(' and ')} reading statements as pinned, ${Object.keys(fnPins).length} functions with their pinned code and no second declaration, ${cssWant.length} .daily5 selectors with non-empty rules, ${k.indexMarkup} daily5 element${k.indexMarkup === 1 ? '' : 's'} in index.html, ${DAILY5_KEYS.length} daily5 strings in English and Spanish, ${k.warmup} warm-ups, ${ttsPinned} pinned Take It to a Song steps all present (${secSteps} today, in ${Object.keys(k.steps).length} modules); the deleted tour: none of its ${Object.keys(TOUR_BLOBS).length} files (${scanned} same-size files hashed) and no page with its slides' words`);
   return r.lines;
 }
 
-/* --pins: today's value of every pin, to paste (with a date and a reason) after a change Jonathan asked for. */
+/* --pins: every pin whose value differs from today's code. With --why "<reason>", write the new values into
+   tools/never-pins.json with that reason and today's date; without it, refuse to write. */
 function printPins(root) {
-  const k = measureKept(root);
-  const { found } = analyzeSite(root);
-  const sites = progressWriteSites(found, false);
-  console.log('PROGRESS_WRITERS (file|function: chains that write progress/… or hand it on):');
-  for (const [key, list] of [...sites].sort()) console.log(`  '${key}': { n: ${list.length}, why: '…' },   // lines ${list.map(c => c.line).join(', ')}`);
-  console.log(`SWITCH_READS = ${JSON.stringify(k.reads)};   // declared: ${JSON.stringify(k.declared)}`);
-  console.log('DAILY5_FUNCTIONS = {');
-  for (const [f, h] of Object.entries(k.fnSig)) console.log(`  ${f}: '${h}',`);
-  console.log('};');
-  console.log(`DAILY5_CSS_RULES = ${k.cssRules}; DAILY5_INDEX_MARKUP = ${k.indexMarkup}; WARMUP_BANK_MIN = ${k.warmup};`);
-  console.log(`daily5 strings: ${Object.entries(k.strings).map(([key, v]) => `${key} en ${v.en.length} es ${v.es.length}`).join('; ')}`);
-  console.log('TAKE_TO_SONG_STEPS = {');
-  for (const [m, l] of Object.entries(k.steps)) console.log(`  ${m}: [${l.map(h => `'${h}'`).join(', ')}],`);
-  console.log('};');
+  const pins = loadPins(root) || {};
+  const cur = currentPins(root, pins);
+  const i = process.argv.indexOf('--why'), why = i >= 0 ? (process.argv[i + 1] || '').trim() : '';
+  const diffs = [];
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  for (const [k, v] of Object.entries(cur)) {
+    if (k === 'PROGRESS_WRITERS' || k === 'DAILY5_FUNCTIONS' || k === 'SWITCH_READS' || k === 'TAKE_TO_SONG_STEPS') {
+      const keys = new Set([...Object.keys(v), ...Object.keys(pins[k] || {})]);
+      for (const key of keys) { const was = ((pins[k] || {})[key] || {}).value; if (!same(was, v[key])) diffs.push([k, key, was, v[key]]); }
+    } else { const was = (pins[k] || {}).value; if (!same(was, v)) diffs.push([k, null, was, v]); }
+  }
+  if (!diffs.length) { console.log(`every pin in ${PINS_FILE} matches today's code`); return; }
+  for (const [k, key, was, now] of diffs) console.log(`${k}${key ? ` · ${key}` : ''}\n  pinned: ${JSON.stringify(was)}\n  today:  ${JSON.stringify(now)}`);
+  if (!why) { console.log(`\n${diffs.length} pin${diffs.length === 1 ? '' : 's'} differ. Not written: give the reason Jonathan asked for it, node tools/never-blocks.mjs --pins --why "<reason>"`); process.exitCode = 1; return; }
+  const date = todayLocal();
+  for (const [k, key, , now] of diffs) {
+    if (key) { pins[k] = pins[k] || {}; if (now === undefined || now === null) delete pins[k][key]; else pins[k][key] = { value: now, why, date }; }
+    else pins[k] = { value: now, why, date };
+  }
+  writeFileSync(join(root, PINS_FILE), JSON.stringify(pins, null, 1) + '\n');
+  console.log(`\nwrote ${diffs.length} pin${diffs.length === 1 ? '' : 's'} to ${PINS_FILE}, each with "${why}" (${date})`);
 }
 
-const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+const isMain = (() => { try { return !!process.argv[1] && realpathSync(fileURLToPath(import.meta.url)) === realpathSync(process.argv[1]); } catch { return false; } })();
 if (isMain) {
   if (process.argv.includes('--self-test')) import('./never-blocks-selftest.mjs').then(m => m.selfTest());
   else if (process.argv.includes('--pins')) printPins(DEFAULT_ROOT);
