@@ -23,7 +23,18 @@
    (`const s = await <chain>.get()`, `for (const d of s.docs)`,
    `s.docs.forEach(d => …)`), and the code shapes it cannot follow at all
    (a Firestore method named in brackets, eval, the modular SDK's bare calls,
-   the REST endpoint, Firestore code written inside a string). */
+   the REST endpoint, a string handed to setTimeout).
+
+   Two things cross files (analyzeFile's `ctx`):
+     handles    every name the site assigns the database to (db, fbDb, lqDb …,
+                from `NAME = firebase.firestore()`, `= await ensureDb()`, `= db`):
+                collectHandles() finds them in all the scripts at once
+     factories  a function that returns a reference (`function lqDoc(){ return
+                lqDb.collection('liveQuiz').doc('current'); }`): a chain that starts
+                with a call to it starts at that path
+
+   Inline handlers (onclick="…" in a page, or in a string a script builds) are
+   code too: handlerSources() pulls them out so they are read like a script. */
 
 import { tokenize, readChain, splitArgs, foldString, segments, matchClose, UNKNOWN } from './js-scan.mjs';
 
@@ -35,6 +46,68 @@ const GLOBAL_HANDLES = new Set(['db', 'fbDb']);
 const SNAP_ITER = new Set(['forEach', 'map', 'filter', 'some', 'every', 'find', 'flatMap', 'reduce']);
 const FIRESTORE_MEMBER_NAMES = new Set(['collection', 'doc', 'collectionGroup', 'ref', 'set', 'update', 'add', 'delete', 'batch', 'runTransaction', 'parent', 'firestore']);
 const MODULAR = new Set(['setDoc', 'updateDoc', 'deleteDoc', 'addDoc', 'writeBatch', 'getFirestore']);
+
+/* Every name the database is assigned to, across all the scripts (a fixpoint:
+   `const a = db; const b = a;`). */
+export function collectHandles(tokenArrays) {
+  const handles = new Set(GLOBAL_HANDLES);
+  const isHandleInit = (toks, j) => {
+    let k = j;
+    if (toks[k] && toks[k].t === 'id' && toks[k].v === 'await') k++;
+    const x = toks[k], n1 = toks[k + 1], n2 = toks[k + 2], n3 = toks[k + 3];
+    if (!x || x.t !== 'id') return false;
+    if (x.v === 'firebase' && n1 && n1.v === '.' && n2 && n2.v === 'firestore' && n3 && n3.v === '(') return true;
+    if (x.v === 'ensureDb' && n1 && n1.v === '(') return true;
+    if (handles.has(x.v) && !(n1 && n1.t === 'punc' && /^(\.|\?\.|\(|\[)$/.test(n1.v))) return true;
+    return false;
+  };
+  for (let grew = true; grew;) {
+    grew = false;
+    for (const toks of tokenArrays) for (let k = 1; k + 1 < toks.length; k++) {
+      if (toks[k].t !== 'punc' || toks[k].v !== '=' || toks[k - 1].t !== 'id' || handles.has(toks[k - 1].v)) continue;
+      const before = toks[k - 2];
+      if (before && before.t === 'punc' && (before.v === '.' || before.v === '?.')) continue;
+      if (isHandleInit(toks, k + 1)) { handles.add(toks[k - 1].v); grew = true; }
+    }
+  }
+  return handles;
+}
+
+/* Inline handler code: the value of every on<event>="…" / on<event>='…' in an
+   HTML page's text, or in a script's string and template literals (a ${…} becomes
+   the name __tpl__). Returns [{ code, line }]. */
+export function handlerSources(text, line0 = 1) {
+  const out = [];
+  const re = /(?:^|[\s"'`<])on[a-z]{3,}\s*=\s*(["'])/g;
+  let m;
+  while ((m = re.exec(text))) {
+    const q = m[1];
+    const end = text.indexOf(q, re.lastIndex);
+    if (end < 0) break;
+    const val = text.slice(re.lastIndex, end).replace(/&quot;/g, '"').replace(/&#0*39;|&#x0*27;|&apos;/gi, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+    let line = line0;
+    for (let i = text.indexOf('\n'); i >= 0 && i < m.index; i = text.indexOf('\n', i + 1)) line++;
+    if (/[A-Za-z_$]/.test(val)) out.push({ code: val, line });
+    re.lastIndex = end + 1;
+  }
+  return out;
+}
+/* The handler code inside a script's string and template literals. */
+export function scriptHandlerSources(toks) {
+  const out = [];
+  const walk = (arr) => {
+    for (const x of arr) {
+      if (x.t === 'str' && /\bon[a-z]{3,}\s*=/.test(x.v)) out.push(...handlerSources(x.v, x.line));
+      else if (x.t === 'tpl') {
+        const joined = x.quasis.join('__tpl__');
+        if (/\bon[a-z]{3,}\s*=/.test(joined)) out.push(...handlerSources(joined, x.line));
+        x.exprs.forEach(walk);
+      }
+    }
+  };
+  walk(toks);
+  return out;
+}
 
 /* Top-level `const NAME = <string expression>` across the given sources: the
    constants a path may be built from. A name bound twice to different values
@@ -89,16 +162,27 @@ export const pathString = p => p ? p.join('/') : '(none)';
 
 /* Analyze one file. Returns {chains, refs, odd}. Each entry carries the
    function (segment) it is in and its line. */
-export function analyzeFile(file, src, consts) {
+export function analyzeFile(file, src, consts, ctx = {}) {
   const toks = Array.isArray(src) ? src : tokenize(src);
   const out = { chains: [], refs: [], odd: [] };
-  for (const seg of segments(toks)) analyzeSegment(file, toks.slice(seg.from, seg.to), seg.name, consts, out);
+  for (const seg of segments(toks)) analyzeSegment(file, toks.slice(seg.from, seg.to), seg.name, consts, out, ctx);
   return out;
 }
 
-function analyzeSegment(file, toks, fn, consts, out) {
+/* Functions that return a reference: fn name → paths (from a first analysis). */
+export function collectFactories(chains) {
+  const f = new Map();
+  for (const c of chains) if (c.kind === 'escape' && c.detail === 'returned' && c.fn !== '(top level)' && !c.unknownBase) {
+    if (!f.has(c.fn)) f.set(c.fn, []);
+    f.get(c.fn).push(c.path);
+  }
+  return f;
+}
+
+function analyzeSegment(file, toks, fn, consts, out, ctx) {
   const vars = new Map();      // name → [path, …]  (references)
-  const handles = new Set(GLOBAL_HANDLES);
+  const handles = new Set(ctx.handles || GLOBAL_HANDLES);
+  const factories = ctx.factories || new Map();
   const snaps = new Map();     // name → [path, …]  (query / document snapshots and their docs)
 
   // Every chain start in this segment, templates' ${…} included, in order.
@@ -135,6 +219,7 @@ function analyzeSegment(file, toks, fn, consts, out) {
   const chainPath = (c) => {
     let paths = null, li = 0, handle = false, unknownBase = false, last = -1;
     if (!c.baseCall && vars.has(c.base)) paths = vars.get(c.base).map(p => p.slice());
+    else if (c.baseCall && !c.baseCall.length && factories.has(c.base)) paths = factories.get(c.base).map(p => p.slice());
     else if (!c.baseCall && handles.has(c.base)) handle = true;
     else if (c.base === 'firebase' && c.links[0] && c.links[0].name === 'firestore' && c.links[0].call) { handle = true; li = 1; }
     for (let i = li; i < c.links.length; i++) {
@@ -220,18 +305,24 @@ function analyzeSegment(file, toks, fn, consts, out) {
     c.links.forEach(L => consumed.get(arr).add(L.at));
     // the bad shapes first (they need no path)
     const called = arr[k + 1] && arr[k + 1].t === 'punc' && arr[k + 1].v === '(';
-    if ((x.v === 'eval' || x.v === 'Function') && called) out.odd.push({ file, fn, line: x.line, what: `${x.v}(…) runs code this check cannot read` });
-    if (MODULAR.has(x.v) && called) out.odd.push({ file, fn, line: x.line, what: `${x.v}(…) is the modular SDK's write, which this check cannot follow` });
-    if (PATH_LINKS.has(x.v) && called) out.odd.push({ file, fn, line: x.line, what: `a bare ${x.v}(…) call (the modular SDK's shape), which this check cannot follow` });
-    // a destructured `ref` ({ ref } = snap, ({ ref }) => …): a document reference under another name
-    if (x.v === 'ref' && arr[k - 1] && arr[k - 1].t === 'punc' && (arr[k - 1].v === '{' || arr[k - 1].v === ',') && arr[k + 1] && arr[k + 1].t === 'punc' && /^[,}:=]$/.test(arr[k + 1].v))
-      out.odd.push({ file, fn, line: x.line, what: 'a `ref` taken by destructuring, a document reference this check cannot trace' });
+    const prevTok = arr[k - 1];
+    const isDef = called && ((prevTok && prevTok.t === 'id' && prevTok.v === 'function') ||
+      (prevTok && prevTok.t === 'punc' && /^[{},;]$/.test(prevTok.v) && arr[matchClose(arr, k + 1) + 1] && arr[matchClose(arr, k + 1) + 1].v === '{'));
+    if ((x.v === 'eval' || x.v === 'Function') && called) out.odd.push({ file, fn, line: x.line, what: `${x.v}(…) runs code`, todo: 'run no code from a string in the console' });
+    if ((x.v === 'setTimeout' || x.v === 'setInterval') && called && arr[k + 2] && (arr[k + 2].t === 'str' || arr[k + 2].t === 'tpl')) out.odd.push({ file, fn, line: x.line, what: `${x.v}() with a string runs that string as code`, todo: `pass ${x.v} a function, not a string` });
+    if (MODULAR.has(x.v) && called && !isDef) out.odd.push({ file, fn, line: x.line, what: `${x.v}(…) is the modular SDK's write`, todo: "use the page's compat SDK: db.collection('<name>')…" });
+    if (PATH_LINKS.has(x.v) && called && !isDef) out.odd.push({ file, fn, line: x.line, what: `a bare ${x.v}(…) call (the modular SDK's shape)`, todo: "write db.collection('<name>')… instead" });
+    // a destructured `ref` ({ ref } = snap, ({ ref }) => …, for (const { ref } of …)): a reference under another name.
+    // An object literal that merely has a `ref` key ({ ref: el }) is not one.
+    if (x.v === 'ref' && prevTok && prevTok.t === 'punc' && (prevTok.v === '{' || prevTok.v === ',') && arr[k + 1] && arr[k + 1].t === 'punc' && /^[,}:=]$/.test(arr[k + 1].v) && isPattern(arr, k))
+      out.odd.push({ file, fn, line: x.line, what: 'a `ref` taken by destructuring', todo: "use d.ref on a snapshot from a db.collection('<name>') query in the same function" });
     for (const L of c.links) {
       if (L.index) {
         const f = foldString(L.index, consts);
         const v = f && f.length === 1 && typeof f[0] === 'string' ? f[0] : null;
-        if (v !== null && FIRESTORE_MEMBER_NAMES.has(v)) out.odd.push({ file, fn, line: x.line, what: `a Firestore method named in brackets (["${v}"]) — the check reads only .${v}(…)` });
-        if (v === null && (handles.has(c.base) || vars.has(c.base))) out.odd.push({ file, fn, line: x.line, what: `${c.base}[…] picks a member of a database reference by a value this check cannot read` });
+        if (v !== null && FIRESTORE_MEMBER_NAMES.has(v) && (handles.has(c.base) || vars.has(c.base) || snaps.has(c.base) || c.links.some(L2 => L2.name && (PATH_LINKS.has(L2.name) || L2.name === 'ref'))))
+          out.odd.push({ file, fn, line: x.line, what: `a Firestore method named in brackets (["${v}"])`, todo: `write .${v}(…)` });
+        if (v === null && (handles.has(c.base) || vars.has(c.base))) out.odd.push({ file, fn, line: x.line, what: `${c.base}[…] picks a member of a database reference by a value`, todo: 'name the method: .collection(…), .doc(…), .get()' });
       }
     }
     // `.ref` from a snapshot
@@ -280,43 +371,129 @@ function analyzeSegment(file, toks, fn, consts, out) {
       if (y.t !== 'punc' || (y.v !== '.' && y.v !== '?.') || seen.has(k)) continue;
       const nm = arr[k + 1];
       if (nm.t === 'id' && ((PATH_LINKS.has(nm.v) && arr[k + 2] && arr[k + 2].v === '(') || nm.v === 'ref'))
-        out.odd.push({ file, fn, line: nm.line, what: `.${nm.v} on something that is not a plain name (a bracketed or computed receiver), which this check cannot follow` });
+        out.odd.push({ file, fn, line: nm.line, what: `.${nm.v} on something that is not a plain name (a bracketed or computed receiver)`, todo: 'put the database or the snapshot in a plain variable first' });
     }
   };
   walkLinks(toks);
 
-  // Firestore code or the REST endpoint written inside a string or template literal.
-  const strings = [];
-  const walkStr = (arr) => { for (const y of arr) { if (y.t === 'str') strings.push([y.v, y.line]); else if (y.t === 'tpl') { y.quasis.forEach(q => strings.push([q, y.line])); y.exprs.forEach(walkStr); } } };
+  // The REST endpoint (a fetch() to it writes with no SDK call to read). Other string contents are text,
+  // except inline handlers, which handlerSources() hands back to be read as code.
+  const walkStr = (arr) => { for (const y of arr) { if (y.t === 'str' && /firestore\.googleapis\.com/.test(y.v)) out.odd.push({ file, fn, line: y.line, what: 'a string names the Firestore REST endpoint', todo: 'use the SDK (db.collection(…))' }); else if (y.t === 'tpl') { if (y.quasis.some(q => /firestore\.googleapis\.com/.test(q))) out.odd.push({ file, fn, line: y.line, what: 'a string names the Firestore REST endpoint', todo: 'use the SDK (db.collection(…))' }); y.exprs.forEach(walkStr); } } };
   walkStr(toks);
-  for (const [s, line] of strings) {
-    if (/firestore\.googleapis\.com/.test(s)) out.odd.push({ file, fn, line, what: 'a string names the Firestore REST endpoint, which this check cannot follow' });
-    if (/\.\s*(collection|collectionGroup|doc)\s*\(|\bfirestore\s*\(\s*\)|\.runTransaction\s*\(|\.batch\s*\(\s*\)/.test(s)) out.odd.push({ file, fn, line, what: `Firestore code inside a string ("${s.trim().slice(0, 60)}") runs where this check cannot read it` });
-  }
 }
 
-/* Names of functions called (or passed by name) in each segment, and names
-   written as NAME( inside its strings (inline handlers). */
+/* Is the `{` that encloses toks[k] a destructuring pattern? `const {…} =`, `{…} = x`,
+   `({…}) =>`, `function f({…})`, `for (const {…} of …)`. */
+function isPattern(toks, k) {
+  let d = 0, open = -1;
+  for (let j = k - 1; j >= 0; j--) {
+    const y = toks[j];
+    if (y.t !== 'punc') continue;
+    if (y.v === '}' || y.v === ')' || y.v === ']') d++;
+    else if (y.v === '{' || y.v === '(' || y.v === '[') { if (d === 0) { if (y.v === '{') { open = j; break; } return false; } d--; }
+  }
+  if (open < 0) return false;
+  const close = matchClose(toks, open), after = toks[close + 1], before = toks[open - 1];
+  if (before && before.t === 'id' && /^(const|let|var)$/.test(before.v)) return true;
+  if (after && after.t === 'punc' && after.v === '=') return true;
+  if (before && before.t === 'punc' && (before.v === '(' || before.v === ',')) {
+    // a parameter: find the `)` that closes the list, then `=>` or a function body
+    let dd = 0;
+    for (let j = close + 1; j < toks.length; j++) {
+      const y = toks[j];
+      if (y.t === 'punc' && (y.v === '(' || y.v === '[' || y.v === '{')) dd++;
+      else if (y.t === 'punc' && (y.v === ')' || y.v === ']' || y.v === '}')) { if (dd === 0) { const z = toks[j + 1]; return !!(z && z.t === 'punc' && (z.v === '=>' || z.v === '{')); } dd--; }
+    }
+  }
+  return false;
+}
+
+/* The names a segment declares for itself (const / let / var, inner functions,
+   parameters, catch bindings): a call to one of them is to the local, not to a
+   global function of the same name. */
+export function localNames(toks) {
+  const names = new Set();
+  const addParams = (from, to) => { for (let j = from; j < to; j++) { const y = toks[j]; if (y.t === 'id' && !(toks[j - 1] && toks[j - 1].t === 'punc' && (toks[j - 1].v === '.' || toks[j - 1].v === '=' || toks[j - 1].v === ':'))) names.add(y.v); } };
+  for (let k = 0; k < toks.length; k++) {
+    const x = toks[k];
+    if (x.t === 'id' && /^(const|let|var)$/.test(x.v)) {
+      const n = toks[k + 1];
+      if (n && n.t === 'id') names.add(n.v);
+      else if (n && n.t === 'punc' && (n.v === '{' || n.v === '[')) addParams(k + 2, matchClose(toks, k + 1));
+      // later declarators on the same statement: , NAME =
+      let d = 0;
+      for (let j = k + 2; j < toks.length; j++) {
+        const y = toks[j];
+        if (y.t === 'punc' && (y.v === '(' || y.v === '[' || y.v === '{')) d++;
+        else if (y.t === 'punc' && (y.v === ')' || y.v === ']' || y.v === '}')) { if (d === 0) break; d--; }
+        else if (d === 0 && y.t === 'punc' && y.v === ';') break;
+        else if (d === 0 && y.t === 'punc' && y.v === ',' && toks[j + 1] && toks[j + 1].t === 'id' && toks[j + 2] && toks[j + 2].v === '=') names.add(toks[j + 1].v);
+      }
+    }
+    if (x.t === 'id' && x.v === 'function') {
+      let j = k + 1;
+      if (toks[j] && toks[j].t === 'id') { names.add(toks[j].v); j++; }
+      if (toks[j] && toks[j].v === '(') addParams(j + 1, matchClose(toks, j));
+    }
+    if (x.t === 'id' && x.v === 'catch' && toks[k + 1] && toks[k + 1].v === '(' && toks[k + 2] && toks[k + 2].t === 'id') names.add(toks[k + 2].v);
+    if (x.t === 'punc' && x.v === '=>') {
+      const p = toks[k - 1];
+      if (p && p.t === 'id') names.add(p.v);
+      else if (p && p.t === 'punc' && p.v === ')') {
+        let d = 0, j = k - 1;
+        for (; j >= 0; j--) { const y = toks[j]; if (y.t === 'punc' && (y.v === ')' || y.v === ']' || y.v === '}')) d++; else if (y.t === 'punc' && (y.v === '(' || y.v === '[' || y.v === '{')) { d--; if (d === 0) break; } }
+        addParams(j + 1, k - 1);
+      }
+    }
+  }
+  return names;
+}
+
+/* The real calls in a token list: NAME( and window. / globalThis. / self. / this.NAME(,
+   never a definition (function NAME(, a method NAME(…){ in an object or class) and
+   never a name the segment declares itself. Returns [{ name, line }]. */
+export function realCalls(toks, locals = new Set()) {
+  const out = [];
+  const walk = (arr) => {
+    for (let k = 0; k < arr.length; k++) {
+      const x = arr[k];
+      if (x.t === 'tpl') { x.exprs.forEach(walk); continue; }
+      if (x.t !== 'id' || !arr[k + 1] || arr[k + 1].t !== 'punc' || arr[k + 1].v !== '(') continue;
+      const p = arr[k - 1];
+      if (p && p.t === 'id' && (p.v === 'function' || p.v === 'new' || p.v === 'get' || p.v === 'set' || p.v === 'async' && arr[k - 2] && arr[k - 2].t === 'punc' && (arr[k - 2].v === '{' || arr[k - 2].v === ','))) continue;
+      if (p && p.t === 'punc' && (p.v === '.' || p.v === '?.')) {
+        const o = arr[k - 2];
+        if (!(o && o.t === 'id' && /^(window|globalThis|self|this)$/.test(o.v) && !(arr[k - 3] && arr[k - 3].t === 'punc' && (arr[k - 3].v === '.' || arr[k - 3].v === '?.')))) continue;
+      } else if (locals.has(x.v)) continue;
+      const close = matchClose(arr, k + 1), after = arr[close + 1];
+      if (after && after.t === 'punc' && after.v === '{' && p && p.t === 'punc' && (p.v === '{' || p.v === ',' || p.v === '}' || p.v === ';')) continue;   // a method definition
+      out.push({ name: x.v, line: x.line });
+    }
+  };
+  walk(toks);
+  return out;
+}
+
+/* The call edges of each segment: real calls (realCalls: NAME( and window.NAME(,
+   not a local of the same name, not a definition) and functions handed on by
+   name as an argument. */
 export function callGraph(file, src) {
   const toks = Array.isArray(src) ? src : tokenize(src);
   const graph = new Map();
   for (const seg of segments(toks)) {
-    const calls = new Set(), strCalls = new Set();
-    const walk = (arr) => {
-      for (let k = 0; k < arr.length; k++) {
-        const x = arr[k];
-        if (x.t === 'tpl') { x.quasis.forEach(q => { for (const m of q.matchAll(/\b([A-Za-z_$][\w$]*)\s*\(/g)) strCalls.add(m[1]); }); x.exprs.forEach(walk); continue; }
-        if (x.t === 'str') { for (const m of x.v.matchAll(/\b([A-Za-z_$][\w$]*)\s*\(/g)) strCalls.add(m[1]); continue; }
-        if (x.t !== 'id') continue;
-        const prev = arr[k - 1];
-        if (prev && prev.t === 'punc' && (prev.v === '.' || prev.v === '?.')) continue;
-        if (prev && prev.t === 'id' && prev.v === 'function') continue;
-        calls.add(x.v);
-      }
-    };
-    walk(toks.slice(seg.from, seg.to));
-    const cur = graph.get(seg.name) || { calls: new Set(), strCalls: new Set(), file };
-    calls.forEach(c => cur.calls.add(c)); strCalls.forEach(c => cur.strCalls.add(c));
+    const body = toks.slice(seg.from, seg.to);
+    const locals = localNames(body);
+    locals.delete(seg.name);
+    const cur = graph.get(seg.name) || { calls: new Set(), file };
+    for (const c of realCalls(body, locals)) cur.calls.add(c.name);
+    // a function handed on by name (setTimeout(flushSave, 0), addEventListener('x', save)) is an edge too
+    const walk = (arr) => arr.forEach((x, k) => {
+      if (x.t === 'tpl') { x.exprs.forEach(walk); return; }
+      if (x.t !== 'id' || locals.has(x.v)) return;
+      const p = arr[k - 1], n = arr[k + 1];
+      if (p && p.t === 'punc' && (p.v === '(' || p.v === ',') && n && n.t === 'punc' && (n.v === ')' || n.v === ',')) cur.calls.add(x.v);
+    });
+    walk(body);
     graph.set(seg.name, cur);
   }
   return graph;
