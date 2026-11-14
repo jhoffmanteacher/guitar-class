@@ -47,7 +47,9 @@ What is open right now: `WORKFLOW.md` → "Where things stand" (top of the file)
 4. Changed what a student SEES (a renderer, a colour, a new control, or
    directions that describe the music)? Before reporting:
    - Screenshot every state at 1366×657 — before, during and after any
-     highlight or toggle — and look at each one.
+     highlight or toggle — and look at each one. A change to the big-screen
+     fill itself (`site-fill.js`, a `/ var(--site-fill,1)` unit) is also
+     screenshotted at the classroom size, 2560×1300.
    - A sentence that states a pattern across the data ("root in one bar, 5th
      in the next") → prove it with a script over all of it and report the
      count ("76 of 76").
@@ -129,7 +131,10 @@ Static HTML/JS/CSS, no build; Firebase + Firestore; GitHub deploy. Module 13 is 
   checklist is the graded assessment. A set is exactly two panels, lesson ladder and
   checklist (the per-set Songs tab was removed 2026-08-27).
 - **No student tour** — don't resurrect. **No in-panel tab bar**: the rail is the only switcher.
-- **Target screen: Chromebook 1366×657.** Phone width out of scope (no phone work or breakpoints unless asked; keep existing phone CSS and 1o).
+- **Target screen: Chromebook 1366×657.** Every layout is designed and measured there, and it is the priority. A
+  bigger screen shows that same layout enlarged to fill it (`site-fill.js`, 2026-11-13: student site, Song Journey
+  pages, console and live-game stage; a new `vh`/`vw` is written `/ var(--site-fill,1)`, 1df). Phone width out of
+  scope (no phone work or breakpoints unless asked; keep existing phone CSS and 1o).
 - Shell: Windows *and* macOS.
 
 ## Where the code lives (since the 2026-11-11 cut)

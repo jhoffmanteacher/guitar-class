@@ -6,6 +6,10 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-13 — Live In-Class Games are bigger on the classroom screen
+
+- **On the big classroom screen, the live game's question, timer and answer count are now much bigger**, so you can read them from the back of the room.
+
 ## 2026-11-13 — Song Journey pages fill a big screen too
 
 - **The six Song Journey pages now grow to fill a screen bigger than a Chromebook**, the same way the rest of the site does: the TAB, the text and the tool buttons all get bigger together. On a Chromebook nothing changes.

@@ -79,23 +79,6 @@ no code was changed.
 - **When it ships:** delete this section, and update the "dots still lead the beat" part of skill
   `audio-and-snippets` and the comments above the three constants so they describe the new rule.
 
-## Queued by Jonathan 2026-11-13: fill whatever monitor is being used
-
-**Work order written, not started: `docs/WORK-ORDER-fill-big-screens.md`.** To build it, tell Claude Code:
-"Run the work order in docs/WORK-ORDER-fill-big-screens.md."
-
-- **What Jonathan said:** "the view should be maximized for whatever monitor is being used. so chromebooks but
-  also other displays (not phones) should be taken into account"; "chromebook is priority but the display is not
-  good on my classroom display"; "it displays perfectly on chromebooks."
-- **The classroom display:** 4K at 150% scaling (about 2560 CSS px wide). On it the In class page was one narrow
-  column, small text, and an empty lower half.
-- **Decided (2026-11-13):** grow everything, so a big screen shows the Chromebook layout enlarged to fill it;
-  covers the student site, the Song Journey pages, the live quiz stage and the teacher console; phones out of
-  scope; nothing may change on the Chromebook.
-- **It widens a standing rule:** `CLAUDE.md` "Target screen: Chromebook 1366×657". The work order says how the
-  docs change.
-- **When it ships:** the work order's last part deletes this section and the work order file.
-
 ## Split the four parts that are already over 2,000 lines
 
 Added 2026-11-11 (Jonathan: "let's make sure we split those files at some point"). Not urgent, but do it in a

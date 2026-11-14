@@ -383,6 +383,28 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-13 — The big-screen fill, Part 3: the teacher console and the live-game stage; the work order is done (`docs/WORK-ORDER-fill-big-screens.md`, now deleted). Fast.**
+      `site-fill.js` no longer opts the console (`?teacher`) out: the whole console grows on a big screen like the
+      student site, and the live-game stage with it. **Jonathan's choice (2026-11-13, asked with the before/after
+      pictures): "Grow the whole console"**, knowing a table shows about a third as many rows on the classroom
+      display (the Skills grid: about 23 rows on the first screen before, about 8 after). A later "only the stage"
+      switch would be a new ask, not a bug. No change to `teacher-*.js`, `live-quiz.js` or any `config/class` writer:
+      the board's drag and drop reads `e.clientY` against `getBoundingClientRect`, which site-fill.js keeps in page
+      pixels. The stage's `vw` sizes were divided by `var(--site-fill,1)` in Part 1, so they do not double up.
+      **Proofs** (headless Chrome, the stub Firestore of `tools/console-layout-smoke.mjs`, 30 made-up students):
+      14 sidebar views, an activity's detail, Arrange board and the stage (lobby, question, reveal; with the new Games
+      list and the Hide names box) at 1366×657: 8,777 of 8,778 boxes identical to main (the one is the stage timer,
+      whose text depends on when the clock ticked; the old site shows both states in its own runs); at 2560×1300 and
+      1920×950 0 elements missing, 0 font sizes differ, the same rounding difference (636 / 1,963 of 8,778 within
+      1 px; a 14,000 px Arrange board comes out 3.7% shorter). A real HTML5 drag on Arrange board (Chrome's drag
+      intercepted and replayed at the screen points) moved ca-48 above ca-49 at 1366×657, 2560×1300 and 1920×950.
+      Full screen: headless Chrome refuses it, so a stand-in (the browser's full-screen box plus the site's
+      `.lq-stage:fullscreen` rule) fills 2560×1300 with 0 of 6 parts cut off. `checks.mjs` 1df: the console must
+      fill (break-it: the opt-out put back is red). Docs: `CLAUDE.md` "Target screen" and "Start here" step 4,
+      `.claude/rules/rail-layout.md`; the `todo.md` section is gone.
+      **Still open:** the classroom display's real window size was never measured (2560×1300 or about 3200×1650):
+      Jonathan to say whether it now looks right.
+
 - [x] **2026-11-13 — The big-screen fill, Part 2: the six Song Journey pages (`docs/WORK-ORDER-fill-big-screens.md`). Fast.**
       Each of `tabs/*.html` loads `../site-fill.js` as a plain script in `<head>` after `journey-theme.css` and
       `fab-tools.css` (the same one copy of the formula as Part 1; `journey-theme.css`'s 2 viewport units were divided
