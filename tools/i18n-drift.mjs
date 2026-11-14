@@ -36,7 +36,8 @@
    characters they stand for, straight against curly quotes, and the punctuation marks  . , ; : ! ? ' " ( ) - – — …
    (decided on the 2026-11-13 mining: every one of the 3 such past changes needed no Spanish). The Spanish counts as
    changed if ANY character of it changed: someone touched it, so they saw it.
-   A change prints in FULL, or as one compact line, by driftWeight() below (review R1-2).
+   A change prints in FULL, or as one compact line, by driftWeight() below (review R1-2; R2-1 order swaps and R2-5
+   short meaning flips print in full too).
 
    Zero dependencies, Node 18+. Exports driftReport(); checks.mjs prints it. */
 import { spawnSync } from 'node:child_process';
@@ -153,10 +154,13 @@ const facts = s => {
   for (const m of p.matchAll(/\d+(?:\/\d+)?/g)) out.push(m[0]);
   for (const m of p.matchAll(/(?<![A-Za-z#])([A-G](?:#|b|♯|♭)?(?:m|maj|min|dim|sus|add)?\d{0,2}(?:\/[A-G][#b]?)?)(?![A-Za-z'’])/g))
     if (m[1] !== 'A' || /(?:^|[\s(,–—-])A(?=[\s,.;:)–—-]|$)/.test(p.slice(Math.max(0, m.index - 1), m.index + 2)) && !/^A [a-z]/.test(p.slice(m.index, m.index + 3))) out.push(m[1]);
-  return out.sort().join(' ');
+  return out.join(' ');   // in reading order: "G, then C" → "C, then G" is a change (review R2-1)
 };
 const bagDiff = (a, b) => { const A = new Map(), B = new Map(); for (const w of a) A.set(w, (A.get(w) || 0) + 1); for (const w of b) B.set(w, (B.get(w) || 0) + 1);
   const gone = [], added = []; for (const [w, n] of A) for (let i = (B.get(w) || 0); i < n; i++) gone.push(w); for (const [w, n] of B) for (let i = (A.get(w) || 0); i < n; i++) added.push(w); return [gone, added]; };
+/* R2-5 (the reviewer's narrow list; on the mined history it adds no full warning beyond R2-1's). */
+const NEGATIONS = new Set("not no never don't doesn't can't cannot without".split(' '));
+const FLIPS = new Set("not no never don't doesn't can't cannot without with before after up down left right first last high low higher lower open barre major minor once twice one two three four five six seven eight half whole index middle ring pinky thumb faster slower always hard lightly mute strum thickest thinnest can".split(' '));
 export function driftWeight(enOld, enNew) {
   const a = asText(enOld), b = asText(enNew);
   const fact = facts(a) !== facts(b);
@@ -164,7 +168,14 @@ export function driftWeight(enOld, enNew) {
   // What to show on a compact line: the plain words that went and came (no stemming, stop words kept).
   const show = s => plainText(s).replace(/[^\p{L}\p{N}#'\/ ]+/gu, ' ').split(/\s+/).filter(Boolean);
   const [wGone, wAdded] = bagDiff(show(a).map(w => w.toLowerCase()), show(b).map(w => w.toLowerCase()));
-  return { full: fact || Math.max(gone.length, added.length) >= 3, fact, gone: gone.length, added: added.length, wGone, wAdded };
+  // R2-1: a change that moved words without adding or removing any (an order swap) prints in full: norm() already
+  // said the English differs, and the word bags cannot show what moved.
+  const reordered = !gone.length && !added.length && !wGone.length && !wAdded.length && norm(a) !== norm(b);
+  // R2-5: a short meaning flip — only words from a small list of opposites changed, some went and some came
+  // ("before" → "after", "up" → "down", "major" → "minor"), or only a negation word went or came ("don't").
+  const all = [...wGone, ...wAdded];
+  const flip = all.length > 0 && (all.every(w => NEGATIONS.has(w)) || (wGone.length > 0 && wAdded.length > 0 && all.length <= 4 && all.every(w => FLIPS.has(w))));
+  return { full: fact || reordered || flip || Math.max(gone.length, added.length) >= 3, fact, reordered, flip, gone: gone.length, added: added.length, wGone, wAdded };
 }
 
 /* The comparison itself, on two versions of one file. Returns { pairs, hits: [{ key, enOld, enNew, es }] }.
@@ -209,7 +220,10 @@ export function compareFile(file, oldSrc, newSrc, { loadI18n, oldConfig, newConf
         if (!olds) continue;   // new, or the Spanish changed too
         if (olds.some(o => !changed(o.en, b.en))) { pairs++; continue; }   // it only moved
         const news = gB.get(id) || [];
-        a = olds.find(o => !news.some(n => !changed(o.en, n.en)));   // the English it replaced: gone from the new file
+        // The English it replaced: one that is beside this Spanish fewer times now than before (R2-3: two identical
+        // sections, one changed, still leave one copy of the old English, so "gone entirely" missed it).
+        const cnt = (L, en) => L.filter(p => !changed(p.en, en)).length;
+        a = olds.find(o => cnt(olds, o.en) > cnt(news, o.en));
         if (!a) continue;
       }
       pairs++;
