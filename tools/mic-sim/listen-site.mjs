@@ -70,7 +70,11 @@ const VM = `globalThis.__lb = {
         n: s.hit && s.hit.readings ? s.hit.readings.length : null, look: !!s.secondLook, heard: s.hit && s.hit.midi != null ? s.hit.midi : null })),
       events: c.events.map(e => ({ t: Math.round(e.t * 10) / 10, slot: e.slot, n: (e.readings || []).length, midi: e.midi == null ? null : e.midi,
         rd: (e.readings || []).map(r => Math.round(r * 10) / 10) })),
-      gate: COACH_GATE_MIN_LEVEL, minHeard: coachMinHeard(c.slots.length), matchWinMs: coachMatchWinMs() };
+      gate: COACH_GATE_MIN_LEVEL, minHeard: coachMinHeard(c.slots.length), matchWinMs: coachMatchWinMs(),
+      /* The cue under the lane at the end of the take (coachLoop writes it at every new beat): what the student
+         read last, the beat the pulse last showed, and the text the last slot's cue is. */
+      cue: { text: String(document.getElementById('coach-next').textContent || ''), pulse: c.lastPulse, hide: !!c.hideNames,
+        last: t(c.mode === 'chords' ? 'coach.lastChord' : 'coach.lastNote') } };
     coachClose();
     return JSON.stringify(out);
   },
