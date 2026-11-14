@@ -52,6 +52,9 @@ rules_version = '2';
                       account. minutesBoard/{uid} has NO block (denied).
      siteErrors/*     the anonymous error log (2026-11-13): any signed-in
                       account creates, the teacher reads and deletes
+     songRequests/*   a student's song request, one per week (2026-11-13):
+                      the student creates and reads their own, the teacher
+                      reads, sets the state and deletes
 
    Anything not matched below is denied by default. Do not add a catch-all.
    ══════════════════════════════════════════════════════════════════════ */
@@ -632,6 +635,102 @@ service cloud.firestore {
             && siteErrorDayNear(request.resource.data.day)
             && request.resource.data.lang in ['en', 'es'];
       allow read, delete: if isTeacher();
+    }
+
+    /* ── SONG REQUESTS (2026-11-13; app/songrequests.js, teacher-songrequests.js) ──
+       A NEW block; no rule above it was changed (only the path list at the
+       top of this file gained a line). A student asks for a song: a YouTube
+       link and two yes/no answers (are the lyrics right for class, is what
+       the song is about right for class), a reason when either answer is no,
+       and an optional title. The console's "Song requests" view lists them.
+
+       songRequests/{uid}_{week}  { uid, name, email, period, week, videoId,
+                                    url, lyricsOk, topicOk, why, title,
+                                    createdAt, state [, note] }
+       ONE REQUEST PER STUDENT PER WEEK (Jonathan, 2026-11-13). The doc id is
+       the student's uid, "_" and the ISO week ('2026-W47', Monday first, the
+       week practice minutes uses), and a student may only CREATE: a second
+       request in the same week writes to a doc that exists, which is an
+       update, and students have no update. The week must be the one that
+       holds request.time, give or take one day (a student's local week
+       starts up to 14 hours away from the UTC one), and its Thursday must
+       fall in the stated year (so "2027-W53", a week that does not exist,
+       is refused). The used turn stays used whatever the teacher answers;
+       only the teacher's Delete gives it back.
+
+       A create carries exactly these fields: its own uid; a name up to 200;
+       the sign-in token's own email (so a request cannot carry a classmate's
+       address); a period the site knows or ''; the week of the id; an
+       11-character YouTube video id and the one link built from it (the page
+       never stores pasted text as a link); the two answers as booleans; the
+       reason: empty when both answers are yes, required (up to 200, with at
+       least one character that is not a space) when either is no; a title up
+       to 80; createdAt = the server's time; and
+       state 'asked'.
+
+       A student reads only their own (the page queries where uid == theirs;
+       one equality, no composite index). The teacher reads all, deletes, and
+       updates only `state` (asked, adding, declined) and `note` (a short
+       line to the student, up to 200). Nobody else updates.
+
+       HONEST LIMITS: one account makes at most one request per week, two at
+       a week boundary (the week before or after is accepted for one day).
+       In this published text any signed-in Google account may ask; the
+       school-accounts paste 2 (firestore.rules.paste2) gates the create and
+       the student's read with isSchool(), like every other student rule.
+       The name, title and reason are free text within their caps (the name
+       is NOT shown as the student's identity: the console names a request by
+       its uid from the roster, else by the email, which the rule ties to the
+       sign-in token); the console escapes every value.
+       student-side: becomes isSchool() with the school-accounts paste 2
+       ⚠ Must be published BEFORE the site code that writes it (until then
+       the page says requests are not open yet). */
+    function songRequestNow() { return request.time; }
+    function songRequestWeekOk(week) {
+      let y = int(week[0:4]);
+      let w = int(week[6:8]);
+      let jan4 = timestamp.date(y, 1, 4);
+      let monday = jan4 - duration.value(jan4.dayOfWeek() - 1, 'd') + duration.value((w - 1) * 7, 'd');
+      return w >= 1 && w <= 53
+          && (monday + duration.value(3, 'd')).year() == y
+          && songRequestNow() >= monday - duration.value(1, 'd')
+          && songRequestNow() < monday + duration.value(8, 'd');
+    }
+    match /songRequests/{requestId} {
+      allow create: if isSignedIn()
+            && request.resource.data.keys().hasOnly(['uid', 'name', 'email', 'period', 'week', 'videoId', 'url', 'lyricsOk', 'topicOk', 'why', 'title', 'createdAt', 'state'])
+            && request.resource.data.keys().hasAll(['uid', 'name', 'email', 'period', 'week', 'videoId', 'url', 'lyricsOk', 'topicOk', 'why', 'title', 'createdAt', 'state'])
+            && request.resource.data.uid == request.auth.uid
+            && request.resource.data.week is string
+            && request.resource.data.week.matches('^[0-9]{4}-W[0-9]{2}$')
+            && requestId == request.auth.uid + '_' + request.resource.data.week
+            && songRequestWeekOk(request.resource.data.week)
+            && request.resource.data.name is string
+            && request.resource.data.name.size() <= 200
+            && request.resource.data.email is string
+            && request.resource.data.email.size() <= 200
+            && request.resource.data.email == request.auth.token.email
+            && request.resource.data.period in ['4', '7', 'CAS', '']
+            && request.resource.data.videoId is string
+            && request.resource.data.videoId.matches('^[A-Za-z0-9_-]{11}$')
+            && request.resource.data.url == 'https://www.youtube.com/watch?v=' + request.resource.data.videoId
+            && request.resource.data.lyricsOk is bool
+            && request.resource.data.topicOk is bool
+            && request.resource.data.why is string
+            && request.resource.data.why.size() <= 200
+            && ((request.resource.data.lyricsOk && request.resource.data.topicOk && request.resource.data.why.size() == 0)
+                || ((!request.resource.data.lyricsOk || !request.resource.data.topicOk) && request.resource.data.why.matches('(?s).*[^ \t\r\n].*')))
+            && request.resource.data.title is string
+            && request.resource.data.title.size() <= 80
+            && request.resource.data.createdAt == request.time
+            && request.resource.data.state == 'asked';
+      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow read, delete: if isTeacher();
+      allow update: if isTeacher()
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['state', 'note'])
+            && request.resource.data.state in ['asked', 'adding', 'declined']
+            && (!('note' in request.resource.data)
+                || (request.resource.data.note is string && request.resource.data.note.size() <= 200));
     }
   }
 }

@@ -6,6 +6,8 @@
 #   tools/rules-core-test.mjs  progress, config/class, the teacher check, the
 #                              live quiz, issue reports (with --breaks: broken
 #                              copies of the rules, each must turn a case red)
+#   tools/song-requests-rules-test.mjs  song requests: one per student per week,
+#                              the week maths at its edges (with --breaks)
 #
 # Nothing here touches the real Firebase project: the emulator runs on the
 # runner under a "demo-" project id, which needs no credentials and cannot
@@ -91,6 +93,7 @@ jobs:
             tools/pm-rules-test.mjs
             tools/rules-core-test.mjs --breaks
             tools/site-errors-rules-test.mjs --breaks --site ${{ github.workspace }}
+            tools/song-requests-rules-test.mjs --breaks
         run: |
           # GitHub runs this with -e and pipefail; one tool failing must not stop the others.
           set +e +o pipefail
