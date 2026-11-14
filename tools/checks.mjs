@@ -21853,7 +21853,8 @@ function checkPracticeMinutes(i18nTable) {
      1dl  a module change is run through tools/rule-zero-proof.mjs against the
           push's base: no section or step moves, no keyed quiz is reworded
           (choices or English prompt) in Modules 1..FROZEN_THROUGH or the next
-          one; a pure revert passes loudly; FROZEN_THROUGH = 1ap's number
+          one; a revert of a change committed under 24 hours ago passes
+          loudly; FROZEN_THROUGH = 1ap's number, and neither is ever lowered
      1dm  only the pinned places write progress/…, the console never does;
           config/class is written only inside teacherWriteConfig() (every
           script a page loads read as code, paths folded)

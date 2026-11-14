@@ -9,6 +9,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdtempSync, rmSync, readdirSync, mkdirSync, statSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { join, dirname } from 'node:path';
+import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import vm from 'node:vm';
@@ -235,7 +236,7 @@ export function selfTest() {
       const old = commit('an allowed append, 30 hours ago', hoursAgo(30));
       git(wt, ['revert', '--no-edit', '--no-commit', old]);
       process.env.GC_CHECKS_BASE = old; clearBaseCache();
-      report('R2-5: reverting a module change that has been live 30 hours', '1dl', true, run('1dl'), ls => ls.some(l => /live for 30 hours/.test(l.text)));
+      report('R2-5: reverting a module change that has been live 30 hours', '1dl', true, run('1dl'), ls => ls.some(l => /committed 30 hours ago/.test(l.text)));
       git(wt, ['reset', '-q', '--hard', head]);
       append('module-2.js', "(function(){ const w = SETS.find(x => x.id === 'm2w1'); const sec = w.stations.b.sections[w.stations.b.sections.length - 1]; sec.steps.push({ label: 'Self-test A', text: 'Play it.' }); })();");
       const a = commit('change A (module-2), 3 hours ago', hoursAgo(3));
@@ -280,7 +281,7 @@ export function selfTest() {
       append(PASTE_FILE, ack(rulesHash(t))); clearBaseCache();
       report('near-miss (R2-3): …until the record line is added', '1dn', false, run('1dn'));
     }
-    expect('R2-3: the hooks git runs are an older copy (at the push)', '1dn', true, () => { write('old-hooks/pre-push', '#!/bin/sh\nexit 0\n'); write('old-hooks/pre-commit', read('.githooks/pre-commit')); process.env.GIT_CONFIG_VALUE_0 = join(wt, 'old-hooks'); }, ls => ls.some(l => /older copy/.test(l.text)));
+    expect('R2-3: the hooks git runs are an older copy (at the push)', '1dn', true, () => { write('old-hooks/pre-push', '#!/bin/sh\nexit 0\n'); write('old-hooks/pre-commit', read('.githooks/pre-commit')); process.env.GIT_CONFIG_VALUE_0 = join(wt, 'old-hooks'); }, ls => ls.some(l => /older copy[\s\S]*point git at this tree's hooks/.test(l.text)));
     expect('near-miss (R2-3): the same at a commit only warns', '1dn', false, () => { write('old-hooks/pre-push', '#!/bin/sh\nexit 0\n'); write('old-hooks/pre-commit', read('.githooks/pre-commit')); process.env.GIT_CONFIG_VALUE_0 = join(wt, 'old-hooks'); process.env.GC_CHECKS_STAGE = 'commit'; }, ls => ls.some(l => l.kind === 'warn' && /older copy/.test(l.text)));
     { reset(); rulesEdit(); delete process.env.GC_CHECKS_STAGE;
       write('stage/pre-push', `#!/bin/sh\n"${process.execPath}" "${join(wt, 'tools', 'never-blocks.mjs')}"\n`);
@@ -292,6 +293,98 @@ export function selfTest() {
     { reset();
       const r = spawnSync('sh', [join(wt, '.githooks', 'pre-push'), 'origin', 'x'], { cwd: wt, encoding: 'utf8', input: `refs/heads/x ${git(wt, ['rev-parse', 'HEAD~1']).out} refs/heads/x 0000000000000000000000000000000000000000\n` });
       report('R2-14: pre-push, pushing a commit that is not HEAD', 'hook', true, [{ kind: r.status === 1 && /vouch for the wrong commit/.test(r.stdout) ? 'err' : 'ok', text: r.stdout.trim().slice(0, 200) }]);
+    }
+
+    // ── review round 3 ──
+    { // R3-1: 1dn dates a record line only against a rules change made in THIS push
+      const yesterday = (() => { const d = new Date(Date.now() - 86400e3); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; })();
+      const ackOn = (d, h) => `- ${d} firestore.rules ${h}: Jonathan was told on ${d} to paste it in the Firebase console (Firestore → Rules → Publish)`;
+      reset();
+      const t = read(RULES_FILE) + '\n// self-test r3\n'; write(RULES_FILE, t); append(PASTE_FILE, ackOn(yesterday, rulesHash(t)));
+      const off = -new Date().getTimezoneOffset(), tz = `${off >= 0 ? '+' : '-'}${String(Math.floor(Math.abs(off) / 60)).padStart(2, '0')}${String(Math.abs(off) % 60).padStart(2, '0')}`;
+      commit('rules change + its line, authored yesterday, rebased (committed) today', { GIT_AUTHOR_DATE: `${Math.floor((Date.now() - 86400e3) / 1000)} ${tz}` });   // in this machine's time zone, as a real author date is
+      clearBaseCache();
+      report('near-miss (R3-1b): a rules commit with its line, authored yesterday, rebased today', '1dn', false, run('1dn'));
+      reset();
+      const t2 = read(RULES_FILE) + '\n// self-test r3c\n'; write(RULES_FILE, t2); append(PASTE_FILE, ackOn(yesterday, rulesHash(t2)));
+      commit('rules change today, its line dated yesterday');
+      clearBaseCache();
+      report('R3-1c: a line dated before a real change in the same push', '1dn', true, run('1dn'));
+      // (a) the rules equal the base, the last rules commit is out of sight (a shallow clone's boundary, dated later)
+      reset();
+      write('README-selftest.txt', 'x'); const b = commit('a later commit (not the rules), dated 3 days ahead', { GIT_COMMITTER_DATE: new Date(Date.now() + 3 * 86400e3).toISOString(), GIT_AUTHOR_DATE: new Date(Date.now() + 3 * 86400e3).toISOString() });
+      const sc = join(dir, 'shallow-r3'); rmSync(sc, { recursive: true, force: true });
+      const gd2 = (c => c.startsWith('/') ? c : join(ROOT, c))(git(ROOT, ['rev-parse', '--git-common-dir']).out);
+      git(dir, ['clone', '-q', '--no-checkout', '--depth', '1', `file://${gd2}`, sc]); git(sc, ['fetch', '-q', '--depth', '1', 'origin', b]);
+      git(sc, ['sparse-checkout', 'set', '--no-cone', '/*', '!/audio/']); git(sc, ['checkout', '-q', '--detach', 'FETCH_HEAD']);
+      for (const f of TOOLS) { mkdirSync(dirname(join(sc, f)), { recursive: true }); writeFileSync(join(sc, f), readFileSync(join(ROOT, f))); }
+      process.env.GC_CHECKS_BASE = b; process.env.GIT_CONFIG_VALUE_0 = join(sc, '.githooks'); clearBaseCache();
+      report('near-miss (R3-1a): rules equal the base in a shallow clone whose boundary is newer than the record line', '1dn', false, run('1dn', sc));
+    }
+    // R3-2: the documented reword: response.renamedChoices + 1ap re-pinned
+    const renameReword = (withMap, repin) => () => {
+      const f = 'module-1.js';
+      const fpOf = mc => createHash('sha256').update(JSON.stringify({ choices: mc.choices, choices_es: mc.choices_es, answer: mc.answer })).digest('hex').slice(0, 16);
+      let m = null;
+      for (const w of loadSets()) for (const stId of Object.keys(w.stations || {})) (w.stations[stId].sections || []).forEach((sec, si) => (sec.steps || []).forEach((st, i) => {
+        const r = st.response; if (m || !r || r.type !== 'mc' || r.renamedChoices) return;
+        const c = (r.choices || []).find(x => read(f).split(`'${x}'`).length === 2 && !/['\\]/.test(x));
+        if (c) m = { key: `${w.id}·${stId}·sec${si}·step${i}`, choice: c, w: w.id, stId, si, i };
+      }));
+      if (!m) throw new Error('no MC found');
+      const neu = m.choice + ' (reworded)';
+      edit(f, `'${m.choice}'`, `'${neu}'`);
+      if (withMap) { const s2 = read(f); const at = s2.indexOf(`'${neu}'`); const r = s2.lastIndexOf('response: {', at); write(f, s2.slice(0, r) + `response: { renamedChoices: { ${JSON.stringify(m.choice)}: ${JSON.stringify(neu)} },` + s2.slice(r + 'response: {'.length)); }
+      const st = loadSets().find(x => x.id === m.w).stations[m.stId].sections[m.si].steps[m.i].response;
+      if (repin) edit('tools/checks.mjs', new RegExp(`('${m.key}': ')[0-9a-f]{16}'`), `$1${fpOf(st)}'`);
+    };
+    expect('near-miss (R3-2): a frozen keyed quiz reworded with renamedChoices and 1ap re-pinned (the documented route)', '1dl', false, renameReword(true, true));
+    expect('R3-2: …the same reword and re-pin with NO renamedChoices map', '1dl', true, renameReword(false, true));
+    expect('R3-2: a 1ap fingerprint changed with no module change', '1dl', true, () => edit('tools/checks.mjs', /('w1·b·sec0·step2': ')[0-9a-f]{16}'/, "$10123456789abcdef'"));
+    // m1: a revert of a commit dated in the future
+    { reset();
+      append('module-2.js', "(function(){ const w = SETS.find(x => x.id === 'm2w1'); const sec = w.stations.b.sections[w.stations.b.sections.length - 1]; sec.steps.push({ label: 'Self-test F', text: 'Play it.' }); })();");
+      const fut = commit('dated 300 days ahead', hoursAgo(-24 * 300)); git(wt, ['revert', '--no-edit', '--no-commit', fut]);
+      process.env.GC_CHECKS_BASE = fut; clearBaseCache();
+      report('R3 m1: reverting a commit dated in the future', '1dl', true, run('1dl'), ls => ls.some(l => /in the future/.test(l.text)));
+    }
+    // m2: the saver list holds only functions whose own run reaches a progress write
+    expect('near-miss (R3 m2): console calls renderAll() (it only installs handlers that save)', '1dm', false, T(CONSOLE, 'function teacherRe1(){ renderAll(); }'));
+    expect('R3 m2: console calls signOut() (it flushes progress first)', '1dm', true, T(CONSOLE, 'function teacherRe2(){ signOut(); }'));
+    // m3: hollowing that once passed
+    expect("R3 m3: buildDaily5 = () => ''", '1do', true, T('app/tab.js', "buildDaily5 = () => '';"));
+    expect("R3 m3: window['buildDaily5'] = …", '1do', true, T('app/tab.js', "window['buildDaily5'] = function(){ return ''; };"));
+    expect('R3 m3: the DAILY5_ENABLED read wrapped in if(0){…}', '1do', true, () => edit('app/lesson.js', /(\n\s*)(const reminder = DAILY5_ENABLED &&[^\n]*\n[^\n]*\n[^\n]*\n)/, "$1let reminder = '';$1if(0){ reminder = DAILY5_ENABLED && false; }$1const _unused = 0;\n"));
+    expect('R3 m3: an early return [] above the TAKE_TO_SONG_ENABLED read in visibleSteps()', '1do', true, () => edit('app/lesson.js', /(function visibleSteps\([^)]*\)\s*\{)/, '$1\n  if (true) return [];'));
+    // m4: a push that changes the guards says so
+    expect('R3 m4: never-pins.json changed (a loud line, not a failure)', '1dl', false, () => { const p = JSON.parse(read('tools/never-pins.json')); p.WARMUP_BANK_MIN.why += ' '; write('tools/never-pins.json', JSON.stringify(p, null, 1) + '\n'); }, ls => ls.some(l => l.kind === 'warn' && /this push changes the guards: [^.]*tools\/never-pins\.json/.test(l.text)));
+    // R3-3 / R3-4: the pre-push hook, with a stand-in node so only its own gate is under test
+    { reset(); commit('the tools as copied in, so the tree matches HEAD');
+      const fake = join(dir, 'fakebin'); mkdirSync(fake, { recursive: true }); writeFileSync(join(fake, 'node'), '#!/bin/sh\necho FAKE-NODE-RAN\nexit 0\n'); spawnSync('chmod', ['+x', join(fake, 'node')]);
+      const hook = (input) => spawnSync('sh', [join(wt, '.githooks', 'pre-push'), 'origin', 'x'], { cwd: wt, encoding: 'utf8', input, env: { ...process.env, PATH: `${fake}:/usr/bin:/bin` } });
+      const H = git(wt, ['rev-parse', 'HEAD']).out, H1 = git(wt, ['rev-parse', 'HEAD~1']).out, Z = '0000000000000000000000000000000000000000';
+      git(wt, ['tag', 'st-light', 'HEAD~1']);
+      let r = hook(`refs/tags/st-light ${H1} refs/tags/st-light ${Z}\n`);
+      report('near-miss (R3-3): pushing a lightweight tag on another commit', 'hook', false, [{ kind: r.status === 0 && /FAKE-NODE-RAN/.test(r.stdout) ? 'ok' : 'err', text: r.stdout.trim().slice(0, 160) }]);
+      git(wt, ['-c', 'user.name=t', '-c', 'user.email=t@x.invalid', 'tag', '-a', 'st-ann', '-m', 'x', 'HEAD']);
+      r = hook(`refs/tags/st-ann ${git(wt, ['rev-parse', 'st-ann']).out} refs/tags/st-ann ${Z}\n`);
+      report('near-miss (R3-3): pushing an annotated tag at HEAD', 'hook', false, [{ kind: r.status === 0 && /FAKE-NODE-RAN/.test(r.stdout) ? 'ok' : 'err', text: r.stdout.trim().slice(0, 160) }]);
+      git(wt, ['branch', '-f', 'st-other', 'HEAD~1']);
+      r = hook(`refs/heads/st-other ${H1} refs/heads/main ${Z}\n`);
+      report('R3-3: other:main (a branch that is not HEAD) is still refused', 'hook', true, [{ kind: r.status === 1 && /vouch for the wrong commit/.test(r.stdout) ? 'err' : 'ok', text: r.stdout.trim().slice(0, 160) }]);
+      write('scratch-untracked.txt', 'x');
+      r = hook(`refs/heads/x ${H} refs/heads/x ${Z}\n`);
+      report('near-miss (R3-4): HEAD pushed with only an untracked file around', 'hook', false, [{ kind: r.status === 0 && /FAKE-NODE-RAN/.test(r.stdout) ? 'ok' : 'err', text: r.stdout.trim().slice(0, 160) }]);
+      // end to end: a refused module commit, put back in the working tree only, pushed to a bare remote
+      const bare = join(dir, 'bare.git'); rmSync(bare, { recursive: true, force: true }); spawnSync('git', ['init', '-q', '--bare', bare]);
+      git(wt, ['push', '-q', '--no-verify', bare, `HEAD:refs/heads/main`]);
+      append('module-2.js', "SETS.forEach(w => { if (w.id === 'm2w1') w.stations.b.sections[0].steps.reverse(); });");
+      const badC = commit('a refused module commit');
+      git(wt, ['checkout', head, '--', 'module-2.js']);
+      const p = spawnSync('git', ['push', bare, 'HEAD:refs/heads/main'], { cwd: wt, encoding: 'utf8', env: { ...process.env, PATH: `${fake}:/usr/bin:/bin`, GIT_CONFIG_COUNT: '1', GIT_CONFIG_KEY_0: 'core.hooksPath', GIT_CONFIG_VALUE_0: join(wt, '.githooks') } });
+      const landed = spawnSync('git', ['--git-dir', bare, 'rev-parse', 'main'], { encoding: 'utf8' }).stdout.trim() === badC;
+      report('R3-4: a refused commit pushed with the old file put back but not committed (bare remote, end to end)', 'hook', true, [{ kind: p.status !== 0 && !landed && /tracked files differ/.test(p.stdout + p.stderr) ? 'err' : 'ok', text: (p.stdout + p.stderr).trim().split('\n').slice(0, 2).join(' | ').slice(0, 200) }]);
+      git(wt, ['tag', '-d', 'st-light', 'st-ann']); git(wt, ['branch', '-D', 'st-other']);
     }
 
     // ── R1-1: CRLF copies of every text file the checks read ──
