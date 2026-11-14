@@ -717,12 +717,23 @@ function ccLiveBpm(d){
   if (d > 0 && next < cur) next = cur;   // never a slow-down from a speed-up button
   if (next === cur) return;
   const now = performance.now();
-  const oldBeat = cc.beatMs, newBeat = 60000 / next;
+  const oldBeat = cc.beatMs, newBeat = 60000 / next, oldStart = cc.listenStart;
   cc.listenStart = now - cc.gridOffset - (now - cc.listenStart - cc.gridOffset) * newBeat / oldBeat;
   cc.beatMs = newBeat;
   cc.stageBpms[cc.stage] = next;
   cc.roundLow = Math.min(cc.roundLow == null ? next : cc.roundLow, next);
-  cc.changes.forEach(c => { if (c.result === null){ c.t = cc.listenStart + c.beat * cc.beatMs; c.bpm = next; } });
+  /* A change still waiting moves with the new tempo. A check open or held for it (ccLoop, the nearest strum decides) measured its strum's
+     distance from the OLD due time: it moves by the same amount, or a farther strum could beat a nearer one (review 2026-11-13, R1-2). Its
+     window is the new tempo's, as for every sound heard from now on. */
+  const winNow = Math.min(cc.beatMs * cc.bpc * 0.5, Math.max(220, cc.beatMs * 0.5));
+  cc.changes.forEach(c => {
+    if (c.result !== null) return;
+    const moved = cc.listenStart - oldStart + c.beat * (cc.beatMs - oldBeat);
+    c.t = cc.listenStart + c.beat * cc.beatMs; c.bpm = next;
+    if (c.pend && c.pend.dev != null) c.pend.dev -= moved;
+    if (c.hold && c.hold.dev != null) c.hold.dev -= moved;
+    if (c.win != null) c.win = winNow;
+  });
   if (cc.tempoLog) cc.tempoLog.push({ t: now, stage: cc.stage, from: cur, to: next });
   if (cc.retimedStages && cc.retimedStages.indexOf(cc.stage) < 0) cc.retimedStages.push(cc.stage);
   /* A pair's tempo is the one it is played at; the next visit to the setup opens on it. A song switch's rounds are its own. */
