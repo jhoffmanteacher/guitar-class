@@ -2043,7 +2043,7 @@ function a11yReport(found) {
   if (A11Y_OUT) { try { writeFileSync(A11Y_OUT, JSON.stringify(found, null, 1)); say(`a11y: every finding written to ${A11Y_OUT}`); } catch (e) { console.error(`a11y: could not write ${A11Y_OUT}: ${e.message}`); } }
   // This run, as the baseline holds it: screen → rule → { count, targets }.
   const now = {};
-  for (const key of screens) { now[key] = {}; for (const v of found.screens[key].rules) now[key][v.id] = { count: v.nodes.length, targets: v.nodes.map(n => n.target) }; }
+  for (const key of screens) { now[key] = {}; for (const v of found.screens[key].rules) now[key][v.id] = { count: v.nodes.length, targets: v.nodes.map(n => n.target), html: Object.fromEntries(v.nodes.map(n => [n.target, n.html])) }; }
   if (args.includes('--a11y-write-baseline')) {
     const doc = { _about: `The accessibility scan's baseline (tools/smoke.mjs, area a11y): the findings on ${new Date().toLocaleDateString('en-CA')}, per screen and rule. The count decides; the targets only name a new element. Lower it with node tools/smoke.mjs --only a11y --a11y-write-baseline (both languages).`, axe: found.axe, screens: {} };
     for (const key of screens.sort()) { doc.screens[key] = {}; for (const id of Object.keys(now[key]).sort()) doc.screens[key][id] = { count: now[key][id].count, targets: now[key][id].targets.slice(0, 50) }; }
@@ -2062,7 +2062,8 @@ function a11yReport(found) {
       if (have > allowed) {
         up++;
         const known = new Set((b[id] && b[id].targets) || []), fresh = now[key][id].targets.filter(x => !known.has(x));
-        const named = (fresh.length ? fresh : now[key][id].targets).slice(0, 4).join(' | ').slice(0, 400);
+        // Each named element carries the start of its markup: a selector alone can hide the fault (a duplicate id is not in it).
+        const named = (fresh.length ? fresh : now[key][id].targets).slice(0, 4).map(x => `${x} ${String(now[key][id].html[x] || '').replace(/\s+/g, ' ').slice(0, 90)}`).join(' | ').slice(0, 500);
         const text = `${id} on ${key}: ${have} element${have === 1 ? '' : 's'}, the baseline allows ${allowed}${fresh.length ? '; new: ' : '; e.g. '}${named}`;
         if (ratchet) out.push({ step: `a11y:${key}`, kind: 'a11y-new', text });
         else say(`a11y: (ratchet off until ${'2026-11-27'}) would fail: ${text}`);
