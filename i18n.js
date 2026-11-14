@@ -1060,7 +1060,7 @@
     'sc.target':             { en: 'Play the eight bars once. I listen for a strum in each strum place, nothing where the hand misses, and the chord on each 1.',
                                es: 'Toca los ocho compases una vez. Escucho un rasgueo en cada lugar de rasgueo, nada donde la mano no toca, y el acorde en cada 1.' },
     'sc.tipDir':             { en: 'The mic cannot hear down from up, so it only checks where each strum lands.',
-                               es: 'El micrófono no distingue abajo de arriba, así que solo revisa dónde cae cada rasgueo.' },
+                               es: 'El micrófono no oye si vas abajo o arriba: solo dónde cae cada rasgueo.' },
     'sc.tipCount':           { en: '4 clicks, then the click goes quiet: keep the beat in your head, not with your foot.',
                                es: '4 clics, luego el clic se calla: lleva el pulso en tu cabeza, no con el pie.' },
     'sc.listening':          { en: 'Listening — play the pattern', es: 'Escuchando — toca el patrón' },
