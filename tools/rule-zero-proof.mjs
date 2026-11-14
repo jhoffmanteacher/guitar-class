@@ -46,8 +46,13 @@ import { tmpdir } from 'node:os';
 import vm from 'node:vm';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const BASE = process.argv[2] || 'origin/main';
-const FROZEN_THROUGH = 3;   // students are in Modules 1..3 this school year (raised 2→3 on 2026-10-01, as the class reached Module 3)
+const BASE = process.argv.slice(2).find(a => !a.startsWith('--')) || 'origin/main';
+/* --frozen-through=N / --open-through=N can only RAISE the numbers below:
+   checks.mjs 1dl passes the base's numbers, so a push that lowers them here is
+   still judged by the numbers students already rely on (review R2-1). */
+const flagNum = name => { const a = process.argv.find(x => x.startsWith(`--${name}=`)); const n = a ? Number(a.split('=')[1]) : NaN; return Number.isFinite(n) ? n : -1; };
+const FROZEN_THROUGH_PINNED = 3;   // students are in Modules 1..3 (raised 2→3 on 2026-10-01, as the class reached Module 3); never lowered: module progress is never wiped (Jonathan, 2026-11-13)
+const FROZEN_THROUGH = Math.max(FROZEN_THROUGH_PINNED, flagNum('frozen-through'));
 
 const C = { red:'\x1b[31m', green:'\x1b[32m', yellow:'\x1b[33m', dim:'\x1b[2m', bold:'\x1b[1m', reset:'\x1b[0m' };
 const ok   = m => console.log(`${C.green}✓${C.reset} ${m}`);
@@ -172,7 +177,7 @@ function skeleton(sets) {
    backstop for `storageSections()`. Step LABELS stay frozen by index —
    they are how this check sees an insertion. */
 const LOAD_BEARING_TITLE = 'Warm-up — tuning check (Module 1)';
-const OPEN_THROUGH = 6;
+const OPEN_THROUGH = Math.max(6, flagNum('open-through'));   // never lowered either
 function lcs(a, b) {
   const n = a.length, m = b.length;
   const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
@@ -309,16 +314,30 @@ function renameMapped(bm, hm) {
   return mapped[bm.answer] === hm.choices[hm.answer];
 }
 
-/* B covers the frozen modules AND the next one, the module the class is about
-   to enter (CLAUDE.md "Three regimes": treat it as frozen; checks.mjs 1dl). */
-const NEXT = FROZEN_THROUGH + 1;
+/* B covers the frozen modules AND the next one: FROZEN_THROUGH is raised when
+   the class ENTERS a module, and the keyed quizzes of the module after it are
+   frozen automatically (CLAUDE.md "Three regimes"; checks.mjs 1dl). That module
+   is in the open regime, where a step may be inserted anywhere in a section, so
+   its quizzes are matched by their step's LABEL within the section (section A
+   proves old labels keep their relative order), not by index (review R2-2). */
+const FREEZE_AHEAD = 1;
+const NEXT = FROZEN_THROUGH + FREEZE_AHEAD;
+const secOf = k => k.replace(/·step\d+$/, '');
+const pairNext = (() => {
+  // base key → head key for the graded MCs of Module NEXT, by section + label + occurrence
+  const group = (m) => { const g = new Map(); for (const [k, v] of m) { if (v.kind !== 'graded' || v.moduleNum !== NEXT) continue; const gk = `${secOf(k)}\u0001${v.label}`; if (!g.has(gk)) g.set(gk, []); g.get(gk).push(k); } return g; };
+  const bg = group(baseMc), hg = group(headMc), pairs = new Map();
+  for (const [gk, bl] of bg) { const hl = hg.get(gk) || []; bl.forEach((bk, i) => { if (hl[i]) pairs.set(bk, hl[i]); }); }
+  return pairs;
+})();
+const headToBase = new Map([...pairNext].map(([b, h]) => [h, b]));
 const whereMod = m => m === NEXT ? `in Module ${NEXT}, the module the class is about to enter (CLAUDE.md, Three regimes)` : 'in a module students are in';
 head(`B. Keyed MC choices and English prompts frozen in Modules 1–${FROZEN_THROUGH} and Module ${NEXT} (about to be entered)`);
 {
   let frozen = 0, broken = 0;
   for (const [k, h] of headMc) {
     if (h.kind !== 'graded' || h.moduleNum > NEXT) continue;
-    const b = baseMc.get(k);
+    const b = h.moduleNum === NEXT ? baseMc.get(headToBase.get(k)) : baseMc.get(k);
     /* A new keyed MC on a step that was already there orphans no saved
        answer (section A has proved every step kept its place), so it prints
        instead of failing (Jonathan, 2026-10-19). */
@@ -350,8 +369,9 @@ head(`B. Keyed MC choices and English prompts frozen in Modules 1–${FROZEN_THR
      was removed (or turned into another response type) passed here — only
      checks.mjs 1ap caught it (2026-10-11 review). Walk the base too. */
   for (const [k, b] of baseMc) {
-    if (b.kind !== 'graded' || b.moduleNum > NEXT || headMc.has(k)) continue;
-    fail(`${k} — "${b.label}": keyed MC is GONE ${whereMod(b.moduleNum)}. Its stored picks are orphaned.`);
+    if (b.kind !== 'graded' || b.moduleNum > NEXT) continue;
+    if (b.moduleNum === NEXT ? pairNext.has(k) : headMc.has(k)) continue;
+    fail(`${k} — "${b.label}": keyed MC is GONE ${whereMod(b.moduleNum)} (no keyed MC on a step labelled ${q(b.label)} in that section any more). Its stored picks are orphaned.`);
     broken++;
   }
   if (!broken) ok(`${frozen} keyed MCs in Modules 1–${NEXT} are byte-identical (choices, choices_es, answer, English prompt)`);

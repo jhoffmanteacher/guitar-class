@@ -30,15 +30,27 @@ ROOT=$(git rev-parse --show-toplevel)
 # Nothing to check on a pure delete (`git push origin :branch`) — git feeds
 # an all-zero local sha for those, and there's no tree to validate.
 deleting_only=1
-while read -r _local_ref local_sha _remote_ref _remote_sha; do
+HEAD_SHA=$(git rev-parse HEAD)
+not_head=""
+while read -r local_ref local_sha _remote_ref _remote_sha; do
   [ -z "$local_sha" ] && continue
   case "$local_sha" in
-    *[!0]*) deleting_only=0 ;;
+    *[!0]*)
+      deleting_only=0
+      # The checks below read this checkout's files, so they only speak for what is pushed when the
+      # pushed commit IS the checked-out one.
+      [ "$local_sha" != "$HEAD_SHA" ] && not_head="$not_head $local_ref ($local_sha)"
+      ;;
   esac
 done
 if [ "$deleting_only" -eq 1 ]; then
   exit 0
 fi
+if [ -n "$not_head" ]; then
+  printf '\033[31m✗ pre-push: this push sends%s, but this checkout is at %s; the checks read the checked-out files, so they would vouch for the wrong commit. Check out the commit you push (or push HEAD), then push again.\033[0m\n' "$not_head" "$HEAD_SHA"
+  exit 1
+fi
+printf 'pre-push: checking this checkout, at %s (the commit being pushed)%s\n' "$HEAD_SHA" "$( [ -n "$(git status --porcelain --untracked-files=no)" ] && echo ', plus uncommitted edits' )"
 
 # Same node resolution as .githooks/pre-commit — Git Bash on Windows doesn't
 # inherit the PATH entry the Node installer adds for cmd/PowerShell, so PATH

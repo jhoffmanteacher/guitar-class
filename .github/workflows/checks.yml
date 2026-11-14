@@ -10,8 +10,10 @@
 # last push". GitHub emails the pusher when a run fails.
 #
 # The "never" checks (1dl, 1dn) compare with the commit before the push; the
-# first job fetches it (the checkout is shallow) and hands it over as
-# GC_CHECKS_BASE. Without it they would compare main with itself.
+# jobs that run them fetch it (the checkout is shallow) and hand it over as
+# GC_CHECKS_BASE, with GC_CHECKS_STAGE=push. Without it they would compare main
+# with itself. They also run alone in the `never` job, which no newer push
+# cancels.
 #
 # The second job runs the quick Node-only proof tools that CLAUDE.md asks for
 # after a change to their area (the save path, what a student sees, the live
@@ -39,12 +41,57 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: site-checks-${{ github.ref }}
-  cancel-in-progress: true
-
+# A newer push cancels an older push's run of these jobs, each in its own group,
+# EXCEPT the `never` job: it compares one push's change with that push's own base,
+# so cancelling it would leave that change compared with nothing (review R2-4).
 jobs:
   checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: site-checks-checks-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24
+      # checks.mjs 1dl and 1dn ("never" rules: no section or step moved, no
+      # frozen quiz reworded; a firestore.rules change acknowledged) compare the
+      # tree with the commit before the push. The checkout is shallow, so that
+      # commit is fetched by its id, with three days of history behind it (1dl
+      # lets a revert of a change younger than 24 hours through) and two more
+      # commits; a new branch, or a before-commit GitHub no longer has, falls
+      # back to the last commit alone (as browser.yml does). The `never` job
+      # below does the same.
+      - name: The push's base, for the "never" checks
+        id: base
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -u
+          base=""
+          if [ "$EVENT" = "push" ] && [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
+            if git fetch --no-tags --shallow-since="3 days ago" origin "$BEFORE" || git fetch --no-tags --depth=2 origin "$BEFORE"; then
+              git fetch --no-tags --deepen=2 origin "$BEFORE" || true
+              base="$BEFORE"
+            fi
+          fi
+          if [ -z "$base" ] && git rev-parse -q --verify 'HEAD~1^{commit}' >/dev/null; then base="$(git rev-parse HEAD~1)"; fi
+          echo "Compared with: ${base:-nothing (the checks say so)}"
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+      - name: node tools/checks.mjs --check --skip-links
+        env:
+          GC_CHECKS_BASE: ${{ steps.base.outputs.base }}
+          GC_CHECKS_STAGE: push
+        run: node tools/checks.mjs --check --skip-links
+
+  # The "never" checks (tools/never-blocks.mjs: 1dl-1do) on their own, in no
+  # concurrency group, so a newer push never cancels them.
+  never:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -57,8 +104,11 @@ jobs:
       # checks.mjs 1dl and 1dn ("never" rules: no section or step moved, no
       # frozen quiz reworded; a firestore.rules change acknowledged) compare the
       # tree with the commit before the push. The checkout is shallow, so that
-      # commit is fetched by its id; a new branch, or a before-commit GitHub no
-      # longer has, falls back to the last commit alone (as browser.yml does).
+      # commit is fetched by its id, with three days of history behind it (1dl
+      # lets a revert of a change younger than 24 hours through) and two more
+      # commits; a new branch, or a before-commit GitHub no longer has, falls
+      # back to the last commit alone (as browser.yml does). The `never` job
+      # below does the same.
       - name: The push's base, for the "never" checks
         id: base
         env:
@@ -68,21 +118,26 @@ jobs:
           set -u
           base=""
           if [ "$EVENT" = "push" ] && [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
-            # 51 deep: 1dl lets a pure revert through when the module files equal an ancestor of the base (50 back)
-            if git fetch --no-tags --depth=51 origin "$BEFORE" || git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then base="$BEFORE"; fi
+            if git fetch --no-tags --shallow-since="3 days ago" origin "$BEFORE" || git fetch --no-tags --depth=2 origin "$BEFORE"; then
+              git fetch --no-tags --deepen=2 origin "$BEFORE" || true
+              base="$BEFORE"
+            fi
           fi
           if [ -z "$base" ] && git rev-parse -q --verify 'HEAD~1^{commit}' >/dev/null; then base="$(git rev-parse HEAD~1)"; fi
           echo "Compared with: ${base:-nothing (the checks say so)}"
           echo "base=$base" >> "$GITHUB_OUTPUT"
-      - name: node tools/checks.mjs --check --skip-links
+      - name: The never rules (node tools/never-blocks.mjs)
         env:
           GC_CHECKS_BASE: ${{ steps.base.outputs.base }}
           GC_CHECKS_STAGE: push
-        run: node tools/checks.mjs --check --skip-links
+        run: node tools/never-blocks.mjs
 
   proofs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    concurrency:
+      group: site-checks-proofs-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -104,6 +159,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     continue-on-error: true
+    concurrency:
+      group: site-checks-lint-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0

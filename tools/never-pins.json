@@ -1,0 +1,246 @@
+{
+ "DAILY5_FUNCTIONS": {
+  "buildDaily5": {
+   "value": "00eff2494800",
+   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "date": "2026-11-13"
+  },
+  "openDaily5Here": {
+   "value": "e009f23fe6ee",
+   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "date": "2026-11-13"
+  },
+  "closeDaily5": {
+   "value": "2f57d98c568f",
+   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "date": "2026-11-13"
+  },
+  "daily5EscClose": {
+   "value": "095632226185",
+   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "date": "2026-11-13"
+  },
+  "dayOfYear": {
+   "value": "3b1729df30c0",
+   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "date": "2026-11-13"
+  },
+  "moduleStepsFlat": {
+   "value": "114343a50a76",
+   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "date": "2026-11-13"
+  },
+  "buildModuleRoutine": {
+   "value": "3623c95a5044",
+   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "date": "2026-11-13"
+  },
+  "isTakeToSongSection": {
+   "value": "9e117490f7a0",
+   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "date": "2026-11-13"
+  }
+ },
+ "PROGRESS_WRITERS": {
+  "app/explore.js|songsLibraryOpen": {
+   "value": [
+    "91b470ff2fd4"
+   ],
+   "why": "a Songs-page click counts one open in the student's own doc (checks.mjs 1ch) (pinned at origin/main 2f9041a)",
+   "date": "2026-11-13"
+  },
+  "app/save.js|flushSave": {
+   "value": [
+    "9a0f50eae17c"
+   ],
+   "why": "the app's progress writer: the signed-in student's own doc (pinned at origin/main 2f9041a)",
+   "date": "2026-11-13"
+  },
+  "app/save.js|swap45Commit": {
+   "value": [
+    "b43cd7212c3f",
+    "1096aa83b97d",
+    "105b80bfb4ad"
+   ],
+   "why": "the one-time Modules 4/5 move: its transaction reads and writes the signed-in student's own doc (pinned at origin/main 2f9041a)",
+   "date": "2026-11-13"
+  },
+  "tabs/journey.js|flushSave": {
+   "value": [
+    "340b12099fbe",
+    "0aef25b39c41",
+    "2acf19daee29"
+   ],
+   "why": "a Journey page's \"I'm ready\" saves into the student's own doc (pinned at origin/main 2f9041a)",
+   "date": "2026-11-13"
+  },
+  "trainer-site-adapter.js|(top level)": {
+   "value": [
+    "168cb5033803"
+   ],
+   "why": "Hear It First saves its profile in the signed-in account's own doc (mergeFields trainer) (pinned at origin/main 2f9041a)",
+   "date": "2026-11-13"
+  }
+ },
+ "SWITCH_READS": {
+  "DAILY5_ENABLED": {
+   "value": [
+    "ab874bb8b0be"
+   ],
+   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "date": "2026-11-13"
+  },
+  "TAKE_TO_SONG_ENABLED": {
+   "value": [
+    "f8bf986b2c1d",
+    "65a27aa21291"
+   ],
+   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "date": "2026-11-13"
+  }
+ },
+ "DAILY5_CSS": {
+  "value": [
+   ".daily5-head",
+   ".daily5-inline",
+   ".daily5-inline strong",
+   ".daily5-inline-btn",
+   ".daily5-inline-btn:hover",
+   ".daily5-modal",
+   ".daily5-overlay",
+   ".daily5-panel",
+   ".dp.focus.pd-showing .daily5-inline",
+   "body.print-routine .daily5-panel"
+  ],
+  "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+  "date": "2026-11-13"
+ },
+ "DAILY5_INDEX_MARKUP": {
+  "value": 1,
+  "why": "the search panel reuses .daily5-panel (pinned at origin/main 2f9041a)",
+  "date": "2026-11-13"
+ },
+ "WARMUP_BANK_MIN": {
+  "value": 3,
+  "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+  "date": "2026-11-13"
+ },
+ "TAKE_TO_SONG_STEPS": {
+  "2": {
+   "value": [
+    "632e0618",
+    "4b962563",
+    "12e037b6",
+    "3ff9522a",
+    "6a052b9f",
+    "9bccfa86",
+    "7ba62b77",
+    "4a29051a"
+   ],
+   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "date": "2026-11-13"
+  },
+  "3": {
+   "value": [
+    "94f1fb26",
+    "4a56e7bb",
+    "270e1454",
+    "6d62106e"
+   ],
+   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "date": "2026-11-13"
+  },
+  "4": {
+   "value": [
+    "9014262e",
+    "59628d20",
+    "83c07e5d",
+    "a7c42178",
+    "d181121a",
+    "e12331e6"
+   ],
+   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "date": "2026-11-13"
+  },
+  "5": {
+   "value": [
+    "71e8b80d",
+    "00bcc49e",
+    "560c3e09",
+    "6b992898",
+    "1e8630a1",
+    "563cfd38",
+    "39c29dbb"
+   ],
+   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "date": "2026-11-13"
+  },
+  "6": {
+   "value": [
+    "b2a0a0f5",
+    "235c75e2",
+    "fd15cb59",
+    "18e825f1",
+    "e5a0b558",
+    "85866425"
+   ],
+   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "date": "2026-11-13"
+  },
+  "7": {
+   "value": [
+    "746975a8",
+    "0fd5ae96",
+    "e167ef7f",
+    "84109771",
+    "1b1fa0a1"
+   ],
+   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "date": "2026-11-13"
+  },
+  "8": {
+   "value": [
+    "80f8f729",
+    "ce998de6",
+    "81192928"
+   ],
+   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "date": "2026-11-13"
+  },
+  "9": {
+   "value": [
+    "26745c8e",
+    "55b0ebca"
+   ],
+   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "date": "2026-11-13"
+  },
+  "10": {
+   "value": [
+    "7d4df60a",
+    "be3911d4",
+    "cffb036a"
+   ],
+   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "date": "2026-11-13"
+  },
+  "11": {
+   "value": [
+    "6478eaa1",
+    "12c4e71d",
+    "09aeca5d"
+   ],
+   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "date": "2026-11-13"
+  },
+  "12": {
+   "value": [
+    "b5dfa4bf",
+    "483cbd18",
+    "ade55e1a"
+   ],
+   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "date": "2026-11-13"
+  }
+ }
+}
