@@ -177,6 +177,19 @@ async function openPage(port) {
   return { send, evalJs, on: h => handlers.push(h), close: async () => { try { ws.close(); await fetch(`http://127.0.0.1:${port}/json/close/${t.id}`); } catch { /* gone */ } } };
 }
 
+/* A reload inside a walk waits for the page itself after its fixed pause. The app's parts are `defer` scripts, so
+   every one has run once the document is complete. The fixed 3.5 s alone was too short once on a GitHub runner
+   (2026-11-14, main a0f4047: the Note Call walk called functions from two parts that had not run yet). It gives up
+   after 30 s and lets the next step report what is missing. */
+const pageLoaded = async (page, ms = 30000) => {
+  const t0 = Date.now();
+  while (Date.now() - t0 < ms) {
+    try { if (await page.evalJs(`document.readyState === 'complete' && typeof devBypass === 'function'`)) return true; } catch { /* between two documents */ }
+    await sleep(200);
+  }
+  return false;
+};
+
 // Network and browser-policy noise that says nothing about our code.
 const NOISE = /firebase|firestore|googleapis|gstatic|google\.com|youtube|ytimg|net::ERR|Failed to fetch|ERR_|auth\/|identitytoolkit|favicon|Content Security|websocket|WebChannel|Missing or insufficient|offline|Could not reach|NotAllowedError|play\(\) request|AbortError|NotSupportedError|The play\(\)/i;
 
@@ -349,7 +362,7 @@ async function chordCallWalk(page, run, events, stats, base) {
   if (!list || !list.length) return;
   const fail = (step, text) => events.push({ step: 'chordcall:' + step, kind: 'chordcall', text });
   await page.send('Page.navigate', { url: base + '/index.html' });
-  await sleep(3500);
+  await sleep(3500); await pageLoaded(page);
   await run('chc:devBypass', 'devBypass()', 3500);
   for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'chc:devBypass' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
   await run('chc:open', 'openClassActivitiesScreen()', 600);
@@ -415,7 +428,7 @@ async function chordCallWalk(page, run, events, stats, base) {
   // After a reload the speed is back on its default.
   await run('chc:set-normal', `${q(0, '[data-chc-slow="0"]')} ? ${q(0, '[data-chc-slow="0"]')}.click() : 0`, 100);
   await page.send('Page.navigate', { url: base + '/index.html' });
-  await sleep(3500);
+  await sleep(3500); await pageLoaded(page);
   await run('chc:devBypass2', 'devBypass()', 3500);
   for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'chc:devBypass2' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
   await run('chc:reopen', 'openClassActivitiesScreen()', 600);
@@ -443,7 +456,7 @@ async function powerNameWalk(page, run, events, stats, base) {
   if (!list || !list.length) return;
   const fail = (step, text) => events.push({ step: 'pcname:' + step, kind: 'pcname', text });
   await page.send('Page.navigate', { url: base + '/index.html' });
-  await sleep(3500);
+  await sleep(3500); await pageLoaded(page);
   await run('pwn:devBypass', 'devBypass()', 3500);
   for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'pwn:devBypass' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
   await run('pwn:clear', `(function(){ try { localStorage.removeItem('pwnAnswer'); } catch (e) {} return 1; })()`, 10);
@@ -536,7 +549,7 @@ async function powerNameWalk(page, run, events, stats, base) {
   // Show answer is remembered per browser: the Off clicked above is still Off after a reload, and On comes back when clicked.
   await run('pwn:reload-pref', `(function(){ try { return localStorage.getItem('pwnAnswer'); } catch (e) { return null; } })()`, 10);
   await page.send('Page.navigate', { url: base + '/index.html' });
-  await sleep(3500);
+  await sleep(3500); await pageLoaded(page);
   await run('pwn:devBypass2', 'devBypass()', 3500);
   for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'pwn:devBypass2' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
   await run('pwn:reopen', 'openClassActivitiesScreen()', 600);
@@ -600,7 +613,7 @@ async function recordingWalk(page, run, events, stats, base) {
     if (!saved) fail(id, 'the choice was not saved for the song (' + b.saved + ')');
     // Reload: the saved choice must still be the one showing.
     await page.send('Page.navigate', { url: base + '/index.html' });
-    await sleep(3500);
+    await sleep(3500); await pageLoaded(page);
     await run('recording:' + id + ':devBypass', 'devBypass()', 3500);
     // The app downgrades this benign browser warning to console.warn (app.js, near the top); a second boot trips it.
     for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'recording:' + id + ':devBypass' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
@@ -638,7 +651,7 @@ async function noteCallWalk(page, run, events, stats, base) {
      had loaded coach.js earlier, so nothing saw it). The first Start below runs
      here. */
   await page.send('Page.navigate', { url: base + '/index.html' });
-  await sleep(3500);
+  await sleep(3500); await pageLoaded(page);
   await run('nc:devBypass', 'devBypass()', 3500);
   for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'nc:devBypass' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
   const lazy = await run('nc:no-coach', `typeof coachReadFrame === 'undefined' && typeof coachPowerTargets === 'function'`, 10);
@@ -920,7 +933,7 @@ async function powerSwitchWalk(page, run, events, stats, base) {
   // Reload: a new student's first look (the remembered pick is sessionStorage, so a new session starts without it).
   await run('pw:new-session', `(sessionStorage.clear(), 1)`, 10);
   await page.send('Page.navigate', { url: base + '/index.html' });
-  await sleep(3500);
+  await sleep(3500); await pageLoaded(page);
   await run('pw:devBypass', 'devBypass()', 3500);
   for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'pw:devBypass' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
   await page.send('Emulation.setDeviceMetricsOverride', size);
@@ -1351,7 +1364,7 @@ async function cardKeysWalk(page, run, events, stats, base) {
   /* A FRESH page, like noteCallWalk's: a state an earlier walk left behind (a Call-the-chord round still live, a tool
      popup open, the rail open, a card playing) would make the first Space do nothing for a reason that is not the keys. */
   await page.send('Page.navigate', { url: base + '/index.html' });
-  await sleep(3500);
+  await sleep(3500); await pageLoaded(page);
   await run('keys:devBypass', 'devBypass()', 3500);
   for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'keys:devBypass' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
   if (!(await run('keys:present', `typeof pcKeydown === 'function' && typeof pcKeyPointerUp === 'function' && CLASS_ACTIVITIES.some(a => a.id === '${ID}')`, 10))) return;
@@ -2088,7 +2101,7 @@ async function a11yWalk(page, run, events, stats, base) {
   await run('a11y:clear-storage', `(() => { try { localStorage.clear(); sessionStorage.clear(); } catch (e) { /* none */ } return 1; })()`, 10);
   // Sign-in: a fresh page, not signed in (the dev bypass signs in below, as the walk's boot does).
   await page.send('Page.navigate', { url: base + '/index.html' });
-  await sleep(3500);
+  await sleep(3500); await pageLoaded(page);
   // R2-6: sign-in has its identity check too: the sign-in panel shown, the app not.
   const si = await run('a11y:en:sign-in:is', `(() => { const p = document.getElementById('auth-signin'), app = document.getElementById('app');
     return { ok: !!p && !p.hidden && p.getClientRects().length > 0 && !!app && getComputedStyle(app).display === 'none', lang: document.documentElement.lang }; })()`, 10);
