@@ -17534,7 +17534,7 @@ function checkSongRequests() {
    asking at once, the limit at and one byte over, the card's loading line,
    a stop during the load. The case count is pinned (SONG_FILES_SIM_PIN) so a
    deleted case fails here; `node tools/song-files-sim.mjs --breaks` turns
-   24 broken copies of the loader red, one at a time.
+   25 broken copies of the loader red, one at a time.
    Then source pins for what a run of the loader alone cannot see, read with
    comments stripped:
      - SONG_FILES_MONTH_LIMIT is 6 GiB (6 * 1024 * 1024 * 1024) and the list
@@ -17553,7 +17553,7 @@ function checkSongRequests() {
        cancels a song still loading;
      - index.html loads app/songfiles.js before app/snippets.js.
    ════════════════════════════════════════════════════════════════════ */
-const SONG_FILES_SIM_PIN = 81;
+const SONG_FILES_SIM_PIN = 84;   // 81 -> 84 (2026-11-14): a sign-out in the same tab stops handing out the loaded copy
 const SONG_FILES_LIST_PIN = 0;
 function checkSongFilesLoader() {
   head('1dx. Song files: the loader is run (pieces, checks, device copy, two tabs, the monthly limit); the player hooks are pinned');

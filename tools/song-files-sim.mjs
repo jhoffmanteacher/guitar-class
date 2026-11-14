@@ -195,6 +195,11 @@ async function suite(src, quiet){
     const r0 = sh.fs.st.reads;
     const url2 = await tab.api.songFileLoad('made-up');
     ok('a second ask in the page reads nothing and gives the same address', url2 === url && sh.fs.st.reads === r0);
+    tab.ctx.currentUser = null;
+    ok('signed out in the same tab: the loaded copy is not handed out (needs a load again, the address is the path)', tab.api.songFileNeedsLoad('private:made-up') && tab.api.songFileSrc('private:made-up') === 'private:made-up');
+    ok('…and asking again says sign in', await code(tab.api.songFileLoad('made-up')) === 'signin');
+    tab.ctx.currentUser = { uid: 'uidOther' };
+    ok('another student signs in on that tab: the copy plays again with no read', !tab.api.songFileNeedsLoad('private:made-up') && sh.fs.st.reads === r0);
   }
   say('== the device copy');
   { const r0 = sh.fs.st.reads, u0 = usage(sh);
@@ -367,7 +372,8 @@ const BREAKS = [
   ['the restart runs for a card no longer waiting', "  songFileLoad(id, f => { if(mine()) songFileShow(host, 'loading', f); }).then(() => {\n    if(!mine()) return;", "  songFileLoad(id, f => { if(mine()) songFileShow(host, 'loading', f); }).then(() => {"],
   ['the loading line never shows the %', "{ pct: Math.max(0, Math.min(99, Math.floor((frac || 0) * 100))) }", "{ pct: 0 }"],
   ['denied reads as failed', "if(c === 'permission-denied' || c === 'unauthenticated') return 'denied';", ''],
-  ['a public path is mapped', "return (id && sfUrls.has(id)) ? sfUrls.get(id) : src;", "return (id && sfUrls.has(id)) ? sfUrls.get(id) : String(src);"],
+  ['a sign-out still hands out the loaded copy', "return (id && sfUrls.has(id) && songFileHost().user) ? sfUrls.get(id) : src;", "return (id && sfUrls.has(id)) ? sfUrls.get(id) : src;"],
+  ['a public path is mapped', "return (id && sfUrls.has(id) && songFileHost().user) ? sfUrls.get(id) : src;", "return (id && sfUrls.has(id) && songFileHost().user) ? sfUrls.get(id) : String(src);"],
 ];
 
 const real = await suite(SRC, false);

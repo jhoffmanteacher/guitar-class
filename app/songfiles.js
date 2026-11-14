@@ -133,13 +133,15 @@ const sfUrls = new Map();       // id -> blob: address of the checked copy
 const sfInflight = new Map();   // id -> { promise, listeners:Set }
 let sfPersistAsked = false;
 
+/* A copy loaded in this page plays only while someone is signed in: after a
+   sign-out the same tab asks again, and songFileLoad says "sign in". */
 function songFileSrc(src){
   const id = songFileId(src);
-  return (id && sfUrls.has(id)) ? sfUrls.get(id) : src;
+  return (id && sfUrls.has(id) && songFileHost().user) ? sfUrls.get(id) : src;
 }
 function songFileNeedsLoad(src){
   const id = songFileId(src);
-  return !!id && !sfUrls.has(id);
+  return !!id && !(sfUrls.has(id) && songFileHost().user);
 }
 
 function sfHex(buf){
@@ -242,10 +244,10 @@ async function sfLoadOnce(id, entry, progress){
    every caller gets the same promise, and each caller's onProgress (0..1)
    is told as pieces arrive. */
 function songFileLoad(id, onProgress){
+  if(!songFileHost().user) return Promise.reject(songFileErr('signin'));
   if(sfUrls.has(id)) return Promise.resolve(sfUrls.get(id));
   const entry = SONG_FILES[id];
   if(!entry) return Promise.reject(songFileErr('missing', 'not on the list'));
-  if(!songFileHost().user) return Promise.reject(songFileErr('signin'));
   let job = sfInflight.get(id);
   if(!job){
     const listeners = new Set();
