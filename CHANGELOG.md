@@ -6,6 +6,14 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-14 — Practice cards: Loop this part, and Build up speed
+
+- **Loop this part.** On a practice card with section buttons (Intro, Verse, Chorus), turn on "Loop this part". The section you picked plays again and again until you press Stop or turn the loop off. The L key turns it on and off.
+- **Build up speed.** Turn on "Build up speed" and the section starts at the slowest speed. After 2 rounds it goes one step faster, up to Normal. A line above the section says where you are, like "Round 1 of 2 at Slower".
+- **Stay at this speed.** Not ready to go faster? Turn on "Stay at this speed" and the loop stays where it is until you turn it off.
+- **You can still pick a speed yourself.** If you move the speed while Build up speed is on, it turns off and the loop keeps going at the speed you picked.
+- A card with only one section does not have these switches.
+
 ## 2026-11-14 — The offline message no longer covers buttons, and the ✓ is easy to see
 
 - **When you are offline, the message is now one line along the bottom of the page.** Before, it sat on top of the page and could cover a button, like "Mark as done" on a practice card. Now the page makes room for it. Press × to close it.
