@@ -56,4 +56,47 @@ Fault-copy outputs seen while building (replay copies, `--root`):
 Every one of the 12 is a test gap only: today's site passes each new assertion (clean runs below).
 
 ## Stability and time
-(See below; filled in from the gated series.)
+Cloud run 2026-11-14, branch at 79a45f7 (tools unchanged by c169f6c), main at cc9fcfb, 4 CPUs, one tool at a time,
+nothing else running. Each tool's normal command (its header / checks.yml / plant-a-fault's TOOLS table), 3 runs in a
+row on the branch, 1 run on main from a second checkout (`git worktree add --detach ../gc-main origin/main`).
+
+| tool (command) | branch exit codes | branch times (s) | main time (s) |
+|---|---|---|---|
+| shared-chromebook-loop.mjs | 0, 0, 0 | 26.0, 26.0, 24.8 | 24.3 |
+| visible-loop.mjs | 0, 0, 0 | 26.4, 25.1, 26.0 | 23.7 |
+| two-consoles-loop.mjs | 1, 1, 1 (expected, see below) | 53.0, 46.6, 47.5 | 49.3 (exit 1) |
+| save-loop.mjs | 0, 0, 0 | 6.3, 6.3, 7.0 | 6.5 |
+| tone-test.mjs | 0, 0, 0 | 2.6, 2.8, 2.9 | 2.2 |
+| song-files-sim.mjs | 0, 0, 0 | 4.3, 4.3, 4.3 | 4.3 |
+| mic-sim/listen-loop.mjs --game=chords --rooms=quiet | 0, 0, 0 | 26.3, 26.1, 26.6 | 26.9 |
+| mic-sim/listen-loop.mjs --game=melody --rooms=quiet | 0, 0, 0 | 37.3, 37.0, 35.7 | 36.2 |
+
+- two-consoles-loop exits 1 on today's code by design ("today's code fails about 10 to 25 of 1,000 schedules";
+  plant-a-fault runs it with `cleanExit: [0, 1]` and judges by diff). All four runs (3 branch, 1 main) printed the same
+  "✗ 17 of 1000 schedules failed" with an identical list of 19 ✗ lines (same schedules, same kinds), so the branch's
+  new refusal rule adds no failure on the clean site. It is not one of the four tools checks.yml runs.
+- No failure on the branch in 24 runs; every assertion the branch added held 3 of 3. Cost of the new tests: about
+  +2 s for shared-chromebook and visible-loop, +0.5 s for tone-test, nothing measurable elsewhere.
+
+### Plant proof (cloud run)
+`node tools/plant-a-fault.mjs --ids <the 12> --jobs 1` (default --max-load), 11.0 min wall →
+`plant-a-fault: 12 planted, 12 caught, 0 new got through, 0 known got through, 0 stale · seed 2026-W46`, exit 0.
+By region: save 3 of 3, listening 3 of 3, signin 1 of 1, songfiles 2 of 2, console-config 3 of 3.
+
+### Known file
+6bfae6ba49 added to `tools/plant-a-fault-known.json` as harmless (commit c169f6c). Verified: `coachFrameBuf` is
+assigned only at coach-core.js:696 (`new Float32Array(COACH_FFT)`, COACH_FFT = 4096; the mic-sim harnesses also use
+4096), so `Math.min(L, 4096)` = `Math.min(L, 8192)`. The id was recomputed with the tool's own `regionMistakes()`:
+coach-core.js:883, `coachPitchReadings()`, op number. `checks.mjs --check --skip-links` after it: all checks passed;
+1ea "its known file parses (46 entries)", no warning.
+
+## Cloud run 2026-11-14
+A scheduled cloud session (no one watching) ran this proof. What worked in this environment:
+- `node --version`: yes, v22.23.4.
+- `node tools/checks.mjs --check --skip-links`: yes, "all checks passed" (1 non-blocking warning, 1bb, about ca-* step
+  counts), about 80 s.
+- `node tools/plant-a-fault.mjs --list`: yes, printed the week's ids (seed 2026-W46), exit 0.
+- The repo was already cloned in the session; `git fetch`, a second worktree and `git push origin HEAD:tools/gap-tests`
+  all worked (no add_repo needed).
+- The branch is 10 commits behind origin/main; nothing was rebased (not asked; tools only).
+- Not tried: anything needing a browser, the Firestore emulator, or sign-in.
