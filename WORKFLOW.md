@@ -383,6 +383,19 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-13 — Console: a Games list for Live In-Class Games (order, rename, remove). Jonathan's ask, Fast.**
+      His words: "i'd like to be able to delete and re-order and rename games. make it look like the class activities
+      screen". A "Games" box under the control strip in the board's look (new part `teacher-livegames.js`): drag, ▲▼
+      or a number moves a game; the pencil renames it (English, optional Spanish, 60 characters; empty = the built-in
+      title); **Remove hides a game and Restore brings it back: nothing is deleted** (the bank is in the code); a
+      running game cannot be removed. Kept in `config/class.liveGames {order, names, removed}`, written only through
+      `teacherWriteConfig()`; no rules change. The picker follows the list (`lqPickerIds()`); a custom name reaches
+      students because Start copies it into `liveQuiz/current.title` (`lqCustomTitle()`), so a rename mid-game shows
+      from the next Start. The idle stage shrinks so the list shows on the first screen at 1366×657. The projector
+      shows the English name (the stage is English-only today). Nothing saved = main in 366 of 366 renders (also
+      with hide-names ticked); `checks.mjs` 1dk (13 of 13 break-its); two console tabs, 300 runs: 0 moves, renames or
+      removes lost.
+
 - [x] **2026-11-13 — My progress compares a student with their own weeks; the class rank is gone (Jonathan's P1). Fast.**
       Reverses his 2026-11-04 ask (class rank "N/total" by all-time minutes): research he accepted says a rank
       discourages the bottom of the list and an absent student can never climb. One line under the tiles: "This week
