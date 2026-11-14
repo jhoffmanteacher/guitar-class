@@ -535,11 +535,27 @@ function gamesBestChip(allTime, today, unit){
    dayStr() — the student's local calendar day, same as the site-wide streak
    — not the UTC date the per-game "at" fields use, since a streak has to
    agree with the day the student actually experienced. Weekends never
-   break it (dayStreakContinues, app/boot.js; Jonathan, 2026-11-13).
+   break it (arcadeStreakContinues below; Jonathan, 2026-11-13).
    Call once per finished round, win or not: flat base XP for playing, plus
    a small bonus for a new personal best. Skipped in dev bypass, same as
    every other games.* write (Firestore rejects that uid) and
    bumpPracticeStreak. */
+/* The arcade's way to the day-streak rule (dayStreakContinues / dayStreakAlive, app/boot.js). The arcade parts load
+   on first use, after the page: a tab still running the page from before the weekend-streak change (2026-11-13) can
+   load these parts from the new cache while it waits to reload, and that page has no such helpers. Then this falls
+   back to the old rule, "the last day was yesterday", exactly as before the change, until the reload, instead of
+   throwing (a throw in awardArcadeXp came before saveGames and lost the round's XP). The ONE "yesterday" copy
+   checks.mjs 1dj allows. */
+function arcadeStreakContinues(lastDay, today){
+  if (typeof dayStreakContinues === 'function') return dayStreakContinues(lastDay, today);
+  const y = new Date();
+  y.setDate(y.getDate() - 1);
+  return lastDay === dayStr(y);
+}
+function arcadeStreakAlive(lastDay, today){
+  if (typeof dayStreakAlive === 'function') return dayStreakAlive(lastDay, today);
+  return lastDay === today || arcadeStreakContinues(lastDay, today);
+}
 const ARCADE_XP_BASE = 10, ARCADE_XP_BEST_BONUS = 5, ARCADE_DAILY_XP_GOAL = 30;
 function awardArcadeXp(gotNewBest){
   if (!currentUser || isDevBypassUser()) return;
@@ -550,7 +566,7 @@ function awardArcadeXp(gotNewBest){
   m.xp = (m.xp || 0) + gained;
   m.xpToday += gained;
   if (m.streak.lastDay !== today){
-    m.streak.count = dayStreakContinues(m.streak.lastDay, today) ? (m.streak.count || 0) + 1 : 1;
+    m.streak.count = arcadeStreakContinues(m.streak.lastDay, today) ? (m.streak.count || 0) + 1 : 1;
     m.streak.lastDay = today;
   }
   saveGames();
@@ -567,7 +583,7 @@ function gamesMetaBarHtml(){
   const goalMet = xpToday >= ARCADE_DAILY_XP_GOAL;
   let streakChip = '';
   if (m && m.streak && m.streak.count > 1 && m.streak.lastDay){
-    const alive = dayStreakAlive(m.streak.lastDay, today);
+    const alive = arcadeStreakAlive(m.streak.lastDay, today);
     if (alive) streakChip = `<span class="games-meta-streak">&#x1F525; ${t('games.meta.streak', { n: m.streak.count })}</span>`;
   }
   return `

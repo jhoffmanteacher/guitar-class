@@ -520,9 +520,11 @@ let streak      = { count:0, lastDay:null };   // site-wide practice streak, ind
    needs school days, Monday to Friday). Shared by the three day streaks: the
    site-wide practice streak above (bumpPracticeStreak in app/save.js, the
    Daily 5 chip in app/lesson.js), the arcade streak (games.meta.streak,
-   coach-hub.js) and Riff Roulette's (games.rr, coach-strum.js). Here, in the
-   first app part, because app/save.js is the earliest part that calls them
-   and the arcade parts load later. Pure: both arguments are the local
+   coach-hub.js) and Riff Roulette's (games.rr, coach-strum.js); the arcade
+   parts reach them through arcadeStreakContinues / arcadeStreakAlive
+   (coach-hub.js), which fall back to the old rule on a page loaded before
+   these existed. Here, in the first app part, because app/save.js is the
+   earliest part that calls them and the arcade parts load later. Pure: both arguments are the local
    calendar-day strings dayStr() makes ('YYYY-MM-DD').
    dayStreakContinues(lastDay, today): playing today adds a day to the streak,
    because every day strictly between the two is a Saturday or Sunday.

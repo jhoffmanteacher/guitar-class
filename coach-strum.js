@@ -624,10 +624,24 @@ function rrDayStr(d){
 
 /* A streak is worth showing only while it's alive — kept up today or
    still winnable today (the last set was on the last school day before
-   today: weekends never break it, dayStreakAlive in app/boot.js). */
-function rrStreakAlive(g, min){
+   today: weekends never break it, arcadeStreakAlive in coach-hub.js).
+   `today` is for tests; the site leaves it out. */
+function rrStreakAlive(g, min, today){
   if (!g || !(g.streak >= (min || 2)) || !g.lastDay) return false;
-  return dayStreakAlive(g.lastDay, rrDayStr(new Date()));
+  return arcadeStreakAlive(g.lastDay, today || rrDayStr(new Date()));
+}
+
+/* The streak chip on the setup screen, or '' for none. "streak started
+   today" only on the day the first set was done: since weekends stopped
+   breaking a streak, a 1-day streak from a Friday is still alive on
+   Saturday, Sunday and Monday, and "started today" would be false there.
+   Those days show no chip: 'games.rr.streakDays' has no singular ("racha
+   de 1 días"). Two days or more: "N-day streak". */
+function rrStreakChipText(g, today){
+  today = today || rrDayStr(new Date());
+  if (!rrStreakAlive(g, 1, today)) return '';
+  if (g.streak === 1) return g.lastDay === today ? t('games.rr.streakStartedToday') : '';
+  return t('games.rr.streakDays', {n: g.streak});
 }
 
 function rrPool(){
@@ -726,11 +740,11 @@ function rrRenderSetup(justDone){
   if (!body || !rr) return;
   const pts = rrNum('rrPts'), done = rrNum('rrDone');
   const g = (typeof games !== 'undefined' && games && games.rr) || null;
-  const streak = rrStreakAlive(g, 1) ? g.streak : 0;
+  const streakText = rrStreakChipText(g);
   const chips =
     `<span class="rr-chip">&#x2B50; ${t('games.rr.chipPointsToday', {n: pts})}</span>
      <span class="rr-chip">&#x1F0CF; ${t('games.rr.chipCardsOfThree', {n: Math.min(done, 3)})}</span>
-     ${streak ? `<span class="rr-chip streak">&#x1F525; ${streak === 1 ? t('games.rr.streakStartedToday') : t('games.rr.streakDays', {n: streak})}</span>` : ''}`;
+     ${streakText ? `<span class="rr-chip streak">&#x1F525; ${streakText}</span>` : ''}`;
   body.innerHTML =
     `<div class="coach-tip rr-center">${t('games.rr.tagline')}</div>
      <div class="rr-chips">${chips}</div>
@@ -989,7 +1003,7 @@ function rrSetDone(ptsTotal){
   const today = rrDayStr(new Date());
   const g = games.rr || {};
   if (g.lastDay !== today){
-    g.streak = dayStreakContinues(g.lastDay, today) ? (g.streak || 0) + 1 : 1;
+    g.streak = arcadeStreakContinues(g.lastDay, today) ? (g.streak || 0) + 1 : 1;
     g.days = (g.days || 0) + 1;
     g.lastDay = today;
   }
