@@ -233,7 +233,8 @@ async function coachOne(site, t, o){
     }
     return it;
   });
-  return { items, overall: res.overall, crits: res.crits, gateOpen: sk ? sk.gated && !sk.gateHolds : null, saved: sk ? sk.saved : null, events: res.events.length, evList: res.events, listenStart: res.listenStart, proc: o.keepProc ? src.proc() : null, key };
+  return { items, overall: res.overall, crits: res.crits, gateOpen: sk ? sk.gated && !sk.gateHolds : null, saved: sk ? sk.saved : null, events: res.events.length, evList: res.events, listenStart: res.listenStart, proc: o.keepProc ? src.proc() : null, key,
+    cue: res.cue ? Object.assign({}, res.cue, { slots: res.slots.length }) : null };
 }
 async function radarOne(site, t, o){
   const player = new NotePlayer(PATTERN, t.kind, { room: t.room, lagMs: o.lag, seed: t.seed });
@@ -618,7 +619,7 @@ async function main(){
   const only = o.replay != null ? Number(o.replay) : 0;
   if (only && only > plan.length) bad(`--replay=${only}: this run has only ${plan.length} takes`);
   if (!only) console.log(`${plan.length} takes: ${o.students.length} students x ${o.rooms.length} rooms x ${o.mics.length} mics x ${items.length} ${o.game === 'radar' ? 'patterns' : o.game === 'runner' ? 'levels' : 'skills'} x ${o.seeds} seeds${o.game === 'chords' ? ' (holdsOne only on rows of 2+ chords)' : ''} · ${o.fps} fps · the student is ${o.lag} ms behind the click, the site's mic delay setting 50 ms`);
-  const t0 = Date.now(), done = [];
+  const t0 = Date.now(), done = [], cues = [];
   for (const t of plan){
     if (only && t.n !== only) continue;
     watchdog.tick(`take ${t.n}: ${t.kind} ${t.room} ${t.mic} ${t.item}`);
@@ -626,13 +627,23 @@ async function main(){
     watchdog.tick(`after take ${t.n}`);
     if (only){ printReplay(o, t, r, l => console.log(l)); process.exit(0); }
     done.push({ n: t.n, kind: t.kind, room: t.room, mic: t.mic, item: t.item, seed: t.seed, bpm: t.bpm, items: r.items, overall: r.overall, crits: r.crits, gateOpen: r.gateOpen, acc: r.acc, stars: r.stars, extras: r.extras, other: t.other ? t.other.name : undefined });
+    if (r.cue) cues.push(Object.assign({ n: t.n, item: t.item, kind: t.kind, room: t.room }, r.cue));
   }
   report(o, done, l => console.log(l));
+  /* THE CUE UNDER THE LANE (2026-11-14, plant-a-fault f9bf7c0f92: no tool read it). Not graded, but what the student
+     reads while playing: a take whose pulse reached the LAST slot must end with that slot's cue ("last note" /
+     "last chord"), unless the names are hidden (sight-reading). A cue left behind means "Next: …" stayed on an earlier
+     slot. Judged on every Coach take, in every mode (with --against too): a wrong cue fails the run (exit 1). */
+  const cueRuns = cues.filter(c => !c.hide && c.pulse === c.slots - 1), cueBad = cueRuns.filter(c => c.text !== c.last);
+  if (cues.length){
+    console.log(`the "Next" cue: ${cueRuns.length - cueBad.length} of ${cueRuns.length} takes whose pulse reached the last slot ended on its cue${cues.length > cueRuns.length ? ` (${cues.length - cueRuns.length} take(s) hid the names or stopped earlier: not judged)` : ''}`);
+    for (const c of cueBad.slice(0, 4)) console.log(`  ✗ take ${c.n} (${c.kind}, ${c.room}, ${c.item}): the cue under the lane reads ${JSON.stringify(c.text)} at the last slot; wanted ${JSON.stringify(c.last)}`);
+  }
   console.log(`\n${done.length} takes, ${done.reduce((n, t) => n + t.items.length, 0)} graded ${o.game === 'radar' ? 'strums' : 'notes'}, every answer key checked against the student's own guitar, ${((Date.now() - t0) / 1000).toFixed(0)} s`);
   const out = { tool: 'listen-loop', model: NOTE_MODEL, game: o.game, fps: o.fps, lag: o.lag, fit: FIT, takes: done };
   if (o.json) writeFileSync(o.json, JSON.stringify(out));
-  if (was){ const c = compare(o, out, was, o.against); c.lines.forEach(l => console.log(l)); process.exit(c.code); }
-  process.exit(0);
+  if (was){ const c = compare(o, out, was, o.against); c.lines.forEach(l => console.log(l)); process.exit(Math.max(c.code, cueBad.length ? 1 : 0)); }
+  process.exit(cueBad.length ? 1 : 0);
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]){
