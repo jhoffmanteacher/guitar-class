@@ -33,8 +33,9 @@ Start here. Update this block whenever an item opens or closes; each line says w
 
 **Plant a fault, weekly (2026-11-14; Wave 3 item 2):** `tools/plant-a-fault.mjs` + `.github/workflows/plant-a-fault.yml`
 (Tuesdays 2:23 AM Pacific, report-only) plant small mistakes in the risky code one at a time and list the ones no tool
-caught. Read survivors and their reasons: `tools/plant-a-fault-known.json`; the first run's gaps (tests still to write):
-`Claude outputs/plant-a-fault/DETAILS.md`. CLAUDE.md → "Other standing rules" says how to replay one.
+caught. Survivors judged harmless or accepted, with reasons: `tools/plant-a-fault-known.json`. Open: the first run's real
+gaps (tests still to write, none written yet) are in `Claude outputs/plant-a-fault/DETAILS.md` on the Mac (not in the
+repo). CLAUDE.md → "Other standing rules" says how to replay one.
 
 **The three big scripts are cut into parts (2026-11-11)**
 - There is no `app.js`, `coach.js` or `teacher.js` file any more: `app/*.js`, `coach-*.js`, `teacher-*.js`. The table

@@ -50,6 +50,7 @@
      --list              print the region table summary and the sampled mistakes; plant nothing
      --replay ID         plant one mistake (from any region) in <scratch>/replay-ID, run its tools with their output,
                          and keep the copy; --no-run plants only
+     --ids a,b           run exactly these mistakes (ids from a report or --list) instead of the sample
      --plant "F|OLD|NEW" a hand-made mistake (the proof's: OLD must occur once in file F), in the one --region given
      --jobs N            scratch copies run side by side (default 2); rules tests on the emulator always run one at a time
      --max-load L        wait before a new mistake while the 1-minute load is above L (default 8)
@@ -160,7 +161,7 @@ export const TOOLS = {
   'save-loop':          { cmd: ['tools/save-loop.mjs'] },
   'visible-loop':       { cmd: ['tools/visible-loop.mjs'] },
   'shared-chromebook':  { cmd: ['tools/shared-chromebook-loop.mjs'] },
-  'two-consoles':       { cmd: ['tools/two-consoles-loop.mjs'], diff: true, cleanExit: [0, 1] },
+  'two-consoles':       { cmd: ['tools/two-consoles-loop.mjs', '--workers', '2'], diff: true, cleanExit: [0, 1] },
   'access-sim':         { cmd: ['tools/access-sim.mjs'] },
   'kill-switch':        { cmd: ['tools/kill-switch/proof.mjs'] },
   'sw-audio':           { cmd: ['tools/sw-audio-proof.mjs'] },
@@ -394,14 +395,21 @@ function describe(f, m) {
   const L0 = f.lineStart(m.a), L1 = f.lineEnd(Math.max(m.a, m.b - 1));
   const before = f.src.slice(L0, L1);
   const after = f.src.slice(L0, m.a) + m.rep + f.src.slice(m.b, L1);
-  return { line: f.lineOf(m.a), before, after };
+  return { line: f.lineOf(m.a), before, after, col: m.a - L0 };
+}
+/* A long line is cut to a window around the change, so before and after show the part that differs. */
+function aroundChange(text, col) {
+  const flat = text.replace(/\n/g, ' ⏎ ');
+  if (flat.length <= 220) return oneLine(text);
+  const from = Math.max(0, Math.min(col - 90, flat.length - 200));
+  return (from > 0 ? '…' : '') + flat.slice(from, from + 200).trim() + (from + 200 < flat.length ? '…' : '');
 }
 const oneLine = s => { const x = s.split('\n').map(l => l.trim()).filter(Boolean).join(' ⏎ '); return x.length > 220 ? x.slice(0, 217) + '…' : (x || '(nothing: the line is gone)'); };
 function finishMistakes(f, list) {
   const occ = new Map();
   for (const m of list) {
     const d = describe(f, m);
-    m.line = d.line; m.before = oneLine(d.before); m.after = oneLine(d.after);
+    m.line = d.line; m.before = aroundChange(d.before, d.col); m.after = aroundChange(d.after, d.col);
     const base = [m.file, m.scope, m.op, norm(d.before), norm(d.after)].join('\n');
     const n = occ.get(base) || 0; occ.set(base, n + 1);
     m.id = createHash('sha1').update(base + '\n' + n).digest('hex').slice(0, 10);
@@ -705,7 +713,7 @@ async function main() {
   const argv = process.argv.slice(2);
   const val = n => { const i = argv.indexOf(n); if (i < 0) return null; const v = argv[i + 1]; if (v == null || v.startsWith('--')) bad(`${n} needs a value`); return v; };
   const bad = m => { console.error('plant-a-fault: ' + m); process.exit(2); };
-  const KNOWN_FLAGS = new Set(['--seed', '--per-region', '--region', '--list', '--replay', '--no-run', '--plant', '--jobs', '--max-load', '--budget', '--all-tools', '--emu', '--emu-port', '--root', '--scratch', '--keep', '--json', '--md', '--help']);
+  const KNOWN_FLAGS = new Set(['--seed', '--per-region', '--region', '--list', '--replay', '--no-run', '--plant', '--ids', '--jobs', '--max-load', '--budget', '--all-tools', '--emu', '--emu-port', '--root', '--scratch', '--keep', '--json', '--md', '--help']);
   for (const a of argv) if (a.startsWith('--') && !KNOWN_FLAGS.has(a)) bad(`unknown option ${a} (see the header of tools/plant-a-fault.mjs)`);
   if (argv.includes('--help')) { console.log(readFileSync(fileURLToPath(import.meta.url), 'utf8').split('*/')[0]); return 0; }
   const root = resolve(val('--root') || REPO);
@@ -773,10 +781,11 @@ async function main() {
     return 0;
   }
 
-  /* the sample */
+  /* the sample (or, with --ids, exactly those mistakes: to run again the ones that got through, say after a new test) */
+  const onlyIds = val('--ids') ? new Set(val('--ids').split(',')) : null;
   const plan = [];
   for (const { region, all, plant } of table) {
-    const s = plant ? { picked: all, unparsable: 0 } : sample(root, region, all, perRegion, seed);
+    const s = plant ? { picked: all, unparsable: 0 } : onlyIds ? { picked: all.filter(m => onlyIds.has(m.id)), unparsable: 0 } : sample(root, region, all, perRegion, seed);
     plan.push({ region, all, picked: s.picked, unparsable: s.unparsable });
   }
   if (argv.includes('--list')) {
@@ -829,6 +838,7 @@ async function main() {
       while (queue.length) {
         if (budgetMin && (Date.now() - t0) / 60000 > budgetMin) { notRunBudget += queue.length; queue.length = 0; break; }
         while (loadavg()[0] > maxLoad) await new Promise(res => setTimeout(res, 5000));
+        if (!queue.length) break;   // another copy took the last one while this one waited for the load to fall
         const m = queue.shift();
         const res = await runMistake(m, r, ctx, w, argv.includes('--all-tools'));
         outcomes.push({ m, res });

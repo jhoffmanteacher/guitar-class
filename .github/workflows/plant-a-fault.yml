@@ -41,9 +41,9 @@ on:
         type: string
         default: ''
       per_region:
-        description: 'Mistakes per region'
+        description: "Mistakes per region (empty = each region's own number, in the matrix below)"
         type: string
-        default: '20'
+        default: ''
 
 permissions:
   contents: read
@@ -60,12 +60,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        region: [save, cache, listening, signin, songfiles, console-config]
+        # count: mistakes per week, sized from the first run's minutes per mistake (2026-11-14, the Mac) so a job
+        # plants them all inside --budget; listening's tools are the slowest (about 4.4 worker-minutes a mistake).
+        include:
+          - { region: save, count: 20 }
+          - { region: cache, count: 20 }
+          - { region: listening, count: 12 }
+          - { region: signin, count: 20 }
+          - { region: songfiles, count: 30 }
+          - { region: console-config, count: 12 }
     env:
       REGION: ${{ matrix.region }}
       ONLY: ${{ inputs.region }}
       SEED_IN: ${{ inputs.seed }}
-      PER_REGION: ${{ inputs.per_region || '20' }}
+      PER_REGION: ${{ inputs.per_region || matrix.count }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -100,7 +108,7 @@ jobs:
       FIREBASE_JS_VERSION: 10.12.2
       ONLY: ${{ inputs.region }}
       SEED_IN: ${{ inputs.seed }}
-      PER_REGION: ${{ inputs.per_region || '20' }}
+      PER_REGION: ${{ inputs.per_region || '30' }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
