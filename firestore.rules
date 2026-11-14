@@ -29,6 +29,12 @@ rules_version = '2';
                       activityBoardSeeded, moduleOpenThrough,
                       micSampling, configVersion
                       (teacher writes, students read)
+     config/access    the outside (not @seq.org) accounts allowed in:
+                      { allow: { uid: true } } (teacher reads and writes,
+                      2026-11-13)
+     accessRequests/{uid}  "Ask your teacher to let me in" from an account
+                      that is not let in: the asker creates its own, once;
+                      the teacher reads, decides, deletes (2026-11-13)
      liveQuiz/current the whole-class live quiz's state (teacher writes,
                       students read) + an answers/{uid} subcollection each
                       student writes their own row of
@@ -114,6 +120,86 @@ service cloud.firestore {
     match /config/class {
       allow read:  if isSignedIn();
       allow write: if isTeacher();
+    }
+
+    /* ── OUTSIDE ACCOUNTS ALLOWED IN (2026-11-13; teacher-accounts.js) ──
+       config/access  { allow: { <uid>: true, ... } }
+       The accounts that may use the class site although their Google
+       address is not @seq.org: CAS students on outside accounts and the
+       teacher's own test accounts (Jonathan, 2026-11-13: "outside accounts
+       in CAS are okay with me"). The teacher alone reads and writes it, in
+       the console's Manage view ("Accounts by sign-in domain"); a student
+       cannot read the list, so it shows nobody which accounts are outside.
+       No uid is written in this file (the repo is public).
+
+       The console only ever MERGES one key at a time (set with
+       { merge: true }, FieldValue.delete() to remove), so two console tabs
+       switching different accounts both land. A whole-document set() from
+       the Firebase console replaces the list: edit a single key there.
+
+       Shape: the one field `allow`, a map. Rules cannot check every entry;
+       the check that reads this list (isSchool(), the second paste) counts
+       an entry only when its value is exactly true.
+       No delete for anyone through the rules (switching every account off
+       leaves { allow: {} }, which means the same as no document at all).
+
+       SIZE: a Firestore document holds at most 1 MiB. An entry is a
+       28-character uid plus a boolean, about 31 bytes, so the list holds
+       about 30,000 accounts. */
+    match /config/access {
+      allow read: if isTeacher();
+      allow create, update: if isTeacher()
+            && request.resource.data.keys().hasOnly(['allow'])
+            && request.resource.data.allow is map;
+    }
+
+    /* ── ASKING TO JOIN (2026-11-13; app/boot.js accessAsk*, teacher-accounts.js) ──
+       accessRequests/{uid}  { name, email, at, status }
+       An account that is not let in (not @seq.org, not on config/access)
+       sees one screen instead of the site, with "Ask your teacher to let me
+       in". Pressing it creates THIS document, once. The teacher sees it in
+       the console (a count on Manage, and the list with Allow / Decline).
+
+       The asker: only its own uid, only once (create; never update or
+       delete, so it cannot ask again after a Decline, and cannot change
+       what it sent). name and email must be exactly the sign-in token's
+       (Google's) values, so nobody can file a request under a made-up name
+       (an account with no name claim sends ''), and the email must be
+       verified (Google sign-in always is; this is for the day another
+       sign-in method is switched on); at must be the server's
+       time (the client sends serverTimestamp()); status must be 'asked'.
+       It may `get` its own document (to show "asked" or "declined"); never
+       `list`: one asker cannot see another.
+       The teacher: reads and lists, deletes, and may change only `status`,
+       to 'allowed' or 'declined'. Decline is what silences an account: its
+       request stays, and it cannot ask again. Delete removes the line and
+       lets that account ask again (it is not the button for spam). Allowing an account is the
+       write to config/access; status here is what the asker's screen says.
+
+       What this lets a stranger do: anyone with a Google account can create
+       ONE small document (its own uid, under 600 characters in all). The
+       console reads at most the newest 200 waiting requests.
+       Nothing a student can read holds another person's name or email. */
+    match /accessRequests/{userId} {
+      allow get: if isSignedIn() && request.auth.uid == userId;
+      allow create: if isSignedIn()
+            && request.auth.uid == userId
+            && request.resource.data.keys().hasOnly(['name', 'email', 'at', 'status'])
+            && request.resource.data.keys().hasAll(['name', 'email', 'at', 'status'])
+            && request.resource.data.name is string
+            && request.resource.data.name.size() <= 200
+            && request.resource.data.name == request.auth.token.get('name', '')
+            && request.resource.data.email is string
+            && request.resource.data.email.size() > 0
+            && request.resource.data.email.size() <= 320
+            && request.resource.data.email == request.auth.token.get('email', '')
+            && request.auth.token.get('email_verified', false) == true
+            && request.resource.data.at == request.time
+            && request.resource.data.status == 'asked';
+      allow read, delete: if isTeacher();
+      allow update: if isTeacher()
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+            && request.resource.data.status in ['allowed', 'declined'];
     }
 
     /* ── Live quiz (live-quiz.js) ──────────────────────────────────────
