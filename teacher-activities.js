@@ -2384,10 +2384,13 @@ async function teacherSetActivityArchived(id, state){
     // the pin array alone, so naming that whole array in `base` (exactly
     // what teacherSetActivityPin does) is enough — a pin or unpin from
     // another console refuses, an unrelated edit still goes through.
-    if(unpin){
-      patch.activityPins=pinsBefore.filter(x=>x!==id);
-      base.activityPins=pinsHad?pinsPrev:undefined;
-    }
+    // Archiving names the pin array even when this screen shows the card
+    // unpinned: "unpin or not" was decided from it, so another console
+    // pinning the card meanwhile must refuse, not leave an archived card
+    // pinned (tools/two-consoles-loop.mjs, 2026-11-14). Restore never
+    // touches pins, so it does not depend on them.
+    if(on) base.activityPins=pinsHad?pinsPrev:undefined;
+    if(unpin) patch.activityPins=pinsBefore.filter(x=>x!==id);
     await teacherWriteConfig(patch, base);
   }catch(e){
     if(hadA) cfg.archivedActivities[id]=prevA; else delete cfg.archivedActivities[id];
