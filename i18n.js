@@ -1694,9 +1694,9 @@
     'micpre.button': { en: 'Turn on the microphone', es: 'Encender el micrófono' },
     // After the tuner's lock-icon steps (tools.micDenied) when Note Call's mic is refused: its way on without the mic
     'micpre.tapFrets': { en: 'Tap the frets on the board instead.', es: 'Toca los trastes en el diagrama.' },
-    // One set-up line on the mic games and the Listening Coach (coachSetupLineHtml; research-4 R5)
+    // One set-up line on the mic games and the Listening Coach (coachSetupLineHtml; research-4 R5). ONE row in a 509px column (the Coach card, Change Up's and Power Chord Switch's columns), so the Spanish is kept short; tools/smoke.mjs setupScreensWalk checks the games
     'micpre.setup': { en: 'Tune first. Guitar a hand to an arm’s length from the mic. Volume at half.',
-      es: 'Afina primero. Guitarra a una mano o un brazo del micrófono. Volumen a la mitad.' },
+      es: 'Afina primero. Guitarra a una mano o un brazo del micrófono. Volumen medio.' },
     'coach.interrupt.tunerTook': { en: 'The tuner took over the mic — tune up, then start the check again.',
       es: 'El afinador tomó el micrófono — afina, y luego empieza el chequeo de nuevo.' },
     'coach.interrupt.micLost': { en: 'The mic switched off before your check finished — start it again when you’re ready.',

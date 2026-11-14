@@ -185,9 +185,12 @@ function coachFootText(records){ return t(records && typeof micRecWanted === 'fu
    not drown the guitar). No link to the tuner: opening it from a game's
    set-up sends the games screen back to the hub (fab-tools.js togglePopup →
    gamesStopMic). `center` matches the rn-center tips of Riff Runner's Wait
-   Mode, Note Runner and Finger Gym. Not on In-Class Activity directions. */
+   Mode, Note Runner and Finger Gym. Not on In-Class Activity directions.
+   `.coach-setup-line` lets one screen tighten its spacing (styles.css,
+   Power Chord Switch). It must stay on one row in the narrowest place it
+   sits, a 509px column, in both languages (tools/smoke.mjs setupScreensWalk). */
 function coachSetupLineHtml(center){
-  return `<div class="coach-tip${center ? ' rn-center' : ''}">&#x1F39A;&#xFE0F; ${escHtml(t('micpre.setup'))}</div>`;
+  return `<div class="coach-tip coach-setup-line${center ? ' rn-center' : ''}">&#x1F39A;&#xFE0F; ${escHtml(t('micpre.setup'))}</div>`;
 }
 
 let coach = null;            // active check session (null = no card open)

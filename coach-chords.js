@@ -496,7 +496,12 @@ function ccRenderSetup(msg){
     ? `<div class="coach-note">&#x1F3B2; ${t(power ? 'games.pw.randomNote' : 'games.cc.randomNote')}</div>`
     : ccDiagramsHtml(prog.chords, null, undefined, prog.shapes);
   const ladderNote = prog.ladder ? `<div class="coach-note"><strong>${t('games.pw.ladder.intro', { rounds: CC_LADDER_ROUNDS })}</strong><br><span id="cc-ladder-note">${ccLadderNoteText(cc.bpm)}</span></div>` : '';
-  const tip = `<div class="coach-tip" id="cc-tip">${ccTipHtml()}</div>` + coachSetupLineHtml();
+  const tip = `<div class="coach-tip" id="cc-tip">${ccTipHtml()}</div>`;
+  /* The set-up line (coachSetupLineHtml) goes in whichever column has room on a
+     1366x657 screen: Power Chord Switch's right column, under the tip; Change
+     Up's left column, above Start (under its charts and tip it made the setup
+     682px tall, 2026-11-13; tools/smoke.mjs changeup-layout). */
+  const setupLine = coachSetupLineHtml();
   const note = msg ? `<div class="coach-note">${escHtml(msg)}</div>` : '';
   /* Power Chord Switch uses the width of the games screen: the settings (speed,
      tempo, the pairs, Start) in the left column, the two charts and the tip in
@@ -505,12 +510,12 @@ function ccRenderSetup(msg){
   body.innerHTML = power
     ? `${note}<div class="cc-cols">
          <div class="cc-col-set">${songsView ? pwBackBtnHtml("ccPickView('pairs')") : ''}<div class="cc-speedtempo">${speedRow}${tempoRow}</div>${viewTabs}<div class="cc-groups${songsView ? ' cc-groups-songs' : ''}">${pills}</div>${ladderNote}<div class="cc-startbar">${startBtn}</div></div>
-         <div class="cc-col-pic">${pic}${tip}</div>
+         <div class="cc-col-pic">${pic}${tip}${setupLine}</div>
        </div>
        ${coachFootHtml(true)}`
     : `${note}<div class="cc-up-groups">${pills}</div>
        <div class="cc-cols">
-         <div class="cc-col-set">${speedRow}${bpmRow}<div class="cc-startbar">${startBtn}</div></div>
+         <div class="cc-col-set">${speedRow}${bpmRow}${setupLine}<div class="cc-startbar">${startBtn}</div></div>
          <div class="cc-col-pic">${pic}${tip}</div>
        </div>
        ${coachFootHtml()}`;
