@@ -16,7 +16,8 @@
 
    THE STUB DATABASE. A flat map of doc paths → fields, holding every collection firestore.rules names: config/class,
    progress/*, minutes/{uid}/weeks/*, minutes/{uid}/days/*, minutes/{uid}/meta/board, issueReports/* (empty in the
-   main case), micTakes/* + chunks, micTakesMeta/count, liveQuiz/current + answers, weekBoard/*, rankBoard/*.
+   main case), micTakes/* + chunks, micTakesMeta/count, liveQuiz/current + answers, weekBoard/*, rankBoard/*,
+   and since 2026-11-13 config/access and accessRequests/* (a hostile name among them).
    It answers doc get, collection get, orderBy(documentId) + limit + startAfter (by id), with 0–3 ms latency, and a
    fresh deep copy on every data() (so the code under test cannot change the store). Every write method (set, update,
    delete, add, batch, runTransaction) counts and throws. A failure can be planted per collection: always, or once.
@@ -35,6 +36,9 @@
      clicks       a second click while one runs does nothing (one file, one config read)
      leave        leaving Manage mid-read → 'stopped', no file, reads stop within the workers in flight; a later run works
      reminder     never / today / 3 days / 7 days / 8 days → the line and whether it is the reminder
+     not pasted   (2026-11-13) config/access and accessRequests refused (their rules not pasted yet) → the file is
+                  still saved, without them, the header's notReadable names both, the line says so; any OTHER failure
+                  on either → failed, no file
      panel        the row's HTML escapes the status text; Manage's head calls teacherBackupPanelHtml(). */
 import { readFileSync, existsSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
@@ -133,13 +137,18 @@ function makeStore(opts = {}){
   S.set('micTakes/fake-uid-001-coach', { uid: 'fake-uid-001', mode: 'coach' }); S.set('micTakes/fake-uid-001-coach/chunks/0', { i: 0, pcm: new Blob_([1, 2]) });
   S.set('micTakesMeta/count', { n: 1 }); S.set('liveQuiz/current', { state: 'lobby' }); S.set('liveQuiz/current/answers/fake-uid-001', { uid: 'fake-uid-001' });
   S.set('weekBoard/' + 'a'.repeat(32), { week: '2026-W46', period: '4', seconds: 60 }); S.set('rankBoard/' + 'a'.repeat(32), { seconds: 600 });
+  if(!opts.noAccess){
+    S.set('config/access', { allow: { 'fake-uid-005': true, 'fake-outside-1': true } });
+    for(let q = 0; q < (opts.requests ?? 3); q++) S.set('accessRequests/fake-ask-' + String(q).padStart(3, '0'), { name: q === 1 ? '<img src=x onerror=alert(3)> \u202Eevil' : 'Test Asker ' + q, email: `asker${q}@example.test`, at: new Timestamp(1762950000 + q, 0), status: q === 2 ? 'declined' : 'asked' });
+  }
   if(opts.unwritable) S.get('progress/fake-uid-003').skills['<img src=x onerror=alert(2)>'] = () => 1;
   return S;
 }
 // Which file collection a stored path belongs to; null = not one the backup should hold.
 function collOf(path){
   const p = path.split('/');
-  if(path === 'config/class') return 'config';
+  if(path === 'config/class' || path === 'config/access') return 'config';
+  if(p.length === 2 && p[0] === 'accessRequests') return 'accessRequests';
   if(p.length === 2 && p[0] === 'progress') return 'progress';
   if(p.length === 2 && p[0] === 'issueReports') return 'issueReports';
   if(p.length === 4 && p[0] === 'minutes' && p[2] === 'weeks') return 'minutesWeeks';
@@ -250,11 +259,11 @@ console.log('\n1. A whole backup (300 students, issueReports empty, every Firest
   ok(j.date === f.name.slice(20, 30), `header date ${j.date} = the file name's`);
   ok(j.site === 'guitar-class-2026-11-13-abc123' && j.project === 'stub-project', `site ${j.site}, project ${j.project}`);
   // Counts vs the stub
-  const want = { config: 0, progress: 0, 'minutesWeeks': 0, issueReports: 0 };
+  const want = { config: 0, progress: 0, 'minutesWeeks': 0, issueReports: 0, accessRequests: 0 };
   for(const p of S.keys()){ const k = collOf(p); if(k) want[k]++; }
   let countOk = 0;
   for(const k of Object.keys(want)){ if(j.counts[k] === want[k] && Object.keys(j.collections[k] || {}).length === want[k]) countOk++; else console.log(`     ${k}: header ${j.counts[k]}, file ${Object.keys(j.collections[k] || {}).length}, stub ${want[k]}`); }
-  ok(countOk === 4 && Object.keys(j.counts).length === 4, `header counts = stub counts for ${countOk} of 4 collections (${Object.entries(want).map(([k, v]) => k + ' ' + v).join(', ')})`);
+  ok(countOk === 5 && Object.keys(j.counts).length === 5 && want.config === 2 && Array.isArray(j.notReadable) && !j.notReadable.length, `header counts = stub counts for ${countOk} of 5 collections (config holds class + access; notReadable empty) (${Object.entries(want).map(([k, v]) => k + ' ' + v).join(', ')})`);
   ok(want.issueReports === 0 && j.collections.issueReports && !Object.keys(j.collections.issueReports).length, 'the empty collection (issueReports) is in the file, empty, count 0');
   // Round trip
   let same = 0, total = 0; const bad = [];
@@ -311,6 +320,7 @@ for(const [coll, code, label] of [
   ['config/class', 'unavailable', 'class settings'], ['progress', 'unavailable', 'saved work'],
   ['minutesWeeks', 'unavailable', 'practice minutes'], ['issueReports', 'unavailable', 'problem reports'],
   ['progress', 'permission-denied', 'saved work'], ['config/class', 'hang', 'class settings'],
+  ['config/access', 'unavailable', 'allow list'], ['accessRequests', 'unavailable', 'requests to join'], ['config/access', 'hang', 'allow list'],
 ]){
   const S = makeStore({ students: 40, reports: 3 });
   const c = makeConsole(S, { fail: { [coll]: code === 'hang' ? { hang: true } : { code } } });
@@ -330,6 +340,32 @@ for(const [coll, code, label] of [
   await c.run('teacherBackupStart()');
   const j = JSON.parse((await fileOf(c)).text);
   ok(state(c).kind === 'saved' && j.counts.progress === 40 && j.complete === true, `a one-off failure on progress is retried: ${state(c).kind}, ${j.counts.progress} of 40 students`);
+}
+
+/* ══ 3b. Before paste 1: the two 2026-11-13 documents refused by the rules ══ */
+console.log('\n3b. config/access and accessRequests refused (their rules not pasted yet): the backup still saves');
+{
+  const S = makeStore({ students: 20, reports: 2 });
+  const c = makeConsole(S, { fail: { 'config/access': { code: 'permission-denied' }, accessRequests: { code: 'permission-denied' } } });
+  await c.run('teacherBackupStart()');
+  const s = state(c);
+  const f = await fileOf(c);
+  const j = f ? JSON.parse(f.text) : {};
+  ok(s.kind === 'saved' && c.saved.length === 1, `refused both: ${s.kind}, files ${c.saved.length}`);
+  ok(j.collections && !('access' in j.collections.config) && !('accessRequests' in j.collections) && !('accessRequests' in j.counts) && j.counts.config === 1, 'the file holds neither (config has class only; no accessRequests collection or count)');
+  ok(JSON.stringify(j.notReadable) === '["config/access","accessRequests"]', `the header's notReadable: ${JSON.stringify(j.notReadable)}`);
+  ok(/not readable yet/.test(s.text) && /allow list/.test(s.text) && /requests to join/.test(s.text), `the saved line says so: "${s.text}"`);
+  ok(c.st.reads.filter(p => p === 'config/access').length === 1, 'permission-denied on config/access is not retried (1 read)');
+  ok(c.st.writes === 0, `write attempts: ${c.st.writes}`);
+}
+{
+  const S = makeStore({ students: 5 });
+  const c = makeConsole(S);
+  await c.run('teacherBackupStart()');
+  const j = JSON.parse((await fileOf(c)).text);
+  const r1 = j.collections.accessRequests['fake-ask-001'];
+  ok(r1 && r1.name === '<img src=x onerror=alert(3)> \u202Eevil' && r1.at.__type === 'timestamp' && j.collections.config.access.allow['fake-outside-1'] === true, 'a request with markup and a direction override is in the file byte for byte; at is a tagged timestamp; the allow list is in config.access');
+  ok(/3 requests to join/.test(state(c).text), `the saved line counts the requests: "${state(c).text}"`);
 }
 
 /* ══ 4. A value the file cannot hold ══ */

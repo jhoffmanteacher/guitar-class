@@ -26,15 +26,24 @@
                                through teacherPmWeeksGet (teacher-students.js),
                                the console's one read under minutes/ (1cg).
      issueReports/*            students' problem reports.
+     config/access             (2026-11-13) the outside accounts the teacher
+                               allowed in, { allow: { uid: true } }; in the file
+                               beside config/class.
+     accessRequests/*          (2026-11-13) "ask your teacher to let me in":
+                               name, email, when, status.
+     Before the paste-1 rules for those two are published the teacher cannot
+     read them: that one refusal (permission-denied) leaves them out and the
+     header says so (notReadable), instead of failing the whole backup. Any
+     other failure on them fails it, like every other read.
    LEFT OUT, and why: TEACHER_BACKUP_LEFT_OUT below (also written into the file).
 
    THE FILE. One JSON object. Its header comes first: format, formatVersion,
    complete (always true: a backup with a failed read is never saved), the date,
    the site's shell cache name, the Firebase project, counts (docs per
    collection), the encoding rules and the left-out list. Then `collections`:
-     { "progress": { uid: fields }, "config": { "class": fields },
+     { "progress": { uid: fields }, "config": { "class": fields, "access": fields },
        "minutesWeeks": { "<uid>/<weekId>": fields },
-       "issueReports": { id: fields } }
+       "issueReports": { id: fields }, "accessRequests": { uid: fields } }
    A Firestore doc id never contains "/", so "<uid>/<weekId>" splits back
    unambiguously into minutes/<uid>/weeks/<weekId>.
    Firestore types are written as tagged objects so they read back exactly
@@ -68,8 +77,8 @@
         bound by firestore.rules). It reads the file, turns every value back
         with the rules of teacherBackupDecode (a timestamp → Timestamp, bytes →
         Bytes, a reference → a doc ref …) and set()s each doc at its path:
-        progress/<uid>, config/class, minutes/<uid>/weeks/<week>,
-        issueReports/<id>.
+        progress/<uid>, config/class, config/access,
+        minutes/<uid>/weeks/<week>, issueReports/<id>, accessRequests/<uid>.
      3. A restored doc REPLACES what is there: anything the student saved after
         the backup is lost. Have the student sign out first. Restore
         config/class only with every console closed (a console holding the
@@ -95,6 +104,8 @@ const TEACHER_BACKUP_LABEL = {
   'progress': 'students’ saved work (progress)',
   [TEACHER_BACKUP_WEEKS]: 'practice minutes (each student’s weeks)',
   'issueReports': 'problem reports (issueReports)',
+  'config/access': 'the allow list of outside accounts (config/access)',
+  'accessRequests': 'requests to join (accessRequests)',
 };
 const TEACHER_BACKUP_LEFT_OUT = [
   {path:'micTakes/* and micTakes/*/chunks/*', why:'mic recordings: large audio, saved by Mic recordings → Download all (with each take’s data)'},
@@ -240,6 +251,16 @@ async function teacherBackupGet(gen, coll, fn){
   teacherBackupCheck(gen);
   throw {backupCollection:coll, cause:err};
 }
+/* A read whose ONLY allowed failure is the rules refusing it (the two 2026-11-13 documents before their rules are
+   pasted): returns null and notes the collection; every other failure throws as teacherBackupGet does. */
+async function teacherBackupOptional(gen, coll, fn, notReadable){
+  try{ return await (coll==='accessRequests' ? fn() : teacherBackupGet(gen, coll, fn)); }
+  catch(e){
+    const cause=e && e.backupCollection ? e.cause : null;
+    if(cause && cause.code==='permission-denied'){ notReadable.push(coll); return null; }
+    throw e;
+  }
+}
 function teacherBackupEncodeDoc(coll, id, data, where){
   try{ return teacherBackupEncode(data, where); }
   catch(e){ throw {backupCollection:coll, cause:e, unwritable:true}; }
@@ -276,6 +297,11 @@ async function teacherBackupReadAll(gen){
   collections.config={};
   if(cfgSnap.exists) teacherBackupSetKey(collections.config, 'class', teacherBackupEncodeDoc('config/class', 'class', cfgSnap.data(), 'config/class'));
   counts.config=cfgSnap.exists?1:0;
+  const notReadable=[];
+  /* The allow list: refused only before its rules are pasted (see the header). */
+  teacherBackupSay(gen, 'running', 'Reading the allow list…');
+  const accSnap=await teacherBackupOptional(gen, 'config/access', ()=>db.collection('config').doc('access').get({source:'server'}), notReadable);
+  if(accSnap && accSnap.exists){ teacherBackupSetKey(collections.config, 'access', teacherBackupEncodeDoc('config/access', 'access', accSnap.data(), 'config/access')); counts.config++; }
 
   teacherBackupSay(gen, 'running', 'Reading students’ saved work…');
   const progressDocs=await teacherBackupReadPaged(gen, 'progress', n=>teacherBackupSay(gen, 'running', `Reading students’ saved work: ${n} read so far…`));
@@ -310,7 +336,15 @@ async function teacherBackupReadAll(gen){
   reportDocs.forEach(d=>teacherBackupSetKey(collections.issueReports, d.id, teacherBackupEncodeDoc('issueReports', d.id, d.data(), 'issueReports/'+d.id)));
   counts.issueReports=reportDocs.length;
 
-  return {collections, counts};
+  teacherBackupSay(gen, 'running', 'Reading requests to join…');
+  const reqDocs=await teacherBackupOptional(gen, 'accessRequests', ()=>teacherBackupReadPaged(gen, 'accessRequests'), notReadable);
+  if(reqDocs){
+    collections.accessRequests={};
+    reqDocs.forEach(d=>teacherBackupSetKey(collections.accessRequests, d.id, teacherBackupEncodeDoc('accessRequests', d.id, d.data(), 'accessRequests/'+d.id)));
+    counts.accessRequests=reqDocs.length;
+  }
+
+  return {collections, counts, notReadable};
 }
 // The shell cache's name (sw.js CACHE_VERSION), so the file says which site wrote it.
 async function teacherBackupSiteVersion(){
@@ -336,15 +370,18 @@ function teacherBackupFileText(read, now, site){
     site,
     project,
     counts:read.counts,
+    notReadable:read.notReadable||[],
     encoding:'Firestore types are tagged objects: {"__type":"timestamp",seconds,nanoseconds,iso}, {"__type":"bytes",base64}, {"__type":"geopoint",latitude,longitude}, {"__type":"reference",path}, {"__type":"number",value:"NaN"|"Infinity"|"-Infinity"|"-0"}, and {"__type":"map",value} for a stored map that has its own "__type" key. Docs are RAW, as stored (no Module 4/5 remap). "minutesWeeks" holds each student’s practice weeks, keyed "<uid>/<weekId>" (that doc’s path is minutes, uid, weeks, weekId). See teacher-backup.js for how to restore.',
     leftOut:TEACHER_BACKUP_LEFT_OUT,
     collections:read.collections,
   };
   return JSON.stringify(file);
 }
-function teacherBackupSummary(counts){
+function teacherBackupSummary(counts, notReadable){
   const n=(k, one, many)=>`${counts[k]} ${counts[k]===1?one:many}`;
-  return `${n('progress','student','students')}, ${n(TEACHER_BACKUP_WEEKS,'practice week','practice weeks')}, ${n('issueReports','problem report','problem reports')}, ${counts.config?'the class settings':'no class settings doc (there is none yet)'}`;
+  const extra=('accessRequests' in counts ? `, ${n('accessRequests','request to join','requests to join')}` : '')
+    + ((notReadable||[]).length ? ` (not readable yet, their rules are not pasted: ${notReadable.map(c=>TEACHER_BACKUP_LABEL[c]||c).join(', ')})` : '');
+  return `${n('progress','student','students')}, ${n(TEACHER_BACKUP_WEEKS,'practice week','practice weeks')}, ${n('issueReports','problem report','problem reports')}, ${counts.config?'the class settings':'no class settings doc (there is none yet)'}${extra}`;
 }
 
 /* The button. A second click while a run is out does nothing. */
@@ -385,5 +422,5 @@ async function teacherBackupStart(){
     return;
   }
   try{ localStorage.setItem(TEACHER_BACKUP_LAST_KEY, String(now)); }catch(e){}
-  teacherBackupSay(gen, 'saved', `Saved ${name}: ${teacherBackupSummary(read.counts)}. Look in your Downloads folder.`);
+  teacherBackupSay(gen, 'saved', `Saved ${name}: ${teacherBackupSummary(read.counts, read.notReadable)}. Look in your Downloads folder.`);
 }
