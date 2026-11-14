@@ -10,8 +10,7 @@ What is open right now: `WORKFLOW.md` → "Where things stand" (top of the file)
    runs it for you at the end of every turn that changed code; if it blocks
    your stop, fix the cause — see "Stop hook" below). Before a push: the full
    `node tools/checks.mjs`. Never hand-edit the version lines in `sw.js`.
-2. Touched a `module-N.js`? `node tools/rule-zero-proof.mjs origin/main`, and
-   paste its summary into your report.
+2. Touched a `module-N.js`? Paste the checks' 1dl line (`rule-zero-proof.mjs`, run for you) into your report.
 3. Touched a renderer, escaping, or 3+ files (counted as in "Triggers" below)? Run the
    **change smoke**: `node tools/smoke.mjs --en-only --only <areas> --baseline <ref> > file 2>&1`.
    A real browser walks the areas your change touches, in English (Jonathan, 2026-11-09: "it's
@@ -79,17 +78,16 @@ What is open right now: `WORKFLOW.md` → "Where things stand" (top of the file)
    conflicts too, abort the whole rebase. Any other conflict (another `sw.js` hunk, a `module-N.js`, a
    danger-zone file): `git rebase --abort` and ask Jonathan. Never force-push, and never make a
    merge commit without asking. When the rebase ends, run the full `node tools/checks.mjs` on
-   the rebased tip (plus `rule-zero-proof.mjs origin/main` if a `module-N.js` changed, and the
-   smoke when those commits touch files you changed), commit the `sw.js` it rewrote, and push
+   the rebased tip (plus the smoke when those commits touch files you changed), commit the `sw.js` it rewrote, and push
    only when `git status` is clean. After pushing: `node tools/checks.mjs --live`.
 
-**Never, whatever the task says:** move or renumber a section or step (progress
-keys); reword a keyed MC's choices — or its English prompt — in a frozen module
-or the one the class is about to enter ("Three regimes"); write `progress/{uid}`
-from console code; write `config/class` except through `teacherWriteConfig()`;
-change `firestore.rules` without telling Jonathan it needs a console paste;
-re-level "the cure"; delete what is switched off (Daily 5, Take It to a Song
-sections); resurrect the deleted student tour.
+**Never, whatever the task says** (each is a check that fails the commit, the push and GitHub; `tools/never-blocks.mjs`):
+move or renumber a section or step (progress keys; 1dl); reword a keyed MC's choices — or its English prompt —
+in a frozen module or the one the class is about to enter ("Three regimes"; 1ap, 1dl); write `progress/{uid}` from
+console code (1dm); write `config/class` except through `teacherWriteConfig()` (1ai, 1dm); change `firestore.rules`
+without telling Jonathan it needs a console paste (1dn: then add the line it prints to `RULES-PASTE.md`); re-level
+"the cure" (1do); delete what is switched off (Daily 5, Take It to a Song sections; 1do); resurrect the deleted
+student tour (1do). A refusal is never fixed by loosening the check; a frozen-module fix goes to skill `summer-reset`.
 
 **Habits that catch the expensive bugs:**
 - Grep before you edit — the same bug lives in sibling copies and in comments
@@ -135,7 +133,7 @@ Static HTML/JS/CSS, no build; Firebase + Firestore; GitHub deploy. Module 13 is 
 - **Module 13** has custom tab labels (`stations.b.tabSub`, `checklistSub`), and its
   checklist is the graded assessment. A set is exactly two panels, lesson ladder and
   checklist (the per-set Songs tab was removed 2026-08-27).
-- **No student tour** — don't resurrect. **No in-panel tab bar**: the rail is the only switcher.
+- **No in-panel tab bar**: the rail is the only switcher.
 - **Target screen: Chromebook 1366×657.** Every layout is designed and measured there, and it is the priority. A
   bigger screen shows that same layout enlarged to fill it (`site-fill.js`, 2026-11-13: student site, Song Journey
   pages, console and live-game stage; a new `vh`/`vw` is written `/ var(--site-fill,1)`, 1df). Phone width out of
@@ -176,8 +174,7 @@ sessions share one `origin`:** fetch first, rebase onto `origin/main`, and never
 didn't intend (step 8 of "Start here").
 
 ### ⚠️ Three regimes decide what may change in a module
-Key `${setId}-${station}-sec${gi}-${i}`: a step that changes INDEX loses its tick. Run
-`node tools/rule-zero-proof.mjs <base-ref>` and paste output before any content push.
+Key `${setId}-${station}-sec${gi}-${i}`: a step that changes INDEX loses its tick (1dl runs `rule-zero-proof.mjs`).
 - **Modules 1–`FROZEN_THROUGH` (3)**: labels match BY INDEX; new steps only appended to a
   section's tail; no renames. Keyed-MC choices frozen (1ap); a keyed MC may be ADDED to an
   existing step; reword only via `response.renamedChoices` (old text → new choice). Re-pin 1ap.
@@ -227,8 +224,8 @@ Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `ap
 - **Two guards that only report** (2026-11-13). `checks.mjs` 1dp warns when an English string changes and its Spanish twin does not (`tools/i18n-drift.mjs`): read each line it prints; a line printed in full is a changed fact, order or meaning. Removing twins on purpose (a Journey page, a game's strings) also lowers `DRIFT_FLOOR` in `tools/checks.mjs` (1dp) to the new count, as a pin-only edit in the same commit. The accessibility scan (`node tools/smoke.mjs --only a11y`, axe-core, vendored) runs report-only on GitHub after every push (`browser.yml`, job "a11y scan"); its ratchet against `tools/a11y-baseline.json` (`--a11y-ratchet`) stays OFF until a week of GitHub runs show 0 new signatures and a reviewer has passed the switch-on.
 - **Sweep ratchet**: 3+ instances of a mechanically-detectable error class → permanent `checks.mjs` detector, same session; it must render/execute, match UNESCAPED strings (`unescapeJs()`); break it in a scratch copy and watch it fail.
 - **Activity order/placement** live on the console board (`config/class.activityBoard`,
-  `caBoardOrder()`, `teacherMoveActivity()`); a digit in a title is a SERIES number (1d, 1l). **`config/class`** writes only via `teacherWriteConfig()` (1ai; omit `base` unless a single-cell toggle).
-- **`firestore.rules` change** → tell Jonathan: Firebase console → Firestore → Rules → paste →
+  `caBoardOrder()`, `teacherMoveActivity()`); a digit in a title is a SERIES number (1d, 1l). **`config/class`** writes only via `teacherWriteConfig()` (1ai, 1dm; omit `base` unless a single-cell toggle).
+- **`firestore.rules` change** (1dn) → tell Jonathan: Firebase console → Firestore → Rules → paste →
   Publish (GitHub Pages doesn't deploy it). Before that: `tools/pm-rules-test.mjs` and
   `tools/rules-core-test.mjs --breaks` on the Firestore emulator (and `tools/site-errors-rules-test.mjs --breaks --site <repo>` for the `siteErrors` block) (their headers say how; GitHub runs both after
   every push, `.github/workflows/rules.yml`). A case named "today: …" turning red means a rule was tightened:
@@ -240,7 +237,7 @@ Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `ap
   `WORKFLOW.md` → "Recently shipped" → the 2026-11-01 "Practice minutes" entry.
 - **Play-along first**: a song link opens its play-along card if one is openable
   (`songsPlayAlongCard()`, at the click), else the Journey page; no per-song retire list (1bn).
-  `TAKE_TO_SONG_ENABLED`/`DAILY5_ENABLED` false: switched off, never deleted.
+  `TAKE_TO_SONG_ENABLED`/`DAILY5_ENABLED` false: switched off, never deleted (1do).
 - **Changelog**: student-facing change → dated top `CHANGELOG.md` entry, same push, student's view.
 
 ## i18n
