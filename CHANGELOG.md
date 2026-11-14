@@ -6,6 +6,10 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-14 — A privacy page
+
+- **The site has a privacy page.** It says what the site saves about you, who can see it, when a game records you, how long things are kept, and who to ask. Open "Privacy" under the sign-in button, or under "Report a problem" in the menu. It is in English and Spanish.
+
 ## 2026-11-14 — Practice cards: Loop this part, and Build up speed
 
 - **Loop this part.** On a practice card with section buttons (Intro, Verse, Chorus), turn on "Loop this part". The section you picked plays again and again until you press Stop or turn the loop off. The L key turns it on and off.
