@@ -17738,8 +17738,8 @@ function checkSongFilesConsole() {
        in English and in Spanish.
    ════════════════════════════════════════════════════════════════════ */
 const PRIVACY_NOTICE_SHA = {
-  en: '91f02b40b2d693dc5f12b8ddfaac9e4ce8a025d21f10d2832b52001668fbd23d',
-  es: '91e30f66ee5f2bd6ab0d0549358254a8a8a619499e2fbfe385cb6357273d657d',
+  en: '1c57f19815f4c5690f25158b8b9ade992890c61f6c3b59580328b2d43db24c0c',
+  es: '2c0e29f70b838538db3a90dcdd73b4b01acd29997c64dfb0873c7f51d5e9158d',
 };
 function privacyNoticeText(html, lang) {
   const m = html.match(new RegExp(`<section data-notice lang="${lang}"[^>]*>([\\s\\S]*?)</section>`));
