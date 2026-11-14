@@ -45,11 +45,15 @@
      nearest     the nearest-strum rule the site used for Power Chord Switch from 2026-11-13 to 2026-11-14 (ccSpanRule off: the site's
                  Change Up rule); on a site from before the whole-span rule it is the site as it is
      spanLate    the whole-span rule with no early allowance: a change's span starts AT the change (the measured `slotA` of
-                 Claude outputs/t02-known-good-2026-11-14.md; the site's rule, with the allowance of `win` before it, is that file's `slotB`) */
+                 Claude outputs/t02-known-good-2026-11-14.md; the site's rule, with the allowance of `win` before it, is that file's `slotB`)
+     spanFarReads (V1 of the 2026-11-14 review) the whole-span rule, but a strum more than half a beat from its change counts only with a
+                 readable chord (3+ pitch readings that fit the new chord); nearer, under 3 readings still passes on timing alone
+     spanReads   (V2) the whole-span rule, but every strum needs a readable chord (3+ readings that fit) to make a change right
+     In both, a strum that does not pass is a "wrong chord" for the changes it was heard in, as any strum that does not read right. */
 export const CAPS = [250, 350, 500, 700], PICKS = ['near', 'last', 'best'];
 export const WINDOW_RULES = ['same', 'first', ...CAPS.map(c => 'w' + c), ...PICKS, ...CAPS.flatMap(c => PICKS.map(p => 'w' + c + p)),
   ...['', ...CAPS.map(c => 'w' + c)].flatMap(w => ['g0', 'gd'].map(g => w + 'near' + g))];
-export const PICK_RULES = ['nearest', 'spanLate'];
+export const PICK_RULES = ['nearest', 'spanLate', 'spanFarReads', 'spanReads'];
 export const RULES = ['base', 'ring', 'half', 'half3', 'both', 'both3', ...WINDOW_RULES, ...PICK_RULES];
 /* The rules replay-takes.mjs runs when no --rules is given (the window rules are many: change-window.mjs runs them). */
 export const DEFAULT_RULES = ['base', 'first'];
@@ -74,6 +78,12 @@ export function applyRule(src, rule, ratio){
   }
   if (rule === 'base') return src;
   if (rule === 'nearest') return unSpan(src);
+  if (rule === 'spanFarReads' || rule === 'spanReads'){
+    if (src.indexOf('function ccSpanRule(') < 0) throw new Error('candidates: "' + rule + '" needs a site with the whole-span rule (coach-chords.js ccSpanRule, from 2026-11-14)');
+    rep('  const won = group.find(g => g.c.result === null && ccToneOk(g.c, readings) !== false);',
+      `  const won = group.find(g => { if (g.c.result !== null) return false; const v = ccToneOk(g.c, readings); return ${rule === 'spanReads' ? 'v === true' : 'Math.abs(g.dev) > cc.beatMs * 0.5 ? v === true : v !== false'}; });`);
+    return src;
+  }
   if (rule === 'spanLate'){
     if (src.indexOf('function ccSpanRule(') < 0) throw new Error('candidates: "spanLate" needs a site with the whole-span rule (coach-chords.js ccSpanRule, from 2026-11-14)');
     rep('    if (c.result !== null || rel < c.beat * cc.beatMs - win || rel >= ccSpanHi(c)) return;', '    if (c.result !== null || rel < c.beat * cc.beatMs || rel >= ccSpanHi(c)) return;');

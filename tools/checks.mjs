@@ -16162,7 +16162,9 @@ function checkCoachVerdicts() {
          P11 the old chord 0.2 window after the change, then the Stop click 0.3 window after it (dropped by ccFinish): wrong (the real strum's
              held verdict outlives the dropped click; where 0.1 window gives its check 3 readings, 0.1 window > 170 ms)
          P12 P11 on the LAST change with the new chord: right, the game counts as finished and awards XP once
-         P13 at 15 BPM: the old chord 200 ms after the change, +5 pressed 500 ms after it, the new chord at 0.8 of the new span: right */
+         P13 at 15 BPM: the old chord 200 ms after the change, +5 pressed 500 ms after it, the new chord at 0.8 of the new span: right
+         P14 a Stop click 0.3 window before the change (in its span and the one before's): dropped from both, neither is right
+         P15 the new chord 0.3 window early, the change before not played: the big line ends on this change's tick, not the older "–" */
     song.pickChecks = 0;
     /* o: last (the change under test is the round's last, else the third), stopAt (ms from the change's time at the start, window units in
        stopWin), stopAfterFirst (ms after the first strum), finishLag (ms from the stop to ccFinish's clock, 400), press { ms, d } (ccLiveBpm(d)
@@ -16209,7 +16211,8 @@ function checkCoachVerdicts() {
         }
         const before = cc.changes[K].result;
         if (stop != null){ performance.now = () => t + lat + (o.finishLag == null ? 400 : o.finishLag); ccFinish(false); }
-        return JSON.stringify({ result: cc.changes[K].result, before, firstAt, win: win0, gap: cc.bpc * cc.beatMs, xp, moved: Math.round(T - T0), prev: cc.changes[K - 1].result, probe: probe === undefined ? 'unset' : probe });
+        return JSON.stringify({ result: cc.changes[K].result, before, firstAt, win: win0, gap: cc.bpc * cc.beatMs, xp, moved: Math.round(T - T0), prev: cc.changes[K - 1].result, probe: probe === undefined ? 'unset' : probe,
+          big: (document.getElementById('cc-last') || {}).textContent || '', okLine: globalThis.t('games.pw.last.ok', { chord: pwChordName(c.to) }) });   /* globalThis.t: the loop's own t is its clock */
       } finally { coachReadFrame = keep.rf; coachAnalyser = keep.an; coachHfRms = keep.hf; coachOnsetAt = keep.at; performance.now = keep.pn; coachPitchReadings = keep.pr; awardArcadeXp = keep.ax; micRec = null; cc = null; ccStop(); }
     })()`));
     for (const [mode, rate, bpm] of [['open', 0, 40], ['open', 0, 60], ['open', 2, 90]]) {
@@ -16259,6 +16262,13 @@ function checkCoachVerdicts() {
       const p9 = R([{ at: -0.5, tones: 'new' }]);
       if (p9.result !== 'ok' || p9.prev !== 'miss') flag(`${tag}: P9 the new chord 0.5 window early gave this change "${p9.result}" and the change before "${p9.prev}", expected "ok" and "miss" (an early strum of the next chord never makes the current one wrong)`);
       song.pickChecks += 9;
+      // P15 (review R1-1): the change before is finished when its span ends, which comes after this change's early tick: the big line must stay on the tick
+      const p15 = R([{ at: -0.3, tones: 'new' }]);
+      if (p15.result !== 'ok' || p15.big !== p15.okLine) flag(`${tag}: P15 the new chord 0.3 window early, the change before not played: this change "${p15.result}" and the big line ends on "${p15.big}", expected "ok" and "${p15.okLine}" (an older change's result must not cover a newer tick)`);
+      // P14 (review R1-3): a Stop click inside TWO open spans (the change before is still open) is dropped from both: neither change is right
+      const p14 = pickRun('power', rate, bpm, [{ at: -0.3, tones: 'none' }], { stopWin: -0.3, stopAt: 20, finishLag: 100 });
+      if (p14.result === 'ok' || p14.prev === 'ok') flag(`${tag}: P14 a Stop click 0.3 window before the change, in this change's and the one before's span, gave "${p14.prev}" / "${p14.result}", expected neither "ok" (ccFinish must drop every check of the click)`);
+      song.pickChecks += 2;
       const p10 = pickRun('power', rate, bpm, [{ at: 0.1, tones: 'old' }], { stopAfterFirst: 500 });
       if (p10.before !== null || p10.result !== 'off') flag(`${tag}: P10 Stopped 500 ms after the old chord, its span still open: "${p10.before}" before the Stop and "${p10.result}" after, expected nothing, then "off" (ccFinish must finish a held wrong chord)`);
       song.pickChecks++;
@@ -16907,7 +16917,7 @@ function checkCoachVerdicts() {
     if (pk !== 'ccBest:F5-G5:beat') flag(`1ck: a pair's best-score key changed to "${pk}" (a student's saved bests would be lost)`);
     const pairPlan = JSON.parse(run(`JSON.stringify(ccRoundPlan(CC_POWER_PROGRESSIONS[1], CC_POWER_PROGRESSIONS[1].chords, CC_RATES[1]))`));
     if (pairPlan.slots !== 12 || pairPlan.ladder || pairPlan.rounds !== 1) flag(`1ck: a pair's round changed (${pairPlan.slots} slots at "Every 2 beats", expected 12, one round)`);
-    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, gridChecks: 60, pickChecks: 59, hintChecks: 20, topChecks: 64, stopChecks: 101, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
+    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, gridChecks: 60, pickChecks: 67, hintChecks: 20, topChecks: 64, stopChecks: 101, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
     for (const [k, n] of Object.entries(SONG_PIN)) if (song[k] !== n) flag(`1ck: ${song[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
     songCounts = song;
     run(`setLang('en'); cc = null; ccStop();`);
@@ -17732,9 +17742,10 @@ async function checkMicStart() {
    neighbour's wrong chord 850 ms early pulls the grid before the student's on-time strum; the console must replay the match nearest-first, or
    four of its gridOffsets miss by about 60 ms).
    Re-pinned 2026-11-14 for pw-span (one take, one round, 9 changes: a take saved since the whole-span rule, changePick 'span': a right chord
-   1200 ms late, outside half a beat but inside its span, must agree, not be a false hit; 8 more agree, 1 silent-miss, 3 off-grid onsets). */
-const PW_EVAL_PIN = { nearestTakes: 1, spanTakes: 1, ownRules: 4, takes: 30, rounds: 53, changes: 421, judged: 398, dropped: 23, agree: 267, 'detector-missed': 58, 'false-hit': 25, 'off-window': 15, 'silent-miss': 33,
-  mismatch: 1, gridOffsets: 398, farGridOffsets: 57, clickRounds: 42, noClickRounds: 11, siteCentred: 45, beepCentred: 6, extra: 41, htmlChecks: 6, hovers: 53, textRounds: 53, evaluateRun: 2, evalTakesLines: 4, crafted: 4, uncappedTakes: 1,
+   1200 ms late, outside half a beat but inside its span, must agree, not be a false hit; 8 more agree, 3 off-grid onsets; review R1-4: the take
+   is Stopped 1.3 s into its last change's span, so that span runs past the audio and the change is dropped, where half a beat would not be). */
+const PW_EVAL_PIN = { nearestTakes: 1, spanTakes: 1, ownRules: 4, takes: 30, rounds: 53, changes: 421, judged: 397, dropped: 24, agree: 267, 'detector-missed': 58, 'false-hit': 25, 'off-window': 15, 'silent-miss': 32,
+  mismatch: 1, gridOffsets: 397, farGridOffsets: 57, clickRounds: 42, noClickRounds: 11, siteCentred: 45, beepCentred: 6, extra: 41, htmlChecks: 6, hovers: 53, textRounds: 53, evaluateRun: 2, evalTakesLines: 4, crafted: 4, uncappedTakes: 1,
   whatIfTakes: 30, whatIfCandidates: 120, whatIfTruth: 8, whatIfRows: 67, dropNotes: 2, pitchTakes: 8, pitchNone: 22, pitchRight: 86, pitchTimingOnly: 55, pitchRows: 26, ratioRows: 17, legacyCountIn: 1, shortRounds: 11, oneBeepRounds: 1, shortLagRounds: 8, guessedRounds: 7 };
 async function checkPwTakeEvaluator() {
   head('1cl. Power Chord Switch takes: the evaluator is run on takes whose site verdicts come from ccLoop\'s own rule');

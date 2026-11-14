@@ -615,6 +615,7 @@ function ccBeginStage(){
      longer lead. Change Up never records. */
   if (ccIsPower() && cc.stage === 0) micRecStart('pw');
   cc.changes = [];
+  cc.lastShown = null;   // the big line's newest change this round (ccShowLast)
   for (let s = 1; s < cc.slots; s++){
     cc.changes.push({ beat: s * cc.bpc, from: cc.seq[s - 1], to: cc.seq[s], result: null, pend: null });
   }
@@ -849,6 +850,14 @@ function ccChipRefresh(i){
 function ccShowLast(c){
   const big = document.getElementById('cc-last');
   if (!big || !c || !c.result) return;
+  /* The line only moves forward (review 2026-11-14, R1-1): under the whole-span rule (ccSpanRule) the change before is finished when its span
+     ends, which can come after this change's ✓ (an early strum of this chord), and would cover the ✓ with an older "–" or "✗" for a whole
+     beat. Its chip still turns. */
+  if (ccSpanRule()){
+    const i = cc.changes.indexOf(c);
+    if (cc.lastShown != null && i < cc.lastShown) return;
+    cc.lastShown = i;
+  }
   const kind = c.result === 'ok' ? 'ok' : c.result === 'off' ? 'wrong' : 'miss';
   big.className = 'cc-last ' + kind;
   big.textContent = t('games.pw.last.' + kind, { chord: pwChordName(c.to) });
