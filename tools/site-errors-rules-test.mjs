@@ -194,9 +194,11 @@ const BREAKS = [
   ['hasAll and the version checks dropped (version may be missing)', ".keys().hasAll(['kind', 'message', 'file', 'line', 'col', 'stack', 'page', 'version', 'day', 'lang'])\n            && request.resource.data.kind in", ".keys().size() >= 0\n            && request.resource.data.kind in",
     "            && request.resource.data.version is string\n            && request.resource.data.version.size() <= 64\n", ""],
   ['message cap raised to 3000', 'request.resource.data.message.size() <= 300', 'request.resource.data.message.size() <= 3000'],
-  ['students may read', '      allow read, delete: if isTeacher();\n    }\n  }\n}', '      allow read, delete: if isTeacher();\n      allow read: if isSignedIn();\n    }\n  }\n}'],
-  ['the teacher may update', '      allow read, delete: if isTeacher();\n    }\n  }\n}', '      allow read, delete: if isTeacher();\n      allow update: if isTeacher();\n    }\n  }\n}'],
-  ['students may delete', '      allow read, delete: if isTeacher();\n    }\n  }\n}', '      allow read, delete: if isTeacher();\n      allow delete: if isSignedIn();\n    }\n  }\n}'],
+  /* These three are anchored on the block's own last rule line and the line above it, not on the end of the file:
+     the siteErrors block stopped being the last block on 2026-11-13 (song requests), and all three then found 0. */
+  ['students may read', "            && request.resource.data.lang in ['en', 'es'];\n      allow read, delete: if isTeacher();\n    }\n", "            && request.resource.data.lang in ['en', 'es'];\n      allow read, delete: if isTeacher();\n      allow read: if isSignedIn();\n    }\n"],
+  ['the teacher may update', "            && request.resource.data.lang in ['en', 'es'];\n      allow read, delete: if isTeacher();\n    }\n", "            && request.resource.data.lang in ['en', 'es'];\n      allow read, delete: if isTeacher();\n      allow update: if isTeacher();\n    }\n"],
+  ['students may delete', "            && request.resource.data.lang in ['en', 'es'];\n      allow read, delete: if isTeacher();\n    }\n", "            && request.resource.data.lang in ['en', 'es'];\n      allow read, delete: if isTeacher();\n      allow delete: if isSignedIn();\n    }\n"],
   ['signed-out create allowed', 'allow create: if isSchool()\n            && errorId', 'allow create: if true\n            && errorId'],
   ['an outside account that is not allowed may create (left on isSignedIn())', 'allow create: if isSchool()\n            && errorId', 'allow create: if isSignedIn()\n            && errorId'],
   ['line may be any number', 'request.resource.data.line is int', 'request.resource.data.line is number'],
