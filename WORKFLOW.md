@@ -130,6 +130,13 @@ Start here. Update this block whenever an item opens or closes; each line says w
   `.claude/rules` file split into one-rule bullets, then cut 20-35% (`7ba94ba`..`ab4aaae`); WORKFLOW.md cut from 47k to 14k words
   and its orphaned rules moved into the binding files (this push).
 
+**The Friday check is moved ONCE: it runs Saturday 2026-11-14 at 11 PM, not Friday 2026-11-13** (Jonathan,
+2026-11-13, so that the rest of that day's work is on main and reviewed in the same run). The cloud routine
+`trig_016m5HTbmhxb2oEqDaefQurB` is set to `0 23 * * 6` for that run; the skill `friday-check` has a "next run
+only" section that tells the run to put the schedule back to Fridays first, to run lean, and to delete that
+section when it tags. If you read this after 2026-11-15 and the routine still says Saturdays, set it back
+(`CRON_TZ=America/Los_Angeles 0 23 * * 5`) and tell Jonathan.
+
 **Waiting on Jonathan**
 - **Practice minutes console view** (`997df22`, `07a4e04`): he pasted the rules on 2026-11-06 (memory
   `firestore-rules-published`; no hash check). Left: open **Practice minutes** in the console and check a student or two

@@ -16,11 +16,22 @@ Runs unattended, Fridays at 11:00 PM Pacific, from a scheduled cloud session.
   is the point: in the 2026-11-09 test each model caught bugs the other
   missed.
 
-## The run of 2026-11-13 only: a big week, keep it lean
+## The next run only (moved to Saturday 2026-11-14, 11 PM): a big week, keep it lean
 
-Jonathan, 2026-11-13: "make tonight's run token efficient". The range is about 425 commits, 81 of them Fast (50 touch
-site files, 31 are tools and notes only). These rules apply to THIS run and override the steps below where they
-differ. **Delete this whole section in the same push as tonight's tag**, so next Friday runs the normal steps.
+Jonathan, 2026-11-13: "make tonight's run token efficient", then: "we could delay the friday check until tomorrow
+night" (so the rest of that day's work is on main and is reviewed in the same run). The routine's schedule was
+changed for this ONE run from Fridays to Saturday (`CRON_TZ=America/Los_Angeles 0 23 * * 6`, routine
+`trig_016m5HTbmhxb2oEqDaefQurB`, "Guitar site Friday check"). The range is 425 commits or more, 81 or more of them
+Fast (on 2026-11-13: 50 touched site files, 31 were tools and notes only). These rules apply to THIS run and
+override the steps below where they differ. **Delete this whole section in the same push as this run's tag**, so the
+next Friday runs the normal steps.
+
+0. **First, put the schedule back to Fridays**, before anything else, so a run that stops early cannot leave it on
+   Saturdays: update the routine `trig_016m5HTbmhxb2oEqDaefQurB` to
+   `cron_expression: "CRON_TZ=America/Los_Angeles 0 23 * * 5"` (the same update call the 2026-11-07 "Re-enable
+   Friday check" reminder used) and confirm its next run is Friday 2026-11-20, 11 PM Pacific. If this session has
+   no tool that can do it, say so in the FIRST line of the report: "Jonathan: the Friday check is still set to
+   Saturdays; set it back to Fridays."
 
 1. **Review by area, not by commit.** Do not read 81 diffs. Take the files the Fast commits touched
    (`git log --format= --name-only --grep='^Review: Fast' $range | sort -u`) and review the NET change to those
