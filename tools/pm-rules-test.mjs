@@ -16,7 +16,10 @@
    nothing else under minutes/ — a "minutes/{uid}/weeks: the teacher reads" section pins it.
    2026-11-13: the made-up students are @seq.org accounts (the school-accounts rule, isSchool()); an outside account
    (X) cannot read the boards or the take counter. --port N (default 8089) picks the emulator's port.
-   Last run: 2026-11-06, 191 passed, 0 failed (179 before the teacher-weeks section). Three scratch breaks of the
+   2026-11-13: the teacher may also READ minutes/{uid}/days/* (one line in the days block, in firestore.rules and
+   firestore.rules.paste2 alike: the console's "Back from an absence" filter) — a "minutes/{uid}/days: the teacher
+   reads" section pins it, read only, and that a student still cannot read another's.
+   Earlier: 2026-11-06, 191 passed, 0 failed (179 before the teacher-weeks section). Three scratch breaks of the
    2026-11-06 rule each turned cases red: the new read line dropped (2 red), a teacher read on the whole tree (6 red),
    a teacher write on weeks (3 red). Earlier (2026-11-05, 179 passed, 0 failed): The rules were also broken in scratch copies and every
    break turned at least one case red: the board rules 12 ways (tag check dropped on weekBoard and on
@@ -112,14 +115,32 @@ if (which.includes('orig')) {
   console.log('== minutes reads');
   await t('owner reads own day', () => day(A, 'uidA', '2026-11-16').get(), true);
   await t('owner lists own weeks', () => A.collection('minutes/uidA/weeks').get(), true);
+  await t('owner runs the "Since your last visit" read (14 days up to yesterday, by document id, from the server)', () => { const id = firebase.firestore.FieldPath.documentId(); return A.collection('minutes/uidA/days').where(id, '>=', '2026-10-30').where(id, '<', '2026-11-13').get({ source: 'server' }); }, true);
   await t('owner queries own days by document id (the client\'s load)', () => A.collection('minutes/uidA/days').where(firebase.firestore.FieldPath.documentId(), '>=', '2026-11-16').get(), true);
   await t('another student cannot read', () => day(B, 'uidA', '2026-11-16').get(), false);
   await t('another student cannot list', () => B.collection('minutes/uidA/weeks').get(), false);
-  await t('the teacher cannot read a day', () => day(T, 'uidA', '2026-11-16').get(), false);
-  console.log('== minutes/{uid}/weeks: the teacher reads (2026-11-06, the console\'s Practice minutes view) and nothing else');
+  console.log('== minutes/{uid}/days: the teacher reads (2026-11-13, the console\'s "Back from an absence" filter) and writes nothing');
+  await t('the teacher reads a student\'s day', () => day(T, 'uidA', '2026-11-16').get(), true);
+  await t('the teacher runs the console\'s real days query (14 days by document id, from the server)', () => {
+    const id = firebase.firestore.FieldPath.documentId();
+    return T.collection('minutes/uidA/days').where(id, '>=', '2026-10-30').where(id, '<=', '2026-11-13').get({ source: 'server' });
+  }, true);
+  await t('the teacher still cannot write a day', () => day(T, 'uidA', '2026-11-16').set({ seconds: 60 }), false);
+  await t('the teacher still cannot increment a day', () => day(T, 'uidA', '2026-11-16').set({ seconds: FV.increment(60) }, { merge: true }), false);
+  await t('the teacher still cannot delete a day', () => day(T, 'uidA', '2026-11-16').delete(), false);
+  await t('a student still cannot read another student\'s day', () => day(B, 'uidA', '2026-11-16').get(), false);
+  await t('a student still cannot list another student\'s days', () => B.collection('minutes/uidA/days').get(), false);
+  await t('a student still cannot run the console\'s days query on another student', () => {
+    const id = firebase.firestore.FieldPath.documentId();
+    return B.collection('minutes/uidA/days').where(id, '>=', '2026-10-30').where(id, '<=', '2026-11-13').get();
+  }, false);
+  await t('signed out still cannot read a day', () => day(N, 'uidA', '2026-11-13').get(), false);
+  await t('an outside account still cannot read a student\'s day', () => day(X, 'uidA', '2026-11-16').get(), false);
+  await t('an account with the teacher\'s email but email_verified false cannot read a day', () => env.authenticatedContext('fakeT2', { email: 'jhoffman@seq.org', email_verified: false }).firestore().doc('minutes/uidA/days/2026-11-16').get(), false);
+  console.log('== minutes/{uid}/weeks: the teacher reads (2026-11-06, the console\'s Practice minutes view); days since 2026-11-13; nothing else');
   await t('the teacher reads another student\'s week doc', () => wk(T, 'uidA', '2026-W47').get(), true);
   await t('the teacher lists a student\'s weeks (the console\'s real read, from the server)', () => T.collection('minutes/uidA/weeks').get(), true);
-  await t('the teacher cannot list a student\'s days', () => T.collection('minutes/uidA/days').get(), false);
+  await t('the teacher lists a student\'s days (2026-11-13)', () => T.collection('minutes/uidA/days').get(), true);
   await t('the teacher cannot read meta/board (the tag)', () => T.doc('minutes/uidA/meta/board').get(), false);
   await t('the teacher cannot write a week doc', () => wk(T, 'uidA', '2026-W47').set({ seconds: 60, goalSeconds: 3600, hit: false }), false);
   await t('the teacher cannot increment a week doc', () => wk(T, 'uidA', '2026-W47').set({ seconds: FV.increment(60) }, { merge: true }), false);

@@ -133,8 +133,9 @@ function teacherStudentCountHtml(tally, universe){
    The class rank is on this view ONLY: since 2026-11-13 no student sees one
    (their My progress compares them with their own weeks instead).
    READ ONLY: it reads minutes/{uid}/weeks/* for each student on the roster
-   (firestore.rules lets the teacher's account read those docs and nothing
-   else under minutes/) and writes nothing anywhere. It never reads days,
+   (firestore.rules lets the teacher's account read those docs, and since
+   2026-11-13 the days docs for the Students view's "Back from an absence",
+   below) and writes nothing anywhere. This view never reads days,
    meta/board (the private tag), rankBoard or weekBoard: rank and Top 5 are
    worked out here from the weeks docs, with the engine's own pure maths
    (PM.calc.status, PM.calc.rankPlace, PM.calc.top5Place), so a student's
@@ -388,7 +389,7 @@ async function teacherSetPmWeekGoal(weekId, raw){
    cleared, never a CAS student). Most behind first, then the older oldest
    card, then name. It reads nothing new: the progress docs and config/class
    are already loaded. ── */
-let teacherStuFilter='all';   // 'all' | 'behind'
+let teacherStuFilter='all';   // 'all' | 'behind' | 'away' (Back from an absence, below)
 const TEACHER_BEHIND_MIN=3;
 // 'YYYY-MM-DD' n days from `ymd`, worked out at noon (daylight saving).
 function teacherDayAdd(ymd, n){
@@ -410,8 +411,110 @@ function teacherBehindFor(stu, cfg, today){
   return old.length>=TEACHER_BEHIND_MIN ? {n:old.length, oldest:old[0]} : null;
 }
 function teacherSetStudentFilter(v){
-  if(v!=='all' && v!=='behind') return;
+  if(v!=='all' && v!=='behind' && v!=='away') return;
   teacherStuFilter=v;
+  // Picking "Back from an absence" again after a refused or failed read tries again.
+  if(v==='away' && !teacherAbsLoading) teacherAbsError='';
+  if(teacherView==='students' && !studentDetailUid) renderTeacherStudents();
+}
+/* BACK FROM AN ABSENCE (2026-11-13). Needs ONE firestore.rules line: the teacher may READ minutes/{uid}/days/* (the days block).
+   Until that is published every read is refused, and the filter says so in place of the list (never "0 students").
+   The rule is the student's "Since your last visit" (caSinceGap, app/activities-2.js) seen from the other side:
+     · a class day = a release date (config/class.activityDates) of a card THAT student can see (teacherActivityVisible);
+     · saved work on a day = a practice-minutes day record, minutes/{uid}/days/{date} (any work on the site that day);
+     · a student is listed when two days with saved work in a row (no saved work between them) have TWO or more class days
+       between them, the later day (the day they came back) is one of the last TEACHER_ABS_RECENT (3) class days, today
+       included, and at least one REQUIRED activity came out on those days (required = teacherBlockersFor's rule, done or
+       not: not Optional, not cleared, never CAS). A gap that starts before the read's window (14 days) is not counted:
+       its start is unknown, and the student's own page shows no group then either.
+   Most recent return first, then the longer gap, then name.
+   THE READ: on demand only (the first time the filter is picked in a day; picking it again after a failure retries),
+   one query per student: their day records from the last TEACHER_ABS_WINDOW_DAYS (14) days through today, by document
+   id, from the server, TEACHER_PM_CONCURRENCY at a time (oldest first: the server refuses a descending key scan, so no
+   "newest 8"). A document exists only for a day the student worked, so at most 15 a student and about 10 for one who
+   works every school day: about 600 reads for 60 students, at most 900, once a day. Kept in memory for the session (a
+   student the last read did not cover is read on the next pick). Nothing is written anywhere. */
+const TEACHER_ABS_WINDOW_DAYS=14, TEACHER_ABS_RECENT=3;
+let teacherAbsData=null;    // { day, at, days: { uid: ['YYYY-MM-DD', … newest first] } } — the last good read
+let teacherAbsLoading=false;
+let teacherAbsError='';     // '' | 'denied' (the rule is not published) | 'failed'
+let teacherAbsGen=0;
+/* The console's second read under minutes/: one student's newest day records (ids only matter). checks.mjs 1cg pins it. */
+function teacherAbsDaysGet(uid, from, today){
+  const id=firebase.firestore.FieldPath.documentId();
+  return db.collection('minutes').doc(uid).collection('days').where(id,'>=',from).where(id,'<=',today).get({source:'server'});
+}
+async function teacherLoadAbsences(){
+  const gen=++teacherAbsGen;
+  const today=dayStr(new Date()), from=teacherDayAdd(today, -TEACHER_ABS_WINDOW_DAYS);
+  const kept=teacherAbsData && teacherAbsData.day===today ? teacherAbsData.days : {};
+  const roster=teacherPmRoster().filter(s=>!kept[s.uid]);
+  teacherAbsLoading=true;
+  teacherRepaintStudentsList();
+  const out=Object.assign({}, kept);
+  let next=0, stop=false;
+  const worker=async()=>{
+    while(!stop && next<roster.length){
+      const s=roster[next++];
+      const snap=await withTimeout(teacherAbsDaysGet(s.uid, from, today), TEACHER_PM_READ_MS);
+      const d=[];
+      snap.forEach(doc=>{ if(/^\d{4}-\d{2}-\d{2}$/.test(doc.id) && doc.id>=from && doc.id<=today) d.push(doc.id); });
+      out[s.uid]=d.sort().reverse();
+    }
+  };
+  let err=null;
+  try{
+    await ensureDb();
+    if(!db) throw new Error('no db');
+    await Promise.all(Array.from({length:Math.min(TEACHER_PM_CONCURRENCY, roster.length)}, ()=>worker().catch(e=>{ stop=true; throw e; })));
+  }catch(e){ err=e; }
+  if(gen!==teacherAbsGen) return;
+  teacherAbsLoading=false;
+  if(err){
+    teacherAbsError=(err&&err.code==='permission-denied')?'denied':'failed';
+    if(teacherAbsError==='failed') console.warn('[guitar-class] saved-work days read failed', err);
+  } else {
+    teacherAbsError='';
+    teacherAbsData={day:today, at:Date.now(), days:out};
+  }
+  teacherRepaintStudentsList();
+}
+/* { back, last, days, total, done } for a student back from an absence, else null. PURE over its arguments (and the
+   CLASS_ACTIVITIES data): workDays = their day records, newest first; view = teacherBoardView(cfg), worked out once. */
+function teacherAbsenceFor(stu, cfg, today, workDays, view){
+  if(!Array.isArray(workDays) || workDays.length<2) return null;
+  if(teacherStudentPeriod(stu, cfg)==='CAS') return null;
+  const dates=(cfg&&cfg.activityDates)||{};
+  const clears=((cfg&&cfg.activityClears)||{})[stu.uid]||{};
+  const vis=(window.CLASS_ACTIVITIES||[]).filter(a=>teacherActivityVisible(a, cfg, today, stu.uid, view));
+  const visDates=vis.map(a=>dates[a.id]);
+  const classDays=Array.from(new Set(visDates.filter(d=>typeof d==='string' && d<=today))).sort();
+  const recentFrom=classDays.slice(-TEACHER_ABS_RECENT)[0];
+  if(!recentFrom) return null;
+  const w=Array.from(new Set(workDays.filter(d=>typeof d==='string' && d<=today))).sort().reverse();
+  for(let i=0;i+1<w.length;i++){
+    const back=w[i], last=w[i+1];
+    if(back<recentFrom) break;
+    const gap=caSinceGap(visDates, last, back);
+    if(!gap) continue;
+    const req=vis.filter(a=>gap.includes(dates[a.id]) && !teacherActivityOptional(a.id, cfg) && clears[a.id]!==true);
+    if(!req.length) continue;
+    return {back, last, days:gap, total:req.length, done:req.filter(a=>(stu.classActivities||{})[a.id]===true).length};
+  }
+  return null;
+}
+// The sidebar's "N back" beside Students: shown once the days have been read this session, gone otherwise.
+function teacherPaintStudentsBadge(n){
+  const btn=document.querySelector('#t-side [data-view="students"]');
+  if(!btn) return;
+  let b=btn.querySelector('.t-away-badge');
+  if(!n){ if(b) b.remove(); btn.removeAttribute('aria-label'); return; }
+  if(!b){ b=document.createElement('span'); b.className='stu-period stu-away t-away-badge'; b.setAttribute('aria-hidden','true'); btn.appendChild(b); }
+  b.textContent=n+' back';
+  b.title=`${n} back from an absence (Students → Show: Back from an absence)`;
+  btn.setAttribute('aria-label', `Students, ${n} back from an absence`);
+}
+function teacherRepaintStudentsList(){
   if(teacherView==='students' && !studentDetailUid) renderTeacherStudents();
 }
 
@@ -450,11 +553,33 @@ function renderTeacherStudents(){
   rows.forEach(({stu})=>{ const b=teacherBehindFor(stu, teacherClassConfig, today); if(b) behind[stu.uid]=b; });
   const behindN=Object.keys(behind).length;
   const filter=teacherStuFilter;
+  /* Back from an absence (teacherAbsenceFor): worked out only once the days have been read today. Picking the filter
+     starts the read (which repaints this view); the switch shows no count until then. */
+  const absData=teacherAbsData && teacherAbsData.day===today ? teacherAbsData : null;
+  if(filter==='away' && !teacherAbsLoading && !teacherAbsError && !(absData && Date.now()-absData.at<5000)
+    && (!absData || rows.some(r=>!teacherPmIsTeacher(r.stu) && !Object.prototype.hasOwnProperty.call(absData.days, r.stu.uid)))){ teacherLoadAbsences(); return; }
+  const away={};
+  if(absData){
+    const view=teacherBoardView(teacherClassConfig);
+    rows.forEach(({stu})=>{ const a=teacherAbsenceFor(stu, teacherClassConfig, today, absData.days[stu.uid], view); if(a) away[stu.uid]=a; });
+  }
+  const awayN=absData ? Object.keys(away).length : null;
+  teacherPaintStudentsBadge(awayN);
   const seg=(v,label,n)=>`<button type="button" class="tg-seg-btn${filter===v?' on':''}" data-stu-filter="${v}" aria-pressed="${filter===v}">${label}${n!=null?`<span class="stu-filter-n">${n}</span>`:''}</button>`;
   const filterNote = filter==='behind'
     ? `${TEACHER_BEHIND_MIN} or more required activities not done, released before yesterday (today's and yesterday's don't count). Most behind first.`
-    : '';
-  const filterHtml=`<div class="stu-filter"><span class="stu-filter-lbl">Show</span><div class="tg-seg">${seg('all','Everyone')}${seg('behind','Behind the class',behindN)}</div>${filterNote?`<p class="stu-filter-note">${escHtml(filterNote)}</p>`:''}</div>`;
+    : filter==='away'
+      ? `No saved work on 2 or more class days in a row (days an activity came out), then back in the last ${TEACHER_ABS_RECENT} class days. Most recent return first.`
+      : '';
+  const filterHtml=`<div class="stu-filter"><span class="stu-filter-lbl">Show</span><div class="tg-seg">${seg('all','Everyone')}${seg('away','Back from an absence',awayN)}${seg('behind','Behind the class',behindN)}</div>${filterNote?`<p class="stu-filter-note">${escHtml(filterNote)}</p>`:''}</div>`;
+  /* No list while the days are being read or could not be read: never an empty list that reads as "nobody". */
+  if(filter==='away' && !absData){
+    const msg = teacherAbsLoading ? 'Reading which days each student saved work…'
+      : teacherAbsError==='denied' ? 'The Firestore rules that let this console read saved-work days are not published yet, so absences cannot be shown. Publish the new rules (Firebase console → Firestore → Rules), then pick “Back from an absence” again.'
+      : 'Could not read which days students saved work. Pick “Back from an absence” again to retry.';
+    box.innerHTML=`${scard}${filterHtml}<div class="t-loading"${teacherAbsError==='denied'?' data-abs-denied':''}>${escHtml(msg)}</div>`;
+    return;
+  }
   let shownRows=rows;
   if(filter==='behind'){
     const nameOf=s=>s.name||s.email||s.uid;
@@ -463,16 +588,36 @@ function renderTeacherStudents(){
       return (y.n-x.n) || (x.oldest<y.oldest?-1:x.oldest>y.oldest?1:0) || nameOf(a.stu).localeCompare(nameOf(b.stu), undefined, {sensitivity:'base'});
     });
   }
+  if(filter==='away'){
+    const nameOf=s=>s.name||s.email||s.uid;
+    shownRows=rows.filter(r=>away[r.stu.uid]).sort((a,b)=>{
+      const x=away[a.stu.uid], y=away[b.stu.uid];
+      return (x.back<y.back?1:x.back>y.back?-1:0) || (y.days.length-x.days.length) || nameOf(a.stu).localeCompare(nameOf(b.stu), undefined, {sensitivity:'base'});
+    });
+  }
+  const yesterday=teacherDayAdd(today, -1);
+  // Tags beside the name in a filtered list: the other filter's finding.
+  const tags=stu=>{
+    if(filter==='all') return '';
+    const a=away[stu.uid], b=behind[stu.uid];
+    return (a ? ` <span class="stu-period stu-away">Away ${a.days.length} class days</span>` : '')
+      + (b && filter!=='behind' ? ` <span class="stu-period stu-blocked">${b.n} behind</span>` : '');
+  };
   // The line under a name in a filtered list (an Everyone row has none).
   const subLine=stu=>{
     if(filter==='behind' && behind[stu.uid]){ const b=behind[stu.uid]; return `${b.n} required activities not done. The oldest is from ${teacherShortDay(b.oldest)}.`; }
+    if(filter==='away' && away[stu.uid]){
+      const a=away[stu.uid];
+      const when=a.back===today ? 'today' : a.back===yesterday ? 'yesterday' : 'on '+teacherShortDay(a.back);
+      return `Back ${when}. No saved work ${teacherShortDay(a.days[0])} – ${teacherShortDay(a.days[a.days.length-1])}. ${a.done} of ${a.total} done.`;
+    }
     return '';
   };
   const rowsHtml=shownRows.map(({stu,tally})=>{
     const displayName=stu.name||stu.email||stu.uid.slice(0,8)+'…';
     const sub=subLine(stu);
     return `<button type="button" class="stu-row" data-open-student data-uid="${escAttr(stu.uid)}">
-        <div class="stu-name${sub?' stu-name--sub':''}" title="${escAttr(displayName)}">${escHtml(displayName)}${teacherPeriodPillHtml(stu)}${teacherOpenThroughPillHtml(stu)}${teacherBlockedBadgeHtml(stu)}${sub?`<span class="stu-sub">${escHtml(sub)}</span>`:''}</div>
+        <div class="stu-name${sub?' stu-name--sub':''}" title="${escAttr(displayName)}">${escHtml(displayName)}${teacherPeriodPillHtml(stu)}${teacherOpenThroughPillHtml(stu)}${teacherBlockedBadgeHtml(stu)}${tags(stu)}${sub?`<span class="stu-sub">${escHtml(sub)}</span>`:''}</div>
         ${teacherBarFillHtml(tally.got,tally.working,universe.total)}
         ${teacherStudentCountHtml(tally, universe)}
       </button>`;
