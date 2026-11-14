@@ -1974,8 +1974,11 @@ const A11Y_EXCLUDE = [
 ];
 /* Violations decide; "incomplete" (what axe could not decide, e.g. text over a picture) is kept in the JSON and
    counted on one line, never in the baseline. ignorePseudo: a ::before / ::after box (the fret numbers, the game
-   cards' title bands) no longer stops axe deciding the text's contrast against its real background (R1-15). */
-const A11Y_RUN = `(axe.configure({ checks: [{ id: 'color-contrast', options: { ignorePseudo: true } }] }), axe.run(document, { resultTypes: ['violations', 'incomplete'], runOnly: { type: 'tag', values: ${JSON.stringify(A11Y_TAGS)} },
+   cards' title bands) no longer stops axe deciding the text's contrast against its real background (R1-15). It is
+   set ON TOP of the check's own options: axe.configure REPLACES a check's options, and the first try (ignorePseudo
+   alone) made color-contrast error on every page — every contrast finding turned into "Axe encountered an error".
+   A rule that errors is now an event (see scan()), so that cannot pass quietly again. */
+const A11Y_RUN = `((() => { const c = axe._audit.checks['color-contrast']; if (!c.options.ignorePseudo) axe.configure({ checks: [{ id: 'color-contrast', options: Object.assign({}, c.options, { ignorePseudo: true }) }] }); })(), axe.run(document, { resultTypes: ['violations', 'incomplete'], runOnly: { type: 'tag', values: ${JSON.stringify(A11Y_TAGS)} },
   rules: { 'duplicate-id': { enabled: true }, 'duplicate-id-active': { enabled: true } } })).then(r => { const pick = list => list.map(v => ({ id: v.id, impact: v.impact, help: v.help,
   nodes: v.nodes.map(n => ({ target: n.target.map(String).join(' '), html: String(n.html).slice(0, 240), why: String(n.failureSummary || '').replace(/\\s+/g, ' ').slice(0, 300) })) }));
   return { rules: pick(r.violations), unsure: pick(r.incomplete) }; })`;
@@ -2014,6 +2017,9 @@ async function a11yWalk(page, run, events, stats, base) {
     if (ok !== true) { fail(key, 'axe-core did not load on this page'); return; }
     const v = await run(`a11y:${key}:scan`, A11Y_RUN, 10);
     if (!v || !Array.isArray(v.rules)) { fail(key, 'the scan returned nothing'); return; }
+    // A rule that errored decided nothing: its findings would be missing, not passed.
+    const broke = [...new Set((v.unsure || []).filter(r => r.nodes.some(n => /Axe encountered an error/.test(n.why))).map(r => r.id))];
+    if (broke.length) fail(key, `axe-core errored in ${broke.join(', ')} on this screen: those rules decided nothing`);
     const keep = list => list.map(r => ({ ...r, nodes: r.nodes.filter(n => { const x = A11Y_EXCLUDE.find(e => e.rule === r.id && e.html.test(n.html)); if (x) found.excluded.push({ screen: key, rule: r.id, target: n.target }); return !x; }) })).filter(r => r.nodes.length);
     found.screens[key] = { what, rules: keep(v.rules), unsure: keep(v.unsure || []) };
   };
