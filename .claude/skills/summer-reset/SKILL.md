@@ -1,6 +1,6 @@
 ---
 name: summer-reset
-description: The guitar site's Summer reset list: fixes blocked by frozen modules (FROZEN_THROUGH / FROZEN_MC_THROUGH_MODULE), how to unlock at the yearly progress reset, and next-year timed changes. Read when a fix is blocked by a frozen module (to add it here), when planning the summer reset, or before flagging a known frozen-module defect.
+description: The guitar site's Summer reset list: fixes blocked by frozen modules (FROZEN_THROUGH / FROZEN_MC_THROUGH_MODULE), how each one gets made (module progress never resets, so a one-time move of saved progress; activity work does reset each summer), and next-year timed changes. Read when a fix is blocked by a frozen module (to add it here), when planning the summer reset, or before flagging a known frozen-module defect.
 ---
 
 ## Summer reset list
@@ -9,25 +9,34 @@ Every fix below is blocked only because the module it touches is frozen (see
 blocked by a frozen module here the same day**, not to a session scratchpad or
 a PR that never merges.
 
-**How to unlock at the reset:**
-1. Set `FROZEN_THROUGH` in `tools/rule-zero-proof.mjs` to 0.
-2. Set `FROZEN_MC_THROUGH_MODULE` in `tools/checks.mjs` to 0, **and empty
-   `FROZEN_MC_FINGERPRINTS`** — with the constant at 0 but the table still
-   full, 1ap fails every leftover key as "pinned keyed MC no longer exists."
-3. Make the fixes below.
-4. Raise both numbers again as the new class advances, pasting the newly
-   printed fingerprints back into `FROZEN_MC_FINGERPRINTS` each time.
+**Module progress is never wiped.** Jonathan, 2026-11-13: "modules do not
+reset for students unless i do it. everything else will reset"; "some students
+may continue into future years". So every module progress key and keyed-MC
+pick stays valid for good, and `checks.mjs` 1dl (rule-zero-proof against the
+push's base) has no override. In-Class Activities and everything else
+(practice minutes, games, recordings, live-game scores) do reset each summer.
+
+**How a fix on this list gets made:**
+- **A module fix** (a keyed MC's choices or English prompt, a moved, removed
+  or relabelled frozen step, a section change) needs a one-time move of the
+  saved progress it touches, with the Modules 4/5 swap as the model
+  (`swap45*` in `app/save.js`, with its halves in `tabs/journey.js` and
+  `teacherFetchStudents()` in `teacher-core.js`): designed with Jonathan and
+  deep-reviewed (`site-reviewer-deep`). Until then it stays on this list.
+- **An activity-side fix blocked only by work students already took** (an exit
+  check's positional `items`, like `ca-14` below) can wait for the summer
+  reset, which clears that work.
 
 **Raising `FROZEN_THROUGH` or `FROZEN_MC_THROUGH_MODULE` never unlocks
 anything; it only freezes more modules.** A comment or plan that says "do
-this once FROZEN_THROUGH is raised" is wrong. The only unlock is the reset
-above.
+this once FROZEN_THROUGH is raised" is wrong. Never lower either: module
+progress is never wiped, so no module becomes unfrozen.
 
 **Practice-panel MCs don't need to be on this list**: they store the choice
 INDEX, so only the ORDER is locked (the "Keyed MCs" bullet under "Content
 rules" in CLAUDE.md).
 
-**Reword next summer.** These three keyed Module 1 Set 2 cards have throwaway
+**Reword (needs a one-time move).** These three keyed Module 1 Set 2 cards have throwaway
 distractors worth replacing:
 - "Which of these is NOT a part of the guitar?" → "Hinge"
 - "If a string's pitch is too LOW…" → **two** dead choices, "Take the string
@@ -53,7 +62,7 @@ end-of-period product" in skill `in-class-activities`).
 **`m2w2` Challenge 3's label, "(your low-E assessment piece)" → "(assessment
 preparation)".** That is the site's wording everywhere else ("No teacher speak"
 and "Challenge cards" in CLAUDE.md); this `label` is frozen by index, so it waits
-for the reset. In the same edit:
+for a one-time move. In the same edit:
 - remove the `module-2.js` / `'assessment piece'` entry from
   `TEACHER_PHRASE_ALLOW` in checks.mjs;
 - reword the hidden twin at `module-2.js`'s Seven Nation Army Challenge,
@@ -72,7 +81,7 @@ in the switched-off Take It to a Song section. ES: "Reto — TAB misterioso (lé
 
 **Module 3 Set 2's Challenge numbers.** The labels run "Challenge 1", then six
 unnumbered "Challenge —" cards, then "Challenge 2 / 3 / 4", then two more
-unnumbered ones. At the reset either number every Challenge in order or drop
+unnumbered ones. With a one-time move, either number every Challenge in order or drop
 the numbers from all of them; the step circle already numbers each card. In the
 same edit:
 - Set 1's "One shape, three chords" label can become "Watch: what a power
@@ -87,9 +96,9 @@ tuning video (step 1) needs string names (step 7) and tuning pegs (step 2), the
 two tuning cards sit apart at steps 5–6, and ~1,000 words come before the first
 guitar-in-hands challenge (step 10 of 13).
 It crosses a section boundary (string names is `b·sec1`, tuning is `b·sec0`)
-and moves progress keys, so it is reset-only, and `rule-zero-proof.mjs`'s
-"sections are fixed in every regime" rule fails it even after the reset. That
-is expected; don't read it as a new bug.
+and moves progress keys, so it needs a one-time move, and `rule-zero-proof.mjs`'s
+"sections are fixed in every regime" rule (checks.mjs 1dl) refuses it until that
+move is designed with Jonathan. That is expected; don't read it as a new bug.
 
 ### Also for the summer (not locked, timed for next year)
 **Move the Finger Gym Reach up to 5th/7th position.** Today it stretches from
@@ -101,12 +110,14 @@ cards, both fret positions, EN and ES captions).
 **Split Module 4 Set 2 (`m4w2`) into two sets.** 20 visible steps, about
 1,075 words on the cards. It shows as Part 1 / Part 2 today (`partOne` /
 `partBreak`, display only). A real split moves Part 2's progress keys to a new
-set id (mid-year that needs a one-time move like `swap45`). Jonathan,
-2026-10-16: keep the parts until the reset. Splitting changes the SET list and
+set id, which needs a one-time move like `swap45` (module progress is never
+wiped). Jonathan, 2026-10-16: keep the parts for now. Splitting changes the SET list and
 m4w2's section count, so `rule-zero-proof.mjs` fails it by design. After the split,
 drop the 1ao pin (sets with parts: 1 → 0) unless another set uses parts.
 
-**Remove the Module 4/5 swap progress move (`swap45`):** `app/save.js`
+**Keep the Module 4/5 swap progress move (`swap45`)**: module progress is never
+wiped (2026-11-13), so a student who has not signed in since the swap still needs
+it. Remove it only with Jonathan, and then all four halves together: `app/save.js`
 `swap45MapId` … `swap45OnLoad`, the `await swap45Commit()` gate in
 `flushSave()`, the display remap in `teacher-core.js` `teacherFetchStudents()`, and
 the `swap45` block in `tabs/journey.js`. All four halves go together: removing
@@ -114,11 +125,12 @@ only some lets one writer save in a numbering another still reads differently.
 Delete the `migrations` field from the reset docs, or leave it: nothing else
 reads it.
 
-**Delete the 29 "Take It to a Song" sections and their card code.**
-Switched off (`TAKE_TO_SONG_ENABLED = false` in `app/shell.js`), but still in the
-module files because each one counts toward its neighbours' `gi`. Removing
-them re-keys every section after them, so it is reset-only, and
-`rule-zero-proof.mjs` will fail it by design. With them go
+**The 29 "Take It to a Song" sections stay.** Switched off
+(`TAKE_TO_SONG_ENABLED = false` in `app/shell.js`), never deleted (CLAUDE.md
+"Never"; checks.mjs 1do pins every step): each one counts toward its
+neighbours' `gi`, and module progress is never wiped. Deleting them would need
+a one-time move of every later section's keys, designed with Jonathan. If he
+ever asks for that, with them go
 `journeyLinkCardHtml()`, `journeySongsFor()`, the `jl-song-btn` rules that
 only the card used (the activity cards share `.jl-song-btn`, so check first),
 the `journey.takeItTitle`/`takeItSub` i18n keys, the `KIND_TITLE_COUNTS`
