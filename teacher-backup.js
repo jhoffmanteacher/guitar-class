@@ -26,15 +26,17 @@
                                through teacherPmWeeksGet (teacher-students.js),
                                the console's one read under minutes/ (1cg).
      issueReports/*            students' problem reports.
+     songRequests/*            students' song requests (2026-11-13), id <uid>_<week>.
      config/access             (2026-11-13) the outside accounts the teacher
                                allowed in, { allow: { uid: true } }; in the file
                                beside config/class.
      accessRequests/*          (2026-11-13) "ask your teacher to let me in":
                                name, email, when, status.
-     Before the paste-1 rules for those two are published the teacher cannot
-     read them: that one refusal (permission-denied) leaves them out and the
-     header says so (notReadable), instead of failing the whole backup. Any
-     other failure on them fails it, like every other read.
+     Before the rules for those two (paste 1) and for songRequests are
+     published the teacher cannot read them: that one refusal
+     (permission-denied) on any of these three leaves it out and the header
+     says so (notReadable), instead of failing the whole backup. Any other
+     failure on them fails it, like every other read.
    LEFT OUT, and why: TEACHER_BACKUP_LEFT_OUT below (also written into the file).
 
    THE FILE. One JSON object. Its header comes first: format, formatVersion,
@@ -43,7 +45,8 @@
    collection), the encoding rules and the left-out list. Then `collections`:
      { "progress": { uid: fields }, "config": { "class": fields, "access": fields },
        "minutesWeeks": { "<uid>/<weekId>": fields },
-       "issueReports": { id: fields }, "accessRequests": { uid: fields } }
+       "issueReports": { id: fields }, "accessRequests": { uid: fields },
+       "songRequests": { id: fields } }
    A Firestore doc id never contains "/", so "<uid>/<weekId>" splits back
    unambiguously into minutes/<uid>/weeks/<weekId>.
    Firestore types are written as tagged objects so they read back exactly
@@ -78,7 +81,8 @@
         with the rules of teacherBackupDecode (a timestamp → Timestamp, bytes →
         Bytes, a reference → a doc ref …) and set()s each doc at its path:
         progress/<uid>, config/class, config/access,
-        minutes/<uid>/weeks/<week>, issueReports/<id>, accessRequests/<uid>.
+        minutes/<uid>/weeks/<week>, issueReports/<id>, accessRequests/<uid>,
+        songRequests/<id>.
      3. A restored doc REPLACES what is there: anything the student saved after
         the backup is lost. Have the student sign out first. Restore
         config/class only with every console closed (a console holding the
@@ -106,6 +110,7 @@ const TEACHER_BACKUP_LABEL = {
   'issueReports': 'problem reports (issueReports)',
   'config/access': 'the allow list of outside accounts (config/access)',
   'accessRequests': 'requests to join (accessRequests)',
+  'songRequests': 'song requests (songRequests)',
 };
 const TEACHER_BACKUP_LEFT_OUT = [
   {path:'micTakes/* and micTakes/*/chunks/*', why:'mic recordings: large audio, saved by Mic recordings → Download all (with each take’s data)'},
@@ -254,7 +259,8 @@ async function teacherBackupGet(gen, coll, fn){
 /* A read whose ONLY allowed failure is the rules refusing it (the two 2026-11-13 documents before their rules are
    pasted): returns null and notes the collection; every other failure throws as teacherBackupGet does. */
 async function teacherBackupOptional(gen, coll, fn, notReadable){
-  try{ return await (coll==='accessRequests' ? fn() : teacherBackupGet(gen, coll, fn)); }
+  // A paged read (accessRequests, songRequests) wraps each page itself.
+  try{ return await (coll==='accessRequests' || coll==='songRequests' ? fn() : teacherBackupGet(gen, coll, fn)); }
   catch(e){
     const cause=e && e.backupCollection ? e.cause : null;
     if(cause && cause.code==='permission-denied'){ notReadable.push(coll); return null; }
@@ -344,6 +350,14 @@ async function teacherBackupReadAll(gen){
     counts.accessRequests=reqDocs.length;
   }
 
+  teacherBackupSay(gen, 'running', 'Reading song requests…');
+  const songDocs=await teacherBackupOptional(gen, 'songRequests', ()=>teacherBackupReadPaged(gen, 'songRequests'), notReadable);
+  if(songDocs){
+    collections.songRequests={};
+    songDocs.forEach(d=>teacherBackupSetKey(collections.songRequests, d.id, teacherBackupEncodeDoc('songRequests', d.id, d.data(), 'songRequests/'+d.id)));
+    counts.songRequests=songDocs.length;
+  }
+
   return {collections, counts, notReadable};
 }
 // The shell cache's name (sw.js CACHE_VERSION), so the file says which site wrote it.
@@ -380,6 +394,7 @@ function teacherBackupFileText(read, now, site){
 function teacherBackupSummary(counts, notReadable){
   const n=(k, one, many)=>`${counts[k]} ${counts[k]===1?one:many}`;
   const extra=('accessRequests' in counts ? `, ${n('accessRequests','request to join','requests to join')}` : '')
+    + ('songRequests' in counts ? `, ${n('songRequests','song request','song requests')}` : '')
     + ((notReadable||[]).length ? ` (not readable yet, their rules are not pasted: ${notReadable.map(c=>TEACHER_BACKUP_LABEL[c]||c).join(', ')})` : '');
   return `${n('progress','student','students')}, ${n(TEACHER_BACKUP_WEEKS,'practice week','practice weeks')}, ${n('issueReports','problem report','problem reports')}, ${counts.config?'the class settings':'no class settings doc (there is none yet)'}${extra}`;
 }

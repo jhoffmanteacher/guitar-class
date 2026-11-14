@@ -736,7 +736,7 @@ async function loadAllStudents(){
 const TEACHER_REFRESH_MS=60000;
 const TEACHER_AUTO_REFRESH_VIEWS=['activities','students','skills','responses','trouble'];
 // Views where student progress isn't on screen at all — no Refresh bar.
-const TEACHER_NO_REFRESH_BAR_VIEWS=['livequiz','mic','reports','tsongs','minutes','errors'];   // minutes, errors: their own Refresh (renderTeacherMinutes, renderTeacherErrors)
+const TEACHER_NO_REFRESH_BAR_VIEWS=['livequiz','mic','reports','tsongs','minutes','errors','songrequests'];   // minutes, errors, songrequests: their own Refresh (renderTeacherMinutes, renderTeacherErrors, renderTeacherSongRequests)
 let teacherStudentsAt=0;          // when the roster on screen was read (ms); 0 = not yet
 let teacherRefreshing=false;      // a read is out — no overlapping fetches
 let teacherRefreshFailed=false;   // the last read failed; the screen shows the older roster
@@ -899,6 +899,8 @@ function teacherMarkReportsSeen(ts){
 async function teacherRefreshReportsBadge(){
   // The "asking to join" count (teacher-accounts.js) refreshes at the same moments.
   if(typeof teacherRefreshAccessBadge==='function') teacherRefreshAccessBadge();
+  // The Song requests badge refreshes at the same moments (teacher-songrequests.js).
+  if(typeof teacherRefreshSongRequestsBadge==='function') teacherRefreshSongRequestsBadge();
   const req=++teacherReportsBadgeReq;
   let n;
   try{
@@ -1151,10 +1153,11 @@ const TEACHER_NAV_ICON={
   games:'<rect x="2.5" y="6.5" width="19" height="11" rx="5.5"/><path d="M7 9.5v3M5.5 11h3"/><circle cx="15.7" cy="10.7" r="0.95" fill="currentColor" stroke="none"/><circle cx="17.6" cy="12.6" r="0.95" fill="currentColor" stroke="none"/>',
   mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',
   errors:'<circle cx="12" cy="12" r="9"/><path d="M12 7v6"/><circle cx="12" cy="16.5" r="0.6" fill="currentColor" stroke="none"/>',
+  songrequests:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><path d="M15 9h6"/><path d="M18 6v6"/>',
   reports:'<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="0.6" fill="currentColor" stroke="none"/>',
 };
 const TEACHER_NAV=[
-  {group:'Teach', items:[['activities','Class activities'],['songs','Songs'],['tsongs','Teacher view songs'],['livequiz','Live In-Class Games']]},
+  {group:'Teach', items:[['activities','Class activities'],['songs','Songs'],['songrequests','Song requests'],['tsongs','Teacher view songs'],['livequiz','Live In-Class Games']]},
   {group:'Students', items:[['students','Students'],['skills','Skills grid'],['trouble','Trouble spots'],['minutes','Practice minutes'],['responses','Responses']]},
   {group:'Set up', items:[['manage','Manage'],['games','Games']]},
   {group:'Tools', items:[['mic','Mic recordings'],['errors','Error log'],['reports','Reports']]},
@@ -1372,6 +1375,7 @@ function renderTeacherBody(){
   else if(teacherView==='reports') renderTeacherReports();
   else if(teacherView==='mic') renderTeacherMic();
   else if(teacherView==='errors') renderTeacherErrors();
+  else if(teacherView==='songrequests') renderTeacherSongRequests();
   else if(teacherView==='livequiz'){ if(typeof renderTeacherLiveQuiz==='function') renderTeacherLiveQuiz(); }
   else renderTeacherGrid();
 }

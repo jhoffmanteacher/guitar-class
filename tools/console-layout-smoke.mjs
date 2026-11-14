@@ -13,7 +13,7 @@
      node tools/console-layout-smoke.mjs --chrome <path> Chrome binary (or CHROME=…)
 
    What it does, and fails on:
-     - clicks every sidebar item (the 13 are pinned) and checks that view
+     - clicks every sidebar item (the 15 are pinned) and checks that view
        renders its own element with no page error, that exactly that item is
        marked current, and that no view scrolls the page sideways at 1366 px;
      - opens a practice card, a focus-view activity, a paths activity and an
@@ -265,7 +265,7 @@ async function main() {
       picked: activityDetailId, students: allStudentsRaw.length })`);
     if (boot.err) fail('boot', 'showTeacherApp threw ' + boot.err);
     if (boot.view !== 'activities' || !boot.list) fail('boot', 'the console did not open on the Class activities list (view ' + boot.view + ')');
-    if (boot.side !== 13) fail('boot', 'the sidebar has ' + boot.side + ' items, expected 13');
+    if (boot.side !== 15) fail('boot', 'the sidebar has ' + boot.side + ' items, expected 15');
     if (JSON.stringify(boot.current) !== '["activities"]') fail('boot', 'the current sidebar item is ' + JSON.stringify(boot.current));
     if (boot.students !== nStu) fail('boot', 'the console read ' + boot.students + ' students, the stub has ' + nStu);
     await sleep(300);
@@ -277,7 +277,8 @@ async function main() {
        view's content up, which a "rendered something" test can't tell apart. */
     const MARKERS = { activities: ['[data-ta-split]'], songs: ['.t-songs'], tsongs: ['[data-tvs]'], livequiz: ['.lq-shell'], students: ['.stu-chart'],
       skills: ['td.nc[data-open-student]'], trouble: ['.tr-meta', /least-mastered skills/], minutes: ['.pm-t-table'], responses: ['.t-loading', /written a response/],
-      manage: ['[data-set-open-through]'], games: ['[data-set-games]'], mic: ['.tg-class', /Collect mic recordings/], reports: ['.t-loading', /issue reports/] };
+      manage: ['[data-set-open-through]'], games: ['[data-set-games]'], mic: ['.tg-class', /Collect mic recordings/], reports: ['.t-loading', /issue reports/],
+      errors: ['.t-loading', /No errors logged/], songrequests: ['.t-loading', /No song requests/] };
     const views = await js(`[...document.querySelectorAll('#t-side [data-view]')].map(b => b.dataset.view)`);
     if (JSON.stringify(views.slice().sort()) !== JSON.stringify(Object.keys(MARKERS).sort())) fail('sidebar', 'the sidebar views are ' + JSON.stringify(views) + ', expected ' + JSON.stringify(Object.keys(MARKERS)));
     for (const v of views) {
@@ -1121,9 +1122,9 @@ async function main() {
     await js(`setTeacherView('activities')`); await sleep(400);
     await shot('12-console-390');
     {
-      // The sideways strip has no room for a tree: only the 13 items stay.
+      // The sideways strip has no room for a tree: only the 15 items stay.
       const r = await js(`({ tree: getComputedStyle(document.getElementById('t-side-tree')).display, fold: getComputedStyle(document.querySelector('#t-side [data-side-fold]')).display, items: document.querySelectorAll('#t-side [data-view]').length })`);
-      if (r.tree !== 'none' || r.fold !== 'none' || r.items !== 13) fail('390', 'the units tree at 390px: ' + JSON.stringify(r));
+      if (r.tree !== 'none' || r.fold !== 'none' || r.items !== 15) fail('390', 'the units tree at 390px: ' + JSON.stringify(r));
     }
     for (const tab of ['preview', 'students', 'settings']) {
       await js(`document.querySelector('[data-ta-tab="${tab}"]').click()`); await sleep(120);

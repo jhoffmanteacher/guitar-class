@@ -17244,6 +17244,40 @@ function checkSiteErrors() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1dr. SONG REQUESTS (2026-11-13) — the student's form (app/songrequests.js),
+   the console's view (teacher-songrequests.js) and the songRequests block of
+   firestore.rules. RUN by tools/song-requests-sim.mjs (Node, under a second:
+   the real code in a vm with the real i18n.js and escHtml / escAttr): the link
+   parser on a table of 60 pasted links (every YouTube form accepted with the
+   right id and the one stored link; javascript:, data:, look-alike hosts such
+   as youtube.com.evil.example and notyoutube.com, an @ or backslash trick, a
+   port, channels, playlists, wrong-length ids, spaces and newlines inside a
+   link, an over-long paste refused); the form's rule (a No needs a reason; two
+   Yes drop one; caps without half an emoji); the caps and id shape equal to
+   the rules'; every student-written value escaped in the console's blocks and
+   the student's own list, no link built from a doc's url or a bad id, no
+   inline handler; the grouping; and the form walked through srSend in English
+   and Spanish (sent, refused as a second request this week, rules not
+   published, a wrong device date, a dropped connection, the dev bypass, a
+   shared Chromebook). Its count of cases is pinned so deleting one to get
+   green fails here. The emulator half is tools/song-requests-rules-test.mjs
+   (it needs Java; GitHub runs it after every push, .github/workflows/rules.yml).
+   ════════════════════════════════════════════════════════════════════ */
+const SONG_REQUESTS_SIM_PIN = 127;
+function checkSongRequests() {
+  head('1dr. Song requests: the link parser, the form, the escaping and the rules caps are run');
+  const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'song-requests-sim.mjs')], { encoding: 'utf8', timeout: 120000 });
+  const m = /song-requests-sim: (\d+) cases, (\d+) failed \(links: (\d+) of (\d+) accepted, (\d+) of (\d+) refused\)/.exec(r.stdout || '');
+  if (r.status !== 0 || !m) {
+    err('1dr: tools/song-requests-sim.mjs failed (exit ' + r.status + ')' + (r.error ? ': ' + r.error.message : '')); problems++;
+    for (const l of ((r.stdout || '') + (r.stderr || '')).trim().split('\n').filter(l => /✗|could not|would not|Error/.test(l)).slice(0, 8)) console.log(`${C.dim}      ${l}${C.reset}`);
+    return;
+  }
+  if (+m[1] !== SONG_REQUESTS_SIM_PIN || +m[2] !== 0) { err(`1dr: song-requests-sim ran ${m[1]} cases (${m[2]} failed); pinned at ${SONG_REQUESTS_SIM_PIN} — if you changed the simulation on purpose, re-pin SONG_REQUESTS_SIM_PIN (never lower it to hide a deleted case)`); problems++; return; }
+  ok(`song-requests-sim: ${m[1]} cases pass (pinned ${SONG_REQUESTS_SIM_PIN}): links ${m[3]} of ${m[4]} accepted and ${m[5]} of ${m[6]} refused, the form's "a No needs a reason", escaping in the console and the student's list, the rules' caps, the form walked in English and Spanish`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1cg. PRACTICE MINUTES (2026-11-01) — practice-minutes.js + its config + the
    rules blocks it writes under.
    The engine is RUN, not read: tools/pm-sim.mjs loads the real config and engine
@@ -18202,6 +18236,7 @@ function checkPracticeMinutes(i18nTable) {
   checkSiteErrors();
   checkWeekendStreaks();
   checkRulesPaste2();
+  checkSongRequests();
   await checkBackingLoudness();
   checkSiteFill();
   checkPartSizes();

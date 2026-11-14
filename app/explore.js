@@ -344,8 +344,10 @@ async function renderSongsHub(){
   const requestHtml = requestEntries.length ? `<div class="card">${renderRows(requestEntries)}</div>` : '';
   // The Mood Chart row that sat here was removed 2026-10-02 (Jonathan). The
   // page itself, mood-chart.html, still ships — nothing on the site links it.
-  p.innerHTML = `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('hub.legendCore')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('hub.legendChoice')}</div></div>
+  /* #sr-slot: "Request a song" and the student's own requests (app/songrequests.js). */
+  p.innerHTML = `<div class="sr-box" id="sr-slot" hidden></div><div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('hub.legendCore')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('hub.legendChoice')}</div></div>
     ${coreHtml}<div class="sh-lib-slot">${songsLibraryHtml()}</div>${groupsHtml}${requestHtml}`;
+  if(typeof srLoad === 'function') srLoad();
 }
 /* "More Play Along songs" — the song library (see caIsLibrarySong), between
    the Core songs and the Choice menu. One row per library card: the song's

@@ -1311,6 +1311,22 @@ body.rail-collapsed .rail-tools .tool-popup{
 .tg-seg-btn{font-size:0.8125rem;padding:4px 13px;border:0;background:transparent;color:var(--text2);cursor:pointer;font-family:inherit}
 .tg-seg-btn.on{background:var(--text);color:var(--bg)}
 .tg-grid-wrap{overflow-x:auto}
+.tg-seg-btn:disabled{opacity:0.5;cursor:default}
+/* Console "Song requests" (teacher-songrequests.js): one block per video. */
+.tsr-group{border:1px solid var(--border2);border-radius:var(--radius);padding:10px 12px;margin:0 0 14px;background:var(--bg)}
+.tsr-group.tsr-waiting{border-left:4px solid var(--amber-text)}
+.tsr-head{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-bottom:8px}
+.tsr-title{flex:1 1 320px;min-width:0;font-weight:600;font-size:0.9375rem;overflow-wrap:anywhere}
+.tsr-title a{color:var(--blue-text)}
+.tsr-count{font-weight:500;font-size:0.8125rem;color:var(--text2);margin-left:6px}
+.tsr-state{font-size:0.8125rem;font-weight:600;color:var(--text2)}
+.tsr-actions{display:flex;flex-wrap:wrap;gap:6px}
+.tsr-actions .tg-seg-btn,.tsr-group td .tg-seg-btn{border:1px solid var(--border2);border-radius:16px}
+.tsr-group .t-grid-wrap td{text-align:left}
+.tsr-why{max-width:280px;overflow-wrap:anywhere}
+.tsr-email{font-size:0.75rem;font-weight:400;color:var(--text2);white-space:normal;overflow-wrap:anywhere}
+.tsr-yes{color:var(--text2)}
+.tsr-no{display:inline-block;font-weight:700;color:var(--red-text);background:var(--red-bg);border-radius:6px;padding:1px 8px}
 .tg-table{border-collapse:collapse;width:100%}
 .tg-table th,.tg-table td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--border2);font-size:0.875rem}
 .tg-table th{font-weight:600;color:var(--text2)}
@@ -2812,6 +2828,31 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 .period-btn{flex:1;font-size:1.0625rem;padding:16px 12px}
 .period-btn:disabled{opacity:0.6;cursor:default}
 .period-out{margin-top:14px;text-align:center}
+/* Song requests (app/songrequests.js): the box at the top of the Songs page
+   and its form, in the .daily5-overlay/.daily5-modal shell. Existing colour
+   tokens only. */
+.sr-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;margin-bottom:12px}
+.sr-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.sr-head .sr-line{flex:1;min-width:0}
+.sr-line{font-size:0.9375rem;color:var(--text);line-height:1.45}
+.sr-mine-title{font-size:0.8125rem;font-weight:600;color:var(--text2);margin:10px 0 4px}
+.sr-list{list-style:none;margin:0;padding:0}
+.sr-item{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;padding:5px 0;border-top:1px solid var(--border)}
+.sr-item-name{flex:1;min-width:0;overflow-wrap:anywhere;font-size:0.9375rem}
+.sr-item-name a{color:var(--blue-text)}
+.sr-state{font-size:0.8125rem;font-weight:600;white-space:nowrap;color:var(--text2)}
+.sr-state-adding{color:var(--green-text)}
+.sr-state-declined{color:var(--red-text)}
+.sr-note{flex-basis:100%;font-size:0.8125rem;color:var(--text2);overflow-wrap:anywhere}
+.sr-modal{width:min(520px,100%)}
+.sr-label{display:block;font-size:0.875rem;font-weight:600;margin:12px 0 4px}
+.sr-input{width:100%;box-sizing:border-box;border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 11px;font-size:0.9375rem;font-family:inherit;color:var(--text);background:var(--bg)}
+.sr-input:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
+.sr-q{border:0;margin:12px 0 0;padding:0;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.sr-q legend{float:left;width:100%;padding:0;margin-bottom:6px;font-size:0.875rem;font-weight:600}
+.sr-yn{display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 18px;border:1px solid var(--border2);border-radius:20px;font-size:0.9375rem;font-weight:600;cursor:pointer;background:var(--bg)}
+.sr-yn:has(input:checked){border-color:var(--brand);background:var(--purple-bg)}
+.sr-yn:has(input:focus-visible){outline:2px solid var(--blue-text);outline-offset:2px}
 .period-signout{font-family:inherit;font-size:0.8125rem;padding:4px 6px;border:0;background:transparent;color:var(--text2);text-decoration:underline;cursor:pointer}
 
 .song-thread-name{font-weight:600;color:var(--text)}

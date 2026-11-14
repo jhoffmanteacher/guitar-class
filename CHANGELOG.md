@@ -6,6 +6,12 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-13 — Ask for a song
+
+- **You can ask your teacher for a song.** Open Songs and press "Request a song". Paste the YouTube link, then answer two questions: are the lyrics OK for class, and is what the song is about OK for class. If you answer No, write why you still want it (for example, there is a clean version).
+- **One song a week.** After you ask, the Songs page says the day you can ask again.
+- **Your requests stay on the Songs page with what your teacher decided:** Asked, Your teacher is adding it, or Not this one.
+
 ## 2026-11-13 — Keys for practice cards, a clearer microphone start, and clearer save messages
 
 - **Practice cards have keyboard keys.** The space bar (or K) plays and stops the song. The ← and → keys move between sections. < and > change the speed. Each button's tooltip says its key. The keys work after you click or tap a button on the card too.
