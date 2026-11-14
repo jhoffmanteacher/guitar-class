@@ -15400,38 +15400,63 @@ function checkCoachVerdicts() {
          C  the new chord alone, 0.6 window early: right, shown no sooner than 0.6 window after the change (grid moves aside, +-100 ms)
          D  C Stopped 400 ms after that strum, where the hold is still waiting (0.6 window > 450 ms): nothing shown before the Stop, right after
             it (ccFinish finishes the hold; a lost hold would be "no strum")
+         E  the old chord 0.7 window early, then the Stop click 0.1 window early (closer, so it takes the change) and ccFinish 100 ms later: the
+            click is dropped (the last sound within 300 ms of the Stop) and the old chord's held verdict stands: wrong (review R1-1; where the
+            old chord's check had ended before the click, 0.6 window > 400 ms)
+         F  E on the LAST change with the new chord: the game counts as finished (every change graded, checked or held) and awards XP once
+         G  Power Chord Switch at 15 BPM: the new chord 1000 ms early, the +5 tempo button 200 ms later (the change moves about 170 ms
+            earlier), the old chord 900 ms after the change's NEW time (960 ms on the grid, which the early strum moved 60 ms): right. The held
+            strum's distance is moved with the change (ccLiveBpm), about 830 ms, nearer than 960 (review R1-2: left in the old tempo's
+            milliseconds, 1000 ms, the late wrong chord won). Without the press the same two strums are 1000 and 960 ms off, and the late one
+            rightly wins: wrong (the control, so G tests the press and not the grid). The press comes 200 ms after the strum (its check
+            still open) and again 500 ms after it (its verdict already held): ccLiveBpm must move both
        In both games: Power Chord Switch every beat at 15, 30 and 60 BPM and every bar at 30; Change Up every bar at 40 and 60, every beat at 90. */
     song.pickChecks = 0;
-    const pickRun = (mode, rate, bpm, strums, stopAfter) => JSON.parse(run(`(function(){
-      const keep = { rf: coachReadFrame, an: coachAnalyser, hf: coachHfRms, at: coachOnsetAt, pn: performance.now, pr: coachPitchReadings };
+    /* o: last (the change under test is the round's last, else the third), stopAt (ms from the change's time at the start, window units in
+       stopWin), stopAfterFirst (ms after the first strum), finishLag (ms from the stop to ccFinish's clock, 400), press { ms, d } (ccLiveBpm(d)
+       that many ms from the change). A strum is { at (window units), ms, tones: new / old / none, afterPress (placed from the change's time
+       after the press) }. */
+    const pickRun = (mode, rate, bpm, strums, o = {}) => JSON.parse(run(`(function(){
+      const keep = { rf: coachReadFrame, an: coachAnalyser, hf: coachHfRms, at: coachOnsetAt, pn: performance.now, pr: coachPitchReadings, ax: awardArcadeXp };
       try {
         micRec = null; setLang('en'); ccSetup(${JSON.stringify(mode)}); ccPickRate(${rate}); ccPickProg(1); cc.bpm = ${bpm}; ccPrepare(false); ccBeginStage();
         cc.phase = 'play'; cc.listenStart = 0; cc.gridOffset = 0; cc.lastPitchT = 0;
         coachAnalyser = {}; coachHfRms = 0; const lat = coachMicLatencyMs();
-        const K = 2, c = cc.changes[K], T = c.beat * cc.beatMs;
-        const win = Math.min(cc.beatMs * cc.bpc * 0.5, Math.max(220, cc.beatMs * 0.5));
+        let xp = 0; awardArcadeXp = () => { xp++; };
+        const o = ${JSON.stringify(o)}, K = o.last ? cc.changes.length - 1 : 2, c = cc.changes[K];
+        const winOf = () => Math.min(cc.beatMs * cc.bpc * 0.5, Math.max(220, cc.beatMs * 0.5)), dueOf = () => cc.listenStart + c.beat * cc.beatMs;
+        let T = dueOf(), win = winOf();
+        const T0 = T, win0 = win;
         const nw = cc.classes[c.to], od = cc.classes[c.from].filter(x => nw.indexOf(x) < 0);
-        const S = ${JSON.stringify(strums)}.map(s => ({ p: T + s.at * win + (s.ms || 0), tones: s.tones === 'new' ? nw : od }));
-        const reads = [];
-        S.forEach(s => [80, 120, 160, 220, 280].forEach((d, j) => reads.push({ t: s.p + lat + d, midi: 48 + s.tones[j % s.tones.length] })));
-        reads.sort((a, b) => a.t - b.t);
+        const S = [], reads = [];
+        const add = s => {
+          const p = T + (s.at || 0) * win + (s.ms || 0);
+          S.push(p); S.sort((a, b) => a - b);
+          if (s.tones !== 'none') { const tones = s.tones === 'new' ? nw : od; [80, 120, 160, 220, 280].forEach((d, j) => reads.push({ t: p + lat + d, midi: 48 + tones[j % tones.length] })); }
+          reads.sort((a, b) => a.t - b.t);
+        };
+        const plan = ${JSON.stringify(strums)};
+        plan.filter(s => !s.afterPress).forEach(add);
+        const first = S[0];
         coachPitchReadings = (since, from) => reads.filter(r => r.t > since && r.t >= from && r.t <= performance.now());
-        let si = 0, firstAt = null;
+        let firstAt = null, pressed = !o.press;
         const frame = (t, onset) => {
           cc.smoothRms = onset ? 0.01 : 1; if (onset) cc.lastOnsetT = -1e9;
           coachReadFrame = () => 0.05; coachOnsetAt = t + lat; performance.now = () => t + lat;
           __ccLoop();
           if (firstAt === null && cc.changes[K].result !== null) firstAt = t - T;
         };
-        const stop = ${stopAfter == null ? 'null' : stopAfter}, end = stop != null ? S[0].p + stop : T + win + 800;
-        for (let t = T - win - 200; t <= end; t += 20){
-          while (si < S.length && S[si].p <= t) frame(S[si++].p, true);
+        const stop = o.stopAfterFirst != null ? first + o.stopAfterFirst : o.stopAt != null || o.stopWin != null ? T0 + (o.stopWin || 0) * win0 + (o.stopAt || 0) : null;
+        let t = T - win - 200;
+        for (; stop != null ? t <= stop : t <= T + win + 800; t += 20){
+          if (!pressed && t >= T0 + o.press.ms){ performance.now = () => t + lat; ccLiveBpm(o.press.d); pressed = true; T = dueOf(); win = winOf(); plan.filter(s => s.afterPress).forEach(add); }
+          while (S.length && S[0] <= t) frame(S.shift(), true);
           frame(t, false);
         }
         const before = cc.changes[K].result;
-        if (stop != null){ performance.now = () => end + lat + 400; ccFinish(false); }
-        return JSON.stringify({ result: cc.changes[K].result, before, firstAt, win, heard: S.length });
-      } finally { coachReadFrame = keep.rf; coachAnalyser = keep.an; coachHfRms = keep.hf; coachOnsetAt = keep.at; performance.now = keep.pn; coachPitchReadings = keep.pr; micRec = null; cc = null; ccStop(); }
+        if (stop != null){ performance.now = () => t + lat + (o.finishLag == null ? 400 : o.finishLag); ccFinish(false); }
+        return JSON.stringify({ result: cc.changes[K].result, before, firstAt, win: win0, xp, moved: Math.round(T - T0) });
+      } finally { coachReadFrame = keep.rf; coachAnalyser = keep.an; coachHfRms = keep.hf; coachOnsetAt = keep.at; performance.now = keep.pn; coachPitchReadings = keep.pr; awardArcadeXp = keep.ax; micRec = null; cc = null; ccStop(); }
     })()`));
     for (const [mode, rate, bpm] of [['power', 2, 15], ['power', 2, 30], ['power', 2, 60], ['power', 0, 30], ['open', 0, 40], ['open', 0, 60], ['open', 2, 90]]) {
       const tag = `1du: ${mode === 'power' ? 'Power Chord Switch' : 'Change Up'} at ${bpm} BPM (speed ${rate})`;
@@ -15443,10 +15468,27 @@ function checkCoachVerdicts() {
       if (c.result !== 'ok' || c.firstAt == null || Math.abs(c.firstAt - 0.6 * c.win) > 100) flag(`${tag}: the new chord alone 0.6 window early gave "${c.result}" shown ${c.firstAt} ms after the change, expected "ok" shown about ${Math.round(0.6 * c.win)} ms after it (held until no closer strum can come)`);
       song.pickChecks += 3;
       if (0.6 * c.win > 450) {
-        const d = pickRun(mode, rate, bpm, [{ at: -0.6, tones: 'new' }], 400);
+        const d = pickRun(mode, rate, bpm, [{ at: -0.6, tones: 'new' }], { stopAfterFirst: 400 });
         if (d.before !== null || d.result !== 'ok') flag(`${tag}: Stopped 400 ms after a strum 0.6 window early, the change showed "${d.before}" before the Stop and "${d.result}" after, expected nothing, then "ok" (ccFinish must finish a held verdict)`);
         song.pickChecks++;
       }
+      if (0.6 * c.win > 400) {
+        const e = pickRun(mode, rate, bpm, [{ at: -0.7, tones: 'old' }, { at: -0.1, tones: 'none' }], { stopWin: -0.1, stopAt: 40, finishLag: 100 });
+        if (e.result !== 'off') flag(`${tag}: the old chord 0.7 window early, then a Stop click 0.1 window early that took the change and was dropped, gave "${e.result}", expected "off" (the held verdict of the real strum must outlive the dropped click)`);
+        song.pickChecks++;
+      }
+      const f = pickRun(mode, rate, bpm, [{ at: -0.7, tones: 'new' }, { at: -0.1, tones: 'none' }], { last: true, stopWin: -0.1, stopAt: 40, finishLag: 100 });
+      if (f.result !== 'ok' || f.xp !== 1) flag(`${tag}: the LAST change strummed right 0.7 window early, then the Stop click: the change came out "${f.result}" and XP was awarded ${f.xp} times, expected "ok" and once (a held last change still finishes the game)`);
+      song.pickChecks++;
+    }
+    {
+      const g = pickRun('power', 2, 15, [{ ms: -1000, tones: 'new' }, { afterPress: true, ms: 900, tones: 'old' }], { press: { ms: -800, d: 5 } });
+      if (g.result !== 'ok' || g.moved >= 0) flag(`1du: Power Chord Switch at 15 BPM: the new chord 1000 ms early, +5 pressed 200 ms later (the change moved ${g.moved} ms), the old chord 900 ms after the change gave "${g.result}", expected "ok" (ccLiveBpm must move the held strum's distance with the change)`);
+      const gh = pickRun('power', 2, 15, [{ ms: -1000, tones: 'new' }, { afterPress: true, ms: 900, tones: 'old' }], { press: { ms: -500, d: 5 } });
+      if (gh.result !== 'ok' || gh.moved >= 0) flag(`1du: Power Chord Switch at 15 BPM: the new chord 1000 ms early (held by then), +5 pressed 500 ms later (the change moved ${gh.moved} ms), the old chord 900 ms after the change gave "${gh.result}", expected "ok" (ccLiveBpm must move a HELD strum's distance too)`);
+      const g0 = pickRun('power', 2, 15, [{ ms: -1000, tones: 'new' }, { ms: 900, tones: 'old' }]);
+      if (g0.result !== 'off') flag(`1du: Power Chord Switch at 15 BPM, no tempo press: the new chord 1000 ms early and the old chord 900 ms late gave "${g0.result}", expected "off" (the late one is nearer on the grid; without this control G would not test the press)`);
+      song.pickChecks += 3;
     }
     if (full.saves.length === 1 && full.saves[0].fields.changePick !== 'nearest') flag(`1du: the saved take says changePick ${JSON.stringify(full.saves[0].fields.changePick)}, want "nearest" (the console replays a take without it by the first-strum rule)`);
     if (full.saves.length === 1 && full.saves[0].fields.gridStepCapMs !== GRID_CAP) flag(`1ck: the saved take records gridStepCapMs ${full.saves[0].fields.gridStepCapMs}, want ${GRID_CAP} (the console replays a take without it uncapped)`);
@@ -16073,7 +16115,7 @@ function checkCoachVerdicts() {
     if (pk !== 'ccBest:F5-G5:beat') flag(`1ck: a pair's best-score key changed to "${pk}" (a student's saved bests would be lost)`);
     const pairPlan = JSON.parse(run(`JSON.stringify(ccRoundPlan(CC_POWER_PROGRESSIONS[1], CC_POWER_PROGRESSIONS[1].chords, CC_RATES[1]))`));
     if (pairPlan.slots !== 12 || pairPlan.ladder || pairPlan.rounds !== 1) flag(`1ck: a pair's round changed (${pairPlan.slots} slots at "Every 2 beats", expected 12, one round)`);
-    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, gridChecks: 60, pickChecks: 24, hintChecks: 20, topChecks: 64, stopChecks: 99, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
+    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, gridChecks: 60, pickChecks: 38, hintChecks: 20, topChecks: 64, stopChecks: 99, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
     for (const [k, n] of Object.entries(SONG_PIN)) if (song[k] !== n) flag(`1ck: ${song[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
     songCounts = song;
     run(`setLang('en'); cc = null; ccStop();`);
@@ -16083,7 +16125,7 @@ function checkCoachVerdicts() {
     if (counts[k] !== n) flag(`1ca: rendered ${counts[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin EXPECT on purpose)`);
   }
   if (bad === 0 && songCounts) { head('1ck. Power Chord Switch song switches: each activity is checked against its card and the three rounds are run'); ok(`${songCounts.songs} songs, ${songCounts.entries} switch activities (${songCounts.cardSwitches} distinct card switches, each once; Sweet Child's open A5 only next to C5/B5/E5, the fret-5 A5 only next to G5, same pitches as A5); the ladder run for every one (${songCounts.rounds} round changes: 60/65/70 BPM, 21 changes, the BPM buttons ${songCounts.nudges} times: only later rounds, 10..140, off in the last); ${songCounts.hints} "next:" hints (EN+ES) match the diagrams, ${songCounts.setups} setup and ${songCounts.dones} done screens never show the key "A5o", the computer never picks a song, best keys are per switch and the pair keys are unchanged; a saved take carries each change's pitch readings (${songCounts.readingChecks} of 21 changes read back: no strum null, strum with no pitch [], four readings rounded; grading unchanged); the real ccLoop run on scripted frames: Power Chord Switch grades a strum with its own ratios (1.8 / 2.19) and Change Up with the shared ones (1.4 / 1.7) — ${songCounts.ratioChecks} runs just below and above every threshold: Change Up as a pair and as the computer's pick at three speeds, and Power Chord Switch as a song switch (all three rounds), a pair and the computer's pick at three speeds, with a recording live and without; the two lines that choose the ratios are pinned by text; and the saved take records the ratios; the grid moves at most 60 ms for one strum in both games (${songCounts.gridChecks} real ccLoop runs: a stray sound just under half a beat early and late at 10 to 140 BPM and two speeds, with no change open and with the change due next TAKING it, a player 150 ms late still pulls it to within 20 ms in 16 strums, one 300 ms late moves it exactly 60, the take saves the cap (in the document micRecSaveNow writes too) and the console replays an older take, which has none, uncapped); the done screen's tempo-cannot-go-higher line replaces "Level up" exactly when the step up is blocked (${songCounts.topChecks} renders: a pair at 140 and one step below, at 13 of 15 right (just over 85%), 10 of 15, firmer (two ways) and under half, at every switch speed and as the computer's pick, and after a live slow-down; a song switch from 130 and 125, all right, 6 of 7 and under half, Stopped in round 1 or 2 or late, with the Next round buttons pressed, and after a live slow-down of round 1; Change Up at 140 untouched; EN + ES; the advice line is compared whole); the done screen's "strum a little firmer" hint shows exactly when it is true (${songCounts.stopChecks} real games (the count-in's own callback at a faked clock, the real Stop: saved only after 10 s of play, across a song switch's rounds; "strum firmer" for strums the mic missed and not for changes never reached; the top song switch says 130; a Stop where every change reached was right says neither "too fast" nor "Drop", counts the changes reached, in a pair and across a song switch's rounds, EN + ES, and changes nothing for a wrong change, a full game, nothing reached, 85% or a hearing problem; the song-switch setup tops out at 130 on the readout, the slider and the session), ${songCounts.hintChecks} renders, EN + ES: nothing heard, many heard, a single miss, a tie, mostly wrong chords, 85% and better, Change Up)`); }
-  if (bad === 0 && songCounts) { head('1du. Power Chord Switch and Change Up: the strum nearest the chord change decides it'); ok(`${songCounts.pickChecks} real ccLoop runs on scripted frames (both games, 15 to 90 BPM, every beat and every bar): an early wrong chord then the right one on time is right and never shown before the change; the right one on time then a late wrong one is right; a lone early strum is held and shown about as long after the change as it came before; a Stop while it is held still shows it right`); }
+  if (bad === 0 && songCounts) { head('1du. Power Chord Switch and Change Up: the strum nearest the chord change decides it'); ok(`${songCounts.pickChecks} real ccLoop runs on scripted frames (both games, 15 to 90 BPM, every beat and every bar): an early wrong chord then the right one on time is right and never shown before the change; the right one on time then a late wrong one is right; a lone early strum is held and shown about as long after the change as it came before; a Stop while it is held still shows it right; a Stop click that took a change and is dropped leaves the real strum's held verdict, and on the last change the game still counts as finished and awards XP once; the tempo buttons move an open or held strum's distance with the change`); }
   if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwDraws} random draws all listed pairs (11 of 11 and both orders seen), the Again button replays the pair and Start draws, Start sticks in Change Up and not in Power Chord Switch (two columns that fit 657px), Every beat is the first speed button there, the live quiz keeps its 760px shell, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up; the way back to the chords is one \u25C0 Pick different chords button, first on the songs view and the done screen, run and found absent where it must be (${counts.pwBack} screens, EN + ES); tempo controls: setup −5 +5 and a 10..140 slider in steps of 5, the live change keeps the beat the student is on (re-anchored, exact on a fixed clock), holds 30..140, counts the round at its lowest tempo, moves a song switch's later rounds by the same amount, and the saved take says so (${counts.pwLive} assertions)`);
 }
 
