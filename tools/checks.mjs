@@ -18496,13 +18496,16 @@ function checkPracticeMinutes(i18nTable) {
    `node tools/never-blocks.mjs --self-test` plants every forbidden edit and
    its allowed near-misses in a scratch worktree):
      1dl  a module change is run through tools/rule-zero-proof.mjs against the
-          push's base: no section or step moves, no frozen keyed quiz is
-          reworded (choices or English prompt); FROZEN_THROUGH = 1ap's number
-     1dm  the console never writes progress/…; config/class is written only
-          inside teacherWriteConfig() (read from the code, paths folded)
-     1dn  a firestore.rules change fails until RULES-PASTE.md names its paste
-     1do  "the cure"'s bytes, the switched-off Daily 5 and Take It to a Song,
-          and the deleted student tour stay as they are
+          push's base: no section or step moves, no keyed quiz is reworded
+          (choices or English prompt) in Modules 1..FROZEN_THROUGH or the next
+          one; a pure revert passes loudly; FROZEN_THROUGH = 1ap's number
+     1dm  only the pinned places write progress/…, the console never does;
+          config/class is written only inside teacherWriteConfig() (every
+          script a page loads read as code, paths folded)
+     1dn  a firestore.rules change fails at the push (GC_CHECKS_STAGE=push:
+          the pre-push hook, GitHub) until RULES-PASTE.md names its paste
+     1do  "the cure"'s bytes, the switched-off Daily 5 and Take It to a Song
+          (fingerprinted), and the deleted student tour stay as they are
    The base is GC_CHECKS_BASE (GitHub: the push's `before`), else where this
    branch left origin/main. A refusal is never silenced by an allowlist.
    ════════════════════════════════════════════════════════════════════ */

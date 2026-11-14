@@ -63,7 +63,9 @@ if [ -z "$NODE" ]; then
   exit 0
 fi
 
-"$NODE" "$ROOT/tools/checks.mjs" --check --skip-links
+# GC_CHECKS_STAGE=push: checks.mjs 1dn (a firestore.rules change needs its
+# RULES-PASTE.md line) refuses here and on GitHub; at a commit it only warns.
+GC_CHECKS_STAGE=push "$NODE" "$ROOT/tools/checks.mjs" --check --skip-links
 status=$?
 
 if [ "$status" -ne 0 ]; then

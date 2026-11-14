@@ -68,7 +68,8 @@ jobs:
           set -u
           base=""
           if [ "$EVENT" = "push" ] && [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
-            if git cat-file -e "$BEFORE^{commit}" 2>/dev/null || git fetch --no-tags --depth=1 origin "$BEFORE"; then base="$BEFORE"; fi
+            # 51 deep: 1dl lets a pure revert through when the module files equal an ancestor of the base (50 back)
+            if git fetch --no-tags --depth=51 origin "$BEFORE" || git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then base="$BEFORE"; fi
           fi
           if [ -z "$base" ] && git rev-parse -q --verify 'HEAD~1^{commit}' >/dev/null; then base="$(git rev-parse HEAD~1)"; fi
           echo "Compared with: ${base:-nothing (the checks say so)}"
@@ -76,6 +77,7 @@ jobs:
       - name: node tools/checks.mjs --check --skip-links
         env:
           GC_CHECKS_BASE: ${{ steps.base.outputs.base }}
+          GC_CHECKS_STAGE: push
         run: node tools/checks.mjs --check --skip-links
 
   proofs:
