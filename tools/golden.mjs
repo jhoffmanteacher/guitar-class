@@ -155,8 +155,11 @@
    (Build-a-Chord, Finger Gym, Note Hunt, Riff Roulette, Riff Runner, Pentatonic Simon Guitar
    Hero, Strum Hero); Note Hunt and Pentatonic Simon Guitar Hero stay on their first prompt
    (the recording never plays what they ask); Riff Runner never finishes a round in 60 s.
-   The student also presses each tempo button (…NudgeBpm() once before Start, and the key "1"
-   once a second from three seconds after Start (with the virtual clock's time stamp). It presses buttons by
+   The student also presses each tempo button (…NudgeBpm() once before Start, and one key a
+   second from three seconds after Start, 1 to 6 in turn (with the virtual clock's time stamp).
+   NOTE: the final full pair of 2026-11-13 (1,546 of 1,546 files identical) ran one version
+   behind on the play pass only (it pressed "1" alone); the play pass of this version was
+   proven on its own (play part twice, 0 files different). It presses buttons by
    position, so answer buttons a refactor reorders show as a difference. Sounds are fake: a
    game that waits on an audio 'ended' event gets it at the fake clock's time of the stop.
 
@@ -795,16 +798,18 @@ function pagePlayer() {
       for (let i = 0; i < n; i++) { const b = nudges()[i]; if (!b) break; g.clicks.push({ at: Math.round(performance.now() - g.t0), what: oc(b) }); b.click(); await window.__gv.advance(100); }
       if (n) { await window.__gv.advance(500); g.tick++; const r = document.querySelector(g.rootSel); g.marks.push(r ? H(r.innerHTML) : '(gone)'); return { done: false }; }
     }
-    /* From three seconds after Start, the key "1" once a second (a string key in Riff Runner, a pad in Simon …), with
-       the virtual clock's time stamp. One press two seconds in fell inside Riff Runner's count-in, where a press does
-       nothing, so a doubled key listener (review 3's fault B3) still went unseen; a press a second lands near a
-       note now and then, and a press near a note is judged. */
+    /* From three seconds after Start, one key a second, 1 to 6 in turn (a string key in Riff Runner, a pad in Simon …),
+       with the virtual clock's time stamp. Review 3's fault B3 (a doubled key listener) stayed hidden twice: one press
+       two seconds in fell inside Riff Runner's count-in, and "1" alone never matched a note's string, so a press was
+       only ever a stray (the score cannot go below 0). In turn, some presses land as hits, and a doubled press then
+       changes the score. */
     if (g.started && g.tick - g.startTick >= 3) {
-      const ev = new KeyboardEvent('keydown', { key: '1', code: 'Digit1', bubbles: true, cancelable: true });
+      const k = String(1 + (g.tick - g.startTick - 3) % 6);
+      const ev = new KeyboardEvent('keydown', { key: k, code: 'Digit' + k, bubbles: true, cancelable: true });
       Object.defineProperty(ev, 'timeStamp', { value: performance.now() });
-      g.clicks.push({ at: Math.round(performance.now() - g.t0), what: 'key 1' });
+      g.clicks.push({ at: Math.round(performance.now() - g.t0), what: 'key ' + k });
       (document.activeElement || document.body).dispatchEvent(ev);
-      document.dispatchEvent(new KeyboardEvent('keyup', { key: '1', code: 'Digit1', bubbles: true }));
+      document.dispatchEvent(new KeyboardEvent('keyup', { key: k, code: 'Digit' + k, bubbles: true }));
     }
     if (!g.started) {
       pick = list.find(b => START.test(oc(b)));
