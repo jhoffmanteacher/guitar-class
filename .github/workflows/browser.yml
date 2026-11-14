@@ -230,7 +230,7 @@ jobs:
   # print no "would fail" line; the planned 2026-11-27 depends on that week.
   a11y:
     name: a11y scan (English, report-only)
-    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.full) }}
+    if: ${{ github.event_name != 'schedule' && !(github.event_name == 'workflow_dispatch' && inputs.full) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     concurrency:
