@@ -158,7 +158,8 @@ function lex(src, pos, stopAtBrace, lineRef) {
 }
 
 export function tokenize(src) {
-  return lex(String(src), 0, false, { line: 1 });
+  // Line endings as LF first: a Windows checkout (CRLF) must read the same, line continuations included.
+  return lex(String(src).replace(/\r\n?/g, '\n'), 0, false, { line: 1 });
 }
 
 const OPEN = { '(': ')', '[': ']', '{': '}' };
