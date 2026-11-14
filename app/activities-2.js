@@ -1808,7 +1808,7 @@ function caSinceHtml(since, byId, swapIn){
   const noteKey = n === 1 ? 'ca.sinceNote1' : 'ca.sinceNote';
   const noteParams = n === 1 ? null : { n };
   const date = caFormatDate(since.last);
-  return `<section class="ca-since" aria-labelledby="ca-since-lbl"><div class="ca-today-head"><span class="ca-today-label" id="ca-since-lbl" data-i18n="ca.sinceTitle">${escHtml(t('ca.sinceTitle'))}</span>${date ? `<span class="ca-today-date">${escHtml(date)}</span>` : ''}</div>`
+  return `<section class="ca-since" aria-labelledby="ca-since-lbl"><div class="ca-today-head" role="heading" aria-level="3"><span class="ca-today-label" id="ca-since-lbl" data-i18n="ca.sinceTitle">${escHtml(t('ca.sinceTitle'))}</span>${date ? `<span class="ca-today-date">${escHtml(date)}</span>` : ''}</div>`
     + `<p class="ca-since-note" data-i18n="${noteKey}"${noteParams ? ` data-i18n-params="${escAttr(JSON.stringify(noteParams))}"` : ''}>${escHtml(t(noteKey, noteParams))}</p>`
     + cards.map((a, i) => i === 0 ? caHeroCardHtml(swapIn(a), caDate(a) || '') : caActivityCardHtml(swapIn(a))).join('')
     + `</section>`;

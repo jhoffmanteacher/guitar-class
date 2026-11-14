@@ -6702,7 +6702,7 @@ const HEADING_CLASSES = ['set-eyebrow-title', 'stp-sec-label', 'stp-part-title',
   't-title', 'ta-list-title', 't-board-head', 'ta-roll-head', 'stu-section-head', 'stu-set-head', 'stu-detail-name'];
 /* Each kind (its listed class, else its first class, else its tag) -> 'levelxcount ...' in source order of levels. */
 const HEADING_ROLE_PINS = {
-  '<span>': '2x1 3x1 4x1', 'ca-card-title': '3x2', 'ca-hero-title': '3x2', 'ca-mod-head': '3x3', 'ca-today-head': '3x1',
+  '<span>': '2x1 3x1 4x1', 'ca-card-title': '3x2', 'ca-hero-title': '3x2', 'ca-mod-head': '3x3', 'ca-today-head': '3x2',
   'games-game-title': '3x1', 'games-logo': '2x2', 'games-section-head': '3x1', 'jl-title': '3x1', 'mr-assess-head': '3x1',
   'rail-sec-label': '4x1', 'rec-checklist-title': '3x1', 'resume-title': '3x1', 'review-head': '3x1', 'rp-meta-title': '2x1',
   'set-eyebrow-title': '2x2', 'sh-sec-title': '3x3', 'stp-part-title': '3x1', 'stp-sec-label': '3x1 4x1', 'stu-detail-name': '3x1',
@@ -10864,7 +10864,7 @@ function checkSinceLastVisit(ctx) {
         renders++;
         const html = String(body.innerHTML);
         const at = s => html.indexOf(s);
-        const sinceAt = at('<section class="ca-since"'), todoAt = at('<details class="ca-todo-group"'), finAt = at('<details class="ca-finished-group"'), todayAt = at('<div class="ca-today-head"><span class="ca-today-label" data-i18n="ca.startHere"');
+        const sinceAt = at('<section class="ca-since"'), todoAt = at('<details class="ca-todo-group"'), finAt = at('<details class="ca-finished-group"'), todayAt = at('<div class="ca-today-head" role="heading" aria-level="3"><span class="ca-today-label" data-i18n="ca.startHere"');
         const cut = (from, ...ends) => { if (from < 0) return ''; const e = ends.filter(x => x > from); return html.slice(from, e.length ? Math.min(...e) : html.length); };
         const since = cut(sinceAt, todoAt, finAt);
         const ids = seg => [...seg.matchAll(/<details class="ca-card[^"]*"[^>]*data-id="([^"]+)"/g)].map(m => m[1]);
