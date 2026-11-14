@@ -383,6 +383,19 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-13 — Weekends never break a day streak (Jonathan's P2). Reviewed (deep, one round + fixes).**
+      His answer to "count school days only?": "Weekends never break it"; weekend play still adds a day. One rule
+      in `app/boot.js` (`dayStreakContinues` / `dayStreakAlive`, dates built at local noon): a streak continues when
+      every day between the last day played and today is a Saturday or Sunday. Used by the site-wide practice
+      streak (`bumpPracticeStreak` in `app/save.js`: the one comparison; saved, shown only in the switched-off
+      Daily 5), the arcade streak and Riff Roulette's. The arcade parts reach it through `arcadeStreakContinues()` /
+      `arcadeStreakAlive()` (`coach-hub.js`), which fall back to the old "yesterday" rule when an OLD page in a tab
+      meets the NEW lazy-loaded arcade parts during a deploy (no throw, XP still saved). Riff Roulette's "streak
+      started today" shows only that day; a 1-day streak on a later day shows no chip. School holidays are not
+      handled. `checks.mjs` 1dj (5,828 date cases in 4 time zones, every caller pinned, "yesterday" copies refused
+      however they are spelled); `save-loop` has a tenth family that crosses a weekend (200 of 200; the old rule
+      fails 10). Practice minutes counts in weeks and did not change.
+
 - [x] **2026-11-13 — Console: a Games list for Live In-Class Games (order, rename, remove). Jonathan's ask, Fast.**
       His words: "i'd like to be able to delete and re-order and rename games. make it look like the class activities
       screen". A "Games" box under the control strip in the board's look (new part `teacher-livegames.js`): drag, ▲▼
