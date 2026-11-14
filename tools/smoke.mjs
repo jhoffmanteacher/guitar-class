@@ -1530,8 +1530,8 @@ async function todayGridWalk(page, run, events, stats) {
 /* An open activity fills the page (Jonathan, 2026-11-10). checks.mjs 1cr runs
    caSyncSolo / caSyncTopbar against stubs; this is the real page at 1366x657,
    in each language: a Focus card and a practice card open with the header and
-   the left menu off screen and no full screen; each of the bar's four tool
-   buttons opens its own popup fully on screen and on top (and a second press
+   the left menu off screen and no full screen; each of the bar's three tool
+   buttons (Tuner, Timer, Metro; Record was removed 2026-11-14) opens its own popup fully on screen and on top (and a second press
    closes it); the bar is one row; "All activities" brings the header and the
    menu back; a reload on #class-activities/<id> opens the card folded. A
    checkout without the bar's tools (the baseline) skips it. */
@@ -1557,8 +1557,8 @@ async function foldWalk(page, run, events, stats, base) {
       if (!s || !s.open) { fail(w, 'the card did not open'); continue; }
       if (!s.fold || s.full || s.header || s.rail) fail(w, `a card open in the normal window should fold the header and the menu away: ${JSON.stringify(s)}`);
       if (s.rows !== 1) fail(w, `the bar is ${s.rows} rows at 1366x657, want 1`);
-      if (s.tools !== 4) fail(w, `the bar has ${s.tools} tool buttons, want 4`);
-      for (const tool of ['tuner', 'timer', 'metro', 'rec']) {
+      if (s.tools !== 3) fail(w, `the bar has ${s.tools} tool buttons, want 3`);
+      for (const tool of ['tuner', 'timer', 'metro']) {
         await run(`fold:press-${tool}:` + w, `document.querySelector('#ca-bar-open .ca-bar-tool[data-tool="${tool}"]').click()`, 400);
         const p = await run(`fold:popup-${tool}:` + w, popup(tool), 10);
         if (!p || !p.open || p.vis !== 'visible' || !p.onTop || p.r[0] < 0 || p.r[1] < 0 || p.r[2] > p.vw || p.r[3] > p.vh || p.r[2] - p.r[0] < 100) fail(w, `the ${tool} button's popup is not fully on screen and on top: ${JSON.stringify(p)}`);

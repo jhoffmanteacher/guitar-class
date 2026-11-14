@@ -6750,16 +6750,16 @@ function checkSiteFill() {
    would change what .ca-mod-head>span:first-child styles). */
 const HEADING_CLASSES = ['set-eyebrow-title', 'stp-sec-label', 'stp-part-title', 'jl-title', 'review-head',
   'mr-assess-head', 'ca-today-head', 'ca-hero-title', 'ca-card-title', 'ca-mod-head', 'resume-title', 'sh-sec-title',
-  'rp-meta-title', 'games-logo', 'games-section-head', 'games-game-title', 'tp-title', 'rec-checklist-title',
+  'rp-meta-title', 'games-logo', 'games-section-head', 'games-game-title', 'tp-title',
   't-title', 'ta-list-title', 't-board-head', 'ta-roll-head', 'stu-section-head', 'stu-set-head', 'stu-detail-name'];
 /* Each kind (its listed class, else its first class, else its tag) -> 'levelxcount ...' in source order of levels. */
 const HEADING_ROLE_PINS = {
   '<span>': '2x1 3x1 4x1', 'ca-card-title': '3x2', 'ca-hero-title': '3x2', 'ca-mod-head': '3x3', 'ca-today-head': '3x2',
   'games-game-title': '3x1', 'games-logo': '2x2', 'games-section-head': '3x1', 'jl-title': '3x1', 'mr-assess-head': '3x1',
-  'rail-sec-label': '4x1', 'rec-checklist-title': '3x1', 'resume-title': '3x1', 'review-head': '3x1', 'rp-meta-title': '2x1',
+  'rail-sec-label': '4x1', 'resume-title': '3x1', 'review-head': '3x1', 'rp-meta-title': '2x1',
   'set-eyebrow-title': '2x2', 'sh-sec-title': '3x3', 'stp-part-title': '3x1', 'stp-sec-label': '3x1 4x1', 'stu-detail-name': '3x1',
   'stu-section-head': '3x3 4x6 5x2', 'stu-set-head': '6x1', 't-board-head': '3x2', 't-scard-lbl': '3x2 5x2', 't-title': '2x1',
-  'ta-list-title': '3x1', 'ta-roll-head': '3x1', 'tp-title': '2x4',
+  'ta-list-title': '3x1', 'ta-roll-head': '3x1', 'tp-title': '2x3',
 };
 const HEADING_ROLE_TOTAL = Object.values(HEADING_ROLE_PINS).reduce((n, v) => n + v.split(' ').reduce((m, x) => m + +x.split('x')[1], 0), 0);
 function a11yScanTags(src) {
@@ -9503,22 +9503,23 @@ function checkPracticeCards(ctx) {
    activity should fill the page"). With a card open on the In class page the
    site header and the left menu fold away, full screen or not
    (body.ca-fold); full screen adds only the zoom (body.ca-full). The rail's
-   tools go with the rail, so the open card's bar carries four round copies
-   of them (Tuner, Timer, Metro, Record) before Print and Full screen, each
+   tools go with the rail, so the open card's bar carries three round copies
+   of them (Tuner, Timer, Metro; the fourth, Record, was removed with the
+   dock's button 2026-11-14) before Print and Full screen, each
    running the dock's own togglePopup(). Runs the REAL caSyncSolo(),
    caSyncTopbar() and caBarTool() in the 0b render context (a card open, a
    card open in full screen, no card), and reads the real styles.css rules
    that do the folding. tools/smoke.mjs (foldWalk) clicks it all in a real
-   browser. Pinned: 22 assertions. */
-const FOLD_ASSERTS = 22;
+   browser. Pinned: 21 assertions (22 with the Record button). */
+const FOLD_ASSERTS = 21;
 /* 1db. THE PRACTICE-CARD KEYS AND THE TICK POP (2026-11-13).
    Keys (KEYS in app/cards.js): Space or K press the card's Play / Stop, the
    arrows its Previous / Next pager (stopped) or the neighbouring section chip
    (playing), < , > . one stop of its own speed control, each by calling the
    function that control already calls. Nothing while typing or on an
    <audio> / <video> player, with Ctrl / Cmd / Alt, on a repeat, in teacher
-   mode, in a dialog, the drawer, a tool popup (metronome, timer, tuner,
-   recorder), the video viewer, the live quiz's join banner, the search panel,
+   mode, in a dialog, the drawer, a tool popup (metronome, timer, tuner),
+   the video viewer, the live quiz's join banner, the search panel,
    with a "Turn on the microphone" panel on screen, a live mic or a
    Call-the-chord round; Space on a focused button / link / summary keeps its
    meaning; with two cards on screen only the playing one, else the last
@@ -9748,7 +9749,7 @@ const DB_PAGE_TEST_SRC = String.raw`(function(){
       const games = body.appendChild(E('div', ['games-screen'], { id: 'games-screen', role: 'dialog', 'aria-modal': 'true', hidden: '' }));
       const lq = body.appendChild(E('div', ['games-screen', 'lq-screen'], { id: 'live-quiz-screen', role: 'dialog', 'aria-modal': 'true', hidden: '' }));
       const tuner = body.appendChild(E('div', ['tool-popup'], { id: 'tuner-popup', role: 'dialog' }));
-      const rec = body.appendChild(E('div', ['tool-popup'], { id: 'rec-popup', role: 'dialog' }));
+      const metro = body.appendChild(E('div', ['tool-popup'], { id: 'metro-popup', role: 'dialog' }));
       const search = body.appendChild(E('div', ['daily5-panel'], { id: 'search-panel', hidden: '' }));
       const radios = body.appendChild(E('div', ['timer-presets'], { role: 'radiogroup' }));
       const radioBtn = radios.appendChild(E('button'));
@@ -9905,7 +9906,7 @@ const DB_PAGE_TEST_SRC = String.raw`(function(){
       gate('#app inert alone', () => { app.inert = true; }, () => { app.inert = false; });
       gate('the nav drawer open', () => body.classList.add('rail-open'), () => body.classList.remove('rail-open'));
       gate('the tuner open', () => tuner.classList.add('open'), () => tuner.classList.remove('open'));
-      gate('the recorder open', () => rec.classList.add('open'), () => rec.classList.remove('open'));
+      gate('the metronome open', () => metro.classList.add('open'), () => metro.classList.remove('open'));
       gate('the search panel open', () => { search.hidden = false; }, () => { search.hidden = true; });
       gate('a mic listening', () => { R.coachMicLive = true; }, () => { R.coachMicLive = false; });
       gate('a Call-the-chord round', () => { chcLive = 'chk'; }, () => { chcLive = null; });
@@ -10457,7 +10458,7 @@ function checkNoChecklist(ctx) {
   if (!bad) ok(`1ct: ${cards} practice card renders end in one Mark complete and ${extra} extra-song renders in none, EN + ES; no checklist, no ticks counted`);
 }
 function checkFoldedActivity(ctx) {
-  head('1cr. An open activity folds the header and the menu away (no full screen needed); the bar carries the four tools');
+  head('1cr. An open activity folds the header and the menu away (no full screen needed); the bar carries the three tools');
   let bad = 0, asserts = 0;
   const flag = m => { err('1cr: ' + m); problems++; bad++; };
   if (!ctx) { flag('cannot run — the 0b render context is unavailable'); return; }
@@ -10479,7 +10480,7 @@ function checkFoldedActivity(ctx) {
   const doc = ctx.document;
   const keep = { body: doc.body, gid: doc.getElementById, qs: doc.querySelector, fse: doc.fullscreenElement, fsen: doc.fullscreenEnabled, rfs: doc.documentElement.requestFullscreen, css: ctx.CSS };
   const ids = { 'class-activities-screen': screen, 'class-activities-body': caBody, 'ca-bar-open': bar, 'ca-page-title': title,
-    'fab-tuner': dock('tuner'), 'fab-timer': dock('timer'), 'fab-metro': dock('metro'), 'fab-rec': dock('rec') };
+    'fab-tuner': dock('tuner'), 'fab-timer': dock('timer'), 'fab-metro': dock('metro') };
   const a = run(`((window.CLASS_ACTIVITIES || []).find(x => x && x.kind !== 'check' && !x.teacherOnly && x.view !== 'card') || {}).id || null`);
   if (!a) { flag('no Focus/ladder activity to open'); return; }
   let savedOpen, savedToggle;
@@ -10507,7 +10508,7 @@ function checkFoldedActivity(ctx) {
     run('caSyncSolo')(null);
     c = classes();
     want(!c.fold && !c.full && !c.solo, `no open card left ${JSON.stringify(c)} on — "All activities" must bring the header and the menu back`);
-    // 4. The bar: four tool buttons, in order, before Print and Full screen.
+    // 4. The bar: three tool buttons, in order, before Print and Full screen (no Record since 2026-11-14).
     doc.fullscreenElement = null;
     run(`caOpenId = ${JSON.stringify(a)}`);
     run('caSyncTopbar()');
@@ -10516,8 +10517,8 @@ function checkFoldedActivity(ctx) {
     const fabs = /<span class="fab-buttons ca-bar-fabs">([\s\S]*?)<\/span>/.exec(html);
     want(!!fabs, 'the open card\'s bar has no .fab-buttons.ca-bar-fabs group (fab-tools.js\'s click-away listener needs .fab-buttons)');
     const btns = fabs ? [...fabs[1].matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/g)] : [];
-    want(btns.length === 4, `the bar has ${btns.length} tool buttons, want 4 (Tuner, Timer, Metro, Record)`);
-    const tools = ['tuner', 'timer', 'metro', 'rec'];
+    want(btns.length === 3, `the bar has ${btns.length} tool buttons, want 3 (Tuner, Timer, Metro; Record was removed 2026-11-14)`);
+    const tools = ['tuner', 'timer', 'metro'];
     btns.forEach((b, i) => {
       const w = tools[i];
       want(new RegExp(`data-tool="${w}"`).test(b[1]) && new RegExp(`aria-controls="${w}-popup"`).test(b[1]) && /aria-expanded="(true|false)"/.test(b[1]) && /\btitle="[^"]+"/.test(b[1]) && b[2].includes(`data-dock="${w}"`),
@@ -10525,13 +10526,13 @@ function checkFoldedActivity(ctx) {
     });
     const at = s => html.indexOf(s);
     want(at('ca-bar-fabs') >= 0 && at('ca-bar-fabs') < at('ca-print-btn') && at('ca-print-btn') < at('class="ca-bar-full"') && at('<span class="ca-bar-tools">') >= 0 && at('<span class="ca-bar-tools">') < at('ca-bar-fabs'),
-      'the bar\'s order should be .ca-bar-tools: Tuner Timer Metro Record, then Print, then Full screen');
+      'the bar\'s order should be .ca-bar-tools: Tuner Timer Metro, then Print, then Full screen');
     // 5. Each button runs the dock's togglePopup with its own tool.
     const calls = [];
     ctx.__fold = calls;
     run('togglePopup = w => __fold.push(w)');
     for (const w of tools) run(`caBarTool(${JSON.stringify(w)})`);
-    want(JSON.stringify(calls) === JSON.stringify(tools), `caBarTool() should call togglePopup with tuner, timer, metro, rec — called ${JSON.stringify(calls)}`);
+    want(JSON.stringify(calls) === JSON.stringify(tools), `caBarTool() should call togglePopup with tuner, timer, metro — called ${JSON.stringify(calls)}`);
     want(btns.every((b, i) => b[1].includes(`onclick="caBarTool(&quot;${tools[i]}&quot;)"`)), 'each tool button\'s onclick should be caBarTool(<its tool>) via jsonAttrArg');
   } catch (e) {
     flag('the page threw — ' + e.message);
@@ -10555,7 +10556,7 @@ function checkFoldedActivity(ctx) {
   const foldZoom = [...rules.keys()].filter(s => s.startsWith('body.ca-fold') && [...rules.get(s).values()].some(d => d.has('zoom')));
   want(!foldZoom.length, `the folded view must stay at normal size (1×), but these rules zoom it: ${foldZoom.join(', ')}`);
   if (asserts !== FOLD_ASSERTS) flag(`ran ${asserts} assertions, pinned ${FOLD_ASSERTS} — a branch stopped running (or update the pin with the change)`);
-  if (!bad) ok(`1cr: a card open folds the page with no full screen, full screen adds the zoom, no card unfolds it; the bar's 4 tool buttons run togglePopup; 7 CSS rules read (${asserts} assertions)`);
+  if (!bad) ok(`1cr: a card open folds the page with no full screen, full screen adds the zoom, no card unfolds it; the bar's 3 tool buttons run togglePopup; 7 CSS rules read (${asserts} assertions)`);
 }
 /* 1cs. ONE SHORT LINE PER DIRECTION IN AN IN-CLASS ACTIVITY (Jonathan,
    2026-11-10: "students don't read them anyway"). Every step text, intro,

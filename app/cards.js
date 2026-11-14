@@ -1527,7 +1527,7 @@ function pcToggleHelp(btn){
    held-down repeat, when another handler already took the
    key, in the teacher console, while the nav drawer, a dialog (the games,
    the live quiz, the gates, Report a problem), the search panel, a tool
-   popup (metronome, timer, tuner, recorder), the video viewer or the live
+   popup (metronome, timer, tuner), the video viewer or the live
    quiz's join banner is open, while a "Turn on the microphone" panel is on
    screen, a mic listens (coachMicLive) or a Call-the-chord round owns the
    space bar (chcLive). Space on a focused button, link or <summary> keeps

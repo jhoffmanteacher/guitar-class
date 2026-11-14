@@ -355,19 +355,6 @@
             <div class="tuner-status" id="tuner-status"></div>
             <div class="tuner-tip" data-i18n="tools.tunerTip">Noisy room? Pick your string above and play close to the computer.</div>
           </div>
-          <div class="tool-popup" id="rec-popup" role="dialog" aria-label="Recorder" data-i18n-attr="aria-label:tools.recorder">
-            <div class="tp-head">
-              <span class="tp-title" role="heading" aria-level="2"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> <span data-i18n="tools.recorder">Recorder</span></span>
-              <button class="tp-close" onclick="closePopup('rec')" aria-label="Close recorder" data-i18n-attr="aria-label:tools.closeRecAria">&#x2715;</button>
-            </div>
-            <div class="mr-rec-body" id="mrfab-rec-body"></div>
-            <div class="rec-checklist-title" role="heading" aria-level="3" data-i18n="rec.checkTitle">Listen back and ask yourself:</div>
-            <ul class="rec-checklist">
-              <li data-i18n="rec.checkBeat">Did every chord change land on the beat?</li>
-              <li data-i18n="rec.checkBuzz">Any buzzing or muted strings?</li>
-              <li data-i18n="rec.checkTempo">Did the tempo stay steady from start to finish?</li>
-            </ul>
-          </div>
           <div class="fab-buttons" id="fab-buttons">
             <button type="button" class="fab fab-tune" id="fab-tuner" onclick="togglePopup('tuner')" aria-controls="tuner-popup" aria-expanded="false" title="Tuner" data-i18n-attr="title:tools.tuner">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
@@ -380,10 +367,6 @@
             <button type="button" class="fab fab-metro" id="fab-metro" onclick="togglePopup('metro')" aria-controls="metro-popup" aria-expanded="false" title="Metronome" data-i18n-attr="title:tools.metronome">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 3 19 21 12 17 5 21 12 3"/><line x1="12" y1="10" x2="12" y2="17"/></svg>
               <span data-i18n="tools.dockMetro">Metro</span>
-            </button>
-            <button type="button" class="fab fab-rec" id="fab-rec" onclick="togglePopup('rec')" aria-controls="rec-popup" aria-expanded="false" title="Recorder" data-i18n-attr="title:tools.recorder">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg>
-              <span data-i18n="tools.dockRec">Record</span>
             </button>
           </div>
         </div>

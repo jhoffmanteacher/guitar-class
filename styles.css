@@ -267,11 +267,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .mr-rec-audio{width:100%;max-width:100%;height:36px}
 .mr-rec-actions{display:flex;gap:8px;flex-wrap:wrap}
 .mr-rec-status{font-size:0.8125rem;color:var(--text2);line-height:1.4}
-/* ── Recorder popup's always-visible listen-back checklist (self-assessment
-   prose, not inputs — no state, no checkboxes) ── */
-.rec-checklist-title{font-size:0.8125rem;font-weight:600;color:var(--text);margin:14px 0 4px;padding-top:12px;border-top:1px dashed var(--border2)}
-.rec-checklist{margin:0;padding-left:18px;font-size:0.8125rem;color:var(--text2);line-height:1.5}
-.rec-checklist li+li{margin-top:2px}
 .week-panel{display:none}.week-panel.active{display:block}
 .obj-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:16px}
 .obj-main{font-size:1.0625rem;font-weight:500;line-height:1.5;margin-bottom:5px}
@@ -951,7 +946,7 @@ body.rail-collapsed .rail-report{justify-content:center;padding:10px 0;gap:0}
 body.rail-collapsed .nav-btn > span:not(.ico),
 body.rail-collapsed .rail-report > span{position:absolute;width:1px;height:1px;
   padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-/* Four tools stacked. The collapsed rail is the one place the dock stays
+/* Three tools stacked. The collapsed rail is the one place the dock stays
    icon-only (the wide dock got its labels back 2026-09-23) — a 48px strip
    has no room for a word, and narrowing the rail was the student's choice. */
 body.rail-collapsed .rail-tools .fab-buttons{grid-template-columns:1fr}
@@ -1046,7 +1041,7 @@ body.rail-collapsed .rail-tools .tool-popup{
   body.rail-collapsed .nav-btn > span:not(.ico),
   body.rail-collapsed .rail-report > span{position:static;width:auto;height:auto;
     margin:0;overflow:visible;clip:auto}
-  body.rail-collapsed .rail-tools .fab-buttons{grid-template-columns:1fr 1fr}
+  body.rail-collapsed .rail-tools .fab-buttons{grid-template-columns:repeat(3,1fr)}
   body.rail-collapsed .rail-tools .tool-popup{left:8px;right:8px;width:auto;bottom:calc(100% + 6px)}
   /* Four more .rail-collapsed overrides that were never unwound here — found
      2026-09-27. Worst: .nav-list's flex-column stayed active in the drawer,
@@ -1055,7 +1050,8 @@ body.rail-collapsed .rail-tools .tool-popup{
      first. The others: .rail-scroll's tighter 62px-rail padding/gap leaked
      into the drawer, .preview-note stayed force-hidden, and the tool dock's
      labels stayed visually clipped even though the drawer unwinds
-     .fab-buttons back to a labelled 2x2 above. */
+     .fab-buttons back to a labelled row above (a 2x2 until 2026-11-14,
+     three across since the Record tool went). */
   body.rail-collapsed .rail-scroll{padding:12px 14px;gap:14px;overflow-x:visible}
   body.rail-collapsed .preview-note{display:block}
   body.rail-collapsed .nav-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 6px}
@@ -1114,7 +1110,8 @@ body.rail-collapsed .rail-tools .tool-popup{
    fixed-to-the-viewport version only existed because the rail used to be
    position:sticky inside a page-level scroll, where a bottom flex child
    drifted upward the moment the sticky came unstuck.
-   Compact by design — four tools in 252px, so the label goes under the icon
+   Compact by design — three tools in 252px (Tuner, Timer, Metro; the
+   fourth, Record, was removed 2026-11-14), so the label goes under the icon
    rather than beside it. */
 .rail-tools{flex:0 0 auto;background:var(--rail-bg);border-top:1px solid var(--border);padding:8px;position:relative}
 .fab-group{display:flex;flex-direction:column;gap:8px}
@@ -1125,20 +1122,13 @@ body.rail-collapsed .rail-tools .tool-popup{
 .fab-metro svg{color:var(--blue-text)}
 .fab-timer svg{color:var(--green-text)}
 .fab-tune svg{color:var(--purple-accent)}
-.fab-rec svg{color:var(--red-text)}
-/* Pulsing dot on the rail tile while its recorder slot is live — visible
-   even with the popup closed, mirrors the timer FAB's done-flash cue.
-   Reuses mr-rec-pulse's box-shadow keyframe verbatim. */
-.fab-rec{position:relative}
-.fab-rec.rec-live::after{content:'';position:absolute;top:5px;right:10px;width:7px;height:7px;border-radius:50%;background:#d63838;box-shadow:0 0 0 0 rgba(214,56,56,0.7);animation:mr-rec-pulse 1.2s infinite}
-@media(prefers-reduced-motion:reduce){.fab-rec.rec-live::after{animation:none}}
-/* In-dock restyle: four small stacked icon-over-label tiles, 2×2 grid —
-   one row of four left each label ~52px, which ellipsized "Metronome",
-   "Grabadora" and "Temporizador" with no other cue. Grid is scoped to the
-   rail dock; the Journey pages' three-tool .fab-buttons stays flex.
-   The 2×2 shape survives on the mobile drawer (below), where the rail is
-   82vw wide and height was never the problem. */
-.rail-tools .fab-buttons{display:grid;grid-template-columns:1fr 1fr}
+/* In-dock restyle: small stacked icon-over-label tiles. Grid is scoped to
+   the rail dock; the Journey pages' three-tool .fab-buttons stays flex.
+   Since the Record tool went (2026-11-14) the dock is three tiles: one row
+   of three on the mobile drawer too (it was a 2×2 of four, and a 2×2 of
+   three would leave a hole), where the rail is 82vw wide and each tile
+   gets ~95px, room for the short dock words below. */
+.rail-tools .fab-buttons{display:grid;grid-template-columns:repeat(3,1fr)}
 .rail-tools .fab{flex:1 1 0;min-width:0;flex-direction:column;justify-content:center;gap:3px;
   padding:7px 2px;border-radius:8px;font-size:0.6875rem;font-weight:600;letter-spacing:0.01em;
   text-align:center;box-shadow:none;background:transparent;border-color:transparent;color:var(--text2)}
@@ -1156,16 +1146,17 @@ body.rail-collapsed .rail-tools .tool-popup{
    <span> stays in the DOM and keeps being each button's accessible name,
    and a translated title= (index.html, data-i18n-attr) gives the same
    words on hover. Icons go up to 19px, and each already carries its own
-   colour. Mobile keeps the labelled 2×2. */
+   colour. Mobile keeps the labelled tiles. Three across since 2026-11-14
+   (the Record tool was removed): ~78px each. */
 /* Labels back under the icons (navigability work order 2026-09-23, item 8):
    a metronome triangle is not obvious to a 9th grader. The words are the
    SHORT dock keys (tools.dock*, i18n.js — "Metro", "Grabar"), picked to fit
-   the ~55px a 4-across dock gives each button at this size, so nothing
+   the ~55px a 4-across dock gave each button at this size, so nothing
    ellipsizes; the full names stay on the popup titles and the title=
    tooltip. Costs ~12px of rail height — measured 7px+ of slack left at
    1366×657 on the tallest rail (Modules · m4w2 with its Part links). */
 @media(min-width:761px){
-  .rail-tools .fab-buttons{grid-template-columns:repeat(4,1fr);gap:2px}
+  .rail-tools .fab-buttons{grid-template-columns:repeat(3,1fr);gap:2px}
   .rail-tools{padding:4px 6px 6px}
   .rail-tools .fab{padding:5px 1px 4px;gap:2px}
   .rail-tools .fab span{font-size:0.625rem;line-height:1.1;font-weight:600;letter-spacing:0}
@@ -3032,7 +3023,7 @@ body.explore-open #week-panels{display:none}
 .ca-bar-stop:not([hidden]) ~ .ca-bar-tools{margin-left:0}
 .ca-bar-tools .ca-print-btn{width:32px;height:32px;border-radius:16px}
 .ca-bar-open .ca-optional-tag{flex-shrink:0;align-self:center;margin-right:0}
-/*    The rail's four tools ride in the bar too (caBarFabsHtml), as 32px
+/*    The rail's three tools ride in the bar too (caBarFabsHtml), as 32px
       round icon buttons before Print, because the rail folds away while a
       card is open (5, below). Same icon colours as the dock. */
 .ca-bar-fabs{display:inline-flex;flex-direction:row;align-items:center;gap:4px}
@@ -3046,9 +3037,6 @@ body.explore-open #week-panels{display:none}
 .ca-bar-tool-tuner svg{color:var(--purple-accent)}
 .ca-bar-tool-timer svg{color:var(--green-text)}
 .ca-bar-tool-metro svg{color:var(--blue-text)}
-.ca-bar-tool-rec svg{color:var(--red-text)}
-.ca-bar-tool.rec-live::after{content:'';position:absolute;top:1px;right:1px;width:7px;height:7px;border-radius:50%;background:#d63838;animation:mr-rec-pulse 1.2s infinite}
-@media(prefers-reduced-motion:reduce){.ca-bar-tool.rec-live::after{animation:none}}
 /*    …and when that would wrap the bar (caFitBar measures it: a Focus card
       with six or seven step buttons, in Spanish above all), the Full screen
       word goes — the icon stays and the word is still the button's
@@ -3666,7 +3654,7 @@ span.tab-count-held{margin-left:4px}
    nav item (data-gate="hide", see checks.mjs 1aa) and the module/set rail
    groups disappear along with the search button and the practice view.
    Tools dock (.rail-tools) deliberately stays — a student still needs the
-   tuner/metronome/timer/recorder to work an activity step. */
+   tuner/metronome/timer to work an activity step. */
 body.ca-gated .g-module,
 body.ca-gated .g-set,
 body.ca-gated #resume-card,

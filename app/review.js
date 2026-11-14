@@ -352,6 +352,10 @@ function refreshRecUI(slot){
   // even with the popup closed — mirrors the timer FAB's done-flash cue.
   // The open card's bar has its own Record button while the rail is folded
   // away (caBarFabsHtml), so it pulses too.
+  // Switched off 2026-11-14: the dock's Record tool ('fab' slot, #fab-rec,
+  // #rec-popup, the bar's 'rec' button) was removed, so #mrfab-rec-body is
+  // gone and the return above always fires for 'fab'. Module Review's two
+  // recorders ('<n>', '<n>a') still run through every function here.
   if (slot === 'fab'){
     const live = !!(recState.fab && recState.fab.recording);
     document.querySelectorAll('#fab-rec, .ca-bar-tool[data-tool="rec"]').forEach(b => b.classList.toggle('rec-live', live));
@@ -449,7 +453,8 @@ function stopRec(slot){
    the rail recorder is a persistent site-wide tool with a pulsing tile —
    switching sets to read a chord chart mid-take shouldn't truncate it) and,
    without options, from startTuner/coachOpen (those need the mic itself, so
-   every slot stops, fab included). */
+   every slot stops, fab included). Since 2026-11-14 there is no 'fab' slot
+   (the dock's Record tool was removed), so keepFab changes nothing; kept. */
 function stopAnyRec(opts){
   Object.keys(recState).forEach(m => {
     if (opts && opts.keepFab && m === 'fab') return;

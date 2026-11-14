@@ -380,6 +380,10 @@ function togglePopup(which){
   if(which==='metro' && open){
     syncMetroMutedNote();
   }
+  // Switched off 2026-11-14: the dock's Record button and #rec-popup were
+  // removed (Jonathan: "we only need metronome and tuner"), so nothing calls
+  // togglePopup('rec') now; kept so putting the popup back restores it. The
+  // 'rec' entries in the popup loops here are null-guarded for the same reason.
   // Populates the idle recorder body on open. Guarded: refreshRecUI lives in
   // app.js, which the tabs/*.html Journey pages don't load, but they still
   // load this file verbatim for the shared Tuner/Timer/Metronome. Idle-only

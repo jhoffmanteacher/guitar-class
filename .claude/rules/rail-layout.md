@@ -47,8 +47,9 @@ site-fill.js multiplies their thresholds by the fill.
   - Nav labels are **clipped, never `display:none`**: each is its button's
     accessible name. `index.html` gives every nav item and every tool a
     translated `title=`.
-- **The tool dock is 1×4, icons only, above 760px** (`.rail-tools`); the
-  drawer keeps the labelled 2×2. The labels do not fit a 252px row, so they are
+- **The tool dock is 1×3 above 760px** (`.rail-tools`: Tuner, Timer, Metro;
+  Record was removed 2026-11-14); the drawer shows the same three labelled
+  tiles in one row. The labels do not fit a 252px row, so they are
   clipped and the tooltip carries the word.
 - **The page nav is a two-column grid, at every screen size** (next section).
   `@media(min-width:761px) and (max-height:800px)` is the short-screen rail on

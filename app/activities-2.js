@@ -427,7 +427,7 @@ function caSyncTopbar(){
      since 2026-10-31 (the collapsed rows dropped theirs). Exit checks carry
      no print button (see caPrintBtnHtml). */
   const optTag = caOptionalTagHtml(a);
-  // Tuner / Timer / Metro / Record, Print and Full screen as one unit, so a
+  // Tuner / Timer / Metro, Print and Full screen as one unit, so a
   // bar too narrow for one row moves them down TOGETHER, to the right end of
   // the second row (styles.css).
   const tools = caBarFabsHtml() + (a.kind === 'check' ? '' : caPrintBtnHtml(a)) + caFullBtnHtml();
@@ -451,10 +451,10 @@ function caSyncTopbar(){
   caFitBar();
   caPlaceToolPopups();
 }
-/* One row at 1366×657 (Jonathan, 2026-11-10). The four tool buttons
-   (caBarFabsHtml) cost the bar ~150px, and a Focus card with six or seven
-   step buttons no longer fit on one row in Spanish, where "Todas las
-   actividades" and "Pantalla completa" are the bar's widest words (ca-17,
+/* One row at 1366×657 (Jonathan, 2026-11-10). The tool buttons
+   (caBarFabsHtml; four then, three since 2026-11-14) cost the bar ~150px,
+   and a Focus card with six or seven step buttons no longer fit on one
+   row in Spanish, where "Todas las actividades" and "Pantalla completa" are the bar's widest words (ca-17,
    ca-21, ca-34, ca-46; ca-34 in English too, with its Optional tag). Only
    when the row would wrap, .ca-bar-tight drops the Full screen WORD — the
    icon stays, and the word stays the button's accessible name, as on a
@@ -479,23 +479,25 @@ function caBarRows(bar){
 }
 /* The rail's tools in the open card's bar (Jonathan, 2026-11-10). With a card
    open the left menu folds away (caSyncSolo, body.ca-fold), and the Tuner /
-   Timer / Metronome / Recorder dock went with it, so the bar carries four
-   round copies of the dock's buttons. Each runs the dock's own
+   Timer / Metronome dock went with it, so the bar carries three round
+   copies of the dock's buttons (a fourth, Record, was removed with the dock's
+   button 2026-11-14, Jonathan: the two go TOGETHER — an entry here with no
+   #rec-popup would be an empty round button whose click throws in
+   togglePopup). Each runs the dock's own
    togglePopup() and opens the dock's own popup: one tuner, one metronome,
    one timer whatever button was pressed. The icons and titles are read off
    the dock buttons in index.html, so the two can't drift. The wrapper's
    .fab-buttons class is what fab-tools.js's click-away listener looks for
    (a click on these must not count as a click outside the popup it just
    opened), and aria-controls is what setFabExpanded() keeps in step. */
-const CA_BAR_FABS = [['tuner', 'tools.tuner'], ['timer', 'tools.timer'], ['metro', 'tools.metronome'], ['rec', 'tools.recorder']];
+const CA_BAR_FABS = [['tuner', 'tools.tuner'], ['timer', 'tools.timer'], ['metro', 'tools.metronome']];
 function caBarFabsHtml(){
   return '<span class="fab-buttons ca-bar-fabs">' + CA_BAR_FABS.map(([w, key]) => {
     const dock = document.getElementById('fab-' + w);
     const svg = dock ? dock.querySelector('svg') : null;
     const pop = document.getElementById(w + '-popup');
     const open = !!(pop && pop.classList.contains('open'));
-    const live = w === 'rec' && typeof recState !== 'undefined' && recState.fab && recState.fab.recording;
-    return `<button type="button" class="ca-bar-tool ca-bar-tool-${w}${live ? ' rec-live' : ''}" data-tool="${w}" onclick="caBarTool(${jsonAttrArg(w)})"`
+    return `<button type="button" class="ca-bar-tool ca-bar-tool-${w}" data-tool="${w}" onclick="caBarTool(${jsonAttrArg(w)})"`
       + ` aria-controls="${w}-popup" aria-expanded="${open}" title="${escAttr(t(key))}" aria-label="${escAttr(t(key))}"`
       + ` data-i18n-attr="${escAttr(['title', 'aria-label'].map(at => at + ':' + key).join(';'))}">${svg ? svg.outerHTML : ''}</button>`;
   }).join('') + '</span>';
@@ -505,7 +507,7 @@ function caBarTool(which){
   togglePopup(which);
 }
 /* Where an opened tool shows while the rail is folded away: under the bar's
-   four tool buttons, its right edge on theirs (styles.css reads the two
+   tool buttons, its right edge on theirs (styles.css reads the two
    custom properties, under body.ca-fold only). Measured, not worked out:
    full screen zooms the bar (caSyncFullZoom) and a narrow bar wraps. */
 function caPlaceToolPopups(){

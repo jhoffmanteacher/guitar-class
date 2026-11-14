@@ -786,11 +786,12 @@
     'tools.tunerStringAria':{ en: 'Which string to tune', es: 'Qué cuerda afinar' },
     'tools.tuner':         { en: 'Tuner', es: 'Afinador' },
     // Dock labels (navigability work order 2026-09-23, item 8): short words
-    // that fit a 4-across dock at ~55px each. The popup titles above stay full.
+    // that fit a narrow dock button. The popup titles above stay full. The
+    // dock's fourth tool, Record, was removed 2026-11-14 (Jonathan: "we only
+    // need metronome and tuner"; the Timer stays), with its strings.
     'tools.dockTuner':         { en: 'Tuner', es: 'Afinar' },
     'tools.dockTimer':         { en: 'Timer', es: 'Tiempo' },
     'tools.dockMetro':         { en: 'Metro', es: 'Metro' },
-    'tools.dockRec':           { en: 'Record', es: 'Grabar' },
     'tools.auto':          { en: 'Auto', es: 'Auto' },
     'tools.flat':          { en: 'flat', es: 'bemol' },
     'tools.inTune':        { en: 'in tune', es: 'afinado' },
@@ -2957,14 +2958,6 @@
     'rec.noSupport':         { en: 'This browser does not support audio recording. Try Chrome, Edge, or Firefox on a desktop.',
                                es: 'Este navegador no permite grabar audio. Prueba Chrome, Edge o Firefox en una computadora.' },
     'rec.micFail':           { en: 'Could not start microphone: {err}', es: 'No se pudo iniciar el micrófono: {err}' },
-
-    // ── Recorder rail tool (fourth FAB, reuses the widget above) ──
-    'tools.recorder':        { en: 'Recorder', es: 'Grabadora' },
-    'tools.closeRecAria':    { en: 'Close recorder', es: 'Cerrar la grabadora' },
-    'rec.checkTitle':        { en: 'Listen back and ask yourself:', es: 'Escucha la grabación y pregúntate:' },
-    'rec.checkBeat':         { en: 'Did every chord change land on the beat?', es: '¿Cada cambio de acorde cayó en el tiempo?' },
-    'rec.checkBuzz':         { en: 'Any buzzing or muted strings?', es: '¿Se oye algún zumbido o alguna cuerda apagada?' },
-    'rec.checkTempo':        { en: 'Did the tempo stay steady from start to finish?', es: '¿El tempo se mantuvo estable de principio a fin?' },
 
     /* ── Live quiz (live-quiz.js) — the whole-class game the teacher runs
        from the projector. The quiz bank's titles, prompts and choice labels

@@ -34,7 +34,8 @@
      pages/<lang>/ the pages that open on their own (tabs/*.html, the Tuning Simulator,
                   the mood chart, 404)
      tools/<lang>/ the floating tools: metronome (each meter, the tempo ladder), timer
-                  (each preset), recorder popup, each opened by a real click
+                  (each preset), each opened by a real click (the recorder popup went
+                  with the dock's Record button, 2026-11-14)
      livequiz/    the live quiz with a made-up game: the student screen (EN + ES, opened
                   through its # link, #live-quiz) in every state, and the projector stage
      console/     the teacher console against the fake class of tools/console-layout-smoke.mjs
@@ -189,7 +190,7 @@
       #my-progress-screen, #games-screen, #search-panel, #games-panel, the hub cards
       [onclick="gamesShow('<key>')"], .main (the scrolling pane), .daily5-overlay,
       .tp-close, .ca-card[open], .pc-sheet-paper, .pc-sheet-msg, textarea.step-resp-input, textarea.reflection-ta,
-      #period-btn-4, #fab-group, #fab-metro, #fab-timer, #fab-rec,
+      #period-btn-4, #fab-group, #fab-metro, #fab-timer,
       #metro-popup [id^=meter-], #ladder-toggle, #timer-presets [id^=tp-],
       #live-quiz-screen, .lq-shell, #teacher-app, #t-side [data-view],
       #t-grid-container [data-ta-list], [data-ta-filter], [data-ta-pick], [data-ta-tab],
@@ -1487,8 +1488,7 @@ try {
       for (const id of (await run(`${lang}:tools-presets`, `[...document.querySelectorAll('#timer-presets [id^="tp-"]')].map(e => e.id)`, 0)) || []) {
         await run(`${lang}:tools-${id}`, clickExpr('#' + id), 150); await rec('timer-' + id);
       }
-      await run(`${lang}:tools-rec`, clickExpr('#fab-rec'), 300); await rec('rec');
-      await run(`${lang}:tools-rec-close`, clickExpr('#fab-rec'), 200); await rec('closed');
+      await run(`${lang}:tools-timer-close`, clickExpr('#fab-timer'), 200); await rec('closed');
     }
   }
 

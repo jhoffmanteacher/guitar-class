@@ -526,6 +526,9 @@ window.addEventListener('gc-langchange', function(){
   // rebuild above covers — re-render it in place or it stays half-English.
   // Idle-only, same guard as togglePopup: rebuilding mid-recording or during
   // a listen-back would reset the timer display / stop the <audio> at 0:00.
+  // Since 2026-11-14 the rail Recorder is gone (no #mrfab-rec-body), so this
+  // returns at once; kept switched off. recState itself stays: Module
+  // Review's recorders use it (the rebuild above reads it).
   if (!recState.fab) refreshRecUI('fab');
 });
 
@@ -1261,7 +1264,7 @@ window.addEventListener('resize', () => {
    `rail-collapsed` can't fight.
    Collapsed, the rail is a ~62px icon strip: page icons keep their labels
    as accessible names (clipped, not removed) and gain a translated
-   title=, the four tools stack, and the module/set block is hidden — the
+   title=, the three tools stack, and the module/set block is hidden — the
    sticky set band names the set now, so the rail is not the only place
    that says where you are.
    Remembered per browser. localStorage is wrapped because a student in a

@@ -151,8 +151,9 @@ should fill the page").
   CSS is scoped to `#class-activities-screen:not([hidden])`).
 - The **Full screen** button is unchanged: it adds `body.ca-full`, which only
   zooms the column (`caSyncFullZoom`). The folded view stays at 1×.
-- The rail's Tuner / Timer / Metro / Record go with the rail, so the bar
-  carries four round copies (`caBarFabsHtml`, in `.ca-bar-tools` before Print
+- The rail's Tuner / Timer / Metro go with the rail, so the bar
+  carries three round copies (Record was removed from the dock and the bar
+  2026-11-14; both go together, or the bar keeps an empty button that throws) (`caBarFabsHtml`, in `.ca-bar-tools` before Print
   and Full screen). Each runs the dock's own `togglePopup()` and opens the
   dock's own popup; styles.css un-hides an open popup and pins it under the
   bar's buttons (`caPlaceToolPopups`). The rail is hidden by `visibility`, not
