@@ -427,18 +427,36 @@ const SITE_ERRORS = (function(){
 /* ── Offline banner ──
    sw.js already serves the cached shell while offline — this just tells the
    student why videos/saving are paused, and clears itself on reconnect.
-   Mirrors the safety-net banner above (same look, same dismiss pattern). */
+   Same colours and dismiss pattern as the safety-net banner above.
+
+   The page makes room for it (2026-11-14). It used to float over the page
+   (a 520px box, bottom centre, over everything): in Spanish it was 85px tall
+   and covered the left edge of a practice card's "Marcar como completado",
+   a lesson step's "Mark done" scrolled to the bottom edge, and the Games
+   tiles. Now it is a full-width bar along the bottom, and while it shows
+   <html> carries .offline-on and --offline-h (the bar's own height, kept
+   current by a ResizeObserver: a language switch or a narrower window
+   re-wraps the text). styles.css ("OFFLINE BANNER") takes that much off
+   the bottom of #app and the Games screen and lifts the bottom-fixed bits
+   (back-to-top, the gate toast, the live-quiz banner, the video overlay)
+   above it, so nothing a student needs is ever under the bar. z-index 55:
+   below the mobile drawer (60) and every popup or modal, which then draw
+   over the bar instead of under it. */
 (function(){
-  let el = null;
+  let el = null, ro = null;
+  const root = document.documentElement;
+  function sizeRoom(){
+    try { if (el) root.style.setProperty('--offline-h', el.offsetHeight + 'px'); } catch(_) {}
+  }
   function showOfflineBanner(){
     if (el) return;
     try {
       const d = document.createElement('div');
       d.setAttribute('role','status');
-      d.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;z-index:99999;'
-        + 'max-width:520px;margin:0 auto;padding:12px 44px 12px 16px;border-radius:12px;'
-        + 'background:#514a7d;color:#fff;font:14px/1.45 system-ui,-apple-system,sans-serif;'
-        + 'box-shadow:0 6px 24px rgba(0,0,0,.28)';
+      d.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:55;box-sizing:border-box;'
+        + 'padding:10px 52px;text-align:center;'
+        + 'background:#514a7d;color:#fff;font:14px/20px system-ui,-apple-system,sans-serif;'
+        + 'box-shadow:0 -2px 12px rgba(0,0,0,.18)';   // a whole-pixel line height: --offline-h is then the bar's exact height
       const msg = document.createElement('span');
       msg.setAttribute('data-i18n', 'offline.body');   // setLang's applyI18n(document) sweep retranslates a banner that's up during a language switch
       msg.textContent = t('offline.body');
@@ -446,16 +464,23 @@ const SITE_ERRORS = (function(){
       close.setAttribute('data-i18n-attr', 'aria-label:offline.dismiss');
       close.setAttribute('aria-label', t('offline.dismiss'));
       close.textContent = '×';
-      close.style.cssText = 'position:absolute;top:8px;right:12px;background:none;border:0;'
+      close.style.cssText = 'position:absolute;top:50%;right:8px;transform:translateY(-50%);'
+        + 'width:36px;height:36px;background:none;border:0;border-radius:50%;'
         + 'color:#fff;font-size:1.25rem;line-height:1;cursor:pointer';
       close.onclick = () => hideOfflineBanner();
       d.append(msg, close);
-      (document.body || document.documentElement).appendChild(d);
+      (document.body || root).appendChild(d);
       el = d;
+      root.classList.add('offline-on');
+      sizeRoom();
+      if (typeof ResizeObserver === 'function') { ro = new ResizeObserver(sizeRoom); ro.observe(d); }
     } catch(_) { /* never let the banner crash the page */ }
   }
   function hideOfflineBanner(){
+    try { if (ro) { ro.disconnect(); ro = null; } } catch(_) {}
     if (el) { el.remove(); el = null; }
+    root.classList.remove('offline-on');
+    root.style.removeProperty('--offline-h');
   }
   window.addEventListener('offline', showOfflineBanner);
   window.addEventListener('online', hideOfflineBanner);

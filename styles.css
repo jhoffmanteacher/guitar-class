@@ -788,6 +788,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    it is what .main > * actually matches; .set-eyebrow is two levels in.) */
 .app-layout .main > #week-panels{margin-top:0}
 @media(min-width:1240px){.app-layout .main{margin:0 auto}}
+/* ══ OFFLINE BANNER — the page makes room for it (2026-11-14) ══════════
+   The offline banner (app/boot.js, "Offline banner") is a full-width bar
+   along the bottom; while it shows, <html> has .offline-on and --offline-h
+   is the bar's height. #app and the Games screen end above it, the body
+   gives a page that scrolls itself (sign-in wall, console) the same room,
+   and the bottom-fixed controls ride up by that much (translate, so each
+   keeps its own bottom from every media query). */
+html.offline-on #app{height:calc(100dvh / var(--site-fill,1) - var(--hdr) - var(--offline-h,0px))}
+html.offline-on body{padding-bottom:var(--offline-h,0px)}
+html.offline-on .games-screen{bottom:var(--offline-h,0px)}
+html.offline-on .back-to-top,html.offline-on #gate-toast,html.offline-on .lq-banner,html.offline-on .video-overlay{translate:0 calc(var(--offline-h,0px) * -1)}
 .rail{width:252px;flex:0 0 252px;background:var(--rail-bg);color:var(--text);
   height:100%;border-right:1px solid var(--border);display:flex;flex-direction:column}
 /* gap/padding tightened 24/20/24 → 14/12/12 on 2026-09-19: on a Chromebook
