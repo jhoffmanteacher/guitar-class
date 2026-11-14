@@ -57,6 +57,7 @@ function renderTeacherManage(){
     const pausedCount=allStudentsRaw.filter(s=>paused[s.uid]).length;
     const head=`
       ${teacherBackupPanelHtml()}
+      <div id="t-songfiles-block"></div>
       <div id="t-access-block"></div>
       <div class="tg-class">
         <div class="tg-class-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg> Student access</div>
@@ -85,7 +86,7 @@ function renderTeacherManage(){
         </div>
       </div>
       <div class="tg-note"><strong>Paused</strong> students can sign in but see a "your access is paused" message instead of the site — use it for a temporary hold, then un-pause. <strong>Archived</strong> students are hidden from every dashboard view; their work is kept and comes back if you restore them. Pausing takes effect the next time that student loads the site. <strong>Period</strong> is whatever the student picked when they first signed in — set 4, 7, or CAS here to correct a wrong tap, or Auto to go back to their own answer. <strong>Open through</strong> lets one student skip ahead: every module up to the one you pick opens (all sets in the modules before it, Set 1 of the one you pick), without marking anything done. Auto removes it. Modules they've already worked in stay open either way.${CLASS_OPEN_THROUGH>1?` <strong>Class-wide:</strong> every student is already open through Module ${CLASS_OPEN_THROUGH} and starts there (CLASS_OPEN_THROUGH in config-main.js), so Auto means Module ${CLASS_OPEN_THROUGH}.`:''} This list always shows everyone, whatever the period filter above is set to.</div>`;
-    if(allStudentsRaw.length===0){ box.innerHTML=head+'<div class="t-loading">No students yet — they’ll appear here once they sign in.</div>'; teacherAccessMount(); return; }
+    if(allStudentsRaw.length===0){ box.innerHTML=head+'<div class="t-loading">No students yet — they’ll appear here once they sign in.</div>'; teacherAccessMount(); teacherSongFilesMount(); return; }
     const nameOf=s=>(s.name||s.email||s.uid);
     const byLast=teacherManageNameBy==='last';
     const shownName=s=>{ const p=byLast&&teacherNameParts(s); return p?`${p.last}, ${p.first}`:(s.name||s.email||s.uid.slice(0,8)+'…'); };
@@ -103,7 +104,7 @@ function renderTeacherManage(){
     const perCmp=(a,b)=>(perRank(a)-perRank(b)) || (perOf(a)<perOf(b)?-1:perOf(a)>perOf(b)?1:0);
     const list=(teacherShowArchived?allStudentsRaw:allStudentsRaw.filter(s=>!arch[s.uid]))
       .sort((a,b)=>(grouped?perCmp(a,b):0)||byName(a,b));
-    if(list.length===0){ box.innerHTML=head+'<div class="t-loading">Every student is archived. Use “Show archived” to bring them back.</div>'; teacherAccessMount(); return; }
+    if(list.length===0){ box.innerHTML=head+'<div class="t-loading">Every student is archived. Use “Show archived” to bring them back.</div>'; teacherAccessMount(); teacherSongFilesMount(); return; }
     const perLabel=p=>!p?'No period':p==='CAS'?'CAS':'Period '+p;
     // Object.create(null) + String(): a period the student typed as 'constructor' would read an inherited key, and the number 4 a group apart from '4'.
     const perCount=Object.create(null); list.forEach(s=>{ const k=String(teacherStudentPeriod(s)||''); perCount[k]=(perCount[k]||0)+1; });
@@ -157,7 +158,7 @@ function renderTeacherManage(){
     const keepY=box.querySelector('[data-tview="manage"]') ? window.scrollY : null;
     box.innerHTML=head+
       `<div class="tg-grid-wrap" data-tview="manage"><table class="tg-table"><thead><tr><th>Student</th><th>Period</th><th>Open through</th><th>Access</th><th>Roster</th><th>Right now</th></tr></thead><tbody>${rows}</tbody></table></div>`+summary;
-    teacherAccessMount();
+    teacherAccessMount(); teacherSongFilesMount();
     if(keepY!==null) window.scrollTo({top:keepY});
   });
 }

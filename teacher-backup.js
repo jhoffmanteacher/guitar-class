@@ -38,6 +38,10 @@
      says so (notReadable), instead of failing the whole backup. Any other
      failure on them fails it, like every other read.
    LEFT OUT, and why: TEACHER_BACKUP_LEFT_OUT below (also written into the file).
+   Among them (2026-11-14) the song recordings, songFiles/* with their pieces,
+   and the month's download count songFilesUsage/*: about 216 MB would not fit
+   in one file, and the mp3s are kept on the teacher's Mac (Manage → Song
+   files, teacher-songfiles.js, uploads them again). Nothing here reads them.
 
    THE FILE. One JSON object. Its header comes first: format, formatVersion,
    complete (always true: a backup with a failed read is never saved), the date,
@@ -119,6 +123,8 @@ const TEACHER_BACKUP_LEFT_OUT = [
   {path:'weekBoard/*, rankBoard/*', why:'the practice boards: the Top 5 board is rebuilt by each student’s own page from their minutes; the class rank board is no longer used (since 2026-11-13)'},
   {path:'each student’s practice days and private board tag (under minutes, beside the weeks)', why:'the teacher’s account may not read them (firestore.rules); the weeks hold the totals'},
   {path:'minutesBoard/*', why:'no rules block: nobody can read it'},
+  {path:'songFiles/* and songFiles/*/pieces/*', why:'the song recordings (about 216 MB of mp3s): far too big for this file, and not student work; the mp3s themselves are kept on the teacher’s Mac and go back in through Manage → Song files'},
+  {path:'songFilesUsage/*', why:'this month’s count of song downloads; Manage → Song files can reset it; not student work'},
 ];
 
 let teacherBackupGen = 0;

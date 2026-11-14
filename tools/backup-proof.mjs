@@ -18,7 +18,7 @@
    progress/*, minutes/{uid}/weeks/*, minutes/{uid}/days/*, minutes/{uid}/meta/board, issueReports/* (empty in the
    main case), micTakes/* + chunks, micTakesMeta/count, liveQuiz/current + answers, weekBoard/*, rankBoard/*,
    and since 2026-11-13 config/access and accessRequests/* (a hostile name among them) and songRequests/* (two, one
-   with a hostile title).
+   with a hostile title); since 2026-11-14 songFiles/* with 2 pieces and songFilesUsage/* (left out: never read).
    It answers doc get, collection get, orderBy(documentId) + limit + startAfter (by id), with 0–3 ms latency, and a
    fresh deep copy on every data() (so the code under test cannot change the store). Every write method (set, update,
    delete, add, batch, runTransaction) counts and throws. A failure can be planted per collection: always, or once.
@@ -29,7 +29,9 @@
                   independent canonical form that keeps types (Timestamp, bytes, geopoint, reference, NaN, -0, ±Inf,
                   a map with its own "__type" key), and no doc is extra or missing (N of N)
      raw          the old-numbered Module 4/5 doc is in the file as stored (its old key there, the remapped key not)
-     reads        the left-out collections were never read; progress came in pages of 200 (300 → 2 pages)
+     reads        the left-out collections were never read; progress came in pages of 200 (300 → 2 pages); nothing
+                  under songFiles or songFilesUsage was read (pinned 0), both are in the file's left-out list, and the
+                  file holds neither
      writes       zero write attempts in every case
      failures     a read failure on each collection in turn (and permission-denied, and a hung read) → status names
                   it, kind 'failed', no file, no "last backup" date; a one-off failure is retried and the file is whole
@@ -139,6 +141,9 @@ function makeStore(opts = {}){
   S.set('songRequests/fake-uid-002_2026-W46', { uid: 'fake-uid-002', name: 'Test Student 002', email: 'student2@example.test', period: '7', week: '2026-W46', videoId: 'dQw4w9WgXcQ', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', lyricsOk: true, topicOk: true, why: '', title: '', createdAt: new Timestamp(1762900600, 0), state: 'adding', note: 'Next week.' });
   S.set('micTakes/fake-uid-001-coach', { uid: 'fake-uid-001', mode: 'coach' }); S.set('micTakes/fake-uid-001-coach/chunks/0', { i: 0, pcm: new Blob_([1, 2]) });
   S.set('micTakesMeta/count', { n: 1 }); S.set('liveQuiz/current', { state: 'lobby' }); S.set('liveQuiz/current/answers/fake-uid-001', { uid: 'fake-uid-001' });
+  S.set('songFiles/test-song', { file: 'test-song.mp3', bytes: 1000001, sha256: 'a'.repeat(64), pieces: 2, pieceBytes: 900000, durationSec: 60, state: 'ready', uploadedAt: new Timestamp(1762900000, 0) });
+  S.set('songFiles/test-song/pieces/0', { i: 0, data: new Blob_([1, 2, 3]) }); S.set('songFiles/test-song/pieces/1', { i: 1, data: new Blob_([4]) });
+  S.set('songFilesUsage/2026-11', { bytes: 1333335 });
   S.set('weekBoard/' + 'a'.repeat(32), { week: '2026-W46', period: '4', seconds: 60 }); S.set('rankBoard/' + 'a'.repeat(32), { seconds: 600 });
   if(!opts.noAccess){
     S.set('config/access', { allow: { 'fake-uid-005': true, 'fake-outside-1': true } });
@@ -291,8 +296,14 @@ console.log('\n1. A whole backup (300 students, issueReports empty, every Firest
   ok(raw42 && 'm4w1-s1' in raw42.skills && !('m5w1-s1' in raw42.skills) && raw42.completed.m4w2 === true && raw42.lastModule === 4 && !('migrations' in raw42),
     'the file holds fake-uid-042 RAW: skills m4w1-s1, completed m4w2, lastModule 4, no migrations marker');
   // Reads
-  const left = c.st.reads.filter(p => /^(micTakes|micTakesMeta|liveQuiz|weekBoard|rankBoard)/.test(p) || /\/(days|meta)(\/|$)/.test(p));
+  const left = c.st.reads.filter(p => /^(micTakes|micTakesMeta|liveQuiz|weekBoard|rankBoard|songFiles)/.test(p) || /\/(days|meta)(\/|$)/.test(p));
   ok(left.length === 0, `left-out collections read: ${left.length} (of ${c.st.reads.length} reads)`);
+  /* Song files (2026-11-14): the stub holds a song, its 2 pieces and a month's count; the backup reads none of them,
+     says so in its left-out list, and the file holds no songFiles collection. */
+  const songReads = c.st.reads.filter(p => /^songFiles/.test(p)).length;
+  const songLeft = (j.leftOut || []).map(x => x.path).filter(p => /^songFiles\/\* and songFiles\/\*\/pieces\/\*$|^songFilesUsage\/\*$/.test(p));
+  ok(songReads === 0 && songLeft.length === 2 && !('songFiles' in j.collections) && !('songFilesUsage' in j.collections),
+    `song files: reads under songFiles/songFilesUsage ${songReads} (of ${c.st.reads.length}), left-out entries ${songLeft.length} of 2, in the file: none`);
   const progPages = c.st.reads.filter(p => p === 'progress').length;
   ok(progPages === 2, `progress read in ${progPages} pages of at most 200 for 300 students`);
   const weekReads = c.st.reads.filter(p => /^minutes\/[^/]+\/weeks$/.test(p)).length;

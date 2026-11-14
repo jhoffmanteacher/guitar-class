@@ -17460,6 +17460,40 @@ function checkSongFilesLoader() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1dy. SONG FILES IN THE CONSOLE (2026-11-14) — Manage → "Song files"
+   (teacher-songfiles.js), the only writer of the songFiles store. RUN by
+   tools/song-files-console-sim.mjs (Node, under a second: the whole console
+   script and app/songfiles.js in a vm, a stub Firestore that checks every
+   write against firestore.rules' "SONG FILES" block, written out again in the
+   sim): renderTeacherManage draws the slot and mounts the section; a made-up
+   2,000,123-byte file on the list uploads as exactly 3 pieces with the right
+   bytes, the head written 'uploading' first and 'ready' last, stale pieces
+   3..5 of an earlier longer upload deleted, the other song untouched; a file
+   not on the list, one over 36,000,000 bytes (not even read) and one whose
+   length cannot be read write nothing; one upload at a time; Verify reads the
+   song back, fails on a flipped byte and a missing piece, counts the month
+   once, and the month's limit refuses it without a read; Delete needs the
+   exact typed id and deletes only that song's docs; leaving Manage mid-upload
+   stops the writes (the head stays 'uploading'); a stale read never paints;
+   every store value escaped, no inline handler. Its count of cases is pinned
+   so deleting one to get green fails here. `--breaks` plants 16 faults in
+   teacher-songfiles.js (each must turn a case red); not run here.
+   ════════════════════════════════════════════════════════════════════ */
+const SONG_FILES_CONSOLE_SIM_PIN = 52;
+function checkSongFilesConsole() {
+  head('1dy. Song files in the console: upload, verify, delete and the escaping are run against the rules\' shape');
+  const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'song-files-console-sim.mjs')], { encoding: 'utf8', timeout: 120000 });
+  const m = /song-files-console-sim: (\d+) cases, (\d+) failed/.exec(r.stdout || '');
+  if (r.status !== 0 || !m) {
+    err('1dy: tools/song-files-console-sim.mjs failed (exit ' + r.status + ')' + (r.error ? ': ' + r.error.message : '')); problems++;
+    for (const l of ((r.stdout || '') + (r.stderr || '')).trim().split('\n').filter(l => /✗|could not|would not|Error/.test(l)).slice(0, 8)) console.log(`${C.dim}      ${l}${C.reset}`);
+    return;
+  }
+  if (+m[1] !== SONG_FILES_CONSOLE_SIM_PIN || +m[2] !== 0) { err(`1dy: song-files-console-sim ran ${m[1]} cases (${m[2]} failed); pinned at ${SONG_FILES_CONSOLE_SIM_PIN} — if you changed the simulation on purpose, re-pin SONG_FILES_CONSOLE_SIM_PIN (never lower it to hide a deleted case)`); problems++; return; }
+  ok(`song-files-console-sim: ${m[1]} cases pass (pinned ${SONG_FILES_CONSOLE_SIM_PIN}): upload in 3 pieces (uploading → ready, stale pieces removed), refusals write nothing, Verify / the month's limit / Delete, leaving Manage stops the upload, every write in the rules' shape, store values escaped`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1cg. PRACTICE MINUTES (2026-11-01) — practice-minutes.js + its config + the
    rules blocks it writes under.
    The engine is RUN, not read: tools/pm-sim.mjs loads the real config and engine
@@ -18420,6 +18454,7 @@ function checkPracticeMinutes(i18nTable) {
   checkRulesPaste2();
   checkSongRequests();
   checkSongFilesLoader();
+  checkSongFilesConsole();
   await checkBackingLoudness();
   checkSiteFill();
   checkPartSizes();
