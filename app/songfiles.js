@@ -6,7 +6,7 @@
    public. Plan: "Claude outputs/PLAN-private-song-audio-2026-11-13.md".
 
    HOW A TRACK SAYS IT IS PRIVATE. A path in SNIPPET_TRACKS (app/snippets.js)
-   or a Song Journey page's data-audio* is 'private:<id>' instead of
+   is 'private:<id>' instead of
    'audio/<file>.mp3', and <id> is a key of SONG_FILES below: the file's name,
    its size in bytes, its SHA-256 and its length. The site trusts the store
    only as far as this list: a download whose size or SHA-256 differs is
@@ -48,7 +48,7 @@
    still play. Saving, the games, the public tracks, everything else, work as
    before: nothing else reads this counter.
 
-   THE PLAYERS (app/snippets.js, app/cards.js, tabs/journey.js) call three
+   THE PLAYERS (app/snippets.js, app/cards.js) call three
    things: snippetSrc() maps a private path through songFileSrc() (the
    device copy's blob: address once it is loaded in this page, else the path
    itself); songFileNeedsLoad(src) says the file is not loaded yet; and
@@ -59,9 +59,11 @@
    the student moved on never starts by itself. A public path goes through
    none of this: snippetSrc() returns it unchanged.
 
-   A Song Journey page does not load the app parts; in Step 2 the page that
-   switches loads this file too (it uses only firebase and the page's own
-   loadFirestoreSdk). tools/song-files-sim.mjs runs this file in Node. */
+   NOT ON THE SONG JOURNEY PAGES YET (2026-11-14, after review round 2): their
+   player (tabs/journey.js) cannot play a private song; checks.mjs 1dx fails
+   any 'private:' in tabs/. That player is its own piece of Step 2, with the
+   reviewer's harness (DETAILS.md, "Step 2: the Journey player").
+   tools/song-files-sim.mjs runs this file in Node. */
 
 /* SONG_FILES:BEGIN — strict JSON between the markers (tools/song-files.mjs and the Python tools read it).
    { "<id>": { "file": "<name>.mp3", "bytes": N, "sha256": "<64 hex>", "durationSec": S } } */
@@ -86,17 +88,9 @@ function songFileMonth(ms){
 }
 function songFileErr(code, detail){ const e = new Error(code + (detail ? ': ' + detail : '')); e.code = code; return e; }
 
-/* Who is signed in, and the database. The app: currentUser and ensureDb()
-   (app/boot.js). A Song Journey page: Firebase's own user and the page's
-   loadFirestoreSdk() (tabs/journey.js). */
+/* Who is signed in, and the database: currentUser and ensureDb() (app/boot.js). */
 function songFileHost(){
-  if(typeof ensureDb === 'function'){
-    const u = typeof currentUser !== 'undefined' ? currentUser : null;
-    return { user: u, db: () => ensureDb() };
-  }
-  let u = null;
-  try { u = (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length) ? firebase.auth().currentUser : null; } catch(e) {}
-  return { user: u, db: () => (typeof loadFirestoreSdk === 'function' ? loadFirestoreSdk() : Promise.resolve()).then(() => firebase.firestore()) };
+  return { user: typeof currentUser !== 'undefined' ? currentUser : null, db: () => ensureDb() };
 }
 
 /* ── The device copy (IndexedDB) ── */
@@ -149,7 +143,10 @@ let sfPersistAsked = false;
    sees "not ready", and a reload (after the teacher uploads it again) tries
    afresh. Not counting a retry gives a page nothing it could not already take:
    the rules cannot count reads at all (firestore.rules, SONG FILES: honest
-   limits), so the counter only ever measures honest traffic. */
+   limits), so the counter only ever measures honest traffic.
+   KNOWN (review round 2, m4): so retries after dropped downloads are free, and
+   honest traffic on bad Wi-Fi can run over the count: each retry downloads
+   again (or part of the song) without adding to the month. */
 const sfCounted = new Set();    // id + ':' + sha256 counted in this page
 const sfBroken = new Map();     // id + ':' + sha256 -> 'notready'
 let sfHashedCopy = new Set();   // id + ':' + sha256 of device copies re-hashed in this page
@@ -175,13 +172,14 @@ function sfHex(buf){
    piece must be there, and the whole must have the expected size and
    SHA-256. Read SONG_FILES_PARALLEL at a time, in any order; each lands at
    its own offset. Also used by the console's Verify (teacher-songfiles.js). */
-async function songFileReadPieces(db, id, expect, onProgress){
+async function songFileReadPieces(db, id, expect, onProgress, stop){
   const n = Math.ceil(expect.bytes / SONG_FILE_PIECE);
   const out = new Uint8Array(expect.bytes);
   const ref = db.collection('songFiles').doc(id).collection('pieces');
   let next = 0, got = 0;
   const one = async () => {
     while(next < n){
+      if(stop && stop()) throw songFileErr('cancelled');   // nobody waits for it any more: read no more pieces
       const k = next++;
       const snap = await ref.doc(String(k)).get();
       if(!snap.exists) throw songFileErr('missing', 'piece ' + k + ' of ' + n);
@@ -220,7 +218,7 @@ function sfFirestoreCode(e){
   if(c === 'permission-denied' || c === 'unauthenticated') return 'denied';
   if(c === 'unavailable') return 'offline';
   if(c === 'missing' || c === 'bad' || c === 'notready') return 'notready';
-  if(c === 'limit' || c === 'offline' || c === 'denied' || c === 'signin' || c === 'clock') return c;
+  if(c === 'limit' || c === 'offline' || c === 'denied' || c === 'signin' || c === 'clock' || c === 'cancelled') return c;
   return 'failed';
 }
 /* With one lock per song across this browser's tabs (Web Locks), so two tabs
@@ -231,7 +229,10 @@ function sfWithLock(id, fn){
     if(typeof navigator !== 'undefined' && navigator.locks && navigator.locks.request){
       /* A tab that hung holding the lock (review m5) must not leave this one on
          "Loading… 0%": after SONG_FILES_LOCK_WAIT_MS it goes on without the lock
-         (at worst a second download of the song). */
+         (at worst a second download of the song). KNOWN (review round 2, m5): a
+         download slower than 60 s in another tab is treated the same way, so
+         this tab downloads and counts it again; and a hung tab costs the
+         others 60 s of "Loading… 0%" first. */
       const opts = (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? { signal: AbortSignal.timeout(SONG_FILES_LOCK_WAIT_MS) } : {};
       return navigator.locks.request('gc-song-file:' + id, opts, fn).catch(e => {
         if(e && (e.name === 'AbortError' || e.name === 'TimeoutError')) return fn();
@@ -241,9 +242,12 @@ function sfWithLock(id, fn){
   } catch(e) {}
   return fn();
 }
-async function sfLoadOnce(id, entry, progress){
+/* wanted(): someone still waits for this song. A load nobody waits for any
+   more (the card asked for another tempo or mix, or stopped) ends before it
+   counts, and reads no more pieces (review round 2, m6). */
+async function sfLoadOnce(id, entry, progress, wanted){
+  const gone = () => !!wanted && !wanted();
   const key = id + ':' + entry.sha256;
-  if(sfBroken.has(key)) throw songFileErr('notready', 'broken earlier in this page');
   /* A device copy is trusted by its label and size, and re-hashed the first
      time a page plays it (review m4: about 20 ms for 15 MB on a Mac, measured
      2026-11-14; a slow Chromebook stays well under a second). A copy that does
@@ -261,9 +265,13 @@ async function sfLoadOnce(id, entry, progress){
   };
   let blob = await fromCopy();
   if(blob) return blob;
+  /* Checked after the device copy (review round 2, m1): a good copy on the
+     device plays even if this page once found the stored file broken. */
+  if(sfBroken.has(key)) throw songFileErr('notready', 'broken earlier in this page');
   return sfWithLock(id, async () => {
     const again = await fromCopy();           // another tab finished while this one waited
     if(again) return again;
+    if(gone()) throw songFileErr('cancelled');
     if(typeof navigator !== 'undefined' && navigator.onLine === false) throw songFileErr('offline');
     const host = songFileHost();
     const db = await host.db();
@@ -272,12 +280,13 @@ async function sfLoadOnce(id, entry, progress){
     const h = head.exists ? head.data() || {} : null;
     if(!h || h.state !== 'ready' || h.bytes !== entry.bytes || h.sha256 !== entry.sha256 || h.pieces !== Math.ceil(entry.bytes / SONG_FILE_PIECE))
       throw songFileErr('missing', h ? 'the stored file is not the one on the list' : 'not uploaded');
+    if(gone()) throw songFileErr('cancelled');
     if(!sfCounted.has(key)){
       await songFileCount(db, songFileCost(entry.bytes));
       sfCounted.add(key);
     }
     let bytes;
-    try { bytes = await songFileReadPieces(db, id, entry, progress); }
+    try { bytes = await songFileReadPieces(db, id, entry, progress, gone); }
     catch(e){
       if(e && (e.code === 'missing' || e.code === 'bad')) sfBroken.set(key, 'notready');
       throw e;
@@ -300,7 +309,10 @@ async function sfLoadOnce(id, entry, progress){
    offline, missing, bad or failed. One load per song at a time in a page;
    every caller gets the same promise, and each caller's onProgress (0..1)
    is told as pieces arrive. */
-function songFileLoad(id, onProgress){
+/* `waiter` (from songFileWaitThen): a card that may give up. The load goes on
+   while any caller still wants it; a plain call (no waiter) always does. The
+   returned promise carries release(), which the waiter calls when it gives up. */
+function songFileLoad(id, onProgress, waiter){
   if(!songFileHost().user) return Promise.reject(songFileErr('signin'));
   if(sfUrls.has(id)) return Promise.resolve(sfUrls.get(id));
   const entry = SONG_FILES[id];
@@ -308,18 +320,25 @@ function songFileLoad(id, onProgress){
   let job = sfInflight.get(id);
   if(!job){
     const listeners = new Set();
-    const promise = sfLoadOnce(id, entry, f => listeners.forEach(fn => { try { fn(f); } catch(e) {} }))
+    const j = { listeners, waiters: 0, direct: 0 };
+    j.promise = sfLoadOnce(id, entry, f => listeners.forEach(fn => { try { fn(f); } catch(e) {} }), () => j.direct > 0 || j.waiters > 0)
       .then(blob => {
         const url = URL.createObjectURL(blob);
         sfUrls.set(id, url);
         return url;
       }, e => { throw songFileErr(sfFirestoreCode(e), e && e.message); })
-      .finally(() => sfInflight.delete(id));
-    job = { promise, listeners };
+      .finally(() => { if(sfInflight.get(id) === j) sfInflight.delete(id); });
+    job = j;
     sfInflight.set(id, job);
   }
   if(onProgress) job.listeners.add(onProgress);
-  return job.promise;
+  const p = job.promise.then(u => u);
+  if(waiter){
+    job.waiters++;
+    let held = true;
+    p.release = () => { if(held){ held = false; job.waiters--; if(onProgress) job.listeners.delete(onProgress); } };
+  } else { job.direct++; p.release = () => {}; }
+  return p;
 }
 
 /* ── The line a card shows while it waits, or instead of playing ── */
@@ -328,7 +347,7 @@ function songFileLoad(id, onProgress){
    failed (a dropped connection, an unknown error) says to press again. */
 const SONG_FILE_LINE_KEYS = { loading: 'sf.loading', signin: 'sf.signIn', denied: 'sf.notAllowed', limit: 'sf.limit', offline: 'sf.offline', notready: 'sf.notReady', clock: 'sf.clock', failed: 'sf.failed' };
 /* Where the line goes: a practice card's own status line (.pc-status); in a
-   snippet card or a Song Journey box, a .sf-line made the first time a
+   snippet card, a .sf-line made the first time a
    private song is pressed (a public card never gets one). */
 function songFileLineEl(host, make){
   if(!host) return null;
@@ -359,11 +378,12 @@ function songFileShow(host, code, frac){
   el.innerHTML = '';
   el.appendChild(span);
 }
-let sfWait = null;              // { host, token, ui } — the one card waiting for its song
+let sfWait = null;              // { host, token, ui, restart, load } — the one card waiting for its song
 function songFileCancelWait(){
   if(!sfWait) return;
   const w = sfWait;
   sfWait = null;
+  if(w.load && w.load.release) w.load.release();   // nobody else waiting: the load ends before it counts or reads more
   songFileShow(w.host, '');
   if(w.ui && w.ui.done) try { w.ui.done(); } catch(e) {}
 }
@@ -373,6 +393,17 @@ function songFileCancelWaitIn(el){
   if(sfWait && el && typeof el.contains === 'function' && el.contains(sfWait.host)) songFileCancelWait();
 }
 function songFileWaitingFor(host){ return !!(sfWait && sfWait.host === host); }
+/* The card changed its tempo or mix while its song loads (review round 2, m6):
+   press it again now, so it waits for the file it wants NOW. The old wait is
+   cancelled by that press (a stop), and its load, if nobody else wants it,
+   ends before it counts or reads more pieces. */
+function songFileRedoWait(host){
+  if(!sfWait || sfWait.host !== host) return false;
+  const r = sfWait.restart;
+  songFileCancelWait();
+  r();
+  return true;
+}
 /* The card is still where the student can see it: on the page, laid out, not
    inside a closed <details>, [hidden] or [inert]. A song never starts by
    itself anywhere else (review B1). */
@@ -386,20 +417,20 @@ function songFileHostShown(host){
    loading line, load it, and call restart() — the same press again — once it
    is here, if this is still the card waiting and it is still on the page.
    Any stop (songFileCancelWait) or another card's wait cancels the restart. */
-/* `ui` (optional): { wait(), done(), fail(code) } — the player's own button
-   while it waits (Stop shows; a press cancels), put back when the wait ends
-   by a cancel, a failure or the restart; fail() lets a player undo the switch
-   that asked for the file (a Song Journey page's Slow / Guitar). */
+/* `ui` (optional): { wait(), done() } — the player's own button while it
+   waits (Stop shows; a press cancels), put back when the wait ends by a
+   cancel, a failure or the restart. */
 function songFileWaitThen(host, src, restart, ui){
   const id = songFileId(src);
   songFileCancelWait();
   const token = {};
-  sfWait = { host, token, ui };
+  const w = sfWait = { host, token, ui, restart, load: null };
   const mine = () => sfWait && sfWait.token === token;
   songFileShow(host, 'loading', 0);
   if(ui && ui.wait) try { ui.wait(); } catch(e) {}
   const end = () => { sfWait = null; if(ui && ui.done) try { ui.done(); } catch(e) {} };
-  songFileLoad(id, f => { if(mine()) songFileShow(host, 'loading', f); }).then(() => {
+  w.load = songFileLoad(id, f => { if(mine()) songFileShow(host, 'loading', f); }, true);
+  w.load.then(() => {
     if(!mine()) return;
     end();
     songFileShow(host, '');
@@ -409,6 +440,5 @@ function songFileWaitThen(host, src, restart, ui){
     end();
     const code = (e && e.code) || 'failed';
     songFileShow(host, code);
-    if(ui && ui.fail) try { ui.fail(code); } catch(e2) {}
   });
 }

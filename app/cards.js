@@ -1403,6 +1403,8 @@ function pcCancelHandoff(st){
    new tempo. */
 function pcRetrack(root){
   const st = pcState;
+  // A speed or Guitar change while this card's song still loads: wait for the file asked for now (SONG FILES).
+  if((!st || st.root !== root) && songFileRedoWait(root)) return;
   if(!st || st.root !== root) return;
   if(st.counting){ pcStart(root, st.loopFrom, st.fromRep); return; }
   const slow = root.dataset.slow === '1', guitar = root.dataset.guitar === '1';

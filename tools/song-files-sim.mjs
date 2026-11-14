@@ -37,6 +37,8 @@ const I18N = readFileSync(join(ROOT, 'i18n.js'), 'utf8');
 const sha = b => createHash('sha256').update(b).digest('hex');
 const PIECE = 900000;
 const tick = () => new Promise(r => setTimeout(r, 0));
+/* Wait while cond() holds, at most ms (a load that was cancelled never lands). */
+const until = async (cond, ms = 1500) => { const t0 = Date.now(); while (cond() && Date.now() - t0 < ms) await new Promise(r => setTimeout(r, 2)); };
 
 /* ── fakes ── */
 class FakeBytes { constructor(u8){ this.u8 = u8; } toUint8Array(){ return new Uint8Array(this.u8); } }
@@ -65,6 +67,7 @@ function makeFirestore(){
       await later(path);
       if (st.offline) throw err('unavailable');
       if (st.deny || (st.denyCount && path.startsWith('songFilesUsage/'))) throw err('permission-denied');
+      if (st.denyCountOnce && path.startsWith('songFilesUsage/')) { st.denyCountOnce = false; throw err('permission-denied'); }
       const old = (opt && opt.merge && docs.get(path)) || {};
       const out = Object.assign({}, opt && opt.merge ? old : {});
       for (const [k, v] of Object.entries(data)) out[k] = (v && v.__inc != null) ? (Number(old[k]) || 0) + v.__inc : v;
@@ -322,7 +325,7 @@ async function suite(src, quiet){
       const h = makeEl('snip'); h.closest = () => null; h.getClientRects = () => [1]; let runs = 0;
       tab.api.songFileWaitThen(h, 'private:x', () => runs++);
       edit(h);
-      while (tab.api.songFileNeedsLoad('private:x')) await tick();
+      await until(() => tab.api.songFileNeedsLoad('private:x'));
       await tick(); await tick();
       ok(`the card ${label} while it loads: the song does not start`, runs === 0);
     }
@@ -334,10 +337,74 @@ async function suite(src, quiet){
     tab.api.songFileCancelWaitIn(other);
     const still = tab.api.songFileWaitingFor(h);
     tab.api.songFileCancelWaitIn(fold);
-    while (tab.api.songFileNeedsLoad('private:x')) await tick();
+    await until(() => tab.api.songFileNeedsLoad('private:x'));
     await tick(); await tick();
     ok('closing another fold leaves the wait; closing the card\'s own fold cancels it: no start', still && !tab.api.songFileWaitingFor(h) && runs === 0);
     ok('the player\'s button: Stop while it waits, Play again when the wait is cancelled', ui === 'wd', ui);
+  }
+
+  say('== review round 2 (m1, m2, m6)');
+  { // m6: a tempo / Guitar change during a load waits for the file asked for now: one download, one count
+    const s = newShared(); const A = bytesOf(2 * PIECE + 5), Bb = bytesOf(2 * PIECE + 7);
+    putFile(s.fs, 'a', A); putFile(s.fs, 'b', Bb);
+    const tab = makeTab(src, s); register(tab, 'a', A); register(tab, 'b', Bb);
+    const h = makeEl('pc'); h.closest = () => null; h.getClientRects = () => [1];
+    let want = 'private:a', played = [];
+    const press = () => { if (tab.api.songFileNeedsLoad(want)) tab.api.songFileWaitThen(h, want, press); else played.push(want); };
+    press();
+    want = 'private:b';                       // the student flips Guitar before the count is written
+    const redone = tab.ctx.songFileRedoWait(h);
+    await until(() => !played.length);
+    await tick(); await tick();
+    const readsA = [...s.fs.st.order.keys()].length;
+    ok('a change during the load: the card waits for the new file and plays it', redone && played.join() === 'private:b', played.join());
+    ok('…the first file is not counted: one count for the two presses', usage(s) === Math.ceil(Bb.length * 4 / 3), `${usage(s)}`);
+    ok('…and only the second file\'s pieces are read', s.fs.st.pieceReads === 3, String(s.fs.st.pieceReads));
+    void readsA;
+  }
+  { // PL1: a refused count is counted on the next try (never marked counted before it is written)
+    const s = newShared(); putFile(s.fs, 'x', BIG); s.fs.st.denyCountOnce = true;
+    const tab = makeTab(src, s); register(tab, 'x', BIG);
+    const c1 = await code(tab.api.songFileLoad('x'));
+    const c2 = await code(tab.api.songFileLoad('x'));
+    ok('a count refused once: the next press counts it (not marked counted before the write)', c1 === 'clock' && c2 === 'resolved' && usage(s) === cost, `${c1} ${c2} ${usage(s)}`);
+  }
+  { // an unfinished upload is not remembered as broken: once it is ready, the same page loads it
+    const s = newShared(); putFile(s.fs, 'x', BIG); s.fs.docs.get('songFiles/x').state = 'uploading';
+    const tab = makeTab(src, s); register(tab, 'x', BIG);
+    const c1 = await code(tab.api.songFileLoad('x'));
+    s.fs.docs.get('songFiles/x').state = 'ready';
+    const c2 = await code(tab.api.songFileLoad('x'));
+    ok('an unfinished upload says not ready; once it is ready the same page loads it', c1 === 'notready' && c2 === 'resolved', `${c1} ${c2}`);
+  }
+  { // m1: a page that found the stored file broken still plays a good device copy
+    const s = newShared(); putFile(s.fs, 'x', BIG);
+    const p = s.fs.docs.get('songFiles/x/pieces/1'); const good = p.data; const c = new Uint8Array(p.data.u8); c[3] ^= 1; p.data = new FakeBytes(c);
+    const tab = makeTab(src, s); register(tab, 'x', BIG);
+    const c1 = await code(tab.api.songFileLoad('x'));
+    s.idb.stores.set('x', { id: 'x', sha256: sha(BIG), bytes: BIG.length, blob: new Blob([BIG]), savedAt: 2 });   // another tab stored a good copy
+    p.data = good;
+    const r0 = s.fs.st.reads;
+    const c2 = await code(tab.api.songFileLoad('x'));
+    ok('broken in this page, then a good copy on the device: it plays the copy with no read', c1 === 'notready' && c2 === 'resolved' && s.fs.st.reads === r0, `${c1} ${c2} ${s.fs.st.reads - r0}`);
+  }
+  { // two cards, one song: the second card's wait takes over; the load goes on for it, and only it starts
+    const s = newShared(); putFile(s.fs, 'x', BIG);
+    const tab = makeTab(src, s); register(tab, 'x', BIG);
+    const hA = makeEl('snip'), hB = makeEl('snip'); let rA = 0, rB = 0;
+    tab.api.songFileWaitThen(hA, 'private:x', () => rA++);
+    tab.api.songFileWaitThen(hB, 'private:x', () => rB++);
+    await until(() => tab.api.songFileNeedsLoad('private:x'));
+    await tick(); await tick();
+    ok('two cards, one song: the load goes on for the second card, and only the second card starts', rA === 0 && rB === 1 && usage(s) === cost, `${rA} ${rB} ${usage(s)}`);
+  }
+  { // PC2: a failed wait puts the button back to Play
+    const s = newShared(); putFile(s.fs, 'x', BIG); s.fs.st.deny = true;
+    const tab = makeTab(src, s); register(tab, 'x', BIG);
+    const h = makeEl('snip'); let ui = '';
+    tab.api.songFileWaitThen(h, 'private:x', () => {}, { wait: () => { ui += 'w'; }, done: () => { ui += 'd'; } });
+    await until(() => tab.api.songFileWaitingFor(h));
+    ok('a failed wait puts the button back (Stop, then Play)', ui === 'wd', ui);
   }
 
   say('== a full device');
@@ -412,7 +479,8 @@ async function suite(src, quiet){
     await tick();
     tab2.api.songFileCancelWait();
     ok('a stop clears the line at once', h2.querySelector('.sf-line').text === '');
-    while (tab2.api.songFileNeedsLoad('private:y')) await tick();
+    await until(() => tab2.api.songFileNeedsLoad('private:y'));
+    ok('…and the load it was waiting for ends: nothing counted, not every piece read (review round 2, m6)', usage(s2) === 0 && s2.fs.st.pieceReads < 3, `${usage(s2)} ${s2.fs.st.pieceReads}`);
     await tick(); await tick();
     ok('…and the song does not start by itself when it arrives', r2 === 0);
 
@@ -421,7 +489,7 @@ async function suite(src, quiet){
     const hA = makeEl('snip'), hB = makeEl('snip'); let rA = 0, rB = 0;
     tab3.api.songFileWaitThen(hA, 'private:z', () => rA++);
     tab3.api.songFileWaitThen(hB, 'private:w', () => rB++);
-    while (tab3.api.songFileNeedsLoad('private:z') || tab3.api.songFileNeedsLoad('private:w')) await tick();
+    await until(() => tab3.api.songFileNeedsLoad('private:w'));
     await tick(); await tick();
     ok('a second card\'s wait cancels the first\'s restart', rA === 0 && rB === 1, `${rA} ${rB}`);
 
@@ -441,13 +509,21 @@ async function suite(src, quiet){
 
 /* Each break: [name, old text, new text]. The old text must occur exactly once in app/songfiles.js. */
 const BREAKS = [
+  /* Review round 2 (2026-11-14): the reviewer's plants that the round-1 sim missed, and the round-2 fixes. */
+  ['PL1: marked counted before the count is written', "      await songFileCount(db, songFileCost(entry.bytes));\n      sfCounted.add(key);", "      sfCounted.add(key);\n      await songFileCount(db, songFileCost(entry.bytes));"],
+  ['PC2: a failed wait leaves the button on Stop', "    if(!mine()) return;\n    end();\n    const code", "    if(!mine()) return;\n    sfWait = null;\n    const code"],
+  ['PL4: an unfinished upload remembered as broken', "      throw songFileErr('missing', h ? 'the stored file is not the one on the list' : 'not uploaded');", "      { sfBroken.set(key, 'notready'); throw songFileErr('missing', h ? 'the stored file is not the one on the list' : 'not uploaded'); }"],
+  ['m1: the broken-file memory checked before the device copy', "  let blob = await fromCopy();\n  if(blob) return blob;", "  if(sfBroken.has(key)) throw songFileErr('notready', 'x');\n  let blob = await fromCopy();\n  if(blob) return blob;"],
+  ['m6: a load nobody waits for still counts (both checks before the count gone)', "    if(again) return again;\n    if(gone()) throw songFileErr('cancelled');", "    if(again) return again;", "    if(gone()) throw songFileErr('cancelled');\n    if(!sfCounted.has(key)){", "    if(!sfCounted.has(key)){"],
+  ['m6: a cancelled wait does not let its load go', "  if(w.load && w.load.release) w.load.release();", ''],
+  ['m6: a change during the load is not redone', "  const r = sfWait.restart;\n  songFileCancelWait();\n  r();\n  return true;", "  return false;"],
   /* Review round 1 (2026-11-14): the reviewer's five loader plants L1-L5, the restart plant C1, and the fixes. */
   ['L1: a device copy\'s size is not checked (and not re-hashed, which now covers it)', "rec.blob && rec.blob.size === entry.bytes", "rec.blob", "      if(sha !== entry.sha256) return null;\n", ''],
-  ['L2: a failed load is never tried again', ".finally(() => sfInflight.delete(id));", ".then(u => { sfInflight.delete(id); return u; });"],
+  ['L2: a failed load is never tried again', ".finally(() => { if(sfInflight.get(id) === j) sfInflight.delete(id); });", ".then(u => { sfInflight.delete(id); return u; });"],
   ['L3: unavailable is not read as offline', "if(c === 'unavailable') return 'offline';", ''],
   ['L4: an IndexedDB open error, with no time limit, hangs', "    setTimeout(() => resolve(null), SONG_FILES_IDB_WAIT_MS);\n", ''],
   ['L4b: the open error handler gone and no time limit', "    req.onerror = () => resolve(null);       // private window, blocked storage: no copy, the song still plays this time\n", "    req.onerror = null;\n", "    setTimeout(() => resolve(null), SONG_FILES_IDB_WAIT_MS);\n", ''],
-  ['L5: a junk copy kept when the connection drops mid-download', "    try { bytes = await songFileReadPieces(db, id, entry, progress); }", "    try { bytes = await songFileReadPieces(db, id, entry, progress); }\n    catch(e){ if(e && e.code === 'unavailable') await sfCopyPut({ id, sha256: entry.sha256, bytes: entry.bytes, blob: new Blob([new Uint8Array(entry.bytes)]), savedAt: 0 }); throw e; }\n    try {}"],
+  ['L5: a junk copy kept when the connection drops mid-download', "    try { bytes = await songFileReadPieces(db, id, entry, progress, gone); }", "    try { bytes = await songFileReadPieces(db, id, entry, progress, gone); }\n    catch(e){ if(e && e.code === 'unavailable') await sfCopyPut({ id, sha256: entry.sha256, bytes: entry.bytes, blob: new Blob([new Uint8Array(entry.bytes)]), savedAt: 0 }); throw e; }\n    try {}"],
   ['C1: the restart does not ask whether the card is still shown', "    if(songFileHostShown(host)) restart();", "    restart();"],
   ['B1: closing a fold does not cancel a wait inside it', "  if(sfWait && el && typeof el.contains === 'function' && el.contains(sfWait.host)) songFileCancelWait();", ''],
   ['B1: a closed fold counts as shown', "host.closest('details:not([open]), [hidden], [inert]')", "host.closest('[data-never]')"],
@@ -480,7 +556,7 @@ const BREAKS = [
   ['a full device fails the song', "    } catch(e) {}\n    return b;", "    } catch(e) { throw e; }\n    return b;"],
   ['the month is local time, not UTC', "return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0');", "return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 2).padStart(2, '0');"],
   ['a stop does not cancel the restart', "  const w = sfWait;\n  sfWait = null;", "  const w = sfWait;"],
-  ['the restart runs for a card no longer waiting', "  songFileLoad(id, f => { if(mine()) songFileShow(host, 'loading', f); }).then(() => {\n    if(!mine()) return;", "  songFileLoad(id, f => { if(mine()) songFileShow(host, 'loading', f); }).then(() => {"],
+  ['the restart runs for a card no longer waiting', "  w.load.then(() => {\n    if(!mine()) return;", "  w.load.then(() => {"],
   ['the loading line never shows the %', "{ pct: Math.max(0, Math.min(99, Math.floor((frac || 0) * 100))) }", "{ pct: 0 }"],
   ['denied reads as failed', "if(c === 'permission-denied' || c === 'unauthenticated') return 'denied';", ''],
   ['a sign-out still hands out the loaded copy', "return (id && sfUrls.has(id) && songFileHost().user) ? sfUrls.get(id) : src;", "return (id && sfUrls.has(id)) ? sfUrls.get(id) : src;"],

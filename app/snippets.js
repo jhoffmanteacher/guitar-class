@@ -1178,6 +1178,8 @@ function snipSetTier(btn, which){
     if(snipState && snipState.card === card){ cancelQueuedClicks(snipState); snipState.lastBeat = -1; }
     return;
   }
+  // A speed or Guitar change while this card's song still loads: wait for the file asked for now (SONG FILES).
+  if((!snipState || snipState.card !== card) && songFileRedoWait(card)) return;
   if(!snipState || snipState.card !== card) return;
   const { audio, spec, tr } = snipState;
   const slow = card.dataset.slow === '1';
