@@ -14,8 +14,9 @@
        --lag=70                       ms from the site's click to the student's strum reaching the mic, beyond their own timing
        --seeds=2                      games per cell
        --coach=<file>                 another coach.js (git show <ref>:coach.js > file) for a before / after
-       --rule=base|ring|half|half3|both|both3|<a window rule>   a candidate grading rule from candidates.mjs, applied in memory
-                                      (the window / pick rules, WINDOW_RULES there: w350, near, w350near, ...; Change Up takes these too)
+       --rule=base|first|<a window rule>   a candidate grading rule from candidates.mjs, applied in memory: `first` is the first-strum rule
+                                      the site used before 2026-11-13 (base, the site, picks the strum nearest the change); the other window /
+                                      pick rules are in WINDOW_RULES there (Change Up takes these too). ring / half / both: first-strum code only
        --json=<file>                  every game, every change
        --takes-out=<folder>           also save every game as a take (V001.wav + V001.json, the console's download format, with the answer
                                       key in the JSON) for eval-takes.mjs and replay-takes.mjs; these hold no student audio

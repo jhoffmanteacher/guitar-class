@@ -28,7 +28,10 @@
        CC_GRID_STEP_CAP_MS either way (a take marked `uncapped` is one saved before the cap: no cap, no gridStepCapMs field), when that is under half a beat; the first change still open with
        |its beat - rel| <= win (half a beat, at least 220 ms, at most half the
        gap between changes) takes the strum: 'off' if it was the wrong chord,
-       else 'ok'; a change nothing took is 'miss'. Onsets are logged as events
+       else 'ok'; a change nothing took is 'miss'. A take marked `nearest` is one saved
+       since 2026-11-13 (changePick 'nearest'): a strum also takes a change already
+       taken by one FARTHER from it (ccLoop's nearest rule); every other fixture is
+       the first-strum rule of the takes saved before. Onsets are logged as events
        only while the capture runs (the 30 s cap, Stop).
    Per graded change, `plan` picks what the student does (default: the new
    chord, on time):
@@ -45,6 +48,9 @@
      beyond:F  strummed F beats past the late edge of the site's window
      pre:in:late  the site hears noise between the raw window edge and its (late)
                window, then a strum 25 ms inside the late edge
+     early:N   a neighbour strums the WRONG chord N ms before the beat (the site hears
+               it), then the student plays the new chord on time: the first-strum
+               rule takes the neighbour's ('off'), the nearest rule the student's
    `readings: true` saves the pitch readings the way coach.js ccRecMeta does (takes from 2026-11-05):
    per change null when the verdict is 'miss', 4 readings for 'off' (a wrong verdict needs 3+), and for 'ok'
    0, 1, 2, 3 or 5 readings by [0, 1, 2, 3, 5][change index % 5] (under 3 = passed on timing alone).
@@ -186,7 +192,9 @@ export const PW_FIXTURES = [
   { ...base, name: 'pw-slow-noisy', desc: 'a pair at 30 BPM in a loud room: beeps 1 and 2 each heard only at their own pitch (660, 990 Hz) and give the lag', bpms: [30], slots: 8, chords: ['G5', 'C5'], song: null,
     lag: 130, map: 25, lat: 120, amp: 0.3, clickAmp: 0.06, noise: 0.05, seed: 51, plan: { 2: 'silent', 5: 'detmiss' } },
   { ...base, name: 'pw-slow-legacy', desc: 'a pair at 30 BPM saved before 2026-11-09: 4 clicks and no countInBeats field; the evaluator must look for 4 beeps', bpms: [30], slots: 8, chords: ['E5', 'A5'], song: null,
-    lag: 150, map: 25, lat: 130, legacyCountIn: true, seed: 45, plan: { 1: 'detmiss', 3: 'silent', 5: 'held' } }
+    lag: 150, map: 25, lat: 130, legacyCountIn: true, seed: 45, plan: { 1: 'detmiss', 3: 'silent', 5: 'held' } },
+  { ...base, readings: true, nearest: true, name: 'pw-nearest', desc: 'a pair at 30 BPM saved since 2026-11-13 (changePick nearest): a neighbour strums the wrong chord 850 ms before four of the changes and the student plays on time; the site took the student\'s strum, nearest the change, and the console must replay it that way (the neighbour\'s pulled the grid first)', bpms: [30], slots: 10, chords: ['G5', 'C5'], song: null,
+    lag: 130, map: 25, lat: 120, seed: 61, plan: { 1: 'early:850', 3: 'early:850', 5: 'early:850', 7: 'early:850', 8: 'silent' } }
 ];
 // The candidate ratios the strum what-if tries: the shared ones older takes were graded with (coach.js CHK_ONSET_RATIO 1.4, CHK_HF_RATIO 1.7; Power Chord Switch grades with its own stricter CC_POWER_* since 2026-11-05, and takes graded with those are left out of the what-if) and stricter ones; the attack-channel ratio scales the same way
 export const PW_WHATIF = { full: [1.4, 1.8, 2.2, 2.6], hfBase: 1.7, fullBase: 1.4, floor: 0.003, hfFloor: 0.0008, margin: 0.06 };
@@ -253,8 +261,8 @@ export function makePwTake(o){
       const rel = played - rd.listen - goff;
       const bi = Math.round(rel / rd.beat), dev = rel - bi * rd.beat, before = goff;
       if (Math.abs(dev) < rd.beat * 0.5) goff += o.uncapped ? dev * 0.25 : Math.max(-(o.capMs || GRID_STEP_CAP_MS), Math.min(o.capMs || GRID_STEP_CAP_MS, dev * 0.25));
-      const ch = rd.changes.find(c => !c.match && Math.abs(c.s * o.bpc * rd.beat - rel) <= rd.win);
-      if (ch) ch.match = { played, sharp, goff: before };
+      const ch = rd.changes.find(c => { const d = Math.abs(c.s * o.bpc * rd.beat - rel); return d <= rd.win && (!c.match || o.nearest && d < c.match.d); });
+      if (ch) ch.match = { played, sharp, goff: before, d: Math.abs(ch.s * o.bpc * rd.beat - rel) };
       rd.onsets.push({ played, goffAfter: goff });
       if (played + o.lat - o.map < audioEnd) events.push({ t: Math.round(played * 10) / 10, stage: rd.stage });
     };
@@ -281,6 +289,13 @@ export function makePwTake(o){
       while (extras.length && extras[0] < attack - 30){ const ms = extras.shift(); pluck(ms, ms + o.map >= rd.listen ? rd : null); }
       const site = X => ch.t + rd.goffNow() + X + o.lat - o.map;   // X ms from the centre of the site's window, on the audio clock
       if (/^late:/.test(kind)) attack = due + rd.lag + allDev + driftAt(due) + +kind.slice(5);
+      const earlyM = /^early:(\d+)$/.exec(kind);
+      if (earlyM){
+        const ms = attack - +earlyM[1];
+        strum(ms, ROOT[chord] + 1, o.amp * 0.8); attacks.push({ ms, deliberate: false, extra: true });
+        if (!o.deaf) rd.siteHear(ms + o.map - o.lat, true);
+        kind = 'ok';
+      }
       if (kind === 'pre:in:late'){
         // noise the site hears after the raw window edge (due - win) but before its window opens (gridOffset is late), then a strum 25 ms inside its late edge
         if (rd.goffNow() < 80) throw new Error(o.name + ': change ' + ch.i + ' needs a gridOffset over 80 ms for pre:in:late (has ' + Math.round(rd.goffNow()) + ')');
@@ -486,7 +501,8 @@ export function makePwTake(o){
     game: 'pw', complete: stopMs == null, progression: o.chords.join('-'), song: o.song, ladder: o.bpms.length > 1,
     bpm: o.bpms[0], stageBpms: o.bpms.slice(), bpc: o.bpc, eventTimes: 'played (arrival - micLatencyMs)',
     ...(o.uncapped ? {} : { gridStepCapMs: o.capMs || GRID_STEP_CAP_MS }),   // an `uncapped` take is one saved before 2026-11-07: no such field, graded on the uncapped grid
-    ...(o.legacyCountIn ? {} : { countInBeats: o.bpms.map(b => ccCountInBeats(b)) }),   // a `legacyCountIn` take is one saved before 2026-11-09: no such field, 4 clicks every round
+    ...(o.legacyCountIn ? {} : { countInBeats: o.bpms.map(b => ccCountInBeats(b)) }),
+    ...(o.nearest ? { changePick: 'nearest' } : {}),   // a `nearest` take is one saved since 2026-11-13: the strum nearest each change decided it   // a `legacyCountIn` take is one saved before 2026-11-09: no such field, 4 clicks every round
     ...(o.readings ? { changeReadings: 'per change: null = no strum in its window; [] = a strum but no pitch could be read; else the midi readings its chord check used (under 3 passes on timing alone)' } : {}),
     expected, events, uid: 'fake', name: 'Fake Student', period: '3', mode: 'pw',
     micLatencyMs: o.lat, sampleRate: R, srcSampleRate: 48000, durationSec: Math.round(N / R * 100) / 100,

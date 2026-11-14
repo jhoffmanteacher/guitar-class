@@ -175,7 +175,7 @@ export function replayTake(site, d, src, srcRate, mapMs){
 
 /* The fields of a take a summary keeps: the game's own numbers. No name, id, label, user agent or time of day. */
 const KEEP = ['game', 'complete', 'progression', 'song', 'ladder', 'bpm', 'stageBpms', 'bpc', 'gridStepCapMs', 'countInBeats', 'onsetRatio', 'hfRatio', 'micLatencyMs',
-  'frameMeanMs', 'frameMaxMs', 'durationSec', 'tempoChanges', 'virtual'];
+  'frameMeanMs', 'frameMaxMs', 'durationSec', 'tempoChanges', 'virtual', 'changePick'];
 export function summarize(tk){
   const site = siteFor('base', null, false);
   site.reset();
@@ -246,13 +246,17 @@ export function loadSummaries(dir){
       notes: s.truth.notes.map(n => ({ i: n.i, stage: n.stage, site: n.site, played: n.played, why: { cat: n.cat } })), detector: s.detector, measured: s.measured || null,
       sum: { E: unb64(s.E), D: unb64(s.D), pitch: Object.fromEntries(Object.entries(s.pitch).map(([k, v]) => [k, unb64(v)])) } }));
 }
+/* The rule a take was graded with, for `base`: a take saved since 2026-11-13 says changePick 'nearest' (coach-chords.js ccRecMeta) and was
+   graded by the site's rule; one without it by the first-strum rule (candidates.mjs `first`). Other rules are replayed as they are. */
+export function ownRule(rule, tk){ return rule === 'base' && !(tk.d && tk.d.changePick === 'nearest') ? 'first' : rule; }
 /* Runs every rule on every take; res[rule@own|now] = { expected index: { verdict, readings } }. */
 /* `cache` (closed-loop.mjs passes one; this tool's own command line does not): { key(site, tk), get(key), set(key, result) }, so a replay already
    made by the same site code on the same summary is read back instead of run again. */
+/* `own` replays a take as it was graded: its own strum ratios and, for `base`, its own pick (ownRule). */
 export function replayAll(takes, rules, now, at, cache){
   takes.forEach(tk => { tk.res = {};
     for (const rule of rules) for (const [mode, ratio] of [['own', tk.own], ['now', now]]){
-      const site = siteFor(rule, ratio, !!tk.sum, at), k = cache && tk.hash ? cache.key(site, tk) : null, hit = k ? cache.get(k) : null;
+      const site = siteFor(mode === 'own' ? ownRule(rule, tk) : rule, ratio, !!tk.sum, at), k = cache && tk.hash ? cache.key(site, tk) : null, hit = k ? cache.get(k) : null;
       tk.res[rule + '@' + mode] = hit || replayTake(site, tk.d, tk.sum || tk.proc, tk.srcRate, tk.mapMs);
       if (k && !hit) cache.set(k, tk.res[rule + '@' + mode]);
     }
@@ -335,7 +339,7 @@ export function printReport(takes, rules, NOW, log){
     if (rules.includes('base')){
       let same = 0, sameHeard = 0, n = 0;
       notes.forEach(z => { const v = z.t.res['base@own'][z.n.i]; if (!v) return; n++; const site = v.verdict === 'ok' ? 'right' : v.verdict === 'off' ? 'wrong' : 'miss'; if (site === z.n.site) same++; if ((site !== 'miss') === (z.n.site !== 'miss')) sameHeard++; });
-      log(`   reproduced: the base rule at each take's own ratios gives the saved verdict on ${same} of ${n} changes (heard / not heard: ${sameHeard} of ${n})`);
+      log(`   reproduced: the base rule at each take's own ratios and pick (ownRule) gives the saved verdict on ${same} of ${n} changes (heard / not heard: ${sameHeard} of ${n})`);
       report[g.name] = { reproduced: [same, sameHeard, n] };
     }
     log('   rule   ratios | no strum: HEARD   marked RIGHT | real strums: LOST   right before -> right now');

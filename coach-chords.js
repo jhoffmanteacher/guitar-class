@@ -667,7 +667,8 @@ function ccRecMeta(complete){
               onsetRatio: CC_POWER_ONSET_RATIO, hfRatio: CC_POWER_HF_RATIO,
               gridStepCapMs: CC_GRID_STEP_CAP_MS,   // the console replays the grid with this cap; a take without it was graded on the uncapped grid
               countInBeats: ccCountInList(),   // each round's count-in clicks, one per stageBpms entry; a take without it counted 4 in every round (before 2026-11-09)
-              changeReadings: 'per change: null = no strum in its window; [] = a strum but no pitch could be read; else the midi readings its chord check used (under 3 passes on timing alone)' },
+              changeReadings: 'per change: null = no strum in its window; [] = a strum but no pitch could be read; else the midi readings its chord check used (under 3 passes on timing alone)',
+              changePick: 'nearest' },   // which strum decided a change: the one nearest it (from 2026-11-13); a take without it, the first in its window (teacher-mic.js micEvalTakePw)
     expected: cc.changes.map((c, i) => Object.assign({ i, t: c.t, from: c.from, to: c.to, stage: c.stage == null ? 0 : c.stage, bpm: c.bpm, verdict: c.result,
       readings: c.readings ? c.readings.map(r2) : null }, (cc.retimedStages || []).indexOf(c.stage == null ? 0 : c.stage) >= 0 ? { retimed: true } : {})),
     tempoChanges: (cc.tempoLog || []).slice(),

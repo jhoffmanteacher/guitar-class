@@ -215,7 +215,14 @@ script.
   loses real strums beyond it.
 - **`candidates.mjs`** (2026-11-11): candidate Power Chord Switch grading rules (`ring`, `half`, `half3`, `both`,
   `both3`; what each does is in its header), applied to coach.js IN MEMORY. None is in coach.js. `closed-loop.mjs
-  --rule=<name>` plays one; `replay-takes.mjs` replays them on real takes.
+  --rule=<name>` plays one; `replay-takes.mjs` replays them on real takes. Those five were written for the first-strum
+  `ccLoop` and stop with a message on today's site (run them with `--root=<a checkout from before 2026-11-13>`).
+  The window / pick rules (2026-11-13, `WINDOW_RULES`): which strum decides a change. Since 2026-11-13 the site's own
+  rule (`base`) is the strum NEAREST the change; `first` is the rule before it (the first strum in the window), and
+  every take saved before carries no `changePick` stamp, so the "reproduced" line replays those under `first`
+  (`replay-takes.mjs` `ownRule`). `same` must equal `base` on every change. Fixed caps (`w250`..`w700`), `last`,
+  `best` and the grid switches (`...g0`, `...gd`) were measured and NOT chosen. `change-window.mjs` prints the real-take
+  table for any of them.
 - **`replay-takes.mjs <folder>`** (2026-11-11): each candidate rule on the REAL takes' audio, through the real `ccLoop`
   (the recording goes back through the site's mic chain; nothing is replayed from the take's saved strums). Counts,
   per rule, the changes with no strum in the window that the rule still hears / marks right, and the real strums it

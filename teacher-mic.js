@@ -991,8 +991,12 @@ function micEvalStrumHits(frames, rule, ratio, hfRatio){
        whole take); ideal = lag + map, as in micEvalTake; skew = ideal - the
        saved micLatencyMs. Beeps can be missing: speaker muted, headphones, or
        a student strumming over the count-in.
-     - The site's own window, replayed: ccLoop takes a strum for the first open
-       change with |its beat - rel| <= win (inclusive), rel = played time -
+     - The site's own window, replayed: ccLoop takes a strum for an open
+       change with |its beat - rel| <= win (inclusive): a take that saves
+       changePick 'nearest' (coach-chords.js ccRecMeta, from 2026-11-13) was
+       graded by the strum NEAREST the change (a closer one replaces the one
+       taken); a take without it by the FIRST strum in the window, as every
+       older take was. rel = played time -
        listenStart - gridOffset, win = half a beat, at least 220 ms, at most
        half the gap between changes; gridOffset moves a quarter of the way to
        each strum's nearest beat, by at most the take's gridStepCapMs (none saved = uncapped; from 0 each round), AFTER rel is taken. Every
@@ -1171,6 +1175,9 @@ function micEvalTakePw(pcm, R, d, deps){
 
   /* ── ccLoop's matching, replayed on the strums it heard ── */
   // evs = [{ t: played ms }] of one round, in time order; returns the strum each change took and the gridOffset after every strum
+  /* Which strum decides a change: the take's own rule (ccRecMeta changePick). Anything but 'nearest' is the first-strum rule every take saved
+     before 2026-11-13 was graded with. */
+  const nearest = d.changePick === 'nearest';
   const matchRound = (rd, evs) => {
     const at = rd.list.map(c => c.e.t - rd.listen);        // each change's c.beat * beatMs
     const match = rd.list.map(() => null);
@@ -1178,11 +1185,13 @@ function micEvalTakePw(pcm, R, d, deps){
     let goff = 0;
     evs.forEach(ev => {
       const rel = ev.t - rd.listen - goff;
-      // the first open change within win of rel (the list is in time order; at most a few qualify)
+      // the first change within win of rel that this strum may take (the list is in time order; at most a few qualify): first-strum rule, one
+      // not taken yet; nearest rule (ccLoop's find), one not taken yet or taken by a strum farther from it
       let lo = 0, hi = at.length;
       while (lo < hi){ const m = (lo + hi) >> 1; if (at[m] < rel - rd.win) lo = m + 1; else hi = m; }
       for (let k = lo, n = 0; k < at.length && at[k] <= rel + rd.win && n < 8; k++, n++){
-        if (!match[k]){ match[k] = { t: ev.t, goff }; break; }
+        const dd = Math.abs(rel - at[k]);
+        if (!match[k] || nearest && dd < match[k].dd){ match[k] = { t: ev.t, goff, dd }; break; }
       }
       const dev = rel - Math.round(rel / rd.beat) * rd.beat;
       if (Math.abs(dev) < rd.beat * 0.5) goff += Math.max(-gridCap, Math.min(gridCap, dev * 0.25));
