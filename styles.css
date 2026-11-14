@@ -3095,6 +3095,11 @@ body.ca-fold:has(#class-activities-screen:not([hidden])){--hdr:0px}
       window was resized with a card open). Out of the focus order and the
       accessibility tree all the same. */
 body.ca-fold:has(#class-activities-screen:not([hidden])) .header{visibility:hidden;position:absolute;top:0;left:0;right:0}
+/*    ...except the page's one h1 (the site title), kept for screen readers so
+      an open card is not a page with no h1. clip-path hides it on screen and
+      from the pointer; it keeps its box, so the header's height (above) does
+      not change. */
+body.ca-fold:has(#class-activities-screen:not([hidden])) .header h1.header-title{visibility:visible;clip-path:inset(50%)}
 body.ca-fold:has(#class-activities-screen:not([hidden])) .rail-backdrop{display:none !important}
 /*    The rail is hidden by visibility, not display:none, because the tool
       popups live inside it (.rail-tools) and the bar's buttons open those
