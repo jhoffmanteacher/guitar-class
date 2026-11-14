@@ -1,6 +1,6 @@
 ---
 name: friday-check
-description: The weekly Friday 11 PM review of every change that shipped Fast (commits with a `Review: Fast` trailer) — finding the range, running the reviewer, fixing and pushing, tagging, and reporting. Read when running the Friday check or when a scheduled task says "run the Friday check".
+description: The weekly Friday 11 PM review of every change that shipped Fast (commits with a `Review: Fast` trailer) — finding the range, reading GitHub's Friday walk, reviewing the net change by area, fixing and pushing, tagging, and reporting. Read when running the Friday check or when a scheduled task says "run the Friday check".
 ---
 
 # Friday check
@@ -24,7 +24,8 @@ changed for this ONE run from Fridays to Saturday (`CRON_TZ=America/Los_Angeles 
 `trig_016m5HTbmhxb2oEqDaefQurB`, "Guitar site Friday check"). The range is 425 commits or more, 81 or more of them
 Fast (on 2026-11-13: 50 touched site files, 31 were tools and notes only). These rules apply to THIS run and
 override the steps below where they differ. **Delete this whole section in the same push as this run's tag**, so the
-next Friday runs the normal steps.
+next Friday runs the normal steps. (Review by area on the net change, no reviewer for tools and notes, not re-running
+what GitHub ran green, and what to do when a run cannot finish are standing steps now: 1b, 2, 4 and 5.)
 
 0. **First, put the schedule back to Fridays**, before anything else, so a run that stops early cannot leave it on
    Saturdays: update the routine `trig_016m5HTbmhxb2oEqDaefQurB` to
@@ -32,46 +33,24 @@ next Friday runs the normal steps.
    Friday check" reminder used) and confirm its next run is Friday 2026-11-20, 11 PM Pacific. If this session has
    no tool that can do it, say so in the FIRST line of the report: "Jonathan: the Friday check is still set to
    Saturdays; set it back to Fridays."
-
-1. **Review by area, not by commit.** Do not read 81 diffs. Take the files the Fast commits touched
-   (`git log --format= --name-only --grep='^Review: Fast' $range | sort -u`) and review the NET change to those
-   files, `git diff <range start> origin/main -- <files>`, split into at most FOUR areas, one reviewer each, all
-   spawned in one message: (a) the app shell and lists (`app/*.js` except cards and the player, `index.html`,
-   `styles.css`, `site-fill.js`, `i18n.js`); (b) practice cards, the player and the arcade (`app/cards.js`,
-   `app/snippets.js`, `coach-*.js`, `practice-minutes*.js`, `class-activities.js`, `module-*.js`); (c) the live game
-   and the console (`live-quiz.js`, `teacher-*.js`); (d) the Song Journey pages (`tabs/**`). Give each reviewer the
-   commit subjects for its files, not the commits.
-2. **No reviewer for tools and notes.** `tools/**`, `.claude/**`, `.github/**`, `docs/**`, `CLAUDE.md`,
-   `WORKFLOW.md`, `CHANGELOG.md`: read the net diff of `tools/checks.mjs` yourself for ONE thing only, a check
-   that was loosened (a pin's number changed, a check removed, an allowlist entry added), and report what you find.
-   Each new tool shipped with its own break-it proof this week.
-3. **Skip what a reviewer already broke and passed this week** even though its commits say Fast: the weekend
-   streak rule (`861b735`, `186bd4b`, `6a79677`; deep review, one round plus fixes) and the big-screen fill
-   (`4bda529` on, `site-fill.js` and the `sw.js` lists; deep review, and GitHub's browser walk before it went
-   live). Tell the area reviewers these are settled; they still read the files around them.
-4. **Reviewers: Opus at `high` tonight** (not `xhigh`); `xhigh` only for `site-reviewer-deep` on a danger-zone
+1. **Skip what a reviewer already broke and passed this week** even though its commits say Fast (they predate the
+   `Review: Reviewed` label): the weekend streak rule (`861b735`, `186bd4b`, `6a79677`; deep review, one round plus
+   fixes) and the big-screen fill (`4bda529` on, `site-fill.js` and the `sw.js` lists; deep review, and GitHub's
+   browser walk before it went live). Tell the area reviewers these are settled; they still read the files around
+   them.
+2. **Reviewers: Opus at `high` tonight** (not `xhigh`); `xhigh` only for `site-reviewer-deep` on a danger-zone
    file. A different model from the week's reviewers is still the point.
-5. **Do not re-run what GitHub already ran green on the tip.** Since 2026-11-13 GitHub runs the checks, four proof
-   tools, the rules tests and a browser walk (English smoke per area, slow-load, update-reload, play-along) after
-   every push to main. Read the tip's runs (WebFetch on
-   `https://api.github.com/repos/jhoffmanteacher/guitar-class/actions/runs?branch=main&per_page=12`); what is
-   green there is not run again here. Step 1b's full two-language walk still runs ONCE (Spanish is walked only on
-   Fridays). Step 4's second full walk runs only if a fix touched a site file, and then with `--only` the areas
-   the fix touched.
-6. **Fix only what a student would hit** (a BLOCKER or MAJOR finding). MINOR findings go to WORKFLOW.md's Open
+3. **Fix only what a student would hit** (a BLOCKER or MAJOR finding). MINOR findings go to WORKFLOW.md's Open
    work as one short list; no fix and no re-review for them tonight. A fix that is itself Always-Reviewed: ONE
    deep round at most; not clean → push the branch and report it as waiting (do not run three rounds tonight).
-7. **Work in flight: do not fix what these branches already fix, and do not touch them.** `wave/integration`
+4. **Work in flight: do not fix what these branches already fix, and do not touch them.** `wave/integration`
    (keys on practice cards, the microphone start, save messages; it also fixes a Change Up set-up overflow that is
    NOT on main), `feat/song-requests` (it fixes `tools/console-layout-smoke.mjs`'s sidebar pin: that tool fails 4
    checks on main today, known), `feat/catch-up` (one rules line and a console filter), `fix/nearest-strum`,
    `tools/never-blocks`, `tools/a11y-and-drift`, `cl/golden-rebuild`. Ignore `ci-try/*` (trial branches).
    `firestore.rules` on main holds unpublished add-only blocks (school accounts step 1) and `firestore.rules.paste2`
    is NOT published: both are known, waiting for Jonathan's paste; not findings.
-8. **If the run cannot finish** (a usage limit, time): review the areas in the order (a), (b), (c), (d); write in
-   WORKFLOW.md's Open work which areas were reviewed and which were not, push that, and do NOT tag (the next run
-   then takes the same range and skips the areas marked reviewed).
-9. **Report in ten lines or fewer**, as step 6 says, plus one line: which areas were reviewed.
+5. **Report in ten lines or fewer**, as step 6 says.
 
 ## 1. Find the range
 
@@ -130,13 +109,27 @@ Ten is a Friday evening's pushes at most; more than that and the walk no longer 
 
 Ignore `wip/*` branches (not live).
 
-## 2. Review
+## 2. Review: the net change, by area
 
-Run `site-reviewer` on the Fast commits (combined diff plus the commit list). Use `site-reviewer-deep` instead if any of them touches a
-danger-zone file or a section/step order, and say in the report that it
-should never have shipped Fast.
+Do not read the week commit by commit. Take the files the Fast commits touched
+(`git log --format= --name-only --grep='^Review: Fast' $range | sort -u`) and review the NET change to them,
+`git diff <range start> origin/main -- <files>`. Give each reviewer the subjects of the Fast commits that touched
+its files, not the commits.
+- **Fewer than about 15 site files changed** → ONE reviewer for all of it.
+- **More** → at most FOUR areas, one reviewer each, all spawned in one message (an area with no changed file gets
+  none): (a) the app shell and lists (`app/*.js` except cards and the player, `index.html`, `styles.css`,
+  `site-fill.js`, `i18n.js`); (b) practice cards, the player and the arcade (`app/cards.js`, `app/snippets.js`,
+  `coach-*.js`, `practice-minutes*.js`, `class-activities.js`, `module-*.js`); (c) the live game and the console
+  (`live-quiz.js`, `teacher-*.js`); (d) the Song Journey pages (`tabs/**`). A site file in none of them goes to the
+  nearest area.
+- `site-reviewer` for each; `site-reviewer-deep` for an area holding a danger-zone change or a section/step move,
+  and say in the report that it should never have shipped Fast.
+- **No reviewer for tools and notes**: `tools/**`, `.claude/**`, `.github/**`, `docs/**`, `CLAUDE.md`,
+  `WORKFLOW.md`, `CHANGELOG.md`. Each tool ships with its own break-it proof. Read the net diff of
+  `tools/checks.mjs` yourself for ONE thing: a check that was loosened (a pin's number changed, a check removed,
+  an allowlist entry added); report what you find.
 
-Brief the reviewer to find real problems students would hit:
+Brief each reviewer to find real problems students would hit:
 - broken rendering at 1366×657;
 - wrong Spanish twin;
 - a control whose default isn't pinned;
@@ -206,6 +199,10 @@ git push origin friday-check-<YYYY-MM-DD>
 Always create a new dated tag — never move or delete one (cloud credentials
 can't rewrite refs). Tag even when nothing shipped Fast.
 
+**A run that cannot finish** (a usage limit, time): review the areas in the order (a), (b), (c), (d); write in
+WORKFLOW.md's Open work which areas were reviewed and which were not, push that, and do NOT tag. The next run then
+takes the same range and skips the areas marked reviewed.
+
 ## 5b. Are the real takes still current? (every run, even when nothing shipped Fast)
 
 ```
@@ -223,7 +220,7 @@ tests read: that is a finding for step 3.
 
 Plain language, short (he reads it on his phone):
 
-- How many Fast commits were reviewed, and their one-line subjects; "N Fast reviewed, M already Reviewed, skipped".
+- The count, "N Fast reviewed, M already Reviewed, skipped", and which areas were reviewed (step 2).
 - The full walk: GitHub's Friday run (its summary line) or this run's own, and what it found.
 - What was fixed and pushed (one line each, what a student would have seen).
 - Anything on a branch or in Open work waiting for Jonathan.
