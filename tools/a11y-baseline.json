@@ -27,63 +27,49 @@
   "es:songs"
  ],
  "findings": {
-  "color-contrast|#dev-bypass-btn": {
+  "color-contrast|button#dev-bypass-btn": {
    "screens": [
     "en:sign-in"
    ],
    "html": "<button id=\"dev-bypass-btn\" onclick=\"devBypass()\" style=\"margin-top: 14px; padding: 7px 18px; font-size: 0.875"
   },
-  "color-contrast|button[onclick] > .cc-rate-sub": {
+  "color-contrast|span.cc-rate-sub": {
    "screens": [
     "en:game-setup",
     "es:game-setup"
    ],
    "html": "<span class=\"cc-rate-sub\">4 beats each</span>"
   },
-  "label-content-name-mismatch|li[data-key] > .step-head[aria-current][onclick]": {
+  "label-content-name-mismatch|button.step-head[type=\"button\"]": {
    "screens": [
     "en:lesson",
     "es:lesson"
    ],
    "html": "<button type=\"button\" class=\"step-head\" aria-expanded=\"true\" onclick=\"toggleStepOpen(this)\" aria-label=\"Step 1"
   },
-  "landmark-one-main|html": {
+  "landmark-one-main|html@en:journey-luna": {
    "screens": [
-    "en:journey-luna",
+    "en:journey-luna"
+   ],
+   "html": "<html lang=\"en\">"
+  },
+  "landmark-one-main|html@en:sign-in": {
+   "screens": [
     "en:sign-in"
    ],
    "html": "<html lang=\"en\" style=\"--hdr: 48px;\">"
   },
-  "page-has-heading-one|html": {
+  "page-has-heading-one|html@en:practice-card": {
    "screens": [
-    "en:practice-card",
-    "es:practice-card"
+    "en:practice-card"
    ],
    "html": "<html lang=\"en\" style=\"--hdr: 49px;\">"
   },
-  "region|#layer-1-body": {
+  "page-has-heading-one|html@es:practice-card": {
    "screens": [
-    "en:journey-luna"
+    "es:practice-card"
    ],
-   "html": "<div class=\"layer-body\" id=\"layer-1-body\">"
-  },
-  "region|.journey-note": {
-   "screens": [
-    "en:journey-luna"
-   ],
-   "html": "<p class=\"journey-note\" data-es=\"Una canción, cinco capas. Cada capa usa la destreza de un módulo. Tócalas en "
-  },
-  "region|.playalong-note": {
-   "screens": [
-    "en:journey-luna"
-   ],
-   "html": "<p class=\"playalong-note\" data-es=\"Esta pista es el disco a velocidad completa. El metrónomo suena seis veces "
-  },
-  "region|.songmap": {
-   "screens": [
-    "en:journey-luna"
-   ],
-   "html": "<div class=\"songmap\" data-es=\"<b>Mapa de la canció...\">"
+   "html": "<html lang=\"es\" style=\"--hdr: 49px;\">"
   },
   "region|a[href=\"../index.html\"]": {
    "screens": [
@@ -91,17 +77,41 @@
    ],
    "html": "<a href=\"../index.html\" data-es=\"← Volver al sitio de la clase\">← Back to class site</a>"
   },
-  "region|h2[data-i18n=\"auth.title\"]": {
+  "region|div#layer-1-body": {
+   "screens": [
+    "en:journey-luna"
+   ],
+   "html": "<div class=\"layer-body\" id=\"layer-1-body\">"
+  },
+  "region|div.songmap": {
+   "screens": [
+    "en:journey-luna"
+   ],
+   "html": "<div class=\"songmap\" data-es=\"<b>Mapa de la canció...\">"
+  },
+  "region|h2.notranslate[data-i18n=\"auth.title\"]": {
    "screens": [
     "en:sign-in"
    ],
    "html": "<h2 data-i18n=\"auth.title\" translate=\"no\" class=\"notranslate\">Welcome to Guitar Class</h2>"
   },
-  "region|p[data-i18n=\"auth.body\"]": {
+  "region|p.journey-note": {
+   "screens": [
+    "en:journey-luna"
+   ],
+   "html": "<p class=\"journey-note\" data-es=\"Una canción, cinco capas. Cada capa usa la destreza de un módulo. Tócalas en "
+  },
+  "region|p.notranslate[data-i18n=\"auth.body\"]": {
    "screens": [
     "en:sign-in"
    ],
    "html": "<p data-i18n=\"auth.body\" translate=\"no\" class=\"notranslate\">Sign in with your school Google account to use the"
+  },
+  "region|p.playalong-note": {
+   "screens": [
+    "en:journey-luna"
+   ],
+   "html": "<p class=\"playalong-note\" data-es=\"Esta pista es el disco a velocidad completa. El metrónomo suena seis veces "
   }
  }
 }
