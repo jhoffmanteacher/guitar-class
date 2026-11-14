@@ -205,6 +205,16 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Open work
 
+- [ ] **Private song audio, step 1 is on main with NOTHING switched** (2026-11-14; plan and decisions:
+  `Claude outputs/PLAN-private-song-audio-2026-11-13.md`, build notes `Claude outputs/private-audio-step1/DETAILS.md`).
+  The loader (`app/songfiles.js`), the player hooks, Manage → "Song files" and the tools are live; `SONG_FILES` is
+  empty. Its rules block (`songFiles`, `songFilesUsage`) is in both rules files and needs Jonathan's paste. Limits
+  he must know: rules cannot count reads, so the 6 GiB month count guards honest use only; upload no real song
+  before paste 2 (school accounts) is published. Step 2: switch the 18 practice-card files (the switch commit also
+  removes them from `audio/`, or a dated warning if he wants a fallback week); the 8 Watchtower files wait for a
+  Journey-page private player, which is NOT built (two review rounds found majors in it; the harness and findings
+  are in `Claude outputs/private-audio-step1/step2-journey-harness/`).
+
 - [ ] **School accounts: paste 2** (Jonathan, 2026-11-13: only school accounts, or outside accounts he allows, use
   the class data). `firestore.rules` is the published text PLUS add-only blocks that wait for one paste, "Paste A" (NOT
   published as of 2026-11-13: the allow list `config/access` and the requests `accessRequests`, the `songRequests`
