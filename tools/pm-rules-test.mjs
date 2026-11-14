@@ -14,6 +14,12 @@
    Then it re-checks one rule on each OLDER path to show they still behave.
    2026-11-06: the teacher may READ minutes/{uid}/weeks/* (the console's Practice minutes view) and
    nothing else under minutes/ — a "minutes/{uid}/weeks: the teacher reads" section pins it.
+   2026-11-14 (Jonathan): the teacher may also DELETE a student's days, weeks and meta/board (the console's "Delete
+   this student's data…", one student at a time), and still creates, changes and (the tag) reads nothing there; a
+   student deletes nothing, not even their own. The three cases that pinned "the teacher cannot delete a day / a week"
+   and "the tag cannot be deleted" now state that ("the teacher deletes…", "today: the owner cannot delete…"), and a
+   "one student's removal" section pins the rest. This tool has no --breaks: the breaks for these lines are in
+   tools/rules-core-test.mjs.
    2026-11-13: the made-up students are @seq.org accounts (the school-accounts rule, isSchool()); an outside account
    (X) cannot read the boards or the take counter. --port N (default 8089) picks the emulator's port.
    2026-11-14 (paste-2 day): firestore.rules is ONE text with the isSchool() gate (the second paste moved in and its
@@ -105,7 +111,7 @@ if (which.includes('orig')) {
   await t('the teacher cannot write it either', () => day(T, 'uidA', '2026-11-16').set({ seconds: 60 }), false);
   await t('an outside account (not @seq.org, not allowed) cannot write its OWN day (2026-11-13, isSchool())', () => day(X, 'outsideX', '2026-11-16').set({ seconds: 60 }), false);
   await t('…nor read its own tree', () => X.collection('minutes/outsideX/days').get(), false);
-  await t('no delete', () => day(A, 'uidA', '2026-11-16').delete(), false);
+  await t('today: the owner cannot delete their own day (no student delete under minutes/)', () => day(A, 'uidA', '2026-11-16').delete(), false);
   console.log('== minutes/{uid}/weeks');
   await t('own week { seconds, goalSeconds, hit }', () => wk(A, 'uidA', '2026-W47').set({ seconds: 1800, goalSeconds: 1800, hit: true }), true);
   await t('own week via merge + increment', () => wk(A, 'uidA', '2026-W48').set({ seconds: FV.increment(600), goalSeconds: 1800, hit: false }, { merge: true }), true);
@@ -126,7 +132,7 @@ if (which.includes('orig')) {
   await t('owner queries own days by document id (the client\'s load)', () => A.collection('minutes/uidA/days').where(firebase.firestore.FieldPath.documentId(), '>=', '2026-11-16').get(), true);
   await t('another student cannot read', () => day(B, 'uidA', '2026-11-16').get(), false);
   await t('another student cannot list', () => B.collection('minutes/uidA/weeks').get(), false);
-  console.log('== minutes/{uid}/days: the teacher reads (2026-11-13, the console\'s "Back from an absence" filter) and writes nothing');
+  console.log('== minutes/{uid}/days: the teacher reads (2026-11-13, the console\'s "Back from an absence" filter), deletes one (2026-11-14) and writes nothing');
   await t('the teacher reads a student\'s day', () => day(T, 'uidA', '2026-11-16').get(), true);
   await t('the teacher runs the console\'s real days query (14 days by document id, from the server)', () => {
     const id = firebase.firestore.FieldPath.documentId();
@@ -134,7 +140,9 @@ if (which.includes('orig')) {
   }, true);
   await t('the teacher still cannot write a day', () => day(T, 'uidA', '2026-11-16').set({ seconds: 60 }), false);
   await t('the teacher still cannot increment a day', () => day(T, 'uidA', '2026-11-16').set({ seconds: FV.increment(60) }, { merge: true }), false);
-  await t('the teacher still cannot delete a day', () => day(T, 'uidA', '2026-11-16').delete(), false);
+  await t('the teacher still cannot create a day', () => day(T, 'uidA', '2026-11-25').set({ seconds: 60 }), false);
+  await t('the teacher deletes a student\'s day (2026-11-14, "Delete this student\'s data…")', () => day(T, 'uidA', '2026-11-18').delete(), true);
+  await t('…another student cannot delete one', () => day(B, 'uidA', '2026-11-17').delete(), false);
   await t('a student still cannot read another student\'s day', () => day(B, 'uidA', '2026-11-16').get(), false);
   await t('a student still cannot list another student\'s days', () => B.collection('minutes/uidA/days').get(), false);
   await t('a student still cannot run the console\'s days query on another student', () => {
@@ -144,14 +152,17 @@ if (which.includes('orig')) {
   await t('signed out still cannot read a day', () => day(N, 'uidA', '2026-11-13').get(), false);
   await t('an outside account still cannot read a student\'s day', () => day(X, 'uidA', '2026-11-16').get(), false);
   await t('an account with the teacher\'s email but email_verified false cannot read a day', () => env.authenticatedContext('fakeT2', { email: 'jhoffman@seq.org', email_verified: false }).firestore().doc('minutes/uidA/days/2026-11-16').get(), false);
-  console.log('== minutes/{uid}/weeks: the teacher reads (2026-11-06, the console\'s Practice minutes view); days since 2026-11-13; nothing else');
+  console.log('== minutes/{uid}/weeks: the teacher reads (2026-11-06, the console\'s Practice minutes view); days since 2026-11-13; deletes a week since 2026-11-14; nothing else');
   await t('the teacher reads another student\'s week doc', () => wk(T, 'uidA', '2026-W47').get(), true);
   await t('the teacher lists a student\'s weeks (the console\'s real read, from the server)', () => T.collection('minutes/uidA/weeks').get(), true);
   await t('the teacher lists a student\'s days (2026-11-13)', () => T.collection('minutes/uidA/days').get(), true);
   await t('the teacher cannot read meta/board (the tag)', () => T.doc('minutes/uidA/meta/board').get(), false);
   await t('the teacher cannot write a week doc', () => wk(T, 'uidA', '2026-W47').set({ seconds: 60, goalSeconds: 3600, hit: false }), false);
   await t('the teacher cannot increment a week doc', () => wk(T, 'uidA', '2026-W47').set({ seconds: FV.increment(60) }, { merge: true }), false);
-  await t('the teacher cannot delete a week doc', () => wk(T, 'uidA', '2026-W47').delete(), false);
+  await t('the teacher cannot create a week doc', () => wk(T, 'uidA', '2027-W02').set({ seconds: 0, goalSeconds: 0, hit: false }), false);
+  await t('the teacher deletes a student\'s week doc (2026-11-14)', () => wk(T, 'uidA', '2026-W49').delete(), true);
+  await t('…another student cannot delete one', () => wk(B, 'uidA', '2026-W48').delete(), false);
+  await t('today: the owner cannot delete their own week', () => wk(A, 'uidA', '2026-W48').delete(), false);
   await t('another student cannot read a week doc', () => wk(B, 'uidA', '2026-W47').get(), false);
   await t('signed out cannot read a week doc', () => wk(N, 'uidA', '2026-W47').get(), false);
   await t('an account with the teacher\'s email but email_verified false cannot read a week', () => env.authenticatedContext('fakeT', { email: 'jhoffman@seq.org', email_verified: false }).firestore().doc('minutes/uidA/weeks/2026-W47').get(), false);
@@ -183,7 +194,8 @@ if (which.includes('orig')) {
   await t('A creates its own tag (32 lowercase hex)', () => META(A, 'uidA').set({ id: TAGA }), true);
   await t('B creates its own tag', () => META(B, 'uidB').set({ id: TAGB }), true);
   await t('the tag cannot be changed (create-only)', () => META(A, 'uidA').set({ id: TAGC }), false);
-  await t('the tag cannot be deleted', () => META(A, 'uidA').delete(), false);
+  await t('today: the owner cannot delete its own tag', () => META(A, 'uidA').delete(), false);
+  await t('another student cannot delete A\'s tag', () => META(B, 'uidA').delete(), false);
   await t('A reads its own tag', () => META(A, 'uidA').get(), true);
   await t('another student cannot read A\'s tag', () => META(B, 'uidA').get(), false);
   await t('the teacher cannot read it', () => META(T, 'uidA').get(), false);
@@ -352,6 +364,37 @@ if (which.includes('orig')) {
   await t('an outside account (not allowed) cannot add (2026-11-13)', () => X.doc('micTakesMeta/count').set({ n: 3 }), false);
   await t('the teacher sets it to 40 (any number)', () => T.doc('micTakesMeta/count').set({ n: 40 }), true);
   await t('the teacher resets it to 0 ("Reset counter")', () => T.doc('micTakesMeta/count').set({ n: 0 }), true);
+
+  /* 2026-11-14 (Jonathan): the console's "Delete this student's data…" (teacher-remove.js) deletes ONE student's
+     practice minutes: days, weeks and the private tag meta/board, by path. The teacher still creates, changes and
+     (the tag) reads nothing there, and nobody else deletes. uidD is a made-up student with its own tree. The --breaks
+     for these lines are in tools/rules-core-test.mjs (its "one student's removal" section). */
+  console.log('== one student\'s removal (2026-11-14): the teacher deletes a student\'s days, weeks and meta/board');
+  const D = env.authenticatedContext('uidD', { email: 'd@seq.org', email_verified: true }).firestore();
+  const TAGD = 'dddddddddddddddddddddddddddddddd';
+  await t('D saves a day, a week and makes its tag (the student\'s own writes)', async () => { await day(D, 'uidD', '2026-11-13').set({ seconds: 600 }); await wk(D, 'uidD', '2026-W46').set({ seconds: 600, goalSeconds: 1800, hit: false }); return META(D, 'uidD').set({ id: TAGD }); }, true);
+  await env.withSecurityRulesDisabled(c => c.firestore().doc('minutes/uidD/other/x').set({ seconds: 1 }));
+  await t('the teacher still cannot read D\'s tag', () => META(T, 'uidD').get(), false);
+  await t('the teacher cannot change D\'s tag', () => META(T, 'uidD').set({ id: TAGC }), false);
+  await t('the teacher cannot update() D\'s week', () => wk(T, 'uidD', '2026-W46').update({ hit: true }), false);
+  await t('the teacher cannot merge into D\'s day', () => day(T, 'uidD', '2026-11-13').set({ seconds: 0 }, { merge: true }), false);
+  for (const [what, ref] of [['day', db => day(db, 'uidD', '2026-11-13')], ['week', db => wk(db, 'uidD', '2026-W46')], ['tag (meta/board)', db => META(db, 'uidD')]]) {
+    await t(`another student cannot delete D's ${what}`, () => ref(B).delete(), false);
+    await t(`today: D cannot delete its own ${what}`, () => ref(D).delete(), false);
+    await t(`an outside account (not allowed) cannot delete D's ${what}`, () => ref(X).delete(), false);
+    await t(`signed out cannot delete D's ${what}`, () => ref(N).delete(), false);
+    await t(`an account with the teacher's email but email_verified false cannot delete D's ${what}`, () => ref(env.authenticatedContext('fakeT3', { email: 'jhoffman@seq.org', email_verified: false }).firestore()).delete(), false);
+  }
+  await t('the teacher cannot delete a doc elsewhere under minutes/ (minutes/uidD/other/x)', () => T.doc('minutes/uidD/other/x').delete(), false);
+  await t('the teacher deletes D\'s day', () => day(T, 'uidD', '2026-11-13').delete(), true);
+  await t('the teacher deletes D\'s week', () => wk(T, 'uidD', '2026-W46').delete(), true);
+  await t('the teacher deletes D\'s tag by path, without reading it', () => META(T, 'uidD').delete(), true);
+  await t('…all three are gone (other/x, which has no delete rule, stays)', async () => {
+    const left = []; let other = false;
+    await env.withSecurityRulesDisabled(async c => { const db = c.firestore(); for (const p of ['minutes/uidD/days/2026-11-13', 'minutes/uidD/weeks/2026-W46', 'minutes/uidD/meta/board']) if ((await db.doc(p).get()).exists) left.push(p); other = (await db.doc('minutes/uidD/other/x').get()).exists; });
+    if (left.length || !other) throw new Error('left: ' + left.join(', ') + '; other/x ' + other);
+  }, true);
+  await t('…and D\'s page may make a new tag (create-only for the student; the old doc is gone)', () => META(D, 'uidD').set({ id: TAGD }), true);
 }
 console.log('== existing rules still behave (baseline checks on every older path)');
 await t('progress: own read+write', async () => { await A.doc('progress/uidA').set({ x: 1 }); return A.doc('progress/uidA').get(); }, true);

@@ -20,6 +20,10 @@
      --json=FILE        every case's result
      --stall=SEC        watchdog: no case finished for SEC seconds (default 120) -> prints where it was, exit 3
      --list             the families and the fake faults
+     --reset            only the reset cases (Start over / Delete, S1-S7, and Z1-Z5: Song Journey ticks; see "the reset
+                        cases" below); a full default run runs them too
+     --no-reset         the random cases only (to run this tool against a site without the feature, e.g. origin/main)
+     --json=FILE        (2026-11-14) also holds, per case, the final stored doc, the writes issued and the config/class reads
    stdout is identical for the same seed and site; the run time is printed on stderr.
    Exit 0 = every case passed (KNOWN faults below excepted); 1 = a case failed, the fake failed its self-test, a run
    that reaches a KNOWN entry matched nothing for it, or a site script does not parse (a FAIL line names it); 2 = bad
@@ -219,7 +223,7 @@ const opt = (k, d) => { const a = ARGV.find(x => x === '--' + k || x.startsWith(
 /* Bad arguments exit 2 before anything runs. */
 const argFail = msg => { console.error('save-loop: ' + msg + ' (see the header of tools/save-loop.mjs)'); process.exit(2); };
 {
-  const VALUED = ['cases', 'seed', 'case', 'family', 'root', 'fake-fault', 'json', 'stall'], BARE = ['verbose', 'list'];
+  const VALUED = ['cases', 'seed', 'case', 'family', 'root', 'fake-fault', 'json', 'stall'], BARE = ['verbose', 'list', 'reset', 'no-reset'];
   for (const a of ARGV){
     const m = /^--([a-z-]+)(=(.*))?$/.exec(a);
     if (!m) argFail('not an option: ' + JSON.stringify(a));
@@ -1705,6 +1709,379 @@ function actionCode(a){
   throw new Error('no code for ' + a.kind);
 }
 
+/* ─────────────────────────── Start over / Delete: the reset cases (2026-11-14) ───────────────────────────
+   The console's "Start this student over…" writes progressStartOver[uid] = T in config/class; "Delete this student's
+   data…" deletes the doc and writes progressDeleted[uid] = T. The student's own page looks at them ONCE, at sign-in, and
+   only when both sign-in reads succeeded (progressStartOverAtSignIn, app/save.js). Scripted cases, run in the same fake
+   world as the random cases, each with the site's own sign-in sequence:
+     S1 a Start over is applied at the next sign-in: the lesson fields gone; name, email, period, activities, exit
+        checks, games, streak and practice minutes kept; startOverApplied = T; the notice says it once
+     S2 applied once only: the next sign-in does nothing
+     S3 NOT applied when the progress read fails (the next good sign-in applies it)
+     S4 NOT applied when the settings read fails (no cached marker is used)
+     S5 a marker for another student does nothing
+     S8 a Delete marker, the student came back, and a sign-in whose progress read fails: nothing is cleared
+     S9 two Chromebooks sign in at the same moment: applied once (the transaction re-checks)
+     S10 (R3-1) Start over, later Delete, the student returns as new and works: the next sign-in keeps that work
+     S11 (R3-6) a new student (no doc, no marker) keeps this Chromebook's copies at sign-in
+     S12 (R3-4) Delete, and the Chromebook holds only the legacy activity ticks: nothing old is uploaded
+     S6 a deleted student signs in again on the Chromebook holding their old copies: a new student, nothing old
+        re-uploaded at sign-in
+     S7 THE LIMIT, documented: a page left open writes its old copy back, after a Start over and after a Delete
+     Z1, Z1c, Z3, Z5 (review R2): a Song Journey tick made offline, before a close, on slow or stalled Wi-Fi reaches
+        the server (tabs/journey.js is main's, byte for byte)
+   The teacher acts from outside the student's world (the marker into config/class, the doc removed). Every case also
+   fails on any fault the site raised (R12). */
+/* A Song Journey page (tabs/journey.js, unmodified) in the same fake world (review R1-2, 2026-11-14): its own vm
+   context, the world's Firestore client on its device, a small DOM of five layers with an "I'm ready" box each (the
+   shape tools/checks.mjs 1bw uses), the page's own load / pagehide listeners and its own auth callback. A tick is
+   the page's readyChanged(box). A location.reload() it asks for is recorded (the page then counts as gone). */
+const JOURNEY_SRC = (() => { try { return readFileSync(join(ROOT, 'tabs', 'journey.js'), 'utf8'); } catch { return null; } })();
+function makeJourneyTab(world, name, device){
+  const tab = { name, device, alive: true, hidden: false, net: [], lastLandAt: 0, stallQueued: 0, faults: [], unloading: false, dropUnload: false, journey: true };
+  const parseSel = sel => /^(\w+)?((?:\.[\w-]+)*)(?::not\(\.([\w-]+)\))?(?:\[([\w-]+)(?:="([^"]*)")?\])?$/.exec(sel);
+  const all = [];
+  class El {
+    constructor(tag, cls = [], attrs = {}){
+      this.tagName = tag.toUpperCase(); this.children = []; this.parentNode = null; this._cls = new Set(cls); this.dataset = {}; this.attrs = {}; this.style = {};
+      this.checked = false; this.hidden = false; this.textContent = ''; this._html = '';
+      for (const [k, v] of Object.entries(attrs)) this.setAttribute(k, v);
+      const cl = this._cls;
+      this.classList = { add: c => cl.add(c), remove: c => cl.delete(c), contains: c => cl.has(c), toggle: (c, on) => { const v = on === undefined ? !cl.has(c) : !!on; if (v) cl.add(c); else cl.delete(c); return v; } };
+      all.push(this);
+    }
+    get id(){ return this.attrs.id || ''; }
+    setAttribute(k, v){ this.attrs[k] = String(v); if (k.startsWith('data-')) this.dataset[k.slice(5).replace(/-(\w)/g, (_, c) => c.toUpperCase())] = String(v); }
+    getAttribute(k){ return k in this.attrs ? this.attrs[k] : null; }
+    removeAttribute(k){ delete this.attrs[k]; }
+    appendChild(c){ c.parentNode = this; this.children.push(c); return c; }
+    insertBefore(c, ref){ c.parentNode = this; const i = ref ? this.children.indexOf(ref) : -1; if (i < 0) this.children.push(c); else this.children.splice(i, 0, c); return c; }
+    removeChild(c){ this.children = this.children.filter(x => x !== c); }
+    remove(){ if (this.parentNode) this.parentNode.removeChild(this); }
+    get innerHTML(){ return this._html; } set innerHTML(v){ this._html = v; }
+    get firstChild(){ return this.children[0] || null; }
+    addEventListener(){} removeEventListener(){} scrollIntoView(){} getBoundingClientRect(){ return { width: 0, left: 0 }; }
+    matches(sel){ const m = parseSel(sel); if (!m) return false; const [, tg, clsPart, notCls, attr, val] = m;
+      if (tg && this.tagName !== tg.toUpperCase()) return false;
+      for (const c of (clsPart || '').split('.').filter(Boolean)) if (!this._cls.has(c)) return false;
+      if (notCls && this._cls.has(notCls)) return false;
+      if (attr){ const v = this.getAttribute(attr); if (v === null || (val !== undefined && v !== val)) return false; }
+      return true; }
+    closest(sel){ let e = this; while (e && e.matches){ if (e.matches(sel)) return e; e = e.parentNode; } return null; }
+    querySelectorAll(sel){ const out = []; const walk = e => { for (const c of e.children){ if (c.matches(sel)) out.push(c); walk(c); } }; walk(this); return out; }
+    querySelector(sel){ return this.querySelectorAll(sel)[0] || null; }
+  }
+  const body = new El('body');
+  body.appendChild(new El('span', ['prog-pill']));
+  body.appendChild(new El('span', [], { id: 'save-msg' }));
+  const boxes = {};
+  for (let n = 1; n <= 5; n++){
+    const sec = body.appendChild(new El('section', n === 1 ? ['layer'] : ['layer', 'closed'], { id: 'layer-' + n }));
+    sec.appendChild(new El('button', ['layer-head'])); sec.appendChild(new El('span', ['layer-rate-chip']));
+    const lb = sec.appendChild(new El('div', [], { id: 'layer-' + n + '-body' }));
+    boxes[n] = lb.appendChild(new El('div', ['ready-row'], { 'data-layer': String(n) })).appendChild(new El('input', ['ready-box']));
+  }
+  const attached = e => { while (e){ if (e === body) return true; e = e.parentNode; } return false; };
+  const document = { body, readyState: 'complete', documentElement: { clientWidth: 1366 }, head: new El('head'),
+    createElement: t => new El(t), getElementById: id => all.find(e => e.id === id && attached(e)) || null,
+    querySelectorAll: s => body.querySelectorAll(s), querySelector: s => body.querySelector(s), addEventListener(){},
+    get hidden(){ return tab.hidden; } };
+  const listeners = {};
+  const db = makeClient(world, tab);
+  let authCb = null;
+  const auth = { currentUser: null, onAuthStateChanged(cb){ authCb = cb; return () => {}; } };
+  const call = fn => { if (!tab.alive) return; try { const r = fn(); if (r && typeof r.then === 'function') r.then(null, e => tab.faults.push('unhandled rejection: ' + (e && e.message || e))); } catch (e){ tab.faults.push('threw: ' + (e && e.stack ? e.stack.split('\n').slice(0, 2).join(' | ') : e)); } };
+  const win = { document, console: { log(){}, warn(){}, error(){}, info(){} },
+    setTimeout: (fn, ms) => world.at(world.now + Math.max(0, Number(ms) || 0), () => call(fn), tab, 'timer'),
+    clearTimeout: id => { if (id != null) world.cancel(id); },
+    requestAnimationFrame: () => 0, cancelAnimationFrame(){},
+    location: { hash: '', href: 'https://class.example.test/tabs/the-cure.html', reload(){ tab.reloaded = true; world.log(`${name} RELOADS (journey.js asked)`); } },
+    history: { scrollRestoration: 'auto', replaceState(){}, length: 1 },
+    scrollTo(){}, matchMedia: () => ({ matches: false, addEventListener(){} }), getComputedStyle: () => ({ paddingLeft: '0', paddingRight: '0' }),
+    addEventListener: (ev, fn) => { (listeners[ev] = listeners[ev] || []).push(fn); }, removeEventListener(){},
+    t: k => k, getLang: () => 'en', setLang(){}, applyI18n(){},
+    firebase: { initializeApp(){}, auth: () => auth, firestore: Object.assign(() => db, { FieldValue: { delete: () => DELETE } }) },
+    firebaseConfig: {}, TEACHER_EMAIL: 'teacher@example.test', SONG_ID: 'the-cure', navigator: { onLine: true, userAgent: 'save-loop' } };
+  win.window = win;
+  vm.createContext(win);
+  vm.runInContext(`(function(){ const D = Date, clock = __clock; function FakeDate(...a){ if (!new.target) return new D(clock()).toString(); return a.length ? new D(...a) : new D(clock()); } FakeDate.prototype = D.prototype; FakeDate.now = () => clock(); FakeDate.UTC = D.UTC; FakeDate.parse = D.parse; globalThis.Date = FakeDate; })();`, Object.assign(win, { __clock: () => world.now }));
+  vm.runInContext(JOURNEY_SRC, win, { filename: 'tabs/journey.js', timeout: 10000 });
+  tab.win = win;
+  tab.boot = () => { for (const fn of (listeners.load || []).slice()) call(() => fn({})); auth.currentUser = { uid: USER.uid, email: USER.email, displayName: USER.displayName }; call(() => authCb && authCb(auth.currentUser)); };
+  tab.tick = n => { if (!tab.alive || tab.reloaded) return; boxes[n].checked = !boxes[n].checked; call(() => win.readyChanged(boxes[n])); };
+  tab.close = () => { tab.unloading = true; for (const fn of (listeners.pagehide || []).slice()) call(() => fn({})); world.at(world.now, () => { tab.alive = false; world.killTimers(tab); }, null, 'script'); };
+  return tab;
+}
+const MODULE_FIELDS = ['skills', 'responses', 'completed', 'lastModule', 'lastSet', 'songReady', 'songReadyAt', 'practiceLog'];
+async function resetCases(){
+  const out = [];
+  const OLD = initialDoc(null, 'marked');
+  const OLD_TICKS = Object.keys(OLD.completed);
+  const NEW_TICK = 'm7w2-c-sec0-1';
+  const mkStorage = () => ({ _d: {}, getItem(k){ return Object.prototype.hasOwnProperty.call(this._d, k) ? this._d[k] : null; }, setItem(k, v){ this._d[k] = String(v); }, removeItem(k){ delete this._d[k]; }, clear(){ this._d = {}; }, key(i){ return Object.keys(this._d)[i] ?? null; }, get length(){ return Object.keys(this._d).length; } });
+  const BOOT = 'currentUser = __user; (async () => { await loadProgress(); caAdoptLocalTicks(); await loadClassConfig(); await progressStartOverAtSignIn(); })().finally(() => __booted())';
+  const scenario = async (id, what, script) => {
+    beat('reset case ' + id);
+    const world = new World(mix(BASE_SEED, 9000 + id.charCodeAt(1) * 7 + id.length));
+    world.faults = []; CURRENT_WORLD = world;
+    const tabs = [];
+    const dev = (name, phases) => { const d = device(name, phases || []); d.localStorage = mkStorage(); return d; };
+    const at = (ms, fn) => world.at(T0 + ms, fn, null, 'script');
+    /* The site's own sign-in sequence (app/start.js): the two reads, then progressStartOverAtSignIn(). */
+    const boot = (name, d, ms) => at(ms, () => {
+      const tab = makeTab(world, name, d, { root: ROOT, seed: mix(BASE_SEED, name.charCodeAt(0)), sdkMs: 150 });
+      tabs.push(tab); world.log(`${name} opens on ${d.name}; signs in`);
+      tab.ctx.__booted = () => { tab.booted = true; tab.notice = tab.run('progressResetNotice'); tab.run("document.getElementById('app').style.display = 'block'"); };
+      siteCall(tab, BOOT);
+    });
+    const tab = name => tabs.filter(t => t.name === name).pop();
+    const act = (name, ms, code) => at(ms, () => { const t = tab(name); if (t && t.alive && !t.hidden) siteCall(t, code); });
+    const vis = (name, ms, hidden) => at(ms, () => {
+      const t = tab(name); if (!t || !t.alive) return;
+      t.hidden = hidden;
+      for (const fn of (t.docL.visibilitychange || []).slice()) callSite(t, () => fn({ type: 'visibilitychange' }));
+    });
+    const kill = (name, ms) => at(ms, () => { const t = tab(name); if (t){ t.alive = false; world.killTimers(t); } });
+    /* The console's writes, landing at ms: the marker in config/class, and for a Delete the doc gone. */
+    const teacher = (ms, kind, uid = USER.uid) => at(ms, () => {
+      const cfg = world.docs.get('config/class') || { data: {}, version: 0 };
+      const field = kind === 'del' ? 'progressDeleted' : 'progressStartOver';
+      cfg.data[field] = Object.assign({}, cfg.data[field], { [uid]: world.now });
+      cfg.version++; world.docs.set('config/class', cfg);
+      if (kind === 'del' && uid === USER.uid) world.docs.delete('progress/' + USER.uid);
+      world.marker = world.now;
+      world.log(`TEACHER: ${kind === 'del' ? 'Delete' : 'Start over'} for ${uid} (marker ${world.now})`);
+    });
+    const jboot = (name, d, ms) => at(ms, () => { const t = makeJourneyTab(world, name, d); tabs.push(t); world.log(`${name} (a Journey page) opens on ${d.name}`); t.boot(); });
+    const jtick = (name, ms, n) => at(ms, () => { const t = tab(name); if (t && t.alive) t.tick(n); });
+    const jclose = (name, ms) => at(ms, () => { const t = tab(name); if (t && t.alive) t.close(); });
+    const ctx = { world, dev, boot, act, vis, kill, teacher, tab, at, tabs, jboot, jtick, jclose };
+    const plan = script(ctx);
+    await world.runUntil(T0 + plan.endMs, () => beat(`reset case ${id} at ${rel(world.now)}`));
+    for (const t of tabs) t.alive = false;
+    await world.drain();
+    CURRENT_WORLD = null;
+    const d = world.docs.get('progress/' + USER.uid);
+    const doc = d ? clone(d.data) : null;
+    const checks = plan.check(doc, world, tabs);
+    const faults = [...world.faults, ...tabs.flatMap(t => t.faults.map(f => t.name + ': ' + f))];
+    if (faults.length) checks.push(['no fault raised (R12)', false, faults.slice(0, 2).join(' | ')]);
+    const bad = checks.filter(c => !c[1]);
+    out.push({ id, what, n: checks.length, bad });
+    console.log(`${bad.length ? '✗' : '✓'} ${id} ${what}: ${checks.length - bad.length} of ${checks.length} hold`);
+    for (const c of bad) console.log(`    ✗ ${c[0]}${c[2] ? ' — ' + c[2] : ''}`);
+    if (VERBOSE || bad.length){ console.log('    stored doc: ' + JSON.stringify(doc)); if (VERBOSE) for (const l of world.trace) console.log('      ' + l); }
+  };
+  const seed = (world, data) => world.docs.set('progress/' + USER.uid, { data: clone(data), version: 1 });
+  const lessonsEmpty = doc => !!doc && MODULE_FIELDS.every(f => !(f in doc));
+  const kept = doc => !!doc && doc.name === USER.displayName && doc.email === USER.email && doc.period === OLD.period
+    && canon(doc.classActivities) === canon(OLD.classActivities) && canon(doc.caSteps) === canon(OLD.caSteps)
+    && canon(doc.exitChecks) === canon(OLD.exitChecks) && canon(doc.games) === canon(OLD.games) && canon(doc.streak) === canon(OLD.streak);
+  const applies = w => w.landed.filter(l => l.tx && l.data && 'startOverApplied' in l.data).length;
+  const jR = doc => (doc && doc.songReady && doc.songReady['the-cure']) || {};
+  const minutesOf = w => [...w.docs.keys()].filter(k => k.startsWith('minutes/'));
+
+  await scenario('S1', 'a Start over is applied at the next sign-in', c => {
+    seed(c.world, OLD);
+    c.world.docs.set(`minutes/${USER.uid}/days/2026-11-10`, { data: { seconds: 300 }, version: 1 });
+    const A = c.dev('A');
+    A.localStorage.setItem('practiceLog:' + USER.uid, JSON.stringify(OLD.practiceLog));   // this Chromebook's copy of the old log
+    c.teacher(100, 'over');
+    c.boot('A', A, 1000);
+    c.at(4000, () => { c.tab('A').s1 = c.tab('A').run('JSON.stringify(practiceLog)'); });
+    return { endMs: 10000, check: (doc, w, tabs) => [
+      ['the lesson fields are empty', lessonsEmpty(doc), JSON.stringify(doc)],
+      ['name, email, period, In-Class Activities, activity steps, exit checks, games and streak are kept', kept(doc)],
+      ['startOverApplied is the marker', doc && doc.startOverApplied === w.marker, String(doc && doc.startOverApplied)],
+      ['practice minutes are untouched', minutesOf(w).length === 1],
+      ['one transaction applied it', applies(w) === 1],
+      ['the page says it once ("over")', tabs[0].notice === 'over'],
+      ["the page's practice log is empty (the device's old copy is not read back)", tabs[0].s1 === '{}', tabs[0].s1] ] };
+  });
+  await scenario('S2', 'applied once only: the next sign-in does nothing', c => {
+    seed(c.world, OLD);
+    const A = c.dev('A');
+    c.teacher(100, 'over');
+    c.boot('A', A, 1000);
+    c.act('A', 4000, `onCompleteChange(${JSON.stringify(NEW_TICK)}, true)`);
+    c.vis('A', 5000, true); c.kill('A', 6000);
+    c.boot('B', A, 8000);
+    return { endMs: 15000, check: (doc, w, tabs) => [
+      ['the tick made after the start over is kept', !!(doc && doc.completed && doc.completed[NEW_TICK]), JSON.stringify(doc && doc.completed)],
+      ['one transaction in all (the second sign-in applied nothing)', applies(w) === 1],
+      ['the second page says nothing', !tabs.find(t => t.name === 'B').notice],
+      ['the second sign-in read the doc once (no second look at the marker)', w.gets.filter(g => g.tab === 'B' && g.path === 'progress/' + USER.uid).length === 1, String(w.gets.filter(g => g.tab === 'B' && g.path === 'progress/' + USER.uid).length)] ] };
+  });
+  await scenario('S3', 'NOT applied when the progress read fails; applied at the next good sign-in', c => {
+    seed(c.world, OLD);
+    const A = c.dev('A', [{ phase: 'up', until: T0 + 1100 }, { phase: 'refused', until: T0 + 1300 }]);
+    c.teacher(100, 'over');
+    c.boot('A', A, 1100);                                    // its progress read is refused; the settings read later succeeds
+    c.at(5000, () => { c.tab('A').s3 = { failed: c.tab('A').run('progressLoadFailed'), ok: c.tab('A').run('progressMarkers.ok'), doc: clone(c.world.docs.get('progress/' + USER.uid).data) }; });
+    c.kill('A', 6000);
+    c.boot('B', c.dev('B'), 8000);
+    return { endMs: 15000, check: (doc, w, tabs) => {
+      const s3 = tabs.find(t => t.name === 'A').s3 || {};
+      return [
+        ['the first sign-in\'s progress read failed (its settings read succeeded)', s3.failed === true && s3.ok === true],
+        ['…and it did nothing: the doc was untouched then', canon(s3.doc) === canon(OLD), JSON.stringify(s3.doc)],
+        ['the next good sign-in applied it', lessonsEmpty(doc) && doc.startOverApplied === w.marker && applies(w) === 1] ];
+    } };
+  });
+  await scenario('S4', 'NOT applied when the settings read fails (no cached marker is used)', c => {
+    seed(c.world, OLD);
+    const A = c.dev('A', [{ phase: 'up', until: T0 + 1400 }, { phase: 'offline', until: T0 + 4000 }]);
+    c.teacher(100, 'over');
+    c.boot('A', A, 1000);                                    // the progress read lands, the settings read fails (offline)
+    c.at(6000, () => { c.tab('A').s4 = { loadFailed: c.tab('A').run('progressLoadFailed'), ok: c.tab('A').run('progressMarkers.ok') }; });
+    return { endMs: 15000, check: (doc, w, tabs) => {
+      const s4 = tabs[0].s4 || {};
+      return [
+        ['the progress read landed and the settings read failed', s4.loadFailed === false && s4.ok === false, JSON.stringify(s4)],
+        ['nothing was applied: the doc is as it was', canon(doc) === canon(OLD), JSON.stringify(doc)] ];
+    } };
+  });
+  await scenario('S5', 'a marker for ANOTHER student does nothing', c => {
+    seed(c.world, OLD);
+    const A = c.dev('A');
+    c.teacher(100, 'over', 'uid-someone-else');
+    c.teacher(200, 'del', 'uid-another-one');
+    c.boot('A', A, 1000);
+    c.act('A', 4000, `onCompleteChange(${JSON.stringify(NEW_TICK)}, true)`);
+    c.vis('A', 6000, true);
+    return { endMs: 12000, check: (doc, w, tabs) => {
+      const want = clone(OLD); want.completed[NEW_TICK] = true;
+      return [
+        ['every stored value kept, the new tick added', canon(doc) === canon(want), JSON.stringify(doc)],
+        ['no transaction applied anything', applies(w) === 0],
+        ['the page says nothing', !tabs[0].notice] ];
+    } };
+  });
+  await scenario('S6', 'a deleted student signs in again on the Chromebook holding their old copies: a new student', c => {
+    seed(c.world, OLD);
+    const A = c.dev('A');
+    c.boot('A', A, 0);
+    c.act('A', 2500, "logPracticeRep('m6w1-s1')");                                   // a local practice-log copy on the device
+    c.at(3500, () => { c.tab('A').ctx.localStorage.setItem('caStepsToday:' + USER.uid, JSON.stringify({ done: { 'ca-20:c1': true } })); });
+    c.vis('A', 4000, true); c.kill('A', 4100);
+    c.teacher(6000, 'del');
+    c.boot('A2', A, 9000);
+    c.act('A2', 13000, `onCompleteChange(${JSON.stringify(NEW_TICK)}, true)`);
+    c.vis('A2', 16000, true);
+    return { endMs: 25000, check: (doc, w, tabs) => {
+      const ls = tabs.find(t => t.name === 'A2').ctx.localStorage;
+      return [
+        ['the doc their first save made holds only the new tick', !!doc && Object.keys(doc.completed || {}).join() === NEW_TICK, JSON.stringify(doc && doc.completed)],
+        ['nothing old re-uploaded: no practice log, answers, ratings, activity ticks, streak, games', !!doc && !doc.practiceLog && !doc.responses && !doc.skills && !doc.caSteps && !doc.classActivities && !doc.streak && !doc.games && !doc.exitChecks, JSON.stringify(doc)],
+        ['the device copies are cleared', ls.getItem('practiceLog:' + USER.uid) === null || ls.getItem('practiceLog:' + USER.uid) === '{}', String(ls.getItem('practiceLog:' + USER.uid))],
+        ['no write landed before the student acted (sign-in uploads nothing)', !w.landed.some(l => l.tab === 'A2' && l.at < T0 + 13000 && !l.tx)],
+        ['the page says it once ("del")', tabs.find(t => t.name === 'A2').notice === 'del'] ];
+    } };
+  });
+  await scenario('S8', 'a Delete marker, the student came back, and this sign-in\'s progress read fails: nothing is cleared', c => {
+    seed(c.world, OLD);
+    const A = c.dev('A', [{ phase: 'up', until: T0 + 3100 }, { phase: 'refused', until: T0 + 3300 }]);
+    c.teacher(100, 'del');
+    c.at(1000, () => { const back = { name: USER.displayName, email: USER.email, migrations: { swap45: true }, completed: { [NEW_TICK]: true } }; seed(c.world, back); });
+    A.localStorage.setItem('practiceLog:' + USER.uid, JSON.stringify({ 'm7w1-s1': { reps: 2 } }));   // made since coming back
+    c.boot('A', A, 3100);
+    return { endMs: 10000, check: (doc, w, tabs) => [
+      ['the progress read failed and the settings read succeeded', tabs[0].run('progressLoadFailed') === true && tabs[0].run('progressMarkers.ok') === true],
+      ['the device copy made since coming back is kept', A.localStorage.getItem('practiceLog:' + USER.uid) !== null],
+      ['the doc is untouched', !!doc && doc.completed && doc.completed[NEW_TICK] === true && !w.landed.some(l => l.tx)] ] };
+  });
+  await scenario('S9', 'two Chromebooks sign in at the same moment: the Start over is applied once', c => {
+    seed(c.world, OLD);
+    const A = c.dev('A'), B = c.dev('B');
+    c.teacher(100, 'over');
+    c.boot('A', A, 1000); c.boot('B', B, 1000);
+    c.act('A', 6000, `onCompleteChange(${JSON.stringify(NEW_TICK)}, true)`);
+    c.vis('A', 8000, true);
+    return { endMs: 15000, check: (doc, w) => [
+      ['one transaction applied it', applies(w) === 1, String(applies(w))],
+      ['the lesson fields are empty but for the new tick', !!doc && Object.keys(doc.completed || {}).join() === NEW_TICK && !doc.responses && !doc.skills, JSON.stringify(doc)] ] };
+  });
+  /* Review R3 (2026-11-14). */
+  await scenario('S10', 'Start over, later Delete; the student returns as new and works; the next sign-in keeps that work (R3-1)', c => {
+    seed(c.world, OLD);
+    const A = c.dev('A');
+    c.teacher(100, 'over');
+    c.teacher(500, 'del');                                                           // later: doc gone, progressDeleted > progressStartOver
+    c.boot('A', A, 1000);                                                            // a new student
+    c.act('A', 4000, `onCompleteChange(${JSON.stringify(NEW_TICK)}, true)`);
+    c.vis('A', 5000, true); c.kill('A', 6000);
+    c.boot('B', A, 8000);                                                            // day 2
+    return { endMs: 15000, check: (doc, w, tabs) => [
+      ['the new tick is still there', !!(doc && doc.completed && doc.completed[NEW_TICK]), JSON.stringify(doc)],
+      ['no start-over transaction ran', applies(w) === 0, String(applies(w))],
+      ['day 2 says nothing', !tabs.find(t => t.name === 'B').notice, String(tabs.find(t => t.name === 'B').notice)] ] };
+  });
+  await scenario('S11', 'a new student (no doc, no marker) keeps this Chromebook\'s copies at sign-in (R3-6)', c => {
+    const A = c.dev('A');
+    A.localStorage.setItem('practiceLog:' + USER.uid, JSON.stringify({ 'm1w1-s1': { reps: 3 } }));
+    c.teacher(100, 'del', 'uid-someone-else');                                      // the class settings exist (both sign-in reads succeed)
+    c.boot('A', A, 1000);
+    return { endMs: 6000, check: (doc, w, tabs) => [
+      ['both sign-in reads succeeded', tabs[0].run('progressMarkers.ok') === true && tabs[0].run('progressLoadFailed') === false],
+      ['the device copy is kept', A.localStorage.getItem('practiceLog:' + USER.uid) !== null],
+      ['the page says nothing', !tabs[0].notice] ] };
+  });
+  await scenario('S12', 'Delete; the Chromebook holds ONLY the legacy activity ticks; nothing old is uploaded (R3-4)', c => {
+    seed(c.world, OLD);
+    const A = c.dev('A');
+    A.localStorage.setItem('caStepsToday:' + USER.uid, JSON.stringify({ done: { 'ca-20:c1': true } }));
+    c.teacher(500, 'del');
+    c.boot('A', A, 1000);
+    c.act('A', 5000, `onCompleteChange(${JSON.stringify(NEW_TICK)}, true)`);
+    c.vis('A', 7000, true);
+    return { endMs: 12000, check: (doc, w, tabs) => [
+      ['no old activity tick in the new record', !!doc && !(doc.caSteps && doc.caSteps['ca-20:c1']), JSON.stringify(doc)],
+      ['the page says it once ("del")', tabs[0].notice === 'del', String(tabs[0].notice)] ] };
+  });
+  await scenario('S7', 'THE LIMIT (expected, documented): an open page writes its old copy back after a Start over and after a Delete', c => {
+    seed(c.world, OLD);
+    const A = c.dev('A'), B = c.dev('B');
+    c.boot('A', A, 0);                                                                // open and visible across both clicks
+    c.teacher(2000, 'over');
+    c.boot('B', B, 3000);                                                              // applies it
+    c.vis('B', 5000, true);
+    c.act('A', 7000, `onCompleteChange(${JSON.stringify(NEW_TICK)}, true)`);         // A's old completed map goes out
+    c.at(9000, () => { c.world.s7over = clone((c.world.docs.get('progress/' + USER.uid) || {}).data || null); });
+    c.teacher(10000, 'del');
+    c.act('A', 12000, `onCompleteChange('m6w1-b-sec0-3', true)`);
+    return { endMs: 20000, check: (doc, w) => [
+      ['after the Start over was applied, the open page put old lesson ticks back (the stated limit)', !!w.s7over && OLD_TICKS.every(k => (w.s7over.completed || {})[k]) && w.s7over.startOverApplied > 0, JSON.stringify(w.s7over && w.s7over.completed)],
+      ['after the Delete, the open page re-created the record with its old copy (Manage: "Deleted <date> · has a record again")', !!doc && OLD_TICKS.every(k => (doc.completed || {})[k]), JSON.stringify(doc && doc.completed)] ] };
+  });
+  /* Review R2's Journey schedules (2026-11-14): tabs/journey.js is main's, byte for byte; a tick made offline, before a
+     close, or on stalled Wi-Fi reaches the server. They RUN the page (makeJourneyTab). */
+  await scenario('Z1', 'a Journey tick made OFFLINE, the connection returns, the page stays open', c => {
+    seed(c.world, OLD);
+    const J = c.dev('J', [{ phase: 'up', until: T0 + 3000 }, { phase: 'offline', until: T0 + 10000 }]);
+    c.jboot('J', J, 0); c.jtick('J', 5000, 3);
+    return { endMs: 40000, check: (doc, w, tabs) => [['the tick is on the server after the reconnect', jR(doc)[3] === true, JSON.stringify(doc && doc.songReady)], ['the page did not reload', !tabs[0].reloaded]] };
+  });
+  await scenario('Z1c', 'a Journey tick made OFFLINE, back online, the tab closed 10 s later', c => {
+    seed(c.world, OLD);
+    const J = c.dev('J', [{ phase: 'up', until: T0 + 3000 }, { phase: 'offline', until: T0 + 10000 }]);
+    c.jboot('J', J, 0); c.jtick('J', 5000, 3); c.at(19999, () => { c.tab('J').dropUnload = true; }); c.jclose('J', 20000);
+    return { endMs: 40000, check: doc => [['the tick is on the server', jR(doc)[3] === true, JSON.stringify(doc && doc.songReady)]] };
+  });
+  await scenario('Z3', 'slow Wi-Fi (3 s round trip): a Journey tick, the tab closed 2 s later', c => {
+    seed(c.world, OLD);
+    const J = c.dev('J', [{ phase: 'up', until: T0 + 3000 }, { phase: 'slow', lat: 3000, until: T0 + 30000 }]);
+    c.jboot('J', J, 0); c.jtick('J', 5000, 3); c.jclose('J', 7000);
+    return { endMs: 40000, check: doc => [['the tick is on the server', jR(doc)[3] === true, JSON.stringify(doc && doc.songReady)]] };
+  });
+  await scenario('Z5', 'STALLED Wi-Fi: a Journey tick, the page stays open', c => {
+    seed(c.world, OLD);
+    const J = c.dev('J', [{ phase: 'up', until: T0 + 3000 }, { phase: 'stall', until: T0 + 30000 }]);
+    c.jboot('J', J, 0); c.jtick('J', 5000, 3);
+    return { endMs: 60000, check: doc => [['the tick is on the server after the stall ends', jR(doc)[3] === true, JSON.stringify(doc && doc.songReady)]] };
+  });
+  return out;
+}
+
 /* ─────────────────────────── main ─────────────────────────── */
 async function main(){
   if (opt('list', false)){
@@ -1729,10 +2106,10 @@ async function main(){
   }
   const single = opt('case', null);
   const N = Number(opt('cases', 200));
-  const idxs = single != null ? [Number(single)] : Array.from({ length: N }, (_, i) => i);
+  const idxs = opt('reset', false) ? [] : single != null ? [Number(single)] : Array.from({ length: N }, (_, i) => i);
   /* A full default run: every family, the default number of cases or more. */
   /* The run each KNOWN entry is reached by (its `reach`): an entry that matches nothing in such a run is stale. */
-  const runSpec = { single: single != null, seed: BASE_SEED, cases: N, fams: famFilter.join(',') };
+  const runSpec = { single: single != null || !!opt('reset', false), seed: BASE_SEED, cases: N, fams: famFilter.join(',') };
   const knownHits = Object.fromEntries(KNOWN.map(k => [k.id, []]));
   const fams = {};
   const byTag = {};
@@ -1777,7 +2154,9 @@ async function main(){
       for (const k of res.known) console.log(`  known ${k.kind}: ${k.leaf} stored ${k.stored}, expected ${k.accept.join(' or ')}${k.by ? ' (carried by tab ' + k.by + ')' : ''}`);
       console.log(`  ${res.leaves} stored values compared; ${res.owedN} owed effects, ${res.notOwedN} not owed; ${res.fails.length} wrong`);
     }
-    json.push({ idx, fam: sc.fam, fails: res.fails.map(x => x.msg), known: res.known, leaves: res.leaves });
+    { const sd = world.docs.get('progress/' + USER.uid);
+      json.push({ idx, fam: sc.fam, fails: res.fails.map(x => x.msg), known: res.known, leaves: res.leaves,
+        doc: sd ? sd.data : null, issued: world.issued, configReads: world.gets.filter(g => g.path === 'config/class').length }); }
   }
   let staleKnown = 0;
   for (const k of KNOWN){
@@ -1794,6 +2173,13 @@ async function main(){
     for (const m of d.fails) console.log(`✗ FAIL directed (seed ${BASE_SEED}): ${m}`);
     console.log(`  directed checks: ${d.checks - Math.min(d.checks, d.fails.length)} of ${d.checks} hold (D1 the place a student opened is the place stored; D2 a new student's doc is marked once, ${d.txRuns} transaction(s) for three saves, and a tick made offline waits for the reconnect)`);
   }
+  /* The reset cases (Start over / Delete): with every full run, or alone with --reset. */
+  let resetBad = 0, resetN = 0;
+  if (((single == null && !famFilter.length) || opt('reset', false)) && !opt('no-reset', false)){
+    const rs = await resetCases();
+    resetN = rs.length; resetBad = rs.filter(x => x.bad.length).length;
+    console.log(`save-loop: reset cases (Start over / Delete) ${resetN - resetBad} of ${resetN} hold`);
+  }
   const secs = ((Date.now() - t0) / 1000).toFixed(1);
   console.log(`save-loop: ${idxs.length} cases (seed ${BASE_SEED}) · ${tabsN} tabs · ${actsN} student actions (${owed} owed effects, ${notOwed} not owed) · ${issued} writes issued, ${landed} landed, ${rejected} rejected, ${lost} lost with a closed or unloading tab · ${tx} move commits (${txRetry} transaction re-runs) · ${leaves} stored values compared`);
   console.log('  by family: ' + Object.entries(fams).map(([k, v]) => `${k} ${v.n - v.fail}/${v.n}`).join(' · '));
@@ -1805,7 +2191,7 @@ async function main(){
   if (opt('json', null)) writeFileSync(String(opt('json')), JSON.stringify(json, null, 1));
   /* The run time goes to stderr, so stdout is the same byte for byte for the same seed. */
   console.error(`save-loop: ${secs} s`);
-  return failed || staleKnown || directedBad ? 1 : 0;
+  return failed || staleKnown || directedBad || resetBad ? 1 : 0;
 }
 /* Exact tags (R3-2): each names one wrong value a site fault this tool found leaves. A failing value with no tag is
    something new. */

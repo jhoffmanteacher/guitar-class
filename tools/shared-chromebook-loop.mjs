@@ -124,9 +124,11 @@
        fields), the console's own preferences (gc-teacher-*, teacherSideTree, gc-lq-limits, gc-lq-autoreveal, gc-lq-hidenames).
      Per STUDENT (must never reach the next student):
        keys named with the uid: practiceLog:<uid>, gc-lastModule:<uid>, gc-lastSet:<uid>, gc-srPicks:<uid>,
-       caStepsToday:<uid> (legacy), micRecConsent:<uid> (coach-core.js: "keyed by uid so the next student on a
+       caStepsToday:<uid> (legacy), gc-resetSeen:<uid> (2026-11-14: the newest Start over / Delete marker this device
+       cleared its copies for, app/save.js; written only when a marker exists, which no case here has), micRecConsent:<uid> (coach-core.js: "keyed by uid so the next student on a
        shared Chromebook is asked for themselves"), pm:q:<uid>:<page>, pm:c|t|t5|b|w:<uid>, hif:v1:<uid>;
-       values that carry the uid: caPeriodOverride, caOpenThrough, caForMe (save.js: "the cache carries the uid");
+       values that carry the uid: caPeriodOverride, caOpenThrough, caForMe, caResetMarker (save.js: "the cache carries the uid";
+       caResetMarker since 2026-11-14, the student's own Start over / Delete marker, a time, read back only for the same uid);
        every sessionStorage key (boot.js signOut: "every sessionStorage best ... Reloading clears the lot";
        live-quiz.js lq-q-opened carries the uid too).
 

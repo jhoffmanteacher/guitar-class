@@ -8,8 +8,14 @@
      the teacher check   isTeacher(): the exact email, email_verified false / missing / a string,
                          another letter case, a look-alike address
      progress/{uid}      each student's saved work: owner, another student, signed out, the teacher
-                         (reads, list, the backup's paged query; never writes), create / merge /
-                         transaction / update / delete, wrong types, a huge doc, a subcollection
+                         (reads, list, the backup's paged query, deletes one since 2026-11-14; never
+                         creates or edits), create / merge / transaction / update / delete, wrong types,
+                         a huge doc, a subcollection
+     one student's removal  (2026-11-14, "Delete this student's data…", teacher-remove.js) every document the
+                         teacher deletes for one made-up student, in the console's order (progress, practice
+                         days, weeks and the board tag, a mic take and its chunk, a song request, the request
+                         to join, a live-quiz answer, the config/access key), who else may not, and what stays
+                         (an issue report, the two board entries); the --breaks for the minutes deletes live here
      config/class        the class settings: who reads, who writes, the console's transaction,
                          a student's write, a signed-out read, other docs under config/
      config/access       the outside accounts allowed in (2026-11-13): teacher-only, the shape, no delete,
@@ -164,16 +170,30 @@ async function suite(rulesText, quiet) {
   await t('cannot read', () => P(N, 'uidA').get(), false);
   await t('cannot write', () => P(N, 'uidA').set(save()), false);
   await t('cannot list', () => N.collection('progress').get(), false);
-  say('== progress/{uid}: the teacher reads every doc and writes none (the console never writes progress)');
+  say('== progress/{uid}: the teacher reads every doc, deletes one (2026-11-14), and creates or edits none');
   await t('reads one doc', () => P(T, 'uidA').get(), true);
   await t('lists the whole collection (teacherFetchStudents)', () => T.collection('progress').get(), true);
   await t('runs the backup\'s paged query (orderBy document id, limit, startAfter)', () => T.collection('progress').orderBy(byId).startAfter('a').limit(200).get(), true);
   await t('cannot overwrite a student\'s doc (set)', () => P(T, 'uidA').set(save({ name: 'x' })), false);
   await t('cannot merge into it', () => P(T, 'uidA').set({ skills: {} }, { merge: true }), false);
   await t('cannot update() it', () => P(T, 'uidA').update({ 'streak.n': 0 }), false);
-  await t('cannot delete it', () => P(T, 'uidA').delete(), false);
   await t('cannot create a doc for another uid', () => P(T, 'uidZ').set(save()), false);
+  await t('cannot create one by a merge-set either (uidZ has no doc)', () => P(T, 'uidZ').set({ name: 'x' }, { merge: true }), false);
+  await t('cannot write an EMPTY doc over a student\'s (a wipe by set, not delete)', () => P(T, 'uidA').set({}), false);
+  await t('cannot update() through a transaction', () => T.runTransaction(async tx => { await tx.get(P(T, 'uidA')); tx.update(P(T, 'uidA'), { skills: {} }); }), false);
   await t('today: the teacher\'s account may write ITS OWN progress doc (the owner rule, like any student)', () => P(T, 'teacher').set(save({ name: 'Teacher' })), true);
+  say('== progress/{uid}: who may DELETE one (2026-11-14: the teacher only, "Delete this student\'s data…")');
+  await admin(db => db.doc('progress/uidB').set(save({ name: 'Test 1', email: 'b@seq.org' })));
+  await t('another student cannot delete it (B on A\'s doc)', () => P(B, 'uidA').delete(), false);
+  await t('an outside account that is not allowed cannot delete A\'s doc', () => P(ctx('outsideDel', { email: 'test4@gmail.example', email_verified: true }), 'uidA').delete(), false);
+  await t('signed out cannot delete A\'s doc', () => P(N, 'uidA').delete(), false);
+  await t('an account with the teacher\'s email, unverified, cannot delete A\'s doc', () => P(FAKES[0][1], 'uidA').delete(), false);
+  await t('another address at the school (someone@seq.org) cannot delete A\'s doc', () => P(FAKES[7][1], 'uidA').delete(), false);
+  await t('the teacher deletes one student\'s doc (uidB)', () => P(T, 'uidB').delete(), true);
+  await t('…it is gone, and A\'s doc is untouched', async () => { let b = true, a = false; await admin(async db => { b = (await db.doc('progress/uidB').get()).exists; a = (await db.doc('progress/uidA').get()).exists; }); if (b || !a) throw new Error('uidB exists ' + b + ', uidA exists ' + a); }, true);
+  await t('…the teacher cannot create it again (no create for the teacher)', () => P(T, 'uidB').set(save({ name: 'Test 1' })), false);
+  await t('…a delete of a doc that does not exist is allowed too (the dialog may run twice)', () => P(T, 'uidB').delete(), true);
+  await t('…and the student may create it again from nothing (their next save)', () => P(B, 'uidB').set(save({ name: 'Test 1', email: 'b@seq.org' })), true);
   say('== progress/{uid}: nothing below a progress doc has rules');
   await t('the owner cannot write a subcollection doc (progress/uidA/notes/n1)', () => A.doc('progress/uidA/notes/n1').set({ a: 1 }), false);
   await t('the owner cannot read one', () => A.doc('progress/uidA/notes/n1').get(), false);
@@ -404,6 +424,79 @@ async function suite(rulesText, quiet) {
   await t('the teacher cannot delete a rankBoard doc', () => T.doc('rankBoard/0123456789abcdef0123456789abcdef').delete(), false);
   await t('the teacher cannot write a rankBoard doc (no tag of their own)', () => T.doc('rankBoard/0123456789abcdef0123456789abcdef').set({ seconds: 0 }), false);
 
+  /* ── one student's removal (2026-11-14, Jonathan: the console's "Delete this student's data…", teacher-remove.js) ──
+     The teacher deletes, for ONE student: progress/{uid} (above), minutes/{uid}/days/*, weeks/* and meta/board (new on
+     2026-11-14), and what the teacher could already delete: micTakes/{uid}-{game} and its chunks, songRequests/{uid}_{week},
+     accessRequests/{uid}, liveQuiz/current/answers/{uid}, and the uid's key in config/access.allow (a merge delete).
+     Never: issueReports (no delete rule for anyone), weekBoard / rankBoard (keyed by a tag the teacher cannot read).
+     pm-rules-test.mjs pins the minutes deletes in depth; these cases carry this tool's --breaks for them. */
+  {
+    const TAGD = 'dddddddddddddddddddddddddddddddd';
+    const DAYD = 'minutes/uidD/days/2026-11-13', WKD = 'minutes/uidD/weeks/2026-W46', METAD = 'minutes/uidD/meta/board';
+    const D = ctx('uidD', { email: 'd@seq.org', email_verified: true });
+    const OUTD = ctx('outsideRm', { email: 'test3@gmail.example', email_verified: true });
+    const seedD = () => admin(async db => {
+      await db.doc('progress/uidD').set(save({ name: 'Test 4', email: 'd@seq.org' }));
+      await db.doc(DAYD).set({ seconds: 600 });
+      await db.doc(WKD).set({ seconds: 600, goalSeconds: 1800, hit: false });
+      await db.doc(METAD).set({ id: TAGD });
+      await db.doc('minutes/uidD/other/x').set({ seconds: 1 });
+      await db.doc('micTakes/uidD-coach').set({ uid: 'uidD', mode: 'coach' });
+      await db.doc('micTakes/uidD-coach/chunks/0').set({ i: 0 });
+      await db.doc('songRequests/uidD_2026-W46').set({ uid: 'uidD', week: '2026-W46', title: 'Test song', state: 'asked' });
+      await db.doc('accessRequests/uidD').set({ name: 'Test 4', email: 'd@seq.org', at: new Date(), status: 'allowed' });
+      await db.doc('liveQuiz/current').set({ state: 'lobby', sessionId: 'sD', qIndex: -1 });
+      await db.doc('liveQuiz/current/answers/uidD').set({ uid: 'uidD', name: 'Test 4', sessionId: 'sD', qIndex: -1, choice: null, ms: 0 });
+      await db.doc('config/access').set({ allow: { uidD: true, outsideKeep: true } });
+      await db.doc('issueReports/rD').set(rep({ uid: 'uidD' }));
+      await db.doc(`weekBoard/${TAGD}`).set({ week: '2026-W46', period: '7', seconds: 600 });
+      await db.doc(`rankBoard/${TAGD}`).set({ seconds: 600 });
+    });
+    const exists = async path => { let e = null; await admin(async db => { e = (await db.doc(path).get()).exists; }); return e; };
+    await seedD();
+    say('== one student\'s removal: practice minutes (days, weeks, meta/board), who may delete');
+    for (const [what, path] of [['a practice day', DAYD], ['a practice week', WKD], ['the private board tag (meta/board)', METAD]]) {
+      await t(`another student cannot delete D's ${what}`, () => B.doc(path).delete(), false);
+      await t(`today: the owner cannot delete their own ${what} (no student delete under minutes/)`, () => D.doc(path).delete(), false);
+      await t(`an outside account that is not allowed cannot delete D's ${what}`, () => OUTD.doc(path).delete(), false);
+      await t(`signed out cannot delete D's ${what}`, () => N.doc(path).delete(), false);
+      await t(`an account with the teacher's email, unverified, cannot delete D's ${what}`, () => FAKES[0][1].doc(path).delete(), false);
+    }
+    say('== one student\'s removal: the teacher still creates, changes and (the tag) reads nothing under minutes/');
+    await t('the teacher cannot overwrite D\'s day', () => T.doc(DAYD).set({ seconds: 60 }), false);
+    await t('the teacher cannot increment D\'s day (merge)', () => T.doc(DAYD).set({ seconds: FV.increment(60) }, { merge: true }), false);
+    await t('the teacher cannot create a day for D', () => T.doc('minutes/uidD/days/2026-11-12').set({ seconds: 60 }), false);
+    await t('the teacher cannot update() D\'s week', () => T.doc(WKD).update({ seconds: 0 }), false);
+    await t('the teacher cannot create a week for D', () => T.doc('minutes/uidD/weeks/2026-W45').set({ seconds: 0, goalSeconds: 0, hit: false }), false);
+    await t('the teacher cannot change D\'s tag', () => T.doc(METAD).set({ id: 'e'.repeat(32) }), false);
+    await t('the teacher cannot create a tag for another student (uidE)', () => T.doc('minutes/uidE/meta/board').set({ id: 'e'.repeat(32) }), false);
+    await t('the teacher still cannot READ D\'s tag (the delete is by path)', () => T.doc(METAD).get(), false);
+    await t('the teacher cannot delete a doc elsewhere under minutes/ (minutes/uidD/other/x: only days, weeks, meta/board)', () => T.doc('minutes/uidD/other/x').delete(), false);
+    await t('the teacher cannot delete the parent doc minutes/uidD', () => T.doc('minutes/uidD').delete(), false);
+    say('== one student\'s removal: the teacher deletes D\'s data, doc by doc (the console\'s order)');
+    await t('the teacher deletes D\'s practice day', () => T.doc(DAYD).delete(), true);
+    await t('the teacher deletes D\'s practice week', () => T.doc(WKD).delete(), true);
+    await t('the teacher deletes D\'s board tag, by path, without reading it', () => T.doc(METAD).delete(), true);
+    await t('the teacher deletes D\'s mic take (micTakes/uidD-coach)', () => T.doc('micTakes/uidD-coach').delete(), true);
+    await t('the teacher deletes the take\'s audio chunk (chunks/0)', () => T.doc('micTakes/uidD-coach/chunks/0').delete(), true);
+    await t('the teacher deletes D\'s song request (songRequests/uidD_2026-W46)', () => T.doc('songRequests/uidD_2026-W46').delete(), true);
+    await t('the teacher deletes D\'s request to join (accessRequests/uidD)', () => T.doc('accessRequests/uidD').delete(), true);
+    await t('the teacher deletes D\'s live-quiz answer (liveQuiz/current/answers/uidD)', () => T.doc('liveQuiz/current/answers/uidD').delete(), true);
+    await t('the teacher removes D\'s key from config/access.allow (merge, FieldValue.delete); the other key stays', async () => { await T.doc('config/access').set({ allow: { uidD: FV.delete() } }, { merge: true }); await expectAllow(['outsideKeep']); }, true);
+    await t('the teacher deletes D\'s progress doc', () => P(T, 'uidD').delete(), true);
+    await t('…every one of those documents is gone', async () => {
+      const left = [];
+      for (const p of ['progress/uidD', DAYD, WKD, METAD, 'micTakes/uidD-coach', 'micTakes/uidD-coach/chunks/0', 'songRequests/uidD_2026-W46', 'accessRequests/uidD', 'liveQuiz/current/answers/uidD']) if (await exists(p)) left.push(p);
+      if (left.length) throw new Error('still there: ' + left.join(', '));
+    }, true);
+    say('== one student\'s removal: what the teacher still cannot delete');
+    await t('the teacher cannot delete D\'s issue report (no delete rule for anyone)', () => T.doc('issueReports/rD').delete(), false);
+    await t('the teacher cannot delete D\'s Top 5 entry (weekBoard/{tag})', () => T.doc(`weekBoard/${TAGD}`).delete(), false);
+    await t('the teacher cannot delete D\'s class-rank entry (rankBoard/{tag})', () => T.doc(`rankBoard/${TAGD}`).delete(), false);
+    await t('…so those three are still there', async () => { for (const p of ['issueReports/rD', `weekBoard/${TAGD}`, `rankBoard/${TAGD}`]) if (!(await exists(p))) throw new Error(p + ' is gone'); }, true);
+    await admin(async db => { await db.doc('minutes/uidD/other/x').delete(); await db.doc('config/access').delete(); await db.doc('liveQuiz/current').delete(); });
+  }
+
   {
     /* ── isSchool(): who reads the class-wide documents (2026-11-13) ──── */
     const SCHOOL_READS = [
@@ -524,13 +617,37 @@ async function suite(rulesText, quiet) {
 }
 
 /* Each break: [name, old text, new text, …]. The old text must occur exactly once in the rules file. */
-const PROGRESS_TEACHER = '      allow read: if isTeacher();\n    }\n\n    /* Class-wide';
+const PROGRESS_TEACHER = '      allow read: if isTeacher();\n      allow delete: if isTeacher();\n    }\n\n    /* Class-wide';
+const PT = s => '      allow read: if isTeacher();\n' + s + '    }\n\n    /* Class-wide';
 const CONFIG_BLOCK = 'match /config/class {\n      allow read:  if isSchool();\n      allow write: if isTeacher();\n    }';
+/* The teacher's minutes deletes (2026-11-14): each line is found once by the line after it. */
+const PM_DAY_DEL = "      allow delete: if isTeacher();\n      allow create, update: if pmOwner(userId)\n            && day.matches(";
+const PM_WEEK_DEL = "      allow delete: if isTeacher();\n      allow create, update: if pmOwner(userId)\n            && week.matches(";
+const PM_META_DEL = "match /minutes/{userId}/meta/board {\n      allow delete: if isTeacher();";
 const BREAKS = [
   ['progress: the owner check dropped (any signed-in account reads and writes any doc)', 'allow read, write: if isSchool() && request.auth.uid == userId;', 'allow read, write: if isSchool();'],
-  ['progress: any signed-in account may read', PROGRESS_TEACHER, '      allow read: if isTeacher();\n      allow read: if isSignedIn();\n    }\n\n    /* Class-wide'],
-  ['progress: the teacher may write', PROGRESS_TEACHER, '      allow read, write: if isTeacher();\n    }\n\n    /* Class-wide'],
-  ['progress: the teacher may delete', PROGRESS_TEACHER, '      allow read: if isTeacher();\n      allow delete: if isTeacher();\n    }\n\n    /* Class-wide'],
+  ['progress: any signed-in account may read', PROGRESS_TEACHER, PT('      allow delete: if isTeacher();\n      allow read: if isSignedIn();\n')],
+  /* 2026-11-14: the teacher's delete on progress is the truth now; these breaks widen, move or drop it. */
+  ['progress: the teacher\'s delete widened to write', PROGRESS_TEACHER, PT('      allow write: if isTeacher();\n')],
+  ['progress: the teacher\'s delete widened to create', PROGRESS_TEACHER, PT('      allow create, delete: if isTeacher();\n')],
+  ['progress: the teacher\'s delete widened to update', PROGRESS_TEACHER, PT('      allow update, delete: if isTeacher();\n')],
+  ['progress: the teacher\'s delete line removed (a tightening must show too)', PROGRESS_TEACHER, PT('')],
+  ['progress: delete for any school account (isTeacher() -> isSchool())', PROGRESS_TEACHER, PT('      allow delete: if isSchool();\n')],
+  ['progress: delete for any signed-in account', PROGRESS_TEACHER, PT('      allow delete: if isSignedIn();\n')],
+  ['minutes days: the teacher\'s delete widened to write', PM_DAY_DEL, PM_DAY_DEL.replace('allow delete:', 'allow write:')],
+  ['minutes days: the teacher\'s delete removed', PM_DAY_DEL, PM_DAY_DEL.replace('      allow delete: if isTeacher();\n', '')],
+  ['minutes days: delete for any school account', PM_DAY_DEL, PM_DAY_DEL.replace('if isTeacher();', 'if isSchool();')],
+  ['minutes days: the owner may delete their own day too', PM_DAY_DEL, PM_DAY_DEL.replace('if isTeacher();', 'if isTeacher() || pmOwner(userId);')],
+  ['minutes weeks: the teacher\'s delete widened to write', PM_WEEK_DEL, PM_WEEK_DEL.replace('allow delete:', 'allow write:')],
+  ['minutes weeks: the teacher\'s delete removed', PM_WEEK_DEL, PM_WEEK_DEL.replace('      allow delete: if isTeacher();\n', '')],
+  ['minutes weeks: delete for any school account', PM_WEEK_DEL, PM_WEEK_DEL.replace('if isTeacher();', 'if isSchool();')],
+  ['meta/board: the teacher\'s delete widened to read', PM_META_DEL, PM_META_DEL.replace('allow delete:', 'allow read, delete:')],
+  ['meta/board: the teacher\'s delete widened to write', PM_META_DEL, PM_META_DEL.replace('allow delete:', 'allow write:')],
+  ['meta/board: the teacher\'s delete removed', PM_META_DEL, PM_META_DEL.replace('\n      allow delete: if isTeacher();', '')],
+  ['meta/board: delete for any signed-in account', PM_META_DEL, PM_META_DEL.replace('if isTeacher();', 'if isSignedIn();')],
+  ['minutes: the teacher\'s delete put on the whole tree ({document=**})', 'match /minutes/{userId}/{document=**} {\n      allow read: if pmOwner(userId);', 'match /minutes/{userId}/{document=**} {\n      allow read: if pmOwner(userId);\n      allow delete: if isTeacher();'],
+  ['weekBoard: the teacher may delete', "match /weekBoard/{tag} {\n      allow read: if isSchool();", "match /weekBoard/{tag} {\n      allow read: if isSchool();\n      allow delete: if isTeacher();"],
+  ['rankBoard: the teacher may delete', "match /rankBoard/{tag} {\n      allow read: if isSchool();", "match /rankBoard/{tag} {\n      allow read: if isSchool();\n      allow delete: if isTeacher();"],
   ['progress: the owner may no longer delete (a tightening must show too)', 'allow read, write: if isSchool() && request.auth.uid == userId;', 'allow read, create, update: if isSchool() && request.auth.uid == userId;'],
   ['progress: a size rule added (a tightening must show too)', 'allow read, write: if isSchool() && request.auth.uid == userId;', 'allow read, delete: if isSchool() && request.auth.uid == userId;\n      allow create, update: if isSchool() && request.auth.uid == userId && !request.resource.data.keys().hasAny([\'blob\']);'],
   ['config/class: a student may write', CONFIG_BLOCK, 'match /config/class {\n      allow read:  if isSchool();\n      allow write: if isSignedIn();\n    }'],

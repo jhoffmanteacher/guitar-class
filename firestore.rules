@@ -10,8 +10,9 @@ rules_version = '2';
 
    This file is the source of truth, but editing it changes NOTHING on its
    own — GitHub Pages does not deploy Firestore rules. Paste the contents
-   into Firebase console → Firestore Database → Rules → Publish (or run
-   `firebase deploy --only firestore:rules` if the CLI is ever set up).
+   into Firebase console → Firestore Database → Rules → Publish, by hand:
+   that is the only way the class rules are ever published (the repo's
+   `firebase deploy` reaches the practice project only, never the class).
    Keep this file and the console in sync; if they drift, the console wins
    and this file becomes a lie.
 
@@ -46,7 +47,9 @@ rules_version = '2';
      micTakesMeta/count  the public "how many takes so far" counter
      minutes/{uid}/*  practice minutes (days, weeks, meta/board) — the student
                       writes and reads their own; the teacher reads weeks
-                      (2026-11-06) and days (2026-11-13), nothing else
+                      (2026-11-06) and days (2026-11-13), and deletes days,
+                      weeks and meta/board (one student's removal, 2026-11-14),
+                      nothing else
      rankBoard/{tag}, weekBoard/{tag}  the class rank and the Top 5, keyed by a private
                       name tag (minutes/{uid}/meta/board), readable by every school
                       account (isSchool(), 2026-11-13). minutesBoard/{uid} has NO block (denied).
@@ -134,16 +137,23 @@ service cloud.firestore {
        A student reads and writes ONLY their own, and only a school account
        (isSchool(), 2026-11-13: an outside account the teacher has not
        allowed creates nothing, so it never appears in the roster; it asks
-       through accessRequests instead). The teacher gets read —
-       deliberately NOT write. The dashboard never needs to modify student
-       work (pause and archive live in config/class precisely so they
-       don't), and withholding write means a compromised teacher session
-       cannot erase the class. If a destructive "wipe progress" button is
-       ever added, it needs `allow delete: if isTeacher()` here, and that
-       trade-off should be a deliberate decision rather than a default. */
+       through accessRequests instead). The teacher reads every doc, and
+       may DELETE one; the teacher may never create or edit one (no write,
+       no create, no update): pause and archive live in config/class so the
+       console never needs to change a student's work.
+
+       The teacher's delete (Jonathan, 2026-11-14, a deliberate decision):
+       the console's "Delete this student's data…" dialog (teacher-remove.js)
+       removes one student at a time, after the teacher types the student's
+       name, and takes this document and the student's practice-minutes
+       documents (days, weeks and the private board tag, below) with it.
+       The trade, said plainly: a stolen teacher sign-in could now erase
+       students one by one. The protection is the console's "Download a
+       backup" button (Manage), taken before a removal. */
     match /progress/{userId} {
       allow read, write: if isSchool() && request.auth.uid == userId;
       allow read: if isTeacher();
+      allow delete: if isTeacher();
     }
 
     /* Class-wide settings. Every student must read this doc (a school
@@ -478,9 +488,13 @@ service cloud.firestore {
        days docs (2026-11-13: the Students view's "Back from an absence"
        filter reads which days a student saved work), and nothing else under
        minutes/: never meta/board (the private tag). The teacher
-       never writes here. The client adds seconds with increment(), so
-       the rule sees the resulting document: a day may hold at most
-       dailyCapSeconds() and a week at most seven days of that. No delete.
+       never creates or changes a doc here; since 2026-11-14 the teacher
+       may DELETE a student's days, weeks and meta/board docs (the
+       console's "Delete this student's data…", one student at a time; see
+       the note above progress/{userId}). The client adds seconds with
+       increment(), so the rule sees the resulting document: a day may hold
+       at most dailyCapSeconds() and a week at most seven days of that. A
+       student deletes nothing here, not even their own.
        ⚠ dailyCapSeconds() is practice-minutes-config.js dailyCapMinutes × 60.
        Raise one, raise the other, re-publish (checks.mjs 1cg fails a push
        where they differ). HONEST LIMIT: a student at DevTools can write any
@@ -494,7 +508,8 @@ service cloud.firestore {
       allow read: if pmOwner(userId);
     }
     match /minutes/{userId}/days/{day} {
-      allow read: if isTeacher();   // 2026-11-13: the console's "Back from an absence" filter reads which days a student saved work (read only)
+      allow read: if isTeacher();   // 2026-11-13: the console's "Back from an absence" filter reads which days a student saved work
+      allow delete: if isTeacher();
       allow create, update: if pmOwner(userId)
             && day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
             && request.resource.data.keys().hasOnly(['seconds'])
@@ -504,6 +519,7 @@ service cloud.firestore {
     }
     match /minutes/{userId}/weeks/{week} {
       allow read: if isTeacher();
+      allow delete: if isTeacher();
       allow create, update: if pmOwner(userId)
             && week.matches('^[0-9]{4}-W[0-9]{2}$')
             && request.resource.data.keys().hasOnly(['seconds', 'goalSeconds', 'hit'])
@@ -527,7 +543,10 @@ service cloud.firestore {
 
        minutes/{uid}/meta/board  { id } — the student's private name tag: 32
        random hex characters the student's own page makes once. Create-only
-       (never changed, never deleted). Only this student reads it: the
+       for the student (never changed; the student never deletes it). Since
+       2026-11-14 the teacher may DELETE it, by path, with the student's
+       other data (see the note above progress/{userId}); the teacher still
+       cannot read it. Only this student reads it: the
        minutes/{uid}/** read rule above is owner-only, not even the teacher.
        (Since 2026-11-06 the teacher reads minutes/{uid}/weeks/* — the
        console's Practice minutes view — but still not this doc, and the
@@ -570,6 +589,7 @@ service cloud.firestore {
        for a grade.
        ⚠ Must be published BEFORE (or with) the site code that writes it. */
     match /minutes/{userId}/meta/board {
+      allow delete: if isTeacher();
       allow create: if pmOwner(userId)
             && request.resource.data.keys().hasOnly(['id'])
             && request.resource.data.id is string

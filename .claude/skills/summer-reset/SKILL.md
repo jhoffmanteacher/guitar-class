@@ -114,6 +114,15 @@ only some lets one writer save in a numbering another still reads differently.
 Delete the `migrations` field from the reset docs, or leave it: nothing else
 reads it.
 
+**Clear the Start over / Delete markers** (2026-11-14, `teacher-remove.js`):
+`config/class.progressStartOver` and `config/class.progressDeleted` (uid → a
+time). They stay all year: Manage reads them for its "Started over" /
+"Deleted" lines, and a student's next sign-in applies a Start over once
+(`progressStartOverAtSignIn`, `app/save.js`). Once every progress doc is reset,
+delete both fields (through `teacherWriteConfig()`, or by hand in the Firebase
+console with every console closed). The students' docs may keep a
+`startOverApplied` time: harmless, a missing marker means nothing to apply.
+
 **Delete the 29 "Take It to a Song" sections and their card code.**
 Switched off (`TAKE_TO_SONG_ENABLED = false` in `app/shell.js`), but still in the
 module files because each one counts toward its neighbours' `gi`. Removing

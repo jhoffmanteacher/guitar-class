@@ -220,6 +220,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
       if(IS_TEACHER_MODE){ await ensureTeacherJs(); showTeacherApp(user); clearAuthStallTimer(); }
       else {
         await loadProgress(); caAdoptLocalTicks(); await loadClassConfig();
+        await progressStartOverAtSignIn();   // the teacher's Start over / Delete, once, at sign-in only (app/save.js)
         clearAuthStallTimer();   // cleared here, not inside showApp/showPausedScreen, so every exit from the wait is covered
         /* An account the rules refused (not @seq.org, not allowed by the
            teacher): the access screen instead of the site. Decided from the

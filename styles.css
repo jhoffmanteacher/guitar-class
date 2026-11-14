@@ -1427,6 +1427,38 @@ body.rail-collapsed .rail-tools .tool-popup{
    rule that sets colour AND background, which this deliberately doesn't. */
 .t-act-danger{color:#a32d2d}
 @media (prefers-color-scheme: dark){ .t-act-danger{color:#e09a9a} }
+/* Manage → More… : Start over · Delete this student's data (teacher-remove.js). The
+   .daily5-overlay/.daily5-modal shell; existing colour tokens and .t-act-danger only. */
+.trm-modal{width:min(620px,100%)}
+.trm-title{font-size:1.125rem;margin:0 0 8px}
+.trm-p{font-size:0.875rem;line-height:1.5;color:var(--text);margin:0 0 10px}
+.trm-small{font-size:0.8125rem;color:var(--text2)}
+.trm-ok{color:var(--green-text);font-weight:600}
+.trm-err{color:var(--red-text);font-weight:600}
+.trm-menu{display:flex;flex-direction:column;gap:8px;margin:4px 0 12px}
+.trm-menu-item{font:inherit;text-align:left;display:flex;flex-direction:column;gap:2px;padding:10px 12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);cursor:pointer}
+.trm-menu-item:hover,.trm-menu-item:focus-visible{background:var(--bg2)}
+.trm-menu-item span{font-size:0.8125rem;color:var(--text2)}
+.trm-menu-item:not(.t-act-danger) strong{color:var(--text)}
+.trm-kinds{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-direction:column;gap:6px}
+.trm-kind{display:block;font-size:0.8438rem;line-height:1.45;color:var(--text);cursor:pointer}
+.trm-kind.trm-none{color:var(--text3);cursor:default}
+.trm-kept{font-size:0.8125rem;color:var(--text2);margin:0 0 12px}
+.trm-kept summary{cursor:pointer}
+.trm-kept ul{margin:6px 0 0 18px;padding:0}
+.trm-type{display:block;font-size:0.875rem;margin:4px 0 10px;color:var(--text)}
+.trm-type input{display:block;width:100%;box-sizing:border-box;margin-top:6px;font:inherit;padding:7px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--bg);color:var(--text)}
+.trm-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.trm-gap{flex:1}
+.trm-go{font-weight:600}
+.trm-go.trm-danger:not(:disabled){color:#a32d2d}
+@media (prefers-color-scheme: dark){ .trm-go.trm-danger:not(:disabled){color:#e09a9a} }
+.trm-go:disabled{opacity:0.5;cursor:default}
+.trm-status{font-size:0.75rem;color:var(--amber-text);margin-top:2px;white-space:normal}
+.trm-who{margin:-4px 0 10px}
+.trm-warn{border-left:3px solid var(--amber-text);padding-left:10px}
+.tg-table td.trm-more-cell{padding-left:2px;padding-right:2px;text-align:right}
+.trm-more-cell .tg-seg-btn{font-size:1rem;line-height:1;padding:4px 10px}
 /* ── Class activities board (teacher.js renderTeacherActivities) ────────
    Two columns: Built (what's been pushed but not placed) and Assigned
    (what students actually get, grouped by module). Sized for the

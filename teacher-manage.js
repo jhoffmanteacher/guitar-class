@@ -116,7 +116,7 @@ function renderTeacherManage(){
       const g=String(teacherStudentPeriod(stu)||'');
       // Escaped: g is the student's own answer when no override is set, and
       // firestore.rules doesn't check what a student writes to progress/{uid}.
-      const groupRow=(grouped && g!==lastGroup)?`<tr class="tg-group"><th colspan="6">${escHtml(perLabel(g))} <span>(${perCount[g]})</span></th></tr>`:'';
+      const groupRow=(grouped && g!==lastGroup)?`<tr class="tg-group"><th colspan="7">${escHtml(perLabel(g))} <span>(${perCount[g]})</span></th></tr>`:'';
       lastGroup=g;
       const isPaused=!!paused[stu.uid], isArch=!!arch[stu.uid];
       // data-uid + the delegated listener in showTeacherApp — a Firestore
@@ -145,19 +145,21 @@ function renderTeacherManage(){
       const openCell=`<select class="tg-open-through" data-set-open-through data-uid="${escAttr(stu.uid)}" style="max-width:220px"><option value="auto"${openN?'':' selected'}>Auto${CLASS_OPEN_THROUGH>1?' (Module '+CLASS_OPEN_THROUGH+')':''}</option>${openOpts}</select>`;
       const archIco='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="3" y="6" width="18" height="4" rx="1"/><path d="M4 10v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9"/><path d="M10 14h4"/></svg>';
       const pauseIco='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
-      const status=isArch?`${archIco} archived`:isPaused?`${pauseIco} paused`:'&#x2713; active';
+      const status=(isArch?`${archIco} archived`:isPaused?`${pauseIco} paused`:'&#x2713; active')+teacherRemoveStatusHtml(stu, cfg);
       return groupRow+`<tr${isArch?' style="opacity:.55"':''}><td class="tg-name tg-name-wide" title="${escAttr(name)}">${escHtml(name)}</td>`+
         `<td class="tg-period">${periodCell}</td>`+
         `<td>${openCell}</td>`+
         `<td><div class="tg-seg">${pauseBtns}</div></td>`+
         `<td><div class="tg-seg">${archBtn}</div></td>`+
-        `<td class="tg-eff">${status}</td></tr>`;
+        `<td class="tg-eff">${status}</td>`+
+        // Start over / Delete sit behind this one button, away from the everyday ones (teacher-remove.js).
+        `<td class="trm-more-cell"><button type="button" class="tg-seg-btn" data-remove-one data-uid="${escAttr(stu.uid)}" aria-haspopup="dialog" aria-label="More: start this student over, or delete their data" title="More: start this student over, or delete their data">&#x22EF;</button></td></tr>`;
     }).join('');
     const summary=(pausedCount||archCount)
       ? `<div class="tg-note">${pausedCount} paused · ${archCount} archived</div>` : '';
     const keepY=box.querySelector('[data-tview="manage"]') ? window.scrollY : null;
     box.innerHTML=head+
-      `<div class="tg-grid-wrap" data-tview="manage"><table class="tg-table"><thead><tr><th>Student</th><th>Period</th><th>Open through</th><th>Access</th><th>Roster</th><th>Right now</th></tr></thead><tbody>${rows}</tbody></table></div>`+summary;
+      `<div class="tg-grid-wrap" data-tview="manage"><table class="tg-table"><thead><tr><th>Student</th><th>Period</th><th>Open through</th><th>Access</th><th>Roster</th><th>Right now</th><th><span class="sr-only">More</span></th></tr></thead><tbody>${rows}</tbody></table></div>`+summary;
     teacherAccessMount(); teacherSongFilesMount();
     if(keepY!==null) window.scrollTo({top:keepY});
   });

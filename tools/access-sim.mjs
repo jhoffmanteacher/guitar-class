@@ -153,8 +153,10 @@ for (const lang of ['en', 'es']) {
     check('progress refused, then config/class lost to the network -> access screen', onlyProg.verdict === 'refused');
   }
   {
-    const pinStart = /await loadProgress\(\); caAdoptLocalTicks\(\); await loadClassConfig\(\);\n\s*clearAuthStallTimer\(\);[^\n]*\n(?:\s*\/\*[\s\S]*?\*\/\n)?\s*if\(accessRefusedAtBoot\(user\)\) showAccessScreen\(user\);\n\s*else if\(accountPaused\) showPausedScreen\(user\); else showApp\(user\);/.test(START);
-    check('app/start.js: the same two reads in the same order, then accessRefusedAtBoot() decides before showApp (pinned by text)', pinStart);
+    /* 2026-11-14: the teacher's Start over / Delete is applied right after the two reads, before the stall timer clears
+       (progressStartOverAtSignIn, app/save.js); it reads nothing the access decision uses. */
+    const pinStart = /await loadProgress\(\); caAdoptLocalTicks\(\); await loadClassConfig\(\);\n\s*await progressStartOverAtSignIn\(\);[^\n]*\n\s*clearAuthStallTimer\(\);[^\n]*\n(?:\s*\/\*[\s\S]*?\*\/\n)?\s*if\(accessRefusedAtBoot\(user\)\) showAccessScreen\(user\);\n\s*else if\(accountPaused\) showPausedScreen\(user\); else showApp\(user\);/.test(START);
+    check('app/start.js: the same two reads in the same order, the Start over / Delete check, then accessRefusedAtBoot() decides before showApp (pinned by text)', pinStart);
     check('app/start.js makes no access read of its own during the boot (no accessCheck call)', !/accessCheck\(/.test(START.replace(/\/\*[\s\S]*?\*\//g, '')));
   }
   {

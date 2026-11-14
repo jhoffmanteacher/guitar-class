@@ -31,6 +31,29 @@ Dates are the Pacific calendar date. `CACHE_VERSION` and commit timestamps may s
 
 Start here. Update this block whenever an item opens or closes; each line says where the detail is.
 
+**Delete / start over one student (2026-11-14): built, waits for a rules paste.** Manage → a student's "⋯" (More):
+"Start this student over…" and "Delete this student's data…" (`teacher-remove.js`). Start over writes a marker
+(`config/class.progressStartOver[uid]`); the student's own page empties the lesson fields ONCE, at its next sign-in on
+the main site, only when both sign-in reads succeeded (`progressStartOverAtSignIn`, `app/save.js`), and records
+`startOverApplied`. Delete removes the data kind by kind (progress last) and writes `progressDeleted[uid]`; nothing
+enforces it afterwards: a student who signs in again starts as a new student (that Chromebook's copies are cleared
+at that sign-in). The paste ("Paste C", on top of Paste B) adds `allow delete: if isTeacher();` on
+`progress/{userId}`, `minutes/{userId}/days/{day}`, `/weeks/{week}` and `/meta/board`, and comment changes only. Until
+it is published, Delete stops at practice minutes and says so; Start over needs no paste. The markers stay until the
+summer reset (skill `summer-reset`). Not removable by the site: problem reports (no delete rule for anyone), the
+anonymous Top 5 / class-rank entries, the Google sign-in record.
+- **The limit (said in both dialogs and in Manage):** a page the student already has OPEN keeps its old copy and saves
+  it again on its next save: after a Delete it re-creates the record (Manage: "Deleted <date> · has a record again"),
+  after a Start over it puts old lesson work back. Do it when the student is not using the site; if the work comes
+  back, press the button again. Two review rounds (2026-11-14) tried to engineer this away and each time put an
+  ordinary student's save at risk; that machinery was removed, and the everyday save path is main's (save-loop: 200 of
+  200 final docs identical to main, 729 = 729 writes).
+- **No undo, and the risk:** the console cannot put a student back (the rules deny the teacher create and update); a
+  restore is hand work in the Firebase console from the dialog's download or "Download a backup". A started-over
+  student's doc put back by hand is emptied again at their next sign-in unless its `startOverApplied` is at least the
+  marker (or the marker cell is removed first). The rules cannot rate-limit: one stolen teacher sign-in could delete
+  every student's saved work and minutes in seconds. "Download a backup" before any use is the only protection.
+
 **Plant a fault, weekly (2026-11-14; Wave 3 item 2):** `tools/plant-a-fault.mjs` + `.github/workflows/plant-a-fault.yml`
 (Tuesdays 2:23 AM Pacific, report-only) plant small mistakes in the risky code one at a time and list the ones no tool
 caught. Survivors judged harmless or accepted, with reasons: `tools/plant-a-fault-known.json`. Open: the first run's real

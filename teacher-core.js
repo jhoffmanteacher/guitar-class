@@ -264,6 +264,9 @@ async function showTeacherApp(user){
       if(paused){ teacherSetStudentPaused(paused.dataset.uid, paused.dataset.state); return; }
       const archived=e.target.closest('[data-set-archived]');
       if(archived){ teacherSetStudentArchived(archived.dataset.uid, archived.dataset.state); return; }
+      // Manage's More… : Start over · Delete this student's data (teacher-remove.js)
+      const removeOne=e.target.closest('[data-remove-one]');
+      if(removeOne){ teacherRemoveOpen(removeOne.dataset.uid); return; }
       const stuFilter=e.target.closest('[data-stu-filter]');
       if(stuFilter){ teacherSetStudentFilter(stuFilter.dataset.stuFilter); return; }
       const periodFilter=e.target.closest('[data-set-period-filter]');
@@ -676,7 +679,9 @@ async function teacherFetchStudents(){
       out.push({uid:doc.id,skills,name:String(data.name||''),email:String(data.email||''),responses:data.responses||{},coachSkill:gamesData.coachSkill||{},drillSkill:gamesData.drillSkill||{},classActivities:data.classActivities||{},exitChecks:data.exitChecks||{},period:data.period||'',songOpens,
         // Step ticks (caSteps, `<id>:<n>`), only to tell "started" from "not started" on an
         // activity's Students tab — keys are tested with startsWith, never shown.
-        caSteps:(data.caSteps&&typeof data.caSteps==='object')?data.caSteps:{}});
+        caSteps:(data.caSteps&&typeof data.caSteps==='object')?data.caSteps:{},
+        // When the student's own page applied a Start over (app/save.js progressStartOverAtSignIn): Manage's status (teacher-remove.js).
+        startOverApplied:Number(data.startOverApplied)||0});
   });
   return out;
 }

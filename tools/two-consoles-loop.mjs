@@ -70,7 +70,10 @@
    a teacher-only song to Class activities. That is 24 of the 27 `await teacherWriteConfig(` call sites; the run counts
    them off the async stack and fails (on 200+ schedules, no --family) if a covered one was never called. Not driven: the one-time
    board migration (teacherMigrateActivityBoard), mic sampling (teacherSetMicSampling), the practice-minutes goal
-   (teacherSetPmWeekGoal). Out of scope (work order): the roster and progress reads, practice minutes, the live quiz.
+   (teacherSetPmWeekGoal), and one student's removal (2026-11-14, teacher-remove.js: teacherRemoveSettings, cell-checked
+   on exactly that student's cells, and trmWriteMarker's two markers, each cell-checked on its one uid cell; one click per
+   student, behind a typed-name dialog, so not part of the random burst; tools/remove-one-sim.mjs runs them).
+   Out of scope (work order): the roster and progress reads, practice minutes, the live quiz.
 
    CHECKS, after each schedule has gone quiet (a failure in any one exits 1):
      corruption        two cards on a unit's board share a position; a malformed board row; a key the console never
@@ -596,8 +599,9 @@ function callSiteOf(stack) {
   }
   return 'unknown';
 }
-// The three writers this tool does not drive (named in the header): the one-time board migration, mic sampling, the practice-minutes goal.
-const OUT_OF_SCOPE_WRITERS = ['teacherMigrateActivityBoard', 'teacherSetMicSampling', 'teacherSetPmWeekGoal'];
+// The writers this tool does not drive (named in the header): the one-time board migration, mic sampling, the practice-minutes goal,
+// and (2026-11-14) one student's removal (teacher-remove.js: its console-settings step and the two markers).
+const OUT_OF_SCOPE_WRITERS = ['teacherMigrateActivityBoard', 'teacherSetMicSampling', 'teacherSetPmWeekGoal', 'teacherRemoveSettings', 'trmWriteMarker'];
 
 /* ════════════════════════════════════════════════════════════════════════
    3. Seeded randomness (mulberry32). Each schedule has its own stream,

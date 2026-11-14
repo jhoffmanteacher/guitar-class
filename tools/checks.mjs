@@ -8320,7 +8320,7 @@ function checkChordBlitzRanks() {
    deliberately, after a look at whether it can pass a `base` or needs the
    strict default.
    ═════════════════════════════════════════════════════════════════ */
-const CONFIG_WRITERS = 28;   // teacherWriteConfig() call sites in teacher.js — 28th: lqgWrite (teacher-livegames.js, the Live In-Class Games list; cell-checked on the one liveGames cell each change was worked out from: the order array, one name, one removed flag), 2026-11-13; 27th: teacherSetPmWeekGoal (cell-checked on its pmWeekGoals week cell, one cell, the Practice minutes "This week's goal" box), 2026-11-09; 26th: teacherSetModuleHidden (cell-checked on each hiddenActivities row it writes), 2026-10-22; 25th: teacherSetClassSong (cell-checked on its classSongs row), 2026-10-22; 22nd/23rd: teacherSetActivityStudent (cell-checked on one student's tick) and teacherSetActivityWholeClass (strict), 2026-10-13; 24th: teacherSetSongPlace (cell-checked on its songLibrary row), 2026-10-20
+const CONFIG_WRITERS = 31;   // teacherWriteConfig() call sites in teacher.js — 29th-31st (teacher-remove.js, 2026-11-14): the Delete dialog's "console settings for this student" step (cell-checked on exactly the student's cells it removes) and the two markers, progressDeleted and progressStartOver (each cell-checked on its one uid cell); 28th: lqgWrite (teacher-livegames.js, the Live In-Class Games list; cell-checked on the one liveGames cell each change was worked out from: the order array, one name, one removed flag), 2026-11-13; 27th: teacherSetPmWeekGoal (cell-checked on its pmWeekGoals week cell, one cell, the Practice minutes "This week's goal" box), 2026-11-09; 26th: teacherSetModuleHidden (cell-checked on each hiddenActivities row it writes), 2026-10-22; 25th: teacherSetClassSong (cell-checked on its classSongs row), 2026-10-22; 22nd/23rd: teacherSetActivityStudent (cell-checked on one student's tick) and teacherSetActivityWholeClass (strict), 2026-10-13; 24th: teacherSetSongPlace (cell-checked on its songLibrary row), 2026-10-20
 function checkConfigWriteGuard() {
   head('1ai. Every config/class write goes through the stale-write guard');
   let bad = 0;
@@ -18026,8 +18026,10 @@ const SITE_ERRORS_SIM_PIN = 161;
 const SCHOOL_GATE_USES = 24;   // 6 class-wide reads + 11 student writes (progress counts once: read, write); 2026-11-13 +2: songRequests (a student's create, and the read of their own); 2026-11-14 +5: song files (read the files, read the pieces, read the month's counter, create it, raise it)
 /* The FINGERPRINT of firestore.rules: the sha256 of the file's bytes exactly as on disk (no line-ending or whitespace
    normalising). Jonathan, 2026-11-14: "Add a fingerprint pin, then ship". Any change to the file fails 1dt until this
-   is re-pinned on purpose, in the same commit as the rules change. 2026-11-14: the school-accounts paste 2 (Paste B). */
-const RULES_FILE_SHA256 = '03960853bb96ce67e7ef3edfcdb051ac7736f56398d55909b6a3d48e89810b17';
+   is re-pinned on purpose, in the same commit as the rules change. 2026-11-14: the school-accounts paste 2 (Paste B).
+   2026-11-14, later (Paste C, not published yet): the teacher may delete one student's progress doc and practice-minutes
+   docs (teacher-remove.js), and the header no longer offers `firebase deploy` for the class rules. */
+const RULES_FILE_SHA256 = '3ea88d3030f708d7cc486c4112061757b4e2ec46d5a665237ee9faa11d5ab8c1';
 const TEACHER_GATE_BODY = "return request.auth != null && request.auth.token.email == 'jhoffman@seq.org' && request.auth.token.email_verified == true;";
 const SIGNED_IN_BODY = "return request.auth != null;";
 const SCHOOL_GATE_BODY = "return request.auth != null && ((request.auth.token.get('email_verified', false) == true && request.auth.token.get('email', '').lower().matches('^[^@]+@seq[.]org$')) || (exists(/databases/$(database)/documents/config/access) && get(/databases/$(database)/documents/config/access).data.get('allow', {}).get(request.auth.uid, false) == true));";
@@ -18216,6 +18218,56 @@ function checkRulesSchoolGate() {
   const lost = want.filter(k => !have.includes(k)), extra = have.filter(k => !want.includes(k));
   if (lost.length || extra.length) fail(`the allow rules a school account passes differ from SCHOOL_GATED: ${lost.length ? 'no longer gated by isSchool() (or gone): ' + lost.join(', ') : ''}${lost.length && extra.length ? '; ' : ''}${extra.length ? 'new: ' + extra.join(', ') : ''}. If this is on purpose, re-pin SCHOOL_GATED (and SCHOOL_GATE_USES) and tell Jonathan to paste the rules`);
   if (!bad) ok(`firestore.rules: ${fnDefs.length} functions, each defined once, none named like a built-in; isSchool(), isTeacher(), isSignedIn() and pmOwner() have the pinned bodies; isSchool() used ${uses} times (pinned); all ${allows} allow statements, ${blocks.length - 1} match blocks and ${fnDefs.length} functions read (as many as the keywords in the text, comments and strings taken out); ${gated.length} school-gated, exactly the pinned list; the other ${allows - gated.length} are teacher-only except the ${Object.keys(SCHOOL_GATE_EXCEPTIONS).length} stated accessRequests exceptions with their pinned conditions; no paste-2 file and no tracked file names one`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1ee. ONE STUDENT: START OVER · DELETE (2026-11-14, teacher-remove.js).
+   THE GUARD IS THE DATABASE RULES, not this check: firestore.rules lets the
+   teacher read and DELETE a progress doc and never create or update one (the
+   emulator tools, rules-core-test above all, hold that on every push). Two
+   review rounds showed a text check cannot tell every console write from an
+   innocent .set(), so this one is narrow and exact:
+     - in teacher-remove.js, teacherRemoveDeleteProgress(uid) is the pinned
+       delete of ONE doc built from its one uid, defined once;
+     - it is called from exactly one place, the confirmed Delete dialog's
+       last step (`await teacherRemoveDeleteProgress(uid);`), and nowhere else
+       in the console script;
+     - tools/remove-one-sim.mjs runs teacher-remove.js against a stub
+       Firestore and must pass all REMOVE_ONE_SIM_PIN cases (its delete case
+       proves the one progress write is that delete, the last write);
+     - a WARNING (never a failure) for any line of a teacher-*.js part, other
+       than that function, that names the progress collection next to a
+       write call: read it, it may be innocent.
+   ════════════════════════════════════════════════════════════════════ */
+const REMOVE_ONE_SIM_PIN = 52;
+const CONSOLE_PROGRESS_DELETE = "\nfunction teacherRemoveDeleteProgress(uid){\n  return db.collection('progress').doc(uid).delete();\n}\n";
+function checkRemoveOne() {
+  head('1ee. One student: the one console delete of a progress doc (teacher-remove.js) is pinned and called once; the remove-one sim runs; the rules are the guard');
+  let bad = 0;
+  const fail = m => { err('1ee: ' + m); problems++; bad++; };
+  let rm = '', all = '';
+  try { rm = stripJsComments(readFileSync(join(ROOT, 'teacher-remove.js'), 'utf8')).replace(/\r\n/g, '\n'); all = stripJsComments(siteSource('teacher.js', ROOT)).replace(/\r\n/g, '\n'); }
+  catch { fail('teacher-remove.js or the console script could not be read'); return; }
+  const defs = rm.split(CONSOLE_PROGRESS_DELETE).length - 1;
+  const anyDefs = (all.match(/function\s+teacherRemoveDeleteProgress\s*\(/g) || []).length;
+  if (defs !== 1 || anyDefs !== 1) fail(`teacherRemoveDeleteProgress must be defined once, in teacher-remove.js, exactly as "${CONSOLE_PROGRESS_DELETE.trim().replace(/\n\s*/g, ' ')}" (the delete of ONE doc from its one uid) — found ${defs} pinned and ${anyDefs} definition(s) in the console script`);
+  const calls = (all.split(CONSOLE_PROGRESS_DELETE).join('\n').match(/\bteacherRemoveDeleteProgress\b/g) || []).length;
+  const theCall = (rm.match(/\n\s*await teacherRemoveDeleteProgress\(uid\);\n/g) || []).length;
+  if (calls !== 1 || theCall !== 1) fail(`teacherRemoveDeleteProgress must be called from exactly one place, the Delete dialog's last step ("await teacherRemoveDeleteProgress(uid);" in teacher-remove.js) — found ${calls} use(s) in the console script`);
+  /* The warning: a teacher-*.js line naming the progress collection next to a write (the pinned function taken out). */
+  const warnLines = [];
+  for (const part of siteParts('teacher.js', ROOT)) {
+    let t; try { t = stripJsComments(readFileSync(join(ROOT, part), 'utf8')).split(CONSOLE_PROGRESS_DELETE).join('\n'); } catch { continue; }
+    t.split('\n').forEach((l, i) => { if (/(?:collection\s*\(\s*['"`]progress['"`]|doc\s*\(\s*['"`]\/?progress\/)/.test(l) && /\.\s*(?:set|update|delete|add)\s*\(|\bbatch\s*\(|runTransaction\s*\(/.test(l)) warnLines.push(`${part}:${i + 1} "${l.trim().slice(0, 90)}"`); });
+  }
+  if (warnLines.length) warn(`1ee: ${warnLines.length} console line(s) name the progress collection next to a write — read each; the rules refuse a teacher create or update, but they allow a delete: ${warnLines.slice(0, 4).join(' · ')}`);
+  const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'remove-one-sim.mjs'), '--root', ROOT], { encoding: 'utf8', timeout: 120000 });
+  const m = /remove-one-sim: (\d+) passed, (\d+) failed/.exec(r.stdout || '');
+  if (r.status !== 0 || !m) {
+    fail('tools/remove-one-sim.mjs failed (exit ' + r.status + ')' + (r.error ? ': ' + r.error.message : ''));
+    for (const l of ((r.stdout || '') + (r.stderr || '')).trim().split('\n').filter(l => /✗|Error|not found/.test(l)).slice(0, 6)) console.log(`${C.dim}      ${l}${C.reset}`);
+  } else if (+m[1] !== REMOVE_ONE_SIM_PIN || +m[2] !== 0) fail(`remove-one-sim ran ${m[1]} cases (${m[2]} failed); pinned at ${REMOVE_ONE_SIM_PIN} — re-pin only for a case added or removed on purpose (never lower it to hide one)`);
+  if (!bad) ok(`teacherRemoveDeleteProgress: pinned, defined once, called once (the Delete dialog); ${warnLines.length} warning line(s); remove-one-sim ${m ? m[1] : '?'} of ${REMOVE_ONE_SIM_PIN} cases. The rules are the guard (teacher: read and delete, never create or update)`);
 }
 
 function checkSiteErrors() {
@@ -19118,21 +19170,25 @@ function checkPracticeMinutes(i18nTable) {
       /* The teacher reads minutes/{uid}/weeks/* (2026-11-06: the console's Practice minutes view) and, since 2026-11-13,
          minutes/{uid}/days/* (the Students view's "Back from an absence": which days a student saved work), and NOTHING ELSE
          under minutes/: the tree block keeps no isTeacher at all (it would reach the tag, the only link between a person and
-         the boards). Each of the two keeps exactly one teacher line, `allow read: if isTeacher();` — never a teacher write,
-         never a wider grant. The weeks block is pinned WHOLE (WEEKS_SHIPPED); the days block's teacher line is pinned here. */
+         the boards). Each of the two keeps exactly two teacher lines, `allow read: if isTeacher();` and, since 2026-11-14
+         (Jonathan: the console's "Delete this student's data…", teacher-remove.js), `allow delete: if isTeacher();` — never a
+         teacher write, create or update, never a wider grant. The weeks block is pinned WHOLE (WEEKS_SHIPPED); the days block's
+         teacher lines are pinned here. The tree block has no delete for anyone. */
       for (const [n, b] of [['tree', mins], ['days', days], ['weeks', weeks]]) {
         if (n === 'tree' && /isTeacher/.test(b)) fail(`minutes ${n} rule lets the teacher in — only minutes/{uid}/weeks and minutes/{uid}/days are teacher-readable (2026-11-06, 2026-11-13)`);
         if (n === 'days') {
-          const tl = b.match(/allow[^;]*isTeacher[^;]*;/g) || [];
-          if (tl.length !== 1 || !/^allow read: if isTeacher\(\);$/.test(tl[0].replace(/\s+/g, ' ').trim())) fail(`minutes days rule: the teacher's ONE line must be exactly "allow read: if isTeacher();" (read only, 2026-11-13) — found ${JSON.stringify(tl)}`);
+          const tl = (b.match(/allow[^;]*isTeacher[^;]*;/g) || []).map(x => x.replace(/\s+/g, ' ').trim());
+          if (tl.length !== 2 || tl[0] !== 'allow read: if isTeacher();' || tl[1] !== 'allow delete: if isTeacher();') fail(`minutes days rule: the teacher's TWO lines must be exactly "allow read: if isTeacher();" (2026-11-13) then "allow delete: if isTeacher();" (2026-11-14) — found ${JSON.stringify(tl)}`);
         }
         if (!/pmOwner\(userId\)/.test(b)) fail(`minutes ${n} rule is not owner-only (pmOwner(userId))`);
-        if (/\bdelete\b|allow\s+write/.test(b)) fail(`minutes ${n} rule allows delete or blanket write`);
+        /* The one delete allowed: the teacher's, in days and weeks (2026-11-14). Taken out, nothing may mention delete or write. */
+        const bNoDel = n === 'tree' ? b : b.replace(/allow delete: if isTeacher\(\);/, '');
+        if ((n !== 'tree' && bNoDel === b) || /\bdelete\b|allow\s+write/.test(bNoDel)) fail(`minutes ${n} rule allows a delete other than the teacher's one "allow delete: if isTeacher();", or a blanket write${n !== 'tree' && bNoDel === b ? ' (the teacher\'s delete line is missing: the console\'s Delete this student\'s data stops at practice minutes)' : ''}`);
       }
       if (!/hasOnly\(\['seconds'\]\)/.test(days) || !/<= dailyCapSeconds\(\)/.test(days)) fail("minutes days rule must be { seconds } only and capped at dailyCapSeconds()");
       if (!/hasOnly\(\['seconds', 'goalSeconds', 'hit'\]\)/.test(weeks) || !/hit is bool/.test(weeks)) fail("minutes weeks rule must be { seconds, goalSeconds, hit } only, hit a bool");
-      const WEEKS_SHIPPED = "match /minutes/{userId}/weeks/{week} { allow read: if isTeacher(); allow create, update: if pmOwner(userId) && week.matches('^[0-9]{4}-W[0-9]{2}$') && request.resource.data.keys().hasOnly(['seconds', 'goalSeconds', 'hit']) && request.resource.data.keys().hasAll(['seconds', 'goalSeconds', 'hit']) && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 7 * dailyCapSeconds() && request.resource.data.goalSeconds is number && request.resource.data.goalSeconds >= 0 && request.resource.data.goalSeconds <= 86400 && request.resource.data.hit is bool; }";
-      if (weeks.replace(/\s+/g, ' ').trim() !== WEEKS_SHIPPED) fail('firestore.rules: the minutes/{userId}/weeks block differs from the one shipped (teacher READ only, 2026-11-06). If this is on purpose, change WEEKS_SHIPPED here with it and tell Jonathan to paste the rules again');
+      const WEEKS_SHIPPED = "match /minutes/{userId}/weeks/{week} { allow read: if isTeacher(); allow delete: if isTeacher(); allow create, update: if pmOwner(userId) && week.matches('^[0-9]{4}-W[0-9]{2}$') && request.resource.data.keys().hasOnly(['seconds', 'goalSeconds', 'hit']) && request.resource.data.keys().hasAll(['seconds', 'goalSeconds', 'hit']) && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 7 * dailyCapSeconds() && request.resource.data.goalSeconds is number && request.resource.data.goalSeconds >= 0 && request.resource.data.goalSeconds <= 86400 && request.resource.data.hit is bool; }";
+      if (weeks.replace(/\s+/g, ' ').trim() !== WEEKS_SHIPPED) fail('firestore.rules: the minutes/{userId}/weeks block differs from the one shipped (teacher READ, 2026-11-06, and DELETE, 2026-11-14). If this is on purpose, change WEEKS_SHIPPED here with it and tell Jonathan to paste the rules again');
     }
     /* The class rank (2026-11-05): ONE number per student keyed by the private Top 5 tag, never the uid. The uid-keyed minutesBoard (2026-11-04) is GONE:
        its all-time seconds were nearly equal to this week's, so joining it to the tag board by value linked tags to uids (and the live quiz links
@@ -19162,7 +19218,7 @@ function checkPracticeMinutes(i18nTable) {
        pinned WHOLE like minutesBoard. The board's docs are keyed by a private random tag, never a uid; the tag lives only in the student's own
        owner-only doc minutes/{uid}/meta/board, and a write to the board must be to the doc whose id is the writer's own tag. A change to either
        block is a change Jonathan must re-paste. */
-    const TAG_SHIPPED = "match /minutes/{userId}/meta/board { allow create: if pmOwner(userId) && request.resource.data.keys().hasOnly(['id']) && request.resource.data.id is string && request.resource.data.id.matches('^[0-9a-f]{32}$'); }";
+    const TAG_SHIPPED = "match /minutes/{userId}/meta/board { allow delete: if isTeacher(); allow create: if pmOwner(userId) && request.resource.data.keys().hasOnly(['id']) && request.resource.data.id is string && request.resource.data.id.matches('^[0-9a-f]{32}$'); }";
     /* read and create/update: the rules' gate (GATE above). */
     const WB_SHIPPED = "match /weekBoard/{tag} { allow read: if isSchool(); allow create, update: if isSchool() && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id && request.resource.data.keys().hasOnly(['week', 'period', 'seconds']) && request.resource.data.keys().hasAll(['week', 'period', 'seconds']) && request.resource.data.week is string && request.resource.data.week.matches('^[0-9]{4}-W[0-9]{2}$') && request.resource.data.period in ['4', '7', 'CAS'] && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 7 * dailyCapSeconds(); }";
     /* The rest of the minutes tree is pinned too (2026-11-04 review): a tree block of `allow read, update: if pmOwner(userId)` would let a
@@ -19310,14 +19366,22 @@ function checkPracticeMinutes(i18nTable) {
     /* The WHOLE of teacher.js, not just the block (N3: a helper defined elsewhere could read days): exactly two collection('minutes')
        — the weeks read here and, since 2026-11-13, teacherAbsDaysGet's days read (the Students view's "Back from an absence") —
        no minutes/… path string, and no collection/doc call naming meta, rankBoard or weekBoard; 'days' only in that one read,
-       which is pinned whole: a server read of the last days by document id, nothing written. */
+       which is pinned whole: a server read of the last days by document id, nothing written.
+       2026-11-14 (teacher-remove.js, "Delete this student's data…"): ONE more, pinned whole and taken out before the counts:
+       teacherRemoveDeleteBoardTag(), the delete of one student's private tag (minutes/{uid}/meta/board) by path. The teacher's
+       account may delete it and still never read it (firestore.rules). The days and weeks that dialog deletes are found
+       through the two reads above (their snapshots' refs), so nothing else names minutes/. */
     {
-      const nMin = (tsrc.match(/collection\(\s*['"`]minutes['"`]\s*\)/g) || []).length;
-      const pathStr = tsrc.match(/['"`]\/?minutes\//g) || [];
+      const TAG_DELETE = "\nfunction teacherRemoveDeleteBoardTag(uid){\n  return db.collection('minutes').doc(uid).collection('meta').doc('board').delete();\n}\n";
+      const tagN = tsrc.split(TAG_DELETE).length - 1;
+      const tsrcM = tsrc.split(TAG_DELETE).join('\n');
+      if (tagN !== 1 || /function teacherRemoveDeleteBoardTag\(/.test(tsrcM)) fail(`teacher.js: teacherRemoveDeleteBoardTag() (teacher-remove.js) must be exactly the pinned delete of minutes/{uid}/meta/board, once — found ${tagN} pinned cop${tagN === 1 ? 'y' : 'ies'}${/function teacherRemoveDeleteBoardTag\(/.test(tsrcM) ? ' and a changed one' : ''}`);
+      const nMin = (tsrcM.match(/collection\(\s*['"`]minutes['"`]\s*\)/g) || []).length;
+      const pathStr = tsrcM.match(/['"`]\/?minutes\//g) || [];
       const DAYS_READ = "\nfunction teacherAbsDaysGet(uid, from, today){\n  const id=firebase.firestore.FieldPath.documentId();\n  return db.collection('minutes').doc(uid).collection('days').where(id,'>=',from).where(id,'<=',today).get({source:'server'});\n}\n";
-      const daysCalls = (tsrc.match(/(?:collection|doc|collectionGroup)\(\s*['"`][^'"`]*\bdays\b/g) || []).length;
+      const daysCalls = (tsrcM.match(/(?:collection|doc|collectionGroup)\(\s*['"`][^'"`]*\bdays\b/g) || []).length;
       if (!tsrc.includes(DAYS_READ) || daysCalls !== 1) fail(`teacher.js: the console's one read of minutes/{uid}/days must be teacherAbsDaysGet() exactly as pinned in 1cg (a server read by document id, never a write) — found ${daysCalls} days call(s)${tsrc.includes(DAYS_READ) ? '' : ', and teacherAbsDaysGet() differs from the pin'}`);
-      const sub = tsrc.match(/(?:collection|doc|collectionGroup)\(\s*['"`][^'"`]*\b(?:meta|rankBoard|weekBoard)\b/g) || [];
+      const sub = tsrcM.match(/(?:collection|doc|collectionGroup)\(\s*['"`][^'"`]*\b(?:meta|rankBoard|weekBoard)\b/g) || [];
       /* collectionGroup anywhere in teacher.js (it would need a wildcard-first rule; the rules refuse it, so it would fail quietly),
          and a space before a collection/doc call's parenthesis (a spelling the patterns above would not see): both 0 (round-3 review). */
       if (/collectionGroup/.test(tsrc)) fail('teacher.js uses collectionGroup: the rules have no wildcard-first match (1cg) — read minutes/{uid}/weeks per student');
@@ -19522,6 +19586,7 @@ function checkPracticeMinutes(i18nTable) {
   checkSongFilesLoader();
   checkSongFilesConsole();
   await checkPlantAFault();
+  checkRemoveOne();
   await checkBackingLoudness();
   checkSiteFill();
   checkPartSizes();

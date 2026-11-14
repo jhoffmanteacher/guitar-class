@@ -186,10 +186,12 @@ async function loadProgress(){
   progressLoadFailed = false;
   progressLoadDenied = false;
   swap45Done = false;
+  progressDocFound = false; progressStartOverApplied = 0;   // Start over (progressStartOverAtSignIn)
   try{
     await ensureDb();
     const doc = await db.collection('progress').doc(currentUser.uid).get();
     if(doc.exists){
+      progressDocFound = true; progressStartOverApplied = Number((doc.data() || {}).startOverApplied) || 0;
       // Module 4/5 swap (2026-10-12): an unmarked doc is read in the new numbering — see swap45OnLoad.
       const data = swap45OnLoad(doc.data());
       const raw = data.skills||{};
@@ -223,6 +225,115 @@ async function loadProgress(){
       studentPeriod = data.period || '';
     } else resetLoadedProgress();
   } catch(e){ progressLoadFailed=true; progressLoadDenied = !!(e && e.code === 'permission-denied'); console.warn('[guitar-class] progress load failed — running read-only on derived data', e); resetLoadedProgress(); }
+}
+
+/* ── Start over / Delete, from the console (2026-11-14; teacher-remove.js) ──
+   The console never creates or edits a progress doc. "Start this student
+   over…" writes a marker in config/class, progressStartOver[uid] = T (a time);
+   "Delete this student's data…" deletes the doc (and the rest) and writes
+   progressDeleted[uid] = T. The student's own page looks at them ONCE, here, at
+   sign-in on the main site, and nowhere else (not before saves, not on tab
+   return, not on Song Journey pages), and only when BOTH sign-in reads of this
+   load succeeded (the student's doc and the class settings): never on a guess.
+     - Start over: when T is newer than the doc's own startOverApplied (absent =
+       never), ONE transaction on the student's own doc deletes the lesson
+       fields (PROGRESS_START_OVER_FIELDS) and sets startOverApplied: T; this
+       Chromebook's copies of them are cleared; the doc is read again and the
+       load goes on with it (the app is not on screen yet: no page reload). A
+       failed read or transaction does nothing; the next sign-in tries again.
+     - Delete: the doc is gone and T is set: this Chromebook's copies of the
+       student's work are cleared, so the new-student start (resetLoadedProgress
+       reads the local practice log and place, caAdoptLocalTicks the legacy
+       activity ticks) re-uploads nothing old.
+   THE LIMIT (said in the console's dialogs and in Manage): a page that is
+   already open keeps its old copy and saves it again on its next save (after a
+   Delete it re-creates the record, after a Start over it puts old lesson work
+   back). Nothing here engineers that away (review rounds 1 and 2, 2026-11-14:
+   each attempt put an ordinary student's save at risk). The teacher presses
+   the button again. */
+/* What Start over empties, by group. Today only 'lessons' (Jonathan,
+   2026-11-14: modules only); adding a group is one word in START_OVER_CLEARS.
+   If you add one, change what the student's notice (reset.startedOver,
+   i18n.js) and the console's dialog (trmStartOverLine) say is kept. */
+const START_OVER_GROUPS = {
+  lessons:    ['skills', 'responses', 'completed', 'lastModule', 'lastSet', 'songReady', 'songReadyAt', 'practiceLog'],
+  activities: ['classActivities', 'caSteps', 'exitChecks'],
+  games:      ['games'],
+  streak:     ['streak'],
+};
+const START_OVER_CLEARS = ['lessons'];
+const PROGRESS_START_OVER_FIELDS = START_OVER_CLEARS.flatMap(g => START_OVER_GROUPS[g]);
+let progressDocFound = false;          // this load's progress read found a doc
+let progressStartOverApplied = 0;      // that doc's startOverApplied (0 = never)
+let progressMarkers = { over: 0, del: 0, ok: false };   // this load's config/class read: this student's markers
+let progressResetNotice = '';          // 'over' | 'del': showApp says it once (showProgressResetNotice)
+function progressMarkersOf(d, uid){
+  const num = v => { const n = Number(v); return Number.isFinite(n) && n > 0 ? n : 0; };
+  return { over: num(((d && d.progressStartOver) || {})[uid]), del: num(((d && d.progressDeleted) || {})[uid]), ok: true };
+}
+/* This student's copies on the Chromebook: the lesson ones for a Start over;
+   for a Delete also the legacy activity ticks, the recording consent, the
+   practice-minutes copies and the Hear It First copy. Returns how many it removed. */
+function progressClearDevice(del){
+  const uid = currentUser && currentUser.uid;
+  if(!uid) return 0;
+  const keys = ['practiceLog', 'gc-lastModule', 'gc-lastSet', 'gc-srPicks'].map(k => k + ':' + uid);
+  if(del) keys.push('caStepsToday:' + uid, 'micRecConsent:' + uid, 'hif:v1:' + uid, 'pm:c:' + uid, 'pm:t5:' + uid, 'pm:w:' + uid, 'pm:q:' + uid);
+  let n = 0;
+  try{
+    if(del) for(let i = localStorage.length - 1; i >= 0; i--){ const k = localStorage.key(i); if(k && k.indexOf('pm:q:' + uid + ':') === 0) keys.push(k); }
+    keys.forEach(k => { if(localStorage.getItem(k) !== null){ localStorage.removeItem(k); n++; } });
+  }catch(e){ /* storage unavailable: nothing kept there either */ }
+  return n;
+}
+/* Called once per sign-in, after loadProgress() and loadClassConfig() (app/start.js). Never throws. */
+async function progressStartOverAtSignIn(){
+  if(!currentUser || IS_TEACHER_MODE || isDevBypassUser() || progressLoadFailed || !progressMarkers.ok) return;
+  const user = currentUser;
+  if(!progressDocFound){
+    /* Deleted: start as a new student with nothing old from this Chromebook.
+       caAdoptLocalTicks already ran (it adopts the legacy local ticks), so the
+       state it built is dropped and the new-student start runs again. */
+    // _dirtyKeys too: caAdoptLocalTicks may have taken the only device copy (the legacy ticks) already (review R3-4).
+    if(progressMarkers.del && (progressClearDevice(true) + _dirtyKeys.size)){
+      clearTimeout(saveTimer); _dirtyKeys.clear(); caStepDone = {};
+      resetLoadedProgress();
+      progressResetNotice = 'del';
+    }
+    return;
+  }
+  const T = progressMarkers.over;
+  // A Delete pressed after the Start over replaces it: the record now is a new student's (review R3-1).
+  if(!T || !(T > progressStartOverApplied) || progressMarkers.del > T) return;
+  try{
+    await ensureDb();
+    if(!db) return;
+    const ref = db.collection('progress').doc(user.uid);
+    let applied = false;
+    await db.runTransaction(async tx => {
+      applied = false;
+      const snap = await tx.get(ref);
+      if(!snap.exists || !(T > (Number((snap.data() || {}).startOverApplied) || 0))) return;   // gone, or another tab applied it
+      const patch = { startOverApplied: T };
+      PROGRESS_START_OVER_FIELDS.forEach(f => { patch[f] = firebase.firestore.FieldValue.delete(); });
+      tx.update(ref, patch);
+      applied = true;
+    });
+    if(currentUser !== user) return;
+    progressClearDevice(false);              // before the read below: a doc with no practiceLog falls back to the local copy
+    clearTimeout(saveTimer); _dirtyKeys.clear();
+    await loadProgress();                    // the emptied doc (another tab's apply counts the same)
+    if(applied) progressResetNotice = 'over';
+  }catch(e){ console.warn('[guitar-class] the teacher\'s start over is not applied yet; the next sign-in tries again', e); }
+}
+/* One line, once, after a start over or a delete reached this Chromebook. */
+function showProgressResetNotice(){
+  const kind = progressResetNotice;
+  progressResetNotice = '';
+  if(kind !== 'over' && kind !== 'del') return;
+  const { d, msg, close } = topNoticeParts('reset-notice', 'status', kind === 'del' ? 'reset.deleted' : 'reset.startedOver');
+  d.append(msg, close);
+  document.body.appendChild(d);
 }
 
 /* ── Games access (teacher-controlled) ──
@@ -273,6 +384,8 @@ async function loadClassConfig(){
     const openN = Number((d.moduleOpenThrough||{})[currentUser.uid]);
     moduleOpenThrough = (Number.isInteger(openN) && openN >= 2 && openN <= 12) ? openN : 0;
     try{ localStorage.setItem('caOpenThrough', JSON.stringify({uid: currentUser.uid, v: moduleOpenThrough})); }catch(e){}
+    // The teacher's Start over / Delete markers for this student (progressStartOverAtSignIn). From THIS read only: never cached.
+    progressMarkers = progressMarkersOf(d, currentUser.uid);
     const ms = d.micSampling || {};
     const msMax = Number(ms.max);
     micSampling = { on: ms.on === true && msMax > 0, max: msMax > 0 ? msMax : 0 };

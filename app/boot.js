@@ -776,7 +776,7 @@ function loadScriptOnce(src){
    into parts on 2026-11-11, tools/split-site.mjs). tools/site-src.mjs reads these two
    lines, so each stays ONE line that starts the line, and neither name may appear in any other comment. */
 const COACH_JS_PARTS = ['coach-core.js', 'coach-hub.js', 'coach-chords.js', 'coach-ear.js', 'coach-strum.js', 'coach-runner.js', 'coach-more.js'];
-const TEACHER_JS_PARTS = ['teacher-core.js', 'teacher-activities.js', 'teacher-songs.js', 'teacher-config.js', 'teacher-manage.js', 'teacher-mic.js', 'teacher-students.js', 'teacher-backup.js', 'teacher-errors.js', 'teacher-livegames.js', 'teacher-accounts.js', 'teacher-songrequests.js', 'teacher-songfiles.js'];
+const TEACHER_JS_PARTS = ['teacher-core.js', 'teacher-activities.js', 'teacher-songs.js', 'teacher-config.js', 'teacher-manage.js', 'teacher-mic.js', 'teacher-students.js', 'teacher-backup.js', 'teacher-errors.js', 'teacher-livegames.js', 'teacher-accounts.js', 'teacher-songrequests.js', 'teacher-songfiles.js', 'teacher-remove.js'];
 /* One after another, each only when the one before it has run: a later part uses what an earlier part defines.
    Every file keeps its own loadScriptOnce promise, so a part that failed to load is the only one fetched again
    on the next try, and a part that already ran never runs twice (a second run would redeclare its consts). */
@@ -1026,26 +1026,22 @@ async function flushBeforeLeaving(ms){
    with work still unsaved. Same look as the safety-net banner at the top of
    this file, but at the TOP of the screen: offline is the usual reason, and
    the offline banner already holds the bottom. */
-function showUnsavedNotice(anywayKey, onAnyway){
-  const old = document.getElementById('unsaved-notice');
+/* The top-of-screen notice both of these use: #id, one i18n line and a ×.
+   Returns the box and its parts; the caller adds any button and appends
+   [msg, ..., close] itself. */
+function topNoticeParts(id, role, key){
+  const old = document.getElementById(id);
   if(old) old.remove();
   const d = document.createElement('div');
-  d.id = 'unsaved-notice';
-  d.setAttribute('role', 'alert');
+  d.id = id;
+  d.setAttribute('role', role);
   d.style.cssText = 'position:fixed;left:12px;right:12px;top:12px;z-index:99999;'
     + 'max-width:520px;margin:0 auto;padding:12px 44px 12px 16px;border-radius:12px;'
     + 'background:#514a7d;color:#fff;font:14px/1.45 system-ui,-apple-system,sans-serif;'
     + 'box-shadow:0 6px 24px rgba(0,0,0,.28)';
   const msg = document.createElement('span');
-  msg.setAttribute('data-i18n', 'save.notSavedYet');
-  msg.textContent = t('save.notSavedYet');
-  const go = document.createElement('button');
-  go.type = 'button';
-  go.setAttribute('data-i18n', anywayKey);
-  go.textContent = t(anywayKey);
-  go.style.cssText = 'margin-left:8px;padding:3px 12px;border:0;border-radius:14px;'
-    + 'background:#fff;color:#514a7d;font-weight:600;cursor:pointer';
-  go.onclick = () => { d.remove(); onAnyway(); };
+  msg.setAttribute('data-i18n', key);
+  msg.textContent = t(key);
   const close = document.createElement('button');
   close.type = 'button';
   close.setAttribute('data-i18n-attr', 'aria-label:offline.dismiss');
@@ -1054,6 +1050,17 @@ function showUnsavedNotice(anywayKey, onAnyway){
   close.style.cssText = 'position:absolute;top:8px;right:12px;background:none;border:0;'
     + 'color:#fff;font-size:1.25rem;line-height:1;cursor:pointer';
   close.onclick = () => d.remove();
+  return { d, msg, close };
+}
+function showUnsavedNotice(anywayKey, onAnyway){
+  const { d, msg, close } = topNoticeParts('unsaved-notice', 'alert', 'save.notSavedYet');
+  const go = document.createElement('button');
+  go.type = 'button';
+  go.setAttribute('data-i18n', anywayKey);
+  go.textContent = t(anywayKey);
+  go.style.cssText = 'margin-left:8px;padding:3px 12px;border:0;border-radius:14px;'
+    + 'background:#fff;color:#514a7d;font-weight:600;cursor:pointer';
+  go.onclick = () => { d.remove(); onAnyway(); };
   d.append(msg, go, close);
   document.body.appendChild(d);
 }
@@ -1702,6 +1709,8 @@ function showApp(user){
   // The period question blocks the whole app, so it still gets first crack
   // at the screen on sign-in.
   maybeShowPeriodPicker();
+  // The teacher started this student over or deleted their data: one line, once (app/save.js).
+  showProgressResetNotice();
   // One long-lived listener on the live-quiz session doc, so a game the
   // teacher starts mid-period reaches a student who's had the site open all
   // along. Guarded: live-quiz.js is a separate deferred script.

@@ -861,6 +861,12 @@
     'save.notSavedYet':      { en: 'Not saved yet — reconnect to the internet first, then try again.',
                                es: 'Todavía no se guardó — primero vuelve a conectarte a internet y luego inténtalo otra vez.' },
     'save.signOutAnyway':    { en: 'Sign out anyway', es: 'Cerrar sesión de todos modos' },
+    // The teacher's Start over / Delete reached this Chromebook (showProgressResetNotice, app/save.js; teacher-remove.js).
+    // True for START_OVER_CLEARS = ['lessons'] (app/save.js): change it with that list.
+    'reset.startedOver':     { en: 'Your teacher started you over: your lesson steps are empty, and your In-Class Activities, game scores, streak and practice minutes are kept.',
+                               es: 'Tu maestro te hizo empezar de nuevo: tus pasos de las lecciones están vacíos, y se quedan tus actividades de clase, tus puntajes de juegos, tu racha y tus minutos de práctica.' },
+    'reset.deleted':         { en: 'Your teacher removed your saved work. You are starting fresh.',
+                               es: 'Tu maestro borró tu trabajo guardado. Empiezas de cero.' },
     'save.refreshAnyway':    { en: 'Refresh anyway', es: 'Actualizar de todos modos' },
 
     // ── Offline banner (app.js, near the top) ──

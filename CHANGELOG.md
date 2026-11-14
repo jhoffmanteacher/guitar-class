@@ -6,6 +6,11 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-14 — Your teacher can start you over
+
+- **You may see one line, once: "Your teacher started you over."** It means your teacher emptied your lesson steps, answers and ratings in the modules so you can do them again. Your In-Class Activities, game scores, streak and practice minutes are kept. It shows only when your teacher chose this for you, the next time you sign in.
+- **Nothing else changes for you.** Saving, the lessons, the games and the Song Journey pages work as before.
+
 ## 2026-11-14 — The Games page is sorted by what each game trains
 
 - **Four groups at the top.** Chord switching (Power Chord Switch, Change Up), Rhythm and tempo (Strum Radar, Strum Hero, Pattern Detective), Finger strength (Finger Gym: The Ladder) and Notes on the low E and A strings (Note Runner, Note Hunt, Fret Zap).
