@@ -307,6 +307,24 @@ function ensurePlayer(){
   if(!box || !box.dataset.audio) return null;
   if(box.dataset.loaded) return box.querySelector('audio');
 
+  /* SONG FILES (2026-11-14; app/songfiles.js): a page whose band files are
+     behind the sign-in names them 'private:<id>'. No page does yet (Step 2
+     switches the Watchtower page, and adds app/songfiles.js to it). Signed
+     out, or without the loader, the box shows one plain line and no player;
+     a press after signing in builds it. A public page skips all of this. */
+  var sfPrivate = Object.keys(box.dataset).some(function(k){ return /^audio/.test(k) && /^private:/.test(box.dataset[k] || ''); });
+  if(sfPrivate){
+    var sfNoLoader = typeof songFileWaitThen !== 'function';
+    if(sfNoLoader || !songFileHost().user){
+      var line = box.querySelector('.sf-line');
+      if(!line){ line = document.createElement('div'); line.className = 'sf-line'; line.setAttribute('role', 'status'); box.appendChild(line); }
+      var key = sfNoLoader ? 'sf.failed' : 'sf.signIn';
+      line.setAttribute('data-i18n', key);
+      line.textContent = t(key);
+      return null;
+    }
+  }
+
   var a = document.createElement('audio');
   a.controls = true;
   a.loop = true;
@@ -327,6 +345,10 @@ function ensurePlayer(){
   var synthClick = barClick || gridClick;
 
   var currentSrc = function(){
+    var s = rawSrc();
+    return sfPrivate ? songFileSrc(s) : s;
+  };
+  var rawSrc = function(){
     if(synthClick) return guitarOn ? (slowOn ? d.audioSlowFull : d.audioFull) : (slowOn ? d.audioSlow : d.audio);
     if(guitarOn){
       if(slowOn) return metroOn ? d.audioSlowFullMetronome : d.audioSlowFull;
@@ -360,11 +382,18 @@ function ensurePlayer(){
     };
     pendingSwitch = { t: t, play: wasPlaying, resume: resume };
     a.addEventListener('loadedmetadata', resume);
+    // A private file not loaded yet: load it first ("Loading the song… 40%"), then switch.
+    if(sfPrivate && songFileNeedsLoad(rawSrc())){
+      a.pause();
+      songFileWaitThen(box, rawSrc(), function(){ a.src = currentSrc(); a.load(); });
+      return;
+    }
     a.src = currentSrc();
     a.load();
   };
 
-  a.src = currentSrc();
+  if(sfPrivate && songFileNeedsLoad(rawSrc())) songFileWaitThen(box, rawSrc(), function(){ a.src = currentSrc(); a.play().catch(function(){}); });
+  else a.src = currentSrc();
 
   /* The page-made click (data-click-anchor or data-click-bars, above). One
      click per counted beat, the next one scheduled once it is under 100 ms

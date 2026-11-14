@@ -866,6 +866,7 @@ function pcActivity(root){
 function pcWindow(L, slow){ return snippetWindow(L.tr, { fromBar: L.firstBar, bars: L.totalBars }, slow); }
 function pcStatus(root, html){ const el = root.querySelector('.pc-status'); if(el) el.innerHTML = html || ''; }   // '' = :empty, see styles.css
 function pcStop(){
+  songFileCancelWait();                // a card waiting for its song (SONG FILES, app/songfiles.js) never starts by itself after a stop
   if(!pcState) return;
   const st = pcState;
   pcState = null;                      // first, so the frame loop's guard bails
@@ -985,10 +986,13 @@ function pcStart(root, si, rep){
   const L = a && pcLayout(a);
   if(!L || !L.sections[si]) return;
   const slow = root.dataset.slow === '1', guitar = root.dataset.guitar === '1';
+  const src = snippetSrc(L.tr, slow, guitar);
+  // A private song not on this page yet: "Loading the song… 40%", then this press again (SONG FILES).
+  if(songFileNeedsLoad(src)){ songFileWaitThen(root, src, () => pcStart(root, si, rep)); return; }
   const audio = new Audio();
   audio.preload = 'auto';
   audio.loop = false;                  // the window is looped (or stopped) by hand, in pcFrame
-  audio.src = snippetSrc(L.tr, slow, guitar);
+  audio.src = src;
   slowestApplyRate(audio, pcRate(root));
   /* `rep` (optional): start at that lap of the section — a tap on a chord on
      a lyric sheet (pcSheetStartAt). The loop, if any, still returns to the
@@ -1392,8 +1396,17 @@ function pcRetrack(root){
   const st = pcState;
   if(!st || st.root !== root) return;
   if(st.counting){ pcStart(root, st.loopFrom, st.fromRep); return; }
-  pcCancelHandoff(st);
   const slow = root.dataset.slow === '1', guitar = root.dataset.guitar === '1';
+  /* The new tier is a private file not loaded yet (SONG FILES): stop, load it,
+     then start the section that was playing again, on the new tier. */
+  const sfSrc = snippetSrc(st.L.tr, slow, guitar);
+  if(songFileNeedsLoad(sfSrc)){
+    const from = st.loopFrom;
+    pcStop();
+    songFileWaitThen(root, sfSrc, () => pcStart(root, from));
+    return;
+  }
+  pcCancelHandoff(st);
   // A switch still waiting for its file keeps the place it saved — see snipSetTier.
   const pend = st.pending;
   const barsIn = pend ? pend.bars : snipBarsAt(st.win, st.audio.currentTime);

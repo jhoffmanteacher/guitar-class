@@ -509,6 +509,18 @@
                                  es: '{n} compases del disco, en bucle — los mismos compases que la tablatura. Detenlo cuando quieras.' },
     'ca.snipLoopNoteNoTab':    { en: '{n} bars of the record, looping. Stop it when you want.',
                                  es: '{n} compases del disco, en bucle. Detenlo cuando quieras.' },
+    // SONG FILES (app/songfiles.js, 2026-11-14): a song kept behind the sign-in. One line in the card while it
+    // downloads to this Chromebook (once), or instead of playing. {pct} is 0 to 99.
+    'sf.loading':              { en: 'Loading the song\u2026 {pct}%', es: 'Cargando la canci\u00f3n\u2026 {pct}%' },
+    'sf.signIn':               { en: 'Sign in to hear this song.', es: 'Inicia sesi\u00f3n para escuchar esta canci\u00f3n.' },
+    'sf.notAllowed':           { en: 'Sign in with your school account to hear this song.',
+                                 es: 'Inicia sesi\u00f3n con tu cuenta de la escuela para escuchar esta canci\u00f3n.' },
+    'sf.limit':                { en: 'This song can\u2019t load until next month: the class has used this month\u2019s song downloads.',
+                                 es: 'Esta canci\u00f3n no se puede cargar hasta el pr\u00f3ximo mes: la clase ya us\u00f3 las descargas de canciones de este mes.' },
+    'sf.offline':              { en: 'This song isn\u2019t on this Chromebook yet. Connect to the internet and press play again.',
+                                 es: 'Esta canci\u00f3n todav\u00eda no est\u00e1 en esta Chromebook. Con\u00e9ctate a internet y vuelve a darle play.' },
+    'sf.failed':               { en: 'This song didn\u2019t load. Press play again in a minute.',
+                                 es: 'Esta canci\u00f3n no se carg\u00f3. Vuelve a darle play en un minuto.' },
     // The Guitar toggle only appears where a full mix has been exported (see
     // SNIPPET_TRACKS in app.js). On = the record plays the part the student
     // is learning, so they can hear whether they've got it; off = the

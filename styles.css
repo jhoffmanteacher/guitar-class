@@ -1919,6 +1919,9 @@ body.rail-collapsed .rail-tools .tool-popup{
 .snip-bar{width:26px;height:26px;border-radius:50%;border:1px solid var(--border2);background:var(--bg2);color:var(--text3);font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
 .snip-bar.bar-now{background:var(--ca-accent);color:var(--bg);border-color:var(--ca-accent)}
 .snip-note{font-size:0.8125rem;color:var(--text2);font-weight:500}
+/* SONG FILES (app/songfiles.js): the one line a snippet card or a Song Journey box shows while its private song loads, or instead of playing. Empty = no box. */
+.sf-line{font-size:0.875rem;font-weight:600;color:var(--purple-text);margin:6px 0 2px}
+.sf-line:empty{display:none}
 /* ?snipcal=1 — the live timecode a track's `anchor` is measured against
    (SNIPPET_TRACKS in app.js). Reachable off localhost too since 2026-09-18
    (anchors get measured on the machine the speakers are on), but only ever

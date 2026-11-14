@@ -727,8 +727,10 @@ function snippetSrc(tr, slow, guitar){
   // Guitar on is only ever honoured when the full mix is actually there; a
   // missing export falls back to rhythm-down rather than a 404 on press.
   // Metronome is not a file — the site makes the click (snipScheduleClick).
-  if(guitar && snippetHasFull(tr)) return slow ? tr.srcFullSlow : tr.srcFull;
-  return slow ? tr.srcSlow : tr.src;
+  // A private path ('private:<id>', SONG FILES in app/songfiles.js) comes back
+  // as its device copy's blob: address once loaded; a public path unchanged.
+  if(guitar && snippetHasFull(tr)) return songFileSrc(slow ? tr.srcFullSlow : tr.srcFull);
+  return songFileSrc(slow ? tr.srcSlow : tr.src);
 }
 /* THE TWIN — a Guitar toggle with no wait (Jonathan: "a delay when I toggle
    the guitar"). The two mixes are different FILES, so flipping the toggle used
@@ -771,6 +773,7 @@ function twinSrcIs(el, src){ return !!el && (el.getAttribute('src') === src || (
    on first use. Does nothing while it is already there. `onLost(el)` is the
    owner's own load-failure handler (snipAudioError / pcAudioError). */
 function twinPark(st, src, onLost){
+  if(songFileNeedsLoad(src)) return;   // a private mix not loaded yet: no twin; the toggle takes the reload path (SONG FILES)
   let tw = st.twin;
   if(!tw){
     tw = st.twin = new Audio();
@@ -899,6 +902,7 @@ function snipPlayBtnHtml(playing){
    gets genuinely confusing, so it is closed off at both ends. */
 let snipState = null;
 function snipStop(){
+  songFileCancelWait();                // a card waiting for its song (SONG FILES, app/songfiles.js) never starts by itself after a stop
   if(!snipState) return;
   const { card, audio, raf } = snipState;
   const gone = snipState;
@@ -939,10 +943,13 @@ function snipToggle(btn){
   const slow = card.dataset.slow === '1';
   const guitar = card.dataset.guitar === '1';
   const win = snippetWindow(tr, spec, slow);
+  const src = snippetSrc(tr, slow, guitar);
+  // A private song not on this page yet: "Loading the song… 40%", then this press again (SONG FILES).
+  if(songFileNeedsLoad(src)){ songFileWaitThen(card, src, () => snipToggle(btn)); return; }
   const audio = new Audio();
   audio.preload = 'auto';
   audio.loop = false;                  // the window is looped by hand, below
-  audio.src = snippetSrc(tr, slow, guitar);
+  audio.src = src;
   slowestApplyRate(audio, snipRate(card));
   /* The bar dots and the sibling tab are looked up once, not every frame:
      both are built with the card and nothing rewrites them in place — any
@@ -1178,6 +1185,13 @@ function snipSetTier(btn, which){
   snipState.win = win;
   const at = snipTimeAtBars(win, isFinite(barsIn) && barsIn > 0 ? barsIn : 0);
   const src = snippetSrc(tr, slow, guitar);
+  /* The new tier is a private file not loaded yet (SONG FILES): stop, load it,
+     then play the card again from the start of its window, on the new tier. */
+  if(songFileNeedsLoad(src)){
+    snipStop();
+    songFileWaitThen(card, src, () => { const b = card.querySelector('.snip-play'); if(b) snipToggle(b); });
+    return;
+  }
   slowestApplyRate(audio, snipRate(card));   // Slowest <-> Slow is the same file, just the rate
   // The count is queued again on the new clock: take back the one already queued (QUEUED CLICKS).
   cancelQueuedClicks(snipState);
