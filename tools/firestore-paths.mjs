@@ -511,16 +511,43 @@ export function realCalls(toks, locals = new Set()) {
 /* The call edges of each segment: real calls (realCalls: NAME( and window.NAME(,
    not a local of the same name, not a definition) and functions handed on by
    name as an argument. */
+/* Event handlers a function only INSTALLS (`el.onclick = () => …`, `addEventListener('click', fn)`) run when
+   a person clicks, not when the function runs, so their calls are not the function's calls (review R3, m2). */
+function withoutInstalledHandlers(body) {
+  const drop = new Set();
+  const skipFn = (i) => {                       // from token i, the extent of a function expression or a name
+    const x = body[i];
+    if (!x) return i;
+    if (x.t === 'id' && x.v === 'function') { let j = i + 1; while (body[j] && body[j].v !== '{') j++; return body[j] ? matchClose(body, j) : j; }
+    if (x.t === 'id' && x.v === 'async') return skipFn(i + 1);
+    let j = i;
+    if (x.t === 'punc' && x.v === '(') j = matchClose(body, i) + 1; else if (x.t === 'id') j = i + 1;
+    if (body[j] && body[j].v === '=>') { const b = body[j + 1]; if (b && b.v === '{') return matchClose(body, j + 1); let d = 0, k = j + 1; for (; k < body.length; k++) { const y = body[k]; if (y.t === 'punc' && /^[([{]$/.test(y.v)) d++; else if (y.t === 'punc' && /^[)\]}]$/.test(y.v)) { if (!d) break; d--; } else if (!d && y.t === 'punc' && (y.v === ';' || y.v === ',')) break; } return k - 1; }
+    return x.t === 'id' ? i : i - 1;              // a plain name handed in
+  };
+  for (let k = 0; k + 2 < body.length; k++) {
+    const x = body[k];
+    if (x.t === 'id' && /^on[a-z]+$/.test(x.v) && body[k - 1] && body[k - 1].v === '.' && body[k + 1].v === '=') { const e = skipFn(k + 2); for (let i = k + 2; i <= e; i++) drop.add(i); }
+    if (x.t === 'id' && x.v === 'addEventListener' && body[k + 1].v === '(') {
+      const close = matchClose(body, k + 1); let d = 0, comma = -1;
+      for (let i = k + 2; i < close; i++) { const y = body[i]; if (y.t === 'punc' && /^[([{]$/.test(y.v)) d++; else if (y.t === 'punc' && /^[)\]}]$/.test(y.v)) d--; else if (!d && y.v === ',' && comma < 0) { comma = i; break; } }
+      if (comma > 0) { const e = Math.min(skipFn(comma + 1), close - 1); for (let i = comma + 1; i <= e; i++) drop.add(i); }
+    }
+  }
+  return drop.size ? body.filter((_, i) => !drop.has(i)) : body;
+}
 export function callGraph(file, src) {
   const toks = Array.isArray(src) ? src : tokenize(src);
   const graph = new Map();
   for (const seg of segments(toks)) {
-    const body = toks.slice(seg.from, seg.to);
+    const body = withoutInstalledHandlers(toks.slice(seg.from, seg.to));
     const locals = localNames(body);
     locals.delete(seg.name);
-    const cur = graph.get(seg.name) || { calls: new Set(), file };
+    // a data table (const NAME = { … } / [ … ]) is not a function: it is never called, so it is no saver
+    const isData = body[0] && body[0].t === 'id' && /^(const|let|var)$/.test(body[0].v) && body[3] && body[3].t === 'punc' && (body[3].v === '{' || body[3].v === '[');
+    const cur = graph.get(seg.name) || { calls: new Set(), file, data: isData };
     for (const c of realCalls(body, locals)) cur.calls.add(c.name);
-    // a function handed on by name (setTimeout(flushSave, 0), addEventListener('x', save)) is an edge too
+    // a function handed on by name to run later (setTimeout(flushSave, 0), p.then(save)) is an edge too
     const walk = (arr) => arr.forEach((x, k) => {
       if (x.t === 'tpl') { x.exprs.forEach(walk); return; }
       if (x.t !== 'id' || locals.has(x.v)) return;
