@@ -6,6 +6,11 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-13 — Power Chord Switch and Change Up judge the strum closest to each change
+
+- **The game now judges the strum you play closest to each chord change.** Before, a sound a second or two early (a classmate's guitar, or your last chord still ringing) could be the one that counted, so a change you played right could show "wrong chord". This mattered most at slow speeds.
+- **The ✓ or ✗ for a change now shows about half a second after the change**, once the game is sure no closer strum is coming. Strumming on every beat still works the same way.
+
 ## 2026-11-13 — Ask for a song
 
 - **You can ask your teacher for a song.** Open Songs and press "Request a song". Paste the YouTube link, then answer two questions: are the lyrics OK for class, and is what the song is about OK for class. If you answer No, write why you still want it (for example, there is a clean version).
