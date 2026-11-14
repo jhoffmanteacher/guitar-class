@@ -144,6 +144,14 @@ section when it tags. If you read this after 2026-11-15 and the routine still sa
 (`CRON_TZ=America/Los_Angeles 0 23 * * 5`) and tell Jonathan.
 
 **Waiting on Jonathan**
+- **Practice copy: built, waiting for Jonathan's key** (2026-11-14). The same files at
+  `https://guitar-class-practice.web.app`, talking to the empty practice project (CLAUDE.md → "Practice copy"). Left:
+  the GitHub secret `FIREBASE_PRACTICE_SA` (his steps: `Claude outputs/practice-copy/JONATHAN-STEPS.md`); until then
+  `.github/workflows/practice.yml` ends green with "practice copy: no key yet, skipped". Unproven until the first run:
+  the deploy itself, sign-in on web.app, the rules deploy with that key's roles. Step 1b, the preview channels: a
+  `ci-try/<name>` push publishes `try-<name>` for 7 days at its own address (printed on the run page), with a real
+  sign-in (the deploy adds the address to the practice project's sign-in domains) and its own browser storage, so a
+  risky change can be signed into and clicked before it reaches main; no rules are published from a branch.
 - **Practice minutes console view** (`997df22`, `07a4e04`): he pasted the rules on 2026-11-06 (memory
   `firestore-rules-published`; no hash check). Left: open **Practice minutes** in the console and check a student or two
   against their My progress (rank can differ slightly: "Recently shipped" → 2026-11-06 Practice minutes in the teacher console).

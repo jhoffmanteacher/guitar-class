@@ -6949,6 +6949,204 @@ function checkSignInAccountChooser() {
   if (!bad) ok(`signIn() ran: 1 popup, prompt 'select_account'; ${files.length} site files read (comments left out): GoogleAuthProvider ${providers.length}x (${providers.join(', ')}), signInWith ${calls.length}x (${calls.join(', ')}), setCustomParameters ${params.length}x (${params.join(', ')}), all inside signIn() (${raw} with comments, pinned); the chooser was set before the popup opened`);
 }
 
+/* 1ed. THE PRACTICE COPY (2026-11-14). The same files are served from a second
+   address, https://guitar-class-practice.web.app (Firebase Hosting of the
+   PRACTICE project), and talk to that project there. firebase-config.js
+   decides, by the page's address, and that decision is the one thing that
+   could send the class to the wrong database. So this check RUNS the file in a
+   sandbox once per address and reads what it chose:
+   - the class settings, on every address but the practice copy's own, are
+     exactly the pinned values (CLASS_PIN), and the practice settings exactly
+     PRACTICE_PIN; the teacher email is the same on both;
+   - exactly three forms get the practice settings: the two Hosting addresses
+     and the practice site's preview channels (guitar-class-practice--<channel>
+     -<8-character hash>.web.app); a page with no address at all (a tool's
+     sandbox, a file) gets the class settings; look-alikes, an upper-case or a
+     trailing-dot address, and any address that merely CONTAINS "practice" get
+     the class settings (a loosened test fails here);
+   - the host test is written with exactly the two names and the pinned
+     pattern (so a new name is a decision, not an accident);
+   - on a class address the strip code touches nothing on the page; on the
+     practice address it adds its strip and its style;
+   - the strip's list of bottom-fixed controls that ride up covers every one
+     styles.css lifts above the offline bar ("OFFLINE BANNER");
+   - .firebaserc names ONLY guitar-class-practice (a stray `firebase deploy`
+     on this repo can then never reach the class project); never add a second
+     project to it;
+   - .github/workflows/practice.yml and firebase.json name no other project:
+     every firebase command in the workflow says --project guitar-class-practice
+     literally (never from a variable or an input), and it has no pull_request
+     trigger;
+   - rules.yml and the emulator rules tools still use a demo- project. */
+function checkPracticeCopy() {
+  head('1ed. The practice copy: which Firebase project each address talks to');
+  let bad = 0;
+  const flag = m => { err(`1ed: ${m}`); problems++; bad++; };
+  const CLASS_PIN = {
+    apiKey: 'AIzaSyB2QKByMeNpV_CaCgvf-oS9HuBDF29dfzU',
+    authDomain: 'guitar-class-2fd21.firebaseapp.com',
+    projectId: 'guitar-class-2fd21',
+    storageBucket: 'guitar-class-2fd21.firebasestorage.app',
+    messagingSenderId: '182670968497',
+    appId: '1:182670968497:web:6e2596b9a0262e70e4c490',
+    measurementId: 'G-M0QVQKTH3C',
+  };
+  const PRACTICE_PIN = {
+    apiKey: 'AIzaSyDTqXYfN6PUnAeN1y-_KeGJ767VAv4fRy4',
+    authDomain: 'guitar-class-practice.firebaseapp.com',
+    projectId: 'guitar-class-practice',
+    storageBucket: 'guitar-class-practice.firebasestorage.app',
+    messagingSenderId: '279579135228',
+    appId: '1:279579135228:web:7e82eb05d68f65b97a1b79',
+  };
+  const PRACTICE = 'guitar-class-practice', CLASS = 'guitar-class-2fd21';
+  const PREVIEW_RE_SRC = '^guitar-class-practice--[a-z0-9-]+-[a-z0-9]{8}\\.web\\.app$';
+  // [hostname (null = no location at all), the project it must choose]
+  const HOSTS = [
+    ['jhoffmanteacher.github.io', CLASS],
+    ['localhost', CLASS],
+    ['127.0.0.1', CLASS],
+    ['[::1]', CLASS],
+    ['', CLASS],
+    [null, CLASS],
+    ['guitar-class-2fd21.web.app', CLASS],
+    ['guitar-class-2fd21.firebaseapp.com', CLASS],
+    ['guitar-class-practice.web.app', PRACTICE],
+    ['guitar-class-practice.firebaseapp.com', PRACTICE],
+    ['guitar-class-practice--try-banner-a1b2c3d4.web.app', PRACTICE],
+    ['guitar-class-practice--x-0z9y8x7w.web.app', PRACTICE],
+    ['guitar-class-practice.web.app.evil.example', CLASS],
+    ['xguitar-class-practice.web.app', CLASS],
+    ['guitar-class-practice--x.web.app.evil.example', CLASS],
+    ['guitar-class-practice--x-a1b2c3d4.web.app.evil.example', CLASS],
+    ['guitar-class-practice--x-a1b2c3d4.firebaseapp.com', CLASS],
+    ['guitar-class-practice--x-a1b2c3d.web.app', CLASS],
+    ['guitar-class-practice-x-a1b2c3d4.web.app', CLASS],
+    ['GUITAR-CLASS-PRACTICE.WEB.APP', CLASS],
+    ['guitar-class-practice.web.app.', CLASS],
+    ['practice.example', CLASS],
+    ['guitar-class-practice.example', CLASS],
+    ['my-guitar-class-practice.web.app', CLASS],
+    ['guitar-class-practice.web.app.github.io', CLASS],
+  ];
+  let src = '';
+  try { src = readFileSync(join(ROOT, 'firebase-config.js'), 'utf8'); } catch { flag('cannot read firebase-config.js'); return; }
+  const same = (a, b) => JSON.stringify(Object.entries(a || {}).sort()) === JSON.stringify(Object.entries(b || {}).sort());
+  const fakeDoc = () => {
+    const made = [];
+    const el = tag => ({ tag, style: { setProperty() {} }, classList: { add() {} }, setAttribute() {}, appendChild() {}, offsetHeight: 32 });
+    const doc = {
+      made, title: 'Guitar Class',
+      documentElement: Object.assign(el('html'), { classList: { add: c => made.push('class:' + c) } }),
+      createElement: t => { made.push(t); return el(t); },
+      getElementById: () => ({}), addEventListener() {},
+    };
+    doc.head = Object.assign(el('head'), { appendChild: () => made.push('head+') });
+    doc.body = Object.assign(el('body'), { appendChild: () => made.push('body+') });
+    return doc;
+  };
+  const runAt = host => {
+    const doc = fakeDoc();
+    const c = { document: doc };
+    if (host !== null) c.location = { hostname: host };
+    vm.runInNewContext(src + '\n;globalThis.__out = { cfg: firebaseConfig, te: TEACHER_EMAIL, p: IS_PRACTICE_COPY };', c, { filename: 'firebase-config.js', timeout: 2000 });
+    return { ...c.__out, made: doc.made, title: doc.title };
+  };
+  let practiceN = 0, classN = 0, te = new Set();
+  for (const [host, want] of HOSTS) {
+    let r;
+    try { r = runAt(host); } catch (e) { flag(`firebase-config.js threw on ${JSON.stringify(host)}: ${e.message}`); continue; }
+    const got = r.cfg && r.cfg.projectId;
+    te.add(r.te);
+    const label = host === null ? '(no location)' : JSON.stringify(host);
+    if (got !== want) { flag(`on ${label} the page talks to ${got}, it must be ${want}${want === CLASS ? ' (only the practice copy\'s own three address forms may choose the practice project)' : ''}`); continue; }
+    if (want === CLASS) {
+      classN++;
+      if (!same(r.cfg, CLASS_PIN)) flag(`on ${label} the class settings are not exactly the pinned values (CLASS_PIN): ${JSON.stringify(r.cfg)}`);
+      if (r.p !== false) flag(`on ${label} IS_PRACTICE_COPY is ${r.p}, must be false`);
+      if (r.made.length || r.title !== 'Guitar Class') flag(`on ${label} firebase-config.js changed the page (${r.made.join(', ') || 'title ' + r.title}): on a class address it must touch nothing`);
+    } else {
+      practiceN++;
+      if (!same(r.cfg, PRACTICE_PIN)) flag(`on ${label} the practice settings are not exactly the pinned values (PRACTICE_PIN): ${JSON.stringify(r.cfg)}`);
+      if (r.p !== true) flag(`on ${label} IS_PRACTICE_COPY is ${r.p}, must be true`);
+      if (!r.made.includes('div') || !r.made.includes('style') || !r.made.includes('class:practice-on') || !/^\[practice\] /.test(r.title)) flag(`on ${label} the practice strip, its style, html.practice-on or the "[practice] " title is missing (${r.made.join(', ')}; title ${r.title})`);
+    }
+  }
+  if (te.size !== 1 || !te.has('jhoffman@seq.org')) flag(`TEACHER_EMAIL differs between addresses or moved: ${[...te].join(', ')}`);
+  // The host test as written: exactly the two names and the pinned preview pattern.
+  const iife = (src.match(/const IS_PRACTICE_COPY = \(function \(\) \{([\s\S]*?)\n\}\)\(\);/) || [])[1];
+  if (!iife) flag('firebase-config.js has no `const IS_PRACTICE_COPY = (function () { … })();`: the host test moved (update 1ed)');
+  else {
+    const names = [...iife.replace(/\/\^[^\n]*\$\//g, '').matchAll(/'([^']*)'|"([^"]*)"/g)].map(m => m[1] ?? m[2]).filter(s => /\./.test(s));
+    const want = ['guitar-class-practice.web.app', 'guitar-class-practice.firebaseapp.com'];
+    if (names.length !== 2 || want.some(w => !names.includes(w))) flag(`the host test names ${JSON.stringify(names)}, it must name exactly ${JSON.stringify(want)}`);
+    const res = [...iife.matchAll(/\/(\^[^\n/]*(?:\\\/[^\n/]*)*\$)\//g)].map(m => m[1]);
+    if (res.length !== 1 || res[0] !== PREVIEW_RE_SRC) flag(`the preview-channel pattern is ${JSON.stringify(res)}, it must be exactly /${PREVIEW_RE_SRC}/`);
+    if (/includes\s*\(|indexOf\s*\(|endsWith\s*\(|startsWith\s*\(|search\s*\(|\/i\b|toLowerCase/.test(iife)) flag('the host test uses includes/indexOf/endsWith/startsWith/search, a case-insensitive pattern or toLowerCase: exact names and the anchored pattern only');
+  }
+  // The strip's ride-up list covers every control styles.css lifts above the offline bar.
+  try {
+    const css = readFileSync(join(ROOT, 'styles.css'), 'utf8');
+    const rule = (css.match(/((?:html\.offline-on [^{},]+,?)+)\{translate:/) || [])[1];
+    const lifted = rule ? rule.split(',').map(s => s.replace('html.offline-on', '').trim()).filter(Boolean) : [];
+    const ride = ((src.match(/var PC_RIDE_UP = \[([^\]]*)\]/) || [])[1] || '').match(/'[^']+'/g)?.map(s => s.slice(1, -1)) || [];
+    if (!lifted.length) flag('styles.css has no `html.offline-on … {translate:` rule to compare the practice strip with (update 1ed)');
+    const miss = lifted.filter(s => !ride.includes(s));
+    if (miss.length) flag(`styles.css lifts ${miss.join(', ')} above the offline bar, the practice strip's PC_RIDE_UP (firebase-config.js) does not: the strip would cover ${miss.length === 1 ? 'it' : 'them'}`);
+  } catch (e) { flag(`cannot compare the ride-up lists: ${e.message}`); }
+  // .firebaserc: the practice project only.
+  try {
+    const rc = JSON.parse(readFileSync(join(ROOT, '.firebaserc'), 'utf8'));
+    const ids = new Set(JSON.stringify(rc).match(/"[a-z][a-z0-9-]{4,}[a-z0-9]"/g)?.map(s => s.slice(1, -1)).filter(s => s !== 'default' && s !== 'projects') || []);
+    if (JSON.stringify(rc) !== JSON.stringify({ projects: { default: PRACTICE } })) flag(`.firebaserc is ${JSON.stringify(rc)}: it must be exactly {"projects":{"default":"${PRACTICE}"}} (never add a second project)`);
+    else if (ids.size !== 1) flag(`.firebaserc names ${[...ids].join(', ')}`);
+  } catch (e) { flag(`.firebaserc missing or not JSON (${e.message}): without it a stray \`firebase deploy\` asks for a project`); }
+  // practice.yml and firebase.json: no other project, no project from a variable.
+  let yml = '';
+  try { yml = readFileSync(join(ROOT, '.github/workflows/practice.yml'), 'utf8'); } catch { flag('.github/workflows/practice.yml is missing'); }
+  if (yml) {
+    const code = yml.split('\n').filter(l => !/^\s*#/.test(l));
+    let fbCmds = 0;
+    code.forEach((l, i) => {
+      const n = i + 1;
+      for (const m of l.matchAll(/(?:--project|(?<![\w-])-P)(?:[=\s]+)(\S+)/g)) if (m[1] !== PRACTICE) flag(`practice.yml: "${l.trim()}" deploys to ${m[1]}: the project must be written literally as ${PRACTICE}`);
+      if (/\bfirebase\s+(?:deploy|hosting:|firestore:|use|target|apps:|projects:)/.test(l)) {
+        fbCmds++;
+        if (!/--project guitar-class-practice(?:\s|$)/.test(l)) flag(`practice.yml: a firebase command without --project ${PRACTICE}: "${l.trim()}"`);
+      }
+      if (/\b(?:GCLOUD_PROJECT|FIREBASE_PROJECT|CLOUDSDK_CORE_PROJECT)\b/.test(l)) flag(`practice.yml sets a project through the environment: "${l.trim()}"`);
+    });
+    if (fbCmds < 3) flag(`practice.yml has ${fbCmds} firebase deploy commands, expected at least 3 (live, rules, preview): this check went blind`);
+    if (/guitar-class-2fd21/.test(yml)) flag('practice.yml names the class project');
+    if (/^\s*pull_request(?:_target)?\s*:/m.test(yml) || /^on:\s*\[[^\]]*pull_request/m.test(yml)) flag('practice.yml runs on pull requests: it must run only on pushes to this repo');
+    if (!/if: github\.repository == 'jhoffmanteacher\/guitar-class'/.test(yml)) flag("practice.yml's job lost `if: github.repository == 'jhoffmanteacher/guitar-class'` (it must never run on a fork)");
+    if (/:\s*write\b/.test(yml.replace(/^\s*#.*$/mg, ''))) flag('practice.yml asks for a write permission: contents: read is all it needs');
+  }
+  try {
+    const fj = readFileSync(join(ROOT, 'firebase.json'), 'utf8');
+    const j = JSON.parse(fj);
+    if (/guitar-class-2fd21/.test(fj) || /"project"/.test(fj)) flag('firebase.json names a project: it must name none (.firebaserc is the one place)');
+    const ig = (j.hosting && j.hosting.ignore) || [];
+    for (const must of ['**/.*', 'tools/**', '**/*.md', 'firestore.rules', 'firestore.rules.paste2', 'firebase.json']) if (!ig.includes(must)) flag(`firebase.json hosting.ignore lost "${must}": the practice copy would publish it`);
+    if (!j.firestore || j.firestore.rules !== 'firestore.rules') flag('firebase.json lost its firestore block (the emulator tools and the practice rules deploy read it)');
+  } catch (e) { flag(`firebase.json unreadable: ${e.message}`); }
+  // The emulator tests stay on a demo- project.
+  try {
+    const ry = readFileSync(join(ROOT, '.github/workflows/rules.yml'), 'utf8');
+    const ps = [...ry.matchAll(/--project[=\s]+(\S+)/g)].map(m => m[1]);
+    if (!ps.length || ps.some(p => !/^demo-/.test(p))) flag(`rules.yml runs its emulator with --project ${ps.join(', ') || '(none)'}: it must be a demo- project`);
+    let tools = 0;
+    for (const f of readdirSync(join(ROOT, 'tools')).filter(f => /rules.*test\.mjs$/.test(f))) {
+      tools++;
+      const t = readFileSync(join(ROOT, 'tools', f), 'utf8');
+      const ids = [...t.matchAll(/projectId:\s*['"]([^'"]+)['"]/g)].map(m => m[1]);
+      if (!ids.length || ids.some(p => !/^demo-/.test(p))) flag(`tools/${f} runs the emulator under ${ids.join(', ') || 'no projectId'}: it must be a demo- project`);
+    }
+    if (tools < 3) flag(`only ${tools} emulator rules tools found: this check went blind`);
+  } catch (e) { flag(`cannot read the emulator settings: ${e.message}`); }
+  if (!bad) ok(`firebase-config.js run on ${HOSTS.length} addresses: ${practiceN} chose the practice project (the two Hosting names and preview channels), ${classN} the class project with the pinned settings and no change to the page; host test exact; .firebaserc = ${PRACTICE} only; practice.yml and firebase.json name no other project; rules.yml and the emulator tools on demo-`);
+}
+
 function checkPrecacheFingerprinted(src, hashed) {
   head('1bt. Every precached file is part of the cache fingerprint');
   const set = new Set(hashed);
@@ -18801,6 +18999,7 @@ function checkPracticeMinutes(i18nTable) {
   checkReviewLabels();
   checkTitleHeadings();
   checkSignInAccountChooser();
+  checkPracticeCopy();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

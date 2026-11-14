@@ -224,6 +224,13 @@ Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `ap
   service-worker block in `app/start.js`, `swResume*`, or the audio cache names in `tools/sw-audio-map.mjs`: also
   `node tools/kill-switch/proof.mjs` (Node, about 1 s; it must end "14 of 14 mutations caught").
   `tools/kill-switch/kill-sw.js` is never loaded by the site and goes in no list.
+- **Practice copy** (2026-11-14): the same files at `https://guitar-class-practice.web.app`, talking to the empty
+  practice project `guitar-class-practice` (made-up data only, never class data). `firebase-config.js` alone picks the
+  project by address (its two Hosting names and preview channels → practice, with a striped "PRACTICE COPY" strip
+  and "[practice]" titles; every other address → the class project, unchanged); `checks.mjs` 1ed pins it.
+  `.github/workflows/practice.yml` publishes it (main → live + `firestore.rules`; `ci-try/**` → 7-day preview) with
+  the secret `FIREBASE_PRACTICE_SA`. Never add a second project to `.firebaserc`, and never deploy to the class
+  project from this repo.
 - **Two guards that only report** (2026-11-13). `checks.mjs` 1dp warns when an English string changes and its Spanish twin does not (`tools/i18n-drift.mjs`): read each line it prints; a line printed in full is a changed fact, order or meaning. Removing twins on purpose (a Journey page, a game's strings) also lowers `DRIFT_FLOOR` in `tools/checks.mjs` (1dp) to the new count, as a pin-only edit in the same commit. The accessibility scan (`node tools/smoke.mjs --only a11y`, axe-core, vendored) runs report-only on GitHub after every push (`browser.yml`, job "a11y scan"); its ratchet against `tools/a11y-baseline.json` (`--a11y-ratchet`) stays OFF until a week of GitHub runs show 0 new signatures and a reviewer has passed the switch-on.
 - **Sweep ratchet**: 3+ instances of a mechanically-detectable error class → permanent `checks.mjs` detector, same session; it must render/execute, match UNESCAPED strings (`unescapeJs()`); break it in a scratch copy and watch it fail.
 - **Activity order/placement** live on the console board (`config/class.activityBoard`,

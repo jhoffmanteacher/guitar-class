@@ -2,5 +2,72 @@
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
+  },
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "**/.*",
+      "**/.*/**",
+      "**/node_modules/**",
+      "firebase.json",
+      "firestore.rules",
+      "firestore.rules.paste2",
+      "firestore.indexes.json",
+      "_config.yml",
+      "**/*.md",
+      "tools/**",
+      "docs/**",
+      "Relevant reference docs/**",
+      "Claude outputs/**",
+      "song-journey-build/**",
+      "screens/**",
+      "package.json",
+      "package-lock.json",
+      "eslint.config.mjs",
+      "**/firebase-debug*.log",
+      "**/firestore-debug.log"
+    ],
+    "headers": [
+      {
+        "source": "**",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=600"
+          },
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
+          }
+        ]
+      },
+      {
+        "source": "/",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "**/*.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      },
+      {
+        "source": "/sw.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      }
+    ]
   }
 }
