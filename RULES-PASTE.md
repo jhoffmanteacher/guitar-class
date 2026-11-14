@@ -16,9 +16,9 @@ file (line endings as LF), so a later edit, or a return to an older text, needs 
 its own; adding a line whose words are already here counts too. Record lines are only ever
 added: 1dn refuses a push that removes or changes one. Newest last. The first line records
 the error-log rules of 2cd2a04, which Jonathan pasted himself on 2026-11-13 (7274ebc); the
-second, school accounts paste 1 of 2 (9332615), published 2026-11-13 (WORKFLOW.md, "School
-accounts: paste 2"). On paste-2 day, the commit that moves `firestore.rules.paste2` into
-`firestore.rules` needs its own line.
+second, "Paste A" (the rules on main at 00d4be4: school accounts step 1, song requests and the
+teacher's read of minutes days), which Jonathan was told on 2026-11-13 to paste. On paste-2
+day, the commit that moves `firestore.rules.paste2` into `firestore.rules` needs its own line.
 
 - 2026-11-13 firestore.rules 789574577823: Jonathan was told on 2026-11-13 to paste it in the Firebase console (Firestore → Rules → Publish)
-- 2026-11-13 firestore.rules 3e9a056175f6: Jonathan was told on 2026-11-13 to paste it in the Firebase console (Firestore → Rules → Publish)
+- 2026-11-13 firestore.rules fbb109792326: Jonathan was told on 2026-11-13 to paste it in the Firebase console (Firestore → Rules → Publish)
