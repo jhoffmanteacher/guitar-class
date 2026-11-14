@@ -1328,6 +1328,9 @@ body.rail-collapsed .rail-tools .tool-popup{
 .tsr-yes{color:var(--text2)}
 .tsr-no{display:inline-block;font-weight:700;color:var(--red-text);background:var(--red-bg);border-radius:6px;padding:1px 8px}
 .tg-table{border-collapse:collapse;width:100%}
+/* Manage → Accounts by sign-in domain (teacher-accounts.js): its tables sit in this block without a
+   .tg-grid-wrap, so a narrow window scrolls the block, not the page. Nothing changes when they fit. */
+.tg-access{overflow-x:auto}
 .tg-table th,.tg-table td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--border2);font-size:0.875rem}
 .tg-table th{font-weight:600;color:var(--text2)}
 .tg-name{font-weight:500}
