@@ -7,6 +7,13 @@
    finished weeks ago), and the derived save categories are held back so a
    session started from a blank slate can't overwrite the real record. */
 let progressLoadFailed = false;
+/* Was a failed read REFUSED by the rules (permission-denied), not lost to the
+   network? Set by the two boot reads below and read only by
+   accessRefusedAtBoot() (app/boot.js), which turns a refusal into the access
+   screen for an account that is not @seq.org (2026-11-13). Nothing here
+   changes what is read, written, or when. */
+let progressLoadDenied = false;
+let classConfigLoadDenied = false;
 
 /* ── Module 4/5 swap: one-time move of saved progress (2026-10-12) ─────────
    On 2026-10-12 Modules 4 and 5 traded places (Open Chords is Module 4,
@@ -177,6 +184,7 @@ function resetLoadedProgress(){
 }
 async function loadProgress(){
   progressLoadFailed = false;
+  progressLoadDenied = false;
   swap45Done = false;
   try{
     await ensureDb();
@@ -214,7 +222,7 @@ async function loadProgress(){
       songReadyAt   = data.songReadyAt || {};
       studentPeriod = data.period || '';
     } else resetLoadedProgress();
-  } catch(e){ progressLoadFailed=true; console.warn('[guitar-class] progress load failed — running read-only on derived data', e); resetLoadedProgress(); }
+  } catch(e){ progressLoadFailed=true; progressLoadDenied = !!(e && e.code === 'permission-denied'); console.warn('[guitar-class] progress load failed — running read-only on derived data', e); resetLoadedProgress(); }
 }
 
 /* ── Games access (teacher-controlled) ──
@@ -237,6 +245,7 @@ async function loadClassConfig(){
      early-return/catch paths, so it now just keeps showing the last known
      good value for the length of the read instead of blanking first. */
   const openBefore = moduleOpenThrough;
+  classConfigLoadDenied = false;
   try{
     await ensureDb();
     if(!db){ restoreClassConfigFromCache(); applyActivityGate(); return; }
@@ -359,7 +368,7 @@ async function loadClassConfig(){
     activityBoard = d.activityBoard || {};
     activityBoardOn = d.activityBoardSeeded === true;
     try{ localStorage.setItem('caBoard', JSON.stringify({on: activityBoardOn, map: activityBoard})); }catch(e){}
-  }catch(e){ console.warn('[guitar-class] class config load failed — using the cached copy', e); restoreClassConfigFromCache(); /* leave games on, nothing hidden */ }
+  }catch(e){ classConfigLoadDenied = !!(e && e.code === 'permission-denied'); console.warn('[guitar-class] class config load failed — using the cached copy', e); restoreClassConfigFromCache(); /* leave games on, nothing hidden */ }
   finally{
     // Every exit, early returns included: the teacher's "Open through" may
     // have changed under a rail that's already drawn (see repaintModuleGate).
