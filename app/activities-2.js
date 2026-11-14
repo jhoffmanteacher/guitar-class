@@ -1262,7 +1262,7 @@ document.addEventListener('visibilitychange', () => {
     flushOnHide();
     return;
   }
-  if(!currentUser || IS_TEACHER_MODE) return;
+  if(!currentUser || IS_TEACHER_MODE || accessLocked) return;   // accessLocked: the access screen, not the app (app/boot.js)
   const before = classConfigSignature();
   loadClassConfig().then(() => {
     if(classConfigSignature() === before) return;

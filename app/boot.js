@@ -583,7 +583,8 @@ let periodOverride = '';   // config/class.periodOverrides[uid] — teacher's co
    sign-in. practice-minutes.js loads after this file and picks the object up. */
 window.PM_HOST = {
   ui: true,
-  user: () => ((typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE) || accountPaused) ? null : (auth && auth.currentUser) || null,
+  /* accessLocked (the access screen, 2026-11-13): no user, so nothing counts, loads or retries for an account the rules refuse. */
+  user: () => ((typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE) || accountPaused || accessLocked) ? null : (auth && auth.currentUser) || null,
   db: () => ensureDb(),
   period: () => periodOverride || studentPeriod || ''
 };
@@ -1417,6 +1418,206 @@ function showPausedScreen(user){
   el.style.display='block';
   document.getElementById('user-area').innerHTML=userHeaderHtml(user);
   if(window.PM) PM.syncHeader(false);   // a paused student has no My progress to open
+}
+
+/* ── An account the database does not let in (2026-11-13) ──
+   firestore.rules isSchool(): a verified @seq.org address, or an account the
+   teacher allowed (config/access). Any other signed-in account is refused
+   the class-wide reads (and, with the stricter rules, every write). Without
+   this screen such an account fell through to the site: its config/class
+   read failed into the cached copy (on a shared Chromebook, the last
+   student's activities; on its own, none), the live quiz and the boards
+   failed silently, and its work did not save.
+
+   No extra read at sign-in: the boot makes the same two reads in the same
+   order as before (loadProgress, then loadClassConfig, app/save.js), and
+   each records whether its failure was a rules refusal (progressLoadDenied,
+   classConfigLoadDenied). accessRefusedAtBoot() then decides, before
+   showApp: an account that is not a verified @seq.org address and had
+   either read REFUSED (permission-denied) gets the access screen. Under the
+   stricter rules the progress read is refused first; under the reads-only
+   rules it succeeds and the config/class refusal is the signal. A school
+   account never gets this screen (a refusal there is a real fault and
+   takes today's path), and no other error (offline, unavailable) counts:
+   those take today's path too. Before the rules are pasted every read
+   succeeds, so this changes nothing until then. (An extra probe read before
+   loadProgress, the first version, shifted the boot's timing:
+   tools/shared-chromebook-loop.mjs, 2026-11-13.)
+
+   The screen: ask once (accessRequests/{own uid}, from the sign-in token's
+   own name and email, which the rules compare), then "asked" with Check
+   again, or "declined" with only Sign out. Check again, and coming back to
+   the tab (at most once every 30 s), read config/class (accessCheck; only
+   ever once the screen is up, never during the boot); once it passes, the
+   page reloads into the site. No timer, no polling. Nothing here writes to
+   progress/{uid} or touches the save. */
+const ACCESS_SCHOOL_RE = /^[^@]+@seq\.org$/i;   // mirrors firestore.rules isSchool()
+let accessLocked = false;                      // the access screen is up: the app is not, nothing may load or save
+let accessState = '';                          // '' (reading) | 'none' | 'asked' | 'declined' | 'failed' | 'offline' | 'cantAsk'
+let accessNote = '';                           // i18n key of a one-line note under the buttons
+let accessCheckedAt = 0;
+let accessBusy = false;
+function accessIsSchoolUser(user){
+  return !!user && user.emailVerified === true && ACCESS_SCHOOL_RE.test(String(user.email || '').trim());
+}
+/* This device remembers, per account, that the rules refused it
+   (localStorage gcAccessRefused:<uid>, review R1-1): set when the access
+   screen shows for a refusal, removed the moment a read lets the account in.
+   An account remembered as refused that boots OFFLINE (its reads fail, none
+   refused) gets the access screen saying it is offline, not the site from
+   the cache (on a shared Chromebook, the cached class settings are the last
+   student's). Named with the uid, so the next student never reads it; sign-out
+   leaves it (it only ever describes that one account on this device). An
+   account never refused here takes today's offline path. */
+let accessBootOffline = false;
+let accessOfflineKey = 'access.offline';
+/* Without Firestore's offline cache, a set() made with no network never
+   settles (it neither lands nor fails). The Ask waits this long, then says it
+   did not send and offers Ask again (review R2-2). */
+const ACCESS_ASK_TIMEOUT_MS = 10000;
+function accessRefusedKey(uid){ return 'gcAccessRefused:' + uid; }
+function accessRemember(uid, refused){
+  try { if(refused) localStorage.setItem(accessRefusedKey(uid), '1'); else if(localStorage.getItem(accessRefusedKey(uid))) localStorage.removeItem(accessRefusedKey(uid)); } catch(e){ /* storage blocked: nothing remembered */ }
+}
+function accessRemembered(uid){
+  try { return localStorage.getItem(accessRefusedKey(uid)) === '1'; } catch(e){ return false; }
+}
+/* Called once per sign-in, after loadProgress() and loadClassConfig(). */
+function accessRefusedAtBoot(user){
+  accessBootOffline = false;
+  if(IS_TEACHER_MODE || isDevBypassUser() || accessIsSchoolUser(user)) return false;
+  if(progressLoadDenied === true || classConfigLoadDenied === true) return true;
+  if(!progressLoadFailed){ accessRemember(user.uid, false); return false; }   // read fine: let in, and forget an old refusal
+  if(accessRemembered(user.uid)){ accessBootOffline = true; return true; }      // offline, and refused here before
+  return false;
+}
+/* The re-check behind Check again and the tab coming back. Three answers:
+   'in' only when the read SUCCEEDS; 'refused' when the rules refuse it;
+   'unknown' for anything else (offline, a timeout): never a reason to leave
+   the access screen (review R1-1). */
+async function accessCheck(user){
+  if(IS_TEACHER_MODE || isDevBypassUser() || accessIsSchoolUser(user)) return 'in';
+  accessCheckedAt = Date.now();
+  try {
+    await ensureDb();
+    if(!db) return 'unknown';
+    await db.collection('config').doc('class').get({ source: 'server' });
+    return 'in';
+  } catch(e){
+    return e && e.code === 'permission-denied' ? 'refused' : 'unknown';
+  }
+}
+function showAccessScreen(user){
+  accessLocked = true;
+  if(!accessBootOffline) accessRemember(user.uid, true);
+  document.getElementById('auth-wall').style.display='none';
+  document.getElementById('app').style.display='none';
+  document.getElementById('teacher-app').style.display='none';
+  document.getElementById('fab-group').style.display='none';
+  document.getElementById('search-btn').style.display='none';
+  let el=document.getElementById('access-screen');
+  if(!el){
+    el=document.createElement('div');
+    el.id='access-screen';
+    el.className='paused-screen';
+    document.querySelector('.wrap, main, body').appendChild(el);
+    el.addEventListener('click', e => {
+      const b = e.target && e.target.closest ? e.target.closest('[data-access]') : null;
+      if(!b) return;
+      if(b.dataset.access === 'out'){ signOut(); return; }   // Sign out works whatever is in flight (review R2-2)
+      if(accessBusy) return;
+      if(b.dataset.access === 'ask') accessAsk();
+      else if(b.dataset.access === 'check') accessRecheck(true);
+    });
+  }
+  el.style.display='block';
+  /* No request to read. "You are offline" only when the device says so; any other failed read (a quota error, a
+     timeout) says "Could not check right now" (review R2). */
+  if(accessBootOffline){ accessState = 'offline'; accessOfflineKey = (typeof navigator !== 'undefined' && navigator.onLine === false) ? 'access.offline' : 'access.cantCheck'; accessPaint(); return; }
+  accessPaint();
+  accessReadMine();
+}
+function accessPaint(){
+  const el=document.getElementById('access-screen');
+  if(!el) return;
+  const s = accessState;
+  const btn = (key, act, primary) => `<button class="${primary ? 'btn-google' : 'btn-sign'}" data-access="${act}" data-i18n="${key}"${accessBusy && act !== 'out' ? ' disabled' : ''}>${escHtml(t(key))}</button>`;
+  let body = `<p data-i18n="access.body">${escHtml(t('access.body'))}</p>`;
+  let buttons = '';
+  if(s === 'none' || s === 'failed') buttons = btn('access.ask', 'ask', true);
+  else if(s === 'asked'){ body += `<p><strong data-i18n="access.asked">${escHtml(t('access.asked'))}</strong></p>`; buttons = btn('access.checkAgain', 'check', true); }
+  else if(s === 'declined') body = `<p><strong data-i18n="access.declined">${escHtml(t('access.declined'))}</strong></p>`;
+  else if(s === 'offline'){ body += `<p><strong data-i18n="${accessOfflineKey}">${escHtml(t(accessOfflineKey))}</strong></p>`; buttons = btn('access.checkAgain', 'check', true); }
+  else if(s === 'cantAsk') body += `<p><strong data-i18n="access.cantAsk">${escHtml(t('access.cantAsk'))}</strong></p>`;
+  const note = s === 'failed' ? 'access.failed' : accessNote;
+  el.innerHTML =
+    `<div class="paused-card" role="region" aria-labelledby="access-title">`+
+      `<h2 id="access-title" data-i18n="access.title">${escHtml(t('access.title'))}</h2>`+
+      body+
+      (note ? `<p class="paused-safe" role="status" data-i18n="${escAttr(note)}">${escHtml(t(note))}</p>` : '')+
+      `<div>${buttons}</div>`+
+      `<div>${btn('access.signOut', 'out', false)}</div>`+
+    `</div>`;
+}
+/* This account's own request, if it made one: decides which state shows. A
+   failed read shows the Ask button; a second ask is refused by the rules
+   anyway, and the page then reads the request again. */
+async function accessReadMine(){
+  accessState = ''; accessPaint();
+  let st = 'none';
+  try {
+    await ensureDb();
+    const snap = await db.collection('accessRequests').doc(currentUser.uid).get({ source: 'server' });
+    if(snap.exists){ const v = (snap.data() || {}).status; st = v === 'declined' ? 'declined' : 'asked'; }
+  } catch(e){ /* not readable (rules not pasted, offline): offer the button */ }
+  if(!accessLocked) return;
+  accessState = st; accessPaint();
+}
+async function accessAsk(){
+  if(accessBusy || !currentUser) return;
+  accessBusy = true; accessNote = ''; accessPaint();
+  try {
+    await ensureDb();
+    /* The rules compare name and email with the sign-in token's own claims,
+       so they are taken from the token, not from the profile. */
+    let claims = {};
+    try { claims = (await currentUser.getIdTokenResult()).claims || {}; } catch(e){ claims = {}; }
+    const sent = db.collection('accessRequests').doc(currentUser.uid).set({
+      name: typeof claims.name === 'string' ? claims.name : '',
+      email: typeof claims.email === 'string' ? claims.email : '',
+      at: firebase.firestore.FieldValue.serverTimestamp(),
+      status: 'asked',
+    });
+    /* If it lands after the wait ran out, say so then. */
+    sent.then(() => { if(accessLocked && accessState === 'failed'){ accessState = 'asked'; accessPaint(); } }, () => {});
+    await Promise.race([sent, new Promise((_, rej) => setTimeout(() => rej(Object.assign(new Error('timeout'), { code: 'deadline-exceeded' })), ACCESS_ASK_TIMEOUT_MS))]);
+    accessState = 'asked';
+  } catch(e){
+    console.warn('[guitar-class] access request not sent', e);
+    accessBusy = false;
+    /* Refused can also mean it was already sent (a second tab): read it back. */
+    /* Refused, and no request of its own to read back: the rules will not take
+       a request from this account (an unverified address, a name too long):
+       say that, not "check your connection" (review R2). */
+    if(e && e.code === 'permission-denied'){ await accessReadMine(); if(accessState === 'none') accessState = 'cantAsk'; }
+    else accessState = 'failed';
+  }
+  accessBusy = false;
+  accessPaint();
+}
+/* Check again (a click), or the tab coming back (at most once every 30 s). */
+async function accessRecheck(byClick){
+  if(!accessLocked || accessBusy || !currentUser) return;
+  if(!byClick && Date.now() - accessCheckedAt < 30000) return;
+  accessBusy = true; accessNote = ''; accessPaint();
+  const r = await accessCheck(currentUser);
+  accessBusy = false;
+  if(r === 'in'){ accessRemember(currentUser.uid, false); location.reload(); return; }
+  if(r === 'unknown'){ if(byClick) accessNote = 'access.failed'; accessPaint(); return; }   // offline: stay, say so on a click
+  accessBootOffline = false;
+  accessRemember(currentUser.uid, true);
+  if(byClick) accessNote = 'access.stillWaiting';
+  await accessReadMine();
 }
 
 function showApp(user){

@@ -151,6 +151,10 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
 window.addEventListener('hashchange', routeExploreHash);
 window.addEventListener('popstate', routeExploreHash);
 
+/* The access screen (app/boot.js showAccessScreen) checks again when the tab
+   comes back, at most once every 30 s: "Check back later" without a timer. */
+document.addEventListener('visibilitychange', () => { if(!document.hidden && accessLocked) accessRecheck(false); });
+
 /* ── Start sign-in: the LAST statement of the app script ──
    Everything above is defined by now, so the callback can use any of it. See the note where this used to be
    (above "Back where you were"). Keep it last: a statement added after it would be code the callback cannot
@@ -207,7 +211,12 @@ if(auth) auth.onAuthStateChanged(async user=>{
       else {
         await loadProgress(); caAdoptLocalTicks(); await loadClassConfig();
         clearAuthStallTimer();   // cleared here, not inside showApp/showPausedScreen, so every exit from the wait is covered
-        if(accountPaused) showPausedScreen(user); else showApp(user);
+        /* An account the rules refused (not @seq.org, not allowed by the
+           teacher): the access screen instead of the site. Decided from the
+           two reads above, no read of its own (accessRefusedAtBoot in
+           app/boot.js). */
+        if(accessRefusedAtBoot(user)) showAccessScreen(user);
+        else if(accountPaused) showPausedScreen(user); else showApp(user);
       }
     } finally {
       // finally, not after the branch: a throw in there must not leave the flag

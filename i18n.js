@@ -189,6 +189,31 @@
                       es: 'El Sr. Hoffman puso tu cuenta en pausa. Habla con él en clase y puede volver a activarla.' },
     'paused.safe':  { en: 'Nothing you have done is lost — all of your progress is saved and will be right where you left it.',
                       es: 'No se ha perdido nada de lo que hiciste — todo tu progreso está guardado y estará justo donde lo dejaste.' },
+    /* An account the database does not let in (not @seq.org and not allowed
+       by the teacher, 2026-11-13; app/boot.js showAccessScreen). One screen
+       instead of the site. The student can ask once; the teacher answers in
+       the console (Manage). */
+    'access.title':     { en: 'This site is for Mr. Hoffman\'s guitar class',
+                          es: 'Este sitio es para la clase de guitarra del Sr. Hoffman' },
+    'access.body':      { en: 'This account is not a school account (@seq.org). Sign in with your school account, or ask your teacher to let this account in.',
+                          es: 'Esta cuenta no es una cuenta de la escuela (@seq.org). Inicia sesión con tu cuenta de la escuela o pide a tu maestro que deje entrar a esta cuenta.' },
+    'access.ask':       { en: 'Ask your teacher to let me in', es: 'Pedir a mi maestro que me deje entrar' },
+    'access.asked':     { en: 'Your teacher has been asked. Check back later.',
+                          es: 'Ya le pediste permiso a tu maestro. Vuelve a revisar más tarde.' },
+    'access.checkAgain':{ en: 'Check again', es: 'Revisar otra vez' },
+    'access.stillWaiting': { en: 'Not yet. Your teacher has not let this account in.',
+                          es: 'Todavía no. Tu maestro no ha dejado entrar a esta cuenta.' },
+    'access.declined':  { en: 'Your teacher did not let this account in. Sign out and use your school account.',
+                          es: 'Tu maestro no dejó entrar a esta cuenta. Cierra sesión y usa tu cuenta de la escuela.' },
+    'access.failed':    { en: 'That did not send. Check your connection and try again.',
+                          es: 'No se envió. Revisa tu conexión e inténtalo otra vez.' },
+    'access.signOut':   { en: 'Sign out or use another account', es: 'Cerrar sesión o usar otra cuenta' },
+    'access.offline':   { en: 'You are offline. Connect to the internet, then press Check again.',
+                          es: 'No tienes conexión. Conéctate a internet y luego presiona Revisar otra vez.' },
+    'access.cantCheck': { en: 'Could not check right now. Press Check again in a moment.',
+                          es: 'No se pudo revisar ahora. Presiona Revisar otra vez en un momento.' },
+    'access.cantAsk':   { en: 'This account cannot send a request. Sign in with your school account.',
+                          es: 'Esta cuenta no puede enviar una solicitud. Inicia sesión con tu cuenta de la escuela.' },
     /* "Which class are you in?" — the one-time period tag (app.js
        maybeShowPeriodPicker). Periods 4 and 7 are the only two classes, so
        the two buttons are the whole question. The body line promises it is

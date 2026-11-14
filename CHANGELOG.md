@@ -6,6 +6,12 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-13 — Accounts that are not school accounts
+
+- **Signed in with an account that is not your school account (@seq.org), and Mr. Hoffman has not let it in?** You see one screen instead of the site. Sign in with your school account, or press **Ask your teacher to let me in**. Then press **Check again** later (or just come back to the tab). Once he says yes, the site opens.
+- School accounts see nothing new. (This screen starts once Mr. Hoffman switches on the new database rules.)
+
+
 ## 2026-11-13 — In class: "Since your last visit"
 
 - **Back after a few days?** If the class did activities on two or more days when you had no work saved on the site, In class now shows them in a group called "Since your last visit", right under Today's activity. The date beside it is the last day you worked on the site.
