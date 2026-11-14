@@ -310,8 +310,11 @@ const PIN_LISTEN = { prompts: 40, plucks: 40, firstTry: 40, slowestMs: 400 };
   const line = n => grab(coachSrc, new RegExp(`^(?:const|let) ${n}\\b[^;]*;`, 'm'), n)[0];
   const parts = [
     ...['COACH_PITCH_GATE', 'CHK_ONSET_FLOOR', 'CHK_ONSET_RATIO', 'CHK_HF_FLOOR', 'CHK_HF_RATIO', 'COACH_ONSET_REFRACT', 'COACH_ATTACK_SKIP',
-      'COACH_LVL_WIN', 'COACH_CATCHUP_MAX_MS', 'COACH_STANDOUT', 'COACH_STANDOUT_TARGET', 'FRET_ROUND',
+      'COACH_LVL_WIN', 'COACH_CATCHUP_MAX_MS', 'COACH_STANDOUT', 'COACH_STANDOUT_TARGET',
       'coachHfRms', 'coachBgRms', 'coachOnsetAt', 'coachReadCtx', 'coachSmoothA', 'coachYinD'].map(line),
+    /* The round is as long as this file's prompt list, whatever the site's FRET_ROUND is: a longer or shorter Note Hunt
+       round is a product change, not a listening change (review, 2026-11-14). */
+    `const FRET_ROUND = ${PROMPTS.length};`,
     'var coachAnalyser = null, coachCtx = null, coachFrameBuf = null, micRec = null, fretRunning = false, fretGame = null, fretRaf = null;',
     extract(tunerSrc, 'tunerMedian'),
     ...['coachReadFrame', 'coachSmooth', 'coachOnsetTick', 'coachIdleTick', 'coachSettlePitch', 'coachPitchReadings', 'coachDetectPitch', 'fretLoop', 'fretJudge'].map(n => extract(coachSrc, n)),
@@ -379,8 +382,12 @@ const PIN_LISTEN = { prompts: 40, plucks: 40, firstTry: 40, slowestMs: 400 };
     return log;
   };
   const got = { prompts: 0, plucks: 0, firstTry: 0, slowestMs: 0 }, late = [];
+  let broke = '';
   for (const seed of [1, 2]) for (const fps of [20, 60]) {
-    for (const P of round(fps, seed)) {
+    let logged = [];
+    /* A name the harness does not know (fretLoop or fretJudge calls a new helper) is a named failure, not a crash. */
+    try { logged = round(fps, seed); } catch (e) { broke = broke || String(e && e.message || e).split('\n')[0]; }
+    for (const P of logged) {
       got.prompts++; got.plucks += P.plucks.length;
       const right = P.answers.find(a => a.m === P.m);
       if (P.plucks.length === 1 && P.answers.length === 1 && right) got.firstTry++;
@@ -388,12 +395,14 @@ const PIN_LISTEN = { prompts: 40, plucks: 40, firstTry: 40, slowestMs: 400 };
       if (right) got.slowestMs = Math.max(got.slowestMs, Math.round(right.at - P.plucks[P.plucks.length - 1]));
     }
   }
-  if (!flag('measure')) {
+  if (broke) fail(`one-note listener (Note Hunt's fretLoop): this test's copy of the game could not run (${broke}). If fretLoop or fretJudge now calls a new screen-only helper, add a do-nothing stub for it to the ctx in section 7 of tools/tone-test.mjs; if it is listening code, add it to the extracted list`);
+  else if (!flag('measure')) {
     if (got.prompts !== PIN_LISTEN.prompts || got.plucks !== PIN_LISTEN.plucks || got.firstTry !== PIN_LISTEN.firstTry)
       fail(`one-note listener (Note Hunt's fretLoop): ${got.firstTry} of ${got.prompts} prompts answered at the first pluck, ${got.plucks} plucks played; pinned ${PIN_LISTEN.firstTry} of ${PIN_LISTEN.prompts}, ${PIN_LISTEN.plucks} plucks${late.length ? '. Not first time: ' + late.slice(0, 4).join('; ') + (late.length > 4 ? `; … ${late.length - 4} more` : '') : ''}`);
     if (got.slowestMs > PIN_LISTEN.slowestMs) fail(`one-note listener (Note Hunt's fretLoop): an answer came ${got.slowestMs} ms after its pluck; pinned at most ${PIN_LISTEN.slowestMs}`);
   }
-  if (flag('measure')) console.log(`const PIN_LISTEN = { prompts: ${got.prompts}, plucks: ${got.plucks}, firstTry: ${got.firstTry}, slowestMs: ${Math.max(PIN_LISTEN.slowestMs, Math.ceil((got.slowestMs + 65) / 50) * 50)} };   // slowest today ${got.slowestMs} ms + one slow frame`);
+  if (flag('measure') && (broke || got.firstTry !== got.prompts)) console.log(`// PIN_LISTEN not offered: ${broke ? 'the test could not run' : got.firstTry + ' of ' + got.prompts + ' prompts were answered at the first pluck'}; a pin must have every prompt heard first time`);
+  else if (flag('measure')) console.log(`const PIN_LISTEN = { prompts: ${got.prompts}, plucks: ${got.plucks}, firstTry: ${got.firstTry}, slowestMs: ${Math.max(PIN_LISTEN.slowestMs, Math.ceil((got.slowestMs + 65) / 50) * 50)} };   // slowest today ${got.slowestMs} ms + one slow frame`);
   summary.push(`one-note listener (Note Hunt's real fretLoop): ${got.firstTry}/${got.prompts} prompts answered at the first pluck (${got.plucks} plucks), slowest ${got.slowestMs} ms after the pluck (pin ${PIN_LISTEN.slowestMs})`);
 }
 

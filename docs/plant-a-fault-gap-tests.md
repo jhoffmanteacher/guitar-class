@@ -1,8 +1,9 @@
 # Gap tests: closing what plant-a-fault let through (2026-11-14)
 
-Branch `tools/gap-tests` (worktree `.claude/worktrees/gap-tests`), rebased onto `origin/main` ddc0b9c, not pushed.
-Tools only: no site file changed; `sw.js`, `CHANGELOG.md`, `tools/plant-a-fault.mjs` and its known file untouched.
-Seven commits, one per tool, no review label (the lead adds it).
+Tools only: no site file changed; `sw.js` and `CHANGELOG.md` untouched. One commit per tool, then the known-file entry
+(a cloud run, 2026-11-14) and one review round (`site-reviewer`): its one major finding, in `tone-test`'s one-note
+listener, is fixed (the round length comes from the test's own prompt list; a name the test does not know is a named
+failure; `--measure` offers no pin unless every prompt was heard first time).
 
 ## Result: 12 of the 24 closed, 1 found harmless, 11 skipped (browser-only)
 
