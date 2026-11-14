@@ -4871,16 +4871,18 @@ function checkI18nParity() {
    the header of tools/i18n-drift.mjs: it compares this tree with where the
    branch left origin/main (GC_DRIFT_BASE=<ref> overrides) on every twin
    the site has (i18n.js keys, every X / X_es pair in the data files, the
-   Journey pages' data-es). A change with a number, a chord or note name, or
-   3+ content words prints in full; a rewording prints as one compact line.
+   Journey pages' data-es). A change with a number, a chord or note name,
+   3+ content words, words that only changed order, or a short meaning flip
+   (before/after, major/minor, a "don't") prints in full; a rewording
+   prints as one compact line.
    No base, or nothing to compare: an info line, no tick.
    The one FAILURE: the floor below. It is the count of twins read on the
-   whole tree (2026-11-13: 7,469 pairs over 34 field names, 1,579 i18n keys,
+   whole tree (2026-11-13: 7,472 pairs over 34 field names, 1,582 i18n keys,
    515 Journey lines), so a change to the reader cannot shrink the guard
-   without someone seeing it. Lower a floor only when twins were really
-   removed from the site.
+   without someone seeing it. Lower a floor only when twins were removed
+   on purpose: a pin-only edit, in the same commit as the removal.
    ════════════════════════════════════════════════════════════════════ */
-const DRIFT_FLOOR = { pairs: 7300, fields: 33, i18n: 1550, journey: 500 };   // about 2% under today's counts
+const DRIFT_FLOOR = { pairs: 7300, fields: 34, i18n: 1550, journey: 500 };   // counts about 2% under today's; fields exact (R2-4)
 let driftWarnings = 0;   // repeated beside the final "N warnings" line (R1-9)
 function checkSpanishDrift() {
   head('1dp. English changed, Spanish did not (warning only)');
@@ -4888,7 +4890,7 @@ function checkSpanishDrift() {
   try { r = driftReport(ROOT, { loadI18n: loadI18nTable }); }
   catch (e) { err(`1dp could not run: ${e.message}`); problems++; return; }
   const low = Object.keys(DRIFT_FLOOR).filter(k => !(r.totals[k] >= DRIFT_FLOOR[k]));
-  if (low.length) { err(`1dp read too few twins: ${low.map(k => `${k} ${r.totals[k]} (floor ${DRIFT_FLOOR[k]})`).join(', ')} — the reader in tools/i18n-drift.mjs lost some; fix it, or lower DRIFT_FLOOR only if twins were really removed`); problems++; }
+  if (low.length) { err(`1dp read too few twins: ${low.map(k => `${k} ${r.totals[k]} (floor ${DRIFT_FLOOR[k]})`).join(', ')} — either the reader in tools/i18n-drift.mjs lost some (fix the reader), or twins were removed on purpose (a Journey page retired, the Power Chord Switch strings in December): then lowering DRIFT_FLOOR in tools/checks.mjs to the new count is a pin-only edit, in the same commit as the removal`); problems++; }
   const tot = `${r.totals.pairs} twins on the tree (${r.totals.fields} data field names, ${r.totals.i18n} i18n keys, ${r.totals.journey} Journey lines)`;
   if (r.nothing) { console.log(`  ${C.dim}i ${r.nothing}; ${tot}${C.reset}`); return; }
   // A long text is shown from a little before its first changed character, so the change is on screen.
