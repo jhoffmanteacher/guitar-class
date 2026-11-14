@@ -383,6 +383,26 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-13 — GitHub walks the site in a real browser after every push (`browser.yml`). Fast.** Chrome for
+      Testing on `ubuntu-24.04`: the English smoke as five jobs, one per area, side by side (0.4 to 4.3 minutes each
+      on the trial), plus `slow-load` (3.4 min), `playalong-loop` (4.2 min) and `update-reload-loop` (10.6 min, 29 of
+      29) when their files change; `tools/ci/run-and-annotate.mjs` puts each tool's summary line on the run. Trial
+      run 43503130861 on `ci-try/browser`: every job green. Why: on 2026-11-13 about ten agents queued for one
+      headless Chrome on the Mac and some waited 107 minutes for a 5-minute job. Two fixes came out of the trial:
+      **the header's `--hdr` is written on the next frame** (`syncHeaderHeightNextFrame()` in `app/audio-ui.js`; on
+      Linux a page scrollbar takes room, so correcting a stale `--hdr` changed the header's width inside its own
+      ResizeObserver: "ResizeObserver loop completed with undelivered notifications" after sign-in), and
+      `update-reload-loop.mjs` removes each Chrome profile only once Chrome's helper processes are gone
+      (`tools/ci/chrome-cleanup-test.mjs`, 4 of 4). Left: the seven ResizeObserver deletions in `smoke.mjs` can go
+      once a week of runs stays clean; the remote branches `ci-try/rules` and `ci-try/browser` are Jonathan's to
+      delete.
+- [x] **2026-11-13 — Live In-Class Games: "Hide names on the projector", off by default (Jonathan's P3). Fast.**
+      A checkbox in the console's control strip, before Full screen. ON: the lobby shows the count and no name
+      chips; the Top 5 at Reveal and the final scores show place and points, no names (left out of the page, not
+      hidden with CSS). Kept in the teacher's browser (`gc-lq-hidenames`), never in `liveQuiz/current`; a student's
+      own screen does not change. OFF = main in 144 of 144 stage states; `checks.mjs` 1di (6 of 6 break-its);
+      `live-quiz-loop` rule H (9 of 9). His to know: the box stays ticked on that computer until he unticks it.
+
 - [x] **2026-11-13 — The anonymous error log is live (Jonathan published the rules, chat). Reviewed (three rounds).**
       A script error or a failed save on a student's page writes one small entry to `siteErrors/{auto id}`
       (`SITE_ERRORS` in `app/boot.js`): the message, file and line, the page, the set, the site version, the day and
