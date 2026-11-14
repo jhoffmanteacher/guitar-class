@@ -89,8 +89,9 @@
           reads after 200-800 ms (nothing applied): set() rejects only there.
        F5 A write already sent lands even if its page then dies (the server has it); its promise is never settled
           in a dead page.
-       F6 The security rules (firestore.rules, quoted): progress/{uid} "allow read, write: if isSignedIn() &&
-          request.auth.uid == userId; allow read: if isTeacher()"; config/class "allow read: if isSignedIn()";
+       F6 The security rules (firestore.rules, quoted): progress/{uid} "allow read, write: if isSchool() &&
+          request.auth.uid == userId; allow read: if isTeacher()"; config/class "allow read: if isSchool()" (since
+          2026-11-14 the gate is isSchool(); every made-up person here is a school account, so it passes as before);
           minutes/{uid}/... owner only. A write or read the rules refuse rejects with permission-denied.
        F7 runTransaction re-reads and re-runs on a changed document (5 attempts) and fails offline.
        F8 onSnapshot (the live-quiz listener) answers once with the current doc, then on each change.

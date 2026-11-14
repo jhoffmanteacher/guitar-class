@@ -37,7 +37,7 @@
                               THAT tab (for a tree without lqRoundOpenedAt)
        --root=<folder>        test the live-quiz.js / i18n.js / guitar-diagrams.js / firestore.rules in that folder
        --fake-fault=<name>    break the fake world on purpose (rules-off | no-order | shallow-merge | no-local |
-                              plain-fieldvalue); the fake-world probes must then fail (the self-test)
+                              plain-fieldvalue | no-school-gate); the fake-world probes must then fail (the self-test)
        --prove=<folder>       the break-it proof on the --root tree (default this checkout): a baseline run (must be
                               green), then FAULTS + FIX_FAULTS + NOV13_FAULTS + HIDE_FAULTS + PREVIEW_FAULTS + AUTO_FAULTS + R3_FAULTS + F4_FAULTS each planted in a copy of its live-quiz.js under <folder>/<fault>/ and the fake-world
                               faults, each a default run; a fault is caught when it adds a failing line (case + kind)
@@ -75,11 +75,13 @@
      lets that write land. In a real browser a write the SDK had not yet sent when the page unloaded is lost (the student
      then simply has no answer and may answer again), and one already on the wire may or may not land; the case
      reload-while-sending covers the "it lands" reading, the one that could give a second pick.
-   - The answers rule is a HAND COPY of firestore.rules lines 198-221 (function live() and match /answers/{userId}),
-     and the doc rule of lines 142-144 (read: signed in; write: the teacher). The tool compares that block of the
-     real file with RULES_PIN below on every run and fails if it changed: update the fake (rulesAnswer) and the pin.
-     isTeacher() / isSignedIn() (lines 60-68) are pinned by a sha256 (HELPERS_SHA256) and modelled as "the console
-     tab" / "any tab with a uid".  (Line numbers as of main 5b2fd5b.)
+   - The answers rule is a HAND COPY of firestore.rules lines 344-367 (function live() and match /answers/{userId}),
+     and the doc rule of lines 288-290 (read: a school account; write: the teacher). The tool compares that block of
+     the real file with RULES_PIN below on every run and fails if it changed: update the fake (rulesAnswer) and the
+     pin. isTeacher() / isSignedIn() / isSchool() (lines 76-84 and 124-130) are pinned by a sha256 (HELPERS_SHA256)
+     and modelled as "the console tab" / "any tab with a uid" / "a tab whose account is a school account" (tab.school:
+     every made-up student and the teacher are @seq.org accounts; the probes add one outside account that is not on
+     the allow list). (Line numbers as of 934b772, the school-accounts paste 2 in firestore.rules, 2026-11-14.)
    - Browser storage: localStorage per student device (kept across reloads and tabs); sessionStorage per browser TAB:
      a reload of the same tab keeps it, as a browser does; a second tab, a new tab or another device gets an empty one.
      Date.now() is the virtual clock (the same in every tab); performance.now() starts at 0 when a tab loads.
@@ -486,10 +488,13 @@ function applyWrite(doc, data, opts, fault) {
 }
 const permErr = why => Object.assign(new Error(`Missing or insufficient permissions. (${why})`), { code: 'permission-denied' });
 
-/* firestore.rules lines 198-221, by hand. Returns null when the write is allowed, else the failing condition. */
+/* isSchool() in the fake: signed in, and a school account (or one on the allow list). The fake fault no-school-gate
+   drops the gate back to "signed in" (the break-it twin of the outside-account probe). */
+const schoolGate = (tab, fault) => !!tab.uid && (fault === 'no-school-gate' || tab.school === true);
+/* firestore.rules lines 344-367, by hand. Returns null when the write is allowed, else the failing condition. */
 const ANSWER_KEYS = ['uid', 'name', 'sessionId', 'qIndex', 'choice', 'ms', 'at'];
-function rulesAnswer(tab, userId, d, cur) {
-  if (!tab.uid) return 'isSignedIn()';
+function rulesAnswer(tab, userId, d, cur, fault) {
+  if (!schoolGate(tab, fault)) return 'isSchool()';
   if (tab.uid !== userId) return 'request.auth.uid == userId';
   if (d.uid !== tab.uid) return 'data.uid == request.auth.uid';
   if (Object.keys(d).some(k => !ANSWER_KEYS.includes(k))) return 'keys().hasOnly(...)';
@@ -504,10 +509,10 @@ function rulesAnswer(tab, userId, d, cur) {
   if (!((cur.state === 'question' && d.qIndex === cur.qIndex) || (cur.state === 'lobby' && d.qIndex === -1))) return `state/qIndex (live state ${cur.state}, qIndex ${cur.qIndex}; write qIndex ${d.qIndex})`;
   return null;
 }
-const RULES_PIN = "function live() { return get(/databases/$(database)/documents/liveQuiz/current).data; } match /answers/{userId} { allow read, delete: if isTeacher(); allow get: if isSignedIn() && request.auth.uid == userId; allow create, update: if isSignedIn() && request.auth.uid == userId && request.resource.data.uid == request.auth.uid && request.resource.data.keys().hasOnly(['uid','name','sessionId','qIndex','choice','ms','at']) && request.resource.data.name is string && request.resource.data.name.size() <= 60 && request.resource.data.qIndex is int && request.resource.data.ms is number && request.resource.data.ms >= 0 && (request.resource.data.choice == null || (request.resource.data.choice is string && request.resource.data.choice.size() <= 64)) && request.resource.data.sessionId == live().sessionId && ( (live().state == 'question' && request.resource.data.qIndex == live().qIndex) || (live().state == 'lobby' && request.resource.data.qIndex == -1) ); }";
-/* isTeacher() and isSignedIn() (firestore.rules 60-68), pinned by hash: the teacher check holds an address this file
-   need not copy. The fake models them as "the console tab" and "any tab with a uid". */
-const HELPERS_SHA256 = '9e2ecc68393581756341dd2fb8e1ccdd9d3d23f41971fd44d81088aa723f30e1';
+const RULES_PIN = "function live() { return get(/databases/$(database)/documents/liveQuiz/current).data; } match /answers/{userId} { allow read, delete: if isTeacher(); allow get: if isSchool() && request.auth.uid == userId; allow create, update: if isSchool() && request.auth.uid == userId && request.resource.data.uid == request.auth.uid && request.resource.data.keys().hasOnly(['uid','name','sessionId','qIndex','choice','ms','at']) && request.resource.data.name is string && request.resource.data.name.size() <= 60 && request.resource.data.qIndex is int && request.resource.data.ms is number && request.resource.data.ms >= 0 && (request.resource.data.choice == null || (request.resource.data.choice is string && request.resource.data.choice.size() <= 64)) && request.resource.data.sessionId == live().sessionId && ( (live().state == 'question' && request.resource.data.qIndex == live().qIndex) || (live().state == 'lobby' && request.resource.data.qIndex == -1) ); }";
+/* isTeacher(), isSignedIn() and isSchool() (firestore.rules 76-84 and 124-130), pinned by hash: they hold addresses and
+   a pattern this file need not copy. The fake models them as "the console tab", "any tab with a uid" and schoolGate(). */
+const HELPERS_SHA256 = '367e3bf204227069ff9193df160c4c86fc6e80313d3598939e3c254342c2776c';
 function rulesDrift() {
   const base = existsSync(join(ROOT, 'firestore.rules')) ? ROOT : REPO;
   const t = readFileSync(join(base, 'firestore.rules'), 'utf8').replace(/\r\n/g, '\n');
@@ -515,12 +520,12 @@ function rulesDrift() {
   if (i < 0 || j < 0) return 'the answers block is gone from firestore.rules';
   const k = t.indexOf('\n      }\n', j);
   const block = (t.slice(i, t.indexOf('}', i) + 1) + ' ' + t.slice(j, k + 8)).replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ').trim();
-  const docRule = /match \/liveQuiz\/current \{\s*allow read:\s+if isSignedIn\(\);\s*allow write: if isTeacher\(\);/.test(t);
+  const docRule = /match \/liveQuiz\/current \{\s*allow read:\s+if isSchool\(\);\s*allow write: if isTeacher\(\);/.test(t);
   const fn = n => { const a = t.indexOf(`function ${n}() {`); return a < 0 ? '' : t.slice(a, t.indexOf('\n    }', a) + 6); };
-  const helpers = (fn('isTeacher') + ' ' + fn('isSignedIn')).replace(/\s+/g, ' ').trim();
-  if (createHash('sha256').update(helpers).digest('hex') !== HELPERS_SHA256) return 'isTeacher() / isSignedIn() in firestore.rules changed: check the fake (tab.isTeacher, tab.uid) and update HELPERS_SHA256';
+  const helpers = (fn('isTeacher') + ' ' + fn('isSignedIn') + ' ' + fn('isSchool')).replace(/\s+/g, ' ').trim();
+  if (createHash('sha256').update(helpers).digest('hex') !== HELPERS_SHA256) return 'isTeacher() / isSignedIn() / isSchool() in firestore.rules changed: check the fake (tab.isTeacher, tab.uid, schoolGate) and update HELPERS_SHA256';
   if (block !== RULES_PIN) return 'the answers rule in firestore.rules changed: update rulesAnswer() (the fake\'s hand copy) and RULES_PIN';
-  if (!docRule) return 'the liveQuiz/current rule (read: signed in, write: teacher) changed: update the fake';
+  if (!docRule) return 'the liveQuiz/current rule (read: a school account, write: teacher) changed: update the fake';
   return null;
 }
 
@@ -576,6 +581,10 @@ class FakeFS {
   listen(tab, kind, next, err) {
     const l = { tab, kind, next, err, last: 0, dead: false, attached: false };
     tab.listeners.push(l);
+    if (kind === 'doc' && !schoolGate(tab, this.fault)) {
+      this.w.loop.at(this.w.loop.now + this.up(tab) + this.down(tab), () => { if (!l.dead && err) this.w.callIn(tab, err, [permErr('liveQuiz/current read: isSchool()')]); }, tab);
+      return () => { l.dead = true; };
+    }
     if (kind === 'ans' && !tab.isTeacher) {
       this.w.loop.at(this.w.loop.now + this.up(tab) + this.down(tab), () => { if (!l.dead && err) this.w.callIn(tab, err, [permErr('list answers: teacher only')]); }, tab);
       return () => { l.dead = true; };
@@ -629,7 +638,7 @@ class FakeFS {
     return new Promise((resolve, reject) => {
       this.w.loop.at(ct, () => {
         const now = this.w.loop.now;
-        const why = this.fault === 'rules-off' ? null : rulesAnswer(tab, uid, data, this.cur);
+        const why = this.fault === 'rules-off' ? null : rulesAnswer(tab, uid, data, this.cur, this.fault);
         this.w.onAnswerCommit(tab, uid, data, why);
         if (why) { this.stats.rejected++; if (this.w.cover) this.w.cover('R7refused'); this.w.loop.at(now + this.down(tab), () => { tab.pending--; this.w.onAnswerRefusedBack(tab, uid, data); this.w.settle(tab, () => reject(permErr(why))); }, null); return; }
         this.stats.accepted++;
@@ -646,7 +655,7 @@ class FakeFS {
     tab.readBacks.push(rb);
     return new Promise((resolve, reject) => {
       this.w.loop.at(this.w.loop.now + this.up(tab), () => {
-        const ok = tab.uid && tab.uid === uid;
+        const ok = schoolGate(tab, this.fault) && tab.uid === uid;
         const raw = ok && this.ans.has(uid) ? cloneRaw(this.ans.get(uid)) : null;
         this.w.loop.at(this.w.loop.now + this.down(tab), () => {
           tab.gets--;
@@ -942,7 +951,7 @@ class World {
   makeTab(kind, student, slot, second) {
     const id = this.tabs.length;
     const tab = {
-      id, kind, isTeacher: kind === 'teacher', uid: student ? student.uid : 'teacher-uid', student, alive: true, born: this.loop.now,
+      id, kind, isTeacher: kind === 'teacher', uid: student ? student.uid : 'teacher-uid', school: true, student, alive: true, born: this.loop.now,
       label: kind === 'teacher' ? (this.tabs.some(t => t.isTeacher) ? 'second console (another device)' : 'teacher') : `${student.name} (${kind === 'journey' ? 'Journey page, ' : ''}${second ? 'second tab, ' : ''}tab ${student.tabs.length + 1})`, slot, second: !!second,
       timers: new Map(), tseq: 0, listeners: [], gets: 0, readBacks: [], pending: 0, dirty: new Set(), view: null, shown: null, lastCommit: 0,
       delivered: new Map(), clockStart: {}, writes: 0, previewing: false, pview: null, logs: [], logsSeen: 0,
@@ -2325,7 +2334,7 @@ async function probes() {
   const fs = new FakeFS(w, FAKE_FAULT);
   w.fs = fs;
   const seq = arr => { let i = 0; return () => arr[Math.min(i++, arr.length - 1)]; };
-  const mk = (uid, teacher, down, up) => ({ uid, isTeacher: !!teacher, alive: true, listeners: [], gets: 0, readBacks: [], pending: 0, net: { down: down || (() => 50), up: up || (() => 50) }, label: uid });
+  const mk = (uid, teacher, down, up, school = true) => ({ uid, isTeacher: !!teacher, school, alive: true, listeners: [], gets: 0, readBacks: [], pending: 0, net: { down: down || (() => 50), up: up || (() => 50) }, label: uid });
   const T = mk('teacher', true), S = mk('s1'), S2 = mk('s2');
   const db = tab => fs.firebaseFor(tab).firestore();
   const ref = tab => db(tab).collection('liveQuiz').doc('current');
@@ -2376,6 +2385,14 @@ async function probes() {
   expect('serverTimestamp() is an instance of the FieldValue class, as in the SDK', typeof FV === 'function' && FV.serverTimestamp() instanceof FV);
   expect('a student may get their own answer doc', (await settle(ref(S).collection('answers').doc('s1').get())) === 'ok');
   expect("a student may not get another's answer doc", (await settle(ref(S2).collection('answers').doc('s1').get())) === 'denied:permission-denied');
+  /* isSchool() (2026-11-14): an outside account that is not on the allow list writes no answer and reads none back,
+     even its own, a well-formed one in an open lobby (--fake-fault=no-school-gate turns this probe red). */
+  const O = mk('o1', false, null, null, false);
+  await settle(ref(T).set({ sessionId: 'S3', state: 'lobby', qIndex: -1 }));
+  const oWrite = await settle(ref(O).collection('answers').doc('o1').set(ans({ uid: 'o1', sessionId: 'S3', qIndex: -1, choice: null })));
+  if (!fs.ans.has('o1')) fs.ans.set('o1', { uid: 'o1', name: 'P Out', sessionId: 'S3', qIndex: -1, choice: null, ms: 0, at: { __ts: 0 } });
+  const oRead = await settle(ref(O).collection('answers').doc('o1').get());
+  expect('an outside account not on the allow list may not write an answer nor get its own (isSchool())', oWrite === 'denied:permission-denied' && oRead === 'denied:permission-denied');
   return results;
 }
 
@@ -2496,7 +2513,7 @@ function prove(dir) {
   const all = [...FAULTS.map(f => ({ ...f, set: 'site' })), ...FIX_FAULTS.map(f => ({ ...f, set: 'reload fix' })), ...NOV13_FAULTS.map(f => ({ ...f, set: '2026-11-13' })), ...HIDE_FAULTS.map(f => ({ ...f, set: 'hide names' })), ...PREVIEW_FAULTS.map(f => ({ ...f, set: 'Preview' })), ...AUTO_FAULTS.map(f => ({ ...f, set: 'auto-reveal' })), ...R3_FAULTS.map(f => ({ ...f, set: 'round 3' })), ...F4_FAULTS.map(f => ({ ...f, set: 'round 4' }))];
   const only = ARGS.only ? String(ARGS.only).split(',') : null;
   if (only) { for (const id of only) if (!all.some(f => f.id === id)) { console.log(`live-quiz-loop: ✗ --only: no fault ${id}`); return Promise.resolve(2); } all.splice(0, all.length, ...all.filter(f => only.includes(f.id))); }
-  const FAKE = only ? [] : ['rules-off', 'no-order', 'shallow-merge', 'no-local', 'plain-fieldvalue'];
+  const FAKE = only ? [] : ['rules-off', 'no-order', 'shallow-merge', 'no-local', 'plain-fieldvalue', 'no-school-gate'];
   console.log(`break-it proof on ${ROOT}: ${FAULTS.length} site + ${FIX_FAULTS.length} reload-fix + ${NOV13_FAULTS.length} change-answer/count/total + ${HIDE_FAULTS.length} hide-names + ${PREVIEW_FAULTS.length} Preview + ${AUTO_FAULTS.length} auto-reveal + ${R3_FAULTS.length} round-3 + ${F4_FAULTS.length} round-4 faults planted in copies of its live-quiz.js, + ${FAKE.length} fake-world faults; each run is the default run (known site faults excused narrowly), seed ${SEED}, ${games} random games, ${jobs} at a time`);
   const plans = [{ label: 'baseline: the site as it is (must be GREEN, the two known faults excused)', args: [`--root=${ROOT}`], baseline: true }];
   for (const f of all) {
