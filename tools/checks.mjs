@@ -16954,7 +16954,7 @@ function checkStrumCheck() {
       const c = { escAttr: x => String(x), escHtml: x => String(x), t: (k, p) => k + (p ? JSON.stringify(p) : ''), IS_TEACHER_MODE: teacher, STRUM_CHECK_MAX_BPM: Number(run('STRUM_CHECK_MAX_BPM')), out: '', at: '', over: '' };
       vm.createContext(c);
       const call = b => `strumCheckBtnHtml({ listen: true, pattern: 'D.DU.UDU', bars: ['D5'], chords: { D5: { midi: [50, 57, 62] } } }, 'k', ${b})`;
-      vm.runInContext(fm[0] + `\nout = ${call(60)}; at = ${call(PIN_MAX)}; over = ${call(PIN_MAX + 1)};`.replace(/PIN_MAX/g, String(PIN.maxBpm)), c);
+      vm.runInContext(fm[0] + `\nout = ${call(60)}; at = ${call(PIN.maxBpm)}; over = ${call(PIN.maxBpm + 1)};`, c);
       if (teacher && (c.out || c.over)) fail('strumCheckBtnHtml draws the button in the teacher console (IS_TEACHER_MODE): the console must never open the mic');
       if (!teacher && !/data-strumcheck=/.test(c.out)) fail('strumCheckBtnHtml draws nothing for a student (control)');
       if (!teacher) {
@@ -16968,7 +16968,9 @@ function checkStrumCheck() {
     }
     if (Number(run('STRUM_CHECK_MAX_BPM')) !== PIN.maxBpm) fail(`STRUM_CHECK_MAX_BPM is ${run('STRUM_CHECK_MAX_BPM')}, want ${PIN.maxBpm} (the highest tempo where the virtual student lost at most 5% of a right player's strums)`);
     if (Number(run('SC_BPM_MAX')) !== PIN.maxBpm) fail(`the card's own tempo buttons stop at ${run('SC_BPM_MAX')}, not at the limit ${PIN.maxBpm}`);
-    if (!/onBpmSliderChange[\s\S]{0,400}strumCheckSync\(slider\)/.test(src)) fail('moving the tempo slider no longer updates the strum check (strumCheckSync in onBpmSliderChange)');
+    /* the slider's own handler, run with a counting strumCheckSync: one call per move */
+    const syncCalls = Number(run(`(() => { const keep = strumCheckSync; let k = 0; strumCheckSync = () => { k++; }; try { onBpmSliderChange({ parentNode: null, dataset: {}, value: '81' }); } finally { strumCheckSync = keep; } return k; })()`));
+    if (syncCalls !== 1) fail(`moving the tempo slider called strumCheckSync ${syncCalls} times, want 1 (onBpmSliderChange keeps the strum check in step)`);
     /* this check's own strum ratios, through the real srHearStrum: a jump of 1.3x is a strum for the check and not for Strum Radar */
     if (Number(run('SC_ONSET_RATIO')) !== PIN.ratio || Number(run('SC_HF_RATIO')) !== PIN.hfRatio) fail(`the check's ratios are ${run('SC_ONSET_RATIO')} / ${run('SC_HF_RATIO')}, want ${PIN.ratio} / ${PIN.hfRatio}`);
     if (Number(run('CHK_ONSET_RATIO')) !== 1.4 || Number(run('CHK_HF_RATIO')) !== 1.7) fail('the shared CHK_ONSET_RATIO / CHK_HF_RATIO moved: every other game reads them');
