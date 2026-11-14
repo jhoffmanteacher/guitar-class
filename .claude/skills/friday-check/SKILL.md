@@ -90,21 +90,43 @@ count them for the report (step 6). A commit carrying both lines counts as Fast.
 None Fast → still do step 1b if anything at all landed in the range, then skip to
 step 5 (tag) and report "Nothing shipped Fast this week."
 
-## 1b. Full smoke (start it first)
+## 1b. GitHub's runs and the full walk (before the review)
 
-Since 2026-11-09 a change's own smoke is English-only and walks only the
-areas it touched (CLAUDE.md "Start here" step 3), so this is the walk that
-catches the rest. Start it now, in the background, from a detached worktree
-at `origin/main`, and let it run while the reviewer works:
+GitHub runs after every push to main: the checks, four proof tools and the name checker (`checks.yml`), the rules
+tests (`rules.yml`), and the English smoke per area with the slow lane (`browser.yml`). Read the tip's runs
+(WebFetch `https://api.github.com/repos/jhoffmanteacher/guitar-class/actions/runs?branch=main&per_page=12`): **what
+ran green on the tip is not run again here.** A red one is a finding for step 3.
 
-```
-node tools/smoke.mjs --baseline <range start> > smoke-friday.log 2>&1
-```
+The full walk in both languages (the only one that walks Spanish; a change's own smoke is English-only and walks
+only its areas, CLAUDE.md "Start here" step 3) runs on GitHub on its own every Friday evening (`browser.yml`
+`schedule:`, Saturday 03:37 UTC = Friday 7:37 PM PST / 8:37 PM PDT). Look for it first: WebFetch
+`https://api.github.com/repos/jhoffmanteacher/guitar-class/actions/workflows/browser.yml/runs?event=schedule&branch=main&per_page=1`
+and take the newest run's `id`, `head_sha`, `created_at`, `status`, `conclusion`. Its summary is the notice (green)
+or error (red) annotation of the job "smoke, full walk": `.../actions/runs/<id>/jobs` → that job's
+`check_run_url` + `/annotations`.
 
-No `--only`, no `--en-only`: every area, English and Spanish. Every error
-it reports (new since the range start) is a finding for step 3: find the
-commit that caused it (`--only <area>` against the commits in the range is
-quick), fix it, and say so in the report. A hang is a finding too.
+**Close enough** = created within the last 24 hours, and `head_sha` is on main at most **10 commits** behind the
+tip (`git merge-base --is-ancestor <head_sha> origin/main` and `git rev-list --count <head_sha>..origin/main` ≤ 10).
+Ten is a Friday evening's pushes at most; more than that and the walk no longer describes the tip.
+- **Green and close enough** → no full walk here; quote its summary line in the report. If the commits after
+  `head_sha` changed a site file (anything outside `tools/`, `.claude/`, `.github/`, `docs/` and `*.md`), walk
+  only their areas here, both languages: `node tools/smoke.mjs --only <areas> --baseline <head_sha>` (areas: the
+  header of `tools/smoke.mjs`).
+- **Red and close enough** → each error it names is a finding for step 3: find the commit with
+  `node tools/smoke.mjs --only <area> --baseline <range start>`. A red that is the runner, not the site (the
+  "Chrome start" step failed, or no annotation names a smoke error) counts as missing.
+- **Still running** → read it again once the reviewers are spawned; not done by the time they report → missing.
+- **Missing, too old, more than 10 commits behind, or unreadable** (GitHub may delay or skip a scheduled run; the
+  API may refuse) → walk here as before, in the background, from a detached worktree at `origin/main`, while the
+  reviewers work:
+
+  ```
+  node tools/smoke.mjs --baseline <range start> > smoke-friday.log 2>&1
+  ```
+
+  No `--only`, no `--en-only`. Every error it reports (new since the range start) is a finding for step 3: find
+  the commit that caused it (`--only <area>` against the commits in the range is quick), fix it, and say so in
+  the report. A hang is a finding too.
 
 Ignore `wip/*` branches (not live).
 
@@ -169,10 +191,10 @@ the deploy needs confirming from a local machine.
 
 ## 4. Re-check
 
-After the fixes, run the full `node tools/checks.mjs` and
-`node tools/smoke.mjs --baseline <range start>` once more on the final
-`main`. A failure you can't fix → revert your own fix commit (a new revert
-commit, never a force-push) and report it.
+After the fixes, run the full `node tools/checks.mjs` once on the final `main`. A smoke only if a fix touched a
+site file, and then `--only` the areas the fix touched: `node tools/smoke.mjs --only <areas> --baseline <range
+start>` (both languages). A failure you can't fix → revert your own fix commit (a new revert commit, never a
+force-push) and report it.
 
 ## 5. Tag
 
@@ -202,6 +224,7 @@ tests read: that is a finding for step 3.
 Plain language, short (he reads it on his phone):
 
 - How many Fast commits were reviewed, and their one-line subjects; "N Fast reviewed, M already Reviewed, skipped".
+- The full walk: GitHub's Friday run (its summary line) or this run's own, and what it found.
 - What was fixed and pushed (one line each, what a student would have seen).
 - Anything on a branch or in Open work waiting for Jonathan.
 - **Takes:** if step 5b printed "ASK JONATHAN", say so first in the report, with its reasons in plain words and the one

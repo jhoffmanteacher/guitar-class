@@ -7,7 +7,7 @@
 #   tools/update-reload-loop.mjs  sw.js, app/start.js, app/boot.js, teacher-core.js
 #   tools/playalong-loop.mjs      app/cards.js, app/snippets.js, class-activities.js
 # (and each when its own tool file, or this workflow, or tools/ci/ changed).
-# The full walk in both languages stays the Friday check's; here it is only a
+# The full walk in both languages runs on a schedule (Friday evenings, see on:) and as a
 # manual run: Actions -> Browser tests -> Run workflow -> "full".
 #
 # Nothing here blocks a push or the Pages deploy (that is GitHub's separate
@@ -56,6 +56,16 @@ on:
         description: 'Run slow-load, update-reload and playalong whatever changed'
         type: boolean
         default: true
+  # The full walk alone (smoke-full; no English jobs, no slow lane), every Friday evening Pacific, so the
+  # Friday check (Fridays 11 PM Pacific) reads its result instead of walking for 40 minutes itself
+  # (skill friday-check, step 1b). Cron is UTC and ignores daylight saving: Saturday 03:37 UTC is Friday
+  # 7:37 PM PST (winter) and 8:37 PM PDT (summer). The job stops itself at 50 minutes (timeout-minutes),
+  # so even in summer it is over by 9:27 PM, an hour before 10:30 PM, which is room for GitHub starting
+  # a scheduled run late (it may delay one at busy times, or skip it; the Friday check then walks itself).
+  # Off the hour on purpose: GitHub's own advice, the top of the hour is when runs queue longest.
+  # Scheduled runs use main's tip. Public repo: GitHub's standard runners cost nothing.
+  schedule:
+    - cron: '37 3 * * 6'
 
 permissions:
   contents: read
@@ -69,6 +79,8 @@ jobs:
   # with the commit before the push (github.event.before); a new branch, or a
   # before-commit GitHub no longer has, falls back to the last commit alone.
   changes:
+    # A scheduled run is the full walk only: without this job the three slow-lane jobs that need it are skipped.
+    if: ${{ github.event_name != 'schedule' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:
@@ -120,7 +132,7 @@ jobs:
   # branch cancels the older one's smoke jobs.
   smoke:
     name: smoke ${{ matrix.area }} (English)
-    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.full) }}
+    if: ${{ github.event_name != 'schedule' && !(github.event_name == 'workflow_dispatch' && inputs.full) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 50
     concurrency:
@@ -169,10 +181,10 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-  # The full walk, English and Spanish, every area: a manual run only.
+  # The full walk, English and Spanish, every area: the Friday evening schedule, or a manual run with "full".
   smoke-full:
     name: smoke, full walk (English and Spanish)
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.full }}
+    if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.full) }}
     runs-on: ubuntu-24.04
     timeout-minutes: 50
     steps:

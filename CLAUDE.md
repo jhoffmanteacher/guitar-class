@@ -29,8 +29,8 @@ What is open right now: `WORKFLOW.md` → "Where things stand" (top of the file)
      `node tools/golden.mjs --compare <dirA> <dirB>`. About 20 minutes each; only one headless-browser run at a
      time (no smoke, `pm-e2e.mjs` or `slow-load.mjs` beside it); it uses Chrome for Testing when `CHROME` is set.
      A small change does not need it.
-   - **The full walk** (both languages, every area, no `--only`/`--en-only`) runs in the
-     Friday check and when Jonathan asks for **"the end-of-day smoke"** (no nightly task: his
+   - **The full walk** (both languages, every area, no `--only`/`--en-only`) runs on GitHub
+     Friday evenings (the Friday check reads it) and when Jonathan asks for **"the end-of-day smoke"** (no nightly task: his
      call, 2026-11-09). End-of-day smoke: `node tools/smoke.mjs --baseline $(git rev-list -1
      --before='today 00:00' origin/main)` on `origin/main`; for each new error find the commit
      (`--only <area>`), fix it, push, and report.
@@ -165,7 +165,7 @@ it before every push, even when no link changed) and the automatic `CACHE_VERSIO
 Flags: `--skip-links`, `--check`, `--live`. `--check` changes nothing. After you edit a cached
 file, "shell cache stale" is expected and makes it exit 1 (the pre-commit hook then refuses the
 commit) until the full `node tools/checks.mjs` rewrites `sw.js`. Any other ✗, including "audio
-hash map in sw.js is stale", is a real failure. GitHub also runs `--check --skip-links` and four Node proof tools (`save-loop`, `visible-loop`, `live-quiz-loop`, `shared-chromebook-loop`) on every push to main (`.github/workflows/checks.yml`, 2026-11-13): a red run there means look at the last push; it does not replace running a tool yourself after changing its area. **GitHub also walks the site in a real browser after every push to main** (`.github/workflows/browser.yml`, 2026-11-13): the English smoke, one job per area, side by side; and `slow-load`, `update-reload-loop` and `playalong-loop` when their files changed (its header lists which). It runs AFTER the push, so it is the Fast change's smoke (read its result and report it; no need to run that smoke on the Mac as well), but an Always-Reviewed change still runs its smoke BEFORE the push (step 3). The two-language walk is its `full` switch (Actions → Browser tests → Run workflow). A branch pushed as `ci-try/<name>` is walked the same way; remote trial branches are deleted by Jonathan, not by Claude. **Stop hook** (`GC_STOP_CHECKS=0` turns it off)
+hash map in sw.js is stale", is a real failure. GitHub also runs `--check --skip-links` and four Node proof tools (`save-loop`, `visible-loop`, `live-quiz-loop`, `shared-chromebook-loop`) on every push to main (`.github/workflows/checks.yml`, 2026-11-13): a red run there means look at the last push; it does not replace running a tool yourself after changing its area. **GitHub also walks the site in a real browser after every push to main** (`.github/workflows/browser.yml`, 2026-11-13): the English smoke, one job per area, side by side; and `slow-load`, `update-reload-loop` and `playalong-loop` when their files changed (its header lists which). It runs AFTER the push, so it is the Fast change's smoke (read its result and report it; no need to run that smoke on the Mac as well), but an Always-Reviewed change still runs its smoke BEFORE the push (step 3). The two-language walk is its `full` job: Friday evenings on a schedule, or Actions → Browser tests → Run workflow → `full`. A branch pushed as `ci-try/<name>` is walked the same way; remote trial branches are deleted by Jonathan, not by Claude. **Stop hook** (`GC_STOP_CHECKS=0` turns it off)
 and `.githooks/*` (`git config core.hooksPath .githooks`): if a hook prints "node not found —
 skipping checks", it checked nothing, so run `node tools/checks.mjs` by hand. **Parallel
 sessions share one `origin`:** fetch first, rebase onto `origin/main`, and never push a merge you
