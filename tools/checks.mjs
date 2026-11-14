@@ -16913,7 +16913,7 @@ function checkStrumCheck() {
   const fail = m => { err('1eh (strum-pattern check): ' + m); problems++; bad++; };
   if (!COACH_SANDBOX) { fail("1ca's sandbox did not load, so the strum-pattern check was NOT run"); return; }
   const { run } = COACH_SANDBOX;
-  const n = { pins: 0, onsets: 0, chords: 0, lines: 0, strumSteps: 0 };
+  const n = { pins: 0, onsets: 0, chords: 0, lines: 0, strumSteps: 0, sweeps: 0 };
   const PIN = { pattern: 'D.DU.UDU', bars: 'D5 D5 C5 C5 G5 G5 D5 D5', rests: '1,4', win: 0.35, rule: 'c', ratio: 1.2, hfRatio: 1.46, maxBpm: 80 };
   try {
     const found = JSON.parse(run(`JSON.stringify(CLASS_ACTIVITIES.flatMap(a => (a.steps || []).map((s, si) => ({ id: a.id, si, path: s.path || null, strum: s.strum || null }))).filter(x => x.strum).map(x => ({ id: x.id, si: x.si, path: x.path, listen: 'listen' in x.strum ? x.strum.listen : '(none)', pattern: x.strum.pattern, bars: x.strum.bars.join(' ') })))`));
@@ -16967,7 +16967,8 @@ function checkStrumCheck() {
       n.pins++;
     }
     if (Number(run('STRUM_CHECK_MAX_BPM')) !== PIN.maxBpm) fail(`STRUM_CHECK_MAX_BPM is ${run('STRUM_CHECK_MAX_BPM')}, want ${PIN.maxBpm} (the highest tempo where the virtual student lost at most 5% of a right player's strums)`);
-    if (Number(run('SC_BPM_MAX')) !== PIN.maxBpm) fail(`the card's own tempo buttons stop at ${run('SC_BPM_MAX')}, not at the limit ${PIN.maxBpm}`);
+    if (Number(run('scBpmMax()')) !== PIN.maxBpm) fail(`the card's own tempo buttons stop at ${run('scBpmMax()')}, not at the limit ${PIN.maxBpm}`);
+    if (/^(const|let|var)\s[^\n]*STRUM_CHECK_MAX_BPM/m.test(siteText('coach-strumcheck.js', ROOT))) fail('coach-strumcheck.js reads STRUM_CHECK_MAX_BPM at load: a page without app/tab.js would leave sc uninitialised and every coachClose throwing (review R1-6)');
     /* the slider's own handler, run with a counting strumCheckSync: one call per move */
     const syncCalls = Number(run(`(() => { const keep = strumCheckSync; let k = 0; strumCheckSync = () => { k++; }; try { onBpmSliderChange({ parentNode: null, dataset: {}, value: '81' }); } finally { strumCheckSync = keep; } return k; })()`));
     if (syncCalls !== 1) fail(`moving the tempo slider called strumCheckSync ${syncCalls} times, want 1 (onBpmSliderChange keeps the strum check in step)`);
@@ -17035,6 +17036,35 @@ function checkStrumCheck() {
       } finally { saveGames = keepSave; games = keepGames; if (sc) sc.card = { isConnected: false, remove(){} }; scClose(); } })()`));
     if (fin.calls || fin.keys) fail(`a finished check called saveGames ${fin.calls} times and wrote ${fin.keys} games keys: it must save nothing`);
     if (fin.phase !== 'report') fail(`scFinish left the check in "${fin.phase}", want report (the control: the finish really ran)`);
+    { const want = [run(`t('sc.summary', { p: 2, n: 2, c: 2 })`), run(`t('sc.allGood')`)];
+      for (const w of want) if (!fin.body.includes(w)) fail(`the end screen of a round with every bar right does not say "${w}"`); }
+    /* The sweep, the bars' lines and the end screen on real slot states (review R1-1): bar 1 leaves out the up strum on "2 and" (its slot
+       still pending) and strums on "3" (where the hand misses), its chord right; bar 2 strums right and its chord is wrong. The real
+       scSweep calls the slots, scBarOver writes each bar's line, scFinish draws the end screen. Both languages. */
+    for (const lang of ['en', 'es']) {
+      run(`setLang(${JSON.stringify(lang)})`);
+      const sw = JSON.parse(run(`(() => { micRec = null;
+        try {
+          sc = { phase: 'listening', card: { isConnected: true, remove(){} }, timeouts: [], cells: [], bars: ['D5', 'D5'], chords: { D5: { midi: [50, 57, 62] } }, pattern: '${PIN.pattern}', slotsOf: scPatternSlots('${PIN.pattern}'),
+            slots: [], caps: [], events: [{ kind: 'strum' }], lines: [], barsDone: 0, sweep: 0, total: 16, cur: -1, cap: null, bpm: 60, beatMs: 1000, slotMs: 500, win: 175, lat: 50, listenStart: 0, gridOffset: 0, where: '' };
+          for (let k = 0; k < 16; k++){ const sl = sc.slotsOf[k % 8]; sc.slots.push({ k, bar: k >> 3, slot: k % 8, strum: sl.strum, dir: sl.dir, state: sl.strum ? (k === 3 ? 'pending' : 'ok') : (k === 4 ? 'extra' : 'pending') }); }
+          sc.caps = [0, 1].map(b => ({ bar: b, chord: 'D5', prev: b ? 'D5' : null, at: 0, rt: [], rm: [], verdict: b ? 'wrong' : 'ok', a: null, b: null, c: null, done: true }));
+          scSweep(sc, 1e9);
+          const states = sc.slots.map(x => x.state).join(','), lines = sc.lines.slice(), barsDone = sc.barsDone;
+          scFinish(true);
+          return JSON.stringify({ states, lines, barsDone, body: document.getElementById('coach-body').innerHTML,
+            want: [t('sc.barN', { n: 1 }) + ' ' + t('sc.missedUp', { count: t('sc.countAnd', { n: 2 }) }) + ' · ' + t('sc.extra', { count: '3' }) + ' · ' + t('sc.chordOk', { chord: 'D5' }),
+                   t('sc.barN', { n: 2 }) + ' ' + t('sc.patternOk') + ' · ' + t('sc.chordWrong', { chord: 'D5' })],
+            head: t('sc.summary', { p: 1, n: 2, c: 1 }) });
+        } finally { if (sc) sc.card = { isConnected: false, remove(){} }; scClose(); } })()`));
+      n.sweeps++;
+      const wantStates = 'ok,quiet,ok,miss,extra,ok,ok,ok,ok,quiet,ok,ok,quiet,ok,ok,ok';
+      if (sw.states !== wantStates) fail(`${lang}: the sweep left the slots ${sw.states}, want ${wantStates} (a strum not heard is missed, a quiet miss is quiet)`);
+      if (sw.barsDone !== 2) fail(`${lang}: the sweep finished ${sw.barsDone} bars, want 2`);
+      sw.want.forEach((w, i) => { if (sw.lines[i] !== w) fail(`${lang}: bar ${i + 1}'s line reads "${sw.lines[i]}", want "${w}"`); if (!sw.body.includes(w)) fail(`${lang}: the end screen does not list bar ${i + 1}: "${w}"`); });
+      if (!sw.body.includes(sw.head)) fail(`${lang}: the end screen does not say "${sw.head}" (one bar of two with no pattern fault, one chord of two right)`);
+    }
+    run(`setLang('en')`);
     /* the end line: 0, 1 and many bars, both languages */
     for (const lang of ['en', 'es']) {
       run(`setLang(${JSON.stringify(lang)})`);
@@ -17052,8 +17082,8 @@ function checkStrumCheck() {
     run(`setLang('en')`);
   } catch (e) { fail('stopped on an error: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : e)); }
   /* pinned totals, so a renamed function cannot turn this into a check of nothing */
-  if (n.onsets !== 14 || n.chords !== 9 || n.lines !== 10 || n.pins !== 4) fail(`ran ${n.onsets} onsets (want 14), ${n.chords} chord cases (9), ${n.lines} end lines (10), ${n.pins} pins (4)`);
-  if (!bad) ok(`1eh: one listening step (ca-46, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, none in the console, disabled with "slow to ${PIN.maxBpm}" above ${PIN.maxBpm} BPM; its own ratios ${PIN.ratio} / ${PIN.hfRatio} (Strum Radar's state still 1.4 / 1.7, run); window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule} (${n.chords} scripted cases); a whole finish saved nothing; end lines at 0, 1 and many bars in both languages`);
+  if (n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 9 || n.lines !== 10 || n.pins !== 4) fail(`ran ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (9), ${n.lines} end lines (10), ${n.pins} pins (4)`);
+  if (!bad) ok(`1eh: one listening step (ca-46, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, none in the console, disabled with "slow to ${PIN.maxBpm}" above ${PIN.maxBpm} BPM; its own ratios ${PIN.ratio} / ${PIN.hfRatio} (Strum Radar's state still 1.4 / 1.7, run); window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule} (${n.chords} scripted cases); a whole finish saved nothing; the real sweep and end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages`);
 }
 
 async function checkCountIn() {

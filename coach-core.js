@@ -167,7 +167,8 @@ function coachOnBeatMs(){
 const COACH_MIC_GAIN = 3;
 
 /* `records` is true ONLY where a consented recording can actually run —
-   the Listening Coach card (micRecStart('coach')), Note Runner
+   the Listening Coach card (micRecStart('coach')), the strum-pattern check
+   (coach-strumcheck.js, micRecStart('coach', its own cap)), Note Runner
    (micRecStart('nr')) and Power Chord Switch (micRecStart('pw'), not Change Up).
    Every other screen never records, so it always says
    "nothing is recorded"; the data-rec mark is what micRecFootSync re-words. */
@@ -1766,11 +1767,13 @@ function coachMicOff(){
        one-time question (localStorage, keyed by uid so the next student on
        a shared Chromebook is asked for themselves — "No thanks" is never
        asked again).
-   Then a Listening Coach take, a Note Runner round (not a Finger Gym
+   Then a Listening Coach take, a strum-pattern check round (saved under the
+   Coach's id, marked game 'strumcheck'), a Note Runner round (not a Finger Gym
    round, which shares Note Runner's engine) or a Power Chord Switch game
    (not Change Up) records the RAW mic
    (before COACH_MIC_GAIN and the filters) from the count-in to the end, at
-   most MICREC_MAX_SEC, with a visible "Recording this take for your
+   most MICREC_MAX_SEC (the strum-pattern check: its whole round, up to its
+   own SC_REC_MAX_SEC, through micRecStart's cap), with a visible "Recording this take for your
    teacher" label the whole time, and saves it to micTakes/<uid>-<mode>
    (one per student per game, the next take overwrites it). Teacher preview
    and the dev bypass never upload. Every way out of a take ends up in

@@ -79,8 +79,11 @@ const SC_CHORD_CLARITY = 0.55;      // the Listening Coach's chord-mode gate (co
 const SC_TAIL_GAP = 60;             // ms: the chord readings stop this long before slot 2 is due
 const SC_MISS_GRACE = 60;           // ms after a slot's window before it is called (a frame, and the onset's dating)
 /* From the step's slider's floor to the check's tempo limit, STRUM_CHECK_MAX_BPM (app/tab.js, where the button is
-   drawn before this part loads): above it the button is disabled, and the card's -5 / +5 stop there too. */
-const SC_BPM_MIN = 40, SC_BPM_MAX = STRUM_CHECK_MAX_BPM;
+   drawn before this part loads): above it the button is disabled, and the card's -5 / +5 stop there too. Read
+   when the check opens (scBpmMax), never at load: this part must load, and coachClose must reach scClose, on a
+   page without app/tab.js too (review R1-6). With no limit on the page the card keeps to the floor. */
+const SC_BPM_MIN = 40;
+function scBpmMax(){ return typeof STRUM_CHECK_MAX_BPM === 'number' ? STRUM_CHECK_MAX_BPM : SC_BPM_MIN; }
 const SC_REC_MAX_SEC = 60;          // a recorded take: the whole round up to this (40 BPM: about 56 s)
 const SC_SLOTS = 8;                 // eighths in a bar (STRUM_SLOTS in app/tab.js)
 
@@ -172,7 +175,8 @@ function scOpen(btn){
   if (!spec || !Array.isArray(spec.bars) || !spec.bars.length || !spec.chords) return;
   let bpm = readGroupBpm(btn, 60);
   if (!(bpm >= SC_BPM_MIN)) bpm = SC_BPM_MIN;
-  bpm = Math.min(SC_BPM_MAX, Math.round(bpm));
+  const bpmMax = scBpmMax();
+  bpm = Math.min(bpmMax, Math.round(bpm));
   const card = document.createElement('div');
   card.className = 'coach-card sc-card';
   card.id = 'coach-card';
@@ -192,7 +196,7 @@ function scOpen(btn){
   const tabBody = anchor.closest('.tab-body');
   const cells = tabBody ? Array.from(tabBody.querySelectorAll('.strum-board .strum-cell')) : [];
   sc = {
-    phase: 'ready', card, spec, bpm, where: btn.dataset.scWhere || '',
+    phase: 'ready', card, spec, bpm, bpmMax, where: btn.dataset.scWhere || '',
     pattern: String(spec.pattern || ''), slotsOf: scPatternSlots(spec.pattern),
     bars: spec.bars.map(String), chords: spec.chords,
     cells: cells.length === spec.bars.length * SC_SLOTS ? cells : [],
@@ -223,7 +227,7 @@ function scRenderReady(msg){
 
 function scNudgeBpm(d){
   if (!sc || (sc.phase !== 'ready' && sc.phase !== 'report')) return;
-  sc.bpm = Math.min(SC_BPM_MAX, Math.max(SC_BPM_MIN, sc.bpm + d));
+  sc.bpm = Math.min(sc.bpmMax, Math.max(SC_BPM_MIN, sc.bpm + d));
   const el = document.getElementById('sc-bpm-readout');
   if (el) el.textContent = sc.bpm + ' BPM';
 }

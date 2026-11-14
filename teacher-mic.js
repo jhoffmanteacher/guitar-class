@@ -375,7 +375,7 @@ async function teacherMicDownloadEverything(){
 }
 async function teacherMicDelete(i){
   const d = teacherMicTakes[i]; if(!d) return;
-  if(!confirm(`Delete ${d.name || 'this student'}’s ${d.mode === 'nr' ? 'Note Runner' : d.mode === 'pw' ? 'Power Chord Switch' : 'Listening Coach'} recording? This cannot be undone.`)) return;
+  if(!confirm(`Delete ${d.name || 'this student'}’s ${d.mode === 'nr' ? 'Note Runner' : d.mode === 'pw' ? 'Power Chord Switch' : d.game === 'strumcheck' ? 'Strum pattern check' : 'Listening Coach'} recording? This cannot be undone.`)) return;
   try{
     await ensureDb();
     const ref = db.collection('micTakes').doc(d.id);
