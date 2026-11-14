@@ -93,7 +93,10 @@
      landed with the opposite effect   an Optional / Required write after which the card is not what was clicked
      false save        something a refused or failed write intended is in the doc although nothing accepted put it there
      doc differs       the doc is not the expected answer (below) for any other reason
-     untold refusal    a refused write did not reach "Nothing was saved" in ITS console exactly once
+     untold refusal    a refused write did not reach "Nothing was saved" in ITS console exactly once. "Refused" is
+                       judged by the server, not by the console's error (2026-11-14, plant-a-fault 23e08d8999 and
+                       25c60b00cd): the update function threw on a read whose configVersion is not the one the
+                       console held, whatever flag the error carries
      a failed write not told / shown as stale   a write that failed for another reason (the connection dropped,
                        five conflicts) must show its own message once, not "Nothing was saved"
      "Nothing was saved" for a saved write   the alert on a write that was committed, or outside any write
@@ -723,7 +726,14 @@ class FakeServer {
       try { result = await fn(t); }
       catch (e) {
         this.log(who, `transaction #${tx}: the update function threw — ${e && e.message}`);
-        if (this.onTxEnd) this.onTxEnd(who, { tx, outcome: e && e.staleConfig ? 'refused' : 'threw', error: e, readCV, vConsole: who.peekVersion ? who.peekVersion() : null });
+        /* A refusal is judged by what the server saw, not by the flag the console puts on its error: the update
+           function threw on a read whose configVersion is not the one this console held (the version guard's only
+           way to throw). Such a write must reach "Nothing was saved" (untold refusal otherwise), whatever the error
+           says (plant-a-fault 23e08d8999: e.staleConfig false gave the connection wording; 25c60b00cd: a strict
+           writer's guard threw a TypeError). */
+        const vC = who.peekVersion ? who.peekVersion() : null;
+        const guard = readCV != null && vC != null && Number(vC) !== readCV;
+        if (this.onTxEnd) this.onTxEnd(who, { tx, outcome: (e && e.staleConfig) || guard ? 'refused' : 'threw', error: e, readCV, vConsole: vC });
         throw e;
       }
       const vConsole = who.peekVersion ? who.peekVersion() : null;
