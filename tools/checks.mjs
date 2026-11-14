@@ -17242,7 +17242,7 @@ const SITE_ERRORS_SIM_PIN = 161;
    before paste 2 is published changes BOTH files the same way (the failure
    message says how).
    ════════════════════════════════════════════════════════════════════ */
-const P2_SCHOOL_USES = 19;   // 6 class-wide reads + 11 student writes (progress counts once: read, write); 2026-11-13 +2: songRequests (a student's create, and the read of their own)
+const P2_SCHOOL_USES = 24;   // 6 class-wide reads + 11 student writes (progress counts once: read, write); 2026-11-13 +2: songRequests (a student's create, and the read of their own); 2026-11-14 +5: song files (read the files, read the pieces, read the month's counter, create it, raise it)
 const P2_IS_SCHOOL_BODY = "return request.auth != null && ((request.auth.token.get('email_verified', false) == true && request.auth.token.get('email', '').lower().matches('^[^@]+@seq[.]org$')) || (exists(/databases/$(database)/documents/config/access) && get(/databases/$(database)/documents/config/access).data.get('allow', {}).get(request.auth.uid, false) == true));";
 function checkRulesPaste2() {
   head('1dt. School accounts: firestore.rules.paste2 (not published) is the published rules with isSchool() as the student gate; isSchool() itself is pinned');
@@ -17261,7 +17261,7 @@ function checkRulesPaste2() {
     const fnBody = body.slice(sp.open + 1, sp.end).replace(/\s+/g, ' ').trim();
     if (fnBody !== P2_IS_SCHOOL_BODY) fail(`${file}: the body of isSchool() is not the pinned one (P2_IS_SCHOOL_BODY: a verified email, lower case, the anchored @seq.org pattern, OR an allow-list entry that is exactly true behind exists()). Found: ${fnBody.slice(0, 220)}`);
     const uses = (body.match(/isSchool\(\)/g) || []).length - 1;
-    if (uses !== P2_SCHOOL_USES) fail(`${file} uses isSchool() ${uses} times; pinned at ${P2_SCHOOL_USES} (6 class-wide reads + 11 student writes + the song request's create and own read). A new student rule needs the gate too: add it, then re-pin P2_SCHOOL_USES on purpose`);
+    if (uses !== P2_SCHOOL_USES) fail(`${file} uses isSchool() ${uses} times; pinned at ${P2_SCHOOL_USES} (6 class-wide reads + 11 student writes + the song request's create and own read + the song files' 3 reads and the counter's create and raise). A new student rule needs the gate too: add it, then re-pin P2_SCHOOL_USES on purpose`);
     const ar = (() => { const i = body.indexOf('match /accessRequests/{userId} {'); if (i < 0) return ''; let d = 0, k = body.indexOf('{', i + 'match /accessRequests/{userId}'.length); for (; k < body.length; k++) { if (body[k] === '{') d++; else if (body[k] === '}' && !--d) break; } return body.slice(i, k + 1); })();
     const signedAll = (body.match(/isSignedIn\(\)/g) || []).length - 1, signedAr = (ar.match(/isSignedIn\(\)/g) || []).length;
     if (signedAll !== 2 || signedAr !== 2) fail(`${file} must leave isSignedIn() on exactly the two accessRequests lines (get, create): found ${signedAll} uses, ${signedAr} in that block`);
