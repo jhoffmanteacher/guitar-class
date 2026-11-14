@@ -42,6 +42,7 @@ import { dirname, join } from 'node:path';
 import { audioHashMap, renderAudioBlock, AUDIO_BLOCK_RE, AUDIO_CACHE_NAME, AUDIO_HASH_CACHE_NAME } from './sw-audio-map.mjs';
 import { reviewLabelReport } from './review-labels.mjs';
 import { tmpdir, cpus } from 'node:os';
+import { driftReport } from './i18n-drift.mjs';
 import vm from 'node:vm';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -4790,8 +4791,7 @@ function functionBodyAt(src, startIndex) {
    DOM/localStorage stubs, so this checks the object the browser would
    actually build, not a regex guess at where the object literal ends.
    ════════════════════════════════════════════════════════════════════ */
-function loadI18nTable() {
-  const src = readFileSync(join(ROOT, 'i18n.js'), 'utf8');
+function loadI18nTable(src = readFileSync(join(ROOT, 'i18n.js'), 'utf8')) {   // src: another version of i18n.js (1dp)
   const patched = src.replace('const I18N = {', 'const I18N = globalThis.__I18N_TABLE__ = {');
   if (patched === src) throw new Error('could not find "const I18N = {" — has i18n.js been restructured?');
   const doc = { documentElement: {}, querySelectorAll: () => [], addEventListener(){} };
@@ -4831,6 +4831,37 @@ function checkI18nParity() {
   }
   if (bad === 0) ok(`${keys.length} i18n.js keys — every one has en+es and matching {param}s`);
   return I18N;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1dp. ENGLISH CHANGED, SPANISH DID NOT — a WARNING, never a failure
+   (Jonathan, 2026-11-13: "a warning when an English string changes and
+   its Spanish twin doesn't"). tools/i18n-drift.mjs compares this tree with
+   where the branch left origin/main (GC_DRIFT_BASE=<ref> overrides) and
+   reads only the files that differ: i18n.js's { en, es } keys, the data
+   files' `<field>` / `<field>_es` pairs for the student fields 1w / 1w-t
+   read (STUDENT_VALUE_NAME_RE below, so the two lists cannot drift), and
+   the Journey pages' data-es attributes against their English. A change
+   of whitespace, letter case, entities, quote style or the punctuation
+   . , ; : ! ? ' " ( ) - – — … is not a change (Spanish does not mirror
+   those one for one). A missing twin is 1b / 1d / 1e's error, not this.
+   ════════════════════════════════════════════════════════════════════ */
+const DRIFT_FIELDS = new Set(/\(([^)]*)\)/.exec(STUDENT_VALUE_NAME_RE.source)[1].split('|').filter(f => !f.endsWith('_es')));
+function checkSpanishDrift() {
+  head('1dp. English changed, Spanish did not (warning only)');
+  let r;
+  try { r = driftReport(ROOT, { fields: DRIFT_FIELDS, loadI18n: loadI18nTable }); }
+  catch (e) { warn(`1dp could not run: ${e.message}`); warnings++; return; }
+  if (r.skipped) { ok(`nothing to compare: ${r.skipped}`); return; }
+  const cut = s => { s = String(s).replace(/\s+/g, ' ').trim(); return s.length > 140 ? s.slice(0, 137) + '…' : s; };
+  for (const e of r.errors) { warn(`1dp could not read ${e}`); warnings++; }
+  for (const h of r.hits) {
+    warn(`${h.file} ${h.key}: the English changed and the Spanish did not\n      was: "${cut(h.enOld)}"\n      now: "${cut(h.enNew)}"\n      es:  "${cut(h.es)}"`);
+    warnings++;
+  }
+  const at = `${r.base.slice(0, 7)} (${r.baseHow})`;
+  if (!r.hits.length) ok(`compared with ${at}: ${r.files} changed file${r.files === 1 ? '' : 's'} with twins, ${r.pairs} pairs read, no English-only change`);
+  else console.log(`  ${C.dim}${r.hits.length} English-only change${r.hits.length === 1 ? '' : 's'} against ${at}: if the Spanish says the same thing still, ignore it${C.reset}`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -16596,6 +16627,7 @@ function checkPracticeMinutes(i18nTable) {
   validateModules();
   validateClassActivities();
   const i18nTable = checkI18nParity();
+  checkSpanishDrift();
   checkMissingI18nKeys(i18nTable);
   checkDuplicateGlobals();
   checkLazyHandlers();
