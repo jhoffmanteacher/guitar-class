@@ -1131,7 +1131,7 @@ SETS.push(
             title_es: 'Toca tu solo original',
             steps: [
           {
-            label: 'Challenge 3 — Record Over the Am Jam Track (assessment preparation)', label_es: 'Reto 3 — Graba sobre la pista de jam en Am (preparación para la evaluación)',
+            label: 'Challenge 3 — Play Over the Am Jam Track (assessment preparation)', label_es: 'Reto 3 — Toca sobre la pista de jam en Am (preparación para la evaluación)',
             text: 'Play your 4-bar solo over a backing track. Use at least one hammer-on, pull-off or vibrato.<ol><li>Start the <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; Am jam track</a>. Or open &#x1F3B5; Songs in the left menu and pick the "the cure" or "Watchtower" backing track. Both are in A minor.</li><li>Say which plan you will use: "call-and-response" or "four phrases".</li><li>Play your solo from memory.</li></ol>You\'ve got it when: you play from memory with the track from start to finish, with no restarts.',
             text_es: 'Toca tu solo de 4 compases sobre una pista de acompañamiento. Usa por lo menos un hammer-on, pull-off o vibrato.<ol><li>Pon la <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; pista de jam en Am</a>. O abre &#x1F3B5; Canciones en el menú de la izquierda y elige la pista de acompañamiento de "the cure" o de "Watchtower". Las dos están en A menor.</li><li>Di qué plan vas a usar: "llamada y respuesta" o "cuatro frases".</li><li>Toca tu solo de memoria.</li></ol>Lo tienes cuando: tocas de memoria con la pista de principio a fin, sin reiniciar.',
             hint: 'Don\'t just run up and down the scale. Play short ideas with rests.',

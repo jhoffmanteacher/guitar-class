@@ -189,7 +189,7 @@ SETS.push(
                 skills: [6]
               },
               {
-                label: 'Fast round: record all six', label_es: 'Ronda rápida: grábate los seis',
+                label: 'Fast round: play all six', label_es: 'Ronda rápida: toca los seis',
                 text: '<ol><li>Play all six re-tests back to back, with no break between them.</li><li>Then open the checklist and settle any you weren\'t sure about.</li></ol>Cleared all six? Module 9 proper starts at Set 2. Flagged some? Spend a session with the practice spots listed above first — they come back fast.',
                 text_es: '<ol><li>Toca los seis repasos seguidos, sin pausa entre ellos.</li><li>Luego abre la lista de verificación y resuelve cualquiera del que no estuvieras seguro.</li></ol>¿Aprobaste los seis? El Módulo 9 propiamente empieza en la Unidad 2. ¿Marcaste algunos? Dedica una sesión a los puntos de práctica listados arriba primero — vuelven rápido.',
                 hint: 'Be strict. One dead string or one pause means "Still working on it".',
