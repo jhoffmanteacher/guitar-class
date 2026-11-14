@@ -73,10 +73,10 @@
    on the UNMUTATED tree, a tool could not be started, or a planted file could not be put back; 2 = bad arguments or
    this tool crashed. Stopped by SIGTERM (a job's deadline) it still writes the report and the JSON of what was
    finished and exits 0 (SIGINT: 130). The last line is one summary line ("plant-a-fault: …"), for the annotation.
-   checks.mjs 1ea checks that every file, function, constant and block named in REGIONS still exists (in code tokens:
-   a comment or spacing does not count) and that the known file parses; a file this tool's tokenizer cannot read is a
-   warning there, not a failure. Node only, no packages. */
-import { readFileSync, writeFileSync, existsSync, mkdirSync, rmSync, cpSync, symlinkSync, readdirSync, copyFileSync, mkdtempSync, appendFileSync } from 'node:fs';
+   checks.mjs 1ea WARNS (never fails: this tool is report-only) when a file, top-level function, constant or block
+   named in REGIONS is gone or the known file does not parse; a run whose table names something gone reports that
+   region as "table stale", plants nothing there, and exits 1. Node only, no packages. */
+import { readFileSync, writeFileSync, existsSync, mkdirSync, rmSync, cpSync, symlinkSync, readdirSync, copyFileSync, mkdtempSync, appendFileSync, realpathSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { join, dirname, resolve, relative, basename, sep } from 'node:path';
@@ -93,6 +93,11 @@ export const KNOWN_FILE = 'tools/plant-a-fault-known.json';
    text) | { file, consts: [top-level const names] } | { file, whole: true } | { file, rules: true } (a rules text).
    tools: run in this order on every mistake (a target may name its own). notRun: the browser tools that guard this
    region and are not in the weekly run. */
+/* The unpublished second rules text (the school-accounts paste 2, checks.mjs 1dt), while it exists. Its file name is
+   built from parts on purpose: the day its text moves into firestore.rules and the file is deleted, a repo-wide check
+   fails on any tracked file that still names it. With the file gone, every rules mistake is planted in the one text
+   and nothing here needs to change. */
+const RULES_PASTE_2 = ['firestore', 'rules', 'paste' + 2].join('.');
 export const REGIONS = [
   { name: 'save',
     why: "the progress save: a fault here loses a student's work (CLAUDE.md danger zone; the save-loop header names these writers)",
@@ -118,8 +123,8 @@ export const REGIONS = [
   { name: 'rules',
     why: "firestore.rules is the real security boundary: a fault here lets the wrong account read or write (danger zone)",
     targets: [
-      { file: 'firestore.rules', rules: true, pairWith: 'firestore.rules.paste2', tools: ['site-errors-sim', 'song-files-console', 'pm-rules', 'rules-core', 'site-errors-rules', 'song-requests-rules', 'song-files-rules', 'live-quiz-loop', 'checks'] },
-      { file: 'firestore.rules.paste2', rules: true, optional: true, pairWith: 'firestore.rules', sharedFromPair: true, tools: ['pm-rules', 'rules-core', 'site-errors-rules', 'song-requests-rules', 'song-files-rules', 'checks'] },
+      { file: 'firestore.rules', rules: true, pairWith: RULES_PASTE_2, tools: ['site-errors-sim', 'song-files-console', 'pm-rules', 'rules-core', 'site-errors-rules', 'song-requests-rules', 'song-files-rules', 'live-quiz-loop', 'checks'] },
+      { file: RULES_PASTE_2, rules: true, optional: true, pairWith: 'firestore.rules', sharedFromPair: true, tools: ['pm-rules', 'rules-core', 'site-errors-rules', 'song-requests-rules', 'song-files-rules', 'checks'] },
     ],
     tools: [] },
   { name: 'listening',
@@ -142,7 +147,7 @@ export const REGIONS = [
   { name: 'signin',
     why: 'sign-in, sign-out and the access screen: a fault here shows one student another\'s work or locks a class out',
     targets: [
-      { file: 'app/start.js', block: 'auth.onAuthStateChanged(async user=>{', label: 'the sign-in callback' },
+      { file: 'app/start.js', block: 'auth.onAuthStateChanged(', label: 'the sign-in callback' },
       { file: 'app/boot.js', fns: ['accessRefusedAtBoot', 'accessCheck', 'showAccessScreen', 'accessReadMine', 'accessAsk', 'accessRecheck', 'signOut', 'flushBeforeLeaving', '_uidKey'] },
     ],
     tools: ['access-sim', 'save-loop', 'shared-chromebook', 'checks'],
@@ -243,7 +248,7 @@ export function tokenize(src, mode = 'js') {
   const n = src.length, parens = [];
   const add = (type, a, b) => {
     const t = { type, a, b, v: src.slice(a, b) };
-    if (type === 'punct' && t.v === '(') parens.push(prev && prev.type === 'name' && /^(if|while|for|with)$/.test(prev.v));
+    if (type === 'punct' && t.v === '(') parens.push(prev && prev.type === 'name' && /^(if|while|for|with)$/.test(prev.v) && !(prev2 && (prev2.v === '.' || prev2.v === '?.')));   // a.with(…) is a call
     else if (type === 'punct' && t.v === ')') t.ctrl = parens.pop() === true;
     toks.push(t); if (type !== 'comment') { prev2 = prev; prev = t; }
   };
@@ -301,10 +306,13 @@ function depthMap(code) { const d = new Array(code.length); let k = 0; for (let 
 /* Each target -> [{ scope, from, to }] token-index ranges (in f.code, exclusive) or a problem text. */
 function targetRanges(f, t) {
   const out = [], problems = [];
+  const d = depthMap(f.code);
   if (t.whole || t.rules) out.push({ scope: '(file)', from: -1, to: f.code.length });
+  /* Only TOP-LEVEL declarations and blocks count (review R2-1): a local helper with the same name inside another
+     function, or a second service-worker check inside some function, is not the code the table names. */
   for (const name of t.fns || []) {
     const hits = [];
-    for (let i = 0; i + 1 < f.code.length; i++) if (f.code[i].v === 'function' && f.code[i + 1].type === 'name' && f.code[i + 1].v === name) hits.push(i);
+    for (let i = 0; i + 1 < f.code.length; i++) if (d[i] === 0 && f.code[i].v === 'function' && f.code[i + 1].type === 'name' && f.code[i + 1].v === name) hits.push(i);
     if (hits.length !== 1) { problems.push(hits.length ? `${t.file} ${name}(), which is declared ${hits.length} times` : `${t.file} ${name}(), which is gone`); continue; }
     let j = hits[0] + 2;
     if (f.code[j]?.v !== '(') { problems.push(`${t.file} ${name}(), which no longer reads as a function`); continue; }
@@ -317,20 +325,26 @@ function targetRanges(f, t) {
   }
   if (t.block) {
     /* Found in the CODE tokens, so a comment or a string that quotes it does not count and spacing does not matter. */
-    const want = tokenize(t.block, 'js').filter(x => x.type !== 'comment').map(x => x.v);
+    /* A string is compared by its content, so 'x' and "x" are the same token. */
+    const key = x => x.type === 'str' ? 'str:' + x.v.slice(1, -1) : x.v;
+    const want = tokenize(t.block, 'js').filter(x => x.type !== 'comment').map(key);
     const hits = [];
-    for (let i = 0; i + want.length <= f.code.length; i++) { let k = 0; while (k < want.length && f.code[i + k].v === want[k]) k++; if (k === want.length) hits.push(i); }
+    for (let i = 0; i + want.length <= f.code.length; i++) { if (d[i] !== 0) continue; let k = 0; while (k < want.length && key(f.code[i + k]) === want[k]) k++; if (k === want.length) hits.push(i); }
     if (hits.length !== 1) problems.push(`${t.file} the block starting "${t.block}", which is ${hits.length ? 'there more than once' : 'gone'}`);
     else {
-      const at = f.code[hits[0]].a;
-      const open = f.code.findIndex(x => x.a >= at && x.v === '{');
+      /* Its { … } is the one right after the ( … ) the anchor opens (an if), or the first one inside it (a callback);
+         a brace anywhere later in the file is not it (review R2-6a). */
+      const p = f.code.findIndex((x, i) => i >= hits[0] && x.v === '(');
+      const pc = p < 0 ? -1 : matchClose(f.code, p);
+      let open = -1;
+      if (pc > 0 && f.code[pc + 1]?.v === '{') open = pc + 1;
+      else if (pc > 0) { const k = f.code.findIndex((x, i) => i > p && i < pc && x.v === '{'); open = k; }
       const close = open < 0 ? -1 : matchClose(f.code, open);
       if (close < 0) problems.push(`${t.file} the block starting "${t.block}", which no longer has a { … } after it`);
       else out.push({ scope: t.label || t.block, from: open, to: close });
     }
   }
   if (t.consts) {
-    const d = depthMap(f.code);
     for (const name of t.consts) {
       let at = -1;
       for (let i = 1; i + 1 < f.code.length; i++) if (d[i] === 0 && f.code[i].v === name && f.code[i + 1].v === '=' && /^(const|let|var|,)$/.test(f.code[i - 1].v)) { at = i; break; }
@@ -444,7 +458,7 @@ function parses(f, m) {
 
 /* Every mistake of a region (deterministic, in file order), and the table's problems. */
 export function regionMistakes(root, region) {
-  const all = [], problems = [], warnings = [];
+  const all = [], problems = [], warnings = [], blind = [];
   for (const t of region.targets) {
     const mode = t.rules ? 'rules' : 'js';
     const f = loadFile(root, t.file, mode);
@@ -452,22 +466,25 @@ export function regionMistakes(root, region) {
     /* This tool's small tokenizer cannot read the file (a construct it does not know): that is the tool's blind spot,
        not a mistake in the site, so it is a WARNING; the weekly run plants nothing there until the tokenizer learns
        it. The names the table gives for the file are still looked for in its text, so a real removal still fails. */
-    if (!f.balanced) { warnings.push(`plant-a-fault cannot read ${t.file} (its tokenizer lost its place in the brackets): that file is left out of the weekly run until tools/plant-a-fault.mjs's tokenizer is taught the new construct`); problems.push(...textNames(f, t)); continue; }
+    if (!f.balanced) { warnings.push(`plant-a-fault cannot read ${t.file} (its tokenizer lost its place in the brackets): that file is left out of the weekly run until tools/plant-a-fault.mjs's tokenizer is taught the new construct`); blind.push(t.file); problems.push(...textNames(f, t)); continue; }
     const { ranges, problems: p } = targetRanges(f, t);
     problems.push(...p);
     const list = [];
     const seen = new Set();
     for (const r of ranges) for (const m of mistakesIn(f, r, region, t)) { const k = m.a + ':' + m.b + ':' + m.op; if (!seen.has(k)) { seen.add(k); list.push(m); } }
     list.sort((x, y) => x.a - y.a || x.b - y.b || x.op.localeCompare(y.op));
-    if (t.pairWith) pairRules(f, loadFile(root, t.pairWith, 'rules'), list);
+    const other = t.pairWith ? loadFile(root, t.pairWith, 'rules') : null;
+    if (other) { pairRules(f, other, list); for (const m of list) if (!m.pair) m.oneText = true; }
     /* paste 2's shared lines are already planted, in both texts, from firestore.rules: keep only its own lines */
     all.push(...finishMistakes(f, t.sharedFromPair ? list.filter(m => !m.pair) : list));
   }
-  return { all, problems, warnings };
+  return { all, problems, warnings, blind };
 }
 /* The names a target gives, looked for in the plain text (the fallback for a file the tokenizer cannot read). */
 function textNames(f, t) {
   const out = [], esc = x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  /* comments out (crudely: this is the fallback), so a name kept only in a comment counts as gone (review R2-6b) */
+  f = { src: f.src.replace(/\/\*[\s\S]*?\*\/|(^|[^:'"\\])\/\/[^\n]*/g, '$1') };
   for (const name of t.fns || []) if (!new RegExp(`\\bfunction\\s+${esc(name)}\\s*\\(`).test(f.src)) out.push(`${t.file} ${name}(), which is gone`);
   for (const name of t.consts || []) if (!new RegExp(`(\\b(const|let|var)\\s+|,\\s*)${esc(name)}\\s*=`).test(f.src)) out.push(`${t.file} the constant ${name}, which is gone`);
   if (t.block && !f.src.replace(/\s+/g, '').includes(t.block.replace(/\s+/g, ''))) out.push(`${t.file} the block starting "${t.block}", which is gone`);
@@ -603,11 +620,15 @@ async function runTool(name, ctx, scratch, mode, rulesFile) {
      finished for time", never "caught"). */
   const left = (ctx.hardEnd || Infinity) - Date.now();
   if (left < 2000) return { tool: name, verdict: 'no-time', why: 'the time budget ran out' };
-  const timeoutMs = Math.min(ownLimit, left);
+  let timeoutMs = Math.min(ownLimit, left);
   let r;
   if (tool.emu) {
     if (!ctx.emu) return { tool: `${name} (${rulesFile})`, verdict: 'skipped', why: 'no --emu', secs: 0 };
     r = await withEmuLock(async () => {
+      /* the time left is worked out again here: the other copy may have held the emulator for minutes (R2-4) */
+      const leftNow = (ctx.hardEnd || Infinity) - Date.now();
+      if (leftNow < 2000) return { noTime: true };
+      timeoutMs = Math.min(ownLimit, leftNow);
       copyFileSync(join(scratch, tool.emu), join(ctx.emu, basename(tool.emu)));
       /* Under another name: the emulator watches its own firestore.rules (firebase.json) and would reload it in the
          middle of a test, over the rules the test loaded itself. The tests read the gate from the text, not the name. */
@@ -615,7 +636,7 @@ async function runTool(name, ctx, scratch, mode, rulesFile) {
       copyFileSync(join(scratch, rulesFile), join(ctx.emu, planted));
       /* Empty the emulator first: a test may leave documents behind (pm-rules-test run twice in a row fails 4 cases
          on its own leftovers), and its next run would then "catch" every mistake. The rules tests use project demo-gc. */
-      try { await fetch(`http://127.0.0.1:${ctx.emuPort}/emulator/v1/projects/demo-gc/databases/(default)/documents`, { method: 'DELETE' }); }
+      try { await fetch(`http://127.0.0.1:${ctx.emuPort}/emulator/v1/projects/demo-gc/databases/(default)/documents`, { method: 'DELETE', signal: AbortSignal.timeout(15000) }); }
       catch (e) { return { code: null, startError: `the emulator on port ${ctx.emuPort} does not answer (${e.message}); run under firebase emulators:exec`, out: '', secs: 0 }; }
       const args = [basename(tool.emu), planted, '--port', String(ctx.emuPort)];
       if (tool.site) args.push('--site', scratch);
@@ -626,6 +647,7 @@ async function runTool(name, ctx, scratch, mode, rulesFile) {
     if (tool.against) args.push(mode === 'clean' ? `--json=${join(ctx.baseDir, name + '.json')}` : `--against=${join(ctx.baseDir, name + '.json')}`);
     r = await run(process.execPath, args, scratch, timeoutMs);
   }
+  if (r.noTime) return { tool: `${name} (${rulesFile})`, verdict: 'no-time', why: 'the time budget ran out', secs: 0 };
   const lines = xLines(r.out, tool);
   const res = { tool: name + (tool.emu ? ` (${rulesFile})` : ''), exit: r.code, secs: Math.round(r.secs * 10) / 10 };
   if (r.startError) return { ...res, verdict: 'start-failed', why: r.startError };
@@ -711,10 +733,18 @@ function report(ctx, regions, outcomes, known, stale, cleanFail, notRunBudget, s
     L.push(`✗ ${c.region}: its tools FAIL ON THE UNMUTATED TREE, so nothing was planted there. Fix the tool or the site first.`);
     for (const r of c.bad) { L.push(`    ${r.tool}: exit ${r.exit}${r.why ? ' (' + r.why + ')' : ''}`); for (const l of (r.first && r.first.length ? r.first : r.tail || []).slice(0, 8)) L.push('      ' + l); }
   }
-  if (cleanFail.length) L.push('');
+  for (const x of ctx.tableStale || []) {
+    L.push(`✗ ${x.region}: table stale, so nothing was planted there. tools/plant-a-fault.mjs's REGIONS names what is gone:`);
+    for (const w of x.what) L.push(`    ${w}`);
+  }
+  if (cleanFail.length || (ctx.tableStale || []).length) L.push('');
   if (stopped) { L.push(`Stopped from outside (${stopped}) before the end: what is below is what was finished.`); L.push(''); }
   const caughtN = all.length - got.length;
-  if (!fresh.length) L.push(`Planted ${all.length} small mistake${all.length === 1 ? '' : 's'} in the risky code; the tools caught ${caughtN}. Nothing new got through${got.length ? ` (${got.length} that got through were read before: see below)` : ''}.`);
+  /* Nothing planted is never a quiet week (R2-3): said first, loudly, and as a GitHub warning. */
+  if (!all.length) {
+    L.push(`Planted NOTHING this run: no mistake was judged, so this run says nothing about the tools.`);
+    console.log(`::warning title=Plant a fault: nothing planted::0 mistakes were planted (time, a stop, a stale table or a failing clean check): read the report`);
+  } else if (!fresh.length) L.push(`Planted ${all.length} small mistake${all.length === 1 ? '' : 's'} in the risky code; the tools caught ${caughtN}. Nothing new got through${got.length ? ` (${got.length} that got through were read before: see below)` : ''}.`);
   else L.push(`Planted ${all.length} small mistake${all.length === 1 ? '' : 's'} in the risky code; the tools caught ${caughtN}. ${fresh.length} got through and ${fresh.length === 1 ? 'is' : 'are'} new this week:`);
   fresh.forEach((o, i) => {
     const m = o.m;
@@ -736,14 +766,15 @@ function report(ctx, regions, outcomes, known, stale, cleanFail, notRunBudget, s
     L.push(`Listed as ${e.class} in the known file but CAUGHT this week by ${o.res.caughtBy}: ${o.m.id} (${o.m.file}:${o.m.line}). Read the entry again: a tool sees a difference.`);
   }
   if (stale.length) { L.push(''); L.push(`Stale entries in the known file (the code they name has changed; take them out): ${stale.length}: ${stale.map(e => `${e.id} (${e.file}: ${e.before.slice(0, 60)})`).join('; ')}`); }
-  const skipped = notRunBudget + unfinished + (ctx.timeOutRegions || []).reduce((n, x) => n + x.count, 0);
-  if (skipped) { L.push(''); L.push(`${skipped} skipped for time: ${notRunBudget} not started, ${unfinished} stopped before a tool had judged them${(ctx.timeOutRegions || []).length ? `, ${ctx.timeOutRegions.map(x => x.count + ' in ' + x.region + ' (its clean check did not finish)').join(', ')}` : ''} (${stopped ? 'the run was stopped by ' + stopped : '--budget ' + ctx.budgetMin + ' min'}). Not a fault in the site: the next run plants others.`); }
+  const skipped = notRunBudget + unfinished + (ctx.stoppedMid || 0) + (ctx.timeOutRegions || []).reduce((n, x) => n + x.count, 0);
+  if (skipped) { L.push(''); L.push(`${skipped} skipped for time: ${notRunBudget} not started, ${unfinished + (ctx.stoppedMid || 0)} stopped before a tool had judged them${(ctx.timeOutRegions || []).length ? `, ${ctx.timeOutRegions.map(x => x.count + ' in ' + x.region + ' (its clean check did not finish)').join(', ')}` : ''} (${stopped ? 'the run was stopped by ' + stopped : '--budget ' + ctx.budgetMin + ' min'}). Not a fault in the site: the next run plants others.`); }
   const byTimeout = all.filter(o => o.res.byTimeout);
   if (byTimeout.length) { L.push(''); L.push(`Caught by timeout: ${byTimeout.length} (a tool did not finish and no other tool caught them; read these: a slow tool can hide a real gap): ${byTimeout.map(o => o.m.id).join(', ')}`); }
   L.push('');
   L.push('By region (caught of planted):');
   for (const r of regions) {
     const os = all.filter(o => o.m.region === r.name);
+    if ((ctx.tableStale || []).some(x => x.region === r.name)) { L.push(`  ${r.name.padEnd(15)} not run: table stale`); continue; }
     if (cleanFail.some(c => c.region === r.name)) { L.push(`  ${r.name.padEnd(15)} not run: its tools fail on the unmutated tree`); continue; }
     if ((ctx.timeOutRegions || []).some(x => x.region === r.name)) { L.push(`  ${r.name.padEnd(15)} not run: its clean check did not finish inside the time budget`); continue; }
     const g = os.filter(o => !o.res.caught), n = g.filter(o => !knownById.has(o.m.id)).length;
@@ -751,7 +782,7 @@ function report(ctx, regions, outcomes, known, stale, cleanFail, notRunBudget, s
     L.push(`  ${r.name.padEnd(15)} ${String(os.length - g.length).padStart(3)} of ${String(os.length).padEnd(3)}${g.length ? ` (${g.length} got through: ${n} new, ${g.length - n} known)` : ''}${mins}`);
     /* A rules mistake on a line only one rules text has is always caught by checks.mjs 1dt's text compare of the two
        texts, whatever the rules tests see: counted on its own line so the rules catch rate is not flattered (R1-7). */
-    const oneText = os.filter(o => o.m.target.rules && !o.m.pair);
+    const oneText = os.filter(o => o.m.oneText);
     if (oneText.length) L.push(`  ${''.padEnd(15)} of these, ${oneText.length} sit in one rules text only (${oneText.filter(o => o.res.caught).length} caught, ${oneText.filter(o => o.res.caught && /^checks/.test(o.res.caughtBy)).length} of them only by checks.mjs's text compare): without them ${os.length - oneText.length - g.filter(o => !oneText.includes(o)).length} of ${os.length - oneText.length}`);
     const tr = (ctx.timeOutRegions || []).find(x => x.region === r.name);
     if (tr) L.push(`  ${''.padEnd(15)} its clean check did not finish inside the time budget: ${tr.count} not planted`);
@@ -769,9 +800,11 @@ function report(ctx, regions, outcomes, known, stale, cleanFail, notRunBudget, s
   for (const s of ctx.restoreFailures) L.push(`✗ a planted file could not be put back: ${s}`);
   for (const w of ctx.tableWarnings || []) L.push(`! ${w}`);
   L.push('');
-  const problems = cleanFail.length + ctx.startFailures.length + ctx.restoreFailures.length;
+  const stales = ctx.tableStale || [];
+  const problems = cleanFail.length + stales.length + ctx.startFailures.length + ctx.restoreFailures.length;
   L.push(`plant-a-fault: ${all.length} planted, ${caughtN} caught${byTimeout.length ? ` (${byTimeout.length} by timeout)` : ''}, ${fresh.length} new got through, ${again.length} known got through, ${stale.length} stale${skipped ? `, ${skipped} skipped for time` : ''}` +
-    (problems ? `, ${cleanFail.length} region(s) failing on the clean tree, ${ctx.startFailures.length + ctx.restoreFailures.length} tool problem(s)` : '') + ` · seed ${ctx.seed}`);
+    (stales.length ? `, table stale: ${stales.map(x => x.region + ' (' + x.what[0].replace(/, which is gone$/, ' gone') + (x.what.length > 1 ? ` +${x.what.length - 1}` : '') + ')').join(', ')}` : '') +
+    (cleanFail.length + ctx.startFailures.length + ctx.restoreFailures.length ? `, ${cleanFail.length} region(s) failing on the clean tree, ${ctx.startFailures.length + ctx.restoreFailures.length} tool problem(s)` : '') + ` · seed ${ctx.seed}`);
   return { text: L.join('\n'), fresh, problems };
 }
 
@@ -779,10 +812,17 @@ function report(ctx, regions, outcomes, known, stale, cleanFail, notRunBudget, s
 /* --scratch must be a folder of this tool's own: never the site, the checkout, inside either or above either, and
    never a folder with other things in it that this tool did not make (it holds a marker file). Review R1-4. */
 const SCRATCH_MARK = '.plant-a-fault-scratch';
+/* The real path of p, links followed, also for a folder that does not exist yet (its deepest existing parent). */
+function realPath(p) {
+  let head = resolve(p), tail = '';
+  while (!existsSync(head)) { const up = dirname(head); if (up === head) break; tail = join(basename(head), tail); head = up; }
+  try { head = realpathSync(head); } catch { /* keep */ }
+  return tail ? join(head, tail) : head;
+}
 function claimScratch(dir, roots, bad) {
-  const d = resolve(dir);
+  const d = resolve(dir), real = realPath(d);
   const under = (a, b) => a === b || a.startsWith(b.endsWith(sep) ? b : b + sep);
-  for (const r of roots) if (under(d, r) || under(r, d)) bad(`--scratch ${d} is the site or the checkout, inside it, or above it: pick a folder of its own`);
+  for (const r of roots.map(realPath)) if (under(real, r) || under(r, real)) bad(`--scratch ${d} is the site or the checkout, inside it, or above it: pick a folder of its own`);
   if (existsSync(d) && readdirSync(d).length && !existsSync(join(d, SCRATCH_MARK))) bad(`--scratch ${d} already holds other files and is not a folder this tool made: pick an empty or new folder`);
   mkdirSync(d, { recursive: true });
   writeFileSync(join(d, SCRATCH_MARK), 'scratch copies made by tools/plant-a-fault.mjs; safe to delete\n');
@@ -804,7 +844,7 @@ async function main() {
   const jobs = +(val('--jobs') || 2), maxLoad = +(val('--max-load') || 8), budgetMin = val('--budget') == null ? 0 : +val('--budget');
   const regionNames = val('--region') ? val('--region').split(',') : null;
   for (const n of regionNames || []) if (!REGIONS.some(r => r.name === n)) bad(`no region "${n}" (regions: ${REGIONS.map(r => r.name).join(', ')})`);
-  const regions = REGIONS.filter(r => !regionNames || regionNames.includes(r.name));
+  let regions = REGIONS.filter(r => !regionNames || regionNames.includes(r.name));
   const emu = val('--emu') ? resolve(val('--emu')) : null;
   if (emu && !existsSync(join(emu, 'node_modules', '@firebase', 'rules-unit-testing'))) bad(`--emu ${emu} has no node_modules/@firebase/rules-unit-testing (the rules tests' packages: see the header of tools/rules-core-test.mjs)`);
   if (!(budgetMin >= 0) || !(maxLoad > 0) || !(jobs >= 1)) bad('--budget, --max-load and --jobs take positive numbers');
@@ -813,12 +853,16 @@ async function main() {
     hardEnd: budgetMin ? tStart + budgetMin * 60000 - 20000 : Infinity, inFlight: new Map(), timeOutRegions: [] };
 
   /* every mistake of every region in the run */
+  /* A region whose table names something that is gone is NOT planted, and NOT silently skipped: the report, the
+     summary line and the exit code say "table stale" (checks.mjs 1ea only warns, so this is where it is noticed). */
   const table = [];
   const tableWarnings = [];
+  ctx.tableStale = []; ctx.blindFiles = new Set();
   for (const r of regions) {
-    const { all, problems, warnings } = regionMistakes(root, r);
-    if (problems.length) { for (const p of problems) console.error(`✗ plant-a-fault's region table names ${p} (region ${r.name})`); return 1; }
+    const { all, problems, warnings, blind } = regionMistakes(root, r);
     for (const w of warnings) if (!tableWarnings.includes(w)) { tableWarnings.push(w); console.error('! ' + w); }
+    for (const b of blind) ctx.blindFiles.add(b);
+    if (problems.length) { for (const p of problems) console.error(`✗ table stale (region ${r.name}): plant-a-fault's region table names ${p}`); ctx.tableStale.push({ region: r.name, what: problems }); continue; }
     table.push({ region: r, all });
   }
   ctx.tableWarnings = tableWarnings;
@@ -827,6 +871,7 @@ async function main() {
   const plantSpec = val('--plant');
   if (plantSpec) {
     if (!regionNames || regionNames.length !== 1) bad('--plant needs exactly one --region');
+    if (!table.length) bad('--plant: the region table is stale (above)');
     const [file, old, neu] = plantSpec.split('|');
     if (file == null || old == null || neu == null) bad('--plant takes "file|old text|new text"');
     const r = regions[0];
@@ -865,7 +910,7 @@ async function main() {
       const c = await runTool(name, ctx, clean, 'clean', hit.file);
       if (c.verdict !== 'pass') { console.log(`  ${name}: fails on the UNMUTATED copy too (exit ${c.exit}): its verdict means nothing`); continue; }
       const r = await runTool(name, ctx, scratch, 'mutant', hit.file);
-      console.log(`  ${r.tool}: ${r.verdict === 'caught' ? 'CAUGHT it' : r.verdict === 'timeout' ? 'did not finish (counted as caught)' : r.verdict === 'refused' ? 'cannot judge this (' + r.why + ')' : r.verdict === 'skipped' ? 'not run (' + r.why + ')' : 'passed: did not catch it'} (exit ${r.exit}, ${r.secs} s)${r.first ? '\n      ' + r.first.join('\n      ') : ''}`);
+      console.log(`  ${r.tool}: ${r.verdict === 'caught' ? 'CAUGHT it' : r.verdict === 'timeout' ? 'did not finish (counted as caught)' : r.verdict === 'refused' ? 'cannot judge this (' + r.why + ')' : r.verdict === 'skipped' ? 'not run (' + r.why + ')' : r.verdict === 'no-time' ? 'stopped: the time budget ran out' : 'passed: did not catch it'} (exit ${r.exit}, ${r.secs} s)${r.first ? '\n      ' + r.first.join('\n      ') : ''}`);
     }
     rmSync(clean, { recursive: true, force: true });
     console.log(`The copy is left at ${scratch} (delete it when done).`);
@@ -874,7 +919,7 @@ async function main() {
 
   /* the sample (or, with --ids, exactly those mistakes: to run again the ones that got through, say after a new test) */
   const onlyIds = val('--ids') ? new Set(val('--ids').split(',').filter(Boolean)) : null;
-  const plan = [];
+  let plan = [];
   for (const { region, all, plant } of table) {
     const s = plant ? { picked: all, unparsable: 0 } : onlyIds ? { picked: all.filter(m => onlyIds.has(m.id)), unparsable: 0 } : sample(root, region, all, perRegion, seed);
     plan.push({ region, all, picked: s.picked, unparsable: s.unparsable });
@@ -882,10 +927,13 @@ async function main() {
   if (onlyIds) {
     const found = new Set(plan.flatMap(p => p.picked.map(m => m.id)));
     const missing = [...onlyIds].filter(id => !found.has(id));
-    if (!onlyIds.size || missing.length) bad(`--ids: ${missing.length ? missing.join(', ') + ' ' + (missing.length === 1 ? 'is' : 'are') : 'nothing'} not a mistake of ${regionNames ? 'the regions asked for' : 'today\'s code'} (ids from a report or --list; the code may have changed)`);
+    if (!onlyIds.size) bad('--ids: give at least one id (from a report or --list)');
+    if (!missing.length) { plan = plan.filter(p => p.picked.length); regions = regions.filter(r => plan.some(p => p.region === r) || ctx.tableStale.some(x => x.region === r.name)); }   // only the regions the ids are in (R2-10)
+    if (missing.length) bad(`--ids: ${missing.join(', ')} ${missing.length === 1 ? 'is' : 'are'} not a mistake of ${regionNames ? 'the regions asked for' : 'today\'s code'} (ids from a report or --list; the code may have changed)`);
   }
   if (argv.includes('--list')) {
     console.log(`plant-a-fault --list · seed ${seed} · ${perRegion} per region`);
+    for (const x of ctx.tableStale) console.log(`\n${x.region}: TABLE STALE, nothing listed: ${x.what.join('; ')}`);
     for (const p of plan) {
       const byOp = {}; for (const m of p.all) byOp[m.op] = (byOp[m.op] || 0) + 1;
       console.log(`\n${p.region.name}: ${p.all.length} possible mistakes (${Object.entries(byOp).map(([k, v]) => `${v} ${k}`).join(', ')}); ${p.picked.length} picked${p.unparsable ? `, ${p.unparsable} skipped (would not parse)` : ''}; tools: ${[...new Set(p.region.targets.flatMap(t => t.tools || []).concat(p.region.tools))].join(', ')}`);
@@ -898,9 +946,12 @@ async function main() {
   let known;
   try { known = readKnown(root); } catch (e) { console.error(`✗ ${KNOWN_FILE} does not parse: ${e.message}`); return 1; }
   /* Stale: an entry whose mistake no longer exists in ANY region (so a region the run did not plant still counts). */
+  const staleRegionsAll = new Set();
   const allIds = new Set(plan.flatMap(p => p.all.map(m => m.id)));
-  for (const r of REGIONS) if (!regions.includes(r)) for (const m of regionMistakes(root, r).all) allIds.add(m.id);
-  const stale = plantSpec ? [] : known.filter(e => !allIds.has(e.id));
+  for (const r of REGIONS) if (!regions.includes(r)) { const x = regionMistakes(root, r); for (const m of x.all) allIds.add(m.id); for (const b of x.blind) ctx.blindFiles.add(b); if (x.problems.length) staleRegionsAll.add(r.name); }
+  /* an entry of a file this tool cannot read (or of a stale region) is not stale: its mistakes were not listed (R2-7) */
+  const staleRegions = new Set(ctx.tableStale.map(x => x.region));
+  const stale = plantSpec ? [] : known.filter(e => !allIds.has(e.id) && !ctx.blindFiles.has(e.file) && !staleRegions.has(e.region) && !staleRegionsAll.has(e.region));
 
   /* scratch copies */
   const scratchBase = claimScratch(val('--scratch') || mkdtempSync(join(tmpdir(), 'plant-a-fault-')), [root, REPO], bad);
@@ -921,8 +972,10 @@ async function main() {
     if (finished) return null;
     finished = true;
     for (const c of live) killTree(c);
+    const stoppedMid = ctx.inFlight.size;
     for (const [scratch, planted] of [...ctx.inFlight]) restorePlanted(ctx, scratch, planted);
-    if (stopped) notRunBudget += plan.reduce((n, p) => n + p.picked.length, 0) - outcomes.length - plan.filter(p => cleanFail.some(c => c.region === p.region.name) || ctx.timeOutRegions.some(x => x.region === p.region.name)).reduce((n, p) => n + p.picked.length, 0) - notRunBudget;
+    if (stopped && ctx.cleanNow && ctx.cleanNow.bad.length) cleanFail.push({ region: ctx.cleanNow.region, bad: ctx.cleanNow.bad });
+    if (stopped) { ctx.stoppedMid = stoppedMid; notRunBudget += plan.reduce((n, p) => n + p.picked.length, 0) - outcomes.length - stoppedMid - plan.filter(p => cleanFail.some(c => c.region === p.region.name) || ctx.timeOutRegions.some(x => x.region === p.region.name)).reduce((n, p) => n + p.picked.length, 0) - notRunBudget; }
     outcomes.sort((x, y) => REGIONS.findIndex(r => r.name === x.m.region) - REGIONS.findIndex(r => r.name === y.m.region) || x.m.file.localeCompare(y.m.file) || x.m.a - y.m.a);
     const rep = report(ctx, regions, outcomes, known, stale, cleanFail, notRunBudget, stopped);
     console.log(rep.text);
@@ -935,7 +988,8 @@ async function main() {
     else if (!argv.includes('--keep')) for (const w of workers) rmSync(w, { recursive: true, force: true });
     return rep;
   };
-  for (const sig of ['SIGINT', 'SIGTERM']) process.on(sig, () => { finish(sig); process.exit(sig === 'SIGINT' ? 130 : 0); });
+  /* SIGTERM (a job's deadline): exit 0 when what was finished is clean, 1 when a real failure was already seen. */
+  for (const sig of ['SIGINT', 'SIGTERM']) process.on(sig, () => { const rep = finish(sig); process.exit(sig === 'SIGINT' ? 130 : rep && rep.problems ? 1 : 0); });
   const outOfTime = () => Date.now() >= ctx.hardEnd;
 
   for (const p of plan) {
@@ -944,12 +998,14 @@ async function main() {
     const needs = [];
     for (const t of r.targets) for (const name of (t.tools || r.tools)) { const key = name + (TOOLS[name].emu ? ':' + t.file : ''); if (!needs.some(n => n.key === key) && !(t.optional && !existsSync(join(root, t.file)))) needs.push({ name, key, file: t.file }); }
     const bad = [];
+    ctx.cleanNow = { region: r.name, bad };   // what a stop in the middle of the clean check must still report (R2-2)
     let cleanNoTime = false;
     /* A tool an earlier region already ran on the clean tree is not run again, but its verdict there still holds:
        red there is red here (review R1-1). */
     for (const n of needs) { const b = ctx.baseline.get(n.key); if (b && b.cleanOk === false) bad.push({ ...b.cleanResult, why: 'failed on the unmutated tree earlier in this run' }); }
     const q = needs.filter(n => !ctx.baseline.has(n.key));
     await Promise.all(workers.map(async w => { while (q.length) { const n = q.shift(); const c = await runTool(n.name, ctx, w, 'clean', n.file); if (c.verdict !== 'skipped') log(`  clean ${r.name}: ${c.tool} ${c.verdict === 'pass' ? 'passes' : c.verdict === 'caught' ? 'FAILS' : c.verdict} (${c.secs} s)`); if (c.verdict === 'no-time') { cleanNoTime = true; continue; } if (c.verdict !== 'pass' && c.verdict !== 'skipped') bad.push(c); if (c.verdict === 'start-failed') ctx.startFailures.push(`${c.tool}: ${c.why}`); } }));
+    ctx.cleanNow = null;
     if (bad.length) { cleanFail.push({ region: r.name, bad }); ctx.regionSecs[r.name] = (Date.now() - rt0) / 1000; continue; }
     if (cleanNoTime) { ctx.timeOutRegions.push({ region: r.name, count: p.picked.length }); ctx.regionSecs[r.name] = (Date.now() - rt0) / 1000; continue; }
     /* 2. the mistakes, a few at a time */
@@ -965,7 +1021,7 @@ async function main() {
         if (!queue.length) break;   // another copy took the last one while this one waited for the load to fall
         /* Start a mistake only if its tools, at their clean times plus a fifth, fit in the time left; any tool still
            running at the hard end is stopped (runTool) and the mistake counted "skipped for time", never "caught". */
-        const worst = toolsFor(r, queue[0]).reduce((t, n) => t + (TOOLS[n].emu ? 2 : 1) * ((ctx.baseline.get(n + (TOOLS[n].emu ? ':' + queue[0].file : ''))?.secs) || 60), 0) * 1.2 * 1000;
+        const worst = toolsFor(r, queue[0]).filter(n => !(TOOLS[n].emu && !ctx.emu)).reduce((t, n) => t + (TOOLS[n].emu ? 2 : 1) * ((ctx.baseline.get(n + (TOOLS[n].emu ? ':' + queue[0].file : ''))?.secs) || 60), 0) * 1.2 * 1000;
         if (outOfTime() || Date.now() + worst > ctx.hardEnd) { notRunBudget += queue.length; queue.length = 0; break; }
         const m = queue.shift();
         const res = await runMistake(m, r, ctx, w, argv.includes('--all-tools'));
@@ -983,6 +1039,7 @@ async function main() {
   return rep.problems ? 1 : 0;
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  main().then(code => process.exit(code), e => { console.error('plant-a-fault: the tool itself failed: ' + (e && e.stack || e)); process.exit(2); });
+const realOr = p => { try { return realpathSync(p); } catch { return resolve(p); } };
+if (process.argv[1] && realOr(process.argv[1]) === realOr(fileURLToPath(import.meta.url))) {   // also when started through a link (R2-10)
+  main().then(code => process.exit(code), e => { for (const c of live) killTree(c); console.error('plant-a-fault: the tool itself failed: ' + (e && e.stack || e)); process.exit(2); });
 }

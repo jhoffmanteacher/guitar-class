@@ -17797,33 +17797,35 @@ function checkPrivacyNotice(i18nTable) {
 }
 
 /* ════════════════════════════════════════════════════════════════════
-   1ea. PLANT A FAULT (2026-11-14) — the weekly run that plants small
-   mistakes in the risky code (tools/plant-a-fault.mjs, run by
-   .github/workflows/plant-a-fault.yml; report-only) names that code in its
-   REGIONS table by file, function, top-level constant and block. A renamed
-   or deleted function would drop out of the weekly run without a word, so
-   this reads the table against today's code: every file must exist, every
-   function be declared exactly once, every constant and block be found, every
-   tool the table runs exist, and tools/plant-a-fault-known.json parse (each
-   entry an id, a region of the table, a class harmless or accepted, a
-   one-line reason and a date). Names are matched in code tokens, so a
-   comment quoting a block opener, spacing, or const -> let passes. A file
-   the tool's own tokenizer cannot read is a WARNING only (the names are
-   then looked for in its plain text; a real removal still fails). It
-   plants nothing and runs no tool (review round 1, R1-3).
+   1ea. PLANT A FAULT (2026-11-14) — WARNING ONLY, never a failure. The
+   weekly run that plants small mistakes in the risky code
+   (tools/plant-a-fault.mjs, run by .github/workflows/plant-a-fault.yml;
+   report-only) names that code in its REGIONS table by file, function,
+   top-level constant and block. This reads the table against today's
+   code, so a renamed function is noticed at the commit, not a week later:
+   every file must exist, every function be declared once at the top level,
+   every constant and block be found, every tool the table runs exist, and
+   tools/plant-a-fault-known.json parse. Anything it finds is a `!` line:
+   a report-only tool must not be able to stop a push (review round 2,
+   the lead's decision). The weekly run reports the same as "table stale".
+   It plants nothing and runs no tool.
    ════════════════════════════════════════════════════════════════════ */
 async function checkPlantAFault() {
-  head('1ea. Plant a fault: the region table names code that exists; the known file parses');
-  let mod;
-  try { mod = await import(pathToFileURL(join(ROOT, 'tools', 'plant-a-fault.mjs')).href); }
-  catch (e) { err('1ea: tools/plant-a-fault.mjs does not load: ' + e.message); problems++; return; }
-  const { problems: probs, warnings: warns } = mod.tableCheck(ROOT);
-  for (const p of probs) { err('1ea: ' + p); problems++; }
-  for (const w of warns) { warn('1ea: ' + w); warnings++; }
-  if (probs.length) return;
-  const ts = mod.REGIONS.flatMap(r => r.targets);
-  const n = k => ts.reduce((s, t) => s + (t[k] ? (Array.isArray(t[k]) ? t[k].length : 1) : 0), 0);
-  ok(`1ea: plant-a-fault's ${mod.REGIONS.length} regions name ${n('fns')} functions, ${n('consts')} constants, ${n('block')} blocks and ${n('whole') + n('rules')} whole files, all present; its known file parses (${mod.readKnown(ROOT).length} entries)`);
+  head('1ea. Plant a fault: the region table names code that exists; the known file parses (warning only)');
+  const say = m => { warn('1ea: ' + m); warnings++; };
+  let r, mod;
+  try {
+    mod = await import(pathToFileURL(join(ROOT, 'tools', 'plant-a-fault.mjs')).href);
+    r = mod.tableCheck(ROOT);
+  } catch (e) { say(`tools/plant-a-fault.mjs could not read its table (${e.message}): the weekly run will say why`); return; }
+  for (const p of r.problems) say(p + ' (update REGIONS in tools/plant-a-fault.mjs)');
+  for (const w of r.warnings) say(w);
+  if (r.problems.length || r.warnings.length) return;
+  try {
+    const ts = mod.REGIONS.flatMap(x => x.targets);
+    const n = k => ts.reduce((s, t) => s + (t[k] ? (Array.isArray(t[k]) ? t[k].length : 1) : 0), 0);
+    ok(`1ea: plant-a-fault's ${mod.REGIONS.length} regions name ${n('fns')} functions, ${n('consts')} constants, ${n('block')} blocks and ${n('whole') + n('rules')} whole files, all present; its known file parses (${mod.readKnown(ROOT).length} entries)`);
+  } catch (e) { say(e.message); }
 }
 
 /* ════════════════════════════════════════════════════════════════════

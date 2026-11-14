@@ -247,8 +247,8 @@ Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `ap
   listening, sign-in, song files, the console's config writer) and lists any no tool caught; one that got through
   never fails the run. Look at one with `node tools/plant-a-fault.mjs --replay <id>` (plants it in a scratch copy and
   runs its tools). Harmless or accepted → an entry with a one-line reason in `tools/plant-a-fault-known.json`; a real
-  gap → a test in the tool that should catch it. Renamed a function its table names? `checks.mjs` 1ea fails: update
-  the table.
+  gap → a test in the tool that should catch it. Renamed a function its table names? `checks.mjs` 1ea warns (it
+  never blocks) and the weekly run says "table stale": update the table.
 
 ## i18n
 Every new student-facing shell string goes in `i18n.js` (read its header for wiring: `data-i18n` / `t()` + `data-i18n-params`) in BOTH `en` and `es`, same edit; never English-only. Module text gets `_es`; Journey pages `data-es`. Reuse its glossary. String names are solfège (`cuerda Mi grave`); chord symbols/keys are not (`tonalidad de G`, `G/B`). The code is the authoritative Spanish: no review sheet; no proofread sweeps unless asked. `i18n.js` loads before the `app/*.js` parts, `fab-tools.js`, `tuner.js`, `journey.js`.
