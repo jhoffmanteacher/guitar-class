@@ -6,6 +6,12 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-14 — The Record button is gone from the tools
+
+- **The tools are now Tuner, Timer and Metro.** The Record button is gone from the tool buttons and from the tool bar on an open activity.
+- **Module Review still has its recorders.** "Play it and record it" and "Practice run" in each Module Review work as before.
+- **14 steps and checklist lines no longer ask for a recording.** Each one now has a finish line you can count while you play, like "play the 8 bars with no stops" or "pluck p-i-m-a 8 times in a row at 60 BPM". They are in Modules 5, 6, 8, 9, 10 and 11. Your checked steps did not change.
+
 ## 2026-11-14 — A privacy page
 
 - **The site has a privacy page.** It says what the site saves about you, who can see it, when a game records you, how long things are kept, and who to ask. Open "Privacy" under the sign-in button, or under "Report a problem" in the menu. It is in English and Spanish.
