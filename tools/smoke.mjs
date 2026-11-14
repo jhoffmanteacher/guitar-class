@@ -1953,9 +1953,12 @@ const A11Y_AXE_SHA256 = '20c09fe157a8a34a30e241aaa1fcdade657734f08ab379ecfbeb7d4
 const A11Y_BASELINE = join(ROOT, 'tools', 'a11y-baseline.json');
 const A11Y_RATCHET = false;   // the switch: true from 2026-11-27 (Jonathan's call), then a new finding fails the smoke
 const A11Y_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'];
-const A11Y_RUN = `axe.run(document, { resultTypes: ['violations'], runOnly: { type: 'tag', values: ${JSON.stringify(A11Y_TAGS)} },
-  rules: { 'duplicate-id': { enabled: true }, 'duplicate-id-active': { enabled: true } } }).then(r => r.violations.map(v => ({ id: v.id, impact: v.impact, help: v.help,
-  nodes: v.nodes.map(n => ({ target: n.target.map(String).join(' '), html: String(n.html).slice(0, 240), why: String(n.failureSummary || '').replace(/\\s+/g, ' ').slice(0, 300) })) })))`;
+/* Violations decide; "incomplete" (what axe could not decide, e.g. text over a picture or a gradient) is kept in the
+   JSON and counted on one line, never in the baseline. */
+const A11Y_RUN = `axe.run(document, { resultTypes: ['violations', 'incomplete'], runOnly: { type: 'tag', values: ${JSON.stringify(A11Y_TAGS)} },
+  rules: { 'duplicate-id': { enabled: true }, 'duplicate-id-active': { enabled: true } } }).then(r => { const pick = list => list.map(v => ({ id: v.id, impact: v.impact, help: v.help,
+  nodes: v.nodes.map(n => ({ target: n.target.map(String).join(' '), html: String(n.html).slice(0, 240), why: String(n.failureSummary || '').replace(/\\s+/g, ' ').slice(0, 300) })) }));
+  return { rules: pick(r.violations), unsure: pick(r.incomplete) }; })`;
 let a11ySrc = null;
 async function a11yWalk(page, run, events, stats, base) {
   const fail = (step, text) => events.push({ step: 'a11y:' + step, kind: 'a11y-setup', text });
@@ -1973,8 +1976,8 @@ async function a11yWalk(page, run, events, stats, base) {
     const ok = (await run(`a11y:${key}:has-axe`, `typeof axe !== 'undefined'`, 10)) || (await run(`a11y:${key}:inject`, `${a11ySrc}\n;typeof axe !== 'undefined'`, 10));
     if (ok !== true) { fail(key, 'axe-core did not load on this page'); return; }
     const v = await run(`a11y:${key}:scan`, A11Y_RUN, 10);
-    if (!Array.isArray(v)) { fail(key, 'the scan returned nothing'); return; }
-    found.screens[key] = { what, rules: v };
+    if (!v || !Array.isArray(v.rules)) { fail(key, 'the scan returned nothing'); return; }
+    found.screens[key] = { what, rules: v.rules, unsure: v.unsure };
   };
   // Sign-in: a fresh page, not signed in (the dev bypass signs in below, as the walk's boot does).
   await page.send('Page.navigate', { url: base + '/index.html' });
@@ -2034,6 +2037,8 @@ function a11yReport(found) {
   for (const r of rules) say(`a11y: ${r.id} (${r.impact}) — ${r.count} element${r.count === 1 ? '' : 's'} (${r.targets.length} distinct) on ${r.screens.size} screen${r.screens.size === 1 ? '' : 's'}: ${r.targets.slice(0, 3).join(' | ').slice(0, 300)}`);
   const total = rules.reduce((s, r) => s + r.count, 0);
   say(`a11y: ${rules.length} rules with findings, ${total} elements, on ${screens.filter(k => found.screens[k].rules.length).length} of ${screens.length} screens scanned (axe-core ${found.axe}${LANGS.length === 1 ? ', English only' : ''})`);
+  const unsure = screens.flatMap(k => (found.screens[k].unsure || []).map(v => [v.id, v.nodes.length]));
+  if (unsure.length) { const by = {}; for (const [id, n] of unsure) by[id] = (by[id] || 0) + n; say(`a11y: not decided by axe (incomplete; listed in --a11y-out, never counted): ${Object.entries(by).map(([id, n]) => `${id} ${n}`).join(', ')}`); }
   const A11Y_OUT = opt('--a11y-out');
   if (A11Y_OUT) { try { writeFileSync(A11Y_OUT, JSON.stringify(found, null, 1)); say(`a11y: every finding written to ${A11Y_OUT}`); } catch (e) { console.error(`a11y: could not write ${A11Y_OUT}: ${e.message}`); } }
   // This run, as the baseline holds it: screen → rule → { count, targets }.
