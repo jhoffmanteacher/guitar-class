@@ -25,6 +25,11 @@ see `WORKFLOW.md` and the git commit log.
 - **Playing on a Saturday or Sunday still adds a day** (Friday, Saturday and Monday is a 3-day streak). Missing a school day still starts it over.
 - **Riff Roulette says "streak started today" only on the day you started it.** On the days after, the chip waits until your streak is 2 days or more.
 - School holidays are not skipped yet: only Saturdays and Sundays.
+## 2026-11-13 — In class: "Since your last visit"
+
+- **Back after a few days?** If the class did activities on two or more days when you had no work saved on the site, In class now shows them in a group called "Since your last visit", right under Today's activity. The date beside it is the last day you worked on the site.
+- **The newest one is on top, with the Start button.** When you finish one, it moves to Completed activities like any other. When you finish them all, the group goes away.
+- Today's activity is still first and has not changed.
 
 
 ## 2026-11-13 — Live In-Class Games: your teacher can name the games

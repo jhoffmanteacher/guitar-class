@@ -2217,6 +2217,7 @@ body.rail-collapsed .rail-tools .tool-popup{
      the page rather than of a group. */
   body.print-activity .ca-mod-head,
   body.print-activity .ca-today-head,
+  body.print-activity .ca-since-note,
   body.print-activity .ca-gate-intro,
   body.print-activity .ca-pins{display:none !important}
   body.print-activity .ca-finished-group,body.print-activity .ca-finished-body,
@@ -3437,6 +3438,14 @@ span.tab-count-held{margin-left:4px}
   .ca-today-grid--multi .ca-hero-side{grid-column:2;grid-row:span 2;align-self:center}
 }
 .ca-today-date{font-size:0.9375rem;font-weight:600;color:var(--text2)}
+/* "Since your last visit" (caSinceHtml, 2026-11-13): under Today, in blue so
+   it reads as its own group; one plain line, then the cards stacked, the top
+   one a hero card with its Start button. */
+.ca-since{margin:4px 0 14px}
+.ca-since .ca-today-label{color:var(--blue-text)}
+.ca-since-note{font-size:0.875rem;color:var(--text2);margin:-6px 2px 10px}
+.ca-since > .ca-card:not(.ca-card--optional){border-left-color:var(--blue-text)}
+.ca-since .ca-hero-cta{background:var(--blue-text)}
 .ca-hero-summary{align-items:stretch;gap:20px}
 /* align-items:flex-start (2f fix, found comparing to the mockup) — without it
    the flex column's default "stretch" cross-sizing stretches EVERY child to

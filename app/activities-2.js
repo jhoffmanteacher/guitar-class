@@ -624,7 +624,8 @@ function caCloseOpen(){
   const paOnly = !!(closing && (caIsPlayAlongOnly(closing) || caIsPinOnly(closing)));
   caSwap = null;
   caOpenId = null;
-  if(hadSwap || paOnly) renderClassActivities(); else caSyncTopbar();
+  // caSinceRepaint: a "Since your last visit" group arrived while the card was open (caSinceRepaintNow).
+  if(hadSwap || paOnly || caSinceRepaint) renderClassActivities(); else caSyncTopbar();
   scrollPaneTop(false);
 }
 /* The open card is in the address (navigability round 2, 2026-09-23):
@@ -1321,6 +1322,7 @@ function renderClassActivities(){
   // keep the last pass's hero, or renderResumeCard stays hidden for good.
   caStartHereId = null;
   caTodayIds = [];
+  caSinceRepaint = false;   // this render reads the "Since your last visit" answer, whatever it is
   caResetRevealsIfNewDay();
   // This rebuilds every card, so a snippet playing in one of them is about to
   // be detached — and a detached <audio> keeps playing with nothing left on
@@ -1495,8 +1497,13 @@ function renderClassActivities(){
       // do" fold (2f) — module headings (plain, no progress bar; that's an
       // Earlier-only addition below) when anything has been placed in a
       // module, otherwise the flat Unsorted list it always was.
+      // "Since your last visit" (caSinceGroup, at the end of this file) sits
+      // between Today and this fold and takes its cards out of the fold: no
+      // card shows twice.
+      const since = caSinceGroup(list, todayDay, myClears, boardPos);
+      const sinceIds = since ? since.ids : [];
       const restGroups = pendingGroups
-        .map(g => ({ sec: g.sec, cards: g.cards.filter(a => !caTodayIds.includes(a.id)) }))
+        .map(g => ({ sec: g.sec, cards: g.cards.filter(a => !caTodayIds.includes(a.id) && !sinceIds.includes(a.id)) }))
         .filter(g => g.cards.length);
       const restFlat = restGroups.reduce((acc, g) => acc.concat(g.cards), []);
       const restCount = restFlat.length;
@@ -1514,7 +1521,7 @@ function renderClassActivities(){
         const openInside = restFlat.some(a => a.id === caOpenId || (swap && a.id === swap.from));
         restHtml = caTodoGroupHtml(body, restCount, openInside);
       }
-      pendingHtml = todayHtml + restHtml;
+      pendingHtml = todayHtml + (since ? caSinceHtml(since, byId, swapIn) : '') + restHtml;
     }
     /* Module headings, EN and ES, from the ONE place the site already keeps
        a module's display name — the MODULE_MANIFEST entry caBoardOrder hands
@@ -1650,6 +1657,157 @@ function caOnFinishedToggle(details){
   caFinishedOpen = details.open;
   if(!details.open && snipState && details.contains(snipState.card)) snipStop();
   if(!details.open && pcState && details.contains(pcState.root)) pcStop();
+}
+
+/* ── "Since your last visit" (Jonathan, 2026-11-13: a catch-up aid for a
+   student coming back after days with no saved work; version B of the
+   mock-ups, "a group inside the list", with his changes) ──────────────────
+   WHAT COUNTS, exactly (checks.mjs 1ds runs caSinceGap / caSinceMissed over
+   a table of made-up histories):
+     · a CLASS DAY is a release date on the board (activityDates) of a card
+       THIS student can see (caIsVisible: assigned, not Hidden, not archived,
+       given to them, dated and arrived);
+     · SAVED WORK on a day = a practice-minutes day record for that day,
+       minutes/{uid}/days/{date} (practice-minutes.js): the engine writes one
+       for every day the student was signed in and working on the site (any
+       click, playback, mic or sound counts a second). The progress document
+       keeps no dates for activities (classActivities is id -> true), so
+       there is nothing better to read there;
+     · the LAST VISIT is the newest day with saved work BEFORE today, looked
+       for in the last CA_SINCE_WINDOW_DAYS days. Today never counts, so
+       working today (finishing one of these cards) does not end the group;
+     · the MISSED class days are every class day after the last visit and
+       before today (none of them has saved work, by definition, so they are
+       "in a row"). TWO or more → the group shows;
+     · it lists the cards released on the missed days that are visible,
+       REQUIRED (not Optional, not CAS, not cleared by the teacher for this
+       student) and not done, minus any card already in Today's activity
+       (today's and yesterday's cards stay there, unchanged), newest date
+       first, within one date lowest board position first (#11 above #12,
+       the Today rule). Nothing left to list → no group.
+   No saved work found in the window, a failed read, a failed progress
+   load, the teacher's account → no group: the page is exactly today's.
+   The group never says "absent" (the site keeps no attendance: a student in
+   the room with a dead Chromebook has no saved work either).
+   DISPLAY ONLY: caIsVisible, caBlockers, caBoardOrder, the gate, the hero
+   (caStartHereId), Today's activity and where a student lands are
+   untouched. The group's cards are taken OUT of the Unfinished fold (it
+   then holds the rest: older cards, optional and cleared ones), so no card
+   shows twice; a finished card leaves the group for Completed exactly as it
+   leaves the fold.
+   THE READ: one query per student per day: the day records from
+   CA_SINCE_WINDOW_DAYS (14) days ago up to yesterday, oldest first (a
+   descending key scan is refused, so no orderBy desc + limit 1): at most 14
+   documents, about 10 for a student who works every school day, none for one
+   who was away the whole time. Kept in memory only,
+   keyed by uid and day: no storage key, so the next student on a shared
+   Chromebook can never see it. The first render goes out without the group;
+   when the answer brings one it paints once (or, with a card open, when
+   "All activities" closes it). */
+const CA_SINCE_WINDOW_DAYS = 14;
+const CA_SINCE_RETRY_MS = 5 * 60 * 1000;
+let caSinceRead = null;      // { key: 'uid|YYYY-MM-DD', state: 'loading'|'ok'|'failed', at, last }
+let caSinceRepaint = false;  // the answer came while a card was open: repaint when it closes
+/* PURE. The class days with no saved work: every date in `dates` after
+   `last` and before `today`, once each, oldest first. Fewer than two → null. */
+function caSinceGap(dates, last, today){
+  if(typeof last !== 'string' || typeof today !== 'string' || !last || last >= today) return null;
+  const days = Array.from(new Set((dates || []).filter(d => typeof d === 'string' && d > last && d < today))).sort();
+  return days.length >= 2 ? days : null;
+}
+/* PURE. o = { today, last, cards: [{ id, date, required, done, inToday, pos }] }
+   (cards = every card the student can see). Returns { last, days, ids } —
+   ids newest date first, then lowest board position — or null. */
+function caSinceMissed(o){
+  const cards = (o && o.cards) || [];
+  const days = caSinceGap(cards.map(c => c.date), o && o.last, o && o.today);
+  if(!days) return null;
+  const ids = cards.filter(c => c.required && !c.done && !c.inToday && days.includes(c.date))
+    .sort((x, y) => x.date !== y.date ? (x.date < y.date ? 1 : -1) : (x.pos - y.pos))
+    .map(c => c.id);
+  return ids.length ? { last: o.last, days, ids } : null;
+}
+// The first day the read looks at: CA_SINCE_WINDOW_DAYS before `today`, at noon (daylight saving).
+function caSinceFrom(today){
+  const [y, m, d] = today.split('-').map(Number);
+  return dayStr(new Date(y, m - 1, d - CA_SINCE_WINDOW_DAYS, 12));
+}
+/* The last day with saved work before `today`, or null (none, not read yet,
+   or nothing to read for this account). Starts the read when needed. */
+function caSinceLastVisit(today){
+  if(!currentUser || !currentUser.uid || progressLoadFailed) return null;
+  const from = caSinceFrom(today);
+  /* The localhost dev bypass has no Firestore: window.__caWorkDays (an array
+     of 'YYYY-MM-DD', localhost only) stands in for the day records, so a
+     preview or a driving script can walk the group. */
+  if(isDevBypassUser()){
+    const w = IS_LOCALHOST && Array.isArray(window.__caWorkDays) ? window.__caWorkDays : [];
+    return w.filter(d => typeof d === 'string' && d >= from && d < today).sort().pop() || null;
+  }
+  if(IS_TEACHER_MODE || isGatePreviewer()) return null;
+  const key = currentUser.uid + '|' + today;
+  const r = caSinceRead;
+  if(r && r.key === key && r.state === 'ok') return r.last;
+  if(!r || r.key !== key || (r.state === 'failed' && Date.now() - r.at > CA_SINCE_RETRY_MS)) caSinceLoad(key, currentUser.uid, from, today);
+  return null;
+}
+// One query: the day records from `from` up to (not including) `today`; the newest is the last visit.
+function caSinceQuery(d, uid, from, today){
+  const docId = firebase.firestore.FieldPath.documentId();
+  return d.collection('minutes').doc(uid).collection('days')
+    .where(docId, '>=', from).where(docId, '<', today)
+    .get({ source: 'server' })   // offline, a cache read answers EMPTY (see practice-minutes.js load): no answer beats a wrong one
+    .then(snap => {
+      let last = null;
+      snap.forEach(doc => { if(/^\d{4}-\d{2}-\d{2}$/.test(doc.id) && doc.id >= from && doc.id < today && (!last || doc.id > last)) last = doc.id; });
+      return last;
+    });
+}
+function caSinceLoad(key, uid, from, today){
+  const r = caSinceRead = { key, state: 'loading', at: Date.now(), last: null };
+  Promise.resolve(typeof ensureDb === 'function' ? ensureDb() : null).then(d => {
+    if(!d) throw new Error('no Firestore');
+    return caSinceQuery(d, uid, from, today);
+  }).then(last => {
+    if(caSinceRead !== r) return;   // another student, or another day, since
+    r.state = 'ok'; r.last = last; r.at = Date.now();
+    if(last) caSinceRepaintNow();
+  }).catch(() => {
+    if(caSinceRead === r){ r.state = 'failed'; r.at = Date.now(); }
+  });
+}
+/* Paint the answer: now if the In class list is on screen with no card
+   open; with a card open, when "All activities" closes it (caCloseOpen) or
+   at the next render, so a playing card is never rebuilt under the student. */
+function caSinceRepaintNow(){
+  const screen = document.getElementById('class-activities-screen');
+  if(!screen || screen.hidden) return;   // the next render of the page reads it
+  if(caOpenId){ caSinceRepaint = true; return; }
+  renderClassActivities();
+}
+/* The group for this render, or null. `list` = the visible cards; called
+   after caTodayIds is set. */
+function caSinceGroup(list, today, clears, boardPos){
+  const last = caSinceLastVisit(today);
+  if(!last) return null;
+  return caSinceMissed({ today, last, cards: list.map(a => ({
+    id: a.id, date: caDate(a), required: !caIsOptional(a) && clears[a.id] !== true,
+    done: classActivities[a.id] === true, inToday: caTodayIds.includes(a.id), pos: boardPos[a.id] })) });
+}
+/* The group's markup: "Since your last visit · <the last day with saved
+   work>", one line, then the cards, newest first. The top card is a hero
+   card (its Start button); the others are list rows, each with its date. */
+function caSinceHtml(since, byId, swapIn){
+  const cards = since.ids.map(id => byId[id]).filter(Boolean);
+  if(!cards.length) return '';
+  const n = cards.length;
+  const noteKey = n === 1 ? 'ca.sinceNote1' : 'ca.sinceNote';
+  const noteParams = n === 1 ? null : { n };
+  const date = caFormatDate(since.last);
+  return `<section class="ca-since" aria-labelledby="ca-since-lbl"><div class="ca-today-head"><span class="ca-today-label" id="ca-since-lbl" data-i18n="ca.sinceTitle">${escHtml(t('ca.sinceTitle'))}</span>${date ? `<span class="ca-today-date">${escHtml(date)}</span>` : ''}</div>`
+    + `<p class="ca-since-note" data-i18n="${noteKey}"${noteParams ? ` data-i18n-params="${escAttr(JSON.stringify(noteParams))}"` : ''}>${escHtml(t(noteKey, noteParams))}</p>`
+    + cards.map((a, i) => i === 0 ? caHeroCardHtml(swapIn(a), caDate(a) || '') : caActivityCardHtml(swapIn(a))).join('')
+    + `</section>`;
 }
 
 /* The unfinished-activities reminder popup (maybeShowCaReminder) was retired

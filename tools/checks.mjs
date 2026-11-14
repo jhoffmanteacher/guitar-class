@@ -9621,6 +9621,237 @@ function checkTodayByDate(ctx) {
   if (!bad) ok(`${renders} runs of the real renderClassActivities (${EXPECT_RENDERS} x EN + ES, 5 through caToggleComplete / caFocusActivity) and 6 of caTodayWindow, ${asserts} assertions: every card dated today or yesterday in Today with no cap, pending first (today before yesterday, required before optional, lowest number first) then finished as ✓ rows, Friday's cards Unfinished on a Monday, no heading when neither day has a card, a date chip exactly on yesterday's cards, future / Hidden / other students' cards never counted, the folds keep the old board order, the toast and the resume card follow caStartHereId, a deep link to a finished Today card leaves Completed shut, yesterday right across month, year and daylight-saving edges`);
 }
 
+/* 1ds. "SINCE YOUR LAST VISIT" (Jonathan, 2026-11-13; the end of
+   app/activities-2.js). A student back after TWO or more class days with no
+   saved work (class day = a release date of a card they can see; saved work =
+   a practice-minutes day record; the last visit = the newest one before
+   today) gets a group under Today's activity: the required, not-done cards
+   released on those days that are not already in Today, newest first, within
+   a date lowest board position first. Run here:
+     A. the pure caSinceMissed / caSinceGap over a table of made-up histories
+        (no gap; a 1-day gap; a 2-day gap; across a weekend; a weekday with no
+        board date; an optional card; everything done; a card in Today; the
+        order) — pinned SINCE_CASES;
+     B. the real read (caSinceQuery) against a fake Firestore: one query over
+        the last 14 days, no descending order (the server refuses a descending
+        key scan), today's own record never counts; and the answer is
+        keyed by student and day (a second student on the same Chromebook
+        starts from nothing);
+     C. the real renderClassActivities() (EN + ES): the group's heading, date,
+        line and order, the top card's Start, no card twice (the Unfinished
+        fold loses them), Today's section byte-identical to the page without
+        the group, a page with nothing missed byte-identical, a card released
+        in the gap for another student only, a failed progress load, after one
+        card is done (caToggleComplete) and after all are done. Pinned
+        SINCE_RENDERS page renders and SINCE_ASSERTS assertions. */
+const SINCE_CASES = 13, SINCE_RENDERS = 32, SINCE_ASSERTS = 67;
+function checkSinceLastVisit(ctx) {
+  head('1ds. "Since your last visit": two or more class days with no saved work → the missed required cards under Today, newest first');
+  let bad = 0, asserts = 0, renders = 0, cases = 0;
+  const flag = m => { err('1ds: ' + m); problems++; bad++; };
+  if (!ctx) { flag('cannot run — the 0b render context is unavailable'); return; }
+  const run = x => vm.runInContext(x, ctx);
+  const J = JSON.stringify;
+  const want = (cond, msg) => { asserts++; if (!cond) flag(msg); };
+  for (const fn of ['caSinceGap', 'caSinceMissed', 'caSinceQuery', 'caSinceLastVisit', 'caSinceGroup', 'caSinceHtml', 'renderClassActivities'])
+    if (run(`typeof ${fn}`) !== 'function') { flag(`${fn}() not found in app.js (renamed? update 1ds)`); return; }
+  /* A. The rule over made-up histories. Today Fri 2025-11-14; one card per weekday; Sat/Sun carry no date. */
+  const missed = run('caSinceMissed');
+  const D = { fri: '2025-11-14', thu: '2025-11-13', wed: '2025-11-12', tue: '2025-11-11', mon: '2025-11-10', lfri: '2025-11-07', lthu: '2025-11-06' };
+  const card = (id, date, o = {}) => ({ id, date, required: o.opt ? false : true, done: !!o.done, inToday: date === D.fri || date === D.thu, pos: o.pos ?? 0 });
+  const week = o => [card('A', D.lthu, o), card('B', D.lfri, o), card('C', D.mon, o), card('D', D.tue, o), card('E', D.wed, o), card('F', D.thu, o)];
+  const TABLE = [
+    ['no gap: worked yesterday', { today: D.fri, last: D.thu, cards: week() }, null],
+    ['1-day gap: worked Wednesday, missed Thursday only', { today: D.fri, last: D.wed, cards: week() }, null],
+    ['2-day gap: worked Tuesday, missed Wed + Thu (Thursday\'s card is in Today)', { today: D.fri, last: D.tue, cards: week() }, ['E']],
+    ['3-day gap: newest first', { today: D.fri, last: D.mon, cards: week() }, ['E', 'D']],
+    ['across a weekend: worked Thu 11/6, back Tue (Mon = yesterday, in Today)', { today: D.tue, last: D.lthu, cards: week().filter(c => c.date <= D.tue).map(c => Object.assign(c, { inToday: c.date === D.tue || c.date === D.mon })) }, ['B']],
+    ['a weekday with no board date is no class day: worked Mon, no card Tue, back Thu', { today: D.thu, last: D.mon, cards: [card('C', D.mon), card('E', D.wed)].map(c => Object.assign(c, { inToday: c.date === D.wed })) }, null],
+    ['across a weekend and a day with no board date: worked Thu 11/6, no card Tue', { today: D.fri, last: D.lthu, cards: week().filter(c => c.date !== D.tue) }, ['E', 'C', 'B']],
+    ['an optional card is a class day but never listed', { today: D.fri, last: D.mon, cards: week().map(c => c.id === 'E' ? Object.assign(c, { required: false }) : c) }, ['D']],
+    ['everything already done', { today: D.fri, last: D.lthu, cards: week({ done: true }) }, null],
+    ['one date, two cards: lowest board position first', { today: D.fri, last: D.mon, cards: [...week(), Object.assign(card('E2', D.wed), { pos: -1 })] }, ['E2', 'E', 'D']],
+    ['1-day gap NOT yesterday: worked Thu 11/6, missed Fri 11/7 only, back Mon (Sunday is yesterday)', { today: D.mon, last: D.lthu, cards: [card('A', D.lthu), card('B', D.lfri), Object.assign(card('C', D.mon), { inToday: true })] }, null],
+    ['no saved work found (no last visit)', { today: D.fri, last: null, cards: week() }, null],
+    ['a last visit of today itself (never passed in) lists nothing', { today: D.fri, last: D.fri, cards: week() }, null],
+  ];
+  for (const [name, input, exp] of TABLE) {
+    cases++;
+    let got;
+    try { got = missed(JSON.parse(J(input))); } catch (e) { flag(`A "${name}" threw: ${e.message}`); continue; }
+    want(J(got ? got.ids : null) === J(exp), `A "${name}": got ${J(got ? got.ids : null)}, expected ${J(exp)}`);
+  }
+  const gap = run('caSinceGap');
+  want(J(gap([D.wed, D.mon, D.wed, D.tue], D.mon, D.fri)) === J([D.tue, D.wed]), `A caSinceGap counts each class day once, oldest first: got ${J(gap([D.wed, D.mon, D.wed, D.tue], D.mon, D.fri))}`);
+  /* B. The read. */
+  const STATE = ['activityDates', 'classActivities', 'activityBoard', 'activityBoardOn', 'optionalActivityIds', 'hiddenActivityIds',
+    'retiredActivityIds', 'activityForMe', 'activityPins', 'activityClears', 'caOpenId', 'caSwap', 'studentPeriod', 'periodOverride', 'currentUser',
+    'songLibraryIds', 'classSongIds', 'caTodoOpen', 'caFinishedOpen', '_resumeCardClosed', 'caTodayStr', 'caSinceRead', 'progressLoadFailed',
+    'onClassActivityChange', 'stopCardAudio', 'scrollPaneTop', 'gateToast', 'resumeSongPick', 'caScrollToActivity', 'caSyncTopbar', 'caSinceLoad', 'ensureDb'];
+  let saved;
+  try { saved = run('[' + STATE.join(',') + ']'); } catch (e) { flag('cannot read the state it stubs: ' + e.message); return; }
+  const keepFb = run('typeof window.firebase === "undefined" ? undefined : window.firebase');
+  const origGet = ctx.document.getElementById;
+  try {
+    const calls = [];
+    const docs = [{ id: D.fri }, { id: D.wed }, { id: 'junk' }];
+    ctx.__q = { calls, docs };
+    run(`window.firebase = { firestore: { FieldPath: { documentId: () => '__id__' } } };
+      window.__fakeDb = { collection: c => { __q.calls.push('collection:' + c); return { doc: u => { __q.calls.push('doc:' + u); return { collection: s => { __q.calls.push('collection:' + s); const q = {
+        where: (f, op, v) => { __q.calls.push('where:' + f + op + v); return q; }, orderBy: (f, dir) => { __q.calls.push('orderBy:' + f + ':' + dir); return q; },
+        limit: n => { __q.calls.push('limit:' + n); return q; }, get: o => { __q.calls.push('get:' + J(o)); return Promise.resolve({ forEach: f => __q.docs.forEach(d => f({ id: d.id, data: () => ({ seconds: 60 }) })) }); } }; return q; } }; } }; } };
+      var J = JSON.stringify;`);
+    // The fake hands back today's record (and junk) as if the query let them through: the code must still drop them.
+    const p = run(`caSinceQuery(__fakeDb, 'test-0', caSinceFrom(${J(D.fri)}), ${J(D.fri)})`);
+    return Promise.resolve(p).then(last => {
+      const from = run(`caSinceFrom(${J(D.fri)})`);
+      want(from === '2025-10-31', `B the read looks back 14 days: from ${from}, expected 2025-10-31`);
+      want(last === D.wed, `B the newest record BEFORE today is the last visit: got ${J(last)}, expected ${D.wed} (today's own record and a malformed id never count)`);
+      const shape = J(calls);
+      const expShape = J(['collection:minutes', 'doc:test-0', 'collection:days', `where:__id__>=${from}`, `where:__id__<${D.fri}`, 'get:{"source":"server"}']);
+      want(shape === expShape, `B the read must be ONE query from the server: minutes/{uid}/days, id >= from, id < today, no descending order (the server refuses a descending key scan) — got ${shape}`);
+      /* The cache: student A's answer never serves student B (a shared Chromebook), and a new day reads again. */
+      const loads = [];
+      ctx.__l = loads;
+      run(`progressLoadFailed = false; caSinceLoad = (k) => { __l.push(k); caSinceRead = { key: k, state: 'loading', at: 0, last: null }; };
+        currentUser = { uid: 'test-0', email: 'test0@example.com' }; caSinceRead = { key: 'test-0|${D.fri}', state: 'ok', at: 0, last: ${J(D.tue)} };`);
+      want(run(`caSinceLastVisit(${J(D.fri)})`) === D.tue && loads.length === 0, `B student test-0 reads its own cached answer with no new read: got ${run(`caSinceLastVisit(${J(D.fri)})`)}, loads ${J(loads)}`);
+      run(`currentUser = { uid: 'test-1', email: 'test1@example.com' };`);
+      want(run(`caSinceLastVisit(${J(D.fri)})`) === null && J(loads) === J([`test-1|${D.fri}`]), `B the next student (test-1) must not get test-0's last visit and must start its own read: got ${J(loads)}`);
+      run(`currentUser = { uid: 'test-0', email: 'test0@example.com' }; caSinceRead = { key: 'test-0|${D.thu}', state: 'ok', at: 0, last: ${J(D.tue)} };`);
+      want(run(`caSinceLastVisit(${J(D.fri)})`) === null && loads.length === 2, `B yesterday's answer must not serve today: loads ${J(loads)}`);
+      run(`progressLoadFailed = true; caSinceRead = { key: 'test-0|${D.fri}', state: 'ok', at: 0, last: ${J(D.tue)} };`);
+      want(run(`caSinceLastVisit(${J(D.fri)})`) === null, 'B a failed progress load must show no group (what is done is not known)');
+      run('progressLoadFailed = false;');
+      renderPart();
+    }).catch(e => { flag('the read part threw — ' + e.message); restore(); });
+  } catch (e) {
+    flag('the read part threw — ' + e.message);
+    restore();
+  }
+  function restore() {
+    ctx.document.getElementById = origGet;
+    ctx.__r = saved;
+    try { run(STATE.map((k, i) => `${k} = __r[${i}]`).join('; ') + '; setLang("en");'); } catch (e) { flag('could not restore the state it stubbed: ' + e.message); }
+    try { if (keepFb === undefined) run('delete window.firebase'); else { ctx.__fb = keepFb; run('window.firebase = __fb; delete window.__fb'); } run('delete window.__fakeDb'); } catch (e) { /* nothing to put back */ }
+    delete ctx.__r; delete ctx.__s; delete ctx.__q; delete ctx.__l;
+  }
+  function renderPart() {
+    try {
+      const body = origGet('class-activities-body');
+      const resume = origGet('resume-card');
+      const pool = run(`(window.CLASS_ACTIVITIES || []).filter(a => a && a.kind !== 'check' && a.optional !== true && !a.teacherOnly && !caIsLibraryCard(a, {})).map(a => a.id)`);
+      if (pool.length < 8) { flag(`needs 8 ordinary activities, found ${pool.length}`); return; }
+      const MA = run('MODULE_MANIFEST.map(m => m.num)')[3];
+      const [A, B, C, Dd, E, F, G, H] = pool;
+      const TODAY = D.fri;
+      const LBL = { en: { [D.mon]: 'Mon, 11/10', [D.tue]: 'Tue, 11/11', [D.wed]: 'Wed, 11/12', [D.lfri]: 'Fri, 11/7' }, es: { [D.mon]: 'lun, 10/11', [D.tue]: 'mar, 11/11', [D.wed]: 'mié, 12/11', [D.lfri]: 'vie, 7/11' } };
+      // [id, date, done, optional, extra] in board order (pos = index). extra 'other' = given to other students only.
+      const setUp = (cards, lang, last, today = TODAY) => {
+        const board = {}, dates = {}, done = {}, opt = {}, forMe = {};
+        cards.forEach(([id, date, isDone, isOpt, extra], pos) => {
+          board[id] = { module: MA, pos }; if (date) dates[id] = date; if (isDone) done[id] = true; if (isOpt) opt[id] = true; if (extra === 'other') forMe[id] = false;
+        });
+        ctx.__s = { board, dates, done, opt, forMe, today, read: last === undefined ? null : { key: 'test-0|' + today, state: 'ok', at: 0, last } };
+        run(`activityBoard = __s.board; activityBoardOn = true; activityDates = __s.dates; classActivities = __s.done; optionalActivityIds = __s.opt;
+          hiddenActivityIds = {}; retiredActivityIds = {}; activityForMe = __s.forMe; activityPins = []; activityClears = {}; caOpenId = null; caSwap = null;
+          studentPeriod = '4'; periodOverride = ''; currentUser = { uid: 'test-0', email: 'test0@example.com' }; songLibraryIds = {}; classSongIds = {};
+          caTodoOpen = true; caFinishedOpen = false; _resumeCardClosed = false; caTodayStr = () => __s.today; caSinceRead = __s.read; progressLoadFailed = false;
+          caSinceLoad = () => {}; ensureDb = () => null;
+          onClassActivityChange = (id, d) => { if (d) classActivities[id] = true; else delete classActivities[id]; };
+          stopCardAudio = () => {}; scrollPaneTop = () => {}; caScrollToActivity = () => {}; caSyncTopbar = () => {}; gateToast = () => {};
+          resumeSongPick = () => ({ song: { name: 'Stub song', url: 'tabs/stub.html' }, ready: 1, total: 2 });
+          setLang(${J(lang)});`);
+      };
+      const page = code => {
+        body.innerHTML = ''; resume.innerHTML = '';
+        ctx.document.getElementById = id => id === 'class-activities-body' ? body : id === 'resume-card' ? resume : origGet(id);
+        try { run(code); } finally { ctx.document.getElementById = origGet; }
+        renders++;
+        const html = String(body.innerHTML);
+        const at = s => html.indexOf(s);
+        const sinceAt = at('<section class="ca-since"'), todoAt = at('<details class="ca-todo-group"'), finAt = at('<details class="ca-finished-group"'), todayAt = at('<div class="ca-today-head"><span class="ca-today-label" data-i18n="ca.startHere"');
+        const cut = (from, ...ends) => { if (from < 0) return ''; const e = ends.filter(x => x > from); return html.slice(from, e.length ? Math.min(...e) : html.length); };
+        const since = cut(sinceAt, todoAt, finAt);
+        const ids = seg => [...seg.matchAll(/<details class="ca-card[^"]*"[^>]*data-id="([^"]+)"/g)].map(m => m[1]);
+        const sinceHead = /<span class="ca-today-label" id="ca-since-lbl" data-i18n="ca.sinceTitle">([^<]*)<\/span>(?:<span class="ca-today-date">([^<]*)<\/span>)?/.exec(since);
+        const note = /<p class="ca-since-note"[^>]*>([^<]*)<\/p>/.exec(since);
+        const heroes = [...since.matchAll(/<details class="ca-card[^"]*ca-card--hero[^"]*"[^>]*data-id="([^"]+)"/g)].map(m => m[1]);
+        const chips = Object.fromEntries([...since.matchAll(/<details class="ca-card[^"]*"[^>]*data-id="([^"]+)"[^>]*>([\s\S]*?)<\/summary>/g)].map(m => [m[1], (/<span class="ca-chip">([^<]*)<\/span>/.exec(m[2]) || [])[1] || null]));
+        return { html, since: ids(since), todo: ids(cut(todoAt, finAt)), fin: ids(cut(finAt)), today: ids(cut(todayAt, sinceAt, todoAt, finAt)), all: ids(html),
+          todayHtml: cut(todayAt, sinceAt, todoAt, finAt), sinceAt, todayAt, todoAt, head: sinceHead ? { text: sinceHead[1], date: sinceHead[2] || null } : null,
+          note: note ? note[1] : null, heroes, chips, hero: run('caStartHereId'), sinceN: (html.match(/<section class="ca-since"/g) || []).length };
+      };
+      // A week: one card per weekday, two on Wednesday, today's card pending.
+      const WEEK = [[A, D.lfri], [B, D.mon], [C, D.tue], [Dd, D.wed], [E, D.wed], [F, D.thu], [G, D.fri]];
+      for (const lang of ['en', 'es']) {
+        const T = (k, p) => run(`t(${J(k)}${p ? ', ' + J(p) : ''})`);
+        // 1. Worked Monday, missed Tue/Wed/Thu: Tue + Wed cards (Thursday's is in Today), Wed first (#lowest first), Start on the top one.
+        setUp(WEEK, lang, D.mon); let r = page('renderClassActivities()');
+        setUp(WEEK, lang); const plain = page('renderClassActivities()');
+        want(J(r.since) === J([Dd, E, C]), `${lang} 3 missed: the group holds ${J(r.since)}, expected ${J([Dd, E, C])} (Wednesday's two, lowest number first, then Tuesday's)`);
+        want(r.head && r.head.text === T('ca.sinceTitle') && r.head.date === LBL[lang][D.mon], `${lang} 3 missed: heading ${J(r.head)}, expected ${T('ca.sinceTitle')} · ${LBL[lang][D.mon]} (the last day with saved work)`);
+        want(r.note === T('ca.sinceNote', { n: 3 }).replace(/'/g, '&#39;') || r.note === T('ca.sinceNote', { n: 3 }), `${lang} 3 missed: the line reads ${J(r.note)}, expected ${J(T('ca.sinceNote', { n: 3 }))}`);
+        want(J(r.heroes) === J([Dd]) && r.chips[Dd] === LBL[lang][D.wed] && r.chips[C] === LBL[lang][D.tue], `${lang} 3 missed: Start on the top card only (${J(r.heroes)}), each card with its own date (${J(r.chips)})`);
+        want(r.todayAt >= 0 && r.todayAt < r.sinceAt && (r.todoAt < 0 || r.sinceAt < r.todoAt), `${lang} 3 missed: Today first, then the group, then the Unfinished fold (at ${r.todayAt} / ${r.sinceAt} / ${r.todoAt})`);
+        want(r.todayHtml === plain.todayHtml && J(r.today) === J([G, F]), `${lang} 3 missed: Today's section must be byte-identical to the page without the group (Today ${J(r.today)}, plain ${J(plain.today)})`);
+        want(!r.todo.some(id => r.since.includes(id)) && J(r.todo) === J(plain.todo.filter(id => !r.since.includes(id))), `${lang} 3 missed: a group card also shows in the Unfinished fold (fold ${J(r.todo)})`);
+        want(r.all.length === new Set(r.all).size, `${lang} 3 missed: a card is drawn twice: ${J(r.all)}`);
+        want(r.hero === plain.hero, `${lang} 3 missed: the hero (caStartHereId) moved from ${plain.hero} to ${r.hero} — the group is display only`);
+        // 2. Nothing missed (worked Thursday): the page is byte-identical to the page with no answer at all.
+        setUp(WEEK, lang, D.thu); r = page('renderClassActivities()');
+        want(r.html === plain.html && r.sinceN === 0, `${lang} nothing missed: the page differs from today's page (group ${r.sinceN})`);
+        // 3. A 1-day gap (worked Wednesday): no group, page identical.
+        setUp(WEEK, lang, D.wed); r = page('renderClassActivities()');
+        want(r.html === plain.html, `${lang} 1-day gap: the page differs from today's page`);
+        // 4. Tuesday's only card was for other students: Tuesday is no class day for this student -> worked Mon, missed Wed + Thu = 2.
+        const other = WEEK.map(c => c[0] === C ? [C, D.tue, false, false, 'other'] : c);
+        setUp(other, lang, D.mon); r = page('renderClassActivities()');
+        want(J(r.since) === J([Dd, E]) && !r.all.includes(C), `${lang} a card for other students: group ${J(r.since)}, page ${J(r.all)}; expected ${J([Dd, E])} and ${C} nowhere`);
+        setUp(other.map(c => c[0] === Dd || c[0] === E ? [c[0], D.tue, false, false, 'other'] : c), lang, D.mon); r = page('renderClassActivities()');
+        want(r.sinceN === 0, `${lang} only Thursday left as a class day for this student: a 1-day gap must show no group (got ${J(r.since)})`);
+        // 5. An optional card in the gap stays in the fold; one card left -> the singular line.
+        setUp(WEEK.map(c => c[0] === Dd || c[0] === E ? [c[0], c[1], false, true] : c), lang, D.mon); r = page('renderClassActivities()');
+        want(J(r.since) === J([C]) && r.todo.includes(Dd) && r.todo.includes(E) && r.note === T('ca.sinceNote1'), `${lang} optional: group ${J(r.since)}, fold ${J(r.todo)}, line ${J(r.note)}; expected ${J([C])}, both optional cards in the fold, ${J(T('ca.sinceNote1'))}`);
+        // 6. Mark the top card complete: it leaves the group for Completed; the next one gets Start.
+        setUp(WEEK, lang, D.mon); r = page(`caToggleComplete(${J(Dd)})`);
+        want(J(r.since) === J([E, C]) && r.fin.includes(Dd) && J(r.heroes) === J([E]) && r.note === T('ca.sinceNote', { n: 2 }), `${lang} after one is done: group ${J(r.since)}, Completed ${J(r.fin)}, Start on ${J(r.heroes)}, line ${J(r.note)}`);
+        // 7. All three done: the group goes.
+        setUp(WEEK.map(c => [Dd, E, C].includes(c[0]) ? [c[0], c[1], true] : c), lang, D.mon); r = page('renderClassActivities()');
+        want(r.sinceN === 0 && [Dd, E, C].every(id => r.fin.includes(id)), `${lang} all done: group ${r.sinceN}, Completed ${J(r.fin)}`);
+        // 8. No answer yet / a failed progress load: no group.
+        setUp(WEEK, lang, null); r = page('renderClassActivities()');
+        want(r.html === plain.html, `${lang} no saved work found: the page differs from today's page`);
+        setUp(WEEK, lang, D.mon); run('progressLoadFailed = true'); r = page('renderClassActivities()');
+        want(r.sinceN === 0, `${lang} failed progress load: a group was drawn`);
+        // 9. A CAS student: every card optional, no group.
+        setUp(WEEK, lang, D.mon); run(`studentPeriod = 'CAS'`); r = page('renderClassActivities()');
+        want(r.sinceN === 0, `${lang} CAS: a group was drawn (every card is optional for CAS)`);
+        // 10. A card cleared by the teacher for this student is not listed.
+        setUp(WEEK, lang, D.mon); run(`activityClears = { 'test-0': { ${J(C)}: true } }`); r = page('renderClassActivities()');
+        want(J(r.since) === J([Dd, E]), `${lang} cleared: group ${J(r.since)}, expected ${J([Dd, E])}`);
+        // 11. Worked Thursday 11/6 and nothing since: across the weekend, the Friday 11/7 card is listed too, oldest last.
+        setUp([[H, D.lthu], ...WEEK], lang, D.lthu); r = page('renderClassActivities()');
+        want(J(r.since) === J([Dd, E, C, B, A]) && r.head && r.head.date !== null, `${lang} across a weekend: group ${J(r.since)}, expected ${J([Dd, E, C, B, A])}`);
+        // 12. Away on Friday only, back on Monday: one class day missed (and not yesterday: Sunday is) -> no group, the page as today.
+        const MON = [[H, D.lthu], [A, D.lfri], [B, D.mon]];
+        setUp(MON, lang, D.lthu, D.mon); r = page('renderClassActivities()');
+        setUp(MON, lang, undefined, D.mon); const plainMon = page('renderClassActivities()');
+        want(r.html === plainMon.html && r.sinceN === 0 && r.todo.includes(A), `${lang} 1 missed day, not yesterday: group ${J(r.since)} — one missed class day must show no group, Friday's card stays in the Unfinished fold (fold ${J(r.todo)})`);
+        want(plainMon.today.length === 1 && plainMon.today[0] === B, `${lang} the Monday page: Today ${J(plainMon.today)}, expected ${J([B])}`);
+      }
+    } catch (e) {
+      flag('the page threw — ' + e.message);
+    } finally {
+      restore();
+    }
+    if (cases !== SINCE_CASES) flag(`ran ${cases} history cases, pinned ${SINCE_CASES}`);
+    if (renders !== SINCE_RENDERS) flag(`ran ${renders} page renders, pinned ${SINCE_RENDERS} (EN + ES)`);
+    if (asserts !== SINCE_ASSERTS) flag(`ran ${asserts} assertions, pinned ${SINCE_ASSERTS} — a branch stopped running (or update the pin with the change)`);
+    if (!bad) ok(`1ds: ${cases} made-up histories through caSinceMissed, the real read against a fake Firestore (one query, 14 days, today never counts, keyed by student and day), and ${renders} runs of the real renderClassActivities (EN + ES): group under Today, newest first, Start on the top card, no card twice, Today byte-identical, nothing missed = the page byte-identical, other students' / optional / cleared / CAS / done / failed load handled (${asserts} assertions)`);
+  }
+}
+
 /* 1cc. RECORDING VERSIONS (Jonathan, 2026-10-30 — ca-26, ca-29, ca-40; caView
    in app.js). A card can play another RECORDING of its song: the Jimi
    Hendrix / Neil Young switch on the Watchtower play-alongs. The other
@@ -16338,6 +16569,7 @@ function checkPracticeMinutes(i18nTable) {
   checkPowerChordPopups(rcSets, rcCtx);
   checkPendingFileSwitch(rcCtx);
   checkTodayByDate(rcCtx);
+  await checkSinceLastVisit(rcCtx);
   checkFoldedActivity(rcCtx);
   checkNoChecklist(rcCtx);
   checkOneLineDirections(rcCtx, i18nTable);

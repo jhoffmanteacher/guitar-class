@@ -379,6 +379,13 @@
     // gated) until 2026-09-23; now the first of the page's three group
     // names, gated or not.
     'ca.startHere':            { en: "Today's activity", es: 'Actividad de hoy' },
+    // "Since your last visit" (caSinceHtml, 2026-11-13): the group under Today
+    // for a student back after two or more class days with no saved work.
+    // Never "absent": the site keeps no attendance. The date after the
+    // heading is the last day with saved work.
+    'ca.sinceTitle':           { en: 'Since your last visit', es: 'Desde tu última visita' },
+    'ca.sinceNote':            { en: 'The class did these {n} activities. Start with the newest.', es: 'La clase hizo estas {n} actividades. Empieza por la más reciente.' },
+    'ca.sinceNote1':           { en: 'The class did this activity.', es: 'La clase hizo esta actividad.' },
     // A card the teacher marked Optional in the console (caOptionalTagHtml)
     // — it shows like any other but never locks the rest of the site.
     'ca.optional':             { en: 'Optional', es: 'Opcional' },
