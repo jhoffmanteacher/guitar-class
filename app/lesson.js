@@ -701,14 +701,78 @@ function toggleStepDone(btn, key){
    later re-render, a language switch or the save's own repaint draws the
    tick without it, and a tick painted on page load never has it. The CSS
    is the TICK POP block at the end of styles.css; under
-   prefers-reduced-motion it is never added at all. */
+   prefers-reduced-motion it is never added at all.
+
+   Seen, not just played (2026-11-14): on a long step the student scrolls
+   down to "Mark done", so the step's ✓ circle (in the step head) can sit
+   under the sticky set band, or above the scroll box altogether, and the
+   pop played where nobody could see it. tickPopReveal() first scrolls the
+   tick just clear of the band (smoothly, the least distance), and the pop
+   starts when that scroll ends. A tick that is already fully in view is
+   not scrolled at all, and under reduced motion nothing happens (the
+   return above it), so those students get neither a pop nor a scroll. */
 const TICK_POP_MS = 700;
+const TICK_POP_CLEAR = 12;   // px between the tick and the band (or the scroll box's edge) after a reveal: room for the ring
+const TICK_POP_SCROLL_MS = 1200;   // the pop starts at the scroll's end, or after this if 'scrollend' never comes
 function tickPop(el){
   /* Only decoration: whatever goes wrong in here stays in here, so a fault can
      never stop the caller's own work (both call it after the tick is saved). */
   try {
     if(!el || !el.classList) return;
     try { if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return; } catch(e){}
+    // A reveal that fails pops in place, as before it existed.
+    let waiting = false;
+    try { waiting = tickPopReveal(el, () => tickPopStart(el)); } catch(e){ waiting = false; }
+    if(!waiting) tickPopStart(el);
+  } catch(e){}
+}
+/* If `el` is not fully visible in its scroll box (under the sticky set band
+   at the top, or past either edge), scroll the least distance that shows
+   it with TICK_POP_CLEAR to spare, then call `then` once the scroll has
+   ended; returns true. Fully visible, inside the band itself, or no scroll
+   box: changes nothing and returns false. */
+function tickPopReveal(el, then){
+  if(!el.getClientRects().length) return false;
+  let sc = el.parentElement;
+  while(sc && sc !== document.body && sc !== document.documentElement){
+    const oy = getComputedStyle(sc).overflowY;
+    if((oy === 'auto' || oy === 'scroll') && sc.scrollHeight > sc.clientHeight) break;
+    sc = sc.parentElement;
+  }
+  if(!sc || sc === document.body || sc === document.documentElement) return false;
+  const panel = el.closest('.week-panel');
+  const band = panel && panel.querySelector('.set-eyebrow');
+  if(band && band.contains(el)) return false;   // the band's own pill: always on screen
+  const sr = sc.getBoundingClientRect(), r = el.getBoundingClientRect();
+  let top = sr.top;
+  if(band && band.getClientRects().length){ const b = band.getBoundingClientRect().bottom; if(b > top) top = b; }
+  const bottom = sr.bottom;
+  let dy = 0;
+  if(r.top < top) dy = r.top - (top + TICK_POP_CLEAR);
+  else if(r.bottom > bottom) dy = Math.min(r.bottom - (bottom - TICK_POP_CLEAR), r.top - (top + TICK_POP_CLEAR));
+  dy = Math.round(dy);
+  if(!dy) return false;
+  const want = Math.max(0, Math.min(sc.scrollHeight - sc.clientHeight, sc.scrollTop + dy));
+  let done = false, timer = 0;
+  const finish = () => {
+    if(done) return;
+    done = true;
+    clearTimeout(timer);
+    sc.removeEventListener('scrollend', onEnd);
+    then();
+  };
+  /* Only OUR scroll's end: the step that just collapsed can shorten the
+     page, and the browser's own clamp of the scroll position sends a
+     'scrollend' of its own a frame later, while this scroll is still going. */
+  const onEnd = () => { if(Math.abs(sc.scrollTop - want) <= 2) finish(); };
+  sc.scrollBy({ top: dy, behavior: 'smooth' });   // first: if it throws, nothing below is left waiting
+  sc.addEventListener('scrollend', onEnd);
+  timer = setTimeout(finish, TICK_POP_SCROLL_MS);
+  return true;
+}
+function tickPopStart(el){
+  try {
+    if(!el || !el.classList) return;
     // A second tick inside the 400 ms (on, off, on) restarts it: reading the width makes the browser drop the old run first.
     if(el._tickPopEnd){ el._tickPopEnd(); void el.offsetWidth; }
     const end = () => {
