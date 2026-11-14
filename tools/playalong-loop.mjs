@@ -1178,7 +1178,7 @@ function planWalks(M) {
       stops.forEach((stop, k) => { for (let n = 0; n < (k < stops.length - 1 ? PC_BUILD_LAPS : 1); n++) plan.push(stop); });
       const ops = setup(stops[0], false, true, null);
       ops.push(loopSw('build'), startOp(si), { op: 'untilAudible', max: 60000, dt: FINE_MS },
-        { op: 'run', ms: plan.reduce((t, stop) => t + secMs(stop, S), 0) + msFor(M, 'normal', S.fromBar - 1, S.fromBar) * 0.5, dt: STEP_MS }, { op: 'click', sel: '.pc-play', stop: true });
+        { op: 'run', ms: plan.reduce((t, stop) => t + secMs(stop, S), 0) + msFor(M, 'normal', S.fromBar - 1, S.fromBar) + 200, dt: STEP_MS }, { op: 'click', sel: '.pc-play', stop: true });
       walks.push({ kind: 'lap', loopWalk: true, coarse: true, name: `build up speed · ${S.label} (section ${si + 1} of ${ch.secs.length}) · ${plan.length - 1} laps to Normal · ${spare ? 'the spare ready' : 'no spare (the seek)'}`, stop: stops[0], guitar: false, ops, span: 'lap', lapFrom: si, loopSi: si, build: plan, laps: plan.length, lateNeverLoad: !spare, metro: true, fresh: true });
     }
   }
@@ -1294,7 +1294,9 @@ function judge(M, W, res) {
     if (!k.aud.length) {
       if (phase === 'countin' || phase === 'stopped' || phase === 'idle' || phase === 'ended') { if (!litEmpty(k)) bad(`${at}: a cell is lit while nothing plays (${phase === 'countin' ? 'the count-in' : 'stopped'})`); }
       else if (phase === 'play') {
-        if (litEmpty(k) && !pendSwitch) {
+        /* A Build step taken by the seek (no spare) loads the next stop's file like a speed switch, and a lyric sheet's
+           strip is empty while it loads: the silence check below still holds it to a file load. */
+        if (litEmpty(k) && !pendSwitch && !(W.build && W.lateNeverLoad)) {
           phase = 'ended';
           const T = lastAud && clk(lastAud.file);
           const endT = T ? T.clock.time(ch.endBar - 1) : 0;
@@ -1430,7 +1432,7 @@ function judge(M, W, res) {
       if (hit) {
         const o = orderOf(hit);
         /* THE SPARE's overlap: for a few ms the loop's first bar (the spare) and its last bar (the file on its way out) both sound. */
-        if (o < order && !ch.wholeSong && k.aud.length > 1) order = -1;
+        if (o < order && (!ch.wholeSong || LS) && k.aud.length > 1) order = -1;
         if (o < order) bad(`${where}: the cursor went back to ${secName(hit)}`, 'back', hit.si, [placeName(hit)]);
         order = Math.max(order, o);
         seen.add(hit.key);
