@@ -15,9 +15,10 @@
           the base, tools/rule-zero-proof.mjs is run against it and its
           verdict is the check's, every line of its printout shown. It
           freezes keyed quizzes in Modules 1..FROZEN_THROUGH and in the next
-          module, the one the class is about to enter. A PURE REVERT (every
-          module file byte-identical to an ancestor of the base, within 50
-          commits) is let through with a loud line (BREAK-GLASS.md step 4).
+          module, the one the class is about to enter. A REVERT (each changed
+          module file equal to that file at an earlier commit, and every
+          commit it undoes committed under REVERT_MAX_HOURS ago) is let
+          through with a loud line (BREAK-GLASS.md step 4).
           Also: FROZEN_THROUGH = checks.mjs's FROZEN_MC_THROUGH_MODULE.
           Module progress keys stay valid for good (Jonathan, 2026-11-13:
           "modules do not reset for students unless i do it"), so there is
@@ -146,6 +147,7 @@ const R = () => { const lines = []; return { lines, ok: t => lines.push({ kind: 
    1dl. PROGRESS KEYS AND FROZEN QUIZZES, AGAINST THE BASE (rules 1, 2)
    ════════════════════════════════════════════════════════════════════ */
 const MODULE_FILE = /^(module-\d+\.js|config-main\.js)$/;
+const GUARD_FILES = ['tools/never-blocks.mjs', 'tools/never-blocks-selftest.mjs', 'tools/never-pins.json', 'tools/js-scan.mjs', 'tools/firestore-paths.mjs', 'tools/rule-zero-proof.mjs', '.githooks', '.github/workflows/checks.yml'];
 const MODULE_SPECS = ['module-*.js', 'config-main.js'];
 /* A REVERT is let through when, for each changed module file, the tree's copy
    equals that file at some earlier commit on the base's history, AND every commit
@@ -178,7 +180,9 @@ function revertCheck(root, base, changed) {
   if (!oldest) return { why: 'nothing to undo' };
   const hours = (now - oldest.t) / 3600e3;
   const subject = git(root, ['log', '-1', '--format=%s', oldest.h]).out;
-  if (hours >= REVERT_MAX_HOURS) return { why: `the oldest change it undoes, ${oldest.h.slice(0, 7)} ("${subject}", ${oldest.file}), has been live for ${Math.floor(hours)} hours; students may have ticked it: ask Jonathan` };
+  // Judged by COMMIT time (when it reached main is not in git); a commit dated in the future proves nothing.
+  if (hours < -0.25) return { why: `the change it undoes, ${oldest.h.slice(0, 7)} ("${subject}"), is dated ${Math.ceil(-hours)} hours in the future, so its age cannot be told: ask Jonathan` };
+  if (hours >= REVERT_MAX_HOURS) return { why: `the oldest change it undoes, ${oldest.h.slice(0, 7)} ("${subject}", ${oldest.file}), was committed ${Math.floor(hours)} hours ago; students may have ticked it: ask Jonathan` };
   return { ok: true, commits: [...new Set(undone)], oldest, hours, subject };
 }
 /* The numbers that say which modules are frozen, read from a source text. */
@@ -217,6 +221,10 @@ export function checkKeysAgainstBase(root = DEFAULT_ROOT, { frozenMcThrough } = 
     else r.warn(`1dl: ${base.none}; no module file changed here (or this is not git), so there was nothing to compare`);
     return r.lines;
   }
+  /* A push that changes the guards themselves says so, loudly (not a failure): a weakened guard would
+     otherwise judge its own push quietly (review R3, m4). */
+  const guards = changedSince(root, base.ref, GUARD_FILES, () => true);
+  if (guards.length) r.warn(`1dl: this push changes the guards: ${guards.join(', ')}. Read those diffs before trusting this run's verdicts.`);
   /* The frozen numbers and 1ap's fingerprints may only go UP: module progress is never wiped
      (Jonathan, 2026-11-13: "modules do not reset for students unless i do it"). */
   const show = f => { const g = git(root, ['show', `${base.ref}:${f}`]); return g.ok ? lf(g.raw) : null; };
@@ -225,15 +233,21 @@ export function checkKeysAgainstBase(root = DEFAULT_ROOT, { frozenMcThrough } = 
   const lowered = [];
   for (const [k, label] of [['frozen', 'FROZEN_THROUGH (tools/rule-zero-proof.mjs)'], ['open', 'OPEN_THROUGH (tools/rule-zero-proof.mjs)'], ['mc', 'FROZEN_MC_THROUGH_MODULE (tools/checks.mjs)']])
     if (Number.isFinite(baseNums[k]) && !(treeNums[k] >= baseNums[k])) lowered.push(`${label} ${baseNums[k]} → ${Number.isFinite(treeNums[k]) ? treeNums[k] : 'gone'}`);
-  const fpGone = Object.entries(baseNums.fps).filter(([k, v]) => treeNums.fps[k] !== v).map(([k]) => k);
+  /* A fingerprint REMOVED is refused. A fingerprint CHANGED is the documented reword (response.renamedChoices,
+     then re-pin 1ap; CLAUDE.md "Three regimes"): allowed only when a module file changed in the same push and
+     rule-zero-proof, the base's copy too, passes (it checks every old pick maps to a new choice). */
+  const fpGone = Object.keys(baseNums.fps).filter(k => !(k in treeNums.fps));
+  const fpChanged = Object.entries(baseNums.fps).filter(([k, v]) => k in treeNums.fps && treeNums.fps[k] !== v).map(([k]) => k);
   if (lowered.length || fpGone.length)
-    r.err(`1dl: refused — ${[...lowered, ...(fpGone.length ? [`${fpGone.length} of 1ap's FROZEN_MC_FINGERPRINTS removed or changed (${fpGone.slice(0, 3).join(', ')}${fpGone.length > 3 ? ', …' : ''})`] : [])].join('; ')}. These only ever go up: module progress is never wiped (Jonathan, 2026-11-13: "modules do not reset for students unless i do it"), so a module once frozen stays frozen (${NEVER}; "Three regimes"). Put them back.`);
+    r.err(`1dl: refused — ${[...lowered, ...(fpGone.length ? [`${fpGone.length} of 1ap's FROZEN_MC_FINGERPRINTS removed (${fpGone.slice(0, 3).join(', ')}${fpGone.length > 3 ? ', …' : ''})`] : [])].join('; ')}. These only ever go up: module progress is never wiped (Jonathan, 2026-11-13: "modules do not reset for students unless i do it"), so a module once frozen stays frozen (${NEVER}; "Three regimes"). Put them back.`);
   const nums = { frozen: Math.max(treeNums.frozen || 0, baseNums.frozen || 0), open: Math.max(treeNums.open || 0, baseNums.open || 0) };
   const changed = changedSince(root, base.ref, MODULE_SPECS, f => MODULE_FILE.test(f));
+  if (fpChanged.length && !changed.length)
+    r.err(`1dl: refused — 1ap's fingerprint changed for ${fpChanged.slice(0, 3).join(', ')}${fpChanged.length > 3 ? ', …' : ''} but no module file changed: a re-pin goes with the reword it records (response.renamedChoices in the module, "Three regimes"). Put the old fingerprint back.`);
   if (!changed.length) { if (!r.lines.some(l => l.kind === 'err')) r.ok(`no module file differs from ${base.label}: no progress key can have moved; the frozen numbers (${nums.frozen}, open ${nums.open}) and ${Object.keys(treeNums.fps).length} fingerprints are no lower than the base's`); return r.lines; }
   const proofChanged = baseProofSrc !== null && lf(readText(root, 'tools/rule-zero-proof.mjs') || '') !== baseProofSrc;
   const runs = [runProof(root, base.ref, nums, null)];
-  if (proofChanged) runs.push(runProof(root, base.ref, nums, baseProofSrc));
+  if ((proofChanged || fpChanged.length) && baseProofSrc) runs.push(runProof(root, base.ref, nums, baseProofSrc));
   const lines = runs.flatMap(x => x.out.split('\n'));
   const crosses = [...new Set(lines.filter(l => /^✗ /.test(l)).map(l => l.slice(2)))];
   const ticks = runs[0].out.split('\n').filter(l => /^✓ /.test(l)).map(l => l.slice(2));
@@ -245,9 +259,9 @@ export function checkKeysAgainstBase(root = DEFAULT_ROOT, { frozenMcThrough } = 
     rest.forEach(l => r.info(l));
     return r.lines;
   }
-  const rev = revertCheck(root, base.ref, changed);
+  const rev = fpChanged.length ? { why: '1ap fingerprints changed in the same push' } : revertCheck(root, base.ref, changed);
   if (rev.ok) {
-    const msg = `1dl LET THROUGH: this change puts ${changed.join(', ')} back as ${changed.length === 1 ? 'it was' : 'they were'} before ${rev.commits.map(c => c.slice(0, 7)).join(', ')}; the oldest change undone (${rev.oldest.h.slice(0, 7)}, "${rev.subject}") landed ${rev.hours.toFixed(1)} hours ago, under ${REVERT_MAX_HOURS}: a revert, let through (BREAK-GLASS.md step 4). Without it, rule-zero-proof said: ${crosses.join(' | ') || 'not proved'}`;
+    const msg = `1dl LET THROUGH: this change puts ${changed.join(', ')} back as ${changed.length === 1 ? 'it was' : 'they were'} before ${rev.commits.map(c => c.slice(0, 7)).join(', ')}; the oldest change undone (${rev.oldest.h.slice(0, 7)}, "${rev.subject}") was committed ${Math.max(0, rev.hours).toFixed(1)} hours ago, under ${REVERT_MAX_HOURS}: a revert, let through (BREAK-GLASS.md step 4). Without it, rule-zero-proof said: ${crosses.join(' | ') || 'not proved'}`;
     r.warn(msg);
     LET_THROUGH.push(msg);
     if (process.env.GITHUB_ACTIONS === 'true') console.log(`::warning title=1dl let a revert through::${msg.replace(/[\r\n]+/g, ' ')}`);
@@ -496,11 +510,13 @@ export function checkFirestoreWrites(root = DEFAULT_ROOT) {
   for (const e of entries) {
     if (e.console || e.file === 'sw.js' || e.file.startsWith('tabs/') || e.file.includes('<script>') || e.file.includes('handlers')) continue;
     if (!/\.m?js$/.test(e.file) || /^module-\d+\.js$/.test(e.file)) continue;
-    for (const [k, v] of callGraph(e.file, tok(e))) if (k !== '(top level)') { if (!graph.has(k)) graph.set(k, new Set()); v.calls.forEach(c => graph.get(k).add(c)); }
+    for (const [k, v] of callGraph(e.file, tok(e))) if (k !== '(top level)' && !v.data) { if (!graph.has(k)) graph.set(k, new Set()); v.calls.forEach(c => graph.get(k).add(c)); }
   }
   const reach = new Set(writers);
   for (let grew = true; grew;) { grew = false; for (const [k, calls] of graph) if (!reach.has(k) && [...calls].some(c => reach.has(c))) { reach.add(k); grew = true; } }
-  /* Any mention of such a function in console code is refused, called or not: handed to setTimeout or
+  /* The list: a function is on it only if a chain of calls from its body (NAME(…), or a function handed on
+     by name) reaches a progress write; a data table (const NAME = { … }) is not a function and is never on it.
+     Any mention of such a function in console code is refused, called or not: handed to setTimeout or
      .then, aliased, .call()ed, (0, f)() or named in brackets all run it. Not a mention: a local of the same
      name, someone else's member (obj.f), an object key or method of that name. The one exception that exists
      today is the exact case below, with its reason. */
@@ -648,8 +664,8 @@ export function checkRulesPaste(root = DEFAULT_ROOT) {
     if (process.env.GITHUB_ACTIONS === 'true') return;
     const sh = staleHooks(root, baseRef);
     if (sh.unset) r.warn(`1dn: git runs no hooks here (core.hooksPath is not set), so no check runs before a commit or a push. Run: git config core.hooksPath .githooks`);
-    else if (sh.list.length) block(`1dn: refused — the hooks this push runs are an older copy: ${sh.list.join(', ')} ${sh.list.length === 1 ? 'is' : 'are'} not main's, so a check may be skipped. Bring the folder they live in up to date: git -C "${dirname(sh.dir)}" pull --ff-only`);
-    else if (sh.ahead.length) r.warn(`1dn: this change updates ${sh.ahead.join(' and ')} in .githooks/; the copy git runs (${sh.dir}) is main's. After it lands, bring that folder up to date: git -C "${dirname(sh.dir)}" pull --ff-only`);
+    else if (sh.list.length) block(`1dn: refused — the hooks this push runs are an older copy: ${sh.list.join(', ')} ${sh.list.length === 1 ? 'is' : 'are'} not main's, so a check may be skipped. Bring the folder they live in up to date: git -C "${dirname(sh.dir)}" pull --ff-only. If that cannot fast-forward (that checkout has commits of its own, or is not on main), point git at this tree's hooks instead: git config core.hooksPath "${join(git(root, ['rev-parse', '--show-toplevel']).out || root, '.githooks')}" (and set it back once that checkout is up to date)`);
+    else if (sh.ahead.length) r.warn(`1dn: this change updates ${sh.ahead.join(' and ')} in .githooks/; the copy git runs (${sh.dir}) is main's. After it lands, bring that folder up to date: git -C "${dirname(sh.dir)}" pull --ff-only (if it cannot fast-forward, git config core.hooksPath to an up-to-date checkout's .githooks)`);
   };
   const base = resolveBase(root);
   hookCheck(base.ref || null);
@@ -657,10 +673,12 @@ export function checkRulesPaste(root = DEFAULT_ROOT) {
   const now = readText(root, RULES_FILE);
   const nowLines = (readText(root, PASTE_FILE) || '').split('\n').filter(l => RECORD.test(l));
   const today = todayLocal();
-  /* A record line counts only in the printed form, for this text, dated no earlier than the rules' last
-     change (the commit that last changed the file; today when it is changed and not committed). */
-  const uncommitted = !git(root, ['diff', '--quiet', 'HEAD', '--', RULES_FILE]).ok;
-  const changedOn = uncommitted ? today : (git(root, ['log', '-1', '--format=%cs', '--', RULES_FILE]).out || '0000-00-00');
+  /* A record line counts only in the printed form, for this text. When THIS push changes the rules, it must
+     also be dated no earlier than that change: the last commit in base..HEAD that touched the file (its
+     author date, which a rebase keeps), or today when the change is not committed. When the rules equal the
+     base's, any printed-form line naming the hash counts: the date of a change made in an earlier push is
+     not this push's business (and a shallow checkout cannot see it; review R3-1). */
+  let changedOn = '0000-00-00';
   const valid = (l, h) => {
     const m = l.match(RECORD);
     if (!m || m[2] !== h || m[3] !== ACK_TAIL(m[1])) return false;
@@ -669,9 +687,15 @@ export function checkRulesPaste(root = DEFAULT_ROOT) {
     if (m[1] > today && (new Date(`${m[1]}T00:00:00`) - new Date()) > 36 * 3600e3) return false;   // not in the future (a day's slack)
     return m[1] >= changedOn;
   };
+  const changeDate = baseRef => {
+    if (!git(root, ['diff', '--quiet', 'HEAD', '--', RULES_FILE]).ok) return today;          // changed and not committed
+    const d = baseRef ? git(root, ['log', '-1', '--format=%as', `${baseRef}..HEAD`, '--', RULES_FILE]).out : '';
+    return d || today;
+  };
   const h = now === null ? null : rulesHash(now);
   if (base.none) {
     const t = touchesWithoutBase(root, [RULES_FILE], f => f === RULES_FILE);
+    changedOn = changeDate(null);
     if (t && t.length && !(h && nowLines.some(l => valid(l, h)))) block(`1dn: refused — firestore.rules changed, and ${base.none}, so this check cannot tell whether Jonathan was told (${NEVER}). Run git fetch origin (so origin/main exists) and check again.`);
     else r.warn(`1dn: ${base.none}; nothing to compare firestore.rules with`);
     return r.lines;
@@ -683,12 +707,13 @@ export function checkRulesPaste(root = DEFAULT_ROOT) {
   const lost = [...beforeTally].filter(([l, n]) => (nowTally.get(l) || 0) < n).map(([l]) => l);
   if (lost.length) block(`1dn: refused — ${PASTE_FILE} lost or changed ${lost.length} record line${lost.length === 1 ? '' : 's'} the base had ("${lost[0].slice(0, 90)}"${lost.length > 1 ? ', …' : ''}); it is the record of what Jonathan was told, so record lines are only ever added (${NEVER}). Put ${lost.length === 1 ? 'it' : 'them'} back as ${lost.length === 1 ? 'it was' : 'they were'}.`);
   if (now === null) { block(`1dn: refused — firestore.rules is gone. The live rules stay whatever was last pasted; deleting the file changes nothing there and loses the record (${NEVER}). Put it back.`); return r.lines; }
-  const want = ackLine(today >= changedOn ? today : changedOn, h);
   const diff = git(root, ['diff', '--quiet', base.ref, '--', RULES_FILE]);
   if (diff.status !== 0 && diff.status !== 1) { r.err(`1dn: git could not compare firestore.rules with ${base.label}: ${diff.err}`); return r.lines; }
   const untracked = git(root, ['ls-files', '--others', '--exclude-standard', '--', RULES_FILE]).out;
   const thenText = git(root, ['show', `${base.ref}:${RULES_FILE}`]);
   const same = (diff.status === 0 && !untracked) || (thenText.ok && rulesHash(now) === rulesHash(thenText.raw));
+  if (!same) changedOn = changeDate(base.ref);
+  const want = ackLine(today >= changedOn ? today : changedOn, h);
   const acked = nowLines.filter(l => valid(l, h));
   if (same) {
     if (acked.length) { if (!lost.length) r.ok(`firestore.rules is unchanged since ${base.label}: nothing new for Jonathan to paste; its text (${h}) is on record in ${PASTE_FILE} ("${acked[acked.length - 1].slice(2, 60)}…")${baseLog.ok ? '' : ` (${PASTE_FILE} is new on this branch)`}`); }
@@ -728,8 +753,9 @@ export const CURE_AUDIO = {
    - DAILY5_FUNCTIONS: each function's token fingerprint (comments, spacing and
      line endings do not count; any change to its code does); a second
      declaration of one of those names anywhere also fails (it would shadow it);
-   - SWITCH_READS: a fingerprint of each statement that reads each switch, so
-     `DAILY5_ENABLED && false && …` is a change;
+   - SWITCH_READS: a fingerprint of the innermost function that reads each
+     switch, so `DAILY5_ENABLED && false && …`, an `if(0){…}` around the read
+     or an early return above it is a change;
    - DAILY5_CSS: every selector naming a .daily5 class, each with a non-empty rule;
    - DAILY5_INDEX_MARKUP, WARMUP_BANK_MIN: counts; the daily5 strings must be
      non-empty in English and Spanish;
@@ -794,6 +820,34 @@ function loadSets(root) {
 const tokenSig = t => t.t === 'tpl' ? `tpl(${t.quasis.map(q => JSON.stringify(q)).join(',')};${t.exprs.map(e => e.map(tokenSig).join(' ')).join(';')})` : `${t.t}:${t.v}`;
 const stepHash = st => sha([st.label, st.text, st.label_es, st.text_es].map(x => x == null ? '' : String(x)).join('\u0001'), 8);
 
+/* The fingerprint of the innermost function (declaration or arrow) that holds toks[k]: a switch read is
+   pinned with its whole function, so `if(0){…}` around it or an early return above it is a change. */
+function innermostFunctionSig(t, k) {
+  let d = 0;
+  for (let j = k - 1; j >= 0; j--) {
+    const y = t[j];
+    if (y.t !== 'punc') continue;
+    if (y.v === '}' || y.v === ')' || y.v === ']') { d++; continue; }
+    if (y.v === '(' || y.v === '[') { if (d) d--; continue; }
+    if (y.v !== '{') continue;
+    if (d) { d--; continue; }
+    // an enclosing block: is it a function body?
+    const p = t[j - 1];
+    let start = -1;
+    if (p && p.t === 'punc' && p.v === '=>') {
+      const q = t[j - 2];
+      if (q && q.t === 'punc' && q.v === ')') { let dd = 0, i = j - 2; for (; i >= 0; i--) { if (t[i].v === ')') dd++; else if (t[i].v === '(') { dd--; if (!dd) break; } } start = i; }
+      else start = j - 2;
+    } else if (p && p.t === 'punc' && p.v === ')') {
+      let dd = 0, i = j - 1; for (; i >= 0; i--) { if (t[i].v === ')') dd++; else if (t[i].v === '(') { dd--; if (!dd) break; } }
+      const before = t[i - 1], before2 = t[i - 2];
+      if ((before && before.v === 'function') || (before && before.t === 'id' && before2 && before2.v === 'function')) start = before.v === 'function' ? i - 1 : i - 2;
+    }
+    if (start >= 0) return sha(t.slice(start, matchCloseTok(t, j) + 1).map(tokenSig).join(' '));
+  }
+  return sha(t.map(tokenSig).join(' '));   // top level: the whole file
+}
+
 /* Today's value of every 1do pin (also what --pins compares and writes). `fnNames` = the pinned functions. */
 export function measureKept(root, sets, fnNames) {
   const appFiles = siteParts('app.js', root);
@@ -808,7 +862,7 @@ export function measureKept(root, sets, fnNames) {
       const x = t[k];
       if (x.t !== 'id' || !SWITCHES.includes(x.v)) continue;
       if (t[k - 1] && t[k - 1].t === 'id' && t[k - 1].v === 'const' && t[k + 1] && t[k + 1].v === '=') declared[x.v].push(t[k + 2] && t[k + 2].t === 'id' && t[k + 3] && t[k + 3].v === ';' ? t[k + 2].v : '(not a literal)');
-      else if (!(t[k - 1] && t[k - 1].t === 'punc' && (t[k - 1].v === '.' || t[k - 1].v === '?.'))) reads[x.v].push(statementSig(t, k, k + 1));
+      else if (!(t[k - 1] && t[k - 1].t === 'punc' && (t[k - 1].v === '.' || t[k - 1].v === '?.'))) reads[x.v].push(innermostFunctionSig(t, k));
     }
   }
   // every declaration of a pinned function's name, in every script a page loads
@@ -819,7 +873,9 @@ export function measureKept(root, sets, fnNames) {
       const x = t[k], n = t[k + 1];
       if (x.t === 'id' && x.v === 'function' && n.t === 'id' && fnDecls[n.v]) fnDecls[n.v].push(`${f}:${n.line}`);
       if (x.t === 'id' && /^(const|let|var)$/.test(x.v) && n.t === 'id' && fnDecls[n.v]) fnDecls[n.v].push(`${f}:${n.line}`);
-      if (x.t === 'id' && fnDecls[x.v] && n.t === 'punc' && n.v === '=' && t[k - 1] && t[k - 1].t === 'punc' && t[k - 1].v === '.' && t[k - 2] && /^(window|globalThis|self)$/.test(t[k - 2].v)) fnDecls[x.v].push(`${f}:${x.line} (window.)`);
+      // an assignment replaces the function too: NAME = …, window.NAME = …, window['NAME'] = …
+      if (x.t === 'id' && fnDecls[x.v] && n.t === 'punc' && n.v === '=' && !(t[k - 1] && t[k - 1].t === 'id' && /^(const|let|var)$/.test(t[k - 1].v)) && !(t[k - 1] && t[k - 1].t === 'punc' && (t[k - 1].v === '.' || t[k - 1].v === '?.') && !(t[k - 2] && /^(window|globalThis|self)$/.test(t[k - 2].v)))) fnDecls[x.v].push(`${f}:${x.line} (assigned)`);
+      if (x.t === 'str' && fnDecls[x.v] && t[k - 1] && t[k - 1].v === '[' && n.t === 'punc' && n.v === ']' && t[k + 2] && t[k + 2].v === '=') fnDecls[x.v].push(`${f}:${x.line} (assigned in brackets)`);
     }
   }
   // .daily5 selectors and whether each rule has a declaration
@@ -901,7 +957,7 @@ export function checkKeptThings(root = DEFAULT_ROOT, { sets } = {}) {
   const fnPins = P.DAILY5_FUNCTIONS || {};
   const k = measureKept(root, sets, Object.keys(fnPins));
   const OFF = `(${NEVER}: never delete what is switched off — "switched off, never deleted", so flipping the switch brings it back)`;
-  const REPIN = `If it keeps the feature working (a renamed helper, an accessibility attribute) and Jonathan asked for it, re-pin it with its reason: node tools/never-blocks.mjs --pins --why "<reason>"`;
+  const REPIN = `If it keeps the feature working (a renamed helper, an accessibility attribute, a typo fixed inside it) and Jonathan asked for it, that is allowed: re-pin it with its reason, node tools/never-blocks.mjs --pins --why "<reason>"`;
   for (const sw of SWITCHES) {
     const d = k.declared[sw];
     if (d.length !== 1 || !/^(true|false)$/.test(d[0])) bad.push(`1do: refused — ${sw} must be declared once in the app as \`const ${sw} = true;\` or \`= false;\` (found ${d.length ? d.join(', ') : 'nothing'}) ${OFF}. On or off is Jonathan's call; deleting the switch is not.`);

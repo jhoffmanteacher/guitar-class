@@ -28,7 +28,7 @@ Before any of them: `git switch main && git pull --ff-only`, then `git status` m
    push silently deletes their commits and the history the Friday check reads. A revert is an
    ordinary commit, so a plain push works (if it is refused, `git pull --rebase`, then push
    again). Check 1dl lets a module revert through, with a warning, only when each module file is back
-   exactly as it was and the change it undoes landed under 24 hours ago; older, it refuses (students
+   exactly as it was and the change it undoes was committed under 24 hours ago; older (or dated in the future), it refuses (students
    may have ticked that step): ask Jonathan. If the revert changes `firestore.rules`, check 1dn refuses
    the push until you tell Jonathan to paste the old rules back and add the line it prints to `RULES-PASTE.md`.
 5. Confirm, one or two minutes later: `node tools/checks.mjs --live` must print
