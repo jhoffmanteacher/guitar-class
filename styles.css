@@ -4672,6 +4672,10 @@ a.jl-song-btn{display:inline-block;text-decoration:none}
 .lq-stage{background:var(--bg);border:1px solid var(--border);border-radius:16px;
   padding:clamp(18px,3vw,40px);text-align:center;min-height:340px;
   display:flex;flex-direction:column;justify-content:center;gap:10px}
+/* Nothing running: the stage shrinks to its two lines, so the Games list
+   (teacher-livegames.js) shows on the first screen at 1366x657. Full screen
+   and every running state keep the full height. */
+.lq-stage:not(:fullscreen):has(> .lq-st-idle){min-height:0}
 /* Fullscreen strips the page background out from under it, so repaint it. */
 .lq-stage:fullscreen{background:var(--bg);border-radius:0;justify-content:center}
 .lq-st-title{font-family:var(--font-display);font-size:clamp(1.75rem,4vw,3.25rem);
