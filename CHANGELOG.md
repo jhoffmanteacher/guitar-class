@@ -6,6 +6,13 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-14 — Easier to use with a screen reader
+
+- **Pages now name their main part.** The sign-in screen, the six Song Journey pages, Mic check and Mood chart tell a screen reader where the main content is.
+- **An open practice card keeps its page title** for screen readers.
+- **Lesson step buttons read correctly.** The step number and its name are now read as two words.
+- **One small line is easier to read.** The line under each speed button in Change Up's set-up is no longer faded.
+
 ## 2026-11-14 — Your teacher can start you over
 
 - **You may see one line, once: "Your teacher started you over."** It means your teacher emptied your lesson steps, answers and ratings in the modules so you can do them again. Your In-Class Activities, game scores, streak and practice minutes are kept. It shows only when your teacher chose this for you, the next time you sign in.
