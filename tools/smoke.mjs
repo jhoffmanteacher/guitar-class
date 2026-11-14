@@ -2288,6 +2288,38 @@ async function walk(base, chromePort, label) {
   if (backTo && (backTo.hash !== '#class-activities' || !backTo.ca || backTo.games)) events.push({ step: 'games-exits', kind: 'games-exits', text: `In class → Games → Main site landed on ${JSON.stringify(backTo)} (want In class open, games closed)` });
   await run('games-from-ca-leave', `exitExploreHash()`, 900);
   await run('games-reopen', `openGamesScreen()`, 400);   // the steps after this one need the screen open
+  /* The Games page by what each game teaches (GAMES_GROUPS, 2026-11-14), clicked for real: "More games" opens
+     closed; a game in it opens by its direct entry point (gamesShow, as an activity's free-play button does) with
+     the fold closed; the fold's summary opens it and a card inside starts its game; "All games" comes back to it
+     still open in the same visit, and the next visit opens it closed again. A checkout without the groups (the
+     baseline) skips it. The steps after this one still find the screen open, on the hub. */
+  const more = await run('games-more', `(async () => {
+    if (typeof GAMES_GROUPS === 'undefined') return null;
+    const d = () => document.querySelector('#games-panel .games-more');
+    const has = id => { const b = document.getElementById(id); return !!b && b.children.length > 0; };
+    gamesClosePanel(); openGamesScreen();
+    if (!d()) return { exists: false };
+    /* A closed <details> keeps its content laid out under content-visibility:hidden in today's Chrome, so
+       "shown" is checkVisibility(), not getClientRects(). The toggle event is a task of its own: wait one. */
+    const shown = c => (typeof c.checkVisibility === 'function' ? c.checkVisibility() : c.getClientRects().length > 0);
+    const tick = () => new Promise(r => setTimeout(r, 50));
+    const out = { exists: true, closedAtOpen: !d().open, total: d().querySelectorAll('.games-card').length, shownWhileClosed: [...d().querySelectorAll('.games-card')].filter(shown).length };
+    gamesShow('blitz'); out.direct = has('cb-body');
+    gamesShow('hub'); out.closedAfterDirect = !d().open;
+    d().querySelector('summary').click(); await tick(); out.openAfterClick = d().open;
+    const card = [...d().querySelectorAll('.games-card')].find(c => c.getAttribute('onclick') === "gamesShow('detective')");
+    out.cardShown = !!card && shown(card);
+    if (card) card.click();
+    out.fromFold = has('cd-body');
+    document.getElementById('games-all-btn').click(); out.keptOpenInVisit = !!d() && d().open;
+    gamesClosePanel(); openGamesScreen(); out.closedNextVisit = !!d() && !d().open;
+    return out;
+  })()`, 600);
+  if (more) {
+    const w = { exists: true, closedAtOpen: true, shownWhileClosed: 0, direct: true, closedAfterDirect: true, openAfterClick: true, cardShown: true, fromFold: true, keptOpenInVisit: true, closedNextVisit: true };
+    const off = Object.keys(w).filter(k => more[k] !== w[k]);
+    if (off.length || !(more.total > 0)) events.push({ step: 'games-more', kind: 'games-more', text: `"More games": ${off.map(k => `${k} = ${more[k]} (want ${w[k]})`).join('; ') || `${more.total} cards inside`}` });
+  }
   if (exits) {
     const j = JSON.stringify;
     if (j(exits.hub) !== '[true,false]') events.push({ step: 'games-exits', kind: 'games-exits', text: `hub shows [Main site, All games] = ${j(exits.hub)} (want [true,false])` });

@@ -319,6 +319,7 @@ function openGamesScreen(){
   if (typeof closeTopPanels === 'function') closeTopPanels('games');
   screen.removeAttribute('hidden');
   if (typeof syncExploreNav === 'function') syncExploreNav();
+  gamesMoreOpen = false;   // "More games" opens closed on every visit (GAMES_GROUPS)
   gamesShow('hub');
   /* Keyboard/screen-reader users: focus follows into the page.
      gamesClosePanel hands focus back to the Games button. */
@@ -419,16 +420,17 @@ function gamesHeadHtml(title){
   return `<div class="games-game-head"><span class="games-game-title" role="heading" aria-level="3">${title}</span></div>`;
 }
 
-/* Single source of truth for the hub grid, the guitar / no-guitar split AND
-   each game's screen: `body` is the id its own code renders into (gamesShow
+/* Single source of truth for the hub cards, each card's guitar / no-guitar
+   mark AND each game's screen: `body` is the id its own code renders into (gamesShow
    builds it; gamesStopMic looks for it to know a game is on screen),
    `setup` starts it, `foot` adds the privacy footer under it, and `records`
    says that footer is on a screen that can record (micRecStart). Finger Gym
    shares Note Runner's #nr-body and engine but does not record. A game
    added here gets its screen and its stop path from this row alone.
    `guitar:true` = you need a real guitar in hand (mic-graded, or self-judged
-   like Riff Roulette); `guitar:false` = eyes + keyboard/tap only. Order here is
-   the order shown within each section. titleKey/descKey are resolved at
+   like Riff Roulette); `guitar:false` = eyes + keyboard/tap only; each card
+   says which (gamesRenderHub's card()). Which heading a game sits under, and
+   its place there, is GAMES_GROUPS below. titleKey/descKey are resolved at
    render time in gamesRenderHub()'s card() — never here (this table is
    built once at load, so t() here would freeze one language in). */
 /* One stroke icon per game, in the site's line-icon style — used BOTH on the
@@ -483,8 +485,8 @@ const GAME_ICO = {
   buildchord: gIco('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 4v16M3 12h18"/><circle cx="6" cy="8" r="1.8" fill="currentColor" stroke="none"/><circle cx="18" cy="16" r="1.8" fill="currentColor" stroke="none"/>'),
 };
 
-/* The order here is the order of the cards on the Games page (each section keeps it).
-   Power Chord Switch is first (Jonathan, 2026-11-04). */
+/* The order here is NOT the order on the Games page: GAMES_GROUPS (after this
+   table) sets that. Power Chord Switch is first on the page (Jonathan, 2026-11-04). */
 const GAMES_META = [
   /* Power Chord Switch runs Change Up's engine (ccSetup('power')) and shares
      its #cc-body, as Finger Gym shares Note Runner's #nr-body. */
@@ -528,6 +530,45 @@ const GAMES_META = [
   { key:'buildchord', cls:'gc-buildchord', ico:GAME_ICO.buildchord, titleKey:'games.bc.title', guitar:false, descKey:'games.bc.desc',
     body:'bc-body', setup:() => bcSetup() },
 ];
+
+/* The Games page, grouped by what each game teaches (Jonathan, 2026-11-14:
+   chord switching, rhythm and tempo, finger strength, the notes on the low E
+   and A strings). Display only: a game's key, saves and screen do not depend
+   on where it sits. Each GAMES_META key is in exactly one group, in the order
+   shown; a new game goes in one of these lists (checks.mjs 1ei fails until it
+   does). The `fold` group is "More games": a <details> that opens closed on
+   every visit to the Games page (openGamesScreen resets gamesMoreOpen) and
+   stores nothing. Within one visit it stays as the student left it, so "All
+   games" from a game in it comes back to it open. Opening a game never needs
+   the fold: gamesShow(key) works from anywhere. */
+const GAMES_GROUPS = [
+  { key:'chords',  headKey:'games.hub.groupChords',  games:['power', 'cc'] },
+  { key:'rhythm',  headKey:'games.hub.groupRhythm',  games:['radar', 'strum', 'patterndet'] },
+  { key:'fingers', headKey:'games.hub.groupFingers', games:['fingergym'] },
+  { key:'notes',   headKey:'games.hub.groupNotes',   games:['noterunner', 'fret', 'fretzap'] },
+  { key:'more',    headKey:'games.hub.groupMore',    fold:true,
+    games:['roulette', 'simonguitar', 'simon', 'tuningsim', 'runner', 'blitz', 'detective', 'riffid', 'buildchord'] },
+];
+let gamesMoreOpen = false;
+function gamesOnMoreToggle(details){ gamesMoreOpen = details.open; }
+/* The hub's headings and card grids, from GAMES_GROUPS. `card` draws one
+   GAMES_META row. One heading markup for every group: the fold's heading sits
+   INSIDE its <summary> (as the Completed fold's module name does, check 1da),
+   because a heading role ON the summary would hide the control. */
+function gamesHubGroupsHtml(card){
+  const head = label => `<span class="games-section-head" role="heading" aria-level="3">${label}</span>`;
+  return GAMES_GROUPS.map(gr => {
+    const list = gr.games.map(k => GAMES_META.find(g => g.key === k)).filter(Boolean);
+    const grid = `<div class="games-grid">${list.map(card).join('')}</div>`;
+    if (gr.fold){
+      return `<details class="games-more" data-group="${gr.key}" ${gamesMoreOpen ? 'open' : ''} ontoggle="gamesOnMoreToggle(this)">
+       <summary class="games-more-summary">${head(t(gr.headKey, { n: list.length }))}</summary>
+       ${grid}
+     </details>`;
+    }
+    return `<div class="games-group" data-group="${gr.key}">${head(t(gr.headKey))}${grid}</div>`;
+  }).join('');
+}
 
 /* Card chip for a game's best score. Prefers the all-time best persisted in
    the student's progress doc ("best") over this browser session's high
@@ -730,16 +771,12 @@ function gamesRenderHub(p){
          <span class="games-card-ico">${g.ico}</span>
          <span class="games-card-title">${t(g.titleKey)}</span>
          <span class="games-card-desc">${t(g.descKey)}</span>
-         ${chips[g.key] || ''}
+         <span class="games-card-foot"><span class="games-card-need${g.guitar ? ' games-card-need--guitar' : ''}">${g.guitar ? '&#x1F3B8; ' + t('games.hub.sectionGuitar') : t('games.hub.sectionNoGuitar')}</span>${chips[g.key] || ''}</span>
        </button>`;
-  const section = (label, list) =>
-    `<div class="games-section-head" role="heading" aria-level="3">${label}</div>
-     <div class="games-grid">${list.map(card).join('')}</div>`;
   p.innerHTML =
     `<div class="games-tagline">${t('games.hub.tagline')}</div>
      ${gamesMetaBarHtml()}
-     ${section('&#x1F3B8; ' + t('games.hub.sectionGuitar'), GAMES_META.filter(g=>g.guitar))}
-     ${section('&#x1F5B1;&#xFE0F; ' + t('games.hub.sectionNoGuitar'), GAMES_META.filter(g=>!g.guitar))}
+     ${gamesHubGroupsHtml(card)}
      ${coachFootHtml()}`;
 }
 

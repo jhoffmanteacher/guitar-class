@@ -6731,6 +6731,81 @@ function checkSiteFill() {
   if (!bad) ok(`1df: the factor is 1 at 1366x657, 1366x768, 1280x720 and 390x844 (nothing set), about 1.874 at 2560x1300 (root zoomed, the short-screen rule rewritten, page pixels for the script), 1 to 3 over 26,474 sizes; print, resize, browser zoom, the console (it fills too) and odd pages; wired in the <head> of index.html and the ${journeys.length} Song Journey pages; no bare viewport unit in the 3 stylesheets (${asserts} assertions)`);
 }
 
+/* 1ei. The Games page is grouped by what each game teaches (Jonathan, 2026-11-14): chord switching, rhythm and
+   tempo, finger strength, the notes on the low E and A strings, then the other games in a closed "More games".
+   The table is GAMES_GROUPS in coach-hub.js. The real GAMES_META, GAMES_GROUPS and gamesHubGroupsHtml are RUN
+   here (a VM, t() returns the key): every GAMES_META key is in exactly one group (a new game with no group fails
+   and says where to add it), no group names a game that does not exist, the five group keys in their order, the
+   fold is the last group, the page's first card is Power Chord Switch, the cards come out in the table's order
+   and count, five level-3 headings, and "More games" renders closed with its count. Source pins: openGamesScreen
+   closes it before drawing the hub (every visit), gamesRenderHub draws from gamesHubGroupsHtml, each card shows
+   the guitar / no-guitar mark from its `guitar` flag, the fold stores nothing, and the five headings are in
+   i18n.js in both languages. tools/smoke.mjs opens the fold and a game in it for real. */
+const GAMES_GROUP_KEYS = ['chords', 'rhythm', 'fingers', 'notes', 'more'];
+function checkGamesGroups() {
+  head('1ei. Games page groups: every game in one group, Power Chord Switch first, "More games" closed');
+  let bad = 0;
+  const flag = m => { err(`1ei: ${m}`); problems++; bad++; };
+  let src = '';
+  try { src = readFileSync(join(ROOT, 'coach-hub.js'), 'utf8'); } catch { flag('coach-hub.js is missing'); return; }
+  const start = src.indexOf('const gIco =');
+  const fnAt = src.search(/function\s+gamesHubGroupsHtml\s*\(/);
+  const body = jsFunctionBody(src, 'gamesHubGroupsHtml');
+  if (start < 0 || fnAt < start || !body) { flag('could not cut gIco … GAMES_META … GAMES_GROUPS … gamesHubGroupsHtml out of coach-hub.js (renamed or moved? this check went blind)'); return; }
+  const cut = src.slice(start, src.indexOf(body, fnAt) + body.length);
+  const box = { t: (k, p) => (p && p.n !== undefined ? `${k}#${p.n}` : k) };
+  let r;
+  try {
+    vm.createContext(box);
+    vm.runInContext(cut + `
+;this.__out = { meta: GAMES_META.map(g => g.key), groups: GAMES_GROUPS.map(g => ({ key: g.key, fold: !!g.fold, games: g.games.slice(), headKey: g.headKey })),
+  html: gamesHubGroupsHtml(g => '<button class="games-card" data-k="' + g.key + '"></button>'), closedAtLoad: gamesMoreOpen === false };`, box, { filename: 'coach-hub.js (1ei cut)' });
+    r = box.__out;
+  } catch (e) { flag(`the Games page grouping would not run: ${e.message}`); return; }
+  const where = {};
+  for (const g of r.groups) for (const k of g.games) (where[k] = where[k] || []).push(g.key);
+  for (const k of r.meta) {
+    if (!where[k]) flag(`game '${k}' is in GAMES_META but in no group: add it to the grouping table GAMES_GROUPS in coach-hub.js, under the heading that says what it teaches (or in 'more')`);
+    else if (where[k].length > 1) flag(`game '${k}' is in ${where[k].length} groups (${where[k].join(', ')}): each game sits in exactly one`);
+  }
+  for (const k of Object.keys(where)) if (!r.meta.includes(k)) flag(`GAMES_GROUPS names '${k}', which is not a GAMES_META key`);
+  const keys = r.groups.map(g => g.key);
+  if (keys.join(',') !== GAMES_GROUP_KEYS.join(',')) flag(`the groups are [${keys.join(', ')}]; Jonathan's grouping is [${GAMES_GROUP_KEYS.join(', ')}] in that order (2026-11-14)`);
+  const folds = r.groups.filter(g => g.fold).map(g => g.key);
+  if (folds.join() !== 'more' || keys[keys.length - 1] !== 'more') flag(`"More games" ('more') must be the one fold and the last group (folds: [${folds.join(', ')}])`);
+  const order = [...r.html.matchAll(/data-k="([^"]+)"/g)].map(m => m[1]);
+  const want = r.groups.flatMap(g => g.games);
+  if (order[0] !== 'power') flag(`the first card on the Games page is '${order[0]}'; Power Chord Switch ('power') is first (Jonathan, 2026-11-04)`);
+  if (order.join() !== want.join() || order.length !== r.meta.length) flag(`the page draws ${order.length} cards [${order.join(', ')}]; the table has ${want.length} and GAMES_META ${r.meta.length}`);
+  const heads = [...r.html.matchAll(/<(\w+) class="games-section-head" role="heading" aria-level="3">([^<]*)</g)].map(m => m[2]);
+  const wantHeads = r.groups.map(g => g.fold ? `${g.headKey}#${g.games.length}` : g.headKey);
+  if (heads.join() !== wantHeads.join()) flag(`the headings drawn are [${heads.join(', ')}]; want one level-3 heading per group [${wantHeads.join(', ')}] (the fold's with its count)`);
+  const det = r.html.match(/<details\b[^>]*>/g) || [];
+  if (det.length !== 1) flag(`${det.length} <details> on the Games page; want exactly one, "More games"`);
+  else if (/\sopen(\s|>|=)/.test(det[0]) || !r.closedAtLoad) flag(`"More games" renders open (${det[0]}); it opens closed on every visit`);
+  const fold = r.html.match(/<details\b[\s\S]*?<\/details>/);
+  if (fold && !/<summary class="games-more-summary"><span class="games-section-head" role="heading" aria-level="3">/.test(fold[0])) flag('"More games" heading must sit INSIDE its <summary> (a heading role on the summary hides the control)');
+  const foldGames = r.groups.find(g => g.fold);
+  if (fold && foldGames && [...fold[0].matchAll(/data-k="([^"]+)"/g)].map(m => m[1]).join() !== foldGames.games.join()) flag('the cards inside "More games" are not the fold group\'s games');
+  /* Source pins: the rest of the wiring. */
+  const open = jsFunctionBody(src, 'openGamesScreen') || '';
+  if (!/gamesMoreOpen\s*=\s*false;[^]*?gamesShow\('hub'\)/.test(open)) flag('openGamesScreen must set gamesMoreOpen = false before gamesShow(\'hub\'): "More games" opens closed on every visit');
+  const hub = jsFunctionBody(src, 'gamesRenderHub') || '';
+  if (!/\$\{gamesHubGroupsHtml\(card\)\}/.test(hub)) flag('gamesRenderHub no longer draws the cards through gamesHubGroupsHtml(card)');
+  if (/GAMES_META\.filter\(\s*g\s*=>\s*!?g\.guitar\s*\)/.test(hub)) flag('gamesRenderHub still splits the page by the guitar flag (the two old sections)');
+  if (!/games-card-need[^`]*\$\{g\.guitar \?[^}]*t\('games\.hub\.sectionGuitar'\) : t\('games\.hub\.sectionNoGuitar'\)\}/.test(hub)) flag('each card must show the guitar / no-guitar mark from g.guitar (games-card-need, games.hub.sectionGuitar / sectionNoGuitar)');
+  const toggle = jsFunctionBody(src, 'gamesOnMoreToggle') || '';
+  if (!toggle || /Storage|save[A-Z(]|progress|currentUser/.test(toggle + body)) flag('"More games" must store nothing: gamesOnMoreToggle and gamesHubGroupsHtml touch no storage, save or progress');
+  let i18n = '';
+  try { i18n = readFileSync(join(ROOT, 'i18n.js'), 'utf8'); } catch { flag('i18n.js is missing'); }
+  for (const g of r.groups) {
+    const m = i18n.match(new RegExp(`'${g.headKey.replace(/\./g, '\\.')}':\\s*\\{\\s*en:\\s*'([^']*)',\\s*es:\\s*'([^']*)'`));
+    if (!m || !m[1] || !m[2]) flag(`${g.headKey} needs both en and es in i18n.js`);
+    else if (g.fold && !(m[1].includes('{n}') && m[2].includes('{n}'))) flag(`${g.headKey} must show the count ({n}) in both languages`);
+  }
+  if (!bad) ok(`1ei: ${r.meta.length} of ${r.meta.length} games in exactly one of ${r.groups.length} groups [${keys.join(', ')}], first card power, ${order.length} cards in table order, ${heads.length} level-3 headings, "More games (${foldGames.games.length})" closed, stores nothing`);
+}
+
 /* 1da. Title boxes are headings for screen readers (2026-11-13, research 2 item 1). Most screen-reader users
    move through a page by its headings, and the site drew its titles as styled <div>/<span> boxes. They keep
    their tag and class (nothing looks different) and carry role="heading" aria-level="N": the header's <h1>
@@ -19452,6 +19527,7 @@ function checkPracticeMinutes(i18nTable) {
   checkPartSizes();
   checkReviewLabels();
   checkTitleHeadings();
+  checkGamesGroups();
   checkSignInAccountChooser();
   checkPracticeCopy();
   if (!SKIP_LINKS) await checkLinks();
