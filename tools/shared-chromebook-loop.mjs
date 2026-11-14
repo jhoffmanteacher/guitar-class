@@ -174,6 +174,13 @@
         keys after the device signed B in). The pm:* keys follow Firebase's user by design (boot.js PM_HOST.user
         reads auth.currentUser), so for them only the seconds are judged.
      R7 Nothing the site runs throws, and no promise is left rejected with nobody to handle it.
+     R8 The not-saved notice tells the truth, and its way out works (2026-11-14, plant-a-fault 35b9beeca7 and
+        a378a132d1: R1 takes "told" as a pass, so a FALSE notice, and a "Sign out anyway" that did nothing, passed).
+        (a) No notice when nothing was left to save: one that came up while the device was still signed in as the
+        student, after that page's progress read had succeeded (nothing held back), with every progress write the
+        page had issued already LANDED and every action of the student on that page carried by one of those landed
+        writes (issued at or after it), fails. Any other notice may be true and is not judged. (b) "Sign out anyway"
+        signs the device out (or someone else is signed in) within 5 s of the click.
 
    THE FAMILIES (--list): last-action (A's last action of 8 kinds right before Sign out, network up / slow /
    refused once / offline / stalled; the student who sees the not-saved notice either takes "Sign out anyway" or
@@ -198,6 +205,9 @@
    flush before Sign out (R1); flushOnHide that no longer sends (R1, no longer absorbed by K-TAB); an unscoped
    gc-draft key showing the last typed answer to the next student (R4: the value read and the markup); the next
    student's Google popup pre-filled with the last student's email (R4: the popup parameters).
+   R8 (2026-11-14, plant-a-fault on 5a92ab1, each red): flushSave never clears _flushP after a save lands (R8 a:
+   every Sign out says "Not saved yet"); signOut leaves _signOutBusy set after showing the notice (R8 b: "Sign out
+   anyway" does nothing).
 
    NOT COVERED (stated limits). Leak channels the stub DOM does not see: canvas and SVG drawn by script, CSS
    content, the clipboard, IndexedDB and Cache Storage, cookies, the browser's own autofill and history, anything
@@ -1263,6 +1273,7 @@ function buildWorld(sc){
   world.snapListeners = [];
   world.authHistory = [];
   world.issuedLog = [];
+  world.anyway = [];
   world.sc = sc;
   world.ledger = [];
   world.firstScreens = [];
@@ -1372,6 +1383,7 @@ function hands(world, dev, sc){
           await world.sleep(1500);
           if (choice === 'anyway' || attempt >= 2){
             world.log(`${P.key} takes "Sign out anyway"`);
+            if (page.alive) world.anyway.push({ page: page.id, at: world.now, uid: P.uid, who: P.key, button: !!(n.go && n.go.onclick) });
             if (n.go && n.go.onclick) callSite(page, () => n.go.onclick());
             await world.waitFor(() => !dev.authUser || dev.authUser.uid !== P.uid, 10000, 100);
             break;
@@ -2031,9 +2043,38 @@ function oracle(sc, world, dev){
       if (e.siteUid && e.siteUid !== Q.uid) fail('R6', `${e.page} ${e.op === 'set' ? 'wrote' : 'removed'} localStorage "${e.k}" (${k}'s key) while that page showed ${uidOwner[e.siteUid] || e.siteUid}, at ${rel(e.at)}`);
     }
   }
+  /* R8 (a): a not-saved notice with nothing left to save. Judged only when the oracle can see that everything was
+     saved: the device was still signed in as that student, the page's last progress read before the notice had
+     succeeded (no categories held back after a failed load), every progress write the page had issued before the
+     notice had LANDED by then, and every action the student took on that page was carried by one of those landed
+     writes (issued at or after the action). Any other notice may be true and is not judged. */
+  let r8Anyway = 0;
+  {
+    const landedKey = new Map();
+    for (const w of world.writes) if (w.ok){ const k = w.page + '|' + w.issuedAt + '|' + canon(w.items.map(it => it.path)); landedKey.set(k, Math.min(landedKey.get(k) ?? Infinity, w.at)); }
+    for (const page of world.allPages) for (const n of page.notices){
+      const uid = authUidAt(world, n.at);
+      const who = uid && uidOwner[uid];
+      if (!who) continue;
+      const pr = (page.reads['progress/' + uid] || []).filter(x => x.at <= n.at).pop();
+      if (!pr || !pr.ok) continue;
+      const issued = world.issuedLog.filter(w => w.page === page.id && w.at <= n.at && w.items.some(it => it.path.startsWith('progress/')));
+      const landed = issued.filter(w => (landedKey.get(w.page + '|' + w.at + '|' + canon(w.items.map(it => it.path))) ?? Infinity) <= n.at);
+      if (landed.length !== issued.length) continue;
+      const acts = world.ledger.filter(a => a.page === page.id && a.who === who && a.t <= n.at);
+      if (!acts.every(a => landed.some(w => w.at >= a.t && w.items.some(it => it.path === 'progress/' + uid && carriesAction(it.data, a))))) continue;
+      fail('R8', `${page.id} showed the NOT-SAVED notice to ${who} at ${rel(n.at)} with nothing left to save (${landed.length} progress write(s) issued, all landed; ${acts.length} action(s), all carried)`);
+    }
+    /* R8 (b): "Sign out anyway" signs the device out (or someone else is signed in) within 5 s of the click. */
+    for (const c of world.anyway){
+      r8Anyway++;
+      const out = authUidAt(world, c.at) !== c.uid || world.authHistory.some(h => h.at >= c.at && h.at <= c.at + 5000 && h.uid !== c.uid);
+      if (!out) fail('R8', `${c.who} took "Sign out anyway" on ${c.page} at ${rel(c.at)}${c.button ? '' : ' (the notice had no such button)'} and the device was still signed in as ${c.who} 5 s later`);
+    }
+  }
   /* R7 */
   for (const f of world.siteFaults.slice(0, 4)) fail('R7', f);
-  return { fails: dedupe(fails), known: dedupe(known), compared, writesChecked, issuedChecked, screens, actionsLanded, actionsTold, actionsLost, pmSeconds, crossRefused, crossUnsent };
+  return { fails: dedupe(fails), known: dedupe(known), r8Anyway, compared, writesChecked, issuedChecked, screens, actionsLanded, actionsTold, actionsLost, pmSeconds, crossRefused, crossUnsent };
 }
 function dedupe(fails){ const seen = new Set(); return fails.filter(f => { const k = f.rule + f.msg; if (seen.has(k)) return false; seen.add(k); return true; }); }
 /* A rep's `last` is the action's millisecond; the site stamps Date.now() when its handler runs (the same virtual
@@ -2217,7 +2258,7 @@ async function main(){
   const N = Number(opt('cases', 120));
   const idxs = single != null ? [Number(single)] : Array.from({ length: N }, (_, i) => i);
   const fams = {};
-  const tot = { compared: 0, writesChecked: 0, screens: 0, landed: 0, told: 0, lost: 0, issued: 0, landedW: 0, refusedRules: 0, refusedServer: 0, lostPage: 0, lostUnload: 0, pages: 0, reloads: 0, reads: 0, readsFailed: 0, notices: 0, ledger: 0, crossRefused: 0, crossUnsent: 0, issuedChecked: 0, unloadSent: 0, unloadCases: 0 };
+  const tot = { compared: 0, writesChecked: 0, screens: 0, landed: 0, told: 0, lost: 0, issued: 0, landedW: 0, refusedRules: 0, refusedServer: 0, lostPage: 0, lostUnload: 0, pages: 0, reloads: 0, reads: 0, readsFailed: 0, notices: 0, ledger: 0, crossRefused: 0, crossUnsent: 0, issuedChecked: 0, unloadSent: 0, unloadCases: 0, r8Anyway: 0 };
   const json = [];
   const knownHits = {}, knownCases = new Set();
   let failed = 0;
@@ -2235,7 +2276,7 @@ async function main(){
     const what = `${famName}, last action ${sc.actionKind}, network ${sc.net}`;
     for (const k of res.known){ knownHits[k.id] = (knownHits[k.id] || 0) + 1; knownCases.add(idx); console.log(`~ known ${k.id}, listed ${KNOWN.find(x => x.id === k.id).listed}: case ${idx} (seed ${BASE_SEED}, ${what}): ${k.msg}`); }
     tot.crossRefused += res.crossRefused.length; tot.crossUnsent += res.crossUnsent.length; tot.issuedChecked += res.issuedChecked;
-    tot.unloadSent += world.stats.unloadSent || 0; if (sc.unloadDelivered) tot.unloadCases++;
+    tot.r8Anyway += res.r8Anyway; tot.unloadSent += world.stats.unloadSent || 0; if (sc.unloadDelivered) tot.unloadCases++;
     if (res.crossRefused.length) console.log(`~ case ${idx} (seed ${BASE_SEED}, ${what}): ${res.crossRefused.length} write${res.crossRefused.length > 1 ? 's' : ''} refused by the rules for going out under the wrong sign-in: ${res.crossRefused.slice(0, 2).join('; ')}`);
     if (res.fails.length){
       failed++; f.fail++;
@@ -2263,7 +2304,7 @@ async function main(){
   }
   console.log(`  ${tot.ledger} actions by the students: ${tot.landed} landed in their own doc, ${tot.told} told "not saved" and not landed, ${tot.lost} lost without a word`);
   console.log(`  ${tot.screens} first screens read (state, markup, sessionStorage, localStorage reads and values); ${tot.compared} records and values compared; ${tot.writesChecked} sent and ${tot.issuedChecked} never-sent student writes checked for target and markers`);
-  console.log(`  ${tot.pages} page loads, ${tot.reloads} reloads; writes (a batch counts once): ${tot.issued} issued, ${tot.landedW} landed, ${tot.refusedRules} refused by the rules (${tot.crossRefused} of them for going out under the wrong sign-in), ${tot.refusedServer} refused by the server, ${tot.lostPage} lost with their page, ${tot.lostUnload} started while unloading and lost, ${tot.unloadSent} started while unloading and let through (${tot.unloadCases} cases deliver unload writes); ${tot.crossUnsent} never-sent writes issued under another sign-in or none (a page already told "signed out"); ${tot.reads} reads (${tot.readsFailed} failed); ${tot.notices} not-saved notices shown`);
+  console.log(`  ${tot.pages} page loads, ${tot.reloads} reloads; writes (a batch counts once): ${tot.issued} issued, ${tot.landedW} landed, ${tot.refusedRules} refused by the rules (${tot.crossRefused} of them for going out under the wrong sign-in), ${tot.refusedServer} refused by the server, ${tot.lostPage} lost with their page, ${tot.lostUnload} started while unloading and lost, ${tot.unloadSent} started while unloading and let through (${tot.unloadCases} cases deliver unload writes); ${tot.crossUnsent} never-sent writes issued under another sign-in or none (a page already told "signed out"); ${tot.reads} reads (${tot.readsFailed} failed); ${tot.notices} not-saved notices shown, each read for whether anything was left to save (R8); ${tot.r8Anyway} "Sign out anyway" clicks, each followed to the sign-out`);
   console.error(`shared-chromebook-loop: ${((Date.now() - t0) / 1000).toFixed(1)} s`);
   if (opt('json', null)) writeFileSync(opt('json'), JSON.stringify(json, null, 1));
   return failed ? 1 : 0;
