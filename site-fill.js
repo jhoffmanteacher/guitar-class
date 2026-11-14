@@ -57,8 +57,6 @@
   window.siteFill = function(){ return cur; };
   var root = document.documentElement;
   if(!root || !root.style || typeof root.style.setProperty !== 'function') return;
-  // The teacher console keeps its own size until the console part of this work order.
-  if(/[?&]teacher(=|&|$)/.test(location.search)) return;
 
   /* The window's own numbers, read before pagePixels replaces them. */
   var nativeGet = function(obj, name){

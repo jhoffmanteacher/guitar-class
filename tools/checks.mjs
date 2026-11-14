@@ -6604,7 +6604,9 @@ function checkSiteFill() {
       want(cb.props.size === 0, `a ${w}x${h} page in a ${ow}-wide window (a Chromebook at browser zoom) must set nothing, but it set ${JSON.stringify([...cb.props])}`);
     }
     // The console keeps its size in this part; odd pages do not throw.
-    want(boot(2560, 1300, { search: '?teacher=true' }).props.size === 0, 'the teacher console (?teacher) must keep factor 1 until the console part of the work order');
+    // The teacher console fills a big screen too (Part 3, 2026-11-13): no opt-out for ?teacher.
+    const tc = boot(2560, 1300, { search: '?teacher=true' });
+    want(Math.abs(+tc.props.get('zoom') - 2560 / 1366) < 0.001, `the teacher console (?teacher) must fill a big screen like the student site (zoom about 1.874 at 2560x1300), got ${tc.props.get('zoom')}`);
     let threw = null;
     try { boot(2560, 1300, { oddStyle: true }); boot(2560, 1300, { noMatchMedia: true }); } catch (e) { threw = e.message; }
     want(threw === null, `site-fill.js must not throw on a page with odd root styles or no matchMedia: ${threw}`);
@@ -6624,7 +6626,7 @@ function checkSiteFill() {
   });
   want(!bare.length, `every viewport unit in styles.css, tabs/journey-theme.css and tabs/fab-tools.css must be divided by var(--site-fill,1) (the root zoom enlarges it already): ${bare.slice(0, 6).join(', ')}${bare.length > 6 ? ' …' : ''}`);
   if (asserts !== FILL_ASSERTS) flag(`ran ${asserts} assertions, pinned ${FILL_ASSERTS} — a branch stopped running (or update the pin with the change)`);
-  if (!bad) ok(`1df: the factor is 1 at 1366x657, 1366x768, 1280x720 and 390x844 (nothing set), about 1.874 at 2560x1300 (root zoomed, the short-screen rule rewritten, page pixels for the script), 1 to 3 over 26,474 sizes; print, resize, browser zoom, the console and odd pages; wired in the <head> of index.html and the ${journeys.length} Song Journey pages; no bare viewport unit in the 3 stylesheets (${asserts} assertions)`);
+  if (!bad) ok(`1df: the factor is 1 at 1366x657, 1366x768, 1280x720 and 390x844 (nothing set), about 1.874 at 2560x1300 (root zoomed, the short-screen rule rewritten, page pixels for the script), 1 to 3 over 26,474 sizes; print, resize, browser zoom, the console (it fills too) and odd pages; wired in the <head> of index.html and the ${journeys.length} Song Journey pages; no bare viewport unit in the 3 stylesheets (${asserts} assertions)`);
 }
 
 function checkPrecacheFingerprinted(src, hashed) {
