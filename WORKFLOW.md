@@ -383,6 +383,30 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-13 — "Since your last visit": a catch-up group for a returning student; console "Behind the class". Fast.**
+      Jonathan's choices from the mock-ups: today's activity stays first; "no saved work stands in as an absence";
+      "the most recent activities should be on top"; never the word "absent" (the site has no attendance). In the
+      In-Class Activities list, under Today's activity: the visible, required, not-done cards released on class
+      days (board dates) after the student's last day with saved work (a `minutes/{uid}/days` record, looked for 14
+      days back) and before today, when two or more class days were missed; newest first, Start on the top one.
+      Display only: `caIsVisible` / `caBlockers` / `caBoardOrder` / the gate are untouched (`visible-loop` equals the
+      base); nothing missed = today's page byte for byte (16 of 16). CAS students never get the group. Console,
+      Students: Show Everyone / Behind the class (3 or more required activities not done that came out before
+      yesterday). `checks.mjs` 1ds (14 break-its). **Not shipped yet:** "Back from an absence" in the console needs
+      one rules line (the teacher reads `minutes/{uid}/days`), commit `7736beb` on `feat/catch-up`, waiting for the
+      combined paste. Dropped the same day: the "Today's practice" card ("i don't think i want" it).
+- [x] **2026-11-13 — A recipe for a new Play Along song from an mp3 (skill `new-playalong`). Fast.** Jonathan: "i
+      upload a mp3 and ask claudecode to make one, is there a mechanism … to do this more easily?" One sentence
+      from him (song, artist, mp3 path, chords, level, which part) → `tools/playalong-measure.py` (tuning, steady
+      beat, meter evidence, beat 1, the anchor) → a short spec → `tools/new-playalong.mjs` (the two mp3s, the track
+      entry, the card with both chord forms, the pins, a changelog draft) → `loudness.py`, `beat-audit.py`, the
+      checks, `playalong-loop.mjs --only <id> --shots`. Proven by rebuilding Perdón Mamá (ca-51): 71 of 71 chord
+      objects identical, the anchor 11 ms from the shipped one on all 113 bars, 0 mismatches in 5,154 places. Its
+      stop conditions come from the six earlier play-alongs' mistakes (wrong meter, an anchor on a silent lead-in,
+      an invented chord, a swapped title, no levelling, no changelog). **Audio still goes in the public `audio/`
+      folder**; 26 of its files are record-derived. He chose the same day to move those and all new songs behind
+      the sign-in (plan: `Claude outputs/PLAN-private-song-audio-2026-11-13.md`; free database, a monthly limit).
+
 - [x] **2026-11-13 — The big-screen fill, Part 3: the teacher console and the live-game stage; the work order is done (`docs/WORK-ORDER-fill-big-screens.md`, now deleted). Fast.**
       `site-fill.js` no longer opts the console (`?teacher`) out: the whole console grows on a big screen like the
       student site, and the live-game stage with it. **Jonathan's choice (2026-11-13, asked with the before/after
