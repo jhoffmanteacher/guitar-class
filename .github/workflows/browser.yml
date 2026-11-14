@@ -9,6 +9,8 @@
 # (and each when its own tool file, or this workflow, or tools/ci/ changed).
 # The full walk in both languages runs on a schedule (Friday evenings, see on:) and as a
 # manual run: Actions -> Browser tests -> Run workflow -> "full".
+# A sixth job runs the accessibility scan (smoke area a11y) in English,
+# report-only, and keeps its findings as an artifact every run (see the job).
 #
 # Nothing here blocks a push or the Pages deploy (that is GitHub's separate
 # "pages build and deployment" run); a red run means "look at the last push".
@@ -220,6 +222,53 @@ jobs:
           path: ${{ runner.temp }}/ci-out/
           if-no-files-found: warn
           retention-days: 14
+
+  # The accessibility scan (tools/smoke.mjs area a11y, 2026-11-13), English, REPORT-ONLY: its findings never fail
+  # this job; a setup failure does (the axe file refused, a scan that returned nothing, a screen that is not the
+  # one it claims). Its JSON is kept every run, so a week of Linux runs can be read against tools/a11y-baseline.json
+  # (made on the Mac). The ratchet (A11Y_RATCHET in smoke.mjs) is switched on only after one week of these runs
+  # print no "would fail" line; the planned 2026-11-27 depends on that week.
+  a11y:
+    name: a11y scan (English, report-only)
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.full) }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    concurrency:
+      group: browser-a11y-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Let Chrome use its sandbox
+        run: if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns; fi
+      - uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
+        id: chrome
+        with:
+          chrome-version: ${{ env.CHROME_VERSION }}
+          install-dependencies: true
+      - name: Chrome starts
+        timeout-minutes: 3
+        env:
+          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          node tools/ci/run-and-annotate.mjs --title "Chrome start" --log "$RUNNER_TEMP/ci-out/chrome-start.log" --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
+      - name: node tools/smoke.mjs --en-only --only a11y
+        env:
+          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+        run: |
+          node tools/ci/run-and-annotate.mjs --title "a11y scan" --log "$RUNNER_TEMP/ci-out/a11y.log" --summary '^(smoke: (✓|✗)|a11y: [0-9]+ rules|a11y: against the baseline)' --deadline 25 -- node tools/smoke.mjs --en-only --only a11y --a11y-out "$RUNNER_TEMP/ci-out/a11y.json"
+      - name: Keep the findings
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: a11y
+          path: ${{ runner.temp }}/ci-out/
+          if-no-files-found: warn
+          retention-days: 30
 
   # The slow lane. A newer push does NOT cancel a run already going: it may be
   # the only run that saw a change to the files it guards. (A newer push still
