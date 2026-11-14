@@ -85,17 +85,17 @@
  "SWITCH_READS": {
   "DAILY5_ENABLED": {
    "value": [
-    "ab874bb8b0be"
+    "0be385463dea"
    ],
-   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "why": "review round 3 (m3): a switch read is now pinned with its whole innermost function",
    "date": "2026-11-13"
   },
   "TAKE_TO_SONG_ENABLED": {
    "value": [
-    "f8bf986b2c1d",
-    "65a27aa21291"
+    "af2138af3387",
+    "371764437ed2"
    ],
-   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
+   "why": "review round 3 (m3): a switch read is now pinned with its whole innermost function",
    "date": "2026-11-13"
   }
  },

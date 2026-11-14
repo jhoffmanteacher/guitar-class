@@ -37,9 +37,13 @@ while read -r local_ref local_sha _remote_ref _remote_sha; do
   case "$local_sha" in
     *[!0]*)
       deleting_only=0
-      # The checks below read this checkout's files, so they only speak for what is pushed when the
-      # pushed commit IS the checked-out one.
-      [ "$local_sha" != "$HEAD_SHA" ] && not_head="$not_head $local_ref ($local_sha)"
+      # The checks below read this checkout's files, so they only speak for a pushed BRANCH when its tip IS the
+      # checked-out commit. A tag (the Friday check's `git push origin friday-check-<date>`) passes through.
+      case "$local_ref" in
+        refs/heads/*|HEAD)
+          [ "$(git rev-parse "$local_sha^{commit}" 2>/dev/null)" != "$HEAD_SHA" ] && not_head="$not_head $local_ref ($local_sha)"
+          ;;
+      esac
       ;;
   esac
 done
@@ -50,7 +54,16 @@ if [ -n "$not_head" ]; then
   printf '\033[31m✗ pre-push: this push sends%s, but this checkout is at %s; the checks read the checked-out files, so they would vouch for the wrong commit. Check out the commit you push (or push HEAD), then push again.\033[0m\n' "$not_head" "$HEAD_SHA"
   exit 1
 fi
-printf 'pre-push: checking this checkout, at %s (the commit being pushed)%s\n' "$HEAD_SHA" "$( [ -n "$(git status --porcelain --untracked-files=no)" ] && echo ', plus uncommitted edits' )"
+# The push sends the COMMIT; the checks read the files. Tracked files that differ from HEAD would make the
+# checks vouch for something that is not being pushed (untracked files do not count).
+if ! git diff --quiet HEAD -- 2>/dev/null; then
+  printf '\033[31m✗ pre-push: tracked files differ from the commit being pushed (%s):\033[0m\n' "$HEAD_SHA"
+  git diff --name-only HEAD -- | sed 's/^/    /' | head -20
+  printf '  The checks read these files but the push sends the commit, so they would vouch for the wrong thing.\n'
+  printf '  Commit or stash them first (after the full node tools/checks.mjs, commit the sw.js it rewrote), then push again.\n'
+  exit 1
+fi
+printf 'pre-push: checking this checkout, at %s (the commit being pushed; no uncommitted changes to tracked files)\n' "$HEAD_SHA"
 
 # Same node resolution as .githooks/pre-commit — Git Bash on Windows doesn't
 # inherit the PATH entry the Node installer adds for cmd/PowerShell, so PATH
