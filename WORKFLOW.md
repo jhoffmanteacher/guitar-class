@@ -383,6 +383,17 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-13 — The big-screen fill, Part 2: the six Song Journey pages (`docs/WORK-ORDER-fill-big-screens.md`). Fast.**
+      Each of `tabs/*.html` loads `../site-fill.js` as a plain script in `<head>` after `journey-theme.css` and
+      `fab-tools.css` (the same one copy of the formula as Part 1; `journey-theme.css`'s 2 viewport units were divided
+      in Part 1; `fab-tools.css` has none). No change to `journey.js`, `fab-tools.js`, the player, the click bars or the
+      gate: their pointer and window maths go through site-fill.js's page-pixel view. **Proofs** (headless Chrome, the
+      six pages, at load and with layer 2 open, EN + ES): identical at 1366×657 (3,070 of 3,070 boxes; per page 446 to
+      642) and 390×844 (3,070 of 3,070); at 2560×1300 and 1920×950 0 elements missing and 0 font sizes differ,
+      with the same rounding difference as Part 1 (528 / 648 of 3,070 within 1 px). `checks.mjs` 1df now
+      fails if any of the six pages is not wired, or a viewport unit in `journey-theme.css` / `fab-tools.css` is bare
+      (36 assertions).
+
 - [x] **2026-11-13 — The site fills a big screen the way it fills a Chromebook: Part 1, the student site (`docs/WORK-ORDER-fill-big-screens.md`). Always Reviewed (sw.js lists).**
       Jonathan: "the view should be maximized for whatever monitor is being used"; on a bigger screen "grow everything".
       **`site-fill.js` (new, the one copy of the formula):** s = min(width / 1366, height / 657), 1 to 3, 1 at 760 px

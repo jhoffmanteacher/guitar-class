@@ -6,6 +6,10 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-13 — Song Journey pages fill a big screen too
+
+- **The six Song Journey pages now grow to fill a screen bigger than a Chromebook**, the same way the rest of the site does: the TAB, the text and the tool buttons all get bigger together. On a Chromebook nothing changes.
+
 ## 2026-11-13 — The site fills a big screen
 
 - **On a screen bigger than a Chromebook, the whole page now grows to fill it.** The top bar, the menu, the text, the TAB and the buttons all get bigger together, so the page looks the way it does on a Chromebook, just larger. On a Chromebook nothing changes.
