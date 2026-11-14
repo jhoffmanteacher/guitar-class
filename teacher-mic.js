@@ -86,6 +86,7 @@ async function renderTeacherMic(){
   box.innerHTML = ctl + `<div class="tg-note" style="margin:12px 0 16px"><button class="tp-btn primary" id="t-mic-dl-every" style="flex:none;padding:8px 16px;margin-right:10px" onclick="teacherMicDownloadEverything()">Download everything (${takes.length})</button>
       One click: measures every recording, then saves ONE .zip with each recording's WAV and data plus the results. <b>No names go in the zip:</b> the files are T01, T02… in the order of this table. Nothing is changed or deleted. Then, on the Mac: <code>node tools/mic-sim/takes-in.mjs</code></div>
     <div id="t-mic-every-note"></div>
+    ${teacherMicOldHtml(takes)}
     <div class="t-grid-wrap"><table><thead><tr><th>Take</th><th class="nc">Student</th><th>Period</th><th>Game</th><th>BPM</th><th>Length</th><th>Counted right</th><th>Saved</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
     <div class="tg-note" style="margin-top:16px"><button class="tp-btn" id="t-mic-dl-all" style="flex:none;padding:8px 16px;margin-right:10px" onclick="teacherMicDownloadAll()">Download all (${takes.length})</button>
       One .zip with every recording's WAV and data, named T01, T02… in the order of this table, with no names inside. (The buttons in each row keep the student's name in the file name: those are for your own listening.)</div>
@@ -380,6 +381,102 @@ async function teacherMicDelete(i){
     await ref.delete();
   }catch(e){ alert('Could not delete that recording — check your connection and Firestore rules.'); }
   if(teacherView==='mic') renderTeacherMic();
+}
+
+/* ── Delete recordings older than 30 days (2026-11-14) ───────────────────
+   The privacy notice (privacy.html) tells students "Your teacher deletes
+   recordings after 30 days", in English and Spanish. This makes that one
+   click. Nothing ever deletes itself: the button below the "Download
+   everything" line is the only trigger.
+   - Age comes from the take's own savedAt (the server time coach-core.js
+     writes with the take). Age in whole days = floor((now - savedAt) / 24 h).
+     A take is OLD when that is MORE than MIC_TAKE_KEEP_DAYS: 31 full days or
+     more. A take 30 days old (up to 30 days 23 h 59 min) or younger is kept.
+   - A take with no readable savedAt (micTakeDate() null) is counted apart as
+     "no saved date" and this button never deletes it (its own row button can).
+   - Each take is deleted in ONE transaction (its chunks, then its doc), after
+     re-reading the doc inside it: if a newer take replaced it meanwhile, it is
+     kept. A failure leaves that take whole and the run goes on; the note says
+     "Deleted X of N; Y failed" and the button can be pressed again.
+   - It never touches micTakesMeta/count, nor anything outside micTakes.
+   Proof: node tools/mic-old-takes-proof.mjs (headless Chrome, stub Firestore).
+   MIC_TAKE_KEEP_DAYS: the privacy notice states the same number (30, EN and
+   ES); checks.mjs 1ec pins the two together, so change both or neither. */
+const MIC_TAKE_KEEP_DAYS = 30;
+const MIC_TAKE_DAY_MS = 24 * 60 * 60 * 1000;
+function micTakeIsOld(saved, now){ return Math.floor((now - saved.getTime()) / MIC_TAKE_DAY_MS) > MIC_TAKE_KEEP_DAYS; }
+/* teacherMicOldNow: the clock the list was sorted with when the view drew, so
+   the line, the button, the confirm and the deletes all name the same takes. */
+let teacherMicOldBusy = false, teacherMicOldMsg = '', teacherMicOldNow = 0;
+/* Sorts the takes into old (deletable), no date, and kept, against one clock. */
+function teacherMicOldSplit(takes, now){
+  const old = [], noDate = [];
+  (takes || []).forEach(d => {
+    const saved = micTakeDate(d);
+    if(!saved || !isFinite(saved.getTime())) noDate.push(d);
+    else if(micTakeIsOld(saved, now)) old.push(d);
+  });
+  return { old, noDate };
+}
+function teacherMicRecs(n){ return n === 1 ? '1 recording' : n + ' recordings'; }
+function teacherMicOldHtml(takes){
+  teacherMicOldNow = Date.now();
+  const { old, noDate } = teacherMicOldSplit(takes, teacherMicOldNow);
+  const n = old.length;
+  const line = n ? `<b>${teacherMicRecs(n)} ${n === 1 ? 'is' : 'are'} older than ${MIC_TAKE_KEEP_DAYS} days.</b>`
+                 : `No recordings are older than ${MIC_TAKE_KEEP_DAYS} days.`;
+  const nd = noDate.length ? ` ${teacherMicRecs(noDate.length)} ${noDate.length === 1 ? 'has' : 'have'} no saved date: this button never deletes ${noDate.length === 1 ? 'it' : 'them'} (use the row’s own Delete).` : '';
+  const btn = n ? `<button class="tp-btn" id="t-mic-old-del" style="flex:none;padding:8px 16px;margin-right:10px" onclick="teacherMicDeleteOld()">Delete ${teacherMicRecs(n)} older than ${MIC_TAKE_KEEP_DAYS} days</button>` : '';
+  const msg = teacherMicOldMsg; teacherMicOldMsg = '';
+  return `<div class="tg-note" id="t-mic-old" style="margin:0 0 12px">${btn}<span id="t-mic-old-line">${line}${nd} Nothing is deleted until you press the button.</span>`+
+    `<div id="t-mic-old-note" role="status">${msg ? escHtml(msg) : ''}</div></div>`;
+}
+async function teacherMicDeleteOld(){
+  if(teacherMicOldBusy) return;
+  const now = teacherMicOldNow || Date.now();
+  const { old, noDate } = teacherMicOldSplit(teacherMicTakes, now);
+  const n = old.length;
+  if(!n) return;
+  const kept = teacherMicTakes.length - n;
+  const keptLine = kept ? `\n\nThe other ${teacherMicRecs(kept)} (${MIC_TAKE_KEEP_DAYS} days old or newer${noDate.length ? ', or with no saved date' : ''}) ${kept === 1 ? 'is' : 'are'} kept.` : '';
+  if(!confirm(`Delete ${teacherMicRecs(n)} older than ${MIC_TAKE_KEEP_DAYS} days? This cannot be undone.${keptLine}`)) return;
+  teacherMicOldBusy = true;
+  const btn = document.getElementById('t-mic-old-del');
+  const note = msg => { const el = document.getElementById('t-mic-old-note'); if(el) el.textContent = msg; };
+  if(btn) btn.disabled = true;
+  let done = 0, failed = 0, skipped = 0;
+  try{ await ensureDb(); }catch(e){}
+  for(let k = 0; k < n; k++){
+    note(`Deleting ${k + 1} of ${n}…`);
+    const d = old[k];
+    try{
+      const ref = db.collection('micTakes').doc(d.id);
+      const chunks = await ref.collection('chunks').get();
+      const r = await db.runTransaction(async tx => {
+        const cur = await tx.get(ref);
+        if(!cur.exists) return 'gone';
+        const saved = micTakeDate(cur.data());
+        if(!saved || !isFinite(saved.getTime()) || !micTakeIsOld(saved, now)) return 'newer';
+        chunks.docs.forEach(c => tx.delete(c.ref));
+        tx.delete(ref);
+        return 'deleted';
+      });
+      if(r === 'newer') skipped++; else done++;
+    }catch(e){ failed++; }
+  }
+  teacherMicOldBusy = false;
+  teacherMicOldMsg = (failed ? `Deleted ${done} of ${n}; ${failed} failed and ${failed === 1 ? 'is' : 'are'} still whole. Check your connection and press the button again.`
+                             : `Deleted ${done} of ${n}.`)
+    + (skipped ? ` ${teacherMicRecs(skipped)} had been replaced by a newer take and ${skipped === 1 ? 'was' : 'were'} kept.` : '');
+  const msg = teacherMicOldMsg;
+  if(teacherView==='mic') await renderTeacherMic();
+  /* The view drew no list (every take gone, or a read error): the result
+     still shows, under whatever it drew. */
+  if(teacherMicOldMsg && teacherView==='mic'){
+    const box = document.getElementById('t-grid-container');
+    if(box) box.insertAdjacentHTML('beforeend', `<div class="tg-note" id="t-mic-old-note" role="status">${escHtml(msg)}</div>`);
+  }
+  teacherMicOldMsg = '';
 }
 
 /* ── Mic recordings: evaluation ─────────────────────────────────────────
