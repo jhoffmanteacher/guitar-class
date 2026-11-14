@@ -238,7 +238,7 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 - [ ] **School accounts: paste 2** (Jonathan, 2026-11-13: only school accounts, or outside accounts he allows, use
   the class data). Done 2026-11-14: Jonathan published Paste A (the allow list `config/access`, the requests
   `accessRequests`, the `songRequests` and `songFiles` blocks, the teacher's read of `minutes/{uid}/days`) and set
-  the allow list in Manage → "Accounts by sign-in domain"; it saved and reads "0 would be locked out". The paste-2
+  the allow list in Manage → "Accounts by sign-in domain"; it saved and reads "0 would be locked out" (his report to the lead, 2026-11-14; nothing in the repo can show either). The paste-2
   text (every class-wide read and student write gated by `isSchool()`) is now `firestore.rules` itself, one file:
   its own second file is deleted, and check `1dt` pins `isSchool()`, its use count and the list of gated rules.
   The ONE remaining step is Jonathan's: paste `firestore.rules` into the Firebase console (Firestore → Rules →

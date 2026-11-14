@@ -17884,17 +17884,27 @@ const SITE_ERRORS_SIM_PIN = 161;
    class-wide documents and writes as a student. The second paste waited in
    its own file until paste-2 day (2026-11-14), when one commit moved it
    into firestore.rules and deleted that file. What this pins now:
-     - isSchool() is defined ONCE and its body is the pinned one
-       (SCHOOL_GATE_BODY: dropping email_verified, or "== true" read as
-       "!= false", fails); pmOwner() is still isSchool() plus the owner;
-     - isSchool() is used SCHOOL_GATE_USES times (a text count);
-     - every allow rule is GATED: each of its "||" alternatives starts with
-       isSchool(), pmOwner(userId), isTeacher() or false (inside "&&", one
-       of those as any part). An allow that some account passes with no
-       gate (if true, request.auth != null, isSignedIn(), the owner check
-       alone) fails, unless it is a stated exception in
-       SCHOOL_GATE_EXCEPTIONS: today only accessRequests' get and create
-       (isSignedIn(): the one door for an account that is not let in);
+     - the four gate functions are each defined ONCE in the whole file (a
+       second one, or one inside a block that shadows it, fails) and each
+       body is the pinned one: isSchool() (SCHOOL_GATE_BODY: dropping
+       email_verified, or "== true" read as "!= false", fails), isTeacher()
+       (TEACHER_GATE_BODY), isSignedIn() (SIGNED_IN_BODY), and pmOwner()
+       (isSchool() plus the owner);
+     - isSchool() is used SCHOOL_GATE_USES times (outside comments and strings);
+     - every allow rule is GATED. Comments and string literals are taken out
+       first (a quote-aware scan, so a ";" or "//" inside a string changes
+       nothing). An allow with no condition ("allow read;") is open. A
+       condition with a "?" (a ternary) is not read: 1dt fails and says so
+       (fail closed: a rules edit is rare and always reviewed). Otherwise
+       each top-level "||" alternative must have isSchool(),
+       pmOwner(userId), isTeacher() or false as one of its top-level "&&"
+       parts (after taking off outer brackets); with "?" refused and "||"
+       split first, such a part makes the alternative false without it.
+       Anything else (true, request.auth != null, isSignedIn(), a helper
+       1dt does not know, the owner check alone) fails, unless it is a
+       stated exception in SCHOOL_GATE_EXCEPTIONS: today only accessRequests'
+       get and create (isSignedIn(): the one door for an account that is not
+       let in);
      - the list of allow rules a school account passes (SCHOOL_GATED: the
        path and the operations) is exactly the pinned one, so dropping the
        gate from one block, or adding a student block, fails here until it
@@ -17902,10 +17912,17 @@ const SITE_ERRORS_SIM_PIN = 161;
      - no paste-2 file exists, and no tracked file names one (the old
        second-file name, built below from two halves so this file does not
        name it).
+   NOT guarded here: WHO within the class (the owner checks such as
+   request.auth.uid == userId on progress, answers, songRequests and
+   accessRequests), and teacher-only rules (a new or wider isTeacher()
+   rule stays green). Those are held by the emulator tools, rules-core-test
+   and song-requests-rules-test above all, on GitHub after every push.
    The emulator half is the five rules tools (.github/workflows/rules.yml),
    which since 2026-11-14 refuse a rules text without isSchool().
    ════════════════════════════════════════════════════════════════════ */
 const SCHOOL_GATE_USES = 24;   // 6 class-wide reads + 11 student writes (progress counts once: read, write); 2026-11-13 +2: songRequests (a student's create, and the read of their own); 2026-11-14 +5: song files (read the files, read the pieces, read the month's counter, create it, raise it)
+const TEACHER_GATE_BODY = "return request.auth != null && request.auth.token.email == 'jhoffman@seq.org' && request.auth.token.email_verified == true;";
+const SIGNED_IN_BODY = "return request.auth != null;";
 const SCHOOL_GATE_BODY = "return request.auth != null && ((request.auth.token.get('email_verified', false) == true && request.auth.token.get('email', '').lower().matches('^[^@]+@seq[.]org$')) || (exists(/databases/$(database)/documents/config/access) && get(/databases/$(database)/documents/config/access).data.get('allow', {}).get(request.auth.uid, false) == true));";
 /* The allow rules a school account passes, as "path ops" (the path under /databases/{database}/documents). 27 rules. */
 const SCHOOL_GATED = [
@@ -17964,15 +17981,37 @@ function checkRulesSchoolGate() {
     }
   }
   let rules; try { rules = readFileSync(join(ROOT, 'firestore.rules'), 'utf8').replace(/\r\n/g, '\n'); } catch { fail('firestore.rules cannot be read'); return; }
-  const body = rules.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '').replace(/;[ \t]*\/\/.*$/gm, ';');
+  /* One quote-aware pass: comments out (a "//" or "/*" inside a string is text, not a comment), giving two texts of the
+     SAME length: `kept` with the strings as written (for the pinned function bodies) and `blank` with every character
+     inside a string turned into "x" (for everything else: a ";", "?", "{" or "//" in a string can no longer mislead). */
+  let kept = '', blank = '';
+  for (let i = 0, q = null; i < rules.length; i++) {
+    const c = rules[i], d = rules[i + 1];
+    if (q) {
+      if (c === '\\' && i + 1 < rules.length) { kept += c + d; blank += 'xx'; i++; continue; }
+      if (c === q) { q = null; kept += c; blank += c; continue; }
+      kept += c; blank += c === '\n' ? '\n' : 'x'; continue;
+    }
+    if (c === "'" || c === '"') { q = c; kept += c; blank += c; continue; }
+    if (c === '/' && d === '*') { const e = rules.indexOf('*/', i + 2); const n = (e < 0 ? rules.length : e + 2) - i; kept += ' '.repeat(n); blank += ' '.repeat(n); i += n - 1; continue; }
+    if (c === '/' && d === '/') { const e = rules.indexOf('\n', i); const n = (e < 0 ? rules.length : e) - i; kept += ' '.repeat(n); blank += ' '.repeat(n); i += n - 1; continue; }
+    kept += c; blank += c;
+  }
   const closeOf = (t, open) => { let d = 0, k = open; for (; k < t.length; k++) { if (t[k] === '{') d++; else if (t[k] === '}' && !--d) break; } return k; };
-  const fnBody = name => { const re = new RegExp('function ' + name + '\\(([^)]*)\\)\\s*\\{', 'g'); const all = [...body.matchAll(re)]; return all.map(m => { const open = m.index + m[0].length - 1; return body.slice(open + 1, closeOf(body, open)).replace(/\s+/g, ' ').trim(); }); };
-  const sch = fnBody('isSchool');
-  if (sch.length !== 1) { fail(`firestore.rules defines isSchool() ${sch.length} times (exactly once: the school-accounts gate). Without it every student rule is open to any Google account`); return; }
-  if (sch[0] !== SCHOOL_GATE_BODY) fail(`the body of isSchool() is not the pinned one (SCHOOL_GATE_BODY: a verified email, lower case, the anchored @seq.org pattern, OR an allow-list entry that is exactly true behind exists()). Found: ${sch[0].slice(0, 220)}`);
-  const pm = fnBody('pmOwner');
-  if (pm.length !== 1 || pm[0] !== 'return isSchool() && request.auth.uid == userId;') fail(`pmOwner(userId) must be defined once as "return isSchool() && request.auth.uid == userId;" (this check counts it as the gate); found ${JSON.stringify(pm)}`);
-  const uses = (body.match(/isSchool\(\)/g) || []).length - 1;
+  /* Every definition of a function by that name, anywhere (a second one inside a block would shadow the first there). */
+  const fnBody = name => [...blank.matchAll(new RegExp('\\bfunction\\s+' + name + '\\s*\\(([^)]*)\\)\\s*\\{', 'g'))].map(m => { const open = m.index + m[0].length - 1; return kept.slice(open + 1, closeOf(blank, open)).replace(/\s+/g, ' ').trim(); });
+  for (const [name, want, what] of [
+    ['isSchool', SCHOOL_GATE_BODY, 'SCHOOL_GATE_BODY: a verified email, lower case, the anchored @seq.org pattern, OR an allow-list entry that is exactly true behind exists()'],
+    ['isTeacher', TEACHER_GATE_BODY, 'TEACHER_GATE_BODY: signed in, the teacher\'s exact address, email_verified exactly true'],
+    ['isSignedIn', SIGNED_IN_BODY, 'SIGNED_IN_BODY: signed in, nothing more (the accessRequests door)'],
+    ['pmOwner', 'return isSchool() && request.auth.uid == userId;', 'isSchool() plus the owner'],
+  ]) {
+    const all = fnBody(name);
+    if (all.length !== 1) { fail(`firestore.rules defines ${name}() ${all.length} times: exactly once (a second definition, at the top or inside a block, would change what the gate means there)`); continue; }
+    if (all[0] !== want) fail(`the body of ${name}() is not the pinned one (${what}). Found: ${all[0].slice(0, 220)}`);
+  }
+  if (bad) return;
+  const uses = (blank.match(/\bisSchool\(\)/g) || []).length - 1;
   if (uses !== SCHOOL_GATE_USES) fail(`firestore.rules uses isSchool() ${uses} times; pinned at ${SCHOOL_GATE_USES} (6 class-wide reads + 11 student writes + the song request's create and own read + the song files' 3 reads and the counter's create and raise). A new student rule needs the gate too: add it, then re-pin SCHOOL_GATE_USES and SCHOOL_GATED on purpose`);
   /* Every match block, with its own text (nested match blocks taken out). */
   const blocks = [];
@@ -17981,35 +18020,44 @@ function checkRulesSchoolGate() {
     while ((m = re.exec(t))) { const open = m.index + m[0].length - 1, close = closeOf(t, open); own += t.slice(last, m.index); last = close + 1; walk(t.slice(open + 1, close), prefix + m[1]); re.lastIndex = close + 1; }
     blocks.push({ path: prefix.replace(/^\/databases\/\{database\}\/documents/, ''), own: own + t.slice(last) });
   };
-  walk(body, '');
-  const splitTop = (e, op) => { const out = []; let d = 0, q = null, s = 0; for (let i = 0; i < e.length; i++) { const c = e[i]; if (q) { if (c === q && e[i - 1] !== '\\') q = null; continue; } if (c === "'" || c === '"') { q = c; continue; } if ('([{'.includes(c)) d++; else if (')]}'.includes(c)) d--; else if (!d && e.startsWith(op, i)) { out.push(e.slice(s, i)); s = i + op.length; i += op.length - 1; } } out.push(e.slice(s)); return out.map(x => x.trim()); };
+  walk(blank, '');
+  const splitTop = (e, op) => { const out = []; let d = 0, s = 0; for (let i = 0; i < e.length; i++) { const c = e[i]; if ('([{'.includes(c)) d++; else if (')]}'.includes(c)) d--; else if (!d && e.startsWith(op, i)) { out.push(e.slice(s, i)); s = i + op.length; i += op.length - 1; } } out.push(e.slice(s)); return out.map(x => x.trim()); };
   const wrapped = e => { if (e[0] !== '(') return false; let d = 0; for (let i = 0; i < e.length; i++) { if (e[i] === '(') d++; else if (e[i] === ')' && !--d) return i === e.length - 1; } return false; };
-  /* The gate a condition puts in front of every account: 'school', 'teacher', 'signed', 'false', several joined by '|', or null (no gate). */
+  /* The gate a condition (no "?" in it: checked before) puts in front of every account: 'school', 'teacher', 'signed',
+     'false', several joined by '|' (one per "||" alternative), or null (some alternative has no gate). */
   const gateOf = e => {
     e = e.trim();
+    while (wrapped(e)) e = e.slice(1, -1).trim();
     const alts = splitTop(e, '||');
-    if (alts.length > 1) { const ks = alts.map(gateOf); return ks.includes(null) ? null : [...new Set(ks)].sort().join('|'); }
-    if (wrapped(e)) return gateOf(e.slice(1, -1));
-    const cs = splitTop(e, '&&');
-    if (cs.length > 1) { const ks = cs.map(gateOf).filter(Boolean); for (const k of ['school', 'teacher', 'signed', 'false']) if (ks.includes(k)) return k; return ks[0] || null; }
-    return e === 'isSchool()' || e === 'pmOwner(userId)' ? 'school' : e === 'isTeacher()' ? 'teacher' : e === 'isSignedIn()' ? 'signed' : e === 'false' ? 'false' : null;
+    if (alts.length > 1) { const ks = alts.map(gateOf); return ks.includes(null) ? null : [...new Set(ks.flatMap(k => k.split('|')))].sort().join('|'); }
+    const parts = splitTop(e, '&&').map(p => { while (wrapped(p)) p = p.slice(1, -1).trim(); return p; });
+    for (const [k, tok] of [['school', 'isSchool()'], ['school', 'pmOwner(userId)'], ['teacher', 'isTeacher()'], ['false', 'false'], ['signed', 'isSignedIn()']]) if (parts.includes(tok)) return k;
+    return null;
   };
-  const gated = [], open = [];
+  const gated = [], open = [], unread = [], keys = [];
   let allows = 0;
-  for (const b of blocks) for (const a of b.own.matchAll(/allow\s+([a-z, ]+?)\s*:\s*if\s+([\s\S]*?);/g)) {
+  for (const b of blocks) for (const m of b.own.matchAll(/(?<=(?:^|[;{}])\s*)allow\b/g)) {   // a statement (after ; { } or the start), not a field named allow
     allows++;
-    const key = `${b.path} ${a[1].replace(/\s+/g, '')}`, g = gateOf(a[2]);
+    const rest = b.own.slice(m.index), head = /^allow\s+([a-z]+(?:\s*,\s*[a-z]+)*)\s*(;|:\s*if\b)/.exec(rest);
+    if (!head) { unread.push(`${b.path}: ${rest.slice(0, 60).replace(/\s+/g, ' ')}`); continue; }
+    const key = `${b.path} ${head[1].replace(/\s+/g, '')}`;
+    keys.push(key);
+    if (head[2] === ';') { open.push(`${key}: no condition (always allowed)`); continue; }
+    const end = rest.indexOf(';', head[0].length), cond = (end < 0 ? rest.slice(head[0].length) : rest.slice(head[0].length, end)).replace(/\s+/g, ' ').trim();
+    if (end < 0 || /[?]/.test(cond)) { unread.push(`${key}: if ${cond.slice(0, 90)}`); continue; }
+    const g = gateOf(cond);
     if (g && g.split('|').includes('school')) gated.push(key);
     const ungated = !g || g.split('|').includes('signed');
-    if (ungated && !SCHOOL_GATE_EXCEPTIONS[key]) open.push(`${key}: if ${a[2].replace(/\s+/g, ' ').trim().slice(0, 90)}`);
+    if (ungated && !SCHOOL_GATE_EXCEPTIONS[key]) open.push(`${key}: if ${cond.slice(0, 90)}`);
     if (!ungated && SCHOOL_GATE_EXCEPTIONS[key]) fail(`${key} is listed in SCHOOL_GATE_EXCEPTIONS but is gated now: take it off the list`);
   }
-  for (const k of Object.keys(SCHOOL_GATE_EXCEPTIONS)) if (!blocks.some(b => [...b.own.matchAll(/allow\s+([a-z, ]+?)\s*:/g)].some(a => `${b.path} ${a[1].replace(/\s+/g, '')}` === k))) fail(`SCHOOL_GATE_EXCEPTIONS lists "${k}", which firestore.rules no longer has: take it off the list`);
+  if (unread.length) fail(`1dt cannot read ${unread.length} allow rule(s): ${unread.join(' · ')}. It reads only "allow <ops>;" and "allow <ops>: if <condition>;" with no "?" (ternary) outside strings: write the condition as gate && …, or pin this shape by hand in 1dt (it fails closed on purpose)`);
+  for (const k of Object.keys(SCHOOL_GATE_EXCEPTIONS)) if (!keys.includes(k)) fail(`SCHOOL_GATE_EXCEPTIONS lists "${k}", which firestore.rules no longer has: take it off the list`);
   if (open.length) fail(`${open.length} allow rule(s) let an account through with no isSchool(), isTeacher() or pmOwner() in front: ${open.join(' · ')}. Every class-wide read and student write needs isSchool(); a rule that must be open goes in SCHOOL_GATE_EXCEPTIONS with its reason`);
   const want = [...SCHOOL_GATED].sort(), have = [...gated].sort();
   const lost = want.filter(k => !have.includes(k)), extra = have.filter(k => !want.includes(k));
   if (lost.length || extra.length) fail(`the allow rules a school account passes differ from SCHOOL_GATED: ${lost.length ? 'no longer gated by isSchool() (or gone): ' + lost.join(', ') : ''}${lost.length && extra.length ? '; ' : ''}${extra.length ? 'new: ' + extra.join(', ') : ''}. If this is on purpose, re-pin SCHOOL_GATED (and SCHOOL_GATE_USES) and tell Jonathan to paste the rules`);
-  if (!bad) ok(`firestore.rules: isSchool() defined once with the pinned body, used ${uses} times (pinned); ${gated.length} of ${allows} allow rules are school-gated, exactly the pinned list; the other ${allows - gated.length} are teacher-only except the ${Object.keys(SCHOOL_GATE_EXCEPTIONS).length} stated accessRequests exceptions; no paste-2 file and no tracked file names one`);
+  if (!bad) ok(`firestore.rules: isSchool(), isTeacher(), isSignedIn() and pmOwner() each defined once with the pinned body; isSchool() used ${uses} times (pinned); all ${allows} allow rules read (comments and strings taken out), ${gated.length} school-gated, exactly the pinned list; the other ${allows - gated.length} are teacher-only except the ${Object.keys(SCHOOL_GATE_EXCEPTIONS).length} stated accessRequests exceptions; no paste-2 file and no tracked file names one`);
 }
 
 function checkSiteErrors() {
