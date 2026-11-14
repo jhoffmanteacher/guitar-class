@@ -198,6 +198,11 @@
          "save.notSaving" right after it, and no "save.saved" before that tab's next action or its next landed write that
          carries more than name and email (that one saves other work).
 
+   DIRECTED CHECKS (2026-11-14; plant-a-fault gaps ac3028fcd0 and 29266b76eb), after the cases on a run of every family:
+     D1 the place a student opens (lastModule / lastSet) is the place stored; D2 a new student's doc is marked once (one
+     transaction for three saves) and a tick made offline waits for the reconnect with no "save.failed" / "save.notSaving".
+     See directedChecks(). A failure prints "✗ FAIL directed …" and exits 1.
+
    Reading a FAIL line: case index, family, the stored value, the values the oracle accepts, and the replay command. */
 import vm from 'node:vm';
 import { readFileSync, readdirSync, writeFileSync, existsSync } from 'node:fs';
@@ -444,7 +449,7 @@ function makeClient(world, tab){
   });
   const db = {
     collection: c => ({ doc: id => ref(c + '/' + id) }),
-    runTransaction: fn => { const rec = { from: world.now, to: Infinity }; tab.net.push(rec); return (async () => {
+    runTransaction: fn => { tab.txRuns = (tab.txRuns || 0) + 1; const rec = { from: world.now, to: Infinity }; tab.net.push(rec); return (async () => {
       for (let attempt = 0; attempt < 5; attempt++){
         const reads = new Map(), writes = [];
         const tx = {
@@ -1597,6 +1602,90 @@ async function runCase(seed, idx, famFilter){
   const res = oracle(sc, world, tabs);
   return { sc, world, tabs, res };
 }
+/* ─────────────────────────── directed checks (2026-11-14) ───────────────────────────
+   Two fixed scenarios the seeded families never judge (plant-a-fault found both gaps), run after the cases on a full
+   run (not with --case or --family). Same fake world, same site code, one tab; nothing here calls site logic to get
+   the expected answer.
+   D1 THE PLACE. A returning student (initialDoc) opens a set in another module (the set pill's own code, shell.js:
+      `lastSetId=w.id; ... saveProgress()`, with the module it is in) and hides the tab. The stored lastModule / lastSet
+      must be that set: the next sign-in, on any Chromebook, lands there (save.js loadProgress reads data.lastSet).
+   D2 A NEW STUDENT'S FIRST SAVES. No doc at sign-in: the doc is born marked (swap45Commit, one transaction), and every
+      later save is a plain write (save.js swap45Commit: "Resolves at once after the first success"). Two ticks with the
+      network up, then a third while the browser is OFFLINE: the third waits in the SDK and lands at the reconnect
+      (F12: offline, set() does not fail), and the page never says "save.failed" or "save.notSaving" for it. Counted:
+      the transactions the tab ran (1). */
+async function directedRun(label, initial, phases, steps, untilMs){
+  const world = new World(mix(BASE_SEED, 4242));
+  const dev = device('chromebook', phases);
+  dev.localStorage = { _d: {}, getItem(k){ return Object.prototype.hasOwnProperty.call(this._d, k) ? this._d[k] : null; }, setItem(k, v){ this._d[k] = String(v); }, removeItem(k){ delete this._d[k]; }, clear(){ this._d = {}; }, key(i){ return Object.keys(this._d)[i] ?? null; }, get length(){ return Object.keys(this._d).length; } };
+  if (initial) world.docs.set('progress/' + USER.uid, { data: clone(initial), version: 1 });
+  CURRENT_WORLD = world;
+  world.faults = [];
+  const tab = makeTab(world, 'T1', dev, { root: ROOT, seed: mix(BASE_SEED, 77), sdkMs: 150 });
+  tab.ctx.__booted = () => { tab.booted = true; };
+  siteCall(tab, 'currentUser = __user; (async () => { await loadProgress(); caAdoptLocalTicks(); })().finally(() => __booted())');
+  let from = T0;
+  for (const p of phases){
+    if (p.phase === 'offline'){
+      const fire = (type, on) => world.at(on, () => { dev.offlineNow = type === 'offline'; for (const fn of (tab.winL[type] || []).slice()) callSite(tab, () => fn({ type })); }, null, 'script');
+      fire('offline', from); fire('online', p.until);
+    }
+    from = p.until;
+  }
+  for (const s of steps) world.at(T0 + s.at, () => {
+    world.log(`${label}: ${s.what}`);
+    if (s.code) siteCall(tab, s.code);
+    if (s.hide){ tab.hidden = true; for (const fn of (tab.docL.visibilitychange || []).slice()) callSite(tab, () => fn({ type: 'visibilitychange' })); }
+  }, null, 'script');
+  await world.runUntil(T0 + untilMs, () => beat(`${label} at ${rel(world.now)}`));
+  tab.alive = false;
+  await world.drain();
+  CURRENT_WORLD = null;
+  const stored = world.docs.get('progress/' + USER.uid);
+  return { world, tab, stored: stored ? stored.data : null };
+}
+async function directedChecks(){
+  const out = { fails: [], checks: 0 };
+  const fail = msg => out.fails.push(msg);
+  /* D1 */
+  {
+    const start = initialDoc(null, 'returning');
+    const to = { module: 7, set: 'm7w1' };
+    if (start.lastSet === to.set || start.lastModule === to.module) fail('D1 setup: the start doc already holds the set D1 opens');
+    const { tab, stored } = await directedRun('D1 the place', start, [], [
+      { at: 3000, what: `opens set ${to.set} (Module ${to.module})`, code: `lastModuleNum = ${to.module}; lastSetId = ${JSON.stringify(to.set)}; saveProgress();` },
+      { at: 6000, what: 'hides the tab', hide: true }
+    ], 20000);
+    out.checks += 2;
+    if (!stored || stored.lastSet !== to.set || stored.lastModule !== to.module)
+      fail(`D1 the place: the student opened ${to.set} (Module ${to.module}) and hid the tab; stored lastSet ${JSON.stringify(stored && stored.lastSet)}, lastModule ${JSON.stringify(stored && stored.lastModule)} — the next sign-in on another Chromebook would not land there`);
+    for (const f of tab.faults) fail(`D1 the place: site code ${f} (R12)`);
+  }
+  /* D2 */
+  {
+    let txRuns = 0;
+    const keys = ['m6w1-b-sec0-0', 'm6w1-b-sec0-1', 'm7w1-b-sec1-0'];
+    const phases = [{ phase: 'up', until: T0 + 10000 }, { phase: 'offline', until: T0 + 25000 }];
+    const OFF = [T0 + 10000, T0 + 25000];
+    const { tab, stored } = await directedRun('D2 a new student', null, phases, [
+      { at: 3000, what: `ticks ${keys[0]}`, code: `onCompleteChange(${JSON.stringify(keys[0])}, true)` },
+      { at: 6000, what: `ticks ${keys[1]}`, code: `onCompleteChange(${JSON.stringify(keys[1])}, true)` },
+      { at: 12000, what: `ticks ${keys[2]} while offline`, code: `onCompleteChange(${JSON.stringify(keys[2])}, true)` },
+      { at: 32000, what: 'hides the tab', hide: true }
+    ], 45000);
+    txRuns = tab.txRuns || 0;   // every runTransaction the site called on that tab (the fake client counts them)
+    out.checks += 3;
+    const missing = keys.filter(k => !(stored && stored.completed && stored.completed[k] === true));
+    if (missing.length) fail(`D2 a new student: ${missing.join(', ')} not in the stored doc after the reconnect`);
+    if (!stored || !stored.migrations || stored.migrations.swap45 !== true) fail('D2 a new student: the stored doc is not marked (migrations.swap45)');
+    const told = tab.msgs.filter(m => m.t >= T0 + 12000 && m.t < OFF[1] && (m.key === 'save.failed' || m.key === 'save.notSaving'));
+    if (told.length) fail(`D2 a new student: a tick made offline showed ${JSON.stringify(told[0].key)} at ${rel(told[0].t)} (a plain write waits for the reconnect; a save that needs a transaction fails offline)`);
+    if (txRuns !== 1) fail(`D2 a new student: ${txRuns} transactions ran for three saves; wanted 1 (the doc is marked once, then every save is a plain write)`);
+    out.txRuns = txRuns;
+    for (const f of tab.faults) fail(`D2 a new student: site code ${f} (R12)`);
+  }
+  return out;
+}
 function actionCode(a){
   const j = JSON.stringify;
   switch (a.kind){
@@ -1696,6 +1785,15 @@ async function main(){
     console.log(`  KNOWN ${k.id} (listed ${k.listed}): ${k.what} — matched in ${hits.length} case${hits.length === 1 ? '' : 's'}${hits.length ? ' (' + hits.slice(0, 12).join(', ') + (hits.length > 12 ? ', …' : '') + ')' : ''}`);
     if (k.reach(runSpec) && !hits.length){ staleKnown++; console.log(`✗ FAIL KNOWN ${k.id} matched nothing in a full run: the fault is fixed or the tool stopped reaching it; take the entry out of KNOWN`); }
   }
+  /* The directed checks (D1 the place, D2 a new student's first saves): on a run of every family, not one case. */
+  let directedBad = 0;
+  if (single == null && !famFilter.length){
+    beat('directed checks');
+    const d = await directedChecks();
+    directedBad = d.fails.length;
+    for (const m of d.fails) console.log(`✗ FAIL directed (seed ${BASE_SEED}): ${m}`);
+    console.log(`  directed checks: ${d.checks - Math.min(d.checks, d.fails.length)} of ${d.checks} hold (D1 the place a student opened is the place stored; D2 a new student's doc is marked once, ${d.txRuns} transaction(s) for three saves, and a tick made offline waits for the reconnect)`);
+  }
   const secs = ((Date.now() - t0) / 1000).toFixed(1);
   console.log(`save-loop: ${idxs.length} cases (seed ${BASE_SEED}) · ${tabsN} tabs · ${actsN} student actions (${owed} owed effects, ${notOwed} not owed) · ${issued} writes issued, ${landed} landed, ${rejected} rejected, ${lost} lost with a closed or unloading tab · ${tx} move commits (${txRetry} transaction re-runs) · ${leaves} stored values compared`);
   console.log('  by family: ' + Object.entries(fams).map(([k, v]) => `${k} ${v.n - v.fail}/${v.n}`).join(' · '));
@@ -1703,11 +1801,11 @@ async function main(){
   console.log(`  failing values by tag: ${tagLine}`);
   console.log(`  a record left as a mixture of two tabs' writes (M2, not failed): ${knownKinds["M2 a record left as a mixture of two tabs' writes"] || 0}`);
   console.log(`  known exposures, not failed: ${knownN} values in ${knownCases} cases` + (knownN ? ' (' + Object.entries(knownKinds).map(([k, v]) => `${k}: ${v}`).join(', ') + ')' : ''));
-  console.log(failed || staleKnown ? `save-loop: ✗ ${failed} of ${idxs.length} cases FAIL (failing values: ${tagLine})${staleKnown ? `, ${staleKnown} KNOWN entr${staleKnown === 1 ? 'y' : 'ies'} matched nothing` : ''}` : `save-loop: ✓ ${idxs.length} of ${idxs.length} cases pass`);
+  console.log(failed || staleKnown || directedBad ? `save-loop: ✗ ${failed} of ${idxs.length} cases FAIL (failing values: ${tagLine})${staleKnown ? `, ${staleKnown} KNOWN entr${staleKnown === 1 ? 'y' : 'ies'} matched nothing` : ''}${directedBad ? `, ${directedBad} directed check${directedBad === 1 ? '' : 's'} FAIL` : ''}` : `save-loop: ✓ ${idxs.length} of ${idxs.length} cases pass`);
   if (opt('json', null)) writeFileSync(String(opt('json')), JSON.stringify(json, null, 1));
   /* The run time goes to stderr, so stdout is the same byte for byte for the same seed. */
   console.error(`save-loop: ${secs} s`);
-  return failed || staleKnown ? 1 : 0;
+  return failed || staleKnown || directedBad ? 1 : 0;
 }
 /* Exact tags (R3-2): each names one wrong value a site fault this tool found leaves. A failing value with no tag is
    something new. */
