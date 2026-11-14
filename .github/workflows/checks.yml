@@ -9,6 +9,10 @@
 # It does not block a push or the Pages deploy: a red run means "look at the
 # last push". GitHub emails the pusher when a run fails.
 #
+# The "never" checks (1dl, 1dn) compare with the commit before the push; the
+# first job fetches it (the checkout is shallow) and hands it over as
+# GC_CHECKS_BASE. Without it they would compare main with itself.
+#
 # The second job runs the quick Node-only proof tools that CLAUDE.md asks for
 # after a change to their area (the save path, what a student sees, the live
 # quiz, a shared Chromebook). On GitHub they run after EVERY push, so a change
@@ -45,10 +49,33 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 2
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24
+      # checks.mjs 1dl and 1dn ("never" rules: no section or step moved, no
+      # frozen quiz reworded; a firestore.rules change acknowledged) compare the
+      # tree with the commit before the push. The checkout is shallow, so that
+      # commit is fetched by its id; a new branch, or a before-commit GitHub no
+      # longer has, falls back to the last commit alone (as browser.yml does).
+      - name: The push's base, for the "never" checks
+        id: base
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -u
+          base=""
+          if [ "$EVENT" = "push" ] && [ -n "$BEFORE" ] && [ "$BEFORE" != "0000000000000000000000000000000000000000" ]; then
+            if git cat-file -e "$BEFORE^{commit}" 2>/dev/null || git fetch --no-tags --depth=1 origin "$BEFORE"; then base="$BEFORE"; fi
+          fi
+          if [ -z "$base" ] && git rev-parse -q --verify 'HEAD~1^{commit}' >/dev/null; then base="$(git rev-parse HEAD~1)"; fi
+          echo "Compared with: ${base:-nothing (the checks say so)}"
+          echo "base=$base" >> "$GITHUB_OUTPUT"
       - name: node tools/checks.mjs --check --skip-links
+        env:
+          GC_CHECKS_BASE: ${{ steps.base.outputs.base }}
         run: node tools/checks.mjs --check --skip-links
 
   proofs:
