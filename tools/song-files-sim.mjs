@@ -112,6 +112,9 @@ function makeIdb(opts){
   const indexedDB = { open(){ const r = req();
     if (opts && opts.openHang) return r;                                  // never answers
     if (opts && opts.openError) { setTimeout(() => { r.error = new Error('blocked'); r.onerror && r.onerror(); }, 0); return r; }
+    /* Another tab holds the database open at an older version: the open fires 'blocked' and nothing else until that
+       tab lets go (here: never). */
+    if (opts && opts.openBlocked) { setTimeout(() => { r.onblocked && r.onblocked(); }, 0); return r; }
     setTimeout(() => { r.result = db; if (!opts || !opts.noUpgrade) r.onupgradeneeded && r.onupgradeneeded(); r.onsuccess && r.onsuccess(); }, 0); return r; } };
   return { indexedDB, stores, st };
 }
@@ -141,7 +144,7 @@ function makeEl(cls){
 function makeTab(src, shared, opts){
   const o = opts || {};
   // The waits are seconds long on the site; the sim shortens them in its own copy of the text.
-  src = src.replace('const SONG_FILES_IDB_WAIT_MS = 5000;', 'const SONG_FILES_IDB_WAIT_MS = 40;').replace('const SONG_FILES_LOCK_WAIT_MS = 60000;', 'const SONG_FILES_LOCK_WAIT_MS = 40;');
+  src = src.replace('const SONG_FILES_IDB_WAIT_MS = 5000;', `const SONG_FILES_IDB_WAIT_MS = ${o.idbWaitMs || 40};`).replace('const SONG_FILES_LOCK_WAIT_MS = 60000;', 'const SONG_FILES_LOCK_WAIT_MS = 40;');
   const urls = [];
   const ctx = {
     console, Promise, Map, Set, Uint8Array, Date, Math, Number, String, Error, JSON, Object, Array, setTimeout, clearTimeout,
@@ -407,6 +410,18 @@ async function suite(src, quiet){
     ok('a failed wait puts the button back (Stop, then Play)', ui === 'wd', ui);
   }
 
+  say('== another tab holds the device store open (IndexedDB "blocked")');
+  /* plant-a-fault 33147bfb56 (2026-11-14): with no answer to 'blocked' the page sat on "Loading the song… 0%" until
+     the time limit (5 s on the site; 1.5 s here, so the case cannot pass by waiting it out). */
+  { const s = newShared({ openBlocked: true }); putFile(s.fs, 'x', BIG);
+    const tab = makeTab(src, s, { idbWaitMs: 1500 }); register(tab, 'x', BIG);
+    const t0 = Date.now();
+    const url = await tab.api.songFileLoad('x');
+    const ms = Date.now() - t0;
+    ok('a blocked device store: the song still plays, from Firestore', /^blob:/.test(url) && sha(await blobBytes(tab.urls[0])) === sha(BIG));
+    ok('…at once, not after the time limit', ms < 750, ms + ' ms');
+  }
+
   say('== a full device');
   { const s = newShared(); s.idb.st.full = true; putFile(s.fs, 'x', BIG);
     const tab = makeTab(src, s); register(tab, 'x', BIG);
@@ -468,6 +483,7 @@ async function suite(src, quiet){
     await tick(); await tick();
     const texts = LINE_LOG.slice();
     ok('the line starts at "sf.loading" 0%', texts[0] === 'sf.loading{"pct":0}', texts[0]);
+    ok('…and a screen reader announces it (role="status")', host.querySelector('.sf-line').getAttribute('role') === 'status', String(host.querySelector('.sf-line').getAttribute('role')));
     ok('…and rises with the pieces', texts.some(x => { const m = /"pct":(\d+)/.exec(x); return m && +m[1] > 0 && +m[1] < 99; }), JSON.stringify(texts));
     ok('restart runs once when the song is here', runs === 1, String(runs));
     ok('the line is cleared', host.querySelector('.sf-line').text === '');
@@ -533,6 +549,8 @@ const BREAKS = [
   ['m5: no time limit on a hung lock', "      const opts = (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? { signal: AbortSignal.timeout(SONG_FILES_LOCK_WAIT_MS) } : {};", "      const opts = {};"],
   ['m6: a refused count reads as not allowed', "catch(e){ if(e && e.code === 'permission-denied') throw songFileErr('clock'); throw e; }", "catch(e){ throw e; }"],
   ['B4: a cancelled wait leaves the button on Stop', "  songFileShow(w.host, '');\n  if(w.ui && w.ui.done) try { w.ui.done(); } catch(e) {}", "  songFileShow(w.host, '');"],
+  ['plant-a-fault 33147bfb56: a "blocked" open is not answered', "    req.onblocked = () => resolve(null);\n", ''],
+  ['plant-a-fault 6eb5c43dc5: the loading line is not announced', "    el.setAttribute('role', 'status');\n", ''],
   ['the SHA-256 is not checked', "if(sha !== expect.sha256) throw songFileErr('bad', 'the SHA-256 is not the list\\'s');", ''],
   /* No break drops the piece-length check: a piece of the wrong length also changes the whole file's SHA-256, which
      the next check refuses ('one wrong byte' and 'a piece of the wrong length' above), so that mutant only names the

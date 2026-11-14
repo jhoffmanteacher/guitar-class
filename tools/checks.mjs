@@ -18082,7 +18082,7 @@ function checkSongRequests() {
        Journey player cannot play a private song yet; it is its own piece of
        Step 2.
    ════════════════════════════════════════════════════════════════════ */
-const SONG_FILES_SIM_PIN = 110;   // 81 -> 84 (2026-11-14): a sign-out in the same tab stops handing out the loaded copy; -> 101 (review round 1): L1-L5, A2, m4-m6, B1, B4; the "ships empty" case gone (B3); -> 109 (round 2): m1, m6, the three missed plants, two cards waiting for one song
+const SONG_FILES_SIM_PIN = 113;   // -> 113 (2026-11-14, plant-a-fault gaps 33147bfb56 and 6eb5c43dc5): a blocked IndexedDB open (2 cases), the loading line announced (role="status"); 81 -> 84 (2026-11-14): a sign-out in the same tab stops handing out the loaded copy; -> 101 (review round 1): L1-L5, A2, m4-m6, B1, B4; the "ships empty" case gone (B3); -> 109 (round 2): m1, m6, the three missed plants, two cards waiting for one song
 const SONG_FILES_CLOSE_PIN = 6;
 function checkSongFilesLoader() {
   head('1dx. Song files: the loader is run (pieces, checks, device copy, two tabs, the monthly limit); the player hooks are pinned');
