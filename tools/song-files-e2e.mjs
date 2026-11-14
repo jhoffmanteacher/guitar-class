@@ -37,9 +37,16 @@ const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; cha
   '.svg': 'image/svg+xml', '.png': 'image/png', '.mp3': 'audio/mpeg', '.woff2': 'font/woff2', '.webmanifest': 'application/manifest+json' };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const freePort = () => new Promise((res, rej) => { const s = net.createServer(); s.listen(0, '127.0.0.1', () => { const p = s.address().port; s.close(() => res(p)); }); s.on('error', rej); });
+/* The stub store travels between the console page and the student page through the server (POST, then GET at
+   /__e2e/store), never through one big DevTools message. */
+let STORE_TEXT = '';
 function serve(dir){
   const srv = createServer((req, res) => {
     let p = decodeURIComponent((req.url || '/').split('?')[0].split('#')[0]);
+    if (p === '/__e2e/store') {
+      if (req.method === 'POST') { const parts = []; req.on('data', c => parts.push(c)); req.on('end', () => { STORE_TEXT = Buffer.concat(parts).toString('utf8'); res.writeHead(200); res.end('ok'); }); return; }
+      res.writeHead(200, { 'content-type': 'application/json' }); res.end(STORE_TEXT); return;
+    }
     if (p.endsWith('/')) p += 'index.html';
     if (p === '/sw.js') { res.writeHead(404); res.end(); return; }     // no service worker: it would cache the shell across runs
     const f = normalize(join(dir, p));
@@ -58,7 +65,9 @@ async function openPage(port){
     if (m.id && pending.has(m.id)) { const { res, rej } = pending.get(m.id); pending.delete(m.id); m.error ? rej(new Error(JSON.stringify(m.error))) : res(m.result); }
     else if (m.method) handlers.forEach(h => h(m.method, m.params)); };
   const send = (method, params = {}) => new Promise((res, rej) => { const i = ++id; pending.set(i, { res, rej }); ws.send(JSON.stringify({ id: i, method, params })); });
-  const evalJs = async expression => { const r = await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
+  /* Every evaluation gives up after 30 s (a hang names its expression instead of stopping the run for good). */
+  const evalJs = async expression => { const r = await Promise.race([send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true }),
+      new Promise((_, j) => setTimeout(() => j(new Error('no answer in 30 s to: ' + expression.slice(0, 120))), 30000))]);
     if (r.exceptionDetails) throw new Error((r.exceptionDetails.exception && r.exceptionDetails.exception.description) || JSON.stringify(r.exceptionDetails)); return r.result.value; };
   return { send, evalJs, on: h => handlers.push(h) };
 }
@@ -104,6 +113,8 @@ const STUB = String.raw`(() => {
 })()`;
 
 async function main(){
+  const watchdog = setTimeout(() => { console.log('song-files-e2e: ✗ HUNG (10 minutes)'); process.exit(3); }, 600000);
+  watchdog.unref();
   if (!CHROME || !existsSync(CHROME)) { console.error('song-files-e2e: no Chrome for Testing: set CHROME or pass --chrome <path>'); return 2; }
   if (/\/Applications\/Google Chrome\.app\//.test(CHROME)) { console.error('song-files-e2e: refusing /Applications/Google Chrome.app (use Chrome for Testing)'); return 2; }
   if (spawnSync('ffmpeg', ['-version']).status !== 0) { console.error('song-files-e2e: needs ffmpeg'); return 2; }
@@ -122,13 +133,15 @@ async function main(){
     for (let i = 0; i < 60; i++) { try { await fetch(`http://127.0.0.1:${cdp}/json/version`); break; } catch { await sleep(250); } }
     page = await openPage(cdp);
     const errs = [];
+    // A leave-page dialog (the console during or after a write) is accepted, or it would hold every later call.
+    page.on((m, p) => { if (m === 'Page.javascriptDialogOpening') page.send('Page.handleJavaScriptDialog', { accept: true }).catch(() => {}); });
     page.on((m, p) => { if (m === 'Runtime.exceptionThrown') errs.push((p.exceptionDetails.exception && p.exceptionDetails.exception.description) || p.exceptionDetails.text); });
     await page.send('Runtime.enable'); await page.send('Page.enable'); await page.send('DOM.enable');
     await page.send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false });
     const js = e => page.evalJs(e);
     const waitFor = async (expr, ms = 8000) => { for (let t = 0; t < ms; t += 100) { if (await js(expr).catch(() => false)) return true; await sleep(100); } return false; };
     const shot = async name => { if (!SHOTS) return; const r = await page.send('Page.captureScreenshot', { format: 'png' }); const f = join(SHOTS, name + '.png'); writeFileSync(f, Buffer.from(r.data, 'base64')); shots.push(f); };
-    const nav = async url => { await page.send('Page.navigate', { url }); await sleep(600); };
+    const nav = async url => { console.log('   … ' + url.replace(/^http:\/\/[^/]+/, '')); await page.send('Page.navigate', { url }); await sleep(600); };
 
     /* ── the student page: pick the card, learn its track's length ── */
     const bootStudent = async () => {
@@ -161,13 +174,18 @@ async function main(){
     await js(`setTeacherView('manage')`);
     const hasView = await waitFor(`!!document.querySelector(${JSON.stringify(CONSOLE.view)})`, 8000);
     check('the console shows Manage → Song files', hasView);
+    await waitFor(`!!document.querySelector(${JSON.stringify(CONSOLE.toggle)})`, 8000);
+    await js(`document.querySelector(${JSON.stringify(CONSOLE.toggle)}).click(), true`);
+    await waitFor(`!!document.querySelector(${JSON.stringify(CONSOLE.input)})`, 8000);
     const inputSel = CONSOLE.input;
     const { root } = await page.send('DOM.getDocument', { depth: -1 });
     const { nodeId } = await page.send('DOM.querySelector', { nodeId: root.nodeId, selector: inputSel });
     if (!nodeId) check('the upload file input is on the page', false, inputSel);
     else {
       await page.send('DOM.setFileInputFiles', { nodeId, files: [mp3] });
-      await js(`(() => { const i = document.querySelector(${JSON.stringify(inputSel)}); i.dispatchEvent(new Event('change', { bubbles: true })); return true; })()`).catch(() => {});
+      // Chrome fires change for setFileInputFiles; only if nothing started after 3 s is it dispatched by hand.
+      if (!(await waitFor(`__store.has('songFiles/${ID}')`, 3000)))
+        await js(`(() => { const i = document.querySelector(${JSON.stringify(inputSel)}); i.dispatchEvent(new Event('change', { bubbles: true })); return true; })()`).catch(() => {});
       const up = await waitFor(`(__store.get('songFiles/${ID}') || {}).state === 'ready'`, 30000);
       check(`the console uploaded it: the head is ready and ${pieces} pieces are in the store`, up && await js(`[...__store.keys()].filter(k => k.startsWith('songFiles/${ID}/pieces/')).length`) === pieces);
       await sleep(600);
@@ -179,8 +197,10 @@ async function main(){
       check('Verify passes on the uploaded file', !!verified);
       await shot('console-song-files-verified-en');
     }
-    const exported = await js(`__storeOut('songFiles/')`);   // the files and pieces, not the console's own count
-    if (!/pieces/.test(exported)) throw new Error('nothing was uploaded; the student half has nothing to load');
+    // The files and pieces, not the console's own count.
+    await js(`fetch('/__e2e/store', { method: 'POST', body: __storeOut('songFiles/') }).then(r => r.ok)`);
+    if (!/pieces/.test(STORE_TEXT)) throw new Error('nothing was uploaded; the student half has nothing to load');
+    const storeIn = `fetch('/__e2e/store').then(r => r.text()).then(t => { __storeIn(t); return true; })`;
 
     /* ── 2. the student plays it ── */
     const switchCard = `(() => { const tr = SNIPPET_TRACKS[${JSON.stringify(pick.track)}]; for (const k of ['src', 'srcSlow', 'srcFull', 'srcFullSlow']) if (tr[k]) tr[k] = 'private:${ID}';
@@ -194,7 +214,8 @@ async function main(){
       await bootStudent();
       await dropCopy();
       await bootStudent();
-      await js(`__storeIn(${JSON.stringify(exported)}); __sf.slow = 700; setLang(${JSON.stringify(lang)}); true`);
+      await js(storeIn);
+      await js(`__sf.slow = 700; setLang(${JSON.stringify(lang)}); true`);
       await js(switchCard); await sleep(1200);
       await js(play);
       const seen = await waitFor(`/\\d+%/.test(${line}) && !/ 0%/.test(${line})`, 10000);
@@ -225,7 +246,8 @@ async function main(){
     /* ── 4. signed out ── 5. the limit ── */
     for (const lang of ['en', 'es']) {
       await bootStudent();
-      await js(`__storeIn(${JSON.stringify(exported)}); setLang(${JSON.stringify(lang)}); true`);
+      await js(storeIn);
+      await js(`setLang(${JSON.stringify(lang)}); true`);
       await js(switchCard); await sleep(1200);
       await js(`currentUser = null; true`);
       await js(play); await sleep(500);
@@ -235,7 +257,8 @@ async function main(){
       await js(`currentUser = { uid: 'dev-user', displayName: 'Dev User', email: 'dev@test.local' }; true`);
       await dropCopy();
       await bootStudent();
-      await js(`__storeIn(${JSON.stringify(exported)}); __store.set('songFilesUsage/' + songFileMonth(), { bytes: SONG_FILES_MONTH_LIMIT }); setLang(${JSON.stringify(lang)}); true`);
+      await js(storeIn);
+      await js(`__store.set('songFilesUsage/' + songFileMonth(), { bytes: SONG_FILES_MONTH_LIMIT }); setLang(${JSON.stringify(lang)}); true`);
       await js(switchCard); await sleep(1200);
       const pr0 = await js(`__sf.pieceReads`);
       await js(play);
@@ -248,6 +271,7 @@ async function main(){
     /* ── 6. a Song Journey page, signed out ── */
     await nav(`http://127.0.0.1:${port}/tabs/luna.html`);
     await waitFor(`document.readyState === 'complete' && typeof ensurePlayer === 'function'`, 15000);
+    await js(`setLang('en'), true`);   // the app's steps above left the shared language on Spanish
     await js(`new Promise(r => { const s = document.createElement('script'); s.src = '../app/songfiles.js'; s.onload = () => r(true); s.onerror = () => r(false); document.head.appendChild(s); })`);
     await js(`(() => { const b = document.getElementById('playalong-frame'); for (const k of Object.keys(b.dataset)) if (/^audio/.test(k)) b.dataset[k] = 'private:${ID}'; return true; })()`);
     await js(`(() => { const btn = document.querySelector('[onclick*="togglePlayalong"]'); if (btn) btn.click(); else { const b = document.getElementById('playalong-frame'); b.hidden = false; ensurePlayer(); } return true; })()`);
@@ -271,5 +295,5 @@ async function main(){
 }
 /* The console's Song files view (teacher-songfiles.js): where it is, its file input, a Verify button, and the words
    that mean "uploaded and matching" / "verified". */
-const CONSOLE = { view: '[data-sf-view]', input: '[data-sf-view] input[type=file]', verify: '[data-sf-verify]', matches: /matches/i, verified: /✓/ };
+const CONSOLE = { view: '#t-songfiles-block', toggle: '#t-songfiles-block [data-tsf-act="toggle"]', input: '#t-songfiles-block input[type=file][data-tsf-file]', verify: '#t-songfiles-block [data-tsf-act="verify-all"]', matches: /on the list, uploaded, matches/, verified: /Verified 1 of 1 song file/ };
 process.exit(await main());
