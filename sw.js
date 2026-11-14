@@ -284,6 +284,7 @@ const ASSETS = [
   './fab-tools.js',
   './tuner.js',
   './tuning-sim.html',
+  './privacy.html',
   './coach-core.js',
   './coach-hub.js',
   './coach-chords.js',

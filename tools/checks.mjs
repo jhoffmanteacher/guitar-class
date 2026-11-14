@@ -84,7 +84,7 @@ try {
 } catch { /* no tabs/ dir yet */ }
 
 const SHELL_FILES = [
-  'index.html', '404.html', 'mood-chart.html', 'tuning-sim.html', 'styles.css', 'site-fill.js', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', ...siteParts('app.js', ROOT), 'practice-minutes-config.js', 'practice-minutes.js', 'fab-tools.js', 'tuner.js', ...siteParts('coach.js', ROOT), ...siteParts('teacher.js', ROOT), 'live-quiz.js', 'config-main.js',
+  'index.html', '404.html', 'privacy.html', 'mood-chart.html', 'tuning-sim.html', 'styles.css', 'site-fill.js', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', ...siteParts('app.js', ROOT), 'practice-minutes-config.js', 'practice-minutes.js', 'fab-tools.js', 'tuner.js', ...siteParts('coach.js', ROOT), ...siteParts('teacher.js', ROOT), 'live-quiz.js', 'config-main.js',
   'trainer-core.js', 'trainer-audio.js', 'trainer-ui.js', 'trainer-site-adapter.js',
   'firebase-config.js', 'manifest.json', 'icon.svg',
   ...MODULE_FILES,
@@ -1468,6 +1468,8 @@ const CONTRAST_SOURCES = [
   // 404.html has no :root of its own — it <link>s styles.css and its inline
   // block reads that palette's tokens.
   ['404.html',                'html', 'styles.css'],
+  // privacy.html (2026-11-14) likewise links styles.css.
+  ['privacy.html',            'html', 'styles.css'],
 ];
 const isDarkMedia = m => /prefers-color-scheme\s*:\s*dark/.test(m);
 const isLightMedia = m => /prefers-color-scheme\s*:\s*light/.test(m);
@@ -17714,6 +17716,87 @@ function checkSongFilesConsole() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1ec. THE PRIVACY NOTICE (privacy.html, 2026-11-14). Jonathan wrote the
+   words, in English and Spanish, and approves every change to them. The page
+   is the one copy in the repo: its two <section data-notice lang="en|es">
+   blocks. This fails:
+     - the page missing, or a language missing (one h1 and 9 h2 questions each);
+     - either language's text changing at all: the text of each h1 / h2 / p,
+       tags stripped, entities decoded, spaces collapsed, one block per line,
+       is hashed and pinned in PRIVACY_NOTICE_SHA (a re-pin is a wording change
+       Jonathan approved, in the same commit);
+     - the page loading anything that can send: a script file, Firebase, a
+       form, a frame, an outside URL, fetch / XHR / beacon / socket, a storage
+       write, or a Content-Security-Policy without default-src, connect-src and
+       form-action 'none';
+     - the "Privacy" / "Privacidad" link gone from the sign-in screen or from
+       beside "Report a problem" (index.html), or btn.privacy missing a language;
+     - the page out of sw.js ASSETS (the rail link must open offline);
+     - teacher-mic.js MIC_TAKE_KEEP_DAYS (the "Delete recordings older than
+       30 days" button) differing from the number of days the notice states,
+       in English and in Spanish.
+   ════════════════════════════════════════════════════════════════════ */
+const PRIVACY_NOTICE_SHA = {
+  en: '91f02b40b2d693dc5f12b8ddfaac9e4ce8a025d21f10d2832b52001668fbd23d',
+  es: '91e30f66ee5f2bd6ab0d0549358254a8a8a619499e2fbfe385cb6357273d657d',
+};
+function privacyNoticeText(html, lang) {
+  const m = html.match(new RegExp(`<section data-notice lang="${lang}"[^>]*>([\\s\\S]*?)</section>`));
+  if (!m) return null;
+  const ent = s => s.replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(+n)).replace(/&amp;/g, '&');
+  const blocks = [...m[1].matchAll(/<(h1|h2|p)\b[^>]*>([\s\S]*?)<\/\1>/g)];
+  return { tags: blocks.map(b => b[1]), text: blocks.map(b => ent(b[2].replace(/<[^>]+>/g, '')).replace(/\s+/g, ' ').trim()).join('\n') };
+}
+function checkPrivacyNotice(i18nTable) {
+  head('1ec. The privacy notice: Jonathan\'s wording pinned (EN and ES), the page sends nothing, its two links, the 30 days');
+  let bad = 0;
+  const fail = m => { err('1ec: ' + m); problems++; bad++; };
+  let html;
+  try { html = readFileSync(join(ROOT, 'privacy.html'), 'utf8'); }
+  catch { fail('privacy.html is missing'); return; }
+  const days = {};
+  for (const lang of ['en', 'es']) {
+    const n = privacyNoticeText(html, lang);
+    if (!n) { fail(`privacy.html has no <section data-notice lang="${lang}">`); continue; }
+    const h1 = n.tags.filter(t => t === 'h1').length, h2 = n.tags.filter(t => t === 'h2').length;
+    if (n.tags[0] !== 'h1' || h1 !== 1 || h2 !== 9) fail(`privacy.html ${lang}: the notice must open with its one h1 title and ask its 9 questions as h2 (found ${h1} h1, ${h2} h2)`);
+    const sha = createHash('sha256').update(n.text).digest('hex');
+    if (sha !== PRIVACY_NOTICE_SHA[lang]) fail(`the privacy notice wording changed (${lang === 'en' ? 'English' : 'Spanish'}): Jonathan approves wording changes; re-pin PRIVACY_NOTICE_SHA.${lang} in the same commit (now ${sha})`);
+    const dm = lang === 'en' ? /deletes recordings after (\d+) days/.exec(n.text) : /borra las grabaciones después de (\d+) días/.exec(n.text);
+    days[lang] = dm ? +dm[1] : null;
+  }
+  // Sends nothing, loads no Firebase. Comments are left out first: the page's own comments say "No Firebase".
+  const code = html.replace(/<!--[\s\S]*?-->/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
+  const csp = (/<meta http-equiv="Content-Security-Policy" content="([^"]*)"/.exec(code) || [])[1] || '';
+  for (const d of ["default-src 'none'", "connect-src 'none'", "form-action 'none'", "script-src 'unsafe-inline';"])
+    if (!csp.includes(d)) fail(`privacy.html: its Content-Security-Policy must hold ${d} (the browser then refuses any request the page could make)`);
+  if (/<script\b[^>]*\bsrc=/i.test(code)) fail('privacy.html loads a script file: it is standalone (no app script, no i18n.js, no Firebase)');
+  if (/firebase|firestore|gstatic|googleapis/i.test(code)) fail('privacy.html names Firebase or a Google script host: the page loads no Firebase');
+  if (/<(form|iframe|object|embed)\b/i.test(code)) fail('privacy.html has a form, frame or embed: the page sends nothing');
+  if (/\b(src|href|action)="(https?:)?\/\//i.test(code)) fail('privacy.html points at an outside URL: it loads only the site\'s own stylesheet, fonts and icon');
+  if (/\bfetch\s*\(|XMLHttpRequest|sendBeacon|WebSocket|EventSource|\.setItem\s*\(|indexedDB|sessionStorage|\bimport\s*\(|new Image\b/.test(code)) fail('privacy.html: its script sends or saves something (fetch, XHR, beacon, socket, a storage write…): it only reads gc-lang and swaps the language');
+  const links = [...code.matchAll(/<link\b[^>]*>/g)].map(m => m[0]);
+  for (const l of links) if (!/href="(styles\.css|icon-192\.png|apple-touch-icon\.png)"/.test(l)) fail(`privacy.html links ${l}: only styles.css and the icons`);
+  // The two links (index.html) and their words.
+  const idx = readFileSync(join(ROOT, 'index.html'), 'utf8');
+  const signin = (/<div id="auth-signin"[\s\S]*?<\/div>/.exec(idx) || [''])[0];
+  if (!/<a href="privacy\.html" data-i18n="btn\.privacy">Privacy<\/a>/.test(signin)) fail('index.html: the sign-in screen (#auth-signin) lost its "Privacy" link (<a href="privacy.html" data-i18n="btn.privacy">)');
+  const foot = (/id="sf-report"[\s\S]*?<\/a>([\s\S]*?<\/a>)/.exec(idx) || [])[1] || '';
+  if (!/href="privacy\.html"/.test(foot) || !/data-i18n="btn\.privacy">Privacy</.test(foot)) fail('index.html: the "Privacy" link (href="privacy.html", data-i18n="btn.privacy") must come right after "Report a problem" (#sf-report) at the foot of the rail');
+  const k = i18nTable && i18nTable['btn.privacy'];
+  if (!k || k.en !== 'Privacy' || k.es !== 'Privacidad') fail(`i18n.js btn.privacy must be { en: 'Privacy', es: 'Privacidad' } (found ${JSON.stringify(k)})`);
+  const sw = readFileSync(join(ROOT, 'sw.js'), 'utf8');
+  if (!/'\.\/privacy\.html'/.test(sw)) fail('sw.js ASSETS lacks ./privacy.html: the rail link must open offline');
+  // The 30 days: the console button and the notice say the same number.
+  const tm = /const MIC_TAKE_KEEP_DAYS = (\d+);/.exec(siteSource('teacher.js', ROOT));
+  const keep = tm ? +tm[1] : null;
+  if (keep === null) fail('teacher-mic.js has no `const MIC_TAKE_KEEP_DAYS = <n>;` (the "Delete recordings older than N days" button)');
+  for (const lang of ['en', 'es']) if (days[lang] !== keep) fail(`the privacy notice (${lang}) says recordings are deleted after ${days[lang]} days but teacher-mic.js MIC_TAKE_KEEP_DAYS is ${keep}: change both or neither (the notice wording is Jonathan's)`);
+  if (!bad) ok(`privacy.html: EN and ES wording match the pins (1 h1 + 9 h2 each), CSP forbids every request, no script file / Firebase / form / outside URL / storage write; "Privacy" on the sign-in screen and under "Report a problem"; in sw.js ASSETS; MIC_TAKE_KEEP_DAYS ${keep} = the notice's ${days.en} (EN) and ${days.es} (ES)`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1cg. PRACTICE MINUTES (2026-11-01) — practice-minutes.js + its config + the
    rules blocks it writes under.
    The engine is RUN, not read: tools/pm-sim.mjs loads the real config and engine
@@ -18671,6 +18754,7 @@ function checkPracticeMinutes(i18nTable) {
   checkPracticeMinutes(i18nTable);
   checkNoStudentDataHook();
   checkMicZipsAnonymous();
+  checkPrivacyNotice(i18nTable);
   checkSiteErrors();
   checkWeekendStreaks();
   checkRulesPaste2();

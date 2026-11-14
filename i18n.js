@@ -838,6 +838,9 @@
     'btn.backToTop':         { en: 'Back to top', es: 'Volver arriba' },
     'btn.top':               { en: 'Top', es: 'Arriba' },
     'btn.reportProblem':     { en: 'Report a problem', es: 'Reportar un problema' },
+    // The privacy notice (privacy.html, 2026-11-14): a link on the sign-in
+    // screen and beside "Report a problem" at the foot of the rail.
+    'btn.privacy':           { en: 'Privacy', es: 'Privacidad' },
 
     // ── Save indicator (the small "Saving…/Saved ✓" strip under a set or
     // module review — setSaveMsg() in app.js) ──

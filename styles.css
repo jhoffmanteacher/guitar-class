@@ -739,6 +739,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .rail-report:hover{background:rgba(0,0,0,0.05);color:var(--text)}
 .rail-report:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
 @media(prefers-color-scheme:dark){.rail-report:hover{background:rgba(255,255,255,0.06)}}
+/* "Privacy" (privacy.html, 2026-11-14): the same quiet link, right under
+   "Report a problem"; only Report a problem takes the free space above. */
+.rail-report.rail-privacy{margin-top:0}
+/* …and on the sign-in screen, a small link under the Google button. */
+.auth-wall p.auth-privacy{margin:18px 0 0;font-size:0.875rem;line-height:1.4}
+.auth-privacy a{color:var(--text2)}
+.auth-privacy a:hover{color:var(--text)}
 .module-select:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
 /* ── Single-column layout: content column capped at 800px so the card's
       right edge ends where the capped prose (70–78ch) ends and the floating

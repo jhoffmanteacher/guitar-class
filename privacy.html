@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- "Saves nothing, sends nothing", enforced by the browser: no network request
+     (connect-src 'none'), no form, no frame, no script file; only this page's
+     own inline code, the site's stylesheet, its fonts and the icon. No Firebase.
+     tools/checks.mjs 1ec pins this policy and the notice's wording. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; form-action 'none'; frame-src 'none'; base-uri 'none'">
+<title>Privacy · Guitar Class · Sequoia HS</title>
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#514a7d">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#494370">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="styles.css">
+<style>
+/* The privacy notice (2026-11-14). Jonathan wrote the words, in English and
+   Spanish; they are kept here WORD FOR WORD, once, in the two
+   <section data-notice> blocks below. checks.mjs 1ec hashes each language's
+   text: a change to the wording fails until it is re-pinned in the same
+   commit, and Jonathan approves wording changes.
+   Standalone like 404.html: the site's stylesheet, no app script, no i18n.js.
+   It follows the site's saved language (localStorage 'gc-lang', read only) and
+   its Español / English button swaps the page without saving anything.
+   Readable signed out: the sign-in screen and the rail link here. */
+.pv-main{max-width:46rem;margin:0 auto;padding:22px 20px 48px}
+.pv-back{display:inline-block;font-size:0.875rem;color:var(--text2);text-decoration:none;padding:3px 10px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--border2);margin-bottom:14px}
+.pv-back:hover{color:var(--text);background:var(--bg3)}
+.pv-back:focus-visible,.pv-main a:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
+.pv-main h1{font-family:var(--font-display);font-size:1.625rem;font-weight:600;line-height:1.25;margin:0 0 6px;color:var(--text)}
+.pv-main h2{font-size:1.0625rem;font-weight:650;margin:22px 0 4px;color:var(--text)}
+.pv-main p{font-size:1rem;line-height:1.6;color:var(--text);margin:0}
+.pv-main p.pv-sign{margin-top:26px;color:var(--text2);font-size:0.9375rem}
+.pv-main a{color:var(--blue-text)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<header class="header">
+  <div style="min-width:0;flex:1 1 auto">
+    <div class="header-title" data-pv-en="Sequoia High School &ndash; Beginning Guitar" data-pv-es="Sequoia High School &ndash; Guitarra para principiantes">Sequoia High School &ndash; Beginning Guitar</div>
+  </div>
+  <button type="button" class="btn-translate" id="pv-lang" title="Translate to Spanish"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18"/><path d="M12 3a14 14 0 0 0 0 18"/></svg></span><span id="pv-lang-label" lang="es">Español</span></button>
+</header>
+<main class="pv-main">
+  <a class="pv-back" id="pv-back" href="index.html" data-pv-en="&larr; Back to class site" data-pv-es="&larr; Volver al sitio de la clase">&larr; Back to class site</a>
+
+  <section data-notice lang="en">
+    <h1>Guitar Class website: your privacy</h1>
+
+    <h2>What is this site?</h2>
+    <p>It is the website for Mr. Hoffman’s guitar class at Sequoia High School. He built it. It has no ads.</p>
+
+    <h2>What does it save about me?</h2>
+    <p>When you sign in with Google, it saves your name, email, class period, the steps you check off, your answers, game scores and practice minutes. “Report a problem” saves your message with your name and email. A song request saves the link and your answers with your name and email. When the site breaks, it saves a note about the error without a name field, and the site removes your name and email from it.</p>
+
+    <h2>Who can see it?</h2>
+    <p>You and your teacher. Other students cannot see your name, work or minutes. In a live class game, your name and points show on the classroom screen.</p>
+
+    <h2>Does it record me?</h2>
+    <p>The games and the tuner listen on your computer and do not save the sound. Sometimes your teacher turns on recordings. Then a game asks you once: “Save this take as a recording to help your teacher make this feature better?” A take is saved only if you press “Yes, save it.” It holds up to 30 seconds of sound, your name, class period and device type. A red label shows while it records. You can press “Stop saving my takes” at any time. On the site, only your teacher can hear it. The “Record” practice tool never sends your recording anywhere.</p>
+
+    <h2>What stays on this computer?</h2>
+    <p>Your sign-in, until you sign out. Also your settings, like language, and a copy of some of your progress.</p>
+
+    <h2>Who else gets my information?</h2>
+    <p>Google stores it and runs the sign-in. YouTube gets a visit when you play a video. Nobody else gets it, and nothing is sold. The site sends nothing to an AI service. Your teacher uses an AI tool to build the site. He keeps student names, emails and work out of it. Recordings with no names may be used to test the games that listen.</p>
+
+    <h2>How long is it kept?</h2>
+    <p>Your teacher deletes recordings after 30 days. A new recording replaces your old one for the same game. Nothing else is deleted on a schedule.</p>
+
+    <h2>How do I see my information, or ask to remove it?</h2>
+    <p>Most of it is on “My progress.” For a copy, or to have something removed, ask your teacher.</p>
+
+    <h2>Who do I ask?</h2>
+    <p>Your teacher, Mr. Hoffman, in class or at <a href="mailto:jhoffman@seq.org">jhoffman@seq.org</a>.</p>
+
+    <p class="pv-sign"><em>Written by Mr. Hoffman. Date of this notice: November 14, 2026.</em></p>
+  </section>
+
+  <section data-notice lang="es" hidden>
+    <h1>Sitio web de la clase de guitarra: tu privacidad</h1>
+
+    <h2>¿Qué es este sitio?</h2>
+    <p>Es el sitio web de la clase de guitarra del Sr. Hoffman en Sequoia High School. Él lo hizo. No tiene anuncios.</p>
+
+    <h2>¿Qué guarda sobre mí?</h2>
+    <p>Cuando inicias sesión con Google, guarda tu nombre, tu correo, tu periodo de clase, los pasos que marcas, tus respuestas, tus puntos en los juegos y tus minutos de práctica. “Reportar un problema” guarda tu mensaje con tu nombre y tu correo. Una petición de canción guarda el enlace y tus respuestas con tu nombre y tu correo. Cuando el sitio falla, guarda una nota sobre el error sin un campo de nombre, y el sitio quita tu nombre y tu correo de la nota.</p>
+
+    <h2>¿Quién lo puede ver?</h2>
+    <p>Tú y tu maestro. Los demás estudiantes no pueden ver tu nombre, tu trabajo ni tus minutos. En un juego de clase en vivo, tu nombre y tus puntos se ven en la pantalla del salón.</p>
+
+    <h2>¿Me graba?</h2>
+    <p>Los juegos y el afinador escuchan en tu computadora y no guardan el sonido. A veces tu maestro activa las grabaciones. Entonces un juego te pregunta una vez: “¿Guardar esta toma como grabación para ayudar a tu maestro a mejorar esta función?” Una toma se guarda solo si presionas “Sí, guárdala”. Tiene hasta 30 segundos de sonido, tu nombre, tu periodo de clase y el tipo de dispositivo. Una etiqueta roja se ve mientras graba. Puedes presionar “Ya no guardar mis tomas” en cualquier momento. En el sitio, solo tu maestro la puede escuchar. La herramienta de práctica “Grabar” nunca envía tu grabación a ningún lugar.</p>
+
+    <h2>¿Qué se queda en esta computadora?</h2>
+    <p>Tu sesión, hasta que cierres sesión. También tus ajustes, como el idioma, y una copia de parte de tu progreso.</p>
+
+    <h2>¿Quién más recibe mi información?</h2>
+    <p>Google la guarda y maneja el inicio de sesión. YouTube recibe una visita cuando pones un video. Nadie más la recibe, y no se vende nada. El sitio no envía nada a un servicio de inteligencia artificial (IA). Tu maestro usa una herramienta de IA para hacer el sitio. Él no pone en ella los nombres, los correos ni el trabajo de los estudiantes. Las grabaciones sin nombres se pueden usar para probar los juegos que escuchan.</p>
+
+    <h2>¿Por cuánto tiempo se guarda?</h2>
+    <p>Tu maestro borra las grabaciones después de 30 días. Una grabación nueva reemplaza tu grabación anterior del mismo juego. Nada más se borra en una fecha fija.</p>
+
+    <h2>¿Cómo veo mi información o pido que la borren?</h2>
+    <p>Casi todo está en “Mi progreso”. Para una copia, o para que borren algo, pregúntale a tu maestro.</p>
+
+    <h2>¿A quién le pregunto?</h2>
+    <p>A tu maestro, el Sr. Hoffman, en clase o en <a href="mailto:jhoffman@seq.org">jhoffman@seq.org</a>.</p>
+
+    <p class="pv-sign"><em>Escrito por el Sr. Hoffman. Fecha de este aviso: 14 de noviembre de 2026.</em></p>
+  </section>
+</main>
+<script>
+/* Language: start from the site's saved choice (read only); the button and a
+   change made in another tab of the site swap the page. Nothing is written. */
+(function(){
+  var lang = 'en';
+  try { lang = localStorage.getItem('gc-lang') === 'es' ? 'es' : 'en'; } catch(e){}
+  var TITLE = { en: 'Privacy · Guitar Class · Sequoia HS', es: 'Privacidad · Clase de guitarra · Sequoia HS' };
+  var BTN = { en: { label: 'Español', lang: 'es', title: 'Translate to Spanish' }, es: { label: 'English', lang: 'en', title: 'Cambiar a inglés' } };
+  function apply(){
+    document.documentElement.lang = lang;
+    document.title = TITLE[lang];
+    document.querySelectorAll('section[data-notice]').forEach(function(s){ s.hidden = s.getAttribute('lang') !== lang; });
+    document.querySelectorAll('[data-pv-en]').forEach(function(el){ el.textContent = el.getAttribute('data-pv-' + lang); });
+    var b = document.getElementById('pv-lang'), l = document.getElementById('pv-lang-label');
+    l.textContent = BTN[lang].label; l.lang = BTN[lang].lang; b.title = BTN[lang].title;
+    b.classList.toggle('active', lang === 'es');
+  }
+  document.getElementById('pv-lang').addEventListener('click', function(){ lang = lang === 'es' ? 'en' : 'es'; apply(); });
+  window.addEventListener('storage', function(e){ if (e.key === 'gc-lang') { lang = e.newValue === 'es' ? 'es' : 'en'; apply(); } });
+  /* Back: return to the site page the reader came from instead of stacking a second copy. */
+  document.getElementById('pv-back').addEventListener('click', function(e){
+    var same = false;
+    try { same = !!document.referrer && new URL(document.referrer).origin === location.origin; } catch(_){}
+    if (same && history.length > 1) { e.preventDefault(); history.back(); }
+  });
+  apply();
+})();
+</script>
+</body>
+</html>
