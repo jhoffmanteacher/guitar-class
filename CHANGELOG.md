@@ -6,6 +6,12 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-14 — The Games page is sorted by what each game trains
+
+- **Four groups at the top.** Chord switching (Power Chord Switch, Change Up), Rhythm and tempo (Strum Radar, Strum Hero, Pattern Detective), Finger strength (Finger Gym: The Ladder) and Notes on the low E and A strings (Note Runner, Note Hunt, Fret Zap).
+- **The other nine games are under "More games (9)".** It starts closed. Click it to open it. Every game is still there, and your best scores did not change.
+- **Each card says if you need your guitar.** A small label at the bottom reads "Grab your guitar" or "No guitar needed".
+
 ## 2026-11-14 — The Record button is gone from the tools
 
 - **The tools are now Tuner, Timer and Metro.** The Record button is gone from the tool buttons and from the tool bar on an open activity.
