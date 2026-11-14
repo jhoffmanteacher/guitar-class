@@ -190,10 +190,10 @@ SETS.push(
               },
               {
                 label: 'Fast round: record all six', label_es: 'Ronda rápida: grábate los seis',
-                text: '<ol><li>Record yourself playing all six re-tests back to back.</li><li>Then listen with the checklist open and settle any you weren\'t sure about.</li></ol>Cleared all six? Module 9 proper starts at Set 2. Flagged some? Spend a session with the practice spots listed above first — they come back fast.',
-                text_es: '<ol><li>Grábate tocando los seis repasos seguidos.</li><li>Luego escucha con la lista de verificación abierta y resuelve cualquiera del que no estuvieras seguro.</li></ol>¿Aprobaste los seis? El Módulo 9 propiamente empieza en la Unidad 2. ¿Marcaste algunos? Dedica una sesión a los puntos de práctica listados arriba primero — vuelven rápido.',
-                hint: 'The recording shows exactly how you really sounded. Judge each re-test from the recording, not from memory.',
-                hint_es: 'La grabación muestra exactamente cómo sonaste de verdad. Juzga cada repaso con la grabación, no de memoria.'
+                text: '<ol><li>Play all six re-tests back to back, with no break between them.</li><li>Then open the checklist and settle any you weren\'t sure about.</li></ol>Cleared all six? Module 9 proper starts at Set 2. Flagged some? Spend a session with the practice spots listed above first — they come back fast.',
+                text_es: '<ol><li>Toca los seis repasos seguidos, sin pausa entre ellos.</li><li>Luego abre la lista de verificación y resuelve cualquiera del que no estuvieras seguro.</li></ol>¿Aprobaste los seis? El Módulo 9 propiamente empieza en la Unidad 2. ¿Marcaste algunos? Dedica una sesión a los puntos de práctica listados arriba primero — vuelven rápido.',
+                hint: 'Be strict. One dead string or one pause means "Still working on it".',
+                hint_es: 'Sé estricto. Una cuerda apagada o una pausa significa "Todavía lo practico".'
               }
             ]
           }
