@@ -881,8 +881,20 @@ function ccResolvePend(ch){
     const oldHits = p.readings.filter(r => oldOnly.indexOf(pcOf(r)) >= 0).length;
     toneOk = anyNew > 0.15 && !(oldHits > newHits && oldHits / n > 0.15);
   }
-  ch.result = toneOk === false ? 'off' : 'ok';    // percussive/unclear counts on timing alone
-  ccChipRefresh(cc.changes.indexOf(ch));
+  /* Percussive/unclear counts on timing alone. The verdict is HELD, not shown: a closer strum may still come (ccLoop), and ccHoldFinal
+     shows it once none can. Of two checks, the one closer to the change is kept. */
+  const h = { v: toneOk === false ? 'off' : 'ok', readings: ch.readings, dev: p.dev };
+  if (!ch.hold || Math.abs(h.dev) < Math.abs(ch.hold.dev)) ch.hold = h;
+}
+/* A held verdict becomes the change's result (and its chip and big line turn). ccLoop calls it once no closer strum can come: the change
+   time plus the held strum's distance from it (no later sound can be closer after that), at most the window; on time or late, that is
+   as soon as its check ends (340 ms), early by d, d after the change. ccStageEnd and ccFinish call it for what is still held. */
+function ccHoldFinal(c){
+  const h = c.hold;
+  c.hold = null;
+  c.result = h.v;
+  c.readings = h.readings;
+  ccChipRefresh(cc.changes.indexOf(c));
 }
 
 function ccLoop(){
@@ -926,9 +938,24 @@ function ccLoop(){
       // Cap the match window at half the spacing between changes (bpc beats) so a
       // single strum can't land inside two adjacent change windows at fast rates.
       const win = Math.min(cc.beatMs * cc.bpc * 0.5, Math.max(220, cc.beatMs * 0.5));
-      const ch = cc.changes.find(c => c.result === null && !c.pend &&
-        Math.abs(c.beat * cc.beatMs - rel) <= win);
-      if (ch) ch.pend = { t: at, readings: [] };
+      /* NEAREST WINS (2026-11-13, Jonathan: "the tempo should not matter as long as the student hits the chord within an allowable window"),
+         as the Listening Coach's coachMatchEvent has since 2026-10-07. Until then the FIRST sound in the window opened the change's check and
+         decided it: at 15 BPM the window opens 2 s before the change, while the old chord still rings, so a neighbour's strum or a bump
+         judged the change and the student's own strum was never used (real takes: at 30 BPM and under, 98 of 120 heard changes were decided
+         by a sound more than 0.25 s off the change). Now a sound closer to the change than the one being checked, or already checked (hold),
+         takes its place. The check it replaces is finished early with the readings it has (ccResolvePend keeps the closer of the two), so a
+         Stop click that replaces a real strum and is then dropped (ccFinish) leaves that strum's verdict. tools/mic-sim/change-window.mjs:
+         the 33 real takes, 315 changes: right / wrong / no strum 156 / 124 / 35 -> 166 / 114 / 35, no real strum lost, nothing-played
+         marked right 29 -> 30 of 65. */
+      const ch = cc.changes.find(c => {
+        const d = Math.abs(rel - c.beat * cc.beatMs);
+        return c.result === null && d <= win && (!c.pend || d < Math.abs(c.pend.dev)) && (!c.hold || d < Math.abs(c.hold.dev));
+      });
+      if (ch){
+        if (ch.pend) ccResolvePend(ch);
+        ch.win = win;
+        ch.pend = { t: at, readings: [], dev: rel - ch.beat * cc.beatMs };
+      }
     }
     coachSmooth(cc, rms, coachHfRms);
 
@@ -969,8 +996,11 @@ function ccLoop(){
     /* Overdue changes are misses — on the played-time clock, so a strum
        still on its way through the mic isn't swept before it arrives. */
     const relNow = now - lat - cc.listenStart - cc.gridOffset;
+    cc.changes.forEach(c => {
+      if (c.result === null && !c.pend && c.hold && relNow > c.beat * cc.beatMs + Math.min(c.win, Math.abs(c.hold.dev))) ccHoldFinal(c);
+    });
     cc.changes.forEach((c, i) => {
-      if (c.result === null && !c.pend && relNow > (c.beat + 0.85) * cc.beatMs){
+      if (c.result === null && !c.pend && !c.hold && relNow > (c.beat + 0.85) * cc.beatMs){
         c.result = 'miss';
         ccChipRefresh(i);
       }
@@ -993,6 +1023,7 @@ function ccStageEnd(){
   if (!cc.ladder || cc.stage >= CC_LADDER_ROUNDS - 1){ ccFinish(true); return; }
   cc.changes.forEach(c => {
     if (c.pend) ccResolvePend(c);
+    if (c.result === null && c.hold) ccHoldFinal(c);
     if (c.result === null) c.result = 'miss';
   });
   cc.stageLog.push({ bpm: ccRoundBpm(), changes: cc.changes });
@@ -1035,14 +1066,14 @@ function ccFinish(complete){
      last chord plus one beat (ccLoop) — so that counts as a finished round.
      Stop with a change still ahead of the player stays an early Stop. */
   if (!complete && cc.phase === 'play' && (!cc.ladder || cc.stage >= CC_LADDER_ROUNDS - 1) &&
-      cc.changes.every(c => c.result !== null || c.pend)) complete = true;
+      cc.changes.every(c => c.result !== null || c.pend || c.hold)) complete = true;
   /* Changes the player never got to are 'miss' only in the data, not strums the mic missed: ccRenderDone leaves them out of the "strum firmer" count.
      That is every change still waiting and not yet due before the last strum the mic heard, and the misses after that strum that fell due in the CC_STOP_REACH_MS before the Stop
      (ccLoop has already swept those while the hand was going for the Stop button: at 60 BPM a 3 s reach is 3 changes). A game whose time ran out (ccStageEnd; never a Stop, even one counted as finished above), and a song switch
      stopped in a later round's count-in (that round is left out below), have none. */
   const stopT = performance.now() - coachMicLatencyMs();
   let lastHeard = -1;
-  cc.changes.forEach((c, i) => { if (c.pend || c.result === 'ok' || c.result === 'off') lastHeard = i; });
+  cc.changes.forEach((c, i) => { if (c.pend || c.hold || c.result === 'ok' || c.result === 'off') lastHeard = i; });
   /* A strum the mic heard AFTER a change fell due means the student reached it, even if the strum landed outside every window (a late one): that change
      is not "never reached" (a student who strums late and gives up must still get the old screen). lastStrumT is that strum's played time (cc.lastOnsetT is
      when it arrived, minus the mic latency, as stopT is), in the clock of c.t; -1e9 when no strum was heard this round. A sound in the last 300 ms before the
@@ -1051,7 +1082,7 @@ function ccFinish(complete){
   const lastOnsetEff = cc.lastOnsetT - stopLat > stopT - 300 ? cc.prevOnsetT : cc.lastOnsetT;
   const lastStrumT = lastOnsetEff - stopLat;
   const neverReached = ended || (cc.ladder && cc.phase === 'countin' && cc.stage > 0) ? []
-    : cc.changes.filter((c, i) => i > lastHeard && c.t > lastStrumT && ((c.result === null && !c.pend) || (c.result === 'miss' && stopT - c.t < CC_STOP_REACH_MS)));
+    : cc.changes.filter((c, i) => i > lastHeard && c.t > lastStrumT && ((c.result === null && !c.pend && !c.hold) || (c.result === 'miss' && stopT - c.t < CC_STOP_REACH_MS)));
   neverReached.forEach(c => { c.neverReached = true; });   // ccRenderDone draws these as "not reached", not as "no strum heard", when everything the student did reach was right
   cc.unreached = neverReached.length;
   /* Nothing had fallen due yet at the Stop (no earlier round either): "before the first change" is true. Otherwise changes went by in silence (ccRenderDone). */
@@ -1072,6 +1103,7 @@ function ccFinish(complete){
   }
   cc.changes.forEach(c => {
     if (c.pend) ccResolvePend(c);
+    if (c.result === null && c.hold) ccHoldFinal(c);
     if (c.result === null) c.result = 'miss';
   });
   /* A song switch reports all its rounds together. A round whose count-in had not
