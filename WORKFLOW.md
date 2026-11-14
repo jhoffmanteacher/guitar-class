@@ -206,10 +206,11 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 ## Open work
 
 - [ ] **School accounts: paste 2** (Jonathan, 2026-11-13: only school accounts, or outside accounts he allows, use
-  the class data). `firestore.rules` is always the PUBLISHED text: it holds paste 1 (the allow list `config/access`
-  and the requests `accessRequests`). Paste 2 waits in `firestore.rules.paste2` (first line "NOT PUBLISHED"; check
+  the class data). `firestore.rules` is the published text PLUS add-only blocks that wait for one paste, "Paste A" (NOT
+  published as of 2026-11-13: the allow list `config/access` and the requests `accessRequests`, the `songRequests`
+  block, and the teacher's read of `minutes/{uid}/days`; build the paste file from the repo on the day). Paste 2 waits in `firestore.rules.paste2` (first line "NOT PUBLISHED"; check
   `1dt` pins it as the published rules plus the `isSchool()` gate; GitHub's rules run tests both files). Order:
-  paste 1 published; the console's Manage block, the access screen and the save-path flags shipped; Jonathan
+  Paste A published (Jonathan); the console's Manage block, the access screen and the save-path flags shipped; Jonathan
   allows every outside roster account (the count line must read "0 would be locked out" unless he means it); THEN
   on paste-2 day ONE commit moves the text of `firestore.rules.paste2` (without its first line) into
   `firestore.rules` and deletes the `.paste2` file, the full `node tools/checks.mjs` passes, and he pastes it.
