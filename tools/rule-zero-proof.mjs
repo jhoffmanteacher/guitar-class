@@ -13,7 +13,8 @@
         Nothing added, removed or moved, so no positional progress key
         (`${setId}-${station}-sec${gi}-${i}`) can have shifted.
 
-     B. KEYED MCs in Modules 1..FROZEN_THROUGH are BYTE-IDENTICAL —
+     B. KEYED MCs in Modules 1..FROZEN_THROUGH, and in the next module (the one
+        the class is about to enter, 2026-11-13), are BYTE-IDENTICAL —
         `choices`, `choices_es` and `answer`. The keyed path persists the
         chosen choice's TEXT, so a reworded choice orphans every stored
         pick. Students are in Module 2 (Jonathan, 2026-09-19). The English
@@ -60,6 +61,9 @@ const MODULE_FILES = readdirSync(ROOT)
   .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
 function gitShow(ref, path) {
+  /* A module file the base does not have yet (a new module-14.js) is all new:
+     no sets at the base, so nothing it holds can have moved. */
+  if (/^module-\d+\.js$/.test(path) && spawnSync('git', ['cat-file', '-e', `${ref}:${path}`], { cwd: ROOT }).status !== 0) return '';
   const r = spawnSync('git', ['show', `${ref}:${path}`], { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
   if (r.status !== 0) throw new Error(`git show ${ref}:${path} failed: ${r.stderr.trim()}`);
   return r.stdout;
@@ -189,9 +193,12 @@ head(`A. Structure vs ${BASE}`);
   const baseById = idx(baseSets), headById = idx(headSets);
   let sets = 0, secs = 0, steps = 0, added = 0, renamed = 0;
 
+  /* A set id is a progress key prefix: one the base had must still be there.
+     A NEW set moves no key (keys are by id, not by position), so it prints. */
   const baseIds = [...baseById.keys()], headIds = [...headById.keys()];
-  if (baseIds.join('|') !== headIds.join('|'))
-    fail(`the SET list changed — ${baseIds.length} → ${headIds.length}, and a set id is a progress key prefix`);
+  const goneSets = baseIds.filter(id => !headById.has(id));
+  if (goneSets.length) fail(`set${goneSets.length === 1 ? '' : 's'} ${goneSets.join(', ')} removed or renamed — a set id is the prefix of every progress key in it`);
+  headIds.filter(id => !baseById.has(id)).forEach(id => notes.push(`   ${C.bold}${id}${C.reset} NEW set (Module ${headById.get(id).moduleNum}) — no saved key yet`));
 
   for (const [id, hs] of headById) {
     const bs = baseById.get(id);
@@ -302,16 +309,20 @@ function renameMapped(bm, hm) {
   return mapped[bm.answer] === hm.choices[hm.answer];
 }
 
-head(`B. Keyed MC choices and English prompts frozen in Modules 1–${FROZEN_THROUGH}`);
+/* B covers the frozen modules AND the next one, the module the class is about
+   to enter (CLAUDE.md "Three regimes": treat it as frozen; checks.mjs 1dl). */
+const NEXT = FROZEN_THROUGH + 1;
+const whereMod = m => m === NEXT ? `in Module ${NEXT}, the module the class is about to enter (CLAUDE.md, Three regimes)` : 'in a module students are in';
+head(`B. Keyed MC choices and English prompts frozen in Modules 1–${FROZEN_THROUGH} and Module ${NEXT} (about to be entered)`);
 {
   let frozen = 0, broken = 0;
   for (const [k, h] of headMc) {
-    if (h.kind !== 'graded' || h.moduleNum > FROZEN_THROUGH) continue;
+    if (h.kind !== 'graded' || h.moduleNum > NEXT) continue;
     const b = baseMc.get(k);
     /* A new keyed MC on a step that was already there orphans no saved
        answer (section A has proved every step kept its place), so it prints
        instead of failing (Jonathan, 2026-10-19). */
-    if (!b) { ok(`${k} — "${h.label}": keyed MC ADDED in a frozen module — no saved answer to orphan`); console.log(`   + ${q(h.mc.choices)}`); continue; }
+    if (!b) { ok(`${k} — "${h.label}": keyed MC ADDED ${h.moduleNum === NEXT ? `in Module ${NEXT}` : 'in a frozen module'} — no saved answer to orphan`); console.log(`   + ${q(h.mc.choices)}`); continue; }
     frozen++;
     /* The ENGLISH prompt is frozen too (CLAUDE.md "Never": "reword a keyed MC's
        choices — or its English prompt — in a frozen module"): it is half of the
@@ -320,7 +331,7 @@ head(`B. Keyed MC choices and English prompts frozen in Modules 1–${FROZEN_THR
        already answered. renamedChoices does not cover it. prompt_es may change
        (it seeds nothing). Added 2026-11-13 with checks.mjs 1dl. */
     if (q(b.mc.prompt) !== q(h.mc.prompt)) {
-      fail(`${k} — "${h.label}": FROZEN keyed MC's English prompt changed. The prompt seeds the choice shuffle, so every student would see this answered card's choices in a new order. Keep the old prompt; reword at the summer reset (skill summer-reset).`);
+      fail(`${k} — "${h.label}": keyed MC's English prompt changed ${whereMod(h.moduleNum)}. The prompt seeds the choice shuffle, so every student would see this card's choices in a new order. Keep the old prompt; a reword needs a one-time move of saved answers (skill summer-reset).`);
       broken++;
       console.log(`   - ${q(b.mc.prompt)}\n   + ${q(h.mc.prompt)}`);
     }
@@ -328,7 +339,7 @@ head(`B. Keyed MC choices and English prompts frozen in Modules 1–${FROZEN_THR
       frozen--; ok(`${k} — "${h.label}": keyed MC reworded with renamedChoices — every old pick maps to a new choice, the keyed one to the keyed one`);
       console.log(`   - ${q(b.mc.choices)}\n   + ${q(h.mc.choices)}`);
     } else if (fp(b.mc) !== fp(h.mc)) {
-      fail(`${k} — "${h.label}": FROZEN keyed MC changed. Students have stored their pick as TEXT, so this orphans every answer already given. Reword only with an old→new map in the renderer.`);
+      fail(`${k} — "${h.label}": keyed MC changed ${whereMod(h.moduleNum)}. Students store their pick as TEXT, so this orphans every answer already given. Reword only with an old→new map (response.renamedChoices).`);
       broken++;
       console.log(`   - ${q(b.mc.choices)}\n   + ${q(h.mc.choices)}`);
       console.log(`   - ${q(b.mc.choices_es)}\n   + ${q(h.mc.choices_es)}`);
@@ -339,16 +350,16 @@ head(`B. Keyed MC choices and English prompts frozen in Modules 1–${FROZEN_THR
      was removed (or turned into another response type) passed here — only
      checks.mjs 1ap caught it (2026-10-11 review). Walk the base too. */
   for (const [k, b] of baseMc) {
-    if (b.kind !== 'graded' || b.moduleNum > FROZEN_THROUGH || headMc.has(k)) continue;
-    fail(`${k} — "${b.label}": FROZEN keyed MC is GONE in a module students are in. Its stored picks are orphaned.`);
+    if (b.kind !== 'graded' || b.moduleNum > NEXT || headMc.has(k)) continue;
+    fail(`${k} — "${b.label}": keyed MC is GONE ${whereMod(b.moduleNum)}. Its stored picks are orphaned.`);
     broken++;
   }
-  if (!broken) ok(`${frozen} keyed MCs in Modules 1–${FROZEN_THROUGH} are byte-identical (choices, choices_es, answer, English prompt)`);
+  if (!broken) ok(`${frozen} keyed MCs in Modules 1–${NEXT} are byte-identical (choices, choices_es, answer, English prompt)`);
 }
 
-head(`C. Keyed MC changes above Module ${FROZEN_THROUGH} (expected — nobody has reached them)`);
+head(`C. Keyed MC changes above Module ${NEXT} (expected — nobody has reached them)`);
 for (const [k, h] of headMc) {
-  if (h.kind !== 'graded' || h.moduleNum <= FROZEN_THROUGH) continue;
+  if (h.kind !== 'graded' || h.moduleNum <= NEXT) continue;
   const b = baseMc.get(k);
   if (!b) { console.log(`   ${k}: NEW keyed MC`); continue; }
   const fields = ['prompt', 'prompt_es', 'answer', 'explain', 'explain_es'];
@@ -372,7 +383,11 @@ head('D. Practice MCs keep their choice order (answer index + count unchanged)')
   for (const [k, h] of headMc) {
     if (h.kind !== 'practice') continue;
     const b = baseMc.get(k);
-    if (!b) { fail(`${k}: practice MC is NEW — a stored index would now mean a different choice`); broken++; continue; }
+    if (!b) {
+      // On a skill that is new too (a new set or module) nothing is stored yet; on an old skill a stored index would now mean a different choice.
+      if (!baseSets.some(s => (s.skills || []).some(sk => sk && `skill ${sk.id}` === k))) { ok(`${k}: practice MC on a NEW skill — nothing stored yet`); continue; }
+      fail(`${k}: practice MC is NEW — a stored index would now mean a different choice`); broken++; continue;
+    }
     checked++;
     if (b.mc.answer !== h.mc.answer) { fail(`${k}: practice MC answer index moved ${b.mc.answer} → ${h.mc.answer} — stored picks are INDEXES`); broken++; }
     if ((b.mc.choices || []).length !== (h.mc.choices || []).length) { fail(`${k}: practice MC choice count changed ${(b.mc.choices||[]).length} → ${(h.mc.choices||[]).length}`); broken++; }
