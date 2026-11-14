@@ -207,6 +207,9 @@ function coachOpen(btn){
                                       // cleanly (its UI resets) before coachClose()
                                       // tears the stream down
   coachClose();                       // one card at a time
+  /* The strum-pattern check on an In-Class Activity (coach-strumcheck.js,
+     2026-11-14) is its own card: same evictions above, its own session. */
+  if (btn.dataset.strumcheck && typeof scOpen === 'function'){ scOpen(btn); return; }
   let slots, mode, desc, tabNotes = null, tabDerived = false, hideNames = false, chordShapes = null;
   if (btn.dataset.chords){
     let chords;
@@ -734,6 +737,7 @@ async function coachEnsureRunning(){
 function coachReleaseMicIfIdle(){
   setTimeout(() => {
     const active = (coach && (coach.phase === 'countin' || coach.phase === 'listening')) ||
+                   (typeof scMicActive === 'function' && scMicActive()) ||   // the strum-pattern check (coach-strumcheck.js)
                    fretRunning || (cc && cc.micOn) || (sr && sr.micOn) || (rn && rn.micOn) ||
                    (nr && nr.micOn) || psgRunning ||
                    (typeof ncMicActive === 'function' && ncMicActive());   // Note Call (app.js)
@@ -1806,7 +1810,7 @@ function micRecAskHtml(game){
 function micRecConsent(yes, game){
   try { localStorage.setItem(micRecAskKey(), yes ? 'yes' : 'no'); } catch(e){}
   micRecFootSync();
-  if (game === 'nr') nrStart(); else if (game === 'pw') ccStart(!!(cc && cc.pendingAgain)); else coachStartCheck();
+  if (game === 'nr') nrStart(); else if (game === 'pw') ccStart(!!(cc && cc.pendingAgain)); else if (game === 'sc') scStart(); else coachStartCheck();
 }
 function micRecBadgeHtml(){
   return `<div class="micrec-on" id="micrec-on"><span class="micrec-dot"></span>${escHtml(t('micrec.recording'))}<button type="button" class="micrec-stop" title="${escAttr(t('micrec.stopTitle'))}" onclick="micRecRevoke()">${escHtml(t('micrec.stop'))}</button></div>`;
@@ -1826,8 +1830,13 @@ function micRecFootSync(){
 /* Start capturing. A separate source node off the raw stream, into a
    ScriptProcessor whose output goes to a zero gain — so nothing is heard
    and the listening chain is untouched. */
-function micRecStart(mode){
+/* `maxSec` (optional): this take's own cap, for a take longer than
+   MICREC_MAX_SEC by design. Only the strum-pattern check passes one
+   (coach-strumcheck.js: eight bars at the step's tempo, at most
+   SC_REC_MAX_SEC); every other caller keeps MICREC_MAX_SEC. */
+function micRecStart(mode, maxSec){
   micRecAbort();
+  const capSec = maxSec > 0 ? maxSec : MICREC_MAX_SEC;
   if (!micRecWanted() || !coachCtx || !coachStream) return false;
   try {
     const ctx = coachCtx, srcRate = ctx.sampleRate;
@@ -1836,7 +1845,7 @@ function micRecStart(mode){
     const mute = ctx.createGain();
     mute.gain.value = 0;
     const rec = { mode, ctx, src, proc, mute, srcRate, bufs: [], n: 0,
-      cap: Math.ceil(MICREC_MAX_SEC * srcRate), live: true,
+      cap: Math.ceil(capSec * srcRate), capSec, live: true,
       perf0: performance.now(), ctx0: ctx.currentTime, firstPlay: null,
       frames: 0, frameSum: 0, frameMax: 0, lastFrameT: 0,
       track: (coachStream.getAudioTracks()[0] || {}).label || '',
@@ -1847,12 +1856,12 @@ function micRecStart(mode){
       const x = e.inputBuffer.getChannelData(0);
       const take = Math.min(x.length, rec.cap - rec.n);
       if (take > 0){ rec.bufs.push(x.slice(0, take)); rec.n += take; }
-      if (rec.n >= rec.cap) micRecTeardown(rec);   // 30 s: stop listening, keep what we have
+      if (rec.n >= rec.cap) micRecTeardown(rec);   // the cap: stop listening, keep what we have
     };
     src.connect(proc); proc.connect(mute); mute.connect(ctx.destination);
     // Belt and braces: whatever happens, the capture stops a minute after
-    // its 30 s cap (what it holds is still saved if the take finishes).
-    rec.timer = setTimeout(() => micRecTeardown(rec), (MICREC_MAX_SEC + 60) * 1000);
+    // its cap, 30 s unless the caller gave one (what it holds is still saved if the take finishes).
+    rec.timer = setTimeout(() => micRecTeardown(rec), (capSec + 60) * 1000);
     micRec = rec;
     return true;
   } catch(e){ micRecAbort(); return false; }
@@ -2400,6 +2409,7 @@ function coachScoreCompletion(){
 
 /* Full stop: mic off, timers cleared, card removed. Safe to call anytime. */
 function coachClose(){
+  if (typeof scClose === 'function') scClose();   // the strum-pattern check's card (coach-strumcheck.js): one card at a time
   if (coachRaf){ cancelAnimationFrame(coachRaf); coachRaf = null; }
   if (coach){
     coach.timeouts.forEach(clearTimeout);
@@ -2414,6 +2424,7 @@ function coachStopAll(){ coachClose(); }
 /* Called by app.js when the tuner opens (the tuner takes the mic) and by the
    hidden-tab handler below. */
 function coachInterrupt(msg){
+  if (typeof scInterrupt === 'function') scInterrupt(msg);   // the strum-pattern check (coach-strumcheck.js) takes the same exits
   if (!coach) return;
   if (coach.phase === 'listening' || coach.phase === 'countin'){
     coach.timeouts.forEach(clearTimeout);

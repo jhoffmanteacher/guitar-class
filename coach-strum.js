@@ -1235,6 +1235,37 @@ function srSlotTick(cur){
   document.querySelectorAll('#sr-beats .cc-pip').forEach((el, i) => el.classList.toggle('on', i === Math.floor(cur / 2) % 4));
 }
 
+/* One frame of Strum Radar's strum detector. Shared, unchanged, with the
+   strum-pattern check on an In-Class Activity (coach-strumcheck.js), so the
+   two always hear a strum the same way.
+   Onset = strum (Change Up's dual-channel detector, same constants:
+   full-band jump for a clean strum over silence, HF pick-attack
+   channel for a strum over the still-ringing previous one — which is
+   every strum after the first here). The 140ms refractory still fits:
+   eighths at the 100 BPM cap arrive every 300ms.
+   `s` holds smoothRms / smoothHf / lastOnsetT / listenStart / gridOffset /
+   lat / slotMs. Returns null when this frame holds no new strum; else the
+   strum's played time in ms from beat 1 on the grid as it was BEFORE this
+   strum eased it (the time srLoop matches against). The caller still runs
+   coachSmooth after it. */
+const SR_GRID_EASE = 0.2;          // how far one strum pulls the grid toward itself
+const SR_GRID_EASE_WITHIN = 0.45;  // ...only when it is this close (in eighths) to an eighth
+function srHearStrum(s, rms, hf){
+  if (!((rms > CHK_ONSET_FLOOR &&
+         rms > s.smoothRms * CHK_ONSET_RATIO ||
+         hf > CHK_HF_FLOOR &&
+         hf > s.smoothHf * CHK_HF_RATIO) &&
+        coachOnsetAt - s.lastOnsetT > COACH_ONSET_REFRACT)) return null;
+  s.lastOnsetT = coachOnsetAt;   // when it arrived, not when this frame ran
+  const rel = coachOnsetAt - s.listenStart - s.gridOffset - s.lat;
+  /* No audible reference during play, so the grid eases toward the
+     player — Change Up's EMA, on the eighth grid. */
+  const slotIdx = Math.round(rel / s.slotMs);
+  const dev = rel - slotIdx * s.slotMs;
+  if (Math.abs(dev) < s.slotMs * SR_GRID_EASE_WITHIN) s.gridOffset += dev * SR_GRID_EASE;
+  return rel;
+}
+
 function srLoop(){
   if (!sr) return;
   if (!coachAnalyser || !srBody()){ srStop(); return; }  // mic taken or panel closed under us
@@ -1256,23 +1287,8 @@ function srLoop(){
     const rms = coachReadFrame();
     const hf = coachHfRms;
 
-    /* Onset = strum (Change Up's dual-channel detector, same constants:
-       full-band jump for a clean strum over silence, HF pick-attack
-       channel for a strum over the still-ringing previous one — which is
-       every strum after the first here). The 140ms refractory still fits:
-       eighths at the 100 BPM cap arrive every 300ms. */
-    if ((rms > CHK_ONSET_FLOOR &&
-         rms > s.smoothRms * CHK_ONSET_RATIO ||
-         hf > CHK_HF_FLOOR &&
-         hf > s.smoothHf * CHK_HF_RATIO) &&
-        coachOnsetAt - s.lastOnsetT > COACH_ONSET_REFRACT){
-      s.lastOnsetT = coachOnsetAt;   // when it arrived, not when this frame ran
-      const rel = coachOnsetAt - s.listenStart - s.gridOffset - s.lat;
-      /* No audible reference during play, so the grid eases toward the
-         player — Change Up's EMA, on the eighth grid. */
-      const slotIdx = Math.round(rel / s.slotMs);
-      const dev = rel - slotIdx * s.slotMs;
-      if (Math.abs(dev) < s.slotMs * 0.45) s.gridOffset += dev * 0.2;
+    const rel = srHearStrum(s, rms, hf);
+    if (rel != null){
       /* Nearest unconsumed expected strum within the window; anything
          else is an extra — counted, never punished live (real rooms are
          noisy, and a squeaky chair shouldn't wreck a run). */

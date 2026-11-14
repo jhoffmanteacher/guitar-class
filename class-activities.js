@@ -7097,6 +7097,11 @@ window.CLASS_ACTIVITIES = [
           },
           bars: ['D5', 'D5', 'C5', 'C5', 'G5', 'G5', 'D5', 'D5'],
           barsPerRow: 4,   // a row per two chords — eight bars fit the screen
+          /* The strum-pattern check (Jonathan, 2026-11-14; coach-strumcheck.js):
+             a Listening Coach button that listens to the eight bars once, the
+             pattern by slot and the chord on each 1. Feedback only: it saves
+             nothing to progress. checks.mjs 1eh pins it to this step alone. */
+          listen: true,
         },
       },
       {

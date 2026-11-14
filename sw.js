@@ -292,6 +292,7 @@ const ASSETS = [
   './coach-strum.js',
   './coach-runner.js',
   './coach-more.js',
+  './coach-strumcheck.js',
   './live-quiz.js',
   './trainer-site-adapter.js',
   './config-main.js',

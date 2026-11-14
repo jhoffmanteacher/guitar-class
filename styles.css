@@ -3257,6 +3257,19 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 .strum-count{font-size:0.875rem;font-weight:600;color:var(--text2);margin-top:2px}
 .strum-cell.beat-now{background:var(--blue-bg)}
 .strum-cell.beat-now .strum-dir{color:var(--blue-text)}
+/* The strum-pattern check (coach-strumcheck.js) marks the page's own board:
+   the slot the beat is on, a strum heard in its slot (at once), a missed
+   strum or a strum where the hand should miss (when the bar is over), and
+   the chord's mark beside its name on the 1. */
+.strum-cell.sc-now{background:var(--blue-bg)}
+.strum-cell.sc-ok .strum-dir{color:var(--green-text)}
+.strum-cell.sc-bad{background:var(--red-bg)}
+.strum-cell.sc-bad .strum-dir{color:var(--red-text)}
+.sc-mark{margin-left:4px;font-weight:700}
+.sc-mark--ok{color:var(--green-text)}
+.sc-mark--wrong{color:var(--red-text)}
+.sc-mark--unheard{color:var(--text3)}
+.sc-card .sc-line{margin:2px 0}
 /* A step's video button (step.video) comes right after the step text in both
    renderers — on its own line, not glued to the last sentence (ca-46, the
    first activity with a video step, 2026-11-03). */

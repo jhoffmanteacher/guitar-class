@@ -73,6 +73,8 @@ async function renderTeacherMic(){
     const saved = micTakeDate(d), when = saved ? saved.toLocaleString() : '—';
     const game = d.mode === 'nr' ? 'Note Runner' + (d.level != null ? ' · level ' + (Number(d.level) + 1) : '')
                : d.mode === 'pw' ? 'Power Chord Switch' + (d.progression ? ' · ' + d.progression : '')
+               /* The strum-pattern check (coach-strumcheck.js) saves under the Coach's id, marked by its own game field. */
+               : d.game === 'strumcheck' ? 'Strum pattern check' + (Array.isArray(d.bars) ? ' · ' + d.bars.length + ' bars' : '')
                                  : 'Listening Coach' + (d.coachMode ? ' · ' + d.coachMode : '');
     const exp = micTakeExpected(d);
     const right = exp.filter(e => ['ok','oct','perfect','good'].indexOf(e.verdict) >= 0).length;
@@ -143,7 +145,8 @@ function teacherMicDownloadJson(i){
    side, not one round trip after another: Download all and Evaluate all call
    this once per take. `chunks` is off the student-written take doc, so it is
    bounded before it sizes anything — a real take is at most 30 s, three
-   chunks (coach.js MICREC_MAX_SEC / MICREC_CHUNK). */
+   chunks (coach.js MICREC_MAX_SEC / MICREC_CHUNK); a strum-pattern check
+   take at most 60 s, five chunks (SC_REC_MAX_SEC). */
 const TEACHER_MIC_MAX_CHUNKS = 16;
 async function teacherMicChunks(d){
   await ensureDb();

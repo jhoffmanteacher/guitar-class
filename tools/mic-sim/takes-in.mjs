@@ -74,7 +74,11 @@ try {
 
   const loaded = loadAudio(anon, true), total = loaded.total;
   const takes = gamesArg.includes('pw') ? loaded.takes : [];
-  const listen = loaded.listen.filter(t => gamesArg.includes(t.kind === 'nr' ? 'nr' : 'coach'));
+  /* A strum-pattern check take (coach-strumcheck.js, 2026-11-14) is saved under the Coach's id with game 'strumcheck': no summary or
+     replay reads it yet (replay-takes.mjs loadAudio would take it for a melody take), so it is counted and left out. */
+  const strumChecks = loaded.listen.filter(t => t.d && t.d.game === 'strumcheck').length;
+  if (strumChecks) console.log(`${strumChecks} strum-pattern check take(s): not summarized (no replay reads them yet); keep their audio`);
+  const listen = loaded.listen.filter(t => !(t.d && t.d.game === 'strumcheck') && gamesArg.includes(t.kind === 'nr' ? 'nr' : 'coach'));
   console.log(`${total} takes in all: ${loaded.takes.length} Power Chord Switch, ${loaded.listen.filter(t => t.kind !== 'nr').length} Listening Coach, ${loaded.listen.filter(t => t.kind === 'nr').length} Note Runner; writing ${gamesArg.join(', ')}`);
   if (!takes.length && !listen.length) fail('no takes of those games in there: nothing to add');
   /* Which summary is which row of the console's table (2026-11-13: "T02 is the one"). The console numbers its table newest first

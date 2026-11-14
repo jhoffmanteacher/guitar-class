@@ -16887,6 +16887,148 @@ function checkCoachVerdicts() {
    −5 / +5 and the slider redraw it (EN + ES). Totals pinned (COUNTIN_PIN).
    ════════════════════════════════════════════════════════════════════ */
 const COUNTIN_PIN = { runs: 44, beeps: 140, rounds: 9, takes: 6, tips: 28 };   // tips 16 -> 28 (2026-11-09 review R1-1: a song switch from 50, crossing 60)
+/* 1eh. The strum-pattern check (coach-strumcheck.js, 2026-11-14; Jonathan: judge "both on chords and strumming pattern", "listens to
+   pattern in the right slot", "strum in rest counts against", "medium strict", "check chord on the first down strum only"). Pinned and
+   RUN in 1ca's sandbox (the real site scripts):
+     - the data: exactly one strum spec carries `listen`, it is `true`, on ca-46's shared eight-bar step, pattern D.DU.UDU, bars
+       D5 D5 C5 C5 G5 G5 D5 D5 (rests on slots 1 and 4);
+     - the button: buildStrum draws exactly one data-strumcheck button for it (inside the BPM group, carrying the pattern, the bars and
+       every chord's notes) and none for any other strum step, none without a keyPrefix, none in the teacher console (strumCheckBtnHtml
+       run with IS_TEACHER_MODE true);
+     - the window: SC_WIN_FRAC is 0.35 ("medium"); scOnset, run, takes a strum 0.34 of an eighth off its slot and not one 0.36 off, in
+       both directions; a strum near a slot where the hand misses is a fault (an extra), and a bar with one says so;
+     - the chord: only a strum on slot 0 opens a chord reading; the reading's verdict is SC_CHORD_RULE's (rule 'c', pinned) and all
+       three rules give their pinned answers on scripted readings (G5 after C5: G alone, a D, a C, the held C5's C and G);
+     - saves nothing: the part never names saveGames, games, progress, caSteps, flushSave or storage, and a whole finish (scFinish and
+       its report) run with a counting saveGames leaves games untouched and saveGames uncalled;
+     - the end line at 1 bar and at many, in both languages. */
+function checkStrumCheck() {
+  head('1eh. The strum-pattern check on ca-46: the step, the button, the window, the chord on the 1, nothing saved (run)');
+  let bad = 0;
+  const fail = m => { err('1eh (strum-pattern check): ' + m); problems++; bad++; };
+  if (!COACH_SANDBOX) { fail("1ca's sandbox did not load, so the strum-pattern check was NOT run"); return; }
+  const { run } = COACH_SANDBOX;
+  const n = { pins: 0, onsets: 0, chords: 0, lines: 0, strumSteps: 0 };
+  const PIN = { pattern: 'D.DU.UDU', bars: 'D5 D5 C5 C5 G5 G5 D5 D5', rests: '1,4', win: 0.35, rule: 'c' };
+  try {
+    const found = JSON.parse(run(`JSON.stringify(CLASS_ACTIVITIES.flatMap(a => (a.steps || []).map((s, si) => ({ id: a.id, si, path: s.path || null, strum: s.strum || null }))).filter(x => x.strum).map(x => ({ id: x.id, si: x.si, path: x.path, listen: 'listen' in x.strum ? x.strum.listen : '(none)', pattern: x.strum.pattern, bars: x.strum.bars.join(' ') })))`));
+    n.strumSteps = found.length;
+    const listening = found.filter(x => x.listen !== '(none)');
+    if (listening.length !== 1) fail(`${listening.length} strum steps carry "listen" (${listening.map(x => x.id + ' step ' + (x.si + 1)).join(', ') || 'none'}); want exactly one, ca-46's eight bars`);
+    const L = listening[0];
+    if (L){
+      n.pins++;
+      if (L.listen !== true) fail(`${L.id} step ${L.si + 1}: listen is ${JSON.stringify(L.listen)}, want true`);
+      if (L.id !== 'ca-46' || L.path !== null) fail(`the listening step is ${L.id} step ${L.si + 1} (path ${L.path}); want ca-46's shared step`);
+      if (L.pattern !== PIN.pattern) fail(`its pattern is "${L.pattern}", want "${PIN.pattern}"`);
+      if (L.bars !== PIN.bars) fail(`its bars are "${L.bars}", want "${PIN.bars}"`);
+      const rests = run(`scPatternSlots(${JSON.stringify(L.pattern)}).map((x, k) => x.strum ? -1 : k).filter(k => k >= 0).join(',')`);
+      if (rests !== PIN.rests) fail(`scPatternSlots reads the slots where the hand misses as [${rests}], want [${PIN.rests}]`);
+      /* the button, from the site's own builder */
+      const html = run(`buildStrum(CLASS_ACTIVITIES.find(a => a.id === 'ca-46').steps[${L.si}].strum, { keyPrefix: 'bpm:ca:ca-46:${L.si}:strum' })`);
+      const btns = html.match(/data-strumcheck="/g) || [];
+      if (btns.length !== 1) fail(`buildStrum drew ${btns.length} strum-check buttons on the listening step, want 1`);
+      const grp = /<span class="bpm-control-group">([\s\S]*?)<\/span><\/div>/.exec(html);
+      if (!grp || !/data-strumcheck=/.test(grp[1]) || !/class="bpm-slider"/.test(grp[1])) fail('the strum-check button is not inside the step\'s BPM group (readGroupBpm would not find the slider)');
+      if (!/onclick="coachOpenLazy\(this\)"/.test(html)) fail('the strum-check button does not open through coachOpenLazy');
+      const m = /data-strumcheck="([^"]*)"/.exec(html);
+      if (m){
+        const d = JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&'));
+        const want = JSON.parse(run(`JSON.stringify(CLASS_ACTIVITIES.find(a => a.id === 'ca-46').steps[${L.si}].strum)`));
+        if (d.pattern !== want.pattern || d.bars.join(' ') !== want.bars.join(' ')) fail('the button carries another pattern or other bars than the step');
+        Object.keys(want.chords).forEach(c => { if (!d.chords[c] || d.chords[c].midi.join() !== want.chords[c].midi.join()) fail(`the button carries other notes for ${c} than the step`); });
+      }
+      if (/data-strumcheck=/.test(run(`buildStrum(CLASS_ACTIVITIES.find(a => a.id === 'ca-46').steps[${L.si}].strum, {})`))) fail('a board with no keyPrefix (the paths chooser\'s silent preview) drew the strum-check button');
+      const others = run(`CLASS_ACTIVITIES.flatMap(a => (a.steps || []).map((s, si) => ({ a, s, si }))).filter(x => x.s.strum && !('listen' in x.s.strum)).filter(x => /data-strumcheck=/.test(buildStrum(x.s.strum, { keyPrefix: 'k' }))).map(x => x.a.id + ' step ' + (x.si + 1)).join(', ')`);
+      if (others) fail('buildStrum drew the strum-check button on a step without listen: ' + others);
+    }
+    /* the teacher console never gets it: strumCheckBtnHtml run in its own context with IS_TEACHER_MODE true, and false as the control */
+    const src = siteSource('app.js', ROOT), fm = /\nfunction strumCheckBtnHtml\([\s\S]*?\n}\n/.exec(src);
+    if (!fm) fail('app/tab.js no longer has strumCheckBtnHtml');
+    else for (const teacher of [true, false]){
+      const c = { escAttr: x => String(x), t: k => k, IS_TEACHER_MODE: teacher, out: '' };
+      vm.createContext(c);
+      vm.runInContext(fm[0] + `\nout = strumCheckBtnHtml({ listen: true, pattern: 'D.DU.UDU', bars: ['D5'], chords: { D5: { midi: [50, 57, 62] } } }, 'k');`, c);
+      if (teacher && c.out) fail('strumCheckBtnHtml draws the button in the teacher console (IS_TEACHER_MODE): the console must never open the mic');
+      if (!teacher && !/data-strumcheck=/.test(c.out)) fail('strumCheckBtnHtml draws nothing for a student (control)');
+      n.pins++;
+    }
+    /* the window and the slots where the hand misses, through the real scOnset */
+    if (Number(run('SC_WIN_FRAC')) !== PIN.win) fail(`SC_WIN_FRAC is ${run('SC_WIN_FRAC')}, want ${PIN.win} ("medium strict", Jonathan 2026-11-14)`);
+    if (run('SC_CHORD_RULE') !== PIN.rule) fail(`SC_CHORD_RULE is "${run('SC_CHORD_RULE')}", want "${PIN.rule}" (re-pin only with Jonathan's choice)`);
+    run(`globalThis.__sch = (frac, slot) => { const slotMs = 500, s = { slotMs, win: SC_WIN_FRAC * slotMs, total: 16, slots: [], events: [], cells: [], listenStart: 0, gridOffset: 0, lat: 0, cap: null, chords: { D5: { midi: [50, 57, 62] } }, bars: ['D5', 'D5'],
+        caps: [0, 1].map(b => ({ bar: b, chord: 'D5', prev: b ? 'D5' : null, at: null, rt: [], rm: [], done: false })) };
+      const pat = scPatternSlots('${PIN.pattern}');
+      for (let k = 0; k < 16; k++) s.slots.push({ k, bar: k >> 3, slot: k % 8, strum: pat[k % 8].strum, dir: pat[k % 8].dir, state: 'pending' });
+      const rel = (slot + frac) * slotMs; scOnset(s, rel, rel);
+      return JSON.stringify({ state: s.slots[slot].state, kind: s.events[0].kind, cap: !!s.cap, capEnd: s.cap ? s.cap.end : null, faults: scBarFaults(s.slots.slice(0, 8).map(x => x.state === 'pending' ? (x.strum ? 'ok' : 'quiet') : x.state), pat) }); };`);
+    const on = (frac, slot) => { n.onsets++; return JSON.parse(run(`__sch(${frac}, ${slot})`)); };
+    for (const f of [0.34, -0.34]) { const r = on(f, 3); if (r.state !== 'ok') fail(`a strum ${f} of an eighth off slot 3 was "${r.state}", want ok (inside the medium window)`); }
+    for (const f of [0.36, -0.36]) { const r = on(f, 3); if (r.state !== 'pending' || r.kind !== 'between') fail(`a strum ${f} of an eighth off slot 3 was "${r.state}" / ${r.kind}, want not taken ("between")`); }
+    for (const k of [1, 4]) {
+      const r = on(0.2, k);
+      if (r.state !== 'extra') fail(`a strum on slot ${k} (where the hand misses) was "${r.state}", want extra`);
+      if (!r.faults.some(x => x.kind === 'extra' && x.slot === k)) fail(`a bar with a strum on slot ${k} has no "extra" fault`);
+      const q = on(0.4, k);
+      if (q.state === 'extra') fail(`a strum 0.4 of an eighth from slot ${k} counted as an extra (outside the window)`);
+    }
+    for (const k of [2, 3, 5, 6, 7]) { const r = on(0, k); if (r.cap) fail(`a strum on slot ${k} opened a chord reading: the chord is read on the 1 only`); }
+    { const r = on(0, 0); if (!r.cap) fail('a strum on slot 0 opened no chord reading'); else if (!(r.capEnd >= 340 && r.capEnd <= 2 * 500 - 60 + 1e-6)) fail(`the chord reading on the 1 ends ${r.capEnd} ms after it, want from 340 to 60 ms before slot 2`); }
+    /* the chord rules on scripted readings: [bar chord, previous, readings, rule a, rule b, rule c] */
+    const CH = { D5: [50, 57, 62], C5: [48, 55, 60], G5: [43, 50, 55] };
+    const CASES = [
+      ['G5', 'C5', [43, 55, 43, 55], 'ok', 'unheard', 'ok'],
+      ['G5', 'C5', [43, 50, 55, 50], 'ok', 'ok', 'ok'],
+      ['G5', 'C5', [48, 48, 60, 48], 'wrong', 'wrong', 'wrong'],
+      ['G5', 'C5', [48, 55, 48, 55], 'ok', 'wrong', 'wrong'],
+      ['D5', 'G5', [50, 62, 50], 'ok', 'unheard', 'ok'],
+      ['D5', 'G5', [50, 57, 57, 62], 'ok', 'ok', 'ok'],
+      ['C5', 'D5', [50, 57, 50], 'wrong', 'wrong', 'wrong'],
+      ['C5', 'D5', [48, 55], 'ok', 'unheard', 'ok'],
+      ['D5', 'D5', [50, 57, 62], 'ok', 'ok', 'ok']
+    ];
+    for (const [c, p, rd, wa, wb, wc] of CASES) {
+      n.chords++;
+      const r = JSON.parse(run(`(() => { const s = { cells: [], chords: { D5: { midi: [50, 57, 62] }, C5: { midi: [48, 55, 60] }, G5: { midi: [43, 50, 55] } }, cap: null };
+        const cap = { bar: 0, chord: ${JSON.stringify(c)}, prev: ${JSON.stringify(p)}, at: 0, rt: ${JSON.stringify(rd.map((_, i) => 100 + i * 40))}, rm: ${JSON.stringify(rd)}, done: false };
+        scCloseChord(s, cap); return JSON.stringify({ a: cap.a, b: cap.b, c: cap.c, v: cap.verdict }); })()`));
+      if (r.a !== wa || r.b !== wb || r.c !== wc) fail(`${p} -> ${c} with readings [${rd}]: rules a / b / c ${r.a} / ${r.b} / ${r.c}, want ${wa} / ${wb} / ${wc}`);
+      if (r.v !== r[PIN.rule]) fail(`${p} -> ${c}: the verdict shown is "${r.v}", not rule ${PIN.rule}'s "${r[PIN.rule]}"`);
+    }
+    /* saves nothing to progress: the part's text, and a whole finish run with a counting saveGames */
+    const part = siteText('coach-strumcheck.js', ROOT).replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+    /* a name in code, not inside a string ('games.radar.barOfTotal' is an i18n key): not after a letter, a dot or a quote */
+    for (const w of ['saveGames', 'games.', 'games[', 'progress', 'caSteps', 'flushSave', 'localStorage', 'sessionStorage', 'markStep', 'toggleSkill']) if (new RegExp('(?<![\\w.\'"`])' + w.replace(/[.[\]]/g, '\\$&')).test(part)) fail(`coach-strumcheck.js names "${w}": the check must save nothing to progress`);
+    const fin = JSON.parse(run(`(() => { const keepSave = saveGames, keepGames = games; let calls = 0; saveGames = () => { calls++; }; games = {}; micRec = null;
+      try {
+        sc = { phase: 'listening', card: { isConnected: true, remove(){} }, timeouts: [], cells: [], bars: ['D5', 'D5'], chords: { D5: { midi: [50, 57, 62] } }, pattern: '${PIN.pattern}', slotsOf: scPatternSlots('${PIN.pattern}'),
+          slots: [], caps: [], events: [{ kind: 'strum' }], lines: ['x', 'y'], barsDone: 2, cur: -1, cap: null, bpm: 60, beatMs: 1000, slotMs: 500, win: 175, lat: 50, listenStart: 0, gridOffset: 0, where: '' };
+        for (let k = 0; k < 16; k++) sc.slots.push({ k, bar: k >> 3, slot: k % 8, strum: sc.slotsOf[k % 8].strum, dir: sc.slotsOf[k % 8].dir, state: sc.slotsOf[k % 8].strum ? 'ok' : 'quiet' });
+        sc.caps = [0, 1].map(b => ({ bar: b, chord: 'D5', prev: null, at: 0, rt: [], rm: [], verdict: 'ok', a: 'ok', b: 'ok', done: true }));
+        scFinish(true);
+        return JSON.stringify({ calls, keys: Object.keys(games).length, phase: sc ? sc.phase : 'none', body: document.getElementById('coach-body').innerHTML });
+      } finally { saveGames = keepSave; games = keepGames; if (sc) sc.card = { isConnected: false, remove(){} }; scClose(); } })()`));
+    if (fin.calls || fin.keys) fail(`a finished check called saveGames ${fin.calls} times and wrote ${fin.keys} games keys: it must save nothing`);
+    if (fin.phase !== 'report') fail(`scFinish left the check in "${fin.phase}", want report (the control: the finish really ran)`);
+    /* the end line: 0, 1 and many bars, both languages */
+    for (const lang of ['en', 'es']) {
+      run(`setLang(${JSON.stringify(lang)})`);
+      const one = run('scSummaryLine(1, 1, 0)'), many = run('scSummaryLine(8, 6, 7)'), all = run('scSummaryLine(8, 8, 8)'), none = run('scSummaryLine(0, 0, 0)');
+      n.lines += 4;
+      if (lang === 'en' && (!/of 1 bar\./.test(one) || /bars/.test(one))) fail(`en: the end line at 1 bar reads "${one}"`);
+      if (lang === 'es' && (!/de 1 compás\./.test(one) || /compases/.test(one))) fail(`es: the end line at 1 bar reads "${one}"`);
+      if (!/6/.test(many) || !/7/.test(many) || !/8/.test(many)) fail(`${lang}: the end line at 8 bars does not carry 6 and 7 of 8: "${many}"`);
+      const allGood = run(`t('sc.allGood')`);
+      if (!all.includes(allGood) || many.includes(allGood) || one.includes(allGood)) fail(`${lang}: "${allGood}" shows when not every bar was right, or not when every bar was`);
+      if (none !== run(`t('sc.noBars')`)) fail(`${lang}: a check stopped before bar 1 ended says "${none}"`);
+    }
+    run(`setLang('en')`);
+  } catch (e) { fail('stopped on an error: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : e)); }
+  /* pinned totals, so a renamed function cannot turn this into a check of nothing */
+  if (n.onsets !== 14 || n.chords !== 9 || n.lines !== 8 || n.pins !== 3) fail(`ran ${n.onsets} onsets (want 14), ${n.chords} chord cases (9), ${n.lines} end lines (8), ${n.pins} pins (3)`);
+  if (!bad) ok(`1eh: one listening step (ca-46, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, none in the console; window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule} (${n.chords} scripted cases); a whole finish saved nothing; end lines at 0, 1 and many bars in both languages`);
+}
+
 async function checkCountIn() {
   head('1ck. The count-in: 2 clicks below 60 BPM in Power Chord Switch and Change Up, 4 from 60 and in every other game (the real coachCountIn, run)');
   let bad = 0;
@@ -17068,7 +17210,7 @@ async function checkCountIn() {
    ════════════════════════════════════════════════════════════════════ */
 async function checkMicStart() {
   head('1cy. The mic start: the panel before the browser asks, one blocked-mic message, the take\'s mic settings, the set-up line (run)');
-  const PIN = { states: 7, flag: 6, noAsk: 1, lines: 12, wording: 4, exits: 4, tuner: 1, givenUp: 3, retryButton: 2, noteCall: 3, never: 1, callersWithAsk: 8, trainerCalls: 2, failMsgs: 8, settings: 4, keys: 1, takeDoc: 1, setupScreens: 8, micCheck: 8 };
+  const PIN = { states: 7, flag: 6, noAsk: 1, lines: 12, wording: 4, exits: 4, tuner: 1, givenUp: 3, retryButton: 2, noteCall: 3, never: 1, callersWithAsk: 9, trainerCalls: 2, failMsgs: 8, settings: 4, keys: 1, takeDoc: 1, setupScreens: 8, micCheck: 8 };
   const tot = { states: 0, flag: 0, noAsk: 0, lines: 0, wording: 0, exits: 0, tuner: 0, givenUp: 0, retryButton: 0, noteCall: 0, never: 0, callersWithAsk: 0, trainerCalls: 0, failMsgs: 0, settings: 0, keys: 0, takeDoc: 0, setupScreens: 0, micCheck: 0 };
   let bad = 0;
   const fail = m => { err('1cy: ' + m); problems++; bad++; };
@@ -19574,6 +19716,7 @@ function checkPracticeMinutes(i18nTable) {
   checkToneTest();
   await checkCountIn();
   await checkMicStart();
+  checkStrumCheck();
   await checkPwTakeEvaluator();
   checkPracticeMinutes(i18nTable);
   checkNoStudentDataHook();
