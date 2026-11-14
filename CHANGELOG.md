@@ -6,6 +6,13 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-14 — Power Chord Switch checks the chord, not the timing
+
+- **Play the right chord any time before the next switch.** A change counts as right when you strum the new chord while it is the chord on screen, early or late. A strum a little before the switch counts too.
+- **The ✓ shows as soon as the right chord is heard.** "Wrong chord" or "no strum heard" shows only when the chord's time is over, so a wrong strum early on can still be fixed.
+- **No more "on time" on the end screen.** It counts right changes, chords that sounded wrong and strums not heard.
+- **Change Up is unchanged.** It still checks that you change chords in time with the beat.
+
 ## 2026-11-14 — A Listening Coach check for the strum pattern
 
 - **A new green button in the strum pattern activity.** On the step with the eight bars of D5, C5 and G5, click "Listening Coach — click here to get feedback", then "Start the check", and play the eight bars once after the four clicks.
