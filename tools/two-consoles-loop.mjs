@@ -21,7 +21,7 @@
 
    WHAT IS REAL. Each console is its own vm context holding the site's scripts unchanged, in index.html's order:
    config-main.js, class-activities.js, i18n.js, guitar-diagrams.js, the app parts (site-src.mjs), practice-minutes,
-   then the whole console script (siteSource('teacher.js')), the module files when showTeacherApp asks for them, and
+   live-quiz.js (2026-11-14: the Live In-Class Games list reads its game bank), then the whole console script (siteSource('teacher.js')), the module files when showTeacherApp asks for them, and
    index.html's <body> as its DOM (a small DOM in this file: innerHTML is parsed into a tree, so querySelector, closest,
    dataset and textContent answer as a browser's would; no layout). Each console boots with its own showTeacherApp,
    and holds its own teacherClassConfig, teacherConfigVersion, timers and alerts. The real teacherWriteConfig,
@@ -60,6 +60,12 @@
                       Manage, Games, Songs or Teacher songs 30–900 ms after its click, half the time then Refresh;
                       3 slots in 29 (about 103 of 1,000): the null-read mutant fails 12 of 300 of these (4%), so a
                       default run catches it with about 98.5% from this family alone
+     live-games       (2026-11-14) both consoles work the Live In-Class Games list (teacher-livegames.js, lqgWrite): 2–4
+                      clicks each — move (▲ ▼ / the # box), rename, Remove / Restore — half the time starting on the SAME
+                      game. NOT in the cycle (that would renumber every seed's schedules): a default run of 200+ schedules
+                      runs 60 of them AFTER the main ones, shown as its own row "live-games (+)" under "all"; replay with
+                      --family live-games --schedule K. A click while the list is greyed (lqgBusy) is skipped, as a
+                      greyed button is. Break-it (2026-11-14): lqgWrite cell-checked on a wrong cell → 31 of 60 red.
    A quarter of solo / random schedules run on a flaky network (12% of commit requests are lost: the write fails,
    nothing is written), and in 30% of them a console starts clicking from 100 ms, while it is still booting (a click
    on a control that is not drawn yet is skipped; view switches are not).
@@ -67,10 +73,12 @@
    Hidden / Visible, Optional / Required, pin / unpin, set and clear a release date, Who for one student and Back to
    whole class, rename, Play Along, move a song to Songs and back, a student's Open through, period, games and paused,
    the class games switch, Hide all / Show all, a gate Clear, Clear all, Open everyone through N, archive a student,
-   a teacher-only song to Class activities. That is 24 of the 27 `await teacherWriteConfig(` call sites; the run counts
+   a teacher-only song to Class activities, and the Live In-Class Games list's one writer (lqgWrite: move, rename, Remove /
+   Restore; the live-games family). That is 25 of the 28 `await teacherWriteConfig(` call sites; the run counts
    them off the async stack and fails (on 200+ schedules, no --family) if a covered one was never called. Not driven: the one-time
    board migration (teacherMigrateActivityBoard), mic sampling (teacherSetMicSampling), the practice-minutes goal
-   (teacherSetPmWeekGoal). Out of scope (work order): the roster and progress reads, practice minutes, the live quiz.
+   (teacherSetPmWeekGoal). Out of scope (work order): the roster and progress reads, practice minutes, the live quiz's own session
+   (liveQuiz/current; its games LIST in config/class is in scope since 2026-11-14).
 
    CHECKS, after each schedule has gone quiet (a failure in any one exits 1):
      corruption        two cards on a unit's board share a position; a malformed board row; a key the console never
@@ -172,6 +180,11 @@
      M27 what blocks a student: on the board (M4), not archived / deleted / Hidden, given to them (empty Who = all),
          dated on or before today, Required (the flag, else the M11 default), not done on their own doc, not cleared;
          a CAS student (override, else their own period) is blocked by nothing
+     M28 the Live In-Class Games list (liveGames): the full order = the saved order's bank ids, then the bank's others in
+         bank order; on screen = the full order without removed games. Move X to N: X out of the full order, back in just
+         before the game shown at N (moving up) or just after it (moving down); liveGames.order = that whole array.
+         Rename: names[X] = {en, es} (spaces squeezed, trimmed, ≤ 60), both empty removes it. Remove: removed[X] = true;
+         Restore removes it. The game ids are read from live-quiz.js in a bare context, as data.
    Removing an entry from a map that is not there creates nothing. Independence: section 9 calls no console function
    (grep it: no ctx, no peek, no teacher…(), no ca…()); the one console state it reads is the screen above, as data,
    through screenOf / placementOf, and only for those decisions. The checks OUTSIDE the model also read console state:
@@ -818,6 +831,9 @@ function compileSite(root, consoleFile) {
   for (const f of ['config-main.js', 'class-activities.js', 'i18n.js', 'guitar-diagrams.js']) scripts.push(S(f, read(f)));
   scripts.push(S('app (all parts)', siteSource('app.js', root)));
   for (const f of ['practice-minutes-config.js', 'practice-minutes.js']) if (existsSync(join(root, f))) scripts.push(S(f, read(f)));
+  // live-quiz.js: index.html loads it on every page; the console's Live In-Class Games list (teacher-livegames.js, lqgWrite)
+  // reads its game bank (LIVE_QUIZZES) and repaints its controls (lqPaintControls). Added 2026-11-14 for the live-games family.
+  if (existsSync(join(root, 'live-quiz.js'))) scripts.push(S('live-quiz.js', read('live-quiz.js')));
   const consoleText = consoleFile ? readFileSync(consoleFile, 'utf8') : siteSource('teacher.js', root);
   const consoleName = consoleFile ? 'console (' + consoleFile + ')' : 'console (all teacher-*.js parts)';
   scripts.push(S(consoleName, consoleText));
@@ -838,6 +854,14 @@ function loadActivityData(root) {
   vm.runInContext(readFileSync(join(root, 'class-activities.js'), 'utf8'), c);
   return JSON.parse(JSON.stringify(c.CLASS_ACTIVITIES.map(a => ({ id: a.id, title: a.title, title_power: a.title_power, kind: a.kind || null, library: a.library,
     teacherOnly: a.teacherOnly === true, optional: a.optional === true, number: a.number, journey: !!a.journey, wholeOrSheet: !!(a.card && (a.card.wholeSong || a.card.sheet)) }))));
+}
+
+// The live game bank's ids alone (LIVE_QUIZZES' keys, in bank order), in a bare context: data for M28 and the generator.
+function loadLiveGameIds(root) {
+  if (!existsSync(join(root, 'live-quiz.js'))) return [];
+  const noop = () => {}, c = { document: { addEventListener: noop, getElementById: () => null }, addEventListener: noop }; c.window = c; vm.createContext(c);
+  vm.runInContext(readFileSync(join(root, 'live-quiz.js'), 'utf8') + ';globalThis.__ids = Object.keys(LIVE_QUIZZES);', c);
+  return [...c.__ids];
 }
 
 function makeConsole(W, label) {
@@ -914,7 +938,7 @@ function makeConsole(W, label) {
   }) };
   vm.runInContext(`
     globalThis.__peek = () => ({ cfg: teacherClassConfig, v: teacherConfigVersion, view: teacherView, open: teacherConfigWritesOpen,
-      board: activityBoardMode, loaded: teacherClassConfigLoaded, screen: (typeof teacherActivityScreen === 'function' && teacherView === 'activities') ? teacherActivityScreen() : '' });
+      board: activityBoardMode, loaded: teacherClassConfigLoaded, lqgBusy: typeof lqgBusy !== 'undefined' && lqgBusy === true, screen: (typeof teacherActivityScreen === 'function' && teacherView === 'activities') ? teacherActivityScreen() : '' });
   `, ctx);
   ctx.__db = makeDb(W.server, label, () => { try { return ctx.__peek().v; } catch { return null; } });
   vm.runInContext('db = __db;', ctx);
@@ -1022,7 +1046,7 @@ async function probe() {
    decisions listed in the header. Every rule
    is listed in this file's header (M1–M27); the numbers match.
    ════════════════════════════════════════════════════════════════════════ */
-let DATA = null, DATA_BY_ID = null;
+let DATA = null, DATA_BY_ID = null, LIVE_GAME_IDS = [];
 const M = {
   // M1: a "song card" can move between Class activities and the Songs page: its data carries library true/false, it is not an exit check, not tied to a Song Journey page, not a whole-song card or lyric sheet.
   isSongCard: a => !!a && (a.library === true || a.library === false) && a.kind !== 'check' && !a.journey && !a.wholeOrSheet,
@@ -1062,6 +1086,29 @@ const M = {
   setIn(doc, map, key, val) { if (!isMap(doc[map])) doc[map] = {}; doc[map][key] = val; },
   // Removing an entry from a map that is not there leaves no map behind.
   delIn(doc, map, key) { if (isMap(doc[map])) delete doc[map][key]; },
+  /* M28 (the Live In-Class Games list, liveGames in config/class; the rules as teacher-livegames.js's header states them):
+     the full order is the saved order (ids the bank has, first time each), then every bank game it lacks, in bank order;
+     a game is removed when liveGames.removed[id] === true; the list on screen is the full order without removed games. */
+  lqg(doc) { const g = doc.liveGames; return isMap(g) ? g : {}; },
+  lqgAll(doc) {
+    const g = M.lqg(doc), seen = new Set(), out = [];
+    (Array.isArray(g.order) ? g.order : []).forEach(id => { if (LIVE_GAME_IDS.includes(id) && !seen.has(id)) { seen.add(id); out.push(id); } });
+    LIVE_GAME_IDS.forEach(id => { if (!seen.has(id)) { seen.add(id); out.push(id); } });
+    return out;
+  },
+  lqgRemoved(doc, id) { const r = M.lqg(doc).removed; return isMap(r) && r[id] === true; },
+  lqgActive(doc) { return M.lqgAll(doc).filter(id => !M.lqgRemoved(doc, id)); },
+  /* Move game X to number N on the list as the teacher saw it: X is taken out of the full order and put back just before
+     the game shown at N when moving up, just after it when moving down (removed games keep their slots). null = no move. */
+  lqgMoved(screen, id, n) {
+    const act = M.lqgActive(screen), cur = act.indexOf(id) + 1;
+    if (!cur || n < 1 || n > act.length || n === cur) return null;
+    const target = act[n - 1], rest = M.lqgAll(screen).filter(x => x !== id), ti = rest.indexOf(target);
+    rest.splice(n > cur ? ti + 1 : ti, 0, id);
+    return rest;
+  },
+  lqgSet(doc, sub, key, val) { if (!isMap(doc.liveGames)) doc.liveGames = {}; const g = doc.liveGames; if (key === null) { g[sub] = val; return; } if (!isMap(g[sub])) g[sub] = {}; g[sub][key] = val; },
+  lqgDel(doc, sub, key) { if (isMap(doc.liveGames) && isMap(doc.liveGames[sub])) delete doc.liveGames[sub][key]; },
   /* `screen` is the copy the write was worked out from (screenOf, placementOf): the model reads it for ONE thing, the DECISION the
      teacher made looking at it (which cards Hide all / Clear all / Open everyone cover, the card's default under
      Optional / Required, whether an archived card was pinned). The EFFECT of that decision is applied to the doc as it
@@ -1161,6 +1208,17 @@ const M = {
       case 'studentArchived': if (a.state === 'archive') M.setIn(doc, 'archived', a.uid, true); else M.delIn(doc, 'archived', a.uid); break;
       // M26: a teacher-only card to Class activities: classSongs[X] = true; back to Teacher only removes it.
       case 'classSong': if (a.on) M.setIn(doc, 'classSongs', a.id, true); else M.delIn(doc, 'classSongs', a.id); break;
+      // M28: the Live In-Class Games list. Move: liveGames.order = the full order moved as the screen showed it (M.lqgMoved),
+      //      the whole array. Rename: liveGames.names[X] = {en, es}, each with its spaces squeezed and trimmed (60 characters
+      //      at most); both empty removes it (the generator never types a built-in title). Remove: liveGames.removed[X] = true;
+      //      Restore removes the flag.
+      case 'lqgMove': { const next = M.lqgMoved(screen, a.id, a.n); if (next) M.lqgSet(doc, 'order', null, next); break; }
+      case 'lqgName': {
+        const cl = v => String(v || '').replace(/\s+/g, ' ').trim().slice(0, 60), en = cl(a.en), es = cl(a.es);
+        if (!en && !es) M.lqgDel(doc, 'names', a.id); else M.lqgSet(doc, 'names', a.id, { en, es });
+        break;
+      }
+      case 'lqgRemove': if (a.removed) M.lqgSet(doc, 'removed', a.id, true); else M.lqgDel(doc, 'removed', a.id); break;
       default: throw new Error('model: no rule for ' + act.kind);
     }
     // M20: every accepted write moves configVersion on by exactly one.
@@ -1176,7 +1234,7 @@ const M = {
    purpose, and a gap changes neither the order nor any #N students see (#N is counted along the order). */
 const DOC_KEYS = new Set(['configVersion', 'gamesEnabled', 'gameOverrides', 'activityBoard', 'activityBoardSeeded', 'activityDates', 'hiddenActivities', 'optionalActivities',
   'archivedActivities', 'deletedActivities', 'activityPins', 'activityStudents', 'activityTitles', 'playAlongActivities', 'activityNumbers', 'activityClears', 'songLibrary',
-  'classSongs', 'archived', 'paused', 'periodOverrides', 'moduleOpenThrough', 'pmWeekGoals', 'micSampling']);
+  'classSongs', 'archived', 'paused', 'periodOverrides', 'moduleOpenThrough', 'pmWeekGoals', 'micSampling', 'liveGames']);
 function corruption(doc, gaps, dups) {
   const out = [];
   Object.keys(doc).forEach(k => { if (!DOC_KEYS.has(k)) out.push(`a key the console never writes: ${k}`); });
@@ -1245,7 +1303,12 @@ const WRITERS = {
   clearAll: (c, a) => c.teacherClearAllBlockers(a.uid),
   openAll: c => c.teacherOpenAllThrough(),
   studentArchived: (c, a) => c.teacherSetStudentArchived(a.uid, a.state),
-  classSong: (c, a) => c.teacherSetClassSong(a.id, a.on)
+  classSong: (c, a) => c.teacherSetClassSong(a.id, a.on),
+  // The Live In-Class Games list (teacher-livegames.js): ▲ ▼ / the # box, Save in the rename editor, Remove / Restore.
+  // lqgMoveTo does not return lqgWrite's promise; its commits and alerts are still this click's (the async context).
+  lqgMove: (c, a) => c.lqgMoveTo(a.id, a.n),
+  lqgName: (c, a) => c.lqgSetName(a.id, a.en, a.es),
+  lqgRemove: (c, a) => c.lqgSetRemoved(a.id, a.removed)
 };
 const VIEWERS = {
   view: (c, a) => c.setTeacherView(a.v),
@@ -1254,7 +1317,10 @@ const VIEWERS = {
   pick: (c, a) => c.teacherPickActivity(a.id),
   refresh: c => c.teacherRefreshStudents({ manual: true })
 };
-const FAMILIES = ['solo', 'random', 'diff-switch', 'same-cell', 'same-unit-moves', 'move-vs-switch', 'delete-vs-edit', 'burst', 'map-cells', 'optional-vs-who', 'songs-and-back', 'pin-pair', 'student-cells', 'view-mid-write'];
+const FAMILIES = ['solo', 'random', 'diff-switch', 'same-cell', 'same-unit-moves', 'move-vs-switch', 'delete-vs-edit', 'burst', 'map-cells', 'optional-vs-who', 'songs-and-back', 'pin-pair', 'student-cells', 'view-mid-write', 'live-games'];
+/* live-games is NOT in the cycle (adding it would renumber every schedule of every seed): a default run of 200+ schedules
+   runs LIVE_GAMES_N of them after the main ones, as if with --family live-games (replay: --family live-games --schedule K). */
+const LIVE_GAMES_N = 60;
 const FAMILY_CYCLE = ['solo', 'solo', 'solo', 'random', 'random', 'random', 'random', 'random', 'random', 'diff-switch', 'diff-switch', 'same-cell', 'same-cell',
   'same-unit-moves', 'same-unit-moves', 'move-vs-switch', 'move-vs-switch', 'delete-vs-edit', 'delete-vs-edit', 'burst', 'map-cells', 'optional-vs-who', 'optional-vs-who',
   'songs-and-back', 'pin-pair', 'student-cells', 'view-mid-write', 'view-mid-write', 'view-mid-write'];
@@ -1332,6 +1398,19 @@ function genSchedule(seed, k, famOverride) {
       add('B', dA + rng.int(-120, 120), rng.pick(['hidden', 'date', 'rename', 'playAlong']), { id: y });
       add('A', dA + rng.int(30, 900), 'view', { v: rng.pick(['manage', 'games', 'songs', 'tsongs']) });
       if (rng() < 0.5) add('A', dA + rng.int(900, 2500), 'refresh');
+    } else if (family === 'live-games') {
+      // Both consoles work the Live In-Class Games list: 2-4 clicks each (move, rename, Remove / Restore), some within
+      // 100 ms of the console's own last one, half the time on the SAME game as the other console's first click.
+      const shared = rng.pick(LIVE_GAME_IDS);
+      for (const c of S.consoles) {
+        let t = (c === 'A' ? dA : dB);
+        const n = rng.int(2, 4);
+        for (let i = 0; i < n; i++) {
+          const kind = rng.pick(['lqgMove', 'lqgMove', 'lqgName', 'lqgRemove']);
+          add(c, t, kind, i === 0 && rng() < 0.5 ? { id: shared } : {});
+          t += rng() < 0.4 ? rng.int(0, 100) : rng.int(300, 1500);
+        }
+      }
     } else throw new Error('unknown family ' + family);
   }
   S.steps.sort((a, b) => a.at - b.at || a.order - b.order);
@@ -1391,6 +1470,14 @@ function resolveClick(step, cfg, label, n) {
     case 'period': return W('period', { uid, value: pick(['4', '7', 'CAS', 'auto'], r[2]) });
     case 'studentGames': return W('studentGames', { uid, state: pick(['default', 'on', 'off'], r[2]) });
     case 'paused': return W('paused', { uid, state: map('paused')[uid] === true ? 'active' : 'paused' });
+    case 'lqgMove': {
+      const act = M.lqgActive(cfg), x = f.id && act.includes(f.id) ? f.id : pick(act, r[0]);
+      if (!x || act.length < 2) return W('skip', { why: 'fewer than two games on the list' });
+      const cur = act.indexOf(x) + 1, others = act.map((_, i) => i + 1).filter(i => i !== cur);
+      return W('lqgMove', { id: x, n: pick(others, r[1]) });
+    }
+    case 'lqgName': { const x = f.id || pick(LIVE_GAME_IDS, r[0]); return W('lqgName', { id: x, en: r[1] < 0.25 ? '' : 'Game by ' + label + ' ' + n, es: r[2] < 0.5 ? '' : 'Juego de ' + label + ' ' + n }); }
+    case 'lqgRemove': { const x = f.id || pick(LIVE_GAME_IDS, r[0]); return W('lqgRemove', { id: x, removed: !M.lqgRemoved(cfg, x) }); }
     default: throw new Error('no click for ' + step.kind);
   }
 }
@@ -1431,6 +1518,9 @@ function depsOf(act) {
     case 'paused': return [P('paused.' + a.uid)];
     case 'studentGames': return [P('gameOverrides.' + a.uid)];
     case 'classGames': return [P('gamesEnabled')];
+    case 'lqgMove': return [P('liveGames.order')];
+    case 'lqgName': return [P('liveGames.names.' + a.id)];
+    case 'lqgRemove': return [P('liveGames.removed.' + a.id)];
     default: return null;
   }
 }
@@ -1448,6 +1538,7 @@ function fire(W, step) {
     else if (step.kind === 'pick') { const ids = ACT_IDS.filter(id => DATA_BY_ID[id] && !M.onSongsPage(DATA_BY_ID[id], p.cfg) && !M.offBoardTeacherOnly(DATA_BY_ID[id], p.cfg)); click = p.view === 'activities' && p.screen === 'split' ? { kind: 'pick', args: { id: ids[Math.floor(step.r[0] * ids.length)] } } : { kind: 'skip', args: { why: 'no list on screen' } }; }
     else click = { kind: step.kind, args: { ...step.fixed } };
   } else if (!p.loaded) click = { kind: 'skip', args: { why: step.kind + ': nothing on screen to click yet (still booting)' } };
+  else if (/^lqg/.test(step.kind) && p.lqgBusy) click = { kind: 'skip', args: { why: step.kind + ': the games list is greyed while its write is out (lqgBusy)' } };
   else click = resolveClick(step, p.cfg || {}, step.console, n);
   // Open everyone through N reads its module from the Manage view's own select: set it as the teacher would, or there is nothing to click.
   if (click.kind === 'openAll') { const sel = C.doc.getElementById('t-open-all-select'); if (sel) sel.value = String(click.args.n); else click = { kind: 'skip', args: { why: 'openAll: the Manage view is not drawn' } }; }
@@ -1769,7 +1860,7 @@ const pct = (a, b) => b ? (100 * a / b).toFixed(1) + '%' : '—';
 async function workerMain() {
   const o = workerData;
   SITE = compileSite(o.root, o.consoleFile);
-  DATA = loadActivityData(o.root); DATA_BY_ID = {}; DATA.forEach(a => { DATA_BY_ID[a.id] = a; });
+  DATA = loadActivityData(o.root); DATA_BY_ID = {}; DATA.forEach(a => { DATA_BY_ID[a.id] = a; }); LIVE_GAME_IDS = loadLiveGameIds(o.root);
   for (const k of o.ks) { heartbeat(`schedule ${k}: starting`, true); parentPort.postMessage({ type: 'result', R: await runSchedule(k, o) }); }
   parentPort.postMessage({ type: 'end' });
 }
@@ -1804,7 +1895,7 @@ async function main() {
   }
   const root = resolve(opt('--root', REPO));
   SITE = compileSite(root, opt('--console', null));
-  DATA = loadActivityData(root); DATA_BY_ID = {}; DATA.forEach(a => { DATA_BY_ID[a.id] = a; });
+  DATA = loadActivityData(root); DATA_BY_ID = {}; DATA.forEach(a => { DATA_BY_ID[a.id] = a; }); LIVE_GAME_IDS = loadLiveGameIds(root);
   const ks = o.only !== null ? [Number(o.only)] : Array.from({ length: o.n }, (_, i) => i);
   const nW = Math.max(1, Math.min(ks.length, Number(opt('--workers', Math.min(4, Math.max(1, availableParallelism() >> 1))))));
   let results = [];
@@ -1814,6 +1905,13 @@ async function main() {
     const R = await runSchedule(k, o);
     results.push(R);
     if (o.verbose) { console.log(`── schedule ${k} (${R.family}), seed ${o.seed}: every read, attempt, commit, refusal and alert in virtual-time order ──`); R.timeline.forEach(l => console.log(l)); console.log(''); }
+  }
+  // The live-games block (not in the cycle; see LIVE_GAMES_N): on a default run of 200+ schedules, after the main ones.
+  if (!o.family && o.only === null && results.length >= 200 && LIVE_GAME_IDS.length) {
+    const lk = Array.from({ length: LIVE_GAMES_N }, (_, i) => i), lo = { ...o, family: 'live-games' };
+    const lr = nW > 1 ? await runInWorkers(lk, { ...lo, root, consoleFile: opt('--console', null) }, Math.min(nW, lk.length)) : [];
+    if (nW <= 1) for (const k of lk) { heartbeat(`live-games schedule ${k}: starting`, true); lr.push(await runSchedule(k, lo)); }
+    results = results.concat(lr);
   }
   // The table.
   const fam = {};
@@ -1832,8 +1930,11 @@ async function main() {
   L('family            schedules  writes  accepted  refused+told  refused  failed  no write | all landed  some refused, all told | failing');
   const row = (name, f) => L(`${name.padEnd(17)} ${String(f.schedules).padStart(9)} ${String(f.writes).padStart(7)} ${String(f.accepted).padStart(9)} ${String(f.refusedTold).padStart(13)} ${String(f.refused).padStart(8)} ${String(f.failed).padStart(7)} ${String(f.noWrite).padStart(9)} | ${(f.allLanded + ' of ' + f.schedules).padStart(10)}  ${(f.someRefusedAllTold + ' of ' + f.schedules).padStart(22)} | ${String(f.failing).padStart(7)}`);
   const tot = { schedules: 0, writes: 0, accepted: 0, refusedTold: 0, refused: 0, failed: 0, noWrite: 0, allLanded: 0, someRefusedAllTold: 0, failing: 0 };
-  FAMILIES.filter(f => fam[f]).forEach(f => { row(f, fam[f]); Object.keys(tot).forEach(x => { tot[x] += fam[f][x]; }); });
+  // The live-games block, run after the main schedules, is its own row below "all" (so "all" stays the main run's N).
+  const extra = !o.family && fam['live-games'] ? ['live-games'] : [];
+  FAMILIES.filter(f => fam[f] && !extra.includes(f)).forEach(f => { row(f, fam[f]); Object.keys(tot).forEach(x => { tot[x] += fam[f][x]; }); });
   row('all', tot);
+  extra.forEach(f => row(f + ' (+)', fam[f]));
   L('');
   const solo = results.filter(R => R.consoles === 1), two = results.filter(R => R.consoles === 2), rand = results.filter(R => R.family === 'random');
   const withAlert = rs => rs.filter(R => R.staleAlerts > 0).length, withSelf = rs => rs.filter(R => R.selfInflicted > 0).length;
@@ -1859,7 +1960,7 @@ async function main() {
   const cats = {}; failing.forEach(R => R.problems.forEach(p => { cats[p.cat] = (cats[p.cat] || 0) + 1; }));
   if (failing.length) {
     L(`✗ ${failing.filter(R => R.k !== 'run').length} of ${nSched} schedules failed${failing.some(R => R.k === 'run') ? ', and the run itself failed' : ''}: ` + Object.keys(cats).sort().map(c => `${c} ×${cats[c]}`).join(', '));
-    failing.slice(0, 25).forEach(R => { L(`  ✗ schedule ${R.k} (${R.family}) — ${R.problems[0].cat}: ${R.problems[0].msg}${R.problems.length > 1 ? ` (+${R.problems.length - 1} more)` : ''}`); L(`      replay: node tools/two-consoles-loop.mjs --seed ${o.seed}${o.family ? ' --family ' + o.family : ''} --schedule ${R.k} --verbose`); });
+    failing.slice(0, 25).forEach(R => { L(`  ✗ schedule ${R.k} (${R.family}) — ${R.problems[0].cat}: ${R.problems[0].msg}${R.problems.length > 1 ? ` (+${R.problems.length - 1} more)` : ''}`); L(`      replay: node tools/two-consoles-loop.mjs --seed ${o.seed}${o.family ? ' --family ' + o.family : R.family === 'live-games' ? ' --family live-games' : ''} --schedule ${R.k} --verbose`); });
     if (failing.length > 25) L(`  … and ${failing.length - 25} more (--json for all)`);
   } else L(`✓ no corruption, no lost or false save, every refusal told exactly once, no dead view, every console matched the server after its next read — ${results.length} of ${results.length} schedules`);
   console.log(lines.join('\n'));
