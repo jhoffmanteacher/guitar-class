@@ -49,9 +49,12 @@
       minutes/{uid}/meta/board         { id }                      (the tag: create-only, owner-only)
   Nothing else: no heartbeat, no live count (see NO LIVE COUNT below), and no class rank board any more
   (rankBoard/{tag} is neither written nor read since 2026-11-13; see YOUR OWN WEEKS).
-  Who else reads them: only the teacher console's Practice minutes view (teacher.js, 2026-11-06), which reads
-  minutes/{uid}/weeks/* for every student (the one teacher grant under minutes/ in firestore.rules) and works the
-  rank and Top 5 out itself with calc.rankPlace / calc.top5Place; it never reads days, meta/board or any board.
+  Who else reads them: the teacher console. Its Practice minutes view (teacher.js, 2026-11-06) reads
+  minutes/{uid}/weeks/* for every student and works the rank and Top 5 out itself with calc.rankPlace /
+  calc.top5Place. Since 2026-11-13 its Students view's "Back from an absence" filter reads the last 14 days of
+  minutes/{uid}/days/* (which days a student saved work, teacher-students.js teacherAbsDaysGet; the
+  student's own "Since your last visit" group reads the same records). Those are the two teacher grants under
+  minutes/ in firestore.rules, both read-only; the console never reads meta/board or any board.
   The rank is the teacher's column only: no student sees a class rank (2026-11-13).
    Seconds are kept whole; the display floors to whole minutes. They are added
    with increment(), so two tabs or two devices never overwrite each other.

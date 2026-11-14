@@ -10736,9 +10736,13 @@ function checkTodayByDate(ctx) {
         fold loses them), Today's section byte-identical to the page without
         the group, a page with nothing missed byte-identical, a card released
         in the gap for another student only, a failed progress load, after one
-        card is done (caToggleComplete) and after all are done. Pinned
+        card is done (caToggleComplete) and after all are done; and the read
+        itself (the real caSinceLoad over a fake Firestore) landing while a
+        card is open (caOpenId): nothing is repainted under the open card,
+        then "All activities" (the real caCloseOpen) shows the group; with no
+        card open it paints at once. Pinned
         SINCE_RENDERS page renders and SINCE_ASSERTS assertions. */
-const SINCE_CASES = 13, SINCE_RENDERS = 32, SINCE_ASSERTS = 67;
+const SINCE_CASES = 13, SINCE_RENDERS = 40, SINCE_ASSERTS = 73;
 function checkSinceLastVisit(ctx) {
   head('1ds. "Since your last visit": two or more class days with no saved work → the missed required cards under Today, newest first');
   let bad = 0, asserts = 0, renders = 0, cases = 0;
@@ -10817,7 +10821,7 @@ function checkSinceLastVisit(ctx) {
       run(`progressLoadFailed = true; caSinceRead = { key: 'test-0|${D.fri}', state: 'ok', at: 0, last: ${J(D.tue)} };`);
       want(run(`caSinceLastVisit(${J(D.fri)})`) === null, 'B a failed progress load must show no group (what is done is not known)');
       run('progressLoadFailed = false;');
-      renderPart();
+      return renderPart();
     }).catch(e => { flag('the read part threw — ' + e.message); restore(); });
   } catch (e) {
     flag('the read part threw — ' + e.message);
@@ -10830,7 +10834,8 @@ function checkSinceLastVisit(ctx) {
     try { if (keepFb === undefined) run('delete window.firebase'); else { ctx.__fb = keepFb; run('window.firebase = __fb; delete window.__fb'); } run('delete window.__fakeDb'); } catch (e) { /* nothing to put back */ }
     delete ctx.__r; delete ctx.__s; delete ctx.__q; delete ctx.__l;
   }
-  function renderPart() {
+  async function renderPart() {
+    const realLoad = saved[STATE.indexOf('caSinceLoad')];
     try {
       const body = origGet('class-activities-body');
       const resume = origGet('resume-card');
@@ -10933,6 +10938,35 @@ function checkSinceLastVisit(ctx) {
         setUp(MON, lang, undefined, D.mon); const plainMon = page('renderClassActivities()');
         want(r.html === plainMon.html && r.sinceN === 0 && r.todo.includes(A), `${lang} 1 missed day, not yesterday: group ${J(r.since)} — one missed class day must show no group, Friday's card stays in the Unfinished fold (fold ${J(r.todo)})`);
         want(plainMon.today.length === 1 && plainMon.today[0] === B, `${lang} the Monday page: Today ${J(plainMon.today)}, expected ${J([B])}`);
+        /* 13. The read lands while a card is open (a deep link opened it first). The real caSinceLoad runs against the fake
+           Firestore (one record: Monday). Nothing may repaint under the open card; "All activities" (the real caCloseOpen)
+           then repaints, with the group. 14. The same answer with no card open paints at once. */
+        const keepCss = ctx.CSS;
+        if (!ctx.CSS) ctx.CSS = { escape: x => String(x) };
+        ctx.__q.docs = [{ id: D.mon }];
+        ctx.__realLoad = realLoad;
+        const live = async fn => { ctx.document.getElementById = id => id === 'class-activities-body' ? body : id === 'resume-card' ? resume : origGet(id);
+          try { return await fn(); } finally { ctx.document.getElementById = origGet; } };
+        const settle = () => new Promise(res => setTimeout(res, 0));
+        try {
+          setUp(WEEK, lang); run(`caSinceLoad = __realLoad; ensureDb = () => window.__fakeDb;`);
+          page('renderClassActivities()');
+          run(`caOpenId = ${J(Dd)}`);
+          body.innerHTML = 'UNDER-THE-OPEN-CARD';
+          await live(async () => { run(`caSinceLastVisit(${J(TODAY)})`); await settle(); await settle(); });
+          const st = run('({ state: caSinceRead && caSinceRead.state, last: caSinceRead && caSinceRead.last, wait: caSinceRepaint })');
+          want(String(body.innerHTML) === 'UNDER-THE-OPEN-CARD' && st.state === 'ok' && st.last === D.mon && st.wait === true,
+            `${lang} the read landing with a card open: ${J(st)}, page ${String(body.innerHTML) === 'UNDER-THE-OPEN-CARD' ? 'untouched' : 'REPAINTED under the open card'}; expected ok, ${D.mon}, a repaint waiting, the page untouched`);
+          r = page('caCloseOpen()');
+          want(J(r.since) === J([Dd, E, C]) && run('caSinceRepaint') === false && run('caOpenId') === null, `${lang} "All activities" after the read landed: group ${J(r.since)}, waiting ${run('caSinceRepaint')}; expected ${J([Dd, E, C])} and no repaint left waiting`);
+          setUp(WEEK, lang); run(`caSinceLoad = __realLoad; ensureDb = () => window.__fakeDb;`);
+          page('renderClassActivities()');
+          body.innerHTML = '';
+          await live(async () => { run(`caSinceLastVisit(${J(TODAY)})`); await settle(); await settle(); });
+          renders++;
+          const now = String(body.innerHTML);
+          want(/<section class="ca-since"/.test(now) && run('caSinceRepaint') === false, `${lang} the read landing with no card open must paint the group at once (group ${/ca-since/.test(now)}, waiting ${run('caSinceRepaint')})`);
+        } finally { ctx.CSS = keepCss; delete ctx.__realLoad; }
       }
     } catch (e) {
       flag('the page threw — ' + e.message);
@@ -17173,7 +17207,7 @@ function checkSiteErrors() {
    rule's number is refused), the heartbeat writer and the "N playing" count query
    (removed 2026-11-04) must not come back in the engine or the config (the
    heartbeats rules block and index were deleted 2026-11-05 and must stay gone), the minutes blocks must stay owner-only for writes with
-   no delete (the teacher READS minutes/{uid}/weeks and nothing else since 2026-11-06: WEEKS_SHIPPED), the teacher console's
+   no delete (the teacher READS minutes/{uid}/weeks since 2026-11-06, WEEKS_SHIPPED, and minutes/{uid}/days since 2026-11-13, one read line; nothing else), the teacher console's
    Practice minutes view stays a weeks-only server read with no write or timer (its maths is run in pm-sim section 17), every script tag is in place in order, every pm.* string the engine
    asks for exists in English AND Spanish (and every one is used), and the three
    hooks into app.js / index.html / journey.js are still there (the strip is ONE hidden <button id="pm-header"> in the main top bar,
@@ -17719,12 +17753,17 @@ function checkPracticeMinutes(i18nTable) {
     const mins = block('minutes/{userId}/{document=**}'), days = block('minutes/{userId}/days/{day}'), weeks = block('minutes/{userId}/weeks/{week}');
     if (!mins || !days || !weeks) fail('firestore.rules: the three minutes/{userId} blocks (tree read, days, weeks) must all be present');
     else {
-      /* The teacher reads minutes/{uid}/weeks/* (2026-11-06: the console's Practice minutes view) and NOTHING ELSE under minutes/:
-         the tree and days blocks keep no isTeacher at all (days would show when a student practised; the tree would reach the tag,
-         the only link between a person and the boards). The weeks block is pinned WHOLE (WEEKS_SHIPPED) so its one teacher line
-         stays `allow read: if isTeacher();` — never a teacher write, never a wider grant. */
+      /* The teacher reads minutes/{uid}/weeks/* (2026-11-06: the console's Practice minutes view) and, since 2026-11-13,
+         minutes/{uid}/days/* (the Students view's "Back from an absence": which days a student saved work), and NOTHING ELSE
+         under minutes/: the tree block keeps no isTeacher at all (it would reach the tag, the only link between a person and
+         the boards). Each of the two keeps exactly one teacher line, `allow read: if isTeacher();` — never a teacher write,
+         never a wider grant. The weeks block is pinned WHOLE (WEEKS_SHIPPED); the days block's teacher line is pinned here. */
       for (const [n, b] of [['tree', mins], ['days', days], ['weeks', weeks]]) {
-        if (n !== 'weeks' && /isTeacher/.test(b)) fail(`minutes ${n} rule lets the teacher in — only minutes/{uid}/weeks is teacher-readable (2026-11-06)`);
+        if (n === 'tree' && /isTeacher/.test(b)) fail(`minutes ${n} rule lets the teacher in — only minutes/{uid}/weeks and minutes/{uid}/days are teacher-readable (2026-11-06, 2026-11-13)`);
+        if (n === 'days') {
+          const tl = b.match(/allow[^;]*isTeacher[^;]*;/g) || [];
+          if (tl.length !== 1 || !/^allow read: if isTeacher\(\);$/.test(tl[0].replace(/\s+/g, ' ').trim())) fail(`minutes days rule: the teacher's ONE line must be exactly "allow read: if isTeacher();" (read only, 2026-11-13) — found ${JSON.stringify(tl)}`);
+        }
         if (!/pmOwner\(userId\)/.test(b)) fail(`minutes ${n} rule is not owner-only (pmOwner(userId))`);
         if (/\bdelete\b|allow\s+write/.test(b)) fail(`minutes ${n} rule allows delete or blanket write`);
       }
@@ -17906,17 +17945,22 @@ function checkPracticeMinutes(i18nTable) {
       }
       if (!/\nlet teacherSideTreeOpen=true;\ntry\{ teacherSideTreeOpen=localStorage\.getItem\('teacherSideTree'\)!=='0'; \}catch\(e\)\{\}/.test(tsrc)) fail('teacher.js: the units tree must start open: let teacherSideTreeOpen=true; then try{ … localStorage.getItem(\'teacherSideTree\')!==\'0\' }');
     }
-    /* The WHOLE of teacher.js, not just the block (N3: a helper defined elsewhere could read days): exactly one collection('minutes'),
-       no minutes/… path string, and no collection/doc call naming days, meta, rankBoard or weekBoard. */
+    /* The WHOLE of teacher.js, not just the block (N3: a helper defined elsewhere could read days): exactly two collection('minutes')
+       — the weeks read here and, since 2026-11-13, teacherAbsDaysGet's days read (the Students view's "Back from an absence") —
+       no minutes/… path string, and no collection/doc call naming meta, rankBoard or weekBoard; 'days' only in that one read,
+       which is pinned whole: a server read of the last days by document id, nothing written. */
     {
       const nMin = (tsrc.match(/collection\(\s*['"`]minutes['"`]\s*\)/g) || []).length;
       const pathStr = tsrc.match(/['"`]\/?minutes\//g) || [];
-      const sub = tsrc.match(/(?:collection|doc|collectionGroup)\(\s*['"`][^'"`]*\b(?:days|meta|rankBoard|weekBoard)\b/g) || [];
+      const DAYS_READ = "\nfunction teacherAbsDaysGet(uid, from, today){\n  const id=firebase.firestore.FieldPath.documentId();\n  return db.collection('minutes').doc(uid).collection('days').where(id,'>=',from).where(id,'<=',today).get({source:'server'});\n}\n";
+      const daysCalls = (tsrc.match(/(?:collection|doc|collectionGroup)\(\s*['"`][^'"`]*\bdays\b/g) || []).length;
+      if (!tsrc.includes(DAYS_READ) || daysCalls !== 1) fail(`teacher.js: the console's one read of minutes/{uid}/days must be teacherAbsDaysGet() exactly as pinned in 1cg (a server read by document id, never a write) — found ${daysCalls} days call(s)${tsrc.includes(DAYS_READ) ? '' : ', and teacherAbsDaysGet() differs from the pin'}`);
+      const sub = tsrc.match(/(?:collection|doc|collectionGroup)\(\s*['"`][^'"`]*\b(?:meta|rankBoard|weekBoard)\b/g) || [];
       /* collectionGroup anywhere in teacher.js (it would need a wildcard-first rule; the rules refuse it, so it would fail quietly),
          and a space before a collection/doc call's parenthesis (a spelling the patterns above would not see): both 0 (round-3 review). */
       if (/collectionGroup/.test(tsrc)) fail('teacher.js uses collectionGroup: the rules have no wildcard-first match (1cg) — read minutes/{uid}/weeks per student');
       if (/\.(?:collection|doc|collectionGroup)\s+\(/.test(tsrc)) fail('teacher.js writes a collection/doc call with a space before "(": write it as .collection(…) so 1cg can read the path');
-      if (nMin !== 1 || pathStr.length || sub.length) fail(`teacher.js reads practice minutes outside minutes/{uid}/weeks: collection('minutes') ${nMin} time(s) (1 allowed)${pathStr.length ? ', a minutes/ path string' : ''}${sub.length ? ', ' + sub.join(' ; ') : ''}`);
+      if (nMin !== 2 || pathStr.length || sub.length) fail(`teacher.js reads practice minutes outside minutes/{uid}/weeks and the days read: collection('minutes') ${nMin} time(s) (2 allowed)${pathStr.length ? ', a minutes/ path string' : ''}${sub.length ? ', ' + sub.join(' ; ') : ''}`);
     }
     const blk = /\nconst TEACHER_PM_CONCURRENCY=[\s\S]*?\nfunction teacherSetMinutesSort\(/.exec(tsrc);
     if (!blk) fail('teacher.js: the Practice minutes block (TEACHER_PM_CONCURRENCY … teacherSetMinutesSort) was not found');

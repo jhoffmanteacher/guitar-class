@@ -463,10 +463,12 @@ service cloud.firestore {
        minutes/{uid}/days/{YYYY-MM-DD}  { seconds }
        minutes/{uid}/weeks/{YYYY-Www}   { seconds, goalSeconds, hit }
        Only that signed-in uid writes its own tree, and reads all of it. The
-       teacher's account reads the weeks docs and nothing else under minutes/
-       (2026-11-06: the console's "Practice minutes" view, teacher.js, shows
-       every student's week, streak, rank and Top 5 place; it works them out
-       from the weeks docs and never reads days or meta/board). The teacher
+       teacher's account reads the weeks docs (2026-11-06: the console's
+       "Practice minutes" view, teacher.js, shows every student's week,
+       streak, rank and Top 5 place, worked out from the weeks docs) and the
+       days docs (2026-11-13: the Students view's "Back from an absence"
+       filter reads which days a student saved work), and nothing else under
+       minutes/: never meta/board (the private tag). The teacher
        never writes here. The client adds seconds with increment(), so
        the rule sees the resulting document: a day may hold at most
        dailyCapSeconds() and a week at most seven days of that. No delete.
@@ -483,6 +485,7 @@ service cloud.firestore {
       allow read: if pmOwner(userId);
     }
     match /minutes/{userId}/days/{day} {
+      allow read: if isTeacher();   // 2026-11-13: the console's "Back from an absence" filter reads which days a student saved work (read only)
       allow create, update: if pmOwner(userId)
             && day.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
             && request.resource.data.keys().hasOnly(['seconds'])
