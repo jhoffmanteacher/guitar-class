@@ -155,8 +155,8 @@
    (Build-a-Chord, Finger Gym, Note Hunt, Riff Roulette, Riff Runner, Pentatonic Simon Guitar
    Hero, Strum Hero); Note Hunt and Pentatonic Simon Guitar Hero stay on their first prompt
    (the recording never plays what they ask); Riff Runner never finishes a round in 60 s.
-   The student also presses each tempo button (…NudgeBpm() once before Start and the key "1"
-   once, two seconds after Start (with the virtual clock's time stamp). It presses buttons by
+   The student also presses each tempo button (…NudgeBpm() once before Start, and the key "1"
+   once a second from three seconds after Start (with the virtual clock's time stamp). It presses buttons by
    position, so answer buttons a refactor reorders show as a difference. Sounds are fake: a
    game that waits on an audio 'ended' event gets it at the fake clock's time of the stop.
 
@@ -795,10 +795,11 @@ function pagePlayer() {
       for (let i = 0; i < n; i++) { const b = nudges()[i]; if (!b) break; g.clicks.push({ at: Math.round(performance.now() - g.t0), what: oc(b) }); b.click(); await window.__gv.advance(100); }
       if (n) { await window.__gv.advance(500); g.tick++; const r = document.querySelector(g.rootSel); g.marks.push(r ? H(r.innerHTML) : '(gone)'); return { done: false }; }
     }
-    /* Once, two seconds after Start: one key press, "1" (a string key in Riff Runner, a pad in Simon …), with the
-       virtual clock's time stamp (fault B3: a doubled key listener must show). */
-    if (g.started && !g.keyed && g.tick - g.startTick === 2) {
-      g.keyed = true;
+    /* From three seconds after Start, the key "1" once a second (a string key in Riff Runner, a pad in Simon …), with
+       the virtual clock's time stamp. One press two seconds in fell inside Riff Runner's count-in, where a press does
+       nothing, so a doubled key listener (review 3's fault B3) still went unseen; a press a second lands near a
+       note now and then, and a press near a note is judged. */
+    if (g.started && g.tick - g.startTick >= 3) {
       const ev = new KeyboardEvent('keydown', { key: '1', code: 'Digit1', bubbles: true, cancelable: true });
       Object.defineProperty(ev, 'timeStamp', { value: performance.now() });
       g.clicks.push({ at: Math.round(performance.now() - g.t0), what: 'key 1' });
