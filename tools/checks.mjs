@@ -4867,37 +4867,48 @@ function checkI18nParity() {
 /* ════════════════════════════════════════════════════════════════════
    1dp. ENGLISH CHANGED, SPANISH DID NOT — a WARNING, never a failure
    (Jonathan, 2026-11-13: "a warning when an English string changes and
-   its Spanish twin doesn't"). tools/i18n-drift.mjs compares this tree with
-   where the branch left origin/main (GC_DRIFT_BASE=<ref> overrides) and
-   reads only the files that differ: i18n.js's { en, es } keys, the data
-   files' `<field>` / `<field>_es` pairs for the student fields 1w / 1w-t
-   read (STUDENT_VALUE_NAME_RE below, so the two lists cannot drift), and
-   the Journey pages' data-es attributes against their English. A change
-   of whitespace, letter case, entities, quote style or the punctuation
-   . , ; : ! ? ' " ( ) - – — … is not a change (Spanish does not mirror
-   those one for one). A missing twin is 1b / 1d / 1e's error, not this.
+   its Spanish twin doesn't"; review round 1 the same day). The rules are in
+   the header of tools/i18n-drift.mjs: it compares this tree with where the
+   branch left origin/main (GC_DRIFT_BASE=<ref> overrides) on every twin
+   the site has (i18n.js keys, every X / X_es pair in the data files, the
+   Journey pages' data-es). A change with a number, a chord or note name, or
+   3+ content words prints in full; a rewording prints as one compact line.
+   No base, or nothing to compare: an info line, no tick.
+   The one FAILURE: the floor below. It is the count of twins read on the
+   whole tree (2026-11-13: 7,469 pairs over 34 field names, 1,579 i18n keys,
+   515 Journey lines), so a change to the reader cannot shrink the guard
+   without someone seeing it. Lower a floor only when twins were really
+   removed from the site.
    ════════════════════════════════════════════════════════════════════ */
-const DRIFT_FIELDS = new Set(/\(([^)]*)\)/.exec(STUDENT_VALUE_NAME_RE.source)[1].split('|').filter(f => !f.endsWith('_es')));
+const DRIFT_FLOOR = { pairs: 7300, fields: 33, i18n: 1550, journey: 500 };   // about 2% under today's counts
+let driftWarnings = 0;   // repeated beside the final "N warnings" line (R1-9)
 function checkSpanishDrift() {
   head('1dp. English changed, Spanish did not (warning only)');
   let r;
-  try { r = driftReport(ROOT, { fields: DRIFT_FIELDS, loadI18n: loadI18nTable }); }
-  catch (e) { warn(`1dp could not run: ${e.message}`); warnings++; return; }
-  if (r.skipped) { ok(`nothing to compare: ${r.skipped}`); return; }
+  try { r = driftReport(ROOT, { loadI18n: loadI18nTable }); }
+  catch (e) { err(`1dp could not run: ${e.message}`); problems++; return; }
+  const low = Object.keys(DRIFT_FLOOR).filter(k => !(r.totals[k] >= DRIFT_FLOOR[k]));
+  if (low.length) { err(`1dp read too few twins: ${low.map(k => `${k} ${r.totals[k]} (floor ${DRIFT_FLOOR[k]})`).join(', ')} — the reader in tools/i18n-drift.mjs lost some; fix it, or lower DRIFT_FLOOR only if twins were really removed`); problems++; }
+  const tot = `${r.totals.pairs} twins on the tree (${r.totals.fields} data field names, ${r.totals.i18n} i18n keys, ${r.totals.journey} Journey lines)`;
+  if (r.nothing) { console.log(`  ${C.dim}i ${r.nothing}; ${tot}${C.reset}`); return; }
   // A long text is shown from a little before its first changed character, so the change is on screen.
-  const flat = s => String(s).replace(/\s+/g, ' ').trim();
+  const flat = s => String(Array.isArray(s) ? s.join(' | ') : s).replace(/\s+/g, ' ').trim();
   const cut = (s, from = 0) => { s = flat(s); const t = s.slice(from, from + 140); return (from ? '…' : '') + t + (from + 140 < s.length ? '…' : ''); };
   for (const e of r.errors) { warn(`1dp could not read ${e}`); warnings++; }
-  for (const h of r.hits) {
+  const full = r.hits.filter(h => h.weight.full), small = r.hits.filter(h => !h.weight.full);
+  for (const h of full) {
     const a = flat(h.enOld), b = flat(h.enNew);
     let d = 0; while (d < a.length && d < b.length && a[d] === b[d]) d++;
     const from = d > 70 ? d - 50 : 0;
-    warn(`${h.file} ${h.key}: the English changed and the Spanish did not\n      was: "${cut(a, from)}"\n      now: "${cut(b, from)}"\n      es:  "${cut(h.es)}"`);
-    warnings++;
+    warn(`${h.file} ${h.key}: the English changed and the Spanish did not${h.weight.fact ? ' (a number or a chord / note name changed)' : ''}\n      was: "${cut(a, from)}"\n      now: "${cut(b, from)}"\n      es:  "${cut(h.es)}"`);
   }
+  // A rewording (no number or chord changed, under 3 content words): one line each.
+  const words = l => l.slice(0, 6).join(' ') + (l.length > 6 ? ' …' : '');
+  for (const h of small) warn(`${h.file} ${h.key}: rewording only, check the Spanish still matches ("${words(h.weight.wGone)}" → "${words(h.weight.wAdded)}")`);
+  warnings += r.hits.length; driftWarnings = r.hits.length;
   const at = `${r.base.slice(0, 7)} (${r.baseHow})`;
-  if (!r.hits.length) ok(`compared with ${at}: ${r.files} changed file${r.files === 1 ? '' : 's'} with twins, ${r.pairs} pairs read, no English-only change`);
-  else console.log(`  ${C.dim}${r.hits.length} English-only change${r.hits.length === 1 ? '' : 's'} against ${at}: if the Spanish says the same thing still, ignore it${C.reset}`);
+  if (!r.hits.length) ok(`compared with ${at}: ${r.files} changed file${r.files === 1 ? '' : 's'} with twins, ${r.pairs} pairs compared, no English-only change; ${tot}`);
+  else console.log(`  ${C.dim}${r.hits.length} English-only change${r.hits.length === 1 ? '' : 's'} against ${at} (${full.length} in full, ${small.length} rewording${small.length === 1 ? '' : 's'}): if the Spanish says the same thing still, ignore it; ${tot}${C.reset}`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -18201,9 +18212,9 @@ function checkPracticeMinutes(i18nTable) {
 
   console.log('');
   if (problems > 0) {
-    err(`${problems} problem${problems > 1 ? 's' : ''} found${warnings ? `, ${warnings} warning${warnings > 1 ? 's' : ''}` : ''} — do not push until fixed.`);
+    err(`${problems} problem${problems > 1 ? 's' : ''} found${warnings ? `, ${warnings} warning${warnings > 1 ? 's' : ''}${driftWarnings ? ` (${driftWarnings} from 1dp)` : ''}` : ''} — do not push until fixed.`);
     process.exit(1);
   }
-  if (warnings > 0) warn(`${warnings} warning${warnings > 1 ? 's' : ''} (non-blocking).`);
+  if (warnings > 0) warn(`${warnings} warning${warnings > 1 ? 's' : ''} (non-blocking)${driftWarnings ? `, ${driftWarnings} of them from 1dp (English changed, Spanish did not)` : ''}.`);
   ok('all checks passed.');
 })();
