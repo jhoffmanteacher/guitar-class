@@ -969,10 +969,19 @@ function pcSpareReady(st){
   const sp = st.spare;
   return !!(sp && sp.src === st.audio.src && sp.readyState >= 3 && !sp.seeking && Math.abs(sp.currentTime - pcLoopStart(st)) < 0.05);
 }
+/* While a private song loads (SONG FILES), Play reads Stop and a press (or
+   Space / K) cancels the wait; it goes back to Play when the wait ends. */
+function pcWaitUi(root){
+  const btn = root.querySelector('.pc-play');
+  const set = on => { if(btn){ btn.innerHTML = pcPlayBtnHtml(on); btn.classList.toggle('playing', on); } };
+  return { wait: () => set(true), done: () => set(false) };
+}
 function pcToggle(btn){
   const root = btn.closest('.pc');
   if(!root) return;
   if(pcState && pcState.root === root){ pcStop(); return; }
+  // Stop while the song is still loading (SONG FILES): cancel the wait.
+  if(songFileWaitingFor(root)){ songFileCancelWait(); return; }
   pcStart(root, 0);
 }
 function pcFromSection(btn, si){
@@ -988,7 +997,7 @@ function pcStart(root, si, rep){
   const slow = root.dataset.slow === '1', guitar = root.dataset.guitar === '1';
   const src = snippetSrc(L.tr, slow, guitar);
   // A private song not on this page yet: "Loading the song… 40%", then this press again (SONG FILES).
-  if(songFileNeedsLoad(src)){ songFileWaitThen(root, src, () => pcStart(root, si, rep)); return; }
+  if(songFileNeedsLoad(src)){ songFileWaitThen(root, src, () => pcStart(root, si, rep), pcWaitUi(root)); return; }
   const audio = new Audio();
   audio.preload = 'auto';
   audio.loop = false;                  // the window is looped (or stopped) by hand, in pcFrame
@@ -1403,7 +1412,7 @@ function pcRetrack(root){
   if(songFileNeedsLoad(sfSrc)){
     const from = st.loopFrom;
     pcStop();
-    songFileWaitThen(root, sfSrc, () => pcStart(root, from));
+    songFileWaitThen(root, sfSrc, () => pcStart(root, from), pcWaitUi(root));
     return;
   }
   pcCancelHandoff(st);

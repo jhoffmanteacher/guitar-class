@@ -341,6 +341,7 @@ function caOnToggle(details){
   if(!details.open && caSwap && details.dataset.id === caSwap.to && caOpenId === caSwap.to){
     if(pcState && details.contains(pcState.root)) pcStop();
     if(snipState && details.contains(snipState.card)) snipStop();
+    songFileCancelWaitIn(details);     // a song still loading in it (SONG FILES)
     const from = caSwap.from;
     caSwap = null;
     caOpenId = from;
@@ -375,6 +376,7 @@ function caOnToggle(details){
   // off the loop the student just started.)
   if(!details.open && snipState && details.contains(snipState.card)) snipStop();
   if(!details.open && pcState && details.contains(pcState.root)) pcStop();
+  if(!details.open) songFileCancelWaitIn(details);     // a song still loading in it (SONG FILES)
   /* A card opened from "Still to do" left its header wherever it already sat
      on the page — under the header, the page title and the Do-now card, as
      low as y≈370 at 1366×657 (2026-09-20). Scroll only on a genuine click:
@@ -694,6 +696,7 @@ function caToggleStepOpen(btn){
      accordion collapsing a sibling, which is the deliberate case the
      caOnToggle comment above describes. */
   if(!willOpen && snipState && li.contains(snipState.card)) snipStop();
+  if(!willOpen) songFileCancelWaitIn(li);     // a song still loading in it (SONG FILES)
   btn.setAttribute('aria-expanded', String(willOpen));
   const activityId = list.closest('.ca-card').dataset.id;
   caStepOpen[activityId] = willOpen ? Number(li.dataset.idx) : -1;
@@ -1619,6 +1622,7 @@ function caOnModFoldToggle(details){
   caModFoldOpen[details.dataset.foldKey] = details.open;
   if(!details.open && snipState && details.contains(snipState.card)) snipStop();
   if(!details.open && pcState && details.contains(pcState.root)) pcStop();
+  if(!details.open) songFileCancelWaitIn(details);     // a song still loading in it (SONG FILES)
 }
 /* ── "Unfinished activities" — every pending card except the Today hero,
    wrapped in ONE fold (item 2f). OPEN by default (Jonathan, 2026-10-02);
@@ -1629,6 +1633,7 @@ function caOnTodoToggle(details){
   caTodoOpen = details.open;
   if(!details.open && snipState && details.contains(snipState.card)) snipStop();
   if(!details.open && pcState && details.contains(pcState.root)) pcStop();
+  if(!details.open) songFileCancelWaitIn(details);     // a song still loading in it (SONG FILES)
 }
 function caTodoGroupHtml(bodyHtml, count, openInside){
   const open = caTodoOpen || openInside;
@@ -1661,6 +1666,7 @@ function caOnFinishedToggle(details){
   caFinishedOpen = details.open;
   if(!details.open && snipState && details.contains(snipState.card)) snipStop();
   if(!details.open && pcState && details.contains(pcState.root)) pcStop();
+  if(!details.open) songFileCancelWaitIn(details);     // a song still loading in it (SONG FILES)
 }
 
 /* ── "Since your last visit" (Jonathan, 2026-11-13: a catch-up aid for a

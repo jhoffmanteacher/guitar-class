@@ -42,7 +42,7 @@ const tick = () => new Promise(r => setTimeout(r, 0));
 class FakeBytes { constructor(u8){ this.u8 = u8; } toUint8Array(){ return new Uint8Array(this.u8); } }
 function makeFirestore(){
   const docs = new Map();                     // path -> data
-  const st = { reads: 0, pieceReads: 0, writes: 0, deny: false, offline: false, order: [] };
+  const st = { reads: 0, pieceReads: 0, writes: 0, deny: false, offline: false, order: [], dropAtPiece: -1, denyCount: false };
   const err = code => { const e = new Error(code); e.code = code; return e; };
   /* Pieces answer out of order, the same way every run: piece k waits [6, 1, 3][k % 3] ms, so 0, 1, 2 arrive 1, 2, 0. */
   const later = async path => { const m = /\/pieces\/(\d+)$/.exec(path); await new Promise(r => setTimeout(r, m ? [6, 1, 3][+m[1] % 3] : 0)); };
@@ -54,6 +54,8 @@ function makeFirestore(){
       await later(path);
       if (st.offline) throw err('unavailable');
       if (st.deny) throw err('permission-denied');
+      // The connection drops at one piece, once (navigator.onLine still says online).
+      if (/\/pieces\//.test(path) && +path.split('/').pop() === st.dropAtPiece){ st.dropAtPiece = -1; throw err('unavailable'); }
       if (/\/pieces\//.test(path)) st.order.push(+path.split('/').pop());
       const d = docs.get(path);
       return { exists: !!d, id: path.split('/').pop(), data: () => d ? Object.assign({}, d) : undefined };
@@ -62,7 +64,7 @@ function makeFirestore(){
       st.writes++;
       await later(path);
       if (st.offline) throw err('unavailable');
-      if (st.deny) throw err('permission-denied');
+      if (st.deny || (st.denyCount && path.startsWith('songFilesUsage/'))) throw err('permission-denied');
       const old = (opt && opt.merge && docs.get(path)) || {};
       const out = Object.assign({}, opt && opt.merge ? old : {});
       for (const [k, v] of Object.entries(data)) out[k] = (v && v.__inc != null) ? (Number(old[k]) || 0) + v.__inc : v;
@@ -104,12 +106,19 @@ function makeIdb(opts){
       return tx;
     },
   };
-  const indexedDB = { open(){ const r = req(); setTimeout(() => { r.result = db; if (!opts || !opts.noUpgrade) r.onupgradeneeded && r.onupgradeneeded(); r.onsuccess && r.onsuccess(); }, 0); return r; } };
+  const indexedDB = { open(){ const r = req();
+    if (opts && opts.openHang) return r;                                  // never answers
+    if (opts && opts.openError) { setTimeout(() => { r.error = new Error('blocked'); r.onerror && r.onerror(); }, 0); return r; }
+    setTimeout(() => { r.result = db; if (!opts || !opts.noUpgrade) r.onupgradeneeded && r.onupgradeneeded(); r.onsuccess && r.onsuccess(); }, 0); return r; } };
   return { indexedDB, stores, st };
 }
 function makeLocks(){
   const q = new Map();
-  return { request(name, fn){ const prev = q.get(name) || Promise.resolve(); const run = prev.then(() => fn()); q.set(name, run.catch(() => {})); return run; } };
+  const L = { hung: false, request(name, a, b){
+    const fn = typeof a === 'function' ? a : b, opt = typeof a === 'function' ? {} : (a || {});
+    if (L.hung) return new Promise((res, rej) => { const sg = opt.signal; if (!sg) return; const go = () => rej(Object.assign(new Error('lock wait timed out'), { name: 'TimeoutError' })); if (sg.aborted) go(); else sg.addEventListener('abort', go); });
+    const prev = q.get(name) || Promise.resolve(); const run = prev.then(() => fn()); q.set(name, run.catch(() => {})); return run; } };
+  return L;
 }
 /* An element just big enough for songFileShow: querySelector, appendChild, attributes, textContent. */
 const LINE_LOG = [];                          // every text a line was given, in order
@@ -128,6 +137,8 @@ function makeEl(cls){
 /* One "tab": a fresh context running app/songfiles.js with the shared fakes. */
 function makeTab(src, shared, opts){
   const o = opts || {};
+  // The waits are seconds long on the site; the sim shortens them in its own copy of the text.
+  src = src.replace('const SONG_FILES_IDB_WAIT_MS = 5000;', 'const SONG_FILES_IDB_WAIT_MS = 40;').replace('const SONG_FILES_LOCK_WAIT_MS = 60000;', 'const SONG_FILES_LOCK_WAIT_MS = 40;');
   const urls = [];
   const ctx = {
     console, Promise, Map, Set, Uint8Array, Date, Math, Number, String, Error, JSON, Object, Array, setTimeout, clearTimeout,
@@ -135,6 +146,7 @@ function makeTab(src, shared, opts){
     URL: { createObjectURL: b => { const u = 'blob:sim/' + urls.length; urls.push(b); return u; } },
     indexedDB: shared.idb.indexedDB,
     navigator: { locks: o.noLocks ? undefined : shared.locks, onLine: !o.offline, storage: { persist: async () => true } },
+    AbortSignal,
     firebase: { firestore: { FieldValue: { increment: n => ({ __inc: n }) } } },
     currentUser: o.signedOut ? null : { uid: 'uidSim' },
     ensureDb: async () => shared.fs.db,
@@ -142,10 +154,11 @@ function makeTab(src, shared, opts){
     t: (k, p) => k + (p ? JSON.stringify(p) : ''),
   };
   vm.createContext(ctx);
-  vm.runInContext(src + `\n;globalThis.__api = { SONG_FILES, songFileLoad, songFileSrc, songFileNeedsLoad, songFileWaitThen, songFileCancelWait, songFileCost, songFileMonth, SONG_FILES_MONTH_LIMIT, SONG_FILE_LINE_KEYS };`, ctx, { filename: 'app/songfiles.js' });
+  /* The sim's own list: whatever the site ships on SONG_FILES is cleared, so a real entry never changes a case (review B3). */
+  vm.runInContext(src + `\n;for (const k of Object.keys(SONG_FILES)) delete SONG_FILES[k];\nglobalThis.__api = { SONG_FILES, songFileLoad, songFileSrc, songFileNeedsLoad, songFileWaitThen, songFileCancelWait, songFileCancelWaitIn, songFileWaitingFor, songFileCost, songFileMonth, SONG_FILES_MONTH_LIMIT, SONG_FILE_LINE_KEYS };`, ctx, { filename: 'app/songfiles.js' });
   return { api: ctx.__api, ctx, urls };
 }
-const newShared = () => ({ fs: makeFirestore(), idb: makeIdb(), locks: makeLocks() });
+const newShared = o => ({ fs: makeFirestore(), idb: makeIdb(o), locks: makeLocks() });
 const bytesOf = n => new Uint8Array(randomBytes(n));
 const register = (tab, id, b, over) => { tab.api.SONG_FILES[id] = Object.assign({ file: id + '.mp3', bytes: b.length, sha256: sha(b), durationSec: 100 }, over || {}); };
 const blobBytes = async b => new Uint8Array(await b.arrayBuffer());
@@ -164,7 +177,6 @@ async function suite(src, quiet){
     ok('songFileNeedsLoad is false for a public path', tab.api.songFileNeedsLoad('audio/x-backing-full.mp3') === false);
     ok('…and for undefined (a track with no slow tier)', tab.api.songFileNeedsLoad(undefined) === false && tab.api.songFileSrc(undefined) === undefined);
     ok('songFileNeedsLoad is true for a private path not loaded', tab.api.songFileNeedsLoad('private:made-up') === true);
-    ok('the list ships empty (no song is switched in Step 1)', Object.keys(tab.api.SONG_FILES).length === 0);
   }
   say('== maths');
   { const tab = makeTab(src, newShared());
@@ -233,17 +245,100 @@ async function suite(src, quiet){
     return s;
   };
   await refuse('signed out', null, 'signin', { tab: { signedOut: true }, noRead: true });
-  await refuse('not on the list', (s, tab) => { delete tab.api.SONG_FILES.x; }, 'missing', { noRead: true });
-  await refuse('not uploaded', s => { s.fs.docs.delete('songFiles/x'); }, 'missing', { noCount: true });
-  await refuse('still uploading', s => { s.fs.docs.get('songFiles/x').state = 'uploading'; }, 'missing', { noCount: true });
-  await refuse('the stored SHA-256 is not the list\'s', s => { s.fs.docs.get('songFiles/x').sha256 = 'b'.repeat(64); }, 'missing', { noCount: true });
-  await refuse('the stored size is not the list\'s', s => { s.fs.docs.get('songFiles/x').bytes += 1; }, 'missing', { noCount: true });
-  await refuse('a missing piece', s => { s.fs.docs.delete('songFiles/x/pieces/1'); }, 'missing');
-  await refuse('a piece of the wrong length', s => { const p = s.fs.docs.get('songFiles/x/pieces/2'); p.data = new FakeBytes(p.data.u8.subarray(1)); }, 'bad');
-  await refuse('a piece under the wrong index', s => { s.fs.docs.get('songFiles/x/pieces/1').i = 0; }, 'bad');
-  await refuse('one wrong byte (the SHA-256 check)', s => { const p = s.fs.docs.get('songFiles/x/pieces/1'); const c = new Uint8Array(p.data.u8); c[500] ^= 1; p.data = new FakeBytes(c); }, 'bad');
+  await refuse('not on the list', (s, tab) => { delete tab.api.SONG_FILES.x; }, 'notready', { noRead: true });
+  await refuse('not uploaded', s => { s.fs.docs.delete('songFiles/x'); }, 'notready', { noCount: true });
+  await refuse('still uploading', s => { s.fs.docs.get('songFiles/x').state = 'uploading'; }, 'notready', { noCount: true });
+  await refuse('the stored SHA-256 is not the list\'s', s => { s.fs.docs.get('songFiles/x').sha256 = 'b'.repeat(64); }, 'notready', { noCount: true });
+  await refuse('the stored size is not the list\'s', s => { s.fs.docs.get('songFiles/x').bytes += 1; }, 'notready', { noCount: true });
+  await refuse('a missing piece', s => { s.fs.docs.delete('songFiles/x/pieces/1'); }, 'notready');
+  await refuse('a piece of the wrong length', s => { const p = s.fs.docs.get('songFiles/x/pieces/2'); p.data = new FakeBytes(p.data.u8.subarray(1)); }, 'notready');
+  await refuse('a piece under the wrong index', s => { s.fs.docs.get('songFiles/x/pieces/1').i = 0; }, 'notready');
+  await refuse('one wrong byte (the SHA-256 check)', s => { const p = s.fs.docs.get('songFiles/x/pieces/1'); const c = new Uint8Array(p.data.u8); c[500] ^= 1; p.data = new FakeBytes(c); }, 'notready');
   await refuse('the rules refuse', s => { s.fs.st.deny = true; }, 'denied', { noCount: true });
   await refuse('offline with no copy', null, 'offline', { tab: { offline: true }, noRead: true, noCount: true });
+
+  say('== review round 1 (A2, m4-m7, B1, B4)');
+  { // A2: a broken stored file is refused at once on the next press: no read, no count
+    const s = newShared(); putFile(s.fs, 'x', BIG);
+    const tab = makeTab(src, s); register(tab, 'x', BIG);
+    const p = s.fs.docs.get('songFiles/x/pieces/1'); const c = new Uint8Array(p.data.u8); c[9] ^= 1; p.data = new FakeBytes(c);
+    await code(tab.api.songFileLoad('x'));
+    const r0 = s.fs.st.reads, u0 = usage(s);
+    const again = await code(tab.api.songFileLoad('x'));
+    ok('a broken file: the second press says not ready with no read and no count', again === 'notready' && s.fs.st.reads === r0 && usage(s) === u0 && u0 === cost, `${again} ${s.fs.st.reads - r0} ${usage(s)}`);
+  }
+  { // L5 + L2 + A2: the connection drops mid-download: offline, no copy kept; the retry downloads and is NOT counted again
+    const s = newShared(); putFile(s.fs, 'x', BIG); s.fs.st.dropAtPiece = 2;
+    const tab = makeTab(src, s); register(tab, 'x', BIG);
+    const c1 = await code(tab.api.songFileLoad('x'));
+    await tick(); await tick();
+    ok('a connection dropped mid-download (navigator still online) reads as offline', c1 === 'offline', c1);
+    ok('…keeps no copy', !s.idb.stores.get('x'));
+    const c2 = await code(tab.api.songFileLoad('x'));
+    await tick(); await tick();
+    ok('…the next press downloads it', c2 === 'resolved' && sha(await blobBytes(tab.urls[0])) === sha(BIG), c2);
+    ok('…counted once for the two presses', usage(s) === cost, String(usage(s)));
+    const pr = s.fs.st.pieceReads, fresh = makeTab(src, s); register(fresh, 'x', BIG);
+    ok('…and kept: a new page plays the copy with no read', await code(fresh.api.songFileLoad('x')) === 'resolved' && s.fs.st.pieceReads === pr);
+  }
+  { // L1 + m4: a device copy with the right label but the wrong size, or the right size but other bytes, is not used
+    for (const [label, blob] of [['the wrong size', new Blob([new Uint8Array(BIG.length - 1)])], ['the right size, other bytes', new Blob([new Uint8Array(BIG.length)])]]) {
+      const s = newShared(); putFile(s.fs, 'x', BIG);
+      s.idb.stores.set('x', { id: 'x', sha256: sha(BIG), bytes: BIG.length, blob, savedAt: 1 });
+      const tab = makeTab(src, s); register(tab, 'x', BIG);
+      await tab.api.songFileLoad('x'); await tick(); await tick();
+      ok(`a device copy labelled right but ${label}: downloaded again and replaced`, s.fs.st.pieceReads === 3 && sha(await blobBytes(tab.urls[0])) === sha(BIG) && s.idb.stores.get('x').blob.size === BIG.length && sha(await blobBytes(s.idb.stores.get('x').blob)) === sha(BIG));
+    }
+  }
+  { // L3: 'unavailable' on the first read with navigator online
+    const s = newShared(); putFile(s.fs, 'x', BIG); s.fs.st.offline = true;
+    const tab = makeTab(src, s); register(tab, 'x', BIG);
+    ok('the database unreachable while the browser says online: offline', await code(tab.api.songFileLoad('x')) === 'offline');
+  }
+  { // L4 + m5: IndexedDB that errors, or never answers: the song still plays (no copy)
+    for (const [label, o] of [['errors', { openError: true }], ['never answers', { openHang: true }]]) {
+      const s = newShared(o); putFile(s.fs, 'x', BIG);
+      const tab = makeTab(src, s); register(tab, 'x', BIG);
+      const c = await Promise.race([code(tab.api.songFileLoad('x')), new Promise(r => setTimeout(() => r('hung'), 3000))]);
+      ok(`IndexedDB that ${label}: the song still plays this time`, c === 'resolved', c);
+    }
+  }
+  { // m5: another tab hung holding the lock: this one goes on without it
+    const s = newShared(); putFile(s.fs, 'x', BIG); s.locks.hung = true;
+    const tab = makeTab(src, s); register(tab, 'x', BIG);
+    const c = await Promise.race([code(tab.api.songFileLoad('x')), new Promise(r => setTimeout(() => r('hung'), 3000))]);
+    ok('a lock held by a hung tab: the song still loads', c === 'resolved', c);
+  }
+  { // m6: the counter write refused while the read passed: this Chromebook's date
+    const s = newShared(); putFile(s.fs, 'x', BIG); s.fs.st.denyCount = true;
+    const tab = makeTab(src, s); register(tab, 'x', BIG);
+    const c = await code(tab.api.songFileLoad('x'));
+    ok('the month\'s count refused (another month on this Chromebook\'s clock): the date line, nothing read', c === 'clock' && s.fs.st.pieceReads === 0, c);
+  }
+  { // B1: the card leaves, is hidden, or its fold closes during the load: no restart
+    for (const [label, edit] of [['removed from the page', h => { h.isConnected = false; }], ['inside a closed fold', h => { h.closest = sel => /details:not\(\[open\]\)/.test(sel) ? {} : null; }], ['not laid out', h => { h.getClientRects = () => []; }]]) {
+      const s = newShared(); putFile(s.fs, 'x', BIG);
+      const tab = makeTab(src, s); register(tab, 'x', BIG);
+      const h = makeEl('snip'); h.closest = () => null; h.getClientRects = () => [1]; let runs = 0;
+      tab.api.songFileWaitThen(h, 'private:x', () => runs++);
+      edit(h);
+      while (tab.api.songFileNeedsLoad('private:x')) await tick();
+      await tick(); await tick();
+      ok(`the card ${label} while it loads: the song does not start`, runs === 0);
+    }
+    const s = newShared(); putFile(s.fs, 'x', BIG);
+    const tab = makeTab(src, s); register(tab, 'x', BIG);
+    const h = makeEl('snip'), fold = { contains: el => el === h }, other = { contains: () => false };
+    let runs = 0, ui = '';
+    tab.api.songFileWaitThen(h, 'private:x', () => runs++, { wait: () => { ui += 'w'; }, done: () => { ui += 'd'; } });
+    tab.api.songFileCancelWaitIn(other);
+    const still = tab.api.songFileWaitingFor(h);
+    tab.api.songFileCancelWaitIn(fold);
+    while (tab.api.songFileNeedsLoad('private:x')) await tick();
+    await tick(); await tick();
+    ok('closing another fold leaves the wait; closing the card\'s own fold cancels it: no start', still && !tab.api.songFileWaitingFor(h) && runs === 0);
+    ok('the player\'s button: Stop while it waits, Play again when the wait is cancelled', ui === 'wd', ui);
+  }
 
   say('== a full device');
   { const s = newShared(); s.idb.st.full = true; putFile(s.fs, 'x', BIG);
@@ -346,20 +441,36 @@ async function suite(src, quiet){
 
 /* Each break: [name, old text, new text]. The old text must occur exactly once in app/songfiles.js. */
 const BREAKS = [
+  /* Review round 1 (2026-11-14): the reviewer's five loader plants L1-L5, the restart plant C1, and the fixes. */
+  ['L1: a device copy\'s size is not checked (and not re-hashed, which now covers it)', "rec.blob && rec.blob.size === entry.bytes", "rec.blob", "      if(sha !== entry.sha256) return null;\n", ''],
+  ['L2: a failed load is never tried again', ".finally(() => sfInflight.delete(id));", ".then(u => { sfInflight.delete(id); return u; });"],
+  ['L3: unavailable is not read as offline', "if(c === 'unavailable') return 'offline';", ''],
+  ['L4: an IndexedDB open error, with no time limit, hangs', "    setTimeout(() => resolve(null), SONG_FILES_IDB_WAIT_MS);\n", ''],
+  ['L4b: the open error handler gone and no time limit', "    req.onerror = () => resolve(null);       // private window, blocked storage: no copy, the song still plays this time\n", "    req.onerror = null;\n", "    setTimeout(() => resolve(null), SONG_FILES_IDB_WAIT_MS);\n", ''],
+  ['L5: a junk copy kept when the connection drops mid-download', "    try { bytes = await songFileReadPieces(db, id, entry, progress); }", "    try { bytes = await songFileReadPieces(db, id, entry, progress); }\n    catch(e){ if(e && e.code === 'unavailable') await sfCopyPut({ id, sha256: entry.sha256, bytes: entry.bytes, blob: new Blob([new Uint8Array(entry.bytes)]), savedAt: 0 }); throw e; }\n    try {}"],
+  ['C1: the restart does not ask whether the card is still shown', "    if(songFileHostShown(host)) restart();", "    restart();"],
+  ['B1: closing a fold does not cancel a wait inside it', "  if(sfWait && el && typeof el.contains === 'function' && el.contains(sfWait.host)) songFileCancelWait();", ''],
+  ['B1: a closed fold counts as shown', "host.closest('details:not([open]), [hidden], [inert]')", "host.closest('[data-never]')"],
+  ['A2: a broken file is read and counted again', "  if(sfBroken.has(key)) throw songFileErr('notready', 'broken earlier in this page');\n", ''],
+  ['A2: a retry is counted again', "    if(!sfCounted.has(key)){", "    if(true){"],
+  ['m4: a device copy is not re-hashed', "      if(sha !== entry.sha256) return null;\n", ''],
+  ['m5: no time limit on a hung lock', "      const opts = (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) ? { signal: AbortSignal.timeout(SONG_FILES_LOCK_WAIT_MS) } : {};", "      const opts = {};"],
+  ['m6: a refused count reads as not allowed', "catch(e){ if(e && e.code === 'permission-denied') throw songFileErr('clock'); throw e; }", "catch(e){ throw e; }"],
+  ['B4: a cancelled wait leaves the button on Stop', "  songFileShow(w.host, '');\n  if(w.ui && w.ui.done) try { w.ui.done(); } catch(e) {}", "  songFileShow(w.host, '');"],
   ['the SHA-256 is not checked', "if(sha !== expect.sha256) throw songFileErr('bad', 'the SHA-256 is not the list\\'s');", ''],
   /* No break drops the piece-length check: a piece of the wrong length also changes the whole file's SHA-256, which
      the next check refuses ('one wrong byte' and 'a piece of the wrong length' above), so that mutant only names the
      fault later. */
   ['a piece\'s index is not checked', "if(d.i !== k || !bytes || bytes.length !== want)", "if(!bytes || bytes.length !== want)"],
-  ['a missing piece is not noticed', "if(!snap.exists) throw songFileErr('missing', 'piece ' + k + ' of ' + n);", "if(!snap.exists) continue;"],
+  /* No break skips a missing piece: the hole then fails the SHA-256 check, and both end on the same "not ready" line. */
   ['pieces placed in arrival order, not by index', "out.set(bytes, k * SONG_FILE_PIECE);", "out.set(bytes, Math.min(got, expect.bytes - bytes.length));"],
   ['the limit is not checked', "if(used + cost > SONG_FILES_MONTH_LIMIT) throw songFileErr('limit');", ''],
   ['the limit lets one byte over', "if(used + cost > SONG_FILES_MONTH_LIMIT)", "if(used + cost > SONG_FILES_MONTH_LIMIT + 1)"],
   ['nothing is counted', "await ref.set({ bytes: firebase.firestore.FieldValue.increment(cost) }, { merge: true });", ''],
   ['counted at the raw size', "return Math.ceil(bytes * 4 / 3);", "return bytes;"],
-  ['the device copy is not used', "return sfCopyOk(rec, entry) ? rec.blob : null;", "return null;"],
-  ['a copy of another version is used', "rec.sha256 === entry.sha256 && ", ''],
-  ['no lock between tabs', "return navigator.locks.request('gc-song-file:' + id, fn);", "return fn();"],
+  ['the device copy is not used', "    if(!sfCopyOk(rec, entry)) return null;", "    return null;"],
+  ['a copy of another version is used (label not compared, not re-hashed)', "rec.sha256 === entry.sha256 && ", '', "      if(sha !== entry.sha256) return null;\n", ''],
+  ['no lock between tabs', "return navigator.locks.request('gc-song-file:' + id, opts, fn)", "return Promise.resolve().then(fn)"],
   ['the copy is not looked at again under the lock', "const again = await fromCopy();", "const again = null;"],
   ['no sharing of one load in a page', "let job = sfInflight.get(id);", "let job = null;"],
   ['a file still uploading is read', "h.state !== 'ready' || ", ''],
@@ -381,11 +492,16 @@ console.log(`\nsong-files-sim: ${real.pass + real.fail} cases, ${real.fail} fail
 let missed = 0;
 if (process.argv.includes('--breaks')) {
   console.log('\n== broken copies of app/songfiles.js (each must turn at least one case red)');
-  for (const [name, a, b] of BREAKS) {
-    const n = SRC.split(a).length - 1;
-    if (n !== 1) { console.log(`  ✗ ${name}: the text to break is found ${n} times (must be 1)`); missed++; continue; }
+  for (const [name, ...pairs] of BREAKS) {
+    let broken = SRC, bad = '';
+    for (let i = 0; i < pairs.length; i += 2) {
+      const n = broken.split(pairs[i]).length - 1;
+      if (n !== 1) { bad = `the text to break is found ${n} times (must be 1): ${JSON.stringify(pairs[i].slice(0, 60))}`; break; }
+      broken = broken.replace(pairs[i], () => pairs[i + 1]);
+    }
+    if (bad) { console.log(`  ✗ ${name}: ${bad}`); missed++; continue; }
     let r;
-    try { r = await suite(SRC.replace(a, () => b), true); } catch (e) { r = { fail: 1, red: ['threw: ' + String(e.message || e).slice(0, 100)] }; }
+    try { r = await suite(broken, true); } catch (e) { r = { fail: 1, red: ['threw: ' + String(e.message || e).slice(0, 100)] }; }
     if (r.fail) console.log(`  ✓ caught: ${name} — ${r.red.slice(0, 2).join(' | ')}`);
     else { console.log(`  ✗ NOT caught: ${name}`); missed++; }
   }

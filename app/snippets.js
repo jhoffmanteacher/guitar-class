@@ -922,10 +922,19 @@ function snipStop(){
     if(tabEl) delete tabEl.dataset.snipPage;
   }
 }
+/* While a private song loads (SONG FILES), the card's button reads Stop and a
+   press cancels the wait; it goes back to Play when the wait ends. */
+function snipWaitUi(card){
+  const btn = card.querySelector('.snip-play');
+  const set = on => { if(btn){ btn.innerHTML = snipPlayBtnHtml(on); btn.classList.toggle('playing', on); } };
+  return { wait: () => set(true), done: () => set(false) };
+}
 function snipToggle(btn){
   const card = btn.closest('.snip');
   if(!card) return;
   if(snipState && snipState.card === card){ snipStop(); return; }
+  // Stop while the song is still loading (SONG FILES): cancel the wait.
+  if(songFileWaitingFor(card)){ songFileCancelWait(); return; }
   /* Same guard playSequence() and strumChord() open with: the Coach's mic
      check renders inside class-activity tab cards (buildTab is called there
      without suppressCoach), and the snippet sits directly under it — so
@@ -945,7 +954,7 @@ function snipToggle(btn){
   const win = snippetWindow(tr, spec, slow);
   const src = snippetSrc(tr, slow, guitar);
   // A private song not on this page yet: "Loading the song… 40%", then this press again (SONG FILES).
-  if(songFileNeedsLoad(src)){ songFileWaitThen(card, src, () => snipToggle(btn)); return; }
+  if(songFileNeedsLoad(src)){ songFileWaitThen(card, src, () => snipToggle(btn), snipWaitUi(card)); return; }
   const audio = new Audio();
   audio.preload = 'auto';
   audio.loop = false;                  // the window is looped by hand, below
@@ -1189,7 +1198,7 @@ function snipSetTier(btn, which){
      then play the card again from the start of its window, on the new tier. */
   if(songFileNeedsLoad(src)){
     snipStop();
-    songFileWaitThen(card, src, () => { const b = card.querySelector('.snip-play'); if(b) snipToggle(b); });
+    songFileWaitThen(card, src, () => { const b = card.querySelector('.snip-play'); if(b) snipToggle(b); }, snipWaitUi(card));
     return;
   }
   slowestApplyRate(audio, snipRate(card));   // Slowest <-> Slow is the same file, just the rate

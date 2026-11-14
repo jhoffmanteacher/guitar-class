@@ -519,6 +519,9 @@
                                  es: 'Esta canci\u00f3n no se puede cargar hasta el pr\u00f3ximo mes: la clase ya us\u00f3 las descargas de canciones de este mes.' },
     'sf.offline':              { en: 'This song isn\u2019t on this Chromebook yet. Connect to the internet and press play again.',
                                  es: 'Esta canci\u00f3n todav\u00eda no est\u00e1 en esta Chromebook. Con\u00e9ctate a internet y vuelve a darle play.' },
+    'sf.notReady':             { en: 'This song isn\u2019t ready on the site yet.', es: 'Esta canci\u00f3n todav\u00eda no est\u00e1 lista en el sitio.' },
+    'sf.clock':                { en: 'This song couldn\u2019t load. Check that this Chromebook\u2019s date is right, then press play again.',
+                                 es: 'Esta canci\u00f3n no se pudo cargar. Revisa que la fecha de esta Chromebook sea correcta y vuelve a darle play.' },
     'sf.failed':               { en: 'This song didn\u2019t load. Press play again in a minute.',
                                  es: 'Esta canci\u00f3n no se carg\u00f3. Vuelve a darle play en un minuto.' },
     // The Guitar toggle only appears where a full mix has been exported (see
