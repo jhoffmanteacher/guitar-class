@@ -4676,6 +4676,9 @@ a.jl-song-btn{display:inline-block;text-decoration:none}
    (teacher-livegames.js) shows on the first screen at 1366x657. Full screen
    and every running state keep the full height. */
 .lq-stage:not(:fullscreen):has(> .lq-st-idle){min-height:0}
+/* The games list: a greyed button reads as off (a running game's Remove, every
+   button while a save is out). Scoped here; the Class activities board is unchanged. */
+.lq-games .tg-seg-btn:disabled{opacity:.4;cursor:not-allowed}
 /* Fullscreen strips the page background out from under it, so repaint it. */
 .lq-stage:fullscreen{background:var(--bg);border-radius:0;justify-content:center}
 .lq-st-title{font-family:var(--font-display);font-size:clamp(1.75rem,4vw,3.25rem);
