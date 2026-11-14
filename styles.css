@@ -2460,7 +2460,11 @@ body.rail-collapsed .rail-tools .tool-popup{
 .cc-group-title{font-size:0.75rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
 .cc-group .fret-levels{flex-wrap:wrap}
 .cc-group .ts-btn{flex:0 0 auto;padding:4px 12px;white-space:nowrap}
-.cc-rate-sub{display:block;font-size:0.75rem;font-weight:400;opacity:0.68;margin-top:1px}
+/* The small line under a speed or song button ("4 beats each"). No opacity:
+   any fade fails 4.5:1 somewhere (0.68 was 3.1:1 on --bg2; in the dark theme
+   the hovered button passes only at full strength, 4.6:1). It is set apart by
+   its size and weight instead. */
+.cc-rate-sub{display:block;font-size:0.75rem;font-weight:400;margin-top:1px}
 .cc-best{font-size:0.7812rem;font-weight:600;color:var(--green-text);margin-left:6px}
 .cc-diagrams{margin:8px 0}
 .cc-dia{opacity:0.75;border-radius:8px;padding:2px;transition:opacity .15s,box-shadow .15s}
