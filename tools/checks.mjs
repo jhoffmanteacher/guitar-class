@@ -17013,10 +17013,12 @@ function checkStrumCheck() {
     /* the end line: 0, 1 and many bars, both languages */
     for (const lang of ['en', 'es']) {
       run(`setLang(${JSON.stringify(lang)})`);
-      const one = run('scSummaryLine(1, 1, 0)'), many = run('scSummaryLine(8, 6, 7)'), all = run('scSummaryLine(8, 8, 8)'), none = run('scSummaryLine(0, 0, 0)');
-      n.lines += 4;
-      if (lang === 'en' && (!/of 1 bar\./.test(one) || /bars/.test(one))) fail(`en: the end line at 1 bar reads "${one}"`);
-      if (lang === 'es' && (!/de 1 compás\./.test(one) || /compases/.test(one))) fail(`es: the end line at 1 bar reads "${one}"`);
+      const one = run('scSummaryLine(1, 1, 0)'), oneAll = run('scSummaryLine(1, 1, 1)'), many = run('scSummaryLine(8, 6, 7)'), all = run('scSummaryLine(8, 8, 8)'), none = run('scSummaryLine(0, 0, 0)');
+      n.lines += 5;
+      for (const x of [one, oneAll]) {
+        if (lang === 'en' && (!/of 1 bar\./.test(x) || /bars/.test(x))) fail(`en: the end line at 1 bar reads "${x}"`);
+        if (lang === 'es' && (!/de 1 compás\./.test(x) || /compases/.test(x))) fail(`es: the end line at 1 bar reads "${x}"`);
+      }
       if (!/6/.test(many) || !/7/.test(many) || !/8/.test(many)) fail(`${lang}: the end line at 8 bars does not carry 6 and 7 of 8: "${many}"`);
       const allGood = run(`t('sc.allGood')`);
       if (!all.includes(allGood) || many.includes(allGood) || one.includes(allGood)) fail(`${lang}: "${allGood}" shows when not every bar was right, or not when every bar was`);
@@ -17025,7 +17027,7 @@ function checkStrumCheck() {
     run(`setLang('en')`);
   } catch (e) { fail('stopped on an error: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : e)); }
   /* pinned totals, so a renamed function cannot turn this into a check of nothing */
-  if (n.onsets !== 14 || n.chords !== 9 || n.lines !== 8 || n.pins !== 3) fail(`ran ${n.onsets} onsets (want 14), ${n.chords} chord cases (9), ${n.lines} end lines (8), ${n.pins} pins (3)`);
+  if (n.onsets !== 14 || n.chords !== 9 || n.lines !== 10 || n.pins !== 3) fail(`ran ${n.onsets} onsets (want 14), ${n.chords} chord cases (9), ${n.lines} end lines (10), ${n.pins} pins (3)`);
   if (!bad) ok(`1eh: one listening step (ca-46, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, none in the console; window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule} (${n.chords} scripted cases); a whole finish saved nothing; end lines at 0, 1 and many bars in both languages`);
 }
 
