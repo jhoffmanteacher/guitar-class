@@ -26,8 +26,12 @@ What is open right now: `WORKFLOW.md` → "Where things stand" (top of the file)
    - **A risky or wide change** (load order, a shared renderer, the save path, a many-file refactor): also take a
      golden snapshot of what the site shows and saves, on the commit before and on your tree, then compare:
      `node tools/golden.mjs --out <dir> --shots` twice (`--root <site folder>` snapshots another checkout), then
-     `node tools/golden.mjs --compare <dirA> <dirB>`. About 20 minutes each; only one headless-browser run at a
-     time (no smoke, `pm-e2e.mjs` or `slow-load.mjs` beside it); it uses Chrome for Testing when `CHROME` is set.
+     `node tools/golden.mjs --compare <dirA> <dirB>`. About 30 minutes each (29 and 38 measured 2026-11-13, longer
+     under load); only one headless-browser run at a time (no smoke, `pm-e2e.mjs` or `slow-load.mjs` beside it); it
+     uses Chrome for Testing when `CHROME` is set. Coverage is on by default: every run prints, per script, how many
+     top-level functions it NEVER ran (names in `coverage.json`), and the compare prints that count for each file the
+     two sites differ in. "Identical" says nothing about code a run never reached: read the header's "not covered"
+     list. `--out` refuses a non-empty folder that is not a snapshot, the site, the checkout or anything above it.
      A small change does not need it.
    - **The full walk** (both languages, every area, no `--only`/`--en-only`) runs on GitHub
      Friday evenings (the Friday check reads it) and when Jonathan asks for **"the end-of-day smoke"** (no nightly task: his
