@@ -897,6 +897,8 @@ function teacherMarkReportsSeen(ts){
   try{ localStorage.setItem(TEACHER_REPORTS_SEEN_KEY, JSON.stringify(v)); }catch(e){}
 }
 async function teacherRefreshReportsBadge(){
+  // The "asking to join" count (teacher-accounts.js) refreshes at the same moments.
+  if(typeof teacherRefreshAccessBadge==='function') teacherRefreshAccessBadge();
   const req=++teacherReportsBadgeReq;
   let n;
   try{
