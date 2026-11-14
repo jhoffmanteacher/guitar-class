@@ -6,6 +6,11 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-14 — The offline message no longer covers buttons, and the ✓ is easy to see
+
+- **When you are offline, the message is now one line along the bottom of the page.** Before, it sat on top of the page and could cover a button, like "Mark as done" on a practice card. Now the page makes room for it. Press × to close it.
+- **When you finish a long step, the page moves so you can see its ✓.** Before, the ✓ could appear where you could not see it, under the bar at the top of the page.
+
 ## 2026-11-13 — Power Chord Switch and Change Up judge the strum closest to each change
 
 - **The game now judges the strum you play closest to each chord change.** Before, a sound a second or two early (a classmate's guitar, or your last chord still ringing) could be the one that counted, so a change you played right could show "wrong chord". This mattered most at slow speeds.
