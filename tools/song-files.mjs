@@ -214,6 +214,17 @@ export function addSongFile(root, mp3, opts = {}) {
   const was = list[id] || null;
   list[id] = { file: name, bytes: m.bytes, sha256: m.sha256, durationSec: m.durationSec };
   writeSongFiles(root, list);
+  /* ONE pin counts the list (checks.mjs 1dz, SONG_FILES_PIN; review B3): a NEW entry moves it here, so every way a
+     song joins the list (this CLI, new-playalong --private, loudness.py's rewrite of an existing entry, which does
+     not move it) keeps the checks green without a hand edit. */
+  if (!was) {
+    const cf = join(root, 'tools', 'checks.mjs');
+    if (existsSync(cf)) {
+      const t = readFileSync(cf, 'utf8'), n = t.replace(/const SONG_FILES_PIN = (\d+);/, (x, k) => `const SONG_FILES_PIN = ${Number(k) + 1};`);
+      if (n === t) throw new Error('tools/checks.mjs has no "const SONG_FILES_PIN = N;" to move');
+      writeFileSync(cf, n);
+    }
+  }
   return { id, entry: list[id], was, copied, dest, ffprobeSec: m.ffprobeSec };
 }
 

@@ -152,6 +152,10 @@ function teacherSfBlockHtml(){
   const lines = [teacherSfReadErr, teacherSfProgress, teacherSfNote].filter(Boolean);
   if(lines.length) html += `<div class="tg-note" role="status">${lines.map(l => `<b>${escHtml(l)}</b>`).join('<br>')}</div>`;
   if(!open) return html;
+  /* Review A1 (2026-11-14): the monthly limit is the site's own count of honest use; the rules cannot count reads,
+     so any account the rules let read can download the pieces directly. Until the school-accounts paste 2 is
+     published that is any Google account. */
+  html += `<div class="tg-note"><strong>Upload real songs only after the school-accounts rules (paste 2) are published.</strong> Until then any signed-in Google account can read these files, and the monthly limit only counts what the site itself downloads.</div>`;
   html += `<div class="tg-note">The site's song recordings, kept in the class database and played only to signed-in accounts. Upload takes an .mp3 from this computer only if it is exactly a file on the site's list (same size and SHA-256). Verify reads a song back the way a Chromebook does and counts against this month's downloads.</div>
       <div class="tg-note"><label>Upload an .mp3: <input type="file" accept=".mp3,audio/mpeg" data-tsf-file${off}></label>
         <button type="button" class="tg-seg-btn" data-tsf-act="verify-all"${off}>Verify all</button>
@@ -286,6 +290,14 @@ async function teacherSfUpload(file){
       return;
     }
     const entry = teacherSfEntry(id);
+    /* Uploading over a song that is already there and matching (review B7): it goes back to "uploading" for the
+       minutes the upload takes, and a Chromebook with no copy is refused in that time. Ask first. */
+    const was = teacherSfHeads && teacherSfHeads.get(id);
+    if(was && was.state === 'ready' && teacherSfHeadMatches(was, entry)
+       && !confirm(`${id} is already uploaded and matches the list. Upload it again? While it uploads, Chromebooks that do not have it yet see "not ready".`)){
+      teacherSfEnd(`Nothing uploaded: ${id} is already there and matches the list.`);
+      return;
+    }
     const dur = await teacherSfDuration(file);
     if(dur == null){ teacherSfEnd(`This browser could not read the length of that file, so it was not uploaded. Is it a whole .mp3?`); return; }
     const durationSec = Math.round(dur * 100) / 100;

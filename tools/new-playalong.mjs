@@ -8,7 +8,7 @@
      --private      a song behind the sign-in (SONG FILES, 2026-11-14; app/songfiles.js): the two mp3s go to the
                     private song folder (~/Documents/guitar-class-song-files/, or GC_SONG_FILES_DIR), never audio/;
                     the track's paths are 'private:<slug>-<bpm>'; both files are put on the SONG_FILES list with
-                    tools/song-files.mjs (name, size, SHA-256, length) and checks.mjs's SONG_FILES_PIN goes up by 2.
+                    tools/song-files.mjs (name, size, SHA-256, length) and checks.mjs's SONG_FILES_PIN goes up by 2 (tools/song-files.mjs moves it, once per new entry).
                     Then Jonathan uploads them in the console (Manage → Song files) and presses Verify before the push.
 
    WHY IT EXISTS. Every play-along on a record (ca-37, ca-39, ca-41, ca-42, ca-51) was typed by hand: two mp3s
@@ -360,7 +360,7 @@ edit('tools/checks.mjs', (s) => s
     ? `const NO_CHECKLIST_CARDS = ${c}, NO_CHECKLIST_EXTRA = ${Number(e) + 2};`
     : `const NO_CHECKLIST_CARDS = ${Number(c) + 2}, NO_CHECKLIST_EXTRA = ${e};`)
   .replace(/const ONE_LINE_2A = (\d+),/, (m, n) => `const ONE_LINE_2A = ${Number(n) + dirStrings},`)
-  .replace(/const SONG_FILES_PIN = (\d+);/, (m, n) => PRIVATE ? `const SONG_FILES_PIN = ${Number(n) + 2};` : m), PRIVATE ? 'CHORD_GRID_CARDS, 1ct, 1cs and 1dz pins' : 'CHORD_GRID_CARDS, 1ct and 1cs pins');
+  , 'CHORD_GRID_CARDS, 1ct and 1cs pins');   // 1dz's SONG_FILES_PIN moves in addSongFile (tools/song-files.mjs), once per new entry
 edit('tools/playalong-loop.mjs', (s) => s
   .replace(/(const METER = \{[\s\S]*?)(\n\};)/, (m, a, b) => `${a}\n  '${S.slug}': '${meterName}',${b}`)
   .replace(/(const CLOCK_PINS = \{[\s\S]*?)(\n\};)/, (m, a, b) => `${a}\n  '${S.slug}': '${clockPin}',   // ${date}: set from tools/playalong-measure.py, then checked with tools/beat-audit.py; not yet by ear (?snipcal=1)${b}`), 'METER and CLOCK_PINS');

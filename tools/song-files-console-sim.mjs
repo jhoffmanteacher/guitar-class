@@ -185,6 +185,8 @@ function makeConsole(consoleSrc){
   vm.runInContext(esc + '\nlet db = null; let firebaseReady = true; async function ensureDb(){ return db; }\n'
     + 'const MODULE_MANIFEST = []; const CLASS_OPEN_THROUGH = 1;\nfunction __setDb(x){ db = x; }', box, { filename: 'prelude' });
   vm.runInContext(read('app/songfiles.js'), box, { filename: 'app/songfiles.js' });
+  // The sim's own list: whatever the site ships on SONG_FILES is cleared, so a real entry never changes a case (review B3).
+  vm.runInContext('for (const k of Object.keys(SONG_FILES)) delete SONG_FILES[k];', box);
   vm.runInContext(consoleSrc, box, { filename: 'teacher.js (all parts)' });
   vm.runInContext('__setDb', box)(F.db);
   const run = code => vm.runInContext(code, box);
@@ -237,6 +239,21 @@ async function runCases(consoleSrc){
     ok(nAcc >= 1 && nSf === nAcc, `hook: every Manage paint that mounts the access block mounts Song files too (${nSf} of ${nAcc})`);
   }
   ok(c.F.st.writes.length === 0, `hook: opening Manage writes nothing (${c.F.st.writes.length} writes)`);
+  done(c);
+
+  /* upload over a song that is already there and matching: asked first (review B7) */
+  c = makeConsole(consoleSrc); register(c);
+  await uploaded(c);
+  {
+    await c.run('teacherSfLoad()'); await settle();
+    const n0 = c.F.st.writes.length;
+    c.env.confirmAnswer = false;
+    await c.run('teacherSfUpload')(fileOf(SONG, 125.5)); await settle(60);
+    ok(c.F.st.writes.length === n0 && /already there and matches/.test(c.block._html), `re-upload of a matching song, answered No: nothing written (${c.F.st.writes.length - n0} writes)`);
+    c.env.confirmAnswer = true;
+    await c.run('teacherSfUpload')(fileOf(SONG, 125.5)); await settle(60);
+    ok(c.F.st.writes.length > n0 && (c.F.S.get('songFiles/test-song') || {}).state === 'ready', 're-upload answered Yes: uploaded again, ready');
+  }
   done(c);
 
   /* upload: 3 pieces, uploading → ready, stale pieces 3..5 removed */
@@ -404,6 +421,17 @@ async function runCases(consoleSrc){
     ok(!html.includes('"><svg') && html.includes('data-tsf-id="x&quot;&gt;&lt;svg onload=alert(3)&gt;"'), 'escape: a stored doc id with "><svg …> is escaped in its data-tsf-id');
     ok(!/\son[a-z]+="/i.test(html.replace(/&[a-z#0-9]+;/g, '')) , 'escape: the section has no inline on…= handler');
     ok(/in the store, not on the list/.test(html), 'list: a store doc that is not on the list says so');
+    ok(/Upload real songs only after the school-accounts rules \(paste 2\) are published/.test(html), 'the section says to upload real songs only after paste 2 is published (review A1)');
+    // A Verify result's text is drawn as text too (review B, minor 3).
+    c.run(`teacherSfChecks.set('test-song', { ok: false, text: '<img src=x onerror=alert(4)>' }); teacherSfPaint()`);
+    const h2 = c.block._html;
+    ok(!/<img/i.test(h2) && h2.includes('&lt;img src=x onerror=alert(4)&gt;'), 'escape: a Verify result\'s text is drawn as text');
+    // A read that lands while a write is under way does not replace what the section shows (review B, minor 3).
+    const before = c.run('teacherSfHeads');
+    c.run(`teacherSfBusy = 'upload'`);
+    await c.run('teacherSfLoad()');
+    ok(c.run('teacherSfHeads') === before, 'a read that finishes during an upload does not replace the list (the write\'s end reads again)');
+    c.run(`teacherSfBusy = ''`);
   }
   done(c);
 
@@ -502,6 +530,9 @@ if(BREAKS){
     ['an older read paints over a newer one', "if(gen !== teacherSfReadGen) return;                        // a newer read owns the section\n", ''],
     ['paints after leaving Manage', "function teacherSfPaint(){\n  if(teacherView !== 'manage') return;", 'function teacherSfPaint(){'],
     ['Reset writes the wrong shape', "set({ bytes: 0 });", "set({ bytes: 0, at: 1 });"],
+    ['a re-upload over a matching song is not asked first', "    if(was && was.state === 'ready' && teacherSfHeadMatches(was, entry)", "    if(false"],
+    ['a Verify result drawn unescaped (review B minor 3)', "${escHtml(chk.text)}", "${chk.text}"],
+    ['a read paints over a write (review B minor 3)', "  if(teacherSfBusy) return;                                   // the write's end reads again\n", ''],
     ['one upload at a time dropped', "async function teacherSfUpload(file){\n  if(teacherSfBusy || !file) return;", "async function teacherSfUpload(file){\n  if(!file) return;"],
   ];
   let caught = 0;
