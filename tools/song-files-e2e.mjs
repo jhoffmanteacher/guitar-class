@@ -12,8 +12,7 @@
         device copy (IndexedDB), with 0 database reads;
      4. signed out (currentUser null): Play → the plain line "Sign in to hear this song.", no player started;
      5. the monthly limit tripped (the stub's count at the limit, the device copy deleted): Play → the limit line;
-     6. a Song Journey page whose box is switched (in the page only) to the private id, the loader added, signed out:
-        the box shows the sign-in line and no <audio> element.
+   (The Song Journey pages cannot play a private song yet: that player is its own piece of Step 2.)
    Steps 2, 4 and 5 are screenshotted at 1366x657 in English and Spanish, the console view in English.
      node tools/song-files-e2e.mjs [--shots <dir>] [--chrome <path>]   (or CHROME=…; Chrome for Testing only)
    Exit 0: every step passed. 1: a step failed (each is printed). 2: could not run. Needs ffmpeg and Node 22+.
@@ -267,19 +266,6 @@ async function main(){
       check(`[${lang}] the limit tripped: one plain line, nothing read, nothing playing (${JSON.stringify(lim)})`, /next month|próximo mes/.test(lim) && await js(`__sf.pieceReads`) === pr0 && !(await js(`!!pcState`)), lim);
       await shot(`limit-line-${lang}`);
     }
-
-    /* ── 6. a Song Journey page, signed out ── */
-    await nav(`http://127.0.0.1:${port}/tabs/luna.html`);
-    await waitFor(`document.readyState === 'complete' && typeof ensurePlayer === 'function'`, 15000);
-    await js(`setLang('en'), true`);   // the app's steps above left the shared language on Spanish
-    await js(`new Promise(r => { const s = document.createElement('script'); s.src = '../app/songfiles.js'; s.onload = () => r(true); s.onerror = () => r(false); document.head.appendChild(s); })`);
-    await js(`(() => { const b = document.getElementById('playalong-frame'); for (const k of Object.keys(b.dataset)) if (/^audio/.test(k)) b.dataset[k] = 'private:${ID}'; return true; })()`);
-    await js(`(() => { const btn = document.querySelector('[onclick*="togglePlayalong"]'); if (btn) btn.click(); else { const b = document.getElementById('playalong-frame'); b.hidden = false; ensurePlayer(); } return true; })()`);
-    await sleep(500);
-    const jp = await js(`(() => { const b = document.getElementById('playalong-frame'); return { line: (b.querySelector('.sf-line') || {}).textContent || '', audio: !!b.querySelector('audio') }; })()`);
-    check(`a Song Journey page switched to a private file, signed out: the sign-in line and no player (${JSON.stringify(jp.line)})`, jp.line === 'Sign in to hear this song.' && !jp.audio, JSON.stringify(jp));
-    await js(`(() => { const b = document.getElementById('playalong-frame'); b.scrollIntoView({ block: 'center' }); return true; })()`);
-    await shot('journey-signed-out-en');
 
     const pageErrs = errs.filter(e => !/firebase|firestore|googleapis|gstatic|net::|Failed to fetch|NotAllowedError|play\(\)|AbortError|NotSupportedError|offline/i.test(e || ''));
     check('no page error', !pageErrs.length, pageErrs.slice(0, 3).join(' | '));

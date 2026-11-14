@@ -307,24 +307,6 @@ function ensurePlayer(){
   if(!box || !box.dataset.audio) return null;
   if(box.dataset.loaded) return box.querySelector('audio');
 
-  /* SONG FILES (2026-11-14; app/songfiles.js): a page whose band files are
-     behind the sign-in names them 'private:<id>'. No page does yet (Step 2
-     switches the Watchtower page, and adds app/songfiles.js to it). Signed
-     out, or without the loader, the box shows one plain line and no player;
-     a press after signing in builds it. A public page skips all of this. */
-  var sfPrivate = Object.keys(box.dataset).some(function(k){ return /^audio/.test(k) && /^private:/.test(box.dataset[k] || ''); });
-  if(sfPrivate){
-    var sfNoLoader = typeof window.songFileWaitThen !== 'function';   // app/songfiles.js, when the page loads it (Step 2); read off window so no page without it names an undefined function
-    if(sfNoLoader || !window.songFileHost().user){
-      var line = box.querySelector('.sf-line');
-      if(!line){ line = document.createElement('div'); line.className = 'sf-line'; line.setAttribute('role', 'status'); box.appendChild(line); }
-      var key = sfNoLoader ? 'sf.notReady' : 'sf.signIn';
-      line.setAttribute('data-i18n', key);
-      line.textContent = t(key);
-      return null;
-    }
-  }
-
   var a = document.createElement('audio');
   a.controls = true;
   a.loop = true;
@@ -345,10 +327,6 @@ function ensurePlayer(){
   var synthClick = barClick || gridClick;
 
   var currentSrc = function(){
-    var s = rawSrc();
-    return sfPrivate ? window.songFileSrc(s) : s;
-  };
-  var rawSrc = function(){
     if(synthClick) return guitarOn ? (slowOn ? d.audioSlowFull : d.audioFull) : (slowOn ? d.audioSlow : d.audio);
     if(guitarOn){
       if(slowOn) return metroOn ? d.audioSlowFullMetronome : d.audioSlowFull;
@@ -364,10 +342,7 @@ function ensurePlayer(){
      after the first switch's seek. It carries the pending switch's place
      and play state forward instead, and replaces its listener. */
   var pendingSwitch = null;
-  /* undo (optional): flips back the toggle that asked for this switch, used
-     when a private file it needs fails to load (SONG FILES), so the button
-     and the file playing never disagree. */
-  var switchSrc = function(rescale, undo){
+  var switchSrc = function(rescale){
     clickTakeBack();                   // the file is about to change: see QUEUED CLICKS below
     var wasPlaying = pendingSwitch ? pendingSwitch.play : !a.paused;
     var t = pendingSwitch ? pendingSwitch.t : a.currentTime;
@@ -385,24 +360,11 @@ function ensurePlayer(){
     };
     pendingSwitch = { t: t, play: wasPlaying, resume: resume };
     a.addEventListener('loadedmetadata', resume);
-    // A private file not loaded yet: load it first ("Loading the song… 40%"), then switch.
-    if(sfPrivate && window.songFileNeedsLoad(rawSrc())){
-      a.pause();
-      window.songFileWaitThen(box, rawSrc(), function(){ a.src = currentSrc(); a.load(); }, { fail: function(){
-        // The old file is still loaded: drop the pending switch, put the toggle back, and play on if it was playing.
-        var p = pendingSwitch;
-        if(p){ a.removeEventListener('loadedmetadata', p.resume); pendingSwitch = null; }
-        if(undo) undo();
-        if(p && p.play) a.play().catch(function(){});
-      } });
-      return;
-    }
     a.src = currentSrc();
     a.load();
   };
 
-  if(sfPrivate && window.songFileNeedsLoad(rawSrc())) window.songFileWaitThen(box, rawSrc(), function(){ a.src = currentSrc(); a.play().catch(function(){}); });
-  else a.src = currentSrc();
+  a.src = currentSrc();
 
   /* The page-made click (data-click-anchor or data-click-bars, above). One
      click per counted beat, the next one scheduled once it is under 100 ms
@@ -518,12 +480,12 @@ function ensurePlayer(){
     slowBtn.className = 'metronome-toggle';
     slowBtn.setAttribute('aria-pressed', 'false');
     slowBtn.innerHTML = '&#x1F422; <span data-i18n="journey.slow" data-i18n-params=\'{"bpm":"' + box.dataset.bpmSlow + '"}\'></span>';
-    var flipSlow = function(){
+    slowBtn.onclick = function(){
       slowOn = !slowOn;
       slowBtn.classList.toggle('on', slowOn);
       slowBtn.setAttribute('aria-pressed', slowOn ? 'true' : 'false');
+      switchSrc(true);
     };
-    slowBtn.onclick = function(){ flipSlow(); switchSrc(true, flipSlow); };
     box.appendChild(slowBtn);
   }
 
@@ -533,16 +495,13 @@ function ensurePlayer(){
     metroBtn.className = 'metronome-toggle';
     metroBtn.setAttribute('aria-pressed', 'false');
     metroBtn.innerHTML = '&#x1F3B5; <span data-i18n="tools.metronome"></span>';
-    var flipMetro = function(){
+    metroBtn.onclick = function(){
       metroOn = !metroOn;
       metroBtn.classList.toggle('on', metroOn);
       metroBtn.setAttribute('aria-pressed', metroOn ? 'true' : 'false');
-    };
-    metroBtn.onclick = function(){
-      flipMetro();
       // Our click — no file to swap. A click already queued is taken back (QUEUED CLICKS).
       if(synthClick){ clickTakeBack(); lastBeat = -1; if(metroOn) startClicks(); return; }
-      switchSrc(false, flipMetro);
+      switchSrc(false);
     };
     box.appendChild(metroBtn);
   }
@@ -554,7 +513,7 @@ function ensurePlayer(){
     gtrBtn.setAttribute('aria-pressed', 'true');
     gtrBtn.setAttribute('data-i18n-attr', 'title:ca.snipGuitarTitle');
     gtrBtn.innerHTML = '&#x1F3B8; <span data-i18n="ca.snipGuitarOn"></span>';
-    var flipGuitar = function(){
+    gtrBtn.onclick = function(){
       guitarOn = !guitarOn;
       gtrBtn.classList.toggle('on', guitarOn);
       gtrBtn.setAttribute('aria-pressed', guitarOn ? 'true' : 'false');
@@ -564,8 +523,8 @@ function ensurePlayer(){
       var lab = gtrBtn.querySelector('span');
       lab.setAttribute('data-i18n', guitarOn ? 'ca.snipGuitarOn' : 'ca.snipGuitarOff');
       lab.textContent = t(guitarOn ? 'ca.snipGuitarOn' : 'ca.snipGuitarOff');
+      switchSrc(false);
     };
-    gtrBtn.onclick = function(){ flipGuitar(); switchSrc(false, flipGuitar); };
     box.appendChild(gtrBtn);
   }
 
@@ -614,8 +573,6 @@ function togglePlayalong(btn){
        visible transport to stop it. Pause on collapse, and resume on re-open
        only if collapsing is what paused it, so a student who pressed pause on
        the player doesn't get the track restarted behind their back. */
-    // Collapsing while a private song still loads (SONG FILES): it must not start hidden later.
-    if(!opening && typeof songFileCancelWait === 'function') songFileCancelWait();
     var player = box.querySelector('audio');
     if(player){
       if(!opening && !player.paused){
@@ -644,8 +601,6 @@ function toggleTrackFab(){
    this page has no app.js. The page's own click stops by itself once the
    track is paused (clickTick returns while a.paused). */
 function stopJourneyAudio(){
-  // A private song still loading (SONG FILES) must not start into the tuner's mic.
-  if(typeof songFileCancelWait === 'function') songFileCancelWait();
   var box = document.getElementById('playalong-frame');
   var a = box && box.querySelector('audio');
   if(a && !a.paused) a.pause();
