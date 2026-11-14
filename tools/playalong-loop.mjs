@@ -177,6 +177,10 @@
    This tool does not walk those two players (NOT COVERED); they were proved by a scripted check on the same fake
    world, not kept in the repo.
 
+   PRIVATE SONG FILES (2026-11-14): a 'private:<id>' track is walked like any other, with no private folder and no
+   download: see "SONG FILES" where the tracks are read. The loader's own wait ("Loading the song... 40%") is not
+   walked here; tools/song-files-sim.mjs is its test.
+
    NOT COVERED: the six Song Journey pages (tabs/journey.js has its own player: ensurePlayer, switchSrc, clickTick,
    barNextBeat / barBeatTime, the data-click-bars / data-click-anchor lists; its tabs are static text with no
    cursor) and the step snippets (snipState in app/snippets.js). Both could reuse the fake world below.
@@ -1613,6 +1617,18 @@ async function main() {
   await step('boot: the fake world', PAGE_SRC);
   const consts = await step('boot: reading the tracks and cards', '__pl.consts()');
   const tracks = consts.tracks, files = fileIndex(tracks);
+  /* SONG FILES (2026-11-14): a track path may be 'private:<id>' (app/songfiles.js). The fake world plays no bytes
+     (FakeAudio only moves currentTime, and every length comes from SNIPPET_TRACKS durationSec), so a private track
+     needs neither the private folder nor a download here: each id on the list is marked loaded under its own path
+     (sfUrls), the player then hands that same 'private:<id>' to the fake element, and the walks compare it with the
+     track's path as they compare 'audio/...'. What this stands in for (the download, the device copy, "Loading the
+     song... 40%") is tools/song-files-sim.mjs's. With no private path it does nothing and prints nothing. */
+  const privatePaths = Object.keys(files).filter(f => f.startsWith('private:')).length;
+  if (privatePaths) {
+    const n = await step('boot: private song files stand in', `(function(){ if (typeof SONG_FILES === 'undefined' || typeof sfUrls === 'undefined') return -1; const ids = Object.keys(SONG_FILES); ids.forEach(function(id){ sfUrls.set(id, 'private:' + id); }); return ids.length; })()`);
+    if (n < 0) { console.error('playalong-loop: a track names a private file but the page has no SONG_FILES / sfUrls (app/songfiles.js)'); return 2; }
+    console.log(`playalong-loop: ${privatePaths} private track file${privatePaths === 1 ? '' : 's'} (${n} on the SONG_FILES list) stand in under their own path: the fake world plays no bytes`);
+  }
   const meterOf = (key) => METERS[METER[key]];
 
   if (PINS_ONLY) { for (const [k, tr] of Object.entries(tracks)) console.log(`  '${k}': '${clockPin(tr)}',`); return 0; }

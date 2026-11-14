@@ -5,6 +5,15 @@ song. See the audio-and-snippets skill, "Backing tracks".
   python3 tools/loudness.py <song-slug> [--dry-run] [--source-ref <git-ref>] [--accept-spread]
   python3 tools/loudness.py --list-reference-files
 
+  A PRIVATE song (SONG FILES, 2026-11-14: its SNIPPET_TRACKS paths are 'private:<id>' and its files sit in the
+  private song folder, ~/Documents/guitar-class-song-files/ or GC_SONG_FILES_DIR; tools/song_files.py) is found
+  by the same slug: a file on the SONG_FILES list named <slug>-backing-... is one of the song's files, read from
+  the private folder. Nothing extra to type. Such a file is written back into the private folder, never into
+  audio/, and its list entry (bytes, SHA-256) is rewritten by `node tools/song-files.mjs --add` (the bytes
+  change, and the site checks every download against the list). A private file the folder does not have is
+  skipped with one line (its list size and length); --dry-run then measures the rest, and a real run refuses
+  (one gain goes on EVERY file of a song). A copy whose size or SHA-256 is not the list's stops the run.
+
   song-slug        the file-name prefix before `-backing-`, e.g.
                    guns-n-roses-sweet-child-o-mine
   --dry-run        do everything (measure, encode, verify, print the table)
@@ -80,6 +89,8 @@ import sys
 import tempfile
 from pathlib import Path
 
+import song_files as sf
+
 ROOT = Path(__file__).resolve().parent.parent
 AUDIO = ROOT / 'audio'
 REFERENCE_SLUG = 'olivia-rodrigo-the-cure'
@@ -104,14 +115,31 @@ def parse_name(path):
     return m.groupdict() | {'bpm': int(m['bpm'])} if m else None
 
 
+# Private files (SONG FILES): local path -> (id, list entry). Filled by songs().
+PRIVATE = {}
+
+
 def songs():
-    """slug -> sorted list of its backing-track paths in audio/."""
+    """slug -> sorted list of its backing-track paths: audio/, then the private files on the SONG_FILES list (a
+    path in the private folder, which may not exist: see PRIVATE and main)."""
     out = {}
     for p in sorted(AUDIO.glob('*-backing-*.mp3')):
         n = parse_name(p)
         if n:
             out.setdefault(n['slug'], []).append(p)
+    folder = sf.song_files_dir()
+    for sid, e in sorted(sf.read_song_files(ROOT).items(), key=lambda kv: kv[1]['file']):
+        n = parse_name(e['file'])
+        if n:
+            p = folder / e['file']
+            PRIVATE[p] = (sid, e)
+            out.setdefault(n['slug'], []).append(p)
     return out
+
+
+def app_ref(p):
+    """How app.js names a file: 'audio/<name>' or 'private:<id>'."""
+    return f"'private:{PRIVATE[p][0]}'" if p in PRIVATE else f"'audio/{p.name}'"
 
 
 def app_source():
@@ -152,7 +180,7 @@ def level_file(files):
         if cands:
             top = max(parse_name(p)['bpm'] for p in cands)
             cands = [p for p in cands if parse_name(p)['bpm'] == top]
-            pos = lambda p: (app.find(f"'audio/{p.name}'") % (len(app) + 1), p.name)  # -1 (absent) sorts last
+            pos = lambda p: (app.find(app_ref(p)) % (len(app) + 1), p.name)  # -1 (absent) sorts last
             return min(cands, key=pos)
     return None
 
@@ -355,13 +383,41 @@ def fmt_table(rows):
 def main(argv):
     args = argv[1:]
     if '--list-reference-files' in args:
-        all_songs = songs()
+        # A private level file: its absolute path in the private folder when it is there and matches the list;
+        # otherwise it is not listed under songs, and privateNotMeasured says why (checks.mjs 1bu counts it).
+        try:
+            all_songs, list_err = songs(), None
+        except sf.SongFilesError as ex:
+            PRIVATE.clear()
+            all_songs, list_err = {}, str(ex)
+            for p in sorted(AUDIO.glob('*-backing-*.mp3')):
+                n = parse_name(p)
+                if n:
+                    all_songs.setdefault(n['slug'], []).append(p)
         ref = reference_file()
-        print(json.dumps({
-            'reference': ref.relative_to(ROOT).as_posix() if ref else None,
-            'songs': {s: level_file(f).relative_to(ROOT).as_posix()
-                      for s, f in all_songs.items() if s != REFERENCE_SLUG and level_file(f)},
-        }, indent=1))
+        out, skipped = {}, {}
+        for s, f in all_songs.items():
+            lvl = level_file(f) if s != REFERENCE_SLUG else None
+            if not lvl:
+                continue
+            if lvl in PRIVATE:
+                sid, e = PRIVATE[lvl]
+                if not lvl.exists():
+                    skipped[s] = f'private:{sid}: not in the private folder'
+                    continue
+                bad = sf.local_mismatch(lvl, e)
+                if bad:
+                    skipped[s] = f'private:{sid}: the private folder\'s copy {bad}'
+                    continue
+                out[s] = lvl.as_posix()
+            else:
+                out[s] = lvl.relative_to(ROOT).as_posix()
+        res = {'reference': ref.relative_to(ROOT).as_posix() if ref and ref not in PRIVATE else None, 'songs': out}
+        if skipped:
+            res['privateNotMeasured'] = skipped
+        if list_err:
+            res['songFilesError'] = list_err
+        print(json.dumps(res, indent=1))
         return 0
     dry = '--dry-run' in args
     accept_spread = '--accept-spread' in args
@@ -380,18 +436,54 @@ def main(argv):
         print(f'{slug} is the reference — every other song is levelled TO it. '
               'It is never re-levelled (Jonathan, 2026-10-25).', file=sys.stderr)
         return 2
-    files = songs().get(slug)
+    try:
+        all_songs = songs()
+    except sf.SongFilesError as ex:
+        print(f'loudness.py: {ex}', file=sys.stderr)
+        return 2
+    files = all_songs.get(slug)
     if not files:
-        print(f'no audio/{slug}-backing-*.mp3 files. Songs: {", ".join(sorted(songs()))}', file=sys.stderr)
+        print(f'no audio/{slug}-backing-*.mp3 files. Songs: {", ".join(sorted(all_songs))}', file=sys.stderr)
         return 2
     ref = reference_file()
-    if not ref:
+    if not ref or ref in PRIVATE:
         print('cannot find "the cure"\'s record-tempo full mix in audio/', file=sys.stderr)
         return 2
     lvl = level_file(files)
     if not lvl:
         print(f'{slug} has no full or rhythm-down mix to take its level from', file=sys.stderr)
         return 2
+    # SONG FILES: a private file is read from the private folder only when it matches the list; one the folder
+    # does not have is skipped with a line; a private file may never also be in audio/.
+    absent = []
+    for p in files:
+        if p not in PRIVATE:
+            continue
+        sid, e = PRIVATE[p]
+        if (AUDIO / p.name).exists():
+            print(f'audio/{p.name} is on the SONG_FILES list as private:{sid}: a private song must not be public '
+                  'too. Nothing written.', file=sys.stderr)
+            return 2
+        if not p.exists():
+            absent.append(p)
+            print(sf.absent_line(sid, e))
+            continue
+        bad = sf.local_mismatch(p, e)
+        if bad:
+            print(f'private:{sid}: the private folder\'s {p} {bad}. Nothing written: put the listed file back, or '
+                  'register this one with node tools/song-files.mjs --add.', file=sys.stderr)
+            return 2
+        if source_ref:
+            print(f'--source-ref reads audio/ at a commit, and private:{sid} was never in the repo', file=sys.stderr)
+            return 2
+    if lvl in absent:
+        print(f'the level file {lvl.name} is not here, so the song\'s gain cannot be worked out: nothing measured')
+        return 0
+    if absent and not dry:
+        print(f'{len(absent)} file(s) of {slug} are not in the private folder, and one gain goes on every file of '
+              'the song: nothing written (--dry-run measures the rest)', file=sys.stderr)
+        return 2
+    files = [p for p in files if p not in absent]
 
     target = loudness_only(ref)
     now = loudness_only(lvl)
@@ -509,10 +601,28 @@ def main(argv):
             print('\n--dry-run: every file passed; audio/ left untouched')
             return 0
         for p in files:            # all passed: move them in, each by an atomic rename
+            # a private file goes back where it came from, the private folder: never audio/
+            if p in PRIVATE and p.parent.resolve() == AUDIO.resolve():
+                raise RuntimeError(f'{p}: a private file would be written into audio/')
             part = p.with_name(f'.{p.name}.loudness-part')
             shutil.copyfile(out[p], part)
             os.replace(part, p)
-        print(f'\nwrote {len(files)} files to audio/ at {gain:+.2f} dB')
+        pub = [p for p in files if p not in PRIVATE]
+        priv = [p for p in files if p in PRIVATE]
+        if pub:
+            print(f'\nwrote {len(pub)} files to audio/ at {gain:+.2f} dB')
+        if priv:
+            print(f'\nwrote {len(priv)} private file(s) to {sf.song_files_dir()} at {gain:+.2f} dB; their list entries:')
+            bad = 0
+            for p in priv:
+                r = subprocess.run(['node', str(ROOT / 'tools' / 'song-files.mjs'), '--add', str(p),
+                                    '--id', PRIVATE[p][0], '--root', str(ROOT)], capture_output=True, text=True)
+                print('  ' + (r.stdout.strip() or r.stderr.strip()).replace('\n', '\n  '))
+                bad += r.returncode != 0
+            if bad:
+                print(f'{bad} list entr{"y" if bad == 1 else "ies"} NOT updated: the folder no longer matches '
+                      'app/songfiles.js; run node tools/song-files.mjs --add <file> --id <id> by hand', file=sys.stderr)
+                return 1
         return 0
     finally:
         shutil.rmtree(tmp, ignore_errors=True)

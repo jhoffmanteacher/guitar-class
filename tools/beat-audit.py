@@ -18,6 +18,10 @@ audio file is written, and it never prints a "corrected" map to paste. Jonathan 
                                                       breaks the detector on purpose, and the self-test must FAIL
   python3 tools/beat-audit.py --resolution            plant bar-line shifts in memory and print, per track, the
                                                       smallest one it catches
+A PRIVATE track file (SONG FILES, 2026-11-14: a SNIPPET_TRACKS path 'private:<id>'; tools/song_files.py) is read from
+the private song folder (~/Documents/guitar-class-song-files/, or GC_SONG_FILES_DIR) when the folder has it and its
+size and SHA-256 are the list's (app/songfiles.js of --root); one the folder does not have is "not measured" with one
+line naming the id and its list size and length; a copy that differs stops the run (exit 2).
 NOT HANDLED: a half-beat section on a 6/8 map with barTimes (half a big beat is 3 half-units, which the comb
 cannot see; none such exists today: the 6/8 tracks are steady grids).
 
@@ -185,6 +189,8 @@ import threading
 import time
 
 import numpy as np
+
+import song_files as sf
 
 SR = 22050
 HOP = 64
@@ -1134,6 +1140,30 @@ def where_in_cards(idx, bar):
     return '; '.join(parts[:3]) + (' (+%d more)' % (len(parts) - 3) if len(parts) > 3 else '')
 
 
+_LISTS = {}
+
+
+def audio_path(root, rel):
+    """The file a track path names: <root>/<rel> for a public one; for 'private:<id>' the private folder's copy when
+    it is there and matches the list, None when the folder does not have it. ToolError when it differs, or when
+    the id is not on the list."""
+    if sf.private_id(rel) is None:
+        return os.path.join(root, rel)
+    try:
+        if root not in _LISTS:
+            _LISTS[root] = sf.read_song_files(root)
+        r = sf.resolve_audio(root, rel, lst=_LISTS[root])
+    except sf.SongFilesError as ex:
+        raise ToolError(str(ex))
+    return str(r['file']) if r['file'] else None
+
+
+def absent_skip(root, rel):
+    """The 'not measured' reason for a private file the folder does not have."""
+    e = _LISTS[root][sf.private_id(rel)]
+    return 'not in the private folder %s; the list: %d bytes, %.1f s' % (sf.song_files_dir(), e['bytes'], e['durationSec'])
+
+
 def audit_track(slug, tr, cards, root, opts, breaks=(), override_E=None):
     files = []
     for role, key, slow in ROLES:
@@ -1141,16 +1171,20 @@ def audit_track(slug, tr, cards, root, opts, breaks=(), override_E=None):
             files.append((role, tr[key], slow))
     if opts.get('file'):
         want = os.path.abspath(opts['file'])
-        files = [f for f in files if os.path.abspath(os.path.join(root, f[1])) == want]
+        files = [f for f in files if os.path.abspath(audio_path(root, f[1]) or f[1]) == want]
+    absent = [f for f in files if audio_path(root, f[1]) is None]
+    files = [f for f in files if f not in absent]
     scale_slow = tr['trackBpm'] / tr['trackBpmSlow']
     G, bpb, ppb = units_per_bar(tr)
     beat_fast = 60.0 / tr['feltBpm']
     res = {'slug': slug, 'G': G, 'bpb': bpb, 'files': [], 'groups': [], 'xcorr': [], 'downbeat': [],
            'played': set(b for b0, b1, _, _ in card_index(cards, slug) for b in range(b0, b1 + 1)), 'breaks': breaks}
+    for role, rel, slow in absent:
+        res['files'].append({'role': role, 'rel': rel, 'scale': scale_slow if slow else 1.0, 'skip': absent_skip(root, rel)})
     fast_dur = None
     A = {}
     for role, rel, slow in files:
-        path = os.path.join(root, rel)
+        path = audio_path(root, rel)
         if not os.path.exists(path):
             raise ToolError('missing audio file: ' + rel)
         progress('%s %s' % (slug, role))
@@ -1797,14 +1831,22 @@ def main(argv):
         slugs = [args.only]
     if args.file:
         want = os.path.abspath(args.file)
-        slugs = [s for s in slugs if any(tracks[s].get(k) and os.path.abspath(os.path.join(args.root, tracks[s][k])) == want
-                                         for _, k, _ in ROLES)]
+        try:
+            slugs = [s for s in slugs if any(tracks[s].get(k) and os.path.abspath(audio_path(args.root, tracks[s][k]) or tracks[s][k]) == want
+                                             for _, k, _ in ROLES)]
+        except ToolError as ex:
+            print('beat-audit: ✗ %s' % ex, file=sys.stderr)
+            return 2
         if not slugs:
             print('beat-audit: ✗ %s is not a file of any SNIPPET_TRACKS entry' % args.file, file=sys.stderr)
             return 2
     stages = set(args.stage.replace(' ', '').split(','))
     if args.resolution:
-        return resolution_sweep(site, slugs, args.root, opts)
+        try:
+            return resolution_sweep(site, slugs, args.root, opts)
+        except ToolError as ex:
+            print('beat-audit: ✗ %s' % ex, file=sys.stderr)
+            return 2
     results = []
     try:
         for slug in slugs:
@@ -2092,7 +2134,7 @@ def stage2_track(slug, tr, cards, r, opts, root):
         next((f for f in r['files'] if f['role'] == 'fast' and 'm' in f), None)
     if fa is None:
         return None
-    a = opts['analyse'](os.path.join(root, fa['rel']))
+    a = opts['analyse'](audio_path(root, fa['rel']))
     E = fa['m']['E']
     nbars = len(E) - 1
     bpb = int(round(tr['beatsPerBar']))
@@ -2523,7 +2565,10 @@ def resolution_sweep(site, slugs, root, opts):
     print('beat-audit --resolution: planted bar-line shifts, in memory, through the whole stage-1 judgment')
     for slug in slugs:
         tr = site['tracks'][slug]
-        a = opts['analyse'](os.path.join(root, tr['src']))
+        if audio_path(root, tr['src']) is None:
+            print('  %s: %s, not swept' % (slug, absent_skip(root, tr['src'])))
+            continue
+        a = opts['analyse'](audio_path(root, tr['src']))
         G, bpb, _ = units_per_bar(tr)
         E0, _ = fast_bar_lines(tr, float(a['duration']))
         base = audit_track(slug, tr, [], root, opts, override_E=E0)

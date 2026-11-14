@@ -5,6 +5,11 @@
      node tools/new-playalong.mjs <spec.json> --from <upload.mp3>        make the two mp3s in audio/, then add the rest
      node tools/new-playalong.mjs <spec.json>                            the mp3s are already in audio/: add the rest
      --root <dir>   work on another copy of the site (default: this checkout)
+     --private      a song behind the sign-in (SONG FILES, 2026-11-14; app/songfiles.js): the two mp3s go to the
+                    private song folder (~/Documents/guitar-class-song-files/, or GC_SONG_FILES_DIR), never audio/;
+                    the track's paths are 'private:<slug>-<bpm>'; both files are put on the SONG_FILES list with
+                    tools/song-files.mjs (name, size, SHA-256, length) and checks.mjs's SONG_FILES_PIN goes up by 2.
+                    Then Jonathan uploads them in the console (Manage → Song files) and presses Verify before the push.
 
    WHY IT EXISTS. Every play-along on a record (ca-37, ca-39, ca-41, ca-42, ca-51) was typed by hand: two mp3s
    made with the same three ffmpeg lines, a SNIPPET_TRACKS entry, a card whose chart is the same loop written out
@@ -48,6 +53,7 @@ import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
+import { addSongFile, songFilesDir, readSongFiles, SONG_ID_RE } from './song-files.mjs';
 
 const HERE = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -55,9 +61,10 @@ const opt = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : nu
 const DRY = args.includes('--dry-run');
 const ROOT = resolve(opt('--root') || HERE);
 const FROM = opt('--from');
+const PRIVATE = args.includes('--private');
 const specPath = args.find((a, i) => !a.startsWith('--') && !['--root', '--from'].includes(args[i - 1]));
 const die = (m) => { console.error('new-playalong: ' + m); process.exit(2); };
-if (!specPath) die('usage: node tools/new-playalong.mjs <spec.json> [--dry-run] [--from <upload.mp3>] [--root <dir>]');
+if (!specPath) die('usage: node tools/new-playalong.mjs <spec.json> [--dry-run] [--from <upload.mp3>] [--root <dir>] [--private]');
 const S = JSON.parse(readFileSync(specPath, 'utf8'));
 for (const k of ['song', 'artist', 'slug', 'fileSlug', 'key', 'bpm', 'slowBpm', 'feltBpm', 'beatsPerBar', 'anchor', 'durationSec', 'sections'])
   if (S[k] == null) die(`the spec has no "${k}"`);
@@ -225,12 +232,24 @@ const fretsJs = (fr) => '[' + fr.map(([s, f]) => `[${q(s)}, ${f}]`).join(', ') +
 const noteJs = (shape, beats) => `{ frets: ${fretsJs(shape.frets)}, note: ${q(shape.note)}, midi: [${shape.midi.join(', ')}], beats: ${+beats.toFixed(6)} }`;
 const baseShape = (n) => versions === 'power' ? POWER[n] : FULL[n];
 
-const fileOf = (bpm) => `audio/${S.fileSlug}-backing-${S.key}-${bpm}bpm-440hz-full.mp3`;
+/* A file's name; the path SNIPPET_TRACKS gives it; where its bytes go on this machine. A private one (--private) is
+   'private:<slug>-<bpm>' on the SONG_FILES list, its bytes in the private song folder. */
+const nameOf = (bpm) => `${S.fileSlug}-backing-${S.key}-${bpm}bpm-440hz-full.mp3`;
+const idOf = (bpm) => `${S.slug}-${bpm}`;
+const fileOf = (bpm) => PRIVATE ? `private:${idOf(bpm)}` : `audio/${nameOf(bpm)}`;
+const diskOf = (bpm) => PRIVATE ? join(songFilesDir(), nameOf(bpm)) : join(ROOT, 'audio', nameOf(bpm));
+if (PRIVATE) {
+  for (const b of [S.bpm, S.slowBpm]) if (!SONG_ID_RE.test(idOf(b))) die(`the private id "${idOf(b)}" is not ${SONG_ID_RE}: pick a slug of lower-case letters, digits and dashes`);
+  let L;
+  try { L = readSongFiles(ROOT); } catch (e) { die(e.message); }
+  for (const b of [S.bpm, S.slowBpm]) if (L[idOf(b)] && L[idOf(b)].file !== nameOf(b)) die(`"${idOf(b)}" is already on the SONG_FILES list for ${L[idOf(b)].file}`);
+  for (const b of [S.bpm, S.slowBpm]) if (existsSync(join(ROOT, 'audio', nameOf(b)))) die(`audio/${nameOf(b)} is in the public folder: a private song must not be public too`);
+}
 const feltJs = typeof S.feltBpm === 'string' ? S.feltBpm : String(S.feltBpm);
 const feltNum = Number(Function(`"use strict";return (${feltJs});`)());
 if (!(feltNum > 0)) die('feltBpm is not a positive number');
 const trackJs = [
-  wrap(`/* ${S.song} — ${S.artist} (Jonathan uploaded the record, ${date}). The RECORD itself: no rhythm-down mix, so \`src\` IS the full mix and there is no Guitar toggle. ${S.trackComment || ''} */`, '  '),
+  wrap(`/* ${S.song} — ${S.artist} (Jonathan uploaded the record, ${date}). The RECORD itself: no rhythm-down mix, so \`src\` IS the full mix and there is no Guitar toggle.${PRIVATE ? ' Behind the sign-in: both files are private (SONG FILES, app/songfiles.js).' : ''} ${S.trackComment || ''} */`, '  '),
   `  '${S.slug}': {`,
   `    src:     ${q(fileOf(S.bpm))},`,
   `    srcSlow: ${q(fileOf(S.slowBpm))},`,
@@ -340,7 +359,8 @@ edit('tools/checks.mjs', (s) => s
   .replace(/const NO_CHECKLIST_CARDS = (\d+), NO_CHECKLIST_EXTRA = (\d+);/, (m, c, e) => library
     ? `const NO_CHECKLIST_CARDS = ${c}, NO_CHECKLIST_EXTRA = ${Number(e) + 2};`
     : `const NO_CHECKLIST_CARDS = ${Number(c) + 2}, NO_CHECKLIST_EXTRA = ${e};`)
-  .replace(/const ONE_LINE_2A = (\d+),/, (m, n) => `const ONE_LINE_2A = ${Number(n) + dirStrings},`), 'CHORD_GRID_CARDS, 1ct and 1cs pins');
+  .replace(/const ONE_LINE_2A = (\d+),/, (m, n) => `const ONE_LINE_2A = ${Number(n) + dirStrings},`)
+  .replace(/const SONG_FILES_PIN = (\d+);/, (m, n) => PRIVATE ? `const SONG_FILES_PIN = ${Number(n) + 2};` : m), PRIVATE ? 'CHORD_GRID_CARDS, 1ct, 1cs and 1dz pins' : 'CHORD_GRID_CARDS, 1ct and 1cs pins');
 edit('tools/playalong-loop.mjs', (s) => s
   .replace(/(const METER = \{[\s\S]*?)(\n\};)/, (m, a, b) => `${a}\n  '${S.slug}': '${meterName}',${b}`)
   .replace(/(const CLOCK_PINS = \{[\s\S]*?)(\n\};)/, (m, a, b) => `${a}\n  '${S.slug}': '${clockPin}',   // ${date}: set from tools/playalong-measure.py, then checked with tools/beat-audit.py; not yet by ear (?snipcal=1)${b}`), 'METER and CLOCK_PINS');
@@ -352,8 +372,8 @@ if (FROM || DRY) {
   const pitch = S.cents ? `rubberband=pitch=${Math.pow(2, -S.cents / 1200).toFixed(6)}:formant=preserved` : '';
   const tempo = `rubberband=tempo=${(S.slowBpm / S.bpm).toFixed(6)}`;
   const enc = ['-map', '0:a:0', '-map_metadata', '-1', '-c:a', 'libmp3lame', '-b:a', '320k'];
-  audioCmds.push(['ffmpeg', '-v', 'error', '-n', '-i', src, ...(pitch ? ['-af', pitch] : []), ...enc, join(ROOT, fileOf(S.bpm))]);
-  audioCmds.push(['ffmpeg', '-v', 'error', '-n', '-i', src, '-af', [pitch, tempo].filter(Boolean).join(','), ...enc, join(ROOT, fileOf(S.slowBpm))]);
+  audioCmds.push(['ffmpeg', '-v', 'error', '-n', '-i', src, ...(pitch ? ['-af', pitch] : []), ...enc, diskOf(S.bpm)]);
+  audioCmds.push(['ffmpeg', '-v', 'error', '-n', '-i', src, '-af', [pitch, tempo].filter(Boolean).join(','), ...enc, diskOf(S.slowBpm)]);
 }
 
 console.log(`new-playalong: ${id}, track '${S.slug}' (${meterName}, ${sections.length} sections, ${sections.reduce((a, s) => a + s.notes.length, 0)} chord changes)`);
@@ -363,16 +383,24 @@ if (DRY) {
   for (const c of audioCmds) console.log('\n$ ' + c.map(x => /\s/.test(x) ? JSON.stringify(x) : x).join(' '));
   console.log('\n── app/snippets.js, last in SNIPPET_TRACKS ──\n' + trackJs);
   console.log('\n── class-activities.js, last in the array ──\n' + cardJs);
-  console.log(`\n── tools/checks.mjs: '${id}' joins CHORD_GRID_CARDS, ${library ? 'NO_CHECKLIST_EXTRA' : 'NO_CHECKLIST_CARDS'} +2 (1ct, EN + ES), ONE_LINE_2A +${dirStrings} (1cs); tools/playalong-loop.mjs: METER '${S.slug}': '${meterName}', CLOCK_PINS '${S.slug}': '${clockPin}'`);
+  console.log(`\n── tools/checks.mjs: '${id}' joins CHORD_GRID_CARDS, ${library ? 'NO_CHECKLIST_EXTRA' : 'NO_CHECKLIST_CARDS'} +2 (1ct, EN + ES), ONE_LINE_2A +${dirStrings} (1cs)${PRIVATE ? ', SONG_FILES_PIN +2 (1dz)' : ''}; tools/playalong-loop.mjs: METER '${S.slug}': '${meterName}', CLOCK_PINS '${S.slug}': '${clockPin}'`);
+  if (PRIVATE) console.log(`\n── app/songfiles.js, the SONG_FILES list (tools/song-files.mjs --add) ──\n${[S.bpm, S.slowBpm].map(b => `  "${idOf(b)}": ${nameOf(b)}, measured from ${diskOf(b)}`).join('\n')}`);
   console.log('\n── CHANGELOG.md, on top ──\n' + changelog);
   console.log('(dry run: nothing written)');
   process.exit(0);
 }
 for (const c of audioCmds) {
-  mkdirSync(join(ROOT, 'audio'), { recursive: true });
+  mkdirSync(dirname(c[c.length - 1]), { recursive: true });
   const r = spawnSync(c[0], c.slice(1), { stdio: 'inherit' });
   if (r.status !== 0) die(`ffmpeg failed: ${c.join(' ')}`);
 }
-for (const f of [fileOf(S.bpm), fileOf(S.slowBpm)]) if (!existsSync(join(ROOT, f))) die(`${f} is not in audio/ (use --from <upload.mp3>)`);
+for (const b of [S.bpm, S.slowBpm]) if (!existsSync(diskOf(b))) die(`${diskOf(b)} is not there (use --from <upload.mp3>)`);
+if (PRIVATE) {
+  for (const b of [S.bpm, S.slowBpm]) {
+    let r;
+    try { r = addSongFile(ROOT, diskOf(b), { id: idOf(b) }); } catch (e) { die(`the SONG_FILES list: ${e.message}`); }
+    console.log(`  ${r.was ? 'updated' : 'added'} "${r.id}" on the SONG_FILES list: ${r.entry.file}, ${r.entry.bytes} bytes, ${r.entry.durationSec} s`);
+  }
+}
 for (const e of edits) { writeFileSync(join(ROOT, e.file), e.after); console.log(`  wrote ${e.file}: ${e.what}`); }
-console.log(`next: python3 tools/loudness.py ${S.fileSlug}   (the skill's step 5)`);
+console.log(`next: python3 tools/loudness.py ${S.fileSlug}   (the skill's step 5${PRIVATE ? '; it levels the private folder\'s files and updates their list entries' : ''})`);

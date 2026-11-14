@@ -38,8 +38,9 @@ import { spawnSync, spawn } from 'node:child_process';
 import { siteParts, siteSource, siteText, SPLIT_NAMES } from './site-src.mjs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { dirname, join } from 'node:path';
+import { dirname, join, isAbsolute, relative } from 'node:path';
 import { audioHashMap, renderAudioBlock, AUDIO_BLOCK_RE, AUDIO_CACHE_NAME, AUDIO_HASH_CACHE_NAME } from './sw-audio-map.mjs';
+import { readSongFiles, resolveAudio, privateId, songFilesDir, localMismatch, SONG_FILE_PREFIX } from './song-files.mjs';
 import { reviewLabelReport } from './review-labels.mjs';
 import { tmpdir, cpus } from 'node:os';
 import { driftReport } from './i18n-drift.mjs';
@@ -4234,8 +4235,8 @@ function validateClassActivities() {
                 if (tr[f] !== baseTr[f]) { err(`${w}: track '${v.track}' has ${f} ${tr[f]} but '${a.card.track}' has ${baseTr[f]} — a key version is the same record, timing held`); problems++; }
               if (JSON.stringify(tr.barTimes || null) !== JSON.stringify(baseTr.barTimes || null)) { err(`${w}: track '${v.track}' and '${a.card.track}' have different barTimes — the two keys must share one bar map`); problems++; }
               for (const f of ['src', 'srcSlow']) {
-                const x = tr[f] && existsSync(join(ROOT, tr[f])) ? mp3DurationSec(join(ROOT, tr[f])) : null;
-                const y = baseTr[f] && existsSync(join(ROOT, baseTr[f])) ? mp3DurationSec(join(ROOT, baseTr[f])) : null;
+                const x = tr[f] ? audioInfo(tr[f]).sec : null;
+                const y = baseTr[f] ? audioInfo(baseTr[f]).sec : null;
                 if (x !== null && y !== null && Math.abs(x - y) > 0.25) { err(`${w}: ${tr[f]} is ${x.toFixed(2)}s but ${baseTr[f]} is ${y.toFixed(2)}s — the two keys must be the same length`); problems++; }
               }
             }
@@ -8004,6 +8005,38 @@ function mp3DurationSec(file) {
   }
   return (frames && rate) ? samples / rate : null;
 }
+/* SONG FILES (2026-11-14; app/songfiles.js, tools/song-files.mjs). A track path may be 'private:<id>': the mp3 is
+   not in the repo but in the private song folder on Jonathan's Mac, and the list (SONG_FILES) holds its size,
+   SHA-256 and length. audioInfo(path, base) is how an audio check opens a SNIPPET_TRACKS or Song Journey path
+   (base 'tabs' for a page's data-audio*): a public path is the file under ROOT; a private one is the folder's copy
+   when it is there and matches the list, otherwise the list's entry, whose durationSec stands in for the file's
+   length (counted the same way as mp3DurationSec). A copy that does not match is reported, never read. Each
+   check says in its ok line how many private files it took from the list instead of the file (privateNote). */
+let songFilesCache;
+function songFilesList() {
+  if (songFilesCache === undefined) { try { songFilesCache = { list: readSongFiles(ROOT) }; } catch (e) { songFilesCache = { list: {}, err: e.message }; } }
+  return songFilesCache;
+}
+function audioInfo(path, base = '', tally = null) {
+  if (privateId(path) === null) {
+    const file = join(ROOT, base, path);
+    const exists = existsSync(file);
+    return { exists, file, sec: exists ? mp3DurationSec(file) : null };
+  }
+  const L = songFilesList();
+  let r;
+  try { r = resolveAudio(ROOT, path, { list: L.list }); }
+  catch (e) { return { exists: false, file: null, sec: null, err: L.err ? `${path}: the SONG_FILES list cannot be read (${L.err})` : e.message }; }
+  if (tally) tally[r.file ? 'folder' : 'list'].add(r.id);
+  return r.file ? { exists: true, file: r.file, sec: mp3DurationSec(r.file), id: r.id }
+    : { exists: true, file: null, sec: r.entry.durationSec, id: r.id, fromList: true };
+}
+const newTally = () => ({ folder: new Set(), list: new Set() });
+function privateNote(t) {
+  const a = t.folder.size, b = t.list.size;
+  if (!a && !b) return '';
+  return ` (private files: ${a} read from the private folder, ${b} checked from the SONG_FILES list instead of the file)`;
+}
 /* The source of one top-level `function name(...) { ... }`, brace-matched.
    Null when there is no such function — a caller that renames one should be
    told its check went blind, not quietly pass. Brace counting ignores braces
@@ -8067,14 +8100,17 @@ function checkBackingSnippets() {
   else if (!callsBuildSnippet(teacherSrc, 'renderTeacherActivityDetail'))
     flag('teacher.js: renderTeacherActivityDetail() never calls buildSnippet() — the console preview would not play the day\'s loop (two renderers, see CLAUDE.md)');
 
-  // Every track is fully specified, and its files exist.
+  // Every track is fully specified, and its files exist (a 'private:<id>' path: on the SONG_FILES list — audioInfo).
   const trackNames = Object.keys(TRACKS);
+  const tally = newTally();
+  const info = p => audioInfo(p, '', tally);
   let unverified = 0;
   for (const [name, tr] of Object.entries(TRACKS)) {
     for (const f of SNIPPET_TRACK_FIELDS) {
       if (tr[f] === undefined) { flag(`SNIPPET_TRACKS['${name}']: missing ${f}`); continue; }
       if (f.startsWith('src')) {
-        if (!existsSync(join(ROOT, tr[f]))) flag(`SNIPPET_TRACKS['${name}'].${f}: ${tr[f]} does not exist`);
+        const ai = info(tr[f]);
+        if (!ai.exists) flag(`SNIPPET_TRACKS['${name}'].${f}: ${ai.err || `${tr[f]} does not exist`}`);
       } else if (!(Number(tr[f]) > 0)) {
         flag(`SNIPPET_TRACKS['${name}'].${f}: "${tr[f]}" is not a positive number`);
       }
@@ -8106,7 +8142,8 @@ function checkBackingSnippets() {
         flag(`SNIPPET_TRACKS['${name}']: defaultSlow is true but there is no srcSlow — every card on this track would open on a tier with no file`);
     }
     for (const f of FULL_PAIRS.flat()) {
-      if (tr[f] && !existsSync(join(ROOT, tr[f]))) flag(`SNIPPET_TRACKS['${name}'].${f}: ${tr[f]} does not exist`);
+      const ai = tr[f] ? info(tr[f]) : null;
+      if (ai && !ai.exists) flag(`SNIPPET_TRACKS['${name}'].${f}: ${ai.err || `${tr[f]} does not exist`}`);
     }
     /* A full mix and its rhythm-down twin are the same performance at the
        same tempo with different stems muted, so they are the same length.
@@ -8117,15 +8154,17 @@ function checkBackingSnippets() {
        still catching a real re-trim. */
     const TWINS = [['srcFull', 'src'], ['srcFullSlow', 'srcSlow']];
     for (const [full, plain] of TWINS) {
-      if (!tr[full] || !existsSync(join(ROOT, tr[full])) || !existsSync(join(ROOT, tr[plain]))) continue;
-      const a = mp3DurationSec(join(ROOT, tr[full])), b = mp3DurationSec(join(ROOT, tr[plain]));
+      if (!tr[full] || !tr[plain]) continue;
+      const fa = info(tr[full]), pa = info(tr[plain]);
+      if (!fa.exists || !pa.exists) continue;
+      const a = fa.sec, b = pa.sec;
       if (a === null || b === null) { flag(`SNIPPET_TRACKS['${name}']: could not read the length of ${a === null ? tr[full] : tr[plain]} — not a readable mp3?`); continue; }
       if (Math.abs(a - b) > 0.25)
         flag(`SNIPPET_TRACKS['${name}']: ${full} is ${a.toFixed(2)}s but ${plain} is ${b.toFixed(2)}s (${(a - b > 0 ? '+' : '')}${(a - b).toFixed(2)}s) — the two mixes must be the same performance, so the Guitar toggle would jump the loop. Re-export the full mix at the same tempo with no count-in and no re-trim.`);
     }
     /* durationSec is hand-typed and is what catches a window running off the
        end of the track, so a typo there quietly disarms that check. */
-    const realDur = existsSync(join(ROOT, tr.src)) ? mp3DurationSec(join(ROOT, tr.src)) : null;
+    const realDur = tr.src ? info(tr.src).sec : null;
     if (realDur !== null && Math.abs(realDur - Number(tr.durationSec)) > 1.5)
       flag(`SNIPPET_TRACKS['${name}'].durationSec says ${tr.durationSec} but ${tr.src} is ${realDur.toFixed(1)}s — fix the number, it is what stops a window running past the end`);
     if (!(Number(tr.anchor) >= 0)) flag(`SNIPPET_TRACKS['${name}'].anchor: "${tr.anchor}" is not a number ≥ 0`);
@@ -8213,13 +8252,14 @@ function checkBackingSnippets() {
   /* A track whose src IS the record (`-full.mp3` — Las Mañanitas, 2026-10-14:
      the uploaded recording, no Moises stems) already plays the part; there is
      nothing for a Guitar toggle to switch to, so it isn't counted as missing. */
-  const isRecord = tr => /-full\.mp3$/.test(tr.src || '') && /-full\.mp3$/.test(tr.srcSlow || '');
+  const nameOf = p => { const id = privateId(p); const e = id === null ? null : songFilesList().list[id]; return e ? e.file : (p || ''); };   // a private path: its listed file name
+  const isRecord = tr => /-full\.mp3$/.test(nameOf(tr.src)) && /-full\.mp3$/.test(nameOf(tr.srcSlow));
   const withFull = Object.values(TRACKS).filter(tr => (tr.srcFull && tr.srcFullSlow) || isRecord(tr)).length;
   if (withFull < trackNames.length) {
     warn(`${trackNames.length - withFull} of ${trackNames.length} snippet track${trackNames.length === 1 ? '' : 's'} have no full mix exported, so their cards show no Guitar toggle — students hear the rhythm-down mix only and cannot check the part they are learning against the record.`);
     warnings++;
   }
-  if (bad === 0) ok(`${snippets} backing-track snippet${snippets === 1 ? '' : 's'} across ${trackNames.length} track${trackNames.length === 1 ? '' : 's'} (${withFull} with a full mix) — every window lands inside its file, both renderers build them`);
+  if (bad === 0) ok(`${snippets} backing-track snippet${snippets === 1 ? '' : 's'} across ${trackNames.length} track${trackNames.length === 1 ? '' : 's'} (${withFull} with a full mix) — every window lands inside its file, both renderers build them${privateNote(tally)}`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -9027,6 +9067,7 @@ const JOURNEY_GUITAR_PAGES = 5;   // seven-nation-army, the-cure, luna, all-alon
 function checkJourneyGuitarToggle() {
   head('1be. Song Journey Guitar toggle');
   let bad = 0, withToggle = 0;
+  const tally = newTally();
   const flag = m => { err(m); problems++; bad++; };
   const TWINS = [['audioFull', 'audio'], ['audioFullMetronome', 'audioMetronome'],
                  ['audioSlowFull', 'audioSlow'], ['audioSlowFullMetronome', 'audioSlowMetronome']];
@@ -9049,10 +9090,11 @@ function checkJourneyGuitarToggle() {
         flag(`${page}: declares ${attr(full)} with no ${attr(plain)} to be its rhythm-down twin`);
     }
     for (const [full, plain] of declared) {
-      const fp = join(ROOT, 'tabs', d[full]);
-      if (!existsSync(fp)) { flag(`${page}: ${attr(full)} → ${d[full]} does not exist`); continue; }
-      if (d[plain] === undefined || !existsSync(join(ROOT, 'tabs', d[plain]))) continue;
-      const a = mp3DurationSec(fp), b = mp3DurationSec(join(ROOT, 'tabs', d[plain]));
+      const fi = audioInfo(d[full], 'tabs', tally);
+      if (!fi.exists) { flag(`${page}: ${attr(full)} → ${fi.err || `${d[full]} does not exist`}`); continue; }
+      const pi = d[plain] === undefined ? null : audioInfo(d[plain], 'tabs', tally);
+      if (!pi || !pi.exists) continue;
+      const a = fi.sec, b = pi.sec;
       if (a === null || b === null) { flag(`${page}: could not read the length of ${a === null ? d[full] : d[plain]}`); continue; }
       if (Math.abs(a - b) > 0.25)
         flag(`${page}: ${attr(full)} is ${a.toFixed(2)}s but ${attr(plain)} is ${b.toFixed(2)}s — the two mixes must be one take, or the Guitar toggle jumps the song`);
@@ -9060,7 +9102,7 @@ function checkJourneyGuitarToggle() {
   }
   if (withToggle !== JOURNEY_GUITAR_PAGES)
     flag(`${withToggle} Song Journey page(s) declare a full mix, expected ${JOURNEY_GUITAR_PAGES} — if that change is on purpose, update JOURNEY_GUITAR_PAGES`);
-  if (bad === 0) ok(`${withToggle} Song Journey pages carry a complete full-mix set for the Guitar toggle, every twin the same length as its rhythm-down file`);
+  if (bad === 0) ok(`${withToggle} Song Journey pages carry a complete full-mix set for the Guitar toggle, every twin the same length as its rhythm-down file${privateNote(tally)}`);
 }
 
 const ES_FIELD_RE = /\b(?:text|hint|stuck|levelUp|gotItWhen|explain|forward|subtitle|meta|intro|note|label|prompt|placeholder|caption|title)_es:\s*'((?:\\.|[^'\\])*)'/g;
@@ -14034,6 +14076,7 @@ const METRONOME_MIXES_ALLOWED = ['the-beatles-let-it-be-backing-C-71bpm-440hz-rh
 function checkSiteMadeClick() {
   head('1bk. The site makes its own click');
   let bad = 0, clickPages = 0;
+  const tally = newTally();
   const flag = m => { err(m); problems++; bad++; };
   let TRACKS = {};
   try { TRACKS = loadConstObject(siteSource('app.js', ROOT), 'SNIPPET_TRACKS'); }
@@ -14076,8 +14119,7 @@ function checkSiteMadeClick() {
       flag(`${page}: data-click-bars needs data-click-beats (clicks per bar, a whole number) — got "${d['click-beats']}"`);
     const dip = bars.findIndex((v, i) => i > 0 && v <= bars[i - 1]);
     if (dip > 0) flag(`${page}: data-click-bars goes backwards at entry ${dip + 1} (${bars[dip - 1]} → ${bars[dip]})`);
-    const audio = d.audio && join(ROOT, 'tabs', d.audio);
-    const dur = audio && existsSync(audio) ? mp3DurationSec(audio) : null;
+    const dur = d.audio ? audioInfo(d.audio, 'tabs', tally).sec : null;
     if (dur !== null && bars[bars.length - 1] > dur)
       flag(`${page}: data-click-bars runs to ${bars[bars.length - 1]}s but ${d.audio} is ${dur.toFixed(1)}s long`);
     if (!tr) { flag(`${page}: data-click-bars with no SNIPPET_TRACKS['${slug}'] to check it against`); continue; }
@@ -14121,7 +14163,96 @@ function checkSiteMadeClick() {
   for (const f of METRONOME_MIXES_ALLOWED) {
     if (!mixes.includes(f)) flag(`audio/${f} is on METRONOME_MIXES_ALLOWED but is not in audio/ — if its page now makes its own click, drop it from the list`);
   }
-  if (bad === 0) ok(`${clickPages} Song Journey pages make their own click (pinned), every beat map agrees with SNIPPET_TRACKS; audio/ holds ${mixes.length} metronome mix (allow-listed)`);
+  if (bad === 0) ok(`${clickPages} Song Journey pages make their own click (pinned), every beat map agrees with SNIPPET_TRACKS; audio/ holds ${mixes.length} metronome mix (allow-listed)${privateNote(tally)}`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1dz. SONG FILES — the list of private song files (2026-11-14). From now
+   on a song recording (and, in Step 2, the 26 record-derived files) is not
+   in audio/ but behind the sign-in: a SNIPPET_TRACKS path or a Song Journey
+   page's data-audio* is 'private:<id>', and SONG_FILES in app/songfiles.js
+   (strict JSON between its markers; written only by tools/song-files.mjs)
+   holds each file's name, size, SHA-256 and length. The site throws away a
+   download that is not what the list says, so the list IS the file as far
+   as students are concerned. This fails:
+     - a list that does not parse, or an entry of the wrong shape;
+     - a 'private:<id>' path (SNIPPET_TRACKS, tabs/*.html data-audio*) whose
+       id is not on the list (the card would say "can't load" forever);
+     - a listed file that is also in audio/, or (with --check) in sw.js's
+       AUDIO_HASHES (a private song must not be public too);
+     - a private folder inside the site folder (it would ship);
+     - with the private folder on this machine (GC_SONG_FILES_DIR or
+       ~/Documents/guitar-class-song-files/): a local copy whose size or
+       SHA-256 is not the list's (a re-export nobody registered: the console
+       would upload a file the site then refuses).
+   Warns: a listed file the folder does not have, an entry no path names.
+   Pinned: SONG_FILES_PIN, the number of entries, so one cannot drop off
+   unnoticed. The audio checks (1ak, 1be, 1bk, the key versions, 1bu) take
+   a private path through audioInfo() above.
+   ════════════════════════════════════════════════════════════════════ */
+const SONG_FILES_PIN = 0;   // entries on the SONG_FILES list (app/songfiles.js); none switched in Step 1
+function checkSongFiles() {
+  head('1dz. Song files: the private list');
+  let bad = 0;
+  const flag = m => { err(`1dz: ${m}`); problems++; bad++; };
+  let list;
+  try { list = readSongFiles(ROOT); }
+  catch (e) { flag(e.message); return; }
+  const ids = Object.keys(list);
+  if (ids.length !== SONG_FILES_PIN)
+    flag(`${ids.length} entr${ids.length === 1 ? 'y is' : 'ies are'} on the SONG_FILES list, pinned ${SONG_FILES_PIN} — if that change is on purpose (a song added with tools/song-files.mjs --add, or retired), update SONG_FILES_PIN`);
+  const used = new Map();
+  let paths = 0;
+  const usePath = (v, where) => {
+    if (typeof v !== 'string' || !v.startsWith(SONG_FILE_PREFIX)) return;
+    paths++;
+    const id = privateId(v);
+    if (!Object.prototype.hasOwnProperty.call(list, id)) flag(`${where} is "${v}", but "${id}" is not on the SONG_FILES list in app/songfiles.js — add it with node tools/song-files.mjs --add <mp3> --id ${id}`);
+    else used.set(id, where);
+  };
+  let TRACKS;
+  try { TRACKS = loadConstObject(siteSource('app.js', ROOT), 'SNIPPET_TRACKS'); }
+  catch (e) { flag(`could not load SNIPPET_TRACKS — ${e.message}`); return; }
+  for (const [name, tr] of Object.entries(TRACKS))
+    for (const [k, v] of Object.entries(tr)) usePath(v, `SNIPPET_TRACKS['${name}'].${k}`);
+  let pages = 0;
+  for (const page of TAB_PAGES.filter(p => p.endsWith('.html'))) {
+    let src;
+    try { src = readFileSync(join(ROOT, page), 'utf8'); } catch { continue; }
+    pages++;
+    for (const m of src.matchAll(/\bdata-(audio[a-z-]*)="([^"]*)"/g)) usePath(m[2], `${page} data-${m[1]}`);
+  }
+  if (!pages) flag('read no tabs/*.html page — TAB_PAGES is empty, so the data-audio* paths were not checked');
+  let audioNames = [];
+  try { audioNames = readdirSync(join(ROOT, 'audio')); } catch { /* no audio/ */ }
+  let swBlock = '';
+  try { swBlock = (AUDIO_BLOCK_RE.exec(readFileSync(join(ROOT, 'sw.js'), 'utf8')) || [''])[0]; } catch { /* reported by the sw checks */ }
+  for (const id of ids) {
+    const f = list[id].file;
+    if (audioNames.includes(f)) flag(`audio/${f} is on the SONG_FILES list as "${id}": a private song must not be public too — take it out of audio/`);
+    /* Without --check this run rewrites the block from audio/ at its end (syncAudioHashes), so only --check
+       (GitHub, the hooks) reads the block as it stands. */
+    if (CHECK_ONLY && swBlock.includes(JSON.stringify(`audio/${f}`))) flag(`sw.js's AUDIO_HASHES lists audio/${f}, which is the private "${id}" — run node tools/checks.mjs (without --check) to rewrite the block`);
+  }
+  const dir = songFilesDir();
+  const inRoot = relative(ROOT, dir);
+  if (!inRoot || (!inRoot.startsWith('..') && !isAbsolute(inRoot)))
+    flag(`the private song folder ${dir} is inside the site folder: everything in it would ship. Point GC_SONG_FILES_DIR outside the repo`);
+  const folder = existsSync(dir);
+  let matches = 0, missing = 0;
+  if (folder) {
+    for (const id of ids) {
+      const local = join(dir, list[id].file);
+      if (!existsSync(local)) { missing++; continue; }
+      const why = localMismatch(local, list[id]);
+      if (why) flag(`the private folder's ${list[id].file} ${why} — the console would upload a file the site refuses. Register the new export with node tools/song-files.mjs --add, or put the listed file back`);
+      else matches++;
+    }
+    if (missing) { warn(`1dz: ${missing} listed song file${missing === 1 ? ' is' : 's are'} not in the private folder ${dir}: the checks use the list for ${missing === 1 ? 'it' : 'them'}`); warnings++; }
+  }
+  const unused = ids.filter(id => !used.has(id));
+  if (unused.length) { warn(`1dz: on the SONG_FILES list but named by no track or page: ${unused.join(', ')}`); warnings++; }
+  if (bad === 0) ok(`${ids.length} song file${ids.length === 1 ? '' : 's'} on the list (pinned), ${paths} private path${paths === 1 ? '' : 's'} in SNIPPET_TRACKS and ${pages} Song Journey pages, every one on the list; none in audio/ or AUDIO_HASHES; ${folder ? `the private folder is here: ${matches} of ${ids.length} match the list` : 'no private folder on this machine: checked from the list'}`);
 }
 
 const GUITAR_NOTE_COUNT = 35;
@@ -14230,7 +14361,11 @@ async function checkBackingLoudness() {
   let cache = {};
   try { cache = JSON.parse(readFileSync(LOUDNESS_CACHE, 'utf8')); } catch { /* none yet, or unreadable: measure */ }
   const files = [list.reference, ...Object.values(list.songs)];
-  const keyOf = f => { try { const s = statSync(join(ROOT, f)); return `${s.size}:${s.mtimeMs}`; } catch { return null; } };
+  /* A private song's level file (SONG FILES) comes as an absolute path in the private folder, and only when it is
+     there and matches the list; privateNotMeasured names the others (folder absent: the list has no loudness). */
+  const at = f => isAbsolute(f) ? f : join(ROOT, f);
+  const notMeasured = Object.keys(list.privateNotMeasured || {}).length;
+  const keyOf = f => { try { const s = statSync(at(f)); return `${s.size}:${s.mtimeMs}`; } catch { return null; } };
   const lufs = {}, todo = [];
   for (const f of files) {
     const k = keyOf(f);
@@ -14242,7 +14377,7 @@ async function checkBackingLoudness() {
   await Promise.all(Array.from({ length: workers }, async () => {
     while (next < todo.length) {
       const f = todo[next++];
-      const v = await measureLufs(join(ROOT, f));
+      const v = await measureLufs(at(f));
       if (v === null) continue;
       lufs[f] = v;
       cache[f] = { key: keyOf(f), lufs: v };
@@ -14262,7 +14397,7 @@ async function checkBackingLoudness() {
     }
   }
   const n = Object.keys(list.songs).length;
-  if (off === 0) ok(`${n} songs within ±${LOUDNESS_TOLERANCE_LU} LU of "the cure" (${ref.toFixed(1)} LUFS), each on its record-tempo full mix (${todo.length} measured, ${files.length - todo.length} from the cache)`);
+  if (off === 0) ok(`${n} songs within ±${LOUDNESS_TOLERANCE_LU} LU of "the cure" (${ref.toFixed(1)} LUFS), each on its record-tempo full mix (${todo.length} measured, ${files.length - todo.length} from the cache)${notMeasured ? `; ${notMeasured} private song${notMeasured === 1 ? '' : 's'} not measured (${Object.values(list.privateNotMeasured).join('; ')})` : ''}`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -18435,6 +18570,7 @@ function checkPracticeMinutes(i18nTable) {
   checkLoadFailedMaps();
   await checkJourneyReadySave();
   checkSiteMadeClick();
+  checkSongFiles();
   checkLiveQuizTimerRepaint();
   checkLiveQuizAutoReveal();
   await checkLiveQuizNoNames();

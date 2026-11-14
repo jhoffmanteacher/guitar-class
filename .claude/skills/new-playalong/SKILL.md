@@ -9,8 +9,16 @@ The rules live in skills `audio-and-snippets` (tracks, levelling, `beat-audit.py
 `in-class-activities` (practice cards, the Songs page library, one-line directions) and `song-facts`. This file is
 the order of work and the commands. History it is built on: ca-37, ca-39, ca-41, ca-42, ca-51 and their fixes.
 
-**Where the audio lives:** the uploaded record goes into `audio/` of this public repo (two re-encoded copies, record
-speed and slow) and is served from GitHub Pages. That is Jonathan's standing choice until he says otherwise.
+**Where the audio lives:** every new song is PRIVATE, behind the sign-in (Jonathan, 2026-11-13: "every new song
+from now on"; design in the header of `app/songfiles.js`). Build with `--private` (step 4): the two re-encoded copies
+(record speed and slow) go to the private song folder on his Mac (`~/Documents/guitar-class-song-files/`, or
+`GC_SONG_FILES_DIR`), never into `audio/`; the track's paths are `private:<slug>-<bpm>`; both files go on the
+`SONG_FILES` list in `app/songfiles.js` (name, size, SHA-256, length) through `tools/song-files.mjs`, and checks.mjs
+1dz's `SONG_FILES_PIN` goes up by 2. `loudness.py` and `beat-audit.py` read the private folder by themselves; on
+GitHub and in a worktree without the folder, `checks.mjs` works from the list. Before the push (step 6): Jonathan
+uploads the two files in the console (Manage → Song files) and presses **Verify**; push only once Verify says both
+match (until then a student's card says the song can't load). `node tools/song-files.mjs` prints the list and
+whether the folder's copies match. The backing and jam tracks stay public in `audio/` (no `--private`).
 
 ## 1. Inputs: ask once, in one message, only for what is missing
 - The mp3's path, the song and the artist (as the title should read: `"<song>" - <artist>`; ca-37 was renamed twice
@@ -60,8 +68,9 @@ A JSON file in the scratchpad; `perdon-mama.example.json` beside this file is a 
 `"both"`, `chordStart: "power"` unless every full chord is an open chord the class knows.
 1. `node tools/new-playalong.mjs <spec.json> --dry-run`: read the chord positions it picked (smallest hand move;
    override in `shapes` / `powerShapes`), the card and the track.
-2. `node tools/new-playalong.mjs <spec.json> --from <upload.mp3>`: makes the two mp3s (320k, tags and cover art
-   dropped; the slow file is `rubberband` tempo slow/record, pitch held) and writes the track, the card
+2. `node tools/new-playalong.mjs <spec.json> --from <upload.mp3> --private`: makes the two mp3s (320k, tags and cover art
+   dropped; the slow file is `rubberband` tempo slow/record, pitch held) in the private folder, puts them on the
+   `SONG_FILES` list, and writes the track, the card
    (`library: true`: on the Songs page's "More Play Along songs" for EVERY student from the push; no board slot or
    date), the next id, the pins in `tools/checks.mjs` and `tools/playalong-loop.mjs`, and a CHANGELOG draft.
    A class activity instead (`"library": false`) arrives on the board's Built list, invisible until he assigns and
@@ -70,7 +79,8 @@ A JSON file in the scratchpad; `perdon-mama.example.json` beside this file is a 
 ## 5. Level, audit, check (about 15 minutes, mostly waiting: loudness.py 7, checks.mjs 3 to 7)
 1. `python3 tools/loudness.py <fileSlug>` (the file prefix before `-backing-`, not the track key). One gain for both
    files; a slow file outside ±1 LU needs `--accept-spread`, which is Jonathan's call: ask (Vuelve a la Vida, Ella
-   and Las Mañanitas shipped with it).
+   and Las Mañanitas shipped with it). A private song is levelled in the private folder and its two list entries are
+   rewritten (the bytes change), so level BEFORE Jonathan uploads; a re-level after an upload means uploading again.
 2. `python3 tools/beat-audit.py --only <slug> --cache <scratch>/bacache` (a Choice song gets the light pass: report
    the counted lines; leave WEAK lines and "cannot tell" bars). A counted CONSTANT or BEAT 1 line: move `anchor` by
    what it says, then put the new pin in `CLOCK_PINS` (`node tools/playalong-loop.mjs --pins`, the song's line)
@@ -83,7 +93,8 @@ A JSON file in the scratchpad; `perdon-mama.example.json` beside this file is a 
 5. Read the CHANGELOG draft and put it in the student's words (what they can now do, where it is).
 
 ## 6. Ship (Fast) and report
-A new song is not a danger-zone change: commit with the `Review: Fast` trailer, then CLAUDE.md "Start here" step 8
+A private song first: Jonathan uploads both files in the console (Manage → Song files: Upload, then Verify); push only
+after Verify says both match the list. A new song is not a danger-zone change: commit with the `Review: Fast` trailer, then CLAUDE.md "Start here" step 8
 (fetch, rebase, full checks on the tip, push, `node tools/checks.mjs --live`). GitHub's Browser tests then run the
 English smoke and the whole `playalong-loop.mjs` (class-activities.js changed): read the result and report it.
 
