@@ -65,11 +65,14 @@ decT(r => true, 'all takes');
 decT(r => r.bpm <= 30, '30 BPM and under');
 decT(r => r.bpm > 30, 'above 30 BPM');
 /* How far the NEAREST sound the game heard was from the change (any onset, not only the deciding one), for changes the recording has a strum. */
-const near = r => (r.v.same.ons || []).reduce((b, d) => b == null || Math.abs(d) < Math.abs(b) ? d : b, null);
+/* On today's grid (same) and, when run, on a grid that never adapts (nearg0): a wandering grid moves the student's strums away from the change. */
 const nb = [[0, 250], [250, 350], [350, 500], [500, 700], [700, 1e9]];
-for (const [lab, pick] of [['30 BPM and under', r => r.bpm <= 30], ['above 30 BPM', r => r.bpm > 30]]){
-  const rs = rows.filter(r => r.played && pick(r));
-  console.log(`Strum in the recording (${lab}, ${rs.length} changes): the game's NEAREST onset to the change was within ` + nb.map(([a, b]) => `${a}-${b === 1e9 ? '…' : b} ms: ${rs.filter(r => { const d = near(r); return d != null && Math.abs(d) >= a && Math.abs(d) < b; }).length}`).join(' · ') + ` · none at all: ${rs.filter(r => near(r) == null).length}`);
+for (const g of ['same', 'nearg0', 'neargd'].filter(g => rules.includes(g))){
+  const near = r => (r.v[g].ons || []).reduce((b, d) => b == null || Math.abs(d) < Math.abs(b) ? d : b, null);
+  for (const [lab, pick] of [['30 BPM and under', r => r.bpm <= 30], ['above 30 BPM', r => r.bpm > 30]]){
+    const rs = rows.filter(r => r.played && pick(r));
+    console.log(`Grid of ${g === 'same' ? 'today (adapts to every onset)' : g === 'nearg0' ? 'nearg0 (never adapts)' : 'neargd (adapts to deciding onsets only)'} · strum in the recording (${lab}, ${rs.length} changes): the game's NEAREST onset to the change was within ` + nb.map(([a, b]) => `${a}-${b === 1e9 ? '…' : b} ms: ${rs.filter(r => { const d = near(r); return d != null && Math.abs(d) >= a && Math.abs(d) < b; }).length}`).join(' · ') + ` · none at all: ${rs.filter(r => near(r) == null).length}`);
+  }
 }
 
 /* 3. The table. */
