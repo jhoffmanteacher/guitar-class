@@ -264,6 +264,8 @@ async function showTeacherApp(user){
       if(paused){ teacherSetStudentPaused(paused.dataset.uid, paused.dataset.state); return; }
       const archived=e.target.closest('[data-set-archived]');
       if(archived){ teacherSetStudentArchived(archived.dataset.uid, archived.dataset.state); return; }
+      const stuFilter=e.target.closest('[data-stu-filter]');
+      if(stuFilter){ teacherSetStudentFilter(stuFilter.dataset.stuFilter); return; }
       const periodFilter=e.target.closest('[data-set-period-filter]');
       if(periodFilter){ teacherSetPeriodFilter(periodFilter.dataset.period); return; }
       const period=e.target.closest('[data-set-period]');

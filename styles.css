@@ -1714,6 +1714,20 @@ body.rail-collapsed .rail-tools .tool-popup{
 .stu-row:hover{background:var(--bg3)}
 .stu-row:focus-visible{outline:2px solid var(--green-text);outline-offset:-2px}
 .stu-name{font-size:0.9375rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* The Students view's "Show" switch (renderTeacherStudents, 2026-11-13):
+   Everyone / Behind the class (/ Back from an absence), a one-line note on
+   what the chosen list counts, and in a filtered list a wider name column
+   with one line under each name. */
+.stu-filter{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin:14px 0 8px}
+.stu-filter-lbl{font-size:0.8125rem;color:var(--text2);font-weight:600}
+.stu-filter .tg-seg-btn{font-size:0.875rem;padding:5px 14px}
+.stu-filter-n{display:inline-block;min-width:18px;margin-left:6px;padding:0 6px;border-radius:9px;background:var(--bg3);color:var(--text);font-size:0.75rem;font-weight:700;text-align:center}
+.tg-seg-btn.on .stu-filter-n{background:rgba(255,255,255,0.22);color:inherit}
+.stu-filter-note{flex-basis:100%;font-size:0.8125rem;color:var(--text2);margin:0 2px}
+.stu-chart.stu-chart--wide{--namecol:430px}
+.stu-name.stu-name--sub{white-space:normal}
+.stu-name--sub .stu-period{white-space:nowrap;display:inline-block}
+.stu-sub{display:block;font-size:0.8125rem;font-weight:400;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stu-track{position:relative;height:14px;border-radius:7px;background:var(--bg2);overflow:hidden;border:1px solid var(--border)}
 .stu-fill-got{position:absolute;left:0;top:0;bottom:0;background:var(--green-text)}
 .stu-fill-work{position:absolute;top:0;bottom:0;background:var(--amber-text)}

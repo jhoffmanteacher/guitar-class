@@ -377,6 +377,44 @@ async function teacherSetPmWeekGoal(weekId, raw){
   }
 }
 
+/* ── Students view: Show Everyone / Behind the class (2026-11-13, Jonathan
+   picked the mock-up: "a group inside the list" on the student side, these
+   filters here). In memory only, this session; the list a filter shows is
+   the same roster (period filter, archived) as Everyone.
+   BEHIND THE CLASS: TEACHER_BEHIND_MIN (3) or more required activities not
+   done, counting only those released before yesterday (today's and
+   yesterday's are still Today's activity on the student's page). Required =
+   exactly teacherBlockersFor (visible to that student, not Optional, not
+   cleared, never a CAS student). Most behind first, then the older oldest
+   card, then name. It reads nothing new: the progress docs and config/class
+   are already loaded. ── */
+let teacherStuFilter='all';   // 'all' | 'behind'
+const TEACHER_BEHIND_MIN=3;
+// 'YYYY-MM-DD' n days from `ymd`, worked out at noon (daylight saving).
+function teacherDayAdd(ymd, n){
+  const [y,m,d]=ymd.split('-').map(Number);
+  return dayStr(new Date(y, m-1, d+n, 12));
+}
+// "Tue 11/10": the console's short date.
+function teacherShortDay(ymd){
+  const [y,m,d]=String(ymd||'').split('-').map(Number);
+  if(!y||!m||!d) return '';
+  return new Date(y, m-1, d, 12).toLocaleDateString('en-US', {weekday:'short'})+' '+m+'/'+d;
+}
+/* { n, oldest } for a student who is behind, else null. PURE over its
+   arguments (and the CLASS_ACTIVITIES data, through teacherBlockersFor). */
+function teacherBehindFor(stu, cfg, today){
+  const dates=(cfg&&cfg.activityDates)||{};
+  const yesterday=teacherDayAdd(today, -1);
+  const old=teacherBlockersFor(stu, cfg).map(a=>dates[a.id]).filter(d=>typeof d==='string' && d<yesterday).sort();
+  return old.length>=TEACHER_BEHIND_MIN ? {n:old.length, oldest:old[0]} : null;
+}
+function teacherSetStudentFilter(v){
+  if(v!=='all' && v!=='behind') return;
+  teacherStuFilter=v;
+  if(teacherView==='students' && !studentDetailUid) renderTeacherStudents();
+}
+
 function renderTeacherStudents(){
   const box=document.getElementById('t-grid-container');
   if(allStudents.length===0){ box.innerHTML='<div class="t-loading">No student data yet — students need to sign in and check off skills first.</div>'; return; }
@@ -405,17 +443,44 @@ function renderTeacherStudents(){
       <div class="t-scard"><div class="t-scard-lbl">Furthest along</div>${furthestVal}</div>
       <div class="t-scard"><div class="t-scard-lbl">Not started yet</div><div class="t-scard-val">${notStarted}</div></div>
     </div>`;
-  const rowsHtml=rows.map(({stu,tally})=>{
+  /* Show: Everyone / Behind the class (teacherBehindFor above). Everyone is
+     the list exactly as before. */
+  const today=dayStr(new Date());
+  const behind={};
+  rows.forEach(({stu})=>{ const b=teacherBehindFor(stu, teacherClassConfig, today); if(b) behind[stu.uid]=b; });
+  const behindN=Object.keys(behind).length;
+  const filter=teacherStuFilter;
+  const seg=(v,label,n)=>`<button type="button" class="tg-seg-btn${filter===v?' on':''}" data-stu-filter="${v}" aria-pressed="${filter===v}">${label}${n!=null?`<span class="stu-filter-n">${n}</span>`:''}</button>`;
+  const filterNote = filter==='behind'
+    ? `${TEACHER_BEHIND_MIN} or more required activities not done, released before yesterday (today's and yesterday's don't count). Most behind first.`
+    : '';
+  const filterHtml=`<div class="stu-filter"><span class="stu-filter-lbl">Show</span><div class="tg-seg">${seg('all','Everyone')}${seg('behind','Behind the class',behindN)}</div>${filterNote?`<p class="stu-filter-note">${escHtml(filterNote)}</p>`:''}</div>`;
+  let shownRows=rows;
+  if(filter==='behind'){
+    const nameOf=s=>s.name||s.email||s.uid;
+    shownRows=rows.filter(r=>behind[r.stu.uid]).sort((a,b)=>{
+      const x=behind[a.stu.uid], y=behind[b.stu.uid];
+      return (y.n-x.n) || (x.oldest<y.oldest?-1:x.oldest>y.oldest?1:0) || nameOf(a.stu).localeCompare(nameOf(b.stu), undefined, {sensitivity:'base'});
+    });
+  }
+  // The line under a name in a filtered list (an Everyone row has none).
+  const subLine=stu=>{
+    if(filter==='behind' && behind[stu.uid]){ const b=behind[stu.uid]; return `${b.n} required activities not done. The oldest is from ${teacherShortDay(b.oldest)}.`; }
+    return '';
+  };
+  const rowsHtml=shownRows.map(({stu,tally})=>{
     const displayName=stu.name||stu.email||stu.uid.slice(0,8)+'…';
+    const sub=subLine(stu);
     return `<button type="button" class="stu-row" data-open-student data-uid="${escAttr(stu.uid)}">
-        <div class="stu-name" title="${escAttr(displayName)}">${escHtml(displayName)}${teacherPeriodPillHtml(stu)}${teacherOpenThroughPillHtml(stu)}${teacherBlockedBadgeHtml(stu)}</div>
+        <div class="stu-name${sub?' stu-name--sub':''}" title="${escAttr(displayName)}">${escHtml(displayName)}${teacherPeriodPillHtml(stu)}${teacherOpenThroughPillHtml(stu)}${teacherBlockedBadgeHtml(stu)}${sub?`<span class="stu-sub">${escHtml(sub)}</span>`:''}</div>
         ${teacherBarFillHtml(tally.got,tally.working,universe.total)}
         ${teacherStudentCountHtml(tally, universe)}
       </button>`;
   }).join('');
-  box.innerHTML = `${scard}
-    <div class="t-grid-wrap" style="border:0;overflow:visible">
-      <div class="stu-chart">
+  const emptyHtml = !shownRows.length ? `<div class="t-loading">No students in this list.</div>` : '';
+  box.innerHTML = `${scard}${filterHtml}${emptyHtml}
+    <div class="t-grid-wrap" style="border:0;overflow:visible"${shownRows.length?'':' hidden'}>
+      <div class="stu-chart${filter==='all'?'':' stu-chart--wide'}">
         ${teacherAxisHeaderHtml(universe)}
         <div class="stu-rows">
           ${teacherTicksHtml(universe)}
