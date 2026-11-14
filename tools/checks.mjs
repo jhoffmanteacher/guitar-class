@@ -17388,6 +17388,78 @@ function checkSongRequests() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1dx. SONG FILES — the loader (2026-11-14, app/songfiles.js): song
+   recordings behind the sign-in, read from the database in pieces, checked
+   against the site's own list (size and SHA-256), kept on the device in
+   IndexedDB, and counted against a monthly limit (Jonathan, 2026-11-13).
+   RUN by tools/song-files-sim.mjs (Node, a few seconds: a fake Firestore, a
+   fake IndexedDB shared by two "tabs", a Web Locks stand-in): pieces out of
+   order, a missing piece, a wrong length, one wrong byte, the rules
+   refusing, offline with and without the copy, a full device, two tabs
+   asking at once, the limit at and one byte over, the card's loading line,
+   a stop during the load. The case count is pinned (SONG_FILES_SIM_PIN) so a
+   deleted case fails here; `node tools/song-files-sim.mjs --breaks` turns
+   24 broken copies of the loader red, one at a time.
+   Then source pins for what a run of the loader alone cannot see, read with
+   comments stripped:
+     - SONG_FILES_MONTH_LIMIT is 6 GiB (6 * 1024 * 1024 * 1024) and the list
+       ships with SONG_FILES_LIST_PIN entries (0: no song switched in Step 1;
+       the tools' check 1dz pins the list's entries too);
+     - snippetSrc() returns both paths through songFileSrc(), so a private
+       path becomes the device copy and a public one comes back unchanged;
+     - every place a player is about to load a file asks songFileNeedsLoad()
+       first: snipToggle, snipSetTier, twinPark (app/snippets.js), pcStart,
+       pcRetrack (app/cards.js), and ensurePlayer twice (tabs/journey.js);
+       snipToggle, snipSetTier, pcStart and pcRetrack hand the wait to
+       songFileWaitThen();
+     - snipStop() and pcStop() call songFileCancelWait() BEFORE their "not
+       playing" early return, so every stop path (stopCardAudio,
+       stopAllDemoAudio, playSequence, a card leaving the screen) also
+       cancels a song still loading;
+     - index.html loads app/songfiles.js before app/snippets.js.
+   ════════════════════════════════════════════════════════════════════ */
+const SONG_FILES_SIM_PIN = 81;
+const SONG_FILES_LIST_PIN = 0;
+function checkSongFilesLoader() {
+  head('1dx. Song files: the loader is run (pieces, checks, device copy, two tabs, the monthly limit); the player hooks are pinned');
+  let bad = 0;
+  const fail = m => { err('1dx: ' + m); problems++; bad++; };
+  const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'song-files-sim.mjs')], { encoding: 'utf8', timeout: 120000 });
+  const m = /song-files-sim: (\d+) cases, (\d+) failed/.exec(r.stdout || '');
+  if (r.status !== 0 || !m) {
+    fail('tools/song-files-sim.mjs failed (exit ' + r.status + ')' + (r.error ? ': ' + r.error.message : ''));
+    for (const l of ((r.stdout || '') + (r.stderr || '')).trim().split('\n').filter(l => /✗|Error/.test(l)).slice(0, 8)) console.log(`${C.dim}      ${l}${C.reset}`);
+  } else if (+m[1] !== SONG_FILES_SIM_PIN || +m[2] !== 0) fail(`song-files-sim ran ${m[1]} cases (${m[2]} failed); pinned at ${SONG_FILES_SIM_PIN}. If you changed the simulation on purpose, re-pin SONG_FILES_SIM_PIN (never lower it to hide a deleted case)`);
+  const read = f => { try { return readFileSync(join(ROOT, f), 'utf8'); } catch { return ''; } };
+  const sf = stripJsComments(read('app/songfiles.js')), sn = stripJsComments(read('app/snippets.js')), cd = stripJsComments(read('app/cards.js')), jr = stripJsComments(read('tabs/journey.js'));
+  if (!/const SONG_FILES_MONTH_LIMIT = 6 \* 1024 \* 1024 \* 1024;/.test(sf)) fail('app/songfiles.js: SONG_FILES_MONTH_LIMIT is not 6 GiB (6 * 1024 * 1024 * 1024; Jonathan, 2026-11-13). A change is his call: re-pin here with his words');
+  const list = /SONG_FILES:BEGIN[\s\S]*?const SONG_FILES = (\{[\s\S]*?\});\s*\/\* SONG_FILES:END/.exec(read('app/songfiles.js'));
+  let n = -1; try { n = Object.keys(JSON.parse(list[1])).length; } catch { fail('app/songfiles.js: the SONG_FILES list between its markers is not strict JSON (tools/song-files.mjs and the Python tools read it)'); }
+  if (n >= 0 && n !== SONG_FILES_LIST_PIN) fail(`app/songfiles.js lists ${n} song files; pinned at ${SONG_FILES_LIST_PIN}. Adding one is the recipe's step (tools/song-files.mjs --add): re-pin SONG_FILES_LIST_PIN in the same commit`);
+  const body = (src, name) => { const d = topLevelFunctionDecls(src).find(x => x.name === name); return d ? functionBodyAt(src, d.index) : ''; };
+  const ss = body(sn, 'snippetSrc');
+  if ((ss.match(/return songFileSrc\(/g) || []).length !== 2 || /return (?!songFileSrc\()/.test(ss)) fail('app/snippets.js: snippetSrc() must return BOTH its paths through songFileSrc(...) (a private path becomes the device copy; a public one is unchanged)');
+  for (const [file, src, name, wait] of [['app/snippets.js', sn, 'snipToggle', true], ['app/snippets.js', sn, 'snipSetTier', true], ['app/snippets.js', sn, 'twinPark', false], ['app/cards.js', cd, 'pcStart', true], ['app/cards.js', cd, 'pcRetrack', true]]) {
+    const b = body(src, name);
+    if (!b) { fail(`${file}: no ${name}()`); continue; }
+    const i = b.indexOf('songFileNeedsLoad('), j = b.search(/\.src = /);
+    if (i < 0) fail(`${file}: ${name}() no longer asks songFileNeedsLoad() before loading a file: a private song would load a 'private:' address and fail`);
+    else if (j >= 0 && j < i) fail(`${file}: ${name}() sets an element's src before it asks songFileNeedsLoad()`);
+    if (wait && !/songFileWaitThen\(/.test(b)) fail(`${file}: ${name}() no longer hands a private song to songFileWaitThen() (the loading line, then the press again)`);
+  }
+  for (const [file, src, name] of [['app/snippets.js', sn, 'snipStop'], ['app/cards.js', cd, 'pcStop']]) {
+    const b = body(src, name);
+    const i = b.indexOf('songFileCancelWait()'), r2 = b.search(/if\(!\w+\) return;/);
+    if (i < 0 || (r2 >= 0 && r2 < i)) fail(`${file}: ${name}() must call songFileCancelWait() before its "nothing playing" return, so every stop also cancels a song still loading`);
+  }
+  const ep = body(jr, 'ensurePlayer');
+  if ((ep.match(/songFileNeedsLoad\(/g) || []).length !== 2 || !/songFileHost\(\)\.user/.test(ep)) fail('tabs/journey.js: ensurePlayer() must ask songFileNeedsLoad() at the first load and at a switch, and show the sign-in line (songFileHost().user) instead of a player for a private page signed out');
+  const html = read('index.html'), a = html.indexOf('src="app/songfiles.js"'), b2 = html.indexOf('src="app/snippets.js"');
+  if (a < 0 || b2 < 0 || a > b2) fail('index.html must load app/songfiles.js before app/snippets.js');
+  if (!bad) ok(`song-files-sim: ${m[1]} cases pass (pinned ${SONG_FILES_SIM_PIN}); the limit is 6 GiB; the list has ${n} entries (pinned); snippetSrc maps both paths; 5 player sites and ensurePlayer ask songFileNeedsLoad() first; snipStop and pcStop cancel a waiting song; songfiles.js loads before snippets.js`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1cg. PRACTICE MINUTES (2026-11-01) — practice-minutes.js + its config + the
    rules blocks it writes under.
    The engine is RUN, not read: tools/pm-sim.mjs loads the real config and engine
@@ -18347,6 +18419,7 @@ function checkPracticeMinutes(i18nTable) {
   checkWeekendStreaks();
   checkRulesPaste2();
   checkSongRequests();
+  checkSongFilesLoader();
   await checkBackingLoudness();
   checkSiteFill();
   checkPartSizes();
