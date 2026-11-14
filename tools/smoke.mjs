@@ -1826,7 +1826,8 @@ async function a11yWalk(page, run, events, stats, base) {
   const found = stats.a11y = { screens: {}, axe: A11Y_AXE_VERSION };
   await page.send('Emulation.setDeviceMetricsOverride', { width: 1366, height: 657, deviceScaleFactor: 1, mobile: false });
   const scan = async (key, what) => {
-    const ok = await run(`a11y:${key}:inject`, `typeof axe !== 'undefined' || ((0, eval)(${JSON.stringify(a11ySrc)}), typeof axe !== 'undefined')`, 10);
+    // The file itself is the evaluated script (not an eval() inside the page), so the page's CSP does not apply to it.
+    const ok = (await run(`a11y:${key}:has-axe`, `typeof axe !== 'undefined'`, 10)) || (await run(`a11y:${key}:inject`, `${a11ySrc}\n;typeof axe !== 'undefined'`, 10));
     if (ok !== true) { fail(key, 'axe-core did not load on this page'); return; }
     const v = await run(`a11y:${key}:scan`, A11Y_RUN, 10);
     if (!Array.isArray(v)) { fail(key, 'the scan returned nothing'); return; }
