@@ -33,9 +33,14 @@ Read the fixers' own proof scripts to learn what they did NOT test.
    comment that now lies, a mid-line `//` that swallows code.
 
 ## Report
+Write the full report to ONE details file in your scratch folder (never in the repo).
 Every finding: id `R<n>-<k>`, severity (BLOCKER = breaks students/teacher or ships
 a wrong result / MAJOR / MINOR), `file:line` at the pinned commit, the quoted code
 verbatim (re-open to confirm — agents have fabricated findings), the concrete
 failing input → output, the smallest fix (replacement text for strings, EN and ES).
-If the harness refuses to write a report file, put the whole report in your final
-message. End with what you tried that did NOT break, so the lead knows the coverage.
+End the file with what you tried that did NOT break, so the lead knows the coverage.
+Final message, 20 lines at most: the verdict first (clean, or N BLOCKER / M MAJOR /
+K MINOR); one line per BLOCKER and MAJOR with id, `file:line` and the failure (only
+these lines may pass the cap); coverage as counts with denominators; what needs the
+lead or Jonathan; the details file path. If the harness refuses to write the file,
+put the whole report in the final message.

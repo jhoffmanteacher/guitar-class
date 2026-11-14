@@ -35,8 +35,11 @@ script outside the repo that fails on the old code and passes on the new.
 - After the last commit: `node --check` every touched .js; `node tools/checks.mjs
   --check --skip-links` (only the stale shell-cache line may fail).
 
-## Final message (≤ 450 words)
-Per finding id: `FIXED <hash> — how proved` / `SKIPPED-NOT-REAL` /
-`SKIPPED-DECLINED` / `NEEDS-LEAD`; student-visible changes in plain English;
-teacher-visible changes; files touched and `git log --oneline main..HEAD`;
-anything noticed outside scope (one line each, do not fix).
+## Final message (20 lines at most)
+The tip and commit count first; counts with denominators (FIXED x of y,
+SKIPPED-NOT-REAL, SKIPPED-DECLINED, NEEDS-LEAD); one line per NEEDS-LEAD and per
+student- or teacher-visible change, in plain English; anything noticed outside scope
+(one line each, do not fix); the path of your ONE details file. That file, in the
+session scratchpad, holds everything else: per finding id `FIXED <hash> — how
+proved` / `SKIPPED-…` / `NEEDS-LEAD`, each proof's red and green lines, files touched
+and `git log --oneline main..HEAD`. The lead reads it only for what it must verify.

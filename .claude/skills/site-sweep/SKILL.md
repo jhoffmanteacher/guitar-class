@@ -62,8 +62,9 @@ general-purpose agent with `model: opus` and `effort: high`; a reviewer gets `mo
    - Review a *pinned commit* through `git show <hash>:file`, with a
      differential harness wherever logic changed (old vs new over many
      inputs/schedules).
-   - Reviewers cannot write report files; ask for the report in the final
-     message.
+   - Reviewers write no file in the repo: the full report goes in one file in
+     their scratch folder and the final message is 20 lines (`reviewer.md`);
+     if the harness refuses the file, the whole report comes in the message.
    - Send findings back to the same fixer on a new branch cut from the
      integration tip, then cherry-pick again.
 6. **Smoke.** `node tools/smoke.mjs --baseline origin/main` — must report no

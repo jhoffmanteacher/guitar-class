@@ -47,5 +47,8 @@ MODULE" (it belongs on the summer-reset list).
 
 ## Output
 Write the full report to the path in your scope (findings numbered `AREA-1`…,
-grouped ERRORS / INEFFICIENCIES / REFACTOR / BLOCKED, most severe first). Final
-message: ≤ 350 words — counts, top 5, what you checked and how, the report path.
+grouped ERRORS / INEFFICIENCIES / REFACTOR / BLOCKED, most severe first): it is your
+ONE details file, with every table, quoted line and proof. Final message: 20 lines at
+most — the verdict first, counts with denominators ("41 timer sites traced, 3 leak"),
+the top 5 one line each, what needs the lead or Jonathan, the report path. The lead
+reads the report only for what it must verify.
