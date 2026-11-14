@@ -16,6 +16,52 @@ Runs unattended, Fridays at 11:00 PM Pacific, from a scheduled cloud session.
   is the point: in the 2026-11-09 test each model caught bugs the other
   missed.
 
+## The run of 2026-11-13 only: a big week, keep it lean
+
+Jonathan, 2026-11-13: "make tonight's run token efficient". The range is about 425 commits, 81 of them Fast (50 touch
+site files, 31 are tools and notes only). These rules apply to THIS run and override the steps below where they
+differ. **Delete this whole section in the same push as tonight's tag**, so next Friday runs the normal steps.
+
+1. **Review by area, not by commit.** Do not read 81 diffs. Take the files the Fast commits touched
+   (`git log --format= --name-only --grep='^Review: Fast' $range | sort -u`) and review the NET change to those
+   files, `git diff <range start> origin/main -- <files>`, split into at most FOUR areas, one reviewer each, all
+   spawned in one message: (a) the app shell and lists (`app/*.js` except cards and the player, `index.html`,
+   `styles.css`, `site-fill.js`, `i18n.js`); (b) practice cards, the player and the arcade (`app/cards.js`,
+   `app/snippets.js`, `coach-*.js`, `practice-minutes*.js`, `class-activities.js`, `module-*.js`); (c) the live game
+   and the console (`live-quiz.js`, `teacher-*.js`); (d) the Song Journey pages (`tabs/**`). Give each reviewer the
+   commit subjects for its files, not the commits.
+2. **No reviewer for tools and notes.** `tools/**`, `.claude/**`, `.github/**`, `docs/**`, `CLAUDE.md`,
+   `WORKFLOW.md`, `CHANGELOG.md`: read the net diff of `tools/checks.mjs` yourself for ONE thing only, a check
+   that was loosened (a pin's number changed, a check removed, an allowlist entry added), and report what you find.
+   Each new tool shipped with its own break-it proof this week.
+3. **Skip what a reviewer already broke and passed this week** even though its commits say Fast: the weekend
+   streak rule (`861b735`, `186bd4b`, `6a79677`; deep review, one round plus fixes) and the big-screen fill
+   (`4bda529` on, `site-fill.js` and the `sw.js` lists; deep review, and GitHub's browser walk before it went
+   live). Tell the area reviewers these are settled; they still read the files around them.
+4. **Reviewers: Opus at `high` tonight** (not `xhigh`); `xhigh` only for `site-reviewer-deep` on a danger-zone
+   file. A different model from the week's reviewers is still the point.
+5. **Do not re-run what GitHub already ran green on the tip.** Since 2026-11-13 GitHub runs the checks, four proof
+   tools, the rules tests and a browser walk (English smoke per area, slow-load, update-reload, play-along) after
+   every push to main. Read the tip's runs (WebFetch on
+   `https://api.github.com/repos/jhoffmanteacher/guitar-class/actions/runs?branch=main&per_page=12`); what is
+   green there is not run again here. Step 1b's full two-language walk still runs ONCE (Spanish is walked only on
+   Fridays). Step 4's second full walk runs only if a fix touched a site file, and then with `--only` the areas
+   the fix touched.
+6. **Fix only what a student would hit** (a BLOCKER or MAJOR finding). MINOR findings go to WORKFLOW.md's Open
+   work as one short list; no fix and no re-review for them tonight. A fix that is itself Always-Reviewed: ONE
+   deep round at most; not clean → push the branch and report it as waiting (do not run three rounds tonight).
+7. **Work in flight: do not fix what these branches already fix, and do not touch them.** `wave/integration`
+   (keys on practice cards, the microphone start, save messages; it also fixes a Change Up set-up overflow that is
+   NOT on main), `feat/song-requests` (it fixes `tools/console-layout-smoke.mjs`'s sidebar pin: that tool fails 4
+   checks on main today, known), `feat/catch-up` (one rules line and a console filter), `fix/nearest-strum`,
+   `tools/never-blocks`, `tools/a11y-and-drift`, `cl/golden-rebuild`. Ignore `ci-try/*` (trial branches).
+   `firestore.rules` on main holds unpublished add-only blocks (school accounts step 1) and `firestore.rules.paste2`
+   is NOT published: both are known, waiting for Jonathan's paste; not findings.
+8. **If the run cannot finish** (a usage limit, time): review the areas in the order (a), (b), (c), (d); write in
+   WORKFLOW.md's Open work which areas were reviewed and which were not, push that, and do NOT tag (the next run
+   then takes the same range and skips the areas marked reviewed).
+9. **Report in ten lines or fewer**, as step 6 says, plus one line: which areas were reviewed.
+
 ## 1. Find the range
 
 ```
