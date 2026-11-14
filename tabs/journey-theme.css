@@ -380,3 +380,7 @@ body.lq-invite-open{overflow:hidden}
      same fix as .fab-track above: use the purple chip palette instead. */
   .ca-gate-btn{color:var(--purple-text);background:var(--purple-bg);border-color:var(--purple-border)}
 }
+
+/* SONG FILES (app/songfiles.js, 2026-11-14): the one line the play-along box shows while a song behind the sign-in loads, or instead of a player (signed out). The same look as styles.css .sf-line. */
+.sf-line{font-size:0.875rem;font-weight:600;color:var(--purple-text);margin:6px 0 2px}
+.sf-line:empty{display:none}
