@@ -383,6 +383,15 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-13 — My progress compares a student with their own weeks; the class rank is gone (Jonathan's P1). Fast.**
+      Reverses his 2026-11-04 ask (class rank "N/total" by all-time minutes): research he accepted says a rank
+      discourages the bottom of the list and an absent student can never climb. One line under the tiles: "This week
+      42 min · last week 35 min · your best week 60 min" ("this is your best week" only when it beats every earlier
+      week; "no earlier weeks yet" in a first week); no arrows, colours or praise. The weekly Top 5 stays. The page no
+      longer reads or writes `rankBoard/{tag}`; its rules block and old documents are unused and can be closed in a
+      later paste (about a week after this, once cached pages have updated). The console keeps its own rank column.
+      `pm-sim` 381 of 381 (pin 390 → 381, reasons beside it), `pm-e2e` 136 of 136, shared-Chromebook 120 of 120.
+
 - [x] **2026-11-13 — GitHub walks the site in a real browser after every push (`browser.yml`). Fast.** Chrome for
       Testing on `ubuntu-24.04`: the English smoke as five jobs, one per area, side by side (0.4 to 4.3 minutes each
       on the trial), plus `slow-load` (3.4 min), `playalong-loop` (4.2 min) and `update-reload-loop` (10.6 min, 29 of
