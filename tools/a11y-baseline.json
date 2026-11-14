@@ -1,0 +1,118 @@
+{
+ "_about": "The accessibility scan's baseline (tools/smoke.mjs, area a11y): the findings on 2026-11-13, per screen and rule. The count decides; the targets only name a new element. Lower it with node tools/smoke.mjs --only a11y --a11y-write-baseline (both languages).",
+ "axe": "4.14.0",
+ "screens": {
+  "en:checklist": {},
+  "en:class-activities": {},
+  "en:game-setup": {
+   "color-contrast": {
+    "count": 3,
+    "targets": [
+     "button[onclick=\"ccPickRate(0)\"] > .cc-rate-sub",
+     "button[onclick=\"ccPickRate(1)\"] > .cc-rate-sub",
+     "button[onclick=\"ccPickRate(2)\"] > .cc-rate-sub"
+    ]
+   }
+  },
+  "en:games-hub": {},
+  "en:journey-luna": {
+   "landmark-one-main": {
+    "count": 1,
+    "targets": [
+     "html"
+    ]
+   },
+   "region": {
+    "count": 5,
+    "targets": [
+     "a",
+     ".playalong-note",
+     ".journey-note",
+     ".songmap",
+     "#layer-1-body"
+    ]
+   }
+  },
+  "en:lesson": {
+   "label-content-name-mismatch": {
+    "count": 1,
+    "targets": [
+     "li[data-key=\"m4w1-b-sec0-0\"] > .step-head[aria-current=\"step\"][onclick=\"toggleStepOpen(this)\"]"
+    ]
+   }
+  },
+  "en:live-game": {},
+  "en:live-game-question": {},
+  "en:my-progress": {},
+  "en:practice-card": {
+   "page-has-heading-one": {
+    "count": 1,
+    "targets": [
+     "html"
+    ]
+   }
+  },
+  "en:sign-in": {
+   "color-contrast": {
+    "count": 1,
+    "targets": [
+     "#dev-bypass-btn"
+    ]
+   },
+   "landmark-one-main": {
+    "count": 1,
+    "targets": [
+     "html"
+    ]
+   },
+   "region": {
+    "count": 2,
+    "targets": [
+     "h2[data-i18n=\"auth.title\"]",
+     "p[data-i18n=\"auth.body\"]"
+    ]
+   }
+  },
+  "en:songs": {},
+  "es:checklist": {},
+  "es:class-activities": {
+   "page-has-heading-one": {
+    "count": 1,
+    "targets": [
+     "html"
+    ]
+   }
+  },
+  "es:game-setup": {
+   "color-contrast": {
+    "count": 3,
+    "targets": [
+     "button[onclick=\"ccPickRate(0)\"] > .cc-rate-sub",
+     "button[onclick=\"ccPickRate(1)\"] > .cc-rate-sub",
+     "button[onclick=\"ccPickRate(2)\"] > .cc-rate-sub"
+    ]
+   }
+  },
+  "es:games-hub": {},
+  "es:lesson": {
+   "label-content-name-mismatch": {
+    "count": 1,
+    "targets": [
+     "li[data-key=\"m4w1-b-sec0-0\"] > .step-head[aria-current=\"step\"][onclick=\"toggleStepOpen(this)\"]"
+    ]
+   }
+  },
+  "es:live-game": {},
+  "es:live-game-question": {},
+  "es:my-progress": {},
+  "es:practice-card": {
+   "page-has-heading-one": {
+    "count": 1,
+    "targets": [
+     "html"
+    ]
+   }
+  },
+  "es:songs": {}
+ }
+}
