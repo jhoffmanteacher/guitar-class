@@ -112,6 +112,8 @@ async function suite(rulesText, quiet) {
     await t('a school account reads a piece', () => P(A, 'seeded', 0).get(), true);
     await t('a school account lists the files', () => A.collection('songFiles').get(), true);
     await t('a school account reads this month\'s counter', () => U(A, M).get(), true);
+    await t('a school account lists the counter collection (the console and the site read one doc; listing is allowed too)', () => A.collection('songFilesUsage').get(), true);
+    await t('signed out cannot list the counter collection', () => N.collection('songFilesUsage').get(), false);
     await t('signed out cannot read a file', () => F(N, 'seeded').get(), false);
     await t('signed out cannot read a piece', () => P(N, 'seeded', 0).get(), false);
     await t('signed out cannot read the counter', () => U(N, M).get(), false);
@@ -257,6 +259,7 @@ const BREAKS = [
   ['a student may raise it without end', 'request.resource.data.bytes <= resource.data.bytes + 50000000;', 'request.resource.data.bytes >= 0;'],
   ['a student may add a field to the counter', "            && songFilesThisMonth(month)\n            && request.resource.data.keys().hasOnly(['bytes'])\n            && request.resource.data.bytes is int\n            && request.resource.data.bytes > resource", "            && songFilesThisMonth(month)\n            && request.resource.data.bytes is int\n            && request.resource.data.bytes > resource"],
   ['a student deletes the counter', "            && request.resource.data.bytes >= 0;\n      allow delete: if isTeacher();", `            && request.resource.data.bytes >= 0;\n      allow delete: if ${G};`],
+  ['the counter collection cannot be listed (get only; a tightening must show too)', `    match /songFilesUsage/{month} {\n      allow read: if ${G};`, `    match /songFilesUsage/{month} {\n      allow get: if ${G};`],
   ['the counter readable signed out', `    match /songFilesUsage/{month} {\n      allow read: if ${G};`, '    match /songFilesUsage/{month} {\n      allow read: if true;'],
   ['the teacher may not reset (a tightening must show too)', "      allow create, update: if isTeacher()\n            && request.resource.data.keys().hasOnly(['bytes'])\n            && request.resource.data.bytes is int\n            && request.resource.data.bytes >= 0;", "      allow create, update: if false;"],
   ['the teacher may not write a file (a tightening must show too)', "      allow create, update: if isTeacher()\n            && fileId.matches", "      allow create, update: if false\n            && fileId.matches"],
