@@ -306,13 +306,49 @@ function teacherConfigSame(a, b) {
   if (a === undefined || b === undefined) return a === b;
   return teacherConfigCanon(a) === teacherConfigCanon(b);
 }
+/* This tab's own clicks on the same cell land in click order (2026-11-14).
+   Every writer changes the copy before it writes, so a later click on a cell
+   is worked out from a copy that already holds the earlier click. If the
+   earlier one's transaction retried and landed after the later one, it wrote
+   its older value back over the newer click while the screen still showed
+   the newer (two quick pins: the second pin vanished; tools/two-consoles-
+   loop.mjs, pin-pair). The version check could not see it: the gap between
+   the two was this tab's own write. So a cell-checked write waits for this
+   tab's EARLIER writes whose cells overlap its own (its patch and its base,
+   dotted paths, one a prefix of the other) to finish their transaction, and
+   only then runs its own. It waits on the transaction alone, never on the
+   reload a diverged write does after it, so a read can never wait on a
+   write that waits on it ("Counting queued writes as open deadlocks").
+   Strict writers neither wait nor change: the board writers keep their own
+   turn (waitBoardWriteTurn), and a queue around every write corrupted
+   two-console boards (teacher-console.md, "Known limits"). */
+let teacherConfigCellWrites = [];   // {paths, done} for each of this tab's writes whose transaction is still out
+function teacherConfigPaths(obj, pre, out) {
+  Object.keys(obj).forEach(k => {
+    const v = obj[k], p = pre ? pre + '.' + k : k;
+    if (v && typeof v === 'object' && !Array.isArray(v) && Object.getPrototypeOf(v) === Object.prototype && Object.keys(v).length) teacherConfigPaths(v, p, out);
+    else out.push(p);
+  });
+  return out;
+}
+function teacherConfigPathsMeet(a, b) {
+  return a.some(x => b.some(y => x === y || x.startsWith(y + '.') || y.startsWith(x + '.')));
+}
 async function teacherWriteConfig(patch, base) {
-  const dbh = await ensureDb();
-  if (!dbh) throw new Error('Firestore is not available');
-  const ref = dbh.collection('config').doc('class');
+  const paths = teacherConfigPaths(patch, '', base ? Object.keys(base) : []);
+  const earlier = (base && Object.keys(base).length)
+    ? teacherConfigCellWrites.filter(w => teacherConfigPathsMeet(w.paths, paths)).map(w => w.done)
+    : [];
+  let txDone;
+  const mine = { paths, done: new Promise(r => { txDone = r; }) };
+  teacherConfigCellWrites.push(mine);
   let wrote = 0, diverged = false;
   teacherConfigWriteSeq++; teacherConfigWritesOpen++;
   try {
+    const dbh = await ensureDb();
+    if (!dbh) throw new Error('Firestore is not available');
+    const ref = dbh.collection('config').doc('class');
+    await Promise.all(earlier);
     await dbh.runTransaction(async t => {
       // Re-read inside the transaction on every attempt — Firestore may run
       // this function more than once, and the second run has to judge the
@@ -332,6 +368,8 @@ async function teacherWriteConfig(patch, base) {
       t.set(ref, Object.assign({}, patch, { configVersion: wrote }), { merge: true });
     });
   } finally {
+    teacherConfigCellWrites = teacherConfigCellWrites.filter(w => w !== mine);
+    txDone();
     if (--teacherConfigWritesOpen === 0) { const w = teacherConfigIdleWaiters; teacherConfigIdleWaiters = []; w.forEach(r => r()); }
   }
   /* The version moves on only through versions this tab wrote itself, in
