@@ -234,16 +234,19 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
   Journey-page private player, which is NOT built (two review rounds found majors in it; the harness and findings
   are in `Claude outputs/private-audio-step1/step2-journey-harness/`).
 
-- [ ] **School accounts: paste 2** (Jonathan, 2026-11-13: only school accounts, or outside accounts he allows, use
+- [x] **School accounts: paste 2. DONE 2026-11-14** (Jonathan, 2026-11-13: only school accounts, or outside accounts he allows, use
   the class data). Done 2026-11-14: Jonathan published Paste A (the allow list `config/access`, the requests
   `accessRequests`, the `songRequests` and `songFiles` blocks, the teacher's read of `minutes/{uid}/days`) and set
   the allow list in Manage → "Accounts by sign-in domain"; it saved and reads "0 would be locked out" (his report to the lead, 2026-11-14; nothing in the repo can show either). The paste-2
   text (every class-wide read and student write gated by `isSchool()`) is now `firestore.rules` itself, one file:
   its own second file is deleted, and check `1dt` pins `isSchool()`, its use count and the list of gated rules.
-  The ONE remaining step is Jonathan's: paste `firestore.rules` into the Firebase console (Firestore → Rules →
-  Publish), then three sign-in tests: a school student (uses the site as before), an allowed outside account (uses
-  the site), a signed-out visitor (the sign-in page). Until he does, the console runs the Paste A text. To undo
-  after the paste: re-publish the Paste A text, kept at `Claude outputs/firestore-rules-PASTE-A-2026-11-13.txt` and in
+  Jonathan PUBLISHED it in the class project on 2026-11-14 (about noon; `Claude outputs/firestore-rules-PASTE-B-2026-11-14.txt`,
+  byte-identical to `firestore.rules` at `252e78e`, sha256 `03960853bb96…`, pinned by `1dt`'s `RULES_FILE_SHA256`).
+  His report: an outside account and his teacher account both work; he has no @seq.org STUDENT account to test with,
+  so a school student's sign-in rests on the deep review's emulator runs and on "0 would be locked out". Watch the
+  first class period after it. One stale comment remains in `firestore.rules` (lines 111-115, "Until Jonathan pastes
+  it…"): it is fixed with the next rules change, because any edit to that file needs a paste. To undo: re-publish
+  the Paste A text, kept at `Claude outputs/firestore-rules-PASTE-A-2026-11-13.txt` and in
   git at `af1166e:firestore.rules`. The reads-only variant was dropped (it let a refused account write its progress
   before the screen); its draft stays in `Claude outputs/` as a record.
 

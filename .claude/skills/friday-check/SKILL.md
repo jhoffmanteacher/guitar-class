@@ -49,8 +49,7 @@ what GitHub ran green, and what to do when a run cannot finish are standing step
    checks on main today, known), `feat/catch-up` (one rules line and a console filter), `fix/nearest-strum`,
    `tools/never-blocks`, `tools/a11y-and-drift`, `cl/golden-rebuild`. Ignore `ci-try/*` (trial branches).
    `firestore.rules` on main is the school-accounts paste 2 since 2026-11-14 (one file; the second file is gone).
-   Until Jonathan pastes it the Firebase console runs the Paste A text (`af1166e:firestore.rules`); WORKFLOW.md,
-   "School accounts: paste 2", says whether he has. Known, not a finding.
+   Jonathan published it in the class project on 2026-11-14, so the console runs this text. Known, not a finding.
 5. **Report in ten lines or fewer**, as step 6 says.
 
 ## 1. Find the range
