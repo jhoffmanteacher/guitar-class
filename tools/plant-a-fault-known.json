@@ -540,6 +540,18 @@
    "class": "harmless",
    "reason": "diverged is set inside the transaction before anything reads it; a failed transaction throws past every reader",
    "date": "2026-11-14"
+  },
+  {
+   "id": "6bfae6ba49",
+   "region": "listening",
+   "file": "coach-core.js",
+   "where": "coachPitchReadings()",
+   "line": 883,
+   "before": "const W = Math.min(L, sr > 60000 ? 4096 : 2048);",
+   "after": "const W = Math.min(L, sr > 60000 ? 8192 : 2048);",
+   "class": "harmless",
+   "reason": "L is always COACH_FFT = 4096 (coachFrameBuf's only assignment, coach-core.js:696), so min(L, 4096) and min(L, 8192) are both 4096",
+   "date": "2026-11-14"
   }
  ]
 }
