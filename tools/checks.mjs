@@ -42,6 +42,7 @@ import { dirname, join, isAbsolute, relative } from 'node:path';
 import { audioHashMap, renderAudioBlock, AUDIO_BLOCK_RE, AUDIO_CACHE_NAME, AUDIO_HASH_CACHE_NAME } from './sw-audio-map.mjs';
 import { readSongFiles, resolveAudio, privateId, songFilesDir, localMismatch, SONG_FILE_PREFIX } from './song-files.mjs';
 import { reviewLabelReport } from './review-labels.mjs';
+import { checkKeysAgainstBase, checkFirestoreWrites, checkRulesPaste, checkKeptThings } from './never-blocks.mjs';
 import { tmpdir, cpus } from 'node:os';
 import { driftReport } from './i18n-drift.mjs';
 import vm from 'node:vm';
@@ -21838,6 +21839,41 @@ function checkPracticeMinutes(i18nTable) {
   if (!bad) ok(`engine run: ${m[1]} simulation assertions pass (pinned; incl. the teacher console's Practice minutes maths and the This week's goal box); console view pinned (button after Students, This week default, weeks-only server read, the view's block read-only, its one write — the goal box — a single cell-checked pmWeekGoals patch, blank = the flat goal); rules day ceiling = config day ceiling (${cfg ? cfg.dayCeilingMinutes * 60 : '?'} s), no daily limit; no heartbeat or "N playing" query in the engine or config, the heartbeats rules block and index gone; minutes rules owner-only, no delete; older rules untouched; hooks, script order and strings in place`);
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   1dl / 1dm / 1dn / 1do. CLAUDE.md's "Never, whatever the task says" list,
+   enforced (Jonathan, 2026-11-13: "Automatic blocks for the 'never' rules.
+   Today those are instructions; a block can't be forgotten."). The checks
+   live in tools/never-blocks.mjs (its header says what each one reads, and
+   `node tools/never-blocks.mjs --self-test` plants every forbidden edit and
+   its allowed near-misses in a scratch worktree):
+     1dl  a module change is run through tools/rule-zero-proof.mjs against the
+          push's base: no section or step moves, no frozen keyed quiz is
+          reworded (choices or English prompt); FROZEN_THROUGH = 1ap's number
+     1dm  the console never writes progress/…; config/class is written only
+          inside teacherWriteConfig() (read from the code, paths folded)
+     1dn  a firestore.rules change fails until RULES-PASTE.md names its paste
+     1do  "the cure"'s bytes, the switched-off Daily 5 and Take It to a Song,
+          and the deleted student tour stay as they are
+   The base is GC_CHECKS_BASE (GitHub: the push's `before`), else where this
+   branch left origin/main. A refusal is never silenced by an allowlist.
+   ════════════════════════════════════════════════════════════════════ */
+function checkNeverRules(sets) {
+  const show = (title, lines) => {
+    head(title);
+    for (const l of lines) {
+      if (l.kind === 'ok') ok(l.text);
+      else if (l.kind === 'err') { err(l.text); problems++; }
+      else if (l.kind === 'warn') { warn(l.text); if (!/^firestore\.rules changed:/.test(l.text)) warnings++; }
+      else console.log(`  ${l.text}`);
+    }
+  };
+  const guard = f => { try { return f(); } catch (e) { return [{ kind: 'err', text: `could not run: ${e && e.stack ? e.stack.split('\n').slice(0, 2).join(' ') : e}` }]; } };
+  show('1dl. Never move a section or step, never reword a frozen keyed quiz (rule-zero-proof against the push\'s base)', guard(() => checkKeysAgainstBase(ROOT, { frozenMcThrough: FROZEN_MC_THROUGH_MODULE })));
+  show('1dm. Never write progress/{uid} from the console; config/class only through teacherWriteConfig() (read as code)', guard(() => checkFirestoreWrites(ROOT)));
+  show('1dn. Never change firestore.rules without telling Jonathan it needs a console paste', guard(() => checkRulesPaste(ROOT)));
+  show('1do. Never re-level "the cure", delete what is switched off, or resurrect the deleted student tour', guard(() => checkKeptThings(ROOT, { sets })));
+}
+
 (async function main() {
   if (LIVE_ONLY) {
     console.log(`${C.bold}Guitar Class — post-push live check${C.reset}`);
@@ -21961,6 +21997,7 @@ function checkPracticeMinutes(i18nTable) {
   checkBuiltSongs(rcCtx);
   await checkPlantAFault();
   checkRemoveOne();
+  checkNeverRules(rcSets);
   await checkBackingLoudness();
   checkSiteFill();
   checkPartSizes();
