@@ -46,7 +46,9 @@
      3. the accuracy tones that give no pitch at all are exactly the pinned list;
      4. each count row reads exactly the pinned counts (own note / another note / no pitch, per timbre);
      5. a read with `end` equals a read of the buffer cut at `end`;
-     6. silence and white noise give no pitch, every time.
+     6. silence and white noise give no pitch, every time;
+     7. (2026-11-14) a one-note listener hears each pluck: Note Hunt's real fretLoop, on made-up plucks played while
+        the last note still rings, answers every prompt at its first pluck (PIN_LISTEN; the section's own comment).
    A list or count that changes in EITHER direction fails. --measure prints each moved pin as old → new, and a loud
    line when more tones are missed or misread, so a regression is never re-pinned quietly. */
 import { readFileSync } from 'node:fs';
@@ -285,6 +287,114 @@ for (const D of DETECTORS) {
   }
   if (bad.length && !flag('measure')) fail(`coach@48000: a read with \`end\` differs from a read of the buffer cut at \`end\` in ${bad.length} of ${n}: ${bad.slice(0, 4).join('; ')}`);
   summary.push(`catch-up window: ${same}/${n} reads with \`end\` equal the cut buffer`);
+}
+
+/* ── The one-note listeners hear each pluck (2026-11-14; plant-a-fault 9431d464d9 and 298563a085 got through every
+   tool: no tool played a one-note listener). Note Hunt, Pentatonic Simon, Riff Runner's Wait Mode and Note Call
+   settle a pluck through coach-core.js's coachReadFrame, coachOnsetTick / coachIdleTick and coachSettlePitch. Played
+   here through Note Hunt's REAL fretLoop and fretJudge (coach-hub.js), with those coach-core functions, all cut out of
+   the site's text (extract.mjs). Stubbed: the screen (fretRender, t), the next prompt (fretNextPrompt: a fixed list,
+   with its own state resets), the timers (a virtual clock) and the mic: an analyser over hiss (RMS 0.0005) plus this
+   file's plucks ("guitar" timbre at peak 0.05, a 6 ms pick scrape, 50 ms mic latency). The student plays the right
+   note 1.0-2.0 s after each prompt, while the last note still rings (nobody damps the strings), and plays it again
+   when 2.5 s go by unanswered (at most 3 times). Frames are jittered around 20 and 60 fps, seeded.
+   Asserted (pinned, either direction): every prompt is answered at its FIRST pluck, as the right note on the first
+   try, and no answer comes later than PIN_LISTEN.slowestMs after its pluck. Today: 40 of 40 at 20 and 60 fps on two
+   seeds, the slowest ~0.3 s (311 ms over 8 seeds x 4 frame rates while the test was written). A new pluck the
+   listener does not hear while the old note rings (the onset no longer reported, or the idle tick deaf after the
+   floor) makes the student play it again: 52 and 55 plucks for the two mistakes above. Not a detector pin: the
+   PIN above is untouched. */
+const PIN_LISTEN = { prompts: 40, plucks: 40, firstTry: 40, slowestMs: 400 };
+{
+  const SR = 48000, LAT = 50, PROMPTS = [45, 52, 57, 48, 64, 55, 59, 50, 62, 43];
+  const line = n => grab(coachSrc, new RegExp(`^(?:const|let) ${n}\\b[^;]*;`, 'm'), n)[0];
+  const parts = [
+    ...['COACH_PITCH_GATE', 'CHK_ONSET_FLOOR', 'CHK_ONSET_RATIO', 'CHK_HF_FLOOR', 'CHK_HF_RATIO', 'COACH_ONSET_REFRACT', 'COACH_ATTACK_SKIP',
+      'COACH_LVL_WIN', 'COACH_CATCHUP_MAX_MS', 'COACH_STANDOUT', 'COACH_STANDOUT_TARGET', 'FRET_ROUND',
+      'coachHfRms', 'coachBgRms', 'coachOnsetAt', 'coachReadCtx', 'coachSmoothA', 'coachYinD'].map(line),
+    'var coachAnalyser = null, coachCtx = null, coachFrameBuf = null, micRec = null, fretRunning = false, fretGame = null, fretRaf = null;',
+    extract(tunerSrc, 'tunerMedian'),
+    ...['coachReadFrame', 'coachSmooth', 'coachOnsetTick', 'coachIdleTick', 'coachSettlePitch', 'coachPitchReadings', 'coachDetectPitch', 'fretLoop', 'fretJudge'].map(n => extract(coachSrc, n)),
+  ].join('\n');
+  const hash = i => { let x = (i * 2654435761) >>> 0; x ^= x >>> 13; x = Math.imul(x, 1274126177) >>> 0; x ^= x >>> 16; return x / 4294967296 - 0.5; };
+  const waves = new Map();
+  const wave = m => {
+    if (waves.has(m)) return waves.get(m);
+    const f = hz(m), n = 3 * SR, buf = new Float64Array(n), out = new Float32Array(n);
+    for (let h = 1; h <= 6; h++) {
+      const k = Math.exp(-1 / ((1.2 / h) * SR)), w = 2 * Math.PI * f * h / SR, c = Math.cos(w), s = Math.sin(w);
+      let a = 1 / h, re = 1, im = 0;
+      for (let i = 0; i < n; i++) { buf[i] += a * im; const nre = re * c - im * s; im = re * s + im * c; re = nre; a *= k; }
+    }
+    let pk = 0; for (let i = 0; i < n; i++) pk = Math.max(pk, Math.abs(buf[i]));
+    const na = Math.floor(0.006 * SR);
+    for (let i = 0; i < n; i++) out[i] = buf[i] * 0.05 / pk + (i < na ? hash(i + m * 977) * 0.1 * (1 - i / na) : 0);
+    waves.set(m, out);
+    return out;
+  };
+  const round = (fps, seed) => {
+    const r = rng(seed), timers = [], plucks = [], log = [];
+    let vnow = 1000, finished = false, pi = -1;
+    const analyser = { getFloatTimeDomainData(b) {
+      const endS = Math.floor((vnow - LAT) / 1000 * SR), s0 = endS - b.length;
+      for (let i = 0; i < b.length; i++) b[i] = 0.0005 * 3.46 * hash(s0 + i);
+      for (const p of plucks) {
+        if (p.s0 >= endS || p.s0 + p.w.length <= s0) continue;
+        for (let s = Math.max(p.s0, s0); s < endS && s < p.s0 + p.w.length; s++) b[s - s0] += p.w[s - p.s0];
+      }
+    } };
+    const ctx = {
+      Math, Float32Array, Array, Number, Object,
+      performance: { now: () => vnow }, document: { getElementById: () => ({}) }, requestAnimationFrame: () => 0,
+      setTimeout: (fn, ms) => { timers.push({ at: vnow + ms, fn }); return timers.length; },
+      t: k => k, escHtml: s => s, coachNoteName: m => 'n' + m, fretStringName: s => 's' + s,
+      fretRender() {}, fretStop() { finished = true; }, fretFinish() { finished = true; }, coachUpdateMicLevel() {}, micRecFrame() {},
+      __an: analyser, __ctx: { sampleRate: SR, get currentTime() { return vnow / 1000; } },
+    };
+    vm.createContext(ctx);
+    vm.runInContext(parts, ctx, { filename: 'one-note-listener.js' });
+    vm.runInContext(`coachAnalyser = __an; coachCtx = __ctx; coachFrameBuf = new Float32Array(${COACH_FFT}); fretRunning = true;
+      fretGame = { phase: 'play', level: 0, results: [], readings: [], attackT: 0, lastPitchT: 0, needSilence: false, cooldownUntil: 0, tries: 0 };`, ctx);
+    ctx.fretNextPrompt = () => {
+      const g = ctx.fretGame;
+      g.prompt = { m: PROMPTS[++pi], s: 0, f: 0, note: 'n' + PROMPTS[pi] };
+      g.tries = 0; g.hint = ''; g.flash = null; g.readings = []; g.attackT = 0; g.advancing = false;   // fretNextPrompt's own resets
+      log.push({ m: PROMPTS[pi], plucks: [], answers: [], nextPluck: vnow + 1000 + r() * 1000 });
+    };
+    const judge = ctx.fretJudge;
+    ctx.fretJudge = m => { log[log.length - 1].answers.push({ m, at: vnow }); judge(m); };
+    ctx.fretNextPrompt();
+    for (let guard = 0; !finished && guard < 20000; guard++) {
+      vnow += 1000 / fps * (0.7 + r() * 0.6);
+      for (const tm of timers.splice(0)) { if (tm.at <= vnow) tm.fn(); else timers.push(tm); }
+      const P = log[log.length - 1];
+      if (!P.answers.some(a => a.m === P.m) && vnow >= P.nextPluck) {
+        if (P.plucks.length >= 3) break;   // three plucks unheard: the round is stuck
+        P.plucks.push(P.nextPluck);
+        plucks.push({ s0: Math.floor(P.nextPluck / 1000 * SR), w: wave(P.m) });
+        P.nextPluck += 2500;
+      }
+      vm.runInContext('fretLoop()', ctx);
+    }
+    return log;
+  };
+  const got = { prompts: 0, plucks: 0, firstTry: 0, slowestMs: 0 }, late = [];
+  for (const seed of [1, 2]) for (const fps of [20, 60]) {
+    for (const P of round(fps, seed)) {
+      got.prompts++; got.plucks += P.plucks.length;
+      const right = P.answers.find(a => a.m === P.m);
+      if (P.plucks.length === 1 && P.answers.length === 1 && right) got.firstTry++;
+      else late.push(`${nameOf(P.m)} at ${fps} fps, seed ${seed}: ${P.plucks.length} pluck(s), heard as ${P.answers.map(a => nameOf(a.m)).join(', ') || 'nothing'}`);
+      if (right) got.slowestMs = Math.max(got.slowestMs, Math.round(right.at - P.plucks[P.plucks.length - 1]));
+    }
+  }
+  if (!flag('measure')) {
+    if (got.prompts !== PIN_LISTEN.prompts || got.plucks !== PIN_LISTEN.plucks || got.firstTry !== PIN_LISTEN.firstTry)
+      fail(`one-note listener (Note Hunt's fretLoop): ${got.firstTry} of ${got.prompts} prompts answered at the first pluck, ${got.plucks} plucks played; pinned ${PIN_LISTEN.firstTry} of ${PIN_LISTEN.prompts}, ${PIN_LISTEN.plucks} plucks${late.length ? '. Not first time: ' + late.slice(0, 4).join('; ') + (late.length > 4 ? `; … ${late.length - 4} more` : '') : ''}`);
+    if (got.slowestMs > PIN_LISTEN.slowestMs) fail(`one-note listener (Note Hunt's fretLoop): an answer came ${got.slowestMs} ms after its pluck; pinned at most ${PIN_LISTEN.slowestMs}`);
+  }
+  if (flag('measure')) console.log(`const PIN_LISTEN = { prompts: ${got.prompts}, plucks: ${got.plucks}, firstTry: ${got.firstTry}, slowestMs: ${Math.max(PIN_LISTEN.slowestMs, Math.ceil((got.slowestMs + 65) / 50) * 50)} };   // slowest today ${got.slowestMs} ms + one slow frame`);
+  summary.push(`one-note listener (Note Hunt's real fretLoop): ${got.firstTry}/${got.prompts} prompts answered at the first pluck (${got.plucks} plucks), slowest ${got.slowestMs} ms after the pluck (pin ${PIN_LISTEN.slowestMs})`);
 }
 
 if (flag('measure')) {
