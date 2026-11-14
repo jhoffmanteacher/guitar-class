@@ -98,8 +98,11 @@
     </div>
   </div>
 </header>
-<div id="auth-wall" class="auth-wall">
-  <!-- Two states, swapped by app.js. #auth-checking is the button-free one, and
+<div id="auth-wall" class="auth-wall" role="main">
+  <!-- role="main": the sign-in screen's landmark (the app's own <main> is
+       inside #app, which is display:none until sign-in, and this wall is
+       display:none after it, so only one is ever there).
+       Two states, swapped by app.js. #auth-checking is the button-free one, and
        it shows both on the way in and on the way through:
 
          1. On every page load Firebase needs a moment to decide whether a
