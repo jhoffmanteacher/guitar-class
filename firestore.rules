@@ -107,9 +107,11 @@ service cloud.firestore {
        issue reports, mic takes and the take counter, the error log). The
        one door left to any signed-in account is accessRequests/{own uid}.
 
-       THIS TEXT IS NOT PUBLISHED YET: it lives in firestore.rules.paste2
-       until paste-2 day, when one commit moves it into firestore.rules
-       (dropping the first line) and Jonathan pastes it.
+       This is the school-accounts paste 2. It waited in a second file until
+       paste-2 day (2026-11-14), when one commit moved it here. Until
+       Jonathan pastes it, the console runs the Paste A text (in git at
+       af1166e:firestore.rules); WORKFLOW.md, "School accounts: paste 2",
+       says whether he has.
 
        SHIPPING ORDER (see the paste-2 note in the commit and the report):
        paste 1 (config/access + accessRequests) and the console first; the
@@ -803,8 +805,8 @@ service cloud.firestore {
        songFilesUsage/{YYYY-MM}     { bytes }     what the site has counted
                                       against this month's song downloads
 
-       READ: any signed-in account reads the files and the pieces (a school
-       account with the school-accounts paste 2: isSchool()). WRITE: only the
+       READ: a school account (isSchool()) reads the files and the pieces
+       (before the school-accounts paste 2, any signed-in account). WRITE: only the
        teacher, and only in this shape: an id of lower-case letters, digits
        and dashes (up to 80); exactly these fields; a whole number of bytes
        above 0 and at most 40 pieces' worth; a 64-character lower-case hex
@@ -818,9 +820,9 @@ service cloud.firestore {
        code (app/songfiles.js) adds the song's size, as it counts it, to this
        month's doc, and downloads nothing once the month's total would pass
        the limit. That guards HONEST use only: rules cannot count reads, so
-       any signed-in account (paste 2: any school account) can read the pieces
+       any school account can read the pieces
        directly, without the counter, as it can already re-read its own
-       progress doc as often as it likes. A signed-in account (isSchool() with paste 2)
+       progress doc as often as it likes. A school account (isSchool())
        may create the doc for the CURRENT month (UTC, by the server's clock)
        at 1 to 50,000,000, and may only RAISE it, by at most 50,000,000 at a
        time, with no other field. The teacher may set it to any whole number
