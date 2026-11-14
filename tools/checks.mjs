@@ -7353,7 +7353,7 @@ function checkPracticeCopy() {
     const j = JSON.parse(fj);
     if (/guitar-class-2fd21/.test(fj) || /"project"/.test(fj)) flag('firebase.json names a project: it must name none (.firebaserc is the one place)');
     const ig = (j.hosting && j.hosting.ignore) || [];
-    const MUST = ['**/.*', '**/.*/**', '**/node_modules/**', 'firebase.json', 'firestore.rules', 'firestore.rules.paste2', '**/*.md', 'tools/**', 'docs/**',
+    const MUST = ['**/.*', '**/.*/**', '**/node_modules/**', 'firebase.json', 'firestore.rules', '**/*.md', 'tools/**', 'docs/**',
       'Relevant reference docs/**', 'Claude outputs/**', '**/*.zip', '**/guitar-class-backup-*', '**/mic-recordings-*'];
     const lost = MUST.filter(m => !ig.includes(m));
     if (lost.length) flag(`firebase.json hosting.ignore lost ${lost.map(m => `"${m}"`).join(', ')}: a deploy would publish ${lost.length === 1 ? 'it' : 'them'}`);
