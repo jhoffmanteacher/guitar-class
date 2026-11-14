@@ -17053,9 +17053,9 @@ const COUNTIN_PIN = { runs: 44, beeps: 140, rounds: 9, takes: 6, tips: 28 };   /
      - saves nothing: the part never names saveGames, games, progress, caSteps, flushSave or storage, and a whole finish (scFinish and
        its report) run with a counting saveGames leaves games untouched and saveGames uncalled;
      - the end line at 1 bar and at many, in both languages;
-     - the tempo limit (STRUM_CHECK_MAX_BPM, the lead 2026-11-14: the highest tempo where the virtual student lost at most 5% of a
-       right player's strums): at the limit the button works, one BPM over it is disabled with the "slow to" line; the card's own
-       -5 / +5 stop there; the slider's handler keeps the button in step;
+     - the tempo (Jonathan, 2026-11-14: "Start 85, no limit", replacing the 80 BPM limit of earlier that day): the button is never
+       disabled; scOpen, run, opens at SC_START_BPM 85 whatever the step's slider says; scNudgeBpm reaches the step slider's own top
+       and floor;
      - the check's own strum ratios (SC_ONSET_RATIO / SC_HF_RATIO), run through the real srHearStrum: a 1.3x jump is a strum for the
        check and not for a state without them (Strum Radar's); the shared CHK_ONSET_RATIO / CHK_HF_RATIO stay 1.4 / 1.7. */
 function checkStrumCheck() {
@@ -17064,8 +17064,8 @@ function checkStrumCheck() {
   const fail = m => { err('1eh (strum-pattern check): ' + m); problems++; bad++; };
   if (!COACH_SANDBOX) { fail("1ca's sandbox did not load, so the strum-pattern check was NOT run"); return; }
   const { run } = COACH_SANDBOX;
-  const n = { pins: 0, onsets: 0, chords: 0, lines: 0, strumSteps: 0, sweeps: 0 };
-  const PIN = { pattern: 'D.DU.UDU', bars: 'D5 D5 C5 C5 G5 G5 D5 D5', rests: '1,4', win: 0.35, rule: 'c', ratio: 1.2, hfRatio: 1.46, maxBpm: 80 };
+  const n = { pins: 0, onsets: 0, chords: 0, lines: 0, strumSteps: 0, sweeps: 0, tempos: 0 };
+  const PIN = { pattern: 'D.DU.UDU', bars: 'D5 D5 C5 C5 G5 G5 D5 D5', rests: '1,4', win: 0.35, rule: 'c', ratio: 1.2, hfRatio: 1.46, startBpm: 85 };
   try {
     const found = JSON.parse(run(`JSON.stringify(CLASS_ACTIVITIES.flatMap(a => (a.steps || []).map((s, si) => ({ id: a.id, si, path: s.path || null, strum: s.strum || null }))).filter(x => x.strum).map(x => ({ id: x.id, si: x.si, path: x.path, listen: 'listen' in x.strum ? x.strum.listen : '(none)', pattern: x.strum.pattern, bars: x.strum.bars.join(' ') })))`));
     n.strumSteps = found.length;
@@ -17102,27 +17102,38 @@ function checkStrumCheck() {
     const src = siteSource('app.js', ROOT), fm = /\nfunction strumCheckBtnHtml\([\s\S]*?\n}\n/.exec(src);
     if (!fm) fail('app/tab.js no longer has strumCheckBtnHtml');
     else for (const teacher of [true, false]){
-      const c = { escAttr: x => String(x), escHtml: x => String(x), t: (k, p) => k + (p ? JSON.stringify(p) : ''), IS_TEACHER_MODE: teacher, STRUM_CHECK_MAX_BPM: Number(run('STRUM_CHECK_MAX_BPM')), out: '', at: '', over: '' };
+      const c = { escAttr: x => String(x), escHtml: x => String(x), t: k => k, IS_TEACHER_MODE: teacher, out: '' };
       vm.createContext(c);
-      const call = b => `strumCheckBtnHtml({ listen: true, pattern: 'D.DU.UDU', bars: ['D5'], chords: { D5: { midi: [50, 57, 62] } } }, 'k', ${b})`;
-      vm.runInContext(fm[0] + `\nout = ${call(60)}; at = ${call(PIN.maxBpm)}; over = ${call(PIN.maxBpm + 1)};`, c);
-      if (teacher && (c.out || c.over)) fail('strumCheckBtnHtml draws the button in the teacher console (IS_TEACHER_MODE): the console must never open the mic');
+      vm.runInContext(fm[0] + `\nout = strumCheckBtnHtml({ listen: true, pattern: 'D.DU.UDU', bars: ['D5'], chords: { D5: { midi: [50, 57, 62] } } }, 'k');`, c);
+      if (teacher && c.out) fail('strumCheckBtnHtml draws the button in the teacher console (IS_TEACHER_MODE): the console must never open the mic');
       if (!teacher && !/data-strumcheck=/.test(c.out)) fail('strumCheckBtnHtml draws nothing for a student (control)');
-      if (!teacher) {
-        /* the tempo limit: at the limit the button works and the line is hidden; one BPM over, the button is disabled and the line shows the limit */
-        const dis = h => /<button[^>]*\sdisabled[\s>]/.test(h), line = h => /<span class="sc-limit"(?! hidden)[^>]*>sc\.slowTo\{"n":(\d+)\}/.exec(h);
-        if (dis(c.out) || dis(c.at) || line(c.out) || line(c.at)) fail(`the strum check is disabled (or says to slow down) at ${PIN.maxBpm} BPM or under`);
-        const L = line(c.over);
-        if (!dis(c.over) || !L || Number(L[1]) !== PIN.maxBpm) fail(`at ${PIN.maxBpm + 1} BPM the strum check is not disabled with "slow to ${PIN.maxBpm}" under it`);
-      }
+      if (!teacher && /<button[^>]*\sdisabled[\s>]/.test(c.out)) fail('the strum check button is drawn disabled: there is no tempo limit (Jonathan, 2026-11-14: "Start 85, no limit")');
       n.pins++;
     }
-    if (Number(run('STRUM_CHECK_MAX_BPM')) !== PIN.maxBpm) fail(`STRUM_CHECK_MAX_BPM is ${run('STRUM_CHECK_MAX_BPM')}, want ${PIN.maxBpm} (the highest tempo where the virtual student lost at most 5% of a right player's strums)`);
-    if (Number(run('scBpmMax()')) !== PIN.maxBpm) fail(`the card's own tempo buttons stop at ${run('scBpmMax()')}, not at the limit ${PIN.maxBpm}`);
-    if (/^(const|let|var)\s[^\n]*STRUM_CHECK_MAX_BPM/m.test(siteText('coach-strumcheck.js', ROOT))) fail('coach-strumcheck.js reads STRUM_CHECK_MAX_BPM at load: a page without app/tab.js would leave sc uninitialised and every coachClose throwing (review R1-6)');
-    /* the slider's own handler, run with a counting strumCheckSync: one call per move */
-    const syncCalls = Number(run(`(() => { const keep = strumCheckSync; let k = 0; strumCheckSync = () => { k++; }; try { onBpmSliderChange({ parentNode: null, dataset: {}, value: '81' }); } finally { strumCheckSync = keep; } return k; })()`));
-    if (syncCalls !== 1) fail(`moving the tempo slider called strumCheckSync ${syncCalls} times, want 1 (onBpmSliderChange keeps the strum check in step)`);
+    /* The tempo (Jonathan, 2026-11-14: "Start 85, no limit"), through the real scOpen and scNudgeBpm: the check opens at 85 whatever the
+       step's slider says (60 and 125 tried), and its -5 / +5 reach the step's own slider range, top and floor, read off the step's HTML. */
+    if (L) {
+      const stepHtml = run(`buildStrum(CLASS_ACTIVITIES.find(a => a.id === 'ca-46').steps[${L.si}].strum, { keyPrefix: 'bpm:ca:ca-46:${L.si}:strum' })`);
+      const range = /class="bpm-slider"[^>]*min="(\d+)"[^>]*max="(\d+)"/.exec(stepHtml);
+      if (/sc-limit|\sdisabled[\s>]/.test(stepHtml)) fail('the listening step still draws a tempo-limit line or a disabled button');
+      if (!range) fail('the listening step has no tempo slider to read its range from');
+      else {
+        const [lo, hi] = [Number(range[1]), Number(range[2])];
+        const tempo = slider => JSON.parse(run(`(() => { const group = { querySelector(q){ return q === '.bpm-slider' ? { value: '${slider}', max: '${hi}' } : null; }, insertAdjacentElement(){}, closest(){ return null; } };
+          const btn = { dataset: { strumcheck: ${JSON.stringify(JSON.stringify({ pattern: PIN.pattern, bars: PIN.bars.split(' '), chords: { D5: { midi: [50, 57, 62] }, C5: { midi: [48, 55, 60] }, G5: { midi: [43, 50, 55] } } }))} }, parentElement: group, closest(q){ return q === '.bpm-control-group' ? group : null; } };
+          try { scOpen(btn); if (!sc) return JSON.stringify(null); const start = sc.bpm; for (let i = 0; i < 40; i++) scNudgeBpm(5); const top = sc.bpm; for (let i = 0; i < 40; i++) scNudgeBpm(-5); return JSON.stringify({ start, top, floor: sc.bpm }); }
+          finally { scClose(); } })()`));
+        for (const sl of [60, hi]) {
+          const r = tempo(sl);
+          n.tempos++;
+          if (!r) { fail('scOpen opened no check'); continue; }
+          if (r.start !== PIN.startBpm) fail(`with the step's slider at ${sl} the check opens at ${r.start} BPM, want ${PIN.startBpm}`);
+          if (r.top !== hi) fail(`the check's +5 stops at ${r.top} BPM, want the step's own top, ${hi} (no tempo limit)`);
+          if (r.floor !== lo) fail(`the check's -5 stops at ${r.floor} BPM, want the step's own floor, ${lo}`);
+        }
+      }
+    }
+    if (/STRUM_CHECK_MAX_BPM|strumCheckSync|sc\.slowTo/.test(src + siteText('coach-strumcheck.js', ROOT))) fail('the removed tempo limit is still named (STRUM_CHECK_MAX_BPM / strumCheckSync / sc.slowTo)');
     /* this check's own strum ratios, through the real srHearStrum: a jump of 1.3x is a strum for the check and not for Strum Radar */
     if (Number(run('SC_ONSET_RATIO')) !== PIN.ratio || Number(run('SC_HF_RATIO')) !== PIN.hfRatio) fail(`the check's ratios are ${run('SC_ONSET_RATIO')} / ${run('SC_HF_RATIO')}, want ${PIN.ratio} / ${PIN.hfRatio}`);
     if (Number(run('CHK_ONSET_RATIO')) !== 1.4 || Number(run('CHK_HF_RATIO')) !== 1.7) fail('the shared CHK_ONSET_RATIO / CHK_HF_RATIO moved: every other game reads them');
@@ -17233,8 +17244,8 @@ function checkStrumCheck() {
     run(`setLang('en')`);
   } catch (e) { fail('stopped on an error: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : e)); }
   /* pinned totals, so a renamed function cannot turn this into a check of nothing */
-  if (n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 9 || n.lines !== 10 || n.pins !== 4) fail(`ran ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (9), ${n.lines} end lines (10), ${n.pins} pins (4)`);
-  if (!bad) ok(`1eh: one listening step (ca-46, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, none in the console, disabled with "slow to ${PIN.maxBpm}" above ${PIN.maxBpm} BPM; its own ratios ${PIN.ratio} / ${PIN.hfRatio} (Strum Radar's state still 1.4 / 1.7, run); window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule} (${n.chords} scripted cases); a whole finish saved nothing; the real sweep and end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages`);
+  if (n.tempos !== 2 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 9 || n.lines !== 10 || n.pins !== 4) fail(`ran ${n.tempos} tempo opens (want 2), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (9), ${n.lines} end lines (10), ${n.pins} pins (4)`);
+  if (!bad) ok(`1eh: one listening step (ca-46, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, none in the console, never disabled; opens at ${PIN.startBpm} BPM whatever the slider says, -5 / +5 across the step's own range; its own ratios ${PIN.ratio} / ${PIN.hfRatio} (Strum Radar's state still 1.4 / 1.7, run); window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule} (${n.chords} scripted cases); a whole finish saved nothing; the real sweep and end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages`);
 }
 
 async function checkCountIn() {
