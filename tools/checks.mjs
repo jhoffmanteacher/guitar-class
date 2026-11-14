@@ -4853,10 +4853,15 @@ function checkSpanishDrift() {
   try { r = driftReport(ROOT, { fields: DRIFT_FIELDS, loadI18n: loadI18nTable }); }
   catch (e) { warn(`1dp could not run: ${e.message}`); warnings++; return; }
   if (r.skipped) { ok(`nothing to compare: ${r.skipped}`); return; }
-  const cut = s => { s = String(s).replace(/\s+/g, ' ').trim(); return s.length > 140 ? s.slice(0, 137) + '…' : s; };
+  // A long text is shown from a little before its first changed character, so the change is on screen.
+  const flat = s => String(s).replace(/\s+/g, ' ').trim();
+  const cut = (s, from = 0) => { s = flat(s); const t = s.slice(from, from + 140); return (from ? '…' : '') + t + (from + 140 < s.length ? '…' : ''); };
   for (const e of r.errors) { warn(`1dp could not read ${e}`); warnings++; }
   for (const h of r.hits) {
-    warn(`${h.file} ${h.key}: the English changed and the Spanish did not\n      was: "${cut(h.enOld)}"\n      now: "${cut(h.enNew)}"\n      es:  "${cut(h.es)}"`);
+    const a = flat(h.enOld), b = flat(h.enNew);
+    let d = 0; while (d < a.length && d < b.length && a[d] === b[d]) d++;
+    const from = d > 70 ? d - 50 : 0;
+    warn(`${h.file} ${h.key}: the English changed and the Spanish did not\n      was: "${cut(a, from)}"\n      now: "${cut(b, from)}"\n      es:  "${cut(h.es)}"`);
     warnings++;
   }
   const at = `${r.base.slice(0, 7)} (${r.baseHow})`;
