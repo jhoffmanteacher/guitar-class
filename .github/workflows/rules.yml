@@ -33,10 +33,10 @@
 # To add a tool: one line under RULES_TOOLS below (the file, then its
 # arguments). The rules file and --port 8089 are passed to every tool.
 #
-# Two rules texts (2026-11-13): firestore.rules, the one PUBLISHED in the
-# Firebase console, and, while it exists, firestore.rules.paste2, the
-# school-accounts second paste that is not published yet (checks.mjs 1dt).
-# Every tool runs against each; the tools read which gate a text has.
+# One rules text since 2026-11-14 (paste-2 day): firestore.rules, with the
+# school-accounts gate isSchool() (checks.mjs 1dt). From 2026-11-13 to that
+# day a second file held that paste and every tool ran on both; each tool now
+# refuses a rules text without isSchool().
 name: Firestore rules
 
 on:
@@ -109,7 +109,6 @@ jobs:
           failed=0
           # (stdin of each run is /dev/null so it cannot swallow the rest of this list)
           RULES_FILES="firestore.rules"
-          [ -f firestore.rules.paste2 ] && RULES_FILES="$RULES_FILES firestore.rules.paste2"
           while read -r tool args; do
             [ -z "$tool" ] && continue
             if [ ! -f "$tool" ]; then

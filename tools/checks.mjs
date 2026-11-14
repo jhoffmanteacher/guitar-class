@@ -51,9 +51,9 @@ const args = new Set(process.argv.slice(2));
 const CHECK_ONLY = args.has('--check');
 const SKIP_LINKS = args.has('--skip-links');
 const LIVE_ONLY  = args.has('--live');
-/* The gate a student passes in a rules text: isSchool() once the school-accounts paste 2 is published (it defines the
-   function), isSignedIn() before. The pins below read the PUBLISHED firestore.rules with its own gate, so the day paste 2
-   moves into firestore.rules (firestore.rules.paste2, check 1dt) no pin has to change. */
+/* The gate a student passes in a rules text: isSchool() when the text defines it (firestore.rules since paste-2 day,
+   2026-11-14), isSignedIn() in an older text. The pins below read firestore.rules with its own gate; a firestore.rules
+   without isSchool() fails check 1dt on its own. */
 const rulesGate = text => /function isSchool\(\)/.test(text) ? 'isSchool()' : 'isSignedIn()';
 
 const LIVE_SW_URL = 'https://jhoffmanteacher.github.io/guitar-class/sw.js';
@@ -5417,7 +5417,7 @@ async function checkLiveQuizNoNames() {
   if (!ablock) flag('firestore.rules: the answers/{userId} block is missing');
   else {
     if (!/allow read, delete: if isTeacher\(\);/.test(ablock)) flag('firestore.rules answers: `allow read, delete: if isTeacher();` is gone (the answer docs hold every player\'s name; only the teacher may list them)');
-    /* The rules' own gate (rulesGate): isSignedIn() today, isSchool() after the school-accounts paste 2. */
+    /* The rules' own gate (rulesGate): isSchool() since the school-accounts paste 2 moved into firestore.rules, 2026-11-14. */
     const gate = rulesGate(readFileSync(join(ROOT, 'firestore.rules'), 'utf8'));
     if (!new RegExp('allow get: if ' + gate.replace(/[()]/g, '\\$&') + ' && request\\.auth\\.uid == userId;').test(ablock)) flag(`firestore.rules answers: a student may only \`get\` their own doc (allow get: if ${gate} && request.auth.uid == userId)`);
     const reads = [...ablock.matchAll(/allow\s+([a-z, ]+?):/g)].map(m => m[1].replace(/\s/g, ''));
@@ -17878,65 +17878,138 @@ async function checkPwTakeEvaluator() {
    ════════════════════════════════════════════════════════════════════ */
 const SITE_ERRORS_SIM_PIN = 161;
 /* ════════════════════════════════════════════════════════════════════
-   1dt. THE SCHOOL-ACCOUNTS PASTE 2, NOT PUBLISHED (2026-11-13, review R1-8) —
-   firestore.rules is always the text that is PUBLISHED in the Firebase
-   console. The second paste of the school-accounts change (isSchool(): only a
-   verified @seq.org address, or an account the teacher allowed, reads the
-   class-wide documents and writes as a student) waits in
-   firestore.rules.paste2 until Jonathan pastes it; that day one commit moves
-   its text into firestore.rules (without the first line) and deletes it.
-   Until then this pins: its first line says it is not published; it is the
-   published rules and nothing else, except that the student gate is
-   isSchool() (with the comments stripped, the isSchool() function taken out
-   and every isSchool() read as isSignedIn(), the two texts are equal); it
-   leaves isSignedIn() on exactly the two accessRequests lines (the one door
-   for an account that is not let in); and it uses isSchool() exactly
-   P2_SCHOOL_USES times. The emulator tools run against both files on GitHub
-   (.github/workflows/rules.yml). Once firestore.rules defines isSchool(),
-   the file must be gone, and the pins move to firestore.rules: the body of
-   isSchool() (P2_IS_SCHOOL_BODY: dropping email_verified, or "== true" read
-   as "!= false", fails), the P2_SCHOOL_USES count, isSignedIn() only on the
-   two accessRequests lines (review R2-4). A branch that changes the rules
-   before paste 2 is published changes BOTH files the same way (the failure
-   message says how).
+   1dt. THE SCHOOL-ACCOUNTS GATE (2026-11-13, review R1-8; one file since
+   2026-11-14) — firestore.rules holds isSchool(): only a verified @seq.org
+   address, or an account the teacher allowed (config/access), reads the
+   class-wide documents and writes as a student. The second paste waited in
+   its own file until paste-2 day (2026-11-14), when one commit moved it
+   into firestore.rules and deleted that file. What this pins now:
+     - isSchool() is defined ONCE and its body is the pinned one
+       (SCHOOL_GATE_BODY: dropping email_verified, or "== true" read as
+       "!= false", fails); pmOwner() is still isSchool() plus the owner;
+     - isSchool() is used SCHOOL_GATE_USES times (a text count);
+     - every allow rule is GATED: each of its "||" alternatives starts with
+       isSchool(), pmOwner(userId), isTeacher() or false (inside "&&", one
+       of those as any part). An allow that some account passes with no
+       gate (if true, request.auth != null, isSignedIn(), the owner check
+       alone) fails, unless it is a stated exception in
+       SCHOOL_GATE_EXCEPTIONS: today only accessRequests' get and create
+       (isSignedIn(): the one door for an account that is not let in);
+     - the list of allow rules a school account passes (SCHOOL_GATED: the
+       path and the operations) is exactly the pinned one, so dropping the
+       gate from one block, or adding a student block, fails here until it
+       is re-pinned on purpose (and Jonathan pastes the rules);
+     - no paste-2 file exists, and no tracked file names one (the old
+       second-file name, built below from two halves so this file does not
+       name it).
+   The emulator half is the five rules tools (.github/workflows/rules.yml),
+   which since 2026-11-14 refuse a rules text without isSchool().
    ════════════════════════════════════════════════════════════════════ */
-const P2_SCHOOL_USES = 24;   // 6 class-wide reads + 11 student writes (progress counts once: read, write); 2026-11-13 +2: songRequests (a student's create, and the read of their own); 2026-11-14 +5: song files (read the files, read the pieces, read the month's counter, create it, raise it)
-const P2_IS_SCHOOL_BODY = "return request.auth != null && ((request.auth.token.get('email_verified', false) == true && request.auth.token.get('email', '').lower().matches('^[^@]+@seq[.]org$')) || (exists(/databases/$(database)/documents/config/access) && get(/databases/$(database)/documents/config/access).data.get('allow', {}).get(request.auth.uid, false) == true));";
-function checkRulesPaste2() {
-  head('1dt. School accounts: firestore.rules.paste2 (not published) is the published rules with isSchool() as the student gate; isSchool() itself is pinned');
+const SCHOOL_GATE_USES = 24;   // 6 class-wide reads + 11 student writes (progress counts once: read, write); 2026-11-13 +2: songRequests (a student's create, and the read of their own); 2026-11-14 +5: song files (read the files, read the pieces, read the month's counter, create it, raise it)
+const SCHOOL_GATE_BODY = "return request.auth != null && ((request.auth.token.get('email_verified', false) == true && request.auth.token.get('email', '').lower().matches('^[^@]+@seq[.]org$')) || (exists(/databases/$(database)/documents/config/access) && get(/databases/$(database)/documents/config/access).data.get('allow', {}).get(request.auth.uid, false) == true));";
+/* The allow rules a school account passes, as "path ops" (the path under /databases/{database}/documents). 27 rules. */
+const SCHOOL_GATED = [
+  '/progress/{userId} read,write',
+  '/config/class read',
+  '/liveQuiz/current read',
+  '/liveQuiz/current/answers/{userId} get',
+  '/liveQuiz/current/answers/{userId} create,update',
+  '/issueReports/{reportId} create',
+  '/micTakes/{takeId} create,update',
+  '/micTakes/{takeId}/chunks/{chunkId} create,update',
+  '/micTakesMeta/count read',
+  '/micTakesMeta/count create',
+  '/micTakesMeta/count update',
+  '/minutes/{userId}/{document=**} read',
+  '/minutes/{userId}/days/{day} create,update',
+  '/minutes/{userId}/weeks/{week} create,update',
+  '/minutes/{userId}/meta/board create',
+  '/weekBoard/{tag} read',
+  '/weekBoard/{tag} create,update',
+  '/rankBoard/{tag} read',
+  '/rankBoard/{tag} create,update',
+  '/siteErrors/{errorId} create',
+  '/songRequests/{requestId} create',
+  '/songRequests/{requestId} read',
+  '/songFiles/{fileId} read',
+  '/songFiles/{fileId}/pieces/{pieceId} read',
+  '/songFilesUsage/{month} read',
+  '/songFilesUsage/{month} create',
+  '/songFilesUsage/{month} update',
+];
+/* Allow rules an account passes WITHOUT isSchool(), on purpose, with the reason. */
+const SCHOOL_GATE_EXCEPTIONS = {
+  '/accessRequests/{userId} get': 'an account that is not let in reads its own request (the access screen)',
+  '/accessRequests/{userId} create': 'an account that is not let in asks to join (the access screen)',
+};
+function checkRulesSchoolGate() {
+  head('1dt. School accounts: firestore.rules gates every class-wide read and student write with isSchool(); isSchool() and the gated rules are pinned; no paste-2 file');
   let bad = 0;
   const fail = m => { err('1dt: ' + m); problems++; bad++; };
-  const read = f => { try { return readFileSync(join(ROOT, f), 'utf8').replace(/\r\n/g, '\n'); } catch { return null; } };
-  const pub = read('firestore.rules'), p2 = read('firestore.rules.paste2');
-  const strip = t => t.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
-  const fnSpan = (t, name) => { const i = t.indexOf('function ' + name + '()'); if (i < 0) return null; let d = 0, k = t.indexOf('{', i); const open = k; for (; k < t.length; k++) { if (t[k] === '{') d++; else if (t[k] === '}' && !--d) break; } return { i, open, end: k }; };
-  const dropFn = (t, name) => { const sp = fnSpan(t, name); return sp ? t.slice(0, sp.i) + t.slice(sp.end + 1) : t; };
-  /* The pins on the text that holds isSchool(): paste 2 while it waits, firestore.rules once it is published. */
-  const gatePins = (file, text) => {
-    const body = strip(text);
-    const sp = fnSpan(body, 'isSchool');
-    if (!sp) { fail(`${file} has no isSchool() function`); return; }
-    const fnBody = body.slice(sp.open + 1, sp.end).replace(/\s+/g, ' ').trim();
-    if (fnBody !== P2_IS_SCHOOL_BODY) fail(`${file}: the body of isSchool() is not the pinned one (P2_IS_SCHOOL_BODY: a verified email, lower case, the anchored @seq.org pattern, OR an allow-list entry that is exactly true behind exists()). Found: ${fnBody.slice(0, 220)}`);
-    const uses = (body.match(/isSchool\(\)/g) || []).length - 1;
-    if (uses !== P2_SCHOOL_USES) fail(`${file} uses isSchool() ${uses} times; pinned at ${P2_SCHOOL_USES} (6 class-wide reads + 11 student writes + the song request's create and own read + the song files' 3 reads and the counter's create and raise). A new student rule needs the gate too: add it, then re-pin P2_SCHOOL_USES on purpose`);
-    const ar = (() => { const i = body.indexOf('match /accessRequests/{userId} {'); if (i < 0) return ''; let d = 0, k = body.indexOf('{', i + 'match /accessRequests/{userId}'.length); for (; k < body.length; k++) { if (body[k] === '{') d++; else if (body[k] === '}' && !--d) break; } return body.slice(i, k + 1); })();
-    const signedAll = (body.match(/isSignedIn\(\)/g) || []).length - 1, signedAr = (ar.match(/isSignedIn\(\)/g) || []).length;
-    if (signedAll !== 2 || signedAr !== 2) fail(`${file} must leave isSignedIn() on exactly the two accessRequests lines (get, create): found ${signedAll} uses, ${signedAr} in that block`);
-    return uses;
-  };
-  if (p2 == null) {
-    if (pub && /function isSchool\(\)/.test(pub)) { const uses = gatePins('firestore.rules', pub); if (!bad) ok(`1dt: paste 2 is published (firestore.rules defines isSchool()): its body is the pinned one, used ${uses} times (pinned), isSignedIn() only on the 2 accessRequests lines; no paste-2 file left`); }
-    else warn('1dt: no firestore.rules.paste2 and firestore.rules has no isSchool(): the school-accounts paste 2 is neither prepared nor published');
-    return;
+  const OLD_NAME = 'firestore.rules.' + 'paste' + '2';
+  if (existsSync(join(ROOT, OLD_NAME))) fail(`${OLD_NAME} exists again: paste 2 moved into firestore.rules on 2026-11-14 and the second file was deleted. A rules change now goes into firestore.rules only (and Jonathan pastes it)`);
+  /* No tracked file names a paste-2 file (a tool, the workflow or a doc still pointing at it would test or describe a file that is gone). */
+  {
+    const ls = spawnSync('git', ['ls-files', '-z'], { cwd: ROOT, encoding: 'utf8' });
+    if (ls.status !== 0 || !ls.stdout) warn('1dt: git ls-files did not run: the scan for a file that names the old paste-2 file was skipped');
+    else {
+      const needle = new RegExp('\\.paste' + '2\\b');
+      const hits = [];
+      for (const f of ls.stdout.split('\0').filter(Boolean)) {
+        if (/\.(mp3|wav|ogg|m4a|png|jpe?g|gif|webp|ico|pdf|woff2?|ttf|zip)$/i.test(f)) continue;
+        let t; try { t = readFileSync(join(ROOT, f), 'utf8'); } catch { continue; }
+        if (needle.test(t)) hits.push(f);
+      }
+      if (hits.length) fail(`${hits.length} tracked file(s) still name the paste-2 file (${hits.join(', ')}): it is gone since 2026-11-14; say firestore.rules`);
+    }
   }
-  if (/function isSchool\(\)/.test(pub || '')) { fail('firestore.rules already defines isSchool() (paste 2 moved in): delete firestore.rules.paste2'); return; }
-  if (!/^\/\/ NOT PUBLISHED: paste 2 of the school-accounts change/.test(p2)) fail('firestore.rules.paste2 must start with the line "// NOT PUBLISHED: paste 2 of the school-accounts change …"');
-  const norm = t => dropFn(strip(t), 'isSchool').split('isSchool()').join('isSignedIn()').replace(/\s+/g, ' ').trim();
-  const a = norm(pub || ''), b = norm(p2);
-  if (a !== b) { let i = 0; while (i < a.length && a[i] === b[i]) i++; fail(`firestore.rules and firestore.rules.paste2 are out of step, near: firestore.rules "…${a.slice(Math.max(0, i - 40), i + 60)}…" / paste 2 "…${b.slice(Math.max(0, i - 40), i + 60)}…". A change to the rules must go into BOTH files the same way, until paste 2 is published: firestore.rules (published) with isSignedIn() where a student reads or writes, firestore.rules.paste2 with isSchool() there (a new class-wide read or student write: then re-pin P2_SCHOOL_USES); a teacher-only rule is the same text in both. Run node tools/checks.mjs --check again after.`); }
-  const uses = gatePins('firestore.rules.paste2', p2);
-  if (!bad) ok(`firestore.rules.paste2: marked NOT PUBLISHED; equal to firestore.rules once the gate is read as isSignedIn() (${b.length} characters compared); isSchool() body pinned, used ${uses} times (pinned); isSignedIn() only on the 2 accessRequests lines`);
+  let rules; try { rules = readFileSync(join(ROOT, 'firestore.rules'), 'utf8').replace(/\r\n/g, '\n'); } catch { fail('firestore.rules cannot be read'); return; }
+  const body = rules.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '').replace(/;[ \t]*\/\/.*$/gm, ';');
+  const closeOf = (t, open) => { let d = 0, k = open; for (; k < t.length; k++) { if (t[k] === '{') d++; else if (t[k] === '}' && !--d) break; } return k; };
+  const fnBody = name => { const re = new RegExp('function ' + name + '\\(([^)]*)\\)\\s*\\{', 'g'); const all = [...body.matchAll(re)]; return all.map(m => { const open = m.index + m[0].length - 1; return body.slice(open + 1, closeOf(body, open)).replace(/\s+/g, ' ').trim(); }); };
+  const sch = fnBody('isSchool');
+  if (sch.length !== 1) { fail(`firestore.rules defines isSchool() ${sch.length} times (exactly once: the school-accounts gate). Without it every student rule is open to any Google account`); return; }
+  if (sch[0] !== SCHOOL_GATE_BODY) fail(`the body of isSchool() is not the pinned one (SCHOOL_GATE_BODY: a verified email, lower case, the anchored @seq.org pattern, OR an allow-list entry that is exactly true behind exists()). Found: ${sch[0].slice(0, 220)}`);
+  const pm = fnBody('pmOwner');
+  if (pm.length !== 1 || pm[0] !== 'return isSchool() && request.auth.uid == userId;') fail(`pmOwner(userId) must be defined once as "return isSchool() && request.auth.uid == userId;" (this check counts it as the gate); found ${JSON.stringify(pm)}`);
+  const uses = (body.match(/isSchool\(\)/g) || []).length - 1;
+  if (uses !== SCHOOL_GATE_USES) fail(`firestore.rules uses isSchool() ${uses} times; pinned at ${SCHOOL_GATE_USES} (6 class-wide reads + 11 student writes + the song request's create and own read + the song files' 3 reads and the counter's create and raise). A new student rule needs the gate too: add it, then re-pin SCHOOL_GATE_USES and SCHOOL_GATED on purpose`);
+  /* Every match block, with its own text (nested match blocks taken out). */
+  const blocks = [];
+  const walk = (t, prefix) => {
+    const re = /match\s+(\/[^\s{]*(?:\{[^}]*\}[^\s{]*)*)\s*\{/g; let m, own = '', last = 0;
+    while ((m = re.exec(t))) { const open = m.index + m[0].length - 1, close = closeOf(t, open); own += t.slice(last, m.index); last = close + 1; walk(t.slice(open + 1, close), prefix + m[1]); re.lastIndex = close + 1; }
+    blocks.push({ path: prefix.replace(/^\/databases\/\{database\}\/documents/, ''), own: own + t.slice(last) });
+  };
+  walk(body, '');
+  const splitTop = (e, op) => { const out = []; let d = 0, q = null, s = 0; for (let i = 0; i < e.length; i++) { const c = e[i]; if (q) { if (c === q && e[i - 1] !== '\\') q = null; continue; } if (c === "'" || c === '"') { q = c; continue; } if ('([{'.includes(c)) d++; else if (')]}'.includes(c)) d--; else if (!d && e.startsWith(op, i)) { out.push(e.slice(s, i)); s = i + op.length; i += op.length - 1; } } out.push(e.slice(s)); return out.map(x => x.trim()); };
+  const wrapped = e => { if (e[0] !== '(') return false; let d = 0; for (let i = 0; i < e.length; i++) { if (e[i] === '(') d++; else if (e[i] === ')' && !--d) return i === e.length - 1; } return false; };
+  /* The gate a condition puts in front of every account: 'school', 'teacher', 'signed', 'false', several joined by '|', or null (no gate). */
+  const gateOf = e => {
+    e = e.trim();
+    const alts = splitTop(e, '||');
+    if (alts.length > 1) { const ks = alts.map(gateOf); return ks.includes(null) ? null : [...new Set(ks)].sort().join('|'); }
+    if (wrapped(e)) return gateOf(e.slice(1, -1));
+    const cs = splitTop(e, '&&');
+    if (cs.length > 1) { const ks = cs.map(gateOf).filter(Boolean); for (const k of ['school', 'teacher', 'signed', 'false']) if (ks.includes(k)) return k; return ks[0] || null; }
+    return e === 'isSchool()' || e === 'pmOwner(userId)' ? 'school' : e === 'isTeacher()' ? 'teacher' : e === 'isSignedIn()' ? 'signed' : e === 'false' ? 'false' : null;
+  };
+  const gated = [], open = [];
+  let allows = 0;
+  for (const b of blocks) for (const a of b.own.matchAll(/allow\s+([a-z, ]+?)\s*:\s*if\s+([\s\S]*?);/g)) {
+    allows++;
+    const key = `${b.path} ${a[1].replace(/\s+/g, '')}`, g = gateOf(a[2]);
+    if (g && g.split('|').includes('school')) gated.push(key);
+    const ungated = !g || g.split('|').includes('signed');
+    if (ungated && !SCHOOL_GATE_EXCEPTIONS[key]) open.push(`${key}: if ${a[2].replace(/\s+/g, ' ').trim().slice(0, 90)}`);
+    if (!ungated && SCHOOL_GATE_EXCEPTIONS[key]) fail(`${key} is listed in SCHOOL_GATE_EXCEPTIONS but is gated now: take it off the list`);
+  }
+  for (const k of Object.keys(SCHOOL_GATE_EXCEPTIONS)) if (!blocks.some(b => [...b.own.matchAll(/allow\s+([a-z, ]+?)\s*:/g)].some(a => `${b.path} ${a[1].replace(/\s+/g, '')}` === k))) fail(`SCHOOL_GATE_EXCEPTIONS lists "${k}", which firestore.rules no longer has: take it off the list`);
+  if (open.length) fail(`${open.length} allow rule(s) let an account through with no isSchool(), isTeacher() or pmOwner() in front: ${open.join(' · ')}. Every class-wide read and student write needs isSchool(); a rule that must be open goes in SCHOOL_GATE_EXCEPTIONS with its reason`);
+  const want = [...SCHOOL_GATED].sort(), have = [...gated].sort();
+  const lost = want.filter(k => !have.includes(k)), extra = have.filter(k => !want.includes(k));
+  if (lost.length || extra.length) fail(`the allow rules a school account passes differ from SCHOOL_GATED: ${lost.length ? 'no longer gated by isSchool() (or gone): ' + lost.join(', ') : ''}${lost.length && extra.length ? '; ' : ''}${extra.length ? 'new: ' + extra.join(', ') : ''}. If this is on purpose, re-pin SCHOOL_GATED (and SCHOOL_GATE_USES) and tell Jonathan to paste the rules`);
+  if (!bad) ok(`firestore.rules: isSchool() defined once with the pinned body, used ${uses} times (pinned); ${gated.length} of ${allows} allow rules are school-gated, exactly the pinned list; the other ${allows - gated.length} are teacher-only except the ${Object.keys(SCHOOL_GATE_EXCEPTIONS).length} stated accessRequests exceptions; no paste-2 file and no tracked file names one`);
 }
 
 function checkSiteErrors() {
@@ -17997,7 +18070,7 @@ function checkSiteErrors() {
 
   // 5. who may do what
   const allows = [...block.matchAll(/allow ([a-z, ]+):\s*if\s+([^\n;]*)/g)].map(x => [x[1].replace(/\s+/g, ''), x[2].trim()]);
-  /* create: the rules' gate (rulesGate: isSignedIn() today, isSchool() after the school-accounts paste 2). */
+  /* create: the rules' gate (rulesGate: isSchool() since the school-accounts paste 2 moved into firestore.rules, 2026-11-14). */
   const gate = rulesGate(read('firestore.rules'));
   const want = [['create', gate], ['read,delete', 'isTeacher()']];
   if (JSON.stringify(allows) !== JSON.stringify(want)) fail(`the siteErrors block must allow exactly "create: if ${gate} && …" and "read, delete: if isTeacher()" — found ${JSON.stringify(allows)}`);
@@ -18872,7 +18945,7 @@ function checkPracticeMinutes(i18nTable) {
       if (/pm\.tileRank|pm-rank\b|rankInfo|rankTile/.test(engNoComments)) fail('practice-minutes.js draws a class rank on My progress again (pm.tileRank / .pm-rank / rankTile): removed 2026-11-13, the own-weeks line (pm.ownWeeks) took its place');
       if (!/function ownWeeksHtml\(/.test(engNoComments) || !/\+ ownWeeksHtml\(w\.id\)/.test(engNoComments)) fail("practice-minutes.js: My progress must draw the own-weeks line (ownWeeksHtml(w.id) after the tiles) — this week against the student's own last and best week (2026-11-13)");
     }
-    /* read and create/update: the rules' gate (rulesGate: isSignedIn() today, isSchool() after the school-accounts paste 2). */
+    /* read and create/update: the rules' gate (rulesGate: isSchool() since the school-accounts paste 2 moved into firestore.rules, 2026-11-14). */
     const GATE = rulesGate(rules);
     const RB_SHIPPED = "match /rankBoard/{tag} { allow read: if isSchool(); allow create, update: if isSchool() && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id && request.resource.data.keys().hasOnly(['seconds']) && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 400 * dailyCapSeconds(); }";
     const rbMatches = (strip(rules).match(/match\s+\/rankBoard\b/g) || []).length;
@@ -19238,7 +19311,7 @@ function checkPracticeMinutes(i18nTable) {
   checkPrivacyNotice(i18nTable);
   checkSiteErrors();
   checkWeekendStreaks();
-  checkRulesPaste2();
+  checkRulesSchoolGate();
   checkSongRequests();
   checkSongFilesLoader();
   checkSongFilesConsole();

@@ -43,10 +43,10 @@
      # firebase.json:  { "firestore": { "rules": "firestore.rules" }, "emulators": { "firestore": { "port": 8089 }, "ui": { "enabled": false } } }
      npx firebase emulators:exec --only firestore --project demo-gc "node rules-core-test.mjs firestore.rules --port 8089 --breaks"
    Exit 0 = every case passed on the real rules (and, with --breaks, every break was caught).
-   Two rules texts (2026-11-13): run it once with firestore.rules (PUBLISHED, paste 1: no isSchool()) and once with
-   firestore.rules.paste2 (not published: isSchool() gates the class-wide reads and student writes). The text given
-   decides the gate a student passes, which sections run (the isSchool() ones only on paste 2) and which breaks apply;
-   GitHub runs both (.github/workflows/rules.yml).
+   One rules text since 2026-11-14 (paste-2 day): firestore.rules, where isSchool() gates the class-wide reads and
+   student writes; a text without isSchool() fails at once (0 passed, 1 failed). Until then a second file held that
+   paste and this tool ran on both; the cases that pinned the older published text ("today (paste 1): …", 4 of them)
+   now state the refusal, and every break applies.
    The last line of each part is the summary GitHub prints: "✓ firestore.rules: N passed, 0 failed" and
    "✓ K of K breaks caught". */
 import { initializeTestEnvironment, assertSucceeds, assertFails } from '@firebase/rules-unit-testing';
@@ -59,11 +59,9 @@ const portAt = ARGV.indexOf('--port');
 const which = ARGV.find((a, i) => !a.startsWith('--') && i !== portAt + 1) || 'firestore.rules';
 const PORT = (portAt >= 0 && +ARGV[portAt + 1]) || 8089;
 const RULES = readFileSync(which, 'utf8');
-/* Two rules texts are tested (2026-11-13): firestore.rules, the PUBLISHED one (paste 1: no isSchool()), and
-   firestore.rules.paste2, not published yet (every class-wide read and student write gated by isSchool()). Which one
-   this run has decides the gate a student passes (G) and whether the isSchool() sections and breaks run. */
-const SCHOOL = /function isSchool\(\)/.test(RULES);
-const G = SCHOOL ? 'isSchool()' : 'isSignedIn()';
+/* One rules text since 2026-11-14 (paste-2 day): firestore.rules, with every class-wide read and student write gated by
+   isSchool(). A text without isSchool() is refused at once, so an edit that drops the gate cannot pass as older rules. */
+if (!/function isSchool\(\)/.test(RULES)) { console.log(`\n✗ ${which} has no isSchool() (the school-accounts gate, in firestore.rules since 2026-11-14): 0 passed, 1 failed`); process.exit(1); }
 const TEACHER = 'jhoffman@seq.org';
 
 async function suite(rulesText, quiet) {
@@ -186,7 +184,7 @@ async function suite(rulesText, quiet) {
   await admin(db => db.doc('config/class').set({ paused: false, gamesEnabled: true, configVersion: 5 }));
   await t('a signed-in student reads it (loadClassConfig)', () => A.doc('config/class').get(), true);
   await t('the teacher reads it', () => T.doc('config/class').get(), true);
-  await t(SCHOOL ? 'an account with the teacher\'s email, unverified, cannot read it (paste 2: not a verified school address)' : 'today (paste 1): an account with the teacher\'s email, unverified, still reads it (any signed-in account does)', () => FAKES[0][1].doc('config/class').get(), !SCHOOL);
+  await t('an account with the teacher\'s email, unverified, cannot read it (not a verified school address; until 2026-11-14 the published text let it read)', () => FAKES[0][1].doc('config/class').get(), false);
   await t('signed out cannot read it', () => N.doc('config/class').get(), false);
   await t('a student cannot list the config collection', () => A.collection('config').get(), false);
   say('== config/class: only the teacher writes');
@@ -406,15 +404,7 @@ async function suite(rulesText, quiet) {
   await t('the teacher cannot delete a rankBoard doc', () => T.doc('rankBoard/0123456789abcdef0123456789abcdef').delete(), false);
   await t('the teacher cannot write a rankBoard doc (no tag of their own)', () => T.doc('rankBoard/0123456789abcdef0123456789abcdef').set({ seconds: 0 }), false);
 
-  if (!SCHOOL) {
-    /* Paste 1 (published): no isSchool() yet. An outside account still reads and writes as any signed-in account. */
-    say('== paste 1 (no isSchool()): an outside account is not refused yet');
-    const OUT1 = ctx('outside1', { email: 'test8@gmail.example', email_verified: true });
-    await admin(db => db.doc('config/class').set({ paused: false }));
-    await t('today (paste 1): an outside account reads config/class', () => OUT1.doc('config/class').get(), true);
-    await t('today (paste 1): an outside account writes its own progress', () => OUT1.doc('progress/outside1').set({ name: 'Test 8' }, { merge: true }), true);
-    await t('today (paste 1): an outside account reads the Top 5 board', () => OUT1.collection('weekBoard').get(), true);
-  } else {
+  {
     /* ── isSchool(): who reads the class-wide documents (2026-11-13) ──── */
     const SCHOOL_READS = [
       ['config/class', db => db.doc('config/class').get()],
@@ -425,6 +415,13 @@ async function suite(rulesText, quiet) {
       ['the class rank (rankBoard list)', db => db.collection('rankBoard').get()],
     ];
     await admin(async db => { await db.doc('config/class').set({ paused: false }); await db.doc('liveQuiz/current').set({ state: 'lobby', sessionId: 's9', qIndex: -1 }); await db.doc('micTakesMeta/count').set({ n: 1 }); await db.doc('config/access').set({ allow: { allowedU: true, notTrueU: 'yes' } }); });
+    /* Until 2026-11-14 the published text had no isSchool(), and these three read "today (paste 1): an outside account
+       reads / writes …" (allowed). Since paste 2 moved into firestore.rules they state the refusal. */
+    say('== isSchool(): an outside account that is not on the list (the three former "today (paste 1)" cases)');
+    const OUT1 = ctx('outside1', { email: 'test8@gmail.example', email_verified: true });
+    await t('an outside account not on the list cannot read config/class', () => OUT1.doc('config/class').get(), false);
+    await t('an outside account not on the list cannot write its own progress', () => OUT1.doc('progress/outside1').set({ name: 'Test 8' }, { merge: true }), false);
+    await t('an outside account not on the list cannot read the Top 5 board', () => OUT1.collection('weekBoard').get(), false);
     const readsFor = async (label, uid, token, ok) => {
       const db = ctx(uid, token);
       for (const [what, fn] of SCHOOL_READS) await t(`${label}: ${ok ? 'reads' : 'cannot read'} ${what}`, () => fn(db, uid), ok);
@@ -528,7 +525,7 @@ async function suite(rulesText, quiet) {
 
 /* Each break: [name, old text, new text, …]. The old text must occur exactly once in the rules file. */
 const PROGRESS_TEACHER = '      allow read: if isTeacher();\n    }\n\n    /* Class-wide';
-const CONFIG_BLOCK = 'match /config/class {\n      allow read:  if isSchool();\n      allow write: if isTeacher();\n    }';   // isSchool() here and in BREAKS below stands for the gate G (see ACTIVE_BREAKS)
+const CONFIG_BLOCK = 'match /config/class {\n      allow read:  if isSchool();\n      allow write: if isTeacher();\n    }';
 const BREAKS = [
   ['progress: the owner check dropped (any signed-in account reads and writes any doc)', 'allow read, write: if isSchool() && request.auth.uid == userId;', 'allow read, write: if isSchool();'],
   ['progress: any signed-in account may read', PROGRESS_TEACHER, '      allow read: if isTeacher();\n      allow read: if isSignedIn();\n    }\n\n    /* Class-wide'],
@@ -598,11 +595,9 @@ const BREAKS = [
   ['a catch-all read for signed-in accounts', 'service cloud.firestore {\n  match /databases/{database}/documents {\n', 'service cloud.firestore {\n  match /databases/{database}/documents {\n    match /{document=**} { allow read: if request.auth != null; }\n'],
 ];
 
-/* Paste 1 has no isSchool(): the breaks of its function and of the reads / writes it gates do not apply there; in every
-   other break "isSchool()" stands for the gate G (isSignedIn() on paste 1). */
-const SCHOOL_ONLY = n => /^isSchool\(\)|left on isSignedIn\(\)/.test(n);
-const ACTIVE_BREAKS = BREAKS.filter(b => SCHOOL || !SCHOOL_ONLY(b[0])).map(b => b.map((x, i) => i === 0 ? x : x.split('isSchool()').join(G)));
-console.log(`== rules-core-test: ${which} on the emulator at 127.0.0.1:${PORT} (${SCHOOL ? 'paste 2: isSchool() gates the class-wide reads and student writes' : 'paste 1, published: no isSchool()'}; ${ACTIVE_BREAKS.length} of ${BREAKS.length} breaks apply)`);
+/* Every break applies (until 2026-11-14 a text without isSchool() skipped the gate's breaks; there is no such text now). */
+const ACTIVE_BREAKS = BREAKS;
+console.log(`== rules-core-test: ${which} on the emulator at 127.0.0.1:${PORT} (isSchool() gates the class-wide reads and student writes; ${ACTIVE_BREAKS.length} breaks)`);
 const real = await suite(RULES, false);
 console.log(`\n${real.fail ? '✗' : '✓'} ${which}: ${real.pass} passed, ${real.fail} failed`);
 let missed = 0;

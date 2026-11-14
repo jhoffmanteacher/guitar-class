@@ -22,10 +22,11 @@
                  Monday (next week accepted), a day and a minute before it (refused); the year's end:
                  2026-W53 (a real week: 2026 has 53), 2027-W01, and 2027-W53 (no such week: refused), W00, W54.
 
-   Two rules texts (2026-11-13): run it with firestore.rules (published: any signed-in account may ask) and with
-   firestore.rules.paste2 (not published: only isSchool() accounts ask and read their own). The section "who may ask"
-   checks a school account, an outside account the teacher allowed, an outside account not allowed and an unverified
-   @seq.org address; the last two are "today: allowed" on the published text and refused on paste 2.
+   One rules text since 2026-11-14 (paste-2 day): firestore.rules, where only isSchool() accounts ask and read their
+   own; a text without isSchool() fails at once (0 passed, 1 failed). The section "who may ask" checks a school
+   account, an outside account the teacher allowed, an outside account not allowed and an unverified @seq.org address;
+   the last two are refused (4 cases; until 2026-11-14 they also ran as "today (published): allowed" on the older
+   published text).
 
    --breaks  runs every case against broken copies of the rules, made in memory from the file given; each break
              must turn at least one case red. Exit 1 if any is not caught.
@@ -52,12 +53,11 @@ const which = ARGV.find((a, i) => !a.startsWith('--') && i !== portAt + 1) || 'f
 const PORT = (portAt >= 0 && +ARGV[portAt + 1]) || 8089;
 const RULES = readFileSync(which, 'utf8');
 const TEACHER = 'jhoffman@seq.org';
-/* Two rules texts are tested (2026-11-13), as by tools/rules-core-test.mjs: firestore.rules, the PUBLISHED one (any
-   signed-in account may ask), and firestore.rules.paste2, not published yet (the create and the student's own read
-   gated by isSchool(): a verified @seq.org address, or an outside account the teacher allowed in config/access).
-   The text given decides the gate (G), what an outside account that is not allowed gets, and which breaks apply. */
-const SCHOOL = /function isSchool\(\)/.test(RULES);
-const G = SCHOOL ? 'isSchool()' : 'isSignedIn()';
+/* One rules text since 2026-11-14 (paste-2 day), as for tools/rules-core-test.mjs: firestore.rules, where the create
+   and the student's own read are gated by isSchool() (a verified @seq.org address, or an outside account the teacher
+   allowed in config/access). G is that gate. A text without isSchool() is refused. */
+if (!/function isSchool\(\)/.test(RULES)) { console.log(`\n✗ ${which} has no isSchool() (the school-accounts gate, in firestore.rules since 2026-11-14): 0 passed, 1 failed`); process.exit(1); }
+const G = 'isSchool()';
 const NOW_FN = 'function songRequestNow() { return request.time; }';
 
 /* ISO week ('2026-W47') of a moment, by its UTC date (practice minutes' weekIdOf, in UTC). */
@@ -164,7 +164,7 @@ async function suite(rulesText, quiet) {
     await t('the teacher counts the waiting ones (the badge\'s query)', () => T.collection('songRequests').where('state', '==', 'asked').limit(100).get(), true);
     await t('the teacher\'s email with email_verified false cannot list', () => FAKE.collection('songRequests').get(), false);
 
-    say(`== who may ask (${SCHOOL ? 'paste 2: isSchool()' : 'published: isSignedIn()'})`);
+    say('== who may ask (isSchool())');
     const OUT = ctx('outsideO', { email: 'test.outside@gmail.example', email_verified: true });
     const OK_OUT = ctx('outsideK', { email: 'test.allowed@gmail.example', email_verified: true });
     const UNVER = ctx('uidU', { email: 'uidU@seq.org', email_verified: false });
@@ -173,12 +173,12 @@ async function suite(rulesText, quiet) {
     await t('…and lists its own', () => S.uidF.collection('songRequests').where('uid', '==', 'uidF').get(), true);
     await t(`an outside account the teacher allowed (config/access) asks`, () => R(OK_OUT, 'outsideK_' + W).set(doc('outsideK', W, { email: 'test.allowed@gmail.example', period: 'CAS' })), true);
     await t('…and lists its own', () => OK_OUT.collection('songRequests').where('uid', '==', 'outsideK').get(), true);
-    await t(`${SCHOOL ? 'refused' : 'today (published): allowed'}: an outside account NOT allowed (its entry is false) asks`, () => R(OUT, 'outsideO_' + W).set(doc('outsideO', W, { email: 'test.outside@gmail.example' })), !SCHOOL);
-    await t(`${SCHOOL ? 'refused' : 'today (published): allowed'}: an @seq.org address that is not verified asks`, () => R(UNVER, 'uidU_' + W).set(doc('uidU', W)), !SCHOOL);
+    await t(`refused: an outside account NOT allowed (its entry is false) asks`, () => R(OUT, 'outsideO_' + W).set(doc('outsideO', W, { email: 'test.outside@gmail.example' })), false);
+    await t(`refused: an @seq.org address that is not verified asks`, () => R(UNVER, 'uidU_' + W).set(doc('uidU', W)), false);
     await env.withSecurityRulesDisabled(c => c.firestore().doc('songRequests/outsideO_' + W).set(Object.assign(doc('outsideO', W), { createdAt: new Date() })));
-    await t(`${SCHOOL ? 'refused' : 'today (published): allowed'}: the outside account NOT allowed reads its own request`, () => OUT.collection('songRequests').where('uid', '==', 'outsideO').get(), !SCHOOL);
+    await t(`refused: the outside account NOT allowed reads its own request`, () => OUT.collection('songRequests').where('uid', '==', 'outsideO').get(), false);
     await env.withSecurityRulesDisabled(c => c.firestore().doc('config/access').delete());
-    await t(`${SCHOOL ? 'refused' : 'today (published): allowed'}: with no config/access at all, the allowed account's own read`, () => OK_OUT.collection('songRequests').where('uid', '==', 'outsideK').get(), !SCHOOL);
+    await t(`refused: with no config/access at all, the allowed account's own read`, () => OK_OUT.collection('songRequests').where('uid', '==', 'outsideK').get(), false);
     await t('the teacher still reads all (no allow list needed)', () => T.collection('songRequests').get(), true);
 
     say('== update and delete: only the teacher, only the state and the note');
@@ -267,10 +267,8 @@ const BREAKS = [
   ['the server time not required', "            && request.resource.data.createdAt == request.time\n", ''],
   ['a student may create any state', "            && request.resource.data.state == 'asked';", ';'],
   ['every signed-in account reads every request', `allow read: if ${G} && resource.data.uid == request.auth.uid;`, 'allow read: if isSignedIn();'],
-  ...(SCHOOL ? [
-    ['paste 2: the create gate back to isSignedIn() (an outside account not allowed may ask)', '      allow create: if isSchool()\n            && request.resource.data.keys().hasOnly([\'uid\', \'name\', \'email\', \'period\', \'week\'', '      allow create: if isSignedIn()\n            && request.resource.data.keys().hasOnly([\'uid\', \'name\', \'email\', \'period\', \'week\''],
-    ['paste 2: the own-read gate back to isSignedIn()', 'allow read: if isSchool() && resource.data.uid == request.auth.uid;', 'allow read: if isSignedIn() && resource.data.uid == request.auth.uid;'],
-  ] : []),
+  ['the create gate back to isSignedIn() (an outside account not allowed may ask)', '      allow create: if isSchool()\n            && request.resource.data.keys().hasOnly([\'uid\', \'name\', \'email\', \'period\', \'week\'', '      allow create: if isSignedIn()\n            && request.resource.data.keys().hasOnly([\'uid\', \'name\', \'email\', \'period\', \'week\''],
+  ['the own-read gate back to isSignedIn()', 'allow read: if isSchool() && resource.data.uid == request.auth.uid;', 'allow read: if isSignedIn() && resource.data.uid == request.auth.uid;'],
   ['the teacher may change any field', ".diff(resource.data).affectedKeys().hasOnly(['state', 'note'])", ".diff(resource.data).affectedKeys().size() >= 0"],
   ['the teacher may set any state', "request.resource.data.state in ['asked', 'adding', 'declined']\n            && (!('note'", "request.resource.data.state is string\n            && (!('note'"],
   ['the teacher may not delete (a tightening must show too)', "allow read, delete: if isTeacher();\n      allow update: if isTeacher()\n            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['state', 'note'])", "allow read: if isTeacher();\n      allow update: if isTeacher()\n            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['state', 'note'])"],

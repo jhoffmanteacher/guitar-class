@@ -24,10 +24,10 @@
                  and of a year (UTC): 2026-11-30 23:59 (2026-11 allowed, 2026-12 refused), 2026-12-01 00:00 (the
                  reverse), 2026-12-31 23:59 and 2027-01-01 00:00 (the year rolls).
 
-   Two rules texts (as every rules tool since 2026-11-13): run it with firestore.rules (published: any signed-in
-   account reads and counts) and with firestore.rules.paste2 (not published: only isSchool() accounts). The section
-   "who may read" checks a school account, an outside account the teacher allowed, an outside account not allowed and
-   an unverified @seq.org address; the last two are "today: allowed" on the published text and refused on paste 2.
+   One rules text since 2026-11-14 (paste-2 day): firestore.rules, where only isSchool() accounts read and count; a
+   text without isSchool() fails at once (0 passed, 1 failed). The section "who may read" checks a school account, an
+   outside account the teacher allowed, an outside account not allowed and an unverified @seq.org address; the last
+   two are refused (3 cases; until 2026-11-14 they also ran as "today: allowed" on the older published text).
 
    --breaks  runs every case against broken copies of the rules, made in memory from the file given; each break
              must turn at least one case red. Exit 1 if any is not caught.
@@ -54,8 +54,9 @@ const which = ARGV.find((a, i) => !a.startsWith('--') && i !== portAt + 1) || 'f
 const PORT = (portAt >= 0 && +ARGV[portAt + 1]) || 8089;
 const RULES = readFileSync(which, 'utf8');
 const TEACHER = 'jhoffman@seq.org';
-const SCHOOL = /function isSchool\(\)/.test(RULES);
-const G = SCHOOL ? 'isSchool()' : 'isSignedIn()';
+/* One rules text since 2026-11-14: firestore.rules, with isSchool() as the student gate (G). A text without it is refused. */
+if (!/function isSchool\(\)/.test(RULES)) { console.log(`\n✗ ${which} has no isSchool() (the school-accounts gate, in firestore.rules since 2026-11-14): 0 passed, 1 failed`); process.exit(1); }
+const G = 'isSchool()';
 const NOW_FN = 'function songFilesNow() { return request.time; }';
 const PIECE = 900000;
 
@@ -118,9 +119,9 @@ async function suite(rulesText, quiet) {
     await t('signed out cannot read a piece', () => P(N, 'seeded', 0).get(), false);
     await t('signed out cannot read the counter', () => U(N, M).get(), false);
     await t('an outside account the teacher allowed reads a piece', () => P(OUT_OK, 'seeded', 0).get(), true);
-    await t(SCHOOL ? 'paste 2: an outside account not allowed cannot read a piece' : 'today: an outside account not allowed reads a piece (any signed-in account)', () => P(OUT_NO, 'seeded', 0).get(), !SCHOOL);
-    await t(SCHOOL ? 'paste 2: an unverified @seq.org address cannot read a file' : 'today: an unverified @seq.org address reads a file', () => F(UNVER, 'seeded').get(), !SCHOOL);
-    await t(SCHOOL ? 'paste 2: an outside account not allowed cannot raise the counter' : 'today: an outside account not allowed raises the counter', () => U(OUT_NO, M).set({ bytes: FV.increment(5) }, { merge: true }), !SCHOOL);
+    await t('an outside account not allowed cannot read a piece', () => P(OUT_NO, 'seeded', 0).get(), false);
+    await t('an unverified @seq.org address cannot read a file', () => F(UNVER, 'seeded').get(), false);
+    await t('an outside account not allowed cannot raise the counter', () => U(OUT_NO, M).set({ bytes: FV.increment(5) }, { merge: true }), false);
 
     say('== files: the teacher writes, nobody else');
     await t('the teacher writes a file as uploading', () => F(T, 'made-up-song-full-120').set(head({ state: 'uploading' })), true);

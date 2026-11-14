@@ -48,8 +48,9 @@ what GitHub ran green, and what to do when a run cannot finish are standing step
    NOT on main), `feat/song-requests` (it fixes `tools/console-layout-smoke.mjs`'s sidebar pin: that tool fails 4
    checks on main today, known), `feat/catch-up` (one rules line and a console filter), `fix/nearest-strum`,
    `tools/never-blocks`, `tools/a11y-and-drift`, `cl/golden-rebuild`. Ignore `ci-try/*` (trial branches).
-   `firestore.rules` on main holds unpublished add-only blocks (school accounts step 1) and `firestore.rules.paste2`
-   is NOT published: both are known, waiting for Jonathan's paste; not findings.
+   `firestore.rules` on main is the school-accounts paste 2 since 2026-11-14 (one file; the second file is gone).
+   Until Jonathan pastes it the Firebase console runs the Paste A text (`af1166e:firestore.rules`); WORKFLOW.md,
+   "School accounts: paste 2", says whether he has. Known, not a finding.
 5. **Report in ten lines or fewer**, as step 6 says.
 
 ## 1. Find the range

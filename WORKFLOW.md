@@ -228,7 +228,7 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 - [ ] **Private song audio, step 1 is on main with NOTHING switched** (2026-11-14; plan and decisions:
   `Claude outputs/PLAN-private-song-audio-2026-11-13.md`, build notes `Claude outputs/private-audio-step1/DETAILS.md`).
   The loader (`app/songfiles.js`), the player hooks, Manage → "Song files" and the tools are live; `SONG_FILES` is
-  empty. Its rules block (`songFiles`, `songFilesUsage`) is in both rules files and needs Jonathan's paste. Limits
+  empty. Its rules block (`songFiles`, `songFilesUsage`) went live with Paste A on 2026-11-14 (any signed-in account reads); paste 2 narrows it to school accounts. Limits
   he must know: rules cannot count reads, so the 6 GiB month count guards honest use only; upload no real song
   before paste 2 (school accounts) is published. Step 2: switch the 18 practice-card files (the switch commit also
   removes them from `audio/`, or a dated warning if he wants a fallback week); the 8 Watchtower files wait for a
@@ -236,16 +236,17 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
   are in `Claude outputs/private-audio-step1/step2-journey-harness/`).
 
 - [ ] **School accounts: paste 2** (Jonathan, 2026-11-13: only school accounts, or outside accounts he allows, use
-  the class data). `firestore.rules` is the published text PLUS add-only blocks that wait for one paste, "Paste A" (NOT
-  published as of 2026-11-13: the allow list `config/access` and the requests `accessRequests`, the `songRequests`
-  block, and the teacher's read of `minutes/{uid}/days`; build the paste file from the repo on the day). Paste 2 waits in `firestore.rules.paste2` (first line "NOT PUBLISHED"; check
-  `1dt` pins it as the published rules plus the `isSchool()` gate; GitHub's rules run tests both files). Order:
-  Paste A published (Jonathan); the console's Manage block, the access screen and the save-path flags shipped; Jonathan
-  allows every outside roster account (the count line must read "0 would be locked out" unless he means it); THEN
-  on paste-2 day ONE commit moves the text of `firestore.rules.paste2` (without its first line) into
-  `firestore.rules` and deletes the `.paste2` file, the full `node tools/checks.mjs` passes, and he pastes it.
-  The reads-only variant was dropped (it let a refused account write its progress before the screen); its draft
-  stays in `Claude outputs/` as a record.
+  the class data). Done 2026-11-14: Jonathan published Paste A (the allow list `config/access`, the requests
+  `accessRequests`, the `songRequests` and `songFiles` blocks, the teacher's read of `minutes/{uid}/days`) and set
+  the allow list in Manage → "Accounts by sign-in domain"; it saved and reads "0 would be locked out". The paste-2
+  text (every class-wide read and student write gated by `isSchool()`) is now `firestore.rules` itself, one file:
+  its own second file is deleted, and check `1dt` pins `isSchool()`, its use count and the list of gated rules.
+  The ONE remaining step is Jonathan's: paste `firestore.rules` into the Firebase console (Firestore → Rules →
+  Publish), then three sign-in tests: a school student (uses the site as before), an allowed outside account (uses
+  the site), a signed-out visitor (the sign-in page). Until he does, the console runs the Paste A text. To undo
+  after the paste: re-publish the Paste A text, kept at `Claude outputs/firestore-rules-PASTE-A-2026-11-13.txt` and in
+  git at `af1166e:firestore.rules`. The reads-only variant was dropped (it let a refused account write its progress
+  before the screen); its draft stays in `Claude outputs/` as a record.
 
 - [ ] **2026-11-06 — Friday check: left for Jonathan.** Done 2026-11-07: "No streak right now" (`93cb1dc`); the My
   progress pin gap (`pm-sim` section 18, `PM_SIM_PIN` 285 -> 302); ca-43 is a board limit at fret 12, not a drill bug

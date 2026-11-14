@@ -48,18 +48,18 @@ rules_version = '2';
                       writes and reads their own; the teacher reads weeks
                       (2026-11-06) and days (2026-11-13), nothing else
      rankBoard/{tag}, weekBoard/{tag}  the class rank and the Top 5, keyed by a private
-                      name tag (minutes/{uid}/meta/board), readable by every signed-in
-                      account. minutesBoard/{uid} has NO block (denied).
-     siteErrors/*     the anonymous error log (2026-11-13): any signed-in
+                      name tag (minutes/{uid}/meta/board), readable by every school
+                      account (isSchool(), 2026-11-13). minutesBoard/{uid} has NO block (denied).
+     siteErrors/*     the anonymous error log (2026-11-13): any school
                       account creates, the teacher reads and deletes
      songRequests/*   a student's song request, one per week (2026-11-13):
-                      the student creates and reads their own, the teacher
-                      reads, sets the state and deletes
+                      a school account creates and reads its own, the
+                      teacher reads, sets the state and deletes
      songFiles/*      song recordings behind the sign-in (2026-11-14), in
-                      pieces (songFiles/{id}/pieces/{i}): any signed-in account reads,
+                      pieces (songFiles/{id}/pieces/{i}): a school account reads,
                       only the teacher writes and deletes
      songFilesUsage/{YYYY-MM}  the month's count of song downloads:
-                      any signed-in account reads it and raises it; the teacher resets it
+                      a school account reads it and raises it; the teacher resets it
 
    Anything not matched below is denied by default. Do not add a catch-all.
    ══════════════════════════════════════════════════════════════════════ */
@@ -83,9 +83,56 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    /* ── SCHOOL ACCOUNTS ONLY (2026-11-13, Jonathan) ────────────────────
+       Who may read the class-wide documents: a signed-in account with a
+       VERIFIED @seq.org address (every student and the teacher), OR an
+       account the teacher allowed in the console (config/access: CAS
+       students on outside accounts, his own test accounts). This reverses
+       the earlier "no domain rule": before, any Google account could read
+       them.
+
+       The address check comes first, so a school account never costs the
+       allow-list read; only an outside account pays one document read
+       (config/access) per request. The pattern is matched against the
+       whole address (matches() is anchored; ^ and $ say so too), in lower
+       case, with the dot escaped: a@seq.org.evil.com, a@notseq.org,
+       a+seq.org@gmail.com and a@seq-org are all refused. An unverified
+       address, a missing email claim and an anonymous account are refused
+       unless their uid is on the list. A missing config/access means
+       "nobody extra" (exists() first, so there is no evaluation error), and
+       only an entry whose value is exactly true counts.
+
+       WRITES TOO: every student-side create and write below also needs
+       isSchool() (progress, minutes, the boards, the live-quiz answers,
+       issue reports, mic takes and the take counter, the error log). The
+       one door left to any signed-in account is accessRequests/{own uid}.
+
+       THIS TEXT IS NOT PUBLISHED YET: it lives in firestore.rules.paste2
+       until paste-2 day, when one commit moves it into firestore.rules
+       (dropping the first line) and Jonathan pastes it.
+
+       SHIPPING ORDER (see the paste-2 note in the commit and the report):
+       paste 1 (config/access + accessRequests) and the console first; the
+       teacher allows the outside accounts already in the roster; the page
+       with the access screen ships; THEN this paste. Pasted before the page
+       handling, an outside account that is not allowed sees a site with no
+       class settings (the cached copy, or none), no live quiz and no boards,
+       with no word why; pasted before the allow list is filled, every CAS
+       student on an outside account is in that state until allowed. */
+    function isSchool() {
+      return request.auth != null
+          && ((request.auth.token.get('email_verified', false) == true
+               && request.auth.token.get('email', '').lower().matches('^[^@]+@seq[.]org$'))
+              || (exists(/databases/$(database)/documents/config/access)
+                  && get(/databases/$(database)/documents/config/access).data.get('allow', {}).get(request.auth.uid, false) == true));
+    }
+
     /* One document per student, keyed by uid.
 
-       A student reads and writes ONLY their own. The teacher gets read —
+       A student reads and writes ONLY their own, and only a school account
+       (isSchool(), 2026-11-13: an outside account the teacher has not
+       allowed creates nothing, so it never appears in the roster; it asks
+       through accessRequests instead). The teacher gets read —
        deliberately NOT write. The dashboard never needs to modify student
        work (pause and archive live in config/class precisely so they
        don't), and withholding write means a compromised teacher session
@@ -93,11 +140,12 @@ service cloud.firestore {
        ever added, it needs `allow delete: if isTeacher()` here, and that
        trade-off should be a deliberate decision rather than a default. */
     match /progress/{userId} {
-      allow read, write: if isSignedIn() && request.auth.uid == userId;
+      allow read, write: if isSchool() && request.auth.uid == userId;
       allow read: if isTeacher();
     }
 
-    /* Class-wide settings. Every signed-in student must read this doc —
+    /* Class-wide settings. Every student must read this doc (a school
+       account: isSchool(), 2026-11-13; before that any signed-in account) —
        app.js loadClassConfig() needs gamesEnabled/gameOverrides for the
        arcade, `paused` for the access hold, and `hiddenActivities` /
        `archivedActivities` / `deletedActivities` to skip any In-Class
@@ -126,7 +174,7 @@ service cloud.firestore {
        guard is there to stop an accident, not an attacker — and only the
        teacher can write this doc at all. */
     match /config/class {
-      allow read:  if isSignedIn();
+      allow read:  if isSchool();
       allow write: if isTeacher();
     }
 
@@ -213,11 +261,11 @@ service cloud.firestore {
     /* ── Live quiz (live-quiz.js) ──────────────────────────────────────
        One doc, rewritten from scratch each game. Only the teacher writes
        it: state, the current question number, the correct answer (written
-       only at reveal) and the running scores. Every signed-in student
+       only at reveal) and the running scores. Every school account
        reads it, which is what makes the game live.
 
        What that exposes: the `scores` map — every player's POINTS, keyed by
-       uid — is readable by any signed-in account. It carries NO NAME
+       uid — is readable by any school account. It carries NO NAME
        (2026-11-05, Jonathan: no per-period minutes tied to a name, readable
        by anyone): names stay in answers/{uid} below (teacher-only), and the
        projected wall, which is the teacher's own screen, builds its
@@ -236,7 +284,7 @@ service cloud.firestore {
        the same reason config/class is: a wildcard would open every future
        document under liveQuiz/ to every signed-in user. */
     match /liveQuiz/current {
-      allow read:  if isSignedIn();
+      allow read:  if isSchool();
       allow write: if isTeacher();
 
       /* One answer doc per student, keyed by uid, overwritten each round.
@@ -296,8 +344,8 @@ service cloud.firestore {
       }
       match /answers/{userId} {
         allow read, delete: if isTeacher();
-        allow get: if isSignedIn() && request.auth.uid == userId;
-        allow create, update: if isSignedIn()
+        allow get: if isSchool() && request.auth.uid == userId;
+        allow create, update: if isSchool()
               && request.auth.uid == userId
               && request.resource.data.uid == request.auth.uid
               && request.resource.data.keys().hasOnly(['uid','name','sessionId','qIndex','choice','ms','at'])
@@ -332,7 +380,7 @@ service cloud.firestore {
        console escapes everything, but a data-validation gap worth closing
        the same way `answers` already is. */
     match /issueReports/{reportId} {
-      allow create: if isSignedIn()
+      allow create: if isSchool()
                     && request.resource.data.uid == request.auth.uid
                     && request.resource.data.keys().hasOnly(
                          ['uid','email','name','message','location','moduleNum','setId','lang','userAgent','createdAt'])
@@ -379,14 +427,14 @@ service cloud.firestore {
                .get('micSampling', {}).get('on', false) == true;
     }
     match /micTakes/{takeId} {
-      allow create, update: if isSignedIn()
+      allow create, update: if isSchool()
                             && takeId.matches(request.auth.uid + '-(coach|nr|pw)')
                             && request.resource.data.uid == request.auth.uid
                             && micSamplingOn();
       allow read, delete:   if isTeacher();
 
       match /chunks/{chunkId} {
-        allow create, update: if isSignedIn()
+        allow create, update: if isSchool()
                               && takeId.matches(request.auth.uid + '-(coach|nr|pw)')
                               && micSamplingOn()
                               && request.resource.data.keys().hasOnly(['i','pcm'])
@@ -397,19 +445,19 @@ service cloud.firestore {
     }
 
     /* How many takes have been collected, so the prompt stops once the
-       teacher's "how many" is reached. Every signed-in student reads it. A
+       teacher's "how many" is reached. Every school account reads it. A
        student may only create it at 1 or add exactly 1, and only to `n`;
        the teacher may set it to anything (Reset counter). A student could
        still add 1 without saving a take — the worst that does is end the
        collection early, which only stops recording. */
     match /micTakesMeta/count {
-      allow read:   if isSignedIn();
+      allow read:   if isSchool();
       allow create: if isTeacher()
-                    || (isSignedIn()
+                    || (isSchool()
                         && request.resource.data.keys().hasOnly(['n'])
                         && request.resource.data.n == 1);
       allow update: if isTeacher()
-                    || (isSignedIn()
+                    || (isSchool()
                         && request.resource.data.keys().hasOnly(['n'])
                         && request.resource.data.n == resource.data.n + 1);
     }
@@ -438,7 +486,7 @@ service cloud.firestore {
        reads these numbers for a grade. */
     function dailyCapSeconds() { return 1200; }
     function pmOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
+      return isSchool() && request.auth.uid == userId;
     }
     match /minutes/{userId}/{document=**} {
       allow read: if pmOwner(userId);
@@ -491,7 +539,7 @@ service cloud.firestore {
        weekBoard/{tag}  { week, period, seconds } — the practice seconds of
        ONE ISO week ('2026-W45') for the student who holds that tag, and their
        class period, so the site can tell a student whether they are in their
-       period's Top 5 this week. Every signed-in account reads the collection
+       period's Top 5 this week. Every school account reads the collection
        (the site queries one week + one period). A write is allowed only when
        the doc id IS the writer's own tag (the rule reads the writer's
        minutes/{uid}/meta/board; a missing doc denies), with exactly those
@@ -526,8 +574,8 @@ service cloud.firestore {
             && request.resource.data.id.matches('^[0-9a-f]{32}$');
     }
     match /weekBoard/{tag} {
-      allow read: if isSignedIn();
-      allow create, update: if isSignedIn()
+      allow read: if isSchool();
+      allow create, update: if isSchool()
             && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id
             && request.resource.data.keys().hasOnly(['week', 'period', 'seconds'])
             && request.resource.data.keys().hasAll(['week', 'period', 'seconds'])
@@ -546,20 +594,20 @@ service cloud.firestore {
        or name is in it, and so the two boards cannot be joined to a person
        (before, this week's and all-time seconds were nearly the same number
        and minutesBoard was keyed by uid, so a plain value match linked a tag
-       to a uid, and the live quiz links a uid to a name). Every signed-in
+       to a uid, and the live quiz links a uid to a name). Every school
        account reads the whole collection (that is how a rank is worked
        out); a write is allowed only under the writer's own tag, with that
        one field, a number from 0 to 400 days of the daily cap. No delete.
        HONEST LIMITS: as weekBoard (a student at DevTools can claim first
        place for themselves; a tag cannot be proven unique, so one account can
        overwrite one other student's entry, and UNLIKE weekBoard the victim's
-       page never repairs this one: it only adds; any Google account that signs
-       in once adds 1 to the total: no domain rule, Jonathan's call). Nothing
+       page never repairs this one: it only adds; any account that signs in once
+       and may write adds 1 to the total). Nothing
        reads this for a grade.
        ⚠ Must be published BEFORE (or with) the site code that writes it. */
     match /rankBoard/{tag} {
-      allow read: if isSignedIn();
-      allow create, update: if isSignedIn()
+      allow read: if isSchool();
+      allow create, update: if isSchool()
             && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id
             && request.resource.data.keys().hasOnly(['seconds'])
             && request.resource.data.seconds is number
@@ -590,8 +638,10 @@ service cloud.firestore {
        within that), so a wrong clock cannot write a day in the future that
        would sort above every real entry.
 
-       Any signed-in account may CREATE one (the logger runs only when someone
-       is signed in). Nobody may update one. Only the teacher reads (the
+       Any school account (isSchool(), 2026-11-13; before that any signed-in
+       account) may CREATE one (the logger runs only when someone is signed
+       in; an outside account that is not allowed is refused once, and its
+       logger stops for that page load). Nobody may update one. Only the teacher reads (the
        Error log view) and deletes ("Delete older than 30 days"); a student
        cannot read the pile back.
 
@@ -613,7 +663,7 @@ service cloud.firestore {
         return stated >= utcDay - duration.value(1, 'd')
             && stated <= utcDay + duration.value(1, 'd');
       }
-      allow create: if isSignedIn()
+      allow create: if isSchool()
             && errorId.matches('^[A-Za-z0-9]{20}$')
             && request.resource.data.keys().hasOnly(['kind', 'message', 'file', 'line', 'col', 'stack', 'page', 'version', 'day', 'lang'])
             && request.resource.data.keys().hasAll(['kind', 'message', 'file', 'line', 'col', 'stack', 'page', 'version', 'day', 'lang'])
@@ -680,14 +730,12 @@ service cloud.firestore {
 
        HONEST LIMITS: one account makes at most one request per week, two at
        a week boundary (the week before or after is accepted for one day).
-       In this published text any signed-in Google account may ask; the
-       school-accounts paste 2 (firestore.rules.paste2) gates the create and
-       the student's read with isSchool(), like every other student rule.
+       Only a school account, or an outside account the teacher allowed,
+       may ask or read its own (isSchool(), like every other student rule).
        The name, title and reason are free text within their caps (the name
        is NOT shown as the student's identity: the console names a request by
        its uid from the roster, else by the email, which the rule ties to the
        sign-in token); the console escapes every value.
-       student-side: becomes isSchool() with the school-accounts paste 2
        ⚠ Must be published BEFORE the site code that writes it (until then
        the page says requests are not open yet). */
     function songRequestNow() { return request.time; }
@@ -702,7 +750,7 @@ service cloud.firestore {
           && songRequestNow() < monday + duration.value(8, 'd');
     }
     match /songRequests/{requestId} {
-      allow create: if isSignedIn()
+      allow create: if isSchool()
             && request.resource.data.keys().hasOnly(['uid', 'name', 'email', 'period', 'week', 'videoId', 'url', 'lyricsOk', 'topicOk', 'why', 'title', 'createdAt', 'state'])
             && request.resource.data.keys().hasAll(['uid', 'name', 'email', 'period', 'week', 'videoId', 'url', 'lyricsOk', 'topicOk', 'why', 'title', 'createdAt', 'state'])
             && request.resource.data.uid == request.auth.uid
@@ -729,7 +777,7 @@ service cloud.firestore {
             && request.resource.data.title.size() <= 80
             && request.resource.data.createdAt == request.time
             && request.resource.data.state == 'asked';
-      allow read: if isSignedIn() && resource.data.uid == request.auth.uid;
+      allow read: if isSchool() && resource.data.uid == request.auth.uid;
       allow read, delete: if isTeacher();
       allow update: if isTeacher()
             && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['state', 'note'])
@@ -794,7 +842,7 @@ service cloud.firestore {
           && int(month[5:7]) == songFilesNow().month();
     }
     match /songFiles/{fileId} {
-      allow read: if isSignedIn();
+      allow read: if isSchool();
       allow create, update: if isTeacher()
             && fileId.matches('^[a-z0-9][a-z0-9-]{0,79}$')
             && request.resource.data.keys().hasOnly(['file', 'bytes', 'sha256', 'pieces', 'pieceBytes', 'durationSec', 'state', 'uploadedAt'])
@@ -818,7 +866,7 @@ service cloud.firestore {
       allow delete: if isTeacher();
 
       match /pieces/{pieceId} {
-        allow read: if isSignedIn();
+        allow read: if isSchool();
         allow create, update: if isTeacher()
               && pieceId.matches('^[0-9]{1,2}$')
               && request.resource.data.keys().hasOnly(['i', 'data'])
@@ -834,14 +882,14 @@ service cloud.firestore {
       }
     }
     match /songFilesUsage/{month} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn()
+      allow read: if isSchool();
+      allow create: if isSchool()
             && songFilesThisMonth(month)
             && request.resource.data.keys().hasOnly(['bytes'])
             && request.resource.data.bytes is int
             && request.resource.data.bytes >= 1
             && request.resource.data.bytes <= 50000000;
-      allow update: if isSignedIn()
+      allow update: if isSchool()
             && songFilesThisMonth(month)
             && request.resource.data.keys().hasOnly(['bytes'])
             && request.resource.data.bytes is int

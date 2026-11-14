@@ -59,9 +59,8 @@ const PORT = +(ARGV[ARGV.indexOf('--port') + 1] || 0) || 8089;
 /* The server checks the day against ITS UTC date: the cases are built from this machine's UTC date. */
 const utcDay = n => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10);
 const RULES = readFileSync(which, 'utf8');
-/* firestore.rules (published, paste 1) or firestore.rules.paste2 (isSchool() gates the create): G is the gate. */
-const SCHOOL = /function isSchool\(\)/.test(RULES);
-const G = SCHOOL ? 'isSchool()' : 'isSignedIn()';
+/* Since 2026-11-14 firestore.rules gates the create with isSchool() (paste 2 moved in). A text without it is refused. */
+if (!/function isSchool\(\)/.test(RULES)) { console.log(`\n✗ ${which} has no isSchool() (the school-accounts gate, in firestore.rules since 2026-11-14): 0 passed, 1 failed`); process.exit(1); }
 
 const FIELDS = ['kind', 'message', 'file', 'line', 'col', 'stack', 'page', 'version', 'day', 'lang'];
 const good = extra => Object.assign({ kind: 'error', message: "Uncaught TypeError: Cannot read properties of undefined (reading 'length')", file: '/app/lesson.js', line: 412, col: 17,
@@ -90,7 +89,7 @@ async function suite(rulesText, quiet) {
 
   say('== siteErrors: who may create');
   await t('signed out: refused', () => col(N).add(good()), false);
-  await t((SCHOOL ? '' : 'today (paste 1), allowed: ') + 'an outside account (not @seq.org, not allowed by the teacher): refused (2026-11-13)', () => col(env.authenticatedContext('outsideX', { email: 'test9@gmail.example', email_verified: true }).firestore()).add(good()), !SCHOOL);
+  await t('an outside account (not @seq.org, not allowed by the teacher): refused (2026-11-13)', () => col(env.authenticatedContext('outsideX', { email: 'test9@gmail.example', email_verified: true }).firestore()).add(good()), false);
   await t('a signed-in student, the exact ten fields (add, the client\'s real write)', () => col(A).add(good()), true);
   await t('…an unhandledrejection doc, in Spanish, with an empty file and stack (line 0, col 0)', () => col(B).add(good({ kind: 'rejection', file: '', stack: '', line: 0, col: 0, lang: 'es', page: '#' })), true);
   await t('the teacher\'s own console may log too', () => col(T).add(good({ page: 'console #' })), true);
@@ -175,7 +174,7 @@ async function suite(rulesText, quiet) {
   await t('progress: teacher reads', () => T.doc('progress/uidA').get(), true);
   await t('progress: teacher cannot write', () => T.doc('progress/uidA').set({ x: 2 }), false);
   await t('config/class: signed-in read', () => A.doc('config/class').get(), true);
-  await t((SCHOOL ? '' : 'today (paste 1), allowed: ') + 'config/class: an outside account (not @seq.org, not allowed) refused (2026-11-13)', () => env.authenticatedContext('outsideX', { email: 'test9@gmail.example', email_verified: true }).firestore().doc('config/class').get(), !SCHOOL);
+  await t('config/class: an outside account (not @seq.org, not allowed) refused (2026-11-13)', () => env.authenticatedContext('outsideX', { email: 'test9@gmail.example', email_verified: true }).firestore().doc('config/class').get(), false);
   await t('config/class: student write refused', () => A.doc('config/class').set({ paused: true }), false);
   await t('config/class: teacher write', () => T.doc('config/class').set({ paused: false }), true);
   await t('liveQuiz/current: student write refused', () => A.doc('liveQuiz/current').set({ state: 'x' }), false);
@@ -210,9 +209,9 @@ const BREAKS = [
   ['the day window two days wide', "&& stated <= utcDay + duration.value(1, 'd');", "&& stated <= utcDay + duration.value(2, 'd');"],
 ];
 
-/* In every break "isSchool()" stands for the gate G; the one that leaves the gate on isSignedIn() applies to paste 2 only. */
-const ACTIVE_BREAKS = BREAKS.filter(b => SCHOOL || !/left on isSignedIn\(\)/.test(b[0])).map(b => b.map((x, i) => i === 0 ? x : x.split('isSchool()').join(G)));
-console.log(`== site-errors-rules-test: ${which} on the emulator at 127.0.0.1:${PORT} (${SCHOOL ? 'paste 2' : 'paste 1, published'}; ${ACTIVE_BREAKS.length} of ${BREAKS.length} breaks apply)`);
+/* Every break applies (until 2026-11-14 a text without isSchool() skipped the one that leaves the gate on isSignedIn()). */
+const ACTIVE_BREAKS = BREAKS;
+console.log(`== site-errors-rules-test: ${which} on the emulator at 127.0.0.1:${PORT} (isSchool() gates the create; ${ACTIVE_BREAKS.length} breaks)`);
 const real = await suite(RULES, false);
 console.log(`\n${real.fail ? '✗' : '✓'} ${which}: ${real.pass} passed, ${real.fail} failed`);
 let missed = 0;
