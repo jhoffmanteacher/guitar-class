@@ -9549,7 +9549,7 @@ const FOLD_ASSERTS = 22;
    with IS_TEACHER_MODE true: nothing happens) and no set ever renders with the
    class. Pinned counts below; the page test was proved red by 28 mutations
    (2026-11-13, one per guard), the 2026-11-13 fix round's cases by more. */
-const DB_CASES = 701, DB_KEY_PRESSES = 318, DB_TICK_CHECKS = 36, DB_SEQ_CLICKS = 12;
+const DB_CASES = 781, DB_KEY_PRESSES = 358, DB_TICK_CHECKS = 36, DB_SEQ_CLICKS = 12;
 /* Every .tick-pop rule in styles.css and what it sets (position and display with their values): the pop scales and
    fades (the keyframes, checked apart), its ring is placed absolutely on ::after, and reduced motion turns both off. */
 const DB_POP_CSS = {
@@ -9558,7 +9558,7 @@ const DB_POP_CSS = {
   '.prog-pill-wrap.tick-pop::after': 'border-radius',
   '.tick-pop,.tick-pop::after': 'animation',
 };
-const DB_KEYS = { ' ': 'play', 'Spacebar': 'play', 'k': 'play', 'K': 'play', 'ArrowLeft': 'prev', 'ArrowRight': 'next', '<': 'slower', ',': 'slower', '>': 'faster', '.': 'faster' };
+const DB_KEYS = { ' ': 'play', 'Spacebar': 'play', 'k': 'play', 'K': 'play', 'ArrowLeft': 'prev', 'ArrowRight': 'next', '<': 'slower', ',': 'slower', '>': 'faster', '.': 'faster', 'l': 'loop', 'L': 'loop' };
 const DB_PAGE_TEST_SRC = String.raw`(function(){
   /* A small page: elements, compound + descendant selectors, layout = "not hidden, not in a closed details,
      not a collapsed step in One-step view". Enough for pcKeydown, toggleStepDone and toggleSkill. */
@@ -9782,6 +9782,7 @@ const DB_PAGE_TEST_SRC = String.raw`(function(){
         if(kind !== 'single'){
           const secs = tbody.appendChild(E('div', ['pc-secs']));
           for(let i = 0; i < 3; i++) chips.push(secs.appendChild(E('button', ['pc-sec'].concat(i ? [] : ['cur']), { 'data-sec': String(i) })));
+          secs.appendChild(E('button', ['pc-loop-sw'], { 'data-loop-sw': 'loop', role: 'switch' }));   // Loop this part (app/cards-loop.js): L
           for(let i = 0; i < 3; i++) pages.push(tbody.appendChild(E('div', ['tab-page', 'pc-page'], i ? { 'data-page': String(i), hidden: '' } : { 'data-page': '0' })));
           if(kind !== 'sheet'){
             const pager = tbody.appendChild(E('div', ['tab-pager', 'pc-pager']));
@@ -9806,6 +9807,7 @@ const DB_PAGE_TEST_SRC = String.raw`(function(){
       stubFn('pcPage', (b, dir) => { const c = ALL.find(x => x.pc.contains(b)); log.push('pcPage:' + who(b) + ':' + dir + (c && b === (dir < 0 ? c.prev : c.next) ? '' : ':WRONG-BUTTON')); });
       stubFn('pcSetSpeedTo', r => log.push('pcSetSpeedTo:' + who(r) + ':' + r.value));
       stubFn('pcSetSpeed', b => log.push('pcSetSpeed:' + who(b) + (b.classList.contains('pc-guitar') ? ':GUITAR' : '')));
+      stubFn('pcSetLoopSw', b => log.push('pcSetLoopSw:' + who(b) + (b.getAttribute('data-loop-sw') === 'loop' ? '' : ':NOT-THE-LOOP-SWITCH')));
       const ev = o => Object.assign({ key: ' ', code: 'Space', target: body, repeat: false, ctrlKey: false, metaKey: false, altKey: false, shiftKey: false, isComposing: false,
         defaultPrevented: false, prevented: 0, preventDefault(){ this.prevented++; this.defaultPrevented = true; } }, o || {});
       const press = (o, expect, what) => {
@@ -9824,6 +9826,9 @@ const DB_PAGE_TEST_SRC = String.raw`(function(){
       press({ key: 'Spacebar' }, 'pcToggle:ca-18', 'old-style Spacebar key');
       press({ key: 'k', code: 'KeyK' }, 'pcToggle:ca-18', 'k');
       press({ key: 'K', code: 'KeyK' }, 'pcToggle:ca-18', 'K (Caps Lock on, no Shift)');
+      press({ key: 'l', code: 'KeyL' }, 'pcSetLoopSw:ca-18', 'l: the Loop this part switch');
+      press({ key: 'L', code: 'KeyL' }, 'pcSetLoopSw:ca-18', 'L (Caps Lock on, no Shift)');
+      press({ key: 'L', code: 'KeyL', shiftKey: true }, '', 'Shift+L');
       // Shift belongs to the page (Shift+Space scrolls up, Shift+arrows select), except for < and >, which need it.
       press({ key: 'K', code: 'KeyK', shiftKey: true }, '', 'Shift+K');
       press({ key: ' ', code: 'Space', shiftKey: true }, '', 'Shift+Space');
@@ -9866,6 +9871,7 @@ const DB_PAGE_TEST_SRC = String.raw`(function(){
       only(One);
       press({ key: 'ArrowRight', code: 'ArrowRight' }, '', 'Right on a one-section card');
       press({}, 'pcToggle:ca-36', 'Space on a one-section card');
+      press({ key: 'l', code: 'KeyL' }, '', 'L on a one-section card (no Loop switch: the key does nothing and is not cancelled)');
       // A lyric sheet: chips, no pager.
       only(Sheet);
       press({ key: 'ArrowRight', code: 'ArrowRight' }, '', 'Right on a stopped lyric sheet (no pager)');
@@ -9875,7 +9881,7 @@ const DB_PAGE_TEST_SRC = String.raw`(function(){
 
       // The traps.
       only(A); pcKeyLast = null;
-      const ALLKEYS = [{}, { key: 'k', code: 'KeyK' }, { key: 'ArrowRight', code: 'ArrowRight' }, { key: '<', code: 'Comma' }, { key: '>', code: 'Period' }, { key: ',', code: 'Comma' }, { key: '.', code: 'Period' }];
+      const ALLKEYS = [{}, { key: 'k', code: 'KeyK' }, { key: 'l', code: 'KeyL' }, { key: 'ArrowRight', code: 'ArrowRight' }, { key: '<', code: 'Comma' }, { key: '>', code: 'Period' }, { key: ',', code: 'Comma' }, { key: '.', code: 'Period' }];
       const none = (o, what) => ALLKEYS.forEach(k => press(Object.assign({}, k, o), '', what + ' [' + (k.key || ' ') + ']'));
       [['an input', textIn], ['a textarea', area], ['a select', sel], ['contenteditable', editable], ['inside contenteditable', editKid], ['the speed slider', A.range]].forEach(([w, el]) => none({ target: el }, 'typing in ' + w));
       none({ ctrlKey: true }, 'Ctrl held'); none({ metaKey: true }, 'Cmd held'); none({ altKey: true }, 'Alt held');
@@ -10197,6 +10203,75 @@ const DB_PAGE_TEST_SRC = String.raw`(function(){
   out.storageUntouched = JSON.stringify(R.localStorage && R.localStorage._d || {}) === lsBefore;
   return JSON.stringify(out);
 })()`;
+/* 1eb. LOOP THIS PART / BUILD UP SPEED (app/cards-loop.js; Jonathan, 2026-11-14). Every practice card is rendered
+   in its first view, student and console preview, in both languages: a card with section buttons (more than one
+   section) carries exactly one switch group, inside its .pc-secs row, with Loop this part, Build up speed and Stay at
+   this speed in that order, every one OFF (aria-checked="false"), Stay hidden, and the card element carries no
+   data-loop / data-build; a card with one section carries none of it. The counts are pinned (EB_CARDS_WITH /
+   EB_CARDS_WITHOUT). Nothing is stored: app/cards-loop.js (comments stripped) names no storage or save call, and
+   caOnToggle resets the switches when a card closes (pcLoopReset), so every opening starts off. Every string the
+   part uses is in i18n.js in English and Spanish. The behaviour itself (laps on the bar line, the steps) is
+   tools/playalong-loop.mjs's (R15) and the smoke's. */
+const EB_CARDS_WITH = 24, EB_CARDS_WITHOUT = 2;
+const EB_STRINGS = ['pc.loop', 'pc.build', 'pc.buildTitle', 'pc.hold', 'pc.holdTitle', 'pc.looping', 'pc.lapOf', 'pc.lapAt', 'pc.keys.loop'];
+function checkLoopSpeed(ctx, i18nTable) {
+  head('1eb. Loop this part / Build up speed: only on cards with section buttons, off by default, nothing stored');
+  let bad = 0, renders = 0;
+  const flag = m => { err('1eb: ' + m); problems++; bad++; };
+  if (!ctx) { flag('cannot run — the 0b render context is unavailable'); return; }
+  const run = x => vm.runInContext(x, ctx);
+  for (const fn of ['pcLoopHtml', 'pcSetLoopSw', 'pcLoopReset', 'caCardBodyHtml', 'pcLayout']) if (run('typeof ' + fn) !== 'function') { flag(fn + '() not found in the app script (renamed? update 1eb)'); return; }
+  const acts = run('(window.CLASS_ACTIVITIES || []).filter(a => a && a.view === "card" && a.card)');
+  const saveLang = run('getLang()');
+  let nWith = 0, nWithout = 0;
+  try {
+    for (const lang of ['en', 'es']) {
+      run('setLang(' + JSON.stringify(lang) + ')');
+      for (const a of acts) {
+        ctx.__ebCard = a;
+        const n = run('(pcLayout(caView(window.__ebCard)) || { sections: [] }).sections.length');
+        for (const preview of [false, true]) {
+          const html = String(run('caCardBodyHtml(window.__ebCard' + (preview ? ', { preview: true }' : '') + ')'));
+          renders++;
+          const where = `${a.id} (${lang}${preview ? ', console preview' : ''})`;
+          const groups = (html.match(/<span class="pc-loop">/g) || []).length;
+          const sws = [...html.matchAll(/<button type="button" class="pc-loop-sw"([^>]*)>/g)].map(m => m[1]);
+          const rootTag = (/<div class="pc"[^>]*>/.exec(html) || [''])[0];
+          if (/data-(loop|build|hold)=/.test(rootTag)) flag(`${where}: the card element is drawn with a Loop / Build flag set: ${rootTag}`);
+          if (n <= 1) {
+            if (groups || sws.length || /pc-loop/.test(html)) flag(`${where}: one section, and the Loop / Build switches are drawn (only cards with section buttons get them)`);
+            if (lang === 'en' && !preview) nWithout++;
+            continue;
+          }
+          if (lang === 'en' && !preview) nWith++;
+          if (groups !== 1) { flag(`${where}: ${groups} Loop / Build groups, want 1`); continue; }
+          const secsAt = html.indexOf('<div class="pc-secs">'), grpAt = html.indexOf('<span class="pc-loop">');
+          const lastChip = html.lastIndexOf('class="pc-sec'), closeAt = html.indexOf('</div>', grpAt);
+          if (secsAt < 0 || grpAt < secsAt || grpAt < lastChip || html.slice(grpAt, closeAt).includes('<div')) flag(`${where}: the switch group is not at the end of the section buttons' row`);
+          const names = sws.map(x => (/data-loop-sw="(\w+)"/.exec(x) || [])[1]);
+          if (names.join(',') !== 'loop,build,hold') flag(`${where}: the switches are [${names.join(', ')}], want [loop, build, hold]`);
+          sws.forEach((x, i) => {
+            if (!/role="switch" aria-checked="false"/.test(x)) flag(`${where}: the ${names[i]} switch is not drawn OFF (${x.slice(0, 80)})`);
+            if ((names[i] === 'hold') !== / hidden(?=[ >])/.test(x + '>')) flag(`${where}: the ${names[i]} switch is ${names[i] === 'hold' ? 'not hidden (Stay at this speed shows only while Build is on)' : 'hidden'}`);
+          });
+          const keyTitle = sws[0] && / title="/.test(sws[0]);
+          if (preview === keyTitle) flag(`${where}: the Loop switch ${preview ? 'names its key in the console preview (the keys are off there)' : 'does not name its key (pc.keys.loop)'}`);
+        }
+      }
+    }
+  } catch (e) { flag('rendering the cards threw: ' + e.message); }
+  finally { run('setLang(' + JSON.stringify(saveLang) + ')'); delete ctx.__ebCard; }
+  if (nWith !== EB_CARDS_WITH || nWithout !== EB_CARDS_WITHOUT) flag(`${nWith} cards drew the switches and ${nWithout} did not; pinned ${EB_CARDS_WITH} and ${EB_CARDS_WITHOUT} (a new card or a section change: re-pin)`);
+  /* Nothing stored, and the reset on close. */
+  const loopSrc = stripJsComments(readFileSync(join(ROOT, 'app/cards-loop.js'), 'utf8'));
+  const store = loopSrc.match(/\b(localStorage|sessionStorage|indexedDB|flushSave|saveProgress|scheduleSave|markDirty|setDoc|updateDoc|progress\s*\[|completed\s*\[|classActivities\s*\[)/g);
+  if (store) flag(`app/cards-loop.js names a store or a save (${[...new Set(store)].join(', ')}): the switches store nothing`);
+  const ac = stripJsComments(readFileSync(join(ROOT, 'app/activities-2.js'), 'utf8'));
+  const onToggle = (/function caOnToggle\(details\)\{[\s\S]*?\n\}/.exec(ac) || [''])[0];
+  if (!/if\(!details\.open\) pcLoopReset\(details\);/.test(onToggle)) flag('caOnToggle (app/activities-2.js) no longer calls pcLoopReset(details) when a card closes: the switches would stay on for the next opening');
+  for (const k of EB_STRINGS) { const e = i18nTable && i18nTable[k]; if (!e || !e.en || !e.es) flag(`${k} is missing in English or Spanish`); }
+  if (!bad) ok(`1eb: ${renders} renders of ${acts.length} practice cards (both languages, student and preview): ${nWith} with section buttons draw Loop / Build / Stay, all off, Stay hidden; ${nWithout} with one section draw none · cards-loop.js stores nothing · reset on close · ${EB_STRINGS.length} strings in both languages`);
+}
 function checkCardKeysAndTickPop(ctx, sets, i18nTable) {
   head('1db. Practice-card keys (Space/K, arrows, < >) and the tick pop on a check-off');
   let bad = 0, teacherKeys = 0;
@@ -10230,8 +10305,8 @@ function checkCardKeysAndTickPop(ctx, sets, i18nTable) {
     (seqA.seq || []).forEach((x, i) => { if (x !== (seqB.seq || [])[i]) flag('click ' + (i + 1) + ' leaves different data to save with the pop than without: ' + x + ' vs ' + (seqB.seq || [])[i]); });
   }
   // The strings, both languages.
-  const KEYS = { 'pc.keys.play': [/space bar/, /K/], 'pc.keys.prev': [/←/], 'pc.keys.next': [/→/], 'pc.keys.section': [/←/, /→/], 'pc.keys.speed': [/</, />/] };
-  const ES = { 'pc.keys.play': [/barra espaciadora/, /K/], 'pc.keys.prev': [/←/], 'pc.keys.next': [/→/], 'pc.keys.section': [/←/, /→/], 'pc.keys.speed': [/</, />/] };
+  const KEYS = { 'pc.keys.play': [/space bar/, /K/], 'pc.keys.prev': [/←/], 'pc.keys.next': [/→/], 'pc.keys.section': [/←/, /→/], 'pc.keys.speed': [/</, />/], 'pc.keys.loop': [/\bL key\b/] };
+  const ES = { 'pc.keys.play': [/barra espaciadora/, /K/], 'pc.keys.prev': [/←/], 'pc.keys.next': [/→/], 'pc.keys.section': [/←/, /→/], 'pc.keys.speed': [/</, />/], 'pc.keys.loop': [/\btecla L\b/] };
   for (const k of Object.keys(KEYS)) {
     const e = i18nTable && i18nTable[k];
     if (!e || !e.en || !e.es) { flag(k + ' is missing in English or Spanish'); continue; }
@@ -10254,7 +10329,7 @@ function checkCardKeysAndTickPop(ctx, sets, i18nTable) {
         const html = String(run('caCardBodyHtml(window.__dbCard)'));
         const n = run('pcLayout(caView(window.__dbCard)).sections.length');
         const esc = x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const want = [['class="pc-play" title="' + esc(ta('pc.keys.play')) + '"', 1], ['data-sec="\\d+" title="' + esc(ta('pc.keys.section')) + '"', n > 1 ? n : 0]];
+        const want = [['class="pc-play" title="' + esc(ta('pc.keys.play')) + '"', 1], ['data-sec="\\d+" title="' + esc(ta('pc.keys.section')) + '"', n > 1 ? n : 0], ['data-loop-sw="loop" title="' + esc(ta('pc.keys.loop')) + '"', n > 1 ? 1 : 0]];
         if (a === tabCard) want.push(['title="' + esc(ta('pc.keys.prev')) + '" onclick="pcPage\\(this,-1\\)"', 1], ['title="' + esc(ta('pc.keys.next')) + '" onclick="pcPage\\(this,1\\)"', 1], ['class="pc-speed4"[^>]*title="' + esc(ta('pc.keys.speed')) + '"', 1]);
         for (const [re, count] of want) {
           const got = (html.match(new RegExp(re, 'g')) || []).length;
@@ -10263,7 +10338,7 @@ function checkCardKeysAndTickPop(ctx, sets, i18nTable) {
         }
         // The console's preview (keys off there): no control names a key.
         const prev = String(run('caCardBodyHtml(window.__dbCard, { preview: true })'));
-        const hints = ['pc.keys.play', 'pc.keys.prev', 'pc.keys.next', 'pc.keys.section', 'pc.keys.speed'].filter(k => prev.includes('title="' + ta(k) + '"'));
+        const hints = ['pc.keys.play', 'pc.keys.prev', 'pc.keys.next', 'pc.keys.section', 'pc.keys.speed', 'pc.keys.loop'].filter(k => prev.includes('title="' + ta(k) + '"'));
         previews++;
         if (hints.length) flag(a.id + ' (' + lang + '): the console preview shows the key tooltips ' + hints.join(', ') + ' (the keys are off there)');
       }
@@ -18569,6 +18644,7 @@ function checkPracticeMinutes(i18nTable) {
   checkFoldedActivity(rcCtx);
   checkNoChecklist(rcCtx);
   checkCardKeysAndTickPop(rcCtx, rcSets, i18nTable);
+  checkLoopSpeed(rcCtx, i18nTable);
   checkOneLineDirections(rcCtx, i18nTable);
   checkCardCaptionWords();
   checkJourneyRetired();

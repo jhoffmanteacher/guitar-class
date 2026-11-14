@@ -585,6 +585,17 @@
     'pc.keys.next':            { en: 'Next section (→ key)', es: 'Sección siguiente (tecla →)' },
     'pc.keys.section':         { en: 'Start here (while the song plays, the ← and → keys move between sections)', es: 'Empieza aquí (mientras suena la canción, las teclas ← y → cambian de sección)' },
     'pc.keys.speed':           { en: 'Speed (< slower, > faster)', es: 'Velocidad (< más lenta, > más rápida)' },
+    'pc.keys.loop':            { en: 'Repeat the section playing until you stop it (L key)', es: 'Repite la sección que suena hasta que la detengas (tecla L)' },
+    // Loop this part / Build up speed (app/cards-loop.js, 2026-11-14): switches at the end of the section buttons, and the status line while they run.
+    'pc.loop':                 { en: 'Loop this part', es: 'Repetir esta parte' },
+    'pc.build':                { en: 'Build up speed', es: 'Subir la velocidad' },
+    'pc.buildTitle':           { en: 'Start at the slowest speed and go one step faster every 2 rounds, up to Normal.',
+                                 es: 'Empieza en la velocidad más lenta y sube un paso cada 2 rondas, hasta Normal.' },
+    'pc.hold':                 { en: 'Stay at this speed', es: 'Mantener esta velocidad' },
+    'pc.holdTitle':            { en: 'Keep looping at this speed until you turn this off.', es: 'Sigue repitiendo a esta velocidad hasta que apagues esto.' },
+    'pc.looping':              { en: 'Looping: {section}', es: 'Repitiendo: {section}' },
+    'pc.lapOf':                { en: 'Round {n} of {total} at {speed}', es: 'Ronda {n} de {total} en {speed}' },
+    'pc.lapAt':                { en: 'Round {n} at {speed}', es: 'Ronda {n} en {speed}' },
     // Lyric-sheet practice card (card.sheet, ca-38 — 2026-10-19)
     'ca.sheetDirections':      { en: 'Press Play song, strum the way the recording does and change chords on the word under each name.',
                                  es: 'Presiona «Tocar la canción», rasguea como la grabación y cambia de acorde en la palabra bajo cada nombre.' },

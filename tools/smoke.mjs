@@ -1339,7 +1339,10 @@ async function noChecklistWalk(page, run, events, stats) {
    practice card ca-18 at 1366x657, in English: with the focus on the page body Space plays (the Play button shows its
    Stop state) and Space again stops; > then < move the speed control one stop and back; a MOUSE click on a section
    chip leaves the focus on <body> once the press is over, so Space then stops instead of restarting that section;
-   a reload brings the card back at its first speed (nothing persisted). It starts from a fresh page and puts the
+   a reload brings the card back at its first speed (nothing persisted). LOOP THIS PART / BUILD UP SPEED
+   (app/cards-loop.js, 2026-11-14): both open off; a mouse click on Loop turns it on, L turns it off and on again, a
+   click on Build turns Build on with Stay at this speed shown and the speed control on its slowest stop; after the
+   reload both are off again and the speed is back on its first stop (nothing stored). It starts from a fresh page and puts the
    language back. checks.mjs 1db runs the same handlers on a small page in Node, the touchscreen event order
    included; this is Chrome's own focus and key handling, with a mouse (this file sends no touch events). A
    checkout without the keys skips it. */
@@ -1354,14 +1357,27 @@ async function cardKeysWalk(page, run, events, stats, base) {
   if (!(await run('keys:present', `typeof pcKeydown === 'function' && typeof pcKeyPointerUp === 'function' && CLASS_ACTIVITIES.some(a => a.id === '${ID}')`, 10))) return;
   const lang0 = await run('keys:lang', 'getLang()', 10);
   const fail = (w, text) => events.push({ step: 'keys:' + w, kind: 'card-keys', text });
-  const KEYS = { ' ': ['Space', 32], '>': ['Period', 190, 8], '<': ['Comma', 188, 8] };
+  const KEYS = { ' ': ['Space', 32], '>': ['Period', 190, 8], '<': ['Comma', 188, 8], 'l': ['KeyL', 76] };
   const key = async k => { const [code, vk, mods = 0] = KEYS[k];
     await page.send('Input.dispatchKeyEvent', { type: 'keyDown', key: k, code, windowsVirtualKeyCode: vk, nativeVirtualKeyCode: vk, modifiers: mods, text: k, unmodifiedText: k });
     await page.send('Input.dispatchKeyEvent', { type: 'keyUp', key: k, code, windowsVirtualKeyCode: vk, nativeVirtualKeyCode: vk, modifiers: mods }); await sleep(250); };
   const state = `(() => { const root = document.querySelector('.ca-card[open][data-id="${ID}"] .pc'); const r = root && root.querySelector('.pc-speed-range');
     const a = document.activeElement;
     return { open: !!root, playing: !!(root && pcState && pcState.root === root), stopLabel: !!(root && root.querySelector('.pc-play').classList.contains('playing')),
-      speed: r ? r.value : (root ? root.dataset.slow : null), focus: !a || a === document.body ? 'body' : a.className || a.tagName }; })()`;
+      speed: r ? r.value : (root ? root.dataset.slow : null), focus: !a || a === document.body ? 'body' : a.className || a.tagName,
+      loop: root ? [root.dataset.loop || '', (root.querySelector('.pc-loop-sw[data-loop-sw="loop"]') || {}).getAttribute ? root.querySelector('.pc-loop-sw[data-loop-sw="loop"]').getAttribute('aria-checked') : 'none'].join('/') : null,
+      build: root ? [root.dataset.build || '', (root.querySelector('.pc-loop-sw[data-loop-sw="build"]') || {}).getAttribute ? root.querySelector('.pc-loop-sw[data-loop-sw="build"]').getAttribute('aria-checked') : 'none'].join('/') : null,
+      hold: root && root.querySelector('.pc-loop-sw[data-loop-sw="hold"]') ? (root.querySelector('.pc-loop-sw[data-loop-sw="hold"]').hidden ? 'hidden' : 'shown') : null }; })()`;
+  const OFF = '/false', ON1 = '1/true';
+  const clickSw = async (name) => {
+    const at = await run('keys:loop-at:' + name, `(() => { const b = document.querySelector('.ca-card[open][data-id="${ID}"] .pc-loop-sw[data-loop-sw="${name}"]'); if (!b) return null; b.scrollIntoView({ block: 'center' }); const q = b.getBoundingClientRect(); return { x: q.left + q.width / 2, y: q.top + q.height / 2 }; })()`, 100);
+    if (!at) return false;
+    await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: at.x, y: at.y });
+    await page.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: at.x, y: at.y, button: 'left', buttons: 1, clickCount: 1 });
+    await page.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: at.x, y: at.y, button: 'left', buttons: 0, clickCount: 1 });
+    await sleep(300);
+    return true;
+  };
   const openCard = async w => {
     await run('keys:open-ca:' + w, `(setLang('en'), openClassActivitiesScreen(), 1)`, 500);
     await run('keys:open:' + w, `caFocusActivity('${ID}')`, 900);
@@ -1384,6 +1400,20 @@ async function cardKeysWalk(page, run, events, stats, base) {
     await key('<');
     const s4 = await run('keys:slower', state, 10);
     if (!s4 || s4.speed !== s0.speed) fail('slower', `< did not bring the speed control back: ${JSON.stringify(s0)} -> ${JSON.stringify(s4)}`);
+    // Loop this part / Build up speed: off as the card opens; a click, the L key, Build.
+    if (s0.loop !== OFF || s0.build !== OFF || s0.hold !== 'hidden') fail('loop-default', `${ID} should open with Loop and Build off and Stay hidden: ${JSON.stringify(s0)}`);
+    if (!(await clickSw('loop'))) fail('loop-click', `${ID} has no Loop this part switch`);
+    const l1 = await run('keys:loop-on', state, 10);
+    if (!l1 || l1.loop !== ON1 || l1.focus !== 'body') fail('loop-click', `a mouse click on Loop this part should turn it on and leave the focus on the page: ${JSON.stringify(l1)}`);
+    await key('l');
+    const l2 = await run('keys:loop-l-off', state, 10);
+    if (!l2 || l2.loop !== OFF) fail('loop-l', `L should turn Loop this part off: ${JSON.stringify(l2)}`);
+    await key('l');
+    const l3 = await run('keys:loop-l-on', state, 10);
+    if (!l3 || l3.loop !== ON1) fail('loop-l', `L again should turn Loop this part on: ${JSON.stringify(l3)}`);
+    await clickSw('build');
+    const b1 = await run('keys:build-on', state, 10);
+    if (!b1 || b1.build !== ON1 || b1.loop !== ON1 || b1.hold !== 'shown' || b1.speed !== '0') fail('build-click', `Build up speed should be on with Loop on, Stay at this speed shown and the speed on its slowest stop (0): ${JSON.stringify(b1)}`);
     // R1-1: a mouse click on a section chip, then Space stops (not a restart of that section with a new count-in).
     const at = await run('keys:chip-at', `(() => { const b = document.querySelectorAll('.ca-card[open][data-id="${ID}"] .pc-sec')[1]; if (!b) return null; b.scrollIntoView({ block: 'center' }); const q = b.getBoundingClientRect(); return { x: q.left + q.width / 2, y: q.top + q.height / 2 }; })()`, 100);
     if (!at) fail('chip', `${ID} has no second section chip to click`);
@@ -1407,6 +1437,7 @@ async function cardKeysWalk(page, run, events, stats, base) {
     await openCard('reload');
     const r = await run('keys:after-reload', state, 10);
     if (!r || !r.open || r.playing || r.speed !== s0.speed) fail('reload', `after a reload ${ID} should open stopped at its first speed (${s0.speed}): ${JSON.stringify(r)}`);
+    else if (r.loop !== OFF || r.build !== OFF || r.hold !== 'hidden') fail('reload', `after a reload ${ID} should open with Loop and Build off (nothing stored): ${JSON.stringify(r)}`);
     else stats.cardKeys = (stats.cardKeys || 0) + 1;
     await run('keys:done', `(caCloseOpen(), 1)`, 300);
   } finally {

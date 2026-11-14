@@ -102,6 +102,12 @@
          key version replaces the track and renames each chord through its map (the power map when the card is
          on power chords); power chords rename each chord through chordVersions.power. A power chord keeps its
          chord's root; a key version moves every chord by one interval. Bass notes change the drawing only.
+     R15 LOOP THIS PART (app/cards-loop.js): with the switch on, the lap is at the end of the section started from
+         (its last bar line, all its reps) instead of the card's, and goes back to its first beat, on a whole-song card
+         too; the Metronome's count at that bar line is the next lap's downbeat (as at the card's end); a lead that
+         looks past a section end that is not the card's end stays on the section's last place. BUILD UP SPEED plays
+         PC_BUILD_LAPS (2) laps at each stop of the speed control from the slowest, then Normal, the step on the lap's
+         bar line, and the control on screen shows the stop playing.
      R14 BASS NOTES (the rule in the BASS NOTES comment of app/activities.js): with the bass on, a chord-grid section
          carries ONE bass note on beat 1 of every bar: the root in the first bar of a chord (the first bar whose
          beat 1 falls inside it), the 5th in the next, alternating until the chord changes; a new chord starts again
@@ -298,6 +304,8 @@ const KNOWN = [
    lead by ear on 2026-10-19). The page's own values are what the walks use; a value that no longer matches its pin
    fails the run until someone has listened to the new one and changed the pin here. */
 const LEAD_PINS = { PC_TAB_LEAD: 0, PC_ROW_LEAD: 0.15, PC_SHEET_LEAD: 0.175, snipLatency: 0.08 };
+/* R15: how far before the end of a looped section (bars) a lead that looks past it is held (pcLoopClamp). */
+const LOOP_CLAMP = 1e-4;
 
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg',
@@ -566,6 +574,9 @@ const PAGE_SRC = String.raw`(() => {
       const rp = vis >= 0 ? R.reps[vis] : null;
       misc = vis + '~' + (rp && !rp.hidden ? rp.textContent : '') + '~' + R.status.textContent;
     }
+    /* LOOP THIS PART / BUILD UP SPEED walks only: the speed control as the student sees it (the slider's value and
+       its bold stop, or the two-way switch), so the judge can hold it to the speed playing at every step. */
+    if (R.watch) misc += '~' + (R.range ? R.range.value + '/' + Array.prototype.findIndex.call(R.ticks, function(x){ return x.classList.contains('on'); }) : (R.sw && R.sw.getAttribute('aria-checked') === 'true' ? '1/1' : '0/0'));
     const key = aKey + '#' + lk + '#' + misc;
     let ki = R.keyIdx.get(key);
     if (ki === undefined){ ki = R.keys.length; R.keys.push(key); R.keyIdx.set(key, ki); }
@@ -626,7 +637,7 @@ const PAGE_SRC = String.raw`(() => {
       const pressed = function(sel){ const bs = root.querySelectorAll(sel + ' button'); for (let i = 0; i < bs.length; i++) if (bs[i].getAttribute('aria-pressed') === 'true') return i; return -1; };
       return { ok: !miss.length, why: miss.length ? 'no switch for: ' + miss.join(', ') : '', sheet: !!root.querySelector('.pc-sheet'),
         got: { rec: pressed('.ca-rec-switch'), key: pressed('.ca-key-switch:not(.ca-rec-switch)'), chord: pressed('.ca-chord-switch:not(.ca-key-switch):not(.ca-bass-switch)'), bass: pressed('.ca-bass-switch') },
-        hasGuitar: !!root.querySelector('.pc-guitar:not(.pc-counts)'), hasSlider: !!root.querySelector('.pc-speed-range'), hasCounts: !!root.querySelector('.pc-counts'),
+        hasGuitar: !!root.querySelector('.pc-guitar:not(.pc-counts)'), hasLoop: !!root.querySelector('.pc-loop-sw[data-loop-sw="loop"]'), hasBuild: !!root.querySelector('.pc-loop-sw[data-loop-sw="build"]'), hasSlider: !!root.querySelector('.pc-speed-range'), hasCounts: !!root.querySelector('.pc-counts'),
         sections: root.querySelectorAll('.pc-sec').length, state: snap(root) };
     },
     sheetReady: function(){ const root = theRoot(); const p = root && root.querySelector('.pc-sheet-paper'); return !!(p && p._sheet); },
@@ -660,7 +671,8 @@ const PAGE_SRC = String.raw`(() => {
       audioCtx = fctx;
       const sheet = !!root.querySelector('.pc-sheet');
       R = { sheet: sheet, runs: [], keys: [], keyIdx: new Map(), events: [], frames: 0, prev: [], litKey: '', lit: root.getElementsByClassName('beat-now'),
-        pages: root.querySelectorAll('.pc-page'), reps: [], status: root.querySelector('.pc-status') };
+        pages: root.querySelectorAll('.pc-page'), reps: [], status: root.querySelector('.pc-status'), watch: !!plan.watchSpeed,
+        range: root.querySelector('.pc-speed-range'), ticks: root.querySelectorAll('.pc-speed4 .pc-speed-tick'), sw: root.querySelector('.pc-player .pc-speed:not(.pc-guitar)') };
       R.pages.forEach(function(p){ R.reps.push(p.querySelector('.pc-rep')); });
       if (sheet){
         R.strip = root.querySelectorAll('.pc-strip-cell'); R.stripCh = root.querySelectorAll('.pc-strip-cell .pc-strip-ch');
@@ -1142,8 +1154,38 @@ function planWalks(M) {
     ops.push({ op: 'click', sel: '.pc-play', stop: true });
     walks.push({ kind: 'lines', name: `starts · ${pick.length} chord names of the sheet (${pick.length - firsts.filter(i => pick.includes(i)).length} in the middle of a line)`, stop: 'slower', guitar: hasFull, ops, span: 'cover', metro: false, fresh: true });
   }
+  /* LOOP THIS PART and BUILD UP SPEED (app/cards-loop.js, 2026-11-14), on every card with section buttons, in its
+     first view. Loop: at every stop of the speed control, a section that is not the card's last (its end is a bar
+     line inside the window: the lap must not run on into the next section), three laps, Metronome on; the 2nd and
+     3rd must start on the section's first beat (R10, at the section's end instead of the card's). The sections
+     are the shortest ones, one per stop where there are enough. Build: from the slowest stop, every lap judged at
+     the stop it should play (PC_BUILD_LAPS laps a stop, then Normal), and the speed control on screen at the
+     same stop at every step; once with the spare ready (a shorter section), once with no spare (the seek, and the
+     step through the speed switch's own path) on the last section. */
+  if (M.isBase && M.open.hasLoop && ch.secs.length > 1) {
+    const secMs = (stop, S) => msFor(M, stop, S.fromBar - 1, S.fromBar - 1 + S.bars * S.reps);
+    const cands = ch.secs.slice(0, -1).map(S => S.i).sort((p, q) => secMs('normal', ch.secs[p]) - secMs('normal', ch.secs[q]) || p - q);
+    const loopSw = (name) => ({ op: 'click', sel: `.pc-loop-sw[data-loop-sw="${name}"]`, attr: 'aria-checked', want: 'true' });
+    stops.forEach((stop, j) => {
+      const si = cands[j % cands.length], S = ch.secs[si];
+      const ops = setup(stop, false, true, null);
+      ops.push(loopSw('loop'), startOp(si), { op: 'untilAudible', max: 60000, dt: FINE_MS }, { op: 'run', ms: secMs(stop, S) * 3 + msFor(M, stop, S.fromBar - 1, S.fromBar) * 0.5, dt: FINE_MS }, { op: 'click', sel: '.pc-play', stop: true });
+      walks.push({ kind: 'lap', loopWalk: true, name: `loop this part · ${S.label} (section ${si + 1} of ${ch.secs.length}) · ${stop}`, stop, guitar: false, ops, span: 'lap', lapFrom: si, loopSi: si, laps: 3, metro: true, fresh: true });
+    });
+    if (M.open.hasBuild) for (const spare of [true, false]) {
+      const si = spare ? cands[0] : ch.secs.length - 1, S = ch.secs[si];
+      const plan = [];
+      stops.forEach((stop, k) => { for (let n = 0; n < (k < stops.length - 1 ? PC_BUILD_LAPS : 1); n++) plan.push(stop); });
+      const ops = setup(stops[0], false, true, null);
+      ops.push(loopSw('build'), startOp(si), { op: 'untilAudible', max: 60000, dt: FINE_MS },
+        { op: 'run', ms: plan.reduce((t, stop) => t + secMs(stop, S), 0) + msFor(M, 'normal', S.fromBar - 1, S.fromBar) * 0.5, dt: STEP_MS }, { op: 'click', sel: '.pc-play', stop: true });
+      walks.push({ kind: 'lap', loopWalk: true, coarse: true, name: `build up speed · ${S.label} (section ${si + 1} of ${ch.secs.length}) · ${plan.length - 1} laps to Normal · ${spare ? 'the spare ready' : 'no spare (the seek)'}`, stop: stops[0], guitar: false, ops, span: 'lap', lapFrom: si, loopSi: si, build: plan, laps: plan.length, lateNeverLoad: !spare, metro: true, fresh: true });
+    }
+  }
   return walks;
 }
+/* Laps a stop of Build up speed plays before the next (PC_BUILD_LAPS in app/cards-loop.js; the work order's rule). */
+const PC_BUILD_LAPS = 2;
 
 function parseKey(k) {
   const [a, lit, ...rest] = k.split('#');
@@ -1191,13 +1233,18 @@ function judge(M, W, res) {
   const cellOf = (p) => (M.tables[p.si] && M.tables[p.si].steps[idx(p)] != null) ? p.si + ':' + M.tables[p.si].steps[idx(p)] : null;
   const rowOf = (p) => p.si + ':' + (M.tables[p.si] ? M.tables[p.si].rowOf[idx(p)] : '?');
   const lead0 = ch.sheet ? C.sheetLead : C.tabLead;
+  /* R15: with Loop this part on, the lap is at the end of the looped section (loopEnd0, bars from bar 1's downbeat),
+     and a lead never looks past it when it is not the card's end (clampB). */
+  const LS = W.loopSi != null ? ch.secs[W.loopSi] : null;
+  const loopEnd0 = LS ? LS.fromBar - 1 + LS.bars * LS.reps : ch.endBar - 1;
+  const clampB = (b) => (LS && loopEnd0 < ch.endBar - 1 && b > loopEnd0 - LOOP_CLAMP) ? loopEnd0 - LOOP_CLAMP : b;
   /* What may be lit when file f is at time ct, playing at rate r (R9). */
   const expectAt = (f, ct, r) => {
     const c = clk(f);
     if (!c) return null;
-    const here = ch.place(c.clock.bars(ct + lead0 * r));
+    const here = ch.place(clampB(c.clock.bars(ct + lead0 * r)));
     if (ch.sheet || !here) return here;
-    const ahead = ch.place(c.clock.bars(ct + (lead0 + C.rowLead) * r));
+    const ahead = ch.place(clampB(c.clock.bars(ct + (lead0 + C.rowLead) * r)));
     return (ahead && ahead.key !== here.key && rowOf(ahead) !== rowOf(here)) ? ahead : here;
   };
   const D = 2e-6;
@@ -1251,7 +1298,7 @@ function judge(M, W, res) {
           phase = 'ended';
           const T = lastAud && clk(lastAud.file);
           const endT = T ? T.clock.time(ch.endBar - 1) : 0;
-          if (!ch.wholeSong) bad(`${at}: the song stopped by itself on a card that loops`);
+          if (!ch.wholeSong || LS) bad(`${at}: the song stopped by itself on a card that loops`);
           else if (!lastAud || lastAud.ct < endT - 0.08) bad(`${at}: the song stopped ${lastAud ? (endT - lastAud.ct).toFixed(2) : '?'} s before the end of its last section`);
         } else {
           if (k.lit !== lastLit && !litEmpty(k)) bad(`${at}: the lit cell moved while no file was playing`);
@@ -1266,13 +1313,22 @@ function judge(M, W, res) {
     /* A file is playing. */
     const a1 = k.aud[0], T1 = clk(a1.file);
     if (!T1) { bad(`${at}: a file the track does not declare is playing: ${a1.file}`); continue; }
+    /* Build up speed: the lap this jump starts is played at the plan's next stop (PC_BUILD_LAPS laps a stop). */
+    if (W.build && phase === 'play' && lastAud && !pendSwitch && (a1.file !== lastAud.file || c1a < lastAud.ct - 0.2)) expStop = W.build[Math.min(laps + 1, W.build.length - 1)];
     const tier = tierOf(M, expStop, expGuitar);
     if (a1.file !== tier.file) bad(`${at}: ${a1.file.replace(/^audio\//, '')} is playing; ${expStop}${M.tr.srcFull ? ', guitar ' + (expGuitar ? 'on' : 'off') : ''} should play ${tier.file.replace(/^audio\//, '')}`);
     if (!near(a1.rate, tier.rate, 2e-3)) bad(`${at}: playing at rate ${a1.rate}; ${expStop} should be ${+tier.rate.toFixed(4)}`);
     if (k.aud.length > 2) bad(`${at}: more than two files are sounding at once`);
+    /* Loop and Build walks: the speed control on screen shows the stop that is playing (one file sounding; in the
+       few ms two overlap at a lap it may already show the next). */
+    if (LS && k.aud.length === 1) {
+      const ctl = k.misc.slice(k.misc.lastIndexOf('~') + 1), x = STOPS.indexOf(expStop);
+      const want = M.open.hasSlider ? x + '/' + x : (expStop === 'normal' ? '1/1' : '0/0');
+      if (ctl !== want) bad(`${at}: the speed control on screen shows ${ctl} while ${expStop} plays (${want})`);
+    }
     if (phase === 'countin' && pendStart) {
       const S = ch.secs[pendStart.si], wantCt = T1.clock.time(S.fromBar - 1 + pendStart.rep * S.bars);
-      const tolS = (W.kind === 'song' ? STEP_MS : FINE_MS) / 1000 + 0.002;
+      const tolS = (W.kind === 'song' || W.coarse ? STEP_MS : FINE_MS) / 1000 + 0.002;
       if (c1a < wantCt - 0.002 || c1a > wantCt + tolS) bad(`${at}: started ${(c1a - wantCt >= 0 ? '+' : '') + (c1a - wantCt).toFixed(3)} s from the first beat of ${S.label}${pendStart.rep ? ' lap ' + (pendStart.rep + 1) : ''}`);
       const s = starts[starts.length - 1];
       if (s) s.firstAud = t0;
@@ -1293,12 +1349,12 @@ function judge(M, W, res) {
       pendSwitch = null;
     } else if (phase === 'play' && lastAud && (a1.file !== lastAud.file || c1a < lastAud.ct - 0.2)) {
       /* The song jumped back with no switch pressed: the lap (R10). */
-      const Tl = clk(lastAud.file), endT = Tl.clock.time(ch.endBar - 1), startT = T1.clock.time(ch.secs[pendLoopFrom].fromBar - 1);
-      const fine = (W.kind === 'song' ? STEP_MS : FINE_MS) / 1000;
-      if (ch.wholeSong) bad(`${at}: a whole-song card jumped back from ${lastAud.ct.toFixed(2)} s to ${c1a.toFixed(2)} s`);
+      const Tl = clk(lastAud.file), endT = Tl.clock.time(loopEnd0), startT = T1.clock.time(ch.secs[pendLoopFrom].fromBar - 1);
+      const fine = (W.kind === 'song' || W.coarse ? STEP_MS : FINE_MS) / 1000;
+      if (ch.wholeSong && !LS) bad(`${at}: a whole-song card jumped back from ${lastAud.ct.toFixed(2)} s to ${c1a.toFixed(2)} s`);
       else {
         laps++;
-        if (lastAud.ct < endT - 0.06 - fine) bad(`${at}: the lap came ${(endT - lastAud.ct).toFixed(3)} s before the end of the last bar`);
+        if (lastAud.ct < endT - 0.06 - fine) bad(`${at}: the lap came ${(endT - lastAud.ct).toFixed(3)} s before the end of the last bar${LS ? ' of ' + LS.label : ''}`);
         if (lastAud.ct > endT + 0.03 + fine) bad(`${at}: the song ran ${(lastAud.ct - endT).toFixed(3)} s past the end of the last bar before the lap`);
         if (!near(c1a, startT, 0.06 + fine)) bad(`${at}: the lap landed ${(c1a - startT >= 0 ? '+' : '') + (c1a - startT).toFixed(3)} s from the first beat of ${ch.secs[pendLoopFrom].label}`);
         order = -1;
@@ -1343,7 +1399,7 @@ function judge(M, W, res) {
              the lead lands within one step of a lap or section start. */
           const KB = KNOWN.find(x => x.card === '*' && x.kinds.includes('sheetLapBoundary'));
           if (KB && n === 1 && k.lit === '' && names.split(',').every(x => x === '') && real.some(p => Number(pill) === ch.tok[p.si][p.rep][p.ni])) {
-            const look = ct + lead0 * a1.rate, stepFile = (W.kind === 'song' ? STEP_MS : FINE_MS) / 1000 * a1.rate;
+            const look = ct + lead0 * a1.rate, stepFile = (W.kind === 'song' || W.coarse ? STEP_MS : FINE_MS) / 1000 * a1.rate;
             const onStart = ch.secs.some(S => { for (let r = 0; r < S.reps; r++) if (Math.abs(T1.clock.time(S.fromBar - 1 + r * S.bars) - look) <= stepFile) return true; return false; });
             if (onStart) { if (lapBlankRun !== i) { lapBlankRun = i; stats.lapBlank = (stats.lapBlank || 0) + 1; } continue; }
           }
@@ -1397,6 +1453,8 @@ function judge(M, W, res) {
     }
   }
   if (W.kind === 'lap' && laps < W.laps) bad(`${laps} laps seen, the walk is long enough for ${W.laps}`);
+  stats.laps = laps;
+  if (W.build && expStop !== W.build[W.build.length - 1]) bad(`Build up speed ended the walk at ${expStop}, not at ${W.build[W.build.length - 1]}`);
   if (W.kind === 'song' && !ch.wholeSong && laps < 1) bad('the card never came round to its first bar again');
   if (W.kind === 'song' && ch.wholeSong && phase !== 'ended') bad('the song did not stop at the end');
 
@@ -1455,7 +1513,7 @@ function judge(M, W, res) {
     const countPos = (s, ct) => clk(s.file).clock.bars(ct) * meter.steps;
     const countSec = (s, n) => { const T = clk(s.file).clock; return (T.time((n + 1) / meter.steps) - T.time(n / meter.steps)) / pace(s); };
     const lo0 = (ch.firstBar - 1) * meter.steps, hi0 = (ch.endBar - 1) * meter.steps;
-    const isLapBeat = (n) => !ch.wholeSong && (n === (ch.secs[pendLoopFrom].fromBar - 1) * meter.steps || n === hi0);
+    const isLapBeat = (n) => (!ch.wholeSong || LS) && (n === (ch.secs[pendLoopFrom].fromBar - 1) * meter.steps || n === hi0 || n === loopEnd0 * meter.steps);
     /* Which switch, if any, a click comes right after (for the message only). */
     const switches = res.events.filter(e => W.ops[e.i].sw || W.ops[e.i].stop).map(e => ({ t: e.t / 1000, kind: W.ops[e.i].stop ? 'Stop' : W.ops[e.i].sw + (W.ops[e.i].stopName ? ' (to ' + W.ops[e.i].stopName + ')' : W.ops[e.i].sw === 'guitar' ? ' (guitar ' + (W.ops[e.i].guitar ? 'on' : 'off') + ')' : '') }));
     const afterSw = (c) => { const t = c.at - C.latency, w = switches.filter(x => x.t <= t + 1e-9 && t - x.t < 0.5).pop(); return w ? `, ${((t - w.t) * 1000).toFixed(0)} ms after ${w.kind === 'Stop' ? 'Stop was pressed' : 'the ' + w.kind + ' switch'}${c.made <= w.t + 1e-9 ? ', scheduled before it' : ''}` : ''; };
@@ -1508,7 +1566,7 @@ function judge(M, W, res) {
       const q = prev ? countPos(prev, prev.c1) : null;
       const from = q != null && p0 >= q - 1e-6 && p0 - q < 0.5 ? q : p0;
       for (let n = Math.floor(from + 1e-9) + 1; n <= p1 + 1e-9; n++) {
-        if (n < lo0 || n >= hi0) continue;
+        if (n < lo0 || n >= hi0 || n >= loopEnd0 * meter.steps) continue;   // R15: the looped section's end is the lap's, like the card's
         const T = clk(s.file).clock;
         due.push({ n, tau: s.t0 + (T.time(n / meter.steps) - s.c0) / pace(s) });
       }
@@ -1529,6 +1587,7 @@ function judge(M, W, res) {
   /* The two KNOWN faults matched by their exact form, for every card ('*'): what this walk showed of them. */
   for (const K of KNOWN) {
     if (K.card !== '*') continue;
+    if (W.loopWalk) { K.seen = K.walks || 0; continue; }
     if (K.kinds.includes('sheetPastEnd') && stats.pastEnd) { K.n = (K.n || 0) + stats.pastEnd; K.walks = (K.walks || 0) + 1; known.push(`${M.view.id} "This bar" one past the end: ${stats.pastEnd} steps`); }
     if (K.kinds.includes('sheetLapBoundary') && stats.lapBlank) { K.n = (K.n || 0) + stats.lapBlank; K.walks = (K.walks || 0) + 1; known.push(`${M.view.id} "This bar" blank for one step at a lap or section start: ${stats.lapBlank} time(s)`); }
     K.seen = K.walks || 0;
@@ -1758,10 +1817,11 @@ async function main() {
   dataIssues.forEach(p => console.log('    ' + p));
 
   const totals = { cards: 0, views: 0, walks: 0, failed: 0, onlyQueued: 0, frames: 0, steps: 0, clicks: 0, pages: 0, known: 0, pastEnd: 0 };
+  const totalsMain = totals, totalsLoop = { walks: 0, failed: 0, onlyQueued: 0, frames: 0, steps: 0, clicks: 0, known: 0, pastEnd: 0, laps: 0, cards: new Set() };
   const unwalked = [];
   for (const a of cards) {
     totals.cards++;
-    const walksBefore = totals.walks;
+    const walksBefore = totals.walks + totalsLoop.walks;
     for (const x of allViews.filter(y => y.a.id === a.id)) {
       const label = `${a.id} ${viewName(a, x.v)}`;
       const idxView = { rec: x.v.rec ? x.lists.rec.indexOf(x.v.rec) : null, key: x.v.key ? x.lists.key.indexOf(x.v.key) : null, chord: x.v.chord ? x.lists.chord.indexOf(x.v.chord) : null, bass: x.v.bass ? x.lists.bass.indexOf(x.v.bass) : null };
@@ -1807,10 +1867,13 @@ async function main() {
       for (const [f, fi] of Object.entries(files)) dur[f] = tracks[fi.key].durationSec * (fi.slow ? tracks[fi.key].trackBpm / tracks[fi.key].trackBpmSlow : 1) + 2;
       for (const W of planWalks(M)) {
         if (SETTING && !W.name.includes(SETTING)) continue;
-        if (W.fresh) { o = await openIt(); if (!o.ok) { console.log(`✗ ${label} · ${W.name}: could not reopen the card: ${o.why}`); totals.failed++; continue; } M.open = o; M.scan = o.scan; if (!o.scan.sheet) M.tables = checkDrawing(x.chart, o.scan, x.meter, x.view).tables; }
-        const res = await step(`${label}: ${W.name}`, `__pl.walk(${JSON.stringify({ ops: W.ops, dur, lateNeverLoad: !!W.lateNeverLoad })})`);
+        if (W.fresh) { o = await openIt(); if (!o.ok) { console.log(`✗ ${label} · ${W.name}: could not reopen the card: ${o.why}`); (W.loopWalk ? totalsLoop : totals).failed++; continue; } M.open = o; M.scan = o.scan; if (!o.scan.sheet) M.tables = checkDrawing(x.chart, o.scan, x.meter, x.view).tables; }
+        const res = await step(`${label}: ${W.name}`, `__pl.walk(${JSON.stringify({ ops: W.ops, dur, lateNeverLoad: !!W.lateNeverLoad, watchSpeed: W.loopSi != null })})`);
         const J = judge(M, W, res);
-        totals.walks++; totals.frames += J.stats.frames || 0; totals.steps += J.stats.steps || 0; totals.clicks += J.stats.clicks || 0;
+        /* The Loop and Build walks keep their own totals (their own summary line), so the line of the walks every card
+           had before them reads as it did. */
+        const totals = W.loopWalk ? totalsLoop : totalsMain;
+        totals.walks++; totals.frames += J.stats.frames || 0; totals.steps += J.stats.steps || 0; totals.clicks += J.stats.clicks || 0; totals.laps = (totals.laps || 0) + (J.stats.laps || 0);
         const size = `${x.chart.secs.length} sections, ${J.stats.steps} places lit, ${J.stats.frames.toLocaleString('en-US')} steps${J.stats.clicks ? ', ' + J.stats.clicks + ' clicks' : ''}`;
         totals.known += J.known.length; totals.pastEnd += J.stats.pastEnd || 0;
         const kn = J.known.length ? ` (and ${J.known.length} known, listed: see KNOWN)` : '';
@@ -1818,10 +1881,11 @@ async function main() {
         else console.log(`✓ ${label} · ${W.name}: ${size}: every lit cell on the chart's place${kn}`);
         if (VERBOSE) J.known.forEach(p => console.log('    known: ' + p));
         out.walks.push({ card: a.id, view: viewName(a, x.v), name: W.name, issues: J.issues, nIssues: J.nIssues, nQueued: J.nQueued, known: J.known, stats: J.stats });
+        if (W.loopWalk) totalsLoop.cards.add(a.id);
         W.fresh = false;
       }
     }
-    if (SETTING && totals.walks === walksBefore && !'drawing'.includes(SETTING)) { unwalked.push(a.id); console.log(`✗ ${a.id}: --setting "${SETTING}" matches no walk of this card`); }
+    if (SETTING && totals.walks + totalsLoop.walks === walksBefore && !'drawing'.includes(SETTING)) { unwalked.push(a.id); console.log(`✗ ${a.id}: --setting "${SETTING}" matches no walk of this card`); }
   }
   const secs = ((Date.now() - t0) / 1000).toFixed(0);
   const realErrors = pageErrors.filter(e => !/firebase|firestore|googleapis|gstatic|net::ERR|Failed to fetch|ResizeObserver loop/i.test(e));
@@ -1841,9 +1905,13 @@ async function main() {
   });
   stale.forEach(K => console.log(`✗ the KNOWN list names a fault that this full run did not see: ${K.card === '*' ? 'every card' : K.card + ' ' + K.section} (${K.kinds.join(', ')}). If it was fixed, delete its entry.`));
   const failed = totals.failed + (dataIssues.length ? 1 : 0) + (realErrors.length ? 1 : 0) + stale.length;
-  const none = !failed && (unwalked.length > 0 || (!totals.walks && !(SETTING && 'drawing'.includes(SETTING))));
+  const loopCards = cards.filter(a => allViews.some(y => y.a.id === a.id && y.v.base && y.chart.secs.length > 1)).length;
+  const none = !failed && !totalsLoop.failed && (unwalked.length > 0 || (!totals.walks && !totalsLoop.walks && !(SETTING && 'drawing'.includes(SETTING))));
   console.log(`\nplayalong-loop: ${failed || none ? '✗' : '✓'} ${totals.cards} cards, ${totals.views} views, ${totals.pages} pages read, ${totals.walks} walks (card-setting pairs), ${totals.steps.toLocaleString('en-US')} places lit and compared, ${totals.frames.toLocaleString('en-US')} steps of the fake clock, ${totals.clicks.toLocaleString('en-US')} clicks: ${failed ? failed + ' with a mismatch' + ` (${totals.onlyQueued} only the queued Metronome click, scheduled before a press and sounding after it; ${failed - totals.onlyQueued} with anything else)` : '0 mismatches'}${totals.known ? ', ' + totals.known + ' known (listed, not fixed)' : ''} · ${secs} s`);
-  out.totals = totals; out.failed = failed; out.seconds = Number(secs);
+  /* The Loop and Build walks (R15): their own line, after the summary above. */
+  const TL = totalsLoop, loopWalksWanted = !SETTING || TL.walks > 0;
+  if (loopWalksWanted) console.log(`playalong-loop (Loop this part / Build up speed): ${TL.failed ? '✗' : '✓'} ${TL.cards.size} of the ${loopCards} cards with section buttons, ${TL.walks} walks, ${TL.laps} laps, ${TL.steps.toLocaleString('en-US')} places lit and compared, ${TL.clicks.toLocaleString('en-US')} clicks: ${TL.failed ? TL.failed + ' with a mismatch' : '0 mismatches'}`);
+  out.totals = totals; out.totalsLoop = { ...TL, cards: [...TL.cards] }; out.failed = failed + TL.failed; out.seconds = Number(secs);
   /* A --setting that matched no walk (a typo, or a card without that walk) is not a pass. The drawing alone is a run
      only when it was asked for (--setting drawing). */
   if (none) {
@@ -1854,7 +1922,7 @@ async function main() {
   }
   if (JSON_OUT) writeFileSync(JSON_OUT, JSON.stringify(out, null, 1));
   await page.close();
-  return failed ? 1 : 0;
+  return failed || TL.failed ? 1 : 0;
 }
 
 try { exitCode = await main(); }

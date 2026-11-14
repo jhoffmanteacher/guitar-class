@@ -3447,6 +3447,21 @@ span.tab-count-held{margin-left:4px}
 .pc-secs{gap:4px;margin-bottom:4px}
 .pc-sec{font-size:0.8125rem;min-height:30px;padding:0 10px}
 .pc-sec-play{margin-right:4px}
+/* Loop this part / Build up speed / Stay at this speed (app/cards-loop.js, 2026-11-14): three small
+   switches at the END of the section buttons, on their row when it has room, the same chip and green
+   track as the Guitar switch, as tall as a section button. Inside .pc-secs, which is display:contents
+   on a TAB card (so this is one more item of the TAB body's row) and a plain wrapping row on a sheet. */
+.pc-loop{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px;margin-left:auto}
+.pc-tab .tab-body > .pc-secs > .pc-loop{order:3}
+.pc-loop-sw{display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:0 8px 0 10px;font:inherit;font-size:0.8125rem;font-weight:600;color:var(--text2);background:var(--bg2);border:1px solid var(--border2);border-radius:18px;cursor:pointer}
+.pc-loop-sw:hover{background:var(--bg3)}
+.pc-loop-sw[hidden]{display:none}
+.pc-loop-track{position:relative;flex:0 0 40px;width:40px;height:22px;border-radius:999px;background:var(--text3)}
+.pc-loop-knob{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--bg);box-shadow:0 1px 3px rgba(0,0,0,0.3);transition:left .15s}
+.pc-loop-sw[aria-checked="true"] .pc-loop-track{background:var(--green-text)}
+.pc-loop-sw[aria-checked="true"] .pc-loop-knob{left:21px}
+.pc-loop-sw[aria-checked="true"] .pc-loop-lab{color:var(--text);font-weight:700}
+.pc-loop-sw:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
 /* Finished-activities group (renderClassActivities/caFinishedGroupHtml) —
    a plain <details>, closed by default, holding the same .ca-card markup
    as the main list. Deliberately quieter than .ca-card: no left accent, so

@@ -326,7 +326,7 @@ function pcTabHtml(a, L, preview){
   const chips = many
     ? `<p class="pc-hint">${escHtml(t('ca.cardSectionHint'))}</p><div class="pc-secs">`
       + L.sections.map((S, si) => `<button type="button" class="pc-sec${si === 0 ? ' cur' : ''}" data-sec="${si}"${pcKeyTitle('pc.keys.section', preview)} onclick="pcFromSection(this,${si})"><span class="pc-sec-play" aria-hidden="true">&#x25B6;</span>${escHtml(tf(S.s, 'label'))}</button>`).join('')
-      + `</div>`
+      + pcLoopHtml(L, preview) + `</div>`
     : '';
   const pages = L.sections.map((S, si) => {
     const widest = S.notes.length || 1;
@@ -615,7 +615,7 @@ function pcSheetHtml(a, L, preview){
   const c = a.card;
   const many = L.sections.length > 1;
   const chips = many
-    ? `<div class="pc-secs">` + L.sections.map((S, si) => `<button type="button" class="pc-sec${si === 0 ? ' cur' : ''}" data-sec="${si}"${pcKeyTitle('pc.keys.section', preview)} onclick="pcFromSection(this,${si})"><span class="pc-sec-play" aria-hidden="true">&#x25B6;</span>${escHtml(tf(S.s, 'label'))}</button>`).join('') + `</div>`
+    ? `<div class="pc-secs">` + L.sections.map((S, si) => `<button type="button" class="pc-sec${si === 0 ? ' cur' : ''}" data-sec="${si}"${pcKeyTitle('pc.keys.section', preview)} onclick="pcFromSection(this,${si})"><span class="pc-sec-play" aria-hidden="true">&#x25B6;</span>${escHtml(tf(S.s, 'label'))}</button>`).join('') + pcLoopHtml(L, preview) + `</div>`
     : '';
   const cells = ['1', '+', '2', '+', '3', '+', '4', '+'].slice(0, L.tr.beatsPerBar * 2)
     .map(n => `<span class="pc-strip-cell"><span class="pc-strip-ch"></span><span class="pc-strip-n">${n}</span></span>`).join('');
@@ -933,7 +933,10 @@ function pcSyncBarStop(){
    case is what the card did before. A whole-song card never loops and never
    makes one. */
 const PC_LAP_LEAD = 0.1, PC_SPARE_START = 0.02;
-function pcLoopStart(st){ return snipTimeAtBars(st.win, st.L.sections[st.loopFrom].fromBar - st.L.firstBar); }
+function pcLoopStart(st){ return pcLoopStartIn(st, st.win); }
+/* The lap goes back to the section started from, or, with Loop this part on,
+   to the section being looped (LOOP THIS PART, app/cards-loop.js). */
+function pcLoopStartIn(st, win){ return snipTimeAtBars(win, st.L.sections[pcLoopSec(st)].fromBar - st.L.firstBar); }
 /* One of the card's <audio> elements failed. The two swap roles every lap,
    so both get this same handler: the PLAYING one stops the card and says
    so; the spare (or the one on its way out) is just dropped, since losing
@@ -945,7 +948,7 @@ function pcAudioError(st, el){
   if(typeof gateToast === 'function') gateToast(t('ca.snipLoadFailed'));
 }
 function pcSparePark(st){
-  if(st.wholeSong || pcState !== st || st.leaving) return;   // mid-handoff: the timer parks it
+  if((st.wholeSong && !(st.loopSi >= 0)) || pcState !== st || st.leaving) return;   // mid-handoff: the timer parks it
   let sp = st.spare;
   if(!sp){
     sp = st.spare = new Audio();
@@ -955,18 +958,23 @@ function pcSparePark(st){
     // After a lap it is the playing element, and then an error stops the card.
     sp.addEventListener('error', () => pcAudioError(st, sp), { once: true });
   }
-  slowestApplyRate(sp, pcRate(st.root));
+  /* Build up speed (app/cards-loop.js): when the lap coming up is one step
+     faster, the spare waits on THAT stop's file and place, so the step lands
+     on the bar line with no gap. pcLoopNext() is null otherwise. */
+  const nx = pcLoopNext(st);
+  slowestApplyRate(sp, nx ? parseFloat(nx.rate) : pcRate(st.root));
   // Reads the window when it runs, not when it was queued — a speed switch
   // while the file is still loading must not park it on the old tier's clock.
-  const seek = () => { if(pcState === st && st.spare === sp){ try { sp.currentTime = pcLoopStart(st); } catch(e) {} } };
-  if(sp.src !== st.audio.src){
+  const seek = () => { if(pcState === st && st.spare === sp){ const n = pcLoopNext(st); try { sp.currentTime = n ? pcLoopStartIn(st, n.win) : pcLoopStart(st); } catch(e) {} } };
+  if(nx ? !twinSrcIs(sp, nx.src) : sp.src !== st.audio.src){
     sp.addEventListener('loadedmetadata', seek, { once: true });
-    sp.src = st.audio.src;
+    sp.src = nx ? nx.src : st.audio.src;
     sp.load();
   } else if(sp.readyState >= 1) seek();
 }
 function pcSpareReady(st){
-  const sp = st.spare;
+  const sp = st.spare, nx = pcLoopNext(st);
+  if(nx) return !!(sp && twinSrcIs(sp, nx.src) && sp.readyState >= 3 && !sp.seeking && Math.abs(sp.currentTime - pcLoopStartIn(st, nx.win)) < 0.05);
   return !!(sp && sp.src === st.audio.src && sp.readyState >= 3 && !sp.seeking && Math.abs(sp.currentTime - pcLoopStart(st)) < 0.05);
 }
 /* While a private song loads (SONG FILES), Play reads Stop and a press (or
@@ -988,12 +996,16 @@ function pcFromSection(btn, si){
   const root = btn.closest('.pc');
   if(root) pcStart(root, si);
 }
-function pcStart(root, si, rep){
+function pcStart(root, si, rep, keepBuild){
   if(window.coachMicLive) return;      // same guard as snipToggle: never play into a live mic
   if(typeof stopAllDemoAudio === 'function') stopAllDemoAudio();   // includes pcStop()
   const a = pcActivity(root);
   const L = a && pcLayout(a);
   if(!L || !L.sections[si]) return;
+  /* Loop this part / Build up speed (app/cards-loop.js): Build starts every
+     play at the slowest stop (or, after a private song loaded, the stop it
+     reached: keepBuild), so the speed control is set before the file is picked. */
+  const build = pcBuildBegin(root, keepBuild);
   const slow = root.dataset.slow === '1', guitar = root.dataset.guitar === '1';
   const src = snippetSrc(L.tr, slow, guitar);
   // A private song not on this page yet: "Loading the song… 40%", then this press again (SONG FILES).
@@ -1007,7 +1019,8 @@ function pcStart(root, si, rep){
      a lyric sheet (pcSheetStartAt). The loop, if any, still returns to the
      section's start. */
   const fromRep = Math.max(0, Math.min(L.sections[si].reps - 1, rep | 0));
-  const st = { root, L, audio, win: pcWindow(L, slow), loopFrom: si, fromRep, wholeSong: !!a.card.wholeSong, sheet: !!a.card.sheet, raf: 0, timers: [], lastBeat: -1, counting: true, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null };
+  const st = { root, L, audio, win: pcWindow(L, slow), loopFrom: si, fromRep, wholeSong: !!a.card.wholeSong, sheet: !!a.card.sheet, raf: 0, timers: [], lastBeat: -1, counting: true, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null,
+               loopSi: root.dataset.loop === '1' ? si : -1, build, laps: 0 };
   pcState = st;
   const btn = root.querySelector('.pc-play');
   if(btn){ btn.innerHTML = pcPlayBtnHtml(true); btn.classList.add('playing'); }
@@ -1030,6 +1043,7 @@ function pcGo(st, si){
   st.counting = false;
   st.lastBeat = -1;
   pcStatus(st.root, escHtml(t('ca.cardPlayingFrom', {section: tf(st.L.sections[si].s, 'label')})));
+  pcLoopStatus(st);                    // "Looping: Chorus" / "Round 1 of 2 at Slowest" instead, with Loop on
   st.audio.play().catch(() => {});
   st.raf = requestAnimationFrame(pcFrame);
   // The other mix loads only once this one is playing, and only where
@@ -1110,7 +1124,7 @@ function pcScheduleClick(st, now){
   const beatPos = snipBarsAt(st.win, now) * bpb;
   const nb = Math.ceil(beatPos - 1e-6);
   if(nb < st.lastBeat) st.lastBeat = nb - 1;
-  if(nb <= st.lastBeat || nb < 0 || nb >= st.L.totalBars * bpb) return;
+  if(nb <= st.lastBeat || nb < 0 || nb >= pcLoopEndBars(st) * bpb) return;   // the looped section's end, as the card's end: the next lap clicks its own downbeat
   const ahead = (snipTimeAtBars(st.win, nb / bpb) - now) / pcRate(st.root);   // real seconds
   if(ahead > 0.1) return;
   const ctx = getAudioCtx();
@@ -1127,7 +1141,8 @@ function pcFrame(){
   const { L } = st;
   let audio = st.audio;
   const now = audio.currentTime;
-  const left = (st.win.end - now) / (audio.playbackRate || 1);   // real seconds to the end of the window
+  const end = pcLoopEnd(st);           // the end of the window, or of the section Loop this part repeats
+  const left = (end - now) / (audio.playbackRate || 1);   // real seconds to the end of the window
   if(left <= PC_LAP_LEAD && !st.leaving && !audio.ended && pcSpareReady(st)){
     // The lap, with no seek and no hole — see THE SPARE.
     const sp = st.spare, old = audio;
@@ -1137,10 +1152,13 @@ function pcFrame(){
     hand.push(setTimeout(() => {
       if(pcState !== st || st.leaving !== old) return;
       if(st.audio !== old || !pcSpareReady(st)){ st.leaving = null; return; }   // switched under us: seek instead
+      const nx = pcLoopNext(st);       // Build up speed: this lap is one stop faster, and the spare waits on it
+      if(nx){ pcBuildShow(st.root, nx.stop); st.win = nx.win; }
       slowestApplyRate(sp, pcRate(st.root));   // a speed tap in the last tenth of a second skipped pcSparePark
       sp.play().catch(() => {});
       st.audio = sp; st.spare = null;
       st.lastBeat = -1;
+      pcLoopLapDone(st, nx);
     }, Math.max(0, (left - PC_SPARE_START) * 1000)));
     hand.push(setTimeout(() => {
       if(pcState !== st || st.leaving !== old) return;
@@ -1152,20 +1170,29 @@ function pcFrame(){
       if(st.audio.paused) st.audio.play().catch(() => {});
     }, Math.max(0, left * 1000 - 4)));
     st.timers.push(...hand);           // pcStop still clears them with the rest
-  } else if(!st.leaving && (now >= st.win.end - 0.02 || audio.ended)){
+  } else if(!st.leaving && (now >= end - 0.02 || audio.ended)){
     // A whole-song card stops at the end of the song (Jonathan, 2026-10-02:
     // it used to loop back to where it started). A card that is a few bars
     // of the song (ca-10's twelve laps of the riff, ca-20's four-bar loop)
     // still loops.
-    if(st.wholeSong){
+    if(st.wholeSong && !(st.loopSi >= 0)){
       const root = st.root;
       pcStop();
       pcStatus(root, escHtml(t('ca.cardSongEnd')));
       return;
     }
     // The spare was not ready (or this card has none yet): the old seek.
+    const nx = pcLoopNext(st);
+    // Build up speed, the next stop a private song not loaded yet: load it, then that stop from a count-in (SONG FILES).
+    if(nx && pcBuildWaitStep(st, nx)) return;
     try { audio.currentTime = pcLoopStart(st); } catch(e) {}
     if(audio.paused) audio.play().catch(() => {});
+    /* Build up speed: the lap is counted and the control moved to the next
+       stop first, then the speed switch's own path plays it (the rate, or the
+       other file at this bar), and the spare is parked for the lap after. */
+    if(nx) pcBuildShow(st.root, nx.stop);
+    pcLoopLapDone(st, nx);
+    if(nx){ pcRetrack(st.root); audio = st.audio; }
     pcSparePark(st);                   // try to be ready for the next lap
     st.lastBeat = -1;
   }
@@ -1175,11 +1202,12 @@ function pcFrame(){
      dot runs PC_SHEET_LEAD ahead, so the chord is on screen as the student
      plays it (Jonathan tuned it by ear, 2026-10-19). */
   const shift = st.sheet ? PC_SHEET_LEAD : PC_TAB_LEAD;
-  const barsIn = snipBarsAt(st.win, audio.currentTime + shift * pcRate(st.root));
+  // A lead never looks past the end of the section Loop this part repeats (pcLoopClamp).
+  const barsIn = pcLoopClamp(st, snipBarsAt(st.win, audio.currentTime + shift * pcRate(st.root)));
   let loc = pcLocate(L, barsIn);
   if(!st.sheet && loc){
     // A note (a beat, on a chord grid) on another row lights PC_ROW_LEAD early — see PC_ROW_LEAD.
-    const ahead = pcLocate(L, snipBarsAt(st.win, audio.currentTime + (shift + PC_ROW_LEAD) * pcRate(st.root)));
+    const ahead = pcLocate(L, pcLoopClamp(st, snipBarsAt(st.win, audio.currentTime + (shift + PC_ROW_LEAD) * pcRate(st.root))));
     if(ahead && pcLocKey(L, ahead) !== pcLocKey(L, loc)
        && pcLocRow(st.root, L, ahead) !== pcLocRow(st.root, L, loc)) loc = ahead;
   }
@@ -1320,6 +1348,7 @@ function pcSetMetro(btn){
 function pcSetSpeed(sw){
   const root = sw.closest('.pc');
   if(!root) return;
+  pcBuildTakeover(root);               // a speed chosen by hand ends Build up speed (app/cards-loop.js)
   const slow = root.dataset.slow !== '1';
   root.dataset.slow = slow ? '1' : '';
   sw.setAttribute('aria-checked', slow ? 'false' : 'true');   // checked = Normal
@@ -1349,6 +1378,7 @@ function pcSetSpeedTo(range){
   const speed = tick.dataset.speed, rate = tick.dataset.rate || '1';
   const slow = (speed === 'slowest' || speed === 'slower') ? '1' : '';
   if(root.dataset.slow === slow && pcRate(root) === parseFloat(rate)) return;
+  pcBuildTakeover(root);               // a speed chosen by hand ends Build up speed (app/cards-loop.js)
   root.dataset.slow = slow;
   root.dataset.rate = rate;
   pcRetrack(root);
@@ -1406,7 +1436,7 @@ function pcRetrack(root){
   // A speed or Guitar change while this card's song still loads: wait for the file asked for now (SONG FILES).
   if((!st || st.root !== root) && songFileRedoWait(root)) return;
   if(!st || st.root !== root) return;
-  if(st.counting){ pcStart(root, st.loopFrom, st.fromRep); return; }
+  if(st.counting){ pcStart(root, st.loopFrom, st.fromRep, st.build); return; }
   const slow = root.dataset.slow === '1', guitar = root.dataset.guitar === '1';
   /* The new tier is a private file not loaded yet (SONG FILES): stop, load it,
      then start the section that was playing again, on the new tier. */
@@ -1481,6 +1511,7 @@ function pcToggleHelp(btn){
                   playing: the previous / next section chip   pcFromSection(chip, si)
      < or ,       one speed stop slower         pcSetSpeedTo(range) / pcSetSpeed(switch)
      > or .       one speed stop faster         (same, within the control's own ends)
+     L            the Loop this part switch     pcSetLoopSw(switch) — a card with sections only (app/cards-loop.js)
    A card with one section has no pager and no chips, so the arrows do
    nothing there; a lyric-sheet card has chips but no pager, so its arrows
    work only while it plays.
@@ -1577,7 +1608,7 @@ function pcKeyBlocked(){
   if(Array.from(document.querySelectorAll('.micrec-ask')).some(m => m.getClientRects().length)) return true;
   return Array.from(document.querySelectorAll('[aria-modal="true"]')).some(m => !m.closest('[hidden]') && m.getClientRects().length);
 }
-const PC_KEYS = { ' ': 'play', 'Spacebar': 'play', 'k': 'play', 'K': 'play', 'ArrowLeft': 'prev', 'ArrowRight': 'next', '<': 'slower', ',': 'slower', '>': 'faster', '.': 'faster' };
+const PC_KEYS = { ' ': 'play', 'Spacebar': 'play', 'k': 'play', 'K': 'play', 'ArrowLeft': 'prev', 'ArrowRight': 'next', '<': 'slower', ',': 'slower', '>': 'faster', '.': 'faster', 'l': 'loop', 'L': 'loop' };
 function pcKeydown(e){
   const act = Object.prototype.hasOwnProperty.call(PC_KEYS, e.key) ? PC_KEYS[e.key] : null;
   // A key press forgets the last pointer press, so the click Enter or Space makes on a control keeps its focus.
@@ -1599,6 +1630,9 @@ function pcKeydown(e){
   if(act === 'play'){
     const btn = root.querySelector('.pc-play');
     if(btn){ pcToggle(btn); done = true; }
+  } else if(act === 'loop'){
+    const sw = root.querySelector('.pc-loop-sw[data-loop-sw="loop"]');
+    if(sw){ pcSetLoopSw(sw); done = true; }
   } else if(act === 'prev' || act === 'next'){
     const dir = act === 'next' ? 1 : -1;
     if(playing){

@@ -376,6 +376,7 @@ function caOnToggle(details){
   // off the loop the student just started.)
   if(!details.open && snipState && details.contains(snipState.card)) snipStop();
   if(!details.open && pcState && details.contains(pcState.root)) pcStop();
+  if(!details.open) pcLoopReset(details);   // Loop this part / Build up speed start off at every opening (app/cards-loop.js)
   if(!details.open) songFileCancelWaitIn(details);     // a song still loading in it (SONG FILES)
   /* A card opened from "Still to do" left its header wherever it already sat
      on the page — under the header, the page title and the Do-now card, as
