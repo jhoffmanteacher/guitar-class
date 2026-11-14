@@ -945,7 +945,7 @@ function genWorld(rng, today) {
 /* ════════════════════════════════════════════════════════════════════════════
    THE CHECKS
    ════════════════════════════════════════════════════════════════════════════ */
-const C = { cases: 0, pages: 0, comparisons: 0, sigSteps: 0, withBlocker: 0, landed: 0, landingChecks: 0, asked: 0, firstChecks: 0, routerChecks: 0, journeyLocks: 0, changes: 0, writes: 0, threeWay: 0, tabReturns: 0, midRead: 0, freshLoads: 0, landings: 0, gatedSeen: 0, several: 0,
+const C = { cases: 0, pages: 0, comparisons: 0, sigSteps: 0, consoleReadPaints: 0, withBlocker: 0, landed: 0, landingChecks: 0, asked: 0, firstChecks: 0, routerChecks: 0, journeyLocks: 0, changes: 0, writes: 0, threeWay: 0, tabReturns: 0, midRead: 0, freshLoads: 0, landings: 0, gatedSeen: 0, several: 0,
   marked: 0, cas: 0, newStudent: 0, richRetire: { archive: 0, delete: 0 }, namedRetire: { archive: 0, delete: 0 }, gamesTabReturn: [0, 0], gamesKeepLast: 0 };
 const FAILS = [];
 const TRUTH = {};
@@ -1477,6 +1477,38 @@ async function directedSignature() {
   }
 }
 
+/* ── Directed: the console after a FAILED read of config/class (2026-11-14, plant-a-fault 635dbb41db) ──
+   teacher-config.js renderTeacherGames: "A failed read leaves cfg = {} ... renders as all-defaults with nothing to
+   say so ... do the same here rather than show a confident wrong answer" (and the comment above
+   teacherClassConfigReadOk: a failed read taken for an empty doc seeds an empty board). The real Games view is
+   painted three times on one console, each after its own read: a read that FAILS must leave "Could not read the
+   class settings" and no table; a good read must draw the table (so the block cannot pass by drawing nothing);
+   a second failed read after that good one must refuse again. Judged on what the teacher sees (the view's
+   markup), never on the flag. Fixed, not seeded. */
+async function directedConsoleRead() {
+  CUR = { seed: SEED, idx: 'cfg-read', label: 'directed console read block' };
+  step('directed console read block');
+  VNOW = DAYS[0][1];
+  const store = new Store();
+  store.put('config/class', { activityBoardSeeded: true, activityBoard: {}, gamesEnabled: false, gameOverrides: {}, configVersion: 3 });
+  UIDS.forEach((u, i) => store.put('progress/' + u, { name: NAMES[u], email: `stu${i + 1}@example.test`, period: '4', classActivities: {}, migrations: { swap45: true } }));
+  const con = await bootConsole(store);
+  const paint = async mode => {
+    con.client.plan.config.push(mode);
+    await con.run(`(function(){ teacherView = 'games'; renderTeacherGames(); })()`);
+    await flush();
+    C.consoleReadPaints++;
+    return String(con.ctx.document.getElementById('t-grid-container').innerHTML || '');
+  };
+  const REFUSED = /Could not read the class settings/, TABLE = /tg-class/;
+  for (const [label, mode, wantRefused] of [['a failed read', 'fail', true], ['a good read', 'ok', false], ['a failed read after a good one', 'fail', true]]) {
+    const html = await paint(mode);
+    if (wantRefused && (!REFUSED.test(html) || TABLE.test(html))) fail(`console Games view after ${label}`, `the view drew ${TABLE.test(html) ? 'the games table (from an empty config: "games off" shows as on, every override as Default)' : JSON.stringify(html.slice(0, 120))}; wanted "Could not read the class settings" and no table`);
+    if (!wantRefused && (REFUSED.test(html) || !TABLE.test(html))) fail(`console Games view after ${label}`, `the view drew ${JSON.stringify(html.slice(0, 120))}; wanted the games table`);
+  }
+  if (con.alerts.length) fail('console read block', `alert: ${con.alerts[0].slice(0, 160)}`);
+}
+
 /* ── Run ── */
 process.on('unhandledRejection', e => { fail('unhandled rejection', String(e && e.stack || e).split('\n').slice(0, 3).join(' / ')); });
 const indices = ONE_CASE !== null ? [ONE_CASE] : Array.from({ length: CASES }, (_, i) => i);
@@ -1491,6 +1523,7 @@ for (const i of indices) {
 }
 if (ONE_CASE === null) {
   try { await directedSignature(); } catch (e) { fail('harness (signature block)', String(e && e.stack || e).split('\n').slice(0, 4).join(' / ')); }
+  try { await directedConsoleRead(); } catch (e) { fail('harness (console read block)', String(e && e.stack || e).split('\n').slice(0, 4).join(' / ')); }
 }
 clearInterval(watchdog);
 if (FULL_RUN) {
@@ -1509,6 +1542,7 @@ out.push(`  config/progress reads served: ${READS.ok} ok, ${READS.fail} failed, 
 out.push(`  the lock (R6): body.ca-gated seen on ${C.gatedSeen} of ${C.freshLoads} sign-ins (and after every tab return); JOURNEY_GATE_LOCKS read false on ${C.journeyLocks} Journey probes; ${C.routerChecks} students with an unfinished required activity asked the router for another page`);
 out.push(`  the landing (R13, the real showApp): ${C.landingChecks} sign-ins from a bare address, a page, a lesson, a deep link, the live quiz, a Journey page or an update reload; ${C.landed} ended on In-Class Activities (${C.withBlocker} had an unfinished required activity)`);
 out.push(`  the signature, directed: ${C.sigSteps} of 13 inputs changed alone, each followed by a tab return with a good read`);
+out.push(`  the console after a failed config read, directed: ${C.consoleReadPaints} of 3 Games views painted (failed read, good read, failed read)`);
 out.push(`  the first card (R14, caStartHereId after the real renderClassActivities): ${C.firstChecks} sign-ins checked · the period question (R15) asked at ${C.asked} sign-ins`);
 out.push(`  changes by kind (floor ${KIND_FLOOR}${FULL_RUN ? '' : ', checked on a full run only'}): ` + CHANGE_KINDS.map(k => `${k} ${KIND_COUNT[k] || 0}`).join(' · ') + ` (of them on a Hidden or Who card: archive ${C.richRetire.archive}, delete ${C.richRetire.delete}; on a renamed or pinned card: archive ${C.namedRetire.archive}, delete ${C.namedRetire.delete})`);
 out.push('  WHEN a console change reaches a student (R12) — passed / run, by change and moment:');
