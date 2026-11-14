@@ -26,8 +26,11 @@ Before any of them: `git switch main && git pull --ff-only`, then `git status` m
    read skill `audio-and-snippets`, "Rolling `sw.js` back past this scheme".
 4. `git push`. **Never `git push --force`**: other sessions push to the same `main`, and a force
    push silently deletes their commits and the history the Friday check reads. A revert is an
-   ordinary commit, so a plain push always works (if it is refused, `git pull --rebase`, then
-   push again).
+   ordinary commit, so a plain push works (if it is refused, `git pull --rebase`, then push
+   again). If the revert puts every module file back exactly as an earlier commit had them, check
+   1dl lets it through with a `!` line naming that commit; any other module change stays refused.
+   If it changes `firestore.rules`, check 1dn refuses the push until you tell Jonathan to paste the
+   old rules back and add the line it prints to `RULES-PASTE.md`.
 5. Confirm, one or two minutes later: `node tools/checks.mjs --live` must print
    "live site is serving this exact version". If it says "does not match", wait a minute and run it again.
 6. Open tabs reload themselves once (after a drill, recording, exit check or playing card ends; at
