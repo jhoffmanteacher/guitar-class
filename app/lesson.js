@@ -350,12 +350,16 @@ function buildLesson(w){
     const statusIcon = isDone ? '&#x2713;' : String(num);
     if(isOpen) openNum = gnum;
     const curAttr = isCur ? ' aria-current="step"' : '';
+    // The space between the number and the label is for screen readers and
+    // voice control only (a flex row drops it on screen): without it the
+    // visible text reads "1Watch…", which is not inside the aria-label
+    // "Step 1 — Watch…" (axe label-content-name-mismatch).
     // data-key is the step's progress key, the same in both languages — the
     // handle rebuildModuleContentPanels() uses to put the student back on
     // this row after a language switch. Never a storage key of its own.
     return `<li class="step${isDone ? ' step-done' : ''}${isCur ? ' cur' : ''}${isOpen ? '' : ' collapsed'}"${skillsAttr} data-num="${num}" data-key="${escAttr(doneKey)}">`
       + `<button type="button" class="step-head" aria-expanded="${isOpen}" onclick="toggleStepOpen(this)" aria-label="${escAttr(ariaLabel)}"${curAttr}>`
-      + `<span class="step-status" aria-hidden="true">${statusIcon}</span>`
+      + `<span class="step-status" aria-hidden="true">${statusIcon}</span> `
       + `<span class="step-label">${escHtml(label)}</span>`
       + `<span class="step-chev" aria-hidden="true">&#x25B6;</span>`
       + `</button>`
