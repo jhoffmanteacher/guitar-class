@@ -76,6 +76,9 @@ a{color:var(--brand)}
 .crumb{font-size:0.8125rem;color:var(--text2);margin-bottom:18px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px}
 .crumb-left{display:flex;align-items:center;gap:12px}
 #save-msg{color:var(--text3)}
+/* While it says something it floats in the top-right corner: ticking a box scrolls the page to the next layer, so a
+   line in the crumb was off screen (Friday check 2026-11-14: 606-847 px above the top, 9 of 9 at 1366x657). */
+#save-msg:not(:empty){position:fixed;top:12px;right:16px;z-index:120;background:var(--bg);color:var(--text);padding:6px 12px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.25);max-width:min(560px,calc(100vw / var(--site-fill,1) - 32px))}
 .btn-translate{font:inherit;padding:4px 10px;font-size:0.75rem;border:1px solid var(--border2);border-radius:20px;background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:5px;position:relative}
 .btn-translate::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   width:max(100%,44px);height:max(100%,44px)}

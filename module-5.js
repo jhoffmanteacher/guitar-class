@@ -311,14 +311,14 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — Solo over "Seven Nation Army"', label_es: 'Reto — Solo sobre "Seven Nation Army"',
-                text: '<ol><li>Record yourself playing the "Seven Nation Army" riff (a riff = a short musical phrase that repeats) on the A string — E · E · G · E · D · C · B, the same one from Module 2 — and loop the recording.</li><li>Improvise over it using ONLY these three notes — open low E, G (low E, fret 3), and open A — for four bars.</li></ol>You\'ve got it when: four bars of intentional phrases — not a stream of notes — that land back on E. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
-                text_es: '<ol><li>Grábate tocando el riff de "Seven Nation Army" (un riff = una frase musical corta que se repite) en la cuerda La — E · E · G · E · D · C · B, el mismo que tocas desde el Módulo 2 — y repite la grabación en bucle.</li><li>Improvisa sobre ella usando SOLO estas tres notas — Mi grave al aire, G (cuerda Mi grave, traste 3), y La al aire — durante cuatro compases.</li></ol>Lo tienes cuando: cuatro compases de frases intencionadas — no un torrente de notas — que aterricen de vuelta en E. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5</a>.',
+                text: '<ol><li>Play the "Seven Nation Army" riff (a riff = a short musical phrase that repeats) on the A string once — E · E · G · E · D · C · B, the same one from Module 2.</li><li>Then improvise for four bars in its place using ONLY these three notes — open low E, G (low E, fret 3), and open A — for four bars.</li></ol>You\'ve got it when: four bars of intentional phrases — not a stream of notes — that land back on E. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
+                text_es: '<ol><li>Toca una vez el riff de "Seven Nation Army" (un riff = una frase musical corta que se repite) en la cuerda La — E · E · G · E · D · C · B, el mismo que tocas desde el Módulo 2.</li><li>Luego improvisa cuatro compases en su lugar usando SOLO estas tres notas — Mi grave al aire, G (cuerda Mi grave, traste 3), y La al aire — durante cuatro compases.</li></ol>Lo tienes cuando: cuatro compases de frases intencionadas — no un torrente de notas — que aterricen de vuelta en E. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5</a>.',
                 hint: 'Remember the Rule of 3: short ideas, with space between them. E is the note this song centers on, and your three notes come from E minor pentatonic — so they sit just below the riff, which you play on the A string.',
                 hint_es: 'Recuerda la Regla de 3: ideas cortas, con espacio entre ellas. E es la nota en la que se centra esta canción, y tus tres notas vienen de la pentatónica de E menor — así que caen justo debajo del riff, que tocas en la cuerda La.',
                 stuck: 'Play just E and G, trading two-beat phrases with silence: play two beats, rest two beats.',
                 stuck_es: 'Toca solo E y G, intercambiando frases de dos tiempos con silencio: toca dos tiempos, descansa dos tiempos.',
-                levelUp: 'Add the open D string as a fourth note, or record the riff on a loop and trade fours with your recording (trade fours = play 4 bars, then let the recording play 4) — or with anyone at home who\'ll play it.',
-                levelUp_es: 'Agrega la cuerda Re al aire como una cuarta nota, o graba el riff en un loop e intercambia de a cuatro con tu grabación (intercambiar de a cuatro = toca 4 compases, y luego deja que la grabación toque 4) — o con quien esté en casa y quiera tocarlo.',
+                levelUp: 'Add the open D string as a fourth note, or trade fours with a partner who plays the riff (trade fours = you improvise 4 bars, then they play 4) — or with anyone at home who\'ll play it.',
+                levelUp_es: 'Agrega la cuerda Re al aire como una cuarta nota, o intercambia de a cuatro con un compañero que toque el riff (intercambiar de a cuatro = improvisas 4 compases, y luego él toca 4) — o con quien esté en casa y quiera tocarlo.',
                 skills: [6],
                 tab: {
                   caption: 'Your three allowed notes — E minor pentatonic, open position',
@@ -709,8 +709,8 @@ SETS.push(
             hint_es: 'La llamada suena como una pregunta. La respuesta suena como la contestación.',
             stuck: 'Use only 2 or 3 notes for both parts. End every response on A.',
             stuck_es: 'Usa solo 2 o 3 notas en las dos partes. Termina cada respuesta en A.',
-            levelUp: 'Take turns with the person next to you: two bars each, back and forth, four times. End every one of your answers on A. Or record a 2-bar call and answer it over the playback.',
-            levelUp_es: 'Alterna con la persona de al lado: dos compases cada quien, de ida y vuelta, cuatro veces. Termina cada una de tus respuestas en A. O graba una llamada de 2 compases y respóndela sobre la grabación.',
+            levelUp: 'Take turns with the person next to you: two bars each, back and forth, four times. End every one of your answers on A.',
+            levelUp_es: 'Alterna con la persona de al lado: dos compases cada quien, de ida y vuelta, cuatro veces. Termina cada una de tus respuestas en A.',
             skills: [6]
           }
             ]

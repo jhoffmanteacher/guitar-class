@@ -1197,10 +1197,16 @@ function flushSave(closing){
          not the next student's: re-marking it dirty would write the reset
          page into the new student's doc once their read lands. */
       if(gen !== loadGen) return;
-      /* Still only in the page: a reload would drop it, and the next tick retries. */
+      /* Still only in the page: a reload would drop it. It retries on its own (every 15 s, and at once when the
+         browser says it is back online), so the line can say "it keeps trying" (Friday check 2026-11-14: the old
+         "tick any box" asked a student to tick a layer they had not passed). */
       dirty = true; setSaveMsg('journey.saveRetry');
+      clearTimeout(saveRetryTimer);
+      saveRetryTimer = setTimeout(function(){ if(gen === loadGen) flushSave(false); }, SAVE_RETRY_MS);
     });
 }
+var SAVE_RETRY_MS = 15000, saveRetryTimer = null;
+window.addEventListener('online', function(){ if(dirty) flushSave(false); });
 
 /* ── Activity gate (Today-first work order, Phase 1) ──
    A bookmarked Journey page sits behind the same gate as the main site — see

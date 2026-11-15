@@ -6757,6 +6757,26 @@ function checkNoClickMidSeek() {
   if (!bad) ok('3 of 3 Metronome schedulers skip a seeking track (journey.js clickTick, snipTick, pcFrame)');
 }
 
+/* 1ek. THE JOURNEY "NOT SAVED YET" LINE TELLS THE TRUTH (Friday check 2026-11-14). journey.saveRetry says the page
+   "keeps trying on its own", so tabs/journey.js must retry a refused save by itself: a timer set in flushSave's catch
+   and an 'online' listener. And the line must be on screen: tabs/journey-theme.css floats #save-msg while it has
+   text (ticking a box scrolls the page down to the next layer). */
+function checkJourneySaveRetry() {
+  head('1ek. Journey pages: "Not saved yet" is on screen and the page really retries on its own');
+  let bad = 0;
+  const flag = m => { err(`1ek: ${m}`); problems++; bad++; };
+  const read = f => { try { return readFileSync(join(ROOT, f), 'utf8'); } catch { flag(`${f} is missing`); return ''; } };
+  const j = read('tabs/journey.js'), css = read('tabs/journey-theme.css'), i18n = read('i18n.js');
+  const body = jsFunctionBody(j, 'flushSave') || '';
+  if (!body) flag('could not find flushSave in tabs/journey.js: this check went blind');
+  else if (!/setSaveMsg\('journey\.saveRetry'\);[\s\S]{0,200}saveRetryTimer = setTimeout\(function\(\)\{ if\(gen === loadGen\) flushSave\(false\); \}, SAVE_RETRY_MS\);/.test(body))
+    flag("flushSave's catch shows journey.saveRetry but no longer sets the retry timer (saveRetryTimer = setTimeout(… flushSave(false) …, SAVE_RETRY_MS))");
+  if (!/window\.addEventListener\('online', function\(\)\{ if\(dirty\) flushSave\(false\); \}\);/.test(j)) flag("tabs/journey.js lost its 'online' retry (window.addEventListener('online', … flushSave(false) …))");
+  if (!/#save-msg:not\(:empty\)\{position:fixed;/.test(css)) flag('tabs/journey-theme.css no longer floats #save-msg while it has text (#save-msg:not(:empty){position:fixed;…}): the line is off screen after a tick scrolls the page');
+  if (!/'journey\.saveRetry':\s*\{ en: '[^']*keeps trying on its own[^']*',\s*es: '[^']*Sigue intentando solo[^']*' \}/.test(i18n)) flag('journey.saveRetry no longer says it keeps trying (EN + ES): if the retry changed, change the words and this pin together');
+  if (!bad) ok('Journey "Not saved yet": floats on screen, retries every SAVE_RETRY_MS and when back online, EN + ES say so');
+}
+
 /* 1ei. The Games page is grouped by what each game teaches (Jonathan, 2026-11-14): chord switching, rhythm and
    tempo, finger strength, the notes on the low E and A strings, then the other games in a closed "More games".
    The table is GAMES_GROUPS in coach-hub.js. The real GAMES_META, GAMES_GROUPS and gamesHubGroupsHtml are RUN
@@ -19923,6 +19943,7 @@ function checkPracticeMinutes(i18nTable) {
   checkTitleHeadings();
   checkGamesGroups();
   checkNoClickMidSeek();
+  checkJourneySaveRetry();
   checkSignInAccountChooser();
   checkPracticeCopy();
   if (!SKIP_LINKS) await checkLinks();

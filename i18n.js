@@ -1603,8 +1603,8 @@
                                es: 'No se guardó — revisa la conexión a internet y luego actualiza la página.' },
     // A write was refused while the page is up: the ticks are only in the page, a reload would drop them, and the
     // next tick retries (flushSave in tabs/journey.js keeps them dirty). saveFailed is for the Google scripts never loading.
-    'journey.saveRetry':     { en: 'Not saved yet — check the internet connection, then tick any box.',
-                               es: 'Todavía no se guardó — revisa la conexión a internet y luego marca cualquier casilla.' },
+    'journey.saveRetry':     { en: 'Not saved yet — check the internet connection. It keeps trying on its own; don’t close this page yet.',
+                               es: 'Todavía no se guardó — revisa la conexión a internet. Sigue intentando solo; no cierres esta página todavía.' },
     'journey.signin':        { en: 'Sign in on the class site to save your progress',
                                es: 'Inicia sesión en el sitio de la clase para guardar tu progreso' },
     'journey.slow':          { en: 'Slow ({bpm} BPM)', es: 'Lento ({bpm} BPM)' },

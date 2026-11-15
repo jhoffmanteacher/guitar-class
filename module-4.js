@@ -675,8 +675,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — "Let It Be", verse (assessment rehearsal)', label_es: 'Reto — "Let It Be", estrofa (ensayo de evaluación)',
-                text: '<ol><li>Play C · G · Am · F with a down-strum, four beats per chord, building from 60 to 70 BPM.</li><li>Record a run and check it against the chart.</li></ol>You\'ve got it when: one full loop at 70 BPM, every change landing on beat 1. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5 — Open Chords</a>.',
-                text_es: '<ol><li>Toca C · G · Am · F con un rasgueo hacia abajo, cuatro tiempos por acorde, subiendo de 60 a 70 BPM.</li><li>Graba una toma y compárala con el diagrama.</li></ol>Lo tienes cuando: una vuelta completa a 70 BPM, cada cambio cayendo en el tiempo 1. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 4 de 5 — Acordes al aire</a>.',
+                text: '<ol><li>Play C · G · Am · F with a down-strum, four beats per chord, building from 60 to 70 BPM.</li><li>Play one full loop with the metronome on and check that every change lands on beat 1.</li></ol>You\'ve got it when: one full loop at 70 BPM, every change landing on beat 1. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5 — Open Chords</a>.',
+                text_es: '<ol><li>Toca C · G · Am · F con un rasgueo hacia abajo, cuatro tiempos por acorde, subiendo de 60 a 70 BPM.</li><li>Toca una vuelta completa con el metrónomo encendido y comprueba que cada cambio caiga en el tiempo 1.</li></ol>Lo tienes cuando: una vuelta completa a 70 BPM, cada cambio cayendo en el tiempo 1. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 4 de 5 — Acordes al aire</a>.',
                 hint: 'A full bar per chord — patient and unhurried, twice as long as your Module 2 bass roots, which moved every two beats. This C–G–Am–F progression opens one of the three songs you can choose from to play from memory for the module assessment. The record actually moves at your Module 2 pace — two beats per chord — and the Half-Bar Changes ladder later in this set gets you there. Look ahead — start forming the next chord on beat 4 of the current one. Keep your fingers arched and your thumb behind the neck so every string rings. The strum keeps moving even while fingers travel.',
                 hint_es: 'Un compás completo por acorde — paciente y sin apuro, el doble de duración que tus raíces de bajo del Módulo 2, que se movían cada dos tiempos. Esta progresión C–G–Am–F abre una de las tres canciones entre las que puedes elegir para tocar de memoria en la evaluación del módulo. La grabación en realidad se mueve al ritmo de tu Módulo 2 — dos tiempos por acorde — y la escalera de Cambios de Medio Compás más adelante en esta unidad te lleva ahí. Mira hacia adelante — empieza a formar el siguiente acorde en el tiempo 4 del actual. Mantén tus dedos arqueados y tu pulgar detrás del mástil para que cada cuerda suene. El rasgueo sigue moviéndose aunque los dedos viajen.',
                 stuck: 'Isolate the roughest pair (probably C → F) and loop just those two, four beats each.',
@@ -846,8 +846,8 @@ SETS.push(
             steps: [
               {
                 label: 'Ear Spark: bright or sad?', label_es: 'Chispa auditiva: ¿alegre o triste?',
-                text: 'Ear Spark (optional, 2 min):<ol><li>Record yourself strumming C or Am, playing them a few times in a mixed-up order.</li><li>On playback, say whether each one sounds bright or sad before checking — that\'s major vs minor, and you can already hear it.</li><li>Try it live too: strum one from memory without looking at your fingers, then check which one you played.</li></ol>',
-                text_es: 'Chispa auditiva (opcional, 2 min):<ol><li>Grábate rasgueando C o Am, tocándolos varias veces en un orden mezclado.</li><li>Al escuchar la grabación, di si cada uno suena alegre o triste antes de comprobarlo — eso es mayor vs. menor, y ya puedes oírlo.</li><li>Pruébalo también en vivo: rasguea uno de memoria sin mirar tus dedos, y luego comprueba cuál tocaste.</li></ol>'
+                text: 'Ear Spark (optional, 2 min):<ol><li>With a partner: one of you strums C or Am a few times in a mixed-up order, and the other listens without looking.</li><li>The listener says whether each one sounds bright or sad before checking — that\'s major vs minor, and you can already hear it. Then swap.</li><li>On your own: strum one from memory without looking at your fingers, then check which one you played.</li></ol>',
+                text_es: 'Chispa auditiva (opcional, 2 min):<ol><li>Con un compañero: uno rasguea C o Am varias veces en un orden mezclado, y el otro escucha sin mirar.</li><li>El que escucha dice si cada uno suena alegre o triste antes de comprobarlo — eso es mayor vs. menor, y ya puedes oírlo. Luego cambien.</li><li>Tú solo: rasguea uno de memoria sin mirar tus dedos, y luego comprueba cuál tocaste.</li></ol>'
               }
             ]
           },
@@ -1615,8 +1615,8 @@ SETS.push(
             steps: [
               {
                 label: 'Wrap-up: your pressure point', label_es: 'Cierre: tu punto débil bajo presión',
-                text: 'After today, what\'s the one part of the song you\'re working on most likely to fall apart under pressure (recording light on, someone listening)? Type it below — that\'s exactly where your next practice starts.',
-                text_es: 'Después de hoy, ¿cuál es la única parte de la canción en la que estás trabajando que más probablemente se desarme bajo presión (con la luz de grabación encendida, alguien escuchando)? Escríbelo abajo — ahí es exactamente donde empieza tu próxima práctica.',
+                text: 'After today, what\'s the one part of the song you\'re working on most likely to fall apart under pressure (someone listening)? Type it below — that\'s exactly where your next practice starts.',
+                text_es: 'Después de hoy, ¿cuál es la única parte de la canción en la que estás trabajando que más probablemente se desarme bajo presión (con alguien escuchando)? Escríbelo abajo — ahí es exactamente donde empieza tu próxima práctica.',
               }
             ]
           }
@@ -1735,13 +1735,13 @@ MODULE_REVIEWS[4] = {
   ],
   assessItems: [
     'Run the chord deck (Set 3) for three chords at random and play them in an 8-bar progression at 70 BPM with clean changes in time',
-    'Record (or perform for someone) one core song from memory — "Let It Be", "Luna", or "the cure" — with clean tone and smooth chord changes, then listen back and check it',
+    'Play one core song from memory for someone (or straight through on your own) — "Let It Be", "Luna", or "the cure" — with clean tone and smooth chord changes',
     'Name the chords on an unlabelled chord chart',
     'Write a few sentences (not graded) on what you can play now that you could not play when you started this class'
   ],
   assessItems_es: [
     'Corre la baraja de acordes (Unidad 3) para elegir tres acordes al azar y tócalos en una progresión de 8 compases a 70 BPM con cambios limpios a tiempo',
-    'Graba (o interpreta para alguien) una canción principal de memoria — "Let It Be", "Luna", o "the cure" — con tono limpio y cambios de acorde suaves, y luego escúchala y revísala',
+    'Toca de memoria una canción principal para alguien (o de principio a fin tú solo) — "Let It Be", "Luna", o "the cure" — con tono limpio y cambios de acorde suaves',
     'Nombra los acordes en un diagrama de acordes sin etiquetar',
     'Escribe unas oraciones (no calificadas) sobre lo que puedes tocar ahora y no podías cuando empezaste esta clase'
   ],

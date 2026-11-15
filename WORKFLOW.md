@@ -245,16 +245,11 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
       turned clockwise in `bf634eb`: mirror Module 1, or say the two differ on purpose.
     - Games heading "Notes on the low E and A strings" (`i18n.js:2225`, `9e62b46`): Note Runner keeps to those two
       strings, but only 1 of Note Hunt's 5 levels and 1 of Fret Zap's 4 decks do.
-    - Lines that still need a recording now that the dock's Record is gone (`4422c66`): `module-5.js:314`,
-      `module-7.js:569`, and `module-4.js:678,849` (Module 4 is open; `72539e4` skipped 1-4). Is Module 4 frozen?
     - Two blues solos with no backing (`module-11.js:894`, m10w2·c·sec5, `72539e4`): point to a 12-bar backing
       track, or a partner comping.
     - Backup leaves out `minutes/{uid}/days` "because the teacher may not read them" (`teacher-backup.js:124`,
       `bbbfdff`): false since `e88603f` lets the teacher read them. Back them up, or keep them out and fix the
       reason; `siteErrors/*` is not listed either.
-    - Journey pages' "Not saved yet" line (`#save-msg`, in `.crumb` at the top) is scrolled off screen when it shows
-      (9 of 9 at 1366×657): where should the save status live?
-  - **Code or wording (fix any day):**
     - Change Up done screen at 135 / 45 BPM says "10 BPM" and the lit button plays 140 / 40, a 5 BPM step
       (`coach-chords.js:1373`, `66bac56`, `e9711b8`): say the real step, EN + ES.
     - `coach.foot` (`i18n.js:1773`) still says nothing is "recorded or uploaded" beside the line `c8f2d79` fixed:
@@ -267,13 +262,14 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
       `fc27370`): `if(!en && es === lqgBuiltIn(id, 'es')) es = '';`.
     - "Behind the class" does not skip the teacher's own doc (`teacher-students.js:553`, `c06b81e`):
       `if(teacherPmIsTeacher(stu)) return;`.
-    - Journey "then tick any box" (`i18n.js:1606`, `0ec73a2`) asks a student to tick a layer they have not
-      passed; nothing retries on `online`. Reword, or retry `flushSave()` on `online`.
     - Check `1t3` passes a page with a duplicated tuner button (`tools/checks.mjs:2285`, `a768bbc`): compare tags
       in order.
     - Song Journey Metronome, fast seeks: a doubled beat on 3-4 of 40 quick seeks on localhost, before and
       after the 2026-11-14 seeking fix (that one fixed the slow-connection stray click, 5+2 of 20 → 0). Not found.
     - `tools/smoke.mjs` summary says "each of its 4 tool buttons"; 3 since `4422c66`.
+  - **Done 2026-11-14 (Jonathan's calls):** the Record lines in Modules 4, 5 and 7 rewritten (Module 4 changed
+    although the class is about to enter it: text only, Rule Zero holds); Journey "Not saved yet" floats on screen and
+    retries by itself (every 15 s and when back online; check `1ek`). Blues backing tracks: waiting for the video check.
   - **Process:** `6ae6532` (1ec), `137ebfd` (1ds) and `9e62b46` (1ei) added a new kind of check and shipped Fast;
     CLAUDE.md lists that as always-Reviewed. Their checks are green and the area reviewer found nothing wrong in
     what they guard.

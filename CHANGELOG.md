@@ -6,6 +6,11 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-14 — No more "record yourself" steps; "Not saved yet" stays on screen
+
+- **Steps that asked you to record yourself are rewritten (Modules 4, 5 and 7).** The Record button is gone, so these steps now use the metronome, a partner, or playing straight through instead.
+- **On a Song Journey page, "Not saved yet" is now easy to see.** It shows in the top-right corner, even after the page scrolls to the next layer. The page keeps trying to save on its own, so you don't need to tick another box. Keep the page open until it says "Saved ✓".
+
 ## 2026-11-14 — A whole song stops at its end after Loop this part
 
 - **Turning Loop this part off now lets the song finish.** On a whole-song practice card, if you turned Loop this part on and then off, the song used to jump back to the section you looped when it reached the end and keep playing. Now it stops at the end, the same as when Loop was never on.
