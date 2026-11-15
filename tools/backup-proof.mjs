@@ -7,7 +7,7 @@
 
    WHAT IS REAL. teacher-backup.js exactly as it ships, found through tools/site-src.mjs (it must be a part of the
    console script, after teacher-mic.js), run in a Node vm context; with it the site's own escHtml / escAttr
-   (app/boot.js), withTimeout (app/save.js), teacherPmWeeksGet (teacher-students.js: the console's one minutes read), the Module 4/5 helpers swap45MapId … swap45Remap (app/save.js, only so a
+   (app/boot.js), withTimeout (app/save.js), teacherPmWeeksGet and teacherAbsDaysGet (teacher-students.js: the console's two minutes reads), the Module 4/5 helpers swap45MapId … swap45Remap (app/save.js, only so a
    break-it copy that remaps can be planted and seen) and teacherMicSaveFile (teacher-mic.js), unmodified.
    STUBBED: Firestore (below), the page (getElementById, an <a> whose click is the "download"), URL.createObjectURL
    (it keeps the Blob: that Blob IS the saved file), localStorage, caches.keys(). The clock: any timer of 1 s or more
@@ -19,12 +19,17 @@
    main case), micTakes/* + chunks, micTakesMeta/count, liveQuiz/current + answers, weekBoard/*, rankBoard/*,
    and since 2026-11-13 config/access and accessRequests/* (a hostile name among them) and songRequests/* (two, one
    with a hostile title); since 2026-11-14 songFiles/* with 2 pieces and songFilesUsage/* (left out: never read).
-   It answers doc get, collection get, orderBy(documentId) + limit + startAfter (by id), with 0–3 ms latency, and a
+   It answers doc get, collection get, orderBy(documentId) + limit + startAfter (by id), where(documentId, '>=' | '<=', id),
+   with 0–3 ms latency, and a
    fresh deep copy on every data() (so the code under test cannot change the store). Every write method (set, update,
    delete, add, batch, runTransaction) counts and throws. A failure can be planted per collection: always, or once.
 
    WHAT IT CHECKS (each prints a line with its denominator):
      header       complete:true, format, the file name's date, the counts per collection = the stub's (N of N)
+     days         (2026-11-14) every student's practice days are in the file (minutesDays, "<uid>/<day>"), read once per
+                  student; the left-out list no longer names the days, still names the private board tag, and names
+                  siteErrors/*; days refused (rules not published) → saved without them, notReadable ["minutesDays"],
+                  the days reads stop at the first refusal; any other failure on the days → failed, no file
      round-trip   every doc in the file, parsed and decoded (teacherBackupDecode), equals the stub's stored doc by an
                   independent canonical form that keeps types (Timestamp, bytes, geopoint, reference, NaN, -0, ±Inf,
                   a map with its own "__type" key), and no doc is extra or missing (N of N)
@@ -78,6 +83,7 @@ if(a < 0 || b < a) throw new Error('swap45 block not found');
 const HELPERS = [
   extractLine(APP, 'const escHtml = '), extractLine(APP, 'const escAttr = '),
   extractFn(APP, 'withTimeout'), APP.slice(a, b), extractFn(CONSOLE, 'teacherMicSaveFile'), extractFn(CONSOLE, 'teacherPmWeeksGet'),
+  extractFn(CONSOLE, 'teacherAbsDaysGet'),
 ].join('\n');
 const manageFn = extractFn(CONSOLE, 'renderTeacherManage');
 ok(/const head=`\s*\$\{teacherBackupPanelHtml\(\)\}/.test(manageFn), "Manage's head starts with ${teacherBackupPanelHtml()} (renderTeacherManage, teacher-manage.js)");
@@ -134,7 +140,7 @@ function makeStore(opts = {}){
     if(i === 42){ delete d.migrations; d.skills['m4w1-s1'] = 'gotit'; d.completed['m4w2'] = true; d.lastModule = 4; }   // OLD numbering: Module 4 = Pentatonic then
     S.set('progress/' + uid, d);
     if(i % 3) for(let w = 0; w < (i % 4) + 1; w++) S.set(`minutes/${uid}/weeks/2026-W${String(40 + w).padStart(2, '0')}`, { seconds: 60 * (i + w), goalSeconds: 3600, hit: w % 2 === 0 });
-    if(i % 5 === 0){ S.set(`minutes/${uid}/days/2026-11-1${i % 10}`, { seconds: 120 }); S.set(`minutes/${uid}/meta/board`, { id: 'f'.repeat(32) }); }
+    if(i % 5 === 0){ for(let d = 0; d <= i % 7; d++) S.set(`minutes/${uid}/days/2026-10-${String(10 + d).padStart(2, '0')}`, { seconds: 60 + d }); S.set(`minutes/${uid}/meta/board`, { id: 'f'.repeat(32) }); }
   }
   for(let r = 0; r < (opts.reports ?? 0); r++) S.set('issueReports/rep-' + String(r).padStart(4, '0'), { uid: 'fake-uid-001', name: 'Test Student 001', message: 'Broken <b>' + r, createdAt: new Timestamp(1762800000 + r, 0), moduleNum: 3, setId: null, lang: 'en', email: 'student1@example.test', location: 'x', userAgent: 'ua' });
   S.set('songRequests/fake-uid-001_2026-W46', { uid: 'fake-uid-001', name: 'Test Student 001', email: 'student1@example.test', period: '4', week: '2026-W46', videoId: 'dQw4w9WgXcQ', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', lyricsOk: false, topicOk: true, why: 'There is a clean version.', title: '<img src=x onerror=alert(3)> "Song"', createdAt: new Timestamp(1762900500, 42), state: 'asked' });
@@ -161,9 +167,10 @@ function collOf(path){
   if(p.length === 2 && p[0] === 'issueReports') return 'issueReports';
   if(p.length === 2 && p[0] === 'songRequests') return 'songRequests';
   if(p.length === 4 && p[0] === 'minutes' && p[2] === 'weeks') return 'minutesWeeks';
+  if(p.length === 4 && p[0] === 'minutes' && p[2] === 'days') return 'minutesDays';
   return null;
 }
-function fileKeyOf(path){ const p = path.split('/'); return collOf(path) === 'minutesWeeks' ? p[1] + '/' + p[3] : p[p.length - 1]; }
+function fileKeyOf(path){ const p = path.split('/'); return /^minutes(Weeks|Days)$/.test(collOf(path) || '') ? p[1] + '/' + p[3] : p[p.length - 1]; }
 
 /* ── The stub db ── */
 function makeDb(S, plan = {}){
@@ -187,17 +194,18 @@ function makeDb(S, plan = {}){
     if(f) throw f;
     return fn();
   };
-  const collGroupOf = path => { const p = path.split('/'); return p.length === 3 && p[0] === 'minutes' && p[2] === 'weeks' ? 'minutesWeeks' : path; };
+  const collGroupOf = path => { const p = path.split('/'); return p.length === 3 && p[0] === 'minutes' && p[2] === 'weeks' ? 'minutesWeeks' : p.length === 3 && p[0] === 'minutes' && p[2] === 'days' ? 'minutesDays' : path; };
   function collection(path){
     const childrenOf = () => [...S.keys()].filter(k => k.startsWith(path + '/') && k.split('/').length === path.split('/').length + 1).sort();
     const query = (q) => ({
       orderBy(f){ if(f !== '__name__') throw new Error('stub orders by id only'); return query({ ...q, ordered: true }); },
       limit(n){ return query({ ...q, limit: n }); },
       startAfter(s){ return query({ ...q, after: typeof s === 'string' ? s : s.id }); },
-      where(){ throw new Error('stub: no where'); },
+      where(f, op, v){ if(f !== '__name__' || !['>=', '<='].includes(op) || typeof v !== 'string') throw new Error('stub: where by id, >= or <=, only'); return query({ ...q, w: [...(q.w || []), [op, v]] }); },
       get(){ st.queries++; return read(collGroupOf(path), path, () => {
         let ids = childrenOf();
         if(q.after != null) ids = ids.filter(k => k.split('/').pop() > q.after);
+        for(const [op, v] of q.w || []) ids = ids.filter(k => op === '>=' ? k.split('/').pop() >= v : k.split('/').pop() <= v);
         if(q.limit) ids = ids.slice(0, q.limit);
         const docs = ids.map(snapOf);
         return { docs, size: docs.length, empty: !docs.length, forEach: fn => docs.forEach(fn) };
@@ -268,11 +276,11 @@ console.log('\n1. A whole backup (300 students, issueReports empty, every Firest
   ok(j.date === f.name.slice(20, 30), `header date ${j.date} = the file name's`);
   ok(j.site === 'guitar-class-2026-11-13-abc123' && j.project === 'stub-project', `site ${j.site}, project ${j.project}`);
   // Counts vs the stub
-  const want = { config: 0, progress: 0, 'minutesWeeks': 0, issueReports: 0, accessRequests: 0, songRequests: 0 };
+  const want = { config: 0, progress: 0, 'minutesWeeks': 0, minutesDays: 0, issueReports: 0, accessRequests: 0, songRequests: 0 };
   for(const p of S.keys()){ const k = collOf(p); if(k) want[k]++; }
   let countOk = 0;
   for(const k of Object.keys(want)){ if(j.counts[k] === want[k] && Object.keys(j.collections[k] || {}).length === want[k]) countOk++; else console.log(`     ${k}: header ${j.counts[k]}, file ${Object.keys(j.collections[k] || {}).length}, stub ${want[k]}`); }
-  ok(countOk === 6 && Object.keys(j.counts).length === 6 && want.config === 2 && Array.isArray(j.notReadable) && !j.notReadable.length, `header counts = stub counts for ${countOk} of 6 collections (config holds class + access; notReadable empty) (${Object.entries(want).map(([k, v]) => k + ' ' + v).join(', ')})`);
+  ok(countOk === 7 && Object.keys(j.counts).length === 7 && want.config === 2 && Array.isArray(j.notReadable) && !j.notReadable.length, `header counts = stub counts for ${countOk} of 7 collections (config holds class + access; notReadable empty) (${Object.entries(want).map(([k, v]) => k + ' ' + v).join(', ')})`);
   ok(want.issueReports === 0 && j.collections.issueReports && !Object.keys(j.collections.issueReports).length, 'the empty collection (issueReports) is in the file, empty, count 0');
   // Round trip
   let same = 0, total = 0; const bad = [];
@@ -296,7 +304,7 @@ console.log('\n1. A whole backup (300 students, issueReports empty, every Firest
   ok(raw42 && 'm4w1-s1' in raw42.skills && !('m5w1-s1' in raw42.skills) && raw42.completed.m4w2 === true && raw42.lastModule === 4 && !('migrations' in raw42),
     'the file holds fake-uid-042 RAW: skills m4w1-s1, completed m4w2, lastModule 4, no migrations marker');
   // Reads
-  const left = c.st.reads.filter(p => /^(micTakes|micTakesMeta|liveQuiz|weekBoard|rankBoard|songFiles)/.test(p) || /\/(days|meta)(\/|$)/.test(p));
+  const left = c.st.reads.filter(p => /^(micTakes|micTakesMeta|liveQuiz|weekBoard|rankBoard|songFiles|siteErrors)/.test(p) || /\/meta(\/|$)/.test(p));
   ok(left.length === 0, `left-out collections read: ${left.length} (of ${c.st.reads.length} reads)`);
   /* Song files (2026-11-14): the stub holds a song, its 2 pieces and a month's count; the backup reads none of them,
      says so in its left-out list, and the file holds no songFiles collection. */
@@ -308,6 +316,18 @@ console.log('\n1. A whole backup (300 students, issueReports empty, every Firest
   ok(progPages === 2, `progress read in ${progPages} pages of at most 200 for 300 students`);
   const weekReads = c.st.reads.filter(p => /^minutes\/[^/]+\/weeks$/.test(p)).length;
   ok(weekReads === 300, `practice-minutes weeks read once per student: ${weekReads} of 300`);
+  /* The practice days (2026-11-14): every stored day doc is in the file under "<uid>/<day>", read once per student. */
+  const dayReads = c.st.reads.filter(p => /^minutes\/[^/]+\/days$/.test(p)).length;
+  const stubDays = [...S.keys()].filter(p => /^minutes\/[^/]+\/days\//.test(p));
+  const fileDays = Object.keys(j.collections.minutesDays || {});
+  const daysIn = stubDays.filter(p => { const q = p.split('/'); return fileDays.includes(q[1] + '/' + q[3]); }).length;
+  ok(dayReads === 300 && stubDays.length > 60 && daysIn === stubDays.length && fileDays.length === stubDays.length && j.counts.minutesDays === stubDays.length,
+    `practice days: ${daysIn} of ${stubDays.length} stored day docs in the file (minutesDays, count ${j.counts.minutesDays}), read once per student: ${dayReads} of 300`);
+  ok(/\d+ practice days/.test(s.text), `the saved line counts the practice days: "${s.text.slice(0, 100)}…"`);
+  const lo = (j.leftOut || []).map(x => x.path + ' — ' + x.why);
+  ok(!lo.some(x => /practice days/.test(x)) && lo.some(x => /private board tag/.test(x) && /may not read it/.test(x)) && lo.some(x => /^siteErrors\/\* — /.test(x) && /anonymous/.test(x)),
+    `left-out list (${lo.length} entries): the days are not in it, the private board tag is (not readable), siteErrors/* is (anonymous log)`);
+  ok(!('siteErrors' in j.collections), 'the file holds no siteErrors collection');
   ok(c.st.writes === 0, `write attempts: ${c.st.writes}`);
   ok(Number(c.store.get('gc-teacher-backup-last')) > 0, 'the "last backup" date is kept in localStorage');
   ok(/300 students/.test(s.text) && /0 problem reports/.test(s.text) && /2 song requests/.test(s.text), 'the saved line counts 300 students, 0 problem reports and 2 song requests');
@@ -336,7 +356,7 @@ console.log('\n2. 405 problem reports, 3 students (paging past 200 twice)');
 console.log('\n3. Read failures: each collection in turn, never a file');
 for(const [coll, code, label] of [
   ['config/class', 'unavailable', 'class settings'], ['progress', 'unavailable', 'saved work'],
-  ['minutesWeeks', 'unavailable', 'practice minutes'], ['issueReports', 'unavailable', 'problem reports'], ['songRequests', 'unavailable', 'song requests'],
+  ['minutesWeeks', 'unavailable', 'practice minutes'], ['minutesDays', 'unavailable', 'practice days'], ['minutesDays', 'hang', 'practice days'], ['issueReports', 'unavailable', 'problem reports'], ['songRequests', 'unavailable', 'song requests'],
   ['progress', 'permission-denied', 'saved work'], ['config/class', 'hang', 'class settings'],
   ['config/access', 'unavailable', 'allow list'], ['accessRequests', 'unavailable', 'requests to join'], ['config/access', 'hang', 'allow list'],
 ]){
@@ -344,7 +364,7 @@ for(const [coll, code, label] of [
   const c = makeConsole(S, { fail: { [coll]: code === 'hang' ? { hang: true } : { code } } });
   await c.run('teacherBackupStart()');
   const s = state(c);
-  const tries = c.st.reads.filter(p => coll === 'minutesWeeks' ? /\/weeks$/.test(p) : p === coll).length;
+  const tries = c.st.reads.filter(p => coll === 'minutesWeeks' ? /\/weeks$/.test(p) : coll === 'minutesDays' ? /\/days$/.test(p) : p === coll).length;
   const why = code === 'hang' ? 'timeout' : code;
   ok(s.kind === 'failed' && s.text.includes(label) && s.text.includes(why) && /Nothing was saved/.test(s.text) && c.saved.length === 0 && !c.store.has('gc-teacher-backup-last') && c.st.writes === 0,
     `${coll} ${code}: ${s.kind}, files ${c.saved.length}, tries ${tries}, writes ${c.st.writes} — "${s.text.slice(0, 90)}…"`);
@@ -408,6 +428,24 @@ console.log('\n3c. songRequests refused (its rules not pasted yet): the backup s
   await c.run('teacherBackupStart()');
   const j = JSON.parse(((await fileOf(c)) || { text: '{}' }).text);
   ok(state(c).kind === 'saved' && JSON.stringify(j.notReadable) === '["config/access","accessRequests","songRequests"]', `all three refused: ${state(c).kind}, notReadable ${JSON.stringify(j.notReadable)}`);
+}
+
+/* ══ 3d. Before the days line is published: minutes/{uid}/days refused by the rules ══ */
+console.log('\n3d. practice days refused (the days rule not published yet): the backup still saves, without any days');
+{
+  const S = makeStore({ students: 40, reports: 2 });
+  const c = makeConsole(S, { fail: { minutesDays: { code: 'permission-denied' } } });
+  await c.run('teacherBackupStart()');
+  const s = state(c);
+  const f = await fileOf(c);
+  const j = f ? JSON.parse(f.text) : {};
+  const dayReads = c.st.reads.filter(p => /\/days$/.test(p)).length;
+  ok(s.kind === 'saved' && c.saved.length === 1, `days refused: ${s.kind}, files ${c.saved.length}`);
+  ok(j.collections && !('minutesDays' in j.collections) && !('minutesDays' in j.counts) && j.counts.progress === 40 && j.counts.minutesWeeks > 0, 'the file holds no days (no collection, no count) and everything else');
+  ok(JSON.stringify(j.notReadable) === '["minutesDays"]', `the header's notReadable: ${JSON.stringify(j.notReadable)}`);
+  ok(/not readable yet/.test(s.text) && /practice days \(each student/.test(s.text) && !/\d+ practice days?,/.test(s.text), `the saved line says so: "${s.text}"`);
+  ok(dayReads >= 1 && dayReads <= 6, `the days reads stop at the first refusal: ${dayReads} (at most the 6 in flight) of 40 students`);
+  ok(c.st.writes === 0, `write attempts: ${c.st.writes}`);
 }
 
 /* ══ 4. A value the file cannot hold ══ */

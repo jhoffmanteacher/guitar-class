@@ -24,7 +24,20 @@
      minutes/{uid}/weeks/*     practice-minutes weeks, read once per progress
                                uid (the teacher cannot list minutes/ itself),
                                through teacherPmWeeksGet (teacher-students.js),
-                               the console's one read under minutes/ (1cg).
+                               one of the console's two reads under minutes/ (1cg).
+     minutes/{uid}/days/*      (2026-11-14) practice-minutes days, one read per
+                               progress uid beside its weeks, through
+                               teacherAbsDaysGet (teacher-students.js, the
+                               console's other read under minutes/, 1cg) over
+                               every day id ('0000-00-00' … '9999-99-99'), as
+                               teacher-remove.js reads them. The teacher may read
+                               them since e88603f (firestore.rules, the days
+                               block). Until that line is published they are
+                               refused: the first permission-denied leaves the
+                               days out WHOLE (no student's days in the file) and
+                               the header says so (notReadable), as below. About
+                               one doc read per practice day: 60 students with
+                               70 days each is 4,200 more reads per backup.
      issueReports/*            students' problem reports.
      songRequests/*            students' song requests (2026-11-13), id <uid>_<week>.
      config/access             (2026-11-13) the outside accounts the teacher
@@ -32,9 +45,9 @@
                                beside config/class.
      accessRequests/*          (2026-11-13) "ask your teacher to let me in":
                                name, email, when, status.
-     Before the rules for those two (paste 1) and for songRequests are
-     published the teacher cannot read them: that one refusal
-     (permission-denied) on any of these three leaves it out and the header
+     Before the rules for those two (paste 1), for songRequests and for the
+     days are published the teacher cannot read them: that one refusal
+     (permission-denied) on any of these four leaves it out and the header
      says so (notReadable), instead of failing the whole backup. Any other
      failure on them fails it, like every other read.
    LEFT OUT, and why: TEACHER_BACKUP_LEFT_OUT below (also written into the file).
@@ -49,10 +62,11 @@
    collection), the encoding rules and the left-out list. Then `collections`:
      { "progress": { uid: fields }, "config": { "class": fields, "access": fields },
        "minutesWeeks": { "<uid>/<weekId>": fields },
+       "minutesDays": { "<uid>/<YYYY-MM-DD>": fields },
        "issueReports": { id: fields }, "accessRequests": { uid: fields },
        "songRequests": { id: fields } }
    A Firestore doc id never contains "/", so "<uid>/<weekId>" splits back
-   unambiguously into minutes/<uid>/weeks/<weekId>.
+   unambiguously into minutes/<uid>/weeks/<weekId> (and minutes/<uid>/days/<day>).
    Firestore types are written as tagged objects so they read back exactly
    (teacherBackupEncode / teacherBackupDecode):
      {"__type":"timestamp","seconds":S,"nanoseconds":N,"iso":"…"}  (iso is for
@@ -85,7 +99,7 @@
         with the rules of teacherBackupDecode (a timestamp → Timestamp, bytes →
         Bytes, a reference → a doc ref …) and set()s each doc at its path:
         progress/<uid>, config/class, config/access,
-        minutes/<uid>/weeks/<week>, issueReports/<id>, accessRequests/<uid>,
+        minutes/<uid>/weeks/<week>, minutes/<uid>/days/<day>, issueReports/<id>, accessRequests/<uid>,
         songRequests/<id>.
      3. A restored doc REPLACES what is there: anything the student saved after
         the backup is lost. Have the student sign out first. Restore
@@ -107,10 +121,12 @@ const TEACHER_BACKUP_MAX_PAGES = 1000;      // a pager that never ends is a faul
 const TEACHER_BACKUP_LAST_KEY = 'gc-teacher-backup-last';
 const TEACHER_BACKUP_DUE_DAYS = 7;          // more than this many days (or never) → the reminder line
 const TEACHER_BACKUP_WEEKS = 'minutesWeeks';
+const TEACHER_BACKUP_DAYS = 'minutesDays';
 const TEACHER_BACKUP_LABEL = {
   'config/class': 'the class settings (config/class)',
   'progress': 'students’ saved work (progress)',
   [TEACHER_BACKUP_WEEKS]: 'practice minutes (each student’s weeks)',
+  [TEACHER_BACKUP_DAYS]: 'practice days (each student’s days)',
   'issueReports': 'problem reports (issueReports)',
   'config/access': 'the allow list of outside accounts (config/access)',
   'accessRequests': 'requests to join (accessRequests)',
@@ -121,10 +137,11 @@ const TEACHER_BACKUP_LEFT_OUT = [
   {path:'micTakesMeta/count', why:'a counter Mic recordings can reset; not student work'},
   {path:'liveQuiz/current and liveQuiz/current/answers/*', why:'one live game’s state, written from scratch each game'},
   {path:'weekBoard/*, rankBoard/*', why:'the practice boards: the Top 5 board is rebuilt by each student’s own page from their minutes; the class rank board is no longer used (since 2026-11-13)'},
-  {path:'each student’s practice days and private board tag (under minutes, beside the weeks)', why:'the teacher’s account may not read them (firestore.rules); the weeks hold the totals'},
+  {path:'each student’s private board tag (under minutes, beside the weeks and days)', why:'the teacher’s account may not read it (firestore.rules: on purpose, so nothing the teacher reads ties a name to the Top 5 board); a student who has none gets a new one from their own page'},
   {path:'minutesBoard/*', why:'no rules block: nobody can read it'},
   {path:'songFiles/* and songFiles/*/pieces/*', why:'the song recordings (about 216 MB of mp3s): far too big for this file, and not student work; the mp3s themselves are kept on the teacher’s Mac and go back in through Manage → Song files'},
   {path:'songFilesUsage/*', why:'this month’s count of song downloads; Manage → Song files can reset it; not student work'},
+  {path:'siteErrors/*', why:'the anonymous error log (no names): site faults, not student work; shown in Tools → Error log'},
 ];
 
 let teacherBackupGen = 0;
@@ -321,16 +338,27 @@ async function teacherBackupReadAll(gen){
   progressDocs.forEach(d=>teacherBackupSetKey(collections.progress, d.id, teacherBackupEncodeDoc('progress', d.id, d.data(), 'progress/'+d.id)));
   counts.progress=progressDocs.length;
 
-  // Practice-minutes weeks: one read per student, a few at a time (as the Practice minutes view reads them).
+  /* Practice minutes: per student, the weeks (as the Practice minutes view reads them) and then every day (as
+     teacher-remove.js reads them), a few students at a time. The days alone may be refused by unpublished rules:
+     the first refusal stops every days read and leaves the days out whole (see the header). */
   const uids=progressDocs.map(d=>d.id), total=uids.length;
-  const weeks={};
-  let next=0, done=0, weekCount=0, failed=null;
+  const weeks={}, days={};
+  let next=0, done=0, weekCount=0, dayCount=0, daysDenied=false, failed=null;
   teacherBackupSay(gen, 'running', `Reading practice minutes: 0 of ${total} students…`);
   const worker=async()=>{
     while(!failed && next<total){
       const uid=uids[next++];
       const snap=await teacherBackupGet(gen, TEACHER_BACKUP_WEEKS, ()=>teacherPmWeeksGet({uid}));
       (snap.docs||[]).forEach(d=>{ teacherBackupSetKey(weeks, uid+'/'+d.id, teacherBackupEncodeDoc(TEACHER_BACKUP_WEEKS, d.id, d.data(), 'practice week '+uid+'/'+d.id)); weekCount++; });
+      if(!daysDenied){
+        let dsnap=null;
+        try{ dsnap=await teacherBackupGet(gen, TEACHER_BACKUP_DAYS, ()=>teacherAbsDaysGet(uid, '0000-00-00', '9999-99-99')); }
+        catch(e){
+          if(e && e.backupCollection===TEACHER_BACKUP_DAYS && e.cause && e.cause.code==='permission-denied') daysDenied=true;
+          else throw e;
+        }
+        if(dsnap && !daysDenied) (dsnap.docs||[]).forEach(d=>{ teacherBackupSetKey(days, uid+'/'+d.id, teacherBackupEncodeDoc(TEACHER_BACKUP_DAYS, d.id, d.data(), 'practice day '+uid+'/'+d.id)); dayCount++; });
+      }
       done++;
       teacherBackupSay(gen, 'running', `Reading practice minutes: ${done} of ${total} students…`);
     }
@@ -341,6 +369,12 @@ async function teacherBackupReadAll(gen){
   collections[TEACHER_BACKUP_WEEKS]={};
   Object.keys(weeks).sort().forEach(k=>teacherBackupSetKey(collections[TEACHER_BACKUP_WEEKS], k, weeks[k]));
   counts[TEACHER_BACKUP_WEEKS]=weekCount;
+  if(daysDenied) notReadable.push(TEACHER_BACKUP_DAYS);
+  else{
+    collections[TEACHER_BACKUP_DAYS]={};
+    Object.keys(days).sort().forEach(k=>teacherBackupSetKey(collections[TEACHER_BACKUP_DAYS], k, days[k]));
+    counts[TEACHER_BACKUP_DAYS]=dayCount;
+  }
 
   teacherBackupSay(gen, 'running', 'Reading problem reports…');
   const reportDocs=await teacherBackupReadPaged(gen, 'issueReports');
@@ -391,7 +425,7 @@ function teacherBackupFileText(read, now, site){
     project,
     counts:read.counts,
     notReadable:read.notReadable||[],
-    encoding:'Firestore types are tagged objects: {"__type":"timestamp",seconds,nanoseconds,iso}, {"__type":"bytes",base64}, {"__type":"geopoint",latitude,longitude}, {"__type":"reference",path}, {"__type":"number",value:"NaN"|"Infinity"|"-Infinity"|"-0"}, and {"__type":"map",value} for a stored map that has its own "__type" key. Docs are RAW, as stored (no Module 4/5 remap). "minutesWeeks" holds each student’s practice weeks, keyed "<uid>/<weekId>" (that doc’s path is minutes, uid, weeks, weekId). See teacher-backup.js for how to restore.',
+    encoding:'Firestore types are tagged objects: {"__type":"timestamp",seconds,nanoseconds,iso}, {"__type":"bytes",base64}, {"__type":"geopoint",latitude,longitude}, {"__type":"reference",path}, {"__type":"number",value:"NaN"|"Infinity"|"-Infinity"|"-0"}, and {"__type":"map",value} for a stored map that has its own "__type" key. Docs are RAW, as stored (no Module 4/5 remap). "minutesWeeks" holds each student’s practice weeks, keyed "<uid>/<weekId>" (that doc’s path is minutes, uid, weeks, weekId); "minutesDays" their practice days, keyed "<uid>/<YYYY-MM-DD>" (minutes, uid, days, day). See teacher-backup.js for how to restore.',
     leftOut:TEACHER_BACKUP_LEFT_OUT,
     collections:read.collections,
   };
@@ -402,7 +436,7 @@ function teacherBackupSummary(counts, notReadable){
   const extra=('accessRequests' in counts ? `, ${n('accessRequests','request to join','requests to join')}` : '')
     + ('songRequests' in counts ? `, ${n('songRequests','song request','song requests')}` : '')
     + ((notReadable||[]).length ? ` (not readable yet, their rules are not pasted: ${notReadable.map(c=>TEACHER_BACKUP_LABEL[c]||c).join(', ')})` : '');
-  return `${n('progress','student','students')}, ${n(TEACHER_BACKUP_WEEKS,'practice week','practice weeks')}, ${n('issueReports','problem report','problem reports')}, ${counts.config?'the class settings':'no class settings doc (there is none yet)'}${extra}`;
+  return `${n('progress','student','students')}, ${n(TEACHER_BACKUP_WEEKS,'practice week','practice weeks')}${TEACHER_BACKUP_DAYS in counts ? ', '+n(TEACHER_BACKUP_DAYS,'practice day','practice days') : ''}, ${n('issueReports','problem report','problem reports')}, ${counts.config?'the class settings':'no class settings doc (there is none yet)'}${extra}`;
 }
 
 /* The button. A second click while a run is out does nothing. */
