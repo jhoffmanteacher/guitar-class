@@ -31,6 +31,23 @@ Dates are the Pacific calendar date. `CACHE_VERSION` and commit timestamps may s
 
 Start here. Update this block whenever an item opens or closes; each line says where the detail is.
 
+**For a session on the Windows computer (written 2026-11-15 for 2026-11-16; Jonathan cannot paste between his
+computers, so it lives here).** Jonathan opens Claude Code on Windows and says "do the Windows work in WORKFLOW".
+- First: `git fetch` and fast-forward main (this note was written at `2dbbce7`).
+- The work, after 9:00 (his usage limit): (1) a review of the Strum Pattern check's listening code
+  (`coach-strumcheck.js`, ca-52; the entry below, "Strum Pattern check") with a fresh `site-reviewer-deep` on Opus,
+  rounds and fixes as CLAUDE.md says; (2) the listening design job: plans only, nothing ships (same entry: unheard
+  up-strums, the shared-note chord, one shared detector, the `coach-core.js` split).
+- Practice minutes is DONE (two review rounds, clean): do not touch it.
+- A session on the Mac builds Song builder Part b at the same time. Leave alone: the `teacher-*.js` console parts,
+  `TEACHER_NAV` (`teacher-core.js`), `TEACHER_JS_PARTS` (`app/boot.js`), `vendor/`, and new Song builder checks.
+- Before every push: `git fetch`, `git rebase origin/main` (CLAUDE.md "Start here" step 8); CHANGELOG / WORKFLOW
+  entries last, after the final rebase; after a rebase `grep -oE "head\('1[a-z0-9]+\." tools/checks.mjs | sort | uniq -d`
+  may print only `1ck` (an old duplicate): renumber yours if it collides.
+- Building a song on Windows: not tried yet (see "Song builder" below, "Windows too"). If he asks for one, fix the
+  tool on the way.
+- Delete this block when that work is done.
+
 **Class rules published 2026-11-15: Paste C, D and E are live.** Jonathan published `firestore.rules` as one paste
 (`Claude outputs/firestore-rules-PASTE-E-2026-11-15.txt`, sha256 `8cb7341f61c3…`, pinned by `1dt`'s `RULES_FILE_SHA256`);
 he reported the Rules editor at 1038 lines. It carries Paste C (teacher deletes), Paste D (built songs) and Paste E
