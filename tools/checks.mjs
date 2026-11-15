@@ -18856,7 +18856,7 @@ function checkSongFilesLoader() {
    not run here. Since 2026-11-14 it also runs Manage → Built songs' Import
    (teacher-builtsongs.js) against the rules' BUILT SONGS shape.
    ════════════════════════════════════════════════════════════════════ */
-const SONG_FILES_CONSOLE_SIM_PIN = 84;   // 57 -> 84 (2026-11-14, Song builder Part a2): Manage → Built songs' Import (27 cases); 52 -> 57 (review round 1, 2026-11-14): the paste-2 line, a Verify text escaped, a read during a write, a re-upload asked first (2)
+const SONG_FILES_CONSOLE_SIM_PIN = 88;   // 57 -> 84 (2026-11-14, Song builder Part a2): Manage → Built songs' Import (27 cases); -> 88 (review round 1: before the rules are published, Delete as on main and Import refused; an Import during Delete's check); 52 -> 57 (review round 1, 2026-11-14): the paste-2 line, a Verify text escaped, a read during a write, a re-upload asked first (2)
 function checkSongFilesConsole() {
   head('1dy. Song files in the console: upload, verify, delete and the escaping are run against the rules\' shape');
   const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'song-files-console-sim.mjs')], { encoding: 'utf8', timeout: 120000 });
@@ -18883,14 +18883,14 @@ function checkSongFilesConsole() {
    English and Spanish, never reach In-Class Activities or the board; one
    broken doc per validator rule is left out alone; the device copy, sign-out,
    a deep link, Hidden. Its case count is pinned (BUILT_SONGS_SIM_PIN) so a
-   deleted case fails here; `--breaks` (not run here) plants 24 faults (app/builtsongs.js, app/cards.js, app/activities-2.js, app/songfiles.js).
+   deleted case fails here; `--breaks` (not run here) plants 28 faults (app/builtsongs.js, app/cards.js, app/activities-2.js, app/songfiles.js).
    And, EXECUTED here in the 0b render context: the ONE-FILE SPEEDS (app/
    cards.js, Jonathan 2026-11-14: "the browser slows the one file"): a track
    with no srcSlow renders the four stops 0.65 / 0.85 / 0.9 / 1, all on the one
    file (data-slow stays empty), opening on 0.85; and index.html loads
    app/builtsongs.js right after app/snippets.js.
    ════════════════════════════════════════════════════════════════════ */
-const BUILT_SONGS_SIM_PIN = 139;   // 2026-11-14, Song builder Part a2: 14 zero, 60 merge, 38 refused, 27 store, deep-link and tab-return cases (136 -> 139: the 15-minute tab-return throttle, 4 cases for 1)
+const BUILT_SONGS_SIM_PIN = 148;   // 2026-11-14, Song builder Part a2: 14 zero, 63 merge and directions, 44 refused, 27 store, deep-link and tab-return cases (136 -> 139: the 15-minute tab-return throttle; -> 148, review round 1: Object.prototype names, the lyric cap, the directions line)
 const ONE_FILE_STOPS = '0.65,0.85,0.9,1', ONE_FILE_OPEN = '0.85';   // Jonathan, 2026-11-14 (work order decision 3)
 function checkBuiltSongs(ctx) {
   head('1el. Built songs: the merge is run (0 songs changes nothing; fixtures, refusals, device copy); the one-file stops are pinned');

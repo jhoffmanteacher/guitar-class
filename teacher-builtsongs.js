@@ -43,6 +43,7 @@
 const TEACHER_BS_MAX_JSON = 1000000;
 let teacherBsSongs = null;     // Map id -> { ver, doc } read from the store (doc null: the list names it, the doc is missing); null = not read
 let teacherBsReadErr = '';
+let teacherBsDenied = false;   // the last read of the list was refused: the BUILT SONGS rules are not published yet
 let teacherBsReadAt = 0;
 let teacherBsReadGen = 0;
 let teacherBsOpGen = 0;
@@ -64,7 +65,11 @@ function teacherBsAudioOwner(audioId){
 /* Every song on the list whose audio is `audioId`, read fresh from the store (Song files' Delete asks this). */
 async function teacherBsAudioUsers(audioId){
   await ensureDb();
-  const meta = await db.collection('builtSongsMeta').doc('list').get();
+  /* The list refused (the BUILT SONGS rules not published yet): no built song can exist, since nobody can write
+     one either, so no file is in use (review R1-4: Delete works as before the paste). Any other failure throws. */
+  let meta;
+  try{ meta = await db.collection('builtSongsMeta').doc('list').get(); }
+  catch(e){ if(e && e.code === 'permission-denied') return []; throw e; }
   const ids = Object.keys(bsListOf(meta.exists ? meta.data() : null));
   const out = [];
   for(const id of ids){
@@ -131,7 +136,7 @@ function teacherBuiltSongsMount(){
 function teacherBsOnMerged(){ if(teacherView === 'manage' && typeof teacherSfPaint === 'function') teacherSfPaint(); }
 async function teacherBsLoad(){
   const gen = ++teacherBsReadGen, op = teacherBsOpGen;
-  let songs = null, err = '';
+  let songs = null, err = '', denied = false;
   try{
     await ensureDb();
     const meta = await db.collection('builtSongsMeta').doc('list').get();
@@ -144,7 +149,8 @@ async function teacherBsLoad(){
       songs.set(id, { ver: list[id], doc: d });
     }));
   }catch(e){
-    err = e && e.code === 'permission-denied'
+    denied = !!(e && e.code === 'permission-denied');
+    err = denied
       ? 'Built songs are not switched on yet: their rules are not published (firestore.rules, "BUILT SONGS").'
       : 'Could not read the built songs. Check your connection and press Refresh.';
   }
@@ -153,6 +159,7 @@ async function teacherBsLoad(){
   if(op !== teacherBsOpGen){ teacherBsLoad(); return; }       // overlapped a write: read again
   teacherBsReadAt = Date.now();
   teacherBsReadErr = err;
+  teacherBsDenied = denied;
   if(!err) teacherBsSongs = songs;
   teacherBsPaint();
   if(typeof teacherSfPaint === 'function') teacherSfPaint();  // the Song files rows name each built song's audio
@@ -189,6 +196,9 @@ function teacherBsRefuse(line){ teacherBsNote = 'Nothing was imported: ' + line;
 async function teacherBsImport(jsonFile, mp3File){
   if(teacherBsBusy || !jsonFile || !mp3File) return;
   if(typeof teacherSfBusy !== 'undefined' && teacherSfBusy){ teacherBsRefuse('a Song files action is still running. Try again when it ends.'); return; }
+  /* Before the BUILT SONGS rules are published the song could not be saved, and its audio would be left stored
+     with no song (review R1-4): refused up front, nothing written. */
+  if(teacherBsDenied){ teacherBsRefuse('built songs are not switched on yet: their rules are not published (firestore.rules, "BUILT SONGS"). Nothing was uploaded.'); return; }
   if(!(jsonFile.size > 0) || jsonFile.size > TEACHER_BS_MAX_JSON){ teacherBsRefuse('the song file is empty or over 1 MB.'); return; }
   let f;
   try{ f = JSON.parse(await jsonFile.text()); }catch(e){ teacherBsRefuse('the song file is not JSON (' + String((e && e.message) || e).slice(0, 80) + ').'); return; }

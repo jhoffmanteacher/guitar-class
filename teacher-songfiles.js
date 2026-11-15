@@ -418,16 +418,19 @@ function teacherSfVerifyAll(){
 }
 
 /* ── Delete one song ── */
+/* Another write is running in this section or in Manage → Built songs (an Import uploads into the same store). */
+function teacherSfOtherBusy(){ return !!teacherSfBusy || (typeof teacherBsBusy !== 'undefined' && !!teacherBsBusy); }
 async function teacherSfDelete(id){
-  if(teacherSfBusy || !id) return;
+  if(teacherSfOtherBusy() || !id) return;
   /* Never the audio a built song plays (Manage → Built songs): the list of built songs is read fresh, and a file one
-     of them uses is refused, naming the song. A list that cannot be read refuses too. */
+     of them uses is refused, naming the song. A list that cannot be read refuses too, except a REFUSED read (the
+     BUILT SONGS rules not published yet: no built song can exist), which counts as no built songs. */
   if(typeof teacherBsAudioUsers === 'function'){
     let users;
     try{ users = await teacherBsAudioUsers(id); }
     catch(e){ teacherSfNote = `Nothing was deleted: could not check whether a built song plays ${id} (${teacherSfWhy(e)}).`; teacherSfPaint(); return; }
     if(users.length){ teacherSfNote = `Nothing was deleted: the built song "${users[0].title}"${users.length > 1 ? ` and ${users.length - 1} more` : ''} plays ${id}. Delete or re-import that song first.`; teacherSfPaint(); return; }
-    if(teacherSfBusy) return;
+    if(teacherSfOtherBusy()) return;   // an Import or another action began during the read (review R1-5)
   }
   const typed = prompt(`Delete the song file "${id}" from the database? Its pieces and its entry go; the site cannot play it until it is uploaded again. Type its id to delete it:`, '');
   if(typed === null) return;

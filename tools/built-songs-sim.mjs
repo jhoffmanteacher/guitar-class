@@ -33,7 +33,7 @@
                bad keys and values are skipped; a refused or failed doc read; an audio id on SONG_FILES or another
                song's with other bytes; an id already a coded track; sign-out clears; a deep link waits for the
                merge; a changed file drops the page's loaded copy; Hidden takes it off the list; a broken
-               IndexedDB; the tab-return read at most once a minute; no write anywhere
+               IndexedDB; the tab-return read at most once every 15 minutes; no write anywhere
    Made-up data only; nothing leaves the process. */
 import { readFileSync, readdirSync } from 'node:fs';
 import vm from 'node:vm';
@@ -276,6 +276,21 @@ async function runCases(files){
     const rg = GOOD.find(g => g.key === 'range');
     ok(p.run(`(() => { const L = pcLayout(CLASS_ACTIVITIES.find(a => a.id === ${JSON.stringify(rg.id)})); return L.sections.length === 2 && L.firstBar === 5 && L.totalBars === 8; })()`),
       'merge range: the card plays sections 2 to 3 only (bars 5 to 12)');
+    /* The directions line names each chord once, and only the chords the card plays (review R1-2, R1-3). */
+    {
+      const ex = (doc, id) => p.run(`builtSongExpand(${JSON.stringify(id)}, ${JSON.stringify(doc)})`).activity;
+      const bmd = JSON.parse(JSON.stringify(bm.doc)); bmd.song.chords.Em = { full: { frets: [0, 2, 2, 0, 0, 0] }, power: { frets: [0, 2, 2, null, null, null] } }; bmd.song.bars[1] = 'Em';
+      const a1 = ex(bmd, bm.id);
+      ok(p.run(`builtSongCheck(${JSON.stringify(bm.id)}, ${JSON.stringify(bmd)}).length`) === 0 && a1.intro === 'Play along with the band: E, Em, D and A.' && a1.intro_power === 'Play along with the band: E5, D5 and A5.' && a1.intro_power_es === 'Toca con la banda: E5, D5 y A5.',
+        `directions: E and Em are one power chord, named once (${JSON.stringify(a1.intro_power)})`);
+      const po = JSON.parse(JSON.stringify(GOOD.find(g => g.key === 'threeFour').doc)); po.song.chords.Am = { full: null, power: { frets: [null, 0, 2, 2, null, null] } }; po.song.bars[4] = 'Am';
+      const a2 = ex(po, 'sb-test34bbbb');
+      ok(a2.intro === 'Play along with the band: A5, D5 and E5.', `directions: a power-only card with A and Am names A5 once (${JSON.stringify(a2.intro)})`);
+      const rd = JSON.parse(JSON.stringify(rg.doc)); rd.song.bars = rd.song.bars.map((b, i) => (i < 4 || i >= 12) ? 'Bm' : ['D', 'G', 'A', 'D'][i % 4]);
+      const a3 = ex(rd, rg.id);
+      ok(p.run(`builtSongCheck(${JSON.stringify(rg.id)}, ${JSON.stringify(rd)}).length`) === 0 && a3.intro === 'Play along with the band: D, G and A.' && a3.intro_es === 'Toca con la banda: D, G y A.',
+        `directions: with a range, only the chords the card plays (Bm only outside it: ${JSON.stringify(a3.intro)})`);
+    }
     const fx = GOOD.find(g => g.key === 'fifteen');
     const copyBytes = JSON.stringify({ id: 'all', songs: { [fx.id]: { ver: 1, doc: fx.doc } } }).length;
     ok(copyBytes > 1000 && p.run(`CLASS_ACTIVITIES.find(a => a.id === ${JSON.stringify(fx.id)}).card.sections.length`) === 15, `merge fifteen: 15 sections with lyrics merge; its device copy is ${copyBytes.toLocaleString('en-US')} bytes of JSON`);
@@ -467,6 +482,10 @@ async function main(){
   }
   if (BREAKS) {
     const MUT = [
+      ['app/builtsongs.js', 'a meter looked up without the own-property test', "function bsMeter(m){ return bsOwn(BS_METERS, m) ? BS_METERS[m] : null; }", "function bsMeter(m){ return BS_METERS[m] || null; }"],
+      ['app/builtsongs.js', 'the lyric-line cap raised to 10000', "BS_MAX_LYRIC = 160", "BS_MAX_LYRIC = 10000"],
+      ['app/builtsongs.js', 'a power chord named twice in the directions', "powerNames = [...new Set(used.map(n => bsChordName(n).q === '5' ? n : bsPowerName(n)))];", "powerNames = used.map(n => bsChordName(n).q === '5' ? n : bsPowerName(n));"],
+      ['app/builtsongs.js', 'the directions name chords from outside the range', "  const parts = s.bars.map(b => bsBarParts(b, meter, s.chords));", "  const parts = s.bars.map(b => { const p = bsBarParts(b, meter, s.chords); p.forEach(x => { if(x.name && !used.includes(x.name)) used.push(x.name); }); return p; });"],
       ['app/builtsongs.js', 'the cents rule dropped', "Math.abs(a.centsOff) > BS_MAX_CENTS", "Math.abs(a.centsOff) > 99"],
       ['app/builtsongs.js', 'the title separator not refused', "else if(doc.title.indexOf(BS_SEP) >= 0)", "else if(false)"],
       ['app/builtsongs.js', 'a section gap allowed', "if(x.from !== next) no(", "if(false) no("],

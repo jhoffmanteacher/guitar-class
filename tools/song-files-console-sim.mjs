@@ -133,7 +133,7 @@ function rulesCheck(op, path, data){
 }
 function makeDb(){
   const S = new Map();
-  const st = { writes: [], violations: [], reads: [], pieceReads: 0, hooks: [], delay: {}, failWrite: null };
+  const st = { writes: [], violations: [], reads: [], pieceReads: 0, hooks: [], delay: {}, failWrite: null, failRead: {} };
   const lat = async path => { const ms = st.delay[path]; if(ms) await new Promise(r => setTimeout(r, ms)); else await tick(); };
   const apply = (op, path, data, opts) => {
     let next;
@@ -153,7 +153,7 @@ function makeDb(){
     return {
       path, id: path.split('/').pop(),
       collection: n => collRef(path + '/' + n),
-      async get(){ st.reads.push(path); if(/\/pieces\//.test(path)) st.pieceReads++; await lat(path); return snapOf(path); },
+      async get(){ st.reads.push(path); if(/\/pieces\//.test(path)) st.pieceReads++; await lat(path); if(st.failRead[path]){ const e = new Error(st.failRead[path]); e.code = st.failRead[path]; throw e; } return snapOf(path); },
       async set(d, o){ await tick(); if(st.failWrite && st.failWrite(path)){ const e = new Error('unavailable'); e.code = 'unavailable'; throw e; } apply('set', path, d, o); },
       async delete(){ await tick(); apply('delete', path); },
     };
@@ -631,6 +631,41 @@ async function runCases(consoleSrc){
   }
   done(c);
 
+  /* Before the BUILT SONGS rules are published (review R1-4): the list's read is refused. Delete works as on main;
+     Import is refused up front and writes nothing. Any other failure of that read still stops a Delete. */
+  c = makeConsole(consoleSrc); register(c); seedOther(c);
+  c.F.st.failRead['builtSongsMeta/list'] = 'permission-denied';
+  await uploaded(c);
+  {
+    await c.run('teacherBsLoad()'); await settle(60);
+    const n0 = c.F.st.writes.length;
+    await importNow(c, jsonOf(importFile(BID, bdoc)), fileOf(SONG, 125.5));
+    const note = (c.bblock._html.match(/<b>(Nothing was imported:[^<]*)<\/b>/) || [, ''])[1];
+    ok(c.F.st.writes.length === n0 && /^Nothing was imported: built songs are not switched on yet/.test(note), `before the rules: Import is refused up front, nothing written (${c.F.st.writes.length - n0} writes; ${JSON.stringify(note.slice(0, 60))})`);
+    c.env.promptAnswer = 'test-song';
+    await c.run('teacherSfDelete')('test-song'); await settle(150);
+    ok(!c.F.S.has('songFiles/test-song') && c.F.S.has('songFiles/other-song'), 'before the rules: a refused read of the built-songs list counts as none, and Delete deletes as on main');
+    c.F.st.failRead['builtSongsMeta/list'] = 'unavailable';
+    const n1 = c.F.st.writes.length;
+    c.env.promptAnswer = 'other-song';
+    await c.run('teacherSfDelete')('other-song'); await settle(150);
+    ok(c.F.st.writes.length === n1 && c.F.S.has('songFiles/other-song') && /could not check whether a built song plays other-song/.test(c.block._html), 'a list read that FAILS (not refused) still stops a Delete, which says so');
+  }
+  done(c);
+  /* An Import that begins while Delete reads the list stops the Delete (review R1-5). */
+  c = makeConsole(consoleSrc); register(c); seedOther(c);
+  await uploaded(c);
+  {
+    c.env.promptAnswer = 'test-song'; c.env.prompts.length = 0;
+    const n0 = c.F.st.writes.length;
+    const pd = c.run('teacherSfDelete')('test-song');
+    c.run(`teacherBsBusy = 'import'`);
+    await pd; await settle(150);
+    c.run(`teacherBsBusy = ''`);
+    ok(c.F.st.writes.length === n0 && c.F.S.has('songFiles/test-song') && c.env.prompts.length === 0, `an Import that starts during Delete's check stops the Delete before it asks (${c.F.st.writes.length - n0} writes, ${c.env.prompts.length} prompts)`);
+  }
+  done(c);
+
   /* Song files: a built song's audio is named, and its Delete is refused */
   c = makeConsole(consoleSrc); register(c);
   await managed(c);
@@ -679,6 +714,7 @@ console.log(`song-files-console-sim: ${cases} cases, ${failed} failed`);
 
 if(BREAKS){
   const MUT = [
+    ['Delete does not look again for an Import after its check', "    if(teacherSfOtherBusy()) return;   // an Import or another action began during the read (review R1-5)\n", ""],
     ['a built song\'s audio deleted anyway', "    if(users.length){ teacherSfNote", "    if(false){ teacherSfNote"],
     ['a built song\'s audio drawn as stray', "  return teacherSfOnList(id) ? 'match' : 'built';", "  return teacherSfOnList(id) ? 'match' : 'stray';"],
     ['no list match: any file uploads as the first entry', "return Object.keys(list).find(id => list[id] && list[id].sha256 === sha && list[id].bytes === bytes) || null;", "return Object.keys(list)[0] || null;"],
@@ -726,6 +762,8 @@ if(BREAKS){
     ['leaving Manage does not stop the import', "  const stopped = () => teacherView !== 'manage';\n  const w = { stopped, wrote: false, k: -1, n: 0, progress: line => { teacherBsProgress", "  const stopped = () => false;\n  const w = { stopped, wrote: false, k: -1, n: 0, progress: line => { teacherBsProgress"],
     ['two imports at once', "  if(teacherBsBusy || !jsonFile || !mp3File) return;", "  if(!jsonFile || !mp3File) return;"],
     ['a title drawn unescaped', "<td>${escHtml(String(d.title == null ? '—' : d.title))}</td>", "<td>${String(d.title == null ? '—' : d.title)}</td>"],
+    ['Import before the rules are published', "  if(teacherBsDenied){ teacherBsRefuse(", "  if(false){ teacherBsRefuse("],
+    ['a refused list read stops every Delete', "  catch(e){ if(e && e.code === 'permission-denied') return []; throw e; }", "  catch(e){ throw e; }"],
     ['a repaint keeps files the pickers no longer show', "  if(!teacherBsBusy) teacherBsPicked.json = teacherBsPicked.mp3 = null;\n", ""],
     ['the stored song not checked in the list', "  const why = builtSongCheck(id, s.doc);", "  const why = [];"],
   ];
