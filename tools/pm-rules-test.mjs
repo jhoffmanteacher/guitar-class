@@ -3,8 +3,8 @@
    (2026-11-01). Not part of checks.mjs: it needs Java and a few npm packages
    the repo deliberately does not carry.
 
-   It tries every allow and deny in the minutes/{uid}/days|weeks blocks (the daily
-   cap, the exact field lists, another student, the teacher, signed out, delete, a bad id),
+   It tries every allow and deny in the minutes/{uid}/days|weeks blocks (the 24-hour
+   ceiling, the exact field lists, another student, the teacher, signed out, delete, a bad id),
    in minutes/{uid}/meta/board (the private tag), weekBoard/{tag} (the Top 5) and
    rankBoard/{tag} (the class rank): the shape of each doc, the caps, writing under someone
    else's tag, no uid or name in a board doc, no delete, and minutesBoard having no rules.
@@ -20,6 +20,11 @@
    and "the tag cannot be deleted" now state that ("the teacher deletes…", "today: the owner cannot delete…"), and a
    "one student's removal" section pins the rest. This tool has no --breaks: the breaks for these lines are in
    tools/rules-core-test.mjs.
+   2026-11-15 (Paste E; Jonathan: "remove the 20 minute a day limit. it should be actual minutes"): a day holds up to
+   24 hours (dayCeilingSeconds() = 86400, a guard against a hand-written number), a week and a weekBoard doc 7 x that.
+   Four cases changed result on purpose: a day of 1201 s, an increment past the old cap, a week of 8401 s and a weekBoard
+   doc of 8401 s were refused and are now allowed; new cases pin 86400 / 86401 on a day (and by increment) and 604800 /
+   604801 on a week and on weekBoard. rankBoard keeps its number (480000, written out).
    2026-11-13: the made-up students are @seq.org accounts (the school-accounts rule, isSchool()); an outside account
    (X) cannot read the boards or the take counter. --port N (default 8089) picks the emulator's port.
    2026-11-14 (paste-2 day): firestore.rules is ONE text with the isSchool() gate (the second paste moved in and its
@@ -98,9 +103,14 @@ if (which.includes('orig')) {
   await t('own day, 600 s', () => day(A, 'uidA', '2026-11-16').set({ seconds: 600 }), true);
   await t('own day, increment merge-set (the client\'s real write)', () => day(A, 'uidA', '2026-11-17').set({ seconds: FV.increment(60) }, { merge: true }), true);
   await t('…and a second increment on the same doc', () => day(A, 'uidA', '2026-11-17').set({ seconds: FV.increment(60) }, { merge: true }), true);
-  await t('exactly the cap, 1200 s', () => day(A, 'uidA', '2026-11-18').set({ seconds: 1200 }), true);
-  await t('1201 s refused', () => day(A, 'uidA', '2026-11-19').set({ seconds: 1201 }), false);
-  await t('an increment that pushes the stored day past the cap is refused', async () => { await day(A, 'uidA', '2026-11-20').set({ seconds: 1190 }); return day(A, 'uidA', '2026-11-20').set({ seconds: FV.increment(30) }, { merge: true }); }, false);
+  await t('the old cap, 1200 s', () => day(A, 'uidA', '2026-11-18').set({ seconds: 1200 }), true);
+  /* 2026-11-15 (Jonathan: no 20-minute daily limit): a day holds up to 24 hours, a guard against a hand-written number.
+     The two cases below were "1201 s refused" and "an increment past the cap is refused" until then. */
+  await t('20 min + 1 s (1201 s) allowed since 2026-11-15 (no daily limit)', () => day(A, 'uidA', '2026-11-19').set({ seconds: 1201 }), true);
+  await t('an increment past the old 20-minute cap (1190 + 30) is allowed', async () => { await day(A, 'uidA', '2026-11-20').set({ seconds: 1190 }); return day(A, 'uidA', '2026-11-20').set({ seconds: FV.increment(30) }, { merge: true }); }, true);
+  await t('exactly 24 hours (86400 s), the ceiling', () => day(A, 'uidA', '2026-11-28').set({ seconds: 86400 }), true);
+  await t('24 h + 1 s (86401 s) refused', () => day(A, 'uidA', '2026-11-29').set({ seconds: 86401 }), false);
+  await t('an increment that pushes the stored day past 24 hours is refused', async () => { await day(A, 'uidA', '2026-11-30').set({ seconds: 86390 }); return day(A, 'uidA', '2026-11-30').set({ seconds: FV.increment(30) }, { merge: true }); }, false);
   await t('negative refused', () => day(A, 'uidA', '2026-11-21').set({ seconds: -5 }), false);
   await t('string seconds refused', () => day(A, 'uidA', '2026-11-22').set({ seconds: '60' }), false);
   await t('extra field refused', () => day(A, 'uidA', '2026-11-23').set({ seconds: 60, name: 'x' }), false);
@@ -117,8 +127,10 @@ if (which.includes('orig')) {
   await t('own week via merge + increment', () => wk(A, 'uidA', '2026-W48').set({ seconds: FV.increment(600), goalSeconds: 1800, hit: false }, { merge: true }), true);
   await t('a merge that omits hit keeps the stored one (the client sends hit only when it must): allowed on an existing week', async () => { await wk(A, 'uidA', '2026-W52').set({ seconds: 60, goalSeconds: 1800, hit: true }); return wk(A, 'uidA', '2026-W52').set({ seconds: FV.increment(60), goalSeconds: 1800 }, { merge: true }); }, true);
   await t('…but creating a week doc without hit is refused', () => wk(A, 'uidA', '2027-W01').set({ seconds: FV.increment(60), goalSeconds: 1800 }, { merge: true }), false);
-  await t('week at 7 × cap (8400)', () => wk(A, 'uidA', '2026-W49').set({ seconds: 8400, goalSeconds: 1800, hit: true }), true);
-  await t('week above 8400 refused', () => wk(A, 'uidA', '2026-W50').set({ seconds: 8401, goalSeconds: 1800, hit: true }), false);
+  await t('week at 7 × the old cap (8400)', () => wk(A, 'uidA', '2026-W49').set({ seconds: 8400, goalSeconds: 1800, hit: true }), true);
+  await t('week above the old 140 minutes (8401 s) allowed since 2026-11-15 (was refused)', () => wk(A, 'uidA', '2026-W50').set({ seconds: 8401, goalSeconds: 1800, hit: true }), true);
+  await t('week at 7 × 24 h (604800 s), the ceiling', () => wk(A, 'uidA', '2026-W44').set({ seconds: 604800, goalSeconds: 3600, hit: true }), true);
+  await t('week above 7 × 24 h (604801 s) refused', () => wk(A, 'uidA', '2026-W43').set({ seconds: 604801, goalSeconds: 3600, hit: true }), false);
   await t('missing hit refused', () => wk(A, 'uidA', '2026-W51').set({ seconds: 60, goalSeconds: 1800 }), false);
   await t('hit not a bool refused', () => wk(A, 'uidA', '2026-W51').set({ seconds: 60, goalSeconds: 1800, hit: 'yes' }), false);
   await t('extra field refused', () => wk(A, 'uidA', '2026-W51').set({ seconds: 60, goalSeconds: 1800, hit: true, grade: 'A' }), false);
@@ -211,8 +223,10 @@ if (which.includes('orig')) {
   await t('period 4', () => WB(A, TAGA).set({ week: '2026-W46', period: '4', seconds: 60 }), true);
   await t('period CAS', () => WB(A, TAGA).set({ week: '2026-W46', period: 'CAS', seconds: 60 }), true);
   await t('0 seconds', () => WB(A, TAGA).set({ week: '2026-W46', period: '7', seconds: 0 }), true);
-  await t('exactly 7 × the daily cap (8400)', () => WB(A, TAGA).set({ week: '2026-W46', period: '7', seconds: 8400 }), true);
-  await t('8401 refused', () => WB(A, TAGA).set({ week: '2026-W46', period: '7', seconds: 8401 }), false);
+  await t('7 × the old cap (8400)', () => WB(A, TAGA).set({ week: '2026-W46', period: '7', seconds: 8400 }), true);
+  await t('8401 allowed since 2026-11-15 (was refused: no daily limit)', () => WB(A, TAGA).set({ week: '2026-W46', period: '7', seconds: 8401 }), true);
+  await t('exactly 7 × 24 h (604800)', () => WB(A, TAGA).set({ week: '2026-W46', period: '7', seconds: 604800 }), true);
+  await t('604801 refused', () => WB(A, TAGA).set({ week: '2026-W46', period: '7', seconds: 604801 }), false);
   await t('negative refused', () => WB(A, TAGA).set({ week: '2026-W46', period: '7', seconds: -1 }), false);
   await t('seconds as a string refused', () => WB(A, TAGA).set({ week: '2026-W46', period: '7', seconds: '60' }), false);
   await t('a period the site does not know (5) refused', () => WB(A, TAGA).set({ week: '2026-W46', period: '5', seconds: 60 }), false);
@@ -236,7 +250,7 @@ if (which.includes('orig')) {
   console.log('== rankBoard/{tag}  { seconds }');
   await t('A writes under its own tag', () => RB(A, TAGA).set({ seconds: 3600 }), true);
   await t('…and updates it', () => RB(A, TAGA).set({ seconds: 7200 }), true);
-  await t('exactly 400 × the daily cap (480000)', () => RB(A, TAGA).set({ seconds: 480000 }), true);
+  await t('exactly 480000 (400 days of the old cap; unchanged 2026-11-15)', () => RB(A, TAGA).set({ seconds: 480000 }), true);
   await t('480001 refused', () => RB(A, TAGA).set({ seconds: 480001 }), false);
   await t('negative refused', () => RB(A, TAGA).set({ seconds: -1 }), false);
   await t('seconds as a string refused', () => RB(A, TAGA).set({ seconds: '60' }), false);

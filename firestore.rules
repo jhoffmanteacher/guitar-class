@@ -499,14 +499,17 @@ service cloud.firestore {
        console's "Delete this student's data…", one student at a time; see
        the note above progress/{userId}). The client adds seconds with
        increment(), so the rule sees the resulting document: a day may hold
-       at most dailyCapSeconds() and a week at most seven days of that. A
+       at most dayCeilingSeconds() and a week at most seven days of that. A
        student deletes nothing here, not even their own.
-       ⚠ dailyCapSeconds() is practice-minutes-config.js dailyCapMinutes × 60.
-       Raise one, raise the other, re-publish (checks.mjs 1cg fails a push
-       where they differ). HONEST LIMIT: a student at DevTools can write any
-       number up to the cap for themselves; the cap is the bound, and nothing
-       reads these numbers for a grade. */
-    function dailyCapSeconds() { return 1200; }
+       2026-11-15 (Jonathan: "remove the 20 minute a day limit. it should be
+       actual minutes"): there is no daily limit on practice any more. The
+       ceiling is 24 hours a day, a guard against a hand-written number, not
+       a product limit (it was dailyCapSeconds(), 1200 = 20 minutes, before).
+       ⚠ dayCeilingSeconds() is practice-minutes-config.js dayCeilingMinutes × 60
+       (checks.mjs 1cg fails a push where they differ). HONEST LIMIT: a
+       student at DevTools can write any number up to the ceiling for
+       themselves; nothing reads these numbers for a grade. */
+    function dayCeilingSeconds() { return 86400; }
     function pmOwner(userId) {
       return isSchool() && request.auth.uid == userId;
     }
@@ -521,7 +524,7 @@ service cloud.firestore {
             && request.resource.data.keys().hasOnly(['seconds'])
             && request.resource.data.seconds is number
             && request.resource.data.seconds >= 0
-            && request.resource.data.seconds <= dailyCapSeconds();
+            && request.resource.data.seconds <= dayCeilingSeconds();
     }
     match /minutes/{userId}/weeks/{week} {
       allow read: if isTeacher();
@@ -532,7 +535,7 @@ service cloud.firestore {
             && request.resource.data.keys().hasAll(['seconds', 'goalSeconds', 'hit'])
             && request.resource.data.seconds is number
             && request.resource.data.seconds >= 0
-            && request.resource.data.seconds <= 7 * dailyCapSeconds()
+            && request.resource.data.seconds <= 7 * dayCeilingSeconds()
             && request.resource.data.goalSeconds is number
             && request.resource.data.goalSeconds >= 0
             && request.resource.data.goalSeconds <= 86400
@@ -571,7 +574,7 @@ service cloud.firestore {
        the doc id IS the writer's own tag (the rule reads the writer's
        minutes/{uid}/meta/board; a missing doc denies), with exactly those
        three fields: a week id, a period the site knows, and a number from 0 to
-       seven days of the daily cap. A new week overwrites last week's doc (one
+       seven days of the day ceiling (24 hours). A new week overwrites last week's doc (one
        doc per student, ever). No delete.
 
        What a reader sees here: a random tag, a period, a week and a number.
@@ -586,7 +589,7 @@ service cloud.firestore {
        does tie a uid to a period for the students the teacher corrected
        (a period, never a name, and not part of this change).
 
-       HONEST LIMITS: a student at DevTools can write any number up to the cap
+       HONEST LIMITS: a student at DevTools can write any number up to the ceiling
        for themselves and place themselves in any period or week. A tag cannot
        be proven unique: any account may create its meta doc with ANY 32-hex id
        (including another student's public tag) and then write that board doc,
@@ -612,7 +615,7 @@ service cloud.firestore {
             && request.resource.data.period in ['4', '7', 'CAS']
             && request.resource.data.seconds is number
             && request.resource.data.seconds >= 0
-            && request.resource.data.seconds <= 7 * dailyCapSeconds();
+            && request.resource.data.seconds <= 7 * dayCeilingSeconds();
     }
 
     /* ── CLASS RANK (2026-11-05; practice-minutes.js, "CLASS RANK") ───────
@@ -625,7 +628,7 @@ service cloud.firestore {
        to a uid, and the live quiz links a uid to a name). Every school
        account reads the whole collection (that is how a rank is worked
        out); a write is allowed only under the writer's own tag, with that
-       one field, a number from 0 to 400 days of the daily cap. No delete.
+       one field, a number from 0 to 480000 (400 days of the old 20-minute cap). No delete.
        HONEST LIMITS: as weekBoard (a student at DevTools can claim first
        place for themselves; a tag cannot be proven unique, so one account can
        overwrite one other student's entry, and UNLIKE weekBoard the victim's
@@ -640,7 +643,7 @@ service cloud.firestore {
             && request.resource.data.keys().hasOnly(['seconds'])
             && request.resource.data.seconds is number
             && request.resource.data.seconds >= 0
-            && request.resource.data.seconds <= 400 * dailyCapSeconds();
+            && request.resource.data.seconds <= 480000;
     }
 
     /* ── ERROR LOG (2026-11-13; app/boot.js SITE_ERRORS, teacher-errors.js) ──

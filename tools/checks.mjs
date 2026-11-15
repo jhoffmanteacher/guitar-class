@@ -18872,8 +18872,11 @@ const SCHOOL_GATE_USES = 26;   // 6 class-wide reads + 11 student writes (progre
    2026-11-14, Song builder Part a1 (Paste D): a new add-only block for builtSongs/{id},
    builtSongsMeta/list and songDrafts/{id} (tools/built-songs-rules-test.mjs), the path list, two paste-2 notes.
    2026-11-14, Part a1 review round 1 (still Paste D): a title of spaces only is refused, gainDb and sourceSha256 are
-   checked when present, and comments (v is the format version; the list's entries are the page's to check; paste 2). */
-const RULES_FILE_SHA256 = '9b144f0af27668709b77aad4c35020ef71efe043d547aee626cbab493c067a4e';
+   checked when present, and comments (v is the format version; the list's entries are the page's to check; paste 2).
+   2026-11-15 (Paste E): practice minutes have no daily limit (Jonathan: "it should be actual minutes"); the minutes
+   ceilings are 24 hours a day (dayCeilingSeconds() = 86400, was dailyCapSeconds() = 1200), 7 x that a week and on
+   weekBoard; rankBoard keeps its old number, written out (480000). */
+const RULES_FILE_SHA256 = '8cb7341f61c3e0232535e31e3132698ae09ec732b2fdd4506f22413fa5308c20';
 const TEACHER_GATE_BODY = "return request.auth != null && request.auth.token.email == 'jhoffman@seq.org' && request.auth.token.email_verified == true;";
 const SIGNED_IN_BODY = "return request.auth != null;";
 const SCHOOL_GATE_BODY = "return request.auth != null && ((request.auth.token.get('email_verified', false) == true && request.auth.token.get('email', '').lower().matches('^[^@]+@seq[.]org$')) || (exists(/databases/$(database)/documents/config/access) && get(/databases/$(database)/documents/config/access).data.get('allow', {}).get(request.auth.uid, false) == true));";
@@ -19978,9 +19981,11 @@ function checkPracticeMinutes(i18nTable) {
     const engCode = strip(read('practice-minutes.js') || '').replace(/([;,{}()\]])[ \t]+\/\/.*$/gm, '$1');
     const hbHit = /\b(?:heartbeats?|runAggregationQuery|pollLive|liveMinCount|pmSid|HEARTBEAT_MS)\b|pm:p:/i.exec(engCode);
     if (hbHit) fail(`practice-minutes.js has '${hbHit[0]}': the heartbeat writer and the "N playing" count query were removed 2026-11-04 and must not come back`);
-    const cap = rules && /function dailyCapSeconds\(\)\s*\{\s*return\s+(\d+);\s*\}/.exec(rules);
-    if (!cap) fail('firestore.rules: dailyCapSeconds() not found — the cap check cannot run (renamed? update this check with it)');
-    else if (+cap[1] !== cfg.dailyCapMinutes * 60) fail(`firestore.rules dailyCapSeconds() is ${cap[1]} but practice-minutes-config.js dailyCapMinutes × 60 is ${cfg.dailyCapMinutes * 60}: every day above the smaller number is refused by the database. Change both, and re-publish the rules`);
+    /* 2026-11-15: the rules' day ceiling is 24 hours (dayCeilingSeconds(), was dailyCapSeconds() = 1200). Until the engine stops
+       capping at 20 minutes, the rules must allow at least what the config's cap lets the page write. */
+    const cap = rules && /function dayCeilingSeconds\(\)\s*\{\s*return\s+(\d+);\s*\}/.exec(rules);
+    if (!cap) fail('firestore.rules: dayCeilingSeconds() not found — the ceiling check cannot run (renamed? update this check with it)');
+    else if (+cap[1] < cfg.dailyCapMinutes * 60) fail(`firestore.rules dayCeilingSeconds() is ${cap[1]} but practice-minutes-config.js dailyCapMinutes × 60 is ${cfg.dailyCapMinutes * 60}: every day above the rules' number is refused by the database`);
   }
 
   // 3. the rules blocks
@@ -20034,9 +20039,9 @@ function checkPracticeMinutes(i18nTable) {
         const bNoDel = n === 'tree' ? b : b.replace(/allow delete: if isTeacher\(\);/, '');
         if ((n !== 'tree' && bNoDel === b) || /\bdelete\b|allow\s+write/.test(bNoDel)) fail(`minutes ${n} rule allows a delete other than the teacher's one "allow delete: if isTeacher();", or a blanket write${n !== 'tree' && bNoDel === b ? ' (the teacher\'s delete line is missing: the console\'s Delete this student\'s data stops at practice minutes)' : ''}`);
       }
-      if (!/hasOnly\(\['seconds'\]\)/.test(days) || !/<= dailyCapSeconds\(\)/.test(days)) fail("minutes days rule must be { seconds } only and capped at dailyCapSeconds()");
+      if (!/hasOnly\(\['seconds'\]\)/.test(days) || !/<= dayCeilingSeconds\(\)/.test(days)) fail("minutes days rule must be { seconds } only and capped at dayCeilingSeconds()");
       if (!/hasOnly\(\['seconds', 'goalSeconds', 'hit'\]\)/.test(weeks) || !/hit is bool/.test(weeks)) fail("minutes weeks rule must be { seconds, goalSeconds, hit } only, hit a bool");
-      const WEEKS_SHIPPED = "match /minutes/{userId}/weeks/{week} { allow read: if isTeacher(); allow delete: if isTeacher(); allow create, update: if pmOwner(userId) && week.matches('^[0-9]{4}-W[0-9]{2}$') && request.resource.data.keys().hasOnly(['seconds', 'goalSeconds', 'hit']) && request.resource.data.keys().hasAll(['seconds', 'goalSeconds', 'hit']) && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 7 * dailyCapSeconds() && request.resource.data.goalSeconds is number && request.resource.data.goalSeconds >= 0 && request.resource.data.goalSeconds <= 86400 && request.resource.data.hit is bool; }";
+      const WEEKS_SHIPPED = "match /minutes/{userId}/weeks/{week} { allow read: if isTeacher(); allow delete: if isTeacher(); allow create, update: if pmOwner(userId) && week.matches('^[0-9]{4}-W[0-9]{2}$') && request.resource.data.keys().hasOnly(['seconds', 'goalSeconds', 'hit']) && request.resource.data.keys().hasAll(['seconds', 'goalSeconds', 'hit']) && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 7 * dayCeilingSeconds() && request.resource.data.goalSeconds is number && request.resource.data.goalSeconds >= 0 && request.resource.data.goalSeconds <= 86400 && request.resource.data.hit is bool; }";
       if (weeks.replace(/\s+/g, ' ').trim() !== WEEKS_SHIPPED) fail('firestore.rules: the minutes/{userId}/weeks block differs from the one shipped (teacher READ, 2026-11-06, and DELETE, 2026-11-14). If this is on purpose, change WEEKS_SHIPPED here with it and tell Jonathan to paste the rules again');
     }
     /* The class rank (2026-11-05): ONE number per student keyed by the private Top 5 tag, never the uid. The uid-keyed minutesBoard (2026-11-04) is GONE:
@@ -20058,7 +20063,7 @@ function checkPracticeMinutes(i18nTable) {
     }
     /* read and create/update: the rules' gate (rulesGate: isSchool() since the school-accounts paste 2 moved into firestore.rules, 2026-11-14). */
     const GATE = rulesGate(rules);
-    const RB_SHIPPED = "match /rankBoard/{tag} { allow read: if isSchool(); allow create, update: if isSchool() && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id && request.resource.data.keys().hasOnly(['seconds']) && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 400 * dailyCapSeconds(); }";
+    const RB_SHIPPED = "match /rankBoard/{tag} { allow read: if isSchool(); allow create, update: if isSchool() && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id && request.resource.data.keys().hasOnly(['seconds']) && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 480000; }";
     const rbMatches = (strip(rules).match(/match\s+\/rankBoard\b/g) || []).length;
     const rboard = block('rankBoard/{tag}');
     if (rbMatches !== 1 || !rboard) fail(`firestore.rules has ${rbMatches} match blocks for /rankBoard (exactly one, as published: nothing uses it since 2026-11-13; removing it is a rules change for Jonathan to paste — then set this count to 0)`);
@@ -20069,7 +20074,7 @@ function checkPracticeMinutes(i18nTable) {
        block is a change Jonathan must re-paste. */
     const TAG_SHIPPED = "match /minutes/{userId}/meta/board { allow delete: if isTeacher(); allow create: if pmOwner(userId) && request.resource.data.keys().hasOnly(['id']) && request.resource.data.id is string && request.resource.data.id.matches('^[0-9a-f]{32}$'); }";
     /* read and create/update: the rules' gate (GATE above). */
-    const WB_SHIPPED = "match /weekBoard/{tag} { allow read: if isSchool(); allow create, update: if isSchool() && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id && request.resource.data.keys().hasOnly(['week', 'period', 'seconds']) && request.resource.data.keys().hasAll(['week', 'period', 'seconds']) && request.resource.data.week is string && request.resource.data.week.matches('^[0-9]{4}-W[0-9]{2}$') && request.resource.data.period in ['4', '7', 'CAS'] && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 7 * dailyCapSeconds(); }";
+    const WB_SHIPPED = "match /weekBoard/{tag} { allow read: if isSchool(); allow create, update: if isSchool() && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id && request.resource.data.keys().hasOnly(['week', 'period', 'seconds']) && request.resource.data.keys().hasAll(['week', 'period', 'seconds']) && request.resource.data.week is string && request.resource.data.week.matches('^[0-9]{4}-W[0-9]{2}$') && request.resource.data.period in ['4', '7', 'CAS'] && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 7 * dayCeilingSeconds(); }";
     /* The rest of the minutes tree is pinned too (2026-11-04 review): a tree block of `allow read, update: if pmOwner(userId)` would let a
        student change their own tag and skip the day cap; a second `match /minutes/{u}/meta/{doc}` or a catch-all `match /{path=**}/meta/{doc}`
        would overlap the tag block. Exactly four `match /minutes/` blocks (tree read, days, weeks, the tag), the tree block whole, and no match
@@ -20315,7 +20320,7 @@ function checkPracticeMinutes(i18nTable) {
       if (!/window\.PM = \{[\s\S]*?setWeekGoals: setWeekGoals,/.test(eng) || !/o\.weekGoals = liveWeekGoals;/.test(eng)) fail('practice-minutes.js: PM.setWeekGoals must be offered, and cfg() must carry only the handed-in map (o.weekGoals = liveWeekGoals), never one from the settings file');
     }
   }
-  if (!bad) ok(`engine run: ${m[1]} simulation assertions pass (pinned; incl. the teacher console's Practice minutes maths and the This week's goal box); console view pinned (button after Students, This week default, weeks-only server read, the view's block read-only, its one write — the goal box — a single cell-checked pmWeekGoals patch, blank = the flat goal); rules cap = config cap (${cfg ? cfg.dailyCapMinutes * 60 : '?'} s); no heartbeat or "N playing" query in the engine or config, the heartbeats rules block and index gone; minutes rules owner-only, no delete; older rules untouched; hooks, script order and strings in place`);
+  if (!bad) ok(`engine run: ${m[1]} simulation assertions pass (pinned; incl. the teacher console's Practice minutes maths and the This week's goal box); console view pinned (button after Students, This week default, weeks-only server read, the view's block read-only, its one write — the goal box — a single cell-checked pmWeekGoals patch, blank = the flat goal); rules day ceiling ≥ config cap (${cfg ? cfg.dailyCapMinutes * 60 : '?'} s); no heartbeat or "N playing" query in the engine or config, the heartbeats rules block and index gone; minutes rules owner-only, no delete; older rules untouched; hooks, script order and strings in place`);
 }
 
 (async function main() {
