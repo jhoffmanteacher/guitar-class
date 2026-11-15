@@ -116,6 +116,10 @@ const BS_SECTION_NAMES = { intro: 'bs.sec.intro', verse: 'bs.sec.verse', prechor
   refrain: 'bs.sec.refrain', bridge: 'bs.sec.bridge', interlude: 'bs.sec.interlude', solo: 'bs.sec.solo', riff: 'bs.sec.riff',
   requinto: 'bs.sec.requinto', outro: 'bs.sec.outro', ending: 'bs.sec.ending' };
 const BS_METERS = { '4/4': { bpb: 4, q: 2 }, '3/4': { bpb: 3, q: 2 }, '6/8': { bpb: 2, q: 3, countSix: true } };
+/* Every lookup by a value the doc supplies goes through an own-property test: a plain object answers "constructor",
+   "__proto__" or "toString" with Object.prototype's own (review R1-1, 2026-11-15). */
+function bsOwn(o, k){ return typeof k === 'string' && Object.prototype.hasOwnProperty.call(o, k); }
+function bsMeter(m){ return bsOwn(BS_METERS, m) ? BS_METERS[m] : null; }
 const BS_STRINGS = ['E', 'A', 'D', 'G', 'B', 'e'];
 const BS_OPEN_MIDI = [40, 45, 50, 55, 59, 64];
 const BS_PC = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
@@ -198,7 +202,7 @@ function bsBarParts(s, meter, chords){
   return out;
 }
 function bsLang(key, lang, params){ return typeof tIn === 'function' ? tIn(key, lang, params) : key; }
-function bsSectionLabel(s, lang){ return bsLang(BS_SECTION_NAMES[s.name], lang) + (s.n ? ' ' + s.n : ''); }
+function bsSectionLabel(s, lang){ return bsLang(bsOwn(BS_SECTION_NAMES, s.name) ? BS_SECTION_NAMES[s.name] : '', lang) + (s.n ? ' ' + s.n : ''); }
 /* "G, C and D" in English, "G, C y D" in Spanish. */
 function bsList(names, lang){
   if(names.length < 2) return names.join('');
@@ -207,6 +211,7 @@ function bsList(names, lang){
 /* The directions line over the card (an activity's intro): the chords it uses, or the short line when that would
    not fit one rendered line (BS_CAP, both languages). */
 function bsIntro(names, lang){
+  if(!names.length) return bsLang('bs.introShort', lang);   // a card of rests only names no chord
   const long = bsLang('bs.intro', lang, { chords: bsList(names, lang) });
   return long.length <= BS_CAP ? long : bsLang('bs.introShort', lang);
 }
@@ -243,7 +248,7 @@ function builtSongCheck(id, doc){
   if(!bsIsObj(s)) return no('song (the chart) is missing');
   const sx = bsKeysOnly(s, ['meter', 'bpm', 'anchor', 'barTimes', 'chords', 'bars', 'sections', 'level', 'range']);
   if(sx.length) no(`the chart has unknown field(s): ${sx.slice(0, 4).join(', ')} (a built song is never a whole-song, sheet, journey, teacher-only, check or required card)`);
-  const meter = BS_METERS[s.meter];
+  const meter = bsMeter(s.meter);
   if(!meter) return no(`meter ${JSON.stringify(s.meter)} is not 4/4, 3/4 or 6/8`);
   if(!bsNum(s.bpm) || s.bpm < 30 || s.bpm > 260) no('bpm is not a number from 30 to 260 (counted beats a minute)');
   const dur = a && bsNum(a.durationSec) ? a.durationSec : 0;
@@ -339,11 +344,13 @@ function bsNoteOf(name, shape, beats, label){
   return { frets, note: label || name, midi, beats };
 }
 function builtSongExpand(id, doc){
-  const s = doc.song, meter = BS_METERS[s.meter], lv = s.level;
+  const s = doc.song, meter = bsMeter(s.meter), lv = s.level;
   const versions = lv.versions;
   const notesFull = versions !== 'power';          // the notes hold full chords (a power-only card holds power chords)
+  /* The chords the CARD plays (the sections in its range), in the order they first sound: the directions line and
+     the power-chord map name these and no others (review R1-3). */
   const used = [];
-  const parts = s.bars.map(b => { const p = bsBarParts(b, meter, s.chords); p.forEach(x => { if(x.name && !used.includes(x.name)) used.push(x.name); }); return p; });
+  const parts = s.bars.map(b => bsBarParts(b, meter, s.chords));
   const noteFor = x => {
     if(!x.name) return { rest: true, beats: x.beats };
     const c = s.chords[x.name];
@@ -356,7 +363,7 @@ function builtSongExpand(id, doc){
     let bar = x.from - 1;
     (lines || [{ text: '', bars: x.bars }]).forEach(l => {
       let n = 0;
-      for(let k = 0; k < l.bars; k++, bar++) parts[bar].forEach(p => { notes.push(noteFor(p)); n++; });
+      for(let k = 0; k < l.bars; k++, bar++) parts[bar].forEach(p => { if(p.name && !used.includes(p.name)) used.push(p.name); notes.push(noteFor(p)); n++; });
       rows.push(n); labels.push(l.text);
     });
     const out = { label: bsSectionLabel(x, 'en'), label_es: bsSectionLabel(x, 'es'),
@@ -366,7 +373,8 @@ function builtSongExpand(id, doc){
   });
   const tail = doc.artist && doc.artist.trim() ? ' - ' + doc.artist.trim() : '';
   const name = '"' + doc.title.trim() + '"' + tail;
-  const fullNames = used.map(n => n), powerNames = used.map(n => bsChordName(n).q === '5' ? n : bsPowerName(n));
+  /* E and Em are both E5: a name is said once, in the order it first sounds (review R1-2). */
+  const fullNames = used.slice(), powerNames = [...new Set(used.map(n => bsChordName(n).q === '5' ? n : bsPowerName(n)))];
   const shown = notesFull ? fullNames : powerNames;
   const act = {
     id, view: 'card', library: true, optional: true,

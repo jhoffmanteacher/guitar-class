@@ -141,6 +141,12 @@ export function brokenFixtures(good){
   add('a chart field that would make a sheet card', d => { d.song.sheet = 'sheets/x.pdf'; });
   add('a chart field that would make it required', d => { d.song.optional = false; });
   add('meter 5/4', d => { d.song.meter = '5/4'; });
+  /* Object.prototype's own names, where a plain lookup would answer (review R1-1, 2026-11-15). */
+  add('meter "constructor"', d => { d.song.meter = 'constructor'; });
+  add('meter "toString"', d => { d.song.meter = 'toString'; });
+  add('meter "__proto__"', d => { d.song.meter = '__proto__'; });
+  add('a section named "constructor"', d => { d.song.sections[0].name = 'constructor'; });
+  add('a bar naming "constructor"', d => { d.song.bars[0] = 'constructor'; });
   add('bpm 0', d => { d.song.bpm = 0; });
   add('anchor past the end of the file', d => { d.song.anchor = d.audio.durationSec + 1; });
   add('the bars run past the end of the file', d => { d.song.bpm = 31; });
@@ -157,6 +163,7 @@ export function brokenFixtures(good){
   add('a section name not on the list', d => { d.song.sections[0].name = 'tag'; });
   add('a section of 0 bars', d => { d.song.sections.push({ name: 'outro', from: d.song.bars.length + 1, bars: 0 }); });
   add('16 sections', d => { const n = d.song.bars.length; d.song.bars = Array.from({ length: 16 }, (_, i) => d.song.bars[i % n]); d.song.sections = Array.from({ length: 16 }, (_, i) => ({ name: 'verse', from: i + 1, bars: 1 })); });
+  add('a lyric line of 161 characters', d => { const s = d.song.sections.find(x => x.lyrics); s.lyrics[0].text = 'x'.repeat(161); });
   add('lyric lines that do not cover the section', d => { const s = d.song.sections.find(x => x.lyrics) || d.song.sections[0]; s.lyrics = [{ text: 'Test', bars: s.bars + 1 }]; });
   add('a range outside the sections', d => { d.song.range = { from: 0, to: d.song.sections.length }; });
   add('barTimes that do not start at the anchor', d => { d.song.barTimes = d.song.bars.map((_, i) => d.song.anchor + 0.2 + i * 2.5); });
