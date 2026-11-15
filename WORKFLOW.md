@@ -241,20 +241,13 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 - [ ] **2026-11-14 — Friday check: MINOR findings, not fixed (a lean run: only BLOCKER/MAJOR were fixed).** Range
   `friday-check-2026-11-06..364b6d2`, 168 Fast commits, reviewed by area (Opus, high). Each line: what, where, the cause.
   - **For Jonathan (content or product calls):**
-    - Module 1's note circle still goes counterclockwise (`module-1.js:442,444`, EN + ES), while the Tuning Simulator
-      turned clockwise in `bf634eb`: mirror Module 1, or say the two differ on purpose.
     - Games heading "Notes on the low E and A strings" (`i18n.js:2225`, `9e62b46`): Note Runner keeps to those two
       strings, but only 1 of Note Hunt's 5 levels and 1 of Fret Zap's 4 decks do.
-    - Backup leaves out `minutes/{uid}/days` "because the teacher may not read them" (`teacher-backup.js:124`,
-      `bbbfdff`): false since `e88603f` lets the teacher read them. Back them up, or keep them out and fix the
-      reason; `siteErrors/*` is not listed either.
     - Change Up done screen at 135 / 45 BPM says "10 BPM" and the lit button plays 140 / 40, a 5 BPM step
       (`coach-chords.js:1373`, `66bac56`, `e9711b8`): say the real step, EN + ES.
     - `coach.foot` (`i18n.js:1773`) still says nothing is "recorded or uploaded" beside the line `c8f2d79` fixed:
       EN "… No sound is recorded or uploaded.", ES "… No se graba ni se sube ningún sonido."
     - `module-9.js:138,196` `hint_es` quote the button as "Todavía lo practico"; it is "Todavía lo estoy practicando".
-    - "Marked complete. Your next activity is at the top." can be false (`app/activities-2.js:1470` → `:773`,
-      `771fdc3`): the next required card can be in Unfinished under an Optional one at the top. Name the card.
     - The module fold's default (newest open) is not pinned (`app/activities-2.js:1615`, `5b2fd5b`): 1da cases.
     - Live game: a Spanish name typed equal to the built-in Spanish title is wiped (`teacher-livegames.js:237`,
       `fc27370`): `if(!en && es === lqgBuiltIn(id, 'es')) es = '';`.
@@ -265,6 +258,9 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
     - Song Journey Metronome, fast seeks: a doubled beat on 3-4 of 40 quick seeks on localhost, before and
       after the 2026-11-14 seeking fix (that one fixed the slow-connection stray click, 5+2 of 20 → 0). Not found.
     - `tools/smoke.mjs` summary says "each of its 4 tool buttons"; 3 since `4422c66`.
+  - **Done 2026-11-14, evening (Jonathan's calls, Fast):** Module 1's note circle goes clockwise (both figures, hint and
+    alt text, EN + ES); the backup includes each student's practice days (`minutesDays`) and its left-out list is true;
+    on In class, required cards sit above optional ones and the next required card is always the first pending card.
   - **Done 2026-11-14 (Jonathan's calls):** the Record lines in Modules 4, 5 and 7 rewritten (Module 4 changed
     although the class is about to enter it: text only, Rule Zero holds); Journey "Not saved yet" floats on screen and
     retries by itself (every 15 s and when back online; check `1ek`). Both blues solos (m10w2,
