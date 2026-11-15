@@ -94,14 +94,9 @@
    day totals (including any older day the queue holds) and trims the queue to the
    24-hour ceiling; if nothing is left to trim, the refusal is something else (the rules not
    published yet, say), so the seconds stay queued and are retried every 5 minutes,
-   and reads back off the same way. THE PASTE GAP (2026-11-15): until the rules without
-   the 20-minute daily limit are published, the database refuses a day above 1200 s and a
-   week above 8400 s. A batch that would pass them is refused as a whole, kept, and
-   retried every 5 minutes, so it lands once the rules are published; the student's own
-   page shows the true total meanwhile (it counts what is queued). The pagehide keepalive
-   cannot see a refusal and deletes what it sends, so it does not send a day that would
-   pass 1200 s until this week's server copy already holds such a day (keepaliveSafe):
-   those seconds stay in the leaving key and the next page sends them.
+   and reads back off the same way. (The rules without the 20-minute daily limit were
+   published 2026-11-15; the guard that held back the pagehide keepalive until then,
+   keepaliveSafe / OLD_DAY_CAP, was removed the same day.)
    Known limits: the week doc's `hit` and `goalSeconds` are a best-effort snapshot
    for later (the app recomputes from `seconds`); a device that has never seen a
    week's doc sends hit with its first write, which can overwrite a true another
@@ -898,7 +893,7 @@
   }
   /* Refused by the rules. Re-read the server, trim the queue to the ceiling and
      try again; if the queue did not shrink, something other than the ceiling is
-     wrong (rules not published, the paste gap): keep the seconds, try again in 5 minutes. */
+     wrong (rules not published, say): keep the seconds, try again in 5 minutes. */
   function afterDenied(st){
     var before = JSON.stringify(st.pend);
     return load(true).then(function(){
@@ -1077,17 +1072,6 @@
       if(u && typeof u.getIdToken === 'function'){ var who = u.uid; u.getIdToken().then(function(tk){ if(S && S.uid === who){ idToken = tk; idTokenUid = who; } }, function(){}); }
     } catch(e) {}
   }
-  /* THE PASTE GAP (2026-11-15, see the header). Rules published before 2026-11-15 refuse a day above OLD_DAY_CAP
-     (20 minutes) and a week above 7 x it. The keepalive cannot see a refusal and deletes what it sends, so it sends a
-     day past OLD_DAY_CAP only once this week's server copy shows the new rules are live (a day or a week above the
-     old numbers already landed). Otherwise those seconds stay in the leaving key: the next page sends them, and the
-     regular flush, which sees a refusal and keeps the seconds, carries them over the gap. Never a loss, at worst late. */
-  var OLD_DAY_CAP = 1200;
-  function keepaliveSafe(st, snap){
-    var open = Object.keys(st.days).some(function(d){ return st.days[d] > OLD_DAY_CAP; })
-      || Object.keys(st.weeks).some(function(w){ return (st.weeks[w] && st.weeks[w].seconds) > 7 * OLD_DAY_CAP; });
-    return open || Object.keys(snap).every(function(d){ return (st.days[d] || 0) + ((st.inflight && st.inflight.snap[d]) || 0) + snap[d] <= OLD_DAY_CAP; });
-  }
   function keepaliveFlush(){
     var st = S;
     if(!st || st.loading || !idToken || idTokenUid !== st.uid || typeof fetch === 'undefined') return;
@@ -1098,7 +1082,7 @@
     if(typeof navigator !== 'undefined' && navigator.onLine === false) return;
     if(Date.now() < deniedUntil) return;
     var snap = takePending();
-    if(!snap || !keepaliveSafe(st, snap)) return;
+    if(!snap) return;
     var ops = buildOps(snap);
     var proj = firebaseConfig.projectId, root = 'projects/' + proj + '/databases/(default)/documents/minutes/' + st.uid + '/';
     var writes = ops.map(function(o){

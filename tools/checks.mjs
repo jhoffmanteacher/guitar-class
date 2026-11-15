@@ -19547,7 +19547,7 @@ async function checkPlantAFault() {
    looping counts 10 minutes after the last input; no input ever counts nothing; clicks alone keep 2 minutes), section 12's metronome and mic
    cases follow it, section 18 pins the strip's TRUE total ("140/60", "140/140", the ring full at the goal), section 22 the console's
    "385 / 40 min", and a new section 23 runs the gap before the rules paste (nothing lost, the keepalive holds a day past 1200 s back). */
-const PM_SIM_PIN = 407;
+const PM_SIM_PIN = 404;
 /* ════════════════════════════════════════════════════════════════════
    1dc. STUDENT DATA NEVER GOES TO CLAUDE (Jonathan, 2026-11-13: "I am allowed to
         store data in google/firestore but not in claude"; "let's block student

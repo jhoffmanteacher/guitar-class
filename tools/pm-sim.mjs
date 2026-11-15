@@ -2405,8 +2405,9 @@ console.log('22. the Practice minutes view as drawn (teacher.js renderTeacherMin
 /* ═══════════ 23. No daily limit, and the paste gap (2026-11-15) ═══════════
    Jonathan: "remove the 20 minute a day limit. it should be actual minutes". The rules that allow it (Paste E) are pasted by hand, so this
    engine may run for a while against the OLD rules (server.oldRules: a day above 1200 s, a week above 8400 s refused). Nothing may be lost
-   in that gap: a refused batch stays queued and lands once the rules are published, and the pagehide keepalive (which cannot see a
-   refusal and deletes what it sends) does not send a day past 1200 s until the server shows the new rules. */
+   in that gap: a refused batch stays queued and lands once the rules are published. Jonathan published them 2026-11-15, and the guard
+   that kept the pagehide keepalive from sending a day past 1200 s (keepaliveSafe / OLD_DAY_CAP) was removed the same day: a closing
+   tab's seconds past 20 minutes now go out at once. */
 console.log('23. no daily limit, and the gap before the rules are pasted');
 {
   const sh = shared(); sh.server.oldRules = true;
@@ -2417,19 +2418,12 @@ console.log('23. no daily limit, and the gap before the rules are pasted');
   const counted = sec(w), onServer = sh.server.days[todayStr]?.seconds || 0;
   check('the gap: 30 minutes played; the server keeps what the old rules allow (at most 1200 s) and the page keeps every second (1800 counted)', counted >= 1799 && counted <= 1801 && onServer <= 1200 && onServer >= 1100, `counted ${counted}, server ${onServer}`);
   check('…and the student\'s own page shows the true week (30 min), not the server\'s', Math.floor(w.PM.status().week.secs / 60) === 30, String(w.PM.status().week.secs));
-  const f0 = w.log.fetches.length;
-  for (const f of w.listeners['win:pagehide'] || []) f();
-  const key = qDays(w);
-  check('…the tab closes in the gap: the keepalive does NOT send the day past 1200 s (it would be refused and deleted); the seconds stay in the leaving key', w.log.fetches.length === f0 && key && key[todayStr] === counted - onServer, `fetches ${w.log.fetches.length - f0}, key ${JSON.stringify(key)}`);
-  sh.server.oldRules = false;   // Jonathan pastes the rules
-  const w2 = makeWorld({ ...sh, clock: { ms: sh.clock.ms + 240000, perf: 9000 } });
-  w2.PM.status(); await runAll([w2], 40); await w2.PM.flush(); await w2.settle(); await runAll([w2], 5);
-  check('…the rules are pasted, a page opens 4 minutes later: every second lands, once (server = 1800 counted)', (sh.server.days[todayStr]?.seconds || 0) === counted, `server ${sh.server.days[todayStr]?.seconds} vs ${counted}`);
 }
 {
-  /* The gap, and a tab that closes BEFORE any flush was refused (no back-off is running): the server holds 1180 s today, the page counted
-     50 s more and has not flushed yet. A keepalive of them would be refused (1230 > 1200) and deleted as if it had landed. */
-  const sh = shared(); sh.server.oldRules = true; sh.net.applyKeepalive = true;
+  /* The rules are published (2026-11-15): a tab that closes with the day past 20 minutes sends its last seconds at once. The server holds
+     1180 s today, the page counts 50 s more and has not flushed them; the keepalive carries them (until 2026-11-15 a guard held them back
+     for the next page, since the old rules would have refused them). */
+  const sh = shared(); sh.net.applyKeepalive = true;
   sh.server.days[todayStr] = { seconds: 1180 }; sh.server.weeks['2026-W47'] = { seconds: 1180, goalSeconds: 3600, hit: false };
   const w = makeWorld(sh);
   const a = w.track(); a.play();
@@ -2437,12 +2431,7 @@ console.log('23. no daily limit, and the gap before the rules are pasted');
   const held = sec(w) - 1180;
   for (const f of w.listeners['win:pagehide'] || []) f();
   await w.settle();
-  const landed = (sh.server.days[todayStr]?.seconds || 0) - 1180;   // the first flush after the load sends the few seconds counted by then (still under 1200)
-  check('the gap, a tab closing with the day at 1180 + 50 s and no refusal seen yet: no keepalive is sent, and every second not landed stays in the leaving key', held >= 49 && landed < 20 && !w.log.fetches.some((f) => f.init && f.init.keepalive) && (qDays(w) || {})[todayStr] === held - landed, `held ${held}, landed ${landed}, fetches ${w.log.fetches.length}, key ${JSON.stringify(qDays(w))}`);
-  sh.server.oldRules = false;
-  const w2 = makeWorld({ ...sh, clock: { ms: sh.clock.ms + 240000, perf: 9000 } });
-  w2.PM.status(); await runAll([w2], 40); await w2.PM.flush(); await w2.settle(); await runAll([w2], 5);
-  check('…after the paste the next page sends them: the server holds 1180 + 50, nothing lost', (sh.server.days[todayStr]?.seconds || 0) === 1180 + held, `server ${sh.server.days[todayStr]?.seconds}`);
+  check('a tab closing with the day at 1180 + 50 s: the keepalive goes out and every second lands, once (server 1180 + 50, the leaving key empty)', held >= 49 && w.log.fetches.some((f) => f.init && f.init.keepalive) && (sh.server.days[todayStr]?.seconds || 0) === 1180 + held && !((qDays(w) || {})[todayStr]), `held ${held}, server ${sh.server.days[todayStr]?.seconds}, key ${JSON.stringify(qDays(w))}`);
 }
 {
   /* The same gap with the page left open: the regular flush is refused, keeps the seconds, backs off 5 minutes, and lands after the paste. */
