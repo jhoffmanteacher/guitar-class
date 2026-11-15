@@ -5,7 +5,7 @@
    CAS are fine, and his own test accounts go through the same list; no uid
    is written in the repo.
 
-   A block at the top of Manage, three lists:
+   Manage's Accounts section (teacher-manage-layout.js), three lists:
      1. Asking to join   accessRequests/{uid}: an account that is not let in
                          pressed "Ask your teacher to let me in". Allow /
                          Decline / Delete. Two reads (review R1-6): every
@@ -382,6 +382,7 @@ async function teacherRefreshAccessBadge(){
 }
 function teacherPaintAccessBadge(n){
   const label = n >= TEACHER_ACCESS_BADGE_MAX ? `${TEACHER_ACCESS_BADGE_MAX - 1}+` : String(n);
+  if(typeof teacherManageSetWaiting === 'function') teacherManageSetWaiting(n ? label : '');   // the Accounts tab in Manage
   const btn = document.querySelector('#t-side [data-view="manage"]');
   if(btn){
     let b = btn.querySelector('.t-access-badge');
@@ -402,7 +403,7 @@ function teacherPaintAccessBadge(n){
     line.className = 'tg-note';
     line.setAttribute('role', 'status');
     summ.parentNode.insertBefore(line, summ);
-    line.addEventListener('click', e => { if(e.target && e.target.closest && e.target.closest('[data-access-open]')) setTeacherView('manage'); });
+    line.addEventListener('click', e => { if(e.target && e.target.closest && e.target.closest('[data-access-open]')) teacherManageOpen('accounts'); });
   }
   if(line) line.innerHTML = `<strong>${escHtml(label)} account${n === 1 ? ' is' : 's are'} asking to join.</strong> <button class="tg-seg-btn" data-access-open>Open Manage</button>`;
 }

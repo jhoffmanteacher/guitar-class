@@ -6777,6 +6777,53 @@ function checkJourneySaveRetry() {
   if (!bad) ok('Journey "Not saved yet": floats on screen, retries every SAVE_RETRY_MS and when back online, EN + ES say so');
 }
 
+/* 1el. MANAGE SHOWS ONE SECTION AT A TIME, STUDENTS FIRST (Jonathan, 2026-11-15). teacher-manage-layout.js is RUN
+   here (a VM): its four sections in order (Students, Accounts, Song files, Backup), Students opens when this browser
+   has nothing saved, saved junk, or storage that throws; a saved section opens when it is one of the four; exactly
+   one tab is selected and exactly one section is not hidden, and each section holds what it was given. Source pins:
+   all 3 of renderTeacherManage's paints go through teacherManageLayoutHtml, and the dashboard's "Open Manage" (requests
+   to join) opens Accounts. A browser walk of every section: tools/manage-layout-smoke.mjs. */
+const MANAGE_SECTIONS_WANT = ['students', 'accounts', 'songs', 'backup'];
+function checkManageLayout() {
+  head('1el. Manage: one section at a time, Students by default');
+  let bad = 0;
+  const flag = m => { err(`1el: ${m}`); problems++; bad++; };
+  const read = f => { try { return readFileSync(join(ROOT, f), 'utf8'); } catch { flag(`${f} is missing`); return ''; } };
+  const src = read('teacher-manage-layout.js'), manage = read('teacher-manage.js'), acc = read('teacher-accounts.js');
+  if (!src) return;
+  const run = stored => {
+    const ls = stored === 'THROW' ? { getItem() { throw new Error('blocked'); }, setItem() { throw new Error('blocked'); } } : { getItem: () => stored, setItem() {} };
+    const box = { localStorage: ls, escHtml: s => String(s), teacherBackupLastLine: () => ({ due: false }), teacherView: 'manage' };
+    vm.createContext(box);
+    vm.runInContext(src + `\n;this.__out = { keys: TEACHER_MANAGE_SECTIONS.map(s => s[0]), def: TEACHER_MANAGE_DEFAULT,
+      html: teacherManageLayoutHtml({ accounts: '<i>ACC</i>', songs: '<i>SONGS</i>', backup: '<i>BACKUP</i>' }, '<i>STUDENTS</i>') };`, box, { filename: 'teacher-manage-layout.js (1el)' });
+    return box.__out;
+  };
+  const shown = html => {
+    const tabs = [...html.matchAll(/<button [^>]*role="tab"[^>]*data-manage-tab="(\w+)"[^>]*aria-selected="(true|false)"/g)].map(m => [m[1], m[2] === 'true']);
+    const panes = [...html.matchAll(/<div role="tabpanel"[^>]*data-manage-pane="(\w+)"( hidden)?>(.*?)<\/div>(?=<div role="tabpanel"|$)/g)].map(m => [m[1], !m[2], m[3]]);
+    return { tabs, panes, tab: tabs.filter(t => t[1]).map(t => t[0]), pane: panes.filter(p => p[1]).map(p => p[0]) };
+  };
+  const cases = [['nothing saved', null, 'students'], ['saved junk', 'constructor', 'students'], ['storage throws', 'THROW', 'students'], ['saved Accounts', 'accounts', 'accounts'], ['saved Backup', 'backup', 'backup']];
+  let n = 0;
+  for (const [name, stored, want] of cases) {
+    let r;
+    try { r = run(stored); } catch (e) { flag(`teacher-manage-layout.js would not run (${name}): ${e.message}`); return; }
+    if (r.keys.join() !== MANAGE_SECTIONS_WANT.join()) { flag(`the sections are [${r.keys.join(', ')}]; want [${MANAGE_SECTIONS_WANT.join(', ')}] in that order`); return; }
+    if (r.def !== 'students') { flag(`TEACHER_MANAGE_DEFAULT is '${r.def}'; Manage opens on Students by default (Jonathan, 2026-11-15)`); return; }
+    const s = shown(r.html);
+    if (s.tabs.length !== 4 || s.panes.length !== 4) { flag(`${name}: drew ${s.tabs.length} tabs and ${s.panes.length} sections; want 4 and 4`); continue; }
+    if (s.tab.join() !== want || s.pane.join() !== want) flag(`${name}: selected tab [${s.tab.join(', ')}], shown section [${s.pane.join(', ')}]; want exactly '${want}'`);
+    const own = { students: 'STUDENTS', accounts: 'ACC', songs: 'SONGS', backup: 'BACKUP' };
+    for (const [k, , inner] of s.panes) if (inner !== `<i>${own[k]}</i>`) flag(`${name}: section '${k}' holds "${inner.slice(0, 60)}", not what it was given`);
+    n++;
+  }
+  const paints = (manage.match(/box\.innerHTML=teacherManageLayoutHtml\(panes, head\+/g) || []).length;
+  if (paints !== 3) flag(`renderTeacherManage paints through teacherManageLayoutHtml ${paints} times; want all 3 (no students, all archived, the roster)`);
+  if (!/data-access-open\]'\)\) teacherManageOpen\('accounts'\);/.test(acc)) flag(`the dashboard's "Open Manage" (requests to join, teacher-accounts.js) no longer opens Manage on Accounts (teacherManageOpen('accounts'))`);
+  if (!bad) ok(`Manage: ${n} of ${cases.length} storage cases open the right one of 4 sections (Students by default); 3 of 3 paints sectioned; "Open Manage" → Accounts`);
+}
+
 /* 1ei. The Games page is grouped by what each game teaches (Jonathan, 2026-11-14): chord switching, rhythm and
    tempo, finger strength, the notes on the low E and A strings, then the other games in a closed "More games".
    The table is GAMES_GROUPS in coach-hub.js. The real GAMES_META, GAMES_GROUPS and gamesHubGroupsHtml are RUN
@@ -20398,6 +20445,7 @@ function checkPracticeMinutes(i18nTable) {
   checkGamesGroups();
   checkNoClickMidSeek();
   checkJourneySaveRetry();
+  checkManageLayout();
   checkSignInAccountChooser();
   checkPracticeCopy();
   if (!SKIP_LINKS) await checkLinks();

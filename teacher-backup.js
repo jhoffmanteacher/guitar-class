@@ -109,8 +109,8 @@
      4. A doc restored in the old Module 4/5 numbering (no migrations.swap45)
         is moved by the student's own browser on their next visit, as today.
 
-   WHERE: one row at the end of Manage's settings (renderTeacherManage calls
-   teacherBackupPanelHtml). Manage repaints its whole screen on every toggle,
+   WHERE: Manage's Backup section (renderTeacherManage calls
+   teacherBackupPanelHtml; the sections: teacher-manage-layout.js). Manage repaints its whole screen on every toggle,
    so the run's state lives here and the row is drawn from it each time;
    progress updates only the row's own elements. */
 const TEACHER_BACKUP_FORMAT_VERSION = 1;
@@ -249,6 +249,7 @@ function teacherBackupPaint(){
     lastEl.style.color=last.due?'var(--amber-text)':'var(--text2)';
     lastEl.style.fontWeight=last.due?'600':'';
   }
+  if(typeof teacherManagePaintTabs==='function') teacherManagePaintTabs();   // the Backup tab's "due"
 }
 function teacherBackupSay(gen, kind, text){
   if(gen!==teacherBackupGen) return;

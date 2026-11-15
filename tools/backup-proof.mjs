@@ -47,7 +47,7 @@
      not pasted   (2026-11-13) config/access and accessRequests refused (their rules not pasted yet) → the file is
                   still saved, without them, the header's notReadable names both, the line says so; any OTHER failure
                   on either → failed, no file
-     panel        the row's HTML escapes the status text; Manage's head calls teacherBackupPanelHtml(). */
+     panel        the row's HTML escapes the status text; Manage's Backup section is teacherBackupPanelHtml(). */
 import { readFileSync, existsSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -86,7 +86,7 @@ const HELPERS = [
   extractFn(CONSOLE, 'teacherAbsDaysGet'),
 ].join('\n');
 const manageFn = extractFn(CONSOLE, 'renderTeacherManage');
-ok(/const head=`\s*\$\{teacherBackupPanelHtml\(\)\}/.test(manageFn), "Manage's head starts with ${teacherBackupPanelHtml()} (renderTeacherManage, teacher-manage.js)");
+ok(/const panes=\{backup:teacherBackupPanelHtml\(\),/.test(manageFn) && (manageFn.match(/box\.innerHTML=teacherManageLayoutHtml\(panes, /g) || []).length === 3, "Manage's Backup section is ${teacherBackupPanelHtml()}, drawn by all 3 of Manage's paints (renderTeacherManage, teacher-manage.js; the sections: teacher-manage-layout.js)");
 
 /* ── Stub Firestore types ── */
 class Timestamp { constructor(s, n){ this.seconds = s; this.nanoseconds = n; } toMillis(){ return this.seconds * 1000 + Math.floor(this.nanoseconds / 1e6); } isEqual(o){ return o instanceof Timestamp && o.seconds === this.seconds && o.nanoseconds === this.nanoseconds; } }
