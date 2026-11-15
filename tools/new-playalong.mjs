@@ -10,6 +10,54 @@
                     the track's paths are 'private:<slug>-<bpm>'; both files are put on the SONG_FILES list with
                     tools/song-files.mjs (name, size, SHA-256, length) and checks.mjs's SONG_FILES_PIN goes up by 2 (tools/song-files.mjs moves it, once per new entry).
                     Then Jonathan uploads them in the console (Manage → Song files) and presses Verify before the push.
+     node tools/new-playalong.mjs <spec.json> --built --from <upload.mp3>    a BUILT SONG (Song builder, Part a2)
+     node tools/new-playalong.mjs <spec.json> --built [--from <upload.mp3>] --dry-run
+                    instead of a card: the Import file and the stored copy, for Manage → Built songs → Import.
+                    See "THE BUILT MODE" below. It edits NO repo file.
+
+   THE BUILT MODE (--built, 2026-11-14; format: the header of app/builtsongs.js, "THE CHART" and "THE AUDIO").
+     It writes TWO files into the private song folder (GC_SONG_FILES_DIR, else ~/Documents/guitar-class-song-files/;
+     a folder inside the checkout is refused), never audio/ or the repo:
+       <id>.json         the Import file { id, v: 1, title, artist, audio, song }. id = 'sb-' + the spec's slug with
+                         everything but a-z and 0-9 taken out, cut to 24 (or the spec's "builtId"); 8 to 24 needed.
+       <audio.id>.mp3    the stored copy: audio.id = <id>-<first 10 hex of its SHA-256>. ONE file, made like this:
+                         the source's first audio stream; with a "cents" shift, first shifted as the card mode
+                         shifts (rubberband, formants held) into a lossless copy whose timing is checked against the
+                         upload (loudness.py's 40 s cross-correlation on the part above 2 kHz: on held notes a pitch
+                         shift makes the full-band peak land a period off; under 10 ms); then ONE measured gain to
+                         "the cure"'s loudness and a -1 dBFS limiter (both from tools/loudness.py, imported:
+                         LIMITER, measure, the gain iteration and the ceiling search of encode_verified),
+                         libmp3lame 192k CONSTANT bitrate, the source's sample rate and channels (no resample: a
+                         source that is not 32, 44.1 or 48 kHz is refused), tags and cover art dropped. No
+                         time-stretch, no slow file, no trim. It must pass loudness.py's own tests before it is
+                         kept, against what was levelled: the cure's loudness ±0.3 LU, both decoded peaks ≤ -1 dBFS,
+                         length within 0.05 s (decoded, and ffprobe against the upload), the first 40 s
+                         cross-correlated under 10 ms; plus 192k CBR (frame headers and ffprobe) and the source's
+                         rate and channels. Like loudness.py it tries the gain 8 times: a source the limiter keeps
+                         eating (very peaky and quiet) can end outside ±0.3 LU, and is refused. Staged in a dot
+                         folder, moved in only when every test passed.
+     audio: bytes, sha256 (the stored copy), durationSec (ffprobe), gainDb (the one gain), sourceSha256 (the
+       --from file), centsOff (tools/playalong-measure.py's TUNING reading of the STORED copy: with a "cents" shift
+       that is the residual after it). |centsOff| > 10 is refused before anything is encoded (read on the source,
+       minus the shift) and again on the copy: put "cents" in the spec.
+     song: meter from beatsPerBar / countSix ('4/4', '3/4', '6/8'); bpm = feltBpm (the COUNTED beats a minute; the
+       spec's bpm and slowBpm name files and are not used); anchor; barTimes (optional, below); chords from the same
+       shape picker as the card (flat [lowE..highE] arrays); one bar string per bar from loop / chart ("A G" splits
+       the bar evenly: 'A:2 G:2'; "-" is a rest, built mode only); sections from the labels (Intro, Verse N,
+       Pre-Chorus, Chorus, Refrain, Bridge, Interlude, Solo, Riff, Requinto, Outro, Ending, or a section's own
+       "name" / "n"); level from versions / chordStart. If the first section starts after bar 1, the bars before it
+       are dropped and the anchor moves to it (bar numbers start again at 1).
+     Spec fields read ONLY by --built (the card mode ignores them):
+       barTimes      every song bar's downbeat in seconds, barTimes[0] = anchor (a beat map from 3+ pins)
+       lyrics        per section: [{ "text": "...", "bars": n }], the lines adding up to the section's bars
+                     (a line with text "" is bars with no words). Built songs show lyrics; a coded card never does
+       name, n       per section: the built section name and number, when the label is not one of the list
+       range         { "from": i, "to": j }: the card plays sections i..j (0-based); left out = the whole song
+       builtId       the id, when the slug gives fewer than 8 letters and digits
+     Captions, label_es, fileSlug, key, slowBpm and durationSec are not needed. --private is refused with it.
+     It ends by running node tools/built-song-check.mjs <id>.json --audio <audio.id>.mp3 and printing its line;
+     the exit code is that tool's. --dry-run prints the Import file (audio entry still empty), the validator's
+     verdict on the chart and the planned ffmpeg chain, and writes nothing.
 
    WHY IT EXISTS. Every play-along on a record (ca-37, ca-39, ca-41, ca-42, ca-51) was typed by hand: two mp3s
    made with the same three ffmpeg lines, a SNIPPET_TRACKS entry, a card whose chart is the same loop written out
@@ -48,8 +96,8 @@
    EN + ES), tools/playalong-loop.mjs (METER and CLOCK_PINS: the pin is the
    measured clock, written so the walk can run; see the skill), CHANGELOG.md (a draft entry on top: read it and
    fix the words). It never touches sw.js (node tools/checks.mjs writes the audio hashes and the cache version). */
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
-import { join, resolve, dirname } from 'node:path';
+import { readFileSync, writeFileSync, existsSync, mkdirSync, renameSync, rmSync } from 'node:fs';
+import { join, resolve, dirname, relative, isAbsolute } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -62,11 +110,13 @@ const DRY = args.includes('--dry-run');
 const ROOT = resolve(opt('--root') || HERE);
 const FROM = opt('--from');
 const PRIVATE = args.includes('--private');
+const BUILT = args.includes('--built');
 const specPath = args.find((a, i) => !a.startsWith('--') && !['--root', '--from'].includes(args[i - 1]));
 const die = (m) => { console.error('new-playalong: ' + m); process.exit(2); };
 if (!specPath) die('usage: node tools/new-playalong.mjs <spec.json> [--dry-run] [--from <upload.mp3>] [--root <dir>] [--private]');
 const S = JSON.parse(readFileSync(specPath, 'utf8'));
-for (const k of ['song', 'artist', 'slug', 'fileSlug', 'key', 'bpm', 'slowBpm', 'feltBpm', 'beatsPerBar', 'anchor', 'durationSec', 'sections'])
+for (const k of BUILT ? ['song', 'artist', 'slug', 'feltBpm', 'beatsPerBar', 'anchor', 'sections']
+  : ['song', 'artist', 'slug', 'fileSlug', 'key', 'bpm', 'slowBpm', 'feltBpm', 'beatsPerBar', 'anchor', 'durationSec', 'sections'])
   if (S[k] == null) die(`the spec has no "${k}"`);
 const date = S.date || new Date().toISOString().slice(0, 10);
 const versions = S.versions || 'both';
@@ -179,15 +229,268 @@ const LABEL_ES = { Intro: 'Intro', Chorus: 'Coro', Interlude: 'Interludio', Solo
 const labelEs = (l) => LABEL_ES[l] || (/^Verse( \d+)?$/.test(l) ? l.replace('Verse', 'Estrofa') : /^Chorus \d+$/.test(l) ? l.replace('Chorus', 'Coro') : /^Solo \d+$/.test(l) ? l : null);
 for (const s of sections) {
   s.label_es = s.label_es || labelEs(s.label);
-  for (const k of ['label_es', 'caption', 'caption_es']) if (!s[k]) die(`section "${s.label}" has no ${k}`);
+  for (const k of BUILT ? ['label'] : ['label_es', 'caption', 'caption_es']) if (!s[k]) die(`section "${s.label}" has no ${k}`);
   if (!!s.caption_power !== !!s.caption_power_es) die(`section "${s.label}": caption_power and caption_power_es go together`);
 }
-const names = [...new Set(sections.flatMap(s => s.notes.map(n => n.name)))];
+const names = [...new Set(sections.flatMap(s => s.notes.map(n => n.name)))].filter(n => !(BUILT && n === '-'));   // '-': a rest, --built only
 const fullPos = versions === 'power' ? {} : choosePositions(names, S.shapes || {}, true);
 const powPos = versions === 'full' ? {} : choosePositions(names, S.powerShapes || {}, false);
 const FULL = Object.fromEntries(Object.entries(fullPos).map(([n, w]) => [n, fullShape(n, w)]));
 const POWER = Object.fromEntries(Object.entries(powPos).map(([n, w]) => [n, powerShape(n, w)]));
 const span = (m) => { const f = Object.values(m).flatMap(x => x.frets.map(y => y[1])).filter(x => x > 0); return f.length ? `frets ${Math.min(...f)}-${Math.max(...f)}` : 'open'; };
+
+/* ── THE BUILT MODE (--built): the Import file and the stored copy, into the private song folder; see the header.
+   Everything the card mode does after this point (the id, the track, the card, the pins) is skipped. ── */
+if (BUILT) {
+  if (PRIVATE) die('--built and --private are two different outputs: pick one');
+  if (!DRY && !FROM) die('--built needs --from <upload.mp3> (or --dry-run)');
+  if (FROM && !existsSync(FROM)) die(`no file at ${FROM}`);
+  const meter = S.countSix ? (bpb === 2 ? '6/8' : null) : bpb === 4 ? '4/4' : bpb === 3 ? '3/4' : null;
+  if (!meter) die(`beatsPerBar ${bpb}${S.countSix ? ' with countSix' : ''} is not 4/4, 3/4 or 6/8 (6/8: beatsPerBar 2 and countSix)`);
+  const bid = S.builtId || 'sb-' + String(S.slug).toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 24);
+  if (!/^sb-[a-z0-9]{8,24}$/.test(bid)) die(`the built id "${bid}" is not 'sb-' and 8 to 24 lower-case letters or digits: give "builtId" in the spec`);
+  const felt = Number(Function(`"use strict";return (${typeof S.feltBpm === 'string' ? S.feltBpm : String(S.feltBpm)});`)());
+  if (!(felt > 0)) die('feltBpm is not a positive number');
+  /* the bars, one string each */
+  const off = sections[0].fromBar - 1, nBars = sections.reduce((a, s) => a + s.bars, 0);
+  const barsOf = (sec) => {
+    const src = sec.chart ? sec.chart.map(x => String(x).trim().split(/\s+/)) : loop;
+    if (!src.length) die(`section ${sec.label}: no loop and no chart`);
+    const out = [];
+    for (let b = sec.fromBar; b < sec.fromBar + sec.bars; b++) {
+      const i = sec.chart ? b - sec.fromBar : (((b - loopFrom) % src.length) + src.length) % src.length;
+      if (i >= src.length) die(`section ${sec.label}: its chart has ${src.length} bars, the section ${sec.bars}`);
+      out.push(src[i]);
+    }
+    return out;
+  };
+  const beatsTxt = (b) => Number.isInteger(b * 2) ? String(b) : `${Math.round(b * 3)}/3`;
+  const bars = sections.flatMap(s => barsOf(s)).map(bar => bar.length === 1 ? bar[0] : bar.map(n => `${n}:${beatsTxt(bpb / bar.length)}`).join(' '));
+  /* the chords: the card mode's shapes, as flat six-string arrays */
+  const six = (fr) => STR.map(s => { const h = fr.find(([x]) => x === s); return h ? h[1] : null; });
+  const chords = Object.fromEntries(names.map(n => [n, { full: FULL[n] ? { frets: six(FULL[n].frets) } : null, power: POWER[n] ? { frets: six(POWER[n].frets) } : null }]));
+  /* the sections */
+  const SEC = { intro: 'intro', verse: 'verse', prechorus: 'prechorus', 'pre-chorus': 'prechorus', chorus: 'chorus', refrain: 'refrain', bridge: 'bridge',
+    interlude: 'interlude', solo: 'solo', riff: 'riff', requinto: 'requinto', outro: 'outro', ending: 'ending' };
+  const secs = sections.map(s => {
+    let name = s.name, n = s.n;
+    if (!name) {
+      const m = /^([A-Za-z-]+)(?: (\d))?$/.exec(String(s.label).trim());
+      name = m && SEC[m[1].toLowerCase()];
+      if (!name) die(`section "${s.label}": not a built section name (${Object.keys(SEC).join(', ')}); give it "name" (and "n")`);
+      if (m[2]) n = Number(m[2]);
+    }
+    return Object.assign({ name }, n ? { n } : {}, { from: s.fromBar - off, bars: s.bars }, s.lyrics ? { lyrics: s.lyrics } : {});
+  });
+  /* the grid: bar numbers start again at the first section */
+  const r3 = (x) => Math.round(x * 1000) / 1000;
+  let anchor = r3(Number(S.anchor) + off * bpb * 60 / felt), barTimes;
+  if (S.barTimes) {
+    if (!Array.isArray(S.barTimes) || Math.abs(S.barTimes[0] - S.anchor) > 0.001) die('barTimes[0] is not the anchor (barTimes are the song bars from bar 1)');
+    barTimes = S.barTimes.slice(off, off + nBars + 1).map(r3);
+    anchor = barTimes[0];
+  }
+  const song = Object.assign({ meter, bpm: Math.round(felt * 10000) / 10000, anchor }, barTimes ? { barTimes } : {}, { chords, bars, sections: secs,
+    level: versions === 'both' ? { versions, start: chordStart } : { versions } }, S.range ? { range: S.range } : {});
+  const file = { id: bid, v: 1, title: S.song, artist: S.artist, audio: null, song };
+
+  const dir = songFilesDir();
+  for (const r of new Set([ROOT, HERE])) { const rel = relative(r, dir); if (!rel || (!rel.startsWith('..') && !isAbsolute(rel))) die(`the private song folder ${dir} is inside the checkout ${r}: set GC_SONG_FILES_DIR to a folder outside it`); }
+  const jsonPath = join(dir, bid + '.json');
+  const ffDur = (p) => { const r = spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', p], { encoding: 'utf8' }); return r.status === 0 ? Number(r.stdout.trim()) : NaN; };
+  const B = (await import('./built-song-check.mjs')).loadBuiltSongs(ROOT);
+  const srcDur = FROM ? ffDur(FROM) : Number(S.durationSec) || 0;
+  /* the chart, checked now with a stand-in audio entry, so a chart the site would refuse costs no encode */
+  const stand = { id: bid + '-0000000000', bytes: 1, sha256: '0'.repeat(64), durationSec: srcDur > 0 ? Math.round(srcDur * 1000) / 1000 : 1800, centsOff: 0 };
+  const why0 = B.check(bid, { v: 1, title: S.song, artist: S.artist, audio: stand, song });
+  console.log(`new-playalong --built: ${bid} "${S.song}" - ${S.artist}: ${meter} at ${song.bpm}, ${bars.length} bars${off ? ` (song bars ${off + 1}-${off + nBars}, renumbered from 1)` : ''}, ${secs.length} sections, ${names.length} chords, level ${versions}${barTimes ? ', a beat map' : ''}`);
+  console.log(`  full chords: ${versions === 'power' ? '-' : Object.entries(fullPos).map(([n, w]) => `${n} ${w}`).join(', ')}`);
+  console.log(`  power chords: ${versions === 'full' ? '-' : Object.entries(powPos).map(([n, w]) => `${POWER[n].note} ${w}`).join(', ')}`);
+  if (why0.length) { console.log(`  the chart is refused by builtSongCheck (app/builtsongs.js), ${why0.length} reason${why0.length === 1 ? '' : 's'}:`); why0.forEach(w => console.log('    - ' + w)); die('nothing written'); }
+  console.log('  the chart passes builtSongCheck' + (FROM ? ` against the upload's ${srcDur.toFixed(2)} s` : ''));
+
+  /* The audio: Python, so the meter, the limiter, the gain iteration, the ceiling search and the checks are
+     tools/loudness.py's own (imported, with its encode swapped for the 192k one) and the tuning is
+     tools/playalong-measure.py's TUNING. Prints one JSON line on stdout; progress on stderr. */
+  const PY = String.raw`
+import json, os, sys, importlib.util
+from pathlib import Path
+TOOLS, A = sys.argv[1], json.loads(sys.argv[2])
+sys.path.insert(0, TOOLS)
+import loudness as L
+
+def done(**kw):
+    print(json.dumps(kw))
+    sys.exit(0 if kw.get('ok') else 1)
+
+shift = float(A.get('cents') or 0)
+PITCH = 'rubberband=pitch=%.6f:formant=preserved' % (2 ** (-shift / 1200))   # the card mode's shift
+RATES = (32000, 44100, 48000)   # MPEG-1 Layer III, where 192k exists
+
+def cmd(src, dst, gain, limit, sr, ch):
+    return ['ffmpeg', '-hide_banner', '-v', 'error', '-y', '-i', src, '-map', '0:a:0',
+            '-map_metadata', '-1', '-id3v2_version', '0', '-write_id3v1', '0',
+            '-af', gain + ',' + limit, '-c:a', 'libmp3lame', '-b:a', '192k',
+            '-ar', sr, '-ac', ch, dst]
+
+def shift_cmd(src, dst, sr, ch):
+    return ['ffmpeg', '-hide_banner', '-v', 'error', '-y', '-i', src, '-map', '0:a:0', '-af', PITCH,
+            '-c:a', 'pcm_f32le', '-ar', sr, '-ac', ch, dst]
+
+def hp_decode(path, seconds):
+    # the shift's timing: loudness.py's alignment on the part above 2 kHz (clicks, picks, cymbals). A pitch
+    # shift moves every tone, so on held notes the full-band correlation peaks a period or two off (measured
+    # -17 ms on made-up tones that the high-passed one reads at +0.2, 2026-11-14).
+    import numpy as np, subprocess
+    r = subprocess.run(['ffmpeg', '-v', 'error', '-i', str(path), '-ac', '1', '-t', str(seconds), '-af',
+                        'highpass=f=2000:poles=2,highpass=f=2000:poles=2', '-f', 'f32le', '-'], capture_output=True, check=True)
+    return np.frombuffer(r.stdout, dtype=np.float32).astype(np.float64)
+
+def probe(p):
+    j = json.loads(L.run(['ffprobe', '-v', 'error', '-select_streams', 'a:0', '-show_entries',
+                          'stream=sample_rate,channels,bit_rate:format=duration', '-of', 'json', str(p)]).stdout)
+    st = j['streams'][0]
+    return int(st['sample_rate']), int(st['channels']), float(j['format']['duration']), st
+
+try:
+    if A.get('plan'):
+        sr, ch = '<the source rate>', '<the source channels>'
+        if A.get('src'):
+            sr, ch = (str(x) for x in probe(A['src'])[:2])
+        lv = A.get('src') or '<upload.mp3>'
+        sh = shift_cmd(lv, '<shifted>.wav', sr, ch) if shift else None
+        done(ok=True, shift=sh, cmd=cmd('<shifted>.wav' if shift else lv, '<staged copy>.mp3', 'volume=<gain>dB',
+                                        L.LIMITER.replace('{limit:.6f}', '<ceiling>'), sr, ch))
+    _s = importlib.util.spec_from_file_location('playalong_measure', os.path.join(TOOLS, 'playalong-measure.py'))
+    PM = importlib.util.module_from_spec(_s)
+    _s.loader.exec_module(PM)
+    src, out = Path(A['src']), Path(A['out'])
+    sr, ch, dur_src, _ = probe(src)
+    if sr not in RATES:
+        done(ok=False, why='the upload is %d Hz: a 192k mp3 exists at 32000, 44100 and 48000 Hz only, and the copy keeps the source rate (no resample)' % sr)
+    c_src, n_src = PM.tuning_cents(PM.BA.decode(str(src)))
+    if c_src is None:
+        done(ok=False, why='the tuning could not be read (playalong-measure.py TUNING)')
+    if abs(c_src - shift) > 10:
+        done(ok=False, centsSrc=c_src, why='the record is %+.1f cents from A = 440%s: more than 10 cents off is not published. Put "cents": %.1f in the spec (the shift, as the card mode does)' % (c_src, ' (%+.1f after the spec\'s %+g shift)' % (c_src - shift, shift) if shift else '', c_src))
+    params = {'sr': sr, 'channels': ch}
+    lv, slag = src, None          # what is levelled: the upload, or (with a shift) the shifted copy
+    if shift:
+        lv = out.with_name('shifted.wav')
+        L.run(shift_cmd(str(src), str(lv), str(sr), str(ch)))
+        keep = L.decode_mono
+        L.decode_mono = hp_decode
+        try:
+            slag = L.alignment(src, lv, sr)[0]
+        finally:
+            L.decode_mono = keep
+        if abs(slag) >= L.LAG_PASS_MS:
+            done(ok=False, why='the %+g-cent shift moved the audio %+.1f ms (high-passed, first 40 s)' % (shift, slag))
+    target = L.loudness_only(L.reference_file())
+    before = L.measure(lv)
+
+    def encode(src_, dst, gain_db, ceiling_db, params_, vbr_q=None):
+        L.run(cmd(str(src_), str(dst), 'volume=%.3fdB' % gain_db, L.LIMITER.format(limit=10 ** (ceiling_db / 20)),
+                  str(params_['sr']), str(params_['channels'])))
+    L.encode = encode                       # encode_verified's ceiling search, on the 192k encode
+
+    gain = first = target - before['I']
+    for _ in range(8):                      # loudness.py's iteration: ONE gain, until the copy lands on the target
+        used = gain
+        after, ceil = L.encode_verified(lv, out, gain, params, None)
+        miss = target - after['I']
+        print('  at %+.2f dB: %.2f LUFS, ceiling %.2f' % (gain, after['I'], ceil), file=sys.stderr, flush=True)
+        if abs(miss) <= L.LEVEL_AIM:
+            break
+        gain += miss
+    lag, fit, resid = L.alignment(lv, out, sr)   # loudness.py's check: the copy against what was levelled
+    sr_o, ch_o, dur_out, st_o = probe(out)
+    mp = L.mp3_params(out)
+    c_out, n_out = PM.tuning_cents(PM.BA.decode(str(out)))
+    why = []
+    d = after['I'] - target
+    if abs(d) > L.LEVEL_PASS:
+        why.append('%+.2f LU from the cure (more than %.1f)' % (d, L.LEVEL_PASS))
+    if after['sp'] > L.PEAK_MAX or after['tp'] > L.PEAK_MAX:
+        why.append('peak %.2f dBFS (sample %.2f, true %.2f; over %.0f)' % (max(after['sp'], after['tp']), after['sp'], after['tp'], L.PEAK_MAX))
+    if abs(after['len'] - before['len']) > L.LENGTH_PASS or abs(dur_out - dur_src) > L.LENGTH_PASS:
+        why.append('length %+.3f s decoded, %+.3f s ffprobe' % (after['len'] - before['len'], dur_out - dur_src))
+    if abs(lag) >= L.LAG_PASS_MS:
+        why.append('lag %+.1f ms' % lag)
+    if not mp['cbr'] or mp['kbps'] != 192 or str(st_o.get('bit_rate')) != '192000':
+        why.append('not 192k constant bitrate (frames: %s, ffprobe stream bit_rate %s)' % ('CBR %sk' % mp['kbps'] if mp['cbr'] else 'VBR avg %.0fk' % mp['avg_kbps'], st_o.get('bit_rate')))
+    if mp['sr'] != sr or sr_o != sr or mp['channels'] != ch or ch_o != ch:
+        why.append('rate or channels changed: %d Hz %d ch -> %d Hz %d ch' % (sr, ch, sr_o, ch_o))
+    if c_out is None or abs(c_out) > 10:
+        why.append('the copy reads %s cents from A = 440 (more than 10)' % ('no' if c_out is None else '%+.1f' % c_out))
+    done(ok=not why, why='; '.join(why), target=target, beforeI=before['I'], afterI=after['I'], sp=after['sp'], tp=after['tp'],
+         ceiling=ceil, gainDb=used, firstGain=first, lagMs=lag, lenDiff=after['len'] - before['len'], durSrc=dur_src,
+         durOut=dur_out, centsSrc=c_src, centsOut=c_out, shift=shift, shiftLagMs=slag, sr=sr_o, channels=ch_o,
+         frames='CBR %sk' % mp['kbps'] if mp['cbr'] else 'VBR', bitRate=st_o.get('bit_rate'))
+except RuntimeError as e:
+    done(ok=False, why=str(e))
+`;
+  const py = (a) => {
+    const r = spawnSync('python3', ['-c', PY, join(ROOT, 'tools'), JSON.stringify(a)], { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'], maxBuffer: 1 << 24 });
+    const line = (r.stdout || '').trim().split('\n').pop();
+    try { return JSON.parse(line); } catch { console.error(`new-playalong: python3 exit ${r.status}: ${(r.stdout || '').slice(-400)}`); return null; }
+  };
+  /* The Import file as text: JSON, two-space indent, a shape's six frets on one line. */
+  const pretty = (v, ind = '') => {
+    if (Array.isArray(v)) {
+      if (v.every(x => x === null || typeof x === 'number')) return '[' + v.map(x => JSON.stringify(x)).join(', ') + ']';
+      return v.length ? '[\n' + v.map(x => ind + '  ' + pretty(x, ind + '  ')).join(',\n') + '\n' + ind + ']' : '[]';
+    }
+    if (v && typeof v === 'object') {
+      const k = Object.keys(v);
+      return k.length ? '{\n' + k.map(x => ind + '  ' + JSON.stringify(x) + ': ' + pretty(v[x], ind + '  ')).join(',\n') + '\n' + ind + '}' : '{}';
+    }
+    return JSON.stringify(v);
+  };
+  const fmtCmd = (c) => c.map(x => /[\s<>]/.test(x) ? JSON.stringify(x) : x).join(' ');
+  if (DRY) {
+    const plan = py({ plan: true, src: FROM, cents: S.cents || 0 });
+    if (!plan) die('the audio plan did not print');
+    console.log('\n── the Import file, ' + jsonPath + ' (audio is filled in from the stored copy) ──\n' + pretty(file));
+    if (plan.shift) console.log(`\n── the shift ("cents": ${S.cents}), to a lossless copy; its timing checked against the upload (high-passed, under 10 ms) ──\n$ ` + fmtCmd(plan.shift));
+    console.log('\n── the stored copy: ONE gain to the cure (tools/loudness.py; iterated until within 0.1 LU) and the -1 dBFS ceiling, lowered until both decoded peaks pass ──\n$ ' + fmtCmd(plan.cmd));
+    console.log(`\nthen: the checks (the cure ±0.3 LU, peaks ≤ -1 dBFS, length ±0.05 s, lag < 10 ms, 192k CBR, rate kept, |cents| ≤ 10), ${dir}/${bid}-<sha10>.mp3, ${jsonPath}, node tools/built-song-check.mjs --audio`);
+    console.log('(dry run: nothing written)');
+    process.exit(0);
+  }
+  if (existsSync(jsonPath)) die(`${jsonPath} is already there: move it away first (nothing written)`);
+  const stageDir = join(dir, `.built-${bid}-${process.pid}`);
+  mkdirSync(stageDir, { recursive: true });
+  let res;
+  const fail = (m) => { rmSync(stageDir, { recursive: true, force: true }); die(m); };
+  try {
+    const stage = join(stageDir, 'stage.mp3');
+    const srcBytes = readFileSync(FROM);
+    const sourceSha256 = createHash('sha256').update(srcBytes).digest('hex');
+    console.log(`  source ${FROM}: ${srcBytes.length.toLocaleString('en-US')} bytes, SHA-256 ${sourceSha256.slice(0, 12)}…; levelling (a minute or two)…`);
+    res = py({ src: resolve(FROM), out: stage, cents: S.cents || 0 });
+    if (!res) fail('the audio step did not finish (its output is above)');
+    if (!res.ok) fail(`the stored copy fails, nothing written: ${res.why}`);
+    const bytes = readFileSync(stage), sha256 = createHash('sha256').update(bytes).digest('hex');
+    const audioId = `${bid}-${sha256.slice(0, 10)}`, mp3Path = join(dir, audioId + '.mp3');
+    file.audio = { id: audioId, bytes: bytes.length, sha256, durationSec: Math.round(res.durOut * 1000) / 1000,
+      centsOff: Math.round(res.centsOut * 10) / 10, gainDb: Math.round(res.gainDb * 100) / 100, sourceSha256 };
+    const why1 = B.check(bid, { v: 1, title: file.title, artist: file.artist, audio: file.audio, song });
+    if (why1.length) fail(`the finished song is refused by builtSongCheck, nothing written: ${why1.join('; ')}`);
+    renameSync(stage, mp3Path);
+    writeFileSync(jsonPath, pretty(file) + '\n');
+    console.log(`  the cure ${res.target.toFixed(2)} LUFS; the source ${res.beforeI.toFixed(2)} → the copy ${res.afterI.toFixed(2)} LUFS at ${res.gainDb >= 0 ? '+' : ''}${res.gainDb.toFixed(2)} dB (first estimate ${res.firstGain >= 0 ? '+' : ''}${res.firstGain.toFixed(2)}), ceiling ${res.ceiling.toFixed(2)} dBFS${res.ceiling < -1 ? ' (lowered: the encode overshot -1)' : ''}`);
+    console.log(`  peaks: sample ${res.sp.toFixed(2)}, true ${res.tp.toFixed(2)} dBFS; length ${res.lenDiff >= 0 ? '+' : ''}${res.lenDiff.toFixed(3)} s; lag ${res.lagMs >= 0 ? '+' : ''}${res.lagMs.toFixed(2)} ms; ${res.frames}, ffprobe ${res.bitRate}, ${res.sr} Hz, ${res.channels} ch; tuning ${res.centsSrc >= 0 ? '+' : ''}${res.centsSrc.toFixed(1)} cents → copy ${file.audio.centsOff >= 0 ? '+' : ''}${file.audio.centsOff.toFixed(1)}${res.shift ? ` (shifted ${res.shift} cents; the shift moved it ${res.shiftLagMs >= 0 ? '+' : ''}${res.shiftLagMs.toFixed(2)} ms)` : ''}`);
+    console.log(`  wrote ${mp3Path}\n  wrote ${jsonPath}`);
+    const chk = spawnSync(process.execPath, [join(HERE, 'tools', 'built-song-check.mjs'), jsonPath, '--audio', mp3Path, '--root', ROOT], { encoding: 'utf8' });
+    process.stdout.write(chk.stdout || ''); process.stderr.write(chk.stderr || '');
+    console.log('next (Jonathan): console → Manage → Built songs → pick both files → Import; then open it as a student');
+    process.exitCode = chk.status === null ? 2 : chk.status;
+  } finally {
+    rmSync(stageDir, { recursive: true, force: true });
+  }
+  process.exit(process.exitCode);
+}
 
 /* ── the id ── */
 const ca = rd('class-activities.js');
