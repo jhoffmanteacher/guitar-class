@@ -1797,7 +1797,46 @@ function micRecOpen(){
     !(typeof isGatePreviewer === 'function' && isGatePreviewer());   // the teacher's own account, previewing
 }
 function micRecShouldAsk(){ return micRecOpen() && micRecAnswer() === ''; }
-function micRecWanted(){ return micRecOpen() && micRecAnswer() === 'yes'; }
+function micRecWanted(){ return micRecLocal() || (micRecOpen() && micRecAnswer() === 'yes'); }
+/* LOCAL RECORDING MODE (Jonathan, 2026-11-14: "can it build a mock site for me to record onto?"; his teacher account never records,
+   a student account keeps one take per game). Only on the site served from this computer (the host is exactly localhost, 127.0.0.1
+   or [::1]) AND signed in with the dev-bypass button: every listening round records (no question, no class switch, no counter, no
+   Firestore), the usual red label shows, and each take is offered as two files, a .wav (the same 24 kHz 16-bit mono the site uploads)
+   and a .json (the take document the site would write, without uid and name), named take-<game>-<YYYYMMDD-HHMMSS>, behind two links
+   the user clicks (micRecLocalOffer). Never on the real site: both conditions, read at call time. checks.mjs 1eh pins it. */
+function micRecLocal(){
+  try { return ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname) && typeof isDevBypassUser === 'function' && isDevBypassUser(); }
+  catch(e){ return false; }
+}
+const MICREC_LOCAL_KEEP = 6;
+let micRecLocalTakes = [];
+function micRecWavBlob(pcm, rate){
+  const len = pcm.length * 2, h = new DataView(new ArrayBuffer(44));
+  const str = (o, s) => { for (let k = 0; k < s.length; k++) h.setUint8(o + k, s.charCodeAt(k)); };
+  str(0, 'RIFF'); h.setUint32(4, 36 + len, true); str(8, 'WAVE'); str(12, 'fmt '); h.setUint32(16, 16, true); h.setUint16(20, 1, true); h.setUint16(22, 1, true);
+  h.setUint32(24, rate, true); h.setUint32(28, rate * 2, true); h.setUint16(32, 2, true); h.setUint16(34, 16, true); str(36, 'data'); h.setUint32(40, len, true);
+  return new Blob([h.buffer, new Uint8Array(pcm.buffer, pcm.byteOffset, len)], { type: 'audio/wav' });
+}
+function micRecLocalOffer(doc, pcm, rec){
+  const d = new Date(), p2 = n => String(n).padStart(2, '0');
+  const game = String(doc.game || rec.mode || 'take').replace(/[^A-Za-z0-9]/g, '');
+  const base0 = `take-${game}-${d.getFullYear()}${p2(d.getMonth() + 1)}${p2(d.getDate())}-${p2(d.getHours())}${p2(d.getMinutes())}${p2(d.getSeconds())}`;
+  let base = base0;
+  for (let k = 2; micRecLocalTakes.some(x => x.base === base); k++) base = base0 + '-' + k;   // two takes in one second
+  const json = Object.assign({}, doc, { wav: base + '.wav', localTake: true, savedAtLocal: d.toISOString() });
+  delete json.uid; delete json.name;
+  micRecLocalTakes.unshift({ base, wav: URL.createObjectURL(micRecWavBlob(pcm, MICREC_RATE)),
+    json: URL.createObjectURL(new Blob([JSON.stringify(json, null, 2)], { type: 'application/json' })) });
+  while (micRecLocalTakes.length > MICREC_LOCAL_KEEP){ const old = micRecLocalTakes.pop(); try { URL.revokeObjectURL(old.wav); URL.revokeObjectURL(old.json); } catch(e){} }
+  micRecLocalRender();
+}
+/* The takes of this page load, newest first, in a small fixed box (English: never shown to a student). Gone on reload. */
+function micRecLocalRender(){
+  let box = document.getElementById('micrec-local');
+  if (!box){ box = document.createElement('div'); box.id = 'micrec-local'; box.className = 'micrec-local'; document.body.appendChild(box); }
+  box.innerHTML = '<b>Local recording mode</b> (this computer only). Save each take: the sound and the details.<ul>' +
+    micRecLocalTakes.map(x => `<li>${escHtml(x.base)}: <a href="${escAttr(x.wav)}" download="${escAttr(x.base)}.wav">Save this take (sound)</a> · <a href="${escAttr(x.json)}" download="${escAttr(x.base)}.json">Save this take (details)</a></li>`).join('') + '</ul>';
+}
 
 function micRecAskHtml(game){
   return `<div class="micrec-ask" role="group" aria-label="${escHtml(t('micrec.ask'))}">
@@ -2001,7 +2040,10 @@ async function micRecSaveNow(rec, meta){
   });
   if (rec.settings) doc.micSettings = rec.settings;   // left out when the browser reported none (micRecTrackSettings)
   const pcm = micRecPcm16(rec);
-  if (isDevBypassUser()){ console.info('[micRec] dev bypass — not uploading', doc, pcm.length + ' samples'); return; }
+  if (isDevBypassUser()){
+    if (micRecLocal()){ micRecLocalOffer(doc, pcm, rec); return; }   // local recording mode: files, never Firestore
+    console.info('[micRec] dev bypass — not uploading', doc, pcm.length + ' samples'); return;
+  }
   let stage = 'save';   // 'count' once the take itself is written: a counter failure must not read as a lost take (review R1-2)
   try {
     if (typeof ensureDb === 'function') await ensureDb();

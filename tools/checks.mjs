@@ -15730,10 +15730,11 @@ function checkCoachVerdicts() {
     const l10 = live(`${ladderPlay.replace('cc.bpm = 60', 'cc.bpm = 130')} const a = cc.stageBpms.slice(); ccLiveBpm(5); const b = cc.stageBpms.slice(); ccLiveBpm(-5); ccLiveBpm(5); const c = cc.stageBpms.slice(); ccLiveBpm(1000); const d = cc.stageBpms.slice(); return { a, b, c, d, log: cc.tempoLog.length };`);
     lv(JSON.stringify(l10.a) !== '[130,135,140]' || JSON.stringify(l10.b) !== '[130,135,140]' || JSON.stringify(l10.c) !== '[130,135,140]' || JSON.stringify(l10.d) !== '[130,135,140]' || l10.log !== 2, `1ca: a song switch at 130 went ${JSON.stringify([l10.a, l10.b, l10.c, l10.d])} (want [130,135,140] each time: round 3 may not pass 140, so a speed-up is held and +5 then −5 changes nothing) with ${l10.log} changes logged (want 2: the −5 and the +5 back)`);
     // The real save path (micRecSaveNow, run up to the dev-bypass log, which prints the document it would write): tempoChanges on the take's clock, the retimed flag, no undefined.
-    const saveDoc = withLive => live(`const keepFns = { p: micRecPcm16, n: micRecMicName, ci: console.info, cu: currentUser }; currentUser = { uid: 'dev-user', displayName: 'x' }; micRecPcm16 = () => new Int16Array(4); micRecMicName = () => 'mic';
+    const saveDoc = withLive => live(`const keepFns = { p: micRecPcm16, n: micRecMicName, ci: console.info, cu: currentUser, host: location.hostname }; currentUser = { uid: 'dev-user', displayName: 'x' }; micRecPcm16 = () => new Int16Array(4); micRecMicName = () => 'mic';
+      location.hostname = 'site.example';   // not this computer: the dev-bypass log path (local recording mode is 1eh's)
       let seen = null; console.info = (a, d) => { seen = d; };
       try { ${startPair} ${withLive ? 'ccLiveBpm(30); ccLiveBpm(-10);' : ''} const rec = { n: 48000, srcRate: 48000, perf0: 9000, ctx0: 0, firstPlay: 0, mode: 'pw', frames: 0, frameSum: 0, frameMax: 0, track: null }; micRecSaveNow(rec, ccRecMeta(true)); }
-      finally { micRecPcm16 = keepFns.p; micRecMicName = keepFns.n; console.info = keepFns.ci; currentUser = keepFns.cu; }
+      finally { micRecPcm16 = keepFns.p; micRecMicName = keepFns.n; console.info = keepFns.ci; currentUser = keepFns.cu; location.hostname = keepFns.host; }
       return { got: seen !== null, has: !!seen && 'tempoChanges' in seen, tc: seen && seen.tempoChanges, flagged: !!seen && seen.expected.length > 0 && seen.expected.every(e => e.retimed === true), bpm: seen && seen.bpm,
         undef: JSON.stringify(seen, (k, v) => v === undefined ? '__u' : v).includes('__u'), cap: seen && seen.gridStepCapMs };`);
     const sd1 = saveDoc(true), sd0 = saveDoc(false);
@@ -17396,6 +17397,46 @@ async function checkStrumCheck() {
       const src2 = siteText('coach-strumcheck.js', ROOT);
       if (!/if \(scClicksWanted\(s\.metro, s\.hp\)\) scScheduleClicks\(s\);/.test(src2) || !/sc\.hp = scHeadphonesGet\(\);/.test(src2)) fail('scStart no longer decides the round\'s clicks from the Metronome and the headphones switch');
     }
+    /* LOCAL RECORDING MODE (Jonathan, 2026-11-14: "can it build a mock site for me to record onto?"): only on this computer's host AND
+       the dev-bypass user. Run through the real micRecWanted / micRecSaveNow with a counting Firestore stub and a stub Blob / URL:
+       localhost + dev bypass -> recording wanted, the take offered as two files named take-<game>-<date>-<time>, its JSON without uid
+       and name, nothing sent to Firestore; another host + dev bypass -> not wanted, no file (the dev-bypass log, as before); localhost +
+       a real account -> no file, the upload path unchanged (Firestore written). */
+    {
+      const r = JSON.parse(await run(`(async () => {
+        const keep = { host: location.hostname, cu: currentUser, ed: ensureDb, db, fb: globalThis.firebase, info: console.info, warn: console.warn, rep: SITE_ERRORS.report, cnt: micTakesCount, Bl: globalThis.Blob, cou: URL.createObjectURL, rou: URL.revokeObjectURL, takes: micRecLocalTakes };
+        const out = {}, blobs = [];
+        try {
+          globalThis.Blob = function(parts, o){ this.parts = parts; this.type = o && o.type; blobs.push(this); };
+          URL.createObjectURL = b => 'blob:test-' + blobs.indexOf(b); URL.revokeObjectURL = () => {};
+          console.info = () => { out.devLog = (out.devLog || 0) + 1; }; console.warn = () => {}; SITE_ERRORS.report = () => {};
+          globalThis.firebase = { firestore: { Blob: { fromUint8Array: () => ({}) }, FieldValue: { serverTimestamp: () => ({}) } } };
+          const meta = { fields: { game: 'strumcheck', bpm: 85 }, expected: [], events: [] };
+          const rec = () => ({ mode: 'coach', n: 48000, srcRate: 48000, bufs: [new Float32Array(48000)], ctx0: 0, perf0: 0, firstPlay: 0.1, frames: 1, frameSum: 17, frameMax: 17, track: '', settings: null });
+          for (const [name, host, uid] of [['local', '127.0.0.1', 'dev-user'], ['otherHost', 'guitar.example.org', 'dev-user'], ['realUser', 'localhost', 'test-student-0']]) {
+            location.hostname = host; currentUser = { uid, displayName: 'Test 0' }; micRecLocalTakes = []; out.devLog = 0;
+            let fsWrites = 0;
+            db = { collection: () => ({ doc: () => ({ set: async () => { fsWrites++; }, collection: () => ({ doc: () => ({ set: async () => { fsWrites++; } }) }) }) }), runTransaction: async () => { fsWrites++; } };
+            ensureDb = async () => db;
+            const wanted = micRecWanted();
+            blobs.length = 0;
+            await micRecSaveNow(rec(), meta);
+            const json = blobs.find(b => b.type === 'application/json'), wav = blobs.find(b => b.type === 'audio/wav');
+            const doc = json ? JSON.parse(json.parts[0]) : null;
+            out[name] = { wanted, local: micRecLocal(), takes: micRecLocalTakes.length, base: micRecLocalTakes[0] ? micRecLocalTakes[0].base : null, fsWrites, devLog: out.devLog,
+              jsonHasUid: doc ? ('uid' in doc || 'name' in doc) : null, wavName: doc ? doc.wav : null, wavBytes: wav ? wav.parts[1].length + 44 : null,
+              links: (document.getElementById('micrec-local') && micRecLocalTakes.length) ? (document.getElementById('micrec-local').innerHTML.match(/download="/g) || []).length : 0 };
+          }
+          return JSON.stringify(out);
+        } finally { location.hostname = keep.host; currentUser = keep.cu; ensureDb = keep.ed; db = keep.db; globalThis.firebase = keep.fb; console.info = keep.info; console.warn = keep.warn; SITE_ERRORS.report = keep.rep; micTakesCount = keep.cnt; globalThis.Blob = keep.Bl; URL.createObjectURL = keep.cou; URL.revokeObjectURL = keep.rou; micRecLocalTakes = keep.takes; }
+      })()`));
+      n.pins++;
+      const L = r.local, O = r.otherHost, U = r.realUser;
+      if (!L.wanted || !L.local || L.takes !== 1 || !/^take-strumcheck-\d{8}-\d{6}$/.test(L.base || '') || L.fsWrites !== 0 || L.jsonHasUid !== false || L.wavName !== L.base + '.wav' || L.wavBytes !== 44 + 24000 * 2 || L.links !== 2)
+        fail(`local recording mode (127.0.0.1 + dev bypass): ${JSON.stringify(L)} (want recording wanted, one take take-strumcheck-<date>-<time> with two links, a .wav of 1 s at 24 kHz, a .json without uid or name, no Firestore write)`);
+      if (O.wanted || O.local || O.takes || O.fsWrites || O.devLog !== 1) fail(`another host + dev bypass: ${JSON.stringify(O)} (want no recording, no file, no Firestore, the dev-bypass log as before)`);
+      if (U.wanted || U.local || U.takes || U.fsWrites < 2) fail(`localhost + a real account: ${JSON.stringify(U)} (want no local mode and no file; the take goes up to Firestore as before)`);
+    }
     /* the end line: 0, 1 and many bars, both languages */
     for (const lang of ['en', 'es']) {
       run(`setLang(${JSON.stringify(lang)})`);
@@ -17413,8 +17454,8 @@ async function checkStrumCheck() {
     run(`setLang('en')`);
   } catch (e) { fail('stopped on an error: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : e)); }
   /* pinned totals, so a renamed function cannot turn this into a check of nothing */
-  if (n.saves !== 4 || n.tempos !== 4 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 9 || n.lines !== 10 || n.pins !== 6) fail(`ran ${n.saves} take saves (want 4), ${n.tempos} tempo opens (want 4), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (9), ${n.lines} end lines (10), ${n.pins} pins (6)`);
-  if (!bad) ok(`1eh: one listening step (ca-52, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, none in the console, never disabled; opens at the step's last tempo (${PIN.startBpm} if never set), one tempo with the step's slider, -5 / +5 across its range, the tempo controls locked during a round and given back on every exit; its own ratios ${PIN.ratio} / ${PIN.hfRatio} (Strum Radar's state still 1.4 / 1.7, run); window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule} (${n.chords} scripted cases); the Metronome's click only with headphones (32 a round, all cleared by Stop) and its beat dot (32 flashes, none with it off); two full rounds tick ca-52's step (round 1 <id>:0:r1, round 2 the step; Stopped, short and other steps write nothing; no Mark done button); a whole finish saved nothing else; its take saved through micRecSaveNow into a strict Firestore stub (3 rounds); the real sweep and end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages`);
+  if (n.saves !== 4 || n.tempos !== 4 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 9 || n.lines !== 10 || n.pins !== 7) fail(`ran ${n.saves} take saves (want 4), ${n.tempos} tempo opens (want 4), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (9), ${n.lines} end lines (10), ${n.pins} pins (7)`);
+  if (!bad) ok(`1eh: one listening step (ca-52, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, none in the console, never disabled; opens at the step's last tempo (${PIN.startBpm} if never set), one tempo with the step's slider, -5 / +5 across its range, the tempo controls locked during a round and given back on every exit; its own ratios ${PIN.ratio} / ${PIN.hfRatio} (Strum Radar's state still 1.4 / 1.7, run); window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule} (${n.chords} scripted cases); the Metronome's click only with headphones (32 a round, all cleared by Stop) and its beat dot (32 flashes, none with it off); local recording mode only on this computer's host with the dev bypass (files, no Firestore; another host or a real account unchanged); two full rounds tick ca-52's step (round 1 <id>:0:r1, round 2 the step; Stopped, short and other steps write nothing; no Mark done button); a whole finish saved nothing else; its take saved through micRecSaveNow into a strict Firestore stub (3 rounds); the real sweep and end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages`);
 }
 
 async function checkCountIn() {
@@ -17526,11 +17567,12 @@ async function checkCountIn() {
       tot.takes++;
       if (JSON.stringify(r.countInBeats) !== '[2,2,4]' || JSON.stringify(r.stageBpms) !== '[50,55,60]') fail(`a song switch from 50 Stopped in round 1 saves countInBeats ${JSON.stringify(r.countInBeats)} for ${JSON.stringify(r.stageBpms)}; want [2,2,4] (the rounds not reached at their planned tempos)`);
       for (const [bpm, want] of [[30, '[2]'], [60, '[4]']]) {
-        const doc = JSON.parse(run(`(() => { const keep = { p: micRecPcm16, n: micRecMicName, ci: console.info, cu: currentUser }; currentUser = { uid: 'dev-user', displayName: 'x' }; micRecPcm16 = () => new Int16Array(4); micRecMicName = () => 'mic';
+        const doc = JSON.parse(run(`(() => { const keep = { p: micRecPcm16, n: micRecMicName, ci: console.info, cu: currentUser, host: location.hostname }; currentUser = { uid: 'dev-user', displayName: 'x' }; micRecPcm16 = () => new Int16Array(4); micRecMicName = () => 'mic';
+          location.hostname = 'site.example';   // not this computer: the dev-bypass log path
           let seen = null; console.info = (a, d) => { seen = d; };
           try { __ciReset(true); ccSetup('power'); ccPickRate(2); ccPickProg(1); cc.bpm = ${bpm}; ccPrepare(false); ccBeginStage(); __ciRead(cc);
             micRecSaveNow({ n: 48000, srcRate: 48000, perf0: 900, ctx0: 0, firstPlay: 0, mode: 'pw', frames: 0, frameSum: 0, frameMax: 0, track: null }, ccRecMeta(true)); }
-          finally { micRecPcm16 = keep.p; micRecMicName = keep.n; console.info = keep.ci; currentUser = keep.cu; }
+          finally { micRecPcm16 = keep.p; micRecMicName = keep.n; console.info = keep.ci; currentUser = keep.cu; location.hostname = keep.host; }
           return JSON.stringify({ got: seen !== null, cib: seen && seen.countInBeats, sched: __ci.beeps.length }); })()`));
         tot.takes++;
         if (!doc.got || JSON.stringify(doc.cib) !== want || `[${doc.sched}]` !== want) fail(`a pair at ${bpm} BPM: the document micRecSaveNow writes has countInBeats ${JSON.stringify(doc.cib)} (${doc.got ? 'written' : 'NOT written'}), ${doc.sched} clicks were scheduled; want ${want}`);
@@ -17828,12 +17870,13 @@ async function checkMicStart() {
         let seen = null, started = false;
         try {
           currentUser = { uid: 'dev-user', displayName: 'x' }; micRecPcm16 = () => new Int16Array(4); micRecMicName = () => 'mic'; console.info = (a, d) => { seen = d; }; micRecWanted = () => true;
+          keep.host = location.hostname; location.hostname = 'site.example';   // not this computer: the dev-bypass log path (local recording mode is 1eh's)
           const node = () => ({ connect(){}, disconnect(){}, gain: { value: 1 } });
           coachCtx = { sampleRate: 48000, currentTime: 0, destination: {}, createMediaStreamSource: node, createScriptProcessor: node, createGain: node };
           coachStream = { getAudioTracks(){ return [__mpTrack]; }, getTracks(){ return [__mpTrack]; } };
           started = micRecStart('coach'); if (micRec) micRec.n = 48000;
           micRecSaveNow(micRecStop(), { fields: {}, expected: [], events: [] });
-        } finally { micRecPcm16 = keep.p; micRecMicName = keep.n; console.info = keep.ci; currentUser = keep.cu; micRecWanted = keep.w; coachCtx = keep.cx; coachStream = keep.cs; }
+        } finally { micRecPcm16 = keep.p; micRecMicName = keep.n; console.info = keep.ci; currentUser = keep.cu; micRecWanted = keep.w; coachCtx = keep.cx; coachStream = keep.cs; if (keep.host) location.hostname = keep.host; }
         return JSON.stringify({ started, ms: seen ? seen.micSettings || null : 'NO DOCUMENT' }); })()`);
       if (doc !== '{"started":true,"ms":{"echoCancellation":false,"noiseSuppression":false,"autoGainControl":true,"sampleRate":48000,"channelCount":1,"latency":0.01}}') fail(`a take recorded through micRecStart/micRecStop/micRecSaveNow: ${doc} (want started and micSettings with the six reported keys)`);
     }

@@ -3271,6 +3271,9 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 .sc-mark--unheard{color:var(--text3)}
 .sc-card .sc-line{margin:2px 0}
 .sc-rounds{font-size:0.875rem;font-weight:600;color:var(--text2)}
+/* Local recording mode's box (coach-core.js micRecLocalRender): localhost + dev bypass only, never a student's page. */
+.micrec-local{position:fixed;left:12px;bottom:12px;z-index:95;max-width:min(560px,90vw / var(--site-fill,1));max-height:calc(40vh / var(--site-fill,1));overflow:auto;background:var(--bg);border:2px solid var(--red-text);border-radius:var(--radius);padding:8px 12px;font-size:0.8125rem;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.micrec-local ul{margin:6px 0 0;padding-left:18px}
 .sc-hp{display:flex;align-items:center;gap:6px;font-size:0.875rem;margin:4px 0 8px;cursor:pointer}
 /* The beat dot during a checked round with the Metronome on: the Metronome tool's dot, twice its size, beside nothing it could cover. */
 .metro-dot.sc-beat-dot{width:56px;height:56px;border-width:3px;margin:6px auto 8px}
