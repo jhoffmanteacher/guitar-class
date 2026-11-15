@@ -465,7 +465,11 @@ function codedRenders(root){
 }
 
 async function main(){
-  const watchdog = setTimeout(() => { console.log('built-songs-sim: ✗ HUNG (5 minutes)'); process.exit(3); }, 300000); watchdog.unref();
+  /* The watchdog guards ONE run of the cases (5 minutes); --breaks re-arms it for each planted fault, so a long list
+     of breaks on a busy machine is not mistaken for a hang (it was, at 28 breaks, 2026-11-15). */
+  let watchdog = null;
+  const arm = () => { clearTimeout(watchdog); watchdog = setTimeout(() => { console.log('built-songs-sim: ✗ HUNG (5 minutes in one run of the cases)'); process.exit(3); }, 300000); watchdog.unref(); };
+  arm();
   const files = siteFiles(ROOT);
   let res;
   try { res = await runCases(files); }
@@ -518,6 +522,7 @@ async function main(){
       if (n !== 1) { console.log(`  ✗ break "${name}": its text is in ${file} ${n} times (must be once)`); continue; }
       const copy = files.map(([f, s], j) => [f, j === i ? s.replace(from, to) : s]);
       let r;
+      arm();
       try { r = await runCases(copy); } catch (e) { r = { fails: 1 }; }
       if (r.fails > 0) { caught++; console.log(`  ✓ break caught: ${name} (${r.fails} red)`); }
       else console.log(`  ✗ break NOT caught: ${name}`);
