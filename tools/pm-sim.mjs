@@ -2448,7 +2448,7 @@ console.log('23. no daily limit, and the gap before the rules are pasted');
   const f0 = w.log.fetches.length;
   w.input('pointerdown'); a.play(); await runAll([w], 30, clicks);
   for (const f of w.listeners['win:pagehide'] || []) f();
-  check('…and once the server holds a day past 1200 s, the keepalive sends a closing tab\'s last seconds again', w.log.fetches.length === f0 + 1, `fetches ${w.log.fetches.length - f0}`);
+  check('…and a closing tab\'s last seconds go out by keepalive', w.log.fetches.length === f0 + 1, `fetches ${w.log.fetches.length - f0}`);
 }
 {
   /* Under the new rules from the start: a day far past 20 minutes, a week far past 140 minutes. */

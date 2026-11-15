@@ -43,11 +43,11 @@ student's last input ("No limit, but need activity"). The engine is live before 
 the student's own screen is true, the server write is refused, kept on that Chromebook and retried, and lands after the paste.
 His console picture of five rows at "40 / 40" was two days at the old 20-minute cap, not a goal cap; those weeks cannot be
 rebuilt. Review: one deep round (Opus) found 1 MAJOR, fixed with break-it proof (a scroll is no longer input: a practice card
-scrolls itself, so a looping song counted for hours); **a second round on that fix is owed (after 2026-11-16 9:00, his usage
-limit)**. Jonathan's calls, do not re-raise: two devices at once count double and an auto-clicker counts with no ceiling
-("nobody will use an auto clicker or sign in from two devices. don't worry about it"). Open now that the rules are
-published: remove `keepaliveSafe` / `OLD_DAY_CAP` in `practice-minutes.js` (it holds back the tab-close write that first
-passes 20 minutes; it was needed only while the old rules were published). The older notes below that say "the daily cap bounds it" are history.
+scrolls itself, so a looping song counted for hours); a second round (Opus, 2026-11-15) came back clean. Jonathan's calls, do not re-raise: two devices at once count double and an auto-clicker counts with no ceiling
+("nobody will use an auto clicker or sign in from two devices. don't worry about it"). Done 2026-11-15:
+`keepaliveSafe` / `OLD_DAY_CAP` removed from `practice-minutes.js` (it held back the tab-close write that first passed 20
+minutes while the old rules were published), and the second review round on the scroll fix came back clean (0 BLOCKER, 0 MAJOR,
+4 stale-text MINORs fixed). The older notes below that say "the daily cap bounds it" are history.
 
 **Strum Pattern check `ca-52` (2026-11-15): shipped, not yet on the board; Jonathan tests it, then places it.**
 The pattern `D.DU.UDU` over D5 D5 C5 C5 G5 G5 D5 D5 (`coach-strumcheck.js`; `coach-core.js` untouched). Three Opus

@@ -7,14 +7,15 @@
    streaks"; it was backing tracks only before). A second of wall-clock time
    counts while ALL of these hold:
      · the student is WORKING on the site — any one of:
-         – the student clicked, tapped, typed, scrolled or moved the pointer
+         – the student clicked, tapped, typed, turned the wheel or moved the
+           pointer (not a bare scroll event: a practice card scrolls itself)
            in the last ACTIVE_MS (2 minutes — Jonathan's pick, 2026-11-03:
            reading a step and then playing it for a minute still counts);
          – focus is inside an embedded video (a YouTube lesson): a click
            there never reaches this page, so the window is FRAME_ACTIVE_MS
            (10 minutes) from the click instead;
          – SOMETHING IS PLAYING and the student clicked, tapped, typed,
-           scrolled or moved the pointer in the last soundAloneMinutes (the
+           turned the wheel or moved the pointer in the last soundAloneMinutes (the
            config, 10 minutes; 2026-11-15). Playing means any one of:
              · an <audio>/<video> element: not paused, not ended, not muted
                (the Guitar toggle's twin plays muted beside the audible one),
