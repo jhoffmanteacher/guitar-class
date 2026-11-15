@@ -68,6 +68,9 @@ Existing faults found on the way, not fixed: `micRecStartPerf` is about one audi
 game's takes; a live-quiz key (`lq-q-opened`) can survive to the next student on a shared Chromebook
 (`shared-chromebook-loop` case 28 at seed 2); a practice card's speed press less than one frame before a count drops
 that click (`pcRetrack` → `cancelQueuedClicks`).
+A smoke flake (2026-11-15, `smoke.mjs --en-only --only activities` on the Song builder tip): once, `flashClass is not
+defined` in Name the power chord (`ncMark`, `app/drills-call.js`), so `fab-tools.js` had not run on that page; the same
+commit walked clean the next run and on GitHub. Seen once; if it comes back, look at that page's script loads first.
 
 **Parked, only if storage gets tight (Jonathan, 2026-11-15): smaller audio files.** 26 of the 44 song files in
 `audio/` are saved at 320k (275 of 396 MB); 192k copies made from them would save about 110 MB. One song first for
