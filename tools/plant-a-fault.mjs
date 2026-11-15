@@ -123,7 +123,7 @@ export const REGIONS = [
   { name: 'rules',
     why: "firestore.rules is the real security boundary: a fault here lets the wrong account read or write (danger zone)",
     targets: [
-      { file: 'firestore.rules', rules: true, pairWith: RULES_PASTE_2, tools: ['site-errors-sim', 'song-files-console', 'pm-rules', 'rules-core', 'site-errors-rules', 'song-requests-rules', 'song-files-rules', 'live-quiz-loop', 'checks'] },
+      { file: 'firestore.rules', rules: true, pairWith: RULES_PASTE_2, tools: ['site-errors-sim', 'song-files-console', 'pm-rules', 'rules-core', 'site-errors-rules', 'song-requests-rules', 'song-files-rules', 'built-songs-rules', 'live-quiz-loop', 'checks'] },
       { file: RULES_PASTE_2, rules: true, optional: true, pairWith: 'firestore.rules', sharedFromPair: true, tools: ['pm-rules', 'rules-core', 'site-errors-rules', 'song-requests-rules', 'song-files-rules', 'checks'] },
     ],
     tools: [] },
@@ -194,6 +194,7 @@ export const TOOLS = {
   'site-errors-rules':  { emu: 'tools/site-errors-rules-test.mjs', site: true },
   'song-requests-rules': { emu: 'tools/song-requests-rules-test.mjs' },
   'song-files-rules':   { emu: 'tools/song-files-rules-test.mjs' },
+  'built-songs-rules':  { emu: 'tools/built-songs-rules-test.mjs' },
 };
 /* "Cannot judge this": the tool says so (a changed detector, other takes), or its own text rewrite of the site (the
    older grading rules it replays the takes with, tools/mic-sim/candidates.mjs) no longer finds the line it rewrites. */

@@ -15,12 +15,15 @@
                  list or a draft.
      songs       the teacher writes the exact shape the console will write (create, a re-save, with and without the
                  two optional audio fields, the edges: an id of 8 and of 24, v 1 and 99, a title of 120, an empty
-                 artist, bytes 36,000,000, a length of 1,800 s, centsOff 10 and -10) and not: an id without 'sb-',
-                 with a capital, of 7 or of 25; a missing or an extra key; v 0, 100 or a float; a title of 0 or 121, a
-                 title or artist that is not a string; an artist of 121; an audio map with an extra key or without
-                 one of its five; an audio id not shaped like a songFiles id; bytes 0, 36,000,001 or a float; a
-                 SHA-256 in capitals or 63 long; a length of 0, 1,801 or a string; centsOff 10.1, -10.1 or a string;
-                 song not a map; a client time; the teacher's email with email_verified false. The teacher deletes.
+                 artist, bytes 36,000,000, a length of 1,800 s, centsOff 10 and -10, gainDb 40 and -40) and not: an
+                 id without 'sb-', with a capital, of 7 or of 25; a missing or an extra key; v 0, 100 or a float; a
+                 title of 0 or 121 or of spaces only, a title or artist that is not a string; an artist of 121; an
+                 audio map with an extra key or without one of its five; an audio id not shaped like a songFiles id
+                 (a capital, a dot, a slash, an underscore, a space); bytes 0, 36,000,001 or a float; a SHA-256 in
+                 capitals or 63 long; a length of 0, 1,801 or a string; centsOff 10.1, -10.1 or a string; gainDb
+                 40.1, -40.1, a string, a map or null; a sourceSha256 that is a number, in capitals or 63 long; song
+                 not a map; a client time; the teacher's email with email_verified false. Nobody but the teacher
+                 deletes a song, also one the teacher has re-saved as v 2. The teacher deletes.
      list        the teacher writes the list with 0, 1 and 200 songs; not 201, not songs as a list, not an extra key,
                  not without songs, not a client time. The teacher deletes it.
      drafts      the teacher writes a draft of any shape with an 'sb-' id, reads and deletes it; not an id without
@@ -142,6 +145,10 @@ async function suite(rulesText, quiet) {
   await t('the teacher creates a built song', () => S(T, 'sb-test0song1').set(doc()), true);
   await t('…and re-saves it (update, new savedAt)', () => S(T, 'sb-test0song1').update({ title: 'Test Song 0b', savedAt: FV.serverTimestamp() }), true);
   await t('…and sets it again whole (v 2)', () => S(T, 'sb-test0song1').set(doc({ v: 2 })), true);
+  await t('a school account cannot delete that v 2 song', () => S(A, 'sb-test0song1').delete(), false);
+  await t('an allowed outside account cannot delete that v 2 song', () => S(OUT_OK, 'sb-test0song1').delete(), false);
+  await t('signed out cannot delete that v 2 song', () => S(N, 'sb-test0song1').delete(), false);
+  await t('the teacher\'s email unverified cannot delete that v 2 song', () => S(FAKE, 'sb-test0song1').delete(), false);
   await t('without gainDb and sourceSha256', () => { const a = audio(); delete a.gainDb; delete a.sourceSha256; return S(T, 'sb-test0song2').set(doc({ audio: a })); }, true);
   await t('an id of 8 characters after sb-', () => S(T, 'sb-' + 'a'.repeat(8)).set(doc()), true);
   await t('an id of 24 characters after sb-', () => S(T, 'sb-' + 'a1'.repeat(12)).set(doc()), true);
@@ -151,6 +158,10 @@ async function suite(rulesText, quiet) {
     ['bytes 1', { audio: audio({ bytes: 1 }) }], ['bytes 36,000,000', { audio: audio({ bytes: 36000000 }) }],
     ['a length of 1,800 s', { audio: audio({ durationSec: 1800 }) }], ['a length of 1 s (an int)', { audio: audio({ durationSec: 1 }) }],
     ['centsOff 10', { audio: audio({ centsOff: 10 }) }], ['centsOff -10', { audio: audio({ centsOff: -10 }) }], ['centsOff 0 (an int)', { audio: audio({ centsOff: 0 }) }],
+    ['a title with spaces around a letter', { title: ' x ' }],
+    ['gainDb 40', { audio: audio({ gainDb: 40 }) }], ['gainDb -40', { audio: audio({ gainDb: -40 }) }], ['gainDb 0 (an int)', { audio: audio({ gainDb: 0 }) }],
+    ['without gainDb only', { audio: (() => { const a = audio(); delete a.gainDb; return a; })() }],
+    ['without sourceSha256 only', { audio: (() => { const a = audio(); delete a.sourceSha256; return a; })() }],
     ['an empty song map', { song: {} }], ['an audio id like a songFiles id', { audio: audio({ id: 'made-up-song-full-120' }) }],
   ]) await t(label, () => S(T, 'sb-edges0001').set(doc(extra)), true);
   for (const [label, id] of [['an id without sb-', 'test0song1abc'], ['an id with sb_', 'sb_test0song1'], ['an id with a capital', 'sb-Test0song1'],
@@ -161,11 +172,13 @@ async function suite(rulesText, quiet) {
   for (const [label, extra] of [
     ['an extra key', { grade: 'A' }],
     ['v 0', { v: 0 }], ['v 100', { v: 100 }], ['v 1.5', { v: 1.5 }], ['v as a string', { v: '1' }],
-    ['a title of 0', { title: '' }], ['a title of 121', { title: 't'.repeat(121) }], ['a title as a list', { title: ['Test'] }],
+    ['a title of 0', { title: '' }], ['a title of three spaces', { title: '   ' }], ['a title of a tab and a newline', { title: '\t\n' }], ['a title of 121', { title: 't'.repeat(121) }], ['a title as a list', { title: ['Test'] }],
     ['an artist of 121', { artist: 'a'.repeat(121) }], ['an artist as a list', { artist: ['Test'] }], ['an artist as a map', { artist: {} }],
     ['audio as a string', { audio: 'sb-test0song1-full' }], ['audio as a list', { audio: ['sb-test0song1-full'] }],
     ['an audio map with an extra key', { audio: audio({ url: 'https://example.com/x.mp3' }) }],
     ['an audio id with a capital', { audio: audio({ id: 'Sb-test0song1' }) }], ['an audio id with a dot', { audio: audio({ id: 'sb-test.mp3' }) }],
+    ['an audio id with a slash', { audio: audio({ id: 'sb-test/song1' }) }], ['an audio id with an underscore', { audio: audio({ id: 'sb-test_song1' }) }],
+    ['an audio id with a space', { audio: audio({ id: 'sb-test song1' }) }],
     ['an audio id of 81', { audio: audio({ id: 'a'.repeat(81) }) }], ['an audio id as a number', { audio: audio({ id: 12345 }) }],
     ['bytes 0', { audio: audio({ bytes: 0 }) }], ['bytes 36,000,001', { audio: audio({ bytes: 36000001 }) }], ['bytes 1.5', { audio: audio({ bytes: 1.5 }) }],
     ['a SHA-256 in capitals', { audio: audio({ sha256: 'A'.repeat(64) }) }], ['a SHA-256 of 63', { audio: audio({ sha256: 'a'.repeat(63) }) }],
@@ -174,6 +187,11 @@ async function suite(rulesText, quiet) {
     ['a length as a string', { audio: audio({ durationSec: '210' }) }],
     ['centsOff 10.1', { audio: audio({ centsOff: 10.1 }) }], ['centsOff -10.1', { audio: audio({ centsOff: -10.1 }) }],
     ['centsOff 11', { audio: audio({ centsOff: 11 }) }], ['centsOff as a string', { audio: audio({ centsOff: '3' }) }],
+    ['gainDb 40.1', { audio: audio({ gainDb: 40.1 }) }], ['gainDb -40.1', { audio: audio({ gainDb: -40.1 }) }],
+    ['gainDb as a string', { audio: audio({ gainDb: 'x'.repeat(500) }) }], ['gainDb as a map', { audio: audio({ gainDb: { a: 1 } }) }],
+    ['gainDb null', { audio: audio({ gainDb: null }) }],
+    ['a sourceSha256 that is a number', { audio: audio({ sourceSha256: 12345 }) }], ['a sourceSha256 in capitals', { audio: audio({ sourceSha256: 'B'.repeat(64) }) }],
+    ['a sourceSha256 of 63', { audio: audio({ sourceSha256: 'b'.repeat(63) }) }],
     ['song as a string', { song: 'Test chart' }], ['song as a list', { song: ['G', 'C'] }],
     ['a client time', { savedAt: new Date() }],
   ]) await t('refused: ' + label, () => S(T, 'sb-shape0001').set(doc(extra)), false);
@@ -219,17 +237,19 @@ async function suite(rulesText, quiet) {
 }
 
 /* Each break: [name, old text, new text, …]. The old text must occur exactly once in the rules file.
-   No break drops the two hasAll lines, "audio is map", "durationSec is number" or "centsOff is number": each is a
-   mutant the rules cannot tell apart (every field hasAll names is also read by name below it, and a missing field, a
-   non-map's keys() and a string compared with a number are each an error, which refuses the write either way). The
-   'no <key>', 'audio without <key>', 'audio as a string', 'a length as a string' and 'centsOff as a string' cases
-   above hold that behaviour. */
+   No break drops the two hasAll lines, "audio is map", "title is string", "durationSec is number", "centsOff is
+   number" or "gainDb is number": each is a mutant the rules cannot tell apart (every field hasAll names is also read
+   by name below it, and a missing field, a non-map's keys(), a non-string's trim() and a string compared with a
+   number are each an error, which refuses the write either way). The 'no <key>', 'audio without <key>', 'audio as a
+   string', 'a title as a list', 'a length as a string', 'centsOff as a string' and 'gainDb as a string / a map /
+   null' cases above hold that behaviour. */
 const P = '            && request.resource.data.';
 const BREAKS = [
   ['every account gets a built song (gate dropped)', `    match /builtSongs/{songId} {\n      allow get: if ${G};`, '    match /builtSongs/{songId} {\n      allow get: if true;'],
   ['a school account lists the built songs (get widened to read)', `    match /builtSongs/{songId} {\n      allow get: if ${G};`, `    match /builtSongs/{songId} {\n      allow read: if ${G};`],
   ['every account lists the built songs', `    match /builtSongs/{songId} {\n      allow get: if ${G};\n      allow read: if isTeacher();`, `    match /builtSongs/{songId} {\n      allow get: if ${G};\n      allow read: if isSignedIn();`],
   ['a student writes a built song', "      allow create, update: if isTeacher()\n            && songId.matches", `      allow create, update: if ${G}\n            && songId.matches`],
+  ['anyone deletes a song re-saved as v 2 (review R1-5, P5)', "            && request.resource.data.savedAt == request.time;\n      allow delete: if isTeacher();", "            && request.resource.data.savedAt == request.time;\n      allow delete: if isTeacher() || resource.data.v > 1;"],
   ['a student deletes a built song', "            && request.resource.data.savedAt == request.time;\n      allow delete: if isTeacher();", `            && request.resource.data.savedAt == request.time;\n      allow delete: if ${G};`],
   ['the list readable by every account', `    match /builtSongsMeta/list {\n      allow read: if ${G};`, '    match /builtSongsMeta/list {\n      allow read: if true;'],
   ['a student writes the list', "      allow create, update: if isTeacher()\n            && request.resource.data.keys().hasOnly(['songs', 'updatedAt'])", `      allow create, update: if ${G}\n            && request.resource.data.keys().hasOnly(['songs', 'updatedAt'])`],
@@ -247,8 +267,8 @@ const BREAKS = [
   ['v not an int', `${P}v is int\n`, ''],
   ['v from 0', `${P}v >= 1\n`, ''],
   ['v past 99', `${P}v <= 99\n`, ''],
-  ['the title not a string', `${P}title is string\n${P}title.size() >= 1\n`, `${P}title.size() >= 1\n`],
-  ['an empty title', `${P}title.size() >= 1\n`, ''],
+  ['an empty title', `${P}title.trim().size() >= 1\n`, ''],
+  ['a title of spaces (trim dropped)', 'request.resource.data.title.trim().size() >= 1', 'request.resource.data.title.size() >= 1'],
   ['the title cap dropped', `${P}title.size() <= 120\n`, ''],
   ['the title cap 121', 'request.resource.data.title.size() <= 120', 'request.resource.data.title.size() <= 121'],
   ['the artist not a string', `${P}artist is string\n`, ''],
@@ -257,6 +277,7 @@ const BREAKS = [
   ['audio takes a url', "audio.keys().hasOnly(['id', 'bytes', 'sha256', 'durationSec', 'centsOff', 'gainDb', 'sourceSha256'])", "audio.keys().hasOnly(['id', 'bytes', 'sha256', 'durationSec', 'centsOff', 'gainDb', 'sourceSha256', 'url'])"],
   ['the audio id check dropped', `${P}audio.id.matches('^[a-z0-9][a-z0-9-]{0,79}$')\n`, ''],
   ['the audio id loosened', "audio.id.matches('^[a-z0-9][a-z0-9-]{0,79}$')", "audio.id.matches('^.{1,200}$')"],
+  ['the audio id takes a slash (review R1-5, P6)', "audio.id.matches('^[a-z0-9][a-z0-9-]{0,79}$')", "audio.id.matches('^[a-z0-9][a-z0-9/-]{0,79}$')"],
   ['bytes not an int', `${P}audio.bytes is int\n`, ''],
   ['bytes from 0', `${P}audio.bytes > 0\n`, ''],
   ['the size cap dropped', `${P}audio.bytes <= 36000000\n`, ''],
@@ -271,6 +292,13 @@ const BREAKS = [
   ['centsOff above 10', `${P}audio.centsOff <= 10\n`, ''],
   ['centsOff to 10.5', 'request.resource.data.audio.centsOff <= 10\n', 'request.resource.data.audio.centsOff <= 10.5\n'],
   ['centsOff from -10.5', 'request.resource.data.audio.centsOff >= -10\n', 'request.resource.data.audio.centsOff >= -10.5\n'],
+  ['gainDb unchecked', "            && (!('gainDb' in request.resource.data.audio)\n                || (request.resource.data.audio.gainDb is number\n                    && request.resource.data.audio.gainDb >= -40\n                    && request.resource.data.audio.gainDb <= 40))\n", ''],
+  ['gainDb below -40', 'request.resource.data.audio.gainDb >= -40', 'request.resource.data.audio.gainDb >= -400'],
+  ['gainDb above 40', 'request.resource.data.audio.gainDb <= 40)', 'request.resource.data.audio.gainDb <= 400)'],
+  ['gainDb required (a tightening must show too)', "(!('gainDb' in request.resource.data.audio)\n                || (", "(false\n                || ("],
+  ['sourceSha256 unchecked', "            && (!('sourceSha256' in request.resource.data.audio)\n                || request.resource.data.audio.sourceSha256.matches('^[0-9a-f]{64}$'))\n", ''],
+  ['sourceSha256 takes capitals', "audio.sourceSha256.matches('^[0-9a-f]{64}$')", "audio.sourceSha256.matches('^[0-9a-fA-F]{64}$')"],
+  ['sourceSha256 required (a tightening must show too)', "(!('sourceSha256' in request.resource.data.audio)\n                || request", "(false\n                || request"],
   ['song not a map', `${P}song is map\n`, ''],
   ['a client time on a song', "\n            && request.resource.data.savedAt == request.time;", ';'],
   ['hasOnly dropped on the list', "\n            && request.resource.data.keys().hasOnly(['songs', 'updatedAt'])", ''],

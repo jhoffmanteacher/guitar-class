@@ -18400,8 +18400,10 @@ const SCHOOL_GATE_USES = 26;   // 6 class-wide reads + 11 student writes (progre
    2026-11-14, later (Paste C, not published yet): the teacher may delete one student's progress doc and practice-minutes
    docs (teacher-remove.js), and the header no longer offers `firebase deploy` for the class rules.
    2026-11-14, Song builder Part a1 (Paste D): a new add-only block for builtSongs/{id},
-   builtSongsMeta/list and songDrafts/{id} (tools/built-songs-rules-test.mjs), the path list, two paste-2 notes. */
-const RULES_FILE_SHA256 = 'd5c70e3a44336f38eb98a4edca92ddb593f3af9551e647d8bc1785d78cd9ed9e';
+   builtSongsMeta/list and songDrafts/{id} (tools/built-songs-rules-test.mjs), the path list, two paste-2 notes.
+   2026-11-14, Part a1 review round 1 (still Paste D): a title of spaces only is refused, gainDb and sourceSha256 are
+   checked when present, and comments (v is the format version; the list's entries are the page's to check; paste 2). */
+const RULES_FILE_SHA256 = '9b144f0af27668709b77aad4c35020ef71efe043d547aee626cbab493c067a4e';
 const TEACHER_GATE_BODY = "return request.auth != null && request.auth.token.email == 'jhoffman@seq.org' && request.auth.token.email_verified == true;";
 const SIGNED_IN_BODY = "return request.auth != null;";
 const SCHOOL_GATE_BODY = "return request.auth != null && ((request.auth.token.get('email_verified', false) == true && request.auth.token.get('email', '').lower().matches('^[^@]+@seq[.]org$')) || (exists(/databases/$(database)/documents/config/access) && get(/databases/$(database)/documents/config/access).data.get('allow', {}).get(request.auth.uid, false) == true));";
