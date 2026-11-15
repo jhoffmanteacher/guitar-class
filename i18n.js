@@ -799,7 +799,7 @@
     'tools.playAString':   { en: 'Play a string…', es: 'Toca una cuerda…' },
     'tools.listening':     { en: 'Listening…', es: 'Escuchando…' },
     'tools.micDenied':     { en: 'Mic access denied. Click the lock icon to the left of the address bar, set Microphone to Allow, then reload.',
-                              es: 'Acceso al micrófono denegado. Haz clic en el ícono de candado a la izquierda de la barra de direcciones, pon el Micrófono en Permitir y luego recarga la página.' },
+                              es: 'Acceso al micrófono denegado. Haz clic en el candado a la izquierda de la barra de direcciones, pon Micrófono en Permitir y recarga.' },
     'tools.micUnavailable': { en: 'No microphone was found, or another app is using it. Close other apps that use the mic, then close the tuner and open it again.',
                               es: 'No se encontró un micrófono, o otra aplicación lo está usando. Cierra las otras aplicaciones que usan el micrófono, luego cierra el afinador y ábrelo otra vez.' },
     'tools.micError':      { en: 'The mic didn’t start. Close the tuner and open it again.',

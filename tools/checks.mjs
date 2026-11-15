@@ -17245,14 +17245,21 @@ async function checkStrumCheck() {
           for (let i = 0; i < 5; i++) await null;
           /* review round 2 (R2-5): the guard must be let go once the first start is over, or round 2 can never start */
           scStart(); const later = n; if (release) release(); for (let i = 0; i < 5; i++) await null;
-          return JSON.stringify({ n: twice, later }); } finally { scStartRun = keep; sc = null; } })()`));
+          /* review round 3 (R3-3): a start that throws lets the guard go too (released in a finally, not only on success) */
+          let m = 0; scStartRun = async () => { m++; throw new Error('planted'); }; sc = { phase: 'ready' };
+          scStart().catch(() => {}); for (let i = 0; i < 5; i++) await null;
+          scStart().catch(() => {}); for (let i = 0; i < 5; i++) await null;
+          return JSON.stringify({ n: twice, later, afterThrow: m }); } finally { scStartRun = keep; sc = null; } })()`));
       if (r.n !== 1) fail(`two clicks on the button while the first start waits: the round started ${r.n} times, want 1`);
       if (r.later !== 2) fail(`after the first start was over, a new click started ${r.later - 1} rounds, want 1 (the start guard was never let go: round 2 could never start)`);
+      if (r.afterThrow !== 2) fail(`after a start that threw, a new click started ${r.afterThrow - 1} rounds, want 1 (the start guard is let go only on success: one error leaves the button dead)`);
       n.pins++;
     }
-    /* review round 2 (R2-6): round 2 keeps the beat, through the REAL scStartRun and scFinish: the Metronome on at Start (the start
-       stops the tool, as stopAllDemoAudio does), a full round, the tool still off: the check still wants the beat and draws the
-       headphones switch. The mic, the count-in and the loop are stubbed; everything the round's start and end do on the check is real. */
+    /* review round 2 (R2-6), round 3 (R3-2): round 2 keeps the beat, through the REAL scStartRun, scFinish, scButton and scInterrupt:
+       the Metronome on at Start (the start stops the tool, as stopAllDemoAudio does), round 1 ended three ways (played to the end,
+       Stop during the count-in, a hidden tab), the tool still off: the check still wants the beat, draws the headphones switch, and
+       round 2 starts with the beat. The mic, the count-in and the loop are stubbed; everything the round's start and end do on the
+       check is real. */
     {
       const r = JSON.parse(await run(`(async () => {
         const keep = { acq: coachAcquireMic, ens: coachEnsureRunning, ask: micRecShouldAsk, tun: coachEvictTuner, gsm: gamesStopMic, sda: stopAllDemoAudio, cci: coachCountIn, loop: scLoop, rec: micRecStart, stop: micRecStop, str: coachStream, mr: metroRunning, kv: scKeepInView, off: coachMicOff };
@@ -17262,17 +17269,30 @@ async function checkStrumCheck() {
           coachStream = { getAudioTracks: () => [{ label: '' }] };
           sc = { phase: 'ready', card: { isConnected: true, remove(){} }, btn: null, cells: [], board: null, bars: ['D5','D5','C5','C5','G5','G5','D5','D5'], chords: { D5: { midi: [50, 57, 62] }, C5: { midi: [48, 55, 60] }, G5: { midi: [43, 50, 55] } },
             pattern: '${PIN.pattern}', slotsOf: scPatternSlots('${PIN.pattern}'), timeouts: [], locked: [], bpm: 85, where: '' };
-          metroRunning = true;
-          await scStartRun();
-          const round1 = { metro: sc.metro, phase: sc.phase };
-          sc.barsDone = 0; scFinish(true);
-          metroRunning = false;
-          const wanted = scMetroWanted(), sw = /id="sc-hp"/.test(document.getElementById('coach-body').innerHTML);
-          return JSON.stringify({ round1, wanted, sw });
+          const base = sc, out = {};
+          for (const end of ['complete', 'stop', 'interrupt']) {
+            sc = Object.assign({}, base, { btn: document.createElement('button'), timeouts: [], locked: [] });
+            metroRunning = true;
+            await scStartRun();
+            const round1 = { metro: sc.metro, phase: sc.phase };
+            if (end === 'complete'){ sc.barsDone = 0; scFinish(true); }
+            else if (end === 'stop') scButton(sc.btn);
+            else scInterrupt('x');
+            metroRunning = false;
+            const wanted = scMetroWanted(), sw = /id="sc-hp"/.test(document.getElementById('coach-body').innerHTML), phase = sc.phase;
+            await scStartRun();
+            out[end] = { round1, phase, wanted, sw, round2: sc.metro };
+          }
+          return JSON.stringify(out);
         } finally { coachAcquireMic = keep.acq; coachEnsureRunning = keep.ens; micRecShouldAsk = keep.ask; coachEvictTuner = keep.tun; gamesStopMic = keep.gsm; stopAllDemoAudio = keep.sda; coachCountIn = keep.cci; scLoop = keep.loop;
           micRecStart = keep.rec; micRecStop = keep.stop; coachStream = keep.str; metroRunning = keep.mr; scKeepInView = keep.kv; coachMicOff = keep.off; if (sc) sc.card = { isConnected: false, remove(){} }; sc = null; } })()`));
-      if (!r.round1.metro || r.round1.phase !== 'countin') fail(`the real start with the Metronome on did not start a round with the beat: ${JSON.stringify(r.round1)} (the test proves nothing)`);
-      if (!r.wanted || !r.sw) fail(`after a full round with the Metronome on (the tool stopped by the start): the check wants the beat ${r.wanted}, draws the headphones switch ${r.sw} (want both: round 2 keeps the beat)`);
+      const how = { complete: 'a full round', stop: 'a round stopped during the count-in', interrupt: 'a round cut short by a hidden tab' };
+      for (const end of Object.keys(how)) {
+        const e = r[end];
+        if (!e.round1.metro || e.round1.phase !== 'countin') fail(`the real start with the Metronome on did not start a round with the beat (${end}): ${JSON.stringify(e.round1)} (the test proves nothing)`);
+        if (e.phase !== (end === 'interrupt' ? 'ready' : 'report')) fail(`${how[end]} ended in phase ${e.phase} (the test proves nothing)`);
+        if (!e.wanted || !e.sw || !e.round2) fail(`after ${how[end]} with the Metronome on (the tool stopped by the start): the check wants the beat ${e.wanted}, draws the headphones switch ${e.sw}, round 2 starts with the beat ${e.round2} (want all three: every later round keeps the beat)`);
+      }
       n.pins++;
     }
     /* TOO NOISY TO CHECK, through the real scGateFrame / scGateDecide: the constants; a quiet count-in (level 0.002) with its four loud

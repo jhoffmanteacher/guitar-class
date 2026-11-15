@@ -3275,20 +3275,21 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 .micrec-local{position:fixed;left:12px;bottom:12px;z-index:95;max-width:min(560px,90vw / var(--site-fill,1));max-height:calc(40vh / var(--site-fill,1));overflow:auto;background:var(--bg);border:2px solid var(--red-text);border-radius:var(--radius);padding:8px 12px;font-size:0.8125rem;box-shadow:0 4px 16px rgba(0,0,0,.2)}
 .micrec-local ul{margin:6px 0 0;padding-left:18px}
 /* The check's ONE row under the board (app/tab.js .sc-row, coach-strumcheck.js THE SCREEN): the button and a one-line strip beside
-   it, never taller than the button. Nothing wraps to a second line: a long line is cut with an ellipsis (its title-less text is read
-   whole by a screen reader). One exception: the "I'm wearing headphones" switch (.sc-hp) is never cut off; when it does not fit
-   beside the line before it, it goes on its own line under it (the lead, 2026-11-14). */
+   it. No words are ever cut off (the lead, 2026-11-14, review round 3): the end line (.sc-summary) and a reason or the too-noisy
+   line (.sc-note) wrap onto a second line when they are longer than the strip, and the "I'm wearing headphones" switch (.sc-hp)
+   goes on its own line under the line before it when it does not fit beside it. The row then grows below the board. */
 .sc-row{display:flex;align-items:center;gap:10px;margin-top:8px;min-height:32px;min-width:0}
 .sc-row .coach-btn.sc-play{margin-left:0;flex:none;white-space:nowrap}
 .sc-row .coach-btn.sc-play--stop{border-color:var(--red-text);color:var(--red-text)}
 .sc-strip{display:flex;align-items:center;gap:10px;min-width:0;flex:1 1 auto;overflow:hidden;white-space:nowrap;font-size:0.875rem}
 .sc-strip .sc-body{display:flex;align-items:center;gap:10px;flex:none;max-width:100%;min-width:0;overflow:hidden}
 .sc-strip .sc-body > *{flex:none;margin:0}
-.sc-strip .sc-body > .sc-note,.sc-strip .sc-body > .sc-local{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.sc-strip .sc-body > .sc-local{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.sc-strip .sc-body > .sc-note,.sc-strip .sc-body > .sc-summary{flex:0 1 auto;min-width:0;white-space:normal}
 .sc-strip .coach-mic{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .sc-strip .coach-count.sc-count{font-size:1.25rem;min-height:0;line-height:1.2;text-align:left}
 .sc-strip .sc-bar{margin-left:0}
-.sc-strip .sc-summary{font-size:0.875rem;margin:0}
+.sc-strip .sc-summary{font-size:0.875rem;margin:0;line-height:1.3}
 .sc-strip .sc-note{padding:2px 8px;margin:0;line-height:1.3}
 .sc-strip .sc-dev{display:inline-block;max-width:140px;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}
 .sc-strip .micrec-on{font-size:0.75rem;padding:2px 8px;margin:0}
