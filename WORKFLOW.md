@@ -31,6 +31,18 @@ Dates are the Pacific calendar date. `CACHE_VERSION` and commit timestamps may s
 
 Start here. Update this block whenever an item opens or closes; each line says where the detail is.
 
+**Practice minutes: no daily limit (2026-11-15), waits for a rules paste ("Paste E", pasted together with Paste D).** Jonathan:
+"let's remove the 20 minute a day limit. it should be actual minutes"; sound alone counts only within 10 minutes of the
+student's last input ("No limit, but need activity"). The engine is live before the paste on purpose: past 20 minutes in a day
+the student's own screen is true, the server write is refused, kept on that Chromebook and retried, and lands after the paste.
+His console picture of five rows at "40 / 40" was two days at the old 20-minute cap, not a goal cap; those weeks cannot be
+rebuilt. Review: one deep round (Opus) found 1 MAJOR, fixed with break-it proof (a scroll is no longer input: a practice card
+scrolls itself, so a looping song counted for hours); **a second round on that fix is owed (after 2026-11-16 9:00, his usage
+limit)**. Jonathan's calls, do not re-raise: two devices at once count double and an auto-clicker counts with no ceiling
+("nobody will use an auto clicker or sign in from two devices. don't worry about it"). Open after the paste: remove
+`keepaliveSafe` / `OLD_DAY_CAP` in `practice-minutes.js` (it holds back the tab-close write that first passes 20 minutes; needed
+only while the old rules are published). The older notes below that say "the daily cap bounds it" are history.
+
 **Strum Pattern check `ca-52` (2026-11-15): shipped, not yet on the board; Jonathan tests it, then places it.**
 The pattern `D.DU.UDU` over D5 D5 C5 C5 G5 G5 D5 D5 (`coach-strumcheck.js`; `coach-core.js` untouched). Three Opus
 deep-review rounds (5fbd3a5, 65c30c4, 45165b2); after round 3's one MAJOR (the too-noisy words) Jonathan chose "fix
@@ -431,7 +443,7 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
   miss before any streak spends no free miss. Done: test gaps (pm-sim 142, 2026-11-02); R2-6 (`adopt()` takes the
   `pm:q:<uid>` key `70ef823` wrote, 2026-11-02); PD-6 (closed 2026-11-05); impossible tips (`611503a`, `weekReach`,
   1cg: goal ≤ 7 × daily cap; "hide Longest at 0", Jonathan 2026-11-02, reworded 2026-11-07 in `93cb1dc`). Still open, LOW:
-  - [ ] Liberal counting can over-count (accepted; the daily cap bounds it; sim: 84 played → 144). Fix if wanted: keep
+  - [ ] Liberal counting can over-count (accepted; since 2026-11-15 there is no daily cap to bound it; sim: 84 played → 144). Fix if wanted: keep
     a leaving key's in-flight part in its own bucket an adopting page never puts back.
   - [ ] The keepalive's dead-link guard only sees a commit in flight (up to ~60 s lost).
   - [ ] The bar's flame is orange only when this week is hit, My progress's whenever the streak is above 0: pick one.

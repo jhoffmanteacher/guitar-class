@@ -600,8 +600,10 @@
   }
   if(typeof document !== 'undefined'){
     /* 'click' too (2026-11-15): a switch or screen-reader activation can send a click with no pointerdown, and a song now counts only
-       within soundAloneMinutes of the last input. */
-    ['pointerdown', 'pointermove', 'keydown', 'wheel', 'scroll', 'touchstart', 'input', 'click'].forEach(function(ev){
+       within soundAloneMinutes of the last input.
+       NOT 'scroll' (review, 2026-11-15): a practice card scrolls ITSELF as its cursor moves (pcFollow), so a looping song would
+       keep the window open with nobody there. A person who scrolls also sends wheel, touchstart, keydown or pointerdown. */
+    ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart', 'input', 'click'].forEach(function(ev){
       document.addEventListener(ev, markActive, { capture: true, passive: true });
     });
   }
@@ -1152,6 +1154,8 @@
   function stripInner(){
     var st = status(), w = st.week;
     var done = mins(w.secs), goal = mins(w.goal);
+    /* Past 999 the strip says "999+" (review, 2026-11-15): four digits fill the one-row top bar in Spanish. My progress and the console show the full number. */
+    if(done > 999) done = '999+';
     /* The TRUE minutes, past the goal too ("140/60"; Jonathan, 2026-11-15: it showed at most the goal before).
        Measured at 1366x657 in both languages with the widest week a page can count: the one-row top bar
        still fits (tools/pm-e2e.mjs). The ring stays full at the goal. A week with no class has no goal: minutes only. */

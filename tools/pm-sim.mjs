@@ -295,7 +295,7 @@ function makeWorld(opts = {}) {
   let stamping = false;
   vm.runInContext(ENGINE_SRC, ctx);
   const PM = windowStub.PM;
-  /* 2026-11-15 (no daily limit): a sound counts only within soundAloneMinutes (10) of the student's last click, key, scroll or touch,
+  /* 2026-11-15 (no daily limit): a sound counts only within soundAloneMinutes (10) of the student's last click, key or touch (not a scroll: a card scrolls itself),
      and input alone counts for 2 minutes. Every world starts with that last input opts.inputAgo seconds back (default 180: older than
      the 2-minute window, inside the 10-minute one), so the sections written before this rule still see a sound counted on its own and
      input-free time not counted, for 7 minutes; a longer run clicks (w.input()). null = no input ever. */
@@ -1284,10 +1284,21 @@ console.log('12. all site work counts');
   check('one click and nothing else counts ≈ 2 minutes (118–121 s), then nothing over the next 5 minutes', sec(w) >= 118 && sec(w) <= 121, 'counted ' + sec(w));
   check('…and the 1 s timer stops once the student is idle', w.__timers.filter((t) => t.ms === 1000).length === 0, w.__timers.map((t) => t.ms).join());
 
-  const evs = ['pointerdown', 'pointermove', 'keydown', 'wheel', 'scroll', 'touchstart', 'input'];
+  const evs = ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart', 'input', 'click'];
   const got = [];
   for (const ev of evs) { const x = makeWorld(); x.PM._state(); x.input(ev); await x.run(200); got.push(sec(x)); }
   check(`each of the ${evs.length} input events alone (${evs.join(', ')}) starts ≈ 2 minutes of counting`, got.every((n) => n >= 118 && n <= 121), got.join());
+
+  /* A scroll is NOT input (review, 2026-11-15): a practice card scrolls itself as its cursor moves, so a looping song would never stop counting. */
+  const wS = makeWorld();
+  wS.PM._state();
+  await wS.run(300, (i) => { if (i % 30 === 0) wS.input('scroll'); });
+  check('scroll events alone, one every 30 s for 5 minutes, count nothing (a card scrolls itself)', sec(wS) === 0, 'counted ' + sec(wS));
+  const wL = makeWorld();
+  wL.PM._state();
+  const aL = wL.track(); wL.input('pointerdown'); aL.play();
+  await wL.run(3600, (i) => { if (i % 40 === 0) wL.input('scroll'); return wL.playing(aL)(i); });
+  check('one click on Play, then a looping song that scrolls the card every 40 s for an hour: counts 10 minutes, then stops (≈ 600 s of 3600)', sec(wL) >= 598 && sec(wL) <= 601, 'counted ' + sec(wL));
 
   const w2 = makeWorld();
   w2.PM._state();
@@ -1353,7 +1364,7 @@ console.log('12. all site work counts');
 
   const w8 = makeWorld();
   w8.PM._state();
-  await w8.run(100, (i) => { if (i % 30 === 0) w8.input('scroll'); });
+  await w8.run(100, (i) => { if (i % 30 === 0) w8.input('wheel'); });
   check('counting from clicks alone counts (≈ 100 s) and writes no single document', w8.log.sets.length === 0 && sec(w8) >= 98, w8.log.sets.length + ' sets, ' + sec(w8) + ' s');
 
   const w9 = makeWorld();
@@ -2009,6 +2020,8 @@ console.log('18. My progress rules: can\'t-reach in seconds, "No streak yet" / "
   };
   const W47 = '2026-W47';
   const s75 = stripAt(75 * 60), s140 = stripAt(140 * 60), s385 = stripAt(385 * 60), s60 = stripAt(60 * 60), s140g = stripAt(140 * 60, { [W47]: 140 }), s20 = stripAt(20 * 60);
+  const s999 = stripAt(999 * 60), s1000 = stripAt(1000 * 60), s10080 = stripAt(10080 * 60);
+  check('the strip says "999+" past 999 minutes (four digits fill the one-row top bar): 999 → 999, 1000 → 999+, 10080 → 999+', s999.txt === '{"done":999,"goal":60}' && s1000.txt === '{"done":"999+","goal":60}' && s10080.txt === '{"done":"999+","goal":60}', [s999.txt, s1000.txt, s10080.txt].join(' '));
   check('the strip shows the true minutes past the goal: 75/60, 140/60, 385/60 (and 60/60, 20/60 as before)', s75.txt === '{"done":75,"goal":60}' && s140.txt === '{"done":140,"goal":60}' && s385.txt === '{"done":385,"goal":60}' && s60.txt === '{"done":60,"goal":60}' && s20.txt === '{"done":20,"goal":60}', [s75.txt, s140.txt, s385.txt, s60.txt, s20.txt].join(' '));
   check('…with a this-week goal of 140: 140/140', s140g.txt === '{"done":140,"goal":140}', s140g.txt);
   check('…the ring stays full at the goal (dash offset 0 at 60, 140 and 385 of 60) and is a third full at 20', [s60, s140, s385, s140g].every((x) => x.dash === 0) && Math.abs(s20.dash - 2 * Math.PI * 7 * (2 / 3)) < 0.02, [s60.dash, s140.dash, s385.dash, s140g.dash, s20.dash].join(' '));
