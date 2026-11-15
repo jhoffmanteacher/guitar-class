@@ -1,0 +1,1281 @@
+{
+  "game": "strumcheck",
+  "coachMode": "strum",
+  "rule": "strumcheck-1",
+  "chordRule": "c",
+  "winFrac": 0.45,
+  "winMs": 137.8,
+  "bpm": 98,
+  "beatMs": 612.2,
+  "slotMs": 306.1,
+  "pattern": "D.DU.UDU",
+  "bars": [
+    "D5",
+    "D5",
+    "C5",
+    "C5",
+    "G5",
+    "G5",
+    "D5",
+    "D5"
+  ],
+  "activity": "bpm:ca:ca-52:0:strum",
+  "latMs": 50,
+  "gridEase": 0.2,
+  "gridEaseWithin": 0.45,
+  "gridStepCapMs": null,
+  "gridOffsetMs": -182.1,
+  "onsetRatio": 1.2,
+  "hfRatio": 1.46,
+  "refractMs": 140,
+  "chordClarity": 0.55,
+  "attackSkipMs": 70,
+  "tailAMs": 340,
+  "tailGapMs": 60,
+  "missGraceMs": 60,
+  "recCapSec": 25,
+  "roundSec": 23.1,
+  "complete": true,
+  "barsDone": 8,
+  "eventTimes": "played (arrival - latMs)",
+  "rests": [
+    {
+      "bar": 0,
+      "slot": 1,
+      "verdict": "quiet",
+      "devMs": null
+    },
+    {
+      "bar": 0,
+      "slot": 4,
+      "verdict": "quiet",
+      "devMs": null
+    },
+    {
+      "bar": 1,
+      "slot": 1,
+      "verdict": "quiet",
+      "devMs": null
+    },
+    {
+      "bar": 1,
+      "slot": 4,
+      "verdict": "extra",
+      "devMs": -101.9
+    },
+    {
+      "bar": 2,
+      "slot": 1,
+      "verdict": "extra",
+      "devMs": -101.3
+    },
+    {
+      "bar": 2,
+      "slot": 4,
+      "verdict": "extra",
+      "devMs": -14.6
+    },
+    {
+      "bar": 3,
+      "slot": 1,
+      "verdict": "extra",
+      "devMs": -2.8
+    },
+    {
+      "bar": 3,
+      "slot": 4,
+      "verdict": "extra",
+      "devMs": 12.5
+    },
+    {
+      "bar": 4,
+      "slot": 1,
+      "verdict": "extra",
+      "devMs": -26.7
+    },
+    {
+      "bar": 4,
+      "slot": 4,
+      "verdict": "extra",
+      "devMs": -16.3
+    },
+    {
+      "bar": 5,
+      "slot": 1,
+      "verdict": "extra",
+      "devMs": -6.3
+    },
+    {
+      "bar": 5,
+      "slot": 4,
+      "verdict": "extra",
+      "devMs": -24.9
+    },
+    {
+      "bar": 6,
+      "slot": 1,
+      "verdict": "extra",
+      "devMs": -83.3
+    },
+    {
+      "bar": 6,
+      "slot": 4,
+      "verdict": "extra",
+      "devMs": 0.4
+    },
+    {
+      "bar": 7,
+      "slot": 1,
+      "verdict": "extra",
+      "devMs": -92.4
+    },
+    {
+      "bar": 7,
+      "slot": 4,
+      "verdict": "extra",
+      "devMs": -28.4
+    }
+  ],
+  "chords": [
+    {
+      "bar": 0,
+      "chord": "D5",
+      "prev": null,
+      "verdict": "ok",
+      "a": "ok",
+      "b": "ok",
+      "c": "ok",
+      "atMs": 75.4,
+      "endMs": 491.9,
+      "rt": [
+        142.9,
+        190.4,
+        240.5,
+        290,
+        339.1,
+        389.7,
+        439.4,
+        488.9
+      ],
+      "rm": [
+        50.03,
+        50.03,
+        49.99,
+        50.11,
+        50.1,
+        49.98,
+        50.03,
+        50.06
+      ]
+    },
+    {
+      "bar": 1,
+      "chord": "D5",
+      "prev": "D5",
+      "verdict": "unheard",
+      "a": "unheard",
+      "b": "unheard",
+      "c": "unheard",
+      "atMs": null,
+      "endMs": null,
+      "rt": [],
+      "rm": []
+    },
+    {
+      "bar": 2,
+      "chord": "C5",
+      "prev": "D5",
+      "verdict": "ok",
+      "a": "ok",
+      "b": "ok",
+      "c": "ok",
+      "atMs": 4958.1,
+      "endMs": 524.8,
+      "rt": [
+        79.1,
+        129.5,
+        177.4,
+        227.6,
+        278.6,
+        327.3,
+        378.4,
+        428.4,
+        478.4
+      ],
+      "rm": [
+        55.64,
+        55.98,
+        54.94,
+        53.73,
+        54.67,
+        55.27,
+        36.16,
+        36.14,
+        36.11
+      ]
+    },
+    {
+      "bar": 3,
+      "chord": "C5",
+      "prev": "C5",
+      "verdict": "ok",
+      "a": "ok",
+      "b": "ok",
+      "c": "ok",
+      "atMs": 7354.4,
+      "endMs": 531.6,
+      "rt": [
+        83.6,
+        132,
+        181.8,
+        233.1,
+        282.7,
+        332.8,
+        381.9,
+        433.2,
+        481.9
+      ],
+      "rm": [
+        36.17,
+        36.11,
+        36.11,
+        36.13,
+        36.46,
+        54.44,
+        55.24,
+        54.69,
+        36.13
+      ]
+    },
+    {
+      "bar": 4,
+      "chord": "G5",
+      "prev": "C5",
+      "verdict": "ok",
+      "a": "ok",
+      "b": "unheard",
+      "c": "ok",
+      "atMs": 9803.6,
+      "endMs": 540.8,
+      "rt": [
+        70.7,
+        121.7,
+        172.1,
+        219.9,
+        317.3,
+        366.8,
+        417.5,
+        466.9,
+        516.4
+      ],
+      "rm": [
+        55.99,
+        55.48,
+        42.78,
+        42.37,
+        43.13,
+        43.12,
+        43.18,
+        43.09,
+        43.18
+      ]
+    },
+    {
+      "bar": 5,
+      "chord": "G5",
+      "prev": "G5",
+      "verdict": "ok",
+      "a": "wrong",
+      "b": "ok",
+      "c": "ok",
+      "atMs": 12220.8,
+      "endMs": 553.2,
+      "rt": [
+        234.4,
+        286.5,
+        334.4,
+        384.6,
+        535.6
+      ],
+      "rm": [
+        50.65,
+        50.64,
+        53.89,
+        43.13,
+        51.13
+      ]
+    },
+    {
+      "bar": 6,
+      "chord": "D5",
+      "prev": "G5",
+      "verdict": "unheard",
+      "a": "unheard",
+      "b": "unheard",
+      "c": "unheard",
+      "atMs": null,
+      "endMs": null,
+      "rt": [],
+      "rm": []
+    },
+    {
+      "bar": 7,
+      "chord": "D5",
+      "prev": "D5",
+      "verdict": "unheard",
+      "a": "unheard",
+      "b": "unheard",
+      "c": "unheard",
+      "atMs": null,
+      "endMs": null,
+      "rt": [],
+      "rm": []
+    }
+  ],
+  "expected": [
+    {
+      "i": 0,
+      "bar": 0,
+      "slot": 0,
+      "dir": "D",
+      "chord": "D5",
+      "midis": [
+        50,
+        57,
+        62
+      ],
+      "t": 2750.5,
+      "verdict": "ok",
+      "devMs": 75.4,
+      "gridMs": 0
+    },
+    {
+      "i": 1,
+      "bar": 0,
+      "slot": 2,
+      "dir": "D",
+      "chord": null,
+      "midis": null,
+      "t": 3362.7,
+      "verdict": "ok",
+      "devMs": 103.6,
+      "gridMs": 15.1
+    },
+    {
+      "i": 2,
+      "bar": 0,
+      "slot": 3,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 3668.9,
+      "verdict": "ok",
+      "devMs": 126.3,
+      "gridMs": 35.8
+    },
+    {
+      "i": 3,
+      "bar": 0,
+      "slot": 5,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 4281.1,
+      "verdict": "ok",
+      "devMs": 130.8,
+      "gridMs": 61.1
+    },
+    {
+      "i": 4,
+      "bar": 0,
+      "slot": 6,
+      "dir": "D",
+      "chord": null,
+      "midis": null,
+      "t": 4587.2,
+      "verdict": "miss",
+      "devMs": null,
+      "gridMs": null
+    },
+    {
+      "i": 5,
+      "bar": 0,
+      "slot": 7,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 4893.4,
+      "verdict": "miss",
+      "devMs": null,
+      "gridMs": null
+    },
+    {
+      "i": 6,
+      "bar": 1,
+      "slot": 0,
+      "dir": "D",
+      "chord": "D5",
+      "midis": [
+        50,
+        57,
+        62
+      ],
+      "t": 5199.5,
+      "verdict": "miss",
+      "devMs": null,
+      "gridMs": null
+    },
+    {
+      "i": 7,
+      "bar": 1,
+      "slot": 2,
+      "dir": "D",
+      "chord": null,
+      "midis": null,
+      "t": 5811.7,
+      "verdict": "miss",
+      "devMs": null,
+      "gridMs": null
+    },
+    {
+      "i": 8,
+      "bar": 1,
+      "slot": 3,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 6117.8,
+      "verdict": "miss",
+      "devMs": null,
+      "gridMs": null
+    },
+    {
+      "i": 9,
+      "bar": 1,
+      "slot": 5,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 6730.1,
+      "verdict": "miss",
+      "devMs": null,
+      "gridMs": null
+    },
+    {
+      "i": 10,
+      "bar": 1,
+      "slot": 6,
+      "dir": "D",
+      "chord": null,
+      "midis": null,
+      "t": 7036.2,
+      "verdict": "ok",
+      "devMs": -111.2,
+      "gridMs": 66.8
+    },
+    {
+      "i": 11,
+      "bar": 1,
+      "slot": 7,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 7342.3,
+      "verdict": "ok",
+      "devMs": -93.7,
+      "gridMs": 44.6
+    },
+    {
+      "i": 12,
+      "bar": 2,
+      "slot": 0,
+      "dir": "D",
+      "chord": "C5",
+      "midis": [
+        48,
+        55,
+        60
+      ],
+      "t": 7648.5,
+      "verdict": "ok",
+      "devMs": 34.3,
+      "gridMs": 25.8
+    },
+    {
+      "i": 13,
+      "bar": 2,
+      "slot": 2,
+      "dir": "D",
+      "chord": null,
+      "midis": null,
+      "t": 8260.7,
+      "verdict": "miss",
+      "devMs": null,
+      "gridMs": null
+    },
+    {
+      "i": 14,
+      "bar": 2,
+      "slot": 3,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 8566.8,
+      "verdict": "ok",
+      "devMs": -74.9,
+      "gridMs": 12.5
+    },
+    {
+      "i": 15,
+      "bar": 2,
+      "slot": 5,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 9179.1,
+      "verdict": "miss",
+      "devMs": null,
+      "gridMs": null
+    },
+    {
+      "i": 16,
+      "bar": 2,
+      "slot": 6,
+      "dir": "D",
+      "chord": null,
+      "midis": null,
+      "t": 9485.2,
+      "verdict": "ok",
+      "devMs": -41.3,
+      "gridMs": -5.4
+    },
+    {
+      "i": 17,
+      "bar": 2,
+      "slot": 7,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 9791.3,
+      "verdict": "ok",
+      "devMs": -23,
+      "gridMs": -13.7
+    },
+    {
+      "i": 18,
+      "bar": 3,
+      "slot": 0,
+      "dir": "D",
+      "chord": "C5",
+      "midis": [
+        48,
+        55,
+        60
+      ],
+      "t": 10097.4,
+      "verdict": "ok",
+      "devMs": 25.8,
+      "gridMs": -18.3
+    },
+    {
+      "i": 19,
+      "bar": 3,
+      "slot": 2,
+      "dir": "D",
+      "chord": null,
+      "midis": null,
+      "t": 10709.7,
+      "verdict": "miss",
+      "devMs": null,
+      "gridMs": null
+    },
+    {
+      "i": 20,
+      "bar": 3,
+      "slot": 3,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 11015.8,
+      "verdict": "ok",
+      "devMs": 1.4,
+      "gridMs": -13.7
+    },
+    {
+      "i": 21,
+      "bar": 3,
+      "slot": 5,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 11628,
+      "verdict": "miss",
+      "devMs": null,
+      "gridMs": null
+    },
+    {
+      "i": 22,
+      "bar": 3,
+      "slot": 6,
+      "dir": "D",
+      "chord": null,
+      "midis": null,
+      "t": 11934.2,
+      "verdict": "ok",
+      "devMs": 14.8,
+      "gridMs": -10.9
+    },
+    {
+      "i": 23,
+      "bar": 3,
+      "slot": 7,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 12240.3,
+      "verdict": "ok",
+      "devMs": 7,
+      "gridMs": -8
+    },
+    {
+      "i": 24,
+      "bar": 4,
+      "slot": 0,
+      "dir": "D",
+      "chord": "G5",
+      "midis": [
+        43,
+        50,
+        55
+      ],
+      "t": 12546.4,
+      "verdict": "ok",
+      "devMs": 14.3,
+      "gridMs": -6.6
+    },
+    {
+      "i": 25,
+      "bar": 4,
+      "slot": 2,
+      "dir": "D",
+      "chord": null,
+      "midis": null,
+      "t": 13158.7,
+      "verdict": "miss",
+      "devMs": null,
+      "gridMs": null
+    },
+    {
+      "i": 26,
+      "bar": 4,
+      "slot": 3,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 13464.8,
+      "verdict": "ok",
+      "devMs": -35.9,
+      "gridMs": -9.1
+    },
+    {
+      "i": 27,
+      "bar": 4,
+      "slot": 5,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 14077,
+      "verdict": "miss",
+      "devMs": null,
+      "gridMs": null
+    },
+    {
+      "i": 28,
+      "bar": 4,
+      "slot": 6,
+      "dir": "D",
+      "chord": null,
+      "midis": null,
+      "t": 14383.1,
+      "verdict": "ok",
+      "devMs": -25,
+      "gridMs": -19.5
+    },
+    {
+      "i": 29,
+      "bar": 4,
+      "slot": 7,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 14689.3,
+      "verdict": "ok",
+      "devMs": 8.3,
+      "gridMs": -24.5
+    },
+    {
+      "i": 30,
+      "bar": 5,
+      "slot": 0,
+      "dir": "D",
+      "chord": "G5",
+      "midis": [
+        43,
+        50,
+        55
+      ],
+      "t": 14995.4,
+      "verdict": "ok",
+      "devMs": -1.2,
+      "gridMs": -22.8
+    },
+    {
+      "i": 31,
+      "bar": 5,
+      "slot": 2,
+      "dir": "D",
+      "chord": null,
+      "midis": null,
+      "t": 15607.6,
+      "verdict": "miss",
+      "devMs": null,
+      "gridMs": null
+    },
+    {
+      "i": 32,
+      "bar": 5,
+      "slot": 3,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 15913.8,
+      "verdict": "ok",
+      "devMs": -47.5,
+      "gridMs": -24.3
+    },
+    {
+      "i": 33,
+      "bar": 5,
+      "slot": 5,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 16526,
+      "verdict": "miss",
+      "devMs": null,
+      "gridMs": null
+    },
+    {
+      "i": 34,
+      "bar": 5,
+      "slot": 6,
+      "dir": "D",
+      "chord": null,
+      "midis": null,
+      "t": 16832.1,
+      "verdict": "ok",
+      "devMs": -70.5,
+      "gridMs": -38.8
+    },
+    {
+      "i": 35,
+      "bar": 5,
+      "slot": 7,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 17138.2,
+      "verdict": "ok",
+      "devMs": -46.4,
+      "gridMs": -52.9
+    },
+    {
+      "i": 36,
+      "bar": 6,
+      "slot": 0,
+      "dir": "D",
+      "chord": "D5",
+      "midis": [
+        50,
+        57,
+        62
+      ],
+      "t": 17444.4,
+      "verdict": "miss",
+      "devMs": null,
+      "gridMs": null
+    },
+    {
+      "i": 37,
+      "bar": 6,
+      "slot": 2,
+      "dir": "D",
+      "chord": null,
+      "midis": null,
+      "t": 18056.6,
+      "verdict": "miss",
+      "devMs": null,
+      "gridMs": null
+    },
+    {
+      "i": 38,
+      "bar": 6,
+      "slot": 3,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 18362.7,
+      "verdict": "ok",
+      "devMs": -94.1,
+      "gridMs": -78.9
+    },
+    {
+      "i": 39,
+      "bar": 6,
+      "slot": 5,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 18975,
+      "verdict": "miss",
+      "devMs": null,
+      "gridMs": null
+    },
+    {
+      "i": 40,
+      "bar": 6,
+      "slot": 6,
+      "dir": "D",
+      "chord": null,
+      "midis": null,
+      "t": 19281.1,
+      "verdict": "ok",
+      "devMs": -63.2,
+      "gridMs": -97.6
+    },
+    {
+      "i": 41,
+      "bar": 6,
+      "slot": 7,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 19587.2,
+      "verdict": "ok",
+      "devMs": -36.8,
+      "gridMs": -110.2
+    },
+    {
+      "i": 42,
+      "bar": 7,
+      "slot": 0,
+      "dir": "D",
+      "chord": "D5",
+      "midis": [
+        50,
+        57,
+        62
+      ],
+      "t": 19893.4,
+      "verdict": "miss",
+      "devMs": null,
+      "gridMs": null
+    },
+    {
+      "i": 43,
+      "bar": 7,
+      "slot": 2,
+      "dir": "D",
+      "chord": null,
+      "midis": null,
+      "t": 20505.6,
+      "verdict": "miss",
+      "devMs": null,
+      "gridMs": null
+    },
+    {
+      "i": 44,
+      "bar": 7,
+      "slot": 3,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 20811.7,
+      "verdict": "ok",
+      "devMs": -69.8,
+      "gridMs": -136.1
+    },
+    {
+      "i": 45,
+      "bar": 7,
+      "slot": 5,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 21424,
+      "verdict": "miss",
+      "devMs": null,
+      "gridMs": null
+    },
+    {
+      "i": 46,
+      "bar": 7,
+      "slot": 6,
+      "dir": "D",
+      "chord": null,
+      "midis": null,
+      "t": 21730.1,
+      "verdict": "ok",
+      "devMs": -52.8,
+      "gridMs": -155.7
+    },
+    {
+      "i": 47,
+      "bar": 7,
+      "slot": 7,
+      "dir": "U",
+      "chord": null,
+      "midis": null,
+      "t": 22036.2,
+      "verdict": "ok",
+      "devMs": -79.2,
+      "gridMs": -166.3
+    }
+  ],
+  "events": [
+    {
+      "t": 2825.9,
+      "k": 0,
+      "devMs": 75.4,
+      "kind": "strum",
+      "gridMs": 0
+    },
+    {
+      "t": 3481.4,
+      "k": 2,
+      "devMs": 103.6,
+      "kind": "strum",
+      "gridMs": 15.1
+    },
+    {
+      "t": 3830.9,
+      "k": 3,
+      "devMs": 126.3,
+      "kind": "strum",
+      "gridMs": 35.8
+    },
+    {
+      "t": 4472.9,
+      "k": 5,
+      "devMs": 130.8,
+      "kind": "strum",
+      "gridMs": 61.1
+    },
+    {
+      "t": 4820.2,
+      "k": 6,
+      "devMs": 145.8,
+      "kind": "between",
+      "gridMs": 87.2
+    },
+    {
+      "t": 5444,
+      "k": 9,
+      "devMs": -148.8,
+      "kind": "between",
+      "gridMs": 87.2
+    },
+    {
+      "t": 6058.6,
+      "k": 11,
+      "devMs": -146.4,
+      "kind": "between",
+      "gridMs": 87.2
+    },
+    {
+      "t": 6409.3,
+      "k": 12,
+      "devMs": -101.9,
+      "kind": "extra",
+      "gridMs": 87.2
+    },
+    {
+      "t": 6991.8,
+      "k": 14,
+      "devMs": -111.2,
+      "kind": "strum",
+      "gridMs": 66.8
+    },
+    {
+      "t": 7293.2,
+      "k": 15,
+      "devMs": -93.7,
+      "kind": "strum",
+      "gridMs": 44.6
+    },
+    {
+      "t": 7708.6,
+      "k": 16,
+      "devMs": 34.3,
+      "kind": "strum",
+      "gridMs": 25.8
+    },
+    {
+      "t": 7886,
+      "k": 17,
+      "devMs": -101.3,
+      "kind": "extra",
+      "gridMs": 32.7
+    },
+    {
+      "t": 8504.4,
+      "k": 19,
+      "devMs": -74.9,
+      "kind": "strum",
+      "gridMs": 12.5
+    },
+    {
+      "t": 8855.8,
+      "k": 20,
+      "devMs": -14.6,
+      "kind": "extra",
+      "gridMs": -2.5
+    },
+    {
+      "t": 9438.4,
+      "k": 22,
+      "devMs": -41.3,
+      "kind": "strum",
+      "gridMs": -5.4
+    },
+    {
+      "t": 9754.6,
+      "k": 23,
+      "devMs": -23,
+      "kind": "strum",
+      "gridMs": -13.7
+    },
+    {
+      "t": 10104.9,
+      "k": 24,
+      "devMs": 25.8,
+      "kind": "strum",
+      "gridMs": -18.3
+    },
+    {
+      "t": 10387.6,
+      "k": 25,
+      "devMs": -2.8,
+      "kind": "extra",
+      "gridMs": -13.1
+    },
+    {
+      "t": 11003.5,
+      "k": 27,
+      "devMs": 1.4,
+      "kind": "strum",
+      "gridMs": -13.7
+    },
+    {
+      "t": 11321,
+      "k": 28,
+      "devMs": 12.5,
+      "kind": "extra",
+      "gridMs": -13.4
+    },
+    {
+      "t": 11938,
+      "k": 30,
+      "devMs": 14.8,
+      "kind": "strum",
+      "gridMs": -10.9
+    },
+    {
+      "t": 12239.3,
+      "k": 31,
+      "devMs": 7,
+      "kind": "strum",
+      "gridMs": -8
+    },
+    {
+      "t": 12554.1,
+      "k": 32,
+      "devMs": 14.3,
+      "kind": "strum",
+      "gridMs": -6.6
+    },
+    {
+      "t": 12822.1,
+      "k": 33,
+      "devMs": -26.7,
+      "kind": "extra",
+      "gridMs": -3.7
+    },
+    {
+      "t": 13419.8,
+      "k": 35,
+      "devMs": -35.9,
+      "kind": "strum",
+      "gridMs": -9.1
+    },
+    {
+      "t": 13738.4,
+      "k": 36,
+      "devMs": -16.3,
+      "kind": "extra",
+      "gridMs": -16.2
+    },
+    {
+      "t": 14338.6,
+      "k": 38,
+      "devMs": -25,
+      "kind": "strum",
+      "gridMs": -19.5
+    },
+    {
+      "t": 14673.1,
+      "k": 39,
+      "devMs": 8.3,
+      "kind": "strum",
+      "gridMs": -24.5
+    },
+    {
+      "t": 14971.3,
+      "k": 40,
+      "devMs": -1.2,
+      "kind": "strum",
+      "gridMs": -22.8
+    },
+    {
+      "t": 15272.1,
+      "k": 41,
+      "devMs": -6.3,
+      "kind": "extra",
+      "gridMs": -23.1
+    },
+    {
+      "t": 15841.9,
+      "k": 43,
+      "devMs": -47.5,
+      "kind": "strum",
+      "gridMs": -24.3
+    },
+    {
+      "t": 16161.1,
+      "k": 44,
+      "devMs": -24.9,
+      "kind": "extra",
+      "gridMs": -33.8
+    },
+    {
+      "t": 16722.8,
+      "k": 46,
+      "devMs": -70.5,
+      "kind": "strum",
+      "gridMs": -38.8
+    },
+    {
+      "t": 17038.9,
+      "k": 47,
+      "devMs": -46.4,
+      "kind": "strum",
+      "gridMs": -52.9
+    },
+    {
+      "t": 17605,
+      "k": 49,
+      "devMs": -83.3,
+      "kind": "extra",
+      "gridMs": -62.2
+    },
+    {
+      "t": 18189.8,
+      "k": 51,
+      "devMs": -94.1,
+      "kind": "strum",
+      "gridMs": -78.9
+    },
+    {
+      "t": 18571.6,
+      "k": 52,
+      "devMs": 0.4,
+      "kind": "extra",
+      "gridMs": -97.7
+    },
+    {
+      "t": 19120.3,
+      "k": 54,
+      "devMs": -63.2,
+      "kind": "strum",
+      "gridMs": -97.6
+    },
+    {
+      "t": 19440.2,
+      "k": 55,
+      "devMs": -36.8,
+      "kind": "strum",
+      "gridMs": -110.2
+    },
+    {
+      "t": 19989.5,
+      "k": 57,
+      "devMs": -92.4,
+      "kind": "extra",
+      "gridMs": -117.6
+    },
+    {
+      "t": 20605.8,
+      "k": 59,
+      "devMs": -69.8,
+      "kind": "strum",
+      "gridMs": -136.1
+    },
+    {
+      "t": 20939.4,
+      "k": 60,
+      "devMs": -28.4,
+      "kind": "extra",
+      "gridMs": -150
+    },
+    {
+      "t": 21521.6,
+      "k": 62,
+      "devMs": -52.8,
+      "kind": "strum",
+      "gridMs": -155.7
+    },
+    {
+      "t": 21790.7,
+      "k": 63,
+      "devMs": -79.2,
+      "kind": "strum",
+      "gridMs": -166.3
+    }
+  ],
+  "period": "",
+  "mode": "coach",
+  "micLatencyMs": 50,
+  "sampleRate": 24000,
+  "srcSampleRate": 44100,
+  "durationSec": 22.2,
+  "micLabel": "MacBook Air Microphone (Built-in)",
+  "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36",
+  "frameMeanMs": 16.9,
+  "frameMaxMs": 36.6,
+  "lang": "en",
+  "micSettings": {
+    "echoCancellation": false,
+    "noiseSuppression": false,
+    "autoGainControl": false,
+    "voiceIsolation": false,
+    "sampleRate": 48000,
+    "channelCount": 1,
+    "latency": 0.002666
+  },
+  "wav": "take-strumcheck-20261114-172633.wav",
+  "localTake": true,
+  "savedAtLocal": "2026-11-15T01:26:33.139Z",
+  "teacherOwn": true,
+  "answerNote": "Jonathan, 2026-11-14, third local take: Metronome flashing only (no click); he thought he was close enough on all strums",
+  "source": "take-strumcheck-20261114-172633.json"
+}
