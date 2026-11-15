@@ -1,6 +1,6 @@
 ---
 name: friday-check
-description: The weekly Friday 11 PM review of every change that shipped Fast (commits with a `Review: Fast` trailer) — finding the range, reading GitHub's Friday walk, reviewing the net change by area, fixing and pushing, tagging, and reporting. Read when running the Friday check or when a scheduled task says "run the Friday check".
+description: The weekly Friday 11 PM review of every change that shipped Fast (commits with a `Review: Fast` trailer) — finding the range, reading GitHub's Friday walk, reviewing the net change by area, fixing and pushing, recording where the run ended (last-run.txt), and reporting. Read when running the Friday check or when a scheduled task says "run the Friday check".
 ---
 
 # Friday check
@@ -18,20 +18,27 @@ Runs unattended, Fridays at 11:00 PM Pacific, from a scheduled cloud session.
 
 ## 1. Find the range
 
+Where the last run ended is the newer of two markers: the first word of
+`.claude/skills/friday-check/last-run.txt` on `origin/main` (a commit; since 2026-11-14, because a cloud session
+may not push tags: the git proxy answers 403) and the newest `friday-check-*` tag (the older runs, and any tag
+Jonathan pushes by hand).
+
 ```
-git fetch origin --tags
-last=$(git tag -l 'friday-check-*' --sort=-creatordate | head -1)
+git fetch origin main --tags --depth=3000        # a fresh cloud clone is shallow: the ancestry test needs history
+tag=$(git tag -l 'friday-check-*' --sort=-creatordate | head -1)
+file=$(git show origin/main:.claude/skills/friday-check/last-run.txt 2>/dev/null | awk 'NR==1{print $1}')
+last=$tag
+if [ -n "$file" ] && { [ -z "$tag" ] || git merge-base --is-ancestor "$tag" "$file"; }; then last=$file; fi
 ```
 
-- `last` exists → range is `$last..origin/main`.
-- No tag (tags exist since `friday-check-2026-10-31`) → every commit on
-  `origin/main` since `2026-10-30 00:00 -0700`.
+- `last` set → range is `$last..origin/main`.
+- Neither marker → every commit on `origin/main` since `2026-10-30 00:00 -0700`.
 
 Fast commits = `git log --format='%H %s' --grep='^Review: Fast' $range`.
 `Review: Reviewed` commits (`--grep='^Review: Reviewed'`) had their reviewer before they shipped: skip them, but
 count them for the report (step 6). A commit carrying both lines counts as Fast.
 None Fast → still do step 1b if anything at all landed in the range, then skip to
-step 5 (tag) and report "Nothing shipped Fast this week."
+step 5 (record the end) and report "Nothing shipped Fast this week."
 
 ## 1b. GitHub's runs and the full walk (before the review)
 
@@ -153,18 +160,27 @@ site file, and then `--only` the areas the fix touched: `node tools/smoke.mjs --
 start>` (both languages). A failure you can't fix → revert your own fix commit (a new revert commit, never a
 force-push) and report it.
 
-## 5. Tag
+## 5. Record where the run ended
+
+After your pushes land, write the tip into `last-run.txt` and push that as an ordinary commit (a branch push works
+from the cloud; a tag push does not):
 
 ```
-git tag friday-check-<YYYY-MM-DD> origin/main   # after your pushes land
-git push origin friday-check-<YYYY-MM-DD>
+git fetch origin main && end=$(git rev-parse origin/main)
+printf '%s %s\n' "$end" "<YYYY-MM-DD>" > .claude/skills/friday-check/last-run.txt
+git add .claude/skills/friday-check/last-run.txt
+git commit -m "Friday check <YYYY-MM-DD>: the next run starts after ${end:0:8}"   # no Review trailer
+git push origin main                                                            # fast-forward; fetch and rebase first if needed
 ```
 
-Always create a new dated tag — never move or delete one (cloud credentials
-can't rewrite refs). Tag even when nothing shipped Fast.
+The file holds ONE line, the newest run; git history keeps the older ones. Overwrite it every run, even when
+nothing shipped Fast. Then also try `git tag friday-check-<YYYY-MM-DD> $end && git push origin
+friday-check-<YYYY-MM-DD>` ONCE: on a Mac it works; from the cloud it gets a 403 (policy, not the network). A 403 is
+not a failure of the run: do not retry it, do not route around it (the GitHub API refuses tag writes too), and
+do not ask Jonathan to push it. Never move or delete an existing tag.
 
 **A run that cannot finish** (a usage limit, time): review the areas in the order (a), (b), (c), (d); write in
-WORKFLOW.md's Open work which areas were reviewed and which were not, push that, and do NOT tag. The next run then
+WORKFLOW.md's Open work which areas were reviewed and which were not, push that, and do NOT write `last-run.txt`. The next run then
 takes the same range and skips the areas marked reviewed.
 
 ## 5b. Are the real takes still current? (every run, even when nothing shipped Fast)

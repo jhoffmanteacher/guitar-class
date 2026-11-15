@@ -245,8 +245,6 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
       turned clockwise in `bf634eb`: mirror Module 1, or say the two differ on purpose.
     - Games heading "Notes on the low E and A strings" (`i18n.js:2225`, `9e62b46`): Note Runner keeps to those two
       strings, but only 1 of Note Hunt's 5 levels and 1 of Fret Zap's 4 decks do.
-    - Two blues solos with no backing (`module-11.js:894`, m10w2·c·sec5, `72539e4`): point to a 12-bar backing
-      track, or a partner comping.
     - Backup leaves out `minutes/{uid}/days` "because the teacher may not read them" (`teacher-backup.js:124`,
       `bbbfdff`): false since `e88603f` lets the teacher read them. Back them up, or keep them out and fix the
       reason; `siteErrors/*` is not listed either.
@@ -269,7 +267,9 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
     - `tools/smoke.mjs` summary says "each of its 4 tool buttons"; 3 since `4422c66`.
   - **Done 2026-11-14 (Jonathan's calls):** the Record lines in Modules 4, 5 and 7 rewritten (Module 4 changed
     although the class is about to enter it: text only, Rule Zero holds); Journey "Not saved yet" floats on screen and
-    retries by itself (every 15 s and when back online; check `1ek`). Blues backing tracks: waiting for the video check.
+    retries by itself (every 15 s and when back online; check `1ek`). Both blues solos (m10w2,
+    `module-11.js:894`) link "A - Slow 12 Bar Blues Backing Track (60bpm)" (`sQGcIWF29t4`; Jonathan checked the link,
+    2026-11-14; the cloud could not reach oEmbed). The Friday check now ends by committing `last-run.txt`, not a tag.
   - **Process:** `6ae6532` (1ec), `137ebfd` (1ds) and `9e62b46` (1ei) added a new kind of check and shipped Fast;
     CLAUDE.md lists that as always-Reviewed. Their checks are green and the area reviewer found nothing wrong in
     what they guard.
