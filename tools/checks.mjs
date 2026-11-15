@@ -17075,7 +17075,7 @@ async function checkStrumCheck() {
   const { run } = COACH_SANDBOX;
   const n = { pins: 0, onsets: 0, chords: 0, lines: 0, strumSteps: 0, sweeps: 0, tempos: 0, saves: 0 };
   const PIN = { pattern: 'D.DU.UDU', bars: 'D5 D5 C5 C5 G5 G5 D5 D5', rests: '1,4', win: 0.45, rule: 'oc', ratio: 1.15, hfRatio: 1.3, startBpm: 85, octTol: 0.6,
-    anchor: { range: 1, step: 5, span: 8, rest: -1.5 }, gate: { level: 0.012, skip: 300, pre: 20, post: 150 } };
+    anchor: { range: 1, step: 5, span: 8, rest: -1.5, wide: 4, wideMin: 6, wideSlack: 1.5, wideAccept: 1, wideTight: 0.15 }, gate: { level: 0.012, pct: 0.2, floor: 0.003, skip: 300, pre: 20, post: 150 }, octMargin: 2 };
   try {
     const found = JSON.parse(run(`JSON.stringify(CLASS_ACTIVITIES.flatMap(a => (a.steps || []).map((s, si) => ({ id: a.id, si, path: s.path || null, strum: s.strum || null }))).filter(x => x.strum).map(x => ({ id: x.id, si: x.si, path: x.path, listen: 'listen' in x.strum ? x.strum.listen : '(none)', pattern: x.strum.pattern, bars: x.strum.bars.join(' ') })))`));
     n.strumSteps = found.length;
@@ -17207,18 +17207,42 @@ async function checkStrumCheck() {
        the constants. */
     {
       const A = PIN.anchor;
-      for (const [k, v] of [['SC_ANCHOR_RANGE', A.range], ['SC_ANCHOR_STEP', A.step], ['SC_ANCHOR_SPAN', A.span], ['SC_ANCHOR_REST', A.rest]])
+      for (const [k, v] of [['SC_ANCHOR_RANGE', A.range], ['SC_ANCHOR_STEP', A.step], ['SC_ANCHOR_SPAN', A.span], ['SC_ANCHOR_REST', A.rest], ['SC_ANCHOR_WIDE_RANGE', A.wide], ['SC_ANCHOR_WIDE_MIN', A.wideMin], ['SC_ANCHOR_WIDE_SLACK', A.wideSlack], ['SC_ANCHOR_WIDE_ACCEPT', A.wideAccept], ['SC_ANCHOR_WIDE_TIGHT', A.wideTight], ['SC_OCT_MARGIN', PIN.octMargin]])
         if (Number(run(k)) !== v) fail(`${k} is ${run(k)}, want ${v}`);
-      const late = (click) => JSON.parse(run(`(() => { const slotMs = 353, s = { smoothRms: 0, smoothHf: 0, lastOnsetT: -1e9, listenStart: 0, gridOffset: 0, lat: 0, slotMs, win: SC_WIN_FRAC * slotMs,
+      const late = (click, lateBy = 0.8, bars = 3) => JSON.parse(run(`(() => { const slotMs = 353, s = { smoothRms: 0, smoothHf: 0, lastOnsetT: -1e9, listenStart: 0, gridOffset: 0, lat: 0, slotMs, win: SC_WIN_FRAC * slotMs,
           slotsOf: scPatternSlots('${PIN.pattern}'), onsets: [], onsetRatio: SC_ONSET_RATIO, hfRatio: SC_HF_RATIO, metro: ${click}, hp: ${click} };
         const keep = coachOnsetAt, ks = []; let extras = 0;
         let off = 0;
-        for (let b = 0; b < 3; b++) for (const k of [0, 2, 3, 5, 6, 7]){ const at = (b * 8 + k) * slotMs + 0.8 * slotMs; coachOnsetAt = at; s.smoothRms = 0; const rel = scHearStrum(s, 0.1, 0.01);
-          const kk = Math.round(rel / slotMs); ks.push(kk); if (kk !== b * 8 + k) off++; if (b === 2 && !s.slotsOf[((kk % 8) + 8) % 8].strum) extras++; }
-        coachOnsetAt = keep; return JSON.stringify({ g: Math.round(s.gridOffset), extras, off }); })()`));
+        let offLast = 0;
+        for (let b = 0; b < ${bars}; b++) for (const k of [0, 2, 3, 5, 6, 7]){ const at = (b * 8 + k) * slotMs + ${lateBy} * slotMs; coachOnsetAt = at; s.smoothRms = 0; const rel = scHearStrum(s, 0.1, 0.01);
+          const kk = Math.round(rel / slotMs); ks.push(kk); if (kk !== b * 8 + k) off++; if (b === ${bars} - 1 && kk !== b * 8 + k) offLast++; if (b === ${bars} - 1 && !s.slotsOf[((kk % 8) + 8) % 8].strum) extras++; }
+        coachOnsetAt = keep; return JSON.stringify({ g: Math.round(s.gridOffset), extras, off, offLast }); })()`));
       const free = late(false), click = late(true);
       if (free.extras !== 0 || free.off !== 0) fail(`a player 0.8 of an eighth late, no click: ${free.off} of 18 strums judged in another slot, ${free.extras} of bar 3's in rests (grid ${free.g} ms; want 0 and 0: the grid follows his pattern)`);
       if (click.extras !== 0 || click.g !== free.g) fail(`the same player with the Metronome's click in his ears: grid ${click.g} ms, ${click.extras} in rests (want the same as without it: ${free.g} ms, 0)`);
+      /* FOLLOW THE PLAYER'S OWN BEAT (review R1-1): a steady player who comes in a whole beat (two eighths) late is followed once a
+         bar of his strums shows it: his last bar (of four) judged on his own slots, no strum in a rest */
+      /* the half-bar limit and the regularity rule, on the search itself: a full bar of a player one beat late fits a grid +2
+         eighths and one -6 (a whole bar early: every chord in the wrong bar); from a grid at -3, -6 is in reach and must not be
+         picked. And a bar that
+         fits the pattern only with every strum 0.4 of an eighth off its window's middle (irregular, like talking) moves nothing. */
+      const limits = JSON.parse(run(`(() => { const slotMs = 353, mk = g => ({ listenStart: 0, gridOffset: g, lat: 0, slotMs, win: SC_WIN_FRAC * slotMs, slotsOf: scPatternSlots('${PIN.pattern}'), onsets: [] });
+        const bar = [0, 2, 3, 5, 6, 7].map(k => (8 + k + 2) * slotMs);
+        const a = mk(-3 * slotMs), wide = scAnchorSearch(a, bar, SC_ANCHOR_WIDE_RANGE, true);
+        const b = mk(0), sloppy = [0, 2, 3, 5, 6, 7].map((k, i) => (8 + k + 4 + (i % 2 ? -0.3 : 0.3)) * slotMs);   /* narrow fit 3.5 of 6: the wide search runs and finds 6 of 6 at +2.31, 0.20 of an eighth off-centre on average */
+        b.onsets = sloppy.slice(0, 5); scAnchor(b, sloppy[5]);
+        return JSON.stringify({ wide: Math.round(wide.best / slotMs * 100) / 100, sloppy: Math.round(b.gridOffset / slotMs * 100) / 100 }); })()`));
+      if (!(Math.abs(limits.wide) <= A.wide + 0.01)) fail(`a full bar one beat late, the grid at -3 eighths: the wide search picked ${limits.wide} eighths, want within ${A.wide} of the click grid (-6 fits too, and would put every chord a bar off)`);
+      if (Math.abs(limits.sloppy) > A.range + 0.01) fail(`an irregular bar (its strums 0.3 of an eighth off-centre) moved the grid ${limits.sloppy} eighths, want within ${A.range} (the wide search keeps only a regular fit)`);
+      const beatLate = late(false, 2, 4);
+      if (beatLate.offLast !== 0 || beatLate.extras !== 0) fail(`a steady player one beat late: ${beatLate.offLast} of his 6 last-bar strums judged in another slot, ${beatLate.extras} in rests (grid ${beatLate.g} ms; want 0 and 0: the wide search follows his beat)`);
+      n.pins++;
+    }
+    /* one start at a time (review round 1): a second click while the first start waits for the mic runs nothing */
+    {
+      const r = JSON.parse(run(`(() => { const keep = scStartRun; let n = 0, release = null; scStartRun = () => { n++; return new Promise(res => { release = res; }); };
+        try { sc = { phase: 'ready' }; scStart(); scStart(); const twice = n; if (release) release(); return JSON.stringify({ n: twice }); } finally { scStartRun = keep; sc = null; } })()`));
+      if (r.n !== 1) fail(`two clicks on the button while the first start waits: the round started ${r.n} times, want 1`);
       n.pins++;
     }
     /* TOO NOISY TO CHECK, through the real scGateFrame / scGateDecide: the constants; a quiet count-in (level 0.002) with its four loud
@@ -17226,16 +17250,20 @@ async function checkStrumCheck() {
        colours nothing (no sc-ok, no sc-bad, no chord mark), still says one line, and still counts toward the step's rounds. */
     {
       const G = PIN.gate;
-      for (const [k, v] of [['SC_GATE_LEVEL', G.level], ['SC_GATE_SKIP', G.skip], ['SC_GATE_CLICK_PRE', G.pre], ['SC_GATE_CLICK_POST', G.post]])
+      for (const [k, v] of [['SC_GATE_LEVEL', G.level], ['SC_GATE_PCT', G.pct], ['SC_GATE_FLOOR', G.floor], ['SC_GATE_SKIP', G.skip], ['SC_GATE_CLICK_PRE', G.pre], ['SC_GATE_CLICK_POST', G.post]])
         if (Number(run(k)) !== v) fail(`${k} is ${run(k)}, want ${v}`);
-      const gate = (room, clickLevel, earlyLoud) => JSON.parse(run(`(() => { const beatMs = 706, s = { listenStart: 10000, beatMs, win: 159, gateLevels: [], gateLevel: null, tooLoud: false, phase: 'countin' };
+      const gate = (room, clickLevel, earlyLoud, strumFrom) => JSON.parse(run(`(() => { const beatMs = 706, s = { listenStart: 10000, beatMs, win: 159, gateLevels: [], gateLevel: null, tooLoud: false, phase: 'countin' };
         const a0 = s.listenStart - 4 * beatMs;
         for (let t = a0 - 100; t < s.listenStart - s.win; t += 17){ let lv = ${room};
+          if (${strumFrom == null ? 'false' : 't >= a0 + ' + strumFrom + ' * beatMs'}) lv = 0.3;   /* the student strums along from that count on, and it rings */
           for (let k = 0; k < 4; k++){ const c = a0 + k * beatMs; if (t >= c + 40 && t <= c + 120) lv = ${clickLevel}; }
           if (${earlyLoud} && t < a0 + 250) lv = 0.5;
           scGateFrame(s, lv, t); }
         scGateDecide(s); return JSON.stringify({ tooLoud: s.tooLoud, level: s.gateLevel, n: s.gateLevels.length }); })()`));
       const quiet = gate(0.002, 0.4, false), noisy = gate(0.05, 0.4, false), warm = gate(0.002, 0.002, true), justUnder = gate(Math.round(G.level * 0.9 * 1e5) / 1e5, 0.4, false);
+      /* review R1-3: the room, not the guitar: a quiet room where the student strums (and lets ring) from count 3 on is not too noisy */
+      const strummed = gate(0.002, 0.4, false, 2);
+      if (strummed.tooLoud) fail(`a quiet room with the student strumming from count 3 of the count-in: too noisy (level ${strummed.level}); want not: the room must also be loud in the count-in's quiet part (its ${G.pct * 100}th percentile at ${G.floor} or more), the guitar is not the room`);
       /* which frames the gate keeps: inside a count-in click's window (its own sound) and in the first SC_GATE_SKIP ms: left out; between clicks: kept */
       const keeps = JSON.parse(run(`(() => { const beatMs = 706, mk = () => ({ listenStart: 10000, beatMs, win: 159, gateLevels: [] }), a0 = 10000 - 4 * beatMs, r = {};
         for (const [name, at] of [['onClick', a0 + beatMs + 60], ['firstMs', a0 + 200], ['between', a0 + beatMs + 400]]){ const s = mk(); scGateFrame(s, 0.3, at); r[name] = s.gateLevels.length; }
@@ -17256,10 +17284,18 @@ async function checkStrumCheck() {
           sc.caps[0].rm = [50, 57, 62]; sc.caps[0].rt = [100, 140, 180]; scCloseChord(sc, sc.caps[0]);
           scSweep(sc, 1e9); const colours = sc.cells.filter(c => c.set.size).length;
           sc.complete = true; scFinish(true); const body = document.getElementById('coach-body').innerHTML;
-          return JSON.stringify({ colours, body, line: t('sc.tooLoud'), writes });
+          const bodyDone = body; sc = null;
+          /* the same round Stopped in bar 3: not counted, so the line must not say it counted (review R1-4) */
+          sc = { phase: 'listening', card: { isConnected: false, remove(){} }, timeouts: [], bars: ['D5','D5','C5','C5','G5','G5','D5','D5'], chords: {}, pattern: '${PIN.pattern}', slotsOf: scPatternSlots('${PIN.pattern}'),
+            slots: [], caps: [], events: [{ kind: 'strum' }], barsDone: 3, cur: -1, cap: null, bpm: 85, beatMs: 706, slotMs: 353, win: 159, lat: 50, listenStart: 0, gridOffset: 0, where: 'bpm:ca:ca-52:0:strum', locked: [], tooLoud: true, cells: [] };
+          for (let k = 0; k < 64; k++){ const sl = sc.slotsOf[k % 8]; sc.slots.push({ k, bar: k >> 3, slot: k % 8, strum: sl.strum, dir: sl.dir, state: k < 24 ? (sl.strum ? 'ok' : 'quiet') : 'pending' }); }
+          sc.caps = sc.bars.map((c, b) => ({ bar: b, chord: c, prev: null, at: null, rt: [], rm: [], verdict: 'ok', done: true }));
+          scFinish(false); const bodyStopped = document.getElementById('coach-body').innerHTML;
+          return JSON.stringify({ colours, body: bodyDone, bodyStopped, line: t('sc.tooLoudCounted'), stopped: t('sc.tooLoudStopped'), writes });
         } finally { onCaStepChange = keepW; caStepDone = keepDone; if (sc) { sc.card = { isConnected: false, remove(){} }; } sc = null; } })()`));
       if (r.colours) fail(`a too-noisy round coloured ${r.colours} of 64 cells (want none: no green, no red, no chord mark)`);
-      if (!r.body.includes(r.line) || /sc-summary[^>]*>Pattern/.test(r.body)) fail('a too-noisy round does not end on the one too-noisy line: ' + r.body.replace(/<[^>]+>/g, ' ').slice(0, 120));
+      if (!r.body.includes(r.line) || /sc-summary[^>]*>Pattern/.test(r.body)) fail('a too-noisy full round does not end on its line ("' + r.line + '"): ' + r.body.replace(/<[^>]+>/g, ' ').slice(0, 120));
+      if (!r.bodyStopped.includes(r.stopped) || r.bodyStopped.includes(r.line)) fail('a too-noisy round Stopped in bar 3 does not say only "' + r.stopped + '" (it does not count): ' + r.bodyStopped.replace(/<[^>]+>/g, ' ').slice(0, 120));
       if (!r.writes.includes('ca-52:0:r1')) fail(`a too-noisy full round did not count toward the step's two rounds (writes: ${r.writes.join(', ') || 'none'})`);
       n.pins++;
     }
@@ -17286,20 +17322,23 @@ async function checkStrumCheck() {
     { const r = on(0, 0); if (!r.cap) fail('a strum on slot 0 opened no chord reading'); else if (!(r.capEnd >= 340 && r.capEnd <= 2 * 500 - 60 + 1e-6)) fail(`the chord reading on the 1 ends ${r.capEnd} ms after it, want from 340 to 60 ms before slot 2`); }
     /* the chord rules on scripted readings: [bar chord, previous, readings, rule a, rule b, rule c, the octave vote, the verdict shown
        ('oc': the vote when it decides, else c)]. The last two are Jonathan's real takes (2026-11-14): take 1 bar 4, G5 played where
-       C5 is due (rule c passed it; the vote catches it: D 38 / 50 is G5's and not C5's); take 2 bar 5, G5 read only as its root 43,
-       which C5's G an octave down also is, so the vote ties and rule c decides. */
+       C5 is due, as read live (7 readings: G5 6, D5 5, a margin of 1, so rule c decides) and as the replay reads it (6 readings:
+       G5 6, D5 4: caught); take 2 bar 5, G5 read only as its root 43, which C5's G an octave down also is (a tie: rule c); take 2
+       bar 1, a right D5 the vote called G5 9 to 8 before the margin (review R1-5): now rule c's. */
     const CH = { D5: [50, 57, 62], C5: [48, 55, 60], G5: [43, 50, 55] };
     const CASES = [
       ['G5', 'C5', [43, 55, 43, 55], 'ok', 'unheard', 'ok', 'unheard', 'ok'],
       ['G5', 'C5', [43, 50, 55, 50], 'ok', 'ok', 'ok', 'ok', 'ok'],
       ['G5', 'C5', [48, 48, 60, 48], 'wrong', 'wrong', 'wrong', 'wrong', 'wrong'],
       ['G5', 'C5', [48, 55, 48, 55], 'ok', 'wrong', 'wrong', 'wrong', 'wrong'],
-      ['D5', 'G5', [50, 62, 50], 'ok', 'unheard', 'ok', 'ok', 'ok'],
+      ['D5', 'G5', [50, 62, 50], 'ok', 'unheard', 'ok', 'unheard', 'ok'],
       ['D5', 'G5', [50, 57, 57, 62], 'ok', 'ok', 'ok', 'ok', 'ok'],
-      ['C5', 'D5', [50, 57, 50], 'wrong', 'wrong', 'wrong', 'wrong', 'wrong'],
+      ['C5', 'D5', [50, 57, 50], 'wrong', 'wrong', 'wrong', 'unheard', 'wrong'],
       ['C5', 'D5', [48, 55], 'ok', 'unheard', 'ok', 'unheard', 'ok'],
       ['D5', 'D5', [50, 57, 62], 'ok', 'ok', 'ok', 'ok', 'ok'],
-      ['C5', 'C5', [54.17, 54.79, 38.02, 38.05, 50.33, 50.41, 50.26], 'unheard', 'unheard', 'unheard', 'wrong', 'wrong'],
+      ['C5', 'C5', [54.17, 54.79, 38.02, 38.05, 50.33, 50.41, 50.26], 'unheard', 'unheard', 'unheard', 'unheard', 'unheard'],
+      ['C5', 'C5', [54.8, 54.7, 38, 50.4, 50.3, 50.4], 'ok', 'ok', 'ok', 'wrong', 'wrong'],
+      ['D5', null, [53.3, 38.5, 50.3, 53.1, 54.6, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1], 'ok', 'ok', 'ok', 'unheard', 'ok'],
       ['G5', 'C5', [43.05, 43.24, 43.18, 43.18, 43.16], 'ok', 'unheard', 'ok', 'unheard', 'ok']
     ];
     for (const [c, p, rd, wa, wb, wc, wo, wv] of CASES) {
@@ -17312,8 +17351,8 @@ async function checkStrumCheck() {
     }
     /* saves nothing to progress: the part's text, and a whole finish run with a counting saveGames */
     const part = siteText('coach-strumcheck.js', ROOT).replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
-    /* the one browser setting it keeps: "I'm wearing headphones" (SC_HP_KEY, a device fact, never progress); nothing else may touch storage */
-    const partNoHp = part.replace(/localStorage\.(getItem|removeItem)\(SC_HP_KEY\)|localStorage\.setItem\(SC_HP_KEY, '1'\)/g, '');
+    /* no browser storage at all: "I'm wearing headphones" lives for the open page only (the lead, 2026-11-14) */
+    const partNoHp = part;
     /* a name in code, not inside a string ('games.radar.barOfTotal' is an i18n key): not after a letter, a dot or a quote */
     for (const w of ['saveGames', 'games.', 'games[', 'progress', 'caSteps', 'flushSave', 'localStorage', 'sessionStorage', 'markStep', 'toggleSkill']) if (new RegExp('(?<![\\w.\'"`])' + w.replace(/[.[\]]/g, '\\$&')).test(partNoHp)) fail(`coach-strumcheck.js names "${w}": the check must save nothing to progress`);
     const fin = JSON.parse(run(`(() => { const keepSave = saveGames, keepGames = games; let calls = 0; saveGames = () => { calls++; }; games = {}; micRec = null;
@@ -17480,9 +17519,11 @@ async function checkStrumCheck() {
           sc = mk(true); sc.phase = 'ready';
           metroRunning = true; scRenderReady(); const withSwitch = /id="sc-hp"/.test(document.getElementById('coach-body').innerHTML);
           metroRunning = false; scRenderReady(); const noSwitch = !/id="sc-hp"/.test(document.getElementById('coach-body').innerHTML);
+          /* review R1-2: round 1 stopped the Metronome tool (stopAllDemoAudio); the open check keeps the choice for round 2 */
+          sc.metroSticky = true; scRenderReady(); const stickySwitch = /id="sc-hp"/.test(document.getElementById('coach-body').innerHTML) && scMetroWanted(); sc.metroSticky = false;
           sc.metro = true; scRenderListening(); const dotOn = /id="sc-beat"/.test(document.getElementById('coach-body').innerHTML);
           sc.metro = false; scRenderListening(); const dotOff = !/id="sc-beat"/.test(document.getElementById('coach-body').innerHTML);
-          return JSON.stringify({ table, queued, pending, beepsNow: beeps, leftAfterStop, fOn, fOff, flashed, pulses: on.board.n.pulse, ones: on.board.n.one, offPulses: off.board.n.pulse, cleared, withSwitch, noSwitch, dotOn, dotOff });
+          return JSON.stringify({ stickySwitch, table, queued, pending, beepsNow: beeps, leftAfterStop, fOn, fOff, flashed, pulses: on.board.n.pulse, ones: on.board.n.one, offPulses: off.board.n.pulse, cleared, withSwitch, noSwitch, dotOn, dotOff });
         } finally { setTimeout = keep.st; clearTimeout = keep.ct; getAudioCtx = keep.ga; metroRunning = keep.mr; performance.now = keep.pn; sc = null; } })()`));
       n.pins++;
       if (r.table !== '1000') fail(`clicks wanted (Metronome on/off x headphones on/off) = ${r.table}, want 1000: no click through a laptop speaker`);
@@ -17492,6 +17533,8 @@ async function checkStrumCheck() {
       if (r.pulses !== 32 || r.ones !== 8 || r.offPulses !== 0) fail(`the frame around the board pulsed ${r.pulses} times and marked the 1 ${r.ones} times in 8 bars with the Metronome on (want 32 and 8), ${r.offPulses} with it off (want 0)`);
       for (const [way, x] of Object.entries(r.cleared)) if (x !== '3>0') fail(`after ${way === 'finish' ? 'Stop' : way} the frame keeps its beat classes (${x}: classes before > after, want 3>0)`);
       if (!r.withSwitch || !r.noSwitch) fail(`the headphones switch: with the Metronome on ${r.withSwitch} (want shown), off ${!r.noSwitch} (want not shown)`);
+      if (!r.stickySwitch) fail('after a round with the Metronome on (the tool now stopped), the open check lost the beat: no headphones switch / scMetroWanted false (review R1-2: round 2 must keep it)');
+      if (!/sc\.metro = scMetroWanted\(\);\s*sc\.metroSticky = sc\.metro;/.test(siteText('coach-strumcheck.js', ROOT))) fail('scStart no longer takes the round\'s beat from scMetroWanted() and keeps it on the open check');
       if (!r.dotOn || !r.dotOff) fail(`the beat dot on the listening screen: Metronome on ${r.dotOn} (want drawn), off ${!r.dotOff} (want none)`);
       const src2 = siteText('coach-strumcheck.js', ROOT);
       if (!/if \(scClicksWanted\(s\.metro, s\.hp\)\) scScheduleClicks\(s\);/.test(src2) || !/sc\.hp = scHeadphonesGet\(\);/.test(src2)) fail('scStart no longer decides the round\'s clicks from the Metronome and the headphones switch');
@@ -17561,7 +17604,7 @@ async function checkStrumCheck() {
     run(`setLang('en')`);
   } catch (e) { fail('stopped on an error: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : e)); }
   /* pinned totals, so a renamed function cannot turn this into a check of nothing */
-  if (n.saves !== 4 || n.tempos !== 4 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 11 || n.lines !== 10 || n.pins !== 11) fail(`ran ${n.saves} take saves (want 4), ${n.tempos} tempo opens (want 4), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (11), ${n.lines} end lines (10), ${n.pins} pins (11)`);
+  if (n.saves !== 4 || n.tempos !== 4 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 13 || n.lines !== 10 || n.pins !== 12) fail(`ran ${n.saves} take saves (want 4), ${n.tempos} tempo opens (want 4), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (13), ${n.lines} end lines (10), ${n.pins} pins (12)`);
   if (!bad) ok(`1eh: one listening step (ca-52, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, in a row under the board, none in the console, never disabled; the step's slider drawn at ${PIN.startBpm}, the only tempo control, one tempo with the check; no block element and no per-bar sentence (their strings gone); the tempo controls locked during a round and given back on every exit; its own ratios ${PIN.ratio} / ${PIN.hfRatio} through its own scHearStrum (Strum Radar's still 1.4 / 1.7, run); the pattern-shape grid (a player 0.8 of an eighth late kept on his own 18 slots, with or without the click); the too-noisy gate at count-in level ${PIN.gate.level} (a quiet count-in with loud clicks not gated, a noisy one gated, the first ${PIN.gate.skip} ms left out; a gated round colours nothing, says one line and still counts); the take's beat and gate fields; window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule}: the octave vote, then c (${n.chords} scripted cases, two from real takes); the Metronome's click only with headphones (32 a round, all cleared by Stop), its beat dot and the frame around the board on the same click-grid clock (32 beats, 8 bars' 1s, none with it off, cleared on every exit); local recording mode only on this computer's host with the dev bypass (files, no Firestore; another host or a real account unchanged); two full rounds tick ca-52's step (round 1 <id>:0:r1, round 2 the step; Stopped, short and other steps write nothing; no Mark done button); a whole finish saved nothing else; its take saved through micRecSaveNow into a strict Firestore stub (3 rounds); the real sweep and its one-line end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages`);
 }
 

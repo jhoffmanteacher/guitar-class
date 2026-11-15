@@ -102,11 +102,37 @@ const SC_ANCHOR_RANGE = 1;
 const SC_ANCHOR_STEP = 5;
 const SC_ANCHOR_SPAN = 8;
 const SC_ANCHOR_REST = -1.5;
+/* FOLLOW THE PLAYER'S OWN BEAT (review R1-1, the lead's decision, 2026-11-14): a steady player who comes in more than an eighth late
+   or early after the clicks, or after a silent bar, was fitted to the nearest strum place at his first onset and then never searched
+   past one eighth, so he stayed on the wrong slots for the rest of the round. When the onsets of the last bar fit badly (at least
+   SC_ANCHOR_WIDE_MIN of them, a full bar's six strums: D.DU.UDU shifted by 1 to 7 eighths never puts all six on strum places, so
+   six strums fit one grid only; fewer can fit two) and score under their count less SC_ANCHOR_WIDE_SLACK, the search runs again
+   over SC_ANCHOR_WIDE_RANGE eighths either way. The chord on each 1 follows the same grid (scOnset reads the slot from it). And the search starts from the
+   grid it has and steps outward (review R1-6: the old loop never tried the current offset at tempos whose eighth is not a multiple
+   of 5 ms, so the grid crept about 2 ms a strum). */
+const SC_ANCHOR_WIDE_RANGE = 4;
+const SC_ANCHOR_WIDE_MIN = 6;
+const SC_ANCHOR_WIDE_SLACK = 1.5;
+/* ...and the wide result is kept only when it fits the bar almost perfectly: a score of at least the onsets' count less
+   SC_ANCHOR_WIDE_ACCEPT (every onset but one on a strum place). A late player's bar fits that way; room noise and talking rarely do
+   (measured: without this line nothing played passed 4 / 9 bars of 64 in the talk / chatter rooms, 2 / 7 before the wide search).
+   Two more rules keep the bars right: the wide search breaks a tie by how near the strums sit to the middles of their windows (a grid
+   almost half an eighth off fits every strum at a window's edge and scores the same as the true one), and no grid is ever more than
+   SC_ANCHOR_WIDE_RANGE eighths from the click grid (half a bar: the pattern repeats every bar, so a player one beat late also fits a
+   grid one bar early, which would put every chord in the wrong bar). */
+const SC_ANCHOR_WIDE_ACCEPT = 1;
+/* ...and only when its strums sit on average within SC_ANCHOR_WIDE_TIGHT of an eighth of their windows' middles: a player is regular,
+   talking that happens to land in six strum windows is not (measured: with the score rule alone talking passed 3 bars of 64, 1 without
+   the wide search). */
+const SC_ANCHOR_WIDE_TIGHT = 0.15;
 /* THE CHORD, octave first (2026-11-14, take 1 bar 4: G5 played where C5 is due passed, because G is in both chords and pitch classes
    drop the octave). Each reading within SC_OCT_TOL semitones of one of a chord's own notes, or of that note an octave under it (the
    detector's sub-octave), votes for every chord of the step that has it; the chord with the most votes alone wins (3+ readings). It
    decides when it can; when it cannot (a tie, too few readings) rule 'c' decides, as before. */
 const SC_OCT_TOL = 0.6;
+/* The vote decides only by SC_OCT_MARGIN votes or more (review R1-5: on take 2 bar 1 one stray reading tipped a right D5 to G5, 9 to
+   8; G5 shares D with D5 and G with C5, so most root or fifth readings vote for two chords). */
+const SC_OCT_MARGIN = 2;
 /* TOO NOISY TO CHECK (Jonathan, 2026-11-14: "a too loud to grade warning might be good instead of saying it's wrong"). During the
    count-in the student is not playing yet, so what the mic hears there is the room. The median level of the frames the check reads,
    from SC_GATE_SKIP ms after the first click (the smoothed level starts at 0) until bar 1's first window opens, leaving out each
@@ -115,6 +141,13 @@ const SC_OCT_TOL = 0.6;
    rounds, but no arrow turns green or red, no chord mark is drawn, and the row says so. Measured on the bench (tools/mic-sim/
    strum-check-replay.mjs --gate; DETAILS section 23) and on Jonathan's three takes (0 of 3). */
 const SC_GATE_LEVEL = 0.012;
+/* The room, not the guitar (review R1-3, the lead's decision): a student who strums along with the count-in fills part of it with
+   guitar, and the median then reads his guitar. So the room must ALSO be loud in the count-in's quiet part: its SC_GATE_PCT
+   percentile at SC_GATE_FLOOR or more. Measured (DETAILS section 24): the percentile alone dropped the rooms where people talk (the
+   gaps between syllables are quiet: chatter 6 of 12 rounds gated at 0.012, against 12); the two together keep room7, room4 and
+   chatter at 12 of 12, quiet rooms and Jonathan's takes at 0, and a count-in strummed on counts 3 and 4 is no longer gated. */
+const SC_GATE_PCT = 0.2;
+const SC_GATE_FLOOR = 0.003;
 const SC_GATE_SKIP = 300, SC_GATE_CLICK_PRE = 20, SC_GATE_CLICK_POST = 150;
 const SC_CHORD_RULE = 'oc';         // 'a', 'b', 'c' (header) or 'oc' (the octave vote, then c); every take saves a, b, c and o
 const SC_CHORD_CLARITY = 0.55;      // the Listening Coach's chord-mode gate (coachLoop)
@@ -306,14 +339,18 @@ function scRenderReady(msg){
   body.innerHTML = (msg ? `<span class="coach-note sc-note">${escHtml(msg)}</span>` : '') + scHeadphonesHtml();
 }
 function scHeadphonesHtml(){
-  return typeof metroRunning !== 'undefined' && metroRunning ? `<label class="sc-hp"><input type="checkbox" id="sc-hp"${scHeadphonesGet() ? ' checked' : ''} onchange="scHeadphonesSet(this.checked)"> ${escHtml(t('sc.headphones'))}</label>` : '';
+  return scMetroWanted() ? `<label class="sc-hp"><input type="checkbox" id="sc-hp"${scHeadphonesGet() ? ' checked' : ''} onchange="scHeadphonesSet(this.checked)"> ${escHtml(t('sc.headphones'))}</label>` : '';
 }
 /* "I'm wearing headphones" (Jonathan, 2026-11-14: "can a headphone option be given if not it just flashes and can the flashing dot
-   be made larger?"). Shown on the start screen only while the Metronome tool is on. Remembered for this browser, not per student and
-   not in progress (a device fact, like gc-mic-ok). Default off. */
-const SC_HP_KEY = 'gc-sc-headphones';
-function scHeadphonesGet(){ try { return localStorage.getItem(SC_HP_KEY) === '1'; } catch(e){ return false; } }
-function scHeadphonesSet(on){ try { if (on) localStorage.setItem(SC_HP_KEY, '1'); else localStorage.removeItem(SC_HP_KEY); } catch(e){} }
+   be made larger?"). Shown next to the button while the Metronome is wanted (scMetroWanted). Kept for this page only, in memory,
+   unticked on every load (the lead, 2026-11-14: never stored, so the next student on a shared Chromebook does not start with it). */
+let scHeadphonesOn = false;
+function scHeadphonesGet(){ return scHeadphonesOn; }
+function scHeadphonesSet(on){ scHeadphonesOn = !!on; }
+/* The Metronome for the open check (review R1-2): the tool is stopped at every Start (stopAllDemoAudio), so its live state cannot say
+   what the student chose for round 2. Once it was on at a Start, the open check keeps the beat aids (click with headphones, dot,
+   frame) for every later round, and the headphones switch stays shown between rounds. A new check (scOpen) starts from the tool. */
+function scMetroWanted(){ return !!((sc && sc.metroSticky) || (typeof metroRunning !== 'undefined' && metroRunning)); }
 /* The Metronome during a round, decided at Start: on + headphones -> the click on every beat (scScheduleClicks); on, no
    headphones -> no sound after the count-in, the big dot flashes each beat; off -> neither (the board's moving cell, as before). */
 function scClicksWanted(metro, hp){ return !!(metro && hp); }
@@ -370,7 +407,14 @@ function scClearBoard(){
   if (sc.board) sc.board.classList.remove('sc-frame', 'sc-pulse', 'sc-pulse-1');
 }
 
+/* One start at a time (review: a second click while the mic prompt is open ran it twice, phase still 'ready'). */
 async function scStart(){
+  const s0 = sc;
+  if (!s0 || s0.starting || (s0.phase !== 'ready' && s0.phase !== 'report')) return;
+  s0.starting = true;
+  try { await scStartRun(); } finally { s0.starting = false; }
+}
+async function scStartRun(){
   if (!sc || (sc.phase !== 'ready' && sc.phase !== 'report')) return;
   // Collection is on and this device hasn't answered yet: ask first (micRecConsent comes back here).
   if (micRecShouldAsk() && scBody()){ scBody().innerHTML = micRecAskHtml('sc'); return; }
@@ -386,7 +430,8 @@ async function scStart(){
   if (document.hidden){ coachMicOff(); scRenderReady(t('coach.paused.backgrounded')); return; }
   /* The Metronome tool's state at Start, and the headphones switch, decide the round's beat (scClicksWanted). No click through a
      speaker: the laptop's own click reaches the mic, as in every other listening game. stopAllDemoAudio stops the tool itself. */
-  sc.metro = typeof metroRunning !== 'undefined' && !!metroRunning;
+  sc.metro = scMetroWanted();
+  sc.metroSticky = sc.metro;
   sc.hp = scHeadphonesGet();
   stopAllDemoAudio();
   scLock(true);
@@ -408,7 +453,7 @@ async function scStart(){
   s.lat = coachMicLatencyMs();
   s.onsetRatio = SC_ONSET_RATIO; s.hfRatio = SC_HF_RATIO;   // scHearStrum: this check's own ratios
   s.smoothRms = 0; s.smoothHf = 0; s.lastOnsetT = -1e9; s.gridOffset = 0; s.lastPitchT = 0; s.onsets = [];
-  s.cur = -1; s.beat = -1; s.sweep = 0; s.cap = null; s.events = []; s.barsDone = 0; s.gateLevels = []; s.gateLevel = null; s.tooLoud = false;
+  s.cur = -1; s.beat = -1; s.sweep = 0; s.cap = null; s.events = []; s.barsDone = 0; s.gateLevels = []; s.gateLevel = null; s.gateFloor = null; s.tooLoud = false;
   s.slots = [];
   s.bars.forEach((name, b) => s.slotsOf.forEach((sl, k) => s.slots.push({ k: b * SC_SLOTS + k, bar: b, slot: k, strum: sl.strum, dir: sl.dir, state: 'pending', devMs: null, gridMs: null })));
   s.caps = s.bars.map((name, b) => ({ bar: b, chord: name, prev: b ? s.bars[b - 1] : null, at: null, rt: [], rm: [], verdict: null, a: null, b: null, c: null, o: null, done: false }));
@@ -448,11 +493,13 @@ function scGateFrame(s, rms, at){
   for (let k = 0; k < 4; k++){ const c = a0 + k * s.beatMs; if (at >= c - SC_GATE_CLICK_PRE && at <= c + SC_GATE_CLICK_POST) return; }
   s.gateLevels.push(rms);
 }
-/* Bar 1's first window opens: the room's level is the median of the kept frames; the round is too noisy to check at SC_GATE_LEVEL. */
+/* Bar 1's first window opens: too noisy to check when the kept frames' median is SC_GATE_LEVEL or more AND their SC_GATE_PCT
+   percentile (the count-in's quiet part) is SC_GATE_FLOOR or more. */
 function scGateDecide(s){
   const lv = s.gateLevels.slice().sort((p, q) => p - q);
   s.gateLevel = lv.length ? lv[Math.floor(lv.length / 2)] : 0;
-  s.tooLoud = s.gateLevel >= SC_GATE_LEVEL;
+  s.gateFloor = lv.length ? lv[Math.floor(lv.length * SC_GATE_PCT)] : 0;
+  s.tooLoud = s.gateLevel >= SC_GATE_LEVEL && s.gateFloor >= SC_GATE_FLOOR;
   if (s.tooLoud && s.phase === 'listening') scRenderListening();
 }
 /* The board and the row under it inside the window once, when a round starts (Jonathan, 2026-11-14: "it doesn't scroll down to
@@ -520,19 +567,33 @@ function scAnchor(s, at){
   s.onsets = s.onsets || [];
   s.onsets.push(at);
   const recent = s.onsets.filter(t => at - t < SC_ANCHOR_SPAN * s.slotMs);
-  const c0 = s.gridOffset, R = SC_ANCHOR_RANGE * s.slotMs;
-  let best = s.gridOffset, bestScore = -1e9;
-  for (let o = c0 - R; o <= c0 + R; o += SC_ANCHOR_STEP){
-    let score = 0;
+  let r = scAnchorSearch(s, recent, SC_ANCHOR_RANGE, false);
+  if (recent.length >= SC_ANCHOR_WIDE_MIN && r.score < recent.length - SC_ANCHOR_WIDE_SLACK){
+    const w = scAnchorSearch(s, recent, SC_ANCHOR_WIDE_RANGE, true);
+    if (w.score >= recent.length - SC_ANCHOR_WIDE_ACCEPT && w.n && w.off / w.n <= SC_ANCHOR_WIDE_TIGHT * s.slotMs) r = w;
+  }
+  s.gridOffset = r.best;
+}
+/* The best grid offset within `range` eighths of the grid it has, never more than SC_ANCHOR_WIDE_RANGE eighths from the click grid:
+   the grid it has first, then SC_ANCHOR_STEP ms out on both sides; a later offset wins only with a higher score (so a tie keeps the
+   nearest), or, when `centred`, with the same score and its strums nearer the middles of their windows. */
+function scAnchorSearch(s, recent, range, centred){
+  const c0 = s.gridOffset, n = Math.ceil(range * s.slotMs / SC_ANCHOR_STEP), lim = SC_ANCHOR_WIDE_RANGE * s.slotMs;
+  let best = c0, bestScore = -1e9, bestOff = 1e9, bestN = 0;
+  for (let i = 0; i <= 2 * n; i++){
+    const o = c0 + (i % 2 ? 1 : -1) * Math.ceil(i / 2) * SC_ANCHOR_STEP;
+    if (Math.abs(o) > lim + 1e-9 && o !== c0) continue;
+    let score = 0, off = 0, nIn = 0;
     for (const t of recent){
       const q = t - s.listenStart - o - s.lat, k = Math.round(q / s.slotMs), d = q - k * s.slotMs;
       if (Math.abs(d) > s.win) continue;
       const sl = s.slotsOf[((k % SC_SLOTS) + SC_SLOTS) % SC_SLOTS];
       score += sl && sl.strum ? 1 : SC_ANCHOR_REST;
+      off += Math.abs(d); nIn++;
     }
-    if (score > bestScore || (score === bestScore && Math.abs(o - s.gridOffset) < Math.abs(best - s.gridOffset))){ bestScore = score; best = o; }
+    if (score > bestScore || (centred && score === bestScore && off < bestOff - 1e-9)){ bestScore = score; best = o; bestOff = off; bestN = nIn; }
   }
-  s.gridOffset = best;
+  return { best, score: bestScore, off: bestOff, n: bestN };
 }
 /* The octave vote (THE CHORD, above): 'ok' / 'wrong' / 'unheard'. `chords`: the step's chords by name ({ midi: [...] }). */
 function scChordO(midis, want, chords){
@@ -541,9 +602,10 @@ function scChordO(midis, want, chords){
   const names = Object.keys(chords), votes = {};
   names.forEach(n => { const ns = (chords[n] && chords[n].midi || []).map(Number);
     votes[n] = ms.filter(m => ns.some(x => Math.abs(m - x) <= SC_OCT_TOL || Math.abs(m - (x - 12)) <= SC_OCT_TOL)).length; });
-  const best = Math.max(0, ...names.map(n => votes[n])), top = names.filter(n => votes[n] === best);
-  if (!best || top.length !== 1) return 'unheard';
-  return top[0] === want ? 'ok' : 'wrong';
+  const order = names.slice().sort((p, q) => votes[q] - votes[p]);
+  const best = votes[order[0]] || 0, second = order.length > 1 ? votes[order[1]] : 0;
+  if (!best || best - second < SC_OCT_MARGIN) return 'unheard';
+  return order[0] === want ? 'ok' : 'wrong';
 }
 
 /* Pitch readings for the open chord capture; closes it when its stretch is over. */
@@ -704,7 +766,9 @@ function scRenderReport(){
     if (s.caps[b].verdict === 'ok') c++;
   }
   const heard = s.events.some(e => e.kind !== 'outside');   // a sound inside the bars, anywhere
-  const head = s.tooLoud ? t('sc.tooLoud') : n < 1 ? t('sc.noBars') : !heard ? t('sc.nothing') : scSummaryLine(n, p, c);
+  /* too noisy: the end line says whether the round counted (review R1-4: a Stopped round does not) */
+  const counted = !!(s.complete && s.barsDone === s.bars.length);
+  const head = s.tooLoud ? t(counted ? 'sc.tooLoudCounted' : 'sc.tooLoudStopped') : n < 1 ? t('sc.noBars') : !heard ? t('sc.nothing') : scSummaryLine(n, p, c);
   /* One line, no per-bar sentences; the marks stay on the board until the next round. The row's button starts it. */
   body.innerHTML = `<span class="coach-overall sc-summary">${escHtml(head)}</span>${scHeadphonesHtml()}<span class="sc-local" data-micrec-local></span>`;
 }
@@ -730,8 +794,8 @@ function scRecMeta(){
       recCapSec: num(s.recCapSec), roundSec: r1(s.roundSec), complete: !!s.complete, barsDone: num(s.barsDone) || 0,
       /* what the student had for a beat (2026-11-14): the Metronome on at Start, "I'm wearing headphones", the click played */
       metroOn: !!s.metro, headphones: !!s.hp, clicks: scClicksWanted(s.metro, s.hp),
-      tooLoud: !!s.tooLoud, gateLevel: num(s.gateLevel) == null ? null : Math.round(s.gateLevel * 1e5) / 1e5, gateFrames: (s.gateLevels || []).length, gateThreshold: SC_GATE_LEVEL,
-      anchorRange: SC_ANCHOR_RANGE, anchorStep: SC_ANCHOR_STEP, anchorSpan: SC_ANCHOR_SPAN, anchorRest: SC_ANCHOR_REST, octTol: SC_OCT_TOL,
+      tooLoud: !!s.tooLoud, gateLevel: num(s.gateLevel) == null ? null : Math.round(s.gateLevel * 1e5) / 1e5, gateFloorLevel: num(s.gateFloor) == null ? null : Math.round(s.gateFloor * 1e5) / 1e5, gateFloor: SC_GATE_FLOOR, gateFrames: (s.gateLevels || []).length, gateThreshold: SC_GATE_LEVEL,
+      anchorRange: SC_ANCHOR_RANGE, anchorWide: SC_ANCHOR_WIDE_RANGE, anchorWideMin: SC_ANCHOR_WIDE_MIN, anchorWideSlack: SC_ANCHOR_WIDE_SLACK, anchorWideAccept: SC_ANCHOR_WIDE_ACCEPT, anchorWideTight: SC_ANCHOR_WIDE_TIGHT, gatePct: SC_GATE_PCT, octMargin: SC_OCT_MARGIN, anchorStep: SC_ANCHOR_STEP, anchorSpan: SC_ANCHOR_SPAN, anchorRest: SC_ANCHOR_REST, octTol: SC_OCT_TOL,
       eventTimes: 'played (arrival - latMs)',
       rests: s.slots.filter(x => !x.strum).map(x => ({ bar: x.bar, slot: x.slot, verdict: str(x.state), devMs: r1(x.devMs) })),
       chords: s.caps.map(cp => ({ bar: cp.bar, chord: str(cp.chord), prev: str(cp.prev), verdict: str(cp.verdict), a: str(cp.a), b: str(cp.b), c: str(cp.c), o: str(cp.o),

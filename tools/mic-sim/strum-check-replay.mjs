@@ -66,19 +66,31 @@ const HOOK = `(() => {
         else if (p.rule === 'beatsDown'){ if (inWin && isStrum && sl % 2 === 0) s.gridOffset += dev * p.ease; }
         else if (p.rule === 'shape' || p.rule === 'shapeFree'){
           /* the pattern's own shape: over the onsets of the last bar (this one included), the offset that best fits D.DU.UDU
-             (+1 an onset within the window of a strum slot, -1.5 of a rest), searched in 5 ms steps over +-half a slot around the
-             click grid ('shape': a whole-slot slide is impossible) or +-one slot around the grid of the moment ('shapeFree');
-             ties: the nearest the grid of the moment. The grid moves ease of the way there. */
+             (+1 an onset inside the window of a strum place, -1.5 of a rest), searched in 5 ms steps from the grid of the moment
+             outward (it first, so a tie keeps it): over +-half a slot around the click grid ('shape'), or +-p.range (default 1)
+             eighths around the grid of the moment ('shapeFree'), and when a full bar fits badly (p.wideMin+ onsets scoring under
+             their count less p.wideSlack) again over +-p.wide eighths. The grid moves ease of the way there. As coach-strumcheck.js
+             scAnchor since 2026-11-14 (review R1-1 / R1-6) with p.wide 4, p.wideMin 5, p.wideSlack 1.5. */
           s.__on = s.__on || []; s.__on.push(coachOnsetAt);
           const span = 8 * s.slotMs, recent = s.__on.filter(t => coachOnsetAt - t < span);
-          const c0 = p.rule === 'shape' ? 0 : s.gridOffset, R = p.rule === 'shape' ? s.slotMs / 2 : s.slotMs;
-          let best = s.gridOffset, bestSc = -1e9;
-          for (let o = c0 - R; o <= c0 + R; o += 5){
-            let sc0 = 0;
-            for (const t of recent){ const q = t - s.listenStart - o - s.lat, k = Math.round(q / s.slotMs), d = q - k * s.slotMs; if (Math.abs(d) > s.win) continue; const ks = ((k % 8) + 8) % 8; sc0 += s.slotsOf && s.slotsOf[ks] && s.slotsOf[ks].strum ? 1 : -1.5; }
-            if (sc0 > bestSc || (sc0 === bestSc && Math.abs(o - s.gridOffset) < Math.abs(best - s.gridOffset))){ bestSc = sc0; best = o; }
+          const lim = (p.wide || 1e9) * s.slotMs;
+          const search = (c0, R, keepNear, centred) => {
+            const n = Math.ceil(R / 5); let best = keepNear, bestSc = -1e9, bestOff = 1e9, bestN = 0;
+            for (let i = 0; i <= 2 * n; i++){
+              const o = c0 + (i % 2 ? 1 : -1) * Math.ceil(i / 2) * 5;
+              if (p.rule === 'shapeFree' && Math.abs(o) > lim + 1e-9 && o !== c0) continue;
+              let sc0 = 0, off = 0, nIn = 0;
+              for (const t of recent){ const q = t - s.listenStart - o - s.lat, k = Math.round(q / s.slotMs), d = q - k * s.slotMs; if (Math.abs(d) > s.win) continue; const ks = ((k % 8) + 8) % 8; sc0 += s.slotsOf && s.slotsOf[ks] && s.slotsOf[ks].strum ? 1 : -1.5; off += Math.abs(d); nIn++; }
+              if (sc0 > bestSc || (centred && sc0 === bestSc && off < bestOff - 1e-9) || (p.rule === 'shape' && sc0 === bestSc && Math.abs(o - keepNear) < Math.abs(best - keepNear))){ bestSc = sc0; best = o; bestOff = off; bestN = nIn; }
+            }
+            return { best, score: bestSc, off: bestOff, n: bestN };
+          };
+          let r = p.rule === 'shape' ? search(0, s.slotMs / 2, s.gridOffset) : search(s.gridOffset, (p.range || 1) * s.slotMs, s.gridOffset);
+          if (p.rule === 'shapeFree' && p.wide && recent.length >= (p.wideMin || 6) && r.score < recent.length - (p.wideSlack == null ? 1.5 : p.wideSlack)){
+            const w = search(s.gridOffset, p.wide * s.slotMs, s.gridOffset, true);
+            if (w.score >= recent.length - (p.wideAccept == null ? 1 : p.wideAccept) && w.n && w.off / w.n <= (p.wideTight == null ? 1e9 : p.wideTight) * s.slotMs) r = w;
           }
-          s.gridOffset += (best - s.gridOffset) * p.ease;
+          s.gridOffset += (r.best - s.gridOffset) * p.ease;
           const rel2 = coachOnsetAt - s.listenStart - s.gridOffset - s.lat;   // this onset judged on the anchored grid
           if (pre){ pre.fired = true; H.diag.push(pre); }
           return rel2;
@@ -99,7 +111,7 @@ const HOOK = `(() => {
 /* the site's settings as the page's copy of the detector writes them (the identity test below compares the copy with the real one):
    since 2026-11-14 ratios 1.15 / 1.3 and the pattern-shape grid (scHearStrum, coach-strumcheck.js); before, 1.2 / 1.46 and Strum
    Radar's easing 0.2 (rule 'base'). */
-export const SITE_P = { ratio: 1.15, hfRatio: 1.3, refract: 140, ease: 1, within: 0.45, rule: 'shapeFree' };
+export const SITE_P = { ratio: 1.15, hfRatio: 1.3, refract: 140, ease: 1, within: 0.45, rule: 'shapeFree', wide: 4, wideMin: 6, wideSlack: 1.5, wideAccept: 1, wideTight: 0.15 };
 
 const args = process.argv.slice(2);
 const opt = k => { const a = args.find(x => x.startsWith('--' + k + '=')); return a ? a.slice(k.length + 3) : null; };
@@ -296,7 +308,8 @@ function gateMeasure(ci, ls, beatMs, win, ratio, hfRatio){
     if (((f.rms > 0.005 && f.rms > f.sR * ratio) || (f.hf > 0.004 && f.hf > f.sH * hfRatio)) && f.at - last > 140){ n++; last = f.at; }
   }
   lv.sort((p, q) => p - q);
-  return { n, level: lv.length ? lv[Math.floor(lv.length / 2)] : 0, frames: lv.length };
+  /* level: the median; p20: the 20th percentile (the site's since review R1-3: the room, not a guitar strummed in the count-in) */
+  return { n, level: lv.length ? lv[Math.floor(lv.length / 2)] : 0, p20: lv.length ? lv[Math.floor(lv.length * 0.2)] : 0, frames: lv.length };
 }
 const BENCH = {
   ratios: { students: ['silent', 'right'], bpm: [85], seeds: 4 },
@@ -383,9 +396,9 @@ if (flag('gate')){
     const groups = [...new Set(rows.map(r => r.room + '|' + r.kind))];
     for (const g of groups){
       const sel = rows.filter(r => r.room + '|' + r.kind === g).map(r => gateMeasure(r.ci, r.ls, r.beatMs, r.win, ratio, hfRatio));
-      const ns = sel.map(x => x.n).sort((p, q) => p - q), lv = sel.map(x => x.level).sort((p, q) => p - q);
-      const at = th => sel.filter(x => x.n >= th).length;
-      lines.push(`  ${g.replace('|', ' ').padEnd(22)} ${String(sel.length).padStart(2)} rounds · onsets ${ns[0]} / ${ns[Math.floor(ns.length / 2)]} / ${ns[ns.length - 1]} · >=1 ${at(1)} >=2 ${at(2)} >=3 ${at(3)} >=4 ${at(4)} · level median ${(lv[Math.floor(lv.length / 2)] || 0).toFixed(4)} (${(lv[0] || 0).toFixed(4)}..${(lv[lv.length - 1] || 0).toFixed(4)}) · frames ${sel[0] ? sel[0].frames : 0}`);
+      const ns = sel.map(x => x.n).sort((p, q) => p - q), lv = sel.map(x => x.level).sort((p, q) => p - q), p2 = sel.map(x => x.p20).sort((p, q) => p - q);
+      const at = th => sel.filter(x => x.n >= th).length, fire = (arr, th) => arr.filter(v => v >= th).length;
+      lines.push(`  ${g.replace('|', ' ').padEnd(22)} ${String(sel.length).padStart(2)} rounds · onsets ${ns[0]} / ${ns[Math.floor(ns.length / 2)]} / ${ns[ns.length - 1]} · median level ${(lv[0] || 0).toFixed(4)}..${(lv[lv.length - 1] || 0).toFixed(4)}, gated at 0.012: ${fire(lv, 0.012)} · 20th percentile ${(p2[0] || 0).toFixed(4)}..${(p2[p2.length - 1] || 0).toFixed(4)}, gated at 0.012: ${fire(p2, 0.012)} · frames ${sel[0] ? sel[0].frames : 0}`);
     }
   }
   console.log(lines.join('\n'));

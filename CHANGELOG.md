@@ -12,10 +12,10 @@ see `WORKFLOW.md` and the git commit log.
 - **No box opens.** Click the button and the round starts right there: four clicks, then play the eight bars while the arrows light up. The button says Stop while you play. Set the tempo with the slider above the bars before you click.
 - **After the round, the arrows show how you did** (green: heard in its place; red: missed, or a strum on a dot) and one line gives your counts, like "Pattern: 7 of 8 bars. Chords: 8 of 8." The arrows stay until your next round.
 - **The step ticks itself after two full rounds.** A round counts when it reaches the end of bar 8; a round you stop early does not. The step shows "Rounds done: 0 of 2", then 1, then 2 with a ✓. There is no Mark done button on this step.
-- **The Metronome during the check.** If the Metronome is on, a small box next to the button says "I'm wearing headphones". Tick it to hear the click through the whole round. Without headphones the click stays quiet (the mic would hear it as a strum). Either way, the frame around the bars pulses on each beat, strongest on each "1", and a small dot flashes with it.
+- **The Metronome during the check.** If the Metronome is on, a small box next to the button says "I'm wearing headphones". Tick it to hear the click through the whole round. Without headphones the click stays quiet (the mic would hear it as a strum). Either way, the frame around the bars pulses on each beat, strongest on each "1", and a small dot flashes with it. Your second round keeps the same beat. The box starts unticked each time you open the page.
 - **The bars stay on screen** while you play, on a Chromebook too.
-- **It follows your tempo.** If you drift a little slower or faster, the check moves with you instead of marking every strum one place off. It also hears soft up-strums better.
-- **Too noisy?** If the room is too loud while the four clicks play, the check says "Too noisy to check right now. Keep playing: this round still counts." The arrows stay plain for that round, and the round still counts toward your two.
+- **It follows your beat.** If you come in a little late or early after the four clicks, or after stopping for a bar, the check finds your beat after one bar instead of marking every strum one place off. It also hears soft up-strums better.
+- **Too noisy?** If the room is too loud while the four clicks play, the check says "Too noisy to check right now. Keep playing: this round still counts." The arrows stay plain for that round. At the end it says "This round counted" if you played to the end; a round you stop does not count. Strumming along with the four clicks does not make it say "too noisy".
 - **The chord on each "1" is checked more carefully,** so a G5 played where the bar says C5 now shows as wrong.
 - **The button moved.** The strum pattern activity (Down, Down-Up, Up-Down-Up) no longer has the Listening Coach button; everything else in it is the same.
 
@@ -47,7 +47,7 @@ see `WORKFLOW.md` and the git commit log.
 - **A new green button in the strum pattern activity.** On the step with the eight bars of D5, C5 and G5, click "Listening Coach — click here to get feedback", then "Start the check", and play the eight bars once after the four clicks.
 - **It listens for your strums in the right places.** It wants a strum on each arrow and nothing on each dot, where your hand swings past the strings. It cannot hear down from up, so it only checks where each strum lands. It also checks the chord on each "1".
 - **You see each bar as you play.** Strums it heard turn green. A missed strum or a strum on a dot turns red when the bar ends. At the end one line gives your counts, like "Pattern: 7 of 8 bars. Chords: 8 of 8."
-- **It uses the tempo you set on the step.** If you have not set one, it starts at 85 BPM. The step's tempo slider and the check's −5 and +5 always show the same number. While the check listens, the tempo controls and the Metronome turn grey, so the tempo cannot change mid-round. Use it in a quiet spot, and keep the beat in your head, not with your foot.
+- **Use it at 80 BPM or slower, in a quiet spot.** Above 80 BPM the button turns grey and says "Slow to 80 BPM or less to use the check." Keep the beat in your head, not with your foot.
 - **It only gives feedback.** It does not tick the step or save a score; "Got it" still moves you on.
 
 ## 2026-11-14 — Easier to use with a screen reader
