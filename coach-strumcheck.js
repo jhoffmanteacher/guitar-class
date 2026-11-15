@@ -90,7 +90,14 @@ const SC_MISS_GRACE = 60;           // ms after a slot's window before it is cal
 /* The check's tempo (Jonathan, 2026-11-14, after trying it on a real guitar: "it should also default to 85bpm
    to start b/c 60 is too slow", then "Start 85, no limit"): it opens at SC_START_BPM whatever the step's
    slider says, and the -5 / +5 on its panel move it across the step's own slider range (40 to 125). The
-   virtual student's numbers at 85+ (more missed re-strums) are in tools/mic-sim/strum-check-loop.mjs. */
+   virtual student's numbers at 85+ (more missed re-strums) are in tools/mic-sim/strum-check-loop.mjs.
+   Then (Jonathan, same day: "even when i set the metronome to 85 prior it started at 60"; "the metronome
+   settings should be grayed out or actually affect the tempo of activity"; the lead's choice): ONE tempo.
+   The check opens at the tempo the student last set on the step's slider (85 if they never touched it),
+   and while the check waits for Start the step's slider and the check's -5 / +5 move each other
+   (scSetTempo, scSliderMoved from onBpmSliderChange). From the count-in to the last bar the step's
+   slider, its Play clicks and the Metronome tool's Start/Stop and tempo are disabled (scLock); every way
+   out gives them back. */
 const SC_START_BPM = 85;
 const SC_BPM_MIN = 40, SC_BPM_MAX = 125;
 const SC_REC_MAX_SEC = 60;          // a recorded take: the whole round up to this (40 BPM: about 56 s)
@@ -182,7 +189,10 @@ function scOpen(btn){
   let spec;
   try { spec = JSON.parse(btn.dataset.strumcheck); } catch(e){ return; }
   if (!spec || !Array.isArray(spec.bars) || !spec.bars.length || !spec.chords) return;
-  const bpm = SC_START_BPM;
+  const group = btn.closest('.bpm-control-group');
+  const slider = group ? group.querySelector('.bpm-slider') : null;
+  const stored = btn.dataset.scWhere ? readStoredBpm(btn.dataset.scWhere, null) : null;
+  const bpm = typeof stored === 'number' && stored >= SC_BPM_MIN && stored <= SC_BPM_MAX ? stored : SC_START_BPM;
   const card = document.createElement('div');
   card.className = 'coach-card sc-card';
   card.id = 'coach-card';
@@ -202,14 +212,45 @@ function scOpen(btn){
   const tabBody = anchor.closest('.tab-body');
   const cells = tabBody ? Array.from(tabBody.querySelectorAll('.strum-board .strum-cell')) : [];
   sc = {
-    phase: 'ready', card, spec, bpm, where: btn.dataset.scWhere || '',
+    phase: 'ready', card, spec, bpm, where: btn.dataset.scWhere || '', group, slider, locked: [],
     pattern: String(spec.pattern || ''), slotsOf: scPatternSlots(spec.pattern),
     bars: spec.bars.map(String), chords: spec.chords,
     cells: cells.length === spec.bars.length * SC_SLOTS ? cells : [],
     timeouts: []
   };
+  scSetTempo(bpm);   // the step's slider shows the tempo the check will use
   scRenderReady();
   card.scrollIntoView({ block: 'nearest', behavior: scrollBehavior() });
+}
+
+/* One tempo before a round: the check's and the step slider's (its readout and saved value through onBpmSliderChange). */
+function scSetTempo(v){
+  if (!sc) return;
+  sc.bpm = Math.min(SC_BPM_MAX, Math.max(SC_BPM_MIN, Math.round(v)));
+  const el = document.getElementById('sc-bpm-readout');
+  if (el) el.textContent = sc.bpm + ' BPM';
+  const sl = sc.slider;
+  if (sl && String(sl.value) !== String(sc.bpm)){ sl.value = String(sc.bpm); if (typeof onBpmSliderChange === 'function') onBpmSliderChange(sl); }
+}
+/* The step's slider moved (onBpmSliderChange): before a round the open check takes its tempo. */
+function scSliderMoved(slider){
+  if (!sc || slider !== sc.slider || (sc.phase !== 'ready' && sc.phase !== 'report')) return;
+  const v = parseInt(slider.value, 10);
+  if (!isNaN(v) && v !== sc.bpm) scSetTempo(v);
+}
+/* During a round the tempo cannot change under the grid: the step's slider and Play clicks, and the
+   Metronome tool's Start/Stop and tempo, are disabled (greyed, not hidden); scLock(false) gives back
+   exactly what it took. Every exit calls it (scFinish, scInterrupt, scClose). */
+function scLock(on){
+  if (!sc) return;
+  if (on){
+    const els = [sc.slider, sc.group && sc.group.querySelector('.strum-clicks-btn'), document.getElementById('metro-btn'), document.getElementById('bpm-slider')].filter(Boolean);
+    sc.locked = sc.locked || [];
+    els.forEach(el => { if (el.disabled) return; el.disabled = true; el.setAttribute('aria-disabled', 'true'); sc.locked.push(el); });
+  } else {
+    (sc.locked || []).forEach(el => { el.disabled = false; el.removeAttribute('aria-disabled'); });
+    sc.locked = [];
+  }
 }
 
 function scRenderReady(msg){
@@ -233,9 +274,7 @@ function scRenderReady(msg){
 
 function scNudgeBpm(d){
   if (!sc || (sc.phase !== 'ready' && sc.phase !== 'report')) return;
-  sc.bpm = Math.min(SC_BPM_MAX, Math.max(SC_BPM_MIN, sc.bpm + d));
-  const el = document.getElementById('sc-bpm-readout');
-  if (el) el.textContent = sc.bpm + ' BPM';
+  scSetTempo(sc.bpm + d);
 }
 
 /* The board's live marks, all of them off. */
@@ -261,7 +300,11 @@ async function scStart(){
   await coachEnsureRunning();
   if (sc !== session || !scBody()){ coachReleaseMicIfIdle(); return; }   // card closed or replaced during the prompt
   if (document.hidden){ coachMicOff(); scRenderReady(t('coach.paused.backgrounded')); return; }
+  /* No click while the mic listens, as in every other listening game (Strum Radar, Power Chord Switch, the Coach; the Metronome tool
+     itself goes silent while the mic is on): the laptop's own click reaches the mic. Measured 2026-11-14 with clicks through the round,
+     at the count-in's level: nothing played heard 96 of 96 beat strum slots and a "strum" on "3" in every bar (strum-check-loop.mjs). */
   stopAllDemoAudio();
+  scLock(true);
   const micEl = document.getElementById('coach-mic');
   if (micEl){
     micEl.hidden = false;
@@ -441,6 +484,7 @@ function scFinish(complete){
   s.complete = !!complete;
   const rec = micRecStop();
   coachMicOff();
+  scLock(false);
   if (s.cells[s.cur]) s.cells[s.cur].classList.remove('sc-now');
   s.phase = 'report';
   scRenderReport();
@@ -529,6 +573,7 @@ function scClose(){
   if (!sc) return;
   if (scRaf){ cancelAnimationFrame(scRaf); scRaf = null; }
   sc.timeouts.forEach(clearTimeout);
+  scLock(false);
   scClearBoard();
   if (sc.card && sc.card.isConnected) sc.card.remove();
   sc = null;
@@ -542,6 +587,7 @@ function scInterrupt(msg){
   sc.timeouts = [];
   if (scRaf){ cancelAnimationFrame(scRaf); scRaf = null; }
   coachMicOff();
+  scLock(false);
   scClearBoard();
   scRenderReady(msg || t('coach.interrupt.tunerTook'));
 }

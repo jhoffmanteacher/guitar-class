@@ -17054,9 +17054,10 @@ const COUNTIN_PIN = { runs: 44, beeps: 140, rounds: 9, takes: 6, tips: 28 };   /
      - saves nothing: the part never names saveGames, games, progress, caSteps, flushSave or storage, and a whole finish (scFinish and
        its report) run with a counting saveGames leaves games untouched and saveGames uncalled;
      - the end line at 1 bar and at many, in both languages;
-     - the tempo (Jonathan, 2026-11-14: "Start 85, no limit", replacing the 80 BPM limit of earlier that day): the button is never
-       disabled; scOpen, run, opens at SC_START_BPM 85 whatever the step's slider says; scNudgeBpm reaches the step slider's own top
-       and floor;
+     - the tempo (Jonathan, 2026-11-14: "Start 85, no limit", then one tempo): the button is never disabled; scOpen, run, opens at
+       the step's last-set tempo (85 if never set) and shows it on the step's slider; the slider and the check's -5 / +5 move each
+       other before a round; scNudgeBpm reaches the slider's own top and floor; during a round the slider, Play clicks and the
+       Metronome's Start/Stop and tempo are disabled and moving the slider changes nothing; Stop, an interrupt and close give them back;
      - the check's own strum ratios (SC_ONSET_RATIO / SC_HF_RATIO), run through the real srHearStrum: a 1.3x jump is a strum for the
        check and not for a state without them (Strum Radar's); the shared CHK_ONSET_RATIO / CHK_HF_RATIO stay 1.4 / 1.7. */
 async function checkStrumCheck() {
@@ -17111,8 +17112,7 @@ async function checkStrumCheck() {
       if (!teacher && /<button[^>]*\sdisabled[\s>]/.test(c.out)) fail('the strum check button is drawn disabled: there is no tempo limit (Jonathan, 2026-11-14: "Start 85, no limit")');
       n.pins++;
     }
-    /* The tempo (Jonathan, 2026-11-14: "Start 85, no limit"), through the real scOpen and scNudgeBpm: the check opens at 85 whatever the
-       step's slider says (60 and 125 tried), and its -5 / +5 reach the step's own slider range, top and floor, read off the step's HTML. */
+    /* The tempo: no limit ("Start 85, no limit"), one tempo with the step's slider, locked during a round (below). */
     if (L) {
       const stepHtml = run(`buildStrum(CLASS_ACTIVITIES.find(a => a.id === 'ca-46').steps[${L.si}].strum, { keyPrefix: 'bpm:ca:ca-46:${L.si}:strum' })`);
       const range = /class="bpm-slider"[^>]*min="(\d+)"[^>]*max="(\d+)"/.exec(stepHtml);
@@ -17120,18 +17120,54 @@ async function checkStrumCheck() {
       if (!range) fail('the listening step has no tempo slider to read its range from');
       else {
         const [lo, hi] = [Number(range[1]), Number(range[2])];
-        const tempo = slider => JSON.parse(run(`(() => { const group = { querySelector(q){ return q === '.bpm-slider' ? { value: '${slider}', max: '${hi}' } : null; }, insertAdjacentElement(){}, closest(){ return null; } };
-          const btn = { dataset: { strumcheck: ${JSON.stringify(JSON.stringify({ pattern: PIN.pattern, bars: PIN.bars.split(' '), chords: { D5: { midi: [50, 57, 62] }, C5: { midi: [48, 55, 60] }, G5: { midi: [43, 50, 55] } } }))} }, parentElement: group, closest(q){ return q === '.bpm-control-group' ? group : null; } };
-          try { scOpen(btn); if (!sc) return JSON.stringify(null); const start = sc.bpm; for (let i = 0; i < 40; i++) scNudgeBpm(5); const top = sc.bpm; for (let i = 0; i < 40; i++) scNudgeBpm(-5); return JSON.stringify({ start, top, floor: sc.bpm }); }
-          finally { scClose(); } })()`));
-        for (const sl of [60, hi]) {
-          const r = tempo(sl);
+        /* One tempo (Jonathan, 2026-11-14: "even when i set the metronome to 85 prior it started at 60"; "the metronome settings should
+           be grayed out or actually affect the tempo of activity"): the check opens at the tempo last set on the step's slider (its saved
+           value), 85 when never set, and shows it on the step's slider; the slider moved while the check waits changes the check; the
+           check's -5 / +5 move the slider. Run through the real scOpen / scSliderMoved / scNudgeBpm with a stub slider and Play clicks. */
+        const tempo = (stored, moveTo) => JSON.parse(run(`(() => {
+          const mk = v => ({ value: String(v), max: '${hi}', dataset: { key: 'sc-test-key' }, parentNode: null, disabled: false, setAttribute(){}, removeAttribute(){} });
+          const slider = mk(60), clicks = { disabled: false, setAttribute(){}, removeAttribute(){} };
+          const group = { querySelector(q){ return q === '.bpm-slider' ? slider : q === '.strum-clicks-btn' ? clicks : null; }, insertAdjacentElement(){}, closest(){ return null; } };
+          const btn = { dataset: { strumcheck: ${JSON.stringify(JSON.stringify({ pattern: PIN.pattern, bars: PIN.bars.split(' '), chords: { D5: { midi: [50, 57, 62] }, C5: { midi: [48, 55, 60] }, G5: { midi: [43, 50, 55] } } }))}, scWhere: 'sc-test-key' }, parentElement: group, closest(q){ return q === '.bpm-control-group' ? group : null; } };
+          try { localStorage.removeItem('sc-test-key'); if (${stored} != null) localStorage.setItem('sc-test-key', String(${stored}));
+            scOpen(btn); if (!sc) return JSON.stringify(null);
+            const start = sc.bpm, shown = slider.value;
+            let moved = null; if (${moveTo} != null){ slider.value = String(${moveTo}); onBpmSliderChange(slider); moved = sc.bpm; }
+            scNudgeBpm(5); const nudged = { bpm: sc.bpm, slider: slider.value };
+            for (let i = 0; i < 40; i++) scNudgeBpm(5); const top = sc.bpm; for (let i = 0; i < 40; i++) scNudgeBpm(-5); const floor = sc.bpm;
+            /* a round: everything locked, the slider cannot change the tempo; every way out gives the controls back */
+            const m = document.getElementById('metro-btn'), b = document.getElementById('bpm-slider'); m.disabled = false; b.disabled = false;
+            const ctl = () => [slider.disabled, clicks.disabled, m.disabled, b.disabled].map(Number).join('');
+            const exits = {};
+            for (const way of ['finish', 'interrupt', 'close']) {
+              if (!sc) scOpen(btn);
+              sc.phase = 'listening'; sc.timeouts = []; scLock(true); const during = ctl(); const before = sc.bpm;
+              slider.value = String(before >= ${hi} ? before - 10 : before + 10); onBpmSliderChange(slider); const held = sc.bpm === before;
+              if (way === 'finish'){ sc.slots = []; sc.caps = []; sc.events = []; sc.lines = []; sc.barsDone = 0; micRec = null; scFinish(false); }
+              else if (way === 'interrupt') scInterrupt('x'); else scClose();
+              exits[way] = { during, held, after: ctl() };
+            }
+            return JSON.stringify({ start, shown, moved, nudged, top, floor, exits }); }
+          finally { scClose(); localStorage.removeItem('sc-test-key'); } })()`));
+        for (const [stored, moveTo, want] of [[null, null, PIN.startBpm], [85, null, 85], [100, null, 100], [null, 95, PIN.startBpm]]) {
+          const r = tempo(stored, moveTo);
           n.tempos++;
+          const what = stored == null ? 'never set' : `last set to ${stored}`;
           if (!r) { fail('scOpen opened no check'); continue; }
-          if (r.start !== PIN.startBpm) fail(`with the step's slider at ${sl} the check opens at ${r.start} BPM, want ${PIN.startBpm}`);
+          if (r.start !== want || r.shown !== String(want)) fail(`with the step's tempo ${what} the check opens at ${r.start} BPM and the slider shows ${r.shown}, want ${want} on both`);
+          if (moveTo != null && r.moved !== moveTo) fail(`the step's slider moved to ${moveTo} while the check waited: the check's tempo is ${r.moved}, want ${moveTo}`);
+          const after = (moveTo != null ? moveTo : want) + 5;
+          if (r.nudged.bpm !== after || r.nudged.slider !== String(after)) fail(`the check's +5 gave ${JSON.stringify(r.nudged)}, want ${after} on the check and on the step's slider`);
           if (r.top !== hi) fail(`the check's +5 stops at ${r.top} BPM, want the step's own top, ${hi} (no tempo limit)`);
           if (r.floor !== lo) fail(`the check's -5 stops at ${r.floor} BPM, want the step's own floor, ${lo}`);
+          for (const [way, x] of Object.entries(r.exits)) {
+            if (x.during !== '1111') fail(`during a round (then ${way}) the step's slider, Play clicks, the Metronome's Start/Stop and its tempo are disabled ${x.during} (want 1111: none may change the tempo under the grid)`);
+            if (!x.held) fail(`during a round (then ${way}) moving the step's slider changed the check's tempo`);
+            if (x.after !== '0000') fail(`after ${way === 'finish' ? 'Stop' : way} the controls are disabled ${x.after}, want 0000 (every way out gives them back)`);
+          }
         }
+        if (!/stopAllDemoAudio\(\);\s*scLock\(true\);/.test(siteText('coach-strumcheck.js', ROOT))) fail('scStart no longer locks the tempo controls when the round starts (scLock(true) after stopAllDemoAudio)');
+        if (!/onBpmSliderChange[\s\S]{0,600}scSliderMoved\(slider\)/.test(src)) fail('onBpmSliderChange no longer tells an open check that the step\'s slider moved');
       }
     }
     if (/STRUM_CHECK_MAX_BPM|strumCheckSync|sc\.slowTo/.test(src + siteText('coach-strumcheck.js', ROOT))) fail('the removed tempo limit is still named (STRUM_CHECK_MAX_BPM / strumCheckSync / sc.slowTo)');
@@ -17290,8 +17326,8 @@ async function checkStrumCheck() {
     run(`setLang('en')`);
   } catch (e) { fail('stopped on an error: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : e)); }
   /* pinned totals, so a renamed function cannot turn this into a check of nothing */
-  if (n.saves !== 3 || n.tempos !== 2 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 9 || n.lines !== 10 || n.pins !== 4) fail(`ran ${n.saves} take saves (want 3), ${n.tempos} tempo opens (want 2), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (9), ${n.lines} end lines (10), ${n.pins} pins (4)`);
-  if (!bad) ok(`1eh: one listening step (ca-46, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, none in the console, never disabled; opens at ${PIN.startBpm} BPM whatever the slider says, -5 / +5 across the step's own range; its own ratios ${PIN.ratio} / ${PIN.hfRatio} (Strum Radar's state still 1.4 / 1.7, run); window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule} (${n.chords} scripted cases); a whole finish saved nothing to progress; its take saved through micRecSaveNow into a strict Firestore stub (3 rounds); the real sweep and end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages`);
+  if (n.saves !== 3 || n.tempos !== 4 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 9 || n.lines !== 10 || n.pins !== 4) fail(`ran ${n.saves} take saves (want 3), ${n.tempos} tempo opens (want 4), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (9), ${n.lines} end lines (10), ${n.pins} pins (4)`);
+  if (!bad) ok(`1eh: one listening step (ca-46, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, none in the console, never disabled; opens at the step's last tempo (${PIN.startBpm} if never set), one tempo with the step's slider, -5 / +5 across its range, the tempo controls locked during a round and given back on every exit; its own ratios ${PIN.ratio} / ${PIN.hfRatio} (Strum Radar's state still 1.4 / 1.7, run); window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule} (${n.chords} scripted cases); a whole finish saved nothing to progress; its take saved through micRecSaveNow into a strict Firestore stub (3 rounds); the real sweep and end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages`);
 }
 
 async function checkCountIn() {

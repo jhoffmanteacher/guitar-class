@@ -3270,6 +3270,9 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 .sc-mark--wrong{color:var(--red-text)}
 .sc-mark--unheard{color:var(--text3)}
 .sc-card .sc-line{margin:2px 0}
+/* During a strum-pattern check round (scLock) the step's tempo slider and Play clicks, and the Metronome's Start/Stop and tempo, are
+   disabled: shown greyed so it is plain they cannot change the tempo under the round. */
+.bpm-slider:disabled,.play-seq-btn:disabled,#metro-btn:disabled{opacity:.45;cursor:not-allowed}
 /* A step's video button (step.video) comes right after the step text in both
    renderers — on its own line, not glued to the last sentence (ca-46, the
    first activity with a video step, 2026-11-03). */

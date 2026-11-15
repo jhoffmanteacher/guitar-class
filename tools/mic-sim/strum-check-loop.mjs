@@ -163,7 +163,8 @@ const SC_VM = `globalThis.__sc = {
   },
   start(o){
     __lb.world(o.lat);
-    const group = { querySelector(sel){ return sel === '.bpm-slider' ? { value: String(o.bpm) } : null; }, insertAdjacentElement(){}, closest(){ return null; } };
+    const slider = { value: String(o.bpm), dataset: {}, parentNode: null, disabled: false, setAttribute(){}, removeAttribute(){} };
+    const group = { querySelector(sel){ return sel === '.bpm-slider' ? slider : null; }, insertAdjacentElement(){}, closest(){ return null; } };
     const btn = { dataset: { strumcheck: o.data, scWhere: 'bench' }, parentElement: group, closest(sel){ return sel === '.bpm-control-group' ? group : null; } };
     /* the error log hears only of a belt that had to null a value or a failed save: both are bugs, so the bench collects them */
     __sc.logged = []; SITE_ERRORS.report = (k, ev) => { __sc.logged.push(String(ev && ev.message || '')); };
@@ -268,6 +269,7 @@ async function oneTake(site, t, o, btn, chords){
   const save = JSON.parse(JSON.stringify(await site.run('__scSave')));
   const res = JSON.parse(site.run('__sc.out()'));
   res.save = save;
+  res.beeps = site.beeps.length;   // the count-in's 4 clicks, and with --metro=on one per beat of the round
   if (!play) throw new Error('strum-check-loop: the student was never told the round');
   if (res.slots.length !== play.key.length) throw new Error('fake-world check failed: the site judged ' + res.slots.length + ' slots, the key has ' + play.key.length);
   if (o.break){ const e = play.key.find(x => x.truth === 'played' && play.sounds.some(s => s.kind === 'guitar')); if (e) e.truth = 'quiet'; }
