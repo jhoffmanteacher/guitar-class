@@ -461,22 +461,23 @@ function strumOpenMetro(btn){
   if(!metroRunning) startMetro();
 }
 /* The strum-pattern check's button (Jonathan, 2026-11-14; coach-strumcheck.js):
-   only on a spec with `listen: true` (today ca-46's eight-bar step; checks.mjs
-   1eh pins it). The site's green Listening Coach button, inside the BPM group
-   with the step's slider, opening through
-   coachOpenLazy like every Coach button. data-strumcheck carries the pattern,
-   the bars and each chord's notes. Not in the teacher console's preview
-   (IS_TEACHER_MODE): the console never opens the mic, as buildTab's
-   suppressCoach keeps the melody Coach out of it. No tempo limit (Jonathan,
-   2026-11-14: "Start 85, no limit"): the check opens at its own 85 BPM and the
-   student sets its tempo on the check's panel (coach-strumcheck.js). */
+   only on a spec with `listen: true` (ca-52's eight-bar step; checks.mjs 1eh
+   pins it). ONE row UNDER the board (.sc-row; Jonathan, 2026-11-14: "there
+   should just be a button that says ... and it should be underneath"), the
+   button reading "Click here and play it to get feedback" (sc.play), opening
+   through coachOpenLazy like every Coach button; the round runs on the board
+   and its strip sits beside the button in the same row. data-strumcheck
+   carries the pattern, the bars and each chord's notes. Not in the teacher
+   console's preview (IS_TEACHER_MODE): the console never opens the mic, as
+   buildTab's suppressCoach keeps the melody Coach out of it. The step's
+   slider above the board is the only tempo control; no tempo limit. */
 function strumCheckBtnHtml(spec, keyPrefix){
   if(!spec || spec.listen !== true) return '';
   if(typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE) return '';
   const chords = {};
   Object.keys(spec.chords || {}).forEach(n => { const c = spec.chords[n]; chords[n] = { midi: c && Array.isArray(c.midi) ? c.midi.map(Number) : [] }; });
   const data = JSON.stringify({ pattern: String(spec.pattern || ''), bars: spec.bars.map(String), chords });
-  return `<button type="button" class="coach-btn" data-strumcheck="${escAttr(data)}" data-sc-where="${escAttr(keyPrefix || '')}" onclick="coachOpenLazy(this)" title="${escAttr(t('coach.btnTitle'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> <span data-i18n="coach.btn">${t('coach.btn')}</span></button>`;
+  return `<button type="button" class="coach-btn sc-play" data-strumcheck="${escAttr(data)}" data-sc-where="${escAttr(keyPrefix || '')}" onclick="coachOpenLazy(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> <span class="sc-play-label" data-i18n="sc.play">${t('sc.play')}</span></button>`;
 }
 function buildStrum(spec, opts){
   if(!spec || !Array.isArray(spec.bars) || !spec.bars.length) return '';
@@ -494,7 +495,6 @@ function buildStrum(spec, opts){
       + `<button type="button" class="play-seq-btn" data-midis="${escAttr(JSON.stringify(midis))}" data-clicks="${spec.bars.length * 4}" onclick="playSequenceFromGroup(this)" title="${escAttr(t('strum.playTitle'))}">&#x25B6; ${t('strum.play')}</button>`
       + `<button type="button" class="play-seq-btn strum-clicks-btn" onclick="strumOpenMetro(this)" title="${escAttr(t('strum.clicksTitle'))}">&#x25B6; ${t('strum.clicks')}</button>`
       + renderBpmControl(keyPrefix, bpm, spec.minBpm || 40, spec.maxBpm || 125)
-      + strumCheckBtnHtml(spec, keyPrefix)
       + `</span></div>`;
   }
   const pat = String(spec.pattern || '');
@@ -522,7 +522,8 @@ function buildStrum(spec, opts){
     }
     rows.push(`<div class="strum-row" style="--strum-cols:${cells.length}">${cells.join('')}</div>`);
   }
-  return `<div class="tab tab--strum">${headHtml}<div class="tab-body">${controlsHtml}<div class="strum-board">${rows.join('')}</div></div></div>`;
+  const check = hits.length && keyPrefix ? strumCheckBtnHtml(spec, keyPrefix) : '';
+  return `<div class="tab tab--strum">${headHtml}<div class="tab-body">${controlsHtml}<div class="strum-board">${rows.join('')}</div>${check ? `<div class="sc-row">${check}</div>` : ''}</div></div>`;
 }
 /* Hides a just-built tab (`wrapTabReveal`) until caArmTabReveals() has let
    its `revealDelay` seconds pass, then fades it in. `hidden` short-circuits

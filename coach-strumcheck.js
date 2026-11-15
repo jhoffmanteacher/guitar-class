@@ -1,9 +1,10 @@
 /* ════════════════════════════════════════════════════════════════════
    STRUM-PATTERN CHECK (2026-11-14, Jonathan: "add a listening coach aspect
    to the existing strumming pattern activity that judges both on chords and
-   strumming pattern"). A Listening Coach card under a drawn strum pattern
-   whose spec says `listen: true` (buildStrum in app/tab.js; today only
-   ca-46's last strum step, the eight bars D5 D5 C5 C5 G5 G5 D5 D5).
+   strumming pattern"). One button and a one-line strip under a drawn strum
+   pattern whose spec says `listen: true` (buildStrum in app/tab.js; ca-52's
+   one step, the eight bars D5 D5 C5 C5 G5 G5 D5 D5); no box since
+   2026-11-14 (THE SCREEN, below).
 
    What it judges, as Jonathan decided:
      · the PATTERN by slot, never by direction ("the mic cannot tell down
@@ -90,13 +91,13 @@ const SC_CHORD_CLARITY = 0.55;      // the Listening Coach's chord-mode gate (co
 const SC_TAIL_GAP = 60;             // ms: the chord readings stop this long before slot 2 is due
 const SC_MISS_GRACE = 60;           // ms after a slot's window before it is called (a frame, and the onset's dating)
 /* The check's tempo (Jonathan, 2026-11-14, after trying it on a real guitar: "it should also default to 85bpm
-   to start b/c 60 is too slow", then "Start 85, no limit"): it opens at SC_START_BPM whatever the step's
-   slider says, and the -5 / +5 on its panel move it across the step's own slider range (40 to 125). The
-   virtual student's numbers at 85+ (more missed re-strums) are in tools/mic-sim/strum-check-loop.mjs.
+   to start b/c 60 is too slow", then "Start 85, no limit"): ca-52's step opens its slider at 85 (its strum
+   spec's bpm), across the step's own slider range (40 to 125). The virtual student's numbers at 85+ (more
+   missed re-strums) are in tools/mic-sim/strum-check-loop.mjs.
    Then (Jonathan, same day: "even when i set the metronome to 85 prior it started at 60"; "the metronome
    settings should be grayed out or actually affect the tempo of activity"; the lead's choice): ONE tempo.
-   The check opens at the tempo the student last set on the step's slider (85 if they never touched it),
-   and while the check waits for Start the step's slider and the check's -5 / +5 move each other
+   The check runs at the tempo on the step's slider, the only tempo control since 2026-11-14 ("the tempo
+   scroll at the top is sufficient to set the tempo"); between rounds a slider move reaches the open check
    (scSetTempo, scSliderMoved from onBpmSliderChange). From the count-in to the last bar the step's
    slider, its Play clicks and the Metronome tool's Start/Stop and tempo are disabled (scLock); every way
    out gives them back. */
@@ -163,18 +164,8 @@ function scBarFaults(states, slots){
   }
   return out;
 }
-/* The count word for a slot: "1", "1 and", "2", ... (the board counts "1 + 2 +"; the step's caption says the + is "and"). */
-function scCountWord(k){
-  const n = Math.floor(k / 2) + 1;
-  return k % 2 ? t('sc.countAnd', { n }) : String(n);
-}
-/* A bar's sentence: "Bar 3: pattern ✓ · C5 on the 1 ✓". `chord` null leaves the chord out. */
-function scBarLine(b, faults, chordName, chordVerdict){
-  const pat = faults.length ? faults.map(f => f.kind === 'extra' ? t('sc.extra', { count: scCountWord(f.slot) })
-    : t(f.dir === 'U' ? 'sc.missedUp' : 'sc.missedDown', { count: scCountWord(f.slot) })).join(' · ') : t('sc.patternOk');
-  const ch = chordName == null || chordVerdict == null ? '' : ' · ' + t(chordVerdict === 'ok' ? 'sc.chordOk' : chordVerdict === 'wrong' ? 'sc.chordWrong' : 'sc.chordUnheard', { chord: chordName });
-  return t('sc.barN', { n: b + 1 }) + ' ' + pat + ch;
-}
+/* No per-bar sentences (Jonathan, 2026-11-14, of the written list of faults after a round: "i don't think they should get that.
+   they won't read it"): the board's coloured arrows and marks are the feedback, and one summary line. */
 /* The end line. n = bars finished, p = bars with no pattern fault, c = bars whose chord on the 1 was ok. */
 function scSummaryLine(n, p, c){
   if (n < 1) return t('sc.noBars');
@@ -184,37 +175,56 @@ function scSummaryLine(n, p, c){
 
 /* ── The card ── */
 
+/* THE SCREEN (Jonathan, 2026-11-14, after playing it: "the listening coach box is also huge. there should just be a button that says
+   ... and it should be underneath. the tempo scroll at the top is sufficient to set the tempo. get rid of the coach box that opens").
+   No box: the step's tempo slider above the board is the only tempo control, the board is where the round runs, and ONE row under the
+   board (.sc-row, app/tab.js buildStrum) holds the button ("Click here and play it to get feedback"; Stop while a round runs) and a
+   one-line strip beside it (#coach-card.sc-strip: the mic chip and recording label, the count-in, the bar, the beat dot, the mic
+   question or panel, the summary line, the headphones switch, local recording mode's two links). Nothing is drawn over or beside the
+   board. The ids coach-card / coach-body / coach-mic are kept: the mic panel, the recording label and the level meter write there. */
+
+/* The row's button, every click (coachOpen, coach-core.js, before it evicts anything): the check already open on THIS button ->
+   Stop during a round, another round after one; returns false (coachOpen goes on to scOpen) for a check not yet open here. */
+function scButton(btn){
+  if (!sc || sc.btn !== btn || !sc.card || !sc.card.isConnected) return false;
+  if (sc.phase === 'countin' || sc.phase === 'listening') scFinish(false);
+  else if (sc.phase === 'ready' || sc.phase === 'report') scStart();
+  return true;
+}
+/* The button's word: Stop during a round, its own word otherwise. */
+function scButtonLabel(s, running){
+  const b = s && s.btn, lab = b && b.querySelector('.sc-play-label');
+  if (!lab) return;
+  if (running){ lab.removeAttribute('data-i18n'); lab.textContent = t('games.common.stop'); b.classList.add('sc-play--stop'); }
+  else { lab.setAttribute('data-i18n', 'sc.play'); lab.textContent = t('sc.play'); b.classList.remove('sc-play--stop'); }
+}
+
 /* Opened by coachOpen (coach-core.js) for a button with data-strumcheck,
-   after it has stopped every other mic owner and card. */
+   after it has stopped every other mic owner and card. Starts a round at once. */
 function scOpen(btn){
   scClose();
   let spec;
   try { spec = JSON.parse(btn.dataset.strumcheck); } catch(e){ return; }
   if (!spec || !Array.isArray(spec.bars) || !spec.bars.length || !spec.chords) return;
-  const group = btn.closest('.bpm-control-group');
-  const slider = group ? group.querySelector('.bpm-slider') : null;
-  const stored = btn.dataset.scWhere ? readStoredBpm(btn.dataset.scWhere, null) : null;
-  const bpm = typeof stored === 'number' && stored >= SC_BPM_MIN && stored <= SC_BPM_MAX ? stored : SC_START_BPM;
-  const card = document.createElement('div');
-  card.className = 'coach-card sc-card';
-  card.id = 'coach-card';
-  card.innerHTML =
-    `<div class="coach-head">
-       <span class="coach-title">&#x1F3A4; ${t('coach.title')}</span>
-       <span class="coach-mic" id="coach-mic" hidden><span class="coach-mic-dot"></span>${t('coach.micOn')}</span>
-       <button type="button" class="coach-x" onclick="coachClose()" aria-label="${t('coach.closeAria')}">&#x2715;</button>
-     </div>
-     <div class="coach-body" id="coach-body"></div>
-     ${coachFootHtml(true)}`;
-  const anchor = btn.closest('.bpm-control-group') || btn.parentElement;
-  anchor.insertAdjacentElement('afterend', card);
   /* The page's own board is the one the student reads: the check lights it
      (scCells) instead of drawing a second copy. Eight bars of eight cells,
      in order; anything else and the board is left alone. */
-  const tabBody = anchor.closest('.tab-body');
+  const tabBody = btn.closest('.tab-body');
+  const group = tabBody ? tabBody.querySelector('.bpm-control-group') : null;
+  const slider = group ? group.querySelector('.bpm-slider') : null;
+  const fromSlider = slider ? parseInt(slider.value, 10) : NaN;
+  const stored = btn.dataset.scWhere ? readStoredBpm(btn.dataset.scWhere, null) : null;
+  const bpm = fromSlider >= SC_BPM_MIN && fromSlider <= SC_BPM_MAX ? fromSlider
+    : typeof stored === 'number' && stored >= SC_BPM_MIN && stored <= SC_BPM_MAX ? stored : SC_START_BPM;
+  const card = document.createElement('span');
+  card.className = 'sc-strip';
+  card.id = 'coach-card';
+  card.innerHTML = `<span class="sc-body" id="coach-body" aria-live="polite"></span><span class="coach-mic sc-mic" id="coach-mic" hidden></span>`;
+  btn.insertAdjacentElement('afterend', card);
   const cells = tabBody ? Array.from(tabBody.querySelectorAll('.strum-board .strum-cell')) : [];
   sc = {
-    phase: 'ready', card, spec, bpm, where: btn.dataset.scWhere || '', group, slider, locked: [],
+    phase: 'ready', card, btn, spec, bpm, where: btn.dataset.scWhere || '', group, slider, locked: [],
+    board: tabBody ? tabBody.querySelector('.strum-board') : null,
     pattern: String(spec.pattern || ''), slotsOf: scPatternSlots(spec.pattern),
     bars: spec.bars.map(String), chords: spec.chords,
     cells: cells.length === spec.bars.length * SC_SLOTS ? cells : [],
@@ -222,15 +232,13 @@ function scOpen(btn){
   };
   scSetTempo(bpm);   // the step's slider shows the tempo the check will use
   scRenderReady();
-  card.scrollIntoView({ block: 'nearest', behavior: scrollBehavior() });
+  scStart();
 }
 
 /* One tempo before a round: the check's and the step slider's (its readout and saved value through onBpmSliderChange). */
 function scSetTempo(v){
   if (!sc) return;
   sc.bpm = Math.min(SC_BPM_MAX, Math.max(SC_BPM_MIN, Math.round(v)));
-  const el = document.getElementById('sc-bpm-readout');
-  if (el) el.textContent = sc.bpm + ' BPM';
   const sl = sc.slider;
   if (sl && String(sl.value) !== String(sc.bpm)){ sl.value = String(sc.bpm); if (typeof onBpmSliderChange === 'function') onBpmSliderChange(sl); }
 }
@@ -257,24 +265,18 @@ function scLock(on){
   }
 }
 
+/* Before a round, or after one was cut short (a refused mic, a hidden tab, the tuner): the reason if any, and the headphones
+   switch while the Metronome tool runs. The row's button starts the next round. */
 function scRenderReady(msg){
   if (!sc) return;
   const body = scBody();
   if (!body) return;
   sc.phase = 'ready';
-  body.innerHTML =
-    (msg ? `<div class="coach-note">${escHtml(msg)}</div>` : '') +
-    `<div class="coach-target">${escHtml(t('sc.target'))}</div>
-     <div class="coach-bpm-row">
-       <button type="button" class="tp-btn" onclick="scNudgeBpm(-5)">&#x2212;5</button>
-       <span class="coach-bpm-readout" id="sc-bpm-readout">${sc.bpm} BPM</span>
-       <button type="button" class="tp-btn" onclick="scNudgeBpm(5)">+5</button>
-     </div>
-     <div class="coach-tip">&#x1F92B; ${escHtml(t('sc.tipDir'))}</div>
-     <div class="coach-tip">&#x1F941; ${escHtml(t('sc.tipCount'))}</div>
-     ${coachSetupLineHtml()}
-     ${typeof metroRunning !== 'undefined' && metroRunning ? `<label class="sc-hp"><input type="checkbox" id="sc-hp"${scHeadphonesGet() ? ' checked' : ''} onchange="scHeadphonesSet(this.checked)"> ${escHtml(t('sc.headphones'))}</label>` : ''}
-     <button type="button" class="coach-start" onclick="scStart()">&#x25B6; ${t('coach.start')}</button>`;
+  scButtonLabel(sc, false);
+  body.innerHTML = (msg ? `<span class="coach-note sc-note">${escHtml(msg)}</span>` : '') + scHeadphonesHtml();
+}
+function scHeadphonesHtml(){
+  return typeof metroRunning !== 'undefined' && metroRunning ? `<label class="sc-hp"><input type="checkbox" id="sc-hp"${scHeadphonesGet() ? ' checked' : ''} onchange="scHeadphonesSet(this.checked)"> ${escHtml(t('sc.headphones'))}</label>` : '';
 }
 /* "I'm wearing headphones" (Jonathan, 2026-11-14: "can a headphone option be given if not it just flashes and can the flashing dot
    be made larger?"). Shown on the start screen only while the Metronome tool is on. Remembered for this browser, not per student and
@@ -289,13 +291,19 @@ function scClicksWanted(metro, hp){ return !!(metro && hp); }
    listenStart from, at the check's tempo. Each click is queued just before it is due (COACH_COUNTIN_AHEAD), so every exit, which
    clears s.timeouts, silences the rest. Only with headphones: through a laptop speaker the mic hears every click as a strum
    (measured 2026-11-14: 96 of 96 beat slots with nothing played). */
+/* THE BEAT, one clock for everything the student sees or hears of it (Jonathan, 2026-11-14, "what if the frame around it flashed at
+   tempo?"; the lead: one scheduler for dot, frame and click): beat j of the round is at scBeatAt(s, j), the click grid the count-in
+   set (listenStart + j beats), never the grid the listening eases toward the player. Measured on Jonathan's three real takes
+   (2026-11-14): a dot drawn on the eased grid moved with the grid, up to 303 ms after the click's beat on one take and 150 ms before
+   it on another, so a student following the dot chased his own lag. The board's moving cell keeps the eased grid. */
+function scBeatAt(s, j){ return s.listenStart + j * s.beatMs; }
 function scScheduleClicks(s){
   const ac = typeof getAudioCtx === 'function' ? getAudioCtx() : null;
   if (!ac || ac.state !== 'running') return 0;
   const perf0 = performance.now(), ctx0 = ac.currentTime, beats = s.total / 2;
   let n = 0;
   for (let j = 0; j < beats; j++){
-    const dueMs = s.listenStart + j * s.beatMs - perf0, at = ctx0 + dueMs / 1000;
+    const dueMs = scBeatAt(s, j) - perf0, at = ctx0 + dueMs / 1000;
     const queue = () => { if (sc === s && (s.phase === 'countin' || s.phase === 'listening')) coachBeepAt(ac, at, 660, 0.08); };
     if (dueMs <= COACH_COUNTIN_AHEAD * 1000) queue();
     else s.timeouts.push(setTimeout(queue, dueMs - COACH_COUNTIN_AHEAD * 1000));
@@ -303,29 +311,33 @@ function scScheduleClicks(s){
   }
   return n;
 }
-/* The beat dot (the Metronome tool's own .metro-dot, larger: .sc-beat-dot) flashes on each beat of the displayed grid while the
-   Metronome was on at Start, whether or not the click sounds. */
-function scBeatTick(s, cur){
-  if (!s.metro || cur % 2) return false;
+/* Beat j is due (scLoop, the first frame at or after scBeatAt): while the Metronome was on at Start, whether or not the click sounds,
+   the beat dot (the Metronome tool's .metro-dot, .sc-beat-dot) flashes and the frame around the board pulses, stronger on the 1 of
+   each bar (sc-pulse sc-pulse-1) than on beats 2-4 (sc-pulse). An outline and a shadow, never the border: nothing moves. At most one
+   pulse a beat (125 BPM: about 2 a second). With prefers-reduced-motion the frame holds a steady outline for the round instead
+   (styles.css) and only the dot changes. Every exit clears both (scClearBoard). */
+function scBeat(s, j){
+  if (!s.metro) return false;
   const dot = document.getElementById('sc-beat');
-  if (!dot) return false;
-  dot.classList.add('flash');
-  s.timeouts.push(setTimeout(() => dot.classList.remove('flash'), 90));
+  if (dot){ dot.classList.add('flash'); s.timeouts.push(setTimeout(() => dot.classList.remove('flash'), 90)); }
+  const f = s.board;
+  if (f){
+    f.classList.remove('sc-pulse', 'sc-pulse-1');
+    f.classList.add('sc-pulse');
+    if (j % 4 === 0) f.classList.add('sc-pulse-1');
+    s.timeouts.push(setTimeout(() => f.classList.remove('sc-pulse', 'sc-pulse-1'), 120));
+  }
   return true;
 }
 
-function scNudgeBpm(d){
-  if (!sc || (sc.phase !== 'ready' && sc.phase !== 'report')) return;
-  scSetTempo(sc.bpm + d);
-}
-
-/* The board's live marks, all of them off. */
+/* The board's live marks, all of them off, and the frame's. */
 function scClearBoard(){
   if (!sc) return;
   sc.cells.forEach(el => {
     el.classList.remove('sc-now', 'sc-ok', 'sc-bad');
     el.querySelectorAll('.sc-mark').forEach(m => m.remove());
   });
+  if (sc.board) sc.board.classList.remove('sc-frame', 'sc-pulse', 'sc-pulse-1');
 }
 
 async function scStart(){
@@ -354,7 +366,7 @@ async function scStart(){
     const track = coachStream && coachStream.getAudioTracks()[0];
     const label = track && track.label ? track.label : '';
     micEl.innerHTML = '<span class="coach-mic-dot"></span>' +
-      (label ? t('coach.micOnDevice', { device: escHtml(label) }) : t('coach.micOn')) +
+      (label ? t('coach.micOnDevice', { device: `<span class="sc-dev">${escHtml(label)}</span>` }) : t('coach.micOn')) +
       '<span class="coach-mic-level" id="coach-mic-level"><i></i><i></i><i></i></span>';
     coachMicLevelLast = -1;
   }
@@ -366,15 +378,16 @@ async function scStart(){
   s.lat = coachMicLatencyMs();
   s.onsetRatio = SC_ONSET_RATIO; s.hfRatio = SC_HF_RATIO;   // srHearStrum: this check's own ratios
   s.smoothRms = 0; s.smoothHf = 0; s.lastOnsetT = -1e9; s.gridOffset = 0; s.lastPitchT = 0;
-  s.cur = -1; s.sweep = 0; s.cap = null; s.events = []; s.barsDone = 0; s.lines = [];
+  s.cur = -1; s.beat = -1; s.sweep = 0; s.cap = null; s.events = []; s.barsDone = 0;
   s.slots = [];
   s.bars.forEach((name, b) => s.slotsOf.forEach((sl, k) => s.slots.push({ k: b * SC_SLOTS + k, bar: b, slot: k, strum: sl.strum, dir: sl.dir, state: 'pending', devMs: null, gridMs: null })));
   s.caps = s.bars.map((name, b) => ({ bar: b, chord: name, prev: b ? s.bars[b - 1] : null, at: null, rt: [], rm: [], verdict: null, a: null, b: null, c: null, done: false }));
   s.total = s.slots.length;
   s.phase = 'countin';
-  scBody().innerHTML =
-    `<div class="coach-count" id="sc-count">&nbsp;</div>
-     <div class="coach-tip">&#x1F941; ${escHtml(t('sc.tipCount'))}</div>`;
+  scButtonLabel(s, true);
+  if (s.metro && s.board) s.board.classList.add('sc-frame');
+  scBody().innerHTML = `<span class="coach-count sc-count" id="sc-count">&nbsp;</span>`;
+  scKeepInView(s);
   /* A consented recording runs from here to the end of the round: the whole
      round, up to SC_REC_MAX_SEC (count-in lead and clicks, the bars, a beat). */
   s.roundSec = COACH_COUNTIN_REC_LEAD + (4 + s.total / 2 + 1) * s.beatMs / 1000;
@@ -395,10 +408,29 @@ function scRenderListening(){
   const body = scBody();
   if (!body || !sc) return;
   body.innerHTML =
-    `<div class="coach-live"><span class="coach-live-dot"></span>${escHtml(t('sc.listening'))}<span class="sr-bar" id="sc-bar">${t('games.radar.barOfTotal', { bar: 1, total: sc.bars.length })}</span></div>
-     ${sc.metro ? '<div class="metro-dot sc-beat-dot" id="sc-beat" aria-hidden="true"></div>' : ''}
-     <div class="coach-tip sc-last" id="sc-last" aria-live="polite">${sc.lines.length ? escHtml(sc.lines[sc.lines.length - 1]) : '&nbsp;'}</div>
-     <button type="button" class="tp-btn coach-stop" onclick="scFinish(false)">&#x25A0; ${t('games.common.stop')}</button>`;
+    `${sc.metro ? '<span class="metro-dot sc-beat-dot" id="sc-beat" aria-hidden="true"></span>' : ''}<span class="sr-bar sc-bar" id="sc-bar">${t('games.radar.barOfTotal', { bar: 1, total: sc.bars.length })}</span>`;
+}
+/* The board and the row under it inside the window once, when a round starts (Jonathan, 2026-11-14: "it doesn't scroll down to
+   reveal what's next"): the step's strum widget scrolled to the nearest edge that shows all of it below the sticky band, only if any of
+   it is outside. Once, not every frame; no smooth scroll with prefers-reduced-motion (scrollBehavior). */
+function scKeepInView(s){
+  const box = s.board && s.board.closest('.tab');
+  if (!box || typeof box.getBoundingClientRect !== 'function') return;
+  const r = box.getBoundingClientRect(), top = scTopEdge(), H = window.innerHeight || document.documentElement.clientHeight;
+  if (r.top >= top && r.bottom <= H) return;
+  box.style.scrollMarginTop = Math.ceil(top) + 'px';
+  box.scrollIntoView({ block: r.height <= H - top ? (r.bottom > H ? 'end' : 'start') : 'start', behavior: scrollBehavior() });
+}
+/* The bottom of whatever sticks at the top of the window (the header, the set band), or 0. */
+function scTopEdge(){
+  let edge = 0;
+  document.querySelectorAll('header, .set-eyebrow, .ca-card-bar').forEach(el => {
+    const cs = getComputedStyle(el);
+    if (cs.position !== 'sticky' && cs.position !== 'fixed') return;
+    const r = el.getBoundingClientRect();
+    if (r.height && r.top <= 1) edge = Math.max(edge, r.bottom);
+  });
+  return edge;
 }
 
 /* A strum heard (rel: its played time in ms from beat 1 on the grid before
@@ -480,11 +512,10 @@ function scBarOver(s, b){
     if (el && ((x.strum && x.state === 'miss') || (!x.strum && x.state === 'extra'))) el.classList.add('sc-bad');   // a ✗ only once the bar is over
   });
   s.barsDone = b + 1;
+  s.faults = s.faults || [];
+  s.faults[b] = faults;
   const cap = s.caps[b];
   if (!cap.done) scCloseChord(s, cap);
-  s.lines.push(scBarLine(b, faults, cap.chord, cap.verdict));
-  const last = document.getElementById('sc-last');
-  if (last) last.textContent = s.lines[s.lines.length - 1];
 }
 
 function scLoop(){
@@ -511,10 +542,12 @@ function scLoop(){
       if (s.cells[s.cur]) s.cells[s.cur].classList.remove('sc-now');
       if (s.cells[cur]) s.cells[cur].classList.add('sc-now');
       s.cur = cur;
-      scBeatTick(s, cur);
       const barEl = document.getElementById('sc-bar');
       if (barEl) barEl.textContent = t('games.radar.barOfTotal', { bar: Math.floor(cur / SC_SLOTS) + 1, total: s.bars.length });
     }
+    /* the beat, on the click grid (scBeatAt): dot and frame */
+    const beat = Math.floor((now - scBeatAt(s, 0)) / s.beatMs);
+    if (beat !== s.beat && beat >= 0 && beat < s.total / 2){ s.beat = beat; scBeat(s, beat); }
     if (s.sweep >= s.total && !s.cap){ scFinish(true); return; }
   }
   scRaf = requestAnimationFrame(scLoop);
@@ -532,7 +565,9 @@ function scFinish(complete){
   coachMicOff();
   scLock(false);
   if (s.cells[s.cur]) s.cells[s.cur].classList.remove('sc-now');
+  if (s.board) s.board.classList.remove('sc-frame', 'sc-pulse', 'sc-pulse-1');
   s.phase = 'report';
+  scButtonLabel(s, false);
   scRenderReport();
   if (s.complete && s.barsDone === s.bars.length) scCountRound(s);
   if (rec) micRecSave(rec, scRecMeta());
@@ -575,23 +610,14 @@ function scRenderReport(){
   if (!s || !body) return;
   const n = s.barsDone;
   let p = 0, c = 0;
-  const bad = [];
   for (let b = 0; b < n; b++){
-    const faults = scBarFaults(s.slots.slice(b * SC_SLOTS, (b + 1) * SC_SLOTS).map(x => x.state), s.slotsOf);
-    if (!faults.length) p++;
+    if (!scBarFaults(s.slots.slice(b * SC_SLOTS, (b + 1) * SC_SLOTS).map(x => x.state), s.slotsOf).length) p++;
     if (s.caps[b].verdict === 'ok') c++;
-    if (faults.length || s.caps[b].verdict !== 'ok') bad.push(s.lines[b]);
   }
   const heard = s.events.some(e => e.kind !== 'outside');   // a sound inside the bars, anywhere
   const head = n < 1 ? t('sc.noBars') : !heard ? t('sc.nothing') : scSummaryLine(n, p, c);
-  body.innerHTML =
-    `<div class="coach-report">
-       <div class="coach-overall">${escHtml(head)}</div>
-       ${heard && n ? bad.map(l => `<div class="coach-tip sc-line">${escHtml(l)}</div>`).join('') : ''}
-       <div class="coach-actions">
-         <button type="button" class="coach-start" onclick="scStart()">&#x21BB; ${t('coach.tryAgain')}</button>
-       </div>
-     </div>`;
+  /* One line, no per-bar sentences; the marks stay on the board until the next round. The row's button starts it. */
+  body.innerHTML = `<span class="coach-overall sc-summary">${escHtml(head)}</span>${scHeadphonesHtml()}<span class="sc-local" data-micrec-local></span>`;
 }
 
 /* What a saved take needs for a later replay (micRecSave): the rule and its
@@ -654,6 +680,7 @@ function scClose(){
   sc.timeouts.forEach(clearTimeout);
   scLock(false);
   scClearBoard();
+  scButtonLabel(sc, false);
   if (sc.card && sc.card.isConnected) sc.card.remove();
   sc = null;
   coachMicOff();

@@ -17056,10 +17056,15 @@ const COUNTIN_PIN = { runs: 44, beeps: 140, rounds: 9, takes: 6, tips: 28 };   /
      - saves nothing: the part never names saveGames, games, progress, caSteps, flushSave or storage, and a whole finish (scFinish and
        its report) run with a counting saveGames leaves games untouched and saveGames uncalled;
      - the end line at 1 bar and at many, in both languages;
-     - the tempo (Jonathan, 2026-11-14: "Start 85, no limit", then one tempo): the button is never disabled; scOpen, run, opens at
-       the step's last-set tempo (85 if never set) and shows it on the step's slider; the slider and the check's -5 / +5 move each
-       other before a round; scNudgeBpm reaches the slider's own top and floor; during a round the slider, Play clicks and the
-       Metronome's Start/Stop and tempo are disabled and moving the slider changes nothing; Stop, an interrupt and close give them back;
+     - the tempo (Jonathan, 2026-11-14: "Start 85, no limit", one tempo, then "the tempo scroll at the top is sufficient"): the button
+       is never disabled; ca-52's slider is drawn at 85 when nothing is stored; scOpen, run, takes the step slider's tempo and the
+       slider moved between rounds reaches the open check; the strip draws no tempo control; during a round the slider, Play clicks
+       and the Metronome's Start/Stop and tempo are disabled and moving the slider changes nothing; Stop, an interrupt and close give
+       them back;
+     - the screen (Jonathan, 2026-11-14: no box, one button under the board, no written list of faults): the button in a row under the
+       board, not in the BPM group; the part draws no block element (a <div) anywhere, so the row stays one line; no per-bar sentence
+       after a round (their strings are gone); the frame around the board pulses once a beat and marks each bar's 1, only with the
+       Metronome on, cleared on every exit;
      - the check's own strum ratios (SC_ONSET_RATIO / SC_HF_RATIO), run through the real srHearStrum: a 1.3x jump is a strum for the
        check and not for a state without them (Strum Radar's); the shared CHK_ONSET_RATIO / CHK_HF_RATIO stay 1.4 / 1.7. */
 async function checkStrumCheck() {
@@ -17088,8 +17093,18 @@ async function checkStrumCheck() {
       const html = run(`buildStrum(CLASS_ACTIVITIES.find(a => a.id === 'ca-52').steps[${L.si}].strum, { keyPrefix: 'bpm:ca:ca-52:${L.si}:strum' })`);
       const btns = html.match(/data-strumcheck="/g) || [];
       if (btns.length !== 1) fail(`buildStrum drew ${btns.length} strum-check buttons on the listening step, want 1`);
+      /* the button UNDER the board (Jonathan, 2026-11-14: "it should be underneath"), in the row .sc-row, and not with the tempo */
       const grp = /<span class="bpm-control-group">([\s\S]*?)<\/span><\/div>/.exec(html);
-      if (!grp || !/data-strumcheck=/.test(grp[1]) || !/class="bpm-slider"/.test(grp[1])) fail('the strum-check button is not inside the step\'s BPM group (readGroupBpm would not find the slider)');
+      if (!grp || /data-strumcheck=/.test(grp[1]) || !/class="bpm-slider"/.test(grp[1])) fail('the strum-check button is in the step\'s BPM group (it belongs in the row under the board), or the group has no slider');
+      const iBoard = html.indexOf('class="strum-board"'), iRow = html.indexOf('<div class="sc-row">'), iBtn = html.indexOf('data-strumcheck=');
+      if (!(iBoard >= 0 && iRow > iBoard && iBtn > iRow)) fail(`the strum-check button is not in a row under the board (board at ${iBoard}, row at ${iRow}, button at ${iBtn})`);
+      if (!/class="sc-play-label" data-i18n="sc\.play"/.test(html)) fail('the button does not carry its one wording key, sc.play');
+      /* the step's first tempo is 85 (Jonathan, 2026-11-14: "it also seemed to be default 60"): the slider drawn with nothing stored */
+      n.pins++;
+      run(`try { localStorage.removeItem('bpm:ca:ca-52:${L.si}:strum'); } catch(e){}`);
+      const html85 = run(`buildStrum(CLASS_ACTIVITIES.find(a => a.id === 'ca-52').steps[${L.si}].strum, { keyPrefix: 'bpm:ca:ca-52:${L.si}:strum' })`);
+      const v85 = (/class="bpm-slider"[^>]*value="(\d+)"/.exec(html85) || /value="(\d+)"[^>]*class="bpm-slider"/.exec(html85) || [])[1];
+      if (v85 !== String(PIN.startBpm)) fail(`ca-52's tempo slider is drawn at ${v85} with nothing stored, want ${PIN.startBpm}`);
       if (!/onclick="coachOpenLazy\(this\)"/.test(html)) fail('the strum-check button does not open through coachOpenLazy');
       const m = /data-strumcheck="([^"]*)"/.exec(html);
       if (m){
@@ -17121,22 +17136,22 @@ async function checkStrumCheck() {
       if (/sc-limit|\sdisabled[\s>]/.test(stepHtml)) fail('the listening step still draws a tempo-limit line or a disabled button');
       if (!range) fail('the listening step has no tempo slider to read its range from');
       else {
-        const [lo, hi] = [Number(range[1]), Number(range[2])];
-        /* One tempo (Jonathan, 2026-11-14: "even when i set the metronome to 85 prior it started at 60"; "the metronome settings should
-           be grayed out or actually affect the tempo of activity"): the check opens at the tempo last set on the step's slider (its saved
-           value), 85 when never set, and shows it on the step's slider; the slider moved while the check waits changes the check; the
-           check's -5 / +5 move the slider. Run through the real scOpen / scSliderMoved / scNudgeBpm with a stub slider and Play clicks. */
+        const hi = Number(range[2]);
+        /* One tempo, the step's slider (Jonathan, 2026-11-14: "even when i set the metronome to 85 prior it started at 60"; "the tempo
+           scroll at the top is sufficient to set the tempo"): the check takes the tempo on the step's slider (drawn from its saved value,
+           85 when never set); the slider moved between rounds changes the open check; the strip has no tempo control of its own. Run
+           through the real scOpen / scSliderMoved with a stub slider and Play clicks; scStart (which scOpen calls) held for the run. */
         const tempo = (stored, moveTo) => JSON.parse(run(`(() => {
           const mk = v => ({ value: String(v), max: '${hi}', dataset: { key: 'sc-test-key' }, parentNode: null, disabled: false, setAttribute(){}, removeAttribute(){} });
-          const slider = mk(60), clicks = { disabled: false, setAttribute(){}, removeAttribute(){} };
+          const slider = mk(${stored} != null ? ${stored} : ${PIN.startBpm}), clicks = { disabled: false, setAttribute(){}, removeAttribute(){} };
           const group = { querySelector(q){ return q === '.bpm-slider' ? slider : q === '.strum-clicks-btn' ? clicks : null; }, insertAdjacentElement(){}, closest(){ return null; } };
-          const btn = { dataset: { strumcheck: ${JSON.stringify(JSON.stringify({ pattern: PIN.pattern, bars: PIN.bars.split(' '), chords: { D5: { midi: [50, 57, 62] }, C5: { midi: [48, 55, 60] }, G5: { midi: [43, 50, 55] } } }))}, scWhere: 'sc-test-key' }, parentElement: group, closest(q){ return q === '.bpm-control-group' ? group : null; } };
+          const body = { querySelector(q){ return q === '.bpm-control-group' ? group : null; }, querySelectorAll(){ return []; } };
+          const btn = { dataset: { strumcheck: ${JSON.stringify(JSON.stringify({ pattern: PIN.pattern, bars: PIN.bars.split(' '), chords: { D5: { midi: [50, 57, 62] }, C5: { midi: [48, 55, 60] }, G5: { midi: [43, 50, 55] } } }))}, scWhere: 'sc-test-key' }, parentElement: null, closest(q){ return q === '.tab-body' ? body : null; }, insertAdjacentElement(){}, querySelector(){ return null; }, classList: { add(){}, remove(){} } };
+          const keepStart = scStart; scStart = () => {};
           try { localStorage.removeItem('sc-test-key'); if (${stored} != null) localStorage.setItem('sc-test-key', String(${stored}));
             scOpen(btn); if (!sc) return JSON.stringify(null);
-            const start = sc.bpm, shown = slider.value;
+            const start = sc.bpm, shown = slider.value, tempoCtl = /tp-btn|BPM/.test(document.getElementById('coach-body').innerHTML);
             let moved = null; if (${moveTo} != null){ slider.value = String(${moveTo}); onBpmSliderChange(slider); moved = sc.bpm; }
-            scNudgeBpm(5); const nudged = { bpm: sc.bpm, slider: slider.value };
-            for (let i = 0; i < 40; i++) scNudgeBpm(5); const top = sc.bpm; for (let i = 0; i < 40; i++) scNudgeBpm(-5); const floor = sc.bpm;
             /* a round: everything locked, the slider cannot change the tempo; every way out gives the controls back */
             const m = document.getElementById('metro-btn'), b = document.getElementById('bpm-slider'); m.disabled = false; b.disabled = false;
             /* the Metronome tool's -5 / -1 / +1 / +5 (review R1-1), served to scLock's query */
@@ -17153,8 +17168,8 @@ async function checkStrumCheck() {
               exits[way] = { during, held, after: ctl() };
             }
             document.querySelectorAll = keepQSA;
-            return JSON.stringify({ start, shown, moved, nudged, top, floor, exits }); }
-          finally { scClose(); localStorage.removeItem('sc-test-key'); } })()`));
+            return JSON.stringify({ start, shown, moved, tempoCtl, exits }); }
+          finally { scClose(); scStart = keepStart; localStorage.removeItem('sc-test-key'); } })()`));
         for (const [stored, moveTo, want] of [[null, null, PIN.startBpm], [85, null, 85], [100, null, 100], [null, 95, PIN.startBpm]]) {
           const r = tempo(stored, moveTo);
           n.tempos++;
@@ -17162,10 +17177,7 @@ async function checkStrumCheck() {
           if (!r) { fail('scOpen opened no check'); continue; }
           if (r.start !== want || r.shown !== String(want)) fail(`with the step's tempo ${what} the check opens at ${r.start} BPM and the slider shows ${r.shown}, want ${want} on both`);
           if (moveTo != null && r.moved !== moveTo) fail(`the step's slider moved to ${moveTo} while the check waited: the check's tempo is ${r.moved}, want ${moveTo}`);
-          const after = (moveTo != null ? moveTo : want) + 5;
-          if (r.nudged.bpm !== after || r.nudged.slider !== String(after)) fail(`the check's +5 gave ${JSON.stringify(r.nudged)}, want ${after} on the check and on the step's slider`);
-          if (r.top !== hi) fail(`the check's +5 stops at ${r.top} BPM, want the step's own top, ${hi} (no tempo limit)`);
-          if (r.floor !== lo) fail(`the check's -5 stops at ${r.floor} BPM, want the step's own floor, ${lo}`);
+          if (r.tempoCtl) fail('the check draws its own tempo control: the step\'s slider is the only one');
           for (const [way, x] of Object.entries(r.exits)) {
             if (x.during !== '11111111') fail(`during a round (then ${way}) the step's slider, Play clicks, the Metronome's Start/Stop, its tempo slider and its -5 / -1 / +1 / +5 are disabled ${x.during} (want 11111111: none may change the tempo under the grid)`);
             if (!x.held) fail(`during a round (then ${way}) moving the step's slider changed the check's tempo`);
@@ -17257,18 +17269,16 @@ async function checkStrumCheck() {
           for (let k = 0; k < 16; k++){ const sl = sc.slotsOf[k % 8]; sc.slots.push({ k, bar: k >> 3, slot: k % 8, strum: sl.strum, dir: sl.dir, state: sl.strum ? (k === 3 ? 'pending' : 'ok') : (k === 4 ? 'extra' : 'pending') }); }
           sc.caps = [0, 1].map(b => ({ bar: b, chord: 'D5', prev: b ? 'D5' : null, at: 0, rt: [], rm: [], verdict: b ? 'wrong' : 'ok', a: null, b: null, c: null, done: true }));
           scSweep(sc, 1e9);
-          const states = sc.slots.map(x => x.state).join(','), lines = sc.lines.slice(), barsDone = sc.barsDone;
+          const states = sc.slots.map(x => x.state).join(','), barsDone = sc.barsDone;
           scFinish(true);
-          return JSON.stringify({ states, lines, barsDone, body: document.getElementById('coach-body').innerHTML,
-            want: [t('sc.barN', { n: 1 }) + ' ' + t('sc.missedUp', { count: t('sc.countAnd', { n: 2 }) }) + ' · ' + t('sc.extra', { count: '3' }) + ' · ' + t('sc.chordOk', { chord: 'D5' }),
-                   t('sc.barN', { n: 2 }) + ' ' + t('sc.patternOk') + ' · ' + t('sc.chordWrong', { chord: 'D5' })],
-            head: t('sc.summary', { p: 1, n: 2, c: 1 }) });
+          return JSON.stringify({ states, barsDone, body: document.getElementById('coach-body').innerHTML, head: t('sc.summary', { p: 1, n: 2, c: 1 }) });
         } finally { if (sc) sc.card = { isConnected: false, remove(){} }; scClose(); } })()`));
       n.sweeps++;
       const wantStates = 'ok,quiet,ok,miss,extra,ok,ok,ok,ok,quiet,ok,ok,quiet,ok,ok,ok';
       if (sw.states !== wantStates) fail(`${lang}: the sweep left the slots ${sw.states}, want ${wantStates} (a strum not heard is missed, a quiet miss is quiet)`);
       if (sw.barsDone !== 2) fail(`${lang}: the sweep finished ${sw.barsDone} bars, want 2`);
-      sw.want.forEach((w, i) => { if (sw.lines[i] !== w) fail(`${lang}: bar ${i + 1}'s line reads "${sw.lines[i]}", want "${w}"`); if (!sw.body.includes(w)) fail(`${lang}: the end screen does not list bar ${i + 1}: "${w}"`); });
+      /* no written list of faults (Jonathan, 2026-11-14: "i don't think they should get that. they won't read it"): one summary line */
+      if (/sc-line|<div/.test(sw.body) || (lang === 'en' ? /\bBar \d/ : /Compás \d/).test(sw.body)) fail(`${lang}: the end screen writes a line per bar (or a block) after the round: ${sw.body.replace(/<[^>]+>/g, ' ').slice(0, 160)}`);
       if (!sw.body.includes(sw.head)) fail(`${lang}: the end screen does not say "${sw.head}" (one bar of two with no pattern fault, one chord of two right)`);
     }
     run(`setLang('en')`);
@@ -17376,26 +17386,48 @@ async function checkStrumCheck() {
           const queued = scScheduleClicks(sc), pending = ids.size;
           micRec = null; scFinish(false);
           const leftAfterStop = ids.size;
-          const dot = document.getElementById('sc-beat'); let flashes = 0; const keepAdd = dot.classList.add; dot.classList.add = () => { flashes++; };
-          const on = mk(true), off = mk(false); let fOn = 0, fOff = 0;
-          for (let c = 0; c < 64; c++){ if (scBeatTick(on, c)) fOn++; if (scBeatTick(off, c)) fOff++; }
+          /* the beat (scBeat, once per beat on the click grid): the dot and the frame around the board, counted by class */
+          const dot = document.getElementById('sc-beat'); let flashes = 0; const keepAdd = dot.classList.add; dot.classList.add = c => { if (c === 'flash') flashes++; };
+          const frame = () => { const cls = new Set(), n = { pulse: 0, one: 0 }; return { n, cls, classList: { add(...c){ c.forEach(x => { cls.add(x); if (x === 'sc-pulse') n.pulse++; if (x === 'sc-pulse-1') n.one++; }); }, remove(...c){ c.forEach(x => cls.delete(x)); }, contains(x){ return cls.has(x); } } }; };
+          const on = mk(true), off = mk(false); on.board = frame(); off.board = frame(); let fOn = 0, fOff = 0;
+          for (let j = 0; j < 32; j++){ if (scBeat(on, j)) fOn++; if (scBeat(off, j)) fOff++; }
+          const flashed = flashes;
           dot.classList.add = keepAdd;
+          /* every exit takes the frame off: Stop / the end, an interrupt, close */
+          const cleared = {};
+          for (const way of ['finish', 'interrupt', 'close']) {
+            sc = mk(true); sc.board = frame(); sc.board.classList.add('sc-frame'); scBeat(sc, 0);
+            const had = ['sc-frame', 'sc-pulse', 'sc-pulse-1'].filter(c => sc.board.cls.has(c)).length, b = sc.board;
+            if (way === 'finish'){ micRec = null; scFinish(false); } else if (way === 'interrupt') scInterrupt('x'); else scClose();
+            cleared[way] = had + '>' + ['sc-frame', 'sc-pulse', 'sc-pulse-1'].filter(c => b.cls.has(c)).length;
+            if (sc){ sc.card = { isConnected: false, remove(){} }; scClose(); }
+          }
           sc = mk(true); sc.phase = 'ready';
           metroRunning = true; scRenderReady(); const withSwitch = /id="sc-hp"/.test(document.getElementById('coach-body').innerHTML);
           metroRunning = false; scRenderReady(); const noSwitch = !/id="sc-hp"/.test(document.getElementById('coach-body').innerHTML);
           sc.metro = true; scRenderListening(); const dotOn = /id="sc-beat"/.test(document.getElementById('coach-body').innerHTML);
           sc.metro = false; scRenderListening(); const dotOff = !/id="sc-beat"/.test(document.getElementById('coach-body').innerHTML);
-          return JSON.stringify({ table, queued, pending, beepsNow: beeps, leftAfterStop, fOn, fOff, withSwitch, noSwitch, dotOn, dotOff });
+          return JSON.stringify({ table, queued, pending, beepsNow: beeps, leftAfterStop, fOn, fOff, flashed, pulses: on.board.n.pulse, ones: on.board.n.one, offPulses: off.board.n.pulse, cleared, withSwitch, noSwitch, dotOn, dotOff });
         } finally { setTimeout = keep.st; clearTimeout = keep.ct; getAudioCtx = keep.ga; metroRunning = keep.mr; performance.now = keep.pn; sc = null; } })()`));
       n.pins++;
       if (r.table !== '1000') fail(`clicks wanted (Metronome on/off x headphones on/off) = ${r.table}, want 1000: no click through a laptop speaker`);
       if (r.queued !== 32 || r.pending !== 32 || r.beepsNow !== 0) fail(`with headphones the round queued ${r.queued} clicks (${r.pending} waiting, ${r.beepsNow} sounded at once), want 32 waiting: one per beat of 8 bars`);
       if (r.leftAfterStop !== 0) fail(`Stop left ${r.leftAfterStop} clicks queued, want 0`);
-      if (r.fOn !== 32 || r.fOff !== 0) fail(`the beat dot flashed ${r.fOn} times in 8 bars with the Metronome on (want 32) and ${r.fOff} with it off (want 0)`);
+      if (r.fOn !== 32 || r.fOff !== 0 || r.flashed !== 32) fail(`the beat (dot and frame) ran ${r.fOn} times in 8 bars with the Metronome on (want 32; the dot flashed ${r.flashed}) and ${r.fOff} with it off (want 0)`);
+      if (r.pulses !== 32 || r.ones !== 8 || r.offPulses !== 0) fail(`the frame around the board pulsed ${r.pulses} times and marked the 1 ${r.ones} times in 8 bars with the Metronome on (want 32 and 8), ${r.offPulses} with it off (want 0)`);
+      for (const [way, x] of Object.entries(r.cleared)) if (x !== '3>0') fail(`after ${way === 'finish' ? 'Stop' : way} the frame keeps its beat classes (${x}: classes before > after, want 3>0)`);
       if (!r.withSwitch || !r.noSwitch) fail(`the headphones switch: with the Metronome on ${r.withSwitch} (want shown), off ${!r.noSwitch} (want not shown)`);
       if (!r.dotOn || !r.dotOff) fail(`the beat dot on the listening screen: Metronome on ${r.dotOn} (want drawn), off ${!r.dotOff} (want none)`);
       const src2 = siteText('coach-strumcheck.js', ROOT);
       if (!/if \(scClicksWanted\(s\.metro, s\.hp\)\) scScheduleClicks\(s\);/.test(src2) || !/sc\.hp = scHeadphonesGet\(\);/.test(src2)) fail('scStart no longer decides the round\'s clicks from the Metronome and the headphones switch');
+      /* one clock for the beat: the click's time and the loop's beat both from scBeatAt, never the eased grid */
+      if (!/const dueMs = scBeatAt\(s, j\) - perf0/.test(src2) || !/Math\.floor\(\(now - scBeatAt\(s, 0\)\) \/ s\.beatMs\)/.test(src2) || /function scBeatAt[^\n]*gridOffset/.test(src2)) fail('the click and the visible beat are no longer both on scBeatAt (the click grid): they could drift apart');
+      /* THE SCREEN: the part draws no block element anywhere (the row under the board stays one line: no box), and the per-bar
+         sentences are gone with their strings (Jonathan, 2026-11-14) */
+      n.pins++;
+      if (/<div/.test(src2)) fail('coach-strumcheck.js draws a <div>: the check\'s row under the board must stay one line (no box)');
+      const gone = ['sc.barN', 'sc.patternOk', 'sc.missedDown', 'sc.missedUp', 'sc.extra', 'sc.countAnd', 'sc.chordOk', 'sc.chordWrong', 'sc.chordUnheard', 'sc.target', 'sc.tipDir', 'sc.tipCount', 'sc.listening'].filter(k => run(`t(${JSON.stringify(k)})`) !== k);
+      if (gone.length || /function scBarLine|s\.lines\b/.test(src2)) fail(`the per-bar sentences or the old panel's strings are back: ${gone.join(', ') || 'scBarLine / s.lines'}`);
     }
     /* LOCAL RECORDING MODE (Jonathan, 2026-11-14: "can it build a mock site for me to record onto?"): only on this computer's host AND
        the dev-bypass user. Run through the real micRecWanted / micRecSaveNow with a counting Firestore stub and a stub Blob / URL:
@@ -17454,8 +17486,8 @@ async function checkStrumCheck() {
     run(`setLang('en')`);
   } catch (e) { fail('stopped on an error: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : e)); }
   /* pinned totals, so a renamed function cannot turn this into a check of nothing */
-  if (n.saves !== 4 || n.tempos !== 4 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 9 || n.lines !== 10 || n.pins !== 7) fail(`ran ${n.saves} take saves (want 4), ${n.tempos} tempo opens (want 4), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (9), ${n.lines} end lines (10), ${n.pins} pins (7)`);
-  if (!bad) ok(`1eh: one listening step (ca-52, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, none in the console, never disabled; opens at the step's last tempo (${PIN.startBpm} if never set), one tempo with the step's slider, -5 / +5 across its range, the tempo controls locked during a round and given back on every exit; its own ratios ${PIN.ratio} / ${PIN.hfRatio} (Strum Radar's state still 1.4 / 1.7, run); window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule} (${n.chords} scripted cases); the Metronome's click only with headphones (32 a round, all cleared by Stop) and its beat dot (32 flashes, none with it off); local recording mode only on this computer's host with the dev bypass (files, no Firestore; another host or a real account unchanged); two full rounds tick ca-52's step (round 1 <id>:0:r1, round 2 the step; Stopped, short and other steps write nothing; no Mark done button); a whole finish saved nothing else; its take saved through micRecSaveNow into a strict Firestore stub (3 rounds); the real sweep and end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages`);
+  if (n.saves !== 4 || n.tempos !== 4 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 9 || n.lines !== 10 || n.pins !== 9) fail(`ran ${n.saves} take saves (want 4), ${n.tempos} tempo opens (want 4), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (9), ${n.lines} end lines (10), ${n.pins} pins (9)`);
+  if (!bad) ok(`1eh: one listening step (ca-52, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, in a row under the board, none in the console, never disabled; the step's slider drawn at ${PIN.startBpm}, the only tempo control, one tempo with the check; no block element and no per-bar sentence (their strings gone); the tempo controls locked during a round and given back on every exit; its own ratios ${PIN.ratio} / ${PIN.hfRatio} (Strum Radar's state still 1.4 / 1.7, run); window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule} (${n.chords} scripted cases); the Metronome's click only with headphones (32 a round, all cleared by Stop), its beat dot and the frame around the board on the same click-grid clock (32 beats, 8 bars' 1s, none with it off, cleared on every exit); local recording mode only on this computer's host with the dev bypass (files, no Firestore; another host or a real account unchanged); two full rounds tick ca-52's step (round 1 <id>:0:r1, round 2 the step; Stopped, short and other steps write nothing; no Mark done button); a whole finish saved nothing else; its take saved through micRecSaveNow into a strict Firestore stub (3 rounds); the real sweep and its one-line end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages`);
 }
 
 async function checkCountIn() {

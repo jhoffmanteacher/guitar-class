@@ -203,6 +203,8 @@ window.coachMicLive = false; // read by app.js to silence ▶ Play while listeni
 
 /* onclick target for every coach button app.js renders. */
 function coachOpen(btn){
+  /* The strum-pattern check's own button, its check already open: Stop / another round, with nothing evicted (coach-strumcheck.js). */
+  if (btn.dataset.strumcheck && typeof scButton === 'function' && scButton(btn)) return;
   if (typeof stopAnyRec === 'function') stopAnyRec();   // an in-progress self-recording also owns the mic
   gamesStopMic();                     // a running game owns the shared mic — evict it
                                       // cleanly (its UI resets) before coachClose()
@@ -1832,6 +1834,13 @@ function micRecLocalOffer(doc, pcm, rec){
 }
 /* The takes of this page load, newest first, in a small fixed box (English: never shown to a student). Gone on reload. */
 function micRecLocalRender(){
+  /* A page place for them (the strum-pattern check's row, data-micrec-local): the newest take's two links there, compact. */
+  const slot = document.querySelector('[data-micrec-local]');
+  if (slot && micRecLocalTakes.length){
+    const x = micRecLocalTakes[0];
+    slot.innerHTML = `<a href="${escAttr(x.wav)}" download="${escAttr(x.base)}.wav">Save this take (sound)</a> · <a href="${escAttr(x.json)}" download="${escAttr(x.base)}.json">Save this take (details)</a>`;
+    return;
+  }
   let box = document.getElementById('micrec-local');
   if (!box){ box = document.createElement('div'); box.id = 'micrec-local'; box.className = 'micrec-local'; document.body.appendChild(box); }
   box.innerHTML = '<b>Local recording mode</b> (this computer only). Save each take: the sound and the details.<ul>' +

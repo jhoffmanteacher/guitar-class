@@ -7437,10 +7437,10 @@ window.CLASS_ACTIVITIES = [
     title_es: 'Chequeo del patrón de rasgueo',
     steps: [
       {
-        label:    'The Listening Coach — D5, C5, G5',
-        label_es: 'El Entrenador de Escucha — D5, C5, G5',
-        text:    'Play the eight bars for the Listening Coach, two full rounds.',
-        text_es: 'Toca los ocho compases para el Entrenador de Escucha, dos rondas completas.',
+        label:    'Play for feedback — D5, C5, G5',
+        label_es: 'Toca para recibir comentarios — D5, C5, G5',
+        text:    'Play the eight bars, two full rounds, with the button under them.',
+        text_es: 'Toca los ocho compases, dos rondas completas, con el botón de abajo.',
         listenRounds: 2,
         strum: {
           caption:    'D5 · C5 · G5 · D5 · two bars each',
@@ -7453,6 +7453,7 @@ window.CLASS_ACTIVITIES = [
           },
           bars: ['D5', 'D5', 'C5', 'C5', 'G5', 'G5', 'D5', 'D5'],
           barsPerRow: 4,   // a row per two chords — eight bars fit the screen
+          bpm: 85,         // the slider's first tempo (Jonathan, 2026-11-14: "it also seemed to be default 60"; buildStrum's default is 60)
           listen: true,    // the strum-pattern check (coach-strumcheck.js); 1eh pins it to this step alone
         },
       },

@@ -8,9 +8,12 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-11-14 — The strum pattern check is its own activity
 
-- **"Strum Pattern check" is a new In-Class Activity** (when your teacher adds it). It has one step: the eight bars of D5, C5 and G5 with the green Listening Coach button.
-- **The step ticks itself after two full rounds.** A round counts when the check reaches the end of bar 8; a round you stop early does not. The step shows "Full rounds with the Listening Coach: 0 of 2", then 1, then 2 with a ✓. There is no Mark done button on this step.
-- **The Metronome during the check.** If the Metronome is on, the check's start screen has a box, "I'm wearing headphones". Tick it to hear the Metronome's click through the whole check. Without headphones the click stays quiet (the mic would hear it as a strum) and a big dot flashes on each beat instead.
+- **"Strum Pattern check" is a new In-Class Activity** (when your teacher adds it). It has one step: the eight bars of D5, C5 and G5, the tempo slider above them at 85 BPM, and one button under them: "Click here and play it to get feedback".
+- **No box opens.** Click the button and the round starts right there: four clicks, then play the eight bars while the arrows light up. The button says Stop while you play. Set the tempo with the slider above the bars before you click.
+- **After the round, the arrows show how you did** (green: heard in its place; red: missed, or a strum on a dot) and one line gives your counts, like "Pattern: 7 of 8 bars. Chords: 8 of 8." The arrows stay until your next round.
+- **The step ticks itself after two full rounds.** A round counts when it reaches the end of bar 8; a round you stop early does not. The step shows "Rounds done: 0 of 2", then 1, then 2 with a ✓. There is no Mark done button on this step.
+- **The Metronome during the check.** If the Metronome is on, a small box next to the button says "I'm wearing headphones". Tick it to hear the click through the whole round. Without headphones the click stays quiet (the mic would hear it as a strum). Either way, the frame around the bars pulses on each beat, strongest on each "1", and a small dot flashes with it.
+- **The bars stay on screen** while you play, on a Chromebook too.
 - **The button moved.** The strum pattern activity (Down, Down-Up, Up-Down-Up) no longer has the Listening Coach button; everything else in it is the same.
 
 ## 2026-11-14 — Your next required activity is at the top; Module 1's note circle goes clockwise
