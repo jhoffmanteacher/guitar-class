@@ -20,10 +20,11 @@
        Slot 1 is a slot where the hand misses, so about a beat of sound is
        free after it: the readings run from COACH_ATTACK_SKIP after that
        strum to SC_TAIL_GAP before slot 2 is due.
-   What it reuses: Strum Radar's strum detector and grid (srHearStrum,
-   coach-strum.js: the 140 ms refractory, the grid that eases toward the
-   player) with this check's OWN ratios SC_ONSET_RATIO / SC_HF_RATIO, below,
-   in place of the shared CHK_ONSET_RATIO / CHK_HF_RATIO, the Listening Coach's pitch readings for chords
+   What it reuses: Strum Radar's onset test (srHearStrum, coach-strum.js:
+   a jump over the smoothed level, the 140 ms refractory), run in its own
+   scHearStrum with this check's OWN ratios SC_ONSET_RATIO / SC_HF_RATIO
+   and its own grid (THE GRID, below: the pattern's shape, not Strum
+   Radar's easing), the Listening Coach's pitch readings for chords
    (coachPitchReadings at the chord-mode clarity 0.55) and its chord-tone
    test (rule 'a' below: the test coachMatchEvent applies), the mic panel
    (coachAcquireMic, "Turn on the microphone"), the count-in (coachCountIn)
@@ -66,7 +67,7 @@
    real strum-pattern takes yet).
    ════════════════════════════════════════════════════════════════════ */
 
-const SC_RULE = 'strumcheck-1';     // bump when what is judged changes; saved with every take
+const SC_RULE = 'strumcheck-2';     // bump when what is judged changes; saved with every take (2: the pattern-shape grid, the octave vote, 2026-11-14)
 /* A strum counts within SC_WIN_FRAC of an eighth of its slot (both ways), and so does a strum in a miss. 0.35 ("medium strict")
    until Jonathan played it on a real guitar (2026-11-14): "the arrows lit up red like i got things wrong. i think it needs to be
    slightly more permissive to start". 0.45 is Strum Radar's own window for this pattern; the strum and miss windows still do not
@@ -80,13 +81,42 @@ const SC_WIN_FRAC = 0.45;
    student lost a right player's re-strums at the shared 1.4 / 1.7: 22% at
    80 BPM, 37% at 100). A re-strum of the same chord an eighth after the last
    lands on strings still ringing, so it raises the level less than a strum
-   over silence. srHearStrum reads these from the check's state; every other
-   game keeps CHK_ONSET_RATIO / CHK_HF_RATIO. HF = 1.7 x 1.2 / 1.4, the
-   scaling Power Chord Switch's ratios use. Numbers: the commit and
-   tools/mic-sim/strum-check-loop.mjs. */
-const SC_ONSET_RATIO = 1.2;
-const SC_HF_RATIO = 1.46;
-const SC_CHORD_RULE = 'c';          // 'a', 'b' or 'c' (header); every take saves all three
+   over silence. scHearStrum reads these from the check's state; every other
+   game keeps CHK_ONSET_RATIO / CHK_HF_RATIO. 1.2 / 1.46 until 2026-11-14;
+   then 1.15 / 1.3 with the pattern-shape grid (the lead's rule, DETAILS section 23: the most right-player bars in the class room
+   among settings where nothing played and beats only pass 0 bars once the too-noisy gate has done its work; 1.1 / 1.2 let talking
+   pass 3 of 40 bars). */
+const SC_ONSET_RATIO = 1.15;
+const SC_HF_RATIO = 1.3;
+/* THE GRID: the pattern's own shape (the lead, 2026-11-14, on Jonathan's three real takes; Claude outputs/strum-coach/DETAILS.md
+   sections 20 and 22). Until then the check used Strum Radar's grid, which eases 0.2 of each onset's deviation toward the player: a
+   player who drifted more than half an eighth late was matched to the NEXT slot and the easing then slid the grid a whole eighth (take
+   3: every bar heard one slot late; take 2: from bar 8). Now, at each strum heard, the check tries every grid offset SC_ANCHOR_STEP ms
+   apart within SC_ANCHOR_RANGE eighths of the grid it has, scores the onsets of the last SC_ANCHOR_SPAN eighths against D.DU.UDU
+   (+1 an onset inside a strum place's window, SC_ANCHOR_REST inside a rest's), and takes the best (ties: the nearest the grid it
+   has). D.DU.UDU shifted by an eighth fits 4 of its 6 strum places, so a whole-slot slide scores worse than the right grid and the
+   grid stays on the player's own pattern. The same with the Metronome's click in the student's ears: a search held to half an
+   eighth around the click grid was measured (bench, 1.15 / 1.3): the same for a steady player, a late one and an early one, and it
+   failed students who drift with the click (drag 4%: 5-6 of 32 bars against 11-17), so it was not kept. */
+const SC_ANCHOR_RANGE = 1;
+const SC_ANCHOR_STEP = 5;
+const SC_ANCHOR_SPAN = 8;
+const SC_ANCHOR_REST = -1.5;
+/* THE CHORD, octave first (2026-11-14, take 1 bar 4: G5 played where C5 is due passed, because G is in both chords and pitch classes
+   drop the octave). Each reading within SC_OCT_TOL semitones of one of a chord's own notes, or of that note an octave under it (the
+   detector's sub-octave), votes for every chord of the step that has it; the chord with the most votes alone wins (3+ readings). It
+   decides when it can; when it cannot (a tie, too few readings) rule 'c' decides, as before. */
+const SC_OCT_TOL = 0.6;
+/* TOO NOISY TO CHECK (Jonathan, 2026-11-14: "a too loud to grade warning might be good instead of saying it's wrong"). During the
+   count-in the student is not playing yet, so what the mic hears there is the room. The median level of the frames the check reads,
+   from SC_GATE_SKIP ms after the first click (the smoothed level starts at 0) until bar 1's first window opens, leaving out each
+   count-in click (SC_GATE_CLICK_PRE ms before its time to SC_GATE_CLICK_POST after: the speaker's click reaches the mic), is the
+   room's level. At SC_GATE_LEVEL or more the round is too noisy to check: it still runs to bar 8 and still counts toward the step's
+   rounds, but no arrow turns green or red, no chord mark is drawn, and the row says so. Measured on the bench (tools/mic-sim/
+   strum-check-replay.mjs --gate; DETAILS section 23) and on Jonathan's three takes (0 of 3). */
+const SC_GATE_LEVEL = 0.012;
+const SC_GATE_SKIP = 300, SC_GATE_CLICK_PRE = 20, SC_GATE_CLICK_POST = 150;
+const SC_CHORD_RULE = 'oc';         // 'a', 'b', 'c' (header) or 'oc' (the octave vote, then c); every take saves a, b, c and o
 const SC_CHORD_CLARITY = 0.55;      // the Listening Coach's chord-mode gate (coachLoop)
 const SC_TAIL_GAP = 60;             // ms: the chord readings stop this long before slot 2 is due
 const SC_MISS_GRACE = 60;           // ms after a slot's window before it is called (a frame, and the onset's dating)
@@ -376,12 +406,12 @@ async function scStart(){
   s.slotMs = s.beatMs / 2;
   s.win = SC_WIN_FRAC * s.slotMs;
   s.lat = coachMicLatencyMs();
-  s.onsetRatio = SC_ONSET_RATIO; s.hfRatio = SC_HF_RATIO;   // srHearStrum: this check's own ratios
-  s.smoothRms = 0; s.smoothHf = 0; s.lastOnsetT = -1e9; s.gridOffset = 0; s.lastPitchT = 0;
-  s.cur = -1; s.beat = -1; s.sweep = 0; s.cap = null; s.events = []; s.barsDone = 0;
+  s.onsetRatio = SC_ONSET_RATIO; s.hfRatio = SC_HF_RATIO;   // scHearStrum: this check's own ratios
+  s.smoothRms = 0; s.smoothHf = 0; s.lastOnsetT = -1e9; s.gridOffset = 0; s.lastPitchT = 0; s.onsets = [];
+  s.cur = -1; s.beat = -1; s.sweep = 0; s.cap = null; s.events = []; s.barsDone = 0; s.gateLevels = []; s.gateLevel = null; s.tooLoud = false;
   s.slots = [];
   s.bars.forEach((name, b) => s.slotsOf.forEach((sl, k) => s.slots.push({ k: b * SC_SLOTS + k, bar: b, slot: k, strum: sl.strum, dir: sl.dir, state: 'pending', devMs: null, gridMs: null })));
-  s.caps = s.bars.map((name, b) => ({ bar: b, chord: name, prev: b ? s.bars[b - 1] : null, at: null, rt: [], rm: [], verdict: null, a: null, b: null, c: null, done: false }));
+  s.caps = s.bars.map((name, b) => ({ bar: b, chord: name, prev: b ? s.bars[b - 1] : null, at: null, rt: [], rm: [], verdict: null, a: null, b: null, c: null, o: null, done: false }));
   s.total = s.slots.length;
   s.phase = 'countin';
   scButtonLabel(s, true);
@@ -408,7 +438,22 @@ function scRenderListening(){
   const body = scBody();
   if (!body || !sc) return;
   body.innerHTML =
-    `${sc.metro ? '<span class="metro-dot sc-beat-dot" id="sc-beat" aria-hidden="true"></span>' : ''}<span class="sr-bar sc-bar" id="sc-bar">${t('games.radar.barOfTotal', { bar: 1, total: sc.bars.length })}</span>`;
+    `${sc.metro ? '<span class="metro-dot sc-beat-dot" id="sc-beat" aria-hidden="true"></span>' : ''}<span class="sr-bar sc-bar" id="sc-bar">${t('games.radar.barOfTotal', { bar: 1, total: sc.bars.length })}</span>` +
+    (sc.tooLoud ? `<span class="coach-note sc-note sc-too-loud">${escHtml(t('sc.tooLoud'))}</span>` : '');
+}
+/* TOO NOISY TO CHECK (above): one count-in frame (its level and when its sound arrived), kept when it is inside the measured stretch. */
+function scGateFrame(s, rms, at){
+  const a0 = s.listenStart - 4 * s.beatMs;
+  if (at < a0 + SC_GATE_SKIP || at >= s.listenStart - s.win) return;
+  for (let k = 0; k < 4; k++){ const c = a0 + k * s.beatMs; if (at >= c - SC_GATE_CLICK_PRE && at <= c + SC_GATE_CLICK_POST) return; }
+  s.gateLevels.push(rms);
+}
+/* Bar 1's first window opens: the room's level is the median of the kept frames; the round is too noisy to check at SC_GATE_LEVEL. */
+function scGateDecide(s){
+  const lv = s.gateLevels.slice().sort((p, q) => p - q);
+  s.gateLevel = lv.length ? lv[Math.floor(lv.length / 2)] : 0;
+  s.tooLoud = s.gateLevel >= SC_GATE_LEVEL;
+  if (s.tooLoud && s.phase === 'listening') scRenderListening();
 }
 /* The board and the row under it inside the window once, when a round starts (Jonathan, 2026-11-14: "it doesn't scroll down to
    reveal what's next"): the step's strum widget scrolled to the nearest edge that shows all of it below the sticky band, only if any of
@@ -447,7 +492,7 @@ function scOnset(s, rel, at){
   if (!sl.strum){ ev.kind = 'extra'; sl.state = 'extra'; return; }
   ev.kind = 'strum';
   sl.state = 'ok';
-  if (s.cells[k]) s.cells[k].classList.add('sc-ok');   // a ✓ may show at once
+  if (s.cells[k] && !s.tooLoud) s.cells[k].classList.add('sc-ok');   // a ✓ may show at once (none when the room is too noisy to check)
   if (sl.slot === 0){
     /* The chord on the 1: readings from COACH_ATTACK_SKIP after this strum
        to SC_TAIL_GAP before slot 2 is due (rule 'b'), the first
@@ -458,6 +503,47 @@ function scOnset(s, rel, at){
     s.cap = cap;
     s.lastPitchT = at;
   }
+}
+
+/* A strum heard (THE GRID, above): Strum Radar's onset test (srHearStrum, coach-strum.js: a level or HF jump over the smoothed level,
+   past the 140 ms refractory) with this check's own ratios, then the grid put where the pattern fits. Returns the strum's time from
+   beat 1 on that grid, or null. */
+function scHearStrum(s, rms, hf){
+  if (!((rms > CHK_ONSET_FLOOR && rms > s.smoothRms * s.onsetRatio ||
+         hf > CHK_HF_FLOOR && hf > s.smoothHf * s.hfRatio) &&
+        coachOnsetAt - s.lastOnsetT > COACH_ONSET_REFRACT)) return null;
+  s.lastOnsetT = coachOnsetAt;   // when it arrived, not when this frame ran
+  scAnchor(s, coachOnsetAt);
+  return coachOnsetAt - s.listenStart - s.gridOffset - s.lat;
+}
+function scAnchor(s, at){
+  s.onsets = s.onsets || [];
+  s.onsets.push(at);
+  const recent = s.onsets.filter(t => at - t < SC_ANCHOR_SPAN * s.slotMs);
+  const c0 = s.gridOffset, R = SC_ANCHOR_RANGE * s.slotMs;
+  let best = s.gridOffset, bestScore = -1e9;
+  for (let o = c0 - R; o <= c0 + R; o += SC_ANCHOR_STEP){
+    let score = 0;
+    for (const t of recent){
+      const q = t - s.listenStart - o - s.lat, k = Math.round(q / s.slotMs), d = q - k * s.slotMs;
+      if (Math.abs(d) > s.win) continue;
+      const sl = s.slotsOf[((k % SC_SLOTS) + SC_SLOTS) % SC_SLOTS];
+      score += sl && sl.strum ? 1 : SC_ANCHOR_REST;
+    }
+    if (score > bestScore || (score === bestScore && Math.abs(o - s.gridOffset) < Math.abs(best - s.gridOffset))){ bestScore = score; best = o; }
+  }
+  s.gridOffset = best;
+}
+/* The octave vote (THE CHORD, above): 'ok' / 'wrong' / 'unheard'. `chords`: the step's chords by name ({ midi: [...] }). */
+function scChordO(midis, want, chords){
+  const ms = (midis || []).filter(m => typeof m === 'number' && isFinite(m));
+  if (ms.length < 3 || !chords) return 'unheard';
+  const names = Object.keys(chords), votes = {};
+  names.forEach(n => { const ns = (chords[n] && chords[n].midi || []).map(Number);
+    votes[n] = ms.filter(m => ns.some(x => Math.abs(m - x) <= SC_OCT_TOL || Math.abs(m - (x - 12)) <= SC_OCT_TOL)).length; });
+  const best = Math.max(0, ...names.map(n => votes[n])), top = names.filter(n => votes[n] === best);
+  if (!best || top.length !== 1) return 'unheard';
+  return top[0] === want ? 'ok' : 'wrong';
 }
 
 /* Pitch readings for the open chord capture; closes it when its stretch is over. */
@@ -486,10 +572,11 @@ function scCloseChord(s, cap){
   cap.a = scChordA(short, want);
   cap.b = scChordB(cap.rm, want, prev);
   cap.c = cap.b !== 'unheard' ? cap.b : cap.a;
-  cap.verdict = cap[SC_CHORD_RULE];
+  cap.o = scChordO(cap.rm, cap.chord, s.chords);
+  cap.verdict = SC_CHORD_RULE === 'oc' ? (cap.o !== 'unheard' ? cap.o : cap.c) : cap[SC_CHORD_RULE];
   const cell = s.cells[cap.bar * SC_SLOTS];
   const name = cell && cell.querySelector('.strum-chord');
-  if (name) name.insertAdjacentHTML('beforeend', `<span class="sc-mark sc-mark--${cap.verdict}">${cap.verdict === 'ok' ? '&#x2713;' : cap.verdict === 'wrong' ? '&#x2717;' : '?'}</span>`);
+  if (name && !s.tooLoud) name.insertAdjacentHTML('beforeend', `<span class="sc-mark sc-mark--${cap.verdict}">${cap.verdict === 'ok' ? '&#x2713;' : cap.verdict === 'wrong' ? '&#x2717;' : '?'}</span>`);
 }
 
 /* Slots whose window has passed: a strum slot not heard is missed, a slot
@@ -509,7 +596,7 @@ function scBarOver(s, b){
   const faults = scBarFaults(own.map(x => x.state), s.slotsOf);
   own.forEach(x => {
     const el = s.cells[x.k];
-    if (el && ((x.strum && x.state === 'miss') || (!x.strum && x.state === 'extra'))) el.classList.add('sc-bad');   // a ✗ only once the bar is over
+    if (el && !s.tooLoud && ((x.strum && x.state === 'miss') || (!x.strum && x.state === 'extra'))) el.classList.add('sc-bad');   // a ✗ only once the bar is over
   });
   s.barsDone = b + 1;
   s.faults = s.faults || [];
@@ -527,10 +614,12 @@ function scLoop(){
   const early = s.phase === 'countin' && now >= s.listenStart - s.win;
   if (s.phase === 'countin' && !early){
     const r = coachReadFrame();
+    scGateFrame(s, r, coachOnsetAt);   // the room's level, for TOO NOISY TO CHECK
     coachSmooth(s, r, coachHfRms);   // warm the level trackers on the room
   } else if (s.phase === 'listening' || early){
+    if (s.gateLevel == null) scGateDecide(s);
     const rms = coachReadFrame(), hf = coachHfRms;
-    const rel = srHearStrum(s, rms, hf);
+    const rel = scHearStrum(s, rms, hf);
     if (rel != null) scOnset(s, rel, coachOnsetAt);
     coachSmooth(s, rms, hf);
     scReadChord(s, rms, now);
@@ -615,7 +704,7 @@ function scRenderReport(){
     if (s.caps[b].verdict === 'ok') c++;
   }
   const heard = s.events.some(e => e.kind !== 'outside');   // a sound inside the bars, anywhere
-  const head = n < 1 ? t('sc.noBars') : !heard ? t('sc.nothing') : scSummaryLine(n, p, c);
+  const head = s.tooLoud ? t('sc.tooLoud') : n < 1 ? t('sc.noBars') : !heard ? t('sc.nothing') : scSummaryLine(n, p, c);
   /* One line, no per-bar sentences; the marks stay on the board until the next round. The row's button starts it. */
   body.innerHTML = `<span class="coach-overall sc-summary">${escHtml(head)}</span>${scHeadphonesHtml()}<span class="sc-local" data-micrec-local></span>`;
 }
@@ -635,13 +724,17 @@ function scRecMeta(){
   const meta = {
     fields: { game: 'strumcheck', coachMode: 'strum', rule: SC_RULE, chordRule: SC_CHORD_RULE, winFrac: SC_WIN_FRAC, winMs: r1(s.win),
       bpm: num(s.bpm), beatMs: r1(s.beatMs), slotMs: r1(s.slotMs), pattern: String(s.pattern || ''), bars: s.bars.map(String), activity: String(s.where || ''),
-      latMs: num(s.lat), gridEase: SR_GRID_EASE, gridEaseWithin: SR_GRID_EASE_WITHIN, gridStepCapMs: null, gridOffsetMs: r1(s.gridOffset),
+      latMs: num(s.lat), gridRule: 'shape', gridEase: null, gridEaseWithin: null, gridStepCapMs: null, gridOffsetMs: r1(s.gridOffset),
       onsetRatio: SC_ONSET_RATIO, hfRatio: SC_HF_RATIO, refractMs: COACH_ONSET_REFRACT, chordClarity: SC_CHORD_CLARITY,
       attackSkipMs: COACH_ATTACK_SKIP, tailAMs: COACH_EVENT_TAIL, tailGapMs: SC_TAIL_GAP, missGraceMs: SC_MISS_GRACE,
       recCapSec: num(s.recCapSec), roundSec: r1(s.roundSec), complete: !!s.complete, barsDone: num(s.barsDone) || 0,
+      /* what the student had for a beat (2026-11-14): the Metronome on at Start, "I'm wearing headphones", the click played */
+      metroOn: !!s.metro, headphones: !!s.hp, clicks: scClicksWanted(s.metro, s.hp),
+      tooLoud: !!s.tooLoud, gateLevel: num(s.gateLevel) == null ? null : Math.round(s.gateLevel * 1e5) / 1e5, gateFrames: (s.gateLevels || []).length, gateThreshold: SC_GATE_LEVEL,
+      anchorRange: SC_ANCHOR_RANGE, anchorStep: SC_ANCHOR_STEP, anchorSpan: SC_ANCHOR_SPAN, anchorRest: SC_ANCHOR_REST, octTol: SC_OCT_TOL,
       eventTimes: 'played (arrival - latMs)',
       rests: s.slots.filter(x => !x.strum).map(x => ({ bar: x.bar, slot: x.slot, verdict: str(x.state), devMs: r1(x.devMs) })),
-      chords: s.caps.map(cp => ({ bar: cp.bar, chord: str(cp.chord), prev: str(cp.prev), verdict: str(cp.verdict), a: str(cp.a), b: str(cp.b), c: str(cp.c),
+      chords: s.caps.map(cp => ({ bar: cp.bar, chord: str(cp.chord), prev: str(cp.prev), verdict: str(cp.verdict), a: str(cp.a), b: str(cp.b), c: str(cp.c), o: str(cp.o),
         atMs: num(cp.at) == null ? null : r1(cp.at - s.lat - s.listenStart), endMs: num(cp.end) == null || num(cp.at) == null ? null : r1(cp.end - cp.at),
         rt: (cp.rt || []).map(x => r1(x)), rm: (cp.rm || []).map(x => num(x) == null ? null : Math.round(x * 100) / 100) })) },
     expected: s.slots.filter(x => x.strum).map((x, i) => ({ i, bar: x.bar, slot: x.slot, dir: str(x.dir), chord: x.slot === 0 ? str(s.bars[x.bar]) : null, midis: x.slot === 0 ? scChordMidis(s, s.bars[x.bar]) : null,

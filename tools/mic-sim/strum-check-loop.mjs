@@ -226,6 +226,7 @@ export const SC_VM = `globalThis.__sc = {
     const s = sc, r1 = x => x == null ? null : Math.round(x * 10) / 10;
     const html = scBody() ? scBody().innerHTML : '';
     const out = { bpm: s.bpm, win: s.win, slotMs: s.slotMs, listenStart: s.listenStart, gridOffset: r1(s.gridOffset), barsDone: s.barsDone, saved: __lb.saved,
+      tooLoud: !!s.tooLoud, gateLevel: s.gateLevel == null ? null : s.gateLevel,
       slots: s.slots.map(x => ({ bar: x.bar, slot: x.slot, strum: x.strum, state: x.state, devMs: r1(x.devMs) })),
       caps: s.caps.map(c => ({ bar: c.bar, chord: c.chord, prev: c.prev, a: c.a, b: c.b, c: c.c, o: c.o === undefined ? null : c.o, verdict: c.verdict, n: c.rm.length, nA: c.rt.filter(t => t <= COACH_EVENT_TAIL).length, rm: c.rm.map(x => Math.round(x * 10) / 10) })),
       events: s.events.map(e => ({ t: r1(e.t - s.listenStart), k: e.k, dev: r1(e.dev), kind: e.kind })),
@@ -394,7 +395,7 @@ async function main(){
     chords[n] = c.frets.map(([s, f]) => OPEN[s] + f);
     if (chords[n].join() !== spec.chords[n].midi.join()) throw new Error(`fake-world check failed: ${n} from its frets is ${chords[n]}, the button says ${spec.chords[n].midi}`);
   }
-  console.log(`strum-check-loop · site ${o.root || 'this checkout'} · student model ${NOTE_MODEL} · pattern ${spec.pattern} · bars ${spec.bars.join(' ')} · chord rule shown to students: ${site.run('SC_CHORD_RULE')} · window ${site.run('SC_WIN_FRAC')} of an eighth`);
+  console.log(`strum-check-loop · site ${o.root || 'this checkout'} · student model ${NOTE_MODEL} · pattern ${spec.pattern} · bars ${spec.bars.join(' ')} · chord rule shown to students: ${site.run('SC_CHORD_RULE')} · window ${site.run('SC_WIN_FRAC')} of an eighth · ratios ${site.run('SC_ONSET_RATIO')} / ${site.run('SC_HF_RATIO')}${site.run("typeof SC_ANCHOR_RANGE === 'undefined' ? '' : ' · grid: the pattern shape, +-' + SC_ANCHOR_RANGE + ' eighth'")}${site.run("typeof SC_GATE_LEVEL === 'undefined' ? '' : ' · too-noisy gate at count-in level ' + SC_GATE_LEVEL")}`);
   const plan = [];
   for (const kind of o.students) for (const room of o.rooms) for (const mic of o.mics) for (const bpm of o.bpm) for (let s = 1; s <= o.seeds; s++)
     plan.push({ kind, room, mic, bpm, s, seed: seedOf(['sc', kind, room, mic, bpm, s].join('|')) });

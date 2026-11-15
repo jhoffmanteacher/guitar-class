@@ -14,6 +14,9 @@ see `WORKFLOW.md` and the git commit log.
 - **The step ticks itself after two full rounds.** A round counts when it reaches the end of bar 8; a round you stop early does not. The step shows "Rounds done: 0 of 2", then 1, then 2 with a ✓. There is no Mark done button on this step.
 - **The Metronome during the check.** If the Metronome is on, a small box next to the button says "I'm wearing headphones". Tick it to hear the click through the whole round. Without headphones the click stays quiet (the mic would hear it as a strum). Either way, the frame around the bars pulses on each beat, strongest on each "1", and a small dot flashes with it.
 - **The bars stay on screen** while you play, on a Chromebook too.
+- **It follows your tempo.** If you drift a little slower or faster, the check moves with you instead of marking every strum one place off. It also hears soft up-strums better.
+- **Too noisy?** If the room is too loud while the four clicks play, the check says "Too noisy to check right now. Keep playing: this round still counts." The arrows stay plain for that round, and the round still counts toward your two.
+- **The chord on each "1" is checked more carefully,** so a G5 played where the bar says C5 now shows as wrong.
 - **The button moved.** The strum pattern activity (Down, Down-Up, Up-Down-Up) no longer has the Listening Coach button; everything else in it is the same.
 
 ## 2026-11-14 — Your next required activity is at the top; Module 1's note circle goes clockwise

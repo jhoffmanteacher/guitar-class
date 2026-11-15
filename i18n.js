@@ -1060,6 +1060,7 @@
     'sc.play':               { en: 'Click here and play it to get feedback', es: 'Haz clic aquí y tócalo para recibir comentarios' },
     'sc.rounds':             { en: 'Rounds done: {n} of {total}', es: 'Rondas hechas: {n} de {total}' },
     'sc.headphones':         { en: 'I\'m wearing headphones', es: 'Llevo audífonos' },
+    'sc.tooLoud':            { en: 'Too noisy to check right now. Keep playing: this round still counts.', es: 'Hay demasiado ruido para revisar ahora. Sigue tocando: esta ronda cuenta igual.' },
     'sc.summary':            { en: 'Pattern: {p} of {n} bars. Chords: {c} of {n}.', es: 'Patrón: {p} de {n} compases. Acordes: {c} de {n}.' },
     'sc.summaryOne':         { en: 'Pattern: {p} of 1 bar. Chord: {c} of 1.', es: 'Patrón: {p} de 1 compás. Acorde: {c} de 1.' },
     'sc.allGood':            { en: 'Every bar: pattern ✓ and chord ✓.', es: 'Cada compás: patrón ✓ y acorde ✓.' },

@@ -96,7 +96,10 @@ const HOOK = `(() => {
     return r;
   };
 })()`;
-export const SITE_P = { ratio: 1.2, hfRatio: 1.46, refract: 140, ease: 0.2, within: 0.45, rule: 'base' };
+/* the site's settings as the page's copy of the detector writes them (the identity test below compares the copy with the real one):
+   since 2026-11-14 ratios 1.15 / 1.3 and the pattern-shape grid (scHearStrum, coach-strumcheck.js); before, 1.2 / 1.46 and Strum
+   Radar's easing 0.2 (rule 'base'). */
+export const SITE_P = { ratio: 1.15, hfRatio: 1.3, refract: 140, ease: 1, within: 0.45, rule: 'shapeFree' };
 
 const args = process.argv.slice(2);
 const opt = k => { const a = args.find(x => x.startsWith('--' + k + '=')); return a ? a.slice(k.length + 3) : null; };
@@ -108,6 +111,11 @@ const KEY = opt('key') ? JSON.parse(readFileSync(opt('key'), 'utf8')) : {};
 const site = benchSite(null);
 site.run(SC_VM);
 site.run(HOOK);
+/* --gate: every frame the check reads during its count-in (scLoop's warm-up: coachSmooth before it updates), with the smoothed level
+   it would be tested against. Recorded only while __ci is an array and the frame is the strum check's. */
+site.run(`(() => { if (globalThis.__ciHook) return; globalThis.__ciHook = true; const real = coachSmooth;
+  coachSmooth = function(st, rms, hf){ if (Array.isArray(globalThis.__ci) && typeof sc !== 'undefined' && st === sc && sc.phase === 'countin')
+    __ci.push({ now: performance.now(), at: coachOnsetAt, rms, hf, sR: st.smoothRms, sH: st.smoothHf }); return real(st, rms, hf); }; })()`);
 const btn = JSON.parse(site.run('__sc.button()'));
 if (btn.err) { console.error('strum-check-replay: ' + btn.err); process.exit(2); }
 const OPEN = { E: 40, A: 45, D: 50, G: 55, B: 59, e: 64 };
@@ -129,6 +137,7 @@ async function replay(tk, p, o = {}){
   setP(p);
   site.run('__scHook.diag = ' + (o.diag ? '[]' : 'null'));
   site.reset(); site.clock.now = 1000;
+  if (o.ci) site.run('globalThis.__ci = []');
   takeSource(tk.proc, tk.srcRate, 0).start(site);
   /* --dot: the Metronome on (no headphones), so the check draws its beat (dot and frame); every beat is logged with the grid of that
      moment. The site's beat function: scBeat(s, j) on the click grid since 2026-11-14 (scBeatTick(s, cur) on the eased grid before). */
@@ -152,6 +161,7 @@ async function replay(tk, p, o = {}){
   const res = JSON.parse(site.run('__sc.out()'));
   res.map = map; res.ls = Number(ls);
   if (o.diag) res.diag = JSON.parse(site.run('JSON.stringify(__scHook.diag)'));
+  if (o.ci){ res.ci = JSON.parse(site.run('JSON.stringify(__ci)')); site.run('globalThis.__ci = null'); }
   if (o.dot) res.dots = JSON.parse(site.run('JSON.stringify(__dots)'));
   return res;
 }
@@ -215,7 +225,10 @@ const log = l => console.log(l);
 for (const tk of takes){
   const raw = await replay(tk, null, {});
   const ar = agree(tk, raw);
-  const fit = await fitShift(tk);
+  /* --shifts=J01:-119.9,J02:-75.1: the clock given, not fitted (a site whose verdicts differ from the live ones cannot be fitted to
+     them; the clocks fitted on the take's own site are the like-for-like ones) */
+  const given = Object.fromEntries((opt('shifts') || '').split(',').filter(Boolean).map(x => x.split(':')).map(([k, v]) => [k, Number(v)]));
+  const fit = tk.id in given ? { fit: given[tk.id], shift: given[tk.id], paired: 0, of: tk.d.events.length, p90: 0, scan: [] } : await fitShift(tk);
   tk.shift = fit.shift;
   log(`${tk.id}: the take's own clock: slots ${ar.s} of 64, chords ${ar.c} of 8; clock fitted on the onsets: ${fit.fit} ms (${fit.paired} of ${fit.of} live onsets paired, 90% within ${fit.p90} ms); kept ${fit.shift} ms`);
   log(`  slots reproduced, clock fit ${fit.scan.map(x => (x.d > 0 ? '+' : '') + x.d + ':' + x.s).join(' ')}`);
@@ -267,6 +280,24 @@ function diagnose(tk, res){
 }
 
 /* ── the sweep ── */
+/* ── the count-in gate (the lead, 2026-11-14: "a too loud to grade warning"): how much the room makes the check's detector fire while
+   the student is not yet playing. Per round: onsets the check's test would hear in the count-in, from GATE_SKIP ms after the count-in's
+   first click (the smoothed level starts at 0) to the first window of bar 1, outside each count-in click (GATE_CLICK_PRE ms before
+   its scheduled time to GATE_CLICK_POST after: the speaker's click reaches the mic too), with the 140 ms refractory; and the median
+   frame level there. Two ratio pairs: 1.1 / 1.2 and 1.2 / 1.46. */
+const GATE_SKIP = 300, GATE_CLICK_PRE = 20, GATE_CLICK_POST = 150;
+function gateMeasure(ci, ls, beatMs, win, ratio, hfRatio){
+  const a0 = ls - 4 * beatMs, clicks = [0, 1, 2, 3].map(k => a0 + k * beatMs);
+  const inside = f => f.at >= a0 + GATE_SKIP && f.at < ls - win && !clicks.some(c => f.at >= c - GATE_CLICK_PRE && f.at <= c + GATE_CLICK_POST);
+  let last = -1e9, n = 0; const lv = [];
+  for (const f of ci){
+    if (!inside(f)) continue;
+    lv.push(f.rms);
+    if (((f.rms > 0.005 && f.rms > f.sR * ratio) || (f.hf > 0.004 && f.hf > f.sH * hfRatio)) && f.at - last > 140){ n++; last = f.at; }
+  }
+  lv.sort((p, q) => p - q);
+  return { n, level: lv.length ? lv[Math.floor(lv.length / 2)] : 0, frames: lv.length };
+}
 const BENCH = {
   ratios: { students: ['silent', 'right'], bpm: [85], seeds: 4 },
   grid: { students: ['right', 'silent', 'late100', 'early100', 'drag2', 'drag4', 'rush2', 'rush4', 'straight8', 'beats'], bpm: [85, 98], seeds: 2 },
@@ -278,7 +309,7 @@ const BENCH = {
 };
 async function bench(p, which){
   setP(p);
-  const B = BENCH[which], o = { lag: 70, fps: 60, stop: 0 }, rows = {};
+  const B = { ...BENCH[which], ...(opt('bench-seeds') ? { seeds: Number(opt('bench-seeds')) } : {}) }, o = { lag: 70, fps: 60, stop: 0 }, rows = {};
   const plan = [];
   for (const room of B.rooms || ['quiet']) for (const kind of B.students) plan.push([kind, room]);
   for (const x of B.extra || []) plan.push(x);
@@ -286,8 +317,16 @@ async function bench(p, which){
     const c = rows[kind + '@' + bpm + (B.rooms ? '@' + room : '')] = { heard: 0, strums: 0, extras: 0, rests: 0, bars: 0, barsOk: 0, silentHeard: 0 };
     for (let s = 1; s <= B.seeds; s++){
       const t = { kind, room, mic: 'chromebook', bpm, s, seed: seedOf(['scr', kind, bpm, s].concat(room === 'quiet' ? [] : [room]).join('|')) };
+      site.run('globalThis.__ci = []');
       const { res, play } = await oneTake(site, t, o, btn, CH);
+      const ci = JSON.parse(site.run('JSON.stringify(__ci)')); site.run('globalThis.__ci = null');
       const end = site.clock.now, slotMs = 60000 / bpm / 2;
+      /* this round alone, and its count-in gate readings (both ratio pairs), so a gate can be applied round by round */
+      const one = { kind, room, bpm, s, bars: res.barsDone, barsOk: 0, heard: 0, strums: 0, extras: 0, rests: 0,
+        g11: gateMeasure(ci, res.listenStart, 60000 / bpm, res.win, 1.1, 1.2), g12: gateMeasure(ci, res.listenStart, 60000 / bpm, res.win, 1.2, 1.46) };
+      for (let b = 0; b < res.barsDone; b++){ const own = res.slots.slice(b * 8, b * 8 + 8); if (own.every(x => x.strum ? x.state === 'ok' : x.state !== 'extra')) one.barsOk++; }
+      res.slots.forEach((x, i) => { const e = play.key[i]; if (e.wantMs + slotMs / 2 > end || kind === 'silent') return; if (e.truth === 'played'){ one.strums++; if (x.state === 'ok') one.heard++; } if (e.truth === 'quiet'){ one.rests++; if (x.state === 'extra') one.extras++; } });
+      (rows.__rounds = rows.__rounds || []).push(one);
       res.slots.forEach((x, i) => {
         const e = play.key[i];
         if (e.wantMs + slotMs / 2 > end) return;   // after the round ended (a dragging student)
@@ -324,5 +363,31 @@ if (flag('sweep')){
     process.stderr.write('.');
   }
   process.stderr.write('\n');
+}
+if (flag('gate')){
+  const seeds = Number(opt('gate-seeds') || 6), rooms = (opt('gate-rooms') || 'quiet,class,room7,room4,talk,chatter').split(','), o2 = { lag: 70, fps: 60, stop: 0 };
+  const rows = [];
+  for (const room of rooms) for (const kind of ['silent', 'right']) for (const bpm of [85, 98]) for (let k = 1; k <= seeds; k++){
+    if (['talk', 'chatter'].includes(room) && kind === 'right') continue;   // no guitar in those rooms
+    site.run('globalThis.__ci = []');
+    const t = { kind, room, mic: 'chromebook', bpm, s: k, seed: seedOf(['gate', kind, room, bpm, k].join('|')) };
+    const { res } = await oneTake(site, t, o2, btn, CH);
+    const ci = JSON.parse(site.run('JSON.stringify(__ci)')); site.run('globalThis.__ci = null');
+    rows.push({ room, kind, bpm, k, ls: res.listenStart, beatMs: 60000 / bpm, win: res.win, ci });
+  }
+  for (const tk of takes){ const r = await replay(tk, null, { ci: true }); rows.push({ room: 'take ' + tk.id, kind: 'right', bpm: tk.d.bpm, k: 1, ls: r.ls, beatMs: 60000 / tk.d.bpm, win: r.win, ci: r.ci }); }
+  out.gate = rows;
+  const lines = [];
+  for (const [ratio, hfRatio] of [[1.1, 1.2], [1.2, 1.46]]){
+    lines.push(`\nCOUNT-IN GATE at ${ratio} / ${hfRatio}: onsets heard in the count-in per round (min / median / max), rounds with >= 1, 2, 3, 4 onsets, median frame level`);
+    const groups = [...new Set(rows.map(r => r.room + '|' + r.kind))];
+    for (const g of groups){
+      const sel = rows.filter(r => r.room + '|' + r.kind === g).map(r => gateMeasure(r.ci, r.ls, r.beatMs, r.win, ratio, hfRatio));
+      const ns = sel.map(x => x.n).sort((p, q) => p - q), lv = sel.map(x => x.level).sort((p, q) => p - q);
+      const at = th => sel.filter(x => x.n >= th).length;
+      lines.push(`  ${g.replace('|', ' ').padEnd(22)} ${String(sel.length).padStart(2)} rounds · onsets ${ns[0]} / ${ns[Math.floor(ns.length / 2)]} / ${ns[ns.length - 1]} · >=1 ${at(1)} >=2 ${at(2)} >=3 ${at(3)} >=4 ${at(4)} · level median ${(lv[Math.floor(lv.length / 2)] || 0).toFixed(4)} (${(lv[0] || 0).toFixed(4)}..${(lv[lv.length - 1] || 0).toFixed(4)}) · frames ${sel[0] ? sel[0].frames : 0}`);
+    }
+  }
+  console.log(lines.join('\n'));
 }
 if (opt('json')) writeFileSync(opt('json'), JSON.stringify(out));
