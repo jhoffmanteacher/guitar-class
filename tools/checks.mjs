@@ -17295,7 +17295,7 @@ async function checkStrumCheck() {
       }
       n.pins++;
     }
-    /* TOO NOISY TO CHECK, through the real scGateFrame / scGateDecide: the constants; a quiet count-in (level 0.002) with its four loud
+    /* TOO NOISY FOR FEEDBACK, through the real scGateFrame / scGateDecide: the constants; a quiet count-in (level 0.002) with its four loud
        clicks is not too noisy (the clicks are left out); a noisy one is; frames before SC_GATE_SKIP are left out; a too-noisy round
        colours nothing (no sc-ok, no sc-bad, no chord mark), still says one line, and still counts toward the step's rounds. */
     {

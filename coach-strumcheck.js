@@ -139,11 +139,11 @@ const SC_OCT_TOL = 0.6;
    G with C5, so most root or fifth readings vote for two chords and one stray reading can tip a tie (review R1-5: take 2 bar 1). */
 const SC_OCT_OK_MARGIN = 1;
 const SC_OCT_WRONG_MARGIN = 2;
-/* TOO NOISY TO CHECK (Jonathan, 2026-11-14: "a too loud to grade warning might be good instead of saying it's wrong"). During the
+/* TOO NOISY FOR FEEDBACK (Jonathan, 2026-11-14: "a too loud to grade warning might be good instead of saying it's wrong"). During the
    count-in the student is not playing yet, so what the mic hears there is the room. The median level of the frames the check reads,
    from SC_GATE_SKIP ms after the first click (the smoothed level starts at 0) until bar 1's first window opens, leaving out each
    count-in click (SC_GATE_CLICK_PRE ms before its time to SC_GATE_CLICK_POST after: the speaker's click reaches the mic), is the
-   room's level. At SC_GATE_LEVEL or more the round is too noisy to check: it still runs to bar 8 and still counts toward the step's
+   room's level. At SC_GATE_LEVEL or more the round is too noisy for feedback: it still runs to bar 8 and still counts toward the step's
    rounds, but no arrow turns green or red, no chord mark is drawn, and the row says so. Measured on the bench (tools/mic-sim/
    strum-check-replay.mjs --gate; DETAILS section 23) and on Jonathan's three takes (0 of 3). */
 const SC_GATE_LEVEL = 0.012;
@@ -492,19 +492,19 @@ function scRenderListening(){
     `${sc.metro ? '<span class="metro-dot sc-beat-dot" id="sc-beat" aria-hidden="true"></span>' : ''}<span class="sr-bar sc-bar" id="sc-bar">${t('games.radar.barOfTotal', { bar: 1, total: sc.bars.length })}</span>` +
     (sc.tooLoud ? `<span class="coach-note sc-note sc-too-loud">${escHtml(t('sc.tooLoud'))}</span>` : '');
 }
-/* TOO NOISY TO CHECK (above): one count-in frame (its level and when its sound arrived), kept when it is inside the measured stretch. */
+/* TOO NOISY FOR FEEDBACK (above): one count-in frame (its level and when its sound arrived), kept when it is inside the measured stretch. */
 function scGateFrame(s, rms, at){
   const a0 = s.listenStart - 4 * s.beatMs;
   if (at < a0 + SC_GATE_SKIP || at >= s.listenStart - s.win) return;
   for (let k = 0; k < 4; k++){ const c = a0 + k * s.beatMs; if (at >= c - SC_GATE_CLICK_PRE && at <= c + SC_GATE_CLICK_POST) return; }
   s.gateLevels.push(rms);
 }
-/* Bar 1's first window opens: too noisy to check when the kept frames' median is SC_GATE_LEVEL or more AND their SC_GATE_PCT
+/* Bar 1's first window opens: too noisy for feedback when the kept frames' median is SC_GATE_LEVEL or more AND their SC_GATE_PCT
    percentile (the count-in's quiet part) is SC_GATE_FLOOR or more. Strums on the count-in that STILL fire it in a quiet room (review
    round 2, Jonathan's take 1 with its own strum pasted in; median / 20th percentile): strums on all four clicks 0.2475 / 0.2298, and
    one strum on count 1 left to ring into bar 1 0.1513 / 0.1026: the guitar fills the count-in's quiet part too. Accepted (the lead,
-   2026-11-14): the end line then says "Don't play on the 4 clicks", and a round played to the end still counts. Strums on counts 3 and 4, on 2-4,
-   or a strum on count 3 left to ring, do not fire it. */
+   2026-11-14): the end line then says "Too noisy for feedback" (Jonathan's words, 2026-11-15), and a round played to the end still
+   counts. Strums on counts 3 and 4, on 2-4, or a strum on count 3 left to ring, do not fire it. */
 function scGateDecide(s){
   const lv = s.gateLevels.slice().sort((p, q) => p - q);
   s.gateLevel = lv.length ? lv[Math.floor(lv.length / 2)] : 0;
@@ -549,7 +549,7 @@ function scOnset(s, rel, at){
   if (!sl.strum){ ev.kind = 'extra'; sl.state = 'extra'; return; }
   ev.kind = 'strum';
   sl.state = 'ok';
-  if (s.cells[k] && !s.tooLoud) s.cells[k].classList.add('sc-ok');   // a ✓ may show at once (none when the room is too noisy to check)
+  if (s.cells[k] && !s.tooLoud) s.cells[k].classList.add('sc-ok');   // a ✓ may show at once (none when the room is too noisy for feedback)
   if (sl.slot === 0){
     /* The chord on the 1: readings from COACH_ATTACK_SKIP after this strum
        to SC_TAIL_GAP before slot 2 is due (rule 'b'), the first
@@ -692,7 +692,7 @@ function scLoop(){
   const early = s.phase === 'countin' && now >= s.listenStart - s.win;
   if (s.phase === 'countin' && !early){
     const r = coachReadFrame();
-    scGateFrame(s, r, coachOnsetAt);   // the room's level, for TOO NOISY TO CHECK
+    scGateFrame(s, r, coachOnsetAt);   // the room's level, for TOO NOISY FOR FEEDBACK
     coachSmooth(s, r, coachHfRms);   // warm the level trackers on the room
   } else if (s.phase === 'listening' || early){
     if (s.gateLevel == null) scGateDecide(s);
