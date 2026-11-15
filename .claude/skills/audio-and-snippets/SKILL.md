@@ -370,13 +370,18 @@ length, so the two mixes drift apart as the loop runs and 1ak fails the push.
 **Every track ships at A=440**: `tuner.js` is hardcoded to A4=440Hz. Export
 at 440 from Moises; ffmpeg/rubberband only as fallback.
 
-**And as mp3, at 320k** (for `audio/` and coded private songs; a BUILT
-song's one stored copy is 192k constant bitrate, Jonathan 2026-11-14).
-Moises will hand you `.m4a`. `sw.js`'s `AUDIO_RE`
-and the audio fingerprint accept it, but keep one format and one bitrate
-across `audio/` (Jonathan's call) so the Guitar toggle never steps between
-codecs. (The existing rhythm-down set is 320k except "the cure" at 120bpm,
-which is 192k.)
+**And as mp3, at 192k constant bitrate, for every NEW file** (Jonathan,
+2026-11-15: "any file that i upload that is not 192k should be converted
+moving forward"; it was 320k until then). That covers `audio/`, coded
+private songs (`tools/new-playalong.mjs` encodes at 192k) and a BUILT
+song's one stored copy (his Song builder decision, 2026-11-14). Never
+below 192k. Moises will hand you `.m4a`. `sw.js`'s `AUDIO_RE` and the
+audio fingerprint accept it, but keep one format, and ONE bitrate across
+the files of a song, so the Guitar toggle and the speed stops never step
+between qualities. The files already in `audio/` stay as they are
+(measured 2026-11-15: 26 song files at 320k, 17 at 192k, 1 at 172k);
+re-encoding those is parked until storage gets tight (WORKFLOW.md,
+"Where things stand").
 
 ## Checking a beat map against the record: `tools/beat-audit.py`
 After changing a `SNIPPET_TRACKS` timing field (`anchor`, `barTimes`, `trackBpm`, `trackBpmSlow`, `feltBpm`,

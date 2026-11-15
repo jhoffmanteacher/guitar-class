@@ -80,7 +80,7 @@ A JSON file in the scratchpad; `perdon-mama.example.json` beside this file is a 
 `"both"`, `chordStart: "power"` unless every full chord is an open chord the class knows.
 1. `node tools/new-playalong.mjs <spec.json> --dry-run`: read the chord positions it picked (smallest hand move;
    override in `shapes` / `powerShapes`), the card and the track.
-2. `node tools/new-playalong.mjs <spec.json> --from <upload.mp3> --private`: makes the two mp3s (320k, tags and cover art
+2. `node tools/new-playalong.mjs <spec.json> --from <upload.mp3> --private`: makes the two mp3s (192k whatever the upload is: Jonathan, 2026-11-15; tags and cover art
    dropped; the slow file is `rubberband` tempo slow/record, pitch held) in the private folder, puts them on the
    `SONG_FILES` list, and writes the track, the card
    (`library: true`: on the Songs page's "More Play Along songs" for EVERY student from the push; no board slot or
