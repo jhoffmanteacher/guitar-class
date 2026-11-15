@@ -34,7 +34,7 @@ see `WORKFLOW.md` and the git commit log.
 - **A new green button in the strum pattern activity.** On the step with the eight bars of D5, C5 and G5, click "Listening Coach — click here to get feedback", then "Start the check", and play the eight bars once after the four clicks.
 - **It listens for your strums in the right places.** It wants a strum on each arrow and nothing on each dot, where your hand swings past the strings. It cannot hear down from up, so it only checks where each strum lands. It also checks the chord on each "1".
 - **You see each bar as you play.** Strums it heard turn green. A missed strum or a strum on a dot turns red when the bar ends. At the end one line gives your counts, like "Pattern: 7 of 8 bars. Chords: 8 of 8."
-- **It starts at 85 BPM; you can change the tempo.** Use −5 and +5 on the check before you press Start. Use it in a quiet spot, and keep the beat in your head, not with your foot.
+- **It uses the tempo you set on the step.** If you have not set one, it starts at 85 BPM. The step's tempo slider and the check's −5 and +5 always show the same number. While the check listens, the tempo controls and the Metronome turn grey, so the tempo cannot change mid-round. Use it in a quiet spot, and keep the beat in your head, not with your foot.
 - **It only gives feedback.** It does not tick the step or save a score; "Got it" still moves you on.
 
 ## 2026-11-14 — Easier to use with a screen reader
