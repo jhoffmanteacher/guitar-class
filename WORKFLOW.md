@@ -31,6 +31,15 @@ Dates are the Pacific calendar date. `CACHE_VERSION` and commit timestamps may s
 
 Start here. Update this block whenever an item opens or closes; each line says where the detail is.
 
+**Song builder (2026-11-14): Part a1 shipped, waits for a rules paste ("Paste D").** Jonathan builds a Play Along
+song in the console with no code push. All ten decisions are his (`Claude outputs/PLAN-song-builder-2026-11-14.md`);
+the build brief is `Claude outputs/WORK-ORDER-song-builder.md` (parts a1, a2, b, c, d; board placement is LATER).
+Part a1 is the rules only: a new add-only block (`builtSongs/{id}`, `builtSongsMeta/list`, `songDrafts/{id}`), the
+emulator tool `tools/built-songs-rules-test.mjs` (166 cases, 66 of 66 breaks) and the 1dt re-pin. No site code reads
+these paths yet, so nothing changes for students before or after the paste. Paste D is the whole `firestore.rules`
+file, so it also publishes Paste C (below) if that is not live yet. Part a2 (the data path, Import, one real song)
+starts after he says "published", and needs his Firestore Usage numbers and "same Chromebook or a cart" first.
+
 **Delete / start over one student (2026-11-14): built, waits for a rules paste.** Manage → a student's "⋯" (More):
 "Start this student over…" and "Delete this student's data…" (`teacher-remove.js`). Start over writes a marker
 (`config/class.progressStartOver[uid]`); the student's own page empties the lesson fields ONCE, at its next sign-in on
@@ -290,8 +299,8 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
   byte-identical to `firestore.rules` at `252e78e`, sha256 `03960853bb96…`, pinned by `1dt`'s `RULES_FILE_SHA256`).
   His report: an outside account and his teacher account both work; he has no @seq.org STUDENT account to test with,
   so a school student's sign-in rests on the deep review's emulator runs and on "0 would be locked out". Watch the
-  first class period after it. One stale comment remains in `firestore.rules` (lines 111-115, "Until Jonathan pastes
-  it…"): it is fixed with the next rules change, because any edit to that file needs a paste. To undo: re-publish
+  first class period after it. The stale comment in `firestore.rules` ("Until Jonathan pastes it…") was fixed with
+  the built-songs rules change (Paste D). To undo: re-publish
   the Paste A text, kept at `Claude outputs/firestore-rules-PASTE-A-2026-11-13.txt` and in
   git at `af1166e:firestore.rules`. The reads-only variant was dropped (it let a refused account write its progress
   before the screen); its draft stays in `Claude outputs/` as a record.
