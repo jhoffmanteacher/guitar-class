@@ -18731,14 +18731,17 @@ function checkSiteErrors() {
    Yes drop one; caps without half an emoji); the caps and id shape equal to
    the rules'; every student-written value escaped in the console's blocks and
    the student's own list, no link built from a doc's url or a bad id, no
-   inline handler; the grouping; and the form walked through srSend in English
+   inline handler; the grouping; the console's "Copy download commands" (one
+   yt-dlp line per waiting video, nothing in them but a valid 11-character id:
+   hostile ids and titles never reach the lines; 0 waiting → button off; a
+   refused clipboard → a read-only box); and the form walked through srSend in English
    and Spanish (sent, refused as a second request this week, rules not
    published, a wrong device date, a dropped connection, the dev bypass, a
    shared Chromebook). Its count of cases is pinned so deleting one to get
    green fails here. The emulator half is tools/song-requests-rules-test.mjs
    (it needs Java; GitHub runs it after every push, .github/workflows/rules.yml).
    ════════════════════════════════════════════════════════════════════ */
-const SONG_REQUESTS_SIM_PIN = 127;
+const SONG_REQUESTS_SIM_PIN = 140;
 function checkSongRequests() {
   head('1dr. Song requests: the link parser, the form, the escaping and the rules caps are run');
   const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'song-requests-sim.mjs')], { encoding: 'utf8', timeout: 120000 });
@@ -18749,7 +18752,7 @@ function checkSongRequests() {
     return;
   }
   if (+m[1] !== SONG_REQUESTS_SIM_PIN || +m[2] !== 0) { err(`1dr: song-requests-sim ran ${m[1]} cases (${m[2]} failed); pinned at ${SONG_REQUESTS_SIM_PIN} — if you changed the simulation on purpose, re-pin SONG_REQUESTS_SIM_PIN (never lower it to hide a deleted case)`); problems++; return; }
-  ok(`song-requests-sim: ${m[1]} cases pass (pinned ${SONG_REQUESTS_SIM_PIN}): links ${m[3]} of ${m[4]} accepted and ${m[5]} of ${m[6]} refused, the form's "a No needs a reason", escaping in the console and the student's list, the rules' caps, the form walked in English and Spanish`);
+  ok(`song-requests-sim: ${m[1]} cases pass (pinned ${SONG_REQUESTS_SIM_PIN}): links ${m[3]} of ${m[4]} accepted and ${m[5]} of ${m[6]} refused, the form's "a No needs a reason", escaping in the console and the student's list, the console's download commands (only valid ids reach them), the rules' caps, the form walked in English and Spanish`);
 }
 
 /* ════════════════════════════════════════════════════════════════════

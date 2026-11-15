@@ -11,7 +11,8 @@
    Delete). The block's buttons set the state of every request in it:
    "Adding it", "Not this one", "Back to Asked", and "Note" (a short line the
    student sees under the state). Filter: Waiting (blocks with a request still
-   "asked") or All.
+   "asked") or All. "Copy download commands" copies one yt-dlp line per
+   waiting video for Terminal (the section "Download commands" below).
 
    WRITES. Field-level updates only (state, note), in one batch per click; the
    rules let the teacher change nothing else. Delete removes one request,
@@ -156,6 +157,85 @@ function teacherSrGroupHtml(g){
     + `<div class="t-grid-wrap"><table><thead><tr><th>When</th><th class="nc">Student</th><th>Period</th><th>Lyrics OK?</th><th>Subject OK?</th><th>Why they still want it</th><th>Title they typed</th><th>State</th><th></th></tr></thead>`
     + `<tbody>${g.rows.map(teacherSrRowHtml).join('')}</tbody></table></div></div>`;
 }
+/* ── Download commands (2026-11-15) ──
+   "Copy download commands" puts one yt-dlp line per distinct video still
+   waiting (a block with a request in state 'asked', the Waiting filter's
+   rule) on the clipboard, after one line that makes and enters a folder; the
+   teacher pastes them into Terminal to get the mp3s for building Play Along
+   songs. "Save as .txt" gives the same text as a file. These lines are run by
+   a shell, so the ONLY value in them is a video id that matches
+   TEACHER_SR_ID_RE, checked again where the line is built: nothing a student
+   typed (title, reason, name), not even in a comment. A waiting request with
+   no valid video id is left out and counted. Nothing is written anywhere. */
+const TEACHER_SR_DL_HEAD = 'mkdir -p ~/Downloads/song-requests && cd ~/Downloads/song-requests';
+const TEACHER_SR_DL_FILE = 'song-requests-download.txt';
+let teacherSrCmdBox = '';             // the commands, shown in a read-only box when the clipboard refused
+/* One video's line; '' for anything that is not an 11-character id. */
+function teacherSrDlLine(id){
+  const v = String(id == null ? '' : id);
+  if(!TEACHER_SR_ID_RE.test(v)) return '';
+  return `yt-dlp -x --audio-format mp3 --audio-quality 192K -o "%(title)s [%(id)s].%(ext)s" "https://www.youtube.com/watch?v=${v}"`;
+}
+/* {lines, songs, noVideo}: lines = the folder line + one per song ([] when
+   there is no song); noVideo = waiting requests left out for a bad video id. */
+function teacherSrDownloadPlan(docs){
+  const songs = [];
+  let noVideo = 0;
+  teacherSrGroups(docs).forEach(g => {
+    if(!g.waiting) return;
+    const line = teacherSrDlLine(g.videoId);
+    if(line) songs.push(line); else noVideo += g.waiting;
+  });
+  return {lines: songs.length ? [TEACHER_SR_DL_HEAD].concat(songs) : [], songs: songs.length, noVideo};
+}
+function teacherSrPlural(n, one, many){ return n === 1 ? '1 ' + one : n + ' ' + many; }
+function teacherSrDownloadHtml(docs){
+  const p = teacherSrDownloadPlan(docs);
+  /* The block buttons' pill border (styles.css .tsr-actions), inline: styles.css is the students' too. */
+  const pill = ' style="border:1px solid var(--border2);border-radius:16px;margin-right:6px"';
+  const btn = p.songs
+    ? `<button type="button" class="tg-seg-btn" data-tsr-act="copycmds"${pill}>Copy download commands (${teacherSrPlural(p.songs, 'song', 'songs')})</button>`
+      + `<button type="button" class="tg-seg-btn" data-tsr-act="savecmds"${pill}>Save as .txt</button>`
+    : `<button type="button" class="tg-seg-btn" data-tsr-act="copycmds"${pill} disabled>No waiting songs to download</button>`;
+  const bad = p.noVideo ? ` <span class="tsr-count">${teacherSrPlural(p.noVideo, 'waiting request has', 'waiting requests have')} no valid video and ${p.noVideo === 1 ? 'is' : 'are'} left out.</span>` : '';
+  return `<div class="tg-note">${btn}${bad}</div>`;
+}
+/* The read-only box, drawn under the note, only after the clipboard refused. */
+function teacherSrCmdBoxHtml(){
+  return teacherSrCmdBox
+    ? `<div class="tg-note"><textarea readonly aria-label="Download commands" data-tsr-cmdbox rows="${Math.min(8, teacherSrCmdBox.split('\n').length + 1)}" style="width:100%;font-family:monospace;font-size:0.75rem;white-space:pre;overflow-x:auto">${escHtml(teacherSrCmdBox)}</textarea></div>`
+    : '';
+}
+function teacherSrCopyCommands(){
+  const p = teacherSrDownloadPlan(teacherSrDocs || []);
+  if(!p.songs) return;
+  const text = p.lines.join('\n') + '\n';
+  const left = p.noVideo ? ` ${teacherSrPlural(p.noVideo, 'request', 'requests')} with no valid video left out.` : '';
+  const done = () => { teacherSrCmdBox = ''; teacherSrNote = `Copied ${teacherSrPlural(p.lines.length, 'line', 'lines')} (${teacherSrPlural(p.songs, 'song', 'songs')}). Paste into Terminal.${left}`; teacherSrPaint(); };
+  const refused = () => {
+    teacherSrCmdBox = text.trimEnd();
+    teacherSrNote = `The browser would not copy. Select the ${teacherSrPlural(p.lines.length, 'line', 'lines')} below, copy them, and paste into Terminal.${left}`;
+    teacherSrPaint();
+    const ta = document.querySelector('#t-grid-container [data-tsr-cmdbox]');
+    if(ta){ try{ ta.focus(); ta.select(); }catch(e){} }
+  };
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done, refused); return; }
+  }catch(e){}
+  refused();
+}
+function teacherSrSaveCommands(){
+  const p = teacherSrDownloadPlan(teacherSrDocs || []);
+  if(!p.songs) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([p.lines.join('\n') + '\n'], {type: 'text/plain'}));
+  a.download = TEACHER_SR_DL_FILE;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  teacherSrCmdBox = '';
+  teacherSrNote = `Saved ${TEACHER_SR_DL_FILE} (${teacherSrPlural(p.lines.length, 'line', 'lines')}). Open it, copy everything, and paste into Terminal.`;
+  teacherSrPaint();
+}
 function teacherSrHtml(docs){
   const groups = teacherSrGroups(docs);
   const waitingN = (docs || []).filter(d => d && teacherSrState(d.state) === 'asked').length;
@@ -163,7 +243,9 @@ function teacherSrHtml(docs){
   const seg = (f, label) => `<button type="button" class="tg-seg-btn${teacherSrFilter === f ? ' on' : ''}" data-tsr-filter="${f}" aria-pressed="${teacherSrFilter === f}">${label}</button>`;
   const head = `<div class="tg-note">${seg('waiting', `Waiting (${waitingN})`)}${seg('all', `All (${(docs || []).length})`)} <button type="button" class="tg-seg-btn" data-tsr-act="refresh">Refresh</button></div>`
     + `<div class="tg-note">Songs students asked for, one per student per week. A block's buttons set every request in it; the student sees the state on their Songs page. Delete gives a student this week's turn back.${(docs || []).length >= TEACHER_SR_READ_MAX ? ` Only the newest ${TEACHER_SR_READ_MAX} are shown.` : ''}</div>`
-    + (teacherSrNote ? `<div class="tg-note"><b>${escHtml(teacherSrNote)}</b></div>` : '');
+    + teacherSrDownloadHtml(docs)
+    + (teacherSrNote ? `<div class="tg-note"><b>${escHtml(teacherSrNote)}</b></div>` : '')
+    + teacherSrCmdBoxHtml();
   if(!shown.length) return head + `<div class="t-loading">${teacherSrFilter === 'all' ? 'No song requests yet.' : 'No song requests waiting.'}</div>`;
   return head + shown.map(teacherSrGroupHtml).join('');
 }
@@ -207,11 +289,13 @@ async function renderTeacherSongRequests(){
 function teacherSrClick(e){
   if(teacherView !== 'songrequests') return;
   const f = e.target.closest('[data-tsr-filter]');
-  if(f){ teacherSrFilter = f.dataset.tsrFilter === 'all' ? 'all' : 'waiting'; teacherSrNote = ''; teacherSrPaint(); return; }
+  if(f){ teacherSrFilter = f.dataset.tsrFilter === 'all' ? 'all' : 'waiting'; teacherSrNote = ''; teacherSrCmdBox = ''; teacherSrPaint(); return; }
   const b = e.target.closest('[data-tsr-act]');
   if(!b || b.disabled) return;
   const act = b.dataset.tsrAct;
-  if(act === 'refresh'){ teacherSrNote = ''; renderTeacherSongRequests(); return; }
+  if(act === 'refresh'){ teacherSrNote = ''; teacherSrCmdBox = ''; renderTeacherSongRequests(); return; }
+  if(act === 'copycmds'){ teacherSrCopyCommands(); return; }
+  if(act === 'savecmds'){ teacherSrSaveCommands(); return; }
   if(act === 'delete'){ teacherSrDelete(b.dataset.tsrId); return; }
   if(act === 'note'){ teacherSrSetNote(b.dataset.tsrKey); return; }
   if(Object.prototype.hasOwnProperty.call(TEACHER_SR_STATES, act)) teacherSrSetState(b.dataset.tsrKey, act);
@@ -233,6 +317,7 @@ async function teacherSrWrite(key, rows, fields, done){
     await batch.commit();
   }catch(e){ err = e || new Error('failed'); }
   teacherSrBusy.delete(key); teacherSrWritesOpen--; teacherSrWriteGen++;
+  teacherSrCmdBox = '';   // the copied list may be out of date now
   if(!err){
     const ids = new Set(rows.map(r => String(r.id)));
     (teacherSrDocs || []).forEach(d => { if(ids.has(String(d.id))) Object.assign(d, fields); });
@@ -277,6 +362,7 @@ async function teacherSrDelete(id){
     await db.collection('songRequests').doc(String(id)).delete();
   }catch(e){ err = e || new Error('failed'); }
   teacherSrBusy.delete(String(id)); teacherSrWritesOpen--; teacherSrWriteGen++;
+  teacherSrCmdBox = '';
   if(!err){
     teacherSrDocs = (teacherSrDocs || []).filter(x => String(x.id) !== String(id));
     teacherSrNote = 'Request deleted.';

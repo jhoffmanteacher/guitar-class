@@ -24,6 +24,11 @@
               escaped; no link is built from a doc's url field or from a video id of the wrong shape; the
               console has no inline handler that carries a value.
      group    three requests for one video show as one block, "3 students asked", newest first.
+     download the console's "Copy download commands" (2026-11-15): 3 waiting requests for 2 videos give the
+              folder line + 2 yt-dlp lines in the one shape; "Not this one" and "Adding it" videos are left out;
+              hostile video ids (quotes, $(…), backticks, a newline, 10 and 12 characters, null, a number) and
+              hostile titles never reach the lines (the line builder checks the id again); 0 waiting → no lines
+              and the button off; the clipboard gets exactly the lines, a refused one shows them in a read-only box.
      walk     the form's states through srSend with a stub page and a stub Firestore: empty, a bad link,
               both Yes (sent: the doc written), one No without a reason, one No with one, this week's request
               already in (the box says when the student can ask again), the send refused (already asked,
@@ -238,6 +243,79 @@ for(const f of ['waiting', 'all']){
   const inv = Object.assign({}, forged[0], { why: '\u200B\u200C\u200D \u2060\u3164\uFEFF\t' });
   ok(run(`teacherSrRowHtml(${JSON.stringify(inv)})`).includes('<i>no reason given</i>'), 'a No whose reason is only invisible characters (zero-width, word joiner, Hangul filler, BOM) shows "no reason given"');
   run('var allStudentsRaw = [];');
+}
+
+/* ══ download: "Copy download commands" (2026-11-15). These lines are pasted into a shell, so the only value
+   in them may be an 11-character video id; every line must be the folder line or the one yt-dlp shape. ══ */
+{
+  const HEAD = 'mkdir -p ~/Downloads/song-requests && cd ~/Downloads/song-requests';
+  const LINE = id => `yt-dlp -x --audio-format mp3 --audio-quality 192K -o "%(title)s [%(id)s].%(ext)s" "https://www.youtube.com/watch?v=${id}"`;
+  const SHAPE = /^yt-dlp -x --audio-format mp3 --audio-quality 192K -o "%\(title\)s \[%\(id\)s\]\.%\(ext\)s" "https:\/\/www\.youtube\.com\/watch\?v=[A-Za-z0-9_-]{11}"$/;
+  const B = 'bbbbbbbbbbb', C = 'Cc_-0123456';
+  const EVIL_TITLE = '$(touch /tmp/x) `id` "; rm -rf ~ #\nnext';
+  const at = s => ({ seconds: s, nanoseconds: 0 });
+  const req = (n, videoId, state, extra) => Object.assign({ id: `fake-uid-${n}_2026-W46`, uid: `fake-uid-${n}`, email: `s${n}@x.test`, period: '4', week: '2026-W46', videoId, lyricsOk: true, topicOk: true, why: '', title: EVIL_TITLE, createdAt: at(1763000000 + n), state }, extra || {});
+  const plan = d => run(`teacherSrDownloadPlan(${JSON.stringify(d)})`);
+  const shapeOk = p => p.lines.every((l, i) => i === 0 ? l === HEAD : SHAPE.test(l));
+  /* 3 waiting requests for 2 videos, plus a declined and an "Adding it" video. */
+  const mix = [req(1, B, 'asked'), req(2, B, 'asked'), req(3, C, 'asked'), req(4, 'ddddddddddd', 'declined'), req(5, 'eeeeeeeeeee', 'adding')];
+  let p = plan(mix);
+  ok(p.songs === 2 && p.lines.length === 3 && p.lines[0] === HEAD && p.lines[1] === LINE(C) && p.lines[2] === LINE(B) && p.noVideo === 0,
+    `download: 3 waiting requests for 2 videos → the folder line + 2 command lines, newest first (${p.lines.length} lines)`);
+  ok(!p.lines.join('\n').includes('ddddddddddd') && !p.lines.join('\n').includes('eeeeeeeeeee'), 'download: a "Not this one" video and an "Adding it" video are left out');
+  /* A block with one request still waiting and one declined is in (the Waiting filter shows it). */
+  p = plan([req(1, B, 'declined'), req(2, B, 'asked')]);
+  ok(p.songs === 1 && p.lines[1] === LINE(B), 'download: a block with one request still waiting is in, once');
+  /* Hostile ids: quotes, $(…), backticks, a newline, 12 characters, 10, a shell ; — never reach the output. */
+  const BAD = ['aaaa"$(id)"a', '$(rm -rf ~)', '`touch x`aa', 'aaaaa\naaaaa', 'aaaaaaaaaaaa', 'aaaaaaaaaa', "aaaa'; ls #", 'aaaaa aaaaa', 'aaaaaaaaaa\n'];
+  const hostile = BAD.map((v, i) => req(10 + i, v, 'asked')).concat([req(30, B, 'asked'), req(31, null, 'asked'), req(32, 123, 'asked')]);
+  p = plan(hostile);
+  const out = p.lines.join('\n');
+  ok(p.songs === 1 && p.noVideo === BAD.length + 2 && shapeOk(p) && BAD.every(v => !out.includes(v)) && !/[`$;']|\(id\)"a|rm -rf/.test(out.replace(/%\((title|id|ext)\)s/g, '')),
+    `download: ${BAD.length + 2} hostile or missing video ids never reach the output (${p.noVideo} left out, ${p.songs} good one kept, every line the one shape)`);
+  ok(run(`teacherSrDlLine(${JSON.stringify('aaaaaaaaaaa\n')})`) === '' && run(`teacherSrDlLine(${JSON.stringify(B + '"')})`) === '' && run(`teacherSrDlLine(${JSON.stringify(B)})`) === LINE(B),
+    "download: the line builder checks the id again (a trailing newline, a quote → nothing)");
+  ok(!out.includes('touch') && !out.includes('rm -rf') && !out.includes('s30@') && !out.includes('fake-uid') && !out.includes('next'),
+    "download: no title, name, email or uid reaches the output (every title here is hostile)");
+  /* 0 waiting → no commands, the button off. */
+  const none = [req(1, B, 'declined'), req(2, C, 'adding')];
+  p = plan(none);
+  run('teacherSrFilter = "waiting"; teacherSrNote = ""; teacherSrCmdBox = "";');
+  let h = run(`teacherSrHtml(${JSON.stringify(none)})`);
+  ok(p.songs === 0 && p.lines.length === 0 && /<button[^>]*data-tsr-act="copycmds"[^>]* disabled>No waiting songs to download<\/button>/.test(h) && !h.includes('savecmds'),
+    'download: 0 waiting → no commands, the button is off and says "No waiting songs to download"');
+  h = run(`teacherSrHtml(${JSON.stringify(hostile)})`);
+  ok(/data-tsr-act="copycmds"[^>]*>Copy download commands \(1 song\)<\/button>/.test(h) && h.includes('11 waiting requests have no valid video and are left out.'),
+    'download: the button counts songs ("1 song") and the note counts the requests left out (11)');
+  h = run(`teacherSrHtml(${JSON.stringify([req(1, B, 'asked'), req(2, 'x', 'asked')])})`);
+  ok(h.includes('1 waiting request has no valid video and is left out.'), 'download: one request left out reads "1 waiting request has … is left out."');
+  /* The copy: the clipboard gets exactly the plan; a refused clipboard shows the lines in a read-only box. */
+  els['t-grid-container'] = { innerHTML: '' };
+  run(`teacherSrDocs = ${JSON.stringify(mix)}; teacherSrFilter = "waiting"; teacherSrNote = ""; teacherSrCmdBox = "";`);
+  let copied = null;
+  box.navigator = { clipboard: { writeText: t => { copied = t; return Promise.resolve(); } } };
+  run('teacherSrCopyCommands()');
+  await new Promise(r => setImmediate(r));
+  const want = [HEAD, LINE(C), LINE(B)].join('\n') + '\n';
+  ok(copied === want && els['t-grid-container'].innerHTML.includes('<b>Copied 3 lines (2 songs). Paste into Terminal.</b>') && !els['t-grid-container'].innerHTML.includes('<textarea'),
+    'download: Copy puts the 3 lines on the clipboard and says "Copied 3 lines (2 songs). Paste into Terminal."');
+  box.navigator = { clipboard: { writeText: () => Promise.reject(new Error('NotAllowedError')) } };
+  run('teacherSrCopyCommands()');
+  await new Promise(r => setImmediate(r));
+  const unesc = x => x == null ? x : x.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+  const ta = unesc((els['t-grid-container'].innerHTML.match(/<textarea readonly[^>]*>([\s\S]*?)<\/textarea>/) || ['', null])[1]);
+  ok(ta !== null && ta === want.trimEnd() && els['t-grid-container'].innerHTML.includes('The browser would not copy. Select the 3 lines below'),
+    'download: a refused clipboard shows the same 3 lines in a read-only box, with a note');
+  box.navigator = {};
+  run('teacherSrCopyCommands()');
+  ok(els['t-grid-container'].innerHTML.includes('<textarea readonly'), 'download: no clipboard at all (an http page) also gets the box');
+  run(`teacherSrDocs = ${JSON.stringify(hostile.map(d => Object.assign({}, d, { title: '<img src=x onerror=alert(1)>' })))}; teacherSrCmdBox = ""; teacherSrNote = "";`);
+  run('teacherSrCopyCommands()');
+  await new Promise(r => setImmediate(r));
+  const ta2 = unesc((els['t-grid-container'].innerHTML.match(/<textarea readonly[^>]*>([\s\S]*?)<\/textarea>/) || ['', ''])[1]);
+  ok(ta2.split('\n').length === 2 && ta2.split('\n').every((l, i) => i === 0 ? l === HEAD : SHAPE.test(l)), `download: the box from hostile data holds only the folder line and the 1 good line`);
+  run('teacherSrDocs = null; teacherSrNote = ""; teacherSrCmdBox = "";');
+  delete els['t-grid-container']; delete box.navigator;
 }
 
 /* ══ walk: the form through srSend, with a stub page and Firestore ══ */
