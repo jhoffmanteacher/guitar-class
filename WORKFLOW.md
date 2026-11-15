@@ -51,6 +51,11 @@ game's takes; a live-quiz key (`lq-q-opened`) can survive to the next student on
 (`shared-chromebook-loop` case 28 at seed 2); a practice card's speed press less than one frame before a count drops
 that click (`pcRetrack` → `cancelQueuedClicks`).
 
+**Parked, only if storage gets tight (Jonathan, 2026-11-15): smaller audio files.** 26 of the 44 song files in
+`audio/` are saved at 320k (275 of 396 MB); 192k copies made from them would save about 110 MB. One song first for
+his ears, then per file: `tools/loudness.py`, `tools/beat-audit.py`, `tools/playalong-loop.mjs`. New audio is
+exported at 192k from now on. Do not start it unasked.
+
 **Song builder (2026-11-14): Part a1 shipped, waits for a rules paste ("Paste D").** Jonathan builds a Play Along
 song in the console with no code push. All ten decisions are his (`Claude outputs/PLAN-song-builder-2026-11-14.md`);
 the build brief is `Claude outputs/WORK-ORDER-song-builder.md` (parts a1, a2, b, c, d; board placement is LATER).
