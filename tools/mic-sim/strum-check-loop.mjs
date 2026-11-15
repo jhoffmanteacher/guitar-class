@@ -228,7 +228,7 @@ export const SC_VM = `globalThis.__sc = {
     const out = { bpm: s.bpm, win: s.win, slotMs: s.slotMs, listenStart: s.listenStart, gridOffset: r1(s.gridOffset), barsDone: s.barsDone, saved: __lb.saved,
       tooLoud: !!s.tooLoud, gateLevel: s.gateLevel == null ? null : s.gateLevel,
       slots: s.slots.map(x => ({ bar: x.bar, slot: x.slot, strum: x.strum, state: x.state, devMs: r1(x.devMs) })),
-      caps: s.caps.map(c => ({ bar: c.bar, chord: c.chord, prev: c.prev, a: c.a, b: c.b, c: c.c, o: c.o === undefined ? null : c.o, verdict: c.verdict, n: c.rm.length, nA: c.rt.filter(t => t <= COACH_EVENT_TAIL).length, rm: c.rm.map(x => Math.round(x * 10) / 10) })),
+      caps: s.caps.map(c => ({ bar: c.bar, chord: c.chord, prev: c.prev, a: c.a, b: c.b, c: c.c, o: c.o === undefined ? null : c.o, ov: c.ov || null, verdict: c.verdict, n: c.rm.length, nA: c.rt.filter(t => t <= COACH_EVENT_TAIL).length, rm: c.rm.map(x => Math.round(x * 10) / 10) })),
       events: s.events.map(e => ({ t: r1(e.t - s.listenStart), k: e.k, dev: r1(e.dev), kind: e.kind })),
       metaProblems: [...new Set(__sc.fsProblems(scRecMeta(), '', []).map(x => x.replace(/\\[\\d+\\]/g, '[]')))],
       logged: __sc.logged.slice(), lines: (s.lines || []).slice(),   /* no per-bar lines since 2026-11-14 */ report: html.replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim(), rule: SC_CHORD_RULE, winFrac: SC_WIN_FRAC,

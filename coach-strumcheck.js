@@ -130,9 +130,12 @@ const SC_ANCHOR_WIDE_TIGHT = 0.15;
    detector's sub-octave), votes for every chord of the step that has it; the chord with the most votes alone wins (3+ readings). It
    decides when it can; when it cannot (a tie, too few readings) rule 'c' decides, as before. */
 const SC_OCT_TOL = 0.6;
-/* The vote decides only by SC_OCT_MARGIN votes or more (review R1-5: on take 2 bar 1 one stray reading tipped a right D5 to G5, 9 to
-   8; G5 shares D with D5 and G with C5, so most root or fifth readings vote for two chords). */
-const SC_OCT_MARGIN = 2;
+/* The vote is lopsided on purpose (the lead, 2026-11-14: a right chord called wrong is worse here than a wrong chord passed): 'ok'
+   when the bar's chord leads every other chord by SC_OCT_OK_MARGIN vote or more; 'wrong' only when another chord leads the bar's
+   chord by SC_OCT_WRONG_MARGIN votes or more; anything else (a tie, another chord ahead by one) is rule c's. G5 shares D with D5 and
+   G with C5, so most root or fifth readings vote for two chords and one stray reading can tip a tie (review R1-5: take 2 bar 1). */
+const SC_OCT_OK_MARGIN = 1;
+const SC_OCT_WRONG_MARGIN = 2;
 /* TOO NOISY TO CHECK (Jonathan, 2026-11-14: "a too loud to grade warning might be good instead of saying it's wrong"). During the
    count-in the student is not playing yet, so what the mic hears there is the room. The median level of the frames the check reads,
    from SC_GATE_SKIP ms after the first click (the smoothed level starts at 0) until bar 1's first window opens, leaving out each
@@ -599,13 +602,18 @@ function scAnchorSearch(s, recent, range, centred){
 function scChordO(midis, want, chords){
   const ms = (midis || []).filter(m => typeof m === 'number' && isFinite(m));
   if (ms.length < 3 || !chords) return 'unheard';
-  const names = Object.keys(chords), votes = {};
-  names.forEach(n => { const ns = (chords[n] && chords[n].midi || []).map(Number);
+  const votes = scChordVotes(ms, chords), mine = votes[want] || 0;
+  const other = Math.max(0, ...Object.keys(votes).filter(n => n !== want).map(n => votes[n]));
+  if (mine > 0 && mine - other >= SC_OCT_OK_MARGIN) return 'ok';
+  if (other - mine >= SC_OCT_WRONG_MARGIN) return 'wrong';
+  return 'unheard';
+}
+/* Each chord's votes: the readings within SC_OCT_TOL of one of its notes or that note an octave down. */
+function scChordVotes(ms, chords){
+  const votes = {};
+  Object.keys(chords).forEach(n => { const ns = (chords[n] && chords[n].midi || []).map(Number);
     votes[n] = ms.filter(m => ns.some(x => Math.abs(m - x) <= SC_OCT_TOL || Math.abs(m - (x - 12)) <= SC_OCT_TOL)).length; });
-  const order = names.slice().sort((p, q) => votes[q] - votes[p]);
-  const best = votes[order[0]] || 0, second = order.length > 1 ? votes[order[1]] : 0;
-  if (!best || best - second < SC_OCT_MARGIN) return 'unheard';
-  return order[0] === want ? 'ok' : 'wrong';
+  return votes;
 }
 
 /* Pitch readings for the open chord capture; closes it when its stretch is over. */
@@ -635,6 +643,7 @@ function scCloseChord(s, cap){
   cap.b = scChordB(cap.rm, want, prev);
   cap.c = cap.b !== 'unheard' ? cap.b : cap.a;
   cap.o = scChordO(cap.rm, cap.chord, s.chords);
+  cap.ov = s.chords ? scChordVotes((cap.rm || []).filter(m => typeof m === 'number' && isFinite(m)), s.chords) : null;   // the votes, for a replay
   cap.verdict = SC_CHORD_RULE === 'oc' ? (cap.o !== 'unheard' ? cap.o : cap.c) : cap[SC_CHORD_RULE];
   const cell = s.cells[cap.bar * SC_SLOTS];
   const name = cell && cell.querySelector('.strum-chord');
@@ -795,7 +804,7 @@ function scRecMeta(){
       /* what the student had for a beat (2026-11-14): the Metronome on at Start, "I'm wearing headphones", the click played */
       metroOn: !!s.metro, headphones: !!s.hp, clicks: scClicksWanted(s.metro, s.hp),
       tooLoud: !!s.tooLoud, gateLevel: num(s.gateLevel) == null ? null : Math.round(s.gateLevel * 1e5) / 1e5, gateFloorLevel: num(s.gateFloor) == null ? null : Math.round(s.gateFloor * 1e5) / 1e5, gateFloor: SC_GATE_FLOOR, gateFrames: (s.gateLevels || []).length, gateThreshold: SC_GATE_LEVEL,
-      anchorRange: SC_ANCHOR_RANGE, anchorWide: SC_ANCHOR_WIDE_RANGE, anchorWideMin: SC_ANCHOR_WIDE_MIN, anchorWideSlack: SC_ANCHOR_WIDE_SLACK, anchorWideAccept: SC_ANCHOR_WIDE_ACCEPT, anchorWideTight: SC_ANCHOR_WIDE_TIGHT, gatePct: SC_GATE_PCT, octMargin: SC_OCT_MARGIN, anchorStep: SC_ANCHOR_STEP, anchorSpan: SC_ANCHOR_SPAN, anchorRest: SC_ANCHOR_REST, octTol: SC_OCT_TOL,
+      anchorRange: SC_ANCHOR_RANGE, anchorWide: SC_ANCHOR_WIDE_RANGE, anchorWideMin: SC_ANCHOR_WIDE_MIN, anchorWideSlack: SC_ANCHOR_WIDE_SLACK, anchorWideAccept: SC_ANCHOR_WIDE_ACCEPT, anchorWideTight: SC_ANCHOR_WIDE_TIGHT, gatePct: SC_GATE_PCT, octOkMargin: SC_OCT_OK_MARGIN, octWrongMargin: SC_OCT_WRONG_MARGIN, anchorStep: SC_ANCHOR_STEP, anchorSpan: SC_ANCHOR_SPAN, anchorRest: SC_ANCHOR_REST, octTol: SC_OCT_TOL,
       eventTimes: 'played (arrival - latMs)',
       rests: s.slots.filter(x => !x.strum).map(x => ({ bar: x.bar, slot: x.slot, verdict: str(x.state), devMs: r1(x.devMs) })),
       chords: s.caps.map(cp => ({ bar: cp.bar, chord: str(cp.chord), prev: str(cp.prev), verdict: str(cp.verdict), a: str(cp.a), b: str(cp.b), c: str(cp.c), o: str(cp.o),

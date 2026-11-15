@@ -17075,7 +17075,7 @@ async function checkStrumCheck() {
   const { run } = COACH_SANDBOX;
   const n = { pins: 0, onsets: 0, chords: 0, lines: 0, strumSteps: 0, sweeps: 0, tempos: 0, saves: 0 };
   const PIN = { pattern: 'D.DU.UDU', bars: 'D5 D5 C5 C5 G5 G5 D5 D5', rests: '1,4', win: 0.45, rule: 'oc', ratio: 1.15, hfRatio: 1.3, startBpm: 85, octTol: 0.6,
-    anchor: { range: 1, step: 5, span: 8, rest: -1.5, wide: 4, wideMin: 6, wideSlack: 1.5, wideAccept: 1, wideTight: 0.15 }, gate: { level: 0.012, pct: 0.2, floor: 0.003, skip: 300, pre: 20, post: 150 }, octMargin: 2 };
+    anchor: { range: 1, step: 5, span: 8, rest: -1.5, wide: 4, wideMin: 6, wideSlack: 1.5, wideAccept: 1, wideTight: 0.15 }, gate: { level: 0.012, pct: 0.2, floor: 0.003, skip: 300, pre: 20, post: 150 }, octOk: 1, octWrong: 2 };
   try {
     const found = JSON.parse(run(`JSON.stringify(CLASS_ACTIVITIES.flatMap(a => (a.steps || []).map((s, si) => ({ id: a.id, si, path: s.path || null, strum: s.strum || null }))).filter(x => x.strum).map(x => ({ id: x.id, si: x.si, path: x.path, listen: 'listen' in x.strum ? x.strum.listen : '(none)', pattern: x.strum.pattern, bars: x.strum.bars.join(' ') })))`));
     n.strumSteps = found.length;
@@ -17207,7 +17207,7 @@ async function checkStrumCheck() {
        the constants. */
     {
       const A = PIN.anchor;
-      for (const [k, v] of [['SC_ANCHOR_RANGE', A.range], ['SC_ANCHOR_STEP', A.step], ['SC_ANCHOR_SPAN', A.span], ['SC_ANCHOR_REST', A.rest], ['SC_ANCHOR_WIDE_RANGE', A.wide], ['SC_ANCHOR_WIDE_MIN', A.wideMin], ['SC_ANCHOR_WIDE_SLACK', A.wideSlack], ['SC_ANCHOR_WIDE_ACCEPT', A.wideAccept], ['SC_ANCHOR_WIDE_TIGHT', A.wideTight], ['SC_OCT_MARGIN', PIN.octMargin]])
+      for (const [k, v] of [['SC_ANCHOR_RANGE', A.range], ['SC_ANCHOR_STEP', A.step], ['SC_ANCHOR_SPAN', A.span], ['SC_ANCHOR_REST', A.rest], ['SC_ANCHOR_WIDE_RANGE', A.wide], ['SC_ANCHOR_WIDE_MIN', A.wideMin], ['SC_ANCHOR_WIDE_SLACK', A.wideSlack], ['SC_ANCHOR_WIDE_ACCEPT', A.wideAccept], ['SC_ANCHOR_WIDE_TIGHT', A.wideTight], ['SC_OCT_OK_MARGIN', PIN.octOk], ['SC_OCT_WRONG_MARGIN', PIN.octWrong]])
         if (Number(run(k)) !== v) fail(`${k} is ${run(k)}, want ${v}`);
       const late = (click, lateBy = 0.8, bars = 3) => JSON.parse(run(`(() => { const slotMs = 353, s = { smoothRms: 0, smoothHf: 0, lastOnsetT: -1e9, listenStart: 0, gridOffset: 0, lat: 0, slotMs, win: SC_WIN_FRAC * slotMs,
           slotsOf: scPatternSlots('${PIN.pattern}'), onsets: [], onsetRatio: SC_ONSET_RATIO, hfRatio: SC_HF_RATIO, metro: ${click}, hp: ${click} };
@@ -17322,21 +17322,21 @@ async function checkStrumCheck() {
     { const r = on(0, 0); if (!r.cap) fail('a strum on slot 0 opened no chord reading'); else if (!(r.capEnd >= 340 && r.capEnd <= 2 * 500 - 60 + 1e-6)) fail(`the chord reading on the 1 ends ${r.capEnd} ms after it, want from 340 to 60 ms before slot 2`); }
     /* the chord rules on scripted readings: [bar chord, previous, readings, rule a, rule b, rule c, the octave vote, the verdict shown
        ('oc': the vote when it decides, else c)]. The last two are Jonathan's real takes (2026-11-14): take 1 bar 4, G5 played where
-       C5 is due, as read live (7 readings: G5 6, D5 5, a margin of 1, so rule c decides) and as the replay reads it (6 readings:
-       G5 6, D5 4: caught); take 2 bar 5, G5 read only as its root 43, which C5's G an octave down also is (a tie: rule c); take 2
-       bar 1, a right D5 the vote called G5 9 to 8 before the margin (review R1-5): now rule c's. */
+       C5 is due, as read live (7 readings: C5 1, G5 6) and as the replay reads it (6 readings: C5 2, G5 6): caught both ways;
+       take 2 bar 5, G5 read only as its root 43, which C5's G an octave down also is (a tie: rule c); take 2 bar 1, a right D5
+       the vote once called G5 (9 to 8): another chord one vote ahead is not enough for "wrong" (the lead: ok by 1, wrong by 2). */
     const CH = { D5: [50, 57, 62], C5: [48, 55, 60], G5: [43, 50, 55] };
     const CASES = [
       ['G5', 'C5', [43, 55, 43, 55], 'ok', 'unheard', 'ok', 'unheard', 'ok'],
       ['G5', 'C5', [43, 50, 55, 50], 'ok', 'ok', 'ok', 'ok', 'ok'],
       ['G5', 'C5', [48, 48, 60, 48], 'wrong', 'wrong', 'wrong', 'wrong', 'wrong'],
       ['G5', 'C5', [48, 55, 48, 55], 'ok', 'wrong', 'wrong', 'wrong', 'wrong'],
-      ['D5', 'G5', [50, 62, 50], 'ok', 'unheard', 'ok', 'unheard', 'ok'],
+      ['D5', 'G5', [50, 62, 50], 'ok', 'unheard', 'ok', 'ok', 'ok'],
       ['D5', 'G5', [50, 57, 57, 62], 'ok', 'ok', 'ok', 'ok', 'ok'],
-      ['C5', 'D5', [50, 57, 50], 'wrong', 'wrong', 'wrong', 'unheard', 'wrong'],
+      ['C5', 'D5', [50, 57, 50], 'wrong', 'wrong', 'wrong', 'wrong', 'wrong'],
       ['C5', 'D5', [48, 55], 'ok', 'unheard', 'ok', 'unheard', 'ok'],
       ['D5', 'D5', [50, 57, 62], 'ok', 'ok', 'ok', 'ok', 'ok'],
-      ['C5', 'C5', [54.17, 54.79, 38.02, 38.05, 50.33, 50.41, 50.26], 'unheard', 'unheard', 'unheard', 'unheard', 'unheard'],
+      ['C5', 'C5', [54.17, 54.79, 38.02, 38.05, 50.33, 50.41, 50.26], 'unheard', 'unheard', 'unheard', 'wrong', 'wrong'],
       ['C5', 'C5', [54.8, 54.7, 38, 50.4, 50.3, 50.4], 'ok', 'ok', 'ok', 'wrong', 'wrong'],
       ['D5', null, [53.3, 38.5, 50.3, 53.1, 54.6, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1], 'ok', 'ok', 'ok', 'unheard', 'ok'],
       ['G5', 'C5', [43.05, 43.24, 43.18, 43.18, 43.16], 'ok', 'unheard', 'ok', 'unheard', 'ok']
