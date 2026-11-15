@@ -31,22 +31,42 @@ Dates are the Pacific calendar date. `CACHE_VERSION` and commit timestamps may s
 
 Start here. Update this block whenever an item opens or closes; each line says where the detail is.
 
-**For a session on the Windows computer (written 2026-11-15 for 2026-11-16; Jonathan cannot paste between his
+**For a session on the Windows computer (written 2026-11-15 for 2026-11-16 on; Jonathan cannot paste between his
 computers, so it lives here).** Jonathan opens Claude Code on Windows and says "do the Windows work in WORKFLOW".
-- First: `git fetch` and fast-forward main (this note was written at `2dbbce7`).
-- The work, after 9:00 (his usage limit): (1) a review of the Strum Pattern check's listening code
-  (`coach-strumcheck.js`, ca-52; the entry below, "Strum Pattern check") with a fresh `site-reviewer-deep` on Opus,
-  rounds and fixes as CLAUDE.md says; (2) the listening design job: plans only, nothing ships (same entry: unheard
-  up-strums, the shared-note chord, one shared detector, the `coach-core.js` split).
+It runs on Fable (Jonathan, 2026-11-15: "big jobs using fable"): the session and the agents it spawns use Fable.
+- First: `git fetch` and fast-forward main. Check `~/.claude/settings.json` has `autoContinueAtUsageLimit` (memory
+  note); start after 9:00 2026-11-16 (his usage limit resets then).
+- The jobs, in this order; each one ships (pushed, `--live`, GitHub's runs read) before the next starts, and each
+  ticks its line here when done:
+  1. [ ] **Strum Pattern check:** a review of its listening code (`coach-strumcheck.js`, ca-52; entry "Strum Pattern
+     check" below) with a fresh `site-reviewer-deep`, rounds and fixes as CLAUDE.md says; then the listening design
+     job: plans only, nothing ships (unheard up-strums, the shared-note chord, one shared detector, the `coach-core.js`
+     split; `coach-core.js` itself is only split with Jonathan).
+  2. [ ] **The known faults** (same entry, "Existing faults found on the way"): the live-quiz key `lq-q-opened` left
+     for the next student on a shared Chromebook (`shared-chromebook-loop --seed=2 --case=28`); a practice card's
+     speed press dropping a count-in click (`pcRetrack` → `cancelQueuedClicks`); `micRecStartPerf` one audio buffer
+     late (listening code: measure on the real takes first, `tools/mic-sim/README.md`); `tools/smoke.mjs --baseline`
+     crashing on a baseline without a new step; the golden live-quiz pictures byte-identical (2 self-checks). Each
+     with a failing case first, then the fix, then the proof.
+  3. [ ] **Split two big parts** (CLAUDE.md "Keep the parts small"): `coach-runner.js` and `coach-chords.js` (over
+     2,000 lines). Move whole banner sections, unchanged, into new parts loaded right after (`COACH_JS_PARTS`, the
+     `sw.js` lists); `node tools/slow-load.mjs`; one split per push. NOT `coach-core.js`, NOT `teacher-activities.js`
+     (the Mac is changing `TEACHER_JS_PARTS`).
+  4. [ ] **The Friday checks' open findings:** every unticked Friday-check item under "Open work" (2026-11-14 MINORs,
+     2026-11-01, 2026-10-31). Verify each on today's code; fix the real ones; tick or close each with a reason.
+  5. [ ] **Other put-off work:** the rest of "Open work" that is unticked, oldest first, EXCEPT anything about song files
+     or private song audio (the Mac's Song builder area) and anything that is a product call: those go to Jonathan
+     with AskUserQuestion, two to four options, one per turn, and wait.
 - Practice minutes is DONE (two review rounds, clean): do not touch it.
-- A session on the Mac builds Song builder Part b at the same time. Leave alone: the `teacher-*.js` console parts,
-  `TEACHER_NAV` (`teacher-core.js`), `TEACHER_JS_PARTS` (`app/boot.js`), `vendor/`, and new Song builder checks.
+- A session on the Mac builds the Song builder (Part b on) at the same time. Leave alone: the `teacher-*.js` console
+  parts, `TEACHER_NAV` (`teacher-core.js`), `TEACHER_JS_PARTS` (`app/boot.js`), `app/songfiles.js`,
+  `app/builtsongs.js`, `teacher-songfiles.js`, `teacher-builtsongs.js`, `vendor/`, and the Song builder checks.
 - Before every push: `git fetch`, `git rebase origin/main` (CLAUDE.md "Start here" step 8); CHANGELOG / WORKFLOW
   entries last, after the final rebase; after a rebase `grep -oE "head\('1[a-z0-9]+\." tools/checks.mjs | sort | uniq -d`
-  may print only `1ck` (an old duplicate): renumber yours if it collides.
+  may print only `1ck` (an old duplicate): renumber yours if it collides. Only one headless-Chrome run at a time.
 - Building a song on Windows: not tried yet (see "Song builder" below, "Windows too"). If he asks for one, fix the
   tool on the way.
-- Delete this block when that work is done.
+- Delete this block when every job above is ticked.
 
 **Class rules published 2026-11-15: Paste C, D and E are live.** Jonathan published `firestore.rules` as one paste
 (`Claude outputs/firestore-rules-PASTE-E-2026-11-15.txt`, sha256 `8cb7341f61c3…`, pinned by `1dt`'s `RULES_FILE_SHA256`);
