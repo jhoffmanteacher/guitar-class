@@ -9,6 +9,7 @@ see `WORKFLOW.md` and the git commit log.
 ## 2026-11-14 — No more "record yourself" steps; "Not saved yet" stays on screen
 
 - **Steps that asked you to record yourself are rewritten (Modules 4, 5 and 7).** The Record button is gone, so these steps now use the metronome, a partner, or playing straight through instead.
+- **The two blues solos have a backing track.** In Module 10 and Module 11, the "solo over the same 12 bars" step links a slow 12-bar blues in A (60 BPM) to play along with.
 - **On a Song Journey page, "Not saved yet" is now easy to see.** It shows in the top-right corner, even after the page scrolls to the next layer. The page keeps trying to save on its own, so you don't need to tick another box. Keep the page open until it says "Saved ✓".
 
 ## 2026-11-14 — A whole song stops at its end after Loop this part
