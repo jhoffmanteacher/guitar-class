@@ -3276,7 +3276,8 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 .micrec-local ul{margin:6px 0 0;padding-left:18px}
 /* The check's ONE row under the board (app/tab.js .sc-row, coach-strumcheck.js THE SCREEN): the button and a one-line strip beside
    it, never taller than the button. Nothing wraps to a second line: a long line is cut with an ellipsis (its title-less text is read
-   whole by a screen reader). */
+   whole by a screen reader). One exception: the "I'm wearing headphones" switch (.sc-hp) is never cut off; when it does not fit
+   beside the line before it, it goes on its own line under it (the lead, 2026-11-14). */
 .sc-row{display:flex;align-items:center;gap:10px;margin-top:8px;min-height:32px;min-width:0}
 .sc-row .coach-btn.sc-play{margin-left:0;flex:none;white-space:nowrap}
 .sc-row .coach-btn.sc-play--stop{border-color:var(--red-text);color:var(--red-text)}
@@ -3300,6 +3301,8 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 .sc-row .sc-strip .micrec-ask .coach-start,.sc-row .sc-strip .micrec-ask .tp-btn{padding:4px 12px;margin:0;font-size:0.8125rem;white-space:nowrap}
 .sc-local a{font-size:0.8125rem}
 .sc-hp{display:flex;align-items:center;gap:6px;font-size:0.8125rem;margin:0;cursor:pointer}
+.sc-strip .sc-body:has(> .sc-hp){flex-wrap:wrap;row-gap:4px}
+.sc-strip .sc-body > .sc-hp{white-space:nowrap}
 /* The beat dot during a checked round with the Metronome on: the Metronome tool's dot, twice its size, beside nothing it could cover. */
 /* The beat dot in the row: the Metronome tool's dot at its own size (the frame around the board carries the beat too). */
 .metro-dot.sc-beat-dot{display:block;box-sizing:border-box;width:22px;height:22px;min-width:22px;margin:0;flex:none}
