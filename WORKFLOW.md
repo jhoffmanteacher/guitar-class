@@ -31,9 +31,19 @@ Dates are the Pacific calendar date. `CACHE_VERSION` and commit timestamps may s
 
 Start here. Update this block whenever an item opens or closes; each line says where the detail is.
 
+**For the next session on the Mac (written 2026-11-15).** Jonathan types "do the Mac work in WORKFLOW". Build the
+Song builder Part b (the Song builder view in the console: drafts, Upload, Volume, Beat) from
+`Claude outputs/WORK-ORDER-song-builder.md` (on the Mac only; Parts a1 and a2 are shipped, entry "Song builder"
+below). Work in its own worktree made from `origin/main`. Parts b and c ship Fast, d is Reviewed, then stop for
+Jonathan before Part e. Agents: Opus or Fable by the need, as for the Windows block below. The Windows computer works
+the list in the next block at the same time: stay out of those files; fetch and rebase before every push. If Jonathan
+sends an mp3 for a first real song: skill `new-playalong`, 192k. Delete this block when Part d ships.
+
 **For a session on the Windows computer (written 2026-11-15 for 2026-11-16 on; Jonathan cannot paste between his
 computers, so it lives here).** Jonathan opens Claude Code on Windows and says "do the Windows work in WORKFLOW".
-It runs on Fable (Jonathan, 2026-11-15: "big jobs using fable"): the session and the agents it spawns use Fable.
+The session runs on Fable (Jonathan, 2026-11-15: "big jobs using fable"). Agents: Opus or Fable by the need
+(Jonathan, 2026-11-15): Opus (`model: 'opus'`) for review rounds, anything in the listening code and the listening
+plan; Fable (`model: 'fable'`) for mechanical work (a part split, re-checking an old finding, a test-tool fault).
 - First: `git fetch` and fast-forward main. Check `~/.claude/settings.json` has `autoContinueAtUsageLimit` (memory
   note); start after 9:00 2026-11-16 (his usage limit resets then).
 - The jobs, in this order; each one ships (pushed, `--live`, GitHub's runs read) before the next starts, and each
