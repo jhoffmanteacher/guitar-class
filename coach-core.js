@@ -2033,7 +2033,12 @@ async function micRecSaveNow(rec, meta){
       saved.push(id);
       try { localStorage.setItem('micRecSaved', JSON.stringify(saved)); } catch(e){}
     }
-  } catch(e){ console.warn('[micRec] save failed', e); }
+  } catch(e){
+    console.warn('[micRec] save failed', e);
+    /* Seen by the teacher in Tools -> Error log (SITE_ERRORS, anonymous): the game, the error's code and the field Firestore names; never
+       the error's own text, which carries the document path (the uid). Nothing is shown to the student. */
+    try { const f = /in field ([\w.`[\]]+)/.exec(String(e && e.message || '')); if (typeof SITE_ERRORS !== 'undefined') SITE_ERRORS.report('error', { message: '[micRec] save failed: ' + rec.mode + ' ' + String((e && (e.code || e.name)) || 'error').slice(0, 40) + (f ? ' in field ' + f[1] : '') }); } catch(_){}
+  }
 }
 
 /* How many matched slots a take needs before we trust it enough to score.

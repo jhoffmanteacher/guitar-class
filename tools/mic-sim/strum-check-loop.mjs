@@ -164,6 +164,8 @@ const SC_VM = `globalThis.__sc = {
     __lb.world(o.lat);
     const group = { querySelector(sel){ return sel === '.bpm-slider' ? { value: String(o.bpm) } : null; }, insertAdjacentElement(){}, closest(){ return null; } };
     const btn = { dataset: { strumcheck: o.data, scWhere: 'bench' }, parentElement: group, closest(sel){ return sel === '.bpm-control-group' ? group : null; } };
+    /* the error log hears only of a belt that had to null a value or a failed save: both are bugs, so the bench collects them */
+    __sc.logged = []; SITE_ERRORS.report = (k, ev) => { __sc.logged.push(String(ev && ev.message || '')); };
     coachOpen(btn);
     if (!sc) return 'coachOpen opened no strum check';
     /* The card opens at SC_START_BPM (85); the student moves it with -5 / +5. The bench sets the take's tempo the same way, directly. */
@@ -172,6 +174,41 @@ const SC_VM = `globalThis.__sc = {
     return '';
   },
   phase(){ return sc ? sc.phase + '|' + sc.listenStart : 'none'; },
+  /* The take this round would save, through the REAL micRecSaveNow into a STRICT stub Firestore: set() throws, as the SDK does, on any
+     value fsProblems lists (a Blob and the server-timestamp sentinel are the SDK's own types and pass). A student account (not the dev
+     bypass), a capture of 1 s. Resolves to { sets: [paths written], refused: [why], warned: [...] }. Everything replaced is put back. */
+  saveProbe(meta){
+    const Blob_ = function(){}, Sent_ = function(){};
+    const keep = { cu: currentUser, ed: ensureDb, db, fb: globalThis.firebase, warn: console.warn, cnt: micTakesCount };
+    const out = { sets: [], refused: [], warned: [] };
+    const sdkOk = v => v instanceof Blob_ || v instanceof Sent_;
+    const strict = (path, v) => {
+      const bad = __sc.fsProblems(v, '', [], sdkOk);
+      if (bad.length){ out.refused.push(path + ': ' + bad.join(', ')); throw new Error('Unsupported field value (' + bad[0] + ')'); }
+      out.sets.push(path);
+    };
+    const docRef = path => ({ set: async v => strict(path, v), collection: c => ({ doc: id => docRef(path + '/' + c + '/' + id) }) });
+    currentUser = { uid: 'bench-student-0001', displayName: 'Test 0' };
+    db = { collection: c => ({ doc: id => docRef(c + '/' + id) }),
+      runTransaction: async fn => fn({ get: async () => ({ exists: false, data: () => ({}) }), update: (r, v) => strict('count update', v), set: (r, v) => strict('count set', v) }) };
+    ensureDb = async () => db;
+    globalThis.firebase = { firestore: { Blob: { fromUint8Array: () => new Blob_() }, FieldValue: { serverTimestamp: () => new Sent_() } } };
+    console.warn = (...a) => { out.warned.push(String(a[0]) + ' ' + String(a[1] && a[1].message || '')); };
+    const rec = { mode: 'coach', n: 48000, srcRate: 48000, bufs: [new Float32Array(48000)], ctx0: 0, perf0: 0, firstPlay: 0.1, frames: 10, frameSum: 170, frameMax: 20, track: '', settings: null };
+    return micRecSaveNow(rec, meta).then(() => out, e => { out.warned.push('threw ' + e.message); return out; }).finally(() => {
+      currentUser = keep.cu; ensureDb = keep.ed; db = keep.db; globalThis.firebase = keep.fb; console.warn = keep.warn; micTakesCount = keep.cnt; });
+  },
+  /* What the real Firestore SDK refuses in a document (it throws "Unsupported field value"): undefined anywhere, a function, an array
+     directly inside an array, an object that is not a plain one; NaN and Infinity are listed too (the take keeps null there). */
+  fsProblems(v, p, out, sdkOk){
+    if (sdkOk && sdkOk(v)) return out;
+    if (v === undefined) out.push(p + ' undefined');
+    else if (typeof v === 'function') out.push(p + ' function');
+    else if (typeof v === 'number' && !isFinite(v)) out.push(p + ' ' + v);
+    else if (Array.isArray(v)) v.forEach((x, i) => { if (Array.isArray(x)) out.push(p + '[' + i + '] array in array'); __sc.fsProblems(x, p + '[' + i + ']', out, sdkOk); });
+    else if (v && typeof v === 'object'){ const pr = Object.getPrototypeOf(v); if (pr !== Object.prototype && pr !== null) out.push(p + ' not a plain object'); Object.keys(v).forEach(k => __sc.fsProblems(v[k], p ? p + '.' + k : k, out, sdkOk)); }
+    return out;
+  },
   out(){
     const s = sc, r1 = x => x == null ? null : Math.round(x * 10) / 10;
     const html = scBody() ? scBody().innerHTML : '';
@@ -179,7 +216,8 @@ const SC_VM = `globalThis.__sc = {
       slots: s.slots.map(x => ({ bar: x.bar, slot: x.slot, strum: x.strum, state: x.state, devMs: r1(x.devMs) })),
       caps: s.caps.map(c => ({ bar: c.bar, chord: c.chord, prev: c.prev, a: c.a, b: c.b, c: c.c, verdict: c.verdict, n: c.rm.length, nA: c.rt.filter(t => t <= COACH_EVENT_TAIL).length, rm: c.rm.map(x => Math.round(x * 10) / 10) })),
       events: s.events.map(e => ({ t: r1(e.t - s.listenStart), k: e.k, dev: r1(e.dev), kind: e.kind })),
-      lines: s.lines.slice(), report: html.replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim(), rule: SC_CHORD_RULE, winFrac: SC_WIN_FRAC,
+      metaProblems: [...new Set(__sc.fsProblems(scRecMeta(), '', []).map(x => x.replace(/\\[\\d+\\]/g, '[]')))],
+      logged: __sc.logged.slice(), lines: s.lines.slice(), report: html.replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim(), rule: SC_CHORD_RULE, winFrac: SC_WIN_FRAC,
       progressWrites: typeof games === 'object' && games ? Object.keys(games).length : -1 };
     coachClose();
     return JSON.stringify(out);
@@ -187,7 +225,7 @@ const SC_VM = `globalThis.__sc = {
 };`;
 
 function bad(msg){ console.error('strum-check-loop: ' + msg); process.exit(2); }
-const VALUED = ['students', 'rooms', 'bpm', 'seeds', 'fps', 'lag', 'root', 'json', 'replay', 'break', 'table', 'mics'];
+const VALUED = ['students', 'rooms', 'bpm', 'seeds', 'fps', 'lag', 'root', 'json', 'replay', 'break', 'table', 'mics', 'stop'];
 function parseArgs(argv){
   const o = {}, seen = new Set();
   for (const a of argv){
@@ -219,14 +257,20 @@ async function oneTake(site, t, o, btn, chords){
   let guard = 0;
   for (;;){
     if (site.run('__sc.phase()').split('|')[0] === 'report') break;
+    /* --stop=N: the student presses Stop once N bars are over (scFinish(false), as the Stop button does) */
+    if (o.stop && Number(site.run('sc ? sc.barsDone : 0')) >= o.stop) site.run('scFinish(false)');
     site.clock.now += 1000 / o.fps; src.pump(); site.tick();
     if (++guard > 400000) throw new Error('strum-check-loop: the round never ended');
   }
+  /* the take through the real micRecSaveNow into the strict stub (before out(), which closes the check) */
+  site.run('globalThis.__scSave = __sc.saveProbe(scRecMeta())');
+  const save = JSON.parse(JSON.stringify(await site.run('__scSave')));
   const res = JSON.parse(site.run('__sc.out()'));
+  res.save = save;
   if (!play) throw new Error('strum-check-loop: the student was never told the round');
   if (res.slots.length !== play.key.length) throw new Error('fake-world check failed: the site judged ' + res.slots.length + ' slots, the key has ' + play.key.length);
   if (o.break){ const e = play.key.find(x => x.truth === 'played' && play.sounds.some(s => s.kind === 'guitar')); if (e) e.truth = 'quiet'; }
-  keyCheck(play, player.clean, res.slotMs);
+  keyCheck(o.stop ? Object.assign({}, play, { key: play.key.filter(e => e.bar < o.stop) }) : play, player.clean, res.slotMs);   // --stop: no sound was made after the Stop
   return { res, play };
 }
 
@@ -312,6 +356,8 @@ async function main(){
   o.rooms = (o.rooms || 'quiet').split(',');
   o.mics = (o.mics || 'chromebook').split(',');
   o.bpm = (o.bpm || '60,80,100').split(',').map(Number);
+  o.stop = o.stop == null ? 0 : Number(o.stop);
+  if (!(Number.isInteger(o.stop) && o.stop >= 0 && o.stop < 8)) bad('--stop must be a whole number of bars from 1 to 7');
   o.seeds = Number(o.seeds || 1); o.fps = Number(o.fps || 60); o.lag = Number(o.lag == null ? 70 : o.lag);
   for (const s of o.students) if (!KINDS[s]) bad('no student ' + s);
   for (const r of o.rooms) if (!ROOMS[r]) bad('no room ' + r);
@@ -348,6 +394,10 @@ async function main(){
     const r = await oneTake(site, t, o, btn, chords);
     if (r.res.progressWrites !== 0) throw new Error('the check wrote to games (the progress doc): ' + r.res.progressWrites + ' keys');
     if (r.res.saved) throw new Error('the check called saveGames ' + r.res.saved + ' times');
+    /* The take's document as scRecMeta builds it must be one the real Firestore SDK accepts (a refused write is lost silently). */
+    if (r.res.metaProblems.length) throw new Error('the take this round would save is not one Firestore accepts: ' + r.res.metaProblems.join(', '));
+    if (r.res.logged.length) throw new Error('the round sent the error log: ' + r.res.logged.join(' | '));
+    if (r.res.save.refused.length || r.res.save.warned.length || !r.res.save.sets.includes('micTakes/bench-student-0001-coach')) throw new Error('the take did not save through the real micRecSaveNow into the strict stub: ' + JSON.stringify(r.res.save));
     if (only){
       console.log(`take ${t.n}: ${t.kind} (${KINDS[t.kind].what}) · ${t.room} · ${t.bpm} BPM · grid offset at the end ${r.res.gridOffset} ms`);
       console.log('  report: ' + r.res.report);

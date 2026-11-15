@@ -17058,13 +17058,13 @@ const COUNTIN_PIN = { runs: 44, beeps: 140, rounds: 9, takes: 6, tips: 28 };   /
        and floor;
      - the check's own strum ratios (SC_ONSET_RATIO / SC_HF_RATIO), run through the real srHearStrum: a 1.3x jump is a strum for the
        check and not for a state without them (Strum Radar's); the shared CHK_ONSET_RATIO / CHK_HF_RATIO stay 1.4 / 1.7. */
-function checkStrumCheck() {
+async function checkStrumCheck() {
   head('1eh. The strum-pattern check on ca-46: the step, the button, the window, the chord on the 1, nothing saved (run)');
   let bad = 0;
   const fail = m => { err('1eh (strum-pattern check): ' + m); problems++; bad++; };
   if (!COACH_SANDBOX) { fail("1ca's sandbox did not load, so the strum-pattern check was NOT run"); return; }
   const { run } = COACH_SANDBOX;
-  const n = { pins: 0, onsets: 0, chords: 0, lines: 0, strumSteps: 0, sweeps: 0, tempos: 0 };
+  const n = { pins: 0, onsets: 0, chords: 0, lines: 0, strumSteps: 0, sweeps: 0, tempos: 0, saves: 0 };
   const PIN = { pattern: 'D.DU.UDU', bars: 'D5 D5 C5 C5 G5 G5 D5 D5', rests: '1,4', win: 0.35, rule: 'c', ratio: 1.2, hfRatio: 1.46, startBpm: 85 };
   try {
     const found = JSON.parse(run(`JSON.stringify(CLASS_ACTIVITIES.flatMap(a => (a.steps || []).map((s, si) => ({ id: a.id, si, path: s.path || null, strum: s.strum || null }))).filter(x => x.strum).map(x => ({ id: x.id, si: x.si, path: x.path, listen: 'listen' in x.strum ? x.strum.listen : '(none)', pattern: x.strum.pattern, bars: x.strum.bars.join(' ') })))`));
@@ -17227,6 +17227,50 @@ function checkStrumCheck() {
       if (!sw.body.includes(sw.head)) fail(`${lang}: the end screen does not say "${sw.head}" (one bar of two with no pattern fault, one chord of two right)`);
     }
     run(`setLang('en')`);
+    /* The take's document, through the REAL micRecSaveNow into a STRICT stub Firestore (Jonathan's first real take did not arrive,
+       2026-11-14): its set() refuses what the SDK refuses (undefined, a function, a non-finite number, a non-plain object, an array
+       directly inside an array; the SDK's Blob and server-timestamp sentinel pass). Three rounds: every bar right, nothing played,
+       Stopped after 3 bars. Each must save its document with nothing refused, and scRecMeta's own belt (scFirestoreFix) must not have
+       had to null anything (a value it nulls is a bug at the source). */
+    for (const kase of ['right', 'nothing', 'stopped']) {
+      const r = JSON.parse(await run(`(async () => {
+        const Blob_ = function(){}, Sent_ = function(){};
+        const keep = { cu: currentUser, ed: ensureDb, db, fb: globalThis.firebase, warn: console.warn, rep: SITE_ERRORS.report, cnt: micTakesCount, pcm: micRecPcm16 };
+        const out = { sets: [], refused: [], warned: [], belt: [] };
+        const probs = (v, p, o) => { if (v instanceof Blob_ || v instanceof Sent_) return o;
+          if (v === undefined) o.push(p + ' undefined'); else if (typeof v === 'function') o.push(p + ' function'); else if (typeof v === 'number' && !isFinite(v)) o.push(p + ' ' + v);
+          else if (Array.isArray(v)) v.forEach((x, i) => { if (Array.isArray(x)) o.push(p + '[' + i + '] array in array'); probs(x, p + '[' + i + ']', o); });
+          else if (v && typeof v === 'object'){ const pr = Object.getPrototypeOf(v); if (pr !== Object.prototype && pr !== null) o.push(p + ' not plain'); Object.keys(v).forEach(k => probs(v[k], p ? p + '.' + k : k, o)); }
+          return o; };
+        const strict = (path, v) => { const b = probs(v, '', []); if (b.length){ out.refused.push(path + ': ' + b.slice(0, 3).join(', ')); throw new Error('Unsupported field value: ' + b[0]); } out.sets.push(path); };
+        const ref = path => ({ set: async v => strict(path, v), collection: c => ({ doc: id => ref(path + '/' + c + '/' + id) }) });
+        try {
+          currentUser = { uid: 'test-student-0', displayName: 'Test 0' }; micRecPcm16 = () => new Int16Array(4);
+          db = { collection: c => ({ doc: id => ref(c + '/' + id) }), runTransaction: async fn => fn({ get: async () => ({ exists: false }), update: (x, v) => strict('count', v), set: (x, v) => strict('count', v) }) };
+          ensureDb = async () => db;
+          globalThis.firebase = { firestore: { Blob: { fromUint8Array: () => new Blob_() }, FieldValue: { serverTimestamp: () => new Sent_() } } };
+          console.warn = (a, e) => { out.warned.push(String(a) + ' ' + String(e && e.message || '')); };
+          SITE_ERRORS.report = (k, ev) => { out.belt.push(String(ev && ev.message || '')); };
+          const kase = ${JSON.stringify(kase)}, pat = scPatternSlots('${PIN.pattern}'), bars = ${JSON.stringify(PIN.bars.split(' '))};
+          sc = { phase: 'report', card: { isConnected: false, remove(){} }, timeouts: [], cells: [], bars, chords: { D5: { midi: [50, 57, 62] }, C5: { midi: [48, 55, 60] }, G5: { midi: [43, 50, 55] } },
+            pattern: '${PIN.pattern}', slotsOf: pat, slots: [], caps: [], events: [], lines: [], barsDone: kase === 'stopped' ? 3 : 8, complete: kase !== 'stopped', cur: -1, cap: null, bpm: 85,
+            beatMs: 60000 / 85, slotMs: 30000 / 85, win: SC_WIN_FRAC * 30000 / 85, lat: 50, listenStart: 4000, gridOffset: 12.5, where: 'bpm:ca:ca-46:6:strum', recCapSec: 28, roundSec: 26.5 };
+          for (let k = 0; k < 64; k++){ const sl = pat[k % 8], b = k >> 3, reached = kase !== 'stopped' || b < 3;
+            sc.slots.push({ k, bar: b, slot: k % 8, strum: sl.strum, dir: sl.dir, devMs: kase === 'right' && sl.strum ? 12 : null, gridMs: kase === 'right' && sl.strum ? 10 : null,
+              state: !reached ? 'pending' : kase === 'nothing' ? (sl.strum ? 'miss' : 'quiet') : (sl.strum ? 'ok' : 'quiet') });
+            if (kase !== 'nothing' && reached && sl.strum) sc.events.push({ t: 4000 + k * sc.slotMs, k, dev: 12, grid: 10, kind: 'strum' }); }
+          sc.caps = bars.map((name, b) => { const heard = kase !== 'nothing' && (kase !== 'stopped' || b < 3);
+            return { bar: b, chord: name, prev: b ? bars[b - 1] : null, at: heard ? 4000 + b * 8 * sc.slotMs + 50 : null, end: heard ? 4000 + b * 8 * sc.slotMs + 600 : undefined,
+              rt: heard ? [80, 120, 160] : [], rm: heard ? [50.1, 57, 62] : [], verdict: heard ? 'ok' : (kase === 'stopped' && b >= 3 ? null : 'unheard'), a: heard ? 'ok' : null, b: heard ? 'ok' : null, c: heard ? 'ok' : null, done: kase !== 'stopped' || b < 3 }; });
+          const meta = scRecMeta();
+          await micRecSaveNow({ mode: 'coach', n: 48000, srcRate: 48000, bufs: [], ctx0: 0, perf0: 0, firstPlay: 0.1, frames: 10, frameSum: 170, frameMax: 20, track: '', settings: null }, meta);
+          return JSON.stringify(out);
+        } finally { currentUser = keep.cu; ensureDb = keep.ed; db = keep.db; globalThis.firebase = keep.fb; console.warn = keep.warn; SITE_ERRORS.report = keep.rep; micTakesCount = keep.cnt; micRecPcm16 = keep.pcm; sc = null; }
+      })()`));
+      n.saves++;
+      if (!r.sets.includes('micTakes/test-student-0-coach') || r.refused.length || r.warned.length) fail(`the take of a round with ${kase === 'right' ? 'every bar right' : kase === 'nothing' ? 'nothing played' : 'a Stop after 3 bars'} did not save through micRecSaveNow into a strict Firestore stub: ${JSON.stringify({ refused: r.refused, warned: r.warned })}`);
+      if (r.belt.length) fail(`scRecMeta's belt had to null values in the take of a round with ${kase}: ${r.belt.join(' | ')} (fix them at the source)`);
+    }
     /* the end line: 0, 1 and many bars, both languages */
     for (const lang of ['en', 'es']) {
       run(`setLang(${JSON.stringify(lang)})`);
@@ -17244,8 +17288,8 @@ function checkStrumCheck() {
     run(`setLang('en')`);
   } catch (e) { fail('stopped on an error: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : e)); }
   /* pinned totals, so a renamed function cannot turn this into a check of nothing */
-  if (n.tempos !== 2 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 9 || n.lines !== 10 || n.pins !== 4) fail(`ran ${n.tempos} tempo opens (want 2), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (9), ${n.lines} end lines (10), ${n.pins} pins (4)`);
-  if (!bad) ok(`1eh: one listening step (ca-46, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, none in the console, never disabled; opens at ${PIN.startBpm} BPM whatever the slider says, -5 / +5 across the step's own range; its own ratios ${PIN.ratio} / ${PIN.hfRatio} (Strum Radar's state still 1.4 / 1.7, run); window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule} (${n.chords} scripted cases); a whole finish saved nothing; the real sweep and end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages`);
+  if (n.saves !== 3 || n.tempos !== 2 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 9 || n.lines !== 10 || n.pins !== 4) fail(`ran ${n.saves} take saves (want 3), ${n.tempos} tempo opens (want 2), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (9), ${n.lines} end lines (10), ${n.pins} pins (4)`);
+  if (!bad) ok(`1eh: one listening step (ca-46, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, none in the console, never disabled; opens at ${PIN.startBpm} BPM whatever the slider says, -5 / +5 across the step's own range; its own ratios ${PIN.ratio} / ${PIN.hfRatio} (Strum Radar's state still 1.4 / 1.7, run); window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule} (${n.chords} scripted cases); a whole finish saved nothing to progress; its take saved through micRecSaveNow into a strict Firestore stub (3 rounds); the real sweep and end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages`);
 }
 
 async function checkCountIn() {
@@ -19964,7 +20008,7 @@ function checkPracticeMinutes(i18nTable) {
   checkToneTest();
   await checkCountIn();
   await checkMicStart();
-  checkStrumCheck();
+  await checkStrumCheck();
   await checkPwTakeEvaluator();
   checkPracticeMinutes(i18nTable);
   checkNoStudentDataHook();

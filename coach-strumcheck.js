@@ -469,23 +469,48 @@ function scRenderReport(){
    times inside `rests` and `chords` are ms from beat 1 (bar 1, slot 0) on
    the grid as the round started, or from the chord's own strum (`rt`). */
 function scRecMeta(){
-  const s = sc, r1 = x => x == null || !isFinite(x) ? null : Math.round(x * 10) / 10;
-  return {
+  /* Every value set on purpose to a string, a finite number, true / false or null: the real Firestore SDK refuses a document holding
+     undefined anywhere (and an array directly inside an array), and micRecSaveNow's write would then be lost with only a console
+     line (Jonathan's first real take, 2026-11-14, did not arrive; the bench found no such value, but nothing here may rely on that). */
+  const s = sc, r1 = x => typeof x === 'number' && isFinite(x) ? Math.round(x * 10) / 10 : null;
+  const num = x => typeof x === 'number' && isFinite(x) ? x : null, str = x => typeof x === 'string' ? x : null;
+  const meta = {
     fields: { game: 'strumcheck', coachMode: 'strum', rule: SC_RULE, chordRule: SC_CHORD_RULE, winFrac: SC_WIN_FRAC, winMs: r1(s.win),
-      bpm: s.bpm, beatMs: r1(s.beatMs), slotMs: r1(s.slotMs), pattern: s.pattern, bars: s.bars.slice(), activity: s.where,
-      latMs: s.lat, gridEase: SR_GRID_EASE, gridEaseWithin: SR_GRID_EASE_WITHIN, gridStepCapMs: null, gridOffsetMs: r1(s.gridOffset),
+      bpm: num(s.bpm), beatMs: r1(s.beatMs), slotMs: r1(s.slotMs), pattern: String(s.pattern || ''), bars: s.bars.map(String), activity: String(s.where || ''),
+      latMs: num(s.lat), gridEase: SR_GRID_EASE, gridEaseWithin: SR_GRID_EASE_WITHIN, gridStepCapMs: null, gridOffsetMs: r1(s.gridOffset),
       onsetRatio: SC_ONSET_RATIO, hfRatio: SC_HF_RATIO, refractMs: COACH_ONSET_REFRACT, chordClarity: SC_CHORD_CLARITY,
       attackSkipMs: COACH_ATTACK_SKIP, tailAMs: COACH_EVENT_TAIL, tailGapMs: SC_TAIL_GAP, missGraceMs: SC_MISS_GRACE,
-      recCapSec: s.recCapSec, roundSec: r1(s.roundSec), complete: !!s.complete, barsDone: s.barsDone,
+      recCapSec: num(s.recCapSec), roundSec: r1(s.roundSec), complete: !!s.complete, barsDone: num(s.barsDone) || 0,
       eventTimes: 'played (arrival - latMs)',
-      rests: s.slots.filter(x => !x.strum).map(x => ({ bar: x.bar, slot: x.slot, verdict: x.state, devMs: r1(x.devMs) })),
-      chords: s.caps.map(cp => ({ bar: cp.bar, chord: cp.chord, prev: cp.prev, verdict: cp.verdict, a: cp.a, b: cp.b, c: cp.c,
-        atMs: cp.at == null ? null : r1(cp.at - s.lat - s.listenStart), endMs: cp.end == null ? null : r1(cp.end - cp.at),
-        rt: cp.rt.map(r1), rm: cp.rm.map(x => Math.round(x * 100) / 100) })) },
-    expected: s.slots.filter(x => x.strum).map((x, i) => ({ i, bar: x.bar, slot: x.slot, dir: x.dir, chord: x.slot === 0 ? s.bars[x.bar] : null, midis: x.slot === 0 ? scChordMidis(s, s.bars[x.bar]) : null,
-      t: s.listenStart + x.k * s.slotMs, verdict: x.state, devMs: r1(x.devMs), gridMs: r1(x.gridMs) })),
-    events: s.events.map(e => ({ t: e.t, k: e.k, devMs: r1(e.dev), kind: e.kind, gridMs: r1(e.grid) }))
+      rests: s.slots.filter(x => !x.strum).map(x => ({ bar: x.bar, slot: x.slot, verdict: str(x.state), devMs: r1(x.devMs) })),
+      chords: s.caps.map(cp => ({ bar: cp.bar, chord: str(cp.chord), prev: str(cp.prev), verdict: str(cp.verdict), a: str(cp.a), b: str(cp.b), c: str(cp.c),
+        atMs: num(cp.at) == null ? null : r1(cp.at - s.lat - s.listenStart), endMs: num(cp.end) == null || num(cp.at) == null ? null : r1(cp.end - cp.at),
+        rt: (cp.rt || []).map(x => r1(x)), rm: (cp.rm || []).map(x => num(x) == null ? null : Math.round(x * 100) / 100) })) },
+    expected: s.slots.filter(x => x.strum).map((x, i) => ({ i, bar: x.bar, slot: x.slot, dir: str(x.dir), chord: x.slot === 0 ? str(s.bars[x.bar]) : null, midis: x.slot === 0 ? scChordMidis(s, s.bars[x.bar]) : null,
+      t: num(s.listenStart + x.k * s.slotMs), verdict: str(x.state), devMs: r1(x.devMs), gridMs: r1(x.gridMs) })),
+    events: s.events.map(e => ({ t: num(e.t), k: num(e.k), devMs: r1(e.dev), kind: str(e.kind), gridMs: r1(e.grid) }))
   };
+  /* The belt: anything the SDK would still refuse becomes null, and the error log hears of it (field paths only, no name or uid). */
+  const bad = scFirestoreFix(meta, '');
+  if (bad.length && typeof SITE_ERRORS !== 'undefined') SITE_ERRORS.report('error', { message: '[strumcheck] take fields set to null: ' + bad.slice(0, 5).join(', ') });
+  return meta;
+}
+/* Walks a take's document as the Firestore SDK would: undefined, a function, a number that is not finite or a non-plain object becomes
+   null, an array directly inside an array becomes null; returns the paths it changed ([] = the SDK would take it as it is). */
+function scFirestoreFix(v, path){
+  const out = [];
+  const bad = x => x === undefined || typeof x === 'function' || (typeof x === 'number' && !isFinite(x)) ||
+    (x && typeof x === 'object' && !Array.isArray(x) && Object.getPrototypeOf(x) !== Object.prototype && Object.getPrototypeOf(x) !== null);
+  const walk = (o, p, inArray) => {
+    const keys = Array.isArray(o) ? o.map((_, i) => i) : Object.keys(o);
+    keys.forEach(k => {
+      const x = o[k], q = Array.isArray(o) ? p + '[' + k + ']' : (p ? p + '.' + k : String(k));
+      if (bad(x) || (inArray && Array.isArray(x))){ o[k] = null; out.push(q); }
+      else if (x && typeof x === 'object') walk(x, q, Array.isArray(x));
+    });
+  };
+  if (v && typeof v === 'object') walk(v, path, Array.isArray(v));
+  return out;
 }
 
 /* Every way out: another card or game takes over (coachClose), the card
