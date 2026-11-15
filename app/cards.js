@@ -948,7 +948,14 @@ function pcAudioError(st, el){
   if(typeof gateToast === 'function') gateToast(t('ca.snipLoadFailed'));
 }
 function pcSparePark(st){
-  if((st.wholeSong && !(st.loopSi >= 0)) || pcState !== st || st.leaving) return;   // mid-handoff: the timer parks it
+  if(pcState !== st || st.leaving) return;   // mid-handoff: the timer parks it
+  /* A whole-song card laps only while Loop this part is on. With it off (never on, or turned off) its spare is
+     dropped, so the song stops at its end (Friday check 2026-11-14: Loop on, then off, left the spare parked and
+     the card lapped forever). */
+  if(st.wholeSong && !(st.loopSi >= 0)){
+    if(st.spare){ try { st.spare.pause(); st.spare.removeAttribute('src'); st.spare.load(); } catch(e) {} st.spare = null; }
+    return;
+  }
   let sp = st.spare;
   if(!sp){
     sp = st.spare = new Audio();
@@ -973,6 +980,7 @@ function pcSparePark(st){
   } else if(sp.readyState >= 1) seek();
 }
 function pcSpareReady(st){
+  if(st.wholeSong && !(st.loopSi >= 0)) return false;   // a whole-song card ends at its end unless Loop this part is on
   const sp = st.spare, nx = pcLoopNext(st);
   if(nx) return !!(sp && twinSrcIs(sp, nx.src) && sp.readyState >= 3 && !sp.seeking && Math.abs(sp.currentTime - pcLoopStartIn(st, nx.win)) < 0.05);
   return !!(sp && sp.src === st.audio.src && sp.readyState >= 3 && !sp.seeking && Math.abs(sp.currentTime - pcLoopStart(st)) < 0.05);

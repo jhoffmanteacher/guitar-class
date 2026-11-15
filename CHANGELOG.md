@@ -6,6 +6,10 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-14 — A whole song stops at its end after Loop this part
+
+- **Turning Loop this part off now lets the song finish.** On a whole-song practice card, if you turned Loop this part on and then off, the song used to jump back to the section you looped when it reached the end and keep playing. Now it stops at the end, the same as when Loop was never on.
+
 ## 2026-11-14 — Power Chord Switch checks the chord, not the timing
 
 - **Play the right chord any time before the next switch.** A change counts as right when you strum the new chord while it is the chord on screen, early or late. A strum a little before the switch counts too.

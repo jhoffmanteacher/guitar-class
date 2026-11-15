@@ -1162,6 +1162,17 @@ function planWalks(M) {
      the stop it should play (PC_BUILD_LAPS laps a stop, then Normal), and the speed control on screen at the
      same stop at every step; once with the spare ready (a shorter section), once with no spare (the seek, and the
      step through the speed switch's own path) on the last section. */
+  /* R15 (Friday check 2026-11-14): a whole-song card with Loop this part turned on and then off stops at the song's
+     end, like one where it was never on (the spare parked at the looped section used to lap it back, forever). */
+  if (M.isBase && ch.wholeSong && M.open.hasLoop && ch.secs.length > 1) {
+    const whole = msFor(M, 'normal', ch.firstBar - 1, ch.endBar - 1), S0 = ch.secs[0];
+    const ops = setup('normal', false, false, null);
+    ops.push({ op: 'click', sel: '.pc-loop-sw[data-loop-sw="loop"]', attr: 'aria-checked', want: 'true' }, startOp(0), { op: 'untilAudible', max: 60000, dt: FINE_MS },
+      { op: 'run', ms: msFor(M, 'normal', S0.fromBar - 1, S0.fromBar) * 0.5, dt: FINE_MS },
+      { op: 'click', sel: '.pc-loop-sw[data-loop-sw="loop"]', attr: 'aria-checked', want: 'false' },
+      { op: 'run', ms: whole + 6000, dt: STEP_MS });
+    walks.push({ kind: 'endStop', loopWalk: true, name: 'Loop this part on, then off: the whole song stops at its end', stop: 'normal', guitar: false, ops, span: 'all', metro: false, fresh: true });
+  }
   if (M.isBase && M.open.hasLoop && ch.secs.length > 1) {
     const secMs = (stop, S) => msFor(M, stop, S.fromBar - 1, S.fromBar - 1 + S.bars * S.reps);
     const cands = ch.secs.slice(0, -1).map(S => S.i).sort((p, q) => secMs('normal', ch.secs[p]) - secMs('normal', ch.secs[q]) || p - q);
@@ -1871,6 +1882,16 @@ async function main() {
         if (SETTING && !W.name.includes(SETTING)) continue;
         if (W.fresh) { o = await openIt(); if (!o.ok) { console.log(`✗ ${label} · ${W.name}: could not reopen the card: ${o.why}`); (W.loopWalk ? totalsLoop : totals).failed++; continue; } M.open = o; M.scan = o.scan; if (!o.scan.sheet) M.tables = checkDrawing(x.chart, o.scan, x.meter, x.view).tables; }
         const res = await step(`${label}: ${W.name}`, `__pl.walk(${JSON.stringify({ ops: W.ops, dur, lateNeverLoad: !!W.lateNeverLoad, watchSpeed: W.loopSi != null })})`);
+        if (W.kind === 'endStop') {
+          /* Only one thing is judged: after the song's end (and six seconds more), nothing plays. */
+          const last = (res.events || [])[res.events.length - 1], okEnd = !res.fatal && last && last.playing === false;
+          totalsLoop.walks++; totalsLoop.cards.add(a.id);
+          if (!okEnd) { totalsLoop.failed++; console.log(`✗ ${label} · ${W.name}: ${res.fatal ? 'the walk failed: ' + res.fatal : 'still playing ' + Math.round((last && last.t1) || 0) + ' ms in, past the song\'s end'}`); }
+          else console.log(`✓ ${label} · ${W.name}: stopped at the end`);
+          out.walks.push({ card: a.id, view: viewName(a, x.v), name: W.name, issues: okEnd ? [] : ['still playing past the end'], nIssues: okEnd ? 0 : 1 });
+          W.fresh = false;
+          continue;
+        }
         const J = judge(M, W, res);
         /* The Loop and Build walks keep their own totals (their own summary line), so the line of the walks every card
            had before them reads as it did. */
