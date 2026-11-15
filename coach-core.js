@@ -2002,6 +2002,7 @@ async function micRecSaveNow(rec, meta){
   if (rec.settings) doc.micSettings = rec.settings;   // left out when the browser reported none (micRecTrackSettings)
   const pcm = micRecPcm16(rec);
   if (isDevBypassUser()){ console.info('[micRec] dev bypass — not uploading', doc, pcm.length + ' samples'); return; }
+  let stage = 'save';   // 'count' once the take itself is written: a counter failure must not read as a lost take (review R1-2)
   try {
     if (typeof ensureDb === 'function') await ensureDb();
     if (!db) return;
@@ -2020,6 +2021,7 @@ async function micRecSaveNow(rec, meta){
     // Count it once per take id (an overwrite of the same student's game
     // is not a new take). Remembered on this device, so a second device
     // can over-count by one — the quota only decides when asking stops.
+    stage = 'count';
     let saved = [];
     try { saved = JSON.parse(localStorage.getItem('micRecSaved') || '[]'); } catch(e){}
     if (saved.indexOf(id) < 0){
@@ -2034,10 +2036,10 @@ async function micRecSaveNow(rec, meta){
       try { localStorage.setItem('micRecSaved', JSON.stringify(saved)); } catch(e){}
     }
   } catch(e){
-    console.warn('[micRec] save failed', e);
+    console.warn(stage === 'count' ? '[micRec] take saved, take counter failed' : '[micRec] save failed', e);
     /* Seen by the teacher in Tools -> Error log (SITE_ERRORS, anonymous): the game, the error's code and the field Firestore names; never
        the error's own text, which carries the document path (the uid). Nothing is shown to the student. */
-    try { const f = /in field ([\w.`[\]]+)/.exec(String(e && e.message || '')); if (typeof SITE_ERRORS !== 'undefined') SITE_ERRORS.report('error', { message: '[micRec] save failed: ' + rec.mode + ' ' + String((e && (e.code || e.name)) || 'error').slice(0, 40) + (f ? ' in field ' + f[1] : '') }); } catch(_){}
+    try { const f = /in field ([\w.`[\]]+)/.exec(String(e && e.message || '')); if (typeof SITE_ERRORS !== 'undefined') SITE_ERRORS.report('error', { message: (stage === 'count' ? '[micRec] take saved, counter failed: ' : '[micRec] save failed: ') + rec.mode + ' ' + String((e && (e.code || e.name)) || 'error').slice(0, 40) + (f ? ' in field ' + f[1] : '') }); } catch(_){}
   }
 }
 

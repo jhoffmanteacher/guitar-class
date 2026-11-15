@@ -17138,7 +17138,10 @@ async function checkStrumCheck() {
             for (let i = 0; i < 40; i++) scNudgeBpm(5); const top = sc.bpm; for (let i = 0; i < 40; i++) scNudgeBpm(-5); const floor = sc.bpm;
             /* a round: everything locked, the slider cannot change the tempo; every way out gives the controls back */
             const m = document.getElementById('metro-btn'), b = document.getElementById('bpm-slider'); m.disabled = false; b.disabled = false;
-            const ctl = () => [slider.disabled, clicks.disabled, m.disabled, b.disabled].map(Number).join('');
+            /* the Metronome tool's -5 / -1 / +1 / +5 (review R1-1), served to scLock's query */
+            const nudges = [0, 1, 2, 3].map(() => ({ disabled: false, setAttribute(){}, removeAttribute(){} })), keepQSA = document.querySelectorAll;
+            document.querySelectorAll = q => q === '#metro-popup .tp-ctrl .tp-btn' ? nudges : keepQSA.call(document, q);
+            const ctl = () => [slider.disabled, clicks.disabled, m.disabled, b.disabled, ...nudges.map(x => x.disabled)].map(Number).join('');
             const exits = {};
             for (const way of ['finish', 'interrupt', 'close']) {
               if (!sc) scOpen(btn);
@@ -17148,6 +17151,7 @@ async function checkStrumCheck() {
               else if (way === 'interrupt') scInterrupt('x'); else scClose();
               exits[way] = { during, held, after: ctl() };
             }
+            document.querySelectorAll = keepQSA;
             return JSON.stringify({ start, shown, moved, nudged, top, floor, exits }); }
           finally { scClose(); localStorage.removeItem('sc-test-key'); } })()`));
         for (const [stored, moveTo, want] of [[null, null, PIN.startBpm], [85, null, 85], [100, null, 100], [null, 95, PIN.startBpm]]) {
@@ -17162,9 +17166,9 @@ async function checkStrumCheck() {
           if (r.top !== hi) fail(`the check's +5 stops at ${r.top} BPM, want the step's own top, ${hi} (no tempo limit)`);
           if (r.floor !== lo) fail(`the check's -5 stops at ${r.floor} BPM, want the step's own floor, ${lo}`);
           for (const [way, x] of Object.entries(r.exits)) {
-            if (x.during !== '1111') fail(`during a round (then ${way}) the step's slider, Play clicks, the Metronome's Start/Stop and its tempo are disabled ${x.during} (want 1111: none may change the tempo under the grid)`);
+            if (x.during !== '11111111') fail(`during a round (then ${way}) the step's slider, Play clicks, the Metronome's Start/Stop, its tempo slider and its -5 / -1 / +1 / +5 are disabled ${x.during} (want 11111111: none may change the tempo under the grid)`);
             if (!x.held) fail(`during a round (then ${way}) moving the step's slider changed the check's tempo`);
-            if (x.after !== '0000') fail(`after ${way === 'finish' ? 'Stop' : way} the controls are disabled ${x.after}, want 0000 (every way out gives them back)`);
+            if (x.after !== '00000000') fail(`after ${way === 'finish' ? 'Stop' : way} the controls are disabled ${x.after}, want 00000000 (every way out gives them back)`);
           }
         }
         if (!/stopAllDemoAudio\(\);\s*scLock\(true\);/.test(siteText('coach-strumcheck.js', ROOT))) fail('scStart no longer locks the tempo controls when the round starts (scLock(true) after stopAllDemoAudio)');
@@ -17270,7 +17274,7 @@ async function checkStrumCheck() {
        directly inside an array; the SDK's Blob and server-timestamp sentinel pass). Three rounds: every bar right, nothing played,
        Stopped after 3 bars. Each must save its document with nothing refused, and scRecMeta's own belt (scFirestoreFix) must not have
        had to null anything (a value it nulls is a bug at the source). */
-    for (const kase of ['right', 'nothing', 'stopped']) {
+    for (const kase of ['right', 'nothing', 'stopped', 'counterFails']) {
       const r = JSON.parse(await run(`(async () => {
         const Blob_ = function(){}, Sent_ = function(){};
         const keep = { cu: currentUser, ed: ensureDb, db, fb: globalThis.firebase, warn: console.warn, rep: SITE_ERRORS.report, cnt: micTakesCount, pcm: micRecPcm16 };
@@ -17284,12 +17288,14 @@ async function checkStrumCheck() {
         const ref = path => ({ set: async v => strict(path, v), collection: c => ({ doc: id => ref(path + '/' + c + '/' + id) }) });
         try {
           currentUser = { uid: 'test-student-0', displayName: 'Test 0' }; micRecPcm16 = () => new Int16Array(4);
-          db = { collection: c => ({ doc: id => ref(c + '/' + id) }), runTransaction: async fn => fn({ get: async () => ({ exists: false }), update: (x, v) => strict('count', v), set: (x, v) => strict('count', v) }) };
+          db = { collection: c => ({ doc: id => ref(c + '/' + id) }), runTransaction: ${JSON.stringify(kase)} === 'counterFails' ? async () => { throw Object.assign(new Error('counter down'), { code: 'unavailable' }); }
+            : async fn => fn({ get: async () => ({ exists: false }), update: (x, v) => strict('count', v), set: (x, v) => strict('count', v) }) };
+          try { localStorage.removeItem('micRecSaved'); } catch (e) {}
           ensureDb = async () => db;
           globalThis.firebase = { firestore: { Blob: { fromUint8Array: () => new Blob_() }, FieldValue: { serverTimestamp: () => new Sent_() } } };
           console.warn = (a, e) => { out.warned.push(String(a) + ' ' + String(e && e.message || '')); };
           SITE_ERRORS.report = (k, ev) => { out.belt.push(String(ev && ev.message || '')); };
-          const kase = ${JSON.stringify(kase)}, pat = scPatternSlots('${PIN.pattern}'), bars = ${JSON.stringify(PIN.bars.split(' '))};
+          const kase = ${JSON.stringify(kase)} === 'counterFails' ? 'right' : ${JSON.stringify(kase)}, pat = scPatternSlots('${PIN.pattern}'), bars = ${JSON.stringify(PIN.bars.split(' '))};
           sc = { phase: 'report', card: { isConnected: false, remove(){} }, timeouts: [], cells: [], bars, chords: { D5: { midi: [50, 57, 62] }, C5: { midi: [48, 55, 60] }, G5: { midi: [43, 50, 55] } },
             pattern: '${PIN.pattern}', slotsOf: pat, slots: [], caps: [], events: [], lines: [], barsDone: kase === 'stopped' ? 3 : 8, complete: kase !== 'stopped', cur: -1, cap: null, bpm: 85,
             beatMs: 60000 / 85, slotMs: 30000 / 85, win: SC_WIN_FRAC * 30000 / 85, lat: 50, listenStart: 4000, gridOffset: 12.5, where: 'bpm:ca:ca-52:0:strum', recCapSec: 28, roundSec: 26.5 };
@@ -17306,6 +17312,11 @@ async function checkStrumCheck() {
         } finally { currentUser = keep.cu; ensureDb = keep.ed; db = keep.db; globalThis.firebase = keep.fb; console.warn = keep.warn; SITE_ERRORS.report = keep.rep; micTakesCount = keep.cnt; micRecPcm16 = keep.pcm; sc = null; }
       })()`));
       n.saves++;
+      /* R1-2 (review of 753790a): a take that arrived and a counter that failed must not read as a lost take in the error log */
+      if (kase === 'counterFails') {
+        if (!r.sets.includes('micTakes/test-student-0-coach') || !r.belt.some(x => x.startsWith('[micRec] take saved, counter failed: coach')) || r.belt.some(x => x.startsWith('[micRec] save failed'))) fail(`a take saved with its counter failing logged ${JSON.stringify(r.belt)} (want one "[micRec] take saved, counter failed: coach ..." and no "save failed")`);
+        continue;
+      }
       if (!r.sets.includes('micTakes/test-student-0-coach') || r.refused.length || r.warned.length) fail(`the take of a round with ${kase === 'right' ? 'every bar right' : kase === 'nothing' ? 'nothing played' : 'a Stop after 3 bars'} did not save through micRecSaveNow into a strict Firestore stub: ${JSON.stringify({ refused: r.refused, warned: r.warned })}`);
       if (!r.win || r.win.frac !== PIN.win || Math.abs(r.win.ms - Math.round(PIN.win * r.win.slotMs * 10) / 10) > 0.11) fail(`the saved take says window ${JSON.stringify(r.win)}, want winFrac ${PIN.win} and winMs ${PIN.win} of its slotMs (a replay must know the width that graded it)`);
       if (r.belt.length) fail(`scRecMeta's belt had to null values in the take of a round with ${kase}: ${r.belt.join(' | ')} (fix them at the source)`);
@@ -17361,7 +17372,7 @@ async function checkStrumCheck() {
     run(`setLang('en')`);
   } catch (e) { fail('stopped on an error: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : e)); }
   /* pinned totals, so a renamed function cannot turn this into a check of nothing */
-  if (n.saves !== 3 || n.tempos !== 4 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 9 || n.lines !== 10 || n.pins !== 5) fail(`ran ${n.saves} take saves (want 3), ${n.tempos} tempo opens (want 4), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (9), ${n.lines} end lines (10), ${n.pins} pins (5)`);
+  if (n.saves !== 4 || n.tempos !== 4 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 9 || n.lines !== 10 || n.pins !== 5) fail(`ran ${n.saves} take saves (want 4), ${n.tempos} tempo opens (want 4), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (9), ${n.lines} end lines (10), ${n.pins} pins (5)`);
   if (!bad) ok(`1eh: one listening step (ca-52, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, none in the console, never disabled; opens at the step's last tempo (${PIN.startBpm} if never set), one tempo with the step's slider, -5 / +5 across its range, the tempo controls locked during a round and given back on every exit; its own ratios ${PIN.ratio} / ${PIN.hfRatio} (Strum Radar's state still 1.4 / 1.7, run); window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule} (${n.chords} scripted cases); two full rounds tick ca-52's step (round 1 <id>:0:r1, round 2 the step; Stopped, short and other steps write nothing; no Mark done button); a whole finish saved nothing else; its take saved through micRecSaveNow into a strict Firestore stub (3 rounds); the real sweep and end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages`);
 }
 

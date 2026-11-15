@@ -246,7 +246,9 @@ function scSliderMoved(slider){
 function scLock(on){
   if (!sc) return;
   if (on){
-    const els = [sc.slider, sc.group && sc.group.querySelector('.strum-clicks-btn'), document.getElementById('metro-btn'), document.getElementById('bpm-slider')].filter(Boolean);
+    /* the Metronome tool's own -5 / -1 / +1 / +5 too (review R1-1): the whole tool greys, as the CHANGELOG says */
+    const els = [sc.slider, sc.group && sc.group.querySelector('.strum-clicks-btn'), document.getElementById('metro-btn'), document.getElementById('bpm-slider'),
+      ...document.querySelectorAll('#metro-popup .tp-ctrl .tp-btn')].filter(Boolean);
     sc.locked = sc.locked || [];
     els.forEach(el => { if (el.disabled) return; el.disabled = true; el.setAttribute('aria-disabled', 'true'); sc.locked.push(el); });
   } else {
