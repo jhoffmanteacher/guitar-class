@@ -132,7 +132,9 @@ async function suite(rulesText, quiet) {
   await t('lang "fr" refused', () => col(A).add(good({ lang: 'fr' })), false);
   await t('day "today" refused', () => col(A).add(good({ day: 'today' })), false);
   await t('day "2026-1-1" refused', () => col(A).add(good({ day: '2026-1-1' })), false);
-  await t('day with a time ("2026-11-13T10:42") refused', () => col(A).add(good({ day: '2026-11-13T10:42' })), false);
+  /* Today's date plus a time: inside the day window, so only the format check refuses it. (A fixed date here stopped
+     catching "the day check dropped" once that date was two days old: GitHub, 2026-11-15 UTC.) */
+  await t('day with a time (today + "T10:42") refused', () => col(A).add(good({ day: utcDay(0) + 'T10:42' })), false);
   await t('day as a timestamp refused', () => col(A).add(good({ day: FV.serverTimestamp() })), false);
   await t('message as a number refused', () => col(A).add(good({ message: 42 })), false);
   await t('file as null refused', () => col(A).add(good({ file: null })), false);
