@@ -10,6 +10,7 @@ see `WORKFLOW.md` and the git commit log.
 
 - **"Strum Pattern check" is a new In-Class Activity** (when your teacher adds it). It has one step: the eight bars of D5, C5 and G5 with the green Listening Coach button.
 - **The step ticks itself after two full rounds.** A round counts when the check reaches the end of bar 8; a round you stop early does not. The step shows "Full rounds with the Listening Coach: 0 of 2", then 1, then 2 with a ✓. There is no Mark done button on this step.
+- **The Metronome during the check.** If the Metronome is on, the check's start screen has a box, "I'm wearing headphones". Tick it to hear the Metronome's click through the whole check. Without headphones the click stays quiet (the mic would hear it as a strum) and a big dot flashes on each beat instead.
 - **The button moved.** The strum pattern activity (Down, Down-Up, Up-Down-Up) no longer has the Listening Coach button; everything else in it is the same.
 
 ## 2026-11-14 — Your next required activity is at the top; Module 1's note circle goes clockwise

@@ -273,7 +273,45 @@ function scRenderReady(msg){
      <div class="coach-tip">&#x1F92B; ${escHtml(t('sc.tipDir'))}</div>
      <div class="coach-tip">&#x1F941; ${escHtml(t('sc.tipCount'))}</div>
      ${coachSetupLineHtml()}
+     ${typeof metroRunning !== 'undefined' && metroRunning ? `<label class="sc-hp"><input type="checkbox" id="sc-hp"${scHeadphonesGet() ? ' checked' : ''} onchange="scHeadphonesSet(this.checked)"> ${escHtml(t('sc.headphones'))}</label>` : ''}
      <button type="button" class="coach-start" onclick="scStart()">&#x25B6; ${t('coach.start')}</button>`;
+}
+/* "I'm wearing headphones" (Jonathan, 2026-11-14: "can a headphone option be given if not it just flashes and can the flashing dot
+   be made larger?"). Shown on the start screen only while the Metronome tool is on. Remembered for this browser, not per student and
+   not in progress (a device fact, like gc-mic-ok). Default off. */
+const SC_HP_KEY = 'gc-sc-headphones';
+function scHeadphonesGet(){ try { return localStorage.getItem(SC_HP_KEY) === '1'; } catch(e){ return false; } }
+function scHeadphonesSet(on){ try { if (on) localStorage.setItem(SC_HP_KEY, '1'); else localStorage.removeItem(SC_HP_KEY); } catch(e){} }
+/* The Metronome during a round, decided at Start: on + headphones -> the click on every beat (scScheduleClicks); on, no
+   headphones -> no sound after the count-in, the big dot flashes each beat; off -> neither (the board's moving cell, as before). */
+function scClicksWanted(metro, hp){ return !!(metro && hp); }
+/* The count-in's own click (coachBeepAt, the same voice and level) on every beat of the round, on the audio clock the count-in set
+   listenStart from, at the check's tempo. Each click is queued just before it is due (COACH_COUNTIN_AHEAD), so every exit, which
+   clears s.timeouts, silences the rest. Only with headphones: through a laptop speaker the mic hears every click as a strum
+   (measured 2026-11-14: 96 of 96 beat slots with nothing played). */
+function scScheduleClicks(s){
+  const ac = typeof getAudioCtx === 'function' ? getAudioCtx() : null;
+  if (!ac || ac.state !== 'running') return 0;
+  const perf0 = performance.now(), ctx0 = ac.currentTime, beats = s.total / 2;
+  let n = 0;
+  for (let j = 0; j < beats; j++){
+    const dueMs = s.listenStart + j * s.beatMs - perf0, at = ctx0 + dueMs / 1000;
+    const queue = () => { if (sc === s && (s.phase === 'countin' || s.phase === 'listening')) coachBeepAt(ac, at, 660, 0.08); };
+    if (dueMs <= COACH_COUNTIN_AHEAD * 1000) queue();
+    else s.timeouts.push(setTimeout(queue, dueMs - COACH_COUNTIN_AHEAD * 1000));
+    n++;
+  }
+  return n;
+}
+/* The beat dot (the Metronome tool's own .metro-dot, larger: .sc-beat-dot) flashes on each beat of the displayed grid while the
+   Metronome was on at Start, whether or not the click sounds. */
+function scBeatTick(s, cur){
+  if (!s.metro || cur % 2) return false;
+  const dot = document.getElementById('sc-beat');
+  if (!dot) return false;
+  dot.classList.add('flash');
+  s.timeouts.push(setTimeout(() => dot.classList.remove('flash'), 90));
+  return true;
 }
 
 function scNudgeBpm(d){
@@ -304,9 +342,10 @@ async function scStart(){
   await coachEnsureRunning();
   if (sc !== session || !scBody()){ coachReleaseMicIfIdle(); return; }   // card closed or replaced during the prompt
   if (document.hidden){ coachMicOff(); scRenderReady(t('coach.paused.backgrounded')); return; }
-  /* No click while the mic listens, as in every other listening game (Strum Radar, Power Chord Switch, the Coach; the Metronome tool
-     itself goes silent while the mic is on): the laptop's own click reaches the mic. Measured 2026-11-14 with clicks through the round,
-     at the count-in's level: nothing played heard 96 of 96 beat strum slots and a "strum" on "3" in every bar (strum-check-loop.mjs). */
+  /* The Metronome tool's state at Start, and the headphones switch, decide the round's beat (scClicksWanted). No click through a
+     speaker: the laptop's own click reaches the mic, as in every other listening game. stopAllDemoAudio stops the tool itself. */
+  sc.metro = typeof metroRunning !== 'undefined' && !!metroRunning;
+  sc.hp = scHeadphonesGet();
   stopAllDemoAudio();
   scLock(true);
   const micEl = document.getElementById('coach-mic');
@@ -347,6 +386,7 @@ async function scStart(){
   coachCountIn(s, 'sc-count', () => {
     if (sc === s && s.phase === 'countin' && scBody()){ s.phase = 'listening'; scRenderListening(); }
   });
+  if (scClicksWanted(s.metro, s.hp)) scScheduleClicks(s);
   if (scRaf) cancelAnimationFrame(scRaf);
   scLoop();
 }
@@ -356,6 +396,7 @@ function scRenderListening(){
   if (!body || !sc) return;
   body.innerHTML =
     `<div class="coach-live"><span class="coach-live-dot"></span>${escHtml(t('sc.listening'))}<span class="sr-bar" id="sc-bar">${t('games.radar.barOfTotal', { bar: 1, total: sc.bars.length })}</span></div>
+     ${sc.metro ? '<div class="metro-dot sc-beat-dot" id="sc-beat" aria-hidden="true"></div>' : ''}
      <div class="coach-tip sc-last" id="sc-last" aria-live="polite">${sc.lines.length ? escHtml(sc.lines[sc.lines.length - 1]) : '&nbsp;'}</div>
      <button type="button" class="tp-btn coach-stop" onclick="scFinish(false)">&#x25A0; ${t('games.common.stop')}</button>`;
 }
@@ -470,6 +511,7 @@ function scLoop(){
       if (s.cells[s.cur]) s.cells[s.cur].classList.remove('sc-now');
       if (s.cells[cur]) s.cells[cur].classList.add('sc-now');
       s.cur = cur;
+      scBeatTick(s, cur);
       const barEl = document.getElementById('sc-bar');
       if (barEl) barEl.textContent = t('games.radar.barOfTotal', { bar: Math.floor(cur / SC_SLOTS) + 1, total: s.bars.length });
     }

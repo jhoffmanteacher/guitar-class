@@ -17227,8 +17227,10 @@ async function checkStrumCheck() {
     }
     /* saves nothing to progress: the part's text, and a whole finish run with a counting saveGames */
     const part = siteText('coach-strumcheck.js', ROOT).replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+    /* the one browser setting it keeps: "I'm wearing headphones" (SC_HP_KEY, a device fact, never progress); nothing else may touch storage */
+    const partNoHp = part.replace(/localStorage\.(getItem|removeItem)\(SC_HP_KEY\)|localStorage\.setItem\(SC_HP_KEY, '1'\)/g, '');
     /* a name in code, not inside a string ('games.radar.barOfTotal' is an i18n key): not after a letter, a dot or a quote */
-    for (const w of ['saveGames', 'games.', 'games[', 'progress', 'caSteps', 'flushSave', 'localStorage', 'sessionStorage', 'markStep', 'toggleSkill']) if (new RegExp('(?<![\\w.\'"`])' + w.replace(/[.[\]]/g, '\\$&')).test(part)) fail(`coach-strumcheck.js names "${w}": the check must save nothing to progress`);
+    for (const w of ['saveGames', 'games.', 'games[', 'progress', 'caSteps', 'flushSave', 'localStorage', 'sessionStorage', 'markStep', 'toggleSkill']) if (new RegExp('(?<![\\w.\'"`])' + w.replace(/[.[\]]/g, '\\$&')).test(partNoHp)) fail(`coach-strumcheck.js names "${w}": the check must save nothing to progress`);
     const fin = JSON.parse(run(`(() => { const keepSave = saveGames, keepGames = games; let calls = 0; saveGames = () => { calls++; }; games = {}; micRec = null;
       try {
         sc = { phase: 'listening', card: { isConnected: true, remove(){} }, timeouts: [], cells: [], bars: ['D5', 'D5'], chords: { D5: { midi: [50, 57, 62] } }, pattern: '${PIN.pattern}', slotsOf: scPatternSlots('${PIN.pattern}'),
@@ -17355,6 +17357,45 @@ async function checkStrumCheck() {
       if (r.other) fail(`a full round on a step with no listenRounds wrote "${r.other}"`);
       if (r.done !== 2) fail(`after two rounds caListenRoundsDone says ${r.done}, want 2`);
     }
+    /* The Metronome during a round (Jonathan, 2026-11-14: "can a headphone option be given if not it just flashes and can the flashing
+       dot be made larger?"): clicks only with the Metronome on AND "I'm wearing headphones"; the switch only on a start screen with the
+       Metronome on; scScheduleClicks queues one click per beat, every one cleared by Stop; the big dot flashes on each beat only with the
+       Metronome on. Run with counting timers and a fake audio context. */
+    {
+      const r = JSON.parse(run(`(() => { const keep = { st: setTimeout, ct: clearTimeout, ga: getAudioCtx, mr: metroRunning, pn: performance.now }, ids = new Set(); let seq = 0, beeps = 0;
+        try {
+          setTimeout = () => { const id = ++seq; ids.add(id); return id; }; clearTimeout = id => { ids.delete(id); };
+          performance.now = () => 1000;
+          getAudioCtx = () => ({ state: 'running', currentTime: 10, destination: {}, createOscillator(){ return { frequency: { value: 0 }, connect(){}, start(){ beeps++; }, stop(){} }; }, createGain(){ return { connect(){}, gain: { setValueAtTime(){}, exponentialRampToValueAtTime(){} } }; } });
+          const table = [[true, true], [true, false], [false, true], [false, false]].map(([m, h]) => scClicksWanted(m, h)).map(Number).join('');
+          const mk = metro => ({ phase: 'listening', card: { isConnected: false, remove(){} }, timeouts: [], cells: [], bars: ['D5','D5','C5','C5','G5','G5','D5','D5'], chords: { D5: { midi: [50, 57, 62] } },
+            pattern: '${PIN.pattern}', slotsOf: scPatternSlots('${PIN.pattern}'), slots: [], caps: [], events: [], lines: [], barsDone: 0, total: 64, cur: -1, cap: null, bpm: 85, beatMs: 60000 / 85, slotMs: 30000 / 85,
+            win: 159, lat: 50, listenStart: 1000 + 4 * 60000 / 85 + 100, gridOffset: 0, where: '', locked: [], metro });
+          sc = mk(true);
+          const queued = scScheduleClicks(sc), pending = ids.size;
+          micRec = null; scFinish(false);
+          const leftAfterStop = ids.size;
+          const dot = document.getElementById('sc-beat'); let flashes = 0; const keepAdd = dot.classList.add; dot.classList.add = () => { flashes++; };
+          const on = mk(true), off = mk(false); let fOn = 0, fOff = 0;
+          for (let c = 0; c < 64; c++){ if (scBeatTick(on, c)) fOn++; if (scBeatTick(off, c)) fOff++; }
+          dot.classList.add = keepAdd;
+          sc = mk(true); sc.phase = 'ready';
+          metroRunning = true; scRenderReady(); const withSwitch = /id="sc-hp"/.test(document.getElementById('coach-body').innerHTML);
+          metroRunning = false; scRenderReady(); const noSwitch = !/id="sc-hp"/.test(document.getElementById('coach-body').innerHTML);
+          sc.metro = true; scRenderListening(); const dotOn = /id="sc-beat"/.test(document.getElementById('coach-body').innerHTML);
+          sc.metro = false; scRenderListening(); const dotOff = !/id="sc-beat"/.test(document.getElementById('coach-body').innerHTML);
+          return JSON.stringify({ table, queued, pending, beepsNow: beeps, leftAfterStop, fOn, fOff, withSwitch, noSwitch, dotOn, dotOff });
+        } finally { setTimeout = keep.st; clearTimeout = keep.ct; getAudioCtx = keep.ga; metroRunning = keep.mr; performance.now = keep.pn; sc = null; } })()`));
+      n.pins++;
+      if (r.table !== '1000') fail(`clicks wanted (Metronome on/off x headphones on/off) = ${r.table}, want 1000: no click through a laptop speaker`);
+      if (r.queued !== 32 || r.pending !== 32 || r.beepsNow !== 0) fail(`with headphones the round queued ${r.queued} clicks (${r.pending} waiting, ${r.beepsNow} sounded at once), want 32 waiting: one per beat of 8 bars`);
+      if (r.leftAfterStop !== 0) fail(`Stop left ${r.leftAfterStop} clicks queued, want 0`);
+      if (r.fOn !== 32 || r.fOff !== 0) fail(`the beat dot flashed ${r.fOn} times in 8 bars with the Metronome on (want 32) and ${r.fOff} with it off (want 0)`);
+      if (!r.withSwitch || !r.noSwitch) fail(`the headphones switch: with the Metronome on ${r.withSwitch} (want shown), off ${!r.noSwitch} (want not shown)`);
+      if (!r.dotOn || !r.dotOff) fail(`the beat dot on the listening screen: Metronome on ${r.dotOn} (want drawn), off ${!r.dotOff} (want none)`);
+      const src2 = siteText('coach-strumcheck.js', ROOT);
+      if (!/if \(scClicksWanted\(s\.metro, s\.hp\)\) scScheduleClicks\(s\);/.test(src2) || !/sc\.hp = scHeadphonesGet\(\);/.test(src2)) fail('scStart no longer decides the round\'s clicks from the Metronome and the headphones switch');
+    }
     /* the end line: 0, 1 and many bars, both languages */
     for (const lang of ['en', 'es']) {
       run(`setLang(${JSON.stringify(lang)})`);
@@ -17372,8 +17413,8 @@ async function checkStrumCheck() {
     run(`setLang('en')`);
   } catch (e) { fail('stopped on an error: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : e)); }
   /* pinned totals, so a renamed function cannot turn this into a check of nothing */
-  if (n.saves !== 4 || n.tempos !== 4 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 9 || n.lines !== 10 || n.pins !== 5) fail(`ran ${n.saves} take saves (want 4), ${n.tempos} tempo opens (want 4), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (9), ${n.lines} end lines (10), ${n.pins} pins (5)`);
-  if (!bad) ok(`1eh: one listening step (ca-52, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, none in the console, never disabled; opens at the step's last tempo (${PIN.startBpm} if never set), one tempo with the step's slider, -5 / +5 across its range, the tempo controls locked during a round and given back on every exit; its own ratios ${PIN.ratio} / ${PIN.hfRatio} (Strum Radar's state still 1.4 / 1.7, run); window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule} (${n.chords} scripted cases); two full rounds tick ca-52's step (round 1 <id>:0:r1, round 2 the step; Stopped, short and other steps write nothing; no Mark done button); a whole finish saved nothing else; its take saved through micRecSaveNow into a strict Firestore stub (3 rounds); the real sweep and end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages`);
+  if (n.saves !== 4 || n.tempos !== 4 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 9 || n.lines !== 10 || n.pins !== 6) fail(`ran ${n.saves} take saves (want 4), ${n.tempos} tempo opens (want 4), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (9), ${n.lines} end lines (10), ${n.pins} pins (6)`);
+  if (!bad) ok(`1eh: one listening step (ca-52, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, none in the console, never disabled; opens at the step's last tempo (${PIN.startBpm} if never set), one tempo with the step's slider, -5 / +5 across its range, the tempo controls locked during a round and given back on every exit; its own ratios ${PIN.ratio} / ${PIN.hfRatio} (Strum Radar's state still 1.4 / 1.7, run); window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule} (${n.chords} scripted cases); the Metronome's click only with headphones (32 a round, all cleared by Stop) and its beat dot (32 flashes, none with it off); two full rounds tick ca-52's step (round 1 <id>:0:r1, round 2 the step; Stopped, short and other steps write nothing; no Mark done button); a whole finish saved nothing else; its take saved through micRecSaveNow into a strict Firestore stub (3 rounds); the real sweep and end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages`);
 }
 
 async function checkCountIn() {

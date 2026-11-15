@@ -3271,6 +3271,10 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 .sc-mark--unheard{color:var(--text3)}
 .sc-card .sc-line{margin:2px 0}
 .sc-rounds{font-size:0.875rem;font-weight:600;color:var(--text2)}
+.sc-hp{display:flex;align-items:center;gap:6px;font-size:0.875rem;margin:4px 0 8px;cursor:pointer}
+/* The beat dot during a checked round with the Metronome on: the Metronome tool's dot, twice its size, beside nothing it could cover. */
+.metro-dot.sc-beat-dot{width:56px;height:56px;border-width:3px;margin:6px auto 8px}
+@media(prefers-reduced-motion:reduce){.metro-dot.sc-beat-dot,.metro-dot.sc-beat-dot.flash{transition:none;transform:none}}
 .sc-rounds--done{color:var(--green-text)}
 /* During a strum-pattern check round (scLock) the step's tempo slider and Play clicks, and the Metronome's Start/Stop and tempo, are
    disabled: shown greyed so it is plain they cannot change the tempo under the round. */
