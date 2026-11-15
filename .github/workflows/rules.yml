@@ -11,6 +11,9 @@
 #   tools/song-files-rules-test.mjs  song files behind the sign-in: only the
 #                              teacher writes them, the month's download
 #                              counter only rises (with --breaks)
+#   tools/built-songs-rules-test.mjs  built songs (the console's Song builder):
+#                              a school account gets one by id and reads the
+#                              list, only the teacher writes (with --breaks)
 #
 # Nothing here touches the real Firebase project: the emulator runs on the
 # runner under a "demo-" project id, which needs no credentials and cannot
@@ -98,6 +101,7 @@ jobs:
             tools/site-errors-rules-test.mjs --breaks --site ${{ github.workspace }}
             tools/song-requests-rules-test.mjs --breaks
             tools/song-files-rules-test.mjs --breaks
+            tools/built-songs-rules-test.mjs --breaks
         run: |
           # GitHub runs this with -e and pipefail; one tool failing must not stop the others.
           set +e +o pipefail

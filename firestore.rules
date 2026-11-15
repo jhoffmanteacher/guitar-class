@@ -63,6 +63,12 @@ rules_version = '2';
                       only the teacher writes and deletes
      songFilesUsage/{YYYY-MM}  the month's count of song downloads:
                       a school account reads it and raises it; the teacher resets it
+     builtSongs/{id}  a Play Along song built in the console (2026-11-14):
+                      a school account gets one by id (no list); only the
+                      teacher lists, writes and deletes
+     builtSongsMeta/list  the list of built songs: a school account reads,
+                      the teacher writes
+     songDrafts/{id}  a song the teacher is still building: teacher only
 
    Anything not matched below is denied by default. Do not add a catch-all.
    ══════════════════════════════════════════════════════════════════════ */
@@ -111,10 +117,10 @@ service cloud.firestore {
        one door left to any signed-in account is accessRequests/{own uid}.
 
        This is the school-accounts paste 2. It waited in a second file until
-       paste-2 day (2026-11-14), when one commit moved it here. Until
-       Jonathan pastes it, the console runs the Paste A text (in git at
-       af1166e:firestore.rules); WORKFLOW.md, "School accounts: paste 2",
-       says whether he has.
+       paste-2 day (2026-11-14), when one commit moved it here; WORKFLOW.md,
+       "School accounts: paste 2", records it as done that day. Whether the
+       console holds the newest text of this file: WORKFLOW.md, "Where
+       things stand".
 
        SHIPPING ORDER (see the paste-2 note in the commit and the report):
        paste 1 (config/access + accessRequests) and the console first; the
@@ -826,7 +832,7 @@ service cloud.firestore {
                                       against this month's song downloads
 
        READ: a school account (isSchool()) reads the files and the pieces
-       (before the school-accounts paste 2, any signed-in account). WRITE: only the
+       (since the school-accounts paste 2, 2026-11-14). WRITE: only the
        teacher, and only in this shape: an id of lower-case letters, digits
        and dashes (up to 80); exactly these fields; a whole number of bytes
        above 0 and at most 40 pieces' worth; a 64-character lower-case hex
@@ -922,6 +928,94 @@ service cloud.firestore {
             && request.resource.data.bytes is int
             && request.resource.data.bytes >= 0;
       allow delete: if isTeacher();
+    }
+
+    /* ── BUILT SONGS (2026-11-14; the console's Song builder) ────────────
+       A NEW block; no rule above it was changed (only comments: the path
+       list at the top gained three paths, and two notes about paste 2 were
+       brought up to date). Jonathan, 2026-11-14: "go with
+       song builder". A Play Along song he builds in the console, with no
+       code push. Its audio is a songFiles entry (the block above, unchanged);
+       these docs say what the song is.
+
+       builtSongs/{id}       { v, title, artist, audio, song, savedAt }
+                             id 'sb-' + 8 to 24 lower-case letters and digits;
+                             audio { id, bytes, sha256, durationSec, centsOff,
+                             gainDb?, sourceSha256? } names the songFiles entry
+                             (id) and what the site checks the file against;
+                             song is the chart (bars, sections, chords, lyrics)
+       builtSongsMeta/list   { songs, updatedAt }  the built songs the Songs
+                             page lists, at most 200
+       songDrafts/{id}       a song the teacher is still building (any shape)
+
+       READ: a school account (isSchool()) GETS one built song by its id and
+       reads the list; it cannot list the builtSongs collection (the list doc
+       is the only index). The teacher reads everything. Drafts: the teacher
+       only. WRITE: only the teacher, everywhere here. A built song only in
+       this shape: exactly these fields; v a whole number 1 to 99; a title of
+       1 to 120 characters; an artist of 0 to 120; audio with only the fields
+       above and the first five present, an id shaped like a songFiles id, a
+       whole number of bytes above 0 and at most 36,000,000, a 64-character
+       lower-case hex SHA-256, a length above 0 and at most 30 minutes, and
+       centsOff from -10 to 10 (a record further off A=440 is not published:
+       Jonathan, 2026-11-14; the builder is to refuse it too); song a map;
+       savedAt = the server's time. The list: only songs and updatedAt, songs
+       a map of at most 200, updatedAt = the server's time.
+
+       HONEST LIMITS: the rules do not read the chart (song) or the list's
+       entries; the site's validator (Song builder Part a2) is to check a
+       song on every page before it shows it. Nothing here proves the
+       songFiles entry exists or matches: the site is to check the file's
+       size and SHA-256 against audio when it downloads it (Part a2). gainDb
+       and sourceSha256 are not checked (notes for the console). Every
+       school account can read every built song, lyrics included, and
+       whatever a signed-in browser shows, it can save. */
+    match /builtSongs/{songId} {
+      allow get: if isSchool();
+      allow read: if isTeacher();
+      allow create, update: if isTeacher()
+            && songId.matches('^sb-[a-z0-9]{8,24}$')
+            && request.resource.data.keys().hasOnly(['v', 'title', 'artist', 'audio', 'song', 'savedAt'])
+            && request.resource.data.keys().hasAll(['v', 'title', 'artist', 'audio', 'song', 'savedAt'])
+            && request.resource.data.v is int
+            && request.resource.data.v >= 1
+            && request.resource.data.v <= 99
+            && request.resource.data.title is string
+            && request.resource.data.title.size() >= 1
+            && request.resource.data.title.size() <= 120
+            && request.resource.data.artist is string
+            && request.resource.data.artist.size() <= 120
+            && request.resource.data.audio is map
+            && request.resource.data.audio.keys().hasOnly(['id', 'bytes', 'sha256', 'durationSec', 'centsOff', 'gainDb', 'sourceSha256'])
+            && request.resource.data.audio.keys().hasAll(['id', 'bytes', 'sha256', 'durationSec', 'centsOff'])
+            && request.resource.data.audio.id.matches('^[a-z0-9][a-z0-9-]{0,79}$')
+            && request.resource.data.audio.bytes is int
+            && request.resource.data.audio.bytes > 0
+            && request.resource.data.audio.bytes <= 36000000
+            && request.resource.data.audio.sha256.matches('^[0-9a-f]{64}$')
+            && request.resource.data.audio.durationSec is number
+            && request.resource.data.audio.durationSec > 0
+            && request.resource.data.audio.durationSec <= 1800
+            && request.resource.data.audio.centsOff is number
+            && request.resource.data.audio.centsOff >= -10
+            && request.resource.data.audio.centsOff <= 10
+            && request.resource.data.song is map
+            && request.resource.data.savedAt == request.time;
+      allow delete: if isTeacher();
+    }
+    match /builtSongsMeta/list {
+      allow read: if isSchool();
+      allow create, update: if isTeacher()
+            && request.resource.data.keys().hasOnly(['songs', 'updatedAt'])
+            && request.resource.data.songs is map
+            && request.resource.data.songs.size() <= 200
+            && request.resource.data.updatedAt == request.time;
+      allow delete: if isTeacher();
+    }
+    match /songDrafts/{draftId} {
+      allow read, delete: if isTeacher();
+      allow create, update: if isTeacher()
+            && draftId.matches('^sb-[a-z0-9]{8,24}$');
     }
   }
 }

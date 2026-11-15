@@ -241,7 +241,7 @@ Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `ap
 - **`firestore.rules` change** → tell Jonathan: Firebase console → Firestore → Rules → paste →
   Publish (GitHub Pages doesn't deploy it). The class database's rules are only ever pasted by hand; `firebase
   deploy` on this repo reaches the practice project only (`.firebaserc`), whatever the rules file's own comment says. Before that: `tools/pm-rules-test.mjs` and
-  `tools/rules-core-test.mjs --breaks` on the Firestore emulator (and `tools/site-errors-rules-test.mjs --breaks --site <repo>` for the `siteErrors` block) (their headers say how; GitHub runs both after
+  `tools/rules-core-test.mjs --breaks` on the Firestore emulator (and `tools/site-errors-rules-test.mjs --breaks --site <repo>` for the `siteErrors` block, `tools/built-songs-rules-test.mjs --breaks` for the built-songs block) (their headers say how; GitHub runs both after
   every push, `.github/workflows/rules.yml`). A case named "today: …" turning red means a rule was tightened:
   make sure that was the point. A rules edit re-pins `RULES_FILE_SHA256` (`checks.mjs` 1dt) in the same commit.
 - **Skills edit** → bump `skillCount` in `MODULE_MANIFEST`.

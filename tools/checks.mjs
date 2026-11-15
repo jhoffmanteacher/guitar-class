@@ -18336,7 +18336,7 @@ const SITE_ERRORS_SIM_PIN = 161;
       a dirty tree, and a CRLF checkout fails with a line that says so; a
       missing file fails). ANY change to the file fails until it is
       re-pinned in the same commit, which is the moment the change is
-      Always Reviewed (site-reviewer-deep), runs the five emulator rules
+      Always Reviewed (site-reviewer-deep), runs the six emulator rules
       tools, and is handed to Jonathan to paste.
    2. THE TEXT READING below, a second layer that catches common slips and
       explains them. It is known NOT to be a proof: it reads the text with
@@ -18390,20 +18390,22 @@ const SITE_ERRORS_SIM_PIN = 161;
    accessRequests), and teacher-only rules (a new or wider isTeacher()
    rule stays green). Those are held by the emulator tools, rules-core-test
    and song-requests-rules-test above all, on GitHub after every push.
-   The emulator half is the five rules tools (.github/workflows/rules.yml),
+   The emulator half is the six rules tools (.github/workflows/rules.yml),
    which since 2026-11-14 refuse a rules text without isSchool().
    ════════════════════════════════════════════════════════════════════ */
-const SCHOOL_GATE_USES = 24;   // 6 class-wide reads + 11 student writes (progress counts once: read, write); 2026-11-13 +2: songRequests (a student's create, and the read of their own); 2026-11-14 +5: song files (read the files, read the pieces, read the month's counter, create it, raise it)
+const SCHOOL_GATE_USES = 26;   // 6 class-wide reads + 11 student writes (progress counts once: read, write); 2026-11-13 +2: songRequests (a student's create, and the read of their own); 2026-11-14 +5: song files (read the files, read the pieces, read the month's counter, create it, raise it); 2026-11-14 +2: built songs (get one song, read the list)
 /* The FINGERPRINT of firestore.rules: the sha256 of the file's bytes exactly as on disk (no line-ending or whitespace
    normalising). Jonathan, 2026-11-14: "Add a fingerprint pin, then ship". Any change to the file fails 1dt until this
    is re-pinned on purpose, in the same commit as the rules change. 2026-11-14: the school-accounts paste 2 (Paste B).
    2026-11-14, later (Paste C, not published yet): the teacher may delete one student's progress doc and practice-minutes
-   docs (teacher-remove.js), and the header no longer offers `firebase deploy` for the class rules. */
-const RULES_FILE_SHA256 = '3ea88d3030f708d7cc486c4112061757b4e2ec46d5a665237ee9faa11d5ab8c1';
+   docs (teacher-remove.js), and the header no longer offers `firebase deploy` for the class rules.
+   2026-11-14, Song builder Part a1 (Paste D): a new add-only block for builtSongs/{id},
+   builtSongsMeta/list and songDrafts/{id} (tools/built-songs-rules-test.mjs), the path list, two paste-2 notes. */
+const RULES_FILE_SHA256 = 'd5c70e3a44336f38eb98a4edca92ddb593f3af9551e647d8bc1785d78cd9ed9e';
 const TEACHER_GATE_BODY = "return request.auth != null && request.auth.token.email == 'jhoffman@seq.org' && request.auth.token.email_verified == true;";
 const SIGNED_IN_BODY = "return request.auth != null;";
 const SCHOOL_GATE_BODY = "return request.auth != null && ((request.auth.token.get('email_verified', false) == true && request.auth.token.get('email', '').lower().matches('^[^@]+@seq[.]org$')) || (exists(/databases/$(database)/documents/config/access) && get(/databases/$(database)/documents/config/access).data.get('allow', {}).get(request.auth.uid, false) == true));";
-/* The allow rules a school account passes, as "path ops" (the path under /databases/{database}/documents). 27 rules. */
+/* The allow rules a school account passes, as "path ops" (the path under /databases/{database}/documents). 29 rules. */
 const SCHOOL_GATED = [
   '/progress/{userId} read,write',
   '/config/class read',
@@ -18432,6 +18434,8 @@ const SCHOOL_GATED = [
   '/songFilesUsage/{month} read',
   '/songFilesUsage/{month} create',
   '/songFilesUsage/{month} update',
+  '/builtSongs/{songId} get',
+  '/builtSongsMeta/list read',
 ];
 /* Allow rules an account passes WITHOUT isSchool(), on purpose: the reason, and the whole condition (compared with the
    whitespace outside strings taken out, so any other condition under the same key fails). */
@@ -18460,7 +18464,7 @@ function checkRulesFingerprint(fail) {
   if (got === RULES_FILE_SHA256) return;
   const crlf = buf.includes('\r\n') && createHash('sha256').update(buf.toString('latin1').replace(/\r\n/g, '\n'), 'latin1').digest('hex') === RULES_FILE_SHA256;
   if (crlf) { fail(`firestore.rules has Windows line endings (CRLF) in this checkout: its bytes differ from the pinned ones, although the text is the same. Check it out with LF endings (git config core.autocrlf false, then git checkout -- firestore.rules); do NOT re-pin`); return; }
-  fail(`firestore.rules changed (sha256 now ${got.slice(0, 12)}…, pinned ${RULES_FILE_SHA256.slice(0, 12)}…). A rules change is Always Reviewed (site-reviewer-deep), runs the five emulator rules tools, and needs Jonathan to paste the new text in the Firebase console. When that is the plan, set RULES_FILE_SHA256 in tools/checks.mjs to ${got} in the same commit`);
+  fail(`firestore.rules changed (sha256 now ${got.slice(0, 12)}…, pinned ${RULES_FILE_SHA256.slice(0, 12)}…). A rules change is Always Reviewed (site-reviewer-deep), runs the six emulator rules tools, and needs Jonathan to paste the new text in the Firebase console. When that is the plan, set RULES_FILE_SHA256 in tools/checks.mjs to ${got} in the same commit`);
 }
 function checkRulesSchoolGate() {
   head('1dt. School accounts: firestore.rules gates every class-wide read and student write with isSchool(); isSchool() and the gated rules are pinned; no paste-2 file');
@@ -18530,7 +18534,7 @@ function checkRulesSchoolGate() {
   }
   if (bad) return;
   const uses = (blank.match(/\bisSchool\s*\(\s*\)/g) || []).length - 1;
-  if (uses !== SCHOOL_GATE_USES) fail(`firestore.rules uses isSchool() ${uses} times; pinned at ${SCHOOL_GATE_USES} (6 class-wide reads + 11 student writes + the song request's create and own read + the song files' 3 reads and the counter's create and raise). A new student rule needs the gate too: add it, then re-pin SCHOOL_GATE_USES and SCHOOL_GATED on purpose`);
+  if (uses !== SCHOOL_GATE_USES) fail(`firestore.rules uses isSchool() ${uses} times; pinned at ${SCHOOL_GATE_USES} (6 class-wide reads + 11 student writes + the song request's create and own read + the song files' 3 reads and the counter's create and raise + a built song's get and the built-songs list's read). A new student rule needs the gate too: add it, then re-pin SCHOOL_GATE_USES and SCHOOL_GATED on purpose`);
   /* Every match block, with its own text (nested match blocks taken out) twice, aligned: from `blank` (to parse) and
      from `kept` (the same characters with the strings as written), and the wildcards of its whole path. */
   const blocks = [];
