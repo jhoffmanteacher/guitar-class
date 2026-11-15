@@ -6223,7 +6223,7 @@ function checkTuningSim() {
   }
   if (pins !== 21 || ways !== 8) { dirBad++; err(`tuning-sim.html: ${pins} of 21 drawing/peg/keyboard pins and ${ways} of 8 answer sentences held (every one must)`); }
   /* The Module 1 note-circle figure and its step ("Right needle, wrong letter") turn the same way as this page. */
-  const FIG = { en: ['HIGHER = tighten ↺', '↻ LOWER = loosen', '3+ steps away? stop and ask'], es: ['MÁS AGUDA = aprieta ↺', '↻ MÁS GRAVE = afloja', '¿3+ pasos de distancia? detente y pregunta'] };
+  const FIG = { en: ['HIGHER = tighten ↻', '↺ LOWER = loosen', '3+ steps away? stop and ask'], es: ['MÁS AGUDA = aprieta ↻', '↺ MÁS GRAVE = afloja', '¿3+ pasos de distancia? detente y pregunta'] };
   const CIRCLE = ['E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'C', 'C#', 'D', 'D#'];
   let figs = 0;
   for (const lang of ['en', 'es']) {
@@ -6234,13 +6234,13 @@ function checkTuningSim() {
     if (nodes.map(x => x.n).join() !== CIRCLE.join()) why.push(`the letters are [${nodes.map(x => x.n)}], expected [${CIRCLE}] in drawing order`);
     else {
       if (Math.abs(nodes[0].a - 90) > 0.5) why.push(`E sits at ${nodes[0].a.toFixed(1)} degrees, not the top`);
-      const off = nodes.filter((x, i) => Math.abs((((nodes[(i + 1) % 12].a - x.a) % 360) + 540) % 360 - 180 - 30) > 0.5).map(x => x.n);
-      if (off.length) why.push(`the letter after ${off.join(', ')} is not 30 degrees COUNTERCLOCKWISE`);
+      const off = nodes.filter((x, i) => Math.abs((((nodes[(i + 1) % 12].a - x.a) % 360) + 540) % 360 - 180 + 30) > 0.5).map(x => x.n);
+      if (off.length) why.push(`the letter after ${off.join(', ')} is not 30 degrees CLOCKWISE`);
       const blue = nodes.filter(x => x.fill === '#1f4e79').map(x => x.n).sort().join();
       if (blue !== 'A,B,D,E,G') why.push(`the blue letters are [${blue}], expected the string letters A,B,D,E,G`);
     }
     const arrow = svg.match(/<path d="M\s*[\d.]+\s+[\d.]+\s+A\s*[\d.]+\s+[\d.]+\s+[\d.]+\s+[01]\s+([01])\s[^"]*"[^>]*stroke="#3b6d11"/);
-    if (!arrow || arrow[1] !== '0') why.push(`the green "higher" arrow's sweep flag is ${arrow ? arrow[1] : 'missing'} (0 = counterclockwise)`);
+    if (!arrow || arrow[1] !== '1') why.push(`the green "higher" arrow's sweep flag is ${arrow ? arrow[1] : 'missing'} (1 = clockwise)`);
     for (const t of FIG[lang]) if (!svg.includes('>' + t + '</text>')) why.push(`no label "${t}"`);
     if (why.length) { dirBad++; err(`img/m1-note-circle-${lang}.svg: ${why.join('; ')}`); } else figs++;
   }
@@ -6248,17 +6248,17 @@ function checkTuningSim() {
   const si = m1.indexOf("label: 'Right needle, wrong letter'"), m1step = si >= 0 ? m1.slice(si, m1.indexOf('skills:', si)) : '';
   const m1f = k => (m1step.match(new RegExp(`\\n\\s*${k}: '((?:[^'\\\\]|\\\\.)*)'`)) || [])[1] || '';
   const m1alt = (k, lang) => (m1f(k).match(new RegExp(`<img src="img/m1-note-circle-${lang}\\.svg" alt="([^"]*)"`)) || [])[1] || '';
-  const M1 = { en: { alt: m1alt('text', 'en'), hint: m1f('hint'), yes: /counterclockwise/, no: /(?<!counter)clockwise/i }, es: { alt: m1alt('text_es', 'es'), hint: m1f('hint_es'), yes: /en sentido antihorario/, no: /(?<!anti)horario/i } };
+  const M1 = { en: { alt: m1alt('text', 'en'), hint: m1f('hint'), yes: /(?<!counter)clockwise/, no: /counterclockwise/i }, es: { alt: m1alt('text_es', 'es'), hint: m1f('hint_es'), yes: /en sentido horario/, no: /antihorario/i } };
   let m1ok = 0;
   for (const lang of ['en', 'es']) for (const part of ['alt', 'hint']) {
     const s = M1[lang][part];
     if (M1[lang].yes.test(s) && !M1[lang].no.test(s)) m1ok++;
-    else { dirBad++; err(`module-1.js "Right needle, wrong letter" ${lang} ${part === 'alt' ? `figure alt (img/m1-note-circle-${lang}.svg)` : part} is "${s.slice(0, 90)}…" — it must say the circle goes ${lang === 'en' ? 'counterclockwise' : 'en sentido antihorario'}, and never the plain other word`); }
+    else { dirBad++; err(`module-1.js "Right needle, wrong letter" ${lang} ${part === 'alt' ? `figure alt (img/m1-note-circle-${lang}.svg)` : part} is "${s.slice(0, 90)}…" — it must say the circle goes ${lang === 'en' ? 'clockwise' : 'en sentido horario'}, and never the other word`); }
   }
   if (!/S\.level\+\+; S\.clean = 0; saveLevel\(\); leveled = true;\s*S\.note = T\('levelUp', \{ l: S\.level, m: LEVEL_LETTERS\[S\.level - 1\] \}\);/.test(code) || !I || !['en', 'es'].every(l => /\{l\}/.test(I[l].levelUp) && /\{m\}/.test(I[l].levelUp))) { bad++; problems++; err("tuning-sim.html: the level-up line must be T('levelUp', { l: S.level, m: LEVEL_LETTERS[S.level - 1] }) right after S.level++ (the most LETTERS a level starts away; tools/tuning-sim-proof.mjs checks the numbers), and both languages' levelUp must use {l} and {m}"); }
-  if (figs !== 2 || m1ok !== 4) { dirBad++; err(`the Module 1 note circle: ${figs} of 2 figures and ${m1ok} of 4 alt/hint texts go counterclockwise (every one must)`); }
+  if (figs !== 2 || m1ok !== 4) { dirBad++; err(`the Module 1 note circle: ${figs} of 2 figures and ${m1ok} of 4 alt/hint texts go clockwise, like the Tuning Simulator (every one must)`); }
   if (dirBad) { problems++; bad++; }
-  if (bad === 0) ok(`tuning-sim.html: defaults pinned (sound on; level 1 first; the four levels; no naming step, the string to tune and the tuner's letter shown), no mic, no script files, and a card on the Games page with the no-guitar games; the circle runs clockwise (7 of 7 letters, 42 of 42 arrows), ${words} of ${dirWordCount} direction words (EN + ES), ${ways} of 8 answer sentences say the way with its verb, and the arrow keys pinned; ${pins} of 21 drawing/peg/keyboard/wording lines pinned (notes drawn at ringPt(i), one arrow, the peg's turn and icons, Space/Enter, focus, green only when done, the peg-foot layout); the Module 1 figure (${figs} of 2) and its step (${m1ok} of 4 alt/hint) go counterclockwise; ${twins} data-t/data-tl uses have both languages; a miss restarts the clean count, from the wrong branch of each answer; the level-up line names the new level`);
+  if (bad === 0) ok(`tuning-sim.html: defaults pinned (sound on; level 1 first; the four levels; no naming step, the string to tune and the tuner's letter shown), no mic, no script files, and a card on the Games page with the no-guitar games; the circle runs clockwise (7 of 7 letters, 42 of 42 arrows), ${words} of ${dirWordCount} direction words (EN + ES), ${ways} of 8 answer sentences say the way with its verb, and the arrow keys pinned; ${pins} of 21 drawing/peg/keyboard/wording lines pinned (notes drawn at ringPt(i), one arrow, the peg's turn and icons, Space/Enter, focus, green only when done, the peg-foot layout); the Module 1 figure (${figs} of 2) and its step (${m1ok} of 4 alt/hint) go clockwise; ${twins} data-t/data-tl uses have both languages; a miss restarts the clean count, from the wrong branch of each answer; the level-up line names the new level`);
 }
 
 /* Journey pages are referenced by ~30 hand-typed 'tabs/*.html' strings across
