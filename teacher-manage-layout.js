@@ -7,7 +7,8 @@
                   teacher-manage.js; each row's "⋯" is teacher-remove.js)
      Accounts     Accounts by sign-in domain (teacher-accounts.js,
                   #t-access-block)
-     Song files   Song files (teacher-songfiles.js, #t-songfiles-block)
+     Song files   Song files (teacher-songfiles.js, #t-songfiles-block) and
+                  Built songs (teacher-builtsongs.js, #t-builtsongs-block)
      Backup       Download a backup (teacher-backup.js, #t-backup)
 
    LAYOUT ONLY. Every section is still drawn on every Manage paint, by the

@@ -31,7 +31,7 @@ browser slows the one file"; `app/builtsongs.js` merges it into
 that file at 0.65 / 0.85 / 0.9 / 1, pitch held, opening on 0.85 (ONE-FILE
 SPEEDS, `pcOneFile` / `PC_ONE_FILE_RATES` in `app/cards.js`; `data-slow` stays
 empty at every stop, so the bars never move); Build up speed works on those
-rates. Pinned by checks.mjs 1el. A clean slow file for one built song is a
+rates. Pinned by checks.mjs 1em. A clean slow file for one built song is a
 code push on Jonathan's request (work order, LATER); its track then has
 `srcSlow` and today's two-file stops.
 

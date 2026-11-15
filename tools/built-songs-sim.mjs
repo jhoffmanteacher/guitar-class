@@ -3,7 +3,7 @@
    the REAL whole app script (every app/*.js part, in index.html order, after i18n.js, guitar-diagrams.js,
    class-activities.js, config-main.js and the module data, the same set checks.mjs 0b renders), a fake Firestore
    (builtSongsMeta/list, builtSongs/{id}; denied, missing, offline), a fake IndexedDB shared by the "pages" of one
-   case (the device copy), and a spy on the error log. checks.mjs 1el runs it and pins the case count.
+   case (the device copy), and a spy on the error log. checks.mjs 1em runs it and pins the case count.
 
      node tools/built-songs-sim.mjs                 every case (a few seconds)
      node tools/built-songs-sim.mjs --verbose       every case's line, not only the failures
@@ -15,7 +15,7 @@
    What it proves (each case prints ✓/✗):
      zero      with no built song (the list missing, empty, refused, offline with no device copy, nobody signed
                in, no IndexedDB at all): CLASS_ACTIVITIES and SNIPPET_TRACKS deep-equal before and after (the same
-               48 objects, the same 14 tracks), no audio entry, no repaint, no write, no error-log line; every
+               objects, the same tracks), no audio entry, no repaint, no write, no error-log line; every
                coded practice card still has its two-file stops (no data-one-file, data-slow="1", Slowest 0.8 of the
                slow file, Slow at pcSlowRate) — the guard that 0 built songs changes nothing a student sees
      merge     the made-up fixtures (tools/built-songs-fixtures.mjs: 4/4, 3/4, 6/8 counted in six, a beat map,
@@ -201,12 +201,13 @@ async function runCases(files){
       setup(shared.fs);
       const p = makePage(files, shared);
       const objs = p.run('CLASS_ACTIVITIES.slice()');
+      const nActs = objs.length, nTracks = p.run('Object.keys(SNIPPET_TRACKS).length');
       const before = snap(p);
       if (!signedOut) p.signIn();
       await sync(p);
       p.ctx.__o0 = objs;
-      const same = snap(p) === before && p.run('CLASS_ACTIVITIES.length') === 48 && p.run(`CLASS_ACTIVITIES.every((a, i) => a === __o0[i])`);
-      ok(same && p.run('Object.keys(SNIPPET_TRACKS).length') === 14, `zero (${name}): CLASS_ACTIVITIES (48, the same objects) and SNIPPET_TRACKS (14) deep-equal before and after the merge`);
+      const same = snap(p) === before && nActs > 0 && p.run('CLASS_ACTIVITIES.length') === nActs && p.run(`CLASS_ACTIVITIES.every((a, i) => a === __o0[i])`);
+      ok(same && nTracks > 0 && p.run('Object.keys(SNIPPET_TRACKS).length') === nTracks, `zero (${name}): CLASS_ACTIVITIES (${nActs}, the same objects) and SNIPPET_TRACKS (${nTracks}) deep-equal before and after the merge`);
       ok(p.run('__repaints') === 0 && shared.fs.st.writes === 0 && p.run('__logs.length') === 0 && p.run(`songFileEntry('sb-test44aaaa-x') === null && Object.keys(sfBuilt).length === 0`),
         `zero (${name}): no repaint, no write, no error-log line, no audio entry (${p.run('__repaints')} / ${shared.fs.st.writes} / ${p.run('__logs.length')})`);
       if (signedOut) ok(shared.fs.st.reads.length === 0, `zero (${name}): nothing is read (${shared.fs.st.reads.length} reads)`);

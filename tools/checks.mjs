@@ -19347,7 +19347,7 @@ function checkSongFilesConsole() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
-   1el. BUILT SONGS (2026-11-14, Song builder Part a2) — a Play Along song
+   1em. BUILT SONGS (2026-11-14, Song builder Part a2) — a Play Along song
    Jonathan adds in the console lives in the database (app/builtsongs.js:
    the format, the validator, the merge; teacher-builtsongs.js: Import).
    RUN by tools/built-songs-sim.mjs (Node, about 15 s: the whole app script
@@ -19369,9 +19369,9 @@ function checkSongFilesConsole() {
 const BUILT_SONGS_SIM_PIN = 148;   // 2026-11-14, Song builder Part a2: 14 zero, 63 merge and directions, 44 refused, 27 store, deep-link and tab-return cases (136 -> 139: the 15-minute tab-return throttle; -> 148, review round 1: Object.prototype names, the lyric cap, the directions line)
 const ONE_FILE_STOPS = '0.65,0.85,0.9,1', ONE_FILE_OPEN = '0.85';   // Jonathan, 2026-11-14 (work order decision 3)
 function checkBuiltSongs(ctx) {
-  head('1el. Built songs: the merge is run (0 songs changes nothing; fixtures, refusals, device copy); the one-file stops are pinned');
+  head('1em. Built songs: the merge is run (0 songs changes nothing; fixtures, refusals, device copy); the one-file stops are pinned');
   let bad = 0;
-  const fail = m => { err('1el: ' + m); problems++; bad++; };
+  const fail = m => { err('1em: ' + m); problems++; bad++; };
   const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'built-songs-sim.mjs')], { encoding: 'utf8', timeout: 180000 });
   const m = /built-songs-sim: (\d+) cases, (\d+) failed/.exec(r.stdout || '');
   if (r.status !== 0 || !m) {
