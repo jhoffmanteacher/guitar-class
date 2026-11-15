@@ -31,6 +31,26 @@ Dates are the Pacific calendar date. `CACHE_VERSION` and commit timestamps may s
 
 Start here. Update this block whenever an item opens or closes; each line says where the detail is.
 
+**Strum Pattern check `ca-52` (2026-11-15): shipped, not yet on the board; Jonathan tests it, then places it.**
+The pattern `D.DU.UDU` over D5 D5 C5 C5 G5 G5 D5 D5 (`coach-strumcheck.js`; `coach-core.js` untouched). Three Opus
+deep-review rounds (5fbd3a5, 65c30c4, 45165b2); after round 3's one MAJOR (the too-noisy words) Jonathan chose "fix
+words, then ship" and the words "Too noisy for feedback". What it does: a grid that follows the player's own
+pattern (a late start up to half a bar is followed); strum ratios 1.15 / 1.3; a count-in noise gate (median 0.012
+AND 20th percentile 0.003) that colours nothing and still counts the round; a lopsided octave chord vote ("ok" by
+one vote, "wrong" only by two); done after two full rounds at any score. Known limits, all measured, in
+`Claude outputs/strum-coach/DETAILS.md` (sections 19b to 28): the gate fires in most rounds in a full room (bench
+class room 7 of 8); a student who plays on all four count-in clicks, or lets a count-1 strum ring, is gated too; a
+wrong chord that shares a note (G5 for C5) is caught at one clock and passed at ±20 ms; a player more than half a
+bar late is judged one bar on; a dragging player (4%) passes 25 of 80 bars; the Metronome click through a speaker
+is heard as a strum, so the click plays only with "I'm wearing headphones" ticked (two click-removal attempts
+measured and not built: `CLICK-2.md`). Only MacBook-mic takes exist: Chromebook and classroom takes are owed.
+Owed next: a Fable high-effort review of this code after Jonathan's limit resets; the listening design job (unheard
+up-strums, the shared-note chord, one shared detector, the `coach-core.js` split) on one Opus agent, nothing ships.
+Existing faults found on the way, not fixed: `micRecStartPerf` is about one audio buffer (93 to 103 ms) late in every
+game's takes; a live-quiz key (`lq-q-opened`) can survive to the next student on a shared Chromebook
+(`shared-chromebook-loop` case 28 at seed 2); a practice card's speed press less than one frame before a count drops
+that click (`pcRetrack` → `cancelQueuedClicks`).
+
 **Song builder (2026-11-14): Part a1 shipped, waits for a rules paste ("Paste D").** Jonathan builds a Play Along
 song in the console with no code push. All ten decisions are his (`Claude outputs/PLAN-song-builder-2026-11-14.md`);
 the build brief is `Claude outputs/WORK-ORDER-song-builder.md` (parts a1, a2, b, c, d; board placement is LATER).
