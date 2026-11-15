@@ -11,8 +11,9 @@
        heard inside each strum slot's window; a strum heard inside a slot
        where the hand should miss (a '.' in the pattern) COUNTS AGAINST the
        bar ("strum in rest counts against");
-     · "medium strict": the window is SC_WIN_FRAC of an eighth either side
-       (Strum Radar's own 0.45 is the lenient reference, 0.25 the strict);
+     · "medium strict" at first, then "slightly more permissive" (both
+       2026-11-14): the window is SC_WIN_FRAC of an eighth either side,
+       now 0.45, Strum Radar's own width for this pattern;
      · the CHORD only on the first down strum of each bar, slot 0 ("check
        chord on the first down strum only that verifies changing on time").
        Slot 1 is a slot where the hand misses, so about a beat of sound is
@@ -63,7 +64,15 @@
    ════════════════════════════════════════════════════════════════════ */
 
 const SC_RULE = 'strumcheck-1';     // bump when what is judged changes; saved with every take
-const SC_WIN_FRAC = 0.35;           // medium: a strum counts within 0.35 of an eighth of its slot
+/* A strum counts within SC_WIN_FRAC of an eighth of its slot (both ways), and so does a strum in a miss. 0.35 ("medium strict")
+   until Jonathan played it on a real guitar (2026-11-14): "the arrows lit up red like i got things wrong. i think it needs to be
+   slightly more permissive to start". 0.45 is Strum Radar's own window for this pattern; the strum and miss windows still do not
+   overlap (0.45 + 0.45 < 1). Measured with the virtual student (quiet, 60 / 85 / 100 BPM): a missing strum on each of the 6 strum
+   slots and an extra on each miss are caught exactly as at 0.35 and 0.40 (every miss 2 of 2; the one extra not caught at 85 and at 100
+   was not heard at all, the same at every width); one strum 150 ms late at 60 BPM now passes 2 of 2 (0.35: 1 of 2); nothing played
+   still hears 0 of 96. The right player's red arrows at 85 and 100 BPM (6 and 17 of 96) are strums the detector did not hear, not
+   timing: the same at all three widths. */
+const SC_WIN_FRAC = 0.45;
 /* This check's own strum ratios (the lead, 2026-11-14, after the virtual
    student lost a right player's re-strums at the shared 1.4 / 1.7: 22% at
    80 BPM, 37% at 100). A re-strum of the same chord an eighth after the last

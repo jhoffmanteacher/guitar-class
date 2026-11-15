@@ -40,6 +40,7 @@ export const KINDS = {
   ...Object.fromEntries([1, 4].map(k => ['extra' + k, { ...A, extraSlot: k, what: `bar ${MB + 1}: an extra strum on slot ${k}, where the hand should miss` }])),
   ...Object.fromEntries([50, 100, 150, 200].flatMap(ms => [['late' + ms, { ...A, shiftAll: ms, what: `every strum ${ms} ms late (the whole round)` }], ['early' + ms, { ...A, shiftAll: -ms, what: `every strum ${ms} ms early (the whole round)` }]])),
   ...Object.fromEntries([50, 100, 150, 200].flatMap(ms => [['oneLate' + ms, { ...A, shiftOne: ms, what: `bar ${MB + 1}: the strum on "2 and" ${ms} ms late` }], ['oneEarly' + ms, { ...A, shiftOne: -ms, what: `bar ${MB + 1}: the strum on "2 and" ${ms} ms early` }]])),
+  halfEarly2: { ...A, halfSlot: 2, what: `bar ${MB + 1}: the strum on "2" half an eighth early, half-way between the miss on "1 and" and "2"` },
   wrongC:  { ...A, wrongBar: 2, wrongChord: 'G5', what: 'bar 3 (D5 -> C5): plays G5 instead' },
   wrongG:  { ...A, wrongBar: 4, wrongChord: 'D5', what: 'bar 5 (C5 -> G5): plays D5 instead' },
   wrongD:  { ...A, wrongBar: 6, wrongChord: 'C5', what: 'bar 7 (G5 -> D5): plays C5 instead' },
@@ -85,7 +86,7 @@ class StrumCheckPlayer {
         let play = strums[s];
         if (b === MB && k.missSlot === s) play = false;
         if (b === MB && k.extraSlot === s) play = true;
-        const shift = (k.shiftAll || 0) + (b === MB && s === 3 && k.shiftOne ? k.shiftOne : 0);
+        const shift = (k.shiftAll || 0) + (b === MB && s === 3 && k.shiftOne ? k.shiftOne : 0) + (b === MB && s === k.halfSlot ? -slot / 2 : 0);
         const at = round.listenStartMs + idx * slot + this.lagMs + gauss(r) * P.sigmaMs + P.lateMs + shift;
         if (play){
           if (k.silent){

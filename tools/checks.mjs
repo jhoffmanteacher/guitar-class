@@ -17046,7 +17046,8 @@ const COUNTIN_PIN = { runs: 44, beeps: 140, rounds: 9, takes: 6, tips: 28 };   /
      - the button: buildStrum draws exactly one data-strumcheck button for it (inside the BPM group, carrying the pattern, the bars and
        every chord's notes) and none for any other strum step, none without a keyPrefix, none in the teacher console (strumCheckBtnHtml
        run with IS_TEACHER_MODE true);
-     - the window: SC_WIN_FRAC is 0.35 ("medium"); scOnset, run, takes a strum 0.34 of an eighth off its slot and not one 0.36 off, in
+     - the window: SC_WIN_FRAC is 0.45 (Jonathan, 2026-11-14, after a real guitar: "slightly more permissive to start"; it was 0.35,
+       "medium"); scOnset, run, takes a strum 0.44 of an eighth off its slot and not one 0.46 off, in
        both directions; a strum near a slot where the hand misses is a fault (an extra), and a bar with one says so;
      - the chord: only a strum on slot 0 opens a chord reading; the reading's verdict is SC_CHORD_RULE's (rule 'c', pinned) and all
        three rules give their pinned answers on scripted readings (G5 after C5: G alone, a D, a C, the held C5's C and G);
@@ -17065,7 +17066,7 @@ async function checkStrumCheck() {
   if (!COACH_SANDBOX) { fail("1ca's sandbox did not load, so the strum-pattern check was NOT run"); return; }
   const { run } = COACH_SANDBOX;
   const n = { pins: 0, onsets: 0, chords: 0, lines: 0, strumSteps: 0, sweeps: 0, tempos: 0, saves: 0 };
-  const PIN = { pattern: 'D.DU.UDU', bars: 'D5 D5 C5 C5 G5 G5 D5 D5', rests: '1,4', win: 0.35, rule: 'c', ratio: 1.2, hfRatio: 1.46, startBpm: 85 };
+  const PIN = { pattern: 'D.DU.UDU', bars: 'D5 D5 C5 C5 G5 G5 D5 D5', rests: '1,4', win: 0.45, rule: 'c', ratio: 1.2, hfRatio: 1.46, startBpm: 85 };
   try {
     const found = JSON.parse(run(`JSON.stringify(CLASS_ACTIVITIES.flatMap(a => (a.steps || []).map((s, si) => ({ id: a.id, si, path: s.path || null, strum: s.strum || null }))).filter(x => x.strum).map(x => ({ id: x.id, si: x.si, path: x.path, listen: 'listen' in x.strum ? x.strum.listen : '(none)', pattern: x.strum.pattern, bars: x.strum.bars.join(' ') })))`));
     n.strumSteps = found.length;
@@ -17142,7 +17143,7 @@ async function checkStrumCheck() {
     if (!/s\.onsetRatio = SC_ONSET_RATIO; s\.hfRatio = SC_HF_RATIO;/.test(siteText('coach-strumcheck.js', ROOT))) fail('scStart no longer hands the check\'s own ratios to srHearStrum');
     n.pins++;
     /* the window and the slots where the hand misses, through the real scOnset */
-    if (Number(run('SC_WIN_FRAC')) !== PIN.win) fail(`SC_WIN_FRAC is ${run('SC_WIN_FRAC')}, want ${PIN.win} ("medium strict", Jonathan 2026-11-14)`);
+    if (Number(run('SC_WIN_FRAC')) !== PIN.win) fail(`SC_WIN_FRAC is ${run('SC_WIN_FRAC')}, want ${PIN.win} (Jonathan 2026-11-14: "medium strict", then "slightly more permissive to start")`);
     if (run('SC_CHORD_RULE') !== PIN.rule) fail(`SC_CHORD_RULE is "${run('SC_CHORD_RULE')}", want "${PIN.rule}" (re-pin only with Jonathan's choice)`);
     run(`globalThis.__sch = (frac, slot) => { const slotMs = 500, s = { slotMs, win: SC_WIN_FRAC * slotMs, total: 16, slots: [], events: [], cells: [], listenStart: 0, gridOffset: 0, lat: 0, cap: null, chords: { D5: { midi: [50, 57, 62] } }, bars: ['D5', 'D5'],
         caps: [0, 1].map(b => ({ bar: b, chord: 'D5', prev: b ? 'D5' : null, at: null, rt: [], rm: [], done: false })) };
@@ -17151,14 +17152,14 @@ async function checkStrumCheck() {
       const rel = (slot + frac) * slotMs; scOnset(s, rel, rel);
       return JSON.stringify({ state: s.slots[slot].state, kind: s.events[0].kind, cap: !!s.cap, capEnd: s.cap ? s.cap.end : null, faults: scBarFaults(s.slots.slice(0, 8).map(x => x.state === 'pending' ? (x.strum ? 'ok' : 'quiet') : x.state), pat) }); };`);
     const on = (frac, slot) => { n.onsets++; return JSON.parse(run(`__sch(${frac}, ${slot})`)); };
-    for (const f of [0.34, -0.34]) { const r = on(f, 3); if (r.state !== 'ok') fail(`a strum ${f} of an eighth off slot 3 was "${r.state}", want ok (inside the medium window)`); }
-    for (const f of [0.36, -0.36]) { const r = on(f, 3); if (r.state !== 'pending' || r.kind !== 'between') fail(`a strum ${f} of an eighth off slot 3 was "${r.state}" / ${r.kind}, want not taken ("between")`); }
+    for (const f of [0.44, -0.44]) { const r = on(f, 3); if (r.state !== 'ok') fail(`a strum ${f} of an eighth off slot 3 was "${r.state}", want ok (inside the medium window)`); }
+    for (const f of [0.46, -0.46]) { const r = on(f, 3); if (r.state !== 'pending' || r.kind !== 'between') fail(`a strum ${f} of an eighth off slot 3 was "${r.state}" / ${r.kind}, want not taken ("between")`); }
     for (const k of [1, 4]) {
       const r = on(0.2, k);
       if (r.state !== 'extra') fail(`a strum on slot ${k} (where the hand misses) was "${r.state}", want extra`);
       if (!r.faults.some(x => x.kind === 'extra' && x.slot === k)) fail(`a bar with a strum on slot ${k} has no "extra" fault`);
-      const q = on(0.4, k);
-      if (q.state === 'extra') fail(`a strum 0.4 of an eighth from slot ${k} counted as an extra (outside the window)`);
+      const q = on(0.47, k);
+      if (q.state === 'extra') fail(`a strum 0.47 of an eighth from slot ${k} counted as an extra (outside the window)`);
     }
     for (const k of [2, 3, 5, 6, 7]) { const r = on(0, k); if (r.cap) fail(`a strum on slot ${k} opened a chord reading: the chord is read on the 1 only`); }
     { const r = on(0, 0); if (!r.cap) fail('a strum on slot 0 opened no chord reading'); else if (!(r.capEnd >= 340 && r.capEnd <= 2 * 500 - 60 + 1e-6)) fail(`the chord reading on the 1 ends ${r.capEnd} ms after it, want from 340 to 60 ms before slot 2`); }
@@ -17242,7 +17243,7 @@ async function checkStrumCheck() {
           else if (Array.isArray(v)) v.forEach((x, i) => { if (Array.isArray(x)) o.push(p + '[' + i + '] array in array'); probs(x, p + '[' + i + ']', o); });
           else if (v && typeof v === 'object'){ const pr = Object.getPrototypeOf(v); if (pr !== Object.prototype && pr !== null) o.push(p + ' not plain'); Object.keys(v).forEach(k => probs(v[k], p ? p + '.' + k : k, o)); }
           return o; };
-        const strict = (path, v) => { const b = probs(v, '', []); if (b.length){ out.refused.push(path + ': ' + b.slice(0, 3).join(', ')); throw new Error('Unsupported field value: ' + b[0]); } out.sets.push(path); };
+        const strict = (path, v) => { const b = probs(v, '', []); if (b.length){ out.refused.push(path + ': ' + b.slice(0, 3).join(', ')); throw new Error('Unsupported field value: ' + b[0]); } out.sets.push(path); if (/-coach$/.test(path)) out.win = { frac: v.winFrac, ms: v.winMs, slotMs: v.slotMs }; };
         const ref = path => ({ set: async v => strict(path, v), collection: c => ({ doc: id => ref(path + '/' + c + '/' + id) }) });
         try {
           currentUser = { uid: 'test-student-0', displayName: 'Test 0' }; micRecPcm16 = () => new Int16Array(4);
@@ -17269,6 +17270,7 @@ async function checkStrumCheck() {
       })()`));
       n.saves++;
       if (!r.sets.includes('micTakes/test-student-0-coach') || r.refused.length || r.warned.length) fail(`the take of a round with ${kase === 'right' ? 'every bar right' : kase === 'nothing' ? 'nothing played' : 'a Stop after 3 bars'} did not save through micRecSaveNow into a strict Firestore stub: ${JSON.stringify({ refused: r.refused, warned: r.warned })}`);
+      if (!r.win || r.win.frac !== PIN.win || Math.abs(r.win.ms - Math.round(PIN.win * r.win.slotMs * 10) / 10) > 0.11) fail(`the saved take says window ${JSON.stringify(r.win)}, want winFrac ${PIN.win} and winMs ${PIN.win} of its slotMs (a replay must know the width that graded it)`);
       if (r.belt.length) fail(`scRecMeta's belt had to null values in the take of a round with ${kase}: ${r.belt.join(' | ')} (fix them at the source)`);
     }
     /* the end line: 0, 1 and many bars, both languages */
