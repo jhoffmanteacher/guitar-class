@@ -10047,8 +10047,8 @@ function checkPracticeCards(ctx) {
    before" is the CALENDAR day, so on a Monday Friday's cards are
    Unfinished). renderClassActivities() puts in Today EVERY visible card
    released today or yesterday (caTodayWindow), no cap: the PENDING ones
-   first (today before yesterday; within a date required before optional,
-   then lowest board position), then the FINISHED ones as the Completed
+   first (required before optional and cleared, 2026-11-14; then today
+   before yesterday, then lowest board position), then the FINISHED ones as the Completed
    fold's ✓ row (today before yesterday, lowest board position first), not
    repeated in Completed or counted. The heading is dated today; a card from
    yesterday wears its own .ca-chip. No card of either day → no heading.
@@ -10057,13 +10057,17 @@ function checkPracticeCards(ctx) {
    when nothing but cleared cards is pending (2026-11-12): it
    decides the "next up" toast and the resume card. Only visible cards count
    (a future date, Hidden, or another student's card never draws). The folds
-   keep their old board order. A deep link to a finished Today card does not
+   keep their old board order, except that within each module the required
+   cards come above the optional ones, and the FIRST pending card on the page
+   is always the hero: when an optional card would sit above it, the hero is
+   drawn first in Today with its date chip (Jonathan, 2026-11-14: "fix it so
+   the optional cards are below"). A deep link to a finished Today card does not
    open the Completed fold. caTodayWindow is run across a month end, a year
    end and the March daylight-saving change.
    Run through the REAL renderClassActivities() / caToggleComplete() /
    caFocusActivity() / renderResumeCard() in the 0b render context, with
    stubbed board / dates / completions / today (caTodayStr), EN and ES. Every
-   scenario restores the context's state afterwards. Pinned: 16 page renders
+   scenario restores the context's state afterwards. Pinned: 20 page renders
    per language. */
 /* 1cr. AN OPEN ACTIVITY FILLS THE PAGE (Jonathan, 2026-11-10: "an open
    activity should fill the page"). With a card open on the In class page the
@@ -11259,7 +11263,7 @@ function checkTodayByDate(ctx) {
   if (!ctx) { flag('1cq cannot run — the 0b render context is unavailable'); return; }
   const run = x => vm.runInContext(x, ctx);
   const J = JSON.stringify;
-  const EXPECT_RENDERS = 16;
+  const EXPECT_RENDERS = 20;
   let renders = 0, asserts = 0;
   const STATE = ['activityDates', 'classActivities', 'activityBoard', 'activityBoardOn', 'optionalActivityIds', 'hiddenActivityIds',
     'retiredActivityIds', 'activityForMe', 'activityPins', 'caOpenId', 'caSwap', 'studentPeriod', 'periodOverride', 'currentUser',
@@ -11393,9 +11397,21 @@ function checkTodayByDate(ctx) {
       /* 5. Optional: within one date the required card comes first; an optional card today is not the hero while a
          required card of yesterday is pending. */
       r = render([[A, MA, D.d9, false, true], [B, MA, D.d9], [C, MA, D.d8], [Dd, MA, D.d8, false, true], [E, MA, D.d8]], lang);
-      want(J(r.today) === J([B, A, C, E, Dd]) && r.hero === B, `${lang} optional: Today ${J(r.today)}, hero ${r.hero}; expected ${J([B, A, C, E, Dd])}, hero ${B} (same date: required before optional)`);
+      want(J(r.today) === J([B, C, E, A, Dd]) && r.hero === B, `${lang} optional: Today ${J(r.today)}, hero ${r.hero}; expected ${J([B, C, E, A, Dd])}, hero ${B} (required before optional, then today before yesterday)`);
       r = render([[A, MA, D.d9, false, true], [B, MA, D.d8], [C, MA, D.d2]], lang);
-      want(J(r.today) === J([A, B]) && r.hero === B && J(r.todo) === J([C]), `${lang} optional today, required yesterday: Today ${J(r.today)}, hero ${r.hero}, fold ${J(r.todo)}; expected ${J([A, B])}, hero ${B}, ${J([C])}`);
+      want(J(r.today) === J([B, A]) && r.hero === B && J(r.todo) === J([C]), `${lang} optional today, required yesterday: Today ${J(r.today)}, hero ${r.hero}, fold ${J(r.todo)}; expected ${J([B, A])} (required first), hero ${B}, ${J([C])}`);
+      /* 5b. Optional cards below the next required card (2026-11-14). The FIRST pending card on the page is the hero.
+         (i) Only an optional card today, a required one older: the hero is drawn first in Today, with its date chip,
+         and leaves the fold. (ii) One module, nothing today, an optional card above a required one on the board: the
+         fold puts the required one first; no lift. (iii) The newest module holds only an optional card, the required
+         one is in an older module: the hero is drawn first in Today, the optional card stays in the fold. */
+      r = render([[A, MA, D.d2], [B, MA, D.d9, false, true], [C, MA, D.d29]], lang);
+      want(r.hero === A && J(r.today) === J([A, B]) && r.sum[A] && r.sum[A].hero && r.sum[A].chip !== null && r.sum[B] && r.sum[B].chip === null && J(r.todo) === J([C]),
+        `${lang} optional today, required older: Today ${J(r.today)}, hero ${r.hero}, ${A}'s chip ${J(r.sum[A] && r.sum[A].chip)}, fold ${J(r.todo)}; expected ${J([A, B])} (the hero first, chipped), hero ${A}, fold ${J([C])}`);
+      r = render([[A, MA, D.d2], [B, MA, D.d5, false, true], [C, MA, D.d29, false, true]], lang);
+      want(r.hero === A && r.headCount === 0 && J(r.todo) === J([A, C, B]), `${lang} one module, optional above required: fold ${J(r.todo)}, hero ${r.hero}, heading ${r.headCount}; expected ${J([A, C, B])} (required first, then the optional ones in board reading order), hero ${A}, no heading`);
+      r = render([[A, MA, D.d2], [B, MB, D.d5, false, true]], lang);
+      want(r.hero === A && J(r.today) === J([A]) && J(r.todo) === J([B]), `${lang} newest module optional only: Today ${J(r.today)}, fold ${J(r.todo)}, hero ${r.hero}; expected ${J([A])}, ${J([B])}, hero ${A}`);
       /* 6. Everything finished, today's card included: the caught-up box, then the finished card in Today; the resume card shows. */
       r = render([[A, MA, D.d2, true], [B, MA, D.d9, true]], lang);
       want(r.freePlay && r.hero === null && J(r.today) === J([B]) && done(r, B), `${lang} all done: free play ${r.freePlay}, hero ${r.hero}, Today ${J(r.today)}; expected the caught-up box, no hero, ${J([B])} marked done`);
@@ -11431,6 +11447,12 @@ function checkTodayByDate(ctx) {
       setUp([[A, MA, D.d5], [B, MA, D.d9]], lang); toasts.length = 0; renders++;
       r = page(`caToggleComplete(${J(B)})`);
       want(J(toasts) === J([T('ca.doneNextToast')]) && r.hero === A && J(r.today) === J([B]) && J(r.todo) === J([A]), `${lang} toast, older card left: ${J(toasts)}, hero ${r.hero}, Today ${J(r.today)}, fold ${J(r.todo)}; expected ${J([T('ca.doneNextToast')])}, hero ${A} in the fold, ${B} done in Today`);
+      /* The Friday-check case (2026-11-14): finishing today's required card while an optional card dated today and an
+         older required card are left: "next is at the top", and the top card IS the older required one. */
+      setUp([[A, MA, D.d2], [B, MA, D.d9, false, true], [C, MA, D.d9]], lang); toasts.length = 0; renders++;
+      r = page(`caToggleComplete(${J(C)})`);
+      want(J(toasts) === J([T('ca.doneNextToast')]) && r.hero === A && J(r.today) === J([A, B, C]) && r.todo.length === 0 && done(r, C),
+        `${lang} toast, optional today and an older required card left: ${J(toasts)}, hero ${r.hero}, Today ${J(r.today)}, fold ${J(r.todo)}; expected ${J([T('ca.doneNextToast')])}, hero ${A} at the top, Today ${J([A, B, C])} (${C} done), empty fold`);
       /* 12. A deep link to a finished card in Today leaves the Completed fold shut; one to a finished card in that fold opens it. */
       setUp([[A, MA, D.d2, true], [B, MA, D.d9, true], [C, MA, D.d8]], lang);
       renders++; r = page(`caFocusActivity(${J(B)})`);
@@ -11447,7 +11469,7 @@ function checkTodayByDate(ctx) {
     delete ctx.__r; delete ctx.__s;
   }
   if (renders !== EXPECT_RENDERS * 2) flag(`1cq ran ${renders} page renders, pinned ${EXPECT_RENDERS * 2} (${EXPECT_RENDERS} x EN + ES)`);
-  if (!bad) ok(`${renders} runs of the real renderClassActivities (${EXPECT_RENDERS} x EN + ES, 5 through caToggleComplete / caFocusActivity) and 6 of caTodayWindow, ${asserts} assertions: every card dated today or yesterday in Today with no cap, pending first (today before yesterday, required before optional, lowest number first) then finished as ✓ rows, Friday's cards Unfinished on a Monday, no heading when neither day has a card, a date chip exactly on yesterday's cards, future / Hidden / other students' cards never counted, the folds keep the old board order, the toast and the resume card follow caStartHereId, a deep link to a finished Today card leaves Completed shut, yesterday right across month, year and daylight-saving edges`);
+  if (!bad) ok(`${renders} runs of the real renderClassActivities (${EXPECT_RENDERS} x EN + ES, 6 through caToggleComplete / caFocusActivity) and 6 of caTodayWindow, ${asserts} assertions: every card dated today or yesterday in Today with no cap, pending first (required before optional, today before yesterday, lowest number first) then finished as ✓ rows, the first pending card on the page is always the hero (an optional card never above it: lifted into Today, or required first in each module), Friday's cards Unfinished on a Monday, no heading when neither day has a card, a date chip exactly on yesterday's cards, future / Hidden / other students' cards never counted, the folds keep the old board order with each module's required cards first, the toast and the resume card follow caStartHereId, a deep link to a finished Today card leaves Completed shut, yesterday right across month, year and daylight-saving edges`);
 }
 
 /* 1ds. "SINCE YOUR LAST VISIT" (Jonathan, 2026-11-13; the end of

@@ -69,8 +69,9 @@ let caStartHereId = null;
    (caTodayWindow; Jonathan, 2026-11-09, evening), pending ones first, then
    finished ones, shown done. No cap (CA_TODAY_MAX, 3, went with this rule).
    caTodayIds is every card in the group, the finished ones included; the
-   hero (caStartHereId) is not always the first card, and may not be in the
-   group at all (an older required card beats an optional one dated today). */
+   hero (caStartHereId) is always the FIRST pending card on the page (2026-11-14): Today's required cards come
+   before its optional ones, and an older required hero that something would sit above is drawn first in Today
+   with its date chip (renderClassActivities, "THE TOP CARD IS THE HERO"). */
 let caTodayIds = [];
 // Non-interactive whole-activity progress dots, drawn only for the Today
 // cards — distinct from repDotsHtml (a TAPPABLE rep counter under one

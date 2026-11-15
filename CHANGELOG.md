@@ -6,6 +6,11 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-14 — Your next required activity is at the top; Module 1's note circle goes clockwise
+
+- **In-Class Activities: optional cards sit below the ones you still need to do.** In Today's activity and in Unfinished activities, required cards now come first and optional cards after them. If the next activity you need is an older one, it shows first under Today's activity, with its date, so "Your next activity is at the top" is always true.
+- **Module 1: the note circle goes clockwise.** In "Right needle, wrong letter", the letters E F F# G … D# now go around the circle clockwise, the same way as the Tuning Simulator.
+
 ## 2026-11-14 — No more "record yourself" steps; "Not saved yet" stays on screen
 
 - **Steps that asked you to record yourself are rewritten (Modules 4, 5 and 7).** The Record button is gone, so these steps now use the metronome, a partner, or playing straight through instead.

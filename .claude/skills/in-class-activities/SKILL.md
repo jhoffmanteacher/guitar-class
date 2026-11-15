@@ -70,7 +70,17 @@ gate (`caIsVisible`) and Today both read; 1cq stubs it. In
 `renderClassActivities()`:
 - `pendingPool`: every pending visible card, newest `caDate` first, undated
   last; within one date required before optional, then lowest board position
-  (#11 above #12). `todayPending` = the ones dated today or yesterday.
+  (#11 above #12). `todayPending` = the ones dated today or yesterday,
+  REQUIRED FIRST (not optional, not cleared for this student), then by date
+  and board position (`caRequiredFirst`, Jonathan, 2026-11-14: "fix it so the
+  optional cards are below").
+- **The first pending card on the page is the hero** (2026-11-14), so the
+  toast "Your next activity is at the top" is true. The Unfinished fold puts
+  each module's required cards above its optional ones (otherwise its old
+  reading order). When something pending would still sit above the hero (only
+  optional or cleared cards in Today, or an optional-only newer module in the
+  fold), the hero is drawn FIRST in Today's grid with its date chip and leaves
+  Since / Unfinished. 1cq pins it (5b and the toast case).
 - The hero (`caStartHereId`): required and unfinished first (Jonathan,
   2026-11-12, "required and unfinished first"): the newest pending REQUIRED
   card whatever its date, an optional one only when no required card is

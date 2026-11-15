@@ -1321,6 +1321,11 @@ function refreshOpenClassActivitiesScreen(){
    Ends with the resume card (moved here from the practice column, see
    index.html) when the activity gate is off — once today's work is done,
    "Your practice" is the next thing on the page. */
+/* PURE. The same cards, rank 0 (required) before rank 1 (optional, or cleared for this student), each rank in the
+   order it came in. Display order only: caBoardOrder, the board, the gate and caIsVisible never read it. */
+function caRequiredFirst(cards, rankOf){
+  return cards.filter(a => rankOf(a) === 0).concat(cards.filter(a => rankOf(a) !== 0));
+}
 function renderClassActivities(){
   const bodyEl = document.getElementById('class-activities-body');
   if(!bodyEl) return;
@@ -1434,9 +1439,12 @@ function renderClassActivities(){
        day). No cap: it replaces "up to CA_TODAY_MAX pending cards across
        days" (the 2026-11-09 morning rule) and its "finished cards of the
        newest date only".
-       1. The PENDING cards of those two days first: today before yesterday;
-          within one date required before optional, then the lowest board
-          position (#11 above #12, the 2026-11-02 rule).
+       1. The PENDING cards of those two days first: the required ones
+          before the optional ones (and cards cleared for this student), then
+          today before yesterday, then the lowest board position (#11 above
+          #12, the 2026-11-02 rule). Optional cards below (Jonathan,
+          2026-11-14: "fix it so the optional cards are below"); before, an
+          optional card dated today sat above a required one dated yesterday.
        2. Then the FINISHED cards of those two days, below them, today
           before yesterday, lowest board position first: re-dating a card
           puts it back in Today for everyone, and a student who already did
@@ -1456,7 +1464,11 @@ function renderClassActivities(){
     };
     const pendingPool = list.filter(a => !isDone(a))
       .sort((x, y) => byDate(x, y) || (Number(caIsOptional(x)) - Number(caIsOptional(y))) || (boardPos[x.id] - boardPos[y.id]));
-    const todayPending = pendingPool.filter(inToday);
+    const myClears = (activityClears || {})[currentUser && currentUser.uid] || {};
+    /* 0 = required (not optional, not cleared for this student: the hero's own rule), 1 = the rest. Every pending
+       list on this page puts the 0s first and keeps its own order otherwise (caRequiredFirst). */
+    const rankOf = a => (caIsOptional(a) || myClears[a.id] === true) ? 1 : 0;
+    let todayPending = caRequiredFirst(pendingPool.filter(inToday), rankOf);
     /* The hero (caStartHereId) stays COLLAPSED like every other card
        (Jonathan, 2026-09-15). Required and unfinished first (Jonathan,
        2026-11-12): the newest REQUIRED pending card, whatever its date (an
@@ -1465,14 +1477,37 @@ function renderClassActivities(){
        teacher cleared for this student is never the hero. caStartHereId
        answers "is anything left to do?" for the "next up" toast and the
        resume card, so it is null when nothing is pending but cleared cards. */
-    const myClears = (activityClears || {})[currentUser && currentUser.uid] || {};
     const pickable = pendingPool.filter(a => myClears[a.id] !== true);
     const heroPick = pickable.find(a => !caIsOptional(a)) || pickable[0] || null;
     caStartHereId = heroPick ? heroPick.id : null;
     const todayDone = list.filter(a => isDone(a) && inToday(a)).sort((x, y) => byDate(x, y) || (boardPos[x.id] - boardPos[y.id]));
-    const todayCards = todayPending.concat(todayDone);
+    let todayCards = todayPending.concat(todayDone);
     // Every card in the group, the finished ones below included.
     caTodayIds = todayCards.map(a => a.id);
+    /* The rest of the pending cards: "Since your last visit" (caSinceGroup, at the end of this file) sits between
+       Today and the Unfinished fold and takes its cards out of the fold (no card shows twice); the fold keeps the
+       board's reading order, module by module, with each module's required cards above its optional ones. */
+    let since = null, restGroups = [];
+    const placeRest = () => {
+      since = pendingCount ? caSinceGroup(list, todayDay, myClears, boardPos) : null;
+      const sinceIds = since ? since.ids : [];
+      restGroups = pendingGroups
+        .map(g => ({ sec: g.sec, cards: caRequiredFirst(g.cards.filter(a => !caTodayIds.includes(a.id) && !sinceIds.includes(a.id)), rankOf) }))
+        .filter(g => g.cards.length);
+    };
+    placeRest();
+    /* THE TOP CARD IS THE HERO (Jonathan, 2026-11-14). "Marked complete. Your next activity is at the top." must be
+       true: the first pending card on the page is caStartHereId. It already is when Today holds a required card, or
+       when nothing pending sits above the hero. When something would (only optional or cleared cards dated today or
+       yesterday, or optional cards above it in the fold), the hero is drawn FIRST in Today's grid, with its own date
+       chip, and leaves the group it would have been in. Nothing else moves. */
+    const firstPending = (todayPending[0] && todayPending[0].id) || (since && since.ids[0]) || ((restGroups[0] && restGroups[0].cards[0]) || {}).id || null;
+    if(heroPick && firstPending !== heroPick.id){
+      todayPending = [heroPick].concat(todayPending);
+      todayCards = todayPending.concat(todayDone);
+      caTodayIds = todayCards.map(a => a.id);
+      placeRest();
+    }
     /* One heading over the group (caTodayHeadHtml), dated TODAY. A card
        released yesterday wears its own date chip (the Unfinished fold's
        .ca-chip); today's wear none. A finished card is drawn exactly as the
@@ -1499,18 +1534,11 @@ function renderClassActivities(){
       // Any finished card dated today still shows under it, done.
       pendingHtml = finished.length ? caFreePlayHeroHtml() + todayHtml : '';
     } else {
-      // Everything else pending, minus the Today cards, wrapped in ONE "Still to
-      // do" fold (2f) — module headings (plain, no progress bar; that's an
-      // Earlier-only addition below) when anything has been placed in a
-      // module, otherwise the flat Unsorted list it always was.
-      // "Since your last visit" (caSinceGroup, at the end of this file) sits
-      // between Today and this fold and takes its cards out of the fold: no
-      // card shows twice.
-      const since = caSinceGroup(list, todayDay, myClears, boardPos);
-      const sinceIds = since ? since.ids : [];
-      const restGroups = pendingGroups
-        .map(g => ({ sec: g.sec, cards: g.cards.filter(a => !caTodayIds.includes(a.id) && !sinceIds.includes(a.id)) }))
-        .filter(g => g.cards.length);
+      // Everything else pending, minus the Today and Since cards (restGroups,
+      // above), wrapped in ONE "Still to do" fold (2f) — module headings
+      // (plain, no progress bar; that's an Earlier-only addition below) when
+      // anything has been placed in a module, otherwise the flat Unsorted list
+      // it always was.
       const restFlat = restGroups.reduce((acc, g) => acc.concat(g.cards), []);
       const restCount = restFlat.length;
       let restHtml = '';
