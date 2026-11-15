@@ -154,7 +154,7 @@ window.addEventListener('popstate', routeExploreHash);
 /* The access screen (app/boot.js showAccessScreen) checks again when the tab
    comes back, at most once every 30 s: "Check back later" without a timer. */
 document.addEventListener('visibilitychange', () => { if(!document.hidden && accessLocked) accessRecheck(false); });
-/* Built songs: read their list again when the tab comes back, at most once a minute (app/builtsongs.js). */
+/* Built songs: read their list again when the tab comes back, at most once every 15 minutes (BS_RETURN_MS, app/builtsongs.js). */
 document.addEventListener('visibilitychange', () => { if(!document.hidden) builtSongsSyncSoon(); });
 
 /* ── The practice-card player's keys (KEYS in app/cards.js): one keydown listener, the two that note which

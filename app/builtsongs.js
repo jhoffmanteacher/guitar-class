@@ -71,7 +71,8 @@
    THE IMPORT FILE (tools/built-song-check.mjs checks one in Node; the console's Import reads one): the doc
    without savedAt, plus its id: { id, v, title, artist, audio, song }.
 
-   WHAT A PAGE DOES (builtSongsSync, started from app/start.js only: after a sign-in and on a tab return):
+   WHAT A PAGE DOES (builtSongsSync, started from app/start.js only: after a sign-in, and on a tab return when the
+   last answered read of the list is over 15 minutes old, BS_RETURN_MS):
      1. one read of builtSongsMeta/list. Refused (permission-denied: the rules not pasted yet, or an account the
         rules do not let in) or missing → NO built songs, no line on screen, no error-log entry (a refused read
         leaves the device copy as it was, unused). Offline or another failure → the device copy (below), only
@@ -393,10 +394,14 @@ let bsApplied = new Map();      // id -> { ver, sha, title } of the built songs 
 let bsSig = '';                 // what is on the page, to repaint only on a change
 let bsGen = 0;                  // a newer sync drops an older one
 let bsPending = null;           // the promise of the sync in flight, or null
-let bsLastSync = 0;
+let bsLastRead = 0;             // when the list was last read with an answer (read, missing or refused); 0 = never
 let bsLogged = false;           // at most one error-log line per page
 let bsWaiter = null;            // { id, fn } a deep link waiting for the first merge
-const BS_IDB = 'gc-built-songs', BS_IDB_WAIT_MS = 4000, BS_RETURN_MS = 60000;
+const BS_IDB = 'gc-built-songs', BS_IDB_WAIT_MS = 4000;
+/* A tab return reads the list again only when its last answered read (read, missing or refused) is older than
+   this. Every tab return by every student would otherwise cost a read, and Firestore's free daily reads are
+   shared with saving. A sign-in always reads once. A read that failed (offline) does not start the clock. */
+const BS_RETURN_MS = 15 * 60 * 1000;
 
 function bsIdb(){
   return new Promise(resolve => {
@@ -507,7 +512,6 @@ function builtSongsSync(){
     bsWaiterRun();
   });
   bsPending = p;
-  bsLastSync = Date.now();
   return p;
 }
 async function bsSyncOnce(gen){
@@ -522,8 +526,9 @@ async function bsSyncOnce(gen){
     try {
       const snap = await db.collection('builtSongsMeta').doc('list').get();
       list = snap.exists ? bsListOf(snap.data()) : {};
+      bsLastRead = Date.now();
     } catch(e){
-      if(bsDenied(e)){ list = {}; denied = true; }
+      if(bsDenied(e)){ list = {}; denied = true; bsLastRead = Date.now(); }
       else offline = true;
     }
   }
@@ -562,11 +567,12 @@ async function bsSyncOnce(gen){
     try { await bsCopyWrite(out); } catch(e) {}
   }
 }
-/* A tab return: again, at most once a minute, only while signed in (app/start.js). */
+/* A tab return: again, only while signed in, and only when the last answered read is older than BS_RETURN_MS
+   (15 minutes) (app/start.js). */
 function builtSongsSyncSoon(){
   const u = bsHost().user;
   if(!u || (typeof isDevBypassUser === 'function' && isDevBypassUser()) || bsPending) return;
-  if(Date.now() - bsLastSync < BS_RETURN_MS) return;
+  if(Date.now() - bsLastRead < BS_RETURN_MS) return;
   builtSongsSync();
 }
 /* A deep link to an 'sb-' id that is not on the page yet: true when a merge is still on its way (then fn runs
