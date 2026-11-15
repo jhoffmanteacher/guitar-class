@@ -19359,14 +19359,14 @@ function checkSongFilesConsole() {
    English and Spanish, never reach In-Class Activities or the board; one
    broken doc per validator rule is left out alone; the device copy, sign-out,
    a deep link, Hidden. Its case count is pinned (BUILT_SONGS_SIM_PIN) so a
-   deleted case fails here; `--breaks` (not run here) plants 22 faults (app/builtsongs.js, app/cards.js, app/activities-2.js, app/songfiles.js).
+   deleted case fails here; `--breaks` (not run here) plants 24 faults (app/builtsongs.js, app/cards.js, app/activities-2.js, app/songfiles.js).
    And, EXECUTED here in the 0b render context: the ONE-FILE SPEEDS (app/
    cards.js, Jonathan 2026-11-14: "the browser slows the one file"): a track
    with no srcSlow renders the four stops 0.65 / 0.85 / 0.9 / 1, all on the one
    file (data-slow stays empty), opening on 0.85; and index.html loads
    app/builtsongs.js right after app/snippets.js.
    ════════════════════════════════════════════════════════════════════ */
-const BUILT_SONGS_SIM_PIN = 136;   // 2026-11-14, Song builder Part a2: 14 zero, 60 merge, 38 refused, 24 store, deep-link and tab-return cases
+const BUILT_SONGS_SIM_PIN = 139;   // 2026-11-14, Song builder Part a2: 14 zero, 60 merge, 38 refused, 27 store, deep-link and tab-return cases (136 -> 139: the 15-minute tab-return throttle, 4 cases for 1)
 const ONE_FILE_STOPS = '0.65,0.85,0.9,1', ONE_FILE_OPEN = '0.85';   // Jonathan, 2026-11-14 (work order decision 3)
 function checkBuiltSongs(ctx) {
   head('1el. Built songs: the merge is run (0 songs changes nothing; fixtures, refusals, device copy); the one-file stops are pinned');

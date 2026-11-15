@@ -328,7 +328,7 @@ async function runCases(files){
     /* taken off the list: gone from the page, with its audio entry */
     shared.fs.docs.set('builtSongsMeta/list', { songs: { [g2.id]: 1 } });
     const rp = p6.run('__repaints');
-    p6.run('bsLastSync = 0'); await p6.run('builtSongsSync()'); await settle();
+    await p6.run('builtSongsSync()'); await settle();
     ok(!p6.run(`CLASS_ACTIVITIES.some(a => a.id === ${JSON.stringify(g1.id)}) || !!SNIPPET_TRACKS[${JSON.stringify(g1.id)}] || !!songFileEntry(${JSON.stringify(g1.doc.audio.id)})`) && p6.run('__repaints') === rp + 1,
       'store: a song taken off the list leaves the page (card, track and audio entry), with one repaint');
     await p6.run('builtSongsSync()'); await settle();
@@ -406,11 +406,29 @@ async function runCases(files){
     p.run(`location.hash = '#songs'`);
     await pr2; await settle();
     ok(ran === 1, 'deep link: a student who moved on meanwhile is not taken to the card');
-    p.run(`bsLastSync = Date.now()`); shared.fs.st.reads = [];
-    p.run('builtSongsSyncSoon()'); await settle();
-    const r1 = shared.fs.st.reads.length;
-    p.run(`bsLastSync = Date.now() - 61000`); p.run('builtSongsSyncSoon()'); await settle();
-    ok(r1 === 0 && shared.fs.st.reads.length >= 1, `tab return: no read within a minute of the last, one after (${r1}, then ${shared.fs.st.reads.length})`);
+  }
+  {
+    /* The tab-return throttle (BS_RETURN_MS, 15 minutes), on the page's own clock. */
+    const shared = fresh(); publish(shared.fs, [g1]);
+    const p = makePage(files, shared); p.signIn();
+    p.ctx.__now = 1e12; p.run('Date.now = () => __now');
+    const metaReads = () => shared.fs.st.reads.filter(r => r === 'builtSongsMeta/list').length;
+    const ret = async min => { p.ctx.__now = 1e12 + min * 60000; p.run('builtSongsSyncSoon()'); await p.run('bsPending || Promise.resolve()'); await settle(); };
+    await sync(p);
+    await ret(1); await ret(14);
+    ok(metaReads() === 1, `tab return: the sign-in read, then two tab returns inside 15 minutes: 1 read of the list (${metaReads()})`);
+    await ret(15.1);
+    ok(metaReads() === 2, `tab return: one after 15 minutes: 2 reads (${metaReads()})`);
+    shared.fs.st.denyAll = true;
+    await ret(31);
+    const afterDenied = metaReads();
+    await ret(40);
+    ok(afterDenied === 3 && metaReads() === 3, `tab return: a refused read starts the clock too (one at 31 min refused, none at 40: ${afterDenied}, then ${metaReads()})`);
+    shared.fs.st.denyAll = false; shared.fs.st.offline = true;
+    await ret(47);
+    await ret(48);
+    ok(metaReads() === 5, `tab return: a failed (offline) read does not start the clock: the next tab return tries again (${metaReads()})`);
+    shared.fs.st.offline = false;
   }
   {
     for (const [name, o] of [['an IndexedDB whose open throws', { throws: true }], ['an IndexedDB that never answers', { never: true }], ['a full IndexedDB', { quota: true }]]) {
@@ -455,7 +473,7 @@ async function main(){
       ['app/builtsongs.js', 'a bar\'s beats not added up', "if(Math.abs(sum - meter.bpb) > 1e-6) return", "if(false) return"],
       ['app/builtsongs.js', 'unknown chart fields allowed', "if(sx.length) no(", "if(false) no("],
       ['app/builtsongs.js', 'the old entries not removed on a merge', "for(let i = list.length - 1; i >= 0; i--) if(list[i] && bsApplied.has(list[i].id)) list.splice(i, 1);", ""],
-      ['app/builtsongs.js', 'a refused list read treated as offline (the device copy used)', "if(bsDenied(e)){ list = {}; denied = true; }", "if(false){ list = {}; denied = true; }"],
+      ['app/builtsongs.js', 'a refused list read treated as offline (the device copy used)', "if(bsDenied(e)){ list = {}; denied = true; bsLastRead = Date.now(); }", "if(false){ list = {}; denied = true; bsLastRead = Date.now(); }"],
       ['app/builtsongs.js', 'a refused list read wipes the device copy', "if(!teacher && !denied){", "if(!teacher){"],
       ['app/builtsongs.js', 'the device copy used signed out', "if(!user){ if(bsApply([])) bsRepaint(); return; }", "if(false){ }"],
       ['app/builtsongs.js', 'the list\'s keys not checked', "if(BS_ID_RE.test(k) && bsInt(v) && v >= 1", "if(bsInt(v) && v >= 1"],
@@ -464,6 +482,8 @@ async function main(){
       ['app/builtsongs.js', 'every refusal logged', "if(bsLogged) return;\n  bsLogged = true;", "bsLogged = true;"],
       ['app/builtsongs.js', 'an audio id on SONG_FILES kept', "else if(typeof SONG_FILES !== 'undefined' && Object.prototype.hasOwnProperty.call(SONG_FILES, aid)) why.push(", "else if(false) why.push("],
       ['app/builtsongs.js', 'a repaint with no change', "if(sig === bsSig) return false;", ""],
+      ['app/builtsongs.js', 'the tab-return throttle dropped', "  if(Date.now() - bsLastRead < BS_RETURN_MS) return;\n", ""],
+      ['app/builtsongs.js', 'a refused read does not start the throttle\'s clock', "if(bsDenied(e)){ list = {}; denied = true; bsLastRead = Date.now(); }", "if(bsDenied(e)){ list = {}; denied = true; }"],
       ['app/builtsongs.js', 'a deep link that never waits', "if(typeof id !== 'string' || !BS_ID_RE.test(id) || !bsPending) return false;", "return false;"],
       ['app/cards.js', 'one-file stops at the two-file rates', "const PC_ONE_FILE_RATES = [0.65, 0.85, 0.9, 1];", "const PC_ONE_FILE_RATES = [0.8, 1, 0.9, 1];"],
       ['app/cards.js', 'a one-file card opening on the slow file', " data-slow=\"\" data-rate=\"${PC_ONE_FILE_RATES[1]}\"", " data-slow=\"1\""],
