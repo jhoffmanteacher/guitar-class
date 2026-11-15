@@ -154,6 +154,8 @@ window.addEventListener('popstate', routeExploreHash);
 /* The access screen (app/boot.js showAccessScreen) checks again when the tab
    comes back, at most once every 30 s: "Check back later" without a timer. */
 document.addEventListener('visibilitychange', () => { if(!document.hidden && accessLocked) accessRecheck(false); });
+/* Built songs: read their list again when the tab comes back, at most once a minute (app/builtsongs.js). */
+document.addEventListener('visibilitychange', () => { if(!document.hidden) builtSongsSyncSoon(); });
 
 /* ── The practice-card player's keys (KEYS in app/cards.js): one keydown listener, the two that note which
    card the student last touched or tabbed into, and the pointerup and click that let go of the focus a mouse or
@@ -217,6 +219,9 @@ if(auth) auth.onAuthStateChanged(async user=>{
     if(window.PM) PM.syncHeader(false);   // hidden until showApp: no app behind it yet, and never on the teacher console
     startAuthStallTimer();   // ...but don't strand them there if the load never finishes
     try{
+      /* Built songs (app/builtsongs.js): one read of their list, started here and not waited for; the Songs page,
+         the console's Songs view and a deep link to one pick them up when it lands. */
+      builtSongsSync();
       if(IS_TEACHER_MODE){ await ensureTeacherJs(); showTeacherApp(user); clearAuthStallTimer(); }
       else {
         await loadProgress(); caAdoptLocalTicks(); await loadClassConfig();
@@ -265,5 +270,6 @@ if(auth) auth.onAuthStateChanged(async user=>{
     document.getElementById('search-btn').style.display='none';
     document.getElementById('user-area').innerHTML=`<button class="btn-sign" onclick="signIn()" data-i18n="header.signIn">${t('header.signIn')}</button>`;
     if(window.PM) PM.syncHeader(false);   // signed out: the practice-minutes strip goes with the student
+    builtSongsClear();   // signed out: no built song stays on the page (app/builtsongs.js)
   }
 });

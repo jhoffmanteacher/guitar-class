@@ -64,7 +64,8 @@ function renderTeacherSongs(){
         +`<div class="t-board-ctl">${status}<span class="t-board-ctl-sp">`
         +`<button class="tg-seg-btn" data-open-activity data-id="${escAttr(a.id)}">Preview</button>`
         +`<button class="tg-seg-btn" data-copy-activity-link data-id="${escAttr(a.id)}">Copy link</button>`
-        +`<button class="tg-seg-btn" data-set-song-place data-id="${escAttr(a.id)}" data-state="activities" title="Take this off the Songs page and put it back on the Class activities board — in its old slot if it had one, otherwise in Built">Move to Class activities</button></span></div>`
+        /* A built song (an 'sb-' id, Manage → Built songs) stays on the Songs page: no move (Song builder, Part e later). */
+        +(isBuiltSongId(a.id) ? `<span class="t-songs-off" title="Built in the console (Manage → Built songs); it stays on the Songs page">Built song</span>` : `<button class="tg-seg-btn" data-set-song-place data-id="${escAttr(a.id)}" data-state="activities" title="Take this off the Songs page and put it back on the Class activities board — in its old slot if it had one, otherwise in Built">Move to Class activities</button>`)+`</span></div>`
         +`</div>`;
     }).join('');
     box.innerHTML=intro+`<div class="t-songs">${rows}</div>`;
@@ -179,7 +180,7 @@ async function teacherSetClassSong(id, on){
    moved back lands where it was. Students' progress is never written. */
 async function teacherSetSongPlace(id, where){
   const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
-  if(!a || !caIsSongCard(a)) return;
+  if(!a || !caIsSongCard(a) || isBuiltSongId(a.id)) return;   // a built song never moves (it stays on the Songs page)
   const toSongs = where==='songs';
   if(!teacherClassConfig.songLibrary) teacherClassConfig.songLibrary={};
   const map=teacherClassConfig.songLibrary;

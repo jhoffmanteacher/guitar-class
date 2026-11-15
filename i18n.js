@@ -524,6 +524,27 @@
                                  es: 'Esta canci\u00f3n no se pudo cargar. Revisa que la fecha de esta Chromebook sea correcta y vuelve a darle play.' },
     'sf.failed':               { en: 'This song didn\u2019t load. Press play again in a minute.',
                                  es: 'Esta canci\u00f3n no se carg\u00f3. Vuelve a darle play en un minuto.' },
+    // BUILT SONGS (app/builtsongs.js, 2026-11-14): a Play Along song the teacher adds in the console. Its card's
+    // title ending, caption, directions line and section names come from here (the title, the artist and the
+    // lyric lines are the teacher's own). bs.intro must stay one line at 1366x657 with its chords filled in:
+    // builtSongCheck refuses a card whose line passes 105 characters and bs.introShort is used instead.
+    'bs.titleEnd':             { en: 'Play Along', es: 'Toca con la canci\u00f3n' },
+    'bs.caption':              { en: 'The song in order', es: 'La canci\u00f3n en orden' },
+    'bs.intro':                { en: 'Play along with the band: {chords}.', es: 'Toca con la banda: {chords}.' },
+    'bs.introShort':           { en: 'Play along with the band, one part at a time.', es: 'Toca con la banda, una parte a la vez.' },
+    'bs.and':                  { en: ' and ', es: ' y ' },
+    'bs.sec.intro':            { en: 'Intro', es: 'Intro' },
+    'bs.sec.verse':            { en: 'Verse', es: 'Estrofa' },
+    'bs.sec.prechorus':        { en: 'Pre-chorus', es: 'Pre-coro' },
+    'bs.sec.chorus':           { en: 'Chorus', es: 'Coro' },
+    'bs.sec.refrain':          { en: 'Refrain', es: 'Estribillo' },
+    'bs.sec.bridge':           { en: 'Bridge', es: 'Puente' },
+    'bs.sec.interlude':        { en: 'Interlude', es: 'Interludio' },
+    'bs.sec.solo':             { en: 'Solo', es: 'Solo' },
+    'bs.sec.riff':             { en: 'Riff', es: 'Riff' },
+    'bs.sec.requinto':         { en: 'Requinto', es: 'Requinto' },
+    'bs.sec.outro':            { en: 'Outro', es: 'Final' },
+    'bs.sec.ending':           { en: 'Ending', es: 'Final' },
     // The Guitar toggle only appears where a full mix has been exported (see
     // SNIPPET_TRACKS in app.js). On = the record plays the part the student
     // is learning, so they can hear whether they've got it; off = the

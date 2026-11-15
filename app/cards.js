@@ -253,6 +253,12 @@ function pcPlayBtnHtml(playing){
    already 105 against 115. Each option carries its own playback rate in
    data-rate; the card's data-rate is what pcRate() reads. */
 function pcSlowRate(tr){ return (1 + tr.trackBpmSlow / tr.trackBpm) / 2; }
+/* ONE-FILE SPEEDS (2026-11-14, Jonathan: "the browser slows the one file"): a track with no slow file (a built song,
+   app/builtsongs.js) gets the same four stops on its ONE file, at these rates, pitch held, opening on Slower (0.85).
+   The bars never move (the same file at another rate), so data-slow stays '' at every stop and only data-rate
+   changes. A track that has a srcSlow keeps the two-file stops above, unchanged. */
+const PC_ONE_FILE_RATES = [0.65, 0.85, 0.9, 1];
+function pcOneFile(tr){ return !!tr && !tr.srcSlow; }
 /* A control's tooltip naming its key (KEYS, below). None in the console's
    preview (`preview`), where the keys are off. */
 function pcKeyTitle(key, preview){ return preview ? '' : ` title="${escAttr(t(key))}"`; }
@@ -287,20 +293,27 @@ function pcSpeed3Html(tr, preview){
      exactly under its four stops, so a tap on a tick lands on that stop.
      Each tick still carries data-speed / data-rate — pcSetSpeedTo() reads
      the one the range points at. */
-  const ratio = tr.trackBpmSlow / tr.trackBpm;   // the slow file against the record
-  const stops = [
+  const one = pcOneFile(tr);
+  const ratio = one ? 1 : tr.trackBpmSlow / tr.trackBpm;   // the slow file against the record
+  const stops = one
+    ? [
+    ['slowest', 'ca.cardSlowest', PC_ONE_FILE_RATES[0],        PC_ONE_FILE_RATES[0]],
+    ['slower',  'ca.cardSlower',  PC_ONE_FILE_RATES[1],        PC_ONE_FILE_RATES[1]],
+    ['slow',    'ca.cardSlow',    PC_ONE_FILE_RATES[2],        PC_ONE_FILE_RATES[2]],
+    ['normal',  'ca.cardNormal',  PC_ONE_FILE_RATES[3],        PC_ONE_FILE_RATES[3]],
+  ] : [
     ['slowest', 'ca.cardSlowest', SLOWEST_RATE,                ratio * SLOWEST_RATE],
     ['slower',  'ca.cardSlower',  1,                           ratio],
     ['slow',    'ca.cardSlow',    pcSlowRate(tr).toFixed(4),   pcSlowRate(tr)],
     ['normal',  'ca.cardNormal',  1,                           1],
   ];
-  const START = 1;   // Slower — the card opens with data-slow="1"
+  const START = 1;   // Slower — the card opens with data-slow="1" (one file: data-rate="0.85")
   const ticks = stops.map(([speed, key, rate, factor], i) => {
     const x = pcSpeedFactor(factor);
     return `<span class="pc-speed-tick${i === START ? ' on' : ''}" style="--i:${i}" data-speed="${speed}" data-rate="${rate}" data-label="${escAttr(t(key) + ', ' + x)}"></span>`
       + `<span class="pc-speed-x${i === START ? ' on' : ''}" style="--i:${i}" aria-hidden="true">${x}</span>`;
   }).join('');
-  return `<span class="pc-speed4" role="group" aria-label="${escAttr(t('ca.cardSpeed4Aria'))}"${pcKeyTitle('pc.keys.speed', preview)}>`
+  return `<span class="pc-speed4"${one ? ' data-one-file="1"' : ''} role="group" aria-label="${escAttr(t('ca.cardSpeed4Aria'))}"${pcKeyTitle('pc.keys.speed', preview)}>`
     + `<span class="pc-speed-end" aria-hidden="true">${escHtml(t('ca.cardSlower'))}</span>`
     + `<span class="pc-speed-rail"><span class="pc-speed-line" aria-hidden="true"></span>${ticks}`
     +   `<input type="range" class="pc-speed-range" min="0" max="3" step="1" value="${START}" aria-label="${escAttr(t('ca.cardSpeedLabel'))}" aria-valuetext="${escAttr(t(stops[START][1]) + ', ' + pcSpeedFactor(stops[START][3]))}" oninput="pcSpeedShow(this)" onchange="pcSetSpeedTo(this)"></span>`
@@ -315,7 +328,7 @@ function pcPlayerHtml(a, L, preview){
   return `<div class="pc-player">`
     + `<button type="button" class="pc-play"${pcKeyTitle('pc.keys.play', preview)} onclick="pcToggle(this)">${pcPlayBtnHtml(false)}</button>`
     + `<button type="button" class="snip-toggle pc-metro" aria-pressed="false" onclick="pcSetMetro(this)">&#x1F3B5; ${escHtml(t('tools.metronome'))}</button>`
-    + (a.card.slowest ? pcSpeed3Html(L.tr, preview) : pcSpeedSwitchHtml(preview))
+    + ((a.card.slowest || pcOneFile(L.tr)) ? pcSpeed3Html(L.tr, preview) : pcSpeedSwitchHtml(preview))   // one file: always the four stops
     /* The Guitar switch: only where a full mix exists, ON by default. */
     + (hasFull ? pcGuitarSwitchHtml() : '')
     + `</div>`;
@@ -459,7 +472,7 @@ function caCardBodyHtml(a, opts){
      card, the hero card, the console preview) gets it the same way. */
   const sheet = !!a.card.sheet;
   if(sheet) setTimeout(pcSheetScan, 0);
-  return `<div class="pc" data-id="${escAttr(a.id)}" data-slow="1"${snippetHasFull(L.tr) ? ' data-guitar="1"' : ''}${preview ? ' data-preview="1"' : ''}>`
+  return `<div class="pc" data-id="${escAttr(a.id)}"${pcOneFile(L.tr) ? ` data-slow="" data-rate="${PC_ONE_FILE_RATES[1]}"` : ' data-slow="1"'}${snippetHasFull(L.tr) ? ' data-guitar="1"' : ''}${preview ? ' data-preview="1"' : ''}>`
     + caRecordingSwitchHtml(a) + caKeySwitchHtml(a) + caChordSwitchHtml(a) + caBassSwitchHtml(a)
     + `<p class="pc-dir">${escHtml(t(sheet ? 'ca.sheetDirections' : L.sections.some(S => S.grid) ? (L.sections.every(S => S.grid) ? (L.sections.every(S => S.every) ? 'ca.cardStrumDirections' : 'ca.cardChordDirections') : 'ca.cardChordMixedDirections') : 'ca.cardDirections'))}`
     + (caBassMode(a) === 'on' && tf(a, 'bassDirections') ? ' ' + escHtml(tf(a, 'bassDirections')) : '')   // alternating bass — see BASS NOTES
@@ -1384,7 +1397,8 @@ function pcSetSpeedTo(range){
   if(!root) return;
   const tick = pcSpeedShow(range);
   const speed = tick.dataset.speed, rate = tick.dataset.rate || '1';
-  const slow = (speed === 'slowest' || speed === 'slower') ? '1' : '';
+  const one = !!range.closest('.pc-speed4[data-one-file="1"]');   // ONE-FILE SPEEDS: every stop is the one file
+  const slow = !one && (speed === 'slowest' || speed === 'slower') ? '1' : '';
   if(root.dataset.slow === slow && pcRate(root) === parseFloat(rate)) return;
   pcBuildTakeover(root);               // a speed chosen by hand ends Build up speed (app/cards-loop.js)
   root.dataset.slow = slow;

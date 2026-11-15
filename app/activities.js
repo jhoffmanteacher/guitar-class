@@ -9,6 +9,9 @@ function caFocusActivity(id){
   // A "Play Along now" card opens here too, from the Songs page — see
   // caIsPlayAlongOnly — and so does a pinned one, from the Keep practicing row.
   const found = (window.CLASS_ACTIVITIES || []).find(a => a.id === id && (caIsVisible(a) || caIsPlayAlongOnly(a) || caPinReachable(a)));
+  /* A link to a built song ('sb-', app/builtsongs.js) that came before the songs did: the page shows no "not posted"
+     note yet, and this runs again once the merge is done (then the card, or the usual note). */
+  if(!found && builtSongWait(id, () => caFocusActivity(id))){ caLinkMissingId = null; renderClassActivities(); return; }
   caLinkMissingId = found ? null : id;
   caOpenId = found ? id : caOpenId;
   renderClassActivities();

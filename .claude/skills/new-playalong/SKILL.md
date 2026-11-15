@@ -20,6 +20,18 @@ uploads the two files in the console (Manage → Song files) and presses **Verif
 match (until then a student's card says the song can't load). `node tools/song-files.mjs` prints the list and
 whether the folder's copies match. The backing and jam tracks stay public in `audio/` (no `--private`).
 
+**A BUILT song instead of a coded card** (2026-11-14, Song builder Part a2; `app/builtsongs.js`): the same steps 1 to 3,
+then `node tools/new-playalong.mjs <spec.json> --built --from <upload.mp3>` writes TWO files to the private song folder
+and edits no repo file: the Import file `<id>.json` (`sb-` id, the chart in the built format) and ONE stored copy
+`<audio.id>.mp3` (one measured gain to the cure, -1 dBFS limiter, **192k constant bitrate**, no slow file: the card plays
+that one file at 0.65 / 0.85 / 0.9 / 1). Jonathan imports both in the console (Manage → Built songs → pick the .json and
+the .mp3 → Import); it is live for every student from that moment, with **no push** (this reverses "live on push" and
+"push only after Verify" for built songs). A built song's **lyric lines always show** when the spec has them (Jonathan:
+"lyrics always show if they are available"; they sit behind the sign-in); the "No lyrics" rule below stays for coded
+cards. Over 10 cents: the `cents` shift as below; the file records what is left (`audio.centsOff`, at most 10, or the
+tool and the site refuse it). `node tools/built-song-check.mjs <id>.json --audio <mp3>` checks a file the way every page
+does. Steps 5 to 6 do not apply (no card in `class-activities.js`, no `SNIPPET_TRACKS` entry, no pins, no push).
+
 ## 1. Inputs: ask once, in one message, only for what is missing
 - The mp3's path, the song and the artist (as the title should read: `"<song>" - <artist>`; ca-37 was renamed twice
   because the song and the band were swapped, so read them back to him).

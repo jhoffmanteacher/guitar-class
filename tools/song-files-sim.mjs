@@ -161,7 +161,7 @@ function makeTab(src, shared, opts){
   };
   vm.createContext(ctx);
   /* The sim's own list: whatever the site ships on SONG_FILES is cleared, so a real entry never changes a case (review B3). */
-  vm.runInContext(src + `\n;for (const k of Object.keys(SONG_FILES)) delete SONG_FILES[k];\nglobalThis.__api = { SONG_FILES, songFileLoad, songFileSrc, songFileNeedsLoad, songFileWaitThen, songFileCancelWait, songFileCancelWaitIn, songFileWaitingFor, songFileCost, songFileMonth, SONG_FILES_MONTH_LIMIT, SONG_FILE_LINE_KEYS };`, ctx, { filename: 'app/songfiles.js' });
+  vm.runInContext(src + `\n;for (const k of Object.keys(SONG_FILES)) delete SONG_FILES[k];\nglobalThis.__api = { SONG_FILES, songFileLoad, songFileSrc, songFileNeedsLoad, songFileWaitThen, songFileCancelWait, songFileCancelWaitIn, songFileWaitingFor, songFileCost, songFileMonth, SONG_FILES_MONTH_LIMIT, SONG_FILE_LINE_KEYS, songFilesSetBuilt, songFileEntry, sfUrls };`, ctx, { filename: 'app/songfiles.js' });
   return { api: ctx.__api, ctx, urls };
 }
 const newShared = o => ({ fs: makeFirestore(), idb: makeIdb(o), locks: makeLocks() });
@@ -234,6 +234,32 @@ async function suite(src, quiet){
     const re = makeTab(src, sh); register(re, 'made-up', B2);
     await re.api.songFileLoad('made-up'); await tick(); await tick();
     ok('a re-exported song (new SHA-256 on the list) is downloaded again and replaces the copy', sh.idb.stores.get('made-up').sha256 === sha(B2) && sha(await blobBytes(re.urls[0])) === sha(B2));
+  }
+
+  say('== a built song\'s audio (app/builtsongs.js hands its entries to songFilesSetBuilt)');
+  { const shB = newShared();
+    const AB = bytesOf(PIECE + 777), entry = { file: 'sb-made-up-a.mp3', bytes: AB.length, sha256: sha(AB), durationSec: 60 };
+    putFile(shB.fs, 'sb-made-up-a', AB);
+    const tab = makeTab(src, shB);
+    ok('built: not loadable before the merge hands it over (not on the list)', await code(tab.api.songFileLoad('sb-made-up-a')) === 'notready');
+    tab.api.songFilesSetBuilt({ 'sb-made-up-a': entry });
+    const url = await tab.api.songFileLoad('sb-made-up-a'); await tick(); await tick();
+    ok('built: a built song\'s file downloads, byte for byte, through the same checks', /^blob:/.test(url) && sha(await blobBytes(tab.urls[0])) === sha(AB));
+    ok('built: …it counts against the month, once', usage(shB) === Math.ceil(AB.length * 4 / 3), String(usage(shB)));
+    ok('built: …and the device keeps a copy', !!shB.idb.stores.get('sb-made-up-a') && shB.idb.stores.get('sb-made-up-a').sha256 === sha(AB));
+    const r0 = shB.fs.st.reads;
+    const next = makeTab(src, shB); next.api.songFilesSetBuilt({ 'sb-made-up-a': entry });
+    ok('built: a new page plays it from the device copy with 0 reads', /^blob:/.test(await next.api.songFileLoad('sb-made-up-a')) && shB.fs.st.reads === r0);
+    const shW = newShared(); putFile(shW.fs, 'sb-made-up-b', AB);
+    const w = makeTab(src, shW); w.api.songFilesSetBuilt({ 'sb-made-up-b': Object.assign({}, entry, { file: 'sb-made-up-b.mp3', sha256: sha(bytesOf(10)) }) });
+    ok('built: a wrong SHA-256 in the built doc is refused (missing), nothing kept, no address', await code(w.api.songFileLoad('sb-made-up-b')) === 'notready' && !shW.idb.stores.get('sb-made-up-b') && w.api.songFileNeedsLoad('private:sb-made-up-b'));
+    const shL = newShared(); const LB = bytesOf(5000); putFile(shL.fs, 'both-lists', LB);
+    const l = makeTab(src, shL); register(l, 'both-lists', LB);
+    l.api.songFilesSetBuilt({ 'both-lists': { file: 'other.mp3', bytes: 9, sha256: sha(bytesOf(9)), durationSec: 1 } });
+    ok('built: an id on both lists is the tracked list\'s (the built entry is dropped)', l.api.songFileEntry('both-lists').bytes === LB.length && /^blob:/.test(await l.api.songFileLoad('both-lists')));
+    const t2 = makeTab(src, shB); t2.api.songFilesSetBuilt({ 'sb-made-up-a': entry }); await t2.api.songFileLoad('sb-made-up-a');
+    t2.api.songFilesSetBuilt({});
+    ok('built: a song taken off the list loses its entry and the page\'s loaded copy', t2.api.songFileEntry('sb-made-up-a') === null && !t2.api.sfUrls.has('sb-made-up-a') && await code(t2.api.songFileLoad('sb-made-up-a')) === 'notready');
   }
 
   say('== refusals: nothing kept, no address');
@@ -525,6 +551,10 @@ async function suite(src, quiet){
 
 /* Each break: [name, old text, new text]. The old text must occur exactly once in app/songfiles.js. */
 const BREAKS = [
+  /* Song builder Part a2 (2026-11-14): the built songs' audio entries. */
+  ['B1: the loader ignores built entries', "  const entry = songFileEntry(id);\n  if(!entry) return Promise.reject(", "  const entry = SONG_FILES[id];\n  if(!entry) return Promise.reject("],
+  ['B2: a built entry wins over the list', "  if(Object.prototype.hasOwnProperty.call(SONG_FILES, id)) return SONG_FILES[id];\n  return Object.prototype", "  if(Object.prototype.hasOwnProperty.call(sfBuilt, id)) return sfBuilt[id];\n  return Object.prototype"],
+  ['B3: a song taken off the list keeps its loaded copy', "    if(sfUrls.has(id) && (!now || now.sha256 !== was.sha256 || now.bytes !== was.bytes)){", "    if(sfUrls.has(id) && now && (now.sha256 !== was.sha256 || now.bytes !== was.bytes)){"],
   /* Review round 2 (2026-11-14): the reviewer's plants that the round-1 sim missed, and the round-2 fixes. */
   ['PL1: marked counted before the count is written', "      await songFileCount(db, songFileCost(entry.bytes));\n      sfCounted.add(key);", "      sfCounted.add(key);\n      await songFileCount(db, songFileCost(entry.bytes));"],
   ['PC2: a failed wait leaves the button on Stop', "    if(!mine()) return;\n    end();\n    const code", "    if(!mine()) return;\n    sfWait = null;\n    const code"],
