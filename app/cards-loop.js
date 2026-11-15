@@ -39,7 +39,7 @@ function pcLoopHtml(L, preview){
     + `<span class="pc-loop-lab">${escHtml(t(label))}</span>`
     + `<span class="pc-loop-track" aria-hidden="true"><span class="pc-loop-knob"></span></span></button>`;
   const tr = L && L.tr;
-  const canBuild = !!(tr && tr.srcSlow);   // every track today; one with no slower file gets Loop only
+  const canBuild = !!(tr && (tr.srcSlow || pcOneFile(tr)));   // a slow file, or the one-file stops (ONE-FILE SPEEDS, app/cards.js)
   return `<span class="pc-loop">`
     + sw('loop', 'pc.loop', pcKeyTitle('pc.keys.loop', preview))
     + (canBuild ? sw('build', 'pc.build', ` title="${escAttr(t('pc.buildTitle'))}"`)
@@ -57,7 +57,8 @@ function pcLoopSet(root, name, on){
 /* The card's speed stops, slowest first: the slider's ticks, or the two-way switch's Slower / Normal. */
 function pcBuildStops(root){
   const ticks = root.querySelectorAll('.pc-speed4 .pc-speed-tick');
-  if(ticks.length) return Array.from(ticks).map(tk => ({ slow: tk.dataset.speed === 'slowest' || tk.dataset.speed === 'slower', rate: tk.dataset.rate || '1', key: PC_SPEED_KEYS[tk.dataset.speed] || 'ca.cardNormal' }));
+  const one = !!root.querySelector('.pc-speed4[data-one-file="1"]');   // ONE-FILE SPEEDS: no stop is a slow file
+  if(ticks.length) return Array.from(ticks).map(tk => ({ slow: !one && (tk.dataset.speed === 'slowest' || tk.dataset.speed === 'slower'), rate: tk.dataset.rate || '1', key: PC_SPEED_KEYS[tk.dataset.speed] || 'ca.cardNormal' }));
   return [{ slow: true, rate: '1', key: 'ca.cardSlower' }, { slow: false, rate: '1', key: 'ca.cardNormal' }];
 }
 /* Put the card's speed control on stop i and set what it plays (data-slow / data-rate), as a press would,

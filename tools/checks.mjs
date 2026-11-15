@@ -19265,7 +19265,7 @@ function checkSongRequests() {
        Journey player cannot play a private song yet; it is its own piece of
        Step 2.
    ════════════════════════════════════════════════════════════════════ */
-const SONG_FILES_SIM_PIN = 113;   // -> 113 (2026-11-14, plant-a-fault gaps 33147bfb56 and 6eb5c43dc5): a blocked IndexedDB open (2 cases), the loading line announced (role="status"); 81 -> 84 (2026-11-14): a sign-out in the same tab stops handing out the loaded copy; -> 101 (review round 1): L1-L5, A2, m4-m6, B1, B4; the "ships empty" case gone (B3); -> 109 (round 2): m1, m6, the three missed plants, two cards waiting for one song
+const SONG_FILES_SIM_PIN = 121;   // 113 -> 121 (2026-11-14, Song builder Part a2): a built song's audio entry (8 cases); -> 113 (2026-11-14, plant-a-fault gaps 33147bfb56 and 6eb5c43dc5): a blocked IndexedDB open (2 cases), the loading line announced (role="status"); 81 -> 84 (2026-11-14): a sign-out in the same tab stops handing out the loaded copy; -> 101 (review round 1): L1-L5, A2, m4-m6, B1, B4; the "ships empty" case gone (B3); -> 109 (round 2): m1, m6, the three missed plants, two cards waiting for one song
 const SONG_FILES_CLOSE_PIN = 6;
 function checkSongFilesLoader() {
   head('1dx. Song files: the loader is run (pieces, checks, device copy, two tabs, the monthly limit); the player hooks are pinned');
@@ -19327,10 +19327,12 @@ function checkSongFilesLoader() {
    exact typed id and deletes only that song's docs; leaving Manage mid-upload
    stops the writes (the head stays 'uploading'); a stale read never paints;
    every store value escaped, no inline handler. Its count of cases is pinned
-   so deleting one to get green fails here. `--breaks` plants 16 faults in
-   teacher-songfiles.js (each must turn a case red); not run here.
+   so deleting one to get green fails here. `--breaks` plants faults in
+   teacher-songfiles.js and teacher-builtsongs.js (each must turn a case red);
+   not run here. Since 2026-11-14 it also runs Manage → Built songs' Import
+   (teacher-builtsongs.js) against the rules' BUILT SONGS shape.
    ════════════════════════════════════════════════════════════════════ */
-const SONG_FILES_CONSOLE_SIM_PIN = 57;   // 52 -> 57 (review round 1, 2026-11-14): the paste-2 line, a Verify text escaped, a read during a write, a re-upload asked first (2)
+const SONG_FILES_CONSOLE_SIM_PIN = 84;   // 57 -> 84 (2026-11-14, Song builder Part a2): Manage → Built songs' Import (27 cases); 52 -> 57 (review round 1, 2026-11-14): the paste-2 line, a Verify text escaped, a read during a write, a re-upload asked first (2)
 function checkSongFilesConsole() {
   head('1dy. Song files in the console: upload, verify, delete and the escaping are run against the rules\' shape');
   const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'song-files-console-sim.mjs')], { encoding: 'utf8', timeout: 120000 });
@@ -19342,6 +19344,61 @@ function checkSongFilesConsole() {
   }
   if (+m[1] !== SONG_FILES_CONSOLE_SIM_PIN || +m[2] !== 0) { err(`1dy: song-files-console-sim ran ${m[1]} cases (${m[2]} failed); pinned at ${SONG_FILES_CONSOLE_SIM_PIN} — if you changed the simulation on purpose, re-pin SONG_FILES_CONSOLE_SIM_PIN (never lower it to hide a deleted case)`); problems++; return; }
   ok(`song-files-console-sim: ${m[1]} cases pass (pinned ${SONG_FILES_CONSOLE_SIM_PIN}): upload in 3 pieces (uploading → ready, stale pieces removed), refusals write nothing, Verify / the month's limit / Delete, leaving Manage stops the upload, every write in the rules' shape, store values escaped`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1el. BUILT SONGS (2026-11-14, Song builder Part a2) — a Play Along song
+   Jonathan adds in the console lives in the database (app/builtsongs.js:
+   the format, the validator, the merge; teacher-builtsongs.js: Import).
+   RUN by tools/built-songs-sim.mjs (Node, about 15 s: the whole app script
+   in a vm, a fake Firestore and IndexedDB): with no built song,
+   CLASS_ACTIVITIES and SNIPPET_TRACKS are deep-equal before and after the
+   merge (the list missing, empty, refused, offline, signed out, no
+   IndexedDB) and every coded card keeps its two-file stops; the made-up
+   fixtures merge as one library card and one one-file track each, render in
+   English and Spanish, never reach In-Class Activities or the board; one
+   broken doc per validator rule is left out alone; the device copy, sign-out,
+   a deep link, Hidden. Its case count is pinned (BUILT_SONGS_SIM_PIN) so a
+   deleted case fails here; `--breaks` (not run here) plants 22 faults (app/builtsongs.js, app/cards.js, app/activities-2.js, app/songfiles.js).
+   And, EXECUTED here in the 0b render context: the ONE-FILE SPEEDS (app/
+   cards.js, Jonathan 2026-11-14: "the browser slows the one file"): a track
+   with no srcSlow renders the four stops 0.65 / 0.85 / 0.9 / 1, all on the one
+   file (data-slow stays empty), opening on 0.85; and index.html loads
+   app/builtsongs.js right after app/snippets.js.
+   ════════════════════════════════════════════════════════════════════ */
+const BUILT_SONGS_SIM_PIN = 136;   // 2026-11-14, Song builder Part a2: 14 zero, 60 merge, 38 refused, 24 store, deep-link and tab-return cases
+const ONE_FILE_STOPS = '0.65,0.85,0.9,1', ONE_FILE_OPEN = '0.85';   // Jonathan, 2026-11-14 (work order decision 3)
+function checkBuiltSongs(ctx) {
+  head('1el. Built songs: the merge is run (0 songs changes nothing; fixtures, refusals, device copy); the one-file stops are pinned');
+  let bad = 0;
+  const fail = m => { err('1el: ' + m); problems++; bad++; };
+  const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'built-songs-sim.mjs')], { encoding: 'utf8', timeout: 180000 });
+  const m = /built-songs-sim: (\d+) cases, (\d+) failed/.exec(r.stdout || '');
+  if (r.status !== 0 || !m) {
+    fail('tools/built-songs-sim.mjs failed (exit ' + r.status + ')' + (r.error ? ': ' + r.error.message : ''));
+    for (const l of ((r.stdout || '') + (r.stderr || '')).trim().split('\n').filter(l => /✗|Error/.test(l)).slice(0, 8)) console.log(`${C.dim}      ${l}${C.reset}`);
+  } else if (+m[1] !== BUILT_SONGS_SIM_PIN || +m[2] !== 0) fail(`built-songs-sim ran ${m[1]} cases (${m[2]} failed); pinned at ${BUILT_SONGS_SIM_PIN}. If you changed the simulation on purpose, re-pin BUILT_SONGS_SIM_PIN (never lower it to hide a deleted case)`);
+  let stops = '', open = '', slow = '';
+  if (!ctx) fail('cannot pin the one-file stops: the 0b render context is unavailable');
+  else {
+    try {
+      const out = vm.runInContext(`(() => {
+        SNIPPET_TRACKS.__oneFileProbe = { src: 'audio/one-file-probe.mp3', trackBpm: 100, feltBpm: 100, beatsPerBar: 4, durationSec: 60, anchor: 0.5, anchorVerified: true };
+        const a = { id: '__oneFileProbe', view: 'card', library: true, optional: true, title: 'x', card: { track: '__oneFileProbe', slowest: true, chordGrid: true, sections: [{ label: 'A', fromBar: 1, bars: 1, notes: [{ rest: true, beats: 4 }] }], checks: [] }, steps: [] };
+        try { const h = caCardBodyHtml(a);
+          return { stops: [...h.matchAll(/class="pc-speed-tick[^"]*"[^>]*data-rate="([^"]+)"/g)].map(x => x[1]).join(','),
+                   open: ((/class="pc-speed-tick on"[^>]*data-rate="([^"]+)"/.exec(h) || [])[1] || '') + '|' + ((/<div class="pc" data-id="__oneFileProbe" data-slow="" data-rate="([^"]+)"/.exec(h) || [])[1] || ''),
+                   slow: /data-one-file="1"/.test(h) ? 'one' : 'two' };
+        } finally { delete SNIPPET_TRACKS.__oneFileProbe; } })()`, ctx);
+      stops = out.stops; open = out.open; slow = out.slow;
+    } catch (e) { fail('the one-file probe card would not render: ' + e.message); }
+    if (stops !== ONE_FILE_STOPS) fail(`a one-file track renders the stops ${stops || '(none)'}; pinned ${ONE_FILE_STOPS} (PC_ONE_FILE_RATES in app/cards.js; a change is Jonathan's call)`);
+    if (open !== ONE_FILE_OPEN + '|' + ONE_FILE_OPEN) fail(`a one-file card opens on ${open || '(nothing)'} (the lit tick | the card's data-rate with data-slow=""); pinned ${ONE_FILE_OPEN}`);
+    if (slow !== 'one') fail('a one-file card\'s slider is not marked data-one-file="1", so a stop would ask for a slow file it does not have');
+  }
+  const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
+  if (!/<script defer src="app\/snippets\.js"><\/script>\s*<script defer src="app\/builtsongs\.js"><\/script>/.test(html)) fail('index.html must load app/builtsongs.js right after app/snippets.js');
+  if (!bad) ok(`built-songs-sim: ${m[1]} cases pass (pinned ${BUILT_SONGS_SIM_PIN}); a one-file track's stops are ${stops}, opening on ${ONE_FILE_OPEN} (executed); app/builtsongs.js loads right after app/snippets.js`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -20447,6 +20504,7 @@ function checkPracticeMinutes(i18nTable) {
   checkSongRequests();
   checkSongFilesLoader();
   checkSongFilesConsole();
+  checkBuiltSongs(rcCtx);
   await checkPlantAFault();
   checkRemoveOne();
   await checkBackingLoudness();

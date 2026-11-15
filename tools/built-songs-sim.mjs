@@ -1,0 +1,491 @@
+#!/usr/bin/env node
+/* built-songs-sim.mjs — the built songs' merge (app/builtsongs.js, Song builder Part a2, 2026-11-14), RUN in Node:
+   the REAL whole app script (every app/*.js part, in index.html order, after i18n.js, guitar-diagrams.js,
+   class-activities.js, config-main.js and the module data, the same set checks.mjs 0b renders), a fake Firestore
+   (builtSongsMeta/list, builtSongs/{id}; denied, missing, offline), a fake IndexedDB shared by the "pages" of one
+   case (the device copy), and a spy on the error log. checks.mjs 1el runs it and pins the case count.
+
+     node tools/built-songs-sim.mjs                 every case (a few seconds)
+     node tools/built-songs-sim.mjs --verbose       every case's line, not only the failures
+     node tools/built-songs-sim.mjs --breaks        the cases against broken copies of the site (each must turn red)
+     node tools/built-songs-sim.mjs --against <dir> also renders every coded practice card (both languages, every
+                                                    chord view) in this tree and in <dir> (a checkout of the commit
+                                                    before) and compares them byte for byte
+
+   What it proves (each case prints ✓/✗):
+     zero      with no built song (the list missing, empty, refused, offline with no device copy, nobody signed
+               in, no IndexedDB at all): CLASS_ACTIVITIES and SNIPPET_TRACKS deep-equal before and after (the same
+               48 objects, the same 14 tracks), no audio entry, no repaint, no write, no error-log line; every
+               coded practice card still has its two-file stops (no data-one-file, data-slow="1", Slowest 0.8 of the
+               slow file, Slow at pcSlowRate) — the guard that 0 built songs changes nothing a student sees
+     merge     the made-up fixtures (tools/built-songs-fixtures.mjs: 4/4, 3/4, 6/8 counted in six, a beat map,
+               power chords only, both versions opening each way, lyric lines, a 1-bar section, 15 sections, a
+               from-to range, and a built copy of ca-51) each merge as ONE library card and ONE one-file track,
+               render through caCardBodyHtml in English and Spanish (section buttons, names, lyrics escaped, the
+               chord names of the view it opens on, the one-file stops 0.65 / 0.85 / 0.9 / 1 opening on 0.85), are
+               on the Songs page list, never visible on In-Class Activities, never on the board, never moved by
+               config/class.songLibrary, have no Mark complete, and fit their file
+     refused   one broken doc per validator rule (tools/built-songs-fixtures.mjs brokenFixtures) is left out
+               ALONE while every good song merges; at most one error-log line per page
+     store     offline → the device copy; signed out → nothing, not even from the device copy; refused → nothing,
+               even with a device copy; a listed song whose doc is missing is skipped; a newer edit replaces the
+               device copy's; the same edit is not read again; a song taken off the list leaves the page; the list's
+               bad keys and values are skipped; a refused or failed doc read; an audio id on SONG_FILES or another
+               song's with other bytes; an id already a coded track; sign-out clears; a deep link waits for the
+               merge; a changed file drops the page's loaded copy; Hidden takes it off the list; a broken
+               IndexedDB; the tab-return read at most once a minute; no write anywhere
+   Made-up data only; nothing leaves the process. */
+import { readFileSync, readdirSync } from 'node:fs';
+import vm from 'node:vm';
+import { fileURLToPath } from 'node:url';
+import { dirname, join, resolve } from 'node:path';
+import { siteParts } from './site-src.mjs';
+import { FIXTURES, withAudio, audioIdFor, brokenFixtures, ca51Built } from './built-songs-fixtures.mjs';
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+const args = process.argv.slice(2);
+const VERBOSE = args.includes('--verbose'), BREAKS = args.includes('--breaks');
+const AGAINST = (() => { const i = args.indexOf('--against'); return i >= 0 ? resolve(args[i + 1]) : null; })();
+const tick = () => new Promise(r => setImmediate(r));
+const settle = async (n = 30) => { for (let i = 0; i < n; i++) await tick(); };
+const hex = n => { let x = n * 2654435761 >>> 0, s = ''; while (s.length < 64) { x ^= x << 13; x >>>= 0; x ^= x >>> 17; x ^= x << 5; x >>>= 0; s += (x >>> 0).toString(16).padStart(8, '0'); } return s.slice(0, 64); };
+
+/* ── the site's text, part by part (a break replaces one part) ── */
+function siteFiles(root){
+  const mods = readdirSync(root).filter(f => /^module-\d+\.js$/.test(f)).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  const pre = ['i18n.js', 'guitar-diagrams.js', 'class-activities.js', 'config-main.js', ...mods].map(f => [f, readFileSync(join(root, f), 'utf8')]);
+  const app = siteParts('app.js', root).map(f => [f, readFileSync(join(root, f), 'utf8')]);
+  return [...pre, ...app];
+}
+
+/* ── fakes ── */
+function makeFirestore(){
+  const docs = new Map();
+  const st = { reads: [], writes: 0, offline: false, deny: new Set(), denyAll: false };
+  const err = code => { const e = new Error(code); e.code = code; return e; };
+  const ref = path => ({
+    path,
+    collection: n => ({ doc: id => ref(path + '/' + n + '/' + id) }),
+    async get(){
+      st.reads.push(path); await tick();
+      if (st.offline) throw err('unavailable');
+      if (st.denyAll || st.deny.has(path)) throw err('permission-denied');
+      const d = docs.get(path);
+      return { exists: d !== undefined, id: path.split('/').pop(), data: () => d === undefined ? undefined : JSON.parse(JSON.stringify(d)) };
+    },
+    async set(){ st.writes++; }, async update(){ st.writes++; }, async delete(){ st.writes++; },
+  });
+  const db = { collection: n => ({ doc: id => ref(n + '/' + id), get: async () => { st.reads.push(n); return { docs: [], forEach(){} }; } }),
+    batch: () => ({ set(){ st.writes++; }, update(){ st.writes++; }, delete(){ st.writes++; }, commit: async () => {} }),
+    runTransaction: async () => { st.writes++; } };
+  return { docs, st, db };
+}
+/* IndexedDB with one shared backing Map per "device": open / upgrade / transaction / get / put. */
+function makeIdb(shared, opts = {}){
+  return {
+    open(name){
+      if (opts.throws) throw new Error('blocked');
+      const req = {};
+      setTimeout(() => {
+        if (opts.never) return;
+        let dbs = shared.get(name), fresh = false;
+        if (!dbs) { dbs = new Map(); shared.set(name, dbs); fresh = true; }
+        const db = {
+          createObjectStore(s, o){ if (!dbs.has(s)) dbs.set(s, { key: o.keyPath, rows: new Map() }); },
+          transaction(s){
+            const store = dbs.get(s);
+            const tx = {};
+            const reqs = [];
+            tx.objectStore = () => ({
+              get(k){ const r = { result: store.rows.has(k) ? structuredClone(store.rows.get(k)) : undefined }; reqs.push(r); return r; },
+              put(v){ const r = {}; if (opts.quota) { setTimeout(() => tx.onerror && tx.onerror(), 0); return r; } store.rows.set(v[store.key], structuredClone(v)); reqs.push(r); return r; },
+            });
+            setTimeout(() => { if (!opts.quota && tx.oncomplete) tx.oncomplete(); }, 0);
+            return tx;
+          },
+          close(){},
+        };
+        req.result = db;
+        if (fresh && req.onupgradeneeded) req.onupgradeneeded();
+        if (req.onsuccess) req.onsuccess();
+      }, 0);
+      return req;
+    },
+  };
+}
+
+/* ── one page: the whole app in a vm ── */
+function makePage(files, shared = {}){
+  const stubStyle = () => ({ setProperty(){}, removeProperty(){}, getPropertyValue(){ return ''; } });
+  const el = () => ({
+    style: stubStyle(), dataset: {}, children: [], hidden: false,
+    classList: { add(){}, remove(){}, toggle(){}, contains(){ return false; } },
+    innerHTML: '', textContent: '', value: '', checked: false,
+    addEventListener(){}, removeEventListener(){}, appendChild(){}, removeChild(){}, remove(){},
+    setAttribute(){}, getAttribute(){ return null; }, removeAttribute(){}, hasAttribute(){ return false; },
+    querySelector(){ return null; }, querySelectorAll(){ return []; }, closest(){ return null; },
+    focus(){}, blur(){}, click(){}, scrollIntoView(){}, insertAdjacentHTML(){}, cloneNode(){ return el(); },
+    getBoundingClientRect(){ return { top: 0, left: 0, width: 0, height: 0, bottom: 0, right: 0 }; },
+  });
+  const storage = () => ({ _d: {}, getItem(k){ return this._d[k] ?? null; }, setItem(k, v){ this._d[k] = String(v); }, removeItem(k){ delete this._d[k]; }, clear(){ this._d = {}; } });
+  const ctx = {
+    console: { log(){}, warn(){}, error(){}, info(){} },
+    document: { documentElement: el(), head: el(), body: el(), getElementById(){ return null; }, querySelector(){ return null; }, querySelectorAll(){ return []; },
+      createElement(){ return el(); }, createDocumentFragment(){ return el(); }, addEventListener(){}, removeEventListener(){}, fonts: { ready: Promise.resolve() }, hidden: false, visibilityState: 'visible' },
+    localStorage: storage(), sessionStorage: storage(),
+    location: { hostname: 'localhost', href: 'http://localhost/', pathname: '/', search: '', hash: '', reload(){} },
+    history: { scrollRestoration: 'auto', replaceState(){}, pushState(){} },
+    navigator: { userAgent: 'node', language: 'en', onLine: true },
+    setTimeout, clearTimeout, setInterval: () => 0, clearInterval(){},
+    requestAnimationFrame: () => 0, cancelAnimationFrame(){},
+    matchMedia: () => ({ matches: false, addEventListener(){}, addListener(){} }),
+    getComputedStyle: () => ({ getPropertyValue: () => '' }),
+    fetch: () => Promise.reject(new Error('no network')),
+    CustomEvent: class { constructor(t, o){ this.type = t; Object.assign(this, o || {}); } },
+    Image: class {}, Audio: class { play(){ return Promise.resolve(); } pause(){} },
+    AudioContext: class { createOscillator(){ return { connect(){}, start(){}, stop(){}, frequency: { value: 0 } }; } createGain(){ return { connect(){}, gain: { value: 0, setValueAtTime(){} } }; } close(){} },
+    performance: { now: () => 0 }, structuredClone,
+    URLSearchParams, URL: Object.assign(function(){ return new URL(...arguments); }, { createObjectURL: () => 'blob:sim', revokeObjectURL(){} }), TextEncoder, TextDecoder, Blob,
+    addEventListener(){}, removeEventListener(){}, dispatchEvent(){}, scrollTo(){},
+    innerWidth: 1366, innerHeight: 657, devicePixelRatio: 1,
+  };
+  ctx.URL.prototype = URL.prototype;
+  if (shared.idb) ctx.indexedDB = shared.idb;
+  ctx.window = ctx; ctx.globalThis = ctx; ctx.self = ctx;
+  vm.createContext(ctx);
+  for (const [f, src] of files) vm.runInContext(src, ctx, { filename: f });
+  const run = x => vm.runInContext(x, ctx);
+  const F = shared.fs || makeFirestore();
+  ctx.__fdb = F.db;
+  run(`ensureDb = async () => __fdb; window.__logs = []; SITE_ERRORS.report = (k, e) => { __logs.push(String(e && e.message)); };
+       window.__repaints = 0; const __rsp = refreshSongsPlayAlong; refreshSongsPlayAlong = function(){ __repaints++; return __rsp.apply(this, arguments); };`);
+  return { ctx, run, F, signIn: (uid = 'stub-uid-1') => run(`currentUser = { uid: ${JSON.stringify(uid)}, email: 'test0@example.org', displayName: 'Test 0' }`), signOut: () => run('currentUser = null') };
+}
+
+/* The fixtures with made-up audio: { id, doc } each, audio id '<id>-<sha10>'. */
+function goodSongs(page){
+  const out = Object.entries(FIXTURES).map(([k, f], i) => {
+    const sha = hex(i + 1), d = withAudio(f.doc, 1000 + i, sha); d.audio.id = audioIdFor(f.id, sha); d.audio.gainDb = -1.5; d.audio.sourceSha256 = hex(i + 101);
+    return { key: k, id: f.id, doc: d };
+  });
+  const a = page.run(`CLASS_ACTIVITIES.find(x => x.id === 'ca-51')`), tr = page.run(`SNIPPET_TRACKS['perdon-mama']`);
+  const d = ca51Built(JSON.parse(JSON.stringify(a)), JSON.parse(JSON.stringify(tr))); const sha = hex(99);
+  Object.assign(d.audio, { id: audioIdFor('sb-copyofca51x', sha), bytes: 5000, sha256: sha });
+  out.push({ key: 'ca51', id: 'sb-copyofca51x', doc: d });
+  return out;
+}
+function publish(F, songs, vers){
+  F.docs.set('builtSongsMeta/list', { songs: Object.fromEntries(songs.map(s => [s.id, (vers && vers[s.id]) || 1])) });
+  songs.forEach(s => F.docs.set('builtSongs/' + s.id, s.doc));
+}
+
+/* ── the cases ── */
+async function runCases(files){
+  let cases = 0, fails = 0; const lines = [];
+  const ok = (cond, line) => { cases++; if (!cond) fails++; if (!cond || VERBOSE) lines.push((cond ? '  ✓ ' : '  ✗ ') + line); return !!cond; };
+  const sync = async p => { await p.run('builtSongsSync()'); await settle(); };
+  const snap = p => p.run(`JSON.stringify([CLASS_ACTIVITIES.length, CLASS_ACTIVITIES, Object.keys(SNIPPET_TRACKS).length, SNIPPET_TRACKS])`);
+
+  /* ── zero ── */
+  {
+    const variants = [
+      ['the list missing', F => {}],
+      ['the list empty', F => { F.docs.set('builtSongsMeta/list', { songs: {} }); }],
+      ['the list refused (rules not pasted, or an account not let in)', F => { F.st.denyAll = true; }],
+      ['offline with no device copy', F => { F.st.offline = true; }],
+      ['nobody signed in', F => { F.docs.set('builtSongsMeta/list', { songs: { 'sb-test44aaaa': 1 } }); }, true],
+      ['no IndexedDB at all', F => {}, false, true],
+    ];
+    for (const [name, setup, signedOut, noIdb] of variants) {
+      const shared = { fs: makeFirestore(), idb: noIdb ? undefined : makeIdb(new Map()) };
+      setup(shared.fs);
+      const p = makePage(files, shared);
+      const objs = p.run('CLASS_ACTIVITIES.slice()');
+      const before = snap(p);
+      if (!signedOut) p.signIn();
+      await sync(p);
+      p.ctx.__o0 = objs;
+      const same = snap(p) === before && p.run('CLASS_ACTIVITIES.length') === 48 && p.run(`CLASS_ACTIVITIES.every((a, i) => a === __o0[i])`);
+      ok(same && p.run('Object.keys(SNIPPET_TRACKS).length') === 14, `zero (${name}): CLASS_ACTIVITIES (48, the same objects) and SNIPPET_TRACKS (14) deep-equal before and after the merge`);
+      ok(p.run('__repaints') === 0 && shared.fs.st.writes === 0 && p.run('__logs.length') === 0 && p.run(`songFileEntry('sb-test44aaaa-x') === null && Object.keys(sfBuilt).length === 0`),
+        `zero (${name}): no repaint, no write, no error-log line, no audio entry (${p.run('__repaints')} / ${shared.fs.st.writes} / ${p.run('__logs.length')})`);
+      if (signedOut) ok(shared.fs.st.reads.length === 0, `zero (${name}): nothing is read (${shared.fs.st.reads.length} reads)`);
+    }
+    /* Every coded practice card keeps its two-file stops. */
+    const p = makePage(files);
+    const res = p.run(`(() => { const out = []; for (const a of CLASS_ACTIVITIES) { if (a.view !== 'card' || !a.card || !a.card.slowest) continue;
+      const tr = SNIPPET_TRACKS[caView(a).card.track]; const h = caCardBodyHtml(a); if (!h) continue;
+      const rates = [...h.matchAll(/class="pc-speed-tick[^"]*"[^>]*data-rate="([^"]+)"/g)].map(m => m[1]);
+      const want = [String(SLOWEST_RATE), '1', pcSlowRate(tr).toFixed(4), '1'];
+      out.push({ id: a.id, ok: !/data-one-file/.test(h) && /<div class="pc" data-id="[^"]+" data-slow="1"/.test(h) && JSON.stringify(rates) === JSON.stringify(want) && !!tr.srcSlow }); } return out; })()`);
+    ok(res.length === 26 && res.every(r => r.ok), `zero: every coded practice card keeps its two-file stops (no data-one-file, data-slow="1", ${res.filter(r => r.ok).length} of ${res.length} cards; ${res.filter(r => !r.ok).map(r => r.id).join(', ')})`);
+  }
+
+  /* ── merge ── */
+  const base = makePage(files);
+  const GOOD = goodSongs(base);
+  {
+    const shared = { fs: makeFirestore(), idb: makeIdb(new Map()) };
+    publish(shared.fs, GOOD);
+    const p = makePage(files, shared);
+    p.signIn(); await sync(p);
+    const lib = p.run('songsLibraryHtml()');
+    for (const g of GOOD) {
+      const id = g.id, d = g.doc;
+      const r = p.run(`(() => { const id = ${JSON.stringify(id)}; const all = CLASS_ACTIVITIES.filter(a => a.id === id); const a = all[0], tr = SNIPPET_TRACKS[id];
+        return { n: all.length, src: tr && tr.src, slow: tr && ('srcSlow' in tr), lib: a && caIsLibrarySong(a), libMoved: a && caIsLibraryCard(a, { [id]: false }), vis: a && caIsVisible(a),
+          board: !!caBoardOrder(CLASS_ACTIVITIES, {}, {}).number[id] || !!caBoardOrder(CLASS_ACTIVITIES, { [id]: { module: 4, pos: 1 } }, { seeded: true }).assigned[id], song: a && caIsSongCard(a),
+          mark: a ? caMarkRowHtml(a, false, 'x') : 'none', entry: songFileEntry(${JSON.stringify(d.audio.id)}),
+          shape: a && JSON.stringify([a.library, a.optional, !!a.journey, !!a.card.wholeSong, !!a.card.sheet, !!a.teacherOnly, a.kind || '']),
+          end: a && pcWindow(pcLayout(a), false).end, beats: tr && tr.beatsPerBar, six: tr && !!tr.countSix, bt: tr && tr.barTimes ? tr.barTimes.length : 0 }; })()`);
+      ok(r.n === 1 && r.src === 'private:' + d.audio.id && r.slow === false, `merge ${g.key}: one card and one one-file track (src private:${d.audio.id.slice(0, 18)}…, no srcSlow)`);
+      ok(r.lib && r.libMoved && r.song && !r.vis && !r.board && r.mark === '' && r.shape === JSON.stringify([true, true, false, false, false, false, '']),
+        `merge ${g.key}: on the Songs list, never moved by songLibrary, never visible on In-Class Activities, never on the board, no Mark complete, library + optional only`);
+      ok(r.entry && r.entry.bytes === d.audio.bytes && r.entry.sha256 === d.audio.sha256 && r.end <= d.audio.durationSec + 0.05, `merge ${g.key}: its audio entry is the doc's, and the card's window ends inside the file (${r.end.toFixed(2)} of ${d.audio.durationSec} s)`);
+      ok(lib.includes(`songsLibraryOpen(&quot;${id}&quot;)`) && lib.includes(escapeHtml(`"${d.title}"`)), `merge ${g.key}: a row on Songs → More Play Along songs`);
+      for (const lang of ['en', 'es']) {
+        p.run(`setLang(${JSON.stringify(lang)})`);
+        const h = p.run(`caCardBodyHtml(CLASS_ACTIVITIES.find(a => a.id === ${JSON.stringify(id)}))`);
+        const secs = d.song.range ? d.song.sections.slice(d.song.range.from, d.song.range.to + 1) : d.song.sections;
+        const names = secs.map(s => p.run(`tIn(${JSON.stringify('bs.sec.' + s.name)}, ${JSON.stringify(lang)})`) + (s.n ? ' ' + s.n : ''));
+        const chips = (h.match(/class="pc-sec[ "]/g) || []).length;
+        const rates = [...h.matchAll(/class="pc-speed-tick[^"]*"[^>]*data-rate="([^"]+)"/g)].map(m => m[1]).join(',');
+        const lyr = secs.flatMap(s => (s.lyrics || []).map(l => l.text).filter(Boolean));
+        const start = d.song.level.versions === 'power' || d.song.level.start === 'power' ? 'power' : 'full';
+        const firstChord = d.song.bars.map(b => b.split(/\s+/)[0].split(':')[0]).find(n => n !== '-');
+        const shownName = start === 'power' && !/5$/.test(firstChord) ? firstChord.replace(/m$/, '') + '5' : firstChord;
+        ok(h.length > 500 && (secs.length > 1 ? chips === secs.length : chips === 0) && names.every(n => h.includes(escapeHtml(n))) && rates === '0.65,0.85,0.9,1'
+          && /<div class="pc" data-id="[^"]+" data-slow="" data-rate="0.85"/.test(h) && /data-one-file="1"/.test(h)
+          && lyr.every(t => h.includes(`pc-row-label">${escapeHtml(t)}</div>`)) && h.includes(`>${escapeHtml(shownName)}<span class="tab-spkr"`),
+          `merge ${g.key} [${lang}]: renders through caCardBodyHtml: ${secs.length} section${secs.length === 1 ? '' : 's'} named in ${lang}, ${lyr.length} lyric line${lyr.length === 1 ? '' : 's'} escaped, opens on ${start} chords (${shownName}), the stops 0.65 / 0.85 / 0.9 / 1 opening on 0.85`);
+      }
+      p.run(`setLang('en')`);
+    }
+    /* the other chord view, and the one-file count in six */
+    const six = GOOD.find(g => g.key === 'sixEight');
+    p.run(`caChordModes[${JSON.stringify(six.id)}] = 'full'`);
+    const hFull = p.run(`caCardBodyHtml(CLASS_ACTIVITIES.find(a => a.id === ${JSON.stringify(six.id)}))`);
+    p.run(`delete caChordModes[${JSON.stringify(six.id)}]`);
+    const hPow = p.run(`caCardBodyHtml(CLASS_ACTIVITIES.find(a => a.id === ${JSON.stringify(six.id)}))`);
+    ok(/>Am<span class="tab-spkr"/.test(hFull) && !/>A5<span/.test(hFull) && /data-beat="5"/.test(hFull) && />6<\/div>/.test(hFull) && />A5<span class="tab-spkr"/.test(hPow),
+      'merge sixEight: the Full chords view names Am, the Power view A5; the 6/8 grid counts 1-6 a bar');
+    ok(hFull.includes(escapeHtml('Rest')) || /tab-rest-lab/.test(hFull), 'merge sixEight: its rest bar draws the rest word');
+    const bm = GOOD.find(g => g.key === 'beatMap');
+    ok(p.run(`JSON.stringify(snippetWindow(SNIPPET_TRACKS[${JSON.stringify(bm.id)}], { fromBar: 1, bars: 12 }, false).edges)`) === JSON.stringify(bm.doc.song.barTimes),
+      'merge beatMap: the window\'s 13 bar lines are its barTimes');
+    const rg = GOOD.find(g => g.key === 'range');
+    ok(p.run(`(() => { const L = pcLayout(CLASS_ACTIVITIES.find(a => a.id === ${JSON.stringify(rg.id)})); return L.sections.length === 2 && L.firstBar === 5 && L.totalBars === 8; })()`),
+      'merge range: the card plays sections 2 to 3 only (bars 5 to 12)');
+    const fx = GOOD.find(g => g.key === 'fifteen');
+    const copyBytes = JSON.stringify({ id: 'all', songs: { [fx.id]: { ver: 1, doc: fx.doc } } }).length;
+    ok(copyBytes > 1000 && p.run(`CLASS_ACTIVITIES.find(a => a.id === ${JSON.stringify(fx.id)}).card.sections.length`) === 15, `merge fifteen: 15 sections with lyrics merge; its device copy is ${copyBytes.toLocaleString('en-US')} bytes of JSON`);
+    lines.push(`  · the device copy of the 15-section fixture with lyrics: ${copyBytes.toLocaleString('en-US')} bytes (JSON); all ${GOOD.length} fixtures: ${JSON.stringify({ id: 'all', songs: Object.fromEntries(GOOD.map(g => [g.id, { ver: 1, doc: g.doc }])) }).length.toLocaleString('en-US')} bytes`);
+    ok(shared.fs.st.writes === 0 && p.run('__logs.length') === 0 && p.run('__repaints') === 1, `merge: no write, no error-log line, one repaint (${shared.fs.st.writes} / ${p.run('__logs.length')} / ${p.run('__repaints')})`);
+  }
+
+  /* ── refused: one broken doc per rule, each left out alone ── */
+  {
+    const good = GOOD.find(g => g.key === 'fourFour');
+    const broken = brokenFixtures({ id: good.id, doc: good.doc });
+    const shared = { fs: makeFirestore(), idb: makeIdb(new Map()) };
+    publish(shared.fs, [...GOOD, ...broken]);
+    const p = makePage(files, shared);
+    p.signIn(); await sync(p);
+    const ids = new Set(p.run('CLASS_ACTIVITIES.map(a => a.id)'));
+    for (const b of broken) ok(!ids.has(b.id) && !p.run(`!!SNIPPET_TRACKS[${JSON.stringify(b.id)}]`), `refused alone: ${b.rule}`);
+    ok(GOOD.every(g => ids.has(g.id)), `refused: the ${GOOD.length} good songs still merge beside ${broken.length} broken ones`);
+    ok(p.run('__logs.length') === 1 && !/stub-uid|test0@|Test 0/.test(p.run('__logs[0]')), `refused: one error-log line for the page (${p.run('__logs.length')}), with no account in it`);
+  }
+
+  /* ── store ── */
+  const fresh = () => ({ fs: makeFirestore(), idb: makeIdb(new Map()) });
+  const g1 = GOOD[0], g2 = GOOD[1];
+  {
+    const shared = fresh(); publish(shared.fs, [g1, g2]);
+    const p1 = makePage(files, shared); p1.signIn(); await sync(p1);
+    shared.fs.st.offline = true; shared.fs.st.reads = [];
+    const p2 = makePage(files, shared); p2.signIn(); await sync(p2);
+    ok(p2.run(`[${JSON.stringify(g1.id)}, ${JSON.stringify(g2.id)}].every(id => CLASS_ACTIVITIES.some(a => a.id === id) && SNIPPET_TRACKS[id])`), 'store: offline, a new page merges the device copy');
+    const p3 = makePage(files, shared); await sync(p3);
+    ok(!p3.run(`CLASS_ACTIVITIES.some(a => /^sb-/.test(a.id))`), 'store: signed out, nothing merges, not even from the device copy');
+    shared.fs.st.offline = false; shared.fs.st.denyAll = true;
+    const p4 = makePage(files, shared); p4.signIn(); await sync(p4);
+    ok(!p4.run(`CLASS_ACTIVITIES.some(a => /^sb-/.test(a.id))`) && p4.run('__logs.length') === 0, 'store: the list refused, nothing merges even with a device copy, and nothing is logged');
+    shared.fs.st.denyAll = false; shared.fs.st.reads = [];
+    const p5 = makePage(files, shared); p5.signIn(); await sync(p5);
+    ok(!shared.fs.st.reads.some(r => r.startsWith('builtSongs/')) && p5.run(`CLASS_ACTIVITIES.filter(a => /^sb-/.test(a.id)).length`) === 2, `store: the same edit numbers: the songs come from the device copy, no song doc read (${shared.fs.st.reads.length} read)`);
+    const changed = JSON.parse(JSON.stringify(g1.doc)); changed.title = 'Test Song Four, edited';
+    shared.fs.docs.set('builtSongs/' + g1.id, changed);
+    shared.fs.docs.set('builtSongsMeta/list', { songs: { [g1.id]: 2, [g2.id]: 1 } });
+    shared.fs.st.reads = [];
+    const p6 = makePage(files, shared); p6.signIn(); await sync(p6);
+    ok(shared.fs.st.reads.includes('builtSongs/' + g1.id) && !shared.fs.st.reads.includes('builtSongs/' + g2.id) && p6.run(`caTitle(CLASS_ACTIVITIES.find(a => a.id === ${JSON.stringify(g1.id)}))`).includes('edited'),
+      'store: a newer edit is read again and replaces the device copy\'s; the unchanged song is not read');
+    shared.fs.st.offline = true;
+    const p7 = makePage(files, shared); p7.signIn(); await sync(p7);
+    ok(p7.run(`caTitle(CLASS_ACTIVITIES.find(a => a.id === ${JSON.stringify(g1.id)}))`).includes('edited'), 'store: offline afterwards, the device copy holds the newer edit');
+    shared.fs.st.offline = false;
+    /* taken off the list: gone from the page, with its audio entry */
+    shared.fs.docs.set('builtSongsMeta/list', { songs: { [g2.id]: 1 } });
+    const rp = p6.run('__repaints');
+    p6.run('bsLastSync = 0'); await p6.run('builtSongsSync()'); await settle();
+    ok(!p6.run(`CLASS_ACTIVITIES.some(a => a.id === ${JSON.stringify(g1.id)}) || !!SNIPPET_TRACKS[${JSON.stringify(g1.id)}] || !!songFileEntry(${JSON.stringify(g1.doc.audio.id)})`) && p6.run('__repaints') === rp + 1,
+      'store: a song taken off the list leaves the page (card, track and audio entry), with one repaint');
+    await p6.run('builtSongsSync()'); await settle();
+    ok(p6.run('__repaints') === rp + 1, 'store: a merge that changes nothing repaints nothing');
+    p6.run('builtSongsClear()');
+    ok(snap(p6) === snap(makePage(files)), 'store: sign-out clears every built entry: CLASS_ACTIVITIES and SNIPPET_TRACKS deep-equal a page with none');
+  }
+  {
+    const shared = fresh(); publish(shared.fs, [g1, g2]);
+    shared.fs.docs.delete('builtSongs/' + g2.id);
+    shared.fs.docs.set('builtSongsMeta/list', { songs: { [g1.id]: 1, [g2.id]: 1, 'SB-CAPITALS1': 1, 'sb-short': 1, 'sb-stringver1': '2', 'sb-zeroverss': 0, 'sb-floatvers': 1.5, 'sb-nodocatall': 3 } });
+    const p = makePage(files, shared); p.signIn(); await sync(p);
+    const reads = shared.fs.st.reads.filter(r => r.startsWith('builtSongs/'));
+    ok(p.run(`CLASS_ACTIVITIES.filter(a => /^sb-/.test(a.id)).map(a => a.id).join()`) === g1.id && reads.length === 3 && !reads.some(r => /CAPITALS|short|stringver|zeroverss|floatvers/.test(r)),
+      `store: a listed song whose doc is missing is skipped; the list's bad keys and values are never read (${reads.length} doc reads)`);
+  }
+  {
+    const shared = fresh(); publish(shared.fs, [g1, g2]);
+    const p1 = makePage(files, shared); p1.signIn(); await sync(p1);
+    shared.fs.docs.set('builtSongsMeta/list', { songs: { [g1.id]: 2, [g2.id]: 2 } });
+    shared.fs.st.deny.add('builtSongs/' + g1.id);
+    shared.fs.docs.delete('builtSongs/' + g2.id);
+    const p2 = makePage(files, shared); p2.signIn(); await sync(p2);
+    ok(!p2.run(`CLASS_ACTIVITIES.some(a => /^sb-/.test(a.id))`), 'store: a song doc read refused, or missing, at a newer edit: left out (the older device copy is not used)');
+  }
+  {
+    const shared = fresh(); publish(shared.fs, [g1, g2]);
+    const p1 = makePage(files, shared); p1.signIn(); await sync(p1);
+    publish(shared.fs, [g1, g2], { [g1.id]: 3, [g2.id]: 3 });
+    const pOff = makePage(files, shared); pOff.signIn();
+    const fsOff = shared.fs.db.collection;
+    pOff.ctx.__fdb = { collection: n => n === 'builtSongs' ? { doc: id => ({ get: async () => { const e = new Error('unavailable'); e.code = 'unavailable'; throw e; } }) } : fsOff(n) };
+    pOff.run('ensureDb = async () => __fdb');
+    await sync(pOff);
+    ok(pOff.run(`CLASS_ACTIVITIES.filter(a => /^sb-/.test(a.id)).length`) === 2, 'store: a song doc read that fails (not refused) keeps the device copy\'s older version');
+  }
+  {
+    const shared = fresh();
+    const clash = JSON.parse(JSON.stringify(g2.doc)); clash.audio.id = g1.doc.audio.id;
+    const listed = { id: 'sb-listedaudio', doc: JSON.parse(JSON.stringify(g2.doc)) }; listed.doc.audio.id = 'listed-song-file';
+    const coded = { id: 'sb-codedtrack1', doc: JSON.parse(JSON.stringify(g2.doc)) }; coded.doc.audio.id = 'coded-track-audio';
+    publish(shared.fs, [g1, { id: 'sb-zzlaterclash', doc: clash }, listed, coded]);
+    const p = makePage(files, shared); p.signIn();
+    p.run(`SONG_FILES['listed-song-file'] = { file: 'x.mp3', bytes: 7, sha256: '${hex(7)}', durationSec: 9 }; SNIPPET_TRACKS['sb-codedtrack1'] = { src: 'audio/x.mp3' };`);
+    await sync(p);
+    const ids = p.run(`CLASS_ACTIVITIES.filter(a => /^sb-/.test(a.id)).map(a => a.id).join()`);
+    ok(ids === g1.id, `store: refused — an audio id another built song uses with other bytes, an audio id on SONG_FILES, an id already a coded track (kept: ${ids})`);
+    ok(p.run(`songFileEntry('listed-song-file').bytes === 7 && SNIPPET_TRACKS['sb-codedtrack1'].src === 'audio/x.mp3'`), 'store: the tracked list keeps its entry, and the coded track is untouched');
+    p.run(`sfBuilt = {}; songFilesSetBuilt({ 'listed-song-file': { file: 'y.mp3', bytes: 8, sha256: '${hex(8)}', durationSec: 1 } })`);
+    ok(p.run(`songFileEntry('listed-song-file').bytes === 7 && !('listed-song-file' in sfBuilt)`), 'store: songFilesSetBuilt never takes an id the list has');
+  }
+  {
+    const shared = fresh(); publish(shared.fs, [g1]);
+    const p = makePage(files, shared); p.signIn(); await sync(p);
+    p.run(`sfUrls.set(${JSON.stringify(g1.doc.audio.id)}, 'blob:old')`);
+    const d = JSON.parse(JSON.stringify(g1.doc)); d.audio.sha256 = hex(55);
+    shared.fs.docs.set('builtSongs/' + g1.id, d); shared.fs.docs.set('builtSongsMeta/list', { songs: { [g1.id]: 2 } });
+    await sync(p);
+    ok(!p.run(`sfUrls.has(${JSON.stringify(g1.doc.audio.id)})`), 'store: a re-imported file under the same audio id drops the page\'s loaded copy of the old bytes');
+    p.run(`hiddenActivityIds[${JSON.stringify(g1.id)}] = true`);
+    ok(!p.run(`caIsLibrarySong(CLASS_ACTIVITIES.find(a => a.id === ${JSON.stringify(g1.id)}))`) && !p.run('songsLibraryHtml()').includes(g1.id), 'store: Hidden (config/class.hiddenActivities) takes it off the Songs list');
+  }
+  {
+    const shared = fresh(); publish(shared.fs, [g1]);
+    const p = makePage(files, shared); p.signIn();
+    let ran = 0; p.ctx.__ran = () => { ran++; };
+    p.run(`location.hash = '#class-activities/${g1.id}'`);
+    ok(!p.run(`builtSongWait(${JSON.stringify(g1.id)}, __ran)`), 'deep link: with no merge on its way, builtSongWait says no (the usual not-posted path)');
+    const pr = p.run('builtSongsSync()');
+    const waiting = p.run(`builtSongWait(${JSON.stringify(g1.id)}, () => __ran(CLASS_ACTIVITIES.some(a => a.id === ${JSON.stringify(g1.id)})))`);
+    await pr; await settle();
+    ok(waiting && ran === 1, 'deep link: a link to a built song that comes before the merge waits, and runs once after it, with the song on the page');
+    const pr2 = p.run('builtSongsSync()');
+    p.run(`builtSongWait(${JSON.stringify(g1.id)}, __ran)`);
+    p.run(`location.hash = '#songs'`);
+    await pr2; await settle();
+    ok(ran === 1, 'deep link: a student who moved on meanwhile is not taken to the card');
+    p.run(`bsLastSync = Date.now()`); shared.fs.st.reads = [];
+    p.run('builtSongsSyncSoon()'); await settle();
+    const r1 = shared.fs.st.reads.length;
+    p.run(`bsLastSync = Date.now() - 61000`); p.run('builtSongsSyncSoon()'); await settle();
+    ok(r1 === 0 && shared.fs.st.reads.length >= 1, `tab return: no read within a minute of the last, one after (${r1}, then ${shared.fs.st.reads.length})`);
+  }
+  {
+    for (const [name, o] of [['an IndexedDB whose open throws', { throws: true }], ['an IndexedDB that never answers', { never: true }], ['a full IndexedDB', { quota: true }]]) {
+      const shared = { fs: makeFirestore(), idb: makeIdb(new Map(), o) }; publish(shared.fs, [g1]);
+      const p = makePage(files, shared); p.signIn();
+      const t0 = Date.now(); await p.run('builtSongsSync()'); await settle();
+      ok(p.run(`CLASS_ACTIVITIES.some(a => a.id === ${JSON.stringify(g1.id)})`), `store: ${name}: the song still merges (${Date.now() - t0} ms)`);
+    }
+  }
+  return { cases, fails, lines };
+}
+function escapeHtml(s){ return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+/* Every coded practice card, both languages, every chord view: the HTML, for --against. */
+function codedRenders(root){
+  const p = makePage(siteFiles(root));
+  return p.run(`(() => { const out = {}; for (const lang of ['en', 'es']) { setLang(lang); for (const a of CLASS_ACTIVITIES) { if (a.view !== 'card' || !a.card) continue;
+    for (const m of ['full', 'power']) { caChordModes[a.id] = m; out[lang + '|' + a.id + '|' + m] = caCardBodyHtml(a); } delete caChordModes[a.id]; } } return out; })()`);
+}
+
+async function main(){
+  const watchdog = setTimeout(() => { console.log('built-songs-sim: ✗ HUNG (5 minutes)'); process.exit(3); }, 300000); watchdog.unref();
+  const files = siteFiles(ROOT);
+  let res;
+  try { res = await runCases(files); }
+  catch (e) { console.log('built-songs-sim: the code would not run: ' + (e && e.stack || e)); return 1; }
+  for (const l of res.lines) console.log(l);
+  console.log(`built-songs-sim: ${res.cases} cases, ${res.fails} failed`);
+  let bad = res.fails ? 1 : 0;
+  if (AGAINST) {
+    const a = codedRenders(ROOT), b = codedRenders(AGAINST);
+    const keys = Object.keys(b), diff = keys.filter(k => a[k] !== b[k]);
+    const same = !diff.length && Object.keys(a).length === keys.length;
+    console.log(`${same ? '✓' : '✗'} against ${AGAINST}: ${keys.length - diff.length} of ${keys.length} coded card renders (2 languages x 2 chord views) byte for byte the same${diff.length ? '; differ: ' + diff.slice(0, 5).join(', ') : ''}`);
+    if (!same) bad = 1;
+  }
+  if (BREAKS) {
+    const MUT = [
+      ['app/builtsongs.js', 'the cents rule dropped', "Math.abs(a.centsOff) > BS_MAX_CENTS", "Math.abs(a.centsOff) > 99"],
+      ['app/builtsongs.js', 'the title separator not refused', "else if(doc.title.indexOf(BS_SEP) >= 0)", "else if(false)"],
+      ['app/builtsongs.js', 'a section gap allowed', "if(x.from !== next) no(", "if(false) no("],
+      ['app/builtsongs.js', 'a bar\'s beats not added up', "if(Math.abs(sum - meter.bpb) > 1e-6) return", "if(false) return"],
+      ['app/builtsongs.js', 'unknown chart fields allowed', "if(sx.length) no(", "if(false) no("],
+      ['app/builtsongs.js', 'the old entries not removed on a merge', "for(let i = list.length - 1; i >= 0; i--) if(list[i] && bsApplied.has(list[i].id)) list.splice(i, 1);", ""],
+      ['app/builtsongs.js', 'a refused list read treated as offline (the device copy used)', "if(bsDenied(e)){ list = {}; denied = true; }", "if(false){ list = {}; denied = true; }"],
+      ['app/builtsongs.js', 'a refused list read wipes the device copy', "if(!teacher && !denied){", "if(!teacher){"],
+      ['app/builtsongs.js', 'the device copy used signed out', "if(!user){ if(bsApply([])) bsRepaint(); return; }", "if(false){ }"],
+      ['app/builtsongs.js', 'the list\'s keys not checked', "if(BS_ID_RE.test(k) && bsInt(v) && v >= 1", "if(bsInt(v) && v >= 1"],
+      ['app/builtsongs.js', 'an extra song made required', "id, view: 'card', library: true, optional: true,", "id, view: 'card', library: true, optional: false,"],
+      ['app/builtsongs.js', 'the same edit read again', "if(have && have.ver === list[id] && bsIsObj(have.doc)){", "if(false){"],
+      ['app/builtsongs.js', 'every refusal logged', "if(bsLogged) return;\n  bsLogged = true;", "bsLogged = true;"],
+      ['app/builtsongs.js', 'an audio id on SONG_FILES kept', "else if(typeof SONG_FILES !== 'undefined' && Object.prototype.hasOwnProperty.call(SONG_FILES, aid)) why.push(", "else if(false) why.push("],
+      ['app/builtsongs.js', 'a repaint with no change', "if(sig === bsSig) return false;", ""],
+      ['app/builtsongs.js', 'a deep link that never waits', "if(typeof id !== 'string' || !BS_ID_RE.test(id) || !bsPending) return false;", "return false;"],
+      ['app/cards.js', 'one-file stops at the two-file rates', "const PC_ONE_FILE_RATES = [0.65, 0.85, 0.9, 1];", "const PC_ONE_FILE_RATES = [0.8, 1, 0.9, 1];"],
+      ['app/cards.js', 'a one-file card opening on the slow file', " data-slow=\"\" data-rate=\"${PC_ONE_FILE_RATES[1]}\"", " data-slow=\"1\""],
+      ['app/cards.js', 'a coded card given one-file stops', "function pcOneFile(tr){ return !!tr && !tr.srcSlow; }", "function pcOneFile(tr){ return !!tr; }"],
+      ['app/activities-2.js', 'songLibrary moves a built song', "  if(isBuiltSongId(a.id)) return a.library === true;\n", ""],
+      ['app/songfiles.js', 'the built map takes a listed id', "if(!Object.prototype.hasOwnProperty.call(SONG_FILES, id)) next[id] = map[id];", "next[id] = map[id];"],
+      ['app/songfiles.js', 'a changed file keeps the old copy', "      sfUrls.delete(id);\n", "\n"],
+    ];
+    let caught = 0;
+    for (const [file, name, from, to] of MUT) {
+      const i = files.findIndex(([f]) => f === file);
+      const n = i < 0 ? 0 : files[i][1].split(from).length - 1;
+      if (n !== 1) { console.log(`  ✗ break "${name}": its text is in ${file} ${n} times (must be once)`); continue; }
+      const copy = files.map(([f, s], j) => [f, j === i ? s.replace(from, to) : s]);
+      let r;
+      try { r = await runCases(copy); } catch (e) { r = { fails: 1 }; }
+      if (r.fails > 0) { caught++; console.log(`  ✓ break caught: ${name} (${r.fails} red)`); }
+      else console.log(`  ✗ break NOT caught: ${name}`);
+    }
+    console.log(`${caught === MUT.length ? '✓' : '✗'} ${caught} of ${MUT.length} breaks caught`);
+    if (caught !== MUT.length) bad = 1;
+  }
+  return bad;
+}
+process.exit(await main());

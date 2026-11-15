@@ -17,8 +17,11 @@
    UPLOAD. The browser reads the file, works out its SHA-256 (crypto.subtle)
    and its length (an Audio element's metadata; a file whose length cannot be
    read is refused), and looks for the SONG_FILES entry with that SHA-256 AND
-   that size: the store only ever holds what the list names, and the list is
-   what the site checks every download against. No match → refused, nothing
+   that size: Upload only ever writes what the list names, and the list is
+   what the site checks every download against (since 2026-11-14 the store
+   also holds BUILT songs' audio, written by Manage → Built songs' Import,
+   teacher-builtsongs.js, through teacherSfPutFile below, and checked against
+   that song's own `audio` entry). No match → refused, nothing
    written. Over 36,000,000 bytes (the rules' cap) → refused before it is even
    read. A match is written in this order:
      1. songFiles/{id}  { file, bytes, sha256, pieces, pieceBytes,
@@ -43,7 +46,13 @@
    would pass the limit, it says so and reads nothing), then
    songFileReadPieces checks every piece and the SHA-256.
 
-   DELETE removes one song: after the teacher types its id (prompt), one batch
+   A BUILT SONG'S AUDIO (not on the list) is shown as "Built song: <title>",
+   checked against that song's audio entry (Verify works on it too).
+
+   DELETE removes one song: never the audio a built song on
+   builtSongsMeta/list plays (that list and its songs are read fresh first;
+   the refusal names the song; a list that cannot be read refuses too). Then,
+   after the teacher types its id (prompt), one batch
    deletes pieces 0 … TEACHER_SF_MAX_PIECES-1 (every piece id the rules allow)
    and the head. Nothing else.
 
@@ -71,6 +80,7 @@ const TEACHER_SF_STATUS = {
   stray: 'in the store, not on the list',
   differs: 'uploaded, but its size or SHA-256 is not the list’s',
   unfinished: 'upload not finished (uploading)',
+  built: 'Built song: ',
 };
 let teacherSfHeads = null;      // Map id -> head fields from the store; null = not read yet
 let teacherSfUsed = null;       // this month's count in bytes; null = not read
@@ -85,8 +95,13 @@ let teacherSfOpen = false;      // the list and the upload are shown (any action
 const teacherSfChecks = new Map();   // id -> { ok, text }: the last Verify
 
 function teacherSfEntry(id){
-  return (typeof SONG_FILES !== 'undefined' && Object.prototype.hasOwnProperty.call(SONG_FILES, id)) ? SONG_FILES[id] : null;
+  if(typeof SONG_FILES !== 'undefined' && Object.prototype.hasOwnProperty.call(SONG_FILES, id)) return SONG_FILES[id];
+  /* A built song's audio (Manage → Built songs, teacher-builtsongs.js): checked against that song's own audio entry,
+     never on the list. The list wins an id on both. */
+  const own = typeof teacherBsAudioOwner === 'function' ? teacherBsAudioOwner(id) : null;
+  return own ? own.entry : null;
 }
+function teacherSfOnList(id){ return typeof SONG_FILES !== 'undefined' && Object.prototype.hasOwnProperty.call(SONG_FILES, id); }
 function teacherSfPiecesOf(bytes){ return Math.ceil(bytes / SONG_FILE_PIECE); }
 /* The stored head matches the list's entry the way the site checks it (app/songfiles.js sfLoadOnce). */
 function teacherSfHeadMatches(h, entry){
@@ -97,7 +112,8 @@ function teacherSfStatus(id){
   if(!h) return 'notUp';
   if(!entry) return 'stray';
   if(h.state !== 'ready') return 'unfinished';
-  return teacherSfHeadMatches(h, entry) ? 'match' : 'differs';
+  if(!teacherSfHeadMatches(h, entry)) return 'differs';
+  return teacherSfOnList(id) ? 'match' : 'built';
 }
 function teacherSfMb(n){ n = Number(n); return Number.isFinite(n) && n >= 0 ? (n / 1e6).toFixed(1) + ' MB' : '—'; }
 function teacherSfLen(s){
@@ -132,7 +148,7 @@ function teacherSfRowHtml(id){
     + `<td style="white-space:nowrap">${escHtml(teacherSfMb(src.bytes))}</td>`
     + `<td>${escHtml(teacherSfLen(src.durationSec))}</td>`
     + `<td>${h ? escHtml(String(h.state == null ? '—' : h.state)) : '—'}</td>`
-    + `<td>${escHtml(TEACHER_SF_STATUS[st])}${chk ? `<div class="tg-note">${chk.ok ? '✓ ' : '✗ '}${escHtml(chk.text)}</div>` : ''}</td>`
+    + `<td>${escHtml(TEACHER_SF_STATUS[st] + (st === 'built' ? teacherBsAudioOwner(id).title : ''))}${chk ? `<div class="tg-note">${chk.ok ? '✓ ' : '✗ '}${escHtml(chk.text)}</div>` : ''}</td>`
     + `<td style="white-space:nowrap">${entry && h ? btn('verify', 'Verify') : ''}${h ? btn('delete', 'Delete') : ''}</td></tr>`;
 }
 function teacherSfBlockHtml(){
@@ -213,6 +229,7 @@ function teacherSfClick(e){
   const act = b.dataset.tsfAct, id = b.dataset.tsfId;
   if(act === 'toggle'){ teacherSfOpen = !teacherSfOpen; teacherSfPaint(); return; }
   if(teacherSfBusy) return;
+  if(typeof teacherBsBusy !== 'undefined' && teacherBsBusy) return;   // a built-song import is writing (teacher-builtsongs.js)
   if(act === 'refresh'){ teacherSfNote = ''; teacherSfLoad(); return; }
   if(act === 'reset'){ teacherSfReset(); return; }
   if(act === 'verify-all'){ teacherSfVerifyAll(); return; }
@@ -272,15 +289,50 @@ function teacherSfHead(id, entry, durationSec, state){
   if(!(durationSec > 0 && durationSec <= TEACHER_SF_MAX_SEC)) return 'it is longer than 30 minutes';
   return h;
 }
+/* Write one song file into the store, in this order: the head 'uploading'; the pieces, in order, SONG_FILE_PIECE
+   bytes each (the last one shorter); the pieces an earlier, longer upload of the same id left, deleted (one batch);
+   the head 'ready'. Shared by Upload below (a file on the site's list) and Manage → Built songs' Import (a built
+   song's own audio entry, teacher-builtsongs.js). `w` is the caller's: w.stopped() ends it before its next write
+   (throws 'stop'); w.progress(text) shows a line; it fills w.wrote (the head was written), w.k and w.n (the piece
+   being written, of how many). A head the rules would refuse throws { shape: <sentence> } and writes nothing. */
+async function teacherSfPutFile(id, entry, buf, durationSec, w){
+  const head = teacherSfHead(id, entry, durationSec, 'uploading');
+  if(typeof head === 'string') throw { shape: head };
+  if(w.stopped()) throw 'stop';
+  const n = w.n = head.pieces;
+  await ensureDb();
+  const ref = db.collection('songFiles').doc(id);
+  w.wrote = true;
+  await ref.set(head);
+  for(let k = 0; k < n; k++){
+    w.k = k;
+    if(w.stopped()) throw 'stop';
+    w.progress(`Uploading ${id}… ${k + 1} of ${n}`);
+    const slice = buf.subarray(k * SONG_FILE_PIECE, Math.min(buf.length, (k + 1) * SONG_FILE_PIECE));
+    await ref.collection('pieces').doc(String(k)).set({ i: k, data: firebase.firestore.Blob.fromUint8Array(slice) });
+  }
+  w.k = n;
+  if(w.stopped()) throw 'stop';
+  if(n < TEACHER_SF_MAX_PIECES){
+    w.progress(`Uploading ${id}… removing pieces left by an earlier upload`);
+    const batch = db.batch();
+    for(let j = n; j < TEACHER_SF_MAX_PIECES; j++) batch.delete(ref.collection('pieces').doc(String(j)));
+    await batch.commit();
+  }
+  if(w.stopped()) throw 'stop';
+  await ref.set(teacherSfHead(id, entry, durationSec, 'ready'));
+}
 async function teacherSfUpload(file){
   if(teacherSfBusy || !file) return;
+  if(typeof teacherBsBusy !== 'undefined' && teacherBsBusy){ teacherSfNote = 'Wait for the built-song import to finish.'; teacherSfPaint(); return; }
   const size = Number(file.size);
   if(!(size > 0)){ teacherSfNote = 'That file is empty. Nothing was uploaded.'; teacherSfPaint(); return; }
   if(size > TEACHER_SF_MAX_BYTES){ teacherSfNote = `That file is ${size.toLocaleString('en-US')} bytes; the most a song file may be is 36,000,000. Nothing was uploaded.`; teacherSfPaint(); return; }
   teacherSfStart('upload');
   teacherSfProgress = 'Reading the file…'; teacherSfPaint();
-  let id = null, n = 0, k = -1, wrote = false;
+  let id = null;
   const stopped = () => teacherView !== 'manage';
+  const w = { stopped, wrote: false, k: -1, n: 0, progress: line => { teacherSfProgress = line; teacherSfPaint(); } };
   try{
     const buf = new Uint8Array(await file.arrayBuffer());
     const sha = sfHex(await crypto.subtle.digest('SHA-256', buf));
@@ -301,33 +353,12 @@ async function teacherSfUpload(file){
     const dur = await teacherSfDuration(file);
     if(dur == null){ teacherSfEnd(`This browser could not read the length of that file, so it was not uploaded. Is it a whole .mp3?`); return; }
     const durationSec = Math.round(dur * 100) / 100;
-    const head = teacherSfHead(id, entry, durationSec, 'uploading');
-    if(typeof head === 'string'){ teacherSfEnd(`${id} was not uploaded: ${head}.`); return; }
-    if(stopped()) throw 'stop';
-    n = head.pieces;
-    await ensureDb();
-    const ref = db.collection('songFiles').doc(id);
-    wrote = true;
-    await ref.set(head);
-    for(k = 0; k < n; k++){
-      if(stopped()) throw 'stop';
-      teacherSfProgress = `Uploading ${id}… ${k + 1} of ${n}`; teacherSfPaint();
-      const slice = buf.subarray(k * SONG_FILE_PIECE, Math.min(buf.length, (k + 1) * SONG_FILE_PIECE));
-      await ref.collection('pieces').doc(String(k)).set({ i: k, data: firebase.firestore.Blob.fromUint8Array(slice) });
-    }
-    k = n;
-    if(stopped()) throw 'stop';
-    if(n < TEACHER_SF_MAX_PIECES){
-      teacherSfProgress = `Uploading ${id}… removing pieces left by an earlier upload`; teacherSfPaint();
-      const batch = db.batch();
-      for(let j = n; j < TEACHER_SF_MAX_PIECES; j++) batch.delete(ref.collection('pieces').doc(String(j)));
-      await batch.commit();
-    }
-    if(stopped()) throw 'stop';
-    await ref.set(teacherSfHead(id, entry, durationSec, 'ready'));
+    try{ await teacherSfPutFile(id, entry, buf, durationSec, w); }
+    catch(e){ if(e && e.shape){ teacherSfEnd(`${id} was not uploaded: ${e.shape}.`); return; } throw e; }
     teacherSfChecks.delete(id);
-    teacherSfEnd(`${id} uploaded: ${n} piece${n === 1 ? '' : 's'}, ${teacherSfMb(entry.bytes)}, ${teacherSfLen(durationSec)}. Press Verify to read it back.`);
+    teacherSfEnd(`${id} uploaded: ${w.n} piece${w.n === 1 ? '' : 's'}, ${teacherSfMb(entry.bytes)}, ${teacherSfLen(durationSec)}. Press Verify to read it back.`);
   }catch(e){
+    const { wrote, k, n } = w;
     if(e === 'stop' && !wrote){ teacherSfEnd('Stopped: you left Manage before the upload started. Nothing was written.'); return; }
     if(e === 'stop'){
       teacherSfEnd(`Stopped: you left Manage during the upload. ${id} is NOT ready (it stays "uploading", which the site refuses to play). Upload it again.`);
@@ -389,6 +420,15 @@ function teacherSfVerifyAll(){
 /* ── Delete one song ── */
 async function teacherSfDelete(id){
   if(teacherSfBusy || !id) return;
+  /* Never the audio a built song plays (Manage → Built songs): the list of built songs is read fresh, and a file one
+     of them uses is refused, naming the song. A list that cannot be read refuses too. */
+  if(typeof teacherBsAudioUsers === 'function'){
+    let users;
+    try{ users = await teacherBsAudioUsers(id); }
+    catch(e){ teacherSfNote = `Nothing was deleted: could not check whether a built song plays ${id} (${teacherSfWhy(e)}).`; teacherSfPaint(); return; }
+    if(users.length){ teacherSfNote = `Nothing was deleted: the built song "${users[0].title}"${users.length > 1 ? ` and ${users.length - 1} more` : ''} plays ${id}. Delete or re-import that song first.`; teacherSfPaint(); return; }
+    if(teacherSfBusy) return;
+  }
   const typed = prompt(`Delete the song file "${id}" from the database? Its pieces and its entry go; the site cannot play it until it is uploaded again. Type its id to delete it:`, '');
   if(typed === null) return;
   if(String(typed).trim() !== id){ teacherSfNote = `Nothing was deleted: what you typed is not "${id}".`; teacherSfPaint(); return; }

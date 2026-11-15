@@ -9,8 +9,13 @@
    is 'private:<id>' instead of
    'audio/<file>.mp3', and <id> is a key of SONG_FILES below: the file's name,
    its size in bytes, its SHA-256 and its length. The site trusts the store
-   only as far as this list: a download whose size or SHA-256 differs is
-   thrown away.
+   only as far as this list, or (since 2026-11-14) as far as a BUILT SONG's
+   doc (app/builtsongs.js): a song Jonathan adds in the console names its
+   file's size and SHA-256 in its `audio` entry, the doc is teacher-written,
+   rules-checked and checked again on every page (builtSongCheck), and the
+   merge hands those entries to songFilesSetBuilt(). An id on both is the
+   list's (the tracked list wins; the built song is left out). Either way a
+   download whose size or SHA-256 differs is thrown away.
 
    THE STORE (firestore.rules, "SONG FILES"; written only by the console's
    Manage → Song files, teacher-songfiles.js):
@@ -77,6 +82,28 @@ const SONG_FILES_IDB = 'gc-song-files';
 const SONG_FILES_IDB_WAIT_MS = 5000;               // an IndexedDB that never answers: go on without the device copy
 const SONG_FILES_LOCK_WAIT_MS = 60000;             // a tab that holds a song's lock this long (hung): go on without it
 
+/* The built songs' audio entries (id -> { file, bytes, sha256, durationSec }),
+   filled ONLY by the merge in app/builtsongs.js, replaced as a whole each
+   time. An id on SONG_FILES is never taken from here. A built entry whose
+   bytes changed under the same id drops this page's loaded copy of it. */
+let sfBuilt = {};
+function songFilesSetBuilt(map){
+  const next = {};
+  Object.keys(map || {}).forEach(id => { if(!Object.prototype.hasOwnProperty.call(SONG_FILES, id)) next[id] = map[id]; });
+  Object.keys(sfBuilt).forEach(id => {
+    const was = sfBuilt[id], now = next[id];
+    if(sfUrls.has(id) && (!now || now.sha256 !== was.sha256 || now.bytes !== was.bytes)){
+      try { URL.revokeObjectURL(sfUrls.get(id)); } catch(e) {}
+      sfUrls.delete(id);
+    }
+  });
+  sfBuilt = next;
+}
+/* The entry a download is checked against: the list's, else a built song's. */
+function songFileEntry(id){
+  if(Object.prototype.hasOwnProperty.call(SONG_FILES, id)) return SONG_FILES[id];
+  return Object.prototype.hasOwnProperty.call(sfBuilt, id) ? sfBuilt[id] : null;
+}
 function songFileId(src){
   return (typeof src === 'string' && src.indexOf(SONG_FILE_PREFIX) === 0) ? src.slice(SONG_FILE_PREFIX.length) : null;
 }
@@ -315,7 +342,7 @@ async function sfLoadOnce(id, entry, progress, wanted){
 function songFileLoad(id, onProgress, waiter){
   if(!songFileHost().user) return Promise.reject(songFileErr('signin'));
   if(sfUrls.has(id)) return Promise.resolve(sfUrls.get(id));
-  const entry = SONG_FILES[id];
+  const entry = songFileEntry(id);
   if(!entry) return Promise.reject(songFileErr('notready', 'not on the list'));
   let job = sfInflight.get(id);
   if(!job){

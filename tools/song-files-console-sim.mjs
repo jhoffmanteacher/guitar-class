@@ -23,12 +23,25 @@
    pieceBytes 900000; pieces = ceil(bytes / 900000); durationSec a number in (0, 1800]; state uploading|ready;
    uploadedAt the server's time. A piece at songFiles/{id}/pieces/{p}: exactly i and data; p matches ^[0-9]{1,2}$;
    i an int 0..39 equal to p; data bytes of 1..900,000. songFilesUsage/{month}: only bytes, an int >= 0. Deletes:
-   only under songFiles/ or songFilesUsage/. Anything else written is a violation; every case counts them. */
+   only under songFiles/ or songFilesUsage/. BUILT SONGS (2026-11-14): builtSongs/{id} has exactly v, title,
+   artist, audio, song, savedAt in the rules' shape (the id ^sb-[a-z0-9]{8,24}$, audio's fields and ranges,
+   centsOff -10..10, savedAt the server's time); builtSongsMeta/list exactly songs (at most 200) and updatedAt (the
+   server's time). Anything else written is a violation; every case counts them.
+
+   MANAGE → BUILT SONGS (teacher-builtsongs.js, Song builder Part a2; app/builtsongs.js is loaded for the validator):
+   the slot is drawn and mounted with Song files; an Import writes the audio (3 pieces, ready), then the song, then
+   the list (edit 1), in that order; importing again replaces the song, skips the stored audio, raises the edit,
+   keeps the other songs and drops the list's bad keys; eight refused files (not JSON, an extra field, two validator
+   rules, an .mp3 of another size (not even read), other bytes, a length 2 s off, an audio id on SONG_FILES) and an
+   audio id another song uses with other bytes each write nothing and say why in one line; one import at a time;
+   leaving Manage stops it; Song files names a built song's audio ("Built song: <title>", escaped) and its Delete is
+   refused while a listed song plays it; a stored song the validator refuses shows ✗ and its reason. */
 import { readFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import vm from 'node:vm';
+import { FIXTURES, withAudio, audioIdFor, importFile } from './built-songs-fixtures.mjs';
 import { siteParts } from './site-src.mjs';
 
 const args = process.argv.slice(2);
@@ -89,6 +102,31 @@ function rulesCheck(op, path, data){
   }
   if(p[0] === 'songFilesUsage' && p.length === 2){
     if(keys !== 'bytes' || !Number.isInteger(data.bytes) || data.bytes < 0) return 'usage ' + JSON.stringify(data);
+    return '';
+  }
+  /* BUILT SONGS (firestore.rules, 2026-11-14), written out again here. */
+  if(p[0] === 'builtSongs' && p.length === 2){
+    const d = data, a = d.audio || {};
+    if(!/^sb-[a-z0-9]{8,24}$/.test(p[1])) return 'built song id ' + p[1];
+    if(keys !== 'artist,audio,savedAt,song,title,v') return 'built song fields ' + keys;
+    if(!Number.isInteger(d.v) || d.v < 1 || d.v > 99) return 'built song v';
+    if(typeof d.title !== 'string' || !d.title.trim().length || d.title.length > 120) return 'built song title';
+    if(typeof d.artist !== 'string' || d.artist.length > 120) return 'built song artist';
+    const ak = Object.keys(a);
+    if(!ak.every(k => ['id', 'bytes', 'sha256', 'durationSec', 'centsOff', 'gainDb', 'sourceSha256'].includes(k)) || !['id', 'bytes', 'sha256', 'durationSec', 'centsOff'].every(k => ak.includes(k))) return 'built song audio fields ' + ak.sort().join(',');
+    if(!/^[a-z0-9][a-z0-9-]{0,79}$/.test(a.id) || !Number.isInteger(a.bytes) || a.bytes <= 0 || a.bytes > 36000000 || !/^[0-9a-f]{64}$/.test(a.sha256)) return 'built song audio id/bytes/sha256';
+    if(typeof a.durationSec !== 'number' || !(a.durationSec > 0) || a.durationSec > 1800) return 'built song audio durationSec';
+    if(typeof a.centsOff !== 'number' || a.centsOff < -10 || a.centsOff > 10) return 'built song audio centsOff';
+    if('gainDb' in a && (typeof a.gainDb !== 'number' || a.gainDb < -40 || a.gainDb > 40)) return 'built song audio gainDb';
+    if('sourceSha256' in a && !/^[0-9a-f]{64}$/.test(a.sourceSha256)) return 'built song audio sourceSha256';
+    if(!d.song || typeof d.song !== 'object' || Array.isArray(d.song)) return 'built song song';
+    if(d.savedAt !== TS) return 'built song savedAt is not the server time';
+    return '';
+  }
+  if(p[0] === 'builtSongsMeta' && p[1] === 'list' && p.length === 2){
+    if(keys !== 'songs,updatedAt') return 'built songs list fields ' + keys;
+    if(!data.songs || typeof data.songs !== 'object' || Object.keys(data.songs).length > 200) return 'built songs list songs';
+    if(data.updatedAt !== TS) return 'built songs list updatedAt is not the server time';
     return '';
   }
   return 'write outside the song files: ' + path;
@@ -158,6 +196,7 @@ function makeConsole(consoleSrc){
   };
   els['t-grid-container'] = mkEl('t-grid-container');
   els['t-songfiles-block'] = mkEl('t-songfiles-block');
+  els['t-builtsongs-block'] = mkEl('t-builtsongs-block');
   const env = { promptAnswer: null, confirmAnswer: true, prompts: [], durations: new Map(), urlN: 0, audioMade: 0 };
   class Audio {
     constructor(){ this.l = {}; env.audioMade++; }
@@ -171,7 +210,7 @@ function makeConsole(consoleSrc){
     navigator: {}, location: { hash: '', search: '' }, addEventListener() {}, crypto: globalThis.crypto, Blob, Audio,
     URL: { createObjectURL(f){ const u = 'blob:sim/' + (++env.urlN); env.durations.set(u, f && f.__dur); return u; }, revokeObjectURL() {} },
     // The section's element exists only while the Manage HTML painted into the box holds its slot.
-    document: { getElementById: id => id === 't-songfiles-block' ? (els['t-grid-container']._html.includes('id="t-songfiles-block"') ? els[id] : null) : (els[id] || null),
+    document: { getElementById: id => (id === 't-songfiles-block' || id === 't-builtsongs-block') ? (els['t-grid-container']._html.includes(`id="${id}"`) ? els[id] : null) : (els[id] || null),
       querySelector: () => null, querySelectorAll: () => [], addEventListener() {}, createElement: () => ({ addEventListener() {}, setAttribute() {}, appendChild() {}, style: {} }),
       body: { appendChild() {} }, documentElement: { style: {} } },
     prompt: q => { env.prompts.push(q); return env.promptAnswer; }, confirm: () => env.confirmAnswer, alert() {},
@@ -185,12 +224,13 @@ function makeConsole(consoleSrc){
   vm.runInContext(esc + '\nlet db = null; let firebaseReady = true; async function ensureDb(){ return db; }\n'
     + 'const MODULE_MANIFEST = []; const CLASS_OPEN_THROUGH = 1;\nfunction __setDb(x){ db = x; }', box, { filename: 'prelude' });
   vm.runInContext(read('app/songfiles.js'), box, { filename: 'app/songfiles.js' });
+  vm.runInContext(read('app/builtsongs.js'), box, { filename: 'app/builtsongs.js' });   // the validator and bsListOf the console's Import uses
   // The sim's own list: whatever the site ships on SONG_FILES is cleared, so a real entry never changes a case (review B3).
   vm.runInContext('for (const k of Object.keys(SONG_FILES)) delete SONG_FILES[k];', box);
   vm.runInContext(consoleSrc, box, { filename: 'teacher.js (all parts)' });
   vm.runInContext('__setDb', box)(F.db);
   const run = code => vm.runInContext(code, box);
-  return { box, F, els, env, run, block: els['t-songfiles-block'], grid: els['t-grid-container'] };
+  return { box, F, els, env, run, block: els['t-songfiles-block'], bblock: els['t-builtsongs-block'], grid: els['t-grid-container'] };
 }
 
 /* ── the made-up songs ── */
@@ -385,7 +425,7 @@ async function runCases(consoleSrc){
     // through the delegated listener, as a click on the row's button
     const btn = { disabled: false, dataset: { tsfAct: 'delete', tsfId: 'test-song' } };
     for(const fn of c.block.listeners.click || []) fn({ target: { closest: sel => sel === '[data-tsf-act]' ? btn : null } });
-    await settle();
+    await settle(150);   // the delete reads the built songs' list first (teacherBsAudioUsers)
     const dels = c.F.st.writes.slice(w0);
     ok(!c.F.S.has('songFiles/test-song') && ![0, 1, 2].some(k => c.F.S.has('songFiles/test-song/pieces/' + k)), 'delete: the typed id deletes the head and every piece (clicked through the delegated listener)');
     ok(dels.length > 0 && dels.every(w => w.op === 'delete' && /^songFiles\/test-song(\/pieces\/\d+)?$/.test(w.path)) && c.F.S.has('songFiles/other-song') && c.F.S.has('songFiles/other-song/pieces/0'),
@@ -491,6 +531,130 @@ async function runCases(consoleSrc){
   }
   done(c);
 
+  /* ── Manage → Built songs: Import (teacher-builtsongs.js, Song builder Part a2) ── */
+  const BID = FIXTURES.fourFour.id, BAID = audioIdFor(BID, SONG_SHA);
+  const bdoc = (() => { const d = withAudio(FIXTURES.fourFour.doc, SONG_BYTES, SONG_SHA, 125.5); d.audio.id = BAID; d.audio.gainDb = 2.5; return d; })();
+  const jsonOf = (obj, raw) => { const t = raw != null ? raw : JSON.stringify(obj); return { name: 'song.json', size: t.length, text: async () => t }; };
+  const importNow = async (c, j, m) => { await c.run('teacherBsImport')(j, m); await settle(150); };
+
+  /* hook */
+  c = makeConsole(consoleSrc); register(c);
+  await managed(c);
+  {
+    ok(c.grid._html.includes('id="t-builtsongs-block"') && /Built songs/.test(c.bblock._html), 'built: Manage draws the <div id="t-builtsongs-block"> slot and paints the section');
+    const src = c.run('renderTeacherManage.toString()');
+    const nSf = (src.match(/teacherSongFilesMount\(\)/g) || []).length, nBs = (src.match(/teacherBuiltSongsMount\(\)/g) || []).length;
+    ok(nSf >= 1 && nBs === nSf, `built: every Manage paint that mounts Song files mounts Built songs too (${nBs} of ${nSf})`);
+    ok(/No built songs yet/.test(c.bblock._html) && c.F.st.writes.length === 0, 'built: an empty list says so, and opening Manage writes nothing');
+    c.run(`teacherBsPicked.json = { name: 'a.json' }; teacherBsPicked.mp3 = { name: 'a.mp3' }; teacherBsPaint()`);
+    ok(c.run('teacherBsPicked.json === null && teacherBsPicked.mp3 === null') && /data-tbs-act="import" disabled/.test(c.bblock._html), 'built: a repaint (its pickers drawn empty) lets go of the files picked before it, and Import is off');
+  }
+  done(c);
+
+  /* import: the audio, the song, the list, in that order, each in the rules' shape */
+  c = makeConsole(consoleSrc); register(c);
+  await managed(c);
+  {
+    await importNow(c, jsonOf(importFile(BID, bdoc)), fileOf(SONG, 125.5));
+    const w = c.F.st.writes, paths = w.map(x => x.path);
+    const iSong = paths.indexOf('builtSongs/' + BID), iList = paths.indexOf('builtSongsMeta/list'), iReady = paths.lastIndexOf('songFiles/' + BAID);
+    ok(iSong > 0 && iList > iSong && iReady >= 0 && iReady < iSong && (c.F.S.get('songFiles/' + BAID) || {}).state === 'ready' && [0, 1, 2].every(k => c.F.S.has(`songFiles/${BAID}/pieces/${k}`)),
+      `import: the audio (3 pieces, ready) first, then builtSongs/${BID}, then the list (${w.length} writes)`);
+    const d = c.F.S.get('builtSongs/' + BID) || {};
+    ok(JSON.stringify(d.song) === JSON.stringify(bdoc.song) && JSON.stringify(d.audio) === JSON.stringify(bdoc.audio) && d.title === bdoc.title && d.v === 1, 'import: the song doc holds the file\'s chart and audio entry unchanged');
+    ok(JSON.stringify((c.F.S.get('builtSongsMeta/list') || {}).songs) === JSON.stringify({ [BID]: 1 }), 'import: the list names the song at edit 1');
+    ok(/Imported &quot;Test Song Four&quot; \(edit 1\)/.test(c.bblock._html) || /Imported "Test Song Four" \(edit 1\)/.test(c.bblock._html), 'import: the section says it was imported, edit 1');
+    // again: the same id replaces the song; the audio already stored and matching is not uploaded again; another song on the list is kept
+    c.F.S.set('builtSongsMeta/list', { songs: { [BID]: 1, 'sb-othersong1': 4, 'BAD KEY': 2, 'sb-badvalue1': 'x' }, updatedAt: TS });
+    const n0 = c.F.st.writes.length;
+    const again = JSON.parse(JSON.stringify(bdoc)); again.title = 'Test Song Four, fixed';
+    await importNow(c, jsonOf(importFile(BID, again)), fileOf(SONG, 125.5));
+    const w2 = c.F.st.writes.slice(n0);
+    ok(!w2.some(x => /^songFiles\//.test(x.path)) && (c.F.S.get('builtSongs/' + BID) || {}).title === 'Test Song Four, fixed', `import again: the song is replaced and the stored audio is not uploaded again (${w2.length} writes)`);
+    ok(JSON.stringify((c.F.S.get('builtSongsMeta/list') || {}).songs) === JSON.stringify({ [BID]: 2, 'sb-othersong1': 4 }), 'import again: edit 2; another song on the list is kept; a key or a value the page would refuse is dropped');
+  }
+  done(c);
+
+  /* refusals: nothing written, one line */
+  {
+    const cases = [
+      ['not JSON', () => jsonOf(null, '{ not json'), SONG, 125.5],
+      ['a field a song does not take', () => jsonOf(Object.assign(importFile(BID, bdoc), { extra: 1 })), SONG, 125.5],
+      ['centsOff 11 (the validator)', () => { const d = JSON.parse(JSON.stringify(bdoc)); d.audio.centsOff = 11; return jsonOf(importFile(BID, d)); }, SONG, 125.5],
+      ['a section gap (the validator)', () => { const d = JSON.parse(JSON.stringify(bdoc)); d.song.sections[1].from = 6; return jsonOf(importFile(BID, d)); }, SONG, 125.5],
+      ['an .mp3 of another size', () => jsonOf(importFile(BID, bdoc)), OTHER, 125.5],
+      ['an .mp3 of the right size with other bytes', () => jsonOf(importFile(BID, bdoc)), (() => { const b = Uint8Array.from(SONG); b[5] ^= 1; return b; })(), 125.5],
+      ['an .mp3 whose length is 2 s off', () => jsonOf(importFile(BID, bdoc)), SONG, 127.5],
+      ['an audio id on SONG_FILES', () => { const d = JSON.parse(JSON.stringify(bdoc)); d.audio.id = 'test-song'; return jsonOf(importFile(BID, d)); }, SONG, 125.5],
+    ];
+    for(const [name, mk, bytes, dur] of cases){
+      c = makeConsole(consoleSrc); register(c);
+      await managed(c);
+      const mp3 = fileOf(bytes, dur);
+      await importNow(c, mk(), mp3);
+      const note = (c.bblock._html.match(/<b>([^<]*)<\/b>/) || [, ''])[1];
+      // A file of the wrong size is refused before it is even read (the size is on the file's entry).
+      if(bytes.length !== SONG_BYTES) ok(mp3.reads === 0, `import refused (${name}): the .mp3 is not read (${mp3.reads} reads)`);
+      ok(c.F.st.writes.length === 0 && /^Nothing was imported: /.test(note) && !/<br>/.test((c.bblock._html.match(/role="status">([\s\S]*?)<\/div>/) || [, ''])[1]), `import refused (${name}): nothing written, one line (${c.F.st.writes.length} writes; ${JSON.stringify(note.slice(0, 70))})`);
+      done(c);
+    }
+  }
+
+  /* another built song's audio id with other bytes; one import at a time; leaving Manage stops it */
+  c = makeConsole(consoleSrc); register(c);
+  c.F.S.set('builtSongsMeta/list', { songs: { 'sb-firstsong1': 1 }, updatedAt: TS });
+  c.F.S.set('builtSongs/sb-firstsong1', Object.assign(JSON.parse(JSON.stringify(bdoc)), { audio: Object.assign({}, bdoc.audio, { sha256: 'd'.repeat(64) }), savedAt: TS }));
+  await managed(c); await c.run('teacherBsLoad()'); await settle(60);
+  {
+    await importNow(c, jsonOf(importFile(BID, bdoc)), fileOf(SONG, 125.5));
+    ok(c.F.st.writes.length === 0 && /already sb-firstsong1&#39;s|already sb-firstsong1's/.test(c.bblock._html), `import refused: its audio id is another built song's with other bytes (${c.F.st.writes.length} writes)`);
+  }
+  done(c);
+  c = makeConsole(consoleSrc); register(c);
+  await managed(c);
+  {
+    const p1 = c.run('teacherBsImport')(jsonOf(importFile(BID, bdoc)), fileOf(SONG, 125.5));
+    await settle(2);
+    const other = JSON.parse(JSON.stringify(bdoc)); other.title = 'Second import';
+    await c.run('teacherBsImport')(jsonOf(importFile('sb-secondimport', other)), fileOf(SONG, 125.5));
+    await p1; await settle(150);
+    ok(!c.F.S.has('builtSongs/sb-secondimport') && c.F.S.has('builtSongs/' + BID), 'one import at a time: a second Import during the first writes nothing');
+  }
+  done(c);
+  c = makeConsole(consoleSrc); register(c);
+  await managed(c);
+  {
+    let left = false;
+    c.F.st.hooks.push(w => { if(!left && w.path === `songFiles/${BAID}/pieces/0`){ left = true; c.run(`teacherView = 'students'`); } });
+    await importNow(c, jsonOf(importFile(BID, bdoc)), fileOf(SONG, 125.5));
+    ok(left && !c.F.S.has('builtSongs/' + BID) && !c.F.S.has('builtSongsMeta/list') && (c.F.S.get('songFiles/' + BAID) || {}).state === 'uploading', 'leave mid-import: writing stops; the song and the list are not written; the audio stays not ready');
+  }
+  done(c);
+
+  /* Song files: a built song's audio is named, and its Delete is refused */
+  c = makeConsole(consoleSrc); register(c);
+  await managed(c);
+  await importNow(c, jsonOf(importFile(BID, Object.assign(JSON.parse(JSON.stringify(bdoc)), { title: 'Test <b>bold</b> & co' }))), fileOf(SONG, 125.5));
+  {
+    await c.run('teacherSfLoad()'); await c.run('teacherBsLoad()'); await settle(80);
+    c.run('teacherSfOpen = true; teacherSfPaint()');
+    const row = c.block._html.split('<tr').find(r => r.includes(`<td>${BAID}</td>`)) || '';
+    ok(/Built song: Test &lt;b&gt;bold&lt;\/b&gt; &amp; co/.test(row) && !/not on the list/.test(row), 'song files: a built song\'s audio reads "Built song: <title>", escaped, not "not on the list"');
+    ok(/Test &lt;b&gt;bold&lt;\/b&gt; &amp; co/.test(c.bblock._html) && !/<b>bold/.test(c.bblock._html) && /✓ passes today/.test(c.bblock._html), 'built: the list row is escaped and says the song passes today\'s checks');
+    const n0 = c.F.st.writes.length;
+    c.env.promptAnswer = BAID;
+    await c.run('teacherSfDelete')(BAID); await settle(150);
+    ok(c.F.st.writes.length === n0 && c.F.S.has('songFiles/' + BAID) && /Nothing was deleted: the built song &quot;Test &lt;b&gt;bold|Nothing was deleted: the built song "Test &lt;b&gt;bold/.test(c.block._html), `song files: Delete of a built song's audio is refused and names the song (${c.F.st.writes.length - n0} writes)`);
+    c.F.S.set('builtSongsMeta/list', { songs: {}, updatedAt: TS });
+    await c.run('teacherSfDelete')(BAID); await settle(150);
+    ok(!c.F.S.has('songFiles/' + BAID), 'song files: once no song on the list uses it, the typed id deletes it');
+    c.F.S.set('builtSongs/sb-brokenstore', { v: 1, title: 'Test broken', artist: '', audio: Object.assign({}, bdoc.audio, { centsOff: 30 }), song: bdoc.song, savedAt: TS });
+    c.F.S.set('builtSongsMeta/list', { songs: { 'sb-brokenstore': 1 }, updatedAt: TS });
+    await c.run('teacherBsLoad()'); await settle(80);
+    ok(/✗ audio\.centsOff is 30/.test(c.bblock._html), 'built: a stored song the validator refuses shows ✗ and its first reason');
+  }
+  done(c);
+
   ok(allViolations.length === 0, `rules: every write in every case meets firestore.rules' shape (${allViolations.length} violations${allViolations.length ? ': ' + allViolations.slice(0, 3).join('; ') : ''})`);
   return { cases, fails, lines };
 }
@@ -508,13 +672,15 @@ catch(e){ console.log('song-files-console-sim: the code would not run: ' + (e &&
 for(const l of res.lines) console.log(l);
 const order = parts.indexOf('teacher-songfiles.js') > parts.indexOf('teacher-songrequests.js');
 const sw = read('sw.js');
-const partOk = order && !sw.includes('teacher-songfiles.js');
-if(!partOk) console.log(`  ✗ part: teacher-songfiles.js must load after teacher-songrequests.js (${order}) and stay out of sw.js (${!sw.includes('teacher-songfiles.js')})`);
+const partOk = order && !sw.includes('teacher-songfiles.js') && parts.includes('teacher-builtsongs.js') && !sw.includes('teacher-builtsongs.js');
+if(!partOk) console.log(`  ✗ part: teacher-songfiles.js must load after teacher-songrequests.js (${order}) and stay out of sw.js (${!sw.includes('teacher-songfiles.js')}); teacher-builtsongs.js must be a console part (${parts.includes('teacher-builtsongs.js')}) and stay out of sw.js (${!sw.includes('teacher-builtsongs.js')})`);
 const cases = res.cases + 1, failed = res.fails + (partOk ? 0 : 1);
 console.log(`song-files-console-sim: ${cases} cases, ${failed} failed`);
 
 if(BREAKS){
   const MUT = [
+    ['a built song\'s audio deleted anyway', "    if(users.length){ teacherSfNote", "    if(false){ teacherSfNote"],
+    ['a built song\'s audio drawn as stray', "  return teacherSfOnList(id) ? 'match' : 'built';", "  return teacherSfOnList(id) ? 'match' : 'stray';"],
     ['no list match: any file uploads as the first entry', "return Object.keys(list).find(id => list[id] && list[id].sha256 === sha && list[id].bytes === bytes) || null;", "return Object.keys(list)[0] || null;"],
     ['no size cap before reading', 'if(size > TEACHER_SF_MAX_BYTES){', 'if(false){'],
     ['stale pieces kept', 'for(let j = n; j < TEACHER_SF_MAX_PIECES; j++) batch.delete(', 'for(let j = n; j < n; j++) batch.delete('],
@@ -544,7 +710,37 @@ if(BREAKS){
     if(r.fails > 0){ caught++; console.log(`  ✓ break caught: ${name} (${r.fails} red${VERBOSE ? ': ' + r.lines.filter(l => /✗/.test(l)).slice(0, 2).join(' | ').trim() : ''})`); }
     else console.log(`  ✗ break NOT caught: ${name}`);
   }
-  console.log(`${caught === MUT.length ? '✓' : '✗'} ${caught} of ${MUT.length} breaks caught`);
-  if(caught !== MUT.length) process.exit(1);
+  /* Manage → Built songs (teacher-builtsongs.js): each fault must turn a case red too. */
+  const BS = partSrc.get('teacher-builtsongs.js') || '';
+  const BMUT = [
+    ['Import without the validator', "  const why = builtSongCheck(id, doc);\n  if(why.length){", "  const why = [];\n  if(why.length){"],
+    ['Import without the SHA-256 check', "if(sha !== a.sha256){ teacherBsEnd(", "if(false){ teacherBsEnd("],
+    ['Import without the size check', "if(mp3File.size !== a.bytes){", "if(false){"],
+    ['Import without the length check', "if(dur == null || Math.abs(dur - a.durationSec) > 0.5){", "if(dur == null){"],
+    ['an audio id on SONG_FILES imported', "if(typeof SONG_FILES !== 'undefined' && Object.prototype.hasOwnProperty.call(SONG_FILES, a.id)){ teacherBsRefuse(", "if(false){ teacherBsRefuse("],
+    ['another song\'s audio id taken', "if(oid !== id && o.doc && o.doc.audio && o.doc.audio.id === a.id && o.doc.audio.sha256 !== a.sha256){ teacherBsRefuse(", "if(false){ teacherBsRefuse("],
+    ['the list written before the song', "    step = 'song';", "    step = 'song'; await db.collection('builtSongsMeta').doc('list').set({ songs: { [id]: 1 }, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });"],
+    ['the edit number not raised', "ver = (songs[id] || 0) + 1;", "ver = 1;"],
+    ['other songs dropped from the list', "      songs[id] = ver;\n      tx.set(ref, { songs,", "      tx.set(ref, { songs: { [id]: ver },"],
+    ['the audio uploaded again when it is stored', "if(!teacherSfHeadMatches(h, entry)) await teacherSfPutFile(", "await teacherSfPutFile("],
+    ['leaving Manage does not stop the import', "  const stopped = () => teacherView !== 'manage';\n  const w = { stopped, wrote: false, k: -1, n: 0, progress: line => { teacherBsProgress", "  const stopped = () => false;\n  const w = { stopped, wrote: false, k: -1, n: 0, progress: line => { teacherBsProgress"],
+    ['two imports at once', "  if(teacherBsBusy || !jsonFile || !mp3File) return;", "  if(!jsonFile || !mp3File) return;"],
+    ['a title drawn unescaped', "<td>${escHtml(String(d.title == null ? '—' : d.title))}</td>", "<td>${String(d.title == null ? '—' : d.title)}</td>"],
+    ['a repaint keeps files the pickers no longer show', "  if(!teacherBsBusy) teacherBsPicked.json = teacherBsPicked.mp3 = null;\n", ""],
+    ['the stored song not checked in the list', "  const why = builtSongCheck(id, s.doc);", "  const why = [];"],
+  ];
+  const bsWith = src => parts.map(p => p === 'teacher-builtsongs.js' ? src : partSrc.get(p)).join('');
+  let bcaught = 0;
+  for(const [name, from, to] of BMUT){
+    const n = BS.split(from).length - 1;
+    if(n !== 1){ console.log(`  ✗ break "${name}": its text is in teacher-builtsongs.js ${n} times (must be once)`); continue; }
+    let r;
+    try { r = await runCases(bsWith(BS.replace(from, to))); } catch(e){ r = { fails: 1, lines: ['  (threw: ' + (e && e.message) + ')'] }; }
+    if(r.fails > 0){ bcaught++; console.log(`  ✓ break caught: ${name} (${r.fails} red)`); }
+    else console.log(`  ✗ break NOT caught: ${name}`);
+  }
+  const all = MUT.length + BMUT.length, got = caught + bcaught;
+  console.log(`${got === all ? '✓' : '✗'} ${got} of ${all} breaks caught (${caught} of ${MUT.length} in teacher-songfiles.js, ${bcaught} of ${BMUT.length} in teacher-builtsongs.js)`);
+  if(got !== all) process.exit(1);
 }
 process.exit(failed ? 1 : 0);

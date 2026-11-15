@@ -25,6 +25,16 @@ Everything else is derived. The slow tier is the same master time-stretched,
 so its grid is the fast file's scaled by `trackBpm/trackBpmSlow`. **Never
 measure a second anchor.**
 
+**A BUILT song has ONE file and no slow tier** (Jonathan, 2026-11-14: "the
+browser slows the one file"; `app/builtsongs.js` merges it into
+`SNIPPET_TRACKS` after sign-in, with no `srcSlow`). Its card's four stops are
+that file at 0.65 / 0.85 / 0.9 / 1, pitch held, opening on 0.85 (ONE-FILE
+SPEEDS, `pcOneFile` / `PC_ONE_FILE_RATES` in `app/cards.js`; `data-slow` stays
+empty at every stop, so the bars never move); Build up speed works on those
+rates. Pinned by checks.mjs 1el. A clean slow file for one built song is a
+code push on Jonathan's request (work order, LATER); its track then has
+`srcSlow` and today's two-file stops.
+
 **Live-band tracks carry a beat map — `barTimes`.** The straight grid only
 holds for a track made to a click ("the cure", Luna); Sweet Child, the Hendrix
 Watchtower and Seven Nation Army drift up to half a beat by mid-song.
@@ -304,7 +314,10 @@ so `anchor`, `barTimes` and `data-click-bars` still hold. What it encodes:
   its own gain. Ask Jonathan.
 - **Never re-level "the cure"**: it is the target; the tool refuses it.
 - **Gain and a -1 dBFS limiter, nothing else**: no resample, no pitch
-  change, no trim, same bitrate and sample rate. A clipped record may need a
+  change, no trim, same bitrate and sample rate. (A BUILT song's stored copy,
+  `app/builtsongs.js`, is the one exception to "same bitrate": it is
+  re-encoded once, to 192k constant bitrate, with the same one gain and
+  limiter; Jonathan, 2026-11-14.) A clipped record may need a
   lower ceiling for its TRUE peak; the tool finds it. A song already
   re-encoded once is levelled from the earlier bytes (`--source-ref <commit>`).
 - ⚠️ **ffmpeg's `alimiter` has `level` ON by default**: it normalises the
@@ -357,7 +370,9 @@ length, so the two mixes drift apart as the loop runs and 1ak fails the push.
 **Every track ships at A=440**: `tuner.js` is hardcoded to A4=440Hz. Export
 at 440 from Moises; ffmpeg/rubberband only as fallback.
 
-**And as mp3, at 320k.** Moises will hand you `.m4a`. `sw.js`'s `AUDIO_RE`
+**And as mp3, at 320k** (for `audio/` and coded private songs; a BUILT
+song's one stored copy is 192k constant bitrate, Jonathan 2026-11-14).
+Moises will hand you `.m4a`. `sw.js`'s `AUDIO_RE`
 and the audio fingerprint accept it, but keep one format and one bitrate
 across `audio/` (Jonathan's call) so the Guitar toggle never steps between
 codecs. (The existing rhythm-down set is 320k except "the cure" at 120bpm,

@@ -12,8 +12,17 @@
         device copy (IndexedDB), with 0 database reads;
      4. signed out (currentUser null): Play → the plain line "Sign in to hear this song.", no player started;
      5. the monthly limit tripped (the stub's count at the limit, the device copy deleted): Play → the limit line;
+     6. a BUILT song (Song builder Part a2, app/builtsongs.js): a generated click track (96 BPM, 4/4) and two made-up
+        charts (tools/built-songs-fixtures.mjs: fourFour, with lyric lines; sixEight, Full / Power, sharing the same
+        mp3) imported through the console's Manage → Built songs (the real file inputs; the second import finds the
+        audio already stored); a refused file (centsOff 12) writes nothing and says why in one line; then on the
+        student page the real merge (builtSongsSync) puts both on Songs → More Play Along songs; the card opens,
+        Play shows the loading line and plays the blob: copy at 0.85, and the four stops play the SAME file at
+        0.65 / 0.85 / 0.9 / 1 with data-slow empty (ONE-FILE SPEEDS, app/cards.js).
    (The Song Journey pages cannot play a private song yet: that player is its own piece of Step 2.)
-   Steps 2, 4 and 5 are screenshotted at 1366x657 in English and Spanish, the console view in English.
+   Steps 2, 4 and 5 are screenshotted at 1366x657 in English and Spanish, the console view in English; step 6: the
+   console's Built songs (a song listed; a refused file's line), the Songs page with the built rows, the card in
+   Full and Power chords, a section with lyric lines, the speed slider on its opening stop, in English and Spanish.
      node tools/song-files-e2e.mjs [--shots <dir>] [--chrome <path>]   (or CHROME=…; Chrome for Testing only)
    Exit 0: every step passed. 1: a step failed (each is printed). 2: could not run. Needs ffmpeg and Node 22+.
    One headless-Chrome run at a time on the Mac (CLAUDE.md). */
@@ -25,6 +34,7 @@ import { join, extname, normalize, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import net from 'node:net';
+import { FIXTURES, withAudio, audioIdFor, importFile } from './built-songs-fixtures.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -267,6 +277,119 @@ async function main(){
       await shot(`limit-line-${lang}`);
     }
 
+    /* ── 6. a built song: imported in the console, merged and played on the student page ── */
+    {
+      const click = join(work, 'built-click.mp3');
+      const ffc = spawnSync('ffmpeg', ['-v', 'error', '-f', 'lavfi', '-i', "aevalsrc='if(lt(mod(t,0.625),0.03),0.6*sin(2*PI*1500*t),0)':s=44100:d=56", '-ac', '2', '-c:a', 'libmp3lame', '-b:a', '192k', '-y', click]);
+      if (ffc.status !== 0) throw new Error('ffmpeg (click): ' + ffc.stderr);
+      const cb = readFileSync(click), csha = createHash('sha256').update(cb).digest('hex');
+      const pr = spawnSync('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', click], { encoding: 'utf8' });
+      const cdur = Math.round(Number(pr.stdout) * 100) / 100;
+      const songs = ['fourFour', 'sixEight'].map(k => { const f = FIXTURES[k]; const d = withAudio(f.doc, cb.length, csha, cdur); d.audio.id = audioIdFor('sb-e2eclick', csha); d.audio.gainDb = 0; return { id: f.id, doc: d, json: join(work, f.id + '.json') }; });
+      songs.forEach(x => writeFileSync(x.json, JSON.stringify(importFile(x.id, x.doc), null, 2)));
+      const bad = join(work, 'refused.json');
+      { const d = JSON.parse(JSON.stringify(songs[0].doc)); d.audio.centsOff = 12; writeFileSync(bad, JSON.stringify(importFile('sb-e2erefused1', d))); }
+      console.log(`== built songs: a ${cdur} s click track, ${cb.length} bytes, sha256 ${csha.slice(0, 12)}…, imported as ${songs.map(x => x.id).join(' and ')}`);
+      await nav(`http://127.0.0.1:${port}/index.html?teacher=true`);
+      await waitFor(`typeof ensureTeacherJs === 'function' && typeof CLASS_ACTIVITIES !== 'undefined'`, 15000);
+      await js(`ensureTeacherJs()`);
+      await waitFor(`typeof showTeacherApp === 'function' && typeof teacherBsImport === 'function'`, 15000);
+      await js(STUB);
+      // As the sign-in callback does (app/start.js): currentUser first, then the console; the merge runs for the teacher too.
+      await js(`currentUser = { uid: 'stub-teacher', email: TEACHER_EMAIL, displayName: 'Teacher' }; true`);
+      await js(`showTeacherApp(currentUser).catch(e => { window.__showErr = e.message; })`);
+      await sleep(800);
+      await js(`setTeacherView('manage')`);
+      check('the console shows Manage → Built songs', await waitFor(`!!document.querySelector('#t-builtsongs-block [data-tbs-file="json"]')`, 8000));
+      const pickAndImport = async (jsonPath, mp3Path) => {
+        const { root } = await page.send('DOM.getDocument', { depth: -1 });
+        for (const [sel, f] of [['#t-builtsongs-block input[data-tbs-file="json"]', jsonPath], ['#t-builtsongs-block input[data-tbs-file="mp3"]', mp3Path]]) {
+          const { nodeId } = await page.send('DOM.querySelector', { nodeId: root.nodeId, selector: sel });
+          await page.send('DOM.setFileInputFiles', { nodeId, files: [f] });
+        }
+        await sleep(300);
+        await js(`(() => { for (const i of document.querySelectorAll('#t-builtsongs-block input[data-tbs-file]')) i.dispatchEvent(new Event('change', { bubbles: true })); return true; })()`);
+        await js(`(() => { const b = document.querySelector('#t-builtsongs-block [data-tbs-act="import"]'); if (b) b.click(); return !!b; })()`);
+      };
+      for (const [i, x] of songs.entries()) {
+        await pickAndImport(x.json, click);
+        const done = await waitFor(`((__store.get('builtSongsMeta/list') || {}).songs || {})[${JSON.stringify(x.id)}] === 1 && /Imported/.test(document.querySelector('#t-builtsongs-block').innerText)`, 30000);
+        check(`the console imported ${x.id}${i ? ' (the audio already stored: no upload)' : ''}: the song doc and the list entry are in the store`, done && __okDoc(await js(`JSON.stringify(__store.get('builtSongs/${x.id}') || null)`), x.doc));
+        await sleep(1200);
+      }
+      await shot('console-built-songs-en');
+      const listed = await js(`document.querySelector('#t-builtsongs-block').innerText`);
+      check('the console lists both built songs, each passing today\'s checks', /Test Song Four/.test(listed) && /Test Six Eight/.test(listed) && (listed.match(/passes today/g) || []).length === 2, listed.slice(0, 300));
+      const nBefore = await js(`__store.size`);
+      await pickAndImport(bad, click);
+      await waitFor(`/Nothing was imported/.test(document.querySelector('#t-builtsongs-block').innerText)`, 8000);
+      const refusedLine = await js(`(document.querySelector('#t-builtsongs-block [role=status]') || {}).innerText || ''`);
+      check(`a refused file writes nothing and says why in one line (${JSON.stringify(refusedLine.slice(0, 90))})`, /^Nothing was imported: audio\.centsOff is 12/.test(refusedLine) && !/\n/.test(refusedLine.trim()) && await js(`__store.size`) === nBefore);
+      await shot('console-built-refused-en');
+      /* The console's Songs view lists them (the console merges too), Visible / Hidden, no Move to Class activities. */
+      await js(`setTeacherView('songs')`);
+      const sv = await waitFor(`/Test Song Four/.test((document.getElementById('t-grid-container') || {}).innerText || '') && /Test Six Eight/.test(document.getElementById('t-grid-container').innerText)`, 10000);
+      const svInfo = await js(`(() => { const g = document.getElementById('t-grid-container'); return { move: g.querySelectorAll('[data-set-song-place][data-id^="sb-"]').length, hide: g.querySelectorAll('[data-set-activity-hidden][data-id^="sb-"]').length, label: (g.innerText.match(/Built song/g) || []).length }; })()`);
+      check(`the console's Songs view lists both built songs with Visible / Hidden and no Move to Class activities (${JSON.stringify(svInfo)})`, sv && svInfo.move === 0 && svInfo.hide === 4 && svInfo.label === 2);
+      await shot('console-songs-view-en');
+      await js(`fetch('/__e2e/store', { method: 'POST', body: __storeOut('') }).then(r => r.ok)`);
+      const four = songs[0].id, six = songs[1].id;
+      const card = id => `document.querySelector('.pc[data-id="${id}"]')`;
+      for (const lang of ['en', 'es']) {
+        await bootStudent();
+        await dropCopy();
+        await bootStudent();
+        await js(storeIn);
+        await js(`setLang(${JSON.stringify(lang)}); true`);
+        await js(`builtSongsSync().then(() => true)`);
+        await js(`goExploreHash('songs'); true`);
+        const rows = await waitFor(`/Test Song Four/.test((document.querySelector('.sh-lib-slot') || {}).innerText || '') && /Test Six Eight/.test(document.querySelector('.sh-lib-slot').innerText)`, 10000);
+        check(`[${lang}] the merge puts both built songs on Songs → More Play Along songs`, rows);
+        await js(`(() => { const r = [...document.querySelectorAll('.sh-lib-slot .song-row')].find(x => /Test Song Four/.test(x.innerText)); if (r) r.scrollIntoView({ block: 'center' }); return true; })()`);
+        await sleep(300);
+        await shot(`built-songs-page-${lang}`);
+        await js(`songsLibraryOpen(${JSON.stringify(four)}); true`);
+        check(`[${lang}] the built card opens`, await waitFor(`!!${card(four)}`, 8000));
+        await sleep(600);
+        const open = await js(`(() => { const r = ${card(four)}; const t = r.querySelector('.pc-speed-tick.on'); return { slow: r.dataset.slow, rate: r.dataset.rate, tick: t && t.dataset.rate, one: !!r.querySelector('.pc-speed4[data-one-file="1"]') }; })()`);
+        check(`[${lang}] the card opens on the one-file stop 0.85 (${JSON.stringify(open)})`, open.slow === '' && open.rate === '0.85' && open.tick === '0.85' && open.one);
+        await js(`${card(four)}.scrollIntoView({ block: 'start' }); true`);
+        await sleep(300);
+        await shot(`built-card-${lang}`);
+        await js(`(() => { const b = ${card(four)}.querySelectorAll('.pc-pager .tab-pager-btn')[1]; if (b) b.click(); return true; })()`);
+        await sleep(400);
+        const lyr = await js(`[...${card(four)}.querySelectorAll('.pc-page:not([hidden]) .pc-row-label')].map(x => x.textContent)`);
+        check(`[${lang}] the verse shows its lyric lines, as text (${JSON.stringify(lyr)})`, lyr.length === 2 && lyr[1] === 'Test line <two> & "three"');
+        await shot(`built-card-lyrics-${lang}`);
+        if (lang === 'en') {
+          await js(`__sf.slow = 300; true`);
+          await js(`(() => { ${card(four)}.querySelector('.pc-play').click(); return true; })()`);
+          const bl = await waitFor(`/^Loading the song… \\d+%$/.test((${card(four)}.querySelector('.pc-status') || {}).innerText || '')`, 10000);
+          check('the built card shows the loading line while its file downloads', bl);
+          check('the built card plays its blob: copy, at 0.85', await waitFor(`!!(pcState && pcState.root === ${card(four)} && /^blob:/.test(pcState.audio.src) && Math.abs(pcState.audio.playbackRate - 0.85) < 1e-6)`, 20000));
+          const src0 = await js(`pcState.audio.src`);
+          const seen = [];
+          for (const [i, want] of [[0, 0.65], [1, 0.85], [2, 0.9], [3, 1]]) {
+            await js(`(() => { const r = ${card(four)}.querySelector('.pc-speed-range'); r.value = '${i}'; r.dispatchEvent(new Event('input', { bubbles: true })); r.dispatchEvent(new Event('change', { bubbles: true })); return true; })()`);
+            await sleep(500);
+            seen.push(await js(`({ rate: pcState && pcState.audio.playbackRate, same: !!pcState && pcState.audio.src === ${JSON.stringify(src0)}, slow: ${card(four)}.dataset.slow, want: ${want} })`));
+          }
+          check(`the four stops play the same file at 0.65 / 0.85 / 0.9 / 1 (${seen.map(x => Math.round(x.rate * 100) / 100).join(' / ')})`, seen.every(x => Math.abs(x.rate - x.want) < 1e-6 && x.same && x.slow === ''));
+          await js(`pcStop(); true`);
+          await js(`songsLibraryOpen(${JSON.stringify(six)}); true`);
+          await waitFor(`!!${card(six)}`, 8000); await sleep(500);
+          await js(`${card(six)}.scrollIntoView({ block: 'start' }); true`); await sleep(300);
+          const pw = await js(`${card(six)}.innerText`);
+          check('the six-eight card opens on Power chords (A5)', /A5/.test(pw) && !/\bAm\b/.test(pw.split('\n').filter(l => !/Full|Power|Acordes/.test(l)).join(' ')));
+          await shot('built-card-power-en');
+          await js(`caSetChordMode(${JSON.stringify(six)}, 'full'); true`); await sleep(600);
+          await js(`${card(six)}.scrollIntoView({ block: 'start' }); true`); await sleep(300);
+          check('…and switches to Full chords (Am)', /\bAm\b/.test(await js(`${card(six)}.innerText`)));
+          await shot('built-card-full-en');
+        }
+      }
+    }
+
     const pageErrs = errs.filter(e => !/firebase|firestore|googleapis|gstatic|net::|Failed to fetch|NotAllowedError|play\(\)|AbortError|NotSupportedError|offline/i.test(e || ''));
     check('no page error', !pageErrs.length, pageErrs.slice(0, 3).join(' | '));
   } catch (e) {
@@ -278,6 +401,11 @@ async function main(){
   }
   console.log(`\nsong-files-e2e: ${passes.length + fails.length} steps, ${fails.length} failed${shots.length ? `; ${shots.length} screenshots in ${SHOTS}` : ''}`);
   return fails.length ? 1 : 0;
+}
+/* The song doc in the store holds the file's chart and audio entry unchanged (savedAt is the server's time). */
+function __okDoc(text, want){
+  const d = JSON.parse(text || 'null');
+  return !!d && JSON.stringify(d.song) === JSON.stringify(want.song) && JSON.stringify(d.audio) === JSON.stringify(want.audio) && d.title === want.title && d.v === 1 && 'savedAt' in d;
 }
 /* The console's Song files view (teacher-songfiles.js): where it is, its file input, a Verify button, and the words
    that mean "uploaded and matching" / "verified". */

@@ -1059,6 +1059,9 @@ function caIsSongCard(a){
    students read songLibraryIds. */
 function caIsLibraryCard(a, over){
   if(!caIsSongCard(a)) return false;
+  /* A built song (an 'sb-' id, app/builtsongs.js) is always on the Songs page: no config/class.songLibrary entry
+     moves it to Class activities (Jonathan, 2026-11-14: Songs page only until the board part is built). */
+  if(isBuiltSongId(a.id)) return a.library === true;
   const m = over || songLibraryIds;
   return typeof m[a.id] === 'boolean' ? m[a.id] : a.library === true;
 }

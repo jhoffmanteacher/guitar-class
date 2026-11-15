@@ -671,7 +671,7 @@ function snippetHasFull(tr){ return !!(tr && tr.srcFull && tr.srcFullSlow); }
    Everything downstream (the loop, the bar dots, the tier switch) reads the
    window from here so there is one copy of the bar arithmetic. */
 function snippetWindow(tr, spec, slow){
-  const scale = slow ? (tr.trackBpm / tr.trackBpmSlow) : 1;
+  const scale = (slow && tr.srcSlow) ? (tr.trackBpm / tr.trackBpmSlow) : 1;   // a one-file track (no srcSlow) has one clock
   const from = Math.max(1, spec.fromBar), n = Math.max(1, spec.bars);
   /* `edges` holds the n+1 bar lines of the window. A steady-grid track
      spaces them evenly; a live-band track (barTimes) reads each one off its
@@ -730,7 +730,7 @@ function snippetSrc(tr, slow, guitar){
   // A private path ('private:<id>', SONG FILES in app/songfiles.js) comes back
   // as its device copy's blob: address once loaded; a public path unchanged.
   if(guitar && snippetHasFull(tr)) return songFileSrc(slow ? tr.srcFullSlow : tr.srcFull);
-  return songFileSrc(slow ? tr.srcSlow : tr.src);
+  return songFileSrc(slow && tr.srcSlow ? tr.srcSlow : tr.src);
 }
 /* THE TWIN — a Guitar toggle with no wait (Jonathan: "a delay when I toggle
    the guitar"). The two mixes are different FILES, so flipping the toggle used
