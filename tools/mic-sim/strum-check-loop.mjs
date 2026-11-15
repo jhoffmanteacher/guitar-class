@@ -227,7 +227,7 @@ export const SC_VM = `globalThis.__sc = {
     const html = scBody() ? scBody().innerHTML : '';
     const out = { bpm: s.bpm, win: s.win, slotMs: s.slotMs, listenStart: s.listenStart, gridOffset: r1(s.gridOffset), barsDone: s.barsDone, saved: __lb.saved,
       slots: s.slots.map(x => ({ bar: x.bar, slot: x.slot, strum: x.strum, state: x.state, devMs: r1(x.devMs) })),
-      caps: s.caps.map(c => ({ bar: c.bar, chord: c.chord, prev: c.prev, a: c.a, b: c.b, c: c.c, verdict: c.verdict, n: c.rm.length, nA: c.rt.filter(t => t <= COACH_EVENT_TAIL).length, rm: c.rm.map(x => Math.round(x * 10) / 10) })),
+      caps: s.caps.map(c => ({ bar: c.bar, chord: c.chord, prev: c.prev, a: c.a, b: c.b, c: c.c, o: c.o === undefined ? null : c.o, verdict: c.verdict, n: c.rm.length, nA: c.rt.filter(t => t <= COACH_EVENT_TAIL).length, rm: c.rm.map(x => Math.round(x * 10) / 10) })),
       events: s.events.map(e => ({ t: r1(e.t - s.listenStart), k: e.k, dev: r1(e.dev), kind: e.kind })),
       metaProblems: [...new Set(__sc.fsProblems(scRecMeta(), '', []).map(x => x.replace(/\\[\\d+\\]/g, '[]')))],
       logged: __sc.logged.slice(), lines: (s.lines || []).slice(),   /* no per-bar lines since 2026-11-14 */ report: html.replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim(), rule: SC_CHORD_RULE, winFrac: SC_WIN_FRAC,
@@ -338,7 +338,7 @@ function report(o, takes, log){
     if (row.length) log(`  ${kind.padEnd(12)} ${room.padEnd(7)} ${row.join(' · ')}`);
   }
   log('\nCHORD ON THE 1, by what was strummed (the key) and rule: ok / wrong / could not hear. "right, 1 not played" = the right chord but no strum within a quarter of an eighth of the 1.');
-  for (const room of o.rooms) for (const bpm of o.bpm) for (const rule of ['a', 'b', 'c']){
+  for (const room of o.rooms) for (const bpm of o.bpm) for (const rule of ['a', 'b', 'c', 'o', 'verdict']){   /* o: the octave vote; verdict: what the student sees (SC_CHORD_RULE) */
     for (const [label, f] of [['every bar', null], ['D5 -> C5 (bar 3)', b => b === 2], ['C5 -> G5 (bar 5)', b => b === 4], ['G5 -> D5 (bar 7)', b => b === 6], ['not a change', b => !CHANGES.includes(b)]]){
       const sel = takes.filter(x => x.t.room === room && x.t.bpm === bpm);
       const tbl = chordTally(sel, rule, f);
@@ -356,7 +356,7 @@ function report(o, takes, log){
       if (!sel.length) continue;
       const f = bars ? b => bars.includes(b) : null;
       const s = rule => { const t = chordTally(sel, rule, f); return Object.entries(t).map(([kk, v]) => `${kk} ${v.ok}/${v.wrong}/${v.unheard}`).join(', '); };
-      log(`  ${kind.padEnd(10)} ${room.padEnd(7)} a: ${s('a').padEnd(34)} | b: ${s('b').padEnd(34)} | c: ${s('c')}`);
+      log(`  ${kind.padEnd(10)} ${room.padEnd(7)} a: ${s('a').padEnd(34)} | b: ${s('b').padEnd(34)} | c: ${s('c').padEnd(34)} | o: ${s('o').padEnd(34)} | shown: ${s('verdict')}`);
     }
   }
 }

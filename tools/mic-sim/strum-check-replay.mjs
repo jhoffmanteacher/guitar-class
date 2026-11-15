@@ -43,9 +43,10 @@ import { SC_VM, oneTake, seedOf } from './strum-check-loop.mjs';
      none       the grid never moves (the click's grid, plus the mic-delay setting) */
 const HOOK = `(() => {
   if (globalThis.__scHook) return;
-  const real = srHearStrum;
-  const H = globalThis.__scHook = { on: false, p: null, diag: null, real };
-  srHearStrum = function(s, rms, hf){
+  /* the check's detector: scHearStrum (its own, with the pattern-shape grid) since 2026-11-14; srHearStrum before */
+  const NAME = typeof scHearStrum === 'function' ? 'scHearStrum' : 'srHearStrum', real = globalThis[NAME];
+  const H = globalThis.__scHook = { on: false, p: null, diag: null, real, name: NAME };
+  globalThis[NAME] = function(s, rms, hf){
     const pre = H.diag ? { at: coachOnsetAt, rms, hf, sR: s.smoothRms, sH: s.smoothHf, last: s.lastOnsetT, g: s.gridOffset, ls: s.listenStart, lat: s.lat, slotMs: s.slotMs } : null;
     let r;
     if (!H.on) r = real(s, rms, hf);
@@ -268,15 +269,23 @@ function diagnose(tk, res){
 /* ── the sweep ── */
 const BENCH = {
   ratios: { students: ['silent', 'right'], bpm: [85], seeds: 4 },
-  grid: { students: ['right', 'silent', 'late100', 'early100', 'drag2', 'drag4', 'rush2', 'rush4', 'straight8', 'beats'], bpm: [85, 98], seeds: 2 }
+  grid: { students: ['right', 'silent', 'late100', 'early100', 'drag2', 'drag4', 'rush2', 'rush4', 'straight8', 'beats'], bpm: [85, 98], seeds: 2 },
+  /* the rooms (the lead, 2026-11-14: "the real classroom has talking and other guitars"): every student in the quiet room, the class
+     room (neighbours' guitars) and the two rooms fitted to real classroom takes (room7, room4: talking, neighbours, bangs); and
+     nothing played in the two talking-only rooms (talk, chatter: no guitar anywhere) */
+  noisy: { students: ['right', 'silent', 'late100', 'early100', 'drag2', 'drag4', 'rush2', 'rush4', 'straight8', 'beats'], bpm: [85, 98], seeds: 2,
+    rooms: ['quiet', 'class', 'room7', 'room4'], extra: [['silent', 'talk'], ['silent', 'chatter']] }
 };
 async function bench(p, which){
   setP(p);
   const B = BENCH[which], o = { lag: 70, fps: 60, stop: 0 }, rows = {};
-  for (const kind of B.students) for (const bpm of B.bpm){
-    const c = rows[kind + '@' + bpm] = { heard: 0, strums: 0, extras: 0, rests: 0, bars: 0, barsOk: 0, silentHeard: 0 };
+  const plan = [];
+  for (const room of B.rooms || ['quiet']) for (const kind of B.students) plan.push([kind, room]);
+  for (const x of B.extra || []) plan.push(x);
+  for (const [kind, room] of plan) for (const bpm of B.bpm){
+    const c = rows[kind + '@' + bpm + (B.rooms ? '@' + room : '')] = { heard: 0, strums: 0, extras: 0, rests: 0, bars: 0, barsOk: 0, silentHeard: 0 };
     for (let s = 1; s <= B.seeds; s++){
-      const t = { kind, room: 'quiet', mic: 'chromebook', bpm, s, seed: seedOf(['scr', kind, bpm, s].join('|')) };
+      const t = { kind, room, mic: 'chromebook', bpm, s, seed: seedOf(['scr', kind, bpm, s].concat(room === 'quiet' ? [] : [room]).join('|')) };
       const { res, play } = await oneTake(site, t, o, btn, CH);
       const end = site.clock.now, slotMs = 60000 / bpm / 2;
       res.slots.forEach((x, i) => {
