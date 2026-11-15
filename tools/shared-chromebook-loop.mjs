@@ -1837,14 +1837,17 @@ function oracle(sc, world, dev){
   let compared = 0, actionsLanded = 0, actionsTold = 0, actionsLost = 0;
   /* The legacy day ticks a student left on this Chromebook before 2026-10-01 (caStepsToday:<uid>) are folded into
      THAT student's progress at their first sign-in whose read succeeds (activities.js: "Fold any still on this
-     Chromebook into the student's progress once, then drop the local copy"). An owed action of that student. */
+     Chromebook into the student's progress once, then drop the local copy"). An owed action of that student.
+     The fold runs right after the page's progress read (start.js: `await loadProgress(); caAdoptLocalTicks();`), so
+     of two tabs of one student the one whose read came back FIRST folds, whichever shows its first screen first
+     (2026-11-15: ordering by first screen blamed the wrong tab when one more read before the screen moved the timing). */
   const legacyLeft = {};
   for (const [k, done] of Object.entries(world.legacy || {})) legacyLeft[k] = Object.keys(done);
   const legacyAt = {};
-  for (const fs of world.firstScreens.slice().sort((x, y) => x.at - y.at)){
-    const page = world.allPages.find(p => p.id === fs.page);
-    const P = world.people[fs.who];
-    const pr = page && (page.reads['progress/' + P.uid] || []).filter(x => x.at <= fs.at).pop();
+  const prOf = fs => { const page = world.allPages.find(p => p.id === fs.page); return page && (page.reads['progress/' + world.people[fs.who].uid] || []).filter(x => x.at <= fs.at).pop(); };
+  const foldAt = fs => { const pr = prOf(fs); return pr ? pr.at : fs.at; };
+  for (const fs of world.firstScreens.slice().sort((x, y) => foldAt(x) - foldAt(y) || x.at - y.at)){
+    const pr = prOf(fs);
     fs.legacy = [];
     if (fs.teacherMode || !pr || !pr.ok || !(legacyLeft[fs.who] || []).length) continue;
     fs.legacy = legacyLeft[fs.who]; legacyLeft[fs.who] = [];
