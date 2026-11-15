@@ -674,7 +674,10 @@ if (FROM || DRY) {
   const src = FROM || '<upload.mp3>';
   const pitch = S.cents ? `rubberband=pitch=${Math.pow(2, -S.cents / 1200).toFixed(6)}:formant=preserved` : '';
   const tempo = `rubberband=tempo=${(S.slowBpm / S.bpm).toFixed(6)}`;
-  const enc = ['-map', '0:a:0', '-map_metadata', '-1', '-c:a', 'libmp3lame', '-b:a', '320k'];
+  /* 192k constant bitrate, whatever the upload is (Jonathan, 2026-11-15: "any file that i upload that is not 192k should be
+     converted moving forward"; 320k until then). Both files of a song at the same bitrate, so the speed stops never step between
+     qualities. tools/loudness.py then levels them at the bitrate they have. */
+  const enc = ['-map', '0:a:0', '-map_metadata', '-1', '-c:a', 'libmp3lame', '-b:a', '192k'];
   audioCmds.push(['ffmpeg', '-v', 'error', '-n', '-i', src, ...(pitch ? ['-af', pitch] : []), ...enc, diskOf(S.bpm)]);
   audioCmds.push(['ffmpeg', '-v', 'error', '-n', '-i', src, '-af', [pitch, tempo].filter(Boolean).join(','), ...enc, diskOf(S.slowBpm)]);
 }
