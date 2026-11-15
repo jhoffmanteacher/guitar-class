@@ -28,10 +28,12 @@
    (coachAcquireMic, "Turn on the microphone"), the count-in (coachCountIn)
    and the consented recording (micRecStart / micRecSave, take id
    <uid>-coach, marked `game: 'strumcheck'`).
-   What it saves: NOTHING to progress/{uid}. No games.* field, no
-   saveGames(), no step tick: the step's own count dots and Next stay the
-   way to finish it. A consented recording (when the teacher has turned
-   collection on) is the only thing written, to micTakes.
+   What it saves: no games.* field, no saveGames(), no score. The one thing
+   it writes to progress is a step tick, and only on a step with
+   `listenRounds` (ca-52, since 2026-11-14): a full round counts toward that
+   step's tick through onCaStepChange, the writer every activity step tick
+   uses (scCountRound). A consented recording (when the teacher has turned
+   collection on) goes to micTakes.
 
    The two chord rules (SC_CHORD_RULE picks the one the student sees; a
    recording keeps both verdicts). Power chords that share a note cannot be
@@ -488,7 +490,40 @@ function scFinish(complete){
   if (s.cells[s.cur]) s.cells[s.cur].classList.remove('sc-now');
   s.phase = 'report';
   scRenderReport();
+  if (s.complete && s.barsDone === s.bars.length) scCountRound(s);
   if (rec) micRecSave(rec, scRecMeta());
+}
+
+/* A FULL round (the loop reached the end of the last bar: not Stopped, not interrupted; any score) on
+   a step with `listenRounds: n` (class-activities.js, ca-52: "2 full rounds", Jonathan 2026-11-14)
+   counts toward its tick: rounds 1..n-1 are the caSteps ticks `<id>:<si>:r<k>`, round n is the
+   step's own tick `<id>:<si>`, all through onCaStepChange, the writer every activity step tick uses
+   (no other write to the progress doc). The step's count line and status follow in place: the check's
+   card stays on screen with its report. Nothing in the teacher console (no button there). */
+function scCountRound(s){
+  if (typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE) return;
+  if (typeof onCaStepChange !== 'function' || typeof caListenRoundsDone !== 'function') return;
+  const m = /^bpm:ca:(ca-\d+):(\d+):strum$/.exec(s.where || '');
+  if (!m) return;
+  const id = m[1], si = Number(m[2]);
+  const a = (window.CLASS_ACTIVITIES || []).find(x => x.id === id), step = a && a.steps && a.steps[si];
+  const n = step ? Number(step.listenRounds) || 0 : 0;
+  if (n < 1) return;
+  const done = caListenRoundsDone(id, si, n);
+  if (done >= n) return;
+  onCaStepChange(done + 1 >= n ? `${id}:${si}` : `${id}:${si}:r${done + 1}`, true);
+  const now = caListenRoundsDone(id, si, n);
+  document.querySelectorAll(`.sc-rounds[data-sc-rounds="${id}:${si}"]`).forEach(el => {
+    el.innerHTML = escHtml(t('sc.rounds', { n: now, total: n })) + (now >= n ? ' &#x2713;' : '');
+    el.classList.toggle('sc-rounds--done', now >= n);
+    const li = el.closest('.ca-step');
+    if (li && now >= n){
+      li.classList.add('ca-step-done');
+      const st = li.querySelector('.ca-step-status');
+      if (st && typeof caStepStatusHtml === 'function') st.innerHTML = caStepStatusHtml(si + 1, true);
+    }
+  });
+  if (now >= n && typeof caSyncTopbar === 'function') caSyncTopbar();
 }
 
 function scRenderReport(){

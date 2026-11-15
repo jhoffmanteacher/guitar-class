@@ -119,6 +119,14 @@
    caIsOptional (app.js), teacherActivityOptional (teacher.js) and
    journeyOptional (tabs/journey.js) read it.
 
+   LISTEN ROUNDS — `listenRounds: <n>` on a step whose `strum` has
+   `listen: true` (Jonathan, 2026-11-14: ca-52, "2 full rounds"). The step has
+   no Mark done button: it ticks itself once the student has finished n FULL
+   rounds with the strum-pattern check (every bar reached; a Stopped round
+   does not count; any score). Round 1 is kept as the caSteps tick
+   `<id>:<si>:r1`, the step's own tick `<id>:<si>` is the last round, both
+   through onCaStepChange (coach-strumcheck.js scCountRound). checks.mjs 1eh.
+
    LIBRARY — `library: true` or `library: false` (optional; any card but an
    exit check; Jonathan, 2026-10-20). Marks the card as a SONG the console
    can move between Class activities and the Songs page ("Move to Songs" /
@@ -7097,11 +7105,6 @@ window.CLASS_ACTIVITIES = [
           },
           bars: ['D5', 'D5', 'C5', 'C5', 'G5', 'G5', 'D5', 'D5'],
           barsPerRow: 4,   // a row per two chords — eight bars fit the screen
-          /* The strum-pattern check (Jonathan, 2026-11-14; coach-strumcheck.js):
-             a Listening Coach button that listens to the eight bars once, the
-             pattern by slot and the chord on each 1. Feedback only: it saves
-             nothing to progress. checks.mjs 1eh pins it to this step alone. */
-          listen: true,
         },
       },
       {
@@ -7421,6 +7424,39 @@ window.CLASS_ACTIVITIES = [
     },
     // No help ladder: a practice card is its checks and nothing else (Jonathan, 2026-10-07).
     steps: [],
+  },
+  /* The strum-pattern check as its own activity (Jonathan, 2026-11-14: "make
+     the listening coach part a more obvious step that students have to do",
+     "Its own activity", done after "2 full rounds"). One step: ca-46's last
+     eight bars with the Listening Coach button (coach-strumcheck.js); the step
+     ticks itself after two full rounds (LISTEN ROUNDS above). ca-46 keeps its
+     steps and no longer carries the button. */
+  {
+    id:    'ca-52',
+    title:    'Strum Pattern check',
+    title_es: 'Chequeo del patrón de rasgueo',
+    steps: [
+      {
+        label:    'The Listening Coach — D5, C5, G5',
+        label_es: 'El Entrenador de Escucha — D5, C5, G5',
+        text:    'Play the eight bars for the Listening Coach, two full rounds.',
+        text_es: 'Toca los ocho compases para el Entrenador de Escucha, dos rondas completas.',
+        listenRounds: 2,
+        strum: {
+          caption:    'D5 · C5 · G5 · D5 · two bars each',
+          caption_es: 'D5 · C5 · G5 · D5 · dos compases cada uno',
+          pattern: 'D.DU.UDU',   // 8 eighth notes: D down, U up, . hand moves but misses
+          chords: {
+            D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] },
+            C5: { frets: [['A', 3], ['D', 5], ['G', 5]], midi: [48, 55, 60] },
+            G5: { frets: [['E', 3], ['A', 5], ['D', 5]], midi: [43, 50, 55] }
+          },
+          bars: ['D5', 'D5', 'C5', 'C5', 'G5', 'G5', 'D5', 'D5'],
+          barsPerRow: 4,   // a row per two chords — eight bars fit the screen
+          listen: true,    // the strum-pattern check (coach-strumcheck.js); 1eh pins it to this step alone
+        },
+      },
+    ],
   },
 ];
 

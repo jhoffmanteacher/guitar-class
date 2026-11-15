@@ -1063,6 +1063,7 @@
                                es: 'El micrófono no oye si vas abajo o arriba: solo dónde cae cada rasgueo.' },
     'sc.tipCount':           { en: '4 clicks, then the click goes quiet: keep the beat in your head, not with your foot.',
                                es: '4 clics, luego el clic se calla: lleva el pulso en tu cabeza, no con el pie.' },
+    'sc.rounds':             { en: 'Full rounds with the Listening Coach: {n} of {total}', es: 'Rondas completas con el Entrenador de Escucha: {n} de {total}' },
     'sc.listening':          { en: 'Listening — play the pattern', es: 'Escuchando — toca el patrón' },
     'sc.barN':               { en: 'Bar {n}:', es: 'Compás {n}:' },
     'sc.patternOk':          { en: 'pattern ✓', es: 'patrón ✓' },

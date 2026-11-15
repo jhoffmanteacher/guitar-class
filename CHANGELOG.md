@@ -6,6 +6,12 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-14 — The strum pattern check is its own activity
+
+- **"Strum Pattern check" is a new In-Class Activity** (when your teacher adds it). It has one step: the eight bars of D5, C5 and G5 with the green Listening Coach button.
+- **The step ticks itself after two full rounds.** A round counts when the check reaches the end of bar 8; a round you stop early does not. The step shows "Full rounds with the Listening Coach: 0 of 2", then 1, then 2 with a ✓. There is no Mark done button on this step.
+- **The button moved.** The strum pattern activity (Down, Down-Up, Up-Down-Up) no longer has the Listening Coach button; everything else in it is the same.
+
 ## 2026-11-14 — Your next required activity is at the top; Module 1's note circle goes clockwise
 
 - **In-Class Activities: optional cards sit below the ones you still need to do.** In Today's activity and in Unfinished activities, required cards now come first and optional cards after them. If the next activity you need is an older one, it shows first under Today's activity, with its date, so "Your next activity is at the top" is always true.

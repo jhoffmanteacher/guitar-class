@@ -429,6 +429,22 @@ function caStepHeadText(step, si, total){
   const label = step && step.label ? tf(step, 'label') : '';
   return label ? `${n}: ${label}` : n;
 }
+/* LISTEN ROUNDS (`listenRounds: n` on a step; class-activities.js, ca-52): the step ticks
+   itself after n FULL rounds with the strum-pattern check, so it has no Mark done button, only
+   the count. Round k (1..n-1) is the caSteps tick `<id>:<si>:r<k>`; the last round is the
+   step's own tick. caListenRoundsDone reads them; coach-strumcheck.js scCountRound writes
+   them through onCaStepChange, the step-tick writer every other step uses. */
+function caListenRoundsDone(id, si, n){
+  if(caStepDone[`${id}:${si}`] === true) return n;
+  let k = 0;
+  while(k < n - 1 && caStepDone[`${id}:${si}:r${k + 1}`] === true) k++;
+  return k;
+}
+function caListenRoundsRowHtml(a, si, step){
+  const n = Number(step.listenRounds) || 0;
+  const done = caListenRoundsDone(a.id, si, n);
+  return `<div class="ca-step-done-row"><span class="sc-rounds${done >= n ? ' sc-rounds--done' : ''}" data-sc-rounds="${escAttr(a.id + ':' + si)}">${escHtml(t('sc.rounds', { n: done, total: n }))}${done >= n ? ' &#x2713;' : ''}</span></div>`;
+}
 /* `si` is the step's FLAT index in a.steps — every key (ticks, BPM, drill
    state) hangs off it. `opts.pos` / `opts.total` are where the step sits on
    the student's ROUTE (caRoute): the same thing except on a paths activity,
@@ -481,7 +497,8 @@ function caStepHtml(a, step, si, isOpen, isDone, opts){
       key: `ca:${a.id}:${si}`, isDone, closestSel: '.ca-step', btnSel: focus ? '.ca-focus-next' : '.ca-step-donebtn', id: a.id, extra: si,
       wholeLine: true,
     })}${parts.join('')}`
-    + (focus ? caFocusNavHtml(a, si, isDone)
+    + (step.listenRounds ? caListenRoundsRowHtml(a, si, step)
+      : focus ? caFocusNavHtml(a, si, isDone)
       : `<div class="ca-step-done-row"><button type="button" class="ca-step-donebtn${isDone ? ' is-done' : ''}" onclick="caMarkStepDone(this,'${escAttr(a.id)}',${si})">${stepDoneHtml(isDone)}</button></div>`);
   /* Focus view: the head is a plain label, not the accordion toggle — there
      is nothing to collapse into, the dots and the nav buttons move between

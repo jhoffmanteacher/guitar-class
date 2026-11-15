@@ -11143,7 +11143,7 @@ function checkFoldedActivity(ctx) {
    are frozen and not read. Modules keep their lists (CLAUDE.md). Pinned
    counts, so a field that stops being read fails. */
 const CAP_2A = 105, CAP_2C = 110;
-const ONE_LINE_2A = 410, ONE_LINE_2C = 38, DRILL_SCREENS = 138;
+const ONE_LINE_2A = 412, ONE_LINE_2C = 38, DRILL_SCREENS = 138;   // 2026-11-14: +2, ca-52's one step text (EN + ES), the strum-pattern check as its own activity
 // Each drill's line before Start, and a practice card's own directions line (.pc-dir; Jonathan, 2026-11-10: shorten those too).
 const DRILL_DIRECTION_KEYS = ['drill.intro', 'deck.introOne', 'deck.introTwo', 'nc.intro', 'nc.introCoach', 'nc.introAnswer', 'ncp.intro', 'ncp.introCoach',
   'ncp.introAnswer', 'chc.introFollow', 'chc.introCall', 'pwn.introName', 'pwn.introFret', 'pwn.introBoth',
@@ -14466,7 +14466,7 @@ const REP_COUNT_FIELDS = 339;   // 2026-11-10: every In-Class Activity step is o
    them anyway"): no got-it label, so caStepHtml() passes wholeLine and the dots
    read the count from the whole line. Pinned like REP_COUNT_FIELDS: a step text
    added or removed (or gaining a label again) moves it. */
-const REP_COUNT_LINES = 84;
+const REP_COUNT_LINES = 85;   // 2026-11-14: +1, ca-52's one step (no count in its line: the check's two full rounds tick it, not tap dots)
 // Tap-dot groups drawn by buildSet() over every module set, EN + ES (2026-11-10). Moves only with a module got-it sentence.
 const MODULE_DOT_GROUPS = 152;
 function checkRepCountParity(sets, ctx) {
@@ -17041,7 +17041,8 @@ const COUNTIN_PIN = { runs: 44, beeps: 140, rounds: 9, takes: 6, tips: 28 };   /
 /* 1eh. The strum-pattern check (coach-strumcheck.js, 2026-11-14; Jonathan: judge "both on chords and strumming pattern", "listens to
    pattern in the right slot", "strum in rest counts against", "medium strict", "check chord on the first down strum only"). Pinned and
    RUN in 1ca's sandbox (the real site scripts):
-     - the data: exactly one strum spec carries `listen`, it is `true`, on ca-46's shared eight-bar step, pattern D.DU.UDU, bars
+     - the data: exactly one strum spec carries `listen`, it is `true`, on ca-52's one step (its own activity since 2026-11-14:
+       Jonathan, "Its own activity", "2 full rounds"; ca-46 no longer carries it), pattern D.DU.UDU, bars
        D5 D5 C5 C5 G5 G5 D5 D5 (rests on slots 1 and 4);
      - the button: buildStrum draws exactly one data-strumcheck button for it (inside the BPM group, carrying the pattern, the bars and
        every chord's notes) and none for any other strum step, none without a keyPrefix, none in the teacher console (strumCheckBtnHtml
@@ -17061,7 +17062,7 @@ const COUNTIN_PIN = { runs: 44, beeps: 140, rounds: 9, takes: 6, tips: 28 };   /
      - the check's own strum ratios (SC_ONSET_RATIO / SC_HF_RATIO), run through the real srHearStrum: a 1.3x jump is a strum for the
        check and not for a state without them (Strum Radar's); the shared CHK_ONSET_RATIO / CHK_HF_RATIO stay 1.4 / 1.7. */
 async function checkStrumCheck() {
-  head('1eh. The strum-pattern check on ca-46: the step, the button, the window, the chord on the 1, nothing saved (run)');
+  head('1eh. The strum-pattern check on ca-52: the step, the button, the window, the chord on the 1, two full rounds tick the step (run)');
   let bad = 0;
   const fail = m => { err('1eh (strum-pattern check): ' + m); problems++; bad++; };
   if (!COACH_SANDBOX) { fail("1ca's sandbox did not load, so the strum-pattern check was NOT run"); return; }
@@ -17072,18 +17073,18 @@ async function checkStrumCheck() {
     const found = JSON.parse(run(`JSON.stringify(CLASS_ACTIVITIES.flatMap(a => (a.steps || []).map((s, si) => ({ id: a.id, si, path: s.path || null, strum: s.strum || null }))).filter(x => x.strum).map(x => ({ id: x.id, si: x.si, path: x.path, listen: 'listen' in x.strum ? x.strum.listen : '(none)', pattern: x.strum.pattern, bars: x.strum.bars.join(' ') })))`));
     n.strumSteps = found.length;
     const listening = found.filter(x => x.listen !== '(none)');
-    if (listening.length !== 1) fail(`${listening.length} strum steps carry "listen" (${listening.map(x => x.id + ' step ' + (x.si + 1)).join(', ') || 'none'}); want exactly one, ca-46's eight bars`);
+    if (listening.length !== 1) fail(`${listening.length} strum steps carry "listen" (${listening.map(x => x.id + ' step ' + (x.si + 1)).join(', ') || 'none'}); want exactly one, ca-52's eight bars`);
     const L = listening[0];
     if (L){
       n.pins++;
       if (L.listen !== true) fail(`${L.id} step ${L.si + 1}: listen is ${JSON.stringify(L.listen)}, want true`);
-      if (L.id !== 'ca-46' || L.path !== null) fail(`the listening step is ${L.id} step ${L.si + 1} (path ${L.path}); want ca-46's shared step`);
+      if (L.id !== 'ca-52' || L.path !== null || L.si !== 0) fail(`the listening step is ${L.id} step ${L.si + 1} (path ${L.path}); want ca-52's one step`);
       if (L.pattern !== PIN.pattern) fail(`its pattern is "${L.pattern}", want "${PIN.pattern}"`);
       if (L.bars !== PIN.bars) fail(`its bars are "${L.bars}", want "${PIN.bars}"`);
       const rests = run(`scPatternSlots(${JSON.stringify(L.pattern)}).map((x, k) => x.strum ? -1 : k).filter(k => k >= 0).join(',')`);
       if (rests !== PIN.rests) fail(`scPatternSlots reads the slots where the hand misses as [${rests}], want [${PIN.rests}]`);
       /* the button, from the site's own builder */
-      const html = run(`buildStrum(CLASS_ACTIVITIES.find(a => a.id === 'ca-46').steps[${L.si}].strum, { keyPrefix: 'bpm:ca:ca-46:${L.si}:strum' })`);
+      const html = run(`buildStrum(CLASS_ACTIVITIES.find(a => a.id === 'ca-52').steps[${L.si}].strum, { keyPrefix: 'bpm:ca:ca-52:${L.si}:strum' })`);
       const btns = html.match(/data-strumcheck="/g) || [];
       if (btns.length !== 1) fail(`buildStrum drew ${btns.length} strum-check buttons on the listening step, want 1`);
       const grp = /<span class="bpm-control-group">([\s\S]*?)<\/span><\/div>/.exec(html);
@@ -17092,11 +17093,11 @@ async function checkStrumCheck() {
       const m = /data-strumcheck="([^"]*)"/.exec(html);
       if (m){
         const d = JSON.parse(m[1].replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&'));
-        const want = JSON.parse(run(`JSON.stringify(CLASS_ACTIVITIES.find(a => a.id === 'ca-46').steps[${L.si}].strum)`));
+        const want = JSON.parse(run(`JSON.stringify(CLASS_ACTIVITIES.find(a => a.id === 'ca-52').steps[${L.si}].strum)`));
         if (d.pattern !== want.pattern || d.bars.join(' ') !== want.bars.join(' ')) fail('the button carries another pattern or other bars than the step');
         Object.keys(want.chords).forEach(c => { if (!d.chords[c] || d.chords[c].midi.join() !== want.chords[c].midi.join()) fail(`the button carries other notes for ${c} than the step`); });
       }
-      if (/data-strumcheck=/.test(run(`buildStrum(CLASS_ACTIVITIES.find(a => a.id === 'ca-46').steps[${L.si}].strum, {})`))) fail('a board with no keyPrefix (the paths chooser\'s silent preview) drew the strum-check button');
+      if (/data-strumcheck=/.test(run(`buildStrum(CLASS_ACTIVITIES.find(a => a.id === 'ca-52').steps[${L.si}].strum, {})`))) fail('a board with no keyPrefix (the paths chooser\'s silent preview) drew the strum-check button');
       const others = run(`CLASS_ACTIVITIES.flatMap(a => (a.steps || []).map((s, si) => ({ a, s, si }))).filter(x => x.s.strum && !('listen' in x.s.strum)).filter(x => /data-strumcheck=/.test(buildStrum(x.s.strum, { keyPrefix: 'k' }))).map(x => x.a.id + ' step ' + (x.si + 1)).join(', ')`);
       if (others) fail('buildStrum drew the strum-check button on a step without listen: ' + others);
     }
@@ -17114,7 +17115,7 @@ async function checkStrumCheck() {
     }
     /* The tempo: no limit ("Start 85, no limit"), one tempo with the step's slider, locked during a round (below). */
     if (L) {
-      const stepHtml = run(`buildStrum(CLASS_ACTIVITIES.find(a => a.id === 'ca-46').steps[${L.si}].strum, { keyPrefix: 'bpm:ca:ca-46:${L.si}:strum' })`);
+      const stepHtml = run(`buildStrum(CLASS_ACTIVITIES.find(a => a.id === 'ca-52').steps[${L.si}].strum, { keyPrefix: 'bpm:ca:ca-52:${L.si}:strum' })`);
       const range = /class="bpm-slider"[^>]*min="(\d+)"[^>]*max="(\d+)"/.exec(stepHtml);
       if (/sc-limit|\sdisabled[\s>]/.test(stepHtml)) fail('the listening step still draws a tempo-limit line or a disabled button');
       if (!range) fail('the listening step has no tempo slider to read its range from');
@@ -17291,7 +17292,7 @@ async function checkStrumCheck() {
           const kase = ${JSON.stringify(kase)}, pat = scPatternSlots('${PIN.pattern}'), bars = ${JSON.stringify(PIN.bars.split(' '))};
           sc = { phase: 'report', card: { isConnected: false, remove(){} }, timeouts: [], cells: [], bars, chords: { D5: { midi: [50, 57, 62] }, C5: { midi: [48, 55, 60] }, G5: { midi: [43, 50, 55] } },
             pattern: '${PIN.pattern}', slotsOf: pat, slots: [], caps: [], events: [], lines: [], barsDone: kase === 'stopped' ? 3 : 8, complete: kase !== 'stopped', cur: -1, cap: null, bpm: 85,
-            beatMs: 60000 / 85, slotMs: 30000 / 85, win: SC_WIN_FRAC * 30000 / 85, lat: 50, listenStart: 4000, gridOffset: 12.5, where: 'bpm:ca:ca-46:6:strum', recCapSec: 28, roundSec: 26.5 };
+            beatMs: 60000 / 85, slotMs: 30000 / 85, win: SC_WIN_FRAC * 30000 / 85, lat: 50, listenStart: 4000, gridOffset: 12.5, where: 'bpm:ca:ca-52:0:strum', recCapSec: 28, roundSec: 26.5 };
           for (let k = 0; k < 64; k++){ const sl = pat[k % 8], b = k >> 3, reached = kase !== 'stopped' || b < 3;
             sc.slots.push({ k, bar: b, slot: k % 8, strum: sl.strum, dir: sl.dir, devMs: kase === 'right' && sl.strum ? 12 : null, gridMs: kase === 'right' && sl.strum ? 10 : null,
               state: !reached ? 'pending' : kase === 'nothing' ? (sl.strum ? 'miss' : 'quiet') : (sl.strum ? 'ok' : 'quiet') });
@@ -17308,6 +17309,40 @@ async function checkStrumCheck() {
       if (!r.sets.includes('micTakes/test-student-0-coach') || r.refused.length || r.warned.length) fail(`the take of a round with ${kase === 'right' ? 'every bar right' : kase === 'nothing' ? 'nothing played' : 'a Stop after 3 bars'} did not save through micRecSaveNow into a strict Firestore stub: ${JSON.stringify({ refused: r.refused, warned: r.warned })}`);
       if (!r.win || r.win.frac !== PIN.win || Math.abs(r.win.ms - Math.round(PIN.win * r.win.slotMs * 10) / 10) > 0.11) fail(`the saved take says window ${JSON.stringify(r.win)}, want winFrac ${PIN.win} and winMs ${PIN.win} of its slotMs (a replay must know the width that graded it)`);
       if (r.belt.length) fail(`scRecMeta's belt had to null values in the take of a round with ${kase}: ${r.belt.join(' | ')} (fix them at the source)`);
+    }
+    /* Two full rounds tick ca-52's step (Jonathan, 2026-11-14: "2 full rounds"), through the real caStepHtml, scFinish and scCountRound:
+       no Mark done button, the count line; a full round writes <id>:0:r1, the second the step's own tick <id>:0, a third nothing; a
+       Stopped round and a round short of its last bar nothing; a full round on a step with no listenRounds nothing. onCaStepChange (the
+       writer every step tick uses) is counted, not run. */
+    {
+      const r = JSON.parse(run(`(() => { const a = CLASS_ACTIVITIES.find(x => x.id === 'ca-52'), keepW = onCaStepChange, keepDone = caStepDone, writes = [];
+        try {
+          caStepDone = {}; onCaStepChange = (k, v) => { writes.push(k + '=' + v); if (v) caStepDone[k] = true; else delete caStepDone[k]; };
+          const html0 = caStepHtml(a, a.steps[0], 0, true, false, {});
+          const round = (where, complete, bars) => { micRec = null;
+            sc = { phase: 'listening', card: { isConnected: false, remove(){} }, timeouts: [], cells: [], bars: ['D5','D5','C5','C5','G5','G5','D5','D5'], chords: { D5: { midi: [50, 57, 62] }, C5: { midi: [48, 55, 60] }, G5: { midi: [43, 50, 55] } },
+              pattern: '${PIN.pattern}', slotsOf: scPatternSlots('${PIN.pattern}'), slots: [], caps: [], events: [], lines: [], barsDone: bars, cur: -1, cap: null, bpm: 85, beatMs: 706, slotMs: 353, win: 159, lat: 50, listenStart: 0, gridOffset: 0, where, locked: [] };
+            for (let k = 0; k < 64; k++) sc.slots.push({ k, bar: k >> 3, slot: k % 8, strum: sc.slotsOf[k % 8].strum, dir: sc.slotsOf[k % 8].dir, state: 'quiet' });
+            sc.caps = sc.bars.map((c, b) => ({ bar: b, chord: c, prev: null, at: null, rt: [], rm: [], verdict: 'unheard', a: null, b: null, c: null, done: true }));
+            scFinish(complete); const w = writes.splice(0); scClose(); return w.join(','); };
+          const W = 'bpm:ca:ca-52:0:strum';
+          const out = { noBtn: !/ca-step-donebtn/.test(html0), line0: /class="sc-rounds[^"]*"[^>]*>([^<]*)/.exec(html0), focus: !!a.view,
+            stopped: round(W, false, 3), short: round(W, true, 7), r1: round(W, true, 8), r2: round(W, true, 8), r3: round(W, true, 8),
+            other: round('bpm:ca:ca-46:6:strum', true, 8), done: caListenRoundsDone('ca-52', 0, 2) };
+          out.line0 = out.line0 ? out.line0[1] : null;
+          out.line2 = (/class="sc-rounds[^"]*"[^>]*>([^<]*)/.exec(caStepHtml(a, a.steps[0], 0, true, true, {})) || [])[1] || null;
+          return JSON.stringify(out);
+        } finally { onCaStepChange = keepW; caStepDone = keepDone; sc = null; } })()`));
+      const want0 = run(`t('sc.rounds', { n: 0, total: 2 })`), want2 = run(`t('sc.rounds', { n: 2, total: 2 })`);
+      n.pins++;
+      if (r.focus) fail('ca-52 is a Focus-view activity: its "Got it — next step" would tick the step by hand');
+      if (!r.noBtn) fail('ca-52\'s step draws a Mark done button: a student could tick it by hand before two rounds');
+      if (r.line0 !== want0) fail(`ca-52's step shows "${r.line0}" before any round, want "${want0}"`);
+      if (!r.line2 || !r.line2.startsWith(want2)) fail(`ca-52's step shows "${r.line2}" after two rounds, want "${want2} ✓"`);
+      if (r.stopped || r.short) fail(`a Stopped round wrote "${r.stopped}" and a round short of its last bar "${r.short}": neither is a full round`);
+      if (r.r1 !== 'ca-52:0:r1=true' || r.r2 !== 'ca-52:0=true' || r.r3 !== '') fail(`three full rounds wrote "${r.r1}" / "${r.r2}" / "${r.r3}", want ca-52:0:r1=true / ca-52:0=true / nothing`);
+      if (r.other) fail(`a full round on a step with no listenRounds wrote "${r.other}"`);
+      if (r.done !== 2) fail(`after two rounds caListenRoundsDone says ${r.done}, want 2`);
     }
     /* the end line: 0, 1 and many bars, both languages */
     for (const lang of ['en', 'es']) {
@@ -17326,8 +17361,8 @@ async function checkStrumCheck() {
     run(`setLang('en')`);
   } catch (e) { fail('stopped on an error: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : e)); }
   /* pinned totals, so a renamed function cannot turn this into a check of nothing */
-  if (n.saves !== 3 || n.tempos !== 4 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 9 || n.lines !== 10 || n.pins !== 4) fail(`ran ${n.saves} take saves (want 3), ${n.tempos} tempo opens (want 4), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (9), ${n.lines} end lines (10), ${n.pins} pins (4)`);
-  if (!bad) ok(`1eh: one listening step (ca-46, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, none in the console, never disabled; opens at the step's last tempo (${PIN.startBpm} if never set), one tempo with the step's slider, -5 / +5 across its range, the tempo controls locked during a round and given back on every exit; its own ratios ${PIN.ratio} / ${PIN.hfRatio} (Strum Radar's state still 1.4 / 1.7, run); window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule} (${n.chords} scripted cases); a whole finish saved nothing to progress; its take saved through micRecSaveNow into a strict Firestore stub (3 rounds); the real sweep and end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages`);
+  if (n.saves !== 3 || n.tempos !== 4 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 9 || n.lines !== 10 || n.pins !== 5) fail(`ran ${n.saves} take saves (want 3), ${n.tempos} tempo opens (want 4), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (9), ${n.lines} end lines (10), ${n.pins} pins (5)`);
+  if (!bad) ok(`1eh: one listening step (ca-52, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, none in the console, never disabled; opens at the step's last tempo (${PIN.startBpm} if never set), one tempo with the step's slider, -5 / +5 across its range, the tempo controls locked during a round and given back on every exit; its own ratios ${PIN.ratio} / ${PIN.hfRatio} (Strum Radar's state still 1.4 / 1.7, run); window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule} (${n.chords} scripted cases); two full rounds tick ca-52's step (round 1 <id>:0:r1, round 2 the step; Stopped, short and other steps write nothing; no Mark done button); a whole finish saved nothing else; its take saved through micRecSaveNow into a strict Firestore stub (3 rounds); the real sweep and end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages`);
 }
 
 async function checkCountIn() {

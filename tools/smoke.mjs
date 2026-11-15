@@ -1207,7 +1207,7 @@ async function strumWalk(page, run, events, stats) {
               s.value = was; s.dispatchEvent(new Event('input', { bubbles: true })); return r; })()`, 100);
             if (!top || top.disabled || top.line) fail(w, 'with the step\'s slider at its top the check button is disabled or a limit line shows: ' + JSON.stringify(top));
             await run('strum:sc-tempo-back:' + w, `(() => { const s = document.querySelector('${SCQ} .tab--strum .bpm-slider'); s.value = ${JSON.stringify(String(slWas))}; s.dispatchEvent(new Event('input', { bubbles: true })); })()`, 50);
-            const o3 = await run('strum:sc-closed:' + w, `({ card: !!document.querySelector('.sc-card'), next: !!document.querySelector('${SCQ} .ca-focus-next, ${SCQ} .ca-mark-btn'), board: !!document.querySelector('${SCQ} .strum-board') })`, 10);
+            const o3 = await run('strum:sc-closed:' + w, `({ card: !!document.querySelector('.sc-card'), next: !!document.querySelector('${SCQ} .ca-focus-next, ${SCQ} .ca-mark-btn, ${SCQ} .sc-rounds'), board: !!document.querySelector('${SCQ} .strum-board') })`, 10);
             if (o3.card || !o3.next || !o3.board) fail(w, 'after ✕ the step is not as it was: ' + JSON.stringify(o3));
           }
           await run('strum:sc-unstub:' + w, `(() => { navigator.mediaDevices.getUserMedia = window.__scGum; if (window.__scPerm) navigator.permissions.query = window.__scPerm; if (typeof coachClose === 'function') coachClose(); })()`, 100);

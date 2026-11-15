@@ -1,4 +1,4 @@
-/* The strum-pattern check's closed loop (2026-11-14; coach-strumcheck.js, ca-46's eight bars). A sibling of listen-loop.mjs in the same
+/* The strum-pattern check's closed loop (2026-11-14; coach-strumcheck.js, ca-52's eight bars; ca-46's until 2026-11-14). A sibling of listen-loop.mjs in the same
    style: a VIRTUAL STUDENT plays the D.DU.UDU pattern through D5 D5 C5 C5 G5 G5 D5 D5 into the REAL site code (benchSite's vm: coachOpen
    with the button buildStrum renders, scStart, coachCountIn, scLoop with Strum Radar's srHearStrum, coachReadFrame, coachPitchReadings,
    coachDetectPitch, scFinish), keeps an answer key written before any verdict, and compares.
@@ -150,12 +150,12 @@ function keyCheck(play, clean, slotMs){
 }
 
 const SC_VM = `globalThis.__sc = {
-  /* The button the site renders for ca-46's listening step (buildStrum -> strumCheckBtnHtml), read back from its own HTML. */
+  /* The button the site renders for ca-52's listening step (buildStrum -> strumCheckBtnHtml), read back from its own HTML. */
   button(){
-    const a = CLASS_ACTIVITIES.find(x => x.id === 'ca-46');
+    const a = CLASS_ACTIVITIES.find(x => x.id === 'ca-52');
     const steps = a ? a.steps.filter(s => s.strum && s.strum.listen === true) : [];
-    if (steps.length !== 1) return JSON.stringify({ err: 'ca-46 has ' + steps.length + ' strum steps with listen: true' });
-    const html = buildStrum(steps[0].strum, { keyPrefix: 'bpm:ca:ca-46:bench:strum' });
+    if (steps.length !== 1) return JSON.stringify({ err: 'ca-52 has ' + steps.length + ' strum steps with listen: true' });
+    const html = buildStrum(steps[0].strum, { keyPrefix: 'bpm:ca:ca-52:bench:strum' });
     const m = /data-strumcheck="([^"]*)"/.exec(html);
     if (!m) return JSON.stringify({ err: 'buildStrum drew no strum-check button' });
     const un = s => s.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
@@ -378,7 +378,7 @@ async function main(){
   const chords = {};
   /* the student's hands: each chord from its frets in the activity (standard tuning, written here), checked against the button's notes */
   const OPEN = { E: 40, A: 45, D: 50, G: 55, B: 59, e: 64 };
-  const caSpec = JSON.parse(site.run("JSON.stringify(CLASS_ACTIVITIES.find(x => x.id === 'ca-46').steps.find(s => s.strum && s.strum.listen).strum.chords)"));
+  const caSpec = JSON.parse(site.run("JSON.stringify(CLASS_ACTIVITIES.find(x => x.id === 'ca-52').steps.find(s => s.strum && s.strum.listen).strum.chords)"));
   for (const [n, c] of Object.entries(caSpec)){
     chords[n] = c.frets.map(([s, f]) => OPEN[s] + f);
     if (chords[n].join() !== spec.chords[n].midi.join()) throw new Error(`fake-world check failed: ${n} from its frets is ${chords[n]}, the button says ${spec.chords[n].midi}`);
