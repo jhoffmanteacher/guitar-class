@@ -56,7 +56,12 @@ export const KINDS = {
   foot12:  { ...A, foot: 0.25, what: 'right, and a foot tap on every beat at -12 dB under a strum (a guess)' },
   foot6:   { ...A, foot: 0.5, what: 'right, and a foot tap on every beat at -6 dB under a strum (a guess)' },
   graze20: { ...A, graze: 0.1, what: 'right, and the swinging hand grazes the strings on each miss at -20 dB (a guess)' },
-  graze14: { ...A, graze: 0.2, what: 'right, and the swinging hand grazes the strings on each miss at -14 dB (a guess)' }
+  graze14: { ...A, graze: 0.2, what: 'right, and the swinging hand grazes the strings on each miss at -14 dB (a guess)' },
+  /* 2026-11-14 (Jonathan's real takes without a Metronome: the student is the tempo). drift: each eighth this much longer (+) or shorter
+     (-) than the click's, the whole round; the key is the student's OWN grid (a right pattern at his own tempo is right). */
+  ...Object.fromEntries([2, 4].flatMap(p => [['drag' + p, { ...A, drift: p / 100, what: `the pattern right, every eighth ${p}% longer than the click's (drags)` }], ['rush' + p, { ...A, drift: -p / 100, what: `the pattern right, every eighth ${p}% shorter than the click's (rushes)` }]])),
+  straight8: { ...A, plays: 'DUDUDUDU', what: 'straight eighths: strums every slot, the rests too (must fail)' },
+  beats:   { ...A, plays: 'D.D.D.D.', what: 'down-strums on the beats only: no up-strums, a strum on "3" (must fail)' }
 };
 const PC = m => ((Math.round(m) % 12) + 12) % 12;
 
@@ -83,11 +88,11 @@ class StrumCheckPlayer {
       chordOf.push({ want: name, prev: b ? round.bars[b - 1] : null, did: k.silent ? 'none' : did, played: k.silent ? null : played, midis: k.silent ? null : midis });
       for (let s = 0; s < 8; s++){
         const idx = b * 8 + s;
-        let play = strums[s];
+        let play = k.plays ? (k.plays[s] === 'D' || k.plays[s] === 'U') : strums[s];
         if (b === MB && k.missSlot === s) play = false;
         if (b === MB && k.extraSlot === s) play = true;
         const shift = (k.shiftAll || 0) + (b === MB && s === 3 && k.shiftOne ? k.shiftOne : 0) + (b === MB && s === k.halfSlot ? -slot / 2 : 0);
-        const at = round.listenStartMs + idx * slot + this.lagMs + gauss(r) * P.sigmaMs + P.lateMs + shift;
+        const at = round.listenStartMs + idx * slot * (1 + (k.drift || 0)) + this.lagMs + gauss(r) * P.sigmaMs + P.lateMs + shift;
         if (play){
           if (k.silent){
             if (k.tap){ np.tap(at); sounds.push({ atMs: at, kind: 'tap' }); }
@@ -95,7 +100,7 @@ class StrumCheckPlayer {
           } else {
             /* the fretting hand leaves the old chord just before a new one (student.mjs liftMs 40) */
             if (s === 0 && prevMidis && midis.join() !== prevMidis.join()) np.strummer.lift(at - 40);
-            const up = String(round.pattern)[s] === 'U' && strums[s];
+            const up = String(k.plays || round.pattern)[s] === 'U';
             np.strummer.strum(at, up ? midis.slice().reverse() : midis, STRUM_AMP * P.ampX, np.touch);
             sounds.push({ atMs: at, kind: 'guitar', midis });
             prevMidis = midis;
@@ -112,7 +117,7 @@ class StrumCheckPlayer {
     const key = [];
     round.bars.forEach((name, b) => {
       for (let s = 0; s < 8; s++){
-        const want = round.listenStartMs + (b * 8 + s) * slot + this.lagMs;
+        const want = round.listenStartMs + (b * 8 + s) * slot * (1 + (k.drift || 0)) + this.lagMs;
         let near = Infinity, kind = null;
         sounds.forEach(x => { const d = Math.abs(x.atMs - want); if (d < near){ near = d; kind = x.kind; } });
         const close = near <= slot / 4, far = near > slot / 2;
@@ -131,9 +136,10 @@ function hfOf(x, a, b){ a = Math.max(1, Math.round(a)); b = Math.min(x.length, M
 function blocks(x, a, b){ const W = Math.round(0.005 * SR), v = []; for (let s = Math.round(a); s + W <= Math.round(b); s += W) v.push(hfOf(x, s, s + W)); return v; }
 function rmsOf(x, a, b){ a = Math.max(0, Math.round(a)); b = Math.min(x.length, Math.round(b)); let s = 0; for (let i = a; i < b; i++) s += x[i] * x[i]; return b > a ? Math.sqrt(s / (b - a)) : 0; }
 function rmsBlocks(x, a, b){ const W = Math.round(0.005 * SR), v = []; for (let s = Math.round(a); s + W <= Math.round(b); s += W) v.push(rmsOf(x, s, s + W)); return v; }
-function keyCheck(play, clean, slotMs){
+function keyCheck(play, clean, slotMs, endMs){
   const S = ms => ms / 1000 * SR;
   for (const e of play.key){
+    if (endMs != null && e.wantMs + slotMs / 2 > endMs) continue;   // a dragging student's last strums, after the round ended: never rendered
     const g = play.sounds.find(x => x.kind === 'guitar' && Math.abs(x.atMs - e.wantMs) <= slotMs / 4);
     if (e.truth === 'played' || e.truth === 'extra'){
       if (!g) continue;
@@ -149,7 +155,7 @@ function keyCheck(play, clean, slotMs){
   }
 }
 
-const SC_VM = `globalThis.__sc = {
+export const SC_VM = `globalThis.__sc = {
   /* The button the site renders for ca-52's listening step (buildStrum -> strumCheckBtnHtml), read back from its own HTML. */
   button(){
     const a = CLASS_ACTIVITIES.find(x => x.id === 'ca-52');
@@ -165,10 +171,15 @@ const SC_VM = `globalThis.__sc = {
     __lb.world(o.lat);
     const slider = { value: String(o.bpm), dataset: {}, parentNode: null, disabled: false, setAttribute(){}, removeAttribute(){} };
     const group = { querySelector(sel){ return sel === '.bpm-slider' ? slider : null; }, insertAdjacentElement(){}, closest(){ return null; } };
-    const btn = { dataset: { strumcheck: o.data, scWhere: 'bench' }, parentElement: group, closest(sel){ return sel === '.bpm-control-group' ? group : null; } };
+    /* the button: since 2026-11-14 (no box) it sits under the board and scOpen finds the step's tempo through its .tab-body */
+    const body = { querySelector(q){ return q === '.bpm-control-group' ? group : null; }, querySelectorAll(){ return []; } };
+    const btn = { dataset: { strumcheck: o.data, scWhere: 'bench' }, parentElement: group, closest(sel){ return sel === '.bpm-control-group' ? group : sel === '.tab-body' ? body : null; },
+      insertAdjacentElement(){}, querySelector(){ return null; }, classList: { add(){}, remove(){} } };
     /* the error log hears only of a belt that had to null a value or a failed save: both are bugs, so the bench collects them */
     __sc.logged = []; SITE_ERRORS.report = (k, ev) => { __sc.logged.push(String(ev && ev.message || '')); };
-    coachOpen(btn);
+    /* scOpen starts a round itself (2026-11-14); the bench starts it below at its own tempo, so that first start is held */
+    const keepStart = scStart; scStart = () => {};
+    try { coachOpen(btn); } finally { scStart = keepStart; }
     if (!sc) return 'coachOpen opened no strum check';
     /* The card opens at SC_START_BPM (85); the student moves it with -5 / +5. The bench sets the take's tempo the same way, directly. */
     sc.bpm = o.bpm;
@@ -219,7 +230,7 @@ const SC_VM = `globalThis.__sc = {
       caps: s.caps.map(c => ({ bar: c.bar, chord: c.chord, prev: c.prev, a: c.a, b: c.b, c: c.c, verdict: c.verdict, n: c.rm.length, nA: c.rt.filter(t => t <= COACH_EVENT_TAIL).length, rm: c.rm.map(x => Math.round(x * 10) / 10) })),
       events: s.events.map(e => ({ t: r1(e.t - s.listenStart), k: e.k, dev: r1(e.dev), kind: e.kind })),
       metaProblems: [...new Set(__sc.fsProblems(scRecMeta(), '', []).map(x => x.replace(/\\[\\d+\\]/g, '[]')))],
-      logged: __sc.logged.slice(), lines: s.lines.slice(), report: html.replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim(), rule: SC_CHORD_RULE, winFrac: SC_WIN_FRAC,
+      logged: __sc.logged.slice(), lines: (s.lines || []).slice(),   /* no per-bar lines since 2026-11-14 */ report: html.replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim(), rule: SC_CHORD_RULE, winFrac: SC_WIN_FRAC,
       progressWrites: typeof games === 'object' && games ? Object.keys(games).length : -1 };
     coachClose();
     return JSON.stringify(out);
@@ -239,9 +250,9 @@ function parseArgs(argv){
   }
   return o;
 }
-function seedOf(s){ let h = 2166136261; for (let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return ((h >>> 0) % 2147483646) + 1; }
+export function seedOf(s){ let h = 2166136261; for (let i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return ((h >>> 0) % 2147483646) + 1; }
 
-async function oneTake(site, t, o, btn, chords){
+export async function oneTake(site, t, o, btn, chords){
   const player = new StrumCheckPlayer(t.kind, { room: t.room, lagMs: o.lag, seed: t.seed });
   let play = null;
   const src = worldSource({ player, mic: t.mic, lagMs: o.lag, onRound: r => { play = player.play(r); return play.key; } });
@@ -273,7 +284,7 @@ async function oneTake(site, t, o, btn, chords){
   if (!play) throw new Error('strum-check-loop: the student was never told the round');
   if (res.slots.length !== play.key.length) throw new Error('fake-world check failed: the site judged ' + res.slots.length + ' slots, the key has ' + play.key.length);
   if (o.break){ const e = play.key.find(x => x.truth === 'played' && play.sounds.some(s => s.kind === 'guitar')); if (e) e.truth = 'quiet'; }
-  keyCheck(o.stop ? Object.assign({}, play, { key: play.key.filter(e => e.bar < o.stop) }) : play, player.clean, res.slotMs);   // --stop: no sound was made after the Stop
+  keyCheck(o.stop ? Object.assign({}, play, { key: play.key.filter(e => e.bar < o.stop) }) : play, player.clean, res.slotMs, site.clock.now);   // --stop: no sound was made after the Stop
   return { res, play };
 }
 
