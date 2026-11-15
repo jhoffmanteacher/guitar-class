@@ -119,7 +119,10 @@ const SC_ANCHOR_WIDE_SLACK = 1.5;
    Two more rules keep the bars right: the wide search breaks a tie by how near the strums sit to the middles of their windows (a grid
    almost half an eighth off fits every strum at a window's edge and scores the same as the true one), and no grid is ever more than
    SC_ANCHOR_WIDE_RANGE eighths from the click grid (half a bar: the pattern repeats every bar, so a player one beat late also fits a
-   grid one bar early, which would put every chord in the wrong bar). */
+   grid one bar early). The limit keeps a player up to half a bar late or early on the right bars; MORE than half a bar late is
+   judged one bar on (review round 2, 10 seeds at 60 / 85 / 120 BPM: starting 4.5 to 7 eighths late, the player's bar 1 was judged as bar 2
+   in 10 of 10 seeds, so every chord on a 1 was compared with the next bar's chord; exactly 2 beats early landed a bar off the other
+   way in 4-5 of 10). The pattern repeats every bar, so no grid rule can tell those apart. */
 const SC_ANCHOR_WIDE_ACCEPT = 1;
 /* ...and only when its strums sit on average within SC_ANCHOR_WIDE_TIGHT of an eighth of their windows' middles: a player is regular,
    talking that happens to land in six strum windows is not (measured: with the score rule alone talking passed 3 bars of 64, 1 without
@@ -497,7 +500,11 @@ function scGateFrame(s, rms, at){
   s.gateLevels.push(rms);
 }
 /* Bar 1's first window opens: too noisy to check when the kept frames' median is SC_GATE_LEVEL or more AND their SC_GATE_PCT
-   percentile (the count-in's quiet part) is SC_GATE_FLOOR or more. */
+   percentile (the count-in's quiet part) is SC_GATE_FLOOR or more. Strums on the count-in that STILL fire it in a quiet room (review
+   round 2, Jonathan's take 1 with its own strum pasted in; median / 20th percentile): strums on all four clicks 0.2475 / 0.2298, and
+   one strum on count 1 left to ring into bar 1 0.1513 / 0.1026: the guitar fills the count-in's quiet part too. Accepted (the lead,
+   2026-11-14): the end line then says "Don't play on the 4 clicks", and the round still counts. Strums on counts 3 and 4, on 2-4,
+   or a strum on count 3 left to ring, do not fire it. */
 function scGateDecide(s){
   const lv = s.gateLevels.slice().sort((p, q) => p - q);
   s.gateLevel = lv.length ? lv[Math.floor(lv.length / 2)] : 0;

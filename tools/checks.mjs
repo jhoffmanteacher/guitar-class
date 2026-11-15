@@ -17240,9 +17240,39 @@ async function checkStrumCheck() {
     }
     /* one start at a time (review round 1): a second click while the first start waits for the mic runs nothing */
     {
-      const r = JSON.parse(run(`(() => { const keep = scStartRun; let n = 0, release = null; scStartRun = () => { n++; return new Promise(res => { release = res; }); };
-        try { sc = { phase: 'ready' }; scStart(); scStart(); const twice = n; if (release) release(); return JSON.stringify({ n: twice }); } finally { scStartRun = keep; sc = null; } })()`));
+      const r = JSON.parse(await run(`(async () => { const keep = scStartRun; let n = 0, release = null; scStartRun = () => { n++; return new Promise(res => { release = res; }); };
+        try { sc = { phase: 'ready' }; scStart(); scStart(); const twice = n; if (release) release();
+          for (let i = 0; i < 5; i++) await null;
+          /* review round 2 (R2-5): the guard must be let go once the first start is over, or round 2 can never start */
+          scStart(); const later = n; if (release) release(); for (let i = 0; i < 5; i++) await null;
+          return JSON.stringify({ n: twice, later }); } finally { scStartRun = keep; sc = null; } })()`));
       if (r.n !== 1) fail(`two clicks on the button while the first start waits: the round started ${r.n} times, want 1`);
+      if (r.later !== 2) fail(`after the first start was over, a new click started ${r.later - 1} rounds, want 1 (the start guard was never let go: round 2 could never start)`);
+      n.pins++;
+    }
+    /* review round 2 (R2-6): round 2 keeps the beat, through the REAL scStartRun and scFinish: the Metronome on at Start (the start
+       stops the tool, as stopAllDemoAudio does), a full round, the tool still off: the check still wants the beat and draws the
+       headphones switch. The mic, the count-in and the loop are stubbed; everything the round's start and end do on the check is real. */
+    {
+      const r = JSON.parse(await run(`(async () => {
+        const keep = { acq: coachAcquireMic, ens: coachEnsureRunning, ask: micRecShouldAsk, tun: coachEvictTuner, gsm: gamesStopMic, sda: stopAllDemoAudio, cci: coachCountIn, loop: scLoop, rec: micRecStart, stop: micRecStop, str: coachStream, mr: metroRunning, kv: scKeepInView, off: coachMicOff };
+        try {
+          coachAcquireMic = async () => true; coachEnsureRunning = async () => {}; micRecShouldAsk = () => false; coachEvictTuner = () => {}; gamesStopMic = () => {};
+          stopAllDemoAudio = () => { metroRunning = false; }; coachCountIn = () => {}; scLoop = () => {}; micRecStart = () => false; micRecStop = () => null; scKeepInView = () => {}; coachMicOff = () => {};
+          coachStream = { getAudioTracks: () => [{ label: '' }] };
+          sc = { phase: 'ready', card: { isConnected: true, remove(){} }, btn: null, cells: [], board: null, bars: ['D5','D5','C5','C5','G5','G5','D5','D5'], chords: { D5: { midi: [50, 57, 62] }, C5: { midi: [48, 55, 60] }, G5: { midi: [43, 50, 55] } },
+            pattern: '${PIN.pattern}', slotsOf: scPatternSlots('${PIN.pattern}'), timeouts: [], locked: [], bpm: 85, where: '' };
+          metroRunning = true;
+          await scStartRun();
+          const round1 = { metro: sc.metro, phase: sc.phase };
+          sc.barsDone = 0; scFinish(true);
+          metroRunning = false;
+          const wanted = scMetroWanted(), sw = /id="sc-hp"/.test(document.getElementById('coach-body').innerHTML);
+          return JSON.stringify({ round1, wanted, sw });
+        } finally { coachAcquireMic = keep.acq; coachEnsureRunning = keep.ens; micRecShouldAsk = keep.ask; coachEvictTuner = keep.tun; gamesStopMic = keep.gsm; stopAllDemoAudio = keep.sda; coachCountIn = keep.cci; scLoop = keep.loop;
+          micRecStart = keep.rec; micRecStop = keep.stop; coachStream = keep.str; metroRunning = keep.mr; scKeepInView = keep.kv; coachMicOff = keep.off; if (sc) sc.card = { isConnected: false, remove(){} }; sc = null; } })()`));
+      if (!r.round1.metro || r.round1.phase !== 'countin') fail(`the real start with the Metronome on did not start a round with the beat: ${JSON.stringify(r.round1)} (the test proves nothing)`);
+      if (!r.wanted || !r.sw) fail(`after a full round with the Metronome on (the tool stopped by the start): the check wants the beat ${r.wanted}, draws the headphones switch ${r.sw} (want both: round 2 keeps the beat)`);
       n.pins++;
     }
     /* TOO NOISY TO CHECK, through the real scGateFrame / scGateDecide: the constants; a quiet count-in (level 0.002) with its four loud
@@ -17604,7 +17634,7 @@ async function checkStrumCheck() {
     run(`setLang('en')`);
   } catch (e) { fail('stopped on an error: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : e)); }
   /* pinned totals, so a renamed function cannot turn this into a check of nothing */
-  if (n.saves !== 4 || n.tempos !== 4 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 13 || n.lines !== 10 || n.pins !== 12) fail(`ran ${n.saves} take saves (want 4), ${n.tempos} tempo opens (want 4), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (13), ${n.lines} end lines (10), ${n.pins} pins (12)`);
+  if (n.saves !== 4 || n.tempos !== 4 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 13 || n.lines !== 10 || n.pins !== 13) fail(`ran ${n.saves} take saves (want 4), ${n.tempos} tempo opens (want 4), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (13), ${n.lines} end lines (10), ${n.pins} pins (13)`);
   if (!bad) ok(`1eh: one listening step (ca-52, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, in a row under the board, none in the console, never disabled; the step's slider drawn at ${PIN.startBpm}, the only tempo control, one tempo with the check; no block element and no per-bar sentence (their strings gone); the tempo controls locked during a round and given back on every exit; its own ratios ${PIN.ratio} / ${PIN.hfRatio} through its own scHearStrum (Strum Radar's still 1.4 / 1.7, run); the pattern-shape grid (a player 0.8 of an eighth late kept on his own 18 slots, with or without the click); the too-noisy gate at count-in level ${PIN.gate.level} (a quiet count-in with loud clicks not gated, a noisy one gated, the first ${PIN.gate.skip} ms left out; a gated round colours nothing, says one line and still counts); the take's beat and gate fields; window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule}: the octave vote, then c (${n.chords} scripted cases, two from real takes); the Metronome's click only with headphones (32 a round, all cleared by Stop), its beat dot and the frame around the board on the same click-grid clock (32 beats, 8 bars' 1s, none with it off, cleared on every exit); local recording mode only on this computer's host with the dev bypass (files, no Firestore; another host or a real account unchanged); two full rounds tick ca-52's step (round 1 <id>:0:r1, round 2 the step; Stopped, short and other steps write nothing; no Mark done button); a whole finish saved nothing else; its take saved through micRecSaveNow into a strict Firestore stub (3 rounds); the real sweep and its one-line end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages`);
 }
 
