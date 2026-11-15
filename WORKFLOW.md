@@ -31,7 +31,13 @@ Dates are the Pacific calendar date. `CACHE_VERSION` and commit timestamps may s
 
 Start here. Update this block whenever an item opens or closes; each line says where the detail is.
 
-**Practice minutes: no daily limit (2026-11-15), waits for a rules paste ("Paste E", pasted together with Paste D).** Jonathan:
+**Class rules published 2026-11-15: Paste C, D and E are live.** Jonathan published `firestore.rules` as one paste
+(`Claude outputs/firestore-rules-PASTE-E-2026-11-15.txt`, sha256 `8cb7341f61c3…`, pinned by `1dt`'s `RULES_FILE_SHA256`);
+he reported the Rules editor at 1038 lines. It carries Paste C (teacher deletes), Paste D (built songs) and Paste E
+(practice minutes with no daily limit). Earlier notes below that say one of these "waits for a paste" are history.
+Check the Firestore "denies" count with him a day or two later (2.1K over Nov 9 to 14, before the paste).
+
+**Practice minutes: no daily limit (2026-11-15), live with its rules (Paste E, published 2026-11-15).** Jonathan:
 "let's remove the 20 minute a day limit. it should be actual minutes"; sound alone counts only within 10 minutes of the
 student's last input ("No limit, but need activity"). The engine is live before the paste on purpose: past 20 minutes in a day
 the student's own screen is true, the server write is refused, kept on that Chromebook and retried, and lands after the paste.
@@ -39,9 +45,9 @@ His console picture of five rows at "40 / 40" was two days at the old 20-minute 
 rebuilt. Review: one deep round (Opus) found 1 MAJOR, fixed with break-it proof (a scroll is no longer input: a practice card
 scrolls itself, so a looping song counted for hours); **a second round on that fix is owed (after 2026-11-16 9:00, his usage
 limit)**. Jonathan's calls, do not re-raise: two devices at once count double and an auto-clicker counts with no ceiling
-("nobody will use an auto clicker or sign in from two devices. don't worry about it"). Open after the paste: remove
-`keepaliveSafe` / `OLD_DAY_CAP` in `practice-minutes.js` (it holds back the tab-close write that first passes 20 minutes; needed
-only while the old rules are published). The older notes below that say "the daily cap bounds it" are history.
+("nobody will use an auto clicker or sign in from two devices. don't worry about it"). Open now that the rules are
+published: remove `keepaliveSafe` / `OLD_DAY_CAP` in `practice-minutes.js` (it holds back the tab-close write that first
+passes 20 minutes; it was needed only while the old rules were published). The older notes below that say "the daily cap bounds it" are history.
 
 **Strum Pattern check `ca-52` (2026-11-15): shipped, not yet on the board; Jonathan tests it, then places it.**
 The pattern `D.DU.UDU` over D5 D5 C5 C5 G5 G5 D5 D5 (`coach-strumcheck.js`; `coach-core.js` untouched). Three Opus
@@ -68,16 +74,27 @@ that click (`pcRetrack` → `cancelQueuedClicks`).
 his ears, then per file: `tools/loudness.py`, `tools/beat-audit.py`, `tools/playalong-loop.mjs`. New audio is
 exported at 192k from now on. Do not start it unasked.
 
-**Song builder (2026-11-14): Part a1 shipped, waits for a rules paste ("Paste D").** Jonathan builds a Play Along
+**Song builder (2026-11-14): Parts a1 and a2 shipped, rules published 2026-11-15.** Jonathan builds a Play Along
 song in the console with no code push. All ten decisions are his (`Claude outputs/PLAN-song-builder-2026-11-14.md`);
 the build brief is `Claude outputs/WORK-ORDER-song-builder.md` (parts a1, a2, b, c, d; board placement is LATER).
 Part a1 is the rules only: a new add-only block (`builtSongs/{id}`, `builtSongsMeta/list`, `songDrafts/{id}`), the
 emulator tool `tools/built-songs-rules-test.mjs` (166 cases, 66 of 66 breaks) and the 1dt re-pin. No site code reads
 these paths yet, so nothing changes for students before or after the paste. Paste D is the whole `firestore.rules`
 file, so it also publishes Paste C (below) if that is not live yet. Part a2 (the data path, Import, one real song)
-starts after he says "published", and needs his Firestore Usage numbers and "same Chromebook or a cart" first.
+shipped 2026-11-15 on the Manage tabs (the Built songs list sits in the Song files section). Next: Jonathan imports
+a first real song (his mp3, skill `new-playalong`, 192k) and listens; then parts b and c (Fast) and d (Reviewed).
+- **Downloads, an estimate, not measured (M1, 2026-11-15).** Firestore Usage (Nov 9 to 14): reads peak 15K a day of the
+  free 50K, writes peak 3K of 20K. Stored bytes and download bandwidth are not shown to him, so they are worked out:
+  one built song is about 0.4 GB of downloads for 60 students, about 0.6 GB with 1.5 Chromebooks per student ("most
+  students use the same chromebook but some used shared ones"); one new song a week is about 2.4 GB a month of the
+  free 10 GB. Each Chromebook keeps its copy ("ok for song info to stay on chromebooks").
+- **Windows too (Jonathan, 2026-11-15: "i'd like to be able to build songs on the windows machine too").** A built song
+  travels through the console's Import, so either computer can make it. Windows needs Node, ffmpeg, Python with numpy
+  and its own private song folder. `tools/new-playalong.mjs --built` and `tools/playalong-measure.py` have never run on
+  Windows (paths and the ffmpeg call are the likely trouble): fix them on his first Windows song. Parts b to d move
+  the building into the console, which ends the need.
 
-**Delete / start over one student (2026-11-14): built, waits for a rules paste.** Manage → a student's "⋯" (More):
+**Delete / start over one student (2026-11-14): live; its rules (Paste C) published 2026-11-15.** Manage → a student's "⋯" (More):
 "Start this student over…" and "Delete this student's data…" (`teacher-remove.js`). Start over writes a marker
 (`config/class.progressStartOver[uid]`); the student's own page empties the lesson fields ONCE, at its next sign-in on
 the main site, only when both sign-in reads succeeded (`progressStartOverAtSignIn`, `app/save.js`), and records
