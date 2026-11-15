@@ -1204,7 +1204,7 @@ function pcFrame(){
     pcSparePark(st);                   // try to be ready for the next lap
     st.lastBeat = -1;
   }
-  if(st.root.dataset.metro === '1') pcScheduleClick(st, audio.currentTime);
+  if(st.root.dataset.metro === '1' && !audio.seeking) pcScheduleClick(st, audio.currentTime);   // not mid-seek: see clickTick in tabs/journey.js
   twinFollow(st, st.audio);
   /* The tab lights a note PC_TAB_LEAD ahead of the decoder; a lyric sheet's
      dot runs PC_SHEET_LEAD ahead, so the chord is on screen as the student

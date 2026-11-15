@@ -429,6 +429,9 @@ function ensurePlayer(){
   var clickTick = function(){
     clickRaf = 0;
     if(!metroOn || a.paused) return;
+    // Mid-seek the file is not playing but is not paused either, and currentTime already reads the new place: wait
+    // for 'seeked', or a click is queued in the silence and the same beat again after it (Friday check 2026-11-14).
+    if(a.seeking){ clickRaf = requestAnimationFrame(clickTick); return; }
     var ratio = parseFloat(d.bpm) / parseFloat(d.bpmSlow);
     var now = a.currentTime;
     var nb, due;                       // the next beat, and its time on the file now playing

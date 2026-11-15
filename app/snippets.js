@@ -1128,7 +1128,7 @@ function snipTick(){
     try { audio.currentTime = win.start; } catch(e) {}
     now = audio.currentTime;
   }
-  if(card.dataset.metro === '1' && !audio.paused) snipScheduleClick(snipState, now);
+  if(card.dataset.metro === '1' && !audio.paused && !audio.seeking) snipScheduleClick(snipState, now);   // not mid-seek: see clickTick in tabs/journey.js
   twinFollow(snipState, audio);
   // `heard` is roughly where the music is by the time it reaches the room —
   // see SNIP_OUTPUT_LATENCY. The dots follow the ears, not the decoder.

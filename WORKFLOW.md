@@ -159,12 +159,9 @@ repo). CLAUDE.md → "Other standing rules" says how to replay one.
   `.claude/rules` file split into one-rule bullets, then cut 20-35% (`7ba94ba`..`ab4aaae`); WORKFLOW.md cut from 47k to 14k words
   and its orphaned rules moved into the binding files (this push).
 
-**The Friday check is moved ONCE: it runs Saturday 2026-11-14 at 11 PM, not Friday 2026-11-13** (Jonathan,
-2026-11-13, so that the rest of that day's work is on main and reviewed in the same run). The cloud routine
-`trig_016m5HTbmhxb2oEqDaefQurB` is set to `0 23 * * 6` for that run; the skill `friday-check` has a "next run
-only" section that tells the run to put the schedule back to Fridays first, to run lean, and to delete that
-section when it tags. If you read this after 2026-11-15 and the routine still says Saturdays, set it back
-(`CRON_TZ=America/Los_Angeles 0 23 * * 5`) and tell Jonathan.
+**The Friday check is back on Fridays** (11 PM Pacific). The one Saturday run (2026-11-14) put routine
+`trig_016m5HTbmhxb2oEqDaefQurB` back to `CRON_TZ=America/Los_Angeles 0 23 * * 5` first thing (next run Friday
+2026-11-20) and deleted the skill's "next run only" section.
 
 **Waiting on Jonathan**
 - **Practice copy: built, waiting for Jonathan's key** (2026-11-14). The same files at
@@ -203,20 +200,14 @@ section when it tags. If you read this after 2026-11-15 and the routine still sa
 **Automatic:** the Friday check (Fridays 11 PM Pacific). The 2026-11-06 run (tag `friday-check-2026-11-06`) covered
 `b958165` and `ce5096e`. The next run (2026-11-13) takes `git log --grep='Review: Fast' friday-check-2026-11-06..`.
 
-**Handed to the Friday check (Jonathan, 2026-11-10: "let the friday check fix those things").** In the 2026-11-13 run,
-besides the usual range. Do not ask him; decide, fix, report.
-1. **Review the Tuning Simulator change by hand:** `e471fac` and `e2e58c3` (no strings picture, no naming step; a card
-   says the string to tune and what the tuner shows; CHANGELOG 2026-11-09 "later that night"). Neither commit has a
-   `Review: Fast` trailer, so the `--grep` skips them: add them to the reviewer's diff yourself. The full smoke (step 1b)
-   walks the Tuning Simulator; any error it names is yours to fix.
-2. **"Too fast" through `cc.prevOnsetT`** (`coach.js`, `ccFinish`: `lastOnsetEff`; written near the onset handler).
-   Two Fable reviewers, working separately, found that a press and release heard as two onsets can bring back the "too
-   fast" headline. It was NOT run against today's code (entry "Weekday reviewers are Fable at medium", Open work).
-   First build a failing case with `tools/mic-sim/power-switch.mjs` on the real code. Cannot fail it → drop the item and
-   say so in the report. Fails → this is `coach.js` detection: fix on branch `friday-check/2026-11-13` and run the
-   `site-reviewer-deep` rounds (skill `friday-check`, step 3).
-3. **Refresh this block:** it does not list the Tuning Simulator change or the reviewer-model change (2026-11-09 night).
-   Add both, move shipped items down, and set the "updated" date.
+**Handed to the Friday check (Jonathan, 2026-11-10: "let the friday check fix those things"; updated 2026-11-14).**
+Done in the 2026-11-14 run: the Tuning Simulator change (`e471fac`, `e2e58c3`, then `bf634eb` and the rest) was in the
+range and reviewed by net diff (area B: `tuning-sim-proof` 8,000 rounds; the full walk played it, EN + ES); the
+reviewer-model change (Opus on Fridays) is in the skill. Left:
+1. **"Too fast" through `cc.prevOnsetT`** (`coach-chords.js`, `ccFinish`: `lastOnsetEff`, line ~1171). NOT attempted on
+   2026-11-14 (a lean run): `tools/mic-sim/power-switch.mjs` still takes the old single `coach.js` (gone since the
+   2026-11-11 cut) and Power Chord Switch's end screen was rebuilt that day (`81261b2`, Reviewed). First build a
+   failing case on the real code; cannot fail it → drop the item. Fails → coach detection: branch + `site-reviewer-deep`.
 
 **Finished (don't redo):** the practice-minutes heartbeat removal (2026-11-05; the old `minutesBoard` collection deleted
 too; the class rank and Top 5 are keyed by a private tag, so no uid sits next to minutes). `tools/pm-rules-test.mjs`: 191
@@ -246,6 +237,46 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 ---
 
 ## Open work
+
+- [ ] **2026-11-14 — Friday check: MINOR findings, not fixed (a lean run: only BLOCKER/MAJOR were fixed).** Range
+  `friday-check-2026-11-06..364b6d2`, 168 Fast commits, reviewed by area (Opus, high). Each line: what, where, the cause.
+  - **For Jonathan (content or product calls):**
+    - Module 1's note circle still goes counterclockwise (`module-1.js:442,444`, EN + ES), while the Tuning Simulator
+      turned clockwise in `bf634eb`: mirror Module 1, or say the two differ on purpose.
+    - Games heading "Notes on the low E and A strings" (`i18n.js:2225`, `9e62b46`): Note Runner keeps to those two
+      strings, but only 1 of Note Hunt's 5 levels and 1 of Fret Zap's 4 decks do.
+    - Lines that still need a recording now that the dock's Record is gone (`4422c66`): `module-5.js:314`,
+      `module-7.js:569`, and `module-4.js:678,849` (Module 4 is open; `72539e4` skipped 1-4). Is Module 4 frozen?
+    - Two blues solos with no backing (`module-11.js:894`, m10w2·c·sec5, `72539e4`): point to a 12-bar backing
+      track, or a partner comping.
+    - Backup leaves out `minutes/{uid}/days` "because the teacher may not read them" (`teacher-backup.js:124`,
+      `bbbfdff`): false since `e88603f` lets the teacher read them. Back them up, or keep them out and fix the
+      reason; `siteErrors/*` is not listed either.
+    - Journey pages' "Not saved yet" line (`#save-msg`, in `.crumb` at the top) is scrolled off screen when it shows
+      (9 of 9 at 1366×657): where should the save status live?
+  - **Code or wording (fix any day):**
+    - Change Up done screen at 135 / 45 BPM says "10 BPM" and the lit button plays 140 / 40, a 5 BPM step
+      (`coach-chords.js:1373`, `66bac56`, `e9711b8`): say the real step, EN + ES.
+    - `coach.foot` (`i18n.js:1773`) still says nothing is "recorded or uploaded" beside the line `c8f2d79` fixed:
+      EN "… No sound is recorded or uploaded.", ES "… No se graba ni se sube ningún sonido."
+    - `module-9.js:138,196` `hint_es` quote the button as "Todavía lo practico"; it is "Todavía lo estoy practicando".
+    - "Marked complete. Your next activity is at the top." can be false (`app/activities-2.js:1470` → `:773`,
+      `771fdc3`): the next required card can be in Unfinished under an Optional one at the top. Name the card.
+    - The module fold's default (newest open) is not pinned (`app/activities-2.js:1615`, `5b2fd5b`): 1da cases.
+    - Live game: a Spanish name typed equal to the built-in Spanish title is wiped (`teacher-livegames.js:237`,
+      `fc27370`): `if(!en && es === lqgBuiltIn(id, 'es')) es = '';`.
+    - "Behind the class" does not skip the teacher's own doc (`teacher-students.js:553`, `c06b81e`):
+      `if(teacherPmIsTeacher(stu)) return;`.
+    - Journey "then tick any box" (`i18n.js:1606`, `0ec73a2`) asks a student to tick a layer they have not
+      passed; nothing retries on `online`. Reword, or retry `flushSave()` on `online`.
+    - Check `1t3` passes a page with a duplicated tuner button (`tools/checks.mjs:2285`, `a768bbc`): compare tags
+      in order.
+    - Song Journey Metronome, fast seeks: a doubled beat on 3-4 of 40 quick seeks on localhost, before and
+      after the 2026-11-14 seeking fix (that one fixed the slow-connection stray click, 5+2 of 20 → 0). Not found.
+    - `tools/smoke.mjs` summary says "each of its 4 tool buttons"; 3 since `4422c66`.
+  - **Process:** `6ae6532` (1ec), `137ebfd` (1ds) and `9e62b46` (1ei) added a new kind of check and shipped Fast;
+    CLAUDE.md lists that as always-Reviewed. Their checks are green and the area reviewer found nothing wrong in
+    what they guard.
 
 - [ ] **Private song audio, step 1 is on main with NOTHING switched** (2026-11-14; plan and decisions:
   `Claude outputs/PLAN-private-song-audio-2026-11-13.md`, build notes `Claude outputs/private-audio-step1/DETAILS.md`).

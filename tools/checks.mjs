@@ -6731,6 +6731,32 @@ function checkSiteFill() {
   if (!bad) ok(`1df: the factor is 1 at 1366x657, 1366x768, 1280x720 and 390x844 (nothing set), about 1.874 at 2560x1300 (root zoomed, the short-screen rule rewritten, page pixels for the script), 1 to 3 over 26,474 sizes; print, resize, browser zoom, the console (it fills too) and odd pages; wired in the <head> of index.html and the ${journeys.length} Song Journey pages; no bare viewport unit in the 3 stylesheets (${asserts} assertions)`);
 }
 
+/* 1ej. NO CLICK MID-SEEK (Friday check 2026-11-14). While an <audio> is seeking it is not paused, and currentTime
+   already reads the new place, so a Metronome scheduler that runs then queues a click into the silence and the
+   same beat again after 'seeked' (Song Journey pages: 5 doubled and 2 stray clicks in 20 slow seeks before the
+   fix, 0 after). All three schedulers wait out a seek: clickTick in tabs/journey.js, and the calls of
+   snipScheduleClick (app/snippets.js, snipTick) and pcScheduleClick (app/cards.js, pcFrame). */
+function checkNoClickMidSeek() {
+  head('1ej. Metronome clicks: none queued while the track is seeking (Journey pages, snippets, practice cards)');
+  let bad = 0;
+  const flag = m => { err(`1ej: ${m}`); problems++; bad++; };
+  const read = f => { try { return readFileSync(join(ROOT, f), 'utf8'); } catch { flag(`${f} is missing`); return ''; } };
+  const j = read('tabs/journey.js'), sn = read('app/snippets.js'), pc = read('app/cards.js');
+  const ji = j.indexOf('var clickTick = function(){');
+  const jBody = ji < 0 ? '' : j.slice(ji, j.indexOf('clickQ.push(', ji));
+  if (!jBody) flag('could not find clickTick (var clickTick = function(){ … clickQ.push) in tabs/journey.js: renamed or moved? this check went blind');
+  else if (!/if\(a\.seeking\)\{ clickRaf = requestAnimationFrame\(clickTick\); return; \}/.test(jBody)) flag('tabs/journey.js clickTick no longer waits out a seek before it queues a click (if(a.seeking){ clickRaf = requestAnimationFrame(clickTick); return; })');
+  const calls = [['app/snippets.js', 'snipTick', sn, /snipScheduleClick\(/], ['app/cards.js', 'pcFrame', pc, /pcScheduleClick\(/]];
+  for (const [f, fn, src, re] of calls) {
+    const body = jsFunctionBody(src, fn);
+    if (!body) { flag(`could not find ${fn} in ${f}: renamed or moved? this check went blind`); continue; }
+    const lines = body.split('\n').filter(l => re.test(l));
+    if (!lines.length) flag(`${f} ${fn} no longer calls ${re.source.slice(0, -2)}: this check went blind`);
+    for (const l of lines) if (!/!audio\.seeking/.test(l)) flag(`${f} ${fn}: ${l.trim().slice(0, 120)} — the call must skip a seeking track (&& !audio.seeking)`);
+  }
+  if (!bad) ok('3 of 3 Metronome schedulers skip a seeking track (journey.js clickTick, snipTick, pcFrame)');
+}
+
 /* 1ei. The Games page is grouped by what each game teaches (Jonathan, 2026-11-14): chord switching, rhythm and
    tempo, finger strength, the notes on the low E and A strings, then the other games in a closed "More games".
    The table is GAMES_GROUPS in coach-hub.js. The real GAMES_META, GAMES_GROUPS and gamesHubGroupsHtml are RUN
@@ -19896,6 +19922,7 @@ function checkPracticeMinutes(i18nTable) {
   checkReviewLabels();
   checkTitleHeadings();
   checkGamesGroups();
+  checkNoClickMidSeek();
   checkSignInAccountChooser();
   checkPracticeCopy();
   if (!SKIP_LINKS) await checkLinks();

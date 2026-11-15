@@ -9,6 +9,7 @@ see `WORKFLOW.md` and the git commit log.
 ## 2026-11-14 — A whole song stops at its end after Loop this part
 
 - **Turning Loop this part off now lets the song finish.** On a whole-song practice card, if you turned Loop this part on and then off, the song used to jump back to the section you looped when it reached the end and keep playing. Now it stops at the end, the same as when Loop was never on.
+- **No stray Metronome click when you jump in a song.** On a slow connection, jumping to another place in a Song Journey page, a snippet or a practice card with the Metronome on could play one extra click in the silence, then the same beat again. The click now waits until the music plays again.
 
 ## 2026-11-14 — Power Chord Switch checks the chord, not the timing
 

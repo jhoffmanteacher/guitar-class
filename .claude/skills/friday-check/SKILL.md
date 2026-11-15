@@ -16,42 +16,6 @@ Runs unattended, Fridays at 11:00 PM Pacific, from a scheduled cloud session.
   is the point: in the 2026-11-09 test each model caught bugs the other
   missed.
 
-## The next run only (moved to Saturday 2026-11-14, 11 PM): a big week, keep it lean
-
-Jonathan, 2026-11-13: "make tonight's run token efficient", then: "we could delay the friday check until tomorrow
-night" (so the rest of that day's work is on main and is reviewed in the same run). The routine's schedule was
-changed for this ONE run from Fridays to Saturday (`CRON_TZ=America/Los_Angeles 0 23 * * 6`, routine
-`trig_016m5HTbmhxb2oEqDaefQurB`, "Guitar site Friday check"). The range is 425 commits or more, 81 or more of them
-Fast (on 2026-11-13: 50 touched site files, 31 were tools and notes only). These rules apply to THIS run and
-override the steps below where they differ. **Delete this whole section in the same push as this run's tag**, so the
-next Friday runs the normal steps. (Review by area on the net change, no reviewer for tools and notes, not re-running
-what GitHub ran green, and what to do when a run cannot finish are standing steps now: 1b, 2, 4 and 5.)
-
-0. **First, put the schedule back to Fridays**, before anything else, so a run that stops early cannot leave it on
-   Saturdays: update the routine `trig_016m5HTbmhxb2oEqDaefQurB` to
-   `cron_expression: "CRON_TZ=America/Los_Angeles 0 23 * * 5"` (the same update call the 2026-11-07 "Re-enable
-   Friday check" reminder used) and confirm its next run is Friday 2026-11-20, 11 PM Pacific. If this session has
-   no tool that can do it, say so in the FIRST line of the report: "Jonathan: the Friday check is still set to
-   Saturdays; set it back to Fridays."
-1. **Skip what a reviewer already broke and passed this week** even though its commits say Fast (they predate the
-   `Review: Reviewed` label): the weekend streak rule (`861b735`, `186bd4b`, `6a79677`; deep review, one round plus
-   fixes) and the big-screen fill (`4bda529` on, `site-fill.js` and the `sw.js` lists; deep review, and GitHub's
-   browser walk before it went live). Tell the area reviewers these are settled; they still read the files around
-   them.
-2. **Reviewers: Opus at `high` tonight** (not `xhigh`); `xhigh` only for `site-reviewer-deep` on a danger-zone
-   file. A different model from the week's reviewers is still the point.
-3. **Fix only what a student would hit** (a BLOCKER or MAJOR finding). MINOR findings go to WORKFLOW.md's Open
-   work as one short list; no fix and no re-review for them tonight. A fix that is itself Always-Reviewed: ONE
-   deep round at most; not clean → push the branch and report it as waiting (do not run three rounds tonight).
-4. **Work in flight: do not fix what these branches already fix, and do not touch them.** `wave/integration`
-   (keys on practice cards, the microphone start, save messages; it also fixes a Change Up set-up overflow that is
-   NOT on main), `feat/song-requests` (it fixes `tools/console-layout-smoke.mjs`'s sidebar pin: that tool fails 4
-   checks on main today, known), `feat/catch-up` (one rules line and a console filter), `fix/nearest-strum`,
-   `tools/never-blocks`, `tools/a11y-and-drift`, `cl/golden-rebuild`. Ignore `ci-try/*` (trial branches).
-   `firestore.rules` on main is the school-accounts paste 2 since 2026-11-14 (one file; the second file is gone).
-   Jonathan published it in the class project on 2026-11-14, so the console runs this text. Known, not a finding.
-5. **Report in ten lines or fewer**, as step 6 says.
-
 ## 1. Find the range
 
 ```
