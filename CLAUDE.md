@@ -247,7 +247,8 @@ Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `ap
 - **Skills edit** → bump `skillCount` in `MODULE_MANIFEST`.
 - **Practice minutes** (`practice-minutes-config.js` + `practice-minutes.js`): counts always; the display
   is on (`uiOn: true` since 2026-11-01; the pin is in `tools/pm-sim.mjs`). Its `firestore.rules` blocks must be published BEFORE the code
-  that writes them; `dailyCapMinutes` and the rules' `dailyCapSeconds()` move together (1cg). Entry:
+  that writes them; no daily limit since 2026-11-15 (a sound counts `soundAloneMinutes` after the last input); `dayCeilingMinutes`
+  and the rules' `dayCeilingSeconds()` (24 hours, a guard, not a limit) move together (1cg). Entry:
   `WORKFLOW.md` → "Recently shipped" → the 2026-11-01 "Practice minutes" entry.
 - **Play-along first**: a song link opens its play-along card if one is openable
   (`songsPlayAlongCard()`, at the click), else the Journey page; no per-song retire list (1bn).

@@ -3,9 +3,11 @@
 
    Read by practice-minutes.js, which counts the seconds a student spends
    working on the site — modules, class activities, Song Journey pages, the
-   Songs library, the tools: anything playing, or a click, key, scroll, sound
-   or open mic in the last 2 minutes (since 2026-11-03; backing tracks only
-   before). It is a visible, ungraded signal:
+   Songs library, the tools: a click, key, scroll or touch in the last 2
+   minutes, or something playing (a song, a sound, an open mic) with a click,
+   key, scroll or touch in the last soundAloneMinutes (since 2026-11-15; any
+   work since 2026-11-03; backing tracks only before). There is no daily
+   limit (2026-11-15). It is a visible, ungraded signal:
    nothing here feeds a grade. No page edits this file — change a number,
    run `node tools/checks.mjs`, push.
 
@@ -26,22 +28,32 @@ var PRACTICE_MINUTES_CONFIG = {
   /* The weekly goal, in minutes. It is the same number in every counted week,
      for every student, whichever days they practise, unless the console sets
      another goal for ONE week (see "ONE WEEK ONLY" below). (There is no
-     per-section schedule and no proration.) 60 since 2026-11-04 (30 before):
-     with the 20-minute daily cap a week needs at least 3 days to reach it.
-     checks.mjs 1cg fails a goal above 7 x dailyCapMinutes; tools/pm-sim.mjs
-     and tools/pm-e2e.mjs pin this value: change them with it.
+     per-section schedule and no proration.) 60 since 2026-11-04 (30 before).
+     checks.mjs 1cg fails a goal above 600 (the most the console's box takes
+     too); tools/pm-sim.mjs and tools/pm-e2e.mjs pin this value: change them with it.
      ONE WEEK ONLY (2026-11-09): the console's Practice minutes view has a "This week's
      goal (minutes)" box. It sets another goal, or 0 for a break, for the current week
      and nothing else; it is kept in config/class.pmWeekGoals, never in this file, and
      the week after it this number applies again. A skipWeeks entry below beats it. */
   weeklyGoalMinutes: 60,
 
-  /* The most minutes counted in one day. Playing past it does not count.
-     ⚠ firestore.rules has the same number in seconds (dailyCapSeconds(),
-     1200 = 20 minutes) and REJECTS a day above it. If you raise this, raise
-     that number and re-publish the rules in the same push — checks.mjs (1cg)
-     fails the push when the two disagree. */
-  dailyCapMinutes: 20,
+  /* NO DAILY LIMIT (2026-11-15, Jonathan: "remove the 20 minute a day limit. it
+     should be actual minutes"; it was dailyCapMinutes: 20). Every minute of work
+     counts. What keeps a song left looping in an empty room from counting all day
+     is this window: something playing on its own (a backing track, a practice
+     card, a Journey page's player, the metronome, an open mic) counts only while
+     the student clicked, pressed a key, scrolled or touched the screen in the
+     last soundAloneMinutes. A student plays guitar along with a 3 to 6 minute
+     track without touching the Chromebook, so the window must be longer than a
+     song; a track left looping alone adds at most this many minutes. Work with
+     no sound keeps the 2-minute window (practice-minutes.js, ACTIVE_MS). */
+  soundAloneMinutes: 10,
+
+  /* NOT A LIMIT: the most one day's record can hold, 24 hours, a guard against
+     a hand-written number. ⚠ firestore.rules has the same number in seconds
+     (dayCeilingSeconds(), 86400) and refuses a day above it (a week: 7 x it).
+     checks.mjs (1cg) fails the push when the two disagree. Leave it at 1440. */
+  dayCeilingMinutes: 1440,
 
   /* Weeks that neither count nor break a streak (breaks). Each entry is the
      MONDAY of the week, 'YYYY-MM-DD' (checks.mjs fails a date that is not a

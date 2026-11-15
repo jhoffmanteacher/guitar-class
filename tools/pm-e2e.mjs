@@ -336,10 +336,12 @@ await shot('4-strip-es');
 
 /* ── STOP B (2026-11-03): the main top bar stays ONE row at 1366×657 in Spanish with the widest strip
    (goal hit; "N playing" was part of it until 2026-11-04) and a long name. As first built, "30/30 min esta semana" wrapped the title in Spanish at an
-   11-character name (49px → 70px); the strip now says "30/30 min" ("60/60 min" since the goal became 60 on 2026-11-04). The practice card's own bar lost the strip: still one row. ── */
+   11-character name (49px → 70px); the strip now says "30/30 min" ("60/60 min" since the goal became 60 on 2026-11-04). The practice card's own bar lost the strip: still one row.
+   2026-11-15: the strip shows the TRUE week past the goal and there is no daily limit, so the widest strip is a big week: "999/600 min"
+   (a three-digit week against the largest goal the console takes). ── */
 console.log('top bar width');
 const rows = [];
-await ev(`(() => { const s = PM._state(); s.weeks[PM.calc.weekIdOf(PM.calc.ymd(new Date()))] = { seconds: 3600, goalSeconds: 3600, hit: true }; return true; })()`);
+await ev(`(() => { const s = PM._state(); s.weeks[PM.calc.weekIdOf(PM.calc.ymd(new Date()))] = { seconds: 999 * 60, goalSeconds: 36000, hit: true }; PM.setWeekGoals({ [PM.calc.weekIdOf(PM.calc.ymd(new Date()))]: 600 }); return true; })()`);
 for (const lang of ['en', 'es']) {
   await ev(`setLang('${lang}')`); await sleep(500);
   for (const nm of ['Dev User', 'Ana María Gómez', 'Maximiliano Fernández', 'Maximiliano Fernández-Rodríguez']) {
@@ -349,7 +351,8 @@ for (const lang of ['en', 'es']) {
   }
   await ev(`document.querySelector('.user-name').textContent = 'Dev User'`);
 }
-check('the top bar is one row (≤ 56px) with the widest strip in EN and ES × names of 8, 15, 21 and 31 characters (35 fits in Spanish, 56 in English)', rows.every((r) => +r.split('=')[1] <= 56) && rows.length === 8, rows);
+check('the top bar is one row (≤ 56px) with the widest strip ("999/600 min") in EN and ES × names of 8, 15, 21 and 31 characters (35 fits in Spanish, 56 in English)', rows.every((r) => +r.split('=')[1] <= 56) && rows.length === 8, rows);
+await ev(`PM.setWeekGoals({})`);
 const cardRows = [];
 await openCard();   // the strip checks above ran on the In class list; the card's own bar needs the card open
 for (const lang of ['en', 'es']) {
@@ -435,12 +438,14 @@ check('the page never named the rankBoard collection (no class rank read or writ
 await ev(`setLang('en')`); await sleep(400);
 
 /* ── An impossible "N more" and "0-week streak" (2026-11-01) ──
-   The goal is 60 min (30 until 2026-11-04) and a day counts at most 20. On a Sunday
-   with today at the cap, "10 more reaches your goal" cannot happen, so the tile and
-   the recap say so in plain words instead. Each case below sits on one side of the
-   line "minutes still needed <= days left x 20 - today's minutes" (weekReach).
-   The clock is moved to a fixed Sunday / Saturday / Friday / Wednesday for this
-   section, so it holds whatever day the test runs on (and under --date). */
+   The goal is 60 min (30 until 2026-11-04). There is no daily limit since 2026-11-15 (a day
+   counted at most 20 minutes before), so the only bound is the clock: late on a Sunday, "10
+   more keeps your streak" with 5 minutes of the week left cannot happen, and the tile and the
+   recap say so in plain words instead. Each case below sits on one side of the line "seconds
+   still needed <= seconds left until Monday 00:00" (weekReach), with a margin of a minute or
+   more, because the shifted clock keeps running while the page draws (the exact-second cases
+   are in tools/pm-sim.mjs section 18). The clock is moved to a fixed Sunday / Saturday /
+   Friday / Wednesday for this section, so it holds whatever day the test runs on (and under --date). */
 console.log('out of reach, no streak');
 const shiftClock = (iso) => ev(`(() => { const B = window.__B || (window.__B = window.Date), off = new B(${JSON.stringify(iso)}).getTime() - B.now();
   window.Date = class extends B { constructor(...a) { if (a.length) super(...a); else super(B.now() + off); } static now() { return B.now() + off; } };
@@ -451,44 +456,35 @@ const tilesAt = (weekMin, todayMin, prior, lang) => ev(`(() => { const s = PM._s
   setLang(${JSON.stringify(lang)}); renderMyProgress(); return [...document.querySelectorAll('#pm-progress .pm-tile')].map(t => t.innerText.replace(/\\s+/g, ' ').trim()); })()`);
 const OUT_EN = /^This week .* of 60 min You can.t reach the goal this week\. A new week starts Monday\.$/;
 check('the clock moved to a Sunday (2026-11-29)', await shiftClock('2026-11-29T10:00:00') === '2026-11-29');
-const sunCap = await tilesAt(50, 20, [3700, 3700, 3700], 'en');
+const sunDay = await tilesAt(50, 40, [3700, 3700, 3700], 'en');
+check('Sunday 10:00, 50 of 60 min, 40 minutes already played today, a streak going: "10 more keeps your streak" (no daily limit: at the old 20-minute cap it said it cannot be reached)', /^This week .*50 of 60 min 10 more keeps your streak$/.test(sunDay[0]), sunDay);
+await shiftClock('2026-11-29T23:50:00');
+const sunLate = await tilesAt(49, 40, [3700, 3700, 3700], 'en');
 await ev(`document.getElementById('pm-progress').scrollIntoView({block:'start'})`); await sleep(200); await shot('5b-out-of-reach-en');
-check('Sunday, 50 of 60 min, today at the 20-min cap, a streak going: says it cannot be reached (it used to say "10 more keeps your streak")', OUT_EN.test(sunCap[0]), sunCap);
-const sunExact = await tilesAt(50, 10, [3700, 3700, 3700], 'en');
-check('Sunday, 50 of 60 min, 10 left in today\'s cap: exactly enough, still "10 more keeps your streak"', /^This week .*50 of 60 min 10 more keeps your streak$/.test(sunExact[0]), sunExact);
-const sunOver = await tilesAt(50, 11, [3700, 3700, 3700], 'en');
-check('Sunday, 50 of 60 min, 9 left in today\'s cap: one minute short, cannot be reached', OUT_EN.test(sunOver[0]), sunOver);
-/* Whole seconds, not whole minutes (2026-11-02 review): 1 s short of the goal with 1 s of room left can still be reached. */
-const secOk = await tilesAt(3599 / 60, 1199 / 60, [3700, 3700, 3700], 'en');
-check('Sunday, 1 s short of the goal with exactly 1 s of today\'s cap left: still reachable ("1 more keeps your streak"), not "can\'t reach"', /^This week .*1 more keeps your streak$/.test(secOk[0]), secOk);
-const secOut = await tilesAt(3599 / 60, 1200 / 60, [3700, 3700, 3700], 'en');
-check('Sunday, 1 s short with no cap left: cannot be reached', OUT_EN.test(secOut[0]), secOut);
-const secMin = await tilesAt(3541 / 60, 1141 / 60, [3700, 3700, 3700], 'en');
-check('Sunday, 59 s short with exactly 59 s of cap left ("1 more" rounded up): still reachable', /^This week .*1 more keeps your streak$/.test(secMin[0]), secMin);
-const sunNoStreak = await tilesAt(50, 20, [], 'en');
+check('Sunday 23:50, 49 of 60 min: 11 needed, 10 minutes of the week left: says it cannot be reached', OUT_EN.test(sunLate[0]), sunLate);
+const sunLateOk = await tilesAt(51, 40, [3700, 3700, 3700], 'en');
+check('Sunday 23:50, 51 of 60 min: 9 needed, 10 minutes left: still "9 more keeps your streak"', /^This week .*51 of 60 min 9 more keeps your streak$/.test(sunLateOk[0]), sunLateOk);
+const sunNoStreak = await tilesAt(49, 0, [], 'en');
 check('…the same with no streak going (the "reaches your goal" wording): cannot be reached', OUT_EN.test(sunNoStreak[0]), sunNoStreak);
+await shiftClock('2026-11-29T10:00:00');
 const sunNoStreakOk = await tilesAt(50, 10, [], 'en');
-check('…and with room left and no streak: "10 more reaches your goal"', /50 of 60 min 10 more reaches your goal$/.test(sunNoStreakOk[0]), sunNoStreakOk);
+check('…and with time left and no streak: "10 more reaches your goal"', /50 of 60 min 10 more reaches your goal$/.test(sunNoStreakOk[0]), sunNoStreakOk);
 await shiftClock('2026-11-28T10:00:00');
-const satOk = await tilesAt(40, 20, [3700, 3700, 3700], 'en');
-check('Saturday, 40 of 60 min, today at the cap, Sunday still ahead (20 min of room): "20 more keeps your streak"', /^This week .*40 of 60 min 20 more keeps your streak$/.test(satOk[0]), satOk);
-const satOut = await tilesAt(39, 20, [3700, 3700, 3700], 'en');
-check('Saturday, 39 of 60 min, today at the cap: 21 needed, only Sunday\'s 20 left: cannot be reached', /39 of 60 min You can.t reach the goal this week/.test(satOut[0]), satOut);
-/* New with the 60-minute goal (2026-11-04): starting from nothing, Friday is the last day it can be reached (Fri + Sat + Sun = 60). */
 const satZero = await tilesAt(0, 0, [3700, 3700, 3700], 'en');
-check('Saturday, nothing yet: 60 needed, only 40 of room (Saturday and Sunday): cannot be reached', /^This week .*0 of 60 min You can.t reach the goal this week/.test(satZero[0]), satZero);
+check('Saturday, nothing yet: "60 more keeps your streak" (no daily limit: with 20 a day it could not be reached from Saturday)', /^This week .*0 of 60 min 60 more keeps your streak$/.test(satZero[0]), satZero);
 await shiftClock('2026-11-27T10:00:00');
 const friZero = await tilesAt(0, 0, [3700, 3700, 3700], 'en');
-check('Friday, nothing yet: three days of room (60) is exactly enough: "60 more keeps your streak"', /^This week .*0 of 60 min 60 more keeps your streak$/.test(friZero[0]), friZero);
+check('Friday, nothing yet: "60 more keeps your streak"', /^This week .*0 of 60 min 60 more keeps your streak$/.test(friZero[0]), friZero);
 await shiftClock('2026-11-25T10:00:00');
 const wed = await tilesAt(0, 0, [3700, 3700, 3700], 'en');
-check('Wednesday, nothing yet: five days of room, "60 more keeps your streak"', /^This week .*0 of 60 min 60 more keeps your streak$/.test(wed[0]), wed);
-await shiftClock('2026-11-29T10:00:00');
-const sunEs = await tilesAt(50, 20, [3700, 3700, 3700], 'es');
+check('Wednesday, nothing yet: "60 more keeps your streak"', /^This week .*0 of 60 min 60 more keeps your streak$/.test(wed[0]), wed);
+await shiftClock('2026-11-29T23:50:00');
+const sunEs = await tilesAt(49, 40, [3700, 3700, 3700], 'es');
 await ev(`document.getElementById('pm-progress').scrollIntoView({block:'start'})`); await sleep(200); await shot('5c-out-of-reach-es');
-check('Spanish, Sunday at the cap: "Esta semana ya no puedes llegar a la meta. El lunes empieza una semana nueva."', /^Esta semana .*50 de 60 min Esta semana ya no puedes llegar a la meta\. El lunes empieza una semana nueva\.$/.test(sunEs[0]), sunEs);
-const sunEsOk = await tilesAt(50, 10, [3700, 3700, 3700], 'es');
-check('Spanish, room left: "Con 10 más mantienes tu racha"', /50 de 60 min Con 10 más mantienes tu racha$/.test(sunEsOk[0]), sunEsOk);
+check('Spanish, Sunday 23:50, 11 needed: "Esta semana ya no puedes llegar a la meta. El lunes empieza una semana nueva."', /^Esta semana .*49 de 60 min Esta semana ya no puedes llegar a la meta\. El lunes empieza una semana nueva\.$/.test(sunEs[0]), sunEs);
+await shiftClock('2026-11-29T10:00:00');
+const sunEsOk = await tilesAt(50, 40, [3700, 3700, 3700], 'es');
+check('Spanish, time left: "Con 10 más mantienes tu racha"', /50 de 60 min Con 10 más mantienes tu racha$/.test(sunEsOk[0]), sunEsOk);
 /* "0-week streak" */
 await shiftClock('2026-11-25T10:00:00');
 const none = await tilesAt(5, 0, [], 'en'), noneEs = await tilesAt(5, 0, [], 'es'), one = await tilesAt(60, 0, [], 'en'), oneEs = await tilesAt(60, 0, [], 'es');
@@ -510,25 +506,25 @@ await tilesAt(5, 0, [], 'en'); await ev(`openClassActivitiesScreen(${JSON.string
 await ev(`PM.syncHeader(true); caSyncTopbar(); PM.refreshStrip(true)`); await sleep(300);
 const flameNone = await ev(`(document.querySelector('.pm-strip .pm-streak') || {}).getAttribute ? document.querySelector('.pm-strip .pm-streak').getAttribute('aria-label') : null`);
 check('the header\'s flame is labelled "No streak yet" with no streak (screen readers did hear "0-week streak")', flameNone === 'No streak yet', flameNone);
-await shiftClock('2026-11-29T10:00:00');
+await shiftClock('2026-11-29T23:45:00');   // 15 minutes of the week left (no daily limit since 2026-11-15: only the clock bounds it)
 await ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()), cur = PM.calc.weekIdOf(d); s.pend = {}; s.days = {}; s.weeks = {}; s.loaded = true; s.lastRecapAt = 0;
   for (let i = 1; i <= 3; i++) s.weeks[PM.calc.weekAdd(cur, -i)] = { seconds: 3700, goalSeconds: 3600, hit: true };
-  s.weeks[cur] = { seconds: 50 * 60, goalSeconds: 3600, hit: false }; s.days[d] = 20 * 60; PM.refreshStrip(true); return true; })()`);
+  s.weeks[cur] = { seconds: 40 * 60, goalSeconds: 3600, hit: false }; s.days[d] = 20 * 60; PM.refreshStrip(true); return true; })()`);
 await playCard();
 await ev(`PM._session().counted = 5 * 60; PM._play() && (PM._play().counted = 5 * 60)`); await leaveCard(); await sleep(3500);
 const recapOut = await ev(`(document.getElementById('pm-recap') || {}).innerText`);
-check('a run ending on a Sunday at the cap: the recap says "You can’t reach the goal this week. A new week starts Monday." (not "10 more keeps your 3-week streak.")', /^✕ \+5 min This week: 50 of 60 min\. You can.t reach the goal this week\. A new week starts Monday\.$/.test((recapOut || '').replace(/\s+/g, ' ').trim()), recapOut);
+check('a run ending late on a Sunday, about 20 minutes needed with 15 minutes of the week left: the recap says "You can’t reach the goal this week. A new week starts Monday." (not "20 more keeps your 3-week streak.")', /^✕ \+5 min This week: 4\d of 60 min\. You can.t reach the goal this week\. A new week starts Monday\.$/.test((recapOut || '').replace(/\s+/g, ' ').trim()), recapOut);
 await ev(`document.getElementById('pm-recap') && document.getElementById('pm-recap').remove(); window.Date = window.__B; true`);
 await ev(`location.hash = '#my-progress'`); await sleep(600);
 
 /* ── Review findings: the widest strip, a skipped week, a week that never counted ── */
 console.log('review follow-ups');
-await ev(`(() => { const s = PM._state(), cur = PM.calc.weekIdOf(PM.calc.ymd(new Date())); s.weeks = {}; for (let i = 1; i <= 12; i++) s.weeks[PM.calc.weekAdd(cur, -i)] = { seconds: 3700, goalSeconds: 3600, hit: true }; s.weeks[cur] = { seconds: 100 * 60, goalSeconds: 3600, hit: true }; s.days = {}; s.pend = {}; return true; })()`);
+await ev(`(() => { const s = PM._state(), cur = PM.calc.weekIdOf(PM.calc.ymd(new Date())); s.weeks = {}; for (let i = 1; i <= 12; i++) s.weeks[PM.calc.weekAdd(cur, -i)] = { seconds: 3700, goalSeconds: 3600, hit: true }; s.weeks[cur] = { seconds: 385 * 60, goalSeconds: 3600, hit: true }; s.days = {}; s.pend = {}; return true; })()`);
 await ev(`window.__period = ''; setLang('es'); location.hash = '#class-activities/${card}'; openClassActivitiesScreen(${JSON.stringify(card)})`); await sleep(1000);
 await leaveCard(); await sleep(600);   // the open card folds the header away (2026-11-10): measure the strip on the In class list
 await ev(`(() => { caSyncTopbar(); PM.refreshStrip(true); document.querySelector('.user-name').textContent = 'Ana María Gómez'; return true; })()`); await sleep(300);
 const worst = await ev(`(() => ({ h: Math.round(document.querySelector('.header').getBoundingClientRect().height), text: document.querySelector('.pm-strip').innerText.replace(/\\s+/g, ' ') }))()`);
-check('widest strip (ES, 100+ min, 12-week streak, a 15-character name, on the In class list) keeps the top bar one row; the strip never shows more than the goal', worst.h <= 56 && /^60\/60 min 13$/.test(worst.text), worst);
+check('a big week (ES, 385 min, 12-week streak, a 15-character name, on the In class list) keeps the top bar one row; the strip shows the TRUE minutes past the goal (2026-11-15; it showed "60/60" before)', worst.h <= 56 && /^385\/60 min 13$/.test(worst.text), worst);
 await shot('7-widest-strip-es');
 await ev(`(() => { const cur = PM.calc.weekIdOf(PM.calc.ymd(new Date())), mon = PM.calc.weekMonday(cur), sun = PM.calc.addDays(mon, 6); PRACTICE_MINUTES_CONFIG.skipWeeks.push(PM.calc.ymd(mon)); PM._state().weeks[cur] = { seconds: 40 * 60, goalSeconds: 0, hit: false }; PM.refreshStrip(true); return true; })()`);
 await ev(`setLang('en'); PM.refreshStrip(true)`); await sleep(300);

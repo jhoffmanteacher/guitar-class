@@ -343,7 +343,7 @@ function teacherSetMinutesSort(v){
    teacherSetStudentPeriod): another console's unrelated edit goes through, a change to this week's goal made elsewhere refuses.
    A blank box clears the cell with FieldValue.delete(), so config/class gets no row for a week that was never changed. Old weeks
    stay in the map on purpose: they are what keeps a past streak judged by the goal that week had. The value is a whole number
-   from 0 to the engine's PM.calc.maxWeekGoalMinutes (7 x the daily cap); anything else writes nothing. 0 = a break week.
+   from 0 to the engine's PM.calc.maxWeekGoalMinutes (600 since 2026-11-15; 7 x the old daily cap, 140, before); anything else writes nothing. 0 = a break week.
    The week is the one the box was drawn for (data-week); if a new week has started since, nothing is written. */
 async function teacherSetPmWeekGoal(weekId, raw){
   if(!(window.PM && PM.calc && PM.calc.cleanWeekGoals && PM.calc.maxWeekGoalMinutes && PM.calc.weekIdOf && PM.calc.skipSet) || !/^\d{4}-W\d{2}$/.test(String(weekId))) return;

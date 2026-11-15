@@ -7,27 +7,38 @@
    streaks"; it was backing tracks only before). A second of wall-clock time
    counts while ALL of these hold:
      · the student is WORKING on the site — any one of:
-         – any <audio>/<video> element is playing: not paused, not ended, not
-           muted (the Guitar toggle's twin plays muted beside the audible one),
-           data buffered, currentTime moving (audible()). Backing tracks, the
-           student's own recording, a note file, a local video — all of it;
          – the student clicked, tapped, typed, scrolled or moved the pointer
            in the last ACTIVE_MS (2 minutes — Jonathan's pick, 2026-11-03:
            reading a step and then playing it for a minute still counts);
-         – the site made a sound through Web Audio (metronome, games, strums,
-           the ear trainer) in the last ACTIVE_MS;
-         – a microphone the site opened is live (tuner, Coach, a game that
-           listens for notes): the student is playing into it;
          – focus is inside an embedded video (a YouTube lesson): a click
            there never reaches this page, so the window is FRAME_ACTIVE_MS
            (10 minutes) from the click instead;
+         – SOMETHING IS PLAYING and the student clicked, tapped, typed,
+           scrolled or moved the pointer in the last soundAloneMinutes (the
+           config, 10 minutes; 2026-11-15). Playing means any one of:
+             · an <audio>/<video> element: not paused, not ended, not muted
+               (the Guitar toggle's twin plays muted beside the audible one),
+               data buffered, currentTime moving (audible()). Backing tracks,
+               the student's own recording, a note file, a local video;
+             · a sound the site made through Web Audio (metronome, games,
+               strums, the ear trainer) in the last ACTIVE_MS;
+             · a microphone the site opened is live (tuner, Coach, a game
+               that listens for notes).
+           A student plays guitar along with a 3 to 6 minute track without
+           touching the Chromebook, so the window is longer than a song; a
+           track (or a metronome, or an open tuner) left alone adds at most
+           soundAloneMinutes. The engine cannot hear whether anyone plays into
+           an open mic, so the mic is a sound here, not a sign of a student;
      · the tab is visible (Page Visibility API);
      · a student is signed in (never the ?teacher console).
    Two things at once are still one second. Nothing here starts, loops or
    changes playback or the mic: the engine only watches (play(),
    getUserMedia() and Web Audio start() are wrapped and pass through
-   untouched). The daily cap bounds a tab left open with a song looping or a
-   mic on.
+   untouched). There is NO DAILY LIMIT since 2026-11-15 (Jonathan: "remove
+   the 20 minute a day limit. it should be actual minutes"; it was 20 minutes,
+   dailyCapMinutes): the sound window above is what bounds a tab left open
+   with a song looping. A day's record holds at most dayCeilingMinutes (24
+   hours, the rules' guard against a hand-written number).
 
    One thing stays tied to SOUND, as before: the recap pill ("+N min") opens
    when playback stops (a `play` run inside the counting session). On an open
@@ -43,7 +54,7 @@
    `playing` listener. Both feed one Set; the 1 s tick does the counting.
 
    WHAT IT STORES (Firestore; firestore.rules has the matching blocks).
-     minutes/{uid}/days/{YYYY-MM-DD}  { seconds }                 (capped per day)
+     minutes/{uid}/days/{YYYY-MM-DD}  { seconds }                 (at most 24 hours a day)
      minutes/{uid}/weeks/{YYYY-Www}   { seconds, goalSeconds, hit }
       weekBoard/{tag}                  { week, period, seconds }   (this week's Top 5, keyed by a private random tag, not the uid; see TOP 5)
       minutes/{uid}/meta/board         { id }                      (the tag: create-only, owner-only)
@@ -70,21 +81,27 @@
    and leave only when the SDK answers — there is NO timeout: the SDK keeps a commit
    it cannot deliver and delivers it when the connection returns, so sending the same
    seconds again after "giving up" counts them once per attempt (measured: a 5-minute
-   stall stored the daily cap for 5 minutes of play). Offline (navigator.onLine
+   stall stored 20 minutes for 5 minutes of play). Offline (navigator.onLine
    false) nothing is sent and nothing is lost. A load never overlaps a flush. On
    pagehide (Chrome then fires visibilitychange; it starts nothing new) a
    fetch({keepalive:true}) to the Firestore REST endpoint sends what is left in
    `pend` — even with a commit in flight, unless that commit has gone unanswered
    for DEAD_LINK_MS (the link is dead) — and the leaving key keeps any commit still
    in flight (Jonathan, 2026-11-01: "be liberal with minutes since this is for
-   motivation" — when unsure, count it; a rare double is bounded by the rules'
-   daily cap), with the ID token cached for THIS student (navigator.sendBeacon cannot carry
+   motivation" — when unsure, count it), with the ID token cached for THIS student (navigator.sendBeacon cannot carry
    the sign-in header, so it cannot write to a rules-protected collection).
    A flush the rules refuse is NOT thrown away: it first re-reads the server's
    day totals (including any older day the queue holds) and trims the queue to the
-   cap; if nothing is left to trim, the refusal is something else (the rules not
+   24-hour ceiling; if nothing is left to trim, the refusal is something else (the rules not
    published yet, say), so the seconds stay queued and are retried every 5 minutes,
-   and reads back off the same way.
+   and reads back off the same way. THE PASTE GAP (2026-11-15): until the rules without
+   the 20-minute daily limit are published, the database refuses a day above 1200 s and a
+   week above 8400 s. A batch that would pass them is refused as a whole, kept, and
+   retried every 5 minutes, so it lands once the rules are published; the student's own
+   page shows the true total meanwhile (it counts what is queued). The pagehide keepalive
+   cannot see a refusal and deletes what it sends, so it does not send a day that would
+   pass 1200 s until this week's server copy already holds such a day (keepaliveSafe):
+   those seconds stay in the leaving key and the next page sends them.
    Known limits: the week doc's `hit` and `goalSeconds` are a best-effort snapshot
    for later (the app recomputes from `seconds`); a device that has never seen a
    week's doc sends hit with its first write, which can overwrite a true another
@@ -127,7 +144,7 @@
    (equality filters only: no composite index) and kept WB_KEEP_MS (15 min) in memory and localStorage,
    so a period of 30 reads about 30 documents per student per 15 minutes on screen. The board has no uid. The teacher's account is never written
    or ranked. A failed write or read changes nothing about counting; the medal and the tile stay away.
-   HONEST LIMITS: a student at DevTools can write any number up to the rules' week cap for themselves (and
+   HONEST LIMITS: a student at DevTools can write any number up to the rules' week ceiling for themselves (and
    choose their period). A device whose clock is a week BEHIND replaces the doc with its own week when it loads, and
    a clock AHEAD writes a week the real clock cannot overwrite until it arrives; both heal at the next confirmed
    write from a correct clock and are accepted (school Chromebooks keep time; the guard that fixes one breaks the
@@ -142,7 +159,7 @@
 
   /* ── Config, with a default for any key that is missing ── */
   var DEFAULTS = {
-    uiOn: false, weeklyGoalMinutes: 60, dailyCapMinutes: 20,
+    uiOn: false, weeklyGoalMinutes: 60, soundAloneMinutes: 10, dayCeilingMinutes: 1440,
     skipWeeks: [], semester2Start: '', streakStartWeek: '',
     recapMinSeconds: 60, recapGapSeconds: 180, recapShowSeconds: 6, toastSeconds: 3,
     top5MinMinutes: 10,
@@ -194,12 +211,11 @@
     (c.skipWeeks || []).forEach(function(d){ if(/^\d{4}-\d{2}-\d{2}$/.test(d)) set[calc.weekIdOf(d)] = true; });
     return set;
   };
-  /* THIS WEEK ONLY overrides (c.weekGoals, { 'YYYY-Www': whole minutes }). The most one can be is a
-     full week at the daily cap (7 x dailyCapMinutes): more could never be reached. 0 = a break week. */
-  calc.maxWeekGoalMinutes = function(c){
-    var cap = +c.dailyCapMinutes;
-    return 7 * Math.round(cap > 0 ? cap : DEFAULTS.dailyCapMinutes);
-  };
+  /* THIS WEEK ONLY overrides (c.weekGoals, { 'YYYY-Www': whole minutes }). The most one can be is
+     MAX_WEEK_GOAL_MINUTES (600 = 10 hours, a sane top for a class; 2026-11-15: it was 7 x the 20-minute
+     daily cap, 140, until the daily limit went). 0 = a break week. */
+  var MAX_WEEK_GOAL_MINUTES = 600;
+  calc.maxWeekGoalMinutes = function(){ return MAX_WEEK_GOAL_MINUTES; };
   /* The override for ONE week in whole minutes (0 = break), or null when the week has none or the entry is
      not valid (not an own key, not a whole number, below 0 or above the maximum). Never a guess. */
   calc.weekGoalOf = function(c, weekId){
@@ -213,7 +229,7 @@
   calc.cleanWeekGoals = function(raw, c){
     var out = {};
     if(!raw || typeof raw !== 'object' || Array.isArray(raw)) return out;
-    var probe = { dailyCapMinutes: c && c.dailyCapMinutes, weekGoals: raw };
+    var probe = { weekGoals: raw };
     Object.keys(raw).forEach(function(k){
       if(/^\d{4}-W\d{2}$/.test(k) && calc.weekGoalOf(probe, k) !== null) out[k] = calc.weekGoalOf(probe, k);
     });
@@ -333,10 +349,12 @@
   var media = new Set();              // audio/video elements seen playing
   var timer = 0, lastTick = 0, idleSec = 0, session = null;
   var play = null, playIdle = 0;      // a run of audible playback inside the session: the recap reports it
-  /* WORKING (2026-11-03): counting goes on this long after the last sign of work —
-     a click, key, scroll or pointer move, a Web Audio sound, an open mic. */
+  /* WORKING (2026-11-03; 2026-11-15): counting goes on ACTIVE_MS after the last sign of a student — a click, key,
+     scroll, touch or pointer move — and, while something plays (a song, a Web Audio sound in the last ACTIVE_MS, an
+     open mic), soundAloneMinutes after it (see the header). */
   var ACTIVE_MS = 120000, FRAME_ACTIVE_MS = 600000;
-  var lastActive = -Infinity;         // now() of the last sign of work
+  var lastActive = -Infinity;         // now() of the last sign of a student (input)
+  var lastSound = -Infinity;          // now() of the last Web Audio sound the site started
   var mics = [];                      // streams getUserMedia() handed the site (watched, never touched)
   var lastFlush = 0, lastPersist = 0, lastAdopt = 0, deniedUntil = 0, queueTimer = 0;
   var pid = '';                       // random id for this page (its own queue key)
@@ -498,17 +516,18 @@
     return m;
   }
   function status(){ return calc.status(cfg(), weekTotals(), today()); }
-  /* How many more minutes this week's goal needs, and whether the daily cap still
-     lets the student get them. Each day left (today included) can add at most
-     dailyCapMinutes, and what today has already counted used part of today's. On a
-     Sunday at the cap, "10 more reaches your goal" cannot happen (2026-11-01). */
+  /* How many more minutes this week's goal needs, and whether there is still time to get them. With no daily
+     limit (2026-11-15) the only bound is the clock: the time left until the week ends (Monday 00:00). Late on a
+     Sunday, "10 more keeps your streak" with 5 minutes of the week left cannot happen (2026-11-01, then with the
+     daily cap). */
   function weekReach(w){
-    var cap = Math.round(cfg().dailyCapMinutes * 60), d = today();
-    var daysLeft = 8 - (((calc.parse(d).getDay() + 6) % 7) + 1);   // Monday = 7 … Sunday = 1
-    var room = daysLeft * cap - Math.min(dayTotal(d), cap);
+    var mon = calc.weekMonday(w.id), end = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 7, 0, 0, 0);
+    var room = Math.max(0, Math.floor((end.getTime() - Date.now()) / 1000));
     var need = w.goal - w.secs;                                    // seconds: the comparison must not round up to a whole minute first (a student 1 s short with 1 s of room can still reach it)
     return { more: Math.max(1, Math.ceil(need / 60)), out: need > room };
   }
+  /* The most one day's record may hold (24 hours: firestore.rules dayCeilingSeconds()). Not a limit on practice. */
+  function dayCeiling(){ var m = +cfg().dayCeilingMinutes; return Math.round((m > 0 ? m : DEFAULTS.dayCeilingMinutes) * 60); }
   /* "No streak yet" instead of "0-week streak"; "No streak right now" once a streak has been lost (longest above 0). */
   function streakWords(base, n, longest){ return n > 0 ? plural(base, n) : tr(longest > 0 ? 'pm.streakNoneNow' : 'pm.streakNone'); }
   function allTimeSeconds(){
@@ -540,15 +559,15 @@
     };
     HTMLMediaElement.prototype.__pmWrapped = true;
   }
-  /* Signs of work (2026-11-03). Each only stamps the time and wakes the tick. */
-  function markActive(){
-    lastActive = now();
-    if(!timer && uid()) ensureTimer();
-  }
+  /* Signs of a student (2026-11-03) and of sound (2026-11-15). Each only stamps the time and wakes the tick. */
+  function wake(){ if(!timer && uid()) ensureTimer(); }
+  function markActive(){ lastActive = now(); wake(); }
+  function markSound(){ lastSound = now(); wake(); }
   function activeWindow(){
     var a = typeof document !== 'undefined' && document.activeElement;
     return (a && a.tagName === 'IFRAME') ? FRAME_ACTIVE_MS : ACTIVE_MS;
   }
+  function soundAloneMs(){ var m = +cfg().soundAloneMinutes; return (m > 0 ? m : DEFAULTS.soundAloneMinutes) * 60000; }
   /* A mic is live while one of its audio tracks is: the tuner, Coach and the
      games stop their tracks when they close, which ends it. */
   function micLive(){
@@ -566,7 +585,7 @@
     var origGUM = MediaDevices.prototype.getUserMedia;
     MediaDevices.prototype.getUserMedia = function(){
       var p = origGUM.apply(this, arguments);
-      try { p.then(function(s){ if(s && mics.indexOf(s) < 0){ mics.push(s); markActive(); } }, function(){}); } catch(e) {}
+      try { p.then(function(s){ if(s && mics.indexOf(s) < 0){ mics.push(s); wake(); } }, function(){}); } catch(e) {}
       return p;
     };
     MediaDevices.prototype.__pmWrapped = true;
@@ -574,13 +593,15 @@
   if(typeof AudioScheduledSourceNode !== 'undefined' && !AudioScheduledSourceNode.prototype.__pmWrapped){
     var origStart = AudioScheduledSourceNode.prototype.start;
     AudioScheduledSourceNode.prototype.start = function(){
-      try { markActive(); } catch(e) {}
+      try { markSound(); } catch(e) {}
       return origStart.apply(this, arguments);
     };
     AudioScheduledSourceNode.prototype.__pmWrapped = true;
   }
   if(typeof document !== 'undefined'){
-    ['pointerdown', 'pointermove', 'keydown', 'wheel', 'scroll', 'touchstart', 'input'].forEach(function(ev){
+    /* 'click' too (2026-11-15): a switch or screen-reader activation can send a click with no pointerdown, and a song now counts only
+       within soundAloneMinutes of the last input. */
+    ['pointerdown', 'pointermove', 'keydown', 'wheel', 'scroll', 'touchstart', 'input', 'click'].forEach(function(ev){
       document.addEventListener(ev, markActive, { capture: true, passive: true });
     });
   }
@@ -626,9 +647,9 @@
       if(audible(el)) anyAudible = true;
       else if(el.paused || el.ended || el.error){ media.delete(el); el.__pmT = undefined; }
     });
-    if(micLive()) lastActive = t;
+    var sounding = anyAudible || micLive() || t - lastSound <= ACTIVE_MS;
     var visible = typeof document === 'undefined' || document.visibilityState !== 'hidden';
-    var working = anyAudible || t - lastActive <= activeWindow();
+    var working = t - lastActive <= activeWindow() || (sounding && t - lastActive <= soundAloneMs());
     var counting = !!(st && working && visible);
     /* A practice card's section button pauses the song for a 3-5 s count-in;
        while its player is still live (pcState, app.js), that is not the end of
@@ -666,8 +687,8 @@
     var whole = Math.floor(st.frac);
     if(whole < 1) return;
     st.frac -= whole;
-    var d = today(), cap = Math.round(c.dailyCapMinutes * 60);
-    var n = Math.min(whole, Math.max(0, cap - dayTotal(d)));
+    var d = today(), cap = dayCeiling();
+    var n = Math.min(whole, Math.max(0, cap - dayTotal(d)));   // only the 24-hour ceiling: there is no daily limit
     if(n <= 0) return;
     var w = calc.weekIdOf(d);
     var before = weekTotals()[w] || 0, goal = calc.goalSeconds(c, w);
@@ -708,7 +729,7 @@
     if(Date.now() < st.loadRetryAt) return Promise.resolve();
     st.loading = (st.flushing && st.flushP ? st.flushP.then(function(){}, function(){}) : Promise.resolve()).then(function(){
       /* This week's days, and any OLDER day the queue still holds (a day left from
-         an earlier week must be read too, or the cap cannot be checked for it). */
+         an earlier week must be read too, or the ceiling cannot be checked for it). */
       var from = calc.ymd(calc.weekMonday(calc.weekIdOf(today()))), held = heldDays();
       Object.keys(held).forEach(function(d){ if(d < from) from = d; });
       return dbP().then(function(db){
@@ -741,9 +762,9 @@
     return st.loading;
   }
 
-  /* Cut the queue so server + held never passes the cap on any day. */
+  /* Cut the queue so server + held never passes the 24-hour ceiling on any day (the rules refuse more). */
   function trimToCap(){
-    var cap = Math.round(cfg().dailyCapMinutes * 60), changed = false;
+    var cap = dayCeiling(), changed = false;
     Object.keys(S.pend).forEach(function(d){
       var room = Math.max(0, cap - (S.days[d] || 0) - ((S.inflight && S.inflight.snap[d]) || 0));
       if(S.pend[d] > room){ S.pend[d] = room; changed = true; }
@@ -873,9 +894,9 @@
     Object.keys(cur.days).forEach(function(d){ var n = (cur.days[d] || 0) - (snap[d] || 0); if(n > 0){ left[d] = n; any = true; } });
     ls(qKey(st.uid), any ? JSON.stringify({ days: left, at: cur.at || Date.now() }) : null);
   }
-  /* Refused by the rules. Re-read the server, trim the queue to the cap and
-     try again; if the queue did not shrink, something other than the cap is
-     wrong (rules not published): keep the seconds, try again in 5 minutes. */
+  /* Refused by the rules. Re-read the server, trim the queue to the ceiling and
+     try again; if the queue did not shrink, something other than the ceiling is
+     wrong (rules not published, the paste gap): keep the seconds, try again in 5 minutes. */
   function afterDenied(st){
     var before = JSON.stringify(st.pend);
     return load(true).then(function(){
@@ -978,7 +999,7 @@
           /* What goes out is the week total the SERVER holds (every page of this student adds to it), not this page's own copy: a Journey tab
              opened in a new tab never re-reads its week, so its copy misses what the main tab counted. At least this page's confirmed seconds. */
           var sv = r[1].exists ? Math.max(0, Math.round(+(r[1].data() || {}).seconds || 0)) : 0;
-          var n = Math.min(Math.max(secs, sv), 7 * Math.round(+cfg().dailyCapMinutes * 60));
+          var n = Math.min(Math.max(secs, sv), 7 * dayCeiling());
           if(d && d.week === w && d.period === p && (+d.seconds || 0) >= n) return;
           t.set(ref, { week: w, period: p, seconds: n });
         });
@@ -1054,6 +1075,17 @@
       if(u && typeof u.getIdToken === 'function'){ var who = u.uid; u.getIdToken().then(function(tk){ if(S && S.uid === who){ idToken = tk; idTokenUid = who; } }, function(){}); }
     } catch(e) {}
   }
+  /* THE PASTE GAP (2026-11-15, see the header). Rules published before 2026-11-15 refuse a day above OLD_DAY_CAP
+     (20 minutes) and a week above 7 x it. The keepalive cannot see a refusal and deletes what it sends, so it sends a
+     day past OLD_DAY_CAP only once this week's server copy shows the new rules are live (a day or a week above the
+     old numbers already landed). Otherwise those seconds stay in the leaving key: the next page sends them, and the
+     regular flush, which sees a refusal and keeps the seconds, carries them over the gap. Never a loss, at worst late. */
+  var OLD_DAY_CAP = 1200;
+  function keepaliveSafe(st, snap){
+    var open = Object.keys(st.days).some(function(d){ return st.days[d] > OLD_DAY_CAP; })
+      || Object.keys(st.weeks).some(function(w){ return (st.weeks[w] && st.weeks[w].seconds) > 7 * OLD_DAY_CAP; });
+    return open || Object.keys(snap).every(function(d){ return (st.days[d] || 0) + ((st.inflight && st.inflight.snap[d]) || 0) + snap[d] <= OLD_DAY_CAP; });
+  }
   function keepaliveFlush(){
     var st = S;
     if(!st || st.loading || !idToken || idTokenUid !== st.uid || typeof fetch === 'undefined') return;
@@ -1064,7 +1096,7 @@
     if(typeof navigator !== 'undefined' && navigator.onLine === false) return;
     if(Date.now() < deniedUntil) return;
     var snap = takePending();
-    if(!snap) return;
+    if(!snap || !keepaliveSafe(st, snap)) return;
     var ops = buildOps(snap);
     var proj = firebaseConfig.projectId, root = 'projects/' + proj + '/databases/(default)/documents/minutes/' + st.uid + '/';
     var writes = ops.map(function(o){
@@ -1120,10 +1152,10 @@
   function stripInner(){
     var st = status(), w = st.week;
     var done = mins(w.secs), goal = mins(w.goal);
-    /* The strip shows at most the goal ("60/60"): a long week must not widen it and push
-       the title, Find, Español and the user area off the one-row top bar. My progress
-       shows the true minutes. A week with no class has no goal: minutes only. */
-    var weekTxt = w.isBreak ? tr('pm.weekMinBreak', { done: done }) : tr('pm.weekMin', { done: Math.min(done, goal), goal: goal });
+    /* The TRUE minutes, past the goal too ("140/60"; Jonathan, 2026-11-15: it showed at most the goal before).
+       Measured at 1366x657 in both languages with the widest week a page can count: the one-row top bar
+       still fits (tools/pm-e2e.mjs). The ring stays full at the goal. A week with no class has no goal: minutes only. */
+    var weekTxt = w.isBreak ? tr('pm.weekMinBreak', { done: done }) : tr('pm.weekMin', { done: done, goal: goal });
     var flameLabel = streakWords('pm.streak', st.streak, st.longest), t5 = top5Info(w.secs);
     return '<span class="pm-week">' + ringSvg(w.goal && !w.isBreak ? w.secs / w.goal : 0, w.hit) + '<span>' + esc(weekTxt) + '</span></span>'
       + '<span class="pm-streak' + (w.hit ? ' pm-on' : '') + '" role="img" aria-label="' + esc(flameLabel) + '">' + FLAME + '<b>' + st.streak + '</b></span>'
@@ -1372,6 +1404,7 @@
   }
 
   /* ── My progress ── */
+  var BAR_FULL_SECONDS = 1800;
   var DOW_KEYS = { 1: 'pm.dow1', 2: 'pm.dow2', 3: 'pm.dow3', 4: 'pm.dow4', 5: 'pm.dow5', 6: 'pm.dow6', 7: 'pm.dow7' };
   function renderProgress(host_el){
     if(!host_el) return;
@@ -1412,7 +1445,7 @@
       + '<div class="pm-tile-sub">' + esc(sub) + '</div></div>';
   }
   function progressHtml(){
-    var c = cfg(), st = status(), w = st.week, d = today();
+    var st = status(), w = st.week, d = today();
     var reach = weekReach(w);
     var weekSub = w.isBreak ? tr('pm.tileWeekBreak') : w.hit ? tr('pm.tileWeekHit')
       : reach.out ? tr('pm.weekOut')
@@ -1432,10 +1465,12 @@
       + ownWeeksHtml(w.id);
     /* This week by day: Monday to Sunday for every student. A day with no practice is an
        empty bar, never a miss marker (the goal is for the whole week). */
-    var cap = Math.round(c.dailyCapMinutes * 60), mon = calc.weekMonday(w.id), dates = [];
+    /* A full bar is this week's biggest day, or 30 minutes when no day reaches that (there is no daily limit to measure against since 2026-11-15). */
+    var mon = calc.weekMonday(w.id), dates = [];
     for(var di = 0; di < 7; di++) dates.push(calc.ymd(calc.addDays(mon, di)));
+    var scale = dates.reduce(function(m, ds){ return Math.max(m, dayTotal(ds)); }, BAR_FULL_SECONDS);
     var bars = dates.map(function(ds){
-      var secs = dayTotal(ds), wd = ((calc.parse(ds).getDay() + 6) % 7) + 1, h = Math.round(Math.min(1, secs / cap) * 100);
+      var secs = dayTotal(ds), wd = ((calc.parse(ds).getDay() + 6) % 7) + 1, h = Math.round(Math.min(1, secs / scale) * 100);
       var label = tr(DOW_KEYS[wd]), tip = tr('pm.dayTip', { day: label, n: mins(secs) });
       return '<div class="pm-bar' + (ds === d ? ' pm-bar-today' : '') + (ds > d ? ' pm-bar-future' : '') + '" title="' + esc(tip) + '" aria-label="' + esc(tip) + '" role="img">'
         + '<span class="pm-bar-n">' + (secs ? mins(secs) : '') + '</span><span class="pm-bar-col"><i style="height:' + (secs ? Math.max(6, h) : 0) + '%"></i></span><span class="pm-bar-l">' + esc(label) + '</span></div>';

@@ -19486,7 +19486,11 @@ async function checkPlantAFault() {
    30 cases (the rankBoard writer, its 3-hour read, the tile; pm-sim sections 13, 15, 16 and 17c) went with it. Section 13 now runs the
    own-weeks line (25 cases: rankBoard never touched while the Top 5 works, the pm:b: clean-up, calc.ownWeeks on every edge case, the
    wording keys, what My progress draws) and sections 16 and 17c check that no page touches rankBoard. */
-const PM_SIM_PIN = 381;
+/* 381 → 404 on 2026-11-15: no daily limit (Jonathan: "it should be actual minutes"). Section 4's cap cases became the sound window (a song left
+   looping counts 10 minutes after the last input; no input ever counts nothing; clicks alone keep 2 minutes), section 12's metronome and mic
+   cases follow it, section 18 pins the strip's TRUE total ("140/60", "140/140", the ring full at the goal), section 22 the console's
+   "385 / 40 min", and a new section 23 runs the gap before the rules paste (nothing lost, the keepalive holds a day past 1200 s back). */
+const PM_SIM_PIN = 404;
 /* ════════════════════════════════════════════════════════════════════
    1dc. STUDENT DATA NEVER GOES TO CLAUDE (Jonathan, 2026-11-13: "I am allowed to
         store data in google/firestore but not in claude"; "let's block student
@@ -19953,9 +19957,13 @@ function checkPracticeMinutes(i18nTable) {
   if (cfg) {
     const num = (k, lo, hi) => { if (typeof cfg[k] !== 'number' || !isFinite(cfg[k]) || cfg[k] < lo || cfg[k] > hi) fail(`config.${k} must be a number from ${lo} to ${hi} (is ${JSON.stringify(cfg[k])})`); };
     if (typeof cfg.uiOn !== 'boolean') fail('config.uiOn must be true or false');
-    num('weeklyGoalMinutes', 1, 600); num('dailyCapMinutes', 1, 240);
-    /* A goal above 7 days of the daily cap can never be reached: every week would say "You can't reach the goal this week" (2026-11-02 review). */
-    if (typeof cfg.weeklyGoalMinutes === 'number' && typeof cfg.dailyCapMinutes === 'number' && cfg.weeklyGoalMinutes > 7 * cfg.dailyCapMinutes) fail(`config.weeklyGoalMinutes (${cfg.weeklyGoalMinutes}) is more than 7 x dailyCapMinutes (${cfg.dailyCapMinutes}): no student could ever reach the goal`);
+    /* 2026-11-15 (Jonathan: "remove the 20 minute a day limit. it should be actual minutes"): no daily limit. The goal's top is the
+       console box's (600, the engine's MAX_WEEK_GOAL_MINUTES); a sound playing alone counts for soundAloneMinutes after the last input,
+       longer than a song (a student plays along with a 3 to 6 minute track without touching the Chromebook); the day ceiling is 24 hours. */
+    num('weeklyGoalMinutes', 1, 600); num('soundAloneMinutes', 7, 30);
+    if (cfg.dayCeilingMinutes !== 1440) fail(`config.dayCeilingMinutes must be 1440 (24 hours: the rules' dayCeilingSeconds() guard, not a limit on practice); it is ${JSON.stringify(cfg.dayCeilingMinutes)}`);
+    if ('dailyCapMinutes' in cfg) fail("practice-minutes-config.js has 'dailyCapMinutes': the 20-minute daily limit was removed 2026-11-15 (Jonathan: \"it should be actual minutes\")");
+    if (/\bdailyCapMinutes\b/.test(strip(read('practice-minutes.js') || '').replace(/([;,{}()\]])[ \t]+\/\/.*$/gm, '$1'))) fail("practice-minutes.js reads 'dailyCapMinutes' again: there is no daily limit since 2026-11-15");;
     const dateRe = /^\d{4}-\d{2}-\d{2}$/;
     const monday = d => dateRe.test(d) && new Date(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10), 12).getDay() === 1;
     if (!Array.isArray(cfg.skipWeeks)) fail('config.skipWeeks must be a list of Monday dates');
@@ -19981,11 +19989,10 @@ function checkPracticeMinutes(i18nTable) {
     const engCode = strip(read('practice-minutes.js') || '').replace(/([;,{}()\]])[ \t]+\/\/.*$/gm, '$1');
     const hbHit = /\b(?:heartbeats?|runAggregationQuery|pollLive|liveMinCount|pmSid|HEARTBEAT_MS)\b|pm:p:/i.exec(engCode);
     if (hbHit) fail(`practice-minutes.js has '${hbHit[0]}': the heartbeat writer and the "N playing" count query were removed 2026-11-04 and must not come back`);
-    /* 2026-11-15: the rules' day ceiling is 24 hours (dayCeilingSeconds(), was dailyCapSeconds() = 1200). Until the engine stops
-       capping at 20 minutes, the rules must allow at least what the config's cap lets the page write. */
+    /* 2026-11-15: the rules' day ceiling (dayCeilingSeconds(), was dailyCapSeconds() = 1200) and the config's dayCeilingMinutes move together. */
     const cap = rules && /function dayCeilingSeconds\(\)\s*\{\s*return\s+(\d+);\s*\}/.exec(rules);
     if (!cap) fail('firestore.rules: dayCeilingSeconds() not found — the ceiling check cannot run (renamed? update this check with it)');
-    else if (+cap[1] < cfg.dailyCapMinutes * 60) fail(`firestore.rules dayCeilingSeconds() is ${cap[1]} but practice-minutes-config.js dailyCapMinutes × 60 is ${cfg.dailyCapMinutes * 60}: every day above the rules' number is refused by the database`);
+    else if (+cap[1] !== cfg.dayCeilingMinutes * 60) fail(`firestore.rules dayCeilingSeconds() is ${cap[1]} but practice-minutes-config.js dayCeilingMinutes × 60 is ${cfg.dayCeilingMinutes * 60}: the page trims to one and the database refuses above the other. Change both, and re-publish the rules`);
   }
 
   // 3. the rules blocks
@@ -20320,7 +20327,7 @@ function checkPracticeMinutes(i18nTable) {
       if (!/window\.PM = \{[\s\S]*?setWeekGoals: setWeekGoals,/.test(eng) || !/o\.weekGoals = liveWeekGoals;/.test(eng)) fail('practice-minutes.js: PM.setWeekGoals must be offered, and cfg() must carry only the handed-in map (o.weekGoals = liveWeekGoals), never one from the settings file');
     }
   }
-  if (!bad) ok(`engine run: ${m[1]} simulation assertions pass (pinned; incl. the teacher console's Practice minutes maths and the This week's goal box); console view pinned (button after Students, This week default, weeks-only server read, the view's block read-only, its one write — the goal box — a single cell-checked pmWeekGoals patch, blank = the flat goal); rules day ceiling ≥ config cap (${cfg ? cfg.dailyCapMinutes * 60 : '?'} s); no heartbeat or "N playing" query in the engine or config, the heartbeats rules block and index gone; minutes rules owner-only, no delete; older rules untouched; hooks, script order and strings in place`);
+  if (!bad) ok(`engine run: ${m[1]} simulation assertions pass (pinned; incl. the teacher console's Practice minutes maths and the This week's goal box); console view pinned (button after Students, This week default, weeks-only server read, the view's block read-only, its one write — the goal box — a single cell-checked pmWeekGoals patch, blank = the flat goal); rules day ceiling = config day ceiling (${cfg ? cfg.dayCeilingMinutes * 60 : '?'} s), no daily limit; no heartbeat or "N playing" query in the engine or config, the heartbeats rules block and index gone; minutes rules owner-only, no delete; older rules untouched; hooks, script order and strings in place`);
 }
 
 (async function main() {

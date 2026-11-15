@@ -6,6 +6,11 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-15 — Practice minutes count every minute
+
+- **No more 20-minute limit a day.** Every minute you practice counts, and the top bar shows your real total for the week, even past your goal (for example "75/60 min").
+- **A song left playing on its own stops counting after 10 minutes.** Click, tap or press a key now and then while you practice, and every minute counts.
+
 ## 2026-11-14 — The strum pattern check is its own activity
 
 - **"Strum Pattern check" is a new In-Class Activity** (when your teacher adds it). It has one step: the eight bars of D5, C5 and G5, the tempo slider above them at 85 BPM, and one button under them: "Click here and play it to get feedback".

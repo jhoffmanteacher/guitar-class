@@ -41,6 +41,7 @@ function makeWorld(opts = {}) {
   const listeners = {};
   const net = opts.net || { online: true, denied: false, commitDelay: 0 };
   const server = opts.server || { days: {}, weeks: {} };   // what Firestore holds
+  const DAY_MAX = () => (server.oldRules ? 1200 : 86400);   // firestore.rules dayCeilingSeconds(); 1200 = the rules before 2026-11-15
   server.board ||= {};                                       // rankBoard/{tag}: { seconds } (the class rank, keyed by the private tag; unused since 2026-11-13)
   server.wb ||= {}; server.wbVer ||= {};                     // weekBoard/{tag}: { week, period, seconds } (the Top 5, keyed by a private tag) and a version counter per doc
   server.meta ||= {}; server.metaVer ||= {};                 // minutes/{uid}/meta/board: { id } (the private tag, create-only, owner-only)
@@ -79,10 +80,10 @@ function makeWorld(opts = {}) {
     },
   });
   /* firestore.rules, weekBoard/{tag}: only the doc whose id is the writer's own tag (the rule reads the writer's minutes/{uid}/meta/board); exactly
-     { week, period, seconds }; 'YYYY-Www'; period 4 / 7 / CAS; a number 0..7 x 1200. minutes/{uid}/meta/board: create-only, owner only, { id } of 32 hex. */
+     { week, period, seconds }; 'YYYY-Www'; period 4 / 7 / CAS; a number 0..7 x the day ceiling (DAY_MAX()). minutes/{uid}/meta/board: create-only, owner only, { id } of 32 hex. */
   const metaRulesOk = (uid, pathUid, d) => uid === pathUid && server.meta[pathUid] === undefined && !!d && eq(Object.keys(d), ['id']) && typeof d.id === 'string' && /^[0-9a-f]{32}$/.test(d.id);
   const wbRulesOk = (uid, id, d) => !!server.meta[uid] && server.meta[uid].id === id && !!d && eq(Object.keys(d).sort(), ['period', 'seconds', 'week']) && typeof d.week === 'string' && /^[0-9]{4}-W[0-9]{2}$/.test(d.week)
-    && ['4', '7', 'CAS'].includes(d.period) && typeof d.seconds === 'number' && d.seconds >= 0 && d.seconds <= 7 * 1200;
+    && ['4', '7', 'CAS'].includes(d.period) && typeof d.seconds === 'number' && d.seconds >= 0 && d.seconds <= 7 * DAY_MAX();
   /* The real SDK offline (measured, 10.12.2): a plain get() RESOLVES with an empty answer from the cache; { source: 'server' } rejects 'unavailable'.
      Every get() here is logged in log.getOpts so a test can see which reads asked the server. */
   const offlineGet = (opts) => opts && opts.source === 'server' ? Promise.reject(Object.assign(new Error('Failed to get documents from server.'), { code: 'unavailable' })) : Promise.resolve({ forEach: () => {} });
@@ -132,16 +133,17 @@ function makeWorld(opts = {}) {
       })),
     }),
   });
-  /* The rules: a day above the cap (1200 s) is refused, as in firestore.rules; a week doc must end up with all three
-     fields. A merge-set that omits `hit` keeps the stored one (what Firestore does). */
+  /* The rules: a day above the ceiling (DAY_MAX(): 86400 s since 2026-11-15) or a week above 7 x it is refused, as in firestore.rules;
+     a week doc must end up with all three fields. A merge-set that omits `hit` keeps the stored one (what Firestore does).
+     server.oldRules = the rules published before 2026-11-15 (the paste gap): a day above 1200 s, a week above 8400 s refused. */
   function applyOps(ops) {
     for (const op of ops) {
+      const id = op.path.split('/').pop();
       if (/\/days\//.test(op.path)) {
-        const id = op.path.split('/').pop();
-        if ((server.days[id]?.seconds || 0) + op.data.seconds.__inc > 1200) return false;
+        if ((server.days[id]?.seconds || 0) + op.data.seconds.__inc > DAY_MAX()) return false;
       } else {
-        const id = op.path.split('/').pop();
         if (!('hit' in op.data) && !server.weeks[id]) return false;
+        if ((server.weeks[id]?.seconds || 0) + op.data.seconds.__inc > 7 * DAY_MAX()) return false;
       }
     }
     for (const op of ops) {
@@ -286,12 +288,24 @@ function makeWorld(opts = {}) {
   if (opts.config) vm.runInContext('Object.assign(PRACTICE_MINUTES_CONFIG, ' + JSON.stringify(opts.config) + ')', ctx);
   windowStub.PM_HOST = {
     ui: !!opts.ui,
-    user: () => (opts.signedOut ? null : auth.currentUser),
+    user: () => (opts.signedOut || stamping ? null : auth.currentUser),
     db: () => db,
     period: () => (opts.period === undefined ? '7' : opts.period),
   };
+  let stamping = false;
   vm.runInContext(ENGINE_SRC, ctx);
   const PM = windowStub.PM;
+  /* 2026-11-15 (no daily limit): a sound counts only within soundAloneMinutes (10) of the student's last click, key, scroll or touch,
+     and input alone counts for 2 minutes. Every world starts with that last input opts.inputAgo seconds back (default 180: older than
+     the 2-minute window, inside the 10-minute one), so the sections written before this rule still see a sound counted on its own and
+     input-free time not counted, for 7 minutes; a longer run clicks (w.input()). null = no input ever. */
+  const inputAgo = opts.inputAgo === undefined ? 180 : opts.inputAgo;
+  if (inputAgo !== null) {
+    const keep = clock.perf;
+    clock.perf -= inputAgo * 1000; stamping = true;   // signed out for that instant: the stamp starts no timer
+    (listeners['doc:pointerdown'] || []).forEach((f) => f({ type: 'pointerdown' }));
+    clock.perf = keep; stamping = false;
+  }
 
   /* Advance the world N seconds, one tick per second, flushing microtasks between. */
   async function run(seconds, each) {
@@ -323,6 +337,9 @@ function makeWorld(opts = {}) {
   const input = (ev = 'pointerdown') => (listeners['doc:' + ev] || []).forEach((f) => f({ type: ev }));
   return { stripEl, pills: () => onScreen.slice(), opts, input, FakeSource, FakeMediaDevices, __timers: timers, drain, releaseReads, ctx, PM, clock, net, server, log, store, session, listeners, documentStub, windowStub, FakeAudio, run, settle, track, playing, user, firebase, db };
 }
+/* A student playing along who clicks every 9 minutes (2026-11-15: a song counts within 10 minutes of the last input) and never in the
+   2 minutes before a pause, so a pause still ends the count at once. */
+const clickPlay = (w, a) => (i) => { w.playing(a)(i); if (i % 540 === 0) w.input('pointerdown'); };
 /* Everything counted so far: queued + already acknowledged by the server. */
 /* The page's queue key: pm:q:<uid>:<pageId>. */
 const qKey = (w, uid = 'uid-A') => Object.keys(w.store).find((k) => k.startsWith('pm:q:' + uid + ':'));
@@ -521,21 +538,47 @@ console.log('3. what counts');
   check('nobody signed in: nothing counted, nothing stored', w7.PM._state() === null && !Object.keys(w7.store).some((k) => k.startsWith('pm:q')));
 }
 
-/* ═══════════ 4. Cap, queue, flush ═══════════ */
-console.log('4. daily cap and the pending-write queue');
+/* ═══════════ 4. No daily limit, the sound window, queue, flush ═══════════
+   2026-11-15 (Jonathan: "remove the 20 minute a day limit. it should be actual minutes"): every minute counts; a song playing
+   on its own counts only within soundAloneMinutes (10) of the student's last input. */
+console.log('4. no daily limit, the sound window and the pending-write queue');
 {
   const w = makeWorld();
   const a = w.track(); a.play();
-  await w.run(25 * 60, w.playing(a));
+  await w.run(25 * 60, (i) => { w.playing(a)(i); if (i % 300 === 0) w.input('pointerdown'); });   // a click every 5 minutes
   const st = w.PM._state();
   const total = (st.days[todayStr] || 0) + (st.pend[todayStr] || 0);
-  check('25 minutes of play counts exactly the 20-minute cap (1200 s)', total === 1200, 'counted ' + total);
-  check('flushed every 60 s while counting (≈ 20 commits for 20 counted minutes)', w.log.commits.length >= 18 && w.log.commits.length <= 24, w.log.commits.length + ' commits');
-  check('the server ends with exactly the capped total, never more', (w.server.days[todayStr]?.seconds || 0) + (st.pend[todayStr] || 0) === 1200);
+  check('25 minutes of play with a click every 5 minutes counts all 25 minutes (1500 s): no 20-minute daily limit', total >= 1499 && total <= 1500, 'counted ' + total);
+  check('flushed every 60 s while counting (≈ 25 commits for 25 counted minutes)', w.log.commits.length >= 23 && w.log.commits.length <= 30, w.log.commits.length + ' commits');
+  check('the server holds exactly what was counted, past 1200 s', (w.server.days[todayStr]?.seconds || 0) + (st.pend[todayStr] || 0) === total && (w.server.days[todayStr]?.seconds || 0) > 1200, 'server ' + w.server.days[todayStr]?.seconds);
   const wk = w.server.weeks['2026-W47'];
-  check('the week doc rolls up { seconds, goalSeconds: 3600, hit: false } (1200 < 3600)', wk && wk.goalSeconds === 3600 && wk.hit === false && wk.seconds === (w.server.days[todayStr].seconds), JSON.stringify(wk));
+  check('the week doc rolls up { seconds, goalSeconds: 3600, hit: false } (1500 < 3600)', wk && wk.goalSeconds === 3600 && wk.hit === false && wk.seconds === (w.server.days[todayStr].seconds), JSON.stringify(wk));
   check('every commit writes ONLY days/{date}.seconds and weeks/{id}.{seconds,goalSeconds,(hit)}',
     w.log.commits.every((c) => c.every((o) => /^minutes\/uid-A\/(days|weeks)\//.test(o.path) && (/days/.test(o.path) ? eq(Object.keys(o.data), ['seconds']) : (['seconds', 'goalSeconds'].every((k) => k in o.data) && Object.keys(o.data).every((k) => ['seconds', 'goalSeconds', 'hit'].includes(k)))))));
+}
+{
+  /* The sound window (2026-11-15): a song LEFT LOOPING with nobody touching the Chromebook. The click that pressed Play is the last input. */
+  const w = makeWorld({ inputAgo: null });
+  const a = w.track(); w.input('pointerdown'); a.play();
+  await w.run(60 * 60, w.playing(a));
+  const n = sec(w);
+  check('a song left looping alone for an hour after the click on Play counts 10 minutes (soundAloneMinutes), then stops', n >= 599 && n <= 601, 'counted ' + n);
+  w.input('keydown');
+  await w.run(4 * 60, w.playing(a));
+  check('…a key press brings it back: 4 more minutes of the same song count', sec(w) - n >= 239 && sec(w) - n <= 241, 'added ' + (sec(w) - n));
+  const w2 = makeWorld({ inputAgo: null });
+  const b = w2.track(); w2.input('pointerdown'); b.play();
+  await w2.run(6 * 60, w2.playing(b));
+  check('a student playing along with a 6-minute song, touching nothing after Play: all 6 minutes count', sec(w2) >= 359 && sec(w2) <= 361, 'counted ' + sec(w2));
+  const w3 = makeWorld({ inputAgo: null });
+  const c3 = w3.track(); c3.play();   // no input ever (the OS media keys on a page never clicked)
+  await w3.run(120, w3.playing(c3));
+  check('a song with no input ever on the page counts nothing', sec(w3) === 0, 'counted ' + sec(w3));
+  const w4 = makeWorld({ inputAgo: null });
+  await w4.PM.load(); await w4.settle();
+  w4.input('pointerdown');
+  await w4.run(5 * 60);
+  check('clicking with no sound keeps the 2-minute rule: one click, then 5 minutes of nothing, counts ≈ 2 minutes', sec(w4) >= 119 && sec(w4) <= 121, 'counted ' + sec(w4));
 }
 {
   // Offline: nothing sent, nothing lost; online: it all goes.
@@ -599,17 +642,17 @@ console.log('4. daily cap and the pending-write queue');
   w.net.denied = false;
   a.pause();
   await w.run(300, w.playing(a));
-  a.play();
+  w.input('pointerdown'); a.play();   // the click on Play
   await w.run(70, w.playing(a));
   check('rules published later → after the 5-minute back-off everything lands', (w.server.days[todayStr]?.seconds || 0) >= 130 && (w.server.days[todayStr]?.seconds || 0) + (w.PM._state().pend[todayStr] || 0) >= 195, `server ${w.server.days[todayStr]?.seconds} pend ${w.PM._state().pend[todayStr]}`);
 }
 {
-  // Cap trim: the server already holds 1190 s today from another device.
+  // Ceiling trim: the server already holds 86390 s today (24 hours less 10 s; a hand-written number, another device).
   const w = makeWorld();
-  w.server.days[todayStr] = { seconds: 1190 };
+  w.server.days[todayStr] = { seconds: 86390 };
   const a = w.track(); a.play();
   await w.run(130, w.playing(a));
-  check('server already at 1190 s (another device): the day ends at ≤ 1200, never refused forever', (w.server.days[todayStr].seconds <= 1200) && w.server.days[todayStr].seconds >= 1195, 'server ' + w.server.days[todayStr].seconds);
+  check('server already at 86390 s: the day ends at ≤ 86400 (the rules\' 24-hour ceiling), never refused forever', (w.server.days[todayStr].seconds <= 86400) && w.server.days[todayStr].seconds >= 86395, 'server ' + w.server.days[todayStr].seconds);
   check('…and the queue is not stuck: nothing left pending', (w.PM._state().pend[todayStr] || 0) === 0, 'pend ' + w.PM._state().pend[todayStr]);
 }
 {
@@ -647,11 +690,12 @@ console.log('4. daily cap and the pending-write queue');
 /* ═══════════ 5. Goal ═══════════ */
 console.log('5. the weekly goal');
 {
-  // Hit the goal across several days, each one under the 20-minute daily cap: 4 days × 16 min = 64 min ≥ 60 in the week.
+  // Hit the goal across several days: 4 days × 16 min = 64 min ≥ 60 in the week. The student clicks every 9 minutes
+  // (2026-11-15: a song counts within 10 minutes of the last input), and never in the last 2 minutes, so a pause ends the count at once.
   const w = makeWorld();
   const a = w.track(); a.play();
   for (let day = 0; day < 4; day++) {
-    await w.run(16 * 60, w.playing(a));
+    await w.run(16 * 60, (i) => { w.playing(a)(i); if (i % 540 === 0) w.input('pointerdown'); });
     a.pause();
     await w.run(5, w.playing(a));
     w.clock.ms += 24 * 3600 * 1000; w.clock.perf += 24 * 3600 * 1000;      // jump to the same time the next day
@@ -665,13 +709,13 @@ console.log('5. the weekly goal');
   check('status() says this week is hit and the streak is 1', w.PM.status().week.hit === true && w.PM.status().streak === 1);
 }
 {
-  // The fewest days (goal 60 since 2026-11-04): a day counts at most 20 minutes, so the goal takes 3 days at the cap.
-  // Each day plays 22 minutes (2 past the cap, not counted). After two days the week is short; the third reaches exactly 3600 s.
+  // No daily limit (2026-11-15; until then a day counted at most 20 minutes and the goal of 60 took 3 days at the cap).
+  // Two days of 30 minutes each: the first is 1800 s, not hit; the second reaches exactly 3600 s. A click every 9 minutes.
   const w = makeWorld();
   const a = w.track(); a.play();
   const after = [];
-  for (let day = 0; day < 3; day++) {
-    await w.run(22 * 60, w.playing(a));
+  for (let day = 0; day < 2; day++) {
+    await w.run(30 * 60, (i) => { w.playing(a)(i); if (i % 540 === 0) w.input('pointerdown'); });
     a.pause();
     await w.run(5, w.playing(a));
     await w.PM.flush(); await w.settle();
@@ -680,8 +724,8 @@ console.log('5. the weekly goal');
     w.clock.ms += 24 * 3600 * 1000; w.clock.perf += 24 * 3600 * 1000;      // jump to the same time the next day
     a.play();
   }
-  check('two days at the 20-minute cap: 2400 s, not hit (in status() and in the week doc)', after[1].secs === 2400 && after[1].hit === false && after[1].docSecs === 2400 && after[1].docHit === false, JSON.stringify(after));
-  check('the third day at the cap makes exactly 3600 s: the goal is hit, in status() and in the week doc', after[2].secs === 3600 && after[2].hit === true && after[2].docSecs === 3600 && after[2].docHit === true, JSON.stringify(after));
+  check('one 30-minute day counts all 30 minutes (1800 s, past the old 20-minute cap), not hit (in status() and in the week doc)', after[0].secs === 1800 && after[0].hit === false && after[0].docSecs === 1800 && after[0].docHit === false, JSON.stringify(after));
+  check('the second 30-minute day makes exactly 3600 s: the goal is hit in two days, in status() and in the week doc', after[1].secs === 3600 && after[1].hit === true && after[1].docSecs === 3600 && after[1].docHit === true, JSON.stringify(after));
 }
 
 /* ═══════════ 6. No heartbeat (removed 2026-11-04: "N playing" had left the strip and nothing read it) ═══════════ */
@@ -703,7 +747,7 @@ console.log('7. defaults');
   const w = makeWorld();
   check('shipped config: uiOn is true (on since 2026-11-01; flip this and the config together)', w.ctx.PRACTICE_MINUTES_CONFIG.uiOn === true);
   check('shipped config: streaks start fresh at 2026-W45', w.ctx.PRACTICE_MINUTES_CONFIG.streakStartWeek === '2026-W45');
-  check('shipped config: goal 60 (30 until 2026-11-04), cap 20, semester 2 starts 2027-01-04, five skip weeks', w.ctx.PRACTICE_MINUTES_CONFIG.weeklyGoalMinutes === 60 && w.ctx.PRACTICE_MINUTES_CONFIG.dailyCapMinutes === 20
+  check('shipped config: goal 60 (30 until 2026-11-04), no daily limit (dailyCapMinutes gone 2026-11-15; a sound counts 10 minutes after the last input; the day ceiling is 24 h), semester 2 starts 2027-01-04, five skip weeks', w.ctx.PRACTICE_MINUTES_CONFIG.weeklyGoalMinutes === 60 && !('dailyCapMinutes' in w.ctx.PRACTICE_MINUTES_CONFIG) && w.ctx.PRACTICE_MINUTES_CONFIG.soundAloneMinutes === 10 && w.ctx.PRACTICE_MINUTES_CONFIG.dayCeilingMinutes === 1440
     && w.ctx.PRACTICE_MINUTES_CONFIG.semester2Start === '2027-01-04' && w.ctx.PRACTICE_MINUTES_CONFIG.skipWeeks.length === 5);
   const off = makeWorld({ ui: true, config: { uiOn: false } });
   check('uiOn false (a page with a UI host) → stripHtml() is empty', off.PM.stripHtml() === '');
@@ -768,15 +812,16 @@ const shared = () => ({ clock: { ms: new Date(2026, 10, 16, 9, 0, 0).getTime(), 
   }
 }
 {
-  // R1-2: a day left over from an earlier week that the server would push over the cap must not block every later write.
+  // R1-2: a day left over from an earlier week that the server would push over the ceiling must not block every later write.
+  // (2026-11-15: the ceiling is 24 hours, 86400 s; it was the 20-minute cap, 1200 s, with 900 + 600 here.)
   const sh = shared();
-  sh.server.days['2026-11-15'] = { seconds: 900 };
+  sh.server.days['2026-11-15'] = { seconds: 86100 };
   sh.store['pm:q:uid-A:deadbeefdead'] = JSON.stringify({ days: { '2026-11-15': 600 }, at: 0 });
   const w = makeWorld(sh);
   const a = w.track(); a.play();
   await runAll([w], 150, (i) => { if (!a.paused) a.currentTime += 1; });
   a.pause(); await runAll([w], 3);
-  check('an old day over the cap (server 900 + queued 600): trimmed to the cap (1200), and today still goes through', sh.server.days['2026-11-15'].seconds === 1200 && (sh.server.days[todayStr]?.seconds || 0) >= 140, JSON.stringify(sh.server.days));
+  check('an old day over the ceiling (server 86100 + queued 600): trimmed to the ceiling (86400), and today still goes through', sh.server.days['2026-11-15'].seconds === 86400 && (sh.server.days[todayStr]?.seconds || 0) >= 140, JSON.stringify(sh.server.days));
   check('…and nothing is left stuck in the queue', !qKey(w) || Object.keys(qDays(w) || {}).length === 0, JSON.stringify(qDays(w)));
 }
 {
@@ -863,13 +908,14 @@ const shared = () => ({ clock: { ms: new Date(2026, 10, 16, 9, 0, 0).getTime(), 
   const sh = shared(); sh.net.denyReads = true; sh.net.denied = true;
   const w = makeWorld(sh);
   const a = w.track(); a.play();
-  await runAll([w], 600, () => { if (!a.paused) a.currentTime += 1; });
+  const clicks = (i) => { if (!a.paused) a.currentTime += 1; if (i % 300 === 0) w.input('pointerdown'); };   // a click every 5 minutes (the sound window)
+  await runAll([w], 600, clicks);
   check('rules not published: 10 minutes of play make a handful of refused reads, not hundreds', (sh.net.reads || 0) <= 12, (sh.net.reads || 0) + ' reads');
   check('…and every counted second is still queued', sec(w) >= 590);
   sh.net.denyReads = false; sh.net.denied = false;
-  await runAll([w], 330, () => { if (!a.paused) a.currentTime += 1; });
-  a.pause(); await runAll([w], 3);
-  check('rules published later: everything lands, exactly once', sh.server.days[todayStr].seconds === Math.min(1200, sec(w)) && sec(w) >= 900, sh.server.days[todayStr]?.seconds + ' vs ' + sec(w));
+  await runAll([w], 330, clicks);
+  a.pause(); await runAll([w], 130); await w.PM.flush(); await w.settle();   // the 2-minute window of the last click runs out, then the last flush
+  check('rules published later: everything lands, exactly once (past 20 minutes: no daily limit)', sh.server.days[todayStr].seconds === sec(w) && sec(w) >= 900, sh.server.days[todayStr]?.seconds + ' vs ' + sec(w));
 }
 {
   // R1-7: a stale copy on another device must not flip a stored hit from true back to false.
@@ -1035,7 +1081,7 @@ console.log('10. friday check 2026-11-01');
   {
     const sh = shared(); sh.net.online = false; const w = makeWorld(sh);
     const a = w.track(); a.play();
-    await runAll([w], 600, () => { if (!a.paused) a.currentTime += 1; });
+    await runAll([w], 600, (i) => { if (!a.paused) a.currentTime += 1; if (i % 300 === 0) w.input('pointerdown'); });   // a click every 5 minutes (the sound window)
     a.pause(); await runAll([w], 5);
     sh.net.online = true; sh.net.stall = true;
     for (const f of w.listeners['win:online'] || []) f();
@@ -1264,23 +1310,37 @@ console.log('12. all site work counts');
   await w4.run(60, () => w4.input('pointermove'));
   check('nobody signed in (or the ?teacher console): clicks count nothing, store nothing, start no timer', w4.PM._state() === null && !Object.keys(w4.store).some((k) => k.startsWith('pm:q')) && w4.__timers.filter((t) => t.ms === 1000).length === 0);
 
-  const w5 = makeWorld();
+  /* 2026-11-15: a Web Audio sound and an open mic are SOUNDS: they count only within soundAloneMinutes (10) of the last click, key,
+     scroll or touch, like a song. (Before, each one kept counting with no input at all, and the 20-minute daily cap bounded it.) */
+  const w5 = makeWorld({ inputAgo: null });
   w5.PM._state();
   const src = new w5.FakeSource();
+  w5.input('pointerdown');   // the click that started the metronome
   await w5.run(300, () => src.start());
   const at300 = sec(w5);
-  await w5.run(300);
-  check('a Web Audio sound every second (the metronome) for 5 minutes, no clicks: ≈ 5 minutes, then 2 more after the last click (≈ 420 s)', at300 >= 298 && sec(w5) >= 416 && sec(w5) <= 421, at300 + ' → ' + sec(w5));
+  await w5.run(600, () => src.start());
+  check('a Web Audio sound every second (the metronome) left alone after the click that started it: 5 minutes count, and it stops 10 minutes after the click (≈ 600 s of 900)', at300 >= 298 && sec(w5) >= 598 && sec(w5) <= 601, at300 + ' → ' + sec(w5));
   check('…and the start() call still reaches the real one', src.started === true);
+  const w5b = makeWorld({ inputAgo: null });
+  w5b.PM._state();
+  const src5b = new w5b.FakeSource();
+  await w5b.run(120, () => src5b.start());
+  check('a Web Audio sound with no input ever on the page counts nothing', sec(w5b) === 0, 'counted ' + sec(w5b));
 
-  const w6 = makeWorld();
+  const w6 = makeWorld({ inputAgo: null });
   w6.PM._state();
+  w6.input('pointerdown');   // the click that opened the tuner
   const stream = await new w6.FakeMediaDevices().getUserMedia({ audio: true });
   await w6.run(360);
   const mic6 = sec(w6);
+  await w6.run(540);
+  check('an open mic (a tuner left open) with no clicks after the one that opened it: counts 6 minutes, and stops 10 minutes after the click (≈ 600 s of 900): the engine cannot hear whether anyone plays', mic6 >= 358 && sec(w6) >= 598 && sec(w6) <= 601, mic6 + ' → ' + sec(w6));
+  w6.input('pointerdown');
+  await w6.run(60);
+  const mic6b = sec(w6);
   stream.track.readyState = 'ended';
   await w6.run(300);
-  check('an open mic (tuner, Coach, a game) with no clicks counts while live (6 min ≈ 360 s), then 2 minutes after it closes (≈ 480 s)', mic6 >= 358 && sec(w6) >= 476 && sec(w6) <= 481, mic6 + ' → ' + sec(w6));
+  check('…a click brings it back while the mic is live; after the mic closes only the 2-minute window of that click counts (≈ 120 s more)', mic6b - 600 >= 59 && sec(w6) - 600 >= 118 && sec(w6) - 600 <= 121, mic6b + ' → ' + sec(w6));
   check('…getUserMedia still hands the stream back untouched', typeof stream.getAudioTracks === 'function' && stream.getAudioTracks()[0] === stream.track);
 
   const w7 = makeWorld();
@@ -1310,7 +1370,7 @@ console.log('12. all site work counts');
   const w10 = makeWorld();
   w10.PM._state();
   await w10.run(1800, (i) => { if (i % 30 === 0) w10.input('pointerdown'); });
-  check('half an hour of clicking still stops at the daily cap (1200 s)', sec(w10) === 1200, 'counted ' + sec(w10));
+  check('half an hour of clicking counts the whole half hour (1800 s): no daily limit since 2026-11-15 (it stopped at 1200 s before)', sec(w10) >= 1799 && sec(w10) <= 1800, 'counted ' + sec(w10));
 }
 
 /* ═══════════ 13. Your own weeks (2026-11-13; replaced the class rank, rankBoard/{tag}, 2026-11-05 to 2026-11-13) ═══════════
@@ -1488,7 +1548,7 @@ console.log('14. top 5 of the week');
   await wl.run(1300, (i) => { if (i % 30 === 0) wl.input('pointerdown'); });
   check('a 20-minute day (≈ 20 flushes) writes the week board at most once per 2 minutes (≤ 11), never ahead of the weeks doc', wl.log.wbWrites.length >= 2 && wl.log.wbWrites.length <= 11 && own(wl).seconds <= weekOf(wl) && own(wl).seconds > 0, wl.log.wbWrites.length + ' writes; ' + JSON.stringify(own(wl)) + ' vs ' + weekOf(wl));
   const mid = own(wl).seconds;
-  await wl.PM.flush(); await wl.settle(); await wl.run(130);
+  await wl.run(130); await wl.PM.flush(); await wl.settle(); await wl.run(130);   // 2026-11-15: no daily cap stops the count; the 2-minute window of the last click runs out first
   check('…and once flushed and the 2 minutes pass, the doc catches up to exactly the weeks doc', own(wl).seconds === weekOf(wl) && own(wl).seconds >= mid, JSON.stringify(own(wl)) + ' vs ' + weekOf(wl));
 
   // Raise-only: a page that holds an OLDER copy never lowers what another page of the same student wrote, in the same week and period.
@@ -1519,7 +1579,7 @@ console.log('14. top 5 of the week');
 
   // The rules are not published (or refuse the write): minutes still count and land; the retry waits 5 minutes; the read is retried every 30 s at most.
   const wd = makeWorld({ period: '4', net: { online: true, denied: false, wbDenied: true, wbReadDenied: true } });
-  wd.PM._state(); await wd.run(1300, (i) => { if (i % 30 === 0) wd.input('pointerdown'); }); await wd.PM.flush(); await wd.settle();
+  wd.PM._state(); await wd.run(1300, (i) => { if (i % 30 === 0) wd.input('pointerdown'); }); await wd.run(130); await wd.PM.flush(); await wd.settle();   // 2026-11-15: no daily cap ends the count; the clicks stop and the 2-minute window runs out
   check('with the weekBoard rules unpublished the minutes still all land (server = counted)', weekOf(wd) === sec(wd) && weekOf(wd) >= 1190, weekOf(wd) + ' vs ' + sec(wd));
   check('…refused writes are retried only every 5 minutes (1 to 5 in a 22-minute day), nothing is stored, the engine does not mark the doc sent', wd.log.wbTx >= 1 && wd.log.wbTx <= 5 && eq(wd.server.wb, {}) && wd.PM._state().wbSent === '', wd.log.wbTx + ' tx');
   const wr = makeWorld({ ui: true, strip: true, config: { uiOn: true }, period: '4', net: { online: true, denied: false, wbDenied: true, wbReadDenied: true }, server: { days: {}, weeks: wk(minOf(15)), board: {}, wb: {} } });
@@ -1621,10 +1681,13 @@ console.log('14. top 5 of the week');
   // M30: the same number is not sent twice.
   const tx1 = pe.log.wbTx; pe.PM._publishWeek(); pe.PM._publishWeek(); await pe.settle(); await pe.run(130);
   check('publishing the same week number again (twice, then 2 minutes pass) starts no new transaction', pe.log.wbTx === tx1, tx1 + ' → ' + pe.log.wbTx);
-  // A clock-ahead cap: the number written is never above 7 days of the cap, whatever the server holds.
+  // The ceiling: the number written is never above 7 days of 24 hours, whatever the server holds (2026-11-15; it was 7 x the 20-minute cap, 8400).
   const big = makeWorld({ period: '4', server: { days: {}, weeks: wk(minOf(50)), board: {}, wb: {} } });
-  big.PM._state(); await big.PM.load(); await big.settle(); big.server.weeks[W].seconds = 99999; big.PM._state().wbSent = ''; big.PM._state().wbAt = 0; big.PM._publishWeek(); await big.settle();
-  check('a week total above 7 x the daily cap (impossible, but the rules would refuse it) is clamped to 8400, never refused', own(big) && own(big).seconds === 8400 && !big.log.wbRefused.length, JSON.stringify(own(big)));
+  big.PM._state(); await big.PM.load(); await big.settle(); big.server.weeks[W].seconds = 999999; big.PM._state().wbSent = ''; big.PM._state().wbAt = 0; big.PM._publishWeek(); await big.settle();
+  check('a week total above 7 x 24 hours (impossible, but the rules would refuse it) is clamped to 604800, never refused', own(big) && own(big).seconds === 604800 && !big.log.wbRefused.length, JSON.stringify(own(big)));
+  const real = makeWorld({ period: '4', server: { days: {}, weeks: wk(minOf(50)), board: {}, wb: {} } });
+  real.PM._state(); await real.PM.load(); await real.settle(); real.server.weeks[W].seconds = 385 * 60; real.PM._state().wbSent = ''; real.PM._state().wbAt = 0; real.PM._publishWeek(); await real.settle();
+  check('a real week past the old 140 minutes (385 min) goes on the Top 5 board as it is, not cut to 8400', own(real) && own(real).seconds === 385 * 60 && !real.log.wbRefused.length, JSON.stringify(own(real)));
 
   // M26: a place worked out for period 4 is not shown for period 7 (a teacher's correction arriving mid-session).
   const pcw = makeWorld({ ui: true, strip: true, config: { uiOn: true }, period: '4', server: { days: {}, weeks: wk(minOf(15)), board: {}, wb: { 'uid-O0': wbDoc(minOf(20)) } } });
@@ -1904,13 +1967,14 @@ console.log('18. My progress rules: can\'t-reach in seconds, "No streak yet" / "
   const SUN = '2026-11-22T10:00:00', WED = '2026-11-18T10:00:00';   // not the Thanksgiving week (2026-11-23), which is a skipped week
   const streak3 = [3700, 3700, 3700];
 
-  /* 1. "Can't reach" is compared in seconds, not rounded-up minutes. Sunday: room = today's cap (1200 s) minus what today already holds. */
-  const out = (weekSecs, todaySecs) => /pm\.weekOut/.test(at(SUN, weekSecs, todaySecs, streak3).tile(1));
-  check('can\'t reach, in seconds: 1 s short with exactly 1 s of today\'s cap left → still reachable', !out(3599, 1199));
-  check('…1 s short with no cap left → cannot be reached', out(3599, 1200));
-  check('…59 s short with exactly 59 s of cap left → still reachable', !out(3541, 1141));
-  check('…60 s short with 59 s of cap left → cannot be reached', out(3540, 1141));
-  check('…50 of 60 min with today at the cap → cannot be reached; with 10 min of cap left → reachable', out(3000, 1200) && !out(3000, 600));
+  /* 1. "Can't reach" is compared in seconds, not rounded-up minutes. With no daily limit (2026-11-15) the room is the time left in the
+     week, to Monday 00:00 (it was today's cap, 1200 s, minus what today held). */
+  const out = (iso, weekSecs, todaySecs) => /pm\.weekOut/.test(at(iso, weekSecs, todaySecs, streak3).tile(1));
+  check('can\'t reach, in seconds: Sunday 23:59:59, 1 s short → still reachable (1 s of the week left)', !out('2026-11-22T23:59:59', 3599, 0));
+  check('…Sunday 23:59:59, 2 s short → cannot be reached', out('2026-11-22T23:59:59', 3598, 0));
+  check('…Sunday 23:59:01, 59 s short ("1 more") → still reachable', !out('2026-11-22T23:59:01', 3541, 0));
+  check('…Sunday 23:59:01, 60 s short → cannot be reached', out('2026-11-22T23:59:01', 3540, 0));
+  check('…50 of 60 min on Sunday at 10:00 with 40 minutes already played today → reachable (no daily limit: it said "can\'t reach" at the 20-minute cap); at 23:55 → cannot', !out(SUN, 3000, 2400) && out('2026-11-22T23:55:00', 3000, 2400));
 
   /* 2. "No streak yet" (never had one) vs "No streak right now" (lost one: longest above 0) vs a real streak. */
   const never = at(WED, 300, 0, []), lost = at('2026-12-16T10:00:00', 300, 0, [0, 0, 0, 3700, 3700, 3700])   /* streaks start at 2026-W45: hit Nov 2, 9, 16; Nov 23 is a skipped week; Nov 30 is the free miss; Dec 7 resets it */, live = at(WED, 300, 0, streak3);
@@ -1933,6 +1997,21 @@ console.log('18. My progress rules: can\'t-reach in seconds, "No streak yet" / "
   const hit = at(WED, 3600, 0, streak3), hitFirst = at(WED, 3600, 0, []);
   check('this week at 60 of 60 min: lit in the tile AND the strip (with a streak, and as a first hit week)', eq(lit(hit), { tile: true, strip: true }) && eq(lit(hitFirst), { tile: true, strip: true }), JSON.stringify([lit(hit), lit(hitFirst)]));
   check('59 min 59 s: not lit', eq(lit(at(WED, 3599, 0, streak3)), { tile: false, strip: false }));
+
+  /* 5. The strip shows the TRUE week total past the goal (Jonathan, 2026-11-15: it showed at most the goal, "60/60", before). The ring
+     stays full at the goal. With t() giving back its parameters, the strip's pm.weekMin carries { done, goal } as counted. */
+  const stripAt = (weekSecs, goals) => {
+    const r = at(WED, weekSecs, 0, streak3);
+    if (goals) r.w.PM.setWeekGoals(goals);
+    r.w.ctx.t = (k, p) => k + (p ? JSON.stringify(p) : '');
+    const html = r.w.PM.stripHtml();
+    return { txt: ((html.replace(/&quot;/g, '"').match(/pm\.weekMin(\{[^}]*\})/) || [])[1]) || '', dash: +((html.match(/class="pm-ring-fg"[^>]*stroke-dashoffset="([\d.]+)"/) || [])[1]) };
+  };
+  const W47 = '2026-W47';
+  const s75 = stripAt(75 * 60), s140 = stripAt(140 * 60), s385 = stripAt(385 * 60), s60 = stripAt(60 * 60), s140g = stripAt(140 * 60, { [W47]: 140 }), s20 = stripAt(20 * 60);
+  check('the strip shows the true minutes past the goal: 75/60, 140/60, 385/60 (and 60/60, 20/60 as before)', s75.txt === '{"done":75,"goal":60}' && s140.txt === '{"done":140,"goal":60}' && s385.txt === '{"done":385,"goal":60}' && s60.txt === '{"done":60,"goal":60}' && s20.txt === '{"done":20,"goal":60}', [s75.txt, s140.txt, s385.txt, s60.txt, s20.txt].join(' '));
+  check('…with a this-week goal of 140: 140/140', s140g.txt === '{"done":140,"goal":140}', s140g.txt);
+  check('…the ring stays full at the goal (dash offset 0 at 60, 140 and 385 of 60) and is a third full at 20', [s60, s140, s385, s140g].every((x) => x.dash === 0) && Math.abs(s20.dash - 2 * Math.PI * 7 * (2 / 3)) < 0.02, [s60.dash, s140.dash, s385.dash, s140g.dash, s20.dash].join(' '));
 }
 
 /* ═══════════ 19. This week's goal: config/class.pmWeekGoals (2026-11-09) ═══════════
@@ -1989,12 +2068,12 @@ console.log('19. this week\'s goal (pmWeekGoals)');
   check('a skipWeeks week with an override of 30 is still a BREAK: goal 0, never a hit at 1800 s', calc.goalSeconds(both, wk(2)) === 0 && s.week.isBreak && !s.week.hit);
 
   /* 5. Validation: a bad entry is dropped, never guessed. */
-  const raw = { '2026-W46': 30, '2026-W45': 140, '2026-W44': 0, bad: 5, '2026-W47': 1.5, '2026-W48': -1, '2026-W49': 141, '2026-W50': '30', '2026-W51': null, '2026-W52': NaN, '2026-W43': Infinity, '2026-W42': true, '26-W41': 30, constructor: 3, toString: 3 };
+  const raw = { '2026-W46': 30, '2026-W45': 600, '2026-W44': 0, bad: 5, '2026-W47': 1.5, '2026-W48': -1, '2026-W49': 601, '2026-W50': '30', '2026-W51': null, '2026-W52': NaN, '2026-W43': Infinity, '2026-W42': true, '26-W41': 30, constructor: 3, toString: 3 };
   const cleaned = calc.cleanWeekGoals(raw, base);
-  check(`cleanWeekGoals keeps exactly the 3 valid entries of ${Object.keys(raw).length} (30, 140 = 7 x the 20-minute cap, and 0) and drops fractions, negatives, 141, strings, null, NaN, Infinity, booleans, a bad week id and own-key look-alikes`, eq(Object.keys(cleaned).sort(), ['2026-W44', '2026-W45', '2026-W46']) && cleaned['2026-W45'] === 140 && cleaned['2026-W44'] === 0 && cleaned['2026-W46'] === 30, JSON.stringify(cleaned));
+  check(`cleanWeekGoals keeps exactly the 3 valid entries of ${Object.keys(raw).length} (30, 600 = the most, and 0) and drops fractions, negatives, 601, strings, null, NaN, Infinity, booleans, a bad week id and own-key look-alikes`, eq(Object.keys(cleaned).sort(), ['2026-W44', '2026-W45', '2026-W46']) && cleaned['2026-W45'] === 600 && cleaned['2026-W44'] === 0 && cleaned['2026-W46'] === 30, JSON.stringify(cleaned));
   check('cleanWeekGoals of nothing, a list, a string or a number is {}', [undefined, null, [], [30], 'x', 7].every((v) => eq(calc.cleanWeekGoals(v, base), {})));
-  check('the largest override comes from the cap, not a constant: with a 10-minute daily cap 70 is the most (70 kept, 71 dropped); 140 at the shipped 20', eq(calc.cleanWeekGoals({ '2026-W46': 70, '2026-W47': 71 }, { dailyCapMinutes: 10 }), { '2026-W46': 70 }) && calc.maxWeekGoalMinutes(base) === 140 && calc.maxWeekGoalMinutes({ dailyCapMinutes: 10 }) === 70);
-  check('goalSeconds does not trust the map it is given: 141 (over the maximum), 1.5, "30" and -5 all fall back to the flat 3600; the lookup reads own keys only (a map with none answers null for "constructor" and "toString")', [141, 1.5, '30', -5].every((v) => calc.goalSeconds(withGoals({ [wk(1)]: v }), wk(1)) === 3600) && calc.weekGoalOf(withGoals({}), 'constructor') === null && calc.weekGoalOf(withGoals({}), 'toString') === null);
+  check('the largest override is 600 minutes (2026-11-15: no daily limit; it was 7 x the 20-minute cap, 140): 600 kept, 601 dropped, 140 and 141 kept, whatever the config', eq(calc.cleanWeekGoals({ '2026-W46': 600, '2026-W47': 601, '2026-W48': 140, '2026-W49': 141 }, base), { '2026-W46': 600, '2026-W48': 140, '2026-W49': 141 }) && calc.maxWeekGoalMinutes(base) === 600 && calc.maxWeekGoalMinutes({ dailyCapMinutes: 10 }) === 600);
+  check('goalSeconds does not trust the map it is given: 601 (over the maximum), 1.5, "30" and -5 all fall back to the flat 3600; the lookup reads own keys only (a map with none answers null for "constructor" and "toString")', [601, 1.5, '30', -5].every((v) => calc.goalSeconds(withGoals({ [wk(1)]: v }), wk(1)) === 3600) && calc.weekGoalOf(withGoals({}), 'constructor') === null && calc.weekGoalOf(withGoals({}), 'toString') === null);
   const inherited = Object.create({ [wk(1)]: 30 });   // a number on the prototype chain, not an own entry
   check('…and a number that is only INHERITED (not an own entry of the map) is no override: goal stays 3600', calc.weekGoalOf(withGoals(inherited), wk(1)) === null && calc.goalSeconds(withGoals(inherited), wk(1)) === 3600 && eq(calc.cleanWeekGoals(inherited, base), {}));
   check('a goal that is written to the week doc is never under a minute: an override of 1 is 60 s', calc.goalSeconds(withGoals({ [wk(1)]: 1 }), wk(1)) === 60);
@@ -2024,7 +2103,7 @@ console.log('19. this week\'s goal (pmWeekGoals)');
     const a = w.track(); a.play();
     const seen = [];
     for (let day = 0; day < 2; day++) {
-      await w.run(16 * 60, w.playing(a));
+      await w.run(16 * 60, clickPlay(w, a));
       a.pause();
       await w.run(5, w.playing(a));
       seen.push({ secs: w.PM.status().week.secs, pending: w.PM._state().pendingToast });
@@ -2083,7 +2162,7 @@ console.log('20. the console\'s This week\'s goal box (teacher.js teacherSetPmWe
       return { api, env, world, calc: world.PM.calc, cfg: teacherClassConfig };
     }
     const MON = new Date(2026, 10, 16, 9, 0, 0).getTime();            // Mon 16 Nov 2026 = 2026-W47
-    const W = '2026-W47', maxMin = 140;
+    const W = '2026-W47', maxMin = 600;   // the engine's MAX_WEEK_GOAL_MINUTES (2026-11-15; 7 x the 20-minute cap, 140, before)
     const goalsOf = (k) => k.api.cfg().weekGoals;
 
     /* 1. A typed value is written as one cell, cell-checked, and the console reads it back through the engine. */
@@ -2125,9 +2204,9 @@ console.log('20. the console\'s This week\'s goal box (teacher.js teacherSetPmWe
       check(`${garbage.length} malformed entries (fractions, signs, exponents, hex, non-ASCII digits, units, words) write nothing and say "bad"`, leaked === 0 && eq([...kinds], ['bad']), 'leaked ' + leaked + ' ' + [...kinds]);
       const lead = consoleAt(MON); await lead.api.write(W, '007');
       check('"007" is the number 7 (leading zeros are fine, the value written is 7)', lead.env.writes.length === 1 && lead.env.writes[0].patch.pmWeekGoals[W] === 7);
-      const k10 = consoleAt(MON, { config: { dailyCapMinutes: 10 } });
-      await k10.api.write(W, '71'); await k10.api.write(W, '70');
-      check('the largest value comes from the engine\'s cap, not a constant: with a 10-minute daily cap 71 is refused and 70 written', k10.env.writes.length === 1 && k10.env.writes[0].patch.pmWeekGoals[W] === 70 && /0 to 70/.test(consoleAt(MON, { config: { dailyCapMinutes: 10 } }).api.box(consoleAt(MON, { config: { dailyCapMinutes: 10 } }).api.cfg(), W, k10.calc, { week: W, kind: 'bad' })));
+      const k10 = consoleAt(MON, { config: { dailyCapMinutes: 10 } });   // an old settings file that still has the removed key changes nothing
+      await k10.api.write(W, '601'); await k10.api.write(W, '600');
+      check('the largest value comes from the engine (600), not the settings: even with an old dailyCapMinutes: 10 in the file, 601 is refused and 600 written, and the "bad" note says 0 to 600', k10.env.writes.length === 1 && k10.env.writes[0].patch.pmWeekGoals[W] === 600 && /0 to 600/.test(consoleAt(MON, { config: { dailyCapMinutes: 10 } }).api.box(consoleAt(MON, { config: { dailyCapMinutes: 10 } }).api.cfg(), W, k10.calc, { week: W, kind: 'bad' })));
     }
 
     /* 2b. The 2026-11-09 review. A failed read of the class settings leaves a copy that is {} with version 0: nothing may be written from it. */
@@ -2212,7 +2291,7 @@ console.log('21. a goal that changes while the page is open');
   const w = makeWorld({ ui: true, config: { uiOn: true }, strip: true });
   w.PM.syncHeader(true);
   const wk = w.PM.status().week.id;
-  const a = w.track(); a.play(); await w.run(600, w.playing(a)); a.pause(); await w.run(3, w.playing(a));
+  const a = w.track(); a.play(); await w.run(600, clickPlay(w, a)); a.pause(); await w.run(3, w.playing(a));
   const before = w.stripEl.innerHTML;
   w.PM.setWeekGoals({ [wk]: 30 });
   const after = w.stripEl.innerHTML;
@@ -2225,9 +2304,9 @@ console.log('21. a goal that changes while the page is open');
   w.PM.syncHeader(true);
   const wk = w.PM.status().week.id;
   w.PM.setWeekGoals({ [wk]: 30 });
-  const a = w.track(); a.play(); await w.run(19 * 60, w.playing(a)); a.pause(); await w.run(3, w.playing(a));
+  const a = w.track(); a.play(); await w.run(19 * 60, clickPlay(w, a)); a.pause(); await w.run(3, w.playing(a));
   w.clock.ms += 24 * 3600 * 1000; w.clock.perf += 24 * 3600 * 1000;           // a second day: the 20-minute cap is per day
-  a.play(); await w.run(12 * 60, w.playing(a)); a.pause(); await w.run(3, w.playing(a));
+  a.play(); await w.run(12 * 60, clickPlay(w, a)); a.pause(); await w.run(3, w.playing(a));
   const held = w.PM._state().pendingToast;
   w.PM.setWeekGoals({ [wk]: 60 });                                          // the teacher raises it before the held toast could show
   opts.pills = true;                                                        // the strip is on screen again
@@ -2244,7 +2323,7 @@ console.log('21. a goal that changes while the page is open');
   const w = makeWorld({ ui: true, config: { uiOn: true, recapMinSeconds: 1e9 }, strip: true, pills: true });
   w.PM.syncHeader(true);
   const wk = w.PM.status().week.id;
-  const a = w.track(); a.play(); await w.run(15 * 60, w.playing(a)); a.pause(); await w.run(3, w.playing(a));
+  const a = w.track(); a.play(); await w.run(15 * 60, clickPlay(w, a)); a.pause(); await w.run(3, w.playing(a));
   w.PM.setWeekGoals({ [wk]: 10 });                                          // lowered below the 15 minutes already counted
   a.play(); await w.run(90, w.playing(a)); a.pause(); await w.run(3, w.playing(a));
   check('a goal lowered below what the student has: more counted seconds give NO toast, nothing queued, the week shows as hit', !w.pills().some((p) => p.id === 'pm-toast') && w.PM._state().pendingToast === false && w.PM._state().toastWeek !== wk && w.PM.status().week.hit);
@@ -2265,13 +2344,13 @@ console.log('22. the Practice minutes view as drawn (teacher.js renderTeacherMin
   if (Object.values(parts).every(Boolean)) {
     const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     const MON = new Date(2026, 10, 16, 9, 0, 0).getTime(), W = '2026-W47';
-    function view({ readOk = true, data = true, loading = false, goals = {}, active = null, pm = null, error = '' } = {}) {
+    function view({ readOk = true, data = true, loading = false, goals = {}, active = null, pm = null, error = '', weeks = null } = {}) {
       const world = makeWorld();
       class FakeD extends Date { constructor(...a) { if (a.length) super(...a); else super(MON); } static now() { return MON; } }
       const box = { innerHTML: 'KEEP' };
       const doc = { getElementById: (id) => (id === 't-grid-container' ? box : null), activeElement: active };
       const students = [{ uid: 'u1', name: 'Ana Test', period: '4' }, { uid: 'u2', name: 'Ben Test', period: '7' }];
-      const env = { loads: 0, loading, readOk, error, data: data ? { at: MON, weeks: { u1: { [W]: 600 }, u2: {} } } : null, cfg: { pmWeekGoals: goals }, students };
+      const env = { loads: 0, loading, readOk, error, data: data ? { at: MON, weeks: weeks || { u1: { [W]: 600 }, u2: {} } } : null, cfg: { pmWeekGoals: goals }, students };
       const make = new Function('PM', 'window', 'document', 'Date', 'escHtml', 'escAttr', 'env',
         `let teacherStudentsAt = 1, teacherRefreshFailed = false, teacherPmLoading = env.loading, teacherPmError = env.error, teacherPmData = env.data, teacherPmSort = 'week';
          let teacherClassConfigReadOk = env.readOk, teacherClassConfig = env.cfg, teacherPmGoalNote = null; const allStudents = env.students;
@@ -2286,6 +2365,10 @@ console.log('22. the Practice minutes view as drawn (teacher.js renderTeacherMin
     check('the view as drawn with its settings read: the box (blank, placeholder 60), the table with both students at "10 / 60 min" and "0 / 60 min", the footnote "The goal this week: 60 minutes."', /data-pm-goal/.test(full.box.innerHTML) && /pm-t-table/.test(full.box.innerHTML) && /Ana Test/.test(full.box.innerHTML) && /10 \/ 60 min/.test(full.box.innerHTML) && /0 \/ 60 min/.test(full.box.innerHTML) && /The goal this week: 60 minutes\./.test(full.box.innerHTML) && full.env.loads === 0, full.box.innerHTML.slice(0, 300));
     const g30 = view({ goals: { [W]: 30 } }); g30.api.render();
     check('with this week set to 30 the SAME drawn table reads "10 / 30 min" and the footnote says "30 minutes, set for this week only (usually 60)", the box value is 30', /10 \/ 30 min/.test(g30.box.innerHTML) && /30 minutes, set for this week only \(usually 60\)/.test(g30.box.innerHTML) && /value="30"/.test(g30.box.innerHTML) && !/10 \/ 60 min/.test(g30.box.innerHTML));
+    /* 2026-11-15: the console shows the TRUE week (Jonathan saw five students at exactly "40 / 40 min" with a goal of 40: two days at the
+       20-minute daily cap, which is gone). A week far past the goal reads as it is. */
+    const past = view({ goals: { [W]: 40 }, weeks: { u1: { [W]: 385 * 60 }, u2: { [W]: 41 * 60 } } }); past.api.render();
+    check('the console\'s table shows the true week past the goal: "385 / 40 min ✓" and "41 / 40 min ✓" with this week\'s goal at 40', /385 \/ 40 min/.test(past.box.innerHTML) && /41 \/ 40 min/.test(past.box.innerHTML), (past.box.innerHTML.match(/\d+ \/ \d+ min/g) || []).join(' | '));
     const failed = view({ readOk: false }); failed.api.render();
     check('the class settings could not be read: NO table, NO goal box, and the line says so (a table drawn with the flat goal would be a confident wrong answer)', /data-pm-settings-failed/.test(failed.box.innerHTML) && /Could not read the class settings/.test(failed.box.innerHTML) && !/pm-t-table/.test(failed.box.innerHTML) && !/data-pm-goal/.test(failed.box.innerHTML), failed.box.innerHTML.slice(0, 300));
     const failedLoading = view({ readOk: false, loading: true }); failedLoading.api.render();
@@ -2304,6 +2387,82 @@ console.log('22. the Practice minutes view as drawn (teacher.js renderTeacherMin
     try { old.api.render(); } catch (e) { oldErr = e.message; }   // a throw is a red line here, not a crash of the whole simulation
     check('an older engine on the page (no cleanWeekGoals / weekGoalOf / maxWeekGoalMinutes) draws "did not load, Reload" instead of throwing half way', !oldErr && /did not load on this page/.test(old.box.innerHTML) && !/pm-t-table/.test(old.box.innerHTML), oldErr);
   }
+}
+
+/* ═══════════ 23. No daily limit, and the paste gap (2026-11-15) ═══════════
+   Jonathan: "remove the 20 minute a day limit. it should be actual minutes". The rules that allow it (Paste E) are pasted by hand, so this
+   engine may run for a while against the OLD rules (server.oldRules: a day above 1200 s, a week above 8400 s refused). Nothing may be lost
+   in that gap: a refused batch stays queued and lands once the rules are published, and the pagehide keepalive (which cannot see a
+   refusal and deletes what it sends) does not send a day past 1200 s until the server shows the new rules. */
+console.log('23. no daily limit, and the gap before the rules are pasted');
+{
+  const sh = shared(); sh.server.oldRules = true;
+  const w = makeWorld(sh);
+  const a = w.track(); a.play();
+  await runAll([w], 30 * 60, (i) => { if (!a.paused) a.currentTime += 1; if (i % 300 === 0) w.input('pointerdown'); });
+  a.pause(); await runAll([w], 130);
+  const counted = sec(w), onServer = sh.server.days[todayStr]?.seconds || 0;
+  check('the gap: 30 minutes played; the server keeps what the old rules allow (at most 1200 s) and the page keeps every second (1800 counted)', counted >= 1799 && counted <= 1801 && onServer <= 1200 && onServer >= 1100, `counted ${counted}, server ${onServer}`);
+  check('…and the student\'s own page shows the true week (30 min), not the server\'s', Math.floor(w.PM.status().week.secs / 60) === 30, String(w.PM.status().week.secs));
+  const f0 = w.log.fetches.length;
+  for (const f of w.listeners['win:pagehide'] || []) f();
+  const key = qDays(w);
+  check('…the tab closes in the gap: the keepalive does NOT send the day past 1200 s (it would be refused and deleted); the seconds stay in the leaving key', w.log.fetches.length === f0 && key && key[todayStr] === counted - onServer, `fetches ${w.log.fetches.length - f0}, key ${JSON.stringify(key)}`);
+  sh.server.oldRules = false;   // Jonathan pastes the rules
+  const w2 = makeWorld({ ...sh, clock: { ms: sh.clock.ms + 240000, perf: 9000 } });
+  w2.PM.status(); await runAll([w2], 40); await w2.PM.flush(); await w2.settle(); await runAll([w2], 5);
+  check('…the rules are pasted, a page opens 4 minutes later: every second lands, once (server = 1800 counted)', (sh.server.days[todayStr]?.seconds || 0) === counted, `server ${sh.server.days[todayStr]?.seconds} vs ${counted}`);
+}
+{
+  /* The gap, and a tab that closes BEFORE any flush was refused (no back-off is running): the server holds 1180 s today, the page counted
+     50 s more and has not flushed yet. A keepalive of them would be refused (1230 > 1200) and deleted as if it had landed. */
+  const sh = shared(); sh.server.oldRules = true; sh.net.applyKeepalive = true;
+  sh.server.days[todayStr] = { seconds: 1180 }; sh.server.weeks['2026-W47'] = { seconds: 1180, goalSeconds: 3600, hit: false };
+  const w = makeWorld(sh);
+  const a = w.track(); a.play();
+  await runAll([w], 50, (i) => { if (!a.paused) a.currentTime += 1; });
+  const held = sec(w) - 1180;
+  for (const f of w.listeners['win:pagehide'] || []) f();
+  await w.settle();
+  const landed = (sh.server.days[todayStr]?.seconds || 0) - 1180;   // the first flush after the load sends the few seconds counted by then (still under 1200)
+  check('the gap, a tab closing with the day at 1180 + 50 s and no refusal seen yet: no keepalive is sent, and every second not landed stays in the leaving key', held >= 49 && landed < 20 && !w.log.fetches.some((f) => f.init && f.init.keepalive) && (qDays(w) || {})[todayStr] === held - landed, `held ${held}, landed ${landed}, fetches ${w.log.fetches.length}, key ${JSON.stringify(qDays(w))}`);
+  sh.server.oldRules = false;
+  const w2 = makeWorld({ ...sh, clock: { ms: sh.clock.ms + 240000, perf: 9000 } });
+  w2.PM.status(); await runAll([w2], 40); await w2.PM.flush(); await w2.settle(); await runAll([w2], 5);
+  check('…after the paste the next page sends them: the server holds 1180 + 50, nothing lost', (sh.server.days[todayStr]?.seconds || 0) === 1180 + held, `server ${sh.server.days[todayStr]?.seconds}`);
+}
+{
+  /* The same gap with the page left open: the regular flush is refused, keeps the seconds, backs off 5 minutes, and lands after the paste. */
+  const sh = shared(); sh.server.oldRules = true;
+  const w = makeWorld(sh);
+  const a = w.track(); a.play();
+  const clicks = (i) => { if (!a.paused) a.currentTime += 1; if (i % 300 === 0) w.input('pointerdown'); };
+  await runAll([w], 25 * 60, clicks);
+  check('the gap, page open: the server stops at the old cap and the rest waits in the queue (≈ 300 s or more queued)', (sh.server.days[todayStr]?.seconds || 0) <= 1200 && Object.values(w.PM._state().pend).reduce((x, y) => x + y, 0) + (w.PM._state().inflight ? 1 : 0) >= 290, `server ${sh.server.days[todayStr]?.seconds}`);
+  sh.server.oldRules = false;
+  await runAll([w], 7 * 60, clicks);
+  a.pause(); await runAll([w], 130); await w.PM.flush(); await w.settle();
+  check('…pasted while the page is open: within the 5-minute back-off everything lands, exactly once (32 min)', (sh.server.days[todayStr]?.seconds || 0) === sec(w) && sec(w) >= 32 * 60 - 2, `server ${sh.server.days[todayStr]?.seconds} vs ${sec(w)}`);
+  const f0 = w.log.fetches.length;
+  w.input('pointerdown'); a.play(); await runAll([w], 30, clicks);
+  for (const f of w.listeners['win:pagehide'] || []) f();
+  check('…and once the server holds a day past 1200 s, the keepalive sends a closing tab\'s last seconds again', w.log.fetches.length === f0 + 1, `fetches ${w.log.fetches.length - f0}`);
+}
+{
+  /* Under the new rules from the start: a day far past 20 minutes, a week far past 140 minutes. */
+  const w = makeWorld();
+  const a = w.track(); a.play();
+  for (let day = 0; day < 4; day++) {
+    await w.run(99 * 60, clickPlay(w, a));   // the last click at 90:00, so the pause at 99:00 ends the count at once
+    a.pause(); await w.run(5);
+    await w.PM.flush(); await w.settle();
+    w.clock.ms += 24 * 3600 * 1000; w.clock.perf += 24 * 3600 * 1000;
+    w.input('pointerdown'); a.play();
+  }
+  a.pause(); await w.run(130); await w.PM.flush(); await w.settle();
+  const wk = w.server.weeks['2026-W47'], fifth = w.server.days['2026-11-20']?.seconds || 0;
+  check('four 99-minute days: each day doc holds 5940 s (past the old 1200) and the week doc 23760 s plus the fifth morning\'s click (396 min, past the old 140-minute week): nothing refused, nothing cut', Object.values(w.server.days).filter((d) => d.seconds === 5940).length === 4 && wk && wk.seconds === 23760 + fifth && fifth <= 125 && wk.hit === true, JSON.stringify({ days: w.server.days, wk }));
+  check('…and status() says at least 396 minutes this week', Math.floor(w.PM.status().week.secs / 60) >= 396, String(w.PM.status().week.secs));
 }
 
 console.log(`\n${failed ? '✗' : '✓'} pm-sim: ${passed} passed, ${failed} failed`);
