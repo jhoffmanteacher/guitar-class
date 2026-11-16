@@ -946,8 +946,11 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
       the default); `tools/visible-loop.mjs` R16 (which cards are in Today at every sign-in), the `keep` value
       through caches and tab returns, a `keepToday` change kind and a directed signature step;
       `tools/two-consoles-loop.mjs` drives the new writer (M28). Not changed: `firestore.rules` (the config/class
-      write rule is teacher-only, field-free; its comment's field list does not name the new field). Open product
-      questions for Jonathan are in the agent's report to the lead.
+      write rule is teacher-only, field-free; its comment's field list does not name the new field). Jonathan
+      confirmed (2026-11-16): a finished kept card stays in Today with its ✓; a kept card does not make a student
+      "behind". Known limit: a stale console can tick the box on a card another console just deleted (its one cell
+      is all the write checks), the same race Hidden, Optional and Play Along have; the flag then sits on a deleted
+      card, which no student sees.
 
 - [x] **2026-11-16 — The teacher console stops enlarging on a big screen; Live In-Class Games still fills.**
       Jonathan: "teacher dashboard view is larger on windows than mac"; told the fill shows the same content enlarged:

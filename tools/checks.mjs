@@ -11673,9 +11673,15 @@ function checkTodayByDate(ctx) {
    Today is 1cq's, which it renders; tools/visible-loop.mjs R16 runs it across
    reads, caches and tab returns). This pins the rest, by running it:
    * OFF BY DEFAULT: the student page boots with keepTodayActivityIds = {}
-     (the 0b context, before anything is loaded), and loadClassConfig() reads
-     a missing field as {}; the console draws the box UNticked for a card the
-     map does not name.
+     (the 0b context, before anything is loaded, run); the console draws the
+     box UNticked for a card the map does not name (run). That
+     loadClassConfig() reads a missing field as {} is only a SOURCE pin here:
+     a reader that drops or mangles the field is caught by
+     tools/visible-loop.mjs (the `keep` value and R16), not by this check.
+   * "BEHIND THE CLASS": the real teacherBehindFor (teacher-students.js), with
+     its blocker list stubbed to three required, unfinished cards dated ten
+     days back: behind when none is kept, not behind when one of them is kept
+     (TEACHER_BEHIND_MIN read from the console).
    * THE BOX: the console's real publishBlock (teacherActivityCtlKit, run in a
      small context) draws exactly one data-set-activity-keep-today checkbox in
      each of its three states (undated, scheduled, live), inside the same
@@ -11772,7 +11778,28 @@ function checkKeepToday(ctx) {
       await w.teacherSetActivityKeepToday('ca-9', true);
       want(!('ca-9' in w.teacherClassConfig.keepTodayActivities) && fails.length === 1, `a failed tick: copy ${JSON.stringify(w.teacherClassConfig.keepTodayActivities)}, ${fails.length} reports; expected the copy put back and one teacherConfigSaveFailed`);
     } catch (e) { flag('1eo: the writer threw: ' + e.message); }
-    if (!bad) ok(`off by default (the student page boots with {}, a missing field reads {}), the real publishBlock run ${renders} times (undated, scheduled, live x ticked / off): one box beside the release date, ticked exactly when the map says so; drawn by the board card and the Settings Release row; the real writer run 3 times (tick, untick, a failed tick put back): one cell-checked cell each; Delete clears it; ${asserts} assertions`);
+    /* "Behind the class": the real teacherBehindFor, kept cards left out. */
+    const bBody = jsFunctionBody(tch, 'teacherBehindFor'), aBody = jsFunctionBody(tch, 'teacherDayAdd');
+    const minM = /const TEACHER_BEHIND_MIN=(\d+);/.exec(tch);
+    let behindRuns = 0;
+    if (!bBody || !aBody || !minM) flag('1eo cannot find teacherBehindFor(), teacherDayAdd() or TEACHER_BEHIND_MIN in the console');
+    else {
+      const N = Number(minM[1]);
+      const ymd = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      const ids = Array.from({ length: N }, (_, i) => 'ca-' + (900 + i));
+      const bx = { dayStr: ymd, TEACHER_BEHIND_MIN: N, teacherBlockersFor: () => ids.map(id => ({ id })) };
+      try {
+        vm.createContext(bx);
+        vm.runInContext(`function teacherDayAdd(ymd, n)${aBody}\nfunction teacherBehindFor(stu, cfg, today)${bBody}`, bx, { timeout: 2000 });
+        const old = vm.runInContext('teacherDayAdd("2026-11-16", -10)', bx);
+        const dates = Object.fromEntries(ids.map(id => [id, old]));
+        const plain = bx.teacherBehindFor({ uid: 'test-uid' }, { activityDates: dates }, '2026-11-16'); behindRuns++;
+        const kept = bx.teacherBehindFor({ uid: 'test-uid' }, { activityDates: dates, keepTodayActivities: { [ids[0]]: true } }, '2026-11-16'); behindRuns++;
+        want(plain && plain.n === N, `Behind the class: ${N} required unfinished cards dated ${old}, none kept: ${JSON.stringify(plain)}, expected behind by ${N}`);
+        want(kept === null, `Behind the class: the same ${N} cards with one kept in Today's activities: ${JSON.stringify(kept)}, expected not behind (a kept card is still Today's work)`);
+      } catch (e) { flag('1eo: teacherBehindFor does not run: ' + e.message); }
+    }
+    if (!bad) ok(`off by default (the student page boots with {}, run; the reader's "|| {}" is a source pin, visible-loop R16 runs it), the real teacherBehindFor run ${behindRuns} times (a kept card is not "behind"), the real publishBlock run ${renders} times (undated, scheduled, live x ticked / off): one box beside the release date, ticked exactly when the map says so; drawn by the board card and the Settings Release row; the real writer run 3 times (tick, untick, a failed tick put back): one cell-checked cell each; Delete clears it; ${asserts} assertions`);
   })();
 }
 

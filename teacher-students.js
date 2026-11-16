@@ -570,7 +570,7 @@ function renderTeacherStudents(){
   teacherPaintStudentsBadge(awayN);
   const seg=(v,label,n)=>`<button type="button" class="tg-seg-btn${filter===v?' on':''}" data-stu-filter="${v}" aria-pressed="${filter===v}">${label}${n!=null?`<span class="stu-filter-n">${n}</span>`:''}</button>`;
   const filterNote = filter==='behind'
-    ? `${TEACHER_BEHIND_MIN} or more required activities not done, released before yesterday (today's and yesterday's don't count). Most behind first.`
+    ? `${TEACHER_BEHIND_MIN} or more required activities not done, released before yesterday (today's and yesterday's don't count, and neither does one you keep in Today's activities). Most behind first.`
     : filter==='away'
       ? `No saved work on 2 or more class days in a row (days an activity came out), then back in the last ${TEACHER_ABS_RECENT} class days. Most recent return first.`
       : '';
