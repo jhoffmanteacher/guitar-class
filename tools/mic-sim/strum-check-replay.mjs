@@ -1,7 +1,8 @@
 /* Real strum-pattern-check takes (ca-52), replayed through the REAL check (2026-11-14; Jonathan's own takes from local recording mode,
    J01.. in `Claude outputs/takes-anon/`, local-takes-in.mjs). A sibling of replay-listen.mjs; measure-only, changes no site code.
 
-     node tools/mic-sim/strum-check-replay.mjs <J01.json> [<J02.json> ...] [--key=<file>] [--diag] [--dot] [--sweep [--cands=<json>]]
+     node tools/mic-sim/strum-check-replay.mjs <J01.json> [<J02.json> ...] [--key=<file>] [--diag] [--dot] [--sweep [--cands=<json>]
+                                               [--no-bench]] [--splice [--splice-offs=0,-40,40]] [--copy=<json>] [--shifts=J01:-117.5,..]
                                                [--json=<file>]
 
    THE REPLAY: the take's .wav goes back through the site's mic chain (replay-takes.mjs prepare) into the bench page (listen-site.mjs
@@ -25,7 +26,11 @@
    --sweep: the same takes under other settings, through a copy of srHearStrum put in the page (HOOK below: the site's function line
    for line with its numbers and its grid rule made settable; the default settings must reproduce the real function exactly, and the run
    stops if they do not), beside the synthetic bench's students (strum-check-loop.mjs) under the same settings; each take at its kept
-   clock and +-20 ms. --cands=<json>: only the settings listed ([{ ratio, hfRatio, refract, rule, ease, cap, within, which }]).
+   clock and +-20 ms. --cands=<json>: only the settings listed ([{ name, ratio, hfRatio, refract, rule, ease, cap, within, outPen,
+   dupOnce, lock, which }]), each printed per take and clock beside today's (the copy at SITE_P); --no-bench leaves the bench out.
+   Review R4-1's candidates (2026-11-16): A {"outPen":-1.5}, C {"outPen":-1.5,"dupOnce":true}, D {"lock":0.25}, AD both.
+   --copy=<json>: the settings the identity test gives the copy, for a tree with a candidate planted in coach-strumcheck.js.
+   --splice: one of the take's own strums pasted into a rest (the block above `--gate` says how); caught / bar passed per candidate.
    The results of 2026-11-14 are in `Claude outputs/strum-coach/DETAILS.md` section 20. Not in checks.mjs. */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve, basename, dirname, join } from 'node:path';
@@ -74,18 +79,30 @@ const HOOK = `(() => {
           s.__on = s.__on || []; s.__on.push(coachOnsetAt);
           const span = 8 * s.slotMs, recent = s.__on.filter(t => coachOnsetAt - t < span);
           const lim = (p.wide || 1e9) * s.slotMs;
-          const search = (c0, R, keepNear, centred) => {
+          /* review R4-1's candidates (2026-11-16; all off by default = the site's code):
+               outPen  an onset outside every window scores this (candidate A: -1.5, as on a rest; today it scores nothing)
+               dupOnce a second onset in the same eighth scores as a rest (candidate C, with A)
+               lock    when the onsets before this one (4 or more) all fit the grid of the moment, search only +-lock eighths
+                       (candidate D: 0.25; AD = A and D) */
+          const search = (c0, R, keepNear, centred, list) => {
             const n = Math.ceil(R / 5); let best = keepNear, bestSc = -1e9, bestOff = 1e9, bestN = 0;
             for (let i = 0; i <= 2 * n; i++){
               const o = c0 + (i % 2 ? 1 : -1) * Math.ceil(i / 2) * 5;
               if (p.rule === 'shapeFree' && Math.abs(o) > lim + 1e-9 && o !== c0) continue;
-              let sc0 = 0, off = 0, nIn = 0;
-              for (const t of recent){ const q = t - s.listenStart - o - s.lat, k = Math.round(q / s.slotMs), d = q - k * s.slotMs; if (Math.abs(d) > s.win) continue; const ks = ((k % 8) + 8) % 8; sc0 += s.slotsOf && s.slotsOf[ks] && s.slotsOf[ks].strum ? 1 : -1.5; off += Math.abs(d); nIn++; }
+              let sc0 = 0, off = 0, nIn = 0; const seen = p.dupOnce ? new Set() : null;
+              for (const t of list || recent){
+                const q = t - s.listenStart - o - s.lat, k = Math.round(q / s.slotMs), d = q - k * s.slotMs;
+                if (Math.abs(d) > s.win){ if (p.outPen != null) sc0 += p.outPen; continue; }
+                const ks = ((k % 8) + 8) % 8, dup = seen ? seen.has(k) : false; if (seen) seen.add(k);
+                sc0 += s.slotsOf && s.slotsOf[ks] && s.slotsOf[ks].strum && !dup ? 1 : -1.5; off += Math.abs(d); nIn++;
+              }
               if (sc0 > bestSc || (centred && sc0 === bestSc && off < bestOff - 1e-9) || (p.rule === 'shape' && sc0 === bestSc && Math.abs(o - keepNear) < Math.abs(best - keepNear))){ bestSc = sc0; best = o; bestOff = off; bestN = nIn; }
             }
             return { best, score: bestSc, off: bestOff, n: bestN };
           };
-          let r = p.rule === 'shape' ? search(0, s.slotMs / 2, s.gridOffset) : search(s.gridOffset, (p.range || 1) * s.slotMs, s.gridOffset);
+          let range = p.range || 1;
+          if (p.lock && p.rule === 'shapeFree'){ const others = recent.slice(0, -1); if (others.length >= 4 && search(s.gridOffset, 0, s.gridOffset, false, others).score === others.length) range = p.lock; }
+          let r = p.rule === 'shape' ? search(0, s.slotMs / 2, s.gridOffset) : search(s.gridOffset, range * s.slotMs, s.gridOffset);
           if (p.rule === 'shapeFree' && p.wide && recent.length >= (p.wideMin || 6) && r.score < recent.length - (p.wideSlack == null ? 1.5 : p.wideSlack)){
             const w = search(s.gridOffset, p.wide * s.slotMs, s.gridOffset, true);
             if (w.score >= recent.length - (p.wideAccept == null ? 1 : p.wideAccept) && w.n && w.off / w.n <= (p.wideTight == null ? 1e9 : p.wideTight) * s.slotMs) r = w;
@@ -139,8 +156,11 @@ const takes = files.map(f => {
   if (d.game !== 'strumcheck') throw new Error(basename(f) + ' is not a strum-check take');
   const wav = readWav(resolve(f).replace(/\.json$/, '.wav')), srcRate = Number(d.srcSampleRate) || wav.sr;
   const id = basename(f).replace(/\.json$/, '');
-  return { id, d, srcRate, proc: prepare(wav, srcRate, site.chain), key: KEY[id] || {} };
+  return { id, d, srcRate, wav, proc: prepare(wav, srcRate, site.chain), key: KEY[id] || {} };
 });
+/* --copy=<json>: the settings the identity test gives the page's copy (over SITE_P), for a tree whose real function carries a
+   candidate (e.g. --copy='{"outPen":-1.5}' on a tree with candidate A planted: the copy must equal the planted code too). */
+const COPY_P = { ...SITE_P, ...JSON.parse(opt('copy') || '{}') };
 
 function setP(p){ site.run('__scHook.on = ' + (p ? 'true' : 'false') + '; __scHook.p = ' + JSON.stringify(p || null)); }
 
@@ -249,9 +269,9 @@ for (const tk of takes){
   log(`${tk.id} · ${tk.d.bpm} BPM · ${tk.d.micLabel ? 'mic ' + tk.d.micLabel.replace(/\(.*\)/, '').trim() : ''} · frame ${tk.d.frameMeanMs} ms · live gridOffset ${tk.d.gridOffsetMs} ms, replay ${base.gridOffset} ms`);
   log(`  REPRODUCED (the real check, the fitted clock): slots ${a.s} of 64 · chords ${a.c} of 8 (rules a and b both: ${a.cab} of 8)` + (a.diff.length ? '\n    ' + a.diff.join('\n    ') : ''));
   for (const sh of [-20, 20, -40, 40]){ const r = await replay(tk, null, { shift: tk.shift + sh }); const b = agree(tk, r); log(`    fitted clock ${sh > 0 ? '+' : ''}${sh} ms: slots ${b.s} of 64 · chords ${b.c} of 8`); }
-  const own = await replay(tk, SITE_P);
+  const own = await replay(tk, COPY_P, { shift: tk.shift });
   const ao = agree(tk, own), same = JSON.stringify(own.slots) === JSON.stringify(base.slots) && JSON.stringify(own.caps) === JSON.stringify(base.caps) && JSON.stringify(own.events) === JSON.stringify(base.events);
-  log(`  the page's copy of srHearStrum at the site's settings: ${same ? 'IDENTICAL to the real function (slots, chords, events)' : 'DIFFERENT: slots ' + ao.s + ' of 64'}`);
+  log(`  the page's copy of srHearStrum at the site's settings${opt('copy') ? ' + ' + opt('copy') : ''}: ${same ? 'IDENTICAL to the real function (slots, chords, events)' : 'DIFFERENT: slots ' + ao.s + ' of 64'}`);
   if (!same){ console.error('strum-check-replay: the copy does not reproduce the real srHearStrum; the sweep would mean nothing'); process.exit(1); }
   const sc = score(tk, base);
   log(`  against the key: strums heard ${sc.heard} of ${sc.strums} · false extras ${sc.extras} of ${sc.rests} · right chords called right ${sc.right} of ${sc.rightN} · wrong chords caught ${sc.caught} of ${sc.wrongN}`);
@@ -363,19 +383,69 @@ if (flag('sweep')){
   /* --cands=<json>: only these settings (each { ...settings, which: 'ratios' | 'grid' }), over the site's */
   if (opt('cands')){ cands.length = 0; grid.length = 0; JSON.parse(opt('cands')).forEach(c => cands.push({ ...SITE_P, ...c })); }
   for (const g of grid) cands.push({ ...SITE_P, ...g, which: 'grid' });
+  /* --no-bench: the takes only (the synthetic bench is strum-check-loop.mjs's own run). Each candidate's takes are printed:
+     name (the candidate's `name`, else its settings) · take · clock · heard, false extras, bars all right (of 8), right chords. */
+  if (opt('cands')) cands.unshift({ ...SITE_P, name: 'today', which: 'ratios' });
   for (const c of cands){
-    const p = Object.fromEntries(Object.entries(c).filter(([k]) => k !== 'which'));
-    const row = { p, takes: {}, bench: null };
+    const p = Object.fromEntries(Object.entries(c).filter(([k]) => k !== 'which' && k !== 'name'));
+    const row = { p, name: c.name, takes: {}, bench: null };
     for (const tk of takes){
       const runs = [];
       for (const d of [0, -20, 20]){ const r = await replay(tk, p, { shift: tk.shift + d }); runs.push({ d, score: score(tk, r), perBar: r.slots.reduce((m, x) => { m[x.bar] = (m[x.bar] || '') + (x.state === (x.strum ? 'ok' : 'quiet') ? '·' : x.strum ? 'm' : 'x'); return m; }, []), chords: r.caps.map(x => x.verdict), barsOk: [...Array(8).keys()].filter(b => r.slots.slice(b * 8, b * 8 + 8).every(x => x.state === (x.strum ? 'ok' : 'quiet'))).length }); }
       row.takes[tk.id] = runs;
+      if (opt('cands')) runs.forEach(x => log(`SWEEP ${(c.name || JSON.stringify(Object.fromEntries(Object.entries(p).filter(([k, v]) => SITE_P[k] !== v)))).padEnd(8)} ${tk.id} clock ${x.d > 0 ? '+' : ''}${x.d} ms: heard ${x.score.heard}/${x.score.strums} · false extras ${x.score.extras}/${x.score.rests} · bars all right ${x.barsOk}/8 (${x.perBar.join(' ')}) · right chords ${x.score.right}/${x.score.rightN} · wrong caught ${x.score.caught}/${x.score.wrongN}`));
     }
-    row.bench = await bench(p, c.which);
+    if (!flag('no-bench')) row.bench = await bench(p, c.which);
     out.sweep.push(row);
     process.stderr.write('.');
   }
   process.stderr.write('\n');
+}
+/* --splice (2026-11-16, review R4-1): a REAL extra strum. One of the take's own strums (the bar's slot 0 for its rest on slot 1, its
+   slot 2 for its rest on slot 4: both down-strums) is copied from the .wav (from 30 ms before its onset, min(220 ms, 0.7 eighth) long)
+   and ADDED into one rest of the same bar, at the rest's place as he played it (halfway between his own two strums either side, as the
+   replay of today's code hears them) plus --splice-offs (default 0,-40,40,-80,80 ms). Bars 2 to 7, both rests: up to 12 rests a take,
+   one extra per replay, at the take's kept clock. Under today's code (the copy at SITE_P) and each --cands candidate. Per variant:
+   caught (the rest's slot "extra"), the mistake bar passed (its six strums heard, no extra), and the OTHER 63 slots that changed
+   against the same variant's replay of the unspliced take. */
+if (flag('splice')){
+  const offs = (opt('splice-offs') || '0,-40,40,-80,80').split(',').map(Number);
+  const vars = [{ name: 'today', p: SITE_P }].concat(opt('cands') ? JSON.parse(opt('cands')).map((c, i) => ({ name: c.name || 'cand' + i, p: Object.fromEntries(Object.entries({ ...SITE_P, ...c }).filter(([k]) => k !== 'which' && k !== 'name')) })) : []);
+  const tally = {};
+  for (const tk of takes){
+    const ref = await replay(tk, null, { shift: tk.shift }), sr = tk.wav.sr, lat = Number(tk.d.latMs) || 0;
+    const wavMs = e => e.t + ref.ls + lat - ref.map;   // an event's onset, in ms of the .wav
+    const ev = k => ref.events.find(e => e.k === k && e.kind === 'strum');
+    const plain = {}; for (const v of vars) plain[v.name] = await replay(tk, v.p, { shift: tk.shift });
+    const slotMs = 60000 / tk.d.bpm / 2, L = Math.min(220, 0.7 * slotMs);
+    for (let bar = 1; bar <= 6; bar++) for (const [rest, src, a, b] of [[1, 0, 0, 2], [4, 2, 3, 5]]){
+      const eS = ev(bar * 8 + src), eA = ev(bar * 8 + a), eB = ev(bar * 8 + b);
+      if (!eS || !eA || !eB){ log(`SPLICE ${tk.id} bar ${bar + 1} rest ${rest}: left out (today's replay did not hear its strums ${src}/${a}/${b})`); continue; }
+      const from = Math.round((wavMs(eS) - 30) / 1000 * sr), n = Math.round(L / 1000 * sr), mid = (wavMs(eA) + wavMs(eB)) / 2;
+      for (const off of offs){
+        const to = Math.round((mid + off - 30) / 1000 * sr), x = Float32Array.from(tk.wav.x);
+        for (let i = 0; i < n && to + i < x.length; i++) x[to + i] += tk.wav.x[from + i];
+        const tk2 = { ...tk, proc: prepare({ x, sr }, tk.srcRate, site.chain) };
+        const cells = [];
+        for (const v of vars){
+          const r = await replay(tk2, v.p, { shift: tk.shift }), k = bar * 8 + rest;
+          const caught = r.slots[k].state === 'extra', own = r.slots.slice(bar * 8, bar * 8 + 8), pass = own.every(x2 => x2.strum ? x2.state === 'ok' : x2.state !== 'extra');
+          const moved = r.slots.filter((x2, i) => i !== k && x2.state !== plain[v.name].slots[i].state).length;
+          const t = tally[v.name + '|' + off] = tally[v.name + '|' + off] || { n: 0, caught: 0, pass: 0, moved: 0 };
+          t.n++; if (caught) t.caught++; if (pass) t.pass++; t.moved += moved;
+          const tt = tally[v.name + '|' + tk.id] = tally[v.name + '|' + tk.id] || { n: 0, caught: 0, pass: 0, moved: 0 };
+          tt.n++; if (caught) tt.caught++; if (pass) tt.pass++; tt.moved += moved;
+          cells.push(`${v.name} ${r.slots[k].state}${pass ? ' (bar passed)' : ''}${moved ? ' +' + moved + ' other slots changed' : ''}`);
+        }
+        log(`SPLICE ${tk.id} bar ${bar + 1} rest ${rest} ${off > 0 ? '+' : ''}${off} ms: ${cells.join(' · ')}`);
+      }
+    }
+  }
+  log('SPLICE TOTALS (caught / mistake bar passed / other slots changed, of n splices)');
+  for (const v of vars){
+    log(`  ${v.name.padEnd(8)} by offset: ${offs.map(o => { const t = tally[v.name + '|' + o]; return t ? `${o > 0 ? '+' : ''}${o}: ${t.caught}/${t.n}, passed ${t.pass}, moved ${t.moved}` : ''; }).join(' | ')}`);
+    log(`  ${v.name.padEnd(8)} by take:   ${takes.map(tk => { const t = tally[v.name + '|' + tk.id]; return t ? `${tk.id}: ${t.caught}/${t.n}, passed ${t.pass}, moved ${t.moved}` : ''; }).join(' | ')}`);
+  }
 }
 if (flag('gate')){
   const seeds = Number(opt('gate-seeds') || 6), rooms = (opt('gate-rooms') || 'quiet,class,room7,room4,talk,chatter').split(','), o2 = { lag: 70, fps: 60, stop: 0 };
