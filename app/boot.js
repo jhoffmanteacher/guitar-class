@@ -682,6 +682,17 @@ let optionalActivityIds = {};
    this). See caIsPlayAlongOnly(). Cached like the other maps so a flaky
    read doesn't empty the list a student was just using. */
 let playAlongActivityIds = {};
+/* Activities the teacher ticked "Keep in Today's activities" beside the
+   release date on the console — config/class.keepTodayActivities, id -> true
+   (Jonathan, 2026-11-16: "add an option next to the release date that has a
+   checkbox for 'keep in today's activities'"). A ticked card that is VISIBLE
+   (caIsVisible: its date has arrived, assigned, not Hidden, not retired, given
+   to this student) stays in the Today group on the days after its release
+   date, until it is unticked; renderClassActivities() reads it through
+   caKeptInToday(). It changes nothing else: caIsVisible, the blockers, the
+   hero rule and the board never read it. Off (absent) by default. Cached like
+   the other maps, so a flaky read does not drop the card out of Today. */
+let keepTodayActivityIds = {};
 /* Where each movable song lives, set by the console's "Move to Songs" /
    "Move to Class activities" buttons (config/class.songLibrary, id -> true
    for the Songs page, false for Class activities). Overrides the card's

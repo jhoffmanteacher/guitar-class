@@ -94,6 +94,23 @@ gate (`caIsVisible`) and Today both read; 1cq stubs it. In
 - The heading is dated today; yesterday's cards wear a `.ca-chip`. No card of
   either day → no heading, and the Unfinished fold (open by default) is the
   top of the page.
+- **Keep in Today's activities** (Jonathan, 2026-11-16: "add an option next
+  to the release date that has a checkbox for 'keep in today's activities'").
+  A checkbox beside the release date in `publishBlock` (`teacherActivityCtlKit`,
+  so the board card and the Settings tab's Release row both draw it, in all
+  three publish states) writes `config/class.keepTodayActivities` (`{ id: true }`,
+  cell-checked, `teacherSetActivityKeepToday`; untick deletes the key). Students
+  read it as `keepTodayActivityIds` (cached as `caKeepToday`, an input of
+  `classConfigSignature`); `caKeptInToday(a)` makes `inToday` true on every day
+  after the date too, until unticked. Only VISIBLE cards are in `list`, so the
+  tick never shows a card before its date, Hidden, archived, deleted or given to
+  other students. A kept card sorts by its own date (below today's and
+  yesterday's, required before optional as ever), wears its date chip, and a
+  finished one stays in Today as a ✓ row. It is NOT read by `caIsVisible`, the
+  blockers, the hero rule or the board; Archive keeps it, Delete clears it; the
+  console's "Behind the class" filter leaves a kept card out (it is still Today's
+  work). Off by default; checks.mjs **1eo** (console box, writer, default) and
+  **1cq** case 13 (the page); `tools/visible-loop.mjs` R16.
 - `caTodayIds` = pending + finished Today cards. Pending ones draw with
   `caHeroCardHtml`; finished ones with the Completed fold's own row
   (`caActivityCardHtml`: ✓, no hero dots), not repeated in the Completed fold
@@ -642,6 +659,8 @@ reuses on many days (the play-along cards, ca-23).
   row while it is the open card.
 - The pin stands in for the release date for the ROW only. **Don't fold it
   into `caIsVisible()`**; no blocker rule or Today's activities reads it.
+  (Keeping a card in Today is the separate "Keep in Today's activities" box,
+  above: it needs the release date to have arrived.)
 - Hidden, Archive, Delete (both unpin; Restore does not re-pin) and "not
   assigned" still win (`caPinReachable`). Exit checks are never pinnable.
   Cached as `caPins`.

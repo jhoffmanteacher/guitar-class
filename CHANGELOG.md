@@ -6,6 +6,10 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-16 — An activity can stay in Today's activities
+
+- **Your teacher can keep an activity in "Today's activity" for more than two days.** Usually an activity is there on the day it comes out and the day after, then moves down to Unfinished activities. A kept one stays at the top, with its date on it, until your teacher changes that. If you already finished it, it shows there with its ✓.
+
 ## 2026-11-16 — The Metronome click during a song, and small wording fixes
 
 - **The Metronome no longer skips or doubles a click when you change speed or switch to Guitar mid-song.** Before, pressing a speed button or the Guitar button right on a count could lose that one click or play it twice.

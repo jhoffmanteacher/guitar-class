@@ -371,6 +371,9 @@ async function showTeacherApp(user){
       if(pmGoal){ if(pmGoal.isConnected) teacherSetPmWeekGoal(pmGoal.dataset.week, pmGoal.value); return; }   // a box a repaint removed saves nothing, like the release-date box
       const whoBox=e.target.closest('[data-set-activity-student]');
       if(whoBox){ teacherSetActivityStudent(whoBox.dataset.id, whoBox.dataset.uid, whoBox.checked); return; }
+      // "Keep in Today's activities", beside the release date (teacherActivityCtlKit's publishBlock).
+      const keepBox=e.target.closest('[data-set-activity-keep-today]');
+      if(keepBox){ teacherSetActivityKeepToday(keepBox.dataset.id, keepBox.checked); return; }
     });
     // The Class activities list's search box: repaint the rows on every key.
     shell.addEventListener('input', e=>{

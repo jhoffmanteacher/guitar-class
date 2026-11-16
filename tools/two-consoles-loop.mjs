@@ -65,9 +65,9 @@
    on a control that is not drawn yet is skipped; view switches are not).
    The writes: move a card (to a unit and position, or into a unit from Built), un-assign, delete, archive / restore,
    Hidden / Visible, Optional / Required, pin / unpin, set and clear a release date, Who for one student and Back to
-   whole class, rename, Play Along, move a song to Songs and back, a student's Open through, period, games and paused,
+   whole class, rename, Play Along, Keep in Today's activities, move a song to Songs and back, a student's Open through, period, games and paused,
    the class games switch, Hide all / Show all, a gate Clear, Clear all, Open everyone through N, archive a student,
-   a teacher-only song to Class activities. That is 24 of the 27 `await teacherWriteConfig(` call sites; the run counts
+   a teacher-only song to Class activities. That is 25 of the 32 `await teacherWriteConfig(` call sites; the run counts
    them off the async stack and fails (on 200+ schedules, no --family) if a covered one was never called. Not driven: the one-time
    board migration (teacherMigrateActivityBoard), mic sampling (teacherSetMicSampling), the practice-minutes goal
    (teacherSetPmWeekGoal), and one student's removal (2026-11-14, teacher-remove.js: teacherRemoveSettings, cell-checked
@@ -151,7 +151,7 @@
      M5  move X to unit U position P: U's cards without X, X inserted at P (clamped; none = the end), numbered 1..N;
          the unit X left numbered 1..N again without it
      M6  un-assign: the row goes, its unit numbered 1..N again
-     M7  delete: deletedActivities[X] = true; X leaves archived, hidden, optional, Play Along, Who, dates, names, legacy
+     M7  delete: deletedActivities[X] = true; X leaves archived, hidden, optional, Play Along, Keep in Today, Who, dates, names, legacy
          numbers, every gate clear, the pins and the board; its unit numbered 1..N again
      M8  archive: archivedActivities[X] = true, deletedActivities[X] removed, X unpinned when it was pinned on the
          screen; restore: both flags removed, no pin back
@@ -164,6 +164,8 @@
      M14 Who: activityStudents[X][uid] = true or that key removed (the map stays, even empty); whole class removes X's map
      M15 rename: activityTitles[X] = {en: trimmed name (≤120), base: shipped title}; empty or the shipped title removes it
      M16 Play Along now: playAlongActivities[X] = true; by date removes it
+     M28 Keep in Today's activities (the box beside the release date, 2026-11-16): keepTodayActivities[X] = true;
+         unticking removes it (Delete removes it too, M7; Archive keeps it)
      M17 Open through: moduleOpenThrough[uid] = N; Auto removes it
      M18 class games: gamesEnabled; a student's games: gameOverrides[uid] true/false, Default removes it
      M19 period: periodOverrides[uid]; Auto removes it; paused[uid] = true, Active removes it
@@ -956,7 +958,7 @@ function seedDocs() {
     'config/class': { configVersion: 1, gamesEnabled: true, gameOverrides: {}, activityBoardSeeded: true, activityBoard: board, activityDates: dates,
       hiddenActivities: { 'ca-22': true }, optionalActivities: {}, archivedActivities: { 'ca-23': true }, deletedActivities: {},
       activityPins: ['ca-21', 'ca-10'], activityStudents: { 'ca-12': { 'fake-uid-03': true, 'fake-uid-07': true } },
-      archived: { 'fake-uid-12': true }, paused: {}, periodOverrides: {}, moduleOpenThrough: {}, activityTitles: {}, playAlongActivities: {}, songLibrary: {}, classSongs: {} }
+      archived: { 'fake-uid-12': true }, paused: {}, periodOverrides: {}, moduleOpenThrough: {}, activityTitles: {}, playAlongActivities: {}, keepTodayActivities: {}, songLibrary: {}, classSongs: {} }
   };
   STUDENTS.forEach((s, i) => {
     const done = {}; Object.keys(dates).forEach((id, k) => { if ((i * 7 + k * 3) % 5 < 3) done[id] = true; });
@@ -1099,13 +1101,13 @@ const M = {
       }
       // M6: un-assign X: its board row goes, and its unit is numbered 1..N again. Its date, name, Hidden … stay.
       case 'unassign': { const b = doc.activityBoard || {}; if (!b[a.id]) break; const from = Number(b[a.id].module) || 0; const rest = M.unitIds(M.placedAsOnScreen(doc, placementOf(act)), from).filter(x => x !== a.id); delete b[a.id]; M.repack(doc, from, rest); break; }
-      // M7: delete X: deletedActivities[X] = true; X leaves archived, hidden, optional, Play Along, Who, dates, names, legacy numbers, every student's gate clears, the pins and the board;
+      // M7: delete X: deletedActivities[X] = true; X leaves archived, hidden, optional, Play Along, Keep in Today, Who, dates, names, legacy numbers, every student's gate clears, the pins and the board;
       //     the unit it left is numbered 1..N again.
       case 'delete': {
         const b = doc.activityBoard || {};
         if (b[a.id]) { const from = Number(b[a.id].module) || 0; const rest = M.unitIds(M.placedAsOnScreen(doc, placementOf(act)), from).filter(x => x !== a.id); delete b[a.id]; M.repack(doc, from, rest); }
         M.setIn(doc, 'deletedActivities', a.id, true);
-        ['archivedActivities', 'hiddenActivities', 'optionalActivities', 'playAlongActivities', 'activityStudents', 'activityDates', 'activityTitles', 'activityNumbers'].forEach(m => M.delIn(doc, m, a.id));
+        ['archivedActivities', 'hiddenActivities', 'optionalActivities', 'playAlongActivities', 'keepTodayActivities', 'activityStudents', 'activityDates', 'activityTitles', 'activityNumbers'].forEach(m => M.delIn(doc, m, a.id));
         if (isMap(doc.activityClears)) Object.keys(doc.activityClears).forEach(u => { if (isMap(doc.activityClears[u])) delete doc.activityClears[u][a.id]; });
         if (Array.isArray(doc.activityPins) && doc.activityPins.includes(a.id)) doc.activityPins = doc.activityPins.filter(x => x !== a.id);
         break;
@@ -1152,6 +1154,8 @@ const M = {
       }
       // M16: Play Along now: playAlongActivities[X] = true; "by date" removes it.
       case 'playAlong': if (a.state === 'now') M.setIn(doc, 'playAlongActivities', a.id, true); else M.delIn(doc, 'playAlongActivities', a.id); break;
+      // M28: Keep in Today's activities: keepTodayActivities[X] = true; unticking removes it.
+      case 'keepToday': if (a.on) M.setIn(doc, 'keepTodayActivities', a.id, true); else M.delIn(doc, 'keepTodayActivities', a.id); break;
       // M17: a student's Open through: moduleOpenThrough[uid] = the module number; Auto removes it.
       case 'openThrough': if (a.value === 'auto') M.delIn(doc, 'moduleOpenThrough', a.uid); else M.setIn(doc, 'moduleOpenThrough', a.uid, Number(a.value)); break;
       // M18: class games: gamesEnabled = on/off. A student's games: gameOverrides[uid] = true/false; Default removes it.
@@ -1189,7 +1193,7 @@ const M = {
    A GAP in a unit's positions is counted and reported, not failed: a Songs-page song keeps its slot on
    purpose, and a gap changes neither the order nor any #N students see (#N is counted along the order). */
 const DOC_KEYS = new Set(['configVersion', 'gamesEnabled', 'gameOverrides', 'activityBoard', 'activityBoardSeeded', 'activityDates', 'hiddenActivities', 'optionalActivities',
-  'archivedActivities', 'deletedActivities', 'activityPins', 'activityStudents', 'activityTitles', 'playAlongActivities', 'activityNumbers', 'activityClears', 'songLibrary',
+  'archivedActivities', 'deletedActivities', 'activityPins', 'activityStudents', 'activityTitles', 'playAlongActivities', 'keepTodayActivities', 'activityNumbers', 'activityClears', 'songLibrary',
   'classSongs', 'archived', 'paused', 'periodOverrides', 'moduleOpenThrough', 'pmWeekGoals', 'micSampling']);
 function corruption(doc, gaps, dups) {
   const out = [];
@@ -1227,9 +1231,9 @@ function corruption(doc, gaps, dups) {
 const SEED_LIVE = ['ca-8', 'ca-1', 'ca-2', 'ca-3', 'ca-10', 'ca-12', 'ca-13', 'ca-14', 'ca-41', 'ca-21', 'ca-22', 'ca-11', 'ca-43'];
 const ACT_IDS = [...SEED_LIVE, 'ca-23', 'ca-46', 'ca-48', 'ca-34'];
 const SONG_IDS = ['ca-41', 'ca-34'];
-const SWITCH_KINDS = ['hidden', 'optional', 'playAlong', 'date', 'who', 'archive', 'rename'];
+const SWITCH_KINDS = ['hidden', 'optional', 'playAlong', 'date', 'who', 'archive', 'rename', 'keepToday'];
 const ACTIVITY_WRITES = ['move', 'move', 'move', 'unassign', 'delete', 'archive', 'hidden', 'optional', 'pin', 'date', 'who', 'wholeClass', 'rename', 'playAlong', 'songPlace',
-  'moduleHidden', 'clear'];
+  'moduleHidden', 'clear', 'keepToday'];
 const MANAGE_WRITES = ['period', 'openThrough', 'paused', 'openAll', 'studentArchived'];
 const GAMES_WRITES = ['classGames', 'studentGames'];
 const OTHER_WRITES = { clearAll: 'students', classSong: 'tsongs' };
@@ -1249,6 +1253,7 @@ const WRITERS = {
   wholeClass: (c, a) => c.teacherSetActivityWholeClass(a.id),
   rename: (c, a) => c.teacherSetActivityTitle(a.id, a.value),
   playAlong: (c, a) => c.teacherSetActivityPlayAlong(a.id, a.state),
+  keepToday: (c, a) => c.teacherSetActivityKeepToday(a.id, a.on),
   openThrough: (c, a) => c.teacherSetStudentOpenThrough(a.uid, a.value),
   classGames: (c, a) => c.teacherSetClassGames(a.on),
   period: (c, a) => c.teacherSetStudentPeriod(a.uid, a.value),
@@ -1310,7 +1315,7 @@ function genSchedule(seed, k, famOverride) {
     else if (family === 'same-cell') { const x = rng.pick(SEED_LIVE), kind = rng.pick([...SWITCH_KINDS, 'pin']), f = { id: x }; if (kind === 'who') f.uid = rng.pick(STUDENTS).uid; add('A', dA, kind, f); add('B', dB, kind, { ...f }); }
     else if (family === 'same-unit-moves') { const u = rng.pick([1, 2, 3]); add('A', dA, 'move', { unit: u, sameUnit: true }); add('B', dB, 'move', { unit: u, sameUnit: true }); }
     else if (family === 'move-vs-switch') { add('A', dA, 'move'); add('B', dB, rng.pick([...SWITCH_KINDS, 'pin'])); }
-    else if (family === 'delete-vs-edit') { const x = rng.pick(SEED_LIVE); add('A', dA, rng.pick(['delete', 'archive']), { id: x }); add('B', dB, rng.pick(['rename', 'hidden', 'date', 'who', 'move', 'optional', 'pin']), { id: x }); }
+    else if (family === 'delete-vs-edit') { const x = rng.pick(SEED_LIVE); add('A', dA, rng.pick(['delete', 'archive']), { id: x }); add('B', dB, rng.pick(['rename', 'hidden', 'date', 'who', 'move', 'optional', 'pin', 'keepToday']), { id: x }); }
     else if (family === 'burst') { let t = dA; for (let i = 0; i < 3; i++) { add('A', t, rng.pick(ACTIVITY_WRITES)); t += rng.int(0, 100); } add('B', dA + rng.int(-50, 250), rng.pick(ACTIVITY_WRITES)); }
     else if (family === 'map-cells') {
       const x = rng.pick(SEED_LIVE.filter(i => i !== 'ca-12')), y = rng.pick(SEED_LIVE.filter(i => i !== x)), lo = rng.int(1, 5), hi = rng.int(6, 11);
@@ -1388,6 +1393,7 @@ function resolveClick(step, cfg, label, n) {
     case 'wholeClass': { const x = f.id || pick(ACT_IDS.filter(i => isMap(map('activityStudents')[i])), r[0]); return x ? W('wholeClass', { id: x }) : W('skip', { why: 'no card has a Who list' }); }
     case 'rename': return id ? W('rename', { id, value: r[1] < 0.25 ? '' : 'Renamed by ' + label + ' ' + n }) : W('skip', {});
     case 'playAlong': return id ? W('playAlong', { id, state: toggle(map('playAlongActivities')[id] === true, r[1]) ? 'now' : 'date' }) : W('skip', {});
+    case 'keepToday': return id ? W('keepToday', { id, on: f.on !== undefined ? f.on : toggle(map('keepTodayActivities')[id] === true, r[1]) }) : W('skip', {});
     case 'songPlace': { const x = f.id || pick(SONG_IDS, r[0]); return W('songPlace', { id: x, where: f.where || (M.onSongsPage(DATA_BY_ID[x], cfg) ? 'activities' : 'songs') }); }
     case 'moduleHidden': {
       const units = [0, 1, 2, 3, 4].filter(u => M.unitIds(cfg, u).some(x => !retired(x)));
@@ -1435,6 +1441,7 @@ function depsOf(act) {
     case 'who': return [P('activityStudents.' + a.id + '.' + a.uid)];
     case 'rename': return [P('activityTitles.' + a.id)];
     case 'playAlong': return [P('playAlongActivities.' + a.id)];
+    case 'keepToday': return [P('keepTodayActivities.' + a.id)];
     case 'songPlace': return [P('songLibrary.' + a.id)];
     case 'classSong': return [P('classSongs.' + a.id)];
     case 'moduleHidden': { const sc = screenOf(act); return M.unitIds(sc, a.module).filter(x => !M.retired(sc, x)).map(x => P('hiddenActivities.' + x)); }

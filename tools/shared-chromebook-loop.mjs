@@ -120,7 +120,7 @@
        (coach-core.js: take ids "Remembered on this device"), gc-mic-ok (coach-core.js COACH_MIC_OK_KEY: "this
        browser has given this site the mic", '1' or absent; the browser's own permission is per device too),
        pm:wg (practice-minutes.js: "class data, not a student's: one key for everyone on the device"), the class-config caches caDates / caClears / caRetired /
-       caHidden / caOptional / caPlayAlong / caSongLib / caClassSongs / caPins / caBoard (save.js: whole-class
+       caHidden / caOptional / caPlayAlong / caKeepToday / caSongLib / caClassSongs / caPins / caBoard (save.js: whole-class
        fields), the console's own preferences (gc-teacher-*, teacherSideTree, gc-lq-limits, gc-lq-autoreveal, gc-lq-hidenames).
      Per STUDENT (must never reach the next student):
        keys named with the uid: practiceLog:<uid>, gc-lastModule:<uid>, gc-lastSet:<uid>, gc-srPicks:<uid>,

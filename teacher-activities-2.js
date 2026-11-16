@@ -921,6 +921,33 @@ async function teacherSetActivityPlayAlong(id, state){
   }
   if(teacherView==='activities') renderTeacherActivities();
 }
+/* Keep in Today's activities — config/class.keepTodayActivities (id -> true),
+   the checkbox beside the release date (Jonathan, 2026-11-16). Ticked, a card
+   students can see stays in their Today group on the days after its date
+   (app caKeptInToday); it never makes a card visible, blocking or the hero.
+   Same write shape as teacherSetActivityPlayAlong: cell-checked on its one
+   cell, flag cleared rather than written false. Archive keeps it; Delete
+   clears it (teacherDeleteActivity's MAPS). */
+async function teacherSetActivityKeepToday(id, on){
+  if(!id) return;
+  on = on===true;
+  if(!teacherClassConfig.keepTodayActivities) teacherClassConfig.keepTodayActivities={};
+  const had = Object.prototype.hasOwnProperty.call(teacherClassConfig.keepTodayActivities, id);
+  const prev = teacherClassConfig.keepTodayActivities[id];
+  if(on) teacherClassConfig.keepTodayActivities[id]=true; else delete teacherClassConfig.keepTodayActivities[id];
+  if(teacherView==='activities') renderTeacherActivities({cached:true});   // shown now — see teacherSetActivityHidden
+  try{
+    await ensureDb();
+    const fv=firebase.firestore.FieldValue;
+    const patch = {keepTodayActivities:{[id]: on ? true : fv.delete()}};
+    await teacherWriteConfig(patch, {['keepTodayActivities.'+id]: had?prev:undefined});
+  }catch(e){
+    if(!teacherClassConfig.keepTodayActivities) teacherClassConfig.keepTodayActivities={};
+    if(had) teacherClassConfig.keepTodayActivities[id]=prev; else delete teacherClassConfig.keepTodayActivities[id];
+    teacherConfigSaveFailed(e, 'Could not save that change — check your connection and Firestore rules.');
+  }
+  if(teacherView==='activities') renderTeacherActivities();
+}
 /* Keep practicing pins — config/class.activityPins, an ORDERED array of at
    most TEACHER_PINS_MAX activity ids (app.js CA_PINS_MAX, caPinRowHtml).
    Students get one button per pin at the top of In-Class Activities, in

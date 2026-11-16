@@ -789,6 +789,12 @@ function caTodayWindow(){
   const [y, m, d] = today.split('-').map(Number);
   return [today, dayStr(new Date(y, m - 1, d - 1, 12))];
 }
+/* The console's "Keep in Today's activities" tick (keepTodayActivityIds,
+   Jonathan 2026-11-16): true keeps a card in Today on the days after its
+   release date. Only renderClassActivities() asks, and only about cards that
+   are already visible (caIsVisible), so a kept card still waits for its date
+   and still goes with Hidden, Archive, Delete, Who and "not assigned". */
+function caKeptInToday(a){ return keepTodayActivityIds[a.id] === true; }
 /* The activity's display title, with a teacher rename applied if one is live.
    Renames are typed in the console (teacher.js) and land in
    config/class.activityTitles as { en, base } — see loadClassConfig().
@@ -1234,7 +1240,7 @@ function appIsOnScreen(){
    read came back byte-identical to what was already showing. */
 function classConfigSignature(){
   return JSON.stringify([activityDates, activityBoard, activityBoardOn, hiddenActivityIds, activityForMe,
-    retiredActivityIds, activityClears, optionalActivityIds, playAlongActivityIds, activityPins, activityTitles,
+    retiredActivityIds, activityClears, optionalActivityIds, playAlongActivityIds, keepTodayActivityIds, activityPins, activityTitles,
     activityNumbers, periodOverride, moduleOpenThrough,
     songLibraryIds, classSongIds,   // a Move to Songs / Move to Class activities changes which cards show
     gamesAccessOn]);   // the free-play hero's Games button follows it
@@ -1454,10 +1460,17 @@ function renderClassActivities(){
           it sees it done and can play it again (2026-11-09). A finished card
           never takes a pending card's place.
        Every other pending card is in the Unfinished fold and every other
-       finished one in Completed; both keep their board order. */
+       finished one in Completed; both keep their board order.
+       KEPT cards (Jonathan, 2026-11-16: the console's "Keep in Today's
+       activities" tick beside the release date, caKeptInToday) count as
+       today's or yesterday's on every later day too, until it is unticked:
+       pending ones in the pending part, finished ones in the finished part,
+       each by its own date (so below today's and yesterday's) and wearing its
+       date chip. `list` holds only visible cards, so the tick never shows a
+       card before its date or past Hidden, Archive, Delete or Who. */
     const isDone = a => classActivities[a.id] === true;
     const [todayDay, yesterDay] = caTodayWindow();
-    const inToday = a => { const d = caDate(a); return d === todayDay || d === yesterDay; };
+    const inToday = a => { const d = caDate(a); return d === todayDay || d === yesterDay || caKeptInToday(a); };
     const boardPos = {};
     let posN = 0;
     view.sections.forEach(sec => sec.ids.forEach(id => { boardPos[id] = posN++; }));

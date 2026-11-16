@@ -243,6 +243,7 @@ function teacherActivityCtlKit(cfg, activities){
   const hidden=cfg.hiddenActivities||{};
   const optional=cfg.optionalActivities||{};
   const playAlong=cfg.playAlongActivities||{};
+  const keepToday=cfg.keepTodayActivities||{};
   const pins=teacherActivityPins(cfg);
   const dates=cfg.activityDates||{};
   const today=dayStr(new Date());
@@ -326,6 +327,13 @@ function teacherActivityCtlKit(cfg, activities){
     const dateInput=`<input type="date" class="t-date-input" data-set-activity-date data-id="${escAttr(a.id)}" value="${escAttr(dateVal)}" max="${new Date().getFullYear()+1}-12-31" aria-label="Release date for ${escAttr(teacherActivityTitle(a,cfg))}">`;
     const pubNow=`<button class="tg-seg-btn" data-publish-activity data-id="${escAttr(a.id)}" data-state="now" title="Publish today — students see it as soon as they reload">Publish now</button>`;
     const unpub=`<button class="tg-seg-btn" data-publish-activity data-id="${escAttr(a.id)}" data-state="off" title="Clear the release date — students stop seeing it">Unpublish</button>`;
+    /* "Keep in Today's activities" (Jonathan, 2026-11-16: "add an option
+       next to the release date that has a checkbox for 'keep in today's
+       activities'"), drawn beside the date in all three states: ticked, the
+       card stays in students' Today group on the days after its date, until
+       unticked (app caKeptInToday). It does not publish anything: an undated
+       or future card still waits for its date. See teacherSetActivityKeepToday. */
+    const keepBox=`<label class="t-board-keep" title="Ticked: once its date has arrived, this card stays in students' Today's activities every day until you untick it. Off: it leaves Today two days after its date, as usual."><input type="checkbox" data-set-activity-keep-today data-id="${escAttr(a.id)}"${keepToday[a.id]===true?' checked':''}> Keep in Today's activities</label>`;
     let status, controls;
     if(!dateVal){ status=`<span class="t-board-status">Not published</span>`; controls=pubNow+` <span class="t-board-sched">or schedule ${dateInput}</span>`; }
     else if(dateVal>today){ status=`<span class="t-board-status t-board-sched-on">Scheduled ${escHtml(dateVal)}</span>`; controls=dateInput+' '+unpub; }
@@ -337,7 +345,7 @@ function teacherActivityCtlKit(cfg, activities){
        a new day straight into the box is one write either way: a past
        date just re-dates it, a future one pulls it back to Scheduled. */
     else { status=`<span class="t-board-status ${isHidden?'t-board-hidden-on':'t-board-live'}">${isHidden?'Hidden':'Live'}</span>`; controls=dateInput+' '+unpub; }
-    return `<div class="t-board-publish">${status}<span class="t-board-pubctl">${controls}</span></div>`;
+    return `<div class="t-board-publish">${status}<span class="t-board-pubctl">${controls} ${keepBox}</span></div>`;
   };
   const visSeg=a=>{
     const isHidden=hidden[a.id]===true;
@@ -409,7 +417,7 @@ function teacherActivityCtlKit(cfg, activities){
     return `<select class="t-board-move" data-move-activity data-id="${escAttr(a.id)}" aria-label="${escAttr(label+' '+teacherActivityTitle(a,cfg))}">${opts.join('')}</select>`;
   };
 
-  return {hidden, optional, playAlong, pins, dates, today, view, nums, byId, manifest, doneSummaryRoster, doneSummary,
+  return {hidden, optional, playAlong, keepToday, pins, dates, today, view, nums, byId, manifest, doneSummaryRoster, doneSummary,
     titleBlock, publishBlock, visSeg, optSeg, playSeg, pinBtn, whoPicker, songBtn, moveSelect};
 }
 /* ── Class activities: the board ────────────────────────────────────────
@@ -1159,6 +1167,7 @@ function teacherActivitySettingsHtml(a, cfg){
     if(kit.optional[a.id]===true) strays.push('Optional');
     if(kit.optional[a.id]===false) strays.push('Required');
     if(kit.pins.includes(a.id)) strays.push('Pinned');
+    if(kit.keepToday[a.id]===true) strays.push('Kept in Today');
     html+=row('Unit', retired ? '' : kit.moveSelect(a,'Assign to…',null), 'Not assigned to a unit yet, so no student sees it. Assign it, then set its release date here.'+(strays.length?` It carries: ${strays.join(' · ')} — no effect until it’s assigned.`:''))
       +row('Name', nameHtml, nameNote)
       +row('Songs', kit.songBtn(a))
@@ -1174,7 +1183,7 @@ function teacherActivitySettingsHtml(a, cfg){
   }
   const curModule=Number(((cfg.activityBoard||{})[a.id]||{}).module)||0;
   return html
-    +row('Release', kit.publishBlock(a), 'Students see it once it is assigned, its date has arrived, and it is not Hidden or archived.')
+    +row('Release', kit.publishBlock(a), 'Students see it once it is assigned, its date has arrived, and it is not Hidden or archived. Keep in Today\u2019s activities holds it in their Today group after that day, until you untick it.')
     +row('Students see it', kit.visSeg(a), 'Hidden pulls back a card that is already live. The date and Hidden are independent.')
     +row('Required', kit.optSeg(a), 'A Required card opens first at sign-in until a student finishes it or you clear it. Nothing else is locked.')
     +row('Play Along', kit.playSeg(a))

@@ -96,9 +96,10 @@ is split by file, so both computers work at once.**
   version line, `app/boot.js`): fetch and rebase before every push; in `checks.mjs` Windows edits only 1eh and the
   ~17115 comment, the Mac only its own pins. `coach-core.js` is at 2,549 lines: Windows says in its report if item 3
   takes it past 2,600 and stops there (its split is Jonathan's call).
-1. [ ] **Console: "Keep in Today's activities" (Jonathan, 2026-11-16: "for the teacher dashboard, add an option
+1. [x] **Console: "Keep in Today's activities" (Jonathan, 2026-11-16: "for the teacher dashboard, add an option
    next to the release date that has a checkbox for 'keep in today's activities'. use an opus agent to make
-   this").** Not started. Build it with ONE Opus agent in its own worktree. Where: the release-date control of an
+   this").** Built 2026-11-16 (entry "Keep in Today's activities" under "Recently shipped"; the lead reviews and
+   pushes it). Build it with ONE Opus agent in its own worktree. Where: the release-date control of an
    activity (`teacher-activities.js` ~326, `data-set-activity-date`). The Windows lead's reading, to confirm from
    the code before building: a ticked activity stays in the student's "Today's activities" on the days AFTER its
    release date until unticked; default off. Read how Today is chosen first (`caTodayHeadHtml`, `app/activities.js`;
@@ -926,6 +927,27 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 ---
 
 ## Recently shipped (post-archive)
+
+- [x] **2026-11-16 — "Keep in Today's activities": a checkbox beside the release date. Always Reviewed (a `config/class` writer).**
+      Jonathan: "for the teacher dashboard, add an option next to the release date that has a checkbox for 'keep in
+      today's activities'". Read as: a ticked card stays in the student's Today group on the days after its release
+      date, until unticked; off by default. Console: the box is drawn by `publishBlock` (`teacherActivityCtlKit`,
+      teacher-activities.js), so it sits beside the date in the board card and in the Settings tab's Release row, in
+      all three publish states (an undated or future card still waits for its date). Writer
+      `teacherSetActivityKeepToday` (teacher-activities-2.js): `config/class.keepTodayActivities` `{ id: true }`,
+      cell-checked on its one cell like Play Along; untick deletes the key; Archive keeps it, Delete clears it
+      (`teacherDeleteActivity` MAPS); `CONFIG_WRITERS` 32. Students: `keepTodayActivityIds` (app/boot.js), read and
+      cached as `caKeepToday` by `loadClassConfig` / `restoreClassConfigFromCache`, an input of
+      `classConfigSignature`; `caKeptInToday` widens `inToday` in `renderClassActivities` and nothing else (not
+      `caIsVisible`, the blockers, the hero rule, the board). A kept card sorts by its own date (after today's and
+      yesterday's), wears its date chip, a finished one stays in Today as a ✓ row; "Since your last visit" leaves it
+      out (it is in Today). The console's "Behind the class" filter no longer counts a kept card. Proof:
+      `checks.mjs` 1cq case 13 (5 more renders per language, 25 pinned) and new 1eo (the console box, the writer,
+      the default); `tools/visible-loop.mjs` R16 (which cards are in Today at every sign-in), the `keep` value
+      through caches and tab returns, a `keepToday` change kind and a directed signature step;
+      `tools/two-consoles-loop.mjs` drives the new writer (M28). Not changed: `firestore.rules` (the config/class
+      write rule is teacher-only, field-free; its comment's field list does not name the new field). Open product
+      questions for Jonathan are in the agent's report to the lead.
 
 - [x] **2026-11-16 — The teacher console stops enlarging on a big screen; Live In-Class Games still fills.**
       Jonathan: "teacher dashboard view is larger on windows than mac"; told the fill shows the same content enlarged:

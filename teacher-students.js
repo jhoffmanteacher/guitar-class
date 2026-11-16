@@ -384,7 +384,9 @@ async function teacherSetPmWeekGoal(weekId, raw){
    the same roster (period filter, archived) as Everyone.
    BEHIND THE CLASS: TEACHER_BEHIND_MIN (3) or more required activities not
    done, counting only those released before yesterday (today's and
-   yesterday's are still Today's activity on the student's page). Required =
+   yesterday's are still Today's activity on the student's page, and so is
+   a card ticked "Keep in Today's activities", keepTodayActivities, which is
+   left out whatever its date: 2026-11-16). Required =
    exactly teacherBlockersFor (visible to that student, not Optional, not
    cleared, never a CAS student). Most behind first, then the older oldest
    card, then name. It reads nothing new: the progress docs and config/class
@@ -406,8 +408,9 @@ function teacherShortDay(ymd){
    arguments (and the CLASS_ACTIVITIES data, through teacherBlockersFor). */
 function teacherBehindFor(stu, cfg, today){
   const dates=(cfg&&cfg.activityDates)||{};
+  const kept=(cfg&&cfg.keepTodayActivities)||{};
   const yesterday=teacherDayAdd(today, -1);
-  const old=teacherBlockersFor(stu, cfg).map(a=>dates[a.id]).filter(d=>typeof d==='string' && d<yesterday).sort();
+  const old=teacherBlockersFor(stu, cfg).filter(a=>kept[a.id]!==true).map(a=>dates[a.id]).filter(d=>typeof d==='string' && d<yesterday).sort();
   return old.length>=TEACHER_BEHIND_MIN ? {n:old.length, oldest:old[0]} : null;
 }
 function teacherSetStudentFilter(v){

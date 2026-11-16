@@ -34,7 +34,7 @@
      sometimes the update reload's note), with renderAll and swResumeApply stubbed (they need a rendered lesson).
      It routes through the real routeExploreHash / goExploreHash on a history stub that moves location.hash.
      A tab return fires the real visibilitychange listener.
-     Probed: caIsVisible, caIsOptional, caBlockers, caIsPlayAlongOnly, caNumber, periodOverride,
+     Probed: caIsVisible, caIsOptional, caBlockers, caIsPlayAlongOnly, caNumber, keepTodayActivityIds, periodOverride,
      moduleOpenThrough, gamesAccessOn, the Games button's display, body.ca-gated, classConfigSignature(); at each
      sign-in also location.hash after showApp (the landing), caStartHereId after the real renderClassActivities
      (the first card), whether maybeShowPeriodPicker asked, and, for a student with an unfinished required
@@ -46,7 +46,8 @@
      Boot = the real teacherFetchStudents() + loadTeacherClassConfig() + teacherApplyRosterFilter(). Changes go
      through the real writers: teacherSetActivityDate, teacherSetActivityHidden, teacherSetActivityStudent,
      teacherSetActivityWholeClass, teacherSetActivityOptional, teacherSetSongPlace, teacherSetClassSong,
-     teacherSetActivityArchived, teacherDeleteActivity, teacherSetActivityPlayAlong, teacherSetActivityClear,
+     teacherSetActivityArchived, teacherDeleteActivity, teacherSetActivityPlayAlong, teacherSetActivityKeepToday,
+     teacherSetActivityClear,
      teacherClearAllBlockers, teacherSetStudentPeriod, teacherSetStudentOpenThrough, teacherSetClassGames,
      teacherSetStudentGames, teacherMoveActivity, teacherUnassignActivity — all through the real
      teacherWriteConfig(). Probed: teacherActivityVisible, teacherActivityOptional, teacherBlockersFor,
@@ -82,7 +83,8 @@
    the two-console write race (tools/two-consoles-loop.mjs); screens and renders (only predicates and the
    values they read: no probe reads rendered markup, so how the activity list is laid out — module folds, counts,
    carets — cannot change a result here; only a render that throws would); the Journey "sentHere" exemption
-   (page-level, and unreachable while JOURNEY_GATE_LOCKS is false); Today's activities (check 1cq); pins; renames; the legacy activityNumbers overrides (generated empty);
+   (page-level, and unreachable while JOURNEY_GATE_LOCKS is false); Today's activities' ORDER, chips and folds (check 1cq; only
+   WHICH cards are in Today is judged here, R16); pins; renames; the legacy activityNumbers overrides (generated empty);
    the real update reload's restore (swResumeApply, stubbed); Pause; the Firestore listener-free console reading another console's writes; a failed read by the console
    (its views refuse to draw); the dev bypass's boot path beyond "no reads at boot".
 
@@ -128,6 +130,13 @@
        sees, not finished and not cleared for them; a required one whenever any such required card exists, the
        newest-dated of them; else the newest-dated optional one; null when none is left. (Which of several cards
        with the same newest date: not judged.)
+   R16 Today's activities, WHICH cards (skill in-class-activities "Today's activity"; Jonathan 2026-11-09, "everything with
+       a date either for the current day or dated the day before", and 2026-11-16, the console's "Keep in Today's
+       activities" tick beside the release date): at sign-in, after the real renderClassActivities, caTodayIds holds
+       every card this student sees (R1) dated today or the calendar day before, or ticked in keepTodayActivities, done
+       or not; and nothing else but the first card (R14), which the 2026-11-14 rule may draw at the top of Today. The
+       tick is also compared as a value (`keep`): a whole-class field, cached like Play Along (R9), and an input of
+       classConfigSignature (R12).
    R15 The period question at sign-in (maybeShowPeriodPicker's comments): asked when the student has no answer of
        their own and no teacher override; never for the dev bypass or the teacher's email, never after a failed
        progress load ("never ask a question we can't save the answer to").
@@ -464,6 +473,7 @@ function mStudentAnswers(S) {
     opt: ACTS.filter(a => mStudentOptional(a, S)).map(a => a.id),
     blk: mStudentBlockers(S),
     pao: ACTS.filter(a => mPlayAlongOnly(a, S)).map(a => a.id),
+    keep: ACTS.filter(a => mMap(S.doc, 'keepTodayActivities')[a.id] === true).map(a => a.id),
     num: mNumbers(S.doc),
     period: S.override, openThrough: S.openThrough, games: S.games,
     gamesBtn: S.games ? '' : 'none', gated: false,
@@ -546,7 +556,7 @@ function mExpectChange(d0, ch, progs, today) {
     }
     case 'delete': {
       m('deletedActivities')[ch.id] = true;
-      ['archivedActivities', 'optionalActivities', 'playAlongActivities', 'activityDates', 'activityTitles', 'hiddenActivities', 'activityStudents', 'activityNumbers'].forEach(k => { delete m(k)[ch.id]; });
+      ['archivedActivities', 'optionalActivities', 'playAlongActivities', 'keepTodayActivities', 'activityDates', 'activityTitles', 'hiddenActivities', 'activityStudents', 'activityNumbers'].forEach(k => { delete m(k)[ch.id]; });
       const board = m('activityBoard');
       if (board[ch.id]) {
         const from = Number(board[ch.id].module) || 0;
@@ -559,6 +569,7 @@ function mExpectChange(d0, ch, progs, today) {
       break;
     }
     case 'playAlong': if (ch.on) m('playAlongActivities')[ch.id] = true; else delete m('playAlongActivities')[ch.id]; break;
+    case 'keepToday': if (ch.on) m('keepTodayActivities')[ch.id] = true; else delete m('keepTodayActivities')[ch.id]; break;
     case 'clear': { const c = m('activityClears'); if (!c[ch.uid] || typeof c[ch.uid] !== 'object') c[ch.uid] = {}; if (ch.on) c[ch.uid][ch.id] = true; else delete c[ch.uid][ch.id]; break; }
     case 'clearAll': {
       const blk = mDocAnswers(d0, progs[ch.uid], ch.uid, today).blk;
@@ -620,6 +631,17 @@ function mFirstProblem(S, got) {
   const newest = pool.reduce((m, a) => (dateOf(a) > m ? dateOf(a) : m), '');
   if (dateOf(g) !== newest) return `${got} (dated ${dateOf(g) || 'none'}) is first, but a newer ${req.length ? 'required' : 'optional'} card is dated ${newest}`;
   return null;
+}
+/* R16 which cards are in Today (caTodayIds). Returns a problem, or null. */
+function mTodayProblem(S, got, first) {
+  const dates = mMap(S.doc, 'activityDates'), keep = mMap(S.doc, 'keepTodayActivities');
+  const yest = modelAddDays(S.today, -1);
+  const want = ACTS.filter(a => mVisible(a, S) && (dates[a.id] === S.today || dates[a.id] === yest || keep[a.id] === true)).map(a => a.id);
+  const missing = want.filter(id => !got.includes(id));
+  const extra = got.filter(id => !want.includes(id) && id !== first);
+  if (!missing.length && !extra.length) return null;
+  return `caTodayIds ${JSON.stringify(got)}: ` + (missing.length ? `missing ${missing.join(' ')} (seen, dated today or yesterday, or kept)` : '')
+    + (extra.length ? `${missing.length ? '; ' : ''}holds ${extra.join(' ')} (neither dated today or yesterday nor kept, and not the first card)` : '');
 }
 /* R15 the period question at sign-in. */
 function mPeriodAsked(S) { return !S.previewer && S.progressOk && !(S.ownPeriod || S.override); }
@@ -790,11 +812,12 @@ function makePage(kind, storage, client, nav = {}) {
 
 /* ── Probes: read the real predicates (the only place the site's functions are called) ── */
 const STUDENT_PROBE = `(function(){
-  var A = window.CLASS_ACTIVITIES || [], out = { vis: [], opt: [], blk: [], pao: [], num: {} };
+  var A = window.CLASS_ACTIVITIES || [], out = { vis: [], opt: [], blk: [], pao: [], keep: [], num: {} };
   A.forEach(function(a){
     if (caIsVisible(a)) out.vis.push(a.id);
     if (caIsOptional(a)) out.opt.push(a.id);
     if (caIsPlayAlongOnly(a)) out.pao.push(a.id);
+    if (keepTodayActivityIds[a.id] === true) out.keep.push(a.id);
     var n = caNumber(a); if (n) out.num[a.id] = n;
   });
   out.blk = caBlockers().map(function(a){ return a.id; });
@@ -920,6 +943,8 @@ function genWorld(rng, today) {
   IDS.filter(id => ACT[id].teacherOnly === true).forEach(id => { if (chance(rng, 0.35)) d.classSongs[id] = true; });
   d.playAlongActivities = {};
   IDS.filter(id => ACT[id].view === 'card').forEach(id => { if (chance(rng, 0.12)) d.playAlongActivities[id] = true; });
+  d.keepTodayActivities = {};
+  inPlay.forEach(id => { if (chance(rng, 0.15)) d.keepTodayActivities[id] = true; });
   /* Renames on about 10% of the cards in play, and 0-3 pins (R11: Delete wipes both, Archive drops the pin). */
   d.activityTitles = {};
   inPlay.forEach(id => { if (chance(rng, 0.1)) d.activityTitles[id] = { en: 'Renamed ' + id }; });
@@ -945,7 +970,7 @@ function genWorld(rng, today) {
 /* ════════════════════════════════════════════════════════════════════════════
    THE CHECKS
    ════════════════════════════════════════════════════════════════════════════ */
-const C = { cases: 0, pages: 0, comparisons: 0, sigSteps: 0, consoleReadPaints: 0, withBlocker: 0, landed: 0, landingChecks: 0, asked: 0, firstChecks: 0, routerChecks: 0, journeyLocks: 0, changes: 0, writes: 0, threeWay: 0, tabReturns: 0, midRead: 0, freshLoads: 0, landings: 0, gatedSeen: 0, several: 0,
+const C = { cases: 0, pages: 0, comparisons: 0, sigSteps: 0, consoleReadPaints: 0, withBlocker: 0, landed: 0, landingChecks: 0, asked: 0, firstChecks: 0, todayChecks: 0, todayKept: 0, routerChecks: 0, journeyLocks: 0, changes: 0, writes: 0, threeWay: 0, tabReturns: 0, midRead: 0, freshLoads: 0, landings: 0, gatedSeen: 0, several: 0,
   marked: 0, cas: 0, newStudent: 0, richRetire: { archive: 0, delete: 0 }, namedRetire: { archive: 0, delete: 0 }, gamesTabReturn: [0, 0], gamesKeepLast: 0 };
 const FAILS = [];
 const TRUTH = {};
@@ -965,7 +990,7 @@ function diffList(exp, got) {
   const missing = e.filter(x => !g.includes(x)), extra = g.filter(x => !e.includes(x));
   return (missing.length || extra.length) ? `expected but missing [${missing.join(' ')}]; extra [${extra.join(' ')}]` : '';
 }
-const FIELDS = ['vis', 'opt', 'blk', 'pao', 'num', 'period', 'openThrough', 'games', 'gamesBtn', 'gated'];
+const FIELDS = ['vis', 'opt', 'blk', 'pao', 'keep', 'num', 'period', 'openThrough', 'games', 'gamesBtn', 'gated'];
 /* Every field compared counts once in C.comparisons (count = false for a what-if that judges nothing). */
 function answerDiff(exp, got, fields = FIELDS, count = true) {
   const out = [];
@@ -1076,7 +1101,7 @@ function threeWay(where, studentGot, consolePage, uid, d, prog, today) {
   C.comparisons += 2;
   if (!agree) fail(`${where} — three-way`, `student / console / Journey disagree: vis ${diffList(studentGot.vis, ref.vis) || '='} (student vs ${con ? 'console' : 'Journey'}), blk ${diffList(studentGot.blk, ref.blk) || '='}; Journey vs console vis ${diffList(jny.vis, ref.vis) || '='}`);
 }
-const CHANGE_KINDS = ['date', 'hide', 'who', 'wholeClass', 'optional', 'songPlace', 'classSong', 'archive', 'delete', 'playAlong', 'clear', 'clearAll', 'period', 'openThrough', 'classGames', 'studentGames', 'move', 'unassign'];
+const CHANGE_KINDS = ['date', 'hide', 'who', 'wholeClass', 'optional', 'songPlace', 'classSong', 'archive', 'delete', 'playAlong', 'clear', 'clearAll', 'period', 'openThrough', 'classGames', 'studentGames', 'move', 'unassign', 'keepToday'];
 /* Which kind of change: a rotation over CHANGE_KINDS (slot = this case's start + the change's ordinal), so every
    kind runs about as often as every other; a kind that does not apply to this doc passes to the next one. Most
    changes aim at the student whose page is open (a card that student sees, that student's uid). */
@@ -1103,7 +1128,7 @@ function pickChange(rng, d, today, progs, openUid, slot, aim) {
       const tiers = [
         live.filter(id => mMap(d, 'hiddenActivities')[id] === true || mMap(d, 'activityStudents')[id]),
         live.filter(id => id in mMap(d, 'activityTitles') || pins.includes(id)),
-        live.filter(id => id in mMap(d, 'optionalActivities') || mMap(d, 'playAlongActivities')[id] === true),
+        live.filter(id => id in mMap(d, 'optionalActivities') || mMap(d, 'playAlongActivities')[id] === true || mMap(d, 'keepTodayActivities')[id] === true),
       ];
       return tiers[t].length ? pick(rng, tiers[t]) : null;
     };
@@ -1120,6 +1145,7 @@ function pickChange(rng, d, today, progs, openUid, slot, aim) {
       case 'archive': { const id = aimed(); return { kind, id, on: !mRetired(ACT[id], d) }; }
       case 'delete': { const id = aimed(); if (mMap(d, 'deletedActivities')[id]) continue; return { kind, id }; }
       case 'playAlong': { const ids = IDS.filter(id => ACT[id].view === 'card'); const id = pick(rng, ids); return { kind, id, on: mMap(d, 'playAlongActivities')[id] !== true }; }
+      case 'keepToday': { const id = busy(); return { kind, id, on: mMap(d, 'keepTodayActivities')[id] !== true }; }
       case 'clear': {
         const blk = mDocAnswers(d, progs[uid], uid, today).blk;
         const id = blk.length && chance(rng, 0.7) ? pick(rng, blk) : busy();
@@ -1160,6 +1186,7 @@ function writerCall(ch) {
     case 'archive': return `teacherSetActivityArchived(${J(ch.id)}, ${J(ch.on ? 'archive' : 'restore')})`;
     case 'delete': return `teacherDeleteActivity(${J(ch.id)})`;
     case 'playAlong': return `teacherSetActivityPlayAlong(${J(ch.id)}, ${J(ch.on ? 'now' : 'date')})`;
+    case 'keepToday': return `teacherSetActivityKeepToday(${J(ch.id)}, ${ch.on})`;
     case 'clear': return `teacherSetActivityClear(${J(ch.uid)}, ${J(ch.id)}, ${J(ch.on ? 'clear' : 'unclear')})`;
     case 'clearAll': return `teacherClearAllBlockers(${J(ch.uid)})`;
     case 'period': return `teacherSetStudentPeriod(${J(ch.uid)}, ${J(ch.value)})`;
@@ -1287,11 +1314,17 @@ async function runCase(idx) {
     if (page.asked !== mPeriodAsked(SJ)) fail(`${where}: period question`, page.asked ? 'asked, but the rules say this student is not asked' : 'not asked, but the rules say it is');
     /* R14 the first card. */
     let first;
-    try { first = page.run(`(function(){ renderClassActivities(); return caStartHereId; })()`); } catch (e) { fail(`${where}: first card`, 'renderClassActivities threw ' + (e && e.message)); }
+    let todayIds;
+    try { [first, todayIds] = page.run(`(function(){ renderClassActivities(); return [caStartHereId, caTodayIds.slice()]; })()`); } catch (e) { fail(`${where}: first card`, 'renderClassActivities threw ' + (e && e.message)); }
     if (first !== undefined) {
       C.firstChecks++; C.comparisons++;
       const prob = mFirstProblem(SJ, first);
       if (prob) fail(`${where}: first card`, prob);
+      /* R16 which cards are in Today. */
+      C.todayChecks++; C.comparisons++;
+      if (todayIds.some(id => mMap(SJ.doc, 'keepTodayActivities')[id] === true && mMap(SJ.doc, 'activityDates')[id] !== SJ.today && mMap(SJ.doc, 'activityDates')[id] !== modelAddDays(SJ.today, -1))) C.todayKept++;
+      const tprob = mTodayProblem(SJ, todayIds, first);
+      if (tprob) fail(`${where}: Today's activities`, tprob);
     }
     /* R6 no lock: a student with an unfinished required activity still opens another page. */
     if (mStudentBlockers(SJ).length && !SJ.previewer) {
@@ -1399,7 +1432,7 @@ async function runCase(idx) {
     if (tMode !== 'ok' && opened.kS) st2.known.push({ id: 'K1', S: Object.assign({}, st2.S, { override: opened.kS.override, openThrough: opened.kS.openThrough }) });
     tally(row, tMode === 'ok' ? 'tab back, read ok: new answer' : 'tab back, read failed: old answer', judgeStudent(`${label}: page open since before the change, tab back (read ${tMode})`, got, st2.S, st2.known) !== 'fail');
     if (tMode === 'ok') {
-      const moved = answerDiff(mStudentAnswers(prevS), mStudentAnswers(st2.S), ['vis', 'opt', 'blk', 'pao', 'num', 'games'], false).length > 0;
+      const moved = answerDiff(mStudentAnswers(prevS), mStudentAnswers(st2.S), ['vis', 'opt', 'blk', 'pao', 'keep', 'num', 'games'], false).length > 0;
       C.comparisons++;
       if (moved && got.sig === sigBefore) fail(`${label}: tab back`, 'the student\'s answer changed but classConfigSignature() did not, so the open In-Class Activities screen is not repainted');
       if (prevS.games !== st2.S.games) { C.gamesTabReturn[1]++; if (got.gamesBtn === (st2.S.games ? '' : 'none')) C.gamesTabReturn[0]++; }
@@ -1419,7 +1452,7 @@ async function runCase(idx) {
 /* R12 + the signature, directed (round-2 review R2-5): one change per input of classConfigSignature that the
    student's answer reads, each aimed so that it ALONE moves stu-alpha's answer, then a tab return with a good read.
    The answer must move (the model) and the signature must move with it, or an open In-Class Activities screen is
-   not repainted. Fixed, not seeded: the same 13 steps every run. */
+   not repainted. Fixed, not seeded: the same 14 steps every run. */
 async function directedSignature() {
   const uid = 'stu-alpha';
   const nowMs = DAYS[0][1];
@@ -1454,6 +1487,7 @@ async function directedSignature() {
     ['clears', { kind: 'clear', uid, id: c[5], on: true }],
     ['optional', { kind: 'optional', id: c[6], on: true }],
     ['Play Along now', { kind: 'playAlong', id: P.id, on: true }],
+    ['Keep in Today', { kind: 'keepToday', id: c[6], on: true }],
     ['songLibrary', { kind: 'songPlace', id: G.id, toSongs: true }],
     ['classSongs', { kind: 'classSong', id: T.id, on: true }],
     ['period override', { kind: 'period', uid, value: 'CAS' }],
@@ -1471,7 +1505,7 @@ async function directedSignature() {
     const S = mPageState(device, after, uid, 'ok', prevS, Object.assign(studentBase(uid, progs[uid], true, null, today), { done: prevS.done, ownPeriod: prevS.ownPeriod })).S;
     judgeStudent(`${label}: tab back (read ok)`, got, S, []);
     C.sigSteps++; C.comparisons += 2;
-    if (!answerDiff(mStudentAnswers(prevS), mStudentAnswers(S), ['vis', 'opt', 'blk', 'pao', 'num', 'period', 'openThrough', 'games'], false).length) fail(`${label}`, 'the aimed change did not move the student\'s answer (the block is mis-aimed)');
+    if (!answerDiff(mStudentAnswers(prevS), mStudentAnswers(S), ['vis', 'opt', 'blk', 'pao', 'keep', 'num', 'period', 'openThrough', 'games'], false).length) fail(`${label}`, 'the aimed change did not move the student\'s answer (the block is mis-aimed)');
     if (got.sig === sigBefore) fail(`${label}: tab back`, `only ${input} changed and the student's answer moved, but classConfigSignature() did not, so the open In-Class Activities screen is not repainted`);
     prevS = S;
   }
@@ -1541,9 +1575,10 @@ out.push(`  student events through the real save path: ${C.marked} cards marked 
 out.push(`  config/progress reads served: ${READS.ok} ok, ${READS.fail} failed, ${READS.empty} empty · ${C.comparisons} fields compared`);
 out.push(`  the lock (R6): body.ca-gated seen on ${C.gatedSeen} of ${C.freshLoads} sign-ins (and after every tab return); JOURNEY_GATE_LOCKS read false on ${C.journeyLocks} Journey probes; ${C.routerChecks} students with an unfinished required activity asked the router for another page`);
 out.push(`  the landing (R13, the real showApp): ${C.landingChecks} sign-ins from a bare address, a page, a lesson, a deep link, the live quiz, a Journey page or an update reload; ${C.landed} ended on In-Class Activities (${C.withBlocker} had an unfinished required activity)`);
-out.push(`  the signature, directed: ${C.sigSteps} of 13 inputs changed alone, each followed by a tab return with a good read`);
+out.push(`  the signature, directed: ${C.sigSteps} of 14 inputs changed alone, each followed by a tab return with a good read`);
 out.push(`  the console after a failed config read, directed: ${C.consoleReadPaints} of 3 Games views painted (failed read, good read, failed read)`);
 out.push(`  the first card (R14, caStartHereId after the real renderClassActivities): ${C.firstChecks} sign-ins checked · the period question (R15) asked at ${C.asked} sign-ins`);
+out.push(`  Today's activities (R16, caTodayIds after the same render): ${C.todayChecks} sign-ins checked, ${C.todayKept} of them with a kept card dated before yesterday in Today`);
 out.push(`  changes by kind (floor ${KIND_FLOOR}${FULL_RUN ? '' : ', checked on a full run only'}): ` + CHANGE_KINDS.map(k => `${k} ${KIND_COUNT[k] || 0}`).join(' · ') + ` (of them on a Hidden or Who card: archive ${C.richRetire.archive}, delete ${C.richRetire.delete}; on a renamed or pinned card: archive ${C.namedRetire.archive}, delete ${C.namedRetire.delete})`);
 out.push('  WHEN a console change reaches a student (R12) — passed / run, by change and moment:');
 const COLS = ['open page, tab not back: old answer', 'during the tab-return read: old answer', 'tab back, read ok: new answer', 'tab back, read failed: old answer', 'fresh sign-in: rules for its read'];

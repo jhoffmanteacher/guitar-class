@@ -8528,7 +8528,7 @@ function checkChordBlitzRanks() {
    deliberately, after a look at whether it can pass a `base` or needs the
    strict default.
    ═════════════════════════════════════════════════════════════════ */
-const CONFIG_WRITERS = 31;   // teacherWriteConfig() call sites in teacher.js — 29th-31st (teacher-remove.js, 2026-11-14): the Delete dialog's "console settings for this student" step (cell-checked on exactly the student's cells it removes) and the two markers, progressDeleted and progressStartOver (each cell-checked on its one uid cell); 28th: lqgWrite (teacher-livegames.js, the Live In-Class Games list; cell-checked on the one liveGames cell each change was worked out from: the order array, one name, one removed flag), 2026-11-13; 27th: teacherSetPmWeekGoal (cell-checked on its pmWeekGoals week cell, one cell, the Practice minutes "This week's goal" box), 2026-11-09; 26th: teacherSetModuleHidden (cell-checked on each hiddenActivities row it writes), 2026-10-22; 25th: teacherSetClassSong (cell-checked on its classSongs row), 2026-10-22; 22nd/23rd: teacherSetActivityStudent (cell-checked on one student's tick) and teacherSetActivityWholeClass (strict), 2026-10-13; 24th: teacherSetSongPlace (cell-checked on its songLibrary row), 2026-10-20
+const CONFIG_WRITERS = 32;   // teacherWriteConfig() call sites in teacher.js — 32nd: teacherSetActivityKeepToday (teacher-activities-2.js, the "Keep in Today's activities" box beside the release date; cell-checked on its one keepTodayActivities cell, as Play Along), 2026-11-16; 29th-31st (teacher-remove.js, 2026-11-14): the Delete dialog's "console settings for this student" step (cell-checked on exactly the student's cells it removes) and the two markers, progressDeleted and progressStartOver (each cell-checked on its one uid cell); 28th: lqgWrite (teacher-livegames.js, the Live In-Class Games list; cell-checked on the one liveGames cell each change was worked out from: the order array, one name, one removed flag), 2026-11-13; 27th: teacherSetPmWeekGoal (cell-checked on its pmWeekGoals week cell, one cell, the Practice minutes "This week's goal" box), 2026-11-09; 26th: teacherSetModuleHidden (cell-checked on each hiddenActivities row it writes), 2026-10-22; 25th: teacherSetClassSong (cell-checked on its classSongs row), 2026-10-22; 22nd/23rd: teacherSetActivityStudent (cell-checked on one student's tick) and teacherSetActivityWholeClass (strict), 2026-10-13; 24th: teacherSetSongPlace (cell-checked on its songLibrary row), 2026-10-20
 function checkConfigWriteGuard() {
   head('1ai. Every config/class write goes through the stale-write guard');
   let bad = 0;
@@ -11425,9 +11425,9 @@ function checkTodayByDate(ctx) {
   if (!ctx) { flag('1cq cannot run — the 0b render context is unavailable'); return; }
   const run = x => vm.runInContext(x, ctx);
   const J = JSON.stringify;
-  const EXPECT_RENDERS = 20;
+  const EXPECT_RENDERS = 25;
   let renders = 0, asserts = 0;
-  const STATE = ['activityDates', 'classActivities', 'activityBoard', 'activityBoardOn', 'optionalActivityIds', 'hiddenActivityIds',
+  const STATE = ['activityDates', 'classActivities', 'activityBoard', 'activityBoardOn', 'optionalActivityIds', 'hiddenActivityIds', 'keepTodayActivityIds',
     'retiredActivityIds', 'activityForMe', 'activityPins', 'caOpenId', 'caSwap', 'studentPeriod', 'periodOverride', 'currentUser',
     'songLibraryIds', 'classSongIds', 'caTodoOpen', 'caFinishedOpen', '_resumeCardClosed', 'caTodayStr',
     // Functions stubbed for the toast, resume-card and deep-link runs (no saving, no scrolling, no sticky bar: the 0b DOM stub has none).
@@ -11453,21 +11453,24 @@ function checkTodayByDate(ctx) {
                   es: { [D.d9]: 'lun, 10/11', [D.d8]: 'dom, 9/11' } };
   const toasts = [];
   /* Set the page up. `cards`: [id, module, date, done, optional, extra] in
-     board order (pos = index); extra: 'hidden' (Hidden in the console) or
-     'other' (given to other students only). */
+     board order (pos = index); extra: 'hidden' (Hidden in the console),
+     'other' (given to other students only), 'keep' (the console's "Keep in
+     Today's activities" tick, 2026-11-16), or two of them joined by '+'. */
   const setUp = (cards, lang) => {
-    const board = {}, dates = {}, done = {}, opt = {}, hidden = {}, forMe = {};
+    const board = {}, dates = {}, done = {}, opt = {}, hidden = {}, forMe = {}, keep = {};
     cards.forEach(([id, mod, date, isDone, isOpt, extra], pos) => {
+      const ex = String(extra || '').split('+');
       board[id] = { module: mod, pos };
       if (date) dates[id] = date;
       if (isDone) done[id] = true;
       if (isOpt) opt[id] = true;
-      if (extra === 'hidden') hidden[id] = true;
-      if (extra === 'other') forMe[id] = false;
+      if (ex.includes('hidden')) hidden[id] = true;
+      if (ex.includes('other')) forMe[id] = false;
+      if (ex.includes('keep')) keep[id] = true;
     });
-    ctx.__s = { board, dates, done, opt, hidden, forMe, toasts, today: TODAY };
+    ctx.__s = { board, dates, done, opt, hidden, forMe, keep, toasts, today: TODAY };
     run(`activityBoard = __s.board; activityBoardOn = true; activityDates = __s.dates; classActivities = __s.done; optionalActivityIds = __s.opt;
-      hiddenActivityIds = __s.hidden; retiredActivityIds = {}; activityForMe = __s.forMe; activityPins = []; caOpenId = null; caSwap = null;
+      hiddenActivityIds = __s.hidden; keepTodayActivityIds = __s.keep; retiredActivityIds = {}; activityForMe = __s.forMe; activityPins = []; caOpenId = null; caSwap = null;
       studentPeriod = '4'; periodOverride = ''; currentUser = null; songLibraryIds = {}; classSongIds = {}; caTodoOpen = true; caFinishedOpen = false;
       _resumeCardClosed = false; caTodayStr = () => __s.today;
       onClassActivityChange = (id, d) => { if (d) classActivities[id] = true; else delete classActivities[id]; };
@@ -11621,6 +11624,35 @@ function checkTodayByDate(ctx) {
       want(r.finOpen === false && r.today.includes(B), `${lang} deep link to a finished Today card: caFinishedOpen ${r.finOpen}, Today ${J(r.today)}; expected false, ${B} in Today`);
       renders++; r = page(`caOpenId = null; caFocusActivity(${J(A)})`);
       want(r.finOpen === true && r.fin.includes(A), `${lang} deep link to a finished older card: caFinishedOpen ${r.finOpen}, Completed ${J(r.fin)}; expected true, ${A} in it`);
+      /* 13. KEEP IN TODAY'S ACTIVITIES (the console's tick beside the release date, Jonathan 2026-11-16;
+         keepTodayActivities -> keepTodayActivityIds, caKeptInToday). A kept card that is visible stays in Today on
+         every later day, pending ones after today's and yesterday's (by date), a finished one as a ✓ row, each
+         with its date chip; a kept card dated in the future, an undated one, a Hidden one or another student's
+         never draws; an unkept older card is in the folds as before. */
+      const keepCards = [[A, MA, D.d2, false, false, 'keep'], [B, MA, D.d9], [C, MA, D.d5], [Dd, MA, D.d29, true, false, 'keep'],
+        [E, MA, D.future, false, false, 'keep'], [F, MA, null, false, false, 'keep'], [G, MA, D.d7, false, false, 'keep+hidden']];
+      r = render(keepCards, lang);
+      want(J(r.today) === J([B, A, Dd]) && r.hero === B && J(r.todayIds) === J([B, A, Dd]),
+        `${lang} kept: Today ${J(r.today)}, caTodayIds ${J(r.todayIds)}, hero ${r.hero}; expected ${J([B, A, Dd])} (today's card, then the kept pending one, then the kept finished one), hero ${B}`);
+      want(r.sum[A] && r.sum[A].hero && r.sum[A].chip !== null && r.sum[A].chip !== L[D.d8] && done(r, Dd, r.sum[Dd] && r.sum[Dd].chip) && r.sum[Dd].chip !== null && r.sum[B] && r.sum[B].chip === null,
+        `${lang} kept: drawn ${J([r.sum[A], r.sum[Dd], r.sum[B]])}; expected ${A} a hero card with its own date chip, ${Dd} a ✓ row with its date chip, ${B} no chip`);
+      want(J(r.todo) === J([C]) && r.todoN === 1 && r.fin.length === 0 && J(r.all) === J([B, A, Dd, C]),
+        `${lang} kept: Unfinished ${J(r.todo)} (${r.todoN}), Completed ${J(r.fin)}, page ${J(r.all)}; expected ${J([C])} (1), none, and no future, undated or Hidden kept card on the page`);
+      /* 13b. The same page with every tick off: the old rule (the older cards back in the folds). */
+      r = render(keepCards.map(c => c.slice(0, 5).concat([String(c[5] || '').split('+').filter(x => x !== 'keep').join('+')])), lang);
+      want(J(r.today) === J([B]) && J(r.todo) === J([C, A]) && J(r.fin) === J([Dd]),
+        `${lang} unticked: Today ${J(r.today)}, Unfinished ${J(r.todo)}, Completed ${J(r.fin)}; expected ${J([B])}, ${J([C, A])} (the old board order), ${J([Dd])} in Completed`);
+      /* 13c. Only a kept card is in the Today window's place: the heading still shows (dated today), and the newest
+         required card, older than nothing in Today, is the hero and is drawn first (the 2026-11-14 rule, unchanged). */
+      r = render([[A, MA, D.d2, false, false, 'keep'], [C, MA, D.d5]], lang);
+      want(r.headCount === 1 && r.head && r.head.key === 'ca.startHere' && r.head.date === L[D.d9] && J(r.today) === J([C, A]) && r.hero === C && r.todo.length === 0,
+        `${lang} kept card alone: heading ${J(r.head)} (${r.headCount}), Today ${J(r.today)}, hero ${r.hero}, fold ${J(r.todo)}; expected one ca.startHere dated ${L[D.d9]}, ${J([C, A])}, hero ${C}, empty fold`);
+      /* 13d. Optional kept cards stay below the required ones (caRequiredFirst), newest first among them. */
+      r = render([[A, MA, D.d2, false, true, 'keep'], [B, MA, D.d2, false, false, 'keep'], [C, MA, D.d9, false, true]], lang);
+      want(J(r.today) === J([B, C, A]) && r.hero === B, `${lang} kept optional: Today ${J(r.today)}, hero ${r.hero}; expected ${J([B, C, A])} (the required kept card first), hero ${B}`);
+      /* 13e. A kept card given to other students only never draws for this one. */
+      r = render([[A, MA, D.d2, false, false, 'keep+other'], [B, MA, D.d9]], lang);
+      want(J(r.all) === J([B]) && J(r.todayIds) === J([B]), `${lang} kept for others: page ${J(r.all)}, caTodayIds ${J(r.todayIds)}; expected ${J([B])} only`);
     }
   } catch (e) {
     flag('1cq: the page threw — ' + e.message);
@@ -11631,7 +11663,117 @@ function checkTodayByDate(ctx) {
     delete ctx.__r; delete ctx.__s;
   }
   if (renders !== EXPECT_RENDERS * 2) flag(`1cq ran ${renders} page renders, pinned ${EXPECT_RENDERS * 2} (${EXPECT_RENDERS} x EN + ES)`);
-  if (!bad) ok(`${renders} runs of the real renderClassActivities (${EXPECT_RENDERS} x EN + ES, 6 through caToggleComplete / caFocusActivity) and 6 of caTodayWindow, ${asserts} assertions: every card dated today or yesterday in Today with no cap, pending first (required before optional, today before yesterday, lowest number first) then finished as ✓ rows, the first pending card on the page is always the hero (an optional card never above it: lifted into Today, or required first in each module), Friday's cards Unfinished on a Monday, no heading when neither day has a card, a date chip exactly on yesterday's cards, future / Hidden / other students' cards never counted, the folds keep the old board order with each module's required cards first, the toast and the resume card follow caStartHereId, a deep link to a finished Today card leaves Completed shut, yesterday right across month, year and daylight-saving edges`);
+  if (!bad) ok(`${renders} runs of the real renderClassActivities (${EXPECT_RENDERS} x EN + ES, 6 through caToggleComplete / caFocusActivity) and 6 of caTodayWindow, ${asserts} assertions: every card dated today or yesterday in Today with no cap, pending first (required before optional, today before yesterday, lowest number first) then finished as ✓ rows, the first pending card on the page is always the hero (an optional card never above it: lifted into Today, or required first in each module), Friday's cards Unfinished on a Monday, no heading when neither day has a card, a date chip exactly on yesterday's cards, future / Hidden / other students' cards never counted, a card ticked "Keep in Today's activities" stays in Today after its date (pending after today's and yesterday's, done as a ✓ row, its date chip on; never before its date, Hidden or for other students; unticked = the old rule), the folds keep the old board order with each module's required cards first, the toast and the resume card follow caStartHereId, a deep link to a finished Today card leaves Completed shut, yesterday right across month, year and daylight-saving edges`);
+}
+
+/* 1eo. "KEEP IN TODAY'S ACTIVITIES" (Jonathan, 2026-11-16: "for the teacher
+   dashboard, add an option next to the release date that has a checkbox for
+   'keep in today's activities'"). config/class.keepTodayActivities, id ->
+   true; students: keepTodayActivityIds / caKeptInToday (which cards are in
+   Today is 1cq's, which it renders; tools/visible-loop.mjs R16 runs it across
+   reads, caches and tab returns). This pins the rest, by running it:
+   * OFF BY DEFAULT: the student page boots with keepTodayActivityIds = {}
+     (the 0b context, before anything is loaded), and loadClassConfig() reads
+     a missing field as {}; the console draws the box UNticked for a card the
+     map does not name.
+   * THE BOX: the console's real publishBlock (teacherActivityCtlKit, run in a
+     small context) draws exactly one data-set-activity-keep-today checkbox in
+     each of its three states (undated, scheduled, live), inside the same
+     .t-board-pubctl span as the release-date input, checked only when the
+     map holds true for that card. Both callers draw publishBlock: the board's
+     assigned card and the detail's Settings "Release" row.
+   * THE WRITE: the real teacherSetActivityKeepToday, with teacherWriteConfig
+     stubbed: tick = {keepTodayActivities:{id:true}} cell-checked on that one
+     cell (base undefined), untick = FieldValue.delete() with base true, a
+     failed write puts the copy back and reports through
+     teacherConfigSaveFailed. The change listener sends the box's `checked`
+     to it. Delete (teacherDeleteActivity's MAPS) clears the flag. */
+function checkKeepToday(ctx) {
+  head('1eo. Keep in Today\'s activities: off by default, the box beside the release date (board and Settings), its one cell-checked write');
+  let bad = 0, asserts = 0;
+  const flag = m => { err(m); problems++; bad++; };
+  const want = (cond, msg) => { asserts++; if (!cond) flag('1eo: ' + msg); };
+  /* Student side: the default, in the 0b render context (nothing loaded into it). */
+  if (!ctx) flag('1eo cannot run — the 0b render context is unavailable');
+  else {
+    let v;
+    try { v = vm.runInContext('JSON.stringify(keepTodayActivityIds)', ctx); } catch (e) { v = 'threw ' + e.message; }
+    want(v === '{}', `the student page boots with keepTodayActivityIds = ${v}, expected {} (off by default)`);
+  }
+  let app = '', tch = '';
+  try { app = stripJsComments(siteSource('app.js', ROOT)); tch = siteSource('teacher.js', ROOT); } catch (e) { flag('1eo cannot read the app or the console: ' + e.message); return; }
+  const tchCode = stripJsComments(tch);
+  want(/keepTodayActivityIds = d\.keepTodayActivities \|\| \{\};/.test(app), 'loadClassConfig() no longer reads keepTodayActivityIds as `d.keepTodayActivities || {}` (a missing field must read as off)');
+  /* Console side: the real publishBlock, three states x ticked / not. */
+  const kitBody = jsFunctionBody(tch, 'teacherActivityCtlKit');
+  const pinsBody = jsFunctionBody(tch, 'teacherActivityPins');
+  if (!kitBody || !pinsBody) { flag('1eo cannot find teacherActivityCtlKit() or teacherActivityPins() in the console'); return; }
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  const sb = { escAttr: esc, escHtml: esc, dayStr: () => '2026-11-16', MODULE_MANIFEST: [], allStudentsRaw: [], teacherShowArchived: false,
+    teacherBoardView: () => ({ number: {}, assigned: {}, sections: [] }), teacherActivityTitle: a => a.id, boardDoneOpen: {}, boardWhoOpen: {}, TEACHER_PINS_MAX: 4 };
+  let publishBlock;
+  try {
+    vm.createContext(sb);
+    vm.runInContext(`function teacherActivityPins(cfg)${pinsBody}\nfunction teacherActivityCtlKit(cfg, activities)${kitBody}`, sb, { timeout: 2000 });
+    publishBlock = cfg => vm.runInContext('(c => teacherActivityCtlKit(c, [{ id: "ca-1" }]).publishBlock({ id: "ca-1" }))', sb)(cfg);
+  } catch (e) { flag('1eo: the console kit does not run: ' + e.message); return; }
+  let renders = 0;
+  for (const [state, date] of [['undated', null], ['scheduled', '2026-12-01'], ['live', '2026-11-02']]) {
+    for (const on of [false, true]) {
+      const cfg = { activityDates: date ? { 'ca-1': date } : {}, hiddenActivities: {}, keepTodayActivities: on ? { 'ca-1': true } : { 'ca-2': true } };
+      let html = '';
+      try { html = publishBlock(cfg); renders++; } catch (e) { flag(`1eo: publishBlock threw (${state}, ${on ? 'ticked' : 'off'}): ${e.message}`); continue; }
+      const boxes = [...html.matchAll(/<input type="checkbox" data-set-activity-keep-today data-id="([^"]*)"( checked)?>/g)];
+      want(boxes.length === 1 && boxes[0][1] === 'ca-1', `${state}, ${on ? 'ticked' : 'off'}: ${boxes.length} Keep in Today boxes for ca-1, expected 1`);
+      want(boxes.length === 1 && !!boxes[0][2] === on, `${state}: the box is ${boxes[0] && boxes[0][2] ? 'ticked' : 'not ticked'} when the map ${on ? 'holds true for this card' : 'does not name it'}`);
+      const ctl = (/<span class="t-board-pubctl">([\s\S]*)<\/span><\/div>$/.exec(html) || [])[1] || '';
+      want(/data-set-activity-date/.test(ctl) && ctl.indexOf('data-set-activity-keep-today') > ctl.indexOf('data-set-activity-date'),
+        `${state}: the box is not beside the release date (inside .t-board-pubctl, after the date input)`);
+      want(/>\s*Keep in Today's activities<\/label>/.test(html), `${state}: the box's label "Keep in Today's activities" is gone`);
+    }
+  }
+  want(renders === 6, `publishBlock ran ${renders} times, expected 6`);
+  /* Both places that draw the controls draw publishBlock. */
+  /* Cut from the declaration to the next top-level one (jsFunctionBody stops early inside the board's template literals). */
+  const fnText = name => { const i = tch.indexOf('function ' + name + '('); if (i < 0) return ''; const j = tch.indexOf('\nfunction ', i + 1); return tch.slice(i, j < 0 ? tch.length : j); };
+  const settings = stripJsComments(fnText('teacherActivitySettingsHtml'));
+  const board = stripJsComments(fnText('renderTeacherActivities'));
+  want(/row\('Release', kit\.publishBlock\(a\)/.test(settings), 'the Settings tab no longer draws publishBlock in its Release row');
+  want(/publishBlock\(a\)\+`<div class="t-board-ctl">/.test(board), 'the board\'s assigned card no longer draws publishBlock');
+  want(/closest\('\[data-set-activity-keep-today\]'\);\s*if\(keepBox\)\{ teacherSetActivityKeepToday\(keepBox\.dataset\.id, keepBox\.checked\); return; \}/.test(tchCode),
+    'the console\'s change listener no longer sends the box (its checked) to teacherSetActivityKeepToday');
+  const delBody = jsFunctionBody(tch, 'teacherDeleteActivity') || '';
+  want(/const MAPS=\[[^\]]*'keepTodayActivities'/.test(delBody), 'Delete (teacherDeleteActivity MAPS) no longer clears keepTodayActivities');
+  /* The writer, run: tick, untick, a failed write. */
+  const wBody = jsFunctionBody(tch, 'teacherSetActivityKeepToday');
+  if (!wBody) { flag('1eo cannot find teacherSetActivityKeepToday() in the console'); return; }
+  const DEL = { del: true };
+  const calls = [], fails = [];
+  const w = { teacherClassConfig: {}, teacherView: 'other', renderTeacherActivities() {}, ensureDb: async () => {}, firebase: { firestore: { FieldValue: { delete: () => DEL } } },
+    teacherWriteConfig: async (patch, base) => { calls.push({ patch, base }); if (w.__fail) throw new Error('offline'); }, teacherConfigSaveFailed: e => { fails.push(String(e && e.message)); } };
+  try {
+    vm.createContext(w);
+    vm.runInContext(`async function teacherSetActivityKeepToday(id, on)${wBody}`, w, { timeout: 2000 });
+  } catch (e) { flag('1eo: teacherSetActivityKeepToday does not compile: ' + e.message); return; }
+  return (async () => {
+    try {
+      await w.teacherSetActivityKeepToday('ca-9', true);
+      const c1 = calls[0] || {};
+      want(c1.patch && c1.patch.keepTodayActivities && c1.patch.keepTodayActivities['ca-9'] === true && Object.keys(c1.patch).length === 1
+        && c1.base && Object.keys(c1.base).join() === 'keepTodayActivities.ca-9' && c1.base['keepTodayActivities.ca-9'] === undefined,
+        `tick: wrote ${JSON.stringify(c1)}, expected {keepTodayActivities:{"ca-9":true}} cell-checked on keepTodayActivities.ca-9 (was absent)`);
+      want(w.teacherClassConfig.keepTodayActivities['ca-9'] === true, 'tick: the console\'s copy does not hold the tick');
+      await w.teacherSetActivityKeepToday('ca-9', false);
+      const c2 = calls[1] || {};
+      want(c2.patch && c2.patch.keepTodayActivities && c2.patch.keepTodayActivities['ca-9'] === DEL && c2.base && c2.base['keepTodayActivities.ca-9'] === true,
+        `untick: wrote ${JSON.stringify(c2)}, expected a FieldValue.delete() cell-checked on the true it replaces`);
+      want(!('ca-9' in w.teacherClassConfig.keepTodayActivities), 'untick: the console\'s copy still holds the card');
+      w.__fail = true;
+      await w.teacherSetActivityKeepToday('ca-9', true);
+      want(!('ca-9' in w.teacherClassConfig.keepTodayActivities) && fails.length === 1, `a failed tick: copy ${JSON.stringify(w.teacherClassConfig.keepTodayActivities)}, ${fails.length} reports; expected the copy put back and one teacherConfigSaveFailed`);
+    } catch (e) { flag('1eo: the writer threw: ' + e.message); }
+    if (!bad) ok(`off by default (the student page boots with {}, a missing field reads {}), the real publishBlock run ${renders} times (undated, scheduled, live x ticked / off): one box beside the release date, ticked exactly when the map says so; drawn by the board card and the Settings Release row; the real writer run 3 times (tick, untick, a failed tick put back): one cell-checked cell each; Delete clears it; ${asserts} assertions`);
+  })();
 }
 
 /* 1ds. "SINCE YOUR LAST VISIT" (Jonathan, 2026-11-13; the end of
@@ -20969,6 +21111,7 @@ function checkPracticeMinutes(i18nTable) {
   checkPowerChordPopups(rcSets, rcCtx);
   checkPendingFileSwitch(rcCtx);
   checkTodayByDate(rcCtx);
+  await checkKeepToday(rcCtx);
   await checkSinceLastVisit(rcCtx);
   checkFoldedActivity(rcCtx);
   checkNoChecklist(rcCtx);

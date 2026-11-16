@@ -462,6 +462,9 @@ async function loadClassConfig(){
     // "Play Along now" practice cards (teacher.js board) — see playAlongActivityIds.
     playAlongActivityIds = d.playAlongActivities || {};
     try{ localStorage.setItem('caPlayAlong', JSON.stringify(playAlongActivityIds)); }catch(e){}
+    // "Keep in Today's activities" (teacher.js, beside the release date) — see keepTodayActivityIds.
+    keepTodayActivityIds = d.keepTodayActivities || {};
+    try{ localStorage.setItem('caKeepToday', JSON.stringify(keepTodayActivityIds)); }catch(e){}
     // Songs moved between Class activities and the Songs page — see songLibraryIds.
     songLibraryIds = d.songLibrary || {};
     try{ localStorage.setItem('caSongLib', JSON.stringify(songLibraryIds)); }catch(e){}
@@ -555,6 +558,10 @@ function restoreClassConfigFromCache(){
     const raw = localStorage.getItem('caPlayAlong');
     if(raw) playAlongActivityIds = JSON.parse(raw) || {};
   }catch(e){ /* ignore — playAlongActivityIds stays {} */ }
+  try{
+    const raw = localStorage.getItem('caKeepToday');
+    if(raw) keepTodayActivityIds = JSON.parse(raw) || {};
+  }catch(e){ /* ignore — keepTodayActivityIds stays {} */ }
   try{
     const raw = localStorage.getItem('caSongLib');
     if(raw) songLibraryIds = JSON.parse(raw) || {};

@@ -224,7 +224,7 @@ async function teacherDeleteActivity(id){
   // from scratch. Archive deliberately does NOT touch it — that's the whole
   // difference between the two, and why Restore-from-archive puts the card
   // back in its own module at its own position.
-  const MAPS=['archivedActivities','deletedActivities','hiddenActivities','optionalActivities','playAlongActivities','activityStudents','activityDates','activityTitles','activityNumbers','activityBoard'];
+  const MAPS=['archivedActivities','deletedActivities','hiddenActivities','optionalActivities','playAlongActivities','keepTodayActivities','activityStudents','activityDates','activityTitles','activityNumbers','activityBoard'];
   MAPS.forEach(m=>{ if(!cfg[m]) cfg[m]={}; });
   if(!cfg.activityClears) cfg.activityClears={};
   const clears=cfg.activityClears;
