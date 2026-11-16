@@ -135,7 +135,7 @@ SETS.push(
               {
                 label: 'How to mark each re-test', label_es: 'Cómo marcar cada repaso',
                 text: '<ol><li>Play each re-test below.</li><li>Mark its skill on the checklist.</li><li>Clear it → "I\'ve got it!". Struggle → "Still working on it".</li></ol>The "Where to practice it" line on each re-test names the module to go back to.',
-                text_es: '<ol><li>Toca cada repaso de abajo.</li><li>Marca su destreza en la lista de verificación.</li><li>Lo apruebas → "¡Ya lo tengo!". Te cuesta → "Todavía lo practico".</li></ol>La línea "Dónde practicarlo" de cada repaso dice a qué módulo volver.',
+                text_es: '<ol><li>Toca cada repaso de abajo.</li><li>Marca su destreza en la lista de verificación.</li><li>Lo apruebas → "¡Ya lo tengo!". Te cuesta → "Todavía lo estoy practicando".</li></ol>La línea "Dónde practicarlo" de cada repaso dice a qué módulo volver.',
                 hint: 'Mark "I\'ve got it!" only if it was clean every time.',
                 hint_es: 'Marca "¡Ya lo tengo!" solo si salió limpio todas las veces.'
               },
@@ -193,7 +193,7 @@ SETS.push(
                 text: '<ol><li>Play all six re-tests back to back, with no break between them.</li><li>Then open the checklist and settle any you weren\'t sure about.</li></ol>Cleared all six? Module 9 proper starts at Set 2. Flagged some? Spend a session with the practice spots listed above first — they come back fast.',
                 text_es: '<ol><li>Toca los seis repasos seguidos, sin pausa entre ellos.</li><li>Luego abre la lista de verificación y resuelve cualquiera del que no estuvieras seguro.</li></ol>¿Aprobaste los seis? El Módulo 9 propiamente empieza en la Unidad 2. ¿Marcaste algunos? Dedica una sesión a los puntos de práctica listados arriba primero — vuelven rápido.',
                 hint: 'Be strict. One dead string or one pause means "Still working on it".',
-                hint_es: 'Sé estricto. Una cuerda apagada o una pausa significa "Todavía lo practico".'
+                hint_es: 'Sé estricto. Una cuerda apagada o una pausa significa "Todavía lo estoy practicando".'
               }
             ]
           }
