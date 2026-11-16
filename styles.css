@@ -1547,6 +1547,7 @@ body.rail-collapsed .rail-tools .tool-popup{
 .sb-root .sb-where{cursor:default}
 .sb-root .sb-change-h{margin-top:14px}
 .sb-root .sb-change-h + .sb-row{margin-bottom:6px}
+.sb-root .sb-editpick{gap:6px;margin:0 0 8px}
 /* Console "Song requests" (teacher-songrequests.js): one block per video. */
 .tsr-group{border:1px solid var(--border2);border-radius:var(--radius);padding:10px 12px;margin:0 0 14px;background:var(--bg)}
 .tsr-group.tsr-waiting{border-left:4px solid var(--amber-text)}

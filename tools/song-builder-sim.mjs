@@ -63,6 +63,7 @@ import { createHash } from 'node:crypto';
 import vm from 'node:vm';
 import { siteParts } from './site-src.mjs';
 import { appPage } from './sim-app-page.mjs';
+import { FIXTURES, withAudio, audioIdFor } from './built-songs-fixtures.mjs';
 
 const args = process.argv.slice(2);
 const argOf = n => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : null; };
@@ -127,7 +128,7 @@ function clone(v){
   if(v && typeof v === 'object'){ const o = {}; for(const k of Object.keys(v)) o[k] = clone(v[k]); return o; }
   return v;
 }
-const DRAFT_KEYS = 'artist,audio,beat,chart,level,listens,pitch,pubVer,savedAt,source,step,title,v,volume';
+const DRAFT_KEYS = 'artist,audio,beat,chart,imported,level,listens,pitch,pubVer,savedAt,source,step,title,v,volume';
 function rulesCheck(op, path, data){
   const p = path.split('/');
   if(op === 'delete') return (p[0] === 'songDrafts' && p.length === 2) || (p[0] === 'songFiles' && (p.length === 2 || (p.length === 4 && p[2] === 'pieces')))
@@ -512,6 +513,7 @@ async function runCases(consoleSrc){
   await chartCases(consoleSrc, check);
   await pdfCases(consoleSrc, check);
   await publishCases(consoleSrc, check);
+  await importCases(consoleSrc, check);
   return out;
 }
 function box_set(C, k, v){ C.box[k] = v; }
@@ -958,7 +960,7 @@ async function publishCases(consoleSrc, check){
   F4.S.set('builtSongsMeta/list', { songs: { [other]: 3 }, updatedAt: TS });
   const otherDoc0 = JSON.stringify(F4.S.get('builtSongs/' + other)), otherCopyKeys = 1 + Math.ceil(LVB.length / 900000);
   const nW = () => F4.st.writes.length, since = w0 => F4.st.writes.slice(w0).map(w => w.op + ' ' + w.path), keysOf = p => [...F4.S.keys()].filter(k => k.startsWith(p)).sort();
-  run('teacherMicSaveFile = (name, blob) => { window.__saved = { name, blob }; }');
+  run('window.__saves = []; teacherMicSaveFile = (name, blob) => { window.__saves.push({ name, blob }); window.__saved = { name, blob }; }');
   run('renderTeacherSongBuilder()'); await settle();
   run(`sbOpen(${JSON.stringify(id)})`); await settle();
 
@@ -1078,8 +1080,8 @@ async function publishCases(consoleSrc, check){
   }
   /* D6: Export of the draft */
   {
-    run('window.__saved = null; sbExport("draft")');
-    const sv = run('window.__saved');
+    run('window.__saves = []; sbExport("draft")'); await settle(100);
+    const sv = run('window.__saves.find(x => /\\.json$/.test(x.name))');
     const f = sv ? JSON.parse(await sv.blob.text()) : null;
     check('export (a draft): one file, the Import shape { id, v, title, artist, audio, song }, the draft\'s own song, and builtSongCheck passes on it',
       f && Object.keys(f).sort().join() === 'artist,audio,id,song,title,v' && f.id === id && run('builtSongCheck')(f.id, { v: f.v, title: f.title, artist: f.artist, audio: f.audio, song: f.song }).length === 0
@@ -1132,7 +1134,7 @@ async function publishCases(consoleSrc, check){
   }
   /* D9: a reload: the published song is found again as published, with no change pending */
   const R = makeConsole(consoleSrc, F4);
-  R.run('teacherMicSaveFile = (name, blob) => { window.__saved = { name, blob }; }');
+  R.run('window.__saves = []; teacherMicSaveFile = (name, blob) => { window.__saves.push({ name, blob }); }');
   R.run('renderTeacherSongBuilder()'); await settle();
   R.run(`sbOpen(${JSON.stringify(id)})`); await settle();
   check('reload: the song is listed as Published with no "Changes not published", opens on its page, and its listens are still all done',
@@ -1141,13 +1143,13 @@ async function publishCases(consoleSrc, check){
   /* D10: Edit: the steps open; a new levelled copy is made; students keep the published song; the old copy stays */
   const aidNew = id + '-' + sha(LEVELLED.get('a')).slice(0, 8);
   {
-    R.run("sbPubAct('edit', { dataset: {} })");
-    const editing = R.run('sbShowsSteps()') && R.run('sbStepOn') === 1 && /editing: students keep the published song/.test(R.run('sbDetailHtml()')) && /data-sb-act="delete-song"/.test(R.run('sbDetailHtml()')) && !/data-sb-act="delete"[ >]/.test(R.run('sbDetailHtml()'));
+    R.run("sbPubAct('edit', { dataset: {} })"); await settle();
+    const editing = R.run('sbShowsSteps()') && R.run('sbStepOn') === 4 && /editing: students keep the published song/.test(R.run('sbDetailHtml()')) && /data-sb-act="delete-song"/.test(R.run('sbDetailHtml()')) && !/data-sb-act="delete"[ >]/.test(R.run('sbDetailHtml()'));
     box_set(R, '__f', fileOf('test-c.mp3', SRC_C, 15)); R.run('sbPickFile(__f)'); await settle();
     R.run('sbGoStep(2)'); await settle();
     box_set(R, '__levelNext', 'a'); R.run('sbRunLevel()'); await settle(300);
     const doc = F4.S.get('builtSongs/' + id);
-    check('edit: Edit opens the steps (Delete… with the typed title, not Delete draft); levelling again stores a new copy and names it in the draft, while the published song and the copy it plays stay as they were',
+    check('edit: Edit opens the steps on Chart, its default (Delete… with the typed title, not Delete draft); levelling again stores a new copy and names it in the draft, while the published song and the copy it plays stay as they were',
       editing && R.run('sbDraft().audio.id') === aidNew && keysOf('songFiles/' + aidNew + '/pieces/').length === 3 && keysOf('songFiles/' + aid).length > 0 && JSON.stringify(doc) === JSON.stringify(pubDoc),
       JSON.stringify({ editing, draftAudio: R.run('sbDraft().audio.id'), oldKept: keysOf('songFiles/' + aid).length }));
     check('edit: the list says "Changes not published", the listens start over, and Publish asks for them again', /Changes not published/.test(R.run('sbListHtml()')) && !R.run('sbListensOf(sbDraft()).all') && /Listen at the Preview step/.test(R.run('sbPublishWhy(sbDraft(), sbSel).join(" ")')),
@@ -1205,8 +1207,8 @@ async function publishCases(consoleSrc, check){
   {
     R.run(`sbOpen(${JSON.stringify(other)})`); await settle();
     const page = R.run('sbDetailHtml()');
-    R.run("window.__saved = null; sbPubAct('export', { dataset: { sbV: 'pub' } })");
-    const sv = R.run('window.__saved'), text = sv ? await sv.blob.text() : '';
+    R.run("window.__saves = []; sbPubAct('export', { dataset: { sbV: 'pub' } })"); await settle(100);
+    const sv = R.run('window.__saves.find(x => /\\.json$/.test(x.name))'), text = sv ? await sv.blob.text() : '';
     let tool = { status: -1, out: '' };
     if(text){
       const { mkdtempSync, writeFileSync, rmSync } = await import('node:fs');
@@ -1218,8 +1220,8 @@ async function publishCases(consoleSrc, check){
       tool = { status: r.status, out: (r.stdout || '') + (r.stderr || '') };
       rmSync(dir, { recursive: true, force: true });
     }
-    check('imported song: its page has Delete… and Export but no Edit or Unpublish (it has no draft); Export saves its file and tools/built-song-check.mjs passes it (exit 0)',
-      !/data-sb-act="edit"/.test(page) && !/data-sb-act="unpublish"/.test(page) && /data-sb-act="delete-song"/.test(page) && /import a new song file there/.test(page) && tool.status === 0 && JSON.parse(text).id === other,
+    check('imported song: its page has Edit, Unpublish, Delete… and Export (no draft yet: Edit and Unpublish make one); Export saves its file and tools/built-song-check.mjs passes it (exit 0)',
+      /data-sb-act="edit"/.test(page) && /data-sb-act="unpublish"/.test(page) && /data-sb-act="delete-song"/.test(page) && /has no draft yet/.test(page) && tool.status === 0 && JSON.parse(text).id === other,
       JSON.stringify({ status: tool.status, out: tool.out.trim().split('\n').slice(-2).join(' / ') }));
   }
   /* D16: Delete: the draft's OK / Cancel never deletes a published song; the typed title does; another song is untouched */
@@ -1245,6 +1247,157 @@ async function publishCases(consoleSrc, check){
   check('part d: every write fits firestore.rules (BUILT SONGS, SONG FILES, drafts) and none goes to config/class or progress/',
     F4.st.violations.length === 0 && !F4.st.writes.some(w => /^(config|progress)\//.test(w.path)) && F4.st.writes.length >= 10,
     F4.st.writes.length + ' writes; ' + (F4.st.violations.slice(0, 3).join('; ') || 'no violation'));
+}
+
+/* ── PART D, Jonathan's answers of 2026-11-16: an IMPORTED song gets Edit and Unpublish (a draft rebuilt from its
+   builtSongs doc), Export saves the mp3 too, Edit gives a choice of step. Its own console and store: made-up songs from
+   tools/built-songs-fixtures.mjs (fourFour, with one chord given its own voicing and a bpm with decimals, so a builder
+   that put its own shapes or a rounded tempo in would show; beatMap, with its own bar times), each "imported" as Manage
+   → Built songs' Import leaves it: builtSongs/{id}, the list, the stored copy, no draft. ── */
+async function importCases(consoleSrc, check){
+  const F6 = makeDb(), C = makeConsole(consoleSrc, F6), { run, env } = C;
+  const LV = LEVELLED.get('c'), shaL = sha(LV);
+  const putCopy = (F, audioId, bytes, dur) => {
+    F.S.set('songFiles/' + audioId, { file: audioId + '.mp3', bytes: bytes.length, sha256: sha(bytes), pieces: Math.ceil(bytes.length / 900000), pieceBytes: 900000, durationSec: dur, state: 'ready', uploadedAt: TS });
+    for(let i = 0; i * 900000 < bytes.length; i++) F.S.set(`songFiles/${audioId}/pieces/${i}`, { i, data: new FakeBytes(bytes.subarray(i * 900000, (i + 1) * 900000)) });
+  };
+  const imported = (name, id, mut) => {
+    const f = FIXTURES[name], d = withAudio(f.doc, LV.length, shaL);
+    d.audio.id = audioIdFor(id, shaL); d.audio.gainDb = 1.25; d.audio.sourceSha256 = hex64(9);
+    if(mut) mut(d);
+    putCopy(F6, d.audio.id, LV, d.audio.durationSec);
+    F6.S.set('builtSongs/' + id, Object.assign(JSON.parse(JSON.stringify(d)), { savedAt: TS }));
+    return d;
+  };
+  const A = FIXTURES.fourFour.id, B = FIXTURES.beatMap.id, U = 'sb-testimpunpub1';
+  const docA = imported('fourFour', A, d => { d.song.chords.G.full = { frets: [3, 2, 0, 0, 3, 3] }; d.song.bpm = 96.12345; });
+  const docB = imported('beatMap', B);
+  const docU = imported('fourFour', U, d => { d.title = 'Test Unpublish Me'; });
+  F6.S.set('builtSongsMeta/list', { songs: { [A]: 4, [B]: 2, [U]: 1 }, updatedAt: TS });
+  const nW = () => F6.st.writes.length, since = w0 => F6.st.writes.slice(w0).map(w => w.op + ' ' + w.path);
+  const canon = v => v === undefined ? '(none)' : run('sbCanon')(JSON.parse(JSON.stringify(v)));
+  const bare = p => { const x = Object.assign({}, F6.S.get(p)); delete x.savedAt; return x; };
+  run('window.__saves = []; teacherMicSaveFile = (name, blob) => { window.__saves.push({ name, blob }); };');
+  run('renderTeacherSongBuilder()'); await settle();
+  /* the listens, as the Preview step's card would give them (a whole play of every section) */
+  const listenAll = async () => {
+    run(`sbPv = { id: sbSel, key: 'sim', sig: sbListenSig(sbDocOf(sbDraft())), node: null, act: null, run: null, L: null }`);
+    const ex = run('builtSongExpand(sbSel, sbDocOf(sbDraft()))'), secs = ex.activity.card.sections, first = secs[0].fromBar;
+    C.box.__L = { firstBar: first, sections: secs.map(x => ({ fromBar: x.fromBar, bars: x.bars, reps: 1 })) };
+    for(const x of secs){ const s0 = x.fromBar - first; for(const f of [0.02, 0.5, 0.97]) run(`sbPvStep(sbPv, __L, ${s0 + f * x.bars})`); }
+    run('sbPvRunEnd(sbPv); sbPv = null');
+    await sleep(500); await settle();
+  };
+
+  /* E1: the imported song's page: Edit with a choice of step, Unpublish */
+  run(`sbOpen(${JSON.stringify(A)})`); await settle();
+  {
+    const h = run('sbDetailHtml()');
+    const steps = (h.match(/data-sb-act="edit-step"/g) || []).length;
+    check('imported song: its page now offers Edit (a choice of 6 steps, Chart highlighted) and Unpublish, says what a rebuilt draft cannot bring back, and has no draft yet',
+      steps === 6 && /class="sb-btn small primary" data-sb-act="edit-step" data-sb-v="4"/.test(h) && /data-sb-act="unpublish"/.test(h) && /chart's original text, the taps, the loudness numbers and the original mp3/.test(h) && !F6.S.has('songDrafts/' + A),
+      JSON.stringify({ steps, draft: F6.S.has('songDrafts/' + A) }));
+  }
+  /* E2: Edit on Beat: the draft is rebuilt and saved once; the steps say what came with the song */
+  {
+    const w0 = nW();
+    run("sbPubAct('edit-step', { dataset: { sbV: '3' } })"); await settle();
+    const d = F6.S.get('songDrafts/' + A);
+    const panes = run('[sbUploadHtml(sbDraft()), sbVolumeHtml(sbDraft()), sbBeatPaneHtml(sbDraft()), sbChartPaneHtml(sbDraft())]');
+    const u0 = (F6.S.get('songFilesUsage/' + run('songFileMonth()')) || {}).bytes || 0;
+    run('teacherSbPaint()'); await settle();
+    check('imported song, Edit on Beat: one songDrafts write (the draft fields, imported, its edit number) and the Beat step opens; nothing is loaded for it',
+      since(w0).join() === 'set songDrafts/' + A && d && Object.keys(d).sort().join(',') === 'artist,audio,beat,chart,imported,level,listens,pitch,pubVer,savedAt,source,step,title,v,volume' && d.imported === true && d.pubVer === 4
+      && run('sbShowsSteps()') && run('sbStepOn') === 3 && ((F6.S.get('songFilesUsage/' + run('songFileMonth()')) || {}).bytes || 0) === u0,
+      JSON.stringify({ writes: since(w0), keys: d && Object.keys(d).sort().join(','), step: run('sbStepOn') }));
+    check('imported song: Upload says its original mp3 is not here, Volume that the levelled copy and its numbers came with the song, Beat shows the bars read-only ("came with the imported song"), Chart that its original text is not here',
+      /its original mp3 is not here/.test(panes[0]) && /The levelled copy came with the imported song/.test(panes[1]) && /The bars came with the imported song/.test(panes[2]) && !/data-sb-act="tap"/.test(panes[2]) && /This chart came with the imported song/.test(panes[3]),
+      JSON.stringify(panes.map(x => x.length)));
+  }
+  /* E3: changed nothing: the draft makes the very song that was imported; Publish keeps it, edit 5 */
+  {
+    check('imported song, nothing changed: the rebuilt draft makes the imported song exactly (title, artist, audio, and the song: sections, bars, lyrics, its own chord shapes, its tempo unrounded, level)',
+      canon(run('sbDocOf(sbDraft())')) === canon((({ v, title, artist, audio, song }) => ({ v, title, artist, audio, song }))(docA)) && run('sbSongWhy(sbDraft(), sbSel).length') === 0,
+      run('JSON.stringify(sbDocOf(sbDraft()).song.chords.G)') + ' bpm ' + run('sbDocOf(sbDraft()).song.bpm'));
+    await listenAll();
+    const w0 = nW();
+    env.confirmAnswer = true; run('sbPublish()'); await settle(200);
+    const after = bare('builtSongs/' + A);
+    check('imported song, Edit, change nothing, Publish: the published song is deep-equal to the imported one; only the edit number moves (4 → 5)',
+      since(w0).join(' → ') === `set builtSongs/${A} → set builtSongsMeta/list` && canon(after) === canon((({ v, title, artist, audio, song }) => ({ v, title, artist, audio, song }))(docA)) && F6.S.get('builtSongsMeta/list').songs[A] === 5,
+      JSON.stringify({ seq: since(w0), list: F6.S.get('builtSongsMeta/list').songs }));
+  }
+  /* E4: a beat map kept exactly; one chord changed; only that chord differs */
+  {
+    run(`sbOpen(${JSON.stringify(B)})`); await settle();
+    run("sbPubAct('edit', { dataset: {} })"); await settle();
+    const bt = docB.song.barTimes;
+    check('imported beat map: Edit opens on Chart (the default); the bar times are kept exactly, and the builder\'s own bar clock follows them',
+      run('sbStepOn') === 4 && JSON.stringify(run('sbDocOf(sbDraft()).song.barTimes')) === JSON.stringify(bt) && run('sbBarTime(sbDraft().beat, 5)') === bt[4] && run('sbBarTime(sbDraft().beat, 13)') === bt[12],
+      JSON.stringify({ step: run('sbStepOn'), bt: run('sbDocOf(sbDraft()).song.barTimes') }));
+    run("sbChartEdit(sbDraft(), sbGridSetBar(sbDraft().chart.sections, 2, 'G'), null)"); await sleep(1400); await settle();
+    await listenAll();
+    run('sbPublish()'); await settle(200);
+    const was = docB.song, now = bare('builtSongs/' + B).song;
+    const diffKeys = [...new Set([...Object.keys(was), ...Object.keys(now)])].filter(k => canon(was[k]) !== canon(now[k]));
+    const barDiff = now.bars.map((b, i) => b === was.bars[i] ? null : i).filter(x => x !== null);
+    const chordDiff = [...new Set([...Object.keys(was.chords), ...Object.keys(now.chords)])].filter(k => canon(was.chords[k]) !== canon(now.chords[k]));
+    check('imported beat map, Edit, one chord changed (bar 3: D → G), Publish: only that differs: bars[2], and G added to the chords (the bar times, sections, level and every other shape the same)',
+      JSON.stringify(diffKeys) === '["chords","bars"]' && JSON.stringify(barDiff) === '[2]' && now.bars[2] === 'G' && JSON.stringify(chordDiff) === '["G"]' && JSON.stringify(now.barTimes) === JSON.stringify(bt) && F6.S.get('builtSongsMeta/list').songs[B] === 3,
+      JSON.stringify({ diffKeys, barDiff, chordDiff }));
+  }
+  /* E5: Unpublish of an imported song with no draft: the draft is rebuilt and saved first, then the list, then the song */
+  {
+    run(`sbOpen(${JSON.stringify(U)})`); await settle();
+    const w0 = nW();
+    run('sbUnpublish()'); await settle(200);
+    const d = F6.S.get('songDrafts/' + U);
+    check('imported song, Unpublish: the rebuilt draft first (nothing thrown away: it still makes the published song), then the list, then builtSongs/<id>; its copy stays',
+      since(w0).join(' → ') === `set songDrafts/${U} → set builtSongsMeta/list → delete builtSongs/${U}` && d && d.imported && d.pubVer === 1
+      && canon(run('sbDocOf')(JSON.parse(JSON.stringify(d)))) === canon((({ v, title, artist, audio, song }) => ({ v, title, artist, audio, song }))(docU)) && F6.S.has('songFiles/' + docU.audio.id),
+      JSON.stringify(since(w0)));
+  }
+  /* E6: Export: the .json and the .mp3, paired; the mp3 read from songFiles (one counted download); Import takes the pair */
+  let pair = null;
+  {
+    run(`sbOpen(${JSON.stringify(A)})`); await settle();
+    run('sbMemFor(null); window.__saves = []');
+    const month = run('songFileMonth()'), u0 = (F6.S.get('songFilesUsage/' + month) || {}).bytes || 0;
+    run("sbPubAct('export', { dataset: { sbV: 'pub' } })"); await settle(200);
+    const saves = run('window.__saves');
+    const u1 = (F6.S.get('songFilesUsage/' + month) || {}).bytes || 0;
+    const j = saves.find(x => /\.json$/.test(x.name)), m = saves.find(x => /\.mp3$/.test(x.name));
+    const mp3 = m ? new Uint8Array(await m.blob.arrayBuffer()) : new Uint8Array(0);
+    const f = j ? JSON.parse(await j.blob.text()) : null;
+    pair = { j, m, f };
+    check('export: two downloads, test-song-four-<id>.json and .mp3 (the same name); the mp3 is the stored copy (its SHA-256), read from songFiles and counted once against the month',
+      saves.length === 2 && j && m && j.name.replace(/\.json$/, '') === m.name.replace(/\.mp3$/, '') && j.name === 'test-song-four-' + A + '.json' && sha(mp3) === f.audio.sha256 && u1 - u0 === Math.ceil(LV.length * 4 / 3),
+      JSON.stringify({ names: saves.map(x => x.name), counted: u1 - u0 }));
+  }
+  if(!(pair && pair.j && pair.m && pair.f)) check('export → Import: the exported pair, fed to Manage → Built songs\' Import on another store, makes the same song and the same stored copy', false, 'Export did not save a .json and an .mp3');
+  else {
+    const F7 = makeDb(), C7 = makeConsole(consoleSrc, F7);
+    C7.run("teacherView = 'manage';");
+    C7.box.__dur = pair.f.audio.durationSec;
+    C7.run('teacherSfDuration = async () => __dur;');
+    C7.box.__j = pair.j.blob; C7.box.__m = pair.m.blob;
+    C7.run('teacherBsImport(__j, __m)');
+    for(let t = 0; t < 400 && (C7.run('teacherBsBusy') !== '' || !F7.S.has('builtSongsMeta/list')); t++) await sleep(10);
+    const got = F7.S.get('builtSongs/' + A); const g = got ? Object.assign({}, got) : null; if(g) delete g.savedAt;
+    check('export → Import: the exported pair, fed to Manage → Built songs\' Import on another store, makes the same song and the same stored copy',
+      g && canon(g) === canon(bare('builtSongs/' + A)) && F7.S.get('songFiles/' + pair.f.audio.id) && F7.S.get('songFiles/' + pair.f.audio.id).state === 'ready' && F7.S.get('songFiles/' + pair.f.audio.id).sha256 === pair.f.audio.sha256 && F7.st.violations.length === 0,
+      C7.run('teacherBsNote'));
+  }
+  /* E7: Edit's choice of step on a song with a draft: the default is Chart; each choice opens its step */
+  {
+    run(`sbOpen(${JSON.stringify(B)})`); await settle();
+    const got = [];
+    for(const k of ['2', '5', '6', '1']){ run("sbPubAct('edit-done', { dataset: {} })"); run(`sbPubAct('edit-step', { dataset: { sbV: '${k}' } })`); await settle(); got.push(run('sbStepOn')); }
+    run("sbPubAct('edit-done', { dataset: {} })"); run("sbPubAct('edit', { dataset: {} })"); await settle(); got.push(run('sbStepOn'));
+    check('edit: each choice opens its step (Volume 2, Level 5, Preview 6, Upload 1) and the header\'s Edit opens Chart (4)', JSON.stringify(got) === '[2,5,6,1,4]', JSON.stringify(got));
+  }
+  check('imported songs: every write fits firestore.rules and none goes to config/class or progress/', F6.st.violations.length === 0 && !F6.st.writes.some(w => /^(config|progress)\//.test(w.path)),
+    F6.st.writes.length + ' writes; ' + (F6.st.violations.slice(0, 3).join('; ') || 'no violation'));
 }
 
 /* ── main ── */

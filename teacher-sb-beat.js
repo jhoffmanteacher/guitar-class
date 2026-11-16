@@ -33,7 +33,8 @@ function sbBeatOf(d){ return d && d.beat && Number.isFinite(d.beat.anchor) && Nu
 function sbFmtT(s){ const m = Math.floor(s / 60), r = s - m * 60; return `${m}:${r < 10 ? '0' : ''}${r.toFixed(2)}`; }
 
 function sbBeatPaneHtml(d){
-  if(!d || !d.audio || !d.volume) return `<div class="sb-box"><p class="sb-note" style="margin:0">Level the record first (step 2).</p></div>`;
+  if(d && d.audio && d.beat && d.beat.fromImport) return sbBeatImportedHtml(d);
+  if(!d || !d.audio || !(d.volume || d.imported)) return `<div class="sb-box"><p class="sb-note" style="margin:0">Level the record first (step 2).</p></div>`;
   const lv = sbMem.id === sbSel ? sbMem.level : null;
   if(!lv || !lv.E) return `<div class="sb-box"><p class="sb-note" style="margin:0" data-sb-beatwait>${lv ? 'Reading the beats…' : d && d.audio && sbMem.failed === d.audio.sha256 ? 'The levelled copy did not load (the line above says why).' : 'Loading the levelled copy…'}</p></div>`;
   const bt = sbBtFor(sbSel), beat = sbBeatOf(d), meter = (beat && beat.meter) || bt.meter || '4/4';
@@ -95,9 +96,18 @@ function sbNoFitHtml(pins){
 function sbAutoEndBar(beat){ const ps = (beat.pins || []).map(p => p.bar); return ps.length ? Math.max(...ps) : null; }
 
 /* After a paint with the Beat step showing: load what is missing, then draw. */
+/* An imported song's beat (teacher-sb-publish.js, sbDraftFromDoc): kept exactly as it came, shown read-only (the
+   builder cannot measure a grid it did not set: no taps, no drift windows); Clear this step sets a new one here. */
+function sbBeatImportedHtml(d){
+  const b = d.beat, n = Array.isArray(b.barTimes) ? b.barTimes.length : 0, off = sbBusy ? ' disabled' : '';
+  return `<div class="sb-box tint"><div class="sb-h">The bars came with the imported song</div>
+    <p class="sb-note">${escHtml(`${(Math.round(b.bpm * 10) / 10)} BPM, ${b.meter === '6/8' ? '6/8 in two' : b.meter.slice(0, 1) + ' beats a bar'}, bar 1 at ${sbFmtT(b.anchor)}`)}${n ? `, and a beat map of ${n} bar times (bars that are not all the same length)` : ', every bar the same length'}. The builder keeps them exactly as they are, so a song you publish again plays on the same bars.</p>
+    <p class="sb-note">They were measured when the song file was made, not here: there are no taps and no drift check to show. Hear them at Preview. To set a new beat here instead, clear this step (the imported bars are then gone from the draft).</p>
+    <div class="sb-row"><button type="button" class="sb-btn small" data-sb-act="clear-beat"${off}>Clear this step: set a new beat</button></div></div>`;
+}
 function sbBeatMounted(){
   const d = sbDraft();
-  if(!d || !d.audio || !d.volume) return;
+  if(!d || !d.audio || !(d.volume || d.imported) || (d.beat && d.beat.fromImport)) return;
   const lv = sbMem.id === sbSel ? sbMem.level : null;
   if(!lv){ if(!sbBusy && sbMem.failed !== d.audio.sha256) sbLoadLevel(); return; }   // never again by itself after a failed load (sbMem.failed)
   if(!lv.E){
