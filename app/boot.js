@@ -1002,6 +1002,11 @@ async function signOut(anyway){
   }
   try { sessionStorage.clear(); } catch(e){}
   try { if(auth) await auth.signOut(); } catch(e){}
+  /* Cleared again: the page is still this student's during the await above (20-80 ms), and anything still
+     listening can write a session key in it. The live-quiz listener's first answer did (lq-q-opened,
+     live-quiz.js lqRoundOpenedAt): a student who signed out at once left that key for the next student
+     (tools/shared-chromebook-loop.mjs --seed=2 --case=28, 2026-11-16). */
+  try { sessionStorage.clear(); } catch(e){}
   location.reload();
 }
 /* Is any of the student's work not yet confirmed by Firestore? A category
