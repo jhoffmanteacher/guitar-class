@@ -40,14 +40,21 @@ backup, Export) from `Claude outputs/WORK-ORDER-song-builder.md` (on the Mac onl
 `origin/main`: Part d is ALWAYS REVIEWED (`site-reviewer`, before the push); then stop for Jonathan before Part e.
 Part d must keep his two answers of 2026-11-15: a record over 8 pins is sent to Claude and the line only warns
 (Publish is not blocked by it); the 10-cent pitch rule does block.
-**GitHub's "Site checks" has been RED since Part b (`22d0b86`, 2026-11-15), every push, and nobody had seen it.** Its
-step `node tools/checks.mjs --check --skip-links` fails there; the same command passes on the Mac in a clean shallow
-copy of the same commit, with GitHub's environment (UTC, plain locale, no home folder) and with the newest Node 24
-(24.22.3). So it is something Linux-only, and the log is the only way to know what: this session could not read it
-(`gh` is not installed on the Mac, and reading the log needs a sign-in). Jonathan: open
-https://github.com/jhoffmanteacher/guitar-class/actions → Site checks → the newest run → job "checks", and paste the
-lines with ✗ (or install `gh`). Until then a red "Site checks" says nothing new; the Browser tests, Firestore rules
-and Practice copy runs are green.
+**GitHub's "Site checks" is green again (2026-11-16, `190586d`).** It had been red since Part b: check 1en ran
+`tools/song-builder-sim.mjs`, whose fixed wait was too short on a faster machine (the Windows computer and GitHub's
+Linux; the Mac happened to be slow enough). The Windows session fixed the wait; nothing in the builder changed.
+**Done on the Mac 2026-11-16:** `teacher-activities.js` split in two (`teacher-activities-2.js`, 1,301 and 1,108
+lines; proof in its commit: the console golden snapshot identical before and after, 177 of 177 files). So the
+Windows list's "NOT `teacher-activities.js`" is settled. What the Mac did about the open question in the Windows
+note (`todo.md`: "only once golden is cleared"; the list: `slow-load.mjs` only): both. `golden.mjs` was rebuilt and
+took three review rounds after `todo.md`'s line was written (2026-11-13), and `--only console` took 3.5 minutes a
+run; whether that counts as "cleared" for the two coach splits is still Jonathan's to say.
+**Owed on the Mac, small and Fast (found by the Windows session's Friday re-check, verified on `9bf2b07`):**
+`teacher-livegames.js:237` `if(es === lqgBuiltIn(id, 'es')) es = '';` should be `if(!en && es === …` (a Spanish
+name equal to the built-in one is wiped although the English name was changed, so Spanish students see the
+English name); `teacher-students.js:553` "Behind the class" should skip the teacher's own doc
+(`if(teacherPmIsTeacher(stu)) return;` at the top of the loop, as the filter at line 560 does). Tick them in
+"Open work" → "2026-11-14 — Friday check: MINOR findings".
 **The Beat step's tracker is fixed (2026-11-15, the evening session; entry "The Beat step's tracker" under "Song
 builder" below has the numbers).** It follows American Girl beat for beat (0 of 397 beats over 100 ms from Moises's;
 before: 371). **Decided by Jonathan, 2026-11-15 (asked with the numbers):** a record that needs more than 8 pins
@@ -70,27 +77,10 @@ Agents: Opus or Fable by the need, as for the Windows block below. The Windows c
 the list in the next block at the same time: stay out of those files; fetch and rebase before every push. If Jonathan
 sends an mp3 for a first real song: skill `new-playalong`, 192k. Delete this block when Part d ships.
 
-**For the Mac, a five-minute job: bring Jonathan's three Strum check takes to Windows (written 2026-11-16 on
-Windows; Jonathan says "do the takes job in WORKFLOW").** Jonathan chose it (2026-11-16, "Bring the takes here"): the
-Windows session's review found a listening fault that needs a real-take replay before any fix ships, and the takes
-are only on the Mac.
-- Copy J01, J02 and J03 from `Claude outputs/takes-anon/` (each take's `.json` and its `.wav`) and the `--key` file
-  used in `docs/strum-check/DETAILS.md` section 20 / 24 (what he says he played) into a new repo folder
-  `tools/mic-sim/strum-takes/`, with a three-line `README.md`: whose they are (Jonathan's own playing, MacBook mic,
-  2026-11-14, local recording mode; no student in them), and the command that reproduces section 24's table.
-- First check: they are ONLY his own takes (no student take, no name but his), and say the sizes in the commit
-  message. If the three `.wav` are more than about 30 MB together, stop and write the sizes here instead of pushing.
-- Before pushing, run `node tools/mic-sim/strum-check-replay.mjs tools/mic-sim/strum-takes/J01.json
-  tools/mic-sim/strum-takes/J02.json tools/mic-sim/strum-takes/J03.json --key=<the key file>` from the new place and
-  put its summary lines in the README, so Windows can tell its replay matches the Mac's. If `checks.mjs` or
-  `sw.js` lists object to the new folder (it must NOT be precached), say so here rather than loosening a check.
-- Push (docs / tools only, no `Review:` trailer), then delete this block.
-- Also for the Mac, when the console files are free: two small fixes from the Friday check, verified on `9bf2b07`:
-  `teacher-livegames.js:237` `if(es === lqgBuiltIn(id, 'es')) es = '';` should be `if(!en && es === …` (a Spanish
-  name equal to the built-in one is wiped although the English name was changed, so Spanish students see the
-  English name); `teacher-students.js:553` "Behind the class" should skip the teacher's own doc
-  (`if(teacherPmIsTeacher(stu)) return;` at the top of the loop, as the filter at line 560 does). Both Fast; tick
-  them in "Open work" → "2026-11-14 — Friday check: MINOR findings".
+**The three Strum check takes are in the repo (2026-11-16, the Mac): `tools/mic-sim/strum-takes/`** (J01 to J03,
+`key.json`, a README with the command and the Mac's summary lines; 3.39 MB). `key.json` was written again from
+DETAILS section 20 (the 2026-11-14 file was not kept): J01 bar 4's chord wrong, J02 bar 7 left out, J03 nothing.
+The Windows session deletes this line once its replay matches the README.
 
 **For a session on the Windows computer (written 2026-11-15 for 2026-11-16 on; Jonathan cannot paste between his
 computers, so it lives here).** Jonathan opens Claude Code on Windows and says "do the Windows work in WORKFLOW".
