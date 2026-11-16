@@ -413,6 +413,11 @@ chart and the beat map. It has no ears: `tools/beat-audit.py` is the tool that l
   step snippets in `snipSetTier` and `snipStop`). The Song Journey pages keep their own copy in `tabs/journey.js`
   (`clickQ` / `clickTakeBack()` on a seek, a pause, a Slow or Guitar switch and the Metronome switch). A click whose
   count the music has already reached is kept: it is only waiting out the output latency.
+- **Where the music carries on through a switch, the count taken back is queued again at once** (THE MUSIC CARRIES ON
+  in `app/snippets.js`, fixed 2026-11-16): the same file at another rate, or the twin swapped in. `cancelQueuedClicks()`
+  returns the count it took back and `pcRetrack` / `snipSetTier` hand it to the scheduler, which queues it by number.
+  Before, a press less than a frame before a count lost that click. After touching the click scheduling or a
+  take-back: `node tools/metro-press-sim.mjs` (Node only, about 35 s, exit 0; not in `checks.mjs`).
 - The count-in clicks at the tempo of the bar the song comes in on (`pcCountIn`, fixed 2026-11-12; it used the
   window's average bar, 16.9% too fast at Madrecita Querida's Ending).
 - Its three KNOWN entries are real faults on his list, not fixed: the Las Mañanitas Solo highlight steps back at line

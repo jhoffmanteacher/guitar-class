@@ -1140,10 +1140,11 @@ function pcClick(at, accent, countIn, gain){
 }
 /* The next counted beat, scheduled once it is under 100 ms away. `lastBeat`
    is reset on a loop or a track switch, so a jump back never skips beats. */
-function pcScheduleClick(st, now){
+function pcScheduleClick(st, now, back){
   const bpb = st.L.tr.beatsPerBar * clickSub(st.L.tr);   // clicks a bar — see CLICK IN SIX
   const beatPos = snipBarsAt(st.win, now) * bpb;
-  const nb = Math.ceil(beatPos - 1e-6);
+  let nb = Math.ceil(beatPos - 1e-6);
+  if(back >= 0 && back < nb) nb = back;   // the count a switch just took back, reached since: it still clicks (QUEUED CLICKS, app/snippets.js)
   if(nb < st.lastBeat) st.lastBeat = nb - 1;
   if(nb <= st.lastBeat || nb < 0 || nb >= pcLoopEndBars(st) * bpb) return;   // the looped section's end, as the card's end: the next lap clicks its own downbeat
   const ahead = (snipTimeAtBars(st.win, nb / bpb) - now) / pcRate(st.root);   // real seconds
@@ -1152,7 +1153,7 @@ function pcScheduleClick(st, now){
   const lat = snipLatency() - (ctx.outputLatency || ctx.baseLatency || 0);
   const at = ctx.currentTime + Math.max(0, ahead + lat);
   // Kept until it has sounded, so a switch or Stop can take it back — see QUEUED CLICKS (app/snippets.js).
-  queueClick(st, pcClick(at, clickAccent(st.L.tr, nb), false, (st.L.tr.clickGain || 1) * PLAYALONG_CLICK_GAIN), at, ctx.currentTime + Math.max(0, ahead));
+  queueClick(st, pcClick(at, clickAccent(st.L.tr, nb), false, (st.L.tr.clickGain || 1) * PLAYALONG_CLICK_GAIN), at, ctx.currentTime + Math.max(0, ahead), nb);
   st.lastBeat = nb;
 }
 function pcFrame(){
@@ -1475,7 +1476,7 @@ function pcRetrack(root){
   const barsIn = pend ? pend.bars : snipBarsAt(st.win, st.audio.currentTime);
   st.win = pcWindow(st.L, slow);
   // The count is queued again on the new clock: take back the one already queued (QUEUED CLICKS).
-  cancelQueuedClicks(st);
+  const back = cancelQueuedClicks(st);
   st.lastBeat = -1;
   const at = snipTimeAtBars(st.win, isFinite(barsIn) && barsIn > 0 ? barsIn : 0);
   const src = snippetSrc(st.L.tr, slow, guitar);
@@ -1484,6 +1485,8 @@ function pcRetrack(root){
     // Same file, same window: only the rate moved — no seek (see snipSetTier).
     if(!pend && Math.abs(st.audio.currentTime - at) > SAME_FILE_SEEK_SEC){ try { st.audio.currentTime = at; } catch(e) {} }
     pcSparePark(st);
+    // The music carries on: the count just taken back is queued again now (QUEUED CLICKS, app/snippets.js).
+    if(back >= 0 && !st.audio.seeking) pcScheduleClick(st, st.audio.currentTime, back);
     return;
   }
   /* Guitar flipped and the twin is already playing the other mix in step:
@@ -1493,6 +1496,8 @@ function pcRetrack(root){
     st.audio = twinSwap(st, st.audio);
     pcParkTwin(st);
     pcSparePark(st);
+    // The music carries on: the count just taken back is queued again now (QUEUED CLICKS, app/snippets.js).
+    if(back >= 0 && !st.audio.seeking) pcScheduleClick(st, st.audio.currentTime, back);
     return;
   }
   const p = st.pending = { bars: isFinite(barsIn) && barsIn > 0 ? barsIn : 0, play: pend ? pend.play : !st.audio.paused };

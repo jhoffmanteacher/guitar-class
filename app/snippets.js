@@ -1057,9 +1057,10 @@ function snipSyncTabPage(tabEl, spec, win, heard){
    once it is under 100 ms away — the practice card's pcScheduleClick, on the
    snippet's own window. `lastBeat` drops back by itself when the loop comes
    round, so a lap never loses its first click. */
-function snipScheduleClick(st, now){
+function snipScheduleClick(st, now, back){
   const bpb = st.tr.beatsPerBar * clickSub(st.tr);   // clicks a bar — see CLICK IN SIX
-  const nb = Math.ceil(snipBarsAt(st.win, now) * bpb - 1e-6);
+  let nb = Math.ceil(snipBarsAt(st.win, now) * bpb - 1e-6);
+  if(back >= 0 && back < nb) nb = back;   // the count a switch just took back, reached since: it still clicks (QUEUED CLICKS)
   if(nb < st.lastBeat) st.lastBeat = nb - 1;
   if(nb <= st.lastBeat || nb < 0 || nb >= st.spec.bars * bpb) return;
   const ahead = (snipTimeAtBars(st.win, nb / bpb) - now) / snipRate(st.card);   // real seconds
@@ -1067,7 +1068,7 @@ function snipScheduleClick(st, now){
   const ctx = getAudioCtx();
   const lat = snipLatency() - (ctx.outputLatency || ctx.baseLatency || 0);
   const at = ctx.currentTime + Math.max(0, ahead + lat);
-  queueClick(st, pcClick(at, clickAccent(st.tr, nb), false, (st.tr.clickGain || 1) * PLAYALONG_CLICK_GAIN), at, ctx.currentTime + Math.max(0, ahead));
+  queueClick(st, pcClick(at, clickAccent(st.tr, nb), false, (st.tr.clickGain || 1) * PLAYALONG_CLICK_GAIN), at, ctx.currentTime + Math.max(0, ahead), nb);
   st.lastBeat = nb;
 }
 /* QUEUED CLICKS (fixed 2026-11-12, found by tools/playalong-loop.mjs). An
@@ -1084,23 +1085,38 @@ function snipScheduleClick(st, now){
    kept: it is only waiting out the output latency, and nothing queues that
    count again. `at` is when the click sounds, `due` when its count is
    reached, both on the AudioContext clock. The Song Journey pages
-   (tabs/journey.js) have their own copy of this rule. */
-function queueClick(st, o, at, due){
+   (tabs/journey.js) have their own copy of this rule.
+   THE MUSIC CARRIES ON (fixed 2026-11-16, tools/metro-press-sim.mjs). A
+   switch that changes no file (the same file at another rate, or the twin
+   swapped in) does not stop the music, so a count taken back less than a
+   frame before it was reached had passed by the next frame, which only
+   looks at the NEXT count: that click was lost (about 4 in 10 of the
+   presses less than a frame before a count). Each click carries its count (`nb`),
+   cancelQueuedClicks returns the latest count it took back (-1: none), and
+   those two paths (pcRetrack, snipSetTier) hand it straight back to the
+   scheduler, which queues that count by number even when the music has just
+   reached it. A file that loads needs none of this: the music comes back
+   before the count. */
+function queueClick(st, o, at, due, nb){
   o._at = at;
   o._due = due;
+  o._nb = nb;
   const now = getAudioCtx().currentTime;
   st.clicks = (st.clicks || []).filter(x => x._at > now);
   st.clicks.push(o);
 }
 function cancelQueuedClicks(st){
-  if(!st.clicks || !st.clicks.length) return;
+  let back = -1;                       // the latest count taken back — see THE MUSIC CARRIES ON
+  if(!st.clicks || !st.clicks.length) return back;
   const now = getAudioCtx().currentTime;
   st.clicks = st.clicks.filter(o => {
     if(!(o._due > now)) return true;
+    if(o._nb > back) back = o._nb;
     try { o.stop(0); } catch(e) {}
     try { o.disconnect(); } catch(e) {}
     return false;
   });
+  return back;
 }
 /* One of the snippet's <audio> elements failed. The PLAYING one stops the
    card and says so; the twin is just dropped (the Guitar toggle falls back to
@@ -1205,13 +1221,15 @@ function snipSetTier(btn, which){
   }
   slowestApplyRate(audio, snipRate(card));   // Slowest <-> Slow is the same file, just the rate
   // The count is queued again on the new clock: take back the one already queued (QUEUED CLICKS).
-  cancelQueuedClicks(snipState);
+  const back = cancelQueuedClicks(snipState);
   snipState.lastBeat = -1;
   if(audio.getAttribute('src') === src || audio.src.endsWith(src)){
     // Same file: only the rate moved, and `at` is where it already is. A seek
     // there would only make a gap (an mp3 seek lands late — see THE TWIN).
     // A pending switch places it itself, on the window read when it fires.
     if(!pend && Math.abs(audio.currentTime - at) > SAME_FILE_SEEK_SEC){ try { audio.currentTime = at; } catch(e) {} }
+    // The music carries on: the count just taken back is queued again now (QUEUED CLICKS).
+    if(back >= 0 && !audio.seeking) snipScheduleClick(snipState, audio.currentTime, back);
     return;
   }
   /* Guitar flipped and the twin is already playing the other mix in step:
@@ -1219,6 +1237,8 @@ function snipSetTier(btn, which){
   if(which === 'guitar' && twinReady(snipState, audio, src)){
     snipState.audio = twinSwap(snipState, audio);
     snipParkTwin(snipState);
+    // The music carries on: the count just taken back is queued again now (QUEUED CLICKS).
+    if(back >= 0 && !snipState.audio.seeking) snipScheduleClick(snipState, snipState.audio.currentTime, back);
     return;
   }
   const st = snipState;
