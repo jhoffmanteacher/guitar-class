@@ -10,8 +10,9 @@
    on this page), and the track's src is the levelled copy already in this tab (sbMem.level, read from songFiles and
    checked against its SHA-256 by sbLoadLevel, or just made by Volume), so a preview counts no second download. The
    card is in CLASS_ACTIVITIES / SNIPPET_TRACKS only while the Preview step is on screen (sbPreviewStop(true) takes
-   it out on every way off it). English only, like the console; a line says the Spanish card's words come from the
-   fixed templates. The Full / Power switch is answered here (sbPvCapture): caSetChordMode would save the choice and
+   it out on every way off it). The builder adds no language switch (the console is English); the card's own words
+   follow the page's language like every card the console draws (its header's Español button), and a line says the
+   Spanish card's words come from the fixed templates. The Full / Power switch is answered here (sbPvCapture): caSetChordMode would save the choice and
    redraw a console view that is not this one.
    THE LISTENS (Publish needs three: the card's first section, a middle one, its last; one or two for a card that
    short). A section counts as heard when ONE unbroken run of the play began within its first half bar and reached
@@ -187,7 +188,7 @@ function sbPreviewPaneHtml(d){
   const doc = sbDocOf(d);
   const lv = sbMem.id === sbSel && sbMem.level && sbMem.level.sha256 === d.audio.sha256;
   const pins = d.beat && d.beat.pinsNeeded;
-  return `<p class="sb-note">The real card, as students see it on the Songs page. ▶ plays the levelled copy on the beat grid you set, at the four speeds students get. English here: on a Spanish page the card takes its section names and directions from the site's fixed Spanish templates; the title and the lyric lines are the same in both.</p>`
+  return `<p class="sb-note">The real card, as students see it on the Songs page. ▶ plays the levelled copy on the beat grid you set, at the four speeds students get. It is drawn in this page's language; each student sees it in theirs, with the section names and directions from the site's fixed English and Spanish templates. The title and the lyric lines are the same in both.</p>`
     + (sbBeatTooMuch(pins) ? sbNoFitHtml(pins) : '')
     + (sbPitchBlocked(d) ? `<div class="sb-flag red"><span class="fi">!</span><div class="sb-flag-body"><b>This record is ${escHtml(sbCentsLine(d.pitch.cents))}.</b> A song more than 10 cents off cannot be published. Send the mp3 to Claude.</div></div>` : '')
     + sbListensHtml(d, doc)
