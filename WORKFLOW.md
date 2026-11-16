@@ -438,8 +438,12 @@ real song through Import (part a2) is still open.
     on arriving at step 2 with the original in the tab (once per file); a new draft opens on Full chords, the whole
     song; "Fix in the grid" is highlighted only when something needs settling. Publish is open when the validator
     passes, the pitch is within 10 cents, the levelled copy is the picked mp3's, and every drift window is pinned (the
-    drift rule kept: the decision did not name it). Happy path (steady record, clean chords pdf): 30 presses before,
-    23 after (the 8 Beat taps included), and no 3-minute listen.
+    drift rule kept: the decision did not name it). A first Publish asks nothing (one click; Jonathan, 2026-11-16, "go
+    ahead"); an edit of a live song, Unpublish and Delete… still ask. Happy path (steady record, clean chords pdf): 30
+    presses before, 22 after (the 8 Beat taps included; 20 without "Listen with clicks" and its Stop), and no 3-minute
+    listen. NOT done, on purpose: skipping the Chart and Level steps when nothing needs settling (the Chart step is
+    where "the chart makes N bars; the recording has M" is seen, and with no listen gate nothing else would catch a
+    count that is off); "Listen with clicks" stays where it is, and nothing requires it.
   - **Review round 1 (`aa6b8d3`):** R1-1 the song and the list in ONE transaction (both or neither); R1-2 a new mp3
     picked after levelling shuts Preview and Publish until Volume runs ("A new mp3 was picked: level it at step 2
     first."); R1-3 / R1-4 an edit number is never used twice (`teacherBsNextVer`: the seconds since 2026-01-01, past
