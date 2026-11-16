@@ -170,6 +170,9 @@ is split by file, so both computers work at once.**
    already queued the beat; if proved, reset it on `seeking` instead); and, new, Strum Hero and Strum Radar
    (`coach-strum.js`, `shAgain(±10)` / `srAgain(±10)`) probably say "10 BPM" one 5 BPM step from each end of
    their range, the fault Change Up had (unchecked).
+   **Done 2026-11-16 (the Mac, worktree `friday-close`): every line of the four entries has a verdict (18 lines: 14
+   done, 1 accepted, 3 Jonathan's calls); Strum Hero / Radar `34dfce7`; the Journey Metronome `b666211`. Left: the
+   three questions for Jonathan, one at a time (AskUserQuestion).**
 6. [ ] **Small things found on the way:** the change smoke owed on today's Windows pushes (`games`, `activities`);
    `tools/smoke.mjs` `cardKeysWalk` (~1521) and `foldWalk` (~1666) still lack `await pageLoaded(page)` after
    their reload (9 of 11 walks have it); the Listening Coach has the same `if (rec) micRecSave(…)` line
@@ -653,22 +656,37 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
   `friday-check-2026-11-06..364b6d2`, 168 Fast commits, reviewed by area (Opus, high). Each line: what, where, the cause.
   - **For Jonathan (content or product calls):**
     - Games heading "Notes on the low E and A strings" (`i18n.js:2225`, `9e62b46`): Note Runner keeps to those two
-      strings, but only 1 of Note Hunt's 5 levels and 1 of Fret Zap's 4 decks do.
+      strings, but only 1 of Note Hunt's 5 levels and 1 of Fret Zap's 4 decks do. STILL OPEN, JONATHAN'S CALL (checked
+      2026-11-16: both games START on the E · A level / deck, `coach-hub.js:65`, `coach-ear.js:793`; the question is
+      with the lead).
     - Change Up done screen at 135 / 45 BPM says "10 BPM" and the lit button plays 140 / 40, a 5 BPM step
-      (`coach-chords.js:1373`, `66bac56`, `e9711b8`): say the real step, EN + ES.
+      (`coach-chords.js:1373`, `66bac56`, `e9711b8`): say the real step, EN + ES. DONE 2026-11-16 (`8498f24`, 1ck
+      68 renders). Strum Hero and Strum Radar had the same fault (+10 / −10 at 115 / 55 and 95 / 55, a dead button at
+      each end): DONE 2026-11-16 (the Mac, `34dfce7`).
     - `coach.foot` (`i18n.js:1773`) still says nothing is "recorded or uploaded" beside the line `c8f2d79` fixed:
-      EN "… No sound is recorded or uploaded.", ES "… No se graba ni se sube ningún sonido."
+      EN "… No sound is recorded or uploaded.", ES "… No se graba ni se sube ningún sonido." DONE 2026-11-16 (`1348770`).
     - `module-9.js:138,196` `hint_es` quote the button as "Todavía lo practico"; it is "Todavía lo estoy practicando".
+      DONE 2026-11-16 (`a1892bc`).
     - The module fold's default (newest open) is not pinned (`app/activities-2.js:1615`, `5b2fd5b`): 1da cases.
+      DONE 2026-11-16 (`1e3c3ee`, `7b5d9af`: 1da runs the real callers and toggle; Reviewed).
     - Live game: a Spanish name typed equal to the built-in Spanish title is wiped (`teacher-livegames.js:237`,
       `fc27370`): `if(!en && es === lqgBuiltIn(id, 'es')) es = '';`. DONE 2026-11-16 (the Mac).
     - "Behind the class" does not skip the teacher's own doc (`teacher-students.js:553`, `c06b81e`):
       `if(teacherPmIsTeacher(stu)) return;`. DONE 2026-11-16 (the Mac).
     - Check `1t3` passes a page with a duplicated tuner button (`tools/checks.mjs:2285`, `a768bbc`): compare tags
-      in order.
+      in order. DONE 2026-11-16 (`b274415`, `b6f9f2a`: in order, popup by popup; Reviewed).
     - Song Journey Metronome, fast seeks: a doubled beat on 3-4 of 40 quick seeks on localhost, before and
       after the 2026-11-14 seeking fix (that one fixed the slow-connection stray click, 5+2 of 20 → 0). Not found.
-    - `tools/smoke.mjs` summary says "each of its 4 tool buttons"; 3 since `4422c66`.
+      DONE 2026-11-16 (the Mac, `b666211`), measured in headless Chrome with real mp3s, the-cure and luna, 40 quick
+      seeks each, every click logged: TWO kinds. (1) The same count clicked twice, ~17 ms apart: 3 in 560 seeks, each
+      from a frame between the element's end of seeking and the 'seeked' event (the reset on 'seeked' undid that
+      frame's click): the reset moved to 'seeking'; a Node replay of ensurePlayer in that order is 2 of 3 before, 3 of 3
+      after; 0 in 80 real seeks after. (2) Two DIFFERENT counts < 0.15 s apart, 1-4 per 40 seeks, unchanged: the old
+      place's last click and the new place's first. Some of those (0-3 per 40) are a click whose count was reached
+      just before the seek and sounds after it (QUEUED CLICKS keeps it to wait out the latency); taking back every
+      unsounded click on 'seeking' removed them (2+2 → 0+0 in one 80-seek run, not shipped: it changes the QUEUED
+      CLICKS rule, the lead's call). The rest are a seek landing just before a beat right after one: not a fault.
+    - `tools/smoke.mjs` summary says "each of its 4 tool buttons"; 3 since `4422c66`. DONE 2026-11-16 (`f0e012e`).
   - **Done 2026-11-14, evening (Jonathan's calls, Fast):** Module 1's note circle goes clockwise (both figures, hint and
     alt text, EN + ES); the backup includes each student's practice days (`minutesDays`) and its left-out list is true;
     on In class, required cards sit above optional ones and the next required card is always the first pending card.
@@ -679,7 +697,9 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
     2026-11-14; the cloud could not reach oEmbed). The Friday check now ends by committing `last-run.txt`, not a tag.
   - **Process:** `6ae6532` (1ec), `137ebfd` (1ds) and `9e62b46` (1ei) added a new kind of check and shipped Fast;
     CLAUDE.md lists that as always-Reviewed. Their checks are green and the area reviewer found nothing wrong in
-    what they guard.
+    what they guard. Record only, nothing to do (closed 2026-11-16).
+  - **Closed out 2026-11-16 (the Mac, Windows list item 5):** 10 lines: 9 done, 1 Jonathan's call (the Games heading).
+    Over the four Friday entries: 18 lines: 14 done, 1 accepted, 3 Jonathan's calls.
 
 - [ ] **Private song audio, step 1 is on main with NOTHING switched** (2026-11-14; plan and decisions:
   `Claude outputs/PLAN-private-song-audio-2026-11-13.md`, build notes `Claude outputs/private-audio-step1/DETAILS.md`).
@@ -707,7 +727,7 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
   git at `af1166e:firestore.rules`. The reads-only variant was dropped (it let a refused account write its progress
   before the screen); its draft stays in `Claude outputs/` as a record.
 
-- [ ] **2026-11-06 — Friday check: left for Jonathan.** Done 2026-11-07: "No streak right now" (`93cb1dc`); the My
+- [x] **2026-11-06 — Friday check: left for Jonathan.** Closed 2026-11-16: every item below is ticked. Done 2026-11-07: "No streak right now" (`93cb1dc`); the My
   progress pin gap (`pm-sim` section 18, `PM_SIM_PIN` 285 -> 302); ca-43 is a board limit at fret 12, not a drill bug
   (4 of 10 "Frets 8 to 12" cards and 2 of 24 on the whole neck light only the root; the 2026-11-02 changelog line says
   so); the smoke slider gap (card slider dragged to 77); check `1d` flags a shared step before a path step. coach.js
@@ -808,30 +828,40 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
   miss before any streak spends no free miss. Done: test gaps (pm-sim 142, 2026-11-02); R2-6 (`adopt()` takes the
   `pm:q:<uid>` key `70ef823` wrote, 2026-11-02); PD-6 (closed 2026-11-05); impossible tips (`611503a`, `weekReach`,
   1cg: goal ≤ 7 × daily cap; "hide Longest at 0", Jonathan 2026-11-02, reworded 2026-11-07 in `93cb1dc`). Still open, LOW:
-  - [ ] Liberal counting can over-count (accepted; since 2026-11-15 there is no daily cap to bound it; sim: 84 played → 144). Fix if wanted: keep
-    a leaving key's in-flight part in its own bucket an adopting page never puts back.
-  - [ ] The keepalive's dead-link guard only sees a commit in flight (up to ~60 s lost).
-  - [ ] The bar's flame is orange only when this week is hit, My progress's whenever the streak is above 0: pick one.
-  - [ ] `weekReach` is covered by pm-e2e only, not checks.mjs.
+  - [x] Liberal counting can over-count (accepted; since 2026-11-15 there is no daily cap to bound it; sim: 84 played → 144). Fix if wanted: keep
+    a leaving key's in-flight part in its own bucket an adopting page never puts back. ACCEPTED (Jonathan, 2026-11-01,
+    "count liberally, a rare double is fine", at the head of this entry); closed 2026-11-16.
+  - [ ] The keepalive's dead-link guard only sees a commit in flight (up to ~60 s lost). JONATHAN'S CALL (checked
+    2026-11-16, `practice-minutes.js:1082`; the question is with the lead).
+  - [x] The bar's flame is orange only when this week is hit, My progress's whenever the streak is above 0: pick one.
+    DONE (`bcacf4f`, 2026-11-01: both only on a week hit, Jonathan's pick; pinned by pm-sim section 18, `58b7687`).
+  - [x] `weekReach` is covered by pm-e2e only, not checks.mjs. DONE (`58b7687`, 2026-11-07: pm-sim section 18 runs
+    the can't-reach rule in seconds; checks.mjs runs pm-sim).
   - [ ] The "goal reached" toast shows only on a practice card (never on a Journey page: `pendingToast` is per page).
+    JONATHAN'S CALL (checked 2026-11-16: a Journey page counts with `ui: false`, `tabs/journey.js:18`, and the main
+    page toasts only a crossing it counts itself, `practice-minutes.js:696`; the question is with the lead).
   - [x] `tools/pm-e2e.mjs` and the real date: already fixed in the 2026-11-01 review (it clears the streak start, break
     weeks and semester split before seeding; file lines 137-142). Proved 2026-11-09 with `--date`: 109 of 109 checks on
     each of 12 dates (2026-11-09, -11-25 Thanksgiving, -11-30, -12-08, -12-23 winter break, 2027-01-05, -01-12, -02-17
     mid-winter break, -02-23, -04-14 spring break, -04-20, -05-26); with those lines removed it fails (7 on 2026-11-09,
     29 on 2026-11-30).
-  - [ ] `tools/smoke.mjs` draws no practice-minutes UI; `tools/pm-rules-test.mjs` needs the emulator.
+  - [x] `tools/smoke.mjs` draws no practice-minutes UI; `tools/pm-rules-test.mjs` needs the emulator. DONE (`076d47c`,
+    2026-11-03: the smoke walks the strip; `d641280`, 2026-11-13: GitHub runs pm-rules-test on the emulator after
+    every push).
+  - Closed out 2026-11-16 (the Mac): 6 lines: 3 done, 1 accepted, 2 Jonathan's calls (the keepalive, the toast).
 
 - [x] **2026-11-01 — Friday check (Fast commits `a615925`..`65898ce`).** Done 2026-11-01/02. The grey "Optional" edge
   (Jonathan: "fix the optional look to what you think is best"): `quiet = !done && !caStudentIsCAS() &&
   caIsOptional(a)` in `caActivityCardHtml`. Power Chord Switch's results screen stays full width, left-aligned, on purpose.
 
-- [ ] **2026-10-31 — Friday check (first run, `1c1e6c6`..`59e7915`).** R2-1, R2-4, R2-6, R1-1, R1-3 done 2026-10-31.
+- [x] **2026-10-31 — Friday check (first run, `1c1e6c6`..`59e7915`).** R2-1, R2-4, R2-6, R1-1, R1-3 done 2026-10-31.
   Binding: the console skips the signed-in account's own empty document (Jonathan chose this over a local-only trainer
   profile; check 1cf); Change Up's Start sits in the sticky bar (1ca; the −5/+5 row is still below the first screen, only Start is pinned); trainer `dayStr` is the local date (fails under
   `TZ=Pacific/Auckland`). A mic hit on ca-43's two-fret power cards names and marks both frets ("fret 0 / 12"; 1cd). `639248b`,
   `6871747`, `b3a351c`, `cb3dc5e` (mic detection) and `5e2061e` (new check 1cc) should not have shipped Fast; reviewed
-  then. **Still open:** check 1cd sees only strings asked for through `ncK()`; a direct `t('nc.*')` on a power screen is
-  invisible to it.
+  then. ~~**Still open:** check 1cd sees only strings asked for through `ncK()`; a direct `t('nc.*')` on a power screen is
+  invisible to it.~~ DONE 2026-11-16 (`ad1b063`, `bc0615e`: 1cd spies on every direct string of the power screens;
+  Reviewed). Nothing open.
 
 - [x] **2026-10-31 — Pushed without a reviewer (after `66266c9`)** — reviewer pass covered by `friday-check-2026-10-31`;
   the live-site look is the open item under 2026-10-30. Binding:
