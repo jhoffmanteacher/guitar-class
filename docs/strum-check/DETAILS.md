@@ -194,6 +194,8 @@ every take saves a, b and c, so it can be re-decided on real takes.
 - The take (when the teacher has collection on and the student said yes): saved through the existing `micRecStart` / `micRecSave` path
   under `<uid>-coach` — the only id the published rules allow that fits (coach = a Listening Coach check; nr / pw are other games). It
   overwrites that student's last Listening Coach take, as any Coach take does. `game: 'strumcheck'` marks it; `mode` stays 'coach'.
+  Since 2026-11-16 (review round 4, R4-4) a round Stopped before bar 1 ended (in the count-in or inside bar 1, `barsDone` 0) saves no
+  take: it used to write an empty one over the student's last full round. A Stop after one bar or more saves as before.
 - The cap: the brief's choice "raise this mode's cap if the storage rules allow it". `micRecStart(mode, maxSec)` takes an optional cap;
   only this check passes one: the whole round, ceil(count-in lead 0.4 s + 4 count-in beats + 32 beats + 1 beat) + 1 s, at most
   `SC_REC_MAX_SEC` 60. At 60 BPM: 37.4 s -> a 39 s cap, so **the take holds the whole 8-bar round** (count-in included), 1.87 MB = 4

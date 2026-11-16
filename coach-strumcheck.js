@@ -35,7 +35,8 @@
    `listenRounds` (ca-52, since 2026-11-14): a full round counts toward that
    step's tick through onCaStepChange, the writer every activity step tick
    uses (scCountRound). A consented recording (when the teacher has turned
-   collection on) goes to micTakes.
+   collection on) goes to micTakes, once the round has finished at least
+   one bar (scFinish).
 
    The two chord rules (SC_CHORD_RULE picks the one the student sees; a
    recording keeps both verdicts). Power chords that share a note cannot be
@@ -737,7 +738,10 @@ function scFinish(complete){
   scButtonLabel(s, false);
   scRenderReport();
   if (s.complete && s.barsDone === s.bars.length) scCountRound(s);
-  if (rec) micRecSave(rec, scRecMeta());
+  /* A round Stopped before bar 1 ended (in the count-in, or inside bar 1) has no judged bar: it is not saved, so it cannot replace the
+     student's last take, which has the same id (review round 4, R4-4: Stop 0.67 s into the count-in wrote a take with barsDone 0 over
+     the full round before it). micRecStop, above, has already stopped that capture and let it go; nothing else holds it. */
+  if (rec && s.barsDone >= 1) micRecSave(rec, scRecMeta());
 }
 
 /* A FULL round (the loop reached the end of the last bar: not Stopped, not interrupted; any score) on
