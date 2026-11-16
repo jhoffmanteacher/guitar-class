@@ -76,7 +76,10 @@ const SC_RULE = 'strumcheck-2';     // bump when what is judged changes; saved w
    slots and an extra on each miss are caught exactly as at 0.35 and 0.40 (every miss 2 of 2; the one extra not caught at 85 and at 100
    was not heard at all, the same at every width); one strum 150 ms late at 60 BPM now passes 2 of 2 (0.35: 1 of 2); nothing played
    still hears 0 of 96. The right player's red arrows at 85 and 100 BPM (6 and 17 of 96) are strums the detector did not hear, not
-   timing: the same at all three widths. */
+   timing: the same at all three widths.
+   Since the pattern-shape grid (THE GRID, below; DETAILS section 23), which came after these measurements, an extra strum on a rest is
+   caught only about half the time on the bench (51 of 120 in the quiet room; review round 4, 2026-11-16, R4-1; WORKFLOW), and that
+   is open. */
 const SC_WIN_FRAC = 0.45;
 /* This check's own strum ratios (the lead, 2026-11-14, after the virtual
    student lost a right player's re-strums at the shared 1.4 / 1.7: 22% at

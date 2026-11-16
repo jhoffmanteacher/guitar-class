@@ -17115,7 +17115,9 @@ const COUNTIN_PIN = { runs: 44, beeps: 140, rounds: 9, takes: 6, tips: 28 };   /
        run with IS_TEACHER_MODE true);
      - the window: SC_WIN_FRAC is 0.45 (Jonathan, 2026-11-14, after a real guitar: "slightly more permissive to start"; it was 0.35,
        "medium"); scOnset, run, takes a strum 0.44 of an eighth off its slot and not one 0.46 off, in
-       both directions; a strum near a slot where the hand misses is a fault (an extra), and a bar with one says so;
+       both directions; a strum near a slot where the hand misses is a fault (an extra), and a bar with one says so. That pin hands
+       scOnset the slot directly: it does not go through the grid search (scAnchorSearch), which on the bench excuses about half of
+       the strums on a rest (51 of 120 caught, review round 4, R4-1: open). Nothing in this check pins what a round does with one;
      - the chord: only a strum on slot 0 opens a chord reading; the reading's verdict is SC_CHORD_RULE's (rule 'c', pinned) and all
        three rules give their pinned answers on scripted readings (G5 after C5: G alone, a D, a C, the held C5's C and G);
      - saves nothing: the part never names saveGames, games, progress, caSteps, flushSave or storage, and a whole finish (scFinish and
