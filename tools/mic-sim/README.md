@@ -466,3 +466,8 @@ script.
 - `sim.mjs <old> <new>` — old vs new coachReadFrame at 13–60 fps.
 - `loud.mjs`, `loud-diag2.mjs`, `sweep2.mjs <coach.js>` — beat-graded
   (Coach / Note Runner style) loud-room sweeps.
+- **The Strum Pattern check (ca-52, `coach-strumcheck.js`):** `strum-check-loop.mjs` (the virtual student) and
+  `strum-check-replay.mjs` (Jonathan's three real takes in `strum-takes/`, the bench rooms, `--splice`); their headers
+  say how, and `docs/strum-check/DETAILS.md` holds every result. Since 2026-11-16 the site's grid search carries rule
+  AD (review R4-1: an extra strum on a rest stays an extra; DETAILS section 29), so the replay's `SITE_P` carries
+  `outPen: -1.5, lock: 0.25`; the code before AD is `{"outPen":null,"lock":0}` (`--cands` / `--copy`).

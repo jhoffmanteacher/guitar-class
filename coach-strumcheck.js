@@ -77,9 +77,11 @@ const SC_RULE = 'strumcheck-3';     // bump when what is judged changes; saved w
    was not heard at all, the same at every width); one strum 150 ms late at 60 BPM now passes 2 of 2 (0.35: 1 of 2); nothing played
    still hears 0 of 96. The right player's red arrows at 85 and 100 BPM (6 and 17 of 96) are strums the detector did not hear, not
    timing: the same at all three widths.
-   Since the pattern-shape grid (THE GRID, below; DETAILS section 23), which came after these measurements, an extra strum on a rest is
-   caught only about half the time on the bench (51 of 120 in the quiet room; review round 4, 2026-11-16, R4-1; WORKFLOW), and that
-   is open. */
+   The pattern-shape grid (THE GRID, below; DETAILS section 23) came after these measurements, and with it an extra strum on a rest was
+   caught only about half the time on the bench (51 of 120 in the quiet room; review round 4, 2026-11-16, R4-1). Rule AD (AN EXTRA
+   STRUM ON A REST STAYS AN EXTRA, below; 2026-11-16) catches 114 of the same 120 (DETAILS section 29; of the 6 left, 3 were not heard
+   at all and 3, at 100 BPM, still moved the grid). Never caught: an extra on bar 1's first rest (one strum before it, so the grid
+   still slides to fit it). */
 const SC_WIN_FRAC = 0.45;
 /* This check's own strum ratios (the lead, 2026-11-14, after the virtual
    student lost a right player's re-strums at the shared 1.4 / 1.7: 22% at
@@ -134,15 +136,18 @@ const SC_ANCHOR_WIDE_ACCEPT = 1;
 const SC_ANCHOR_WIDE_TIGHT = 0.15;
 /* AN EXTRA STRUM ON A REST STAYS AN EXTRA (review round 4, R4-1; Jonathan chose rule "AD", 2026-11-16). Before this, the search at each
    strum could slide the grid so that a strum on a rest fell between two windows (it scored nothing there) or on a strum place, and the
-   mistake bar passed: on the bench about half the extras were excused (51 of 120 caught, quiet room). Two rules:
+   mistake bar passed: on the bench about half the extras were excused (51 of 120 caught, quiet room; 114 of 120 with these rules).
+   Two rules:
      A  a sound outside every window costs SC_ANCHOR_REST too, as a sound on a rest does (scAnchorSearch);
      D  when the SC_ANCHOR_LOCK_MIN or more onsets before this one (in the last SC_ANCHOR_SPAN eighths) all sit on strum places of the
         grid it has, the search looks only SC_ANCHOR_LOCK of an eighth either way (not SC_ANCHOR_RANGE): a player whose last strums fit
         is on the grid, so one odd sound cannot move it far. The wide search (above) is unchanged.
    Measured (DETAILS section 29): Jonathan's three takes, kept clock and +-20 ms, right playing: strums heard 379 of 414 (378 before),
-   false extras 1 of 138 (1), bars all right 36 of 72 (35). One of his own strums pasted into a rest (180 splices): caught 115 (38
-   before), the mistake bar passed 32 (83). Not fixed: an extra on bar 1's first rest (one strum before it). Costs: talking (the bench's
-   talk room only; no real take has talk) gives a right player more false extras. */
+   false extras 3 of 138 (3), bars all right 36 of 72 (35), right chords the same. One of his own strums pasted into a rest (180
+   splices): caught 115 (38 before), the mistake bar passed 32 (83). Not fixed: an extra on bar 1's first rest (one strum before it).
+   Costs, all on the bench (no real take has them): talking gives a right player more false extras (talk room: 47 of 128, 15 before;
+   bars right 17 of 64, 28 before); a quiet player in the class room 7 of 24 bars right (10 before); a steady player who starts 1.5
+   beats late 60 of 80 bars (65 before) at 85 BPM. */
 const SC_ANCHOR_LOCK = 0.25;
 const SC_ANCHOR_LOCK_MIN = 4;
 /* THE CHORD, octave first (2026-11-14, take 1 bar 4: G5 played where C5 is due passed, because G is in both chords and pitch classes

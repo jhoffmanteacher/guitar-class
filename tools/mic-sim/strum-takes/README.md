@@ -16,7 +16,7 @@ microphone and the browser. The `answerNote` inside J01.json and J02.json still 
 before he said. `key.json` was written again on 2026-11-16 from his words in `docs/strum-check/DETAILS.md` section
 20 (the file used on 2026-11-14 was not kept).
 
-The command (headless Chrome, about a minute; `--diag`, `--sweep` and the rest are in the tool's header):
+The command (Node only, the site in a vm, no browser: about 10 s; `--diag`, `--sweep` and the rest are in the tool's header):
 
     node tools/mic-sim/strum-check-replay.mjs tools/mic-sim/strum-takes/J01.json tools/mic-sim/strum-takes/J02.json tools/mic-sim/strum-takes/J03.json --key=tools/mic-sim/strum-takes/key.json
 
@@ -28,6 +28,9 @@ What it printed on the Mac, 2026-11-16, on `5c5370d`'s `coach-strumcheck.js` (a 
          against the key: strums heard 37 of 42 · false extras 0 of 14 · right chords called right 8 of 8 · wrong chords caught 0 of 0
     J03  REPRODUCED (the real check, the fitted clock): slots 30 of 64 · chords 4 of 8 (rules a and b both: 3 of 8)
          against the key: strums heard 45 of 48 · false extras 0 of 16 · right chords called right 6 of 8 · wrong chords caught 0 of 0
+
+The Windows run of 2026-11-16 printed the same six lines, before and after rule AD was built (`coach-strumcheck.js`,
+review R4-1; `docs/strum-check/DETAILS.md` section 29): AD changes none of them at the kept clocks.
 
 Kept clocks: J01 -117.5 ms, J02 -70.8 ms, J03 -75.2 ms. The copies in the Mac's `Claude outputs/takes-anon/` are
 the same files, byte for byte.

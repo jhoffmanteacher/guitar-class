@@ -1255,3 +1255,100 @@ Strings (i18n.js; "comentarios" is the Start button's own word, sc.play):
 Stale-hit grep ("4 clicks", "4 clics", "to check", "para revisar", "don't play", "no toques en"), case-insensitive: coach-strumcheck.js 0, sc.* strings 0, the 1eh block 0, the CHANGELOG entry 0, the smoke's strum lines 0. The one other hit, in tools/mic-sim/strum-check-loop.mjs:284 ("the count-in's 4 clicks"), describes the count-in and is not the old wording.
 
 Measured (12 cases: the three lines x EN/ES x Metronome on/off, 1366x657, `r5-feedback/measure.log`): 0 cut, the switch whole in all 6 where drawn, board and button on screen, Mark complete bottom at most 581. Rows: the end lines take 1 row (ES completed wraps the switch under it, strip 42 px); the live line takes 2 rows in ES (and in EN beside the beat dot), strip 39 px. Shot looked at: `r5-feedback/es-xCounted-metro.png`.
+
+## 29. Built: rule AD, an extra strum on a rest stays an extra (review R4-1; Jonathan, 2026-11-16: "Build AD")
+
+**The fault (R4-1).** At every strum heard, `scAnchorSearch` moves the grid to where the last bar's sounds best fit D.DU.UDU. A
+sound outside every window scored nothing, so a grid that put an extra strum BETWEEN two windows cost nothing, and the mistake bar
+passed. On the bench (`extras.mjs`: one extra in bar 2, quiet room, 60 / 85 / 100 BPM, 20 rounds each) 51 of 120 extras were
+caught and the mistake bar passed 33 times.
+
+**The rule** (`coach-strumcheck.js`, constants beside the other `SC_ANCHOR_*`, comment "AN EXTRA STRUM ON A REST STAYS AN EXTRA"):
+- **A:** in `scAnchorSearch`, a sound outside every window costs `SC_ANCHOR_REST` (-1.5), as a sound on a rest does.
+- **D:** in `scAnchor`, when `SC_ANCHOR_LOCK_MIN` (4) or more onsets before this one (in the last `SC_ANCHOR_SPAN` eighths) all sit
+  on strum places of the grid it has, the search looks only `SC_ANCHOR_LOCK` (0.25) of an eighth either way, not
+  `SC_ANCHOR_RANGE` (1). The wide search is unchanged; no ratio, window, the gate, `scHearStrum` or `coach-core.js` changed.
+- `SC_RULE` is `strumcheck-3`; a take saves `anchorLock` and `anchorLockMin`.
+
+**The built code is the measured candidate.** `strum-check-replay.mjs --copy='{"outPen":-1.5,"lock":0.25}'` on the built tree:
+IDENTICAL on J01, J02 and J03; the copy at the old settings (`{"outPen":null,"lock":0}`): DIFFERENT (exit 1). The tool's `SITE_P`
+now carries AD, so the plain command checks the real function. The bench's rows on the built code equal the planted candidate's
+row for row (`fixAD`, 31 of 31 rows), and the late-start table equals `fixAD`'s (14 of 14).
+
+**Jonathan's three takes** (right playing, `--sweep --cands`, each take at its kept clock and +-20 ms: 9 replays):
+
+| | strums heard | false extras | bars all right | right chords | wrong chord caught |
+|---|---|---|---|---|---|
+| before | 378 of 414 | 3 of 138 | 35 of 72 | 66 of 69 | 2 of 3 |
+| AD | 379 of 414 | 3 of 138 | 36 of 72 | 66 of 69 | 2 of 3 |
+
+The 3 false extras are one rest of J01 bar 6 at each of the three clocks, in both. (WORKFLOW's "1 of 138" counted it once.) The
+only difference: J01 at -20 ms, one strum more heard and one bar more right. The README's six lines are unchanged.
+
+**One of his own strums pasted into a rest** (`--splice`: bars 2 to 7, both rests, 3 takes, offsets 0 / +-40 / +-80 ms: 180):
+
+| offset | caught, before | caught, AD | mistake bar passed, before | passed, AD |
+|---|---|---|---|---|
+| 0 | 12 of 36 | 28 | 11 | 1 |
+| -40 ms | 8 | 30 | 15 | 2 |
+| +40 ms | 8 | 19 | 16 | 8 |
+| -80 ms | 6 | 29 | 21 | 4 |
+| +80 ms | 4 | 9 | 20 | 17 |
+| all | **38 of 180** | **115** | **83** | **32** |
+
+Other slots that changed against the same rule's unspliced replay: 255 before, 231 with AD. By take, caught: J01 9 -> 38, J02 20 ->
+38, J03 9 -> 39 (of 60). An extra 80 ms late is still mostly missed: at 98 BPM it is half the window from the next strum place.
+
+**The bench** (`r41-bench.mjs`, the deciding rows of sections 22 / 23; 85 + 98 BPM, 4 seeds; rounds gated "too noisy" left out,
+as in section 23). Bars passed (false extras):
+
+| student | quiet | class | talk |
+|---|---|---|---|
+| nothing played | 0 of 64 -> 0 (0 -> 0 of 128) | 0 of 48 -> 0 (4 -> **10** of 96) | 1 of 56 -> 1 (35 -> **53** of 112) |
+| beats only | 0 of 64 -> 0 (0 -> **10** of 64) | gated 8 of 8 | 3 of 64 -> 4 |
+| straight eighths | 7 of 64 -> 1 | 0 of 16 -> 1 | 9 of 64 -> 5 |
+| right | 55 of 64 -> 55 | 7 of 8 -> 7 | **28 of 64 -> 17** (15 -> 47 of 128) |
+| thumb | 25 of 64 -> 25 | 17 of 32 -> 17 | 22 of 64 -> 23 (3 -> 9) |
+| quiet | 55 of 64 -> 55 | **10 of 24 -> 7** (0 -> 5 of 48) | **13 of 64 -> 6** (36 -> 63) |
+
+room7, room4 and chatter: every round gated "too noisy" for every student, before and after. Nothing played and beats only still
+pass no bar in quiet and class.
+
+**The reviewer's tables** (`deeprev/scripts`): `extras.mjs` (one real extra in bar 2, quiet, 20 rounds a cell): caught 51 -> 114 of
+120, the mistake bar passed 33 -> 4 (the 6 not caught: 3 not heard at all, 3 at 100 BPM where the grid still moved).
+The late start (`dsim.mjs late`: a steady player, 25 ms spread, 10 seeds = 80 bars; start offset in eighths):
+
+| | +0 | +0.5 | +1.05 | +1.5 | +2 | +3 | -1 | drag 4% |
+|---|---|---|---|---|---|---|---|---|
+| 85 BPM before | 80 | 79 | 69 | 64 | 65 | 65 | 69 | 28 |
+| 85 BPM AD | 80 | 79 | 67 | 63 | 63 | **60** | 69 | **33** |
+| 98 BPM before | 80 | 73 | 67 | 63 | 64 | 63 | 68 | 29 |
+| 98 BPM AD | 80 | 73 | 66 | 63 | 63 | **60** | 69 | **33** |
+
+**The virtual student** (`strum-check-loop.mjs`, default run, 150 takes, quiet room): right, thumb and quiet players unchanged
+(every row); the extra students' strum caught 3 -> 6 of 6, their mistake bar passed 2 -> 0 of 6; drag 4% 1 -> 2 and 2 -> 3 of 8
+bars at 80 / 100 BPM; beats only: false extras on slot 1 in 0 -> 5 of 24 bars (still 0 bars passed); the chord shown "ok" on a
+right chord 904 -> 911.
+
+**Data level** (`ad-measure.mjs`: every onset heard, through the real `scHearStrum` / `scOnset` / `scSweep`; one extra in bar b,
+b = 1..8, 0 / +-5 / +-10 / +-40 ms from the rest's place): with no timing spread, before AD only the exact-place extra was caught
+(+-5 ms and beyond: 0 of 8 in every cell); with AD every bar but bar 1 on the first rest (7 of 8), and every bar on the second rest
+(8 of 8; at +-40 ms, 85 / 100 BPM, 7 of 8: bar 1 missed). With 15 ms and with 25 ms spread (10 seeds a bar): AD catches every
+extra in bars 2 to 8, both rests, every offset and tempo (70 of 70 a cell); bar 1's first rest never; bar 1's second rest 8 to 10
+of 10 within +-10 ms and 2 to 10 of 10 at +-40 ms. Before AD: 0 to 61 of 80 a cell (0 of 80 at +-40 ms).
+
+**What AD does not fix, and one case it makes worse.** An extra on bar 1's FIRST rest (slot 1) has one strum before it: the grid
+still slides an eighth to fit both, the extra is filed "again" on slot 0, and bar 1 then shows an extra on slot 4 and misses on 6
+and 7 (both rules). 40 ms EARLY there, today's code left only slot 2 missed; AD also misses 6, 7 and bar 2's first strum. The new
+1eh pin (71 rounds: bar 2's two rests at 0 / +-5 / +-10 / +-40 ms and bar 1's second rest at 0 / +-5 / +-10 ms with a 15 ms
+spread, 60 / 85 / 100 BPM; and with no spread bar 2's rests at +-40 ms, 85 / 100 BPM, and bar 1's second rest at +-5 ms) leaves this
+case out, and bar 1's second rest at +-40 ms (caught only with some timings).
+
+**Unmeasured:** talking on real audio (every talk number above is the bench's synthetic room; no real take has talk in it, and the
+talk room is where AD costs most); takes from a Chromebook mic (all three takes are a MacBook Air); an extra UP-strum (the
+splices paste his down-strums, slot 0 and slot 2).
+
+**Proof in checks** (1eh): the pin "ONE EXTRA STRUM ON A REST" (71 rounds) and `SC_ANCHOR_LOCK` / `SC_ANCHOR_LOCK_MIN` pinned.
+Break-its, each a full `checks.mjs --check --skip-links` run: the code before AD 38 of 71 not called; rule A taken out 16; rule D
+taken out 8; the lock tested on all the onsets (this one too) 8; a sound outside the windows costing -0.5 instead of -1.5: 6;
+`SC_ANCHOR_LOCK` 0.5: the pin line plus 8 of 71; `SC_ANCHOR_LOCK_MIN` 5: the pin line. The unbroken copy: 1eh green.
