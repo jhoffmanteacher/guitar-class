@@ -496,7 +496,7 @@ function sbChartPaneHtml(d){
   if(rec != null && nBars !== rec) flags.push(`<div class="sb-flag sb-flag-info"><span class="fi">i</span><div class="sb-flag-body"><b>The chart makes ${nBars} bars; the recording has about ${rec}</b> at ${escHtml(String(Math.round(sbPinBpm(d.beat))))} BPM. ${read.fmt === 'bar lines' ? 'Add or remove bars in the grid.' : 'Chords over lyrics do not say how long each chord lasts, so each got one bar. Hold the long ones in the grid.'}</div></div>`);
   const marked = `<pre class="sb-paste">` + read.lines.map(l => `<span class="ln ${l.kind === 'bad' ? ((ch.left || []).includes(l.n) ? 'out' : 'bad') : l.kind === 'header' ? 'hd' : l.kind === 'chords' || l.kind === 'bars' || l.kind === 'chordpro' ? 'ch' : l.kind === 'skipped' || l.kind === 'meta' ? 'out' : ''}"><span class="no">${l.n}</span>${escHtml(l.text) || ' '}</span>`).join('') + `</pre>`;
   return pdfBar + stale + imp + `<div class="sb-tools"><span class="sb-chip on">✓ Read as ${escHtml(read.fmt || 'a chart')}</span><span class="sb-note" style="margin:0">${ch.sections.length} section${ch.sections.length === 1 ? '' : 's'} · ${nBars} bars · chords: ${sbChipsHtml(names, kept)}</span><span class="sb-toolbtns">`
-    + `<button type="button" class="sb-btn small" data-sb-act="chart-view" data-sb-v="paste"${off}>← Paste again</button><button type="button" class="sb-btn small" data-sb-act="clear-chart"${off}>Clear this step</button><button type="button" class="sb-btn small primary" data-sb-act="chart-view" data-sb-v="grid"${off}>Fix in the grid →</button></span></div>`
+    + `<button type="button" class="sb-btn small" data-sb-act="chart-view" data-sb-v="paste"${off}>← Paste again</button><button type="button" class="sb-btn small" data-sb-act="clear-chart"${off}>Clear this step</button><button type="button" class="sb-btn small${open.n ? ' primary' : ''}" data-sb-act="chart-view" data-sb-v="grid"${off}>Fix in the grid →</button></span></div>`
     + `<div class="sb-cols c3"><div>${ch.edited ? '<p class="sb-hint">The grid has been changed by hand since this was read; the right side shows the grid as it is now.</p>' : ''}${flags.join('')}${marked}</div><div class="sb-gridscroll">${sbSecGridHtml(ch.sections, meter, { mini: true })}</div></div>`;
 }
 /* The panel beside the grid: the picked bar, and its section. */
@@ -567,9 +567,11 @@ function sbChartSet(d, patch, note, now){
   d.step = Math.max(Number(d.step) || 1, patch.level ? 5 : 4);
   if(note != null) sbNote = note;
   clearTimeout(st.saveTimer);
-  const save = () => { const cur = sbDraft(); if(sbSel === id && !sbBusy && cur === d) sbWriteDraft(id, d); else if(sbSel === id && cur === d) st.saveTimer = setTimeout(save, 600); };
-  if(now) save(); else st.saveTimer = setTimeout(save, 1200);
+  const save = () => { const cur = sbDraft(); if(sbSel === id && !sbBusy && cur === d) return sbWriteDraft(id, d); if(sbSel === id && cur === d) st.saveTimer = setTimeout(save, 600); return null; };
   teacherSbPaint();
+  if(now) return save();          // resolves when the draft is saved (a caller may wait for it: sbChartReadNow)
+  st.saveTimer = setTimeout(save, 1200);
+  return null;
 }
 function sbChartEdit(d, sections, note){
   const st = sbChFor(sbSel);
@@ -589,8 +591,14 @@ function sbChartDoRead(d, text){
   if(!read.sections.length){ sbNote = read.bad.length ? `No chords could be read: ${read.bad.length} line${read.bad.length === 1 ? '' : 's'} ${read.bad.length === 1 ? 'was' : 'were'} refused (line ${read.bad[0].line} ${SB_WHY[read.bad[0].why] || ''}).` : 'No chords could be read in that text.'; st.text = t; teacherSbPaint(); return; }
   st.read = read; st.readOf = meter + '\n' + t; st.view = 'read'; st.text = null; st.sel = null; st.undo = [];
   const lv = d.level && d.level.range ? Object.assign({}, d.level, { range: null }) : d.level;
-  sbChartSet(d, Object.assign({ chart: { text: t, meter, fmt: read.fmt, sections: read.sections, left: [], kept: ((d.chart && d.chart.kept) || []).filter(n => read.chords.includes(n)), edited: false } }, lv !== d.level ? { level: lv } : {}),
+  return sbChartSet(d, Object.assign({ chart: { text: t, meter, fmt: read.fmt, sections: read.sections, left: [], kept: ((d.chart && d.chart.kept) || []).filter(n => read.chords.includes(n)), edited: false } }, lv !== d.level ? { level: lv } : {}),
     `Read: ${read.sections.length} section${read.sections.length === 1 ? '' : 's'}, ${sbChartBars(read.sections)} bars${read.bad.length ? `, ${read.bad.length} line${read.bad.length === 1 ? '' : 's'} refused` : ''}.`, true);
+}
+/* A chart given at step 1, read when the draft is saved: the step opens on the grid when there is nothing to settle. */
+async function sbChartReadNow(d){
+  await sbChartDoRead(d, d.chart.text);   // its save, before Volume starts
+  const nd = sbDraft(), st = sbChFor(sbSel);
+  if(nd && sbHasChart(nd) && st.read) st.view = sbChartOpen(nd, st.read).n ? 'read' : 'grid';
 }
 /* The line `line` of the draft's text is replaced (null: put out with a #), and the chart read again. */
 function sbChartLine(d, line, withText){

@@ -20,8 +20,6 @@
        chart:  { text, meter, fmt, sections, left, kept, edited } | null   (teacher-sb-chart.js; { text } alone = a
                chart given at step 1 and not read yet)
        level:  { versions, start, range } | null
-       listens: { sig, heard: [card section indexes] } | null   the Preview step's listens (teacher-sb-publish.js);
-               they count only while sig is the song's own (a changed chart, beat, level or copy starts them over)
        pubVer: the song's last edit number on the list, kept by Unpublish so a later Publish counts on | null
        imported: true for a draft rebuilt from an IMPORTED song (sbDraftFromDoc, teacher-sb-publish.js): no source,
                no volume measurements, a beat that came with the song (beat.fromImport), its chord shapes (chart.shapes)
@@ -288,14 +286,14 @@ function sbStepReady(d, k){
   if(k === 2 || k === 4) return !!d;
   if(k === 3) return !!(d && d.audio && (d.volume || d.imported));   // an imported song's copy came levelled (teacher-sb-publish.js)
   if(k === 5) return sbHasChart(d);
-  if(k === 6 || k === 7) return !!(sbHasChart(d) && d.level && d.beat && d.audio) && sbCopyCurrent(d) && !sbSongWhy(d, sbSel).length;
+  if(k === 6 || k === 7) return !!(sbHasChart(d) && d.beat && d.audio) && sbCopyCurrent(d) && !sbSongWhy(d, sbSel).length;   // no level yet = Full chords, the whole song (sbSongOf)
   return false;
 }
 function sbStepsHtml(d){
   return `<div class="sb-steps" role="tablist" aria-label="Steps">` + SB_STEPS.map((s, i) => {
     const k = i + 1, ready = sbStepReady(d, k), built = k <= SB_BUILT_STEPS;
-    const done = d && ((k === 1) || (k === 2 && d.audio && (d.volume || d.imported)) || (k === 3 && d.beat && d.beat.anchor != null) || (k === 4 && sbHasChart(d)) || (k === 5 && sbHasChart(d) && d.level && d.beat && d.audio && !sbSongWhy(d, sbSel).length)
-      || (k === 6 && ready && sbListensOf(d).all) || (k === 7 && ready && sbPublished && sbPublished.has(sbSel) && !sbPubChanged(d, sbPublished.get(sbSel))));
+    const done = d && ((k === 1) || (k === 2 && d.audio && (d.volume || d.imported)) || (k === 3 && d.beat && d.beat.anchor != null) || (k === 4 && sbHasChart(d)) || (k === 5 && sbHasChart(d) && d.beat && d.audio && !sbSongWhy(d, sbSel).length)
+      || ((k === 6 || k === 7) && ready && sbPublished && sbPublished.has(sbSel) && !sbPubChanged(d, sbPublished.get(sbSel))));
     const warn = (k === 2 && sbPitchBlocked(d)) || (k === 3 && d && d.beat && d.beat.driftOff > 0) || (k === 4 && sbHasChart(d) && sbChartOpen(d, sbChartReadOf(d)).n > 0);
     const cls = (done ? ' done' : '') + (k === sbStepOn ? ' on' : '') + (warn ? ' warn' : '');
     const why = !built ? ' title="Not built yet: it comes in a later update"' : !ready ? ' title="Finish the step before it first"' : '';
@@ -309,7 +307,7 @@ function sbNavHtml(d){
   if(sbStepOn === 3) return `<button type="button" class="sb-btn" data-sb-step="2"${off}>← Volume</button><button type="button" class="sb-btn primary" data-sb-step="4"${off}>Next: Chart →</button>`;
   if(sbStepOn === 4) return `<button type="button" class="sb-btn" data-sb-step="3"${off || !sbStepReady(d, 3) ? ' disabled' : ''}>← Beat</button><button type="button" class="sb-btn primary" data-sb-step="5"${off || !sbStepReady(d, 5) ? ' disabled' : ''}>Next: Level →</button>`;
   if(sbStepOn === 5) return `<button type="button" class="sb-btn" data-sb-step="4"${off}>← Chart</button><button type="button" class="sb-btn primary" data-sb-step="6"${off || !sbStepReady(d, 6) ? ' disabled' : ''}${sbStepReady(d, 6) ? '' : ' title="The song does not pass the checks yet: the box below says why"'}>Next: Preview →</button>`;
-  if(sbStepOn === 6) return `<button type="button" class="sb-btn" data-sb-step="5"${off}>← Level</button><button type="button" class="sb-btn primary" data-sb-step="7"${off || !sbStepReady(d, 7) ? ' disabled' : ''}>Next: Publish →</button>`;
+  if(sbStepOn === 6) return `<button type="button" class="sb-btn" data-sb-step="5"${off}>← Level</button>${sbPublishBtnHtml(d)}`;   // Publish from Preview (2026-11-16)
   return `<button type="button" class="sb-btn" data-sb-step="6"${off || !sbStepReady(d, 6) ? ' disabled' : ''}>← Preview</button>${sbPublishBtnHtml(d)}`;
 }
 const SB_LOCK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
@@ -507,6 +505,7 @@ function sbGoStep(k){
   /* Preview and Publish are the furthest steps: reaching one is saved, so the list says where the draft is. */
   if(k >= 6 && d && (Number(d.step) || 1) < k){ sbWriteDraft(sbSel, Object.assign(d, { step: k })); return; }
   teacherSbPaint();
+  if(k === 2) sbAutoLevel();
 }
 
 /* ── Step 1: the file ── */
@@ -563,7 +562,8 @@ async function sbSaveUpload(goTo){
   if(!d && !(sbMem.id === 'new' && sbMem.src)){ sbNote = 'Pick the mp3 first.'; teacherSbPaint(); return; }
   if(d && !d.source && !d.audio && !sbMem.src){ sbNote = 'Pick the mp3 first.'; teacherSbPaint(); return; }
   let id = sbSel;
-  const draft = d ? Object.assign({}, d, { title, artist }) : { v: 1, title, artist, step: 1, source: sbSourceOf(sbMem.src), audio: null, volume: null, pitch: null, beat: null, chart: null, level: null };
+  const draft = d ? Object.assign({}, d, { title, artist }) : { v: 1, title, artist, step: 1, source: sbSourceOf(sbMem.src), audio: null, volume: null, pitch: null, beat: null, chart: null,
+    level: { versions: 'full', start: null, range: null } };   // Full chords, the whole song: Level passes with one click (2026-11-16)
   /* A chart given at this step (pasted or picked) is kept as its text, for step 4 to read; never over a chart
      that has been read already. */
   if(typeof obj.chartText === 'string' && !sbHasChart(draft)) draft.chart = obj.chartText.trim() ? { text: obj.chartText.replace(/\r\n?/g, '\n').slice(0, 20000) } : null;
@@ -575,10 +575,26 @@ async function sbSaveUpload(goTo){
   sbStepOn = goTo || 2;
   if(!sbStepReady(sbDraft(), sbStepOn)) sbStepOn = 2;
   teacherSbPaint();
+  /* A chart (pasted, a text file or a chords pdf) given at step 1 is read now, so step 4 opens on what was read, or
+     on the grid when there is nothing to settle (2026-11-16, fewer clicks); never over a chart already read. */
+  const nd = sbDraft();
+  if(nd && nd.chart && typeof nd.chart.text === 'string' && nd.chart.text.trim() && !sbHasChart(nd) && typeof sbChartDoRead === 'function'){
+    await sbChartReadNow(nd);
+  }
+  sbAutoLevel();
+}
+/* Step 2 with the original mp3 in this tab and no current levelled copy: "Level it" starts by itself (2026-11-16, fewer
+   clicks). Once per file in this tab: a levelling that failed waits for the button. */
+const sbAutoLevelTried = new Set();
+function sbAutoLevel(){
+  const d = sbDraft();
+  if(sbStepOn !== 2 || sbBusy || !d || sbMem.id !== sbSel || !sbMem.src || sbCopyCurrent(d) || sbAutoLevelTried.has(sbMem.src.sha256)) return;
+  sbAutoLevelTried.add(sbMem.src.sha256);
+  sbRunLevel();
 }
 /* The one draft writer. Saves the fields a draft has, with the server's time, and keeps the copy in memory. */
 function sbDraftDoc(d){
-  const keep = ['v', 'title', 'artist', 'step', 'source', 'audio', 'volume', 'pitch', 'beat', 'chart', 'level', 'listens', 'pubVer', 'imported'];
+  const keep = ['v', 'title', 'artist', 'step', 'source', 'audio', 'volume', 'pitch', 'beat', 'chart', 'level', 'pubVer', 'imported'];
   const out = {};
   keep.forEach(k => { out[k] = d[k] === undefined ? null : d[k]; });
   out.v = 1;

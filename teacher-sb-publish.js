@@ -14,25 +14,25 @@
    follow the page's language like every card the console draws (its header's Español button), and a line says the
    Spanish card's words come from the fixed templates. The Full / Power switch is answered here (sbPvCapture): caSetChordMode would save the choice and
    redraw a console view that is not this one.
-   THE LISTENS (Publish needs three: the card's first section, a middle one, its last; one or two for a card that
-   short). A section counts as heard when ONE unbroken run of the play began within its first half bar and reached
-   its last 0.3 bar (sbPvStep; a lap back to the start, a stop or another section ends a run). The card is looked at
-   every SB_PV_TICK_MS while it plays (started by a press in the card, ended when it stops). They are saved in the
-   draft (listens: { sig, heard }), and count only while sig is the song's own: a changed chart, beat, level, title
-   aside, or copy starts them over. While the card plays, a repaint (a save, a list read) moves the same card element
-   into the new page, so the song keeps playing.
+   NO LISTEN GATE (decided 2026-11-16, Jonathan: "you pick the way to make things smoothest. i don't know if three
+   listens are necessary"; it reverses the work order's three listens): the step says "Play it through once before
+   you publish", and nothing counts plays. While the card plays, a repaint (a save, a list read) moves the same card
+   element into the new page, so the song keeps playing.
 
-   PUBLISH (step 7) is on only when sbPublishWhy says nothing: builtSongCheck passes on the EXACT doc it will write
-   (the same function every student page runs before it shows a song), the record is within 10 cents of A = 440
-   (Jonathan, 2026-11-14: blocked, send it to Claude), every drift window over 30 ms is pinned (beat.driftOff 0), the
-   three listens are done, the audio id is not on SONG_FILES and no other built song uses it with other bytes, and the
-   list has room. A record that needs more than SB_PINS_MAX pins shows the Beat step's red box here too ("This song
-   does not fit the builder"), and does NOT block (Jonathan, 2026-11-15 and 2026-11-16). The only place it goes:
+   PUBLISH (its button is on the Preview step, decided 2026-11-16, and on step 7, the page of the song's state) is on
+   only when sbPublishWhy says nothing: builtSongCheck passes on the EXACT doc it will write (the same function every
+   student page runs before it shows a song), the record is within 10 cents of A = 440 (Jonathan, 2026-11-14:
+   blocked, send it to Claude), the levelled copy is the picked mp3's (sbCopyCurrent, review R1-2), every drift
+   window over 30 ms is pinned (beat.driftOff 0, measured on this copy), the audio id is not on SONG_FILES and no
+   other built song uses it with other bytes, and the list has room. A record that needs more than SB_PINS_MAX pins
+   shows the Beat step's red box here too ("This song does not fit the builder"), and does NOT block (Jonathan,
+   2026-11-15 and 2026-11-16). The only place it goes:
    Songs → "More Play Along songs" (the board is Part e, later). Writes, in this order:
-     1. (reads) songFiles/{audio.id} must be 'ready' and match the audio entry; builtSongsMeta/list must have room;
-     2. builtSongs/{id} = { v, title, artist, audio, song, savedAt: the server's time } (the rules' shape);
-     3. builtSongsMeta/list, in a transaction: songs[id] + 1 (every other entry kept), updatedAt the server's time;
-     4. the song's previous audio, when the edit replaced it: deleted once nothing on the list plays it (sbDeleteAudio).
+     1. (read) songFiles/{audio.id} must be 'ready' and match the audio entry;
+     2. ONE transaction (review R1-1): builtSongsMeta/list read (it must have room), builtSongs/{id} = { v, title,
+        artist, audio, song, savedAt: the server's time } (the rules' shape) and the list with songs[id] a new edit
+        number (teacherBsNextVer), every other entry kept, updatedAt the server's time; both land or neither does;
+     3. the song's previous audio, when the edit replaced it: deleted once nothing on the list plays it (sbDeleteAudio).
    So the list never names a song that is not saved. Students get it at their next sign-in, or a tab return (read at
    most every 15 minutes, app/builtsongs.js BS_RETURN_MS); this console's Songs view at once (builtSongsSync).
    EDIT opens the steps of a published song (sbEditing, this tab only) on the step he picks (Jonathan, 2026-11-16:
@@ -53,7 +53,7 @@
    song (tools/song-builder-sim.mjs proves it). NOT recoverable: the chart's original text (the Chart step says so and
    shows the grid), the taps and drift windows (the Beat step says the bars came with the song), the loudness
    measurements and the original mp3 (the Volume and Upload steps say so; levelling again needs the original picked,
-   as for any reopened draft). The listens start empty.
+   as for any reopened draft).
    EXPORT (Jonathan, 2026-11-16: "export should save mp3 too"): two downloads that pair up by name, <title>-<id>.json
    (the Import file, { id, v, title, artist, audio, song }) and <title>-<id>.mp3 (the levelled copy: from this tab
    when it is loaded, else read from songFiles, which counts as one song download, as the button's hint says).
@@ -66,10 +66,7 @@
    against a stub Firestore that checks every write against the rules' shape. Every value from the store or a file
    is escaped where it is drawn; buttons carry data-* only (sbClick, teacher-sb-core.js, routes them here). */
 const SB_PV_ID = 'sbpreview';          // the preview card's id and track key while the Preview step is on screen
-const SB_PV_TICK_MS = 100;             // how often a playing preview card is looked at for the listens
-const SB_PV_START = 0.5, SB_PV_END = 0.3;   // a heard section: began within its first half bar, reached its last 0.3 bar
-let sbPv = null;                       // { id, key, sig, node, act, run, L } the preview card on screen
-let sbPvTimer = 0, sbPvSaveTimer = 0;
+let sbPv = null;                       // { id, key, node, act } the preview card on screen
 const sbEditing = new Set();           // published songs whose steps are open in this tab (Edit)
 
 /* ── The song a draft makes, and comparing it with what is published ── */
@@ -114,83 +111,6 @@ function sbHealthHtml(){
     + bad.map(([id, p]) => `<b>${escHtml(p.title)}</b> (${escHtml(sbPubVerdict(id, p).text)})`).join('; ') + '</div>';
 }
 
-/* ── The listens ── */
-function sbListenSig(doc){ return sbHash(sbCanon([doc.song, doc.audio.sha256])); }
-function sbCardSections(doc){
-  const s = doc.song, r = s.range || { from: 0, to: s.sections.length - 1 };
-  return s.sections.slice(r.from, r.to + 1);
-}
-/* What Publish needs heard, and what is: { items: [{ key, label, done }], all, sig, n }. */
-function sbListensOf(d, doc){
-  doc = doc || sbDocOf(d);
-  if(!doc) return { items: [], all: false, sig: '', n: 0 };
-  const secs = sbCardSections(doc), n = secs.length, sig = sbListenSig(doc);
-  const heard = d && d.listens && d.listens.sig === sig && Array.isArray(d.listens.heard) ? d.listens.heard : [];
-  const lab = k => bsSectionLabel(secs[k], 'en');
-  const items = [{ key: 'first', label: n === 1 ? `The song (${lab(0)})` : `The first section (${lab(0)})`, done: heard.includes(0) }];
-  if(n >= 3){
-    const mid = heard.find(k => k > 0 && k < n - 1);
-    items.push({ key: 'mid', label: mid != null ? `A middle section (${lab(mid)})` : 'A middle section (any one)', done: mid != null });
-  }
-  if(n >= 2) items.push({ key: 'last', label: `The last section (${lab(n - 1)})`, done: heard.includes(n - 1) });
-  return { items, all: items.every(x => x.done), sig, n };
-}
-function sbListensHtml(d, doc){
-  const L = sbListensOf(d, doc);
-  return `<div class="sb-listens" data-sb-listens><span class="sb-h">Listen before you publish:</span>`
-    + L.items.map(x => `<span class="sb-listen${x.done ? ' on' : ''}"><span class="sb-check${x.done ? ' on' : ''}"></span>${escHtml(x.label)}</span>`).join('')
-    + `<span class="sb-hint">Each is ticked when its play reaches the end of that section. A section's button on the card starts it there.</span></div>`;
-}
-/* One look at a playing card: `pos` is where the song is, in bars from the card's first bar (pcFrame's clock). */
-function sbPvStep(pv, L, pos){
-  pv.L = L;
-  const k = L.sections.findIndex(S => pos >= S.fromBar - L.firstBar && pos < S.fromBar - L.firstBar + S.bars * S.reps);
-  if(pv.run && (k !== pv.run.k || pos < pv.run.max - 0.05)) sbPvRunEnd(pv);
-  if(k < 0) return;
-  if(!pv.run) pv.run = { k, start: pos, max: pos };
-  else pv.run.max = Math.max(pv.run.max, pos);
-}
-function sbPvRunEnd(pv){
-  const r = pv.run, L = pv.L;
-  pv.run = null;
-  if(!r || !L || !L.sections[r.k]) return;
-  const S = L.sections[r.k], s0 = S.fromBar - L.firstBar, s1 = s0 + S.bars * S.reps;
-  if(r.start <= s0 + SB_PV_START && r.max >= s1 - SB_PV_END) sbPvHeard(pv, r.k);
-}
-function sbPvHeard(pv, k){
-  const d = sbDrafts && sbDrafts.get(pv.id);
-  if(!d) return;
-  const heard = d.listens && d.listens.sig === pv.sig && Array.isArray(d.listens.heard) ? d.listens.heard.slice() : [];
-  if(heard.includes(k)) return;
-  heard.push(k); heard.sort((x, y) => x - y);
-  d.listens = { sig: pv.sig, heard };
-  const box = document.querySelector('[data-sb-root] [data-sb-listens]');
-  if(box && sbSel === pv.id) box.outerHTML = sbListensHtml(d);
-  sbPvSaveSoon(pv.id);
-}
-/* Saved once the console is free (a repaint keeps the playing card: sbPreviewMounted). */
-function sbPvSaveSoon(id){
-  clearTimeout(sbPvSaveTimer);
-  const save = () => {
-    sbPvSaveTimer = 0;
-    const d = sbDrafts && sbDrafts.get(id);
-    if(!d || teacherView !== 'songbuilder') return;
-    if(sbBusy){ sbPvSaveTimer = setTimeout(save, 600); return; }
-    sbWriteDraft(id, d);
-  };
-  sbPvSaveTimer = setTimeout(save, 400);
-}
-function sbPvLook(){
-  const pv = sbPv, st = typeof pcState !== 'undefined' ? pcState : null;
-  if(!pv || !pv.node || !st || !st.root || !pv.node.contains(st.root) || !pv.node.isConnected){ if(pv) sbPvRunEnd(pv); sbPvWatch(false); return; }
-  if(st.counting || !st.audio || st.audio.paused || st.audio.seeking) return;
-  sbPvStep(pv, st.L, snipBarsAt(st.win, st.audio.currentTime));
-}
-function sbPvWatch(on){
-  if(on && !sbPvTimer) sbPvTimer = setInterval(sbPvLook, SB_PV_TICK_MS);
-  if(!on && sbPvTimer){ clearInterval(sbPvTimer); sbPvTimer = 0; }
-}
-
 /* ── Step 6: Preview ── */
 function sbPreviewPaneHtml(d){
   const why = !d ? ['No draft.'] : d.audio && !sbCopyCurrent(d) ? ['A new mp3 was picked: level it at step 2 first.'] : sbSongWhy(d, sbSel);
@@ -198,10 +118,12 @@ function sbPreviewPaneHtml(d){
   const doc = sbDocOf(d);
   const lv = sbMem.id === sbSel && sbMem.level && sbMem.level.sha256 === d.audio.sha256;
   const pins = d.beat && d.beat.pinsNeeded;
+  const p = sbPublished && sbPublished.get(sbSel), pwhy = p && !sbPubChanged(d, p) ? [] : sbPublishWhy(d, sbSel);
   return `<p class="sb-note">The real card, as students see it on the Songs page. ▶ plays the levelled copy on the beat grid you set, at the four speeds students get. It is drawn in this page's language; each student sees it in theirs, with the section names and directions from the site's fixed English and Spanish templates. The title and the lyric lines are the same in both.</p>`
     + (sbBeatTooMuch(pins) ? sbNoFitHtml(pins) : '')
     + (sbPitchBlocked(d) ? `<div class="sb-flag red"><span class="fi">!</span><div class="sb-flag-body"><b>This record is ${escHtml(sbCentsLine(d.pitch.cents))}.</b> A song more than 10 cents off cannot be published. Send the mp3 to Claude.</div></div>` : '')
-    + sbListensHtml(d, doc)
+    + `<p class="sb-note sb-playonce"><b>Play it through once before you publish.</b> Publish is the button at the top.</p>`
+    + (pwhy.length ? `<div class="sb-flag red"><span class="fi">!</span><div class="sb-flag-body"><b>Publish is off until:</b><ul class="sb-list">${pwhy.slice(0, 6).map(w => `<li>${escHtml(w)}</li>`).join('')}</ul></div></div>` : '')
     + `<div class="sb-pv-title">${escHtml(sbStudentsSee(doc.title, doc.artist))}</div>`
     + (lv ? '<div data-sb-pvslot></div>'
       : `<div class="sb-box"><p class="sb-note" style="margin:0">${d.audio && sbMem.failed === d.audio.sha256 ? 'The levelled copy did not load (the line above says why).' : 'Loading the levelled copy…'}</p></div>`);
@@ -233,15 +155,14 @@ function sbPreviewMounted(root){
   host.innerHTML = caCardBodyHtml(act, { preview: true });
   host.addEventListener('click', sbPvCapture, true);
   slot.replaceWith(host);
-  sbPv = { id: sbSel, key, sig: sbListenSig(doc), node: host, act, run: null, L: null };
+  sbPv = { id: sbSel, key, node: host, act };
 }
 /* The card on screen is made again when the song or the page's language changes (review R1-8: Español). */
 function sbPvKey(id, doc){ return id + '|' + (typeof getLang === 'function' ? getLang() : '') + '|' + sbHash(sbCanon(doc)); }
-/* A press in the card: watch it for the listens; the Full / Power switch is redrawn here, in this card only. */
+/* The Full / Power switch is redrawn here, in this card only. */
 function sbPvCapture(e){
   const pv = sbPv;
   if(!pv) return;
-  sbPvWatch(true);
   const b = e.target && e.target.closest ? e.target.closest('.ca-chord-switch button') : null;
   if(!b || !pv.node.contains(b)) return;
   e.stopPropagation(); e.preventDefault();
@@ -251,15 +172,13 @@ function sbPvCapture(e){
   caChordModes[SB_PV_ID] = want;       // this tab only: never saved (caSetChordMode would save it under the preview's id)
   pv.node.innerHTML = caCardBodyHtml(pv.act, { preview: true });
 }
-/* Stops the preview card's song (only when it is THIS card that plays: never a global stopper in the console) and
-   the watch; drop = the card leaves the page's lists too (off the Preview step, another song, leaving the view). */
+/* Stops the preview card's song (only when it is THIS card that plays: never a global stopper in the console);
+   drop = the card leaves the page's lists too (off the Preview step, another song, leaving the view). */
 function sbPreviewStop(drop){
-  sbPvWatch(false);
   const pv = sbPv;
   if(pv && pv.node){
     if(typeof pcState !== 'undefined' && pcState && pcState.root && pv.node.contains(pcState.root) && typeof pcStop === 'function') pcStop();
     if(typeof songFileCancelWaitIn === 'function') songFileCancelWaitIn(pv.node);
-    pv.run = null;
   }
   if(!drop) return;
   sbPv = null;
@@ -292,7 +211,6 @@ function sbPublishWhy(d, id){
   if(!d.beat || !Number.isFinite(d.beat.driftOff)) { if(d.beat) why.push('Open the Beat step once, so the drift check runs.'); }
   else if(d.beat.driftFor && d.audio && d.beat.driftFor !== d.audio.sha256) why.push('The drift check was made on another levelled copy: open the Beat step once, so it runs on this one.');
   else if(d.beat.driftOff > 0) why.push(`${d.beat.driftOff} place${d.beat.driftOff === 1 ? '' : 's'} in the song drift${d.beat.driftOff === 1 ? 's' : ''} more than 30 ms from the grid: pin ${d.beat.driftOff === 1 ? 'it' : 'each one'} at the Beat step.`);
-  if(doc && !songWhy.length && !sbListensOf(d, doc).all) why.push('Listen at the Preview step: the first section, a middle one and the last, each to its end.');
   if(d.dirty) why.push('The title or artist has a change that is not saved: go to step 1 and press Next.');
   return why;
 }
@@ -311,7 +229,7 @@ function sbPublishPaneHtml(d){
   if(!d || !sbStepReady(d, 7)) return `<div class="sb-box"><p class="sb-note" style="margin:0">Not ready yet: ${escHtml((d && d.audio && !sbCopyCurrent(d) ? 'A new mp3 was picked: level it at step 2 first.' : d && sbSongWhy(d, sbSel)[0]) || 'finish the steps before it.')}</p></div>`;
   const doc = sbDocOf(d), why = sbPublishWhy(d, sbSel), p = sbPublished && sbPublished.get(sbSel);
   const ok = s => `<span class="sb-ok">✓</span>${s ? ' ' + s : ''}`, bad = s => `<span class="sb-bad">✗</span> ${s}`;
-  const v = d.volume || {}, a = doc.audio, b = d.beat, s = doc.song, L = sbListensOf(d, doc);
+  const v = d.volume || {}, a = doc.audio, b = d.beat, s = doc.song;
   const nPins = sbPins(b).length, open = sbChartOpen(d, sbChartReadOf(d));
   const pitchBad = sbPitchBlocked(d) || !(Math.abs(Number(a.centsOff)) <= BS_MAX_CENTS);
   const songWhy = sbSongWhy(d, sbSel), checkWhy = songWhy.length ? songWhy : builtSongCheck(sbSel, doc).filter(w => !/^audio\.centsOff/.test(w));
@@ -325,7 +243,6 @@ function sbPublishPaneHtml(d){
       + (open.n ? `<span class="sb-warn">${open.n} thing${open.n === 1 ? '' : 's'} at the Chart step still want${open.n === 1 ? 's' : ''} a look (this does not stop Publish)</span>` : ok(''))],
     ['Level', escHtml(sbLevelLine(s))],
     ['Checks', checkWhy.length ? bad(escHtml(checkWhy[0]) + (checkWhy.length > 1 ? ` (and ${checkWhy.length - 1} more)` : '')) : 'passes every check a student\'s page runs ' + ok('')],
-    ['Listens', L.items.map(x => (x.done ? '<span class="sb-ok">✓</span> ' : '<span class="sb-bad">✗</span> ') + escHtml(x.label)).join(' · ')],
   ];
   const same = p && !sbPubChanged(d, p);
   return `<div class="sb-cols c3"><div>
@@ -496,7 +413,7 @@ function sbDraftFromDoc(id, p){
     pitch: { cents: Number(doc.audio.centsOff), peaks: null }, beat,
     chart: { text: '', meter: s.meter, fmt: 'the imported song', fromImport: true, sections, left: [], kept, edited: true, shapes: JSON.parse(JSON.stringify(s.chords)) },
     level: { versions: lv.versions, start: lv.versions === 'both' ? lv.start : null, range: s.range ? { from: s.range.from, to: s.range.to } : null },
-    listens: null, pubVer: Number(p.ver) || null };
+    pubVer: Number(p.ver) || null };
 }
 /* The draft of the selected published song: its own, or one rebuilt from the published doc and saved. */
 async function sbEnsureDraft(id){
@@ -520,7 +437,7 @@ async function sbEditAt(k){
   while(sbStepOn > 1 && !sbStepReady(sbDraft(), sbStepOn)) sbStepOn--;
   teacherSbPaint();
 }
-const SB_EDIT_STEPS = [[1, 'Upload'], [2, 'Volume'], [3, 'Beat'], [4, 'Chart'], [5, 'Level'], [6, 'Preview']];
+const SB_EDIT_STEPS = [[1, 'Upload'], [2, 'Volume'], [3, 'Beat'], [4, 'Chart'], [5, 'Level'], [6, 'Preview']];   // Preview holds the Publish button
 function sbEditChoiceHtml(off){
   return `<div class="sb-row sb-editpick" role="group" aria-label="Edit: open which step"><span class="sb-hint" style="margin:0">Edit, opening on:</span>`
     + SB_EDIT_STEPS.map(([k, l]) => `<button type="button" class="sb-btn small${k === 4 ? ' primary' : ''}" data-sb-act="edit-step" data-sb-v="${k}"${off}>${l}</button>`).join('') + `</div>`;
