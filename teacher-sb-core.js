@@ -3,13 +3,14 @@
    song builder"). The view sits in the sidebar after Songs (TEACHER_NAV, teacher-core.js). Left: the songs
    (search; All / Published / Drafts; "+ New song"). Right: the steps, Upload, Volume, Beat, Chart, Level,
    Preview, Publish. Upload and Volume are here, Beat in teacher-sb-beat.js (the sound measurements in
-   teacher-sb-dsp.js), Chart and Level in teacher-sb-chart.js (Part c, 2026-11-16); Preview and Publish are Part d
-   (work order "Claude outputs/WORK-ORDER-song-builder.md"). Until Part d, a song reaches students only by Manage →
-   Built songs' Import (teacher-builtsongs.js); nothing here is seen by a student.
+   teacher-sb-dsp.js), Chart and Level in teacher-sb-chart.js (Part c, 2026-11-16), Preview and Publish, the published
+   song's page (Edit, Unpublish, Delete), Export and the health line in teacher-sb-publish.js (Part d, 2026-11-16; work
+   order "Claude outputs/WORK-ORDER-song-builder.md"). A draft is seen by no student; Publish puts the song on the
+   Songs page (builtSongs/{id} and builtSongsMeta/list, the docs Manage → Built songs' Import writes too).
 
    A DRAFT is songDrafts/{id} (firestore.rules "BUILT SONGS": teacher only; id 'sb-' + 12 lower-case letters
    and digits, the id the published song will keep). It is saved at every step ("saved just now"):
-     { v: 1, title, artist, step,                 step = the furthest step reached (1-5)
+     { v: 1, title, artist, step,                 step = the furthest step reached (1-7)
        source: { name, bytes, sha256, durationSec, sampleRate, channels, kbps },   the mp3 Jonathan picked
        audio:  { id, bytes, sha256, durationSec, centsOff, gainDb, sourceSha256 } | null   the levelled copy in
                songFiles (the shape builtSongs' `audio` takes, app/builtsongs.js)
@@ -19,7 +20,12 @@
        chart:  { text, meter, fmt, sections, left, kept, edited } | null   (teacher-sb-chart.js; { text } alone = a
                chart given at step 1 and not read yet)
        level:  { versions, start, range } | null
+       listens: { sig, heard: [card section indexes] } | null   the Preview step's listens (teacher-sb-publish.js);
+               they count only while sig is the song's own (a changed chart, beat, level or copy starts them over)
+       pubVer: the song's last edit number on the list, kept by Unpublish so a later Publish counts on | null
        savedAt: the server's time }
+   The draft keeps its id when it is published: builtSongs/{id} is the song students get, the draft is what Edit
+   changes; students keep the published song until he publishes again.
    UPLOAD: an mp3 only (its frame header is read: a 32, 44.1 or 48 kHz file, the rates LAME encodes at 192k), at
    most 6:00 (SB_MAX_SEC); a title and an artist the validator takes (builtSongCheck: 1-120 / 0-120 characters,
    no " — "). NOTHING goes to the store at this step but the draft itself: the original stays on Jonathan's Mac.
@@ -40,10 +46,11 @@
    counted against the month's song downloads like a Chromebook's read (songFileCount, app/songfiles.js).
 
    WRITES go only to songDrafts/{id}, songFiles/{id} and its pieces, and songFilesUsage/{month} (reading a copy
-   back): never progress/{uid}, never config/class. tools/song-builder-sim.mjs runs this part against a stub
-   Firestore and checks each write. "Delete draft" asks OK / Cancel (Jonathan, 2026-11-15: a draft is cheap to redo, so no typed title; a published
-   song, Part d, keeps the typed title), then removes the draft and its
-   levelled copy.
+   back), and, from Publish, Unpublish and Delete (teacher-sb-publish.js), builtSongs/{id} and builtSongsMeta/list:
+   never progress/{uid}, never config/class. tools/song-builder-sim.mjs runs this part against a stub
+   Firestore and checks each write. "Delete draft" asks OK / Cancel (Jonathan, 2026-11-15: a draft is cheap to redo,
+   so no typed title), then removes the draft and its levelled copy; a published song's "Delete…" takes its typed
+   title (teacher-sb-publish.js).
 
    SAFETY. Every value read from the store or a file (a title, an artist, a file name) is escaped where it is
    drawn; buttons carry data-* only and one delegated listener acts on them. A read that started before a newer
@@ -53,10 +60,11 @@
 const SB_MAX_SEC = 360;                 // 6:00 (work order, Part b)
 const SB_MAX_SRC_BYTES = 60000000;      // an mp3 this big is not a 6-minute song
 const SB_STEPS = ['Upload', 'Volume', 'Beat', 'Chart', 'Level', 'Preview', 'Publish'];
-const SB_BUILT_STEPS = 5;               // Parts b and c: Upload, Volume, Beat, Chart, Level
+const SB_BUILT_STEPS = 7;               // Parts b, c and d: every step
 const SB_CURE = 'audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-full.mp3';
 let sbDrafts = null;                    // Map id -> draft (as stored, savedAt as ms); null = not read
-let sbPublished = null;                 // Map id -> { title, artist, ver } from builtSongsMeta/list and builtSongs
+let sbPublished = null;                 // Map id -> { title, artist, ver, audioId, doc, at } from builtSongsMeta/list and builtSongs
+                                        //   (doc: the song as stored, savedAt left out, null when the list names a missing doc; at: savedAt in ms)
 let sbReadErr = '', sbReadAt = 0, sbReadGen = 0, sbOpGen = 0;
 let sbSel = null;                       // a draft id, 'new', or a published id; null = the start screen
 let sbStepOn = 1;                       // the step shown
@@ -129,8 +137,10 @@ async function teacherSbLoad(){
       const list = bsListOf(meta.exists ? meta.data() : null);
       await Promise.all(Object.keys(list).map(async id => {
         const s = await db.collection('builtSongs').doc(id).get();
-        const d = s.exists ? s.data() || {} : {};
-        pub.set(id, { title: String(d.title || id), artist: String(d.artist || ''), ver: list[id], audioId: d.audio && d.audio.id });
+        const d = s.exists ? Object.assign({}, s.data() || {}) : null;
+        const at = d && d.savedAt && typeof d.savedAt.toMillis === 'function' ? d.savedAt.toMillis() : 0;
+        if(d) delete d.savedAt;
+        pub.set(id, { title: String((d && d.title) || id), artist: String((d && d.artist) || ''), ver: list[id], audioId: d && d.audio && d.audio.id, doc: d, at });
       }));
     }catch(e){ if(!(e && e.code === 'permission-denied')) throw e; }
   }catch(e){
@@ -163,8 +173,12 @@ function renderTeacherSongBuilder(){
   root.addEventListener('change', sbChange);
   sbBindKeys();
   if(typeof sbPdfMounted === 'function') sbPdfMounted(root);
-  if(sbStepOn === 3 && typeof sbBeatMounted === 'function') sbBeatMounted();
-  if(sbStepOn === 4 && typeof sbChartMounted === 'function') sbChartMounted();
+  const steps = sbShowsSteps();
+  if(steps && sbStepOn === 3 && typeof sbBeatMounted === 'function') sbBeatMounted();
+  if(steps && sbStepOn === 4 && typeof sbChartMounted === 'function') sbChartMounted();
+  /* The Preview step's card is put in after the paint (and kept across repaints while it plays); off it, it goes. */
+  if(steps && sbStepOn === 6 && typeof sbPreviewMounted === 'function') sbPreviewMounted(root);
+  else if(typeof sbPreviewStop === 'function') sbPreviewStop(true);
   if(!sbBusy && (!sbDrafts || Date.now() - sbReadAt > 15000) && !sbReadErr) teacherSbLoad();
 }
 function teacherSbPaint(){ if(teacherView === 'songbuilder') renderTeacherSongBuilder(); }
@@ -173,20 +187,36 @@ function sbViewHtml(){
   const pdf = typeof sbPdfPaneOn === 'function' && sbPdfPaneOn();
   return `<div class="ta-split${pdf ? ' sb-pdfopen' : ''}">${sbListHtml()}<section class="ta-detail" data-sb-detail>${sbDetailHtml()}</section>${pdf ? '<aside class="sb-pdfslot" data-sb-pdfslot aria-label="The pdf"></aside>' : ''}</div>`;
 }
+/* One row per song: a draft (with its published song, p, when it has one) or a published song with no draft (one
+   that came in through Manage → Built songs' Import). `pub` says whether students have it. */
 function sbRows(){
   const rows = [];
-  if(sbDrafts) for(const [id, d] of sbDrafts) rows.push({ id, kind: 'draft', title: String(d.title || ''), artist: String(d.artist || ''), d });
-  if(sbPublished) for(const [id, p] of sbPublished) if(!(sbDrafts && sbDrafts.has(id))) rows.push({ id, kind: 'pub', title: p.title, artist: p.artist, p });
+  if(sbDrafts) for(const [id, d] of sbDrafts){ const p = sbPublished ? sbPublished.get(id) || null : null; rows.push({ id, kind: 'draft', pub: !!p, title: String(d.title || ''), artist: String(d.artist || ''), d, p }); }
+  if(sbPublished) for(const [id, p] of sbPublished) if(!(sbDrafts && sbDrafts.has(id))) rows.push({ id, kind: 'pub', pub: true, title: p.title, artist: p.artist, p });
   return rows.sort((a, b) => a.title.localeCompare(b.title));
+}
+/* The steps show for a draft that is not published, for a new song, and for a published song being edited (Edit);
+   a published song otherwise shows its own page (teacher-sb-publish.js). */
+function sbShowsSteps(){
+  if(sbSel === null) return false;
+  if(sbSel === 'new') return true;
+  const pub = sbPublished && sbPublished.has(sbSel), d = sbDraft();
+  return !!d && (!pub || (typeof sbEditing !== 'undefined' && sbEditing.has(sbSel)));
 }
 function sbListHtml(){
   const all = sbRows(), q = sbQuery.trim().toLowerCase();
-  const nPub = all.filter(r => r.kind === 'pub').length, nDraft = all.length - nPub;
-  const rows = all.filter(r => (sbFilter === 'all' || (sbFilter === 'pub') === (r.kind === 'pub')) && (!q || (r.title + ' ' + r.artist).toLowerCase().includes(q)));
+  const nPub = all.filter(r => r.pub).length, nDraft = all.length - nPub;
+  const rows = all.filter(r => (sbFilter === 'all' || (sbFilter === 'pub') === r.pub) && (!q || (r.title + ' ' + r.artist).toLowerCase().includes(q)));
   const off = sbBusy ? ' disabled' : '';
   const rowHtml = r => {
     let tags = '', sub = '';
-    if(r.kind === 'pub'){ tags = '<span class="ta-tag ta-tag-sched">Published</span>'; sub = `On the Songs page · edit ${escHtml(String(r.p.ver))}`; }
+    if(r.pub){
+      const v = typeof sbPubVerdict === 'function' ? sbPubVerdict(r.id, r.p) : { ok: true };
+      const changed = r.kind === 'draft' && typeof sbPubChanged === 'function' && sbPubChanged(r.d, r.p);
+      tags = '<span class="ta-tag ta-tag-sched">Published</span>' + (changed ? '<span class="ta-tag ta-tag-warn">Changes not published</span>' : '')
+        + (v.ok ? '' : '<span class="ta-tag ta-tag-warn">Fails today\'s checks</span>') + (r.kind === 'pub' ? '<span class="ta-tag ta-tag-off">Imported</span>' : '');
+      sub = `On the Songs page · edit ${escHtml(String(r.p.ver))}`;
+    }
     else {
       const d = r.d, step = Math.min(SB_BUILT_STEPS, Math.max(1, Number(d.step) || 1));
       tags = '<span class="ta-tag ta-tag-off">Draft</span>'
@@ -204,6 +234,7 @@ function sbListHtml(){
     : '<div class="ta-list-empty">No songs built yet. Start one with <b>New song</b>: you need the mp3.</div>';
   return `<aside class="ta-list"><div class="ta-list-head"><div class="ta-list-top"><span class="ta-list-title" role="heading" aria-level="3">Song builder</span>`
     + `<button type="button" class="tg-seg-btn ta-board-btn" data-sb-act="new"${off}>+ New song</button></div>`
+    + (typeof sbHealthHtml === 'function' ? sbHealthHtml() : '')
     + (all.length ? `<input class="ta-search" data-sb-search placeholder="Search songs" aria-label="Search songs" value="${escAttr(sbQuery)}">`
       + `<div class="ta-filters">${[['all', 'All', all.length], ['pub', 'Published', nPub], ['draft', 'Drafts', nDraft]].map(([k, l, n]) => `<button type="button" class="ta-filter" data-sb-filter="${k}" aria-pressed="${sbFilter === k}">${l} ${n}</button>`).join('')}</div>` : '')
     + `</div><div class="ta-list-body">${body}</div></aside>`;
@@ -214,44 +245,51 @@ function sbStatusHtml(){
 }
 function sbDetailHtml(){
   if(sbSel === null) return sbStartHtml();
-  if(sbSel !== 'new' && sbPublished && sbPublished.has(sbSel) && !(sbDrafts && sbDrafts.has(sbSel))){
-    const p = sbPublished.get(sbSel);
-    return `<div class="ta-dhead"><div class="ta-meta">Song builder · Published (imported in Manage → Built songs) · edit ${escHtml(String(p.ver))}</div><div class="ta-title-row"><h2 class="ta-title">${escHtml(p.title)} <span class="ta-title-id">${escHtml(p.artist)}</span></h2></div></div>`
-      + `<div class="sb-box tint"><p class="sb-note" style="margin:0">This song is on the Songs page for every student. It came in through Manage → Built songs (Import); Hidden in the Songs view takes it off. Editing, Unpublish and Delete of published songs come with the Publish step.</p></div>`;
-  }
+  const pub = sbSel !== 'new' && sbPublished ? sbPublished.get(sbSel) || null : null;
+  if(pub && !sbShowsSteps()) return sbPublishedHtml(sbSel);
   const d = sbSel === 'new' ? null : sbDraft();
   if(sbSel !== 'new' && !d) return sbStartHtml();
   const title = d ? d.title : (sbNew && sbNew.title) || '', artist = d ? d.artist : (sbNew && sbNew.artist) || '';
-  const meta = d ? `Song builder · Draft · <span data-sb-saved>${escHtml(sbWhen(d.savedAt))}</span>` : 'Song builder · New song · not saved yet';
+  const off = sbBusy ? ' disabled' : '';
+  const meta = !d ? 'Song builder · New song · not saved yet'
+    : pub ? `Song builder · Published (edit ${escHtml(String(pub.ver))}) · editing: students keep the published song until you publish again · <span data-sb-saved>${escHtml(sbWhen(d.savedAt))}</span> · <button type="button" class="sb-linkbtn" data-sb-act="edit-done"${off}>← The published song</button>`
+    : `Song builder · Draft · <span data-sb-saved>${escHtml(sbWhen(d.savedAt))}</span>`;
   const nav = sbNavHtml(d);
+  /* A published song is deleted with its typed title (teacher-sb-publish.js); a draft with one OK / Cancel. */
+  const del = !d ? '' : pub ? `<button type="button" class="tg-seg-btn ta-act-btn t-act-danger" data-sb-act="delete-song"${off}>Delete…</button>`
+    : `<button type="button" class="tg-seg-btn ta-act-btn t-act-danger" data-sb-act="delete"${off}>Delete draft</button>`;
   return `<div class="ta-dhead"><div class="ta-meta">${meta}</div><div class="ta-title-row"><h2 class="ta-title">${escHtml(title || 'New song')} <span class="ta-title-id">${escHtml(artist || '')}</span></h2>`
-    + `<div class="ta-actions">${nav}${d ? `<button type="button" class="tg-seg-btn ta-act-btn t-act-danger" data-sb-act="delete"${sbBusy ? ' disabled' : ''}>Delete draft</button>` : ''}</div></div></div>`
+    + `<div class="ta-actions">${nav}${del}</div></div></div>`
     + sbStepsHtml(d) + sbStatusHtml()
-    + (sbStepOn === 1 ? sbUploadHtml(d) : sbStepOn === 2 ? sbVolumeHtml(d) : sbStepOn === 3 ? sbBeatPaneHtml(d) : sbStepOn === 4 ? sbChartPaneHtml(d) : sbLevelPaneHtml(d));
+    + (sbStepOn === 1 ? sbUploadHtml(d) : sbStepOn === 2 ? sbVolumeHtml(d) : sbStepOn === 3 ? sbBeatPaneHtml(d) : sbStepOn === 4 ? sbChartPaneHtml(d)
+      : sbStepOn === 5 ? sbLevelPaneHtml(d) : sbStepOn === 6 ? sbPreviewPaneHtml(d) : sbPublishPaneHtml(d));
 }
 function sbStartHtml(){
   return sbStatusHtml() + `<div class="sb-empty"><h3>Build a play-along from an mp3</h3>
     <p class="sb-note">For a song a student asks for. One screen per step, and you check each one. Nothing reaches students until the song is published.</p>
     <ol class="sb-how"><li><span><b>Upload the mp3.</b> Kept behind the school sign-in, never on the public site.</span></li><li><span><b>Volume.</b> Measured and set to match "the cure".</span></li>
     <li><span><b>Beat.</b> Tap along, then check the bars sit on the music.</span></li><li><span><b>Chart.</b> Paste the chords; it builds the grid, and you set what is true.</span></li>
-    <li><span><b>Level.</b> Full chords, power chords, or both.</span></li><li><span><b>Preview, then Publish.</b> The real card on the Songs page. (Coming next.)</span></li></ol>
+    <li><span><b>Level.</b> Full chords, power chords, or both.</span></li><li><span><b>Preview, then Publish.</b> Hear the real card, then put it on the Songs page.</span></li></ol>
     <button type="button" class="sb-btn primary big" data-sb-act="new"${sbBusy ? ' disabled' : ''}>+ New song</button></div>`;
 }
 /* The step bar: steps 2 and 3 open once the one before is done; the Chart step opens as soon as the draft exists
-   (Jonathan, 2026-11-15: the chart while other things are being worked on); Level once a chart is read; 6 and 7 are
-   not built yet. */
+   (Jonathan, 2026-11-15: the chart while other things are being worked on); Level once a chart is read; Preview and
+   Publish once the song passes the checks a student's page runs (sbSongWhy). Publish itself has more conditions
+   (sbPublishWhy, teacher-sb-publish.js). */
 function sbHasChart(d){ return !!(d && d.chart && Array.isArray(d.chart.sections) && d.chart.sections.length); }
 function sbStepReady(d, k){
   if(k === 1) return true;
   if(k === 2 || k === 4) return !!d;
   if(k === 3) return !!(d && d.audio && d.volume);
   if(k === 5) return sbHasChart(d);
+  if(k === 6 || k === 7) return !!(sbHasChart(d) && d.level && d.beat && d.audio) && !sbSongWhy(d, sbSel).length;
   return false;
 }
 function sbStepsHtml(d){
   return `<div class="sb-steps" role="tablist" aria-label="Steps">` + SB_STEPS.map((s, i) => {
     const k = i + 1, ready = sbStepReady(d, k), built = k <= SB_BUILT_STEPS;
-    const done = d && ((k === 1) || (k === 2 && d.audio && d.volume) || (k === 3 && d.beat && d.beat.anchor != null) || (k === 4 && sbHasChart(d)) || (k === 5 && sbHasChart(d) && d.level && d.beat && d.audio && !sbSongWhy(d, sbSel).length));
+    const done = d && ((k === 1) || (k === 2 && d.audio && d.volume) || (k === 3 && d.beat && d.beat.anchor != null) || (k === 4 && sbHasChart(d)) || (k === 5 && sbHasChart(d) && d.level && d.beat && d.audio && !sbSongWhy(d, sbSel).length)
+      || (k === 6 && ready && sbListensOf(d).all) || (k === 7 && ready && sbPublished && sbPublished.has(sbSel) && !sbPubChanged(d, sbPublished.get(sbSel))));
     const warn = (k === 2 && sbPitchBlocked(d)) || (k === 3 && d && d.beat && d.beat.driftOff > 0) || (k === 4 && sbHasChart(d) && sbChartOpen(d, sbChartReadOf(d)).n > 0);
     const cls = (done ? ' done' : '') + (k === sbStepOn ? ' on' : '') + (warn ? ' warn' : '');
     const why = !built ? ' title="Not built yet: it comes in a later update"' : !ready ? ' title="Finish the step before it first"' : '';
@@ -264,7 +302,9 @@ function sbNavHtml(d){
   if(sbStepOn === 2) return `<button type="button" class="sb-btn" data-sb-step="1"${off}>← Upload</button><button type="button" class="sb-btn primary" data-sb-step="3"${off || !sbStepReady(d, 3) ? ' disabled' : ''}>Next: Beat →</button>`;
   if(sbStepOn === 3) return `<button type="button" class="sb-btn" data-sb-step="2"${off}>← Volume</button><button type="button" class="sb-btn primary" data-sb-step="4"${off}>Next: Chart →</button>`;
   if(sbStepOn === 4) return `<button type="button" class="sb-btn" data-sb-step="3"${off || !sbStepReady(d, 3) ? ' disabled' : ''}>← Beat</button><button type="button" class="sb-btn primary" data-sb-step="5"${off || !sbStepReady(d, 5) ? ' disabled' : ''}>Next: Level →</button>`;
-  return `<button type="button" class="sb-btn" data-sb-step="4"${off}>← Chart</button><button type="button" class="sb-btn primary" disabled title="Preview and Publish come in the next update">Next: Preview → (not built yet)</button>`;
+  if(sbStepOn === 5) return `<button type="button" class="sb-btn" data-sb-step="4"${off}>← Chart</button><button type="button" class="sb-btn primary" data-sb-step="6"${off || !sbStepReady(d, 6) ? ' disabled' : ''}${sbStepReady(d, 6) ? '' : ' title="The song does not pass the checks yet: the box below says why"'}>Next: Preview →</button>`;
+  if(sbStepOn === 6) return `<button type="button" class="sb-btn" data-sb-step="5"${off}>← Level</button><button type="button" class="sb-btn primary" data-sb-step="7"${off || !sbStepReady(d, 7) ? ' disabled' : ''}>Next: Publish →</button>`;
+  return `<button type="button" class="sb-btn" data-sb-step="6"${off || !sbStepReady(d, 6) ? ' disabled' : ''}>← Preview</button>${sbPublishBtnHtml(d)}`;
 }
 const SB_LOCK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
 const SB_FILE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
@@ -302,7 +342,7 @@ function sbUploadHtml(d){
       </ul>
     </div>
   </div>
-  <p class="sb-note sb-stepnote">Step 1 of 7. Nothing reaches students until you publish.</p>`;
+  <p class="sb-note sb-stepnote">Step 1 of 7. ${d && sbPublished && sbPublished.has(sbSel) ? 'Students keep the published song until you publish again.' : 'Nothing reaches students until you publish.'}</p>`;
 }
 function sbVolumeHtml(d){
   const v = d && d.volume, a = d && d.audio, p = d && d.pitch;
@@ -367,6 +407,7 @@ function sbClick(e){
   if(act === 'next1'){ sbSaveUpload(); return; }
   if(act === 'level'){ sbRunLevel(); return; }
   if(act === 'delete'){ sbDeleteDraft(); return; }
+  if(typeof sbPubAct === 'function' && sbPubAct(act, b)) return;
   if(act === 'clear-volume'){ sbClearStep('volume'); return; }
   if(act === 'clear-beat'){ sbClearStep('beat'); return; }
   if(act === 'clear-chart'){ sbClearStep('chart'); return; }
@@ -421,12 +462,14 @@ function sbOnHidden(){ if(document.hidden) sbStopSounds(); }
 function teacherSbLeave(){
   sbViewGen++;
   sbStopSounds();
+  if(typeof sbPreviewStop === 'function') sbPreviewStop(true);   // the preview card leaves the page's activity list too
   if(sbWorker){ try{ sbWorker.terminate(); }catch(e){} sbWorker = null; }
   if(typeof sbPdfLeave === 'function') sbPdfLeave();
 }
 function sbStopSounds(){
   sbStopTen();
   if(typeof sbBeatStop === 'function') sbBeatStop();
+  if(typeof sbPreviewStop === 'function') sbPreviewStop(false);   // the preview card's song (only that card's: never a global stopper)
 }
 function sbMemFor(id){
   if(sbMem.id === id) return;
@@ -436,10 +479,11 @@ function sbMemFor(id){
 function sbOpen(id){
   if(sbBusy || id === sbSel) return;
   sbStopSounds();
+  if(typeof sbEditing !== 'undefined') sbEditing.clear();   // a published song opens on its own page again
   sbSel = id; sbNote = ''; sbNew = null;
   const d = sbDraft();
   sbStepOn = d ? Math.max(1, Math.min(SB_BUILT_STEPS, Number(d.step) || 1)) : 1;
-  if(d && !sbStepReady(d, sbStepOn)) sbStepOn = sbStepReady(d, 2) ? 2 : 1;
+  while(d && sbStepOn > 1 && !sbStepReady(d, sbStepOn)) sbStepOn--;   // a step that is not open (the checks changed): the last one that is
   sbMemFor(id);
   teacherSbPaint();
 }
@@ -450,6 +494,8 @@ function sbGoStep(k){
   sbStopSounds();
   sbMem.failed = null;                    // a step click is a deliberate try: the Beat step may load the copy again
   sbStepOn = k; sbNote = '';
+  /* Preview and Publish are the furthest steps: reaching one is saved, so the list says where the draft is. */
+  if(k >= 6 && d && (Number(d.step) || 1) < k){ sbWriteDraft(sbSel, Object.assign(d, { step: k })); return; }
   teacherSbPaint();
 }
 
@@ -521,7 +567,7 @@ async function sbSaveUpload(goTo){
 }
 /* The one draft writer. Saves the fields a draft has, with the server's time, and keeps the copy in memory. */
 function sbDraftDoc(d){
-  const keep = ['v', 'title', 'artist', 'step', 'source', 'audio', 'volume', 'pitch', 'beat', 'chart', 'level'];
+  const keep = ['v', 'title', 'artist', 'step', 'source', 'audio', 'volume', 'pitch', 'beat', 'chart', 'level', 'listens', 'pubVer'];
   const out = {};
   keep.forEach(k => { out[k] = d[k] === undefined ? null : d[k]; });
   out.v = 1;
@@ -683,7 +729,7 @@ async function sbLoadLevel(){
     const c = e && e.code;
     sbNote = c === 'limit' ? 'The levelled copy cannot load: this month\'s song downloads are at the limit (Manage → Song files).'
       : c === 'missing' || c === 'bad' ? 'The levelled copy is missing or damaged in the database. Pick the mp3 again (step 1) and level it again.'
-      : 'Could not load the levelled copy: ' + (typeof teacherSfWhy === 'function' ? teacherSfWhy(e) : String((e && (e.code || e.message)) || e)) + '. Press Beat (step 3) to try again.';
+      : 'Could not load the levelled copy: ' + (typeof teacherSfWhy === 'function' ? teacherSfWhy(e) : String((e && (e.code || e.message)) || e)) + '. Click the step\'s name above to try again.';
     return false;
   }finally{
     sbBusy = ''; sbProgress = '';
@@ -748,6 +794,8 @@ async function sbClearStep(which){
 async function sbDeleteDraft(){
   const d = sbDraft();
   if(sbBusy || !d) return;
+  /* A published song is never deleted by the draft's OK / Cancel: it takes the typed title (teacher-sb-publish.js). */
+  if(sbPublished && sbPublished.has(sbSel)){ if(typeof sbDeleteSong === 'function') sbDeleteSong(); return; }
   const id = sbSel, title = String(d.title || '');
   if(!confirm(`Delete the draft "${title}"? Its levelled copy in the database goes too. Your mp3 on the Mac is not touched.`)) return;
   const gen = sbViewGen;

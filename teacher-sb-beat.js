@@ -69,7 +69,7 @@ function sbBeatPaneHtml(d){
   if(beat){
     const dr = bt.drift || [], last = sbBarsIn(beat, d.audio.durationSec);
     const nPins = sbPins(beat).length;
-    if(sbBeatTooMuch(bt.need ? bt.need.pins : beat.pinsNeeded)) html += `<div class="sb-flag red"><span class="fi">!</span><div class="sb-flag-body"><b>This song does not fit the builder: it cannot hold this record's beat.</b> The builder is for records with a steady beat. This one would need about ${bt.need ? bt.need.pins : beat.pinsNeeded} pins to stay on the beat (a steady record needs 2 or 3): the tempo moves, or the beat is hard to follow, so the clicks drift off the music. Send the mp3 to Claude to build this song. You can still try the other steps.</div></div>`;
+    if(sbBeatTooMuch(bt.need ? bt.need.pins : beat.pinsNeeded)) html += sbNoFitHtml(bt.need ? bt.need.pins : beat.pinsNeeded);
     html += `<div class="sb-h sb-drift-title">Drift check: does the grid still sit on the music later in the song?</div>
       <p class="sb-hint sb-drift-sum">${escHtml(`${sbPinBpm(beat).toFixed(2)} BPM · ${last} bars fit in the file · ${nPins} pin${nPins === 1 ? '' : 's'} (bar 1${nPins > 1 ? ' and ' + sbPins(beat).slice(1).map(p => p.bar).join(', ') : ''})`)}${nPins >= 3 ? ' · the bars follow the pins (a beat map)' : ''}</p>`;
     html += `<div class="sb-drift">` + dr.map(w => {
@@ -84,6 +84,12 @@ function sbBeatPaneHtml(d){
     }).join('') + `</div>`;
   }
   return html;
+}
+/* The red box for a record the builder cannot hold (over SB_PINS_MAX pins). The same words at the Beat, Preview and
+   Publish steps (Jonathan, 2026-11-16: "keep the warning that a song doesn't fit"); it never blocks Publish
+   (Jonathan, 2026-11-15: the pins line only warns). */
+function sbNoFitHtml(pins){
+  return `<div class="sb-flag red" data-sb-nofit><span class="fi">!</span><div class="sb-flag-body"><b>This song does not fit the builder: it cannot hold this record's beat.</b> The builder is for records with a steady beat. This one would need about ${escHtml(String(pins))} pins to stay on the beat (a steady record needs 2 or 3): the tempo moves, or the beat is hard to follow, so the clicks drift off the music. Send the mp3 to Claude to build this song. You can still try the other steps.</div></div>`;
 }
 /* The pin sbAutoGrid set near the end (the highest pinned bar): kept, never offered for Unpin. */
 function sbAutoEndBar(beat){ const ps = (beat.pins || []).map(p => p.bar); return ps.length ? Math.max(...ps) : null; }
