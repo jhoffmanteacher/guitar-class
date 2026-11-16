@@ -1395,3 +1395,7 @@ function ccAgain(d){
   ccStart(true);
 }
 
+/* DELIBERATE BRIDGE, remove after 2026-12-01 (todo.md lists it): a page opened before the 2026-11-16
+   split still holds the old part list in app/boot.js, which never names coach-chordcards.js, so coach-chords.js
+   asks for it here. A page with the new list skips this line. */
+if (typeof COACH_JS_PARTS !== 'undefined' && COACH_JS_PARTS.indexOf('coach-chordcards.js') < 0 && typeof loadScriptOnce === 'function') loadScriptOnce('coach-chordcards.js').catch(() => {});
