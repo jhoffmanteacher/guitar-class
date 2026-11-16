@@ -413,7 +413,8 @@ script.
   `micrec-clock.mjs [--root=<site>] [--verbose]` proves the stamp: the real
   micRecStart / onaudioprocess / micRecSaveNow against a fake audio clock that
   runs as Chromium's does (bursts, the page's handler delay, a device that
-  starts late); every case must land within one audio burst. Not in
+  starts late, two takes in one page); every case must land within one
+  audio burst. Not in
   checks.mjs.
 - Power Chord Switch takes (`mode: 'pw'`, 2026-11-04): `micEvalTakePw` in
   teacher.js. No pitch readings are saved with them, so per change it asks

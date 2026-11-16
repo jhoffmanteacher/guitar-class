@@ -18,7 +18,8 @@
    err = stamp - truth (+ = the stamp is LATE, so every saved time is that much too early against the audio). A stamp that rests on
    buffer-end frames only can sit up to one burst (H / sampleRate) above the envelope, which is the band each case allows.
    Cases: two sample rates, five burst sizes, a slow first handler, a page stalled mid-take, and an audio device that starts after the
-   recording does (a context whose clock still stands at 0 when micRecStart reads it). Exit 1 when any case is outside its band.
+   recording does (a context whose clock still stands at 0 when micRecStart reads it), and two takes in one page (one vm), so that what a
+   take leaves behind cannot move the next one's stamp. Exit 1 when any case is outside its band.
    Measured on the real takes the same day (46 summaries in tools/mic-sim/takes/, replayed through the real game code with the clock
    fitted on the onsets; 43 of 46 could be fitted): the stamp before 2026-11-16 was 92 ms late on the median take (40 of 43 between 48
    and 107 ms, one poor fit at 22; one buffer at 48 kHz is 85.3 ms), and about 130 ms EARLY on 2 of 43. */
@@ -63,11 +64,15 @@ function makeVm(){
 function rng(seed){ let s = seed >>> 0; return () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296; }
 
 /* One take. c: { sr, H, cold (ms the device starts after micRecStart; 0 = running long before), d1 (the first handler's delay, ms),
-   dMax (the other handlers' delays, uniform 0.2..dMax ms), stall: [fromBuffer, toBuffer, ms] (a page stall), sec, seed }. */
-async function runCase(c){
-  const { ctx, clock, logged } = makeVm();
+   dMax (the other handlers' delays, uniform 0.2..dMax ms), stall: [fromBuffer, toBuffer, ms] (a page stall), sec, seed,
+   at (the perf time of micRecStart, default 1005), ctxStart (the perf time the device started, to share one clock across takes) }.
+   env: the vm to run in (a fresh one unless a case runs several takes in one page). */
+async function runCase(c, env = makeVm()){
+  const { ctx, clock, logged } = env;
+  logged.length = 0;
   const sr = c.sr, H = c.H, Q = 128, B = 4096, R = rng(c.seed || 1);
-  const pCreate = 1000, pStart = c.cold > 0 ? pCreate + 5 + c.cold : pCreate - 5000;   // a warm context started 5 s before
+  const pCreate = c.at != null ? c.at - 5 : 1000;
+  const pStart = c.ctxStart != null ? c.ctxStart : c.cold > 0 ? pCreate + 5 + c.cold : pCreate - 5000;   // warm: started 5 s before
   const pRec = pCreate + 5;                                                           // micRecStart
   const quantaByBurst = k => Math.ceil((k + 1) * H / Q);                              // quanta rendered once burst k is done
   const burstOfQuantum = q => Math.floor(q * Q / H);                                  // the first burst k with quantaByBurst(k) > q
@@ -145,6 +150,14 @@ const CASES = [
   ['48 kHz, the device starts 230 ms after micRecStart', { sr: 48000, H: 480, cold: 230, d1: 3, dMax: 15 }],
   ['44.1 kHz, the device starts 230 ms after micRecStart', { sr: 44100, H: 512, cold: 230, d1: 3, dMax: 10 }]
 ];
+/* Two takes in one page: the same vm (so the same site globals) and the same running audio clock, the second take 45 s after the
+   first began. Each stamp must land in its band. */
+async function runTwo(){
+  const env = makeVm(), c = { sr: 48000, H: 480, cold: 0, d1: 3, dMax: 15, sec: 30, ctxStart: 1000 - 5000 };
+  const a = await runCase(Object.assign({}, c, { at: 1005, seed: 7 }), env);
+  const b = await runCase(Object.assign({}, c, { at: 1005 + 45000, seed: 11 }), env);
+  return [a, b];
+}
 let bad = 0;
 for (const [name, c] of CASES){
   const r = await runCase(Object.assign({ sec: 30, seed: 7 }, c));
@@ -152,8 +165,11 @@ for (const [name, c] of CASES){
   console.log(`${r.ok ? 'ok  ' : 'FAIL'} ${name}: stamp ${r.err > 0 ? '+' : ''}${r.err} ms (band -2..+${r.band})${r.undef ? ' · the document holds an undefined field' : ''}${r.mark ? ' · ' + r.mark : ''}`);
   if (verbose) console.log('     ' + JSON.stringify({ F0: r.F0, buffers: r.n, recClock: r.doc.recClock, recClockShiftMs: r.doc.recClockShiftMs }));
 }
+const two = await runTwo(), twoOk = two.every(r => r.ok);
+if (!twoOk) bad++;
+console.log(`${twoOk ? 'ok  ' : 'FAIL'} 48 kHz, two takes in one page: ${two.map((r, i) => `take ${i + 1} stamp ${r.err > 0 ? '+' : ''}${r.err} ms${r.undef ? ' (an undefined field)' : ''}${r.mark ? ' (' + r.mark + ')' : ''}`).join(', ')} (band -2..+${two[0].band} each)`);
 const bare = await runBare();
 if (!bare.ok) bad++;
 console.log(`${bare.ok ? 'ok  ' : 'FAIL'} a capture with no buffer timing (hand-built): t ${bare.t} (want ${bare.want}, the older estimate), new-clock fields ${bare.keys.length ? bare.keys.join(', ') : 'none'} (want none)`);
-console.log(`micrec-clock: ${CASES.length + 1 - bad} of ${CASES.length + 1} cases pass (${CASES.length} inside their band of one audio burst, 1 hand-built); ${fns.length} recording functions from ${ROOT === join(import.meta.dirname, '..', '..') ? 'this site' : ROOT}`);
+console.log(`micrec-clock: ${CASES.length + 2 - bad} of ${CASES.length + 2} cases pass (${CASES.length + 1} inside their band of one audio burst, one of them two takes in one page; 1 hand-built); ${fns.length} recording functions from ${ROOT === join(import.meta.dirname, '..', '..') ? 'this site' : ROOT}`);
 process.exit(bad ? 1 : 0);
