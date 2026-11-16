@@ -371,9 +371,9 @@ function gamesStopMic(keepPanel){
   if (typeof ncStopAll === 'function') ncStopAll();
   /* The arcade script is several files that load one after another (the list is in app/boot.js). Every stop
      below is defined once coach-more.js (bcStop lives there) has run: it loads after every game part it calls
-     (coach-chordcards.js, split off 2026-11-16, holds cbStop and cdStop). Until then no game can be running, so
-     there is nothing more to stop; without this line the Tuner or Record pressed in that gap called ccStop()
-     before its file had arrived (review R1-1, 2026-11-11). */
+     (coach-chordcards.js and coach-noterunner.js, split off 2026-11-16, hold cbStop, cdStop and nrStop).
+     Until then no game can be running, so there is nothing more to stop; without this line the Tuner or Record
+     pressed in that gap called ccStop() before its file had arrived (review R1-1, 2026-11-11). */
   if (typeof bcStop !== 'function') return;
   fretStop();
   ccStop();
