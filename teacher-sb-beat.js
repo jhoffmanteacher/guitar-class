@@ -121,7 +121,10 @@ function sbDrawAll(){
   });
 }
 function sbDrawWave(cv, lv, t0, t1, beat, o){
-  const dpr = window.devicePixelRatio || 1, W = Math.max(50, cv.clientWidth || cv.parentNode.clientWidth || 600), H = Number(cv.getAttribute('height')) || 100;
+  /* The drawn height is the markup's height="…", kept in data-h: setting cv.height below rewrites that attribute in
+     device pixels, so reading it back doubled the waveform on every redraw on a Retina screen (2026-11-15). */
+  if(!cv.dataset.h) cv.dataset.h = cv.getAttribute('height') || '100';
+  const dpr = window.devicePixelRatio || 1, W = Math.max(50, cv.clientWidth || cv.parentNode.clientWidth || 600), H = Number(cv.dataset.h) || 100;
   cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); cv.style.height = H + 'px';
   const g = cv.getContext('2d');
   if(!g) return;
