@@ -17321,8 +17321,9 @@ const COUNTIN_PIN = { runs: 44, beeps: 140, rounds: 9, takes: 6, tips: 28 };   /
        board, not in the BPM group; the part draws no block element (a <div) anywhere, so the row stays one line; no per-bar sentence
        after a round (their strings are gone); the frame around the board pulses once a beat and marks each bar's 1, only with the
        Metronome on, cleared on every exit;
-     - the check's own strum ratios (SC_ONSET_RATIO / SC_HF_RATIO), run through the real srHearStrum: a 1.3x jump is a strum for the
-       check and not for a state without them (Strum Radar's); the shared CHK_ONSET_RATIO / CHK_HF_RATIO stay 1.4 / 1.7;
+     - the check's own strum ratios (SC_ONSET_RATIO / SC_HF_RATIO), run through its own scHearStrum (coach-strumcheck.js, since
+       2026-11-14): a 1.3x jump is a strum for the check and not for Strum Radar's srHearStrum; the shared CHK_ONSET_RATIO /
+       CHK_HF_RATIO stay 1.4 / 1.7;
      - what was built and not guarded (review round 4, R4-3: thirteen planted faults had left this check green; all thirteen now turn
        it red): the round's life on a made-up clock, through the real start, loop, Stop, interrupt and close with a stub stream (the
        mic off, no timer or frame left and the capture let go after a full round, a Stop, a start in a hidden tab, a close and an
