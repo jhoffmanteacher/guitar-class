@@ -70,6 +70,28 @@ Agents: Opus or Fable by the need, as for the Windows block below. The Windows c
 the list in the next block at the same time: stay out of those files; fetch and rebase before every push. If Jonathan
 sends an mp3 for a first real song: skill `new-playalong`, 192k. Delete this block when Part d ships.
 
+**For the Mac, a five-minute job: bring Jonathan's three Strum check takes to Windows (written 2026-11-16 on
+Windows; Jonathan says "do the takes job in WORKFLOW").** Jonathan chose it (2026-11-16, "Bring the takes here"): the
+Windows session's review found a listening fault that needs a real-take replay before any fix ships, and the takes
+are only on the Mac.
+- Copy J01, J02 and J03 from `Claude outputs/takes-anon/` (each take's `.json` and its `.wav`) and the `--key` file
+  used in `docs/strum-check/DETAILS.md` section 20 / 24 (what he says he played) into a new repo folder
+  `tools/mic-sim/strum-takes/`, with a three-line `README.md`: whose they are (Jonathan's own playing, MacBook mic,
+  2026-11-14, local recording mode; no student in them), and the command that reproduces section 24's table.
+- First check: they are ONLY his own takes (no student take, no name but his), and say the sizes in the commit
+  message. If the three `.wav` are more than about 30 MB together, stop and write the sizes here instead of pushing.
+- Before pushing, run `node tools/mic-sim/strum-check-replay.mjs tools/mic-sim/strum-takes/J01.json
+  tools/mic-sim/strum-takes/J02.json tools/mic-sim/strum-takes/J03.json --key=<the key file>` from the new place and
+  put its summary lines in the README, so Windows can tell its replay matches the Mac's. If `checks.mjs` or
+  `sw.js` lists object to the new folder (it must NOT be precached), say so here rather than loosening a check.
+- Push (docs / tools only, no `Review:` trailer), then delete this block.
+- Also for the Mac, when the console files are free: two small fixes from the Friday check, verified on `9bf2b07`:
+  `teacher-livegames.js:237` `if(es === lqgBuiltIn(id, 'es')) es = '';` should be `if(!en && es === …` (a Spanish
+  name equal to the built-in one is wiped although the English name was changed, so Spanish students see the
+  English name); `teacher-students.js:553` "Behind the class" should skip the teacher's own doc
+  (`if(teacherPmIsTeacher(stu)) return;` at the top of the loop, as the filter at line 560 does). Both Fast; tick
+  them in "Open work" → "2026-11-14 — Friday check: MINOR findings".
+
 **For a session on the Windows computer (written 2026-11-15 for 2026-11-16 on; Jonathan cannot paste between his
 computers, so it lives here).** Jonathan opens Claude Code on Windows and says "do the Windows work in WORKFLOW".
 The session runs on Fable (Jonathan, 2026-11-15: "big jobs using fable"). Agents: Opus or Fable by the need
@@ -119,8 +141,24 @@ plan; Fable (`model: 'fable'`) for mechanical work (a part split, re-checking an
     hash; it now waits for the console's `sbBusy` to clear. 5 of 5 runs here, 57 cases. Not run on the Mac: one run
     there should say 57. The same turn-count wait is in `tools/song-files-console-sim.mjs` and
     `tools/built-songs-sim.mjs` (both pass on Windows today).
-  - **Job 1: the review is running** (a Fable reviewer, high, on `coach-strumcheck.js` at `9bf2b07`, with
-    `docs/strum-check/DETAILS.md` and `CLICK-2.md`). **The design plans are done, nothing shipped:**
+  - **Job 1, review round 4 (Fable, high, at `9bf2b07`): 0 BLOCKER, 2 MAJOR, 3 MINOR.** The lead re-opened the
+    quoted lines and re-ran the reviewer's deterministic case; scripts in the session scratchpad (`deeprev/scripts`).
+    - **R4-1 MAJOR, waits for the real takes (the Mac block above).** A strum on a rest is excused about half the
+      time: the grid search (`scAnchorSearch`, run at every strum) moves the grid up to a whole eighth so the extra
+      lands in the 10% gap between windows (`coach-strumcheck.js:599` `if (Math.abs(d) > s.win) continue;` costs
+      nothing there) or on the next strum's place. Bench, quiet room: caught 51 of 120, the mistake bar passes 33 of
+      120; with the grid frozen 23 of 24 caught. A student who strums on "3" in every bar passes 24 of 80 bars at 85
+      BPM. Candidate A, one line (a sound outside every window costs `SC_ANCHOR_REST` too): caught 19 of 20, bar
+      passes 1 of 20, right players unchanged in quiet and class; cost: a right player in the bench talk room 69 of
+      192 bars right (today 91). Not tried on a real take. Every "extra caught" number in `DETAILS.md` is from before
+      the pattern-shape grid (section 23).
+    - **R4-2 MAJOR, a known limit to record or a design job:** loud talking near the mic (bench talk room, speech at
+      about 40% of a strum) is not gated (0 of 24 rounds) and a right player gets 91 of 192 bars right (quiet 160 of
+      192). The opposite failure from the gate firing in a full room. One made-up room; no small fix.
+    - **MINOR, a fixer has them:** R4-3 check 1eh stays green on 13 of 18 real planted faults (mic left on after a
+      round, no take saved, three constants unpinned…); R4-4 a Stop in the count-in saves an empty take over the
+      student's last full one (`:740`); R4-5 the comment at `:74-76` and `CHANGELOG.md:18` say extras are shown red.
+    **The design plans are done, nothing shipped:**
     `docs/strum-check/LISTENING-DESIGN-2026-11-16.md` (one Opus agent). Four decisions in it are Jonathan's, none
     asked yet; the agent's recommendation each time: up-strums: leave until Chromebook takes exist (a "lower bar
     only where a strum is due" rule cut bench misses 202 to 74 of 2,300 but heard a skipped up-strum 8 of 24 times,
