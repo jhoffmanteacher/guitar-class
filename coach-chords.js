@@ -1263,6 +1263,10 @@ function ccRenderDone(){
      more unheard changes keeps its "strum a little firmer" screen (firmer): that is the useful advice for a strum the mic cannot hear. */
   const silentStop = !!cc.silentStop && ok === 0 && off === 0 && !noneReached && !firmer;   // ok / off > 0 means a strum WAS graded (never in a real silent game)
   const stoppedClean = allReachedRight && !noneReached && r < 0.85;     // the headline and advice only below 85%: from there on the "great" screen is right
+  /* Change Up's step up / down: 10, or what is left to its top / lowest tempo when that is less (5 at 135 and at 45, since the setup moves in 5s).
+     The advice line and the two step buttons name it, because ccAgain(10) / ccAgain(-10) clamp: "try it 10 BPM faster" at 135 went to 140
+     (Friday check 2026-11-16). Power Chord Switch has its own row and step (ccDoneUpBpm) and does not read these. */
+  const cuUp = Math.min(10, CC_BPM_MAX - cc.bpm), cuDown = Math.min(10, cc.bpm - CC_BPM_MIN);
   let verdict, advice;
   if (noneReached){
     verdict = '&#x1F3B8; ' + (cc.noneDue ? t('games.cc.verdict.stoppedEarly') : cc.noStrum ? t('games.cc.verdict.stoppedSilent') : t('games.cc.verdict.stoppedNoChange'));
@@ -1277,7 +1281,7 @@ function ccRenderDone(){
     verdict = '&#x1F31F; ' + t(ccIsPower() ? 'games.pw.verdict.great' : 'games.cc.verdict.great', { ok, total });   // Power Chord Switch does not grade timing (ccSpanRule): no "on time"
     /* At the top tempo the "N BPM faster" line is false (the tempo cannot go up), so it says that instead: Power Chord Switch since
        2026-11-07 (the test is the done row's own: the step up lands on the tempo just played), Change Up at 140 since 2026-11-09. */
-    advice = t(ccDoneAtTop() ? 'games.pw.advice.top' : ccIsPower() ? 'games.pw.advice.great' : 'games.cc.advice.great');
+    advice = ccDoneAtTop() ? t('games.pw.advice.top') : ccIsPower() ? t('games.pw.advice.great') : t('games.cc.advice.great', { n: cuUp });
     try {
       const k = ccBestKey(prog, cc.rateIdx);
       const best = parseInt(sessionStorage.getItem(k), 10) || 0;
@@ -1302,7 +1306,7 @@ function ccRenderDone(){
        headline is the plain count and the advice is to play it again at this speed (Jonathan, 2026-11-09). */
     const floor = !firmer && ccDoneAtFloor();
     verdict = '&#x1F3B8; ' + t(firmer || floor ? 'games.cc.verdict.ok' : 'games.cc.verdict.low', { ok, total });
-    advice = firmer ? t('games.pw.advice.firmer') : floor ? t('games.cc.advice.tryAgainSteady') : t(ccIsPower() ? 'games.pw.advice.low' : 'games.cc.advice.low');
+    advice = firmer ? t('games.pw.advice.firmer') : floor ? t('games.cc.advice.tryAgainSteady') : ccIsPower() ? t('games.pw.advice.low') : t('games.cc.advice.low', { n: cuDown });
   }
   /* The silent screen (silentStop) draws EVERY change like the nothing-reached one does: grey 'not reached', never a red 'no strum heard' under a headline that says nothing was heard (review 2026-11-09). */
   const greyRest = allReachedRight || silentStop;
@@ -1333,11 +1337,12 @@ function ccRenderDone(){
        <div class="coach-actions">
          <button type="button" class="coach-start" id="cc-done-again" onclick="ccAgain(0)">&#x21BB; ${ccDoneAgainText()}</button>
        </div>`
-    /* Change Up: no −10 at its lowest tempo and no +10 at its top (Jonathan, 2026-11-09): they did nothing there. */
+    /* Change Up: no −10 at its lowest tempo and no +10 at its top (Jonathan, 2026-11-09): they did nothing there. One 5 BPM step away,
+       the button says −5 / +5 (cuDown / cuUp), which is what its clamped ccAgain(∓10) does. */
     : `<div class="coach-actions">
-       ${ccDoneAtFloor() ? '' : `<button type="button" class="${rec === 'down' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(-10)">&#x2B07; ${t('games.common.bpmDown10')}</button>`}
+       ${ccDoneAtFloor() ? '' : `<button type="button" class="${rec === 'down' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(-10)">&#x2B07; ${t('games.common.bpmDown10', { n: cuDown })}</button>`}
        <button type="button" class="${rec === 'same' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(0)">&#x21BB; ${t('games.common.again', { bpm: cc.bpm })}</button>
-       ${ccDoneAtTop() ? '' : `<button type="button" class="${rec === 'up' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(10)">&#x2B06; ${t('games.common.bpmUp10')}</button>`}
+       ${ccDoneAtTop() ? '' : `<button type="button" class="${rec === 'up' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(10)">&#x2B06; ${t('games.common.bpmUp10', { n: cuUp })}</button>`}
      </div>`;
   /* When everything reached was right, a round counts only the changes reached in it, and a round with none left is not listed ("4 of 4" next to "Round 1: 4 of 7" read as a contradiction). */
   const roundRows = cc.ladder ? cc.stageLog.map((sg, k) => ({ k, sg, shown: silentStop ? [] : greyRest ? sg.changes.filter(c => !c.neverReached) : sg.changes })).filter(x => x.shown.length) : [];
