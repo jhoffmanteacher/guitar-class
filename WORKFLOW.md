@@ -227,6 +227,27 @@ bullet under the job), the Mac fixes and pushes. All three branches are on GitHu
   suspect), fix the 1366 ones (`teacher-manage-layout.js`, `teacher-manage.js`, `styles.css`: the Mac is out of
   those files now), decide with a line in WORKFLOW whether the 390 one is in scope (phone width is not), and get
   the tool back to exit 0. Fast.
+  - **W5 DONE, shipped Fast (Windows, 2026-11-16; one Opus agent; `tools/console-layout-smoke.mjs` exits 0, two runs
+    in a row).** The 7 failing lines here were the Mac's 7; nothing fails only on Windows (the two Manage numbers
+    are 25 px smaller here: fonts).
+    - **Manage scrolling sideways (1366 and 390): the layout was wrong, and the cause is `b39299fb` ("Manage: delete
+      one student…"), not the Manage tabs `b40c35f`.** It added a last column whose header is
+      `<th><span class="sr-only">More</span></th>`; `.sr-only` is `position:absolute`, and its scroll box
+      `.tg-grid-wrap{overflow-x:auto}` was not positioned, so the span was placed against the page, escaped the
+      clip and sat past the table's right edge (measured: the page's scrollWidth equalled that span's right edge,
+      1491 against 1351 at 1366, 1267 against 375 at 390). It bites when a roster name is long (the tool's stub has
+      one; `manage-layout-smoke`'s short names fit, which is why that smoke never caught it). Bisect on copies:
+      `b39299fb^` neither line fails, `b39299fb` both. Fix, one rule in `styles.css`:
+      `.tg-grid-wrap{overflow-x:auto;position:relative}`; after: 1351 of 1351 at 1366 and 375 of 375 at 390. The
+      lead looked at Manage → Students at 1366 after the fix: no page-wide scrollbar; the roster scrolls inside its
+      own box when a name is long, as before.
+    - **The five goal-box lines: the tool was stale, the box is right.** `ac0a2ad7` raised the cap ("takes 0 to 600
+      (was 7 x 20 = 140)") without updating the tool. It now tries 601 and expects "whole number from 0 to 600,":
+      the same 3 bad entries with the same 2 assertions each, nothing loosened; break-it: the cap set to 700 turns
+      it red (`goalbox: "601" wrote something`).
+    - **The 390 decision:** the 390 Manage check is a kept guarantee (it passed before `b39299fb`); the Manage tabs
+      did not break it; the same rule that fixed 1366 fixed it; no tool change, no new breakpoint.
+    - Also run: `manage-layout-smoke.mjs` 40 passed, 0 failed. A teacher sees this, not a student: no CHANGELOG.
 - The Mac keeps: fixing what W1 and W2 find, the pushes of Part d and the splits, the three low edge cases of the
   pdf pane (`+ New song` twice keeps the first song's pdfs; a draft switched during a multi-file pick; a deleted
   draft's pdfs kept until the view reopens), and anything Jonathan finds testing the builder.
