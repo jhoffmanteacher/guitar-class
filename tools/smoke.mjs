@@ -1522,7 +1522,7 @@ async function cardKeysWalk(page, run, events, stats, base) {
     await run('keys:stop', `(pcStop(), 1)`, 100);
     // A reload: the card opens at its first speed, stopped.
     await page.send('Page.navigate', { url: `${base}/index.html#class-activities/${ID}` });
-    await sleep(3500);
+    await sleep(3500); await pageLoaded(page);
     await run('keys:devBypass', 'devBypass()', 3500);
     for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'keys:devBypass' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
     await openCard('reload');
@@ -1667,7 +1667,7 @@ async function foldWalk(page, run, events, stats, base) {
   await run('fold:en', "setLang('en')", 600);
   // A reload on the card's own link reopens it folded, in the normal window.
   await page.send('Page.navigate', { url: `${base}/index.html#class-activities/${ids[0]}` });
-  await sleep(3500);
+  await sleep(3500); await pageLoaded(page);
   await run('fold:devBypass', 'devBypass()', 3500);
   for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'fold:devBypass' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
   const r = await run('fold:after-reload', state, 10);
