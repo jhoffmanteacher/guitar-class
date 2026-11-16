@@ -16,7 +16,9 @@ microphone and the browser. The `answerNote` inside J01.json and J02.json still 
 before he said. `key.json` was written again on 2026-11-16 from his words in `docs/strum-check/DETAILS.md` section
 20 (the file used on 2026-11-14 was not kept).
 
-The command (Node only, the site in a vm, no browser: about 10 s; `--diag`, `--sweep` and the rest are in the tool's header):
+The command (Node only, the site in a vm, no browser: about 26 s on the Windows machine, of which about 17 s is the check of the
+tool's own copy against the page, run first; `--no-self-check` leaves it out for repeated runs, about 8 s; `--diag`, `--sweep`
+and the rest are in the tool's header):
 
     node tools/mic-sim/strum-check-replay.mjs tools/mic-sim/strum-takes/J01.json tools/mic-sim/strum-takes/J02.json tools/mic-sim/strum-takes/J03.json --key=tools/mic-sim/strum-takes/key.json
 

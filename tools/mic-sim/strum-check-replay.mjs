@@ -2,8 +2,8 @@
    J01.. in `Claude outputs/takes-anon/`, local-takes-in.mjs). A sibling of replay-listen.mjs; measure-only, changes no site code.
 
      node tools/mic-sim/strum-check-replay.mjs <J01.json> [<J02.json> ...] [--key=<file>] [--diag] [--dot] [--sweep [--cands=<json>]
-                                               [--no-bench]] [--splice [--splice-offs=0,-40,40] [--splice-bars=1]] [--copy=<json>] [--shifts=J01:-117.5,..]
-                                               [--json=<file>]
+                                               [--no-bench]] [--splice [--splice-offs=0,-40,40] [--splice-bars=1]] [--copy=<json>] [--no-self-check]
+                                               [--shifts=J01:-117.5,..] [--json=<file>]
 
    THE REPLAY: the take's .wav goes back through the site's mic chain (replay-takes.mjs prepare) into the bench page (listen-site.mjs
    benchSite, strum-check-loop.mjs SC_VM: coachOpen on ca-52's real button, scStart, the count-in, scLoop with srHearStrum, scOnset, the
@@ -36,7 +36,8 @@
    review R5-1 fix to the wide search's test, is {"trigOut":null}; every site before review R6-1 (the wide search around the click grid,
    2026-11-16) adds "wideFrom":"grid".
    --copy=<json>: the settings the identity test gives the copy, for a tree with a candidate planted in coach-strumcheck.js (or an
-   older tree: --copy='{"outPen":null,"lock":0}' on a tree from before AD).
+   older tree: --copy='{"outPen":null,"lock":0}' on a tree from before AD). Before any replay the copy's numbers and grid are checked
+   against the page's (THE COPY'S NUMBERS AND ITS GRID, below; about 17 s); --no-self-check leaves that out for repeated runs.
    --splice: one of the take's own strums pasted into a rest (the block above `--gate` says how); caught / bar passed per candidate.
    The results of 2026-11-14 are in `Claude outputs/strum-coach/DETAILS.md` section 20. Not in checks.mjs. */
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -316,6 +317,13 @@ function checkCopy(P){
     ['SC_ANCHOR_STEP', 5], ['SC_ANCHOR_SPAN', 8], ['SC_ANCHOR_REST', -1.5], ['SC_ANCHOR_WIDE_RANGE', P.wide], ['SC_ANCHOR_WIDE_MIN', P.wideMin || 6],
     ['SC_ANCHOR_WIDE_SLACK', P.wideSlack == null ? 1.5 : P.wideSlack], ['SC_ANCHOR_WIDE_ACCEPT', P.wideAccept == null ? 1 : P.wideAccept],
     ['SC_ANCHOR_WIDE_TIGHT', P.wideTight == null ? 1e9 : P.wideTight]];
+  /* a constant the page does not have (a site from before it) cannot be matched by any --copy: say so (review R6-3) */
+  const missing = want.filter(([n]) => k[n] == null).map(([n]) => n);
+  if (missing.length){
+    log(`the copy's numbers: this page has no ${missing.join(', ')} (a site from before them): no --copy can stand in for a missing constant, so the copy cannot be checked here; run with --no-self-check to replay without the check`);
+    console.error("strum-check-replay: the page lacks constants the copy needs; --no-self-check skips this check");
+    process.exit(1);
+  }
   const bad = want.filter(([n, v]) => k[n] !== v).map(([n, v]) => `${n} is ${k[n]}, the copy ${v}`);
   if ((k.SC_ANCHOR_LOCK || 0) !== (P.lock || 0)) bad.push(`SC_ANCHOR_LOCK is ${k.SC_ANCHOR_LOCK}, the copy's lock ${P.lock || 0}`);
   if (P.lock && k.SC_ANCHOR_LOCK_MIN !== P.lockMin) bad.push(`SC_ANCHOR_LOCK_MIN is ${k.SC_ANCHOR_LOCK_MIN}, the copy's lockMin ${P.lockMin}`);
@@ -357,7 +365,9 @@ function checkCopy(P){
   }
   log(`the copy's numbers equal the page's (${want.length + 1} constants); its grid IDENTICAL to the real scHearStrum on ${lists.length} made-up rounds (${n} onsets)`);
 }
-checkCopy(COPY_P);
+/* --no-self-check: leave the check above out (about 17 s of a run; review R6-3), for repeated runs on a tree already checked */
+if (flag('no-self-check')) log("the copy's numbers and grid: NOT checked (--no-self-check)");
+else checkCopy(COPY_P);
 for (const tk of takes){
   const raw = await replay(tk, null, {});
   const ar = agree(tk, raw);
