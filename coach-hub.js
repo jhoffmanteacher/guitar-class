@@ -378,16 +378,19 @@ function gamesStopMic(keepPanel){
      Until then no game can be running, so there is nothing more to stop; without this line the Tuner or Record
      pressed in that gap called ccStop() before its file had arrived (review R1-1, 2026-11-11). */
   if (typeof bcStop !== 'function') return;
+  /* DELIBERATE BRIDGE, remove after 2026-12-01 (todo.md lists it): the three stops of the 2026-11-16 parts are each
+     guarded, because a page opened before that split loads those parts late (the bridge line at the end of
+     coach-chords.js and coach-runner.js), so for a moment bcStop exists without them. Every other stop still runs. */
   fretStop();
   ccStop();
-  cbStop();
+  if (typeof cbStop === 'function') cbStop();
   shStop();
   rrStop();
   srStop();
   fzStop();
   rnStop();
-  nrStop();
-  cdStop();
+  if (typeof nrStop === 'function') nrStop();
+  if (typeof cdStop === 'function') cdStop();
   ntrStop();
   psStop();
   psgStop();
@@ -685,7 +688,10 @@ function gamesRenderHub(p){
         parseInt(sessionStorage.getItem(cbBestKey(d.id, 'spot')), 10) || 0);
     }
   } catch(e){}
-  const cbChip = gamesBestChip(cbSavedBest(saved), cbBest);
+  /* DELIBERATE BRIDGE, remove after 2026-12-01 (todo.md lists it): this chip and the Note Runner, Finger Gym and
+     Chord Detective chips below are guarded for a page opened before the 2026-11-16 split, which loads their parts
+     late (Finger Gym reads NR_PASS from coach-noterunner.js). */
+  const cbChip = gamesBestChip(typeof cbSavedBest === 'function' ? cbSavedBest(saved) : 0, cbBest);
   let fzBest = 0;
   try {
     for (const d of FZ_DECKS){
@@ -736,20 +742,20 @@ function gamesRenderHub(p){
   }
   const rnChip = gamesBestChip(rnAllTime, rnBest, '%');
   let nrSess = 0;
-  for (let i = 0; i < NR_LEVELS.length; i++) nrSess = Math.max(nrSess, nrBestSession(i));
+  if (typeof NR_LEVELS !== 'undefined') for (let i = 0; i < NR_LEVELS.length; i++) nrSess = Math.max(nrSess, nrBestSession(i));
   let nrAllTime = 0;
   if (saved.nr && saved.nr.levels){
     for (const k in saved.nr.levels) nrAllTime = Math.max(nrAllTime, saved.nr.levels[k] || 0);
   }
   const nrChip = gamesBestChip(nrAllTime, nrSess, '%');
-  const fgChip = gamesBestChip(fgTopBpm(true), fgTopBpm(false), ' BPM');
+  const fgChip = typeof NR_PASS !== 'undefined' ? gamesBestChip(fgTopBpm(true), fgTopBpm(false), ' BPM') : '';
   let cdBest = 0;
   try {
     for (const d of CD_DECKS){
       cdBest = Math.max(cdBest, parseInt(sessionStorage.getItem(cdBestKey(d.id)), 10) || 0);
     }
   } catch(e){}
-  const cdChip = gamesBestChip(cdSavedBest(saved), cdBest);
+  const cdChip = gamesBestChip(typeof cdSavedBest === 'function' ? cdSavedBest(saved) : 0, cdBest);
   let ntrBest = 0;
   try { ntrBest = parseInt(sessionStorage.getItem('ntrBest'), 10) || 0; } catch(e){}
   const ntrChip = gamesBestChip(saved.ntr && saved.ntr.best, ntrBest);

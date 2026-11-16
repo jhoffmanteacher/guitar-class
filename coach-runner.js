@@ -1092,3 +1092,7 @@ function rnGoReady(){
   rnRenderReady();
 }
 
+/* DELIBERATE BRIDGE, remove after 2026-12-01 (todo.md lists it): a page opened before the 2026-11-16
+   split still holds the old part list in app/boot.js, which never names coach-noterunner.js, so coach-runner.js
+   asks for it here. A page with the new list skips this line. */
+if (typeof COACH_JS_PARTS !== 'undefined' && COACH_JS_PARTS.indexOf('coach-noterunner.js') < 0 && typeof loadScriptOnce === 'function') loadScriptOnce('coach-noterunner.js').catch(() => {});

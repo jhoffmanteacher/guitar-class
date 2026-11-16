@@ -99,6 +99,15 @@ before and after with `--compare` identical, `node tools/slow-load.mjs`, the ful
 `coach-*` also the three mic-sim commands in `CLAUDE.md`. A split touches load order, so it is Always-Reviewed.
 Check `tools/mic-sim/` and `checks.mjs` for text they pin in the section being moved before moving it.
 
+**Remove the 2026-11-16 split bridge on or after 2026-12-01.** A page opened before the push of the two coach
+splits keeps the old 8-name `COACH_JS_PARTS` and never asks for `coach-chordcards.js` or `coach-noterunner.js`
+(review R1-1). The bridge: the 4-line block at the end of `coach-chords.js` and of `coach-runner.js` (the old page
+loads the new part itself), and `typeof` guards for the moment before it arrives: `cbStop` / `nrStop` / `cdStop` in
+`gamesStopMic` and the Chord Blitz, Note Runner, Finger Gym and Chord Detective chips in `gamesRenderHub`
+(`coach-hub.js`), `typeof nr` in `gamesHideStop` and `coachReleaseMicIfIdle` (`coach-core.js`). `grep -n "DELIBERATE
+BRIDGE" coach-*.js` finds the comment over each (5). Remove them all in one commit, put each guarded line back as it
+was before (`git show d6c3e16:<file>`), and keep the `checks.mjs` pin on the part order.
+
 ## Follow-ups from the 2026-11-11 cut (none urgent)
 
 - [x] **DONE 2026-11-12** (`tools/pm-e2e.mjs` now expects the folded header on an open card; see its commit). **`tools/pm-e2e.mjs` is out of date, on the old site too.** It expects the practice-minutes strip to show while

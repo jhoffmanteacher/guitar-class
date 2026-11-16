@@ -743,7 +743,7 @@ function coachReleaseMicIfIdle(){
     const active = (coach && (coach.phase === 'countin' || coach.phase === 'listening')) ||
                    (typeof scMicActive === 'function' && scMicActive()) ||   // the strum-pattern check (coach-strumcheck.js)
                    fretRunning || (cc && cc.micOn) || (sr && sr.micOn) || (rn && rn.micOn) ||
-                   (nr && nr.micOn) || psgRunning ||
+                   (typeof nr !== 'undefined' && nr && nr.micOn) || psgRunning ||
                    (typeof ncMicActive === 'function' && ncMicActive());   // Note Call (app.js)
     if (!active) coachMicOff();
   }, 0);
@@ -2545,8 +2545,10 @@ function gamesHideStop(){
   /* Same gap as in gamesStopMic(): a tab hidden while the later arcade files are still loading. The game state
      read below (fretRunning, cc…) is declared in those files; no game can be running yet (review R1-2). */
   if (typeof bcStop !== 'function') return;
+  /* DELIBERATE BRIDGE, remove after 2026-12-01 (todo.md lists it): `typeof nr` here and in coachReleaseMicIfIdle()
+     is for a page opened before the 2026-11-16 split, which loads coach-noterunner.js after coach-more.js. */
   const micHeld = fretRunning || psgRunning || (cc && cc.micOn) || (sr && sr.micOn) ||
-                  (rn && rn.micOn) || (nr && nr.micOn) || window.coachMicLive;
+                  (rn && rn.micOn) || (typeof nr !== 'undefined' && nr && nr.micOn) || window.coachMicLive;
   if (micHeld) gamesStopMic();
 }
 
