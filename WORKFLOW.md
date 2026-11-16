@@ -313,7 +313,19 @@ bullet under the job), the Mac fixes and pushes. All three branches are on GitHu
     - **The 390 decision:** the 390 Manage check is a kept guarantee (it passed before `b39299fb`); the Manage tabs
       did not break it; the same rule that fixed 1366 fixed it; no tool change, no new breakpoint.
     - Also run: `manage-layout-smoke.mjs` 40 passed, 0 failed. A teacher sees this, not a student: no CHANGELOG.
-  - **W3 status (Windows, 2026-11-16 evening): built, reviewed twice, NOT on main yet.** The detector is check 1ep
+  - **W3 DONE, shipped, Reviewed (Windows, 2026-11-16 evening): check 1ep is on main.** Round 2's nine MINORs are
+    fixed, each with the reviewer's planted fault turning it red: of that reviewer's 26 faults 24 are red with a
+    specific line and 2 are stated limits (which chords a random loop re-draws; a step that also wipes saved bests
+    or writes localStorage); of round 1's 31, all as before. It now runs every game's REAL start with only the mic
+    stubbed and reads the tempo the game then plays (so a cap applied after the mic opens is seen, in Change Up and
+    Strum Radar too); every advice line must match a listed key (a new sentence fails with "add its key to
+    ADVICE.up / down / top / bottom / same"); every step-looking `<button>` in the code must call a swept Again, a
+    setup tempo control or the done-row stepper, or be one of four named exceptions (`OTHER_STEPPERS`:
+    `coachNudgeBpm`, `ccLiveBpm`, `ccNudgeNext`, `downloadRec`, each with its reason in the code; the lead has not
+    judged those four: the Mac or the Friday check should). One verdict hash over 5 orders of running. Cost: 1ep
+    alone takes 2.2 to 2.5 s (async now). Before-the-fix counts with the final rules: 754 and 726 red lines.
+    The text below was written while it was in review:
+  - **W3 status as of the second review (kept for the record).** The detector is check 1ep
     (`checkClampedSteps()`, branch `win/w3-2026-11-16`, local to Windows; `tools/checks.mjs` only, no game file).
     It draws the real done screen of Change Up, Power Chord Switch (pair and song switch), Strum Hero, Strum Radar
     and Riff Runner at every tempo, in every outcome, EN and ES (2,272 screens, 5,328 buttons), presses each Again
