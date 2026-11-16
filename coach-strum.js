@@ -425,10 +425,15 @@ function shRenderDone(){
   const stars = acc >= 90 ? 3 : acc >= 70 ? 2 : acc >= 50 ? 1 : 0;
   const starHtml = '&#x2605;'.repeat(stars) + '&#x2606;'.repeat(3 - stars);
 
+  /* The step up / down: 10, or what is left to the pattern's top / lowest tempo when that is less (5 at 115 and at 55, since the
+     setup moves in 5s; 0 at the ends). shAgain(±10) clamps, so the advice line and the two step buttons name this number, and a
+     step the tempo cannot take has no button (Change Up's rule, Jonathan 2026-11-09; Friday check 2026-11-16). */
+  const pat = SH_PATTERNS[s.patIdx];
+  const up = Math.min(10, pat.maxBpm - s.bpm), down = Math.min(10, s.bpm - pat.minBpm);
   let verdict, advice;
   if (stars === 3){
     verdict = t('games.sh.verdict.three', {acc});
-    advice = t('games.sh.advice.three');
+    advice = up > 0 ? t('games.sh.advice.three', {n: up}) : t('games.pw.advice.top');
   } else if (stars === 2){
     verdict = t('games.sh.verdict.two', {acc});
     advice = t('games.sh.advice.two');
@@ -437,7 +442,7 @@ function shRenderDone(){
     advice = t('games.sh.advice.one');
   } else {
     verdict = t('games.sh.verdict.zero', {acc});
-    advice = t('games.sh.advice.zero');
+    advice = down > 0 ? t('games.sh.advice.zero', {n: down}) : t('games.cc.advice.tryAgainSteady');
   }
 
   /* Early/late bias — median signed error over the graded taps. Only
@@ -459,7 +464,8 @@ function shRenderDone(){
     bestLine = `<div class="coach-tip sh-center">${t('games.common.bestTodayValue', {value: s.prevBest})}</div>`;
   }
 
-  const rec = stars >= 3 ? 'up' : stars >= 1 ? 'same' : 'down';
+  let rec = stars >= 3 ? 'up' : stars >= 1 ? 'same' : 'down';
+  if ((rec === 'up' && !(up > 0)) || (rec === 'down' && !(down > 0))) rec = 'same';
   body.innerHTML =
     `<div class="coach-report">
        <div class="sh-done-score">${s.score}</div>
@@ -476,9 +482,9 @@ function shRenderDone(){
        ${bestLine}
        <div class="coach-crit-note">${escHtml(advice)}</div>
        <div class="coach-actions">
-         <button type="button" class="${rec === 'down' ? 'coach-start' : 'tp-btn'}" onclick="shAgain(-10)">&#x2B07; &minus;10 BPM</button>
+         ${down > 0 ? `<button type="button" class="${rec === 'down' ? 'coach-start' : 'tp-btn'}" onclick="shAgain(-10)">&#x2B07; ${t('games.common.bpmDown10', {n: down})}</button>` : ''}
          <button type="button" class="${rec === 'same' ? 'coach-start' : 'tp-btn'}" onclick="shAgain(0)">&#x21BB; ${t('games.sh.againAtBpm', {bpm: s.bpm})}</button>
-         <button type="button" class="${rec === 'up' ? 'coach-start' : 'tp-btn'}" onclick="shAgain(10)">&#x2B06; +10 BPM</button>
+         ${up > 0 ? `<button type="button" class="${rec === 'up' ? 'coach-start' : 'tp-btn'}" onclick="shAgain(10)">&#x2B06; ${t('games.common.bpmUp10', {n: up})}</button>` : ''}
        </div>
        <button type="button" class="tp-btn" onclick="shSetup()">${t('games.sh.changePatternButton')}</button>
      </div>`;
@@ -1385,10 +1391,13 @@ function srRenderDone(){
   const stars = s.acc >= 85 ? 3 : s.acc >= 65 ? 2 : s.acc >= 40 ? 1 : 0;
   const starHtml = '&#x2605;'.repeat(stars) + '&#x2606;'.repeat(3 - stars);
 
+  /* The step up / down, as in Strum Hero's done screen (shRenderDone): 10, or what is left to SR_BPM_MAX / SR_BPM_MIN when that is
+     less; a step the tempo cannot take has no button and no line naming it. */
+  const up = Math.min(10, SR_BPM_MAX - s.bpm), down = Math.min(10, s.bpm - SR_BPM_MIN);
   let verdict, advice;
   if (stars === 3){
     verdict = t('games.radar.verdict.three', {acc: s.acc});
-    advice = t('games.radar.advice.three');
+    advice = up > 0 ? t('games.radar.advice.three', {n: up}) : t('games.radar.advice.threeTop');
   } else if (stars === 2){
     verdict = t('games.radar.verdict.two', {acc: s.acc});
     advice = t('games.radar.advice.two');
@@ -1397,7 +1406,7 @@ function srRenderDone(){
     advice = t('games.radar.advice.one');
   } else {
     verdict = t('games.radar.verdict.zero', {acc: s.acc});
-    advice = t('games.radar.advice.zero');
+    advice = down > 0 ? t('games.radar.advice.zero', {n: down}) : t('games.radar.advice.zeroFloor');
   }
 
   /* Early/late bias — median signed error over the landed strums. Only
@@ -1419,7 +1428,8 @@ function srRenderDone(){
     bestLine = `<div class="coach-tip sr-center">${t('games.common.bestTodayValue', {value: s.prevBest.acc + '%' + (s.prevBest.bpm ? ' (' + t('games.common.atBpm', {bpm: s.prevBest.bpm}) + ')' : '')})}</div>`;
   }
 
-  const rec = stars >= 3 ? 'up' : stars >= 1 ? 'same' : 'down';
+  let rec = stars >= 3 ? 'up' : stars >= 1 ? 'same' : 'down';
+  if ((rec === 'up' && !(up > 0)) || (rec === 'down' && !(down > 0))) rec = 'same';
   body.innerHTML =
     `<div class="coach-report">
        <div class="sh-stars">${starHtml}</div>
@@ -1433,9 +1443,9 @@ function srRenderDone(){
        ${bestLine}
        <div class="coach-crit-note">${escHtml(advice)}</div>
        <div class="coach-actions">
-         <button type="button" class="${rec === 'down' ? 'coach-start' : 'tp-btn'}" onclick="srAgain(-10)">&#x2B07; &minus;10 BPM</button>
+         ${down > 0 ? `<button type="button" class="${rec === 'down' ? 'coach-start' : 'tp-btn'}" onclick="srAgain(-10)">&#x2B07; ${t('games.common.bpmDown10', {n: down})}</button>` : ''}
          <button type="button" class="${rec === 'same' ? 'coach-start' : 'tp-btn'}" onclick="srAgain(0)">&#x21BB; ${t('games.radar.againAtBpm', {bpm: s.bpm})}</button>
-         <button type="button" class="${rec === 'up' ? 'coach-start' : 'tp-btn'}" onclick="srAgain(10)">&#x2B06; +10 BPM</button>
+         ${up > 0 ? `<button type="button" class="${rec === 'up' ? 'coach-start' : 'tp-btn'}" onclick="srAgain(10)">&#x2B06; ${t('games.common.bpmUp10', {n: up})}</button>` : ''}
        </div>
        <button type="button" class="tp-btn" onclick="srSetup()">${t('games.radar.changePatternButton')}</button>
      </div>`;
