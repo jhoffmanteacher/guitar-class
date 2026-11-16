@@ -119,6 +119,9 @@ function sbBeatMounted(){
       if(b) sbBeatTrack(lv, b);
       sbBtFor(id).drift = b ? sbDrift(lv.E, b, d.audio.durationSec) : null;
       sbBtFor(id).need = b ? sbPinsNeeded(lv.E, b, d.audio.durationSec) : null;
+      /* A beat whose drift windows are not measured on this copy (a new copy was levelled, review R1-6): measured
+         and saved now, so Publish knows them. */
+      if(b && (!Number.isFinite(b.driftOff) || (b.driftFor && b.driftFor !== d.audio.sha256))){ sbBeatSet(d, Object.assign({}, b), null); return; }
       teacherSbPaint();
     }, 30);
     return;
@@ -315,6 +318,7 @@ function sbBeatSet(d, beat, note, now){
   beat.bpm = Math.round(sbPinBpm(beat) * 10000) / 10000;
   bt.drift = sbDrift(lv.E, beat, d.audio.durationSec);
   beat.driftOff = bt.drift.filter(w => w.sure && !w.pinned && Math.abs(w.ms) > SB_DRIFT_MS).length;
+  beat.driftFor = d.audio.sha256;            // review R1-6: the copy the windows were measured on
   bt.need = sbPinsNeeded(lv.E, beat, d.audio.durationSec);
   beat.pinsNeeded = bt.need ? bt.need.pins : null;
   d.beat = beat;

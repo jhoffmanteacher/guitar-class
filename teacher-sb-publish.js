@@ -193,7 +193,7 @@ function sbPvWatch(on){
 
 /* ── Step 6: Preview ── */
 function sbPreviewPaneHtml(d){
-  const why = d ? sbSongWhy(d, sbSel) : ['No draft.'];
+  const why = !d ? ['No draft.'] : d.audio && !sbCopyCurrent(d) ? ['A new mp3 was picked: level it at step 2 first.'] : sbSongWhy(d, sbSel);
   if(why.length) return `<div class="sb-box"><p class="sb-note" style="margin:0">Not ready for a preview: ${escHtml(why[0])}</p></div>`;
   const doc = sbDocOf(d);
   const lv = sbMem.id === sbSel && sbMem.level && sbMem.level.sha256 === d.audio.sha256;
@@ -217,7 +217,7 @@ function sbPreviewMounted(root){
     return;
   }
   const doc = sbDocOf(d), lv = sbMem.level;
-  const key = sbSel + '|' + sbHash(sbCanon(doc));
+  const key = sbPvKey(sbSel, doc);
   if(sbPv && sbPv.key === key && sbPv.node){ slot.replaceWith(sbPv.node); return; }
   sbPreviewStop(true);
   if(typeof caCardBodyHtml !== 'function' || !Array.isArray(window.CLASS_ACTIVITIES) || typeof SNIPPET_TRACKS === 'undefined') return;   // no card renderer (a Node tool)
@@ -235,6 +235,8 @@ function sbPreviewMounted(root){
   slot.replaceWith(host);
   sbPv = { id: sbSel, key, sig: sbListenSig(doc), node: host, act, run: null, L: null };
 }
+/* The card on screen is made again when the song or the page's language changes (review R1-8: Español). */
+function sbPvKey(id, doc){ return id + '|' + (typeof getLang === 'function' ? getLang() : '') + '|' + sbHash(sbCanon(doc)); }
 /* A press in the card: watch it for the listens; the Full / Power switch is redrawn here, in this card only. */
 function sbPvCapture(e){
   const pv = sbPv;
@@ -272,6 +274,8 @@ function sbPreviewStop(drop){
 function sbPublishWhy(d, id){
   if(!d) return ['There is no draft.'];
   const why = [], pitch = sbPitchBlocked(d) || !!(d.audio && !(Math.abs(Number(d.audio.centsOff)) <= BS_MAX_CENTS));
+  /* Review R1-2: a new mp3 picked after levelling: the stored copy is the OLD record's until Volume runs again. */
+  if(d.audio && !sbCopyCurrent(d)) why.push('A new mp3 was picked: level it at step 2 first.');
   if(pitch) why.push(`The record is ${sbCentsLine(d.pitch ? d.pitch.cents : d.audio.centsOff)}: a song more than 10 cents off A = 440 cannot be published. Send the mp3 to Claude.`);
   const songWhy = sbSongWhy(d, id);
   songWhy.forEach(w => why.push(w));
@@ -285,7 +289,8 @@ function sbPublishWhy(d, id){
     if(Array.isArray(window.CLASS_ACTIVITIES) && window.CLASS_ACTIVITIES.some(x => x && x.id === id && !(typeof bsApplied !== 'undefined' && bsApplied.has(id)))) why.push(`The id ${id} is already a song in the site's code.`);
     if(sbPublished && !sbPublished.has(id) && sbPublished.size >= BS_MAX_SONGS) why.push(`The Songs page list already holds ${BS_MAX_SONGS} built songs, the most it can.`);
   }
-  if(!d.beat || !Number.isFinite(Number(d.beat.driftOff))) { if(d.beat) why.push('Open the Beat step once, so the drift check runs.'); }
+  if(!d.beat || !Number.isFinite(d.beat.driftOff)) { if(d.beat) why.push('Open the Beat step once, so the drift check runs.'); }
+  else if(d.beat.driftFor && d.audio && d.beat.driftFor !== d.audio.sha256) why.push('The drift check was made on another levelled copy: open the Beat step once, so it runs on this one.');
   else if(d.beat.driftOff > 0) why.push(`${d.beat.driftOff} place${d.beat.driftOff === 1 ? '' : 's'} in the song drift${d.beat.driftOff === 1 ? 's' : ''} more than 30 ms from the grid: pin ${d.beat.driftOff === 1 ? 'it' : 'each one'} at the Beat step.`);
   if(doc && !songWhy.length && !sbListensOf(d, doc).all) why.push('Listen at the Preview step: the first section, a middle one and the last, each to its end.');
   if(d.dirty) why.push('The title or artist has a change that is not saved: go to step 1 and press Next.');
@@ -303,7 +308,7 @@ function sbLevelLine(song){
   return v + '; ' + (r ? `sections ${bsSectionLabel(secs[r.from], 'en')} to ${bsSectionLabel(secs[r.to], 'en')}` : 'the whole song') + ', looping at its end';
 }
 function sbPublishPaneHtml(d){
-  if(!d || !sbStepReady(d, 7)) return `<div class="sb-box"><p class="sb-note" style="margin:0">Not ready yet: ${escHtml((d && sbSongWhy(d, sbSel)[0]) || 'finish the steps before it.')}</p></div>`;
+  if(!d || !sbStepReady(d, 7)) return `<div class="sb-box"><p class="sb-note" style="margin:0">Not ready yet: ${escHtml((d && d.audio && !sbCopyCurrent(d) ? 'A new mp3 was picked: level it at step 2 first.' : d && sbSongWhy(d, sbSel)[0]) || 'finish the steps before it.')}</p></div>`;
   const doc = sbDocOf(d), why = sbPublishWhy(d, sbSel), p = sbPublished && sbPublished.get(sbSel);
   const ok = s => `<span class="sb-ok">✓</span>${s ? ' ' + s : ''}`, bad = s => `<span class="sb-bad">✗</span> ${s}`;
   const v = d.volume || {}, a = doc.audio, b = d.beat, s = doc.song, L = sbListensOf(d, doc);
@@ -331,7 +336,7 @@ function sbPublishPaneHtml(d){
     </div><div>
       <div class="sb-h">Where does it go?</div>
       <div class="sb-opt on sb-where" role="note"><span class="sb-radio"></span><span><span class="sb-opt-t">Songs page · More Play Along songs</span><span class="sb-opt-d">Every student can open it: no date, no Mark complete, never required.</span></span></div>
-      <p class="sb-hint">${p ? `Students have edit ${escHtml(String(p.ver))} now. Publishing the changes replaces it` : 'Students see it'} at their next sign-in, or when they come back to the site's tab (it checks at most every 15 minutes).</p>
+      <p class="sb-hint">${p ? `Students have the ${escHtml(teacherBsVerText(p.ver))} now. Publishing the changes replaces it` : 'Students see it'} at their next sign-in, or when they come back to the site's tab (it checks at most every 15 minutes).</p>
       <div class="sb-row"><button type="button" class="sb-btn small" data-sb-act="export" data-sb-v="draft"${sbBusy ? ' disabled' : ''}>Export the song file and its mp3</button></div>
       <p class="sb-hint">${escHtml(SB_EXPORT_HINT)}</p>
     </div></div>`;
@@ -343,7 +348,7 @@ async function sbPublish(){
   const why = sbPublishWhy(d, id);
   if(why.length){ sbNote = 'Not published: ' + why[0]; teacherSbPaint(); return; }
   const doc = sbDocOf(d), was = sbPublished && sbPublished.get(id);
-  if(!confirm(was ? `Publish your changes to "${doc.title}"? Students get the new version at their next sign-in or tab return; until then they keep edit ${was.ver}.`
+  if(!confirm(was ? `Publish your changes to "${doc.title}"? Students get the new version at their next sign-in or tab return. Students who have the song open now keep the old version, or lose its sound, until they reload.`
     : `Publish "${doc.title}"? It goes on the Songs page under More Play Along songs for every student, at their next sign-in or tab return.`)) return;
   const gen = sbViewGen;
   sbStopSounds();
@@ -354,23 +359,22 @@ async function sbPublish(){
     const hs = await db.collection('songFiles').doc(doc.audio.id).get();
     if(!teacherSfHeadMatches(hs.exists ? hs.data() || {} : null, { bytes: doc.audio.bytes, sha256: doc.audio.sha256 })) throw { why: 'the levelled copy in the database is missing, unfinished or not the one this draft names. Level it again at step 2' };
     const ref = db.collection('builtSongsMeta').doc('list');
-    const ms = await ref.get();
-    const now = bsListOf(ms.exists ? ms.data() : null);
-    if(!now[id] && Object.keys(now).length >= BS_MAX_SONGS) throw { why: `the Songs page list already holds ${BS_MAX_SONGS} built songs, the most it can` };
     if(sbStopped(gen)) throw 'stop';
     step = 'song';
     sbProgress = 'Saving the song…'; teacherSbPaint();
-    await db.collection('builtSongs').doc(id).set(Object.assign({}, doc, { savedAt: firebase.firestore.FieldValue.serverTimestamp() }));
-    step = 'list';
-    if(sbStopped(gen)) throw 'stop';
+    /* The song and the list in ONE transaction (review R1-1, 2026-11-16): both land or neither does, so an edit is
+       never half published (a new song doc under the old edit number, which a Chromebook holding that number would
+       never fetch). Firestore checks each write against its own rule, as two separate writes would be. */
     let ver = 0;
     await db.runTransaction(async tx => {
       const snap = await tx.get(ref);
       const songs = bsListOf(snap.exists ? snap.data() : null);
-      /* Counts on from the last number this song had, even after an Unpublish (pubVer, in the draft): a Chromebook
-         keeps a song by its edit number (app/builtsongs.js), so a number used again would show it the old song. */
-      ver = Math.max(songs[id] || 0, Number(d.pubVer) || 0) + 1;
+      if(!songs[id] && Object.keys(songs).length >= BS_MAX_SONGS) throw { why: `the Songs page list already holds ${BS_MAX_SONGS} built songs, the most it can` };
+      /* Never a number used before (teacherBsNextVer: from the clock, and past the list's and the draft's last one): a
+         Chromebook keeps a song by its edit number (app/builtsongs.js), so a number used again would show it the old song. */
+      ver = teacherBsNextVer(Math.max(songs[id] || 0, Number(d.pubVer) || 0));
       songs[id] = ver;
+      tx.set(db.collection('builtSongs').doc(id), Object.assign({}, doc, { savedAt: firebase.firestore.FieldValue.serverTimestamp() }));
       tx.set(ref, { songs, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
     });
     step = 'done';
@@ -378,11 +382,10 @@ async function sbPublish(){
     sbPublished.set(id, { title: doc.title, artist: doc.artist, ver, audioId: doc.audio.id, doc: JSON.parse(JSON.stringify(doc)), at: Date.now() });
     sbEditing.delete(id);
     if(was && was.doc && was.doc.audio && was.doc.audio.id !== doc.audio.id) await sbDeleteAudio(was.doc.audio.id, null);
-    sbNote = `Published "${doc.title}" (edit ${ver}). It is on the Songs page under More Play Along songs; students see it at their next sign-in or tab return.`;
+    sbNote = `Published "${doc.title}" (${teacherBsVerText(ver)}). It is on the Songs page under More Play Along songs; students see it at their next sign-in or tab return.`;
     if(typeof builtSongsSync === 'function') builtSongsSync();
   }catch(e){
-    const where = step === 'song' ? ' The song was not saved; students have what they had before.'
-      : step === 'list' ? ' The song is saved, but the Songs page list was not updated, so students do not get it yet. Press Publish again.' : ' Nothing was written.';
+    const where = step === 'song' ? ' Nothing was written: students have what they had before. Press Publish again.' : ' Nothing was written.';
     if(e === 'stop') sbNote = 'Stopped: you left the Song builder.' + where;
     else if(e && e.why) sbNote = 'Not published: ' + e.why + '.' + (step === 'check' ? '' : where);
     else sbNote = 'Not published: ' + (typeof teacherSfWhy === 'function' ? teacherSfWhy(e) : String((e && (e.code || e.message)) || e)) + '.' + where;
@@ -411,7 +414,7 @@ async function sbUnpublish(){
   const d = sbDraft() || (p && p.doc && !builtSongCheck(id, p.doc).length ? sbDraftFromDoc(id, p) : null);
   if(sbBusy || !p) return;
   if(!d){ sbNote = 'Not unpublished: this song fails today\'s checks, so no draft can be made of it. Delete takes it off, or send its file to Claude.'; teacherSbPaint(); return; }
-  if(!confirm(`Unpublish "${p.title}"? It comes off the Songs page for every student (at their next sign-in or tab return). ${sbDraft() ? 'The draft and its recording stay here' : 'It stays here as a draft, made from the published song, with its recording'}, so you can publish it again.`)) return;
+  if(!confirm(`Unpublish "${p.title}"? It comes off the Songs page for every student (at their next sign-in or tab return). Students who have the song open now keep it, or lose its sound, until they reload. ${sbDraft() ? 'The draft and its recording stay here' : 'It stays here as a draft, made from the published song, with its recording'}, so you can publish it again.`)) return;
   const gen = sbViewGen;
   sbStopSounds();
   sbBusy = 'unpublish'; sbOpGen++; sbNote = ''; sbProgress = 'Taking it off the Songs page…'; teacherSbPaint();
@@ -551,7 +554,7 @@ async function sbExport(which){
     if(sbStopped(gen)) throw 'stop';
     teacherMicSaveFile(base + '.json', new Blob([JSON.stringify(file, null, 1)], { type: 'application/json' }));
     teacherMicSaveFile(base + '.mp3', new Blob([bytes], { type: 'audio/mpeg' }));
-    sbNote = `Saved ${base}.json and ${base}.mp3 (${which === 'pub' ? `the published edit ${p.ver}` : 'this draft'}): the pair Manage → Built songs imports as they are, and Claude's tools/built-song-check.mjs checks.`;
+    sbNote = `Saved ${base}.json and ${base}.mp3 (${which === 'pub' ? `the published ${teacherBsVerText(p.ver)}` : 'this draft'}): the pair Manage → Built songs imports as they are, and Claude's tools/built-song-check.mjs checks.`;
   }catch(e){
     const c = e && e.code;
     sbNote = e === 'stop' ? 'Stopped: you left the Song builder. Nothing was saved.'
@@ -586,9 +589,9 @@ function sbPublishedHtml(id){
     ? `<p class="sb-note">Edit opens the steps again, on the step you pick; students keep this song until you publish the change. Unpublish takes it off students' pages and keeps your work. Delete removes the song, the draft and the recording.</p>`
     : canDraft ? `<p class="sb-note">This song came in through Manage → Built songs (Import), so it has no draft yet. Edit or Unpublish first makes one from the published song: its sections, bars, lyrics, chord shapes, level and beat come back as they are. What cannot come back: the chart's original text, the taps, the loudness numbers and the original mp3 (pick that at step 1 only to level the song again). Students keep this song until you publish a change.</p>`
     : `<p class="sb-note">This song came in through Manage → Built songs (Import) and fails today's checks, so the builder cannot open it: send its file to Claude, or Delete it. Hidden in the Songs view takes it off students' pages for now.</p>`;
-  return `<div class="ta-dhead"><div class="ta-meta">Song builder · Published${when ? ' ' + escHtml(when) : ''} · edit ${escHtml(String(p.ver))} · on the Songs page</div><div class="ta-title-row"><h2 class="ta-title">${escHtml(p.title)} <span class="ta-title-id">${escHtml(p.artist)}</span></h2><div class="ta-actions">${acts}</div></div></div>`
+  return `<div class="ta-dhead"><div class="ta-meta">Song builder · Published · ${escHtml(teacherBsVerText(p.ver))} · on the Songs page</div><div class="ta-title-row"><h2 class="ta-title">${escHtml(p.title)} <span class="ta-title-id">${escHtml(p.artist)}</span></h2><div class="ta-actions">${acts}</div></div></div>`
     + sbStatusHtml()
-    + (changed ? `<div class="sb-flag"><span class="fi">!</span><div class="sb-flag-body"><b>The draft has changes that are not published.</b> Students still get edit ${escHtml(String(p.ver))}. <button type="button" class="sb-linkbtn" data-sb-act="edit"${off}>Carry on editing</button></div></div>` : '')
+    + (changed ? `<div class="sb-flag"><span class="fi">!</span><div class="sb-flag-body"><b>The draft has changes that are not published.</b> Students still get the ${escHtml(teacherBsVerText(p.ver))}. <button type="button" class="sb-linkbtn" data-sb-act="edit"${off}>Carry on editing</button></div></div>` : '')
     + body
     + `<div class="sb-h sb-change-h">Change it</div>${canDraft ? sbEditChoiceHtml(off) : ''}<div class="sb-row">${acts}<button type="button" class="tg-seg-btn ta-act-btn" data-sb-act="export" data-sb-v="pub"${off} title="${escAttr(SB_EXPORT_HINT)}">Export the song file and its mp3</button></div>${change}<p class="sb-hint">Export: ${escHtml(SB_EXPORT_HINT)}</p>`;
 }

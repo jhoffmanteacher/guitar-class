@@ -217,7 +217,16 @@ function makeDb(){
   const db = { collection: n => collRef(n),
     batch(){ const ops = []; return { set: (r, d, o) => ops.push(['set', r.path, d, o]), update: (r, d) => ops.push(['set', r.path, d, { merge: true }]), delete: r => ops.push(['delete', r.path]),
       async commit(){ await tick(); for(const o of ops) if(o[0] !== 'delete' || S.has(o[1])) apply(o[0], o[1], o[2], o[3]); } }; },
-    runTransaction: async fn => fn({ get: r => r.get(), set: (r, d, o) => r.set(d, o), update: (r, d) => r.set(d, { merge: true }) }) };
+    /* Atomic, as Firestore's: the writes wait until fn resolves, and one refused write applies none of them. */
+    runTransaction: async fn => {
+      const ops = [];
+      const out = await fn({ get: r => r.get(), set: (r, d, o) => { ops.push([r.path, d, o]); }, update: (r, d) => { ops.push([r.path, d, { merge: true }]); } });
+      await tick();
+      const bad = ops.find(([p]) => st.failWrite && st.failWrite(p));
+      if(bad){ const e = new Error('unavailable'); e.code = 'unavailable'; throw e; }
+      ops.forEach(([p, d, o]) => apply('set', p, d, o));
+      return out;
+    } };
   return { S, st, db };
 }
 
@@ -279,6 +288,9 @@ const LEVELLED = new Map([['a', mp3Of(1900000, 11)], ['b', mp3Of(1950000, 13)], 
 DUR.set(sha(LEVELLED.get('a')), 24); DUR.set(sha(LEVELLED.get('b')), 24.02); DUR.set(sha(LEVELLED.get('c')), 15);
 
 /* ── the cases ── */
+/* An edit number the console just made (teacherBsNextVer): from its clock, and past `prev`. */
+const T0_2026 = Date.UTC(2026, 0, 1);
+const freshVer = (v, prev) => Number.isInteger(v) && v > (prev || 0) && v >= Math.floor((Date.now() - T0_2026) / 1000) - 600 && v <= 1e9;
 async function runCases(consoleSrc){
   const out = [];
   const check = (name, ok, detail) => out.push({ name, ok: !!ok, detail: detail == null ? '' : String(detail) });
@@ -514,6 +526,7 @@ async function runCases(consoleSrc){
   await pdfCases(consoleSrc, check);
   await publishCases(consoleSrc, check);
   await importCases(consoleSrc, check);
+  await fixCases(consoleSrc, check);
   return out;
 }
 function box_set(C, k, v){ C.box[k] = v; }
@@ -1104,12 +1117,12 @@ async function publishCases(consoleSrc, check){
     check('publish: Cancel writes nothing; OK writes builtSongs/<id> and then builtSongsMeta/list (in that order, nothing else), the song in the rules\' exact shape with the server time',
       cancelled && seq.join(' → ') === `set builtSongs/${id} → set builtSongsMeta/list` && doc && Object.keys(doc).sort().join() === 'artist,audio,savedAt,song,title,v' && doc.savedAt === TS && F4.st.violations.length === 0,
       JSON.stringify({ cancelled, seq, violations: F4.st.violations.slice(0, 2) }));
-    check('publish: the stored song IS the draft\'s song (sorted-key compare), builtSongCheck passes on it as stored, and the list has it at edit 1 with the imported song kept at 3',
-      bare && run('sbCanon')(bare) === run('sbCanon(sbDocOf(sbDraft()))') && run('builtSongCheck')(id, bare).length === 0 && meta.songs[id] === 1 && meta.songs[other] === 3 && Object.keys(meta.songs).length === 2 && meta.updatedAt === TS,
+    check('publish: the stored song IS the draft\'s song (sorted-key compare), builtSongCheck passes on it as stored, and the list has it at a new edit number (from the clock) with the imported song kept at 3',
+      bare && run('sbCanon')(bare) === run('sbCanon(sbDocOf(sbDraft()))') && run('builtSongCheck')(id, bare).length === 0 && freshVer(meta.songs[id], 3) && meta.songs[other] === 3 && Object.keys(meta.songs).length === 2 && meta.updatedAt === TS,
       JSON.stringify({ meta: meta && meta.songs }));
     check('publish: the console shows the published song\'s page (Edit, Unpublish, Delete…, Export), "2 published; all pass today\'s checks", and the step bar\'s Publish is done',
       !run('sbShowsSteps()') && /data-sb-act="edit"/.test(run('sbDetailHtml()')) && /data-sb-act="unpublish"/.test(run('sbDetailHtml()')) && /data-sb-act="delete-song"/.test(run('sbDetailHtml()')) && /data-sb-v="pub"/.test(run('sbDetailHtml()'))
-      && /2 published; all pass today's checks/.test(run('sbHealthHtml()')) && /^Published "Test 0 Publish" \(edit 1\)/.test(run('sbNote')), run('sbNote'));
+      && /2 published; all pass today's checks/.test(run('sbHealthHtml()')) && /^Published "Test 0 Publish" \(edit of /.test(run('sbNote')), run('sbNote'));
   }
   /* D8: the student page: the REAL app merges the same store and draws the song on the Songs page and as its card */
   const studentSync = async () => {
@@ -1155,8 +1168,16 @@ async function publishCases(consoleSrc, check){
     check('edit: the list says "Changes not published", the listens start over, and Publish asks for them again', /Changes not published/.test(R.run('sbListHtml()')) && !R.run('sbListensOf(sbDraft()).all') && /Listen at the Preview step/.test(R.run('sbPublishWhy(sbDraft(), sbSel).join(" ")')),
       R.run('sbPublishWhy(sbDraft(), sbSel).join(" | ")'));
   }
-  /* D11: publish the change: the song, the list (edit 2), and only then the old copy goes */
+  /* D11: publish the change: the song, the list (a new edit number), and only then the old copy goes */
+  const pubVer1 = F4.S.get('builtSongsMeta/list').songs[id]; let pubVer2 = 0;
   {
+    /* A new copy: its drift windows are measured at the Beat step first (review R1-6). */
+    const why0 = R.run('sbPublishWhy(sbDraft(), sbSel)');
+    R.run('sbGoStep(3)'); await settle();
+    for(let t = 0; t < 80 && !Number.isFinite((F4.S.get('songDrafts/' + id).beat || {}).driftOff); t++) await sleep(100);
+    await settle();
+    check('republish after a new copy: Publish first asks for the Beat step (the drift windows were the old copy\'s), and opening it measures them on the new one', why0.some(w => /Open the Beat step once/.test(w)) && F4.S.get('songDrafts/' + id).beat.driftFor === F4.S.get('songDrafts/' + id).audio.sha256,
+      JSON.stringify(why0));
     R.run('sbGoStep(6)'); await settle();
     await listenThrough(R, [[0.02, 0.5, 0.95, 1.02, 1.5, 2.0, 2.5, 2.85, 3.0, 3.5, 4.0, 4.5, 4.78, 0.03]]);
     const w0 = nW();
@@ -1164,9 +1185,10 @@ async function publishCases(consoleSrc, check){
     R.run('sbPublish()'); await settle(300);
     const seq = since(w0).filter(x => !x.includes('/pieces/'));
     const iSong = seq.indexOf('set builtSongs/' + id), iList = seq.indexOf('set builtSongsMeta/list'), iDel = seq.indexOf('delete songFiles/' + aid);
+    pubVer2 = F4.S.get('builtSongsMeta/list').songs[id];
     const meta = F4.S.get('builtSongsMeta/list');
-    check('republish: asks "Publish your changes", then the song, then the list (edit 2, the imported song kept), and only then the replaced copy is deleted (head and pieces); the imported song\'s copy is untouched',
-      /^Publish your changes to "Test 0 Publish"\?/.test(R.env.confirms[0] || '') && iSong === 0 && iList === 1 && iDel > iList && meta.songs[id] === 2 && meta.songs[other] === 3 && keysOf('songFiles/' + aid).length === 0
+    check('republish: asks "Publish your changes" (saying open pages keep the old version or lose its sound until they reload), then the song and the list in one transaction (a new edit number, the imported song kept), and only then the replaced copy is deleted (head and pieces); the imported song\'s copy is untouched',
+      /^Publish your changes to "Test 0 Publish"\?.*keep the old version, or lose its sound, until they reload/.test(R.env.confirms[0] || '') && iSong === 0 && iList === 1 && iDel > iList && freshVer(meta.songs[id], pubVer1) && meta.songs[other] === 3 && keysOf('songFiles/' + aid).length === 0
       && F4.S.get('builtSongs/' + id).audio.id === aidNew && keysOf('songFiles/' + oaid).length === otherCopyKeys && JSON.stringify(F4.S.get('builtSongs/' + other)) === otherDoc0,
       JSON.stringify(seq));
   }
@@ -1178,8 +1200,8 @@ async function publishCases(consoleSrc, check){
     R.env.confirmAnswer = true; R.run('sbUnpublish()'); await settle(200);
     const seq = since(w0);
     const meta = F4.S.get('builtSongsMeta/list');
-    check('unpublish: Cancel writes nothing; OK writes the draft (its edit number, 2) first, then the list without the song, then deletes builtSongs/<id>; the draft and its copy stay; the imported song is untouched',
-      cancelled && seq.join(' → ') === `set songDrafts/${id} → set builtSongsMeta/list → delete builtSongs/${id}` && F4.S.get('songDrafts/' + id).pubVer === 2 && !F4.S.has('builtSongs/' + id)
+    check('unpublish: Cancel writes nothing; OK writes the draft (its edit number) first, then the list without the song, then deletes builtSongs/<id>; the draft and its copy stay; the imported song is untouched',
+      cancelled && seq.join(' → ') === `set songDrafts/${id} → set builtSongsMeta/list → delete builtSongs/${id}` && F4.S.get('songDrafts/' + id).pubVer === pubVer2 && !F4.S.has('builtSongs/' + id)
       && Object.keys(meta.songs).join() === other && meta.songs[other] === 3 && keysOf('songFiles/' + aidNew + '/pieces/').length === 3 && JSON.stringify(F4.S.get('builtSongs/' + other)) === otherDoc0 && R.run('sbShowsSteps()') && R.run('sbStepOn') === 7,
       JSON.stringify({ cancelled, seq, pubVer: F4.S.get('songDrafts/' + id).pubVer, step: R.run('sbStepOn') }));
     const page = await studentSync();
@@ -1187,7 +1209,7 @@ async function publishCases(consoleSrc, check){
     check('unpublish: the student page merges the imported song only', ids === JSON.stringify([other]), ids);
     const w1 = nW();
     R.run('sbPublish()'); await settle(200);
-    check('publish after an unpublish counts on: edit 3, not 1 again (a Chromebook keeps a song by its edit number)', F4.S.get('builtSongsMeta/list').songs[id] === 3 && since(w1).join(' → ') === `set builtSongs/${id} → set builtSongsMeta/list`,
+    check('publish after an unpublish counts on: a number past the last one, never one used before (a Chromebook keeps a song by its edit number)', freshVer(F4.S.get('builtSongsMeta/list').songs[id], pubVer2) && since(w1).join(' → ') === `set builtSongs/${id} → set builtSongsMeta/list`,
       JSON.stringify({ songs: F4.S.get('builtSongsMeta/list').songs, seq: since(w1) }));
   }
   /* D13: leaving the view while Publish reads: nothing written after the leave */
@@ -1323,8 +1345,8 @@ async function importCases(consoleSrc, check){
     const w0 = nW();
     env.confirmAnswer = true; run('sbPublish()'); await settle(200);
     const after = bare('builtSongs/' + A);
-    check('imported song, Edit, change nothing, Publish: the published song is deep-equal to the imported one; only the edit number moves (4 → 5)',
-      since(w0).join(' → ') === `set builtSongs/${A} → set builtSongsMeta/list` && canon(after) === canon((({ v, title, artist, audio, song }) => ({ v, title, artist, audio, song }))(docA)) && F6.S.get('builtSongsMeta/list').songs[A] === 5,
+    check('imported song, Edit, change nothing, Publish: the published song is deep-equal to the imported one; only the edit number moves (past 4)',
+      since(w0).join(' → ') === `set builtSongs/${A} → set builtSongsMeta/list` && canon(after) === canon((({ v, title, artist, audio, song }) => ({ v, title, artist, audio, song }))(docA)) && freshVer(F6.S.get('builtSongsMeta/list').songs[A], 4),
       JSON.stringify({ seq: since(w0), list: F6.S.get('builtSongsMeta/list').songs }));
   }
   /* E4: a beat map kept exactly; one chord changed; only that chord differs */
@@ -1343,7 +1365,7 @@ async function importCases(consoleSrc, check){
     const barDiff = now.bars.map((b, i) => b === was.bars[i] ? null : i).filter(x => x !== null);
     const chordDiff = [...new Set([...Object.keys(was.chords), ...Object.keys(now.chords)])].filter(k => canon(was.chords[k]) !== canon(now.chords[k]));
     check('imported beat map, Edit, one chord changed (bar 3: D → G), Publish: only that differs: bars[2], and G added to the chords (the bar times, sections, level and every other shape the same)',
-      JSON.stringify(diffKeys) === '["chords","bars"]' && JSON.stringify(barDiff) === '[2]' && now.bars[2] === 'G' && JSON.stringify(chordDiff) === '["G"]' && JSON.stringify(now.barTimes) === JSON.stringify(bt) && F6.S.get('builtSongsMeta/list').songs[B] === 3,
+      JSON.stringify(diffKeys) === '["chords","bars"]' && JSON.stringify(barDiff) === '[2]' && now.bars[2] === 'G' && JSON.stringify(chordDiff) === '["G"]' && JSON.stringify(now.barTimes) === JSON.stringify(bt) && freshVer(F6.S.get('builtSongsMeta/list').songs[B], 2),
       JSON.stringify({ diffKeys, barDiff, chordDiff }));
   }
   /* E5: Unpublish of an imported song with no draft: the draft is rebuilt and saved first, then the list, then the song */
@@ -1398,6 +1420,105 @@ async function importCases(consoleSrc, check){
   }
   check('imported songs: every write fits firestore.rules and none goes to config/class or progress/', F6.st.violations.length === 0 && !F6.st.writes.some(w => /^(config|progress)\//.test(w.path)),
     F6.st.writes.length + ' writes; ' + (F6.st.violations.slice(0, 3).join('; ') || 'no violation'));
+}
+
+/* ── REVIEW ROUND 1 (2026-11-16): an edit published in halves (R1-1), a new mp3 picked after levelling (R1-2), and the
+   minors. Its own console and store: the made-up draft of the Part d cases, published once. ── */
+async function fixCases(consoleSrc, check){
+  const F8 = makeDb(), C = makeConsole(consoleSrc, F8), { run, env } = C;
+  const id = 'sb-fixdraft00001', LVC = LEVELLED.get('c'), aid = id + '-' + sha(LVC).slice(0, 8);
+  F8.S.set('songFiles/' + aid, { file: aid + '.mp3', bytes: LVC.length, sha256: sha(LVC), pieces: 1, pieceBytes: 900000, durationSec: 15, state: 'ready', uploadedAt: TS });
+  F8.S.set(`songFiles/${aid}/pieces/0`, { i: 0, data: new FakeBytes(LVC) });
+  F8.S.set('songDrafts/' + id, { v: 1, title: 'Test 0 Fix', artist: 'The Test Band', step: 7,
+    source: { name: 'test-c.mp3', bytes: SRC_C.length, sha256: sha(SRC_C), durationSec: 15, sampleRate: 44100, channels: 1, kbps: 192 },
+    audio: { id: aid, bytes: LVC.length, sha256: sha(LVC), durationSec: 15, centsOff: 2, gainDb: 1.5, sourceSha256: sha(SRC_C) },
+    volume: { before: -14, after: -12.5, samplePeak: -1.2, truePeak: -1.1, ceilingDb: -1, encodes: 1 }, pitch: { cents: 2, peaks: 10 },
+    beat: { meter: '4/4', bpm: 96, anchor: 0.5, pins: [], trackBpm: 96, trackSub: 2, driftOff: 0, pinsNeeded: 2 },
+    chart: { text: '[Verse]\n| G | C |', meter: '4/4', fmt: 'bar lines', sections: [{ name: 'intro', label: 'Intro', n: null, bars: ['G'], lyrics: null },
+      { name: 'verse', label: 'Verse', n: null, bars: ['G', 'C'], lyrics: null }, { name: 'chorus', label: 'Chorus', n: null, bars: ['D', 'G'], lyrics: null }], left: [], kept: [], edited: true },
+    level: { versions: 'full', start: null, range: null }, listens: null, pubVer: null, savedAt: TS });
+  const nW = () => F8.st.writes.length, since = w0 => F8.st.writes.slice(w0).map(w => w.op + ' ' + w.path);
+  run('renderTeacherSongBuilder()'); await settle();
+  run(`sbOpen(${JSON.stringify(id)})`); await settle();
+  const listenAll = async (Cx) => {
+    Cx.run(`sbPv = { id: sbSel, key: 'sim', sig: sbListenSig(sbDocOf(sbDraft())), node: null, act: null, run: null, L: null }`);
+    const ex = Cx.run('builtSongExpand(sbSel, sbDocOf(sbDraft()))'), secs = ex.activity.card.sections, first = secs[0].fromBar;
+    Cx.box.__L = { firstBar: first, sections: secs.map(x => ({ fromBar: x.fromBar, bars: x.bars, reps: 1 })) };
+    for(const x of secs){ const s0 = x.fromBar - first; for(const f of [0.02, 0.5, 0.97]) Cx.run(`sbPvStep(sbPv, __L, ${s0 + f * x.bars})`); }
+    Cx.run('sbPvRunEnd(sbPv); sbPv = null');
+    await sleep(500); await settle();
+  };
+  env.confirmAnswer = true;
+  await listenAll(C);
+  run('sbPublish()'); await settle(200);
+  const ver1 = (F8.S.get('builtSongsMeta/list') || { songs: {} }).songs[id];
+  /* R1-1: an edit whose list write is refused: nothing is published in half, and Publish stays on after a reload */
+  {
+    run("sbPubAct('edit-step', { dataset: { sbV: '5' } })"); await settle();
+    run("sbChartSet(sbDraft(), { level: { versions: 'both', start: 'full', range: null } }, null, true)"); await settle();
+    await listenAll(C);
+    const doc0 = JSON.stringify(F8.S.get('builtSongs/' + id));
+    F8.st.failWrite = p => p === 'builtSongsMeta/list';
+    run('sbPublish()'); await settle(200);
+    F8.st.failWrite = null;
+    const R = makeConsole(consoleSrc, F8);
+    R.run('renderTeacherSongBuilder()'); await settle();
+    R.run(`sbOpen(${JSON.stringify(id)})`); await settle();
+    R.run("sbPubAct('edit-step', { dataset: { sbV: '7' } })"); await settle();
+    const btn = R.run('sbPublishBtnHtml(sbDraft())');
+    check('R1-1: an edit whose transaction fails (the list write refused) writes nothing (builtSongs/<id> as it was, the list at the same edit) and, after a reload, Publish can be pressed again',
+      JSON.stringify(F8.S.get('builtSongs/' + id)) === doc0 && F8.S.get('builtSongsMeta/list').songs[id] === ver1 && !/disabled/.test(btn) && !/no changes/.test(btn),
+      JSON.stringify({ docKept: JSON.stringify(F8.S.get('builtSongs/' + id)) === doc0, list: F8.S.get('builtSongsMeta/list').songs[id], ver1, btn: btn.replace(/<[^>]*>/g, '').trim() }));
+  }
+  /* R1-2: a new mp3 of the same length picked at step 1: Preview and Publish wait for Volume */
+  {
+    const NEW = mp3Of(310000, 77);
+    box_set(C, '__f', fileOf('test-new.mp3', NEW, 15));
+    run('renderTeacherSongBuilder()'); await settle();
+    run(`sbOpen(null); sbOpen(${JSON.stringify(id)})`); await settle();
+    run("sbPubAct('edit-step', { dataset: { sbV: '1' } })"); await settle();
+    run('sbPickFile(__f)'); await settle();
+    const why = run('sbPublishWhy(sbDraft(), sbSel)');
+    check('R1-2: after a new mp3 of the same length is picked, Preview and Publish are off and Publish says to level it first (the old copy is never published as the new song)',
+      /beat is kept/.test(run('sbNote')) && !run('sbStepReady(sbDraft(), 6)') && !run('sbStepReady(sbDraft(), 7)') && why.some(w => /A new mp3 was picked: level it at step 2 first/.test(w)),
+      JSON.stringify({ note: run('sbNote'), s6: run('sbStepReady(sbDraft(), 6)'), why }));
+  }
+  /* R1-6: levelling the new mp3 makes a new copy: the old drift number goes; the Beat step measures it again */
+  {
+    run('sbSaveUpload(2)'); await settle(100);
+    box_set(C, '__levelNext', 'a'); run('sbRunLevel()'); await settle(300);
+    const b0 = F8.S.get('songDrafts/' + id).beat, why0 = run('sbPublishWhy(sbDraft(), sbSel)');
+    run('sbGoStep(3)'); await settle(100);
+    for(let t = 0; t < 80 && !Number.isFinite((F8.S.get('songDrafts/' + id).beat || {}).driftOff); t++) await sleep(100);   // the Beat step's measure, then its 1.2 s save
+    await settle(100);
+    const b1 = F8.S.get('songDrafts/' + id).beat, why1 = run('sbPublishWhy(sbDraft(), sbSel)');
+    check('R1-6: a new levelled copy clears the drift number (Publish says to open the Beat step); the Beat step measures it on the new copy and saves it with that copy\'s SHA-256',
+      run('sbCopyCurrent(sbDraft())') && b0 && b0.driftOff === null && why0.some(w => /Open the Beat step once/.test(w)) && Number.isFinite(b1.driftOff) && b1.driftFor === run('sbDraft().audio.sha256') && !why1.some(w => /drift|Beat step/.test(w)),
+      JSON.stringify({ b0: b0 && [b0.driftOff, b0.driftFor], b1: b1 && [b1.driftOff, String(b1.driftFor).slice(0, 8)], why0, why1 }));
+  }
+  /* R1-3: two tabs: A unpublishes (keeping the number in its draft), B (opened before, its draft without that number)
+     publishes: never a number used before */
+  {
+    const B = makeConsole(consoleSrc, F8);
+    B.run('renderTeacherSongBuilder()'); await settle();
+    B.run(`sbOpen(${JSON.stringify(id)})`); await settle();
+    B.run("sbPubAct('edit-step', { dataset: { sbV: '7' } })"); await settle();
+    run('sbStepOn = 7; sbUnpublish()'); await settle(200);
+    const used = F8.S.get('songDrafts/' + id).pubVer;
+    B.run('sbDraft().pubVer = null');
+    await listenAll(B);
+    await sleep(1100);
+    B.env.confirmAnswer = true; B.run('sbPublish()'); await settle(200);
+    const v = (F8.S.get('builtSongsMeta/list').songs || {})[id];
+    check('R1-3: a Publish from another tab after an Unpublish (its draft without the last number) still takes a number never used before', freshVer(v, used) && v !== used, JSON.stringify({ used, v }));
+  }
+  /* R1-8: the preview card's key holds the page's language, so Español makes the card again */
+  {
+    C.box.CustomEvent = class { constructor(t, o){ this.type = t; Object.assign(this, o || {}); } }; C.box.dispatchEvent = () => true;   // setLang announces the change
+    const k = run(`(() => { const d = sbDocOf(sbDraft()), a = sbPvKey('x', d); setLang('es'); const b = sbPvKey('x', d); setLang('en'); return [a, b]; })()`);
+    check('R1-8: the preview card is made again when the page\'s language changes (its key holds the language)', k[0] !== k[1] && /\|es\|/.test(k[1]) && /\|en\|/.test(k[0]), JSON.stringify(k));
+  }
+  check('review fixes: every write fits firestore.rules and none goes to config/class or progress/', F8.st.violations.length === 0 && !F8.st.writes.some(w => /^(config|progress)\//.test(w.path)), (F8.st.violations.slice(0, 3).join('; ') || 'no violation'));
 }
 
 /* ── main ── */

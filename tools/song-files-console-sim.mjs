@@ -562,8 +562,8 @@ async function runCases(consoleSrc){
       `import: the audio (3 pieces, ready) first, then builtSongs/${BID}, then the list (${w.length} writes)`);
     const d = c.F.S.get('builtSongs/' + BID) || {};
     ok(JSON.stringify(d.song) === JSON.stringify(bdoc.song) && JSON.stringify(d.audio) === JSON.stringify(bdoc.audio) && d.title === bdoc.title && d.v === 1, 'import: the song doc holds the file\'s chart and audio entry unchanged');
-    ok(JSON.stringify((c.F.S.get('builtSongsMeta/list') || {}).songs) === JSON.stringify({ [BID]: 1 }), 'import: the list names the song at edit 1');
-    ok(/Imported &quot;Test Song Four&quot; \(edit 1\)/.test(c.bblock._html) || /Imported "Test Song Four" \(edit 1\)/.test(c.bblock._html), 'import: the section says it was imported, edit 1');
+    const __l1 = (c.F.S.get('builtSongsMeta/list') || {}).songs || {}; const __fresh = (v, prev) => Number.isInteger(v) && v > (prev || 0) && v >= Math.floor((Date.now() - Date.UTC(2026, 0, 1)) / 1000) - 600 && v <= 1e9; ok(Object.keys(__l1).join() === BID && __fresh(__l1[BID], 0), 'import: the list names the song at a new edit number (from the clock, teacherBsNextVer)');
+    ok(/Imported (&quot;|")Test Song Four(&quot;|") \(edit of /.test(c.bblock._html), 'import: the section says it was imported, with the time of the edit');
     // again: the same id replaces the song; the audio already stored and matching is not uploaded again; another song on the list is kept
     c.F.S.set('builtSongsMeta/list', { songs: { [BID]: 1, 'sb-othersong1': 4, 'BAD KEY': 2, 'sb-badvalue1': 'x' }, updatedAt: TS });
     const n0 = c.F.st.writes.length;
@@ -571,7 +571,7 @@ async function runCases(consoleSrc){
     await importNow(c, jsonOf(importFile(BID, again)), fileOf(SONG, 125.5));
     const w2 = c.F.st.writes.slice(n0);
     ok(!w2.some(x => /^songFiles\//.test(x.path)) && (c.F.S.get('builtSongs/' + BID) || {}).title === 'Test Song Four, fixed', `import again: the song is replaced and the stored audio is not uploaded again (${w2.length} writes)`);
-    ok(JSON.stringify((c.F.S.get('builtSongsMeta/list') || {}).songs) === JSON.stringify({ [BID]: 2, 'sb-othersong1': 4 }), 'import again: edit 2; another song on the list is kept; a key or a value the page would refuse is dropped');
+    { const __l2 = (c.F.S.get('builtSongsMeta/list') || {}).songs || {}; ok(Object.keys(__l2).sort().join() === [BID, 'sb-othersong1'].sort().join() && (v => Number.isInteger(v) && v > 1 && v >= Math.floor((Date.now() - Date.UTC(2026, 0, 1)) / 1000) - 600)(__l2[BID]) && __l2['sb-othersong1'] === 4, 'import again: a newer edit number; another song on the list is kept; a key or a value the page would refuse is dropped'); }
   }
   done(c);
 
