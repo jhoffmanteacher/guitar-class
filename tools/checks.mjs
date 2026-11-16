@@ -2257,6 +2257,20 @@ const POPUP_EMOJI_RE = /<span class="tp-title"[^>]*>\s*(?:&#x1F3B5;|&#x23F1;|&#x
 /* The tags compared with index.html's: the six tuner string buttons and the popup titles' opening tags. */
 const POPUP_A11Y_TAGS = [['a tuner string button', /<button class="ts-btn" data-string="(?!auto)[^"]*"[^>]*>/g], ['a popup title', /<span class="tp-title"[^>]*>/g]];
 const POPUP_A11Y_TAG_TOTAL = 54;
+/* The three tool popups the Journey pages share with the app; the tags above are compared popup by popup. */
+const SHARED_POPUPS = ['metro-popup', 'timer-popup', 'tuner-popup'];
+/* One tool popup's markup: from its opening <div> to the </div> that closes it (the <div>s in between are counted). */
+function toolPopupHtml(src, id) {
+  const start = src.indexOf(`<div class="tool-popup" id="${id}"`);
+  if (start < 0) return null;
+  const re = /<div\b|<\/div>/g;
+  re.lastIndex = start;
+  for (let m, depth = 0; (m = re.exec(src));) {
+    depth += m[0] === '</div>' ? -1 : 1;
+    if (!depth) return src.slice(start, m.index + m[0].length);
+  }
+  return null;
+}
 /* Which string each tuner button is, and the i18n key of its screen-reader name: checked on the app's buttons (the
    Journey pages must then equal them, above), with each static aria-label equal to that key's English. */
 const TUNER_STRING_KEYS = { E2: 'diagram.stringLowE', A2: 'diagram.stringA', D3: 'diagram.stringD', G3: 'diagram.stringG', B3: 'diagram.stringB', E4: 'diagram.stringHighE' };
@@ -2279,14 +2293,24 @@ function checkJourneyPopupMarkup() {
     /* Screen-reader names (2026-11-13): each tuner string button's tag and each popup title's tag are the app's, byte for
        byte (the string's name in aria-label, the heading role on the title). The page's tags are compared with the app's
        ONE BY ONE, in order (2026-11-16): as a set, a tag pasted over its neighbour (two low E buttons, no A) passed. */
+    /* Only the popups the pages share with the app are read (SHARED_POPUPS), each against the app's popup of the same id: a
+       title the app has somewhere else (a popup of its own) is not the pages' business and must not fail them. The tags are
+       printed whole: a wrong data-i18n-attr key sits at their end. */
+    const popups = SHARED_POPUPS.map(id => ({ id, app: toolPopupHtml(appHtml, id), page: toolPopupHtml(raw, id) }));
+    for (const p of popups) if (p.app == null || p.page == null)
+      flag(`${file}: #${p.id} not found in ${p.app == null ? 'index.html' : 'the page'} (or its <div>s never close): its screen-reader markup NOT compared`);
     for (const [what, re] of POPUP_A11Y_TAGS) {
-      const want = appHtml.match(re) || [];
-      const got = raw.match(re) || [];
-      if (!got.length) { flag(`${file}: no ${what} found: the screen-reader markup NOT compared`); continue; }
-      tagsSeen += got.length;
-      if (got.length !== want.length) flag(`${file}: ${got.length} tags of the kind "${what}", index.html has ${want.length}`);
-      for (let i = 0; i < Math.max(got.length, want.length); i++)
-        if (got[i] !== want[i]) flag(`${file}: ${what}, number ${i + 1} in the page, is ${(got[i] || 'missing').slice(0, 160)}; the app's number ${i + 1} is ${(want[i] || 'missing').slice(0, 160)} (same tags, same order)`);
+      let seen = 0;
+      for (const p of popups) {
+        if (p.app == null || p.page == null) continue;
+        const want = p.app.match(re) || [], got = p.page.match(re) || [];
+        seen += got.length;
+        if (got.length !== want.length) flag(`${file}: #${p.id} holds ${got.length} of the kind "${what}", index.html's #${p.id} holds ${want.length}: make the page's popup match the app's (add or remove the tag in the page, or in index.html if the page is right)`);
+        for (let i = 0; i < Math.max(got.length, want.length); i++)
+          if (got[i] !== want[i]) flag(`${file}: #${p.id}: ${what}, number ${i + 1} in the popup, is ${got[i] || 'missing'}; the app's number ${i + 1} is ${want[i] || 'missing'} (same tags, same order)`);
+      }
+      if (!seen) flag(`${file}: no ${what} found in #${SHARED_POPUPS.join(', #')}: the screen-reader markup NOT compared`);
+      tagsSeen += seen;
     }
   }
   let pairs = 0;
