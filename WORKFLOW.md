@@ -762,6 +762,30 @@ is split by file, so both computers work at once.**
    golden before / after, a change smoke, a fresh reviewer (load order and `sw.js`: Always Reviewed). Deploy
    risk (reasoned, MED): a busy tab open before the push keeps its old part list for up to 5 minutes and would
    fetch the shortened file without the new part; push outside class hours.
+   - **Built 2026-11-16 by a Mac agent, NOT pushed** (worktree `.claude/worktrees/coach-splits`, on `3b667ba`; the
+     map checked line by line). Three commits: `coach-chords.js` 2,167 -> 1,397 + `coach-chordcards.js` 777 (770
+     moved + a 7-line header; from the CHORD DIFFICULTY RANKS banner, line 1398, not 1393); `coach-runner.js` 2,394
+     -> 1,091 + `coach-noterunner.js` 1,310 (1,303 + 7; from line 1092); and item 6's three stale comments
+     (`coach-hub.js` fretLoop, `coach-runner.js` rnwLoop, `coach-strum.js` srHearStrum), comments only. The moved
+     tails also hold helpers later parts call at run time (`cardAnswerKey`, `cbShuffle` for the ear and Gym card
+     games; `nrOffset` for Strum Radar and `coachMicLatencyMs`): later or earlier parts, never at load, so no
+     change. Proof: each pair joined (header off) = the old file byte for byte; the arcade script keeps 586
+     top-level functions and 772 statements in the same order; no top-level statement that runs at load names
+     a name across a cut (GAMES_META's `setup: () => …` and start.js's guarded sign-out call are run-time);
+     `checks.mjs --check --skip-links` only "shell cache stale" on each split; kill-switch 14 of 14;
+     shared-chromebook-loop exit 0, K-TAB 8 records in 6 cases (band 4-14 / 3-10); golden `--only games,play`
+     before (`3b667ba`) and after: identical, 112 of 112 files (PARTIAL by design); slow-load 20 loads, 0 errors;
+     update-reload-loop 29 of 29 cases, 359 of 359 checks; mic-sim closed-loop real takes reproduced 232 of 315
+     (Power Chord Switch) and 46 of 64 / 6 of 8 / 51 of 74 (Coach melody / chords / Note Runner, as recorded in
+     the mic-sim README), `--no-guitar` 9 of 12 cases FAIL, 1,902 of 4,320 changes marked right (the same as
+     `3b667ba`), no-guitar-listen 241 of 624 Coach takes, 34 of 48 Strum Radar rounds. Not run: `tools/lint.mjs`,
+     smoke (the lead's). Deploy risk confirmed in the code: a tab that FIRST loads the arcade while it waits to
+     reload (`app/start.js:76-115`, busy up to 5 min) gets the new short files from the new cache
+     (`sw.js:526-567`) under its old part list, so `gamesStopMic` (`coach-hub.js`, cbStop / cdStop / nrStop) and
+     the hub's best chips (CB_DECKS) throw; so does a tab under the OLD worker whose cache never got
+     `coach-chords.js` (it fetches the new file, `sw.js:549-550`). A tab that already loaded the arcade is safe.
+     Push after school. Left for the lead: rebase, full `checks.mjs` (rewrites `sw.js`), change smoke `--only
+     games`, a fresh reviewer (load order and `sw.js` lists: Always Reviewed), the trailer, tick this item.
 5. [x] **Close out the Friday entries in "Open work".** Tick or close each line of the 2026-11-14, 2026-11-06,
    2026-11-01 and 2026-10-31 entries against the list in the Windows block ("Job 4"). Still open after that:
    Jonathan's three calls, one at a time by AskUserQuestion (the Games heading "Notes on the low E and A strings"
