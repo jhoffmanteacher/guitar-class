@@ -2277,13 +2277,16 @@ function checkJourneyPopupMarkup() {
     if (!/class="ladder-toggle"/.test(metroPopup[0]) || !/class="ladder-box"/.test(metroPopup[0]))
       flag(`${file}: metro-popup is missing the Tempo ladder toggle/box that index.html's metronome popup has.`);
     /* Screen-reader names (2026-11-13): each tuner string button's tag and each popup title's tag are the app's, byte for
-       byte (the string's name in aria-label, the heading role on the title). */
+       byte (the string's name in aria-label, the heading role on the title). The page's tags are compared with the app's
+       ONE BY ONE, in order (2026-11-16): as a set, a tag pasted over its neighbour (two low E buttons, no A) passed. */
     for (const [what, re] of POPUP_A11Y_TAGS) {
       const want = appHtml.match(re) || [];
       const got = raw.match(re) || [];
       if (!got.length) { flag(`${file}: no ${what} found: the screen-reader markup NOT compared`); continue; }
-      const appSet = new Set(want);
-      for (const tag of got) { tagsSeen++; if (!appSet.has(tag)) flag(`${file}: ${what} ${tag.slice(0, 160)} is not the app's (index.html has ${[...appSet].map(x => x.slice(0, 120)).join(' | ') || 'none'})`); }
+      tagsSeen += got.length;
+      if (got.length !== want.length) flag(`${file}: ${got.length} tags of the kind "${what}", index.html has ${want.length}`);
+      for (let i = 0; i < Math.max(got.length, want.length); i++)
+        if (got[i] !== want[i]) flag(`${file}: ${what}, number ${i + 1} in the page, is ${(got[i] || 'missing').slice(0, 160)}; the app's number ${i + 1} is ${(want[i] || 'missing').slice(0, 160)} (same tags, same order)`);
     }
   }
   let pairs = 0;
