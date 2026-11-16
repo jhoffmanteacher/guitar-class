@@ -64,7 +64,7 @@
        strummed within a quarter of an eighth should be a HIT; one with no strum within half an eighth should be a MISS; between, either.
        Extra strums are free by design ("counted, never punished live"). A desk tap is not a strum, but the game cannot tell (no pitch):
        its hits are shown as by-design.
-     - Note Runner (coach-runner.js nrGrade / nrFinalizeEvent comments): the right note on time is RIGHT (perfect or good); "On the beat but
+     - Note Runner (coach-noterunner.js nrGrade / nrFinalizeEvent comments): the right note on time is RIGHT (perfect or good); "On the beat but
        the wrong (or unclear) note: half credit"; a note never played is a MISS; a note played past the game's window ("capped below half
        the smallest gap", at most 180 ms) should not be credited. A round clears the level at 80% (NR_PASS's comment).
    The key check (the fake world's own test, every take): the student's guitar alone (no room, no mic) is read back at every key entry:
