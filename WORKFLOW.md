@@ -356,7 +356,37 @@ is split by file, so both computers work at once.**
     148 of 148 with its IndexedDB timers slowed). The change smoke owed on the Windows pushes ran twice (`games`,
     `activities`, English; baselines `f2e8952` and `e80ca7e`): no error beyond the baseline. Both the baseline and
     today's code show the same 20 error events on this computer; nobody has read what they are.
-  - **Item 2, rule AD: built, NOT shipped; review round 6 is running.** Branch `win/ad-2026-11-16` (local to
+  - **Item 2, rule AD: SHIPPED, Reviewed (2026-11-16, 18 commits; three Opus deep-review rounds at xhigh, each by a
+    fresh reviewer).** What is live in `coach-strumcheck.js` (`SC_RULE` is `strumcheck-3`): A, a sound outside
+    every window costs `SC_ANCHOR_REST` in `scAnchorSearch`; D, when at least `SC_ANCHOR_LOCK_MIN` (4) earlier
+    onsets fit the grid perfectly, this onset may move it only `SC_ANCHOR_LOCK` (0.25 of an eighth); the test that
+    decides whether the WIDE search runs scores the grid without the outside cost (round 5's MAJOR); the wide
+    search looks around the CLICK grid, not the grid it has ("W0", round 6's BLOCKER). Round 7: 0 BLOCKER, 0 MAJOR,
+    3 MINOR, "ship"; the MINORs fixed with break-its. Numbers the round-7 reviewer re-ran itself:
+    - **Round 6's BLOCKER was live on main BEFORE AD** (since the pattern-shape grid of 2026-11-14): a late-starting
+      right player plus one extra sound in bar 1 got the grid stuck 5 eighths off and all 8 bars red. Starts from 4
+      eighths early to 8 late, 2,000 made-up rounds a row, all-red rounds before AD / with the final code: one stray
+      sound in bar 1 72 → 0; one bar-1 strum heard twice 122 → 0.
+    - The three real takes at the kept clock and ±20 ms: strums heard 379 of 414 (before AD 378), false extras 3 of
+      138 (the same), bars right 36 of 72 (35), right chords 66 of 69 (the same). One of his own strums pasted into
+      a rest: caught 115 of 180 (before AD 38), the mistake bar still passed 32 (83).
+    - Right players, 19 kinds, 2,280 made-up rounds: the final code lost 3 or more bars against before AD in 6
+      rounds, all with stray sounds or doubled strums.
+    - **Known costs, all in `docs/strum-check/DETAILS.md` section 29 (Jonathan has seen the first group and chose
+      "AD with the fix"):** any sound the mic hears on a rest is an extra (a foot tap on each beat, half heard: a
+      right player's bars right 321 → 245 of 480; a neighbour's guitar 381 → 329; beat 3 is the pattern's rest);
+      the bench talk room, a right player 28 → 19 of 64 bars; a late starter loses 0 to 3 bars of 80 against AD as
+      first built, and at 60 BPM, 3 eighths late, 133 → 120 of 160 against before AD; W0 can reach a grid 5 eighths
+      away (a settled late player with one strum unheard and one sound on a rest: worse in 55 of 432 such rounds;
+      across 3,840 rounds of all kinds worse in 6, better in about 100); exact ties now go toward the click grid
+      (only at 60, 100, 125 BPM); an extra on bar 1's first rest is still almost never caught (1 of 27 real
+      splices). Not measured on real audio: talk, a Chromebook mic, an up-strum extra.
+    - Tools: `tools/mic-sim/strum-check-replay.mjs` carries the rule as settings and checks its copy against the
+      real code before every replay (13 constants, 488 made-up rounds; `--no-self-check` skips it, 8 s against
+      about 26 s); check 1eh pins both halves of AD, the lock, a floor for dragging players (158 of 320) and six
+      late-starter rounds (about 1.9 s, was 0.2 s). R4-2 (loud talk near the mic is not gated) stays a known limit.
+    The history before the ship, as written while it was in review:
+  - **Item 2, rule AD: built; review round 6 was running when this was written.** Branch `win/ad-2026-11-16` (local to
     Windows, 11 commits, tip `c53255a1`). Round 5 (on AD as first built, `1338af63`): 0 BLOCKER, 1 MAJOR, 4 MINOR.
     The MAJOR: rule A also lowered the score that decides whether the WIDE search runs, so one extra on bar 1's
     first rest made the grid jump 3 eighths and bar 2, played right, went red (made-up rounds, bar 2 passed: before
@@ -388,7 +418,7 @@ is split by file, so both computers work at once.**
    and after, `visible-loop.mjs`, `classConfigSignature`), both step renderers if a student sees a new field, the
    default pinned in `checks.mjs`, smoke clicks it and reloads, screenshots at 1366×657, a CHANGELOG line only if
    a student can see a difference.
-2. [ ] **Strum Pattern check R4-1: build rule "AD" (Jonathan chose it 2026-11-16, "Build AD").** A strum on a rest
+2. [x] **DONE 2026-11-16 by Windows (shipped, Reviewed; see "Item 2, rule AD: SHIPPED" in the block above).** The item as written: **Strum Pattern check R4-1: build rule "AD" (Jonathan chose it 2026-11-16, "Build AD").** A strum on a rest
    is excused about half the time because `scAnchorSearch` slides the grid so the extra lands between windows.
    Rule A: a sound outside every window costs `SC_ANCHOR_REST` too (`coach-strumcheck.js:599`, was
    `if (Math.abs(d) > s.win) continue;`). Rule D ("lock"): read its exact code from the settings `outPen` (A),
