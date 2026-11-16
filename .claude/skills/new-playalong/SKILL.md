@@ -39,9 +39,12 @@ cents of A = 440 and needing at most 8 pins (`SB_PINS_MAX`). Publish puts it on 
 cents (the builder blocks it: shift it with `cents` and the file carries what is left), or "This song does not fit the
 builder" (over 8 pins: a tempo that moves, or a beat the builder's tracker cannot hold; the line only warns, it does
 not block, but the song needs a beat map Claude measures), or a meter, length (over 6:00) or file the builder refuses,
-or when he asks. A song he built can come here too: **Export** (on its page, or at Publish) saves its Import file; check
-it with `node tools/built-song-check.mjs <file>.json`. An imported song shows in the Song builder as a published song
-with no draft: Delete and Export work on it; to change it, import a new file (same `id` replaces it).
+or when he asks. A song he built can come here too: **Export** (on its page, or at Publish) saves its Import file and
+its levelled mp3, a pair named alike; check it with `node tools/built-song-check.mjs <file>.json --audio <file>.mp3`.
+An imported song shows in the Song builder as a published song with no draft yet: its Edit or Unpublish first rebuilds a
+draft from it (sections, bars, lyrics, its own chord shapes, its beat and bar times kept exactly; not its chart's text,
+taps or original mp3), so he can change a file Claude made in the builder; importing a new file (same `id`) still
+replaces it.
 
 ## 1. Inputs: ask once, in one message, only for what is missing
 - The mp3's path, the song and the artist (as the title should read: `"<song>" - <artist>`; ca-37 was renamed twice
