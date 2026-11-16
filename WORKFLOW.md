@@ -129,6 +129,66 @@ bullet under the job), the Mac fixes and pushes. All three branches are on GitHu
   that no script defines and every load-order slip, against today's four new parts (`teacher-activities-2.js`,
   `teacher-sb-pdf.js`, and after their pushes `teacher-sb-publish.js`, `coach-chordcards.js`,
   `coach-noterunner.js`). Report only; fix nothing in the Mac's files.
+  - **W4 DONE (Windows, 2026-11-16; one Opus auditor read every finding; report only).** The linter could not start
+    on Windows either (the space in "guitar-class website" split its own path when npx ran through a shell): fixed in
+    lint: ESLint 10.13.0 over 79 scripts + 18 inline <script> blocks + 957 inline handlers (0 dynamic names not checkable, 2 handlers did not parse), on 13 pages (149 lint runs)
+  load-order 0 · no-undef 130 · no-redeclare 1 · no-dupe-keys 1 · no-unreachable 0 · no-unused-vars 9   (no-unused-vars is a warning; the rest are errors)
+no-undef (130 uses in 30 groups; untagged first: undefined on every page its script is on, no typeof guard):
+  trainer-ui.js:188 root
+  fab-tools.js:372 coachInterrupt  [guarded] [pages: tabs/*.html (6)]
+  fab-tools.js:373 gamesStopMic  [guarded] [pages: tabs/*.html (6)]
+  fab-tools.js:374 stopAllDemoAudio  [guarded] [pages: tabs/*.html (6)]
+  fab-tools.js:375 stopJourneyAudio  [guarded] [pages: index.html]
+  fab-tools.js:393 recState  [pages: tabs/*.html (6)]
+  fab-tools.js:394 refreshRecUI  [guarded] [pages: tabs/*.html (6)]
+  guitar-diagrams.js:843,844 module ×2  [guarded]
+  live-quiz.js:200 lqgActiveIds  [guarded] [pages: tabs/*.html (6)]
+  live-quiz.js:204 lqgName  [guarded] [pages: tabs/*.html (6)]
+  live-quiz.js:204 teacherClassConfig  [guarded] [pages: tabs/*.html (6)]
+  live-quiz.js:360,366,858,936,948,966,995,1042,1080,1099,1121,1122,1165,1178,1179,1322,1384,1749 escAttr ×18  [pages: tabs/*.html (6)]
+  live-quiz.js:360,366,375,850,851,857,858,927,929,936,941,942,943,944,948,963,966,973,975,976,980,993,995,1000,1003,1006,1007,1021,1023,1024,1035,1039,1042,1058,1062,1073,1077,1080,1099,1106,1107,1113,1121,1122,1124,1165,1166,1178,1179,1184,1538,1544,1551,1553,1566,1585,1603,1621,1696,1749,1761,1773,1785,1790 escHtml ×64  [pages: tabs/*.html (6)]
+  live-quiz.js:394 ensureDb  [guarded] [pages: tabs/*.html (6)]
+  live-quiz.js:406,408,409 currentUser ×3  [guarded] [write] [pages: tabs/*.html (6)]
+  live-quiz.js:541 IS_TEACHER_MODE  [guarded] [pages: tabs/*.html (6)]
+  live-quiz.js:591,605,926,1243 isDevBypassUser ×4  [guarded] [pages: tabs/*.html (6)]
+  live-quiz.js:809 goExploreHash  [guarded] [pages: tabs/*.html (6)]
+  live-quiz.js:817 closeTopPanels  [pages: tabs/*.html (6)]
+  live-quiz.js:820,839 syncExploreNav ×2  [pages: tabs/*.html (6)]
+  live-quiz.js:831 exitOverlayHash  [pages: tabs/*.html (6)]
+  live-quiz.js:831 exitExploreHash  [pages: tabs/*.html (6)]
+  live-quiz.js:969,1064,1666 fgBoardSvg ×3  [guarded] [pages: tabs/*.html (6)]
+  live-quiz.js:1271,1437,1479,1488 teacherView ×4  [guarded] [pages: tabs/*.html (6)]
+  live-quiz.js:1425 lqgRender  [guarded] [pages: tabs/*.html (6)]
+  practice-minutes.js:655 pcState  [guarded] [pages: tabs/*.html (6)]
+  trainer-audio.js:22 module  [guarded]
+  trainer-core.js:55 module  [guarded]
+  trainer-ui.js:30 module  [guarded]
+  tuner.js:379 stopAnyRec  [guarded] [pages: tabs/*.html (6)]
+no-redeclare:
+  tabs/journey.js:748 'at' is already defined.
+no-dupe-keys:
+  practice-minutes.js:1509 Duplicate key '_session'.
+no-unused-vars: 9 (list them with --verbose), it runs now. On main : ESLint over 79 scripts + 18 inline blocks + 957 inline
+    handlers on 13 pages: load-order 0; no-undef 130 uses in 30 groups; no-redeclare 1; no-dupe-keys 1; unused 9; 2
+    handlers "did not parse". **No real fault: nothing a student or the teacher can hit.** All 30 no-undef groups are
+    safe: a  guard, or lines no Journey page can reach ('s  ×64 and  ×18
+    run only under , which stops at  when the page has no , or under the
+    console's renderer; a Journey page's banner and invite are built from DOM nodes with no esc helper). One LATENT
+    fault:  :  does not exist inside ; the only caller
+    passes , so the right side never runs (Hear It First, hidden from students). Harmless:     re-declares ;  repeats the key  with the same value as . The 2
+    "unparsed handlers" are the linter's own slips, not dead buttons (, a placeholder straight
+    after a quoted string; , a comment). New since this morning (, 76 → 79 scripts):
+    only an unused  at . The linter reads the part lists through  and
+    , so a new part is linted in its real load order with no edit. The two branches:
+      (81 scripts): no new finding of any kind, load-order 0;     : two unused variables in ,   and   (the publish date is
+    worked out and never shown: was it meant for the  line?). FOR THE MAC: those three unused variables.
+  - **The 20 smoke "error events" on the Windows computer are read (2026-11-16).** All are a setup screen measured
+    taller than 657 px at 1366×657, none a JavaScript error, all present before today's work: Change Up's setup 663
+    px (the default, a 2-chord and a 3-chord loop; 7 lines, EN + ES), Power Chord Switch's setup in Spanish 658 px
+    (12 pairs and the songs view; 13 lines). Likely this computer's fonts (not confirmed). **For the Mac, one run:**
+    : if it lists the same  /  lines, the
+    screens overflow on the class Chromebooks too and need fixing; if not, it is Windows only. Seen ONCE in three
+    runs here:     (the walk did not find the bar marker at bar 1; a timing flake until seen again).
 - **W5. `tools/console-layout-smoke.mjs` exits 1 on main, and did before today** (the Mac's console-size agent, on
   `3b667ba` and after, line for line): Manage scrolls sideways 165 px at 1366, five lines from the Practice minutes
   goal box, Manage +917 px at 390. Find the commit that broke each (the Manage tabs, `b40c35f`, is the first
