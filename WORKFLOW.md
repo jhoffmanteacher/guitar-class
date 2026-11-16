@@ -36,22 +36,27 @@ work in WORKFLOW". Part b is live (entry "Song builder" below). Next: Jonathan b
 step and says whether the bar lines sit on the beat; then build Part c (Chart, the correction grid, sections, Level)
 from `Claude outputs/WORK-ORDER-song-builder.md` (on the Mac only). Work in its own worktree made from `origin/main`.
 Part c ships Fast, d is Reviewed, then stop for Jonathan before Part e.
-**FIRST, before Part c: the Beat step drifts on a real song (Jonathan, 2026-11-15, his draft "American Girl"; mp3
-`~/Downloads/American Girl-D-114bpm-440hz.mp3`, 3:33).** Not fixed. What is known: the drift check showed 100-230 ms
-mid-song and the end pin landed about 1.4 beats off (grid 114.37 BPM). The song is steady eighth/sixteenth strumming;
-`playalong-measure.py` finds the tick at sixteenths, 455.88 a minute = 113.97 BPM (a sharp coherence peak, 0.095 against
-0.04-0.05 either side), and the name "114bpm" suggests a backing track made to a click: probably a nearly steady record,
-so the drift is mostly the TRACKER's error. Measured: `sbPhaseTrack`'s 12-s window phase is ambiguous on this strumming
-at every level (quarter, eighth, sixteenth; window 12-30 s): steps of about 60 ms between windows, so the unwrap slips.
-A dynamic-programming tracker (Ellis/librosa) was tried on local branch `fix/sb-track` (`b591aea`, NOT for main): it
-found 406-408 beats and 114.3-114.7 BPM at every tightness, and failed sb-dsp-test "weak onsets under noise".
-Do next, in order: (1) a GROUND TRUTH for this file. Jonathan, 2026-11-15: "it's the original recording. moises says its 114"
-(so no click: some real drift is expected; 114 is Moises's average). Asked him for Moises's downbeat times at about
-four bars (bar 1, a third in, two thirds in, near the end): measure the builder's grid against those; (2) a generated steady-eighths/sixteenths strummed song in
-`tools/sb-dsp-test.mjs` that fails today; (3) likely fix: the tempo from the tick search (bpm0 x 1, 2, 4; x 1, 3, 6 in
-6/8, as playalong-measure.py's find_pulse) and a straight grid unless the record clearly drifts, with tracking only
-then. Also asked by Jonathan the same day, NOT to build yet: "the drift check should pin the changes automatically"
-("don't do auto-pinning yet"). Agents: Opus or Fable by the need, as for the Windows block below. The Windows computer works
+**FIRST, before Part c: fix the Beat step's tracker (Jonathan, 2026-11-15: "keep fixing tracker. we can use a
+different model tomorrow. for songs that drift too much the app should tell me that i should ask claude to build it
+instead i don't want to have a moises step").** Decided: NO Moises / click-track step in the builder; a song whose
+drift the builder cannot follow says, like the 10-cent block, to send the mp3 to Claude. Not built yet:
+"the drift check should pin the changes automatically" ("don't do auto-pinning yet").
+THE RULER (on the Mac only, never in a test or the repo): `~/Downloads/American Girl-D-114bpm-440hz.mp3` (the
+original 1976 recording, 3:33) and Moises's beats for it, `~/Downloads/American Girl-D-114bpm-440hz metronome only.mp3`
+(397 clicks, 0.092 to 208.010 s, gaps 496-576 ms; Jonathan: the first click is the very start of the song = bar 1).
+Find the clicks: every sample over 20% of the file's peak, then skip 150 ms. Against a straight line (114.31 BPM) the
+record drifts -228..+260 ms: REAL drift, so the drift check's big numbers were largely true.
+Measured 2026-11-15, each tracker's beats against Moises's 397 (nearest-beat error): main today: median 219 ms, 371
+beats over 100 ms off; moved half a beat: median 45 ms, 88 over 100 ms. So today's tracker sits mostly on the "and"
+(the strumming puts more onset there) and also slips between beat and "and" mid-song. Bar 1 itself is right (0.092 s).
+Tried and dropped (none shipped): a whole-song dynamic-programming tracker (Ellis/librosa; tightness 100-20000:
+406-408 beats, on the "and", 155 over 100 ms even when moved half a beat; also failed sb-dsp-test "weak onsets");
+unwrapping the window tracker by half a beat plus "the first strong note is on a beat" (150 over 100 ms).
+`playalong-measure.py`'s STEADY line wraps at the sixteenth (132 ms), so it cannot see these slips: do not use it as
+the ruler. Do next: a tracker that stays on the beat (the target: Moises's beats within about 30 ms, few over 100 ms),
+proved first on a GENERATED drifting, steadily strummed song in `tools/sb-dsp-test.mjs` (accents on the "and" like
+American Girl) that fails today; then the ruler; then the "send it to Claude" line for drift the builder cannot
+follow (define "too much" from the measurements, with Jonathan). Agents: Opus or Fable by the need, as for the Windows block below. The Windows computer works
 the list in the next block at the same time: stay out of those files; fetch and rebase before every push. If Jonathan
 sends an mp3 for a first real song: skill `new-playalong`, 192k. Delete this block when Part d ships.
 
