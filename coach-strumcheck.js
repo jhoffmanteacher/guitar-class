@@ -113,8 +113,9 @@ const SC_ANCHOR_REST = -1.5;
    past one eighth, so he stayed on the wrong slots for the rest of the round. When the onsets of the last bar fit badly (at least
    SC_ANCHOR_WIDE_MIN of them, a full bar's six strums: D.DU.UDU shifted by 1 to 7 eighths never puts all six on strum places, so
    six strums fit one grid only; fewer can fit two) and score under their count less SC_ANCHOR_WIDE_SLACK, the search runs again
-   over SC_ANCHOR_WIDE_RANGE eighths either way. The chord on each 1 follows the same grid (scOnset reads the slot from it). And the search starts from the
-   grid it has and steps outward (review R1-6: the old loop never tried the current offset at tempos whose eighth is not a multiple
+   over SC_ANCHOR_WIDE_RANGE eighths either way of the CLICK grid (since review R6-1, 2026-11-16; before, of the grid it had, so a grid
+   pulled a bar off could not come back). The chord on each 1 follows the same grid (scOnset reads the slot from it). And the search
+   starts from the grid it has (the wide one from the click grid) and steps outward (review R1-6: the old loop never tried the current offset at tempos whose eighth is not a multiple
    of 5 ms, so the grid crept about 2 ms a strum). */
 const SC_ANCHOR_WIDE_RANGE = 4;
 const SC_ANCHOR_WIDE_MIN = 6;
@@ -615,7 +616,9 @@ function scAnchor(s, at){
   /* whether the bar fits badly is scored WITHOUT rule A (review R5-1): with it, one extra on bar 1's first rest made a right bar 1
      look bad, the wide search ran, found D.DU.UDU three eighths on, and bar 2, played right, failed */
   if (recent.length >= SC_ANCHOR_WIDE_MIN && scAnchorSearch({ ...s, gridOffset: r.best }, recent, 0, false, 0).score < recent.length - SC_ANCHOR_WIDE_SLACK){
-    const w = scAnchorSearch(s, recent, SC_ANCHOR_WIDE_RANGE, true);
+    /* around the CLICK grid, so it reaches every grid allowed (review R6-1: searched around the grid it had, a late starter's grid
+       pulled a bar off by one sound heard twice could never come back, and every bar was red) */
+    const w = scAnchorSearch({ ...s, gridOffset: 0 }, recent, SC_ANCHOR_WIDE_RANGE, true);
     if (w.score >= recent.length - SC_ANCHOR_WIDE_ACCEPT && w.n && w.off / w.n <= SC_ANCHOR_WIDE_TIGHT * s.slotMs) r = w;
   }
   s.gridOffset = r.best;

@@ -28,12 +28,13 @@
    for line with its numbers and its grid rule made settable; the default settings must reproduce the real function exactly, and the run
    stops if they do not), beside the synthetic bench's students (strum-check-loop.mjs) under the same settings; each take at its kept
    clock and +-20 ms. --cands=<json>: only the settings listed ([{ name, ratio, hfRatio, refract, rule, ease, cap, within, outPen,
-   dupOnce, lock, lockMin, trigOut, which }]), each printed per take and clock beside the site's (named "site": the copy at SITE_P); --no-bench leaves
+   dupOnce, lock, lockMin, trigOut, wideFrom, which }]), each printed per take and clock beside the site's (named "site": the copy at SITE_P); --no-bench leaves
    the bench out.
    Review R4-1's candidates (2026-11-16): A {"outPen":-1.5}, C {"outPen":-1.5,"dupOnce":true}, D {"lock":0.25}, AD both. AD is BUILT
    (coach-strumcheck.js SC_ANCHOR_LOCK / SC_ANCHOR_LOCK_MIN and the outside-every-window score, 2026-11-16), so SITE_P carries it; the
    code before it is {"outPen":null,"lock":0} (e.g. --cands='[{"name":"before","outPen":null,"lock":0}]'); AD as first built, before the
-   review R5-1 fix to the wide search's test, is {"trigOut":null}.
+   review R5-1 fix to the wide search's test, is {"trigOut":null}; every site before review R6-1 (the wide search around the click grid,
+   2026-11-16) adds "wideFrom":"grid".
    --copy=<json>: the settings the identity test gives the copy, for a tree with a candidate planted in coach-strumcheck.js (or an
    older tree: --copy='{"outPen":null,"lock":0}' on a tree from before AD).
    --splice: one of the take's own strums pasted into a rest (the block above `--gate` says how); caught / bar passed per candidate.
@@ -114,7 +115,8 @@ const HOOK = `(() => {
           let r = p.rule === 'shape' ? search(0, s.slotMs / 2, s.gridOffset) : search(s.gridOffset, range * s.slotMs, s.gridOffset);
           const fit = p.trigOut == null ? r.score : search(r.best, 0, r.best, false, null, p.trigOut).score;
           if (p.rule === 'shapeFree' && p.wide && recent.length >= (p.wideMin || 6) && fit < recent.length - (p.wideSlack == null ? 1.5 : p.wideSlack)){
-            const w = search(s.gridOffset, p.wide * s.slotMs, s.gridOffset, true);
+            const w0 = p.wideFrom === 'grid' ? s.gridOffset : 0;   // review R6-1: around the click grid (SITE_P); 'grid' = before 2026-11-16
+            const w = search(w0, p.wide * s.slotMs, w0, true);
             if (w.score >= recent.length - (p.wideAccept == null ? 1 : p.wideAccept) && w.n && w.off / w.n <= (p.wideTight == null ? 1e9 : p.wideTight) * s.slotMs) r = w;
           }
           s.gridOffset += (r.best - s.gridOffset) * p.ease;
@@ -138,8 +140,9 @@ const HOOK = `(() => {
 /* the site's settings as the page's copy of the detector writes them (the identity test below compares the copy with the real one):
    since 2026-11-14 ratios 1.15 / 1.3 and the pattern-shape grid (scHearStrum, coach-strumcheck.js); before, 1.2 / 1.46 and Strum
    Radar's easing 0.2 (rule 'base'). Since 2026-11-16 rule AD (review R4-1): outPen -1.5 and lock 0.25; and trigOut 0 (review R5-1: the wide search's test without rule A;
-   AD as first built, 1338af63, is {"trigOut":null}). */
-export const SITE_P = { ratio: 1.15, hfRatio: 1.3, refract: 140, ease: 1, within: 0.45, rule: 'shapeFree', wide: 4, wideMin: 6, wideSlack: 1.5, wideAccept: 1, wideTight: 0.15, outPen: -1.5, lock: 0.25, lockMin: 4, trigOut: 0 };
+   AD as first built, 1338af63, is {"trigOut":null}); and wideFrom 'click' (review R6-1: the wide search around the click grid; every
+   site before that is {"wideFrom":"grid"}). */
+export const SITE_P = { ratio: 1.15, hfRatio: 1.3, refract: 140, ease: 1, within: 0.45, rule: 'shapeFree', wide: 4, wideMin: 6, wideSlack: 1.5, wideAccept: 1, wideTight: 0.15, outPen: -1.5, lock: 0.25, lockMin: 4, trigOut: 0, wideFrom: 'click' };
 
 const args = process.argv.slice(2);
 const opt = k => { const a = args.find(x => x.startsWith('--' + k + '=')); return a ? a.slice(k.length + 3) : null; };
@@ -288,6 +291,7 @@ function gridLists(){
       if (o.dbl && r() < o.dbl) on.push(t + 145 + r() * 80);
     }
     if (o.extra) on.push((o.extra[0] * 8 + o.extra[1]) * slot + o.extra[2]);
+    if (o.first2) on.push(Math.min(...on) + o.first2);
     if (o.noise){ let t = 0; for (;;){ t += -Math.log(1 - r()) * 8 * slot / o.noise; if (t > 64 * slot) break; on.push(t); } }
     return on.filter(t => t > -0.45 * slot && t < 66 * slot).sort((p, q) => p - q);
   };
@@ -295,7 +299,8 @@ function gridLists(){
     ['drag 6%', { drift: 0.06 }], ['rush 4%', { drift: -0.04 }], ['tempo +5% from bar 3', { step: 0.05 }], ['tempo -5% from bar 3', { step: -0.05 }],
     ['late 1 eighth', { late: 1 }], ['late 1.5 eighths', { late: 1.5 }], ['late 3 eighths', { late: 3 }], ['early 1 eighth', { late: -1 }],
     ['an eighth lost at bar 4', { jump: 1 }], ['a beat lost at bar 4', { jump: 2 }], ['stray sounds, 1 a bar', { noise: 1 }],
-    ['30% heard twice', { dbl: 0.3 }], ['half the ups not heard', { ups: 0.5 }]];
+    ['30% heard twice', { dbl: 0.3 }], ['half the ups not heard', { ups: 0.5 }], ['late 1.5 eighths, his first strum heard twice', { late: 1.5, sigma: 0, first2: 150 }],
+    ['late 2.5 eighths, his first strum heard twice', { late: 2.5, first2: 180 }]];
   for (const [bar, rest] of [[0, 1], [0, 4], [1, 1], [1, 4], [4, 1], [4, 4]]) for (const off of [-60, -40, -20, 0, 20, 40, 60]){
     SC.push([`an extra on bar ${bar + 1} slot ${rest}, ${off} ms`, { sigma: 15, extra: [bar, rest, off] }]);
   }
