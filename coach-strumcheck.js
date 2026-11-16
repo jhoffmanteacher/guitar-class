@@ -604,7 +604,9 @@ function scAnchor(s, at){
   const before = recent.slice(0, -1);
   const range = before.length >= SC_ANCHOR_LOCK_MIN && scAnchorSearch(s, before, 0, false).score === before.length ? SC_ANCHOR_LOCK : SC_ANCHOR_RANGE;
   let r = scAnchorSearch(s, recent, range, false);
-  if (recent.length >= SC_ANCHOR_WIDE_MIN && r.score < recent.length - SC_ANCHOR_WIDE_SLACK){
+  /* whether the bar fits badly is scored WITHOUT rule A (review R5-1): with it, one extra on bar 1's first rest made a right bar 1
+     look bad, the wide search ran, found D.DU.UDU three eighths on, and bar 2, played right, failed */
+  if (recent.length >= SC_ANCHOR_WIDE_MIN && scAnchorSearch({ ...s, gridOffset: r.best }, recent, 0, false, 0).score < recent.length - SC_ANCHOR_WIDE_SLACK){
     const w = scAnchorSearch(s, recent, SC_ANCHOR_WIDE_RANGE, true);
     if (w.score >= recent.length - SC_ANCHOR_WIDE_ACCEPT && w.n && w.off / w.n <= SC_ANCHOR_WIDE_TIGHT * s.slotMs) r = w;
   }
@@ -612,8 +614,10 @@ function scAnchor(s, at){
 }
 /* The best grid offset within `range` eighths of the grid it has, never more than SC_ANCHOR_WIDE_RANGE eighths from the click grid:
    the grid it has first, then SC_ANCHOR_STEP ms out on both sides; a later offset wins only with a higher score (so a tie keeps the
-   nearest), or, when `centred`, with the same score and its strums nearer the middles of their windows. */
-function scAnchorSearch(s, recent, range, centred){
+   nearest), or, when `centred`, with the same score and its strums nearer the middles of their windows. `outCost`: what a sound
+   outside every window scores (rule A: SC_ANCHOR_REST when left out; scAnchor's wide-search test passes 0). */
+function scAnchorSearch(s, recent, range, centred, outCost){
+  if (outCost === undefined) outCost = SC_ANCHOR_REST;
   const c0 = s.gridOffset, n = Math.ceil(range * s.slotMs / SC_ANCHOR_STEP), lim = SC_ANCHOR_WIDE_RANGE * s.slotMs;
   let best = c0, bestScore = -1e9, bestOff = 1e9, bestN = 0;
   for (let i = 0; i <= 2 * n; i++){
@@ -622,7 +626,7 @@ function scAnchorSearch(s, recent, range, centred){
     let score = 0, off = 0, nIn = 0;
     for (const t of recent){
       const q = t - s.listenStart - o - s.lat, k = Math.round(q / s.slotMs), d = q - k * s.slotMs;
-      if (Math.abs(d) > s.win){ score += SC_ANCHOR_REST; continue; }   // rule A: outside every window costs as a rest does
+      if (Math.abs(d) > s.win){ score += outCost; continue; }   // rule A: outside every window costs as a rest does
       const sl = s.slotsOf[((k % SC_SLOTS) + SC_SLOTS) % SC_SLOTS];
       score += sl && sl.strum ? 1 : SC_ANCHOR_REST;
       off += Math.abs(d); nIn++;

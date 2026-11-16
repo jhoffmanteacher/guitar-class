@@ -17508,7 +17508,7 @@ async function checkStrumCheck() {
   const fail = m => { err('1eh (strum-pattern check): ' + m); problems++; bad++; };
   if (!COACH_SANDBOX) { fail("1ca's sandbox did not load, so the strum-pattern check was NOT run"); return; }
   const { run } = COACH_SANDBOX;
-  const n = { pins: 0, onsets: 0, chords: 0, lines: 0, strumSteps: 0, sweeps: 0, tempos: 0, saves: 0, again: 0, reads: 0, nothing: 0, life: 0, restExtras: 0 };
+  const n = { pins: 0, onsets: 0, chords: 0, lines: 0, strumSteps: 0, sweeps: 0, tempos: 0, saves: 0, again: 0, reads: 0, nothing: 0, life: 0, restExtras: 0, bar1Extras: 0 };
   const PIN = { pattern: 'D.DU.UDU', bars: 'D5 D5 C5 C5 G5 G5 D5 D5', rests: '1,4', win: 0.45, rule: 'oc', ratio: 1.15, hfRatio: 1.3, startBpm: 85, octTol: 0.6, missGrace: 60, clarity: 0.55, recMax: 60,
     anchor: { range: 1, step: 5, span: 8, rest: -1.5, wide: 4, wideMin: 6, wideSlack: 1.5, wideAccept: 1, wideTight: 0.15, lock: 0.25, lockMin: 4 }, gate: { level: 0.012, pct: 0.2, floor: 0.003, skip: 300, pre: 20, post: 150 }, octOk: 1, octWrong: 2 };
   try {
@@ -17724,6 +17724,45 @@ async function checkStrumCheck() {
       const missed = r.filter(x => x.kind !== 'extra' || x.k !== x.bar * 8 + x.rest || x.state !== 'extra' || x.faults !== 'extra on ' + x.rest || x.other);
       n.restExtras = r.length;
       if (missed.length) fail(`one extra strum on a rest of a right bar (through the real scHearStrum and scOnset): ${missed.length} of ${r.length} not called an extra on that rest, e.g. ${missed.slice(0, 4).map(x => `${x.spread ? '' : 'no spread, '}${x.bpm} BPM, bar ${x.bar + 1} rest ${x.rest}, ${x.off > 0 ? '+' : ''}${x.off} ms: filed "${x.kind}" at eighth ${x.k}, the rest "${x.state}", the bar's faults [${x.faults}], the other bar's wrong slots ${x.other}`).join('; ')} (want "extra" on the rest and it the bar's only fault: the grid search must not slide the grid to excuse it)`);
+      n.pins++;
+    }
+    /* AN EXTRA ON BAR 1'S FIRST REST DOES NOT FAIL BAR 2 (review round 5, R5-1): two bars played right (the twelve offsets above) and one
+       more strum on bar 1's slot 1, at 20 to 60 ms from its place. Rule A first made bar 1 score badly with it, the wide search ran, fitted
+       D.DU.UDU three eighths on, and bar 2, played right, failed; scAnchor now tests the fit without rule A. Bar 2 must be all right
+       (and nothing else in it called) in the 24 rounds where it was before AD: at 60 BPM -60 / -50 / -40 ms; 85 BPM -60 to -30 and +50,
+       +60; 100 BPM -60 to -20 and +50, +60; 125 BPM -60 to -20 and +40 to +60. Left out: the nearer extras (the grid slides to fit them
+       and bar 2 fails, before AD as now). Rule A in the wide-search test (AD as first built, 1338af63) fails 14 of the 24. */
+    {
+      const CASES = [[60, -60], [60, -50], [60, -40], [85, -60], [85, -50], [85, -40], [85, -30], [85, 50], [85, 60], [100, -60], [100, -50], [100, -40], [100, -30], [100, -20], [100, 50], [100, 60],
+        [125, -60], [125, -50], [125, -40], [125, -30], [125, -20], [125, 40], [125, 50], [125, 60]];
+      const r = JSON.parse(run(`(() => {
+        const J = [11, -14, 6, -8, 15, -3, -12, 9, 2, -15, 13, -5], STR = [0, 2, 3, 5, 6, 7], out = [], pat = scPatternSlots('${PIN.pattern}'), keep = coachOnsetAt;
+        try {
+          for (const [bpm, off] of ${JSON.stringify(CASES)}){
+            const slotMs = 30000 / bpm, s = { bars: ['D5', 'D5'], chords: {}, slotsOf: pat, cells: [], bpm, beatMs: 2 * slotMs, slotMs, win: SC_WIN_FRAC * slotMs, lat: 0,
+              onsetRatio: SC_ONSET_RATIO, hfRatio: SC_HF_RATIO, smoothRms: 0, smoothHf: 0, lastOnsetT: -1e9, gridOffset: 0, lastPitchT: 0, onsets: [], cur: -1, sweep: 0, cap: null,
+              events: [], barsDone: 0, tooLoud: false, slots: [], listenStart: 100000 };
+            s.bars.forEach((c, b) => pat.forEach((sl, k) => s.slots.push({ k: b * 8 + k, bar: b, slot: k, strum: sl.strum, dir: sl.dir, state: 'pending', devMs: null, gridMs: null })));
+            s.caps = s.bars.map((c, b) => ({ bar: b, chord: c, prev: b ? s.bars[b - 1] : null, at: null, rt: [], rm: [], done: false }));
+            s.total = s.slots.length;
+            const on = []; let j = 0;
+            for (let b = 0; b < 2; b++) for (const k of STR) on.push((b * 8 + k) * slotMs + J[j++]);
+            on.push(slotMs + off); on.sort((p, q) => p - q);
+            for (const t of on){
+              scSweep(s, t + 15 - 17 - s.gridOffset);
+              coachOnsetAt = s.listenStart + t; s.smoothRms = 0; s.smoothHf = 0;
+              const rel = scHearStrum(s, 0.1, 0.01);
+              if (rel != null) scOnset(s, rel, coachOnsetAt);
+              scSweep(s, t + 15 - s.gridOffset);
+            }
+            scSweep(s, 1e9);
+            out.push({ bpm, off, bar2: s.slots.slice(8).filter(x => x.strum ? x.state !== 'ok' : x.state !== 'quiet').map(x => 'slot ' + x.slot + ' ' + x.state).join(', ') });
+          }
+        } finally { coachOnsetAt = keep; }
+        return JSON.stringify(out); })()`));
+      const red = r.filter(x => x.bar2);
+      n.bar1Extras = r.length;
+      if (red.length) fail(`one extra strum on bar 1's first rest failed bar 2, played right, in ${red.length} of ${r.length} rounds, e.g. ${red.slice(0, 3).map(x => `${x.bpm} BPM, ${x.off > 0 ? '+' : ''}${x.off} ms: bar 2 ${x.bar2}`).join('; ')} (scAnchor's wide-search test must score the fit without rule A: review R5-1)`);
       n.pins++;
     }
     /* one start at a time (review round 1): a second click while the first start waits for the mic runs nothing */
@@ -18374,8 +18413,8 @@ async function checkStrumCheck() {
     run(`setLang('en')`);
   } catch (e) { fail('stopped on an error: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : e)); }
   /* pinned totals, so a renamed function cannot turn this into a check of nothing */
-  if (n.saves !== 4 || n.tempos !== 4 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 15 || n.lines !== 10 || n.pins !== 15 || n.again !== 3 || n.reads !== 3 || n.nothing !== 8 || n.life !== 6 || n.restExtras !== 71) fail(`ran ${n.saves} take saves (want 4), ${n.tempos} tempo opens (want 4), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (15), ${n.lines} end lines (10), ${n.pins} pins (15), ${n.again} strums on a called slot (3), ${n.reads} chord-reading frames (3), ${n.nothing} "could not hear" end screens (8), ${n.life} lifecycle cases (6), ${n.restExtras} extra strums on a rest (71)`);
-  if (!bad) ok(`1eh: one listening step (ca-52, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, in a row under the board, none in the console, never disabled; the step's slider drawn at ${PIN.startBpm}, the only tempo control, one tempo with the check; no block element and no per-bar sentence (their strings gone); the tempo controls locked during a round and given back on every exit; its own ratios ${PIN.ratio} / ${PIN.hfRatio} through its own scHearStrum (Strum Radar's still 1.4 / 1.7, run); the pattern-shape grid (a player 0.8 of an eighth late kept on his own 18 slots, with or without the click; one extra strum on a rest called an extra through the grid search, ${n.restExtras} cases, rule AD); the too-noisy gate at count-in level ${PIN.gate.level} (a quiet count-in with loud clicks not gated, a noisy one gated, the first ${PIN.gate.skip} ms left out; a gated round colours nothing, says one line and still counts); the take's beat and gate fields; window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule}: the octave vote, then c (${n.chords} scripted cases, two from real takes); the Metronome's click only with headphones (32 a round, all cleared by Stop), its beat dot and the frame around the board on the same click-grid clock (32 beats, 8 bars' 1s, none with it off, cleared on every exit); local recording mode only on this computer's host with the dev bypass (files, no Firestore; another host or a real account unchanged); two full rounds tick ca-52's step (round 1 <id>:0:r1, round 2 the step; Stopped, short and other steps write nothing; no Mark done button); a whole finish saved nothing else; its take saved through micRecSaveNow into a strict Firestore stub (3 rounds); the real sweep and its one-line end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages; the round's life on a made-up clock (${n.life} ways through a real round: the mic off, no timer left and the capture let go after each; a take saved only with a finished bar, complete only when played to the end); "could not hear any strums" only when nothing was heard inside the bars (${n.nothing} end screens, EN + ES); the chord readings' gate, clarity and end (${n.reads} frames); a called slot keeps its verdict (${n.again}); grace ${PIN.missGrace} ms, clarity ${PIN.clarity}, longest take ${PIN.recMax} s`);
+  if (n.saves !== 4 || n.tempos !== 4 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 15 || n.lines !== 10 || n.pins !== 16 || n.again !== 3 || n.reads !== 3 || n.nothing !== 8 || n.life !== 6 || n.restExtras !== 71 || n.bar1Extras !== 24) fail(`ran ${n.saves} take saves (want 4), ${n.tempos} tempo opens (want 4), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (15), ${n.lines} end lines (10), ${n.pins} pins (16), ${n.again} strums on a called slot (3), ${n.reads} chord-reading frames (3), ${n.nothing} "could not hear" end screens (8), ${n.life} lifecycle cases (6), ${n.restExtras} extra strums on a rest (71), ${n.bar1Extras} extras on bar 1's first rest (24)`);
+  if (!bad) ok(`1eh: one listening step (ca-52, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, in a row under the board, none in the console, never disabled; the step's slider drawn at ${PIN.startBpm}, the only tempo control, one tempo with the check; no block element and no per-bar sentence (their strings gone); the tempo controls locked during a round and given back on every exit; its own ratios ${PIN.ratio} / ${PIN.hfRatio} through its own scHearStrum (Strum Radar's still 1.4 / 1.7, run); the pattern-shape grid (a player 0.8 of an eighth late kept on his own 18 slots, with or without the click; one extra strum on a rest called an extra through the grid search, ${n.restExtras} cases, rule AD; one on bar 1's first rest leaves bar 2 right, ${n.bar1Extras} cases); the too-noisy gate at count-in level ${PIN.gate.level} (a quiet count-in with loud clicks not gated, a noisy one gated, the first ${PIN.gate.skip} ms left out; a gated round colours nothing, says one line and still counts); the take's beat and gate fields; window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule}: the octave vote, then c (${n.chords} scripted cases, two from real takes); the Metronome's click only with headphones (32 a round, all cleared by Stop), its beat dot and the frame around the board on the same click-grid clock (32 beats, 8 bars' 1s, none with it off, cleared on every exit); local recording mode only on this computer's host with the dev bypass (files, no Firestore; another host or a real account unchanged); two full rounds tick ca-52's step (round 1 <id>:0:r1, round 2 the step; Stopped, short and other steps write nothing; no Mark done button); a whole finish saved nothing else; its take saved through micRecSaveNow into a strict Firestore stub (3 rounds); the real sweep and its one-line end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages; the round's life on a made-up clock (${n.life} ways through a real round: the mic off, no timer left and the capture let go after each; a take saved only with a finished bar, complete only when played to the end); "could not hear any strums" only when nothing was heard inside the bars (${n.nothing} end screens, EN + ES); the chord readings' gate, clarity and end (${n.reads} frames); a called slot keeps its verdict (${n.again}); grace ${PIN.missGrace} ms, clarity ${PIN.clarity}, longest take ${PIN.recMax} s`);
 }
 
 async function checkCountIn() {

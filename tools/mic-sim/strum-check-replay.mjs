@@ -2,7 +2,7 @@
    J01.. in `Claude outputs/takes-anon/`, local-takes-in.mjs). A sibling of replay-listen.mjs; measure-only, changes no site code.
 
      node tools/mic-sim/strum-check-replay.mjs <J01.json> [<J02.json> ...] [--key=<file>] [--diag] [--dot] [--sweep [--cands=<json>]
-                                               [--no-bench]] [--splice [--splice-offs=0,-40,40]] [--copy=<json>] [--shifts=J01:-117.5,..]
+                                               [--no-bench]] [--splice [--splice-offs=0,-40,40] [--splice-bars=1]] [--copy=<json>] [--shifts=J01:-117.5,..]
                                                [--json=<file>]
 
    THE REPLAY: the take's .wav goes back through the site's mic chain (replay-takes.mjs prepare) into the bench page (listen-site.mjs
@@ -31,7 +31,8 @@
    the bench out.
    Review R4-1's candidates (2026-11-16): A {"outPen":-1.5}, C {"outPen":-1.5,"dupOnce":true}, D {"lock":0.25}, AD both. AD is BUILT
    (coach-strumcheck.js SC_ANCHOR_LOCK / SC_ANCHOR_LOCK_MIN and the outside-every-window score, 2026-11-16), so SITE_P carries it; the
-   code before it is {"outPen":null,"lock":0} (e.g. --cands='[{"name":"before","outPen":null,"lock":0}]').
+   code before it is {"outPen":null,"lock":0} (e.g. --cands='[{"name":"before","outPen":null,"lock":0}]'); AD as first built, before the
+   review R5-1 fix to the wide search's test, is {"trigOut":null}.
    --copy=<json>: the settings the identity test gives the copy, for a tree with a candidate planted in coach-strumcheck.js (or an
    older tree: --copy='{"outPen":null,"lock":0}' on a tree from before AD).
    --splice: one of the take's own strums pasted into a rest (the block above `--gate` says how); caught / bar passed per candidate.
@@ -87,8 +88,11 @@ const HOOK = `(() => {
                outPen  an onset outside every window scores this (candidate A: -1.5, as on a rest; before AD it scored nothing)
                dupOnce a second onset in the same eighth scores as a rest (candidate C, with A)
                lock    when the onsets before this one (4 or more) all fit the grid of the moment, search only +-lock eighths
-                       (candidate D: 0.25; AD = A and D; BUILT 2026-11-16 with SC_ANCHOR_LOCK_MIN 4: SITE_P below) */
-          const search = (c0, R, keepNear, centred, list) => {
+                       (candidate D: 0.25; AD = A and D; BUILT 2026-11-16 with SC_ANCHOR_LOCK_MIN 4: SITE_P below)
+               trigOut what an onset outside every window scores when the wide search decides whether the bar fits badly (review R5-1:
+                       0 since 2026-11-16, scAnchor's test without rule A; null = outPen, as AD was first built) */
+          const search = (c0, R, keepNear, centred, list, pen) => {
+            if (pen === undefined) pen = p.outPen;
             const n = Math.ceil(R / 5); let best = keepNear, bestSc = -1e9, bestOff = 1e9, bestN = 0;
             for (let i = 0; i <= 2 * n; i++){
               const o = c0 + (i % 2 ? 1 : -1) * Math.ceil(i / 2) * 5;
@@ -96,7 +100,7 @@ const HOOK = `(() => {
               let sc0 = 0, off = 0, nIn = 0; const seen = p.dupOnce ? new Set() : null;
               for (const t of list || recent){
                 const q = t - s.listenStart - o - s.lat, k = Math.round(q / s.slotMs), d = q - k * s.slotMs;
-                if (Math.abs(d) > s.win){ if (p.outPen != null) sc0 += p.outPen; continue; }
+                if (Math.abs(d) > s.win){ if (pen != null) sc0 += pen; continue; }
                 const ks = ((k % 8) + 8) % 8, dup = seen ? seen.has(k) : false; if (seen) seen.add(k);
                 sc0 += s.slotsOf && s.slotsOf[ks] && s.slotsOf[ks].strum && !dup ? 1 : -1.5; off += Math.abs(d); nIn++;
               }
@@ -107,7 +111,8 @@ const HOOK = `(() => {
           let range = p.range || 1;
           if (p.lock && p.rule === 'shapeFree'){ const others = recent.slice(0, -1); if (others.length >= 4 && search(s.gridOffset, 0, s.gridOffset, false, others).score === others.length) range = p.lock; }
           let r = p.rule === 'shape' ? search(0, s.slotMs / 2, s.gridOffset) : search(s.gridOffset, range * s.slotMs, s.gridOffset);
-          if (p.rule === 'shapeFree' && p.wide && recent.length >= (p.wideMin || 6) && r.score < recent.length - (p.wideSlack == null ? 1.5 : p.wideSlack)){
+          const fit = p.trigOut == null ? r.score : search(r.best, 0, r.best, false, null, p.trigOut).score;
+          if (p.rule === 'shapeFree' && p.wide && recent.length >= (p.wideMin || 6) && fit < recent.length - (p.wideSlack == null ? 1.5 : p.wideSlack)){
             const w = search(s.gridOffset, p.wide * s.slotMs, s.gridOffset, true);
             if (w.score >= recent.length - (p.wideAccept == null ? 1 : p.wideAccept) && w.n && w.off / w.n <= (p.wideTight == null ? 1e9 : p.wideTight) * s.slotMs) r = w;
           }
@@ -131,8 +136,9 @@ const HOOK = `(() => {
 })()`;
 /* the site's settings as the page's copy of the detector writes them (the identity test below compares the copy with the real one):
    since 2026-11-14 ratios 1.15 / 1.3 and the pattern-shape grid (scHearStrum, coach-strumcheck.js); before, 1.2 / 1.46 and Strum
-   Radar's easing 0.2 (rule 'base'). Since 2026-11-16 rule AD (review R4-1): outPen -1.5 and lock 0.25. */
-export const SITE_P = { ratio: 1.15, hfRatio: 1.3, refract: 140, ease: 1, within: 0.45, rule: 'shapeFree', wide: 4, wideMin: 6, wideSlack: 1.5, wideAccept: 1, wideTight: 0.15, outPen: -1.5, lock: 0.25 };
+   Radar's easing 0.2 (rule 'base'). Since 2026-11-16 rule AD (review R4-1): outPen -1.5 and lock 0.25; and trigOut 0 (review R5-1: the wide search's test without rule A;
+   AD as first built, 1338af63, is {"trigOut":null}). */
+export const SITE_P = { ratio: 1.15, hfRatio: 1.3, refract: 140, ease: 1, within: 0.45, rule: 'shapeFree', wide: 4, wideMin: 6, wideSlack: 1.5, wideAccept: 1, wideTight: 0.15, outPen: -1.5, lock: 0.25, trigOut: 0 };
 
 const args = process.argv.slice(2);
 const opt = k => { const a = args.find(x => x.startsWith('--' + k + '=')); return a ? a.slice(k.length + 3) : null; };
@@ -410,8 +416,10 @@ if (flag('sweep')){
    and ADDED into one rest of the same bar, at the rest's place as he played it (halfway between his own two strums either side, as the
    replay of the site's code hears them) plus --splice-offs (default 0,-40,40,-80,80 ms). Bars 2 to 7, both rests: up to 12 rests a take,
    one extra per replay, at the take's kept clock. Under the site's code ("site": the copy at SITE_P) and each --cands candidate. Per variant:
-   caught (the rest's slot "extra"), the mistake bar passed (its six strums heard, no extra), and the OTHER 63 slots that changed
-   against the same variant's replay of the unspliced take. */
+   caught (the rest's slot "extra"), the mistake bar passed (its six strums heard, no extra), the OTHER 63 slots that changed
+   against the same variant's replay of the unspliced take, and the NEXT bar failed when it passed unspliced ("next bar red").
+   --splice-bars=1,2,..: the bars to splice into, counted from 1 (default 2 to 7; review R5-1: --splice-bars=1 for bar 1's rests, whose
+   slot 1 has only his own first strum before it). */
 if (flag('splice')){
   const offs = (opt('splice-offs') || '0,-40,40,-80,80').split(',').map(Number);
   const vars = [{ name: 'site', p: SITE_P }].concat(opt('cands') ? JSON.parse(opt('cands')).map((c, i) => ({ name: c.name || 'cand' + i, p: Object.fromEntries(Object.entries({ ...SITE_P, ...c }).filter(([k]) => k !== 'which' && k !== 'name')) })) : []);
@@ -422,7 +430,7 @@ if (flag('splice')){
     const ev = k => ref.events.find(e => e.k === k && e.kind === 'strum');
     const plain = {}; for (const v of vars) plain[v.name] = await replay(tk, v.p, { shift: tk.shift });
     const slotMs = 60000 / tk.d.bpm / 2, L = Math.min(220, 0.7 * slotMs);
-    for (let bar = 1; bar <= 6; bar++) for (const [rest, src, a, b] of [[1, 0, 0, 2], [4, 2, 3, 5]]){
+    for (const bar of (opt('splice-bars') || '2,3,4,5,6,7').split(',').map(x => Number(x) - 1)) for (const [rest, src, a, b] of [[1, 0, 0, 2], [4, 2, 3, 5]]){
       const eS = ev(bar * 8 + src), eA = ev(bar * 8 + a), eB = ev(bar * 8 + b);
       if (!eS || !eA || !eB){ log(`SPLICE ${tk.id} bar ${bar + 1} rest ${rest}: left out (the site's replay did not hear its strums ${src}/${a}/${b})`); continue; }
       const from = Math.round((wavMs(eS) - 30) / 1000 * sr), n = Math.round(L / 1000 * sr), mid = (wavMs(eA) + wavMs(eB)) / 2;
@@ -435,20 +443,22 @@ if (flag('splice')){
           const r = await replay(tk2, v.p, { shift: tk.shift }), k = bar * 8 + rest;
           const caught = r.slots[k].state === 'extra', own = r.slots.slice(bar * 8, bar * 8 + 8), pass = own.every(x2 => x2.strum ? x2.state === 'ok' : x2.state !== 'extra');
           const moved = r.slots.filter((x2, i) => i !== k && x2.state !== plain[v.name].slots[i].state).length;
-          const t = tally[v.name + '|' + off] = tally[v.name + '|' + off] || { n: 0, caught: 0, pass: 0, moved: 0 };
-          t.n++; if (caught) t.caught++; if (pass) t.pass++; t.moved += moved;
-          const tt = tally[v.name + '|' + tk.id] = tally[v.name + '|' + tk.id] || { n: 0, caught: 0, pass: 0, moved: 0 };
-          tt.n++; if (caught) tt.caught++; if (pass) tt.pass++; tt.moved += moved;
-          cells.push(`${v.name} ${r.slots[k].state}${pass ? ' (bar passed)' : ''}${moved ? ' +' + moved + ' other slots changed' : ''}`);
+          const nextOk = sl => sl.slice((bar + 1) * 8, (bar + 2) * 8).every(x2 => x2.strum ? x2.state === 'ok' : x2.state !== 'extra');
+          const nextRed = bar < 7 && nextOk(plain[v.name].slots) && !nextOk(r.slots);
+          const t = tally[v.name + '|' + off] = tally[v.name + '|' + off] || { n: 0, caught: 0, pass: 0, moved: 0, next: 0 };
+          t.n++; if (caught) t.caught++; if (pass) t.pass++; t.moved += moved; if (nextRed) t.next++;
+          const tt = tally[v.name + '|' + tk.id] = tally[v.name + '|' + tk.id] || { n: 0, caught: 0, pass: 0, moved: 0, next: 0 };
+          tt.n++; if (caught) tt.caught++; if (pass) tt.pass++; tt.moved += moved; if (nextRed) tt.next++;
+          cells.push(`${v.name} ${r.slots[k].state}${pass ? ' (bar passed)' : ''}${moved ? ' +' + moved + ' other slots changed' : ''}${nextRed ? ' NEXT BAR RED' : ''}`);
         }
         log(`SPLICE ${tk.id} bar ${bar + 1} rest ${rest} ${off > 0 ? '+' : ''}${off} ms: ${cells.join(' · ')}`);
       }
     }
   }
-  log('SPLICE TOTALS (caught / mistake bar passed / other slots changed, of n splices)');
+  log('SPLICE TOTALS (caught / mistake bar passed / other slots changed / next bar red, of n splices)');
   for (const v of vars){
-    log(`  ${v.name.padEnd(8)} by offset: ${offs.map(o => { const t = tally[v.name + '|' + o]; return t ? `${o > 0 ? '+' : ''}${o}: ${t.caught}/${t.n}, passed ${t.pass}, moved ${t.moved}` : ''; }).join(' | ')}`);
-    log(`  ${v.name.padEnd(8)} by take:   ${takes.map(tk => { const t = tally[v.name + '|' + tk.id]; return t ? `${tk.id}: ${t.caught}/${t.n}, passed ${t.pass}, moved ${t.moved}` : ''; }).join(' | ')}`);
+    log(`  ${v.name.padEnd(8)} by offset: ${offs.map(o => { const t = tally[v.name + '|' + o]; return t ? `${o > 0 ? '+' : ''}${o}: ${t.caught}/${t.n}, passed ${t.pass}, moved ${t.moved}, next red ${t.next}` : ''; }).join(' | ')}`);
+    log(`  ${v.name.padEnd(8)} by take:   ${takes.map(tk => { const t = tally[v.name + '|' + tk.id]; return t ? `${tk.id}: ${t.caught}/${t.n}, passed ${t.pass}, moved ${t.moved}, next red ${t.next}` : ''; }).join(' | ')}`);
   }
 }
 if (flag('gate')){
