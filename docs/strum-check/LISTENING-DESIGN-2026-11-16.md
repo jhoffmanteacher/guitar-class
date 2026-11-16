@@ -184,7 +184,7 @@ readings against another chord of the step (a stand-in, not a real wrong-chord t
 | Note Call | `ncListen` drills-call:676 | `coachOnsetTick` | `coachSettlePitch`; power at [0.22, 0.45] | root and its octaves, not the 5th |
 | Change Up | `ccLoop` chords:983 | inline copy chords:1006-1012, 1.4 / 1.7 | 0.55 | `ccToneOk` (chords:918); nearest strum wins |
 | Power Chord Switch | `ccLoop` | the same copy, **1.8 / 2.19** | [0.22, 0.45] | `ccToneOk`; the whole-span rule `ccSpanRule` |
-| Strum Radar | `srLoop` → `srHearStrum` strum:1255 | inline copy strum:1256-1261, 1.4 / 1.7 | none | timing only; window max(90 ms, min(0.28 beat, 0.45 of the gap)) |
+| Strum Radar | `srLoop` → `srHearStrum` strum:1256 | inline copy strum:1257-1262, 1.4 / 1.7 | none | timing only; window max(90 ms, min(0.28 beat, 0.45 of the gap)) |
 | Note Runner, Finger Gym | `nrLoop` noterunner:625 | inline copy noterunner:650-652, 1.4 / 1.7 | 0.55 / 0.22 | `nrFinalizeEvent`; window min(180 ms, 0.45 of the gap) |
 | Strum Pattern check | `scLoop` → `scHearStrum` strumcheck:568 | inline copy, **1.15 / 1.3** | 0.55, on the "1" only | the octave vote, then rule c |
 | Tuner | `tunerLoop` tuner:211 | none | its **own** detector `detectPitchYIN` (tuner:113) | n/a |
@@ -202,10 +202,11 @@ All share `coachReadFrame`, `coachSmooth`, `coachDetectPitch`, the floors 0.003 
 5. `ccToneOk` (chords:918) and `scChordB` (strumcheck:219-220): the same idea, different "wrong" rules.
 6. The 0.6-semitone tolerance is a bare number in 5 more places beside `COACH_VOTE_TOL`.
 
-**Stale comments found, not fixed:** `coach-strum.js:1238-1240` and `tools/checks.mjs:17115` say `srHearStrum` is
-shared with the strum-pattern check (the check has its own `scHearStrum` since 2026-11-14); `coach-hub.js:144` and
-`coach-runner.js:951` say "No onset detector in this loop" though `coachSettlePitch` runs one; the header of
-`tools/mic-sim/strum-check-replay.mjs` still names `srHearStrum`.
+**Stale comments found:** `coach-strum.js:1238-1240` said `srHearStrum` is shared with the strum-pattern check (the
+check has its own `scHearStrum` since 2026-11-14), and `coach-hub.js:144` and `coach-runner.js:951` said "No onset
+detector in this loop" though `coachSettlePitch` runs one: all three fixed in `d6c3e16` (2026-11-16). Still stale:
+`tools/checks.mjs` (1eh's header, "run through the real srHearStrum") and the header of
+`tools/mic-sim/strum-check-replay.mjs` (line 8), which still name `srHearStrum` for the check.
 
 ### What can be shared, what stays per game
 Can become one function with per-game settings: the start-of-note test, "readings agree", the melody vote, the
