@@ -35,9 +35,11 @@ Start here. Update this block whenever an item opens or closes; each line says w
 Mac work in WORKFLOW". Parts b and c are live (entry "Song builder" below). **Waiting on Jonathan, in this order:**
 (1) he builds one real song up to the Beat step and says whether the bar lines sit on the beat; (2) he pastes three
 real charts at the Chart step and says whether they read right (report per chart the lines read, refused and folded
-as COUNTS only: never paste his lyrics into a report). Then build Part d (Preview, Publish, Edit, Unpublish, Delete,
-backup, Export) from `Claude outputs/WORK-ORDER-song-builder.md` (on the Mac only), in its own worktree made from
-`origin/main`: Part d is ALWAYS REVIEWED (`site-reviewer`, before the push); then stop for Jonathan before Part e.
+as COUNTS only: never paste his lyrics into a report). **Part d (Preview, Publish, Edit, Unpublish, Delete, backup,
+Export) is BUILT (2026-11-16, entry "Song builder" below, bullet "Part d"), not pushed: it is ALWAYS REVIEWED
+(`site-reviewer`, before the push), then the change smoke (`--only activities`) and `console-layout-smoke`; its open
+product questions are in that bullet.** Then Jonathan publishes one song and checks it as a student on a Chromebook;
+then stop for Jonathan before Part e.
 Part d must keep his two answers of 2026-11-15: a record over 8 pins is sent to Claude and the line only warns
 (Publish is not blocked by it); the 10-cent pitch rule does block.
 **GitHub's "Site checks" is green again (2026-11-16, `190586d`).** It had been red since Part b: check 1en ran
@@ -69,7 +71,8 @@ and/or the Chart step is open while the copy is being levelled (about 48 s for a
 it. Build it with Part c's Chart step; it is not in the work order, which was written before he asked.
 Agents: Opus or Fable by the need, as for the Windows block below. The Windows computer works
 the list in the next block at the same time: stay out of those files; fetch and rebase before every push. If Jonathan
-sends an mp3 for a first real song: skill `new-playalong`, 192k. Delete this block when Part d ships.
+sends an mp3 for a first real song: skill `new-playalong`, 192k. Delete this block when Part d is pushed and Jonathan
+has published one song.
 
 **The three Strum check takes are in the repo (2026-11-16, the Mac): `tools/mic-sim/strum-takes/`** (J01 to J03,
 `key.json`, a README with the command and the Mac's summary lines; 3.39 MB). `key.json` was written again from
@@ -391,6 +394,49 @@ real song through Import (part a2) is still open.
   Efectivo) and then LEFT OUT at his word ("Leave it out"): it is on the local Mac branch `feat/sb-follow-the-band`
   (`a6dcc6b`), not on main; its ruler script is `Claude outputs/beat-ruler/follow.mjs`. Do not ship it unless he
   asks. Part d (Preview, Publish) is still the next build, for steady songs. Also declined for now: pin-any-bar.
+- **Part d: Preview, Publish, Edit, Unpublish, Delete, backup, Export (2026-11-16, ALWAYS REVIEWED; `teacher-sb-publish.js`,
+  533 lines).** Step 6 is the real card (`builtSongExpand` + `caCardBodyHtml`, the card's own player at the four one-file
+  stops, on the levelled copy already in the tab: no second download) and three listens (the card's first section, a
+  middle one, its last), each ticked when one unbroken play reaches that section's end; saved in the draft
+  (`listens`), started over by any change to the song or its copy. A repaint while it plays (the listens' save, a list
+  read) moves the same card element in, so the song keeps playing. Step 7 lists what is ready and what is not; Publish
+  is on only when `builtSongCheck` passes on the EXACT doc it writes, the record is within 10 cents, every drift window
+  is pinned and the listens are done ("This song does not fit the builder" shows on Preview and Publish, same words,
+  and blocks nothing). It writes `builtSongs/{id}`, then `builtSongsMeta/list` in a transaction (the same order as
+  Import), after reading the stored copy's head fresh; a copy an edit replaced is deleted only after that. A published
+  song has its own page: Edit (the steps; students keep the published song until Publish runs again; the list says
+  "Changes not published"), Unpublish (the draft keeps the edit number, then the list, then the song; the draft and
+  its copy stay), Delete… (typed title; the list entry first, then the song, the draft and every copy nothing else on
+  the list plays), Export (the Import file, for `tools/built-song-check.mjs`). The list's head has the health line ("N
+  published; all pass today's checks", or each failing song by name). Backup: `builtSongs`, `builtSongsMeta/list` and
+  `songDrafts` are in the file (charts only; their audio stays out with `songFiles`).
+  - **How the work order was read (say if any is wrong):** (1) an IMPORTED song (Manage → Built songs) has no draft, so
+    its page offers Delete… and Export only: no Edit (a draft cannot be rebuilt from a published doc without its
+    original) and no Unpublish (it would throw the chart away); Hidden in the Songs view stays its off switch. (2) The
+    listens are the CARD's sections (a from-to range: its first and last); "reaches the section's end" = one unbroken
+    play that began within the section's first half bar and got within 0.3 bar of its end (a lap back to the start
+    counts); a card of 1 or 2 sections needs 1 or 2; a change of level or range starts them over. (3) The Chart step's
+    flags (a refused line not dealt with, a chord not taught and not kept) WARN at Publish and do not block (the work
+    order's list of blockers does not name them). (4) Unpublish of an edited song whose copy was replaced deletes the
+    published (old) copy and keeps the draft's. (5) Export saves the .json only, not the mp3. (6) Edit opens on step 1.
+    (7) The preview card follows the console's language (its header's Español button), like every card the console
+    draws; the builder adds no switch. (8) An edit number never restarts: Unpublish keeps it in the draft (`pubVer`)
+    and the next Publish counts on, because a Chromebook keeps a song by that number (a reused number would show it the
+    old chart). The same can happen to an IMPORTED song deleted and imported again under the same id (Part a2's
+    Import counts from the list only): not fixed, said here.
+  - **Proof:** `tools/song-builder-sim.mjs` 101 cases (27 new; pin re-set): the listens (a mid-section start, a short
+    stop, a whole play to the lap), every Publish blocker as its one reason and writing nothing, the stored copy and the
+    list read at the press, Publish's two writes in order and in the rules' shape (the sim's rules check now holds
+    "BUILT SONGS"), the REAL student app merging the published song from the same store (Songs page row, the card in
+    English and Spanish, lyric escaped, 0.85), a reload, Edit with a new copy and republish (the old copy deleted only
+    after the list's edit 2), Unpublish and Publish again (edit 3), leaving mid-publish, the health line, the imported
+    song's Export passed by `tools/built-song-check.mjs`, Delete. 15 of 15 planted faults turn it red.
+    `tools/backup-proof.mjs`: 131 of 131 checks, 8 of 8 planted faults red. `tools/song-files-console-sim.mjs` 88 of 88.
+    A browser walk in Chrome for Testing (a 20 s generated tone stored as the Song files writer stores one; console at
+    1366x768, the student page at 1366x657): 57 of 57 checks, 23 screenshots, each looked at, no page error, no
+    sideways scroll. It found one fault, fixed: the console's own Español button draws the preview card in Spanish,
+    so the line "English here" was false then. `node tools/slow-load.mjs`: 20 loads, 0 errors (the new console part
+    changes the load order). Not run: `tools/lint.mjs` (npm could not fetch its packages in the session's sandbox).
 - **The Beat step's tracker (2026-11-15, Fast).** Before: the phase of the BEAT in 12-second windows
   (`sbPhaseTrack`), which on a strummed record sat on the "and" and slipped between beat and "and". Why: on American
   Girl the onsets on the "and" are as strong as on the beat (beat stronger than its "and" on 169 of 396 beats), so

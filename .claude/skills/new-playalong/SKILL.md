@@ -32,6 +32,17 @@ cards. Over 10 cents: the `cents` shift as below; the file records what is left 
 tool and the site refuse it). `node tools/built-song-check.mjs <id>.json --audio <mp3>` checks a file the way every page
 does. Steps 5 to 6 do not apply (no card in `class-activities.js`, no `SNIPPET_TRACKS` entry, no pins, no push).
 
+**Who makes the song (2026-11-16, Song builder Part d).** Jonathan builds a song himself in the console's **Song
+builder** (Upload, Volume, Beat, Chart, Level, Preview, Publish; `teacher-sb-*.js`) when the record is steady: within 10
+cents of A = 440 and needing at most 8 pins (`SB_PINS_MAX`). Publish puts it on the Songs page with no push and no Claude.
+**Claude prepares the files (this skill, `--built`, then his Import)** when the builder sends a record here: over 10
+cents (the builder blocks it: shift it with `cents` and the file carries what is left), or "This song does not fit the
+builder" (over 8 pins: a tempo that moves, or a beat the builder's tracker cannot hold; the line only warns, it does
+not block, but the song needs a beat map Claude measures), or a meter, length (over 6:00) or file the builder refuses,
+or when he asks. A song he built can come here too: **Export** (on its page, or at Publish) saves its Import file; check
+it with `node tools/built-song-check.mjs <file>.json`. An imported song shows in the Song builder as a published song
+with no draft: Delete and Export work on it; to change it, import a new file (same `id` replaces it).
+
 ## 1. Inputs: ask once, in one message, only for what is missing
 - The mp3's path, the song and the artist (as the title should read: `"<song>" - <artist>`; ca-37 was renamed twice
   because the song and the band were swapped, so read them back to him).
