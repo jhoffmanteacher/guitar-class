@@ -119,8 +119,15 @@ plan; Fable (`model: 'fable'`) for mechanical work (a part split, re-checking an
     hash; it now waits for the console's `sbBusy` to clear. 5 of 5 runs here, 57 cases. Not run on the Mac: one run
     there should say 57. The same turn-count wait is in `tools/song-files-console-sim.mjs` and
     `tools/built-songs-sim.mjs` (both pass on Windows today).
-  - **Job 1: running.** A Fable reviewer (high) on `coach-strumcheck.js` at `9bf2b07`, and an Opus agent on the
-    design plans; both have `docs/strum-check/DETAILS.md` and `CLICK-2.md` (on main since `17f5df2`).
+  - **Job 1: the review is running** (a Fable reviewer, high, on `coach-strumcheck.js` at `9bf2b07`, with
+    `docs/strum-check/DETAILS.md` and `CLICK-2.md`). **The design plans are done, nothing shipped:**
+    `docs/strum-check/LISTENING-DESIGN-2026-11-16.md` (one Opus agent). Four decisions in it are Jonathan's, none
+    asked yet; the agent's recommendation each time: up-strums: leave until Chromebook takes exist (a "lower bar
+    only where a strum is due" rule cut bench misses 202 to 74 of 2,300 but heard a skipped up-strum 8 of 24 times,
+    today 3); G5 for C5: leave (on 33 real Power Chord Switch summaries the two rules tried either call 7 of 37
+    right C5s wrong or turn 41 of 46 right G5s into "?"); one shared detector: the start-of-note test exists 6
+    times, do steps S0 to S2 at a quiet moment; `coach-core.js`: move lines 1761 to the end (recordings, report
+    card, teardown) into a new part, 1,760 and 769 lines. Real-take steps are for the Mac.
   - **Job 2: an agent is working** four of the five faults on branch `win/faults-2026-11-16` (failing case first);
     `micRecStartPerf` waits for its own Opus agent.
   - **Job 3: mapped, not started.** Agent's proposal, not yet checked by the lead: `coach-chords.js` 1393 to the end
