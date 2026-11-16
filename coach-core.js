@@ -1906,7 +1906,7 @@ function micRecStart(mode, maxSec){
       if (micRec !== rec || !rec.live) return;
       if (rec.firstPlay == null) rec.firstPlay = e.playbackTime;
       const x = e.inputBuffer.getChannelData(0);
-      // the recording's first sample was on the page no later than now less everything captured so far (micRecStartPerf keeps the earliest)
+      // a start candidate: now less everything captured so far; one buffer's can be late or early, micRecStartPerf keeps the earliest
       rec.got += x.length;
       const startBy = performance.now() - rec.got / rec.srcRate * 1000;
       if (rec.startMin == null || startBy < rec.startMin) rec.startMin = startBy;
@@ -1959,11 +1959,11 @@ function micRecAbort(){
   const el = document.getElementById('micrec-on');
   if (el) el.remove();
 }
-/* The recording's start on the performance.now() clock: when its first sample was on the page (the game's analyser reads the same graph),
-   so a take's saved times line up with its audio. Since 2026-11-16 (recClock 2): the earliest, over every buffer, of "its handler ran by
-   now, less the samples captured so far" (startMin, onaudioprocess). A handler only runs after its samples arrived, so the earliest is
-   within one audio burst (2-23 ms) of the truth, with no AudioContext time in it (tools/mic-sim/micrec-clock.mjs proves it on a fake clock).
-   micRecStartPerfV1, the estimate before, stays for a capture with no buffer timing; how far apart they are is saved (recClockShiftMs). */
+/* The recording's start on the performance.now() clock (when its first sample was on the page, where the game's analyser reads it), so a
+   take's saved times line up with its audio. Since 2026-11-16 (recClock 2): the earliest, over every buffer, of "now less the samples
+   captured so far" (startMin): within one audio burst (2-23 ms) of the truth while the device clock keeps pace with performance.now()
+   (tools/mic-sim/micrec-clock.mjs); early by drift x the take's length when it runs fast (500 ppm over 60 s: about 28 ms, still nearer
+   than micRecStartPerfV1, the estimate before, which stays for a capture with no buffer timing; recClockShiftMs saves the gap). */
 function micRecStartPerf(rec){
   return rec.startMin != null ? rec.startMin : micRecStartPerfV1(rec);
 }
