@@ -33,14 +33,13 @@
    those distances. A record more than 10 cents off is not published (Jonathan, 2026-11-14: the rules hold
    it too); the builder says so and the file goes to Claude.
 
-   THE BEAT (sbOnsetEnv, sbRefineBpm, sbLocalOffset, the grid). The onset envelope is three bands (low 35-180,
+   THE BEAT (sbOnsetEnv, sbTrack, sbLocalOffset, the grid). The onset envelope is three bands (low 35-180,
    mid 180-1500, high 1500-8000 Hz, as tools/beat-audit.py) of short-time energy, the rise of its log,
    each band scaled by its 99th percentile and added. The teacher's taps (or a typed BPM) give a tempo; the
-   audio refines it (sbRefineBpm: the tempo near it whose beat grid the onsets line up with best over the
-   whole song, the phase coherence of tools/playalong-measure.py); bar 1 starts on the first LOUD beat (the
-   first beat whose next second is a quarter of the song's median loudness, as playalong-measure.py; the
+   audio is then FOLLOWED beat by beat (sbTrack, "THE BEAT TRACK" below); bar 1 starts on the first LOUD beat
+   (the first beat whose own length is a quarter of the song's median loudness, as playalong-measure.py; the
    teacher can move it). Two PINS fix the grid: bar 1 and one bar near the end, each set where the music's
-   beats are (sbLocalOffset: the shift of a few bars of grid that lines the onsets up best). The drift check
+   beats are (sbLocalOffset: the shift of a few bars of beats that lines the onsets up best). The drift check
    measures windows through the song against that grid; any window more than 30 ms off gets its own pin, and
    three or more pins make `barTimes` (sbBarTimes: straight lines between pins). The pins are the truth: a
    record's bar n starts at sbBarTime(beat, n). */
@@ -55,6 +54,14 @@ const SB_RATES = [32000, 44100, 48000];   // MPEG-1 rates: the only ones LAME en
 const SB_MAX_CENTS = 10;
 const SB_METER = { '4/4': { bpb: 4, sub: 1 }, '3/4': { bpb: 3, sub: 1 }, '6/8': { bpb: 2, sub: 3 } };   // bpb = counted beats a bar (app/builtsongs.js BS_METERS)
 const SB_DRIFT_MS = 30;             // a window further off than this needs its own pin (the plan)
+/* A record whose followed bars need more pins than this to stay within SB_DRIFT_MS goes to Claude (Jonathan,
+   2026-11-15: "for songs that drift too much the app should tell me that i should ask claude to build it instead").
+   Measured 2026-11-15 (the followed bars of the site's own songs): the steady records the tracker holds need 2 or
+   3 (bar 1 and the end; one needs 6); every record played by a band without a click needs 16 to 26; a steady
+   record the tracker is unsure on ("the cure", 12) reads like those, and goes to Claude for that reason instead.
+   Any number from 7 to 11 splits them the same way; 8 is a first setting, Jonathan's to move. */
+const SB_PINS_MAX = 8;
+function sbBeatTooMuch(pins){ return Number.isFinite(pins) && pins > SB_PINS_MAX; }
 /* The onset envelope peaks this long after the sound starts (a fixed property of sbOnsetEnv's frames, measured
    on generated clicks by tools/sb-dsp-test.mjs and subtracted here so a beat's time is when it sounds). */
 const SB_ONSET_SHIFT = -0.005;
@@ -367,48 +374,29 @@ function sbTapFit(taps){
   let ss = 0; for(let i = 0; i < n; i++) ss += (t[i] - (b0 + P * k[i])) ** 2;
   return { bpm: 60 / P, phase: b0, spreadMs: Math.sqrt(ss / Math.max(1, n - 2)) * 1000, n };
 }
-/* Phase coherence of the onsets on a grid of period P: { R (0..1), phase (s, 0..P) }. `step` frames apart. */
-function sbCoherence(E, P, step){
-  const e = E.env, s = step || 1;
-  let zr = 0, zi = 0, tot = 0;
-  for(let i = 0; i < e.length; i += s){
-    const v = e[i]; if(!v) continue;
-    const a = 2 * Math.PI * ((E.t0 + i / E.fps) / P);
-    zr += v * Math.cos(a); zi += v * Math.sin(a); tot += v;
-  }
-  const ph = ((Math.atan2(zi, zr) / (2 * Math.PI)) % 1 + 1) % 1;
-  return { R: tot ? Math.hypot(zr, zi) / tot : 0, phase: ph * P };
-}
-/* The tempo within ±1.5% of bpm0 whose grid the whole song's onsets line up with best: { bpm, phase, R }. */
-function sbRefineBpm(E, bpm0){
-  let best = { R: -1 };
-  for(let b = bpm0 * 0.985; b <= bpm0 * 1.015; b += bpm0 * 0.0002){
-    const c = sbCoherence(E, 60 / b, 4);
-    if(c.R > best.R) best = { R: c.R, bpm: b };
-  }
-  const b1 = best.bpm;
-  for(let b = b1 - bpm0 * 0.0003; b <= b1 + bpm0 * 0.0003; b += bpm0 * 0.00001){
-    const c = sbCoherence(E, 60 / b, 1);
-    if(c.R > best.R || best.phase === undefined) best = { R: c.R, bpm: b, phase: c.phase };
-  }
-  return best;
-}
 /* The first of `times` (beat times, s) whose own beat is at least a quarter as loud (RMS) as the song's median
    beat (tools/playalong-measure.py "FIRST LOUD PULSE": rms_per over each pulse, the median of the non-silent ones).
    Each beat is measured over its first 80% only: a grid even 1 ms late put the NEXT beat's attack in the window,
    so the last quiet beat of a soft intro passed and bar 1 landed one beat early (found 2026-11-15 on a generated
-   song, tracked beats 3 ms late; tools/sb-dsp-test.mjs "first loud beat" holds it). */
-function sbFirstLoudBeat(mono, fs, times){
-  const loud = [], ts = [];
+   song, tracked beats 3 ms late; tools/sb-dsp-test.mjs "first loud beat" holds it).
+   `groups` (1 unless given): the times are PULSES, `groups` to a beat. The median is then taken for each place in
+   the beat by itself and the loudest place's is used: the pulses between the hits hold only the hits' tails, and
+   with those in one median a soft intro's hits counted as loud (2026-11-15). */
+function sbFirstLoudBeat(mono, fs, times, groups){
+  const loud = [], ts = [], G = Math.max(1, groups || 1);
   for(let i = 0; i + 1 < times.length; i++){
     const a = Math.max(0, Math.floor(times[i] * fs)), b = Math.min(mono.length, Math.floor((times[i] + 0.8 * (times[i + 1] - times[i])) * fs));
-    if(b <= a) continue;
     let s = 0; for(let j = a; j < b; j++) s += mono[j] * mono[j];
-    ts.push(times[i]); loud.push(Math.sqrt(s / (b - a)));
+    ts.push(times[i]); loud.push(b > a ? Math.sqrt(s / (b - a)) : 0);
   }
-  const nz = loud.filter(v => v > 0).sort((a, b) => a - b);
-  if(!nz.length) return times[0];
-  const med = nz.length % 2 ? nz[nz.length >> 1] : (nz[nz.length / 2 - 1] + nz[nz.length / 2]) / 2;
+  let med = 0;
+  for(let g = 0; g < G; g++){
+    const nz = loud.filter((v, i) => i % G === g && v > 0).sort((a, b) => a - b);
+    if(!nz.length) continue;
+    const m = nz.length % 2 ? nz[nz.length >> 1] : (nz[nz.length / 2 - 1] + nz[nz.length / 2]) / 2;
+    if(m > med) med = m;
+  }
+  if(!(med > 0)) return times[0];
   const k = loud.findIndex(v => v >= 0.25 * med);
   return k >= 0 ? ts[k] : times[0];
 }
@@ -428,47 +416,242 @@ function sbLocalOffset(E, beats, weights, range){
   const mean = S.reduce((a, b) => a + b) / S.length;
   return { ms: d, sure: S[k] > 0 && S[k] > 1.5 * mean };
 }
-/* THE BEAT TRACK. A record that drifts can sit hundreds of ms off one straight grid in mid-song, further than any
-   local search should look, so each beat is FOLLOWED instead: the phase of the onsets on the refined tempo's grid
-   in 12-second windows every 4 seconds (tools/playalong-measure.py phase_track), each step unwrapped against the
-   one before (a window moves less than half a beat from the last), centred so the song's middle window is 0.
-   E.track = { bpm, phase, at: [window centres], dev: [s] }. Beat k of the song is then at
-   phase + k·P + dev(that time): the same beat all through the song, so bar n is always the bar n beats count to. */
-function sbPhaseTrack(E, bpm, phase){
-  const P = 60 / bpm, e = E.env, W = Math.round(12 * E.fps), H = Math.round(4 * E.fps);
-  let tot = 0; for(let i = 0; i < e.length; i++) tot += e[i];
-  const avg = tot / Math.max(1, e.length), at = [], dev = [];
-  for(let s = 0; s + W / 2 < e.length; s += H){
-    let zr = 0, zi = 0, sum = 0;
-    for(let i = s; i < Math.min(e.length, s + W); i++){
-      const v = e[i]; if(!v) continue;
-      const a = 2 * Math.PI * ((E.t0 + i / E.fps) / P);
-      zr += v * Math.cos(a); zi += v * Math.sin(a); sum += v;
-    }
-    if(sum < 0.1 * avg * W) continue;              // a near-silent window says nothing
-    const ph = ((Math.atan2(zi, zr) / (2 * Math.PI)) % 1 + 1) % 1 * P;
-    let d = ph - phase; d -= Math.round(d / P) * P;
-    if(dev.length){ const prev = dev[dev.length - 1]; d = prev + (d - prev) - Math.round((d - prev) / P) * P; }
-    at.push(E.t0 + (s + Math.min(W, e.length - s) / 2) / E.fps); dev.push(d);
+/* THE BEAT TRACK (2026-11-15; before it, the phase of the BEAT in 12-second windows, which on a strummed record
+   sat on the "and" and slipped between beat and "and": on the ruler record 371 of 397 beats were more than 100 ms
+   off). A record is not steady, and on many the beat itself is not the clearest thing in it (strums accent the
+   "and"; the kick and snare take turns). So the tracker follows the record's PULSE and its BAR, in four steps:
+     1. THE PULSE. For each way a beat divides (in 2, 3, 4, 6, or not at all) the onsets' phase on that pulse is
+        taken in short windows (12 pulses long, every 2 pulses) and the smoothest strong path through the windows
+        is found (sbViterbi): the pulse may run up to SB_TRACK_TEMPO faster or slower than the tapped tempo from
+        one window to the next. The coarsest division whose path is nearly as strong as the strongest is kept.
+        The tapped tempo is then replaced by the path's own mean tempo, and the path found again.
+     2. THE BAR. A pulse alone cannot count through a weak passage: one pulse more or fewer fits as well. The
+        onsets of one whole bar make a PATTERN (which pulses of the bar are loud), learned from the whole song on
+        the pulse's own clock; each two-bar window is then lined up with that pattern (sbPatternPass, twice), so a
+        passage where the pulse lost count is put back where the bars before and after agree.
+     3. FINE. On the followed clock the pulse is measured once more in 8-beat windows (sbFinePass, twice); a
+        quiet window is left out. Where the record is steady the readings are averaged over a longer stretch, and
+        kept as they are only where the tempo really moves (sbSteady).
+     4. A beat is then COUNTED from bar 1: beat j after a time t0 is where the followed clock has moved j beats
+        on from t0 (sbTrackBeatFrom). Bar 1 decides which pulse is "the beat"; nothing else does.
+   E.track = { bpm (the mean tempo), sub (pulses in a beat), meter, at: [window centres, s], dev: [s], R, q }:
+   the record's time t is the steady clock's time t - dev(t). Measured 2026-11-15 on the ruler record against
+   397 beats marked by Moises and on the site's own beat-mapped songs: WORKFLOW "Song builder", the Beat step.
+   WHAT IT CANNOT FOLLOW: a bar more than about SB_TRACK_TEMPO longer or shorter than its neighbours (a held
+   note, a dropped beat, free time: the two mariachi records on the site). It does not know when that has
+   happened: its own bars come out smooth either way (measured), so "Listen with clicks" stays the check. */
+const SB_TRACK_SUBS = [2, 3, 4, 6];    // pulses in a beat, coarsest first; 1 (the beat itself) only when far clearer
+const SB_TRACK_TEMPO = 0.08;           // how far the tempo may sit from the tapped tempo, window to window
+const SB_TRACK_NB = 48;                // phase bins in one pulse (step 1)
+function sbHannC(n){ const w = new Float64Array(n); for(let i = 0; i < n; i++) w[i] = 0.5 - 0.5 * Math.cos(2 * Math.PI * (i + 0.5) / n); return w; }
+/* dev at a time: straight lines between the readings. Before the first reading and after the last, the slope of
+   the first (last) three readings is carried on, but no further than those three span; past that the value is held
+   (a record that opens slower than it goes on is still slowing back to bar 1; a long silence says nothing). */
+function sbDevAt(at, dev, t){
+  const n = at.length;
+  if(!n) return 0;
+  if(t <= at[0] || t >= at[n - 1]){
+    const e = t <= at[0] ? 0 : n - 1, o = t <= at[0] ? Math.min(2, n - 1) : Math.max(0, n - 3), span = Math.abs(at[o] - at[e]);
+    if(!(span > 0)) return dev[e];
+    const d = Math.max(-span, Math.min(span, t - at[e]));
+    return dev[e] + (dev[o] - dev[e]) / (at[o] - at[e]) * d;
   }
-  if(dev.length){ const mid = dev.slice().sort((a, b) => a - b)[dev.length >> 1], sh = Math.round(mid / P) * P; for(let i = 0; i < dev.length; i++) dev[i] -= sh; }
-  return { bpm, phase, at, dev };
+  let lo = 0, hi = n - 1;
+  while(hi - lo > 1){ const m = (lo + hi) >> 1; if(at[m] <= t) lo = m; else hi = m; }
+  return dev[lo] + (dev[lo + 1] - dev[lo]) * (t - at[lo]) / (at[lo + 1] - at[lo]);
 }
-function sbTrackDev(tr, t){
-  const a = tr.at, d = tr.dev;
-  if(!a.length) return 0;
-  if(t <= a[0]) return d[0];
-  if(t >= a[a.length - 1]) return d[d.length - 1];
-  let i = 0; while(a[i + 1] < t) i++;
-  return d[i] + (d[i + 1] - d[i]) * (t - a[i]) / (a[i + 1] - a[i]);
+function sbTrackDev(tr, t){ return sbDevAt(tr.at, tr.dev, t); }
+function sbFrameDev(E, at, dev){ const w = new Float32Array(E.env.length); if(at) for(let i = 0; i < w.length; i++) w[i] = sbDevAt(at, dev, E.t0 + i / E.fps); return w; }
+/* The onsets' phasors on H harmonics of a period (s), on the clock t - warp[frame], in Hann windows `win` seconds
+   long centred every `hop` seconds from the start. { at, sum: [the window's onset mass], wm: [the warp's mean over
+   the window, weighted as the onsets are], tc: [the time those onsets centre on: not the window's own centre at
+   the two ends of the file, where half the window is empty], Z: [{ zr, zi }] per harmonic }. */
+function sbPhasors(E, period, H, win, hop, warp){
+  const e = E.env, n = e.length, hw = Math.max(4, Math.round(win * E.fps) >> 1), wn = sbHannC(2 * hw + 1);
+  const cr = [], ci = [];
+  for(let h = 0; h < H; h++){ cr.push(new Float32Array(n)); ci.push(new Float32Array(n)); }
+  for(let i = 0; i < n; i++){
+    const v = e[i]; if(!v) continue;
+    const a = 2 * Math.PI * ((E.t0 + i / E.fps - warp[i]) / period), c1 = Math.cos(a), s1 = Math.sin(a);
+    let c = c1, s = s1;
+    for(let h = 0; h < H; h++){ cr[h][i] = v * c; ci[h][i] = v * s; const c2 = c * c1 - s * s1; s = s * c1 + c * s1; c = c2; }
+  }
+  const at = [], sum = [], wm = [], tc = [], Z = [];
+  for(let h = 0; h < H; h++) Z.push({ zr: [], zi: [] });
+  for(let k = 0; ; k++){
+    const mid = Math.round(k * hop * E.fps);
+    if(mid >= n) break;
+    const a = Math.max(0, mid - hw), b = Math.min(n - 1, mid + hw);
+    let m = 0, mw = 0, mt = 0; for(let i = a; i <= b; i++){ const v = wn[i - mid + hw] * e[i]; m += v; mw += v * warp[i]; mt += v * i; }
+    at.push(E.t0 + mid / E.fps); sum.push(m); wm.push(m ? mw / m : warp[mid]); tc.push(E.t0 + (m ? mt / m : mid) / E.fps);
+    for(let h = 0; h < H; h++){
+      const x = cr[h], y = ci[h]; let r = 0, im = 0;
+      for(let i = a; i <= b; i++){ const w = wn[i - mid + hw]; r += w * x[i]; im += w * y[i]; }
+      Z[h].zr.push(r); Z[h].zi.push(im);
+    }
+  }
+  return { at, sum, wm, tc, Z };
 }
-/* Beat k of the track: its time (s). And the k of the tracked beat nearest a time. */
-function sbTrackBeat(tr, k){ const P = 60 / tr.bpm, g = tr.phase + k * P; return g + sbTrackDev(tr, g); }
-function sbTrackK(tr, t){
-  const P = 60 / tr.bpm;
-  let k = Math.round((t - tr.phase) / P);
-  for(let i = 0; i < 4; i++){ const k2 = Math.round((t - tr.phase - sbTrackDev(tr, tr.phase + k * P)) / P); if(k2 === k) break; k = k2; }
-  return k;
+/* The best path through rows of scores (one row a window, NB phase bins that wrap), moving at most K bins a
+   window, each bin moved costing `pen`. Returns the bins, unwrapped (they may pass NB). */
+function sbViterbi(obs, NB, K, pen){
+  const nW = obs.length, back = new Int8Array(nW * NB);
+  let prev = new Float64Array(NB), cur = new Float64Array(NB);
+  for(let w = 0; w < nW; w++){
+    const o = obs[w];
+    for(let b = 0; b < NB; b++){
+      if(w === 0){ cur[b] = o[b]; continue; }
+      let best = -Infinity, bd = 0;
+      for(let d = -K; d <= K; d++){ const v = prev[((b - d) % NB + NB) % NB] - pen * Math.abs(d); if(v > best){ best = v; bd = d; } }
+      cur[b] = best + o[b]; back[w * NB + b] = bd;
+    }
+    const t = prev; prev = cur; cur = t;
+  }
+  const bins = new Int32Array(nW);
+  if(!nW) return bins;
+  let u = 0; for(let i = 1; i < NB; i++) if(prev[i] > prev[u]) u = i;
+  bins[nW - 1] = u;
+  for(let w = nW - 1; w > 0; w--){ u -= back[w * NB + ((u % NB) + NB) % NB]; bins[w - 1] = u; }
+  return bins;
+}
+/* Step 1: the pulse (a beat of P seconds in `sub`) followed through the song. { at, dev, q }: q is how much of the
+   onsets' mass the path lines up (0..1). */
+function sbPulsePath(E, P, sub){
+  const Ps = P / sub, NB = SB_TRACK_NB, hopBeats = 2 / sub;
+  const ph = sbPhasors(E, Ps, 1, 12 / sub * P, hopBeats * P, sbFrameDev(E)), nW = ph.at.length, z = ph.Z[0];
+  const cosT = new Float64Array(NB), sinT = new Float64Array(NB);
+  for(let b = 0; b < NB; b++){ cosT[b] = Math.cos(2 * Math.PI * b / NB); sinT[b] = Math.sin(2 * Math.PI * b / NB); }
+  let mean = 0; for(const m of ph.sum) mean += m; mean /= Math.max(1, nW);
+  const obs = [];
+  for(let w = 0; w < nW; w++){ const row = new Float64Array(NB); for(let b = 0; b < NB; b++) row[b] = z.zr[w] * cosT[b] + z.zi[w] * sinT[b]; obs.push(row); }
+  const K = Math.max(1, Math.min(NB / 2 - 1, Math.ceil(SB_TRACK_TEMPO * hopBeats * sub * NB)));
+  const bins = sbViterbi(obs, NB, K, 0.002 * mean);
+  let got = 0, tot = 0;
+  for(let w = 0; w < nW; w++){ got += obs[w][((bins[w] % NB) + NB) % NB]; tot += ph.sum[w]; }
+  return { at: ph.at, dev: Array.from(bins, v => v / NB * Ps), q: tot ? got / tot : 0 };
+}
+/* Step 2: the bar's pattern, learned on the followed clock (at0, dev0) and followed. { at, dev }. */
+function sbPatternPass(E, P, sub, bpb, at0, dev0){
+  const L = bpb * sub, Pb = P * bpb, H = Math.min(24, 2 * L), NBp = 24, NB = NBp * L;
+  const ph = sbPhasors(E, Pb, H, 2 * Pb, P, sbFrameDev(E, at0, dev0)), nW = ph.at.length;
+  let tot = 0; for(const m of ph.sum) tot += m;
+  if(!nW || !tot) return { at: at0, dev: dev0 };
+  const cosT = new Float64Array(NB), sinT = new Float64Array(NB);
+  for(let b = 0; b < NB; b++){ cosT[b] = Math.cos(2 * Math.PI * b / NB); sinT[b] = Math.sin(2 * Math.PI * b / NB); }
+  const obs = []; for(let w = 0; w < nW; w++) obs.push(new Float64Array(NB));
+  let c2 = 0;
+  for(let h = 1; h <= H; h++){
+    const z = ph.Z[h - 1]; let r = 0, im = 0;
+    for(let w = 0; w < nW; w++){ r += z.zr[w]; im += z.zi[w]; }
+    r /= tot; im /= tot; c2 += r * r + im * im;          // the pattern's share on this harmonic
+    for(let w = 0; w < nW; w++){
+      const ar = r * z.zr[w] + im * z.zi[w], ai = r * z.zi[w] - im * z.zr[w], row = obs[w];
+      for(let b = 0; b < NB; b++){ const k = (h * b) % NB; row[b] += ar * cosT[k] + ai * sinT[k]; }
+    }
+  }
+  const K = Math.max(1, Math.ceil(Math.min(0.45, 0.08 * sub) * NBp));
+  const bins = sbViterbi(obs, NB, K, 0.002 * tot / nW * c2);
+  const res = Array.from(bins, v => v / NB * Pb), mid = res.slice().sort((a, b) => a - b)[nW >> 1], sh = Math.round(mid / Pb) * Pb;
+  return { at: ph.at, dev: ph.at.map((t, w) => sbDevAt(at0, dev0, t) + res[w] - sh) };
+}
+/* Step 3: the pulse measured once more on the followed clock, in 8-beat windows every 2 beats: each window's new
+   reading is the clock's own mean over the window plus what the onsets still sit off it (so the steps of the two
+   paths before are smoothed away), and it is a reading of the moment its onsets centre on (at the start of the file
+   that is later than the window's own centre: read at the centre, a record that opens 5% slow had bar 1 35 ms
+   late, 2026-11-15). A window too quiet or too unclear to read (R under 0.05) is left out: the readings either
+   side of it are joined by a straight line. { at, dev, R (each reading's clearness, 0..1), m (its onsets) }. */
+function sbFinePass(E, P, sub, at0, dev0){
+  const Ps = P / sub, ph = sbPhasors(E, Ps, 1, 8 * P, 2 * P, sbFrameDev(E, at0, dev0)), z = ph.Z[0], nW = ph.at.length;
+  let mean = 0; for(const m of ph.sum) mean += m; mean /= Math.max(1, nW);
+  const res = new Array(nW).fill(null), R = [];
+  for(let w = 0; w < nW; w++){
+    const r = ph.sum[w] ? Math.hypot(z.zr[w], z.zi[w]) / ph.sum[w] : 0;
+    R.push(ph.sum[w] < 0.1 * mean ? 0 : r);
+    if(R[w] >= 0.05) res[w] = Math.atan2(z.zi[w], z.zr[w]) / (2 * Math.PI) * Ps;
+  }
+  const at = [], dev = [], r = [], m = [];
+  for(let w = 0; w < nW; w++) if(res[w] != null && !(ph.tc[w] <= at[at.length - 1] + 0.01)){ at.push(ph.tc[w]); dev.push(ph.wm[w] + res[w]); r.push(R[w]); m.push(ph.sum[w]); }
+  return at.length ? { at, dev, R: r, m } : { at: at0, dev: dev0, R: at0.map(() => 0), m: at0.map(() => 0) };
+}
+/* Step 4: steady where the record is steady. One 8-beat reading is only so exact: about 0.014 of a pulse divided by
+   its clearness R (25 ms at R 0.15 on a 110 BPM song under noise, tools/sb-dsp-test.mjs "weak onsets"), and a
+   reading that far out raised a drift alarm on a steady song. So each reading is set beside the mean of the
+   readings up to 12 beats either side (each weighted by its clearness squared and its onsets). Where the two agree
+   within twice the reading's own exactness (the middle of three neighbours' differences, so one stray reading
+   does not count) the mean is used; where they differ by four times it or more, the tempo is really moving and the
+   reading is kept; between, a share of each. */
+function sbSteady(f, Ps){
+  const n = f.at.length, out = new Array(n), mean = new Array(n), SPAN = 6;
+  for(let w = 0; w < n; w++){
+    let sw = 0, sx = 0;
+    for(let j = Math.max(0, w - SPAN); j <= Math.min(n - 1, w + SPAN); j++){ const g = f.R[j] * f.R[j] * f.m[j] * (1 - Math.abs(j - w) / (SPAN + 1)); sw += g; sx += g * f.dev[j]; }
+    mean[w] = sw ? sx / sw : f.dev[w];
+  }
+  for(let w = 0; w < n; w++){
+    const d = [w - 1, w, w + 1].filter(j => j >= 0 && j < n).map(j => Math.abs(f.dev[j] - mean[j])).sort((a, b) => a - b);
+    const sigma = 0.014 * Ps / Math.max(0.02, f.R[w]), share = Math.max(0, Math.min(1, d[d.length >> 1] / (2 * sigma) - 1));
+    out[w] = mean[w] + share * (f.dev[w] - mean[w]);
+  }
+  return out;
+}
+/* The whole track from a tempo. `fixed` = { sub }: this tempo and division exactly (a draft opened again finds the
+   very track it was saved with: beat.trackBpm, beat.trackSub). Without it the division is chosen and the tempo
+   moved to the path's own mean (three times at most, until it moves under 0.1%). */
+function sbTrack(E, bpm0, meter, fixed){
+  const bpb = (SB_METER[meter] || SB_METER['4/4']).bpb;
+  let bpm = bpm0, sub = fixed && fixed.sub;
+  if(!sub){
+    const q = {}; let top = 0;
+    for(const s of SB_TRACK_SUBS){ q[s] = sbPulsePath(E, 60 / bpm, s).q; if(q[s] > top) top = q[s]; }
+    sub = sbPulsePath(E, 60 / bpm, 1).q > top / 0.75 ? 1 : SB_TRACK_SUBS.find(s => q[s] >= 0.75 * top);
+    for(let i = 0; i < 3; i++){
+      const p = sbPulsePath(E, 60 / bpm, sub), n = p.at.length;
+      if(n < 4) break;
+      const mt = p.at.reduce((a, b) => a + b) / n, md = p.dev.reduce((a, b) => a + b) / n;
+      let sxy = 0, sxx = 0; for(let w = 0; w < n; w++){ sxy += (p.at[w] - mt) * (p.dev[w] - md); sxx += (p.at[w] - mt) ** 2; }
+      const slope = sxx ? sxy / sxx : 0;
+      bpm = bpm / (1 + slope);
+      if(Math.abs(slope) < 0.001) break;
+    }
+    bpm = Math.round(bpm * 10000) / 10000;
+  }
+  const P = 60 / bpm, p1 = sbPulsePath(E, P, sub);
+  let t = sbPatternPass(E, P, sub, bpb, p1.at, p1.dev);
+  t = sbPatternPass(E, P, sub, bpb, t.at, t.dev);
+  let f = sbFinePass(E, P, sub, t.at, t.dev);
+  f = sbFinePass(E, P, sub, f.at, f.dev);
+  return { bpm, sub, meter, at: f.at, dev: sbSteady(f, P / sub), R: f.R, q: p1.q };
+}
+/* The record's time at the followed clock's time u (the clock runs steady at tr.bpm; the record is dev late). */
+function sbTrackAtClock(tr, u){
+  let t = u + sbTrackDev(tr, u);
+  for(let i = 0; i < 8; i++){ const t2 = u + sbTrackDev(tr, t); if(Math.abs(t2 - t) < 1e-5) return t2; t = t2; }
+  return t;
+}
+/* The beat j beats after (before, j < 0) the one at time t0, on the followed clock; j need not be whole. */
+function sbTrackBeatFrom(tr, t0, j){ return sbTrackAtClock(tr, t0 - sbTrackDev(tr, t0) + j * 60 / tr.bpm); }
+/* Every pulse of the track from the start of the file to `durationSec`: [{ k, t }]. The pulses sit at whole
+   numbers of pulses on the clock (the fine pass put them there); k mod sub is the pulse's place in a beat, and which
+   place is "the beat" is bar 1's to say. */
+function sbTrackPulses(tr, durationSec){
+  const Ps = 60 / tr.bpm / tr.sub, out = [];
+  for(let k = Math.floor(-sbTrackDev(tr, 0) / Ps) - 1; out.length < 20000; k++){
+    const t = sbTrackAtClock(tr, k * Ps);
+    if(t > durationSec) break;
+    if(t >= 0) out.push({ k, t });
+  }
+  return out;
+}
+/* Which pulse of the beat the taps fall on (0 .. sub-1), or null when they do not say (fewer than 4, scattered, or
+   nearer the middle between two pulses than to either). People tap on the beat, so that pulse IS the beat. */
+function sbTapPulse(tr, taps){
+  const t = (taps || []).filter(Number.isFinite), P = 60 / tr.bpm;
+  if(t.length < 4) return null;
+  let zr = 0, zi = 0;
+  t.forEach(x => { const a = 2 * Math.PI * ((x - sbTrackDev(tr, x)) / P); zr += Math.cos(a); zi += Math.sin(a); });
+  if(Math.hypot(zr, zi) / t.length < 0.5) return null;
+  const f = ((Math.atan2(zi, zr) / (2 * Math.PI)) % 1 + 1) % 1 * tr.sub, j = Math.round(f);
+  return Math.abs(f - j) > 0.3 ? null : j % tr.sub;
 }
 
 /* ── The grid. beat = { meter, bpm, anchor, pins: [{ bar, t }] } (pins: bars other than 1, each set on the
@@ -525,45 +708,80 @@ function sbGridBeats(beat, b0, b1){
   return { t, w };
 }
 /* Where the music puts bar `bar`: { t (s), ms (music late of the grid = positive), sure }. With a beat track
-   (E.track, sbAutoGrid) the bar is FOLLOWED: bar 1 is the tracked beat nearest the anchor, bar n is that beat
-   plus (n-1) bars of tracked beats, then the 4 bars around it are lined up with the onsets (±60 ms). Without one,
+   (E.track, sbAutoGrid) the bar is FOLLOWED: its beats are counted from bar 1 on the followed clock (sbTrackBeatFrom),
+   then every pulse of the 4 bars around it is lined up with the onsets, ±30 ms (2026-11-15; before: the beats only,
+   ±60 ms, which on a strummed record pulled a pin up to 80 ms toward the strums beside the beat). Without a track,
    the grid's own bar is lined up (±100 ms). */
 function sbFindBar(E, beat, bar){
   const pred = sbBarTime(beat, bar), bpb = (SB_METER[beat.meter] || SB_METER['4/4']).bpb;
   if(E.track && E.track.at.length){
-    const tr = E.track, k1 = sbTrackK(tr, beat.anchor), k = k1 + (bar - 1) * bpb, t = [], w = [];
-    for(let j = k - 2 * bpb; j < k + 2 * bpb; j++){ t.push(sbTrackBeat(tr, j)); w.push(j === k ? 3 : (j - k) % bpb === 0 ? 2 : 1); }
-    const o = sbLocalOffset(E, t, w, 60), at = sbTrackBeat(tr, k) + o.ms / 1000;
+    const tr = E.track, S = tr.sub, k = (bar - 1) * bpb, t = [], w = [];
+    for(let j = (k - 2 * bpb) * S; j < (k + 2 * bpb) * S; j++){
+      t.push(sbTrackBeatFrom(tr, beat.anchor, j / S));
+      w.push(j === k * S ? 3 : j % S ? 1 : (j / S - k) % bpb === 0 ? 2 : 1.5);
+    }
+    const o = sbLocalOffset(E, t, w, 30), at = t[2 * bpb * S] + o.ms / 1000;
     return { t: at, ms: (at - pred) * 1000, sure: o.sure };
   }
   const g = sbGridBeats(beat, Math.max(1, bar - 2), bar + 2);
   const o = sbLocalOffset(E, g.t, g.w);
   return { t: pred + o.ms / 1000, ms: o.ms, sure: o.sure };
 }
-/* The drift check: about every 12 bars from bar 5 to near the last bar, how far the music sits from the grid.
-   [{ bar, ms, sure, pinned }]. */
+/* The followed bars 1 .. last, straight off the beat track (no lining up with the onsets): [s], [0] = bar 1. */
+function sbFollowedBars(E, beat, last){
+  const bpb = (SB_METER[beat.meter] || SB_METER['4/4']).bpb, out = [];
+  for(let b = 1; b <= last; b++) out.push(sbTrackBeatFrom(E.track, beat.anchor, (b - 1) * bpb));
+  return out;
+}
+/* The drift check: about every 12 bars from bar 5 to near the last bar, how far the music sits from the grid; and,
+   with a beat track, the ONE bar of the whole song that sits furthest from the grid when that is over SB_DRIFT_MS
+   and no listed window is within 2 bars of it (the fixed windows alone passed a grid that was 200 ms off between
+   two of them: the ruler record's slow first bars, 2026-11-15). [{ bar, ms, sure, pinned, t }], by bar. */
 function sbDrift(E, beat, durationSec){
   const last = sbBarsIn(beat, durationSec);
   if(last < 6) return [];
   const n = Math.max(2, Math.min(8, Math.round((last - 4) / 12))), out = [];
   const pinned = new Set((beat.pins || []).map(p => p.bar));
+  const add = bar => { const f = sbFindBar(E, beat, bar); out.push({ bar, ms: Math.round(f.ms), sure: f.sure, pinned: pinned.has(bar), t: f.t }); };
   for(let k = 0; k < n; k++){
     const bar = Math.round(5 + k * (last - 3 - 5) / (n - 1));
-    if(out.some(o => o.bar === bar)) continue;
-    const f = sbFindBar(E, beat, bar);
-    out.push({ bar, ms: Math.round(f.ms), sure: f.sure, pinned: pinned.has(bar), t: f.t });
+    if(!out.some(o => o.bar === bar)) add(bar);
   }
-  return out;
+  if(E.track && E.track.at.length){
+    const tb = sbFollowedBars(E, beat, last - 2);
+    let worst = 0, wv = SB_DRIFT_MS / 1000;
+    for(let b = 2; b <= tb.length; b++){ const d = Math.abs(tb[b - 1] - sbBarTime(beat, b)); if(d > wv && !pinned.has(b)){ wv = d; worst = b; } }
+    if(worst && !out.some(o => Math.abs(o.bar - worst) <= 2)) add(worst);
+  }
+  return out.sort((a, b) => a.bar - b.bar);
 }
-/* From taps (or a typed bpm) to a whole grid: the refined tempo, its beat track (kept on E), bar 1 on the first
-   loud tracked beat, and a pin two bars from the end where the music is. { beat, R } — beat = { meter, bpm,
-   anchor, pins }. */
-function sbAutoGrid(E, mono, fs, durationSec, meter, bpm0, again){
-  const r = sbRefineBpm(E, bpm0), P = 60 / r.bpm;
-  E.track = sbPhaseTrack(E, r.bpm, r.phase);
-  const times = [];
-  for(let k = Math.ceil(-r.phase / P) - 1; ; k++){ const t = sbTrackBeat(E.track, k); if(t > durationSec) break; if(t >= 0) times.push(t); }
-  let beat = { meter, bpm: r.bpm, anchor: sbFirstLoudBeat(mono, fs, times), pins: [] };
+/* How many pins this record needs: pins are put on the followed bars one at a time, each on the bar furthest from
+   the straight lines between the pins so far (bar 1 and the last followed bar to start), until every bar is within
+   SB_DRIFT_MS. { pins (bar 1 counted; 2 = a steady record), worstMs (the furthest bar with bar 1 and the end only) }.
+   Null without a beat track. The last two bars are left out, as the end pin leaves them out. */
+function sbPinsNeeded(E, beat, durationSec){
+  if(!E.track || !E.track.at.length) return null;
+  const tb = sbFollowedBars(E, beat, Math.max(2, sbBarsIn(beat, durationSec) - 2)), pins = [0, tb.length - 1];
+  const at = n => { let i = 0; while(i < pins.length - 2 && n > pins[i + 1]) i++; const a = pins[i], b = pins[i + 1]; return tb[a] + (n - a) * (tb[b] - tb[a]) / (b - a); };
+  let worstMs = 0;
+  for(let it = 0; it < 60; it++){
+    let w = -1, wv = SB_DRIFT_MS / 1000;
+    for(let n = 0; n < tb.length; n++){ const e = Math.abs(tb[n] - at(n)); if(e > wv){ wv = e; w = n; } }
+    if(it === 0) worstMs = w < 0 ? 0 : Math.round(wv * 1000);
+    if(w < 0) break;
+    pins.push(w); pins.sort((a, b) => a - b);
+  }
+  return { pins: pins.length, worstMs };
+}
+/* From taps (or a typed bpm) to a whole grid: the beat track (kept on E), bar 1 on the first loud beat, and a pin
+   two bars from the end where the music is. `taps` (the tap times, when there are any) say which pulse of the track
+   is the beat; without them bar 1 is the first loud PULSE (a record that opens on a pickup then needs bar 1 moved).
+   { beat, q } — beat = { meter, bpm, anchor, pins }. */
+function sbAutoGrid(E, mono, fs, durationSec, meter, bpm0, taps){
+  const tr = E.track = sbTrack(E, bpm0, meter);
+  const on = sbTapPulse(tr, taps), pulses = sbTrackPulses(tr, durationSec);
+  const times = pulses.filter(p => on == null || ((p.k - on) % tr.sub + tr.sub) % tr.sub === 0).map(p => p.t);
+  let beat = { meter, bpm: tr.bpm, anchor: times.length ? sbFirstLoudBeat(mono, fs, times, on == null ? tr.sub : 1) : 0, pins: [] };
   const a = sbFindBar(E, beat, 1);
   if(a.sure && a.t >= 0) beat.anchor = a.t;
   const last = sbBarsIn(beat, durationSec);
@@ -572,12 +790,8 @@ function sbAutoGrid(E, mono, fs, durationSec, meter, bpm0, again){
     if(f.sure) beat.pins = [{ bar, t: Math.round(f.t * 10000) / 10000 }];
     beat.bpm = sbPinBpm(beat);
   }
-  /* Taps more than 1.5% off leave the refined tempo off too (the search stays within 1.5% of the taps), and bar 1
-     was found on that tempo's beat track: 39 ms late from taps 5% fast (2026-11-15). The end pin measures the true
-     tempo, so when it moved the tempo more than 0.3%, the grid is worked out once more from the pinned tempo. */
-  if(!again && Math.abs(beat.bpm - r.bpm) > 0.003 * r.bpm) return sbAutoGrid(E, mono, fs, durationSec, meter, beat.bpm, true);
   beat.anchor = Math.round(beat.anchor * 10000) / 10000;
-  return { beat, R: r.R };
+  return { beat, q: tr.q };
 }
 
 /* ── Waveform peaks for drawing: per column the min and max of the mono samples over [t0, t1). ── */

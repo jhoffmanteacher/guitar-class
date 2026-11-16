@@ -12,6 +12,8 @@
                                           length, the lag against the source). A few minutes.
      --break=<name>                       runs a copy of teacher-sb-dsp.js with one planted fault (the list is
                                           BREAKS below); the run must go red
+     SB_DSP_FILE=<path>                   (environment) reads that file in place of teacher-sb-dsp.js: how an older
+                                          checkout's sound code is shown to fail a newer case
 
    QUICK CASES
      loudness  the EBU Tech 3341 case (a 1 kHz sine at -23 dBFS in both channels reads -23.0 ±0.1 LUFS), the
@@ -24,8 +26,14 @@
                made at; the 10-cent block falls on the right side of each
      beat      four click tracks (4/4 at 96 with a quiet intro, 6/8 counted in two, a slow drift of +1.5% over the
                song, weak onsets under noise), taps made from the true beats with 30 ms of scatter: the whole
-               fit (taps → refined tempo → bar 1 → the end pin → the drift check → a pin on each window over
+               fit (taps → the beat track → bar 1 → the end pin → the drift check → a pin on each window over
                30 ms) puts bar 1 and the LAST bar within 10 ms of where they are
+     strummed  (2026-11-15) a made-up STRUMMED record, as the ruler record is: a strum on every eighth note with the
+               "and" louder than the beat, a quiet kick, a slow first two bars, a tempo that wanders ±2.5%, and a
+               silent two-bar breakdown that slows 6%. The followed beats stay on the true beats (the tracker before
+               2026-11-15 sat on the "and" and lost count); every pin lands on its bar; the taps say which pulse
+               is the beat when the record opens on a pickup; the record needs more pins than SB_PINS_MAX (it
+               goes to Claude) and a steady record needs 2
      taps      the tap fit names the scatter it was given (20 to 40 ms), and a missed tap does not halve the tempo
      mp3       sbMp3Info reads the rate, channels and bitrate of a frame header (behind an ID3 tag too)
    Prints "sb-dsp-test: N cases, F failed" and exits 1 on any failure. */
@@ -39,7 +47,7 @@ import vm from 'node:vm';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const FULL = process.argv.includes('--full');
 const BREAK = (process.argv.find(a => a.startsWith('--break=')) || '').slice(8);
-let src = readFileSync(join(ROOT, 'teacher-sb-dsp.js'), 'utf8');
+let src = readFileSync(process.env.SB_DSP_FILE || join(ROOT, 'teacher-sb-dsp.js'), 'utf8');
 
 /* Planted faults: each must turn the run red. */
 const BREAKS = {
@@ -48,11 +56,17 @@ const BREAKS = {
   'limiter-attack': ['m[j] = need[q[h]];', 'm[j] = need[j];'],
   'codec-delay': ['const SB_CODEC_DELAY = 1105;', 'const SB_CODEC_DELAY = 0;'],
   'cents-sign': ['devs.push(100 * (p - Math.round(p)));', 'devs.push(100 * (Math.round(p) - p));'],
-  'refine-off': ['for(let b = bpm0 * 0.985; b <= bpm0 * 1.015; b += bpm0 * 0.0002){', 'for(let b = bpm0; b <= bpm0; b += 1){'],
   'no-end-pin': ['if(f.sure) beat.pins = [{ bar, t: Math.round(f.t * 10000) / 10000 }];', ''],
-  'onset-shift': ['const SB_ONSET_SHIFT = 0.0;', 'const SB_ONSET_SHIFT = 0.02;'],
+  'onset-shift': ['const SB_ONSET_SHIFT = -0.005;', 'const SB_ONSET_SHIFT = 0.02;'],
   'first-loud-window': ['Math.floor((times[i] + 0.8 * (times[i + 1] - times[i])) * fs)', 'Math.floor(times[i + 1] * fs)'],
-  'no-second-pass': ['if(!again && Math.abs(beat.bpm - r.bpm) > 0.003 * r.bpm)', 'if(false)'],
+  'beat-level-only': ['const SB_TRACK_SUBS = [2, 3, 4, 6];', 'const SB_TRACK_SUBS = [1];'],
+  'no-pattern': ['  let t = sbPatternPass(E, P, sub, bpb, p1.at, p1.dev);\n  t = sbPatternPass(E, P, sub, bpb, t.at, t.dev);', '  let t = p1;'],
+  'no-steady': ['dev: sbSteady(f, P / sub), R: f.R', 'dev: f.dev, R: f.R'],
+  'first-loud-places': ['const nz = loud.filter((v, i) => i % G === g && v > 0)', 'const nz = loud.filter((v, i) => v > 0)'],
+  'taps-ignored': ['const on = sbTapPulse(tr, taps),', 'const on = null,'],
+  'no-recentre': ['    for(let i = 0; i < 3; i++){\n      const p = sbPulsePath(', '    for(let i = 0; i < 0; i++){\n      const p = sbPulsePath('],
+  'pins-needed': ['    if(w < 0) break;\n    pins.push(w); pins.sort((a, b) => a - b);\n  }\n  return { pins: pins.length, worstMs };', '    break;\n  }\n  return { pins: pins.length, worstMs };'],
+  'findbar-wide': ['const o = sbLocalOffset(E, t, w, 30), at = t[2 * bpb * S] + o.ms / 1000;', 'const o = sbLocalOffset(E, t, w, 250), at = t[2 * bpb * S] + o.ms / 1000;'],
   'tap-spread': ['spreadMs: Math.sqrt(ss / Math.max(1, n - 2)) * 1000', 'spreadMs: Math.sqrt(ss / Math.max(1, n - 2)) * 100'],
 };
 if(BREAK){
@@ -60,9 +74,10 @@ if(BREAK){
   if(!b || !src.includes(b[0])){ console.error('sb-dsp-test: no such break, or its line is gone: ' + BREAK); process.exit(2); }
   src = src.replace(b[0], b[1]);
 }
-const ctx = { console, Math, Float32Array, Float64Array, Int16Array, Int32Array, Uint8Array, Number, Array, Set, Object, JSON, Promise };
+const ctx = { console, Math, Float32Array, Float64Array, Int8Array, Int16Array, Int32Array, Uint8Array, Number, Array, Set, Object, JSON, Promise };
 vm.createContext(ctx);
-vm.runInContext(src + '\n;globalThis.__sb = { SB_TARGET_LUFS, SB_CEILING_DB, SB_CODEC_DELAY, SB_KBPS, SB_MAX_CENTS, sbMp3Info, sbLoudness, sbSamplePeak, sbTruePeak, sbLimit, sbEncodeInput, sbLevel, sbCents, sbMono, sbOnsetEnv, sbTapFit, sbAutoGrid, sbFirstLoudBeat, sbFindBar, sbDrift, sbBarTime, sbBarsIn, sbBarTimes, sbPinBpm };', ctx);
+const NAMES = ['SB_TARGET_LUFS', 'SB_CEILING_DB', 'SB_CODEC_DELAY', 'SB_KBPS', 'SB_MAX_CENTS', 'SB_PINS_MAX', 'sbMp3Info', 'sbLoudness', 'sbSamplePeak', 'sbTruePeak', 'sbLimit', 'sbEncodeInput', 'sbLevel', 'sbCents', 'sbMono', 'sbOnsetEnv', 'sbTapFit', 'sbAutoGrid', 'sbFirstLoudBeat', 'sbFindBar', 'sbDrift', 'sbBarTime', 'sbBarsIn', 'sbBarTimes', 'sbPinBpm', 'sbTrack', 'sbTrackBeatFrom', 'sbTapPulse', 'sbPinsNeeded', 'sbBeatTooMuch'];
+vm.runInContext(src + '\n;globalThis.__sb = {' + NAMES.map(n => `${n}: typeof ${n} === 'undefined' ? undefined : ${n}`).join(', ') + '};', ctx);
 const S = ctx.__sb;
 
 let cases = 0, failed = 0;
@@ -176,7 +191,7 @@ async function beatCase(name, o){
   const E = S.sbOnsetEnv(mono, FS);
   const tp = taps(o.beatAt, o.tapFrom, 16, 30);
   const f = S.sbTapFit(tp);
-  const g = S.sbAutoGrid(E, mono, FS, o.sec, o.meter, f.bpm);
+  const g = S.sbAutoGrid(E, mono, FS, o.sec, o.meter, f.bpm, tp);
   let beat = g.beat;
   for(let round = 0; round < 3; round++){
     const d = S.sbDrift(E, beat, o.sec).filter(w => w.sure && Math.abs(w.ms) > 30 && !w.pinned);
@@ -219,6 +234,95 @@ await beatCase('weak onsets under noise', { seed: 4, sec: 120, bpb: 4, bpbBeats:
   const grid = [0.96, 1.05].map(f => { const E = S.sbOnsetEnv(mono, FS); return [f, S.sbAutoGrid(E, mono, FS, 40, '4/4', 96 * f).beat]; });
   check('beat: taps 4% slow or 5% fast: bar 1 within 10 ms and the tempo within 0.1 BPM', grid.every(([, b]) => Math.abs(b.anchor - (t0 + 8 * P)) <= 0.01 && Math.abs(b.bpm - 96) <= 0.1),
     grid.map(([f, b]) => `x${f}: bar 1 ${((b.anchor - (t0 + 8 * P)) * 1000).toFixed(1)} ms, ${b.bpm.toFixed(3)} BPM`).join('; '));
+}
+/* ── a strummed record that drifts (2026-11-15) ── */
+/* A strum on every eighth note: a short noise attack and the chord's tones ringing on. LEVELS is how loud each of
+   the bar's 8 strums is: the "and" strums (odd places) are the loud ones, as on the ruler record, and the bar has a
+   shape of its own (loudest on the "and" of 2, softest on beat 2). A quiet kick on beats 1 and 3. `quiet` =
+   [from, to) beats not played at all (a breakdown). `pickup`: one loud strum half a beat before beat 0. */
+const LEVELS = [0.55, 0.8, 0.25, 1.0, 0.3, 0.9, 0.6, 0.7];
+function strumSong(fs, sec, o){
+  const n = Math.round(fs * sec), L = new Float32Array(n), R = new Float32Array(n);
+  const chords = [[146.83, 185, 220], [196, 246.94, 293.66], [164.81, 196, 246.94], [220, 277.18, 329.63]];
+  for(let i = Math.max(0, Math.round((o.beatAt(0) - 0.4) * fs)); i < n; i++){ const nz = noise() * 0.01; L[i] = nz; R[i] = nz; }
+  const strum = (t, until, lvl, ch) => {
+    const a = Math.round(t * fs), b = Math.min(n, Math.round(until * fs));
+    for(let i = Math.max(0, a); i < b; i++){
+      const tt = (i - a) / fs;
+      let tone = 0; for(const f of ch) for(let h = 1; h <= 3; h++) tone += Math.sin(2 * Math.PI * f * h * tt + h) / (h * 6);
+      const v = lvl * (0.5 * tone * Math.exp(-tt * 7) + 0.35 * noise() * Math.exp(-tt * 300));
+      L[i] += v; R[i] += v * 0.95;
+    }
+  };
+  if(o.pickup){ const t0 = o.beatAt(0), half = (o.beatAt(1) - t0) / 2; strum(t0 - half, t0, 1, chords[3]); }
+  for(let k = 0; ; k++){
+    const t = o.beatAt(k); if(t >= sec - 0.05) break;
+    const next = o.beatAt(k + 1), mid = (t + next) / 2, place = (k % 4) * 2, ch = chords[Math.floor(k / 4) % 4];
+    const q = o.quiet && k >= o.quiet[0] && k < o.quiet[1] ? 0 : 1;
+    strum(t, mid, q * LEVELS[place], ch); strum(mid, next, q * LEVELS[place + 1], ch);
+    if(k % 2 === 0 && q === 1){ const a = Math.round(t * fs); for(let i = a; i < Math.min(n, a + Math.round(fs * 0.15)); i++){ const tt = (i - a) / fs, v = 0.22 * Math.exp(-tt * 30) * Math.sin(2 * Math.PI * 55 * tt); L[i] += v; R[i] += v; } }
+  }
+  return [L, R];
+}
+/* The beat times of a record that is not steady: 112 BPM, the first 8 beats 5% slow, the tempo wandering ±2.5% over
+   about 80 beats, and beats 200-207 (the breakdown: two bars of SILENCE) 6% slow, so the band comes back in almost
+   exactly one eighth note later than a steady count would have it. The pulse alone cannot know that: one eighth
+   later fits it as well as on time. Only the bar's own pattern (LEVELS) says where beat 1 is. beatAt(k) for k from -1. */
+const WANDER = (() => { const t = [0.31]; for(let k = 0; k < 700; k++){ let gap = 60 / 112 * (1 + 0.025 * Math.sin(2 * Math.PI * k / 80)); if(k < 8) gap *= 1.05; if(k >= 200 && k < 208) gap *= 1.06; t.push(t[k] + gap); } return k => k < 0 ? t[0] + k * (t[1] - t[0]) : t[k]; })();
+{
+  const SEC = 170, STRUM = { beatAt: WANDER, quiet: [200, 208] };
+  const nBeats = (() => { let k = 0; while(WANDER(k + 1) < SEC - 3) k++; return k; })();
+  const run = (o, withTaps) => {
+    seed = 31;
+    const mono = S.sbMono(strumSong(FS, SEC, o)), E = S.sbOnsetEnv(mono, FS);
+    seed = 32;
+    const tp = taps(WANDER, 40, 16, 30), f = S.sbTapFit(tp);
+    return { E, mono, tp, g: S.sbAutoGrid(E, mono, FS, SEC, '4/4', f.bpm, withTaps ? tp : undefined) };
+  };
+  const a = run(STRUM, true), beat0 = a.g.beat, e1 = (beat0.anchor - WANDER(0)) * 1000;
+  check('strummed: bar 1 within 15 ms of the first beat', Math.abs(e1) <= 15, `${e1.toFixed(1)} ms`);
+  /* The followed beats, counted from the true first beat, against every true beat. */
+  if(S.sbTrackBeatFrom && a.E.track && a.E.track.dev){
+    const errs = []; for(let k = 0; k <= nBeats; k++) errs.push(Math.abs(S.sbTrackBeatFrom(a.E.track, WANDER(0), k) - WANDER(k)) * 1000);
+    const sorted = errs.slice().sort((x, y) => x - y), over = errs.filter(v => v > 40).length, firstOver = errs.findIndex(v => v > 40);
+    check(`strummed: every followed beat within 40 ms of the true beat (${nBeats + 1} beats; the median within 15 ms)`, over === 0 && sorted[sorted.length >> 1] <= 15,
+      `median ${sorted[sorted.length >> 1].toFixed(1)} ms, worst ${sorted[sorted.length - 1].toFixed(0)} ms, over 40 ms: ${over}${over ? ' (the first at beat ' + firstOver + ')' : ''}; the beat in ${a.E.track.sub}`);
+  } else check('strummed: every followed beat within 40 ms of the true beat', false, 'this sound code has no beat track to count beats on (sbTrackBeatFrom)');
+  /* A tempo typed 5% too fast: with the record's own slow opening that is 10% off, more than the track may run
+     from its tempo (8%), so the tempo has to be moved to the record's own first. */
+  if(S.sbTrack){
+    const tr = S.sbTrack({ env: a.E.env, low: a.E.low, fps: a.E.fps, t0: a.E.t0 }, 112 * 1.05, '4/4');
+    let over = 0, worst = 0; for(let k = 0; k <= nBeats; k++){ const e = Math.abs(S.sbTrackBeatFrom(tr, WANDER(0), k) - WANDER(k)) * 1000; if(e > 40) over++; if(e > worst) worst = e; }
+    check('strummed: a tempo typed 5% fast: the track moves to the record\'s own tempo and still follows every beat', over === 0 && Math.abs(tr.bpm / 112 - 1) < 0.01, `track ${tr.bpm} BPM, worst beat ${worst.toFixed(0)} ms, over 40 ms: ${over}`);
+  } else check('strummed: a tempo typed 5% fast: the track moves to the record\'s own tempo and still follows every beat', false, 'no sbTrack');
+  /* The teacher's clicks: a pin on every window over 30 ms, three rounds. Every pin must sit on its own bar. */
+  let beat = beat0;
+  for(let round = 0; round < 3; round++){
+    const d = S.sbDrift(a.E, beat, SEC).filter(w => w.sure && Math.abs(w.ms) > 30 && !w.pinned);
+    if(!d.length) break;
+    const pins = beat.pins.slice();
+    d.forEach(w => { const p = S.sbFindBar(a.E, beat, w.bar); if(p.sure) pins.push({ bar: w.bar, t: p.t }); });
+    beat = Object.assign({}, beat, { pins: pins.sort((x, y) => x.bar - y.bar) }); beat.bpm = S.sbPinBpm(beat);
+  }
+  const pinErr = beat.pins.map(p => [p.bar, (p.t - WANDER((p.bar - 1) * 4)) * 1000]);
+  check('strummed: every pin within 25 ms of its own bar (at least 4 pins: the record drifts)', pinErr.length >= 4 && pinErr.every(([, e]) => Math.abs(e) <= 25), pinErr.map(([b, e]) => `bar ${b}: ${e.toFixed(0)}`).join(', '));
+  const need = S.sbPinsNeeded ? S.sbPinsNeeded(a.E, beat0, SEC) : null;
+  check('strummed: the record needs more pins than SB_PINS_MAX: it goes to Claude', !!need && need.pins > S.SB_PINS_MAX && S.sbBeatTooMuch(need.pins), need ? `${need.pins} pins (the limit is ${S.SB_PINS_MAX}); with bar 1 and the end only the worst bar is ${need.worstMs} ms off` : 'no sbPinsNeeded');
+  /* A pickup: one loud strum half a beat before the first beat. The taps are on the beat, so bar 1 is on a beat (the
+     first beat, or the beat before it: the ±1 beat buttons' job); without taps bar 1 is the first loud pulse, the
+     pickup itself, half a beat early. */
+  const PICK = Object.assign({}, STRUM, { pickup: true }), half = (WANDER(1) - WANDER(0)) / 2;
+  const b = run(PICK, true).g.beat, c = run(PICK, false).g.beat;
+  const onBeat = [-1, 0].some(j => Math.abs(b.anchor - WANDER(j)) <= 0.02);
+  check('strummed: a pickup, with taps: bar 1 is on a beat, not on the pickup', onBeat, `bar 1 at ${b.anchor.toFixed(3)} s; the first beat is at ${WANDER(0).toFixed(3)}, the pickup at ${(WANDER(0) - half).toFixed(3)}`);
+  check('strummed: a pickup, a typed BPM (no taps): bar 1 is the first loud pulse, the pickup', Math.abs(c.anchor - (WANDER(0) - half)) <= 0.02, `bar 1 at ${c.anchor.toFixed(3)} s`);
+}
+/* A steady record needs 2 pins (bar 1 and the end) and does not go to Claude. */
+{
+  seed = 1;
+  const o = { bpb: 4, beatAt: k => 1.37 + k * 0.625 }, s = song(FS, 100, o), mono = S.sbMono(s), E = S.sbOnsetEnv(mono, FS);
+  const g = S.sbAutoGrid(E, mono, FS, 100, '4/4', 96.2), need = S.sbPinsNeeded ? S.sbPinsNeeded(E, g.beat, 100) : null;
+  check('pins: a steady record needs 2 (bar 1 and the end) and stays in the builder', !!need && need.pins === 2 && !S.sbBeatTooMuch(need.pins), need ? `${need.pins} pins, the worst bar ${need.worstMs} ms off` : 'no sbPinsNeeded');
 }
 {
   const beat = { meter: '4/4', bpm: 100, anchor: 1, pins: [{ bar: 20, t: 1 + 19 * 2.4 + 0.05 }, { bar: 40, t: 1 + 39 * 2.4 + 0.02 }] };

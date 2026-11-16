@@ -2,16 +2,23 @@
    Step 3 of the Song builder (teacher-sb-core.js has the view and the draft; teacher-sb-dsp.js the numbers).
    Jonathan taps along (the TAP button or the space bar; the first press starts the song) or types a BPM, and
    picks the beats in a bar: 3, 4, or 6/8 counted in two (the meters a built song takes, app/builtsongs.js
-   BS_METERS; there is no 2/4 there, so no "2"). From that the audio sets the grid (sbAutoGrid): the tempo
-   refined over the whole song, bar 1 on the first LOUD beat, and a pin near the end where the music is. He
+   BS_METERS; there is no 2/4 there, so no "2"). From that the audio sets the grid (sbAutoGrid): the record's
+   beat followed through the whole song (sbTrack), bar 1 on the first LOUD beat, and a pin near the end where the
+   music is. He
    checks it on the waveform (numbered bar lines, his taps as ▲) and by ear: "Listen with clicks" plays the
    levelled copy with the card's own Metronome click (pcClick, app/cards.js, at the play-along level) on the
    grid. Bar 1 moves with its handle (drag), ±10 ms and ±1 beat. The DRIFT CHECK measures windows through the
    song against the grid; a window more than 30 ms off says so and offers "Pin bar N to the music"; three or
    more pins make the song's barTimes (sbBarTimes, at the Chart step, when the bar count is known). The taps
    are reported as their real spread (people tap within 20 to 40 ms; the plan).
-   Saved in the draft as beat = { meter, bpm, anchor, pins: [{ bar, t }], trackBpm, tapBpm, taps, tapSpreadMs,
-   driftOff } (driftOff: windows still over 30 ms; the list shows "Check the beat" while it is above 0).
+   Saved in the draft as beat = { meter, bpm, anchor, pins: [{ bar, t }], trackBpm, trackSub, tapBpm, taps,
+   tapSpreadMs, driftOff, pinsNeeded } (driftOff: windows still over 30 ms; the list shows "Check the beat" while it
+   is above 0. trackBpm and trackSub: the beat track's tempo and how it divides the beat, so the same track is found
+   when the draft is opened again. pinsNeeded: how many pins the record's own bars would take, sbPinsNeeded; over
+   SB_PINS_MAX the step says the builder cannot hold the record's beat and to send the mp3 to Claude, and the list
+   shows "Beat: send to Claude"; the later steps stay open, as with the 10-cent rule).
+   THE TAPS also say which pulse is the beat (sbTapPulse): on a strummed record the "and" is as loud as the beat,
+   and only the person tapping knows which is which. A typed BPM has no taps: bar 1 is then the first loud pulse.
    Everything that sounds here stops on every way out: leaving the view (teacherSbLeave), another step or song,
    a hidden tab, Stop. It never calls a global stopper (the console may be playing to the room). */
 const SB_TAP_WANT = 16;
@@ -58,6 +65,7 @@ function sbBeatPaneHtml(d){
   if(beat){
     const dr = bt.drift || [], last = sbBarsIn(beat, d.audio.durationSec);
     const nPins = sbPins(beat).length;
+    if(sbBeatTooMuch(bt.need ? bt.need.pins : beat.pinsNeeded)) html += `<div class="sb-flag red"><span class="fi">!</span><div class="sb-flag-body"><b>The builder cannot hold this record's beat.</b> Its bars would need about ${bt.need ? bt.need.pins : beat.pinsNeeded} pins to stay on the beat (a steady record needs 2 or 3): the tempo moves, or the beat is hard to follow. Send the mp3 to Claude to build this song. You can still try the other steps.</div></div>`;
     html += `<div class="sb-h sb-drift-title">Drift check: does the grid still sit on the music later in the song?</div>
       <p class="sb-hint sb-drift-sum">${escHtml(`${sbPinBpm(beat).toFixed(2)} BPM · ${last} bars fit in the file · ${nPins} pin${nPins === 1 ? '' : 's'} (bar 1${nPins > 1 ? ' and ' + sbPins(beat).slice(1).map(p => p.bar).join(', ') : ''})`)}${nPins >= 3 ? ' · the bars follow the pins (a beat map)' : ''}</p>`;
     html += `<div class="sb-drift">` + dr.map(w => {
@@ -88,8 +96,9 @@ function sbBeatMounted(){
       if(sbStopped(gen) || sbSel !== id || lv.E) return;
       lv.E = sbOnsetEnv(lv.mono, lv.fs);
       const b = sbBeatOf(d);
-      if(b && Number.isFinite(b.trackBpm)){ const c = sbCoherence(lv.E, 60 / b.trackBpm, 1); lv.E.track = sbPhaseTrack(lv.E, b.trackBpm, c.phase); }
+      if(b) sbBeatTrack(lv, b);
       sbBtFor(id).drift = b ? sbDrift(lv.E, b, d.audio.durationSec) : null;
+      sbBtFor(id).need = b ? sbPinsNeeded(lv.E, b, d.audio.durationSec) : null;
       teacherSbPaint();
     }, 30);
     return;
@@ -97,6 +106,16 @@ function sbBeatMounted(){
   const bt = sbBtFor(sbSel), b = sbBeatOf(d);
   if(b && !bt.drift) bt.drift = sbDrift(lv.E, b, d.audio.durationSec);
   sbDrawAll();
+}
+
+/* The beat track a saved grid was made with, found again on lv.E: the same tempo and division (beat.trackBpm,
+   beat.trackSub; a draft saved before 2026-11-15 has no trackSub and gets the track a new grid would). It is made
+   again when the meter changes: the bar's pattern is part of it. */
+function sbBeatTrack(lv, beat){
+  const tr = lv.E.track;
+  if(!Number.isFinite(beat.trackBpm)) return;
+  if(tr && tr.meter === beat.meter && Math.abs(tr.bpm - beat.trackBpm) < 1e-4 && (!beat.trackSub || tr.sub === beat.trackSub)) return;
+  lv.E.track = sbTrack(lv.E, beat.trackBpm, beat.meter, beat.trackSub ? { sub: beat.trackSub } : null);
 }
 
 /* ── Drawing ── */
@@ -265,8 +284,8 @@ function sbBeatFromBpm(bpm0, fit){
   if(!d || !lv || !lv.E || sbBusy) return;
   if(!(bpm0 >= 30 && bpm0 <= 300)){ sbNote = 'A BPM from 30 to 300, please.'; teacherSbPaint(); return; }
   const meter = (d.beat && d.beat.meter) || bt.meter || '4/4';
-  const g = sbAutoGrid(lv.E, lv.mono, lv.fs, d.audio.durationSec, meter, bpm0);
-  const beat = Object.assign({}, g.beat, { trackBpm: Math.round(lv.E.track.bpm * 10000) / 10000,
+  const g = sbAutoGrid(lv.E, lv.mono, lv.fs, d.audio.durationSec, meter, bpm0, fit ? bt.taps : null);
+  const beat = Object.assign({}, g.beat, { trackBpm: lv.E.track.bpm, trackSub: lv.E.track.sub,
     tapBpm: fit ? Math.round(fit.bpm * 100) / 100 : null, taps: fit ? fit.n : 0, tapSpreadMs: fit ? Math.round(fit.spreadMs) : null });
   sbBeatSet(d, beat, `The grid: ${sbPinBpm(beat).toFixed(2)} BPM, bar 1 at ${sbFmtT(beat.anchor)}. Check it with Listen with clicks.`);
 }
@@ -276,6 +295,8 @@ function sbBeatSet(d, beat, note, now){
   beat.bpm = Math.round(sbPinBpm(beat) * 10000) / 10000;
   bt.drift = sbDrift(lv.E, beat, d.audio.durationSec);
   beat.driftOff = bt.drift.filter(w => w.sure && !w.pinned && Math.abs(w.ms) > SB_DRIFT_MS).length;
+  bt.need = sbPinsNeeded(lv.E, beat, d.audio.durationSec);
+  beat.pinsNeeded = bt.need ? bt.need.pins : null;
   d.beat = beat;
   d.step = Math.max(3, Number(d.step) || 1);
   if(note != null) sbNote = note;
@@ -326,6 +347,7 @@ document.addEventListener('click', e => {
   if(!beat || !lv || !lv.E){ teacherSbPaint(); return; }
   if(beat.meter === meter) return;
   const nb = Object.assign({}, beat, { meter, pins: [] });
+  sbBeatTrack(lv, nb);
   const last = sbBarsIn(nb, d.audio.durationSec);
   if(last >= 8){ const f = sbFindBar(lv.E, nb, last - 2); if(f.sure) nb.pins = [{ bar: last - 2, t: Math.round(f.t * 10000) / 10000 }]; }
   sbBeatSet(d, nb, `Beats in a bar: ${meter === '6/8' ? '6/8 counted in two' : meter.slice(0, 1)}. The pins were set again for the new bar lines.`, true);

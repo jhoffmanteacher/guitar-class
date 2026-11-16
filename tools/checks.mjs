@@ -19351,10 +19351,12 @@ function checkSongFilesConsole() {
    Song builder view (teacher-sb-core.js, teacher-sb-beat.js) and its sound
    code (teacher-sb-dsp.js). Two tools, each RUN and its case count pinned so
    deleting a case to get green fails here:
-   - tools/sb-dsp-test.mjs (quick mode, Node only, about 30 s, generated
+   - tools/sb-dsp-test.mjs (quick mode, Node only, about 45 s, generated
      signals): loudness, peaks and the limiter, the codec delay, pitch and the
      10-cent block, taps, the beat grid (4 click tracks, a soft intro, taps 4%
-     slow or 5% fast). Its `--break=<name>` faults each turn it red; not run
+     slow or 5% fast, and since 2026-11-15 a strummed record that drifts: the
+     beat track, the pins, a pickup, "send to Claude" over SB_PINS_MAX pins).
+     Its `--break=<name>` faults each turn it red; not run
      here. Its result is kept in tools/.sb-dsp-cache.json (gitignored), keyed by
      the SHA-256 of teacher-sb-dsp.js, the test and vendor/lamejs/lame.min.js:
      an unchanged trio with a passing run on file is not run again (the Stop
@@ -19365,8 +19367,8 @@ function checkSongFilesConsole() {
      before the draft names it, a damaged copy loaded once, Delete draft, every
      write on the builder's own paths.
    ════════════════════════════════════════════════════════════════════ */
-const SB_DSP_TEST_PIN = 37;          // 35 -> 37 (2026-11-15, the browser walk): a soft intro's bar 1; taps 4% slow or 5% fast
-const SONG_BUILDER_SIM_PIN = 36;     // 2026-11-15: first count 32; -> 36 the same day: Clear this step (Volume, Beat) and Level it again (4)
+const SB_DSP_TEST_PIN = 45;          // 35 -> 37 (2026-11-15, the browser walk): a soft intro's bar 1; taps 4% slow or 5% fast; -> 45 (2026-11-15, the beat track): a strummed record that drifts (7), a steady record's 2 pins (1)
+const SONG_BUILDER_SIM_PIN = 39;     // 2026-11-15: first count 32; -> 36 the same day: Clear this step (Volume, Beat) and Level it again (4); -> 39 (2026-11-15): the beat track saved and found again, the "send to Claude" line (3)
 function checkSongBuilder() {
   head('1en. Song builder: the sound code and the drafts are run, their case counts pinned');
   let bad = 0;

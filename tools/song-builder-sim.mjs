@@ -248,6 +248,20 @@ async function runCases(consoleSrc){
   check('beat: the grid is saved in the draft (meter, bpm, bar 1, pins, step 3)', b && b.meter === '4/4' && Math.abs(b.bpm - 96) < 3 && typeof b.anchor === 'number' && Array.isArray(b.pins) && d2.step === 3 && d2.audio && d2.audio.id === audA,
     JSON.stringify(b && { meter: b.meter, bpm: b.bpm, anchor: b.anchor, pins: b.pins, step: d2.step }));
 
+  /* The beat track's own numbers are saved with the grid, so a reload finds the same track; and how many pins the
+     record needs (2026-11-15). The made-up record is steady: no "send to Claude" on the step or in the list. */
+  check('beat: the track (trackBpm, trackSub) and the pins the record needs are saved with the grid', b && Number.isFinite(b.trackBpm) && [1, 2, 3, 4, 6].includes(b.trackSub) && Number.isFinite(b.pinsNeeded) && b.pinsNeeded <= run('SB_PINS_MAX'),
+    JSON.stringify(b && { trackBpm: b.trackBpm, trackSub: b.trackSub, pinsNeeded: b.pinsNeeded }));
+  const paneOk = run('sbBeatPaneHtml(sbDraft())'), listOk = run('sbListHtml()');
+  /* The same draft, as a record that needs 21 pins: the step says to send the mp3 to Claude, the list tags it, and
+     nothing is written by showing it. */
+  const writesBefore = writes();
+  const pane21 = run('(() => { const d = sbDraft(), keep = [d.beat.pinsNeeded, sbBt.need]; d.beat.pinsNeeded = 21; sbBt.need = { pins: 21, worstMs: 400 }; const out = [sbBeatPaneHtml(d), sbListHtml()]; d.beat.pinsNeeded = keep[0]; sbBt.need = keep[1]; return out; })()');
+  check('beat: a record that needs more pins than SB_PINS_MAX: the step says to send the mp3 to Claude and the list says "Beat: send to Claude"; a steady record shows neither',
+    /cannot hold this record's beat/.test(pane21[0]) && /about 21 pins/.test(pane21[0]) && /Send the mp3 to Claude/.test(pane21[0]) && /Beat: send to Claude/.test(pane21[1])
+    && !/cannot hold this record's beat/.test(paneOk) && !/Beat: send to Claude/.test(listOk) && writes() === writesBefore,
+    JSON.stringify({ step21: /cannot hold this record's beat/.test(pane21[0]), list21: /Beat: send to Claude/.test(pane21[1]), stepSteady: /cannot hold this record's beat/.test(paneOk), listSteady: /Beat: send to Claude/.test(listOk) }));
+
   /* A reload: a fresh console on the same store resumes the draft where it was. */
   const R = makeConsole(consoleSrc, F);
   R.run('renderTeacherSongBuilder()'); await settle();
@@ -257,6 +271,13 @@ async function runCases(consoleSrc){
     'step ' + R.run('sbStepOn'));
   check('resume: the Beat step reads the levelled copy back from songFiles (counted once)', R.run('!!(sbMem.level && sbMem.level.sha256 === sbDraft().audio.sha256)') && (F.S.get('songFiles' + 'Usage/' + R.run('songFileMonth()')) || {}).bytes > 0,
     JSON.stringify(F.S.get('songFilesUsage/' + R.run('songFileMonth()'))));
+
+  /* The reloaded console makes the beat track again from the saved tempo and division: the same track, so the same
+     drift windows as the console that set the grid. */
+  R.run('sbMem.level.E = sbOnsetEnv(sbMem.level.mono, sbMem.level.fs); sbBeatTrack(sbMem.level, sbDraft().beat);');
+  const trA = run('JSON.stringify([sbMem.level.E.track.bpm, sbMem.level.E.track.sub, sbDrift(sbMem.level.E, sbDraft().beat, sbDraft().audio.durationSec)])');
+  const trB = R.run('JSON.stringify([sbMem.level.E.track.bpm, sbMem.level.E.track.sub, sbDrift(sbMem.level.E, sbDraft().beat, sbDraft().audio.durationSec)])');
+  check('resume: the reloaded console finds the same beat track (tempo, division, every drift window)', trA === trB && JSON.parse(trA)[2].length >= 2, trA === trB ? JSON.parse(trA).slice(0, 2).join(' BPM, the beat in ') : `${trA.slice(0, 200)} / ${trB.slice(0, 200)}`);
 
   /* A damaged copy: one try, a line that says why, and no try by itself after (each try counts a download). */
   {

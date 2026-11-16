@@ -181,6 +181,7 @@ function sbListHtml(){
       const d = r.d, step = Math.min(SB_BUILT_STEPS, Math.max(1, Number(d.step) || 1));
       tags = '<span class="ta-tag ta-tag-off">Draft</span>'
         + (sbPitchBlocked(d) ? '<span class="ta-tag ta-tag-warn">Pitch: send to Claude</span>' : '')
+        + (d && d.beat && sbBeatTooMuch(d.beat.pinsNeeded) ? '<span class="ta-tag ta-tag-warn">Beat: send to Claude</span>' : '')
         + (d.beat && d.beat.driftOff > 0 ? '<span class="ta-tag ta-tag-warn">Check the beat</span>' : '');
       sub = `Step ${step} of 7 · ${SB_STEPS[step - 1]} · ${escHtml(sbWhen(d.savedAt))}`;
     }

@@ -36,27 +36,25 @@ work in WORKFLOW". Part b is live (entry "Song builder" below). Next: Jonathan b
 step and says whether the bar lines sit on the beat; then build Part c (Chart, the correction grid, sections, Level)
 from `Claude outputs/WORK-ORDER-song-builder.md` (on the Mac only). Work in its own worktree made from `origin/main`.
 Part c ships Fast, d is Reviewed, then stop for Jonathan before Part e.
-**FIRST, before Part c: fix the Beat step's tracker (Jonathan, 2026-11-15: "keep fixing tracker. we can use a
-different model tomorrow. for songs that drift too much the app should tell me that i should ask claude to build it
-instead i don't want to have a moises step").** Decided: NO Moises / click-track step in the builder; a song whose
-drift the builder cannot follow says, like the 10-cent block, to send the mp3 to Claude. Not built yet:
-"the drift check should pin the changes automatically" ("don't do auto-pinning yet").
+**The Beat step's tracker is fixed (2026-11-15, the evening session; entry "The Beat step's tracker" under "Song
+builder" below has the numbers).** It follows American Girl beat for beat (0 of 397 beats over 100 ms from Moises's;
+before: 371). What is still Jonathan's to say: (1) the "send it to Claude" line now shows when a record needs more
+than 8 pins (`SB_PINS_MAX`, a first setting: steady records need 2 or 3, every record played without a click needs
+16 to 26, so today American Girl and every rock record go to Claude); the other way is to let the builder set those pins
+itself from the followed bars ("the drift check should pin the changes automatically"; he said "don't do
+auto-pinning yet"), which the tracker is now good enough for. (2) Whether the line should also BLOCK publishing
+(Part d) or only say so. Asked 2026-11-15; until he answers, 8 pins and "says so, blocks nothing" stand.
 THE RULER (on the Mac only, never in a test or the repo): `~/Downloads/American Girl-D-114bpm-440hz.mp3` (the
 original 1976 recording, 3:33) and Moises's beats for it, `~/Downloads/American Girl-D-114bpm-440hz metronome only.mp3`
-(397 clicks, 0.092 to 208.010 s, gaps 496-576 ms; Jonathan: the first click is the very start of the song = bar 1).
-Find the clicks: every sample over 20% of the file's peak, then skip 150 ms. Against a straight line (114.31 BPM) the
-record drifts -228..+260 ms: REAL drift, so the drift check's big numbers were largely true.
-Measured 2026-11-15, each tracker's beats against Moises's 397 (nearest-beat error): main today: median 219 ms, 371
-beats over 100 ms off; moved half a beat: median 45 ms, 88 over 100 ms. So today's tracker sits mostly on the "and"
-(the strumming puts more onset there) and also slips between beat and "and" mid-song. Bar 1 itself is right (0.092 s).
-Tried and dropped (none shipped): a whole-song dynamic-programming tracker (Ellis/librosa; tightness 100-20000:
-406-408 beats, on the "and", 155 over 100 ms even when moved half a beat; also failed sb-dsp-test "weak onsets");
-unwrapping the window tracker by half a beat plus "the first strong note is on a beat" (150 over 100 ms).
-`playalong-measure.py`'s STEADY line wraps at the sixteenth (132 ms), so it cannot see these slips: do not use it as
-the ruler. Do next: a tracker that stays on the beat (the target: Moises's beats within about 30 ms, few over 100 ms),
-proved first on a GENERATED drifting, steadily strummed song in `tools/sb-dsp-test.mjs` (accents on the "and" like
-American Girl) that fails today; then the ruler; then the "send it to Claude" line for drift the builder cannot
-follow (define "too much" from the measurements, with Jonathan). Agents: Opus or Fable by the need, as for the Windows block below. The Windows computer works
+(397 clicks, 0.092 to 208.010 s; Jonathan: the first click is the very start of the song = bar 1). The scripts that
+measure with it (no audio in them) are in `Claude outputs/beat-ruler/` with a README: run `ruler2.mjs` after any
+change to the tracker and report its three lines.
+**For Part c and after (Jonathan, 2026-11-15): "the app should allow me to upload chord charts, etc. as other things
+are being worked on like levels, in order to be more efficient. and/or to let me put all the files in the initial
+upload".** So: the first step takes the chord chart (and anything else the later steps need) together with the mp3,
+and/or the Chart step is open while the copy is being levelled (about 48 s for a 3:30 song) instead of waiting for
+it. Build it with Part c's Chart step; it is not in the work order, which was written before he asked.
+Agents: Opus or Fable by the need, as for the Windows block below. The Windows computer works
 the list in the next block at the same time: stay out of those files; fetch and rebase before every push. If Jonathan
 sends an mp3 for a first real song: skill `new-playalong`, 192k. Delete this block when Part d ships.
 
@@ -165,6 +163,46 @@ me to type the title?"; a draft is cheap to redo; a published song in Part d kee
 Beat has Clear this step (Jonathan, 2026-11-15: "at any step if i want to clear what it had done instead of starting
 over"). Next: Jonathan builds one real song up to the Beat step; then part c (Fast) and d (Reviewed). His first
 real song through Import (part a2) is still open.
+- **The Beat step's tracker (2026-11-15, Fast).** Before: the phase of the BEAT in 12-second windows
+  (`sbPhaseTrack`), which on a strummed record sat on the "and" and slipped between beat and "and". Why: on American
+  Girl the onsets on the "and" are as strong as on the beat (beat stronger than its "and" on 169 of 396 beats), so
+  the beat itself is nearly invisible (window strength 0.04) while the eighth-note pulse is clear (0.15). Now
+  (`sbTrack`, `teacher-sb-dsp.js`, the comment "THE BEAT TRACK"): the PULSE is followed (the beat in 2, 3, 4 or 6,
+  whichever is clear; a path through short windows that may run 8% off the tapped tempo), then the BAR's own rhythm
+  pattern is learned from the song and each two-bar window lined up with it (this is what counts through the
+  American Girl breakdown at 2:34, where one eighth more or fewer fits the pulse equally well), then a fine pass,
+  averaged over a longer stretch where the record is steady. Beats are COUNTED from bar 1, so bar 1 says which pulse
+  is the beat; the taps say it first (`sbTapPulse`), a typed BPM has no taps and takes the first loud pulse.
+  - **The ruler (American Girl, Moises's 397 beats), from any starting tempo 108 to 120 BPM:** followed beats
+    median 18 ms (Moises sits about 18 ms early all through; its clicks are on a 20 ms grid), 0 over 100 ms, count
+    never lost (before: median 219 ms, 371 over 100). Bar 1 at 0.091 s (Moises 0.092). The grid after a pin on every
+    flagged window: median 15 ms, 0 over 100 (before: 235 ms, 392 over 100).
+  - **The site's own 14 backing tracks** (their `barTimes` or steady grid as the answer; errors around their median,
+    a constant offset being bar 1's to fix): the count is kept on 11. Bars over 100 ms: Seven Nation Army 0 of 117,
+    Luna 0 of 53, Ella 0 of 133, Perdón Mamá 0 of 114, Smells Like Teen Spirit 2 of 129, Neil Young's Watchtower 2
+    of 165, The Cure 4 of 88, Sweet Child 7 of 184 and Hendrix's Watchtower 8 of 114 (the last bars, where the band
+    slows to a stop), Vuelve a la Vida 17 of 175 (the ending). NOT followed: Madrecita Querida (44 of 74; its bars
+    run up to 24% long), Las Mañanitas (14 of 108; one bar is 70% of the others), Arsenal Efectivo (131 of 142; the
+    site's own beat-audit cannot tell there either: 103 of 142 bars "cannot tell"). The tracker before: 1,074 of
+    1,670 bars over 100 ms.
+  - **It does not know when it has lost the beat.** Its own bars come out smooth either way (Madrecita: 0 followed
+    bars over 6% off, the record has 15); a per-bar "do the onsets sit on the pulse" score flags 29 of the 119 wrong
+    bars and 17 of 812 right ones. So no "hard places" list was built; "Listen with clicks" stays the check.
+  - **Pins.** `sbPinsNeeded`: steady records need 2 or 3 (bar 1 and the end; Vuelve a la Vida 6); American Girl
+    16, Smells 18, Sweet Child 21, Seven Nation Army 23, the two Watchtowers 24 and 26. "the cure" is steady but
+    reads 12: the tracker loses count there 3 times, so a high number means "the tempo moves OR the tracker cannot
+    hold it", and the message says both. Over `SB_PINS_MAX` (8, a first setting) the step says the builder cannot
+    hold the record's beat and to send the mp3 to Claude, and the list shows "Beat: send to Claude"; nothing is
+    blocked. The drift check also shows the ONE bar furthest off the grid (the fixed
+    windows alone passed a grid 200 ms off between two of them). A pin is now lined up on every pulse of its 4 bars,
+    ±30 ms (before: the beats only, ±60 ms, which pulled two American Girl pins 66 and 80 ms toward the strums).
+  - **Tried and dropped tonight:** a snare / kick detector to mark the beat (Jonathan's idea; on American Girl the
+    beat is the stronger one on 41% of beats for a snare, 54% for a kick: no use); the tempo allowed 12% off (Luna
+    and Ella lost count; 8% holds them and still follows American Girl's 108 BPM opening).
+  - **Proof:** `tools/sb-dsp-test.mjs` 45 cases (8 new: a made-up strummed record with the "and" louder than the
+    beat, a slow opening, a wandering tempo and a silent two-bar breakdown; the code before fails all 8, its pins about 270 ms
+    off = half a beat); 17 of 17 planted faults turn it red (`--break=<name>`; 8 of them new, one for each step of
+    the tracker). `tools/song-builder-sim.mjs` 39 cases (3 new).
 - **Downloads, an estimate, not measured (M1, 2026-11-15).** Firestore Usage (Nov 9 to 14): reads peak 15K a day of the
   free 50K, writes peak 3K of 20K. Stored bytes and download bandwidth are not shown to him, so they are worked out:
   one built song is about 0.4 GB of downloads for 60 students, about 0.6 GB with 1.5 Chromebooks per student ("most
