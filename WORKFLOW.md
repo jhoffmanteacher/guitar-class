@@ -31,6 +31,13 @@ Dates are the Pacific calendar date. `CACHE_VERSION` and commit timestamps may s
 
 Start here. Update this block whenever an item opens or closes; each line says where the detail is.
 
+**Open bug, reported by Jonathan 2026-11-16 (not looked at yet): the "Sweet Child O' Mine — Lyrics and Chords"
+activity (`ca-45`) does not scroll properly in full-screen mode.** That is the lyric-sheet play-along in `class-activities.js`
+(the card after "The Whole Song in Power Chords"; its sheet is two columns over two pages, drawn by the lyric sheet
+in `app/cards.js`). Nothing is known beyond his one line: first reproduce it at 1366×657 and at the classroom size
+2560×1300, full screen on and off, and check whether the "the cure" lyric sheet does the same. Delete this line
+when it is fixed.
+
 **For the next session on the Mac (written 2026-11-16; Part b shipped 2026-11-15, Part c 2026-11-16).** Jonathan types "do the
 Mac work in WORKFLOW". Parts b and c are live (entry "Song builder" below). **Waiting on Jonathan, in this order:**
 (1) he builds one real song up to the Beat step and says whether the bar lines sit on the beat; (2) he pastes three
