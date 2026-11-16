@@ -26,7 +26,8 @@
    window over 30 ms is pinned (beat.driftOff 0, measured on this copy), the audio id is not on SONG_FILES and no
    other built song uses it with other bytes, and the list has room. A record that needs more than SB_PINS_MAX pins
    shows the Beat step's red box here too ("This song does not fit the builder"), and does NOT block (Jonathan,
-   2026-11-15 and 2026-11-16). The only place it goes:
+   2026-11-15 and 2026-11-16). A first Publish asks nothing (one click; Jonathan, 2026-11-16); an edit of a live song
+   asks once. The only place it goes:
    Songs → "More Play Along songs" (the board is Part e, later). Writes, in this order:
      1. (read) songFiles/{audio.id} must be 'ready' and match the audio entry;
      2. ONE transaction (review R1-1): builtSongsMeta/list read (it must have room), builtSongs/{id} = { v, title,
@@ -265,8 +266,10 @@ async function sbPublish(){
   const why = sbPublishWhy(d, id);
   if(why.length){ sbNote = 'Not published: ' + why[0]; teacherSbPaint(); return; }
   const doc = sbDocOf(d), was = sbPublished && sbPublished.get(id);
-  if(!confirm(was ? `Publish your changes to "${doc.title}"? Students get the new version at their next sign-in or tab return. Students who have the song open now keep the old version, or lose its sound, until they reload.`
-    : `Publish "${doc.title}"? It goes on the Songs page under More Play Along songs for every student, at their next sign-in or tab return.`)) return;
+  /* A first Publish (a song not on the Songs page: never published, or unpublished) asks nothing: one click (Jonathan,
+     2026-11-16, "go ahead"); Unpublish takes it off. An EDIT of a live song still asks, with the open-pages sentence. */
+  if(was && !confirm(`Publish your changes to "${doc.title}"? Students get the new version at their next sign-in or tab return. Students who have the song open now keep the old version, or lose its sound, until they reload.`
+  )) return;
   const gen = sbViewGen;
   sbStopSounds();
   sbBusy = 'publish'; sbOpGen++; sbNote = ''; sbProgress = 'Checking the levelled copy in the database…'; teacherSbPaint();
@@ -299,7 +302,8 @@ async function sbPublish(){
     sbPublished.set(id, { title: doc.title, artist: doc.artist, ver, audioId: doc.audio.id, doc: JSON.parse(JSON.stringify(doc)), at: Date.now() });
     sbEditing.delete(id);
     if(was && was.doc && was.doc.audio && was.doc.audio.id !== doc.audio.id) await sbDeleteAudio(was.doc.audio.id, null);
-    sbNote = `Published "${doc.title}" (${teacherBsVerText(ver)}). It is on the Songs page under More Play Along songs; students see it at their next sign-in or tab return.`;
+    sbNote = was ? `Published the changes to "${doc.title}" (${teacherBsVerText(ver)}). Students get them at their next sign-in or tab return.`
+      : `Published "${doc.title}" (${teacherBsVerText(ver)}): it is on the Songs page under More Play Along songs, and students see it at their next sign-in or tab return. Unpublish takes it off.`;
     if(typeof builtSongsSync === 'function') builtSongsSync();
   }catch(e){
     const where = step === 'song' ? ' Nothing was written: students have what they had before. Press Publish again.' : ' Nothing was written.';

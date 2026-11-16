@@ -1071,20 +1071,20 @@ async function publishCases(consoleSrc, check){
       && run('sbCanon')(f.song) === run('sbCanon(sbDocOf(sbDraft()).song)') && /^test-0-publish-sb-pubdraft0001\.json$/.test(sv.name),
       sv ? sv.name : 'nothing saved');
   }
-  /* D7: Publish: Cancel writes nothing; OK writes the song, then the list */
-  let pubDoc = null;
+  /* D7: a first Publish asks nothing and writes the song and the list */
+  let pubDoc = null, firstAsked = -1;
   {
     const w0 = nW();
-    env.confirmAnswer = false; env.confirms.length = 0;
-    run('sbPublish()'); await settle();
-    const cancelled = nW() === w0 && env.confirms.length === 1 && /^Publish "Test 0 Publish"\? It goes on the Songs page under More Play Along songs/.test(env.confirms[0]);
-    env.confirmAnswer = true;
+    env.confirmAnswer = false; env.confirms.length = 0;   // a confirm, if one were asked, would be answered Cancel
     run('sbPublish()'); await settle(200);
+    firstAsked = env.confirms.length;
+    const cancelled = firstAsked === 0;
+    env.confirmAnswer = true;
     const seq = since(w0);
     const doc = F4.S.get('builtSongs/' + id), meta = F4.S.get('builtSongsMeta/list');
     pubDoc = doc;
     const bare = doc ? Object.assign({}, doc) : null; if(bare) delete bare.savedAt;
-    check('publish: Cancel writes nothing; OK writes builtSongs/<id> and then builtSongsMeta/list (in that order, nothing else), the song in the rules\' exact shape with the server time',
+    check('publish: a first Publish (one click, no confirm) writes builtSongs/<id> and builtSongsMeta/list (in that order, nothing else), the song in the rules\' exact shape with the server time',
       cancelled && seq.join(' → ') === `set builtSongs/${id} → set builtSongsMeta/list` && doc && Object.keys(doc).sort().join() === 'artist,audio,savedAt,song,title,v' && doc.savedAt === TS && F4.st.violations.length === 0,
       JSON.stringify({ cancelled, seq, violations: F4.st.violations.slice(0, 2) }));
     check('publish: the stored song IS the draft\'s song (sorted-key compare), builtSongCheck passes on it as stored, and the list has it at a new edit number (from the clock) with the imported song kept at 3',
@@ -1161,6 +1161,8 @@ async function publishCases(consoleSrc, check){
       /^Publish your changes to "Test 0 Publish"\?.*keep the old version, or lose its sound, until they reload/.test(R.env.confirms[0] || '') && iSong === 0 && iList === 1 && iDel > iList && freshVer(meta.songs[id], pubVer1) && meta.songs[other] === 3 && keysOf('songFiles/' + aid).length === 0
       && F4.S.get('builtSongs/' + id).audio.id === aidNew && keysOf('songFiles/' + oaid).length === otherCopyKeys && JSON.stringify(F4.S.get('builtSongs/' + other)) === otherDoc0,
       JSON.stringify(seq));
+    check('publish: a first Publish asks nothing (0 confirms); an edit of a live song asks once (Jonathan, 2026-11-16: "go ahead")', firstAsked === 0 && R.env.confirms.length === 1,
+      JSON.stringify({ firstAsked, editAsked: R.env.confirms.length }));
   }
   /* D12: Unpublish: the draft keeps the edit number, then the list, then the song; the draft and its copy stay */
   {
