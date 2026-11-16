@@ -151,7 +151,11 @@ async function teacherSbLoad(){
   if(gen !== sbReadGen) return;
   if(op !== sbOpGen){ teacherSbLoad(); return; }
   sbReadAt = Date.now(); sbReadErr = err;
-  if(!err){ sbDrafts = drafts; sbPublished = pub; }
+  if(!err){
+    sbDrafts = drafts; sbPublished = pub;
+    /* A draft older than its published song, and not that song (review R2-1, teacher-sb-publish.js sbDraftStale). */
+    if(typeof sbDraftStale === 'function') for(const [id, d] of drafts) if(sbDraftStale(d, pub.get(id))) d.stale = true;
+  }
   teacherSbPaint();
   if(teacherView === 'manage' && typeof teacherSfPaint === 'function') teacherSfPaint();
 }
@@ -567,6 +571,8 @@ async function sbSaveUpload(goTo){
   /* A chart given at this step (pasted or picked) is kept as its text, for step 4 to read; never over a chart
      that has been read already. */
   if(typeof obj.chartText === 'string' && !sbHasChart(draft)) draft.chart = obj.chartText.trim() ? { text: obj.chartText.replace(/\r\n?/g, '\n').slice(0, 20000) } : null;
+  const textOf = x => (x && x.chart && !sbHasChart(x) && typeof x.chart.text === 'string') ? x.chart.text : '';
+  const newText = textOf(draft) !== textOf(d);         // the step-1 chart changed in THIS save (review R2-7)
   if(!d){ id = sbNewId(); }
   draft.step = Math.max(Number(draft.step) || 1, 2);   // step 1 is done once the draft is saved
   const ok = await sbWriteDraft(id, draft);
@@ -575,22 +581,26 @@ async function sbSaveUpload(goTo){
   sbStepOn = goTo || 2;
   if(!sbStepReady(sbDraft(), sbStepOn)) sbStepOn = 2;
   teacherSbPaint();
-  /* A chart (pasted, a text file or a chords pdf) given at step 1 is read now, so step 4 opens on what was read, or
-     on the grid when there is nothing to settle (2026-11-16, fewer clicks); never over a chart already read. */
+  /* A chart (pasted, a text file or a chords pdf) given at step 1 is read now (2026-11-16, fewer clicks); never over a
+     chart already read, and only when its text changed in this save (review R2-7: saving step 1 again does not read the
+     same text again over a chart typed at step 4). A failed read's line stays on screen while Volume runs. */
   const nd = sbDraft();
-  if(nd && nd.chart && typeof nd.chart.text === 'string' && nd.chart.text.trim() && !sbHasChart(nd) && typeof sbChartDoRead === 'function'){
+  let keep = '';
+  if(newText && nd && nd.chart && typeof nd.chart.text === 'string' && nd.chart.text.trim() && !sbHasChart(nd) && typeof sbChartDoRead === 'function'){
     await sbChartReadNow(nd);
+    if(!sbHasChart(sbDraft())) keep = sbNote;
   }
-  sbAutoLevel();
+  sbAutoLevel(keep);
 }
 /* Step 2 with the original mp3 in this tab and no current levelled copy: "Level it" starts by itself (2026-11-16, fewer
-   clicks). Once per file in this tab: a levelling that failed waits for the button. */
+   clicks). Once per file in this tab: a levelling that failed waits for the button. `keep`: a line to keep on screen
+   (sbRunLevel). */
 const sbAutoLevelTried = new Set();
-function sbAutoLevel(){
+function sbAutoLevel(keep){
   const d = sbDraft();
   if(sbStepOn !== 2 || sbBusy || !d || sbMem.id !== sbSel || !sbMem.src || sbCopyCurrent(d) || sbAutoLevelTried.has(sbMem.src.sha256)) return;
   sbAutoLevelTried.add(sbMem.src.sha256);
-  sbRunLevel();
+  sbRunLevel(keep);
 }
 /* The one draft writer. Saves the fields a draft has, with the server's time, and keeps the copy in memory. */
 function sbDraftDoc(d){
@@ -666,12 +676,14 @@ onmessage = function(e){ try{
 }
 
 /* ── Step 2: Volume ── */
-async function sbRunLevel(){
+/* keep: a line said just before (a step-1 chart that could not be read, sbSaveUpload) that stays above this one. */
+async function sbRunLevel(keep){
   const d = sbDraft();
   if(sbBusy || !d || !sbMem.src || sbMem.id !== sbSel) return;
   const gen = sbViewGen, id = sbSel, src = sbMem.src;
+  keep = typeof keep === 'string' ? keep : '';
   sbStopSounds();
-  sbBusy = 'level'; sbOpGen++; sbNote = ''; sbProgress = 'Measuring the record…'; teacherSbPaint();
+  sbBusy = 'level'; sbOpGen++; sbNote = keep; sbProgress = 'Measuring the record…'; teacherSbPaint();
   const say = line => { sbProgress = line; const el = document.querySelector('[data-sb-status]'); if(el && !sbStopped(gen)){ el.hidden = false; el.textContent = line; } };
   const w = { stopped: () => sbStopped(gen), wrote: false, k: -1, n: 0, progress: say };
   let step = 'measure';
@@ -718,6 +730,7 @@ async function sbRunLevel(){
     else if(e && e.why) sbNote = 'Not levelled: ' + e.why + '.';
     else sbNote = 'Not levelled: ' + (typeof teacherSfWhy === 'function' ? teacherSfWhy(e) : String((e && (e.code || e.message)) || e)) + '.' + where;
   }finally{
+    if(keep && sbNote.indexOf(keep) < 0) sbNote = keep + (sbNote ? ' ' + sbNote : '');
     sbBusy = ''; sbProgress = ''; sbOpGen++;
     if(!sbStopped(gen)) teacherSbPaint();
   }

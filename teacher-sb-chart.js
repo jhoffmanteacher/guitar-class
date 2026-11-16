@@ -352,7 +352,6 @@ function sbGridSwap(sections, from, to){
 /* A bar string → [{ name ('' = rest), beats }], and back. */
 function sbBarRead(bar, meter){ const m = SB_METER[meter] || SB_METER['4/4']; return String(bar).indexOf(':') < 0 ? [{ name: bar === '-' ? '' : bar, beats: m.bpb }] : String(bar).split(/\s+/).map(tk => { const p = tk.split(':'); return { name: p[0] === '-' ? '' : p[0], beats: bsBeats(p[1]) }; }); }   // bsBeats: '2', '1.5' and an imported song's '1/3'
 function sbBarWrite(parts, meter){
-  const m = SB_METER[meter] || SB_METER['4/4'];
   if(parts.length === 1 || parts.every(p => p.name === parts[0].name)) return parts[0].name || '-';
   return parts.map(p => (p.name || '-') + ':' + p.beats).join(' ');
 }
@@ -392,6 +391,11 @@ function sbSongWhy(d, id){
   if(!song) return [!d.beat ? 'Set the beat first (step 3).' : 'Read a chart first (step 4).'];
   if(!d.audio) return ['Level the record first (step 2).'];
   if(d.chart.sections.some(s => !s.name)) return ['A section still has no name: pick one in the grid (step 4).'];
+  /* Review R2-4: an imported beat map is kept exactly (above), so its bars must fit it; said plainly, not in the
+     validator's words (its rule: one bar time per bar, or one more for the end). */
+  const bt = d.beat.fromImport && Array.isArray(d.beat.barTimes) ? d.beat.barTimes : null;
+  if(bt && (bt.length < Math.max(3, song.bars.length) || bt.length > song.bars.length + 1))
+    return [`A song imported with its own beat map cannot gain or lose a bar here (its beat map is for ${bt.length - 1} bars; the chart has ${song.bars.length}): undo that change at the Chart step, or send the song to Claude.`];
   return builtSongCheck(id, { v: 1, title: d.title, artist: d.artist, audio: d.audio, song }).filter(w => !/^audio\.centsOff/.test(w));
 }
 /* What still needs him at the Chart step: refused lines not dealt with, chords not taught and not kept, sections
@@ -405,6 +409,20 @@ function sbChartOpen(d, read){
   const untaught = power ? [] : sbChartChords(ch.sections).filter(n => { const sh = sbShapeOf(n); return sh && !sh.taught && !kept.includes(n); });
   const unnamed = ch.sections.filter(s => !s.name).length;
   return { bad, untaught, unnamed, n: bad.length + untaught.length + unnamed };
+}
+/* The chart's bar count against the recording's at the beat set (review R2-2): { n, rec } when they differ, else null.
+   Never blocks Publish (the Chart step, Preview and Publish's Chart row say it). Not before the beat is set, and not for
+   a chart that came with an imported song (its bars are the song as it was published). */
+function sbChartBarsOff(d){
+  const beat = typeof sbBeatOf === 'function' ? sbBeatOf(d) : null;
+  if(!sbHasChart(d) || d.chart.fromImport || !beat || !d.audio) return null;
+  const n = sbChartBars(d.chart.sections), rec = sbBarsIn(beat, d.audio.durationSec);
+  return n === rec ? null : { n, rec };
+}
+function sbBarsOffHtml(d, off, fmt, inGrid){
+  const how = fmt === 'bar lines' ? `Add or remove bars ${inGrid ? 'here' : 'in the grid'}.`
+    : `Chords over lyrics do not say how long each chord lasts, so each got one bar. Hold the long ones ${inGrid ? 'here (pick a bar, then + Bar)' : 'in the grid'}.`;
+  return `<div class="sb-flag"><span class="fi">!</span><div class="sb-flag-body"><b>The chart makes ${off.n} bars; the recording has about ${off.rec}</b> at ${escHtml(String(Math.round(sbPinBpm(d.beat))))} BPM. ${how} This does not stop Publish.</div></div>`;
 }
 
 /* ── The view ── */
@@ -448,7 +466,13 @@ const SB_FORMS = `<div class="sb-forms"><span class="sb-chip">Chords over lyrics
 function sbChartPaneHtml(d){
   if(!d) return `<div class="sb-box"><p class="sb-note" style="margin:0">Save the song first (step 1).</p></div>`;
   const st = sbChFor(sbSel), ch = d.chart || {}, has = Array.isArray(ch.sections) && ch.sections.length > 0, off = sbBusy ? ' disabled' : '';
-  const view = st.view || (has ? (ch.edited ? 'grid' : 'read') : 'paste');
+  const barsOff = sbChartBarsOff(d);
+  /* The first time the step shows a chart in this tab, it opens on the grid when there is nothing to settle, else on
+     what was read; a bar count that is not the recording's is something to settle (review R2-2: decided here, with
+     the beat known, not when a chart given at step 1 is read). Kept for the tab, so settling one thing does not
+     switch the view. */
+  if(!st.view && has) st.view = ch.edited ? 'grid' : (sbChartOpen(d, sbChartReadOf(d)).n || barsOff) ? 'read' : 'grid';
+  const view = st.view || 'paste';
   const pdfBar = typeof sbPdfBarHtml === 'function' ? sbPdfBarHtml() : '';
   if(view === 'paste' || !has){
     const text = st.text != null ? st.text : ch.text || '';
@@ -473,7 +497,7 @@ function sbChartPaneHtml(d){
   const imp = ch.fromImport ? `<div class="sb-flag sb-flag-info"><span class="fi">i</span><div class="sb-flag-body"><b>This chart came with the imported song.</b> Its original text is not here, so there is nothing under "What was read"; the grid is the song as it was published, with its own chord shapes. Pasting a chart replaces it.</div></div>` : '';
   if(view === 'grid'){
     const sel = st.sel != null && st.sel < nBars ? st.sel : null;
-    return pdfBar + stale + imp + `<div class="sb-tools">${count}<span class="sb-hint" style="margin:0">${open.n ? `${open.n} thing${open.n === 1 ? '' : 's'} still to settle` : 'Pick a bar to change it.'}</span><span class="sb-toolbtns">`
+    return pdfBar + stale + imp + (barsOff ? sbBarsOffHtml(d, barsOff, read.fmt, true) : '') + `<div class="sb-tools">${count}<span class="sb-hint" style="margin:0">${open.n ? `${open.n} thing${open.n === 1 ? '' : 's'} still to settle` : 'Pick a bar to change it.'}</span><span class="sb-toolbtns">`
       + `<button type="button" class="sb-btn small" data-sb-act="chart-view" data-sb-v="read"${off}>← What was read</button><button type="button" class="sb-btn small" data-sb-act="chart-undo"${off || !st.undo.length ? ' disabled' : ''}>Undo</button><button type="button" class="sb-btn small" data-sb-act="clear-chart"${off}>Clear this step</button></span></div>`
       + `<div class="sb-cols sb-gridcols"><div class="sb-gridscroll">${sbSecGridHtml(ch.sections, meter, { sel, pick: true, play: !!(d.beat && d.audio) })}</div><div>${sbBarPanelHtml(d, sel)}</div></div>`;
   }
@@ -493,7 +517,7 @@ function sbChartPaneHtml(d){
   if(open.unnamed) flags.push(`<div class="sb-flag"><span class="fi">!</span><div class="sb-flag-body"><b>${open.unnamed} section${open.unnamed === 1 ? ' has' : 's have'} no name on the list.</b> Pick ${open.unnamed === 1 ? 'it' : 'each one'} in the grid: Intro, Verse, Chorus…</div></div>`);
   if(read.folds.length) flags.push(`<div class="sb-flag sb-flag-info"><span class="fi">i</span><div class="sb-flag-body"><b>${read.folds.length} chord${read.folds.length === 1 ? ' was' : 's were'} made plain.</b> ${read.folds.slice(0, 8).map(f => `${escHtml(f.from)} → ${escHtml(f.to)}`).join(', ')}${read.folds.length > 8 ? ', …' : ''}. The card plays the plain chord.</div></div>`);
   read.notes.forEach(t => flags.push(`<div class="sb-flag sb-flag-info"><span class="fi">i</span><div class="sb-flag-body">${escHtml(t)}</div></div>`));
-  if(rec != null && nBars !== rec) flags.push(`<div class="sb-flag sb-flag-info"><span class="fi">i</span><div class="sb-flag-body"><b>The chart makes ${nBars} bars; the recording has about ${rec}</b> at ${escHtml(String(Math.round(sbPinBpm(d.beat))))} BPM. ${read.fmt === 'bar lines' ? 'Add or remove bars in the grid.' : 'Chords over lyrics do not say how long each chord lasts, so each got one bar. Hold the long ones in the grid.'}</div></div>`);
+  if(barsOff) flags.push(sbBarsOffHtml(d, barsOff, read.fmt, false));
   const marked = `<pre class="sb-paste">` + read.lines.map(l => `<span class="ln ${l.kind === 'bad' ? ((ch.left || []).includes(l.n) ? 'out' : 'bad') : l.kind === 'header' ? 'hd' : l.kind === 'chords' || l.kind === 'bars' || l.kind === 'chordpro' ? 'ch' : l.kind === 'skipped' || l.kind === 'meta' ? 'out' : ''}"><span class="no">${l.n}</span>${escHtml(l.text) || ' '}</span>`).join('') + `</pre>`;
   return pdfBar + stale + imp + `<div class="sb-tools"><span class="sb-chip on">✓ Read as ${escHtml(read.fmt || 'a chart')}</span><span class="sb-note" style="margin:0">${ch.sections.length} section${ch.sections.length === 1 ? '' : 's'} · ${nBars} bars · chords: ${sbChipsHtml(names, kept)}</span><span class="sb-toolbtns">`
     + `<button type="button" class="sb-btn small" data-sb-act="chart-view" data-sb-v="paste"${off}>← Paste again</button><button type="button" class="sb-btn small" data-sb-act="clear-chart"${off}>Clear this step</button><button type="button" class="sb-btn small${open.n ? ' primary' : ''}" data-sb-act="chart-view" data-sb-v="grid"${off}>Fix in the grid →</button></span></div>`
@@ -588,17 +612,18 @@ function sbChartDoRead(d, text){
   const t = String(text || '').replace(/\r\n?/g, '\n').slice(0, SB_CHART_MAX);
   if(!t.trim()){ sbNote = 'Paste the chart first.'; teacherSbPaint(); return; }
   const read = sbChartRead(t, meter);
-  if(!read.sections.length){ sbNote = read.bad.length ? `No chords could be read: ${read.bad.length} line${read.bad.length === 1 ? '' : 's'} ${read.bad.length === 1 ? 'was' : 'were'} refused (line ${read.bad[0].line} ${SB_WHY[read.bad[0].why] || ''}).` : 'No chords could be read in that text.'; st.text = t; teacherSbPaint(); return; }
+  /* Nothing read: the text goes into the paste box, unless he has typed there already (review R2-7: never over his own). */
+  if(!read.sections.length){ sbNote = read.bad.length ? `No chords could be read: ${read.bad.length} line${read.bad.length === 1 ? '' : 's'} ${read.bad.length === 1 ? 'was' : 'were'} refused (line ${read.bad[0].line} ${SB_WHY[read.bad[0].why] || ''}).` : 'No chords could be read in that text.'; if(st.text == null) st.text = t; teacherSbPaint(); return; }
   st.read = read; st.readOf = meter + '\n' + t; st.view = 'read'; st.text = null; st.sel = null; st.undo = [];
   const lv = d.level && d.level.range ? Object.assign({}, d.level, { range: null }) : d.level;
   return sbChartSet(d, Object.assign({ chart: { text: t, meter, fmt: read.fmt, sections: read.sections, left: [], kept: ((d.chart && d.chart.kept) || []).filter(n => read.chords.includes(n)), edited: false } }, lv !== d.level ? { level: lv } : {}),
     `Read: ${read.sections.length} section${read.sections.length === 1 ? '' : 's'}, ${sbChartBars(read.sections)} bars${read.bad.length ? `, ${read.bad.length} line${read.bad.length === 1 ? '' : 's'} refused` : ''}.`, true);
 }
-/* A chart given at step 1, read when the draft is saved: the step opens on the grid when there is nothing to settle. */
+/* A chart given at step 1, read when the draft is saved. Which view step 4 opens on is chosen when it is first shown,
+   with the beat known (sbChartPaneHtml; review R2-2): none is chosen here. */
 async function sbChartReadNow(d){
   await sbChartDoRead(d, d.chart.text);   // its save, before Volume starts
-  const nd = sbDraft(), st = sbChFor(sbSel);
-  if(nd && sbHasChart(nd) && st.read) st.view = sbChartOpen(nd, st.read).n ? 'read' : 'grid';
+  if(sbHasChart(sbDraft())) sbChFor(sbSel).view = '';
 }
 /* The line `line` of the draft's text is replaced (null: put out with a #), and the chart read again. */
 function sbChartLine(d, line, withText){

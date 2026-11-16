@@ -20,19 +20,21 @@
      1. the audio goes into songFiles/{audio.id} through the Song files writer (teacherSfPutFile in
         teacher-songfiles.js: head 'uploading', the pieces, stale pieces removed, head 'ready'), skipped when the
         store already holds that file, ready and matching;
-     2. builtSongs/{id} = { v, title, artist, audio, song, savedAt: the server's time };
-     3. builtSongsMeta/list: in a transaction, songs[id] becomes a new EDIT number (what tells every page to fetch
-        the song again; teacherBsNextVer: never one used before), every other entry kept, updatedAt the server's time.
-   Importing the same id again replaces that song. One import at a time (and never during a Song files action).
-   Leaving Manage stops it before its next write; a stop or a failure after step 1 leaves the audio stored and
-   the song not (or not yet) on the list, and says so.
+     2. ONE transaction (review R2-6, 2026-11-16, as the Song builder's Publish): builtSongs/{id} = { v, title,
+        artist, audio, song, savedAt: the server's time } and builtSongsMeta/list with songs[id] a new EDIT number
+        (what tells every page to fetch the song again; teacherBsNextVer: never one used before), every other entry
+        kept, updatedAt the server's time; both land or neither does.
+   Importing the same id again replaces that song; a Song builder draft of it saved before is then stale and is
+   rebuilt from the import when it is next opened (teacherSbImported, teacher-sb-publish.js; review R2-1). One import
+   at a time (and never during a Song files action). Leaving Manage stops it before its next write; a stop or a
+   failure after step 1 leaves the audio stored and the song and the list as they were, and says so.
    Students see it on their next sign-in or tab return (app/start.js); this console's own Songs view at once
    (builtSongsSync()).
 
    NOT HERE: Publish, Edit, Unpublish, Delete and Export are the Song builder's (teacher-sb-publish.js, Part d,
-   2026-11-16), which writes builtSongs/{id} and builtSongsMeta/list in the same order as Import (the song, then
-   the list; the list first when a song comes off). An imported song shows there as a published song with no draft:
-   Delete and Export work on it; to change it, import a new file here. Hidden in the Songs view
+   2026-11-16), which writes builtSongs/{id} and builtSongsMeta/list as Import does (both in one transaction; the
+   list first when a song comes off). An imported song shows there as a published song with no draft: Edit and
+   Unpublish rebuild one from it, and Delete and Export work on it. Hidden in the Songs view
    (config/class.hiddenActivities, the existing writer) still takes any built song off students' pages. A built
    song is never moved to Class activities (teacher-songs.js shows no such button for an 'sb-' id).
 
@@ -248,12 +250,11 @@ async function teacherBsImport(jsonFile, mp3File){
     const hs = await db.collection('songFiles').doc(a.id).get();
     const h = hs.exists ? hs.data() || {} : null;
     if(!teacherSfHeadMatches(h, entry)) await teacherSfPutFile(a.id, entry, buf, Math.round(a.durationSec * 100) / 100, w);
-    if(stopped()) throw 'stop';
     step = 'song';
-    teacherBsProgress = `Saving ${doc.title}…`; teacherBsPaint();
-    await db.collection('builtSongs').doc(id).set({ v: doc.v, title: doc.title, artist: doc.artist, audio: a, song: doc.song, savedAt: firebase.firestore.FieldValue.serverTimestamp() });
     if(stopped()) throw 'stop';
-    step = 'list';
+    teacherBsProgress = `Saving ${doc.title}…`; teacherBsPaint();
+    /* The song and the list in ONE transaction (review R2-6, as the Song builder's Publish): both land or neither does,
+       so a song already on the Songs page is never replaced under its old edit number. */
     const ref = db.collection('builtSongsMeta').doc('list');
     let ver = 0;
     await db.runTransaction(async tx => {
@@ -261,8 +262,11 @@ async function teacherBsImport(jsonFile, mp3File){
       const songs = bsListOf(snap.exists ? snap.data() : null);
       ver = teacherBsNextVer(songs[id]);
       songs[id] = ver;
+      tx.set(db.collection('builtSongs').doc(id), { v: doc.v, title: doc.title, artist: doc.artist, audio: a, song: doc.song, savedAt: firebase.firestore.FieldValue.serverTimestamp() });
       tx.set(ref, { songs, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
     });
+    /* The Song builder's copy of this song, and a draft of it saved before this Import (review R2-1). */
+    if(typeof teacherSbImported === 'function') teacherSbImported(id, doc, ver);
     teacherBsPicked.json = teacherBsPicked.mp3 = null;
     teacherBsEnd(`Imported "${doc.title}" (${teacherBsVerText(ver)}). Students see it under Songs → More Play Along songs on their next sign-in or when they come back to the tab.`);
     if(typeof builtSongsSync === 'function') builtSongsSync();
@@ -270,8 +274,7 @@ async function teacherBsImport(jsonFile, mp3File){
     if(e && e.shape){ teacherBsEnd(`Nothing was imported: ${e.shape}.`); return; }
     const where = step === 'audio'
       ? (w.wrote ? ` The audio is NOT ready (its upload stopped${w.k >= 0 && w.k < w.n ? ` at piece ${w.k + 1} of ${w.n}` : ''}); the song was not added.` : ' Nothing was written.')
-      : step === 'song' ? ' The audio is stored; the song was not saved. Import again.'
-      : ' The audio and the song are stored, but the Songs page list was not updated, so students do not see it yet. Import again.';
+      : ' The audio is stored; the song and the Songs page list were not changed, so students have what they had before. Import again.';
     if(e === 'stop'){ teacherBsEnd('Stopped: you left Manage.' + where); return; }
     teacherBsEnd(`The import failed: ${typeof teacherSfWhy === 'function' ? teacherSfWhy(e) : String((e && (e.code || e.message)) || e)}.${where}`);
   }
