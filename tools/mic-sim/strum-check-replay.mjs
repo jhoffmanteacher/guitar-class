@@ -27,9 +27,13 @@
    for line with its numbers and its grid rule made settable; the default settings must reproduce the real function exactly, and the run
    stops if they do not), beside the synthetic bench's students (strum-check-loop.mjs) under the same settings; each take at its kept
    clock and +-20 ms. --cands=<json>: only the settings listed ([{ name, ratio, hfRatio, refract, rule, ease, cap, within, outPen,
-   dupOnce, lock, which }]), each printed per take and clock beside today's (the copy at SITE_P); --no-bench leaves the bench out.
-   Review R4-1's candidates (2026-11-16): A {"outPen":-1.5}, C {"outPen":-1.5,"dupOnce":true}, D {"lock":0.25}, AD both.
-   --copy=<json>: the settings the identity test gives the copy, for a tree with a candidate planted in coach-strumcheck.js.
+   dupOnce, lock, which }]), each printed per take and clock beside the site's (named "site": the copy at SITE_P); --no-bench leaves
+   the bench out.
+   Review R4-1's candidates (2026-11-16): A {"outPen":-1.5}, C {"outPen":-1.5,"dupOnce":true}, D {"lock":0.25}, AD both. AD is BUILT
+   (coach-strumcheck.js SC_ANCHOR_LOCK / SC_ANCHOR_LOCK_MIN and the outside-every-window score, 2026-11-16), so SITE_P carries it; the
+   code before it is {"outPen":null,"lock":0} (e.g. --cands='[{"name":"before","outPen":null,"lock":0}]').
+   --copy=<json>: the settings the identity test gives the copy, for a tree with a candidate planted in coach-strumcheck.js (or an
+   older tree: --copy='{"outPen":null,"lock":0}' on a tree from before AD).
    --splice: one of the take's own strums pasted into a rest (the block above `--gate` says how); caught / bar passed per candidate.
    The results of 2026-11-14 are in `Claude outputs/strum-coach/DETAILS.md` section 20. Not in checks.mjs. */
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -80,10 +84,10 @@ const HOOK = `(() => {
           const span = 8 * s.slotMs, recent = s.__on.filter(t => coachOnsetAt - t < span);
           const lim = (p.wide || 1e9) * s.slotMs;
           /* review R4-1's candidates (2026-11-16; all off by default = the site's code):
-               outPen  an onset outside every window scores this (candidate A: -1.5, as on a rest; today it scores nothing)
+               outPen  an onset outside every window scores this (candidate A: -1.5, as on a rest; before AD it scored nothing)
                dupOnce a second onset in the same eighth scores as a rest (candidate C, with A)
                lock    when the onsets before this one (4 or more) all fit the grid of the moment, search only +-lock eighths
-                       (candidate D: 0.25; AD = A and D) */
+                       (candidate D: 0.25; AD = A and D; BUILT 2026-11-16 with SC_ANCHOR_LOCK_MIN 4: SITE_P below) */
           const search = (c0, R, keepNear, centred, list) => {
             const n = Math.ceil(R / 5); let best = keepNear, bestSc = -1e9, bestOff = 1e9, bestN = 0;
             for (let i = 0; i <= 2 * n; i++){
@@ -127,8 +131,8 @@ const HOOK = `(() => {
 })()`;
 /* the site's settings as the page's copy of the detector writes them (the identity test below compares the copy with the real one):
    since 2026-11-14 ratios 1.15 / 1.3 and the pattern-shape grid (scHearStrum, coach-strumcheck.js); before, 1.2 / 1.46 and Strum
-   Radar's easing 0.2 (rule 'base'). */
-export const SITE_P = { ratio: 1.15, hfRatio: 1.3, refract: 140, ease: 1, within: 0.45, rule: 'shapeFree', wide: 4, wideMin: 6, wideSlack: 1.5, wideAccept: 1, wideTight: 0.15 };
+   Radar's easing 0.2 (rule 'base'). Since 2026-11-16 rule AD (review R4-1): outPen -1.5 and lock 0.25. */
+export const SITE_P = { ratio: 1.15, hfRatio: 1.3, refract: 140, ease: 1, within: 0.45, rule: 'shapeFree', wide: 4, wideMin: 6, wideSlack: 1.5, wideAccept: 1, wideTight: 0.15, outPen: -1.5, lock: 0.25 };
 
 const args = process.argv.slice(2);
 const opt = k => { const a = args.find(x => x.startsWith('--' + k + '=')); return a ? a.slice(k.length + 3) : null; };
@@ -385,7 +389,7 @@ if (flag('sweep')){
   for (const g of grid) cands.push({ ...SITE_P, ...g, which: 'grid' });
   /* --no-bench: the takes only (the synthetic bench is strum-check-loop.mjs's own run). Each candidate's takes are printed:
      name (the candidate's `name`, else its settings) · take · clock · heard, false extras, bars all right (of 8), right chords. */
-  if (opt('cands')) cands.unshift({ ...SITE_P, name: 'today', which: 'ratios' });
+  if (opt('cands')) cands.unshift({ ...SITE_P, name: 'site', which: 'ratios' });
   for (const c of cands){
     const p = Object.fromEntries(Object.entries(c).filter(([k]) => k !== 'which' && k !== 'name'));
     const row = { p, name: c.name, takes: {}, bench: null };
@@ -404,13 +408,13 @@ if (flag('sweep')){
 /* --splice (2026-11-16, review R4-1): a REAL extra strum. One of the take's own strums (the bar's slot 0 for its rest on slot 1, its
    slot 2 for its rest on slot 4: both down-strums) is copied from the .wav (from 30 ms before its onset, min(220 ms, 0.7 eighth) long)
    and ADDED into one rest of the same bar, at the rest's place as he played it (halfway between his own two strums either side, as the
-   replay of today's code hears them) plus --splice-offs (default 0,-40,40,-80,80 ms). Bars 2 to 7, both rests: up to 12 rests a take,
-   one extra per replay, at the take's kept clock. Under today's code (the copy at SITE_P) and each --cands candidate. Per variant:
+   replay of the site's code hears them) plus --splice-offs (default 0,-40,40,-80,80 ms). Bars 2 to 7, both rests: up to 12 rests a take,
+   one extra per replay, at the take's kept clock. Under the site's code ("site": the copy at SITE_P) and each --cands candidate. Per variant:
    caught (the rest's slot "extra"), the mistake bar passed (its six strums heard, no extra), and the OTHER 63 slots that changed
    against the same variant's replay of the unspliced take. */
 if (flag('splice')){
   const offs = (opt('splice-offs') || '0,-40,40,-80,80').split(',').map(Number);
-  const vars = [{ name: 'today', p: SITE_P }].concat(opt('cands') ? JSON.parse(opt('cands')).map((c, i) => ({ name: c.name || 'cand' + i, p: Object.fromEntries(Object.entries({ ...SITE_P, ...c }).filter(([k]) => k !== 'which' && k !== 'name')) })) : []);
+  const vars = [{ name: 'site', p: SITE_P }].concat(opt('cands') ? JSON.parse(opt('cands')).map((c, i) => ({ name: c.name || 'cand' + i, p: Object.fromEntries(Object.entries({ ...SITE_P, ...c }).filter(([k]) => k !== 'which' && k !== 'name')) })) : []);
   const tally = {};
   for (const tk of takes){
     const ref = await replay(tk, null, { shift: tk.shift }), sr = tk.wav.sr, lat = Number(tk.d.latMs) || 0;
@@ -420,7 +424,7 @@ if (flag('splice')){
     const slotMs = 60000 / tk.d.bpm / 2, L = Math.min(220, 0.7 * slotMs);
     for (let bar = 1; bar <= 6; bar++) for (const [rest, src, a, b] of [[1, 0, 0, 2], [4, 2, 3, 5]]){
       const eS = ev(bar * 8 + src), eA = ev(bar * 8 + a), eB = ev(bar * 8 + b);
-      if (!eS || !eA || !eB){ log(`SPLICE ${tk.id} bar ${bar + 1} rest ${rest}: left out (today's replay did not hear its strums ${src}/${a}/${b})`); continue; }
+      if (!eS || !eA || !eB){ log(`SPLICE ${tk.id} bar ${bar + 1} rest ${rest}: left out (the site's replay did not hear its strums ${src}/${a}/${b})`); continue; }
       const from = Math.round((wavMs(eS) - 30) / 1000 * sr), n = Math.round(L / 1000 * sr), mid = (wavMs(eA) + wavMs(eB)) / 2;
       for (const off of offs){
         const to = Math.round((mid + off - 30) / 1000 * sr), x = Float32Array.from(tk.wav.x);
