@@ -26,7 +26,8 @@
    The chord chart can be given here too (pasted, or a text file), so every file goes in at once (Jonathan,
    2026-11-15: "let me put all the files in the initial upload"); it is kept as chart.text and read at step 4.
    A new file picked later replaces the draft's audio; the beat is kept when the new length is within 0.05 s of
-   the old one (the work order), else cleared.
+   the old one (the work order), else cleared. Pdfs of the chords and of the tab can be picked here and at step 4
+   (teacher-sb-pdf.js, 2026-11-16): they stay in this tab and are never stored.
    VOLUME: teacher-sb-dsp.js sbLevel (one gain to "the cure", a -1 dBFS limiter, 192k constant bitrate in a Worker
    running vendor/lamejs, decoded and measured again). The levelled copy goes to songFiles/{draft id}-{8 hex of its
    SHA-256} through the Song files writer (teacherSfPutFile, teacher-songfiles.js), then the draft is saved, then
@@ -161,13 +162,16 @@ function renderTeacherSongBuilder(){
   root.addEventListener('input', sbInput);
   root.addEventListener('change', sbChange);
   sbBindKeys();
+  if(typeof sbPdfMounted === 'function') sbPdfMounted(root);
   if(sbStepOn === 3 && typeof sbBeatMounted === 'function') sbBeatMounted();
   if(sbStepOn === 4 && typeof sbChartMounted === 'function') sbChartMounted();
   if(!sbBusy && (!sbDrafts || Date.now() - sbReadAt > 15000) && !sbReadErr) teacherSbLoad();
 }
 function teacherSbPaint(){ if(teacherView === 'songbuilder') renderTeacherSongBuilder(); }
+/* With a pdf shown beside the chart (teacher-sb-pdf.js) the song list gives its column to it. */
 function sbViewHtml(){
-  return `<div class="ta-split">${sbListHtml()}<section class="ta-detail" data-sb-detail>${sbDetailHtml()}</section></div>`;
+  const pdf = typeof sbPdfPaneOn === 'function' && sbPdfPaneOn();
+  return `<div class="ta-split${pdf ? ' sb-pdfopen' : ''}">${sbListHtml()}<section class="ta-detail" data-sb-detail>${sbDetailHtml()}</section>${pdf ? '<aside class="sb-pdfslot" data-sb-pdfslot aria-label="The pdf"></aside>' : ''}</div>`;
 }
 function sbRows(){
   const rows = [];
@@ -260,7 +264,7 @@ function sbNavHtml(d){
   if(sbStepOn === 2) return `<button type="button" class="sb-btn" data-sb-step="1"${off}>← Upload</button><button type="button" class="sb-btn primary" data-sb-step="3"${off || !sbStepReady(d, 3) ? ' disabled' : ''}>Next: Beat →</button>`;
   if(sbStepOn === 3) return `<button type="button" class="sb-btn" data-sb-step="2"${off}>← Volume</button><button type="button" class="sb-btn primary" data-sb-step="4"${off}>Next: Chart →</button>`;
   if(sbStepOn === 4) return `<button type="button" class="sb-btn" data-sb-step="3"${off || !sbStepReady(d, 3) ? ' disabled' : ''}>← Beat</button><button type="button" class="sb-btn primary" data-sb-step="5"${off || !sbStepReady(d, 5) ? ' disabled' : ''}>Next: Level →</button>`;
-  return `<button type="button" class="sb-btn" data-sb-step="4"${off}>← Chart</button><button type="button" class="sb-btn primary" disabled title="Preview and Publish come in the next update">Next: Preview →</button>`;
+  return `<button type="button" class="sb-btn" data-sb-step="4"${off}>← Chart</button><button type="button" class="sb-btn primary" disabled title="Preview and Publish come in the next update">Next: Preview → (not built yet)</button>`;
 }
 const SB_LOCK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
 const SB_FILE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
@@ -289,6 +293,7 @@ function sbUploadHtml(d){
       ${sbHasChart(d) ? '<div class="sb-hint">The chord chart is read already: it is at step 4.</div>' : `<div class="sb-field sb-chartfield"><label for="sb-chart1">The chord chart, if you have it now (it is read at step 4)</label>
         <textarea id="sb-chart1" class="sb-pastebox sb-pastebox-small" data-sb-charttext spellcheck="false" maxlength="20000" placeholder="Paste chords over the words, ChordPro, or bars between | lines"${off}>${escHtml(d ? (d.chartText != null ? d.chartText : (d.chart && d.chart.text) || '') : (sbNew && sbNew.chartText) || '')}</textarea>
         <label class="sb-btn small sb-filebtn">Or pick a text file<input type="file" accept=".txt,.pro,.cho,.crd,.chordpro,.chopro,text/plain" data-sb-chartfile${off}></label></div>`}
+      ${typeof sbPdfBarHtml === 'function' ? sbPdfBarHtml() : ''}
       <div class="sb-h">What the page does with it</div>
       <ul class="sb-note sb-list">
         <li>Measures how loud it is and makes one copy at the site's volume ("the cure"), at 192k (next step).</li>
@@ -365,6 +370,7 @@ function sbClick(e){
   if(act === 'clear-volume'){ sbClearStep('volume'); return; }
   if(act === 'clear-beat'){ sbClearStep('beat'); return; }
   if(act === 'clear-chart'){ sbClearStep('chart'); return; }
+  if(typeof sbPdfAct === 'function' && sbPdfAct(act, b)) return;
   if(typeof sbChartAct === 'function' && sbChartAct(act, b)) return;
   if(act === 'play-yours'){ sbPlayTen('yours'); return; }
   if(act === 'play-cure'){ sbPlayTen('cure'); return; }
@@ -394,6 +400,7 @@ function sbInput(e){
 function sbChange(e){
   const t = e.target;
   if(t.matches('[data-sb-file]')){ const f = t.files && t.files[0]; if(f) sbPickFile(f); return; }
+  if(typeof sbPdfChange === 'function' && sbPdfChange(e)) return;
   if(typeof sbChartChange === 'function' && sbChartChange(e)) return;
   if(typeof sbBeatChange === 'function') sbBeatChange(e);
 }
@@ -415,6 +422,7 @@ function teacherSbLeave(){
   sbViewGen++;
   sbStopSounds();
   if(sbWorker){ try{ sbWorker.terminate(); }catch(e){} sbWorker = null; }
+  if(typeof sbPdfLeave === 'function') sbPdfLeave();
 }
 function sbStopSounds(){
   sbStopTen();
@@ -506,7 +514,7 @@ async function sbSaveUpload(goTo){
   draft.step = Math.max(Number(draft.step) || 1, 2);   // step 1 is done once the draft is saved
   const ok = await sbWriteDraft(id, draft);
   if(!ok) return;
-  if(!d){ sbMem.id = id; sbSel = id; sbNew = null; }
+  if(!d){ sbMem.id = id; sbSel = id; sbNew = null; if(typeof sbPdfRename === 'function') sbPdfRename('new', id); }
   sbStepOn = goTo || 2;
   if(!sbStepReady(sbDraft(), sbStepOn)) sbStepOn = 2;
   teacherSbPaint();

@@ -49,12 +49,6 @@ Windows list's "NOT `teacher-activities.js`" is settled. What the Mac did about 
 note (`todo.md`: "only once golden is cleared"; the list: `slow-load.mjs` only): both. `golden.mjs` was rebuilt and
 took three review rounds after `todo.md`'s line was written (2026-11-13), and `--only console` took 3.5 minutes a
 run; whether that counts as "cleared" for the two coach splits is still Jonathan's to say.
-**Owed on the Mac, small and Fast (found by the Windows session's Friday re-check, verified on `9bf2b07`):**
-`teacher-livegames.js:237` `if(es === lqgBuiltIn(id, 'es')) es = '';` should be `if(!en && es === …` (a Spanish
-name equal to the built-in one is wiped although the English name was changed, so Spanish students see the
-English name); `teacher-students.js:553` "Behind the class" should skip the teacher's own doc
-(`if(teacherPmIsTeacher(stu)) return;` at the top of the loop, as the filter at line 560 does). Tick them in
-"Open work" → "2026-11-14 — Friday check: MINOR findings".
 **The Beat step's tracker is fixed (2026-11-15, the evening session; entry "The Beat step's tracker" under "Song
 builder" below has the numbers).** It follows American Girl beat for beat (0 of 397 beats over 100 ms from Moises's;
 before: 371). **Decided by Jonathan, 2026-11-15 (asked with the numbers):** a record that needs more than 8 pins
@@ -273,6 +267,41 @@ real song through Import (part a2) is still open.
     a section edge" is Start 1 bar earlier / later. The range is two pickers, From and to. Not built from the
     mock-up: "Skip: type the grid myself" (a one-line chart does the same) and dropping a file on the box (there is
     a file picker).
+- **Pdfs in the builder (2026-11-16, Fast; `teacher-sb-pdf.js`).** Jonathan: "i'd like to upload pdfs to the builder
+  and multiple ones at that for tab and chords separately", before his first real test. His three answers: a TAB pdf
+  is shown to him while he builds (students see nothing new); a CHORDS pdf is read into the chart box; his pdfs are
+  both downloads and scans. Built: a "Pdfs" bar at steps 1 and 4 with two pickers (several files each, 8 in all, 40
+  MB each); a chords pdf with real text is laid out line by line (two columns of lyrics read left first) and ADDED
+  to the chart box, then read like a pasted chart; a scan has no text, the bar says "a picture: not read", and it is
+  shown for him to type from; at step 4 the picked pdf is drawn beside the chart (the song list gives up its
+  column): file tabs, page ‹ ›, zoom, Own window, Hide. Nothing is stored: the pdfs stay in the tab like the mp3, a
+  reopened draft asks again, the chart's text is in the draft as before. NOT built (his other two options): students
+  seeing the tab pdf (needs storage, a format change, a paste), and reading tab into the card.
+  - **Proof:** a browser walk in Chrome for Testing with 8 made-up pdfs printed by Chrome itself (one-column
+    Courier, Georgia, two columns, a 3-page tab, a scan, a non-pdf): 28 of 28 steps, 13 screenshots looked at, no
+    page error, no sideways scroll at 1366; the store held the same documents after as before. It found one fault,
+    fixed: two chords pdfs in one pick kept only the second one's text. The Node cases are in
+    `tools/song-builder-sim.mjs` (its commit has the count and the planted faults).
+  - **Limits, not fixed:** a pdf whose chords are drawn as pictures or placed far from their words reads badly (he
+    corrects it in the box or the grid); the pane shows one page at a time; a rotated page is read as it lies.
+- **American Girl, Jonathan's first real test (2026-11-16): the clicks were half a beat off, on the "and".** He
+  tapped the tempo; he did not look at the pins line ("it did not say send to claude"). Shipped the same day: two
+  buttons at the Beat step, "◀ ½ beat" and "½ beat ▶", which move bar 1 AND every pin by half of the beat where each
+  sits (the old "1 beat" buttons move bar 1 alone); a sim case, red when the pins are left behind. NOT seen in a
+  browser. Also: step 5's grey Next button now reads "Next: Preview → (not built yet)" (he took it for stuck).
+  - **Measured after (an Opus agent, the ruler, the real `teacher-sb-dsp.js`, the original and a levelled copy;
+    `Claude outputs/beat-ruler/tap-phase-2026-11-16.md` on the Mac). The cause is the DRIFT, not the taps.** Bar 1
+    lands right (0.091 s) for taps -60 to +150 ms late (26 of 27 cases) and for a typed 114. But the grid is bar 1
+    plus one end pin, a straight line at 114.5 BPM, and the record opens at 107.3: over 100 ms off by 2.2 s, about
+    +220 ms (half a beat is 263) through the first 40 s; 249 of 397 beats over 100 ms off. So it SOUNDS like "on the
+    and". `sbPinsNeeded` is 16 in every case (13 in one): the red "send the mp3 to Claude" box should have been on
+    screen (no case gave 8 or under), and the drift check flags 6 or 7 of 9 windows. So: this record goes to Claude,
+    as he decided 2026-11-15, and the ½ beat buttons do not fix it. OPEN for him: the warning is easy to miss; it
+    could sit beside "Listen with clicks" or be said when he presses it.
+  - **The taps can pick the "and" only from about 190 ms of steady lateness** (Bluetooth sound): `sbTapPulse` gives
+    the beat up to 80-105 ms late, nothing from there to 185-210 (the fallback then found the true beat, 11 of 11),
+    the "and" beyond. Taking 100 ms off every tap would be right in 31 of 33 cases (today 26). Not built.
+  - The page cannot tell a grid on the "and" from one on the beat (the same pulses line up): only his ears can.
 - **The Beat step's tracker (2026-11-15, Fast).** Before: the phase of the BEAT in 12-second windows
   (`sbPhaseTrack`), which on a strummed record sat on the "and" and slipped between beat and "and". Why: on American
   Girl the onsets on the "and" are as strong as on the beat (beat stronger than its "and" on 169 of 396 beats), so
@@ -543,9 +572,9 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
     - `module-9.js:138,196` `hint_es` quote the button as "Todavía lo practico"; it is "Todavía lo estoy practicando".
     - The module fold's default (newest open) is not pinned (`app/activities-2.js:1615`, `5b2fd5b`): 1da cases.
     - Live game: a Spanish name typed equal to the built-in Spanish title is wiped (`teacher-livegames.js:237`,
-      `fc27370`): `if(!en && es === lqgBuiltIn(id, 'es')) es = '';`.
+      `fc27370`): `if(!en && es === lqgBuiltIn(id, 'es')) es = '';`. DONE 2026-11-16 (the Mac).
     - "Behind the class" does not skip the teacher's own doc (`teacher-students.js:553`, `c06b81e`):
-      `if(teacherPmIsTeacher(stu)) return;`.
+      `if(teacherPmIsTeacher(stu)) return;`. DONE 2026-11-16 (the Mac).
     - Check `1t3` passes a page with a duplicated tuner button (`tools/checks.mjs:2285`, `a768bbc`): compare tags
       in order.
     - Song Journey Metronome, fast seeks: a doubled beat on 3-4 of 40 quick seeks on localhost, before and

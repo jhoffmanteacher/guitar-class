@@ -56,6 +56,7 @@ function sbBeatPaneHtml(d){
     <div class="sb-beat-bar1">
       <div class="sb-hint" style="margin:0">Bar 1 starts at</div><div class="sb-big sb-bar1t">${beat ? escHtml(sbFmtT(beat.anchor)) : '—'}</div>
       <div class="sb-row sb-nudge"><button type="button" class="sb-btn small" data-sb-act="a-beat"${off || !beat ? ' disabled' : ''} title="Bar 1 one beat earlier">◀ 1 beat</button><button type="button" class="sb-btn small" data-sb-act="a-10"${off || !beat ? ' disabled' : ''}>◀ 10 ms</button><button type="button" class="sb-btn small" data-sb-act="a+10"${off || !beat ? ' disabled' : ''}>10 ms ▶</button><button type="button" class="sb-btn small" data-sb-act="a+beat"${off || !beat ? ' disabled' : ''} title="Bar 1 one beat later">1 beat ▶</button></div>
+      <div class="sb-row sb-nudge"><span class="sb-hint" style="margin:0">Clicks between the beats?</span><button type="button" class="sb-btn small" data-sb-act="a-half"${off || !beat ? ' disabled' : ''} title="Every bar line half a beat earlier: for clicks that land on the 'and'">◀ ½ beat</button><button type="button" class="sb-btn small" data-sb-act="a+half"${off || !beat ? ' disabled' : ''} title="Every bar line half a beat later: for clicks that land on the 'and'">½ beat ▶</button></div>
     </div>
   </div>`;
   html += `<div class="sb-wave sb-wave-main"><canvas data-sb-wave="main" height="118" aria-label="The start of the song, with the bar lines the card will use"></canvas></div>`;
@@ -322,6 +323,18 @@ function sbBeatAct(act, b){
   };
   if(act === 'a-10') return moveAnchor(-0.01);
   if(act === 'a+10') return moveAnchor(0.01);
+  /* Clicks on the "and" (Jonathan, 2026-11-16, American Girl: "the clicks are basically exactly half a beat off"):
+     the WHOLE grid moves half a beat, bar 1 and every pin, each by half of the beat where it sits, so the grid
+     keeps following the record's tempo. (◀ 1 beat ▶ moves bar 1 alone: which beat is the "1".) */
+  if(act === 'a-half' || act === 'a+half'){
+    const sign = act === 'a-half' ? -1 : 1, bpb = SB_METER[beat.meter].bpb;
+    const half = bar => (sbBarTime(beat, bar + 1) - sbBarTime(beat, bar)) / bpb / 2;
+    const a = beat.anchor + sign * half(1);
+    if(a < 0 || a > d.audio.durationSec - 1){ sbNote = 'Bar 1 cannot move that way: it would leave the recording.'; teacherSbPaint(); return; }
+    const pins = (beat.pins || []).filter(p => p.bar > 1).map(p => ({ bar: p.bar, t: Math.round((p.t + sign * half(p.bar)) * 10000) / 10000 }));
+    sbBeatSet(d, Object.assign({}, beat, { anchor: Math.round(a * 10000) / 10000, pins }), `Every bar line moved half a beat ${sign < 0 ? 'earlier' : 'later'}. Listen with clicks again.`);
+    return;
+  }
   if(act === 'a-beat') return moveAnchor(-P);
   if(act === 'a+beat') return moveAnchor(P);
   if(act === 'pin' || act === 'unpin'){

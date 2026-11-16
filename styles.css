@@ -1502,6 +1502,30 @@ body.rail-collapsed .rail-tools .tool-popup{
 .sb-root .sb-check{width:16px;height:16px;box-sizing:border-box;border-radius:4px;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center}
 .sb-root .sb-check.on{background:var(--purple-accent);border-color:var(--purple-accent)}
 .sb-root .sb-check.on::after{content:'';width:8px;height:4px;border-left:2px solid var(--bg);border-bottom:2px solid var(--bg);transform:rotate(-45deg) translate(1px,-1px)}
+/* Song builder: pdfs (teacher-sb-pdf.js, 2026-11-16). The bar at steps 1 and 4; at step 4 the pdf's pane takes the
+   song list's column, on the right, and stays in view while the chart scrolls. */
+.sb-root .sb-pdfbar{background:var(--bg2)}
+.sb-root .sb-pdfbar .sb-row{margin-bottom:0}
+.sb-root .sb-pdfbar-h{margin:0}
+.sb-root .sb-pdfchips{margin-top:7px}
+.sb-root .sb-pdfchip{max-width:100%;min-width:0;gap:7px;font-weight:500}
+.sb-root .sb-pdfchip b{color:var(--text)}
+.sb-root .sb-pdfname{min-width:0;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
+.sb-root .sb-pdfx{font:inherit;font-size:0.875rem;line-height:1;border:0;background:transparent;color:var(--text2);cursor:pointer;padding:0 2px}
+.sb-root .sb-pdfx:disabled{opacity:0.5;cursor:default}
+.sb-root .ta-split.sb-pdfopen{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:14px}
+.sb-root .ta-split.sb-pdfopen > .ta-list{display:none}
+.sb-root .sb-pdfslot{min-width:0;position:sticky;top:8px;align-self:start}
+.sb-root .sb-pdfpane{display:flex;flex-direction:column;min-width:0;height:calc(100vh / var(--site-fill,1) - 150px);min-height:320px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);overflow:hidden}
+.sb-root .sb-pdfhead{flex:0 0 auto;padding:6px 8px;border-bottom:1px solid var(--border2);background:var(--bg2)}
+.sb-root .sb-pdftabs{display:flex;gap:4px;overflow-x:auto;margin-bottom:6px}
+.sb-root .sb-pdftabs button{flex:0 1 auto;min-width:0;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:inherit;font-size:0.75rem;padding:3px 9px;border:1px solid var(--border2);border-radius:6px;background:var(--bg);color:var(--text2);cursor:pointer}
+.sb-root .sb-pdftabs button.on{background:var(--text);border-color:var(--text);color:var(--bg)}
+.sb-root .sb-pdfctl{gap:5px}
+.sb-root .sb-pdfpage{font-size:0.75rem;color:var(--text2);white-space:nowrap}
+.sb-root .sb-pdferr{color:var(--red-text)}
+.sb-root .sb-pdfbody{flex:1 1 auto;min-height:0;overflow:auto;padding:8px;background:var(--bg3)}
+.sb-root .sb-pdfbody canvas{display:block;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.25)}
 /* Console "Song requests" (teacher-songrequests.js): one block per video. */
 .tsr-group{border:1px solid var(--border2);border-radius:var(--radius);padding:10px 12px;margin:0 0 14px;background:var(--bg)}
 .tsr-group.tsr-waiting{border-left:4px solid var(--amber-text)}

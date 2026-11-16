@@ -306,6 +306,23 @@ async function runCases(consoleSrc){
   check('beat: the grid is saved in the draft (meter, bpm, bar 1, pins, step 3)', b && b.meter === '4/4' && Math.abs(b.bpm - 96) < 3 && typeof b.anchor === 'number' && Array.isArray(b.pins) && d2.step === 3 && d2.audio && d2.audio.id === audA,
     JSON.stringify(b && { meter: b.meter, bpm: b.bpm, anchor: b.anchor, pins: b.pins, step: d2.step }));
 
+  /* ½ beat (2026-11-16, American Girl's clicks on the "and"): bar 1 AND every pin move half a beat, so the grid keeps
+     its tempo; the other way puts it back. A pin is added first when the made-up record got none. */
+  {
+    run("(() => { const d = sbDraft(); if(!(d.beat.pins || []).length) d.beat = Object.assign({}, d.beat, { pins: [{ bar: 5, t: Math.round(sbBarTime(d.beat, 5) * 10000) / 10000 }] }); })()");
+    const g0 = JSON.parse(run('JSON.stringify({ a: sbDraft().beat.anchor, pins: sbDraft().beat.pins, bar: sbBarSec(sbDraft().beat) })'));
+    run("sbBeatAct('a+half', { dataset: {} })");
+    const g1 = JSON.parse(run('JSON.stringify({ a: sbDraft().beat.anchor, pins: sbDraft().beat.pins, note: sbNote })'));
+    run("sbBeatAct('a-half', { dataset: {} })");
+    const g2 = JSON.parse(run('JSON.stringify({ a: sbDraft().beat.anchor, pins: sbDraft().beat.pins })'));
+    const half = g0.bar / 4 / 2, near = (x, y) => Math.abs(x - y) < 0.004;
+    check('beat: "½ beat ▶" moves bar 1 and every pin half a beat later (same bars, same tempo), and "◀ ½ beat" puts them back',
+      g0.pins.length >= 1 && near(g1.a, g0.a + half) && g1.pins.length === g0.pins.length && g1.pins.every((q, i) => q.bar === g0.pins[i].bar && near(q.t, g0.pins[i].t + half))
+      && near(g2.a, g0.a) && g2.pins.every((q, i) => near(q.t, g0.pins[i].t)) && /half a beat later/.test(g1.note),
+      JSON.stringify({ half, g0, g1, g2 }));
+    await sleep(1400); await settle();
+  }
+
   /* The beat track's own numbers are saved with the grid, so a reload finds the same track; and how many pins the
      record needs (2026-11-15). The made-up record is steady: no "send to Claude" on the step or in the list. */
   check('beat: the track (trackBpm, trackSub) and the pins the record needs are saved with the grid', b && Number.isFinite(b.trackBpm) && [1, 2, 3, 4, 6].includes(b.trackSub) && Number.isFinite(b.pinsNeeded) && b.pinsNeeded <= run('SB_PINS_MAX'),

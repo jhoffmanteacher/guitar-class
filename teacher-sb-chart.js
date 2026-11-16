@@ -44,7 +44,9 @@
    THE CHART CAN COME EARLY (Jonathan, 2026-11-15: "the app should allow me to upload chord charts, etc. as other
    things are being worked on like levels ... and/or to let me put all the files in the initial upload"): step 1
    has a box for it, and step 4 opens as soon as the draft exists; it is read in 4/4 until the Beat step says
-   otherwise, and read again by itself when the meter changes and the grid has not been edited by hand. */
+   otherwise, and read again by itself when the meter changes and the grid has not been edited by hand.
+   PDFS (teacher-sb-pdf.js, 2026-11-16): the "Pdfs" bar above this step takes chords pdfs (their text goes into the
+   paste box) and tab pdfs (shown beside the chart, never read). */
 const SB_TAUGHT_FULL = ['E', 'Em', 'A', 'Am', 'D', 'Dm', 'G', 'C', 'F', 'Bm'];   // Module 4's open chords and its Bm
 const SB_CHART_MAX = 20000;            // characters of pasted chart kept
 const SB_FOLD_MAJ = ['7', 'maj7', 'M7', 'Maj7', 'ma7', '9', 'maj9', 'add9', 'add2', '2', '4', 'sus', 'sus2', 'sus4', '7sus4', '7sus', '6', '11', '13', 'add4', 'maj', 'M', 'Maj'];
@@ -433,21 +435,22 @@ function sbSecGridHtml(sections, meter, o){
       + (o.play ? `<button type="button" class="sb-btn small" data-sb-act="chart-play" data-sb-g="${first}">▶ from here</button>` : '') + `</div><div class="sb-grid">${cells}</div></div>`;
   }).join('');
 }
-const SB_FORMS = `<div class="sb-forms"><span class="sb-chip">Chords over lyrics</span><span class="sb-chip">ChordPro <code>[G]words</code></span><span class="sb-chip">Bar lines <code>| G | D | Em |</code></span><span class="sb-chip">A .txt or .pro file</span></div>`;
+const SB_FORMS = `<div class="sb-forms"><span class="sb-chip">Chords over lyrics</span><span class="sb-chip">ChordPro <code>[G]words</code></span><span class="sb-chip">Bar lines <code>| G | D | Em |</code></span><span class="sb-chip">A .txt or .pro file</span><span class="sb-chip">A PDF with text</span></div>`;
 function sbChartPaneHtml(d){
   if(!d) return `<div class="sb-box"><p class="sb-note" style="margin:0">Save the song first (step 1).</p></div>`;
   const st = sbChFor(sbSel), ch = d.chart || {}, has = Array.isArray(ch.sections) && ch.sections.length > 0, off = sbBusy ? ' disabled' : '';
   const view = st.view || (has ? (ch.edited ? 'grid' : 'read') : 'paste');
+  const pdfBar = typeof sbPdfBarHtml === 'function' ? sbPdfBarHtml() : '';
   if(view === 'paste' || !has){
     const text = st.text != null ? st.text : ch.text || '';
-    return `<div class="sb-cols c3"><div>
+    return pdfBar + `<div class="sb-cols c3"><div>
       <div class="sb-row sb-paste-top"><div class="sb-h" style="margin:0">Paste the chart</div><label class="sb-btn small sb-filebtn">Pick a text file<input type="file" accept=".txt,.pro,.cho,.crd,.chordpro,.chopro,text/plain" data-sb-chartfile${off}></label></div>
       <textarea class="sb-pastebox" data-sb-charttext spellcheck="false" maxlength="${SB_CHART_MAX}" aria-label="The chord chart"${off}>${escHtml(text)}</textarea>
       <div class="sb-hint">${text ? `${text.split('\n').length} lines.` : 'Chords over the words, ChordPro, or bars between | lines.'}${has ? ' Reading again replaces what is in the grid now.' : ''}</div>
     </div><div>
       <div class="sb-h">It reads any of these</div>${SB_FORMS}
       <p class="sb-note">Section names in brackets (<code>[Verse 1]</code>, <code>[Chorus]</code>, <code>[Coro]</code>) become the card's sections. "x2" and "same chords as Verse 1" are understood.</p>
-      <div class="sb-box tint sb-box-tight"><div class="sb-h small">Have a photo or a PDF?</div><p class="sb-note" style="margin:0">The builder cannot read pictures. Copy the PDF's text, or ask Claude: <i>"Turn this chart photo into plain text, chords over lyrics"</i>, then paste the answer here.</p></div>
+      <div class="sb-box tint sb-box-tight"><div class="sb-h small">Have a PDF or a photo?</div><p class="sb-note" style="margin:0">Pick a PDF under <b>Pdfs</b> above: one with real text is read into this box. The builder cannot read pictures (a scan, a photo): it shows the PDF beside the chart for you to type from, or ask Claude: <i>"Turn this chart photo into plain text, chords over lyrics"</i>, then paste the answer here.</p></div>
       <div class="sb-row"><button type="button" class="sb-btn primary big" data-sb-act="chart-read"${off}>Read the chart</button>${has ? `<button type="button" class="sb-btn" data-sb-act="chart-view" data-sb-v="grid"${off}>Back to the grid</button>` : ''}</div>
       ${d.beat ? '' : '<p class="sb-hint">The beat is not set yet (step 3): the chart is read in 4 beats a bar until it is.</p>'}
     </div></div>`;
@@ -459,7 +462,7 @@ function sbChartPaneHtml(d){
   const count = rec == null ? '' : nBars === rec ? `<span class="sb-chip on">✓ ${nBars} bars, the same as the recording</span>` : `<span class="sb-chip${nBars > rec ? ' new' : ''}">${nBars} bars; the recording has ${rec}</span>`;
   if(view === 'grid'){
     const sel = st.sel != null && st.sel < nBars ? st.sel : null;
-    return stale + `<div class="sb-tools">${count}<span class="sb-hint" style="margin:0">${open.n ? `${open.n} thing${open.n === 1 ? '' : 's'} still to settle` : 'Pick a bar to change it.'}</span><span class="sb-toolbtns">`
+    return pdfBar + stale + `<div class="sb-tools">${count}<span class="sb-hint" style="margin:0">${open.n ? `${open.n} thing${open.n === 1 ? '' : 's'} still to settle` : 'Pick a bar to change it.'}</span><span class="sb-toolbtns">`
       + `<button type="button" class="sb-btn small" data-sb-act="chart-view" data-sb-v="read"${off}>← What was read</button><button type="button" class="sb-btn small" data-sb-act="chart-undo"${off || !st.undo.length ? ' disabled' : ''}>Undo</button><button type="button" class="sb-btn small" data-sb-act="clear-chart"${off}>Clear this step</button></span></div>`
       + `<div class="sb-cols sb-gridcols"><div class="sb-gridscroll">${sbSecGridHtml(ch.sections, meter, { sel, pick: true, play: !!(d.beat && d.audio) })}</div><div>${sbBarPanelHtml(d, sel)}</div></div>`;
   }
@@ -481,7 +484,7 @@ function sbChartPaneHtml(d){
   read.notes.forEach(t => flags.push(`<div class="sb-flag sb-flag-info"><span class="fi">i</span><div class="sb-flag-body">${escHtml(t)}</div></div>`));
   if(rec != null && nBars !== rec) flags.push(`<div class="sb-flag sb-flag-info"><span class="fi">i</span><div class="sb-flag-body"><b>The chart makes ${nBars} bars; the recording has about ${rec}</b> at ${escHtml(String(Math.round(sbPinBpm(d.beat))))} BPM. ${read.fmt === 'bar lines' ? 'Add or remove bars in the grid.' : 'Chords over lyrics do not say how long each chord lasts, so each got one bar. Hold the long ones in the grid.'}</div></div>`);
   const marked = `<pre class="sb-paste">` + read.lines.map(l => `<span class="ln ${l.kind === 'bad' ? ((ch.left || []).includes(l.n) ? 'out' : 'bad') : l.kind === 'header' ? 'hd' : l.kind === 'chords' || l.kind === 'bars' || l.kind === 'chordpro' ? 'ch' : l.kind === 'skipped' || l.kind === 'meta' ? 'out' : ''}"><span class="no">${l.n}</span>${escHtml(l.text) || ' '}</span>`).join('') + `</pre>`;
-  return stale + `<div class="sb-tools"><span class="sb-chip on">✓ Read as ${escHtml(read.fmt || 'a chart')}</span><span class="sb-note" style="margin:0">${ch.sections.length} section${ch.sections.length === 1 ? '' : 's'} · ${nBars} bars · chords: ${sbChipsHtml(names, kept)}</span><span class="sb-toolbtns">`
+  return pdfBar + stale + `<div class="sb-tools"><span class="sb-chip on">✓ Read as ${escHtml(read.fmt || 'a chart')}</span><span class="sb-note" style="margin:0">${ch.sections.length} section${ch.sections.length === 1 ? '' : 's'} · ${nBars} bars · chords: ${sbChipsHtml(names, kept)}</span><span class="sb-toolbtns">`
     + `<button type="button" class="sb-btn small" data-sb-act="chart-view" data-sb-v="paste"${off}>← Paste again</button><button type="button" class="sb-btn small" data-sb-act="clear-chart"${off}>Clear this step</button><button type="button" class="sb-btn small primary" data-sb-act="chart-view" data-sb-v="grid"${off}>Fix in the grid →</button></span></div>`
     + `<div class="sb-cols c3"><div>${ch.edited ? '<p class="sb-hint">The grid has been changed by hand since this was read; the right side shows the grid as it is now.</p>' : ''}${flags.join('')}${marked}</div><div class="sb-gridscroll">${sbSecGridHtml(ch.sections, meter, { mini: true })}</div></div>`;
 }
