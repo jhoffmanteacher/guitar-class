@@ -389,14 +389,15 @@ async function main() {
         if ((await cell()) !== 0 || z.value !== '0') fail('goalbox', '0 saved as ' + JSON.stringify(await cell()) + ', box ' + JSON.stringify(z.value));
         if (!/break/.test(z.table) || !/none: this is a break week/.test(z.foot)) fail('goalbox', 'a goal of 0 does not read as a break week in the table: ' + JSON.stringify([z.table.slice(0, 120), z.foot.slice(0, 100)]));
         await shot('09-minutes-goal-0-break-1366x657');
-        // A bad entry writes nothing and says why; a value over the cap (7 x 20 = 140) too.
-        for (const bad of ['abc', '141', '1.5']) {
+        // A bad entry writes nothing and says why; a value over the cap too: 600 since ac0a2ad7 (2026-11-15, "The
+        // console's 'This week's goal' box takes 0 to 600 (was 7 x 20 = 140)"; practice-minutes.js MAX_WEEK_GOAL_MINUTES).
+        for (const bad of ['abc', '601', '1.5']) {
           const vb = await version();
           await typeGoal(bad);
           await waitFor(`/whole number/.test(document.querySelector('.pm-t-goal-state')?.textContent || '')`);
           const zb = await boxInfo();
           if ((await version()) !== vb || (await cell()) !== 0) fail('goalbox', JSON.stringify(bad) + ' wrote something (cell ' + JSON.stringify(await cell()) + ', version ' + vb + ' -> ' + (await version()) + ')');
-          if (!/whole number from 0 to 140/.test(zb.state || '')) fail('goalbox', JSON.stringify(bad) + ' gave no explanation: ' + JSON.stringify(zb.state));
+          if (!/whole number from 0 to 600,/.test(zb.state || '')) fail('goalbox', JSON.stringify(bad) + ' gave no explanation: ' + JSON.stringify(zb.state));
         }
         await shot('10-minutes-goal-bad-entry-1366x657');
         await typeGoal('');
