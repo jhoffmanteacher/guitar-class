@@ -1241,18 +1241,19 @@ function srSlotTick(cur){
   document.querySelectorAll('#sr-beats .cc-pip').forEach((el, i) => el.classList.toggle('on', i === Math.floor(cur / 2) % 4));
 }
 
-/* One frame of Strum Radar's strum detector. Shared, unchanged, with the
-   strum-pattern check on an In-Class Activity (coach-strumcheck.js), so the
-   two always hear a strum the same way.
+/* One frame of Strum Radar's strum detector. Only Strum Radar calls it: the
+   strum-pattern check on an In-Class Activity used it until 2026-11-14 and
+   now has its own copy, scHearStrum (coach-strumcheck.js), with its own
+   ratios and its own grid.
    Onset = strum (Change Up's dual-channel detector, same constants:
    full-band jump for a clean strum over silence, HF pick-attack
    channel for a strum over the still-ringing previous one — which is
    every strum after the first here). The 140ms refractory still fits:
    eighths at the 100 BPM cap arrive every 300ms.
    `s` holds smoothRms / smoothHf / lastOnsetT / listenStart / gridOffset /
-   lat / slotMs, and may hold its own onsetRatio / hfRatio: only the strum-
-   pattern check sets them (SC_ONSET_RATIO / SC_HF_RATIO); Strum Radar sets
-   neither, so it reads the shared CHK_ONSET_RATIO / CHK_HF_RATIO as always. Returns null when this frame holds no new strum; else the
+   lat / slotMs, and may hold its own onsetRatio / hfRatio (read when set);
+   Strum Radar sets neither, so it reads the shared CHK_ONSET_RATIO /
+   CHK_HF_RATIO as always (checks.mjs 1eh calls it that way). Returns null when this frame holds no new strum; else the
    strum's played time in ms from beat 1 on the grid as it was BEFORE this
    strum eased it (the time srLoop matches against). The caller still runs
    coachSmooth after it. */
