@@ -96,6 +96,48 @@ is split by file, so both computers work at once.**
   version line, `app/boot.js`): fetch and rebase before every push; in `checks.mjs` Windows edits only 1eh and the
   ~17115 comment, the Mac only its own pins. `coach-core.js` is at 2,549 lines: Windows says in its report if item 3
   takes it past 2,600 and stops there (its split is Jonathan's call).
+- **Windows, where its three items stand (2026-11-16, late afternoon; every agent Opus, reviewers at xhigh):**
+  - **Item 3 SHIPPED, Reviewed (`53b1e3f`).** `micRecStartPerf`: one deep review round on the branch, 0 BLOCKER, 0
+    MAJOR, 4 MINOR. The reviewer's own 19 conditions (cold start, late handlers, dropped buffers, 44.1 kHz): the new
+    stamp about +1 ms where the old one was about −95 ms, better in 19 of 19. The Firestore rule for `micTakes` has
+    no field list, so `recClock` / `recClockShiftMs` are accepted. MINORs fixed: two comments that claimed too much
+    (a fast device clock makes the stamp early by drift × the take's length, 500 ppm over 60 s about 28 ms, still
+    nearer than the old estimate); the tool's `burstOfQuantum` (mismatches 864 and 600 of 3,000 → 0, verdict
+    unchanged); a two-takes-in-one-page case (red on two planted "leaks between takes" faults).
+    `tools/mic-sim/micrec-clock.mjs`: 13 of 13, 1 of 13 on the old code. `coach-core.js` is 2,552 lines (48 under
+    the limit). NOT measured by anyone: a real take saved after the fix; the first new ones should fit within about
+    15 ms (`recClockShiftMs` near +92 on a Chromebook). The 2 old takes that read about 130 ms early are still
+    unexplained.
+  - **Item 6, the Windows part, SHIPPED, Fast (`6bfbbed`).** The two smoke walks wait for the page (11 of 11
+    reloads). The Listening Coach: the count-in has no Stop button; the overwrite was "I'm done" pressed early in
+    the listening phase (a full take of 10.24 s / 6 notes replaced by 4.52 s / 0 notes). Now a take that ran to its
+    end always saves, an "I'm done" take saves when at least one note was heard, an empty early one saves nothing
+    (`coachFinish(ended)`, `ended === true`); new tool `tools/mic-sim/coach-take-save.mjs` 9 of 9, 6 of 9 on the old
+    code; the closed loop identical before and after. The 1eh header comment names `scHearStrum`.
+    `tools/__pycache__/` is in `.gitignore`. The two sims (`song-files-console-sim`, `built-songs-sim`) were LEFT
+    ALONE: the race could not be shown (88 of 88 cases with the hash slowed to 300 ms; the other makes no hash call,
+    148 of 148 with its IndexedDB timers slowed). The change smoke owed on the Windows pushes ran twice (`games`,
+    `activities`, English; baselines `f2e8952` and `e80ca7e`): no error beyond the baseline. Both the baseline and
+    today's code show the same 20 error events on this computer; nobody has read what they are.
+  - **Item 2, rule AD: built, NOT shipped; review round 6 is running.** Branch `win/ad-2026-11-16` (local to
+    Windows, 11 commits, tip `c53255a1`). Round 5 (on AD as first built, `1338af63`): 0 BLOCKER, 1 MAJOR, 4 MINOR.
+    The MAJOR: rule A also lowered the score that decides whether the WIDE search runs, so one extra on bar 1's
+    first rest made the grid jump 3 eighths and bar 2, played right, went red (made-up rounds, bar 2 passed: before
+    AD 518 of 1,120, AD as first built 240). Jonathan chose "AD with the fix" (2026-11-16): the trigger now scores
+    the grid without the outside cost (531 of 1,120). After the fix, builder's numbers: the three real takes ±20 ms
+    identical to AD as first built (heard 379 of 414, before AD 378; false extras 3 of 138 both, NOT the "1 of 138"
+    written in item 2 below: one J01 rest counted at each of the 3 clocks; bars 36 of 72, before 35); pasted-in
+    extras caught 115 of 180 (before AD 38), the mistake bar still passed 32 (before 83). A cost Jonathan has seen
+    and accepted: with AD ANY sound the mic hears on a rest is an extra, not only talk (made-up rounds, a right
+    player's bars right of 480: a foot tap on each beat, half heard, 321 → 245; a neighbour's guitar 381 → 329;
+    stray sounds one a bar 426 → 388); beat 3 is the pattern's rest, so a heard foot tap there is an extra; none of
+    these sounds is in the three real takes. Ships only on a round with no BLOCKER or MAJOR.
+  - **Still open from these items:** `micrec-clock.mjs` and `coach-take-save.mjs` are NOT run by `checks.mjs`
+    (Windows may edit only 1eh there today): wire them in at a quiet moment (a new kind of check: Always Reviewed).
+    The Strum Pattern check and the Listening Coach save to the SAME take slot (`<uid>-coach`,
+    `coach-strumcheck.js:480` `micRecStart('coach', …)`), so each overwrites the other's last take; `fields.game`
+    tells them apart; a slot of its own needs a `firestore.rules` change (the take id must match
+    `(coach|nr|pw)`) and a console paste: a question for Jonathan, not asked yet.
 1. [x] **Console: "Keep in Today's activities" (Jonathan, 2026-11-16: "for the teacher dashboard, add an option
    next to the release date that has a checkbox for 'keep in today's activities'. use an opus agent to make
    this").** Built 2026-11-16 (entry "Keep in Today's activities" under "Recently shipped"; the lead reviews and
@@ -129,7 +171,7 @@ is split by file, so both computers work at once.**
    then correct `CHANGELOG.md`'s 2026-11-14 line "(green: heard in its place; red: missed, or a strum on a dot)"
    only if it is still untrue, and the comment at `coach-strumcheck.js` ~80 and 1eh's head comment (both say R4-1
    is open). Add R4-2 to the known limits of the entry "Strum Pattern check `ca-52`".
-3. [ ] **`micRecStartPerf`: review and ship the fix on branch `win/micrec-2026-11-16`** (`e492b66` the test tool
+3. [x] **DONE 2026-11-16 by Windows (`53b1e3f`, Reviewed; the block above).** The item as written: **`micRecStartPerf`: review and ship the fix on branch `win/micrec-2026-11-16`** (`e492b66` the test tool
    `tools/mic-sim/micrec-clock.mjs`, `e3a7019` the fix; one Opus agent; base `cb89a7b`, so rebase). Its report,
    not yet checked by anyone: the stamp treated the ScriptProcessor's `playbackTime` as the END of the input
    buffer, and Chromium gives the time the OUTPUT buffer plays, so a take's start is one buffer late (85.3 ms at
@@ -179,7 +221,7 @@ is split by file, so both computers work at once.**
    and flame show it). Not done, owed: a `checks.mjs` detector for "a clamped step named as 10" (Change Up, Strum
    Hero and Strum Radar had it: three copies, so the sweep ratchet asks for one; a new kind of check, Always
    Reviewed); the Strum done screens were not looked at in a browser at 1366×657.**
-6. [ ] **Small things found on the way:** the change smoke owed on today's Windows pushes (`games`, `activities`);
+6. [ ] **Small things found on the way (the Windows part is DONE, `6bfbbed`: the smoke walks, the Listening Coach take, the 1eh comment, `.gitignore`, the owed smoke; the two sims were left alone on evidence; see the block above. Left: the Mac's three stale comments, the one Mac run of `song-builder-sim`, the ca-43 question):** the change smoke owed on today's Windows pushes (`games`, `activities`);
    `tools/smoke.mjs` `cardKeysWalk` (~1521) and `foldWalk` (~1666) still lack `await pageLoaded(page)` after
    their reload (9 of 11 walks have it); the Listening Coach has the same `if (rec) micRecSave(…)` line
    (`coach-core.js:1730`, take id `<uid>-coach`): check whether a Stop in ITS count-in overwrites a full take
