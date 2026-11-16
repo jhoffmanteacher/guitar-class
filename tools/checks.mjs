@@ -17131,15 +17131,22 @@ const COUNTIN_PIN = { runs: 44, beeps: 140, rounds: 9, takes: 6, tips: 28 };   /
        after a round (their strings are gone); the frame around the board pulses once a beat and marks each bar's 1, only with the
        Metronome on, cleared on every exit;
      - the check's own strum ratios (SC_ONSET_RATIO / SC_HF_RATIO), run through the real srHearStrum: a 1.3x jump is a strum for the
-       check and not for a state without them (Strum Radar's); the shared CHK_ONSET_RATIO / CHK_HF_RATIO stay 1.4 / 1.7. */
+       check and not for a state without them (Strum Radar's); the shared CHK_ONSET_RATIO / CHK_HF_RATIO stay 1.4 / 1.7;
+     - what was built and not guarded (review round 4, R4-3: thirteen planted faults had left this check green; all thirteen now turn
+       it red): the round's life on a made-up clock, through the real start, loop, Stop, interrupt and close with a stub stream (the
+       mic off, no timer or frame left and the capture let go after a full round, a Stop, a start in a hidden tab, a close and an
+       interrupt; a recorded round saves its take, `complete` only when it was played to the end; a round Stopped before bar 1 ended
+       saves none, R4-4); "could not hear any strums" only when no sound was heard inside the bars; the chord readings' level gate,
+       their clarity and their end, through the real scReadChord; rule b's 0.15 share from both sides; a strum slot already called
+       keeps its verdict; a slot is called SC_MISS_GRACE after its window; SC_MISS_GRACE, SC_CHORD_CLARITY and SC_REC_MAX_SEC pinned. */
 async function checkStrumCheck() {
   head('1eh. The strum-pattern check on ca-52: the step, the button, the window, the chord on the 1, two full rounds tick the step (run)');
   let bad = 0;
   const fail = m => { err('1eh (strum-pattern check): ' + m); problems++; bad++; };
   if (!COACH_SANDBOX) { fail("1ca's sandbox did not load, so the strum-pattern check was NOT run"); return; }
   const { run } = COACH_SANDBOX;
-  const n = { pins: 0, onsets: 0, chords: 0, lines: 0, strumSteps: 0, sweeps: 0, tempos: 0, saves: 0 };
-  const PIN = { pattern: 'D.DU.UDU', bars: 'D5 D5 C5 C5 G5 G5 D5 D5', rests: '1,4', win: 0.45, rule: 'oc', ratio: 1.15, hfRatio: 1.3, startBpm: 85, octTol: 0.6,
+  const n = { pins: 0, onsets: 0, chords: 0, lines: 0, strumSteps: 0, sweeps: 0, tempos: 0, saves: 0, again: 0, reads: 0, nothing: 0, life: 0 };
+  const PIN = { pattern: 'D.DU.UDU', bars: 'D5 D5 C5 C5 G5 G5 D5 D5', rests: '1,4', win: 0.45, rule: 'oc', ratio: 1.15, hfRatio: 1.3, startBpm: 85, octTol: 0.6, missGrace: 60, clarity: 0.55, recMax: 60,
     anchor: { range: 1, step: 5, span: 8, rest: -1.5, wide: 4, wideMin: 6, wideSlack: 1.5, wideAccept: 1, wideTight: 0.15 }, gate: { level: 0.012, pct: 0.2, floor: 0.003, skip: 300, pre: 20, post: 150 }, octOk: 1, octWrong: 2 };
   try {
     const found = JSON.parse(run(`JSON.stringify(CLASS_ACTIVITIES.flatMap(a => (a.steps || []).map((s, si) => ({ id: a.id, si, path: s.path || null, strum: s.strum || null }))).filter(x => x.strum).map(x => ({ id: x.id, si: x.si, path: x.path, listen: 'listen' in x.strum ? x.strum.listen : '(none)', pattern: x.strum.pattern, bars: x.strum.bars.join(' ') })))`));
@@ -17417,7 +17424,10 @@ async function checkStrumCheck() {
     /* the window and the slots where the hand misses, through the real scOnset */
     if (Number(run('SC_WIN_FRAC')) !== PIN.win) fail(`SC_WIN_FRAC is ${run('SC_WIN_FRAC')}, want ${PIN.win} (Jonathan 2026-11-14: "medium strict", then "slightly more permissive to start")`);
     if (run('SC_CHORD_RULE') !== PIN.rule) fail(`SC_CHORD_RULE is "${run('SC_CHORD_RULE')}", want "${PIN.rule}" (re-pin only with Jonathan's choice)`);
-    run(`globalThis.__sch = (frac, slot) => { const slotMs = 500, s = { slotMs, win: SC_WIN_FRAC * slotMs, total: 16, slots: [], events: [], cells: [], listenStart: 0, gridOffset: 0, lat: 0, cap: null, chords: { D5: { midi: [50, 57, 62] } }, bars: ['D5', 'D5'],
+    /* three more of the check's numbers (review round 4, R4-3: each could move and leave this check green): the wait after a slot's
+       window before the slot is called, the pitch gate of the chord readings, the longest take */
+    for (const [k, v] of [['SC_MISS_GRACE', PIN.missGrace], ['SC_CHORD_CLARITY', PIN.clarity], ['SC_REC_MAX_SEC', PIN.recMax]]) if (Number(run(k)) !== v) fail(`${k} is ${run(k)}, want ${v}`);
+    run(`globalThis.__sch =(frac, slot) => { const slotMs = 500, s = { slotMs, win: SC_WIN_FRAC * slotMs, total: 16, slots: [], events: [], cells: [], listenStart: 0, gridOffset: 0, lat: 0, cap: null, chords: { D5: { midi: [50, 57, 62] } }, bars: ['D5', 'D5'],
         caps: [0, 1].map(b => ({ bar: b, chord: 'D5', prev: b ? 'D5' : null, at: null, rt: [], rm: [], done: false })) };
       const pat = scPatternSlots('${PIN.pattern}');
       for (let k = 0; k < 16; k++) s.slots.push({ k, bar: k >> 3, slot: k % 8, strum: pat[k % 8].strum, dir: pat[k % 8].dir, state: 'pending' });
@@ -17435,6 +17445,55 @@ async function checkStrumCheck() {
     }
     for (const k of [2, 3, 5, 6, 7]) { const r = on(0, k); if (r.cap) fail(`a strum on slot ${k} opened a chord reading: the chord is read on the 1 only`); }
     { const r = on(0, 0); if (!r.cap) fail('a strum on slot 0 opened no chord reading'); else if (!(r.capEnd >= 340 && r.capEnd <= 2 * 500 - 60 + 1e-6)) fail(`the chord reading on the 1 ends ${r.capEnd} ms after it, want from 340 to 60 ms before slot 2`); }
+    /* A strum slot already called keeps its verdict (scOnset's "again", review round 4): a strum dated inside the window of a slot the
+       sweep has called a miss (slot 3; slot 0, whose chord reading is closed) or that already has its strum (slot 2, 5 ms off) changes
+       nothing on the slot, opens no chord reading, and is filed as "again". Strum slots only: what a strum on a rest does is not
+       pinned here. */
+    {
+      const r = JSON.parse(run(`(() => { const slotMs = 500, pat = scPatternSlots('${PIN.pattern}'), out = [];
+        for (const [slot, was] of [[3, 'miss'], [0, 'miss'], [2, 'ok']]){
+          const s = { slotMs, win: SC_WIN_FRAC * slotMs, total: 8, slots: [], events: [], cells: [], listenStart: 0, gridOffset: 0, lat: 0, cap: null, chords: { D5: { midi: [50, 57, 62] } }, bars: ['D5'],
+            caps: [{ bar: 0, chord: 'D5', prev: null, at: null, rt: [], rm: [], done: true }] };
+          for (let k = 0; k < 8; k++) s.slots.push({ k, bar: 0, slot: k, strum: pat[k].strum, dir: pat[k].dir, state: k === slot ? was : 'pending', devMs: k === slot && was === 'ok' ? 5 : null, gridMs: null });
+          const rel = slot * slotMs + 30; scOnset(s, rel, rel);
+          out.push({ slot, was, state: s.slots[slot].state, kind: s.events[0].kind, devMs: s.slots[slot].devMs, cap: !!s.cap }); }
+        return JSON.stringify(out); })()`));
+      for (const x of r) { n.again++;
+        if (x.state !== x.was || x.kind !== 'again' || x.cap || x.devMs !== (x.was === 'ok' ? 5 : null)) fail(`a strum heard in slot ${x.slot}'s window after the slot was called "${x.was}": the slot is now "${x.state}" (its timing ${x.devMs} ms), the sound is filed as "${x.kind}", a chord reading is open: ${x.cap} (want the verdict and its timing kept, "again", no reading)`); }
+    }
+    /* SC_MISS_GRACE through the real scSweep: slot 2's window shuts 0.45 of an eighth after the slot is due; 1 ms before the grace is
+       over the slot is still open, 1 ms after it is called a miss, and the next slot is not touched. */
+    {
+      const r = JSON.parse(run(`(() => { const slotMs = 500, pat = scPatternSlots('${PIN.pattern}'), mk = () => { const s = { slotMs, win: SC_WIN_FRAC * slotMs, total: 8, sweep: 2, slots: [], cells: [], caps: [{ bar: 0, done: true }], slotsOf: pat };
+          for (let k = 0; k < 8; k++) s.slots.push({ k, bar: 0, slot: k, strum: pat[k].strum, dir: pat[k].dir, state: k < 2 ? 'quiet' : 'pending' }); return s; };
+        const shut = 2 * slotMs + SC_WIN_FRAC * slotMs, a = mk(), b = mk(); scSweep(a, shut + ${PIN.missGrace} - 1); scSweep(b, shut + ${PIN.missGrace} + 1);
+        return JSON.stringify({ before: a.slots[2].state, after: b.slots[2].state, next: b.slots[3].state }); })()`));
+      n.pins++;
+      if (r.before !== 'pending' || r.after !== 'miss' || r.next !== 'pending') fail(`the sweep around a strum slot's window: ${PIN.missGrace - 1} ms after it shut the slot is "${r.before}" (want pending), ${PIN.missGrace + 1} ms after "${r.after}" (want miss), the next slot "${r.next}" (want pending): a slot is called SC_MISS_GRACE after its window`);
+    }
+    /* The chord readings, through the real scReadChord with a scripted coachPitchReadings (review round 4): asked for at this check's
+       gate (SC_CHORD_CLARITY) from COACH_ATTACK_SKIP after the strum; taken only while the frame's level is over half COACH_PITCH_GATE;
+       a reading with no pitch, or one after the capture's end, is left out (one AT the end is kept); the capture closes on the first
+       frame after its end. */
+    {
+      const r = JSON.parse(run(`(() => { const keep = coachPitchReadings, calls = [];
+        try {
+          coachPitchReadings = (since, minEnd, clarity) => { calls.push({ since, minEnd, clarity }); return [{ t: 1100, midi: 50 }, { t: 1300, midi: null }, { t: 1500, midi: 57 }, { t: 1600, midi: 62 }, { t: 1700, midi: 50 }]; };
+          const mk = () => { const s = { cells: [], chords: { D5: { midi: [50, 57, 62] } }, lastPitchT: 1000, tooLoud: false };
+            s.cap = { bar: 0, chord: 'D5', prev: null, at: 1000, endA: 1340, end: 1600, rt: [], rm: [], done: false }; return s; };
+          const loud = mk(), capL = loud.cap; scReadChord(loud, COACH_PITCH_GATE * 0.6, 1550);
+          const first = calls[0] || {}, asked = calls.length;
+          const quiet = mk(), capQ = quiet.cap; scReadChord(quiet, COACH_PITCH_GATE * 0.4, 1550);
+          const late = mk(), capE = late.cap; scReadChord(late, 0, 1601);
+          return JSON.stringify({ rm: capL.rm.join(), rt: capL.rt.join(), open: !capL.done && loud.cap === capL, clarity: first.clarity, from: first.minEnd - 1000, skip: COACH_ATTACK_SKIP, asked,
+            quietAsked: calls.length - asked, quietRm: capQ.rm.length, closed: capE.done && late.cap === null, verdict: capE.verdict });
+        } finally { coachPitchReadings = keep; } })()`));
+      n.reads += 3;
+      if (r.rm !== '50,57,62' || r.rt !== '100,500,600' || !r.open) fail(`five readings (one with no pitch, one at the capture's end, one 100 ms after it) at a level over the gate: kept notes [${r.rm}] at [${r.rt}] ms, the capture still open ${r.open} (want [50,57,62] at [100,500,600], open: no reading after the end, none without a pitch)`);
+      if (r.asked !== 1 || r.clarity !== PIN.clarity || r.from !== r.skip) fail(`the chord readings were asked for ${r.asked} time(s) at clarity ${r.clarity} from ${r.from} ms after the strum (want once, at ${PIN.clarity}, from COACH_ATTACK_SKIP = ${r.skip})`);
+      if (r.quietAsked !== 0 || r.quietRm !== 0) fail(`a frame at 0.4 of COACH_PITCH_GATE: readings asked for ${r.quietAsked} time(s), ${r.quietRm} kept (want 0 and 0: no pitch is read under half the gate)`);
+      if (!r.closed || r.verdict !== 'unheard') fail(`a frame 1 ms after the capture's end: closed ${r.closed}, verdict "${r.verdict}" (want closed, "unheard" with no reading)`);
+    }
     /* the chord rules on scripted readings: [bar chord, previous, readings, rule a, rule b, rule c, the octave vote, the verdict shown
        ('oc': the vote when it decides, else c)]. The last two are Jonathan's real takes (2026-11-14): take 1 bar 4, G5 played where
        C5 is due, as read live (7 readings: C5 1, G5 6) and as the replay reads it (6 readings: C5 2, G5 6): caught both ways;
@@ -17454,7 +17513,11 @@ async function checkStrumCheck() {
       ['C5', 'C5', [54.17, 54.79, 38.02, 38.05, 50.33, 50.41, 50.26], 'unheard', 'unheard', 'unheard', 'wrong', 'wrong'],
       ['C5', 'C5', [54.8, 54.7, 38, 50.4, 50.3, 50.4], 'ok', 'ok', 'ok', 'wrong', 'wrong'],
       ['D5', null, [53.3, 38.5, 50.3, 53.1, 54.6, 38.1, 38.1, 38.1, 38.1, 38.1, 38.1], 'ok', 'ok', 'ok', 'unheard', 'ok'],
-      ['G5', 'C5', [43.05, 43.24, 43.18, 43.18, 43.16], 'ok', 'unheard', 'ok', 'unheard', 'ok']
+      ['G5', 'C5', [43.05, 43.24, 43.18, 43.18, 43.16], 'ok', 'unheard', 'ok', 'unheard', 'ok'],
+      /* rule b's share (review round 4): G5 after C5, the one note C5 lacks (a D) is 1 reading of 5 (0.20, over 0.15: b says ok) and
+         1 of 7 (0.14, under it: b cannot say) */
+      ['G5', 'C5', [43, 43, 55, 43, 50], 'ok', 'ok', 'ok', 'ok', 'ok'],
+      ['G5', 'C5', [43, 43, 55, 43, 43, 55, 50], 'ok', 'unheard', 'ok', 'ok', 'ok']
     ];
     for (const [c, p, rd, wa, wb, wc, wo, wv] of CASES) {
       n.chords++;
@@ -17523,7 +17586,7 @@ async function checkStrumCheck() {
           else if (Array.isArray(v)) v.forEach((x, i) => { if (Array.isArray(x)) o.push(p + '[' + i + '] array in array'); probs(x, p + '[' + i + ']', o); });
           else if (v && typeof v === 'object'){ const pr = Object.getPrototypeOf(v); if (pr !== Object.prototype && pr !== null) o.push(p + ' not plain'); Object.keys(v).forEach(k => probs(v[k], p ? p + '.' + k : k, o)); }
           return o; };
-        const strict = (path, v) => { const b = probs(v, '', []); if (b.length){ out.refused.push(path + ': ' + b.slice(0, 3).join(', ')); throw new Error('Unsupported field value: ' + b[0]); } out.sets.push(path); if (/-coach$/.test(path)){ out.win = { frac: v.winFrac, ms: v.winMs, slotMs: v.slotMs }; out.fields = ['metroOn', 'headphones', 'clicks', 'tooLoud', 'gateLevel', 'gateThreshold', 'anchorRange', 'octTol'].map(k => k + '=' + (k in v ? typeof v[k] : 'missing')).join(','); } };
+        const strict = (path, v) => { const b = probs(v, '', []); if (b.length){ out.refused.push(path + ': ' + b.slice(0, 3).join(', ')); throw new Error('Unsupported field value: ' + b[0]); } out.sets.push(path); if (/-coach$/.test(path)){ out.win = { frac: v.winFrac, ms: v.winMs, slotMs: v.slotMs }; out.ended = v.barsDone + ' bars, complete ' + v.complete; out.fields =['metroOn', 'headphones', 'clicks', 'tooLoud', 'gateLevel', 'gateThreshold', 'anchorRange', 'octTol'].map(k => k + '=' + (k in v ? typeof v[k] : 'missing')).join(','); } };
         const ref = path => ({ set: async v => strict(path, v), collection: c => ({ doc: id => ref(path + '/' + c + '/' + id) }) });
         try {
           currentUser = { uid: 'test-student-0', displayName: 'Test 0' }; micRecPcm16 = () => new Int16Array(4);
@@ -17559,6 +17622,9 @@ async function checkStrumCheck() {
       if (!r.sets.includes('micTakes/test-student-0-coach') || r.refused.length || r.warned.length) fail(`the take of a round with ${kase === 'right' ? 'every bar right' : kase === 'nothing' ? 'nothing played' : 'a Stop after 3 bars'} did not save through micRecSaveNow into a strict Firestore stub: ${JSON.stringify({ refused: r.refused, warned: r.warned })}`);
       if (!r.win || r.win.frac !== PIN.win || Math.abs(r.win.ms - Math.round(PIN.win * r.win.slotMs * 10) / 10) > 0.11) fail(`the saved take says window ${JSON.stringify(r.win)}, want winFrac ${PIN.win} and winMs ${PIN.win} of its slotMs (a replay must know the width that graded it)`);
       if (r.belt.length) fail(`scRecMeta's belt had to null values in the take of a round with ${kase}: ${r.belt.join(' | ')} (fix them at the source)`);
+      /* how the round ended, as the take says it (review round 4): complete only for a round played to the end */
+      const wantEnded = kase === 'stopped' ? '3 bars, complete false' : '8 bars, complete true';
+      if (r.ended !== wantEnded) fail(`the take of a round with ${kase === 'right' ? 'every bar right' : kase === 'nothing' ? 'nothing played' : 'a Stop after 3 bars'} says "${r.ended}", want "${wantEnded}"`);
       /* what the student had for a beat and whether the room was too noisy (2026-11-14): on every take */
       const wantF = 'metroOn=boolean,headphones=boolean,clicks=boolean,tooLoud=boolean,gateLevel=object,gateThreshold=number,anchorRange=number,octTol=number';
       if (r.fields !== wantF) fail(`the take's beat / gate fields are ${r.fields}, want ${wantF} (gateLevel null when the round never reached bar 1)`);
@@ -17702,6 +17768,179 @@ async function checkStrumCheck() {
       if (O.wanted || O.local || O.takes || O.fsWrites || O.devLog !== 1) fail(`another host + dev bypass: ${JSON.stringify(O)} (want no recording, no file, no Firestore, the dev-bypass log as before)`);
       if (U.wanted || U.local || U.takes || U.fsWrites < 2) fail(`localhost + a real account: ${JSON.stringify(U)} (want no local mode and no file; the take goes up to Firestore as before)`);
     }
+    /* "I could not hear any strums" (sc.nothing), through the real scRenderReport, both languages (review round 4): it is the end line
+       when no sound was heard inside the bars (none at all, or only one filed "outside" them), and not when one was (then the summary
+       line); a round stopped before bar 1 ended says so instead, heard or not. */
+    for (const lang of ['en', 'es']) {
+      run(`setLang(${JSON.stringify(lang)})`);
+      const r = JSON.parse(run(`(() => { const pat = scPatternSlots('${PIN.pattern}'), body = () => document.getElementById('coach-body').innerHTML;
+        const end = (events, barsDone) => { sc = { phase: 'report', card: { isConnected: false, remove(){} }, timeouts: [], cells: [], bars: ['D5', 'D5'], chords: { D5: { midi: [50, 57, 62] } }, pattern: '${PIN.pattern}', slotsOf: pat,
+            slots: [], caps: [0, 1].map(b => ({ bar: b, chord: 'D5', prev: null, verdict: 'unheard' })), events, barsDone, complete: false, tooLoud: false, where: '' };
+          for (let k = 0; k < 16; k++) sc.slots.push({ k, bar: k >> 3, slot: k % 8, strum: pat[k % 8].strum, dir: pat[k % 8].dir, state: pat[k % 8].strum ? 'miss' : 'quiet' });
+          scRenderReport(); return body(); };
+        try { return JSON.stringify({ silent: end([], 2), outside: end([{ kind: 'outside' }], 2), heard: end([{ kind: 'between' }], 2), noBars: end([], 0),
+          line: escHtml(t('sc.nothing')), sum: escHtml(t('sc.summary', { p: 0, n: 2, c: 0 })), stop: escHtml(t('sc.noBars')) }); } finally { sc = null; } })()`));
+      n.nothing += 4;
+      if (!r.line || r.line === 'sc.nothing' || r.line === r.sum) fail(`${lang}: sc.nothing has no wording of its own ("${r.line}")`);
+      if (!r.silent.includes(r.line) || r.silent.includes(r.sum)) fail(`${lang}: two bars with no sound heard do not end on "${r.line}": ${r.silent.replace(/<[^>]+>/g, ' ').slice(0, 140)}`);
+      if (!r.outside.includes(r.line)) fail(`${lang}: two bars whose only sound was outside the bars do not end on "${r.line}": ${r.outside.replace(/<[^>]+>/g, ' ').slice(0, 140)}`);
+      if (r.heard.includes(r.line) || !r.heard.includes(r.sum)) fail(`${lang}: two bars with one sound heard inside them end on "${r.heard.replace(/<[^>]+>/g, ' ').slice(0, 140)}", want the summary "${r.sum}" and not "${r.line}"`);
+      if (!r.noBars.includes(r.stop) || r.noBars.includes(r.line)) fail(`${lang}: a round stopped before bar 1 ended says "${r.noBars.replace(/<[^>]+>/g, ' ').slice(0, 140)}", want "${r.stop}"`);
+    }
+    run(`setLang('en')`);
+    /* THE ROUND'S LIFE (review round 4, R4-3: thirteen planted faults left this check green), through the REAL scOpen, scStart /
+       scStartRun, scLoop, scButton, scFinish, scInterrupt, scClose, coachCountIn, coachMicOff and micRecStart / micRecStop / micRecSave
+       / micRecSaveNow, on a made-up clock. Stubbed: the mic (a stream and a context that count their stops), the recording's three
+       nodes (counted), timers and frames (run by hand, 60 a second), each frame's level (a student who strums every written strum on
+       the click, or silence), the pitch readings (the bar's own chord), Firestore (it lists what reaches the take document). Six ways
+       through a round:
+         A  recorded, played to the end: mic on and controls locked during it; then the mic off (its one track stopped once, its
+            context closed once), the capture stopped and let go, no timer or frame left, the take saved "8 bars, complete", the end
+            line the 8-of-8 summary (so not "could not hear"), the take's cap at least the round's length;
+         B  the button again, Stopped 40 frames into the count-in: mic off, the capture stopped and let go, and NO take written (R4-4:
+            it used to write an empty take over round A's);
+         C  silent, Stopped after 2 bars: mic off, the take saved "2 bars, not complete", the end line "could not hear any strums";
+         D  a start in a hidden tab: no round (no click, no timer, no frame, no capture), the mic that was opened is off, the reason shown;
+         E  closed 30 frames into the count-in at the slowest tempo, Metronome and headphones on (over 30 timers waiting): none left,
+            mic off, the capture dropped, nothing saved; the take's cap covers the whole round at that tempo too;
+         F  cut short after bar 1 (scInterrupt: a hidden tab, the tuner): mic off, no timer or frame left, the capture dropped. */
+    {
+      const r = JSON.parse(await run(`(async () => {
+        const keep = { st: setTimeout, ct: clearTimeout, pn: performance.now, raf: requestAnimationFrame, caf: cancelAnimationFrame, ga: getAudioCtx, acq: coachAcquireMic, ask: micRecShouldAsk, want: micRecWanted, gsm: gamesStopMic,
+          sda: stopAllDemoAudio, crf: coachReadFrame, cpr: coachPitchReadings, rs: micRecStart, pcm: micRecPcm16, start: scStart, cu: currentUser, ed: ensureDb, db, fb: globalThis.firebase, warn: console.warn, rep: SITE_ERRORS.report,
+          cnt: micTakesCount, hid: document.hidden, mr: metroRunning, str: coachStream, ctx: coachCtx, an: coachAnalyser, hf: coachHfRms, oa: coachOnsetAt, sa: coachSmoothA };
+        const W = { now: 1000, q: [], seq: 0, raf: null, beeps: 0, steps: 0, tracks: [], ctxs: [], nodes: [], rec: null, caps: [], play: false, prev: 0, i: 0, clar: [], sets: [], warned: [], slider: null };
+        const out = {}, last = a => a[a.length - 1], flush = async () => { for (let i = 0; i < 12; i++) await null; };
+        try {
+          setTimeout = (fn, ms) => { const id = ++W.seq; W.q.push({ id, fn, at: W.now + Math.max(0, +ms || 0) }); return id; };
+          clearTimeout = id => { W.q = W.q.filter(x => x.id !== id); };
+          performance.now = () => W.now;
+          requestAnimationFrame = fn => { W.raf = fn; return ++W.seq; }; cancelAnimationFrame = () => { W.raf = null; };
+          getAudioCtx = () => ({ state: 'running', get currentTime(){ return W.now / 1000; }, destination: {}, resume(){}, createOscillator(){ return { frequency: { value: 0 }, connect(){}, start(){ W.beeps++; }, stop(){} }; },
+            createGain(){ return { connect(){}, gain: { setValueAtTime(){}, exponentialRampToValueAtTime(){} } }; } });
+          const node = kind => () => { const x = { kind, off: 0, connect(){}, disconnect(){ x.off++; }, gain: { value: 1 }, onaudioprocess: null }; W.nodes.push(x); return x; };
+          coachAcquireMic = async () => { const tr = { label: '', stops: 0, stop(){ tr.stops++; } };
+            const cx = { state: 'running', sampleRate: 48000, get currentTime(){ return W.now / 1000; }, destination: {}, closes: 0, close(){ cx.closes++; }, resume(){ return Promise.resolve(); },
+              createMediaStreamSource: node('src'), createScriptProcessor: node('proc'), createGain: node('gain') };
+            W.tracks.push(tr); W.ctxs.push(cx); coachStream = { getAudioTracks: () => [tr], getTracks: () => [tr] }; coachCtx = cx; coachAnalyser = {}; return true; };
+          micRecShouldAsk = () => false; micRecWanted = () => true; gamesStopMic = () => {}; stopAllDemoAudio = () => { metroRunning = false; }; micRecPcm16 = () => new Int16Array(4);
+          micRecStart = (mode, cap) => { W.caps.push(cap); W.nodes = []; const ok = keep.rs(mode, cap); W.rec = micRec; return ok; };
+          /* the frame's level: 0.001 (the room) until the student's first strum, then 0.05 (strings ringing), 0.3 on the frame a written strum is due */
+          coachReadFrame = () => { const s = sc; let lv = 0.001;
+            if (W.play && s && s.listenStart != null){ const at = x => Math.floor((x - s.listenStart - s.lat) / s.slotMs), k = at(W.now);
+              if (k >= 0) lv = k > at(W.prev) && k < s.total && s.slotsOf[k % SC_SLOTS].strum ? 0.3 : 0.05; }
+            W.prev = W.now; coachSmoothA = 0.18; coachHfRms = lv / 10; coachOnsetAt = W.now; return lv; };
+          coachPitchReadings = (since, minEnd, clarity) => { W.clar.push(clarity); const s = sc, notes = s && s.cap ? scChordMidis(s, s.cap.chord) : [];
+            return W.now < minEnd || W.now - (since || 0) < 40 || !notes.length ? [] : [{ t: W.now, midi: notes[W.i++ % notes.length] }]; };
+          const ref = path => ({ set: async v => { if (/-coach$/.test(path)) W.sets.push(v.barsDone + ' bars, complete ' + v.complete); }, collection: c => ({ doc: id => ref(path + '/' + c + '/' + id) }) });
+          currentUser = { uid: 'test-student-0', displayName: 'Test 0' };
+          db = { collection: c => ({ doc: id => ref(c + '/' + id) }), runTransaction: async fn => fn({ get: async () => ({ exists: false }), update(){}, set(){} }) };
+          try { localStorage.removeItem('micRecSaved'); } catch (e) {}
+          ensureDb = async () => db;
+          globalThis.firebase = { firestore: { Blob: { fromUint8Array: () => ({}) }, FieldValue: { serverTimestamp: () => ({}) } } };
+          console.warn = (a, e) => { W.warned.push(String(a) + ' ' + String(e && e.message || '')); }; SITE_ERRORS.report = () => {};
+          /* one frame: the clock, the timers that are due, a block of audio for a live capture every fifth frame, then the frame the loop asked for */
+          const step = () => { W.now += 1000 / 60; W.steps++;
+            for (let g = 0; g < 500; g++){ W.q.sort((a, b) => a.at - b.at || a.id - b.id); if (!W.q.length || W.q[0].at > W.now) break; W.q.shift().fn(); }
+            if (W.steps % 5 === 0 && micRec && micRec.live && micRec.proc.onaudioprocess) micRec.proc.onaudioprocess({ playbackTime: W.now / 1000, inputBuffer: { getChannelData: () => new Float32Array(4096) } });
+            const f = W.raf; if (f){ W.raf = null; f(); } };
+          const until = pred => { for (let g = 0; g < 6000 && !pred(); g++) step(); return !!pred(); };
+          const open = bpm => { const slider = W.slider = { value: String(bpm), max: '125', dataset: {}, parentNode: null, disabled: false, setAttribute(){}, removeAttribute(){} }, clicks = { disabled: false, setAttribute(){}, removeAttribute(){} };
+            const group = { querySelector(q){ return q === '.bpm-slider' ? slider : q === '.strum-clicks-btn' ? clicks : null; }, insertAdjacentElement(){}, closest(){ return null; } };
+            const body = { querySelector(q){ return q === '.bpm-control-group' ? group : null; }, querySelectorAll(){ return []; } };
+            const btn = { dataset: { strumcheck: ${JSON.stringify(JSON.stringify({ pattern: PIN.pattern, bars: PIN.bars.split(' '), chords: { D5: { midi: [50, 57, 62] }, C5: { midi: [48, 55, 60] }, G5: { midi: [43, 50, 55] } } }))}, scWhere: 'sc-life-key' }, parentElement: null,
+              closest(q){ return q === '.tab-body' ? body : null; }, insertAdjacentElement(){}, querySelector(){ return null; }, classList: { add(){}, remove(){} } };
+            scStart = () => {}; try { scOpen(btn); } finally { scStart = keep.start; }
+            return btn; };
+          const mic = () => ({ on: !!(coachStream || coachCtx || coachAnalyser), stops: W.tracks.length ? last(W.tracks).stops : -1, closes: W.ctxs.length ? last(W.ctxs).closes : -1 });
+          const cap = () => { const c = W.rec; return c ? { held: micRec !== null, live: !!c.live, handler: c.proc.onaudioprocess !== null, off: W.nodes.map(x => x.kind + x.off).join(' '), timer: W.q.some(x => x.id === c.timer) } : null; };
+          const text = () => document.getElementById('coach-body').innerHTML.replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim();
+          const takes = async () => { await micRecSaving; await flush(); return W.sets.join(' | '); };
+          const left = () => ({ timers: W.q.length, frame: !!W.raf });
+          document.hidden = false; metroRunning = false; scHeadphonesSet(false);
+          /* A */
+          let btn = open(125); W.play = true;
+          await scStart();
+          out.A0 = { phase: sc ? sc.phase : 'none', mic: mic().on, rec: !!(micRec && micRec.live), locked: W.slider.disabled, cap: last(W.caps), round: sc ? sc.roundSec : null };
+          until(() => !sc || sc.phase === 'report');
+          out.A = { phase: sc.phase, complete: sc.complete, bars: sc.barsDone, mic: mic(), cap: cap(), left: left(), text: text(), want: t('sc.summary', { p: 8, n: 8, c: 8 }) + ' ' + t('sc.allGood'), locked: W.slider.disabled, clar: [...new Set(W.clar)].join(), takes: await takes() };
+          /* B */
+          W.play = false; scButton(btn); await flush();
+          for (let i = 0; i < 40; i++) step();
+          out.B0 = { phase: sc.phase, bars: sc.barsDone, mic: mic().on, held: micRec ? micRec.n : 0 };
+          scButton(btn);
+          out.B = { phase: sc.phase, mic: mic(), cap: cap(), left: left(), text: text(), want: t('sc.noBars'), takes: await takes() };
+          /* C */
+          scButton(btn); await flush(); until(() => !sc || sc.phase === 'report' || sc.barsDone >= 2);
+          out.C0 = { phase: sc.phase, mic: mic().on };
+          scButton(btn);
+          out.C = { phase: sc.phase, complete: sc.complete, bars: sc.barsDone, mic: mic(), cap: cap(), left: left(), text: text(), want: t('sc.nothing'), takes: await takes() };
+          scClose();
+          /* D */
+          btn = open(125); document.hidden = true; W.rec = null;
+          { const opened = W.tracks.length, beeps = W.beeps; await scStart();
+            out.D = { phase: sc ? sc.phase : 'none', mic: mic(), opened: W.tracks.length - opened, beeps: W.beeps - beeps, left: left(), rec: micRec !== null || W.rec !== null, locked: W.slider.disabled, text: text(), want: t('coach.paused.backgrounded') }; }
+          document.hidden = false; scClose();
+          /* E */
+          btn = open(SC_BPM_MIN); metroRunning = true; scHeadphonesSet(true);
+          await scStart(); for (let i = 0; i < 30; i++) step();
+          out.E0 = { phase: sc ? sc.phase : 'none', bpm: sc ? sc.bpm : null, min: SC_BPM_MIN, timers: W.q.length, mic: mic().on, rec: !!(micRec && micRec.live), cap: last(W.caps), round: sc ? sc.roundSec : null };
+          scClose();
+          out.E = { open: !!sc, mic: mic(), cap: cap(), left: left(), takes: await takes() };
+          scHeadphonesSet(false); metroRunning = false;
+          /* F */
+          btn = open(125); await scStart(); until(() => !sc || sc.phase === 'report' || sc.barsDone >= 1);
+          out.F0 = { phase: sc.phase, mic: mic().on, rec: !!(micRec && micRec.live) };
+          scInterrupt('x');
+          out.F = { phase: sc.phase, mic: mic(), cap: cap(), left: left(), locked: W.slider.disabled, takes: await takes() };
+          out.warned = W.warned; out.mics = W.tracks.length;
+          return JSON.stringify(out);
+        } finally {
+          try { if (sc) scClose(); } catch (e) {}
+          setTimeout = keep.st; clearTimeout = keep.ct; performance.now = keep.pn; requestAnimationFrame = keep.raf; cancelAnimationFrame = keep.caf; getAudioCtx = keep.ga; coachAcquireMic = keep.acq; micRecShouldAsk = keep.ask;
+          micRecWanted = keep.want; gamesStopMic = keep.gsm; stopAllDemoAudio = keep.sda; coachReadFrame = keep.crf; coachPitchReadings = keep.cpr; micRecStart = keep.rs; micRecPcm16 = keep.pcm; scStart = keep.start;
+          currentUser = keep.cu; ensureDb = keep.ed; db = keep.db; globalThis.firebase = keep.fb; console.warn = keep.warn; SITE_ERRORS.report = keep.rep; micTakesCount = keep.cnt; document.hidden = keep.hid; metroRunning = keep.mr;
+          micRec = null; coachStream = keep.str; coachCtx = keep.ctx; coachAnalyser = keep.an; coachHfRms = keep.hf; coachOnsetAt = keep.oa; coachSmoothA = keep.sa; scHeadphonesSet(false);
+          try { localStorage.removeItem('micRecSaved'); } catch (e) {}
+        } })()`));
+      const OFF = '{"on":false,"stops":1,"closes":1}', GONE = '{"held":false,"live":false,"handler":false,"off":"src1 proc1 gain1","timer":false}', NONE = '{"timers":0,"frame":false}';
+      const j = x => JSON.stringify(x);
+      const A0 = r.A0, A = r.A, B = r.B, C = r.C, D = r.D, E = r.E, F = r.F;
+      n.life++;
+      if (A0.phase !== 'countin' || !A0.mic || !A0.rec || !A0.locked) fail(`the real start did not start a recorded round (${j(A0)}; want the count-in, the mic on, a capture running, the tempo locked): the lifecycle cases prove nothing`);
+      if (!(A0.cap >= A0.round)) fail(`at 125 BPM the take's cap handed to micRecStart is ${A0.cap} s for a round of ${A0.round} s: the take must hold the whole round`);
+      if (A.phase !== 'report' || A.complete !== true || A.bars !== 8) fail(`a round played to the end finished as ${j({ phase: A.phase, complete: A.complete, bars: A.bars })} (want report, complete, 8 bars)`);
+      if (!A.text.includes(A.want)) fail(`a student who strums every written strum on the click, the bar's own chord read: the end line is "${A.text.slice(0, 140)}", want "${A.want}" (the made-up round no longer plays: the lifecycle cases prove less)`);
+      if (j(A.mic) !== OFF) fail(`after a round played to the end the mic is ${j(A.mic)}, want ${OFF} (off: its track stopped once, its context closed once)`);
+      if (j(A.cap) !== GONE || j(A.left) !== NONE || A.locked) fail(`after a round played to the end: the capture ${j(A.cap)} (want ${GONE}), timers and frame left ${j(A.left)} (want ${NONE}), the tempo still locked ${A.locked}`);
+      if (A.takes !== '8 bars, complete true') fail(`a recorded round played to the end wrote to the take document: "${A.takes || 'nothing'}", want "8 bars, complete true"`);
+      if (A.clar !== String(PIN.clarity)) fail(`the round's chord readings were asked for at clarity [${A.clar}], want ${PIN.clarity} only`);
+      n.life++;
+      if (r.B0.phase !== 'countin' || r.B0.bars !== 0 || !r.B0.mic || !(r.B0.held > 0)) fail(`round 2 was not in its count-in with audio captured before Stop (${j(r.B0)}): the count-in Stop proves nothing`);
+      if (B.phase !== 'report' || !B.text.includes(B.want)) fail(`Stop in the count-in ended in "${B.phase}" saying "${B.text.slice(0, 120)}", want report and "${B.want}"`);
+      if (j(B.mic) !== OFF) fail(`after Stop in the count-in the mic is ${j(B.mic)}, want ${OFF}`);
+      if (j(B.cap) !== GONE || j(B.left) !== NONE) fail(`after Stop in the count-in: the capture ${j(B.cap)} (want ${GONE}: stopped and let go though it is not saved), timers and frame left ${j(B.left)} (want ${NONE})`);
+      if (B.takes !== '8 bars, complete true') fail(`after a full round, a round Stopped in the count-in: the take document was written "${B.takes || 'nothing'}", want only "8 bars, complete true" (R4-4: a round with no finished bar must not replace the last take)`);
+      n.life++;
+      if (r.C0.phase !== 'listening' || !r.C0.mic) fail(`round 3 was not listening before Stop (${j(r.C0)}): the Stop after 2 bars proves nothing`);
+      if (C.phase !== 'report' || C.complete !== false || C.bars !== 2) fail(`Stop after 2 bars finished as ${j({ phase: C.phase, complete: C.complete, bars: C.bars })} (want report, not complete, 2 bars)`);
+      if (j(C.mic) !== OFF || j(C.cap) !== GONE || j(C.left) !== NONE) fail(`after Stop in bar 3: the mic ${j(C.mic)} (want ${OFF}), the capture ${j(C.cap)} (want ${GONE}), timers and frame left ${j(C.left)} (want ${NONE})`);
+      if (!C.text.includes(C.want)) fail(`two silent bars, then Stop: the end line is "${C.text.slice(0, 140)}", want "${C.want}"`);
+      if (C.takes !== '8 bars, complete true | 2 bars, complete false') fail(`after Stop in bar 3 the take document was written "${C.takes}", want "8 bars, complete true | 2 bars, complete false" (a round with a finished bar is saved, and says it was not complete)`);
+      n.life++;
+      if (D.opened !== 1) fail(`a start in a hidden tab opened ${D.opened} mics (want 1: the case must reach the hidden-tab test with a mic open, or it proves nothing)`);
+      if (D.phase !== 'ready' || j(D.mic) !== OFF || D.beeps || j(D.left) !== NONE || D.rec || D.locked || !D.text.includes(D.want)) fail(`a start in a hidden tab: ${j(D)} (want phase ready, the mic ${OFF}, no click, ${NONE}, no capture, nothing locked, the line "${D.want}")`);
+      n.life++;
+      if (r.E0.phase !== 'countin' || r.E0.bpm !== r.E0.min || !r.E0.mic || !r.E0.rec || !(r.E0.timers > 30)) fail(`the round at the slowest tempo with the click was not in its count-in with over 30 timers waiting (${j(r.E0)}): the close proves nothing`);
+      if (!(r.E0.cap >= r.E0.round) || r.E0.cap > PIN.recMax) fail(`at ${r.E0.min} BPM (the slowest) the take's cap is ${r.E0.cap} s for a round of ${r.E0.round} s (want the whole round, at most ${PIN.recMax} s)`);
+      if (E.open || j(E.mic) !== OFF || j(E.cap) !== GONE || j(E.left) !== NONE) fail(`after a close in the count-in: the check still open ${E.open}, the mic ${j(E.mic)} (want ${OFF}), the capture ${j(E.cap)} (want ${GONE}), timers and frame left ${j(E.left)} (want ${NONE}: scClose clears every timer it started)`);
+      n.life++;
+      if (r.F0.phase !== 'listening' || !r.F0.mic || !r.F0.rec) fail(`the round to cut short was not listening with a capture running (${j(r.F0)}): the interrupt proves nothing`);
+      if (F.phase !== 'ready' || j(F.mic) !== OFF || j(F.cap) !== GONE || j(F.left) !== NONE || F.locked) fail(`after a round cut short in bar 2: ${j(F)} (want phase ready, the mic ${OFF}, the capture ${GONE}, ${NONE}, nothing locked)`);
+      if (E.takes !== C.takes || F.takes !== C.takes) fail(`a closed round or one cut short wrote to the take document ("${E.takes}" / "${F.takes}", want still "${C.takes}")`);
+      if (r.warned.length) fail(`a take save in the lifecycle run warned: ${r.warned.join(' | ').slice(0, 200)}`);
+      if (r.mics !== 6) fail(`the lifecycle run opened ${r.mics} mics, want 6 (one per round: every round before it had let its mic go)`);
+    }
     /* the end line: 0, 1 and many bars, both languages */
     for (const lang of ['en', 'es']) {
       run(`setLang(${JSON.stringify(lang)})`);
@@ -17719,8 +17958,8 @@ async function checkStrumCheck() {
     run(`setLang('en')`);
   } catch (e) { fail('stopped on an error: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : e)); }
   /* pinned totals, so a renamed function cannot turn this into a check of nothing */
-  if (n.saves !== 4 || n.tempos !== 4 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 13 || n.lines !== 10 || n.pins !== 13) fail(`ran ${n.saves} take saves (want 4), ${n.tempos} tempo opens (want 4), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (13), ${n.lines} end lines (10), ${n.pins} pins (13)`);
-  if (!bad) ok(`1eh: one listening step (ca-52, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, in a row under the board, none in the console, never disabled; the step's slider drawn at ${PIN.startBpm}, the only tempo control, one tempo with the check; no block element and no per-bar sentence (their strings gone); the tempo controls locked during a round and given back on every exit; its own ratios ${PIN.ratio} / ${PIN.hfRatio} through its own scHearStrum (Strum Radar's still 1.4 / 1.7, run); the pattern-shape grid (a player 0.8 of an eighth late kept on his own 18 slots, with or without the click); the too-noisy gate at count-in level ${PIN.gate.level} (a quiet count-in with loud clicks not gated, a noisy one gated, the first ${PIN.gate.skip} ms left out; a gated round colours nothing, says one line and still counts); the take's beat and gate fields; window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule}: the octave vote, then c (${n.chords} scripted cases, two from real takes); the Metronome's click only with headphones (32 a round, all cleared by Stop), its beat dot and the frame around the board on the same click-grid clock (32 beats, 8 bars' 1s, none with it off, cleared on every exit); local recording mode only on this computer's host with the dev bypass (files, no Firestore; another host or a real account unchanged); two full rounds tick ca-52's step (round 1 <id>:0:r1, round 2 the step; Stopped, short and other steps write nothing; no Mark done button); a whole finish saved nothing else; its take saved through micRecSaveNow into a strict Firestore stub (3 rounds); the real sweep and its one-line end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages`);
+  if (n.saves !== 4 || n.tempos !== 4 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 15 || n.lines !== 10 || n.pins !== 14 || n.again !== 3 || n.reads !== 3 || n.nothing !== 8 || n.life !== 6) fail(`ran ${n.saves} take saves (want 4), ${n.tempos} tempo opens (want 4), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (15), ${n.lines} end lines (10), ${n.pins} pins (14), ${n.again} strums on a called slot (3), ${n.reads} chord-reading frames (3), ${n.nothing} "could not hear" end screens (8), ${n.life} lifecycle cases (6)`);
+  if (!bad) ok(`1eh: one listening step (ca-52, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, in a row under the board, none in the console, never disabled; the step's slider drawn at ${PIN.startBpm}, the only tempo control, one tempo with the check; no block element and no per-bar sentence (their strings gone); the tempo controls locked during a round and given back on every exit; its own ratios ${PIN.ratio} / ${PIN.hfRatio} through its own scHearStrum (Strum Radar's still 1.4 / 1.7, run); the pattern-shape grid (a player 0.8 of an eighth late kept on his own 18 slots, with or without the click); the too-noisy gate at count-in level ${PIN.gate.level} (a quiet count-in with loud clicks not gated, a noisy one gated, the first ${PIN.gate.skip} ms left out; a gated round colours nothing, says one line and still counts); the take's beat and gate fields; window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule}: the octave vote, then c (${n.chords} scripted cases, two from real takes); the Metronome's click only with headphones (32 a round, all cleared by Stop), its beat dot and the frame around the board on the same click-grid clock (32 beats, 8 bars' 1s, none with it off, cleared on every exit); local recording mode only on this computer's host with the dev bypass (files, no Firestore; another host or a real account unchanged); two full rounds tick ca-52's step (round 1 <id>:0:r1, round 2 the step; Stopped, short and other steps write nothing; no Mark done button); a whole finish saved nothing else; its take saved through micRecSaveNow into a strict Firestore stub (3 rounds); the real sweep and its one-line end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages; the round's life on a made-up clock (${n.life} ways through a real round: the mic off, no timer left and the capture let go after each; a take saved only with a finished bar, complete only when played to the end); "could not hear any strums" only when nothing was heard inside the bars (${n.nothing} end screens, EN + ES); the chord readings' gate, clarity and end (${n.reads} frames); a called slot keeps its verdict (${n.again}); grace ${PIN.missGrace} ms, clarity ${PIN.clarity}, longest take ${PIN.recMax} s`);
 }
 
 async function checkCountIn() {
