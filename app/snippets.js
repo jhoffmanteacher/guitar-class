@@ -1120,7 +1120,14 @@ function cancelQueuedClicks(st){
 }
 /* The latest count whose click is still kept (-1: none). After a switch the scheduler starts from it, not from -1:
    that count has clicked or is about to, and the twin swapped in a few ms behind reaches it a second time. */
-function keptClickCount(st){ return (st.clicks || []).reduce((m, o) => o._nb > m ? o._nb : m, -1); }
+/* Only a click whose count was reached in the last 0.2 s is "kept": the twin is at most TWIN_READY_SEC (60 ms)
+   behind. The list is pruned only when a click is queued, so with the Metronome switched off the last click
+   stays in it; laps later, Metronome on and a speed or Guitar press before that same count was queued again
+   set lastBeat to it and the count was silent (review of 4f22e0c, 2026-11-16: 60 of 60, before it 0 of 60). */
+function keptClickCount(st){
+  const now = getAudioCtx().currentTime;
+  return (st.clicks || []).reduce((m, o) => o._due > now - 0.2 && o._nb > m ? o._nb : m, -1);
+}
 /* One of the snippet's <audio> elements failed. The PLAYING one stops the
    card and says so; the twin is just dropped (the Guitar toggle falls back to
    a reload). The same shape as the practice card's pcAudioError, and both are
