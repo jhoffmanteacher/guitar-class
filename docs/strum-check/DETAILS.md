@@ -1267,7 +1267,8 @@ caught and the mistake bar passed 33 times.
 - **A:** in `scAnchorSearch`, a sound outside every window costs `SC_ANCHOR_REST` (-1.5), as a sound on a rest does.
 - **D:** in `scAnchor`, when `SC_ANCHOR_LOCK_MIN` (4) or more onsets before this one (in the last `SC_ANCHOR_SPAN` eighths) all sit
   on strum places of the grid it has, the search looks only `SC_ANCHOR_LOCK` (0.25) of an eighth either way, not
-  `SC_ANCHOR_RANGE` (1). The wide search is unchanged; no ratio, window, the gate, `scHearStrum` or `coach-core.js` changed.
+  `SC_ANCHOR_RANGE` (1). The wide search runs over the same range as before; since the review R5-1 fix (below) the test of whether the
+  bar fits badly enough to run it scores the grid without rule A. No ratio, window, the gate, `scHearStrum` or `coach-core.js` changed.
 - `SC_RULE` is `strumcheck-3`; a take saves `anchorLock` and `anchorLockMin`.
 
 **The built code is the measured candidate.** `strum-check-replay.mjs --copy='{"outPen":-1.5,"lock":0.25}'` on the built tree:
@@ -1337,8 +1338,9 @@ b = 1..8, 0 / +-5 / +-10 / +-40 ms from the rest's place): with no timing spread
 extra in bars 2 to 8, both rests, every offset and tempo (70 of 70 a cell); bar 1's first rest never; bar 1's second rest 8 to 10
 of 10 within +-10 ms and 2 to 10 of 10 at +-40 ms. Before AD: 0 to 61 of 80 a cell (0 of 80 at +-40 ms).
 
-**What AD does not fix, and one case it makes worse.** An extra on bar 1's FIRST rest (slot 1) has one strum before it: the grid
-still slides an eighth to fit both, the extra is filed "again" on slot 0, and bar 1 then shows an extra on slot 4 and misses on 6
+**What AD does not fix, and one case it makes worse.** An extra on bar 1's FIRST rest (slot 1) has one strum before it: on the bench
+it is never caught, and of Jonathan's own strums pasted there (`--splice --splice-bars=1`, 3 takes, 9 offsets: 27) 1 is (0 before AD).
+The grid still slides an eighth to fit both, the extra is filed "again" on slot 0, and bar 1 then shows an extra on slot 4 and misses on 6
 and 7 (both rules). 40 ms EARLY there, today's code left only slot 2 missed; AD also misses 6, 7 and bar 2's first strum. The new
 1eh pin (71 rounds: bar 2's two rests at 0 / +-5 / +-10 / +-40 ms and bar 1's second rest at 0 / +-5 / +-10 ms with a 15 ms
 spread, 60 / 85 / 100 BPM; and with no spread bar 2's rests at +-40 ms, 85 / 100 BPM, and bar 1's second rest at +-5 ms) leaves this
@@ -1365,11 +1367,53 @@ R5-1 fix; scratchpad `ad5-r52.mjs`). Bars all right:
 The talk room (the bench above) is the same story. If real takes show students with a foot tap or a noisy neighbour failing bars
 they played right, this is the place to look.
 
+### Review round 5 (2026-11-16; Jonathan: "AD with the fix")
+
+**R5-1 (MAJOR): the wide search's test.** Rule A lowered every search's score, also the one `scAnchor` uses to decide whether the last
+bar fits badly (`r.score < recent.length - SC_ANCHOR_WIDE_SLACK`). One extra on bar 1's first rest made a right bar 1 "fit badly";
+the wide search ran, found D.DU.UDU three eighths on (it fits onsets 0, 1, 2, 3, 5, 6 exactly), and bar 2, played right, failed. The
+fix (the reviewer's "F1c"): `scAnchorSearch` takes a 5th argument `outCost` (default `SC_ANCHOR_REST`, so every search keeps
+rule A) and the wide-search test scores the grid it found with `outCost` 0. The replay tool's copy does the same (`trigOut: 0`;
+AD as first built is `{"trigOut":null}`).
+
+Bar 2 passed after one extra on bar 1's first rest (made up, right player, 15 / 25 ms spread, -60..+60 ms, 60 / 85 / 100 / 125 BPM,
+20 seeds; scratchpad `ad5-r1.mjs`): 518 of 1120 before AD, **240** as first built, **531** with the fix (at 85 BPM within +-60 ms,
+0 left out: 133, 50, 134 of 240). Real splices into bar 1's first rest of J02 / J03 (18): the next bar red 6 before AD, 8 as first
+built, 7 with the fix.
+
+Everything else before (AD as first built) -> after the fix:
+
+| measure | as first built | with the fix |
+|---|---|---|
+| 3 takes, kept clock +-20 ms (9 replays) | heard 379 / 414, false extras 3 / 138, bars 36 / 72, chords 66 / 69 | the same, replay for replay |
+| `--splice`, bars 2-7 (180) | caught 115, passed 32, other slots moved 231 | caught 115, passed 32, moved 220 |
+| `extras.mjs` | caught 114 / 120, passed 4 | the same |
+| late start, 85 BPM (+1.05 / +1.5 / +2 / +3 / -1 eighths, drag 4%) | 67 / 63 / 63 / 60 / 69, 33 | 66 / 61 / 61 / 60 / 69, 33 |
+| late start, 98 BPM (same) | 66 / 63 / 63 / 60 / 69, 33 | 65 / 60 / 61 / 60 / 68, 33 |
+| `strum-check-loop.mjs` default (150 takes) | | identical, row for row |
+| bench (`r41-bench.mjs`, 30 rows) | | identical but the talk room: right player 17 -> 19 of 64 bars (false extras 47 -> 45 of 128); strums heard, thumb 318 -> 317, quiet 338 -> 340 |
+
+The fix costs a late starter 0 to 3 bars of 80 against AD as first built (85 and 98 BPM), measured, not explained.
+
+**R5-3:** 1eh gains "THE LOCK IS NOT TOO STRONG": when the lock is taken, read from `scAnchor`'s own search calls (4 strums before ->
+the lock; 3 -> not; 5 with one on a rest or outside every window -> not; locked with the bar fitting badly -> the wide search still
+runs; rule A's cost -0.5 for a strum and a sound outside) and a floor (a right player who drags 4% and one whose eighths get 5% longer
+from bar 3: 162 of 320 bars today, floor 154). **R5-4:** the replay tool checks its copy's numbers against the page's constants and
+runs 472 made-up rounds through both before any replay; `SC_ANCHOR_LOCK_MIN` 3 or 5, ">" for ">=", the wide search skipped while
+locked and the pre-fix test all now print DIFFERENT and exit 1 (the takes alone said IDENTICAL).
+
+**Not built: the reviewer's "frozen lock" for dragging players.** The round-5 reviewer reported an idea it called a frozen lock that
+measured better for a player who drags (drag 4%: 204 -> 421 of 480 made-up bars; the reviewer's numbers, not re-run here). It was not
+tried on the real takes and Jonathan did not ask for it. (It is not the R5-3 break-it "lock range 0", which in the builder's runs is
+far worse for a dragging player: 202 against 314 of 640 bars, drag 4% and a tempo step together.)
+
 **Unmeasured:** talking on real audio (every talk number above is the bench's synthetic room; no real take has talk in it, and the
 talk room is where AD costs most); takes from a Chromebook mic (all three takes are a MacBook Air); an extra UP-strum (the
 splices paste his down-strums, slot 0 and slot 2).
 
-**Proof in checks** (1eh): the pin "ONE EXTRA STRUM ON A REST" (71 rounds) and `SC_ANCHOR_LOCK` / `SC_ANCHOR_LOCK_MIN` pinned.
+**Proof in checks** (1eh): the pin "ONE EXTRA STRUM ON A REST" (71 rounds), "AN EXTRA ON BAR 1'S FIRST REST DOES NOT FAIL BAR 2"
+(24 rounds, R5-1), "THE LOCK IS NOT TOO STRONG" (6 cases and a floor, R5-3) and `SC_ANCHOR_LOCK` / `SC_ANCHOR_LOCK_MIN` pinned.
+Break-its of the R5 pins are in their commit messages.
 Break-its, each a full `checks.mjs --check --skip-links` run: the code before AD 38 of 71 not called; rule A taken out 16; rule D
 taken out 8; the lock tested on all the onsets (this one too) 8; a sound outside the windows costing -0.5 instead of -1.5: 6;
 `SC_ANCHOR_LOCK` 0.5: the pin line plus 8 of 71; `SC_ANCHOR_LOCK_MIN` 5: the pin line. The unbroken copy: 1eh green.

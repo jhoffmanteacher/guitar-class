@@ -17477,7 +17477,8 @@ const COUNTIN_PIN = { runs: 44, beeps: 140, rounds: 9, takes: 6, tips: 28 };   /
        scOnset the slot directly. Through the grid search (scHearStrum, scAnchor, scAnchorSearch): before rule AD the search excused
        about half the strums on a rest on the bench (51 of 120 caught, review round 4, R4-1); with AD (2026-11-16) 114 of 120. The
        pin "ONE EXTRA STRUM ON A REST" runs 71 such rounds (bar 2's two rests, bar 1's second) and wants each extra called; an extra on
-       bar 1's first rest is not pinned (AD does not fix it); SC_ANCHOR_LOCK / SC_ANCHOR_LOCK_MIN pinned;
+       bar 1's first rest is not pinned (AD does not fix it), but bar 2 must stay right after one (review R5-1); the lock's cases and a
+       floor for players whose beat moves (R5-3); SC_ANCHOR_LOCK / SC_ANCHOR_LOCK_MIN pinned;
      - the chord: only a strum on slot 0 opens a chord reading; the reading's verdict is SC_CHORD_RULE's (rule 'c', pinned) and all
        three rules give their pinned answers on scripted readings (G5 after C5: G alone, a D, a C, the held C5's C and G);
      - saves nothing: the part never names saveGames, games, progress, caSteps, flushSave or storage, and a whole finish (scFinish and

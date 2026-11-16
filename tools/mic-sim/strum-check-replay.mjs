@@ -10,8 +10,9 @@
    sweep, the chord readings and rules a / b / c, scFinish), at the take's own tempo, mic-delay setting and mean frame time. The take's
    times are ms from the recording's first sample (micRecSaveNow), so the site's clock is set to run (replay listenStart - the take's
    listenStart) ahead of the recording: beat 1 lands where it did live. The grid then eases from there as it did live.
-   THE CLOCK (measured 2026-11-14 on Jonathan's three takes): the saved times sit one ScriptProcessor buffer off the audio (every replayed
-   onset ~93-103 ms after the live one: 4096 samples at 44.1 kHz, micRecStartPerf's estimate), so the clock is FITTED on the onsets
+   THE CLOCK (measured 2026-11-14 on Jonathan's three takes; takes saved before 2026-11-16, without recClock): the saved times sit one
+   ScriptProcessor buffer off the audio (every replayed onset ~93-103 ms after the live one: 4096 samples at 44.1 kHz, micRecStartPerf's
+   estimate), so the clock is FITTED on the onsets
    (median gap of paired live / replayed onsets), then scanned +-40 ms in 5 ms steps for the clock that reproduces the most live slot
    verdicts; every step's count is printed. The scan is the finding as much as the fit: the eased grid can land a whole slot apart
    across 20 ms (J02: 9 of 17 clocks a slot off, J03: 4 of 17), so a replay reproduces a take only near its own clock.
@@ -236,7 +237,8 @@ function score(tk, res){
 }
 
 /* THE CLOCK FIT: the take's times rest on micRecStartPerf's estimate of when the recording's first sample was heard. Measured on J01
-   (2026-11-14): every replayed onset came ~93 ms after the live one, one 4096-sample buffer at 44.1 kHz. So the shift is fitted: replay,
+   (2026-11-14; takes saved before 2026-11-16, without recClock): every replayed onset came ~93 ms after the live one, one 4096-sample
+   buffer at 44.1 kHz. So the shift is fitted: replay,
    pair each live onset with the nearest replayed one (within 200 ms), move the clock by the median gap, until it moves under 2 ms. */
 function gaps(tk, res){
   const t0 = tk.d.expected[0].t, L = tk.d.events.map(e => e.t - t0), R = res.events.map(e => e.t);

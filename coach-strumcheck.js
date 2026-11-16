@@ -80,8 +80,8 @@ const SC_RULE = 'strumcheck-3';     // bump when what is judged changes; saved w
    The pattern-shape grid (THE GRID, below; DETAILS section 23) came after these measurements, and with it an extra strum on a rest was
    caught only about half the time on the bench (51 of 120 in the quiet room; review round 4, 2026-11-16, R4-1). Rule AD (AN EXTRA
    STRUM ON A REST STAYS AN EXTRA, below; 2026-11-16) catches 114 of the same 120 (DETAILS section 29; of the 6 left, 3 were not heard
-   at all and 3, at 100 BPM, still moved the grid). Never caught: an extra on bar 1's first rest (one strum before it, so the grid
-   still slides to fit it). */
+   at all and 3, at 100 BPM, still moved the grid). An extra on bar 1's first rest is almost never caught (one strum before it, so the
+   grid still slides to fit it): never on the bench, and 1 of 27 of Jonathan's own strums pasted there (0 before AD). */
 const SC_WIN_FRAC = 0.45;
 /* This check's own strum ratios (the lead, 2026-11-14, after the virtual
    student lost a right player's re-strums at the shared 1.4 / 1.7: 22% at
@@ -141,16 +141,19 @@ const SC_ANCHOR_WIDE_TIGHT = 0.15;
      A  a sound outside every window costs SC_ANCHOR_REST too, as a sound on a rest does (scAnchorSearch);
      D  when the SC_ANCHOR_LOCK_MIN or more onsets before this one (in the last SC_ANCHOR_SPAN eighths) all sit on strum places of the
         grid it has, the search looks only SC_ANCHOR_LOCK of an eighth either way (not SC_ANCHOR_RANGE): a player whose last strums fit
-        is on the grid, so one odd sound cannot move it far. The wide search (above) is unchanged.
+        is on the grid, so one odd sound cannot move it far. The wide search (above) runs as before over SC_ANCHOR_WIDE_RANGE, but
+        whether the bar fits badly enough to run it is scored WITHOUT rule A (scAnchor; review R5-1: with it, one extra on bar 1's
+        first rest set the wide search off, it fitted the pattern three eighths on, and bar 2, played right, failed).
    Measured (DETAILS section 29): Jonathan's three takes, kept clock and +-20 ms, right playing: strums heard 379 of 414 (378 before),
    false extras 3 of 138 (3), bars all right 36 of 72 (35), right chords the same. One of his own strums pasted into a rest (180
-   splices): caught 115 (38 before), the mistake bar passed 32 (83). Not fixed: an extra on bar 1's first rest (one strum before it).
+   splices): caught 115 (38 before), the mistake bar passed 32 (83). Not fixed: an extra on bar 1's first rest (one strum before it;
+   1 of 27 splices there caught).
    Costs. With AD ANY sound the check hears on a rest is an extra (before, the grid often slid to excuse it): a stray sound, a foot
    tap (beat 3 of each bar is the pattern's rest, so a foot tap heard on beat 3 is an extra), a neighbour's guitar, talking. None of
    these is in Jonathan's three real takes; every number here is made up (DETAILS section 29). A right player, 20 ms spread, 85 BPM,
    bars all right of 480 (60 rounds), before AD -> AD (with the review R5-1 fix): stray sounds 0.5 a bar 456 -> 431; 1 a bar 426 ->
    388; a foot tap on each beat, half of them heard, 321 -> 245; a neighbour's guitar, 30% of his strums heard, 381 -> 329; a strum
-   heard twice (10%) 466 -> 465, at 125 BPM 416 -> 393; a beat lost at bar 4 (a mid-round stumble) 397 -> 368. The bench's talk room:
+   heard twice (10%) 466 -> 465, at 125 BPM 416 -> 393; a beat lost at bar 4 (a mid-round stumble, 25 ms spread) 397 -> 368. The bench's talk room:
    a right player 19 of 64 bars right (28 before), false extras 45 of 128 (15); a quiet player in the class room 7 of 24 (10); a
    steady player who starts 1.5 beats late 60 of 80 bars (65 before) at 85 BPM. */
 const SC_ANCHOR_LOCK = 0.25;
