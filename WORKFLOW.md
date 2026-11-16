@@ -76,6 +76,95 @@ sends an mp3 for a first real song: skill `new-playalong`, 192k. Delete this blo
 DETAILS section 20 (the 2026-11-14 file was not kept): J01 bar 4's chord wrong, J02 bar 7 left out, J03 nothing.
 The Windows session deletes this line once its replay matches the README.
 
+**For the Mac: the rest of the Windows list (handed over 2026-11-16 by the Windows session; Jonathan: "assign
+whatever you haven't done to the mac". He says "do the handed-over work in WORKFLOW").** In this order; each ships
+before the next; agents Opus or Fable by the need (Opus at xhigh is allowed where a finding is in dispute). Branches
+named `win/…` are on GitHub (`git fetch`); cherry-pick from them, do not merge them.
+1. [ ] **Console: "Keep in Today's activities" (Jonathan, 2026-11-16: "for the teacher dashboard, add an option
+   next to the release date that has a checkbox for 'keep in today's activities'. use an opus agent to make
+   this").** Not started. Build it with ONE Opus agent in its own worktree. Where: the release-date control of an
+   activity (`teacher-activities.js` ~326, `data-set-activity-date`). The Windows lead's reading, to confirm from
+   the code before building: a ticked activity stays in the student's "Today's activities" on the days AFTER its
+   release date until unticked; default off. Read how Today is chosen first (`caTodayHeadHtml`, `app/activities.js`;
+   "Today's activities by date", 2026-11-09) and how "Now" / pins already keep things on a page, so this is not a
+   fourth way to say the same thing; report every interpretation made. It is a `config/class` write: only through
+   `teacherWriteConfig()`, so Always Reviewed (`.claude/rules/teacher-console.md`: `two-consoles-loop.mjs` before
+   and after, `visible-loop.mjs`, `classConfigSignature`), both step renderers if a student sees a new field, the
+   default pinned in `checks.mjs`, smoke clicks it and reloads, screenshots at 1366×657, a CHANGELOG line only if
+   a student can see a difference.
+2. [ ] **Strum Pattern check R4-1: build rule "AD" (Jonathan chose it 2026-11-16, "Build AD").** A strum on a rest
+   is excused about half the time because `scAnchorSearch` slides the grid so the extra lands between windows.
+   Rule A: a sound outside every window costs `SC_ANCHOR_REST` too (`coach-strumcheck.js:599`, was
+   `if (Math.abs(d) > s.win) continue;`). Rule D ("lock"): read its exact code from the settings `outPen` (A),
+   `dupOnce` (C), `lock` (D) in `tools/mic-sim/strum-check-replay.mjs` on branch `win/r41-2026-11-16` (commit
+   `dfad3dbc`: the tool's copy of the detector got those settings, `--copy=<json>`, `--cands`, `--no-bench`,
+   `--splice`; cherry-pick it first) and from the reviewer's `dsim.mjs` variants (fixA / fixC / fixD / fixAD;
+   that script is in the Windows scratchpad only, so re-derive D from the tool). Measured by an Opus agent on the
+   three real takes (kept clock and ±20 ms; the lead confirmed only the baseline, which equals the takes' README):
+   right playing, A = AD: strums heard 379 of 414 (today 378), false extras 1 of 138 (today 1), bars all right 36
+   of 72 (today 35), right chords the same. One of his own strums pasted into a rest (`--splice`, 180 splices):
+   caught today 38, A 88, C 117, D 98, **AD 115**; the mistake bar still passed today 83, A 49, AD 32. C costs on
+   right playing (J01) and is not chosen. Bench cost, the talk room only: a right player's bars right 28 of 64
+   today, A 20, AD 17 (false extras 15, 39, 47 of 128); no real take has talk in it. Build AD in
+   `coach-strumcheck.js`, prove the tool's `--copy` for AD is IDENTICAL to the built code on all 3 takes, add a
+   1eh pin that sends a jittered bar plus one extra through `scHearStrum` then `scOnset` (red on today's code),
+   run the bench rows of `DETAILS.md` sections 22 / 23 before and after, then a fresh deep review (danger zone),
+   then correct `CHANGELOG.md`'s 2026-11-14 line "(green: heard in its place; red: missed, or a strum on a dot)"
+   only if it is still untrue, and the comment at `coach-strumcheck.js` ~80 and 1eh's head comment (both say R4-1
+   is open). Add R4-2 to the known limits of the entry "Strum Pattern check `ca-52`".
+3. [ ] **`micRecStartPerf`: review and ship the fix on branch `win/micrec-2026-11-16`** (`e492b66` the test tool
+   `tools/mic-sim/micrec-clock.mjs`, `e3a7019` the fix; one Opus agent; base `cb89a7b`, so rebase). Its report,
+   not yet checked by anyone: the stamp treated the ScriptProcessor's `playbackTime` as the END of the input
+   buffer, and Chromium gives the time the OUTPUT buffer plays, so a take's start is one buffer late (85.3 ms at
+   48 kHz, 92.9 at 44.1) plus the first handler's delay, minus how stale `currentTime` was. On the 46 summaries
+   (43 fitted): median +92.1 ms, 40 of 43 between 48 and 107; 2 takes about 130 ms EARLY (a device not started
+   yet is the guess, not proven). No live grading reads the stamp and no consumer adds a fixed correction
+   (`teacher-mic.js` `mapMs`, `eval-takes`, the replays all fit each take). The fix: each handler records "now
+   minus everything captured so far" and keeps the earliest (`rec.startMin`); new takes save `recClock: 2` and
+   `recClockShiftMs`; the old formula stays as `micRecStartPerfV1` for hand-built captures. Proof claimed: the
+   tool 1 of 12 on base, 12 of 12 fixed; 8 of 8 mutations red; tone-test pinned; closed loop 0 of 10,080 virtual
+   and 0 of 315 real-take changes differ. `coach-core.js` goes to 2,549 lines (limit 2,600: the split in the
+   design document becomes urgent). It is recording code in the listening file: Always Reviewed, deep. The 2
+   early takes: if a new take with `recClockShiftMs` near −130 replays near 0, it was the stale clock; if not,
+   record from the game's own source node next. The stale notes to fix with it: `strum-check-replay.mjs` header
+   lines 10-14 and its THE CLOCK FIT comment, `docs/strum-check/DETAILS.md` lines ~597 and ~681.
+4. [ ] **Split two big parts** (job 3 of the Windows list; Jonathan, 2026-11-16: "Split now": the newer list
+   applies, golden is run before and after as extra evidence, not as the gate). An agent's map, not yet checked
+   by the lead: `coach-chords.js` line 1393 to the end (CHORD DIFFICULTY RANKS, CHORD BLITZ, CHORD DETECTIVE; no
+   grading code, `ccLoop` / `ccResolvePend` / `ccFinish` keep their line numbers) into `coach-chordcards.js`
+   right after it (1,392 and 770 lines; the Change Up done-screen fix of today added a few lines, re-count);
+   `coach-runner.js` line 1092 to the end (NOTE RUNNER whole, with its RACE LANE block and judge) into
+   `coach-noterunner.js` right after it (1,091 and 1,303). Both are the tail of their file, so the joined
+   `siteSource('coach.js')` must be byte-identical before and after. Load order: neither tail runs anything at
+   load but its own `const` / `let`; no other part reads a moving name at load (0 of 26, traced);
+   `GAMES_SESSION_KEY_PREFIXES` and `gamesResetForUser()` move with Note Runner. Register in `COACH_JS_PARTS`
+   (`app/boot.js`) and `sw.js` ASSETS; update CLAUDE.md's table, `todo.md`'s split table, comments in
+   `tools/shared-chromebook-loop.mjs:119`, `tools/mic-sim/listen-loop.mjs:67`, `coach-hub.js:374`. Per split, one
+   push: the joined-text proof, full checks, `slow-load.mjs`, `kill-switch/proof.mjs`, `update-reload-loop.mjs`,
+   golden before / after, a change smoke, a fresh reviewer (load order and `sw.js`: Always Reviewed). Deploy
+   risk (reasoned, MED): a busy tab open before the push keeps its old part list for up to 5 minutes and would
+   fetch the shortened file without the new part; push outside class hours.
+5. [ ] **Close out the Friday entries in "Open work".** Tick or close each line of the 2026-11-14, 2026-11-06,
+   2026-11-01 and 2026-10-31 entries against the list in the Windows block ("Job 4"). Still open after that:
+   Jonathan's three calls, one at a time by AskUserQuestion (the Games heading "Notes on the low E and A strings"
+   over Note Hunt and Fret Zap, `i18n.js` `games.hub.groupNotes`; a tab closed on dead Wi-Fi can lose up to 60 s
+   of practice minutes, `practice-minutes.js:1082`, recommended: accept; the "goal reached" pill never shows for a
+   goal crossed on a Song Journey page); the doubled Journey Metronome beat on quick seeks (needs a browser
+   measurement first; candidate, unproved: `tabs/journey.js:475-477` resets `lastBeat` on `seeked` after a frame
+   already queued the beat; if proved, reset it on `seeking` instead); and, new, Strum Hero and Strum Radar
+   (`coach-strum.js`, `shAgain(±10)` / `srAgain(±10)`) probably say "10 BPM" one 5 BPM step from each end of
+   their range, the fault Change Up had (unchecked).
+6. [ ] **Small things found on the way:** the change smoke owed on today's Windows pushes (`games`, `activities`);
+   `tools/smoke.mjs` `cardKeysWalk` (~1521) and `foldWalk` (~1666) still lack `await pageLoaded(page)` after
+   their reload (9 of 11 walks have it); the Listening Coach has the same `if (rec) micRecSave(…)` line
+   (`coach-core.js:1730`, take id `<uid>-coach`): check whether a Stop in ITS count-in overwrites a full take
+   (not traced); `tools/song-files-console-sim.mjs` and `tools/built-songs-sim.mjs` wait by counting turns, the
+   race fixed in `song-builder-sim.mjs` (run that one once on the Mac: it should say 57 cases); stale comments
+   (`coach-strum.js:1238-1240` and `tools/checks.mjs` ~17115 say `srHearStrum` is shared with the strum check;
+   `coach-hub.js:144` and `coach-runner.js:951` say "No onset detector in this loop"); `tools/__pycache__/` into
+   `.gitignore`; ask Jonathan whether ca-43 Note Call has been used with real guitars on the Chromebooks.
+- Delete this block when every item is ticked.
+
 **For a session on the Windows computer (written 2026-11-15 for 2026-11-16 on; Jonathan cannot paste between his
 computers, so it lives here).** Jonathan opens Claude Code on Windows and says "do the Windows work in WORKFLOW".
 The session runs on Fable (Jonathan, 2026-11-15: "big jobs using fable"). Agents: Opus or Fable by the need
@@ -113,60 +202,35 @@ plan; Fable (`model: 'fable'`) for mechanical work (a part split, re-checking an
   may print only `1ck` (an old duplicate): renumber yours if it collides. Only one headless-Chrome run at a time.
 - Building a song on Windows: not tried yet (see "Song builder" below, "Windows too"). If he asks for one, fix the
   tool on the way.
-- **Where the Windows session is (2026-11-16, late morning; started 9:00).** Nothing of jobs 1 to 5 has shipped yet.
+- **Where the Windows session stopped (2026-11-16, afternoon). Jonathan: "assign whatever you haven't done to
+  the mac": what is left is the block "For the Mac: the rest of the Windows list" above.** Done and on main today:
+  - `190586d` `tools/song-builder-sim.mjs` waits for the console's work (it failed 3 of 3 on Windows).
+  - Job 1: the design plans (`docs/strum-check/LISTENING-DESIGN-2026-11-16.md`, four decisions for Jonathan, none
+    asked); review round 4 (0 BLOCKER, 2 MAJOR, 3 MINOR); the 3 MINORs fixed and shipped (a round Stopped before
+    bar 1 ended saves no take; check 1eh now turns red on 32 of 32 planted faults, before 2 of 32; the comments).
+    R4-1 measured on the real takes; the fix is NOT built (the Mac block, item 2). R4-2 (loud talk not gated) is a
+    known limit: bench only, no real take has talk in it.
+  - Job 2: 4 of 5 faults fixed and shipped (`f0e012e`): the sign-out clear (`lq-q-opened`), the Metronome click lost
+    or doubled on a speed / Guitar press (Reviewed, 1 round, 1 MINOR fixed; new tool `tools/metro-press-sim.mjs`,
+    6,341 of 6,341; `playalong-loop` 0 mismatches), `smoke.mjs --baseline` (new `--self-test`, 3 of 3), the golden
+    live-quiz pictures (`--only livequiz` passes its own checks). `micRecStartPerf` is fixed on a branch, not
+    reviewed, not shipped (the Mac block, item 3).
+  - Job 4: 3 wording fixes shipped (`60a3214`: Change Up names the real 5 BPM step at 135 / 45; `coach.foot`;
+    Module 9 ES button name), 3 checks tightened and Reviewed (1da fold default through both real callers, 13
+    cases; 1t3 in order inside the three shared popups; 1cd spies on every direct string of Note Call's power
+    screens), and the smoke "3 tool buttons" line. Re-check of the 17 open items: 13 real, 3 already fixed (the
+    flame colour, `weekReach`, the smoke / emulator line of 2026-11-01), 1 accepted (liberal counting); the
+    2026-11-06 entry has nothing open. The "Open work" boxes themselves are NOT ticked yet (the Mac block, item 5).
+  - Job 5: sorted, nothing done: outside the Friday entries only private song audio step 2 (the Mac's), ca-43 with
+    a real guitar (Jonathan) and the 2026-11-02 smoke flake (`7369cad` looks to have fixed it) are open.
+  - Owed on today's Windows pushes: NO change smoke was run on any of them, and no screenshot of the Change Up
+    done screen at 135 / 45 (check 1ck renders it, 68 renders).
   - **This computer's setup.** The main folder is checked out with Windows line endings (Git's system setting
-    `core.autocrlf true`), which fails 4 checks on untouched main (1eh twice, 1de, 1dt). The session works in
-    worktrees made with `git -c core.autocrlf=false worktree add` (LF; `.claude/worktrees/win-*`, the lead's is
-    `win-lead`), which pass. The main folder itself is NOT fixed: `git config core.autocrlf false` there and a fresh
-    checkout of the files is Jonathan's to allow. The `site-reviewer-deep` agent type is not offered in this
-    session: a general agent is given that agent file as its brief. `gh` is not installed here.
-  - **Shipped on the way (`190586d`):** `tools/song-builder-sim.mjs` failed 3 runs of 3 on Windows (check 1en, so
-    no commit could pass the hook). Its `settle()` counted event-loop turns and never outlasted a `crypto.subtle`
-    hash; it now waits for the console's `sbBusy` to clear. 5 of 5 runs here, 57 cases. Not run on the Mac: one run
-    there should say 57. The same turn-count wait is in `tools/song-files-console-sim.mjs` and
-    `tools/built-songs-sim.mjs` (both pass on Windows today).
-  - **Job 1, review round 4 (Fable, high, at `9bf2b07`): 0 BLOCKER, 2 MAJOR, 3 MINOR.** The lead re-opened the
-    quoted lines and re-ran the reviewer's deterministic case; scripts in the session scratchpad (`deeprev/scripts`).
-    - **R4-1 MAJOR, waits for the real takes (the Mac block above).** A strum on a rest is excused about half the
-      time: the grid search (`scAnchorSearch`, run at every strum) moves the grid up to a whole eighth so the extra
-      lands in the 10% gap between windows (`coach-strumcheck.js:599` `if (Math.abs(d) > s.win) continue;` costs
-      nothing there) or on the next strum's place. Bench, quiet room: caught 51 of 120, the mistake bar passes 33 of
-      120; with the grid frozen 23 of 24 caught. A student who strums on "3" in every bar passes 24 of 80 bars at 85
-      BPM. Candidate A, one line (a sound outside every window costs `SC_ANCHOR_REST` too): caught 19 of 20, bar
-      passes 1 of 20, right players unchanged in quiet and class; cost: a right player in the bench talk room 69 of
-      192 bars right (today 91). Not tried on a real take. Every "extra caught" number in `DETAILS.md` is from before
-      the pattern-shape grid (section 23).
-    - **R4-2 MAJOR, a known limit to record or a design job:** loud talking near the mic (bench talk room, speech at
-      about 40% of a strum) is not gated (0 of 24 rounds) and a right player gets 91 of 192 bars right (quiet 160 of
-      192). The opposite failure from the gate firing in a full room. One made-up room; no small fix.
-    - **MINOR, a fixer has them:** R4-3 check 1eh stays green on 13 of 18 real planted faults (mic left on after a
-      round, no take saved, three constants unpinned…); R4-4 a Stop in the count-in saves an empty take over the
-      student's last full one (`:740`); R4-5 the comment at `:74-76` and `CHANGELOG.md:18` say extras are shown red.
-    **The design plans are done, nothing shipped:**
-    `docs/strum-check/LISTENING-DESIGN-2026-11-16.md` (one Opus agent). Four decisions in it are Jonathan's, none
-    asked yet; the agent's recommendation each time: up-strums: leave until Chromebook takes exist (a "lower bar
-    only where a strum is due" rule cut bench misses 202 to 74 of 2,300 but heard a skipped up-strum 8 of 24 times,
-    today 3); G5 for C5: leave (on 33 real Power Chord Switch summaries the two rules tried either call 7 of 37
-    right C5s wrong or turn 41 of 46 right G5s into "?"); one shared detector: the start-of-note test exists 6
-    times, do steps S0 to S2 at a quiet moment; `coach-core.js`: move lines 1761 to the end (recordings, report
-    card, teardown) into a new part, 1,760 and 769 lines. Real-take steps are for the Mac.
-  - **Job 2: an agent is working** four of the five faults on branch `win/faults-2026-11-16` (failing case first);
-    `micRecStartPerf` waits for its own Opus agent.
-  - **Job 3: mapped, not started.** Agent's proposal, not yet checked by the lead: `coach-chords.js` 1393 to the end
-    (the chord ranks, Chord Blitz, Chord Detective; no grading code) into `coach-chordcards.js` (1,392 and 770
-    lines); `coach-runner.js` 1092 to the end (Note Runner, whole) into `coach-noterunner.js` (1,091 and 1,303). No
-    load-order hazard found. OPEN for Jonathan: `todo.md` says the splits were approved "only once golden is
-    cleared", this list asks only for `slow-load.mjs`.
-  - **Job 4: re-checked, nothing fixed yet.** Agent's count, not yet checked by the lead: 17 open items; 13 still
-    real, 3 already fixed (the flame colour, `weekReach`, the smoke / emulator line of 2026-11-01), 1 accepted
-    (liberal counting). Of the 13: 7 mechanical for Windows (the Change Up "10 BPM" at 135 / 45, `coach.foot`,
-    Module 9's "Todavía lo practico", the 1da fold pin, check 1t3, the smoke "4 tool buttons" line, check 1cd), 2 in
-    the Mac's console files (`teacher-livegames.js:237`, `teacher-students.js:553`), 1 that needs a browser
-    measurement (the doubled Journey Metronome beat), 3 for Jonathan (the Games heading, a tab closed on dead Wi-Fi,
-    the goal pill after a Journey page). The 2026-11-06 entry has nothing open.
-  - **Job 5: sorted.** Outside the Friday entries 3 items are open: private song audio step 2 (the Mac's), ca-43
-    with a real guitar on a Chromebook (Jonathan), and the 2026-11-02 smoke flake, which `7369cad` looks to have
-    fixed (two walks, `cardKeysWalk` and `foldWalk`, still lack the page-loaded wait).
+    `core.autocrlf true`), which fails 4 checks on untouched main. The session worked in worktrees made with
+    `git -c core.autocrlf=false worktree add` (`.claude/worktrees/win-*`). The main folder itself is NOT fixed
+    (Jonathan's to allow); `git archive` here also needs `-c core.autocrlf=false`. `gh` is not installed; the
+    `site-reviewer-deep` agent type was not offered (a general agent was given that agent file as its brief).
+    `tools/__pycache__/` appears after a checks run on Windows and is not in `.gitignore`.
 - Delete this block when every job above is ticked.
 
 **Class rules published 2026-11-15: Paste C, D and E are live.** Jonathan published `firestore.rules` as one paste
