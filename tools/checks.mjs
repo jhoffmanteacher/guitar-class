@@ -6915,7 +6915,9 @@ function checkGamesGroups() {
    turns a module's heading <div> into its fold's <summary>, which must lose the role, for both callers (the
    Completed fold, on the real caModuleHeadHtml, keeps the module name as one level-3 heading INSIDE the
    summary; the Unfinished fold's tag from activities-2.js, which has no such span, keeps none: a wrapper there
-   would change what .ca-mod-head>span:first-child styles). */
+   would change what .ca-mod-head>span:first-child styles). The same run pins which fold starts OPEN
+   (2026-11-16): only the newest module, unless the student opened or closed it, or it holds the open card
+   or a Level up swap (FOLD_DEFAULT_CASES cases on the real caModFoldHtml and caNewestModNum). */
 const HEADING_CLASSES = ['set-eyebrow-title', 'stp-sec-label', 'stp-part-title', 'jl-title', 'review-head',
   'mr-assess-head', 'ca-today-head', 'ca-hero-title', 'ca-card-title', 'ca-mod-head', 'resume-title', 'sh-sec-title',
   'rp-meta-title', 'games-logo', 'games-section-head', 'games-game-title', 'tp-title',
@@ -6929,6 +6931,8 @@ const HEADING_ROLE_PINS = {
   'stu-section-head': '3x3 4x6 5x2', 'stu-set-head': '6x1', 't-board-head': '3x2', 't-scard-lbl': '3x2 5x2', 't-title': '2x1',
   'ta-list-title': '3x2', 'ta-roll-head': '3x1', 'tp-title': '2x3',
 };
+/* How many open / closed cases the module-fold run below makes (which fold starts open). */
+const FOLD_DEFAULT_CASES = 9;
 const HEADING_ROLE_TOTAL = Object.values(HEADING_ROLE_PINS).reduce((n, v) => n + v.split(' ').reduce((m, x) => m + +x.split('x')[1], 0), 0);
 function a11yScanTags(src) {
   const out = [];
@@ -7009,7 +7013,7 @@ function checkTitleHeadings() {
     if (kindPins[k] !== HEADING_ROLE_PINS[k]) flag(`role="heading" on ${k}: levels x counts ${kindPins[k] || 'none'}, HEADING_ROLE_PINS pins ${HEADING_ROLE_PINS[k] || 'none'} (a heading lost, added, moved to another kind or given another level: fix it, or change the pin on purpose)`);
   if (roles !== HEADING_ROLE_TOTAL) flag(`${roles} elements carry role="heading", HEADING_ROLE_PINS adds up to ${HEADING_ROLE_TOTAL}`);
   /* The module folds: run the real caModFoldHtml on both callers' heading html. */
-  let foldsRun = 0;
+  let foldsRun = 0, foldDefaults = 0;
   try {
     const a2 = siteSource('app.js', ROOT);
     const fold = /function caModFoldHtml\([^)]*\)\{[\s\S]*?\n\}/.exec(a2);
@@ -7032,9 +7036,39 @@ function checkTitleHeadings() {
         else if (heads.length !== inside || (summary.match(/role="heading"/g) || []).length !== inside)
           flag(`${what}: the <summary> holds ${(summary.match(/role="heading"/g) || []).length} heading(s), want ${inside}${inside ? ' (the module name, level 3)' : ''}: ${summary.slice(0, 240)}`);
       }
+      /* Which fold starts OPEN (Friday check 2026-11-16: `sec.mod.num === newest` could become `true` or `false` and nothing above saw it).
+         The real caModFoldHtml, with `newest` from the real caNewestModNum over modules 3, 5, 4 and a group with no module: only the newest
+         module starts open; a student's own open / close (caModFoldOpen, keyed by fold AND module) wins over that; a fold holding the open
+         card (caOpenId) or a Level up swap is open whatever was set. */
+      const newestFn = /function caNewestModNum\([^)]*\)\{[\s\S]*?\n\}/.exec(a2);
+      if (!newestFn) flag('could not find caNewestModNum: which module fold starts open is NOT checked');
+      else {
+        const J = JSON.stringify, grp = n => ({ sec: { mod: n ? { num: n, name: 'M' + n } : null, ids: [] } });
+        const groups = [grp(3), grp(5), grp(4), grp(0)], headDiv = todoTag + 'Module</div>';
+        // [what, fold, module, caModFoldOpen, the card ids in the fold, caOpenId, swap, open?]
+        const cases = [
+          ['the newest module, nothing set', 'todo', 5, {}, [], null, null, true],
+          ['an older module, nothing set', 'todo', 4, {}, [], null, null, false],
+          ['the newest module after the student closed it', 'todo', 5, { 'todo:5': false }, [], null, null, false],
+          ['an older module after the student opened it', 'todo', 4, { 'todo:4': true }, [], null, null, true],
+          ['the newest module, closed in the OTHER fold only', 'todo', 5, { 'done:5': false }, [], null, null, true],
+          ['an older module holding the open card', 'todo', 4, {}, ['x', 'y'], 'y', null, true],
+          ['an older module the student closed, holding the open card', 'todo', 4, { 'todo:4': false }, ['x', 'y'], 'y', null, true],
+          ['an older module holding a Level up swap', 'done', 4, {}, ['x'], null, { from: 'x' }, true],
+          ['an older module when the open card and the swap are in another module', 'todo', 4, {}, ['x'], 'z', { from: 'q' }, false]];
+        for (const [what, foldName, num, state, cardIds, openId, swap, want] of cases) {
+          const out = String(vm.runInNewContext(`${newestFn[0]}; ${fold[0]}; caModFoldHtml(${J(foldName)}, ${J(grp(num).sec)}, ${J(headDiv)}, '<CARDS/>', ${J(cardIds.map(id => ({ id })))}, caNewestModNum(${J(groups)}), ${J(swap)})`,
+            { caOpenId: openId, caModFoldOpen: state, escAttr: x => String(x), escHtml: x => String(x) }));
+          foldDefaults++;
+          const tag = (/^<details\b[^>]*>/.exec(out) || [''])[0];
+          if (!tag) flag(`the module fold (${what}): caModFoldHtml did not return a <details>: ${out.slice(0, 160)}`);
+          else if (/\sopen(?=[\s>])/.test(tag) !== want) flag(`the module fold: ${what} starts ${want ? 'CLOSED' : 'OPEN'}, want ${want ? 'open' : 'closed'} (only the newest module starts open; the student's own choice, the open card and a Level up swap come first): ${tag}`);
+        }
+      }
     }
   } catch (e) { flag(`running caModFoldHtml threw (${e.message}): the module folds NOT checked`); }
-  if (!bad) ok(`${titled} title boxes of ${HEADING_CLASSES.length} kinds in ${files.length} files all carry a heading role; ${roles} role="heading" in ${Object.keys(kindPins).length} kinds, levels and counts pinned, each with one level, on no control, nothing clickable, nothing inside a button or link; no title box made through the DOM; ${foldsRun} module folds run: clean <summary>, the Completed one keeps the module name as a heading inside`);
+  if (foldDefaults !== FOLD_DEFAULT_CASES) flag(`${foldDefaults} module-fold open / closed cases ran, pinned ${FOLD_DEFAULT_CASES}`);
+  if (!bad) ok(`${titled} title boxes of ${HEADING_CLASSES.length} kinds in ${files.length} files all carry a heading role; ${roles} role="heading" in ${Object.keys(kindPins).length} kinds, levels and counts pinned, each with one level, on no control, nothing clickable, nothing inside a button or link; no title box made through the DOM; ${foldsRun} module folds run: clean <summary>, the Completed one keeps the module name as a heading inside; ${foldDefaults} open / closed cases: only the newest module starts open, the student's own choice, the open card and a Level up swap come first`);
 }
 
 /* 1cz. Google sign-in always shows the account chooser (2026-11-13). Students share school Chromebooks. A popup made
