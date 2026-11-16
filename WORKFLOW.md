@@ -195,7 +195,7 @@ is split by file, so both computers work at once.**
     The Strum Pattern check and the Listening Coach save to the SAME take slot (`<uid>-coach`,
     `coach-strumcheck.js:480` `micRecStart('coach', …)`), so each overwrites the other's last take; `fields.game`
     tells them apart; a slot of its own needs a `firestore.rules` change (the take id must match
-    `(coach|nr|pw)`) and a console paste: a question for Jonathan, not asked yet.
+    `(coach|nr|pw)`) and a console paste. **SETTLED (Jonathan, 2026-11-16): "it should keep the latest recording only".** One slot, the latest take wins, whichever of the two games made it: that is what the code does today, so nothing changes and no rules paste is needed. Do not re-raise it (this closes the open note R1-2 of the Strum check reviews).
 1. [x] **Console: "Keep in Today's activities" (Jonathan, 2026-11-16: "for the teacher dashboard, add an option
    next to the release date that has a checkbox for 'keep in today's activities'. use an opus agent to make
    this").** Built 2026-11-16 (entry "Keep in Today's activities" under "Recently shipped"; the lead reviews and
