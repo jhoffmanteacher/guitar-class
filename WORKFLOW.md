@@ -31,11 +31,23 @@ Dates are the Pacific calendar date. `CACHE_VERSION` and commit timestamps may s
 
 Start here. Update this block whenever an item opens or closes; each line says where the detail is.
 
-**For the next session on the Mac (written 2026-11-15, Part b shipped the same day).** Jonathan types "do the Mac
-work in WORKFLOW". Part b is live (entry "Song builder" below). Next: Jonathan builds one real song up to the Beat
-step and says whether the bar lines sit on the beat; then build Part c (Chart, the correction grid, sections, Level)
-from `Claude outputs/WORK-ORDER-song-builder.md` (on the Mac only). Work in its own worktree made from `origin/main`.
-Part c ships Fast, d is Reviewed, then stop for Jonathan before Part e.
+**For the next session on the Mac (written 2026-11-16; Part b shipped 2026-11-15, Part c 2026-11-16).** Jonathan types "do the
+Mac work in WORKFLOW". Parts b and c are live (entry "Song builder" below). **Waiting on Jonathan, in this order:**
+(1) he builds one real song up to the Beat step and says whether the bar lines sit on the beat; (2) he pastes three
+real charts at the Chart step and says whether they read right (report per chart the lines read, refused and folded
+as COUNTS only: never paste his lyrics into a report). Then build Part d (Preview, Publish, Edit, Unpublish, Delete,
+backup, Export) from `Claude outputs/WORK-ORDER-song-builder.md` (on the Mac only), in its own worktree made from
+`origin/main`: Part d is ALWAYS REVIEWED (`site-reviewer`, before the push); then stop for Jonathan before Part e.
+Part d must keep his two answers of 2026-11-15: a record over 8 pins is sent to Claude and the line only warns
+(Publish is not blocked by it); the 10-cent pitch rule does block.
+**GitHub's "Site checks" has been RED since Part b (`22d0b86`, 2026-11-15), every push, and nobody had seen it.** Its
+step `node tools/checks.mjs --check --skip-links` fails there; the same command passes on the Mac in a clean shallow
+copy of the same commit, with GitHub's environment (UTC, plain locale, no home folder) and with the newest Node 24
+(24.22.3). So it is something Linux-only, and the log is the only way to know what: this session could not read it
+(`gh` is not installed on the Mac, and reading the log needs a sign-in). Jonathan: open
+https://github.com/jhoffmanteacher/guitar-class/actions → Site checks → the newest run → job "checks", and paste the
+lines with ✗ (or install `gh`). Until then a red "Site checks" says nothing new; the Browser tests, Firestore rules
+and Practice copy runs are green.
 **The Beat step's tracker is fixed (2026-11-15, the evening session; entry "The Beat step's tracker" under "Song
 builder" below has the numbers).** It follows American Girl beat for beat (0 of 397 beats over 100 ms from Moises's;
 before: 371). **Decided by Jonathan, 2026-11-15 (asked with the numbers):** a record that needs more than 8 pins
@@ -163,6 +175,36 @@ me to type the title?"; a draft is cheap to redo; a published song in Part d kee
 Beat has Clear this step (Jonathan, 2026-11-15: "at any step if i want to clear what it had done instead of starting
 over"). Next: Jonathan builds one real song up to the Beat step; then part c (Fast) and d (Reviewed). His first
 real song through Import (part a2) is still open.
+- **Part c: Chart, the grid, sections, Level (2026-11-16, Fast; `teacher-sb-chart.js`).** Step 4 reads a pasted
+  chart (chords over lyrics, ChordPro, bar lines; English and Spanish section headers; "x2"; a header with nothing
+  under it or "same chords as Verse 1" is copied), refuses line by line with the reason (TAB, number charts, a symbol
+  it cannot read, more chords in a bar than beats) and folds slash chords and sevenths to the plain chord, saying so.
+  The grid sets the truth (a bar's chord, a split bar, a rest, + Bar to hold a chord, Remove bar, a new section, a
+  section edge, Join, the section's name and number, a row's words, Undo). Step 5 is the level (Full / Power / Both
+  and which it opens on) and the whole song or a from-to range. `sbSongOf()` makes the song `builtSongs` takes and
+  `sbSongWhy()` is `builtSongCheck`'s own answer on it; Preview and Publish are Part d.
+  - **His request, built with it** ("the app should allow me to upload chord charts, etc. as other things are being
+    worked on like levels ... and/or to let me put all the files in the initial upload"): step 1 has a chart box
+    (paste or a text file) saved with the draft, and step 4 opens as soon as the draft exists, before the record is
+    levelled; it is read in 4 beats a bar until the Beat step says otherwise, and read again by itself when the meter
+    changes and the grid has not been edited by hand. NOT built: working on the chart WHILE the 48-second levelling
+    runs (the builder is locked during it); he can paste the chart before pressing Next instead.
+  - **Proof:** `tools/song-builder-sim.mjs` 57 cases (18 new): 17 of 17 made-up charts read as expected (9 accepted
+    formats, 7 refusals, the folds); 39 of 39 chord names get shapes the validator takes; 27 of 27 (the 9 accepted
+    charts at Full, Power and Both) pass `builtSongCheck` and render through the real `caCardBodyHtml`
+    (`tools/sim-app-page.mjs`, new: the whole student app in Node), lyric lines escaped; the grid's edits; the flow
+    against the stub database (every write a `songDrafts` write). 6 of 6 planted faults turn it red. A browser walk
+    in Chrome for Testing at 1366×657: 18 states, each screenshot looked at, no page error, no sideways scroll, the
+    grid's columns line up.
+  - **How the work order was read (say if any is wrong):** "taught" = Module 4's open chords and its Bm
+    (`SB_TAUGHT_FULL`: E Em A Am D Dm G C F Bm); every 5 chord counts as taught. sus, add9 and 6 chords fold to the
+    plain chord too (the work order names slash chords and sevenths); dim and aug are refused. A refused line is
+    left out of the grid at once and stays flagged until he clicks "Leave it out" or types its chords. A header that
+    is not on the fixed list gets NO name and the grid asks for one (no free-typed section names). A lyric row is
+    one chord line of the chart (the mock-up joined two lines in a row). "Hold a chord across bars" is + Bar; "move
+    a section edge" is Start 1 bar earlier / later. The range is two pickers, From and to. Not built from the
+    mock-up: "Skip: type the grid myself" (a one-line chart does the same) and dropping a file on the box (there is
+    a file picker).
 - **The Beat step's tracker (2026-11-15, Fast).** Before: the phase of the BEAT in 12-second windows
   (`sbPhaseTrack`), which on a strummed record sat on the "and" and slipped between beat and "and". Why: on American
   Girl the onsets on the "and" are as strong as on the beat (beat stronger than its "and" on 169 of 396 beats), so

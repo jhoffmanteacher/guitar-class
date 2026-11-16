@@ -19366,9 +19366,14 @@ function checkSongFilesConsole() {
      saved and resumed, refused uploads write nothing, the levelled copy stored
      before the draft names it, a damaged copy loaded once, Delete draft, every
      write on the builder's own paths.
+     Since Part c (2026-11-16, teacher-sb-chart.js): the chart reader on
+     made-up charts (each accepted format, each refusal, the folds), the 39
+     chord shapes, every accepted chart as a song builtSongCheck passes and the
+     real card renders (tools/sim-app-page.mjs), the grid's edits, and the Chart
+     and Level flow.
    ════════════════════════════════════════════════════════════════════ */
 const SB_DSP_TEST_PIN = 45;          // 35 -> 37 (2026-11-15, the browser walk): a soft intro's bar 1; taps 4% slow or 5% fast; -> 45 (2026-11-15, the beat track): a strummed record that drifts (7), a steady record's 2 pins (1)
-const SONG_BUILDER_SIM_PIN = 39;     // 2026-11-15: first count 32; -> 36 the same day: Clear this step (Volume, Beat) and Level it again (4); -> 39 (2026-11-15): the beat track saved and found again, the "send to Claude" line (3)
+const SONG_BUILDER_SIM_PIN = 57;     // 2026-11-15: first count 32; -> 36 the same day: Clear this step (Volume, Beat) and Level it again (4); -> 39: the beat track saved and found again, the "send to Claude" line (3); -> 57 (2026-11-16, Part c): the chart reader, the shapes, chart to song, the grid, the Chart and Level flow (18)
 function checkSongBuilder() {
   head('1en. Song builder: the sound code and the drafts are run, their case counts pinned');
   let bad = 0;

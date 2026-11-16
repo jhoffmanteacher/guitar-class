@@ -19,13 +19,25 @@
    its audio has the builtSongs audio shape, centsOff aside: an over-10-cents draft is allowed, it cannot publish);
    songFiles/{id} heads and pieces as firestore.rules "SONG FILES"; songFilesUsage/{month} only bytes. Any other
    path written (config/class, progress/…, builtSongs, builtSongsMeta) is a violation; every case counts them.
-   The stub database is the one tools/song-files-console-sim.mjs uses, cut to these paths. */
+   The stub database is the one tools/song-files-console-sim.mjs uses, cut to these paths.
+
+   PART C (2026-11-16; teacher-sb-chart.js). THE READER on made-up charts the tool writes, one per accepted format
+   (chords over lyrics, ChordPro, bar lines, Spanish headers, 3/4, 6/8, the header forms, no headers, rests and x2),
+   one per refusal (TAB, a number chart, Roman numerals, an unreadable symbol, one in ChordPro, a crowded bar) and
+   the folds (slash, sevenths, sus, add9, "min"): each read as written out below, "N of N". Every accepted chart, at
+   Full, Power and Both, is a song builtSongCheck passes, and its card renders through the REAL caCardBodyHtml
+   (tools/sim-app-page.mjs: the whole student app) with its sections and its lyric lines escaped. THE SHAPES: all 36
+   (12 roots, major / minor / 5) pass the validator's shape rule. THE GRID's edits keep every section's lyric rows
+   adding up to its bars. THE FLOW (its own console and store, a made-up draft with a beat): read, a refused line left
+   out and typed, a chord kept, a bar split and held, a new section named, Undo, the level and a range, Clear this
+   step, a chart given at step 1, a meter change, a reload; every write a songDrafts write. */
 import { readFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import vm from 'node:vm';
 import { siteParts } from './site-src.mjs';
+import { appPage } from './sim-app-page.mjs';
 
 const args = process.argv.slice(2);
 const argOf = n => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : null; };
@@ -56,7 +68,7 @@ function clone(v){
   if(v && typeof v === 'object'){ const o = {}; for(const k of Object.keys(v)) o[k] = clone(v[k]); return o; }
   return v;
 }
-const DRAFT_KEYS = 'artist,audio,beat,pitch,savedAt,source,step,title,v,volume';
+const DRAFT_KEYS = 'artist,audio,beat,chart,level,pitch,savedAt,source,step,title,v,volume';
 function rulesCheck(op, path, data){
   const p = path.split('/');
   if(op === 'delete') return (p[0] === 'songDrafts' && p.length === 2) || (p[0] === 'songFiles' && (p.length === 2 || (p.length === 4 && p[2] === 'pieces'))) ? '' : 'delete outside the builder\'s paths: ' + path;
@@ -146,6 +158,7 @@ function makeConsole(consoleSrc, F){
   const esc = ['escAttr', 'escHtml'].map(n => (BOOT.match(new RegExp(`^const ${n} = .*$`, 'm')) || [''])[0]).join('\n');
   vm.runInContext(esc + '\nlet db = null; let firebaseReady = true; async function ensureDb(){ return db; }\n'
     + 'const MODULE_MANIFEST = []; const CLASS_OPEN_THROUGH = 1;\nfunction __setDb(x){ db = x; }', box, { filename: 'prelude' });
+  for(const f of ['i18n.js', 'guitar-diagrams.js']) vm.runInContext(read(f), box, { filename: f });   // the section names' words and the chord shapes (Part c)
   vm.runInContext(read('app/songfiles.js'), box, { filename: 'app/songfiles.js' });
   vm.runInContext(read('app/builtsongs.js'), box, { filename: 'app/builtsongs.js' });
   vm.runInContext(consoleSrc, box, { filename: 'teacher.js (all parts)' });
@@ -389,13 +402,235 @@ async function runCases(consoleSrc){
   check('every write in the run fits the rules and the builder\'s own paths (songDrafts, songFiles, songFilesUsage)', F.st.violations.length === 0 && F.st.writes.length > 20,
     F.st.writes.length + ' writes; ' + (F.st.violations.slice(0, 3).join('; ') || 'no violation'));
   check('no write to config/class, progress/, builtSongs or builtSongsMeta', !F.st.writes.some(w => /^(config|progress|builtSongs)/.test(w.path)));
+  await chartCases(consoleSrc, check);
   return out;
 }
 function box_set(C, k, v){ C.box[k] = v; }
 
+/* ── Part c: the chart reader, the shapes, the grid, the level ── */
+/* Made-up charts. `secs`: each section as "name n:bars"; `first`: the first bars as written; `lyr`: lyric lines kept. */
+const CHARTS = {
+  'chords over lyrics': { meter: '4/4', fmt: 'chords over lyrics', bars: 21, chords: 'G D Em C', lyr: 3,
+    secs: 'intro:4 verse 1:4 chorus:4 verse 2:4 chorus 2:4 ending:1',
+    text: 'Made-up Song - Nobody\n\n[Intro]\nG    D    Em    C\n\n[Verse 1]\nG                 D\nWalking on the made-up street\nEm              C\nhumming in the <b>summer</b> heat & "rain"\n\n[Chorus]\nC          G             D            Em\nLight them up, let the whole block glow\n\n[Verse 2]  (same chords as Verse 1)\n\n[Chorus]\n\n[Ending]\nG' },
+  'ChordPro': { meter: '4/4', fmt: 'ChordPro', bars: 7, chords: 'G D Em C', lyr: 3, secs: 'verse:4 chorus:3',
+    text: '{title: Made-up Song}\n{artist: Nobody}\n{start_of_verse}\n[G]Walking down the [D]road\n[Em]All the way [C]home\n{end_of_verse}\n{soc}\n[C]Sing it [G]loud [D]now\n{eoc}' },
+  'bar lines': { meter: '4/4', fmt: 'bar lines', bars: 14, chords: 'G D Em C', lyr: 0, secs: 'intro:4 verse:8 outro:2', first: 'G|D|Em:2 C:2|Em:2 C:2',
+    text: 'Intro: | G | D | Em C | % |\n[Verse]\n| G | G | D | D | x2\n[Outro]\n| G | N.C. |' },
+  'Spanish headers': { meter: '4/4', fmt: 'chords over lyrics', bars: 15, chords: 'Am G F E Dm', lyr: 2, secs: 'intro:2 verse 1:4 chorus:6 bridge:2 ending:1',
+    text: 'INTRO\nAm  G\n\nVerso 1\nAm          G\nUna linea de prueba\nF           E\notra linea\n\nCORO x2\nF  G  Am\n\nPuente\nDm  E\n\nFinal\nAm' },
+  '3/4, two chords in a bar': { meter: '3/4', fmt: 'bar lines', bars: 4, chords: 'C G F', lyr: 0, secs: 'verse:4', first: 'C|G:2 C:1|F|G', text: '[Verse]\n| C | G C | F | G |' },
+  '6/8, two chords in a bar': { meter: '6/8', fmt: 'bar lines', bars: 4, chords: 'Am G E', lyr: 0, secs: 'verse:4', first: 'Am|G:1 Am:1|Am|E', text: '[Verse]\n| Am | G Am | Am | E |' },
+  'header forms': { meter: '4/4', fmt: 'chords over lyrics', bars: 10, chords: 'G D C Em', lyr: 0, secs: 'verse 1:2 chorus:2 bridge:2 chorus 2:2 outro:2',
+    text: 'Verse 1:\nG D\nCHORUS\nC G\nBridge\nEm C\nLast chorus\nC G\nOutro: G D' },
+  'no headers': { meter: '4/4', fmt: 'chords over lyrics', bars: 8, chords: 'G D Em C', lyr: 1, secs: '?:8', text: 'G  D  Em  C\nsome words here\nG  D  C  C' },
+  'rests and x2': { meter: '4/4', fmt: 'chords over lyrics', bars: 8, chords: 'E5 G5 A5', lyr: 0, secs: 'riff:8', first: 'E5|G5|A5|-|E5', text: '[Riff]\nE5 G5 A5 N.C. x2' },
+};
+const REFUSED = {
+  'TAB': { text: '[Verse]\nG D\ne|-----3-----2--|\nB|--0-----0-----|\ne|--3--2--0--|\n--3--2--0--2--', bad: [[3, 'tab'], [4, 'tab'], [5, 'tab'], [6, 'tab']], bars: 2 },
+  'a number chart': { text: '[Verse]\nG D\n1 4 5 1', bad: [[3, 'numbers']], bars: 2 },
+  'Roman numerals': { text: '[Verse]\nG D\nI IV V vi', bad: [[3, 'numbers']], bars: 2 },
+  'an unreadable symbol': { text: '[Verse]\nG Bdim Em C\nC G', bad: [[2, 'symbol', 'Bdim']], bars: 2 },
+  'an unreadable symbol in ChordPro': { text: '[Verse]\n[G]la la [G7#9]la\n[C]la', bad: [[2, 'symbol', 'G7#9']], bars: 1 },
+  'a crowded bar': { text: '[Verse]\n| G | D |\n| G D Em C Am |', bad: [[3, 'crowded']], bars: 2 },
+  'words are not chords': { text: '[Verse]\nG D\nA long road home', bad: [], bars: 2 },
+};
+const FOLDS = { text: '[Verse]\nG/B  G7  Am7  Cmaj7  Dsus4  Cadd9  Emin  B♭  (G)  F#m7', names: 'G G Am C D C Em Bb G F#m', folds: 'G/B>G G7>G Am7>Am Cmaj7>C Dsus4>D Cadd9>C Emin>Em F#m7>F#m' };
+const hex64 = n => { let x = n * 2654435761 >>> 0, o = ''; while(o.length < 64){ x ^= x << 13; x >>>= 0; x ^= x >>> 17; x ^= x << 5; x >>>= 0; o += (x >>> 0).toString(16).padStart(8, '0'); } return o.slice(0, 64); };
+async function chartCases(consoleSrc, check){
+  const F2 = makeDb(), C = makeConsole(consoleSrc, F2), { run } = C;
+  const sbRead = run('sbChartRead'), secLabel = s => (s.name ? s.name + (s.n ? ' ' + s.n : '') : '?') + ':' + s.bars.length;
+  /* the reader */
+  let ok = 0; const off = [];
+  const reads = {};
+  for(const [name, f] of Object.entries(CHARTS)){
+    const r = sbRead(f.text, f.meter); reads[name] = r;
+    const got = { fmt: r.fmt, bars: r.sections.reduce((n, s) => n + s.bars.length, 0), chords: r.chords.join(' '), secs: r.sections.map(secLabel).join(' '), lyr: r.sections.reduce((n, s) => n + (s.lyrics ? s.lyrics.filter(l => l.text).length : 0), 0), bad: r.bad.length };
+    const first = f.first ? r.sections[0].bars.slice(0, f.first.split('|').length).join('|') === f.first : true;
+    const rowsOk = r.sections.every(s => !s.lyrics || s.lyrics.reduce((n, l) => n + l.bars, 0) === s.bars.length);
+    if(got.fmt === f.fmt && got.bars === f.bars && got.chords === f.chords && got.secs === f.secs && got.lyr === f.lyr && got.bad === 0 && first && rowsOk) ok++; else off.push(name + ': ' + JSON.stringify(got));
+  }
+  for(const [name, f] of Object.entries(REFUSED)){
+    const r = sbRead(f.text, '4/4'), bars = r.sections.reduce((n, s) => n + s.bars.length, 0);
+    const same = r.bad.length === f.bad.length && f.bad.every((b, i) => r.bad[i].line === b[0] && r.bad[i].why === b[1] && (b[2] == null || r.bad[i].sym === b[2])) && bars === f.bars;
+    if(same) ok++; else off.push(name + ': ' + JSON.stringify({ bad: r.bad.map(b => [b.line, b.why, b.sym]), bars }));
+  }
+  {
+    const r = sbRead(FOLDS.text, '4/4'), names = r.sections[0] ? r.sections[0].bars.join(' ') : '', folds = r.folds.map(x => x.from + '>' + x.to).join(' ');
+    if(names === FOLDS.names && folds === FOLDS.folds && !r.bad.length) ok++; else off.push('folds: ' + names + ' | ' + folds);
+  }
+  const total = Object.keys(CHARTS).length + Object.keys(REFUSED).length + 1;
+  check(`chart reader: ${total} of ${total} made-up charts read as expected (${Object.keys(CHARTS).length} accepted formats, ${Object.keys(REFUSED).length} refusals, the folds)`, ok === total, off.join(' ; ').slice(0, 900) || `${ok} of ${total}`);
+
+  /* the shapes */
+  {
+    const bad = [];
+    for(const root of ['C', 'C#', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B']) for(const q of ['', 'm', '5']){
+      const n = root + q, sh = run('sbShapeOf')(n);
+      const pf = sh ? run('bsShapeProblem')(n, sh.full, 'full') : 'no shape', pp = sh ? run('bsShapeProblem')(n, sh.power, 'power') : 'no shape';
+      if(pf || pp) bad.push(`${n}: ${pf || pp}`);
+    }
+    const g = run('sbShapeOf')('G'), bb = run('sbShapeOf')('Bb'), fs = run('sbShapeOf')('F#m');
+    check('shapes: 39 of 39 chord names (13 spellings of the 12 roots, major / minor / 5) get a full and a power shape the validator takes; G is the site\'s open G and taught, Bb and F#m are flagged not taught',
+      !bad.length && JSON.stringify(g.full.frets) === '[3,2,0,0,0,3]' && g.taught && g.how === 'site' && !bb.taught && bb.how === 'barre' && !fs.taught, bad.join('; ') || JSON.stringify({ G: g.full.frets, Bb: bb.full.frets, 'F#m': fs.full.frets, Bb5: bb.power.frets }));
+  }
+
+  /* every accepted chart is a song the validator passes, and renders as the real card */
+  {
+    const page = appPage(ROOT);
+    const audio = { id: 'sb-fixture00001-abcdef12', bytes: 1900000, sha256: hex64(7), durationSec: 1500, centsOff: 2, gainDb: 1.5, sourceSha256: hex64(8) };
+    let n = 0, pass = 0, rendered = 0; const why = [];
+    for(const [name, f] of Object.entries(CHARTS)){
+      const sections = JSON.parse(JSON.stringify(reads[name].sections)); sections.forEach(s => { if(!s.name) s.name = 'verse'; });
+      for(const lv of [{ versions: 'full' }, { versions: 'power' }, { versions: 'both', start: 'power' }]){
+        n++;
+        const d = { title: 'Test 0 ' + name, artist: 'Nobody', audio, beat: { meter: f.meter, bpm: 100, anchor: 0.5, pins: [] }, chart: { meter: f.meter, sections }, level: lv };
+        const w = run('sbSongWhy')(d, 'sb-fixture00001');
+        if(w.length){ why.push(`${name} [${lv.versions}]: ${w[0]}`); continue; }
+        pass++;
+        const doc = JSON.parse(JSON.stringify({ v: 1, title: d.title, artist: d.artist, audio, song: run('sbSongOf')(d) }));
+        page.ctx.__doc = doc;
+        const html = page.run(`(() => { const ex = builtSongExpand('sb-fixture00001', __doc); CLASS_ACTIVITIES = CLASS_ACTIVITIES.filter(a => a.id !== 'sb-fixture00001').concat([ex.activity]); SNIPPET_TRACKS['sb-fixture00001'] = ex.track; return String(caCardBodyHtml(ex.activity) || ''); })()`);
+        const lyricOk = name !== 'chords over lyrics' || (html.includes('&lt;b&gt;summer&lt;/b&gt;') && !html.includes('<b>summer</b>'));
+        /* Each chord shows by the name its level plays: the full name, or the root + 5 on the power level. */
+        const shown = c => lv.versions === 'full' ? c : c.replace(/(m|5)$/, '') + '5';
+        const secsOk = sections.every(x => html.includes(run('bsSectionLabel')({ name: x.name, n: x.n || undefined }, 'en')));
+        if(html.length > 500 && lyricOk && secsOk && reads[name].chords.every(c => html.includes('>' + shown(c) + '<'))) rendered++; else why.push(`${name} [${lv.versions}]: the card did not render as expected (${html.length} chars; sections ${secsOk}; missing ${reads[name].chords.filter(c => !html.includes('>' + shown(c) + '<')).join(' ')})`);
+      }
+    }
+    check(`chart to song: ${n} of ${n} (the ${Object.keys(CHARTS).length} accepted charts at Full, Power and Both) pass builtSongCheck and render through caCardBodyHtml, lyric lines escaped`, pass === n && rendered === n, why.join(' ; ').slice(0, 700) || `${pass} pass, ${rendered} rendered`);
+  }
+
+  /* the grid's edits */
+  {
+    const base = reads['chords over lyrics'].sections, G = n => run(n);
+    const sum = secs => secs.reduce((n, s) => n + s.bars.length, 0), rows = secs => secs.every(s => !s.lyrics || s.lyrics.reduce((n, l) => n + l.bars, 0) === s.bars.length);
+    const a = G('sbGridAddBar')(base, 5), b = G('sbGridRemoveBar')(base, 5), c = G('sbGridSplit')(base, 6), e1 = G('sbGridEdge')(base, 2, -1), e2 = G('sbGridEdge')(base, 2, 1), j = G('sbGridJoin')(base, 2), sw = G('sbGridSwap')(base, 'Em', 'Am'), sb = G('sbGridSetBar')(base, 0, 'G:2 C:2');
+    const facts = { add: sum(a) === 22 && a[1].bars[2] === a[1].bars[1] && rows(a), remove: sum(b) === 20 && rows(b), split: c.length === base.length + 1 && c[2].name === null && c[1].bars.length === 2 && c[2].bars.length === 2 && rows(c),
+      earlier: e1[1].bars.length === 3 && e1[2].bars.length === 5 && rows(e1), later: e2[1].bars.length === 5 && e2[2].bars.length === 3 && rows(e2), join: j.length === base.length - 1 && j[1].bars.length === 8 && rows(j),
+      swap: !run('sbChartChords')(sw).includes('Em') && run('sbChartChords')(sw).includes('Am'), set: sb[0].bars[0] === 'G:2 C:2', untouched: sum(base) === 21 && base[1].bars.length === 4 };
+    check('grid: + Bar, Remove bar, a new section, an edge earlier and later, Join, Swap and a split bar each do what they say; every section\'s lyric rows still add up to its bars; the chart they started from is not changed', Object.values(facts).every(Boolean), JSON.stringify(facts));
+  }
+
+  /* the flow, on a made-up draft with a beat (its own console and store) */
+  const id = 'sb-chartdraft001';
+  F2.S.set('songDrafts/' + id, { v: 1, title: 'Test 0 Chart', artist: 'Nobody', step: 3, source: { name: 'test.mp3', bytes: 400000, sha256: hex64(1), durationSec: 60, sampleRate: 44100, channels: 2, kbps: 192 },
+    audio: { id: id + '-abcdef12', bytes: 1900000, sha256: hex64(2), durationSec: 60, centsOff: 2, gainDb: 1, sourceSha256: hex64(1) }, volume: { before: -14, after: -12.5, samplePeak: -1.2, truePeak: -1.1, ceilingDb: -1, encodes: 1 },
+    pitch: { cents: 2, peaks: 10 }, beat: { meter: '4/4', bpm: 96, anchor: 0.5, pins: [], trackBpm: 96, trackSub: 2, driftOff: 0, pinsNeeded: 2 }, chart: null, level: null, savedAt: 0 });
+  F2.S.get('songDrafts/' + id).step = 4;      // it opens on the Chart step (the Beat step would read the levelled copy back, which this draft does not have)
+  run('renderTeacherSongBuilder()'); await settle();
+  run(`sbOpen(${JSON.stringify(id)})`); await settle();
+  const stored = () => F2.S.get('songDrafts/' + id), nW = () => F2.st.writes.length;
+  const flush = async () => { run('if(sbCh){ clearTimeout(sbCh.saveTimer); } sbWriteDraft(sbSel, sbDraft())'); await settle(); };
+  const act = (a, ds) => run(`sbChartAct(${JSON.stringify(a)}, { dataset: ${JSON.stringify(ds || {})} })`);
+  run('sbGoStep(4)'); await settle();
+  check('chart: step 4 opens with nothing read (the paste box); Level waits for a chart', run('sbStepOn') === 4 && /data-sb-charttext/.test(run('sbChartPaneHtml(sbDraft())')) && !run('sbStepReady(sbDraft(), 5)') && run('sbStepReady(sbDraft(), 4)'), 'step ' + run('sbStepOn'));
+  const TEXT = '[Verse]\nG  D\nwords here\nEm  Bb\ne|--3--2--0--|';
+  const w0 = nW();
+  run(`sbChartDoRead(sbDraft(), ${JSON.stringify(TEXT)})`); await settle();
+  let d = stored();
+  const pane = run('sbChartPaneHtml(sbDraft())');
+  check('chart: reading saves the chart in the draft at once (one songDrafts write): its text, 1 section, 4 bars, step 4; the step shows what was read, the refused TAB line, the chord not taught and the bar count against the recording',
+    nW() === w0 + 1 && d.chart && d.chart.text === TEXT && d.chart.sections.length === 1 && d.chart.sections[0].name === 'verse' && d.chart.sections[0].bars.join(' ') === 'G D Em Bb' && d.step === 4 && d.chart.meter === '4/4'
+    && /Read as chords over lyrics/.test(pane) && /Line 5 could not be read/.test(pane) && /looks like TAB/.test(pane) && /Bb is a chord the class has not been taught/.test(pane) && /The chart makes 4 bars; the recording has about 23/.test(pane),
+    JSON.stringify({ writes: nW() - w0, chart: d.chart && { n: d.chart.sections.length, bars: d.chart.sections[0] && d.chart.sections[0].bars, step: d.step, meter: d.chart.meter },
+      pane: [/Read as chords over lyrics/, /Line 5 could not be read/, /looks like TAB/, /Bb is a chord the class has not been taught/, /The chart makes 4 bars; the recording has about 23/].map(re => re.test(pane)) }));
+  check('chart: with a refused line and an untaught chord open, the step is marked "!" and says 2 things are open', run('sbChartOpen(sbDraft(), sbChartReadOf(sbDraft())).n') === 2 && /sb-step[^"]*warn[^>]*data-sb-step="4"/.test(run('sbStepsHtml(sbDraft())')), String(run('sbChartOpen(sbDraft(), sbChartReadOf(sbDraft())).n')));
+  act('chart-leave', { sbLine: '5' }); act('chart-keep', { sbChord: 'Bb' });
+  await sleep(1400); await settle();
+  d = stored();
+  check('chart: "Leave it out" and "Keep Bb" are saved once things settle (1.2 s), and nothing is open any more', JSON.stringify(d.chart.left) === '[5]' && JSON.stringify(d.chart.kept) === '["Bb"]' && run('sbChartOpen(sbDraft(), sbChartReadOf(sbDraft())).n') === 0 && /Line 5 is left out/.test(run('sbChartPaneHtml(sbDraft())')),
+    JSON.stringify({ left: d.chart.left, kept: d.chart.kept }));
+  run('sbChartLine(sbDraft(), 5, "C  G")'); await settle();
+  d = stored();
+  check('chart: "Type its chords" puts the typed chords in that line and reads the chart again: 6 bars, no refused line; chords that cannot be read are refused with a line', d.chart.sections[0].bars.join(' ') === 'G D Em Bb C G' && run('sbChartReadOf(sbDraft()).bad.length') === 0
+    && (run('sbChartLine(sbDraft(), 3, "Bdim X")'), /not chords the builder reads/.test(run('sbNote'))) && stored().chart.sections[0].bars.length === 6, d.chart.sections[0].bars.join(' ') + ' | ' + run('sbNote'));
+  /* the grid */
+  act('chart-view', { sbV: 'grid' }); act('bar-pick', { sbG: '1' }); act('bar-split', { sbSplit: '2+2' }); act('bar-part', { sbPart: '1' }); act('bar-chord', { sbChord: 'Am' });
+  const afterSplit = run('sbDraft().chart.sections[0].bars[1]');
+  act('bar-add', {}); act('bar-pick', { sbG: '4' }); act('sec-split', {});
+  const gridPane = run('sbChartPaneHtml(sbDraft())');
+  const unnamed = run('sbSongWhy(sbDraft(), sbSel)');
+  run(`sbChartChange({ target: { matches: q => q === '[data-sb-secname]', value: 'chorus', dataset: {} } })`);
+  await flush(); d = stored();
+  check('grid: a bar split 2 + 2 with Am on its second half, + Bar, and a new section from bar 5: 7 bars in 2 sections; the new section has no name until one is picked (the song is refused until then); all saved, the chart marked edited',
+    afterSplit === 'D:2 Am:2' && d.chart.sections.length === 2 && d.chart.sections[0].bars.join('|') === 'G|D:2 Am:2|D:2 Am:2|Em' && d.chart.sections[1].bars.join('|') === 'Bb|C|G' && d.chart.sections[1].name === 'chorus' && d.chart.edited === true
+    && /pick a name/.test(gridPane) && unnamed.length === 1 && /no name/.test(unnamed[0]), JSON.stringify({ afterSplit, secs: d.chart.sections.map(x => [x.name, x.bars.join('|')]), unnamed }));
+  act('bar-pick', { sbG: '0' }); act('bar-chord', { sbChord: '' });
+  const rested = run('sbDraft().chart.sections[0].bars[0]');
+  act('chart-undo', {});
+  check('grid: a rest, then Undo: the bar is G again', rested === '-' && run('sbDraft().chart.sections[0].bars[0]') === 'G', rested + ' → ' + run('sbDraft().chart.sections[0].bars[0]'));
+  /* the level */
+  run('sbGoStep(5)'); await settle();
+  act('level-versions', { sbV: 'both' }); act('level-start', { sbV: 'power' }); act('level-range', { sbV: 'range' });
+  run(`sbChartChange({ target: { matches: q => q === '[data-sb-range]', value: '1', dataset: { sbRange: 'from' } } })`);
+  await flush(); d = stored();
+  const lvPane = run('sbLevelPaneHtml(sbDraft())'), songWhy = run('sbSongWhy(sbDraft(), sbSel)'), song = JSON.parse(JSON.stringify(run('sbSongOf(sbDraft())')));
+  check('level: Both, opening on Power chords, sections 2 to 2: saved in the draft (step 5); the song it makes passes builtSongCheck and the step says so; its bars, sections, range and shapes are the chart\'s',
+    d.level.versions === 'both' && d.level.start === 'power' && JSON.stringify(d.level.range) === '{"from":1,"to":1}' && d.step === 5 && !songWhy.length && /passes every check/.test(lvPane) && song.bars.length === 7 && song.sections.length === 2 && song.sections[1].from === 5
+    && JSON.stringify(song.range) === '{"from":1,"to":1}' && JSON.stringify(song.level) === '{"versions":"both","start":"power"}' && Object.keys(song.chords).sort().join(' ') === 'Am Bb C D Em G' && song.bpm === 96 && song.anchor === 0.5,
+    JSON.stringify({ level: d.level, step: d.step, why: songWhy, bars: song.bars.length, chords: Object.keys(song.chords) }));
+  /* too many bars for the recording: the validator's own line */
+  {
+    const many = '[Verse]\n' + Array.from({ length: 7 }, () => 'G D Em C').join('\n');
+    run(`(() => { const d = sbDraft(); d.__keep = d.chart; d.chart = Object.assign({}, d.chart, { sections: sbChartRead(${JSON.stringify(many)}, '4/4').sections }); })()`);
+    const w = run('sbSongWhy(sbDraft(), sbSel)');
+    run('(() => { const d = sbDraft(); d.chart = d.__keep; delete d.__keep; })()');
+    check('level: a chart with more bars than the recording has room for (28 against 23) is refused with the validator\'s own line', w.length >= 1 && /past the end of the file/.test(w.join(' ')), w.join(' | ').slice(0, 200));
+  }
+  /* a reload */
+  {
+    const R = makeConsole(consoleSrc, F2);
+    R.run('renderTeacherSongBuilder()'); await settle();
+    R.run(`sbOpen(${JSON.stringify(id)})`); await settle();
+    check('resume: a reload opens the draft on the Level step with the same chart and level, and the grid shows (the chart was edited by hand)', R.run('sbStepOn') === 5 && JSON.stringify(R.run('sbDraft().chart')) === JSON.stringify(d.chart) && JSON.stringify(R.run('sbDraft().level')) === JSON.stringify(d.level)
+      && (R.run('sbGoStep(4)'), /data-sb-act="bar-pick"/.test(R.run('sbChartPaneHtml(sbDraft())'))), 'step ' + R.run('sbStepOn'));
+  }
+  /* the meter changes at the Beat step */
+  {
+    run('sbGoStep(4)'); await settle();
+    run(`(() => { const d = sbDraft(); d.beat = Object.assign({}, d.beat, { meter: '3/4' }); })()`);
+    run('sbChartMounted()'); await settle();
+    const kept = run('sbDraft().chart.meter'), flag = /this chart was read in 4\/4/.test(run('sbChartPaneHtml(sbDraft())'));
+    C.env.confirmAnswer = true;
+    run('sbChartDoRead(sbDraft(), "[Verse]\\n| C | G C | F | G |")'); await settle();
+    run(`(() => { const d = sbDraft(); d.beat = Object.assign({}, d.beat, { meter: '4/4' }); })()`);
+    run('sbChartMounted()'); await settle();
+    d = stored();
+    check('meter: a chart edited by hand is NOT read again when the beat\'s meter changes (the step says to read it again); one not edited is read again by itself in the new meter', kept === '4/4' && flag && d.chart.meter === '4/4' && d.chart.sections[0].bars.join('|') === 'C|G:2 C:2|F|G' && d.chart.edited === false,
+      JSON.stringify({ kept, flag, now: d.chart.meter, bars: d.chart.sections[0].bars }));
+  }
+  /* Clear this step */
+  {
+    C.env.confirmAnswer = true;
+    run("sbClearStep('chart')"); await settle(120);
+    d = stored();
+    check('clear: Clear this step (Chart) drops the grid, the sections and the level, keeps the pasted text, and the paste box shows it', d.chart && Object.keys(d.chart).join() === 'text' && d.level === null && d.beat && d.audio && run('sbStepOn') === 4 && /data-sb-charttext[^>]*>\[Verse\]/.test(run('sbChartPaneHtml(sbDraft())')),
+      JSON.stringify({ chart: d.chart && Object.keys(d.chart), level: d.level }));
+  }
+  /* the chart given at step 1, with the mp3 */
+  {
+    run('sbNewSong()');
+    box_set(C, '__f', fileOf('test-a.mp3', SRC_A, 24)); run('sbPickFile(__f)'); await settle();
+    run(`sbNew.title = 'Test 0 With Chart'; sbNew.artist = 'Nobody'; sbChartInput({ target: { matches: q => q === '[data-sb-charttext]', value: '[Chorus]\\nC G D' } })`);
+    const before = new Set([...F2.S.keys()].filter(k => k.startsWith('songDrafts/')));
+    run('sbSaveUpload()'); await settle();
+    const nid = [...F2.S.keys()].filter(k => k.startsWith('songDrafts/') && !before.has(k))[0], nd = nid ? F2.S.get(nid) : null;
+    run('sbGoStep(4)'); await settle();
+    const p4 = run('sbChartPaneHtml(sbDraft())');
+    run('sbChartAct("chart-read", { dataset: {} })'); await settle();
+    const after = nid ? F2.S.get(nid) : null;
+    check('upload: a chart pasted at step 1 is saved with the new draft as its text; step 4 is open at once with it in the box (before the record is levelled), and Read the chart reads it', !!nd && JSON.stringify(nd.chart) === '{"text":"[Chorus]\\nC G D"}' && nd.audio === null
+      && run('sbStepOn') === 4 && /data-sb-charttext[^>]*>\[Chorus\]/.test(p4) && /4 beats a bar until/.test(p4) && !!after && after.chart.sections.length === 1 && after.chart.sections[0].name === 'chorus' && after.chart.sections[0].bars.join(' ') === 'C G D',
+      JSON.stringify({ chart: nd && nd.chart, step: run('sbStepOn'), read: after && after.chart && after.chart.sections && after.chart.sections.map(x => x.bars) }));
+  }
+  check('chart and level: every write went to songDrafts and fits the rules (no songFiles, config/class, progress/ or builtSongs write)', F2.st.violations.length === 0 && F2.st.writes.length >= 8 && F2.st.writes.every(w => w.path.startsWith('songDrafts/')),
+    F2.st.writes.length + ' writes; ' + (F2.st.violations.slice(0, 2).join('; ') || [...new Set(F2.st.writes.map(w => w.path.split('/')[0]))].join(', ')));
+}
+
 /* ── main ── */
 const parts = siteParts('teacher.js', ROOT);
-for(const p of ['teacher-sb-core.js', 'teacher-sb-beat.js', 'teacher-sb-dsp.js']) if(!parts.includes(p)){ console.log(`song-builder-sim: ${p} is not a console part (TEACHER_JS_PARTS in app/boot.js)`); process.exit(1); }
+for(const p of ['teacher-sb-core.js', 'teacher-sb-beat.js', 'teacher-sb-dsp.js', 'teacher-sb-chart.js']) if(!parts.includes(p)){ console.log(`song-builder-sim: ${p} is not a console part (TEACHER_JS_PARTS in app/boot.js)`); process.exit(1); }
 let res;
 try { res = await runCases(parts.map(read).join('')); }
 catch(e){ console.log('song-builder-sim: the run threw: ' + (e && e.stack || e)); process.exit(1); }

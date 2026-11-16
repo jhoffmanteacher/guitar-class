@@ -1424,6 +1424,84 @@ body.rail-collapsed .rail-tools .tool-popup{
 .sb-root .sb-how li{counter-increment:h;display:flex;gap:8px;line-height:1.4}
 .sb-root .sb-how li::before{content:counter(h);flex:0 0 19px;height:19px;border-radius:50%;background:var(--purple-bg);color:var(--purple-text);font-weight:700;font-size:0.6875rem;display:flex;align-items:center;justify-content:center}
 .sb-root .sb-how li b{color:var(--text)}
+/* Song builder Part c (teacher-sb-chart.js, 2026-11-16): the Chart step (paste box, what was read, the grid) and the
+   Level step, after mock-up screens 6-9. One block, every rule under .sb-root. */
+.sb-root .sb-pastebox{display:block;width:100%;box-sizing:border-box;height:330px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:0.75rem;line-height:1.45;color:var(--text);background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;white-space:pre;overflow:auto}
+.sb-root .sb-pastebox-small{height:150px}
+.sb-root .sb-chartfield{margin-bottom:12px}
+.sb-root .sb-chartfield .sb-filebtn{margin-top:6px}
+.sb-root .sb-paste-top{justify-content:space-between;margin-bottom:4px}
+.sb-root .sb-filebtn{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.sb-root .sb-filebtn input{font-size:0.6875rem;max-width:190px}
+.sb-root .sb-paste{width:100%;box-sizing:border-box;max-height:250px;overflow:auto;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:0.75rem;line-height:1.45;color:var(--text);background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;white-space:pre;margin:0}
+.sb-root .sb-paste .ln{display:block;padding:0 4px;margin:0 -4px;border-radius:3px}
+.sb-root .sb-paste .ln.ch{color:var(--purple-text);font-weight:700}
+.sb-root .sb-paste .ln.hd{color:var(--text2);font-weight:700}
+.sb-root .sb-paste .ln.bad{background:var(--red-bg);outline:1px solid var(--red-text)}
+.sb-root .sb-paste .ln.out{color:var(--text3);text-decoration:line-through}
+.sb-root .sb-paste .no{display:inline-block;width:2.4em;color:var(--text3);font-weight:400;user-select:none;text-decoration:none}
+.sb-root .sb-forms{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
+.sb-root .sb-chip{display:inline-flex;align-items:center;gap:5px;font-size:0.75rem;font-weight:600;border:1px solid var(--border2);border-radius:12px;padding:2px 9px;background:var(--bg);color:var(--text2)}
+.sb-root .sb-chip code{font-size:0.75rem;color:var(--text)}
+.sb-root .sb-chip.on{border-color:var(--green-text);color:var(--green-text);background:var(--green-bg)}
+.sb-root .sb-chip.taught{color:var(--text)}
+.sb-root .sb-chip.new{border-color:var(--amber-text);color:var(--amber-text);background:var(--amber-bg)}
+.sb-root .sb-flag code{font-size:0.75rem;background:var(--bg);padding:0 4px;border-radius:3px;overflow-wrap:anywhere}
+.sb-root .sb-flag-body .sb-row{margin-top:5px}
+.sb-root .sb-flag-info{border-color:var(--blue-text);background:var(--blue-bg)}
+.sb-root .sb-flag-info .fi{background:var(--blue-text)}
+.sb-root .sb-flag-ok{border-color:var(--green-text);background:var(--green-bg)}
+.sb-root .sb-flag-ok .fi{background:var(--green-text)}
+.sb-root .sb-flag-done{border-color:var(--border2);background:var(--bg2);color:var(--text2)}
+.sb-root .sb-flag-done .fi{background:var(--text3)}
+.sb-root .sb-typed{flex:1 1 150px}
+.sb-root .sb-tools{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center;margin-bottom:10px}
+.sb-root .sb-toolbtns{display:inline-flex;flex-wrap:nowrap;gap:6px;margin-left:auto}
+.sb-root .sb-gridcols{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+.sb-root .sb-gridscroll{max-height:372px;overflow:auto;padding-right:2px}
+.sb-root .sb-sec{border:1px solid var(--border2);border-radius:8px;margin-bottom:8px;background:var(--bg);overflow:hidden}
+.sb-root .sb-sec-open{border-color:var(--amber-text)}
+.sb-root .sb-sec-h{display:flex;align-items:center;gap:8px;padding:5px 10px;background:var(--bg2);font-size:0.8125rem;font-weight:700;border-bottom:1px solid var(--border)}
+.sb-root .sb-sec-h .sb-sec-meta{font-weight:500;color:var(--text2);font-size:0.75rem;margin-left:auto}
+.sb-root .sb-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0}
+.sb-root .sb-lyr{grid-column:1 / -1;font-size:0.75rem;color:var(--text2);padding:4px 10px 0;font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-top:1px solid var(--border)}
+.sb-root .sb-lyr-none{padding:0;height:0}
+.sb-root .sb-bar{position:relative;min-width:0;border:0;border-left:1px solid var(--border2);border-top:1px solid var(--border);margin:0;padding:5px 8px 6px;min-height:34px;display:flex;gap:6px;align-items:baseline;font:inherit;font-weight:700;font-size:0.9375rem;color:var(--text);background:transparent;text-align:left}
+.sb-root button.sb-bar{cursor:pointer}
+.sb-root .sb-bar .bn{position:absolute;top:1px;right:4px;font-size:0.625rem;color:var(--text3);font-weight:500}
+.sb-root .sb-bar .half{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.sb-root .sb-bar .half+.half{border-left:1px dotted var(--border2);padding-left:6px}
+.sb-root .sb-bar.new{background:var(--amber-bg);color:var(--amber-text)}
+.sb-root .sb-bar.sel{outline:2px solid var(--purple-accent);outline-offset:-2px;background:var(--purple-bg2)}
+.sb-root .sb-bar.empty{color:var(--text3);font-weight:500;font-style:italic;font-size:0.8125rem}
+.sb-root .sb-sec.mini .sb-bar{min-height:26px;padding:3px 7px;font-size:0.8125rem}
+.sb-root .sb-box-sel{border-color:var(--purple-accent)}
+.sb-root .sb-box-sel .sb-row,.sb-root .sb-box-tight .sb-row{margin-bottom:7px}
+.sb-root .sb-box-tight{padding:9px 12px}
+.sb-root .sb-h.small{font-size:0.8125rem}
+.sb-root .sb-pal{display:flex;flex-wrap:wrap;gap:4px;margin:2px 0 8px}
+.sb-root .sb-pal button{font:inherit;font-weight:700;font-size:0.8125rem;min-width:38px;padding:3px 6px;border:1px solid var(--border2);border-radius:6px;background:var(--bg);color:var(--text);cursor:pointer}
+.sb-root .sb-pal button.on{background:var(--purple-accent);color:var(--bg);border-color:var(--purple-accent)}
+.sb-root .sb-pal button.nt{border-color:var(--amber-text);border-style:dashed}
+.sb-root .sb-pal button:disabled,.sb-root .sb-seg button:disabled{opacity:0.5;cursor:default}
+.sb-root .sb-other{flex:0 1 190px}
+.sb-root .sb-btn.danger{color:var(--red-text);border-color:var(--red-text)}
+.sb-root .sb-opt{display:flex;width:100%;box-sizing:border-box;gap:10px;align-items:flex-start;border:1px solid var(--border2);border-radius:8px;padding:9px 12px;margin-bottom:6px;background:var(--bg);font:inherit;font-size:0.8125rem;color:var(--text);text-align:left;cursor:pointer}
+.sb-root .sb-opt:disabled{opacity:0.6;cursor:default}
+.sb-root .sb-opt.on{border-color:var(--purple-accent);background:var(--purple-bg2)}
+.sb-root .sb-radio{flex:0 0 16px;width:16px;height:16px;box-sizing:border-box;border-radius:50%;border:2px solid var(--border2);margin-top:1px}
+.sb-root .sb-opt.on .sb-radio{border:5px solid var(--purple-accent)}
+.sb-root .sb-opt-t{display:block;font-weight:700}
+.sb-root .sb-opt-d{display:block;color:var(--text2);margin-top:1px;line-height:1.4}
+.sb-root .sb-opens{margin:0 0 6px 26px}
+.sb-root .sb-secbox{padding:4px 10px;margin-top:6px;max-height:300px;overflow:auto}
+.sb-root .sb-secrow{display:grid;grid-template-columns:22px minmax(88px,1fr) 92px minmax(0,1fr);gap:8px;align-items:center;padding:6px 4px;border-top:1px solid var(--border);font-size:0.8125rem}
+.sb-root .sb-secrow:first-child{border-top:0}
+.sb-root .sb-secrow .m{color:var(--text2);font-size:0.75rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-root .sb-secrow.out{opacity:0.45}
+.sb-root .sb-check{width:16px;height:16px;box-sizing:border-box;border-radius:4px;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center}
+.sb-root .sb-check.on{background:var(--purple-accent);border-color:var(--purple-accent)}
+.sb-root .sb-check.on::after{content:'';width:8px;height:4px;border-left:2px solid var(--bg);border-bottom:2px solid var(--bg);transform:rotate(-45deg) translate(1px,-1px)}
 /* Console "Song requests" (teacher-songrequests.js): one block per video. */
 .tsr-group{border:1px solid var(--border2);border-radius:var(--radius);padding:10px 12px;margin:0 0 14px;background:var(--bg)}
 .tsr-group.tsr-waiting{border-left:4px solid var(--amber-text)}
