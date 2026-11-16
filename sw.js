@@ -22,7 +22,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-11-16-391015d94a';
+const CACHE_VERSION = 'guitar-class-2026-11-16-26b6e3a629';
 
 /* BACKING-TRACK AUDIO (2026-10-30 rewrite). Every track lives in ONE cache that
    never changes name, AUDIO_CACHE, apart from the shell's CACHE_VERSION: a routine

@@ -744,7 +744,7 @@ activity that duplicates a module step is the trigger to hide that step.
 ### Activity order, numbering and the board
 **Not in `class-activities.js`.** `config/class.activityBoard`
 (`{ id -> { module, pos } }`, `module: 0` = the board's Unsorted pen) is
-written by the console's **Class activities board** (`teacher-activities.js`): Built on
+written by the console's **Class activities board** (`teacher-activities.js`; its one writer is in `teacher-activities-2.js`): Built on
 the left (pushed, not placed), Assigned on the right (by module, in reading
 order). It decides the order, the module headings and the `#N` prefix.
 - A card with no entry is invisible to everyone. **Not archived/deleted +
@@ -777,7 +777,7 @@ Gym is **Finger Gym 1** though the class meets it as **#3** (Jonathan,
 
 ### There are TWO step renderers — patch both, or the teacher can't see it
 `caStepHtml()` (`app/activities.js`, students) and `renderTeacherActivityDetail()`
-(`teacher-activities.js`, the console preview) each have their own `if(step.figure)` /
+(`teacher-activities-2.js`, the console preview) each have their own `if(step.figure)` /
 `video` / `tab` / `drill` chain, so a field wired into one is silently
 invisible in the other.
 

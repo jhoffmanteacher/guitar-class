@@ -80,7 +80,7 @@ CONSTANT across the four dots: a growing one is a wrong `win.bar` for that
 song, not latency.
 
 One builder, `buildSnippet()`, is called by `caStepHtml()` (`app/activities.js`) and
-`renderTeacherActivityDetail()` (`teacher-activities.js`), the same shape as `buildTab()`:
+`renderTeacherActivityDetail()` (`teacher-activities-2.js`), the same shape as `buildTab()`:
 that is how a step field satisfies the two-renderers rule without two copies.
 1ak pins both calls **inside the function body and with comments stripped**
 (a comment naming the function must not count).
