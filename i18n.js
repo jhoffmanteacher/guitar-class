@@ -1780,8 +1780,8 @@
       es: 'Ya terminé' },
     'coach.footRec': { en: 'Listening happens on this device. You said yes to saving takes, so each take is saved as a recording for your teacher.',
       es: 'La escucha ocurre en este dispositivo. Dijiste que sí a guardar tus tomas, así que cada toma se guarda como una grabación para tu maestro.' },
-    'coach.foot': { en: 'Listening happens right on this device — nothing is recorded or uploaded.',
-      es: 'La escucha ocurre aquí mismo en este dispositivo — no se graba ni se sube nada.' },
+    'coach.foot': { en: 'Listening happens right on this device — no sound is recorded or uploaded.',
+      es: 'La escucha ocurre aquí mismo en este dispositivo — no se graba ni se sube ningún sonido.' },
     // Consented mic recordings (coach.js micRec*): asked once per device, only while the teacher has collection on
     'micrec.ask': { en: 'Save this take as a recording to help your teacher make this feature better?',
       es: '¿Guardar esta toma como grabación para ayudar a tu maestro a mejorar esta función?' },

@@ -16986,7 +16986,7 @@ function checkCoachVerdicts() {
     run(`coachCountIn = __keepCI; performance.now = __keepPN; micRec = null; cc = null; ccStop();`);
     /* The red label is on every screen of a recorded take (each screen replaces #cc-body); every round starts on a clean grid (a leftover
        gridOffset or onset time from round 1 would grade round 2 late); a ladder is always three rising tempos; and a student who said yes is not
-       told "nothing is recorded" on any Power Chord Switch screen (Change Up, which never records, still says it). */
+       told "no sound is recorded" on any Power Chord Switch screen (Change Up, which never records, still says it). */
     run(`micRec = null; setLang('en'); ccSetup('power'); ccPickRate(2); ccPickProg(${SONGS[0].idx}); cc.bpm = 60; ccPrepare(false); ccBeginStage();`);
     const hasLabel = () => /id="micrec-on"/.test(bodies['cc-body']);
     const seen = [hasLabel()];
@@ -17015,7 +17015,7 @@ function checkCoachVerdicts() {
     ];
     for (const sc of screens) if (!/data-rec/.test(sc.html) || !sc.flat.includes(footRec) || sc.flat.includes(footNone)) flag(`1ck: the ${sc.kind} does not tell a student who said yes that takes are saved (data-rec, "${footRec.slice(0, 40)}…")`);
     const cuScreen = foot(`ccSetup('open');`, 'Change Up setup');
-    if (/data-rec/.test(cuScreen.html) || cuScreen.flat.includes(footRec) || !cuScreen.flat.includes(footNone)) flag('1ck: Change Up never records, so its footer must keep saying nothing is recorded');
+    if (/data-rec/.test(cuScreen.html) || cuScreen.flat.includes(footRec) || !cuScreen.flat.includes(footNone)) flag('1ck: Change Up never records, so its footer must keep saying no sound is recorded');
     run(`micRecWanted = __orig.micRecWanted;`);
     run('micRecStop = __orig.micRecStop; micRecSave = __orig.micRecSave; micRecStart = __orig.micRecStart; micRecAbort = __orig.micRecAbort; micRec = null;');
     /* The question first: with an unanswered consent, Start asks and does not start. */
@@ -17984,7 +17984,7 @@ async function checkMicStart() {
       if (!got.includes(want)) fail(`(${lang}) ${key} reads "${got}": it must say "${want}" (what is saved is sound, not "nothing")`);
     }
     run(`setLang('en')`);
-    // the panel's line: one always-true line where a take can be recorded (records), "nothing is recorded" elsewhere, whatever micRecWanted() says
+    // the panel's line: one always-true line where a take can be recorded (records), "no sound is recorded" elsewhere, whatever micRecWanted() says
     for (const lang of ['en', 'es']) for (const [records, wanted] of [[true, false], [true, true], [false, true]]) {
       tot.lines++;
       run(`setLang(${JSON.stringify(lang)}); __mpSet('prompt', 'ok'); globalThis.__mpW = micRecWanted; micRecWanted = () => ${wanted};`);

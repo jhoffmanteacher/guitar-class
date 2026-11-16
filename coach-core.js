@@ -31,7 +31,8 @@
    from audio — chord feedback is about timing + "chord-tone" plausibility,
    hedged in the wording. A too-quiet/unclear take gets "I couldn't hear
    that clearly", never a wrong verdict. Mic runs only while a check is
-   active, with a visible indicator; nothing is recorded or uploaded.
+   active, with a visible indicator; no sound is recorded or uploaded
+   (scores and practice minutes are saved, so the footer says "no sound").
 
    Loaded as a plain <script> AFTER app.js and tuner.js — uses their
    globals at call time: escHtml/escAttr/beep/ordinal (app.js),
@@ -171,12 +172,12 @@ const COACH_MIC_GAIN = 3;
    (coach-strumcheck.js, micRecStart('coach', its own cap)), Note Runner
    (micRecStart('nr')) and Power Chord Switch (micRecStart('pw'), not Change Up).
    Every other screen never records, so it always says
-   "nothing is recorded"; the data-rec mark is what micRecFootSync re-words. */
+   "no sound is recorded"; the data-rec mark is what micRecFootSync re-words. */
 function coachFootHtml(records){ return '<div class="coach-foot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> <span class="coach-foot-txt"' + (records ? ' data-rec="1"' : '') + '>' + coachFootText(records) + '</span></div>'; }
-/* "Nothing is recorded" is only true for a student who has not said yes to
+/* "No sound is recorded" is only true for a student who has not said yes to
    the consented recordings below — one who has, while collection is open,
    is told their takes are saved instead (micRecFootSync re-words it live).
-   Only on a screen that records (`records`); elsewhere it stays "nothing". */
+   Only on a screen that records (`records`); elsewhere it stays "no sound". */
 function coachFootText(records){ return t(records && typeof micRecWanted === 'function' && micRecWanted() ? 'coach.footRec' : 'coach.foot'); }
 
 /* The set-up line every mic game's set-up screen and the Coach's ready
@@ -1760,7 +1761,7 @@ function coachMicOff(){
 
 /* ══════════ Consented mic recordings (2026-10-08) ══════════
    Real classroom audio to tune the listening on. The Coach footer promises
-   nothing is recorded or uploaded, and for anyone who doesn't say yes that
+   no sound is recorded or uploaded, and for anyone who doesn't say yes that
    stays exactly true: nothing here runs unless
      · the teacher has turned collection on (config/class.micSampling —
        app.js reads it into micSampling) and fewer than its `max` takes
