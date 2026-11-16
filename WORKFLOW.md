@@ -84,7 +84,9 @@ named `win/…` are on GitHub (`git fetch`); cherry-pick from them, do not merge
 workflow for what else you want it to work on").** After the 20 error events and rule AD's review, in this order.
 Agents: Opus at high or xhigh; Fable only if Opus cannot do it. Reviews are read-only: findings go in WORKFLOW (a
 bullet under the job), the Mac fixes and pushes. All three branches are on GitHub (`git fetch`).
-- **W1. Review round 2 of Song builder Part d**, branch `ci-try/sb-part-d`, tip `4cc5e33` (base `160de0a`; round 1
+- **W1. Review round 2 of Song builder Part d**, branch `ci-try/sb-part-d` (base `160de0a`). WAIT for the tip the
+  Mac names here: `4cc5e33` plus ONE more commit that is being made now (no OK dialog on a first Publish; Jonathan,
+  2026-11-16, "go ahead"); the Mac pushes the branch again and writes the new tip on this line. Round 1
   was on `d1da871`: 0 BLOCKER, 2 MAJOR, 8 MINOR, all in the "Part d" bullet of the Song builder entry). A FRESH
   reviewer (`site-reviewer`, the save path is not touched), failing scenario first. New since round 1, review all
   of it (`git diff d1da871 4cc5e33`): the two MAJOR fixes (Publish writes the song and the list in ONE transaction;
@@ -93,7 +95,10 @@ bullet under the job), the Mac fixes and pushes. All three branches are on GitHu
   deep-equal song), Export as a paired .json + .mp3 that Import takes back, Edit as one click on a step, and the
   click cuts Jonathan asked for ("as easy as possible ... with the fewest clicks"; "i don't know if three listens
   are necessary"): NO listen gate, Publish on the Preview step, a chart given at step 1 read at once, Volume
-  starting by itself, Level pre-filled. Decided, do not re-argue: those cuts; over 8 pins only warns; pitch over
+  starting by itself, Level pre-filled, and a FIRST Publish with no confirm (an edit of a live song, Unpublish and
+  Delete… keep theirs). Decided, do not re-argue: those cuts; NOT cut, at the Mac's advice and his "go ahead": the
+  Chart and Level steps are never skipped (the Chart step is where "the chart makes N bars; the recording has M"
+  is seen), and "Listen with clicks" stays, required by nothing; over 8 pins only warns; pitch over
   10 cents blocks; R1-5 and R1-7 are accepted limits; firestore.rules does not change. Attack: what a STUDENT gets
   after each write path fails halfway or two console tabs act at once; whether anything can be published that
   fails `builtSongCheck` on a student page now that the listens are gone; the rebuilt draft of an imported song
