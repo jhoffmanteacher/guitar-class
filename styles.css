@@ -1319,7 +1319,9 @@ body.rail-collapsed .rail-tools .tool-popup{
 .tg-seg{display:inline-flex;border:1px solid var(--border2);border-radius:16px;overflow:hidden}
 .tg-seg-btn{font-size:0.8125rem;padding:4px 13px;border:0;background:transparent;color:var(--text2);cursor:pointer;font-family:inherit}
 .tg-seg-btn.on{background:var(--text);color:var(--bg)}
-.tg-grid-wrap{overflow-x:auto}
+/* position:relative makes the scroller the containing block of an absolutely placed child (the Manage roster's
+   .sr-only "More" header): without it that child escaped the clip and pushed the page sideways (140 px at 1366). */
+.tg-grid-wrap{overflow-x:auto;position:relative}
 .tg-seg-btn:disabled{opacity:0.5;cursor:default}
 /* Console "Song builder" (teacher-sb-core.js, teacher-sb-beat.js; Song builder Part b, 2026-11-15). Every rule sits under
    .sb-root, the view's own box; its list reuses the Class activities list (.ta-*). Laid out at 1366x657 like the mock-up
