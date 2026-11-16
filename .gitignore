@@ -22,3 +22,4 @@ Claude outputs/
 
 # Loudness measurements cached by tools/checks.mjs (1br) — per machine, never committed
 tools/.loudness-cache.json
+tools/.sb-dsp-cache.json

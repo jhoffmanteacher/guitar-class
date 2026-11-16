@@ -6927,7 +6927,7 @@ const HEADING_ROLE_PINS = {
   'rail-sec-label': '4x1', 'resume-title': '3x1', 'review-head': '3x1', 'rp-meta-title': '2x1',
   'set-eyebrow-title': '2x2', 'sh-sec-title': '3x3', 'stp-part-title': '3x1', 'stp-sec-label': '3x1 4x1', 'stu-detail-name': '3x1',
   'stu-section-head': '3x3 4x6 5x2', 'stu-set-head': '6x1', 't-board-head': '3x2', 't-scard-lbl': '3x2 5x2', 't-title': '2x1',
-  'ta-list-title': '3x1', 'ta-roll-head': '3x1', 'tp-title': '2x3',
+  'ta-list-title': '3x2', 'ta-roll-head': '3x1', 'tp-title': '2x3',
 };
 const HEADING_ROLE_TOTAL = Object.values(HEADING_ROLE_PINS).reduce((n, v) => n + v.split(' ').reduce((m, x) => m + +x.split('x')[1], 0), 0);
 function a11yScanTags(src) {
@@ -19347,6 +19347,54 @@ function checkSongFilesConsole() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1en. THE SONG BUILDER (2026-11-15, Song builder Part b) — the console's
+   Song builder view (teacher-sb-core.js, teacher-sb-beat.js) and its sound
+   code (teacher-sb-dsp.js). Two tools, each RUN and its case count pinned so
+   deleting a case to get green fails here:
+   - tools/sb-dsp-test.mjs (quick mode, Node only, about 30 s, generated
+     signals): loudness, peaks and the limiter, the codec delay, pitch and the
+     10-cent block, taps, the beat grid (4 click tracks, a soft intro, taps 4%
+     slow or 5% fast). Its `--break=<name>` faults each turn it red; not run
+     here. Its result is kept in tools/.sb-dsp-cache.json (gitignored), keyed by
+     the SHA-256 of teacher-sb-dsp.js, the test and vendor/lamejs/lame.min.js:
+     an unchanged trio with a passing run on file is not run again (the Stop
+     hook runs this file every turn). A fresh checkout (GitHub) always runs it.
+   - tools/song-builder-sim.mjs (Node, about 4 s): the whole console script
+     against a stub Firestore that checks every write against the rules: drafts
+     saved and resumed, refused uploads write nothing, the levelled copy stored
+     before the draft names it, a damaged copy loaded once, Delete draft, every
+     write on the builder's own paths.
+   ════════════════════════════════════════════════════════════════════ */
+const SB_DSP_TEST_PIN = 37;          // 35 -> 37 (2026-11-15, the browser walk): a soft intro's bar 1; taps 4% slow or 5% fast
+const SONG_BUILDER_SIM_PIN = 32;     // 2026-11-15: first count
+function checkSongBuilder() {
+  head('1en. Song builder: the sound code and the drafts are run, their case counts pinned');
+  let bad = 0;
+  const run = (tool, re, pin, name, cache) => {
+    let key = null, cached = null;
+    if (cache) {
+      key = createHash('sha256').update(cache.inputs.map(f => readFileSync(join(ROOT, f))).reduce((a, b) => Buffer.concat([a, b]))).digest('hex');
+      try { cached = JSON.parse(readFileSync(cache.file, 'utf8')); } catch { /* none yet: run it */ }
+      if (cached && cached.key === key && cached.cases === pin) return { cases: pin, cached: true };
+    }
+    const r = spawnSync(process.execPath, [join(ROOT, 'tools', tool)], { encoding: 'utf8', timeout: 300000 });
+    const m = re.exec(r.stdout || '');
+    if (r.status !== 0 || !m) {
+      err(`1en: tools/${tool} failed (exit ${r.status})` + (r.error ? ': ' + r.error.message : '')); problems++; bad++;
+      for (const l of ((r.stdout || '') + (r.stderr || '')).trim().split('\n').filter(l => /✗|threw|Error/.test(l)).slice(0, 8)) console.log(`${C.dim}      ${l}${C.reset}`);
+      return null;
+    }
+    if (+m[1] !== pin || +m[2] !== 0) { err(`1en: ${tool} ran ${m[1]} cases (${m[2]} failed); pinned at ${pin} — if you changed it on purpose, re-pin ${name} (never lower it to hide a deleted case)`); problems++; bad++; return null; }
+    if (cache) { try { writeFileSync(cache.file, JSON.stringify({ key, cases: +m[1] }) + '\n'); } catch { /* read-only: run it next time */ } }
+    return { cases: +m[1], cached: false };
+  };
+  const dsp = run('sb-dsp-test.mjs', /sb-dsp-test: (\d+) cases, (\d+) failed/, SB_DSP_TEST_PIN, 'SB_DSP_TEST_PIN',
+    { file: join(ROOT, 'tools', '.sb-dsp-cache.json'), inputs: ['teacher-sb-dsp.js', 'tools/sb-dsp-test.mjs', 'vendor/lamejs/lame.min.js'] });
+  const sim = run('song-builder-sim.mjs', /song-builder-sim: (\d+) cases, (\d+) failed/, SONG_BUILDER_SIM_PIN, 'SONG_BUILDER_SIM_PIN');
+  if (!bad) ok(`sb-dsp-test: ${dsp.cases} cases pass (pinned ${SB_DSP_TEST_PIN}${dsp.cached ? '; unchanged since a passing run, not run again' : ''}); song-builder-sim: ${sim.cases} cases pass (pinned ${SONG_BUILDER_SIM_PIN}): drafts saved and resumed, refusals write nothing, the copy stored before the draft names it, a damaged copy loaded once, Delete draft, every write on the builder's own paths`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1em. BUILT SONGS (2026-11-14, Song builder Part a2) — a Play Along song
    Jonathan adds in the console lives in the database (app/builtsongs.js:
    the format, the validator, the merge; teacher-builtsongs.js: Import).
@@ -20504,6 +20552,7 @@ function checkPracticeMinutes(i18nTable) {
   checkSongRequests();
   checkSongFilesLoader();
   checkSongFilesConsole();
+  checkSongBuilder();
   checkBuiltSongs(rcCtx);
   await checkPlantAFault();
   checkRemoveOne();

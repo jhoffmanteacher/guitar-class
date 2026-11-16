@@ -31,11 +31,11 @@ Dates are the Pacific calendar date. `CACHE_VERSION` and commit timestamps may s
 
 Start here. Update this block whenever an item opens or closes; each line says where the detail is.
 
-**For the next session on the Mac (written 2026-11-15).** Jonathan types "do the Mac work in WORKFLOW". Build the
-Song builder Part b (the Song builder view in the console: drafts, Upload, Volume, Beat) from
-`Claude outputs/WORK-ORDER-song-builder.md` (on the Mac only; Parts a1 and a2 are shipped, entry "Song builder"
-below). Work in its own worktree made from `origin/main`. Parts b and c ship Fast, d is Reviewed, then stop for
-Jonathan before Part e. Agents: Opus or Fable by the need, as for the Windows block below. The Windows computer works
+**For the next session on the Mac (written 2026-11-15, Part b shipped the same day).** Jonathan types "do the Mac
+work in WORKFLOW". Part b is live (entry "Song builder" below). Next: Jonathan builds one real song up to the Beat
+step and says whether the bar lines sit on the beat; then build Part c (Chart, the correction grid, sections, Level)
+from `Claude outputs/WORK-ORDER-song-builder.md` (on the Mac only). Work in its own worktree made from `origin/main`.
+Part c ships Fast, d is Reviewed, then stop for Jonathan before Part e. Agents: Opus or Fable by the need, as for the Windows block below. The Windows computer works
 the list in the next block at the same time: stay out of those files; fetch and rebase before every push. If Jonathan
 sends an mp3 for a first real song: skill `new-playalong`, 192k. Delete this block when Part d ships.
 
@@ -131,8 +131,16 @@ Part a1 is the rules only: a new add-only block (`builtSongs/{id}`, `builtSongsM
 emulator tool `tools/built-songs-rules-test.mjs` (166 cases, 66 of 66 breaks) and the 1dt re-pin. No site code reads
 these paths yet, so nothing changes for students before or after the paste. Paste D is the whole `firestore.rules`
 file, so it also publishes Paste C (below) if that is not live yet. Part a2 (the data path, Import, one real song)
-shipped 2026-11-15 on the Manage tabs (the Built songs list sits in the Song files section). Next: Jonathan imports
-a first real song (his mp3, skill `new-playalong`, 192k) and listens; then parts b and c (Fast) and d (Reviewed).
+shipped 2026-11-15 on the Manage tabs (the Built songs list sits in the Song files section). Part b shipped
+2026-11-15 (Fast): the "Song builder" view after Songs in the sidebar (`teacher-sb-core.js`, `teacher-sb-beat.js`,
+`teacher-sb-dsp.js`; `vendor/lamejs` 1.2.1, console only): drafts, Upload, Volume (one gain to the cure, a -1 dBFS
+limiter, 192k), Beat (TAP, typed BPM, bar 1, pins, drift windows, Listen with clicks). Measured: M4 (the waveform's
+clock against the player's) 0.03 ms, no offset; M5 a 3:30 song levels in 48 s (2 encodes, kept). The browser walk
+found and fixed: a failed copy load retried forever (froze the tab; each try counts a download), bar 1 one beat early
+after a soft intro, bar 1 up to 39 ms late from taps more than 1.5% off, "NaN MB". Known: a soft intro within 12 dB
+of the band counts as loud (playalong-measure.py's rule), so bar 1 can land on the first note; the ±1 beat buttons
+move it. Next: Jonathan builds one real song up to the Beat step; then part c (Fast) and d (Reviewed). His first
+real song through Import (part a2) is still open.
 - **Downloads, an estimate, not measured (M1, 2026-11-15).** Firestore Usage (Nov 9 to 14): reads peak 15K a day of the
   free 50K, writes peak 3K of 20K. Stored bytes and download bandwidth are not shown to him, so they are worked out:
   one built song is about 0.4 GB of downloads for 60 students, about 0.6 GB with 1.5 Chromebooks per student ("most

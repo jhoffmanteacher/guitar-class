@@ -1321,6 +1321,109 @@ body.rail-collapsed .rail-tools .tool-popup{
 .tg-seg-btn.on{background:var(--text);color:var(--bg)}
 .tg-grid-wrap{overflow-x:auto}
 .tg-seg-btn:disabled{opacity:0.5;cursor:default}
+/* Console "Song builder" (teacher-sb-core.js, teacher-sb-beat.js; Song builder Part b, 2026-11-15). Every rule sits under
+   .sb-root, the view's own box; its list reuses the Class activities list (.ta-*). Laid out at 1366x657 like the mock-up
+   ("Claude outputs/mockups-song-builder/", screens 1-5). */
+.sb-root .sb-steps{display:flex;align-items:flex-end;flex-wrap:wrap;border-bottom:1px solid var(--border2);margin-bottom:12px}
+.sb-root .sb-step{display:flex;align-items:center;gap:6px;font:inherit;font-size:0.8125rem;font-weight:600;color:var(--text2);background:transparent;border:0;border-bottom:3px solid transparent;margin-bottom:-1px;padding:8px 10px;cursor:pointer;white-space:nowrap}
+.sb-root .sb-step:disabled{cursor:default;opacity:0.55}
+.sb-root .sb-step .sb-n{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:50%;font-size:0.6875rem;border:1.5px solid var(--border2);color:var(--text2)}
+.sb-root .sb-step.done .sb-n{background:var(--green-text);border-color:var(--green-text);color:var(--bg)}
+.sb-root .sb-step.warn .sb-n{background:var(--amber-text);border-color:var(--amber-text);color:var(--bg)}
+.sb-root .sb-step.on{color:var(--text);border-bottom-color:var(--purple-accent);opacity:1}
+.sb-root .sb-step.on .sb-n{border-color:var(--purple-accent);color:var(--purple-accent)}
+.sb-root .sb-step.on.done .sb-n{color:var(--bg);background:var(--purple-accent)}
+.sb-root .sb-btn{font:inherit;font-size:0.8125rem;font-weight:600;padding:6px 14px;border-radius:16px;border:1px solid var(--border2);background:var(--bg);color:var(--text);cursor:pointer;white-space:nowrap}
+.sb-root .sb-btn:disabled{opacity:0.5;cursor:default}
+.sb-root .sb-btn.primary{background:var(--purple-accent);border-color:var(--purple-accent);color:var(--bg)}
+.sb-root .sb-btn.small{font-size:0.75rem;padding:3px 10px}
+.sb-root .sb-btn.big{font-size:0.9375rem;padding:10px 22px}
+.sb-root .sb-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px 10px}
+.sb-root .sb-note{font-size:0.8125rem;color:var(--text2);line-height:1.45;margin:0 0 10px}
+.sb-root .sb-h{font-size:0.875rem;font-weight:700;margin:0 0 6px;color:var(--text)}
+.sb-root .sb-hint{font-size:0.75rem;color:var(--text3);margin-top:3px;line-height:1.4}
+.sb-root .sb-box{border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);padding:12px 14px;margin-bottom:12px}
+.sb-root .sb-box.tint{background:var(--bg2)}
+.sb-root .sb-status{font-size:0.8125rem;font-weight:600;color:var(--text);background:var(--bg2);border:1px solid var(--border2);border-radius:8px;padding:6px 10px;margin:0 0 10px}
+.sb-root .sb-lock{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--blue-text);background:var(--blue-bg);color:var(--text);border-radius:var(--radius);padding:9px 12px;font-size:0.8125rem;line-height:1.45;margin-bottom:12px}
+.sb-root .sb-lock svg{flex:0 0 18px;width:18px;height:18px;color:var(--blue-text);margin-top:1px}
+.sb-root .sb-lock b{color:var(--blue-text)}
+.sb-root .sb-drop{display:block;border:2px dashed var(--border2);border-radius:var(--radius);padding:12px 14px;margin-top:8px;text-align:center;background:var(--bg2);color:var(--text2);font-size:0.8125rem;cursor:pointer}
+.sb-root .sb-drop b{color:var(--text)}
+.sb-root .sb-drop input{display:block;margin:0 auto 6px;max-width:100%;font-size:0.75rem}
+.sb-root .sb-file{display:flex;align-items:center;gap:12px;border:1px solid var(--border2);border-radius:var(--radius);padding:10px 12px;background:var(--bg)}
+.sb-root .sb-file-ic{width:34px;height:34px;border-radius:8px;background:var(--purple-bg);color:var(--purple-text);display:flex;align-items:center;justify-content:center;flex:0 0 34px}
+.sb-root .sb-file-ic svg{width:18px;height:18px}
+.sb-root .sb-file-body{flex:1;min-width:0}
+.sb-root .sb-file-name{font-weight:600;font-size:0.875rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-root .sb-file-meta{font-size:0.75rem;color:var(--text2)}
+.sb-root .sb-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 16px;margin-top:12px}
+.sb-root .sb-field label{display:block;font-size:0.75rem;font-weight:700;color:var(--text2);margin-bottom:3px}
+.sb-root .sb-input{width:100%;font:inherit;font-size:0.875rem;color:var(--text);background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:5px 8px;box-sizing:border-box}
+.sb-root .sb-input.small{width:auto;min-width:0}
+.sb-root .sb-bpm{width:64px;padding:2px 6px}
+.sb-root .sb-list{padding-left:18px;margin:0}
+.sb-root .sb-stepnote{margin:12px 0 0;padding-top:10px;border-top:1px solid var(--border)}
+.sb-root .sb-li-artist{font-weight:400;color:var(--text2)}
+.sb-root .sb-cols{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:14px}
+.sb-root .sb-meter{position:relative;height:30px;border-radius:6px;background:linear-gradient(90deg,var(--bg3),var(--bg2));border:1px solid var(--border2);margin:24px 0 26px}
+.sb-root .sb-meter .mk{position:absolute;top:-6px;bottom:-6px;width:3px;border-radius:2px}
+.sb-root .sb-meter .mk span{position:absolute;white-space:nowrap;font-size:0.75rem;font-weight:600;transform:translateX(-50%);left:1px}
+.sb-root .sb-meter .mk.top span{top:-19px}
+.sb-root .sb-meter .mk.bot span{bottom:-19px}
+.sb-root .sb-meter .ref{background:var(--green-text)}
+.sb-root .sb-meter .ref span{color:var(--green-text);background:var(--bg)}
+.sb-root .sb-meter .yours{background:var(--amber-text)}
+.sb-root .sb-meter .yours span{color:var(--amber-text);background:var(--bg)}
+.sb-root .sb-meter .arrow{position:absolute;top:13px;height:2px;background:var(--text3)}
+.sb-root .sb-meter-l,.sb-root .sb-meter-r{position:absolute;top:7px;font-size:0.6875rem;color:var(--text3)}
+.sb-root .sb-meter-l{left:4px}
+.sb-root .sb-meter-r{right:6px}
+.sb-root .sb-volrow{align-items:flex-end;gap:18px;margin-bottom:10px}
+.sb-root .sb-big{font-size:1.75rem;font-weight:600;font-family:var(--font-display);line-height:1.1}
+.sb-root .sb-kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:0.8125rem;margin:0}
+.sb-root .sb-kv dt{color:var(--text2)}
+.sb-root .sb-kv dd{margin:0;font-weight:600}
+.sb-root .sb-ok{color:var(--green-text);font-weight:700}
+.sb-root .sb-warn{color:var(--amber-text);font-weight:700}
+.sb-root .sb-bad{color:var(--red-text);font-weight:700}
+.sb-root .sb-flag{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--amber-text);background:var(--amber-bg);border-radius:8px;padding:8px 10px;margin:4px 0 8px;font-size:0.8125rem;line-height:1.4}
+.sb-root .sb-flag.red{border-color:var(--red-text);background:var(--red-bg)}
+.sb-root .sb-flag .fi{flex:0 0 20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.75rem;color:var(--bg);background:var(--amber-text)}
+.sb-root .sb-flag.red .fi{background:var(--red-text)}
+.sb-root .sb-flag-body{flex:1 1 auto;min-width:0}
+.sb-root .sb-beat-top{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:start;margin-bottom:10px}
+.sb-root .sb-beat-mid{min-width:0}
+.sb-root .sb-beat-bar1{text-align:right}
+.sb-root .sb-bar1t{font-size:1.35rem}
+.sb-root .sb-nudge{justify-content:flex-end;margin-top:4px;gap:4px}
+.sb-root .sb-tap{display:flex;align-items:center;justify-content:center;flex-direction:column;width:120px;height:84px;border-radius:14px;border:2px solid var(--purple-accent);background:var(--purple-bg);color:var(--purple-text);font:inherit;font-weight:700;font-size:1rem;cursor:pointer}
+.sb-root .sb-tap:disabled{opacity:0.5;cursor:default}
+.sb-root .sb-tap small{font-weight:500;font-size:0.6875rem;color:var(--text2)}
+.sb-root .sb-dots{display:flex;gap:4px;align-items:center;margin-bottom:6px}
+.sb-root .sb-dots i{width:9px;height:9px;border-radius:50%;background:var(--purple-accent)}
+.sb-root .sb-dots i.dim{background:var(--border2)}
+.sb-root .sb-tapline{margin:0 0 6px}
+.sb-root .sb-seg{display:inline-flex;border:1px solid var(--border2);border-radius:16px;overflow:hidden}
+.sb-root .sb-seg button{font:inherit;font-size:0.8125rem;padding:4px 12px;border:0;background:transparent;color:var(--text2);cursor:pointer}
+.sb-root .sb-seg button.on{background:var(--text);color:var(--bg)}
+.sb-root .sb-wave{position:relative;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);overflow:hidden}
+.sb-root .sb-wave canvas{display:block;width:100%}
+.sb-root .sb-wave-main canvas{cursor:ew-resize}
+.sb-root .sb-wave-foot{margin:4px 0 8px}
+.sb-root .sb-drift-title{margin:6px 0 0}
+.sb-root .sb-drift-sum{margin:0 0 4px}
+.sb-root .sb-drift{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:6px}
+.sb-root .sb-drift .sb-box{margin:0;padding:8px 10px;min-width:0}
+.sb-root .sb-drift .sb-box.sb-late{border-color:var(--amber-text)}
+.sb-root .sb-drift-h{display:flex;justify-content:space-between;gap:6px;font-size:0.75rem;font-weight:700;margin-bottom:4px}
+.sb-root .sb-drift-btns{margin-top:5px;gap:4px}
+.sb-root .sb-empty{border:1px solid var(--border2);border-radius:var(--radius);padding:22px 24px;background:var(--bg)}
+.sb-root .sb-empty h3{font-family:var(--font-display);font-size:1.25rem;margin:0 0 8px;font-weight:600}
+.sb-root .sb-how{list-style:none;counter-reset:h;margin:10px 0 16px;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 18px;font-size:0.8125rem;color:var(--text2)}
+.sb-root .sb-how li{counter-increment:h;display:flex;gap:8px;line-height:1.4}
+.sb-root .sb-how li::before{content:counter(h);flex:0 0 19px;height:19px;border-radius:50%;background:var(--purple-bg);color:var(--purple-text);font-weight:700;font-size:0.6875rem;display:flex;align-items:center;justify-content:center}
+.sb-root .sb-how li b{color:var(--text)}
 /* Console "Song requests" (teacher-songrequests.js): one block per video. */
 .tsr-group{border:1px solid var(--border2);border-radius:var(--radius);padding:10px 12px;margin:0 0 14px;background:var(--bg)}
 .tsr-group.tsr-waiting{border-left:4px solid var(--amber-text)}

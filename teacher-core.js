@@ -741,7 +741,7 @@ async function loadAllStudents(){
 const TEACHER_REFRESH_MS=60000;
 const TEACHER_AUTO_REFRESH_VIEWS=['activities','students','skills','responses','trouble'];
 // Views where student progress isn't on screen at all — no Refresh bar.
-const TEACHER_NO_REFRESH_BAR_VIEWS=['livequiz','mic','reports','tsongs','minutes','errors','songrequests'];   // minutes, errors, songrequests: their own Refresh (renderTeacherMinutes, renderTeacherErrors, renderTeacherSongRequests)
+const TEACHER_NO_REFRESH_BAR_VIEWS=['livequiz','mic','reports','tsongs','minutes','errors','songrequests','songbuilder'];   // minutes, errors, songrequests: their own Refresh (renderTeacherMinutes, renderTeacherErrors, renderTeacherSongRequests); songbuilder reads its drafts itself
 let teacherStudentsAt=0;          // when the roster on screen was read (ms); 0 = not yet
 let teacherRefreshing=false;      // a read is out — no overlapping fetches
 let teacherRefreshFailed=false;   // the last read failed; the screen shows the older roster
@@ -1147,6 +1147,7 @@ let taFocusPreviewPath={};   // id -> path key picked in the preview (paths acti
 const TEACHER_NAV_ICON={
   activities:'<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="m9 13 2 2 4-4"/>',
   songs:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  songbuilder:'<path d="M4 20 15 9"/><path d="m14 4 1 2 2 1-2 1-1 2-1-2-2-1 2-1z"/><path d="m19 11 .7 1.3L21 13l-1.3.7L19 15l-.7-1.3L17 13l1.3-.7z"/>',
   tsongs:'<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/><path d="m10 8 5 2.5-5 2.5z"/>',
   livequiz:'<path d="M13 2 4 14h6l-1 8 9-12h-6z"/>',
   students:'<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/>',
@@ -1162,7 +1163,7 @@ const TEACHER_NAV_ICON={
   reports:'<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="0.6" fill="currentColor" stroke="none"/>',
 };
 const TEACHER_NAV=[
-  {group:'Teach', items:[['activities','Class activities'],['songs','Songs'],['songrequests','Song requests'],['tsongs','Teacher view songs'],['livequiz','Live In-Class Games']]},
+  {group:'Teach', items:[['activities','Class activities'],['songs','Songs'],['songbuilder','Song builder'],['songrequests','Song requests'],['tsongs','Teacher view songs'],['livequiz','Live In-Class Games']]},
   {group:'Students', items:[['students','Students'],['skills','Skills grid'],['trouble','Trouble spots'],['minutes','Practice minutes'],['responses','Responses']]},
   {group:'Set up', items:[['manage','Manage'],['games','Games']]},
   {group:'Tools', items:[['mic','Mic recordings'],['errors','Error log'],['reports','Reports']]},
@@ -1256,6 +1257,8 @@ function setTeacherView(v){
   // the sidebar or a tree row brings back the list.
   const leavingDetail = teacherView==='activities' && teacherActivityScreen()==='detail';
   if(((teacherView==='tsongs' && v!=='tsongs') || (teacherView==='activities' && v!=='activities') || leavingDetail) && typeof stopCardAudio==='function') stopCardAudio();
+  // The Song builder's sounds, its encoder and any write in flight stop when its view is left (teacher-sb-core.js).
+  if(teacherView==='songbuilder' && v!=='songbuilder' && typeof teacherSbLeave==='function') teacherSbLeave();
   teacherView=v;
   if(v==='students') studentDetailUid=null; // clicking the tab always starts back at the roster
   // Songs always starts back at its list, nothing mid-rename. An activity
@@ -1381,6 +1384,7 @@ function renderTeacherBody(){
   else if(teacherView==='mic') renderTeacherMic();
   else if(teacherView==='errors') renderTeacherErrors();
   else if(teacherView==='songrequests') renderTeacherSongRequests();
+  else if(teacherView==='songbuilder') renderTeacherSongBuilder();
   else if(teacherView==='livequiz'){ if(typeof renderTeacherLiveQuiz==='function') renderTeacherLiveQuiz(); }
   else renderTeacherGrid();
 }

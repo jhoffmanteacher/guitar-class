@@ -47,7 +47,10 @@
    songFileReadPieces checks every piece and the SHA-256.
 
    A BUILT SONG'S AUDIO (not on the list) is shown as "Built song: <title>",
-   checked against that song's audio entry (Verify works on it too).
+   checked against that song's audio entry (Verify works on it too). A Song
+   builder draft's levelled copy (teacher-sb-core.js) is shown as "Song builder
+   draft: <title>" once the drafts are read (Song files asks for them); Delete
+   works on it as on any stray file, and the draft then asks for its mp3 again.
 
    DELETE removes one song: never the audio a built song on
    builtSongsMeta/list plays (that list and its songs are read fresh first;
@@ -81,6 +84,7 @@ const TEACHER_SF_STATUS = {
   differs: 'uploaded, but its size or SHA-256 is not the list’s',
   unfinished: 'upload not finished (uploading)',
   built: 'Built song: ',
+  draft: 'Song builder draft: ',
 };
 let teacherSfHeads = null;      // Map id -> head fields from the store; null = not read yet
 let teacherSfUsed = null;       // this month's count in bytes; null = not read
@@ -110,7 +114,7 @@ function teacherSfHeadMatches(h, entry){
 function teacherSfStatus(id){
   const entry = teacherSfEntry(id), h = teacherSfHeads ? teacherSfHeads.get(id) : null;
   if(!h) return 'notUp';
-  if(!entry) return 'stray';
+  if(!entry) return typeof teacherSbAudioOwner === 'function' && teacherSbAudioOwner(id) ? 'draft' : 'stray';
   if(h.state !== 'ready') return 'unfinished';
   if(!teacherSfHeadMatches(h, entry)) return 'differs';
   return teacherSfOnList(id) ? 'match' : 'built';
@@ -148,7 +152,7 @@ function teacherSfRowHtml(id){
     + `<td style="white-space:nowrap">${escHtml(teacherSfMb(src.bytes))}</td>`
     + `<td>${escHtml(teacherSfLen(src.durationSec))}</td>`
     + `<td>${h ? escHtml(String(h.state == null ? '—' : h.state)) : '—'}</td>`
-    + `<td>${escHtml(TEACHER_SF_STATUS[st] + (st === 'built' ? teacherBsAudioOwner(id).title : ''))}${chk ? `<div class="tg-note">${chk.ok ? '✓ ' : '✗ '}${escHtml(chk.text)}</div>` : ''}</td>`
+    + `<td>${escHtml(TEACHER_SF_STATUS[st] + (st === 'built' ? teacherBsAudioOwner(id).title : st === 'draft' ? teacherSbAudioOwner(id).title : ''))}${chk ? `<div class="tg-note">${chk.ok ? '✓ ' : '✗ '}${escHtml(chk.text)}</div>` : ''}</td>`
     + `<td style="white-space:nowrap">${entry && h ? btn('verify', 'Verify') : ''}${h ? btn('delete', 'Delete') : ''}</td></tr>`;
 }
 function teacherSfBlockHtml(){
@@ -221,6 +225,8 @@ async function teacherSfLoad(){
   teacherSfReadErr = err;
   if(!err){ teacherSfHeads = heads; teacherSfUsed = used; }
   teacherSfPaint();
+  /* A store id no list names may be a Song builder draft's levelled copy: read the drafts once, to name it. */
+  if(!err && typeof teacherSbLoad === 'function' && typeof sbDrafts !== 'undefined' && !sbDrafts) teacherSbLoad();
 }
 function teacherSfClick(e){
   if(teacherView !== 'manage') return;
