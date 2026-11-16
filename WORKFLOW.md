@@ -45,8 +45,9 @@ so the drift is mostly the TRACKER's error. Measured: `sbPhaseTrack`'s 12-s wind
 at every level (quarter, eighth, sixteenth; window 12-30 s): steps of about 60 ms between windows, so the unwrap slips.
 A dynamic-programming tracker (Ellis/librosa) was tried on local branch `fix/sb-track` (`b591aea`, NOT for main): it
 found 406-408 beats and 114.3-114.7 BPM at every tightness, and failed sb-dsp-test "weak onsets under noise".
-Do next, in order: (1) a GROUND TRUTH for this file (ask Jonathan whether the backing track was made to a click at
-114; or hand-mark beats at 4 places by listening); (2) a generated steady-eighths/sixteenths strummed song in
+Do next, in order: (1) a GROUND TRUTH for this file. Jonathan, 2026-11-15: "it's the original recording. moises says its 114"
+(so no click: some real drift is expected; 114 is Moises's average). Asked him for Moises's downbeat times at about
+four bars (bar 1, a third in, two thirds in, near the end): measure the builder's grid against those; (2) a generated steady-eighths/sixteenths strummed song in
 `tools/sb-dsp-test.mjs` that fails today; (3) likely fix: the tempo from the tick search (bpm0 x 1, 2, 4; x 1, 3, 6 in
 6/8, as playalong-measure.py's find_pulse) and a straight grid unless the record clearly drifts, with tracking only
 then. Also asked by Jonathan the same day, NOT to build yet: "the drift check should pin the changes automatically"
