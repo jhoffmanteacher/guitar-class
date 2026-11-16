@@ -186,9 +186,11 @@ export function replayTake(site, d, src, srcRate, mapMs){
 }
 
 
-/* The fields of a take a summary keeps: the game's own numbers. No name, id, label, user agent or time of day. */
+/* The fields of a take a summary keeps: the game's own numbers. No name, id, label, user agent or time of day. recClock / recClockShiftMs
+   (coach-core.js micRecSaveNow, 2026-11-16): which start stamp the take's times rest on; absent = the older one. Nothing here needs them
+   (every replay takes its clock from the take's own mapMs), they only tell the takes apart. */
 const KEEP = ['game', 'complete', 'progression', 'song', 'ladder', 'bpm', 'stageBpms', 'bpc', 'gridStepCapMs', 'countInBeats', 'onsetRatio', 'hfRatio', 'micLatencyMs',
-  'frameMeanMs', 'frameMaxMs', 'durationSec', 'tempoChanges', 'virtual', 'changePick'];
+  'frameMeanMs', 'frameMaxMs', 'durationSec', 'tempoChanges', 'virtual', 'changePick', 'recClock', 'recClockShiftMs'];
 export function summarize(tk){
   const site = siteFor('base', null, false);
   site.reset();

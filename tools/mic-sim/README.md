@@ -397,6 +397,24 @@ script.
 - `fake-take.mjs <out> [lag] [map] [coach|nr] [quiet|class] [clicks]` — a
   synthetic take with planted answers (the header lists them) to prove the
   evaluator.
+- **The take's clock (2026-11-16).** A take's times are ms from the
+  recording's first sample (`micRecStartPerf` in coach-core.js). Takes saved
+  before 2026-11-16 rest on an estimate that was about one ScriptProcessor
+  buffer LATE (92 ms on the median of the 46 summaries here, replayed through
+  the real game code with the clock fitted on the onsets; 85 ms is one buffer
+  at 48 kHz) and about 130 ms EARLY on 2 of 43 (an audio device that had not
+  started yet when the recording did). A take saved since carries
+  `recClock: 2` and `recClockShiftMs` (the old estimate less the new one; old
+  t = t - shift); a take without them is on the old clock. Nothing here needs
+  converting: the evaluator measures each take's own clock offset (`mapMs`,
+  `clickLagMs`) and the replays use it, so the console's "should be about
+  N ms" (`idealMs` = lag + map) comes out the same on either clock. What moves
+  on a new take: `mapMs` up and `clickLagMs` down by `recClockShiftMs`.
+  `micrec-clock.mjs [--root=<site>] [--verbose]` proves the stamp: the real
+  micRecStart / onaudioprocess / micRecSaveNow against a fake audio clock that
+  runs as Chromium's does (bursts, the page's handler delay, a device that
+  starts late); every case must land within one audio burst. Not in
+  checks.mjs.
 - Power Chord Switch takes (`mode: 'pw'`, 2026-11-04): `micEvalTakePw` in
   teacher.js. No pitch readings are saved with them, so per change it asks
   only "is there a strum in the recording where the SITE listened" — its own
