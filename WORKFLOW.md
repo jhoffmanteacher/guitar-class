@@ -80,6 +80,22 @@ The Windows session deletes this line once its replay matches the README.
 whatever you haven't done to the mac". He says "do the handed-over work in WORKFLOW").** In this order; each ships
 before the next; agents Opus or Fable by the need (Opus at xhigh is allowed where a finding is in dispute). Branches
 named `win/…` are on GitHub (`git fetch`); cherry-pick from them, do not merge them.
+**WHO DOES WHAT (the Mac, 2026-11-16 11:10, after Jonathan asked whether Windows can take separate tasks): the list
+is split by file, so both computers work at once.**
+- **The Mac:** item 1 (an Opus agent is building it now: `teacher-activities*.js`, `app/activities*.js`), item 4
+  (the two splits: `coach-chords.js`, `coach-runner.js`, `COACH_JS_PARTS`, `sw.js` lists; pushed after school, not in
+  class hours), item 5 (the Friday entries, Jonathan's three calls, the Journey Metronome measurement, Strum Hero /
+  Strum Radar's "10 BPM"), and the Song builder (`teacher-sb-*.js`: "Follow the band's beat" is being built, then
+  Part d). From item 6 the Mac takes the stale comments in `coach-hub.js:144`, `coach-runner.js:951` and
+  `coach-strum.js:1238` (they move with the splits).
+- **Windows:** item 2 (rule AD: `coach-strumcheck.js`, `tools/mic-sim/`, check 1eh; its own branch and the
+  reviewer's scripts are on that computer), item 3 (`micRecStartPerf`: `coach-core.js`, its own branch), and the
+  rest of item 6 (`tools/smoke.mjs` walks, the Listening Coach count-in Stop in `coach-core.js`, the two sims'
+  turn-count waits, `tools/checks.mjs` ~17115's comment, `.gitignore`, the change smoke owed on its own pushes).
+- **Neither touches the other's files.** Shared files (`WORKFLOW.md`, `CHANGELOG.md`, `tools/checks.mjs`, `sw.js`'s
+  version line, `app/boot.js`): fetch and rebase before every push; in `checks.mjs` Windows edits only 1eh and the
+  ~17115 comment, the Mac only its own pins. `coach-core.js` is at 2,549 lines: Windows says in its report if item 3
+  takes it past 2,600 and stops there (its split is Jonathan's call).
 1. [ ] **Console: "Keep in Today's activities" (Jonathan, 2026-11-16: "for the teacher dashboard, add an option
    next to the release date that has a checkbox for 'keep in today's activities'. use an opus agent to make
    this").** Not started. Build it with ONE Opus agent in its own worktree. Where: the release-date control of an
