@@ -1,8 +1,8 @@
 /* ── Song builder: the Chart and Level steps (2026-11-16, Song builder Part c) ───────────────────────────
    Steps 4 and 5 of the Song builder (teacher-sb-core.js has the view and the draft; work order "Claude outputs/
    WORK-ORDER-song-builder.md", Part c). Jonathan pastes the song's chord chart; the builder READS it into
-   sections and bars, he sets the truth in the GRID, and picks the LEVEL. Nothing here reaches a student: Preview
-   and Publish are Part d.
+   sections and bars, he sets the truth in the GRID, and picks the LEVEL. Nothing here reaches a student until
+   Publish (teacher-sb-publish.js, Part d).
 
    THE READER (sbChartRead; pure, run in Node by tools/song-builder-sim.mjs on made-up charts). It reads
      - chord lines over lyric lines        G        D         /  Lanterns on the Calder street
@@ -40,7 +40,8 @@
               kept though not taught], edited }
      level: { versions: 'full'|'power'|'both', start, range: { from, to }|null }
    sbSongOf(d) makes the `song` builtSongs takes (app/builtsongs.js) from the beat, the chart and the level, and
-   sbSongWhy(d, id) is builtSongCheck's own answer on it: the same function every student page runs.
+   sbSongWhy(d, id) is builtSongCheck's own answer on it: the same function every student page runs. Preview and
+   Publish (teacher-sb-publish.js, Part d) use the same two.
    THE CHART CAN COME EARLY (Jonathan, 2026-11-15: "the app should allow me to upload chord charts, etc. as other
    things are being worked on like levels ... and/or to let me put all the files in the initial upload"): step 1
    has a box for it, and step 4 opens as soon as the draft exists; it is read in 4/4 until the Beat step says
@@ -532,7 +533,7 @@ function sbLevelPaneHtml(d){
   }).join('');
   const sel = (which, val) => `<select class="sb-input small" data-sb-range="${which}" aria-label="${which === 'from' ? 'From section' : 'To section'}"${off}>${ch.sections.map((s, i) => `<option value="${i}"${i === val ? ' selected' : ''}>${escHtml(sbSecLabel(s))}</option>`).join('')}</select>`;
   const why = sbSongWhy(d, sbSel), open = sbChartOpen(d, sbChartReadOf(d));
-  const verdict = !why.length ? `<div class="sb-flag sb-flag-ok"><span class="fi">✓</span><div class="sb-flag-body"><b>The song passes every check a student's page runs.</b> ${open.n ? `${open.n} thing${open.n === 1 ? '' : 's'} at the Chart step still want${open.n === 1 ? 's' : ''} a look.` : 'Preview and Publish come in the next update.'}</div></div>`
+  const verdict = !why.length ? `<div class="sb-flag sb-flag-ok"><span class="fi">✓</span><div class="sb-flag-body"><b>The song passes every check a student's page runs.</b> ${open.n ? `${open.n} thing${open.n === 1 ? '' : 's'} at the Chart step still want${open.n === 1 ? 's' : ''} a look.` : 'Next: hear it at Preview, then Publish.'}</div></div>`
     : `<div class="sb-flag red"><span class="fi">!</span><div class="sb-flag-body"><b>Not ready yet:</b><ul class="sb-list">${why.slice(0, 5).map(w => `<li>${escHtml(w)}</li>`).join('')}</ul>${why.length > 5 ? `and ${why.length - 5} more.` : ''}</div></div>`;
   return `<div class="sb-cols c3"><div>
       <div class="sb-h">Which chords?</div>

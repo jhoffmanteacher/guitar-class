@@ -19794,7 +19794,7 @@ function checkSongFilesConsole() {
      and Level flow.
    ════════════════════════════════════════════════════════════════════ */
 const SB_DSP_TEST_PIN = 45;          // 35 -> 37 (2026-11-15, the browser walk): a soft intro's bar 1; taps 4% slow or 5% fast; -> 45 (2026-11-15, the beat track): a strummed record that drifts (7), a steady record's 2 pins (1)
-const SONG_BUILDER_SIM_PIN = 74;     // 2026-11-15: first count 32; -> 36 the same day: Clear this step (Volume, Beat) and Level it again (4); -> 39: the beat track saved and found again, the "send to Claude" line (3); -> 57 (2026-11-16, Part c): the chart reader, the shapes, chart to song, the grid, the Chart and Level flow (18); -> 73 (2026-11-16, pdfs): the text of a page, the pdf flow with a made-up pdf.js (16)
+const SONG_BUILDER_SIM_PIN = 101;    // 2026-11-15: first count 32; -> 36 the same day: Clear this step (Volume, Beat) and Level it again (4); -> 39: the beat track saved and found again, the "send to Claude" line (3); -> 57 (2026-11-16, Part c): the chart reader, the shapes, chart to song, the grid, the Chart and Level flow (18); -> 73 (2026-11-16, pdfs): the text of a page, the pdf flow with a made-up pdf.js (16); -> 74: ½ beat; -> 101 (2026-11-16, Part d): the listens, Publish and its blockers, Export, the student page's merge, a reload, Edit and republish, Unpublish, Delete, the health line (27)
 function checkSongBuilder() {
   head('1en. Song builder: the sound code and the drafts are run, their case counts pinned');
   let bad = 0;
@@ -19819,7 +19819,7 @@ function checkSongBuilder() {
   const dsp = run('sb-dsp-test.mjs', /sb-dsp-test: (\d+) cases, (\d+) failed/, SB_DSP_TEST_PIN, 'SB_DSP_TEST_PIN',
     { file: join(ROOT, 'tools', '.sb-dsp-cache.json'), inputs: ['teacher-sb-dsp.js', 'tools/sb-dsp-test.mjs', 'vendor/lamejs/lame.min.js'] });
   const sim = run('song-builder-sim.mjs', /song-builder-sim: (\d+) cases, (\d+) failed/, SONG_BUILDER_SIM_PIN, 'SONG_BUILDER_SIM_PIN');
-  if (!bad) ok(`sb-dsp-test: ${dsp.cases} cases pass (pinned ${SB_DSP_TEST_PIN}${dsp.cached ? '; unchanged since a passing run, not run again' : ''}); song-builder-sim: ${sim.cases} cases pass (pinned ${SONG_BUILDER_SIM_PIN}): drafts saved and resumed, refusals write nothing, the copy stored before the draft names it, a damaged copy loaded once, Delete draft, every write on the builder's own paths`);
+  if (!bad) ok(`sb-dsp-test: ${dsp.cases} cases pass (pinned ${SB_DSP_TEST_PIN}${dsp.cached ? '; unchanged since a passing run, not run again' : ''}); song-builder-sim: ${sim.cases} cases pass (pinned ${SONG_BUILDER_SIM_PIN}): drafts saved and resumed, refusals write nothing, the copy stored before the draft names it, a damaged copy loaded once, Delete draft, every write on the builder's own paths; Part d: Publish only after the listens and every blocker, Edit, Unpublish, Delete, the student page's merge`);
 }
 
 /* ════════════════════════════════════════════════════════════════════

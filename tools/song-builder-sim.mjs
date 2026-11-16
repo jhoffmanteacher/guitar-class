@@ -39,7 +39,23 @@
    STUBBED (pcSheetLoadPdfjs returns a made-up library that serves the made-up pages by the file's bytes and counts
    getTextContent and destroy); sbPdfMounted runs as it is, since the vm's inert page has no pane slot and it returns
    before drawing. A chords pdf at step 1 of a new song, two in one pick at step 4, a scan, a tab pdf, the refusals,
-   Remove, another draft opened; no pdf action writes anything. */
+   Remove, another draft opened; no pdf action writes anything.
+
+   PART D (2026-11-16; teacher-sb-publish.js). Its own console and store: a made-up draft past steps 1 to 5 (its
+   levelled copy stored as the Song files writer stores one) and a made-up imported song on the list (edit 3). THE
+   LISTENS: the real sbPvStep / sbPvRunEnd on positions a playing card would give (a run begun mid-section, one stopped
+   short, a whole play to the lap), saved in the draft with the song's signature, started over by a change. PUBLISH:
+   off until the listens; every other blocker said as the one reason (over 10 cents, said once; a drift window; a
+   section with no name; an unsaved title; an audio id on SONG_FILES or another song's), each writing nothing through
+   the button; the stored copy and the list read fresh at the press; a record over 8 pins warns and never blocks.
+   Then Cancel, OK (builtSongs then the list, in the rules' exact shape), the stored song equal to the draft's, the
+   REAL student app (sim-app-page.mjs, builtSongsSync on the same store) showing it on the Songs page and as its card in
+   English and Spanish; a reload; Edit with a new levelled copy (the old one kept while the published song plays it),
+   republish (the old copy deleted only after the list names the new edit); Unpublish (the draft's edit number, the
+   list, then the song; a later Publish counts on); leaving mid-publish; the health line; the imported song's page and
+   its Export, passed by tools/built-song-check.mjs; Delete (the draft's OK / Cancel never deletes a published song;
+   the typed title: the list first, then the song, the draft, its copy; the other song untouched). The rules check
+   above takes builtSongs/{id} and builtSongsMeta/list as firestore.rules "BUILT SONGS" writes them. */
 import { readFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -111,10 +127,11 @@ function clone(v){
   if(v && typeof v === 'object'){ const o = {}; for(const k of Object.keys(v)) o[k] = clone(v[k]); return o; }
   return v;
 }
-const DRAFT_KEYS = 'artist,audio,beat,chart,level,pitch,savedAt,source,step,title,v,volume';
+const DRAFT_KEYS = 'artist,audio,beat,chart,level,listens,pitch,pubVer,savedAt,source,step,title,v,volume';
 function rulesCheck(op, path, data){
   const p = path.split('/');
-  if(op === 'delete') return (p[0] === 'songDrafts' && p.length === 2) || (p[0] === 'songFiles' && (p.length === 2 || (p.length === 4 && p[2] === 'pieces'))) ? '' : 'delete outside the builder\'s paths: ' + path;
+  if(op === 'delete') return (p[0] === 'songDrafts' && p.length === 2) || (p[0] === 'songFiles' && (p.length === 2 || (p.length === 4 && p[2] === 'pieces')))
+    || (p[0] === 'builtSongs' && p.length === 2) || path === 'builtSongsMeta/list' ? '' : 'delete outside the builder\'s paths: ' + path;
   const keys = Object.keys(data || {}).sort().join(',');
   if(p[0] === 'songDrafts' && p.length === 2){
     if(!/^sb-[a-z0-9]{8,24}$/.test(p[1])) return 'draft id ' + p[1];
@@ -138,6 +155,34 @@ function rulesCheck(op, path, data){
     return '';
   }
   if(p[0] === 'songFilesUsage' && p.length === 2) return keys === 'bytes' && Number.isInteger(data.bytes) && data.bytes >= 0 ? '' : 'usage ' + JSON.stringify(data);
+  /* Part d: firestore.rules "BUILT SONGS", written out again (create and update are one rule). */
+  if(p[0] === 'builtSongs' && p.length === 2){
+    const d = data, a = d.audio, isMap = v => !!v && typeof v === 'object' && !Array.isArray(v), num = v => typeof v === 'number' && Number.isFinite(v);
+    if(!/^sb-[a-z0-9]{8,24}$/.test(p[1])) return 'builtSongs id ' + p[1];
+    if(keys !== 'artist,audio,savedAt,song,title,v') return 'builtSongs fields ' + keys;
+    if(!Number.isInteger(d.v) || d.v < 1 || d.v > 99) return 'builtSongs v';
+    if(typeof d.title !== 'string' || d.title.trim().length < 1 || d.title.length > 120) return 'builtSongs title';
+    if(typeof d.artist !== 'string' || d.artist.length > 120) return 'builtSongs artist';
+    if(!isMap(a)) return 'builtSongs audio';
+    const ak = Object.keys(a);
+    if(ak.some(k => !['id', 'bytes', 'sha256', 'durationSec', 'centsOff', 'gainDb', 'sourceSha256'].includes(k)) || !['id', 'bytes', 'sha256', 'durationSec', 'centsOff'].every(k => ak.includes(k))) return 'builtSongs audio fields ' + ak.sort().join(',');
+    if(typeof a.id !== 'string' || !/^[a-z0-9][a-z0-9-]{0,79}$/.test(a.id)) return 'builtSongs audio.id';
+    if(!Number.isInteger(a.bytes) || a.bytes <= 0 || a.bytes > 36000000) return 'builtSongs audio.bytes';
+    if(typeof a.sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(a.sha256)) return 'builtSongs audio.sha256';
+    if(!num(a.durationSec) || a.durationSec <= 0 || a.durationSec > 1800) return 'builtSongs audio.durationSec';
+    if(!num(a.centsOff) || a.centsOff < -10 || a.centsOff > 10) return 'builtSongs audio.centsOff';
+    if('gainDb' in a && (!num(a.gainDb) || a.gainDb < -40 || a.gainDb > 40)) return 'builtSongs audio.gainDb';
+    if('sourceSha256' in a && (typeof a.sourceSha256 !== 'string' || !/^[0-9a-f]{64}$/.test(a.sourceSha256))) return 'builtSongs audio.sourceSha256';
+    if(!isMap(d.song)) return 'builtSongs song';
+    if(d.savedAt !== TS) return 'builtSongs savedAt is not the server time';
+    return '';
+  }
+  if(path === 'builtSongsMeta/list'){
+    if(Object.keys(data || {}).some(k => k !== 'songs' && k !== 'updatedAt')) return 'list fields ' + keys;
+    if(!data.songs || typeof data.songs !== 'object' || Array.isArray(data.songs) || Object.keys(data.songs).length > 200) return 'list songs';
+    if(data.updatedAt !== TS) return 'list updatedAt is not the server time';
+    return '';
+  }
   return 'write outside the builder\'s paths: ' + path;
 }
 function makeDb(){
@@ -466,6 +511,7 @@ async function runCases(consoleSrc){
   check('no write to config/class, progress/, builtSongs or builtSongsMeta', !F.st.writes.some(w => /^(config|progress|builtSongs)/.test(w.path)));
   await chartCases(consoleSrc, check);
   await pdfCases(consoleSrc, check);
+  await publishCases(consoleSrc, check);
   return out;
 }
 function box_set(C, k, v){ C.box[k] = v; }
@@ -883,9 +929,327 @@ async function pdfCases(consoleSrc, check){
     pdfW === 0 && dw.length === 1 && dw[0].path === 'songDrafts/' + nid && F3.st.violations.length === 0, JSON.stringify({ pdfWrites: pdfW, writes: dw.map(w => w.path) }));
 }
 
+/* ── PART D (2026-11-16; teacher-sb-publish.js): Preview's listens, Publish, Edit, Unpublish, Delete, Export, the
+   health line. Its own console and store: a made-up draft that has passed steps 1 to 5 (its levelled copy stored the
+   way the Song files writer stores one) and a made-up imported song on the list. Every write is checked by rulesCheck
+   (firestore.rules "BUILT SONGS" written out above); the student side is the REAL app (sim-app-page.mjs) merging the
+   same store through builtSongsSync. ── */
+async function publishCases(consoleSrc, check){
+  const F4 = makeDb(), C = makeConsole(consoleSrc, F4), { run, env } = C;
+  const id = 'sb-pubdraft0001', other = 'sb-otherbuilt01';
+  const LVC = LEVELLED.get('c'), LVB = LEVELLED.get('b'), aid = id + '-' + sha(LVC).slice(0, 8), oaid = other + '-' + sha(LVB).slice(0, 8);
+  const putCopy = (audioId, bytes, dur) => {
+    F4.S.set('songFiles/' + audioId, { file: audioId + '.mp3', bytes: bytes.length, sha256: sha(bytes), pieces: Math.ceil(bytes.length / 900000), pieceBytes: 900000, durationSec: dur, state: 'ready', uploadedAt: TS });
+    for(let i = 0; i * 900000 < bytes.length; i++) F4.S.set(`songFiles/${audioId}/pieces/${i}`, { i, data: new FakeBytes(bytes.subarray(i * 900000, (i + 1) * 900000)) });
+  };
+  putCopy(aid, LVC, 15); putCopy(oaid, LVB, 24.02);
+  const chart = { text: '[Intro]\n| G |\n[Verse 1]\nG        C\nTest words here\n[Chorus]\n| D | G C |', meter: '4/4', fmt: 'chords', sections: [
+    { name: 'intro', label: 'Intro', n: null, bars: ['G'], lyrics: null },
+    { name: 'verse', label: 'Verse 1', n: 1, bars: ['G', 'C'], lyrics: [{ text: 'Test <b>words</b> & "more"', bars: 2 }] },
+    { name: 'chorus', label: 'Chorus', n: null, bars: ['D', 'G:2 C:2'], lyrics: null }], left: [], kept: [], edited: true };
+  F4.S.set('songDrafts/' + id, { v: 1, title: 'Test 0 Publish', artist: 'The Test Band', step: 5,
+    source: { name: 'test-c.mp3', bytes: SRC_C.length, sha256: sha(SRC_C), durationSec: 15, sampleRate: 44100, channels: 1, kbps: 192 },
+    audio: { id: aid, bytes: LVC.length, sha256: sha(LVC), durationSec: 15, centsOff: 2, gainDb: 1.5, sourceSha256: sha(SRC_C) },
+    volume: { before: -14, after: -12.5, samplePeak: -1.2, truePeak: -1.1, ceilingDb: -1, encodes: 1 }, pitch: { cents: 2, peaks: 10 },
+    beat: { meter: '4/4', bpm: 96, anchor: 0.5, pins: [], trackBpm: 96, trackSub: 2, driftOff: 0, pinsNeeded: 2 }, chart, level: { versions: 'both', start: 'full', range: null }, listens: null, pubVer: null, savedAt: TS });
+  /* The imported song: the same chart as the draft, its own audio, ver 3. */
+  const otherSong = run('sbSongOf')(JSON.parse(JSON.stringify(F4.S.get('songDrafts/' + id))));
+  F4.S.set('builtSongs/' + other, { v: 1, title: 'Test 1 Imported', artist: '', audio: { id: oaid, bytes: LVB.length, sha256: sha(LVB), durationSec: 24.02, centsOff: 0 }, song: JSON.parse(JSON.stringify(otherSong)), savedAt: TS });
+  F4.S.set('builtSongsMeta/list', { songs: { [other]: 3 }, updatedAt: TS });
+  const otherDoc0 = JSON.stringify(F4.S.get('builtSongs/' + other)), otherCopyKeys = 1 + Math.ceil(LVB.length / 900000);
+  const nW = () => F4.st.writes.length, since = w0 => F4.st.writes.slice(w0).map(w => w.op + ' ' + w.path), keysOf = p => [...F4.S.keys()].filter(k => k.startsWith(p)).sort();
+  run('teacherMicSaveFile = (name, blob) => { window.__saved = { name, blob }; }');
+  run('renderTeacherSongBuilder()'); await settle();
+  run(`sbOpen(${JSON.stringify(id)})`); await settle();
+
+  /* D1: the steps are all built, and the words that said they were not are gone */
+  {
+    const html = run('sbDetailHtml()') + run('sbStartHtml()') + run('sbLevelPaneHtml(sbDraft())');
+    const nav5 = run('sbStepOn = 5; sbNavHtml(sbDraft())');
+    check('steps: Preview and Publish are open for a draft that passes the checks; no "not built", "next update" or "Coming next" left on the steps, the start screen or the Level step; step 5\'s Next reads "Next: Preview →" and is on',
+      run('sbStepReady(sbDraft(), 6) && sbStepReady(sbDraft(), 7) && SB_BUILT_STEPS === 7') && !/not built|next update|Coming next|come with the Publish/.test(html + nav5) && /Next: Preview →/.test(nav5) && !/data-sb-step="6" disabled/.test(nav5) && !/data-sb-step="6"[^>]*disabled/.test(nav5),
+      nav5.slice(0, 300));
+    check('health line: the imported song on the list, "1 published; all pass today\'s checks"; it is listed as Published and Imported', /1 published; all pass today's checks/.test(run('sbHealthHtml()')) && /Imported/.test(run('sbListHtml()')),
+      run('sbHealthHtml()'));
+  }
+  /* D2: Preview: the step is reached and saved; the pane */
+  {
+    const w0 = nW();
+    run('sbGoStep(6)'); await settle(100);
+    const pane = run('sbPreviewPaneHtml(sbDraft())');
+    check('preview: going to step 6 saves the furthest step (one songDrafts write); the pane has the three listens, the Spanish-templates line and the title as students see it (escaped), and no "does not fit" box for a steady record',
+      run('sbStepOn') === 6 && F4.S.get('songDrafts/' + id).step === 6 && since(w0).filter(x => !x.includes('songFilesUsage')).join() === 'set songDrafts/' + id
+      && (pane.match(/class="sb-listen[ "]/g) || []).length === 3 && /fixed Spanish templates/.test(pane) && pane.includes('"Test 0 Publish" - The Test Band — Play Along') && !/does not fit the builder/.test(pane),
+      JSON.stringify({ step: run('sbStepOn'), writes: since(w0), listens: (pane.match(/class="sb-listen[ "]/g) || []).length }));
+  }
+  /* D3: Publish stays off until the three listens */
+  {
+    const why = run('sbPublishWhy(sbDraft(), sbSel)');
+    const w0 = nW();
+    env.confirmAnswer = true; env.confirms.length = 0;
+    run('sbPublish()'); await settle();
+    check('publish: off until the three listens (the only reason left); pressing it writes nothing, asks nothing and says why; the button is disabled',
+      why.length === 1 && /Listen at the Preview step/.test(why[0]) && nW() === w0 && env.confirms.length === 0 && /^Not published: Listen at the Preview step/.test(run('sbNote')) && /data-sb-act="publish" disabled/.test(run('sbPublishBtnHtml(sbDraft())')),
+      JSON.stringify({ why, writes: since(w0), note: run('sbNote') }));
+  }
+  /* D4: the listens: a section counts only when one run of the play began at its start and reached its end */
+  const listenThrough = async (Cx, seqs) => {
+    Cx.run(`sbPv = { id: sbSel, key: 'sim', sig: sbListenSig(sbDocOf(sbDraft())), node: null, act: null, run: null, L: null }`);
+    const ex = Cx.run('builtSongExpand(sbSel, sbDocOf(sbDraft()))');
+    const L = { firstBar: ex.activity.card.sections[0].fromBar, sections: ex.activity.card.sections.map(x => ({ fromBar: x.fromBar, bars: x.bars, reps: 1 })) };
+    Cx.box.__L = L;
+    const heardAfter = [];
+    for(const seq of seqs){
+      for(const pos of seq) Cx.run(`sbPvStep(sbPv, __L, ${pos})`);
+      Cx.run('sbPvRunEnd(sbPv)');                         // the play stops
+      heardAfter.push(JSON.stringify(Cx.run('(sbDraft().listens && sbDraft().listens.heard) || []')));
+    }
+    Cx.run('sbPv = null');
+    await sleep(500); await settle();
+    return heardAfter;
+  };
+  {
+    const steps = (a, b, n) => Array.from({ length: n + 1 }, (_, i) => Math.round((a + (b - a) * i / n) * 1000) / 1000);
+    const h = await listenThrough(C, [
+      steps(1.6, 2.95, 8),                                 // the verse from its middle: not heard
+      steps(3.02, 4.6, 8),                                 // the chorus, stopped 0.4 bar before its end: not heard
+      [...steps(0.02, 0.95, 6), ...steps(1.02, 2.85, 8), ...steps(3.0, 4.78, 8), 0.03],   // the whole card and the lap back: all three
+    ]);
+    const st = F4.S.get('songDrafts/' + id);
+    check('listens: a play begun mid-section is not a listen, one stopped before the section\'s end is not, a whole play to the lap is all three; the listens are saved in the draft with the song\'s own signature',
+      h[0] === '[]' && h[1] === '[]' && h[2] === '[0,1,2]' && st.listens && st.listens.heard.join() === '0,1,2' && st.listens.sig === run('sbListenSig(sbDocOf(sbDraft()))') && run('sbListensOf(sbDraft()).all'),
+      JSON.stringify({ h, stored: st.listens }));
+    const other4 = run(`(() => { const d = JSON.parse(JSON.stringify(sbDraft())); d.level = { versions: 'full', range: null }; return sbListensOf(d).all; })()`);
+    check('listens: a change to the song (here the level) starts them over', other4 === false, String(other4));
+  }
+  /* D5: every other blocker, each said, each writing nothing; the "does not fit" warning is shown and blocks nothing */
+  {
+    const variant = mut => run(`(() => { const keep = sbDrafts.get(sbSel), d = JSON.parse(JSON.stringify(keep)); (${mut})(d); sbDrafts.set(sbSel, d); try { return sbPublishWhy(d, sbSel); } finally { sbDrafts.set(sbSel, keep); } })()`);
+    const pitch = variant('d => { d.pitch.cents = 12.3; }'), pitch2 = variant('d => { d.pitch.cents = 12.3; d.audio.centsOff = 12.3; }');
+    const drift = variant('d => { d.beat.driftOff = 2; }'), unnamed = variant('d => { d.chart.sections[1].name = null; }');
+    const dirty = variant('d => { d.dirty = true; }'), nofit = variant('d => { d.beat.pinsNeeded = 21; }');
+    run(`SONG_FILES[${JSON.stringify(aid)}] = { file: 'x.mp3', bytes: 1, sha256: '${'0'.repeat(64)}', durationSec: 1 }`);
+    const listed = run('sbPublishWhy(sbDraft(), sbSel)');
+    run(`delete SONG_FILES[${JSON.stringify(aid)}]`);
+    run(`sbPublished.set('sb-clashsong001', { title: 'Clash', artist: '', ver: 1, doc: { audio: { id: ${JSON.stringify(aid)}, sha256: '${'1'.repeat(64)}' } } })`);
+    const clash = run('sbPublishWhy(sbDraft(), sbSel)');
+    run(`sbPublished.delete('sb-clashsong001')`);
+    const facts = {
+      pitch: pitch.length === 1 && /12\.3 cents above A = 440: a song more than 10 cents off A = 440 cannot be published\. Send the mp3 to Claude/.test(pitch[0]),
+      pitchSaidOnce: pitch2.length === 1 && /cannot be published/.test(pitch2[0]),
+      drift: drift.length === 1 && /2 places in the song drift more than 30 ms/.test(drift[0]),
+      unnamed: unnamed.length >= 1 && /no name/.test(unnamed[0]),
+      dirty: dirty.length === 1 && /not saved/.test(dirty[0]),
+      listed: listed.length === 1 && /on the site's list of song files/.test(listed[0]),
+      clash: clash.length === 1 && /already sb-clashsong001's, with other bytes/.test(clash[0]),
+      nofitDoesNotBlock: nofit.length === 0,
+    };
+    const nofitPanes = run(`(() => { const keep = sbDrafts.get(sbSel), d = JSON.parse(JSON.stringify(keep)); d.beat.pinsNeeded = 21; sbDrafts.set(sbSel, d); try { return [sbPreviewPaneHtml(d), sbPublishPaneHtml(d), sbPublishBtnHtml(d)]; } finally { sbDrafts.set(sbSel, keep); } })()`);
+    facts.nofitShown = nofitPanes.every((h, i) => i === 2 || /This song does not fit the builder: it cannot hold this record's beat\./.test(h)) && /This does not stop Publish/.test(nofitPanes[1]) && !/disabled/.test(nofitPanes[2]);
+    check('publish blockers: over 10 cents (said once, even when the validator says it too), a drift window not pinned, a section with no name, an unsaved title, an audio id on SONG_FILES, an audio id another song plays with other bytes: each the one reason; a record over 8 pins shows "This song does not fit the builder" on Preview and Publish and blocks nothing',
+      Object.values(facts).every(Boolean), JSON.stringify({ facts, pitch, drift, unnamed: unnamed.slice(0, 1), listed, clash }));
+    /* the same, through the button: nothing written */
+    const w0 = nW();
+    run(`(() => { const keep = sbDrafts.get(sbSel), d = JSON.parse(JSON.stringify(keep)); d.pitch.cents = 12.3; sbDrafts.set(sbSel, d); window.__keep = keep; })()`);
+    env.confirms.length = 0; run('sbPublish()'); await settle();
+    const notePitch = run('sbNote');
+    run('sbDrafts.set(sbSel, window.__keep)');
+    run(`(() => { const keep = sbDrafts.get(sbSel), d = JSON.parse(JSON.stringify(keep)); d.beat.driftOff = 1; sbDrafts.set(sbSel, d); })()`);
+    run('sbPublish()'); await settle();
+    const noteDrift = run('sbNote');
+    run('sbDrafts.set(sbSel, window.__keep)');
+    check('publish blockers through the button: over 10 cents and an unpinned drift window each write nothing and ask nothing', nW() === w0 && env.confirms.length === 0 && /^Not published: The record is 12\.3 cents above/.test(notePitch) && /^Not published: 1 place in the song drifts/.test(noteDrift),
+      JSON.stringify({ writes: since(w0), notePitch, noteDrift }));
+    /* At the press: the stored copy and the list are read fresh. */
+    const head = F4.S.get('songFiles/' + aid);
+    F4.S.set('songFiles/' + aid, Object.assign({}, head, { state: 'uploading' }));
+    const w1 = nW();
+    run('sbPublish()'); await settle();
+    const noteCopy = run('sbNote');
+    F4.S.set('songFiles/' + aid, head);
+    const fullList = {}; for(let i = 0; i < 200; i++) fullList['sb-filler' + String(i).padStart(5, '0')] = 1;
+    const meta0 = F4.S.get('builtSongsMeta/list');
+    F4.S.set('builtSongsMeta/list', { songs: fullList, updatedAt: TS });
+    run('sbPublish()'); await settle();
+    const noteFull = run('sbNote');
+    F4.S.set('builtSongsMeta/list', meta0);
+    check('publish at the press: an unfinished stored copy, and a list already holding 200 songs, each refuse with nothing written', nW() === w1 && /^Not published: the levelled copy in the database is missing, unfinished/.test(noteCopy) && /already holds 200 built songs/.test(noteFull),
+      JSON.stringify({ writes: since(w1), noteCopy, noteFull }));
+  }
+  /* D6: Export of the draft */
+  {
+    run('window.__saved = null; sbExport("draft")');
+    const sv = run('window.__saved');
+    const f = sv ? JSON.parse(await sv.blob.text()) : null;
+    check('export (a draft): one file, the Import shape { id, v, title, artist, audio, song }, the draft\'s own song, and builtSongCheck passes on it',
+      f && Object.keys(f).sort().join() === 'artist,audio,id,song,title,v' && f.id === id && run('builtSongCheck')(f.id, { v: f.v, title: f.title, artist: f.artist, audio: f.audio, song: f.song }).length === 0
+      && run('sbCanon')(f.song) === run('sbCanon(sbDocOf(sbDraft()).song)') && /^test-0-publish-sb-pubdraft0001\.json$/.test(sv.name),
+      sv ? sv.name : 'nothing saved');
+  }
+  /* D7: Publish: Cancel writes nothing; OK writes the song, then the list */
+  let pubDoc = null;
+  {
+    const w0 = nW();
+    env.confirmAnswer = false; env.confirms.length = 0;
+    run('sbPublish()'); await settle();
+    const cancelled = nW() === w0 && env.confirms.length === 1 && /^Publish "Test 0 Publish"\? It goes on the Songs page under More Play Along songs/.test(env.confirms[0]);
+    env.confirmAnswer = true;
+    run('sbPublish()'); await settle(200);
+    const seq = since(w0);
+    const doc = F4.S.get('builtSongs/' + id), meta = F4.S.get('builtSongsMeta/list');
+    pubDoc = doc;
+    const bare = doc ? Object.assign({}, doc) : null; if(bare) delete bare.savedAt;
+    check('publish: Cancel writes nothing; OK writes builtSongs/<id> and then builtSongsMeta/list (in that order, nothing else), the song in the rules\' exact shape with the server time',
+      cancelled && seq.join(' → ') === `set builtSongs/${id} → set builtSongsMeta/list` && doc && Object.keys(doc).sort().join() === 'artist,audio,savedAt,song,title,v' && doc.savedAt === TS && F4.st.violations.length === 0,
+      JSON.stringify({ cancelled, seq, violations: F4.st.violations.slice(0, 2) }));
+    check('publish: the stored song IS the draft\'s song (sorted-key compare), builtSongCheck passes on it as stored, and the list has it at edit 1 with the imported song kept at 3',
+      bare && run('sbCanon')(bare) === run('sbCanon(sbDocOf(sbDraft()))') && run('builtSongCheck')(id, bare).length === 0 && meta.songs[id] === 1 && meta.songs[other] === 3 && Object.keys(meta.songs).length === 2 && meta.updatedAt === TS,
+      JSON.stringify({ meta: meta && meta.songs }));
+    check('publish: the console shows the published song\'s page (Edit, Unpublish, Delete…, Export), "2 published; all pass today\'s checks", and the step bar\'s Publish is done',
+      !run('sbShowsSteps()') && /data-sb-act="edit"/.test(run('sbDetailHtml()')) && /data-sb-act="unpublish"/.test(run('sbDetailHtml()')) && /data-sb-act="delete-song"/.test(run('sbDetailHtml()')) && /data-sb-v="pub"/.test(run('sbDetailHtml()'))
+      && /2 published; all pass today's checks/.test(run('sbHealthHtml()')) && /^Published "Test 0 Publish" \(edit 1\)/.test(run('sbNote')), run('sbNote'));
+  }
+  /* D8: the student page: the REAL app merges the same store and draws the song on the Songs page and as its card */
+  const studentSync = async () => {
+    const page = appPage(ROOT);
+    page.ctx.__db = F4.db;
+    page.run("currentUser = { uid: 'test-student-0' }; ensureDb = async () => __db;");
+    await page.run('builtSongsSync()');
+    return page;
+  };
+  {
+    const page = await studentSync();
+    const facts = JSON.parse(page.run(`(() => {
+      const a = CLASS_ACTIVITIES.find(x => x.id === ${JSON.stringify(id)}), o = CLASS_ACTIVITIES.find(x => x.id === ${JSON.stringify(other)});
+      const out = { has: !!a, other: !!o, library: !!a && a.library === true && a.optional === true && caIsLibrarySong(a), track: !!SNIPPET_TRACKS[${JSON.stringify(id)}] && SNIPPET_TRACKS[${JSON.stringify(id)}].src === 'private:' + ${JSON.stringify(aid)} && !SNIPPET_TRACKS[${JSON.stringify(id)}].srcSlow };
+      out.row = songsLibraryHtml().includes('Test 0 Publish');
+      setLang('en'); const en = caCardBodyHtml(a); setLang('es'); const es = caCardBodyHtml(a); setLang('en');
+      out.en = /Verse 1/.test(en) && /Chorus/.test(en) && en.includes('Test &lt;b&gt;words&lt;/b&gt; &amp; "more"') && !en.includes('<b>words</b>') && /data-one-file="1"/.test(en) && /data-rate="0.85"/.test(en);
+      out.es = /Estrofa 1/.test(es) && /Coro/.test(es) && es.includes('Test &lt;b&gt;words&lt;/b&gt;');
+      return JSON.stringify(out); })()`));
+    check('student page: the real app (sim-app-page) merges the published song from the same store: on the Songs page list, an optional library card, its private one-file track; its card renders in English and Spanish (Verse 1 / Estrofa 1, Chorus / Coro), lyric line escaped, the four one-file stops opening on 0.85',
+      Object.values(facts).every(Boolean), JSON.stringify(facts));
+  }
+  /* D9: a reload: the published song is found again as published, with no change pending */
+  const R = makeConsole(consoleSrc, F4);
+  R.run('teacherMicSaveFile = (name, blob) => { window.__saved = { name, blob }; }');
+  R.run('renderTeacherSongBuilder()'); await settle();
+  R.run(`sbOpen(${JSON.stringify(id)})`); await settle();
+  check('reload: the song is listed as Published with no "Changes not published", opens on its page, and its listens are still all done',
+    /Published/.test(R.run('sbListHtml()')) && !/Changes not published/.test(R.run('sbListHtml()')) && !R.run('sbShowsSteps()') && R.run('sbPubChanged(sbDraft(), sbPublished.get(sbSel))') === false && R.run('sbListensOf(sbDraft()).all'),
+    R.run('sbListHtml()').slice(0, 300));
+  /* D10: Edit: the steps open; a new levelled copy is made; students keep the published song; the old copy stays */
+  const aidNew = id + '-' + sha(LEVELLED.get('a')).slice(0, 8);
+  {
+    R.run("sbPubAct('edit', { dataset: {} })");
+    const editing = R.run('sbShowsSteps()') && R.run('sbStepOn') === 1 && /editing: students keep the published song/.test(R.run('sbDetailHtml()')) && /data-sb-act="delete-song"/.test(R.run('sbDetailHtml()')) && !/data-sb-act="delete"[ >]/.test(R.run('sbDetailHtml()'));
+    box_set(R, '__f', fileOf('test-c.mp3', SRC_C, 15)); R.run('sbPickFile(__f)'); await settle();
+    R.run('sbGoStep(2)'); await settle();
+    box_set(R, '__levelNext', 'a'); R.run('sbRunLevel()'); await settle(300);
+    const doc = F4.S.get('builtSongs/' + id);
+    check('edit: Edit opens the steps (Delete… with the typed title, not Delete draft); levelling again stores a new copy and names it in the draft, while the published song and the copy it plays stay as they were',
+      editing && R.run('sbDraft().audio.id') === aidNew && keysOf('songFiles/' + aidNew + '/pieces/').length === 3 && keysOf('songFiles/' + aid).length > 0 && JSON.stringify(doc) === JSON.stringify(pubDoc),
+      JSON.stringify({ editing, draftAudio: R.run('sbDraft().audio.id'), oldKept: keysOf('songFiles/' + aid).length }));
+    check('edit: the list says "Changes not published", the listens start over, and Publish asks for them again', /Changes not published/.test(R.run('sbListHtml()')) && !R.run('sbListensOf(sbDraft()).all') && /Listen at the Preview step/.test(R.run('sbPublishWhy(sbDraft(), sbSel).join(" ")')),
+      R.run('sbPublishWhy(sbDraft(), sbSel).join(" | ")'));
+  }
+  /* D11: publish the change: the song, the list (edit 2), and only then the old copy goes */
+  {
+    R.run('sbGoStep(6)'); await settle();
+    await listenThrough(R, [[0.02, 0.5, 0.95, 1.02, 1.5, 2.0, 2.5, 2.85, 3.0, 3.5, 4.0, 4.5, 4.78, 0.03]]);
+    const w0 = nW();
+    R.env.confirmAnswer = true; R.env.confirms.length = 0;
+    R.run('sbPublish()'); await settle(300);
+    const seq = since(w0).filter(x => !x.includes('/pieces/'));
+    const iSong = seq.indexOf('set builtSongs/' + id), iList = seq.indexOf('set builtSongsMeta/list'), iDel = seq.indexOf('delete songFiles/' + aid);
+    const meta = F4.S.get('builtSongsMeta/list');
+    check('republish: asks "Publish your changes", then the song, then the list (edit 2, the imported song kept), and only then the replaced copy is deleted (head and pieces); the imported song\'s copy is untouched',
+      /^Publish your changes to "Test 0 Publish"\?/.test(R.env.confirms[0] || '') && iSong === 0 && iList === 1 && iDel > iList && meta.songs[id] === 2 && meta.songs[other] === 3 && keysOf('songFiles/' + aid).length === 0
+      && F4.S.get('builtSongs/' + id).audio.id === aidNew && keysOf('songFiles/' + oaid).length === otherCopyKeys && JSON.stringify(F4.S.get('builtSongs/' + other)) === otherDoc0,
+      JSON.stringify(seq));
+  }
+  /* D12: Unpublish: the draft keeps the edit number, then the list, then the song; the draft and its copy stay */
+  {
+    const w0 = nW();
+    R.env.confirmAnswer = false; R.run('sbUnpublish()'); await settle();
+    const cancelled = nW() === w0;
+    R.env.confirmAnswer = true; R.run('sbUnpublish()'); await settle(200);
+    const seq = since(w0);
+    const meta = F4.S.get('builtSongsMeta/list');
+    check('unpublish: Cancel writes nothing; OK writes the draft (its edit number, 2) first, then the list without the song, then deletes builtSongs/<id>; the draft and its copy stay; the imported song is untouched',
+      cancelled && seq.join(' → ') === `set songDrafts/${id} → set builtSongsMeta/list → delete builtSongs/${id}` && F4.S.get('songDrafts/' + id).pubVer === 2 && !F4.S.has('builtSongs/' + id)
+      && Object.keys(meta.songs).join() === other && meta.songs[other] === 3 && keysOf('songFiles/' + aidNew + '/pieces/').length === 3 && JSON.stringify(F4.S.get('builtSongs/' + other)) === otherDoc0 && R.run('sbShowsSteps()') && R.run('sbStepOn') === 7,
+      JSON.stringify({ cancelled, seq, pubVer: F4.S.get('songDrafts/' + id).pubVer, step: R.run('sbStepOn') }));
+    const page = await studentSync();
+    const ids = page.run(`JSON.stringify(builtSongIds())`);
+    check('unpublish: the student page merges the imported song only', ids === JSON.stringify([other]), ids);
+    const w1 = nW();
+    R.run('sbPublish()'); await settle(200);
+    check('publish after an unpublish counts on: edit 3, not 1 again (a Chromebook keeps a song by its edit number)', F4.S.get('builtSongsMeta/list').songs[id] === 3 && since(w1).join(' → ') === `set builtSongs/${id} → set builtSongsMeta/list`,
+      JSON.stringify({ songs: F4.S.get('builtSongsMeta/list').songs, seq: since(w1) }));
+  }
+  /* D13: leaving the view while Publish reads: nothing written after the leave */
+  {
+    const w0 = nW();
+    R.run('sbPublish()'); R.run("teacherSbLeave(); teacherView = 'students';");
+    await settle(100);
+    check('leaving mid-publish: nothing is written after the leave', nW() === w0, JSON.stringify(since(w0)));
+    R.run("teacherView = 'songbuilder'"); R.run('teacherSbPaint()'); await settle();
+  }
+  /* D14: the health line names a song that fails today's checks (as after a validator change) */
+  {
+    const h = R.run(`(() => { const p = sbPublished.get(${JSON.stringify(other)}), keep = p.doc; p.doc = JSON.parse(JSON.stringify(keep)); p.doc.song.bars[0] = 'Zz'; try { return sbHealthHtml(); } finally { p.doc = keep; } })()`);
+    check('health line: a published song that fails builtSongCheck today is named, with its reason', /2 published; this one fails today's checks/.test(h) && /Test 1 Imported/.test(h) && /bar 1 names/.test(h) && /2 published; all pass/.test(R.run('sbHealthHtml()')), h.slice(0, 300));
+  }
+  /* D15: the imported song: no draft, so no Edit or Unpublish; Export gives its file, which tools/built-song-check.mjs passes */
+  {
+    R.run(`sbOpen(${JSON.stringify(other)})`); await settle();
+    const page = R.run('sbDetailHtml()');
+    R.run("window.__saved = null; sbPubAct('export', { dataset: { sbV: 'pub' } })");
+    const sv = R.run('window.__saved'), text = sv ? await sv.blob.text() : '';
+    let tool = { status: -1, out: '' };
+    if(text){
+      const { mkdtempSync, writeFileSync, rmSync } = await import('node:fs');
+      const { tmpdir } = await import('node:os');
+      const { spawnSync } = await import('node:child_process');
+      const dir = mkdtempSync(join(tmpdir(), 'sb-export-')), file = join(dir, sv.name);
+      writeFileSync(file, text);
+      const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'built-song-check.mjs'), file, '--root', ROOT], { encoding: 'utf8' });
+      tool = { status: r.status, out: (r.stdout || '') + (r.stderr || '') };
+      rmSync(dir, { recursive: true, force: true });
+    }
+    check('imported song: its page has Delete… and Export but no Edit or Unpublish (it has no draft); Export saves its file and tools/built-song-check.mjs passes it (exit 0)',
+      !/data-sb-act="edit"/.test(page) && !/data-sb-act="unpublish"/.test(page) && /data-sb-act="delete-song"/.test(page) && /import a new song file there/.test(page) && tool.status === 0 && JSON.parse(text).id === other,
+      JSON.stringify({ status: tool.status, out: tool.out.trim().split('\n').slice(-2).join(' / ') }));
+  }
+  /* D16: Delete: the draft's OK / Cancel never deletes a published song; the typed title does; another song is untouched */
+  {
+    R.run(`sbOpen(${JSON.stringify(id)})`); await settle();
+    const w0 = nW();
+    R.env.confirms.length = 0; R.env.prompts.length = 0; R.env.confirmAnswer = true; R.env.promptAnswer = null;
+    R.run('sbDeleteDraft()'); await settle();
+    const viaDraft = nW() === w0 && R.env.confirms.length === 0 && R.env.prompts.length === 1 && /Type the title to delete it/.test(R.env.prompts[0]);
+    R.env.promptAnswer = 'Test 0'; R.run("sbPubAct('delete-song', { dataset: {} })"); await settle();
+    const wrong = nW() === w0 && /what you typed is not "Test 0 Publish"/.test(R.run('sbNote'));
+    R.env.promptAnswer = '  Test 0 Publish '; R.run("sbPubAct('delete-song', { dataset: {} })"); await settle(300);
+    const seq = since(w0).filter(x => !x.includes('/pieces/'));
+    const meta = F4.S.get('builtSongsMeta/list');
+    check('delete: the draft\'s Delete on a published song asks for the typed title (no OK / Cancel); Cancel and a wrong title delete nothing',
+      viaDraft && wrong, JSON.stringify({ prompts: R.env.prompts.length, confirms: R.env.confirms.length, note: R.run('sbNote') }));
+    check('delete: the typed title removes the list entry FIRST, then builtSongs/<id>, the draft and its copy; the imported song, its list entry and its copy are untouched; students\' progress is never written',
+      seq[0] === 'set builtSongsMeta/list' && seq[1] === 'delete builtSongs/' + id && seq[2] === 'delete songDrafts/' + id && seq.includes('delete songFiles/' + aidNew) && !F4.S.has('songDrafts/' + id) && !F4.S.has('builtSongs/' + id)
+      && keysOf('songFiles/' + aidNew).length === 0 && Object.keys(meta.songs).join() === other && meta.songs[other] === 3 && keysOf('songFiles/' + oaid).length === otherCopyKeys && JSON.stringify(F4.S.get('builtSongs/' + other)) === otherDoc0
+      && R.run('sbSel') === null && /^Deleted "Test 0 Publish"/.test(R.run('sbNote')),
+      JSON.stringify(seq));
+  }
+  check('part d: every write fits firestore.rules (BUILT SONGS, SONG FILES, drafts) and none goes to config/class or progress/',
+    F4.st.violations.length === 0 && !F4.st.writes.some(w => /^(config|progress)\//.test(w.path)) && F4.st.writes.length >= 10,
+    F4.st.writes.length + ' writes; ' + (F4.st.violations.slice(0, 3).join('; ') || 'no violation'));
+}
+
 /* ── main ── */
 const parts = siteParts('teacher.js', ROOT);
-for(const p of ['teacher-sb-core.js', 'teacher-sb-beat.js', 'teacher-sb-dsp.js', 'teacher-sb-chart.js', 'teacher-sb-pdf.js']) if(!parts.includes(p)){ console.log(`song-builder-sim: ${p} is not a console part (TEACHER_JS_PARTS in app/boot.js)`); process.exit(1); }
+for(const p of ['teacher-sb-core.js', 'teacher-sb-beat.js', 'teacher-sb-dsp.js', 'teacher-sb-chart.js', 'teacher-sb-pdf.js', 'teacher-sb-publish.js']) if(!parts.includes(p)){ console.log(`song-builder-sim: ${p} is not a console part (TEACHER_JS_PARTS in app/boot.js)`); process.exit(1); }
 let res;
 try { res = await runCases(parts.map(read).join('')); }
 catch(e){ console.log('song-builder-sim: the run threw: ' + (e && e.stack || e)); if(STUCK) console.log(`  ✗ ${STUCK_NAME} — ${STUCK}`); process.exit(1); }

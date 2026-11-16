@@ -28,9 +28,12 @@
    Students see it on their next sign-in or tab return (app/start.js); this console's own Songs view at once
    (builtSongsSync()).
 
-   NOT HERE (later parts): Publish / Edit / Unpublish / Delete of a song (Part d); Hidden in the Songs view
-   (config/class.hiddenActivities, the existing writer) is the off switch until then. A built song is never
-   moved to Class activities (teacher-songs.js shows no such button for an 'sb-' id).
+   NOT HERE: Publish, Edit, Unpublish, Delete and Export are the Song builder's (teacher-sb-publish.js, Part d,
+   2026-11-16), which writes builtSongs/{id} and builtSongsMeta/list in the same order as Import (the song, then
+   the list; the list first when a song comes off). An imported song shows there as a published song with no draft:
+   Delete and Export work on it; to change it, import a new file here. Hidden in the Songs view
+   (config/class.hiddenActivities, the existing writer) still takes any built song off students' pages. A built
+   song is never moved to Class activities (teacher-songs.js shows no such button for an 'sb-' id).
 
    WRITES go only to songFiles/{id} and its pieces (through teacher-songfiles.js), builtSongs/{id} and
    builtSongsMeta/list: never progress/{uid}, never config/class. tools/song-files-console-sim.mjs runs this
@@ -103,7 +106,7 @@ function teacherBsBlockHtml(){
       <button type="button" class="tg-seg-btn" data-tbs-act="refresh"${off}>Refresh</button></div>`;
   const lines = [teacherBsReadErr, teacherBsProgress, teacherBsNote].filter(Boolean);
   if(lines.length) html += `<div class="tg-note" role="status">${lines.map(l => `<b>${escHtml(l)}</b>`).join('<br>')}</div>`;
-  html += `<div class="tg-note">Play Along songs kept in the class database: every student sees them under Songs → More Play Along songs, with no code push. Import takes a song file (.json) and its .mp3 that Claude prepared; importing the same song again replaces it. Hidden in the Songs view takes one off the list.</div>
+  html += `<div class="tg-note">Play Along songs kept in the class database: every student sees them under Songs → More Play Along songs, with no code push. Import takes a song file (.json) and its .mp3 that Claude prepared; importing the same song again replaces it. The Song builder publishes, unpublishes and deletes them; Hidden in the Songs view takes one off students' pages.</div>
       <div class="tg-note"><label>Song file (.json): <input type="file" accept=".json,application/json" data-tbs-file="json"${off}></label>
         <label>Its .mp3: <input type="file" accept=".mp3,audio/mpeg" data-tbs-file="mp3"${off}></label>
         <button type="button" class="tg-seg-btn" data-tbs-act="import"${busy || !teacherBsPicked.json || !teacherBsPicked.mp3 ? ' disabled' : ''}>Import</button></div>`;
