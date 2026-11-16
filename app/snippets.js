@@ -1118,6 +1118,9 @@ function cancelQueuedClicks(st){
   });
   return back;
 }
+/* The latest count whose click is still kept (-1: none). After a switch the scheduler starts from it, not from -1:
+   that count has clicked or is about to, and the twin swapped in a few ms behind reaches it a second time. */
+function keptClickCount(st){ return (st.clicks || []).reduce((m, o) => o._nb > m ? o._nb : m, -1); }
 /* One of the snippet's <audio> elements failed. The PLAYING one stops the
    card and says so; the twin is just dropped (the Guitar toggle falls back to
    a reload). The same shape as the practice card's pcAudioError, and both are
@@ -1222,7 +1225,7 @@ function snipSetTier(btn, which){
   slowestApplyRate(audio, snipRate(card));   // Slowest <-> Slow is the same file, just the rate
   // The count is queued again on the new clock: take back the one already queued (QUEUED CLICKS).
   const back = cancelQueuedClicks(snipState);
-  snipState.lastBeat = -1;
+  snipState.lastBeat = keptClickCount(snipState);
   if(audio.getAttribute('src') === src || audio.src.endsWith(src)){
     // Same file: only the rate moved, and `at` is where it already is. A seek
     // there would only make a gap (an mp3 seek lands late — see THE TWIN).

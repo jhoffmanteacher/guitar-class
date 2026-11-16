@@ -1139,7 +1139,9 @@ function pcClick(at, accent, countIn, gain){
   return o;
 }
 /* The next counted beat, scheduled once it is under 100 ms away. `lastBeat`
-   is reset on a loop or a track switch, so a jump back never skips beats. */
+   is reset on a loop, and on a track switch goes back to the last count whose
+   click was kept (keptClickCount, app/snippets.js), so a jump back never
+   skips beats and never clicks one twice. */
 function pcScheduleClick(st, now, back){
   const bpb = st.L.tr.beatsPerBar * clickSub(st.L.tr);   // clicks a bar — see CLICK IN SIX
   const beatPos = snipBarsAt(st.win, now) * bpb;
@@ -1477,7 +1479,7 @@ function pcRetrack(root){
   st.win = pcWindow(st.L, slow);
   // The count is queued again on the new clock: take back the one already queued (QUEUED CLICKS).
   const back = cancelQueuedClicks(st);
-  st.lastBeat = -1;
+  st.lastBeat = keptClickCount(st);
   const at = snipTimeAtBars(st.win, isFinite(barsIn) && barsIn > 0 ? barsIn : 0);
   const src = snippetSrc(st.L.tr, slow, guitar);
   slowestApplyRate(st.audio, pcRate(root));   // Slowest <-> Slower and Slow <-> Normal are the same file, just the rate

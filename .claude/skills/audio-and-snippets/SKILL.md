@@ -416,7 +416,9 @@ chart and the beat map. It has no ears: `tools/beat-audit.py` is the tool that l
 - **Where the music carries on through a switch, the count taken back is queued again at once** (THE MUSIC CARRIES ON
   in `app/snippets.js`, fixed 2026-11-16): the same file at another rate, or the twin swapped in. `cancelQueuedClicks()`
   returns the count it took back and `pcRetrack` / `snipSetTier` hand it to the scheduler, which queues it by number.
-  Before, a press less than a frame before a count lost that click. After touching the click scheduling or a
+  Before, a press less than a frame before a count lost that click. And after a switch the scheduler starts from the
+  latest count whose click was kept (`keptClickCount()`), not from -1: the twin swapped in a few ms behind reached a
+  count that had just clicked and clicked it twice. After touching the click scheduling or a
   take-back: `node tools/metro-press-sim.mjs` (Node only, about 35 s, exit 0; not in `checks.mjs`).
 - The count-in clicks at the tempo of the bar the song comes in on (`pcCountIn`, fixed 2026-11-12; it used the
   window's average bar, 16.9% too fast at Madrecita Querida's Ending).
