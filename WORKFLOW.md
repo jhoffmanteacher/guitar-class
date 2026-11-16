@@ -430,17 +430,33 @@ real song through Import (part a2) is still open.
     store giving the same song, each choice of step); 9 of 9 new planted faults red; the walk 67 of 67, 28
     screenshots looked at (5 new: the choice of step, the imported song's page, its Beat, Volume and Chart steps and
     its Preview).
-  - **How the work order was read (2, 3 and 6 stand, Jonathan: "whatever you think", "ok", "ok"):** (2) The
-    listens are the CARD's sections (a from-to range: its first and last); "reaches the section's end" = one unbroken
-    play that began within the section's first half bar and got within 0.3 bar of its end (a lap back to the start
-    counts); a card of 1 or 2 sections needs 1 or 2; a change of level or range starts them over. (3) The Chart step's
+  - **Decided 2026-11-16 (the lead, on Jonathan's "you pick the way to make things smoothest. i don't know if three
+    listens are necessary"; this REVERSES the work order's three listens), built in `a4a18ae`:** no listen gate
+    (Preview says "Play it through once before you publish"; nothing counts plays); Publish is the Preview step's top
+    button (step 7 stays as the song's state page); a chart given at step 1 (pasted, a text file or a chords pdf) is
+    read when Next saves the draft, and step 4 opens on the grid when nothing needs settling; Volume starts by itself
+    on arriving at step 2 with the original in the tab (once per file); a new draft opens on Full chords, the whole
+    song; "Fix in the grid" is highlighted only when something needs settling. Publish is open when the validator
+    passes, the pitch is within 10 cents, the levelled copy is the picked mp3's, and every drift window is pinned (the
+    drift rule kept: the decision did not name it). Happy path (steady record, clean chords pdf): 30 presses before,
+    23 after (the 8 Beat taps included), and no 3-minute listen.
+  - **Review round 1 (`aa6b8d3`):** R1-1 the song and the list in ONE transaction (both or neither); R1-2 a new mp3
+    picked after levelling shuts Preview and Publish until Volume runs ("A new mp3 was picked: level it at step 2
+    first."); R1-3 / R1-4 an edit number is never used twice (`teacherBsNextVer`: the seconds since 2026-01-01, past
+    the last one, for Publish and Import; shown as "edit of <date, time>"); R1-6 a new copy clears the drift number
+    and the Beat step measures it on that copy; R1-8 the preview card follows the language; R1-10 stale comments.
+    **Accepted limits (the lead, 2026-11-16, on Jonathan's "i don't think we should worry too much about wifi
+    dropping at those specific moments"):** R1-5 a replaced or unpublished copy is deleted at once, so a student with
+    the song open keeps the old version, or loses its sound, until they reload (the confirms say so); R1-7 an
+    Unpublish or Delete that fails half way can leave a `builtSongs/{id}` doc that no screen lists (harmless to
+    students, who read only listed songs; visible in the Firebase console). Also: a record whose pitch could not be
+    read is stored as centsOff 0 and publishes (Part b's rule); Hidden in the Songs view is the reversible off switch,
+    Delete… is not.
+  - **How the work order was read (3 and 6 stand, Jonathan: "ok", "ok"; 2, the listens, was replaced above):** (3) The Chart step's
     flags (a refused line not dealt with, a chord not taught and not kept) WARN at Publish and do not block (the work
     order's list of blockers does not name them). (4) Unpublish of an edited song whose copy was replaced deletes the
     published (old) copy and keeps the draft's. (7) The preview card follows the console's language (its header's
-    Español button), like every card the console draws; the builder adds no switch. (8) An edit number never restarts: Unpublish keeps it in the draft (`pubVer`)
-    and the next Publish counts on, because a Chromebook keeps a song by that number (a reused number would show it the
-    old chart). The same can happen to an IMPORTED song deleted and imported again under the same id (Part a2's
-    Import counts from the list only): not fixed, said here.
+    Español button), like every card the console draws; the builder adds no switch. (8) An edit number is never used twice (review R1-3 and R1-4: `teacherBsNextVer`, for Publish and Import alike).
   - **Proof:** `tools/song-builder-sim.mjs` 101 cases (27 new; pin re-set): the listens (a mid-section start, a short
     stop, a whole play to the lap), every Publish blocker as its one reason and writing nothing, the stored copy and the
     list read at the press, Publish's two writes in order and in the rules' shape (the sim's rules check now holds
