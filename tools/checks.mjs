@@ -19391,7 +19391,7 @@ function checkSongFilesConsole() {
      and Level flow.
    ════════════════════════════════════════════════════════════════════ */
 const SB_DSP_TEST_PIN = 45;          // 35 -> 37 (2026-11-15, the browser walk): a soft intro's bar 1; taps 4% slow or 5% fast; -> 45 (2026-11-15, the beat track): a strummed record that drifts (7), a steady record's 2 pins (1)
-const SONG_BUILDER_SIM_PIN = 57;     // 2026-11-15: first count 32; -> 36 the same day: Clear this step (Volume, Beat) and Level it again (4); -> 39: the beat track saved and found again, the "send to Claude" line (3); -> 57 (2026-11-16, Part c): the chart reader, the shapes, chart to song, the grid, the Chart and Level flow (18)
+const SONG_BUILDER_SIM_PIN = 73;     // 2026-11-15: first count 32; -> 36 the same day: Clear this step (Volume, Beat) and Level it again (4); -> 39: the beat track saved and found again, the "send to Claude" line (3); -> 57 (2026-11-16, Part c): the chart reader, the shapes, chart to song, the grid, the Chart and Level flow (18); -> 73 (2026-11-16, pdfs): the text of a page, the pdf flow with a made-up pdf.js (16)
 function checkSongBuilder() {
   head('1en. Song builder: the sound code and the drafts are run, their case counts pinned');
   let bad = 0;

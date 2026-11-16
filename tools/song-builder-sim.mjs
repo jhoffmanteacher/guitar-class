@@ -30,7 +30,16 @@
    (12 roots, major / minor / 5) pass the validator's shape rule. THE GRID's edits keep every section's lyric rows
    adding up to its bars. THE FLOW (its own console and store, a made-up draft with a beat): read, a refused line left
    out and typed, a chord kept, a bar split and held, a new section named, Undo, the level and a range, Clear this
-   step, a chart given at step 1, a meter change, a reload; every write a songDrafts write. */
+   step, a chart given at step 1, a meter change, a reload; every write a songDrafts write.
+
+   PDFS (2026-11-16; teacher-sb-pdf.js). THE TEXT OF A PAGE: the real sbPdfTextOf (pure) on made-up pages the tool
+   lays out word by word (chords over lyrics, a line given as one item, "F" + "#m" touching, two columns, a grid of
+   chord names, a one-column sheet wider than the middle, page numbers and URLs, nothing); the one-column and the
+   two-column sheets also go through the real reader sbChartRead. THE FLOW (its own console and store): pdf.js is
+   STUBBED (pcSheetLoadPdfjs returns a made-up library that serves the made-up pages by the file's bytes and counts
+   getTextContent and destroy); sbPdfMounted runs as it is, since the vm's inert page has no pane slot and it returns
+   before drawing. A chords pdf at step 1 of a new song, two in one pick at step 4, a scan, a tab pdf, the refusals,
+   Remove, another draft opened; no pdf action writes anything. */
 import { readFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -439,6 +448,7 @@ async function runCases(consoleSrc){
     F.st.writes.length + ' writes; ' + (F.st.violations.slice(0, 3).join('; ') || 'no violation'));
   check('no write to config/class, progress/, builtSongs or builtSongsMeta', !F.st.writes.some(w => /^(config|progress|builtSongs)/.test(w.path)));
   await chartCases(consoleSrc, check);
+  await pdfCases(consoleSrc, check);
   return out;
 }
 function box_set(C, k, v){ C.box[k] = v; }
@@ -664,9 +674,201 @@ async function chartCases(consoleSrc, check){
     F2.st.writes.length + ' writes; ' + (F2.st.violations.slice(0, 2).join('; ') || [...new Set(F2.st.writes.map(w => w.path.split('/')[0]))].join(', ')));
 }
 
+/* ── Pdfs: the text of a page, and the flow with a made-up pdf.js ── */
+/* A word on a made-up page: x = its left edge, y = its baseline (y down), 6 points a letter, 10 points high. */
+const PCW = 6;
+const W = (x, y, s) => ({ s, x, y, w: s.length * PCW, h: 10 });
+const PAGES = {
+  /* one column, chords over lyrics, a stanza gap before the chorus (36 points against 12) */
+  oneCol: [W(72, 80, '[Verse]'), W(72, 92, 'G'), W(72 + 18 * PCW, 92, 'D'), W(72, 104, 'Walking down the made-up road'), W(72, 116, 'Em'), W(72 + 16 * PCW, 116, 'C'),
+    W(72, 128, 'Singing all the way back home'), W(72, 164, '[Chorus]'), W(72, 176, 'C'), W(72 + 10 * PCW, 176, 'G'), W(72, 188, 'Light it up tonight')],
+  oneColText: ['[Verse]', 'G'.padEnd(18) + 'D', 'Walking down the made-up road', 'Em'.padEnd(16) + 'C', 'Singing all the way back home', '', '[Chorus]', 'C'.padEnd(10) + 'G', 'Light it up tonight'].join('\n'),
+  /* a whole line as ONE item with inner spaces, and one with leading spaces */
+  oneItem: [W(72, 100, 'G        D        Em'), W(72, 112, 'Made-up words for the test'), W(72, 124, '    C'), W(72, 136, 'more made-up words')],
+  oneItemText: ['G        D        Em', 'Made-up words for the test', '    C', 'more made-up words'].join('\n'),
+  /* "F" and "#m" as two touching items */
+  touch: [W(72, 100, 'F'), W(72 + PCW, 100, '#m'), W(72 + 8 * PCW, 100, 'G'), W(72, 112, 'Made-up words here')],
+  touchText: 'F#m'.padEnd(8) + 'G\nMade-up words here',
+  /* two columns of lyrics with chords: a verse at x 50, a chorus at x 330 */
+  twoCol: (() => {
+    const L =[['[Verse]'], [['G', 0], ['D', 14]], ['Walking down the road'], [['Em', 0], ['C', 12]], ['Singing on my way'], [['C', 0], ['G', 8]], ['Home again tonight']];
+    const R = [['[Chorus]'], [['Am', 0], ['F', 12]], ['Under the made-up moon'], [['C', 0], ['G', 10]], ['Light it up again'], [['Dm', 0], ['E', 8]], ['Till the morning comes']];
+    const out = [];
+    [[L, 50], [R, 330]].forEach(([rows, x0]) => rows.forEach((r, k) => r.forEach(it => typeof it === 'string' ? out.push(W(x0, 100 + 12 * k, it)) : out.push(W(x0 + it[1] * PCW, 100 + 12 * k, it[0])))));
+    return out;
+  })(),
+  twoColText: ['[Verse]', 'G'.padEnd(14) + 'D', 'Walking down the road', 'Em'.padEnd(12) + 'C', 'Singing on my way', 'C'.padEnd(8) + 'G', 'Home again tonight', '',
+    '[Chorus]', 'Am'.padEnd(12) + 'F', 'Under the made-up moon', 'C'.padEnd(10) + 'G', 'Light it up again', 'Dm'.padEnd(8) + 'E', 'Till the morning comes'].join('\n'),
+  /* a grid of chord names in four aligned columns, no lyric words: a clear gap down the middle on every row */
+  gridRows: ['G D Em C', 'Am F C G', 'D A Bm G', 'E B C#m A', 'C G Am F', 'F C Dm Bb'],
+  /* one column whose lyric lines cross the middle (chords far apart above them) */
+  wideRows: [['G', 'D'], 'Walking down the made-up road with nothing on my mind at all', ['Em', 'C'], 'Singing all the way back home under a made-up summer sky', ['C', 'G'], 'Light it up and let the whole made-up block glow tonight'],
+  /* page numbers and URLs */
+  junk: [W(72, 40, 'www.example.org'), W(72, 100, 'G'), W(72 + 10 * PCW, 100, 'D'), W(72, 112, 'Some made-up words here'), W(72, 700, 'Page 2 / 3'), W(72, 712, 'https://example.org/made-up-song')],
+  junkText: 'G'.padEnd(10) + 'D\nSome made-up words here',
+};
+PAGES.grid = PAGES.gridRows.flatMap((r, k) => r.split(' ').map((c, j) => W([72, 172, 372, 472][j], 100 + 12 * k, c)));
+PAGES.wide = PAGES.wideRows.flatMap((r, k) => Array.isArray(r) ? [W(72, 100 + 12 * k, r[0]), W(400, 100 + 12 * k, r[1])] : [W(72, 100 + 12 * k, r)]);
+
+/* The made-up pdf.js: a file's bytes name its record; getTextContent and destroy are counted. */
+const PDFS = new Map();
+const tcOf = items => ({ items: items.map(i => ({ str: i.s, transform: [i.h, 0, 0, i.h, i.x, i.y], width: i.w, height: i.h })) });
+function pdfOf(name, tag, pages){
+  const bytes = new TextEncoder().encode('%PDF-1.7\n% made-up ' + tag + '\n' + 'x'.repeat(40));
+  const rec = { name, pages, opened: 0, textCalls: 0, destroyed: 0 };
+  PDFS.set(sha(bytes), rec);
+  return { file: { name, size: bytes.length, type: 'application/pdf', arrayBuffer: async () => bytes.slice().buffer }, rec };
+}
+const FAKE_PDFJS = {
+  getDocument({ data }){
+    const rec = PDFS.get(sha(data));
+    if(!rec) return { promise: Promise.reject(Object.assign(new Error('Invalid PDF structure.'), { name: 'InvalidPDFException' })) };
+    rec.opened++;
+    const doc = { numPages: rec.pages.length,
+      async getPage(n){ const items = rec.pages[n - 1]; return { getViewport: () => ({ convertToViewportPoint: (x, y) => [x, y], width: 612, height: 792 }), getTextContent: async () => { rec.textCalls++; await tick(); return tcOf(items); } }; },
+      destroy(){ rec.destroyed++; } };
+    return { promise: Promise.resolve(doc) };
+  },
+};
+async function pdfCases(consoleSrc, check){
+  const F3 = makeDb(), C = makeConsole(consoleSrc, F3), { run } = C;
+  C.box.pcSheetLoadPdfjs = async () => FAKE_PDFJS;      // app/cards.js is not in the console's vm
+  const textOf = run('sbPdfTextOf');
+  const read = (t, m) => { const r = run('sbChartRead')(t, m || '4/4'); return { secs: r.sections.map(s => (s.name || '?') + ':' + s.bars.join(' ')).join(' / '), bad: r.bad.length, fmt: r.fmt }; };
+  const norm = t => t.split('\n').map(l => l.trim().split(/\s+/).join(' '));
+
+  /* A. the text of a page (pure) */
+  {
+    const t = textOf(PAGES.oneCol), r = read(t);
+    check('pdf text: one column of chords over lyrics comes out line by line (each chord line before its lyric line, chords over their words, a blank line at the stanza gap); the reader takes it: verse G D Em C, chorus C G, 0 refused',
+      t === PAGES.oneColText && r.secs === 'verse:G D Em C / chorus:C G' && r.bad === 0 && r.fmt === 'chords over lyrics', JSON.stringify(t) + ' | ' + JSON.stringify(r));
+  }
+  {
+    const t = textOf(PAGES.oneItem);
+    check('pdf text: a line given as ONE item keeps its inner spaces, and an item\'s leading spaces keep its place', t === PAGES.oneItemText, JSON.stringify(t));
+  }
+  {
+    const t = textOf(PAGES.touch);
+    check('pdf text: "F" and "#m" as two touching items join to "F#m" with no space', t === PAGES.touchText, JSON.stringify(t));
+  }
+  {
+    const t = textOf(PAGES.twoCol), r = read(t);
+    check('pdf text: two columns of lyrics with chords are read left column first, then the right, a blank line between; the reader takes it: verse 6 bars, chorus 6 bars, 0 refused',
+      t === PAGES.twoColText && r.secs === 'verse:G D Em C C G / chorus:Am F C G Dm E' && r.bad === 0, JSON.stringify(t).slice(0, 400) + ' | ' + JSON.stringify(r));
+  }
+  {
+    const t = textOf(PAGES.grid), got = norm(t);
+    check(`pdf text: a grid of chord names in aligned columns with no lyric words is ONE column: ${PAGES.gridRows.length} rows in order, 4 chords each`, JSON.stringify(got) === JSON.stringify(PAGES.gridRows), JSON.stringify(got));
+  }
+  {
+    const t = textOf(PAGES.wide), got = norm(t), want = PAGES.wideRows.map(r => Array.isArray(r) ? r.join(' ') : r);
+    check('pdf text: a one-column sheet whose lyric lines cross the middle is not split: 6 lines in order', JSON.stringify(got) === JSON.stringify(want), JSON.stringify(got));
+  }
+  {
+    const t = textOf(PAGES.junk);
+    check('pdf text: "Page 2 / 3", a bare https URL and a bare www address are dropped; the song lines stay', t === PAGES.junkText, JSON.stringify(t));
+  }
+  check('pdf text: no items, null, and only blank items give \'\'', textOf([]) === '' && textOf(null) === '' && textOf([W(72, 100, '   ')]) === '', JSON.stringify([textOf([]), textOf(null)]));
+
+  /* B. the flow */
+  let pdfW = 0;
+  const reading = () => run('sbPdf.reading');
+  const pick = async (kind, files) => {
+    const w0 = F3.st.writes.length;
+    C.box.__pdfs = files.map(f => f.file || f);
+    run(`sbPdfAdd(${JSON.stringify(kind)}, __pdfs)`);
+    const t0 = Date.now();
+    do { await settle(); } while(reading() && Date.now() - t0 < SETTLE_MAX_MS);
+    pdfW += F3.st.writes.length - w0;
+  };
+  const otherId = 'sb-pdfotherdraft1';
+  F3.S.set('songDrafts/' + otherId, { v: 1, title: 'Test 1 Other', artist: 'Nobody', step: 4, source: { name: 'test.mp3', bytes: 400000, sha256: hex64(3), durationSec: 60, sampleRate: 44100, channels: 2, kbps: 192 },
+    audio: { id: otherId + '-abcdef12', bytes: 1900000, sha256: hex64(4), durationSec: 60, centsOff: 2, gainDb: 1, sourceSha256: hex64(3) }, volume: { before: -14, after: -12.5, samplePeak: -1.2, truePeak: -1.1, ceilingDb: -1, encodes: 1 },
+    pitch: { cents: 2, peaks: 10 }, beat: { meter: '4/4', bpm: 96, anchor: 0.5, pins: [], trackBpm: 96, trackSub: 2, driftOff: 0, pinsNeeded: 2 }, chart: null, level: null, savedAt: 0 });
+  run('renderTeacherSongBuilder()'); await settle();
+  const names = () => run('sbPdf.files.map(f => f.name).join(",")');
+  /* B9: a chords pdf at step 1 of a new song */
+  const A = pdfOf('chords-a.pdf', 'a', [PAGES.oneCol]);
+  run('sbNewSong()'); await settle();
+  C.box.__f = fileOf('test-a.mp3', SRC_A, 24); run('sbPickFile(__f)'); await settle();
+  run("sbNew.title = 'Test 0 Pdf'; sbNew.artist = 'Nobody'");
+  await pick('chords', [A]);
+  const t1 = PAGES.oneColText, note1 = run('sbNote'), inNew = run('sbNew && sbNew.chartText');
+  const before = new Set([...F3.S.keys()].filter(k => k.startsWith('songDrafts/')));
+  run('sbSaveUpload()'); await settle();
+  const nid = ([...F3.S.keys()].filter(k => k.startsWith('songDrafts/') && !before.has(k))[0] || '').slice(11), nd = nid ? F3.S.get('songDrafts/' + nid) : null;
+  check('pdf flow: a chords pdf picked on a NEW song at step 1 goes into its chart text; Next saves it as the draft\'s chart.text; the pdf follows the new draft (sbPdf.id), still listed',
+    inNew === t1 && /9 lines read into the chart box \(it is read at step 4\)\./.test(note1) && nd && nd.chart && nd.chart.text === t1 && run('sbSel') === nid && run('sbPdf.id') === nid && run('sbPdfMine().length') === 1 && A.rec.textCalls === 1,
+    JSON.stringify({ note: note1, inNew: inNew === t1, chart: nd && nd.chart && nd.chart.text === t1, id: run('sbPdf.id') === nid, mine: run('sbPdfMine().length') }));
+  /* B10: two chords pdfs in ONE pick at step 4 land in pick order after what is there */
+  run('sbGoStep(4)'); await settle();
+  const B = pdfOf('chords-b.pdf', 'b', [PAGES.twoCol]), Cc = pdfOf('chords-c.pdf', 'c', [PAGES.oneItem, PAGES.touch]);
+  await pick('chords', [B, Cc]);
+  const paste = () => run('sbChFor(sbSel).text');
+  const want10 = [t1, PAGES.twoColText, PAGES.oneItemText + '\n\n' + PAGES.touchText].join('\n\n');
+  check('pdf flow: two chords pdfs in one pick at step 4 both land in the paste box, in pick order, after the text that was there (a two-page pdf\'s pages in order); the box shows', paste() === want10 && run('sbChFor(sbSel).view') === 'paste'
+    && /lines read into the chart box\./.test(run('sbNote')) && names() === 'chords-a.pdf,chords-b.pdf,chords-c.pdf',
+    JSON.stringify({ starts: (paste() || '').slice(0, 30), hasB: (paste() || '').includes('Under the made-up moon'), hasC: (paste() || '').includes('F#m'), files: names(), note: run('sbNote') }));
+  /* B11: a scan */
+  const S = pdfOf('scan.pdf', 'scan', [[], [W(500, 780, '1')]]);
+  const p11 = paste();
+  await pick('chords', [S]);
+  const fS = run('sbPdf.files.find(f => f.name === "scan.pdf")');
+  check('pdf flow: a chords pdf with no text on its pages is a picture: 0 text pages of 2, the note says so, the chart text unchanged, the pdf kept to be shown',
+    fS && fS.textPages === 0 && fS.pages === 2 && /scan\.pdf is a picture \(a scan or a photo\)/.test(run('sbNote')) && paste() === p11 && S.rec.textCalls === 2, JSON.stringify({ file: fS && { textPages: fS.textPages, pages: fS.pages }, note: run('sbNote'), same: paste() === p11 }));
+  /* B12: a tab pdf */
+  const T = pdfOf('tab-1.pdf', 'tab1', [PAGES.oneCol]);
+  await pick('tab', [T]);
+  const fT = run('sbPdf.files.find(f => f.name === "tab-1.pdf")');
+  check('pdf flow: a tab pdf is only shown: its text is never asked for (getTextContent 0 times), the chart text unchanged, the note says it is shown beside the chart',
+    fT && fT.kind === 'tab' && T.rec.textCalls === 0 && T.rec.opened === 1 && paste() === p11 && /1 tab pdf added: shown beside the chart\./.test(run('sbNote')), JSON.stringify({ calls: T.rec.textCalls, note: run('sbNote'), same: paste() === p11 }));
+  /* B13: refusals, one pick each */
+  {
+    const notPdf = new TextEncoder().encode('Made-up words, not a pdf at all');
+    const extra = [2, 3, 4, 5].map(n => pdfOf(`tab-${n}.pdf`, 'tab' + n, [PAGES.oneCol]));
+    const tries = [
+      ['not a pdf', 'chords', [{ name: 'notes.pdf', size: notPdf.length, arrayBuffer: async () => notPdf.slice().buffer }], /notes\.pdf was not added: it is not a pdf\./, 5],
+      ['an empty file', 'chords', [{ name: 'empty.pdf', size: 0, arrayBuffer: async () => new ArrayBuffer(0) }], /empty\.pdf was not added: it is empty/, 5],
+      ['the same file twice', 'tab', [T], /tab-1\.pdf is here already\./, 5],
+      ['the 9th file', 'tab', extra, /tab-5\.pdf was not added: 8 pdfs at most\./, 8],
+    ];
+    const off = [];
+    for(const [what, kind, fs, re, n] of tries){
+      const p0 = paste();
+      await pick(kind, fs);
+      const note = run('sbNote');
+      if(!(re.test(note) && run('sbPdf.files.length') === n && paste() === p0 && !/notes\.pdf|empty\.pdf|tab-5\.pdf/.test(names()) && names().split(',').filter(x => x === 'tab-1.pdf').length === 1)) off.push(`${what}: ${note} [${names()}]`);
+    }
+    check(`pdf flow: refused, each with its reason in the note and nothing added: not a pdf, an empty file, the same file twice, the 9th file (SB_PDF_MAX_FILES ${run('SB_PDF_MAX_FILES')}); the 3 before the 9th are added`, !off.length && extra[3].rec.opened === 0, off.join(' ; ') || names());
+  }
+  /* B14: Remove */
+  {
+    const w0 = F3.st.writes.length, i = run('sbPdf.files.findIndex(f => f.name === "scan.pdf")');
+    run(`sbPdfAct('pdf-remove', { dataset: { sbI: '${i}' } })`); await settle();
+    pdfW += F3.st.writes.length - w0;
+    const others = [A, B, Cc, T].map(x => x.rec.destroyed);
+    check('pdf flow: Remove drops that one pdf and destroys its document; the other 7 stay, none destroyed', i >= 0 && S.rec.destroyed === 1 && run('sbPdf.files.length') === 7 && !/scan\.pdf/.test(names()) && others.every(n => n === 0) && /scan\.pdf is removed\./.test(run('sbNote')),
+      JSON.stringify({ i, destroyed: S.rec.destroyed, others, files: names() }));
+  }
+  /* B15: another draft opened */
+  {
+    const kept = [A, B, Cc, T].map(x => x.rec).concat([2, 3, 4].map(n => [...PDFS.values()].find(r => r.name === `tab-${n}.pdf`)));
+    const w0 = F3.st.writes.length;
+    run(`sbOpen(${JSON.stringify(otherId)})`); await settle();
+    pdfW += F3.st.writes.length - w0;
+    const des = kept.map(r => r.destroyed);
+    check(`pdf flow: opening another draft drops every pdf and destroys each document once (${kept.length} of ${kept.length}); none is shown for the other draft`, run('sbSel') === otherId && run('sbPdf.id') === otherId && run('sbPdf.files.length') === 0 && run('sbPdfMine().length') === 0 && des.every(n => n === 1),
+      JSON.stringify({ id: run('sbPdf.id') === otherId, files: run('sbPdf.files.length'), destroyed: des }));
+  }
+  /* B16 */
+  const dw = F3.st.writes;
+  check('pdf flow: no pdf action wrote anything (0 writes across 8 picks, a Remove and an open); the run\'s only writes are the new draft\'s songDrafts write, within the rules',
+    pdfW === 0 && dw.length === 1 && dw[0].path === 'songDrafts/' + nid && F3.st.violations.length === 0, JSON.stringify({ pdfWrites: pdfW, writes: dw.map(w => w.path) }));
+}
+
 /* ── main ── */
 const parts = siteParts('teacher.js', ROOT);
-for(const p of ['teacher-sb-core.js', 'teacher-sb-beat.js', 'teacher-sb-dsp.js', 'teacher-sb-chart.js']) if(!parts.includes(p)){ console.log(`song-builder-sim: ${p} is not a console part (TEACHER_JS_PARTS in app/boot.js)`); process.exit(1); }
+for(const p of ['teacher-sb-core.js', 'teacher-sb-beat.js', 'teacher-sb-dsp.js', 'teacher-sb-chart.js', 'teacher-sb-pdf.js']) if(!parts.includes(p)){ console.log(`song-builder-sim: ${p} is not a console part (TEACHER_JS_PARTS in app/boot.js)`); process.exit(1); }
 let res;
 try { res = await runCases(parts.map(read).join('')); }
 catch(e){ console.log('song-builder-sim: the run threw: ' + (e && e.stack || e)); if(STUCK) console.log(`  ✗ ${STUCK_NAME} — ${STUCK}`); process.exit(1); }

@@ -550,7 +550,7 @@ function renderTeacherStudents(){
      the list exactly as before. */
   const today=dayStr(new Date());
   const behind={};
-  rows.forEach(({stu})=>{ const b=teacherBehindFor(stu, teacherClassConfig, today); if(b) behind[stu.uid]=b; });
+  rows.forEach(({stu})=>{ if(teacherPmIsTeacher(stu)) return; const b=teacherBehindFor(stu, teacherClassConfig, today); if(b) behind[stu.uid]=b; });
   const behindN=Object.keys(behind).length;
   const filter=teacherStuFilter;
   /* Back from an absence (teacherAbsenceFor): worked out only once the days have been read today. Picking the filter

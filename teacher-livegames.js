@@ -232,9 +232,10 @@ async function lqgSetName(id, en, es){
   if(!lqgHas(id) || lqgBusy) return;
   const typed = { id, en: String(en == null ? '' : en), es: String(es == null ? '' : es) };
   en = lqgCleanName(en); es = lqgCleanName(es);
-  // The built-in name typed back (or nothing at all) is "no rename": nothing is stored.
+  // The built-in name typed back (or nothing at all) is "no rename": nothing is stored. The Spanish built-in name
+  // is kept when the English name WAS changed: without it Spanish students would see the new English name.
   if(en === lqgBuiltIn(id, 'en')) en = '';
-  if(es === lqgBuiltIn(id, 'es')) es = '';
+  if(!en && es === lqgBuiltIn(id, 'es')) es = '';
   const clear = !en && !es;
   const g = lqgCfg(teacherClassConfig);
   const names = (g.names && typeof g.names === 'object') ? g.names : {};
