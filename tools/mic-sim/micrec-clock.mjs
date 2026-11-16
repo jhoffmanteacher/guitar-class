@@ -70,7 +70,7 @@ async function runCase(c){
   const pCreate = 1000, pStart = c.cold > 0 ? pCreate + 5 + c.cold : pCreate - 5000;   // a warm context started 5 s before
   const pRec = pCreate + 5;                                                           // micRecStart
   const quantaByBurst = k => Math.ceil((k + 1) * H / Q);                              // quanta rendered once burst k is done
-  const burstOfQuantum = q => Math.max(0, Math.ceil((q + 1) * Q / H) - 1);
+  const burstOfQuantum = q => Math.floor(q * Q / H);                                  // the first burst k with quantaByBurst(k) > q
   const renderedAt = q => pStart + 1000 * (burstOfQuantum(q) + 1) * H / sr;          // the perf time quantum q is rendered (available)
   const framesAt = p => { if (p < pStart + 1000 * H / sr) return 0; const k = Math.floor((p - pStart) / (1000 * H / sr)) - 1; return quantaByBurst(k) * Q; };
   /* The page's view of the context clock. */
