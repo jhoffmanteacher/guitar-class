@@ -84,9 +84,10 @@ named `win/…` are on GitHub (`git fetch`); cherry-pick from them, do not merge
 workflow for what else you want it to work on").** After the 20 error events and rule AD's review, in this order.
 Agents: Opus at high or xhigh; Fable only if Opus cannot do it. Reviews are read-only: findings go in WORKFLOW (a
 bullet under the job), the Mac fixes and pushes. All three branches are on GitHub (`git fetch`).
-- **W1. Review round 2 of Song builder Part d**, branch `ci-try/sb-part-d` (base `160de0a`). WAIT for the tip the
-  Mac names here: `4cc5e33` plus ONE more commit that is being made now (no OK dialog on a first Publish; Jonathan,
-  2026-11-16, "go ahead"); the Mac pushes the branch again and writes the new tip on this line. Round 1
+- **W1. Review round 2 of Song builder Part d**, branch `ci-try/sb-part-d` (base `160de0a`). READY: the tip is `8eb7205` (pushed
+  2026-11-16 about 14:00; `4cc5e33` plus the last cut, no OK dialog on a first Publish: Jonathan, 2026-11-16, "go
+  ahead"). Review `git diff d1da871 8eb7205`; the sim says 124 cases. The builder's browser walk was NOT re-run
+  after the last commit (its step S9 still expects that confirm). Round 1
   was on `d1da871`: 0 BLOCKER, 2 MAJOR, 8 MINOR, all in the "Part d" bullet of the Song builder entry). A FRESH
   reviewer (`site-reviewer`, the save path is not touched), failing scenario first. New since round 1, review all
   of it (`git diff d1da871 4cc5e33`): the two MAJOR fixes (Publish writes the song and the list in ONE transaction;
