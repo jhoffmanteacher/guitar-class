@@ -46,8 +46,42 @@ const VERBOSE = args.includes('--verbose');
 const read = f => readFileSync(join(ROOT, f), 'utf8');
 const sha = b => createHash('sha256').update(b).digest('hex');
 const tick = () => new Promise(r => setImmediate(r));
-const settle = async (n = 60) => { for(let i = 0; i < n; i++) await tick(); };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+/* settle(n): n turns of the event loop, AND every console has finished what it started (its sbBusy is ''), then n
+   turns more for what it starts as it ends (the old copy's delete, the paint). Counting turns alone is not enough
+   (2026-11-16, the Windows computer): sbPickFile, sbRunLevel (through teacherSfPutFile) and sbLoadLevel (through
+   songFileReadPieces) each await a SHA-256 from crypto.subtle, which is worked out on another thread, and sbRunLevel
+   a 30 ms timer; no count of turns outlasts those on every machine (measured there: 200 turns pass in about
+   0.5 ms, one hash of the 1.9 MB levelled copy takes about 4 ms, some 1,200 to 1,800 turns). So never add a fixed
+   sleep or a bigger count to wait for one of those: settle() waits for the work itself. A console still busy after
+   SETTLE_MAX_MS never finishes (a load that starts itself again each time it fails does that): the wait is given up
+   once, for the rest of the run, so each case still prints its own line, and the run ends with a failed line that
+   names the console and what it was doing.
+   The three sleep(1400) lines that are left wait for the builder's own 1.2 s "save once things settle" timer: a timer
+   on the same clock, set earlier and shorter, so it always fires first. */
+const SETTLE_MAX_MS = 20000;
+const CONSOLES = [];
+let STUCK = '';
+const STUCK_NAME = `a console never finished what it started (still busy after ${SETTLE_MAX_MS / 1000} s; the waits after that were not waited out)`;
+const busyNow = () => CONSOLES.map((C, i) => ({ i, busy: C.run('sbBusy'), progress: C.run('sbProgress') })).filter(c => c.busy !== '');
+const turns = async n => { for(let i = 0; i < n; i++) await tick(); };
+async function settle(n = 60){
+  const t0 = Date.now();
+  let waited = false;
+  for(;;){
+    await turns(n);
+    const busy = busyNow();
+    if(busy.length){
+      if(STUCK) return;
+      if(Date.now() - t0 > SETTLE_MAX_MS){ STUCK = busy.map(c => `console ${c.i}: sbBusy '${c.busy}', "${c.progress}"`).join('; '); return; }
+      waited = true;
+      await sleep(1);
+      continue;
+    }
+    if(!waited) return;
+    waited = false;
+  }
+}
 
 /* Made-up bytes behind a real MPEG-1 layer III frame header (192 kb/s, 44.1 kHz, stereo): sbMp3Info reads it. */
 function mp3Of(n, seed){
@@ -171,7 +205,9 @@ function makeConsole(consoleSrc, F){
   run("teacherView = 'songbuilder';");
   /* '+ New song' (sbClick's 'new' branch, copied: the click handler needs a real element). */
   run("function sbNewSong(){ sbStopSounds(); sbSel = 'new'; sbNew = { title: '', artist: '' }; sbStepOn = 1; sbNote = ''; sbMemFor('new'); teacherSbPaint(); }");
-  return { box, F, env, run, grid };
+  const C = { box, F, env, run, grid };
+  CONSOLES.push(C);                       // settle() waits for every console's sbBusy
+  return C;
 }
 const TONES = new Map();
 function tone(sec){
@@ -240,7 +276,7 @@ async function runCases(consoleSrc){
 
   /* Volume: the levelled copy goes to songFiles first, then the draft points at it. */
   const wl = writes();
-  box_set(C, '__levelNext', 'a'); run('sbRunLevel()'); await sleep(60); await settle(200);
+  box_set(C, '__levelNext', 'a'); run('sbRunLevel()'); await settle(200);
   const lw = F.st.writes.slice(wl);
   const shaA = sha(LEVELLED.get('a')), audA = id + '-' + shaA.slice(0, 8);
   const dIdx = lw.findIndex(w => w.path === 'songDrafts/' + id), hIdx = lw.map(w => w.path).lastIndexOf('songFiles/' + audA);
@@ -314,7 +350,7 @@ async function runCases(consoleSrc){
     check('new file, same length: the beat is kept, the draft is marked to level again', /beat is kept/.test(R.run('sbNote')) && R.run('!!sbDraft().beat') && R.run('sbDraft().replaced === true'), R.run('sbNote'));
     R.run('sbSaveUpload(2)'); await settle(100);
     const w0 = writes();
-    box_set(R, '__levelNext', 'b'); R.run('sbRunLevel()'); await sleep(60); await settle(300);
+    box_set(R, '__levelNext', 'b'); R.run('sbRunLevel()'); await settle(300);
     const shaB = sha(LEVELLED.get('b')), audB = id + '-' + shaB.slice(0, 8);
     const seq = F.st.writes.slice(w0).map(w => w.op + ' ' + w.path);
     const iDraft = seq.lastIndexOf('set songDrafts/' + id), iDel = seq.indexOf('delete songFiles/' + audA);
@@ -339,7 +375,7 @@ async function runCases(consoleSrc){
       JSON.stringify({ audio: c2.audio, beat: !!c2.beat, left: keysOf('songFiles/' + audB).length, step: R.run('sbStepOn') }));
     box_set(R, '__f', fileOf('test-b.mp3', SRC_B, 24.02)); R.run('sbStepOn = 1; sbPickFile(__f)'); await settle();
     R.run('sbGoStep(2)'); await settle(50);
-    box_set(R, '__levelNext', 'b'); R.run('sbRunLevel()'); await sleep(60); await settle(300);
+    box_set(R, '__levelNext', 'b'); R.run('sbRunLevel()'); await settle(300);
     const c3 = F.S.get('songDrafts/' + id);
     check('Level it again: a new copy is stored and named, the beat kept', c3.audio && c3.audio.id === audB && keysOf('songFiles/' + audB + '/pieces/').length === 3 && !!c3.beat && c3.volume,
       JSON.stringify({ audio: c3.audio && c3.audio.id, beat: !!c3.beat }));
@@ -352,7 +388,7 @@ async function runCases(consoleSrc){
     box_set(R, '__levelNext', 'c');
     const w0 = writes();
     R.run('sbRunLevel()'); R.run("teacherSbLeave(); teacherView = 'students';");
-    await sleep(80); await settle(300);
+    await settle(300);
     check('leaving mid-level: no write after the leave', writes() === w0, F.st.writes.slice(w0).map(w => w.path).join(', '));
     R.run("teacherView = 'songbuilder'"); await settle();
   }
@@ -381,7 +417,7 @@ async function runCases(consoleSrc){
     const id3 = R.run('sbSel') || [...F.S.keys()].find(k => k.startsWith('songDrafts/')).slice(11);
     R.run(`sbOpen(${JSON.stringify(id3)})`); await settle(50);
     box_set(R, '__f', fileOf('test-a.mp3', SRC_A, 24)); R.run('sbPickFile(__f)'); await settle();   // a reopened draft asks for its mp3 again
-    box_set(R, '__levelNext', 'a'); R.run('sbStepOn = 2; sbRunLevel()'); await sleep(60); await settle(300);
+    box_set(R, '__levelNext', 'a'); R.run('sbStepOn = 2; sbRunLevel()'); await settle(300);
     const aud = F.S.get('songDrafts/' + id3).audio && F.S.get('songDrafts/' + id3).audio.id;
     F.S.set('builtSongsMeta/list', { songs: { 'sb-builtsongone1': 1 }, updatedAt: TS });
     F.S.set('builtSongs/sb-builtsongone1', { v: 1, title: 'Test Built', artist: '', audio: { id: aud }, song: {}, savedAt: TS });
@@ -633,7 +669,8 @@ const parts = siteParts('teacher.js', ROOT);
 for(const p of ['teacher-sb-core.js', 'teacher-sb-beat.js', 'teacher-sb-dsp.js', 'teacher-sb-chart.js']) if(!parts.includes(p)){ console.log(`song-builder-sim: ${p} is not a console part (TEACHER_JS_PARTS in app/boot.js)`); process.exit(1); }
 let res;
 try { res = await runCases(parts.map(read).join('')); }
-catch(e){ console.log('song-builder-sim: the run threw: ' + (e && e.stack || e)); process.exit(1); }
+catch(e){ console.log('song-builder-sim: the run threw: ' + (e && e.stack || e)); if(STUCK) console.log(`  ✗ ${STUCK_NAME} — ${STUCK}`); process.exit(1); }
+if(STUCK) res.push({ name: STUCK_NAME, ok: false, detail: STUCK });
 const bad = res.filter(r => !r.ok);
 for(const r of res) if(VERBOSE || !r.ok) console.log(`  ${r.ok ? '✓' : '✗'} ${r.name}${r.detail ? ' — ' + r.detail : ''}`);
 console.log(`song-builder-sim: ${res.length} cases, ${bad.length} failed`);
