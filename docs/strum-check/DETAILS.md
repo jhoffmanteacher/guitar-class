@@ -4,8 +4,9 @@
 > this note, so a session on the Windows computer can read it (Jonathan cannot paste between his computers). It is a
 > record of what was measured, not a rule file. Where it says `Claude outputs/strum-coach/`, the screenshots stayed on
 > the Mac; `CLICK-2.md` is beside this file. The three real takes it replays (section 20) are Jonathan's own
-> MacBook-mic takes and exist only on the Mac: on Windows the bench numbers can be made again with
-> `node tools/mic-sim/strum-check-loop.mjs`, the real-take numbers cannot.
+> MacBook-mic takes. Since 2026-11-16 they are in the repo too, `tools/mic-sim/strum-takes/` (J01 to J03, a .wav and a
+> .json each, and `key.json`; its README has the command and what it printed on the Mac), so either computer can
+> replay them.
 
 Branch `feat/strum-coach` in `.claude/worktrees/strum-coach`, on `cc9fcfb`. Nothing pushed.
 EVERY NUMBER BELOW IS THE VIRTUAL STUDENT'S (tools/mic-sim/strum-check-loop.mjs). There are 0 real strum-pattern takes and 1 real
