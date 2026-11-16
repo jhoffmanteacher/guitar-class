@@ -17429,7 +17429,7 @@ async function checkStrumCheck() {
     /* three more of the check's numbers (review round 4, R4-3: each could move and leave this check green): the wait after a slot's
        window before the slot is called, the pitch gate of the chord readings, the longest take */
     for (const [k, v] of [['SC_MISS_GRACE', PIN.missGrace], ['SC_CHORD_CLARITY', PIN.clarity], ['SC_REC_MAX_SEC', PIN.recMax]]) if (Number(run(k)) !== v) fail(`${k} is ${run(k)}, want ${v}`);
-    run(`globalThis.__sch =(frac, slot) => { const slotMs = 500, s = { slotMs, win: SC_WIN_FRAC * slotMs, total: 16, slots: [], events: [], cells: [], listenStart: 0, gridOffset: 0, lat: 0, cap: null, chords: { D5: { midi: [50, 57, 62] } }, bars: ['D5', 'D5'],
+    run(`globalThis.__sch = (frac, slot) => { const slotMs = 500, s = { slotMs, win: SC_WIN_FRAC * slotMs, total: 16, slots: [], events: [], cells: [], listenStart: 0, gridOffset: 0, lat: 0, cap: null, chords: { D5: { midi: [50, 57, 62] } }, bars: ['D5', 'D5'],
         caps: [0, 1].map(b => ({ bar: b, chord: 'D5', prev: b ? 'D5' : null, at: null, rt: [], rm: [], done: false })) };
       const pat = scPatternSlots('${PIN.pattern}');
       for (let k = 0; k < 16; k++) s.slots.push({ k, bar: k >> 3, slot: k % 8, strum: pat[k % 8].strum, dir: pat[k % 8].dir, state: 'pending' });
@@ -17588,7 +17588,7 @@ async function checkStrumCheck() {
           else if (Array.isArray(v)) v.forEach((x, i) => { if (Array.isArray(x)) o.push(p + '[' + i + '] array in array'); probs(x, p + '[' + i + ']', o); });
           else if (v && typeof v === 'object'){ const pr = Object.getPrototypeOf(v); if (pr !== Object.prototype && pr !== null) o.push(p + ' not plain'); Object.keys(v).forEach(k => probs(v[k], p ? p + '.' + k : k, o)); }
           return o; };
-        const strict = (path, v) => { const b = probs(v, '', []); if (b.length){ out.refused.push(path + ': ' + b.slice(0, 3).join(', ')); throw new Error('Unsupported field value: ' + b[0]); } out.sets.push(path); if (/-coach$/.test(path)){ out.win = { frac: v.winFrac, ms: v.winMs, slotMs: v.slotMs }; out.ended = v.barsDone + ' bars, complete ' + v.complete; out.fields =['metroOn', 'headphones', 'clicks', 'tooLoud', 'gateLevel', 'gateThreshold', 'anchorRange', 'octTol'].map(k => k + '=' + (k in v ? typeof v[k] : 'missing')).join(','); } };
+        const strict = (path, v) => { const b = probs(v, '', []); if (b.length){ out.refused.push(path + ': ' + b.slice(0, 3).join(', ')); throw new Error('Unsupported field value: ' + b[0]); } out.sets.push(path); if (/-coach$/.test(path)){ out.win = { frac: v.winFrac, ms: v.winMs, slotMs: v.slotMs }; out.ended = v.barsDone + ' bars, complete ' + v.complete; out.fields = ['metroOn','headphones', 'clicks', 'tooLoud', 'gateLevel', 'gateThreshold', 'anchorRange', 'octTol'].map(k => k + '=' + (k in v ? typeof v[k] : 'missing')).join(','); } };
         const ref = path => ({ set: async v => strict(path, v), collection: c => ({ doc: id => ref(path + '/' + c + '/' + id) }) });
         try {
           currentUser = { uid: 'test-student-0', displayName: 'Test 0' }; micRecPcm16 = () => new Int16Array(4);
