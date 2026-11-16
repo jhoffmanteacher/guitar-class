@@ -45,16 +45,28 @@
                                beside config/class.
      accessRequests/*          (2026-11-13) "ask your teacher to let me in":
                                name, email, when, status.
-     Before the rules for those two (paste 1), for songRequests and for the
-     days are published the teacher cannot read them: that one refusal
-     (permission-denied) on any of these four leaves it out and the header
-     says so (notReadable), instead of failing the whole backup. Any other
-     failure on them fails it, like every other read.
+     builtSongs/*              (2026-11-16, Song builder Part d) the built Play
+                               Along songs: title, artist, the audio's songFiles
+                               entry (an id, bytes, SHA-256: never the sound) and
+                               the chart (bars, sections, lyric lines).
+     builtSongsMeta/list       the one list doc the Songs page reads (which built
+                               songs are live, each one's edit number).
+     songDrafts/*              the Song builder's drafts (teacher-sb-core.js):
+                               title, step, the source mp3's facts, the levelled
+                               copy's songFiles entry, volume, pitch, beat, chart
+                               (its pasted text, sections, lyric lines), level.
+     Before the rules for those two (paste 1), for songRequests, for the days
+     and for the built-songs block are published the teacher cannot read them:
+     that one refusal (permission-denied) on any of these seven leaves it out
+     and the header says so (notReadable), instead of failing the whole
+     backup. Any other failure on them fails it, like every other read.
    LEFT OUT, and why: TEACHER_BACKUP_LEFT_OUT below (also written into the file).
    Among them (2026-11-14) the song recordings, songFiles/* with their pieces,
    and the month's download count songFilesUsage/*: about 216 MB would not fit
    in one file, and the mp3s are kept on the teacher's Mac (Manage → Song
-   files, teacher-songfiles.js, uploads them again). Nothing here reads them.
+   files, teacher-songfiles.js, uploads them again). The built songs' audio and
+   the drafts' levelled copies are songFiles entries too, so they stay out: the
+   file holds the charts, never the audio. Nothing here reads songFiles.
 
    THE FILE. One JSON object. Its header comes first: format, formatVersion,
    complete (always true: a backup with a failed read is never saved), the date,
@@ -64,7 +76,10 @@
        "minutesWeeks": { "<uid>/<weekId>": fields },
        "minutesDays": { "<uid>/<YYYY-MM-DD>": fields },
        "issueReports": { id: fields }, "accessRequests": { uid: fields },
-       "songRequests": { id: fields } }
+       "songRequests": { id: fields }, "builtSongs": { id: fields },
+       "builtSongsMeta": { "list": fields }, "songDrafts": { id: fields } }
+   (builtSongsMeta holds its one doc under the key "list", as config holds "class" and "access"; its count is
+   counts.builtSongsMeta, 0 or 1, and a refusal is named "builtSongsMeta/list" in notReadable.)
    A Firestore doc id never contains "/", so "<uid>/<weekId>" splits back
    unambiguously into minutes/<uid>/weeks/<weekId> (and minutes/<uid>/days/<day>).
    Firestore types are written as tagged objects so they read back exactly
@@ -100,7 +115,10 @@
         Bytes, a reference → a doc ref …) and set()s each doc at its path:
         progress/<uid>, config/class, config/access,
         minutes/<uid>/weeks/<week>, minutes/<uid>/days/<day>, issueReports/<id>, accessRequests/<uid>,
-        songRequests/<id>.
+        songRequests/<id>, builtSongs/<id>, builtSongsMeta/list, songDrafts/<id>.
+        A built song restored without its audio plays nothing: its songFiles
+        entry (audio.id) must still be there, or be uploaded again from the
+        Mac (Manage → Song files) with the same bytes (the SHA-256 is checked).
      3. A restored doc REPLACES what is there: anything the student saved after
         the backup is lost. Have the student sign out first. Restore
         config/class only with every console closed (a console holding the
@@ -131,7 +149,12 @@ const TEACHER_BACKUP_LABEL = {
   'config/access': 'the allow list of outside accounts (config/access)',
   'accessRequests': 'requests to join (accessRequests)',
   'songRequests': 'song requests (songRequests)',
+  'builtSongs': 'built songs (builtSongs)',
+  'builtSongsMeta/list': 'the built songs list (builtSongsMeta/list)',
+  'songDrafts': 'song builder drafts (songDrafts)',
 };
+// The optional reads that page a whole collection (each page wraps its own read in teacherBackupGet).
+const TEACHER_BACKUP_PAGED_OPTIONAL = ['accessRequests', 'songRequests', 'builtSongs', 'songDrafts'];
 const TEACHER_BACKUP_LEFT_OUT = [
   {path:'micTakes/* and micTakes/*/chunks/*', why:'mic recordings: large audio, saved by Mic recordings → Download all (with each take’s data)'},
   {path:'micTakesMeta/count', why:'a counter Mic recordings can reset; not student work'},
@@ -139,7 +162,7 @@ const TEACHER_BACKUP_LEFT_OUT = [
   {path:'weekBoard/*, rankBoard/*', why:'the practice boards: the Top 5 board is rebuilt by each student’s own page from their minutes; the class rank board is no longer used (since 2026-11-13)'},
   {path:'each student’s private board tag (under minutes, beside the weeks and days)', why:'the teacher’s account may not read it (firestore.rules: on purpose, so nothing the teacher reads ties a name to the Top 5 board); a student who has none gets a new one from their own page'},
   {path:'minutesBoard/*', why:'no rules block: nobody can read it'},
-  {path:'songFiles/* and songFiles/*/pieces/*', why:'the song recordings (about 216 MB of mp3s): far too big for this file, and not student work; the mp3s themselves are kept on the teacher’s Mac and go back in through Manage → Song files'},
+  {path:'songFiles/* and songFiles/*/pieces/*', why:'the song recordings (about 216 MB of mp3s), the built songs’ audio and the Song builder drafts’ levelled copies among them: far too big for this file, and not student work; the mp3s themselves are kept on the teacher’s Mac and go back in through Manage → Song files'},
   {path:'songFilesUsage/*', why:'this month’s count of song downloads; Manage → Song files can reset it; not student work'},
   {path:'siteErrors/*', why:'the anonymous error log (no names): site faults, not student work; shown in Tools → Error log'},
 ];
@@ -280,11 +303,11 @@ async function teacherBackupGet(gen, coll, fn){
   teacherBackupCheck(gen);
   throw {backupCollection:coll, cause:err};
 }
-/* A read whose ONLY allowed failure is the rules refusing it (the two 2026-11-13 documents before their rules are
-   pasted): returns null and notes the collection; every other failure throws as teacherBackupGet does. */
+/* A read whose ONLY allowed failure is the rules refusing it (a block whose rules are not pasted yet: see the header):
+   returns null and notes the collection; every other failure throws as teacherBackupGet does. */
 async function teacherBackupOptional(gen, coll, fn, notReadable){
-  // A paged read (accessRequests, songRequests) wraps each page itself.
-  try{ return await (coll==='accessRequests' || coll==='songRequests' ? fn() : teacherBackupGet(gen, coll, fn)); }
+  // A paged read (TEACHER_BACKUP_PAGED_OPTIONAL) wraps each page itself.
+  try{ return await (TEACHER_BACKUP_PAGED_OPTIONAL.includes(coll) ? fn() : teacherBackupGet(gen, coll, fn)); }
   catch(e){
     const cause=e && e.backupCollection ? e.cause : null;
     if(cause && cause.code==='permission-denied'){ notReadable.push(coll); return null; }
@@ -383,21 +406,29 @@ async function teacherBackupReadAll(gen){
   reportDocs.forEach(d=>teacherBackupSetKey(collections.issueReports, d.id, teacherBackupEncodeDoc('issueReports', d.id, d.data(), 'issueReports/'+d.id)));
   counts.issueReports=reportDocs.length;
 
-  teacherBackupSay(gen, 'running', 'Reading requests to join…');
-  const reqDocs=await teacherBackupOptional(gen, 'accessRequests', ()=>teacherBackupReadPaged(gen, 'accessRequests'), notReadable);
-  if(reqDocs){
-    collections.accessRequests={};
-    reqDocs.forEach(d=>teacherBackupSetKey(collections.accessRequests, d.id, teacherBackupEncodeDoc('accessRequests', d.id, d.data(), 'accessRequests/'+d.id)));
-    counts.accessRequests=reqDocs.length;
-  }
+  // A whole top-level collection whose rules may not be pasted yet: in the file and counted, or left out and named.
+  const optionalColl=async(coll, saying)=>{
+    teacherBackupSay(gen, 'running', saying);
+    const docs=await teacherBackupOptional(gen, coll, ()=>teacherBackupReadPaged(gen, coll), notReadable);
+    if(!docs) return;
+    collections[coll]={};
+    docs.forEach(d=>teacherBackupSetKey(collections[coll], d.id, teacherBackupEncodeDoc(coll, d.id, d.data(), coll+'/'+d.id)));
+    counts[coll]=docs.length;
+  };
+  await optionalColl('accessRequests', 'Reading requests to join…');
+  await optionalColl('songRequests', 'Reading song requests…');
 
-  teacherBackupSay(gen, 'running', 'Reading song requests…');
-  const songDocs=await teacherBackupOptional(gen, 'songRequests', ()=>teacherBackupReadPaged(gen, 'songRequests'), notReadable);
-  if(songDocs){
-    collections.songRequests={};
-    songDocs.forEach(d=>teacherBackupSetKey(collections.songRequests, d.id, teacherBackupEncodeDoc('songRequests', d.id, d.data(), 'songRequests/'+d.id)));
-    counts.songRequests=songDocs.length;
+  /* The Song builder (2026-11-16): the built songs, their list doc and the drafts. Charts only: each holds a
+     songFiles entry's id and SHA-256, never the sound, and nothing here reads songFiles. */
+  await optionalColl('builtSongs', 'Reading built songs…');
+  teacherBackupSay(gen, 'running', 'Reading the built songs list…');
+  const listSnap=await teacherBackupOptional(gen, 'builtSongsMeta/list', ()=>db.collection('builtSongsMeta').doc('list').get({source:'server'}), notReadable);
+  if(listSnap){
+    collections.builtSongsMeta={};
+    if(listSnap.exists) teacherBackupSetKey(collections.builtSongsMeta, 'list', teacherBackupEncodeDoc('builtSongsMeta/list', 'list', listSnap.data(), 'builtSongsMeta/list'));
+    counts.builtSongsMeta=listSnap.exists?1:0;
   }
+  await optionalColl('songDrafts', 'Reading song builder drafts…');
 
   return {collections, counts, notReadable};
 }
@@ -426,7 +457,7 @@ function teacherBackupFileText(read, now, site){
     project,
     counts:read.counts,
     notReadable:read.notReadable||[],
-    encoding:'Firestore types are tagged objects: {"__type":"timestamp",seconds,nanoseconds,iso}, {"__type":"bytes",base64}, {"__type":"geopoint",latitude,longitude}, {"__type":"reference",path}, {"__type":"number",value:"NaN"|"Infinity"|"-Infinity"|"-0"}, and {"__type":"map",value} for a stored map that has its own "__type" key. Docs are RAW, as stored (no Module 4/5 remap). "minutesWeeks" holds each student’s practice weeks, keyed "<uid>/<weekId>" (that doc’s path is minutes, uid, weeks, weekId); "minutesDays" their practice days, keyed "<uid>/<YYYY-MM-DD>" (minutes, uid, days, day). See teacher-backup.js for how to restore.',
+    encoding:'Firestore types are tagged objects: {"__type":"timestamp",seconds,nanoseconds,iso}, {"__type":"bytes",base64}, {"__type":"geopoint",latitude,longitude}, {"__type":"reference",path}, {"__type":"number",value:"NaN"|"Infinity"|"-Infinity"|"-0"}, and {"__type":"map",value} for a stored map that has its own "__type" key. Docs are RAW, as stored (no Module 4/5 remap). "minutesWeeks" holds each student’s practice weeks, keyed "<uid>/<weekId>" (that doc’s path is minutes, uid, weeks, weekId); "minutesDays" their practice days, keyed "<uid>/<YYYY-MM-DD>" (minutes, uid, days, day). "builtSongs" and "songDrafts" are keyed by doc id; "builtSongsMeta" holds the one doc builtSongsMeta/list under the key "list". The built songs and drafts hold their charts only: their audio is in songFiles, left out. See teacher-backup.js for how to restore.',
     leftOut:TEACHER_BACKUP_LEFT_OUT,
     collections:read.collections,
   };
@@ -436,6 +467,8 @@ function teacherBackupSummary(counts, notReadable){
   const n=(k, one, many)=>`${counts[k]} ${counts[k]===1?one:many}`;
   const extra=('accessRequests' in counts ? `, ${n('accessRequests','request to join','requests to join')}` : '')
     + ('songRequests' in counts ? `, ${n('songRequests','song request','song requests')}` : '')
+    + ('builtSongs' in counts ? `, ${n('builtSongs','built song','built songs')}` : '')
+    + ('songDrafts' in counts ? `, ${n('songDrafts','song builder draft','song builder drafts')}` : '')
     + ((notReadable||[]).length ? ` (not readable yet, their rules are not pasted: ${notReadable.map(c=>TEACHER_BACKUP_LABEL[c]||c).join(', ')})` : '');
   return `${n('progress','student','students')}, ${n(TEACHER_BACKUP_WEEKS,'practice week','practice weeks')}${TEACHER_BACKUP_DAYS in counts ? ', '+n(TEACHER_BACKUP_DAYS,'practice day','practice days') : ''}, ${n('issueReports','problem report','problem reports')}, ${counts.config?'the class settings':'no class settings doc (there is none yet)'}${extra}`;
 }

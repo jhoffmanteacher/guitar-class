@@ -18,7 +18,10 @@
    progress/*, minutes/{uid}/weeks/*, minutes/{uid}/days/*, minutes/{uid}/meta/board, issueReports/* (empty in the
    main case), micTakes/* + chunks, micTakesMeta/count, liveQuiz/current + answers, weekBoard/*, rankBoard/*,
    and since 2026-11-13 config/access and accessRequests/* (a hostile name among them) and songRequests/* (two, one
-   with a hostile title); since 2026-11-14 songFiles/* with 2 pieces and songFilesUsage/* (left out: never read).
+   with a hostile title); since 2026-11-14 songFiles/* with 2 pieces and songFilesUsage/* (left out: never read);
+   since 2026-11-16 (Song builder Part d) builtSongs/* (two, one with a hostile title and lyric line),
+   builtSongsMeta/list naming both, songDrafts/* (two, one with a hostile chart text) and the first song's audio
+   under songFiles/sb-… (never read).
    It answers doc get, collection get, orderBy(documentId) + limit + startAfter (by id), where(documentId, '>=' | '<=', id),
    with 0–3 ms latency, and a
    fresh deep copy on every data() (so the code under test cannot change the store). Every write method (set, update,
@@ -47,6 +50,12 @@
      not pasted   (2026-11-13) config/access and accessRequests refused (their rules not pasted yet) → the file is
                   still saved, without them, the header's notReadable names both, the line says so; any OTHER failure
                   on either → failed, no file
+     built songs  (2026-11-16) builtSongs, builtSongsMeta/list and songDrafts: N of N docs each in the file, the
+                  hostile title / lyric line / chart text byte for byte, the saved line counts built songs and drafts;
+                  the built song's audio under songFiles is never read; each refused alone (permission-denied) →
+                  still saved, without it, notReadable names exactly it, not retried; all three refused → saved;
+                  none stored (no list doc) → counts 0; unavailable or hung on each → failed, no file; a draft
+                  value the file cannot hold → failed, no file, its hostile key escaped in the row
      panel        the row's HTML escapes the status text; Manage's Backup section is teacherBackupPanelHtml(). */
 import { readFileSync, existsSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
@@ -150,6 +159,31 @@ function makeStore(opts = {}){
   S.set('songFiles/test-song', { file: 'test-song.mp3', bytes: 1000001, sha256: 'a'.repeat(64), pieces: 2, pieceBytes: 900000, durationSec: 60, state: 'ready', uploadedAt: new Timestamp(1762900000, 0) });
   S.set('songFiles/test-song/pieces/0', { i: 0, data: new Blob_([1, 2, 3]) }); S.set('songFiles/test-song/pieces/1', { i: 1, data: new Blob_([4]) });
   S.set('songFilesUsage/2026-11', { bytes: 1333335 });
+  /* The Song builder (2026-11-16): two built songs (one with a hostile title and lyric line), the list doc naming
+     them, two drafts (one with a hostile chart text); the built songs' audio sits in songFiles, never read. */
+  const sha = c => c.repeat(64);
+  const chartSong = lyric => ({ meter: '4/4', bpm: 120, anchor: 1.25,
+    chords: { G: { full: { frets: [3, 2, 0, 0, 0, 3] }, power: { frets: [3, 5, 5, null, null, null] } }, C: { full: { frets: [null, 3, 2, 0, 1, 0] }, power: null } },
+    bars: ['G', 'G:2 C:2', '-', 'C'], sections: [{ name: 'verse', n: 1, from: 1, bars: 2, lyrics: [{ text: lyric, bars: 1 }, { text: '', bars: 1 }] }, { name: 'chorus', from: 3, bars: 2 }],
+    level: { versions: 'both', start: 'full' }, range: { from: 0, to: 1 } });
+  if(!opts.noBuilt){
+    S.set('builtSongs/sb-test0song01', { v: 1, title: '<img src=x onerror=alert(1)> "Test 0"', artist: 'Test Band & co', audio: { id: 'sb-test0song01-0a1b2c3d', bytes: 4200000, sha256: sha('b'), durationSec: 175.4, centsOff: -3.5, gainDb: -2.25, sourceSha256: sha('c') },
+      song: chartSong('</p><script>alert(4)</script> la la'), savedAt: new Timestamp(1763100000, 5) });
+    S.set('builtSongs/sb-test0song02', { v: 1, title: 'Test 1', artist: '', audio: { id: 'sb-test0song02-1a2b3c4d', bytes: 3100000, sha256: sha('d'), durationSec: 120, centsOff: 0 },
+      song: chartSong('Words of Test 1'), savedAt: new Timestamp(1763100100, 0) });
+    S.set('builtSongsMeta/list', { songs: { 'sb-test0song01': 3, 'sb-test0song02': 1 }, updatedAt: new Timestamp(1763100100, 7) });
+    S.set('songFiles/sb-test0song01-0a1b2c3d', { file: 'sb-test0song01.mp3', bytes: 4200000, sha256: sha('b'), pieces: 1, pieceBytes: 900000, durationSec: 175.4, state: 'ready', uploadedAt: new Timestamp(1763100000, 0) });
+    S.set('songFiles/sb-test0song01-0a1b2c3d/pieces/0', { i: 0, data: new Blob_([9, 9]) });
+    S.set('songDrafts/sb-test0draft01', { v: 1, title: 'Test 0 draft', artist: 'Test', step: 4,
+      source: { name: 'test0.mp3', bytes: 5000000, sha256: sha('e'), durationSec: 180, sampleRate: 44100, channels: 2, kbps: 320 },
+      audio: { id: 'sb-test0draft01-2b3c4d5e', bytes: 4300000, sha256: sha('f'), durationSec: 180, centsOff: 1, gainDb: -1.5, sourceSha256: sha('e') },
+      volume: { before: -9.1, after: -12.5, samplePeak: -1.2, truePeak: -1.0, ceilingDb: -1, encodes: 1 }, pitch: { cents: 1, peaks: [440.2, 440.5] },
+      beat: { meter: '4/4', bpm: 96, anchor: 0.82, pins: [{ bar: 1, t: 0.82 }, { bar: 9, t: 20.82 }], tapBpm: 95.8, taps: 12, tapSpreadMs: 14, driftOff: false },
+      chart: { text: '[Verse]\nG C <img src=x onerror=alert(5)>\n"words" & </textarea>', meter: '4/4', fmt: 'above', sections: [{ name: 'verse', from: 1, bars: 2, lyrics: [{ text: '<b>hey</b>', bars: 2 }] }], left: [], kept: 2, edited: true },
+      level: { versions: 'power', start: null, range: null }, savedAt: new Timestamp(1763200000, 9) });
+    S.set('songDrafts/sb-test0draft02', { v: 1, title: 'Test 1 draft', artist: '', step: 1, source: null, audio: null, volume: null, pitch: null, beat: null, chart: { text: 'G D Em C' }, level: null, savedAt: new Timestamp(1763200100, 0) });
+    if(opts.unwritableDraft) S.get('songDrafts/sb-test0draft01').chart['<img src=x onerror=alert(6)>'] = () => 1;
+  }
   S.set('weekBoard/' + 'a'.repeat(32), { week: '2026-W46', period: '4', seconds: 60 }); S.set('rankBoard/' + 'a'.repeat(32), { seconds: 600 });
   if(!opts.noAccess){
     S.set('config/access', { allow: { 'fake-uid-005': true, 'fake-outside-1': true } });
@@ -166,6 +200,9 @@ function collOf(path){
   if(p.length === 2 && p[0] === 'progress') return 'progress';
   if(p.length === 2 && p[0] === 'issueReports') return 'issueReports';
   if(p.length === 2 && p[0] === 'songRequests') return 'songRequests';
+  if(p.length === 2 && p[0] === 'builtSongs') return 'builtSongs';
+  if(path === 'builtSongsMeta/list') return 'builtSongsMeta';
+  if(p.length === 2 && p[0] === 'songDrafts') return 'songDrafts';
   if(p.length === 4 && p[0] === 'minutes' && p[2] === 'weeks') return 'minutesWeeks';
   if(p.length === 4 && p[0] === 'minutes' && p[2] === 'days') return 'minutesDays';
   return null;
@@ -276,11 +313,21 @@ console.log('\n1. A whole backup (300 students, issueReports empty, every Firest
   ok(j.date === f.name.slice(20, 30), `header date ${j.date} = the file name's`);
   ok(j.site === 'guitar-class-2026-11-13-abc123' && j.project === 'stub-project', `site ${j.site}, project ${j.project}`);
   // Counts vs the stub
-  const want = { config: 0, progress: 0, 'minutesWeeks': 0, minutesDays: 0, issueReports: 0, accessRequests: 0, songRequests: 0 };
+  const want = { config: 0, progress: 0, 'minutesWeeks': 0, minutesDays: 0, issueReports: 0, accessRequests: 0, songRequests: 0, builtSongs: 0, builtSongsMeta: 0, songDrafts: 0 };
   for(const p of S.keys()){ const k = collOf(p); if(k) want[k]++; }
   let countOk = 0;
   for(const k of Object.keys(want)){ if(j.counts[k] === want[k] && Object.keys(j.collections[k] || {}).length === want[k]) countOk++; else console.log(`     ${k}: header ${j.counts[k]}, file ${Object.keys(j.collections[k] || {}).length}, stub ${want[k]}`); }
-  ok(countOk === 7 && Object.keys(j.counts).length === 7 && want.config === 2 && Array.isArray(j.notReadable) && !j.notReadable.length, `header counts = stub counts for ${countOk} of 7 collections (config holds class + access; notReadable empty) (${Object.entries(want).map(([k, v]) => k + ' ' + v).join(', ')})`);
+  ok(countOk === 10 && Object.keys(j.counts).length === 10 && want.config === 2 && Array.isArray(j.notReadable) && !j.notReadable.length, `header counts = stub counts for ${countOk} of 10 collections (config holds class + access; notReadable empty) (${Object.entries(want).map(([k, v]) => k + ' ' + v).join(', ')})`);
+  /* The Song builder (2026-11-16): N of N per collection, the hostile title / lyric / chart text byte for byte. */
+  for(const [k, n] of [['builtSongs', 2], ['builtSongsMeta', 1], ['songDrafts', 2]])
+    ok(want[k] === n && j.counts[k] === n && Object.keys(j.collections[k] || {}).length === n, `${k}: ${Object.keys(j.collections[k] || {}).length} of ${want[k]} stub docs in the file, header count ${j.counts[k]}`);
+  const bs1 = (j.collections.builtSongs || {})['sb-test0song01'], dr1 = (j.collections.songDrafts || {})['sb-test0draft01'], bl = (j.collections.builtSongsMeta || {}).list;
+  ok(bs1 && bs1.title === '<img src=x onerror=alert(1)> "Test 0"' && bs1.song.sections[0].lyrics[0].text === '</p><script>alert(4)</script> la la' && bs1.audio.id === 'sb-test0song01-0a1b2c3d' && bs1.savedAt.__type === 'timestamp' && bs1.song.chords.G.power.frets[3] === null,
+    'a built song is in the file byte for byte (hostile title and lyric line, its audio ENTRY, a tagged savedAt, null frets)');
+  ok(bl && bl.songs['sb-test0song01'] === 3 && bl.songs['sb-test0song02'] === 1 && bl.updatedAt.__type === 'timestamp', 'the built songs list is in the file under builtSongsMeta.list, naming both songs');
+  ok(dr1 && dr1.chart.text === '[Verse]\nG C <img src=x onerror=alert(5)>\n"words" & </textarea>' && dr1.beat.pins.length === 2 && dr1.audio.sha256 === 'f'.repeat(64) && (j.collections.songDrafts['sb-test0draft02'] || {}).audio === null,
+    'a draft is in the file byte for byte (hostile chart text, beat pins, its levelled copy\'s ENTRY; the other draft\'s audio null)');
+  ok(/2 built songs/.test(s.text) && /2 song builder drafts/.test(s.text), `the saved line counts 2 built songs and 2 song builder drafts`);
   ok(want.issueReports === 0 && j.collections.issueReports && !Object.keys(j.collections.issueReports).length, 'the empty collection (issueReports) is in the file, empty, count 0');
   // Round trip
   let same = 0, total = 0; const bad = [];
@@ -312,6 +359,9 @@ console.log('\n1. A whole backup (300 students, issueReports empty, every Firest
   const songLeft = (j.leftOut || []).map(x => x.path).filter(p => /^songFiles\/\* and songFiles\/\*\/pieces\/\*$|^songFilesUsage\/\*$/.test(p));
   ok(songReads === 0 && songLeft.length === 2 && !('songFiles' in j.collections) && !('songFilesUsage' in j.collections),
     `song files: reads under songFiles/songFilesUsage ${songReads} (of ${c.st.reads.length}), left-out entries ${songLeft.length} of 2, in the file: none`);
+  const sfWhy = ((j.leftOut || []).find(x => /^songFiles\/\* /.test(x.path)) || {}).why || '';
+  ok([...S.keys()].filter(p => /^songFiles\/sb-/.test(p)).length === 2 && /built songs/.test(sfWhy) && /drafts/.test(sfWhy) && !/songFiles|songFilesUsage/.test(Object.keys(j.collections).join(',')),
+    'a built song\'s audio (songFiles/sb-…, 2 stub docs) is not read and not in the file; the left-out entry says the built songs\' audio and the drafts\' copies stay out');
   const progPages = c.st.reads.filter(p => p === 'progress').length;
   ok(progPages === 2, `progress read in ${progPages} pages of at most 200 for 300 students`);
   const weekReads = c.st.reads.filter(p => /^minutes\/[^/]+\/weeks$/.test(p)).length;
@@ -359,6 +409,8 @@ for(const [coll, code, label] of [
   ['minutesWeeks', 'unavailable', 'practice minutes'], ['minutesDays', 'unavailable', 'practice days'], ['minutesDays', 'hang', 'practice days'], ['issueReports', 'unavailable', 'problem reports'], ['songRequests', 'unavailable', 'song requests'],
   ['progress', 'permission-denied', 'saved work'], ['config/class', 'hang', 'class settings'],
   ['config/access', 'unavailable', 'allow list'], ['accessRequests', 'unavailable', 'requests to join'], ['config/access', 'hang', 'allow list'],
+  ['builtSongs', 'unavailable', 'built songs (builtSongs)'], ['builtSongsMeta/list', 'unavailable', 'the built songs list'], ['songDrafts', 'unavailable', 'song builder drafts'],
+  ['builtSongs', 'hang', 'built songs (builtSongs)'], ['builtSongsMeta/list', 'hang', 'the built songs list'], ['songDrafts', 'hang', 'song builder drafts'],
 ]){
   const S = makeStore({ students: 40, reports: 3 });
   const c = makeConsole(S, { fail: { [coll]: code === 'hang' ? { hang: true } : { code } } });
@@ -448,6 +500,38 @@ console.log('\n3d. practice days refused (the days rule not published yet): the 
   ok(c.st.writes === 0, `write attempts: ${c.st.writes}`);
 }
 
+/* ══ 3e. The Song builder's block refused (its rules not pasted yet): each of the three alone, then all three ══ */
+console.log('\n3e. builtSongs, builtSongsMeta/list, songDrafts refused (their rules not pasted yet): the backup still saves');
+for(const [coll, key, label] of [['builtSongs', 'builtSongs', 'built songs (builtSongs)'], ['builtSongsMeta/list', 'builtSongsMeta', 'the built songs list (builtSongsMeta/list)'], ['songDrafts', 'songDrafts', 'song builder drafts (songDrafts)']]){
+  const S = makeStore({ students: 20, reports: 2 });
+  const c = makeConsole(S, { fail: { [coll]: { code: 'permission-denied' } } });
+  await c.run('teacherBackupStart()');
+  const s = state(c);
+  const f = await fileOf(c);
+  const j = f ? JSON.parse(f.text) : {};
+  const others = ['builtSongs', 'builtSongsMeta', 'songDrafts'].filter(k => k !== key);
+  ok(s.kind === 'saved' && c.saved.length === 1 && j.collections && !(key in j.collections) && !(key in j.counts) && others.every(k => k in j.collections && j.counts[k] > 0) && j.counts.progress === 20,
+    `${coll} refused: ${s.kind}, files ${c.saved.length}; the file has no ${key} (collection or count) and holds ${others.join(' + ')}`);
+  ok(JSON.stringify(j.notReadable) === JSON.stringify([coll]) && /not readable yet/.test(s.text) && s.text.includes(label), `notReadable ${JSON.stringify(j.notReadable)}; the saved line names "${label}"`);
+  ok(c.st.reads.filter(p => p === coll).length === 1 && c.st.writes === 0, `${coll}: permission-denied not retried (${c.st.reads.filter(p => p === coll).length} read), writes ${c.st.writes}`);
+}
+{
+  const S = makeStore({ students: 20, reports: 2 });
+  const c = makeConsole(S, { fail: { builtSongs: { code: 'permission-denied' }, 'builtSongsMeta/list': { code: 'permission-denied' }, songDrafts: { code: 'permission-denied' } } });
+  await c.run('teacherBackupStart()');
+  const j = JSON.parse(((await fileOf(c)) || { text: '{}' }).text);
+  ok(state(c).kind === 'saved' && JSON.stringify(j.notReadable) === '["builtSongs","builtSongsMeta/list","songDrafts"]' && !/built song|song builder draft/.test(state(c).text.split(' (not readable')[0]),
+    `all three refused: ${state(c).kind}, notReadable ${JSON.stringify(j.notReadable)}, the counts part of the line names none of them`);
+}
+{
+  const S = makeStore({ students: 5, noBuilt: true });
+  const c = makeConsole(S);
+  await c.run('teacherBackupStart()');
+  const j = JSON.parse(((await fileOf(c)) || { text: '{}' }).text);
+  ok(state(c).kind === 'saved' && j.counts.builtSongs === 0 && j.counts.builtSongsMeta === 0 && j.counts.songDrafts === 0 && j.collections.builtSongsMeta && !Object.keys(j.collections.builtSongsMeta).length && /0 built songs/.test(state(c).text),
+    `no built songs yet (no list doc): ${state(c).kind}, counts ${j.counts.builtSongs}/${j.counts.builtSongsMeta}/${j.counts.songDrafts}, builtSongsMeta empty`);
+}
+
 /* ══ 4. A value the file cannot hold ══ */
 console.log('\n4. An unwritable value');
 {
@@ -458,6 +542,15 @@ console.log('\n4. An unwritable value');
   ok(s.kind === 'failed' && c.saved.length === 0 && /saved work/.test(s.text), `${s.kind}, files ${c.saved.length} — "${s.text.slice(0, 120)}…"`);
   const html = c.run('teacherBackupPanelHtml()');
   ok(!html.includes('<img src=x') && html.includes('&lt;img src=x'), 'the student-written key in the message is escaped in the row\'s HTML');
+}
+{
+  const S = makeStore({ students: 5, unwritableDraft: true });
+  const c = makeConsole(S);
+  await c.run('teacherBackupStart()');
+  const s = state(c);
+  const html = c.run('teacherBackupPanelHtml()');
+  ok(s.kind === 'failed' && c.saved.length === 0 && /could not copy song builder drafts/.test(s.text) && s.text.includes('alert(6)') && !html.includes('<img src=x') && html.includes('&lt;img src=x onerror=alert(6)'),
+    `a draft with an unwritable value: ${s.kind}, files ${c.saved.length}; its hostile key is escaped in the row's HTML — "${s.text.slice(0, 110)}…"`);
 }
 
 /* ══ 5. A second click ══ */
