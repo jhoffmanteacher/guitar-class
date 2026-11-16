@@ -23,3 +23,7 @@ Claude outputs/
 # Loudness measurements cached by tools/checks.mjs (1br) — per machine, never committed
 tools/.loudness-cache.json
 tools/.sb-dsp-cache.json
+
+# Python's compiled copy of tools/song_files.py, written when tools/loudness.py
+# (run by checks.mjs 1bu) or tools/beat-audit.py imports it — per machine, never committed
+tools/__pycache__/
