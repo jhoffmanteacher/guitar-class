@@ -945,23 +945,40 @@ real song through Import (part a2) is still open.
   is pinned and the listens are done ("This song does not fit the builder" shows on Preview and Publish, same words,
   and blocks nothing). It writes `builtSongs/{id}`, then `builtSongsMeta/list` in a transaction (the same order as
   Import), after reading the stored copy's head fresh; a copy an edit replaced is deleted only after that. A published
-  song has its own page: Edit (the steps; students keep the published song until Publish runs again; the list says
-  "Changes not published"), Unpublish (the draft keeps the edit number, then the list, then the song; the draft and
+  song has its own page: Edit (the steps, opening on the one he picks; students keep the published song until Publish
+  runs again; the list says "Changes not published"), Unpublish (the draft keeps the edit number, then the list, then the song; the draft and
   its copy stay), Delete… (typed title; the list entry first, then the song, the draft and every copy nothing else on
-  the list plays), Export (the Import file, for `tools/built-song-check.mjs`). The list's head has the health line ("N
+  the list plays), Export (the Import file and its mp3). The list's head has the health line ("N
   published; all pass today's checks", or each failing song by name). Backup: `builtSongs`, `builtSongsMeta/list` and
   `songDrafts` are in the file (charts only; their audio stays out with `songFiles`).
-  - **How the work order was read (say if any is wrong):** (1) an IMPORTED song (Manage → Built songs) has no draft, so
-    its page offers Delete… and Export only: no Edit (a draft cannot be rebuilt from a published doc without its
-    original) and no Unpublish (it would throw the chart away); Hidden in the Songs view stays its off switch. (2) The
+  - **Decided by Jonathan, 2026-11-16** (his answers to the readings below, verbatim: "1. yes they should get
+    edit/unpublish; 2. whatever you think; 3. ok, 4. export should save mp3 too; 5. edit gives a choice of step; 6.
+    ok"). Built the same day (`2b67a25`): (a) an IMPORTED song gets Edit and Unpublish: they first rebuild a draft from
+    its `builtSongs` doc (`sbDraftFromDoc`) and save it: title, artist, audio, sections, bars, lyric lines, level,
+    range, its own chord shapes and its beat as it came (bpm unrounded, bar 1, its bar times kept exactly; the Beat
+    step shows them read-only and the builder's bar clock follows them). Unchanged, it publishes the same song. NOT
+    recoverable, and each step says so: the chart's original text (Chart: "This chart came with the imported song",
+    the grid as published), the taps and drift windows (Beat: "The bars came with the imported song"), the loudness
+    numbers and the original mp3 (Volume and Upload: levelling again needs the original picked, as for any reopened
+    draft); the listens start empty. (b) Export saves two downloads that pair up by name, `<title>-<id>.json` and
+    `.mp3` (the levelled copy, from the tab or read from `songFiles`: one counted song download, said in the hint;
+    the browser may ask once to allow two downloads); Import takes the pair as it is. (c) Edit opens on the step he
+    picks (Upload, Volume, Beat, Chart, Level, Preview; one click each; Chart is highlighted and is the header's
+    Edit). Proof: `tools/song-builder-sim.mjs` 113 cases (12 new: the imported song's page, Edit on Beat rebuilding
+    the draft with nothing loaded, the four steps' lines, Edit-change-nothing-Publish deep-equal to the import but the
+    edit number, a beat map kept exactly with one chord changed and only that chord differing, Unpublish of an
+    imported song keeping everything in the rebuilt draft, Export's pair counted once and fed to Import on another
+    store giving the same song, each choice of step); 9 of 9 new planted faults red; the walk 67 of 67, 28
+    screenshots looked at (5 new: the choice of step, the imported song's page, its Beat, Volume and Chart steps and
+    its Preview).
+  - **How the work order was read (2, 3 and 6 stand, Jonathan: "whatever you think", "ok", "ok"):** (2) The
     listens are the CARD's sections (a from-to range: its first and last); "reaches the section's end" = one unbroken
     play that began within the section's first half bar and got within 0.3 bar of its end (a lap back to the start
     counts); a card of 1 or 2 sections needs 1 or 2; a change of level or range starts them over. (3) The Chart step's
     flags (a refused line not dealt with, a chord not taught and not kept) WARN at Publish and do not block (the work
     order's list of blockers does not name them). (4) Unpublish of an edited song whose copy was replaced deletes the
-    published (old) copy and keeps the draft's. (5) Export saves the .json only, not the mp3. (6) Edit opens on step 1.
-    (7) The preview card follows the console's language (its header's Español button), like every card the console
-    draws; the builder adds no switch. (8) An edit number never restarts: Unpublish keeps it in the draft (`pubVer`)
+    published (old) copy and keeps the draft's. (7) The preview card follows the console's language (its header's
+    Español button), like every card the console draws; the builder adds no switch. (8) An edit number never restarts: Unpublish keeps it in the draft (`pubVer`)
     and the next Publish counts on, because a Chromebook keeps a song by that number (a reused number would show it the
     old chart). The same can happen to an IMPORTED song deleted and imported again under the same id (Part a2's
     Import counts from the list only): not fixed, said here.
