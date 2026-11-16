@@ -6,6 +6,10 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-16 — The Metronome click during a song
+
+- **The Metronome no longer skips or doubles a click when you change speed or switch to Guitar mid-song.** Before, pressing a speed button or the Guitar button right on a count could lose that one click or play it twice.
+
 ## 2026-11-15 — Practice minutes count every minute
 
 - **No more 20-minute limit a day.** Every minute you practice counts, and the top bar shows your real total for the week, even past your goal (for example "75/60 min").
