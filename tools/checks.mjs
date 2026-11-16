@@ -6944,7 +6944,8 @@ function checkGamesGroups() {
    summary; the Unfinished fold's tag from activities-2.js, which has no such span, keeps none: a wrapper there
    would change what .ca-mod-head>span:first-child styles). The same run pins which fold starts OPEN
    (2026-11-16): only the newest module, unless the student opened or closed it, or it holds the open card
-   or a Level up swap (FOLD_DEFAULT_CASES cases on the real caModFoldHtml and caNewestModNum). */
+   or a Level up swap (FOLD_DEFAULT_CASES cases rendered through both real callers, the student's choice made
+   by the real caOnModFoldToggle on the fold's own data-fold-key). */
 const HEADING_CLASSES = ['set-eyebrow-title', 'stp-sec-label', 'stp-part-title', 'jl-title', 'review-head',
   'mr-assess-head', 'ca-today-head', 'ca-hero-title', 'ca-card-title', 'ca-mod-head', 'resume-title', 'sh-sec-title',
   'rp-meta-title', 'games-logo', 'games-section-head', 'games-game-title', 'tp-title',
@@ -6959,7 +6960,7 @@ const HEADING_ROLE_PINS = {
   'ta-list-title': '3x2', 'ta-roll-head': '3x1', 'tp-title': '2x3',
 };
 /* How many open / closed cases the module-fold run below makes (which fold starts open). */
-const FOLD_DEFAULT_CASES = 9;
+const FOLD_DEFAULT_CASES = 13;
 const HEADING_ROLE_TOTAL = Object.values(HEADING_ROLE_PINS).reduce((n, v) => n + v.split(' ').reduce((m, x) => m + +x.split('x')[1], 0), 0);
 function a11yScanTags(src) {
   const out = [];
@@ -7064,38 +7065,64 @@ function checkTitleHeadings() {
           flag(`${what}: the <summary> holds ${(summary.match(/role="heading"/g) || []).length} heading(s), want ${inside}${inside ? ' (the module name, level 3)' : ''}: ${summary.slice(0, 240)}`);
       }
       /* Which fold starts OPEN (Friday check 2026-11-16: `sec.mod.num === newest` could become `true` or `false` and nothing above saw it).
-         The real caModFoldHtml, with `newest` from the real caNewestModNum over modules 3, 5, 4 and a group with no module: only the newest
-         module starts open; a student's own open / close (caModFoldOpen, keyed by fold AND module) wins over that; a fold holding the open
-         card (caOpenId) or a Level up swap is open whatever was set. */
-      const newestFn = /function caNewestModNum\([^)]*\)\{[\s\S]*?\n\}/.exec(a2);
-      if (!newestFn) flag('could not find caNewestModNum: which module fold starts open is NOT checked');
+         Rendered through the two REAL call sites (review of 2026-11-16: cases that called caModFoldHtml themselves stayed green when a caller
+         passed the wrong `newest` or no `swap`): the Completed fold is the real caFinishedGroupHtml; the Unfinished fold is the two statements
+         of the page's renderer that build its body (`const restNewest = …; const body = …;`), run as they are with the real headHtml. Modules
+         3, 5, 4 and a group with no module, one context per case. Only the newest module starts open; a student's own open / close wins over
+         that, and it is made the way the page makes it: the real caOnModFoldToggle, given the data-fold-key the fold was rendered with (which
+         must be "<fold>:<module>"); a fold holding the open card (caOpenId) or a Level up swap is open whatever was set. */
+      const J = JSON.stringify;
+      const parts = { caNewestModNum: /function caNewestModNum\([^)]*\)\{[\s\S]*?\n\}/.exec(a2), caOnModFoldToggle: /function caOnModFoldToggle\([^)]*\)\{[\s\S]*?\n\}/.exec(a2),
+        caFinishedGroupHtml: /function caFinishedGroupHtml\([^)]*\)\{[\s\S]*?\n\}/.exec(a2), headHtml: /function headHtml\(sec\)\{[\s\S]*?\n\s*\}/.exec(a2),
+        "the Unfinished fold's call site (const restNewest … const body …)": /const restNewest = [^\n]*\n\s*const body = restGroups\.some\([\s\S]*?\n\s*: restFlat\.map\([^\n]*;\n/.exec(a2) };
+      const lost = Object.keys(parts).filter(k => !parts[k]);
+      if (lost.length) flag(`could not find ${lost.join(', ')}: which module fold starts open is NOT checked`);
       else {
-        const J = JSON.stringify, grp = n => ({ sec: { mod: n ? { num: n, name: 'M' + n } : null, ids: [] } });
-        const groups = [grp(3), grp(5), grp(4), grp(0)], headDiv = todoTag + 'Module</div>';
-        // [what, fold, module, caModFoldOpen, the card ids in the fold, caOpenId, swap, open?]
+        const order = [3, 5, 4];
+        const groups = [...order.map(n => ({ sec: { mod: { num: n, name: 'M' + n }, ids: ['a' + n, 'b' + n] }, cards: [{ id: 'a' + n }, { id: 'b' + n }] })), { sec: { mod: null, ids: ['u1'] }, cards: [{ id: 'u1' }] }];
+        const prelude = `${Object.values(parts).slice(0, 4).map(m => m[0]).join('\n')}\n${fold[0]}\n${doneHead[0]}
+          function __todoBody(restGroups, restFlat, swapIn, swap){ ${Object.values(parts)[4][0]}\n return body; }
+          var __groups = ${J(groups)}, __byId = { z: { id: 'z' } }; __groups.forEach(g => g.cards.forEach(a => { __byId[a.id] = a; }));
+          function __render(foldName, swap){
+            const swapIn = a => (swap && a.id === swap.from) ? __byId[swap.to] : a, flat = __groups.reduce((x, g) => x.concat(g.cards), []);
+            return foldName === 'todo' ? __todoBody(__groups, flat, swapIn, swap) : caFinishedGroupHtml(__groups, flat, __byId, swap);
+          }
+          function __toggle(foldKey, open){ caOnModFoldToggle({ dataset: { foldKey }, open, contains: () => false }); }`;
+        const tagOf = (html, num) => (String(html).match(/<details class="ca-mod-fold"[^>]*>/g) || [])[order.indexOf(num)] || '';
+        // [what, fold, module, the student's own toggles before it [fold, module, open], caOpenId, swap, open?]
         const cases = [
-          ['the newest module, nothing set', 'todo', 5, {}, [], null, null, true],
-          ['an older module, nothing set', 'todo', 4, {}, [], null, null, false],
-          ['the newest module after the student closed it', 'todo', 5, { 'todo:5': false }, [], null, null, false],
-          ['an older module after the student opened it', 'todo', 4, { 'todo:4': true }, [], null, null, true],
-          ['the newest module, closed in the OTHER fold only', 'todo', 5, { 'done:5': false }, [], null, null, true],
-          ['an older module holding the open card', 'todo', 4, {}, ['x', 'y'], 'y', null, true],
-          ['an older module the student closed, holding the open card', 'todo', 4, { 'todo:4': false }, ['x', 'y'], 'y', null, true],
-          ['an older module holding a Level up swap', 'done', 4, {}, ['x'], null, { from: 'x' }, true],
-          ['an older module when the open card and the swap are in another module', 'todo', 4, {}, ['x'], 'z', { from: 'q' }, false]];
-        for (const [what, foldName, num, state, cardIds, openId, swap, want] of cases) {
-          const out = String(vm.runInNewContext(`${newestFn[0]}; ${fold[0]}; caModFoldHtml(${J(foldName)}, ${J(grp(num).sec)}, ${J(headDiv)}, '<CARDS/>', ${J(cardIds.map(id => ({ id })))}, caNewestModNum(${J(groups)}), ${J(swap)})`,
-            { caOpenId: openId, caModFoldOpen: state, escAttr: x => String(x), escHtml: x => String(x) }));
+          ['Unfinished: the newest module, nothing set', 'todo', 5, [], null, null, true],
+          ['Unfinished: an older module, nothing set', 'todo', 4, [], null, null, false],
+          ['Completed: the newest module, nothing set', 'done', 5, [], null, null, true],
+          ['Completed: an older module, nothing set', 'done', 3, [], null, null, false],
+          ['Unfinished: the newest module after the student closed it', 'todo', 5, [['todo', 5, false]], null, null, false],
+          ['Unfinished: an older module after the student opened it', 'todo', 4, [['todo', 4, true]], null, null, true],
+          ['Completed: the newest module after the student closed it', 'done', 5, [['done', 5, false]], null, null, false],
+          ['Unfinished: the newest module, closed in the Completed fold only', 'todo', 5, [['done', 5, false]], null, null, true],
+          ['Unfinished: an older module holding the open card', 'todo', 4, [], 'b4', null, true],
+          ['Unfinished: an older module the student closed, holding the open card', 'todo', 4, [['todo', 4, false]], 'b4', null, true],
+          ['Unfinished: an older module holding a Level up swap', 'todo', 3, [], null, { from: 'a3', to: 'z' }, true],
+          ['Completed: an older module holding a Level up swap', 'done', 4, [], null, { from: 'b4', to: 'z' }, true],
+          ['Unfinished: an older module when the open card and the swap are in other modules', 'todo', 4, [], 'a5', { from: 'a3', to: 'z' }, false]];
+        for (const [what, foldName, num, toggles, openId, swap, want] of cases) {
+          const c = vm.createContext({ caOpenId: openId, caModFoldOpen: {}, caFinishedOpen: false, snipState: null, pcState: null, songFileCancelWaitIn() {},
+            escAttr: x => String(x).replace(/"/g, '&quot;'), escHtml: x => String(x), t: k => k, tf: (o, f) => o[f], caIsVisible: () => true, classActivities: {}, caActivityCardHtml: a => `<CARD ${a.id}/>` });
+          vm.runInContext(prelude, c);
+          for (const [tFold, tNum, tOpen] of toggles) {
+            const shown = (/data-fold-key="([^"]*)"/.exec(tagOf(vm.runInContext(`__render(${J(tFold)}, null)`, c), tNum)) || [])[1];
+            vm.runInContext(`__toggle(${J(shown == null ? '' : shown)}, ${tOpen})`, c);
+          }
+          const tag = tagOf(vm.runInContext(`__render(${J(foldName)}, ${J(swap)})`, c), num);
           foldDefaults++;
-          const tag = (/^<details\b[^>]*>/.exec(out) || [''])[0];
-          if (!tag) flag(`the module fold (${what}): caModFoldHtml did not return a <details>: ${out.slice(0, 160)}`);
-          else if (/\sopen(?=[\s>])/.test(tag) !== want) flag(`the module fold: ${what} starts ${want ? 'CLOSED' : 'OPEN'}, want ${want ? 'open' : 'closed'} (only the newest module starts open; the student's own choice, the open card and a Level up swap come first): ${tag}`);
+          if (!tag) { flag(`the module fold (${what}): no <details class="ca-mod-fold"> was rendered for module ${num}`); continue; }
+          if (!tag.includes(` data-fold-key="${foldName}:${num}"`)) flag(`the module fold (${what}): its tag does not carry data-fold-key="${foldName}:${num}", the key the student's own open / close is kept under: ${tag}`);
+          if (/\sopen(?=[\s>])/.test(tag) !== want) flag(`the module fold: ${what} starts ${want ? 'CLOSED' : 'OPEN'}, want ${want ? 'open' : 'closed'} (only the newest module starts open; the student's own choice, the open card and a Level up swap come first): ${tag}`);
         }
       }
     }
   } catch (e) { flag(`running caModFoldHtml threw (${e.message}): the module folds NOT checked`); }
   if (foldDefaults !== FOLD_DEFAULT_CASES) flag(`${foldDefaults} module-fold open / closed cases ran, pinned ${FOLD_DEFAULT_CASES}`);
-  if (!bad) ok(`${titled} title boxes of ${HEADING_CLASSES.length} kinds in ${files.length} files all carry a heading role; ${roles} role="heading" in ${Object.keys(kindPins).length} kinds, levels and counts pinned, each with one level, on no control, nothing clickable, nothing inside a button or link; no title box made through the DOM; ${foldsRun} module folds run: clean <summary>, the Completed one keeps the module name as a heading inside; ${foldDefaults} open / closed cases: only the newest module starts open, the student's own choice, the open card and a Level up swap come first`);
+  if (!bad) ok(`${titled} title boxes of ${HEADING_CLASSES.length} kinds in ${files.length} files all carry a heading role; ${roles} role="heading" in ${Object.keys(kindPins).length} kinds, levels and counts pinned, each with one level, on no control, nothing clickable, nothing inside a button or link; no title box made through the DOM; ${foldsRun} module folds run: clean <summary>, the Completed one keeps the module name as a heading inside; ${foldDefaults} open / closed cases through both real callers: only the newest module starts open, the student's own choice (the real toggle, on the fold's own key), the open card and a Level up swap come first`);
 }
 
 /* 1cz. Google sign-in always shows the account chooser (2026-11-13). Students share school Chromebooks. A popup made
