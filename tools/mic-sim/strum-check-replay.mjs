@@ -27,7 +27,7 @@
    for line with its numbers and its grid rule made settable; the default settings must reproduce the real function exactly, and the run
    stops if they do not), beside the synthetic bench's students (strum-check-loop.mjs) under the same settings; each take at its kept
    clock and +-20 ms. --cands=<json>: only the settings listed ([{ name, ratio, hfRatio, refract, rule, ease, cap, within, outPen,
-   dupOnce, lock, which }]), each printed per take and clock beside the site's (named "site": the copy at SITE_P); --no-bench leaves
+   dupOnce, lock, lockMin, trigOut, which }]), each printed per take and clock beside the site's (named "site": the copy at SITE_P); --no-bench leaves
    the bench out.
    Review R4-1's candidates (2026-11-16): A {"outPen":-1.5}, C {"outPen":-1.5,"dupOnce":true}, D {"lock":0.25}, AD both. AD is BUILT
    (coach-strumcheck.js SC_ANCHOR_LOCK / SC_ANCHOR_LOCK_MIN and the outside-every-window score, 2026-11-16), so SITE_P carries it; the
@@ -87,7 +87,7 @@ const HOOK = `(() => {
           /* review R4-1's candidates (2026-11-16; all off by default = the site's code):
                outPen  an onset outside every window scores this (candidate A: -1.5, as on a rest; before AD it scored nothing)
                dupOnce a second onset in the same eighth scores as a rest (candidate C, with A)
-               lock    when the onsets before this one (4 or more) all fit the grid of the moment, search only +-lock eighths
+               lock    when the onsets before this one (lockMin or more, 4) all fit the grid of the moment, search only +-lock eighths
                        (candidate D: 0.25; AD = A and D; BUILT 2026-11-16 with SC_ANCHOR_LOCK_MIN 4: SITE_P below)
                trigOut what an onset outside every window scores when the wide search decides whether the bar fits badly (review R5-1:
                        0 since 2026-11-16, scAnchor's test without rule A; null = outPen, as AD was first built) */
@@ -109,7 +109,7 @@ const HOOK = `(() => {
             return { best, score: bestSc, off: bestOff, n: bestN };
           };
           let range = p.range || 1;
-          if (p.lock && p.rule === 'shapeFree'){ const others = recent.slice(0, -1); if (others.length >= 4 && search(s.gridOffset, 0, s.gridOffset, false, others).score === others.length) range = p.lock; }
+          if (p.lock && p.rule === 'shapeFree'){ const others = recent.slice(0, -1); if (others.length >= (p.lockMin || 4) && search(s.gridOffset, 0, s.gridOffset, false, others).score === others.length) range = p.lock; }
           let r = p.rule === 'shape' ? search(0, s.slotMs / 2, s.gridOffset) : search(s.gridOffset, range * s.slotMs, s.gridOffset);
           const fit = p.trigOut == null ? r.score : search(r.best, 0, r.best, false, null, p.trigOut).score;
           if (p.rule === 'shapeFree' && p.wide && recent.length >= (p.wideMin || 6) && fit < recent.length - (p.wideSlack == null ? 1.5 : p.wideSlack)){
@@ -138,7 +138,7 @@ const HOOK = `(() => {
    since 2026-11-14 ratios 1.15 / 1.3 and the pattern-shape grid (scHearStrum, coach-strumcheck.js); before, 1.2 / 1.46 and Strum
    Radar's easing 0.2 (rule 'base'). Since 2026-11-16 rule AD (review R4-1): outPen -1.5 and lock 0.25; and trigOut 0 (review R5-1: the wide search's test without rule A;
    AD as first built, 1338af63, is {"trigOut":null}). */
-export const SITE_P = { ratio: 1.15, hfRatio: 1.3, refract: 140, ease: 1, within: 0.45, rule: 'shapeFree', wide: 4, wideMin: 6, wideSlack: 1.5, wideAccept: 1, wideTight: 0.15, outPen: -1.5, lock: 0.25, trigOut: 0 };
+export const SITE_P = { ratio: 1.15, hfRatio: 1.3, refract: 140, ease: 1, within: 0.45, rule: 'shapeFree', wide: 4, wideMin: 6, wideSlack: 1.5, wideAccept: 1, wideTight: 0.15, outPen: -1.5, lock: 0.25, lockMin: 4, trigOut: 0 };
 
 const args = process.argv.slice(2);
 const opt = k => { const a = args.find(x => x.startsWith('--' + k + '=')); return a ? a.slice(k.length + 3) : null; };
@@ -264,6 +264,93 @@ async function fitShift(tk){
 
 const out = { takes: {}, sweep: [] };
 const log = l => console.log(l);
+/* THE COPY'S NUMBERS AND ITS GRID, checked before any replay (review R5-4, 2026-11-16: the three takes never reach some of the grid's
+   code, so they alone printed IDENTICAL with SC_ANCHOR_LOCK_MIN 3 or 5, "> 4" for ">= 4", or the wide search skipped while locked):
+   1. every number the copy's grid hard-codes or takes from its settings equals the page's own constant (exit 1 on a mismatch);
+   2. made-up onset lists (a right player with spread, one extra on each rest of bars 1, 2 and 5, dragging and rushing, a tempo step at
+      bar 3, late and early starts, a lost eighth or beat at bar 4, stray sounds, strums heard twice, up-strums not heard; 60 / 85 /
+      100 / 125 BPM, 2 seeds) go through the real scHearStrum and through the copy at the settings the replay uses: what each onset
+      returns and the grid after it must be the same (exit 1 otherwise). Only for the pattern-shape grid (a site from 2026-11-14 on). */
+function rngOf(seed){ let a = seed >>> 0; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function gridLists(){
+  const STR = [0, 2, 3, 5, 6, 7], lists = [];
+  const play = (bpm, seed, o) => {
+    const r = rngOf(seed), slot = 30000 / bpm, on = [];
+    const g = () => { let u = 0; while (!u) u = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * r()); };
+    for (let b = 0; b < 8; b++) for (const k of STR){
+      if (o.ups && (k === 3 || k === 5 || k === 7) && r() < o.ups) continue;
+      const e = b * 8 + k + (o.late || 0) + (o.jump && b >= 3 ? o.jump : 0);
+      let t = o.step && b >= 2 ? (16 + (e - 16) * (1 + o.step)) * slot : e * slot * (1 + (o.drift || 0));
+      t += g() * (o.sigma == null ? 20 : o.sigma);
+      on.push(t);
+      if (o.dbl && r() < o.dbl) on.push(t + 145 + r() * 80);
+    }
+    if (o.extra) on.push((o.extra[0] * 8 + o.extra[1]) * slot + o.extra[2]);
+    if (o.noise){ let t = 0; for (;;){ t += -Math.log(1 - r()) * 8 * slot / o.noise; if (t > 64 * slot) break; on.push(t); } }
+    return on.filter(t => t > -0.45 * slot && t < 66 * slot).sort((p, q) => p - q);
+  };
+  const SC = [['steady', {}], ['steady, no spread', { sigma: 0 }], ['steady, 40 ms spread', { sigma: 40 }], ['drag 4%', { drift: 0.04 }],
+    ['drag 6%', { drift: 0.06 }], ['rush 4%', { drift: -0.04 }], ['tempo +5% from bar 3', { step: 0.05 }], ['tempo -5% from bar 3', { step: -0.05 }],
+    ['late 1 eighth', { late: 1 }], ['late 1.5 eighths', { late: 1.5 }], ['late 3 eighths', { late: 3 }], ['early 1 eighth', { late: -1 }],
+    ['an eighth lost at bar 4', { jump: 1 }], ['a beat lost at bar 4', { jump: 2 }], ['stray sounds, 1 a bar', { noise: 1 }],
+    ['30% heard twice', { dbl: 0.3 }], ['half the ups not heard', { ups: 0.5 }]];
+  for (const [bar, rest] of [[0, 1], [0, 4], [1, 1], [1, 4], [4, 1], [4, 4]]) for (const off of [-60, -40, -20, 0, 20, 40, 60]){
+    SC.push([`an extra on bar ${bar + 1} slot ${rest}, ${off} ms`, { sigma: 15, extra: [bar, rest, off] }]);
+  }
+  for (const bpm of [60, 85, 100, 125]) for (const [name, o] of SC) for (const seed of [1, 2]) lists.push({ name, bpm, on: play(bpm, seed * 1000 + bpm + lists.length, o) });
+  return lists;
+}
+function checkCopy(P){
+  if (P.rule !== 'shapeFree' || site.run('typeof scHearStrum') !== 'function'){ log("the copy's numbers and grid: not checked (not the pattern-shape grid)"); return; }
+  const NAMES = ['SC_ONSET_RATIO', 'SC_HF_RATIO', 'COACH_ONSET_REFRACT', 'SC_ANCHOR_RANGE', 'SC_ANCHOR_STEP', 'SC_ANCHOR_SPAN', 'SC_ANCHOR_REST',
+    'SC_ANCHOR_WIDE_RANGE', 'SC_ANCHOR_WIDE_MIN', 'SC_ANCHOR_WIDE_SLACK', 'SC_ANCHOR_WIDE_ACCEPT', 'SC_ANCHOR_WIDE_TIGHT', 'SC_ANCHOR_LOCK', 'SC_ANCHOR_LOCK_MIN'];
+  const k = JSON.parse(site.run('JSON.stringify({ ' + NAMES.map(n => `${n}: typeof ${n} === 'undefined' ? null : ${n}`).join(', ') + ' })'));
+  const want = [['SC_ONSET_RATIO', P.ratio], ['SC_HF_RATIO', P.hfRatio], ['COACH_ONSET_REFRACT', P.refract], ['SC_ANCHOR_RANGE', P.range || 1],
+    ['SC_ANCHOR_STEP', 5], ['SC_ANCHOR_SPAN', 8], ['SC_ANCHOR_REST', -1.5], ['SC_ANCHOR_WIDE_RANGE', P.wide], ['SC_ANCHOR_WIDE_MIN', P.wideMin || 6],
+    ['SC_ANCHOR_WIDE_SLACK', P.wideSlack == null ? 1.5 : P.wideSlack], ['SC_ANCHOR_WIDE_ACCEPT', P.wideAccept == null ? 1 : P.wideAccept],
+    ['SC_ANCHOR_WIDE_TIGHT', P.wideTight == null ? 1e9 : P.wideTight]];
+  const bad = want.filter(([n, v]) => k[n] !== v).map(([n, v]) => `${n} is ${k[n]}, the copy ${v}`);
+  if ((k.SC_ANCHOR_LOCK || 0) !== (P.lock || 0)) bad.push(`SC_ANCHOR_LOCK is ${k.SC_ANCHOR_LOCK}, the copy's lock ${P.lock || 0}`);
+  if (P.lock && k.SC_ANCHOR_LOCK_MIN !== P.lockMin) bad.push(`SC_ANCHOR_LOCK_MIN is ${k.SC_ANCHOR_LOCK_MIN}, the copy's lockMin ${P.lockMin}`);
+  if (P.outPen != null && P.outPen !== k.SC_ANCHOR_REST) bad.push(`the copy's outPen ${P.outPen} is not SC_ANCHOR_REST ${k.SC_ANCHOR_REST}`);
+  if (bad.length){
+    log("the copy's numbers: DIFFERENT from the page's: " + bad.join('; '));
+    console.error("strum-check-replay: the copy's settings are not the page's numbers; set SITE_P (or --copy) to the page's");
+    process.exit(1);
+  }
+  const lists = gridLists();
+  site.run('globalThis.__gridLists = ' + JSON.stringify(lists));
+  const diff = JSON.parse(site.run(`(() => {
+    const H = __scHook, keep = coachOnsetAt, out = [], p = ${JSON.stringify(P)};
+    try {
+      for (const L of __gridLists){
+        const got = [];
+        for (const copy of [false, true]){
+          H.on = copy; H.p = copy ? p : null; H.diag = null;
+          const slotMs = 30000 / L.bpm, s = { listenStart: 100000, gridOffset: 0, lat: 0, slotMs, win: SC_WIN_FRAC * slotMs, slotsOf: scPatternSlots('D.DU.UDU'),
+            smoothRms: 0, smoothHf: 0, lastOnsetT: -1e9, onsetRatio: SC_ONSET_RATIO, hfRatio: SC_HF_RATIO, onsets: [] };
+          const g = [];
+          for (const t of L.on){
+            coachOnsetAt = s.listenStart + t; s.smoothRms = 0; s.smoothHf = 0;
+            const r = scHearStrum(s, 0.1, 0.01);
+            g.push(r == null ? 'none' : Math.round(r * 1000) / 1000 + ' @ ' + Math.round(s.gridOffset * 1000) / 1000);
+          }
+          got.push(g);
+        }
+        const i = got[0].findIndex((x, j) => x !== got[1][j]);
+        if (i >= 0) out.push({ name: L.name, bpm: L.bpm, i, real: got[0][i], copy: got[1][i] });
+      }
+    } finally { coachOnsetAt = keep; H.on = false; H.p = null; }
+    return JSON.stringify(out); })()`));
+  const n = lists.reduce((a, L) => a + L.on.length, 0);
+  if (diff.length){
+    log(`the copy's grid: DIFFERENT from the real scHearStrum in ${diff.length} of ${lists.length} made-up rounds, e.g. ` + diff.slice(0, 3).map(d => `${d.name}, ${d.bpm} BPM, onset ${d.i + 1}: real ${d.real}, copy ${d.copy} (ms from beat 1 @ grid)`).join('; '));
+    console.error("strum-check-replay: the copy's grid does not reproduce the real one; the replays would mean nothing");
+    process.exit(1);
+  }
+  log(`the copy's numbers equal the page's (${want.length + 1} constants); its grid IDENTICAL to the real scHearStrum on ${lists.length} made-up rounds (${n} onsets)`);
+}
+checkCopy(COPY_P);
 for (const tk of takes){
   const raw = await replay(tk, null, {});
   const ar = agree(tk, raw);
