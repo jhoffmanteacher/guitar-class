@@ -91,9 +91,14 @@ const { ESLINT_VERSION, GLOBALS_VERSION, scriptConfig } = configMod;
 /* ── Outer run: fetch the pinned ESLint with npx and run this file again inside it ── */
 if (!flag('inner')) {
   const npx = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+  /* On Windows npx.cmd needs a shell, and a shell splits an argument at its spaces: the path of this file in a
+     folder named "guitar-class website" arrived as two words and node could not find the module (2026-11-16).
+     So there every argument with a space or a quote in it is wrapped in double quotes. */
+  const win = process.platform === 'win32';
+  const q = a => win && /[\s"]/.test(a) ? '"' + a.replace(/"/g, '\\"') + '"' : a;
   const r = spawnSync(npx, ['--yes', '-p', `eslint@${ESLINT_VERSION}`, '-p', `globals@${GLOBALS_VERSION}`,
-    'node', fileURLToPath(import.meta.url), '--inner', ...argv],
-    { stdio: 'inherit', shell: process.platform === 'win32' });
+    'node', fileURLToPath(import.meta.url), '--inner', ...argv].map(q),
+    { stdio: 'inherit', shell: win });
   if (r.error) cannotRun('could not start npx: ' + r.error.message);
   /* The inner run exits 0, or 3 for "--strict and findings are left". Any other code means npx or the inner run
      broke (an npm outage exits 1). */
