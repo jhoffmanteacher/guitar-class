@@ -68,7 +68,7 @@
    real strum-pattern takes yet).
    ════════════════════════════════════════════════════════════════════ */
 
-const SC_RULE = 'strumcheck-2';     // bump when what is judged changes; saved with every take (2: the pattern-shape grid, the octave vote, 2026-11-14)
+const SC_RULE = 'strumcheck-3';     // bump when what is judged changes; saved with every take (2: the pattern-shape grid, the octave vote, 2026-11-14; 3: rule AD, an extra on a rest stays an extra, 2026-11-16)
 /* A strum counts within SC_WIN_FRAC of an eighth of its slot (both ways), and so does a strum in a miss. 0.35 ("medium strict")
    until Jonathan played it on a real guitar (2026-11-14): "the arrows lit up red like i got things wrong. i think it needs to be
    slightly more permissive to start". 0.45 is Strum Radar's own window for this pattern; the strum and miss windows still do not
@@ -97,7 +97,7 @@ const SC_HF_RATIO = 1.3;
    player who drifted more than half an eighth late was matched to the NEXT slot and the easing then slid the grid a whole eighth (take
    3: every bar heard one slot late; take 2: from bar 8). Now, at each strum heard, the check tries every grid offset SC_ANCHOR_STEP ms
    apart within SC_ANCHOR_RANGE eighths of the grid it has, scores the onsets of the last SC_ANCHOR_SPAN eighths against D.DU.UDU
-   (+1 an onset inside a strum place's window, SC_ANCHOR_REST inside a rest's), and takes the best (ties: the nearest the grid it
+   (+1 an onset inside a strum place's window, SC_ANCHOR_REST inside a rest's or, since rule AD below, outside every window), and takes the best (ties: the nearest the grid it
    has). D.DU.UDU shifted by an eighth fits 4 of its 6 strum places, so a whole-slot slide scores worse than the right grid and the
    grid stays on the player's own pattern. The same with the Metronome's click in the student's ears: a search held to half an
    eighth around the click grid was measured (bench, 1.15 / 1.3): the same for a steady player, a late one and an early one, and it
@@ -132,6 +132,19 @@ const SC_ANCHOR_WIDE_ACCEPT = 1;
    talking that happens to land in six strum windows is not (measured: with the score rule alone talking passed 3 bars of 64, 1 without
    the wide search). */
 const SC_ANCHOR_WIDE_TIGHT = 0.15;
+/* AN EXTRA STRUM ON A REST STAYS AN EXTRA (review round 4, R4-1; Jonathan chose rule "AD", 2026-11-16). Before this, the search at each
+   strum could slide the grid so that a strum on a rest fell between two windows (it scored nothing there) or on a strum place, and the
+   mistake bar passed: on the bench about half the extras were excused (51 of 120 caught, quiet room). Two rules:
+     A  a sound outside every window costs SC_ANCHOR_REST too, as a sound on a rest does (scAnchorSearch);
+     D  when the SC_ANCHOR_LOCK_MIN or more onsets before this one (in the last SC_ANCHOR_SPAN eighths) all sit on strum places of the
+        grid it has, the search looks only SC_ANCHOR_LOCK of an eighth either way (not SC_ANCHOR_RANGE): a player whose last strums fit
+        is on the grid, so one odd sound cannot move it far. The wide search (above) is unchanged.
+   Measured (DETAILS section 29): Jonathan's three takes, kept clock and +-20 ms, right playing: strums heard 379 of 414 (378 before),
+   false extras 1 of 138 (1), bars all right 36 of 72 (35). One of his own strums pasted into a rest (180 splices): caught 115 (38
+   before), the mistake bar passed 32 (83). Not fixed: an extra on bar 1's first rest (one strum before it). Costs: talking (the bench's
+   talk room only; no real take has talk) gives a right player more false extras. */
+const SC_ANCHOR_LOCK = 0.25;
+const SC_ANCHOR_LOCK_MIN = 4;
 /* THE CHORD, octave first (2026-11-14, take 1 bar 4: G5 played where C5 is due passed, because G is in both chords and pitch classes
    drop the octave). Each reading within SC_OCT_TOL semitones of one of a chord's own notes, or of that note an octave under it (the
    detector's sub-octave), votes for every chord of the step that has it; the chord with the most votes alone wins (3+ readings). It
@@ -581,7 +594,11 @@ function scAnchor(s, at){
   s.onsets = s.onsets || [];
   s.onsets.push(at);
   const recent = s.onsets.filter(t => at - t < SC_ANCHOR_SPAN * s.slotMs);
-  let r = scAnchorSearch(s, recent, SC_ANCHOR_RANGE, false);
+  /* rule D (AN EXTRA STRUM ON A REST STAYS AN EXTRA, above): the onsets before this one all on strum places of the grid it has (each
+     scores 1 there) -> a narrow search */
+  const before = recent.slice(0, -1);
+  const range = before.length >= SC_ANCHOR_LOCK_MIN && scAnchorSearch(s, before, 0, false).score === before.length ? SC_ANCHOR_LOCK : SC_ANCHOR_RANGE;
+  let r = scAnchorSearch(s, recent, range, false);
   if (recent.length >= SC_ANCHOR_WIDE_MIN && r.score < recent.length - SC_ANCHOR_WIDE_SLACK){
     const w = scAnchorSearch(s, recent, SC_ANCHOR_WIDE_RANGE, true);
     if (w.score >= recent.length - SC_ANCHOR_WIDE_ACCEPT && w.n && w.off / w.n <= SC_ANCHOR_WIDE_TIGHT * s.slotMs) r = w;
@@ -600,7 +617,7 @@ function scAnchorSearch(s, recent, range, centred){
     let score = 0, off = 0, nIn = 0;
     for (const t of recent){
       const q = t - s.listenStart - o - s.lat, k = Math.round(q / s.slotMs), d = q - k * s.slotMs;
-      if (Math.abs(d) > s.win) continue;
+      if (Math.abs(d) > s.win){ score += SC_ANCHOR_REST; continue; }   // rule A: outside every window costs as a rest does
       const sl = s.slotsOf[((k % SC_SLOTS) + SC_SLOTS) % SC_SLOTS];
       score += sl && sl.strum ? 1 : SC_ANCHOR_REST;
       off += Math.abs(d); nIn++;
@@ -818,7 +835,7 @@ function scRecMeta(){
       /* what the student had for a beat (2026-11-14): the Metronome on at Start, "I'm wearing headphones", the click played */
       metroOn: !!s.metro, headphones: !!s.hp, clicks: scClicksWanted(s.metro, s.hp),
       tooLoud: !!s.tooLoud, gateLevel: num(s.gateLevel) == null ? null : Math.round(s.gateLevel * 1e5) / 1e5, gateFloorLevel: num(s.gateFloor) == null ? null : Math.round(s.gateFloor * 1e5) / 1e5, gateFloor: SC_GATE_FLOOR, gateFrames: (s.gateLevels || []).length, gateThreshold: SC_GATE_LEVEL,
-      anchorRange: SC_ANCHOR_RANGE, anchorWide: SC_ANCHOR_WIDE_RANGE, anchorWideMin: SC_ANCHOR_WIDE_MIN, anchorWideSlack: SC_ANCHOR_WIDE_SLACK, anchorWideAccept: SC_ANCHOR_WIDE_ACCEPT, anchorWideTight: SC_ANCHOR_WIDE_TIGHT, gatePct: SC_GATE_PCT, octOkMargin: SC_OCT_OK_MARGIN, octWrongMargin: SC_OCT_WRONG_MARGIN, anchorStep: SC_ANCHOR_STEP, anchorSpan: SC_ANCHOR_SPAN, anchorRest: SC_ANCHOR_REST, octTol: SC_OCT_TOL,
+      anchorRange: SC_ANCHOR_RANGE, anchorWide: SC_ANCHOR_WIDE_RANGE, anchorWideMin: SC_ANCHOR_WIDE_MIN, anchorWideSlack: SC_ANCHOR_WIDE_SLACK, anchorWideAccept: SC_ANCHOR_WIDE_ACCEPT, anchorWideTight: SC_ANCHOR_WIDE_TIGHT, gatePct: SC_GATE_PCT, octOkMargin: SC_OCT_OK_MARGIN, octWrongMargin: SC_OCT_WRONG_MARGIN, anchorStep: SC_ANCHOR_STEP, anchorSpan: SC_ANCHOR_SPAN, anchorRest: SC_ANCHOR_REST, anchorLock: SC_ANCHOR_LOCK, anchorLockMin: SC_ANCHOR_LOCK_MIN, octTol: SC_OCT_TOL,
       eventTimes: 'played (arrival - latMs)',
       rests: s.slots.filter(x => !x.strum).map(x => ({ bar: x.bar, slot: x.slot, verdict: str(x.state), devMs: r1(x.devMs) })),
       chords: s.caps.map(cp => ({ bar: cp.bar, chord: str(cp.chord), prev: str(cp.prev), verdict: str(cp.verdict), a: str(cp.a), b: str(cp.b), c: str(cp.c), o: str(cp.o),

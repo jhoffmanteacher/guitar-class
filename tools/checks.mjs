@@ -17508,7 +17508,7 @@ async function checkStrumCheck() {
   const { run } = COACH_SANDBOX;
   const n = { pins: 0, onsets: 0, chords: 0, lines: 0, strumSteps: 0, sweeps: 0, tempos: 0, saves: 0, again: 0, reads: 0, nothing: 0, life: 0, restExtras: 0 };
   const PIN = { pattern: 'D.DU.UDU', bars: 'D5 D5 C5 C5 G5 G5 D5 D5', rests: '1,4', win: 0.45, rule: 'oc', ratio: 1.15, hfRatio: 1.3, startBpm: 85, octTol: 0.6, missGrace: 60, clarity: 0.55, recMax: 60,
-    anchor: { range: 1, step: 5, span: 8, rest: -1.5, wide: 4, wideMin: 6, wideSlack: 1.5, wideAccept: 1, wideTight: 0.15 }, gate: { level: 0.012, pct: 0.2, floor: 0.003, skip: 300, pre: 20, post: 150 }, octOk: 1, octWrong: 2 };
+    anchor: { range: 1, step: 5, span: 8, rest: -1.5, wide: 4, wideMin: 6, wideSlack: 1.5, wideAccept: 1, wideTight: 0.15, lock: 0.25, lockMin: 4 }, gate: { level: 0.012, pct: 0.2, floor: 0.003, skip: 300, pre: 20, post: 150 }, octOk: 1, octWrong: 2 };
   try {
     const found = JSON.parse(run(`JSON.stringify(CLASS_ACTIVITIES.flatMap(a => (a.steps || []).map((s, si) => ({ id: a.id, si, path: s.path || null, strum: s.strum || null }))).filter(x => x.strum).map(x => ({ id: x.id, si: x.si, path: x.path, listen: 'listen' in x.strum ? x.strum.listen : '(none)', pattern: x.strum.pattern, bars: x.strum.bars.join(' ') })))`));
     n.strumSteps = found.length;
@@ -17640,7 +17640,7 @@ async function checkStrumCheck() {
        the constants. */
     {
       const A = PIN.anchor;
-      for (const [k, v] of [['SC_ANCHOR_RANGE', A.range], ['SC_ANCHOR_STEP', A.step], ['SC_ANCHOR_SPAN', A.span], ['SC_ANCHOR_REST', A.rest], ['SC_ANCHOR_WIDE_RANGE', A.wide], ['SC_ANCHOR_WIDE_MIN', A.wideMin], ['SC_ANCHOR_WIDE_SLACK', A.wideSlack], ['SC_ANCHOR_WIDE_ACCEPT', A.wideAccept], ['SC_ANCHOR_WIDE_TIGHT', A.wideTight], ['SC_OCT_OK_MARGIN', PIN.octOk], ['SC_OCT_WRONG_MARGIN', PIN.octWrong]])
+      for (const [k, v] of [['SC_ANCHOR_RANGE', A.range], ['SC_ANCHOR_STEP', A.step], ['SC_ANCHOR_SPAN', A.span], ['SC_ANCHOR_REST', A.rest], ['SC_ANCHOR_WIDE_RANGE', A.wide], ['SC_ANCHOR_WIDE_MIN', A.wideMin], ['SC_ANCHOR_WIDE_SLACK', A.wideSlack], ['SC_ANCHOR_WIDE_ACCEPT', A.wideAccept], ['SC_ANCHOR_WIDE_TIGHT', A.wideTight], ['SC_ANCHOR_LOCK', A.lock], ['SC_ANCHOR_LOCK_MIN', A.lockMin], ['SC_OCT_OK_MARGIN', PIN.octOk], ['SC_OCT_WRONG_MARGIN', PIN.octWrong]])
         if (Number(run(k)) !== v) fail(`${k} is ${run(k)}, want ${v}`);
       const late = (click, lateBy = 0.8, bars = 3) => JSON.parse(run(`(() => { const slotMs = 353, s = { smoothRms: 0, smoothHf: 0, lastOnsetT: -1e9, listenStart: 0, gridOffset: 0, lat: 0, slotMs, win: SC_WIN_FRAC * slotMs,
           slotsOf: scPatternSlots('${PIN.pattern}'), onsets: [], onsetRatio: SC_ONSET_RATIO, hfRatio: SC_HF_RATIO, metro: ${click}, hp: ${click} };
