@@ -121,7 +121,11 @@ const SC_ANCHOR_WIDE_RANGE = 4;
 const SC_ANCHOR_WIDE_MIN = 6;
 const SC_ANCHOR_WIDE_SLACK = 1.5;
 /* ...and the wide result is kept only when it fits the bar almost perfectly: a score of at least the onsets' count less
-   SC_ANCHOR_WIDE_ACCEPT (every onset but one on a strum place). A late player's bar fits that way; room noise and talking rarely do
+   SC_ANCHOR_WIDE_ACCEPT. Until rule A (2026-11-16) that was every onset but one on a strum place; since rule A the wide search scores
+   a sound on a rest or outside every window -1.5 instead of +1 (2.5 under the count), so it means EVERY onset on a strum place:
+   one such sound and the bar is refused, and SC_ANCHOR_WIDE_ACCEPT has no effect anywhere between 0 and 2.5 (review R7-2). So one
+   sound outside the windows in the last bar keeps the wide search from following a player who moved, until a bar comes without
+   one. A late player's bar fits that way; room noise and talking rarely do
    (measured: without this line nothing played passed 4 / 9 bars of 64 in the talk / chatter rooms, 2 / 7 before the wide search).
    Two more rules keep the bars right: the wide search breaks a tie by how near the strums sit to the middles of their windows (a grid
    almost half an eighth off fits every strum at a window's edge and scores the same as the true one), and no grid is ever more than
