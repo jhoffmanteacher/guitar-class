@@ -350,7 +350,7 @@ function sbGridSwap(sections, from, to){
   return out;
 }
 /* A bar string → [{ name ('' = rest), beats }], and back. */
-function sbBarRead(bar, meter){ const m = SB_METER[meter] || SB_METER['4/4']; return String(bar).indexOf(':') < 0 ? [{ name: bar === '-' ? '' : bar, beats: m.bpb }] : String(bar).split(/\s+/).map(tk => { const p = tk.split(':'); return { name: p[0] === '-' ? '' : p[0], beats: Number(p[1]) }; }); }
+function sbBarRead(bar, meter){ const m = SB_METER[meter] || SB_METER['4/4']; return String(bar).indexOf(':') < 0 ? [{ name: bar === '-' ? '' : bar, beats: m.bpb }] : String(bar).split(/\s+/).map(tk => { const p = tk.split(':'); return { name: p[0] === '-' ? '' : p[0], beats: bsBeats(p[1]) }; }); }   // bsBeats: '2', '1.5' and an imported song's '1/3'
 function sbBarWrite(parts, meter){
   const m = SB_METER[meter] || SB_METER['4/4'];
   if(parts.length === 1 || parts.every(p => p.name === parts[0].name)) return parts[0].name || '-';
@@ -369,10 +369,18 @@ function sbSongOf(d){
     if(s.lyrics && s.lyrics.some(l => l.text)) o.lyrics = s.lyrics.map(l => ({ text: l.text, bars: l.bars }));
     sections.push(o); bars.push(...s.bars); from += s.bars.length;
   });
-  sbChartChords(ch.sections).forEach(n => { const sh = sbShapeOf(n); if(sh) chords[n] = { full: sh.full, power: sh.power }; });
-  const song = { meter: beat.meter, bpm: Math.round(sbPinBpm(beat) * 1000) / 1000, anchor: beat.anchor, chords, bars, sections,
+  /* An imported song's own shapes (chart.shapes, sbDraftFromDoc) are kept as they came; a shape its level now needs
+     and the song did not have comes from the builder (sbShapeOf). */
+  const needFull = lv.versions !== 'power', needPower = lv.versions !== 'full';
+  sbChartChords(ch.sections).forEach(n => {
+    const sh = sbShapeOf(n), imp = ch.shapes && bsOwn(ch.shapes, n) && bsIsObj(ch.shapes[n]) ? ch.shapes[n] : null;
+    if(imp) chords[n] = { full: imp.full || (needFull && sh ? sh.full : null), power: imp.power || (needPower && sh ? sh.power : null) };
+    else if(sh) chords[n] = { full: sh.full, power: sh.power };
+  });
+  /* An imported song's beat (beat.fromImport) is kept exactly: its bpm unrounded and its own bar times. */
+  const song = { meter: beat.meter, bpm: beat.fromImport ? beat.bpm : Math.round(sbPinBpm(beat) * 1000) / 1000, anchor: beat.anchor, chords, bars, sections,
     level: lv.versions === 'both' ? { versions: 'both', start: lv.start === 'power' ? 'power' : 'full' } : { versions: lv.versions === 'power' ? 'power' : 'full' } };
-  const bt = sbBarTimes(beat, bars.length);
+  const bt = beat.fromImport && Array.isArray(beat.barTimes) ? beat.barTimes.slice() : sbBarTimes(beat, bars.length);
   if(bt) song.barTimes = bt;
   if(lv.range && Number.isInteger(lv.range.from) && Number.isInteger(lv.range.to)) song.range = { from: lv.range.from, to: lv.range.to };
   return song;
@@ -461,9 +469,11 @@ function sbChartPaneHtml(d){
   const rec = d.beat && d.audio ? sbBarsIn(d.beat, d.audio.durationSec) : null;
   const stale = d.beat && ch.meter && ch.meter !== d.beat.meter ? `<div class="sb-flag red"><span class="fi">!</span><div class="sb-flag-body"><b>The beat is now ${escHtml(d.beat.meter === '6/8' ? '6/8 in two' : d.beat.meter.slice(0, 1) + ' beats a bar')}; this chart was read in ${escHtml(ch.meter)}.</b> Read it again so its bars fit. <button type="button" class="sb-btn small" data-sb-act="chart-read"${off}>Read it again</button></div></div>` : '';
   const count = rec == null ? '' : nBars === rec ? `<span class="sb-chip on">✓ ${nBars} bars, the same as the recording</span>` : `<span class="sb-chip${nBars > rec ? ' new' : ''}">${nBars} bars; the recording has ${rec}</span>`;
+  /* A chart rebuilt from an imported song (sbDraftFromDoc): there is no pasted text to show. */
+  const imp = ch.fromImport ? `<div class="sb-flag sb-flag-info"><span class="fi">i</span><div class="sb-flag-body"><b>This chart came with the imported song.</b> Its original text is not here, so there is nothing under "What was read"; the grid is the song as it was published, with its own chord shapes. Pasting a chart replaces it.</div></div>` : '';
   if(view === 'grid'){
     const sel = st.sel != null && st.sel < nBars ? st.sel : null;
-    return pdfBar + stale + `<div class="sb-tools">${count}<span class="sb-hint" style="margin:0">${open.n ? `${open.n} thing${open.n === 1 ? '' : 's'} still to settle` : 'Pick a bar to change it.'}</span><span class="sb-toolbtns">`
+    return pdfBar + stale + imp + `<div class="sb-tools">${count}<span class="sb-hint" style="margin:0">${open.n ? `${open.n} thing${open.n === 1 ? '' : 's'} still to settle` : 'Pick a bar to change it.'}</span><span class="sb-toolbtns">`
       + `<button type="button" class="sb-btn small" data-sb-act="chart-view" data-sb-v="read"${off}>← What was read</button><button type="button" class="sb-btn small" data-sb-act="chart-undo"${off || !st.undo.length ? ' disabled' : ''}>Undo</button><button type="button" class="sb-btn small" data-sb-act="clear-chart"${off}>Clear this step</button></span></div>`
       + `<div class="sb-cols sb-gridcols"><div class="sb-gridscroll">${sbSecGridHtml(ch.sections, meter, { sel, pick: true, play: !!(d.beat && d.audio) })}</div><div>${sbBarPanelHtml(d, sel)}</div></div>`;
   }
@@ -485,7 +495,7 @@ function sbChartPaneHtml(d){
   read.notes.forEach(t => flags.push(`<div class="sb-flag sb-flag-info"><span class="fi">i</span><div class="sb-flag-body">${escHtml(t)}</div></div>`));
   if(rec != null && nBars !== rec) flags.push(`<div class="sb-flag sb-flag-info"><span class="fi">i</span><div class="sb-flag-body"><b>The chart makes ${nBars} bars; the recording has about ${rec}</b> at ${escHtml(String(Math.round(sbPinBpm(d.beat))))} BPM. ${read.fmt === 'bar lines' ? 'Add or remove bars in the grid.' : 'Chords over lyrics do not say how long each chord lasts, so each got one bar. Hold the long ones in the grid.'}</div></div>`);
   const marked = `<pre class="sb-paste">` + read.lines.map(l => `<span class="ln ${l.kind === 'bad' ? ((ch.left || []).includes(l.n) ? 'out' : 'bad') : l.kind === 'header' ? 'hd' : l.kind === 'chords' || l.kind === 'bars' || l.kind === 'chordpro' ? 'ch' : l.kind === 'skipped' || l.kind === 'meta' ? 'out' : ''}"><span class="no">${l.n}</span>${escHtml(l.text) || ' '}</span>`).join('') + `</pre>`;
-  return pdfBar + stale + `<div class="sb-tools"><span class="sb-chip on">✓ Read as ${escHtml(read.fmt || 'a chart')}</span><span class="sb-note" style="margin:0">${ch.sections.length} section${ch.sections.length === 1 ? '' : 's'} · ${nBars} bars · chords: ${sbChipsHtml(names, kept)}</span><span class="sb-toolbtns">`
+  return pdfBar + stale + imp + `<div class="sb-tools"><span class="sb-chip on">✓ Read as ${escHtml(read.fmt || 'a chart')}</span><span class="sb-note" style="margin:0">${ch.sections.length} section${ch.sections.length === 1 ? '' : 's'} · ${nBars} bars · chords: ${sbChipsHtml(names, kept)}</span><span class="sb-toolbtns">`
     + `<button type="button" class="sb-btn small" data-sb-act="chart-view" data-sb-v="paste"${off}>← Paste again</button><button type="button" class="sb-btn small" data-sb-act="clear-chart"${off}>Clear this step</button><button type="button" class="sb-btn small primary" data-sb-act="chart-view" data-sb-v="grid"${off}>Fix in the grid →</button></span></div>`
     + `<div class="sb-cols c3"><div>${ch.edited ? '<p class="sb-hint">The grid has been changed by hand since this was read; the right side shows the grid as it is now.</p>' : ''}${flags.join('')}${marked}</div><div class="sb-gridscroll">${sbSecGridHtml(ch.sections, meter, { mini: true })}</div></div>`;
 }

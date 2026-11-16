@@ -666,6 +666,15 @@ function sbPins(beat){
   return ps.sort((a, b) => a.bar - b.bar);
 }
 function sbBarTime(beat, bar){
+  /* A beat that came with an IMPORTED song (teacher-sb-publish.js, sbDraftFromDoc) may carry its own bar times: they
+     are the truth, kept exactly; past the last one, the last bars' average length. */
+  const bt = beat.barTimes;
+  if(Array.isArray(bt) && bt.length >= 2){
+    const i = bar - 1, last = bt.length - 1;
+    if(i >= 0 && i <= last) return bt[i];
+    const avg = (bt[last] - bt[0]) / last;
+    return i < 0 ? bt[0] + i * avg : bt[last] + (i - last) * avg;
+  }
   const ps = sbPins(beat);
   if(ps.length < 2) return beat.anchor + (bar - 1) * sbBarSec(beat);
   const L = ps.length;

@@ -35,19 +35,29 @@
      4. the song's previous audio, when the edit replaced it: deleted once nothing on the list plays it (sbDeleteAudio).
    So the list never names a song that is not saved. Students get it at their next sign-in, or a tab return (read at
    most every 15 minutes, app/builtsongs.js BS_RETURN_MS); this console's Songs view at once (builtSongsSync).
-   EDIT opens the steps of a published song (sbEditing, this tab only); every change is saved in the draft, and
-   students keep the published song until Publish runs again. The draft's old levelled copy is kept while the
-   published song plays it (sbDeleteAudio asks the list).
+   EDIT opens the steps of a published song (sbEditing, this tab only) on the step he picks (Jonathan, 2026-11-16:
+   "edit gives a choice of step": Upload, Volume, Beat, Chart, Level, Preview, one click each; the header's Edit and the
+   highlighted choice are Chart); every change is saved in the draft, and students keep the published song until
+   Publish runs again. The draft's old levelled copy is kept while the published song plays it (sbDeleteAudio).
    UNPUBLISH: the draft keeps the song's edit number (pubVer: a later Publish counts on from it, since a Chromebook
    keeps a song by that number), then builtSongsMeta/list loses the song (a transaction), then builtSongs/{id} is
    deleted; the draft and its copy stay (a published copy the draft no longer uses is deleted, as at 4. above).
    DELETE… (a published song): the typed title (the standing rule for deletes in the console; Jonathan, 2026-11-15),
    then the list entry, builtSongs/{id}, the draft, and every copy the song or its draft named that nothing else on the
    list plays. Students' songOpens counts are in their own progress and are not touched.
-   An IMPORTED song (Manage → Built songs, teacher-builtsongs.js) has no draft: its page offers Delete… and Export;
-   it is changed by importing a new file.
-   EXPORT: one song as the Import file ({ id, v, title, artist, audio, song }, app/builtsongs.js), saved to this
-   computer, for Claude's tools/built-song-check.mjs (or Manage → Built songs' Import, with its mp3).
+   An IMPORTED song (Manage → Built songs, teacher-builtsongs.js) has no draft. Edit and Unpublish (Jonathan,
+   2026-11-16: "they should get edit/unpublish") first REBUILD one from its builtSongs doc (sbDraftFromDoc) and save
+   it: title, artist, the audio entry, the sections, bars, lyric lines, level and range, the chord shapes AS THEY CAME
+   (chart.shapes), and the beat as it came (beat.fromImport: its bpm unrounded, bar 1, and its bar times when it has
+   them, kept exactly: the Beat step shows them read-only and sbBarTime follows them). Unchanged, it publishes the same
+   song (tools/song-builder-sim.mjs proves it). NOT recoverable: the chart's original text (the Chart step says so and
+   shows the grid), the taps and drift windows (the Beat step says the bars came with the song), the loudness
+   measurements and the original mp3 (the Volume and Upload steps say so; levelling again needs the original picked,
+   as for any reopened draft). The listens start empty.
+   EXPORT (Jonathan, 2026-11-16: "export should save mp3 too"): two downloads that pair up by name, <title>-<id>.json
+   (the Import file, { id, v, title, artist, audio, song }) and <title>-<id>.mp3 (the levelled copy: from this tab
+   when it is loaded, else read from songFiles, which counts as one song download, as the button's hint says).
+   Manage → Built songs imports the pair as it is; tools/built-song-check.mjs checks it.
    THE HEALTH LINE (the list's head): "N published; all pass today's checks", or each song that fails builtSongCheck
    today (a code change to the validator can make an old song fail; a student's page then leaves it out).
 
@@ -303,7 +313,7 @@ function sbPublishPaneHtml(d){
   const rows = [
     ['Recording', `${escHtml(sbLen(a.durationSec))}, levelled to the cure (${a.gainDb >= 0 ? '+' : '−'}${escHtml(Math.abs(Number(a.gainDb) || 0).toFixed(1))} dB), ${escHtml(sbMb(a.bytes))} behind the school sign-in ` + ok('')],
     ['Pitch', pitchBad ? bad(`${escHtml(sbCentsLine(d.pitch ? d.pitch.cents : a.centsOff))}: send the mp3 to Claude`) : `${escHtml(sbCentsLine(d.pitch ? d.pitch.cents : a.centsOff))} ` + ok('')],
-    ['Beat', `${escHtml(sbPinBpm(b).toFixed(1))} BPM, bar 1 at ${escHtml(sbFmtT(b.anchor))}, ${nPins} pin${nPins === 1 ? '' : 's'} `
+    ['Beat', `${escHtml(sbPinBpm(b).toFixed(1))} BPM, bar 1 at ${escHtml(sbFmtT(b.anchor))}, ${b.fromImport ? `the bars as they came with the imported song${Array.isArray(b.barTimes) ? ` (${b.barTimes.length} bar times)` : ''}` : `${nPins} pin${nPins === 1 ? '' : 's'}`} `
       + (b.driftOff > 0 ? bad(`${b.driftOff} place${b.driftOff === 1 ? '' : 's'} drift over 30 ms`) : Number.isFinite(Number(b.driftOff)) ? ok('') : bad('drift not checked yet'))
       + (sbBeatTooMuch(b.pinsNeeded) ? ' <span class="sb-warn">does not fit the builder (see below)</span>' : '')],
     ['Chart', `${s.sections.length} section${s.sections.length === 1 ? '' : 's'}, ${s.bars.length} bars, ${escHtml(Object.keys(s.chords).join(' '))} `
@@ -322,7 +332,8 @@ function sbPublishPaneHtml(d){
       <div class="sb-h">Where does it go?</div>
       <div class="sb-opt on sb-where" role="note"><span class="sb-radio"></span><span><span class="sb-opt-t">Songs page · More Play Along songs</span><span class="sb-opt-d">Every student can open it: no date, no Mark complete, never required.</span></span></div>
       <p class="sb-hint">${p ? `Students have edit ${escHtml(String(p.ver))} now. Publishing the changes replaces it` : 'Students see it'} at their next sign-in, or when they come back to the site's tab (it checks at most every 15 minutes).</p>
-      <div class="sb-row"><button type="button" class="sb-btn small" data-sb-act="export" data-sb-v="draft"${sbBusy ? ' disabled' : ''}>Export the song file</button><span class="sb-hint" style="margin:0">For Claude: the file Manage → Built songs imports.</span></div>
+      <div class="sb-row"><button type="button" class="sb-btn small" data-sb-act="export" data-sb-v="draft"${sbBusy ? ' disabled' : ''}>Export the song file and its mp3</button></div>
+      <p class="sb-hint">${escHtml(SB_EXPORT_HINT)}</p>
     </div></div>`;
 }
 async function sbPublish(){
@@ -395,9 +406,12 @@ async function sbListDrop(id){
   return had;
 }
 async function sbUnpublish(){
-  const id = sbSel, d = sbDraft(), p = sbPublished && sbPublished.get(id);
-  if(sbBusy || !p || !d) return;
-  if(!confirm(`Unpublish "${p.title}"? It comes off the Songs page for every student (at their next sign-in or tab return). The draft and its recording stay here, so you can publish it again.`)) return;
+  const id = sbSel, p = sbPublished && sbPublished.get(id);
+  /* An imported song has no draft: one is rebuilt from the published doc and saved first, so nothing is thrown away. */
+  const d = sbDraft() || (p && p.doc && !builtSongCheck(id, p.doc).length ? sbDraftFromDoc(id, p) : null);
+  if(sbBusy || !p) return;
+  if(!d){ sbNote = 'Not unpublished: this song fails today\'s checks, so no draft can be made of it. Delete takes it off, or send its file to Claude.'; teacherSbPaint(); return; }
+  if(!confirm(`Unpublish "${p.title}"? It comes off the Songs page for every student (at their next sign-in or tab return). ${sbDraft() ? 'The draft and its recording stay here' : 'It stays here as a draft, made from the published song, with its recording'}, so you can publish it again.`)) return;
   const gen = sbViewGen;
   sbStopSounds();
   sbBusy = 'unpublish'; sbOpGen++; sbNote = ''; sbProgress = 'Taking it off the Songs page…'; teacherSbPaint();
@@ -466,29 +480,96 @@ async function sbDeleteSong(){
   }
 }
 
-/* ── Export: the Import file of one song ── */
+/* ── An imported song's draft, rebuilt from its builtSongs doc (see the header) ── */
+function sbDraftFromDoc(id, p){
+  const doc = p.doc, s = doc.song, lv = s.level;
+  const sections = s.sections.map(x => ({ name: x.name, label: bsSectionLabel(x, 'en'), n: x.n || null, bars: s.bars.slice(x.from - 1, x.from - 1 + x.bars),
+    lyrics: Array.isArray(x.lyrics) ? x.lyrics.map(l => ({ text: l.text, bars: l.bars })) : null, copied: false }));
+  /* Chords the class has not been taught were published that way: kept, so the Chart step does not flag them. */
+  const kept = sbChartChords(sections).filter(n => { const sh = sbShapeOf(n); return sh && !sh.taught; });
+  const beat = { meter: s.meter, bpm: s.bpm, anchor: s.anchor, pins: [], fromImport: true, driftOff: 0, pinsNeeded: null, trackBpm: null, trackSub: null, tapBpm: null, taps: 0, tapSpreadMs: null };
+  if(Array.isArray(s.barTimes)) beat.barTimes = s.barTimes.slice();
+  return { v: 1, title: doc.title, artist: doc.artist, step: 5, imported: true, source: null, audio: JSON.parse(JSON.stringify(doc.audio)), volume: null,
+    pitch: { cents: Number(doc.audio.centsOff), peaks: null }, beat,
+    chart: { text: '', meter: s.meter, fmt: 'the imported song', fromImport: true, sections, left: [], kept, edited: true, shapes: JSON.parse(JSON.stringify(s.chords)) },
+    level: { versions: lv.versions, start: lv.versions === 'both' ? lv.start : null, range: s.range ? { from: s.range.from, to: s.range.to } : null },
+    listens: null, pubVer: Number(p.ver) || null };
+}
+/* The draft of the selected published song: its own, or one rebuilt from the published doc and saved. */
+async function sbEnsureDraft(id){
+  const have = sbDrafts && sbDrafts.get(id);
+  if(have) return have;
+  const p = sbPublished && sbPublished.get(id);
+  if(!p || !p.doc){ sbNote = 'There is no song in the database to make a draft from.'; teacherSbPaint(); return null; }
+  const why = builtSongCheck(id, p.doc);
+  if(why.length){ sbNote = `This song cannot be opened in the builder: it fails today's checks (${why[0]}). Send its file to Claude.`; teacherSbPaint(); return null; }
+  return await sbWriteDraft(id, sbDraftFromDoc(id, p)) ? sbDrafts.get(id) : null;
+}
+/* Edit on the step he picked (4, Chart, by default). */
+async function sbEditAt(k){
+  const id = sbSel;
+  if(sbBusy || !sbPublished || !sbPublished.has(id)) return;
+  sbStopSounds();
+  const d = await sbEnsureDraft(id);
+  if(!d || sbSel !== id) return;
+  sbEditing.add(id); sbNote = '';
+  sbStepOn = Math.max(1, Math.min(7, Number(k) || 4));
+  while(sbStepOn > 1 && !sbStepReady(sbDraft(), sbStepOn)) sbStepOn--;
+  teacherSbPaint();
+}
+const SB_EDIT_STEPS = [[1, 'Upload'], [2, 'Volume'], [3, 'Beat'], [4, 'Chart'], [5, 'Level'], [6, 'Preview']];
+function sbEditChoiceHtml(off){
+  return `<div class="sb-row sb-editpick" role="group" aria-label="Edit: open which step"><span class="sb-hint" style="margin:0">Edit, opening on:</span>`
+    + SB_EDIT_STEPS.map(([k, l]) => `<button type="button" class="sb-btn small${k === 4 ? ' primary' : ''}" data-sb-act="edit-step" data-sb-v="${k}"${off}>${l}</button>`).join('') + `</div>`;
+}
+
+/* ── Export: the Import file of one song, and its mp3 ── */
 function sbFileName(title, id){
   const slug = String(title || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
   return (slug ? slug + '-' : '') + id + '.json';
 }
-function sbExport(which){
+/* The levelled copy's bytes: from this tab when they are here, else read from songFiles (counted as one song download,
+   like a Chromebook's read; checked against its size and SHA-256 by songFileReadPieces). */
+async function sbCopyBytes(a, gen){
+  if(sbMem.level && sbMem.level.bytes && sbMem.level.sha256 === a.sha256) return sbMem.level.bytes;
+  await ensureDb();
+  await songFileCount(db, songFileCost(a.bytes));
+  return songFileReadPieces(db, a.id, { bytes: a.bytes, sha256: a.sha256 }, f => { sbProgress = `Reading the mp3… ${Math.floor(f * 100)}%`; const el = document.querySelector('[data-sb-status]'); if(el){ el.hidden = false; el.textContent = sbProgress; } }, () => sbStopped(gen));
+}
+async function sbExport(which){
+  if(sbBusy) return;
   const id = sbSel, d = sbDraft(), p = sbPublished && sbPublished.get(id);
   const doc = which === 'pub' ? p && p.doc : sbDocOf(d);
   if(!doc){ sbNote = 'Nothing to export yet: the song needs its levelled copy, a beat and a chart.'; teacherSbPaint(); return; }
   const file = { id, v: doc.v, title: doc.title, artist: doc.artist, audio: doc.audio, song: doc.song };
-  const name = sbFileName(doc.title, id);
-  try{ teacherMicSaveFile(name, new Blob([JSON.stringify(file, null, 1)], { type: 'application/json' })); }
-  catch(e){ sbNote = 'The file could not be saved: ' + String((e && e.message) || e) + '.'; teacherSbPaint(); return; }
-  sbNote = `Saved ${name}: the song file (${which === 'pub' ? `the published edit ${p.ver}` : 'this draft'}) that Manage → Built songs imports and Claude's tools/built-song-check.mjs checks. Its mp3 is the levelled copy in the class database.`;
-  teacherSbPaint();
+  const base = sbFileName(doc.title, id).replace(/\.json$/, '');
+  const gen = sbViewGen;
+  sbStopSounds();
+  sbBusy = 'export'; sbOpGen++; sbNote = ''; sbProgress = 'Reading the mp3…'; teacherSbPaint();
+  try{
+    const bytes = await sbCopyBytes(doc.audio, gen);
+    if(sbStopped(gen)) throw 'stop';
+    teacherMicSaveFile(base + '.json', new Blob([JSON.stringify(file, null, 1)], { type: 'application/json' }));
+    teacherMicSaveFile(base + '.mp3', new Blob([bytes], { type: 'audio/mpeg' }));
+    sbNote = `Saved ${base}.json and ${base}.mp3 (${which === 'pub' ? `the published edit ${p.ver}` : 'this draft'}): the pair Manage → Built songs imports as they are, and Claude's tools/built-song-check.mjs checks.`;
+  }catch(e){
+    const c = e && e.code;
+    sbNote = e === 'stop' ? 'Stopped: you left the Song builder. Nothing was saved.'
+      : 'Nothing was saved: ' + (c === 'limit' ? 'this month\'s song downloads are at the limit (Manage → Song files)' : c === 'missing' || c === 'bad' ? 'the levelled copy is missing or damaged in the database' : (typeof teacherSfWhy === 'function' ? teacherSfWhy(e) : String((e && (e.code || e.message)) || e))) + '.';
+  }finally{
+    sbBusy = ''; sbProgress = ''; sbOpGen++;
+    if(!sbStopped(gen)) teacherSbPaint();
+  }
 }
+const SB_EXPORT_HINT = 'Two downloads: the song file (.json) and its levelled .mp3, a pair Manage → Built songs imports as they are. Reading the mp3 counts as one song download this month, unless it is loaded in this tab already. Your browser may ask once to allow two downloads.';
 
 /* ── A published song's page ── */
 function sbPublishedHtml(id){
   const p = sbPublished.get(id), d = sbDrafts ? sbDrafts.get(id) || null : null, doc = p.doc;
   const off = sbBusy ? ' disabled' : '', verdict = sbPubVerdict(id, p), changed = d && sbPubChanged(d, p);
   const when = p.at ? new Date(p.at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-  const acts = (d ? `<button type="button" class="tg-seg-btn ta-act-btn" data-sb-act="edit"${off}>Edit</button><button type="button" class="tg-seg-btn ta-act-btn" data-sb-act="unpublish"${off}>Unpublish</button>` : '')
+  const canDraft = !!(d || (doc && verdict.ok));   // an imported song: Edit and Unpublish rebuild its draft first
+  const acts = (canDraft ? `<button type="button" class="tg-seg-btn ta-act-btn" data-sb-act="edit"${off} title="Opens the Chart step; pick another step below">Edit</button><button type="button" class="tg-seg-btn ta-act-btn" data-sb-act="unpublish"${off}>Unpublish</button>` : '')
     + `<button type="button" class="tg-seg-btn ta-act-btn t-act-danger" data-sb-act="delete-song"${off}>Delete…</button>`;
   let body = '';
   if(doc){
@@ -502,13 +583,14 @@ function sbPublishedHtml(id){
       </dl>`;
   } else body = `<div class="sb-flag red"><span class="fi">!</span><div class="sb-flag-body"><b>The Songs page list names this song, but its song is not in the database.</b> Students' pages skip it. Delete takes it off the list.</div></div>`;
   const change = d
-    ? `<p class="sb-note">Edit opens the steps again; students keep this song until you publish the change. Unpublish takes it off students' pages and keeps your work. Delete removes the song, the draft and the recording.</p>`
-    : `<p class="sb-note">This song came in through Manage → Built songs (Import), so it has no draft here: to change it, import a new song file there. Hidden in the Songs view takes it off students' pages for now; Delete removes the song and its recording.</p>`;
+    ? `<p class="sb-note">Edit opens the steps again, on the step you pick; students keep this song until you publish the change. Unpublish takes it off students' pages and keeps your work. Delete removes the song, the draft and the recording.</p>`
+    : canDraft ? `<p class="sb-note">This song came in through Manage → Built songs (Import), so it has no draft yet. Edit or Unpublish first makes one from the published song: its sections, bars, lyrics, chord shapes, level and beat come back as they are. What cannot come back: the chart's original text, the taps, the loudness numbers and the original mp3 (pick that at step 1 only to level the song again). Students keep this song until you publish a change.</p>`
+    : `<p class="sb-note">This song came in through Manage → Built songs (Import) and fails today's checks, so the builder cannot open it: send its file to Claude, or Delete it. Hidden in the Songs view takes it off students' pages for now.</p>`;
   return `<div class="ta-dhead"><div class="ta-meta">Song builder · Published${when ? ' ' + escHtml(when) : ''} · edit ${escHtml(String(p.ver))} · on the Songs page</div><div class="ta-title-row"><h2 class="ta-title">${escHtml(p.title)} <span class="ta-title-id">${escHtml(p.artist)}</span></h2><div class="ta-actions">${acts}</div></div></div>`
     + sbStatusHtml()
     + (changed ? `<div class="sb-flag"><span class="fi">!</span><div class="sb-flag-body"><b>The draft has changes that are not published.</b> Students still get edit ${escHtml(String(p.ver))}. <button type="button" class="sb-linkbtn" data-sb-act="edit"${off}>Carry on editing</button></div></div>` : '')
     + body
-    + `<div class="sb-h sb-change-h">Change it</div><div class="sb-row">${acts}<button type="button" class="tg-seg-btn ta-act-btn" data-sb-act="export" data-sb-v="pub"${off}>Export the song file</button></div>${change}`;
+    + `<div class="sb-h sb-change-h">Change it</div>${canDraft ? sbEditChoiceHtml(off) : ''}<div class="sb-row">${acts}<button type="button" class="tg-seg-btn ta-act-btn" data-sb-act="export" data-sb-v="pub"${off} title="${escAttr(SB_EXPORT_HINT)}">Export the song file and its mp3</button></div>${change}<p class="sb-hint">Export: ${escHtml(SB_EXPORT_HINT)}</p>`;
 }
 
 /* ── The buttons (sbClick routes here) ── */
@@ -517,13 +599,7 @@ function sbPubAct(act, b){
   if(act === 'unpublish'){ sbUnpublish(); return true; }
   if(act === 'delete-song'){ sbDeleteSong(); return true; }
   if(act === 'export'){ sbExport(b && b.dataset && b.dataset.sbV === 'pub' ? 'pub' : 'draft'); return true; }
-  if(act === 'edit'){
-    if(sbBusy || !sbDraft()) return true;
-    sbStopSounds(); sbEditing.add(sbSel); sbNote = '';
-    sbStepOn = 1;
-    teacherSbPaint();
-    return true;
-  }
+  if(act === 'edit' || act === 'edit-step'){ sbEditAt(act === 'edit' ? 4 : Number(b && b.dataset && b.dataset.sbV)); return true; }
   if(act === 'edit-done'){
     if(sbBusy) return true;
     sbStopSounds(); sbEditing.delete(sbSel); sbNote = '';

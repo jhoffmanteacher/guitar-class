@@ -23,6 +23,8 @@
        listens: { sig, heard: [card section indexes] } | null   the Preview step's listens (teacher-sb-publish.js);
                they count only while sig is the song's own (a changed chart, beat, level or copy starts them over)
        pubVer: the song's last edit number on the list, kept by Unpublish so a later Publish counts on | null
+       imported: true for a draft rebuilt from an IMPORTED song (sbDraftFromDoc, teacher-sb-publish.js): no source,
+               no volume measurements, a beat that came with the song (beat.fromImport), its chord shapes (chart.shapes)
        savedAt: the server's time }
    The draft keeps its id when it is published: builtSongs/{id} is the song students get, the draft is what Edit
    changes; students keep the published song until he publishes again.
@@ -280,7 +282,7 @@ function sbHasChart(d){ return !!(d && d.chart && Array.isArray(d.chart.sections
 function sbStepReady(d, k){
   if(k === 1) return true;
   if(k === 2 || k === 4) return !!d;
-  if(k === 3) return !!(d && d.audio && d.volume);
+  if(k === 3) return !!(d && d.audio && (d.volume || d.imported));   // an imported song's copy came levelled (teacher-sb-publish.js)
   if(k === 5) return sbHasChart(d);
   if(k === 6 || k === 7) return !!(sbHasChart(d) && d.level && d.beat && d.audio) && !sbSongWhy(d, sbSel).length;
   return false;
@@ -288,7 +290,7 @@ function sbStepReady(d, k){
 function sbStepsHtml(d){
   return `<div class="sb-steps" role="tablist" aria-label="Steps">` + SB_STEPS.map((s, i) => {
     const k = i + 1, ready = sbStepReady(d, k), built = k <= SB_BUILT_STEPS;
-    const done = d && ((k === 1) || (k === 2 && d.audio && d.volume) || (k === 3 && d.beat && d.beat.anchor != null) || (k === 4 && sbHasChart(d)) || (k === 5 && sbHasChart(d) && d.level && d.beat && d.audio && !sbSongWhy(d, sbSel).length)
+    const done = d && ((k === 1) || (k === 2 && d.audio && (d.volume || d.imported)) || (k === 3 && d.beat && d.beat.anchor != null) || (k === 4 && sbHasChart(d)) || (k === 5 && sbHasChart(d) && d.level && d.beat && d.audio && !sbSongWhy(d, sbSel).length)
       || (k === 6 && ready && sbListensOf(d).all) || (k === 7 && ready && sbPublished && sbPublished.has(sbSel) && !sbPubChanged(d, sbPublished.get(sbSel))));
     const warn = (k === 2 && sbPitchBlocked(d)) || (k === 3 && d && d.beat && d.beat.driftOff > 0) || (k === 4 && sbHasChart(d) && sbChartOpen(d, sbChartReadOf(d)).n > 0);
     const cls = (done ? ' done' : '') + (k === sbStepOn ? ' on' : '') + (warn ? ' warn' : '');
@@ -315,7 +317,8 @@ function sbUploadHtml(d){
   const off = sbBusy ? ' disabled' : '';
   const file = s ? `<div class="sb-file"><div class="sb-file-ic">${SB_FILE_ICON}</div><div class="sb-file-body"><div class="sb-file-name">${escHtml(String(s.name || 'song.mp3'))}</div>`
       + `<div class="sb-file-meta">${escHtml(sbLen(s.durationSec))} · ${escHtml(sbMb(s.bytes))}${s.kbps ? ` · ${escHtml(String(s.kbps))} kbps` : ''}${s.sampleRate ? ` · ${escHtml(String(s.sampleRate / 1000))} kHz` : ''}${s.channels ? ` · ${s.channels === 1 ? 'mono' : 'stereo'}` : ''}</div>`
-      + `${!src && d ? '<div class="sb-hint">The original stays on your Mac. To level it again, pick the same mp3 again.</div>' : ''}</div></div>` : '';
+      + `${!src && d ? '<div class="sb-hint">The original stays on your Mac. To level it again, pick the same mp3 again.</div>' : ''}</div></div>`
+    : d && d.imported && d.audio ? '<div class="sb-hint">This song came in through Import: its original mp3 is not here (only its levelled copy is stored). Pick it only to level the song again.</div>' : '';
   return `<div class="sb-lock">${SB_LOCK_ICON}<div><b>Kept behind the school sign-in.</b> The next step makes a levelled copy of the mp3 and saves it in the class database, which only signed-in class accounts can read. It is <b>never</b> put in the public GitHub site. Your original stays on your Mac.</div></div>
   <div class="sb-cols c3">
     <div>
@@ -348,6 +351,9 @@ function sbVolumeHtml(d){
   const v = d && d.volume, a = d && d.audio, p = d && d.pitch;
   const src = sbMem.id === sbSel ? sbMem.src : null;
   const off = sbBusy ? ' disabled' : '';
+  if(!v && a && d.imported && !src) return `<div class="sb-box tint"><div class="sb-h">The levelled copy came with the imported song</div>
+      <p class="sb-note">It is stored behind the school sign-in: ${escHtml(sbMb(a.bytes))}, ${escHtml(sbLen(a.durationSec))}, ${a.gainDb != null ? escHtml((a.gainDb >= 0 ? '+' : '−') + Math.abs(Number(a.gainDb)).toFixed(1)) + ' dB to the cure, ' : ''}${escHtml(sbCentsLine(Number(a.centsOff)))}. It was measured when the song file was made, so its loudness numbers are not here.</p>
+      <p class="sb-note" style="margin:0">To level it again, pick the original mp3 at step 1 (it is not stored).</p><div class="sb-row" style="margin-top:8px"><button type="button" class="sb-btn small" data-sb-step="1"${off}>← Pick the mp3</button></div></div>`;
   if(!v || !a){
     const need = !src
       ? `<p class="sb-note">The original is not in this tab. Pick the same mp3 again (step 1) to level it.</p><button type="button" class="sb-btn" data-sb-step="1"${off}>← Pick the mp3</button>`
@@ -524,7 +530,8 @@ async function sbPickFile(file){
     if(d){
       const same = d.source && d.source.sha256 === sha;
       if(!same){
-        const keepBeat = d.source && Math.abs(d.source.durationSec - durationSec) <= 0.05;
+        const was = d.source ? d.source.durationSec : d.audio ? d.audio.durationSec : null;   // an imported song has no source: its copy's length
+        const keepBeat = was != null && Math.abs(was - durationSec) <= 0.05;
         d.source = sbSourceOf(sbMem.src);
         d.volume = null; d.pitch = null;
         if(!keepBeat) d.beat = null;
@@ -550,7 +557,7 @@ async function sbSaveUpload(goTo){
   const why = sbTitleWhy(title, artist);
   if(why){ sbNote = why; teacherSbPaint(); return; }
   if(!d && !(sbMem.id === 'new' && sbMem.src)){ sbNote = 'Pick the mp3 first.'; teacherSbPaint(); return; }
-  if(d && !d.source && !sbMem.src){ sbNote = 'Pick the mp3 first.'; teacherSbPaint(); return; }
+  if(d && !d.source && !d.audio && !sbMem.src){ sbNote = 'Pick the mp3 first.'; teacherSbPaint(); return; }
   let id = sbSel;
   const draft = d ? Object.assign({}, d, { title, artist }) : { v: 1, title, artist, step: 1, source: sbSourceOf(sbMem.src), audio: null, volume: null, pitch: null, beat: null, chart: null, level: null };
   /* A chart given at this step (pasted or picked) is kept as its text, for step 4 to read; never over a chart
@@ -567,7 +574,7 @@ async function sbSaveUpload(goTo){
 }
 /* The one draft writer. Saves the fields a draft has, with the server's time, and keeps the copy in memory. */
 function sbDraftDoc(d){
-  const keep = ['v', 'title', 'artist', 'step', 'source', 'audio', 'volume', 'pitch', 'beat', 'chart', 'level', 'listens', 'pubVer'];
+  const keep = ['v', 'title', 'artist', 'step', 'source', 'audio', 'volume', 'pitch', 'beat', 'chart', 'level', 'listens', 'pubVer', 'imported'];
   const out = {};
   keep.forEach(k => { out[k] = d[k] === undefined ? null : d[k]; });
   out.v = 1;
