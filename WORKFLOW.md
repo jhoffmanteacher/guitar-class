@@ -139,7 +139,10 @@ clock against the player's) 0.03 ms, no offset; M5 a 3:30 song levels in 48 s (2
 found and fixed: a failed copy load retried forever (froze the tab; each try counts a download), bar 1 one beat early
 after a soft intro, bar 1 up to 39 ms late from taps more than 1.5% off, "NaN MB". Known: a soft intro within 12 dB
 of the band counts as loud (playalong-measure.py's rule), so bar 1 can land on the first note; the ±1 beat buttons
-move it. Next: Jonathan builds one real song up to the Beat step; then part c (Fast) and d (Reviewed). His first
+move it. Delete draft asks OK / Cancel, not the typed title (Jonathan, 2026-11-15: "why does the delete button require
+me to type the title?"; a draft is cheap to redo; a published song in Part d keeps the typed title). Volume has Level it again and Clear this step;
+Beat has Clear this step (Jonathan, 2026-11-15: "at any step if i want to clear what it had done instead of starting
+over"). Next: Jonathan builds one real song up to the Beat step; then part c (Fast) and d (Reviewed). His first
 real song through Import (part a2) is still open.
 - **Downloads, an estimate, not measured (M1, 2026-11-15).** Firestore Usage (Nov 9 to 14): reads peak 15K a day of the
   free 50K, writes peak 3K of 20K. Stored bytes and download bandwidth are not shown to him, so they are worked out:

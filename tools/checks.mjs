@@ -19366,7 +19366,7 @@ function checkSongFilesConsole() {
      write on the builder's own paths.
    ════════════════════════════════════════════════════════════════════ */
 const SB_DSP_TEST_PIN = 37;          // 35 -> 37 (2026-11-15, the browser walk): a soft intro's bar 1; taps 4% slow or 5% fast
-const SONG_BUILDER_SIM_PIN = 32;     // 2026-11-15: first count
+const SONG_BUILDER_SIM_PIN = 36;     // 2026-11-15: first count 32; -> 36 the same day: Clear this step (Volume, Beat) and Level it again (4)
 function checkSongBuilder() {
   head('1en. Song builder: the sound code and the drafts are run, their case counts pinned');
   let bad = 0;

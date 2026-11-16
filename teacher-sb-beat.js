@@ -53,7 +53,8 @@ function sbBeatPaneHtml(d){
   </div>`;
   html += `<div class="sb-wave sb-wave-main"><canvas data-sb-wave="main" height="118" aria-label="The start of the song, with the bar lines the card will use"></canvas></div>`;
   html += `<div class="sb-row sb-wave-foot"><span class="sb-hint" style="margin:0">${beat ? 'Purple lines are the bars the card will use; ▲ are your taps. Drag the handle on bar 1 to the first loud chord.' : 'The bar lines appear once you tap or type a BPM.'}</span>`
-    + `<button type="button" class="sb-btn small" data-sb-act="listen"${!beat ? ' disabled' : ''}>▶ Listen with clicks</button><button type="button" class="sb-btn small" data-sb-act="listen-stop">■ Stop</button></div>`;
+    + `<button type="button" class="sb-btn small" data-sb-act="listen"${!beat ? ' disabled' : ''}>▶ Listen with clicks</button><button type="button" class="sb-btn small" data-sb-act="listen-stop">■ Stop</button>`
+    + (beat ? `<button type="button" class="sb-btn small" data-sb-act="clear-beat"${off}>Clear this step</button>` : '') + `</div>`;
   if(beat){
     const dr = bt.drift || [], last = sbBarsIn(beat, d.audio.durationSec);
     const nPins = sbPins(beat).length;

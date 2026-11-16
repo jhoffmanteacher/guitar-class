@@ -12,7 +12,7 @@
    function: sbPickFile, sbSaveUpload, sbRunLevel, sbOpen, sbBeatFromBpm, sbDeleteDraft, sbLoadLevel.
    STUBBED: the browser's decoder and the encoder (sbDecode returns a made-up 440 Hz tone of the file's length;
    sbLevel returns made-up bytes behind a real 192k frame header: the sound itself is tools/sb-dsp-test.mjs's job),
-   Firestore, the page (painting runs; its elements are inert), prompt. Made-up data only ("Test 0"); no network.
+   Firestore, the page (painting runs; its elements are inert), prompt and confirm. Made-up data only ("Test 0"); no network.
 
    THE RULES CHECK (written out again here, never read from the code under test): songDrafts/{id} only with an id
    ^sb-[a-z0-9]{8,24}$ (the rules check nothing else of a draft; the sim also pins the draft's own fields and that
@@ -126,7 +126,7 @@ function makeConsole(consoleSrc, F){
   const inert = () => ({ addEventListener() {}, removeEventListener() {}, querySelector: () => null, querySelectorAll: () => [], classList: { toggle() {}, add() {}, remove() {} }, style: {}, dataset: {} });
   const grid = Object.assign(inert(), { id: 't-grid-container', _html: '', paints: 0, querySelector: () => inert() });
   Object.defineProperty(grid, 'innerHTML', { get(){ return this._html; }, set(v){ this._html = String(v); this.paints++; } });
-  const env = { promptAnswer: null, prompts: [] };
+  const env = { promptAnswer: null, prompts: [], confirmAnswer: true, confirms: [] };
   const box = {
     console: { log() {}, warn() {}, error() {} }, setTimeout, clearTimeout, setInterval: () => 0, clearInterval() {},
     localStorage: { getItem: () => null, setItem() {}, removeItem() {} }, sessionStorage: { getItem: () => null, setItem() {} },
@@ -136,7 +136,7 @@ function makeConsole(consoleSrc, F){
     document: { getElementById: id => id === 't-grid-container' ? grid : null, querySelector: () => null, querySelectorAll: () => [], addEventListener() {}, removeEventListener() {},
       createElement: () => inert(), body: inert(), documentElement: inert(), hidden: false },
     getComputedStyle: () => ({ getPropertyValue: () => '' }),
-    prompt: q => { env.prompts.push(q); return env.promptAnswer; }, confirm: () => true, alert() {}, scrollY: 0, scrollTo() {},
+    prompt: q => { env.prompts.push(q); return env.promptAnswer; }, confirm: q => { env.confirms.push(q); return env.confirmAnswer; }, alert() {}, scrollY: 0, scrollTo() {},
     requestAnimationFrame: () => 0, cancelAnimationFrame() {},
     firebase: { firestore: { Blob: FakeBytes, FieldValue: { serverTimestamp: () => TS, increment: n => ({ __inc: n }), delete: () => ({ __del: true }) } } },
   };
@@ -288,6 +288,29 @@ async function runCases(consoleSrc){
       seq.map(s => s.replace(new RegExp(id, 'g'), '<id>')).filter(s => !s.includes('/pieces/')).join(' → '));
   }
 
+  /* Clear this step / Level it again (Jonathan, 2026-11-15): one step's work goes, the rest of the draft stays. */
+  {
+    const before = F.S.get('songDrafts/' + id), audB = before.audio.id;
+    const w0 = writes();
+    R.env.confirmAnswer = false; R.run("sbClearStep('beat')"); await settle(100);
+    check('clear: Cancel clears nothing', writes() === w0 && !!F.S.get('songDrafts/' + id).beat);
+    R.env.confirmAnswer = true; R.run("sbClearStep('beat')"); await settle(100);
+    const c1 = F.S.get('songDrafts/' + id);
+    check('clear Beat: bar 1, tempo and pins go; the levelled copy, the volume and the title stay', c1.beat === null && c1.audio && c1.audio.id === audB && c1.volume && c1.title === before.title && keysOf('songFiles/' + audB).length > 0 && /Beat step is cleared/.test(R.run('sbNote')),
+      JSON.stringify({ beat: c1.beat, audio: c1.audio && c1.audio.id === audB }));
+    R.run('sbMem.level.E = sbOnsetEnv(sbMem.level.mono, sbMem.level.fs); sbStepOn = 3; sbBeatFromBpm(96, null);'); await sleep(1400); await settle();
+    R.run("sbClearStep('volume')"); await settle(200);
+    const c2 = F.S.get('songDrafts/' + id);
+    check('clear Volume: the copy is deleted from songFiles and the draft forgets it; the beat stays; back on step 2', c2.audio === null && c2.volume === null && c2.pitch === null && !!c2.beat && keysOf('songFiles/' + audB).length === 0 && R.run('sbStepOn') === 2 && !R.run('sbStepReady(sbDraft(), 3)'),
+      JSON.stringify({ audio: c2.audio, beat: !!c2.beat, left: keysOf('songFiles/' + audB).length, step: R.run('sbStepOn') }));
+    box_set(R, '__f', fileOf('test-b.mp3', SRC_B, 24.02)); R.run('sbStepOn = 1; sbPickFile(__f)'); await settle();
+    R.run('sbGoStep(2)'); await settle(50);
+    box_set(R, '__levelNext', 'b'); R.run('sbRunLevel()'); await sleep(60); await settle(300);
+    const c3 = F.S.get('songDrafts/' + id);
+    check('Level it again: a new copy is stored and named, the beat kept', c3.audio && c3.audio.id === audB && keysOf('songFiles/' + audB + '/pieces/').length === 3 && !!c3.beat && c3.volume,
+      JSON.stringify({ audio: c3.audio && c3.audio.id, beat: !!c3.beat }));
+  }
+
   /* Leaving the view while it levels: nothing is written after the leave. */
   {
     box_set(R, '__f', fileOf('test-c.mp3', SRC_C, 15)); R.run('sbStepOn = 1; sbPickFile(__f)'); await settle();
@@ -300,7 +323,7 @@ async function runCases(consoleSrc){
     R.run("teacherView = 'songbuilder'"); await settle();
   }
 
-  /* Delete draft: the typed title, else nothing; the right title removes the draft and its copy, nothing else. */
+  /* Delete draft: one OK / Cancel (no typed title, Jonathan 2026-11-15); OK removes the draft and its copy, nothing else. */
   {
     // A second draft that must survive.
     R.run("sbNewSong()"); await settle();
@@ -309,13 +332,13 @@ async function runCases(consoleSrc){
     const id2 = R.run('sbSel');
     R.run(`sbOpen(${JSON.stringify(id)})`); await settle(100);
     const w0 = writes();
-    R.env.promptAnswer = 'Test'; R.run('sbDeleteDraft()'); await settle(100);
-    check('delete: a wrong title deletes nothing', writes() === w0 && /Nothing was deleted/.test(R.run('sbNote')) && F.S.has('songDrafts/' + id), R.run('sbNote'));
-    R.env.promptAnswer = null; R.run('sbDeleteDraft()'); await settle(100);
+    R.env.confirmAnswer = false; R.env.confirms.length = 0; R.run('sbDeleteDraft()'); await settle(100);
+    const q = R.env.confirms[0] || '';
+    check('delete: one OK / Cancel question that names the draft and says the mp3 on the Mac stays (no typed title)', R.env.confirms.length === 1 && q.includes('"Test 0"') && /mp3 on the Mac is not touched/.test(q) && R.env.prompts.length === 0, q);
     check('delete: Cancel deletes nothing', writes() === w0 && F.S.has('songDrafts/' + id));
     const aud = F.S.get('songDrafts/' + id).audio.id;
-    R.env.promptAnswer = 'Test 0'; R.run('sbDeleteDraft()'); await settle(200);
-    check('delete: the title deletes the draft and its levelled copy, and leaves the other draft', !F.S.has('songDrafts/' + id) && keysOf('songFiles/' + aud).length === 0 && F.S.has('songDrafts/' + id2) && /Deleted the draft "Test 0"/.test(R.run('sbNote')),
+    R.env.confirmAnswer = true; R.run('sbDeleteDraft()'); await settle(200);
+    check('delete: OK deletes the draft and its levelled copy, and leaves the other draft', !F.S.has('songDrafts/' + id) && keysOf('songFiles/' + aud).length === 0 && F.S.has('songDrafts/' + id2) && /Deleted the draft "Test 0"/.test(R.run('sbNote')),
       keysOf('songDrafts/').length + ' drafts left; ' + R.run('sbNote'));
   }
 
@@ -328,7 +351,7 @@ async function runCases(consoleSrc){
     const aud = F.S.get('songDrafts/' + id3).audio && F.S.get('songDrafts/' + id3).audio.id;
     F.S.set('builtSongsMeta/list', { songs: { 'sb-builtsongone1': 1 }, updatedAt: TS });
     F.S.set('builtSongs/sb-builtsongone1', { v: 1, title: 'Test Built', artist: '', audio: { id: aud }, song: {}, savedAt: TS });
-    R.env.promptAnswer = 'Test 1'; R.run('sbDeleteDraft()'); await settle(200);
+    R.run('sbDeleteDraft()'); await settle(200);
     check('delete: a copy a published song plays stays in songFiles', aud && !F.S.has('songDrafts/' + id3) && F.S.get('songFiles/' + aud) && keysOf('songFiles/' + aud + '/pieces/').length > 0, aud);
   }
 

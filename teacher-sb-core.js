@@ -35,7 +35,8 @@
 
    WRITES go only to songDrafts/{id}, songFiles/{id} and its pieces, and songFilesUsage/{month} (reading a copy
    back): never progress/{uid}, never config/class. tools/song-builder-sim.mjs runs this part against a stub
-   Firestore and checks each write. "Delete draft" asks for the typed title, then removes the draft and its
+   Firestore and checks each write. "Delete draft" asks OK / Cancel (Jonathan, 2026-11-15: a draft is cheap to redo, so no typed title; a published
+   song, Part d, keeps the typed title), then removes the draft and its
    levelled copy.
 
    SAFETY. Every value read from the store or a file (a title, an artist, a file name) is escaped where it is
@@ -310,6 +311,7 @@ function sbVolumeHtml(d){
         <div><div class="sb-hint">Volume for this song</div><div class="sb-big">${gain >= 0 ? '+' : '−'}${Math.abs(gain).toFixed(1)} dB</div></div>
         <div class="sb-row"><button type="button" class="sb-btn small" data-sb-act="play-yours"${off}>▶ 10 s of yours</button><button type="button" class="sb-btn small" data-sb-act="play-cure"${off}>▶ 10 s of the cure</button><button type="button" class="sb-btn small" data-sb-act="play-stop">■ Stop</button></div>
       </div>
+      <div class="sb-row">${src ? `<button type="button" class="sb-btn small" data-sb-act="level"${off}>Level it again</button>` : `<button type="button" class="sb-btn small" data-sb-step="1"${off} title="The original is not stored: pick the same mp3 again, then level it">← Pick the mp3 to level again</button>`}<button type="button" class="sb-btn small" data-sb-act="clear-volume"${off}>Clear this step</button></div>
       ${blocked ? `<div class="sb-flag red"><span class="fi">!</span><div class="sb-flag-body"><b>This record is ${escHtml(sbCentsLine(p.cents))}.</b> A song more than 10 cents off cannot be published. Send the mp3 to Claude, who shifts it to A = 440 and sends it back. You can still try the other steps.</div></div>` : ''}
     </div>
     <div class="sb-box tint">
@@ -322,7 +324,7 @@ function sbVolumeHtml(d){
         <dt>Pitch</dt><dd>${escHtml(sbCentsLine(p && p.cents))} ${blocked ? '<span class="sb-bad">over 10 cents</span>' : '<span class="sb-ok">OK</span>'}</dd>
         <dt>Stored</dt><dd>${escHtml(sbMb(a.bytes))}, ${escHtml(sbLen(a.durationSec))}, 192k</dd>
       </dl>
-      <p class="sb-hint">One number for the whole song. To level again from the original, pick the mp3 again on step 1.</p>
+      <p class="sb-hint">One number for the whole song.${src ? '' : ' The original mp3 is not stored: to level again, pick it again on step 1.'}</p>
     </div>
   </div>`;
 }
@@ -344,6 +346,8 @@ function sbClick(e){
   if(act === 'next1'){ sbSaveUpload(); return; }
   if(act === 'level'){ sbRunLevel(); return; }
   if(act === 'delete'){ sbDeleteDraft(); return; }
+  if(act === 'clear-volume'){ sbClearStep('volume'); return; }
+  if(act === 'clear-beat'){ sbClearStep('beat'); return; }
   if(act === 'play-yours'){ sbPlayTen('yours'); return; }
   if(act === 'play-cure'){ sbPlayTen('cure'); return; }
   if(act === 'play-stop'){ sbStopTen(); return; }
@@ -679,14 +683,37 @@ function sbStopTen(){
   sbPlayer = null;
 }
 
+/* ── Clear this step (Jonathan, 2026-11-15: "at any step if i want to clear what it had done instead of starting
+   over"). Volume: the levelled copy, the measurements and the pitch go (the copy is deleted from songFiles after the
+   draft no longer names it; never one a built song plays); the beat is kept, since the same mp3 levelled again has
+   the same length. Beat: bar 1, the tempo, the pins and the taps go. The title, the file's facts and the other
+   steps stay. One OK / Cancel, as Delete draft. ── */
+async function sbClearStep(which){
+  const d = sbDraft();
+  if(sbBusy || !d) return;
+  const q = which === 'volume' ? 'Clear the Volume step? The levelled copy is deleted; the beat you set is kept. Level it again to make a new copy.'
+    : 'Clear the Beat step? Bar 1, the tempo and the pins go. Tap or type the tempo again to set a new grid.';
+  if(!confirm(q)) return;
+  const id = sbSel, gen = sbViewGen;
+  sbStopSounds();
+  const bt = typeof sbBtFor === 'function' ? sbBtFor(id) : null;
+  if(bt){ clearTimeout(bt.saveTimer); bt.taps = []; bt.fit = null; bt.drift = null; }
+  const old = which === 'volume' && d.audio ? d.audio.id : null;
+  const next = which === 'volume' ? Object.assign({}, d, { audio: null, volume: null, pitch: null, step: 2 }) : Object.assign({}, d, { beat: null, step: 3 });
+  const ok = await sbWriteDraft(id, next);
+  if(!ok) return;
+  if(which === 'volume'){ if(sbMem.id === id){ sbMem.level = null; sbMem.failed = null; } sbStepOn = 2; }
+  if(old) await sbDeleteAudio(old, gen);
+  sbNote = which === 'volume' ? 'The Volume step is cleared.' : 'The Beat step is cleared.';
+  if(!sbStopped(gen)) teacherSbPaint();
+}
+
 /* ── Delete draft ── */
 async function sbDeleteDraft(){
   const d = sbDraft();
   if(sbBusy || !d) return;
   const id = sbSel, title = String(d.title || '');
-  const typed = prompt(`Delete the draft "${title}"? Its levelled copy in the database goes too. Your mp3 on the Mac is not touched. This cannot be undone. Type the title to delete it:`, '');
-  if(typed === null) return;
-  if(String(typed).trim() !== title.trim()){ sbNote = 'Nothing was deleted: what you typed is not the title.'; teacherSbPaint(); return; }
+  if(!confirm(`Delete the draft "${title}"? Its levelled copy in the database goes too. Your mp3 on the Mac is not touched.`)) return;
   const gen = sbViewGen;
   sbStopSounds();
   sbBusy = 'delete'; sbOpGen++; sbProgress = 'Deleting…'; teacherSbPaint();
