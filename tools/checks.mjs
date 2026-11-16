@@ -17446,32 +17446,40 @@ function checkCoachVerdicts() {
    every arcade game whose done screen offers a step (Change Up; Power Chord Switch as a pair and as a song switch; Strum Hero and Strum
    Radar on each pattern; Riff Runner's speed levels on each song, at every unlock state), every tempo the game can reach (found by
    pressing the setup's own tempo buttons, slider or speed levels, and every tempo an Again button lands on) is taken to its done screen
-   in each outcome that changes the advice, and exactly at each star / score line, EN and ES. Each Again button's onclick is run as the
-   page runs it (the attribute entity-decoded), and the tempo read is the one the game then PLAYS: Change Up and Power Chord Switch run
-   ccPrepare(true) (what ccStart runs once the mic is on) and give cc.stageBpms[0]; Strum Hero and Riff Runner run their real start
-   (shStart / rnStart, no mic; the click is scheduled on the stub clock) and give 60 / spb. The game state and the session are put back
-   after each call. Then:
+   in each outcome that changes the advice, and exactly at each score line where the advice steps, EN and ES. Each Again button's
+   onclick is run as the page runs it (the attribute entity-decoded), through the game's REAL start, and the tempo read is the one the
+   game then plays: cc.stageBpms[0] after ccStart (Change Up, Power Chord Switch), 60 / spb after shStart / rnStart, 60000 / beatMs after
+   srStart. The mic is the only thing stubbed: coachStream is a stub stream, coachAcquireMic / coachEnsureRunning resolve at once,
+   coachClose, micRecShouldAsk, ccBeginStage, coachCountIn and srLoop do nothing, so a start runs up to its count-in. The game state, the
+   stubs, the mic flag and the session are put back after each call. Then:
      - a label with a sign (+N / −N, with or without "BPM") names the change the call makes; a label with a bare number ("Again at N")
-       names the tempo it plays; a step button changes the tempo, the way its arrow (⬆ / ⬇) or its sign says; it changes nothing else
-       of the game (pattern, chords, switch speed, song, mode: every plain field of the game's setup state);
-     - Power Chord Switch's done row (ccDoneNudge −5 / +5): each press moves the row by its label, clamped to the setup's own range;
-       after it the readout and the Again label name the tempo Again then plays;
+       names the tempo it plays; a label with no number, arrow or sign ("Play again") keeps the tempo; a step button changes the
+       tempo, the way its arrow (⬆ / ⬇) or its sign says; it changes nothing else of the game (pattern, chords, switch speed, song,
+       mode: every plain field of the game's setup state). A button's aria-label and title are read by the same rules;
+     - Power Chord Switch's done row: its readout (#cc-done-bpm) and its Again (#cc-done-again) are on the screen and name the tempo
+       Again plays; each −5 / +5 press (ccDoneNudge) moves the row by its label, clamped to the setup's own range, and after it the
+       readout and the Again label name the tempo Again then plays;
      - an Again call shown on any other screen of the same game, that would change the tempo here, has its button here;
-     - exactly one button is lit; a "Level up" line lights a button that goes up, a "Drop" line one that goes down, any other line the
-       one that keeps the tempo; each "N BPM" in a step line is that step (or where it lands), in any other line the tempo played;
-       a step line is shown only where the game can step that way; a line that says the tempo cannot go higher (TOP) is shown only where
-       nothing goes up; and the outcome that steps up (or down) when it can says so whenever this screen can;
-     - every other "N BPM" on the screen is the tempo played, a tempo a button plays, a round's or a speed level's own tempo; the "new
-       speed level unlocked" line names the tempo ⬆ plays;
+     - every advice line is a known key (ADVICE: up, down, top, bottom, same; a line that matches none fails, "add its key");
+       exactly one button is lit; a step line lights a button that goes that way and each "N BPM" in it is exactly that step; in any
+       other line "N BPM" is the tempo played and the lit button keeps it; a step line is shown only where the game can step that way;
+       a top (bottom) line only where nothing goes up (down); and the outcome that steps up (or down) when it can says so whenever this
+       screen can;
+     - every other "N BPM" on the screen (text, aria-label, title, aria-valuetext) is the tempo played, a tempo a button plays, a
+       round's or a speed level's own tempo; the "new speed level unlocked" line names the tempo ⬆ plays;
      - no {placeholder} is left on the screen.
-   And every Again button and every step label in the arcade and the drills (siteSource 'coach.js' and 'app.js') belongs to a game
-   swept here or to NOT_STEPPED, so a new game with a step cannot ship unswept.
-   Limits: Strum Radar's start needs the mic before it reads the tempo, so its tempo is read from sr.bpm after srAgain (srStart is
-   stubbed). A word that gives the direction inside a sentence (a Spanish "sube" for "baja") is not read: lines are matched by key.
-   The screens are drawn with no earlier best, so a best-today line naming an older tempo is not drawn.
+   The source scan (siteSource 'coach.js' and 'app.js'): every onclick="...Again(" belongs to a game swept here or to NOT_STEPPED, and
+   every <button> whose label starts with an arrow (⬆ ⬇) or a sign (+N, −N), or uses a step label (STEP_KEYS), calls a swept Again,
+   the done-row stepper or a setup tempo control. A step drawn any other way (no arrow, no sign, no step label, not named ...Again) is
+   not seen by the scan.
+   Limits: a word that gives the direction inside a sentence (a Spanish "sube" for "baja") is not read: lines are matched by key. The
+   screens are drawn with no earlier best, so a best-today line naming an older tempo is not drawn. Song switches are drawn with the same
+   score in every round, so 10 of 21 (the highest score under 50%, reachable only with rounds that differ) is not drawn: 9 of 21 is.
+   What a step does to anything but the game's state (a saved best, a localStorage setting) is not read, nor which chords a random
+   loop draws for the next game.
    1ck keeps its named cases (Change Up at 140, 135, 130, 50, 45 and 40; Power Chord Switch at its top and one step below, with live
    slow-downs, Next-round presses, the firmer hint and Stops); this is the sweep over every reachable tempo of every game. Totals pinned. */
-function checkClampedSteps() {
+async function checkClampedSteps() {
   head('1ep. Arcade done screens: every step button and advice line names the step the game really takes, at every tempo (run)');
   let bad = 0;
   const fail = m => { err('1ep: ' + m); problems++; bad++; };
@@ -17480,39 +17488,50 @@ function checkClampedSteps() {
   const dec = s => decodeHtmlEntities(String(s).replace(/&minus;/g, '−').replace(/&apos;/g, "'"));
   const plain = s => dec(String(s).replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
   const sgn = n => (n > 0 ? '+' : '') + n;
-  /* A label is read by its sign: "+5", "−10 BPM" are steps; a bare number ("Again at 60", "Again from 30 BPM") is a tempo. */
-  const readLabel = s => { const m = /([+−-])\s*(\d+)/.exec(s); if (m) return { step: (m[1] === '+' ? 1 : -1) * +m[2] };
+  /* A label is read by its sign: "+5", "−10 BPM" are steps; a bare number ("Again at 60", "Again from 30 BPM") is a tempo. A dash that
+     is not a minus (– — ‒ before a number) is reported, not guessed. */
+  const readLabel = s => { const d = /([‐-―])\s*(\d+)/.exec(s); if (d) return { badSign: d[1], n: +d[2] };
+    const m = /([+−-])\s*(\d+)/.exec(s); if (m) return { step: (m[1] === '+' ? 1 : -1) * +m[2] };
     const a = /(\d+)/.exec(s); return a ? { tempo: +a[1] } : {}; };
   const said = r => r.step != null ? `read as a step of ${sgn(r.step)}` : r.tempo != null ? `read as the tempo ${r.tempo}` : 'no number';
-  /* The advice lines, by key. up / down: the step lines ("Level up", "Drop N BPM"). top: a line that says the tempo cannot go higher.
-     bottom: a line that says it cannot go lower (none today: at the lowest tempo the games say games.cc.advice.tryAgainSteady,
-     games.radar.advice.zeroFloor or games.riff.advice.zeroHearIt, which are true at any tempo; the outcome rule below holds them to the
-     lowest tempo). Any other line keeps the tempo. */
+  const attrs = tag => [...tag.matchAll(/\b(aria-label|title|aria-valuetext)="([^"]*)"/g)].map(m => [m[1], dec(m[2])]);
+  /* Every advice line the five games show, by key. up / down: the step lines ("Level up", "Drop N BPM"). top / bottom: a line that says
+     the tempo cannot go higher / lower (no line says "lower" today: at the lowest tempo the games say games.cc.advice.tryAgainSteady,
+     games.radar.advice.zeroFloor or games.riff.advice.zeroHearIt, true at any tempo; the outcome rule holds them to the lowest tempo).
+     same: every other line, which keeps the tempo. A line that matches none of them fails. Each value is matched whole, its
+     placeholders as .+? */
   const ADVICE = {
     up: ['games.cc.advice.great', 'games.pw.advice.great', 'games.sh.advice.three', 'games.radar.advice.three', 'games.riff.advice.threeMore'],
     down: ['games.cc.advice.low', 'games.pw.advice.low', 'games.sh.advice.zero', 'games.radar.advice.zero', 'games.riff.advice.zeroSlower'],
     top: ['games.pw.advice.top', 'games.radar.advice.threeTop', 'games.riff.advice.threeMax'],
-    bottom: [] };
-  const classCache = {};
-  const classOf = (lang, adv, n) => {
-    const key = lang + '|' + n;
-    if (!classCache[key]) classCache[key] = JSON.parse(run(`(function(){ const P = ${JSON.stringify(ADVICE)}, o = {};
-      for (const d of Object.keys(P)) o[d] = P[d].map(k => t(k, { n: ${JSON.stringify(n)} }).replace(/\\s+/g, ' ').trim()); return JSON.stringify(o); })()`));
-    for (const d of Object.keys(ADVICE)) if (classCache[key][d].includes(adv)) return d;
-    return 'same';
+    bottom: [],
+    same: ['games.cc.advice.stoppedEarly', 'games.cc.advice.stopped', 'games.pw.advice.firmer', 'games.pw.advice.practiceWorst', 'games.cc.advice.practiceWorst',
+      'games.cc.advice.tryAgainSteady', 'games.sh.advice.two', 'games.sh.advice.one', 'games.radar.advice.two', 'games.radar.advice.one',
+      'games.radar.advice.zeroFloor', 'games.riff.advice.two', 'games.riff.advice.one', 'games.riff.advice.zeroHearIt'] };
+  const classRes = {};
+  const classOf = (lang, adv) => {
+    if (!classRes[lang]) {
+      const tpl = JSON.parse(run(`(function(){ const P = ${JSON.stringify(ADVICE)}, o = {}; for (const d of Object.keys(P)) o[d] = P[d].map(k => [k, t(k)]); return JSON.stringify(o); })()`));
+      classRes[lang] = Object.entries(tpl).flatMap(([d, list]) => list.map(([k, s]) => {
+        if (s === k) fail(`ADVICE.${d} names ${k}, which i18n.js does not define`);
+        const src = s.replace(/\s+/g, ' ').trim().split(/\{\w+\}/).map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('.+?');
+        return [d, new RegExp('^' + src + '$')];
+      }));
+    }
+    const hit = classRes[lang].find(([, re]) => re.test(adv));
+    return hit ? hit[0] : 'unknown';
   };
-  /* Each game: its done-screen body; its Again function (onclick prefix); its start, stubbed only where it needs the mic first; what
-     runs after the Again to reach the tempo played (after) and that tempo (bpm); the state; the tempo it was played at (base); the value
-     the setup moves (val); the setup's tempo controls; the done row's own stepper (Power Chord Switch); the round / level tempos the
-     screen may name. */
-  const CC = { body: 'cc-body', again: /^ccAgain\(/, start: 'ccStart', stub: true, after: 'ccPrepare(true)', bpm: 'cc.stageBpms[0]', state: 'cc', val: 'cc.bpm', setupCtl: /^cc(NudgeBpm|SetBpm)\(/, tempos: '(cc.stageLog || []).map(s => s.bpm)' };
+  /* Each game: its done-screen body; its Again function (onclick prefix); its start; the tempo the start plays (bpm); the state; the tempo
+     it was played at (base); the value the setup moves (val); the setup's tempo controls; the done row's own stepper (Power Chord
+     Switch); the round / level tempos the screen may name. */
+  const CC = { body: 'cc-body', again: /^ccAgain\(/, start: 'ccStart', bpm: 'cc.stageBpms[0]', state: 'cc', val: 'cc.bpm', setupCtl: /^cc(NudgeBpm|SetBpm)\(/, tempos: '(cc.stageLog || []).map(s => s.bpm)' };
   const G = {
     cu: { ...CC, name: 'Change Up', base: 'cc.bpm' },
     pwPair: { ...CC, name: 'Power Chord Switch (a pair)', base: 'ccDonePlayedBpm()', stepper: /^ccDoneNudge\(/ },
     pwSong: { ...CC, name: 'Power Chord Switch (a song switch)', base: 'ccDonePlayedBpm()', stepper: /^ccDoneNudge\(/ },
-    sh: { name: 'Strum Hero', body: 'sh-body', again: /^shAgain\(/, start: 'shStart', stub: false, after: '', bpm: 'Math.round(60 / sh.spb)', state: 'sh', base: 'sh.bpm', val: 'sh.bpm', setupCtl: /^shNudgeBpm\(/, tempos: '[]' },
-    sr: { name: 'Strum Radar', body: 'sr-body', again: /^srAgain\(/, start: 'srStart', stub: true, after: '', bpm: 'sr.bpm', state: 'sr', base: 'sr.bpm', val: 'sr.bpm', setupCtl: /^srNudgeBpm\(/, tempos: '[]' },
-    rn: { name: 'Riff Runner', body: 'rn-body', again: /^rnAgain\(/, start: 'rnStart', stub: false, after: '', bpm: 'Math.round(60 / rn.spb)', state: 'rn', base: 'rnTierBpm(RN_SONGS[rn.songIdx], rn.tier)', val: 'rn.tier', setupCtl: /^rnPickTier\(/, tempos: '[0, 1, 2].map(k => rnTierBpm(RN_SONGS[rn.songIdx], k))' },
+    sh: { name: 'Strum Hero', body: 'sh-body', again: /^shAgain\(/, start: 'shStart', bpm: 'Math.round(60 / sh.spb)', state: 'sh', base: 'sh.bpm', val: 'sh.bpm', setupCtl: /^shNudgeBpm\(/, tempos: '[]' },
+    sr: { name: 'Strum Radar', body: 'sr-body', again: /^srAgain\(/, start: 'srStart', bpm: 'Math.round(60000 / sr.beatMs)', state: 'sr', base: 'sr.bpm', val: 'sr.bpm', setupCtl: /^srNudgeBpm\(/, tempos: '[]' },
+    rn: { name: 'Riff Runner', body: 'rn-body', again: /^rnAgain\(/, start: 'rnStart', bpm: 'Math.round(60 / rn.spb)', state: 'rn', base: 'rnTierBpm(RN_SONGS[rn.songIdx], rn.tier)', val: 'rn.tier', setupCtl: /^rnPickTier\(/, tempos: '[0, 1, 2].map(k => rnTierBpm(RN_SONGS[rn.songIdx], k))' },
   };
   /* Done-screen replay buttons in the arcade and the drills that are NOT tempo steps (checked by reading each one, 2026-11-16). Finger
      Gym (fgPick), Note Runner (nrPick / nrPlayAdaptive) and Note Hunt (fretSetLevel) pick a level by its number and have no ...Again(
@@ -17520,46 +17539,88 @@ function checkClampedSteps() {
   const NOT_STEPPED = {
     rnw: "Riff Runner's Wait Mode: rnwAgain() plays the same riff again, untimed: no tempo, no step",
     nc: 'Note Call (app/drills-call.js): ncAgain(key, lv) restarts the same level it names; nothing is stepped or clamped' };
+  /* Buttons that look like steps (an arrow or a sign) but are not on a done screen, each read 2026-11-16: the scan accepts these
+     handlers, and fails when one is no longer found (stale). */
+  const OTHER_STEPPERS = {
+    coachNudgeBpm: "the Listening Coach's setup tempo (−5 / +5): a setup stepper, not a done-screen step",
+    ccLiveBpm: "Power Chord Switch's play screen: the live tempo −5 / +5 (1ca runs it: it holds 30..140 and keeps the beat)",
+    ccNudgeNext: "a song switch's play screen: the Next round −5 / +5 (1ca runs it)",
+    downloadRec: 'Record Yourself: ⬇ is the download icon, not a step' };
   const STEP_KEYS = ['games.common.bpmUp10', 'games.common.bpmDown10', 'games.riff.fasterButton', 'games.riff.slowerButton'];
   const prefixOf = re => /\^(\w+)Again/.exec(re.source)[1];
   const swept = new Set(Object.values(G).map(g => prefixOf(g.again)));
+  const stepHandlers = [...Object.values(G).flatMap(g => [g.again, g.setupCtl, g.stepper].filter(Boolean))];
   const tot = {};
-  for (const k of Object.keys(G)) tot[k] = { tempos: 0, screens: 0, buttons: 0, adviceNums: 0, probes: 0, setupCtls: 0, fields: 0, stepperPresses: 0, otherNums: 0 };
-  const scan = { prefixes: 0, stepLines: 0 };
-  /* 1. The scan: every ...Again( onclick and every step label in the arcade and the drills. */
+  for (const k of Object.keys(G)) tot[k] = { tempos: 0, screens: 0, buttons: 0, adviceNums: 0, probes: 0, setupCtls: 0, fields: 0, stepperPresses: 0, otherNums: 0, attrNums: 0 };
+  const scan = { prefixes: 0, stepButtons: 0 };
+  /* 1. The scan: every ...Again( onclick, and every <button> element whose label starts with an arrow or a sign or uses a step label. The
+     opening tag ends at the first ">" outside a ${...}, so a tag or a label may run over several lines. */
   try {
-    const found = new Map();
+    const found = new Map(), otherSeen = new Set();
     for (const name of ['coach.js', 'app.js']) {
       const src = siteSource(name, ROOT);
       for (const m of src.matchAll(/onclick="(\w+?)Again\(/g)) found.set(m[1], name);
-      for (const line of src.split('\n')) {
-        if (!STEP_KEYS.some(k => line.includes(`'${k}'`))) continue;
-        scan.stepLines++;
-        const fns = [...line.matchAll(/onclick="(\w+)\(/g)].map(m => m[1]);
-        if (!fns.length || !fns.every(f => /Again$/.test(f) && swept.has(f.replace(/Again$/, ''))))
-          fail(`${name}: a step label (${STEP_KEYS.filter(k => line.includes(`'${k}'`)).join(', ')}) sits on a button whose onclick is ${fns.join(', ') || 'missing'}, not the Again of a game 1ep sweeps: "${line.trim().slice(0, 160)}"`);
+      for (let i = src.indexOf('<button'); i >= 0; i = src.indexOf('<button', i + 7)) {
+        let j = i, depth = 0;
+        for (; j < src.length; j++) {
+          if (src[j] === '$' && src[j + 1] === '{') { depth++; j++; continue; }
+          if (src[j] === '}' && depth > 0) { depth--; continue; }
+          if (src[j] === '>' && depth === 0) break;
+        }
+        const end = src.indexOf('</button>', j);
+        if (end < 0) continue;
+        const tag = src.slice(i, j + 1), label = src.slice(j + 1, end).trim();
+        const head = dec(label.replace(/^\$\{[^}]*\?\s*['`]/, '')).trim();
+        const keys = STEP_KEYS.filter(k => label.includes(`'${k}'`));
+        if (!(keys.length || /^[⬆⬇]/.test(head) || /^[+−-]\s*(\d|\$\{)/.test(head))) continue;
+        scan.stepButtons++;
+        const oc = (/\bonclick="([^"]*)"/.exec(tag) || [])[1] || '';
+        const fn = (/^(\w+)\(/.exec(oc) || [])[1];
+        if (fn in OTHER_STEPPERS) { otherSeen.add(fn); continue; }
+        if (!stepHandlers.some(re => re.test(oc)))
+          fail(`${name}: the step-looking button "${label.replace(/\s+/g, ' ').slice(0, 90)}"${keys.length ? ` (${keys.join(', ')})` : ''} calls ${oc ? `"${oc.slice(0, 60)}"` : 'nothing (no onclick)'}, which is not the Again of a game 1ep sweeps, the done-row stepper or a setup tempo control: add the game to 1ep's G, or draw it another way`);
       }
     }
     for (const [p, name] of found) if (!swept.has(p) && !(p in NOT_STEPPED))
       fail(`${name}: onclick="${p}Again(" is a done-screen Again 1ep does not sweep. Add the game to 1ep's G (its done screen, range and outcomes), or to NOT_STEPPED with the reason it has no step`);
     for (const p of [...swept, ...Object.keys(NOT_STEPPED)]) if (!found.has(p)) fail(`${p}Again( is listed in 1ep (${swept.has(p) ? 'G' : 'NOT_STEPPED'}) but no onclick in the arcade or the drills calls it: the list is stale`);
+    for (const f of Object.keys(OTHER_STEPPERS)) if (!otherSeen.has(f)) fail(`OTHER_STEPPERS lists ${f}, but no step-looking button calls it any more: the list is stale`);
     scan.prefixes = found.size;
   } catch (e) { fail(`the source scan threw (${e.message})`); }
-  /* Runs one onclick as the page would, then (after) what the game's start runs, and returns [tempo played, val, the plain fields];
-     with preset, the plain fields are first set back to what the setup picked (1ck's helper runs ccAgain while it draws);
-     the game state, the start and the session are put back. */
-  const call = (g, code, fields, extra = '', preset = null) => run(`(function(){ const ref = ${g.state}, keep = Object.assign({}, ref), ss = JSON.stringify(sessionStorage._d), st = ${g.start};
-    ${g.stub ? `${g.start} = () => {};` : ''}
-    try { ${preset ? `${JSON.stringify(fields)}.forEach((f, i) => { ${g.state}[f] = ${JSON.stringify(preset)}[i]; });` : ''} ${code}; ${g.after}; return [${g.bpm}, ${g.val}, ${JSON.stringify(fields)}.map(f => ${g.state}[f])${extra}]; }
-    finally { ${g.start} = st; ${g.state} = ref; for (const k of Object.keys(ref)) if (!(k in keep)) delete ref[k]; Object.assign(ref, keep); sessionStorage._d = JSON.parse(ss); } })()`);
+  /* Runs one onclick as the page would, awaits the game's start (the real one, mic stubbed; stub: true for the setup walk), and returns
+     [tempo played, val, the plain fields read right after the click (before the start's own awaits), extra]. With preset, the plain
+     fields are first set back to what the setup picked (1ck's helper runs ccAgain while it draws). Everything is put back after. */
+  const LATE = Symbol('late');
+  const call = async (g, code, fields, extra = 'null', preset = null, stub = false) => {
+    run(`globalThis.__epc = { ref: ${g.state}, ss: JSON.stringify(sessionStorage._d), st: ${g.start}, p: null, live: window.coachMicLive,
+        cs: coachStream, am: coachAcquireMic, ce: coachEnsureRunning, cl: coachClose, ask: micRecShouldAsk, bs: ccBeginStage, ci: coachCountIn, sl: srLoop };
+      __epc.keep = Object.assign({}, __epc.ref);
+      ${stub ? `${g.start} = () => {};` : `${g.start} = (...a) => (__epc.p = __epc.st(...a));`}
+      coachStream = { getTracks: () => [], getAudioTracks: () => [] }; coachAcquireMic = async () => true; coachEnsureRunning = async () => {};
+      coachClose = () => {}; micRecShouldAsk = () => false; ccBeginStage = () => {}; coachCountIn = () => {}; srLoop = () => {};`);
+    try {
+      try { run(`${preset ? `${JSON.stringify(fields)}.forEach((f, i) => { ${g.state}[f] = ${JSON.stringify(preset)}[i]; });` : ''} ${code};
+        __epc.f = ${JSON.stringify(fields)}.map(f => ${g.state}[f]);`);
+        /* a start that waits on something the stubs never resolve is reported, not waited on for ever */
+        let tm; const late = new Promise(r => { tm = setTimeout(() => r(LATE), 2000); });
+        const v = await Promise.race([run('__epc.p'), late]); clearTimeout(tm);
+        if (v === LATE) return [NaN, NaN, null, null, "the game's start did not finish within 2 s (it waits on something 1ep's mic stubs do not resolve)"];
+      } catch (e) { return [NaN, NaN, null, null, String(e && e.message || e)]; }
+      return run(`[${g.bpm}, ${g.val}, __epc.f, ${extra}]`);
+    } finally {
+      run(`${g.start} = __epc.st; coachStream = __epc.cs; coachAcquireMic = __epc.am; coachEnsureRunning = __epc.ce; coachClose = __epc.cl;
+        micRecShouldAsk = __epc.ask; ccBeginStage = __epc.bs; coachCountIn = __epc.ci; srLoop = __epc.sl; window.coachMicLive = __epc.live;
+        ${g.state} = __epc.ref; for (const k of Object.keys(__epc.ref)) if (!(k in __epc.keep)) delete __epc.ref[k]; Object.assign(__epc.ref, __epc.keep);
+        sessionStorage._d = JSON.parse(__epc.ss);`);
+    }
+  };
   const onclicksOf = (html, re) => [...html.matchAll(/\bon(?:click|input)="([^"]*)"/g)].map(m => dec(m[1])).filter(c => re.test(c));
-  /* Every value the setup's own controls reach from where it opens, and the game's plain setup fields (what a step must not change). */
-  /* setupFields: the values the student picked on the setup (pattern, chords, switch speed, song...), read right after it, before any
-     done screen is drawn; a step must leave every one of them as it was (1ck's helper itself runs ccAgain while drawing, so the done
-     state is not a clean reference). */
+  /* Every value the setup's own controls reach from where it opens, and the game's plain setup fields (what a step must not change).
+     setupFields: the values the student picked on the setup (pattern, chords, switch speed, song...), read right after it, before any
+     done screen is drawn (1ck's helper itself runs ccAgain while drawing, so the done state is not a clean reference). */
   const fieldsOf = {}, range = {};
   let setupFields = [];
-  const reach = (k, g, setupCode) => {
+  const reach = async (k, g, setupCode) => {
     run(setupCode);
     const html = els[g.body].innerHTML;
     const valKey = g.val.split('.')[1];
@@ -17572,11 +17633,11 @@ function checkClampedSteps() {
     tot[k].setupCtls = Math.max(tot[k].setupCtls, moves.length + (slider ? 1 : 0));
     if (slider) for (let v = +slider[1]; v <= +slider[2]; v += +slider[3]) moves.push(dec(slider[4]).replace(/this\.value/g, JSON.stringify(String(v))));
     const start = +run(g.val), seen = new Set([start]), q = [start];
-    const gs = { ...g, stub: true, after: '', bpm: g.val, start: g.start };
+    const gs = { ...g, bpm: g.val };
     while (q.length) {
       const v = q.shift();
       for (const m of moves) {
-        const w = +call(gs, `${g.val} = ${v}; ${m}`, [])[1];
+        const w = +(await call(gs, `${g.val} = ${v}; ${m}`, [], 'null', null, true))[1];
         if (!seen.has(w)) { seen.add(w); q.push(w); }
       }
     }
@@ -17584,85 +17645,109 @@ function checkClampedSteps() {
     if (k !== 'rn') range[k] = [vals[0], vals[vals.length - 1]];
     return vals;
   };
-  /* One done screen, already drawn: the checks that need only this screen. The rest (missing buttons, TOP, step lines and outcomes,
-     which need every call the game has) run in part 3. */
-  const steps = {};
-  const screen = (k, g, what, lang, want) => {
+  /* One done screen, already drawn: the checks that need only this screen. The rest (missing buttons, top / bottom, step lines and
+     outcomes, which need every call the game has) run in part 3. Advice lines no ADVICE key matches are reported once each, at the end. */
+  const steps = {}, unknownAdvice = new Map();
+  const screen = async (k, g, what, lang) => {
     tot[k].screens++;
     const html = els[g.body].innerHTML, txt = plain(html);
     const base = +run(g.base);
     const before = setupFields;
     const tagged = [...html.matchAll(/<button\b([^>]*)>([\s\S]*?)<\/button>/g)]
-      .map(m => ({ onclick: dec((/\bonclick="([^"]*)"/.exec(m[1]) || [])[1] || ''), lit: /\bclass="[^"]*\bcoach-start\b/.test(m[1]), label: plain(m[2]) }));
+      .map(m => ({ onclick: dec((/\bonclick="([^"]*)"/.exec(m[1]) || [])[1] || ''), lit: /\bclass="[^"]*\bcoach-start\b/.test(m[1]), label: plain(m[2]), attrs: attrs(m[1]) }));
     const btns = tagged.filter(b => g.again.test(b.onclick));
     const res = { base, deltas: [], lit: null, cls: 'same', adv: '' };
     if (!btns.length) { fail(`${g.name}, ${what} (${lang}): the done screen has no Again button`); return res; }
     const landings = new Set([base]);
+    const where = `${g.name}, ${what} (${lang})`;
     for (const b of btns) {
       tot[k].buttons++;
-      const [landed, val, after] = call(g, b.onclick, fieldsOf[k], '', setupFields), delta = landed - base;
+      const [landed, val, after, , thrown] = await call(g, b.onclick, fieldsOf[k], 'null', setupFields), delta = landed - base;
       Object.assign(b, { landed, delta, val });
+      if (thrown) { fail(`${where}: "${b.label}" (${b.onclick}) throws when the game starts: ${thrown}`); continue; }
       landings.add(landed);
-      if (!Number.isFinite(landed)) { fail(`${g.name}, ${what} (${lang}): after "${b.label}" (${b.onclick}) the game plays no tempo (${landed})`); continue; }
+      if (!Number.isFinite(landed)) { fail(`${where}: after "${b.label}" (${b.onclick}) the game plays no tempo (${landed})`); continue; }
       const changed = fieldsOf[k].filter((f, i) => after[i] !== before[i]);
-      if (changed.length) fail(`${g.name}, ${what} (${lang}): "${b.label}" (${b.onclick}) also changes ${changed.map(f => `${f} ${JSON.stringify(before[fieldsOf[k].indexOf(f)])} → ${JSON.stringify(after[fieldsOf[k].indexOf(f)])}`).join(', ')}`);
+      if (changed.length) fail(`${where}: "${b.label}" (${b.onclick}) also changes ${changed.map(f => `${f} ${JSON.stringify(before[fieldsOf[k].indexOf(f)])} → ${JSON.stringify(after[fieldsOf[k].indexOf(f)])}`).join(', ')}`);
       const r = readLabel(b.label);
-      if (r.step != null && r.step !== delta) fail(`${g.name}, ${what} (${lang}): the button "${b.label}" (${b.onclick}; ${said(r)}) moves the tempo by ${sgn(delta)} (${base} → ${landed})`);
-      if (r.tempo != null && r.tempo !== landed) fail(`${g.name}, ${what} (${lang}): the button "${b.label}" (${b.onclick}; ${said(r)}) plays at ${landed} BPM`);
-      if (r.tempo == null) {
+      if (r.badSign) fail(`${where}: the button "${b.label}" (${b.onclick}) puts "${r.badSign}" (U+${r.badSign.codePointAt(0).toString(16).toUpperCase()}) before ${r.n}: 1ep reads only + − - as a sign, so it cannot tell a step from a tempo (write − or -)`);
+      if (r.step != null && r.step !== delta) fail(`${where}: the button "${b.label}" (${b.onclick}; ${said(r)}) moves the tempo by ${sgn(delta)} (${base} → ${landed})`);
+      if (r.tempo != null && r.tempo !== landed) fail(`${where}: the button "${b.label}" (${b.onclick}; ${said(r)}) plays at ${landed} BPM`);
+      for (const [an, av] of b.attrs) {
+        const ra = readLabel(av);
+        if (ra.step != null || ra.tempo != null) tot[k].attrNums++;
+        if (ra.step != null && ra.step !== delta) fail(`${where}: the ${an} "${av}" of "${b.label}" (${b.onclick}; ${said(ra)}) but it moves the tempo by ${sgn(delta)}`);
+        if (ra.tempo != null && ra.tempo !== landed) fail(`${where}: the ${an} "${av}" of "${b.label}" (${b.onclick}; ${said(ra)}) but it plays at ${landed} BPM`);
+      }
+      const arrow = b.label.includes('⬆') ? 1 : b.label.includes('⬇') ? -1 : 0, sign = r.step != null ? Math.sign(r.step) : 0;
+      if (r.tempo == null && !arrow && !sign && !r.badSign) {
+        /* no number, arrow or sign ("Play again"): a button that keeps the tempo */
+        if (delta !== 0) fail(`${where}: the button "${b.label}" (${b.onclick}) names no step but moves the tempo by ${sgn(delta)} (${base} → ${landed})`);
+      } else if (r.tempo == null && !r.badSign) {
         steps[k].add(b.onclick);
-        if (delta === 0) fail(`${g.name}, ${what} (${lang}): the step button "${b.label}" (${b.onclick}) is shown but leaves the tempo at ${base}`);
-        const arrow = b.label.includes('⬆') ? 1 : b.label.includes('⬇') ? -1 : 0, sign = r.step != null ? Math.sign(r.step) : 0;
-        if (!arrow && !sign) fail(`${g.name}, ${what} (${lang}): the step button "${b.label}" (${b.onclick}) has neither ⬆ / ⬇ nor a sign to say which way it goes`);
-        else if (arrow && sign && arrow !== sign) fail(`${g.name}, ${what} (${lang}): the button "${b.label}" points ${arrow > 0 ? 'up' : 'down'} but its sign says ${sign > 0 ? '+' : '−'}`);
-        else if (delta !== 0 && Math.sign(delta) !== (arrow || sign)) fail(`${g.name}, ${what} (${lang}): the button "${b.label}" says ${(arrow || sign) > 0 ? 'up' : 'down'} and moves the tempo by ${sgn(delta)}`);
+        if (delta === 0) fail(`${where}: the step button "${b.label}" (${b.onclick}) is shown but leaves the tempo at ${base}`);
+        if (arrow && sign && arrow !== sign) fail(`${where}: the button "${b.label}" points ${arrow > 0 ? 'up' : 'down'} but its sign says ${sign > 0 ? '+' : '−'}`);
+        else if (delta !== 0 && Math.sign(delta) !== (arrow || sign)) fail(`${where}: the button "${b.label}" says ${(arrow || sign) > 0 ? 'up' : 'down'} and moves the tempo by ${sgn(delta)}`);
       }
       res.deltas.push(delta);
     }
     const lits = btns.filter(b => b.lit);
-    if (lits.length !== 1) fail(`${g.name}, ${what} (${lang}): ${lits.length} Again buttons are lit (${lits.map(b => b.label).join(' / ')}), want 1`);
+    if (lits.length !== 1) fail(`${where}: ${lits.length} Again buttons are lit (${lits.map(b => b.label).join(' / ')}), want 1`);
     const lit = res.lit = lits[0] || null;
-    /* Power Chord Switch's done row: each −5 / +5 press, then the readout, the Again label and the tempo Again plays. */
-    if (g.stepper && lit) for (const sb of tagged.filter(b => g.stepper.test(b.onclick))) {
-      tot[k].stepperPresses++;
-      const r = readLabel(sb.label), [lo, hi] = range[k];
-      const [landed, , , out] = call(g, `globalThis.__ep = [cc.nextBpm]; ${sb.onclick}; __ep.push(cc.nextBpm, document.getElementById('cc-done-bpm').textContent, document.getElementById('cc-done-again').innerHTML); ${lit.onclick}`, [], ', __ep');
-      const [from, to, ro, againHtml] = out, want2 = r.step == null ? NaN : Math.min(hi, Math.max(lo, from + r.step));
-      if (to !== want2) fail(`${g.name}, ${what} (${lang}): the done row's "${sb.label}" (${sb.onclick}; ${said(r)}) moves the row ${from} → ${to}, want ${want2} (the setup's range is ${lo}..${hi})`);
-      const roN = (/(\d+)/.exec(ro || '') || [])[1], agN = (readLabel(plain(againHtml || '')).tempo);
-      if (+roN !== landed) fail(`${g.name}, ${what} (${lang}): after "${sb.label}" the done row shows "${ro}" but Again then plays ${landed}`);
-      if (agN !== landed) fail(`${g.name}, ${what} (${lang}): after "${sb.label}" the Again button says "${plain(againHtml || '')}" but plays ${landed}`);
-      res.deltas.push(landed - base);
-      landings.add(landed);
+    /* Power Chord Switch's done row: the readout and the Again it updates are on the screen and name the tempo Again plays; then each
+       −5 / +5 press, the readout and the Again label after it, and the tempo Again then plays. */
+    if (g.stepper && lit) {
+      for (const id of ['cc-done-bpm', 'cc-done-again']) if (!html.includes(`id="${id}"`)) fail(`${where}: the done row has no #${id}, which ccDoneNudge updates: a press would not change what the student sees`);
+      const ro0 = /id="cc-done-bpm">(\d+) BPM</.exec(html);
+      if (!ro0 || +ro0[1] !== lit.landed) fail(`${where}: the done row shows ${ro0 ? ro0[1] + ' BPM' : 'no tempo'}, but "${lit.label}" plays ${lit.landed}`);
+      for (const sb of tagged.filter(b => g.stepper.test(b.onclick))) {
+        tot[k].stepperPresses++;
+        const r = readLabel(sb.label), [lo, hi] = range[k];
+        const [landed, , , out, thrown] = await call(g, `globalThis.__ep = [cc.nextBpm]; ${sb.onclick}; __ep.push(cc.nextBpm, document.getElementById('cc-done-bpm').textContent, document.getElementById('cc-done-again').innerHTML); ${lit.onclick}`, [], '__ep');
+        if (thrown) { fail(`${where}: the done row's "${sb.label}" (${sb.onclick}) then Again throws: ${thrown}`); continue; }
+        const [from, to, ro, againHtml] = out, want2 = r.step == null ? NaN : Math.min(hi, Math.max(lo, from + r.step));
+        if (to !== want2) fail(`${where}: the done row's "${sb.label}" (${sb.onclick}; ${said(r)}) moves the row ${from} → ${to}, want ${want2} (the setup's range is ${lo}..${hi})`);
+        const roN = (/(\d+)/.exec(ro || '') || [])[1], agN = (readLabel(plain(againHtml || '')).tempo);
+        if (+roN !== landed) fail(`${where}: after "${sb.label}" the done row shows "${ro}" but Again then plays ${landed}`);
+        if (agN !== landed) fail(`${where}: after "${sb.label}" the Again button says "${plain(againHtml || '')}" but plays ${landed}`);
+        res.deltas.push(landed - base);
+        landings.add(landed);
+      }
     }
     /* the advice line */
     const adv = res.adv = plain((/class="coach-crit-note">([\s\S]*?)<\/div>/.exec(html) || [])[1] || '');
-    if (!adv) fail(`${g.name}, ${what} (${lang}): no advice line`);
+    if (!adv) fail(`${where}: no advice line`);
     const nums = [...adv.matchAll(/(\d+)\s*BPM/g)].map(m => +m[1]);
     tot[k].adviceNums += nums.length;
-    const cls = res.cls = classOf(lang, adv, nums.length ? nums[0] : 10);
-    if (lit) {
-      for (const n of nums) {
-        const okN = cls === 'up' || cls === 'down' ? Math.abs(lit.delta) === n || lit.landed === n : n === base;
-        if (!okN) fail(`${g.name}, ${what} (${lang}): the advice "${adv}" names ${n} BPM; ${cls === 'up' || cls === 'down' ? `the step it lights, "${lit.label}", moves the tempo by ${sgn(lit.delta)} (to ${lit.landed})` : `it is not a step line, and the tempo played is ${base}`}`);
-      }
+    const cls = res.cls = classOf(lang, adv);
+    if (cls === 'unknown') {
+      const u = `${g.name} (${lang}): "${adv.replace(/\d+/g, 'N')}"`;   // one report per sentence, whatever number it holds
+      unknownAdvice.set(u, unknownAdvice.get(u) || { n: 0, what });
+      unknownAdvice.get(u).n++;
+    } else if (lit) {
+      const step = cls === 'up' || cls === 'down';
+      for (const n of nums) if (step ? Math.abs(lit.delta) !== n : n !== base)
+        fail(`${where}: the advice "${adv}" names ${n} BPM; ${step ? `the step it lights, "${lit.label}", moves the tempo by ${sgn(lit.delta)}` : `it is not a step line, and the tempo played is ${base}`}`);
       if (cls === 'up' ? !(lit.delta > 0) : cls === 'down' ? !(lit.delta < 0) : lit.delta !== 0)
-        fail(`${g.name}, ${what} (${lang}): the advice "${adv}" (${cls === 'up' || cls === 'down' ? 'a step ' + cls : 'keeps the tempo'}) lights "${lit.label}", which moves the tempo by ${sgn(lit.delta)}`);
+        fail(`${where}: the advice "${adv}" (${step ? 'a step ' + cls : 'keeps the tempo'}) lights "${lit.label}", which moves the tempo by ${sgn(lit.delta)}`);
     }
-    /* every other "N BPM" on the screen (not in a button, not in the advice line) */
-    const rest = html.replace(/<button\b[\s\S]*?<\/button>/g, ' ').replace(/class="coach-crit-note">[\s\S]*?<\/div>/, '>');
+    /* every other "N BPM" on the screen: the text outside the buttons and the advice line, and the aria-label / title / aria-valuetext of
+       every element that is not an Again button (theirs were read with the button) */
     const okTempos = new Set([...landings, ...JSON.parse(run(`JSON.stringify(${g.tempos})`))]);
-    for (const m of plain(rest).matchAll(/(\d+)\s*BPM/g)) {
-      tot[k].otherNums++;
-      if (!okTempos.has(+m[1])) fail(`${g.name}, ${what} (${lang}): the screen names ${m[1]} BPM, which is neither the tempo played (${base}), a tempo a button plays (${[...landings].join(', ')}) nor a round's or level's own tempo`);
+    const badTempo = (n, how) => fail(`${where}: ${how} names ${n} BPM, which is neither the tempo played (${base}), a tempo a button plays (${[...landings].join(', ')}) nor a round's or level's own tempo`);
+    const rest = html.replace(/<button\b[\s\S]*?<\/button>/g, ' ').replace(/class="coach-crit-note">[\s\S]*?<\/div>/, '>');
+    for (const m of plain(rest).matchAll(/(\d+)\s*BPM/g)) { tot[k].otherNums++; if (!okTempos.has(+m[1])) badTempo(m[1], 'the screen'); }
+    for (const m of html.matchAll(/<(\w+)\b([^>]*)>/g)) {
+      if (m[1] === 'button' && g.again.test(dec((/\bonclick="([^"]*)"/.exec(m[2]) || [])[1] || ''))) continue;
+      for (const [an, av] of attrs(m[2])) for (const x of av.matchAll(/(\d+)\s*BPM/g)) { tot[k].attrNums++; if (!okTempos.has(+x[1])) badTempo(x[1], `the ${an} "${av}" of a <${m[1]}>`); }
     }
     const unlock = /id="rn-unlock">([\s\S]*?)<\/div>/.exec(html), upB = btns.find(b => b.delta > 0);
     if (unlock && /\d+\s*BPM/.test(plain(unlock[1]))) {
       const n = +/(\d+)\s*BPM/.exec(plain(unlock[1]))[1];
-      if (!upB || upB.landed !== n) fail(`${g.name}, ${what} (${lang}): "${plain(unlock[1])}" names ${n} BPM for the new level, but ${upB ? `"${upB.label}" plays ${upB.landed}` : 'no button goes up to it'}`);
+      if (!upB || upB.landed !== n) fail(`${where}: "${plain(unlock[1])}" names ${n} BPM for the new level, but ${upB ? `"${upB.label}" plays ${upB.landed}` : 'no button goes up to it'}`);
     }
     const ph = /\{\w+\}/.exec(txt);
-    if (ph) fail(`${g.name}, ${what} (${lang}): the done screen shows an unfilled placeholder "${ph[0]}"`);
+    if (ph) fail(`${where}: the done screen shows an unfilled placeholder "${ph[0]}"`);
     res.btns = btns;
     return res;
   };
@@ -17672,14 +17757,15 @@ function checkClampedSteps() {
   try {
     const ladderIdx = +run(`(ccSetup('power'), ccProgs().findIndex(p => p.ladder))`);
     if (!(ladderIdx >= 0)) fail('no Power Chord Switch song switch (ccProgs().findIndex(p => p.ladder)) — its done screens were NOT swept');
-    /* Change Up / Power Chord Switch: 85% and over steps up, under 50% steps down; 13 of 15 is the lowest score over the 85% line, 7 of 15
-       the highest under 50% (6 of 7 a round: 18 of 21, the lowest over 85%; 3 of 7 a round the highest under 50%). */
+    /* Change Up / Power Chord Switch: 85% and over steps up, under 50% steps down. 13 of 15 is the lowest score over the 85% line, 7 of
+       15 the highest under 50%. A song switch (drawn with the same score each round): 6 of 7 a round (18 of 21) is the lowest over 85%;
+       3 of 7 a round (9 of 21) is under 50% (10 of 21, the highest, needs rounds that differ: a stated limit above). */
     const CCO = [['all right', 15, 'up'], ['13 of 15 right', 13, 'up'], ['10 of 15 right', 10, null], ['7 of 15 right', 7, 'down'], ['3 of 15 right', 3, 'down']];
+    const ccDraw = (mode, ladder) => (v, [, ok], lang) => { run('globalThis.__epRs = ccRenderSetup; ccRenderSetup = () => {}'); try { ccDoneScreen(lang, mode, ladder, v, ok, 'off'); } finally { run('ccRenderSetup = __epRs'); } run(`cc.phase = 'done'`); };
     const sweeps = [
-      ['cu', `ccSetup('open'); ccPickRate(2); ccPickProg(1);`, CCO, (v, [, ok], lang) => { run('globalThis.__epRs = ccRenderSetup; ccRenderSetup = () => {}'); try { ccDoneScreen(lang, 'open', false, v, ok, 'off'); } finally { run('ccRenderSetup = __epRs'); } run(`cc.phase = 'done'`); }],
-      ['pwPair', `ccSetup('power'); ccPickRate(2); ccPickProg(1);`, CCO, (v, [, ok], lang) => { run('globalThis.__epRs = ccRenderSetup; ccRenderSetup = () => {}'); try { ccDoneScreen(lang, 'power', false, v, ok, 'off'); } finally { run('ccRenderSetup = __epRs'); } run(`cc.phase = 'done'`); }],
-      ['pwSong', `ccSetup('power'); ccPickRate(2); ccPickProg(${ladderIdx});`, [['7 of 7 right each round', 7, 'up'], ['6 of 7', 6, 'up'], ['5 of 7', 5, null], ['3 of 7', 3, 'down']],
-        (v, [, ok], lang) => { run('globalThis.__epRs = ccRenderSetup; ccRenderSetup = () => {}'); try { ccDoneScreen(lang, 'power', true, v, ok, 'off'); } finally { run('ccRenderSetup = __epRs'); } run(`cc.phase = 'done'`); }],
+      ['cu', `ccSetup('open'); ccPickRate(2); ccPickProg(1);`, CCO, ccDraw('open', false)],
+      ['pwPair', `ccSetup('power'); ccPickRate(2); ccPickProg(1);`, CCO, ccDraw('power', false)],
+      ['pwSong', `ccSetup('power'); ccPickRate(2); ccPickProg(${ladderIdx});`, [['7 of 7 right each round', 7, 'up'], ['6 of 7', 6, 'up'], ['5 of 7', 5, null], ['3 of 7', 3, 'down']], ccDraw('power', true)],
     ];
     const nPat = +run('SH_PATTERNS.length'), nSongs = +run('RN_SONGS.length');
     /* Strum Hero and Riff Runner: stars at 90 / 70 / 50% of 10 notes; Strum Radar at 85 / 65 / 40%. The lines where the advice steps are
@@ -17710,7 +17796,7 @@ function checkClampedSteps() {
       const g = G[k];
       steps[k] = steps[k] || new Set();
       tempoSeen[k] = tempoSeen[k] || new Set();
-      const q = reach(k, g, setupCode), done = new Set();
+      const q = await reach(k, g, setupCode), done = new Set();
       while (q.length) {
         const v = q.shift();
         if (done.has(v)) continue;
@@ -17721,7 +17807,7 @@ function checkClampedSteps() {
           for (const oc of outcomes) {
             const what = `${sub ? sub + ', ' : ''}${k === 'rn' ? 'speed level ' + v : v + ' BPM'}, ${oc[0]}`;
             draw(v, oc, lang);
-            const res = screen(k, g, what, lang, oc[2]);
+            const res = await screen(k, g, what, lang);
             cases.push({ k, g, what, lang, want: oc[2], res, redraw: () => draw(v, oc, lang), shown: (res.btns || []).map(b => b.onclick) });
             /* where each Again lands joins the sweep (a tempo only an Again reaches is still a tempo the game plays) */
             for (const b of res.btns || []) if (Number.isFinite(b.val) && !done.has(b.val) && !q.includes(b.val)) q.push(b.val);
@@ -17729,8 +17815,8 @@ function checkClampedSteps() {
       }
     }
     for (const k of Object.keys(G)) tot[k].tempos = (tempoSeen[k] || new Set()).size;
-    /* 3. Every call the game has, on every screen: a hidden one that would move the tempo is a missing button; then TOP, the step lines
-       and the outcome that steps when it can, against everything this screen can do. */
+    /* 3. Every call the game has, on every screen: a hidden one that would move the tempo is a missing button; then top / bottom, the
+       step lines and the outcome that steps when it can, against everything this screen can do. */
     for (const c of cases) {
       const absent = [...steps[c.k]].filter(s => !c.shown.includes(s));
       const deltas = [...c.res.deltas];
@@ -17739,12 +17825,14 @@ function checkClampedSteps() {
         const base = +run(c.g.base);
         for (const s of absent) {
           tot[c.k].probes++;
-          const landed = +call(c.g, s, [])[0];
+          const [landed, , , , thrown] = await call(c.g, s, []);
+          if (thrown) { fail(`${c.g.name}, ${c.what} (${c.lang}): ${s}, which this screen hides, throws when the game starts: ${thrown}`); continue; }
           if (landed !== base) fail(`${c.g.name}, ${c.what} (${c.lang}): no button for ${s}, which would move the tempo by ${sgn(landed - base)} (${base} → ${landed})`);
           deltas.push(landed - base);
         }
       }
       const upBy = Math.max(0, ...deltas), downBy = Math.min(0, ...deltas), { cls, adv } = c.res;
+      if (cls === 'unknown') continue;
       const where = `${c.g.name}, ${c.what} (${c.lang})`;
       if (cls === 'top' && upBy > 0) fail(`${where}: the advice "${adv}" says the tempo cannot go higher, but this screen can move it up by ${upBy}`);
       if (cls === 'bottom' && downBy < 0) fail(`${where}: the advice "${adv}" says the tempo cannot go lower, but this screen can move it down by ${-downBy}`);
@@ -17753,6 +17841,7 @@ function checkClampedSteps() {
       if (c.want === 'up' && upBy > 0 && cls !== 'up') fail(`${where}: the game can go up by ${upBy} here and this outcome steps up when it can, but the advice is "${adv}"`);
       if (c.want === 'down' && downBy < 0 && cls !== 'down') fail(`${where}: the game can go down by ${-downBy} here and this outcome steps down when it can, but the advice is "${adv}"`);
     }
+    for (const [u, { n, what }] of unknownAdvice) fail(`${u} is no advice line 1ep knows (${n} screen${n > 1 ? 's' : ''}, e.g. ${what}): add its key to ADVICE.up / down / top / bottom / same in 1ep, so the line is held to what it promises`);
   } catch (e) { fail(`a done screen threw (${e.message}) — a game function was renamed or now needs more of the page; NOT fully checked`); }
   finally {
     run(`setLang(${JSON.stringify(keepLang)}); sessionStorage._d = JSON.parse(${JSON.stringify(keepSs)}); games.rn = ${keepRn} === null ? undefined : ${keepRn}; cc = null; sh = null; sr = null; rn = null;`);
@@ -17760,23 +17849,24 @@ function checkClampedSteps() {
   /* The pins: what the sweep must reach, so it cannot go blind (a setup control renamed, a tempo range cut, a button lost).
      tempos: Change Up 40..140, a pair 10..140, a song switch 10..130, Strum Hero 50..120 on 4 patterns, Strum Radar 50..100 on 4, Riff
      Runner 3 speed levels on 4 songs (steps of 5). screens = tempos x outcomes x 2 languages (Riff Runner: each level at each saved best
-     that opens it). adviceNums / otherNums: every "N BPM" read in the advice line / elsewhere on the screen; probes: hidden calls run;
-     fields: the setup fields a step must not change; stepperPresses: Power Chord Switch's done-row presses. */
+     that opens it). adviceNums / otherNums / attrNums: every "N BPM" read in the advice line / elsewhere in the text / in an attribute;
+     probes: hidden calls run; fields: the setup fields a step must not change; stepperPresses: Power Chord Switch's done-row presses. */
   const PIN = {
-    cu: { tempos: 21, screens: 210, buttons: 610, adviceNums: 160, probes: 20, setupCtls: 2, fields: 4, stepperPresses: 0, otherNums: 0 },
-    pwPair: { tempos: 27, screens: 270, buttons: 270, adviceNums: 208, probes: 0, setupCtls: 3, fields: 5, stepperPresses: 540, otherNums: 270 },
-    pwSong: { tempos: 25, screens: 200, buttons: 200, adviceNums: 144, probes: 0, setupCtls: 3, fields: 4, stepperPresses: 400, otherNums: 800 },
-    sh: { tempos: 60, screens: 720, buttons: 2064, adviceNums: 336, probes: 96, setupCtls: 2, fields: 1, stepperPresses: 0, otherNums: 0 },
-    sr: { tempos: 44, screens: 440, buttons: 1240, adviceNums: 240, probes: 80, setupCtls: 2, fields: 2, stepperPresses: 0, otherNums: 0 },
-    rn: { tempos: 12, screens: 432, buttons: 944, adviceNums: 0, probes: 352, setupCtls: 3, fields: 4, stepperPresses: 0, otherNums: 32 } };
+    cu: { tempos: 21, screens: 210, buttons: 610, adviceNums: 160, probes: 20, setupCtls: 2, fields: 4, stepperPresses: 0, otherNums: 0, attrNums: 0 },
+    pwPair: { tempos: 27, screens: 270, buttons: 270, adviceNums: 208, probes: 0, setupCtls: 3, fields: 5, stepperPresses: 540, otherNums: 270, attrNums: 0 },
+    pwSong: { tempos: 25, screens: 200, buttons: 200, adviceNums: 144, probes: 0, setupCtls: 3, fields: 4, stepperPresses: 400, otherNums: 800, attrNums: 0 },
+    sh: { tempos: 60, screens: 720, buttons: 2064, adviceNums: 336, probes: 96, setupCtls: 2, fields: 1, stepperPresses: 0, otherNums: 0, attrNums: 0 },
+    sr: { tempos: 44, screens: 440, buttons: 1240, adviceNums: 240, probes: 80, setupCtls: 2, fields: 2, stepperPresses: 0, otherNums: 0, attrNums: 0 },
+    rn: { tempos: 12, screens: 432, buttons: 944, adviceNums: 0, probes: 352, setupCtls: 3, fields: 4, stepperPresses: 0, otherNums: 32, attrNums: 0 } };
   for (const [k, pin] of Object.entries(PIN)) {
     const off = Object.entries(pin).filter(([n, v]) => tot[k][n] !== v);
     if (off.length) fail(`${G[k].name}: a count changed (${off.map(([n, v]) => `${n} ${v} → ${tot[k][n]}`).join(', ')}): find out why before re-pinning (a new tempo, outcome or button is fine; a lost one, or growth from a bug, is not)`);
   }
-  const SCAN_PIN = { prefixes: 6, stepLines: 8 };
+  /* stepButtons: 8 done-screen steps, 10 setup / play-screen tempo buttons, the 2 done-row presses, 4 OTHER_STEPPERS handlers (5 buttons) */
+  const SCAN_PIN = { prefixes: 6, stepButtons: 25 };
   for (const [n, v] of Object.entries(SCAN_PIN)) if (scan[n] !== v) fail(`the arcade / drills scan found ${scan[n]} ${n}, pinned ${v}: find out why before re-pinning`);
   const sum = n => Object.values(tot).reduce((a, x) => a + x[n], 0);
-  if (bad === 0) ok(`5 games (${Object.values(G).map(g => g.name).join(', ')}): ${sum('tempos')} reachable tempos (${Object.entries(tot).map(([k, x]) => `${G[k].name} ${x.tempos}`).join(', ')}), ${sum('screens')} done screens in every outcome that changes the advice and exactly on each score line, EN + ES; ${sum('buttons')} Again buttons run as the page runs them, to the tempo the game then plays: each +N / −N names the change it makes, each "Again at N" the tempo it plays, each step moves the way its arrow or sign says, never does nothing and changes none of the game's ${sum('fields')} other setup fields; ${sum('stepperPresses')} done-row presses move by their label within the setup's range and the readout and Again follow; ${sum('probes')} hidden calls run: none would have moved the tempo; ${sum('adviceNums')} "N BPM" in the advice line and ${sum('otherNums')} elsewhere name a true step or tempo; every Level-up / Drop line lights and has a step that way, every "cannot go higher" line has none, and each outcome steps when it can; no {placeholder}; ${scan.prefixes} ...Again( handlers and ${scan.stepLines} step labels in the arcade and the drills all belong to a swept game or to NOT_STEPPED (${Object.keys(NOT_STEPPED).join(', ')})`);
+  if (bad === 0) ok(`5 games (${Object.values(G).map(g => g.name).join(', ')}): ${sum('tempos')} reachable tempos (${Object.entries(tot).map(([k, x]) => `${G[k].name} ${x.tempos}`).join(', ')}), ${sum('screens')} done screens in every outcome that changes the advice and exactly on each score line where it steps, EN + ES; ${sum('buttons')} Again buttons run as the page runs them, through the real start (mic stubbed), to the tempo the game then plays: each +N / −N names the change it makes, each "Again at N" the tempo it plays, each "Play again" keeps it, each step moves the way its arrow or sign says, never does nothing and changes none of the setup's fields (${sum('fields')} over the games); ${sum('stepperPresses')} done-row presses move by their label within the setup's range and the readout and Again follow; ${sum('probes')} hidden calls run: none would have moved the tempo; every advice line is a known key; ${sum('adviceNums')} "N BPM" in the advice, ${sum('otherNums')} elsewhere and ${sum('attrNums')} in aria-label / title name a true step or tempo; every step line lights and has a step that way, every "cannot go higher" line has none, and each outcome steps when it can; no {placeholder}; ${scan.prefixes} ...Again( handlers and ${scan.stepButtons} step-looking buttons in the arcade and the drills all belong to a swept game, a setup control, the done-row stepper or NOT_STEPPED (${Object.keys(NOT_STEPPED).join(', ')})`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -21730,7 +21820,7 @@ function checkPracticeMinutes(i18nTable) {
   await checkMicStart();
   await checkStrumCheck();
   await checkPwTakeEvaluator();
-  checkClampedSteps();   // after every other user of 1ca's sandbox: it draws every arcade done screen in it
+  await checkClampedSteps();   // after every other user of 1ca's sandbox: it draws every arcade done screen in it
   checkPracticeMinutes(i18nTable);
   checkNoStudentDataHook();
   checkMicZipsAnonymous();
