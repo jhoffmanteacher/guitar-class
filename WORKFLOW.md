@@ -38,12 +38,12 @@ from `Claude outputs/WORK-ORDER-song-builder.md` (on the Mac only). Work in its 
 Part c ships Fast, d is Reviewed, then stop for Jonathan before Part e.
 **The Beat step's tracker is fixed (2026-11-15, the evening session; entry "The Beat step's tracker" under "Song
 builder" below has the numbers).** It follows American Girl beat for beat (0 of 397 beats over 100 ms from Moises's;
-before: 371). What is still Jonathan's to say: (1) the "send it to Claude" line now shows when a record needs more
-than 8 pins (`SB_PINS_MAX`, a first setting: steady records need 2 or 3, every record played without a click needs
-16 to 26, so today American Girl and every rock record go to Claude); the other way is to let the builder set those pins
-itself from the followed bars ("the drift check should pin the changes automatically"; he said "don't do
-auto-pinning yet"), which the tracker is now good enough for. (2) Whether the line should also BLOCK publishing
-(Part d) or only say so. Asked 2026-11-15; until he answers, 8 pins and "says so, blocks nothing" stand.
+before: 371). **Decided by Jonathan, 2026-11-15 (asked with the numbers):** a record that needs more than 8 pins
+(`SB_PINS_MAX`) is sent to Claude ("Send to Claude": steady records need 2 or 3, every record played without a click
+needs 16 to 26, so American Girl and every rock record go to Claude; he chose this over letting the builder set the
+pins itself, because the tracker still loses the beat without knowing it on some records). And the line only SAYS
+so: it does not block publishing ("Warn only"; the count can be a false alarm, as on "the cure"). Do not build
+auto-pinning unless he asks.
 THE RULER (on the Mac only, never in a test or the repo): `~/Downloads/American Girl-D-114bpm-440hz.mp3` (the
 original 1976 recording, 3:33) and Moises's beats for it, `~/Downloads/American Girl-D-114bpm-440hz metronome only.mp3`
 (397 clicks, 0.092 to 208.010 s; Jonathan: the first click is the very start of the song = bar 1). The scripts that
