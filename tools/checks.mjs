@@ -12394,9 +12394,12 @@ async function checkSongPopularity(ctx) {
      student reads in the single-note wording (2026-11-16): a spy on t() over
      the same screens plus the play screen, the count-in, a locked level and
      the passed-round done screens. Each key seen must be on a list of lines
-     that were read for power chords (NC_DIRECT_ON_POWER), and every literal
-     t('nc.…') in app/drills-call.js is on it or on NC_DIRECT_NOT_RENDERED, so
-     a new direct line fails until someone reads it.
+     that were read for power chords (NC_DIRECT_ON_POWER), and every quoted
+     'nc.…' string in the code of app/drills-call.js (comments blanked) is on
+     it or on NC_DIRECT_NOT_RENDERED, so a new direct line fails until someone
+     reads it. A string of another family asked for on those screens is held
+     the same way (NC_OTHER_ON_POWER), and no listed line may say "note" /
+     "nota", so a reword is read again.
    Pinned: 4 power steps, 15 ncp.* keys (18 until 2026-11-10, when the drill's second paragraph of directions went: descAnswer, howCoachAnswer, howCoach, howTap; introCoach came in, the mic-on line). */
 function checkNoteCallPower(ctx) {
   head('1cd. Note Call power chords (ca-43): the mic takes a strum, every string it can show');
@@ -12410,6 +12413,8 @@ function checkNoteCallPower(ctx) {
   const NC_DIRECT_ON_POWER = ['nc.again', 'nc.answer', 'nc.clean', 'nc.faster', 'nc.getReady', 'nc.head', 'nc.levelN', 'nc.levels', 'nc.listening', 'nc.locked', 'nc.metaAnswer', 'nc.metaLevel',
     'nc.metaPlayAlong', 'nc.off', 'nc.on', 'nc.passLine', 'nc.playAt', 'nc.playGuitar', 'nc.score', 'nc.slower', 'nc.start', 'nc.startPlain', 'nc.stop', 'nc.verdictFaster', 'nc.verdictTop', 'nc.verdictUnlocked'];
   const NC_DIRECT_NOT_RENDERED = ['nc.heard', 'nc.micDenied', 'nc.micLost', 'nc.startingMic'];
+  /* Strings of other families the same power screens ask for (the fretboard's labels). Exact, like the two lists above. */
+  const NC_OTHER_ON_POWER = ['fret.fretN', 'fret.stringA', 'fret.stringB', 'fret.stringD', 'fret.stringG', 'fret.stringHighE', 'fret.stringLowE'];
   const J = JSON.stringify;
   const run = x => vm.runInContext(x, ctx);
   let csrc = '';
@@ -12589,8 +12594,9 @@ function checkNoteCallPower(ctx) {
     const origNcK = ctx.ncK, origT = ctx.t;
     ctx.ncK = (pw, nm) => { const k = origNcK(pw, nm); keys.add(k); return k; };
     /* A spy on t() as well (Friday check 2026-11-16): the Note Call code also asks for about 30 nc.* strings DIRECTLY, t('nc.stop'), without
-       ncK, so the spy above never saw them: a new direct line on a power-chord screen would show the single-note wording and stay green. */
-    ctx.t = function (k) { if (typeof k === 'string' && k.startsWith('nc.')) asked.add(k); return origT.apply(this, arguments); };
+       ncK, so the spy above never saw them: a new direct line on a power-chord screen would show the single-note wording and stay green.
+       It records EVERY key, whatever its family. */
+    ctx.t = function (k) { if (typeof k === 'string') asked.add(k); return origT.apply(this, arguments); };
     const hadFlash = Object.prototype.hasOwnProperty.call(ctx, 'flashClass');   // fab-tools.js, not in the context: the board marks flash and nothing here looks at them
     if (!hadFlash) ctx.flashClass = () => {};
     try {
@@ -12635,18 +12641,34 @@ function checkNoteCallPower(ctx) {
     finally { ctx.ncK = origNcK; ctx.t = origT; if (!hadFlash) delete ctx.flashClass; try { run('delete noteCalls["chk1"]'); } catch { /* best effort */ } }
     /* The direct nc.* strings. Seen on a power screen: each must be in NC_DIRECT_ON_POWER, a list of lines someone has read as a power-chord
        student would (no "note" where the student plays a chord), so a new direct line fails until it is read and added, or moved to ncK with an
-       ncp.* twin. The screens this render cannot reach (the mic starting, refused, lost, and "Heard X") are held by the source: every literal
-       t('nc.…') in app/drills-call.js is in that list or in NC_DIRECT_NOT_RENDERED. Both lists are exact, so neither can go stale or blind. */
+       ncp.* twin. The screens this render cannot reach (the mic starting, refused, lost, and "Heard X") are held by the source: every quoted
+       'nc.…' string in the code of app/drills-call.js is in that list or in NC_DIRECT_NOT_RENDERED. Both lists are exact, so neither can go
+       stale or blind. */
     {
-      const direct = [...asked].filter(k => !keys.has(k)).sort();
-      for (const k of direct) if (!NC_DIRECT_ON_POWER.includes(k)) flag('a Note Call power-chord screen asks for \'' + k + '\' directly (t(\'' + k + '\'), not through ncK), so it shows the single-note wording: read it as a power-chord student would, then add it to NC_DIRECT_ON_POWER, or give it an ncp.* twin through ncK');
-      for (const k of NC_DIRECT_ON_POWER) if (!direct.includes(k)) flag('\'' + k + '\' is in NC_DIRECT_ON_POWER, but no power screen 1cd renders asks for it directly any more (moved to ncK, deleted, or the render lost a screen): fix the render or take it off the list on purpose');
+      /* Asked for directly: every key t() was given on these screens that did not come out of ncK (an ncp.* key is the power wording already). */
+      const direct = [...asked].filter(k => !keys.has(k) && !k.startsWith('ncp.')).sort();
+      const directNc = direct.filter(k => k.startsWith('nc.')), directOther = direct.filter(k => !k.startsWith('nc.'));
+      for (const k of directNc) if (!NC_DIRECT_ON_POWER.includes(k)) flag('a Note Call power-chord screen asks for \'' + k + '\' directly (t(\'' + k + '\'), not through ncK), so it shows the single-note wording: read it as a power-chord student would, then add it to NC_DIRECT_ON_POWER, or give it an ncp.* twin through ncK');
+      for (const k of NC_DIRECT_ON_POWER) if (!directNc.includes(k)) flag('\'' + k + '\' is in NC_DIRECT_ON_POWER, but no power screen 1cd renders asks for it directly any more (moved to ncK, deleted, or the render lost a screen): fix the render or take it off the list on purpose');
+      /* The same for a string of any OTHER family (review 2026-11-16: the spy read only nc.*, so a new t('fret.playNote') on a power screen was green). */
+      for (const k of directOther) if (!NC_OTHER_ON_POWER.includes(k)) flag('a Note Call power-chord screen asks for \'' + k + '\', a string from outside Note Call: read it as a power-chord student would, then add it to NC_OTHER_ON_POWER');
+      for (const k of NC_OTHER_ON_POWER) if (!directOther.includes(k)) flag('\'' + k + '\' is in NC_OTHER_ON_POWER, but no power screen 1cd renders asks for it any more: fix the render or take it off the list on purpose');
+      /* The source net: every QUOTED 'nc.…' string in the code of app/drills-call.js, comments blanked first (a key kept in a variable,
+         const k = 'nc.intro'; t(k), is read too, and a key named in a comment is not). */
       let ncSrc = '';
-      try { ncSrc = readFileSync(join(ROOT, 'app/drills-call.js'), 'utf8'); } catch { flag('app/drills-call.js is missing: the direct nc.* strings NOT checked'); }
-      const literal = [...new Set([...ncSrc.matchAll(/\bt\(\s*(['"`])(nc\.[\w.]+)\1/g)].map(m => m[2]))].sort();
-      for (const k of literal) if (!NC_DIRECT_ON_POWER.includes(k) && !NC_DIRECT_NOT_RENDERED.includes(k)) flag('app/drills-call.js asks for \'' + k + '\' directly and no screen 1cd renders shows it: render that screen in power mode here, or read the line as a power-chord student would and add it to NC_DIRECT_NOT_RENDERED');
-      for (const k of NC_DIRECT_NOT_RENDERED) if (!literal.includes(k) || direct.includes(k)) flag('\'' + k + '\' is in NC_DIRECT_NOT_RENDERED but ' + (direct.includes(k) ? 'a rendered power screen now asks for it: move it to NC_DIRECT_ON_POWER' : 'app/drills-call.js no longer asks for it: take it off the list'));
-      stats.direct = direct.length; stats.directSrc = literal.length;
+      try { ncSrc = stripJsComments(readFileSync(join(ROOT, 'app/drills-call.js'), 'utf8')); } catch { flag('app/drills-call.js is missing: the direct nc.* strings NOT checked'); }
+      const quoted = [...new Set([...ncSrc.matchAll(/(['"`])(nc\.[A-Za-z][\w.]*)\1/g)].map(m => m[2]))].sort();
+      for (const k of quoted) if (!NC_DIRECT_ON_POWER.includes(k) && !NC_DIRECT_NOT_RENDERED.includes(k) && !directNc.includes(k)) flag('app/drills-call.js names \'' + k + '\' in its code and no screen 1cd renders asks for it: render that screen in power mode here, or read the line as a power-chord student would and add it to NC_DIRECT_NOT_RENDERED');
+      for (const k of NC_DIRECT_NOT_RENDERED) if (!quoted.includes(k) || directNc.includes(k)) flag('\'' + k + '\' is in NC_DIRECT_NOT_RENDERED but ' + (directNc.includes(k) ? 'a rendered power screen now asks for it: move it to NC_DIRECT_ON_POWER' : 'the code of app/drills-call.js no longer names it: take it off the list'));
+      /* The lists hold key NAMES, so the words are read here too: a listed line that says "note" / "nota" (its {placeholders} aside) is the
+         single-note wording on a power-chord screen, whenever it was reworded. */
+      stats.directRead = 0;
+      for (const k of [...NC_DIRECT_ON_POWER, ...NC_DIRECT_NOT_RENDERED, ...NC_OTHER_ON_POWER]) {
+        if (!I18N[k] || !I18N[k].en || !I18N[k].es) { flag('i18n ' + k + ' (on a 1cd list of lines a power-chord student reads) is missing its English or Spanish: its wording NOT read'); continue; }
+        stats.directRead++;
+        for (const lang of ['en', 'es']) if (/\bnot[ea]s?\b/i.test(I18N[k][lang].replace(/\{\w+\}/g, ' '))) flag('i18n ' + k + ' (' + lang + '): "' + I18N[k][lang] + '" says "note" / "nota" and a power-chord student reads it (they play a chord): reword it, or give it an ncp.* twin through ncK');
+      }
+      stats.direct = directNc.length; stats.directSrc = quoted.length; stats.other = directOther.length;
     }
     const defined = Object.keys(I18N).filter(k => k.startsWith('ncp.'));
     stats.keys = keys.size;
@@ -12722,7 +12744,7 @@ function checkNoteCallPower(ctx) {
     } catch (e) { flag('rendering the Note Call hit feedback threw ' + e.message); }
     finally { ctx.document.getElementById = origGet; delete ctx.__flashes; if (hadFlash2) ctx.flashClass = origFlash; else delete ctx.flashClass; try { run('setLang("en")'); } catch { /* best effort */ } }
   }
-  if (bad === 0) ok(EXPECT.power + ' power drills on ca-43 (frets ' + EXPECT.ranges.map(r => r.join('-')).join(' / ') + '); ' + stats.cards + ' cards x 53 pitches = ' + stats.answers + ' answers match the oracle (single-note cards exactly as before); ' + stats.clashCalls + ' ncClash calls match an oracle and ' + stats.deals + ' seeded ncDeal deals (no coach.js loaded) never dealt a clashing card while a clean one existed (' + stats.powerForced + ' of ' + stats.powerDeals + ' power deals had to, every card left clashing; ' + (stats.forced - stats.powerForced) + ' of ' + (stats.deals - stats.powerDeals) + ' single-note); ' + stats.listens + ' ncListen calls (targets, clarity, main and grace fret); ' + stats.micHits + ' mic hits all flagged as the mic; ' + stats.fbRenders + ' hit-feedback renders (a mic hit on a two-fret power card names and flashes both frets; a tap, scored or play-along, a one-fret card and a single note name and flash one); ' + stats.keys + ' of ' + EXPECT.keys + ' ncp.* strings rendered, EN + ES; ' + stats.direct + ' nc.* strings asked for directly on the power screens are the ' + NC_DIRECT_ON_POWER.length + ' on the read list, and the other ' + (stats.directSrc - stats.direct) + ' of ' + stats.directSrc + ' in app/drills-call.js are the ' + NC_DIRECT_NOT_RENDERED.length + ' listed as not rendered');
+  if (bad === 0) ok(EXPECT.power + ' power drills on ca-43 (frets ' + EXPECT.ranges.map(r => r.join('-')).join(' / ') + '); ' + stats.cards + ' cards x 53 pitches = ' + stats.answers + ' answers match the oracle (single-note cards exactly as before); ' + stats.clashCalls + ' ncClash calls match an oracle and ' + stats.deals + ' seeded ncDeal deals (no coach.js loaded) never dealt a clashing card while a clean one existed (' + stats.powerForced + ' of ' + stats.powerDeals + ' power deals had to, every card left clashing; ' + (stats.forced - stats.powerForced) + ' of ' + (stats.deals - stats.powerDeals) + ' single-note); ' + stats.listens + ' ncListen calls (targets, clarity, main and grace fret); ' + stats.micHits + ' mic hits all flagged as the mic; ' + stats.fbRenders + ' hit-feedback renders (a mic hit on a two-fret power card names and flashes both frets; a tap, scored or play-along, a one-fret card and a single note name and flash one); ' + stats.keys + ' of ' + EXPECT.keys + ' ncp.* strings rendered, EN + ES; ' + stats.direct + ' nc.* strings asked for directly on the power screens are the ' + NC_DIRECT_ON_POWER.length + ' on the read list, and the other ' + (stats.directSrc - stats.direct) + ' of ' + stats.directSrc + ' in app/drills-call.js are the ' + NC_DIRECT_NOT_RENDERED.length + ' listed as not rendered; ' + stats.other + ' strings of other families on those screens are the ' + NC_OTHER_ON_POWER.length + ' listed; none of the ' + stats.directRead + ' listed lines says "note" / "nota" (EN + ES)');
 }
 
 /* 1cn. CALL THE CHORD (step.drill 'chordcall', ca-48, work order 2026-11-05).
