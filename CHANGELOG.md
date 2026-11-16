@@ -6,9 +6,12 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
-## 2026-11-16 — The Metronome click during a song
+## 2026-11-16 — The Metronome click during a song, and small wording fixes
 
 - **The Metronome no longer skips or doubles a click when you change speed or switch to Guitar mid-song.** Before, pressing a speed button or the Guitar button right on a count could lose that one click or play it twice.
+- **Change Up names the real tempo step.** At 135 or 45 BPM the done screen said "10 BPM" and "+10 BPM", but the tempo can only move 5 there. It now says 5.
+- **The games' footer is exact:** "no sound is recorded or uploaded." Your scores and practice minutes are saved, as always.
+- **Module 9 in Spanish names the button as it reads:** "Todavía lo estoy practicando".
 
 ## 2026-11-15 — Practice minutes count every minute
 
