@@ -1,6 +1,7 @@
 /* ══ BUILT SONGS — Play Along songs that live in the database, not in the code (2026-11-14) ══════════
    Jonathan, 2026-11-14: "go with song builder". A built song is a Play Along song he adds in the console
-   (Manage → Built songs: Import, teacher-builtsongs.js; later the Song builder) with NO code push. It shows
+   (the Song builder's Publish, teacher-sb-publish.js; or Manage → Built songs: Import, teacher-builtsongs.js) with
+   NO code push. It shows
    where today's extra songs show, Songs → "More Play Along songs", for every student, with the same card a
    coded song has (caCardBodyHtml): Play song, Metronome, the speed slider, section buttons, Loop this part,
    Full / Power chords. Its lyrics always show when the chart has them (Jonathan: "lyrics always show if they
@@ -16,7 +17,8 @@
      songDrafts/{id}       the console's drafts (teacher only; never read here)
    id = 'sb-' + 8 to 24 lower-case letters and digits. `v` is the FORMAT version (1; a page refuses a `v` it does
    not know); an edit keeps it. The list's number for a song is its EDIT number: it goes up on every import or
-   publish, and is what tells a page to fetch the doc again. The rules check the doc's outer shape only; THIS
+   publish, is never used twice for a song (the console makes it from its clock, teacherBsNextVer), and is what tells
+   a page to fetch the doc again. The rules check the doc's outer shape only; THIS
    FILE checks everything (builtSongCheck), on every page, before a song is shown, and the list's keys and
    values one by one (the rules cannot loop over a map).
 
@@ -217,7 +219,7 @@ function bsIntro(names, lang){
 }
 
 /* ── The validator: every reason a doc is refused ([] = fine). `id` is the doc's id. Pure: no DOM, no store. Used
-   by the console before Import (and later Publish), by every page before a merge, and by Node
+   by the console before Import and Publish, by every page before a merge, and by Node
    (tools/built-song-check.mjs). ── */
 function builtSongCheck(id, doc){
   const why = [];

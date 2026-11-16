@@ -217,7 +217,7 @@ function sbListHtml(){
       const changed = r.kind === 'draft' && typeof sbPubChanged === 'function' && sbPubChanged(r.d, r.p);
       tags = '<span class="ta-tag ta-tag-sched">Published</span>' + (changed ? '<span class="ta-tag ta-tag-warn">Changes not published</span>' : '')
         + (v.ok ? '' : '<span class="ta-tag ta-tag-warn">Fails today\'s checks</span>') + (r.kind === 'pub' ? '<span class="ta-tag ta-tag-off">Imported</span>' : '');
-      sub = `On the Songs page · edit ${escHtml(String(r.p.ver))}`;
+      sub = `On the Songs page · ${escHtml(teacherBsVerText(r.p.ver))}`;
     }
     else {
       const d = r.d, step = Math.min(SB_BUILT_STEPS, Math.max(1, Number(d.step) || 1));
@@ -254,7 +254,7 @@ function sbDetailHtml(){
   const title = d ? d.title : (sbNew && sbNew.title) || '', artist = d ? d.artist : (sbNew && sbNew.artist) || '';
   const off = sbBusy ? ' disabled' : '';
   const meta = !d ? 'Song builder · New song · not saved yet'
-    : pub ? `Song builder · Published (edit ${escHtml(String(pub.ver))}) · editing: students keep the published song until you publish again · <span data-sb-saved>${escHtml(sbWhen(d.savedAt))}</span> · <button type="button" class="sb-linkbtn" data-sb-act="edit-done"${off}>← The published song</button>`
+    : pub ? `Song builder · Published (${escHtml(teacherBsVerText(pub.ver))}) · editing: students keep the published song until you publish again · <span data-sb-saved>${escHtml(sbWhen(d.savedAt))}</span> · <button type="button" class="sb-linkbtn" data-sb-act="edit-done"${off}>← The published song</button>`
     : `Song builder · Draft · <span data-sb-saved>${escHtml(sbWhen(d.savedAt))}</span>`;
   const nav = sbNavHtml(d);
   /* A published song is deleted with its typed title (teacher-sb-publish.js); a draft with one OK / Cancel. */
@@ -278,13 +278,17 @@ function sbStartHtml(){
    (Jonathan, 2026-11-15: the chart while other things are being worked on); Level once a chart is read; Preview and
    Publish once the song passes the checks a student's page runs (sbSongWhy). Publish itself has more conditions
    (sbPublishWhy, teacher-sb-publish.js). */
+/* The stored copy is the picked mp3's, levelled (review R1-2: a new mp3 picked after levelling keeps the OLD copy until
+   Volume runs again, so Preview and Publish wait). An imported song's copy came levelled and has no source until one
+   is picked (teacher-sb-publish.js, sbDraftFromDoc). */
+function sbCopyCurrent(d){ return !!(d && d.audio && (d.imported && !d.source ? true : d.volume && d.source && d.audio.sourceSha256 === d.source.sha256)); }
 function sbHasChart(d){ return !!(d && d.chart && Array.isArray(d.chart.sections) && d.chart.sections.length); }
 function sbStepReady(d, k){
   if(k === 1) return true;
   if(k === 2 || k === 4) return !!d;
   if(k === 3) return !!(d && d.audio && (d.volume || d.imported));   // an imported song's copy came levelled (teacher-sb-publish.js)
   if(k === 5) return sbHasChart(d);
-  if(k === 6 || k === 7) return !!(sbHasChart(d) && d.level && d.beat && d.audio) && !sbSongWhy(d, sbSel).length;
+  if(k === 6 || k === 7) return !!(sbHasChart(d) && d.level && d.beat && d.audio) && sbCopyCurrent(d) && !sbSongWhy(d, sbSel).length;
   return false;
 }
 function sbStepsHtml(d){
@@ -683,6 +687,8 @@ async function sbRunLevel(){
       step: Math.max(2, Number(d.step) || 1) });
     delete next.replaced;
     if(next.beat && Math.abs((d.audio ? d.audio.durationSec : durationSec) - durationSec) > 0.05 && d.replaced) next.beat = null;
+    /* Review R1-6: the drift windows were measured on the old copy: the number goes, and the Beat step measures again. */
+    if(next.beat && !next.beat.fromImport && (!d.audio || d.audio.sha256 !== sha)) next.beat = Object.assign({}, next.beat, { driftOff: null, driftFor: null });
     sbBusy = '';
     const saved = await sbWriteDraft(id, next);
     if(!saved) return;

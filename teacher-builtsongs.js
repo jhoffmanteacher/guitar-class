@@ -1,8 +1,9 @@
 /* ── Built songs: Manage → "Built songs" (2026-11-14, Song builder Part a2) ──────────────────────────────
    A Play Along song that lives in the class database instead of the code (app/builtsongs.js has the format,
-   the validator and how every page merges them; firestore.rules "BUILT SONGS" the shape). Until the Song
-   builder screens exist (Parts b to d), a song comes in here: Claude prepares two files with
-   `tools/new-playalong.mjs` (the song file .json and its levelled .mp3) and Jonathan imports them.
+   the validator and how every page merges them; firestore.rules "BUILT SONGS" the shape). Jonathan builds most
+   songs in the Song builder (teacher-sb-*.js); a song the builder sends to Claude comes in here: Claude prepares
+   two files with `tools/new-playalong.mjs` (the song file .json and its levelled .mp3), or the builder's Export
+   gives the pair, and Jonathan imports them.
 
    WHAT IT SHOWS: one row per song on builtSongsMeta/list: its title, artist, length, edit number and the
    validator's verdict TODAY (builtSongCheck, the same function every student page runs: "passes", or the first
@@ -20,8 +21,8 @@
         teacher-songfiles.js: head 'uploading', the pieces, stale pieces removed, head 'ready'), skipped when the
         store already holds that file, ready and matching;
      2. builtSongs/{id} = { v, title, artist, audio, song, savedAt: the server's time };
-     3. builtSongsMeta/list: in a transaction, songs[id] goes up by one (its EDIT number: what tells every page
-        to fetch the song again), every other entry kept as it was, updatedAt the server's time.
+     3. builtSongsMeta/list: in a transaction, songs[id] becomes a new EDIT number (what tells every page to fetch
+        the song again; teacherBsNextVer: never one used before), every other entry kept, updatedAt the server's time.
    Importing the same id again replaces that song. One import at a time (and never during a Song files action).
    Leaving Manage stops it before its next write; a stop or a failure after step 1 leaves the audio stored and
    the song not (or not yet) on the list, and says so.
@@ -44,6 +45,18 @@
    newer read, or before this section's write ended, never paints (teacherBsReadGen / teacherBsOpGen), and
    nothing paints once the teacher has left Manage. English only, like the rest of the console. */
 const TEACHER_BS_MAX_JSON = 1000000;
+/* A song's EDIT number on builtSongsMeta/list (review R1-3 and R1-4, 2026-11-16): the whole seconds since 2026-01-01
+   (UTC) when it is written, and always past the number before it. A Chromebook keeps a song by this number
+   (app/builtsongs.js), so a number used twice (a Delete, then an Import of the same id; an Unpublish in one tab and a
+   Publish from another) would leave it showing the old song. bsListOf takes numbers up to 1e9: until the year 2057.
+   Shared by Import here and the Song builder's Publish (teacher-sb-publish.js). Shown as the time it was made. */
+const TEACHER_BS_VER_T0 = Date.UTC(2026, 0, 1);
+function teacherBsNextVer(prev){ return Math.max((Number(prev) || 0) + 1, Math.floor((Date.now() - TEACHER_BS_VER_T0) / 1000)); }
+function teacherBsVerText(v){
+  v = Number(v);
+  if(!(v >= 1e6)) return 'edit ' + v;            // a number from before 2026-11-16 (1, 2, 3 …)
+  return 'edit of ' + new Date(TEACHER_BS_VER_T0 + v * 1000).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
 let teacherBsSongs = null;     // Map id -> { ver, doc } read from the store (doc null: the list names it, the doc is missing); null = not read
 let teacherBsReadErr = '';
 let teacherBsDenied = false;   // the last read of the list was refused: the BUILT SONGS rules are not published yet
@@ -95,7 +108,7 @@ function teacherBsVerdict(id, s){
 function teacherBsRowHtml(id){
   const s = teacherBsSongs.get(id), d = s.doc || {}, v = teacherBsVerdict(id, s);
   return `<tr><td>${escHtml(String(d.title == null ? '—' : d.title))}</td><td>${escHtml(String(d.artist || ''))}</td>`
-    + `<td>${escHtml(teacherSfLen(d.audio && d.audio.durationSec))}</td><td>${escHtml(String(s.ver))}</td><td>${escHtml(id)}</td>`
+    + `<td>${escHtml(teacherSfLen(d.audio && d.audio.durationSec))}</td><td>${escHtml(teacherBsVerText(s.ver))}</td><td>${escHtml(id)}</td>`
     + `<td>${v.ok ? '✓ ' : '✗ '}${escHtml(v.text)}</td></tr>`;
 }
 function teacherBsBlockHtml(){
@@ -246,12 +259,12 @@ async function teacherBsImport(jsonFile, mp3File){
     await db.runTransaction(async tx => {
       const snap = await tx.get(ref);
       const songs = bsListOf(snap.exists ? snap.data() : null);
-      ver = (songs[id] || 0) + 1;
+      ver = teacherBsNextVer(songs[id]);
       songs[id] = ver;
       tx.set(ref, { songs, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
     });
     teacherBsPicked.json = teacherBsPicked.mp3 = null;
-    teacherBsEnd(`Imported "${doc.title}" (edit ${ver}). Students see it under Songs → More Play Along songs on their next sign-in or when they come back to the tab.`);
+    teacherBsEnd(`Imported "${doc.title}" (${teacherBsVerText(ver)}). Students see it under Songs → More Play Along songs on their next sign-in or when they come back to the tab.`);
     if(typeof builtSongsSync === 'function') builtSongsSync();
   }catch(e){
     if(e && e.shape){ teacherBsEnd(`Nothing was imported: ${e.shape}.`); return; }
