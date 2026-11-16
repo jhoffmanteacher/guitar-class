@@ -88,9 +88,9 @@ blocks a quick change mid-week.
 | Part | Lines on 2026-11-11 | Where it could be cut (read the banners first; these are guesses) |
 |---|---|---|
 | `teacher-activities.js` | 2,400 | the board (arrange, drag and drop, the one move writer) apart from the list and detail screens |
-| `coach-runner.js` | 2,393 | **Split 2026-11-16** (2,394 lines then): Riff Runner and its Wait Mode stay (1,091 lines); Note Runner, with its race lane, judge and `gamesResetForUser`, moved whole into `coach-noterunner.js` (1,303 lines and a 7-line header) |
+| `coach-runner.js` | 2,393 | **Split 2026-11-16** (2,394 lines then): Riff Runner and its Wait Mode stay (1,091 lines at the split; 1,098 after `d6c3e16`'s 3 comment lines and the 4-line bridge below); Note Runner, with its race lane, judge and `gamesResetForUser`, moved whole into `coach-noterunner.js` (1,303 lines and a 7-line header) |
 | `coach-core.js` | 2,329 | only with Jonathan: it is the listening code. Mic recordings (`micRec*`) are the obvious section to move; the detectors, `coachDetectPitch` and every line `tools/mic-sim/` reads stay put |
-| `coach-chords.js` | 2,034 | **Split 2026-11-16** (2,167 lines then): Change Up / Power Chord Switch stay (1,397 lines); the chord ranks, Chord Blitz and Chord Detective moved whole into `coach-chordcards.js` (770 lines and a 7-line header) |
+| `coach-chords.js` | 2,034 | **Split 2026-11-16** (2,167 lines then): Change Up / Power Chord Switch stay (1,397 lines at the split; 1,401 with the 4-line bridge below); the chord ranks, Chord Blitz and Chord Detective moved whole into `coach-chordcards.js` (770 lines and a 7-line header) |
 
 How: one part per change. Move a banner section, whole and unchanged, into a new part loaded right after the one
 it came from; list the new file in `COACH_JS_PARTS` / `TEACHER_JS_PARTS` (`app/boot.js`) and, for an arcade part,
