@@ -979,7 +979,7 @@ async function publishCases(consoleSrc, check){
     const pane = run('sbPreviewPaneHtml(sbDraft())');
     check('preview: going to step 6 saves the furthest step (one songDrafts write); the pane has the three listens, the Spanish-templates line and the title as students see it (escaped), and no "does not fit" box for a steady record',
       run('sbStepOn') === 6 && F4.S.get('songDrafts/' + id).step === 6 && since(w0).filter(x => !x.includes('songFilesUsage')).join() === 'set songDrafts/' + id
-      && (pane.match(/class="sb-listen[ "]/g) || []).length === 3 && /fixed Spanish templates/.test(pane) && pane.includes('"Test 0 Publish" - The Test Band — Play Along') && !/does not fit the builder/.test(pane),
+      && (pane.match(/class="sb-listen[ "]/g) || []).length === 3 && /fixed English and Spanish templates/.test(pane) && pane.includes('"Test 0 Publish" - The Test Band — Play Along') && !/does not fit the builder/.test(pane),
       JSON.stringify({ step: run('sbStepOn'), writes: since(w0), listens: (pane.match(/class="sb-listen[ "]/g) || []).length }));
   }
   /* D3: Publish stays off until the three listens */
