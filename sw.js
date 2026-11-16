@@ -290,6 +290,7 @@ const ASSETS = [
   './coach-core.js',
   './coach-hub.js',
   './coach-chords.js',
+  './coach-chordcards.js',
   './coach-ear.js',
   './coach-strum.js',
   './coach-runner.js',

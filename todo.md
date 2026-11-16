@@ -90,7 +90,7 @@ blocks a quick change mid-week.
 | `teacher-activities.js` | 2,400 | the board (arrange, drag and drop, the one move writer) apart from the list and detail screens |
 | `coach-runner.js` | 2,393 | Riff Runner apart from Note Runner and wait mode |
 | `coach-core.js` | 2,329 | only with Jonathan: it is the listening code. Mic recordings (`micRec*`) are the obvious section to move; the detectors, `coachDetectPitch` and every line `tools/mic-sim/` reads stay put |
-| `coach-chords.js` | 2,034 | Change Up / Power Chord Switch apart from Chord Blitz and Chord Detective. The busiest part (44 of the arcade's 55 commits in 14 days) |
+| `coach-chords.js` | 2,034 | **Split 2026-11-16** (2,167 lines then): Change Up / Power Chord Switch stay (1,397 lines); the chord ranks, Chord Blitz and Chord Detective moved whole into `coach-chordcards.js` (770 lines and a 7-line header) |
 
 How: one part per change. Move a banner section, whole and unchanged, into a new part loaded right after the one
 it came from; list the new file in `COACH_JS_PARTS` / `TEACHER_JS_PARTS` (`app/boot.js`) and, for an arcade part,
