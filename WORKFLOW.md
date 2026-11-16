@@ -892,6 +892,28 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-16 — The teacher console stops enlarging on a big screen; Live In-Class Games still fills.**
+      Jonathan: "teacher dashboard view is larger on windows than mac"; told the fill shows the same content enlarged:
+      "it doesn't actually show same amount of content"; his choice: "Console at normal size, everything else as now:
+      the console stops enlarging and uses the extra room for more content." This reverses his 2026-11-13 "Grow the
+      whole console" (Part 3 below). **What he saw** (headless Chrome, the stub console, 29 made-up students): the
+      fill was working to its own rule. The page was always 1366 page px wide (main column 1102 px) and as tall as the
+      window's shape allows: s = 1.054 / 1.406 / 1.874 at 1440×900 / 1920×1080 / 2560×1300, all set by the WIDTH, so
+      the page is 854 / 768 / 694 page px tall. A 16:10 Mac window is taller for its width than a 16:9 monitor, so the
+      Mac showed more: Students rows on the first screen 18 / 15 / 13, Class activities list 10 / 7 / 6 of 10.
+      **Now:** `site-fill.js` gives the console (`?teacher`, the same test as `IS_TEACHER_MODE`; the teacher signs in on
+      that address, nothing turns a page into the console later, so it is known in `<head>`, no flash) the factor 1 at
+      every size. Students rows 18 / 24 / 29 of 29, Class activities 10 / 10 / 10, main column 1176 / 1656 / 2296 px;
+      no sideways scroll, nothing cut off. **Live In-Class Games** (its stage is what the room reads) keeps the fill:
+      `renderTeacherBody` calls `siteFillStage(teacherView==='livequiz')`; the zoom, `--site-fill`, the rescaled media
+      rules and the page-pixel view go on and off together, and a resize event is sent so sizes are worked out again.
+      **Student view** opens the student site in a new tab (no `?teacher`): it fills as before. The student site's
+      factor is unchanged at 1366×657 / 1920×1080 / 2560×1300 (1 / 1.4056 / 1.8741, same zoom and media rules).
+      Guards: `checks.mjs` 1df (44 assertions: the console 1 at 26,474 sizes and sets nothing; siteFillStage on and
+      off; the call in `renderTeacherBody`), `tools/console-layout-smoke.mjs` (every view at 2560×1300, Student view).
+      **Open:** at 2560 px the activity detail's text lines and the Students bars run the full width (no cap); say if
+      a cap is wanted. The stage's full-screen mode was not walked (headless Chrome refuses full screen).
+
 - [x] **2026-11-13 — "Since your last visit": a catch-up group for a returning student; console "Behind the class". Fast.**
       Jonathan's choices from the mock-ups: today's activity stays first; "no saved work stands in as an absence";
       "the most recent activities should be on top"; never the word "absent" (the site has no attendance). In the
@@ -916,7 +938,7 @@ open); Module 1's "3+ steps" vs the Tuning Simulator's 4-5 step levels: leave bo
       folder**; 26 of its files are record-derived. He chose the same day to move those and all new songs behind
       the sign-in (plan: `Claude outputs/PLAN-private-song-audio-2026-11-13.md`; free database, a monthly limit).
 
-- [x] **2026-11-13 — The big-screen fill, Part 3: the teacher console and the live-game stage; the work order is done (`docs/WORK-ORDER-fill-big-screens.md`, now deleted). Fast.**
+- [x] **2026-11-13 — The big-screen fill, Part 3: the teacher console and the live-game stage; the work order is done (`docs/WORK-ORDER-fill-big-screens.md`, now deleted). Fast. (The console part was reversed 2026-11-16: only Live In-Class Games fills now; see above.)**
       `site-fill.js` no longer opts the console (`?teacher`) out: the whole console grows on a big screen like the
       student site, and the live-game stage with it. **Jonathan's choice (2026-11-13, asked with the before/after
       pictures): "Grow the whole console"**, knowing a table shows about a third as many rows on the classroom

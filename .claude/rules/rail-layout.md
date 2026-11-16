@@ -9,7 +9,8 @@ Test viewport: **1366×657** (a Chromebook with browser chrome). A bigger window
 shows this same layout enlarged (`site-fill.js`, 2026-11-13): the rail, the band
 and the 1000px column are still designed and measured at 1366×657 only, and the
 short-screen rules below (`max-height:800px`) apply on a big screen too, because
-site-fill.js multiplies their thresholds by the fill.
+site-fill.js multiplies their thresholds by the fill. The teacher console
+(`?teacher`) is not enlarged since 2026-11-16, except its Live In-Class Games view.
 
 - **`.set-eyebrow` is the only sticky row.** The progress pill, "Step n of m"
   and the All steps / One at a time toggle live in the band, inside

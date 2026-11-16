@@ -1370,6 +1370,9 @@ function teacherCloseArrangeBoard(){
   window.scrollTo({top:0});
 }
 function renderTeacherBody(){
+  /* The console stays at its normal size on a big screen; only Live In-Class Games, the projector's
+     view, fills it like the student site (site-fill.js, Jonathan 2026-11-16). Before the view paints. */
+  if(typeof siteFillStage==='function') siteFillStage(teacherView==='livequiz');
   teacherSyncAutoRefresh();   // the progress timer runs on Class activities only
   if(teacherView==='games') renderTeacherGames();
   else if(teacherView==='responses') renderTeacherResponses();

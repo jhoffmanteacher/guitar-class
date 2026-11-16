@@ -59,6 +59,10 @@
        cleared, the Preview element not rebuilt, and the right row lit; the counts follow an
        assign, an Un-assign and a song moved to the Songs page and back; the fold survives a
        reload (both ways); the tree is hidden at 390 px;
+     - at 2560x1300 (2026-11-16, the console at its normal size): every sidebar view has the fill factor 1 (no zoom
+       on <html>, innerWidth 2560) and no sideways scroll; Live In-Class Games fills like the student site (about
+       1.874) and the next view puts it back to 1; last, the Student view address (no ?teacher) fills 2560x1300 and is
+       1 at 1366x657;
      - measures sideways scroll at 390 px.
    Needs Node 22+ (global WebSocket) and Chrome or Chromium; serves the repo
    itself. Takes about 40 seconds. */
@@ -1110,6 +1114,26 @@ async function main() {
     await js(`setTeacherView('activities')`); await sleep(300);
     await js(`document.querySelector('[data-ta-board-open]').click()`); await sleep(500); await shot('11-arrange-board-1920');
     await js(`document.querySelector('[data-ta-board-back]').click()`); await sleep(300);
+    /* ── 2560×1300: the console at its normal size (Jonathan, 2026-11-16: "Console at normal size, everything else as
+       now") ── site-fill.js gives the console the factor 1 at every window size: every sidebar view at 2560×1300 reads
+       window pixels (innerWidth 2560, no zoom on <html>) with no sideways scroll; Live In-Class Games, the projector's
+       view, fills like the student site (about 1.874, innerWidth 1366 page pixels), and the next view puts it all back. */
+    {
+      await size(2560, 1300); await sleep(300);
+      const FILL = 2560 / 1366, bigBad = [];
+      const fillNow = () => js(`({ s: siteFill(), zoom: document.documentElement.style.zoom || '', sf: document.documentElement.style.getPropertyValue('--site-fill'), iw: Math.round(innerWidth), sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth })`);
+      for (const v of [...views, 'activities']) {
+        await js(`setTeacherView('${v}')`); await sleep(v === 'activities' ? 400 : 200);
+        const r = await fillNow();
+        const ok = v === 'livequiz' ? Math.abs(r.s - FILL) < 0.001 && Math.abs(+r.zoom - FILL) < 0.001 && r.iw === 1366 : r.s === 1 && r.zoom === '' && r.sf === '' && r.iw === 2560;
+        if (!ok) bigBad.push(v + ' ' + JSON.stringify(r));
+        if (r.sideways > 0) fail('2560', v + ' scrolls sideways by ' + r.sideways + 'px at 2560x1300');
+        if (v === 'livequiz') await shot('11b-live-games-2560');
+      }
+      if (bigBad.length) fail('2560', 'the console must be at factor 1 on every view but Live In-Class Games (which fills, about 1.874): ' + bigBad.join('; '));
+      await shot('11c-console-2560');
+      stats.big = views.length + 1;
+    }
     await size(1366, 768); await sleep(200);
     const at1366 = await js(`({ list: document.querySelector('[data-ta-list]').getBoundingClientRect().width, side: document.getElementById('t-side').getBoundingClientRect().width, detail: document.querySelector('[data-ta-detail]').getBoundingClientRect().width })`);
     await size(390, 844); await sleep(300);
@@ -1150,6 +1174,22 @@ async function main() {
     stats.widths = { at1366, at1920: wide };
     await xss('the end of the walk');
     const late = errsSince(0); if (late.length) fail('page', late.length + ' page error(s), first: ' + late[0]);
+    /* Student view: the address the console's button opens (teacherOpenStudentView, no ?teacher) is the student site,
+       which still fills a big screen: about 1.874 at 2560x1300 and 1 at 1366x657. Last, because it leaves the console. */
+    {
+      const sv = await js(`(() => { const o = window.open; let u = null; window.open = x => { u = String(x); return null; }; try { teacherOpenStudentView(); } finally { window.open = o; } return u; })()`);
+      if (!sv || /[?&]teacher/.test(sv)) fail('student-view', 'the Student view address is ' + JSON.stringify(sv));
+      else {
+        await size(2560, 1300);
+        await page.send('Page.navigate', { url: sv });
+        for (let i = 0; i < 60; i++) { await sleep(150); if (await js(`typeof siteFill === 'function' && document.readyState !== 'loading'`).catch(() => false)) break; }
+        const big = await js(`({ s: siteFill(), zoom: document.documentElement.style.zoom || '', iw: Math.round(innerWidth) })`);
+        await size(1366, 657); await sleep(300);
+        const small = await js(`({ s: siteFill(), zoom: document.documentElement.style.zoom || '', iw: Math.round(innerWidth) })`);
+        if (!(Math.abs(big.s - 2560 / 1366) < 0.001 && big.iw === 1366 && small.s === 1 && small.zoom === '' && small.iw === 1366)) fail('student-view', 'the student site from Student view must fill 2560x1300 (about 1.874) and be 1 at 1366x657: ' + JSON.stringify({ big, small }));
+        else stats.studentView = big.s;
+      }
+    }
   } finally {
     try { if (page) await page.close(); } catch { /* gone */ }
     proc.kill('SIGKILL'); srv.close();
@@ -1160,6 +1200,7 @@ async function main() {
   if (stats.goalbox) console.log(`  Practice minutes goal box: blank = 60, 30 saved as one cell and read back after a reload, cleared with a blank box, 0 = a break week, 3 bad entries wrote nothing, a config break week switched off`);
   if (stats.tree) console.log(`  units tree: ${stats.tree.rows} rows adding up to the board's ${stats.tree.cards} cards, ${stats.tree.clicks} row clicks (Songs, list with a search, Arrange board), ${stats.tree.repaints} repaints after a write, ${stats.tree.reloads} reloads with the fold kept`);
   if (stats.widths) console.log(`  column widths at 1366: sidebar ${Math.round(stats.widths.at1366.side)}, list ${Math.round(stats.widths.at1366.list)}, detail ${Math.round(stats.widths.at1366.detail)}; at 1920: ${Math.round(stats.widths.at1920.side)}, ${Math.round(stats.widths.at1920.list)}, ${Math.round(stats.widths.at1920.detail)}`);
+  if (stats.big) console.log(`  2560x1300: ${stats.big} view switches, the console at factor 1 with no sideways scroll, Live In-Class Games filling (1.874) and the next view back at 1; Student view's student site ${stats.studentView ? 'fills (' + stats.studentView + ') and is 1 at 1366x657' : 'NOT checked'}`);
   if (stats.shots.length) console.log('  screenshots:\n    ' + stats.shots.join('\n    '));
   if (fails.length) { console.log(`\x1b[31m✗ ${fails.length} problem(s):\x1b[0m\n  ` + fails.join('\n  ')); process.exit(1); }
   console.log('\x1b[32m✓ console layout smoke passed\x1b[0m');

@@ -39,6 +39,20 @@
    innerWidth is the browser zoom, snapped to one of Chrome's zoom steps), so
    zooming in still makes the page bigger.
 
+   The teacher console is NOT enlarged (Jonathan, 2026-11-16: "Console at
+   normal size, everything else as now: the console stops enlarging and uses
+   the extra room for more content"). The console is the page whose address
+   has ?teacher (IS_TEACHER_MODE in app/boot.js; the teacher signs in on that
+   address, and nothing turns a student page into the console later), so it
+   is known here, before the first paint: the factor is 1 there at every
+   window size, and the console's own layout takes the room. One view of it
+   keeps the fill: Live In-Class Games, whose stage is what the room reads on
+   the projector. teacher-core.js renderTeacherBody calls siteFillStage(true)
+   while that view is up and siteFillStage(false) for every other view; the
+   factor changes on the spot, everything above goes on or off together, and
+   a resize event tells the page's script its size changed. The console's
+   "Student view" is the student site in a new tab: it fills as today.
+
    A plain (blocking) script right after the stylesheets in the <head> of
    index.html and the six Song Journey pages: the factor is in place before
    the first paint, so nothing jumps from small to large. If it fails to load,
@@ -46,7 +60,9 @@
 (function(){
   'use strict';
   var BASE_W = 1366, BASE_H = 657, MAX = 3, PHONE = 760;
-  function siteFillScale(w, h){
+  /* consoleView: true on the teacher console (outside its Live In-Class Games view): always 1. */
+  function siteFillScale(w, h, consoleView){
+    if(consoleView === true) return 1;
     if(!(w > PHONE) || !(h > 0)) return 1;
     var s = Math.min(w / BASE_W, h / BASE_H);
     return s > MAX ? MAX : (s > 1 ? s : 1);
@@ -55,6 +71,12 @@
 
   var cur = 1;
   window.siteFill = function(){ return cur; };
+  /* The teacher console: the same test as IS_TEACHER_MODE (app/boot.js). */
+  var CONSOLE = (function(){
+    var q = String((window.location && window.location.search) || '');
+    try { return new URLSearchParams(q).has('teacher'); } catch(e) { return /[?&]teacher(=|&|$)/.test(q); }
+  })();
+  var stage = false;
   var root = document.documentElement;
   if(!root || !root.style || typeof root.style.setProperty !== 'function') return;
 
@@ -121,7 +143,7 @@
   }
   function apply(){
     var z = browserZoom();
-    var s = Math.round(siteFillScale(winW() * z, winH() * z) * 10000) / 10000;
+    var s = Math.round(siteFillScale(winW() * z, winH() * z, CONSOLE && !stage) * 10000) / 10000;
     /* A Chromebook at 125% zoom works out at 1.0002 (the page's size is
        rounded to whole pixels): within 1% of 1 is 1, so it sets nothing. */
     if(s < 1.01) s = 1;
@@ -187,6 +209,19 @@
 
   try { apply(); } catch(e) { cur = 1; try { paint(); } catch(e2) { /* leave the page at 1 */ } }
   window.addEventListener('resize', apply);
+  /* The console's Live In-Class Games view on (true) or off (false); does nothing off the console.
+     A change of factor here comes with no window resize, so one is sent: whatever the page's script
+     sized from innerWidth / innerHeight (now in other page pixels) works it out again. */
+  window.siteFillStage = function(on){
+    on = on === true;
+    if(!CONSOLE || on === stage) return;
+    stage = on;
+    var before = cur;
+    try { apply(); } catch(e) { cur = 1; try { paint(); } catch(e2) { /* leave the page at 1 */ } }
+    if(cur !== before && typeof window.dispatchEvent === 'function' && typeof Event === 'function') {
+      try { window.dispatchEvent(new Event('resize')); } catch(e) { /* nothing listens */ }
+    }
+  };
   /* A move to a screen with another scaling can change the pixel ratio with no resize. */
   (function watchDpr(){
     if(!window.matchMedia) return;

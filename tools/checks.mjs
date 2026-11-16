@@ -6642,8 +6642,11 @@ function checkReviewLabels() {
    page pixels there (getBoundingClientRect, clientX, innerWidth, elementFromPoint) and window pixels again at 1, that a
    print puts everything back to 1, and that a page with odd styles or no matchMedia does not throw. Then the wiring:
    index.html loads it as a plain script in <head> after styles.css, and no viewport unit in styles.css is left bare (each
-   is divided by var(--site-fill,1), or it would be zoomed twice). Measured in a real browser: tools/smoke.mjs fillWalk. */
-const FILL_ASSERTS = 36;
+   is divided by var(--site-fill,1), or it would be zoomed twice). The teacher console (?teacher) is NOT enlarged
+   (Jonathan, 2026-11-16: "Console at normal size, everything else as now"): 1 at every size, nothing set; its Live
+   In-Class Games view fills through siteFillStage(true) (renderTeacherBody) and siteFillStage(false) takes it all back.
+   Measured in a real browser: tools/smoke.mjs fillWalk, tools/console-layout-smoke.mjs (the console at 2560x1300). */
+const FILL_ASSERTS = 44;
 function checkSiteFill() {
   head('1df. The page fills a big screen (site-fill.js)');
   let bad = 0, asserts = 0;
@@ -6666,8 +6669,11 @@ function checkSiteFill() {
     Object.defineProperty(Element.prototype, 'clientWidth', { configurable: true, get() { return 2560; } });
     class MouseEvent {} Object.defineProperty(MouseEvent.prototype, 'clientX', { configurable: true, get() { return 937; } });
     class Document {} Document.prototype.elementFromPoint = function (x, y) { return [x, y]; };
-    const win = { outerWidth: w, outerHeight: h + 100, location: { search: opts.search || '' }, devicePixelRatio: 1, DOMRect, Element, MouseEvent, Document,
-      addEventListener: (t, f) => { (listeners[t] = listeners[t] || []).push(f); } };
+    const sent = [];
+    class Event { constructor(t) { this.type = t; } }
+    const win = { outerWidth: w, outerHeight: h + 100, location: { search: opts.search || '' }, devicePixelRatio: 1, DOMRect, Element, MouseEvent, Document, Event,
+      addEventListener: (t, f) => { (listeners[t] = listeners[t] || []).push(f); },
+      dispatchEvent: e => { sent.push(e.type); (listeners[e.type] || []).forEach(f => f(e)); return true; } };
     Object.defineProperty(win, 'innerWidth', { configurable: true, enumerable: true, get() { return win.__w; } });
     Object.defineProperty(win, 'innerHeight', { configurable: true, enumerable: true, get() { return win.__h; } });
     win.__w = w; win.__h = h;
@@ -6676,7 +6682,7 @@ function checkSiteFill() {
     win.window = win; win.document = { documentElement: rootEl, styleSheets: [{ get cssRules() { return rules; } }, { get cssRules() { throw new Error('SecurityError'); } }] };
     const ctx = vm.createContext(win);
     vm.runInContext(src, ctx, { filename: 'site-fill.js' });
-    return { ctx, win, props, rules, listeners, fire: t => (listeners[t] || []).forEach(f => f()) };
+    return { ctx, win, props, rules, listeners, sent, fire: t => (listeners[t] || []).forEach(f => f()) };
   };
   try {
     const f = boot(1366, 657).ctx.siteFillScale;
@@ -6732,10 +6738,31 @@ function checkSiteFill() {
       const cb = boot(w, h); cb.win.outerWidth = ow; cb.win.outerHeight = 768; cb.win.__w = w + 1; cb.fire('resize'); cb.win.__w = w; cb.fire('resize');
       want(cb.props.size === 0, `a ${w}x${h} page in a ${ow}-wide window (a Chromebook at browser zoom) must set nothing, but it set ${JSON.stringify([...cb.props])}`);
     }
-    // The console keeps its size in this part; odd pages do not throw.
-    // The teacher console fills a big screen too (Part 3, 2026-11-13): no opt-out for ?teacher.
-    const tc = boot(2560, 1300, { search: '?teacher=true' });
-    want(Math.abs(+tc.props.get('zoom') - 2560 / 1366) < 0.001, `the teacher console (?teacher) must fill a big screen like the student site (zoom about 1.874 at 2560x1300), got ${tc.props.get('zoom')}`);
+    /* The teacher console stays at its normal size (Jonathan, 2026-11-16: "Console at normal size, everything else as
+       now"): the factor is 1 at every size, and nothing is set on the page; only its Live In-Class Games view (the
+       projector's stage) fills, through siteFillStage, and leaving that view puts everything back. */
+    let cmax = 0;
+    for (let w = 0; w <= 8000; w += 37) for (let h = 0; h <= 5000; h += 41) cmax = Math.max(cmax, f(w, h, true));
+    want(cmax === 1 && f(2560, 1300, true) === 1 && f(2560, 1300, false) === f(2560, 1300), `on the teacher console the factor must be 1 at every one of 26,474 window sizes (largest ${cmax}; 2560x1300 gave ${f(2560, 1300, true)}), and the student page's factor must not change`);
+    for (const search of ['?teacher=true', '?teacher', '?x=1&teacher=true']) {
+      const tc = boot(2560, 1300, { search });
+      want(tc.props.size === 0 && tc.rules[0].media.mediaText === '(min-width: 761px) and (max-height: 800px)' && vm.runInContext('innerWidth', tc.ctx) === 2560 && vm.runInContext('new Element().getBoundingClientRect().left', tc.ctx) === 200,
+        `the teacher console (${search}) at 2560x1300 must set nothing on the page (no zoom, no --site-fill, media rules as written, window pixels), but it set ${JSON.stringify([...tc.props])} / ${tc.rules[0].media.mediaText}`);
+    }
+    const st = boot(2560, 1300, { search: '?teacher=true' });
+    want(vm.runInContext('typeof siteFillStage', st.ctx) === 'function', 'site-fill.js must define window.siteFillStage(on) for the console\'s Live In-Class Games view');
+    vm.runInContext('siteFillStage(true)', st.ctx);
+    want(Math.abs(+st.props.get('zoom') - s) < 0.001 && Math.abs(+st.props.get('--site-fill') - s) < 0.001 && st.rules[0].media.mediaText === '(min-width: 1426.19px) and (max-height: 1499.28px)' && Math.abs(vm.runInContext('innerWidth', st.ctx) - 1366) < 0.05 && st.sent.join() === 'resize',
+      `the console's Live In-Class Games view (siteFillStage(true)) must fill 2560x1300 like the student site (zoom ${st.props.get('zoom')}, media "${st.rules[0].media.mediaText}", innerWidth ${vm.runInContext('innerWidth', st.ctx)}) and send one resize (sent: ${st.sent.join() || 'none'})`);
+    vm.runInContext('siteFillStage(false)', st.ctx);
+    want(st.props.size === 0 && st.rules[0].media.mediaText === '(min-width: 761px) and (max-height: 800px)' && vm.runInContext('innerWidth', st.ctx) === 2560 && vm.runInContext('new MouseEvent().clientX', st.ctx) === 937 && st.sent.join() === 'resize,resize',
+      `leaving Live In-Class Games (siteFillStage(false)) must put the zoom, --site-fill, the media rules and window pixels back together, and send a resize (set ${JSON.stringify([...st.props])}, media "${st.rules[0].media.mediaText}", sent: ${st.sent.join()})`);
+    const sp = boot(2560, 1300); vm.runInContext('siteFillStage(false)', sp.ctx);
+    want(Math.abs(+sp.props.get('zoom') - s) < 0.001 && !sp.sent.length, `siteFillStage must do nothing on a student page (zoom ${sp.props.get('zoom')}, sent: ${sp.sent.join() || 'none'})`);
+    // Wiring: the console's one view painter switches the stage on for Live In-Class Games only.
+    const rtb = (readFileSync(join(ROOT, 'teacher-core.js'), 'utf8').match(/\nfunction renderTeacherBody\(\)\{([\s\S]*?)\n\}/) || [])[1] || '';
+    want(/^\s*\/\*[\s\S]*?\*\/\s*if\(typeof siteFillStage==='function'\) siteFillStage\(teacherView==='livequiz'\);/.test(rtb) || /^\s*if\(typeof siteFillStage==='function'\) siteFillStage\(teacherView==='livequiz'\);/.test(rtb),
+      'teacher-core.js renderTeacherBody must start by calling siteFillStage(teacherView===\'livequiz\') (the console fills only on Live In-Class Games)');
     let threw = null;
     try { boot(2560, 1300, { oddStyle: true }); boot(2560, 1300, { noMatchMedia: true }); } catch (e) { threw = e.message; }
     want(threw === null, `site-fill.js must not throw on a page with odd root styles or no matchMedia: ${threw}`);
@@ -6755,7 +6782,7 @@ function checkSiteFill() {
   });
   want(!bare.length, `every viewport unit in styles.css, tabs/journey-theme.css and tabs/fab-tools.css must be divided by var(--site-fill,1) (the root zoom enlarges it already): ${bare.slice(0, 6).join(', ')}${bare.length > 6 ? ' …' : ''}`);
   if (asserts !== FILL_ASSERTS) flag(`ran ${asserts} assertions, pinned ${FILL_ASSERTS} — a branch stopped running (or update the pin with the change)`);
-  if (!bad) ok(`1df: the factor is 1 at 1366x657, 1366x768, 1280x720 and 390x844 (nothing set), about 1.874 at 2560x1300 (root zoomed, the short-screen rule rewritten, page pixels for the script), 1 to 3 over 26,474 sizes; print, resize, browser zoom, the console (it fills too) and odd pages; wired in the <head> of index.html and the ${journeys.length} Song Journey pages; no bare viewport unit in the 3 stylesheets (${asserts} assertions)`);
+  if (!bad) ok(`1df: the factor is 1 at 1366x657, 1366x768, 1280x720 and 390x844 (nothing set), about 1.874 at 2560x1300 (root zoomed, the short-screen rule rewritten, page pixels for the script), 1 to 3 over 26,474 sizes; print, resize, browser zoom and odd pages; the console at 1 at every size, its Live In-Class Games view filling and going back; wired in the <head> of index.html and the ${journeys.length} Song Journey pages; no bare viewport unit in the 3 stylesheets (${asserts} assertions)`);
 }
 
 /* 1ej. NO CLICK MID-SEEK (Friday check 2026-11-14). While an <audio> is seeking it is not paused, and currentTime

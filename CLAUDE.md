@@ -140,7 +140,10 @@ Static HTML/JS/CSS, no build; Firebase + Firestore; GitHub deploy. Module 13 is 
 - **No student tour** — don't resurrect. **No in-panel tab bar**: the rail is the only switcher.
 - **Target screen: Chromebook 1366×657.** Every layout is designed and measured there, and it is the priority. A
   bigger screen shows that same layout enlarged to fill it (`site-fill.js`, 2026-11-13: student site, Song Journey
-  pages, console and live-game stage; a new `vh`/`vw` is written `/ var(--site-fill,1)`, 1df). Phone width out of
+  pages and the console's Live In-Class Games view, the projector's stage; a new `vh`/`vw` is written
+  `/ var(--site-fill,1)`, 1df). **The teacher console is NOT enlarged** (Jonathan, 2026-11-16): factor 1 at every
+  size (`?teacher`), its layout uses the extra room for more rows; only Live In-Class Games fills
+  (`siteFillStage()`, called by `renderTeacherBody`). Phone width out of
   scope (no phone work or breakpoints unless asked; keep existing phone CSS and 1o).
 - Shell: Windows *and* macOS.
 
