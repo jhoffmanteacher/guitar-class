@@ -9,6 +9,7 @@ see `WORKFLOW.md` and the git commit log.
 ## 2026-11-16 — The Metronome click during a song, and small wording fixes
 
 - **The Metronome no longer skips or doubles a click when you change speed or switch to Guitar mid-song.** Before, pressing a speed button or the Guitar button right on a count could lose that one click or play it twice.
+- **On a Song Journey page, the Metronome no longer clicks one beat twice right after you jump to another place in the song.**
 - **Change Up names the real tempo step.** At 135 or 45 BPM the done screen said "10 BPM" and "+10 BPM", but the tempo can only move 5 there. It now says 5.
 - **Strum Hero and Strum Radar name the real tempo step too.** Near the fastest or slowest tempo, the done screen said "10 BPM" when only 5 was left; it now says 5. At the very top or bottom, the step button that could not change the tempo is gone, and the advice says so.
 - **The games' footer is exact:** "no sound is recorded or uploaded." Your scores and practice minutes are saved, as always.

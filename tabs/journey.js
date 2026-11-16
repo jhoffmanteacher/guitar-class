@@ -430,7 +430,7 @@ function ensurePlayer(){
     clickRaf = 0;
     if(!metroOn || a.paused) return;
     // Mid-seek the file is not playing but is not paused either, and currentTime already reads the new place: wait
-    // for 'seeked', or a click is queued in the silence and the same beat again after it (Friday check 2026-11-14).
+    // until the seek has landed, or a click is queued in the silence and the same beat again after it (Friday check 2026-11-14).
     if(a.seeking){ clickRaf = requestAnimationFrame(clickTick); return; }
     var ratio = parseFloat(d.bpm) / parseFloat(d.bpmSlow);
     var now = a.currentTime;
@@ -472,9 +472,11 @@ function ensurePlayer(){
   if(synthClick){
     a.addEventListener('play', startClicks);
     // A seek (the loop's own one too) or a pause takes back a click whose count is still to come (QUEUED CLICKS).
-    a.addEventListener('seeking', clickTakeBack);
+    /* The beat count starts over when a seek BEGINS, not on 'seeked': the element is no longer seeking a moment before
+       'seeked' is dispatched, so a frame in between queued the new place's first click and the reset on 'seeked' let the
+       next frame queue that same count again, about 17 ms later (measured in headless Chrome, 2026-11-16). */
+    a.addEventListener('seeking', function(){ clickTakeBack(); lastBeat = -1; });
     a.addEventListener('pause', clickTakeBack);
-    a.addEventListener('seeked', function(){ lastBeat = -1; });
   }
 
   if(box.dataset.audioSlow){
