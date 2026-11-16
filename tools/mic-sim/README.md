@@ -416,6 +416,12 @@ script.
   starts late, two takes in one page); every case must land within one
   audio burst. Not in
   checks.mjs.
+- Which Listening Coach takes are saved (2026-11-16): one id per student,
+  `micTakes/<uid>-coach`, so a save replaces the last take. A take that ran
+  to its end is saved; one ended early ("I'm done", or in the count-in) only
+  when a note was heard. `coach-take-save.mjs [--root=<site>]` runs the real
+  Coach in the listen-site vm through 9 ways out and says, for each, whether
+  the last full take is kept and the capture let go. Not in checks.mjs.
 - Power Chord Switch takes (`mode: 'pw'`, 2026-11-04): `micEvalTakePw` in
   teacher.js. No pitch readings are saved with them, so per change it asks
   only "is there a strum in the recording where the SITE listened" — its own

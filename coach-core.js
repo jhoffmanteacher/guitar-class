@@ -1457,7 +1457,7 @@ function coachLoop(){
     // ...and so does a second look still reading (at most COACH_LOOK_TAIL).
     const pendingEvent = coach.pendings.some(p => p.t <= lastBeatT + coachMatchWinMs()) || coach.looks.length > 0;
     if ((allHit || now > coachListenDeadline()) && !pendingEvent){
-      coachFinish();
+      coachFinish(true);
       return;
     }
   }
@@ -1716,7 +1716,7 @@ function coachMatchEvent(ev){
 
 /* ══════════ Finish & score ══════════ */
 
-function coachFinish(){
+function coachFinish(ended){
   if (!coach || (coach.phase !== 'listening' && coach.phase !== 'countin')) return;
   coach.timeouts.forEach(clearTimeout);
   coach.timeouts = [];
@@ -1728,7 +1728,9 @@ function coachFinish(){
   coach.slots.forEach((s, i) => { if (s.state === 'pending'){ s.state = 'miss'; coachChipRefresh(i); } });
   coach.phase = 'report';
   coachRenderReport();
-  if (rec) micRecSave(rec, coachRecMeta());
+  /* Saved when the take ran to its end (only coachLoop passes exactly true) or "I'm done" came after a note was heard: one take id per
+     student (<uid>-coach), so an empty early finish would replace the last real take. Not saved: micRecStop, above, already let it go. */
+  if (rec && (ended === true || coach.events.length)) micRecSave(rec, coachRecMeta());
 }
 
 /* What a saved Coach recording needs beside the audio (see micRecSave):
@@ -1778,7 +1780,7 @@ function coachMicOff(){
    most MICREC_MAX_SEC (the strum-pattern check: its whole round, up to its
    own SC_REC_MAX_SEC, through micRecStart's cap), with a visible "Recording this take for your
    teacher" label the whole time, and saves it to micTakes/<uid>-<mode>
-   (one per student per game, the next take overwrites it). Teacher preview
+   (one per student per game, the next saved take overwrites it). Teacher preview
    and the dev bypass never upload. Every way out of a take ends up in
    coachMicOff(), which tears the capture down. */
 const MICREC_MAX_SEC = 30;
