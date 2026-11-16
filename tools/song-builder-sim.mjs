@@ -333,7 +333,7 @@ async function runCases(consoleSrc){
   const writesBefore = writes();
   const pane21 = run('(() => { const d = sbDraft(), keep = [d.beat.pinsNeeded, sbBt.need]; d.beat.pinsNeeded = 21; sbBt.need = { pins: 21, worstMs: 400 }; const out = [sbBeatPaneHtml(d), sbListHtml()]; d.beat.pinsNeeded = keep[0]; sbBt.need = keep[1]; return out; })()');
   check('beat: a record that needs more pins than SB_PINS_MAX: the step says to send the mp3 to Claude and the list says "Beat: send to Claude"; a steady record shows neither',
-    /cannot hold this record's beat/.test(pane21[0]) && /about 21 pins/.test(pane21[0]) && /Send the mp3 to Claude/.test(pane21[0]) && /Beat: send to Claude/.test(pane21[1])
+    /cannot hold this record's beat/.test(pane21[0]) && /does not fit the builder: the clicks will drift/.test(pane21[0]) && !/does not fit the builder/.test(paneOk) && /about 21 pins/.test(pane21[0]) && /Send the mp3 to Claude/.test(pane21[0]) && /Beat: send to Claude/.test(pane21[1])
     && !/cannot hold this record's beat/.test(paneOk) && !/Beat: send to Claude/.test(listOk) && writes() === writesBefore,
     JSON.stringify({ step21: /cannot hold this record's beat/.test(pane21[0]), list21: /Beat: send to Claude/.test(pane21[1]), stepSteady: /cannot hold this record's beat/.test(paneOk), listSteady: /Beat: send to Claude/.test(listOk) }));
 

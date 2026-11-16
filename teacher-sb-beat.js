@@ -15,7 +15,9 @@
    tapSpreadMs, driftOff, pinsNeeded } (driftOff: windows still over 30 ms; the list shows "Check the beat" while it
    is above 0. trackBpm and trackSub: the beat track's tempo and how it divides the beat, so the same track is found
    when the draft is opened again. pinsNeeded: how many pins the record's own bars would take, sbPinsNeeded; over
-   SB_PINS_MAX the step says the builder cannot hold the record's beat and to send the mp3 to Claude, and the list
+   SB_PINS_MAX the step says the song does not fit the builder (it cannot hold the record's beat; Jonathan, 2026-11-16:
+   the builder is for songs that do not drift much, "keep the warning that a song doesn't fit"), beside "Listen with
+   clicks" too since he listened first and missed the box, and to send the mp3 to Claude, and the list
    shows "Beat: send to Claude"; the later steps stay open, as with the 10-cent rule).
    THE TAPS also say which pulse is the beat (sbTapPulse): on a strummed record the "and" is as loud as the beat,
    and only the person tapping knows which is which. A typed BPM has no taps: bar 1 is then the first loud pulse.
@@ -62,11 +64,12 @@ function sbBeatPaneHtml(d){
   html += `<div class="sb-wave sb-wave-main"><canvas data-sb-wave="main" height="118" aria-label="The start of the song, with the bar lines the card will use"></canvas></div>`;
   html += `<div class="sb-row sb-wave-foot"><span class="sb-hint" style="margin:0">${beat ? 'Purple lines are the bars the card will use; ▲ are your taps. Drag the handle on bar 1 to the first loud chord.' : 'The bar lines appear once you tap or type a BPM.'}</span>`
     + `<button type="button" class="sb-btn small" data-sb-act="listen"${!beat ? ' disabled' : ''}>▶ Listen with clicks</button><button type="button" class="sb-btn small" data-sb-act="listen-stop">■ Stop</button>`
+    + (beat && sbBeatTooMuch(bt.need ? bt.need.pins : beat.pinsNeeded) ? `<span class="sb-bad sb-nofit" role="note">This song does not fit the builder: the clicks will drift. See the red box below.</span>` : '')
     + (beat ? `<button type="button" class="sb-btn small" data-sb-act="clear-beat"${off}>Clear this step</button>` : '') + `</div>`;
   if(beat){
     const dr = bt.drift || [], last = sbBarsIn(beat, d.audio.durationSec);
     const nPins = sbPins(beat).length;
-    if(sbBeatTooMuch(bt.need ? bt.need.pins : beat.pinsNeeded)) html += `<div class="sb-flag red"><span class="fi">!</span><div class="sb-flag-body"><b>The builder cannot hold this record's beat.</b> Its bars would need about ${bt.need ? bt.need.pins : beat.pinsNeeded} pins to stay on the beat (a steady record needs 2 or 3): the tempo moves, or the beat is hard to follow. Send the mp3 to Claude to build this song. You can still try the other steps.</div></div>`;
+    if(sbBeatTooMuch(bt.need ? bt.need.pins : beat.pinsNeeded)) html += `<div class="sb-flag red"><span class="fi">!</span><div class="sb-flag-body"><b>This song does not fit the builder: it cannot hold this record's beat.</b> The builder is for records with a steady beat. This one would need about ${bt.need ? bt.need.pins : beat.pinsNeeded} pins to stay on the beat (a steady record needs 2 or 3): the tempo moves, or the beat is hard to follow, so the clicks drift off the music. Send the mp3 to Claude to build this song. You can still try the other steps.</div></div>`;
     html += `<div class="sb-h sb-drift-title">Drift check: does the grid still sit on the music later in the song?</div>
       <p class="sb-hint sb-drift-sum">${escHtml(`${sbPinBpm(beat).toFixed(2)} BPM · ${last} bars fit in the file · ${nPins} pin${nPins === 1 ? '' : 's'} (bar 1${nPins > 1 ? ' and ' + sbPins(beat).slice(1).map(p => p.bar).join(', ') : ''})`)}${nPins >= 3 ? ' · the bars follow the pins (a beat map)' : ''}</p>`;
     html += `<div class="sb-drift">` + dr.map(w => {

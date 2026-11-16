@@ -1504,6 +1504,7 @@ body.rail-collapsed .rail-tools .tool-popup{
 .sb-root .sb-check.on::after{content:'';width:8px;height:4px;border-left:2px solid var(--bg);border-bottom:2px solid var(--bg);transform:rotate(-45deg) translate(1px,-1px)}
 /* Song builder: pdfs (teacher-sb-pdf.js, 2026-11-16). The bar at steps 1 and 4; at step 4 the pdf's pane takes the
    song list's column, on the right, and stays in view while the chart scrolls. */
+.sb-root .sb-nofit{font-size:0.8125rem}
 .sb-root .sb-pdfbar{background:var(--bg2)}
 .sb-root .sb-pdfbar .sb-row{margin-bottom:0}
 .sb-root .sb-pdfbar-h{margin:0}

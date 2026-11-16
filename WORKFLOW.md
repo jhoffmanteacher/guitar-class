@@ -382,6 +382,15 @@ real song through Import (part a2) is still open.
     the beat up to 80-105 ms late, nothing from there to 185-210 (the fallback then found the true beat, 11 of 11),
     the "and" beyond. Taking 100 ms off every tap would be right in 31 of 33 cases (today 26). Not built.
   - The page cannot tell a grid on the "and" from one on the beat (the same pulses line up): only his ears can.
+- **DECIDED (Jonathan, 2026-11-16, after the measurements): the builder is for songs that do not drift much.** "the
+  song builder is cool for songs that don't drift too much. lets set it up for that with the info we have now and
+  keep the warning that a song doesn't fit." So a record over 8 pins is told plainly "This song does not fit the
+  builder" (the red box, and since today a red line beside "Listen with clicks": he had listened first and missed
+  the box) and goes to Claude (skill `new-playalong`, then Import). "Follow the band's beat" was built and tested the
+  same day (an Opus agent; American Girl 0 of 397 beats over 100 ms, wrong on Madrecita Querida and Arsenal
+  Efectivo) and then LEFT OUT at his word ("Leave it out"): it is on the local Mac branch `feat/sb-follow-the-band`
+  (`a6dcc6b`), not on main; its ruler script is `Claude outputs/beat-ruler/follow.mjs`. Do not ship it unless he
+  asks. Part d (Preview, Publish) is still the next build, for steady songs. Also declined for now: pin-any-bar.
 - **The Beat step's tracker (2026-11-15, Fast).** Before: the phase of the BEAT in 12-second windows
   (`sbPhaseTrack`), which on a strummed record sat on the "and" and slipped between beat and "and". Why: on American
   Girl the onsets on the "and" are as strong as on the beat (beat stronger than its "and" on 169 of 396 beats), so
