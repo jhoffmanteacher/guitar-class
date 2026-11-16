@@ -1897,7 +1897,7 @@ function micRecStart(mode, maxSec){
     mute.gain.value = 0;
     const rec = { mode, ctx, src, proc, mute, srcRate, bufs: [], n: 0,
       cap: Math.ceil(capSec * srcRate), capSec, live: true,
-      perf0: performance.now(), ctx0: ctx.currentTime, firstPlay: null,
+      perf0: performance.now(), ctx0: ctx.currentTime, firstPlay: null, got: 0, startMin: null,
       frames: 0, frameSum: 0, frameMax: 0, lastFrameT: 0,
       track: (coachStream.getAudioTracks()[0] || {}).label || '',
       settings: micRecTrackSettings(coachStream) };
@@ -1905,6 +1905,10 @@ function micRecStart(mode, maxSec){
       if (micRec !== rec || !rec.live) return;
       if (rec.firstPlay == null) rec.firstPlay = e.playbackTime;
       const x = e.inputBuffer.getChannelData(0);
+      // the recording's first sample was on the page no later than now less everything captured so far (micRecStartPerf keeps the earliest)
+      rec.got += x.length;
+      const startBy = performance.now() - rec.got / rec.srcRate * 1000;
+      if (rec.startMin == null || startBy < rec.startMin) rec.startMin = startBy;
       const take = Math.min(x.length, rec.cap - rec.n);
       if (take > 0){ rec.bufs.push(x.slice(0, take)); rec.n += take; }
       if (rec.n >= rec.cap) micRecTeardown(rec);   // the cap: stop listening, keep what we have
@@ -1954,10 +1958,19 @@ function micRecAbort(){
   const el = document.getElementById('micrec-on');
   if (el) el.remove();
 }
-/* The recording's start on the performance.now() clock: the first buffer's
-   audio ended at its playbackTime, which maps onto performance.now()
-   through the (perf0, ctx0) pair taken at the start. Good to a few ms. */
+/* The recording's start on the performance.now() clock: when its first sample was on the page (the game's analyser reads the same graph),
+   so a take's saved times line up with its audio. Since 2026-11-16 (recClock 2): the earliest, over every buffer, of "its handler ran by
+   now, less the samples captured so far" (startMin, onaudioprocess). A handler only runs after its samples arrived, so the earliest is
+   within one audio burst (2-23 ms) of the truth, with no AudioContext time in it (tools/mic-sim/micrec-clock.mjs proves it on a fake clock).
+   micRecStartPerfV1, the estimate before, stays for a capture with no buffer timing; how far apart they are is saved (recClockShiftMs). */
 function micRecStartPerf(rec){
+  return rec.startMin != null ? rec.startMin : micRecStartPerfV1(rec);
+}
+/* Every take saved before 2026-11-16: the first buffer's playbackTime taken as the end of its input, mapped through (perf0, ctx0) read at
+   micRecStart. Chromium's playbackTime is when the OUTPUT buffer plays, one buffer (4096 samples: 85 ms at 48 kHz) after the input ended,
+   plus the first handler's delay; and a context whose device has not started yet reads currentTime 0, which puts the stamp early by that
+   wait. On the 46 take summaries (replayed through the real game code): 92 ms late on the median take, about 130 ms early on 2 of 43. */
+function micRecStartPerfV1(rec){
   const firstEnd = rec.firstPlay != null ? rec.firstPlay : rec.ctx0;
   return rec.perf0 + (firstEnd - rec.ctx0) * 1000 - 4096 / rec.srcRate * 1000;
 }
@@ -2048,6 +2061,13 @@ async function micRecSaveNow(rec, meta){
     lang: typeof getLang === 'function' ? getLang() : ''
   });
   if (rec.settings) doc.micSettings = rec.settings;   // left out when the browser reported none (micRecTrackSettings)
+  /* The start the times rest on (micRecStartPerf): recClock 2 and the old estimate less the new one (old t = t - shift); neither field on a
+     take timed by the old estimate. */
+  if (rec.startMin != null){
+    const shift = Math.round((micRecStartPerfV1(rec) - rec.startMin) * 10) / 10;
+    doc.recClock = 2;
+    if (isFinite(shift)) doc.recClockShiftMs = shift;
+  }
   const pcm = micRecPcm16(rec);
   if (isDevBypassUser()){
     if (micRecLocal()){ micRecLocalOffer(doc, pcm, rec); return; }   // local recording mode: files, never Firestore

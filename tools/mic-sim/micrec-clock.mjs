@@ -20,8 +20,8 @@
    Cases: two sample rates, five burst sizes, a slow first handler, a page stalled mid-take, and an audio device that starts after the
    recording does (a context whose clock still stands at 0 when micRecStart reads it). Exit 1 when any case is outside its band.
    Measured on the real takes the same day (46 summaries in tools/mic-sim/takes/, replayed through the real game code with the clock
-   fitted on the onsets): today's stamp is 92 ms late on the median take (41 of 43 between 48 and 107 ms; one buffer at 48 kHz is
-   85.3 ms), and about 130 ms EARLY on 2 of 43. */
+   fitted on the onsets; 43 of 46 could be fitted): the stamp before 2026-11-16 was 92 ms late on the median take (40 of 43 between 48
+   and 107 ms, one poor fit at 22; one buffer at 48 kHz is 85.3 ms), and about 130 ms EARLY on 2 of 43. */
 import vm from 'node:vm';
 import { join, resolve } from 'node:path';
 import { siteSource } from '../site-src.mjs';

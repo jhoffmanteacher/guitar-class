@@ -56,7 +56,9 @@ const b64 = a => Buffer.from(a.buffer, a.byteOffset, a.byteLength).toString('bas
 const unb64 = s => { const b = Buffer.from(s, 'base64'); return new Float32Array(b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength)); };
 
 /* ── Summaries (takes-in.mjs writes them) ── */
-const KEEP = ['game', 'mode', 'coachMode', 'bpm', 'beatMs', 'gridOffsetMs', 'micLatencyMs', 'frameMeanMs', 'frameMaxMs', 'durationSec', 'level', 'chords', 'goodMs', 'perfectMs', 'score'];
+/* recClock / recClockShiftMs: which start stamp the take's times rest on (replay-takes.mjs KEEP says more). */
+const KEEP = ['game', 'mode', 'coachMode', 'bpm', 'beatMs', 'gridOffsetMs', 'micLatencyMs', 'frameMeanMs', 'frameMaxMs', 'durationSec', 'level', 'chords', 'goodMs', 'perfectMs', 'score',
+  'recClock', 'recClockShiftMs'];
 export const LISTEN_GATES = [0.22, 0.55];
 export function summarizeListen(tk){
   const site = baseSite();
