@@ -107,6 +107,37 @@ plan; Fable (`model: 'fable'`) for mechanical work (a part split, re-checking an
   may print only `1ck` (an old duplicate): renumber yours if it collides. Only one headless-Chrome run at a time.
 - Building a song on Windows: not tried yet (see "Song builder" below, "Windows too"). If he asks for one, fix the
   tool on the way.
+- **Where the Windows session is (2026-11-16, late morning; started 9:00).** Nothing of jobs 1 to 5 has shipped yet.
+  - **This computer's setup.** The main folder is checked out with Windows line endings (Git's system setting
+    `core.autocrlf true`), which fails 4 checks on untouched main (1eh twice, 1de, 1dt). The session works in
+    worktrees made with `git -c core.autocrlf=false worktree add` (LF; `.claude/worktrees/win-*`, the lead's is
+    `win-lead`), which pass. The main folder itself is NOT fixed: `git config core.autocrlf false` there and a fresh
+    checkout of the files is Jonathan's to allow. The `site-reviewer-deep` agent type is not offered in this
+    session: a general agent is given that agent file as its brief. `gh` is not installed here.
+  - **Shipped on the way (`190586d`):** `tools/song-builder-sim.mjs` failed 3 runs of 3 on Windows (check 1en, so
+    no commit could pass the hook). Its `settle()` counted event-loop turns and never outlasted a `crypto.subtle`
+    hash; it now waits for the console's `sbBusy` to clear. 5 of 5 runs here, 57 cases. Not run on the Mac: one run
+    there should say 57. The same turn-count wait is in `tools/song-files-console-sim.mjs` and
+    `tools/built-songs-sim.mjs` (both pass on Windows today).
+  - **Job 1: running.** A Fable reviewer (high) on `coach-strumcheck.js` at `9bf2b07`, and an Opus agent on the
+    design plans; both have `docs/strum-check/DETAILS.md` and `CLICK-2.md` (on main since `17f5df2`).
+  - **Job 2: an agent is working** four of the five faults on branch `win/faults-2026-11-16` (failing case first);
+    `micRecStartPerf` waits for its own Opus agent.
+  - **Job 3: mapped, not started.** Agent's proposal, not yet checked by the lead: `coach-chords.js` 1393 to the end
+    (the chord ranks, Chord Blitz, Chord Detective; no grading code) into `coach-chordcards.js` (1,392 and 770
+    lines); `coach-runner.js` 1092 to the end (Note Runner, whole) into `coach-noterunner.js` (1,091 and 1,303). No
+    load-order hazard found. OPEN for Jonathan: `todo.md` says the splits were approved "only once golden is
+    cleared", this list asks only for `slow-load.mjs`.
+  - **Job 4: re-checked, nothing fixed yet.** Agent's count, not yet checked by the lead: 17 open items; 13 still
+    real, 3 already fixed (the flame colour, `weekReach`, the smoke / emulator line of 2026-11-01), 1 accepted
+    (liberal counting). Of the 13: 7 mechanical for Windows (the Change Up "10 BPM" at 135 / 45, `coach.foot`,
+    Module 9's "Todavía lo practico", the 1da fold pin, check 1t3, the smoke "4 tool buttons" line, check 1cd), 2 in
+    the Mac's console files (`teacher-livegames.js:237`, `teacher-students.js:553`), 1 that needs a browser
+    measurement (the doubled Journey Metronome beat), 3 for Jonathan (the Games heading, a tab closed on dead Wi-Fi,
+    the goal pill after a Journey page). The 2026-11-06 entry has nothing open.
+  - **Job 5: sorted.** Outside the Friday entries 3 items are open: private song audio step 2 (the Mac's), ca-43
+    with a real guitar on a Chromebook (Jonathan), and the 2026-11-02 smoke flake, which `7369cad` looks to have
+    fixed (two walks, `cardKeysWalk` and `foldWalk`, still lack the page-loaded wait).
 - Delete this block when every job above is ticked.
 
 **Class rules published 2026-11-15: Paste C, D and E are live.** Jonathan published `firestore.rules` as one paste
