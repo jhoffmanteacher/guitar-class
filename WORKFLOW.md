@@ -35,7 +35,22 @@ Start here. Update this block whenever an item opens or closes; each line says w
 work in WORKFLOW". Part b is live (entry "Song builder" below). Next: Jonathan builds one real song up to the Beat
 step and says whether the bar lines sit on the beat; then build Part c (Chart, the correction grid, sections, Level)
 from `Claude outputs/WORK-ORDER-song-builder.md` (on the Mac only). Work in its own worktree made from `origin/main`.
-Part c ships Fast, d is Reviewed, then stop for Jonathan before Part e. Agents: Opus or Fable by the need, as for the Windows block below. The Windows computer works
+Part c ships Fast, d is Reviewed, then stop for Jonathan before Part e.
+**FIRST, before Part c: the Beat step drifts on a real song (Jonathan, 2026-11-15, his draft "American Girl"; mp3
+`~/Downloads/American Girl-D-114bpm-440hz.mp3`, 3:33).** Not fixed. What is known: the drift check showed 100-230 ms
+mid-song and the end pin landed about 1.4 beats off (grid 114.37 BPM). The song is steady eighth/sixteenth strumming;
+`playalong-measure.py` finds the tick at sixteenths, 455.88 a minute = 113.97 BPM (a sharp coherence peak, 0.095 against
+0.04-0.05 either side), and the name "114bpm" suggests a backing track made to a click: probably a nearly steady record,
+so the drift is mostly the TRACKER's error. Measured: `sbPhaseTrack`'s 12-s window phase is ambiguous on this strumming
+at every level (quarter, eighth, sixteenth; window 12-30 s): steps of about 60 ms between windows, so the unwrap slips.
+A dynamic-programming tracker (Ellis/librosa) was tried on local branch `fix/sb-track` (`b591aea`, NOT for main): it
+found 406-408 beats and 114.3-114.7 BPM at every tightness, and failed sb-dsp-test "weak onsets under noise".
+Do next, in order: (1) a GROUND TRUTH for this file (ask Jonathan whether the backing track was made to a click at
+114; or hand-mark beats at 4 places by listening); (2) a generated steady-eighths/sixteenths strummed song in
+`tools/sb-dsp-test.mjs` that fails today; (3) likely fix: the tempo from the tick search (bpm0 x 1, 2, 4; x 1, 3, 6 in
+6/8, as playalong-measure.py's find_pulse) and a straight grid unless the record clearly drifts, with tracking only
+then. Also asked by Jonathan the same day, NOT to build yet: "the drift check should pin the changes automatically"
+("don't do auto-pinning yet"). Agents: Opus or Fable by the need, as for the Windows block below. The Windows computer works
 the list in the next block at the same time: stay out of those files; fetch and rebase before every push. If Jonathan
 sends an mp3 for a first real song: skill `new-playalong`, 192k. Delete this block when Part d ships.
 
