@@ -1344,6 +1344,27 @@ and 7 (both rules). 40 ms EARLY there, today's code left only slot 2 missed; AD 
 spread, 60 / 85 / 100 BPM; and with no spread bar 2's rests at +-40 ms, 85 / 100 BPM, and bar 1's second rest at +-5 ms) leaves this
 case out, and bar 1's second rest at +-40 ms (caught only with some timings).
 
+**What it costs: any sound on a rest is now an extra** (review R5-2). Before AD the grid often slid to excuse a sound on a rest; with
+AD it stays put, so every sound the check hears there is an extra: a stray sound, a foot tap (the pattern's rests are slots 1 and 4,
+and slot 4 is beat 3, so a foot tap heard on beat 3 is an extra), a neighbour's guitar, talking. **None of these sounds is in
+Jonathan's three real takes**: every row below is made up. A right player, 20 ms spread, 85 BPM, 60 rounds (480 bars), through the
+real grid code (the round-5 reviewer's scenario scripts `rev5/s/e1.mjs` / `e3.mjs` and round loop, re-run by the builder after the
+R5-1 fix; scratchpad `ad5-r52.mjs`). Bars all right:
+
+| what the mic also hears | before AD | AD as first built | AD with the R5-1 fix |
+|---|---|---|---|
+| nothing else (control) | 480 | 480 | 480 |
+| stray sounds, 0.5 a bar | 456 | 429 | 431 |
+| stray sounds, 1 a bar | 426 | 388 | 388 |
+| a foot tap on each beat, half heard | 321 | 245 | 245 |
+| a neighbour's guitar, 30% of strums heard | 381 | 330 | 329 |
+| a strum heard twice (10%), 85 BPM | 466 | 465 | 465 |
+| a strum heard twice (10%), 125 BPM | 416 | 392 | 393 |
+| a mid-round stumble (a beat lost at bar 4, 25 ms spread) | 397 | 373 | 368 |
+
+The talk room (the bench above) is the same story. If real takes show students with a foot tap or a noisy neighbour failing bars
+they played right, this is the place to look.
+
 **Unmeasured:** talking on real audio (every talk number above is the bench's synthetic room; no real take has talk in it, and the
 talk room is where AD costs most); takes from a Chromebook mic (all three takes are a MacBook Air); an extra UP-strum (the
 splices paste his down-strums, slot 0 and slot 2).

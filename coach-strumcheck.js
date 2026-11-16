@@ -145,9 +145,14 @@ const SC_ANCHOR_WIDE_TIGHT = 0.15;
    Measured (DETAILS section 29): Jonathan's three takes, kept clock and +-20 ms, right playing: strums heard 379 of 414 (378 before),
    false extras 3 of 138 (3), bars all right 36 of 72 (35), right chords the same. One of his own strums pasted into a rest (180
    splices): caught 115 (38 before), the mistake bar passed 32 (83). Not fixed: an extra on bar 1's first rest (one strum before it).
-   Costs, all on the bench (no real take has them): talking gives a right player more false extras (talk room: 47 of 128, 15 before;
-   bars right 17 of 64, 28 before); a quiet player in the class room 7 of 24 bars right (10 before); a steady player who starts 1.5
-   beats late 60 of 80 bars (65 before) at 85 BPM. */
+   Costs. With AD ANY sound the check hears on a rest is an extra (before, the grid often slid to excuse it): a stray sound, a foot
+   tap (beat 3 of each bar is the pattern's rest, so a foot tap heard on beat 3 is an extra), a neighbour's guitar, talking. None of
+   these is in Jonathan's three real takes; every number here is made up (DETAILS section 29). A right player, 20 ms spread, 85 BPM,
+   bars all right of 480 (60 rounds), before AD -> AD (with the review R5-1 fix): stray sounds 0.5 a bar 456 -> 431; 1 a bar 426 ->
+   388; a foot tap on each beat, half of them heard, 321 -> 245; a neighbour's guitar, 30% of his strums heard, 381 -> 329; a strum
+   heard twice (10%) 466 -> 465, at 125 BPM 416 -> 393; a beat lost at bar 4 (a mid-round stumble) 397 -> 368. The bench's talk room:
+   a right player 19 of 64 bars right (28 before), false extras 45 of 128 (15); a quiet player in the class room 7 of 24 (10); a
+   steady player who starts 1.5 beats late 60 of 80 bars (65 before) at 85 BPM. */
 const SC_ANCHOR_LOCK = 0.25;
 const SC_ANCHOR_LOCK_MIN = 4;
 /* THE CHORD, octave first (2026-11-14, take 1 bar 4: G5 played where C5 is due passed, because G is in both chords and pitch classes
