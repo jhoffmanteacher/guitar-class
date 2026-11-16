@@ -294,6 +294,7 @@ const ASSETS = [
   './coach-ear.js',
   './coach-strum.js',
   './coach-runner.js',
+  './coach-noterunner.js',
   './coach-more.js',
   './coach-strumcheck.js',
   './live-quiz.js',

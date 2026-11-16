@@ -185,7 +185,7 @@ readings against another chord of the step (a stand-in, not a real wrong-chord t
 | Change Up | `ccLoop` chords:983 | inline copy chords:1006-1012, 1.4 / 1.7 | 0.55 | `ccToneOk` (chords:918); nearest strum wins |
 | Power Chord Switch | `ccLoop` | the same copy, **1.8 / 2.19** | [0.22, 0.45] | `ccToneOk`; the whole-span rule `ccSpanRule` |
 | Strum Radar | `srLoop` → `srHearStrum` strum:1255 | inline copy strum:1256-1261, 1.4 / 1.7 | none | timing only; window max(90 ms, min(0.28 beat, 0.45 of the gap)) |
-| Note Runner, Finger Gym | `nrLoop` runner:1709 | inline copy runner:1734-1736, 1.4 / 1.7 | 0.55 / 0.22 | `nrFinalizeEvent`; window min(180 ms, 0.45 of the gap) |
+| Note Runner, Finger Gym | `nrLoop` noterunner:625 | inline copy noterunner:650-652, 1.4 / 1.7 | 0.55 / 0.22 | `nrFinalizeEvent`; window min(180 ms, 0.45 of the gap) |
 | Strum Pattern check | `scLoop` → `scHearStrum` strumcheck:568 | inline copy, **1.15 / 1.3** | 0.55, on the "1" only | the octave vote, then rule c |
 | Tuner | `tunerLoop` tuner:211 | none | its **own** detector `detectPitchYIN` (tuner:113) | n/a |
 
@@ -195,10 +195,10 @@ All share `coachReadFrame`, `coachSmooth`, `coachDetectPitch`, the floors 0.003 
 1. The start-of-note rule exists **6 times** (`coachLoop`, `coachOnsetTick`, `nrLoop`, `ccLoop`, `srHearStrum`,
    `scHearStrum`): one test with two ratios. The console also reads `ccLoop`'s condition as TEXT
    (`teacher-mic.js:1003`, `micEvalStrumRule`) for its strum what-if.
-2. The "readings agree" rule: `coachFinalizeEvent` core:1536-1541 and `nrFinalizeEvent` runner:2046-2051, identical.
-3. The loud-room melody vote: `coachMelodyVote` core:1565 and runner:2073, the same rule.
+2. The "readings agree" rule: `coachFinalizeEvent` core:1536-1541 and `nrFinalizeEvent` noterunner:962-967, identical.
+3. The loud-room melody vote: `coachMelodyVote` core:1565 and noterunner:989, the same rule.
 4. The chord-tone share: the Coach's (core:1679-1684) and the check's rule a (strumcheck:204-207), the same 20% /
-   10% / 3 readings; Note Runner's chord rule (runner:2066-2069) is a cousin (2 readings, no 10% band).
+   10% / 3 readings; Note Runner's chord rule (noterunner:982-985) is a cousin (2 readings, no 10% band).
 5. `ccToneOk` (chords:918) and `scChordB` (strumcheck:219-220): the same idea, different "wrong" rules.
 6. The 0.6-semitone tolerance is a bare number in 5 more places beside `COACH_VOTE_TOL`.
 
