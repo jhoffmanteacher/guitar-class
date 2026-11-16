@@ -150,7 +150,14 @@ const SC_ANCHOR_WIDE_TIGHT = 0.15;
         whether the bar fits badly enough to run it is scored WITHOUT rule A (with it, one extra on bar 1's first rest set the wide
         search off, it fitted the pattern three eighths on, and bar 2, played right, failed), and since review R6-1 it searches
         SC_ANCHOR_WIDE_RANGE around the CLICK grid, not the grid it has (a late starter pulled a bar off by one sound heard twice
-        could never come back: every bar red; live before AD too, more often with it).
+        could never come back: every bar red; live before AD too, more often with it). That fix has two costs (review R7-1):
+        more reach (for a settled player T >= 1 eighths late the grid 5 eighths away is now reachable, and wins when that bar's
+        conflicting strum was not heard and one sound lands on a rest: 60 BPM, 1.5 eighths late, bar 5's slot-7 strum unheard and
+        a sound on its first rest, 5 of 8 bars before AD and with the R5-1 fix, 4 with this one; over the reviewer's 432 such
+        rounds below in 55, above in 0), and exact ties now go toward the click grid (only at tempos whose eighth is a multiple of
+        5 ms: 60, 100, 125 BPM; a player rushing 4% at 100 BPM had his true grid and one 3 eighths away tie at score 6). Net over
+        the reviewer's 32 kinds of right players (3,840 rounds): below the R5-1 fix in 6 rounds, above in about 100; bars before AD
+        24,242, R5-1 fix 23,647, this 24,064.
    Measured (DETAILS section 29): Jonathan's three takes, kept clock and +-20 ms, right playing: strums heard 379 of 414 (378 before),
    false extras 3 of 138 (3), bars all right 36 of 72 (35), right chords the same. One of his own strums pasted into a rest (180
    splices): caught 115 (38 before), the mistake bar passed 32 (83). Not fixed: an extra on bar 1's first rest (one strum before it;

@@ -1436,7 +1436,8 @@ Measured by the builder (scratchpad `ad6-r1.mjs`, `ad6-audio.mjs`, `ad6-right.mj
 
 Can it move a right grid to a worse one? 30 kinds of right or nearly right players (steady, behind, ahead, stray sounds, foot taps,
 a neighbour, strums heard twice, drag, rush, tempo steps, beats lost, late and early starts, ups not heard), 2,400 rounds: the R5-1
-fix against W0, rounds worse 0, better 13; extras on rests caught 390 of 400 both. Everything else, R5-1 fix -> W0:
+fix against W0, rounds worse 0, better 13 (true for these 30 kinds only: see review round 7 below); extras on rests caught 390 of
+400 both. Everything else, R5-1 fix -> W0:
 
 | measure | R5-1 fix | W0 |
 |---|---|---|
@@ -1455,6 +1456,34 @@ fix against W0, rounds worse 0, better 13; extras on rests caught 390 of 400 bot
 line: 0 of 8 in all 4). **R6-2:** the floor is 158 (the lock judged on every onset of the round landed exactly on 154) and the spy
 checks that the wide-search test is scored at the narrow search's grid. **R6-3:** the replay tool's self-check (about 17 s of 26)
 can be left out with `--no-self-check`; a constant the page lacks says so. **R6-4:** these words.
+
+### Review round 7 (2026-11-16; verdict "ship")
+
+**R7-1: what W0 costs** (the reviewer's measurements; the first example re-run by the builder, scratchpad `ad7-r1.mjs`).
+- **More reach.** Around the click grid the wide search can reach, for a settled player T eighths late (T >= 1), the grid 5 eighths
+  away, which it could not before. That grid wins when that bar's conflicting strum was not heard and one sound lands on a rest.
+  Example: 60 BPM, 1.5 eighths late, bar 5's slot-7 strum not heard, one sound on bar 5's first rest: 5 of 8 bars before AD and with
+  the R5-1 fix, 4 of 8 with W0 (re-run: the same; on bar 5's second rest all three keep 5). Over 432 such made-up rounds W0 was below
+  the R5-1 fix in 55 and above it in 0.
+- **Exact ties go toward the click grid.** `centred` breaks a tie by distance from the windows' middles, and only a true tie is left;
+  W0 now keeps it nearest the click grid instead of the grid it had. That happens only at tempos whose eighth is a multiple of 5 ms
+  (60, 100, 125 BPM). It is the builder's one worse virtual-student take: rush 4% at 100 BPM, the true grid at -1.62 eighths and the
+  grid 3 eighths away (+1.38) tied at score 6; the R5-1 fix kept -1.62, W0 took +1.38; strums heard 40 -> 37 of 48.
+- **Net**, over the reviewer's 32 kinds of right players (3,840 rounds): W0 below the R5-1 fix in 6 rounds, above in about 100; bars
+  all right before AD 24,242, R5-1 fix 23,647, W0 24,064. The builder's "rounds worse 0, better 13" (round 6, above) holds only for
+  the builder's own 30 kinds.
+- **Rejected: "W2"**, W0's reach with the old tie rule (ties kept nearest the grid it had). It removes the tie cost only and costs late
+  starters bars (the round-6 rows: 4541 -> 4474, 4501 -> 4481, 4089 -> 4054).
+- **Rule A and a late start at 60 BPM.** Against before AD, rule A's late-start cost is a bit larger at 60 BPM than the 85 / 98 BPM
+  table in this section: 3 eighths late, 133 -> 120 of 160 bars (the same with the R5-1 fix and with W0).
+
+**R7-2:** `SC_ANCHOR_WIDE_ACCEPT`'s comment was wrong since rule A: the wide search scores a sound on a rest or outside every window
+2.5 under a strum place, so it accepts a bar only when every onset is on a strum place, and the constant has no effect between 0 and
+2.5. One sound outside the windows in the last bar keeps the wide search from following a player who moved. Comment corrected; the
+code and the constant are unchanged.
+
+**R7-3:** the late-starter pin gains 3.5 and 4 eighths late (60 BPM), so a wide search centred off the click grid or held under 4
+eighths from it is red; 6 rounds.
 
 **Unmeasured:** talking on real audio (every talk number above is the bench's synthetic room; no real take has talk in it, and the
 talk room is where AD costs most); takes from a Chromebook mic (all three takes are a MacBook Air); an extra UP-strum (the
