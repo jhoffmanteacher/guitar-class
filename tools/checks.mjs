@@ -6614,6 +6614,8 @@ function checkPartSizes() {
     if (parts.length > 1 && existsSync(join(ROOT, name))) { err(`${name} is on disk again beside its ${parts.length} parts: delete it (the parts are the script)`); problems++; bad++; }
     for (const f of parts) sizes.push([f, readFileSync(join(ROOT, f), 'utf8').split('\n').length - 1, parts.length > 1]);
   }
+  // The arcade's load order that gamesStopMic / gamesHideStop rely on: they wait only for bcStop (coach-more.js), so every part whose stop or state they read loads before it (review R1-4, 2026-11-16).
+  { const c = siteParts('coach.js', ROOT), m = c.indexOf('coach-more.js'); if (c.length > 1) for (const f of ['coach-hub.js', 'coach-chords.js', 'coach-chordcards.js', 'coach-ear.js', 'coach-strum.js', 'coach-runner.js', 'coach-noterunner.js']) if (m < 0 || c.indexOf(f) < 0 || c.indexOf(f) > m) { err(`COACH_JS_PARTS (app/boot.js): ${f} must load before coach-more.js: gamesStopMic and gamesHideStop wait only for bcStop, which coach-more.js defines`); problems++; bad++; } }
   // A tree that is not cut (an old commit, a rolled-back site) has three whole files: nothing to hold to a size.
   const cut = sizes.filter(x => x[2]);
   for (const [f, n] of cut) if (n > PART_HARD) { err(`${f} is ${n} lines, over the limit of ${PART_HARD}: move one of its banner sections into a new part (CLAUDE.md, "Where the code lives": a new part file)`); problems++; bad++; }
