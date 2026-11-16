@@ -742,19 +742,24 @@ const WRITERS = ['toggleStepDone', 'toggleSkill', 'setSkillLevel', 'onStepMcSele
   'repDotTap', 'repDotReset', 'logCleanRep', 'finishModuleReview', 'toggleTabChoice'];
 
 /* A made-up live-quiz game for one quiz, built in the page with the site's own helpers (so a target is always
-   one the quiz can really ask): the four session docs a game goes through, a right answer and a wrong one. */
+   one the quiz can really ask): the four session docs a game goes through, a right answer and a wrong one.
+   The target's string is the first one the quiz can ask a target ON, not its first string: "Find the power chord"
+   draws all six strings (high E first) and asks roots on low E and A only, so its first string gave no note, no
+   right answer and a tally under "undefined", and its "picked" and "right" pictures were the "no answer" ones
+   (2026-11-16: the two byte-identical self-checks). A game with no right or no wrong answer now fails its step. */
 const LQ_DEF = `window.__goldLq = function(quizId){
   const quiz = lqQuiz(quizId), type = lqType(quiz);
   let target = null, correct, correctIds = null, wrong;
   if (type === 'mc') { correct = quiz.choices[0].id; wrong = quiz.choices[1].id; }
   else if (type === 'fret') {
-    const string = quiz.strings[0], note = lqTargetNotes(quiz, string)[0];
+    const string = quiz.strings.find(x => lqTargetNotes(quiz, x).length), note = lqTargetNotes(quiz, string)[0];
     target = { string, note }; correctIds = lqTargetIds(quiz, target); correct = correctIds[0];
     for (let f = 0; f <= 12; f++) { const id = lqFretId(string, f); if (!correctIds.includes(id)) { wrong = id; break; } }
   } else {
     const p = lqPcNamePool(quiz.strings)[0];
     target = { string: p.string, fret: p.fret }; correct = lqPcNameOf(target); wrong = lqPcNames().find(n => n !== correct);
   }
+  if (correct == null || wrong == null || correct === wrong) throw new Error('golden: no made-up right and wrong answer for the quiz ' + quizId);
   const lobby = { sessionId: 'lq-gold', quizId, state: 'lobby', qIndex: -1, correct: null, correctIds: null, tally: null, scores: {}, target: null,
     speedBonus: false, limitSec: 0, startedAt: null, askedAt: null, endedAt: null };
   const scores = { 'dev-user': { pts: 1000, right: 1, answered: 1, last: 1000, lastRight: true }, 'stub-uid-01': { pts: 0, right: 0, answered: 1, last: 0, lastRight: false },
