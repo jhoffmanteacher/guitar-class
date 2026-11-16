@@ -160,7 +160,7 @@ is split by file, so both computers work at once.**
    golden before / after, a change smoke, a fresh reviewer (load order and `sw.js`: Always Reviewed). Deploy
    risk (reasoned, MED): a busy tab open before the push keeps its old part list for up to 5 minutes and would
    fetch the shortened file without the new part; push outside class hours.
-5. [ ] **Close out the Friday entries in "Open work".** Tick or close each line of the 2026-11-14, 2026-11-06,
+5. [x] **Close out the Friday entries in "Open work".** Tick or close each line of the 2026-11-14, 2026-11-06,
    2026-11-01 and 2026-10-31 entries against the list in the Windows block ("Job 4"). Still open after that:
    Jonathan's three calls, one at a time by AskUserQuestion (the Games heading "Notes on the low E and A strings"
    over Note Hunt and Fret Zap, `i18n.js` `games.hub.groupNotes`; a tab closed on dead Wi-Fi can lose up to 60 s
@@ -171,8 +171,13 @@ is split by file, so both computers work at once.**
    (`coach-strum.js`, `shAgain(±10)` / `srAgain(±10)`) probably say "10 BPM" one 5 BPM step from each end of
    their range, the fault Change Up had (unchecked).
    **Done 2026-11-16 (the Mac, worktree `friday-close`): every line of the four entries has a verdict (18 lines: 14
-   done, 1 accepted, 3 Jonathan's calls); Strum Hero / Radar `34dfce7`; the Journey Metronome `b666211`. Left: the
-   three questions for Jonathan, one at a time (AskUserQuestion).**
+   done, 1 accepted, 3 Jonathan's calls); Strum Hero / Radar `34dfce7`; the Journey Metronome `b666211`. The three
+   calls, answered by Jonathan 2026-11-16 (AskUserQuestion, all "no change", do not re-raise): the Games heading
+   "Notes on the low E and A strings" is KEPT; a tab closed on dead Wi-Fi losing up to about a minute of practice
+   is ACCEPTED; the "Week goal hit" pill not showing for a goal crossed on a Song Journey page is LEFT (the ring
+   and flame show it). Not done, owed: a `checks.mjs` detector for "a clamped step named as 10" (Change Up, Strum
+   Hero and Strum Radar had it: three copies, so the sweep ratchet asks for one; a new kind of check, Always
+   Reviewed); the Strum done screens were not looked at in a browser at 1366×657.**
 6. [ ] **Small things found on the way:** the change smoke owed on today's Windows pushes (`games`, `activities`);
    `tools/smoke.mjs` `cardKeysWalk` (~1521) and `foldWalk` (~1666) still lack `await pageLoaded(page)` after
    their reload (9 of 11 walks have it); the Listening Coach has the same `if (rec) micRecSave(…)` line
