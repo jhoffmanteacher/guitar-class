@@ -107,6 +107,69 @@ bullet under the job), the Mac fixes and pushes. All three branches are on GitHu
   when it must not (a hidden tab, a draft opened only to read it, the month's download count); the auto-read
   replacing a chart he typed; mutate at least 6 of the sim's new guards. Tools: `tools/song-builder-sim.mjs` (123
   cases), `song-files-console-sim`, `built-songs-sim`, `backup-proof`, `sim-app-page`.
+  - **W1 DONE: review round 2 of Part d at `8eb7205` (Windows, 2026-11-16; one fresh Opus `site-reviewer`, read-only,
+    no Chrome): 0 BLOCKER, 2 MAJOR, 8 MINOR. Nothing fixed; the Mac fixes.** The lead has not re-opened the quoted
+    lines. The reviewer's cases: the Windows scratchpad `r2-cases.mjs` (they need the sim's lines 58-292 in front).
+    - **R2-1 MAJOR: an Import over a song the builder published (same id) is reverted by the OLD draft on the next
+      Edit + Publish; students get the old song back.** `teacher-sb-publish.js:424-425`, `sbEnsureDraft`:
+      `const have = sbDrafts && sbDrafts.get(id); if(have) return have;`. Import (`teacher-builtsongs.js:254`, then
+      the transaction at :262) never touches `songDrafts/{id}`. Run on the sim's stub store: published at bpm 96; a
+      fixed copy imported over the same id (bpm 97.5 and a beat map), the import succeeds; after a console reload
+      the song's page says "The draft has changes that are not published" (wrong: the draft is OLDER); Edit on
+      Preview then Publish with no change: the stored song is back to bpm 96 with no `barTimes`, and the only
+      dialog was "Publish your changes to …?". This is the skill's own round trip (Export, Claude, Import of the
+      same id). Smallest fix: in `sbEnsureDraft` (and the published page's `changed` flag), when the draft's
+      `savedAt` is older than the published doc's `p.at` and `sbPubChanged` is true, rebuild the draft with
+      `sbDraftFromDoc` (or ask "Use the published song?"); or Import deletes / rebuilds `songDrafts/{id}`.
+    - **R2-2 MAJOR: a chart whose bar count does not match the recording publishes with a ✓, and the sentence that
+      explains it is hidden by the "opens on the grid" cut.** `teacher-sb-chart.js:601`
+      `if(nd && sbHasChart(nd) && st.read) st.view = sbChartOpen(nd, st.read).n ? 'read' : 'grid';` runs at step 1,
+      before any beat exists, and `sbChartOpen` does not count bars. "The chart makes N bars; the recording has
+      about M … Hold the long ones in the grid" is only in the read view (`:496`); the grid shows a plain chip
+      (`:471`); the Publish page's Chart row ends in ✓ whatever the count (`teacher-sb-publish.js:243-244`). Run: a
+      chords-over-lyrics chart at step 1 makes 4 bars against a recording of 9 at 96 BPM: step 4 opens on the grid,
+      the chip reads "4 bars; the recording has 9", `sbPublishWhy` returns `[]`, Publish is enabled, the Chart row
+      reads "1 section, 4 bars, G C D ✓". That defeats the reason the Chart step was kept. Fix, warn only (the
+      decision stands): choose the view when step 4 mounts and count `rec != null && nBars !== rec` as something to
+      settle, or show the same flag in the grid; and put "N bars; the recording has M" as a warning in the Publish
+      row and on the Preview step.
+    - **MINOR.** R2-3: "edit with no change publishes a deep-equal song" fails for 4 docs the validator accepts (a
+      level with `start` equal to `versions`: start dropped; a section whose lyric lines are all `''`: lyrics
+      dropped; a chord in `chords` no bar uses: dropped; a title with a trailing space: trimmed;
+      `teacher-sb-chart.js:369`, `:382`, `:190`, `teacher-sb-publish.js:88`): "Changes not published" right after
+      Edit and a new edit number; students see no change. R2-4: an imported beat-map song cannot gain or lose a bar
+      (`teacher-sb-chart.js:383`): Publish is blocked with validator wording ("barTimes needs one downbeat per bar
+      (11, or one more for the end), at least 3"). R2-5: two tabs, Delete… against Publish of an edit, can leave a
+      LISTED song with no audio (3 of 40 schedules; `teacher-sb-publish.js:392-393` against `:279-299`; both tabs
+      report success; students get a card whose audio cannot load); fix: Delete re-reads the list right before
+      deleting audio, or Publish's transaction re-reads the songFiles head. Unpublish against Publish: 1 of 40 ends
+      listed with no doc (students skip it). R2-6: Import is still two writes (R1-1 was fixed for Publish only), and
+      its failure line "students do not see it yet. Import again." (`teacher-builtsongs.js:274`) is false for an
+      import over a live song; fix: one transaction, as `sbPublish`. R2-7: the step-1 auto-read wipes a chart he
+      typed at step 4 and has not read yet (`sbChartDoRead`'s failure path `st.text = t`,
+      `teacher-sb-chart.js:591`, through `sbSaveUpload` → `sbChartReadNow`, `teacher-sb-core.js:581-583`), and the
+      first "No chords could be read in that text." is overwritten by the auto-level's note; fix: auto-read only
+      when the step-1 text changed in this save, never assign `st.text` when it is non-null. R2-8: since the click
+      cuts a draft that reached Preview stays saved at step 6, so opening it from the list opens on Preview and
+      `sbPreviewMounted` (`teacher-sb-publish.js:139`) loads the copy: one counted download with no action
+      (1,066,667 bytes counted for a copy of 800,000); fix: `sbOpen` caps a reopened draft at step 5, or Preview
+      loads on the play click. R2-9: the sim misses 2 of 20 planted faults (imported bar times rounded to 1 ms
+      survive because the fixture's times are whole ms; deleting the `driftFor !== sha` blocker in
+      `sbPublishWhy`, `teacher-sb-publish.js:213`, survives), and three texts still speak of the listens
+      (`tools/checks.mjs:19822` 1en's pass line, CLAUDE.md:154, the sim's header lines 46-47). R2-10: an imported
+      song with no `gainDb` prints "levelled to the cure (−0.0 dB)" (`teacher-sb-publish.js:238`).
+    - **Did not break.** `song-builder-sim` 124 of 124, stable over 5 of 5 runs on Windows;
+      `song-files-console-sim` 88 of 88; `built-songs-sim` 148 of 148; `backup-proof` held; `checks --check` on the
+      tip against the `d1da871` control: identical failure sets, 1en passes. 18 of 20 of the reviewer's mutations
+      red. 15 imported docs round-trip deep-equal with bar times bit for bit (3/4, 6/8, a beat map with non-ms
+      times, a range, lyrics, Power, Both). Edit numbers: two publishes in one second, a clock set back, an older
+      Import over a newer song all get a fresh number. Escaping of titles, artist, notes and file names; a hostile
+      `.json` (`__proto__`, wrong types, an id with `/`, huge arrays) is refused. No write to `config/class` or
+      `progress/`. Auto-level does not start without an mp3 picked in this tab and downloads nothing. Nothing
+      publishable was found that a student page refuses.
+    - **Not done:** a browser walk (the builder's step S9 still expects the first-Publish confirm, which is gone);
+      whether re-levelling an imported song shifts its kept bar times (the encoder's delay; line 707 skips the
+      drift reset for `fromImport`): that needs a real decode.
 - **W2. Review of the two coach splits**, branch `ci-try/coach-splits`, tip `d6c3e16` (base `3b667ba`; item 4 of
   the list below; the agent's report is in its WORKFLOW bullet on that branch). `site-reviewer` (load order and
   the `sw.js` lists: Always Reviewed). Re-derive, do not trust: each new part joined to its parent is the old file
