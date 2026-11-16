@@ -80,6 +80,59 @@ The Windows session deletes this line once its replay matches the README.
 whatever you haven't done to the mac". He says "do the handed-over work in WORKFLOW").** In this order; each ships
 before the next; agents Opus or Fable by the need (Opus at xhigh is allowed where a finding is in dispute). Branches
 named `win/…` are on GitHub (`git fetch`); cherry-pick from them, do not merge them.
+**MORE FOR WINDOWS (the Mac, 2026-11-16 13:40; Jonathan: "windows is going to do the 20 error events now. update
+workflow for what else you want it to work on").** After the 20 error events and rule AD's review, in this order.
+Agents: Opus at high or xhigh; Fable only if Opus cannot do it. Reviews are read-only: findings go in WORKFLOW (a
+bullet under the job), the Mac fixes and pushes. All three branches are on GitHub (`git fetch`).
+- **W1. Review round 2 of Song builder Part d**, branch `ci-try/sb-part-d`, tip `4cc5e33` (base `160de0a`; round 1
+  was on `d1da871`: 0 BLOCKER, 2 MAJOR, 8 MINOR, all in the "Part d" bullet of the Song builder entry). A FRESH
+  reviewer (`site-reviewer`, the save path is not touched), failing scenario first. New since round 1, review all
+  of it (`git diff d1da871 4cc5e33`): the two MAJOR fixes (Publish writes the song and the list in ONE transaction;
+  a new mp3 not levelled closes Preview and Publish), the edit number = seconds since 2026-01-01 (Publish and
+  Import), an imported song rebuilt into a draft for Edit / Unpublish (edit with no change must publish a
+  deep-equal song), Export as a paired .json + .mp3 that Import takes back, Edit as one click on a step, and the
+  click cuts Jonathan asked for ("as easy as possible ... with the fewest clicks"; "i don't know if three listens
+  are necessary"): NO listen gate, Publish on the Preview step, a chart given at step 1 read at once, Volume
+  starting by itself, Level pre-filled. Decided, do not re-argue: those cuts; over 8 pins only warns; pitch over
+  10 cents blocks; R1-5 and R1-7 are accepted limits; firestore.rules does not change. Attack: what a STUDENT gets
+  after each write path fails halfway or two console tabs act at once; whether anything can be published that
+  fails `builtSongCheck` on a student page now that the listens are gone; the rebuilt draft of an imported song
+  (bar times kept exactly? a song with a range, with lyrics, in 3/4 or 6/8, at Power or Both); auto-level starting
+  when it must not (a hidden tab, a draft opened only to read it, the month's download count); the auto-read
+  replacing a chart he typed; mutate at least 6 of the sim's new guards. Tools: `tools/song-builder-sim.mjs` (123
+  cases), `song-files-console-sim`, `built-songs-sim`, `backup-proof`, `sim-app-page`.
+- **W2. Review of the two coach splits**, branch `ci-try/coach-splits`, tip `d6c3e16` (base `3b667ba`; item 4 of
+  the list below; the agent's report is in its WORKFLOW bullet on that branch). `site-reviewer` (load order and
+  the `sw.js` lists: Always Reviewed). Re-derive, do not trust: each new part joined to its parent is the old file
+  byte for byte; `COACH_JS_PARTS` and every `sw.js` list name both new parts in load order; nothing runs at load
+  across a cut; every tool that reads a coach part by FILE NAME still finds what it reads; `kill-switch/proof.mjs`
+  14 of 14. And the deploy question, answered with file:line: a student who opens the arcade for the first time
+  within minutes of the push, under the old worker or the old part list. Is "push after school" enough, or does
+  the push need an order (for example the new parts shipped in `sw.js` one push before the cut)? The Mac pushes
+  it after school only if this comes back clean.
+- **W3. The owed ratchet: a `checks.mjs` detector for "a clamped step named as 10".** Change Up, Strum Hero and
+  Strum Radar each said "10 BPM" when only 5 was left at the end of their range (fixed: `95afba0`-era for Change
+  Up, `b21fc07` for the other two). Three copies, so the sweep ratchet asks for a detector: it must RUN each
+  game's done screen at every tempo of its range, both directions, and compare each button and advice number with
+  what the game's own Again function then does (the Mac agent's scratch script did this for 52 screens: re-derive
+  it; the numbers 20 of 52 before and 52 of 52 after are its claim). Any other game with a step control (grep the
+  arcade for `Again(`) joins it. A new kind of check: Always Reviewed, broken two ways, totals pinned. Also look
+  at the Strum Hero / Strum Radar done screens at 1366×657 at the top, the bottom and one step from each (not yet
+  seen in a browser).
+- **W4. `node tools/lint.mjs` on main** (it cannot start on the Mac: an npm cache error): read every name it lists
+  that no script defines and every load-order slip, against today's four new parts (`teacher-activities-2.js`,
+  `teacher-sb-pdf.js`, and after their pushes `teacher-sb-publish.js`, `coach-chordcards.js`,
+  `coach-noterunner.js`). Report only; fix nothing in the Mac's files.
+- **W5. `tools/console-layout-smoke.mjs` exits 1 on main, and did before today** (the Mac's console-size agent, on
+  `3b667ba` and after, line for line): Manage scrolls sideways 165 px at 1366, five lines from the Practice minutes
+  goal box, Manage +917 px at 390. Find the commit that broke each (the Manage tabs, `b40c35f`, is the first
+  suspect), fix the 1366 ones (`teacher-manage-layout.js`, `teacher-manage.js`, `styles.css`: the Mac is out of
+  those files now), decide with a line in WORKFLOW whether the 390 one is in scope (phone width is not), and get
+  the tool back to exit 0. Fast.
+- The Mac keeps: fixing what W1 and W2 find, the pushes of Part d and the splits, the three low edge cases of the
+  pdf pane (`+ New song` twice keeps the first song's pdfs; a draft switched during a multi-file pick; a deleted
+  draft's pdfs kept until the view reopens), and anything Jonathan finds testing the builder.
+
 **WHO DOES WHAT (the Mac, 2026-11-16 11:10, after Jonathan asked whether Windows can take separate tasks): the list
 is split by file, so both computers work at once.**
 - **The Mac:** item 1 (an Opus agent is building it now: `teacher-activities*.js`, `app/activities*.js`), item 4
