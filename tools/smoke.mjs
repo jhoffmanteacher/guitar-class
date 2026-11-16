@@ -28,6 +28,8 @@
                                                Boot and the four screens always run.
      node tools/smoke.mjs --chrome <path>      Chrome/Chromium binary (or CHROME=…)
      node tools/smoke.mjs --quiet              print only the verdict
+     node tools/smoke.mjs --self-test          no browser, about 5 s: the walks on a made-up page whose newer
+                                               steps fail (a --baseline that lacks them), and the compare
      node tools/smoke.mjs --stall <s>          stop if no step starts for <s> seconds (default 120)
      node tools/smoke.mjs --timeout <s>        stop if the whole run passes <s> seconds (default 2400)
      node tools/smoke.mjs --a11y               also run the accessibility scan (area a11y, below); --only a11y
@@ -1190,7 +1192,7 @@ async function strumWalk(page, run, events, stats) {
             return { b, u, row, c, H, below: !!(b && u && u.top >= b.bottom), boardIn: !!b && b.top >= 0 && b.bottom <= H, btnIn: !!u && u.top >= 0 && u.bottom <= H, curIn: c ? c.top >= 0 && c.bottom <= H : null,
               label: (document.querySelector('${SCQ} .sc-play-label') || {}).textContent || '', phase: typeof sc !== 'undefined' && sc ? sc.phase : null, bar: typeof sc !== 'undefined' && sc ? Math.floor(Math.max(0, sc.cur) / 8) + 1 : 0 }; })()`;
           const pl = await run('strum:sc-place:' + w, SCBOX, 10);
-          if (!pl.below) fail(w, 'the strum-check button is not under the board: ' + JSON.stringify(pl));
+          if (!pl || !pl.below) fail(w, 'the strum-check button is not under the board: ' + JSON.stringify(pl));
           await run('strum:sc-stub:' + w, `(() => { window.__scGum = navigator.mediaDevices.getUserMedia; window.__scPerm = navigator.permissions && navigator.permissions.query; window.__scAsked = 0;
             navigator.mediaDevices.getUserMedia = () => { window.__scAsked++; return Promise.reject(new DOMException('blocked', 'NotAllowedError')); };
             if (navigator.permissions) navigator.permissions.query = () => Promise.resolve({ state: 'prompt' });
@@ -1210,7 +1212,7 @@ async function strumWalk(page, run, events, stats) {
               await run('strum:sc-allow:' + w, `document.querySelector('${SCQ} #coach-card .micpre-ask button').click()`, 1200);
             }
             const o2 = await run('strum:sc-refused:' + w, `(() => { const c = document.querySelector('${SCQ} #coach-card'); return { strip: !!c, note: c ? (c.querySelector('.coach-note') || {}).textContent || '' : '', label: (document.querySelector('${SCQ} .sc-play-label') || {}).textContent || '', live: !!window.coachMicLive, asked: window.__scAsked, marks: document.querySelectorAll('${SCQ} .strum-cell.sc-now, ${SCQ} .strum-cell.sc-ok, ${SCQ} .strum-cell.sc-bad, ${SCQ} .sc-mark').length, said: [t('micpre.again'), t('tools.micDenied')], word: t('sc.play') }; })()`, 10);
-            if (!o2.strip || o2.label !== o2.word || o2.asked !== 1 || o2.live || o2.marks || !o2.said.some(x => x && o2.note.includes(x.slice(0, 20)))) fail(w, 'after the mic was refused: ' + JSON.stringify(o2));
+            if (!o2 || !o2.strip || o2.label !== o2.word || o2.asked !== 1 || o2.live || o2.marks || !o2.said.some(x => x && o2.note.includes(x.slice(0, 20)))) fail(w, 'after the mic was refused: ' + JSON.stringify(o2));
           }
           await run('strum:sc-unstub:' + w, `(() => { navigator.mediaDevices.getUserMedia = window.__scGum; if (window.__scPerm) navigator.permissions.query = window.__scPerm; if (typeof coachClose === 'function') coachClose(); })()`, 100);
           /* One real round, the fake mic, the slider at its top (no tempo limit; the shortest round). */
@@ -1220,11 +1222,12 @@ async function strumWalk(page, run, events, stats) {
             let el = bd.parentElement; while (el && !(el.scrollHeight > el.clientHeight + 1 && /auto|scroll/.test(getComputedStyle(el).overflowY))) el = el.parentElement;
             const box = el || document.scrollingElement; box.style.paddingBottom = '700px'; box.scrollTop += Math.round(b.top + b.height / 2);
             return { top: Math.round(bd.getBoundingClientRect().top), box: box === document.scrollingElement ? 'page' : (box.className || box.tagName) }; })()`, 200);
-          if (!(off.top < 0)) fail(w, `could not scroll the board's top above the window (${JSON.stringify(off)}): the scroll check below proves nothing`);
+          if (!off || !(off.top < 0)) fail(w, `could not scroll the board's top above the window (${JSON.stringify(off)}): the scroll check below proves nothing`);
           await run('strum:sc-go:' + w, `document.querySelector('${SCQ} .coach-btn[data-strumcheck]').click()`, 1500);
           const seen = {}; let tallest = 0, stopWord = null;
           for (let i = 0; i < 300; i++) {
             const x = await run('strum:sc-watch:' + w, SCBOX, 0);
+            if (!x) break;   // the step failed (it is in the list already): nothing to watch
             if (x.row) tallest = Math.max(tallest, x.row.h);
             if (x.phase === 'listening'){ if (stopWord == null) stopWord = x.label; if ([1, 4, 5, 8].includes(x.bar) && !seen[x.bar]) seen[x.bar] = x; }
             if (x.phase === 'report' || x.phase == null) break;
@@ -1234,15 +1237,15 @@ async function strumWalk(page, run, events, stats) {
           if (tallest > 36) fail(w, `the row under the board grew to ${tallest} px during the round, want one line (32 measured; 36 at most)`);
           if (stopWord !== await run('strum:sc-stopword:' + w, `t('games.common.stop')`, 0)) fail(w, `during the round the button read "${stopWord}", want Stop`);
           const o3 = await run('strum:sc-after:' + w, `(() => { const c = document.querySelector('${SCQ} #coach-card'), txt = c ? c.textContent : ''; return { phase: sc ? sc.phase : null, summary: !!(c && c.querySelector('.sc-summary')), perBar: /\\bBar \\d/.test(txt) || !!(c && c.querySelector('.sc-line')), label: (document.querySelector('${SCQ} .sc-play-label') || {}).textContent || '', word: t('sc.play'), frame: document.querySelector('${SCQ} .strum-board').className }; })()`, 10);
-          if (o3.phase !== 'report' || !o3.summary || o3.perBar || o3.label !== o3.word || /sc-(frame|pulse)/.test(o3.frame)) fail(w, 'after the round: ' + JSON.stringify(o3));
+          if (!o3 || o3.phase !== 'report' || !o3.summary || o3.perBar || o3.label !== o3.word || /sc-(frame|pulse)/.test(o3.frame)) fail(w, 'after the round: ' + JSON.stringify(o3));
           /* the too-noisy gate (count-in level, 2026-11-14): whichever way it went, the board and the line agree */
           const g = await run('strum:sc-gate:' + w, `(() => { const c = document.querySelector('${SCQ} #coach-card'); return { tooLoud: !!(sc && sc.tooLoud), level: sc ? sc.gateLevel : null, coloured: document.querySelectorAll('${SCQ} .strum-cell.sc-ok, ${SCQ} .strum-cell.sc-bad, ${SCQ} .sc-mark').length, line: c ? (c.querySelector('.sc-summary') || {}).textContent || '' : '', want: t('sc.tooLoudCounted') }; })()`, 10);   /* a full round: the line says it counted */
-          if (g.tooLoud && (g.coloured || g.line !== g.want)) fail(w, 'a too-noisy round coloured the board or did not say so: ' + JSON.stringify(g));
-          if (!g.tooLoud && g.line === g.want) fail(w, 'a round the gate let through says it was too noisy: ' + JSON.stringify(g));
-          stats.strumGate = (stats.strumGate || '') + (g.tooLoud ? 'too noisy' : 'graded') + ' (count-in level ' + (g.level == null ? '-' : g.level.toFixed(4)) + ')';
+          if (g && g.tooLoud && (g.coloured || g.line !== g.want)) fail(w, 'a too-noisy round coloured the board or did not say so: ' + JSON.stringify(g));
+          if (g && !g.tooLoud && g.line === g.want) fail(w, 'a round the gate let through says it was too noisy: ' + JSON.stringify(g));
+          if (g) stats.strumGate = (stats.strumGate || '') + (g.tooLoud ? 'too noisy' : 'graded') + ' (count-in level ' + (g.level == null ? '-' : g.level.toFixed(4)) + ')';
           await run('strum:sc-tempo-back:' + w, `(() => { document.querySelectorAll('[style*="padding-bottom: 700px"]').forEach(el => { el.style.paddingBottom = ''; }); if (typeof coachClose === 'function') coachClose(); ['ca-52:0', 'ca-52:0:r1'].forEach(k => { try { if (caStepDone[k]) onCaStepChange(k, false); } catch (e) {} }); const s = document.querySelector('${SCQ} .tab--strum .bpm-slider'); s.value = ${JSON.stringify(String(slWas))}; s.dispatchEvent(new Event('input', { bubbles: true })); })()`, 100);
           const o4 = await run('strum:sc-closed:' + w, `({ strip: !!document.querySelector('#coach-card'), next: !!document.querySelector('${SCQ} .ca-focus-next, ${SCQ} .ca-mark-btn, ${SCQ} .sc-rounds'), board: !!document.querySelector('${SCQ} .strum-board'), label: (document.querySelector('${SCQ} .sc-play-label') || {}).textContent || '', word: t('sc.play') })`, 10);
-          if (o4.strip || !o4.next || !o4.board || o4.label !== o4.word) fail(w, 'after the check was closed the step is not as it was: ' + JSON.stringify(o4));
+          if (!o4 || o4.strip || !o4.next || !o4.board || o4.label !== o4.word) fail(w, 'after the check was closed the step is not as it was: ' + JSON.stringify(o4));
           stats.strumChecks = (stats.strumChecks || 0) + 1;
         }
         stats.strumSteps = (stats.strumSteps || 0) + 1;
@@ -2306,6 +2309,23 @@ function a11yReport(found) {
   return out;
 }
 
+/* A walk that throws is ONE error event ("walk-stopped", naming the walk, the step it was on and the message), and
+   the walks after it still run (2026-11-16). A step that fails gives null (run() below), and a line that then reads
+   a property of it throws. Until then that throw left walk(), and the whole run ended with "could not run" (exit 2)
+   and NO list of errors: with --baseline that happened on any <ref> that lacks something a newer walk expects,
+   exactly when this checkout had errors to sort. A stopped walk may leave what it changed (a window size, a stub)
+   for the walks after it: read the first walk-stopped line first. node tools/smoke.mjs --self-test proves it. */
+async function tryWalk(name, fn, events, where) {
+  try { await fn(); }
+  catch (e) { events.push({ step: `${name} (at ${where()})`, kind: 'walk-stopped', text: String((e && e.message) || e).split('\n')[0].slice(0, 300) }); }
+}
+/* What this checkout ADDS to the baseline's errors (all of them with no baseline). A baseline error is "the same"
+   when kind + step-without-language + text match; a bad-handler count that grew is new. */
+function newErrors(now, base) {
+  const norm = e => `${e.kind}|${e.step.replace(/^(en|es):/, '')}|${e.kind === 'bad-handler' ? '' : e.text}`;
+  const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
+  return base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
+}
 async function walk(base, chromePort, label) {
   mark(`${label}: opening the page`);
   const page = await openPage(chromePort);
@@ -2322,6 +2342,7 @@ async function walk(base, chromePort, label) {
     try { const v = await page.evalJs(expr); await sleep(wait); return v; }
     catch (e) { events.push({ step: name, kind: 'step-failed', text: String(e.message).split('\n')[0].slice(0, 300) }); return null; }
   };
+  const tw = (name, fn) => tryWalk(name, fn, events, () => step);   // every named walk below goes through it
   const loaded = new Promise(r => page.on(m => { if (m === 'Page.loadEventFired') r(); }));
   await page.send('Page.navigate', { url: `${base}/index.html` });
   await Promise.race([loaded, sleep(15000)]);
@@ -2639,34 +2660,79 @@ async function walk(base, chromePort, label) {
   if (tunerShut === false) tunerFail('tuner-close', 'a second togglePopup(\'tuner\') did not close the popup and stop the mic');
   await run('click-away', `document.body.click()`, 300);
   }   // ── end area: games ──
-  if (ON.activities) await chordGridWalk(page, run, events, stats);
+  if (ON.activities) await tw('chordGridWalk', () => chordGridWalk(page, run, events, stats));
   // Before Note Call's walk: that one reloads a fresh page with no coach.js, and this one needs gamesShow (coach.js) to be there.
   if (ON.games) {
-    await powerSwitchWalk(page, run, events, stats, base);
-    await changeUpWalk(page, run, events, stats);
-    await setupScreensWalk(page, run, events, stats);
-    await twoColumnQuizWalk(page, run, events, stats);
+    await tw('powerSwitchWalk', () => powerSwitchWalk(page, run, events, stats, base));
+    await tw('changeUpWalk', () => changeUpWalk(page, run, events, stats));
+    await tw('setupScreensWalk', () => setupScreensWalk(page, run, events, stats));
+    await tw('twoColumnQuizWalk', () => twoColumnQuizWalk(page, run, events, stats));
   }
   if (ON.activities) {
-    await noteCallWalk(page, run, events, stats, base);
-    await chordCallWalk(page, run, events, stats, base);
-    await powerNameWalk(page, run, events, stats, base);
-    await recordingWalk(page, run, events, stats, base);
-    await strumWalk(page, run, events, stats);
-    await pathsWalk(page, run, events, stats);
-    await foldWalk(page, run, events, stats, base);
-    await fillWalk(page, run, events, stats);
-    await dotsWalk(page, run, events, stats);
-    await noChecklistWalk(page, run, events, stats);
-    await todayGridWalk(page, run, events, stats);
-    await cardKeysWalk(page, run, events, stats, base);
+    await tw('noteCallWalk', () => noteCallWalk(page, run, events, stats, base));
+    await tw('chordCallWalk', () => chordCallWalk(page, run, events, stats, base));
+    await tw('powerNameWalk', () => powerNameWalk(page, run, events, stats, base));
+    await tw('recordingWalk', () => recordingWalk(page, run, events, stats, base));
+    await tw('strumWalk', () => strumWalk(page, run, events, stats));
+    await tw('pathsWalk', () => pathsWalk(page, run, events, stats));
+    await tw('foldWalk', () => foldWalk(page, run, events, stats, base));
+    await tw('fillWalk', () => fillWalk(page, run, events, stats));
+    await tw('dotsWalk', () => dotsWalk(page, run, events, stats));
+    await tw('noChecklistWalk', () => noChecklistWalk(page, run, events, stats));
+    await tw('todayGridWalk', () => todayGridWalk(page, run, events, stats));
+    await tw('cardKeysWalk', () => cardKeysWalk(page, run, events, stats, base));
   }
-  if (ON['practice-minutes']) await pmHeaderWalk(page, run, events, stats);
-  if (ON['tuning-sim']) await tuningSimWalk(page, run, events, stats, base);
-  if (ON.a11y && label === 'this checkout') await a11yWalk(page, run, events, stats, base);   // last: it reloads the page
+  if (ON['practice-minutes']) await tw('pmHeaderWalk', () => pmHeaderWalk(page, run, events, stats));
+  if (ON['tuning-sim']) await tw('tuningSimWalk', () => tuningSimWalk(page, run, events, stats, base));
+  if (ON.a11y && label === 'this checkout') await tw('a11yWalk', () => a11yWalk(page, run, events, stats, base));   // last: it reloads the page
   await page.close();
   return { label, stats, errors: events.filter(e => !NOISE.test(e.text || '')) };
 }
+
+/* --self-test (2026-11-16): Node only, no Chrome, about 5 s. The real walk functions on a MADE-UP page whose newer
+   steps fail (run() gives null), as on a --baseline commit that lacks them; the net; and the compare with made-up
+   walk results. Exit 0 = every case held, 1 = one did not. */
+async function selfTest() {
+  const BARS = ['D5', 'D5', 'C5', 'C5', 'G5', 'G5', 'D5', 'D5'];
+  const fakePage = { send: async () => ({}), on(fn) { setTimeout(() => fn('Page.loadEventFired'), 0); } };
+  const world = answer => {
+    const w = { events: [], stats: {}, last: '' };
+    w.run = async name => { w.last = name; const v = answer(name); if (v === undefined) { w.events.push({ step: name, kind: 'step-failed', text: 'made up: this page has no such thing' }); return null; } return v; };
+    return w;
+  };
+  const strumPage = name => name === 'strum:list' ? [{ id: 'ca-52', steps: [{ i: 0, pattern: 'D.DU.UDU', bars: BARS, path: '', listen: true }] }]
+    : /^strum:(probe|narrow):/.test(name) ? { cells: 64, seqs: [...Array(48).keys()], names: BARS, aligned: true, over: 0, docOver: 0 }
+    : /^strum:sc-count:/.test(name) ? 1
+    : /^strum:sc-/.test(name) ? undefined   /* the strum-pattern check: nothing of it on this page */
+    : /^strum:(open|en|es|focus:|go:|close)/.test(name) ? true : undefined;
+  const tsimPage = name => name === 'tsim:exists' ? true : /:prep$/.test(name) ? true
+    : /:defaults$/.test(name) ? { ok: true, lang: /tsim:es:/.test(name) ? 'es' : 'en', h1: /tsim:es:/.test(name) ? 'Simulador de afinación' : 'Tuning Simulator', state: 'read', sound: true, soundSw: 'true', level: 1, old: false, pop: true, idx: 1, str: /tsim:es:/.test(name) ? 'cuerda La' : 'A string', shows: 'A', lcd: 'A', q: /tsim:es:/.test(name) ? 'La' : 'A' }
+    : undefined;   // an older tuning-sim.html: every later probe fails
+  let bad = 0;
+  const check = (ok, text) => { console.log(`  ${ok ? '✓' : '✗'} ${text}`); if (!ok) bad++; };
+  /* 1. The strum walk itself returns: each failed strum-check step is a line, not a throw. */
+  { const w = world(strumPage); let threw = null;
+    try { await strumWalk(fakePage, w.run, w.events, w.stats); } catch (e) { threw = e; }
+    check(!threw && w.events.some(e => e.kind === 'strum') && w.events.some(e => e.kind === 'step-failed'),
+      threw ? `the strum walk THREW at "${w.last}" on a page with a strum-check step and none of the check's parts: ${threw.message}`
+            : `the strum walk returns on a page with a strum-check step and none of the check's parts (${w.events.filter(e => e.kind === 'strum').length} strum lines, ${w.events.filter(e => e.kind === 'step-failed').length} failed steps listed)`); }
+  /* 2. The net: a walk that throws is one walk-stopped event, and the next walk still runs. */
+  { const w = world(tsimPage); let threw = null, after = false;
+    try { await tryWalk('tuningSimWalk', () => tuningSimWalk(fakePage, w.run, w.events, w.stats, 'http://made-up'), w.events, () => w.last);
+          await tryWalk('madeUpWalk', async () => { after = true; const r = await w.run('made-up:probe'); return r.value; }, w.events, () => w.last); } catch (e) { threw = e; }
+    const stops = w.events.filter(e => e.kind === 'walk-stopped');
+    check(!threw && after && stops.some(e => /^madeUpWalk \(at made-up:probe\)$/.test(e.step) && /null/.test(e.text)),
+      threw ? `a walk's throw got past tryWalk: ${threw.message}` : `a walk that reads a failed step's result is one walk-stopped line and the walk after it runs (${stops.length} stopped: ${stops.map(e => e.step).join('; ')})`); }
+  /* 3. The compare: the baseline's own errors are taken off, everything else stays. */
+  { const E = (step, kind, text) => ({ step, kind, text });
+    const now = { errors: [E('en:set-m1w1', 'exception', 'boom'), E('strum:ca-52 step 1 en', 'strum', 'a new failure'), E('es:buttons-m2w1', 'bad-handler', '3'), E('strumWalk (at strum:sc-place:x)', 'walk-stopped', 'Cannot read properties of null'), E('en:set-m9w9', 'exception', 'only here')] };
+    const base = { errors: [E('es:set-m1w1', 'exception', 'boom'), E('en:buttons-m2w1', 'bad-handler', '2'), E('tuningSimWalk (at tsim:en:r1:way-status)', 'walk-stopped', 'Cannot read properties of null')] };
+    const got = newErrors(now, base).map(e => e.step), want = ['strum:ca-52 step 1 en', 'es:buttons-m2w1', 'strumWalk (at strum:sc-place:x)', 'en:set-m9w9'];
+    check(JSON.stringify(got) === JSON.stringify(want) && newErrors(now, null).length === 5, `the compare reports what this checkout adds: ${JSON.stringify(got)} (and all 5 with no baseline)`); }
+  console.log(`smoke: self-test ${bad ? '✗' : '✓'} ${3 - bad} of 3 cases held`);
+  return bad ? 1 : 0;
+}
+if (args.includes('--self-test')) process.exit(await selfTest());
 
 const chrome = findChrome();
 if (!chrome) { console.error('smoke: no Chrome/Chromium found — pass --chrome <path> or set CHROME'); process.exit(2); }
@@ -2721,10 +2787,7 @@ try {
     base = await walk(`http://127.0.0.1:${bs.port}`, cdp, BASELINE);
   }
 
-  // A baseline error is "the same" when kind + step-without-language + text match; a bad-handler count that grew is new.
-  const norm = e => `${e.kind}|${e.step.replace(/^(en|es):/, '')}|${e.kind === 'bad-handler' ? '' : e.text}`;
-  const baseCount = new Map(); (base ? base.errors : []).forEach(e => baseCount.set(norm(e), Math.max(baseCount.get(norm(e)) || 0, e.kind === 'bad-handler' ? +e.text : 1)));
-  const report = base ? now.errors.filter(e => (e.kind === 'bad-handler' ? +e.text : 1) > (baseCount.get(norm(e)) || 0)) : now.errors;
+  const report = newErrors(now, base);
   say(`smoke: ${now.stats.sets} sets in ${now.stats.modules} modules (${LANGS.join(' + ').toUpperCase()}), ${now.stats.games} game views, ${now.stats.buttons} inline handlers compiled${now.stats.chordCards ? `, ${now.stats.chordCards} chord-grid cards walked (cursor, lap, layout at 1366/390/360, lyric sheet${now.stats.bassClicks ? `, bass switch clicked on ${now.stats.bassClicks}` : ''}${now.stats.recordingClicks ? `, recording switch clicked, reloaded and flipped back on ${now.stats.recordingClicks}` : ''}${now.stats.chordSkipped ? `; ${now.stats.chordSkipped.join(', ')} is teacher-only and not walked` : ''})` : ''}${now.stats.noteCallSteps ? `, ${now.stats.noteCallSteps} Note Call power-chord steps (EN + ES: six strings, taps on low E and A only, a hit and a miss)` : ''}${now.stats.pwnSteps ? `, ${now.stats.pwnSteps} Name the power chord steps (EN + ES: Note Call frets 5-12; Show answer on by default and clicked both ways; the 12 buttons in fret order and a real click on a right and a wrong answer on the buttons and the board; Next, Stop, another step, a language switch; the choice remembered after a reload)` : ''}${now.stats.chordCallRounds ? `, ${now.stats.chordCallRounds} Call the chord steps (EN + ES: Slower by default, the speed switch both ways, Start, a space bar that is cancelled, Stop, a round ended by another step and by a language switch, the default after a reload)` : ''}${now.stats.powerLayouts ? `, a pair play screen says its BPM and its live tempo buttons are clicked (${now.stats.pairPlay || 0} run), the setup's \u22125 / +5 and slider are clicked and measured, EN + ES (${now.stats.tempoSetup || 0} run), the done screen's −5/+5 row clicked twice and Again (${now.stats.doneRow || 0} run), Power Chord Switch at 1366\u00d7657 (Start and tempo on screen: ${now.stats.powerLayouts} views, incl. after a reload${now.stats.powerBestLayouts ? `; with a "Best today" score, EN + ES, no scrolling and the privacy line on screen: ${now.stats.powerBestLayouts} views` : ''}${now.stats.songs ? `; song buttons picked and reopened, ${now.stats.songs} song-switch rounds (16 switches x 3) run on a fake clock: round tempos, the BPM buttons, the play screen fitting 657px, one lit chart per chord, the done screen with 21 changes, ${now.stats.songDraws} random draws, none a song` : ""}${now.stats.powerCosmetic ? `; "low E" title kept together at ${now.stats.powerTitleWidths} window widths and the done-screen button padded, EN + ES: ${now.stats.powerCosmetic}` : ''}${now.stats.powerBack ? `; the way back to the chords measured and clicked on ${now.stats.powerBack} screens (a pair's and a song switch's done screen and the songs view, EN + ES)` : ''})` : ''}${now.stats.changeUpLayouts ? `, Change Up at 1366\u00d7657 (Start on screen, no scrolling: ${now.stats.changeUpLayouts} views)` : ''}${now.stats.setupScreens ? `, ${now.stats.setupScreens} mic set-up screens at 1366\u00d7657, EN + ES even with --en-only (no scrolling, the set-up line once on one row, Start and the privacy line on screen)` : ''}${now.stats.quizLayouts ? `, Chord Blitz (both directions) and Fret Zap at 1366\u00d7657 (picture left, 2\u00d72 answers right, no scroll: ${now.stats.quizLayouts} views)` : ''}${now.stats.pmHeaderViews ? `, practice-minutes strip in the top bar: ${now.stats.pmHeaderViews} view checks (6 views x EN/ES x 1366 and 390 px: a shown button, exactly one strip on top, the Games bar's own on Games, folded away with a practice card open and none in its bar, no sideways scroll), ${now.stats.pmHeaderClicks} clicks open My progress, back after a reload, hidden when signed out` : ''}${now.stats.strumSteps ? `, ${now.stats.strumSteps} strum-pattern steps (EN + ES: cells, arrows, chord names, columns, 1366 and 390 px; Play strum lights an arrow, clicks every beat and sounds down strums louder; Play clicks opens the Metronome at 60 BPM, and again at the card's slider once it is dragged; Stop resets${now.stats.strumChecks ? `; the strum-pattern check run ${now.stats.strumChecks} time(s): its button under the board, the step's slider the only tempo (set to 100 first), the mic refused through the "Turn on the microphone" panel in its row (the button ready, the mic off, no marks), then one real round at the slider's top with the board, the button and the bar being played inside 1366x657 at bars 1, 4, 5 and 8, the row one line, Stop during it, one summary line and no line per bar after it` : ''})` : ''}${now.stats.pathsActivities ? `, ${now.stats.pathsActivities} paths-activity walks (EN + ES: chooser with a silent preview and step list per path, Start, route length, Got it, Change path, ticks kept across a switch, one saved pick)` : ''}${now.stats.noChecklist ? `, ${now.stats.noChecklist} no-checklist walks (a practice card opens with no checkbox and one Mark complete, which completes it and un-marks it; an extra song opens with none)` : ''}${now.stats.dotsWalks ? `, ${now.stats.dotsWalks} one-line step dot walks (EN + ES: the count's dots shown, each tap fills one, the last ticks the step and moves on, Got it on the next step moves on again)` : ''}${now.stats.todayGrid ? `, ${now.stats.todayGrid} Today tiles walked (EN + ES: at 1366x657 the three longest titles and a finished card side by side, two equal columns, reading order = Tab order, titles in two lines, nothing outside its tile; one column at 390px; one card and an open card take the whole width)` : ''}${now.stats.foldCards ? `, ${now.stats.foldCards} folded-card walks at 1366x657 (header and menu off screen with no full screen, a one-row bar, each of its 4 tool buttons opens its popup on screen and closes it, All activities brings both back${now.stats.foldReload ? '; a reload on the card\'s link reopens it folded' : ''})` : ''}${now.stats.fillViews ? `, the big-screen fill at 2560x1300 (the header across the window and the column over 1,400 px on screen, on the In class list and an open activity; factor 1 again at 1366x657)` : ''}${now.stats.cardKeys ? `, practice-card keys on ca-18 (Space plays and stops, > and < move the speed and back, Space after a mouse click on a section chip stops, Loop this part off on opening, clicked on, L off and on, Build up speed on at the slowest stop, a reload keeps nothing)` : ''}`);
   if (now.stats.tuningSimRounds) say(`smoke: Tuning Simulator (EN + ES): ${now.stats.tuningSimRounds} rounds played (round 1 with a real held peg button), ${now.stats.tuningSimChecks} checkpoints — defaults (sound on, level 1, the question up, no naming step), the card (the string to tune and the tuner's letter), the arrow keys (Left = counterclockwise = tighten) and a hidden tab, three clean rounds per level (saved), the sound switch, a wrong way resetting the count, a reload, level 4 (another letter on the tuner, the circle of notes and its arrow, which turns clockwise for Up and counterclockwise for Down, Tighten turns counterclockwise, the held button speeds up, green on the wrong letter does not finish), the notes and arrow as drawn, real keys and clicks (a held Enter answers once, focus after a key, Space/Enter/click = one tick), the saved level never lowered, green on the circle only when done, and no getUserMedia call`);
   if (LANGS.length === 1) say('smoke: --en-only — Spanish not walked (the end-of-day / Friday full walk does it); "EN + ES" below means English only');
