@@ -470,4 +470,8 @@ script.
   `strum-check-replay.mjs` (Jonathan's three real takes in `strum-takes/`, the bench rooms, `--splice`); their headers
   say how, and `docs/strum-check/DETAILS.md` holds every result. Since 2026-11-16 the site's grid search carries rule
   AD (review R4-1: an extra strum on a rest stays an extra; DETAILS section 29), so the replay's `SITE_P` carries
-  `outPen: -1.5, lock: 0.25`; the code before AD is `{"outPen":null,"lock":0}` (`--cands` / `--copy`).
+  `outPen: -1.5, lock: 0.25, lockMin: 4`, `trigOut: 0` (review R5-1: the wide search's test without rule A) and
+  `wideFrom: 'click'` (review R6-1: the wide search around the click grid). The code before AD is
+  `{"outPen":null,"lock":0,"wideFrom":"grid"}`; AD as first built `{"trigOut":null,"wideFrom":"grid"}`; the R5-1 fix alone
+  `{"wideFrom":"grid"}` (`--cands` / `--copy`). Before any replay the tool checks its copy's numbers and grid against the page
+  (about 17 s; `--no-self-check` leaves it out).

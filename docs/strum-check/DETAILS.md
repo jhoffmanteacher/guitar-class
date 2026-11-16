@@ -1353,7 +1353,7 @@ Jonathan's three real takes**: every row below is made up. A right player, 20 ms
 real grid code (the round-5 reviewer's scenario scripts `rev5/s/e1.mjs` / `e3.mjs` and round loop, re-run by the builder after the
 R5-1 fix; scratchpad `ad5-r52.mjs`). Bars all right:
 
-| what the mic also hears | before AD | AD as first built | AD with the R5-1 fix |
+| what the mic also hears | before AD | AD as first built | AD with the R5-1 fix (and with R6-1's) |
 |---|---|---|---|
 | nothing else (control) | 480 | 480 | 480 |
 | stray sounds, 0.5 a bar | 456 | 429 | 431 |
@@ -1393,7 +1393,11 @@ Everything else before (AD as first built) -> after the fix:
 | `strum-check-loop.mjs` default (150 takes) | | identical, row for row |
 | bench (`r41-bench.mjs`, 30 rows) | | identical but the talk room: right player 17 -> 19 of 64 bars (false extras 47 -> 45 of 128); strums heard, thumb 318 -> 317, quiet 338 -> 340 |
 
-The fix costs a late starter 0 to 3 bars of 80 against AD as first built (85 and 98 BPM), measured, not explained.
+The fix costs a late starter 0 to 3 bars of 80 against AD as first built (85 and 98 BPM). Why (the round-6 reviewer's explanation):
+as first built, an onset between two windows scored -1.5 in the wide-search test too, so for a late starter whose strums sit at
+window edges the wide search fired at his 6th onset and found his grid a bar sooner; the fix waits, as the code before AD did, until
+an onset lands on a rest (the reviewer: in all 14 rounds where the fix scored below AD as first built, it matched the code before AD
+slot for slot).
 
 **R5-3:** 1eh gains "THE LOCK IS NOT TOO STRONG": when the lock is taken, read from `scAnchor`'s own search calls (4 strums before ->
 the lock; 3 -> not; 5 with one on a rest or outside every window -> not; locked with the bar fitting badly -> the wide search still
@@ -1407,12 +1411,58 @@ measured better for a player who drags (drag 4%: 204 -> 421 of 480 made-up bars;
 tried on the real takes and Jonathan did not ask for it. (It is not the R5-3 break-it "lock range 0", which in the builder's runs is
 far worse for a dragging player: 202 against 314 of 640 bars, drag 4% and a tempo step together.)
 
+### Review round 6 (2026-11-16)
+
+**R6-1 (BLOCKER): a late starter trapped a bar off.** Live on main before AD (the pattern-shape grid of 2026-11-14), found
+2026-11-16; AD made it more frequent. `SC_ANCHOR_WIDE_MIN` (6) counts every sound: a late starter's first five strums and one strum
+heard twice (or one stray sound) make six onsets, the wide search runs, the five also fit the grid five eighths away and the extra
+sound can land on a strum place there, so that grid wins. The wide search reached only +-4 eighths from the grid it HAD, so his own
+grid was out of reach: every bar red. The reviewer's example: 60 BPM, no spread, 1.5 eighths late (strums at 750, 1750, 2250, 3250,
+3750, 4250 ms and on), his first strum also heard at 900 ms: every bar `ok quiet ok ok extra ok miss ok`, 0 of 8. **The fix
+("W0"):** the wide search runs around the CLICK grid (`scAnchorSearch({ ...s, gridOffset: 0 }, ...)`), so it reaches every allowed
+grid; the same 5 ms lattice, the same limit of `SC_ANCHOR_WIDE_RANGE` eighths from the click grid, the same number of offsets tried;
+only an exact tie is now kept nearest the click grid rather than the grid it had. The replay tool: `wideFrom: 'click'`.
+
+Measured by the builder (scratchpad `ad6-r1.mjs`, `ad6-audio.mjs`, `ad6-right.mjs`, `ad6-pin.mjs`). All 8 bars red:
+
+| late starters (1 to 3.5 eighths, 4 tempos, 30 seeds) | rounds | before AD | AD as first built | R5-1 fix | W0 |
+|---|---|---|---|---|---|
+| one bar-1 strum heard twice | 720 | 155 | 278 | 246 | **0** |
+| one stray sound in bar 1 | 720 | 76 | 139 | 117 | **0** |
+| 10% of strums heard twice | 720 | 64 | 137 | 123 | **0** |
+| nothing else | 720 | 0 | 0 | 0 | 0 |
+| clean (no spread), one strum heard twice, 432 configurations | 432 | | 158 | 158 | **0** (none under 6 bars) |
+| the virtual student's audio, right, 1 to 3.5 eighths late, 60 / 85 / 100 BPM, 6 seeds | 108 | 27 | | 37 | **0** (bars 444 / 372 / 598 of 864) |
+
+Can it move a right grid to a worse one? 30 kinds of right or nearly right players (steady, behind, ahead, stray sounds, foot taps,
+a neighbour, strums heard twice, drag, rush, tempo steps, beats lost, late and early starts, ups not heard), 2,400 rounds: the R5-1
+fix against W0, rounds worse 0, better 13; extras on rests caught 390 of 400 both. Everything else, R5-1 fix -> W0:
+
+| measure | R5-1 fix | W0 |
+|---|---|---|
+| 3 takes, kept clock +-20 ms (9 replays) | heard 379 / 414, false extras 3 / 138, bars 36 / 72 | the same, replay for replay |
+| `--splice`, bars 2-7 (180) | caught 115, passed 32, moved 220 | caught 115, passed 32, moved 225 (J02 at +80 ms) |
+| `--splice-bars=1` (45) | caught 1 of 27 (rest 1), 11 of 18 (rest 4); next bar red J02 8, J03 8 of 18 | the same |
+| `extras.mjs` | 114 / 120 | the same |
+| late start (85 / 98 BPM, 7 offsets and drag 4%) | | the same, every cell |
+| `strum-check-loop.mjs` default (150 takes) | | the same but one take: rush 4% at 100 BPM, strums heard 40 -> 37 of 48 and one false extra (bars 2 of 8 both) |
+| bench (`r41-bench.mjs`, 30 rows) | | the same but straight eighths in talk, strums heard 351 -> 348 |
+| the R5-2 cost rows | | the same, every row |
+| jump at bar 4, 85 + 100 BPM, 960 bars (before AD / first built / now) | a beat 787 / 749 / 738; 3 eighths 722 / 670 / 667 | the same |
+| 1eh floor (drag 4% + tempo +5%) | 162 of 320 | 162 |
+
+1eh pin "A LATE STARTER IS NOT TRAPPED A BAR OFF": the reviewer's example and three more must keep 6 of 8 bars (red with the old
+line: 0 of 8 in all 4). **R6-2:** the floor is 158 (the lock judged on every onset of the round landed exactly on 154) and the spy
+checks that the wide-search test is scored at the narrow search's grid. **R6-3:** the replay tool's self-check (about 17 s of 26)
+can be left out with `--no-self-check`; a constant the page lacks says so. **R6-4:** these words.
+
 **Unmeasured:** talking on real audio (every talk number above is the bench's synthetic room; no real take has talk in it, and the
 talk room is where AD costs most); takes from a Chromebook mic (all three takes are a MacBook Air); an extra UP-strum (the
 splices paste his down-strums, slot 0 and slot 2).
 
 **Proof in checks** (1eh): the pin "ONE EXTRA STRUM ON A REST" (71 rounds), "AN EXTRA ON BAR 1'S FIRST REST DOES NOT FAIL BAR 2"
-(24 rounds, R5-1), "THE LOCK IS NOT TOO STRONG" (6 cases and a floor, R5-3) and `SC_ANCHOR_LOCK` / `SC_ANCHOR_LOCK_MIN` pinned.
+(24 rounds, R5-1), "THE LOCK IS NOT TOO STRONG" (7 cases and a floor of 158, R5-3 / R6-2), "A LATE STARTER IS NOT TRAPPED A BAR
+OFF" (4 rounds, R6-1) and `SC_ANCHOR_LOCK` / `SC_ANCHOR_LOCK_MIN` pinned.
 Break-its of the R5 pins are in their commit messages.
 Break-its, each a full `checks.mjs --check --skip-links` run: the code before AD 38 of 71 not called; rule A taken out 16; rule D
 taken out 8; the lock tested on all the onsets (this one too) 8; a sound outside the windows costing -0.5 instead of -1.5: 6;

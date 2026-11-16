@@ -142,9 +142,11 @@ const SC_ANCHOR_WIDE_TIGHT = 0.15;
      A  a sound outside every window costs SC_ANCHOR_REST too, as a sound on a rest does (scAnchorSearch);
      D  when the SC_ANCHOR_LOCK_MIN or more onsets before this one (in the last SC_ANCHOR_SPAN eighths) all sit on strum places of the
         grid it has, the search looks only SC_ANCHOR_LOCK of an eighth either way (not SC_ANCHOR_RANGE): a player whose last strums fit
-        is on the grid, so one odd sound cannot move it far. The wide search (above) runs as before over SC_ANCHOR_WIDE_RANGE, but
-        whether the bar fits badly enough to run it is scored WITHOUT rule A (scAnchor; review R5-1: with it, one extra on bar 1's
-        first rest set the wide search off, it fitted the pattern three eighths on, and bar 2, played right, failed).
+        is on the grid, so one odd sound cannot move it far. The wide search (above) still runs while locked; since review R5-1
+        whether the bar fits badly enough to run it is scored WITHOUT rule A (with it, one extra on bar 1's first rest set the wide
+        search off, it fitted the pattern three eighths on, and bar 2, played right, failed), and since review R6-1 it searches
+        SC_ANCHOR_WIDE_RANGE around the CLICK grid, not the grid it has (a late starter pulled a bar off by one sound heard twice
+        could never come back: every bar red; live before AD too, more often with it).
    Measured (DETAILS section 29): Jonathan's three takes, kept clock and +-20 ms, right playing: strums heard 379 of 414 (378 before),
    false extras 3 of 138 (3), bars all right 36 of 72 (35), right chords the same. One of his own strums pasted into a rest (180
    splices): caught 115 (38 before), the mistake bar passed 32 (83). Not fixed: an extra on bar 1's first rest (one strum before it;
@@ -154,9 +156,12 @@ const SC_ANCHOR_WIDE_TIGHT = 0.15;
    these is in Jonathan's three real takes; every number here is made up (DETAILS section 29). A right player, 20 ms spread, 85 BPM,
    bars all right of 480 (60 rounds), before AD -> AD (with the review R5-1 fix): stray sounds 0.5 a bar 456 -> 431; 1 a bar 426 ->
    388; a foot tap on each beat, half of them heard, 321 -> 245; a neighbour's guitar, 30% of his strums heard, 381 -> 329; a strum
-   heard twice (10%) 466 -> 465, at 125 BPM 416 -> 393; a beat lost at bar 4 (a mid-round stumble, 25 ms spread) 397 -> 368. The bench's talk room:
-   a right player 19 of 64 bars right (28 before), false extras 45 of 128 (15); a quiet player in the class room 7 of 24 (10); a
-   steady player who starts 1.5 beats late 60 of 80 bars (65 before) at 85 BPM. */
+   heard twice (10%) 466 -> 465, at 125 BPM 416 -> 393; a beat lost at bar 4 (a mid-round stumble, 25 ms spread) 397 -> 368; at 85
+   and 100 BPM (960 bars) a beat lost 787 -> 738, and a jump of 3 eighths mid-round about the same, 722 -> 667. Every one of these
+   the same after the review R6-1 fix. The bench's talk room: a right player 19 of 64 bars right (28 before), false extras 45 of 128
+   (15); a quiet player in the class room 7 of 24 (10); a steady player who starts 1.5 beats late 60 of 80 bars (65 before) at
+   85 BPM. A late starter with one sound heard twice or one stray sound early is no longer trapped a bar off (review R6-1: every
+   bar red in 246 of 720 made-up rounds before that fix, 155 before AD, 0 now). */
 const SC_ANCHOR_LOCK = 0.25;
 const SC_ANCHOR_LOCK_MIN = 4;
 /* THE CHORD, octave first (2026-11-14, take 1 bar 4: G5 played where C5 is due passed, because G is in both chords and pitch classes
