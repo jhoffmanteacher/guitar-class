@@ -43,8 +43,7 @@
 
    PART D (2026-11-16; teacher-sb-publish.js). Its own console and store: a made-up draft past steps 1 to 5 (its
    levelled copy stored as the Song files writer stores one) and a made-up imported song on the list (edit 3). THE
-   LISTENS: the real sbPvStep / sbPvRunEnd on positions a playing card would give (a run begun mid-section, one stopped
-   short, a whole play to the lap), saved in the draft with the song's signature, started over by a change. PUBLISH:
+   (The listens were taken out on 2026-11-16: no listen gate.) PUBLISH:
    off until the listens; every other blocker said as the one reason (over 10 cents, said once; a drift window; a
    section with no name; an unsaved title; an audio id on SONG_FILES or another song's), each writing nothing through
    the button; the stored copy and the list read fresh at the press; a record over 8 pins warns and never blocks.
@@ -128,7 +127,7 @@ function clone(v){
   if(v && typeof v === 'object'){ const o = {}; for(const k of Object.keys(v)) o[k] = clone(v[k]); return o; }
   return v;
 }
-const DRAFT_KEYS = 'artist,audio,beat,chart,imported,level,listens,pitch,pubVer,savedAt,source,step,title,v,volume';
+const DRAFT_KEYS = 'artist,audio,beat,chart,imported,level,pitch,pubVer,savedAt,source,step,title,v,volume';
 function rulesCheck(op, path, data){
   const p = path.split('/');
   if(op === 'delete') return (p[0] === 'songDrafts' && p.length === 2) || (p[0] === 'songFiles' && (p.length === 2 || (p.length === 4 && p[2] === 'pieces')))
@@ -331,14 +330,15 @@ async function runCases(consoleSrc){
   /* A new draft: Next saves it once, in the draft's own shape. */
   run("sbNew = { title: 'Test 0', artist: 'The Test Band' }"); run('sbSaveUpload()'); await settle();
   const id = run('sbSel');
-  const dw = F.st.writes.filter(w => w.path.startsWith('songDrafts/'));
+  const firstSf = F.st.writes.findIndex(w => w.path.startsWith('songFiles/'));
+  const dw = F.st.writes.filter((w, i) => w.path.startsWith('songDrafts/') && (firstSf < 0 || i < firstSf));
   const d0 = dw[0] && dw[0].data;
-  check('new draft: Next writes songDrafts/<sb- id> once, with exactly the draft fields and the server time',
+  check('new draft: Next writes songDrafts/<sb- id> once (before Volume, which now starts by itself), with exactly the draft fields and the server time',
     /^sb-[a-z0-9]{12}$/.test(id) && dw.length === 1 && dw[0].path === 'songDrafts/' + id && Object.keys(d0).sort().join(',') === DRAFT_KEYS && d0.savedAt === TS && d0.v === 1 && d0.step === 2,
     dw.length + ' writes; ' + (d0 ? Object.keys(d0).sort().join(',') : 'none'));
   check('new draft: the source is the file\'s facts, not the file (no audio stored at step 1)',
     d0 && d0.source && d0.source.sha256 === sha(SRC_A) && d0.source.bytes === SRC_A.length && d0.source.durationSec === 24 && d0.source.sampleRate === 44100 && d0.source.channels === 1
-    && d0.audio === null && keysOf('songFiles').length === 0, JSON.stringify(d0 && d0.source));
+    && d0.audio === null && firstSf > F.st.writes.findIndex(w => w.path === 'songDrafts/' + id), JSON.stringify(d0 && d0.source));
   check('new draft: the console opens it on step 2', run('sbStepOn') === 2 && run('sbDraft() && sbDraft().title') === 'Test 0');
 
   /* Volume: the levelled copy goes to songFiles first, then the draft points at it. */
@@ -527,6 +527,7 @@ async function runCases(consoleSrc){
   await publishCases(consoleSrc, check);
   await importCases(consoleSrc, check);
   await fixCases(consoleSrc, check);
+  await cutsCases(consoleSrc, check);
   return out;
 }
 function box_set(C, k, v){ C.box[k] = v; }
@@ -744,11 +745,11 @@ async function chartCases(consoleSrc, check){
     const p4 = run('sbChartPaneHtml(sbDraft())');
     run('sbChartAct("chart-read", { dataset: {} })'); await settle();
     const after = nid ? F2.S.get(nid) : null;
-    check('upload: a chart pasted at step 1 is saved with the new draft as its text; step 4 is open at once with it in the box (before the record is levelled), and Read the chart reads it', !!nd && JSON.stringify(nd.chart) === '{"text":"[Chorus]\\nC G D"}' && nd.audio === null
-      && run('sbStepOn') === 4 && /data-sb-charttext[^>]*>\[Chorus\]/.test(p4) && /4 beats a bar until/.test(p4) && !!after && after.chart.sections.length === 1 && after.chart.sections[0].name === 'chorus' && after.chart.sections[0].bars.join(' ') === 'C G D',
+    check('upload: a chart pasted at step 1 is READ when Next saves the draft (2026-11-16, fewer clicks): step 4 opens on its grid at once', !!nd && nd.chart && nd.chart.text === '[Chorus]\nC G D' && /Pick a bar to change it/.test(p4)
+      && run('sbStepOn') === 4 && Array.isArray(nd.chart.sections) && nd.chart.sections.length === 1 && nd.chart.sections[0].name === 'chorus' && nd.chart.sections[0].bars.join(' ') === 'C G D',
       JSON.stringify({ chart: nd && nd.chart, step: run('sbStepOn'), read: after && after.chart && after.chart.sections && after.chart.sections.map(x => x.bars) }));
   }
-  check('chart and level: every write went to songDrafts and fits the rules (no songFiles, config/class, progress/ or builtSongs write)', F2.st.violations.length === 0 && F2.st.writes.length >= 8 && F2.st.writes.every(w => w.path.startsWith('songDrafts/')),
+  check('chart and level: every write went to songDrafts, or to songFiles from Volume starting by itself after step 1, and fits the rules (no config/class, progress/ or builtSongs write)', F2.st.violations.length === 0 && F2.st.writes.length >= 8 && F2.st.writes.every(w => /^(songDrafts|songFiles|songFilesUsage)\//.test(w.path)),
     F2.st.writes.length + ' writes; ' + (F2.st.violations.slice(0, 2).join('; ') || [...new Set(F2.st.writes.map(w => w.path.split('/')[0]))].join(', ')));
 }
 
@@ -940,8 +941,8 @@ async function pdfCases(consoleSrc, check){
   }
   /* B16 */
   const dw = F3.st.writes;
-  check('pdf flow: no pdf action wrote anything (0 writes across 8 picks, a Remove and an open); the run\'s only writes are the new draft\'s songDrafts write, within the rules',
-    pdfW === 0 && dw.length === 1 && dw[0].path === 'songDrafts/' + nid && F3.st.violations.length === 0, JSON.stringify({ pdfWrites: pdfW, writes: dw.map(w => w.path) }));
+  check('pdf flow: no pdf action wrote anything (0 writes across 8 picks, a Remove and an open); the run\'s only writes are the new draft\'s (the draft, its chart read at once, and the copy Volume makes by itself), within the rules',
+    pdfW === 0 && dw[0].path === 'songDrafts/' + nid && dw[1].path === 'songDrafts/' + nid && dw.every(w => w.path === 'songDrafts/' + nid || w.path.startsWith('songFiles/' + nid + '-')) && F3.st.violations.length === 0, JSON.stringify({ pdfWrites: pdfW, writes: dw.map(w => w.path) }));
 }
 
 /* ── PART D (2026-11-16; teacher-sb-publish.js): Preview's listens, Publish, Edit, Unpublish, Delete, Export, the
@@ -992,51 +993,20 @@ async function publishCases(consoleSrc, check){
     const w0 = nW();
     run('sbGoStep(6)'); await settle(100);
     const pane = run('sbPreviewPaneHtml(sbDraft())');
-    check('preview: going to step 6 saves the furthest step (one songDrafts write); the pane has the three listens, the Spanish-templates line and the title as students see it (escaped), and no "does not fit" box for a steady record',
+    check('preview: going to step 6 saves the furthest step (one songDrafts write); the pane says to play it through once (no listen counted), the Spanish-templates line and the title as students see it (escaped), and no "does not fit" box for a steady record',
       run('sbStepOn') === 6 && F4.S.get('songDrafts/' + id).step === 6 && since(w0).filter(x => !x.includes('songFilesUsage')).join() === 'set songDrafts/' + id
-      && (pane.match(/class="sb-listen[ "]/g) || []).length === 3 && /fixed English and Spanish templates/.test(pane) && pane.includes('"Test 0 Publish" - The Test Band — Play Along') && !/does not fit the builder/.test(pane),
-      JSON.stringify({ step: run('sbStepOn'), writes: since(w0), listens: (pane.match(/class="sb-listen[ "]/g) || []).length }));
+      && /Play it through once before you publish/.test(pane) && /fixed English and Spanish templates/.test(pane) && pane.includes('"Test 0 Publish" - The Test Band — Play Along') && !/does not fit the builder/.test(pane),
+      JSON.stringify({ step: run('sbStepOn'), writes: since(w0), once: /Play it through once/.test(pane) }));
   }
-  /* D3: Publish stays off until the three listens */
+  /* D3: no listen gate (decided 2026-11-16): with the validator, the pitch and the copy passing, Publish is on at once,
+     and its button is on the Preview step itself */
   {
-    const why = run('sbPublishWhy(sbDraft(), sbSel)');
-    const w0 = nW();
-    env.confirmAnswer = true; env.confirms.length = 0;
-    run('sbPublish()'); await settle();
-    check('publish: off until the three listens (the only reason left); pressing it writes nothing, asks nothing and says why; the button is disabled',
-      why.length === 1 && /Listen at the Preview step/.test(why[0]) && nW() === w0 && env.confirms.length === 0 && /^Not published: Listen at the Preview step/.test(run('sbNote')) && /data-sb-act="publish" disabled/.test(run('sbPublishBtnHtml(sbDraft())')),
-      JSON.stringify({ why, writes: since(w0), note: run('sbNote') }));
+    const why = run('sbPublishWhy(sbDraft(), sbSel)'), nav6 = run('sbStepOn = 6; sbNavHtml(sbDraft())');
+    check('publish: no listen is counted or asked for: Publish is on at once, and the Preview step\'s top button is Publish itself (no Next: Publish)',
+      why.length === 0 && /data-sb-act="publish"/.test(nav6) && !/data-sb-act="publish"[^>]*disabled/.test(nav6) && !/Next: Publish/.test(nav6) && !/Listen at the Preview/.test(run('sbPublishPaneHtml(sbDraft())')),
+      JSON.stringify({ why, nav6: nav6.replace(/<[^>]*>/g, ' ').trim() }));
   }
-  /* D4: the listens: a section counts only when one run of the play began at its start and reached its end */
-  const listenThrough = async (Cx, seqs) => {
-    Cx.run(`sbPv = { id: sbSel, key: 'sim', sig: sbListenSig(sbDocOf(sbDraft())), node: null, act: null, run: null, L: null }`);
-    const ex = Cx.run('builtSongExpand(sbSel, sbDocOf(sbDraft()))');
-    const L = { firstBar: ex.activity.card.sections[0].fromBar, sections: ex.activity.card.sections.map(x => ({ fromBar: x.fromBar, bars: x.bars, reps: 1 })) };
-    Cx.box.__L = L;
-    const heardAfter = [];
-    for(const seq of seqs){
-      for(const pos of seq) Cx.run(`sbPvStep(sbPv, __L, ${pos})`);
-      Cx.run('sbPvRunEnd(sbPv)');                         // the play stops
-      heardAfter.push(JSON.stringify(Cx.run('(sbDraft().listens && sbDraft().listens.heard) || []')));
-    }
-    Cx.run('sbPv = null');
-    await sleep(500); await settle();
-    return heardAfter;
-  };
-  {
-    const steps = (a, b, n) => Array.from({ length: n + 1 }, (_, i) => Math.round((a + (b - a) * i / n) * 1000) / 1000);
-    const h = await listenThrough(C, [
-      steps(1.6, 2.95, 8),                                 // the verse from its middle: not heard
-      steps(3.02, 4.6, 8),                                 // the chorus, stopped 0.4 bar before its end: not heard
-      [...steps(0.02, 0.95, 6), ...steps(1.02, 2.85, 8), ...steps(3.0, 4.78, 8), 0.03],   // the whole card and the lap back: all three
-    ]);
-    const st = F4.S.get('songDrafts/' + id);
-    check('listens: a play begun mid-section is not a listen, one stopped before the section\'s end is not, a whole play to the lap is all three; the listens are saved in the draft with the song\'s own signature',
-      h[0] === '[]' && h[1] === '[]' && h[2] === '[0,1,2]' && st.listens && st.listens.heard.join() === '0,1,2' && st.listens.sig === run('sbListenSig(sbDocOf(sbDraft()))') && run('sbListensOf(sbDraft()).all'),
-      JSON.stringify({ h, stored: st.listens }));
-    const other4 = run(`(() => { const d = JSON.parse(JSON.stringify(sbDraft())); d.level = { versions: 'full', range: null }; return sbListensOf(d).all; })()`);
-    check('listens: a change to the song (here the level) starts them over', other4 === false, String(other4));
-  }
+  const listenThrough = async () => {};   // the listens are gone (2026-11-16); kept as a no-op so the flow reads as before
   /* D5: every other blocker, each said, each writing nothing; the "does not fit" warning is shown and blocks nothing */
   {
     const variant = mut => run(`(() => { const keep = sbDrafts.get(sbSel), d = JSON.parse(JSON.stringify(keep)); (${mut})(d); sbDrafts.set(sbSel, d); try { return sbPublishWhy(d, sbSel); } finally { sbDrafts.set(sbSel, keep); } })()`);
@@ -1150,8 +1120,8 @@ async function publishCases(consoleSrc, check){
   R.run('window.__saves = []; teacherMicSaveFile = (name, blob) => { window.__saves.push({ name, blob }); }');
   R.run('renderTeacherSongBuilder()'); await settle();
   R.run(`sbOpen(${JSON.stringify(id)})`); await settle();
-  check('reload: the song is listed as Published with no "Changes not published", opens on its page, and its listens are still all done',
-    /Published/.test(R.run('sbListHtml()')) && !/Changes not published/.test(R.run('sbListHtml()')) && !R.run('sbShowsSteps()') && R.run('sbPubChanged(sbDraft(), sbPublished.get(sbSel))') === false && R.run('sbListensOf(sbDraft()).all'),
+  check('reload: the song is listed as Published with no "Changes not published", and opens on its page',
+    /Published/.test(R.run('sbListHtml()')) && !/Changes not published/.test(R.run('sbListHtml()')) && !R.run('sbShowsSteps()') && R.run('sbPubChanged(sbDraft(), sbPublished.get(sbSel))') === false,
     R.run('sbListHtml()').slice(0, 300));
   /* D10: Edit: the steps open; a new levelled copy is made; students keep the published song; the old copy stays */
   const aidNew = id + '-' + sha(LEVELLED.get('a')).slice(0, 8);
@@ -1165,7 +1135,7 @@ async function publishCases(consoleSrc, check){
     check('edit: Edit opens the steps on Chart, its default (Delete… with the typed title, not Delete draft); levelling again stores a new copy and names it in the draft, while the published song and the copy it plays stay as they were',
       editing && R.run('sbDraft().audio.id') === aidNew && keysOf('songFiles/' + aidNew + '/pieces/').length === 3 && keysOf('songFiles/' + aid).length > 0 && JSON.stringify(doc) === JSON.stringify(pubDoc),
       JSON.stringify({ editing, draftAudio: R.run('sbDraft().audio.id'), oldKept: keysOf('songFiles/' + aid).length }));
-    check('edit: the list says "Changes not published", the listens start over, and Publish asks for them again', /Changes not published/.test(R.run('sbListHtml()')) && !R.run('sbListensOf(sbDraft()).all') && /Listen at the Preview step/.test(R.run('sbPublishWhy(sbDraft(), sbSel).join(" ")')),
+    check('edit: the list says "Changes not published", and the change can be published (the new copy waits only for its drift check at the Beat step)', /Changes not published/.test(R.run('sbListHtml()')) && R.run('sbPublishWhy(sbDraft(), sbSel)').every(w => /Beat step/.test(w)),
       R.run('sbPublishWhy(sbDraft(), sbSel).join(" | ")'));
   }
   /* D11: publish the change: the song, the list (a new edit number), and only then the old copy goes */
@@ -1302,14 +1272,8 @@ async function importCases(consoleSrc, check){
   run('window.__saves = []; teacherMicSaveFile = (name, blob) => { window.__saves.push({ name, blob }); };');
   run('renderTeacherSongBuilder()'); await settle();
   /* the listens, as the Preview step's card would give them (a whole play of every section) */
-  const listenAll = async () => {
-    run(`sbPv = { id: sbSel, key: 'sim', sig: sbListenSig(sbDocOf(sbDraft())), node: null, act: null, run: null, L: null }`);
-    const ex = run('builtSongExpand(sbSel, sbDocOf(sbDraft()))'), secs = ex.activity.card.sections, first = secs[0].fromBar;
-    C.box.__L = { firstBar: first, sections: secs.map(x => ({ fromBar: x.fromBar, bars: x.bars, reps: 1 })) };
-    for(const x of secs){ const s0 = x.fromBar - first; for(const f of [0.02, 0.5, 0.97]) run(`sbPvStep(sbPv, __L, ${s0 + f * x.bars})`); }
-    run('sbPvRunEnd(sbPv); sbPv = null');
-    await sleep(500); await settle();
-  };
+  const listenAll = async () => {};   // no listens since 2026-11-16
+
 
   /* E1: the imported song's page: Edit with a choice of step, Unpublish */
   run(`sbOpen(${JSON.stringify(A)})`); await settle();
@@ -1329,7 +1293,7 @@ async function importCases(consoleSrc, check){
     const u0 = (F6.S.get('songFilesUsage/' + run('songFileMonth()')) || {}).bytes || 0;
     run('teacherSbPaint()'); await settle();
     check('imported song, Edit on Beat: one songDrafts write (the draft fields, imported, its edit number) and the Beat step opens; nothing is loaded for it',
-      since(w0).join() === 'set songDrafts/' + A && d && Object.keys(d).sort().join(',') === 'artist,audio,beat,chart,imported,level,listens,pitch,pubVer,savedAt,source,step,title,v,volume' && d.imported === true && d.pubVer === 4
+      since(w0).join() === 'set songDrafts/' + A && d && Object.keys(d).sort().join(',') === 'artist,audio,beat,chart,imported,level,pitch,pubVer,savedAt,source,step,title,v,volume' && d.imported === true && d.pubVer === 4
       && run('sbShowsSteps()') && run('sbStepOn') === 3 && ((F6.S.get('songFilesUsage/' + run('songFileMonth()')) || {}).bytes || 0) === u0,
       JSON.stringify({ writes: since(w0), keys: d && Object.keys(d).sort().join(','), step: run('sbStepOn') }));
     check('imported song: Upload says its original mp3 is not here, Volume that the levelled copy and its numbers came with the song, Beat shows the bars read-only ("came with the imported song"), Chart that its original text is not here',
@@ -1440,14 +1404,8 @@ async function fixCases(consoleSrc, check){
   const nW = () => F8.st.writes.length, since = w0 => F8.st.writes.slice(w0).map(w => w.op + ' ' + w.path);
   run('renderTeacherSongBuilder()'); await settle();
   run(`sbOpen(${JSON.stringify(id)})`); await settle();
-  const listenAll = async (Cx) => {
-    Cx.run(`sbPv = { id: sbSel, key: 'sim', sig: sbListenSig(sbDocOf(sbDraft())), node: null, act: null, run: null, L: null }`);
-    const ex = Cx.run('builtSongExpand(sbSel, sbDocOf(sbDraft()))'), secs = ex.activity.card.sections, first = secs[0].fromBar;
-    Cx.box.__L = { firstBar: first, sections: secs.map(x => ({ fromBar: x.fromBar, bars: x.bars, reps: 1 })) };
-    for(const x of secs){ const s0 = x.fromBar - first; for(const f of [0.02, 0.5, 0.97]) Cx.run(`sbPvStep(sbPv, __L, ${s0 + f * x.bars})`); }
-    Cx.run('sbPvRunEnd(sbPv); sbPv = null');
-    await sleep(500); await settle();
-  };
+  const listenAll = async () => {};   // no listens since 2026-11-16
+
   env.confirmAnswer = true;
   await listenAll(C);
   run('sbPublish()'); await settle(200);
@@ -1519,6 +1477,51 @@ async function fixCases(consoleSrc, check){
     check('R1-8: the preview card is made again when the page\'s language changes (its key holds the language)', k[0] !== k[1] && /\|es\|/.test(k[1]) && /\|en\|/.test(k[0]), JSON.stringify(k));
   }
   check('review fixes: every write fits firestore.rules and none goes to config/class or progress/', F8.st.violations.length === 0 && !F8.st.writes.some(w => /^(config|progress)\//.test(w.path)), (F8.st.violations.slice(0, 3).join('; ') || 'no violation'));
+}
+
+/* ── FEWER CLICKS (2026-11-16, decided by the lead on Jonathan's word "you pick the way to make things smoothest"):
+   a chart given at step 1 is read when the draft is saved (C); Volume starts by itself on arriving at step 2 with the
+   original in the tab (D); a new draft opens on Full chords, the whole song (F). Its own console and store. ── */
+async function cutsCases(consoleSrc, check){
+  const F9 = makeDb(), C = makeConsole(consoleSrc, F9), { run } = C;
+  run('renderTeacherSongBuilder()'); await settle();
+  let calls = 0; const level0 = C.box.__level; C.box.__level = async () => { calls++; return level0(); };
+  const newSong = async (title, chart) => {
+    run('sbNewSong()'); await settle();
+    box_set(C, '__f', fileOf('test-a.mp3', SRC_A, 24)); run('sbPickFile(__f)'); await settle();
+    run(`sbNew = { title: ${JSON.stringify(title)}, artist: 'Test Band', chartText: ${JSON.stringify(chart)} }`);
+    run('sbSaveUpload()'); await settle(200);
+    return run('sbSel');
+  };
+  const id1 = await newSong('Test Cut One', '[Verse]\nG  C\nTest words here\nD  Em\n[Chorus]\n| C | G | D | G |');
+  const d1 = F9.S.get('songDrafts/' + id1);
+  check('C: a chart given at step 1 is read when Next saves the draft: step 4 opens on the grid (nothing to settle: no refused line, every chord taught)',
+    d1 && d1.chart && Array.isArray(d1.chart.sections) && d1.chart.sections.length === 2 && run('sbChFor(sbSel).view') === 'grid' && run('sbStepOn') === 2,
+    JSON.stringify({ secs: d1 && d1.chart && d1.chart.sections && d1.chart.sections.length, view: run('sbChFor(sbSel).view') }));
+  check('D: arriving at step 2 with the original in the tab levels it without a click (the copy stored, the draft names it); F: the new draft opens on Full chords, the whole song',
+    calls === 1 && d1.audio && !!F9.S.get('songFiles/' + d1.audio.id) && !!d1.volume && run('sbCopyCurrent(sbDraft())') && JSON.stringify(d1.level) === JSON.stringify({ versions: 'full', start: null, range: null }),
+    JSON.stringify({ calls, audio: d1.audio && d1.audio.id, level: d1.level }));
+  const id2 = await newSong('Test Cut Two', '[Verse]\nG  C\ne|--3--2--0--|\nD  Bb');
+  check('C: a chart with something to settle (a TAB line, a chord not taught) opens on "what was read"', run('sbChFor(sbSel).view') === 'read' && id2 !== id1, run('sbChFor(sbSel).view'));
+  /* never over a chart already read or edited */
+  {
+    const before = JSON.stringify(F9.S.get('songDrafts/' + id2).chart.sections);
+    run(`sbDraft().chartText = '[Verse]\\nA A A A'`);
+    run('sbGoStep(1)'); await settle(); run('sbSaveUpload(2)'); await settle(200);
+    check('C: a chart already read is never read again from step 1', JSON.stringify(F9.S.get('songDrafts/' + id2).chart.sections) === before, 'changed');
+  }
+  /* D: once per file: a levelling that failed waits for the button */
+  {
+    const n0 = calls;
+    C.box.__level = async () => { calls++; throw { why: 'sim: the encoder failed' }; };
+    box_set(C, '__f', fileOf('test-b.mp3', SRC_B, 24.02)); run('sbGoStep(1)'); await settle(); run('sbPickFile(__f)'); await settle();
+    run('sbSaveUpload(2)'); await settle(200);
+    const after1 = calls;
+    run('sbGoStep(1)'); await settle(); run('sbGoStep(2)'); await settle(200);
+    check('D: a levelling that failed is not started again by itself (once per file in the tab); "Level it" stays for the click',
+      after1 === n0 + 1 && calls === after1 && run('sbStepOn') === 2 && /data-sb-act="level"/.test(run('sbVolumeHtml(sbDraft())')),
+      JSON.stringify({ n0, after1, calls, note: run('sbNote') }));
+  }
 }
 
 /* ── main ── */
