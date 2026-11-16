@@ -179,6 +179,64 @@ bullet under the job), the Mac fixes and pushes. All three branches are on GitHu
   within minutes of the push, under the old worker or the old part list. Is "push after school" enough, or does
   the push need an order (for example the new parts shipped in `sw.js` one push before the cut)? The Mac pushes
   it after school only if this comes back clean.
+  - **W2 DONE: review of the two coach splits at `d6c3e16` (Windows, 2026-11-16; one fresh Opus `site-reviewer`,
+    read-only, no Chrome): the split itself is CLEAN; 1 BLOCKER about the DEPLOY, 0 MAJOR, 3 MINOR (docs). DO NOT
+    push the cut as one plain push: "after school" is not enough.** The lead has not re-opened the quoted lines.
+    The reviewer's scripts: the Windows scratchpad `rev\` (`mixed.mjs`, `mixed-shim.mjs`, `loadtrace.mjs`,
+    `strip.mjs`).
+    - **R1-1 BLOCKER (deploy).** A page opened BEFORE the push holds the old 8-name `COACH_JS_PARTS` in memory. If
+      it loads the arcade after the push it fetches the SHORTENED `coach-chords.js` and `coach-runner.js` and never
+      asks for `coach-chordcards.js` or `coach-noterunner.js` (part URLs carry no version: `loadScriptOnce(src)`).
+      Not only Games breaks: `gamesStopMic(true)` throws "cbStop is not defined" (the guard at `coach-hub.js:380`
+      `if (typeof bcStop !== 'function') return;` passes because `coach-more.js` did load; `:383` `cbStop();`
+      throws), and its callers are every game and the hub (`coach-hub.js:789`), the Tuner (`fab-tools.js:373`),
+      Record Yourself (`app/review.js:380`), the Coach check (`coach-core.js:470`), Note Call
+      (`app/drills-call.js:268`), the strum check (`coach-strumcheck.js:432`), Hear It First. `gamesHideStop()`
+      throws "nr is not defined" on every hidden tab (`coach-core.js:2527`); the hub render throws
+      (`coach-hub.js:688`); `coachMicLatencyMs()` throws (`coach-core.js:873`). Each throw also raises the "Something
+      went wrong" banner and a site-error report. Proved in a vm with the old list and the tip's files (controls on
+      base and tip pass); `node tools/sw-upgrade-proof.mjs --old <3b667ba> --new <d6c3e16, CACHE_VERSION changed>`
+      shows it as scenario 3's finding (the 8-file list gets 9,995 lines; the arcade is 12,082).
+      **When it bites:** (1a) before the page has checked for an update, the OLD worker serves the old whole files
+      from its cache and the page works, but each of those requests overwrites that cache with the short file
+      (`sw.js:561` `cache.put(req, res.clone())`), so a second old tab, or this tab's next arcade start before the
+      takeover, is broken until a manual reload; (1b) an old cache that never got a coach part fetches the short
+      file: broken until a manual reload; (2a) after the new worker takes over, a tab that is not busy reloads at
+      once and is fine; (2b) a BUSY tab (auth, mic, recording, a drill, an exit check part-way, Note Call, a card
+      playing) waits up to 5 minutes (`app/start.js:73` `SW_RELOAD_MAX_WAIT`), and Games, the Tuner, Record or the
+      Coach opened in that wait are broken until the reload; (3) a tab that had already loaded the arcade is safe.
+      A Chromebook closed with the site open keeps the old page alive overnight, so "after school" does not drain
+      these pages: 1a, 1b and 2b then happen in class.
+      **Fix A, one push (recommended):** append one guarded line to the end of each shortened parent, so an old
+      page loads the new part itself: in `coach-chords.js`
+      `if (typeof COACH_JS_PARTS !== 'undefined' && COACH_JS_PARTS.indexOf('coach-chordcards.js') < 0 && typeof loadScriptOnce === 'function') loadScriptOnce('coach-chordcards.js').catch(() => {});`
+      and the same in `coach-runner.js` with `'coach-noterunner.js'`. Proved in the reviewer's harness: old list +
+      new files + these lines: every call above is fine and exactly the two new parts are loaded; with the new list
+      nothing extra loads. To close the remaining race, widen the guard in `gamesStopMic` / `gamesHideStop` to
+      `typeof bcStop !== 'function' || typeof cbStop !== 'function' || typeof nrStop !== 'function'`. It is a
+      deliberate non-move edit: say so in the commit, and put its removal on the summer-reset list (or remove it
+      after a week). With fix A the push time no longer matters.
+      **Fix B, no code, two pushes a school day apart:** push 1 adds the two names to `COACH_JS_PARTS` and `sw.js`
+      ASSETS with the new files holding only their header and the parents still whole; push 2 moves the code. Less
+      risk, not zero (a page alive since before push 1 can still break).
+      Either way the Mac runs `node tools/update-reload-loop.mjs` (Chrome) and the `sw-upgrade-proof` command above
+      on live main → the rebased tip.
+    - **MINOR (docs).** R1-2: `docs/strum-check/LISTENING-DESIGN-2026-11-16.md` `:187` (line numbers of
+      `srHearStrum`: `coach-strum.js:1256`, the copy 1257-1262 at the tip) and `:205-207` ("Stale comments found,
+      not fixed": `d6c3e16` fixed all three) are stale. R1-3: `todo.md:91` says 1,091 lines; the tip is 1,094.
+      R1-4: nothing pins the part order the `bcStop` guard relies on (optional: a one-line pin in `checks.mjs`).
+    - **Did not break.** Byte identity: each parent + its new part (header off) equals the base file (`cmp`), and
+      `siteSource('coach.js')` base against tip with comments and white space stripped is identical (352,041
+      chars; the stripper catches a planted edit); every non-move hunk is a comment or doc except the two lists,
+      and the three rewritten comments are true. Lists: `COACH_JS_PARTS` and `sw.js` ASSETS `:290-299` in order
+      (the only list naming coach parts). `checks --check` base against tip: the same audio noise plus "shell cache
+      stale"; 1cv goes from 3 parts over 2,000 to 1 (`coach-core.js`). `kill-switch/proof.mjs` 14 of 14. `lint.mjs`:
+      load-order 0, no-undef 130 on both. Load order: 0 load-time global lookups in the four files (a planted
+      cross-cut reference is caught); 23 moved lexicals, none read at load by an earlier part. Tools: none reads a
+      cut parent by file name; `plant-a-fault`'s listening targets all stayed in `coach-chords.js`; `tone-test`
+      identical; `listen-loop --game=runner` JSON byte-identical (72 takes, 1,152 notes); `closed-loop` identical,
+      real takes included; `shared-chromebook-loop` 120 of 120. Rebase onto main conflicts only in WORKFLOW.md.
+      The builder's own proofs were run on `1e2c6fa` and `95f7c0b`, not on `d6c3e16` (which is comments only).
 - **W3. The owed ratchet: a `checks.mjs` detector for "a clamped step named as 10".** Change Up, Strum Hero and
   Strum Radar each said "10 BPM" when only 5 was left at the end of their range (fixed: `95afba0`-era for Change
   Up, `b21fc07` for the other two). Three copies, so the sweep ratchet asks for a detector: it must RUN each
