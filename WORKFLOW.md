@@ -313,6 +313,26 @@ bullet under the job), the Mac fixes and pushes. All three branches are on GitHu
     - **The 390 decision:** the 390 Manage check is a kept guarantee (it passed before `b39299fb`); the Manage tabs
       did not break it; the same rule that fixed 1366 fixed it; no tool change, no new breakpoint.
     - Also run: `manage-layout-smoke.mjs` 40 passed, 0 failed. A teacher sees this, not a student: no CHANGELOG.
+  - **W3 status (Windows, 2026-11-16 evening): built, reviewed twice, NOT on main yet.** The detector is check 1ep
+    (`checkClampedSteps()`, branch `win/w3-2026-11-16`, local to Windows; `tools/checks.mjs` only, no game file).
+    It draws the real done screen of Change Up, Power Chord Switch (pair and song switch), Strum Hero, Strum Radar
+    and Riff Runner at every tempo, in every outcome, EN and ES (2,272 screens, 5,328 buttons), presses each Again
+    button's own onclick and compares the label and the advice with what the game then plays; a scan of the code
+    fails on a done-screen Again that it does not sweep. On the game files before the fixes it prints 751 red lines
+    (`8498f24d^`) and 723 (`b21fc075^`); it found no fourth copy of the fault today. Review round 1 (Opus): 0
+    BLOCKER, 2 MAJOR (a false "The tempo cannot go higher" beside a working +5 passed; a new game was invisible),
+    5 MINOR: fixed. Round 2 (a fresh Opus reviewer): 0 BLOCKER, 0 MAJOR, 9 MINOR, "ship once the MINORs are
+    fixed"; the builder has them now, no further round. It is green with the coach split (`d6c3e16`) applied, and
+    it merges cleanly over rule AD's 1eh edits. It adds about 1.4 to 1.8 s to `checks.mjs`. Still owed with it: a
+    look at the Strum Hero / Strum Radar done screens at 1366×657 at the top, the bottom and one step from each.
+  - **Also on Windows (2026-11-16 evening).** The open bug below, "Sweet Child O' Mine — Lyrics and Chords" (`ca-45`)
+    not scrolling properly in full screen: Jonathan gave it to Windows; one Opus agent is reproducing it in
+    headless Chrome (1366×657 and 2560×1300, full screen on and off, against "the cure"'s sheet). It may fix
+    `app/cards.js`, `app/snippets.js` or `styles.css`; if the cause is in `app/activities-2.js` (the full-screen
+    switch, the Mac's file) it stops at the diagnosis and the change is written here for the Mac. THE MAC: do not
+    start on that bug. Owed: the change smoke on the rule AD push (`545172c`; live site confirmed), waiting for
+    Chrome. A watcher on Windows fetches every 5 minutes and reads this file whenever the Mac pushes, so new work
+    for Windows can simply be written here.
 - The Mac keeps: fixing what W1 and W2 find, the pushes of Part d and the splits, the three low edge cases of the
   pdf pane (`+ New song` twice keeps the first song's pdfs; a draft switched during a multi-file pick; a deleted
   draft's pdfs kept until the view reopens), and anything Jonathan finds testing the builder.
