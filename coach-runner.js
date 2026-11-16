@@ -948,9 +948,12 @@ function rnwLoop(){
      the 3-reading consensus span more than one window at any refresh
      rate — same spacing nrLoop uses. */
   if (!w.needSilence && now >= w.cooldownUntil && rms > COACH_PITCH_GATE){
-    /* No onset detector in this loop — the first frame over the gate after
-       silence IS the pluck. Readings wait out COACH_ATTACK_SKIP from there,
-       same guard the Coach and Note Runner use from their onset timestamp. */
+    /* The shared onset detector runs in this loop too: coachSettlePitch
+       (coachOnsetTick) moves attackT to a new pluck it hears, and
+       coachIdleTick (below) does while waiting for silence. When neither has,
+       the first frame over the gate after silence stands in for the pluck.
+       Readings wait out COACH_ATTACK_SKIP from attackT, the guard the Coach
+       and Note Runner use. */
     if (!w.attackT) w.attackT = Math.max(coachOnsetAt, w.cooldownUntil);
     const n = w.notes[w.cur];
     const m = coachSettlePitch(w, rnwTargets(n), rms, w.cooldownUntil,
