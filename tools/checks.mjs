@@ -20773,7 +20773,7 @@ function checkBuiltSongs(ctx) {
    ════════════════════════════════════════════════════════════════════ */
 const PRIVACY_NOTICE_SHA = {
   en: 'e083550119eaffc292bb37787e8c2c65b76044bafff5d093e7f1185a7f021e7d',
-  es: 'af94a87392bccdbd0790c1208976148d5665fa3545904585d6e7505fd90a1b52',
+  es: '5f2f97dd09817bd97b2349605a66a34ee73378b8a3c90fed0bdafc186b94804c',
 };
 function privacyNoticeText(html, lang) {
   const m = html.match(new RegExp(`<section data-notice lang="${lang}"[^>]*>([\\s\\S]*?)</section>`));
