@@ -42,7 +42,9 @@
    the tree that is live at that moment, its text runs in the page, then its onload fires; a file that tree does
    not have fires onerror (the loader's own failure path). Nothing in the site is shimmed: an undefined name is a
    real ReferenceError and the code's own `typeof x` guards behave as in a browser.
-   WHAT IS STUBBED. The DOM (inert elements; getElementById makes one for any id so renders run), storage, audio,
+   WHAT IS STUBBED. The DOM (inert elements; getElementById finds an id only if the page's OWN index.html has it
+   or a script wrote it into markup or attached it since, else null, so new code that needs an element only the
+   new index.html has throws on an old page as it would for real; querySelector is always null), storage, audio,
    the microphone, timers (a virtual clock: after each call the setTimeout callbacks run, at most 200; setInterval
    and requestAnimationFrame never fire), Firebase and the service worker (absent). A throw that is not a missing
    site name is NOISE when a control makes the same throw from the same call (a stub the code did not expect).
@@ -265,18 +267,18 @@ function makePage({ pageTree, pageLabel, rand, log, search }){
       tagName: String(tag || 'div').toUpperCase(), nodeName: String(tag || 'div').toUpperCase(), id: id || '', nodeType: 1,
       style: stubStyle(), dataset: {}, children: [], childNodes: [], hidden: false, isConnected: true, parentNode: null, parentElement: null,
       classList: { add(){}, remove(){}, toggle(){ return false; }, contains(){ return false; }, replace(){} },
-      _h: '', get innerHTML(){ return this._h; }, set innerHTML(v){ this._h = String(v); htmlLog.push(this._h); },
+      _h: '', get innerHTML(){ return this._h; }, set innerHTML(v){ this._h = String(v); htmlLog.push(this._h); knowIds(this._h); },
       get outerHTML(){ return this._h; }, textContent: '', innerText: '', value: '', checked: false, disabled: false,
       offsetWidth: 0, offsetHeight: 0, clientWidth: 0, clientHeight: 0, scrollHeight: 0, scrollWidth: 0, scrollTop: 0, scrollLeft: 0,
       addEventListener(){}, removeEventListener(){}, dispatchEvent(){ return true; },
-      appendChild(c){ if (c && c.tagName === 'SCRIPT') net.request(c); return c; }, append(){}, prepend(){}, after(){}, before(){},
-      insertBefore(c){ if (c && c.tagName === 'SCRIPT') net.request(c); return c; }, removeChild(c){ return c; }, replaceChildren(){}, replaceWith(){},
+      appendChild(c){ attach(c); if (c && c.tagName === 'SCRIPT') net.request(c); return c; }, append(...c){ c.forEach(attach); }, prepend(...c){ c.forEach(attach); }, after(...c){ c.forEach(attach); }, before(...c){ c.forEach(attach); },
+      insertBefore(c){ attach(c); if (c && c.tagName === 'SCRIPT') net.request(c); return c; }, removeChild(c){ return c; }, replaceChildren(...c){ c.forEach(attach); }, replaceWith(...c){ c.forEach(attach); },
       remove(){ this._removed = true; },
-      setAttribute(k, v){ attrs[k] = String(v); }, getAttribute(k){ return k in attrs ? attrs[k] : null; },
+      setAttribute(k, v){ attrs[k] = String(v); if (k === 'id') this.id = String(v); }, getAttribute(k){ return k === 'id' && this.id ? this.id : (k in attrs ? attrs[k] : null); },
       removeAttribute(k){ delete attrs[k]; }, hasAttribute(k){ return k in attrs; }, toggleAttribute(k, f){ if (f === false || (f === undefined && k in attrs)) { delete attrs[k]; return false; } attrs[k] = ''; return true; },
       querySelector(){ return null; }, querySelectorAll(){ return []; }, getElementsByTagName(){ return []; }, getElementsByClassName(){ return []; },
       closest(){ return null; }, matches(){ return false; }, contains(){ return false; },
-      focus(){}, blur(){}, click(){}, scrollIntoView(){}, scrollTo(){}, scrollBy(){}, insertAdjacentHTML(){}, insertAdjacentElement(){}, insertAdjacentText(){},
+      focus(){}, blur(){}, click(){}, scrollIntoView(){}, scrollTo(){}, scrollBy(){}, insertAdjacentHTML(p, h){ knowIds(String(h)); }, insertAdjacentElement(p, c){ attach(c); return c; }, insertAdjacentText(){},
       cloneNode(){ return mkEl(tag); }, getBoundingClientRect(){ return { top: 0, left: 0, width: 0, height: 0, bottom: 0, right: 0, x: 0, y: 0 }; },
       getClientRects(){ return []; }, animate(){ return { finished: Promise.resolve(), cancel(){}, onfinish: null }; },
       showModal(){}, close(){}, show(){}, play(){ return Promise.resolve(); }, pause(){}, load(){}, select(){}, setSelectionRange(){},
@@ -284,8 +286,14 @@ function makePage({ pageTree, pageLabel, rand, log, search }){
     };
     return el;
   };
-  const els = {};
-  const storage = () => ({ _d: {}, get length(){ return Object.keys(this._d).length; }, key(i){ return Object.keys(this._d)[i] ?? null; },
+  /* The elements a page can find by id: the ones its OWN index.html has (old markup on an old page), plus every
+     id written into markup or attached by its scripts since. Any other id is null, as on the real page (review
+     R1-4: new code that needs an element only the new index.html has). */
+  const els = {}, knownIds = new Set();
+  const knowIds = html => { for (const m of html.matchAll(/\bid\s*=\s*["']([^"'<>]+)["']/g)) knownIds.add(m[1]); };
+  const attach = c => { if (c && typeof c === 'object' && c.id){ knownIds.add(c.id); if (!els[c.id]) els[c.id] = c; } if (c && c._h) knowIds(c._h); };
+  knowIds(pageTree.tree.read('index.html') || '');
+  const storage =() => ({ _d: {}, get length(){ return Object.keys(this._d).length; }, key(i){ return Object.keys(this._d)[i] ?? null; },
     getItem(k){ return this._d[k] ?? null; }, setItem(k, v){ this._d[k] = String(v); }, removeItem(k){ delete this._d[k]; }, clear(){ this._d = {}; } });
   const param = () => ({ value: 1, setValueAtTime(){}, setTargetAtTime(){}, cancelScheduledValues(){}, linearRampToValueAtTime(){}, exponentialRampToValueAtTime(){} });
   const node = () => ({ connect(){ return node(); }, disconnect(){}, start(){}, stop(){}, frequency: param(), gain: param(), playbackRate: param(), detune: param(), Q: param(),
@@ -300,7 +308,7 @@ function makePage({ pageTree, pageLabel, rand, log, search }){
   const doc = {
     readyState: 'complete', title: '', cookie: '', referrer: '', hidden: false, visibilityState: 'visible', activeElement: null, fullscreenElement: null,
     get currentScript(){ return curFile ? { src: 'http://localhost/' + curFile } : null; },
-    getElementById(id){ return els[id] || (els[id] = mkEl('div', id)); },
+    getElementById(id){ return els[id] || (knownIds.has(String(id)) ? (els[id] = mkEl('div', id)) : null); },
     querySelector(){ return null; }, querySelectorAll(){ return []; }, getElementsByTagName(){ return []; }, getElementsByClassName(){ return []; },
     createElement(tag){ return mkEl(tag); }, createElementNS(ns, tag){ return mkEl(tag); }, createTextNode(t){ return { textContent: t, nodeType: 3 }; },
     createDocumentFragment(){ return mkEl('fragment'); }, createRange(){ return { selectNodeContents(){}, getBoundingClientRect(){ return { top: 0, left: 0, width: 0, height: 0 }; } }; },
