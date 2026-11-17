@@ -165,6 +165,22 @@ push. Where the Mac is right now: the coach splits with the reviewer's fix A are
   bullet under this job). If the Mac shows the same lines: fix the fit at 1366×657 in both languages (screenshots
   before and after, CHANGELOG only if a student sees a difference; Fast; the setup screens are `coach-chords.js`,
   so wait for the splits to be on main). If the Mac shows none: write "Windows fonts only" and close it.
+  - **The Strum Hero / Strum Radar done screens have been SEEN (Windows, 2026-11-16 evening; W3's owed look; one Opus
+    agent, headless Chrome at 1366×657, on `b7dae35`).** 16 screens: each game at the top of its range, one step
+    below, one step above the bottom, and the bottom; English and Spanish. Every advice line and step button names
+    the change the game really makes: 40 of 40 real clicks on the done-row buttons (start stubbed) landed on the
+    labelled tempo; exactly one lit button on every screen; every screen fits (the done screen ends at 388 px for
+    Strum Hero, 337 px for Strum Radar; the button row is on one line in both languages). The lead looked at
+    Strum Radar in Spanish at 95 ("Sube de nivel: pruébalo 5 BPM más rápido…", −10 BPM, Otra vez a 95, +5 BPM lit).
+    The script: the Windows scratchpad `strumshots\strumshots.mjs`.
+    - **One older cosmetic fault found, not fixed (add it to W7, same file):** on all 16 screens the "Change
+      pattern" / "Cambiar patrón" button under the done row has no left or right padding (its text touches its
+      border) and sits flush under the row. `styles.css:1197` `.tp-btn{flex:1;padding:10px 0;...}`; only
+      `.coach-actions .tp-btn` gets `padding:8px 16px` (`styles.css:2668`), and this button
+      (`coach-strum.js:489` and `:1450`, `onclick="shSetup()"` / `"srSetup()"`) is outside `.coach-actions`. Power
+      Chord Switch's done screen got this fix before; these two games did not. The clean fix is in
+      `coach-strum.js` (put the button inside the row's `.coach-actions`, or give it the class), which is the
+      Mac's file until the splits are on main.
 - **W8. The small lint findings from W4, one Fast push:** `trainer-ui.js:188` (`root` does not exist inside
   `factory`: fix the fallback, run `node tools/trainer-sim.mjs`); `tabs/journey.js:748` (the second `at`);
   `practice-minutes.js:1509` (the repeated key `_session`: remove the copy, run `node tools/pm-sim.mjs`); the 9
