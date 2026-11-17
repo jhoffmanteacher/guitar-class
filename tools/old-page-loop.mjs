@@ -105,8 +105,17 @@
    'songs' && typeof f === 'function'`) is probed as if the condition held. The service worker's caches and which
    copy of a file a page gets (half-K, mixed-random and new-page-old stand in), reload timing (SW_RELOAD_MAX_WAIT,
    the busy-tab wait), more than one tab, layout, audio: tools/update-reload-loop.mjs (Chrome) and
-   tools/sw-upgrade-proof.mjs cover those. The static pass cannot see a name built at run time (window[name]) or a
-   call through a value passed from elsewhere. */
+   tools/sw-upgrade-proof.mjs cover those. Only index.html is modelled as a page (not tuning-sim.html, the
+   tabs/ pages, a ?teacher page's own markup beyond index.html).
+
+   WHAT THE STATIC PASS CANNOT SEE. A name built at run time (window[name] with a variable, a string passed to
+   setTimeout) or a call through a value handed over from elsewhere; a name inside a regex literal is wrongly taken
+   for a reference (the scanner does not model regex literals; a quote or // inside one can also blank the rest of
+   that line); a binding of the same name anywhere in the reference's top-level statement shadows it there, even
+   in another inner function; destructuring defaults; an object key written as a string. It reads only the NEW
+   text of the list parts an old page fetches: an OLD cached copy of a list part (sw.js) is the run's half-K /
+   mixed-random cases, not the static pass. Files fetched lazily outside the part lists (trainer-*.js by the
+   trainer adapter, vendor/ files, module-N.js data) are neither read for references nor counted as fetched. */
 import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, dirname, resolve } from 'node:path';
