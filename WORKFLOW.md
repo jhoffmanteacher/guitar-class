@@ -31,6 +31,12 @@ Dates are the Pacific calendar date. `CACHE_VERSION` and commit timestamps may s
 
 Start here. Update this block whenever an item opens or closes; each line says where the detail is.
 
+**THIS WEEK ONLY: every agent runs on Opus, reviewers included (Jonathan, 2026-11-16: "heavy fable use this morning
+ran up my total. we can run opusplan stuff").** The Mac and Windows both: pass `model: 'opus'` on every spawn, builders
+at high effort and `site-reviewer` / `site-reviewer-deep` at high too, and a cloud routine's model is Opus. The Fable
+pins in the agent files and CLAUDE.md are NOT changed: they come back when he says the weekly limit has reset; delete
+this block then. A lead session on Fable is his to switch (`/model`).
+
 **FIXED 2026-11-16 by Windows (Fast; one Opus agent): the "Sweet Child O' Mine — Lyrics and Chords" activity (`ca-45`)
 not scrolling properly in full-screen mode.** Reproduced in headless Chrome with real full screen entered through the
 bar's own button. It was every lyric sheet (`ca-45`, `ca-44` "the cure", `ca-38`), not ca-45's shape, and only in
