@@ -2048,9 +2048,9 @@ async function micRecSaveNow(rec, meta){
   doc.events = (meta.events || []).map(e => Object.assign({}, e, { t: rel(e.t) }));
   /* Power Chord Switch: the tempo changes made while playing (ccLiveBpm), on the same clock; the field is left out when there were none. */
   if (meta.tempoChanges && meta.tempoChanges.length) doc.tempoChanges = meta.tempoChanges.map(e => Object.assign({}, e, { t: rel(e.t) }));
+  /* No name on a take (Jonathan, 2026-11-16): the uid alone ties it to the student; the console looks the name up on its roster (teacherMicWho). */
   Object.assign(doc, {
     uid: currentUser.uid,
-    name: currentUser.displayName || '',
     period: (typeof periodOverride !== 'undefined' && periodOverride) || (typeof studentPeriod !== 'undefined' && studentPeriod) || '',
     mode: rec.mode,
     micLatencyMs: coachMicLatencyMs(),

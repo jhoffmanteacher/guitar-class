@@ -18601,7 +18601,7 @@ async function checkStrumCheck() {
           else if (Array.isArray(v)) v.forEach((x, i) => { if (Array.isArray(x)) o.push(p + '[' + i + '] array in array'); probs(x, p + '[' + i + ']', o); });
           else if (v && typeof v === 'object'){ const pr = Object.getPrototypeOf(v); if (pr !== Object.prototype && pr !== null) o.push(p + ' not plain'); Object.keys(v).forEach(k => probs(v[k], p ? p + '.' + k : k, o)); }
           return o; };
-        const strict = (path, v) => { const b = probs(v, '', []); if (b.length){ out.refused.push(path + ': ' + b.slice(0, 3).join(', ')); throw new Error('Unsupported field value: ' + b[0]); } out.sets.push(path); if (/-coach$/.test(path)){ out.win = { frac: v.winFrac, ms: v.winMs, slotMs: v.slotMs }; out.ended = v.barsDone + ' bars, complete ' + v.complete; out.fields = ['metroOn','headphones', 'clicks', 'tooLoud', 'gateLevel', 'gateThreshold', 'anchorRange', 'anchorLock', 'anchorLockMin', 'octTol'].map(k => k + '=' + (k in v ? typeof v[k] : 'missing')).join(','); } };
+        const strict = (path, v) => { const b = probs(v, '', []); if (b.length){ out.refused.push(path + ': ' + b.slice(0, 3).join(', ')); throw new Error('Unsupported field value: ' + b[0]); } out.sets.push(path); if (/-coach$/.test(path)){ out.win = { frac: v.winFrac, ms: v.winMs, slotMs: v.slotMs }; out.ended = v.barsDone + ' bars, complete ' + v.complete; out.ids = Object.keys(v).filter(k => /name|uid|email|user|student|displayName|photo/i.test(k) && !/^(uid|userAgent)$/.test(k)); out.nameIn = JSON.stringify(v).includes(currentUser.displayName); out.fields = ['metroOn','headphones', 'clicks', 'tooLoud', 'gateLevel', 'gateThreshold', 'anchorRange', 'anchorLock', 'anchorLockMin', 'octTol'].map(k => k + '=' + (k in v ? typeof v[k] : 'missing')).join(','); } };
         const ref = path => ({ set: async v => strict(path, v), collection: c => ({ doc: id => ref(path + '/' + c + '/' + id) }) });
         try {
           currentUser = { uid: 'test-student-0', displayName: 'Test 0' }; micRecPcm16 = () => new Int16Array(4);
@@ -18643,6 +18643,8 @@ async function checkStrumCheck() {
       /* what the student had for a beat and whether the room was too noisy (2026-11-14): on every take */
       const wantF = 'metroOn=boolean,headphones=boolean,clicks=boolean,tooLoud=boolean,gateLevel=object,gateThreshold=number,anchorRange=number,anchorLock=number,anchorLockMin=number,octTol=number';
       if (r.fields !== wantF) fail(`the take's beat / gate fields are ${r.fields}, want ${wantF} (gateLevel null when the round never reached bar 1)`);
+      /* No name on a take (Jonathan, 2026-11-16): the uid is the only thing tying it to the student; the console names it from its roster (teacherMicWho). */
+      if (!r.ids || r.ids.length || r.nameIn !== false) fail(`the saved take carries the student's identity beyond uid: keys ${JSON.stringify(r.ids)}, the user's name ${r.nameIn ? 'inside it' : 'not checked'} (micRecSaveNow must store no name, email or photo)`);
     }
     /* Two full rounds tick ca-52's step (Jonathan, 2026-11-14: "2 full rounds"), through the real caStepHtml, scFinish and scCountRound:
        no Mark done button, the count line; a full round writes <id>:0:r1, the second the step's own tick <id>:0, a third nothing; a
@@ -19596,10 +19598,10 @@ async function checkPwTakeEvaluator() {
       ['CHK_ONSET_FLOOR', 'CHK_ONSET_RATIO', 'CHK_HF_FLOOR', 'CHK_HF_RATIO', 'COACH_LVL_WIN', 'COACH_LVL_HOP', 'COACH_CATCHUP_MAX_MS'].map(n => `const ${n} = ${numOf(n)};`).join('\n') +
       // teacherMicEvaluate reads String(ccLoop / coachReadFrame / coachSmooth): the real coach.js functions, never called here
       '\n' + ['ccLoop', 'coachReadFrame', 'coachSmooth'].map(n => extract(cSrc, n)).join('\n');
-    const fns = lift(EVAL_FNS.concat(['micEvalWhatIfSummary', 'micEvalWhatIfText', 'micEvalPitchSummary', 'micEvalPitchText', 'micEvalText', 'micEvalBeepsText', 'micEvalNoDelayText', 'teacherMicEvalHtml', 'teacherMicWhatIfHtml', 'teacherMicPitchHtml', 'teacherMicOffText', 'teacherMicLabel', 'teacherMicEvaluate']));
+    const fns = lift(EVAL_FNS.concat(['micEvalWhatIfSummary', 'micEvalWhatIfText', 'micEvalPitchSummary', 'micEvalPitchText', 'micEvalText', 'micEvalBeepsText', 'micEvalNoDelayText', 'teacherMicEvalHtml', 'teacherMicWhatIfHtml', 'teacherMicPitchHtml', 'teacherMicOffText', 'teacherMicLabel', 'teacherMicWho', 'teacherMicEvaluate']));
     /* teacherMicEvaluate's page: ctx gives the takes, their audio and the result box. */
     core = new Function('ctx', `${esc}\n${consts}\nconst coachDetectPitch = () => -1;\n` +
-      'let teacherMicEvalRows = [], teacherMicEvalNames = [], teacherView = "mic", teacherMicTakes = ctx.takes || [];\n' +
+      'let teacherMicEvalRows = [], teacherMicEvalNames = [], teacherView = "mic", teacherMicTakes = ctx.takes || [], allStudentsRaw = ctx.roster || [];\n' +
       'const document = ctx.document, ensureCoachJs = async () => {}, teacherMicChunks = ctx.chunks, micTakeDate = () => null, setTimeout = f => f();\n' +
       `${fns}\nreturn { micEvalRow, micEvalText, micEvalWhatIfSummary, micEvalPitchSummary, rows: () => teacherMicEvalRows, evaluate: teacherMicEvaluate, html: (rows, names) => { teacherMicEvalRows = rows; teacherMicEvalNames = names; return teacherMicEvalHtml(); } };`);
     core({});
@@ -19951,12 +19953,15 @@ async function checkPwTakeEvaluator() {
   // 4. Evaluate-all, run: two takes, their audio in two chunks each, a stubbed result box
   try {
     const box = { innerHTML: '' }, pick = ['pw-pair', 'pw-every2-stop'].map(nm => takes[names.indexOf(nm)]);
-    const page = core({ takes: pick.map((t, k) => Object.assign({ id: 'fake-' + k }, t.meta)), document: { getElementById: id => id === 't-mic-eval' ? box : null },
+    /* whose take (teacherMicWho, 2026-11-16): the 1st has no stored name and its uid on the roster, the 2nd an older take's stored name and no roster entry */
+    const page = core({ roster: [{ uid: 'stub-uid-00', name: 'Test 0' }], takes: pick.map((t, k) => Object.assign({ id: 'fake-' + k }, t.meta, k ? { uid: 'stub-uid-01', name: 'Test 1' } : { uid: 'stub-uid-00' })), document: { getElementById: id => id === 't-mic-eval' ? box : null },
       chunks: async d => { const t = pick[+d.id.slice(5)], b = new Uint8Array(t.pcm.buffer.slice(0)), h = (b.length >> 2) << 1; return [b.subarray(0, h), b.subarray(h)]; } });
     await page.evaluate();
     const text = flat(box.innerHTML), want = pwLine(pick.map(t => rows[takes.indexOf(t)]));
     tot.evaluateRun = (box.innerHTML.match(/<tr><td class="nc"/g) || []).length;
     if (tot.evaluateRun !== 2 || /Could not measure|not measured/.test(text) || want.some(w => !text.includes(w))) fail(`"Evaluate all recordings" run on 2 Power Chord Switch takes measured ${tot.evaluateRun} (${text.slice(0, 160)}…)`);
+    { const who = [...box.innerHTML.matchAll(/<tr><td class="nc" title="([^"]*)">/g)].map(m => m[1]).join(' | ');
+      if (who !== 'Test 0 | Test 1') fail(`"Evaluate all recordings" names the takes "${who}", want "Test 0 | Test 1" (the roster's name for a take with none stored, an older take's stored name)`); }
     /* The ratios the console itself replays from are its own settings (teacherMicEvaluate's `strum.consts`), which the checks above build from coach.js
        themselves: read them off the rows the real Evaluate-all produced. They must be the shared ratios older takes were graded with. */
     for (const r of page.rows()) {
@@ -20915,8 +20920,15 @@ function checkNoStudentDataHook() {
    a rule drift, so the three key patterns must be identical in both files,
    the zips must be packed through teacherMicAnon() with the leak search, and
    a file in the zip may never be named from the student (teacherMicFileBase).
+   Since 2026-11-16 a take stores no name (micRecSaveNow; the save test in
+   checkStrumCheck pins that): the console's own screens name it from the
+   roster by uid (teacherMicWho). RUN here on made-up takes: the list's
+   Student cell, the per-row file name and the Delete confirm say the
+   roster's name for a new take, an older take's stored name when the uid is
+   not on the roster, the roster's name over a stored one, the short uid when
+   neither exists, and a name with markup comes out escaped.
    ════════════════════════════════════════════════════════════════════ */
-function checkMicZipsAnonymous() {
+async function checkMicZipsAnonymous() {
   head('1dd. Console recording zips carry no names');
   let bad = 0;
   const fail = m => { err('1dd: ' + m); problems++; bad++; };
@@ -20938,7 +20950,41 @@ function checkMicZipsAnonymous() {
     const b = jsFunctionBody(tSrc, fn);
     if (!b || !/teacherMicPackFiles\(takes, btn\)/.test(b)) fail(`${fn} does not pack its zip through teacherMicPackFiles()`);
   }
-  if (!bad) ok('3 of 3 key patterns identical in teacher-mic.js and anon-takes.mjs; both zips are packed through teacherMicAnon() with the leak search; no zip entry is named from the student');
+  /* Whose take, on the console's own screens (teacherMicWho), run on the real renderTeacherMic / teacherMicFileBase / teacherMicDelete */
+  const CASES = [
+    { take: { id: 'stub-uid-00-coach', uid: 'stub-uid-00', mode: 'coach' }, cell: 'Test 0', title: 'Test 0', file: 'mic-coach-Test-0-take', confirm: 'Delete Test 0’s Listening Coach' },
+    { take: { id: 'stub-uid-01-nr', uid: 'stub-uid-01', name: 'Test 1', mode: 'nr' }, cell: 'Test 1', title: 'Test 1', file: 'mic-nr-Test-1-take', confirm: 'Delete Test 1’s Note Runner' },
+    { take: { id: 'stub-uid-02-pw', uid: 'stub-uid-02', mode: 'pw' }, cell: 'stub-uid', title: 'stub-uid-02', file: 'mic-pw-stub-uid-02-take', confirm: 'Delete this student’s Power Chord Switch' },
+    { take: { id: 'stub-uid-03-coach', uid: 'stub-uid-03', name: 'Old 3', mode: 'coach' }, cell: 'Test 3', title: 'Test 3', file: 'mic-coach-Test-3-take', confirm: 'Delete Test 3’s Listening Coach' },
+    { take: { id: 'stub-uid-04-coach', uid: 'stub-uid-04', mode: 'coach' }, cell: 'Test &lt;4&gt;', title: 'Test &lt;4&gt;', file: 'mic-coach-Test-4-take', confirm: 'Delete Test <4>’s Listening Coach' }];
+  const ROSTER = [{ uid: 'stub-uid-00', name: 'Test 0' }, { uid: 'stub-uid-03', name: 'Test 3' }, { uid: 'stub-uid-04', name: 'Test <4>' }];
+  try {
+    const appSrc = siteSource('app.js', ROOT);
+    const esc = ['escAttr', 'escHtml'].map(n => { const m = appSrc.match(new RegExp('^const ' + n + ' = .*;$', 'm')); if (!m) throw new Error('no ' + n + ' in app.js'); return m[0]; }).join('\n');
+    const lift = n => { const m = new RegExp('(?:async\\s+)?function\\s+' + n + '\\s*\\(').exec(tSrc), b = jsFunctionBody(tSrc, n); if (!m || !b) throw new Error('no ' + n + ' in teacher.js'); return tSrc.slice(m.index, tSrc.indexOf('{', m.index)) + b; };
+    const fns = ['micTakeDate', 'micTakeExpected', 'teacherMicWho', 'teacherMicLabel', 'teacherMicFileBase', 'renderTeacherMic', 'teacherMicDelete'].map(lift).join('\n');
+    const page = new Function('ctx', `${esc}
+      let teacherMicTakes = [], teacherMicEvalRows = [], allStudentsRaw = ctx.roster, teacherView = 'mic', teacherClassConfigReadOk = true, teacherClassConfig = {};
+      const document = { getElementById: id => id === 't-grid-container' ? ctx.box : null }, confirm = m => { ctx.confirms.push(m); return false; };
+      const loadTeacherClassConfig = async () => ({}), ensureDb = async () => {}, teacherMicOldHtml = () => '', teacherMicEvalHtml = () => '';
+      const db = { collection: c => ({ doc: () => ({ get: async () => ({ exists: false }) }), get: async () => ({ docs: ctx.takes.map(t => ({ id: t.id, data: () => Object.assign({}, t) })) }) }) };
+      ${fns}
+      return { render: renderTeacherMic, file: d => teacherMicFileBase(d), del: teacherMicDelete, takes: () => teacherMicTakes };`);
+    const ctx = { box: { innerHTML: '' }, confirms: [], roster: ROSTER, takes: CASES.map(c => c.take) };
+    const p = page(ctx);
+    await p.render();
+    const cells = [...ctx.box.innerHTML.matchAll(/<td class="nc" title="([^"]*)">([^<]*)<\/td>/g)].map(m => ({ title: m[1], cell: m[2] }));
+    if (cells.length !== CASES.length) fail(`the Mic recordings list drew ${cells.length} Student cells for ${CASES.length} takes`);
+    for (let i = 0; i < CASES.length; i++) {
+      const c = CASES[i], got = cells[i] || {}, d = p.takes()[i];
+      if (got.cell !== c.cell || got.title !== c.title) fail(`take ${i + 1}: the list's Student cell is "${got.cell}" (title "${got.title}"), want "${c.cell}" (title "${c.title}")`);
+      const f = d ? p.file(d) : '';
+      if (f !== c.file) fail(`take ${i + 1}: the per-row file name is "${f}", want "${c.file}"`);
+      ctx.confirms.length = 0; await p.del(i);
+      if (!(ctx.confirms[0] || '').startsWith(c.confirm)) fail(`take ${i + 1}: Delete asks "${ctx.confirms[0]}", want it to start "${c.confirm}"`);
+    }
+  } catch (e) { fail(`could not run the Mic recordings list on made-up takes (${e.message})`); }
+  if (!bad) ok(`3 of 3 key patterns identical in teacher-mic.js and anon-takes.mjs; both zips are packed through teacherMicAnon() with the leak search; no zip entry is named from the student; ${CASES.length} of ${CASES.length} made-up takes named from the roster, an older take's name or the short uid in the list, the file name and the Delete confirm`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -21825,7 +21871,7 @@ function checkPracticeMinutes(i18nTable) {
   await checkClampedSteps();   // after every other user of 1ca's sandbox: it draws every arcade done screen in it
   checkPracticeMinutes(i18nTable);
   checkNoStudentDataHook();
-  checkMicZipsAnonymous();
+  await checkMicZipsAnonymous();
   checkPrivacyNotice(i18nTable);
   checkSiteErrors();
   checkWeekendStreaks();

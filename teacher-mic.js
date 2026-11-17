@@ -27,6 +27,15 @@ function micTakeDate(d){
 function micTakeExpected(d){
   return Array.isArray(d && d.expected) ? d.expected.filter(e => e && typeof e === 'object') : [];
 }
+/* Whose take, for the console's own screens (never the zips): the roster's name for the take's uid (a take saved since
+   2026-11-16 stores no name, coach-core.js micRecSaveNow), else the name an older take stored, else ''. Each caller keeps
+   its own last fallback (the short uid, "this student", the take label) and escapes the result as before. The roster is
+   allStudentsRaw (teacher-core.js), the full list Manage uses, so an archived student is still named. */
+function teacherMicWho(d){
+  const uid = d && d.uid;
+  const stu = uid ? (allStudentsRaw || []).find(s => s && s.uid === uid) : null;
+  return String((stu && stu.name) || (d && d.name) || '');
+}
 async function renderTeacherMic(){
   const box=document.getElementById('t-grid-container');
   box.innerHTML='<div class="t-loading">Loading mic recordings…</div>';
@@ -78,7 +87,8 @@ async function renderTeacherMic(){
                                  : 'Listening Coach' + (d.coachMode ? ' · ' + d.coachMode : '');
     const exp = micTakeExpected(d);
     const right = exp.filter(e => ['ok','oct','perfect','good'].indexOf(e.verdict) >= 0).length;
-    return `<tr><td>${teacherMicLabel(i)}</td><td class="nc" title="${escAttr(d.name || d.uid || '')}">${escHtml(d.name || (d.uid || '').slice(0,8))}</td>`+
+    const who = teacherMicWho(d);
+    return `<tr><td>${teacherMicLabel(i)}</td><td class="nc" title="${escAttr(who || d.uid || '')}">${escHtml(who || (d.uid || '').slice(0,8))}</td>`+
       `<td>${escHtml(d.period || '')}</td><td>${escHtml(game)}</td><td>${escHtml(String(d.bpm || ''))}</td>`+
       `<td>${escHtml(String(d.durationSec || ''))} s</td><td>${right} / ${exp.length}</td><td>${escHtml(when)}</td>`+
       `<td><button class="tg-seg-btn" onclick="teacherMicDownloadWav(${i})">Download WAV</button> `+
@@ -125,7 +135,7 @@ function teacherMicSaveFile(name, blob){
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
 }
 function teacherMicFileBase(d){
-  const who = String(d.name || d.uid || 'student').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  const who = String(teacherMicWho(d) || d.uid || 'student').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const saved = micTakeDate(d);
   const when = saved ? saved.toISOString().slice(0, 16).replace(/[:T]/g, '-') : 'take';
   return `mic-${d.mode || 'take'}-${who}-${when}`;
@@ -375,7 +385,7 @@ async function teacherMicDownloadEverything(){
 }
 async function teacherMicDelete(i){
   const d = teacherMicTakes[i]; if(!d) return;
-  if(!confirm(`Delete ${d.name || 'this student'}’s ${d.mode === 'nr' ? 'Note Runner' : d.mode === 'pw' ? 'Power Chord Switch' : d.game === 'strumcheck' ? 'Strum pattern check' : 'Listening Coach'} recording? This cannot be undone.`)) return;
+  if(!confirm(`Delete ${teacherMicWho(d) || 'this student'}’s ${d.mode === 'nr' ? 'Note Runner' : d.mode === 'pw' ? 'Power Chord Switch' : d.game === 'strumcheck' ? 'Strum pattern check' : 'Listening Coach'} recording? This cannot be undone.`)) return;
   try{
     await ensureDb();
     const ref = db.collection('micTakes').doc(d.id);
@@ -1674,8 +1684,8 @@ async function teacherMicEvaluate(){
       const saved = micTakeDate(d);
       const meta = Object.assign({}, d, { savedAt: saved ? saved.toISOString() : null });
       rows.push(micEvalRow(label, meta, new Int16Array(bytes.buffer, 0, len >> 1), deps));
-      names.push(d.name || (d.uid || '').slice(0, 8));
-    }catch(e){ fails.push((d.name || label) + ': ' + (e && e.message ? e.message : 'could not read')); }
+      names.push(teacherMicWho(d) || (d.uid || '').slice(0, 8));
+    }catch(e){ fails.push((teacherMicWho(d) || label) + ': ' + (e && e.message ? e.message : 'could not read')); }
     await new Promise(r => setTimeout(r, 0));          // let the screen update between takes
   }
   teacherMicEvalRows = rows; teacherMicEvalNames = names;
