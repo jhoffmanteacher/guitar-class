@@ -252,7 +252,8 @@ function progressApplyDoc(doc){
    redraw would cut something off: progressLoadRetryBusy.
    Everything here belongs to one signed-in student: progressLoadRetryStop() runs at the next loadProgress()
    (any sign-in) and in the signed-out branch (app/start.js), and an answer is applied only when it is still the
-   current retry's and both currentUser and Firebase's signed-in user are the student it read for. Proofs: tools/save-loop.mjs (L1-L7) and
+   current retry's and both currentUser and Firebase's signed-in user are the student it read for.
+   Proofs: tools/save-loop.mjs (family late-load, directed L1-L8, reset cases S3/S8) and
    tools/shared-chromebook-loop.mjs (family load-retry). */
 const LOAD_RETRY_MS = [2000, 4000, 8000, 15000, 30000, 60000];   // then every 60 s
 const LOAD_RETRY_READ_MS = 15000;    // a read still out after this counts as failed (a stalled get() never settles)
