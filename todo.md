@@ -8,17 +8,16 @@ with the full record of the 2026-11-11 cut and its plan: `git show 386d063:todo.
 
 ## For Jonathan (written 2026-11-17; delete a line when it is done)
 
+ONLY what he can act on today goes here (Jonathan, 2026-11-17: "leave stuff like that off my todo list until
+they're ready"). Work still being built, reviewed or waiting on a push is NOT listed: add its line when it is live
+or when the paste file exists.
+
 **Listen and look (a few minutes each, any class Chromebook or the Mac):**
 1. **"the cure", set the beat by ear.** Open the site with `?snipcal=1&mapshift=0#class-activities/ca-13` on the
    end of the address, Metronome on. Play it as it opens, then Guitar off, then Normal speed: all four should feel
    the same now. Then try `&mapshift=20` and `&mapshift=40` in place of `&mapshift=0`. Tell Claude the number where
    the highlight lands ON the beat.
 2. **"the cure", bar 85 (the Outro).** The audit says the record plays about 118 ms early there. Does it look off?
-3. **Lyric sheets (Sweet Child O' Mine, ca-45).** The sheet now scrolls 0.3 s ahead so a new line is on screen
-   before its first chord (Windows, 2026-11-17). Too early, too late, or fine?
-4. **Play Along highlights are ON the beat since 2026-11-17** (your call: "exactly on the beat and not ahead of it
-   for everything"). "On the beat" rests on a guess of 80 ms for a Chromebook's speakers: if highlights look late
-   or early on a class Chromebook, try `?snipcal=1&lat=40` or `&lat=120` and say which looks right.
 
 **Decide (tell Claude; each is one sentence):**
 Decided 2026-11-17: old mic recordings that still hold a name are ignored for now; the sign-in load fix gets NO
@@ -29,8 +28,6 @@ second line after a student's first change.
    Windows is building it.)
 
 **Only you can do:**
-9. **The class-rank rules paste (Paste F).** NOT ready yet: Claude will say "W13 ready: paste <file>". Then Firebase
-   console → Firestore → Rules → replace all → Publish.
 10. **The practice copy's key:** `Claude outputs/practice-copy/JONATHAN-STEPS.md` (GitHub secret
     `FIREBASE_PRACTICE_SA`). Until then the practice copy is not published.
 11. **Song builder: build and publish one real song** (WORKFLOW, "Song builder Part d"). Part e waits for that.
