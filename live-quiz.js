@@ -1841,7 +1841,6 @@ async function lqWrite(patch, replace){
 async function lqTeacherStart(){
   const pick = document.getElementById('lq-quiz-pick');
   const quizId = (pick && LIVE_QUIZZES[pick.value]) ? pick.value : LQ_DEFAULT_QUIZ;
-  const quiz = lqQuiz(quizId);
   const speed = lqTScoring === 'speed';
   const sessionId = 'lq-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
   // The teacher's own name for the game, frozen into the session (see lqCustomTitle);
