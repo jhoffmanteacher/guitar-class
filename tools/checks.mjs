@@ -10168,6 +10168,10 @@ function checkPracticeCards(ctx) {
     if (a && a.view === 'card' && a.card && a.recordingVersions && typeof a.recordingVersions === 'object')
       for (const [r, v] of Object.entries(a.recordingVersions))
         cardViews.push({ ...a, id: a.id + ' [' + r + ']', card: { ...a.card, ...(v && v.card), track: v && v.track }, __rec: true });
+    // Card views (1eq): each of a card's other views goes through the same rules, with its own sections.
+    if (a && a.view === 'card' && a.card && a.card.otherViews && typeof a.card.otherViews === 'object')
+      for (const [nm, v] of Object.entries(a.card.otherViews))
+        cardViews.push({ ...a, id: a.id + ' [view ' + nm + ']', card: { ...a.card, ...(v || {}), sections: (v && v.sections) || a.card.sections }, __rec: true });
   }
   for (const a of cardViews) {
     if (!a || a.view !== 'card' || !a.card) continue;
@@ -12514,6 +12518,159 @@ function checkRecordingVersions(ctx) {
   if (n !== EXPECT.cards) flag('1cc sees ' + n + ' card' + (n === 1 ? '' : 's') + ' with recording versions, expected ' + EXPECT.cards + ' (ca-26, ca-29, ca-40) \u2014 change the pin on purpose, or restore the card');
   if (Object.keys(groups).length !== EXPECT.groups) flag('1cc sees ' + Object.keys(groups).length + ' recording groups, expected ' + EXPECT.groups);
   if (bad === 0) ok(n + ' cards with recording versions, ' + rendered + ' renders (each recording + nothing stored) \u2014 right track, sections, switch and Guitar switch every time; ' + strumRenders + ' every-strum renders draw ' + strumNames + ' chord names (the Neil cards pinned at 128 each, every lap A5 x4 G5 x3 F5 x6 G5 x3); ' + readbacks + ' title / intro / directions read-backs in EN + ES; ' + consoleReads + ' console titles run through teacherActivityTitle');
+}
+
+/* 1eq. CARD VIEWS (Jonathan, 2026-11-17: "chords/tab switch"; app/cards-views.js). A practice card with
+   `card.otherViews` shows the same song as chords, tab or the lyric sheet, with a switch, and the song keeps playing
+   through a press. What can go wrong is quiet: a view whose sections do not line up with the card's (the highlight
+   would jump to another place in the song on a press), a lyric view whose sheet does not match its notes (the dot on
+   the wrong chords), a misspelt key the engine ignores, a default that is not the card's own view, a switch that
+   loses its pressed button, or a press that saves to the student's progress. Checked here, by RUNNING the app's own
+   code in the 0b context:
+   - the shape: a map of tab / chords / lyrics, never the card's own view; each view only the keys that view uses
+     (unknown keys refused); caption with caption_es; lyrics has sheet (a PDF in the repo) and sheetChords; not with
+     recordingVersions / keyVersions / chordVersions / bassNotes (caView would lay two things over one card);
+   - the sections: the card's own, section for section (label, fromBar, bars, reps), and every 16th of the song
+     located (pcLocate) at the same section, lap and beat in every view as in the card's own;
+   - a lyrics view: the app's pcSheetMap over that view's layout counts exactly sheetChords chord changes;
+   - the render, EN and ES, student and console preview: nothing stored, each view stored, junk stored -> one
+     switch, the views in order (Chords, Tab, Lyrics) with their i18n labels, ONE pressed button, and it is the view
+     drawn (a sheet, a chord grid on beats, a tab on notes), with one section button per section; nothing stored
+     opens on the card's own view (pinned: EXPECT) and caView() hands back the card itself, unchanged;
+   - no card without the field draws a switch;
+   - nothing is saved: app/cards-views.js (comments stripped) names no progress write, sessionStorage or Firestore,
+     writes one localStorage key, and its press neither stops the song nor redraws the page (no stopCardAudio, pcStop,
+     renderClassActivities). What a press does in a browser mid-song is tools/playalong-loop.mjs R17 and
+     tools/smoke.mjs (click, reload, remembered).
+   Pinned: one card (ca-33, Chords default, then Tab and Lyrics). */
+function checkCardViews(ctx, i18nTable) {
+  head('1eq. Card views: one practice card as chords, tab or lyrics, with a switch');
+  const EXPECT = { 'ca-33': { own: 'chords', list: ['chords', 'tab', 'lyrics'] } };
+  const VIEW_KEYS = { tab: ['counts'], chords: ['everyStrum', 'restWord'], lyrics: ['sheet', 'sheetChords', 'sheetColumns', 'sheetNamedAgain'] };
+  const COMMON = ['caption', 'caption_es', 'sections'];
+  const LABEL = { chords: 'ca.viewChords', tab: 'ca.viewTab', lyrics: 'ca.viewLyrics' };
+  let bad = 0, renders = 0, located = 0, swOff = 0;
+  const flag = m => { err('1eq: ' + m); problems++; bad++; };
+  if (!ctx) { flag('cannot run — the 0b render context is unavailable'); return; }
+  const run = x => vm.runInContext(x, ctx);
+  for (const fn of ['caCardViewList', 'caCardViewMode', 'caCardViewCard', 'caViewSwitchHtml', 'caSetCardView', 'caView', 'caCardBodyHtml', 'pcLayout', 'pcLocate', 'pcSheetMap'])
+    if (run('typeof ' + fn) !== 'function') { flag(fn + '() not found in the app script (renamed? update 1eq)'); return; }
+  const J = JSON.stringify;
+  const acts = run('(window.CLASS_ACTIVITIES || []).filter(a => a && a.view === "card" && a.card)');
+  const withViews = acts.filter(a => a.card.otherViews !== undefined);
+  const ownOf = c => c.sheet ? 'lyrics' : c.chordGrid ? 'chords' : 'tab';
+  const sig = s => J([s.label, s.fromBar, s.bars, s.reps === undefined ? 1 : s.reps]);
+  for (const a of withViews) {
+    const w = a.id, c = a.card, ov = c.otherViews, own = ownOf(c);
+    if (!ov || typeof ov !== 'object' || Array.isArray(ov) || !Object.keys(ov).length) { flag(`${w}: card.otherViews must be a non-empty map of views (tab / chords / lyrics)`); continue; }
+    for (const f of ['recordingVersions', 'keyVersions', 'chordVersions', 'bassNotes'])
+      if (a[f]) flag(`${w}: otherViews cannot go with ${f} — caView would lay two things over one card`);
+    for (const [nm, v] of Object.entries(ov)) {
+      const vw = `${w} · otherViews.${nm}`;
+      if (!VIEW_KEYS[nm]) { flag(`${vw}: not a view — a view is tab, chords or lyrics`); continue; }
+      if (nm === own) { flag(`${vw}: is the card's own view (${own}) — list only the OTHER views`); continue; }
+      if (!v || typeof v !== 'object') { flag(`${vw}: not an object`); continue; }
+      for (const k of Object.keys(v)) if (!COMMON.includes(k) && !VIEW_KEYS[nm].includes(k)) flag(`${vw}: unknown key "${k}" — a ${nm} view takes ${COMMON.concat(VIEW_KEYS[nm]).join(', ')}`);
+      if (('caption' in v) !== ('caption_es' in v)) flag(`${vw}: caption and caption_es go together`);
+      if (nm === 'lyrics') {
+        if (typeof v.sheet !== 'string' || !/^sheets\/[^/]+\.pdf$/i.test(v.sheet) || !existsSync(join(ROOT, v.sheet))) flag(`${vw}: sheet "${v.sheet}" must be a PDF in sheets/ that is in the repo`);
+        if (!Number.isInteger(v.sheetChords)) flag(`${vw}: needs sheetChords (how many chord names the sheet has)`);
+      }
+      const secs = v.sections === undefined ? c.sections : v.sections;
+      if (!Array.isArray(secs) || secs.length !== c.sections.length) { flag(`${vw}: ${Array.isArray(secs) ? secs.length : 'no'} sections, the card has ${c.sections.length} — a view has the card's sections, section for section`); continue; }
+      secs.forEach((s, si) => { if (sig(s) !== sig(c.sections[si])) flag(`${vw}: section ${si + 1} is ${sig(s)}, the card's is ${sig(c.sections[si])} (label, fromBar, bars, reps) — a press would move the song to another place`); });
+    }
+  }
+  // Every 16th of the song, located in every view: same section, lap and beat as the card's own view.
+  for (const a of withViews) {
+    ctx.__eqCard = a;
+    let L0;
+    try { L0 = run('(() => { delete caCardViewModes[window.__eqCard.id]; return pcLayout(caView(window.__eqCard)); })()'); } catch (e) { flag(`${a.id}: pcLayout threw ${e.message}`); continue; }
+    if (!L0) { flag(`${a.id}: no layout`); continue; }
+    for (const nm of run('caCardViewList(window.__eqCard)')) {
+      let L1, info;
+      try {
+        L1 = run(`(() => { caCardViewModes[window.__eqCard.id] = ${J(nm)}; try { return pcLayout(caView(window.__eqCard)); } finally { delete caCardViewModes[window.__eqCard.id]; } })()`);
+      } catch (e) { flag(`${a.id} [${nm}]: pcLayout threw ${e.message}`); continue; }
+      if (!L1) { flag(`${a.id} [${nm}]: no layout`); continue; }
+      if (L1.firstBar !== L0.firstBar || L1.totalBars !== L0.totalBars || L1.tr !== L0.tr) { flag(`${a.id} [${nm}]: the window is bars ${L1.firstBar}+${L1.totalBars}, the card's own ${L0.firstBar}+${L0.totalBars} (or another track)`); continue; }
+      const bpb = L0.tr.beatsPerBar, steps = Math.round(L0.totalBars * bpb * 4);
+      ctx.__eqL0 = L0; ctx.__eqL1 = L1;
+      const r = run(`(() => { const out = { n: 0, off: [] }; for (let k = 0; k < ${steps}; k++) { const b = k / ${bpb * 4} + 1e-7;
+        const x = pcLocate(window.__eqL0, b), y = pcLocate(window.__eqL1, b); out.n++;
+        const p = [x && x.si, x && x.rep, x && x.beat, y && y.si, y && y.rep, y && y.beat];
+        if (p[0] !== p[3] || p[1] !== p[4] || p[2] !== p[5]) out.off.push([b, p]); } return out; })()`);
+      located += r.n;
+      r.off.slice(0, 3).forEach(([b, p]) => flag(`${a.id} [${nm}]: at ${b.toFixed(3)} bars into the song the card's own view is section ${p[0]} lap ${p[1]} beat ${p[2]}, this view section ${p[3]} lap ${p[4]} beat ${p[5]}`));
+      if (r.off.length > 3) flag(`${a.id} [${nm}]: ${r.off.length} of ${r.n} sixteenths land on another place in all`);
+      if (r.n !== steps || !steps) flag(`${a.id} [${nm}]: located ${r.n} sixteenths, want ${steps}`);
+      if (nm === 'lyrics') {
+        info = run(`(() => { caCardViewModes[window.__eqCard.id] = 'lyrics'; try { const v = caView(window.__eqCard); return { n: pcSheetMap(pcLayout(v)).count, want: v.card.sheetChords }; } finally { delete caCardViewModes[window.__eqCard.id]; } })()`);
+        if (info.n !== info.want) flag(`${a.id} [lyrics]: the view's notes make ${info.n} chord changes, sheetChords says ${info.want} — the dot would walk onto the wrong chords`);
+      }
+    }
+  }
+  // The render: every stored state, both languages, student and console preview.
+  const saveLang = run('getLang()');
+  try {
+    for (const lang of ['en', 'es']) {
+      run('setLang(' + J(lang) + ')');
+      for (const a of acts) {
+        ctx.__eqCard = a;
+        const exp = EXPECT[a.id];
+        if (!exp) {
+          const h = String(run('caCardBodyHtml(window.__eqCard)'));
+          if (/ca-view-switch/.test(h)) flag(`${a.id} (${lang}): draws a Chords / Tab / Lyrics switch, but it has no otherViews (or is not pinned in 1eq's EXPECT)`);
+          else swOff++;
+          continue;
+        }
+        const list = run('caCardViewList(window.__eqCard)');
+        if (J(list) !== J(exp.list)) flag(`${a.id}: the switch offers ${J(list)}, pinned ${J(exp.list)}`);
+        if (ownOf(a.card) !== exp.own) flag(`${a.id}: its own view is ${ownOf(a.card)}, pinned ${exp.own} — the default is the card's own view`);
+        for (const stored of [null, 'junk', ...exp.list]) {
+          const shown = stored && exp.list.includes(stored) ? stored : exp.own;
+          for (const preview of [false, true]) {
+            const where = `${a.id} [${stored === null ? 'nothing stored' : stored}] (${lang}${preview ? ', console' : ''})`;
+            let html, same;
+            try {
+              html = String(run(`(() => { ${stored === null ? 'delete caCardViewModes[window.__eqCard.id]' : 'caCardViewModes[window.__eqCard.id] = ' + J(stored)}; try { return caCardBodyHtml(window.__eqCard${preview ? ', { preview: true }' : ''}); } finally { delete caCardViewModes[window.__eqCard.id]; } })()`));
+              same = stored === null ? run('caView(window.__eqCard) === window.__eqCard') : true;
+            } catch (e) { flag(`${where}: rendering threw ${e.message}`); continue; }
+            renders++;
+            if (!same) flag(`${where}: caView() does not hand back the card itself with nothing stored — the card's own view must be exactly today's`);
+            const sws = html.match(/<div class="ca-chord-switch ca-view-switch"[\s\S]*?<\/div>/g) || [];
+            if (sws.length !== 1) { flag(`${where}: ${sws.length} view switches, want 1`); continue; }
+            const btns = [...sws[0].matchAll(/<button [^>]*aria-pressed="(true|false)"[^>]*data-view="([a-z]+)"[^>]*>([^<]*)</g)];
+            if (J(btns.map(m => m[2])) !== J(exp.list)) flag(`${where}: the switch's buttons are ${J(btns.map(m => m[2]))}, want ${J(exp.list)}`);
+            btns.forEach(m => { const want = i18nTable[LABEL[m[2]]] && i18nTable[LABEL[m[2]]][lang]; if (m[3] !== want) flag(`${where}: the ${m[2]} button reads "${m[3]}", want "${want}" (i18n ${LABEL[m[2]]})`); });
+            const pressed = btns.filter(m => m[1] === 'true').map(m => m[2]);
+            if (J(pressed) !== J([shown])) flag(`${where}: pressed ${J(pressed)}, want ${J([shown])}`);
+            const isSheet = /<div class="pc-sheet"/.test(html), isTab = /<div class="tab pc-tab/.test(html);
+            const beats = /data-beat="/.test(html), seqs = /data-seq="/.test(html);
+            const drew = isSheet && !isTab ? 'lyrics' : isTab && !isSheet && beats ? 'chords' : isTab && !isSheet && seqs && !beats ? 'tab' : 'something else';
+            if (drew !== shown) flag(`${where}: draws ${drew}, want ${shown}`);
+            const chips = (html.match(/class="pc-sec[ "][^>]*data-sec="\d+"/g) || []).length;
+            if (chips !== a.card.sections.length) flag(`${where}: ${chips} section buttons, the card has ${a.card.sections.length}`);
+          }
+        }
+      }
+    }
+  } finally { run('setLang(' + J(saveLang) + ')'); delete ctx.__eqCard; delete ctx.__eqL0; delete ctx.__eqL1; }
+  for (const id of Object.keys(EXPECT)) if (!withViews.some(a => a.id === id)) flag(`${id} is pinned with views but has no card.otherViews — restore it, or change the pin on purpose`);
+  if (withViews.length !== Object.keys(EXPECT).length) flag(`${withViews.length} cards have otherViews, ${Object.keys(EXPECT).length} pinned (${Object.keys(EXPECT).join(', ')}) — pin a new one in EXPECT`);
+  // Nothing saved, the song not stopped, the page not redrawn.
+  let vsrc = '';
+  try { vsrc = stripJsComments(readFileSync(join(ROOT, 'app/cards-views.js'), 'utf8')); } catch (e) { flag('app/cards-views.js unreadable: ' + e.message); }
+  const store = vsrc.match(/\b(flushSave|saveProgress|scheduleSave|progress\/|caSteps|onCaStepChange|sessionStorage|firestore|firebase|db\.collection|setDoc|updateDoc)\b/g);
+  if (store) flag(`app/cards-views.js names a save or another store (${[...new Set(store)].join(', ')}): the choice is a localStorage convenience only`);
+  const keys = [...vsrc.matchAll(/localStorage\.setItem\(\s*([A-Za-z_'"][^,]*),/g)].map(m => m[1].trim());
+  if (J(keys) !== J(['CA_CARD_VIEWS_KEY']) || !/const CA_CARD_VIEWS_KEY = 'caCardViews';/.test(vsrc)) flag(`app/cards-views.js writes localStorage ${J(keys)}; want one key, CA_CARD_VIEWS_KEY = 'caCardViews'`);
+  const press = jsFunctionBody(vsrc, 'caSetCardView'), swap = jsFunctionBody(vsrc, 'caCardViewSwap');
+  if (press === null || swap === null) flag('app/cards-views.js: caSetCardView() / caCardViewSwap() not found');
+  else if (/\b(stopCardAudio|pcStop|pcStart|renderClassActivities|caTeacherRedraw|stopAllDemoAudio)\s*\(/.test(press + swap)) flag('app/cards-views.js: a view press stops the song or redraws the page — it swaps the view in place, the song keeps playing');
+  const cb = jsFunctionBody(siteSource('app.js', ROOT), 'caCardBodyHtml');
+  if (cb === null || !/caViewSwitchHtml\(a\)/.test(stripJsComments(cb))) flag('app/cards.js: caCardBodyHtml() must draw caViewSwitchHtml(a) — the card would have no switch');
+  if (!bad) ok(`1eq: ${withViews.length} card with views (${withViews.map(a => a.id + ': ' + EXPECT[a.id].list.join(' / ')).join('; ')}), shape and sections line up; ${located} sixteenths located at the same section, lap and beat in every view; ${renders} renders (nothing / junk / each view stored, EN + ES, student + console): one switch, one pressed button, the view drawn, default the card's own; ${swOff} renders of the other cards draw no switch; nothing saved, the song not stopped`);
 }
 
 /* 1cf. THE CLASS ROSTER SKIPS THE TEACHER'S OWN HEAR IT FIRST STUB (Friday
@@ -22172,6 +22329,7 @@ function checkNeverRules(sets) {
   checkSheetCards();
   checkChordGridCards(rcCtx);
   checkRecordingVersions(rcCtx);
+  checkCardViews(rcCtx, i18nTable);
   checkNoteCallPower(rcCtx);
   checkChordCall(rcCtx);
   checkPowerName(rcCtx);

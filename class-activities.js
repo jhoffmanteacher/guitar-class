@@ -268,7 +268,30 @@
                                            // chord of every lap, even while it
                                            // is still ringing; the dot steps onto it.
                                            // Counts in sheetChords (1bf2).
-       sections: [{                        // back to back, in song order
+       otherViews: { tab: {...}, lyrics: {...} },  // optional (2026-11-17, Jonathan:
+                                           // "chords/tab switch"): the card's OTHER
+                                           // views of the same song, and a Chords /
+                                           // Tab / Lyrics switch on the card to
+                                           // change between them while the song
+                                           // plays (app/cards-views.js). A view's
+                                           // name is tab (note by note), chords
+                                           // (the chord grid) or lyrics (a sheet);
+                                           // the card's own view (sheet -> lyrics,
+                                           // chordGrid -> chords, else tab) is the
+                                           // default and is not listed. Each view
+                                           // holds what that view needs: caption +
+                                           // _es, sections (left out = the card's
+                                           // own), and for chords everyStrum /
+                                           // restWord, for tab counts, for lyrics
+                                           // sheet / sheetChords / sheetColumns /
+                                           // sheetNamedAgain. Its sections must be
+                                           // the card's own, section for section
+                                           // (label, fromBar, bars, reps), so the
+                                           // place in the song maps exactly.
+                                           // Filled by reference at the END of this
+                                           // file from the song's other cards: no
+                                           // new music. checks.mjs 1eq.
+       sections: [{                       // back to back, in song order
          label, label_es,                  // the tap-to-start button ("Chorus")
          caption, caption_es,              // the heading over its tab page
          chordGrid: false,                 // optional: leave THIS section as a
@@ -7535,6 +7558,28 @@ window.CLASS_ACTIVITIES = [
     const from = list.find(a => a.id === f), to = list.find(a => a.id === t);
     if(from && to) to.card.sections = from.card.sections;
   });
+})();
+
+/* CARD VIEWS (Jonathan, 2026-11-17: "chords/tab switch"; see otherViews in the
+   CARD note above and app/cards-views.js). One card shows the song as chords,
+   as tab or as the lyric sheet, with a switch. The data is the song's OTHER
+   cards' own, by reference (the same arrays, not copies): nothing is written
+   here that is not already a card, and those cards stay where they are.
+   - ca-33 (Sweet Child O' Mine in power chords; its own view is Chords):
+     Tab = ca-28's tab (the roots, one pluck per bar), Lyrics = ca-45's sheet
+     (ca-45 already plays ca-33's sections, above, so the lyrics view keeps the
+     card's own sections and the chord count 1bf2 holds). */
+(function(){
+  const list = window.CLASS_ACTIVITIES;
+  const find = id => list.find(a => a.id === id);
+  const host = find('ca-33'), tab = find('ca-28'), sheet = find('ca-45');
+  if(!host || !tab || !sheet) return;
+  // The named fields of another card, the same values (its texts are checked where that card is written).
+  const take = (c, fields) => { const o = {}; fields.forEach(f => { if(c[f] !== undefined) o[f] = c[f]; }); return o; };
+  host.card.otherViews = {
+    tab: take(tab.card, ['caption', 'caption_es', 'sections']),
+    lyrics: take(sheet.card, ['caption', 'caption_es', 'sheet', 'sheetChords', 'sheetColumns', 'sheetNamedAgain'])
+  };
 })();
 
 /* All Along the Watchtower — the Neil Young version of ca-26, ca-29 and ca-40

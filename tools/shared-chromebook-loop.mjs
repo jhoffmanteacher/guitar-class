@@ -116,7 +116,7 @@
        gc-lang (i18n.js reads it at script load, before anyone signs in: the sign-in wall is drawn in it);
        stationView (lesson.js), railCollapsed (audio-ui.js "Remembered per browser"), pcCounts (cards.js),
        caChordModes / caKeyModes / caRecordingModes / caBassModes (activities.js: "a per-viewer convenience",
-       "per viewer in localStorage"), ncCoach / ncAnswer / ncSharps / pwnAnswer (drills-call.js), the BPM slider
+       "per viewer in localStorage"), caCardViews (cards-views.js: "per card on this device", like caChordModes), ncCoach / ncAnswer / ncSharps / pwnAnswer (drills-call.js), the BPM slider
        keys (audio-ui.js), nrMicOffset (coach-noterunner.js: "a per-device mic-latency offset"), micRecSaved
        (coach-core.js: take ids "Remembered on this device"), gc-mic-ok (coach-core.js COACH_MIC_OK_KEY: "this
        browser has given this site the mic", '1' or absent; the browser's own permission is per device too),
