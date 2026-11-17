@@ -69,8 +69,13 @@ class day: on a Monday, Friday's cards are Unfinished (his pick). No cap
 gate (`caIsVisible`) and Today both read; 1cq stubs it. In
 `renderClassActivities()`:
 - `pendingPool`: every pending visible card, newest `caDate` first, undated
-  last; within one date required before optional, then lowest board position
-  (#11 above #12). `todayPending` = the ones dated today or yesterday,
+  last; within one date required before optional, then by board position
+  (`byPos`): TODAY's cards lowest number first (#11 above #12), every older
+  day's HIGHEST number first, the same as the folds (Jonathan, 2026-11-17,
+  "highest number first": yesterday's #21 and #22 under today's #23 read
+  23 | 22, then 21; until then yesterday read lowest first, 23 | 21, then 22).
+  The hero pick, `todayDone` and the Since group (`caSinceMissed`) use the same
+  rule, so the top card is still the hero. `todayPending` = the ones dated today or yesterday,
   REQUIRED FIRST (not optional, not cleared for this student), then by date
   and board position (`caRequiredFirst`, Jonathan, 2026-11-14: "fix it so the
   optional cards are below").
@@ -87,7 +92,7 @@ gate (`caIsVisible`) and Today both read; 1cq stubs it. In
   pending, never a card the teacher cleared for this student; null when
   nothing but cleared cards is pending.
 - `todayDone`: every FINISHED card dated today or yesterday, appended BELOW
-  the pending ones, today's first, then lowest board position (2026-11-09:
+  the pending ones, today's first, then by `byPos` as above (2026-11-09:
   "In Today, marked done" — re-dating puts a card back in Today for everyone;
   nothing is reset or written). A finished card never takes a pending card's
   place. An older finished card stays in Completed only.

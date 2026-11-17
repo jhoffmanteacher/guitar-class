@@ -1450,12 +1450,13 @@ function renderClassActivities(){
        newest date only".
        1. The PENDING cards of those two days first: the required ones
           before the optional ones (and cards cleared for this student), then
-          today before yesterday, then the lowest board position (#11 above
-          #12, the 2026-11-02 rule). Optional cards below (Jonathan,
+          today before yesterday; today's lowest board position first (#11
+          above #12, the 2026-11-02 rule), older days' highest first (byPos,
+          2026-11-17). Optional cards below (Jonathan,
           2026-11-14: "fix it so the optional cards are below"); before, an
           optional card dated today sat above a required one dated yesterday.
        2. Then the FINISHED cards of those two days, below them, today
-          before yesterday, lowest board position first: re-dating a card
+          before yesterday, in the same order (byPos): re-dating a card
           puts it back in Today for everyone, and a student who already did
           it sees it done and can play it again (2026-11-09). A finished card
           never takes a pending card's place.
@@ -1478,8 +1479,14 @@ function renderClassActivities(){
       const dx = caDate(x) || '', dy = caDate(y) || '';
       return dx !== dy ? (dx < dy ? 1 : -1) : 0;
     };
+    /* Within one date (Jonathan, 2026-11-17, "highest number first"): today's
+       cards lowest number first (#11 above #12, the order the class does
+       them in); every older day highest number first, the same as the
+       Unfinished and Completed folds. So yesterday's #21 and #22 under
+       today's #23 read 23 | 22, then 21. caSinceMissed uses the same rule. */
+    const byPos = (x, y) => caDate(x) === todayDay ? (boardPos[x.id] - boardPos[y.id]) : (boardPos[y.id] - boardPos[x.id]);
     const pendingPool = list.filter(a => !isDone(a))
-      .sort((x, y) => byDate(x, y) || (Number(caIsOptional(x)) - Number(caIsOptional(y))) || (boardPos[x.id] - boardPos[y.id]));
+      .sort((x, y) => byDate(x, y) || (Number(caIsOptional(x)) - Number(caIsOptional(y))) || byPos(x, y));
     const myClears = (activityClears || {})[currentUser && currentUser.uid] || {};
     /* 0 = required (not optional, not cleared for this student: the hero's own rule), 1 = the rest. Every pending
        list on this page puts the 0s first and keeps its own order otherwise (caRequiredFirst). */
@@ -1496,7 +1503,7 @@ function renderClassActivities(){
     const pickable = pendingPool.filter(a => myClears[a.id] !== true);
     const heroPick = pickable.find(a => !caIsOptional(a)) || pickable[0] || null;
     caStartHereId = heroPick ? heroPick.id : null;
-    const todayDone = list.filter(a => isDone(a) && inToday(a)).sort((x, y) => byDate(x, y) || (boardPos[x.id] - boardPos[y.id]));
+    const todayDone = list.filter(a => isDone(a) && inToday(a)).sort((x, y) => byDate(x, y) || byPos(x, y));
     let todayCards = todayPending.concat(todayDone);
     // Every card in the group, the finished ones below included.
     caTodayIds = todayCards.map(a => a.id);
@@ -1740,8 +1747,10 @@ function caOnFinishedToggle(details){
        REQUIRED (not Optional, not CAS, not cleared by the teacher for this
        student) and not done, minus any card already in Today's activity
        (today's and yesterday's cards stay there, unchanged), newest date
-       first, within one date lowest board position first (#11 above #12,
-       the Today rule). Nothing left to list → no group.
+       first, within one date HIGHEST board position first (Jonathan,
+       2026-11-17, "highest number first": every day before today reads
+       highest first, as in Today and the folds; until then lowest first).
+       Nothing left to list → no group.
    No saved work found in the window, a failed read, a failed progress
    load, the teacher's account → no group: the page is exactly today's.
    The group never says "absent" (the site keeps no attendance: a student in
@@ -1774,13 +1783,13 @@ function caSinceGap(dates, last, today){
 }
 /* PURE. o = { today, last, cards: [{ id, date, required, done, inToday, pos }] }
    (cards = every card the student can see). Returns { last, days, ids } —
-   ids newest date first, then lowest board position — or null. */
+   ids newest date first, then highest board position — or null. */
 function caSinceMissed(o){
   const cards = (o && o.cards) || [];
   const days = caSinceGap(cards.map(c => c.date), o && o.last, o && o.today);
   if(!days) return null;
   const ids = cards.filter(c => c.required && !c.done && !c.inToday && days.includes(c.date))
-    .sort((x, y) => x.date !== y.date ? (x.date < y.date ? 1 : -1) : (x.pos - y.pos))
+    .sort((x, y) => x.date !== y.date ? (x.date < y.date ? 1 : -1) : (y.pos - x.pos))
     .map(c => c.id);
   return ids.length ? { last: o.last, days, ids } : null;
 }

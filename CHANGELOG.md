@@ -6,6 +6,10 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-17 — Today's activity: newest number first for earlier days
+
+- **In Today's activity, today's cards still come first. Earlier days' cards now come next with the highest number first,** the same order as the Unfinished and Completed lists. For example, today's #23 sits beside yesterday's #22, and #21 goes on the next row. "Since your last visit" uses the same order.
+
 ## 2026-11-17 — Strum Pattern — The Chorus: two steps
 
 - **"Strum Pattern — The Chorus" is now two steps.** The muted-strings step shows four bars on one line with no chord names. The A5-only step is gone. The chorus step shows A5 C5 D5 D5 twice.

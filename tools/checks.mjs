@@ -10286,8 +10286,9 @@ function checkPracticeCards(ctx) {
    Unfinished). renderClassActivities() puts in Today EVERY visible card
    released today or yesterday (caTodayWindow), no cap: the PENDING ones
    first (required before optional and cleared, 2026-11-14; then today
-   before yesterday, then lowest board position), then the FINISHED ones as the Completed
-   fold's ✓ row (today before yesterday, lowest board position first), not
+   before yesterday; today's lowest board position first, older days' highest
+   first, 2026-11-17), then the FINISHED ones as the Completed
+   fold's ✓ row (today before yesterday, same order), not
    repeated in Completed or counted. The heading is dated today; a card from
    yesterday wears its own .ca-chip. No card of either day → no heading.
    The hero (caStartHereId) is the newest required pending card anywhere,
@@ -11501,7 +11502,7 @@ function checkTodayByDate(ctx) {
   if (!ctx) { flag('1cq cannot run — the 0b render context is unavailable'); return; }
   const run = x => vm.runInContext(x, ctx);
   const J = JSON.stringify;
-  const EXPECT_RENDERS = 25;
+  const EXPECT_RENDERS = 26;
   let renders = 0, asserts = 0;
   const STATE = ['activityDates', 'classActivities', 'activityBoard', 'activityBoardOn', 'optionalActivityIds', 'hiddenActivityIds', 'keepTodayActivityIds',
     'retiredActivityIds', 'activityForMe', 'activityPins', 'caOpenId', 'caSwap', 'studentPeriod', 'periodOverride', 'currentUser',
@@ -11638,7 +11639,7 @@ function checkTodayByDate(ctx) {
       /* 5. Optional: within one date the required card comes first; an optional card today is not the hero while a
          required card of yesterday is pending. */
       r = render([[A, MA, D.d9, false, true], [B, MA, D.d9], [C, MA, D.d8], [Dd, MA, D.d8, false, true], [E, MA, D.d8]], lang);
-      want(J(r.today) === J([B, C, E, A, Dd]) && r.hero === B, `${lang} optional: Today ${J(r.today)}, hero ${r.hero}; expected ${J([B, C, E, A, Dd])}, hero ${B} (required before optional, then today before yesterday)`);
+      want(J(r.today) === J([B, E, C, A, Dd]) && r.hero === B, `${lang} optional: Today ${J(r.today)}, hero ${r.hero}; expected ${J([B, E, C, A, Dd])}, hero ${B} (required before optional, then today before yesterday, yesterday's highest number first)`);
       r = render([[A, MA, D.d9, false, true], [B, MA, D.d8], [C, MA, D.d2]], lang);
       want(J(r.today) === J([B, A]) && r.hero === B && J(r.todo) === J([C]), `${lang} optional today, required yesterday: Today ${J(r.today)}, hero ${r.hero}, fold ${J(r.todo)}; expected ${J([B, A])} (required first), hero ${B}, ${J([C])}`);
       /* 5b. Optional cards below the next required card (2026-11-14). The FIRST pending card on the page is the hero.
@@ -11663,8 +11664,11 @@ function checkTodayByDate(ctx) {
       const two = [[A, MA, D.d29], [B, MA, D.d8], [C, MA, D.d2], [Dd, MB, D.d29], [E, MB, D.d9], [F, MB, D.d2], [G, MB, D.d8]];
       r = render(two, lang);
       const restWant = oldOrder(two).filter(id => ![E, B, G].includes(id));
-      want(J(r.today) === J([E, B, G]), `${lang} two modules: Today holds ${J(r.today)}, expected ${J([E, B, G])}`);
+      want(J(r.today) === J([E, G, B]), `${lang} two modules: Today holds ${J(r.today)}, expected ${J([E, G, B])} (today's, then yesterday's highest number first, 2026-11-17)`);
       want(J(r.todo) === J(restWant) && r.todoN === restWant.length, `${lang} two modules: the fold holds ${J(r.todo)} (${r.todoN}), expected the old order ${J(restWant)}`);
+      /* 7b. Jonathan, 2026-11-17 ("highest number first"): #21 and #22 yesterday, #23 today, one module → 23 | 22, then 21. */
+      r = render([[A, MA, D.d8], [B, MA, D.d8], [C, MA, D.d9]], lang);
+      want(J(r.today) === J([C, B, A]) && r.hero === C, `${lang} highest number first: Today ${J(r.today)}, hero ${r.hero}; expected ${J([C, B, A])}, hero ${C}`);
       /* 8. An exit check dated yesterday: its hero card wears the chip too. */
       r = render([[A, MA, D.d9], [chk, MA, D.d8]], lang);
       want(J(r.today) === J([A, chk]) && r.sum[chk] && r.sum[chk].chip === L[D.d8] && r.sum[A] && r.sum[A].chip === null, `${lang} exit check: Today ${J(r.today)}, chips ${J([r.sum[A] && r.sum[A].chip, r.sum[chk] && r.sum[chk].chip])}; expected ${J([A, chk])} with ${L[D.d8]} on the check only`);
@@ -11885,7 +11889,7 @@ function checkKeepToday(ctx) {
    a practice-minutes day record; the last visit = the newest one before
    today) gets a group under Today's activity: the required, not-done cards
    released on those days that are not already in Today, newest first, within
-   a date lowest board position first. Run here:
+   a date highest board position first (2026-11-17). Run here:
      A. the pure caSinceMissed / caSinceGap over a table of made-up histories
         (no gap; a 1-day gap; a 2-day gap; across a weekend; a weekday with no
         board date; an optional card; everything done; a card in Today; the
@@ -11932,7 +11936,7 @@ function checkSinceLastVisit(ctx) {
     ['across a weekend and a day with no board date: worked Thu 11/6, no card Tue', { today: D.fri, last: D.lthu, cards: week().filter(c => c.date !== D.tue) }, ['E', 'C', 'B']],
     ['an optional card is a class day but never listed', { today: D.fri, last: D.mon, cards: week().map(c => c.id === 'E' ? Object.assign(c, { required: false }) : c) }, ['D']],
     ['everything already done', { today: D.fri, last: D.lthu, cards: week({ done: true }) }, null],
-    ['one date, two cards: lowest board position first', { today: D.fri, last: D.mon, cards: [...week(), Object.assign(card('E2', D.wed), { pos: -1 })] }, ['E2', 'E', 'D']],
+    ['one date, two cards: highest board position first (2026-11-17)', { today: D.fri, last: D.mon, cards: [...week(), Object.assign(card('E2', D.wed), { pos: -1 })] }, ['E', 'E2', 'D']],
     ['1-day gap NOT yesterday: worked Thu 11/6, missed Fri 11/7 only, back Mon (Sunday is yesterday)', { today: D.mon, last: D.lthu, cards: [card('A', D.lthu), card('B', D.lfri), Object.assign(card('C', D.mon), { inToday: true })] }, null],
     ['no saved work found (no last visit)', { today: D.fri, last: null, cards: week() }, null],
     ['a last visit of today itself (never passed in) lists nothing', { today: D.fri, last: D.fri, cards: week() }, null],
@@ -12049,13 +12053,13 @@ function checkSinceLastVisit(ctx) {
       const WEEK = [[A, D.lfri], [B, D.mon], [C, D.tue], [Dd, D.wed], [E, D.wed], [F, D.thu], [G, D.fri]];
       for (const lang of ['en', 'es']) {
         const T = (k, p) => run(`t(${J(k)}${p ? ', ' + J(p) : ''})`);
-        // 1. Worked Monday, missed Tue/Wed/Thu: Tue + Wed cards (Thursday's is in Today), Wed first (#lowest first), Start on the top one.
+        // 1. Worked Monday, missed Tue/Wed/Thu: Tue + Wed cards (Thursday's is in Today), Wed first (#highest first, 2026-11-17), Start on the top one.
         setUp(WEEK, lang, D.mon); let r = page('renderClassActivities()');
         setUp(WEEK, lang); const plain = page('renderClassActivities()');
-        want(J(r.since) === J([Dd, E, C]), `${lang} 3 missed: the group holds ${J(r.since)}, expected ${J([Dd, E, C])} (Wednesday's two, lowest number first, then Tuesday's)`);
+        want(J(r.since) === J([E, Dd, C]), `${lang} 3 missed: the group holds ${J(r.since)}, expected ${J([E, Dd, C])} (Wednesday's two, highest number first, then Tuesday's)`);
         want(r.head && r.head.text === T('ca.sinceTitle') && r.head.date === LBL[lang][D.mon], `${lang} 3 missed: heading ${J(r.head)}, expected ${T('ca.sinceTitle')} · ${LBL[lang][D.mon]} (the last day with saved work)`);
         want(r.note === T('ca.sinceNote', { n: 3 }).replace(/'/g, '&#39;') || r.note === T('ca.sinceNote', { n: 3 }), `${lang} 3 missed: the line reads ${J(r.note)}, expected ${J(T('ca.sinceNote', { n: 3 }))}`);
-        want(J(r.heroes) === J([Dd]) && r.chips[Dd] === LBL[lang][D.wed] && r.chips[C] === LBL[lang][D.tue], `${lang} 3 missed: Start on the top card only (${J(r.heroes)}), each card with its own date (${J(r.chips)})`);
+        want(J(r.heroes) === J([E]) && r.chips[Dd] === LBL[lang][D.wed] && r.chips[C] === LBL[lang][D.tue], `${lang} 3 missed: Start on the top card only (${J(r.heroes)}), each card with its own date (${J(r.chips)})`);
         want(r.todayAt >= 0 && r.todayAt < r.sinceAt && (r.todoAt < 0 || r.sinceAt < r.todoAt), `${lang} 3 missed: Today first, then the group, then the Unfinished fold (at ${r.todayAt} / ${r.sinceAt} / ${r.todoAt})`);
         want(r.todayHtml === plain.todayHtml && J(r.today) === J([G, F]), `${lang} 3 missed: Today's section must be byte-identical to the page without the group (Today ${J(r.today)}, plain ${J(plain.today)})`);
         want(!r.todo.some(id => r.since.includes(id)) && J(r.todo) === J(plain.todo.filter(id => !r.since.includes(id))), `${lang} 3 missed: a group card also shows in the Unfinished fold (fold ${J(r.todo)})`);
@@ -12070,7 +12074,7 @@ function checkSinceLastVisit(ctx) {
         // 4. Tuesday's only card was for other students: Tuesday is no class day for this student -> worked Mon, missed Wed + Thu = 2.
         const other = WEEK.map(c => c[0] === C ? [C, D.tue, false, false, 'other'] : c);
         setUp(other, lang, D.mon); r = page('renderClassActivities()');
-        want(J(r.since) === J([Dd, E]) && !r.all.includes(C), `${lang} a card for other students: group ${J(r.since)}, page ${J(r.all)}; expected ${J([Dd, E])} and ${C} nowhere`);
+        want(J(r.since) === J([E, Dd]) && !r.all.includes(C), `${lang} a card for other students: group ${J(r.since)}, page ${J(r.all)}; expected ${J([E, Dd])} and ${C} nowhere`);
         setUp(other.map(c => c[0] === Dd || c[0] === E ? [c[0], D.tue, false, false, 'other'] : c), lang, D.mon); r = page('renderClassActivities()');
         want(r.sinceN === 0, `${lang} only Thursday left as a class day for this student: a 1-day gap must show no group (got ${J(r.since)})`);
         // 5. An optional card in the gap stays in the fold; one card left -> the singular line.
@@ -12092,10 +12096,10 @@ function checkSinceLastVisit(ctx) {
         want(r.sinceN === 0, `${lang} CAS: a group was drawn (every card is optional for CAS)`);
         // 10. A card cleared by the teacher for this student is not listed.
         setUp(WEEK, lang, D.mon); run(`activityClears = { 'test-0': { ${J(C)}: true } }`); r = page('renderClassActivities()');
-        want(J(r.since) === J([Dd, E]), `${lang} cleared: group ${J(r.since)}, expected ${J([Dd, E])}`);
+        want(J(r.since) === J([E, Dd]), `${lang} cleared: group ${J(r.since)}, expected ${J([E, Dd])}`);
         // 11. Worked Thursday 11/6 and nothing since: across the weekend, the Friday 11/7 card is listed too, oldest last.
         setUp([[H, D.lthu], ...WEEK], lang, D.lthu); r = page('renderClassActivities()');
-        want(J(r.since) === J([Dd, E, C, B, A]) && r.head && r.head.date !== null, `${lang} across a weekend: group ${J(r.since)}, expected ${J([Dd, E, C, B, A])}`);
+        want(J(r.since) === J([E, Dd, C, B, A]) && r.head && r.head.date !== null, `${lang} across a weekend: group ${J(r.since)}, expected ${J([E, Dd, C, B, A])}`);
         // 12. Away on Friday only, back on Monday: one class day missed (and not yesterday: Sunday is) -> no group, the page as today.
         const MON = [[H, D.lthu], [A, D.lfri], [B, D.mon]];
         setUp(MON, lang, D.lthu, D.mon); r = page('renderClassActivities()');
@@ -12122,7 +12126,7 @@ function checkSinceLastVisit(ctx) {
           want(String(body.innerHTML) === 'UNDER-THE-OPEN-CARD' && st.state === 'ok' && st.last === D.mon && st.wait === true,
             `${lang} the read landing with a card open: ${J(st)}, page ${String(body.innerHTML) === 'UNDER-THE-OPEN-CARD' ? 'untouched' : 'REPAINTED under the open card'}; expected ok, ${D.mon}, a repaint waiting, the page untouched`);
           r = page('caCloseOpen()');
-          want(J(r.since) === J([Dd, E, C]) && run('caSinceRepaint') === false && run('caOpenId') === null, `${lang} "All activities" after the read landed: group ${J(r.since)}, waiting ${run('caSinceRepaint')}; expected ${J([Dd, E, C])} and no repaint left waiting`);
+          want(J(r.since) === J([E, Dd, C]) && run('caSinceRepaint') === false && run('caOpenId') === null, `${lang} "All activities" after the read landed: group ${J(r.since)}, waiting ${run('caSinceRepaint')}; expected ${J([E, Dd, C])} and no repaint left waiting`);
           setUp(WEEK, lang); run(`caSinceLoad = __realLoad; ensureDb = () => window.__fakeDb;`);
           page('renderClassActivities()');
           body.innerHTML = '';
