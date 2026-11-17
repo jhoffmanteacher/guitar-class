@@ -40,7 +40,7 @@ import { createHash } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join, isAbsolute, relative } from 'node:path';
 import { audioHashMap, renderAudioBlock, AUDIO_BLOCK_RE, AUDIO_CACHE_NAME, AUDIO_HASH_CACHE_NAME } from './sw-audio-map.mjs';
-import { readSongFiles, resolveAudio, privateId, songFilesDir, localMismatch, SONG_FILE_PREFIX } from './song-files.mjs';
+import { readSongFiles, resolveAudio, privateId, songFilesDir, localMismatch, isAwaiting, SONG_FILE_PREFIX } from './song-files.mjs';
 import { reviewLabelReport } from './review-labels.mjs';
 import { checkKeysAgainstBase, checkFirestoreWrites, checkRulesPaste, checkKeptThings, LET_THROUGH } from './never-blocks.mjs';
 import { tmpdir, cpus } from 'node:os';
@@ -15396,12 +15396,19 @@ function checkSiteMadeClick() {
        ~/Documents/guitar-class-song-files/): a local copy whose size or
        SHA-256 is not the list's (a re-export nobody registered: the console
        would upload a file the site then refuses).
+   AWAITING SWITCH (2026-11-17, step 2 of private song audio; tools/song-files.mjs's header): an entry with
+   "awaitingSwitch": true is a file the site STILL PLAYS from audio/, listed early so the console can upload and
+   verify it. For such an entry the rule above is replaced by: it passes ONLY while audio/<file> exists with the
+   entry's exact bytes and SHA-256 AND some public path (SNIPPET_TRACKS or a Song Journey data-audio*) is
+   'audio/<file>'; it fails when any 'private:<id>' path names it (a switched track drops the flag in the same
+   commit), when audio/ has no such file, or when the file differs by even one byte. The private folder is not
+   compared for it (its bytes are audio/'s), and AUDIO_HASHES may list it.
    Warns: a listed file the folder does not have, an entry no path names.
    Pinned: SONG_FILES_PIN, the number of entries, so one cannot drop off
    unnoticed. The audio checks (1ak, 1be, 1bk, the key versions, 1bu) take
    a private path through audioInfo() above.
    ════════════════════════════════════════════════════════════════════ */
-const SONG_FILES_PIN = 0;   // entries on the SONG_FILES list (app/songfiles.js); none switched in Step 1
+const SONG_FILES_PIN = 18;   // entries on the SONG_FILES list (app/songfiles.js); none switched in Step 1; 0 -> 18 (2026-11-17, step 2a): the 18 practice-card files, all awaitingSwitch
 function checkSongFiles() {
   head('1dz. Song files: the private list');
   let bad = 0;
@@ -15419,27 +15426,41 @@ function checkSongFiles() {
     paths++;
     const id = privateId(v);
     if (!Object.prototype.hasOwnProperty.call(list, id)) flag(`${where} is "${v}", but "${id}" is not on the SONG_FILES list in app/songfiles.js — add it with node tools/song-files.mjs --add <mp3> --id ${id}`);
+    else if (isAwaiting(list[id])) flag(`${where} is "${v}", but "${id}" is still awaitingSwitch on the SONG_FILES list — a switched track drops the flag in the same commit: node tools/song-files.mjs --switch ${id}`);
     else used.set(id, where);
   };
+  /* The public paths, by file name: an awaiting entry must be one the site plays. */
+  const publicUse = new Map();
+  const notePublic = (v, where) => { if (typeof v === 'string' && /^(\.\.\/)?audio\/[^/]+$/.test(v)) { const f = v.replace(/^(\.\.\/)?audio\//, ''); if (!publicUse.has(f)) publicUse.set(f, where); } };
   let TRACKS;
   try { TRACKS = loadConstObject(siteSource('app.js', ROOT), 'SNIPPET_TRACKS'); }
   catch (e) { flag(`could not load SNIPPET_TRACKS — ${e.message}`); return; }
   for (const [name, tr] of Object.entries(TRACKS))
-    for (const [k, v] of Object.entries(tr)) usePath(v, `SNIPPET_TRACKS['${name}'].${k}`);
+    for (const [k, v] of Object.entries(tr)) { usePath(v, `SNIPPET_TRACKS['${name}'].${k}`); notePublic(v, `SNIPPET_TRACKS['${name}'].${k}`); }
   let pages = 0;
   for (const page of TAB_PAGES.filter(p => p.endsWith('.html'))) {
     let src;
     try { src = readFileSync(join(ROOT, page), 'utf8'); } catch { continue; }
     pages++;
-    for (const m of src.matchAll(/\bdata-(audio[a-z-]*)="([^"]*)"/g)) usePath(m[2], `${page} data-${m[1]}`);
+    for (const m of src.matchAll(/\bdata-(audio[a-z-]*)="([^"]*)"/g)) { usePath(m[2], `${page} data-${m[1]}`); notePublic(m[2], `${page} data-${m[1]}`); }
   }
   if (!pages) flag('read no tabs/*.html page — TAB_PAGES is empty, so the data-audio* paths were not checked');
   let audioNames = [];
   try { audioNames = readdirSync(join(ROOT, 'audio')); } catch { /* no audio/ */ }
   let swBlock = '';
   try { swBlock = (AUDIO_BLOCK_RE.exec(readFileSync(join(ROOT, 'sw.js'), 'utf8')) || [''])[0]; } catch { /* reported by the sw checks */ }
+  let awaiting = 0;
   for (const id of ids) {
     const f = list[id].file;
+    if (isAwaiting(list[id])) {
+      awaiting++;
+      if (!audioNames.includes(f)) { flag(`"${id}" is awaitingSwitch, but audio/${f} is not here — an awaiting entry must describe the public file the site plays (put it back, or finish the switch: --switch ${id} and point its track at 'private:${id}')`); continue; }
+      const why = localMismatch(join(ROOT, 'audio', f), list[id]);
+      if (why) flag(`"${id}" is awaitingSwitch, but audio/${f} ${why} — the class plays a different file than the one the console would upload. Re-list it: node tools/song-files.mjs --add audio/${f} --awaiting, then upload it again`);
+      if (!publicUse.has(f)) flag(`"${id}" is awaitingSwitch, but no SNIPPET_TRACKS path or Song Journey page plays audio/${f}`);
+      used.set(id, publicUse.get(f) || 'awaiting');
+      continue;
+    }
     if (audioNames.includes(f)) flag(`audio/${f} is on the SONG_FILES list as "${id}": a private song must not be public too — take it out of audio/`);
     /* Without --check this run rewrites the block from audio/ at its end (syncAudioHashes), so only --check
        (GitHub, the hooks) reads the block as it stands. */
@@ -15453,6 +15474,7 @@ function checkSongFiles() {
   let matches = 0, missing = 0;
   if (folder) {
     for (const id of ids) {
+      if (isAwaiting(list[id])) continue;   // its bytes are audio/'s, checked above
       const local = join(dir, list[id].file);
       if (!existsSync(local)) { missing++; continue; }
       const why = localMismatch(local, list[id]);
@@ -15463,7 +15485,8 @@ function checkSongFiles() {
   }
   const unused = ids.filter(id => !used.has(id));
   if (unused.length) { warn(`1dz: on the SONG_FILES list but named by no track or page: ${unused.join(', ')}`); warnings++; }
-  if (bad === 0) ok(`${ids.length} song file${ids.length === 1 ? '' : 's'} on the list (pinned), ${paths} private path${paths === 1 ? '' : 's'} in SNIPPET_TRACKS and ${pages} Song Journey pages, every one on the list; none in audio/ or AUDIO_HASHES; ${folder ? `the private folder is here: ${matches} of ${ids.length} match the list` : 'no private folder on this machine: checked from the list'}`);
+  const sw = ids.length - awaiting;
+  if (bad === 0) ok(`${ids.length} song file${ids.length === 1 ? '' : 's'} on the list (pinned): ${awaiting} awaiting a switch (each matches its audio/ file byte for byte and is played by a public path; no private path names one), ${sw} switched; ${paths} private path${paths === 1 ? '' : 's'} in SNIPPET_TRACKS and ${pages} Song Journey pages, every one on the list; no switched file in audio/ or AUDIO_HASHES; ${folder ? `the private folder is here: ${matches} of ${sw} switched match the list` : 'no private folder on this machine: checked from the list'}`);
 }
 
 const GUITAR_NOTE_COUNT = 35;
@@ -20819,7 +20842,7 @@ function checkSongFilesLoader() {
    not run here. Since 2026-11-14 it also runs Manage → Built songs' Import
    (teacher-builtsongs.js) against the rules' BUILT SONGS shape.
    ════════════════════════════════════════════════════════════════════ */
-const SONG_FILES_CONSOLE_SIM_PIN = 109;   // 88 -> 109 (W21, 2026-11-17): many files at once and the drop zone (21 cases); 57 -> 84 (2026-11-14, Song builder Part a2): Manage → Built songs' Import (27 cases); -> 88 (review round 1: before the rules are published, Delete as on main and Import refused; an Import during Delete's check); 52 -> 57 (review round 1, 2026-11-14): the paste-2 line, a Verify text escaped, a read during a write, a re-upload asked first (2)
+const SONG_FILES_CONSOLE_SIM_PIN = 115;   // 109 -> 115 (2026-11-17, private song audio step 2a): AWAITING SWITCH, 6 cases (an awaiting upload accepted, a file not on the list refused, Verify all over a mix); 88 -> 109 (W21, 2026-11-17): many files at once and the drop zone (21 cases); 57 -> 84 (2026-11-14, Song builder Part a2): Manage → Built songs' Import (27 cases); -> 88 (review round 1: before the rules are published, Delete as on main and Import refused; an Import during Delete's check); 52 -> 57 (review round 1, 2026-11-14): the paste-2 line, a Verify text escaped, a read during a write, a re-upload asked first (2)
 function checkSongFilesConsole() {
   head('1dy. Song files in the console: upload, verify, delete and the escaping are run against the rules\' shape');
   const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'song-files-console-sim.mjs')], { encoding: 'utf8', timeout: 120000 });

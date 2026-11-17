@@ -129,6 +129,8 @@ def songs():
             out.setdefault(n['slug'], []).append(p)
     folder = sf.song_files_dir()
     for sid, e in sorted(sf.read_song_files(ROOT).items(), key=lambda kv: kv[1]['file']):
+        if sf.is_awaiting(e):
+            continue  # still played from audio/ (found by the glob above); levelling it changes its bytes: re-list it
         n = parse_name(e['file'])
         if n:
             p = folder / e['file']

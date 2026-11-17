@@ -43,7 +43,13 @@
    wrong bytes under a listed name say "wrong bytes"; a failure in the middle never stops the rest; a second drop
    during a batch is refused with a line and writes nothing; leaving Manage stops the batch at the file being
    written; the window drop guard is on only during a batch; a folder, a file that is not .mp3 and an empty drop
-   get one line each. */
+   get one line each.
+
+   AWAITING SWITCH (2026-11-17, private song audio step 2; bat-a and bat-b flagged "awaitingSwitch": true, bat-c
+   not): before upload an awaiting row reads "on the site as a public file; upload it, then it can be switched";
+   its upload is accepted and its head is the rules' shape; uploaded, it reads "uploaded, matches; ready to switch";
+   a file not on the list and an awaiting name with one byte changed are refused and write nothing; Verify all over
+   awaiting-uploaded, awaiting-not-uploaded and an ordinary uploaded entry reads back the two uploaded ones. */
 import { readFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -670,6 +676,59 @@ async function runCases(consoleSrc){
   }
   done(c);
 
+  /* ── AWAITING SWITCH (2026-11-17, private song audio step 2): a list entry the site still plays from audio/
+     ("awaitingSwitch": true) uploads and verifies like any listed file; only its two plain states read differently. */
+  const regAwait = c => { for(const id of ['bat-a', 'bat-b']) c.run(`SONG_FILES['${id}'].awaitingSwitch = true;`); };
+  const rowHtml = (c, id) => ((c.block._html.match(/<tr>[\s\S]*?<\/tr>/g) || []).find(r => r.includes(`<td>${id}</td>`)) || '');
+  const AW_NOT = /on the site as a public file; upload it, then it can be switched/;
+  const AW_OK = /uploaded, matches; ready to switch \(the site still plays the public file\)/;
+
+  /* awaiting: an upload of an awaiting entry is accepted, the head is the rules' shape, the row says so */
+  c = makeConsole(consoleSrc); register(c); regBatch(c); regAwait(c);
+  await managed(c);
+  c.run('teacherSfOpen = true; teacherSfPaint()');
+  {
+    ok(AW_NOT.test(rowHtml(c, 'bat-a')) && AW_NOT.test(rowHtml(c, 'bat-b')) && /on the list, not uploaded/.test(rowHtml(c, 'bat-c')) && !AW_NOT.test(rowHtml(c, 'bat-c')),
+      'awaiting: before upload, an awaiting entry reads "on the site as a public file; upload it, then it can be switched" (an ordinary one: "on the list, not uploaded")');
+    c.run('teacherSfTakeFiles')([bfile('bat-a')], 0);
+    await idle(c);
+    const h = c.F.S.get('songFiles/bat-a') || {};
+    ok(h.state === 'ready' && h.bytes === B('bat-a').bytes.length && h.sha256 === sha(B('bat-a').bytes) && !('awaitingSwitch' in h) && c.F.st.violations.length === 0 && c.F.st.writes.every(w => w.path.startsWith('songFiles/bat-a')),
+      `awaiting: an upload of an awaiting entry is accepted, ready, its head in the rules' shape (no awaitingSwitch in it; ${c.F.st.violations.length} violations)`);
+    ok(AW_OK.test(rowHtml(c, 'bat-a')) && AW_NOT.test(rowHtml(c, 'bat-b')), 'awaiting: uploaded, the row reads "uploaded, matches; ready to switch (the site still plays the public file)"');
+  }
+  done(c);
+
+  /* awaiting: a file that is not on the list is refused with awaiting entries on it, and writes nothing */
+  c = makeConsole(consoleSrc); register(c); regBatch(c); regAwait(c);
+  await managed(c);
+  {
+    const near = Uint8Array.from(B('bat-a').bytes); near[10] ^= 1;
+    c.run('teacherSfTakeFiles')([fileOf(bytesOf(1777, 91), 4, 'stranger.mp3'), bfile('bat-a', 'bat-a.mp3', near)], 0);
+    await idle(c);
+    const lis = refusedLis(c);
+    ok(c.F.st.writes.length === 0 && lis.length === 2 && /stranger\.mp3: not on the site/.test(lis[0]) && /bat-a\.mp3: wrong bytes/.test(lis[1]) && AW_NOT.test(rowHtml(c, 'bat-a')),
+      `awaiting: a file not on the list, and an awaiting entry's name with one byte changed, are refused and write nothing (${c.F.st.writes.length} writes, ${lis.length} refusals)`);
+  }
+  done(c);
+
+  /* awaiting: Verify all over awaiting-uploaded, awaiting-not-uploaded and an ordinary entry */
+  c = makeConsole(consoleSrc); register(c); regBatch(c); regAwait(c);
+  await managed(c);
+  c.run('teacherSfOpen = true; teacherSfPaint()');
+  {
+    c.run('teacherSfTakeFiles')([bfile('bat-a'), bfile('bat-c')], 0);
+    await idle(c);
+    const pr0 = c.F.st.pieceReads;
+    await c.run('teacherSfVerifyAll')(); await settle();
+    const ck = id => c.run(`teacherSfChecks.get(${JSON.stringify(id)})`) || null;
+    ok(ck('bat-a') && ck('bat-a').ok === true && ck('bat-c') && ck('bat-c').ok === true && !ck('bat-b') && c.F.st.pieceReads - pr0 === 2,
+      `verify all, mixed: the uploaded awaiting entry and the uploaded ordinary one read back whole, the awaiting one not uploaded is not read (${c.F.st.pieceReads - pr0} piece reads)`);
+    ok(/Verified 2 of 2/.test(c.block._html) && AW_OK.test(rowHtml(c, 'bat-a')) && /✓/.test(rowHtml(c, 'bat-a')) && AW_NOT.test(rowHtml(c, 'bat-b')) && /on the list, uploaded, matches/.test(rowHtml(c, 'bat-c')),
+      'verify all, mixed: "Verified 2 of 2"; bat-a ✓ and ready to switch, bat-b still to upload, the ordinary bat-c "on the list, uploaded, matches"');
+  }
+  done(c);
+
   /* ── Manage → Built songs: Import (teacher-builtsongs.js, Song builder Part a2) ── */
   const BID = FIXTURES.fourFour.id, BAID = audioIdFor(BID, SONG_SHA);
   const bdoc = (() => { const d = withAudio(FIXTURES.fourFour.doc, SONG_BYTES, SONG_SHA, 125.5); d.audio.id = BAID; d.audio.gainDb = 2.5; return d; })();
@@ -855,7 +914,7 @@ if(BREAKS){
   const MUT = [
     ['Delete does not look again for an Import after its check', "    if(teacherSfOtherBusy()) return;   // an Import or another action began during the read (review R1-5)\n", ""],
     ['a built song\'s audio deleted anyway', "    if(users.length){ teacherSfNote", "    if(false){ teacherSfNote"],
-    ['a built song\'s audio drawn as stray', "  return teacherSfOnList(id) ? 'match' : 'built';", "  return teacherSfOnList(id) ? 'match' : 'stray';"],
+    ['a built song\'s audio drawn as stray', "  return teacherSfOnList(id) ? (teacherSfAwaiting(id) ? 'awaitMatch' : 'match') : 'built';", "  return teacherSfOnList(id) ? (teacherSfAwaiting(id) ? 'awaitMatch' : 'match') : 'stray';"],
     ['no list match: any file uploads as the first entry', "return Object.keys(list).find(id => list[id] && list[id].sha256 === sha && list[id].bytes === bytes) || null;", "return Object.keys(list)[0] || null;"],
     ['no size cap before reading', 'if(size > TEACHER_SF_MAX_BYTES) return {', 'if(false) return {'],
     ['stale pieces kept', 'for(let j = n; j < TEACHER_SF_MAX_PIECES; j++) batch.delete(', 'for(let j = n; j < n; j++) batch.delete('],
@@ -888,6 +947,10 @@ if(BREAKS){
     ['a file that is not .mp3 is taken', "const mp3 = files.filter(teacherSfIsMp3),", "const mp3 = files.slice(),"],
     ['a folder is not named', "if(folders) pre.push(", "if(false) pre.push("],
     ['wrong bytes reported as not on the list', "why: near ? `wrong bytes:", "why: false ? `wrong bytes:"],
+    // AWAITING SWITCH (2026-11-17)
+    ['an awaiting entry drawn as an ordinary one before upload', "if(!h) return teacherSfAwaiting(id) ? 'awaitNotUp' : 'notUp';", "if(!h) return 'notUp';"],
+    ['an awaiting entry drawn as an ordinary one once uploaded', "(teacherSfAwaiting(id) ? 'awaitMatch' : 'match')", "'match'"],
+    ['every entry drawn as awaiting', "SONG_FILES[id].awaitingSwitch === true; }", "true; }"],
   ];
   let caught = 0;
   for(const [name, from, to] of MUT){
