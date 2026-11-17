@@ -691,7 +691,7 @@
     cfg = cfg || CONFIG_DEFAULT;
     ans = ans || {};
     var res = { task: item.task, unclear: false, correct: false, right: false, score: 0, errType: null, pair: null, posError: false, ms: ans.ms == null ? null : ans.ms };
-    var played, r;
+    var played;
     if (item.task === 'match') {
       if (ans.unclear) return { unclear: true, task: 'match' };
       var t = item.target.midi, tries = ans.tries || [];
