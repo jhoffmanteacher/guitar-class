@@ -31,16 +31,13 @@ Dates are the Pacific calendar date. `CACHE_VERSION` and commit timestamps may s
 
 Start here. Update this block whenever an item opens or closes; each line says where the detail is.
 
-**THE MAC'S OWN LIST, in flight 2026-11-17 (delete each line when it is live):**
-- **Sweet Child / every lyric sheet: scroll so the playing line sits at the top** (Jonathan, 2026-11-17: "it should
-  scroll down as much as possible to show what's coming next though and not just two lines at a time"; asked twice).
-  Branch `feat/sheet-scroll-top` (worktree `sheet-scroll`), one Opus builder, in its proof stage at 09:50. It ships
-  in ONE push with the next two lines. Tell him when it is live; only then does a "look at it" line go on his list.
-- **Play Along highlights ON the heard beat** (`PC_LEAD` 0; Jonathan, same day: "exactly on the beat and not ahead
-  of it for everything ... it's confusing otherwise"; reverses his 60 ms of 2026-11-16). Commit `ee24cc2` on
-  `feat/lead-zero`, cherry-picked into the branch above.
-- **The lyric sheet's "This bar" strip went blank for one step at lead 0** (ca-45, slowest): fixed on that branch
-  (`15ee33e`), which is why the three ship together.
+**THE MAC'S OWN LIST, 2026-11-17 (delete each line when it is no longer news):**
+- **On main since 2026-11-17 (Fast): the lyric sheet keeps the playing line at the top** (12 px under the "This bar"
+  strip, one scroll per line; a column change is one instant jump 0.1 s before column 2's first chord; the first line
+  after Play stays low; Jonathan asked for it twice and may still want the column jump earlier), **Play Along
+  highlights ON the heard beat** (`PC_LEAD` 0, his call the same day, reversing his 60 ms of 2026-11-16), and **the
+  "This bar" strip never blank** (the bar is taken from the beat, as `pcLocate` does; the play-along tool's KNOWN
+  entries `sheetLapBoundary` and `sheetPastEnd` are gone: 480 walks, 0 mismatches, 0 known). Windows: W17 may start.
 - **load-retry is on main (2026-11-17, the Mac; `Review: Reviewed`, `site-reviewer-deep`, 2 rounds: Fable, then Opus;
   round 2 clean).** After a failed sign-in read the page keeps retrying and says so (`save.notLoaded`, one line at
   1366×657 in English and Spanish, screenshots taken). Windows: W19 (its test gaps) may start. Not built, by his

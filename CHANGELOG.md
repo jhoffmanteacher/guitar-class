@@ -8,6 +8,8 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-11-17 — Today's activity: newest number first for earlier days
 
+- **Lyric-sheet play-alongs (Sweet Child O' Mine and the others) keep the line you're playing at the top of the sheet,** so the lines coming next are all below it on screen. Before, you could see only a line or two ahead.
+- **Play Along highlights now light exactly on the beat,** on every card. Before, they lit a little ahead of it.
 - **If your saved work does not load when you sign in (bad Wi-Fi), the site now keeps trying** and tells you so at the top of the screen. When it loads, your work appears. Before, you had to reload the page yourself.
 - **In Today's activity, today's cards still come first. Earlier days' cards now come next with the highest number first,** the same order as the Unfinished and Completed lists. For example, today's #23 sits beside yesterday's #22, and #21 goes on the next row. "Since your last visit" uses the same order.
 
