@@ -762,8 +762,18 @@ window.addEventListener('pagehide', function(){ if(_dirtyKeys.size){ clearTimeou
    it bails with no signed-in user and clears the dev bypass; the held-back
    categories never entered _dirtyKeys after a failed load; one timer at a
    time and flushSave() taking the dirty set means nothing is sent twice;
-   and flushSave()'s swap45 gate still runs before the write. */
-window.addEventListener('online', function(){ if(currentUser && _dirtyKeys.size) queueSave(); });
+   and flushSave()'s swap45 gate still runs before the write.
+   A save already on its way when the Wi-Fi comes back has taken the dirty set with it, so there is nothing to
+   re-arm YET: if that save then fails (it started offline; it may be the last automatic retry, which ends in
+   "Not saving"), it puts its categories back, and they are re-armed here once it has settled (_flushP never
+   rejects). Before 2026-11-16 this case waited for the student's next action (tools/save-loop.mjs, the old
+   K-online-retry entry). */
+window.addEventListener('online', function(){
+  if(!currentUser) return;
+  if(_dirtyKeys.size){ queueSave(); return; }
+  const p = _flushP, user = currentUser;
+  if(p) p.then(()=>{ if(currentUser === user && _dirtyKeys.size) queueSave(); });
+});
 
 function activateSet(id, opts){
   // opts.peek: open a locked set read-only instead of bouncing off the gate
