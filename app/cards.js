@@ -774,7 +774,8 @@ async function pcSheetDraw(paperOrCol){
     const at = map.start[i];
     return `<button type="button" class="pc-sheet-hit" style="${box(T, 2, 1.5)}" onclick="pcSheetStartAt(this,${i})" aria-label="${escAttr(t('ca.sheetStartAt', {chord: T.name, section: pcSheetWhere(L, at.si, at.rep)}))}"></button>`;
   }).join('');
-  paper.insertAdjacentHTML('beforeend', html + '<span class="pc-sheet-line" aria-hidden="true"></span>');
+  // The line being played, then the line the follow looks ahead to (THE SHEET'S LOOK-AHEAD); both invisible.
+  paper.insertAdjacentHTML('beforeend', html + '<span class="pc-sheet-line" aria-hidden="true"></span><span class="pc-sheet-line pc-sheet-ahead" aria-hidden="true"></span>');
   ['pc-sheet-pill', 'pc-sheet-ghost', 'pc-sheet-dot'].forEach(cls => {
     if(!paper.querySelector('.' + cls)){ const el = document.createElement('span'); el.className = cls; el.setAttribute('aria-hidden', 'true'); paper.appendChild(el); }
   });
@@ -801,9 +802,15 @@ function pcSheetMark(paper, idx, hit, beatSec){
   const N = sh.model.toks[idx + 1];
   if(ghost){ ghost.hidden = !N; if(N){ ghost.style.left = (N.x0 - crop.x) * s + 'px'; ghost.style.top = mid(N) + 'px'; } }
   // The line being played, with room for the lyric under it — what pcFollow keeps in view.
-  const line = paper.querySelector('.pc-sheet-line');
-  if(line){ line.style.top = (T.y0 - crop.y - 3) * s + 'px'; line.style.height = (T.y1 - T.y0) * 2.6 * s + 'px'; }
+  const line = paper.querySelector('.pc-sheet-line:not(.pc-sheet-ahead)');
+  pcSheetLineBox(sh, line, T);
   return line;
+}
+// Puts a .pc-sheet-line box over chord name T's line, with room for the lyric under it.
+function pcSheetLineBox(sh, el, T){
+  if(!el) return;
+  const { crop } = sh.model, s = sh.scale;
+  el.style.top = (T.y0 - crop.y - 3) * s + 'px'; el.style.height = (T.y1 - T.y0) * 2.6 * s + 'px';
 }
 function pcSheetPaint(st, loc, flash){
   const paper = st.root.querySelector('.pc-sheet-paper');
@@ -814,9 +821,8 @@ function pcSheetPaint(st, loc, flash){
   if(!sh || !sh.ok) return;
   const idx = sh.map.tok[loc.si][loc.rep][loc.ni];
   const beatSec = st.win.bar / st.L.tr.beatsPerBar / pcRate(st.root);
-  const line = pcSheetMark(paper, idx, !!flash, beatSec);
-  const T = sh.model.toks[idx];
-  if(line && st.sheetLine !== T.y0){ st.sheetLine = T.y0; pcSheetStickyTop(st.root); pcFollow(line, false); }
+  pcSheetMark(paper, idx, !!flash, beatSec);
+  // The scroll is pcSheetFollow's, every frame (THE SHEET'S LOOK-AHEAD).
 }
 /* "This bar": the strums of the bar being played, and the count it is on. */
 function pcSheetStrip(st, loc, barsIn){
@@ -864,7 +870,7 @@ function pcSheetStickyTop(root){
 }
 function pcSheetStarted(st){
   pcSheetStickyTop(st.root);
-  st.sheetLine = null; st.stripKey = null;
+  st.sheetLine = null; st.stripKey = null; st.sheetShort = null;
   const paper = st.root.querySelector('.pc-sheet-paper');
   const sh = paper && paper._sheet;
   const where = st.root.querySelector('.pc-sheet-where');
@@ -872,8 +878,66 @@ function pcSheetStarted(st){
   if(!sh || !sh.ok) return;
   const first = sh.map.tok[st.loopFrom][st.fromRep][0];
   const line = pcSheetMark(paper, first, false);
-  st.sheetLine = sh.model.toks[first].y0;
+  const y = sh.model.toks[first].y0;
+  st.sheetLine = y + '|' + y;          // see pcSheetFollow
   pcFollow(line, true);
+}
+/* THE SHEET'S LOOK-AHEAD (W16-1, 2026-11-16). A lyric sheet scrolls
+   smoothly, and a smooth scroll takes time. The dot lights only PC_LEAD
+   (60 ms) before the beat is heard, so a follow that waited for the dot
+   brought a new line fully on screen up to 92 ms after its first chord was
+   heard, and the jump back to the top of the next column 250 to 520 ms
+   after (Chrome 157, ca-38 / ca-44 / ca-45, 1366x657 and 2560x1300, full
+   screen or not). So the FOLLOW looks further ahead than the dot: it keeps
+   in view the line that will be playing PC_SHEET_FOLLOW_AHEAD real seconds
+   before the beat is heard. The dot, the pill and "This bar" keep PC_LEAD;
+   nothing lights early.
+   PC_SHEET_FOLLOW_AHEAD: a line down takes up to about 0.2 s to come fully
+   on screen (2560x1300 full screen; 0.15 s left 3 of 47 new lines of ca-44
+   late by up to 55 ms; 0.2 s left none). 0.3 s is that plus about
+   0.1 s for a slower machine's frames. The line comes on screen that much
+   earlier while the line before it is still playing and still on screen.
+   - The line being played is never scrolled off screen for the one coming
+     (pcFollow's `keep`). Where both do not fit (the jump from the bottom of
+     one column to the top of the next), the scroll goes as far as it can,
+     and the rest is an instant jump the moment the dot reaches the new
+     line (PC_LEAD before its chord is heard). Finished smoothly, that
+     scroll is a whole column long: the line came fully on screen 0.3 to
+     0.6 s after it started, all of it after the chord was heard.
+   - It reads where the dot reads, only further on: never behind the dot
+     (so never back past where a pass began, st.passFrom), and never past
+     the end of the part Loop this part repeats (pcLoopClamp); past the end
+     of the song pcLocate stays on the last chord.
+   - With "reduce motion" the scroll is a jump (scrollBehavior()) and needs
+     no head start: the follow then waits for the dot, as before.
+   - st.sheetLine is the pair "lit line|line ahead" last followed; null
+     (pcRefollow, a start) makes the next frame follow again. st.sheetShort
+     is the lit line that held a follow back (null: none). */
+const PC_SHEET_FOLLOW_AHEAD = 0.3;    // real seconds before the beat is heard; see above
+function pcSheetFollowAhead(){ return scrollBehavior() === 'smooth' ? PC_SHEET_FOLLOW_AHEAD : 0; }
+function pcSheetFollow(st, ct){
+  const paper = st.root.querySelector('.pc-sheet-paper');
+  const sh = paper && paper._sheet;
+  if(!sh || !sh.ok || !(st.si >= 0)) return;
+  const toks = sh.model.toks;
+  const lit = toks[sh.map.tok[st.si][st.rep][st.seq - st.L.sections[st.si].seqOff]];
+  const ahead = pcSheetFollowAhead();
+  const read = snipBarsAt(st.win, ct + (ahead - snipLatency()) * pcRate(st.root));
+  const loc = ahead > 0 ? pcLocate(st.L, pcLoopClamp(st, Math.max(read, pcLeadBars(st, ct)))) : null;
+  const T = loc ? toks[sh.map.tok[loc.si][loc.rep][loc.ni]] : lit;
+  if(!lit || !T) return;
+  const key = lit.y0 + '|' + T.y0;
+  if(st.sheetLine === key) return;
+  st.sheetLine = key;
+  pcSheetStickyTop(st.root);
+  // The dot has left the line that held the last follow back: the rest of that scroll is a jump.
+  const jump = st.sheetShort != null && st.sheetShort !== lit.y0;
+  st.sheetShort = null;
+  const line = paper.querySelector('.pc-sheet-line:not(.pc-sheet-ahead)');
+  if(T.y0 === lit.y0){ pcFollow(line, false, null, jump); return; }
+  const next = paper.querySelector('.pc-sheet-ahead');
+  pcSheetLineBox(sh, next, T);
+  if(pcFollow(next, false, line, jump)) st.sheetShort = lit.y0;
 }
 function pcSheetStopped(root){
   root.querySelectorAll('.pc-strip-cell.now').forEach(c => c.classList.remove('now'));
@@ -1265,7 +1329,7 @@ function pcFrame(){
      repaints on either (its dot fills on every beat, its chord mark moves on
      every chord change). */
   if(loc && (pcLocKey(L, loc) !== st.key || (st.sheet && loc.beat !== st.beat))) pcPaint(st, loc);
-  if(st.sheet) pcSheetStrip(st, loc, barsIn);
+  if(st.sheet){ pcSheetStrip(st, loc, barsIn); pcSheetFollow(st, audio.currentTime); }
   st.raf = requestAnimationFrame(pcFrame);
 }
 /* What a repaint is keyed on: the beat on a chord-grid section, the note
@@ -1306,8 +1370,12 @@ function pcPaint(st, loc){
    bar, so Play/Stop above the tab stays on screen as long as it can. A
    student who scrolled the whole tab out of view (to the checks, say) is
    left there; Play itself (`force`) always brings the tab back. Scrolls
-   whatever is actually scrolling — .main on a laptop, the page on a phone. */
-function pcFollow(row, force){
+   whatever is actually scrolling — .main on a laptop, the page on a phone.
+   `keep` (a lyric sheet's line being played, when `row` is the line coming:
+   THE SHEET'S LOOK-AHEAD): the scroll stops short of moving it off screen,
+   and pcFollow returns true when it did. `jump`: an instant scroll, not a
+   smooth one. */
+function pcFollow(row, force, keep, jump){
   if(!row) return;
   let box = row.parentElement;
   while(box && box !== document.body){
@@ -1353,7 +1421,15 @@ function pcFollow(row, force){
   if(need > bottom - pad) delta = need - (bottom - pad);              // reveal the next row
   delta = Math.min(delta, rr.top - (top + pad));                     // …but keep this one below the bar
   if(rr.top < top + pad) delta = rr.top - (top + pad);               // this row is hidden above: bring it down
-  if(Math.abs(delta) < 2) return;
+  let short = false;
+  if(keep){
+    // Where `keep` can go and stay inside the view; when it is taller than the view, its top.
+    const kr = keep.getBoundingClientRect(), lo = kr.bottom - (bottom - pad), hi = kr.top - (top + pad);
+    const d = lo <= hi ? Math.min(hi, Math.max(lo, delta)) : hi;
+    short = Math.abs(d - delta) >= 2;
+    delta = d;
+  }
+  if(Math.abs(delta) < 2) return short;
   /* Every number above is a getBoundingClientRect one, which counts the
      scroll box's own CSS zoom; scrollBy counts in the box's own pixels. Full
      screen zooms .main (body.ca-full, --ca-zoom, 1.37 on a Chromebook), so
@@ -1361,13 +1437,16 @@ function pcFollow(row, force){
      a lyric sheet's second column left the line half a screen low (ca-45,
      2026-11-16). Measured, not read from --ca-zoom; 1 everywhere else. */
   const zoom = isDoc || !box.offsetHeight ? 1 : box.getBoundingClientRect().height / box.offsetHeight;
-  box.scrollBy({ top: delta / (zoom > 0 ? zoom : 1), behavior: scrollBehavior() });
+  box.scrollBy({ top: delta / (zoom > 0 ? zoom : 1), behavior: jump ? 'auto' : scrollBehavior() });
+  return short;
 }
 /* Full screen on or off, or a window resize, moves the line being played:
    entering full screen puts the scroll box back at its top (Chrome 157,
    measured 2026-11-16: .main from 154 to 0 with the song playing) and the
    zoom changes every height. Forget the line pcFollow last kept in view, so
-   the next beat (a sheet) or note (a tab) brings it back. */
+   the next frame (a sheet: the line being played, or the line its
+   look-ahead reads, with the one being played kept on screen) or the next
+   note (a tab) brings it back. */
 function pcRefollow(){ if(pcState){ pcState.sheetLine = null; pcState.row = null; } }
 document.addEventListener('fullscreenchange', pcRefollow);
 window.addEventListener('resize', pcRefollow);
