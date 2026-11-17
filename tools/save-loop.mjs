@@ -218,7 +218,8 @@
      are sent from the real values; a change first stops it at once; 'online' retries at once; an exit check part-way
      defers it; a sign-out stops it (another student signed in on the same page never gets the first one's doc).
      L6 the Wi-Fi back during the last automatic save retry (the old R10-online-retry); L7 a retried read that comes back
-     after Firebase signed another student in but before the page heard it is not applied. See loadRetryChecks().
+     after Firebase signed another student in but before the page heard it is not applied; L8 each of the ten "busy"
+     states (progressLoadRetryBusy) holds the load back until it ends. See loadRetryChecks().
      See directedChecks(). A failure prints "✗ FAIL directed …" and exits 1.
 
    Reading a FAIL line: case index, family, the stored value, the values the oracle accepts, and the replay command. */
@@ -1809,17 +1810,21 @@ async function loadRetryChecks(out, fail){
   /* L1 */
   {
     let mid = null;
-    const { world, tab, stored } = await directedRun('L1 a late load', START, [{ phase: 'refused', until: T0 + 3000 }], [
+    /* Refused until 6 s: the read that loads (at ~6.5 s) still finds the doc's own place (m6w1), because the place
+       save of 1.5 s keeps failing until then and lands only at ~8.5 s; so keeping m7w1 on screen is the page's doing. */
+    const { world, tab, stored } = await directedRun('L1 a late load', START, [{ phase: 'refused', until: T0 + 6000 }], [
       { at: 1500, what: 'opens set m7w1 (browsing: not a change)', code: 'lastModuleNum = 7; lastSetId = "m7w1"; saveProgress();' },
       { at: 9000, what: '(reads the page)', probe: t => { mid = { failed: t.run('progressLoadFailed'), set: t.run('lastSetId'), retry: t.run('_loadRetry !== null'), skills: t.run('JSON.stringify(progress)') }; } },
       { at: 10000, what: 'logs a rep on m6w1-s1 and the day counts for the streak', code: 'logPracticeRep("m6w1-s1"); bumpPracticeStreak();' },
       { at: 13000, what: 'hides the tab', hide: true }
     ], 30000);
-    out.checks += 6;
+    out.checks += 7;
     const ok = world.gets.filter(g => g.tab === 'T1' && g.path === 'progress/' + USER.uid);
     const lateAt = (ok.find(g => g.ok) || {}).at;
     if (!(ok.length >= 2 && !ok[0].ok && lateAt != null && mid && mid.failed === false && mid.retry === false))
       fail(`directed L1 a late load: the sign-in read failed and a retried read should have loaded the doc by 9 s; reads ${JSON.stringify(ok.map(g => g.ok))}, at 9 s ${JSON.stringify(mid)}`);
+    const lateRead = ok.find(g => g.ok);
+    if (!lateRead || !lateRead.data || lateRead.data.lastSet !== START.lastSet) fail(`directed L1 a late load: setup — the read that loaded should still hold the doc's own place ${START.lastSet}; it held ${JSON.stringify(lateRead && lateRead.data && lateRead.data.lastSet)}`);
     if (!mid || mid.skills !== JSON.stringify(START.skills)) fail(`directed L1 a late load: the loaded skills are not the stored ones (${mid && mid.skills})`);
     if (!mid || mid.set !== 'm7w1') fail(`directed L1 a late load: the set on screen moved to ${JSON.stringify(mid && mid.set)} when the doc loaded; wanted m7w1, the set the student opened`);
     const rep = stored && stored.practiceLog && stored.practiceLog['m6w1-s1'];
@@ -1916,6 +1921,31 @@ async function loadRetryChecks(out, fail){
     if (!aRead.length) fail('directed L7: setup — A\'s retried read did not come back after Firebase moved on');
     if (!mid || mid.failed !== true || mid.completed !== '{}' || mid.retry !== false) fail(`directed L7 Firebase moved on before the callback: A's doc was applied, or the retry goes on; at 8 s ${JSON.stringify(mid)}`);
     for (const f of tab.faults) fail(`directed L7: site code ${f} (R12)`);
+  }
+  /* L8 EVERY "BUSY" SOURCE (progressLoadRetryBusy). The read comes back while the page is busy with something the redraw
+     would cut off: it is not applied then, and once that ends (and the student changed nothing) the next try applies it.
+     The busy state is set and cleared by hand here (the drills, cards and recorder are not driven by this tool). */
+  {
+    const BUSY = [['an exit check part-way', 'ecRuns["ca-15"] = { i: 0, picks: [] }', 'delete ecRuns["ca-15"]'],
+      ['a practice card playing', 'pcState = { fake: 1 }', 'pcState = null'], ['a snippet playing', 'snipState = { fake: 1 }', 'snipState = null'],
+      ['a tab line playing', 'playSeqState = { fake: 1 }', 'playSeqState = null'], ['a Note Call round', 'ncLive = "x"', 'ncLive = null'],
+      ['a Call the chord round', 'chcLive = "x"', 'chcLive = null'], ['a take recording', 'recState.__t = { recording: true }', 'delete recState.__t'],
+      ['a Shuffle round', 'shuffleDrills.__t = { phase: "play" }', 'delete shuffleDrills.__t'], ['a Deck round', 'deckDrills.__t = { phase: "run" }', 'delete deckDrills.__t'],
+      ['an Ear round', 'earDrills.__t = { phase: "run" }', 'delete earDrills.__t']];
+    let bad = 0;
+    for (const [what, on, off] of BUSY){
+      let mid = null, end = null;
+      const { tab } = await directedRun('L8 busy: ' + what, START, [{ phase: 'refused', until: T0 + 3000 }], [
+        { at: 1500, what: `(${what} starts)`, code: on },
+        { at: 12000, what: '(reads the page, then it ends)', probe: t => { mid = t.run('progressLoadFailed'); } },
+        { at: 12001, what: `(${what} ends)`, code: off },
+        { at: 24000, what: '(reads the page)', probe: t => { end = { failed: t.run('progressLoadFailed'), skills: t.run('JSON.stringify(progress)') }; } }
+      ], 26000);
+      out.checks += 1;
+      if (mid !== true || !end || end.failed !== false || end.skills !== JSON.stringify(START.skills)){ bad++; fail(`directed L8 busy, ${what}: the doc should wait while it runs and load after (at 12 s failed=${mid}; at 24 s ${JSON.stringify(end)})`); }
+      for (const f of tab.faults) fail(`directed L8 busy, ${what}: site code ${f} (R12)`);
+    }
+    out.busyN = BUSY.length - bad;
   }
   /* L6 (the old KNOWN K-online-retry, fixed 2026-11-16 in shell.js's 'online' listener). The page opens offline (no
      SDK, no read); the student answers a question at 3 s; every save fails on the SDK; the Wi-Fi comes back WHILE the
@@ -2430,7 +2460,7 @@ async function main(){
     const d = await directedChecks();
     directedBad = d.fails.length;
     for (const m of d.fails) console.log(`✗ FAIL directed (seed ${BASE_SEED}): ${m}`);
-    console.log(`  directed checks: ${d.checks - Math.min(d.checks, d.fails.length)} of ${d.checks} hold (D1 the place a student opened is the place stored; D2 a new student's doc is marked once, ${d.txRuns} transaction(s) for three saves, and a tick made offline waits for the reconnect; L1-L5 and L7 the late load after a failed sign-in read; L6 the Wi-Fi back during the last save retry)`);
+    console.log(`  directed checks: ${d.checks - Math.min(d.checks, d.fails.length)} of ${d.checks} hold (D1 the place a student opened is the place stored; D2 a new student's doc is marked once, ${d.txRuns} transaction(s) for three saves, and a tick made offline waits for the reconnect; L1-L5, L7 and L8 (${d.busyN} of 10 busy sources) the late load after a failed sign-in read; L6 the Wi-Fi back during the last save retry)`);
   }
   /* The reset cases (Start over / Delete): with every full run, or alone with --reset. */
   let resetBad = 0, resetN = 0;
