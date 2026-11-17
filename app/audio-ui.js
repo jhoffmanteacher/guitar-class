@@ -469,7 +469,10 @@ function rebuildModuleContentPanels(){
   }
   restoreLessonScroll(anchor);
 }
-window.addEventListener('gc-langchange', function(){
+window.addEventListener('gc-langchange', redrawAllViews);
+/* Everything the app draws from the language AND from the loaded work, drawn again. Its own name since 2026-11-16:
+   the late load after a failed sign-in read (progressLoadRedraw, app/save.js) redraws through it too. */
+function redrawAllViews(){
   /* The app is fifteen files that run one after another, and the language button is on the sign-in wall. Until
      the last file this handler reaches has run (refreshOpenClassActivitiesScreen lives there) nothing has been
      built that would need redrawing, and going on would call pcStop() or scrollPane() before their files had
@@ -530,7 +533,7 @@ window.addEventListener('gc-langchange', function(){
   // returns at once; kept switched off. recState itself stays: Module
   // Review's recorders use it (the rebuild above reads it).
   if (!recState.fab) refreshRecUI('fab');
-});
+}
 
 /* ══════════════════════════════════════════════
    FLOATING TOOLS — Metronome & Timer

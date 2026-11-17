@@ -183,6 +183,7 @@ function resetLoadedProgress(){
   streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; studentPeriod=''; restoreLocalPlace();
 }
 async function loadProgress(){
+  progressLoadRetryStop();   // this read replaces any retry of an earlier one (progressLoadRetryStart)
   progressLoadFailed = false;
   progressLoadDenied = false;
   swap45Done = false;
@@ -190,6 +191,12 @@ async function loadProgress(){
   try{
     await ensureDb();
     const doc = await db.collection('progress').doc(currentUser.uid).get();
+    progressApplyDoc(doc);
+  } catch(e){ progressLoadFailed=true; progressLoadDenied = !!(e && e.code === 'permission-denied'); console.warn('[guitar-class] progress load failed — running read-only on derived data', e); resetLoadedProgress(); }
+}
+/* The doc read at sign-in (or by progressLoadRetryNow, after a failed one), into the session's state. Throws only
+   on a malformed doc; both callers then fall back to the empty state of a failed read. */
+function progressApplyDoc(doc){
     if(doc.exists){
       progressDocFound = true; progressStartOverApplied = Number((doc.data() || {}).startOverApplied) || 0;
       // Module 4/5 swap (2026-10-12): an unmarked doc is read in the new numbering — see swap45OnLoad.
@@ -224,7 +231,137 @@ async function loadProgress(){
       songReadyAt   = data.songReadyAt || {};
       studentPeriod = data.period || '';
     } else resetLoadedProgress();
-  } catch(e){ progressLoadFailed=true; progressLoadDenied = !!(e && e.code === 'permission-denied'); console.warn('[guitar-class] progress load failed — running read-only on derived data', e); resetLoadedProgress(); }
+}
+
+/* ── After a failed sign-in read: keep trying, while the student has changed nothing (2026-11-16) ──
+   A failed read (bad Wi-Fi as the page opened, a blocked SDK, a stalled read) used to leave the whole session on
+   the empty state above: every set open, the held-back categories, a "got it" that shows as not done. Now the
+   read is tried again in the background (LOAD_RETRY_MS, and at once on the 'online' event) and, when it comes
+   back, the doc is applied exactly as at sign-in (progressApplyDoc) and the page is redrawn
+   (progressLoadRedraw). A line at the top of the screen says the work has not loaded yet (save.notLoaded).
+   ONLY WHILE THE STUDENT HAS CHANGED NOTHING. Nothing in this file merges a doc read late into work the session
+   already changed (progressStartOverAtSignIn's re-read throws the pending work away, and runs only before the
+   app is on screen), so the first change stops the retry for good and the rest of the session runs on the rules
+   of a failed read, as before. "Changed" = the loaded-work state differs from the one the retry started on
+   (progressWorkSnapshot): a tick, an answer, a rep, a deck best, a streak bump, an exit check, a path pick, a
+   period, an un-tick still queued. Browsing sets is not a change: the place (lastModule / lastSet) is left out,
+   and the late load keeps the set the student is on.
+   Not applied, and the retry stops (as before: the next sign-in loads it), when the teacher's Start over or
+   Delete is waiting for this student: that runs only at sign-in (progressStartOverAtSignIn), and old lesson
+   work loaded here would be saved back over it. Not applied YET (tried again in LOAD_RETRY_BUSY_MS) while the
+   redraw would cut something off: progressLoadRetryBusy.
+   Everything here belongs to one signed-in student: progressLoadRetryStop() runs at the next loadProgress()
+   (any sign-in) and in the signed-out branch (app/start.js), and an answer is applied only when it is still the
+   current retry's and currentUser is the student it read for. Proofs: tools/save-loop.mjs (L1-L7) and
+   tools/shared-chromebook-loop.mjs (family load-retry). */
+const LOAD_RETRY_MS = [2000, 4000, 8000, 15000, 30000, 60000];   // then every 60 s
+const LOAD_RETRY_READ_MS = 15000;    // a read still out after this counts as failed (a stalled get() never settles)
+const LOAD_RETRY_BUSY_MS = 5000;
+let _loadRetry = null;               // { user, n, timer, reading, base } while a retry runs
+function progressWorkSnapshot(){
+  return swap45Canon([progress, responses, completed, classActivities, caStepDone, exitChecks, games, streak, practiceLog,
+    songReady, songReadyAt, studentPeriod, completedDeletes.size, classActivitiesDeletes.size, caStepDeletes.size]);
+}
+/* Called by the sign-in (app/start.js) once the app is on screen, when that sign-in's read failed. */
+function progressLoadRetryStart(){
+  progressLoadRetryStop();
+  if(!progressLoadFailed || !currentUser || IS_TEACHER_MODE || isDevBypassUser()) return;
+  _loadRetry = { user: currentUser, n: 0, timer: null, reading: false, base: progressWorkSnapshot() };
+  progressLoadNoticeShow();
+  progressLoadRetryLater();
+}
+function progressLoadRetryStop(){
+  if(!_loadRetry) return;
+  clearTimeout(_loadRetry.timer);
+  _loadRetry = null;
+  progressLoadNoticeHide();
+}
+function progressLoadRetryLater(ms){
+  const r = _loadRetry;
+  if(!r) return;
+  clearTimeout(r.timer);
+  r.timer = setTimeout(progressLoadRetryNow, ms != null ? ms : LOAD_RETRY_MS[Math.min(r.n, LOAD_RETRY_MS.length - 1)]);
+}
+/* Called by queueSave() and the held-back PR entry (onResponseChange): the student's change stops the retry at once
+   (and takes the "still trying" line down), not only at its next attempt. Browsing (a place save) changes nothing. */
+function progressLoadRetryNoteChange(){
+  if(_loadRetry && progressWorkSnapshot() !== _loadRetry.base) progressLoadRetryStop();
+}
+/* The 'online' event (app/start.js): try now rather than wait out the backoff. */
+function progressLoadRetryOnline(){
+  if(_loadRetry && !_loadRetry.reading) progressLoadRetryNow();
+}
+/* Would the redraw cut something off? Same list as the update reload's busyReason (app/start.js, the service
+   worker block) minus the sign-in and the mic: an exit check part-way (its picks are in memory, and a one-try
+   check started on the empty state must not be filed over a stored score), a drill round, a take recording, a
+   practice card playing (rebuildModuleContentPanels stops card audio). */
+function progressLoadRetryBusy(){
+  const anyValue = (obj, fn) => Object.keys(obj || {}).some(k => obj[k] && fn(obj[k]));
+  try{
+    if(Object.keys(ecRuns).length || pcState || ncLive || chcLive) return true;
+    if(anyValue(recState, s => s.starting || s.recording)) return true;
+    return anyValue(shuffleDrills, s => s.phase === 'play') || anyValue(deckDrills, s => s.phase === 'run') || anyValue(earDrills, s => s.phase === 'run');
+  }catch(e){ return true; }
+}
+/* Would progressStartOverAtSignIn have acted on this doc? (Its own tests, without its side effects.) */
+function progressResetWaiting(doc){
+  if(!progressMarkers.ok) return false;   // no markers read this sign-in: a sign-in would not act either
+  if(!doc.exists) return !!progressMarkers.del;
+  const T = progressMarkers.over;
+  return !!T && T > (Number((doc.data() || {}).startOverApplied) || 0) && !(progressMarkers.del > T);
+}
+async function progressLoadRetryNow(){
+  const r = _loadRetry;
+  if(!r || r.reading) return;
+  clearTimeout(r.timer);
+  if(progressWorkSnapshot() !== r.base){ progressLoadRetryStop(); return; }   // the student changed something: as before from here on
+  r.reading = true; r.n++;
+  let doc = null;
+  try{
+    await ensureDb();
+    if(!db) throw new Error('Firestore not available');
+    doc = await withTimeout(db.collection('progress').doc(r.user.uid).get(), LOAD_RETRY_READ_MS);
+  }catch(e){ doc = null; }
+  if(_loadRetry !== r) return;              // stopped while the read was out (sign-out, a new sign-in)
+  r.reading = false;
+  if(currentUser !== r.user){ progressLoadRetryStop(); return; }
+  if(!doc){ progressLoadRetryLater(); return; }
+  /* From here to the end: one synchronous step, so no click can land between the test and the apply. */
+  if(progressWorkSnapshot() !== r.base || progressResetWaiting(doc)){ progressLoadRetryStop(); return; }
+  if(progressLoadRetryBusy()){ progressLoadRetryLater(LOAD_RETRY_BUSY_MS); return; }
+  const placeM = lastModuleNum, placeS = lastSetId;
+  try{
+    progressApplyDoc(doc);
+  }catch(e){
+    // A doc the sign-in could not have applied either: the empty state of a failed read, and no more tries.
+    console.warn('[guitar-class] progress loaded late but could not be applied — staying on the failed-read rules', e);
+    resetLoadedProgress(); lastModuleNum = placeM; lastSetId = placeS;
+    progressLoadRetryStop();
+    return;
+  }
+  lastModuleNum = placeM; lastSetId = placeS;   // the set on screen stays; the doc's place is the next sign-in's
+  progressLoadFailed = false; progressLoadDenied = false;
+  progressLoadRetryStop();
+  caAdoptLocalTicks();
+  progressLoadRedraw();
+}
+/* What showApp() draws from the loaded work, drawn again. */
+function progressLoadRedraw(){
+  if(!appIsOnScreen()) return;
+  redrawAllViews();   // the language switch's redraw (app/audio-ui.js): pills, rail, panels, open pages
+  onModuleChange(lastModuleNum || 1, lastSetId, { quiet: true });   // the set gate on the real work (renderAll's catch-up does the same)
+  applyActivityGate();
+  maybeShowPeriodPicker();
+}
+/* The line at the top of the screen (the box of the "Not saved yet" save message, topNoticeParts in app/boot.js). */
+function progressLoadNoticeShow(){
+  const { d, msg, close } = topNoticeParts('load-notice', 'status', 'save.notLoaded');
+  d.append(msg, close);
+  document.body.appendChild(d);
+}
+function progressLoadNoticeHide(){
+  const el = document.getElementById('load-notice');
+  if(el) el.remove();
 }
 
 /* ── Start over / Delete, from the console (2026-11-14; teacher-remove.js) ──
@@ -637,7 +774,7 @@ function onResponseChange(key, value, isPR){
     responses[key] = arr;
     /* After a failed load this history was built from nothing, so it is not
        sent (flushSave filters it out too): say so instead of a false "Saved". */
-    if(progressLoadFailed){ setSaveMsg('save.notSaving'); return; }
+    if(progressLoadFailed){ progressLoadRetryNoteChange(); setSaveMsg('save.notSaving'); return; }
   } else {
     responses[key] = value;
   }
@@ -720,6 +857,7 @@ const LOAD_DEPENDENT_SAVE_KEYS = new Set(['streak','games','practiceLog','exitCh
 const LOAD_FAILED_EMPTY_MAPS = ['skills','responses','completed','classActivities','caSteps'];
 function queueSave(...keys){
   if(!currentUser) return;
+  progressLoadRetryNoteChange();   // after a failed sign-in read: a change stops the background retry now
   keys.forEach(k=>{ if(!(progressLoadFailed && LOAD_DEPENDENT_SAVE_KEYS.has(k))) _dirtyKeys.add(k); });
   // Everything asked for was held back — say so rather than flash a false
   // "Saved ✓" (or arm a flush with nothing in it).
