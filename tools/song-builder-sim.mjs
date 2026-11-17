@@ -532,6 +532,7 @@ async function runCases(consoleSrc){
   check('no write to config/class, progress/, builtSongs or builtSongsMeta', !F.st.writes.some(w => /^(config|progress|builtSongs)/.test(w.path)));
   await chartCases(consoleSrc, check);
   await pdfCases(consoleSrc, check);
+  await pdfEdgeCases(consoleSrc, check);
   await publishCases(consoleSrc, check);
   await importCases(consoleSrc, check);
   await fixCases(consoleSrc, check);
@@ -953,6 +954,46 @@ async function pdfCases(consoleSrc, check){
   const dw = F3.st.writes;
   check('pdf flow: no pdf action wrote anything (0 writes across 8 picks, a Remove and an open); the run\'s only writes are the new draft\'s (the draft, its chart read at once, and the copy Volume makes by itself), within the rules',
     pdfW === 0 && dw[0].path === 'songDrafts/' + nid && dw[1].path === 'songDrafts/' + nid && dw.every(w => w.path === 'songDrafts/' + nid || w.path.startsWith('songFiles/' + nid + '-')) && F3.st.violations.length === 0, JSON.stringify({ pdfWrites: pdfW, writes: dw.map(w => w.path) }));
+}
+
+/* ── Pdfs: the three edge cases (W10, 2026-11-16; the Mac's list after the pdf pane shipped): "+ New song" pressed
+   twice, a draft switched while a pick of several pdfs is still being read, a draft deleted while the view is left.
+   Its own console and store, the made-up pdf.js above; a `gate` holds one file's text until the case lets it go. The
+   pdfs are never stored, so what could go wrong is what the tab SHOWS and HOLDS (documents, object URLs) and, worse,
+   a chords pdf's text landing in another song's chart box, which Next saves into that draft. ── */
+async function pdfEdgeCases(consoleSrc, check){
+  const F = makeDb(), C = makeConsole(consoleSrc, F), { run } = C;
+  C.box.pcSheetLoadPdfjs = async () => FAKE_PDFJS;
+  let urlN = 0; const revoked = [];
+  C.box.URL = { createObjectURL: () => 'blob:sim-pdf-' + (++urlN), revokeObjectURL: u => { revoked.push(u); } };
+  C.box.open = () => null;                               // "Own window" (window.open): nothing to open in the vm
+  const draftDoc = (title, n) => ({ v: 1, title, artist: 'Nobody', step: 4, source: { name: 'test.mp3', bytes: 400000, sha256: hex64(n), durationSec: 60, sampleRate: 44100, channels: 2, kbps: 192 },
+    audio: null, volume: null, pitch: null, beat: null, chart: null, level: null, savedAt: 0 });
+  const ids = { a: 'sb-edgedrafta001', b: 'sb-edgedraftb001', d: 'sb-edgedraftd001', e: 'sb-edgedrafte001', p: 'sb-edgepubsong01' };
+  F.S.set('songDrafts/' + ids.a, draftDoc('Test 0 Edge A', 21)); F.S.set('songDrafts/' + ids.b, draftDoc('Test 1 Edge B', 22));
+  F.S.set('songDrafts/' + ids.d, draftDoc('Test 2 Edge D', 23)); F.S.set('songDrafts/' + ids.e, draftDoc('Test 3 Edge E', 24));
+  F.S.set('songDrafts/' + ids.p, draftDoc('Test 4 Edge P', 25));
+  run('renderTeacherSongBuilder()'); await settle();
+  const files = () => run('sbPdf.files.map(f => f.name).join(",")');
+  /* Wait for the console's own state, never a fixed sleep (see settle). */
+  const until = async (cond, what) => { const t0 = Date.now(); while(!cond()){ if(Date.now() - t0 > SETTLE_MAX_MS){ STUCK = STUCK || 'pdf edge cases: waited for ' + what; return; } await settle(5); } };
+  const startPick = (kind, fs) => { C.box.__pdfs = fs.map(f => f.file); run(`sbPdfAdd(${JSON.stringify(kind)}, __pdfs)`); };
+  const doneReading = () => until(() => run('sbPdf.reading') === 0, 'the pdf read to end');
+  const gated = (name, tag, pages) => { const x = pdfOf(name, tag, pages); let go; x.rec.gate = new Promise(r => { go = r; }); x.go = () => { x.rec.gate = null; go(); }; return x; };
+  const textOfAll = recs => recs.map(r => r.pages.map(p => run('sbPdfTextOf')(p)).join('\n\n'));
+
+  /* E1: "+ New song" twice, nothing in flight */
+  {
+    const P = pdfOf('e1-chords.pdf', 'e1', [PAGES.oneCol]);
+    run('sbNewSong()'); await settle();
+    startPick('chords', [P]); await doneReading();
+    const had = files() === 'e1-chords.pdf' && run('sbNew.chartText') === PAGES.oneColText;
+    run('sbNewSong()'); await settle();
+    const bar = run('sbPdfBarHtml()');
+    check('pdf edge: "+ New song" pressed again drops the first new song\'s pdfs: none listed or held for the second one (its bar shows no chip), the document destroyed once, its chart box empty',
+      had && run('sbPdf.files.length') === 0 && run('sbPdfMine().length') === 0 && !/e1-chords\.pdf/.test(bar) && P.rec.destroyed === 1 && !run('sbNew.chartText'),
+      JSON.stringify({ had, files: files(), mine: run('sbPdfMine().length'), chipShown: /e1-chords\.pdf/.test(bar), destroyed: P.rec.destroyed, chartText: (run('sbNew.chartText') || '').slice(0, 30) }));
+  }
 }
 
 /* ── PART D (2026-11-16; teacher-sb-publish.js): Preview, Publish, Edit, Unpublish, Delete, Export, the

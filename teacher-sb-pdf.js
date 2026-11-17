@@ -17,7 +17,8 @@
 
    NOTHING IS STORED and nothing reaches a student: the pdfs live in this tab's memory (sbPdf), like the
    original mp3 (sbMem.src). A draft opened again asks for them again; the chart text read from them IS in the
-   draft (chart.text), as before. Another draft, a deleted draft or the start screen drops them (sbPdfSync).
+   draft (chart.text), as before. Another draft, a second "+ New song", a deleted draft or the start screen drops them
+   (sbPdfSync).
    pdf.js (vendor/pdfjs, the practice card's loader pcSheetLoadPdfjs, app/cards.js) draws and reads them; a
    drawing in flight is cancelled when another starts and when the view is left (sbPdfLeave). File names are
    escaped where they are drawn; buttons carry data-* only (the delegated sbClick / sbChange). */
@@ -27,7 +28,8 @@ const SB_PDF_MAX_PAGES = 40;            // pages read for text (every page can s
 const SB_PDF_MIN_CHARS = 12;            // fewer letters than this on a page: a picture, not text
 const SB_PDF_ZOOMS = [0.75, 1, 1.25, 1.5, 2, 2.5, 3];
 /* files: [{ kind: 'chords'|'tab', name, size, bytes, doc, pages, textPages, lines, url }] */
-const sbPdf = { id: null, files: [], cur: 0, page: 1, zoom: 1, open: false, reading: 0, seq: 0, task: null, drawn: '', el: null, scroll: 0, err: '' };
+/* owner: the new song's object (sbNew) when id is 'new', so a second "+ New song" is another song (W10). */
+const sbPdf = { id: null, owner: null, files: [], cur: 0, page: 1, zoom: 1, open: false, reading: 0, seq: 0, task: null, drawn: '', el: null, scroll: 0, err: '' };
 
 /* ── The words of a page → text ── */
 /* items: [{ s, x, y, w, h }] in page points, y DOWN, y = the baseline, x = the left edge, w = the width of s.
@@ -118,16 +120,16 @@ function sbPdfDropFile(f){
   if(f.doc){ try{ f.doc.destroy(); }catch(e){} f.doc = null; }
 }
 function sbPdfSync(){
-  const want = sbPdfWant();
-  if(sbPdf.id === want) return;
+  const want = sbPdfWant(), owner = want === 'new' ? sbNew : null;
+  if(sbPdf.id === want && sbPdf.owner === owner) return;
   sbPdfStopDraw();
   sbPdf.files.forEach(sbPdfDropFile);
   sbPdf.files = []; sbPdf.cur = 0; sbPdf.page = 1; sbPdf.zoom = 1; sbPdf.open = false; sbPdf.drawn = ''; sbPdf.scroll = 0; sbPdf.err = ''; sbPdf.el = null;
-  sbPdf.id = want;
+  sbPdf.id = want; sbPdf.owner = owner;
 }
 /* The new song was saved: its pdfs go with the draft's id (sbSaveUpload). */
-function sbPdfRename(from, to){ if(sbPdf.id === from) sbPdf.id = to; }
-function sbPdfMine(){ return sbPdf.id === sbSel ? sbPdf.files : []; }
+function sbPdfRename(from, to){ if(sbPdf.id === from){ sbPdf.id = to; sbPdf.owner = null; } }
+function sbPdfMine(){ return sbPdf.id === sbSel && (sbSel !== 'new' || sbPdf.owner === sbNew) ? sbPdf.files : []; }
 function sbPdfPaneOn(){ return sbStepOn === 4 && sbPdf.open && sbPdfMine().length > 0; }
 
 /* ── Picking ── */
