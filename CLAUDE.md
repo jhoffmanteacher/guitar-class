@@ -10,8 +10,7 @@ What is open right now: `WORKFLOW.md` → "Where things stand" (top of the file)
    runs it for you at the end of every turn that changed code; if it blocks
    your stop, fix the cause — see "Stop hook" below). Before a push: the full
    `node tools/checks.mjs`. Never hand-edit the version lines in `sw.js`.
-2. Touched a `module-N.js`? `node tools/rule-zero-proof.mjs origin/main`, and
-   paste its summary into your report.
+2. Touched a `module-N.js`? Paste the checks' 1dl line (`rule-zero-proof.mjs`, run for you) into your report.
 3. Touched a renderer, escaping, or 3+ files (counted as in "Triggers" below)? Run the
    **change smoke**: `node tools/smoke.mjs --en-only --only <areas> --baseline <ref> > file 2>&1`.
    A real browser walks the areas your change touches, in English (Jonathan, 2026-11-09: "it's
@@ -79,19 +78,18 @@ What is open right now: `WORKFLOW.md` → "Where things stand" (top of the file)
    conflicts too, abort the whole rebase. Any other conflict (another `sw.js` hunk, a `module-N.js`, a
    danger-zone file): `git rebase --abort` and ask Jonathan. Never force-push, and never make a
    merge commit without asking. When the rebase ends, run the full `node tools/checks.mjs` on
-   the rebased tip (plus `rule-zero-proof.mjs origin/main` if a `module-N.js` changed, and the
-   smoke when those commits touch files you changed), commit the `sw.js` it rewrote, and push
+   the rebased tip (plus the smoke when those commits touch files you changed), commit the `sw.js` it rewrote, and push
    only when `git status` is clean. After pushing: `node tools/checks.mjs --live`.
 
-**Never, whatever the task says:** move or renumber a section or step (progress
-keys); reword a keyed MC's choices — or its English prompt — in a frozen module
-or the one the class is about to enter ("Three regimes"); create or edit `progress/{uid}`
-from console code (the one console write there is the delete in `teacherRemoveDeleteProgress()`,
-`teacher-remove.js`, 2026-11-14; after a change there run `node tools/remove-one-sim.mjs` and
-`node tools/save-loop.mjs`); write `config/class` except through `teacherWriteConfig()`;
-change `firestore.rules` without telling Jonathan it needs a console paste;
-re-level "the cure"; delete what is switched off (Daily 5, Take It to a Song
-sections); resurrect the deleted student tour.
+**Never, whatever the task says** (each is a check that fails the push and GitHub; `tools/never-blocks.mjs`):
+move or renumber a section or step (progress keys; 1dl); reword a keyed MC's choices — or its English prompt —
+in Modules 1–`FROZEN_THROUGH` or the next one, the one the class is about to enter ("Three regimes"; 1ap, 1dl); create
+or edit `progress/{uid}` from console code (1dm; the one console write there is the delete in
+`teacherRemoveDeleteProgress()`, `teacher-remove.js`, 2026-11-14; after a change there run `node tools/remove-one-sim.mjs`
+and `node tools/save-loop.mjs`); write `config/class` except through `teacherWriteConfig()` (1ai, 1dm); change
+`firestore.rules` without telling Jonathan it needs a console paste (1dn: add the line it prints to `RULES-PASTE.md`);
+re-level "the cure" (1do); delete what is switched off (Daily 5, Take It to a Song sections; 1do); resurrect the deleted
+student tour (1do). A refusal is never fixed by loosening the check; a frozen-module fix goes to skill `summer-reset`.
 
 **Keep the Mac's load "just right"** (Jonathan, 2026-11-16; the Mac has 8 cores, a low-power i5, 16 GB). Run
 `uptime` and read the 1-minute load BEFORE each of these: spawning an agent, starting a browser run, starting a full
@@ -155,7 +153,7 @@ Static HTML/JS/CSS, no build; Firebase + Firestore; GitHub deploy. Module 13 is 
 - **Module 13** has custom tab labels (`stations.b.tabSub`, `checklistSub`), and its
   checklist is the graded assessment. A set is exactly two panels, lesson ladder and
   checklist (the per-set Songs tab was removed 2026-08-27).
-- **No student tour** — don't resurrect. **No in-panel tab bar**: the rail is the only switcher.
+- **No in-panel tab bar**: the rail is the only switcher.
 - **Target screen: Chromebook 1366×657.** Every layout is designed and measured there, and it is the priority. A
   bigger screen shows that same layout enlarged to fill it (`site-fill.js`, 2026-11-13: student site, Song Journey
   pages and the console's Live In-Class Games view, the projector's stage; a new `vh`/`vw` is written
@@ -199,19 +197,20 @@ sessions share one `origin`:** fetch first, rebase onto `origin/main`, and never
 didn't intend (step 8 of "Start here").
 
 ### ⚠️ Three regimes decide what may change in a module
-Key `${setId}-${station}-sec${gi}-${i}`: a step that changes INDEX loses its tick. Run
-`node tools/rule-zero-proof.mjs <base-ref>` and paste output before any content push.
+Key `${setId}-${station}-sec${gi}-${i}`: a step that changes INDEX loses its tick (1dl runs `rule-zero-proof.mjs`).
 - **Modules 1–`FROZEN_THROUGH` (3)**: labels match BY INDEX; new steps only appended to a
   section's tail; no renames. Keyed-MC choices frozen (1ap); a keyed MC may be ADDED to an
   existing step; reword only via `response.renamedChoices` (old text → new choice). Re-pin 1ap.
 - **Modules 4–`OPEN_THROUGH` (6)**: steps insertable anywhere inside a section; `response`
-  removable/changeable; old labels keep relative order.
+  removable/changeable, except Module `FROZEN_THROUGH`+1's keyed MCs (1dl); old labels keep relative order.
 - **Above**: step count and order fixed; a rename prints.
 - Every regime: SECTIONS fixed (count, order, kind); a TITLE may be reworded (prints) unless
   it has a `kind` or is the tuning warm-up title.
-- **Raise `FROZEN_THROUGH` (= `FROZEN_MC_THROUGH_MODULE`) a module AHEAD of the class.** Locked
-  sets are read-only previews; every answer writer needs `isPeekedResponseKey()` (1bl); treat the module the class is
-  ABOUT to enter as frozen. A blocked fix → **Summer reset list** (skill `summer-reset`) same day.
+- **Raise `FROZEN_THROUGH` (= `FROZEN_MC_THROUGH_MODULE`) when the class ENTERS a module; the keyed quizzes of the
+  module after it are frozen automatically (1dl). Never lower either** (1dl): module progress never resets (Jonathan,
+  2026-11-13: "modules do not reset for students unless i do it"). A locked set is a read-only preview; every answer
+  writer needs `isPeekedResponseKey()` (1bl). A blocked fix → **Summer reset list** (skill `summer-reset`) same day; it
+  waits there until a declared old key → new key map that `rule-zero-proof` verifies exists (none yet).
 
 ### ⚠️ Modules 4 and 5 swapped
 Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `app/save.js`): no `migrations.swap45` = OLD only, with it NEW only; keep all halves (`flushSave()`, `journey.js`, the `teacherFetchStudents()` remap in `teacher-core.js`). Prove with `rule-zero-proof.mjs d0cd004`.
@@ -258,8 +257,8 @@ Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `ap
 - **Two guards that only report** (2026-11-13). `checks.mjs` 1dp warns when an English string changes and its Spanish twin does not (`tools/i18n-drift.mjs`): read each line it prints; a line printed in full is a changed fact, order or meaning. Removing twins on purpose (a Journey page, a game's strings) also lowers `DRIFT_FLOOR` in `tools/checks.mjs` (1dp) to the new count, as a pin-only edit in the same commit. The accessibility scan (`node tools/smoke.mjs --only a11y`, axe-core, vendored) runs report-only on GitHub after every push (`browser.yml`, job "a11y scan"); its ratchet against `tools/a11y-baseline.json` (`--a11y-ratchet`) stays OFF until a week of GitHub runs show 0 new signatures and a reviewer has passed the switch-on.
 - **Sweep ratchet**: 3+ instances of a mechanically-detectable error class → permanent `checks.mjs` detector, same session; it must render/execute, match UNESCAPED strings (`unescapeJs()`); break it in a scratch copy and watch it fail.
 - **Activity order/placement** live on the console board (`config/class.activityBoard`,
-  `caBoardOrder()`, `teacherMoveActivity()`); a digit in a title is a SERIES number (1d, 1l). **`config/class`** writes only via `teacherWriteConfig()` (1ai; omit `base` unless a single-cell toggle).
-- **`firestore.rules` change** → tell Jonathan: Firebase console → Firestore → Rules → paste →
+  `caBoardOrder()`, `teacherMoveActivity()`); a digit in a title is a SERIES number (1d, 1l). **`config/class`** writes only via `teacherWriteConfig()` (1ai, 1dm; omit `base` unless a single-cell toggle).
+- **`firestore.rules` change** (1dn) → tell Jonathan: Firebase console → Firestore → Rules → paste →
   Publish (GitHub Pages doesn't deploy it). The class database's rules are only ever pasted by hand; `firebase
   deploy` on this repo reaches the practice project only (`.firebaserc`), whatever the rules file's own comment says. Before that: `tools/pm-rules-test.mjs` and
   `tools/rules-core-test.mjs --breaks` on the Firestore emulator (and `tools/site-errors-rules-test.mjs --breaks --site <repo>` for the `siteErrors` block, `tools/built-songs-rules-test.mjs --breaks` for the built-songs block) (their headers say how; GitHub runs both after
@@ -273,7 +272,7 @@ Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `ap
   `WORKFLOW.md` → "Recently shipped" → the 2026-11-01 "Practice minutes" entry.
 - **Play-along first**: a song link opens its play-along card if one is openable
   (`songsPlayAlongCard()`, at the click), else the Journey page; no per-song retire list (1bn).
-  `TAKE_TO_SONG_ENABLED`/`DAILY5_ENABLED` false: switched off, never deleted.
+  `TAKE_TO_SONG_ENABLED`/`DAILY5_ENABLED` false: switched off, never deleted (1do).
 - **Changelog**: student-facing change → dated top `CHANGELOG.md` entry, same push, student's view.
 - **Plant a fault, weekly, report-only** (`tools/plant-a-fault.mjs`, `.github/workflows/plant-a-fault.yml`, Tuesdays
   2:23 AM Pacific): GitHub plants small mistakes one at a time in the risky code (save, offline cache, rules,
@@ -344,7 +343,7 @@ Every new student-facing shell string goes in `i18n.js` (read its header for wir
 | Cloud pushes, Cowork handoff, hook details | skill `session-handoff` | Cowork can't push; the web can |
 | The progress save (`app/save.js`, `logPracticeRep`, `ecSubmit` / `flushOnHide`, `caPickPath`, any other write to `progress/{uid}`) | the header of `tools/save-loop.mjs` | After any change: `node tools/save-loop.mjs` (about 10 s; it must end "untagged 0"; each FAIL prints its replay command). The change itself is still danger-zone: Always Reviewed |
 | Sign-in and sign-out (`app/start.js`, `signOut` / `_uidKey` in `app/boot.js`), the hide / unload flushes, any per-student localStorage or sessionStorage key | the header of `tools/shared-chromebook-loop.mjs` | After any change: `node tools/shared-chromebook-loop.mjs` (Node only, about 75 s; it should exit 0 with KNOWN K-TAB inside its printed band) |
-| Fixes blocked by frozen modules | skill `summer-reset` | Add any blocked fix there the same day; raising FROZEN_* never unlocks anything |
+| Fixes blocked by frozen modules | skill `summer-reset` | Add any blocked fix there the same day; raising FROZEN_* never unlocks anything; module progress is never wiped, so a module fix waits for a declared key map (not built yet) |
 | Live quiz | `.claude/rules/live-quiz.md` (loads with `live-quiz.js`) | Nothing on the stage may reveal the answer before the reveal; after any change to `live-quiz.js`, its `lq.*` strings or the answers rule: `node tools/live-quiz-loop.mjs` (about 20-35 s; exit 1 = a rule broke, replay with `--case=<name> --verbose`) |
 | Set band, left rail, nav grid | `.claude/rules/rail-layout.md` (loads with `styles.css`/`index.html`) | The nav two-column grid is permanent — don't re-simplify; measure, don't do arithmetic |
 | Journey tab cards and Journey-page decisions | `.claude/rules/journey-pages.md` (loads with `tabs/**`) | Restyle `.tab` in both stylesheets or neither |
