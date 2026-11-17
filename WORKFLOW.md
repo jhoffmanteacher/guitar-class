@@ -36,8 +36,10 @@ entry added the same day. Part e of the builder: only when he asks. He asked the
 offer both tab and a lyrics / chord chart: answered (coded songs do it as separate cards; a built song holds
 chords and lyric lines only, no tab); nothing built.
 
-**THE MAC SESSION IS PAUSED (Jonathan, 2026-11-17 afternoon: "prepare to pause"). To pick up: read this block, then
-"The Mac's own list" under it.** Everything shipped is on main and confirmed live through `b1fb3a5` (the lyric sheet
+**The Mac session was paused and RESUMED the same afternoon (2026-11-17, Jonathan: "continue").** Running again: the
+lyric-sheet builder (part A the motion fix, then the one long column); private song audio step 2a in the cloud
+(routine `trig_01SXasbAnwwSzQNi8eu82h2m`, branch `mac/song-files-2a` when it pushes). Queued for the Mac's browser:
+the Chords / Tab switch (`feat/card-views`). The state at the pause, kept as the record: Everything shipped is on main and confirmed live through `b1fb3a5` (the lyric sheet
 at the top, highlights on the beat); the later pushes are notes only. Nothing is half-pushed.
 - **Two builders stopped cleanly; both branches are on GitHub as backups, both end in a commit that starts "WIP, not
   verified:", and their notes are copied to `Claude outputs/pause-2026-11-17/` on the Mac** (read "WHERE I STOPPED"

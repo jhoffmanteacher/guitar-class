@@ -404,6 +404,8 @@ pins) stays for: design and anything with a choice in it, the save path, `firest
 agent's report is a claim like any other: its proof is read before its work ships. An Opus builder may hand its own
 simple parts to ONE Sonnet sub-agent at a time on the Mac (the load rule); its brief still says "no sub-agents"
 when the lead wants none.
+**Opus runs at `high`, and at `xhigh` for the hard jobs** (Jonathan, 2026-11-17: "opus can run at xhigh too"): the save
+path, the rules, listening, a fix whose cause is not known, a design with real choices in it, a deep review. Never `max`.
 **Its effort is set on the spawn too** (`effort:` beside `model:`; Jonathan, 2026-11-17: "your wording about sonnet
 is good. it can also define effort level"): `low` for run-a-tool-and-report, a search or a file copy; `medium` for
 the rest of the Sonnet list (test cases from a settled list, a scripted change over many places). If a Sonnet job
