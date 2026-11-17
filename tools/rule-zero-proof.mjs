@@ -305,6 +305,44 @@ const changedGraded = [], changedPractice = [];
 /* A frozen keyed MC may be reworded when `renamedChoices` (read by the
    renderer in app.js) maps every old English choice to a new one: same count,
    no two old picks landing on one new choice, and the keyed one still keyed. */
+/* renamedChoices is read ONE hop, at render time (app/lesson.js, the step's
+   respHtml: `if(ren && hasOwnProperty(ren, stored)) stored = ren[stored]`):
+   a saved text that is a key shows as its value, and nothing follows that
+   value further. So the map must be FLAT (review round 4, 2026-11-14: a
+   second reword orphaned the picks made under the first):
+   - every value is one of today's English choices (no chain A → B → C, no
+     rename to a text that is not a choice);
+   - no key is one of today's choices (a pick of that choice would show as
+     another one; a cycle needs this);
+   - against the base: every text the base's map named is still a key, and
+     every text students could have saved (the base's keys and the base's
+     choices) still shows as the choice it showed as before, carried through
+     this reword. Keys are only ever added. */
+function renameProblems(bm, hm) {
+  const out = [];
+  const ren = hm.renamedChoices, bren = bm && bm.renamedChoices;
+  const own = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+  const hc = Array.isArray(hm.choices) ? hm.choices : [];
+  if (ren !== undefined && (!ren || typeof ren !== 'object' || Array.isArray(ren))) return ['renamedChoices is not an { old text: new choice } object'];
+  const map = ren || {};
+  for (const [k, v] of Object.entries(map)) {
+    if (typeof v !== 'string' || !hc.includes(v)) out.push(`${q(k)} → ${q(v)}, which is not one of today's choices${typeof v === 'string' && own(map, v) ? ` (a chain: ${q(v)} → ${q(map[v])}; the app reads one step, so write ${q(k)} → today's choice)` : ''}`);
+    if (hc.includes(k)) out.push(`${q(k)} is one of today's choices and also a key, so a pick of it would show as ${q(v)}`);
+  }
+  if (!bm || !Array.isArray(bm.choices)) return out;
+  const show = (m, cs, t) => cs.includes(t) ? t : (m && own(m, t) ? m[t] : undefined);   // what a saved text shows as
+  const carry = t => hc.includes(t) ? t : (own(map, t) ? map[t] : undefined);          // a base choice, through this reword
+  const saved = [...new Set([...Object.keys(bren && typeof bren === 'object' ? bren : {}), ...bm.choices])];
+  for (const t of saved) {
+    const was = show(bren, bm.choices, t);
+    if (was === undefined) continue;                                                    // showed nothing before either
+    const want = carry(was), now = show(map, hc, t);
+    if (bren && own(bren, t) && !own(map, t) && !hc.includes(t)) out.push(`${q(t)} was a key of the base's renamedChoices and is gone from it: picks saved under it show nothing`);
+    else if (now !== want) out.push(`a pick saved as ${q(t)} showed as ${q(was)} and now shows as ${now === undefined ? 'nothing' : q(now)}${want === undefined ? '' : `, not ${q(want)}`}`);
+  }
+  return out;
+}
+const FLAT_HOW = 'Write it flat: every text students may have saved, from EVERY earlier wording (the old map\'s keys too), as a key straight to today\'s choice, e.g. { "first text": "today", "second text": "today" }.';
 function renameMapped(bm, hm) {
   const ren = hm.renamedChoices || {};
   const to = c => Object.prototype.hasOwnProperty.call(ren, c) ? ren[c] : c;
@@ -333,6 +371,7 @@ const pairNext = (() => {
 const headToBase = new Map([...pairNext].map(([b, h]) => [h, b]));
 const whereMod = m => m === NEXT ? `in Module ${NEXT}, the module the class is about to enter (CLAUDE.md, Three regimes)` : 'in a module students are in';
 head(`B. Keyed MC choices and English prompts frozen in Modules 1–${FROZEN_THROUGH} and Module ${NEXT} (about to be entered)`);
+const pairedRen = new Set();
 {
   let frozen = 0, broken = 0;
   for (const [k, h] of headMc) {
@@ -354,7 +393,15 @@ head(`B. Keyed MC choices and English prompts frozen in Modules 1–${FROZEN_THR
       broken++;
       console.log(`   - ${q(b.mc.prompt)}\n   + ${q(h.mc.prompt)}`);
     }
-    if (fp(b.mc) !== fp(h.mc) && renameMapped(b.mc, h.mc)) {
+    const renBad = renameProblems(b.mc, h.mc);
+    pairedRen.add(h);
+    if (renBad.length) {
+      fail(`${k} — "${h.label}": keyed MC's renamedChoices would leave saved picks showing the wrong choice or none ${whereMod(h.moduleNum)}: ${renBad.join('; ')}. ${FLAT_HOW}`);
+      broken++;
+      console.log(`   - renamedChoices ${q(b.mc.renamedChoices)}
+   + renamedChoices ${q(h.mc.renamedChoices)}
+   + choices ${q(h.mc.choices)}`);
+    } else if (fp(b.mc) !== fp(h.mc) && renameMapped(b.mc, h.mc)) {
       frozen--; ok(`${k} — "${h.label}": keyed MC reworded with renamedChoices — every old pick maps to a new choice, the keyed one to the keyed one`);
       console.log(`   - ${q(b.mc.choices)}\n   + ${q(h.mc.choices)}`);
     } else if (fp(b.mc) !== fp(h.mc)) {
@@ -375,6 +422,18 @@ head(`B. Keyed MC choices and English prompts frozen in Modules 1–${FROZEN_THR
     broken++;
   }
   if (!broken) ok(`${frozen} keyed MCs in Modules 1–${NEXT} are byte-identical (choices, choices_es, answer, English prompt)`);
+}
+/* Every other keyed MC with a renamedChoices map (a new one in a frozen module, or any module above): the map
+   must be flat too, or the one-hop read in app/lesson.js shows a wrong choice or none. */
+{
+  let maps = pairedRen.size ? [...pairedRen].filter(h => h.mc.renamedChoices).length : 0, bad = 0;
+  for (const [k, h] of headMc) {
+    if (h.kind !== 'graded' || pairedRen.has(h) || h.mc.renamedChoices === undefined) continue;
+    maps++;
+    const p = renameProblems(null, h.mc);
+    if (p.length) { fail(`${k} — "${h.label}": renamedChoices is not flat: ${p.join('; ')}. ${FLAT_HOW}`); bad++; }
+  }
+  if (!bad) ok(`${maps} renamedChoices map${maps === 1 ? '' : 's'}, every one flat (each key a text no longer offered, each value one of today's choices; app/lesson.js reads one step)`);
 }
 
 head(`C. Keyed MC changes above Module ${NEXT} (expected — nobody has reached them)`);
