@@ -17,6 +17,10 @@
    --new <your tip>. It needs two commits, so it is not in checks.mjs. Node only: no browser, no network, and it
    writes nothing (a ref is read straight from git objects). About 25 s for the coach group, 35 s for the console
    group, 60 s for both.
+   WHERE IT RUNS. It imports only Node built-ins and reads refs with `git -C <the folder above tools/>`, so it must
+   sit in tools/ of a checkout of this repo, or run with GIT_DIR set to a repo that holds both refs (a bare clone
+   with planted commits works: GIT_DIR=<clone> node <checkout>/tools/old-page-loop.mjs --old … --new …). A
+   folder given as --old / --new is read from disk instead. An unknown flag is exit 2.
 
    FLAGS
      --old <ref|folder>   the page's side: a git ref of this repo, or a site folder
@@ -95,6 +99,7 @@ for (let i = 2; i < process.argv.length; i++){
   const a = process.argv[i];
   const m = a.match(/^--([\w-]+)(?:=(.*))?$/);
   if (!m) die(`unknown argument ${a}`);
+  if (!['old', 'new', 'orders', 'seed', 'case', 'verbose', 'strict', 'list'].includes(m[1])) die(`unknown flag --${m[1]} (the flags are in the header)`);
   if (m[2] !== undefined) ARGS[m[1]] = m[2];
   else if (['old', 'new', 'orders', 'seed', 'case'].includes(m[1])) ARGS[m[1]] = process.argv[++i];
   else ARGS[m[1]] = true;
