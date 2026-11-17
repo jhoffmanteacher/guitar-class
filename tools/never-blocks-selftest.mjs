@@ -8,10 +8,10 @@
 
 import { readFileSync, writeFileSync, existsSync, mkdtempSync, rmSync, readdirSync, mkdirSync, statSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { join, dirname } from 'node:path';
+import { join, dirname, isAbsolute } from 'node:path';
 import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import vm from 'node:vm';
 import { checkKeysAgainstBase, checkFirestoreWrites, checkRulesPaste, checkKeptThings, clearBaseCache, rulesHash, PASTE_FILE, RULES_FILE, LET_THROUGH } from './never-blocks.mjs';
 
@@ -328,8 +328,8 @@ export function selfTest() {
       reset();
       write('README-selftest.txt', 'x'); const b = commit('a later commit (not the rules), dated 3 days ahead', { GIT_COMMITTER_DATE: new Date(Date.now() + 3 * 86400e3).toISOString(), GIT_AUTHOR_DATE: new Date(Date.now() + 3 * 86400e3).toISOString() });
       const sc = join(dir, 'shallow-r3'); rmSync(sc, { recursive: true, force: true });
-      const gd2 = (c => c.startsWith('/') ? c : join(ROOT, c))(git(ROOT, ['rev-parse', '--git-common-dir']).out);
-      git(dir, ['clone', '-q', '--no-checkout', '--depth', '1', `file://${gd2}`, sc]); git(sc, ['fetch', '-q', '--depth', '1', 'origin', b]);
+      const gd2 = (c => isAbsolute(c) ? c : join(ROOT, c))(git(ROOT, ['rev-parse', '--git-common-dir']).out);
+      git(dir, ['clone', '-q', '--no-checkout', '--depth', '1', pathToFileURL(gd2).href, sc]); git(sc, ['fetch', '-q', '--depth', '1', 'origin', b]);
       git(sc, ['sparse-checkout', 'set', '--no-cone', '/*', '!/audio/']); git(sc, ['checkout', '-q', '--detach', 'FETCH_HEAD']);
       for (const f of TOOLS) { mkdirSync(dirname(join(sc, f)), { recursive: true }); writeFileSync(join(sc, f), readFileSync(join(ROOT, f))); }
       process.env.GC_CHECKS_BASE = b; process.env.GIT_CONFIG_VALUE_0 = join(sc, '.githooks'); clearBaseCache();
@@ -385,7 +385,7 @@ export function selfTest() {
     expect('R3 m3: the DAILY5_ENABLED read wrapped in if(0){…}', '1do', true, () => edit('app/lesson.js', /(\n\s*)(const reminder = DAILY5_ENABLED &&[^\n]*\n[^\n]*\n[^\n]*\n)/, "$1let reminder = '';$1if(0){ reminder = DAILY5_ENABLED && false; }$1const _unused = 0;\n"));
     expect('R3 m3: an early return [] above the TAKE_TO_SONG_ENABLED read in visibleSteps()', '1do', true, () => edit('app/lesson.js', /(function visibleSteps\([^)]*\)\s*\{)/, '$1\n  if (true) return [];'));
     // m4: a push that changes the guards says so
-    expect('R3 m4: never-pins.json changed (a loud line, not a failure)', '1dl', false, () => { const p = JSON.parse(read('tools/never-pins.json')); p.WARMUP_BANK_MIN.why += ' '; write('tools/never-pins.json', JSON.stringify(p, null, 1) + '\n'); }, ls => ls.some(l => l.kind === 'warn' && /this push changes the guards: [^.]*tools\/never-pins\.json/.test(l.text)));
+    expect('R3 m4: never-pins.json changed (a loud line, not a failure)', '1dl', false, () => { const p = JSON.parse(read('tools/never-pins.json')); p.WARMUP_BANK_MIN.why += ' '; write('tools/never-pins.json', JSON.stringify(p, null, 1) + '\n'); }, ls => ls.some(l => l.kind === 'warn' && /this push changes the guards: [^\n]*tools\/never-pins\.json/.test(l.text)));
     // R3-3 / R3-4 / R4-a: the pre-push hook, with a stand-in node so only its own gate is under test. The hook
     // judges each line git hands it by the commit it SENDS and where it goes, whatever the local ref is called
     // (review round 4, 2026-11-14: a non-HEAD commit went out by hash or by tag).
@@ -455,8 +455,8 @@ export function selfTest() {
     {
       const cl = join(dir, 'clone');
       const common = git(ROOT, ['rev-parse', '--git-common-dir']).out;
-      const gd = common.startsWith('/') ? common : join(ROOT, common);
-      git(dir, ['clone', '-q', '--no-checkout', '--depth', '1', `file://${gd}`, cl]);
+      const gd = isAbsolute(common) ? common : join(ROOT, common);   // C:/… on Windows is absolute too
+      git(dir, ['clone', '-q', '--no-checkout', '--depth', '1', pathToFileURL(gd).href, cl]);
       git(cl, ['fetch', '-q', '--depth', '1', 'origin', head]);
       git(cl, ['sparse-checkout', 'set', '--no-cone', '/*', '!/audio/']);
       const co = git(cl, ['checkout', '-q', '--detach', 'FETCH_HEAD']);
