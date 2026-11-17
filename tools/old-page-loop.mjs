@@ -32,7 +32,9 @@
      --strict             a WINDOW (below) also makes the exit code 1
      --list               print the case names for this --old/--new and exit
    Exit 0 = no finding; 1 = a finding (a control's own finding counts); 2 = could not run (a ref or folder that
-   cannot be read, no part list or group loader found, a page that cannot be built).
+   cannot be read, no part list or group loader found, a page that cannot be built, an old page that cannot fetch
+   its own list even with its own old files). An old page whose chain gets stuck on the NEW files (it never asks
+   for a list file it does fetch with its old ones) is a finding, exit 1.
 
    WHAT IS REAL. The page is a Node vm with an ordinary global object (vm.constants.DONT_CONTEXTIFY: node's
    intercepted sandbox kept a "not defined" for a global const declared by a LATER script, a false finding no
@@ -904,7 +906,15 @@ for (const g of RUN){
      a rollback, or a part removed); anything less means the fetch layer or the loader call is broken */
   const gone = g.oldFiles.findIndex(f => !NEW.tree.has(f));
   const notFetched = g.oldFiles.slice(0, gone < 0 ? undefined : gone + 1).filter(f => !oldRun.requested.includes(f));
-  if (notFetched.length) die(`${g.array}: the old page never fetched ${notFetched.join(', ')} (the fetch layer or the loader call is broken)`);
+  if (notFetched.length){
+    /* Review round 3, item 1: the same old page given its OWN files fetches every list file? Then the tool works and
+       the NEW files stop the old loader's chain (a bridge that never frees the next file's slot): a FINDING. If even
+       the old files do not get fetched, the tool cannot run this ref: exit 2. */
+    const ctl = await runCase({ name: 'probe-control-old', group: g, page: 'old', serve: () => OLD }, 1, []);
+    const ctlMissing = g.oldFiles.filter(f => !ctl.requested.includes(f));
+    if (ctlMissing.length) die(`${g.array}: the old page never fetched ${ctlMissing.join(', ')} even with its own old files (the fetch layer or the loader call is broken)`);
+    g.stuck = notFetched;
+  }
   if (gone >= 0) g.gone = g.oldFiles[gone];
   const declCount = f => g.entries.filter(e => declsOf(NEW.tree, f).has(e.name)).length;
   const drop = [...(g.newFiles || g.oldFiles)].sort((a, b) => declCount(b) - declCount(a))[0];
@@ -998,6 +1008,9 @@ for (const g of RUN){
 const inCases = (c, prefix) => [...c.cases.keys()].some(n => n.startsWith(prefix));
 const all = [...causes.values()].sort((a, b) => (b.id ? 1 : 0) - (a.id ? 1 : 0) || b.calls.size - a.calls.size || a.key.localeCompare(b.key));
 const list = all.filter(c => !c.windowOnly), windows = all.filter(c => c.windowOnly);
+for (const g of RUN) if (g.stuck) list.unshift({ id: null, windowOnly: false, pending: new Set(), phases: new Set(['load']),
+  key: `the old page's loader never asks for ${g.stuck.join(', ')}: with the new files its chain is stuck (with its own old files it fetches every one), so ${g.loader}() never resolves and the group never finishes loading`,
+  calls: new Set([`${g.loader}()`]), cases: new Map([['after-push' + (RUN.length > 1 ? ':' + g.short : ''), new Set(seeds)]]), first: { case: 'after-push' + (RUN.length > 1 ? ':' + g.short : ''), seed: seeds[0] } });
 for (const g of RUN) if (g.gone) list.unshift({ id: null, windowOnly: false, pending: new Set(), phases: new Set(['load']),
   key: `the old page's ${g.array} names ${g.gone}, which the new files do not have: ${g.loader}() rejects there on every try, so the group never finishes loading`,
   calls: new Set([`${g.loader}()`]), cases: new Map([['after-push' + (RUN.length > 1 ? ':' + g.short : ''), new Set(seeds)]]), first: { case: 'after-push' + (RUN.length > 1 ? ':' + g.short : ''), seed: seeds[0] } });
