@@ -579,8 +579,11 @@ function bindsLocally(text, q){
   if (!LOCALS.has(text)){
     const s = new Set();
     for (const m of text.matchAll(new RegExp(`\\b(?:const|let|var)\\s+(${ID})|\\bcatch\\s*\\(\\s*(${ID})\\s*\\)|(?<![\\w$.])(${ID})\\s*=>`, 'g'))) s.add(m[1] || m[2] || m[3]);
+    /* a parameter list: only the names before a default's `=` are parameters ((a = name) READS name: review R2-4);
+       a default holding parentheses is not matched at all, so its names count as neither */
     for (const m of text.matchAll(/function\s*[\w$]*\s*\(([^()]*)\)|\(([^()\n]*)\)\s*=>/g))
-      for (const p of (m[1] ?? m[2]).matchAll(new RegExp(`(?<![\\w$.])(${ID})`, 'g'))) s.add(p[1]);
+      for (const chunk of (m[1] ?? m[2]).split(','))
+        for (const p of chunk.split('=')[0].matchAll(new RegExp(`(?<![\\w$.])(${ID})`, 'g'))) s.add(p[1]);
     LOCALS.set(text, s);
   }
   return LOCALS.get(text).has(q.replace(/\\\$/g, '$'));
@@ -622,25 +625,37 @@ function staticPass(){
   }
   const newEager = eagerScripts(NEW.tree).filter(s => s.file && !s.inline).map(s => s.file);
   const homes = new Map();   // a name the old page never gets → the NEW file(s) that declare it
-  for (const f of [...new Set([...GROUPS.flatMap(g => g.newFiles || []), ...newEager])]) for (const n of declsOf(NEW.tree, f))
-    if (!have.has(n)){ if (!homes.has(n)) homes.set(n, []); homes.get(n).push(f); }
+  for (const f of [...new Set([...GROUPS.flatMap(g => g.newFiles || []), ...newEager])]){
+    const t = NEW.tree.read(f) || '';
+    // a top-level `window.name = …` declares a global too (review R2-4)
+    const decl = new Set([...declsOf(NEW.tree, f), ...[...scanJs(t).code.matchAll(new RegExp(`^window\\.(${ID})\\s*=(?!=)`, 'gm'))].map(m => m[1])]);
+    for (const n of decl) if (!have.has(n)){ if (!homes.has(n)) homes.set(n, []); homes.get(n).push(f); }
+  }
   const found = new Map();   // name → [{ file, line, guarded, fn, text }]
   if (homes.size) for (const r of runs){
     const { code, refs } = scanJs(r.text);
     const lines = r.text.split('\n'), starts = [0];
     for (let k = 0; k < r.text.length; k++) if (r.text[k] === '\n') starts.push(k + 1);
     const lineOf = p => { let lo = 0, hi = starts.length - 1; while (lo < hi){ const mid = (lo + hi + 1) >> 1; if (starts[mid] <= p) lo = mid; else hi = mid - 1; } return lo; };
-    // top-level functions: a line that starts `function` / `async function` at column 0, to the next `}` at column 0
+    /* Top-level statements: each starts at a line whose first character (column 0) is not a space and not a closing
+       } ) ], and runs to the next such line. A one-line function is its own region (review R2-4: the region used to
+       run to the next `}` at column 0, so a later function's local shadowed it and the label was wrong); a
+       function nested in a top-level arrow or IIFE shares that statement's region, so its parameters are locals
+       there (R2-5). Named after `function NAME` or `const NAME =` on the first line. */
     const regions = [];
-    for (const m of code.matchAll(/^(?:async\s+)?function\s*\*?\s*([\w$]+)[^\n]*$/gm)){
-      const end = code.indexOf('\n}', m.index);
-      regions.push({ a: m.index, b: end < 0 ? code.length : end + 2, name: m[1] });
+    for (const m of code.matchAll(/^[^\s})\]][^\n]*$/gm)){
+      const nm = m[0].match(/^(?:async\s+)?function\s*\*?\s*([\w$]+)|^(?:const|let|var)\s+([\w$]+)\s*=/);
+      if (regions.length) regions[regions.length - 1].b = m.index;
+      regions.push({ a: m.index, b: code.length, name: nm ? (nm[1] || nm[2]) : null });
     }
-    const regionOf = p => regions.find(x => x.a <= p && p < x.b);
-    for (const m of refs.matchAll(new RegExp(`(?<![\\w$.])(${ID})`, 'g'))){
-      const n = m[1];
+    const regionOf = p => { let lo = 0, hi = regions.length - 1, r = null; while (lo <= hi){ const mid = (lo + hi) >> 1; if (regions[mid].a <= p){ r = regions[mid]; lo = mid + 1; } else hi = mid - 1; } return r && p < r.b ? r : null; };
+    /* window.name / globalThis.name / self.name and window['name'] read the global too (review R2-4) */
+    const hits = [...refs.matchAll(new RegExp(`(?<![\\w$])(${ID})`, 'g'))].map(m => ({ n: m[1], p: m.index }))
+      .filter(h => refs[h.p - 1] !== '.' || /\b(?:window|globalThis|self)\s*\.\s*$/.test(refs.slice(Math.max(0, h.p - 20), h.p)) && !/\?\.\s*$/.test(refs.slice(Math.max(0, h.p - 3), h.p)));
+    for (const m of code.matchAll(new RegExp(`\\b(?:window|globalThis|self)\\s*\\[\\s*(['"])(${ID})\\1\\s*\\]`, 'g'))) hits.push({ n: m[2], p: m.index + m[0].indexOf(m[2]), bracket: true });
+    for (const { n, p, bracket } of hits){
       if (!homes.has(n)) continue;
-      const p = m.index, after = refs.slice(p + n.length, p + n.length + 3), before = refs.slice(Math.max(0, p - 40), p);
+      const after = refs.slice(p + n.length, p + n.length + 3), before = refs.slice(Math.max(0, p - 40), p);
       if (/^\s*:(?!:)/.test(after) && /[{,]\s*$/.test(before)) continue;           // an object key
       if (/\btypeof\s+$/.test(before)) continue;                                   // the guard itself
       if (/\b(?:function|const|let|var|class)\s+$/.test(before)) continue;        // a declaration of its own
