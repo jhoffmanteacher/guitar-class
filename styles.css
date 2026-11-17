@@ -440,7 +440,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .step.step-done .step-label{text-decoration:line-through;color:var(--text2)}
 .step-chev{font-size:0.75rem;color:var(--text3);flex-shrink:0;transition:transform 0.15s}
 .step:not(.collapsed) .step-chev{transform:rotate(90deg)}
-.step-detail{padding:2px 4px 10px 56px;font-size:0.9375rem;line-height:1.5}
+/* Reading text is 16px (Jonathan, 2026-11-13: 15px → 16px); the step's text, its list items and its
+   "You've got it when" inherit it. The hint folds keep their own smaller sizes. */
+.step-detail{padding:2px 4px 10px 56px;font-size:1rem;line-height:1.5}
 /* One-at-a-time view, desktop: the 56px gutter exists so a step's body
    lines up under its title rather than under the numbered badge beside
    it. That alignment is worth having in the full list, where rows stack —
