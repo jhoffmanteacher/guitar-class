@@ -1773,9 +1773,11 @@ async function sheetFollowWalk(page, run, events, stats) {
   /* WHEN, not only where (W16-1, 2026-11-16), and THE SHEET'S TOP (2026-11-17). The follow above is forced instant,
      so it cannot see a line that arrives late or a sheet that moves too often. Here the page's own pcFrame runs on its
      real requestAnimationFrame loop with REAL smooth scrolling (the reduce-motion jump is not used); only the audio
-     element is fake, its clock running in real time. On the first sheet card with a jump back up (the top of the next
-     column), at 1366x657, at the speed the card opens on: the first 6 new lines and the first 2 jumps, each played from
-     1 s before its first chord is heard (the clock jumps there with instant scrolling) to 0.7 s after. For each:
+     element is fake, its clock running in real time. On the first two-column sheet card (sheetColumns not 1), at
+     1366x657, at the speed the card opens on: the first 6 new lines and the first 2 column changes, each played from
+     1 s before its first chord is heard (the clock jumps there with instant scrolling) to 0.7 s after. ONE LONG
+     COLUMN (2026-11-17): the sheet is drawn as one column, so no new line may sit above the one before it (a jump
+     back up), and a column change (the model's `col` changing on one page) is checked as a line down. For each:
      - at the first frame its first chord is heard, that chord name is fully on screen (under the sticky bars);
      - a new line one line DOWN (not a jump): its first chord name was fully on screen at least 200 ms before it is
        heard (it was the line below the one being played);
@@ -1810,7 +1812,9 @@ async function sheetFollowWalk(page, run, events, stats) {
         heard[i] = snipTimeAtBars(win, S.fromBar - L.firstBar + rep * S.bars + (ni ? S.beatEnds[ni - 1] : 0) / bpb) + lat * rate; }); });
       const firsts = []; for (let i = 1; i < toks.length; i++) if (heard[i] != null && toks[i].y0 !== toks[i - 1].y0) firsts.push(i);
       const jumps = firsts.filter(i => toks[i].y0 < toks[i - 1].y0);
-      const pick = [...new Set([...firsts.slice(0, 6), ...jumps.slice(0, 2)])].sort((a, b) => a - b);
+      const colChanges = firsts.filter(i => toks[i].col != null && toks[i - 1].col != null && toks[i].page === toks[i - 1].page && toks[i].col !== toks[i - 1].col);
+      const bad = jumps.map(i => 'chord ' + (i + 1) + ' (' + toks[i].name + '): its line is drawn above the line before it (the top of the next column): the sheet should read as one long column');
+      const pick = [...new Set([...firsts.slice(0, 6), ...jumps.slice(0, 2), ...colChanges.slice(0, 2)])].sort((a, b) => a - b);
       const nextFirst = i => firsts.find(f => f > i);
       let box = paper.parentElement; while (box && box !== document.body) { const oy = getComputedStyle(box).overflowY; if ((oy === 'auto' || oy === 'scroll') && box.scrollHeight > box.clientHeight) break; box = box.parentElement; }
       const view = () => { const br = box.getBoundingClientRect(); let top = br.top; [document.querySelector('.ca-screen .page-topbar'), root.querySelector('.pc-sheet-bar')].forEach(el => { const q = el && el.offsetHeight && getComputedStyle(el).position === 'sticky' && el.getBoundingClientRect(); if (q && q.top <= top + 1 && q.bottom > top) top = q.bottom; }); return { top, bottom: br.bottom }; };
@@ -1820,7 +1824,7 @@ async function sheetFollowWalk(page, run, events, stats) {
         get currentTime() { return this._base + (performance.now() - this._p0) / 1000 * rate; }, set currentTime(v) { this._base = v; this._p0 = performance.now(); } };
       const metro = root.dataset.metro; root.dataset.metro = '';
       const st = { root, L, audio: fake, win, loopFrom: 0, fromRep: 0, wholeSong: true, sheet: true, raf: 0, timers: [], lastBeat: -1, counting: false, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null, sheetLine: null, stripKey: null, loopSi: -1, laps: 0, passFrom: 0, build: null };
-      const sb = window.scrollBehavior, bad = []; let checked = 0, frames = 0, jumping = false, scrolls = 0, tops = 0;
+      const sb = window.scrollBehavior; let checked = 0, frames = 0, jumping = false, scrolls = 0, tops = 0;
       const ownBy = box.scrollBy; box.scrollBy = function () { if (!jumping) scrolls++; return Element.prototype.scrollBy.apply(this, arguments); };
       pcState = st; pcSheetStarted(st); st.raf = requestAnimationFrame(pcFrame);
       try {
@@ -1864,13 +1868,14 @@ async function sheetFollowWalk(page, run, events, stats) {
           }
         }
       } finally { window.scrollBehavior = sb; box.scrollBy = ownBy; pcStop(); root.dataset.metro = metro; }
-      return { checked, of: pick.length, jumps: pick.filter(i => jumps.includes(i)).length, frames, tops, bad };
+      return { checked, of: pick.length, jumps: pick.filter(i => jumps.includes(i)).length, cols: pick.filter(i => colChanges.includes(i)).length, frames, tops, bad };
     })()`, 10);
     if (!when || when.fatal) fail(`when:${whenId}`, `the timed follow did not run: ${when ? when.fatal : 'no answer'}`);
     else {
       when.bad.forEach(t => fail(`when:${whenId}`, t));
       if (when.checked !== when.of || when.of < 6) fail(`when:${whenId}`, `checked ${when.checked} of ${when.of} new lines (want at least 6, all checked)`);
-      else if (!when.bad.length) stats.sheetWhen = `${whenId}: ${when.checked} new lines (${when.jumps} jump${when.jumps === 1 ? "" : "s"} up a column) on screen when heard, ${when.tops} at the top 0.7 s after`;
+      else if (!when.cols && !when.jumps) fail(`when:${whenId}`, 'no column change was found to check (a two-column sheet with no right column read, or the model lost its col)');
+      else if (!when.bad.length) stats.sheetWhen = `${whenId}: ${when.checked} new lines (${when.cols} column change${when.cols === 1 ? "" : "s"}, read as one column) on screen when heard, ${when.tops} at the top 0.7 s after`;
     }
     await run(`sheet-follow:when:${whenId}:close`, `(caCloseOpen(), 1)`, 300);
   }

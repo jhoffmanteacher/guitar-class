@@ -3745,6 +3745,14 @@ span.tab-count-held{margin-left:4px}
 .pc-strip-cell.now .pc-strip-ch,.pc-strip-cell.now .pc-strip-n{color:var(--blue-text)}
 .pc-sheet-paper{position:relative;margin:12px auto 0;max-width:100%;min-height:120px;background:#fff;border:1px solid var(--border2);border-radius:4px}
 .pc-sheet-paper canvas{display:block;width:100%;height:auto;border-radius:4px}
+/* ONE LONG COLUMN (pcSheetModel): a two-column sheet is drawn as one column on screen; the Print button prints the
+   page's own two columns, a second canvas kept for print only. */
+.pc-sheet-paper .pc-sheet-print{display:none}
+@media print{
+  .pc-sheet-paper:has(.pc-sheet-print) > canvas:not(.pc-sheet-print),
+  .pc-sheet-paper:has(.pc-sheet-print) :is(.pc-sheet-hit,.pc-sheet-pill,.pc-sheet-dot,.pc-sheet-ghost){display:none !important}
+  .pc-sheet-paper .pc-sheet-print{display:block}
+}
 .pc-sheet-msg{margin:0;padding:16px;font-size:0.875rem;color:#5e5e58}
 .pc-sheet-hit{position:absolute;border:0;padding:0;margin:0;background:transparent;border-radius:4px;cursor:pointer}
 .pc-sheet-hit:hover{background:rgba(24,95,165,0.10)}
