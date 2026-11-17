@@ -13,10 +13,10 @@ they're ready"). Work still being built, reviewed or waiting on a push is NOT li
 or when the paste file exists.
 
 **Listen and look (a few minutes each, any class Chromebook or the Mac):**
-1. **"the cure", set the beat by ear.** Open the site with `?snipcal=1&mapshift=0#class-activities/ca-13` on the
-   end of the address, Metronome on. Play it as it opens, then Guitar off, then Normal speed: all four should feel
-   the same now. Then try `&mapshift=20` and `&mapshift=40` in place of `&mapshift=0`. Tell Claude the number where
-   the highlight lands ON the beat.
+1. **"the cure", set the beat by ear.** You heard the click a few ms LATE at Normal speed, Guitar on (2026-11-17).
+   Open the site with `?snipcal=1&mapshift=-15#class-activities/ca-13` on the end of the address, Metronome on,
+   Normal speed; then `-30` in place of `-15`. Tell Claude the number that puts the click on the beat, which device
+   you were on, and whether another song's click (Seven Nation Army, Luna) sounds late too.
 2. **"the cure", bar 85 (the Outro).** The audit says the record plays about 118 ms early there. Does it look off?
 
 **Decide (tell Claude; each is one sentence):**
