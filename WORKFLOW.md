@@ -322,6 +322,15 @@ and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fi
     space or punctuation) in every served `.html`, `.js`, `.css` and in `CHANGELOG.md`; it must pass on today's tree
     with no allowlist (if a real string trips it, say which, do not allowlist), and go red on the 2026-11-16 page
     (`git show e25f0d5:privacy.html`).
+- **W21 DONE, shipped Fast (Windows, 2026-11-17; one Opus agent; `teacher-songfiles.js`, 5 scoped rules in
+  `styles.css`, the sim, the 1dy pin 88 → 109).** Many files or a drop onto the box; one at a time through the old
+  path (`teacherSfUploadOne`, unchanged checks); "3 of 18: <file>"; a summary naming each refused file and why; a
+  second drop, a folder, a non-mp3 or nothing each get one line; leaving Manage stops at the file being written (it
+  stays "uploading"). Extra: a window drop guard during a batch only, so a drop that misses the box does not open the
+  mp3 and leave the console. Sim 109 of 109; `--breaks` 34 of 34 planted faults caught. Pictures at 1366×657 in the
+  Windows scratchpad `w21-shots\`. **For the Mac:** the sim's `--breaks` says 2 of 17 planted faults for
+  `teacher-builtsongs.js` no longer match its code ("the edit number not raised", "other songs dropped from the
+  list"), stale since `87ba4d17`; Windows did not touch that file.
 - **W21. Manage → Song files: upload MANY files at once, and a drop zone (Jonathan, 2026-11-17: "can the upload
   button accomodate multiple files or be a drag/drop field for me to drop multiple files?"). Fast (a console view he
   asked for; `teacher-songfiles.js` only, not the rules, not the loader). Do it before W17 to W20: he is about to
