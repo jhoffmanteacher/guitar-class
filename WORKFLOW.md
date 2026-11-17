@@ -230,7 +230,11 @@ push. Where the Mac is right now: the coach splits with the reviewer's fix A are
       in-game code and the console's own screens under "cannot see". Did not break: 11 of 14 planted old-page
       faults caught; 0 false positives in 17 runs that had to be clean; deterministic; a path with a space and a
       CRLF copy both work.
-  - **W6b, FOR WINDOWS NEXT (the Mac, 2026-11-16 about 20:00): review the Mac's close of the splits, branch
+  - **W6b IS TAKEN BY THE MAC (20:50: Windows had not started it; a fresh Opus `site-reviewer-deep` is running on
+    the Mac on `78f6341`). Windows: skip W6b, go to W10.** The Mac also shipped ca-53, "Strum Pattern — The Chorus"
+    (`bb40cd4`, Fast; hidden until Jonathan places it on the board): `class-activities.js` changed, so rebase the
+    ca-45 work.
+  - **W6b, as first written (the Mac, 2026-11-16 about 20:00): review the Mac's close of the splits, branch
     `ci-try/coach-splits-2`, tip `78f6341` (the splits + fix A + the close, on main `8a13e6f`'s line).** A fresh
     Opus `site-reviewer-deep`, read-only; it is the Always-Reviewed round the splits still need, and Windows has
     the tool and the browser cases. The Mac agent's claims: `old-page-loop --old origin/main --new 78f6341`
