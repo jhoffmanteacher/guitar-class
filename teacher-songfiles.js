@@ -91,6 +91,8 @@ const TEACHER_SF_SHA_RE = /^[0-9a-f]{64}$/;
 const TEACHER_SF_STATUS = {
   match: 'on the list, uploaded, matches',
   notUp: 'on the list, not uploaded',
+  awaitNotUp: 'on the site as a public file; upload it, then it can be switched',
+  awaitMatch: 'uploaded, matches; ready to switch (the site still plays the public file)',
   stray: 'in the store, not on the list',
   differs: 'uploaded, but its size or SHA-256 is not the list’s',
   unfinished: 'upload not finished (uploading)',
@@ -124,13 +126,16 @@ function teacherSfPiecesOf(bytes){ return Math.ceil(bytes / SONG_FILE_PIECE); }
 function teacherSfHeadMatches(h, entry){
   return !!(h && entry && h.state === 'ready' && h.bytes === entry.bytes && h.sha256 === entry.sha256 && h.pieces === teacherSfPiecesOf(entry.bytes));
 }
+/* An entry the site still plays from audio/ ("awaitingSwitch": true, app/songfiles.js): uploaded and verified like
+   any listed file, only its two plain states read differently. */
+function teacherSfAwaiting(id){ return teacherSfOnList(id) && SONG_FILES[id] && SONG_FILES[id].awaitingSwitch === true; }
 function teacherSfStatus(id){
   const entry = teacherSfEntry(id), h = teacherSfHeads ? teacherSfHeads.get(id) : null;
-  if(!h) return 'notUp';
+  if(!h) return teacherSfAwaiting(id) ? 'awaitNotUp' : 'notUp';
   if(!entry) return typeof teacherSbAudioOwner === 'function' && teacherSbAudioOwner(id) ? 'draft' : 'stray';
   if(h.state !== 'ready') return 'unfinished';
   if(!teacherSfHeadMatches(h, entry)) return 'differs';
-  return teacherSfOnList(id) ? 'match' : 'built';
+  return teacherSfOnList(id) ? (teacherSfAwaiting(id) ? 'awaitMatch' : 'match') : 'built';
 }
 function teacherSfMb(n){ n = Number(n); return Number.isFinite(n) && n >= 0 ? (n / 1e6).toFixed(1) + ' MB' : '—'; }
 function teacherSfLen(s){

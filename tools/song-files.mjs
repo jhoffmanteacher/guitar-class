@@ -7,6 +7,15 @@
      node tools/song-files.mjs --add <mp3> [--id <id>]  measure an mp3 (bytes, SHA-256, length) and write or update
                                                         its entry in app/songfiles.js; the mp3 is copied into the
                                                         private folder when it is not there yet
+     node tools/song-files.mjs --add audio/<f>.mp3 --awaiting [--id <id>]
+                                                        put a file the site still plays from audio/ on the list as
+                                                        AWAITING SWITCH (below): measured where it is, nothing
+                                                        copied, moved or deleted
+     node tools/song-files.mjs --switch <id>            step 3 only (docs/private-audio-step2.md): copy audio/<f>
+                                                        into the private folder (it must match the entry) and drop
+                                                        the entry's awaitingSwitch; audio/ is not touched (the
+                                                        same commit git-rm's the file and points the track at
+                                                        'private:<id>', or checks.mjs 1dz fails)
      --root <dir>   work on another copy of the site (default: this checkout)
 
    WHERE A PRIVATE SONG LIVES. Not in the repo. On Jonathan's Mac, in the private song folder:
@@ -20,6 +29,15 @@
    WHAT A LENGTH IS. durationSec is counted from the mp3's frames the way tools/checks.mjs's mp3DurationSec does
    (every frame's samples over the sample rate), so a check reads the same number from the list as it would from
    the file. ffprobe's reading (it honours the encoder delay) is printed beside it by --add, never stored.
+
+   AWAITING SWITCH (2026-11-17, private song audio step 2). An entry may carry "awaitingSwitch": true (only the
+   value true; any other value is refused). It is a file the site STILL PLAYS from audio/: the list names it so
+   that the console's Upload accepts it and Verify checks it, BEFORE any track points at 'private:<id>', so no song
+   goes silent while Jonathan uploads. checks.mjs 1dz allows such an entry only while audio/<file> exists with the
+   entry's exact bytes and SHA-256 and a public track path ('audio/<file>') names it, and refuses it when any
+   'private:<id>' path names it (a switched track must drop the flag in the same commit, with --switch). An entry
+   without the flag keeps the old rule: not in audio/. The id, name, bytes and SHA-256 do not change at the switch,
+   so the copy uploaded while awaiting is the copy the site checks afterwards.
 
    The Python tools (tools/loudness.py, tools/beat-audit.py) read the same list through tools/song_files.py; this
    file is the only WRITER of the list. */
@@ -39,6 +57,9 @@ export const SONG_BYTES_MAX = 36000000;
 export const SONG_SECONDS_MAX = 1800;
 const SHA_RE = /^[0-9a-f]{64}$/;
 const FIELDS = ['file', 'bytes', 'sha256', 'durationSec'];
+/* Optional, after FIELDS: "awaitingSwitch": true (AWAITING SWITCH above). Written only when true. */
+export const AWAITING_FIELD = 'awaitingSwitch';
+export function isAwaiting(e) { return !!e && e[AWAITING_FIELD] === true; }
 /* The list, markers included: group 1 is the JSON object. */
 const BLOCK_RE = /(\/\* SONG_FILES:BEGIN[\s\S]*?\*\/\r?\n)const SONG_FILES = ([\s\S]*?);(\r?\n\/\* SONG_FILES:END \*\/)/;
 
@@ -55,8 +76,9 @@ export function entryProblem(id, e) {
   if (!SONG_ID_RE.test(id)) return `id "${id}" is not ${SONG_ID_RE} (lower-case letters, digits and dashes, at most 80)`;
   if (!e || typeof e !== 'object' || Array.isArray(e)) return `${id}: not an object`;
   const keys = Object.keys(e);
-  const odd = keys.filter(k => !FIELDS.includes(k));
-  if (odd.length) return `${id}: unknown field${odd.length > 1 ? 's' : ''} ${odd.join(', ')} (an entry has exactly ${FIELDS.join(', ')})`;
+  const odd = keys.filter(k => !FIELDS.includes(k) && k !== AWAITING_FIELD);
+  if (odd.length) return `${id}: unknown field${odd.length > 1 ? 's' : ''} ${odd.join(', ')} (an entry has exactly ${FIELDS.join(', ')}, and optionally ${AWAITING_FIELD}: true)`;
+  if (AWAITING_FIELD in e && e[AWAITING_FIELD] !== true) return `${id}: ${AWAITING_FIELD} is ${JSON.stringify(e[AWAITING_FIELD])}; it is either true or left out`;
   const missing = FIELDS.filter(k => !(k in e));
   if (missing.length) return `${id}: missing ${missing.join(', ')}`;
   if (typeof e.file !== 'string' || !SONG_FILE_NAME_RE.test(e.file)) return `${id}: file "${e.file}" is not a plain *.mp3 name`;
@@ -91,7 +113,7 @@ export function readSongFiles(root) {
 export function renderSongFiles(list) {
   const ids = Object.keys(list).sort();
   if (!ids.length) return '{}';
-  return '{\n' + ids.map(id => '  ' + JSON.stringify(id) + ': ' + JSON.stringify(Object.fromEntries(FIELDS.map(k => [k, list[id][k]])))).join(',\n') + '\n}';
+  return '{\n' + ids.map(id => '  ' + JSON.stringify(id) + ': ' + JSON.stringify(Object.fromEntries(FIELDS.map(k => [k, list[id][k]]).concat(isAwaiting(list[id]) ? [[AWAITING_FIELD, true]] : [])))).join(',\n') + '\n}';
 }
 export function writeSongFiles(root, list) {
   for (const [id, e] of Object.entries(list)) { const p = entryProblem(id, e); if (p) throw new Error(`refusing to write SONG_FILES: ${p}`); }
@@ -191,12 +213,27 @@ export function addSongFile(root, mp3, opts = {}) {
   if (!SONG_FILE_NAME_RE.test(name)) throw new Error(`"${name}" is not a plain *.mp3 name (${SONG_FILE_NAME_RE})`);
   const id = opts.id || idFromName(name);
   if (!SONG_ID_RE.test(id)) throw new Error(`id "${id}" is not ${SONG_ID_RE}`);
-  if (existsSync(join(root, 'audio', name))) throw new Error(`audio/${name} is in the public folder: a private song must not be public too (move it out first)`);
+  const awaiting = !!opts.awaiting;
+  const pub = join(root, 'audio', name);
+  if (awaiting) {
+    /* The public file the site plays, measured where it is: never copied, moved or deleted here. */
+    if (!existsSync(pub) || resolve(pub) !== src) throw new Error(`--awaiting takes a file in this site's audio/ folder (audio/${name} under ${root}); ${mp3} is not it`);
+  } else if (existsSync(pub)) throw new Error(`audio/${name} is in the public folder: a private song must not be public too (move it out first, or add it with --awaiting while the site still plays it)`);
   const list = readSongFiles(root);
   if (list[id] && list[id].file !== name) throw new Error(`"${id}" is already on the list for ${list[id].file}, not ${name}`);
   const other = Object.keys(list).find(k => k !== id && list[k].file === name);
   if (other) throw new Error(`${name} is already on the list as "${other}"`);
+  if (awaiting && list[id] && !isAwaiting(list[id])) throw new Error(`"${id}" is already switched (no ${AWAITING_FIELD}); a switched song never goes back to awaiting`);
   const m = measureSongFile(src);
+  const same = Object.keys(list).find(k => k !== id && list[k].sha256 === m.sha256 && list[k].bytes === m.bytes);
+  if (same) throw new Error(`${name} has the same bytes as "${same}" (${list[same].file}): the console matches an upload by its bytes, so two entries cannot share them`);
+  if (awaiting) {
+    const was = list[id] || null;
+    list[id] = { file: name, bytes: m.bytes, sha256: m.sha256, durationSec: m.durationSec, [AWAITING_FIELD]: true };
+    writeSongFiles(root, list);
+    if (!was) bumpPin(root);
+    return { id, entry: list[id], was, copied: false, dest: null, ffprobeSec: m.ffprobeSec, awaiting: true };
+  }
   const dir = opts.dir || songFilesDir();
   const dest = join(dir, name);
   let copied = false;
@@ -214,18 +251,48 @@ export function addSongFile(root, mp3, opts = {}) {
   const was = list[id] || null;
   list[id] = { file: name, bytes: m.bytes, sha256: m.sha256, durationSec: m.durationSec };
   writeSongFiles(root, list);
-  /* ONE pin counts the list (checks.mjs 1dz, SONG_FILES_PIN; review B3): a NEW entry moves it here, so every way a
-     song joins the list (this CLI, new-playalong --private, loudness.py's rewrite of an existing entry, which does
-     not move it) keeps the checks green without a hand edit. */
-  if (!was) {
-    const cf = join(root, 'tools', 'checks.mjs');
-    if (existsSync(cf)) {
-      const t = readFileSync(cf, 'utf8'), n = t.replace(/const SONG_FILES_PIN = (\d+);/, (x, k) => `const SONG_FILES_PIN = ${Number(k) + 1};`);
-      if (n === t) throw new Error('tools/checks.mjs has no "const SONG_FILES_PIN = N;" to move');
-      writeFileSync(cf, n);
-    }
-  }
+  if (!was) bumpPin(root);
   return { id, entry: list[id], was, copied, dest, ffprobeSec: m.ffprobeSec };
+}
+/* ONE pin counts the list (checks.mjs 1dz, SONG_FILES_PIN; review B3): a NEW entry moves it here, so every way a
+   song joins the list (this CLI, new-playalong --private, loudness.py's rewrite of an existing entry, which does
+   not move it) keeps the checks green without a hand edit. */
+function bumpPin(root) {
+  const cf = join(root, 'tools', 'checks.mjs');
+  if (!existsSync(cf)) return;
+  const t = readFileSync(cf, 'utf8'), n = t.replace(/const SONG_FILES_PIN = (\d+);/, (x, k) => `const SONG_FILES_PIN = ${Number(k) + 1};`);
+  if (n === t) throw new Error('tools/checks.mjs has no "const SONG_FILES_PIN = N;" to move');
+  writeFileSync(cf, n);
+}
+
+/* Step 3 (docs/private-audio-step2.md): an awaiting entry becomes an ordinary private one. Copies audio/<file> into
+   the private folder (it must match the entry; a different file of that name there is never overwritten) and drops
+   the flag. It does NOT touch audio/ or SNIPPET_TRACKS: the same commit removes the public file and points the
+   track at 'private:<id>' (checks.mjs 1dz fails until both are done). */
+export function switchSongFile(root, id, opts = {}) {
+  const list = readSongFiles(root);
+  const e = Object.prototype.hasOwnProperty.call(list, id) ? list[id] : null;
+  if (!e) throw new Error(`"${id}" is not on the SONG_FILES list`);
+  if (!isAwaiting(e)) throw new Error(`"${id}" is not awaiting a switch`);
+  const pub = join(root, 'audio', e.file);
+  if (!existsSync(pub)) throw new Error(`audio/${e.file} is not here: switch before removing the public file (or put it back from git)`);
+  const bad = localMismatch(pub, e);
+  if (bad) throw new Error(`audio/${e.file} ${bad}: the public file changed since it was listed; re-run --add ${'audio/' + e.file} --awaiting and upload it again first`);
+  const dir = opts.dir || songFilesDir();
+  const dest = join(dir, e.file);
+  let copied = false;
+  if (existsSync(dest)) {
+    const why = localMismatch(dest, e);
+    if (why) throw new Error(`the private folder's ${dest} ${why}; move it away first`);
+  } else {
+    mkdirSync(dir, { recursive: true });
+    copyFileSync(pub, dest + '.song-files-part');
+    renameSync(dest + '.song-files-part', dest);
+    copied = true;
+  }
+  delete e[AWAITING_FIELD];
+  writeSongFiles(root, list);
+  return { id, entry: e, dest, copied };
 }
 
 /* Each entry against the private folder. */
@@ -234,6 +301,13 @@ export function songFilesStatus(root, opts = {}) {
   const dir = opts.dir || songFilesDir();
   const folder = existsSync(dir);
   return { dir, folder, rows: Object.entries(list).map(([id, entry]) => {
+    if (isAwaiting(entry)) {
+      /* Still played from audio/: the public file is what this entry describes. */
+      const pub = join(root, 'audio', entry.file);
+      if (!existsSync(pub)) return { id, entry, state: 'pubMissing' };
+      const bad = localMismatch(pub, entry);
+      return { id, entry, state: bad ? 'pubDiffers' : 'pubMatches', why: bad };
+    }
     const local = join(dir, entry.file);
     if (!existsSync(local)) return { id, entry, state: 'missing' };
     const bad = localMismatch(local, entry);
@@ -250,19 +324,37 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
   try {
     if (args.includes('--add')) {
       const mp3 = opt('--add');
-      if (!mp3 || mp3.startsWith('--')) die('usage: node tools/song-files.mjs --add <mp3> [--id <id>] [--root <dir>]');
-      const r = addSongFile(root, mp3, { id: opt('--id') || undefined });
+      if (!mp3 || mp3.startsWith('--')) die('usage: node tools/song-files.mjs --add <mp3> [--awaiting] [--id <id>] [--root <dir>]');
+      const r = addSongFile(root, mp3, { id: opt('--id') || undefined, awaiting: args.includes('--awaiting') });
       const e = r.entry;
+      if (r.awaiting) {
+        console.log(`song-files: ${r.was ? 'updated' : 'added'} "${r.id}" in ${SONG_FILES_SRC} AWAITING SWITCH: ${e.file}, ${e.bytes} bytes, sha256 ${e.sha256.slice(0, 12)}…, ${e.durationSec} s by its frames${r.ffprobeSec !== null ? ` (ffprobe ${r.ffprobeSec.toFixed(3)} s)` : ''}`);
+        console.log(`  the site still plays audio/${e.file}; nothing was copied, moved or deleted.`);
+        console.log(`  next: upload it in the console (Manage → Song files) and press Verify all. Step 3, later (docs/private-audio-step2.md):`);
+        console.log(`  node tools/song-files.mjs --switch ${r.id}; git rm audio/${e.file}; its SNIPPET_TRACKS path 'audio/${e.file}' -> 'private:${r.id}'; node tools/checks.mjs`);
+        process.exit(0);
+      }
       console.log(`song-files: ${r.was ? 'updated' : 'added'} "${r.id}" in ${SONG_FILES_SRC}: ${e.file}, ${e.bytes} bytes, sha256 ${e.sha256.slice(0, 12)}…, ${e.durationSec} s by its frames${r.ffprobeSec !== null ? ` (ffprobe ${r.ffprobeSec.toFixed(3)} s)` : ''}`);
       if (r.was && (r.was.bytes !== e.bytes || r.was.sha256 !== e.sha256)) console.log(`  was ${r.was.bytes} bytes, sha256 ${r.was.sha256.slice(0, 12)}…: the console's copy must be uploaded again (Manage → Song files)`);
       console.log(r.copied ? `  copied into the private folder: ${r.dest}` : `  the private folder already has it: ${r.dest}`);
       process.exit(0);
     }
+    if (args.includes('--switch')) {
+      const id = opt('--switch');
+      if (!id || id.startsWith('--')) die('usage: node tools/song-files.mjs --switch <id> [--root <dir>]');
+      const r = switchSongFile(root, id);
+      console.log(`song-files: "${r.id}" is no longer awaiting a switch (${r.entry.file}); ${r.copied ? 'copied into' : 'already in'} the private folder: ${r.dest}`);
+      console.log(`  same commit: git rm audio/${r.entry.file}, and its SNIPPET_TRACKS path -> 'private:${r.id}' (checks.mjs 1dz fails until both are done)`);
+      process.exit(0);
+    }
     const st = songFilesStatus(root);
     const n = st.rows.length;
     console.log(`song-files: ${n} song file${n === 1 ? '' : 's'} on the list (${SONG_FILES_SRC}); private folder ${st.dir} ${st.folder ? 'is here' : 'is NOT here (the tools work from the list)'}`);
+    const STATE = { matches: 'local copy matches', missing: 'no local copy', pubMatches: 'AWAITING SWITCH: audio/ copy matches (the site plays it)', pubMissing: 'AWAITING SWITCH, BUT audio/ HAS NO COPY' };
     for (const r of st.rows)
-      console.log(`  ${r.id.padEnd(40)} ${r.entry.file}  ${r.entry.bytes} bytes  ${r.entry.durationSec} s  ${r.state === 'matches' ? 'local copy matches' : r.state === 'missing' ? 'no local copy' : 'LOCAL COPY DIFFERS: ' + r.why}`);
-    process.exit(st.rows.some(r => r.state === 'differs') ? 1 : 0);
+      console.log(`  ${r.id.padEnd(58)} ${r.entry.file}  ${r.entry.bytes} bytes  ${r.entry.durationSec} s  ${STATE[r.state] || (r.state === 'pubDiffers' ? 'AWAITING SWITCH, BUT audio/ COPY DIFFERS: ' : 'LOCAL COPY DIFFERS: ') + r.why}`);
+    const aw = st.rows.filter(r => isAwaiting(r.entry)).length;
+    if (aw) console.log(`song-files: ${aw} awaiting a switch, ${st.rows.filter(r => r.state === 'pubMatches').length} of them matching their audio/ file`);
+    process.exit(st.rows.some(r => r.state === 'differs' || r.state === 'pubDiffers' || r.state === 'pubMissing') ? 1 : 0);
   } catch (e) { die(e.message); }
 }

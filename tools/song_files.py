@@ -22,6 +22,12 @@ SHA_RE = re.compile(r'^[0-9a-f]{64}$')
 BYTES_MAX = 36000000
 SECONDS_MAX = 1800
 FIELDS = ('file', 'bytes', 'sha256', 'durationSec')
+# Optional: "awaitingSwitch": true, a file the site still plays from audio/ (tools/song-files.mjs, AWAITING SWITCH).
+AWAITING = 'awaitingSwitch'
+
+
+def is_awaiting(e):
+    return isinstance(e, dict) and e.get(AWAITING) is True
 BLOCK_RE = re.compile(r'/\* SONG_FILES:BEGIN[\s\S]*?\*/\r?\nconst SONG_FILES = ([\s\S]*?);\r?\n/\* SONG_FILES:END \*/')
 
 
@@ -43,9 +49,11 @@ def entry_problem(sid, e):
         return 'id "%s" is not %s' % (sid, ID_RE.pattern)
     if not isinstance(e, dict):
         return '%s: not an object' % sid
-    odd = [k for k in e if k not in FIELDS]
+    odd = [k for k in e if k not in FIELDS and k != AWAITING]
     if odd:
         return '%s: unknown field(s) %s' % (sid, ', '.join(odd))
+    if AWAITING in e and e[AWAITING] is not True:
+        return '%s: %s is %r; it is either true or left out' % (sid, AWAITING, e[AWAITING])
     missing = [k for k in FIELDS if k not in e]
     if missing:
         return '%s: missing %s' % (sid, ', '.join(missing))
