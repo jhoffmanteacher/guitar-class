@@ -89,9 +89,10 @@
    never gets (only in a new part its old list never fetches, or only in a new app script), referenced from a file
    an old page runs, with file:line: a reference behind `typeof` is SKIPPED (silently not done), any other THROWS
    when reached. A part an old-list part fetches itself (loadScriptOnce('…'), a bridge like fix A2) counts as
-   fetched; whether it arrives in time is left to the run (at-resolve, cache-fast). Only a name the OLD site had
-   (code that moved) is a finding; a name new in this push is a WARNING when referenced without a guard (exit 1
-   only with --strict) and a NOTE when only behind typeof (the guard's purpose: ca5a220b's strum check).
+   fetched; whether it arrives in time is left to the run (at-resolve, cache-fast). Every UNGUARDED reference is
+   a finding, the name moved or new in this push (labelled: a new name reached only after a guarded call into the
+   new part, as ca5a220b's scStart after scOpen, cannot throw, but that cannot be proved statically: read the
+   lines). A guarded reference to a name the old site had is a finding (SKIPPED); to a new name, a NOTE.
 
    WHAT THE RUN CANNOT SEE (the static pass is what covers the first two). Code that runs only during PLAY: a
    game's own loop (rAF, timers past the first 200 callbacks, the mic loop) never runs in the vm, so a helper
@@ -967,15 +968,15 @@ if (notes.size) console.log(`\nNOTES (${notes.size}; not findings):\n    ${[...n
 if (before.size) console.log(`\nON BOTH PAGES (${before.size}; old page + old files and new page + new files make these too, so the push does not cause them; not findings):\n    ${[...before.keys()].join('\n    ')}`);
 show(list, `\nFINDINGS (${list.length} cause${list.length === 1 ? '' : 's'}; a call a real caller makes throws or is skipped; [settled] = still broken once every file has arrived, until a reload):`, '✗ ');
 show(windows, `\nWINDOWS (${windows.length}; a user action in the moment between the group loader resolving and a part it loads itself arriving; exit 1 only with --strict):`, '⚠ ');
-/* Static verdicts. A name the OLD site declared (code that MOVED, the case of every split) is a finding: an old
-   page had it and now does not; behind typeof it is SKIPPED (silently not done), otherwise it THROWS when reached.
-   A name that is NEW in this push (a new feature's part an old page never fetches): a typeof-guarded reference
-   skips by design (a NOTE); an unguarded one is a WARNING (it throws if an old page ever reaches it, which only
-   the new feature's own code usually does; exit 1 only with --strict). */
+/* Static verdicts (review R2-2). An UNGUARDED reference throws when an old page reaches it, whether the name moved
+   or is new in this push: a finding either way, labelled so the reader can judge ("new in this push": reachable
+   only after a guarded call into the new part, as ca5a220b's scStart after scOpen, is not provable statically).
+   A name the OLD site had, reached only behind typeof, is a finding too (SKIPPED: silently not done any more). A
+   NEW name reached only behind typeof is a NOTE: the guard does what it is for. */
 const staticAll = [...STATIC.found.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-const staticList = staticAll.filter(([n]) => OLD_DEF.has(n));
-const staticNew = staticAll.filter(([n]) => !OLD_DEF.has(n));
-const staticWarn = staticNew.filter(([, rs]) => rs.some(r => !r.guarded)), staticNote = staticNew.filter(([, rs]) => rs.every(r => r.guarded));
+const staticList = staticAll.filter(([n, rs]) => OLD_DEF.has(n) || rs.some(r => !r.guarded));
+const staticNote = staticAll.filter(([n, rs]) => !OLD_DEF.has(n) && rs.every(r => r.guarded));
+const staticWarn = [];
 const showStatic = (arr, title, mark) => {
   if (!arr.length) return;
   console.log(title);
@@ -987,10 +988,11 @@ const showStatic = (arr, title, mark) => {
     if (!VERBOSE && rs.length > 4) console.log(`       … ${rs.length - 4} more (--verbose)`);
   });
 };
-showStatic(staticList, `\nSTATIC FINDINGS (${staticList.length} name${staticList.length === 1 ? '' : 's'} the old site had that an old page reaches but no longer gets: ${staticList.filter(([, rs]) => rs.some(r => !r.guarded)).length} THROW when reached, ${staticList.filter(([, rs]) => rs.every(r => r.guarded)).length} only SKIPPED; this covers code the run cannot reach: in-game loops, the console's own screens):`, '✗ S');
-showStatic(staticWarn, `\nSTATIC WARNINGS (${staticWarn.length}; a name new in this push, referenced WITHOUT a guard from code an old page runs: it throws if an old page reaches it; exit 1 only with --strict):`, '⚠ S');
+const nNew = staticList.filter(([n]) => !OLD_DEF.has(n)).length;
+showStatic(staticList, `\nSTATIC FINDINGS (${staticList.length} name${staticList.length === 1 ? '' : 's'} an old page reaches but never gets: ${staticList.filter(([, rs]) => rs.some(r => !r.guarded)).length} THROW when reached, ${staticList.filter(([, rs]) => rs.every(r => r.guarded)).length} only SKIPPED; this covers code the run cannot reach: in-game loops, the console's own screens)` +
+  (nNew ? `:\n  ${nNew} of them are new in this push: read their lines; one reached only after a guarded call into the new part (e.g. after \`typeof scOpen\`) cannot throw on an old page, but that cannot be proved statically:` : ':'), '✗ S');
 showStatic(staticNote, `\nSTATIC NOTES (${staticNote.length}; a name new in this push, referenced only behind typeof: an old page skips it, as the guard intends; not findings):`, '· S');
 const parts = side => RUN.map(g => `${side === 'old' ? g.oldFiles.length : (g.newFiles || []).length} ${g.short}`).join(' + ');
-const bad = list.length || staticList.length || (ARGS.strict && (windows.length || staticWarn.length));
-console.log(`\nold-page-loop: old ${parts('old')} parts, new ${parts('new')} parts; ${callsSeen.size} entry points × ${seeds.length} orders × ${caseNames.length} cases = ${calls} calls; ${callsHit.size} of the ${callsSeen.size} entry points threw or were skipped (${threw} times): ${list.length} finding${list.length === 1 ? '' : 's'}, ${windows.length} window${windows.length === 1 ? '' : 's'}; static: ${staticList.length} finding${staticList.length === 1 ? "" : "s"}, ${staticWarn.length} warning${staticWarn.length === 1 ? "" : "s"}, ${staticNote.length} note${staticNote.length === 1 ? "" : "s"}; ${noiseN} throws matched a control (stub noise). ${bad ? '✗' : '✓'} ${((Date.now() - T0) / 1000).toFixed(1)} s`);
+const bad = list.length || staticList.length || (ARGS.strict && windows.length);
+console.log(`\nold-page-loop: old ${parts('old')} parts, new ${parts('new')} parts; ${callsSeen.size} entry points × ${seeds.length} orders × ${caseNames.length} cases = ${calls} calls; ${callsHit.size} of the ${callsSeen.size} entry points threw or were skipped (${threw} times): ${list.length} finding${list.length === 1 ? '' : 's'}, ${windows.length} window${windows.length === 1 ? '' : 's'}; static: ${staticList.length} finding${staticList.length === 1 ? "" : "s"} (${nNew} new in this push), ${staticNote.length} note${staticNote.length === 1 ? "" : "s"}; ${noiseN} throws matched a control (stub noise). ${bad ? '✗' : '✓'} ${((Date.now() - T0) / 1000).toFixed(1)} s`);
 process.exit(bad ? 1 : 0);
