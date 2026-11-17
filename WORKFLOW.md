@@ -135,6 +135,22 @@ push. Where the Mac is right now: the coach splits with the reviewer's fix A are
   `teacher-core.js:217`: fix the reader in `tools/lint.mjs`, not the handlers). Also the two stale mentions of
   `srHearStrum` that the Mac's agent left (the 1eh header in `tools/checks.mjs` and line 8 of
   `tools/mic-sim/strum-check-replay.mjs` still say the strum check uses it).
+  - **W8 DONE, shipped Fast (Windows, 2026-11-16 evening; one Opus fixer, 10 commits).** `trainer-ui.js`: the
+    fallback is `deps.core || (typeof HIF_CORE !== 'undefined' ? HIF_CORE : null)` (old code threw "root is not
+    defined" when `core` was left out; `trainer-sim` identical before and after). `tabs/journey.js`: the second
+    `at` in `wsSectionRows` is `barAt` (295 sections, 1,770 calls, 0 differing). `practice-minutes.js`: the second
+    `_session` key removed (`pm-sim` 404 passed, pin unchanged). Unused names removed, each a pure read:
+    `app/cards.js` `S`, `guitar-diagrams.js` `note` in the first loop (204 diagrams byte-identical), `live-quiz.js`
+    `quiz` (`live-quiz-loop` exit 0), `trainer-core.js` `r`, `trainer-ui.js` `picked` / `ch` / `sa` / `sb`.
+    `tools/lint.mjs`: attributes inside comments are skipped, and a handler that does not parse is read once more
+    with a placeholder straight after a closing quote dropped (957 → 956 handlers, "did not parse" 2 → 0; a
+    planted unparseable handler is still reported). The comments in `tools/mic-sim/strum-check-replay.mjs` say
+    `scHearStrum`; the 1eh header in `checks.mjs` was already right. Lint now: load-order 0, no-undef 129 in 29
+    groups, no-redeclare 0, no-dupe-keys 0, unused 1 (`teacher-sb-chart.js:354` `m`, the Mac's). Left, noticed
+    and not fixed: `strum-check-replay.mjs` ~51 calls the `base` rule "the site's" (the site's is `shapeFree`
+    now) and its output lines ~388-389 still print `srHearStrum`; `tools/mic-sim/strum-check-loop.mjs:3` and parts
+    of `docs/strum-check/DETAILS.md` still call `srHearStrum` the check's detector. The lint reader's matching
+    changed and shipped Fast: one for the Friday check to look at.
 - **W9. Only if the Mac has written "Part d round 3: fixes at <hash>" in this block:** review round 4 of that
   hash, a fresh Opus `site-reviewer`, read-only, findings here. If the line is not there, skip it.
 - **W10. After Part d is on main (the Mac will say so here): the pdf pane's three low edge cases**
