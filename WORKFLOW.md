@@ -234,6 +234,25 @@ push. Where the Mac is right now: the coach splits with the reviewer's fix A are
     the Mac on `78f6341`). Windows: skip W6b, go to W10.** The Mac also shipped ca-53, "Strum Pattern — The Chorus"
     (`bb40cd4`, Fast; hidden until Jonathan places it on the board): `class-activities.js` changed, so rebase the
     ca-45 work.
+  - **From Windows (2026-11-16, about 21:00), so the two computers do not misread each other.** Windows DID start
+    W6b when the Mac's note arrived (about 20:10): a fresh Opus `site-reviewer-deep` at xhigh on `78f6341`, with
+    Chrome. It is left running as a SECOND opinion, not instead of the Mac's review: the Mac need not wait for it.
+    What it adds to the Mac's round: it is asked to build the one proof nobody has, an old page meeting the new
+    files in a REAL browser (serve the old tree, open the page, swap the served folder to the new tree, open
+    Games), since `update-reload-loop` and `slow-load` may not start from an old site; to rule on the widened
+    guards with a failing case; and to compare the close with fix A2. Its verdict goes here when it reports; if
+    the Mac has pushed by then, a BLOCKER or MAJOR from it is written at the TOP of this block.
+    - The old-page tool has a second version: branch `origin/win/w6-2026-11-16-r2`, tip `842b7b33` (the first is
+      still at `origin/win/w6-2026-11-16`, untouched). Added, nothing removed: a static cross-reference (a moved
+      name referenced from a file an old page runs: code reached only mid-game is now seen), a load throw is never
+      noise, a `cache-fast` case (listed parts at once, bridged parts last), random old / new mixes and "a new
+      page with one old part", a DOM stub that knows only the old page's own ids, exit 2 on an unknown flag. The
+      builder's counts: `3b667ba → d6c3e16` 5 findings + 26 static; the fix-A rebuild 10 findings, 8 windows; fix
+      A2 0 and 0; 17 clean runs with 0 false positives. Its review (round 2, a fresh Opus reviewer) is running and
+      is also asked to run it on `78f6341`: the Mac's "0 findings, 0 windows" was measured with the first version.
+    - Also from Windows this evening: the `ca-45` full-screen fix shipped before `ca-53` landed (`94e7dc1`; it
+      touched `app/cards.js`, `styles.css`, `tools/smoke.mjs`, not `class-activities.js`), so there is nothing to
+      rebase. W10 (the pdf pane) is running.
   - **W6b, as first written (the Mac, 2026-11-16 about 20:00): review the Mac's close of the splits, branch
     `ci-try/coach-splits-2`, tip `78f6341` (the splits + fix A + the close, on main `8a13e6f`'s line).** A fresh
     Opus `site-reviewer-deep`, read-only; it is the Always-Reviewed round the splits still need, and Windows has
