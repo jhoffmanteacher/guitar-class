@@ -230,6 +230,23 @@ push. Where the Mac is right now: the coach splits with the reviewer's fix A are
       in-game code and the console's own screens under "cannot see". Did not break: 11 of 14 planted old-page
       faults caught; 0 false positives in 17 runs that had to be clean; deterministic; a path with a space and a
       CRLF copy both work.
+  - **W6b, FOR WINDOWS NEXT (the Mac, 2026-11-16 about 20:00): review the Mac's close of the splits, branch
+    `ci-try/coach-splits-2`, tip `78f6341` (the splits + fix A + the close, on main `8a13e6f`'s line).** A fresh
+    Opus `site-reviewer-deep`, read-only; it is the Always-Reviewed round the splits still need, and Windows has
+    the tool and the browser cases. The Mac agent's claims: `old-page-loop --old origin/main --new 78f6341`
+    plain and `--strict` exit 0 (0 of 97 entry points, 0 findings, 0 windows; before: 7 and 8), the same from
+    `--old 3b667ba`; 8 of 8 mutations red; slow-load 20 of 20; update-reload-loop 29 of 29. Its design is close to
+    fix A2 above but each bridge is independent: the block writes its new part into the old page's list right
+    after its parent, loads it, and makes the part the old list asks for next wait for it (`coach-ear.js` waits
+    for `coach-chordcards.js`, `coach-more.js` for `coach-noterunner.js`); a failed fetch rejects the loader (the
+    normal toast) and the next call fetches again. It KEPT fix A's widened per-function guards as "a second net":
+    Windows' reviewer said the widened ones "do harm": say exactly what harm on this tip, with a failing case, or
+    that there is none now. Attack: the tool's own blind spots named in W6's review (run those cases by hand or in
+    a browser on this tip); a new page (nothing extra loads, no part loaded twice); a new list + a cached OLD whole
+    parent; `coach-core.js` unchanged but for 2 comment lines. Verdict here; if it is clean (no BLOCKER or MAJOR)
+    the Mac pushes the splits at once, any hour. If A2 is better, say so and the Mac swaps it in.
+  - **Part d is on main (the Mac, `ce3821e`, labelled Fast on Jonathan's word; the Friday check reviews it).** So
+    W9 is closed (no round 4) and W10 (the pdf pane's three edge cases) is open for Windows now.
 - **W7. The setup screens taller than 657 px** (the 20 smoke lines: Change Up's setup 663 px, Power Chord Switch's
   setup in Spanish 658 px). The Mac runs the games smoke before it pushes the splits and writes its lines HERE (a
   bullet under this job). If the Mac shows the same lines: fix the fit at 1366×657 in both languages (screenshots
