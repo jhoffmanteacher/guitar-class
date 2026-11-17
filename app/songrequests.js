@@ -68,8 +68,8 @@ function srParseYouTube(raw){
    ever, and the save queued behind it never lands), cut to n UTF-16 units
    without splitting a pair. */
 function srClean(s, n){
-  s = String(s == null ? '' : s).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDFFF]/g, m => m.length === 2 ? m : '�')
-    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F￾￿]/g, '�').trim();
+  s = String(s == null ? '' : s).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDFFF]/g, m => m.length === 2 ? m : '\uFFFD')
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g, '\uFFFD').trim();
   if(s.length <= n) return s;
   s = s.slice(0, n);
   if(/[\uD800-\uDBFF]$/.test(s)) s = s.slice(0, -1);

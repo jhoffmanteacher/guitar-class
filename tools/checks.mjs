@@ -7378,35 +7378,50 @@ function parseWorkflowYaml(src) {
 }
 /* 1eq. Twice-encoded text (W20). On 2026-11-16 a `perl` edit read UTF-8 as Latin-1 and "Está" shipped garbled on the
    Spanish privacy page for two hours; the pin recorded the garbled text. The patterns are the byte signatures of UTF-8
-   read as Latin-1, written as \u escapes so this file never trips on itself. No allowlist: a real string that trips it
-   is reported and fixed or discussed, never listed. Reads every .html, .js and .css the site serves (the repo minus
-   tools, .git, .github, .githooks, .claude, node_modules) and CHANGELOG.md. MIN_FILES is a floor (the walk broke if it drops). */
+   read as Latin-1 / CP1252 (a letter-pair garble, a single garbled punctuation mark, an emoji) and of a Latin-1 file read
+   as UTF-8 (U+FFFD), written as \u escapes so this file never trips on itself. No allowlist: a real string that trips
+   it is reported and fixed or discussed, never listed. Reads what the site serves: every .html, .js and .css, every .svg
+   (img/, icon.svg), manifest.json (the only served .json; firebase.json and firestore.indexes.json are tool config, not
+   referenced by the site) and any .webmanifest, in the repo minus tools, .git, .github, .githooks, .claude and
+   node_modules, plus CHANGELOG.md. MIN_FILES is a floor (the walk broke if it drops); each of MUST_DIRS must also give at
+   least one file, so skipping a whole directory goes red. */
 function checkTwiceEncoded(root = ROOT, label = '') {
   head('1eq. Twice-encoded text (UTF-8 read as Latin-1) in what the site serves' + label);
-  const MIN_FILES = 101;
+  const MIN_FILES = 133;
+  const MUST_DIRS = ['', 'app', 'tabs', 'vendor', 'img'];   // '' = the site root
   const SKIP = new Set(['.git', '.github', '.githooks', '.claude', 'node_modules', 'tools']);
+  const CP = '\u20AC\u201A\u0192\u201E\u2026\u2020\u2021\u02C6\u2030\u0160\u2039\u0152\u017D\u2018\u2019\u201C\u201D\u2022\u2013\u2014\u02DC\u2122\u0161\u203A\u0153\u017E\u0178';
   const RES = [
     [/\u00C3[\u0080-\u00BF]/, 'A-tilde before a U+0080-U+00BF character'],
+    [new RegExp('\\u00C3[' + CP + ']'), 'A-tilde before a CP1252 character (an accented capital garbled)'],
     [/\u00E2\u20AC/, 'a-circumflex + euro sign'],
-    [/\u00C2[\u0020\u00A0-\u00BF!-\/:-@\[-`{-~]/, 'A-circumflex before a space or punctuation'],
+    [/\u00E2[\u0080-\u00BF]/, 'a-circumflex before a U+0080-U+00BF character (Latin-1 punctuation garbled)'],
+    [/\u00F0\u0178/, 'eth + Y-diaeresis (an emoji garbled)'],
+    [/\u00C2[\u0020\u00A0-\u00BF!-\u002F:-\u0040\u005B-\u0060{-~]/, 'A-circumflex before a space or punctuation'],
+    [/\uFFFD/, 'U+FFFD replacement character (a Latin-1 file read as UTF-8)'],
   ];
   let n = 0, bad = 0;
+  const byDir = {};
+  const served = (name, p) => /\.(html|js|css|svg|webmanifest)$/.test(name) || p === 'CHANGELOG.md' || p === 'manifest.json';
   const walk = d => {
     for (const e of readdirSync(join(root, d), { withFileTypes: true })) {
       const p = d ? d + '/' + e.name : e.name;
       if (e.isDirectory()) { if (!SKIP.has(e.name)) walk(p); continue; }
-      if (!(/\.(html|js|css)$/.test(e.name) || p === 'CHANGELOG.md')) continue;
+      if (!served(e.name, p)) continue;
       n++;
+      const top = p.includes('/') ? p.split('/')[0] : '';
+      byDir[top] = (byDir[top] || 0) + 1;
       const t = readFileSync(join(root, p), 'utf8');
       for (const [re, what] of RES) {
         const m = re.exec(t);
-        if (m) { err(`1eq: ${p} line ${t.slice(0, m.index).split('\n').length} has ${what}: "${t.slice(Math.max(0, m.index - 15), m.index + 15).replace(/\s+/g, ' ')}" (UTF-8 read as Latin-1; fix the text, never allowlist)`); problems++; bad++; break; }
+        if (m) { err(`1eq: ${p} line ${t.slice(0, m.index).split('\n').length} has ${what}: "${t.slice(Math.max(0, m.index - 15), m.index + 15).replace(/\s+/g, ' ')}" (fix the text, never allowlist)`); problems++; bad++; break; }
       }
     }
   };
   walk('');
   if (n < MIN_FILES) { err(`1eq: read only ${n} files, fewer than ${MIN_FILES}: the walk is broken`); problems++; bad++; }
-  if (!bad) ok(`1eq: read ${n} files, none twice-encoded`);
+  for (const d of MUST_DIRS) if (!byDir[d]) { err(`1eq: no file read from ${d ? d + '/' : 'the site root'}: the walk skipped a whole directory`); problems++; bad++; }
+  if (!bad) ok(`1eq: read ${n} files (${MUST_DIRS.map(d => (d || 'root') + ' ' + byDir[d]).join(', ')}), none twice-encoded`);
   return bad;
 }
 
