@@ -401,8 +401,8 @@ const SNIPPET_TRACKS = {
      pickup "Qué"), chorus 47-54, solo 55-68, verse 2 69-96, chorus 97-104,
      outro 105-107 ("¡Adiós!" at 173.9 s). */
   'las-mananitas': {
-    src:     'audio/ariel-camacho-las-mananitas-backing-A-108bpm-440hz-full.mp3',
-    srcSlow: 'audio/ariel-camacho-las-mananitas-backing-A-90bpm-440hz-full.mp3',
+    src:     'private:ariel-camacho-las-mananitas-backing-a-108bpm-440hz-full',
+    srcSlow: 'private:ariel-camacho-las-mananitas-backing-a-90bpm-440hz-full',
     trackBpm: 108, trackBpmSlow: 90,
     feltBpm: 108,
     beatsPerBar: 3,
@@ -453,8 +453,8 @@ const SNIPPET_TRACKS = {
      entry, 235.119, is the last beat the tracker found, 0.5 s before the end
      of the file. */
   'madrecita-querida': {
-    src:     'audio/vicente-fernandez-madrecita-querida-backing-G-78bpm-440hz-full.mp3',
-    srcSlow: 'audio/vicente-fernandez-madrecita-querida-backing-G-65bpm-440hz-full.mp3',
+    src:     'private:vicente-fernandez-madrecita-querida-backing-g-78bpm-440hz-full',
+    srcSlow: 'private:vicente-fernandez-madrecita-querida-backing-g-65bpm-440hz-full',
     trackBpm: 78, trackBpmSlow: 65,
     feltBpm: 78,
     beatsPerBar: 4,
@@ -476,8 +476,8 @@ const SNIPPET_TRACKS = {
   /* The same record in its own key, F (see above) — ca-36's Key of F. Same
      bar map, number for number. */
   'madrecita-querida-f': {
-    src:     'audio/vicente-fernandez-madrecita-querida-backing-F-78bpm-440hz-full.mp3',
-    srcSlow: 'audio/vicente-fernandez-madrecita-querida-backing-F-65bpm-440hz-full.mp3',
+    src:     'private:vicente-fernandez-madrecita-querida-backing-f-78bpm-440hz-full',
+    srcSlow: 'private:vicente-fernandez-madrecita-querida-backing-f-65bpm-440hz-full',
     trackBpm: 78, trackBpmSlow: 65,
     feltBpm: 78,
     beatsPerBar: 4,
@@ -518,8 +518,8 @@ const SNIPPET_TRACKS = {
      bridge 54-83 (spoken lines and the band alone from about 113 s), verse
      2 84-117, ending 118-141, the last chord ringing out to 216 s. */
   'arsenal-efectivo': {
-    src:     'audio/lolo-felix-arsenal-efectivo-backing-A-119bpm-440hz-full.mp3',
-    srcSlow: 'audio/lolo-felix-arsenal-efectivo-backing-A-100bpm-440hz-full.mp3',
+    src:     'private:lolo-felix-arsenal-efectivo-backing-a-119bpm-440hz-full',
+    srcSlow: 'private:lolo-felix-arsenal-efectivo-backing-a-100bpm-440hz-full',
     trackBpm: 119, trackBpmSlow: 100,   // what the FILES are (quarter notes), for the slow-tier rescale
     feltBpm: 238 / 3,                   // big beats: 3 eighth notes each
     beatsPerBar: 2,                     // two big beats per 6/8 bar
@@ -550,8 +550,8 @@ const SNIPPET_TRACKS = {
      singing 83-114 (pickup in 82), ending 115-132, the last Em ringing to
      260 s. */
   'ella': {
-    src:     'audio/junior-h-ella-backing-Em-185bpm-440hz-full.mp3',
-    srcSlow: 'audio/junior-h-ella-backing-Em-155bpm-440hz-full.mp3',
+    src:     'private:junior-h-ella-backing-em-185bpm-440hz-full',
+    srcSlow: 'private:junior-h-ella-backing-em-155bpm-440hz-full',
     trackBpm: 185, trackBpmSlow: 155,   // what the FILES are (eighth notes), for the slow-tier rescale
     feltBpm: 185 / 3,                   // big beats: 3 eighth notes each
     beatsPerBar: 2,                     // two big beats per 6/8 bar
@@ -588,8 +588,8 @@ const SNIPPET_TRACKS = {
      about 66 to 103, band alone to 112, the last C#m at bar 113 ringing to
      the end of the file. */
   'perdon-mama': {
-    src:     'audio/chuy-montana-perdon-mama-backing-E-115bpm-440hz-full.mp3',
-    srcSlow: 'audio/chuy-montana-perdon-mama-backing-E-96bpm-440hz-full.mp3',
+    src:     'private:chuy-montana-perdon-mama-backing-e-115bpm-440hz-full',
+    srcSlow: 'private:chuy-montana-perdon-mama-backing-e-96bpm-440hz-full',
     trackBpm: 115, trackBpmSlow: 96,    // what the FILES are (the 6/8's quarter-note pulses), for the slow-tier rescale
     feltBpm: 230 / 3,                   // big beats: 3 eighth notes each
     beatsPerBar: 2,                     // two big beats per 6/8 bar
@@ -626,10 +626,10 @@ const SNIPPET_TRACKS = {
      121-128, the last F from 129, ringing to about 272 s. The last two
      entries are past the music, so the last chord's window has an end. */
   'smells-like-teen-spirit': {
-    src:         'audio/nirvana-smells-like-teen-spirit-backing-Fm-117bpm-440hz-rhythm-down.mp3',
-    srcSlow:     'audio/nirvana-smells-like-teen-spirit-backing-Fm-100bpm-440hz-rhythm-down.mp3',
-    srcFull:     'audio/nirvana-smells-like-teen-spirit-backing-Fm-117bpm-440hz-full.mp3',
-    srcFullSlow: 'audio/nirvana-smells-like-teen-spirit-backing-Fm-100bpm-440hz-full.mp3',
+    src:         'private:nirvana-smells-like-teen-spirit-backing-fm-117bpm-440hz-rhythm-down',
+    srcSlow:     'private:nirvana-smells-like-teen-spirit-backing-fm-100bpm-440hz-rhythm-down',
+    srcFull:     'private:nirvana-smells-like-teen-spirit-backing-fm-117bpm-440hz-full',
+    srcFullSlow: 'private:nirvana-smells-like-teen-spirit-backing-fm-100bpm-440hz-full',
     trackBpm: 117, trackBpmSlow: 100,
     feltBpm: 117,                       // counted at record speed
     beatsPerBar: 4,
@@ -679,8 +679,8 @@ const SNIPPET_TRACKS = {
      157-159, free-time sung ending from bar 160 to the end. The loop is
      Bb 4 bars · Gm 4 · Eb 2 · Cm 2 · F 4. */
   'vuelve-a-la-vida': {
-    src:     'audio/efecto-elegante-vuelve-a-la-vida-backing-Bb-147bpm-440hz-full.mp3',
-    srcSlow: 'audio/efecto-elegante-vuelve-a-la-vida-backing-Bb-120bpm-440hz-full.mp3',
+    src:     'private:efecto-elegante-vuelve-a-la-vida-backing-bb-147bpm-440hz-full',
+    srcSlow: 'private:efecto-elegante-vuelve-a-la-vida-backing-bb-120bpm-440hz-full',
     trackBpm: 147, trackBpmSlow: 120,
     feltBpm: 147,
     beatsPerBar: 3,

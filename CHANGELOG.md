@@ -8,6 +8,7 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-11-17 — Today's activity: newest number first for earlier days
 
+- **Seven songs now load after you sign in:** Las Mañanitas, Madrecita Querida, Arsenal Efectivo, Ella, Perdón Mamá, Vuelve a la Vida and Smells Like Teen Spirit. The first time you open one on a Chromebook it says "Loading the song…" for a moment. After that it plays right away.
 - **Lyric sheets for Sweet Child O' Mine and All Along the Watchtower are now one long column.** The sheet just keeps scrolling down as the song plays; it no longer jumps back to the top for a second column.
 - **Lyric-sheet play-alongs: a new line is already in place, and still, when its first chord plays.** Before, the sheet was still sliding up on that beat, so the highlight looked late.
 - **A new song is on the Songs page: American Girl.** Open Songs, find it under More Play Along songs, and play along with the record.
