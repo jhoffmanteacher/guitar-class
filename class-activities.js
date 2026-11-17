@@ -356,7 +356,8 @@
    "Call the Chord" (2026-11-05); `ca-49` is "Name the Power Chord"
    (2026-11-05); `ca-50` is "Call the Chord: "the cure"" (2026-11-05);
    `ca-51` is the "Perdón Mamá" play-along card (2026-11-09);
-   the next new activity is `ca-52`.
+   `ca-52` is "Strum Pattern check" (2026-11-14); `ca-53` is "Strum
+   Pattern — The Chorus" (2026-11-16); the next new activity is `ca-54`.
 
    ORDER AND MODULE PLACEMENT LIVE ON THE CONSOLE BOARD, NOT IN THIS FILE
    (2026-09-16). config/class.activityBoard — { id -> { module, pos } },
@@ -7455,6 +7456,78 @@ window.CLASS_ACTIVITIES = [
           barsPerRow: 4,   // a row per two chords — eight bars fit the screen
           bpm: 85,         // the slider's first tempo (Jonathan, 2026-11-14: "it also seemed to be default 60"; buildStrum's default is 60)
           listen: true,    // the strum-pattern check (coach-strumcheck.js); 1eh pins it to this step alone
+        },
+      },
+    ],
+  },
+  /* ca-53 — ca-46's lesson carried on into the chorus (Jonathan, 2026-11-16:
+     "add on to the sweet child strum lesson class activity to include the
+     chorus strums ... a single journey only one ... a new class activity").
+     ONE path for everyone (no `paths`, no chooser): it follows ca-46's
+     "full" path — muted strings, then one chord ringing, then the chords.
+     THE PATTERN is Jonathan's, typed by him 2026-11-16 from that day's
+     slides: D on 1, U on the + of 2, D on 4, U on the + of 4 — the same on
+     every chorus bar. The hand still swings down on every number and up on
+     every "+"; the dots are the misses. THE CHORDS are the site's (ca-33's
+     Chorus sections): A5 C5 D5 D5, one bar each. A5 is the open shape here,
+     next to C5 (song-facts: Sweet Child's activities play A5 open next to
+     C5). No strum check (the lead's call, 2026-11-16: 1eh pins the button
+     to ca-52 alone) and no video (no watch range checked for the chorus).
+     No `journey`: a strum drill, like ca-46. */
+  {
+    id:    'ca-53',
+    view:  'focus',   // one step at a time — see VIEW above
+    title:    'Strum Pattern — The Chorus',
+    title_es: 'Patrón de rasgueo — El coro',
+    intro:    'Learn the chorus strum pattern of "Sweet Child O\' Mine", then play it through the chorus chords.',
+    intro_es: 'Aprende el patrón de rasgueo del coro de "Sweet Child O\' Mine" y luego tócalo con los acordes del coro.',
+    steps: [
+      {
+        label:    'Practice — Muted strings',
+        label_es: 'Practica — Cuerdas apagadas',
+        text:    'Mute the strings and strum the chorus pattern 8 times in a row without stopping.',
+        text_es: 'Apoya la mano de trastear sobre las cuerdas y rasguea el patrón del coro 8 veces seguidas sin detenerte.',
+        strum: {
+          caption:    'Muted strings · count "1 and 2 and 3 and 4 and" (the + is "and")',
+          caption_es: 'Cuerdas apagadas · cuenta «1 y 2 y 3 y 4 y» (el + es «y»)',
+          pattern: 'D..U..DU',   // 8 eighth notes: D on 1, U on + of 2, D on 4, U on + of 4; . hand moves but misses
+          chords: {
+            A5: { frets: [['A', 0], ['D', 2], ['G', 2]], midi: [45, 52, 57] }
+          },
+          bars: ['A5', 'A5'],
+        },
+      },
+      {
+        label:    'Practice — A5',
+        label_es: 'Practica — A5',
+        text:    'Hold A5 and strum the pattern 8 times in a row with every strum ringing.',
+        text_es: 'Toca A5 y rasguea el patrón 8 veces seguidas con cada rasgueo sonando.',
+        strum: {
+          caption:    'A5 · the pattern 2 times',
+          caption_es: 'A5 · el patrón 2 veces',
+          pattern: 'D..U..DU',
+          chords: {
+            A5: { frets: [['A', 0], ['D', 2], ['G', 2]], midi: [45, 52, 57] }
+          },
+          bars: ['A5', 'A5'],
+        },
+      },
+      {
+        label:    'Practice — A5, C5, D5',
+        label_es: 'Practica — A5, C5, D5',
+        text:    'Play the four chorus bars 4 times through, changing chord on the 1, the pattern never stopping.',
+        text_es: 'Toca los cuatro compases del coro 4 veces completos, cambiando de acorde en el 1, sin detener el patrón.',
+        strum: {
+          caption:    'Chorus · A5 · C5 · D5 · D5 · one bar each',
+          caption_es: 'Coro · A5 · C5 · D5 · D5 · un compás cada uno',
+          pattern: 'D..U..DU',
+          chords: {
+            A5: { frets: [['A', 0], ['D', 2], ['G', 2]], midi: [45, 52, 57] },
+            C5: { frets: [['A', 3], ['D', 5], ['G', 5]], midi: [48, 55, 60] },
+            D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] }
+          },
+          bars: ['A5', 'C5', 'D5', 'D5'],
+          barsPerRow: 4,   // the whole chorus on one row
         },
       },
     ],

@@ -11305,7 +11305,7 @@ function checkFoldedActivity(ctx) {
    are frozen and not read. Modules keep their lists (CLAUDE.md). Pinned
    counts, so a field that stops being read fails. */
 const CAP_2A = 105, CAP_2C = 110;
-const ONE_LINE_2A = 412, ONE_LINE_2C = 38, DRILL_SCREENS = 138;   // 2026-11-14: +2, ca-52's one step text (EN + ES), the strum-pattern check as its own activity
+const ONE_LINE_2A = 420, ONE_LINE_2C = 38, DRILL_SCREENS = 138;   // 2026-11-16: +8, ca-53's intro and three step texts (EN + ES), the chorus strum pattern. 2026-11-14: +2, ca-52's one step text (EN + ES)
 // Each drill's line before Start, and a practice card's own directions line (.pc-dir; Jonathan, 2026-11-10: shorten those too).
 const DRILL_DIRECTION_KEYS = ['drill.intro', 'deck.introOne', 'deck.introTwo', 'nc.intro', 'nc.introCoach', 'nc.introAnswer', 'ncp.intro', 'ncp.introCoach',
   'ncp.introAnswer', 'chc.introFollow', 'chc.introCall', 'pwn.introName', 'pwn.introFret', 'pwn.introBoth',
@@ -14871,7 +14871,7 @@ const REP_COUNT_FIELDS = 339;   // 2026-11-10: every In-Class Activity step is o
    them anyway"): no got-it label, so caStepHtml() passes wholeLine and the dots
    read the count from the whole line. Pinned like REP_COUNT_FIELDS: a step text
    added or removed (or gaining a label again) moves it. */
-const REP_COUNT_LINES = 85;   // 2026-11-14: +1, ca-52's one step (no count in its line: the check's two full rounds tick it, not tap dots)
+const REP_COUNT_LINES = 88;   // 2026-11-16: +3, ca-53's three steps (8, 8 and 4 times). 2026-11-14: +1, ca-52's one step (no count in its line: the check's two full rounds tick it, not tap dots)
 // Tap-dot groups drawn by buildSet() over every module set, EN + ES (2026-11-10). Moves only with a module got-it sentence.
 const MODULE_DOT_GROUPS = 152;
 function checkRepCountParity(sets, ctx) {
