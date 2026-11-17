@@ -160,7 +160,9 @@ and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fi
 - **W12. RELEASED 2026-11-17 (Jonathan: "i think i have opus tokens available to do w12"): Windows, go. Start from
   your own WIP branch `win/w12-2026-11-16-wip` (re-verify what it holds before building on it); Opus agents only; ONE
   review round as written below; park again on a MAJOR. It had been on hold since 2026-11-16 to save the week's
-  usage. W15 stays ON HOLD. The automatic blocks for the "never" rules: fix the two majors, one review, ship or park again.** Branch
+  usage. W15 stays ON HOLD. The automatic blocks for the "never" rules: fix the two majors, one review, ship or park again.**
+  **W12 STARTED on Windows 2026-11-17 08:55 (one Opus builder, branch `win/w12-2026-11-17` from the WIP branch;
+  Windows checks this file hourly until about midnight).** Branch
   `tools/never-blocks` is on GitHub since 2026-11-16 (tip `db8b7b7`, 8 commits on `af1166e`; 14 files, tools and
   CLAUDE.md only; self-test 153 of 153 then). Parked 2026-11-14 after review round 4 found 2 MAJOR: (a) a commit that
   is not HEAD can be pushed to a branch by hash or by tag, past the block; (b) a SECOND reword of a frozen quiz can
