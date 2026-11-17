@@ -882,6 +882,10 @@
     'save.notSavedYet':      { en: 'Not saved yet — reconnect to the internet first, then try again.',
                                es: 'Todavía no se guardó — primero vuelve a conectarte a internet y luego inténtalo otra vez.' },
     'save.signOutAnyway':    { en: 'Sign out anyway', es: 'Cerrar sesión de todos modos' },
+    // The sign-in read of the student's work failed and is being tried again (progressLoadRetryStart, app/save.js):
+    // shown at the top of the screen only while it is retrying; gone when the work loads or the retry stops.
+    'save.notLoaded':        { en: 'Your saved work has not loaded yet — still trying.',
+                               es: 'Tu trabajo guardado todavía no se cargó — se sigue intentando.' },
     // The teacher's Start over / Delete reached this Chromebook (showProgressResetNotice, app/save.js; teacher-remove.js).
     // True for START_OVER_CLEARS = ['lessons'] (app/save.js): change it with that list.
     'reset.startedOver':     { en: 'Your teacher started you over: your lesson steps are empty, and your In-Class Activities, game scores, streak and practice minutes are kept.',

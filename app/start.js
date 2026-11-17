@@ -154,6 +154,9 @@ window.addEventListener('popstate', routeExploreHash);
 /* The access screen (app/boot.js showAccessScreen) checks again when the tab
    comes back, at most once every 30 s: "Check back later" without a timer. */
 document.addEventListener('visibilitychange', () => { if(!document.hidden && accessLocked) accessRecheck(false); });
+/* After a failed sign-in read: the Wi-Fi is back, try the read now (progressLoadRetryOnline, app/save.js; it does
+   nothing unless a retry is running). */
+window.addEventListener('online', progressLoadRetryOnline);
 /* Built songs: read their list again when the tab comes back, at most once every 15 minutes (BS_RETURN_MS, app/builtsongs.js). */
 document.addEventListener('visibilitychange', () => { if(!document.hidden) builtSongsSyncSoon(); });
 
@@ -233,6 +236,9 @@ if(auth) auth.onAuthStateChanged(async user=>{
            app/boot.js). */
         if(accessRefusedAtBoot(user)) showAccessScreen(user);
         else if(accountPaused) showPausedScreen(user); else showApp(user);
+        /* The read above failed: keep trying it while the student changes nothing (app/save.js). Only a student
+           whose app is on screen: the access and paused screens have nothing to load into. */
+        if(progressLoadFailed && appIsOnScreen()) progressLoadRetryStart();
       }
     } finally {
       // finally, not after the branch: a throw in there must not leave the flag
@@ -255,6 +261,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
       return;
     }
     window.__authBootPending = false;
+    progressLoadRetryStop();   // a retry of the last student's read never reaches the next one (app/save.js)
     currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Map(); classActivities = {}; classActivitiesDeletes = new Map(); caStepDone = {}; caStepDeletes = new Map(); exitChecks = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; micSampling = { on: false, max: 0 }; micTakesCount = Infinity; studentPeriod = ''; periodOverride = ''; moduleOpenThrough = 0; hiddenActivityIds = {}; activityForMe = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; activityBoard = {}; activityBoardOn = false; activityClears = {}; retiredActivityIds = {}; optionalActivityIds = {}; activityPins = []; songLibraryIds = {}; classSongIds = {}; progressLoadFailed = false;
     document.body.classList.remove('ca-gated');   // next sign-in recomputes it fresh — don't leave a stale gate showing over the sign-in wall
     if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
