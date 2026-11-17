@@ -8,6 +8,7 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-11-17 — Today's activity: newest number first for earlier days
 
+- **If your saved work does not load when you sign in (bad Wi-Fi), the site now keeps trying** and tells you so at the top of the screen. When it loads, your work appears. Before, you had to reload the page yourself.
 - **In Today's activity, today's cards still come first. Earlier days' cards now come next with the highest number first,** the same order as the Unfinished and Completed lists. For example, today's #23 sits beside yesterday's #22, and #21 goes on the next row. "Since your last visit" uses the same order.
 
 ## 2026-11-17 — Strum Pattern — The Chorus: two steps
