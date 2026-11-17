@@ -1767,15 +1767,18 @@ async function sheetFollowWalk(page, run, events, stats) {
      - at the first frame its first chord is heard, that chord name is fully on screen (under the sticky bars);
      - a new line one line DOWN (not a jump): its first chord name was fully on screen at least 200 ms before it is
        heard (it was the line below the one being played);
-     - 0.7 s after it is heard (the scroll over), the line being played sits at the top: its box (chord names and
-       lyric) 12 px under the sticky bars, within 3 px, or lower only where the scroll box is at its end. Until
-       2026-11-17 the follow only kept the line on screen, about 500 px down at 1366x657, so this is red there;
+     - from the frame it is heard until 0.7 s after (or until 0.4 s before the next line), its chord name does not
+       move on screen (no scroll ON the beat: the dot, lit in the same frame as "This bar", must not then ride up the
+       screen; Jonathan, 2026-11-17, "the highlights are a few ms late": 6 to 9 frames of motion until then);
+     - 0.7 s after it is heard, the line being played sits at the top (12 px under the sticky bars, within 3 px),
+       or lower only where the scroll box is at its end. Before 2026-11-17 the follow only kept the line on screen,
+       about 500 px down at 1366x657;
      - a new line one line down scrolls the sheet exactly once in that window (pcFollowScroll's scrollBy on the
        scroll box), not on every beat; the first new line after the start may take two (the start only brought its
        line on screen);
      - every frame, a lit line (with its lyric) that was on screen stays on screen, except in the last
-       PC_SHEET_JUMP_AHEAD + 50 ms before a jump's first chord is heard (the jump leaves the end of the line being
-       played for the top of the next column then). */
+       PC_SHEET_FOLLOW_AHEAD + 50 ms before the next line's first chord is heard (the next line goes to the top
+       before its beat, and the line ending leaves the screen then; never before the dot is on its last chord). */
   await metrics(1366, 657); await sleep(400);
   const whenId = await run('sheet-follow:when:pick', `(() => { const ids = ${JSON.stringify(ids)}; return ids.find(id => { const a = CLASS_ACTIVITIES.find(x => x.id === id); return a && a.card.sheetColumns !== 1; }) || ids[0] || null; })()`, 10);
   if (whenId) {
@@ -1789,7 +1792,7 @@ async function sheetFollowWalk(page, run, events, stats) {
       if (scrollBehavior() !== 'smooth') return { fatal: 'scrollBehavior() is not smooth in this browser' };
       if (pcState) pcStop();
       const rate = pcRate(root), L = pcLayout(pcActivity(root)), win = pcWindow(L, root.dataset.slow === '1'), lat = snipLatency(), bpb = L.tr.beatsPerBar, toks = sh.model.toks;
-      const jumpAhead = typeof PC_SHEET_JUMP_AHEAD === 'number' ? PC_SHEET_JUMP_AHEAD : 0;
+      const leaveAhead = typeof PC_SHEET_FOLLOW_AHEAD === 'number' ? PC_SHEET_FOLLOW_AHEAD : 0;
       const heard = new Array(toks.length).fill(null);
       L.sections.forEach((S, si) => { for (let rep = 0; rep < S.reps; rep++) S.notes.forEach((n, ni) => { const i = sh.map.tok[si][rep][ni]; if (i == null || heard[i] != null) return;
         heard[i] = snipTimeAtBars(win, S.fromBar - L.firstBar + rep * S.bars + (ni ? S.beatEnds[ni - 1] : 0) / bpb) + lat * rate; }); });
@@ -1815,26 +1818,32 @@ async function sheetFollowWalk(page, run, events, stats) {
           fake.currentTime = Math.max(snipTimeAtBars(win, 0), heard[i] - 1.0 * rate);
           for (let k = 0; k < 4; k++) await frame();
           window.scrollBehavior = sb; jumping = false; scrolls = 0;
-          const seen = new Set(); let onFrom = null, late = null, judged = false;
+          const seen = new Set(); let onFrom = null, late = null, judged = false, y0 = null, moved = 0;
           const settle = heard[i] + 0.7 * rate, nf = nextFirst(i), quiet = nf == null || heard[nf] > settle + 0.05 * rate;
+          const stillTo = Math.min(settle, nf == null ? Infinity : heard[nf] - 0.4 * rate);
           while (true) {
             await frame(); frames++;
             if (pcState !== st) return { fatal: 'the player stopped' };
             const ct = fake.currentTime, v = view(), now = performance.now();
             const litIdx = st.si >= 0 ? sh.map.tok[st.si][st.rep][st.seq - L.sections[st.si].seqOff] : -1, line = paper.querySelector('.pc-sheet-line');
-            if (line && litIdx >= 0) { const on = inView(line.getBoundingClientRect(), v), toGo = (heard[i] - ct) / rate * 1000; if (on) seen.add(litIdx); else if (seen.has(litIdx)) { if (!(isJump && toGo >= 0 && toGo <= jumpAhead * 1000 + 50)) bad.push('chord ' + (litIdx + 1) + ' (' + toks[litIdx].name + ') is being played and its line was scrolled off screen ' + Math.round(toGo) + ' ms before chord ' + (i + 1) + ' is heard'); seen.delete(litIdx); } }
+            if (line && litIdx >= 0) { const on = inView(line.getBoundingClientRect(), v), toGo = (heard[i] - ct) / rate * 1000; if (on) seen.add(litIdx); else if (seen.has(litIdx)) { if (!(toGo >= 0 && toGo <= leaveAhead * 1000 + 50)) bad.push('chord ' + (litIdx + 1) + ' (' + toks[litIdx].name + ') is being played and its line was scrolled off screen ' + Math.round(toGo) + ' ms before chord ' + (i + 1) + ' is heard'); seen.delete(litIdx); } }
             if (ct < heard[i]) { if (inView(hits[i].getBoundingClientRect(), v)) { if (onFrom == null) onFrom = now; } else onFrom = null; continue; }
             if (!judged) {
               judged = true; checked++; const hReal = now - (ct - heard[i]) / rate * 1000;
               if (!isJump && (onFrom == null || hReal - onFrom < 200)) bad.push('chord ' + (i + 1) + ' (' + toks[i].name + '), the first on a new line one line down, was on screen only ' + (onFrom == null ? 'from after' : Math.round(hReal - onFrom) + ' ms before') + ' it is heard; want at least 200 ms (it is the line below the one being played)');
               late = inView(hits[i].getBoundingClientRect(), v) ? 0 : hReal;
+              y0 = hits[i].getBoundingClientRect().top;
             }
+            if (!late && y0 != null && ct < stillTo) moved = Math.max(moved, Math.abs(hits[i].getBoundingClientRect().top - y0));
             if (late) { if (inView(hits[i].getBoundingClientRect(), v)) { bad.push('chord ' + (i + 1) + ' (' + toks[i].name + '), the first on its line' + (isJump ? ' (a jump up to the next column)' : '') + ', is not on screen when it is heard: it arrives ' + Math.round(now - late) + ' ms after'); late = 0; }
               else if (now - late > 1500) { bad.push('chord ' + (i + 1) + ' (' + toks[i].name + ') never came on screen'); break; } }
             if (ct >= settle) {
+              if (moved > 0.5) bad.push('chord ' + (i + 1) + ' (' + toks[i].name + ')' + (isJump ? ', a jump up to the next column' : '') + ': its chord name moved ' + Math.round(moved) + ' px on screen after it was heard (the sheet scrolled on the beat, so the dot lands after "This bar" lights)');
               if (quiet && line) {
+                // The line being played at the top, 12 px under the sticky bars, or lower only where the scroll box is at its end.
+                const want = 12;
                 const r = line.getBoundingClientRect(), off = r.top - v.top, end = box.scrollTop >= box.scrollHeight - box.clientHeight - 1;
-                if (end ? off < 9 : Math.abs(off - 12) > 3) bad.push('chord ' + (i + 1) + ' (' + toks[i].name + ')' + (isJump ? ', a jump up to the next column' : '') + ': 0.7 s after it is heard its line is ' + Math.round(off) + ' px under the sticky bars; want 12 (THE SHEET\\'S TOP' + (end ? ', or lower at the end of the scroll' : '') + ')');
+                if (end ? off < want - 3 : Math.abs(off - want) > 3) bad.push('chord ' + (i + 1) + ' (' + toks[i].name + ')' + (isJump ? ', a jump up to the next column' : '') + ': 0.7 s after it is heard its line is ' + Math.round(off) + ' px under the sticky bars; want ' + Math.round(want) + (end ? ', or lower at the end of the scroll' : ''));
                 else tops++;
               }
               if (!isJump && !isFirst && scrolls !== 1) bad.push('chord ' + (i + 1) + ' (' + toks[i].name + '), a new line one line down: the sheet scrolled ' + scrolls + ' times from 1 s before it is heard to 0.7 s after; want once');

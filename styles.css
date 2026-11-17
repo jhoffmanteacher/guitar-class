@@ -3756,6 +3756,9 @@ span.tab-count-held{margin-left:4px}
 .pc-sheet-pill{position:absolute;border-radius:5px;background:rgba(24,95,165,0.16);box-shadow:0 0 0 2px #185fa5;pointer-events:none}
 .pc-sheet-dot{position:absolute;width:13px;height:13px;margin:-6.5px 0 0 -17px;border-radius:50%;border:2px solid #185fa5;background:#fff;pointer-events:none}
 .pc-sheet-dot.hit{animation:pc-sheet-hit var(--pc-hit,0.2s) steps(1,end) forwards}
+/* The fill is the beat, not motion: the reduce-motion rule (*{animation-duration:0.01ms}) cut it to one frame,
+   so with reduce motion the dot never showed a beat (2026-11-17: filled 1 frame, against 13 at Normal on ca-45). */
+.pc-sheet-dot.hit{animation-duration:var(--pc-hit,0.2s) !important}
 @keyframes pc-sheet-hit{0%{background:#185fa5}100%{background:#fff}}
 .pc-sheet-ghost{position:absolute;width:9px;height:9px;margin:-4.5px 0 0 -14px;border-radius:50%;border:1.5px solid rgba(24,95,165,0.45);pointer-events:none}
 .pc-sheet-paper:not(:has(canvas)) :is(.pc-sheet-pill,.pc-sheet-dot,.pc-sheet-ghost){display:none}
