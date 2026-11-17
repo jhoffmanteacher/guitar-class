@@ -105,6 +105,73 @@ The Windows session deletes this line once its replay matches the README.
 whatever you haven't done to the mac". He says "do the handed-over work in WORKFLOW").** In this order; each ships
 before the next; agents Opus or Fable by the need (Opus at xhigh is allowed where a finding is in dispute). Branches
 named `win/…` are on GitHub (`git fetch`); cherry-pick from them, do not merge them.
+**MORE FOR WINDOWS, 3 (the Mac, 2026-11-16 20:30; Jonathan: "send the due on a date, small to windows along with
+any of the 1-5 that you want to").** From the check of the 2026-11-13 improvements list against what was built.
+Unattended, Opus agents, each in its own worktree, as in block 2 below; after W6 to W10. Fetch and rebase before every
+push. **The Mac is building three of the five right now: stay out of `app/save.js`, `app/boot.js`, `app/start.js`,
+`tools/save-loop.mjs`, `tools/shared-chromebook-loop.mjs` (the failed load at sign-in, `fix/load-retry`),
+`app/cards.js`, `app/snippets.js`, `tools/playalong-loop.mjs` (Play Along highlight timing, `feat/highlight-timing`),
+and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fix/take-no-name`).**
+- **W11. Reading text 15px → 16px, lessons first (Jonathan's P6, 2026-11-13: yes). Fast.** It was queued behind a
+  design-values tidy that never started; it does not need it. Lesson step text is `0.9375rem` at `.step-detail`
+  (`styles.css`, about line 448) and activity step text is 15px at `.ca-step-detail` (about line 3116): both to 16px,
+  plus the hint text that reads with them. Lessons first, in its own commit; activities second. An activity direction
+  must still be ONE rendered line at 1366×657 in both languages (1cs): measure every one before and after and report
+  the count that wrap; if any wrap, ship lessons only and list them here for Jonathan. Screenshots at 1366×657 (a
+  lesson step open, a long step, a practice card, an activity board, in Spanish too) and at 2560×1300; the rail and the
+  set band must not move (`.claude/rules/rail-layout.md`: measure). CHANGELOG entry. GitHub's walk is its smoke.
+- **W12. The automatic blocks for the "never" rules: fix the two majors, one review, ship or park again.** Branch
+  `tools/never-blocks` is on GitHub since 2026-11-16 (tip `db8b7b7`, 8 commits on `af1166e`; 14 files, tools and
+  CLAUDE.md only; self-test 153 of 153 then). Parked 2026-11-14 after review round 4 found 2 MAJOR: (a) a commit that
+  is not HEAD can be pushed to a branch by hash or by tag, past the block; (b) a SECOND reword of a frozen quiz can
+  orphan the picks made under the first (`response.renamedChoices` chains). The reviewer's fixes were small but its
+  scratch folder is gone: build them again. Rebase onto main first (`tools/checks.mjs`, `tools/rule-zero-proof.mjs`,
+  `.github/workflows/checks.yml` and CLAUDE.md have all moved; its `RULES-PASTE.md` line names the rules at `af1166e`
+  and needs today's `RULES_FILE_SHA256`). Prove each fix by doing the forbidden thing in a scratch clone and pasting
+  the refusal. Then ONE fresh `site-reviewer` round on the two fixes and the rebase. No BLOCKER or MAJOR: ship
+  (`Review: Reviewed`), and only then shorten CLAUDE.md's "Never" list as the branch does. A MAJOR again: leave it
+  parked, write the finding here, go on (Jonathan's instruction of 2026-11-14 stands: "a major again: park it").
+- **W13. Close the unused class-rank rule (due about 2026-11-20; it needs Jonathan's paste, so PREPARE, do not
+  push ahead of him).** Nothing has read or written `rankBoard/{tag}` since 2026-11-13 (`practice-minutes.js:63`,
+  `:120`). On a branch `win/close-rankboard`: remove the `match /rankBoard/{tag}` block from `firestore.rules`
+  (about line 639; `weekBoard` stays), fix the comments that describe it (rules lines about 53, 298, 546;
+  `practice-minutes.js`, `teacher-students.js:139`, `teacher-backup.js:162`), update `tools/pm-rules-test.mjs` (its
+  rankBoard cases become "denied"), re-pin `RULES_FILE_SHA256` (1dt), and run `pm-rules-test.mjs` and
+  `rules-core-test.mjs --breaks` on the emulator. `firestore.rules` is danger-zone: `site-reviewer-deep`, failing
+  scenario first (a page cached from before 2026-11-13 that still writes the board: what does the student see when
+  the write is refused?). Tighter rules may be published BEFORE the code is pushed, so when the review is clean: push
+  the branch, write here "W13 ready: paste <file>", and stop. Jonathan pastes, then the branch goes to main. The old
+  `rankBoard` documents are left alone (a console delete is his to name).
+- **W15. Tidy the design values (C13 of the 2026-11-13 list; Jonathan, 2026-11-16: "add it to windows list"). AFTER
+  W11 is on main (same lines of `styles.css`).** Nothing may change on screen. The stylesheet holds 59 distinct text
+  sizes in 693 declarations, 50 spacing numbers, 24 layer numbers (the research agent's counts, 2026-11-13: count them
+  again first and report yours). In this order, each its own commit and its own proof:
+  1. Text sizes: about ten named values (`--fs-*`) equal to today's most-used sizes exactly; every literal replaced by
+     its name; a near-twin (a difference under 0.1px) folded into its partner and listed. Any fold that moves a pixel
+     in the pictures is undone and listed for Jonathan instead.
+  2. Layers: about 8 named values (`--z-band`, `--z-drawer`, `--z-overlay`, `--z-toast`, …) set to today's numbers;
+     the order of every pair of layers must be unchanged (the mobile drawer is 60; a new overlay there is ≤55 or ≥90).
+  3. Spacing: names at today's values ONLY. No snapping (5→4, 7→8 is visible: summer work).
+  4. A `checks.mjs` ratchet that refuses a new one-off text size or layer number (it ships with the feature it guards:
+     break-it proof, paste the red line). Colours are NOT part of this job.
+  Keep every `/ var(--site-fill,1)` unit as it is (1df); restyle `.tab` in both stylesheets or neither
+  (`.claude/rules/journey-pages.md`); read `.claude/rules/rail-layout.md` first. Proof: `node tools/golden.mjs --out
+  <dir> --shots` on the commit before and on the tip, `--compare` identical, and read its "not covered" list; a
+  screen golden never reaches gets a screenshot pair by hand at 1366×657. Skill `site-sweep` (a builder per step at
+  most, Opus at high, own worktrees, one browser run at a time). **Review: an OPUS reviewer, not the Fable deep one
+  (Jonathan, 2026-11-16: "hold off on fable deep review and have an opus reviewer do it"):** `site-reviewer` with
+  `model: 'opus'`, effort high, a fresh one per fix round, told to find a pixel that moved and a value the ratchet
+  lets through. Label `Review: Reviewed (site-reviewer on Opus, N rounds)`. No CHANGELOG entry (nothing a student
+  sees). This is groundwork for a visual pass Jonathan has NOT asked for yet: build no new look.
+- **W14. NOT YET, dates only (do not start early; leave the line here until done):**
+  - about **2026-11-21**: the accessibility scan's ratchet. Read a week of GitHub's "a11y scan" job results; only if
+    every run shows 0 new signatures, switch `--a11y-ratchet` on in `browser.yml`, with one `site-reviewer` round on the
+    switch-on (CLAUDE.md, "Two guards that only report"). Job logs need Jonathan's sign-in: if the public result
+    cannot show the count, write that here.
+  - on or after **2026-12-01**: remove the 2026-11-16 split bridge (`todo.md`, "Remove the 2026-11-16 split bridge":
+    5 `DELIBERATE BRIDGE` comments, one commit, `tools/old-page-loop.mjs` and `slow-load.mjs` after).
+  - **never without Jonathan present:** splitting `coach-core.js`. It is 2,554 lines on 2026-11-16, 46 under the
+    2,600 limit that blocks a push: add nothing to it, and tell him if a job would.
 **MORE FOR WINDOWS, 2 (the Mac, 2026-11-16 16:30; Jonathan: "assign tasks to windows via workflow.md for it to do
 using opus agents unattended").** After the `ca-45` full-screen bug and the smoke owed on rule AD. Unattended: Opus
 agents at high or xhigh, each in its own worktree; no question to Jonathan unless a rule says ask (then write it here
