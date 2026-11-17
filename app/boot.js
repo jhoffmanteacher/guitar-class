@@ -1109,7 +1109,7 @@ const IS_LOCALHOST = ['localhost','127.0.0.1','[::1]'].includes(location.hostnam
    appeared (2026-09-18). Both shapes work now:
      …/index.html?snipcal=1#class-activities
      …/index.html#class-activities?snipcal=1
-   Captured once at load into window.__snipCal / __snipLat, because the app
+   Captured once at load into window.__snipCal / __snipLat / __pcLead, because the app
    rewrites the hash as the student navigates and a param living there would
    otherwise vanish mid-session. */
 function snipUrlParam(name){
@@ -1133,6 +1133,15 @@ if(snipUrlParam('snipcal') === '1'){
   if(raw !== null && raw.trim() !== ''){
     const ms = Number(raw);
     if(isFinite(ms) && ms >= 0) window.__snipLat = ms / 1000;
+  }
+  /* &lead=<ms>: how long before the HEARD beat a practice card's highlight
+     appears (PC_LEAD in app/cards.js, THE LEAD), so Jonathan can try values
+     on a classroom Chromebook with no code change. Same rules as &lat: only
+     with snipcal=1, absent or blank = the constant, never 0 by accident. */
+  const rawLead = snipUrlParam('lead');
+  if(rawLead !== null && rawLead.trim() !== ''){
+    const ms = Number(rawLead);
+    if(isFinite(ms) && ms >= 0 && ms <= 1000) window.__pcLead = ms / 1000;
   }
 }
 function devBypass(){

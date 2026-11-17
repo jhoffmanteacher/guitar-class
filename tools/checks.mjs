@@ -10028,6 +10028,7 @@ function checkEnglishTermsInSpanish(I18N) {
      console preview calls it with preview:true, and
      every silencer that stops a snippet also stops a card (pcStop).
    ════════════════════════════════════════════════════════════════════ */
+const PC_LEAD_PIN = 0.06;   // 2026-11-16: a PLACEHOLDER (60 ms before the heard beat) until Jonathan picks the number by eye
 function checkPracticeCards(ctx) {
   head('1bf. Practice cards');
   let bad = 0, cards = 0;
@@ -10201,8 +10202,24 @@ function checkPracticeCards(ctx) {
     const b = body(appSrc, fn);
     if (b === null || !/\bpcStop\(\)/.test(b)) flag(`app.js: ${fn}() must call pcStop() beside snipStop() — a practice card's song would keep playing under other sound`);
   }
+  /* THE LEAD (app/cards.js, 2026-11-16): every highlight PC_LEAD before the HEARD beat. Pinned by running the page's
+     own functions: the default with no ?snipcal=1&lead= override, the cursor's shift from the decoder at two rates,
+     and the sheet dot still filled when the beat is heard at every tempo from 50 to 200 BPM. A new number is
+     Jonathan's (he picks it by eye with the override): re-pin PC_LEAD_PIN and LEAD_PINS in tools/playalong-loop.mjs. */
+  let leadSaid = '';
+  if (ctx) {
+    try {
+      const L = vm.runInContext(`(() => { const lat = snipLatency(), r = rate => pcLeadShift({ dataset: { rate: String(rate) } });
+        let hollow = 0; for (let bpm = 50; bpm <= 200; bpm += 5) if (!(pcSheetSolidSec(60 / bpm) > pcLead())) hollow++;
+        return { lead: pcLead(), override: typeof window.__pcLead, lat, s1: r(1), s08: r(0.8), hollow }; })()`, ctx);
+      if (L.lead !== PC_LEAD_PIN || L.override !== 'undefined') flag(`app/cards.js: pcLead() reads ${L.lead} s (window.__pcLead is ${L.override}); pinned ${PC_LEAD_PIN} s with no URL override — PC_LEAD is Jonathan's number (THE LEAD)`);
+      if (Math.abs(L.s1 - (PC_LEAD_PIN - L.lat)) > 1e-9 || Math.abs(L.s08 - (PC_LEAD_PIN - L.lat) * 0.8) > 1e-9) flag(`app/cards.js: pcLeadShift() is ${L.s1} s at rate 1 and ${L.s08} at 0.8; THE LEAD wants (PC_LEAD - snipLatency()) x rate = ${(PC_LEAD_PIN - L.lat).toFixed(3)} and ${((PC_LEAD_PIN - L.lat) * 0.8).toFixed(3)}`);
+      if (L.hollow) flag(`app/cards.js: the lyric sheet's dot is hollow again before its beat is heard at ${L.hollow} of 31 tempos from 50 to 200 BPM (pcSheetSolidSec must outlast pcLead())`);
+      leadSaid = `; every highlight ${L.lead * 1000} ms before the heard beat (the cursor reads ${((L.s1) * 1000).toFixed(0)} ms from the decoder at rate 1), the sheet dot filled through it at 31 of 31 tempos`;
+    } catch (e) { flag('1bf could not run THE LEAD (pcLead / pcLeadShift / pcSheetSolidSec): ' + e.message); }
+  }
   if (cards === 0) { flag('1bf found no practice card — it cannot see what it is supposed to guard'); return; }
-  if (bad === 0) ok(`${cards} practice card${cards === 1 ? '' : 's'} — sections add up to their bars and land inside the track, one Level up each, both renderers and every silencer wired`);
+  if (bad === 0) ok(`${cards} practice card${cards === 1 ? '' : 's'} — sections add up to their bars and land inside the track, one Level up each, both renderers and every silencer wired${leadSaid}`);
 }
 
 /* 1cq. TODAY'S ACTIVITIES = TODAY'S AND YESTERDAY'S CARDS (Jonathan,

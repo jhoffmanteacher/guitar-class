@@ -11,6 +11,9 @@
      node tools/playalong-loop.mjs --json <file>   every walk and every issue
      node tools/playalong-loop.mjs --root <dir>    test another copy of the site (a scratch copy with a planted fault)
      node tools/playalong-loop.mjs --step <ms>     the song walks' step in file time (default 20)
+     node tools/playalong-loop.mjs --leads <file>  ALSO measure THE LEAD in every song walk (see "THE LEAD, measured"):
+                                                   a table per kind of highlight and speed, the unsteady ones, and
+                                                   every group in <file> (JSON); the verdict of the run is unchanged
      node tools/playalong-loop.mjs --pins          print the clock pins of this site (see CLOCK PINS)
      node tools/playalong-loop.mjs --built         ALSO every made-up built song and a built copy of ca-51 (see BUILT
                                                    SONGS; about a minute more); their own summary lines, after the others
@@ -77,11 +80,14 @@
          parentheses; a row that begins inside a rest repeats the rest word.
      R8  Any other section shows one column per note (a rest is a column too) and the cursor is on the note that
          is sounding.
-     R9  The cursor may run ahead of the sound by the page's own leads, in real seconds (so multiplied by the
-         playbackRate in file time): PC_TAB_LEAD for a tab, PC_SHEET_LEAD for a lyric sheet, and PC_ROW_LEAD
-         more when the next place is on another row of the tab. The values are read from the page, never copied
-         here. The tool's own limit on them: a lead may not reach one COUNT (a beat; in 6/8 an eighth) of the fastest song it
-         applies to, at record tempo (LEAD RULE below). At a whole count the cursor is simply one cell ahead of the music.
+     R9  THE LEAD (2026-11-16): every highlight (tab, chord grid, row change, lyric sheet) appears PC_LEAD real seconds
+         before its beat is HEARD, the decoder's position plus snipLatency(); so the cursor reads the file
+         (PC_LEAD - snipLatency()) x the playbackRate from the decoder, behind it when the lead is the shorter. It never
+         reads back past where the pass began (the start, or the lap's first bar): there it shows that place. The
+         values are read from the page, never copied here. The tool's own limit: the lead, and its distance from the
+         decoder, may not reach one COUNT (a beat; in 6/8 an eighth) of the fastest song, at record tempo (LEAD RULE
+         below). At a whole count the cursor is simply one cell ahead of the music. --leads MEASURES it (THE LEAD,
+         measured, below).
      R10 A whole-song card stops at the end of its last section. Any other card goes back to the first bar of
          the section it was started from, and carries on.
      R11 Before the song comes in the page counts one bar: as many clicks as the bar has counts (4, 3, or 6 in
@@ -101,8 +107,8 @@
      R12 On a lyric sheet the mark is on the n-th chord name of the PDF, n counting the chord CHANGES of the
          chart from the top of the song, laps included (a rest is not a change; a section listed in
          card.sheetNamedAgain counts its first chord again on every lap). "This bar" lights the cell of the
-         beat that is sounding and shows each chord that starts in the bar at its eighth. In the song's last
-         PC_SHEET_LEAD, when the lead looks past the last bar, the sheet should stay on the last bar (KNOWN
+         beat that is sounding and shows each chord that starts in the bar at its eighth. When the cursor reads
+         ahead of the decoder (R9), in the song's last stretch where the lead looks past the last bar, the sheet should stay on the last bar (KNOWN
          sheetPastEnd: the page steps "This bar" into the bar after it). Where the lead lands on a lap or section
          start, "This bar" should show the bar it lands in (KNOWN sheetLapBoundary: for one step it shows nothing).
      R13 The other versions of a card: a recording version replaces the track and the card fields it carries; a
@@ -168,10 +174,12 @@
    and so does a listed fault that shows one place more or one place fewer, or in a walk the entry does not list; a
    full run that no longer sees an entry fails too (so a fixed fault cannot leave its entry behind). Two entries
    apply to every card and are matched by the fault's exact FORM instead of a list of places: sheetPastEnd (exactly
-   the first cell lit, no chord names and the mark on the last chord name, only in the song's last PC_SHEET_LEAD) and
-   sheetLapBoundary (no cell lit and no chord names, the mark on the right chord name, for one step only, only where
-   the file position plus PC_SHEET_LEAD is within one step of a lap or section start); a sheet that is wrong in any
-   other way fails.
+   the first cell lit, no chord names and the mark on the last chord name, only in the song's last stretch the lead
+   reads past) and sheetLapBoundary (no cell lit and no chord names, the mark on the right chord name, for one step
+   only, only where the file position plus the cursor's lead is within one step of a lap or section start); a sheet
+   that is wrong in any other way fails. sheetPastEnd can only happen while the cursor reads AHEAD of the decoder
+   (PC_LEAD longer than snipLatency()); with a shorter lead a full run does not report it stale. sheetLapBoundary
+   still shows with the cursor 20 ms behind (1 step in a full run, 2026-11-16).
    FIXED 2026-11-12: the count-in tempo (KNOWN countInTempo until then). pcCountIn clicked at the window's AVERAGE
    tempo (st.win.bar), not at the tempo of the bar the song comes in on: 356 count-ins of a full run were off the
    bar's own tempo by more than 1.5 ms a click, the worst Madrecita Querida's Ending, 16.9% too fast. It now reads
@@ -217,6 +225,15 @@
    barNextBeat / barBeatTime, the data-click-bars / data-click-anchor lists; its tabs are static text with no
    cursor) and the step snippets (snipState in app/snippets.js). Both could reuse the fake world below.
 
+   THE LEAD, measured (--leads, 2026-11-16). In every song walk, each time a NEW place lights (the frame before it in
+   the same file and the same pass), its beat's start in the file (this tool's own clock and chart) minus the file
+   time of the paint, divided by the rate, is how long before the decoder it lit; plus the page's snipLatency(), how
+   long before the beat is HEARD. A 20 ms step only brackets each paint; the brackets of every paint of one card,
+   view, speed and kind of highlight (tab note or chord-grid beat, same row or new row; sheet beat) are intersected,
+   which pins a steady lead to a few ms and comes out EMPTY when the lead is not the same at every paint (listed as
+   unsteady). For a lyric sheet it also reads how long the dot stays filled (--pc-hit) against the heard lead. It
+   measures the page against the beat map: whether the beat map matches the record is tools/beat-audit.py's.
+
    CLOCK PINS. A track's clock (anchor, barTimes, the tempos, the count) is measured from the record and nothing
    in the repo can re-derive it. The tool keeps a fingerprint of each one as last confirmed by ear. A clock that
    no longer matches its pin fails the run with the track's name: re-measure (tools/beat-map.py), listen, then
@@ -244,6 +261,14 @@ const FINE_MS = 5;
 const STALL_S = Number(opt('--stall')) > 0 ? Number(opt('--stall')) : 120;
 const PINS_ONLY = args.includes('--pins');
 const SHOTS = opt('--shots') ? resolve(opt('--shots')) : null;
+/* --leads <file>: THE LEAD, measured (see the header). */
+const LEADS = opt('--leads') ? resolve(opt('--leads')) : null;
+/* --beat-shots <dir>: a PNG of each card (as it opens, its own speed) at 1366x657 with the music 100 ms before, on, and
+   150 ms after the HEARD downbeat of the card's third bar (CLAUDE.md step 4: before, during and after a highlight). The
+   page's own pcFrame paints it, stepped in 20 ms frames up to that moment on a stand-in element; nothing is judged. A
+   lyric sheet's dot fill is a CSS animation in real time, so a shot shows it filled whenever it was flashed in the last
+   few real ms: how long it stays filled is --leads' number, not the shot's. */
+const BEAT_SHOTS = opt('--beat-shots') ? resolve(opt('--beat-shots')) : null;
 /* BUILT SONGS (see the header): --built, or any 'sb-' id in --only. */
 const BUILT = args.includes('--built') || !!(ONLY && ONLY.some(id => id.startsWith('sb-')));
 const CA51_BUILT_ID = 'sb-ca51built';
@@ -301,40 +326,31 @@ const SETTLED_RHYTHMS = [
    printed with the leads the page declares, never a number typed here. Add an entry only for a fault Jonathan has
    been told about. */
 const KNOWN = [
-  { card: 'ca-35', section: 'Solo', kinds: ['back', 'neverLit'], since: '2026-11-11',
-    why: (C, x) => `PC_ROW_LEAD (${C.rowLead} s) is longer than the quick notes of the Las Mañanitas solo (the shortest is ${x.shortest.toFixed(3)} s at record tempo). At a line change the cursor shows the SECOND note of the new line first and then steps back to the first (Normal speed: notes 17 and 66, both the first note of a tab row), and the last note of a line (note 65) is never lit in a 20 ms walk at Slower, Slow and Normal.`,
-    expect: {
-      /* Every walk that shows it, as seen on 2026-11-12 (the song walks, 20 ms steps). Notes count from 1 within the Solo;
-         its rows (card.sections rows: 9, 7, 8, ...) start at notes 1, 10, 17, 25, 29, 35, 40, 46, 50, 56, 61, 66, 74, 84.
-         Re-recorded 2026-11-12 after the count-in fix: the count-in now lasts the bar's own length, so the song walks'
-         20 ms steps fall at other points of the music and the step-back is seen at the row start note 17 instead of
-         note 1 (the same fault at another line start). */
-      'power chords, bass notes (as it opens) · song · slower': { neverLit: ['note 65'] },
-      'power chords, bass notes (as it opens) · song · slow': { neverLit: ['note 65'] },
-      'power chords, bass notes (as it opens) · song · normal': { back: ['note 17', 'note 66'], neverLit: ['note 65'] },
-      'full chords, bass notes · song · slower': { neverLit: ['note 65'] },
-      'full chords, bass notes · song · normal': { back: ['note 17', 'note 66'], neverLit: ['note 65'] },
-      'power chords, strum only · song · slower': { neverLit: ['note 65'] },
-      'power chords, strum only · song · normal': { back: ['note 17', 'note 66'], neverLit: ['note 65'] },
-    } },
-  /* A lyric sheet's "This bar" in the song's last PC_SHEET_LEAD: the lead looks past the last bar, and the strip
+  /* FIXED 2026-11-16 (THE LEAD): ca-35 Solo, 'back' and 'neverLit', listed 2026-11-11. PC_ROW_LEAD (0.15 s more at a
+     line change) was longer than the quick notes of the Las Mañanitas solo, so at a line change the cursor showed the
+     second note of the new line first and stepped back, and note 65 was never lit. The row's extra lead is gone. */
+  /* A lyric sheet's "This bar" in the song's last moments when the cursor reads AHEAD of the decoder (PC_LEAD longer
+     than snipLatency(); until 2026-11-16 the sheet read 0.175 s ahead): the lead looks past the last bar, and the strip
      steps into a bar that does not exist (the first cell lit, no chord names) while the mark stays on the last chord name of
-     the sheet. Matched by that exact state, and only in that last stretch; anything else there fails. */
-  { card: '*', kinds: ['sheetPastEnd'], since: '2026-11-11',
-    why: (C, x) => `On a lyric sheet, for the last ${C.sheetLead} s (PC_SHEET_LEAD) of the song (before it stops or laps), "This bar" steps one bar past the end: it lights the bar's first cell and shows no chord names, a bar that does not exist (${x.n} steps of this run, in ${x.walks} walks, every one exactly that state).` },
+     the sheet. Matched by that exact state, and only in that last stretch; anything else there fails. `ahead`: the
+     entry is only expected (and only reported stale) when the cursor reads ahead of the decoder. */
+  { card: '*', kinds: ['sheetPastEnd'], since: '2026-11-11', ahead: true,
+    why: (C, x) => `On a lyric sheet, for the last ${+(C.lead - C.latency).toFixed(3)} s (PC_LEAD - snipLatency()) of the song (before it stops or laps), "This bar" steps one bar past the end: it lights the bar's first cell and shows no chord names, a bar that does not exist (${x.n} steps of this run, in ${x.walks} walks, every one exactly that state).` },
   /* A lyric sheet's "This bar" where the lead lands exactly on a lap or section start, mid-song: pcSheetStrip reads the
      bar with a different rounding margin from pcLocate, so for one step it picks the bar after the last of the lap
      (none exists: no chord names) and a cell before the first (none lit), while the chord mark is right. The same strip
      code as sheetPastEnd. Matched by that exact state, for ONE step, and only where the file position plus
-     PC_SHEET_LEAD is within one step of a lap or section start; a blank strip anywhere else, or longer, fails. */
+     the cursor's lead (PC_LEAD - snipLatency()) is within one step of a lap or section start; a blank strip anywhere else,
+     or longer, fails. */
   { card: '*', kinds: ['sheetLapBoundary'], since: '2026-11-12',
-    why: (C, x) => `On a lyric sheet, where the music is ${C.sheetLead} s (PC_SHEET_LEAD) before a repeat or a new section, the "This bar" strip blinks empty for one frame (no cell lit, no chord names; the chord mark on the sheet stays right). The same strip code as the past-the-end fault above (${x.n} steps of this run, in ${x.walks} walks, every one a single step exactly in that state).` },
+    why: (C, x) => `On a lyric sheet, where the cursor's read point (the decoder ${C.lead - C.latency < 0 ? 'less' : 'plus'} ${Math.abs(+(C.lead - C.latency).toFixed(3))} s, PC_LEAD - snipLatency()) lands on a repeat or a new section, the "This bar" strip blinks empty for one frame (no cell lit, no chord names; the chord mark on the sheet stays right). The same strip code as the past-the-end fault above (${x.n} steps of this run, in ${x.walks} walks, every one a single step exactly in that state).` },
 ];
 
-/* LEAD AND LATENCY PINS: the three leads and the click latency, as last confirmed by ear (Jonathan tuned the sheet's
-   lead by ear on 2026-10-19). The page's own values are what the walks use; a value that no longer matches its pin
-   fails the run until someone has listened to the new one and changed the pin here. */
-const LEAD_PINS = { PC_TAB_LEAD: 0, PC_ROW_LEAD: 0.15, PC_SHEET_LEAD: 0.175, snipLatency: 0.08 };
+/* LEAD AND LATENCY PINS: the one lead (PC_LEAD, before the HEARD beat; THE LEAD in app/cards.js) and the click
+   latency. Until 2026-11-16 there were three leads (tab 0, row +0.15, sheet 0.175 s ahead of the decoder). The page's
+   own values are what the walks use; a value that no longer matches its pin fails the run until someone has looked at
+   the new one on a card and changed the pin here. */
+const LEAD_PINS = { PC_LEAD: 0.06, snipLatency: 0.08 };   // PC_LEAD 0.06: a PLACEHOLDER (2026-11-16) until Jonathan picks the number by eye
 /* R15: how far before the end of a looped section (bars) a lead that looks past it is held (pcLoopClamp). */
 const LOOP_CLAMP = 1e-4;
 
@@ -640,7 +656,7 @@ const PAGE_SRC = String.raw`(() => {
   window.__pl = {
     V: V,
     consts: function(){
-      return { rowLead: PC_ROW_LEAD, tabLead: PC_TAB_LEAD, sheetLead: PC_SHEET_LEAD, slowestRate: SLOWEST_RATE, latency: snipLatency(),
+      return { lead: typeof pcLead === 'function' ? pcLead() : null, slowestRate: SLOWEST_RATE, latency: snipLatency(),
         oneFileRates: typeof PC_ONE_FILE_RATES !== 'undefined' ? PC_ONE_FILE_RATES.slice() : null,
         tracks: JSON.parse(JSON.stringify(SNIPPET_TRACKS)), cards: JSON.parse(JSON.stringify((window.CLASS_ACTIVITIES || []).filter(function(a){ return a.view === 'card' && a.card; }))) };
     },
@@ -696,6 +712,30 @@ const PAGE_SRC = String.raw`(() => {
       }
       showPage(root, was < 0 ? 0 : was);
       return { sheet: false, pages: out, countsOn: !!(root.querySelector('.pc-tab') && root.querySelector('.pc-tab').classList.contains('counts-on')) };
+    },
+    /* --beat-shots: pose the open card with the music ms real ms from the heard downbeat, bars bars into the card. */
+    pose: function(bars, ms){
+      const root = theRoot();
+      if (!root) return { fatal: 'no open card' };
+      if (pcState) pcStop();
+      root.querySelectorAll('.beat-now').forEach(function(e){ e.classList.remove('beat-now'); });
+      const a = pcActivity(root), L = pcLayout(a), rate = pcRate(root);
+      const fake = { currentTime: 0, paused: false, ended: false, playbackRate: rate, src: '', play: function(){ return Promise.resolve(); }, pause: function(){} };
+      const st = { root: root, L: L, audio: fake, win: pcWindow(L, root.dataset.slow === '1'), loopFrom: 0, fromRep: 0, wholeSong: !!a.card.wholeSong, sheet: !!a.card.sheet,
+        raf: 0, timers: [], lastBeat: -1, counting: false, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null, sheetLine: null, stripKey: null, loopSi: -1, laps: 0, passFrom: 0 };
+      const B = snipTimeAtBars(st.win, bars), target = B + (ms / 1000 + snipLatency()) * rate;
+      const raf = window.requestAnimationFrame, metro = root.dataset.metro;
+      window.requestAnimationFrame = function(){ return 0; };
+      root.dataset.metro = '';
+      pcState = st;
+      if (st.sheet) pcSheetStarted(st);
+      try {
+        for (let t = Math.max(snipTimeAtBars(st.win, 0), target - 1); t < target - 1e-9; t += 0.02 * rate){ fake.currentTime = t; pcFrame(); }
+        fake.currentTime = target; pcFrame();
+      } finally { window.requestAnimationFrame = raf; root.dataset.metro = metro; pcState = null; }
+      const lit = st.sheet ? 'strip cell ' + Array.prototype.findIndex.call(root.querySelectorAll('.pc-strip-cell'), function(c){ return c.classList.contains('now'); }) + ', dot ' + (root.querySelector('.pc-sheet-dot.hit') ? 'filled' : 'hollow')
+        : 'lit: ' + (root.querySelector('.pc-tab .beat-now') ? (root.querySelector('.pc-tab .beat-now').dataset.beat != null ? 'beat ' + root.querySelector('.pc-tab .beat-now').dataset.beat : 'note ' + root.querySelector('.pc-tab .beat-now').dataset.seq) : 'nothing');
+      return { ct: target, rate: rate, lead: typeof pcLead === 'function' ? pcLead() : null, lit: lit };
     },
     /* One walk on the virtual clock. plan.ops: click / speed / run / untilAudible / untilSilent. */
     walk: async function(plan){
@@ -778,7 +818,9 @@ const PAGE_SRC = String.raw`(() => {
       V.timers = []; V.rafs = [];
       const out = { fatal: fatal, runs: R.runs, keys: R.keys, events: R.events, frames: R.frames, errors: V.errors.slice(0, 20),
         clicks: V.clicks.map(function(c){ return { at: c.at, freq: c.freq, peak: c.peak, made: c.made, cancelled: c.cancelled }; }), starts: V.starts.slice(), end: V.t,
-        connected: root.isConnected };
+        connected: root.isConnected,
+        /* --leads: how long the lyric sheet's dot stays filled after a beat (the CSS animation's length, as the page set it last). */
+        hitDur: (function(){ const d = root.querySelector('.pc-sheet-dot'); return d ? d.style.getPropertyValue('--pc-hit') : ''; })() };
       R = null;
       return out;
     }
@@ -1283,23 +1325,28 @@ function judge(M, W, res) {
   const idx = (p) => (p.grid ? p.step : p.ni);
   const cellOf = (p) => (M.tables[p.si] && M.tables[p.si].steps[idx(p)] != null) ? p.si + ':' + M.tables[p.si].steps[idx(p)] : null;
   const rowOf = (p) => p.si + ':' + (M.tables[p.si] ? M.tables[p.si].rowOf[idx(p)] : '?');
-  const lead0 = ch.sheet ? C.sheetLead : C.tabLead;
+  /* R9: real seconds the cursor reads the file ahead of the decoder (negative: behind it). */
+  const lead0 = C.lead - C.latency;
   /* R15: with Loop this part on, the lap is at the end of the looped section (loopEnd0, bars from bar 1's downbeat),
      and a lead never looks past it when it is not the card's end (clampB). */
   const LS = W.loopSi != null ? ch.secs[W.loopSi] : null;
   const loopEnd0 = LS ? LS.fromBar - 1 + LS.bars * LS.reps : ch.endBar - 1;
   const clampB = (b) => (LS && loopEnd0 < ch.endBar - 1 && b > loopEnd0 - LOOP_CLAMP) ? loopEnd0 - LOOP_CLAMP : b;
+  /* R9 THE PASS: where this pass of the song began (bars from bar 1's downbeat): the place a start jumped to, then the
+     first bar of the lap. A cursor that reads behind the decoder never reads back past it. passLap: the lap's first
+     bar, also tried while a lap's two files overlap (the page may already be on the new one). */
+  let passFrom = -Infinity, passLap = -Infinity;
   /* What may be lit when file f is at time ct, playing at rate r (R9). */
-  const expectAt = (f, ct, r) => {
+  const expectAt = (f, ct, r, floor) => {
     const c = clk(f);
     if (!c) return null;
-    const here = ch.place(clampB(c.clock.bars(ct + lead0 * r)));
-    if (ch.sheet || !here) return here;
-    const ahead = ch.place(clampB(c.clock.bars(ct + (lead0 + C.rowLead) * r)));
-    return (ahead && ahead.key !== here.key && rowOf(ahead) !== rowOf(here)) ? ahead : here;
+    let b = c.clock.bars(ct + lead0 * r);
+    const dec = c.clock.bars(ct);
+    if (dec >= floor - 1e-6 && b < floor) b = floor;
+    return ch.place(clampB(b));
   };
   const D = 2e-6;
-  const expectSet = (f, ct, r) => [expectAt(f, ct, r), expectAt(f, ct - D, r), expectAt(f, ct + D, r)];
+  const expectSet = (f, ct, r) => [passFrom, passLap].flatMap(fl => [expectAt(f, ct, r, fl), expectAt(f, ct - D, r, fl), expectAt(f, ct + D, r, fl)]);
 
   /* What each walk should have lit, at least once. */
   const want = new Set(), seen = new Set();
@@ -1315,6 +1362,8 @@ function judge(M, W, res) {
   res.events.forEach(e => { if (e.timedOut) bad(`${W.ops[e.i].op === 'untilAudible' ? 'no file started playing' : W.ops[e.i].op === 'untilBefore' ? 'the song never came ' + W.ops[e.i].lead + ' ms before a count' : 'the song never stopped'} (step ${e.i + 1} of the walk)`); });
   let phase = 'idle', lastLit = '', lastAud = null, pendStart = null, pendSwitch = null, laps = 0, expStop = W.stop, expGuitar = W.guitar;
   let pendLoopFrom = 0, lastPlaceKey = null, order = -1, silentFrom = null, saidSilent = false, lapBlankRun = -1;
+  /* --leads: the place lit at the end of the last run that had one file sounding (null after silence or a jump). */
+  let leadPrev = null;
   const loadMs = W.loadMs || 40;
   const orderOf = (p) => { let n = 0; for (let i = 0; i < p.si; i++) n += ch.secs[i].reps * 1e6; return n + p.rep * 1e6 + p.at; };
   const litEmpty = (k) => k.lit === '';
@@ -1332,7 +1381,7 @@ function judge(M, W, res) {
       const cs = e.state.counts;
       if (o.counts ? !(cs.cls && cs.cells > 0 && cs.shown === cs.cells) : (cs.cls || cs.shown > 0)) bad(`the Counts switch set ${o.counts ? 'on' : 'off'}: ${cs.shown} of the ${cs.cells} count cells of the TAB are on screen${cs.cls ? '' : ' (the TAB is not marked counts-on)'}`);
     }
-    if (o.start) { phase = 'countin'; pendStart = { ...o.start, t: e.t }; pendLoopFrom = o.start.si; lastPlaceKey = null; order = -1; lastAud = null; silentFrom = null; starts.push({ t: e.t, stop: expStop, si: o.start.si, rep: o.start.rep, firstAud: null }); }
+    if (o.start) { const S0 = ch.secs[o.start.si]; passFrom = S0.fromBar - 1 + o.start.rep * S0.bars; passLap = S0.fromBar - 1; phase = 'countin'; pendStart = { ...o.start, t: e.t }; pendLoopFrom = o.start.si; lastPlaceKey = null; order = -1; lastAud = null; silentFrom = null; starts.push({ t: e.t, stop: expStop, si: o.start.si, rep: o.start.rep, firstAud: null }); }
     else if (o.stop) { phase = 'stopped'; lastAud = null; silentFrom = null; }
     else if (o.sw && phase === 'play') { pendSwitch = { t: e.t, kind: o.sw, from: lastAud }; }
     else if (o.sw && phase === 'countin') { starts.push({ t: e.t, stop: expStop, si: pendStart.si, rep: pendStart.rep, firstAud: null, restarted: true }); }
@@ -1343,6 +1392,7 @@ function judge(M, W, res) {
     const at = `${(t0 / 1000).toFixed(2)} s into the walk`;
     if (/;u\d/.test(k.lit)) bad(`${at}: something is lit that is not a cell of the tab`);
     if (!k.aud.length) {
+      leadPrev = null;
       if (phase === 'countin' || phase === 'stopped' || phase === 'idle' || phase === 'ended') { if (!litEmpty(k)) bad(`${at}: a cell is lit while nothing plays (${phase === 'countin' ? 'the count-in' : 'stopped'})`); }
       else if (phase === 'play') {
         /* A Build step taken by the seek (no spare) loads the next stop's file like a speed switch, and a lyric sheet's
@@ -1407,6 +1457,7 @@ function judge(M, W, res) {
       if (ch.wholeSong && !LS) bad(`${at}: a whole-song card jumped back from ${lastAud.ct.toFixed(2)} s to ${c1a.toFixed(2)} s`);
       else {
         laps++;
+        passFrom = passLap;
         if (lastAud.ct < endT - 0.06 - fine) bad(`${at}: the lap came ${(endT - lastAud.ct).toFixed(3)} s before the end of the last bar${LS ? ' of ' + LS.label : ''}`);
         if (lastAud.ct > endT + 0.03 + fine) bad(`${at}: the song ran ${(lastAud.ct - endT).toFixed(3)} s past the end of the last bar before the lap`);
         if (!near(c1a, startT, 0.06 + fine)) bad(`${at}: the lap landed ${(c1a - startT >= 0 ? '+' : '') + (c1a - startT).toFixed(3)} s from the first beat of ${ch.secs[pendLoopFrom].label}`);
@@ -1415,7 +1466,8 @@ function judge(M, W, res) {
     }
     phase = 'play';
     /* The lit place at both ends of the run. */
-    for (const [ct, ct2, tt] of [[c1a, c2a, t0], [c1b, c2b, t1]]) {
+    let leadEnd = null;
+    for (const [ct, ct2, tt, isEnd] of [[c1a, c2a, t0, false], [c1b, c2b, t1, true]]) {
       const cands = expectSet(a1.file, ct, a1.rate);
       if (k.aud[1] && ct2 >= 0) cands.push(...expectSet(k.aud[1].file, ct2, k.aud[1].rate));
       const where = `${(tt / 1000).toFixed(2)} s into the walk (${(ct).toFixed(3)} s of the file)`;
@@ -1482,6 +1534,17 @@ function judge(M, W, res) {
       }
       if (hit) {
         const o = orderOf(hit);
+        /* --leads (THE LEAD, measured): a new place lit in a song walk, the frame before it in the same file and in
+           the same pass (no start, lap, switch or second file between them). The page painted it somewhere between
+           the previous frame (prevCt) and this one (c1a); its beat starts at fs in the file. */
+        if (isEnd && k.aud.length === 1) leadEnd = { file: a1.file, ct: c1b, hit };
+        if (LEADS && W.kind === 'song' && !isEnd && k.aud.length === 1 && leadPrev && leadPrev.file === a1.file
+            && c1a > leadPrev.ct && c1a - leadPrev.ct <= 2.5 * STEP_MS / 1000 * a1.rate + 1e-6 && leadPrev.hit.key !== hit.key && o > orderOf(leadPrev.hit)) {
+          const S = ch.secs[hit.si], beat0 = hit.grid ? hit.step / meter.sub : ch.sheet ? hit.at : S.notes[hit.ni].start;
+          const fs = T1.clock.time(S.fromBar - 1 + hit.rep * S.bars + beat0 / meter.beats);
+          const kind = ch.sheet ? 'sheet beat' : (hit.grid ? 'grid beat' : 'tab note') + (rowOf(hit) !== rowOf(leadPrev.hit) ? ', new row' : ', same row');
+          (stats.leads = stats.leads || []).push({ kind, lo: (fs - c1a) / a1.rate, hi: (fs - leadPrev.ct) / a1.rate });
+        }
         /* THE SPARE's overlap: for a few ms the loop's first bar (the spare) and its last bar (the file on its way out) both sound. */
         if (o < order && (!ch.wholeSong || LS) && k.aud.length > 1) order = -1;
         if (o < order) bad(`${where}: the cursor went back to ${secName(hit)}`, 'back', hit.si, [placeName(hit)]);
@@ -1493,6 +1556,7 @@ function judge(M, W, res) {
       }
     }
     lastLit = k.lit;
+    leadPrev = leadEnd;
     lastAud = { file: a1.file, ct: c1b, t: t1, rate: a1.rate };
   }
   for (const [i, list] of evAt) if (i >= nRuns) list.forEach(onEvent);
@@ -1941,11 +2005,12 @@ async function main() {
     if (ch.sheet) shortSheet = Math.min(shortSheet, avgBar / x.meter.steps);
     else shortTab = Math.min(shortTab, avgBar / x.meter.steps);
   }
-  for (const [name, val, lim, what] of [['PC_TAB_LEAD', consts.tabLead, shortTab, 'tab'], ['PC_ROW_LEAD', consts.tabLead + consts.rowLead, shortTab, 'tab row'], ['PC_SHEET_LEAD', consts.sheetLead, shortSheet, 'lyric sheet']]) {
-    if (!(val >= 0) || val >= lim) dataIssues.push(`${name}: the ${what} cursor would run ${val} s ahead of the sound; one count of the fastest song it applies to is ${lim.toFixed(3)} s, so the cursor would sit a whole cell ahead of the music`);
-  }
+  /* PC_LEAD is before the HEARD beat; the cursor reads the file PC_LEAD - snipLatency() ahead of the decoder (THE LEAD). */
+  const shortest = Math.min(shortTab, shortSheet);
+  if (!(consts.lead >= 0) || consts.lead >= shortest) dataIssues.push(`PC_LEAD: every highlight would appear ${consts.lead} s before its beat is heard; one count of the fastest song is ${shortest.toFixed(3)} s, so the cursor would sit a whole cell ahead of the music`);
+  if (!(Math.abs(consts.lead - consts.latency) < shortest)) dataIssues.push(`PC_LEAD - snipLatency() is ${(consts.lead - consts.latency).toFixed(3)} s: the cursor would read a whole count away from the decoder (one count of the fastest song is ${shortest.toFixed(3)} s)`);
   if (!(consts.latency >= 0 && consts.latency <= 0.2)) dataIssues.push(`the click latency reads ${consts.latency} s (expected between 0 and 0.2)`);
-  for (const [name, val] of [['PC_TAB_LEAD', consts.tabLead], ['PC_ROW_LEAD', consts.rowLead], ['PC_SHEET_LEAD', consts.sheetLead], ['snipLatency', consts.latency]]) {
+  for (const [name, val] of [['PC_LEAD', consts.lead], ['snipLatency', consts.latency]]) {
     if (val !== LEAD_PINS[name]) dataIssues.push(`${name} reads ${val} s on the page; the value last confirmed by ear is ${LEAD_PINS[name]} s. The tool cannot hear whether the new value is right: listen to it on a card, then change LEAD_PINS`);
   }
   /* R13's maps. A power chord is the chord's own root and 5th, so its root is the chord's root; a key version moves
@@ -1973,7 +2038,7 @@ async function main() {
   const out = { root: ROOT, data: dataIssues, walks: [] };
   /* --built: the coded cards' lines count the coded cards and tracks only (the built ones have their own lines). */
   const nCodedCards = consts.cards.filter(a => !builtIds.has(a.id)).length, nCodedTracks = Object.keys(tracks).filter(k => !builtIds.has(k)).length;
-  console.log(`playalong-loop: ${cards.filter(a => !builtIds.has(a.id)).length} of ${nCodedCards} practice cards · ${nCodedTracks} tracks · leads read from the page: tab ${consts.tabLead} s, row +${consts.rowLead} s, sheet ${consts.sheetLead} s`);
+  console.log(`playalong-loop: ${cards.filter(a => !builtIds.has(a.id)).length} of ${nCodedCards} practice cards · ${nCodedTracks} tracks · the lead read from the page: every highlight ${consts.lead} s before the heard beat (PC_LEAD), the latency ${consts.latency} s, so the cursor reads ${+(consts.lead - consts.latency).toFixed(3)} s from the decoder`);
   console.log(dataIssues.length ? `✗ the data: ${dataIssues.length} problem(s)` : `✓ the data: ${nCodedTracks} clocks match their pins and meters · ${allViews.filter(x => !builtIds.has(x.a.id)).length} charts add up (every section's beats = its bars) · ${sharedPairs} pairs of cards of one song agree on the chord root over ${Math.round(sharedBeats)} shared beats · ${twinPairs} pairs of twin charts have the same rhythm (${twinNotes.toLocaleString('en-US')} notes) · ${settledSecs} sections follow a settled rhythm · ${mapsChecked} entries of the chord and key maps keep their root and interval · the leads are shorter than one count and match their pins, as does the click latency`);
   dataIssues.forEach(p => console.log('    ' + p));
 
@@ -1984,6 +2049,7 @@ async function main() {
   /* --built, the ca-51 pair: per card and view, the open state, the drawing and the cell lit at each place. */
   const pair = {};
   const unwalked = [];
+  const leadWalks = [];
   for (const a of cards) {
     const isBuilt = builtIds.has(a.id), TT = isBuilt ? totalsBuilt : totals;
     TT.cards++;
@@ -2006,6 +2072,16 @@ async function main() {
         const png = await page.send('Page.captureScreenshot', { format: 'png' });
         mkdirSync(SHOTS, { recursive: true });
         writeFileSync(join(SHOTS, `${a.id}-${viewName(a, x.v).replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '')}.png`), Buffer.from(png.data, 'base64'));
+      }
+      if (BEAT_SHOTS && x.v.base) {
+        mkdirSync(BEAT_SHOTS, { recursive: true });
+        for (const [tag, ms] of [['before', -100], ['on', 0], ['after', 150]]) {
+          const r = await step(`${label}: beat shot ${tag}`, `__pl.pose(2, ${ms})`);
+          const png = await page.send('Page.captureScreenshot', { format: 'png' });
+          const f = join(BEAT_SHOTS, `${a.id}-${tag}.png`);
+          writeFileSync(f, Buffer.from(png.data, 'base64'));
+          console.log(`  beat shot ${a.id} ${tag}: heard ${ms} ms from the downbeat of bar 3 (decoder at ${r && r.ct != null ? r.ct.toFixed(3) : '?'} s, rate ${r && r.rate}, lead ${r && r.lead} s): ${r && r.lit} · ${f}`);
+        }
       }
       const M = { consts, tracks, files, meterOf, meter: x.meter, meterName: METER[x.view.track], tr: tracks[x.view.track], chart: x.chart, view: x.view, viewLabel: viewName(a, x.v), open: o, scan: o.scan, isBase: x.v.base, recAlt: !!x.v.recAlt, tables: [] };
       /* The drawing. */
@@ -2059,6 +2135,8 @@ async function main() {
           continue;
         }
         const J = judge(M, W, res);
+        if (LEADS && W.kind === 'song') leadWalks.push({ card: a.id, built: isBuilt, view: viewName(a, x.v), walk: W.name, stop: W.stop, rate: tierOf(M, W.stop, false).rate,
+          sheet: !!x.chart.sheet, latency: consts.latency, hitDur: parseFloat(res.hitDur) || null, leads: J.stats.leads || [] });
         /* The Loop and Build walks keep their own totals (their own summary line), so the line of the walks every card
            had before them reads as it did. */
         const totals = isBuilt ? totalsBuilt : W.loopWalk ? totalsLoop : totalsMain;
@@ -2081,7 +2159,7 @@ async function main() {
   const realErrors = pageErrors.filter(e => !/firebase|firestore|googleapis|gstatic|net::ERR|Failed to fetch|ResizeObserver loop/i.test(e));
   if (realErrors.length) { console.log(`✗ the page threw ${realErrors.length} uncaught error(s) during the run:`); realErrors.slice(0, 5).forEach(e => console.log('    ' + e)); }
   /* The KNOWN list: what was seen, and (on a full run) what was not. */
-  const stale = (!ONLY && !SETTING) ? KNOWN.filter(K => !K.seen) : [];
+  const stale = (!ONLY && !SETTING) ? KNOWN.filter(K => !K.seen && !(K.ahead && !(consts.lead > consts.latency))) : [];
   const knownInfo = (K) => {
     const x = allViews.find(y => y.a.id === K.card && y.v.base), S = x && x.chart.secs.find(z => z.label === K.section);
     if (!S) return { shortest: NaN };
@@ -2158,6 +2236,7 @@ async function main() {
     pairFailed = 1;
     console.log(`playalong-loop (ca-51 and its built copy): ✗ not compared: ${!pair['ca-51'] ? 'ca-51' : CA51_BUILT_ID} was not walked`);
   }
+  if (LEADS) reportLeads(leadWalks);
   out.totals = totals; out.totalsLoop = { ...TL, cards: [...TL.cards] }; out.failed = failed + TL.failed + builtFailed + pairFailed; out.seconds = Number(secs);
   /* A --setting that matched no walk (a typo, or a card without that walk) is not a pass. The drawing alone is a run
      only when it was asked for (--setting drawing). */
@@ -2170,6 +2249,46 @@ async function main() {
   if (JSON_OUT) writeFileSync(JSON_OUT, JSON.stringify(out, null, 1));
   await page.close();
   return failed || TL.failed || builtFailed || pairFailed ? 1 : 0;
+}
+
+/* --leads: THE LEAD, measured. Each paint only brackets its lead (the page painted somewhere between two frames of the
+   fake clock), so for every (card, view, speed, kind) the brackets of all its paints are intersected: a steady lead
+   lands inside the intersection, and an EMPTY one (the latest bracket start after the earliest bracket end) means the
+   lead was not the same at every paint: UNSTEADY. Leads are real ms before the decoder (audio.currentTime) and, adding
+   the page's snipLatency(), before the beat is HEARD. A sheet's dot is filled when its beat is heard only if it stays
+   filled (hitDur) longer than the heard lead. Nothing here changes the run's verdict. */
+function reportLeads(walks) {
+  const ms = (x) => (x * 1000).toFixed(1);
+  const groups = [];
+  for (const w of walks) {
+    const by = new Map();
+    for (const l of w.leads) { if (!by.has(l.kind)) by.set(l.kind, []); by.get(l.kind).push(l); }
+    for (const [kind, list] of by) {
+      const lo = Math.max(...list.map(l => l.lo)), hi = Math.min(...list.map(l => l.hi));
+      const mids = list.map(l => (l.lo + l.hi) / 2).sort((a, b) => a - b);
+      groups.push({ card: w.card, built: w.built, view: w.view, walk: w.walk, stop: w.stop, rate: w.rate, kind, n: list.length, lo, hi,
+        steady: lo <= hi + 0.0015, midMin: mids[0], midMax: mids[mids.length - 1], latency: w.latency, hitDur: w.sheet ? w.hitDur : null });
+    }
+  }
+  console.log(`\nTHE LEAD (--leads), measured on ${walks.length} song walks: real ms a highlight paints before its beat. "decoder" = before audio.currentTime reaches the beat; "heard" = decoder + snipLatency() (${walks[0] ? ms(walks[0].latency) : '?'} ms)`);
+  const kinds = [...new Set(groups.map(g => g.kind))].sort();
+  for (const kind of kinds) for (const stop of STOPS) {
+    const G = groups.filter(g => g.kind === kind && g.stop === stop && g.steady);
+    if (!G.length) continue;
+    const lo = Math.max(...G.map(g => g.lo)), hi = Math.min(...G.map(g => g.hi));
+    const cards = new Set(G.map(g => g.card)).size, paints = G.reduce((t, g) => t + g.n, 0);
+    const span = lo <= hi + 0.0015 ? `${ms(lo)} to ${ms(hi)}` : `NOT ONE VALUE across cards: per card ${ms(Math.min(...G.map(g => g.lo)))} to ${ms(Math.max(...G.map(g => g.hi)))}`;
+    const lat = G[0].latency;
+    const heard = lo <= hi + 0.0015 ? `${ms(lo + lat)} to ${ms(hi + lat)}` : '-';
+    let dot = '';
+    if (kind === 'sheet beat') { const hd = G.map(g => g.hitDur).filter(x => x > 0); if (hd.length) { const filled = G.filter(g => g.hitDur > g.hi + g.latency).length; dot = ` · dot stays filled ${ms(Math.min(...hd))} to ${ms(Math.max(...hd))} ms: filled when the beat is heard in ${filled} of ${G.length} walks`; } }
+    console.log(`  ${kind.padEnd(20)} ${stop.padEnd(8)} ${String(cards).padStart(2)} cards, ${String(paints).padStart(6)} paints · decoder ${span} ms · heard ${heard} ms${dot}`);
+  }
+  const unsteady = groups.filter(g => !g.steady);
+  console.log(`  unsteady (the paints of one card, view, speed and kind do not share one lead): ${unsteady.length} of ${groups.length} groups`);
+  unsteady.slice(0, VERBOSE ? 400 : 30).forEach(g => console.log(`    ${g.card} · ${g.view} · ${g.walk} · ${g.kind}: ${g.n} paints, leads from ${ms(g.midMin)} to ${ms(g.midMax)} ms before the decoder`));
+  writeFileSync(LEADS, JSON.stringify({ groups }, null, 1));
+  console.log(`  every group: ${LEADS}`);
 }
 
 try { exitCode = await main(); }

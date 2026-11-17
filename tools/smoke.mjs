@@ -220,15 +220,14 @@ async function chordGridWalk(page, run, events, stats) {
     const root = document.querySelector('.ca-card[open] .pc');
     const a = pcActivity(root), L = pcLayout(a);
     const fake = { currentTime: 0, paused: false, ended: false, playbackRate: 1, src: 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=', play(){ return Promise.resolve(); }, pause(){} };
-    const st = { root, L, audio: fake, win: pcWindow(L, root.dataset.slow === '1'), loopFrom: si, fromRep: 0, wholeSong: !!a.card.wholeSong, sheet: false, raf: 0, timers: [], lastBeat: -1, counting: false, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null };
+    const st = { root, L, audio: fake, win: pcWindow(L, root.dataset.slow === '1'), loopFrom: si, fromRep: 0, wholeSong: !!a.card.wholeSong, sheet: false, raf: 0, timers: [], lastBeat: -1, counting: false, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null, passFrom: L.sections[si].fromBar - L.firstBar };
     pcState = st;
     const raf = window.requestAnimationFrame; window.requestAnimationFrame = () => 0;
     pcShowSection(root, L, si);
     fake.currentTime = snipTimeAtBars(st.win, L.sections[si].fromBar - L.firstBar);
     // A lap test starts a few seconds before the end of the window, so one short walk crosses the loop point.
     if (lap) fake.currentTime = Math.max(fake.currentTime, st.win.end - 6);
-    const issues = []; const seen = new Set(), after = new Set(); let frames = 0, paints = 0, last = '', early = 0, rowChanges = 0, prevRow = null, prevT = fake.currentTime, lapped = false;
-    const rowOf = (s2, b) => { const c = root.querySelector('.pc-tab .pc-page[data-page="' + s2 + '"] [data-beat="' + b + '"]'); return c && c.closest('.tab-grid'); };
+    const issues = []; const seen = new Set(), after = new Set(); let frames = 0, paints = 0, last = '', prevT = fake.currentTime, lapped = false;
     const t0 = fake.currentTime;
     try {
       while (fake.currentTime - t0 < maxSec && frames < 6000) {
@@ -237,13 +236,11 @@ async function chordGridWalk(page, run, events, stats) {
         const t = fake.currentTime;
         if (t < prevT - 0.5) { lapped = true; after.clear(); }
         prevT = t;
-        const here = pcLocate(L, snipBarsAt(st.win, t)), ahead = pcLocate(L, snipBarsAt(st.win, t + 0.15));
-        if (here && L.sections[here.si].grid) { const r = rowOf(here.si, here.beat); if (r !== prevRow) { if (prevRow) rowChanges++; prevRow = r; } }
+        // THE LEAD (app/cards.js): the cursor reads the file pcLeadShift() from the decoder, on every row alike, never back past where the pass began.
+        const here = pcLocate(L, pcLeadBars(st, t));
         const lit = [...root.querySelectorAll('.pc-tab .beat-now')];
         const sig = lit.map(e => (e.closest('.pc-page').dataset.page) + ':' + (e.dataset.beat ?? '-') + ':' + (e.dataset.seq ?? '-')).join(',');
-        // The look-ahead (PC_ROW_LEAD) may already show the first note of a note-by-note section that follows.
-        const handover = here && ahead && !L.sections[ahead.si].grid && ahead.si !== here.si && lit.length && lit.every(e => +e.dataset.seq === ahead.seq);
-        if (here && L.sections[here.si].grid && !handover) {
+        if (here && L.sections[here.si].grid) {
           if (!lit.length) issues.push('nothing lit at ' + t.toFixed(2));
           else {
             if (lit.some(e => e.dataset.beat == null)) issues.push('a cell with no data-beat (a "+" column?) lit at ' + t.toFixed(2) + ' ' + sig);
@@ -251,8 +248,7 @@ async function chordGridWalk(page, run, events, stats) {
             const beats = [...new Set(lit.map(e => +e.dataset.beat))], pg = [...new Set(lit.map(e => +e.closest('.pc-page').dataset.page))];
             if (beats.length !== 1 || pg.length !== 1) issues.push('lit more than one beat or page: ' + sig + ' at ' + t.toFixed(2));
             else if (pg[0] === here.si && beats[0] === here.beat) { seen.add(pg[0] + ':' + beats[0]); if (lapped) after.add(pg[0] + ':' + beats[0]); }
-            else if (ahead && pg[0] === ahead.si && beats[0] === ahead.beat && (ahead.si !== here.si || rowOf(ahead.si, ahead.beat) !== rowOf(here.si, here.beat))) { early++; seen.add(pg[0] + ':' + beats[0]); }
-            else issues.push('wrong or early beat ' + pg[0] + ':' + beats[0] + ' (clock says ' + here.si + ':' + here.beat + ', and the next row is not the one being entered) at ' + t.toFixed(2));
+            else issues.push('wrong beat ' + pg[0] + ':' + beats[0] + ' (the clock and the lead say ' + here.si + ':' + here.beat + ') at ' + t.toFixed(2));
             if (lit.length !== 7) issues.push(lit.length + ' cells lit, expected 7 (six string cells and the count cell) at ' + t.toFixed(2));
             const cnt = lit.find(e => e.classList.contains('tab-count'));
             if (cnt) { const cs = getComputedStyle(cnt); if (cs.color === cs.backgroundColor) issues.push('the lit count cell has its text colour equal to its background at ' + t.toFixed(2)); }
@@ -264,7 +260,6 @@ async function chordGridWalk(page, run, events, stats) {
         fake.currentTime += dt;
       }
     } finally { window.requestAnimationFrame = raf; pcState = null; root.querySelectorAll('.beat-now').forEach(e => e.classList.remove('beat-now')); }
-    if (rowChanges > 0 && early === 0) issues.push('the cursor crossed ' + rowChanges + ' row changes and never lit the next row early (PC_ROW_LEAD look-ahead is not working)');
     if (lap && !lapped) issues.push('the walk never reached the end of the loop');
     if (lap && lapped && !after.has(si + ':0')) issues.push('after the lap the cursor never came back to beat 0 of section ' + si);
     return { frames, paints, beats: seen.size, issues: issues.slice(0, 6), n: issues.length };
@@ -317,7 +312,7 @@ async function chordGridWalk(page, run, events, stats) {
   }
   await page.send('Emulation.clearDeviceMetricsOverride');
   // The lyric sheet (ca-38): "This bar" lights beat cells only; the dot fills once per beat.
-  const sheet = await run('chord-grid:sheet', `(() => { const a = CLASS_ACTIVITIES.find(x => x.card && x.card.sheet); if (!a) return null; caFocusActivity(a.id); const root = document.querySelector('.ca-card[open] .pc'); const L = pcLayout(pcActivity(root)); const bpb = L.tr.beatsPerBar; const fake = { currentTime: 0, paused: false, ended: false, playbackRate: 1, src: 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=', play(){ return Promise.resolve(); }, pause(){} }; const st = { root, L, audio: fake, win: pcWindow(L, false), loopFrom: 0, fromRep: 0, wholeSong: true, sheet: true, raf: 0, timers: [], lastBeat: -1, counting: false, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null, sheetLine: null, stripKey: null };
+  const sheet = await run('chord-grid:sheet', `(() => { const a = CLASS_ACTIVITIES.find(x => x.card && x.card.sheet); if (!a) return null; caFocusActivity(a.id); const root = document.querySelector('.ca-card[open] .pc'); const L = pcLayout(pcActivity(root)); const bpb = L.tr.beatsPerBar; const fake = { currentTime: 0, paused: false, ended: false, playbackRate: 1, src: 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=', play(){ return Promise.resolve(); }, pause(){} }; const st = { root, L, audio: fake, win: pcWindow(L, false), loopFrom: 0, fromRep: 0, wholeSong: true, sheet: true, raf: 0, timers: [], lastBeat: -1, counting: false, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null, sheetLine: null, stripKey: null, passFrom: 0 };
       const paper = root.querySelector('.pc-sheet-paper'); const map = pcSheetMap(L); const tk = { x0: 0, x1: 10, y0: 0, y1: 10, name: 'x' };
       paper._sheet = { ok: true, map, model: { crop: { x: 0, y: 0 }, toks: Array.from({ length: map.count + 1 }, () => tk) }, scale: 1 };
       const hits = [], oMark = window.pcSheetMark; window.pcSheetMark = function(pp, idx, hit){ hits.push(!!hit); return null; };
@@ -329,7 +324,7 @@ async function chordGridWalk(page, run, events, stats) {
         const cells = [...root.querySelectorAll('.pc-strip-cell')]; const on = cells.map((c, i) => c.classList.contains('now') ? i : -1).filter(i => i >= 0);
         on.forEach(i => lit.add(i));
         // The strip must be on the beat's own cell and carry each chord name on the cell where it starts.
-        const loc = pcLocate(L, snipBarsAt(st.win, fake.currentTime + PC_SHEET_LEAD));
+        const loc = pcLocate(L, pcLeadBars(st, fake.currentTime));
         if (loc && frames > 3 && !(frames > 3 && st.stripKey == null)) {
           const exp = 2 * (loc.beat % bpb);
           if (on.length !== 1 || on[0] !== exp) { if (wrong.length < 3) wrong.push('strip lit [' + on + '] expected ' + exp + ' at beat ' + loc.beat); }

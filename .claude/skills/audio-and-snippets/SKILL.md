@@ -72,12 +72,27 @@ a constant: currentTime is the decoder's position, not the speakers');
 seek stays on the true decoder position, or every lap would clip its last
 buffered milliseconds.
 
-**The dots still lead the beat slightly at 80 ms. That is correct — don't
-"fix" it** (Jonathan, 2026-09-18: "slightly early, but in an accurate way"):
-a player needs the visual cue before the sound. Raising the constant until the
-dots sit dead on the beat makes it worse. Watch instead whether the lead is
-CONSTANT across the four dots: a growing one is a wrong `win.bar` for that
-song, not latency.
+**The rule for every highlight: a very small, steady lead before the HEARD
+beat** (Jonathan, 2026-11-13: "the highlights should show up only very
+slightly before the actual beat"; the same on every card, song and speed).
+- **Practice / Play Along cards** follow it exactly since 2026-11-16: one
+  constant, `PC_LEAD` (THE LEAD in `app/cards.js`; a 60 ms placeholder until
+  Jonathan picks the number), is how long before the heard beat (the decoder's
+  position plus `snipLatency()`) a tab note, a chord-grid beat, a new tab row,
+  and a lyric sheet's dot and "This bar" cell light. `?snipcal=1&lead=<ms>`
+  overrides it live. It replaced `PC_TAB_LEAD` 0, `PC_ROW_LEAD` 0.15 and
+  `PC_SHEET_LEAD` 0.175 (about 80, 230 and 255 ms before the heard beat,
+  measured). The sheet dot stays filled at least the lead plus 0.1 s, so it is
+  filled when the beat sounds. `node tools/playalong-loop.mjs --leads <file>`
+  measures it.
+- **The step snippets' bar dots** light ON the heard beat (0 ms by the
+  latency estimate) and were judged "slightly early, but in an accurate way"
+  (Jonathan, 2026-09-18), so the real latency on his machine may be longer
+  than 80 ms. Whether they move to `PC_LEAD` too is still his question;
+  until then don't "fix" them. Watch whether the lead is CONSTANT across the
+  four dots: a growing one is a wrong `win.bar` for that song, not latency.
+- The Song Journey pages have no cursor (static tabs); only their click is
+  timed, and it lands on the heard beat.
 
 One builder, `buildSnippet()`, is called by `caStepHtml()` (`app/activities.js`) and
 `renderTeacherActivityDetail()` (`teacher-activities-2.js`), the same shape as `buildTab()`:
@@ -402,7 +417,7 @@ After changing a `SNIPPET_TRACKS` timing field (`anchor`, `barTimes`, `trackBpm`
   64 ms early (a steady grid: no number to edit).
 
 ## Checking the practice-card player: `tools/playalong-loop.mjs`
-After touching a card's chart, `SNIPPET_TRACKS`, a lead (`PC_ROW_LEAD`, `PC_SHEET_LEAD`, `PC_TAB_LEAD`) or the
+After touching a card's chart, `SNIPPET_TRACKS`, the lead (`PC_LEAD`) or the
 practice-card player (`app/cards.js`, `app/snippets.js`): `node tools/playalong-loop.mjs` (`--only <id>` for one card;
 headless Chrome for Testing, about 6½ minutes for all 26 cards, one browser run at a time). It walks every setting on
 a fake clock and checks the cursor, the drawing, the count-in and the Metronome against an answer worked out from the
@@ -422,7 +437,8 @@ chart and the beat map. It has no ears: `tools/beat-audit.py` is the tool that l
   take-back: `node tools/metro-press-sim.mjs` (Node only, about 35 s, exit 0; not in `checks.mjs`).
 - The count-in clicks at the tempo of the bar the song comes in on (`pcCountIn`, fixed 2026-11-12; it used the
   window's average bar, 16.9% too fast at Madrecita Querida's Ending).
-- Its three KNOWN entries are real faults on his list, not fixed: the Las Mañanitas Solo highlight steps back at line
-  starts (`PC_ROW_LEAD` is longer than its quick notes); a lyric sheet's "This bar" steps one past the end in the
-  song's last 0.175 s (`sheetPastEnd`); a lyric sheet's "This bar" strip blinks empty for one frame where the music is
-  0.175 s before a repeat or a new section (`sheetLapBoundary`, the same strip code).
+- Its two KNOWN entries are real faults on his list, not fixed: a lyric sheet's "This bar" steps one past the end in
+  the song's last stretch (`sheetPastEnd`; only while the cursor reads AHEAD of the decoder, `PC_LEAD` longer than
+  `snipLatency()`, so not with the 60 ms placeholder); it blinks empty for one frame where the cursor's read point
+  lands on a repeat or a new section (`sheetLapBoundary`, the same strip code; 1 step in a full run at 60 ms). The
+  third, the Las Mañanitas Solo highlight stepping back at line starts, went with `PC_ROW_LEAD` (2026-11-16).

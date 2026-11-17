@@ -515,7 +515,8 @@ Scope:
 
 Engine: `pcChordGrid` / `pcGridRows` / `renderChordGridRow` (rows), `pcLocate`
 (`beat`, `bar`), `pcLocKey` (the repaint key is the BEAT on a grid — never the
-note, or the cursor steps onto a "+"), `pcLocRow` (the PC_ROW_LEAD look-ahead).
+note, or the cursor steps onto a "+"). Every row is lit with the same lead (THE LEAD,
+`PC_LEAD`; the row look-ahead `PC_ROW_LEAD` / `pcLocRow` went on 2026-11-16).
 Ratchet **1bv** renders every opted-in card in both views and executes
 `pcLocate`/`pcLocKey`; `tools/smoke.mjs` walks the same cards in a real
 browser. Turning a card on or off means editing its pinned list.
@@ -572,8 +573,10 @@ step's tab.
   one name per change. `sheetChords` pins the count and **1bf2** holds the
   notes to it. The console preview says so if the PDF doesn't match (the dot
   is then left off).
-- The dot runs `PC_SHEET_LEAD` (0.175 s) AHEAD of the record — Jonathan tuned
-  it by ear — where the tab takes the output latency off.
+- The dot and "This bar" light `PC_LEAD` before the HEARD beat, the same as
+  the tab (THE LEAD in `app/cards.js`, 2026-11-16; until then the dot ran
+  `PC_SHEET_LEAD` 0.175 s ahead of the decoder, about 255 ms before the heard
+  beat). The dot stays filled until at least 0.1 s after the beat is heard.
 - "This bar" is sticky, so a sheet card is `overflow:clip`, not hidden. A tap
   on a chord starts from that lap (`pcStart(root, si, rep)`).
 - ca-38 has NO `journey` (1bn): it is another view of ca-29, not Layer 3's

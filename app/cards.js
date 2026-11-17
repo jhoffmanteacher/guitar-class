@@ -504,23 +504,46 @@ function caCardBodyHtml(a, opts){
    pdf.js (vendor/pdfjs, Mozilla, Apache-2.0) draws the page; it loads only
    when a sheet card is on screen. Vendored, not a CDN: the CSP in
    index.html runs scripts from this origin only (plus Google/Firebase). */
-const PC_SHEET_LEAD = 0.175;      // real seconds the dot runs ahead of the record — Jonathan tuned it by ear, 2026-10-19
-/* The tab's note cursor lights on the decoder's position, NOT held back by
-   snipLatency() as it was until 2026-10-22 (Jonathan, on ca-29: "the
-   highlighting of the notes is a few ms behind"). Held back, it lit with the
-   sound, and a cue that arrives with the sound reads as late — the same
-   reason the snippet dots are left slightly early. Raise it to lead more. */
-const PC_TAB_LEAD = 0;
-/* …except at a LINE change (Jonathan, 2026-10-22, ca-29: "the highlight is
-   delayed every time it changes to the second line or goes back to the
-   first line"). Inside a line the eye is already on the next note; at a
-   line change it has to jump to the start of another row, so a cursor that
-   gets there with the sound reads as late. The first note of a new row (or
-   a new section's page) lights this many real seconds early; every other
-   note keeps PC_TAB_LEAD. Same reason as PC_SHEET_LEAD. On a chord grid the
-   cursor is a beat, not a note, and the same rule holds (pcLocRow). */
-const PC_ROW_LEAD = 0.15;
+/* THE LEAD (Jonathan, 2026-11-13: "the highlights should show up only very
+   slightly before the actual beat"). Every highlight of a practice card (a
+   tab's note, a chord grid's beat, a lyric sheet's dot and its "This bar"
+   cell) appears PC_LEAD real seconds before its beat is HEARD: the same on
+   every card, every song and every speed, and the same at a line change.
+   It replaced three numbers (2026-11-16): the sheet dot ran 0.175 s ahead of
+   the decoder (tuned by ear on ca-38, 2026-10-19), a note on a new tab row
+   0.15 s more (ca-29, 2026-10-22: the eye has to jump to another row), every
+   other note 0 (on the decoder, so one output latency ahead of the sound).
+   Measured against the heard beat (tools/playalong-loop.mjs --leads) those
+   were about 255, 230 and 80 ms. The row's extra lead is gone: a line change
+   gets the same small lead as every other note.
+   "Heard" is the decoder's position (audio.currentTime) plus the speakers'
+   delay, snipLatency() (app/snippets.js, an estimate). So the cursor reads
+   the music at currentTime + (PC_LEAD - snipLatency()) x the playback rate
+   (pcLeadShift): with a lead shorter than the latency it reads a little
+   BEHIND the decoder. PC_LEAD is a placeholder until Jonathan picks the
+   number by eye: `?snipcal=1&lead=<ms>` on the URL overrides it live
+   (app/boot.js; `&lat=<ms>` overrides the latency the same way). */
+const PC_LEAD = 0.06;
+function pcLead(){ return typeof window.__pcLead === 'number' ? window.__pcLead : PC_LEAD; }
+// File seconds the cursor reads ahead of audio.currentTime (negative = behind it).
+function pcLeadShift(root){ return (pcLead() - snipLatency()) * pcRate(root); }
+/* Where the cursor reads (window bars) with the decoder at `ct`: pcLeadShift
+   on, never back past st.passFrom once the decoder has reached it (pcFrame). */
+function pcLeadBars(st, ct){
+  const read = snipBarsAt(st.win, ct + pcLeadShift(st.root));
+  return read < st.passFrom && snipBarsAt(st.win, ct) >= st.passFrom - 1e-6 ? st.passFrom : read;
+}
+/* The sheet's dot fills on each beat and stays filled for this share of a
+   beat, and never less than the lead plus PC_SHEET_SOLID_AFTER: it lights
+   PC_LEAD before the beat, so it must still be filled when the beat is heard
+   (at 0.175 s ahead it went hollow before the beat on Sweet Child). Never a
+   whole beat, or it would never go hollow. */
 const PC_SHEET_SOLID = 0.42;      // beats the dot stays filled after a beat
+const PC_SHEET_SOLID_AFTER = 0.1; // real seconds it stays filled after the beat is heard, at least
+function pcSheetSolidSec(beatSec){
+  const b = beatSec || 0.5;
+  return Math.min(0.9 * b, Math.max(0.08, b * PC_SHEET_SOLID, pcLead() + PC_SHEET_SOLID_AFTER));
+}
 const PC_SHEET_MAX_SCALE = 1.9;   // CSS px per PDF point at most (chord names ~19px)
 const PC_SHEET_CHORD_RE = /^[A-G](#|b)?(maj|min|m|dim|aug|sus|add|\+|°|ø|[0-9])*(\/[A-G](#|b)?)?$/;
 function pcSheetLoadPdfjs(){
@@ -771,7 +794,7 @@ function pcSheetMark(paper, idx, hit, beatSec){
   if(dot){
     dot.style.left = (T.x0 - crop.x) * s + 'px'; dot.style.top = mid(T) + 'px';
     if(hit){
-      dot.style.setProperty('--pc-hit', Math.max(0.08, (beatSec || 0.5) * PC_SHEET_SOLID) + 's');
+      dot.style.setProperty('--pc-hit', pcSheetSolidSec(beatSec) + 's');
       dot.classList.remove('hit'); void dot.offsetWidth; dot.classList.add('hit');
     }
   }
@@ -1041,7 +1064,8 @@ function pcStart(root, si, rep, keepBuild){
      section's start. */
   const fromRep = Math.max(0, Math.min(L.sections[si].reps - 1, rep | 0));
   const st = { root, L, audio, win: pcWindow(L, slow), loopFrom: si, fromRep, wholeSong: !!a.card.wholeSong, sheet: !!a.card.sheet, raf: 0, timers: [], lastBeat: -1, counting: true, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null,
-               loopSi: root.dataset.loop === '1' ? si : -1, build, laps: 0 };
+               loopSi: root.dataset.loop === '1' ? si : -1, build, laps: 0,
+               passFrom: L.sections[si].fromBar + fromRep * L.sections[si].bars - L.firstBar };   // where this pass began, in window bars (THE LEAD)
   pcState = st;
   const btn = root.querySelector('.pc-play');
   if(btn){ btn.innerHTML = pcPlayBtnHtml(true); btn.classList.add('playing'); }
@@ -1182,6 +1206,7 @@ function pcFrame(){
       sp.play().catch(() => {});
       st.audio = sp; st.spare = null;
       st.lastBeat = -1;
+      st.passFrom = st.L.sections[pcLoopSec(st)].fromBar - st.L.firstBar;   // the lap's first bar (THE LEAD)
       pcLoopLapDone(st, nx);
     }, Math.max(0, (left - PC_SPARE_START) * 1000)));
     hand.push(setTimeout(() => {
@@ -1210,6 +1235,7 @@ function pcFrame(){
     // Build up speed, the next stop a private song not loaded yet: load it, then that stop from a count-in (SONG FILES).
     if(nx && pcBuildWaitStep(st, nx)) return;
     try { audio.currentTime = pcLoopStart(st); } catch(e) {}
+    st.passFrom = st.L.sections[pcLoopSec(st)].fromBar - st.L.firstBar;   // the lap's first bar (THE LEAD)
     if(audio.paused) audio.play().catch(() => {});
     /* Build up speed: the lap is counted and the control moved to the next
        stop first, then the speed switch's own path plays it (the rate, or the
@@ -1222,19 +1248,17 @@ function pcFrame(){
   }
   if(st.root.dataset.metro === '1' && !audio.seeking) pcScheduleClick(st, audio.currentTime);   // not mid-seek: see clickTick in tabs/journey.js
   twinFollow(st, st.audio);
-  /* The tab lights a note PC_TAB_LEAD ahead of the decoder; a lyric sheet's
-     dot runs PC_SHEET_LEAD ahead, so the chord is on screen as the student
-     plays it (Jonathan tuned it by ear, 2026-10-19). */
-  const shift = st.sheet ? PC_SHEET_LEAD : PC_TAB_LEAD;
-  // A lead never looks past the end of the section Loop this part repeats (pcLoopClamp).
-  const barsIn = pcLoopClamp(st, snipBarsAt(st.win, audio.currentTime + shift * pcRate(st.root)));
-  let loc = pcLocate(L, barsIn);
-  if(!st.sheet && loc){
-    // A note (a beat, on a chord grid) on another row lights PC_ROW_LEAD early — see PC_ROW_LEAD.
-    const ahead = pcLocate(L, pcLoopClamp(st, snipBarsAt(st.win, audio.currentTime + (shift + PC_ROW_LEAD) * pcRate(st.root))));
-    if(ahead && pcLocKey(L, ahead) !== pcLocKey(L, loc)
-       && pcLocRow(st.root, L, ahead) !== pcLocRow(st.root, L, loc)) loc = ahead;
-  }
+  /* Every highlight is PC_LEAD before its beat is heard — see THE LEAD. A
+     cursor that reads behind the decoder never reads back past where this
+     pass began (st.passFrom: the start, or the lap's first bar) once the
+     decoder is there, or for a few ms after a start or a lap it would show
+     the bar BEFORE the jump. (A file still loading after a switch sits at 0,
+     before the pass: nothing is lifted then, and nothing moves.) A lead
+     never looks past the end of the section Loop this part repeats
+     (pcLoopClamp). */
+  const read = pcLeadBars(st, audio.currentTime);
+  const barsIn = pcLoopClamp(st, read);
+  const loc = pcLocate(L, barsIn);
   /* A chord grid repaints on a new BEAT, not a new note; a lyric sheet
      repaints on either (its dot fills on every beat, its chord mark moves on
      every chord change). */
@@ -1246,13 +1270,6 @@ function pcFrame(){
    everywhere else. Never the note on a grid — it moves on a "+". */
 function pcLocKey(L, loc){
   return loc.si + ':' + loc.rep + ':' + (L.sections[loc.si].grid ? 'b' + loc.beat : 's' + loc.seq);
-}
-// The tab row the cursor is on for `loc` (a grid's beat is only unique within its page).
-function pcLocRow(root, L, loc){
-  const cell = L.sections[loc.si].grid
-    ? root.querySelector(`.pc-tab .pc-page[data-page="${loc.si}"] [data-beat="${loc.beat}"]`)
-    : root.querySelector(`.pc-tab [data-seq="${loc.seq}"]`);
-  return cell && cell.closest('.tab-grid');
 }
 function pcPaint(st, loc){
   const root = st.root;
