@@ -3719,6 +3719,11 @@ span.tab-count-held{margin-left:4px}
 .pc-sheet-hit:hover{background:rgba(24,95,165,0.10)}
 .pc-sheet-hit:focus-visible{outline:2px solid #185fa5;outline-offset:1px}
 .pc-sheet-line{position:absolute;left:0;right:0;pointer-events:none}
+/* Never a transition: pcFollow reads where the line is right after pcSheetMark
+   moves it. The reduce-motion rule (*{transition-duration:0.01ms}) made every
+   move a transition, so the read got the LAST line's place and the follow
+   ran one line late (2026-11-16: 40 of 57 follows skipped on ca-45). */
+.pc-sheet-line{transition:none !important}
 .pc-sheet-pill{position:absolute;border-radius:5px;background:rgba(24,95,165,0.16);box-shadow:0 0 0 2px #185fa5;pointer-events:none}
 .pc-sheet-dot{position:absolute;width:13px;height:13px;margin:-6.5px 0 0 -17px;border-radius:50%;border:2px solid #185fa5;background:#fff;pointer-events:none}
 .pc-sheet-dot.hit{animation:pc-sheet-hit var(--pc-hit,0.2s) steps(1,end) forwards}
