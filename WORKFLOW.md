@@ -36,17 +36,11 @@ entry added the same day. Part e of the builder: only when he asks. He asked the
 offer both tab and a lyrics / chord chart: answered (coded songs do it as separate cards; a built song holds
 chords and lyric lines only, no tab); nothing built.
 
-**THE MAC SESSION IS PAUSED AGAIN (2026-11-17 late afternoon; Jonathan closed the lid). No agent is running on the
-Mac; local main equals origin/main; nothing is half-pushed. To pick up, in this order:**
-1. **The one long column for lyric sheets: BUILT AND PROVED by its builder, not shipped.** Commit `fe3cd8b` (on
-   GitHub as `feat/sheet-one-column-2`; the older `feat/sheet-one-column` there is a stale WIP: ignore it). Its Part A
-   (`f7c2a71`) is already live as `fa8dd09`. To ship: `git cherry-pick fe3cd8b` on main (it applied cleanly on
-   `403df10`), LOOK at `Claude outputs/pause-2026-11-17/sheet-one-column-shots/` (the lead had not looked yet), a
-   CHANGELOG line, the full `node tools/checks.mjs`, push Fast, `--live`, then tell Jonathan it is live. Builder's
-   numbers (not re-run by the lead): ca-45 and ca-38 as one column, left-aligned; at the old column change 7 to 12
-   lines ahead (was 0); 1 scroll per line (40 of 40, 56 of 56); 0 late chord names (of 224 and 152); ca-44 unchanged;
-   Print still two columns; `playalong-loop --only ca-45` and `--only ca-38` 0 mismatches. `app/cards.js` becomes
-   2,060 lines (over the 2,000 warning; say so, do not split it in that push).
+**The Mac session was paused at the lid close and RESUMED at 3:49 PM (2026-11-17). The pick-up list, with what is
+done since:**
+1. **The one long column for lyric sheets is ON MAIN (2026-11-17, Fast; resumed at 3:49 PM).** ca-45 and ca-38 read as
+   one column; the lead looked at the old column change on ca-45. `app/cards.js` is now 2,060 lines, over the 2,000
+   warning (1cv): split it at a quiet moment, never inside something Jonathan asked for.
 2. **The 7 songs to the private store: BUILT, waits for proofs, a review and Jonathan's word.** Branch
    `mac/song-files-switch`, `81b9274` (on GitHub): the 18 paths are `private:<id>`, the flag gone, the 18 public
    files removed, CHANGELOG written. He uploaded and verified all 18 (his word, 2026-11-17) and chose: remove the
