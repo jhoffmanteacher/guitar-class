@@ -31,12 +31,28 @@ Dates are the Pacific calendar date. `CACHE_VERSION` and commit timestamps may s
 
 Start here. Update this block whenever an item opens or closes; each line says where the detail is.
 
-**Open bug, reported by Jonathan 2026-11-16 (not looked at yet): the "Sweet Child O' Mine — Lyrics and Chords"
-activity (`ca-45`) does not scroll properly in full-screen mode.** That is the lyric-sheet play-along in `class-activities.js`
-(the card after "The Whole Song in Power Chords"; its sheet is two columns over two pages, drawn by the lyric sheet
-in `app/cards.js`). Nothing is known beyond his one line: first reproduce it at 1366×657 and at the classroom size
-2560×1300, full screen on and off, and check whether the "the cure" lyric sheet does the same. Delete this line
-when it is fixed.
+**FIXED 2026-11-16 by Windows (Fast; one Opus agent): the "Sweet Child O' Mine — Lyrics and Chords" activity (`ca-45`)
+not scrolling properly in full-screen mode.** Reproduced in headless Chrome with real full screen entered through the
+bar's own button. It was every lyric sheet (`ca-45`, `ca-44` "the cure", `ca-38`), not ca-45's shape, and only in
+full screen; normal size was exact at 1366×657 and at 2560×1300. Three causes, all fixed:
+- Each auto-scroll in full screen went 1.37 times too far: `pcFollow` (`app/cards.js`) measured with
+  `getBoundingClientRect`, which includes the full-screen zoom on `.main`
+  (`body.ca-full:has(...) .app-layout .main{zoom:var(--ca-zoom,1)}`), then scrolled in `.main`'s unzoomed pixels. It
+  now scrolls `delta / zoom`, zoom measured as the box's `getBoundingClientRect().height / offsetHeight`. Scrolls
+  landing more than 2 px from where the follow aimed, full screen, before → after: ca-45 44 of 44 → 0 at 1366×768
+  (worst 247 px), 47 of 47 → 0 at 2560×1300; ca-44 39 of 40 → 0; ca-38 28 of 28 → 0. The tab cards share
+  `pcFollow` and get the fix.
+- Pressing Full screen mid-song threw the sheet back to the top (Chrome resets `.main`'s scrollTop when full screen
+  opens) and the follow only re-ran on a new line: `pcRefollow` on `fullscreenchange` and `resize` now makes the
+  next beat bring the line back.
+- Found on the way, at every size, on a device with "reduce motion" on: the rule `*{transition-duration:0.01ms}`
+  made the sheet line's move a transition, so the follow read the previous line's place and ran one line late (the
+  lit chord off screen for 86 of 152 chords at 1366×657): `.pc-sheet-line{transition:none !important}`.
+`tools/smoke.mjs` has a new `sheetFollowWalk` (every sheet card at 1366 and 2560, normal and full screen through the
+real button; red on 6 of 6 full-screen views on the old code); it does not cover the refollow after entering full
+screen mid-song. `playalong-loop --only ca-45` and `--only ca-44`: 0 mismatches. The lead looked at the before and
+after pictures at 1366×768 full screen. Nothing was needed in `app/activities-2.js`. Not checked: a real Chromebook
+or the classroom display itself (headless Chrome only): Jonathan's next class will show it.
 
 **For the next session on the Mac (written 2026-11-16; Part b shipped 2026-11-15, Part c 2026-11-16).** Jonathan types "do the
 Mac work in WORKFLOW". Parts b and c are live (entry "Song builder" below). **Waiting on Jonathan, in this order:**

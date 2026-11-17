@@ -8,6 +8,7 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-11-16 — An activity can stay in Today's activities
 
+- **Lyric-sheet play-alongs (Sweet Child O' Mine and the others) keep the line you're playing on screen in full screen,** even if you press Full screen while the song plays. Before, the sheet jumped too far each time it moved.
 - **Strum Pattern check: a strum where your hand should miss now shows a red arrow much more often.** Before, the check let about half of those extra strums pass.
 - **Strum Pattern check: a late start no longer turns the whole round red.** If you come in a little late, the check now catches up with you.
 - **Your teacher can keep an activity in "Today's activity" for more than two days.** Usually an activity is there on the day it comes out and the day after, then moves down to Unfinished activities. A kept one stays at the top, with its date on it, until your teacher changes that. If you already finished it, it shows there with its ✓.
