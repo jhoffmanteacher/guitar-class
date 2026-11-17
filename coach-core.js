@@ -2546,7 +2546,7 @@ function gamesHideStop(){
      read below (fretRunning, cc…) is declared in those files; no game can be running yet (review R1-2). */
   if (typeof bcStop !== 'function') return;
   /* DELIBERATE BRIDGE, remove after 2026-12-01 (todo.md lists it): `typeof nr` here and in coachReleaseMicIfIdle()
-     is for a page opened before the 2026-11-16 split, which loads coach-noterunner.js after coach-more.js. */
+     is a second net for a page opened before the 2026-11-16 split, which loads coach-noterunner.js itself. */
   const micHeld = fretRunning || psgRunning || (cc && cc.micOn) || (sr && sr.micOn) ||
                   (rn && rn.micOn) || (typeof nr !== 'undefined' && nr && nr.micOn) || window.coachMicLive;
   if (micHeld) gamesStopMic();
