@@ -6,7 +6,7 @@
                                                [--shifts=J01:-117.5,..] [--json=<file>]
 
    THE REPLAY: the take's .wav goes back through the site's mic chain (replay-takes.mjs prepare) into the bench page (listen-site.mjs
-   benchSite, strum-check-loop.mjs SC_VM: coachOpen on ca-52's real button, scStart, the count-in, scLoop with srHearStrum, scOnset, the
+   benchSite, strum-check-loop.mjs SC_VM: coachOpen on ca-52's real button, scStart, the count-in, scLoop with scHearStrum, scOnset, the
    sweep, the chord readings and rules a / b / c, scFinish), at the take's own tempo, mic-delay setting and mean frame time. The take's
    times are ms from the recording's first sample (micRecSaveNow), so the site's clock is set to run (replay listenStart - the take's
    listenStart) ahead of the recording: beat 1 lands where it did live. The grid then eases from there as it did live.
@@ -24,7 +24,7 @@
    THE KEY (--key, JSON: { "J01": { "chords": { "4": "wrong" }, "skipBars": [] }, ... }, bars counted from 1): what Jonathan says he
    played. Every strum slot played and every rest quiet unless the key says so; skipBars = bars whose timing he called off (left out of
    the strum counts).
-   --sweep: the same takes under other settings, through a copy of srHearStrum put in the page (HOOK below: the site's function line
+   --sweep: the same takes under other settings, through a copy of scHearStrum put in the page (HOOK below: the site's function line
    for line with its numbers and its grid rule made settable; the default settings must reproduce the real function exactly, and the run
    stops if they do not), beside the synthetic bench's students (strum-check-loop.mjs) under the same settings; each take at its kept
    clock and +-20 ms. --cands=<json>: only the settings listed ([{ name, ratio, hfRatio, refract, rule, ease, cap, within, outPen,
@@ -46,8 +46,8 @@ import { benchSite, takeSource } from './listen-site.mjs';
 import { readWav, prepare } from './replay-takes.mjs';
 import { SC_VM, oneTake, seedOf } from './strum-check-loop.mjs';
 
-/* srHearStrum (coach-strum.js) with its numbers settable: ratio / hfRatio (the check's own, s.onsetRatio / s.hfRatio), refract
-   (COACH_ONSET_REFRACT), ease / within (SR_GRID_EASE / SR_GRID_EASE_WITHIN) and the grid rule:
+/* scHearStrum (coach-strumcheck.js; srHearStrum, coach-strum.js, on a site from before 2026-11-14) with its numbers settable:
+   ratio / hfRatio (the check's own, s.onsetRatio / s.hfRatio), refract (COACH_ONSET_REFRACT), ease / within (SR_GRID_EASE / SR_GRID_EASE_WITHIN) and the grid rule:
      base       the site's: every onset within `within` of an eighth eases the grid by `ease` of its deviation
      strumOnly  only an onset nearest a strum slot of the pattern eases it (a rest's sound never moves the grid)
      anchor1    only an onset nearest a "1" (slot 0) eases it
@@ -179,7 +179,7 @@ const COPY_P = { ...SITE_P, ...JSON.parse(opt('copy') || '{}') };
 
 function setP(p){ site.run('__scHook.on = ' + (p ? 'true' : 'false') + '; __scHook.p = ' + JSON.stringify(p || null)); }
 
-/* One replay. Returns the bench's out() plus the map and (with diag) every frame srHearStrum saw. */
+/* One replay. Returns the bench's out() plus the map and (with diag) every frame scHearStrum saw. */
 async function replay(tk, p, o = {}){
   setP(p);
   site.run('__scHook.diag = ' + (o.diag ? '[]' : 'null'));
