@@ -1308,6 +1308,8 @@ body.rail-collapsed .rail-tools .tool-popup{
 .tg-class-lbl{font-weight:600;font-size:0.9375rem}
 .tg-note{font-size:0.8125rem;color:var(--text2);line-height:1.5;margin:0 2px 16px}
 /* Manage → Song files: the drop zone for many .mp3 files (teacher-songfiles.js, W21) */
+/* Manage → Song files and Built songs: their action buttons look like buttons (Jonathan, 2026-11-17: they read as plain text beside the usage line). Same outline as the Students rows' (.tsr-actions). */
+#t-songfiles-block .tg-seg-btn,#t-builtsongs-block .tg-seg-btn{border:1px solid var(--border2);border-radius:16px}
 #t-songfiles-block .tsf-drop{border:2px dashed var(--border2);border-radius:var(--radius);background:var(--bg2);padding:18px 16px;margin:0 2px 12px;text-align:center;font-size:0.8125rem;color:var(--text2);transition:background .12s,border-color .12s}
 #t-songfiles-block .tsf-drop-msg{font-size:0.9375rem;font-weight:600;color:var(--text);margin-bottom:8px}
 #t-songfiles-block .tsf-drop-over{border-color:var(--purple-accent);background:var(--purple-bg);border-style:solid}

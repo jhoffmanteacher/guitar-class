@@ -478,7 +478,7 @@ async function runCases(consoleSrc){
     ok(!html.includes('"><svg') && html.includes('data-tsf-id="x&quot;&gt;&lt;svg onload=alert(3)&gt;"'), 'escape: a stored doc id with "><svg …> is escaped in its data-tsf-id');
     ok(!/\son[a-z]+="/i.test(html.replace(/&[a-z#0-9]+;/g, '')) , 'escape: the section has no inline on…= handler');
     ok(/in the store, not on the list/.test(html), 'list: a store doc that is not on the list says so');
-    ok(/Upload real songs only after the school-accounts rules \(paste 2\) are published/.test(html), 'the section says to upload real songs only after paste 2 is published (review A1)');
+    ok(/Only school accounts, and the outside accounts you allowed, can read these files\. The monthly limit counts only what the site itself downloads\./.test(html) && !/paste 2/.test(html), 'the section says who can read the files and what the limit counts (review A1; the paste-2 warning went when paste 2 was published)');
     // A Verify result's text is drawn as text too (review B, minor 3).
     c.run(`teacherSfChecks.set('test-song', { ok: false, text: '<img src=x onerror=alert(4)>' }); teacherSfPaint()`);
     const h2 = c.block._html;

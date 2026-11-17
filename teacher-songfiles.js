@@ -108,7 +108,7 @@ let teacherSfOpGen = 0;         // bumped as each write starts and ends: a read 
 let teacherSfBusy = '';         // '' | 'upload' | 'verify' | 'delete' | 'reset': one at a time
 let teacherSfProgress = '';     // the busy line ("Uploading… 3 of 16")
 let teacherSfNote = '';         // one line after an action (plain text)
-let teacherSfOpen = false;      // the list and the upload are shown (any action opens them)
+let teacherSfOpen = true;       // the list and the upload are shown: open from the start (Jonathan, 2026-11-17: he could not find the upload behind the Show button)
 let teacherSfRefused = [];      // after a batch: one plain-text line per file not uploaded ("<name>: <why>")
 let teacherSfDragOver = false;  // files are being dragged over the drop zone
 const teacherSfChecks = new Map();   // id -> { ok, text }: the last Verify
@@ -195,9 +195,10 @@ function teacherSfBlockHtml(){
   /* Closed: the lines under the title. Open: right under the drop zone, where the files were dropped. */
   if(!open) return html + status;
   /* Review A1 (2026-11-14): the monthly limit is the site's own count of honest use; the rules cannot count reads,
-     so any account the rules let read can download the pieces directly. Until the school-accounts paste 2 is
-     published that is any Google account. */
-  html += `<div class="tg-note"><strong>Upload real songs only after the school-accounts rules (paste 2) are published.</strong> Until then any signed-in Google account can read these files, and the monthly limit only counts what the site itself downloads.</div>`;
+     so any account the rules let read can download the pieces directly. The school-accounts rules (paste 2) were
+     published 2026-11-14, so that is a school account or an outside account Jonathan allowed; the line says so
+     (it said "upload real songs only after paste 2" until 2026-11-17). */
+  html += `<div class="tg-note">Only school accounts, and the outside accounts you allowed, can read these files. The monthly limit counts only what the site itself downloads.</div>`;
   html += `<div class="tg-note">The site's song recordings, kept in the class database and played only to signed-in accounts. Upload takes an .mp3 from this computer only if it is exactly a file on the site's list (same size and SHA-256). Verify reads a song back the way a Chromebook does and counts against this month's downloads.</div>
       <div class="tsf-drop${teacherSfDragOver ? ' tsf-drop-over' : ''}${busy ? ' tsf-drop-busy' : ''}" data-tsf-drop>
         <div class="tsf-drop-msg">${busy && teacherSfBusy === 'upload' ? 'Uploading: wait for these files to finish before dropping more.' : teacherSfDragOver ? 'Let go to upload these files.' : 'Drop .mp3 files here, as many as you like. They go up one at a time.'}</div>
