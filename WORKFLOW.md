@@ -132,6 +132,31 @@ and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fi
   the count that wrap; if any wrap, ship lessons only and list them here for Jonathan. Screenshots at 1366×657 (a
   lesson step open, a long step, a practice card, an activity board, in Spanish too) and at 2560×1300; the rail and the
   set band must not move (`.claude/rules/rail-layout.md`: measure). CHANGELOG entry. GitHub's walk is its smoke.
+  - **W11 DONE, shipped Fast (Windows, 2026-11-16 late night; one Opus agent; `styles.css` only, two commits):
+    lessons AND activities, because no activity direction newly wraps.** `.step-detail` and `.ca-step-detail`
+    0.9375rem → 1rem; everything inside them inherits it. No check pinned 15px. Measured in headless Chrome at
+    1366×657, EN + ES (this computer's fonts; every number compares the same machine before and after):
+    - Lessons: 754 step bodies over all 36 sets, 15px / 22.5 → 16px / 24; 718 grew, by 24 px at most; no sideways
+      overflow. The 72ch reading width widens with the font (about 575 → 615 px), so some long steps get shorter.
+    - Activities: 258 direction lines (step text, `text_power`, intros, path blurbs, bass lines, each drill and
+      practice-card line where it shows): 252 of 258 are one line at 15px and 252 of 258 at 16px; NONE newly wraps.
+      **Six already wrapped before, none of them step text and none changed in size by this (for Jonathan, since
+      the rule is one line): `ca-35`'s directions line with the bass line on (EN + ES), and `ca-46`'s two path
+      blurbs (EN + ES).** Not drawn for students, so not measured: the card checks, practice-card intros, `ca-40`.
+    - The rail, the set band and the header: identical in 12 of 12 views (1366×657: rail 252, band at 49 and 43
+      tall, header 49; 2560×1300: fill 1.8741, the same ratios).
+    - The 657 px fit, 260 screens (every focus step, every practice card, the board): nothing that fit stops
+      fitting; the tightest screen that fits has 59 px to spare. **13 focus steps already ran past the bottom
+      before (12 to 334 px over, all with a TAB: in `ca-1`, `ca-11`, `ca-12`, `ca-17`, `ca-22`, `ca-34`) and
+      are 1 to 2 px longer now**: not caused by this; whether a focus step with a TAB should fit 657 px is a
+      separate question nobody has asked.
+    - Left alone on purpose, Jonathan's call if he wants them bigger too: the hint folds (`.sh` / `.sh-list` 14px,
+      `.step-branch` 13.5px), which were never 15px; and controls that set their own 0.9375rem (the video link
+      button, Play, a drill's Start).
+    - The lead looked at a lesson step in Spanish before and after (same layout, larger text) and a focus step of
+      `ca-34` after (its direction on one line). The agent's pictures: the Windows scratchpad `w11\shots\`. The
+      change smoke was NOT run after it (GitHub's walk is its smoke, as the job says). W15 builds on these lines
+      and is on hold.
 - **W12. ON HOLD (Jonathan, 2026-11-16: a third of the week's usage limit was gone by Monday evening; "if we should put
   off any work, that's fine"). Do not start until he says. The automatic blocks for the "never" rules: fix the two majors, one review, ship or park again.** Branch
   `tools/never-blocks` is on GitHub since 2026-11-16 (tip `db8b7b7`, 8 commits on `af1166e`; 14 files, tools and

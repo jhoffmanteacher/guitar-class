@@ -8,6 +8,7 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-11-16 — An activity can stay in Today's activities
 
+- **Lesson steps and In-Class Activity directions are a little bigger** (16px instead of 15px), so they are easier to read. Every activity direction still fits on one line.
 - **Play Along cards: every highlight now lights just before you hear its beat,** the same small amount on every card, song and speed. Before, the first note of a new line and the dot on a lyric sheet lit about a quarter of a second early. The lyric-sheet dot now stays filled when the beat sounds.
 - **A saved microphone recording no longer keeps your name.** It is linked to your account so your teacher can see whose it is. The Privacy page says so now.
 - **Strum Hero and Strum Radar: the "Change pattern" button on the results screen has room around its words** and no longer sits tight under the tempo buttons.
