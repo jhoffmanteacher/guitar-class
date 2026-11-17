@@ -568,8 +568,24 @@ function pcSheetLoadPdfjs(){
    and `crop` is the whole stack ({ x: 0, y: 0, w, h }). Reading order is
    page by page, and on a page column by column — or, with `cols` 1
    (card.sheetColumns: 1, a one-column chord-over-lyric sheet), line by line
-   with no column split: a chord line's wide gaps are not a gutter there. */
+   with no column split: a chord line's wide gaps are not a gutter there.
+   ONE LONG COLUMN (Jonathan, 2026-11-17: "you could cut the pdf in half and
+   just keep scrolling so it doesn't have columns"). On screen a two-column
+   page is drawn in BANDS, stacked: the page's header (title, chord boxes,
+   rule: everything above the columns), then its left column, then its right
+   column under it (pcSheetSplit); page 2 follows the same way. Display only:
+   the PDF, card.sheetColumns, the reading order of `toks` and every
+   beat-to-chord mapping are unchanged. A band is { sx, sy, sw, sh } (PDF
+   points of its page) drawn at { dx, dy } of the sheet, and pcSheetPlace is
+   the one map from a page's points to the sheet's: `toks` are built through
+   it, so the dot, the pill, the hit boxes and the lines the follow aims at
+   all use the stacked sheet. The text keeps today's size (`crop.w` stays the
+   page width). The Print button prints today's two columns (`printPages`,
+   a second canvas, pcSheetDraw). A page with no right-column chord line, or
+   no clean cut between its columns, is drawn whole as before
+   (`fellBack`: its page numbers). */
 const pcSheetModels = {};
+function pcSheetPlace(b, X, Y){ return { x: b.dx + (X - b.sx), y: b.dy + (Y - b.sy) }; }
 function pcSheetModel(url, cols){
   const one = cols === 1, key = url + (one ? '#1' : '');
   if(pcSheetModels[key]) return pcSheetModels[key];
@@ -582,19 +598,108 @@ function pcSheetModel(url, cols){
     const pad = 14, W = Math.max(...pages.map(P => P.width));
     const x = Math.max(0, Math.min(...all.map(w => w.x0)) - pad);
     const w = Math.min(W, Math.max(...all.map(w2 => w2.x1)) + pad) - x;
-    let top = 0;
-    const toks = [];
-    pages.forEach(P => {
-      if(!P.words.length){ P.top = null; return; }
+    let top = 0, dy = 0;
+    const toks = [], fellBack = [];
+    const used = pages.filter(P => P.words.length);
+    used.forEach((P, pi) => {
       P.y = Math.max(0, Math.min(...P.words.map(w2 => w2.y0)) - pad);
       P.h = Math.min(P.height, Math.max(...P.words.map(w2 => w2.y1)) + pad) - P.y;
       P.top = top; top += P.h;
-      P.toks.forEach(T => toks.push({ name: T.name, x0: T.x0 - x, x1: T.x1 - x, y0: T.y0 - P.y + P.top, y1: T.y1 - P.y + P.top }));
+      const split = one ? null : pcSheetSplit(P, x, w, pi === 0, pi === used.length - 1);
+      if(!one && !split && P.toks.some(T => T.col === 1)) fellBack.push(pages.indexOf(P) + 1);
+      let sy = P.y, sh = P.h;
+      if(!one && !split){
+        // A one-column page of a two-column sheet: joined to the page before with a normal line gap, as the columns are.
+        const half = pcSheetHalfGap(P.words), ys = P.words.map(w2 => w2.y0), ye = P.words.map(w2 => w2.y1);
+        if(pi > 0) sy = Math.max(P.y, Math.min(...ys) - half);
+        sh = (pi < used.length - 1 ? Math.min(P.y + P.h, Math.max(...ye) + half) : P.y + P.h) - sy;
+      }
+      P.bands = split || [{ sx: x, sy, sw: w, sh, dx: 0 }];
+      P.bands.forEach(b => { b.dy = dy; dy += b.sh; });
+      P.toks.forEach(T => {
+        const b = P.bands.length === 1 ? P.bands[0] : P.bands.find(b2 => b2.col === T.col);
+        const a = pcSheetPlace(b, T.x0, T.y0), z = pcSheetPlace(b, T.x1, T.y1);
+        toks.push({ name: T.name, x0: a.x, x1: z.x, y0: a.y, y1: z.y, col: split ? T.col : null, page: pages.indexOf(P) + 1 });
+      });
     });
-    return { pages: pages.filter(P => P.top !== null).map(P => ({ page: P.page, x, y: P.y, h: P.h, top: P.top })), toks, crop: { x: 0, y: 0, w, h: top } };
+    return { pages: used.map(P => ({ page: P.page, x, y: P.y, h: P.h, top: P.top, bands: P.bands })), toks,
+      crop: { x: 0, y: 0, w, h: dy }, printH: top, split: !one && used.some(P => P.bands.length > 1), fellBack };
   });
   pcSheetModels[key].catch(() => { delete pcSheetModels[key]; });   // a failed load can be tried again
   return pcSheetModels[key];
+}
+/* A two-column page cut into bands for ONE LONG COLUMN (pcSheetModel), or
+   null: draw the page whole. The columns are the ones pcSheetPage reads in
+   (its chord lines' `col`). The cut is the middle of the widest strip,
+   between the left column's chord names and the right column's, that no
+   word of the columns crosses. The columns start at each side's first chord
+   line, taken up over lines no more than 2.5 line pitches apart (a heading,
+   a lyric line with no chords); everything above is the header, drawn whole
+   once. Each column band is cut half a line gap above its first word and
+   below its last, so column 1's last line and column 2's first sit one
+   normal line gap apart. `first` / `last`: the sheet's first / last page,
+   which keep the usual 14 pt margin at the top / bottom. */
+// Line pitch: the usual distance between baselines; half of the usual gap between one line's words and the next's.
+function pcSheetPitch(ws){
+  const ys = [...new Set(ws.map(wd => Math.round(wd.y1 * 2) / 2))].sort((p, q) => p - q), d = [];
+  for(let i = 1; i < ys.length; i++) d.push(ys[i] - ys[i - 1]);
+  d.sort((p, q) => p - q);
+  return d.length ? d[Math.floor(d.length / 2)] : 0;
+}
+function pcSheetHalfGap(ws){
+  const pitch = pcSheetPitch(ws), h = ws.map(wd => wd.y1 - wd.y0).sort((p, q) => p - q)[Math.floor(ws.length / 2)] || 0;
+  return Math.max(1, (pitch - h) / 2);
+}
+const PC_SHEET_ONE_ALIGN = 'left';   // where column 2 goes under column 1: 'left' (its text at column 1's left edge) or 'center'
+function pcSheetSplit(P, x, w, first, last){
+  const L = P.toks.filter(T => T.col === 0), R = P.toks.filter(T => T.col === 1);
+  if(!L.length || !R.length) return null;
+  const a = Math.max(...L.map(T => T.x1)), b = Math.min(...R.map(T => T.x0));
+  if(!(b > a)) return null;
+  const g0 = (a + b) / 2;
+  const cross = P.words.filter(wd => wd.x0 < g0 && wd.x1 > g0);
+  const sideOf = wd => (wd.x1 <= g0 ? 0 : 1);
+  const plain = P.words.filter(wd => !cross.includes(wd));
+  const pitch = pcSheetPitch(plain.filter(wd => sideOf(wd) === 0));
+  if(!(pitch > 0)) return null;
+  // Each side's start: its first chord line, walked up over lines no more than 2.5 pitches apart.
+  const startOf = (side, toks1) => {
+    const lines = [...new Set(plain.filter(wd => sideOf(wd) === side).map(wd => wd.y0))].sort((p, q) => p - q);
+    let i = lines.findIndex(y => y >= Math.min(...toks1.map(T => T.y0)) - 0.5);
+    if(i < 0) return null;
+    while(i > 0 && lines[i] - lines[i - 1] <= 2.5 * pitch && !cross.some(wd => wd.y1 > lines[i - 1] && wd.y0 < lines[i])) i--;
+    return lines[i];
+  };
+  const s0 = startOf(0, L), s1 = startOf(1, R);
+  if(s0 == null || s1 == null) return null;
+  const colTop = Math.min(s0, s1);
+  if(cross.some(wd => wd.y1 > colTop)) return null;   // a word across the gutter inside the columns
+  const inCols = plain.filter(wd => wd.y0 >= colTop - 0.5);
+  // The cut: the middle of the widest strip of [a, b] no column word crosses.
+  const spans = inCols.filter(wd => wd.x1 > a && wd.x0 < b).map(wd => [Math.max(a, wd.x0), Math.min(b, wd.x1)]).sort((p, q) => p[0] - q[0]);
+  let best = null, at = a;
+  spans.forEach(([p, q]) => { if(p - at > (best ? best[1] - best[0] : 0)) best = [at, p]; at = Math.max(at, q); });
+  if(b - at > (best ? best[1] - best[0] : 0)) best = [at, b];
+  if(!best || best[1] - best[0] < 1) return null;
+  const g = (best[0] + best[1]) / 2;
+  const left = inCols.filter(wd => wd.x1 <= g), right = inCols.filter(wd => wd.x0 >= g);
+  if(left.length + right.length !== inCols.length) return null;
+  if(L.some(T => T.x1 > g) || R.some(T => T.x0 < g)) return null;
+  const half = pcSheetHalfGap(inCols), pad = 14;
+  const ext = ws => ({ y0: Math.min(...ws.map(wd => wd.y0)), y1: Math.max(...ws.map(wd => wd.y1)), x0: Math.min(...ws.map(wd => wd.x0)), x1: Math.max(...ws.map(wd => wd.x1)) });
+  const eL = ext(left), eR = ext(right);
+  const header = P.words.some(wd => wd.y1 <= colTop);
+  const pageBot = P.y + P.h;
+  const clampY = y => Math.max(P.y, Math.min(pageBot, y));
+  const bands = [];
+  let lTop = first ? P.y : clampY(eL.y0 - half);
+  if(header){ const hb = clampY(colTop - half); bands.push({ sx: x, sy: P.y, sw: w, sh: hb - P.y, dx: 0, col: null }); lTop = hb; }
+  const lBot = clampY(eL.y1 + half), rTop = clampY(Math.max(header ? colTop - half : eR.y0 - half, eR.y0 - half)), rBot = clampY(eR.y1 + (last ? pad : half));
+  const cw = Math.max(eL.x1 - eL.x0, eR.x1 - eR.x0);
+  const t0 = PC_SHEET_ONE_ALIGN === 'center' ? (w - cw) / 2 : eL.x0 - x;   // where each column's text starts, in sheet points
+  bands.push({ sx: x, sy: lTop, sw: g - x, sh: lBot - lTop, dx: t0 - (eL.x0 - x), col: 0 });
+  bands.push({ sx: g, sy: rTop, sw: x + w - g, sh: rBot - rTop, dx: t0 - (eR.x0 - g), col: 1 });
+  return bands.every(bd => bd.sh > 0 && bd.sw > 0) ? bands : null;
 }
 /* One page of a sheet: its words and its chord names in reading order, in
    that page's PDF points with y running down the page. */
@@ -630,7 +735,7 @@ async function pcSheetPage(page, one){
   const lines = segs.filter(ws => ws.every(w => PC_SHEET_CHORD_RE.test(w.s)));
   lines.forEach(ws => { ws.col = !one && ws[0].x0 > vp.width * 0.45 ? 1 : 0; });
   lines.sort((p, q) => p.col - q.col || p[0].y0 - q[0].y0);
-  const toks = lines.flatMap(ws => ws.map(w => ({ name: w.s, x0: w.x0, x1: w.x1, y0: w.y0, y1: w.y1 })));
+  const toks = lines.flatMap(ws => ws.map(w => ({ name: w.s, x0: w.x0, x1: w.x1, y0: w.y0, y1: w.y1, col: ws.col })));
   return { page, width: vp.width, height: vp.height, words, toks };
 }
 /* Which sheet chord each note of the card is: tok[si][rep][ni]. A rest is not a
@@ -733,7 +838,7 @@ async function pcSheetDraw(paperOrCol){
      devicePixelRatio; without it the sheet is blurred on a big screen. */
   const fill = typeof siteFill === 'function' ? siteFill() : 1;
   const dpr = Math.min((window.devicePixelRatio || 1) * fill, 3);
-  let canvas = paper.querySelector('canvas');
+  let canvas = paper.querySelector('canvas:not(.pc-sheet-print)');
   if(!canvas){
     canvas = document.createElement('canvas');
     canvas.setAttribute('role', 'img');
@@ -743,7 +848,10 @@ async function pcSheetDraw(paperOrCol){
   const k = scale * dpr;
   const off = document.createElement('canvas');   // draw off screen, then swap — no blank flash on a redraw
   off.width = Math.floor(crop.w * k); off.height = Math.floor(crop.h * k);
-  /* Each page on a canvas of its own, then placed under the one before
+  // ONE LONG COLUMN: the two-column drawing, for the Print button only (pcSheetModel).
+  const prn = model.split ? document.createElement('canvas') : null;
+  if(prn){ prn.width = off.width; prn.height = Math.floor(model.printH * k); }
+  /* Each page on a canvas of its own, then its bands placed on the sheet
      (pdf.js paints a page's whole canvas white, so pages can't share one). */
   try {
     const ctx = off.getContext('2d');
@@ -753,13 +861,21 @@ async function pcSheetDraw(paperOrCol){
       const vp = P.page.getViewport({ scale: k, offsetX: -P.x * k, offsetY: -P.y * k });
       await P.page.render({ canvasContext: pc.getContext('2d'), viewport: vp }).promise;
       if(paper._sheetJob !== job) return;
-      ctx.drawImage(pc, 0, Math.floor(P.top * k));
+      P.bands.forEach(b => {
+        const sx = Math.round((b.sx - P.x) * k), sy = Math.round((b.sy - P.y) * k), sw = Math.round(b.sw * k), sh = Math.round(b.sh * k);
+        if(sw > 0 && sh > 0) ctx.drawImage(pc, sx, sy, sw, sh, Math.round(b.dx * k), Math.round(b.dy * k), sw, sh);
+      });
+      if(prn) prn.getContext('2d').drawImage(pc, 0, Math.floor(P.top * k));
     }
   }
   catch(e){ if(paper._sheetJob === job) msg(t('ca.sheetFailed')); return; }
   if(paper._sheetJob !== job || !paper.isConnected) return;
   canvas.width = off.width; canvas.height = off.height;
   canvas.getContext('2d').drawImage(off, 0, 0);
+  let printCanvas = paper.querySelector('canvas.pc-sheet-print');
+  if(prn && !printCanvas){ printCanvas = document.createElement('canvas'); printCanvas.className = 'pc-sheet-print'; printCanvas.setAttribute('aria-hidden', 'true'); canvas.after(printCanvas); }
+  if(prn){ printCanvas.width = prn.width; printCanvas.height = prn.height; printCanvas.getContext('2d').drawImage(prn, 0, 0); }
+  else if(printCanvas) printCanvas.remove();
   paper.style.width = crop.w * scale + 'px';
   paper._sheetFill = fill;
   msg('');
