@@ -1740,6 +1740,9 @@ async function sheetFollowWalk(page, run, events, stats) {
     for (const id of ids) {
       await metrics(w, h); await sleep(400);
       await run(`sheet-follow:${id}:open`, `caFocusActivity(${JSON.stringify(id)})`, 300);
+      /* The page's known, harmless ResizeObserver warning (app/boot.js only warns on it; the other walks drop it
+         at their own opening step too): three lines here, one per sheet, were counted as error events (2026-11-16). */
+      for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'sheet-follow:' + id + ':open' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
       for (let i = 0; i < 40 && !(await run(`sheet-follow:${id}:ready`, `!!(document.querySelector('.ca-card[open] .pc-sheet-paper') || {})._sheet`, 250)); i++);
       const a = await run(`sheet-follow:${id}:${w}`, probe, 10);
       if (!a) { fail(`${id}:${w}`, 'the sheet did not draw'); continue; }
