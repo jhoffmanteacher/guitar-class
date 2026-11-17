@@ -235,6 +235,13 @@ and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fi
     URL and fail on either VALUE appearing anywhere in the saved take. (c) nothing tests the escaping of the
     Evaluate-all row's tooltip (`teacher-mic.js`, `title="${escAttr(teacherMicEvalNames[i] || '')}"`): a name with
     `"` and `<` must come out escaped; removing `escAttr` must go red. Break-it proof for each; no review round.
+  - **W19 DONE (Windows, 2026-11-17; one Opus builder, one Opus `site-reviewer` round: 0 BLOCKER, 0 MAJOR, 3 MINOR,
+    all fixed with break-it proof; `tools/save-loop.mjs` only).** None of the 5 was caught on today's code before. P4
+    and P12 (+P12b) now red in L1 (a new fake phase "denied", self-test F15); P15 and P16 red in the new L16a (no period)
+    and L16b (period kept: never asked again), which also check the module picker and the failed-read guard. P11 is not
+    a fault: the only marker writer, `trmWriteMarker` (`teacher-remove.js:256`), writes `max(now, prev+1, other+1)`.
+    Not testable today: dropping `applyActivityGate()` from the late load (`CA_GATE_LOCKS = false`). save-loop 200 of
+    200, directed 80 of 80, untagged 0; shared-chromebook-loop untouched (126 of 126, K-TAB in band).
   - **W19. AFTER the Mac writes here "load-retry is on main": close the test gaps its round 2 review left
     (`tools/save-loop.mjs`, `tools/shared-chromebook-loop.mjs`; no site file).** Five of that reviewer's 20 planted
     faults passed both tools: P4 the denied flag kept after a late load (`progressLoadDenied` not cleared), P11 the
