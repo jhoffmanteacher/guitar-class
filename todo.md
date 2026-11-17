@@ -32,53 +32,6 @@ Ordinary work does not wait for any of this: a Fast change or a new activity he 
 - **Ask him when he flags it:** which chords it got wrong, and whether it marked right chords wrong, wrong chords
   right, or heard nothing.
 
-## Queued by Jonathan 2026-11-13: work out the right highlight timing for every Play Along
-
-**For Claude Code: this is a job to do, not only a warning.** Any session about to touch the practice-card player
-(`app/cards.js`, `pcFrame()`, `pcSheetMark()`, the `PC_*_LEAD` constants) should read it first so two sessions do
-not both change the timing. Written from a chat session that read the code only: nothing was run or measured, and
-no code was changed.
-
-- **What Jonathan said:** on ca-45 (Sweet Child O' Mine, Lyrics and Chords) the highlights "feel off". Then:
-  "figure out proper timing for all of the play alongs. the highlights should show up only very slightly before the
-  actual beat". (An earlier version of this note, pushed the same morning, asked for the sheet dot's lead to follow
-  the tempo. He replaced that with this.)
-- **The rule he wants:** on every Play Along card, a highlight appears a very small, steady amount before the beat
-  is HEARD. Not half a beat early, not late, and the same on every card, song and speed.
-- **This reverses three earlier settings. Say so in the report:**
-  - `PC_SHEET_LEAD = 0.175` (lyric-sheet dot; he tuned it by ear on 2026-10-19, on ca-38);
-  - `PC_ROW_LEAD = 0.15` (first note of a new row or page, 2026-10-22, ca-29);
-  - `PC_TAB_LEAD = 0` on the decoder's position, which is already about one output latency ahead of the sound
-    (2026-10-22). This one may already be close to what he wants.
-- **What exists (read from the code, check it):** every card's cursor comes from `audio.currentTime` in
-  `pcFrame()`. The sound reaches the speakers later, by about `SNIP_OUTPUT_LATENCY` (0.08 s, an estimate for a
-  laptop's speakers). So against the HEARD beat, a tab note lights about 80 ms early, a note on a new row about
-  230 ms early, and a sheet dot about 255 ms early. The sheet dot stays filled for `PC_SHEET_SOLID = 0.42` of a
-  beat, which at 125 BPM is about 200 ms, so on ca-45 it may be hollow again before the beat sounds.
-- **Do:**
-  1. Measure, do not reason. For every `view: 'card'` activity in `class-activities.js` (tab cards, chord-grid
-     cards and the three sheet cards ca-38, ca-44, ca-45), at each speed, find when each highlight paints against
-     when its beat is heard. `tools/playalong-loop.mjs` already drives the cards in headless Chrome; extend it or
-     write a small tool beside it. Report the lead per card type and speed, with the count of cards measured.
-  2. Sort what you find into two piles: a lead that is wrong by design (the constants above), and a card whose
-     lead is NOT steady through the song. An unsteady one is a chart or beat-map fault, not a lead
-     (`python3 tools/beat-audit.py --only <slug>`; skill `song-facts`). Fix or list those separately.
-  3. Propose ONE small lead for every card type, in real time at every speed, and make the sheet dot still be
-     filled when the beat sounds. Keep whatever real reason the row lead had (the eye has to jump to a new line)
-     only if it still fits "very slightly".
-  4. "Very slightly" is his to set: ask him for the number (AskUserQuestion, 2 to 4 options in milliseconds), and
-     give him a live override on the URL, like `?snipcal=1&lat=`, so he can check it by eye on a classroom
-     Chromebook before it is fixed in the code.
-  5. Ask him whether the same rule covers the step snippets' bar dots and the Song Journey pages. The dots were
-     left slightly early on purpose (2026-09-18, "slightly early, but in an accurate way"), which sounds like the
-     same rule, so they may need nothing.
-- **Leave alone:** the metronome click (it is scheduled to land on the heard beat), `anchor` and `barTimes` unless
-  step 2 finds a measured fault.
-- **Rules that apply:** skill `audio-and-snippets`; `node tools/playalong-loop.mjs` and report its summary line;
-  screenshots at 1366x657; a `CHANGELOG.md` entry, because students see it. Its own worktree, then ship to main.
-- **When it ships:** delete this section, and update the "dots still lead the beat" part of skill
-  `audio-and-snippets` and the comments above the three constants so they describe the new rule.
-
 ## Split the four parts that are already over 2,000 lines
 
 Added 2026-11-11 (Jonathan: "let's make sure we split those files at some point"). Not urgent, but do it in a

@@ -520,8 +520,8 @@ function caCardBodyHtml(a, opts){
    delay, snipLatency() (app/snippets.js, an estimate). So the cursor reads
    the music at currentTime + (PC_LEAD - snipLatency()) x the playback rate
    (pcLeadShift): with a lead shorter than the latency it reads a little
-   BEHIND the decoder. PC_LEAD is a placeholder until Jonathan picks the
-   number by eye: `?snipcal=1&lead=<ms>` on the URL overrides it live
+   BEHIND the decoder. 60 ms is Jonathan's choice (2026-11-16, from 30 / 60 / 90
+   with the measured numbers); `?snipcal=1&lead=<ms>` on the URL overrides it live
    (app/boot.js; `&lat=<ms>` overrides the latency the same way). */
 const PC_LEAD = 0.06;
 function pcLead(){ return typeof window.__pcLead === 'number' ? window.__pcLead : PC_LEAD; }

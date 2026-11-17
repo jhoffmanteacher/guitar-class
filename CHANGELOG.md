@@ -8,6 +8,7 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-11-16 — An activity can stay in Today's activities
 
+- **Play Along cards: every highlight now lights just before you hear its beat,** the same small amount on every card, song and speed. Before, the first note of a new line and the dot on a lyric sheet lit about a quarter of a second early. The lyric-sheet dot now stays filled when the beat sounds.
 - **A saved microphone recording no longer keeps your name.** It is linked to your account so your teacher can see whose it is. The Privacy page says so now.
 - **Strum Hero and Strum Radar: the "Change pattern" button on the results screen has room around its words** and no longer sits tight under the tempo buttons.
 - **Lyric-sheet play-alongs (Sweet Child O' Mine and the others) keep the line you're playing on screen in full screen,** even if you press Full screen while the song plays. Before, the sheet jumped too far each time it moved.

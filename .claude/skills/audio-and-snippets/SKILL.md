@@ -76,8 +76,8 @@ buffered milliseconds.
 beat** (Jonathan, 2026-11-13: "the highlights should show up only very
 slightly before the actual beat"; the same on every card, song and speed).
 - **Practice / Play Along cards** follow it exactly since 2026-11-16: one
-  constant, `PC_LEAD` (THE LEAD in `app/cards.js`; a 60 ms placeholder until
-  Jonathan picks the number), is how long before the heard beat (the decoder's
+  constant, `PC_LEAD` (THE LEAD in `app/cards.js`; 60 ms, Jonathan's choice of
+  2026-11-16; the step snippets' bar dots stay on the heard beat, his choice too), is how long before the heard beat (the decoder's
   position plus `snipLatency()`) a tab note, a chord-grid beat, a new tab row,
   and a lyric sheet's dot and "This bar" cell light. `?snipcal=1&lead=<ms>`
   overrides it live. It replaced `PC_TAB_LEAD` 0, `PC_ROW_LEAD` 0.15 and
