@@ -12,21 +12,21 @@ with the full record of the 2026-11-11 cut and its plan: `git show 386d063:todo.
 1. **"the cure", set the beat by ear.** Open the site with `?snipcal=1&mapshift=0#class-activities/ca-13` on the
    end of the address, Metronome on. Play it as it opens, then Guitar off, then Normal speed: all four should feel
    the same now. Then try `&mapshift=20` and `&mapshift=40` in place of `&mapshift=0`. Tell Claude the number where
-   the highlight feels "very slightly before" the beat.
+   the highlight lands ON the beat.
 2. **"the cure", bar 85 (the Outro).** The audit says the record plays about 118 ms early there. Does it look off?
 3. **Lyric sheets (Sweet Child O' Mine, ca-45).** The sheet now scrolls 0.3 s ahead so a new line is on screen
    before its first chord (Windows, 2026-11-17). Too early, too late, or fine?
-4. **Play Along highlights in general.** They light 60 ms before the beat since 2026-11-16. If that feels wrong on
-   a Chromebook, try `?snipcal=1&lead=30` or `&lead=90` and say which.
+4. **Play Along highlights are ON the beat since 2026-11-17** (your call: "exactly on the beat and not ahead of it
+   for everything"). "On the beat" rests on a guess of 80 ms for a Chromebook's speakers: if highlights look late
+   or early on a class Chromebook, try `?snipcal=1&lat=40` or `&lat=120` and say which looks right.
 
 **Decide (tell Claude; each is one sentence):**
-5. **Old mic recordings still hold a name.** New ones do not (2026-11-16). Either press "Delete N recordings older
-   than 30 days" in Mic recordings when you are ready, or ask for a line on the Privacy page saying older ones may.
+Decided 2026-11-17: old mic recordings that still hold a name are ignored for now; the sign-in load fix gets NO
+second line after a student's first change.
 6. **Friday: which of this week's changes get a Fable review**, and say when the weekly limit has reset (every agent
    is on Opus until then). The list is at the top of WORKFLOW.
-7. **On hold until you say go:** the automatic blocks for the "never" rules (W12) and the design-values tidy (W15).
-8. **The sign-in load fix** (still in review, not live): once a student changes something, the "saved work has not
-   loaded yet" line goes away and nothing says their earlier work is missing. Want a second line that says so?
+7. **On hold until you say go:** the design-values tidy (W15). (You released the "never" blocks, W12, on 2026-11-17:
+   Windows is building it.)
 
 **Only you can do:**
 9. **The class-rank rules paste (Paste F).** NOT ready yet: Claude will say "W13 ready: paste <file>". Then Firebase
