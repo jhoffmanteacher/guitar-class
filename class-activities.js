@@ -7498,6 +7498,7 @@ window.CLASS_ACTIVITIES = [
           },
           bars: ['A5', 'A5', 'A5', 'A5'],   // A5 only for ▶ Play strum's sound; hideNames keeps it off the chart
           barsPerRow: 4,   // four bars on one line (Jonathan, 2026-11-17)
+          bpm: 85,         // the slider's first tempo (Jonathan, 2026-11-17: "start ca-53 at 85 bpm")
           hideNames: true, // muted: no chord name over the bars (Jonathan, 2026-11-17)
         },
       },
@@ -7517,6 +7518,7 @@ window.CLASS_ACTIVITIES = [
           },
           bars: ['A5', 'C5', 'D5', 'D5', 'A5', 'C5', 'D5', 'D5'],
           barsPerRow: 4,   // the chorus on one row, shown twice (Jonathan, 2026-11-17)
+          bpm: 85,         // the slider's first tempo (Jonathan, 2026-11-17)
         },
       },
     ],
