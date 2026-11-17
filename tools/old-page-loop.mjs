@@ -89,7 +89,8 @@
    never gets (only in a new part its old list never fetches, or only in a new app script), referenced from a file
    an old page runs, with file:line: a reference behind `typeof` is SKIPPED (silently not done), any other THROWS
    when reached. A part an old-list part fetches itself (loadScriptOnce('…'), a bridge like fix A2) counts as
-   fetched; whether it arrives in time is left to the run (at-resolve, cache-fast). Every UNGUARDED reference is
+   fetched only if the old page in the run (probe-old) really fetched it; whether it arrives in time is left to
+   the run (at-resolve, cache-fast). Every UNGUARDED reference is
    a finding, the name moved or new in this push (labelled: a new name reached only after a guarded call into the
    new part, as ca5a220b's scStart after scOpen, cannot throw, but that cannot be proved statically: read the
    lines). A guarded reference to a name the old site had is a finding (SKIPPED); to a new name, a NOTE.
@@ -591,7 +592,8 @@ function bindsLocally(text, q){
    that an old page never gets, referenced from a file an old page DOES run, is a finding, with file:line.
    What an old page runs: its OLD eager scripts (old text) and inline handlers, every file of its OLD lists that
    the new tree has (NEW text: that is what it fetches), and any file one of those fetches itself with a literal
-   loadScriptOnce('…') (a bridge such as fix A / A2: its names count as reachable; WHEN they arrive is the run's
+   loadScriptOnce('…') that the old page in the run really fetched (a bridge such as fix A / A2: its names count as
+   reachable; WHEN they arrive is the run's
    question). Names it never gets: declared at top level in a NEW list part or NEW eager script, declared nowhere
    it runs (nor assigned as window.X there). A reference is an identifier in code (not in a comment, not in a
    string except an on…="…" handler), not a property (obj.name), not an object key, not shadowed by a binding of
@@ -603,11 +605,13 @@ function staticPass(){
   runs.push({ file: 'index.html (inline handlers)', text: inlineHandlers(OLD.tree.read('index.html') || '').join('\n'), side: 'old' });
   const inRuns = new Set(runs.map(r => r.file));
   for (const g of GROUPS) for (const f of g.oldFiles) if (!inRuns.has(f) && NEW.tree.has(f)){ runs.push({ file: f, text: NEW.tree.read(f), side: 'new' }); inRuns.add(f); }
-  const bridged = [];
+  const bridged = [], unbridged = [];
   for (let k = 0; k < runs.length; k++) if (runs[k].side === 'new'){   // a bridge is a part loading another part itself
     for (const m of scanJs(runs[k].text).code.matchAll(/\bloadScriptOnce\s*\(\s*['"]([^'"]+)['"]/g)){
       const f = m[1];
       if (inRuns.has(f) || !NEW.tree.has(f) || !/\.js$/.test(f)) continue;
+      // a literal in the code is not a bridge: the old page in the run must have fetched it (review R2-3)
+      if (!FETCHED.has(f)){ unbridged.push({ file: f, by: runs[k].file }); continue; }
       runs.push({ file: f, text: NEW.tree.read(f), side: 'new' }); inRuns.add(f); bridged.push({ file: f, by: runs[k].file });
     }
   }
@@ -649,7 +653,7 @@ function staticPass(){
       found.get(n).push({ file: r.file, line: ln + 1, guarded, fn: reg ? reg.name : null, text: lines[ln].trim().slice(0, 110) });
     }
   }
-  return { found, homes, bridged, runs: runs.length };
+  return { found, homes, bridged, unbridged, runs: runs.length };
 }
 
 // ───────────────────────── one run ─────────────────────────
@@ -791,9 +795,6 @@ for (const g of GROUPS){
   console.log(`  ${g.array} (loader ${g.loader}()): old ${g.oldFiles.length} parts, new ${g.newFiles ? g.newFiles.length : 'NO LIST'}` +
     `${same ? ', same list' : ', LIST CHANGED'}${ran ? `; ${g.entries.length} calls from outside it into it (${g.entries.filter(e => e.guarded).length} behind a typeof guard)${SAME ? '; no file differs: run as a self-check' : ''}` : '; no file differs: not run'}`);
 }
-const STATIC = staticPass();
-console.log(`  static: ${STATIC.homes.size} names the new site declares that an old page never gets; ${STATIC.found.size} of them referenced from the ${STATIC.runs} files an old page runs`);
-for (const b of STATIC.bridged) console.log(`  static: ${b.file} is fetched by ${b.by} itself (loadScriptOnce), outside the loader's chain: its names count as reachable; whether they arrive in time is the run's question`);
 if (VERBOSE) for (const g of RUN) console.log(`  ${g.short} entry points (A = called in a loader .then, G = behind a typeof guard any time, S = every caller guards it):\n    ` +
   g.entries.map(e => `${e.call}${e.atResolve || e.guarded || e.guardAll ? ' [' + (e.atResolve ? 'A' : '') + (e.guarded ? 'G' : '') + (e.guardAll ? 'S' : '') + ']' : ''}`).join(' · '));
 if (!RUN.length){ console.log(`\nold-page-loop: no part list and no part file differs${appChanged ? ' (the app scripts do; this tool runs the lazy groups only)' : ''}: nothing to run. ✓ 0 findings`); process.exit(0); }
@@ -862,6 +863,13 @@ for (const g of RUN){
   if (!caught) die(`canary: the new page without ${drop} made no call throw a missing name: the tool is blind`);
   g.canary = `without ${drop} (declares ${declCount(drop)} entry names) ${caught} calls threw a missing name`;
 }
+/* The static pass runs after the probe-old runs: a part an old-list part loads itself counts as bridged only if the
+   old page REALLY fetched it there (review R2-3: a loadScriptOnce whose condition is never true on an old page). */
+const FETCHED = new Set([...fetched.values()].flat());
+const STATIC = staticPass();
+console.log(`  static: ${STATIC.homes.size} names the new site declares that an old page never gets; ${STATIC.found.size} of them referenced from the ${STATIC.runs} files an old page runs`);
+for (const b of STATIC.bridged) console.log(`  static: ${b.file} is fetched by ${b.by} itself (loadScriptOnce), outside the loader's chain: its names count as reachable; whether they arrive in time is the run's question`);
+for (const b of STATIC.unbridged) console.log(`  static: ${b.by} names loadScriptOnce('${b.file}') but the old page in the run never fetched it: not a bridge, its names count as never fetched`);
 for (const g of RUN){
   const sfx = RUN.length > 1 ? `:${g.short}` : '';
   const cases = [...casesFor(g), ...fetched.get(g).filter(f => g.oldFiles.includes(f) || (g.newFiles || []).includes(f)).map(f => ({ name: `fail-${f}${sfx}`, group: g, page: 'old', serve: () => NEW, failOnce: f }))];
