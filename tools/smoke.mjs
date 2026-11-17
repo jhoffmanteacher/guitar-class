@@ -1760,7 +1760,7 @@ async function sheetFollowWalk(page, run, events, stats) {
   }
   /* WHEN, not only where (W16-1, 2026-11-16): the follow above is forced instant, so it cannot see a line that
      arrives late. A smooth scroll takes time (a line down up to about 0.2 s to come fully on screen, the jump back
-     to the top of the next column 0.3 to 0.6 s), and with the dot lit only PC_LEAD (60 ms) before the beat is heard,
+     to the top of the next column 0.3 to 0.6 s), and with the dot lit only PC_LEAD (60 ms then; 0 since 2026-11-17) before the beat is heard,
      a follow that waited for the dot brought new lines on screen up to 92 ms, and the column jump 250 to 520 ms,
      after their first chord was heard. Here the page's own pcFrame runs on its real requestAnimationFrame loop with
      REAL smooth scrolling (the reduce-motion jump is not used); only the audio element is fake, its clock running in

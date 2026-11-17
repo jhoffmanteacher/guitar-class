@@ -520,10 +520,16 @@ function caCardBodyHtml(a, opts){
    delay, snipLatency() (app/snippets.js, an estimate). So the cursor reads
    the music at currentTime + (PC_LEAD - snipLatency()) x the playback rate
    (pcLeadShift): with a lead shorter than the latency it reads a little
-   BEHIND the decoder. 60 ms is Jonathan's choice (2026-11-16, from 30 / 60 / 90
-   with the measured numbers); `?snipcal=1&lead=<ms>` on the URL overrides it live
-   (app/boot.js; `&lat=<ms>` overrides the latency the same way). */
-const PC_LEAD = 0.06;
+   BEHIND the decoder. PC_LEAD is 0 since 2026-11-17: ON the heard beat, not ahead
+   of it (Jonathan: "play along highlights should be exactly on the beat and not
+   ahead of it for everything ... it's confusing otherwise"; this reverses his 60 ms
+   of the day before). The step snippets' bar dots are on the heard beat too, so
+   every highlight on the site now follows one rule. "Heard" still rests on the
+   latency estimate: `?snipcal=1&lead=<ms>` on the URL overrides the lead live
+   (app/boot.js; `&lat=<ms>` overrides the latency the same way). The lyric
+   sheet's SCROLL keeps its own look-ahead (PC_SHEET_FOLLOW_AHEAD): that is the
+   page moving, not a highlight. */
+const PC_LEAD = 0;
 function pcLead(){ return typeof window.__pcLead === 'number' ? window.__pcLead : PC_LEAD; }
 // File seconds the cursor reads ahead of audio.currentTime (negative = behind it).
 function pcLeadShift(root){ return (pcLead() - snipLatency()) * pcRate(root); }

@@ -356,7 +356,7 @@ const KNOWN = [
    latency. Until 2026-11-16 there were three leads (tab 0, row +0.15, sheet 0.175 s ahead of the decoder). The page's
    own values are what the walks use; a value that no longer matches its pin fails the run until someone has looked at
    the new one on a card and changed the pin here. */
-const LEAD_PINS = { PC_LEAD: 0.06, snipLatency: 0.08 };   // PC_LEAD 0.06: a PLACEHOLDER (2026-11-16) until Jonathan picks the number by eye
+const LEAD_PINS = { PC_LEAD: 0, snipLatency: 0.08 };   // PC_LEAD 0: on the heard beat (Jonathan, 2026-11-17); it was 0.06 for one day
 /* R15: how far before the end of a looped section (bars) a lead that looks past it is held (pcLoopClamp). */
 const LOOP_CLAMP = 1e-4;
 

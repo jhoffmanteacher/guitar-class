@@ -10085,7 +10085,7 @@ function checkEnglishTermsInSpanish(I18N) {
      console preview calls it with preview:true, and
      every silencer that stops a snippet also stops a card (pcStop).
    ════════════════════════════════════════════════════════════════════ */
-const PC_LEAD_PIN = 0.06;   // 60 ms before the heard beat: Jonathan's choice, 2026-11-16 (from 30 / 60 / 90, with the measured numbers)
+const PC_LEAD_PIN = 0;   // ON the heard beat: Jonathan, 2026-11-17 ("exactly on the beat and not ahead of it for everything"); it was 0.06 for one day
 function checkPracticeCards(ctx) {
   head('1bf. Practice cards');
   let bad = 0, cards = 0;

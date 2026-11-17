@@ -100,11 +100,13 @@ a constant: currentTime is the decoder's position, not the speakers');
 seek stays on the true decoder position, or every lap would clip its last
 buffered milliseconds.
 
-**The rule for every highlight: a very small, steady lead before the HEARD
-beat** (Jonathan, 2026-11-13: "the highlights should show up only very
-slightly before the actual beat"; the same on every card, song and speed).
+**The rule for every highlight: ON the heard beat, not ahead of it**
+(Jonathan, 2026-11-17: "exactly on the beat and not ahead of it for everything
+... it's confusing otherwise"; the same on every card, song and speed. On
+2026-11-13 he had asked for "only very slightly before the actual beat", and
+picked 60 ms on 2026-11-16: both are reversed).
 - **Practice / Play Along cards** follow it exactly since 2026-11-16: one
-  constant, `PC_LEAD` (THE LEAD in `app/cards.js`; 60 ms, Jonathan's choice of
+  constant, `PC_LEAD` (THE LEAD in `app/cards.js`; 0 = ON the heard beat since 2026-11-17 ("exactly on the beat and not ahead of it for everything"), after one day at 60 ms, Jonathan's choice of
   2026-11-16; the step snippets' bar dots stay on the heard beat, his choice too), is how long before the heard beat (the decoder's
   position plus `snipLatency()`) a tab note, a chord-grid beat, a new tab row,
   and a lyric sheet's dot and "This bar" cell light. `?snipcal=1&lead=<ms>`
