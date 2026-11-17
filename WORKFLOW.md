@@ -32,6 +32,9 @@ Dates are the Pacific calendar date. `CACHE_VERSION` and commit timestamps may s
 Start here. Update this block whenever an item opens or closes; each line says where the detail is.
 
 **THE MAC'S OWN LIST, 2026-11-17 (delete each line when it is no longer news):**
+- **IN FLIGHT: two-column lyric sheets shown as ONE long column** (Jonathan, 2026-11-17: "you could cut the pdf in
+  half and just keep scrolling so it doesn't have columns"). ca-45 and ca-38; display only; the column-change jump
+  goes. Branch `feat/sheet-one-column` (worktree `sheet-scroll`), the same Opus builder. Tell him when it is live.
 - **On main since 2026-11-17 (Fast): the lyric sheet keeps the playing line at the top** (12 px under the "This bar"
   strip, one scroll per line; a column change is one instant jump 0.1 s before column 2's first chord; the first line
   after Play stays low; Jonathan asked for it twice and may still want the column jump earlier), **Play Along
