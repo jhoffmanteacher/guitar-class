@@ -640,6 +640,11 @@
     'ca.keyVersion':           { en: 'Key', es: 'Tonalidad' },
     'ca.keyOf':                { en: 'Key of {key}', es: 'Tonalidad de {key}' },
     'ca.recordingVersion':     { en: 'Recording', es: 'Grabación' },
+    // Chords / Tab / Lyrics on a card with otherViews (CARD VIEWS, app/cards-views.js): what the card shows, the song keeps playing.
+    'ca.viewSwitch':           { en: 'Show the song as', es: 'Mostrar la canción como' },
+    'ca.viewChords':           { en: 'Chords', es: 'Acordes' },
+    'ca.viewTab':              { en: 'Tab', es: 'Tab' },
+    'ca.viewLyrics':           { en: 'Lyrics', es: 'Letra' },
     'ca.cardHelpNote':         { en: 'The step-by-step help. Open any step.', es: 'La ayuda paso a paso. Abre cualquier paso.' },
 
     // ── Exit checks (kind:'check' class activities — see class-activities.js) ──

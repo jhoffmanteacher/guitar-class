@@ -677,13 +677,14 @@ const PAGE_SRC = String.raw`(() => {
       const miss = [];
       if (view.rec != null && !press('.ca-rec-switch', view.rec)) miss.push('recording');
       if (view.key != null && !press('.ca-key-switch:not(.ca-rec-switch)', view.key)) miss.push('key');
-      if (view.chord != null && !press('.ca-chord-switch:not(.ca-key-switch):not(.ca-bass-switch)', view.chord)) miss.push('chords');
+      if (view.chord != null && !press('.ca-chord-switch:not(.ca-key-switch):not(.ca-bass-switch):not(.ca-view-switch)', view.chord)) miss.push('chords');
       if (view.bass != null && !press('.ca-bass-switch', view.bass)) miss.push('bass');
+      if (view.cv != null && !press('.ca-view-switch', view.cv)) miss.push('card view');
       root = theRoot();
       if (!root || root.dataset.id !== id) return { ok: false, why: 'the card closed after a view switch' };
       const pressed = function(sel){ const bs = root.querySelectorAll(sel + ' button'); for (let i = 0; i < bs.length; i++) if (bs[i].getAttribute('aria-pressed') === 'true') return i; return -1; };
       return { ok: !miss.length, why: miss.length ? 'no switch for: ' + miss.join(', ') : '', sheet: !!root.querySelector('.pc-sheet'),
-        got: { rec: pressed('.ca-rec-switch'), key: pressed('.ca-key-switch:not(.ca-rec-switch)'), chord: pressed('.ca-chord-switch:not(.ca-key-switch):not(.ca-bass-switch)'), bass: pressed('.ca-bass-switch') },
+        got: { rec: pressed('.ca-rec-switch'), key: pressed('.ca-key-switch:not(.ca-rec-switch)'), chord: pressed('.ca-chord-switch:not(.ca-key-switch):not(.ca-bass-switch):not(.ca-view-switch)'), bass: pressed('.ca-bass-switch'), cv: pressed('.ca-view-switch') },
         hasGuitar: !!root.querySelector('.pc-guitar:not(.pc-counts)'), hasLoop: !!root.querySelector('.pc-loop-sw[data-loop-sw="loop"]'), hasBuild: !!root.querySelector('.pc-loop-sw[data-loop-sw="build"]'), hasSlider: !!root.querySelector('.pc-speed-range'), hasCounts: !!root.querySelector('.pc-counts'),
         sections: root.querySelectorAll('.pc-sec').length, state: snap(root),
         /* R4: the speed control as it opens: each stop's name and rate (* = the stop it is on), the slider's value. */
@@ -800,6 +801,24 @@ const PAGE_SRC = String.raw`(() => {
               await frame(dtOf(op.dt)); observe();
             }
             if (!hit) ev.timedOut = true;
+          } else if (op.op === 'probe'){
+            /* R17: the page as it stands. */
+            const a = primary(), lit = root.querySelector('.pc-tab .beat-now[data-seq], .pc-tab .beat-now[data-beat]');
+            const pg = lit && lit.closest('.pc-page'), pill = root.querySelector('.pc-sheet-pill'), paper = root.querySelector('.pc-sheet-paper');
+            let pi = -1;
+            if (pill) root.querySelectorAll('.pc-sheet-hit').forEach(function(h, i){ if (h.style.left === pill.style.left && h.style.top === pill.style.top) pi = i; });
+            const lsw = root.querySelector('.pc-loop-sw[data-loop-sw="loop"]');
+            ev.probe = { t: V.t, el: V.els.indexOf(a), nEls: V.els.length, file: a ? a._file : null, ct: a ? a._ct : null, rate: a ? a.playbackRate : null, playing: !!pcState,
+              seq: lit && lit.dataset.seq != null ? +lit.dataset.seq : null, beat: lit && lit.dataset.beat != null ? +lit.dataset.beat : null, page: pg ? +pg.dataset.page : null,
+              drawn: !!(paper && paper._sheet && paper._sheet.ok), pill: pi, strip: Array.prototype.findIndex.call(root.querySelectorAll('.pc-strip-cell'), function(c){ return c.classList.contains('now'); }),
+              pressed: Array.prototype.filter.call(root.querySelectorAll('.ca-view-switch button'), function(b){ return b.getAttribute('aria-pressed') === 'true'; }).map(function(b){ return b.dataset.view; }),
+              loop: root.dataset.loop || '', loopSw: lsw ? lsw.getAttribute('aria-checked') : null };
+          } else if (op.op === 'waitSheet'){
+            /* R17: the lyric sheet reads its PDF in REAL time; the fake clock stands still meanwhile. */
+            const until = Date.now() + op.max;
+            const drawn = function(){ const p = root.querySelector('.pc-sheet-paper'); return !!(p && p._sheet); };
+            while (!drawn() && Date.now() < until) await new Promise(function(r){ real.st(r, 50); });
+            if (!drawn()) ev.timedOut = true;
           } else if (op.op === 'untilSilent'){
             const end = V.t + op.max;
             const anyFile = function(){ for (let i = 0; i < V.els.length; i++) if (V.els[i]._attr) return true; return false; };
@@ -882,13 +901,19 @@ function fileIndex(tracks) {
   return idx;
 }
 
-/* R13: the view of a card. v = { rec, key, chord, bass } as names. */
+/* R17: a card's views (card.otherViews): its own is a sheet's lyrics, a chord grid's chords, else tab; the switch's
+   order; what a view replaces (everything a card DRAWS, never how it plays). */
+const CV_ORDER = ['chords', 'tab', 'lyrics'];
+const CV_DRAW = ['caption', 'caption_es', 'sections', 'chordGrid', 'everyStrum', 'restWord', 'counts', 'sheet', 'sheetChords', 'sheetColumns', 'sheetNamedAgain'];
+function ownViewOf(c) { return c.sheet ? 'lyrics' : c.chordGrid ? 'chords' : 'tab'; }
+/* R13: the view of a card. v = { rec, key, chord, bass, cv } as names. */
 function defaultView(a) {
   return {
     rec: a.recordingVersions ? (a.recordingStart || a.recording) : null,
     key: a.keyVersions ? (a.keyStart || a.key) : null,
     chord: a.chordVersions ? (a.chordStart === 'power' ? 'power' : 'full') : null,
     bass: a.bassNotes ? (a.bassStart === 'on' ? 'on' : 'off') : null,
+    cv: a.card.otherViews ? ownViewOf(a.card) : null,
   };
 }
 function viewLists(a) {
@@ -897,6 +922,7 @@ function viewLists(a) {
     key: a.keyVersions ? [a.key, ...Object.keys(a.keyVersions)] : [],
     chord: a.chordVersions ? ['full', 'power'] : [],
     bass: a.bassNotes ? ['off', 'on'] : [],
+    cv: a.card.otherViews ? CV_ORDER.filter(n => n === ownViewOf(a.card) || Object.prototype.hasOwnProperty.call(a.card.otherViews, n)) : [],
   };
 }
 function viewName(a, v) {
@@ -905,7 +931,8 @@ function viewName(a, v) {
   if (v.key) bits.push('key of ' + v.key);
   if (v.chord) bits.push(v.chord === 'power' ? 'power chords' : 'full chords');
   if (v.bass) bits.push(v.bass === 'on' ? 'bass notes' : 'strum only');
-  const same = ['rec', 'key', 'chord', 'bass'].every(k => v[k] === d[k]);
+  if (v.cv) bits.push(v.cv + ' view');
+  const same = ['rec', 'key', 'chord', 'bass', 'cv'].every(k => v[k] === d[k]);
   return (bits.join(', ') || 'the card') + (same && bits.length ? ' (as it opens)' : '');
 }
 function viewOf(a, v) {
@@ -914,6 +941,13 @@ function viewOf(a, v) {
   if (rv) { card = { ...card, ...rv.card }; track = rv.track; }
   const kv = v.key && v.key !== a.key ? a.keyVersions[v.key] : null;
   if (kv) track = kv.track;
+  /* R17: another card view. */
+  if (v.cv && v.cv !== ownViewOf(a.card)) {
+    const ov = a.card.otherViews[v.cv], base = {};
+    Object.keys(card).forEach(k => { if (!CV_DRAW.includes(k)) base[k] = card[k]; });
+    CV_DRAW.forEach(k => { if (k in ov) base[k] = ov[k]; });
+    card = { ...base, sections: ov.sections || a.card.sections, chordGrid: v.cv === 'chords' };
+  }
   const map = rv ? null : kv ? (v.chord === 'power' ? kv.power : kv.full) : (v.chord === 'power' ? a.chordVersions.power : null);
   const sections = card.sections.map(s => ({ ...s, notes: s.notes.map(n => (map && Array.isArray(n.frets) && Object.prototype.hasOwnProperty.call(map, n.note)) ? { ...n, note: map[n.note].note, frets: map[n.note].frets } : n) }));
   return { id: a.id, title: a.title, track, card: { ...card, sections }, bass: v.bass === 'on', bassMap: v.bass === 'on' ? a.bassNotes : null, v };
@@ -1266,17 +1300,17 @@ function planWalks(M) {
       { op: 'run', ms: whole + 6000, dt: STEP_MS });
     walks.push({ kind: 'endStop', loopWalk: true, name: 'Loop this part on, then off: the whole song stops at its end', stop: 'normal', guitar: false, ops, span: 'all', metro: false, fresh: true });
   }
-  if (M.isBase && M.open.hasLoop && ch.secs.length > 1) {
+  if ((M.isBase || M.cvAlt) && M.open.hasLoop && ch.secs.length > 1) {
     const secMs = (stop, S) => msFor(M, stop, S.fromBar - 1, S.fromBar - 1 + S.bars * S.reps);
     const cands = ch.secs.slice(0, -1).map(S => S.i).sort((p, q) => secMs('normal', ch.secs[p]) - secMs('normal', ch.secs[q]) || p - q);
     const loopSw = (name) => ({ op: 'click', sel: `.pc-loop-sw[data-loop-sw="${name}"]`, attr: 'aria-checked', want: 'true' });
-    stops.forEach((stop, j) => {
+    (M.isBase ? stops : ['slower']).forEach((stop, j) => {   // R17: another card view loops once, at Slower
       const si = cands[j % cands.length], S = ch.secs[si];
       const ops = setup(stop, false, true, null);
       ops.push(loopSw('loop'), startOp(si), { op: 'untilAudible', max: 60000, dt: FINE_MS }, { op: 'run', ms: secMs(stop, S) * 3 + msFor(M, stop, S.fromBar - 1, S.fromBar) * 0.5, dt: FINE_MS }, { op: 'click', sel: '.pc-play', stop: true });
       walks.push({ kind: 'lap', loopWalk: true, name: `loop this part · ${S.label} (section ${si + 1} of ${ch.secs.length}) · ${stop}`, stop, guitar: false, ops, span: 'lap', lapFrom: si, loopSi: si, laps: 3, metro: true, fresh: true });
     });
-    if (M.open.hasBuild) for (const spare of [true, false]) for (const g of (hasFull ? [false, true] : [false])) {
+    if (M.isBase && M.open.hasBuild) for (const spare of [true, false]) for (const g of (hasFull ? [false, true] : [false])) {
       const si = spare ? cands[0] : ch.secs.length - 1, S = ch.secs[si];
       const plan = [];
       stops.forEach((stop, k) => { for (let n = 0; n < (k < stops.length - 1 ? PC_BUILD_LAPS : 1); n++) plan.push(stop); });
@@ -1286,7 +1320,78 @@ function planWalks(M) {
       walks.push({ kind: 'lap', loopWalk: true, coarse: true, name: `build up speed · ${S.label} (section ${si + 1} of ${ch.secs.length}) · ${plan.length - 1} laps to Normal · ${spare ? 'the spare ready' : 'no spare (the seek)'}${g ? ' · guitar on' : ''}`, stop: stops[0], guitar: g, ops, span: 'lap', lapFrom: si, loopSi: si, build: plan, laps: plan.length, lateNeverLoad: !spare, metro: true, fresh: true });
     }
   }
+  /* R17 CARD VIEWS: the view switch pressed in the middle of a section while the song plays, to every other view of
+     the card, at Slower, Loop this part on for the first one. A probe just before the press, one frame after it, and a
+     bar and a half later (after a lyric sheet has drawn: the page's own PDF reading takes real time, the fake clock
+     waits); judgeSwap holds each to the place the clock says is sounding, in the view on screen. */
+  if (M.cvCharts && M.view.v.cv) {
+    const others = Object.keys(M.cvCharts).filter(n => n !== M.view.v.cv);
+    const si = ch.secs.findIndex(S => S.reps > 1) >= 0 ? ch.secs.findIndex(S => S.reps > 1) : 0, S = ch.secs[si];
+    others.forEach((to, k) => {
+      const ops = setup('slower', hasFull, false, null);
+      if (k === 0 && M.open.hasLoop) ops.push({ op: 'click', sel: '.pc-loop-sw[data-loop-sw="loop"]', attr: 'aria-checked', want: 'true' });
+      // Into the second lap (or the second bar), on the second half of beat 2: one frame later is still that beat.
+      const at = S.fromBar - 1 + (S.reps > 1 ? S.bars : 1) + 1.45 / M.meter.beats;
+      ops.push(startOp(si), { op: 'untilAudible', max: 60000, dt: FINE_MS }, { op: 'run', ms: msFor(M, 'slower', S.fromBar - 1, at), dt: FINE_MS },
+        { op: 'probe' }, { op: 'click', sel: `.ca-view-switch button[data-view="${to}"]`, sw: 'view' }, { op: 'run', ms: FINE_MS, dt: FINE_MS }, { op: 'probe' });
+      if (to === 'lyrics') ops.push({ op: 'waitSheet', max: 15000 }, { op: 'run', ms: FINE_MS, dt: FINE_MS }, { op: 'probe' });
+      ops.push({ op: 'run', ms: msFor(M, 'slower', at, at + 1.5), dt: FINE_MS }, { op: 'probe' }, { op: 'click', sel: '.pc-play', stop: true });
+      walks.push({ kind: 'viewSwap', name: `view switch mid-section · ${M.view.v.cv} -> ${to}${k === 0 && M.open.hasLoop ? ' · loop this part on' : ''}`, stop: 'slower', guitar: hasFull, ops, to, span: 'none', metro: false, fresh: true });
+    });
+  }
   return walks;
+}
+/* R17: a view switch mid-song. Each probe (the page as it stands: the element playing, its file and place, what is
+   lit) is held to the tool's own place for that moment (R1-R9) in the view the switch shows; across the press the
+   element, its file and its clock carry on (no new element, no reload, no seek: the place moves on by one frame),
+   the place is the same section, lap and beat in both views, and Loop this part stays as it was. */
+function judgeSwap(M, W, res) {
+  const issues = [], C = M.consts, lead0 = C.lead - C.latency;
+  if (res.fatal) return { issues: ['the walk could not run: ' + res.fatal], stats: { probes: 0 } };
+  (res.errors || []).forEach(e => issues.push('the page threw: ' + e));
+  if (!res.connected) issues.push('the card was redrawn in the middle of the walk');
+  const probes = res.events.filter(e => e.probe).map(e => e.probe);
+  const clickOp = W.ops.findIndex(o => o.op === 'click' && o.sw === 'view');   // ev.i is the op's index in the plan
+  const nBefore = res.events.filter(e => e.probe && e.i < clickOp).length;
+  const placeOf = (pr, view) => {
+    const fi = M.files[pr.file];
+    if (!fi) return null;
+    const c = clockOf(M.tracks[fi.key], M.meterOf(fi.key), fi.slow, fi.full);
+    const ch = M.cvCharts[view], read = c.bars(pr.ct + lead0 * pr.rate);
+    const p = ch.place(read);
+    return p && { ...p, ch, read };
+  };
+  const seqOff = (ch, si) => ch.secs.slice(0, si).reduce((n, S) => n + S.notes.length, 0);
+  let prevPlace = null;
+  probes.forEach((pr, i) => {
+    const view = i < nBefore ? M.view.v.cv : W.to, tag = `probe ${i + 1} (${i < nBefore ? 'before' : 'after'} the press, ${view} view)`;
+    if (!pr.playing) { issues.push(`${tag}: the song is not playing`); return; }
+    if (JSON.stringify(pr.pressed) !== JSON.stringify([view])) issues.push(`${tag}: the switch shows ${JSON.stringify(pr.pressed)} pressed`);
+    const p = placeOf(pr, view);
+    if (!p) { issues.push(`${tag}: no place for ${pr.file} at ${pr.ct}`); return; }
+    const S = p.ch.secs[p.si];
+    if (view === 'lyrics') {
+      const want = (Math.floor(p.local + 1e-9) % M.meter.beats) * 2;
+      if (pr.strip !== want) issues.push(`${tag}: "This bar" lights cell ${pr.strip}, the beat sounding is cell ${want} (${S.label} lap ${p.rep + 1})`);
+      if (pr.drawn && pr.pill !== p.ch.tok[p.si][p.rep][p.ni]) issues.push(`${tag}: the mark is on chord name ${pr.pill + 1}, the chord sounding is name ${p.ch.tok[p.si][p.rep][p.ni] + 1}`);
+    } else if (S.grid) {
+      if (pr.page !== p.si || pr.beat !== p.step) issues.push(`${tag}: lit page ${pr.page} beat ${pr.beat}, the clock says page ${p.si} beat ${p.step} (${S.label} lap ${p.rep + 1})`);
+    } else if (pr.page !== p.si || pr.seq !== seqOff(p.ch, p.si) + p.ni) issues.push(`${tag}: lit page ${pr.page} note ${pr.seq}, the clock says page ${p.si} note ${seqOff(p.ch, p.si) + p.ni} (${S.label} lap ${p.rep + 1})`);
+    if (i === nBefore) {
+      const b = probes[i - 1], q = prevPlace;
+      if (!b || !q) issues.push('no probe before the press');
+      else {
+        if (pr.el !== b.el || pr.nEls !== b.nEls || pr.file !== b.file) issues.push(`across the press the audio changed: element ${b.el} -> ${pr.el}, ${b.nEls} -> ${pr.nEls} elements, ${b.file} -> ${pr.file}`);
+        const d = pr.ct - b.ct;
+        if (!(d > 0 && d < 0.1)) issues.push(`across the press the file moved ${d.toFixed(4)} s (one frame expected: no seek, no stop)`);
+        if (q.si !== p.si || q.rep !== p.rep || Math.floor(q.local + 1e-9) !== Math.floor(p.local + 1e-9)) issues.push(`across the press the place moved from ${q.si}:${q.rep}:beat ${Math.floor(q.local)} to ${p.si}:${p.rep}:beat ${Math.floor(p.local)}`);
+        if (pr.loop !== b.loop || pr.loopSw !== b.loopSw) issues.push(`across the press Loop this part went from ${b.loop}/${b.loopSw} to ${pr.loop}/${pr.loopSw}`);
+      }
+    }
+    prevPlace = p;
+  });
+  if (probes.length < 3) issues.push(`${probes.length} probes, expected at least 3`);
+  return { issues, stats: { probes: probes.length } };
 }
 /* Laps a stop of Build up speed plays before the next (PC_BUILD_LAPS in app/cards-loop.js; the work order's rule). */
 const PC_BUILD_LAPS = 2;
@@ -1294,6 +1399,7 @@ const PC_BUILD_LAPS = 2;
    +-5%). Read off the code, like the rules above; a changed gain shows up as every swap failing R16. */
 const TWIN_GAIN = 0.5;
 const SWAPS = { checked: 0, off: 0 };
+const SWAPV = { walks: 0, probes: 0, failed: 0 };   // R17
 
 function parseKey(k) {
   const [a, lit, ...rest] = k.split('#');
@@ -1952,7 +2058,7 @@ async function main() {
   const allViews = [];
   for (const a of consts.cards) {
     const d = defaultView(a), lists = viewLists(a), vs = [{ ...d, base: true }];
-    for (const dim of ['rec', 'key', 'chord', 'bass']) for (const val of lists[dim]) if (val !== d[dim]) vs.push({ ...d, [dim]: val, base: false, recAlt: dim === 'rec' });
+    for (const dim of ['rec', 'key', 'chord', 'bass', 'cv']) for (const val of lists[dim]) if (val !== d[dim]) vs.push({ ...d, [dim]: val, base: false, recAlt: dim === 'rec', cvAlt: dim === 'cv' });
     for (const v of vs) {
       const view = viewOf(a, v), meter = meterOf(view.track);
       if (!tracks[view.track] || !meter) { (builtIds.has(a.id) ? builtIssues : dataIssues).push(`${a.id}: track ${view.track} is unknown`); continue; }
@@ -1969,7 +2075,7 @@ async function main() {
   }
   /* One song, several cards: the chord root at every twelfth of a beat. A rest never disagrees. */
   const byTrack = {};
-  for (const x of allViews) { if (x.v.chord && x.v.chord !== defaultView(x.a).chord) continue; if (x.v.bass && x.v.bass !== defaultView(x.a).bass) continue; (byTrack[x.view.track] = byTrack[x.view.track] || []).push(x); }
+  for (const x of allViews) { if (x.v.chord && x.v.chord !== defaultView(x.a).chord) continue; if (x.v.bass && x.v.bass !== defaultView(x.a).bass) continue; if (x.v.cv && x.v.cv !== defaultView(x.a).cv) continue; (byTrack[x.view.track] = byTrack[x.view.track] || []).push(x); }
   let sharedBeats = 0, sharedPairs = 0;
   for (const [tk, list] of Object.entries(byTrack)) {
     const lines = list.map(x => { const m = new Map(); x.chart.secs.forEach(S => { for (let r = 0; r < S.reps; r++) { const base = ((S.fromBar - 1) + r * S.bars) * x.meter.beats; S.notes.forEach(n => { if (n.rest) return; for (let q = Math.round((base + n.start) * 12); q < Math.round((base + n.start + n.len) * 12); q++) m.set(q, rootOf(n.name)); }); } }); return m; });
@@ -2078,11 +2184,11 @@ async function main() {
     const walksBefore = totals.walks + totalsLoop.walks + totalsBuilt.walks;
     for (const x of allViews.filter(y => y.a.id === a.id)) {
       const label = `${a.id} ${viewName(a, x.v)}`;
-      const idxView = { rec: x.v.rec ? x.lists.rec.indexOf(x.v.rec) : null, key: x.v.key ? x.lists.key.indexOf(x.v.key) : null, chord: x.v.chord ? x.lists.chord.indexOf(x.v.chord) : null, bass: x.v.bass ? x.lists.bass.indexOf(x.v.bass) : null };
+      const idxView = { rec: x.v.rec ? x.lists.rec.indexOf(x.v.rec) : null, key: x.v.key ? x.lists.key.indexOf(x.v.key) : null, chord: x.v.chord ? x.lists.chord.indexOf(x.v.chord) : null, bass: x.v.bass ? x.lists.bass.indexOf(x.v.bass) : null, cv: x.v.cv ? x.lists.cv.indexOf(x.v.cv) : null };
       const openIt = async () => {
         const o = await step(`${label}: opening`, `__pl.open(${JSON.stringify(a.id)}, ${JSON.stringify(idxView)})`, 450);
         if (!o.ok) return o;
-        for (const dim of ['rec', 'key', 'chord', 'bass']) if (idxView[dim] != null && o.got[dim] !== idxView[dim]) return { ok: false, why: `the ${dim} switch did not take` };
+        for (const dim of ['rec', 'key', 'chord', 'bass', 'cv']) if (idxView[dim] != null && o.got[dim] !== idxView[dim]) return { ok: false, why: `the ${dim} switch did not take` };
         if (o.sheet) { let ready = false; for (let i = 0; i < 80 && !ready; i++) { ready = await step(`${label}: waiting for the sheet`, '__pl.sheetReady()'); if (!ready) await sleep(150); } if (!ready) return { ok: false, why: 'the lyric sheet did not draw' }; }
         const scan = await step(`${label}: reading the drawing`, '__pl.scan()');
         return { ...o, scan };
@@ -2105,7 +2211,8 @@ async function main() {
           console.log(`  beat shot ${a.id} ${tag}: heard ${ms} ms from the downbeat of bar 3 (decoder at ${r && r.ct != null ? r.ct.toFixed(3) : '?'} s, rate ${r && r.rate}, lead ${r && r.lead} s): ${r && r.lit} · ${f}`);
         }
       }
-      const M = { consts, tracks, files, meterOf, meter: x.meter, meterName: METER[x.view.track], tr: tracks[x.view.track], chart: x.chart, view: x.view, viewLabel: viewName(a, x.v), open: o, scan: o.scan, isBase: x.v.base, recAlt: !!x.v.recAlt, tables: [] };
+      const M = { consts, tracks, files, meterOf, meter: x.meter, meterName: METER[x.view.track], tr: tracks[x.view.track], chart: x.chart, view: x.view, viewLabel: viewName(a, x.v), open: o, scan: o.scan, isBase: x.v.base, recAlt: !!x.v.recAlt, cvAlt: !!x.v.cvAlt, tables: [],
+        cvCharts: x.v.cv ? Object.fromEntries(allViews.filter(y => y.a.id === a.id && y.v.cv).map(y => [y.v.cv, y.chart])) : null };
       /* The drawing. */
       let drawIssues = [];
       if (x.chart.problems.length) drawIssues.push('its chart does not add up (see the data above)');
@@ -2156,6 +2263,15 @@ async function main() {
           W.fresh = false;
           continue;
         }
+        if (W.kind === 'viewSwap') {
+          const JS = judgeSwap(M, W, res);
+          SWAPV.walks++; SWAPV.probes += JS.stats.probes;
+          if (JS.issues.length) { SWAPV.failed++; console.log(`✗ ${label} · ${W.name}: ${JS.issues.length} problem(s)`); JS.issues.slice(0, VERBOSE ? 400 : 8).forEach(p => console.log('    ' + p)); }
+          else console.log(`✓ ${label} · ${W.name}: ${JS.stats.probes} probes, each lit on the place sounding; the song carried on through the press (same element, file and clock), same section, lap and beat in both views`);
+          out.walks.push({ card: a.id, view: viewName(a, x.v), name: W.name, issues: JS.issues, nIssues: JS.issues.length });
+          W.fresh = false;
+          continue;
+        }
         const J = judge(M, W, res);
         if (LEADS && W.kind === 'song') leadWalks.push({ card: a.id, built: isBuilt, view: viewName(a, x.v), walk: W.name, stop: W.stop, rate: tierOf(M, W.stop, false).rate,
           sheet: !!x.chart.sheet, latency: consts.latency, hitDur: parseFloat(res.hitDur) || null, leads: J.stats.leads || [] });
@@ -2202,6 +2318,7 @@ async function main() {
   const TL = totalsLoop, loopWalksWanted = !SETTING || TL.walks > 0;
   if (loopWalksWanted) console.log(`playalong-loop (Loop this part / Build up speed): ${TL.failed ? '✗' : '✓'} ${TL.cards.size} of the ${loopCards} cards with section buttons, ${TL.walks} walks, ${TL.laps} laps, ${TL.steps.toLocaleString('en-US')} places lit and compared, ${TL.clicks.toLocaleString('en-US')} clicks: ${TL.failed ? TL.failed + ' with a mismatch' : '0 mismatches'}`);
   console.log(`playalong-loop (R16, Guitar twin swaps): ${SWAPS.off ? '✗' : '✓'} ${SWAPS.checked} swap(s) checked for the musical place, ${SWAPS.off} off`);
+  if (SWAPV.walks) console.log(`playalong-loop (R17, card view switch mid-song): ${SWAPV.failed ? '✗' : '✓'} ${SWAPV.walks} walk(s), ${SWAPV.probes} probes, ${SWAPV.failed} with a problem`);
   /* --built: the built songs' own line, then the ca-51 pair. */
   let builtFailed = 0;
   if (built) {
