@@ -333,6 +333,49 @@ push. Where the Mac is right now: the coach splits with the reviewer's fix A are
     - Also from Windows this evening: the `ca-45` full-screen fix shipped before `ca-53` landed (`94e7dc1`; it
       touched `app/cards.js`, `styles.css`, `tools/smoke.mjs`, not `class-activities.js`), so there is nothing to
       rebase. W10 (the pdf pane) is running.
+  - **W6, the old-page tool: review round 3 (the LAST allowed round) found 0 BLOCKER, 1 MAJOR, 5 MINOR, so it STOPS
+    here for Jonathan (Windows, 2026-11-16 late night; a fresh Opus reviewer on `91d2d4bf`, branch
+    `origin/win/w6-2026-11-16-r3`).** The tool is NOT on main and NOT named in CLAUDE.md. The lead has not re-run
+    the reviewer's numbers. **QUESTION FOR JONATHAN (three rounds, a MAJOR in the third): (1) one more small fix
+    and ONE more review, then put it on main (the reviewer prototyped the fix; recommended: it was right about
+    every real push it was given); (2) put it on main as it is, with the limit written in its header; (3) leave it
+    on its branch, usable by hand, and spend nothing more on it this week.** Until he answers: (3) is what stands.
+    - **What it got right:** all 69 runs of the builder's table reproduced line for line; the 40 newest code
+      commits on main, each against its parent: 37 clean, 3 red, all 3 TRUE (the coach splits as first built,
+      twice, and Song builder Part d): a false-red rate of 0 of 40 on ordinary pushes. The shipped splits close:
+      0, plain and `--strict`. The regex fix in its scanner: 324 regex literals in 82 site files, 0 misreads.
+    - **The MAJOR (R3-1): its newest check, STRUCTURE ("the arcade's all-loaded marker `bcStop` is defined, so
+      every name the guarded stops call must be defined"), is red on a CORRECT push that history does not hold
+      yet: the documented way to add a new game** (a new part placed before `coach-more.js`, with
+      `if (typeof xyStop === 'function') xyStop();` added to `gamesStopMic`): exit 1, and it even blames the old
+      page with old files, which the push cannot have changed. Fix, prototyped by the reviewer (scratchpad
+      `rv8\mut\FIX`): report a STRUCTURE miss only if the name IS defined once the page has settled (an order
+      fault; a name that never arrives is the static pass's job), and read the needed names only from files the
+      new list places before the marker's file. With it: the two false reds go to 0, the true reds stay red, the
+      close stays 0.
+    - **How to read it on a push that ADDS a part: 5 of 5 such pushes in history are red, and 1 verdict of the 5 is
+      false** (`ca5a220b`, the strum-check part: `coach-core.js:1813` reaches `scStart` only for `game === 'sc'`,
+      which only the new part's own button sends). So a static line marked "new in this push" is real UNLESS that
+      line can only run after a guarded call into the new part; in a `teacher-*.js` part it hits only a console
+      that signs in after the push (the console parts load at sign-in, `app/start.js:225`). The reviewer's
+      sentence for CLAUDE.md, when the tool is named: "Before pushing a part split, a new part or a part-list
+      change, run `node tools/old-page-loop.mjs --old origin/main --new HEAD`. Fix every ✗ finding. A static line
+      marked 'new in this push' is real unless that line can only run after a guarded call into the new part; in
+      a teacher-*.js part it hits only a console that signs in after the push, so guard the call with typeof or
+      accept it, and say which in the report."
+    - MINOR: the stuck-chain message says the loader "never resolves" where it can also reject on every try; the
+      "cannot see" list should also name five scanner traps (`i++ / 2`, a regex after `if (…)` or after a line
+      comment, a variable named `of` or `in`) and that an old page keeps its OLD eager copies of `i18n.js`,
+      `styles.css` and eager helpers (new `t('…')` keys show as raw keys, new classes are unstyled); column-0
+      lines inside template text start new regions (37 lines, all in `teacher-mic.js`; no run changed); the
+      usage line omits `--strict`; three of the tool's code paths have no test that notices them.
+    - What it still cannot see that a split could break: play-time and console-screen code only statically; names
+      built at run time; new i18n keys and CSS classes on an old page; a changed signature of an eager function;
+      the trainer, pdf and module files; the real browser's service-worker cache and reload timing.
+    - **A true finding on main from this round, low risk:** a console tab opened before Song builder Part d's push
+      and signed in after it gets the new `teacher-sb-core.js`, which calls `sbPublishPaneHtml`,
+      `sbPreviewPaneHtml`, `sbPublishBtnHtml`, `sbPublishedHtml` and `sbPubChanged` (`teacher-sb-core.js:271,
+      316-317, 255, 302`) with no guard, while its old list lacks `teacher-sb-publish.js`. A reload cures it.
   - **The old-page tool, review round 2 (Windows, 2026-11-16 about 22:00; a fresh Opus reviewer on `842b7b33`): 2
     BLOCKER, 1 MAJOR, 5 MINOR on the TOOL, so it is NOT named in CLAUDE.md yet; its builder is fixing them; round 3
     is the last.** What matters for the splits tonight: **the Mac's close `78f63414` is still 0 findings, 0 windows
