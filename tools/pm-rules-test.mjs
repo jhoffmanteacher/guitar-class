@@ -5,9 +5,9 @@
 
    It tries every allow and deny in the minutes/{uid}/days|weeks blocks (the 24-hour
    ceiling, the exact field lists, another student, the teacher, signed out, delete, a bad id),
-   in minutes/{uid}/meta/board (the private tag), weekBoard/{tag} (the Top 5) and
-   rankBoard/{tag} (the class rank): the shape of each doc, the caps, writing under someone
-   else's tag, no uid or name in a board doc, no delete, and minutesBoard having no rules.
+   in minutes/{uid}/meta/board (the private tag) and weekBoard/{tag} (the Top 5): the shape of each doc,
+   the caps, writing under someone else's tag, no uid or name in a board doc, no delete; and that
+   minutesBoard and (since 2026-11-17) rankBoard, the old class rank, have no rules.
    It also tries the recorded takes (micTakes/{uid}-{coach|nr|pw}, who may save one and only while the
    teacher has collection on), their audio chunks (the size cap, the exact fields, written before the take
    doc exists), that only the teacher reads or deletes them, and the micTakesMeta/count counter.
@@ -25,6 +25,13 @@
    Four cases changed result on purpose: a day of 1201 s, an increment past the old cap, a week of 8401 s and a weekBoard
    doc of 8401 s were refused and are now allowed; new cases pin 86400 / 86401 on a day (and by increment) and 604800 /
    604801 on a week and on weekBoard. rankBoard keeps its number (480000, written out).
+   2026-11-17 (Paste F): the rankBoard block is removed (nothing has read or written the class rank since 2026-11-13).
+   Its section now pins that every account is refused there: a student's create, update, delete, get and list (its own
+   tag included), an outside account, signed out, and the teacher (get, list, write, delete: the old docs are cleared, if
+   ever, in the Firebase console, which these rules do not govern). The 5 cases that were allowed (A writes, A updates,
+   480000, B writes under its own tag, a signed-in list) are now refusals; the shape cases (480001, negative, …) left,
+   since nothing is allowed there to have a shape. Run 2026-11-17: 251 passed, 0 failed; the old tool on the new rules
+   failed exactly those 5; the old block put back in a scratch copy turned 10 of the new cases red.
    2026-11-13: the made-up students are @seq.org accounts (the school-accounts rule, isSchool()); an outside account
    (X) cannot read the boards or the take counter. --port N (default 8089) picks the emulator's port.
    2026-11-14 (paste-2 day): firestore.rules is ONE text with the isSchool() gate (the second paste moved in and its
@@ -247,25 +254,27 @@ if (which.includes('orig')) {
   await t('signed out cannot read the board', () => WB(N, TAGA).get(), false);
   await t('signed out cannot list the board', () => N.collection('weekBoard').get(), false);
 
-  console.log('== rankBoard/{tag}  { seconds }');
-  await t('A writes under its own tag', () => RB(A, TAGA).set({ seconds: 3600 }), true);
-  await t('…and updates it', () => RB(A, TAGA).set({ seconds: 7200 }), true);
-  await t('exactly 480000 (400 days of the old cap; unchanged 2026-11-15)', () => RB(A, TAGA).set({ seconds: 480000 }), true);
-  await t('480001 refused', () => RB(A, TAGA).set({ seconds: 480001 }), false);
-  await t('negative refused', () => RB(A, TAGA).set({ seconds: -1 }), false);
-  await t('seconds as a string refused', () => RB(A, TAGA).set({ seconds: '60' }), false);
-  await t('an empty doc refused', () => RB(A, TAGA).set({}), false);
-  await t('a uid beside seconds refused', () => RB(A, TAGA).set({ seconds: 60, uid: 'uidA' }), false);
-  await t('a week field (the weekBoard shape) refused', () => RB(A, TAGA).set({ seconds: 60, week: '2026-W46' }), false);
-  await t('B cannot write under A\'s tag', () => RB(B, TAGA).set({ seconds: 60 }), false);
-  await t('B writes under its own tag', () => RB(B, TAGB).set({ seconds: 500 }), true);
-  await t('uidC has no tag: refused', () => RB(C, TAGC).set({ seconds: 60 }), false);
-  await t('the teacher has no tag: refused', () => RB(T, TAGC).set({ seconds: 60 }), false);
-  await t('signed out refused', () => RB(N, TAGA).set({ seconds: 60 }), false);
-  await t('no delete', () => RB(A, TAGA).delete(), false);
-  await t('every signed-in account reads the whole collection (how a rank is worked out)', () => C.collection('rankBoard').get(), true);
+  console.log('== rankBoard/{tag} has no rules block any more (the class rank; closed 2026-11-17, unused since 2026-11-13)');
+  /* An old doc, as the published rules left them: the closed path must refuse reading and changing what is there too. */
+  await env.withSecurityRulesDisabled(c => c.firestore().doc(`rankBoard/${TAGB}`).set({ seconds: 500 }));
+  await t('A cannot create a doc under its own tag (allowed until 2026-11-17)', () => RB(A, TAGA).set({ seconds: 3600 }), false);
+  await t('…nor merge an increment into it (the old page\'s write)', () => RB(A, TAGA).set({ seconds: FV.increment(60) }, { merge: true }), false);
+  await t('B cannot update its own old doc (allowed until 2026-11-17)', () => RB(B, TAGB).set({ seconds: 600 }), false);
+  await t('…nor increment it', () => RB(B, TAGB).set({ seconds: FV.increment(60) }, { merge: true }), false);
+  await t('B cannot delete its own old doc', () => RB(B, TAGB).delete(), false);
+  await t('B cannot get its own old doc (the old page\'s first look)', () => RB(B, TAGB).get(), false);
+  await t('A cannot get B\'s old doc', () => RB(A, TAGB).get(), false);
+  await t('a school account cannot list the collection (allowed until 2026-11-17: how a rank was worked out)', () => C.collection('rankBoard').get(), false);
+  await t('…nor with source server (the old page\'s read)', () => C.collection('rankBoard').get({ source: 'server' }), false);
+  await t('uidC (no tag) cannot write', () => RB(C, TAGC).set({ seconds: 60 }), false);
+  await t('signed out cannot write', () => RB(N, TAGA).set({ seconds: 60 }), false);
   await t('signed out cannot list it', () => N.collection('rankBoard').get(), false);
-  await t('an outside account (not @seq.org, not allowed) cannot list the class rank (2026-11-13)', () => X.collection('rankBoard').get(), false);
+  await t('the teacher cannot list it', () => T.collection('rankBoard').get(), false);
+  await t('the teacher cannot get an old doc', () => RB(T, TAGB).get(), false);
+  await t('the teacher cannot write one', () => RB(T, TAGC).set({ seconds: 60 }), false);
+  await t('the teacher cannot delete an old doc (the Firebase console can: it does not go through the rules)', () => RB(T, TAGB).delete(), false);
+  await t('…so the old doc is still there', async () => { let e = false; await env.withSecurityRulesDisabled(async c => { e = (await c.firestore().doc(`rankBoard/${TAGB}`).get()).exists; }); if (!e) throw new Error('rankBoard old doc is gone'); }, true);
+  await t('an outside account (not @seq.org, not allowed) cannot list it', () => X.collection('rankBoard').get(), false);
   await t('…nor the Top 5 board', () => X.collection('weekBoard').get(), false);
   await t('…nor the site\'s Top 5 query', () => X.collection('weekBoard').where('week', '==', '2026-W46').where('period', '==', '7').get(), false);
 

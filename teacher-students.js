@@ -136,7 +136,8 @@ function teacherStudentCountHtml(tally, universe){
    (firestore.rules lets the teacher's account read those docs, and since
    2026-11-13 the days docs for the Students view's "Back from an absence",
    below) and writes nothing anywhere. This view never reads days,
-   meta/board (the private tag), rankBoard or weekBoard: rank and Top 5 are
+   meta/board (the private tag), rankBoard (closed in firestore.rules since
+   2026-11-17) or weekBoard: rank and Top 5 are
    worked out here from the weeks docs, with the engine's own pure maths
    (PM.calc.status, PM.calc.rankPlace, PM.calc.top5Place), so a student's
    numbers can't be worked out two ways.

@@ -117,8 +117,8 @@
    A lower week is just a number (no arrow, no colour). See calc.ownWeeks for the edge cases.
    It replaced the CLASS RANK tile ("N/total" by all-time minutes, 2026-11-04 to 2026-11-13): a rank discourages
    the students at the bottom, and an absent student can never climb. The page no longer writes or reads
-   rankBoard/{tag} (its rules block is still in firestore.rules, unused: it and the old docs can be removed
-   later, with a console paste), and the old 3-hour copy of the board (localStorage pm:b:<uid>) is removed
+   rankBoard/{tag} (its rules block was removed from firestore.rules on 2026-11-17, so every account is refused
+   there; the old docs are unused), and the old 3-hour copy of the board (localStorage pm:b:<uid>) is removed
    when a student's state is built (sync). minutesBoard/{uid}, the uid-keyed board before rankBoard, has had
    no rules block since 2026-11-05. The teacher console's Practice minutes view keeps its own Class rank
    column (calc.rankPlace), for the teacher only.

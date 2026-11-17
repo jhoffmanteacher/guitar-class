@@ -159,7 +159,7 @@ const TEACHER_BACKUP_LEFT_OUT = [
   {path:'micTakes/* and micTakes/*/chunks/*', why:'mic recordings: large audio, saved by Mic recordings → Download all (with each take’s data)'},
   {path:'micTakesMeta/count', why:'a counter Mic recordings can reset; not student work'},
   {path:'liveQuiz/current and liveQuiz/current/answers/*', why:'one live game’s state, written from scratch each game'},
-  {path:'weekBoard/*, rankBoard/*', why:'the practice boards: the Top 5 board is rebuilt by each student’s own page from their minutes; the class rank board is no longer used (since 2026-11-13)'},
+  {path:'weekBoard/*, rankBoard/*', why:'the practice boards: the Top 5 board is rebuilt by each student’s own page from their minutes; the class rank board is no longer used (since 2026-11-13) and nobody can read it (closed 2026-11-17)'},
   {path:'each student’s private board tag (under minutes, beside the weeks and days)', why:'the teacher’s account may not read it (firestore.rules: on purpose, so nothing the teacher reads ties a name to the Top 5 board); a student who has none gets a new one from their own page'},
   {path:'minutesBoard/*', why:'no rules block: nobody can read it'},
   {path:'songFiles/* and songFiles/*/pieces/*', why:'the song recordings (about 216 MB of mp3s), the built songs’ audio and the Song builder drafts’ levelled copies among them: far too big for this file, and not student work; the mp3s themselves are kept on the teacher’s Mac and go back in through Manage → Song files'},

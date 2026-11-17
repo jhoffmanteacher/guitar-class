@@ -28,7 +28,10 @@
                          test-only probe block, added in memory, tells a plain false from an evaluation error)
      liveQuiz/current    and answers/{uid}: the live round's shape, session and timing conditions
      issueReports/*      the exact shape submitIssueReport() writes, the caps, teacher-only reading
-     weekBoard, rankBoard  only what pm-rules-test does not already pin (the teacher's account, list)
+     weekBoard, rankBoard  only what pm-rules-test does not already pin (the teacher's account, list); rankBoard
+                         has no rules block since 2026-11-17 (Paste F): refused to every account (run that day:
+                         456 passed, 0 failed, 84 of 84 breaks caught; the old tool on the new rules failed 8 cases,
+                         all rankBoard allows)
      no rules block      a few paths with no match must stay denied
    The made-up students are @seq.org accounts since 2026-11-13 (the school-accounts rule); an outside account is a
    made-up gmail.example address.
@@ -414,21 +417,23 @@ async function suite(rulesText, quiet) {
   await t('today: the teacher cannot delete a report either (no delete rule for anyone)', () => T.doc('issueReports/r1').delete(), false);
 
   /* ── weekBoard / rankBoard: only what pm-rules-test.mjs does not pin ── */
-  say('== weekBoard / rankBoard (pm-rules-test.mjs covers them in depth; these are the teacher\'s account and single gets)');
+  say('== weekBoard / rankBoard (pm-rules-test.mjs covers them in depth; these are the teacher\'s account and single gets; rankBoard closed 2026-11-17)');
   await admin(db => db.doc('weekBoard/0123456789abcdef0123456789abcdef').set({ week: '2026-W46', period: '7', seconds: 60 }));
   await admin(db => db.doc('rankBoard/0123456789abcdef0123456789abcdef').set({ seconds: 600 }));
   await t('the teacher\'s account reads the Top 5 board like any signed-in account', () => T.collection('weekBoard').get(), true);
-  await t('the teacher\'s account reads the class rank like any signed-in account', () => T.collection('rankBoard').get(), true);
+  await t('the teacher\'s account cannot read the class rank (no rules block since 2026-11-17; allowed until then)', () => T.collection('rankBoard').get(), false);
+  await t('the teacher cannot get one rankBoard doc', () => T.doc('rankBoard/0123456789abcdef0123456789abcdef').get(), false);
   await t('signed out cannot get one rankBoard doc', () => N.doc('rankBoard/0123456789abcdef0123456789abcdef').get(), false);
   await t('the teacher cannot delete a weekBoard doc', () => T.doc('weekBoard/0123456789abcdef0123456789abcdef').delete(), false);
   await t('the teacher cannot delete a rankBoard doc', () => T.doc('rankBoard/0123456789abcdef0123456789abcdef').delete(), false);
-  await t('the teacher cannot write a rankBoard doc (no tag of their own)', () => T.doc('rankBoard/0123456789abcdef0123456789abcdef').set({ seconds: 0 }), false);
+  await t('the teacher cannot write a rankBoard doc', () => T.doc('rankBoard/0123456789abcdef0123456789abcdef').set({ seconds: 0 }), false);
 
   /* ── one student's removal (2026-11-14, Jonathan: the console's "Delete this student's data…", teacher-remove.js) ──
      The teacher deletes, for ONE student: progress/{uid} (above), minutes/{uid}/days/*, weeks/* and meta/board (new on
      2026-11-14), and what the teacher could already delete: micTakes/{uid}-{game} and its chunks, songRequests/{uid}_{week},
      accessRequests/{uid}, liveQuiz/current/answers/{uid}, and the uid's key in config/access.allow (a merge delete).
-     Never: issueReports (no delete rule for anyone), weekBoard / rankBoard (keyed by a tag the teacher cannot read).
+     Never: issueReports (no delete rule for anyone), weekBoard (keyed by a tag the teacher cannot read), rankBoard (no rules
+     block since 2026-11-17: nobody may touch it; its old docs are cleared, if ever, in the Firebase console).
      pm-rules-test.mjs pins the minutes deletes in depth; these cases carry this tool's --breaks for them. */
   {
     const TAGD = 'dddddddddddddddddddddddddddddddd';
@@ -505,8 +510,9 @@ async function suite(rulesText, quiet) {
       ['its own live-quiz answer (get)', (db, uid) => db.doc(`liveQuiz/current/answers/${uid}`).get()],
       ['micTakesMeta/count', db => db.doc('micTakesMeta/count').get()],
       ['the Top 5 board (weekBoard list)', db => db.collection('weekBoard').get()],
-      ['the class rank (rankBoard list)', db => db.collection('rankBoard').get()],
     ];
+    /* rankBoard (the class rank list) left SCHOOL_READS on 2026-11-17 (Paste F: no rules block). Refused to every account
+       below, the school ones included, by the CLOSED_RANK cases. */
     await admin(async db => { await db.doc('config/class').set({ paused: false }); await db.doc('liveQuiz/current').set({ state: 'lobby', sessionId: 's9', qIndex: -1 }); await db.doc('micTakesMeta/count').set({ n: 1 }); await db.doc('config/access').set({ allow: { allowedU: true, notTrueU: 'yes' } }); });
     /* Until 2026-11-14 the published text had no isSchool(), and these three read "today (paste 1): an outside account
        reads / writes …" (allowed). Since paste 2 moved into firestore.rules they state the refusal. */
@@ -586,7 +592,6 @@ async function suite(rulesText, quiet) {
       ['read its own practice weeks', (db, u) => db.collection(`minutes/${u}/weeks`).get()],
       ['make its Top 5 name tag', (db, u) => db.doc(`minutes/${u}/meta/board`).set({ id: (u + '0'.repeat(32)).replace(/[^0-9a-f]/g, '0').slice(0, 32) })],
       ['write its Top 5 entry', (db, u) => db.doc(`weekBoard/${(u + '0'.repeat(32)).replace(/[^0-9a-f]/g, '0').slice(0, 32)}`).set({ week: '2026-W46', period: 'CAS', seconds: 60 })],
-      ['write its class-rank entry', (db, u) => db.doc(`rankBoard/${(u + '0'.repeat(32)).replace(/[^0-9a-f]/g, '0').slice(0, 32)}`).set({ seconds: 60 })],
       ['log an error (siteErrors)', (db, u) => db.collection('siteErrors').add({ kind: 'error', message: 'm', file: '', line: 0, col: 0, stack: '', page: '#', version: 'v', day: new Date().toISOString().slice(0, 10), lang: 'en' })],
     ];
     /* Tags: a refused account can never make one, so its board writes are tried under a tag an admin made for it (the
@@ -599,6 +604,14 @@ async function suite(rulesText, quiet) {
     await writesFor('a refused outside account (test9@gmail.example)', 'outsideW', { email: 'test9@gmail.example', email_verified: true }, false);
     await writesFor('an allowed outside account', 'allowedW', { email: 'test8@gmail.example', email_verified: true }, true);
     await writesFor('a school account', 'schoolW', { email: 'test7@seq.org', email_verified: true }, true);
+    /* rankBoard (2026-11-17, Paste F): no rules block, so even a school account and an allowed outside account, each with a tag of
+       its own, may neither write its class-rank entry (in WRITERS until then) nor list the board (in SCHOOL_READS until then). */
+    say('== rankBoard closed (2026-11-17): no account writes or reads the class rank, its own tag included');
+    for (const [label, uid, token] of [['a school account', 'schoolW', { email: 'test7@seq.org', email_verified: true }], ['an allowed outside account', 'allowedW', { email: 'test8@gmail.example', email_verified: true }], ['the teacher', 'teacher', { email: TEACHER, email_verified: true }]]) {
+      const db = ctx(uid, token), tag = (uid + '0'.repeat(32)).replace(/[^0-9a-f]/g, '0').slice(0, 32);
+      await t(`${label} may NOT write a class-rank entry under its own tag`, () => db.doc(`rankBoard/${tag}`).set({ seconds: 60 }), false);
+      await t(`${label} may NOT list the class rank`, () => db.collection('rankBoard').get(), false);
+    }
     await t('…the refused account may still ASK (its one door)', () => ctx('outsideW', { email: 'test9@gmail.example', email_verified: true, name: 'Test 9' }).doc('accessRequests/outsideW').set({ name: 'Test 9', email: 'test9@gmail.example', at: FV.serverTimestamp(), status: 'asked' }), true);
     await t('…and once the teacher allows it, its first save lands', async () => { await T.doc('config/access').set({ allow: { outsideW: true } }, { merge: true }); return ctx('outsideW', { email: 'test9@gmail.example', email_verified: true }).doc('progress/outsideW').set({ name: 'Test 9' }, { merge: true }); }, true);
   }
@@ -624,6 +637,9 @@ const CONFIG_BLOCK = 'match /config/class {\n      allow read:  if isSchool();\n
 const PM_DAY_DEL = "      allow delete: if isTeacher();\n      allow create, update: if pmOwner(userId)\n            && day.matches(";
 const PM_WEEK_DEL = "      allow delete: if isTeacher();\n      allow create, update: if pmOwner(userId)\n            && week.matches(";
 const PM_META_DEL = "match /minutes/{userId}/meta/board {\n      allow delete: if isTeacher();";
+/* The end of the weekBoard block (found once), and the rankBoard block as published from 2026-11-13 to 2026-11-17. */
+const WB_END = "            && request.resource.data.seconds <= 7 * dayCeilingSeconds();\n    }\n";
+const RB_OLD = "    match /rankBoard/{tag} {\n      allow read: if isSchool();\n      allow create, update: if isSchool()\n            && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id\n            && request.resource.data.keys().hasOnly(['seconds'])\n            && request.resource.data.seconds is number\n            && request.resource.data.seconds >= 0\n            && request.resource.data.seconds <= 480000;\n    }\n";
 const BREAKS = [
   ['progress: the owner check dropped (any signed-in account reads and writes any doc)', 'allow read, write: if isSchool() && request.auth.uid == userId;', 'allow read, write: if isSchool();'],
   ['progress: any signed-in account may read', PROGRESS_TEACHER, PT('      allow delete: if isTeacher();\n      allow read: if isSignedIn();\n')],
@@ -647,7 +663,7 @@ const BREAKS = [
   ['meta/board: delete for any signed-in account', PM_META_DEL, PM_META_DEL.replace('if isTeacher();', 'if isSignedIn();')],
   ['minutes: the teacher\'s delete put on the whole tree ({document=**})', 'match /minutes/{userId}/{document=**} {\n      allow read: if pmOwner(userId);', 'match /minutes/{userId}/{document=**} {\n      allow read: if pmOwner(userId);\n      allow delete: if isTeacher();'],
   ['weekBoard: the teacher may delete', "match /weekBoard/{tag} {\n      allow read: if isSchool();", "match /weekBoard/{tag} {\n      allow read: if isSchool();\n      allow delete: if isTeacher();"],
-  ['rankBoard: the teacher may delete', "match /rankBoard/{tag} {\n      allow read: if isSchool();", "match /rankBoard/{tag} {\n      allow read: if isSchool();\n      allow delete: if isTeacher();"],
+  ['rankBoard: a block with only the teacher\'s delete put back', WB_END, WB_END + '    match /rankBoard/{tag} {\n      allow delete: if isTeacher();\n    }\n'],
   ['progress: the owner may no longer delete (a tightening must show too)', 'allow read, write: if isSchool() && request.auth.uid == userId;', 'allow read, create, update: if isSchool() && request.auth.uid == userId;'],
   ['progress: a size rule added (a tightening must show too)', 'allow read, write: if isSchool() && request.auth.uid == userId;', 'allow read, delete: if isSchool() && request.auth.uid == userId;\n      allow create, update: if isSchool() && request.auth.uid == userId && !request.resource.data.keys().hasAny([\'blob\']);'],
   ['config/class: a student may write', CONFIG_BLOCK, 'match /config/class {\n      allow read:  if isSchool();\n      allow write: if isSignedIn();\n    }'],
@@ -678,7 +694,7 @@ const BREAKS = [
   ['answers own get left on isSignedIn()', "allow get: if isSchool() && request.auth.uid == userId;", "allow get: if isSignedIn() && request.auth.uid == userId;"],
   ['micTakesMeta/count read left on isSignedIn()', "allow read:   if isSchool();\n      allow create: if isTeacher()", "allow read:   if isSignedIn();\n      allow create: if isTeacher()"],
   ['weekBoard read left on isSignedIn()', "match /weekBoard/{tag} {\n      allow read: if isSchool();", "match /weekBoard/{tag} {\n      allow read: if isSignedIn();"],
-  ['rankBoard read left on isSignedIn()', "match /rankBoard/{tag} {\n      allow read: if isSchool();", "match /rankBoard/{tag} {\n      allow read: if isSignedIn();"],
+  ['rankBoard: only a school read put back', WB_END, WB_END + '    match /rankBoard/{tag} {\n      allow read: if isSchool();\n    }\n'],
   ['progress writes left on isSignedIn()', 'allow read, write: if isSchool() && request.auth.uid == userId;', 'allow read, write: if isSignedIn() && request.auth.uid == userId;'],
   ['answers writes left on isSignedIn()', "allow create, update: if isSchool()\n              && request.auth.uid == userId", "allow create, update: if isSignedIn()\n              && request.auth.uid == userId"],
   ['issueReports create left on isSignedIn()', "allow create: if isSchool()\n                    && request.resource.data.uid == request.auth.uid", "allow create: if isSignedIn()\n                    && request.resource.data.uid == request.auth.uid"],
@@ -687,7 +703,9 @@ const BREAKS = [
   ['micTakesMeta student add left on isSignedIn()', "allow create: if isTeacher()\n                    || (isSchool()", "allow create: if isTeacher()\n                    || (isSignedIn()"],
   ['pmOwner() left on isSignedIn() (minutes, the tag)', "return isSchool() && request.auth.uid == userId;\n    }\n    match /minutes/", "return isSignedIn() && request.auth.uid == userId;\n    }\n    match /minutes/"],
   ['weekBoard write left on isSignedIn()', "allow create, update: if isSchool()\n            && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id\n            && request.resource.data.keys().hasOnly(['week'", "allow create, update: if isSignedIn()\n            && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id\n            && request.resource.data.keys().hasOnly(['week'"],
-  ['rankBoard write left on isSignedIn()', "allow create, update: if isSchool()\n            && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id\n            && request.resource.data.keys().hasOnly(['seconds'])", "allow create, update: if isSignedIn()\n            && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id\n            && request.resource.data.keys().hasOnly(['seconds'])"],
+  /* rankBoard has no block since 2026-11-17 (Paste F): these breaks put one back, after the weekBoard block. */
+  ['rankBoard: the whole block put back, as published until 2026-11-17', WB_END, WB_END + RB_OLD],
+  ['rankBoard: only its write put back (own tag, isSchool())', WB_END, WB_END + RB_OLD.replace('      allow read: if isSchool();\n', '')],
   ['siteErrors create left on isSignedIn()', "allow create: if isSchool()\n            && errorId.matches(", "allow create: if isSignedIn()\n            && errorId.matches("],
   /* The review's planted faults (2026-11-13, review round 1, f1-f7; f6 "hasAll dropped" is not a fault: every field is also checked). */
   ['accessRequests: the asker may delete its own (and ask again)', 'match /accessRequests/{userId} {\n      allow get: if isSignedIn() && request.auth.uid == userId;', 'match /accessRequests/{userId} {\n      allow get: if isSignedIn() && request.auth.uid == userId;\n      allow delete: if isSignedIn() && request.auth.uid == userId;'],

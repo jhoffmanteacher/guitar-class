@@ -20220,7 +20220,7 @@ const SITE_ERRORS_SIM_PIN = 161;
    The emulator half is the six rules tools (.github/workflows/rules.yml),
    which since 2026-11-14 refuse a rules text without isSchool().
    ════════════════════════════════════════════════════════════════════ */
-const SCHOOL_GATE_USES = 26;   // 6 class-wide reads + 11 student writes (progress counts once: read, write); 2026-11-13 +2: songRequests (a student's create, and the read of their own); 2026-11-14 +5: song files (read the files, read the pieces, read the month's counter, create it, raise it); 2026-11-14 +2: built songs (get one song, read the list)
+const SCHOOL_GATE_USES = 24;   // 6 class-wide reads + 11 student writes (progress counts once: read, write); 2026-11-13 +2: songRequests (a student's create, and the read of their own); 2026-11-14 +5: song files (read the files, read the pieces, read the month's counter, create it, raise it); 2026-11-14 +2: built songs (get one song, read the list); 2026-11-17 -2: rankBoard closed (its read and its write)
 /* The FINGERPRINT of firestore.rules: the sha256 of the file's bytes exactly as on disk (no line-ending or whitespace
    normalising). Jonathan, 2026-11-14: "Add a fingerprint pin, then ship". Any change to the file fails 1dt until this
    is re-pinned on purpose, in the same commit as the rules change. 2026-11-14: the school-accounts paste 2 (Paste B).
@@ -20232,12 +20232,15 @@ const SCHOOL_GATE_USES = 26;   // 6 class-wide reads + 11 student writes (progre
    checked when present, and comments (v is the format version; the list's entries are the page's to check; paste 2).
    2026-11-15 (Paste E): practice minutes have no daily limit (Jonathan: "it should be actual minutes"); the minutes
    ceilings are 24 hours a day (dayCeilingSeconds() = 86400, was dailyCapSeconds() = 1200), 7 x that a week and on
-   weekBoard; rankBoard keeps its old number, written out (480000). */
-const RULES_FILE_SHA256 = '8cb7341f61c3e0232535e31e3132698ae09ec732b2fdd4506f22413fa5308c20';
+   weekBoard; rankBoard keeps its old number, written out (480000).
+   2026-11-17 (Paste F): the rankBoard block is removed (the class rank, unused since 2026-11-13): no account may read,
+   write or delete rankBoard/*; the comments that described it say so; SCHOOL_GATE_USES 26 -> 24, SCHOOL_GATED 29 -> 27. */
+const RULES_FILE_SHA256 = 'fe73c9cd68376ab05e4b561206f6901a80a31ad0f8b48a060a2890c8ac2f6082';
 const TEACHER_GATE_BODY = "return request.auth != null && request.auth.token.email == 'jhoffman@seq.org' && request.auth.token.email_verified == true;";
 const SIGNED_IN_BODY = "return request.auth != null;";
 const SCHOOL_GATE_BODY = "return request.auth != null && ((request.auth.token.get('email_verified', false) == true && request.auth.token.get('email', '').lower().matches('^[^@]+@seq[.]org$')) || (exists(/databases/$(database)/documents/config/access) && get(/databases/$(database)/documents/config/access).data.get('allow', {}).get(request.auth.uid, false) == true));";
-/* The allow rules a school account passes, as "path ops" (the path under /databases/{database}/documents). 29 rules. */
+/* The allow rules a school account passes, as "path ops" (the path under /databases/{database}/documents). 27 rules
+   (29 until 2026-11-17, when the rankBoard block, read and create/update, was removed). */
 const SCHOOL_GATED = [
   '/progress/{userId} read,write',
   '/config/class read',
@@ -20256,8 +20259,6 @@ const SCHOOL_GATED = [
   '/minutes/{userId}/meta/board create',
   '/weekBoard/{tag} read',
   '/weekBoard/{tag} create,update',
-  '/rankBoard/{tag} read',
-  '/rankBoard/{tag} create,update',
   '/siteErrors/{errorId} create',
   '/songRequests/{requestId} create',
   '/songRequests/{requestId} read',
@@ -21563,10 +21564,10 @@ function checkPracticeMinutes(i18nTable) {
     }
     /* The class rank (2026-11-05): ONE number per student keyed by the private Top 5 tag, never the uid. The uid-keyed minutesBoard (2026-11-04) is GONE:
        its all-time seconds were nearly equal to this week's, so joining it to the tag board by value linked tags to uids (and the live quiz links
-       uids to names). It must keep NO rules block at all (default deny), and rankBoard is pinned WHOLE below.
+       uids to names). It must keep NO rules block at all (default deny), and since 2026-11-17 neither may rankBoard (below).
        Since 2026-11-13 no student sees a class rank (Jonathan: a student is compared with their own weeks instead) and the student's page neither
-       writes nor reads rankBoard (pinned below, and run in pm-sim section 13). Its rules block stays exactly as published until it is removed on
-       purpose, which is a rules change Jonathan must paste: then drop RB_SHIPPED and make the count 0. */
+       writes nor reads rankBoard (pinned below, and run in pm-sim section 13). Since 2026-11-17 (Paste F) rankBoard has NO rules block either:
+       like minutesBoard, it must keep none (default deny for every account, the teacher too; the old docs are unused). */
     const mbMatches = (strip(rules).match(/match\s+\/minutesBoard\b/g) || []).length;
     if (mbMatches !== 0) fail(`firestore.rules has ${mbMatches} match block(s) for /minutesBoard: it must have none (a uid-keyed board next to the tag boards can be joined to them by value; Jonathan's rule, 2026-11-05)`);
     if (/['"`.]minutesBoard\b|collection\('minutesBoard'\)/.test(strip(read('practice-minutes.js') || ''))) fail("practice-minutes.js still reads or writes 'minutesBoard' (the class rank moved to rankBoard/{tag})");
@@ -21580,11 +21581,8 @@ function checkPracticeMinutes(i18nTable) {
     }
     /* read and create/update: the rules' gate (rulesGate: isSchool() since the school-accounts paste 2 moved into firestore.rules, 2026-11-14). */
     const GATE = rulesGate(rules);
-    const RB_SHIPPED = "match /rankBoard/{tag} { allow read: if isSchool(); allow create, update: if isSchool() && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id && request.resource.data.keys().hasOnly(['seconds']) && request.resource.data.seconds is number && request.resource.data.seconds >= 0 && request.resource.data.seconds <= 480000; }";
     const rbMatches = (strip(rules).match(/match\s+\/rankBoard\b/g) || []).length;
-    const rboard = block('rankBoard/{tag}');
-    if (rbMatches !== 1 || !rboard) fail(`firestore.rules has ${rbMatches} match blocks for /rankBoard (exactly one, as published: nothing uses it since 2026-11-13; removing it is a rules change for Jonathan to paste — then set this count to 0)`);
-    else if (rboard.replace(/\s+/g, ' ').trim() !== RB_SHIPPED.split('isSchool()').join(GATE)) fail('firestore.rules: the rankBoard block differs from the one shipped. If this is on purpose, change RB_SHIPPED here with it and tell Jonathan to paste the rules again');
+    if (rbMatches !== 0) fail(`firestore.rules has ${rbMatches} match block(s) for /rankBoard: it must have none (the class rank, unused since 2026-11-13, closed 2026-11-17 with Paste F; a block back is a rules change Jonathan must paste)`);
     /* The Top 5 board (2026-11-04, redesigned the same day: Jonathan wants NO per-period minutes tied to a name, readable by anyone): two blocks,
        pinned WHOLE like minutesBoard. The board's docs are keyed by a private random tag, never a uid; the tag lives only in the student's own
        owner-only doc minutes/{uid}/meta/board, and a write to the board must be to the doc whose id is the writer's own tag. A change to either

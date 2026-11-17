@@ -50,9 +50,12 @@ rules_version = '2';
                       (2026-11-06) and days (2026-11-13), and deletes days,
                       weeks and meta/board (one student's removal, 2026-11-14),
                       nothing else
-     rankBoard/{tag}, weekBoard/{tag}  the class rank and the Top 5, keyed by a private
-                      name tag (minutes/{uid}/meta/board), readable by every school
-                      account (isSchool(), 2026-11-13). minutesBoard/{uid} has NO block (denied).
+     weekBoard/{tag}  the Top 5, keyed by a private name tag
+                      (minutes/{uid}/meta/board), readable by every school
+                      account (isSchool(), 2026-11-13). rankBoard/{tag} (the old
+                      class rank) is closed since 2026-11-17: no block, so it is
+                      denied to every account; its old docs are unused.
+                      minutesBoard/{uid} has NO block (denied) either.
      siteErrors/*     the anonymous error log (2026-11-13): any school
                       account creates, the teacher reads and deletes
      songRequests/*   a student's song request, one per week (2026-11-13):
@@ -112,7 +115,7 @@ service cloud.firestore {
        only an entry whose value is exactly true counts.
 
        WRITES TOO: every student-side create and write below also needs
-       isSchool() (progress, minutes, the boards, the live-quiz answers,
+       isSchool() (progress, minutes, the Top 5 board, the live-quiz answers,
        issue reports, mic takes and the take counter, the error log). The
        one door left to any signed-in account is accessRequests/{own uid}.
 
@@ -295,8 +298,9 @@ service cloud.firestore {
        writers and fails the push if a name gets back into this doc. A
        person in the room sees the wall's names with points and can read this
        doc's uid -> points, so the top players' uids can be lined up with their
-       names; from a uid nothing reaches minutes (rankBoard and weekBoard
-       are keyed by a private tag, minutesBoard has no rules block).
+       names; from a uid nothing reaches minutes (weekBoard is keyed by a
+       private tag; rankBoard, closed 2026-11-17, and minutesBoard have no
+       rules block).
 
        Scoped to the specific "current" doc rather than liveQuiz/{doc}, for
        the same reason config/class is: a wildcard would open every future
@@ -543,8 +547,8 @@ service cloud.firestore {
     }
 
     /* minutesBoard/{uid} (the uid-keyed class rank, 2026-11-04) HAS NO RULES BLOCK ANY MORE (2026-11-05): with no match, every read and
-       write is denied. Jonathan's rule (no minutes tied to a name, readable by anyone) ruled the uid out: see rankBoard below. Its old docs
-       are unreachable and can be deleted in the Firebase console. Do not add a block for it back. */
+       write is denied. Jonathan's rule (no minutes tied to a name, readable by anyone) ruled the uid out: it was replaced by rankBoard, now
+       closed too (below). Its old docs are unreachable and can be deleted in the Firebase console. Do not add a block for it back. */
 
     /* ── TOP 5 (2026-11-04; practice-minutes.js, "TOP 5") ────────────────
        Jonathan, 2026-11-04: no per-period minutes tied to a name, readable by
@@ -580,9 +584,9 @@ service cloud.firestore {
        What a reader sees here: a random tag, a period, a week and a number.
        No uid, no name, no email.
 
-       The class rank is keyed by the same tag (rankBoard, below) and the
-       uid-keyed minutesBoard is gone, so neither board holds anything that
-       joins to a uid: a person in the ROOM who lines the wall's names and
+       The old class rank (rankBoard, keyed by the same tag) is closed since
+       2026-11-17 and the uid-keyed minutesBoard is gone, so no readable
+       board holds anything that joins to a uid: a person in the ROOM who lines the wall's names and
        points up with the public liveQuiz uid -> points learns a uid, a name
        and points, and still cannot reach minutes or a period from that uid.
        config/class.periodOverrides[uid] is readable by every student and
@@ -618,33 +622,10 @@ service cloud.firestore {
             && request.resource.data.seconds <= 7 * dayCeilingSeconds();
     }
 
-    /* ── CLASS RANK (2026-11-05; practice-minutes.js, "CLASS RANK") ───────
-       rankBoard/{tag}  { seconds } — the student's all-time practice
-       seconds, so My progress can say "N/total". It replaces the uid-keyed
-       minutesBoard: keyed by the SAME private tag as weekBoard, so no uid
-       or name is in it, and so the two boards cannot be joined to a person
-       (before, this week's and all-time seconds were nearly the same number
-       and minutesBoard was keyed by uid, so a plain value match linked a tag
-       to a uid, and the live quiz links a uid to a name). Every school
-       account reads the whole collection (that is how a rank is worked
-       out); a write is allowed only under the writer's own tag, with that
-       one field, a number from 0 to 480000 (400 days of the old 20-minute cap). No delete.
-       HONEST LIMITS: as weekBoard (a student at DevTools can claim first
-       place for themselves; a tag cannot be proven unique, so one account can
-       overwrite one other student's entry, and UNLIKE weekBoard the victim's
-       page never repairs this one: it only adds; any account that signs in once
-       and may write adds 1 to the total). Nothing
-       reads this for a grade.
-       ⚠ Must be published BEFORE (or with) the site code that writes it. */
-    match /rankBoard/{tag} {
-      allow read: if isSchool();
-      allow create, update: if isSchool()
-            && tag == get(/databases/$(database)/documents/minutes/$(request.auth.uid)/meta/board).data.id
-            && request.resource.data.keys().hasOnly(['seconds'])
-            && request.resource.data.seconds is number
-            && request.resource.data.seconds >= 0
-            && request.resource.data.seconds <= 480000;
-    }
+    /* rankBoard/{tag} (the class rank, { seconds } keyed by the Top 5 tag, 2026-11-05) HAS NO RULES BLOCK ANY MORE (closed 2026-11-17):
+       since 2026-11-13 no student sees a class rank and no page reads or writes it (a student is compared with their own weeks instead).
+       With no match, every read, write and delete is denied, for the teacher too. Its old docs are unused and can be deleted in the
+       Firebase console (which does not go through these rules). Do not add a block for it back. */
 
     /* ── ERROR LOG (2026-11-13; app/boot.js SITE_ERRORS, teacher-errors.js) ──
        A NEW block; no rule above it was changed (only the path list at
