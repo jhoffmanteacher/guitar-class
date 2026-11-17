@@ -133,6 +133,16 @@ and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fi
   the refusal. Then ONE fresh `site-reviewer` round on the two fixes and the rebase. No BLOCKER or MAJOR: ship
   (`Review: Reviewed`), and only then shorten CLAUDE.md's "Never" list as the branch does. A MAJOR again: leave it
   parked, write the finding here, go on (Jonathan's instruction of 2026-11-14 stands: "a major again: park it").
+  - **W12 from Windows (2026-11-16 night): it HAD started (an Opus builder, about 45 minutes) before the hold
+    arrived; stopped at once when the hold was read. Nothing is lost and nothing shipped.** The work so far is on
+    GitHub as branch `win/w12-2026-11-16-wip` (tip `ae57273`, on main `efca304`): the branch's commits brought
+    onto today's main (`69fb959a` "never-blocks on today's main"), then `38fd644e` "pre-push judges what is
+    pushed, not HEAD: every ref by the commit it sends and where it goes" (MAJOR a) and `a8bd1982`
+    "rule-zero-proof: renamedChoices must be flat and only grow" (MAJOR b), then a WIP commit of
+    `tools/never-blocks-selftest.mjs` as the agent left it. The agent was stopped before it reported, so NONE of
+    this is verified: no self-test count, no pasted refusals, no checks run, no review. Whoever resumes: start from
+    that branch, re-run everything in W12's list, and do not trust the two fix commits until their proofs exist.
+    CLAUDE.md's "Never" list is unchanged on main. W15 was not started. W11 is running (not on hold).
 - **W13. Close the unused class-rank rule (due about 2026-11-20; it needs Jonathan's paste, so PREPARE, do not
   push ahead of him).** Nothing has read or written `rankBoard/{tag}` since 2026-11-13 (`practice-minutes.js:63`,
   `:120`). On a branch `win/close-rankboard`: remove the `match /rankBoard/{tag}` block from `firestore.rules`
