@@ -6,6 +6,10 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-17 — "the cure" keeps the beat when you switch Guitar or speed
+
+- **"the cure" play-alongs and snippets: the highlight and the click now stay on the same beat with Guitar on or off, at both speeds.** Before, turning Guitar off made every highlight come a little sooner.
+
 ## 2026-11-16 — An activity can stay in Today's activities
 
 - **Lesson steps and In-Class Activity directions are a little bigger** (16px instead of 15px), so they are easier to read. Every activity direction still fits on one line.

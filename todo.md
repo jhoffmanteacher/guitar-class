@@ -38,6 +38,14 @@ Added 2026-11-16 (Jonathan: "we'll have to fix the beat map in the future"). Not
   The names are the builder's short labels for the tracks: match each to its slug in `SNIPPET_TRACKS` before
   editing. The tool reads ffmpeg's decode; a browser's mp3 start trim is not modelled, so check one track by ear
   before trusting a number.
+- **DONE 2026-11-17 for "the cure" only: fault 2 below, and the files' gaps from each other.** Its four files now
+  share one map through `fileOffset` in `SNIPPET_TRACKS` (rhythm-down 144 +25.1 ms, rhythm-down 120 +23.6 ms, slow
+  full −26.4 ms; `anchor` 0.565 is on the fast full mix). Jonathan chose it, reversing "never a second anchor" for
+  this track. The files agree within 0 to 2 ms (were 25 to 50). NOT done for the cure: the whole map is still about
+  +32 to +44 ms early by the audit (a second method read 19 to 35 ms less: "cannot tell"), so the number is his to
+  set by ear with `?snipcal=1&mapshift=<ms>` on ca-13; it then goes into `anchor`, and into `data-click-anchor` on
+  `tabs/the-cure.html`. New audit line to listen to: bar 85 of the Outro, the record about 118 ms early on all four
+  files. The cure's numbers in the table above are from BEFORE this change.
 - **Three separate faults in that table:**
   1. A fixed offset per track (the whole map early or late): move the map, one number per file.
   2. "the cure" with Guitar off: its rhythm-down files play 25 ms (144 BPM) and 51 ms (120 BPM) after their full
