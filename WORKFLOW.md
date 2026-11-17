@@ -183,6 +183,13 @@ and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fi
     this is verified: no self-test count, no pasted refusals, no checks run, no review. Whoever resumes: start from
     that branch, re-run everything in W12's list, and do not trust the two fix commits until their proofs exist.
     CLAUDE.md's "Never" list is unchanged on main. W15 was not started. W11 is running (not on hold).
+- **W13 ready: paste `Claude outputs/firestore-rules-PASTE-F-2026-11-17.txt`** (the Mac, 2026-11-17). The code side is on
+  main (Reviewed, `site-reviewer-deep` on Opus, 1 round, clean). The file is the whole `firestore.rules`: 1018 lines
+  (the editor may show 1019), sha256 `fe73c9cd68376ab0…f6082`; the rules published now are 1037 lines. Either order was
+  safe; old cached pages only lose the rank tile. Jonathan pastes it in the CLASS project (Firebase console →
+  Firestore → Rules → replace all → Publish); GitHub publishes the same file to the practice project by itself.
+  When he says it is published: write the date here and delete the W13 lines. The old `rankBoard` documents stay
+  until he names them for deletion.
 - **W13 IS THE MAC'S NOW (Jonathan, 2026-11-17: "windows can't do w13"). Windows: skip it, touch nothing in
   `firestore.rules`, `practice-minutes.js`, `tools/pm-rules-test.mjs`. The Mac builds it on `mac/close-rankboard`
   (it has Java and the emulator). The text below is the job as written.**

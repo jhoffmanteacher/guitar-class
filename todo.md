@@ -24,6 +24,9 @@ second line after a student's first change.
    Windows is building it.)
 
 **Only you can do:**
+9. **The class-rank rules paste (Paste F) is READY (2026-11-17).** Firebase console (the class project) → Firestore
+   → Rules → select all, paste the whole of `Claude outputs/firestore-rules-PASTE-F-2026-11-17.txt` → Publish. The
+   editor should end at about line 1019 (today it ends at 1038). Then tell Claude it is published.
 10. **The practice copy's key:** `Claude outputs/practice-copy/JONATHAN-STEPS.md` (GitHub secret
     `FIREBASE_PRACTICE_SA`). Until then the practice copy is not published.
 11. **Song builder: build and publish one real song** (WORKFLOW, "Song builder Part d"). Part e waits for that.
