@@ -241,6 +241,9 @@ async function main(){
 
     console.log('Song files');
     await js(`document.querySelector('[data-manage-tab="songs"]').click(); true`);
+    /* Open from the start since 2026-11-17 (Jonathan could not find the upload behind "Show song files"): the drop zone is there with no click; Hide then Show still work. */
+    ok(await js(`!!document.querySelector('#t-songfiles-block [data-tsf-drop]') && /Hide song files/.test(document.querySelector('[data-tsf-act="toggle"]').textContent)`), 'Song files is open on arrival: the drop zone is on the page');
+    ok(await clickWait('[data-tsf-act="toggle"]', `/Show song files/.test(document.querySelector('[data-tsf-act="toggle"]').textContent) && !document.querySelector('#t-songfiles-block [data-tsf-drop]')`), 'Hide song files → the list closes');
     act(await clickWait('[data-tsf-act="toggle"]', `/Hide song files/.test(document.querySelector('[data-tsf-act="toggle"]').textContent)`), 'Show song files → the list opens');
     ok(await clickWait('[data-tsf-act="refresh"]', `!!document.querySelector('[data-tsf-act="refresh"]') && !document.querySelector('[data-tsf-act="refresh"][disabled]')`), 'Refresh reads the store again');
     await shot('04-songfiles-1440');

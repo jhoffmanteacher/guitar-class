@@ -38,7 +38,7 @@ class plays a different file than the one the console would upload". Fix it by r
 The code from step 1 must be live on main first. The school-accounts rules (paste 2) are already published
 (2026-11-14).
 
-1. Teacher console → Manage → Song files → Show song files. The 18 rows read "on the site as a public file; upload
+1. Teacher console → Manage → Song files (the section is open). The 18 rows read "on the site as a public file; upload
    it, then it can be switched".
 2. Drop the 18 mp3 files from the Mac's site folder (`audio/`) on the drop zone. Upload takes only a file whose
    bytes are on the list.
