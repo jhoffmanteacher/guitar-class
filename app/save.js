@@ -292,16 +292,22 @@ function progressLoadRetryNoteChange(){
 function progressLoadRetryOnline(){
   if(_loadRetry && !_loadRetry.reading) progressLoadRetryNow();
 }
-/* Would the redraw cut something off? Same list as the update reload's busyReason (app/start.js, the service
-   worker block) minus the sign-in and the mic: an exit check part-way (its picks are in memory, and a one-try
-   check started on the empty state must not be filed over a stored score), a drill round, a take recording, a
-   practice card, a backing-track snippet or a tab line playing (rebuildModuleContentPanels stops card audio). */
+/* Would the redraw cut something off? The update reload's busyReason (app/start.js, the service worker block)
+   minus the sign-in, plus what the redraw itself stops: an exit check part-way (its picks are in memory, and a
+   one-try check started on the empty state must not be filed over a stored score), a drill round (Name the power
+   chord too: stopCardAudio quits it), a take recording, the mic listening (a Coach check's card sits inside the step
+   it was opened from, coach-core.js coachOpen, and rebuildModuleContentPanels replaces every set panel's HTML), a
+   practice card, a backing-track snippet or a tab line playing (rebuildModuleContentPanels stops card audio).
+   Not here, because the redraw does not touch them: the tuner and the metronome (fab-tools.js), Live In-Class Games
+   (live-quiz.js), the song request form (its own overlay), and a text box: every box in the set panels saves on
+   input (onResponseChange, saveReflection, savePerformance), so its first keystroke is a change and stops the retry. */
 function progressLoadRetryBusy(){
   const anyValue = (obj, fn) => Object.keys(obj || {}).some(k => obj[k] && fn(obj[k]));
   try{
-    if(Object.keys(ecRuns).length || pcState || snipState || playSeqState || ncLive || chcLive) return true;
+    if(Object.keys(ecRuns).length || pcState || snipState || playSeqState || ncLive || chcLive || window.coachMicLive) return true;
     if(anyValue(recState, s => s.starting || s.recording)) return true;
-    return anyValue(shuffleDrills, s => s.phase === 'play') || anyValue(deckDrills, s => s.phase === 'run') || anyValue(earDrills, s => s.phase === 'run');
+    return anyValue(shuffleDrills, s => s.phase === 'play') || anyValue(deckDrills, s => s.phase === 'run') || anyValue(earDrills, s => s.phase === 'run')
+      || anyValue(powerNames, s => s.phase === 'play');
   }catch(e){ return true; }
 }
 /* Would progressStartOverAtSignIn have acted on this doc? (Its own tests, without its side effects.) */
@@ -321,7 +327,13 @@ async function progressLoadRetryNow(){
   try{
     await ensureDb();
     if(!db) throw new Error('Firestore not available');
-    doc = await withTimeout(db.collection('progress').doc(r.user.uid).get(), LOAD_RETRY_READ_MS);
+    /* The SERVER's doc only. A plain get() with no server answer resolves from the SDK's cache, and after a failed
+       sign-in read that cache holds only this page's own queued writes (a songOpens +1, a place save): a PARTIAL doc
+       (exists, fromCache, hasPendingWrites) that applied here would empty the work and then save the empty state over
+       the stored streak, bests and scores (review of fix/load-retry R1-1, 2026-11-17; tools/save-loop.mjs L9, L10).
+       Second net: a snapshot from the cache is never applied, whatever asked for it. */
+    doc = await withTimeout(db.collection('progress').doc(r.user.uid).get({ source: 'server' }), LOAD_RETRY_READ_MS);
+    if(!doc || (doc.metadata && doc.metadata.fromCache)) doc = null;
   }catch(e){ doc = null; }
   if(_loadRetry !== r) return;              // stopped while the read was out (sign-out, a new sign-in)
   r.reading = false;

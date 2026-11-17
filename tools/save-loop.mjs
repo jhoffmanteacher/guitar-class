@@ -218,7 +218,7 @@
      are sent from the real values; a change first stops it at once; 'online' retries at once; an exit check part-way
      defers it; a sign-out stops it (another student signed in on the same page never gets the first one's doc).
      L6 the Wi-Fi back during the last automatic save retry (the old R10-online-retry); L7 a retried read that comes back
-     after Firebase signed another student in but before the page heard it is not applied; L8 each of the ten "busy"
+     after Firebase signed another student in but before the page heard it is not applied; L8 each of the twelve "busy"
      states (progressLoadRetryBusy) holds the load back until it ends. See loadRetryChecks().
      See directedChecks(). A failure prints "✗ FAIL directed …" and exits 1.
 
@@ -280,7 +280,10 @@ const mix = (a, b) => (Math.imul(a ^ 0x9E3779B9, 0x85EBCA6B) ^ Math.imul(b + 0x7
 const T0 = Date.UTC(2026, 10, 11, 16, 0, 0);
 class FieldDelete { toString(){ return '<FieldValue.delete>'; } }
 const DELETE = new FieldDelete();
-const isMap = v => !!v && typeof v === 'object' && !Array.isArray(v) && !(v instanceof FieldDelete);
+/* FieldValue.increment(n) (2026-11-17): the songOpens count (app/explore.js songsLibraryOpen) adds n to the stored
+   number, or sets n when there is none. */
+class FieldIncrement { constructor(n){ this.n = n; } toString(){ return '<FieldValue.increment ' + this.n + '>'; } }
+const isMap = v => !!v && typeof v === 'object' && !Array.isArray(v) && !(v instanceof FieldDelete) && !(v instanceof FieldIncrement);
 const FAKE_FAULTS = {
   'shallow-merge': 'set(merge) replaces a whole map field instead of merging into it (breaks F1)',
   'empty-map-merges': 'an empty map in set(merge) leaves the stored map alone (breaks F2)',
@@ -291,10 +294,11 @@ const FAKE_FAULTS = {
   'no-tx-retry': 'a transaction commits over a document that changed after it read it (breaks F10)',
   'stall-survives-close': 'a write still queued in a closed tab lands anyway (breaks F11)',
   'update-nested-delete': 'update() accepts a FieldValue.delete() nested inside a map value (breaks F4)',
-  'offline-rejects-writes': 'an offline set() is rejected instead of waiting for the reconnect (breaks F11)'
+  'offline-rejects-writes': 'an offline set() is rejected instead of waiting for the reconnect (breaks F11)',
+  'no-cache-answer': 'an offline get() with a write queued rejects instead of answering from the local cache (breaks F13)'
 };
 function clone(v){
-  if (v instanceof FieldDelete) return v;
+  if (v instanceof FieldDelete || v instanceof FieldIncrement) return v;
   if (Array.isArray(v)) return v.map(clone);
   if (v && typeof v === 'object'){ const o = {}; for (const k of Object.keys(v)) o[k] = clone(v[k]); return o; }
   return v;
@@ -325,6 +329,7 @@ function mergeInto(target, data){
   for (const k of Object.keys(data)){
     const v = data[k];
     if (v instanceof FieldDelete){ if (FAKE_FAULT !== 'delete-ignored') delete target[k]; continue; }
+    if (v instanceof FieldIncrement){ target[k] = (typeof target[k] === 'number' ? target[k] : 0) + v.n; continue; }
     if (isMap(v)){
       if (!Object.keys(v).length){ if (FAKE_FAULT !== 'empty-map-merges') target[k] = {}; continue; }
       if (FAKE_FAULT === 'shallow-merge'){ const o = {}; for (const kk of Object.keys(v)) if (!(v[kk] instanceof FieldDelete)) o[kk] = clone(v[kk]); target[k] = o; continue; }
@@ -342,6 +347,7 @@ function applyUpdate(doc, patch){
     for (let i = 0; i < parts.length - 1; i++){ if (!isMap(o[parts[i]])) o[parts[i]] = {}; o = o[parts[i]]; }
     const last = parts[parts.length - 1];
     if (v instanceof FieldDelete) delete o[last];
+    else if (v instanceof FieldIncrement) o[last] = (typeof o[last] === 'number' ? o[last] : 0) + v.n;
     else if (FAKE_FAULT === 'update-merges' && isMap(v) && isMap(o[last])) mergeInto(o[last], v);
     else o[last] = clone(v);
   }
@@ -378,7 +384,7 @@ class World {
     await this.drain();
   }
   doc(path){ const d = this.docs.get(path); return d ? d : null; }
-  snap(path){ const d = this.docs.get(path); return { exists: !!d, data: () => (d ? clone(d.data) : undefined), id: path.split('/').pop() }; }
+  snap(path){ const d = this.docs.get(path); return { exists: !!d, data: () => (d ? clone(d.data) : undefined), id: path.split('/').pop(), metadata: { fromCache: false, hasPendingWrites: false } }; }
   applyOp(path, op){
     let d = this.docs.get(path);
     if (op.kind === 'update'){
@@ -419,6 +425,9 @@ class World {
 /* A tab's Firestore client: its own write stream (F9) on its device's network. */
 function makeClient(world, tab){
   const dev = tab.device;
+  /* The writes this tab issued that have not landed, been refused or been lost: the SDK's local view (F13). */
+  const pendingW = tab.pendingW = [];
+  const unpend = p => { const i = pendingW.indexOf(p); if (i >= 0) pendingW.splice(i, 1); };
   const issue = (path, op) => {
     if (op.kind === 'update') validateUpdate(op.data); else validate(op.data, '', op.merge);
     const sent = FAKE_FAULT === 'late-copy' ? op.data : clone(op.data);
@@ -433,9 +442,11 @@ function makeClient(world, tab){
       world.log(`${tab.name} write #${world.issued} started during unload: NOT DELIVERED: ${summarize(op.data)}`);
       return new Promise(() => {});
     }
+    const pend = { path, kind: op.kind, merge: op.merge, data: sent };
+    pendingW.push(pend);
     world.log(`${tab.name} write #${world.issued} issued (${tr.ok === false ? 'will be REFUSED' : tr.ok === null ? 'QUEUED until reconnect' : 'lands ~' + ((tr.at - world.now) / 1000).toFixed(2) + ' s'}): ${summarize(op.data)}`);
     return new Promise((res, rej) => {
-      if (tr.ok === false){ world.at(tr.at, () => { rec.to = world.now; world.rejected++; world.log(`${tab.name} write REFUSED by the server`); rej(Object.assign(new Error('Missing or insufficient permissions.'), { code: 'permission-denied' })); }, tab, 'net'); return; }
+      if (tr.ok === false){ world.at(tr.at, () => { rec.to = world.now; unpend(pend); world.rejected++; world.log(`${tab.name} write REFUSED by the server`); rej(Object.assign(new Error('Missing or insufficient permissions.'), { code: 'permission-denied' })); }, tab, 'net'); return; }
       const behindStall = tr.ok === null || tab.stallQueued > 0;
       let at = tr.at;
       if (FAKE_FAULT !== 'no-fifo') at = Math.max(at, tab.lastLandAt);
@@ -443,6 +454,7 @@ function makeClient(world, tab){
       if (behindStall) tab.stallQueued++;
       world.at(at, () => {
         rec.to = world.now;
+        unpend(pend);
         if (behindStall) tab.stallQueued--;
         if (behindStall && !tab.alive && FAKE_FAULT !== 'stall-survives-close'){ world.lostOnClose++; world.log(`${tab.name} queued write LOST (tab closed before reconnect)`); return; }
         try { world.applyOp(path, op.kind === 'update' ? { kind: 'update', data: sent } : { kind: 'set', merge: op.merge, data: sent }); }
@@ -453,9 +465,32 @@ function makeClient(world, tab){
       }, tab, 'net');
     });
   };
-  const read = path => new Promise((res, rej) => {
+  /* F13 THE LOCAL CACHE ANSWERS A FAILED READ. With no server answer (offline, or a stall past 10 s), a get() with no
+     `source` resolves from the SDK's memory cache when it holds the doc: here, only from this tab's own queued writes
+     (no enablePersistence, and the fake keeps no read cache), so it is a PARTIAL doc, just the queued set() fields,
+     with metadata.fromCache and hasPendingWrites true. Shown on firebase 10.12.2 compat (the review of fix/load-retry,
+     2026-11-17): nothing queued -> "unavailable"; a merge write queued -> exists=true, fromCache=true, pending=true,
+     only the queued fields. get({ source: 'server' }) never answers from the cache. A refused read (permission-denied)
+     rejects either way. */
+  const cacheSnap = path => {
+    const ws = pendingW.filter(p => p.path === path && p.kind === 'set');
+    if (!ws.length || FAKE_FAULT === 'no-cache-answer') return null;
+    const data = {};
+    for (const w of ws){ if (!w.merge) for (const k of Object.keys(data)) delete data[k]; mergeInto(data, w.data); }
+    return { exists: true, data: () => clone(data), id: path.split('/').pop(), metadata: { fromCache: true, hasPendingWrites: true } };
+  };
+  const read = (path, o) => new Promise((res, rej) => {
+    const serverOnly = !!(o && o.source === 'server');
+    const refusedNow = dev.phaseAt(world.now).phase === 'refused';
     const tr = world.readTrip(dev);
     const settle = () => {
+      const cached = tr.ok !== true && !serverOnly && !refusedNow ? cacheSnap(path) : null;
+      if (cached){
+        world.gets.push({ tab: tab.name, at: world.now, n: world.evN, alive: tab.alive, path, ok: false, cache: true, data: cached.data() });
+        world.log(`${tab.name} read ${path}: no server answer, ANSWERED FROM THE CACHE (partial: ${summarize(cached.data())})`);
+        res(cached);
+        return;
+      }
       if (tr.ok === true){
         const s = world.snap(path);
         world.gets.push({ tab: tab.name, at: world.now, n: world.evN, alive: tab.alive, path, ok: true, data: s.exists ? s.data() : null });
@@ -474,7 +509,7 @@ function makeClient(world, tab){
   });
   const ref = path => ({
     path, id: path.split('/').pop(),
-    get: () => read(path),
+    get: o => read(path, o),
     set: (data, o) => issue(path, { kind: 'set', merge: !!(o && o.merge), data }),
     update: data => issue(path, { kind: 'update', data })
   });
@@ -629,12 +664,26 @@ async function fakeSelfTest(){
     dev.phases = [{ phase: 'offline', until: T0 + 4000 }];
     let refused = false, readFailed = false;
     db.collection('progress').doc('u').set({ queued: true }, { merge: true }).catch(() => { refused = true; });
-    db.collection('progress').doc('u').get().catch(() => { readFailed = true; });
+    db.collection('progress').doc('u').get({ source: 'server' }).catch(() => { readFailed = true; });
     await w.runUntil(T0 + 3000);
     const before = !!w.docs.get(P);
     await w.runUntil(T0 + 8000);
     dev.phases = [];
     check('F12 offline: a set() waits for the reconnect and then lands; a read fails at once', !before && !refused && readFailed && w.docs.get(P) && w.docs.get(P).data.queued === true);
+  }
+  {
+    const { w, db } = mk();
+    w.docs.set(P, { data: { kept: 'server', n: 1 }, version: 1 });
+    dev.phases = [{ phase: 'offline', until: T0 + 4000 }];
+    const got = {};
+    db.collection('progress').doc('u').get().then(s => { got.empty = 'resolved'; }, () => { got.empty = 'rejected'; });
+    await w.runUntil(T0 + 1500);
+    db.collection('progress').doc('u').set({ q: 1 }, { merge: true });
+    db.collection('progress').doc('u').get().then(s => { got.plain = { exists: s.exists, cache: !!(s.metadata && s.metadata.fromCache), data: s.data() }; }, () => { got.plain = 'rejected'; });
+    db.collection('progress').doc('u').get({ source: 'server' }).then(() => { got.server = 'resolved'; }, () => { got.server = 'rejected'; });
+    await w.runUntil(T0 + 8000);
+    dev.phases = [];
+    check('F13 offline: get() answers from the cache with ONLY the queued fields when a write is queued (fromCache), rejects with nothing queued; get({source:"server"}) rejects', got.empty === 'rejected' && got.server === 'rejected' && got.plain && got.plain.exists === true && got.plain.cache === true && JSON.stringify(got.plain.data) === '{"q":1}', JSON.stringify(got));
   }
   return out;
 }
@@ -721,7 +770,7 @@ function makeTab(world, name, device, opts){
   const storage = () => ({ _d: {}, getItem(k){ return Object.prototype.hasOwnProperty.call(this._d, k) ? this._d[k] : null; }, setItem(k, v){ this._d[k] = String(v); }, removeItem(k){ delete this._d[k]; }, clear(){ this._d = {}; }, key(i){ return Object.keys(this._d)[i] ?? null; }, get length(){ return Object.keys(this._d).length; } });
   const db = makeClient(world, tab);
   const firestoreFn = () => db;
-  firestoreFn.FieldValue = { delete: () => DELETE };
+  firestoreFn.FieldValue = { delete: () => DELETE, increment: n => new FieldIncrement(n) };
   const auth = { currentUser: null, onAuthStateChanged(cb){ tab.authCb = cb; return () => {}; }, signOut(){ return Promise.resolve(); } };
   const intervals = new Map();
   const ctx = {
@@ -1922,6 +1971,42 @@ async function loadRetryChecks(out, fail){
     if (!mid || mid.failed !== true || mid.completed !== '{}' || mid.retry !== false) fail(`directed L7 Firebase moved on before the callback: A's doc was applied, or the retry goes on; at 8 s ${JSON.stringify(mid)}`);
     for (const f of tab.faults) fail(`directed L7: site code ${f} (R12)`);
   }
+  /* L9 / L10 A CACHE ANSWER IS NOT THE DOC (review of fix/load-retry R1-1, 2026-11-17). The sign-in read is refused,
+     then the Wi-Fi drops (3 s) and the student does something that is NOT a change but queues a write to their doc:
+     L9 opens a "More Play Along songs" row (songsLibraryOpen, app/explore.js: an increment of songOpens); L10 opens
+     another set while the Wi-Fi is up for a moment (3-5 s: that place save lands, and the doc's Module 4/5 marker is
+     confirmed, so later saves are plain writes), then another once it has dropped (a place save queued offline). The retried read at ~6.5 s gets no server answer, and a plain get() resolves from the
+     SDK's cache with a PARTIAL doc (F13): only the queued fields. It must not be applied: the session stays on the
+     failed-read rules until the Wi-Fi is back (40 s), the 'online' retry then loads the real doc, and a rep and a
+     streak bump at 45 s are sent from the stored values (47 -> 48, 15 -> 16), nothing else in the doc moving. */
+  for (const [tag, phases, first] of [
+    ['L9', [{ phase: 'refused', until: T0 + 3000 }, { phase: 'offline', until: T0 + 40000 }],
+      [{ at: 4000, what: 'opens a More Play Along songs row (songOpens +1)', code: 'try { songsLibraryOpen("pa-test-song"); } catch(e) {}' }]],
+    ['L10', [{ phase: 'refused', until: T0 + 3000 }, { phase: 'up', until: T0 + 5000 }, { phase: 'offline', until: T0 + 40000 }],
+      [{ at: 3100, what: 'opens set m7w2 (a place save that lands)', code: 'lastModuleNum = 7; lastSetId = "m7w2"; saveProgress();' },
+       { at: 5500, what: 'opens set m7w1 (a place save, queued offline)', code: 'lastModuleNum = 7; lastSetId = "m7w1"; saveProgress();' }]]]){
+    let mid = null, end = null;
+    const label = `${tag} a cache answer while offline`;
+    const { world, tab, stored } = await directedRun(label, START, phases, [
+      ...first,
+      { at: 20000, what: '(reads the page, offline)', probe: t => { mid = { failed: t.run('progressLoadFailed'), retry: t.run('_loadRetry !== null'), skills: t.run('JSON.stringify(progress)'), streak: t.run('JSON.stringify(streak)') }; } },
+      { at: 44000, what: '(reads the page, back online)', probe: t => { end = { failed: t.run('progressLoadFailed'), skills: t.run('JSON.stringify(progress)') }; } },
+      { at: 45000, what: 'logs a rep on m6w1-s1 and the day counts for the streak', code: 'logPracticeRep("m6w1-s1"); bumpPracticeStreak();' },
+      { at: 48000, what: 'hides the tab', hide: true }
+    ], 60000);
+    out.checks += 4;
+    const cached = world.gets.filter(g => g.tab === 'T1' && g.path === 'progress/' + USER.uid && g.cache);
+    if (tag === 'L9' && !(stored && stored.songOpens && stored.songOpens['pa-test-song'] === (START.songOpens && START.songOpens['pa-test-song'] || 0) + 1)) fail(`directed ${label}: setup — the songs row's +1 is not stored (songOpens ${JSON.stringify(stored && stored.songOpens)})`);
+    if (tag === 'L10' && !(stored && stored.lastSet === 'm7w1' && world.landed.some(w => w.at < T0 + 5000 && w.data.lastSet === 'm7w2'))) fail(`directed ${label}: setup — the first place save did not land while the Wi-Fi was up, or the second is not stored (lastSet ${JSON.stringify(stored && stored.lastSet)})`);
+    if (!mid || mid.failed !== true || mid.skills !== '{}' || mid.retry !== true) fail(`directed ${label}: a partial doc answered from the cache was applied as the student's work, or the retry gave up; at 20 s ${JSON.stringify(mid)} (cache answers to the page: ${cached.length})`);
+    if (!end || end.failed !== false || end.skills !== JSON.stringify(START.skills)) fail(`directed ${label}: back online, the real doc should load; at 44 s ${JSON.stringify(end)}`);
+    const rep = stored && stored.practiceLog && stored.practiceLog['m6w1-s1'];
+    if (!rep || rep.reps !== START.practiceLog['m6w1-s1'].reps + 1 || !stored.streak || stored.streak.count !== START.streak.count + 1)
+      fail(`directed ${label}: the rep and streak after the load must be sent from the stored values (reps ${START.practiceLog['m6w1-s1'].reps} -> +1, streak ${START.streak.count} -> +1); stored reps ${rep && rep.reps}, streak ${JSON.stringify(stored && stored.streak)}`);
+    for (const f of ['skills', 'exitChecks', 'games', 'responses', 'completed', 'caSteps', 'classActivities'])
+      if (canon(stored && stored[f]) !== canon(START[f])) fail(`directed ${label}: ${f} changed: ${JSON.stringify(stored && stored[f]).slice(0, 200)}`);
+    for (const f of tab.faults) fail(`directed ${label}: site code ${f} (R12)`);
+  }
   /* L8 EVERY "BUSY" SOURCE (progressLoadRetryBusy). The read comes back while the page is busy with something the redraw
      would cut off: it is not applied then, and once that ends (and the student changed nothing) the next try applies it.
      The busy state is set and cleared by hand here (the drills, cards and recorder are not driven by this tool). */
@@ -1931,7 +2016,13 @@ async function loadRetryChecks(out, fail){
       ['a tab line playing', 'playSeqState = { fake: 1 }', 'playSeqState = null'], ['a Note Call round', 'ncLive = "x"', 'ncLive = null'],
       ['a Call the chord round', 'chcLive = "x"', 'chcLive = null'], ['a take recording', 'recState.__t = { recording: true }', 'delete recState.__t'],
       ['a Shuffle round', 'shuffleDrills.__t = { phase: "play" }', 'delete shuffleDrills.__t'], ['a Deck round', 'deckDrills.__t = { phase: "run" }', 'delete deckDrills.__t'],
-      ['an Ear round', 'earDrills.__t = { phase: "run" }', 'delete earDrills.__t']];
+      ['an Ear round', 'earDrills.__t = { phase: "run" }', 'delete earDrills.__t'],
+      /* 2026-11-17 (the busy-list question of the review of fix/load-retry): the Coach card is inserted inside the
+         step it was opened from (coach-core.js coachOpen: anchor.insertAdjacentElement), and the redraw replaces
+         every set panel's HTML (rebuildModuleContentPanels), so a Coach check or the strum check listening loses its
+         card mid-take; a Name the power chord round is quit by stopCardAudio (pwnStopAll). */
+      ['the mic listening (a Coach check, a mic game)', 'window.coachMicLive = true', 'window.coachMicLive = false'],
+      ['a Name the power chord round', 'powerNames.__t = { phase: "play" }', 'delete powerNames.__t']];
     let bad = 0;
     for (const [what, on, off] of BUSY){
       let mid = null, end = null;
