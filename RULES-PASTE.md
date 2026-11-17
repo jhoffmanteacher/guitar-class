@@ -29,3 +29,4 @@ published 2026-11-15"). `tools/checks.mjs` 1dt pins the same text by its full sh
 - 2026-11-13 firestore.rules fbb109792326: Jonathan was told on 2026-11-13 to paste it in the Firebase console (Firestore → Rules → Publish)
 - 2026-11-14 firestore.rules e08e52157c9d: Jonathan was told on 2026-11-14 to paste it in the Firebase console (Firestore → Rules → Publish)
 - 2026-11-15 firestore.rules 8cb7341f61c3: Jonathan was told on 2026-11-15 to paste it in the Firebase console (Firestore → Rules → Publish)
+- 2026-11-17 firestore.rules fe73c9cd6837: Jonathan was told on 2026-11-17 to paste it in the Firebase console (Firestore → Rules → Publish)
