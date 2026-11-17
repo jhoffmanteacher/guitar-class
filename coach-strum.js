@@ -486,7 +486,7 @@ function shRenderDone(){
          <button type="button" class="${rec === 'same' ? 'coach-start' : 'tp-btn'}" onclick="shAgain(0)">&#x21BB; ${t('games.sh.againAtBpm', {bpm: s.bpm})}</button>
          ${up > 0 ? `<button type="button" class="${rec === 'up' ? 'coach-start' : 'tp-btn'}" onclick="shAgain(10)">&#x2B06; ${t('games.common.bpmUp10', {n: up})}</button>` : ''}
        </div>
-       <button type="button" class="tp-btn" onclick="shSetup()">${t('games.sh.changePatternButton')}</button>
+       <div class="coach-actions"><button type="button" class="tp-btn" onclick="shSetup()">${t('games.sh.changePatternButton')}</button></div>
      </div>`;
 }
 
@@ -1448,7 +1448,7 @@ function srRenderDone(){
          <button type="button" class="${rec === 'same' ? 'coach-start' : 'tp-btn'}" onclick="srAgain(0)">&#x21BB; ${t('games.radar.againAtBpm', {bpm: s.bpm})}</button>
          ${up > 0 ? `<button type="button" class="${rec === 'up' ? 'coach-start' : 'tp-btn'}" onclick="srAgain(10)">&#x2B06; ${t('games.common.bpmUp10', {n: up})}</button>` : ''}
        </div>
-       <button type="button" class="tp-btn" onclick="srSetup()">${t('games.radar.changePatternButton')}</button>
+       <div class="coach-actions"><button type="button" class="tp-btn" onclick="srSetup()">${t('games.radar.changePatternButton')}</button></div>
      </div>`;
 }
 
