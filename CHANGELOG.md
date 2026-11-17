@@ -8,6 +8,7 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-11-16 — An activity can stay in Today's activities
 
+- **Strum Hero and Strum Radar: the "Change pattern" button on the results screen has room around its words** and no longer sits tight under the tempo buttons.
 - **Lyric-sheet play-alongs (Sweet Child O' Mine and the others) keep the line you're playing on screen in full screen,** even if you press Full screen while the song plays. Before, the sheet jumped too far each time it moved.
 - **Strum Pattern check: a strum where your hand should miss now shows a red arrow much more often.** Before, the check let about half of those extra strums pass.
 - **Strum Pattern check: a late start no longer turns the whole round red.** If you come in a little late, the check now catches up with you.
