@@ -67,11 +67,14 @@
    page, new files): a missing name in only one of them is a finding; one both make is printed "ON BOTH PAGES"
    (not caused by the push, never a finding). after-push: the group loaded after the push (W2's timeline 1).
    half-K: K files arrived before the push (old files, e.g. from an old cache), the rest after (timeline "half").
-   loaded-before: the group loaded before the push, then the calls (timeline 3: safe). fail-<file>: after-push
-   with that one fetch failing once; the caller catches the rejection and the NEXT loader call retries (the loader
-   forgets a failed promise), as a second click would. Each case runs --orders seeded arrival orders: when more
-   than one file is in flight (a part that loads another part itself, module data) the seed picks which arrives
-   first; the summary says how many distinct orders of the group's own files were seen.
+   loaded-before: the group loaded before the push, then the calls (timeline 3:
+   safe). fail-<file>: after-push with that one fetch failing once; the caller catches the rejection and the NEXT
+   loader call retries (the loader forgets a failed promise), as a second click would.
+   Each case runs --orders seeded arrival orders: when more than one file is in flight (a part that loads another
+   part itself, module data) the seed picks which arrives first, uniformly, so "4 of 12" is the tool's coin, not
+   a browser rate. cache-fast is the realistic order for a second old tab: the old list's files arrive at once
+   in list order (an old cache answers in milliseconds), anything fetched outside the chain arrives last; each
+   finding says whether cache-fast shows it.
 
    OUTPUT. Findings grouped by cause (one missing name, every call it breaks, the new file that defines it and
    whether the old list names that file), the cases and seeds it was seen in, and a replay line. The last line
@@ -364,7 +367,11 @@ function makePage({ pageTree, pageLabel, rand, log, search }){
   };
   net.deliverOne = () => {
     if (!net.pending.length) return false;
-    const i = rand ? Math.floor(rand() * net.pending.length) : 0;
+    /* cache-fast: the files of the page's own list come first, in request order, as an old cache answers them in
+       milliseconds; anything else (a part a part loads itself, module data) arrives after (review R1-6). */
+    let i = 0;
+    if (net.prefer){ i = net.pending.findIndex(p => net.prefer.has(p.src)); if (i < 0) i = 0; }
+    else if (rand) i = Math.floor(rand() * net.pending.length);
     const { el, src } = net.pending.splice(i, 1)[0];
     const tree = net.serve(src);
     const text = tree.tree.read(src);
@@ -537,13 +544,14 @@ async function runCase(spec, seed, handlers){
   out.buildErrors = page.buildErrors.map(b => `${b.file}: ${b.e && b.e.name}: ${b.e && b.e.message}`);
   if (spec.failOnce) page.net.failOnce.add(spec.failOnce);
   if (spec.drop) page.net.failAlways.add(spec.drop);
+  if (spec.cacheFast) page.net.prefer = new Set(side === NEW ? g.newFiles : g.oldFiles);
   let phase = 'build', current = '(page build)';
   let win = null;   // the files still in flight when a later user action is tried early (see callAll)
   const onThrow = e => { const c = classify(e); out.throws.push({ phase, call: current, ...c, window: win }); if (log) log(`      ✗ ${current}: ${c.key}${c.missing ? '   [MISSING NAME]' : ''}`); };
   asyncSink = r => { const c = classify(r); out.throws.push({ phase, call: current + ' (async)', ...c }); if (log) log(`      ✗ async, after ${current}: ${c.key}`); };
 
   let arrived = 0, serve = spec.serve;
-  page.net.serve = () => serve(arrived);
+  page.net.serve = src => serve(arrived, src, seed);
   const loaderName = side === NEW ? g.newLoader : g.loader;
 
   const call = (label, code, guardName) => {
@@ -665,6 +673,8 @@ const casesFor = g => {
   ];
   for (let k = 1; k < g.oldFiles.length; k++) c.push({ name: `half-${k}${sfx}`, group: g, page: 'old', serve: n => n < k ? OLD : NEW });
   c.push({ name: 'loaded-before' + sfx, group: g, page: 'old', serve: () => NEW, preload: true });
+  // a second old tab: its list's files from the cache at once, the parts fetched outside the chain last (R1-6)
+  c.push({ name: 'cache-fast' + sfx, group: g, page: 'old', serve: () => NEW, cacheFast: true, once: true });
   return c;
 };
 
@@ -713,7 +723,7 @@ for (const g of RUN){
   const cases = [...casesFor(g), ...fetched.get(g).filter(f => g.oldFiles.includes(f) || (g.newFiles || []).includes(f)).map(f => ({ name: `fail-${f}${sfx}`, group: g, page: 'old', serve: () => NEW, failOnce: f }))];
   for (const c of cases){
     if (only && c.name !== only && !c.control) continue;   // the controls always run: they say which throws are stub noise
-    for (const s of seeds){
+    for (const s of (c.once ? seeds.slice(0, 1) : seeds)){
       const out = await runCase(c, s, handlersOf.get(g));
       results.push({ case: c.name, control: !!c.control, seed: s, out });
       if (only && VERBOSE && c.name === only){ console.log(`── ${c.name} seed ${s}: arrivals ${out.arrivals}`); for (const l of out.log) console.log(l); }
@@ -795,7 +805,10 @@ const show = (arr, title, mark) => {
     console.log(`     ${cl.length} call${cl.length === 1 ? '' : 's'}: ${cl.slice(0, 12).join(' · ')}${cl.length > 12 ? ` · … ${cl.length - 12} more (--verbose)` : ''}`);
     if (VERBOSE && cl.length > 12) console.log(`       ${cl.slice(12).join(' · ')}`);
     const cs = [...f.cases.entries()];
-    console.log(`     cases: ${cs.slice(0, 8).map(([c, s]) => `${c} ${s.size}/${seeds.length}`).join(', ')}${cs.length > 8 ? `, … ${cs.length - 8} more` : ''}`);
+    const orderCases = cs.filter(([c]) => !/^cache-fast/.test(c));
+    const inOrders = orderCases.reduce((a, [, s]) => a + s.size, 0), ofOrders = orderCases.length * seeds.length;
+    console.log(`     in ${inOrders} of ${ofOrders} seeded runs of the cases it appears in (uniform arrival orders: not a browser rate); in cache-fast (a second old tab, its list from the cache first): ${cs.some(([c]) => /^cache-fast/.test(c)) ? 'YES' : 'no'}`);
+    console.log(`     cases: ${orderCases.slice(0, 8).map(([c, s]) => `${c} ${s.size}/${seeds.length}`).join(', ')}${orderCases.length > 8 ? `, … ${orderCases.length - 8} more` : ''}`);
     console.log(`     replay: node tools/old-page-loop.mjs --old ${ARGS.old} --new ${ARGS.new} --case=${f.first.case} --seed=${f.first.seed} --verbose`);
   });
 };
