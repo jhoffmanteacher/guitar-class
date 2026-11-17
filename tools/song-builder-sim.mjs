@@ -800,7 +800,8 @@ const PAGES = {
 PAGES.grid = PAGES.gridRows.flatMap((r, k) => r.split(' ').map((c, j) => W([72, 172, 372, 472][j], 100 + 12 * k, c)));
 PAGES.wide = PAGES.wideRows.flatMap((r, k) => Array.isArray(r) ? [W(72, 100 + 12 * k, r[0]), W(400, 100 + 12 * k, r[1])] : [W(72, 100 + 12 * k, r)]);
 
-/* The made-up pdf.js: a file's bytes name its record; getTextContent and destroy are counted. */
+/* The made-up pdf.js: a file's bytes name its record; getTextContent and destroy are counted. A record's `gate` (a
+   promise) holds its getTextContent until the case lets it go: the moment "a pick is still being read". */
 const PDFS = new Map();
 const tcOf = items => ({ items: items.map(i => ({ str: i.s, transform: [i.h, 0, 0, i.h, i.x, i.y], width: i.w, height: i.h })) });
 function pdfOf(name, tag, pages){
@@ -815,7 +816,7 @@ const FAKE_PDFJS = {
     if(!rec) return { promise: Promise.reject(Object.assign(new Error('Invalid PDF structure.'), { name: 'InvalidPDFException' })) };
     rec.opened++;
     const doc = { numPages: rec.pages.length,
-      async getPage(n){ const items = rec.pages[n - 1]; return { getViewport: () => ({ convertToViewportPoint: (x, y) => [x, y], width: 612, height: 792 }), getTextContent: async () => { rec.textCalls++; await tick(); return tcOf(items); } }; },
+      async getPage(n){ const items = rec.pages[n - 1]; return { getViewport: () => ({ convertToViewportPoint: (x, y) => [x, y], width: 612, height: 792 }), getTextContent: async () => { rec.textCalls++; await tick(); if(rec.gate) await rec.gate; return tcOf(items); } }; },
       destroy(){ rec.destroyed++; } };
     return { promise: Promise.resolve(doc) };
   },
@@ -994,6 +995,61 @@ async function pdfEdgeCases(consoleSrc, check){
       had && run('sbPdf.files.length') === 0 && run('sbPdfMine().length') === 0 && !/e1-chords\.pdf/.test(bar) && P.rec.destroyed === 1 && !run('sbNew.chartText'),
       JSON.stringify({ had, files: files(), mine: run('sbPdfMine().length'), chipShown: /e1-chords\.pdf/.test(bar), destroyed: P.rec.destroyed, chartText: (run('sbNew.chartText') || '').slice(0, 30) }));
   }
+  /* E2: "+ New song" again while a pick of two chords pdfs is being read, then Next on the second song */
+  {
+    const X = pdfOf('e2-x.pdf', 'e2x', [PAGES.oneCol]), Y = gated('e2-y.pdf', 'e2y', [PAGES.touch]);
+    run('sbNewSong()'); await settle();
+    startPick('chords', [X, Y]);
+    await until(() => files().split(',').includes('e2-x.pdf') && Y.rec.textCalls === 1, 'the first pdf in, the second held');
+    run('sbNewSong()'); await settle();
+    Y.go(); await doneReading();
+    const second = run('sbNew.chartText') || '', w0 = F.st.writes.length;
+    C.box.__f = fileOf('test-a.mp3', SRC_A, 24); run('sbPickFile(__f)'); await settle();
+    run("sbNew.title = 'Test 5 Second'; sbNew.artist = 'Nobody'");
+    const before = new Set([...F.S.keys()].filter(k => k.startsWith('songDrafts/')));
+    run('sbSaveUpload()'); await settle();
+    const nid = ([...F.S.keys()].filter(k => k.startsWith('songDrafts/') && !before.has(k))[0] || '').slice(11), nd = nid ? F.S.get('songDrafts/' + nid) : null;
+    const [yText] = textOfAll([Y.rec]);
+    check('pdf edge: "+ New song" pressed while the first song\'s two chords pdfs are read: the pdf still being read lands nowhere: the second song lists no pdf, its chart box gets none of the text, and Next saves its draft with no chart; both documents destroyed once',
+      second === '' && nd && nd.chart == null && run('sbPdf.files.length') === 0 && X.rec.destroyed === 1 && Y.rec.destroyed === 1 && F.st.writes.slice(w0).every(w => w.path === 'songDrafts/' + nid || w.path.startsWith('songFiles/' + nid + '-')),
+      JSON.stringify({ secondBox: second.slice(0, 40), savedChart: nd ? (nd.chart && nd.chart.text === yText ? 'the held pdf\'s text' : nd.chart) : 'no draft', files: files(), destroyed: [X.rec.destroyed, Y.rec.destroyed] }));
+  }
+  /* E3: a draft switched during a pick of three chords pdfs (A to B): the rest of the pick lands nowhere, never on B */
+  const opened = recs => recs.map(r => r.opened);
+  {
+    run(`sbOpen(${JSON.stringify(ids.a)})`); await settle();
+    const X = pdfOf('e3-x.pdf', 'e3x', [PAGES.oneCol]), Y = gated('e3-y.pdf', 'e3y', [PAGES.oneItem]), Z = pdfOf('e3-z.pdf', 'e3z', [PAGES.touch]);
+    const w0 = F.st.writes.length;
+    startPick('chords', [X, Y, Z]);
+    await until(() => files().split(',').includes('e3-x.pdf') && Y.rec.textCalls === 1, 'the first pdf in, the second held');
+    run(`sbOpen(${JSON.stringify(ids.b)})`); await settle();
+    Y.go(); await doneReading();
+    /* The first pdf's text was in A's paste box at step 4, which is this tab's only (sbCh) and goes when B opens, as
+       typed text does; sbChFor(A) is not asked here, since asking it would empty B's box. */
+    const bDraft = run('sbDraft()'), aDraft = run(`sbDrafts.get(${JSON.stringify(ids.a)})`);
+    check('pdf edge: another draft opened while three chords pdfs are read: nothing lands on it (no pdf listed, its chart box and draft untouched) nor on A\'s draft, the rest of the pick stops (the third never opened), each opened document destroyed once, nothing written',
+      run('sbSel') === ids.b && run('sbPdf.files.length') === 0 && run('sbChFor(sbSel).text') == null && bDraft.chartText == null && !bDraft.dirty && aDraft.chartText == null && !aDraft.dirty && Z.rec.opened === 0
+        && X.rec.destroyed === 1 && Y.rec.destroyed === 1 && F.st.writes.length === w0,
+      JSON.stringify({ sel: run('sbSel'), files: files(), bBox: run('sbChFor(sbSel).text'), bText: bDraft.chartText, bDirty: !!bDraft.dirty, aText: aDraft.chartText, aDirty: !!aDraft.dirty, opened: opened([X.rec, Y.rec, Z.rec]), destroyed: [X.rec.destroyed, Y.rec.destroyed], writes: F.st.writes.length - w0 }));
+  }
+  /* E4: the same, but back to A before the held pdf is read (A to B to A): the pick is over, not half of it on A */
+  {
+    const X = pdfOf('e4-x.pdf', 'e4x', [PAGES.oneCol]), Y = gated('e4-y.pdf', 'e4y', [PAGES.oneItem]), Z = pdfOf('e4-z.pdf', 'e4z', [PAGES.touch]);
+    run(`sbOpen(${JSON.stringify(ids.a)})`); await settle();
+    const w0 = F.st.writes.length;
+    startPick('chords', [X, Y, Z]);
+    await until(() => files().split(',').includes('e4-x.pdf') && Y.rec.textCalls === 1, 'the first pdf in, the second held');
+    run(`sbOpen(${JSON.stringify(ids.b)})`); await settle();
+    run(`sbOpen(${JSON.stringify(ids.a)})`); await settle();
+    Y.go(); await doneReading();
+    const box = run('sbChFor(sbSel).text'), aDraft = run('sbDraft()');
+    check('pdf edge: a draft switched away and back (A, B, A) while three chords pdfs are read: the pick is over, as when B stays open: A lists none of them (not the last two of three), its box and draft get none of their text, the third never opened, each opened document destroyed once, nothing written',
+      run('sbSel') === ids.a && run('sbPdf.files.length') === 0 && box == null && aDraft.chartText == null && !aDraft.dirty && Z.rec.opened === 0 && X.rec.destroyed === 1 && Y.rec.destroyed === 1 && F.st.writes.length === w0,
+      JSON.stringify({ files: files(), box: (box || '').slice(0, 40), opened: opened([X.rec, Y.rec, Z.rec]), destroyed: [X.rec.destroyed, Y.rec.destroyed, Z.rec.destroyed], writes: F.st.writes.length - w0 }));
+  }
+  const named = F.st.writes.filter(w => !w.path.startsWith('songFiles/') && /\.pdf|%PDF|blob:/.test(JSON.stringify(w)));   // a songFiles write is the mp3's bytes
+  check('pdf edge: every write in these cases is the builder\'s own and fits the rules; no pdf, pdf name or object URL is ever written', F.st.violations.length === 0 && F.st.writes.length > 0 && !named.length,
+    F.st.writes.length + ' writes; ' + (F.st.violations.slice(0, 3).join('; ') || 'no violation') + (named.length ? '; names a pdf: ' + named.map(w => w.path).join(', ') : ''));
 }
 
 /* ── PART D (2026-11-16; teacher-sb-publish.js): Preview, Publish, Edit, Unpublish, Delete, Export, the

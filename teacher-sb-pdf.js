@@ -18,7 +18,7 @@
    NOTHING IS STORED and nothing reaches a student: the pdfs live in this tab's memory (sbPdf), like the
    original mp3 (sbMem.src). A draft opened again asks for them again; the chart text read from them IS in the
    draft (chart.text), as before. Another draft, a second "+ New song", a deleted draft or the start screen drops them
-   (sbPdfSync).
+   (sbPdfSync); a pick still being read then lands nowhere (W10).
    pdf.js (vendor/pdfjs, the practice card's loader pcSheetLoadPdfjs, app/cards.js) draws and reads them; a
    drawing in flight is cancelled when another starts and when the view is left (sbPdfLeave). File names are
    escaped where they are drawn; buttons carry data-* only (the delegated sbClick / sbChange). */
@@ -28,8 +28,9 @@ const SB_PDF_MAX_PAGES = 40;            // pages read for text (every page can s
 const SB_PDF_MIN_CHARS = 12;            // fewer letters than this on a page: a picture, not text
 const SB_PDF_ZOOMS = [0.75, 1, 1.25, 1.5, 2, 2.5, 3];
 /* files: [{ kind: 'chords'|'tab', name, size, bytes, doc, pages, textPages, lines, url }] */
-/* owner: the new song's object (sbNew) when id is 'new', so a second "+ New song" is another song (W10). */
-const sbPdf = { id: null, owner: null, files: [], cur: 0, page: 1, zoom: 1, open: false, reading: 0, seq: 0, task: null, drawn: '', el: null, scroll: 0, err: '' };
+/* owner: the new song's object (sbNew) when id is 'new', so a second "+ New song" is another song (W10);
+   epoch: counts the drops, so a pick still being read when its pdfs were dropped lands nowhere (W10). */
+const sbPdf = { id: null, owner: null, epoch: 0, files: [], cur: 0, page: 1, zoom: 1, open: false, reading: 0, seq: 0, task: null, drawn: '', el: null, scroll: 0, err: '' };
 
 /* ── The words of a page → text ── */
 /* items: [{ s, x, y, w, h }] in page points, y DOWN, y = the baseline, x = the left edge, w = the width of s.
@@ -125,7 +126,7 @@ function sbPdfSync(){
   sbPdfStopDraw();
   sbPdf.files.forEach(sbPdfDropFile);
   sbPdf.files = []; sbPdf.cur = 0; sbPdf.page = 1; sbPdf.zoom = 1; sbPdf.open = false; sbPdf.drawn = ''; sbPdf.scroll = 0; sbPdf.err = ''; sbPdf.el = null;
-  sbPdf.id = want; sbPdf.owner = owner;
+  sbPdf.id = want; sbPdf.owner = owner; sbPdf.epoch++;
 }
 /* The new song was saved: its pdfs go with the draft's id (sbSaveUpload). */
 function sbPdfRename(from, to){ if(sbPdf.id === from){ sbPdf.id = to; sbPdf.owner = null; } }
@@ -141,8 +142,11 @@ async function sbPdfAdd(kind, list){
   const files = Array.from(list || []);
   if(!files.length || sbBusy || sbPdf.reading || sbPdfWant() == null) return;
   const gen = sbViewGen, forId = sbSel;
-  const stale = () => sbStopped(gen) || sbSel !== forId;
   sbPdfSync();
+  /* Another draft opened, even if this one is opened again before the read ends, or a second "+ New song": the pick
+     is over (its pdfs were dropped: sbPdf.epoch moved), never half of it here or any of it on that song (W10). */
+  const epoch = sbPdf.epoch;
+  const stale = () => sbStopped(gen) || sbSel !== forId || sbPdf.epoch !== epoch;
   const notes = [];
   let added = 0, first = -1, textLines = 0, cutShort = false;
   sbPdf.reading++;
