@@ -255,6 +255,12 @@ and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fi
     so re-derive each plant from the code (`app/save.js`, the late-load section) and say if one is not a real fault.
     Add a case per plant; each must go red; `save-loop` must still end "untagged 0" and the shared tool stay in its
     K-TAB band. These tools guard the save path: ONE Opus `site-reviewer` round on the new cases.
+  - **W20 DONE (Windows, 2026-11-17; on Sonnet at Jonathan's word "do w20 on sonnet": a Sonnet builder and one Sonnet
+    `site-reviewer` round, 0 BLOCKER, 0 MAJOR, 4 MINOR, all fixed with break-it proof).** Check 1eq reads every served
+    .html/.js/.css/.svg, `manifest.json` and CHANGELOG.md (floor 133; root, app, tabs, vendor, img must each give a
+    file); it fails on `Ã`+U+0080..U+00BF, `Ã`+a CP1252 capital, `â`+U+0080..U+00BF, `â€`, `ðŸ`, `Â` before a space or
+    punctuation, and U+FFFD. Red on `e25f0d5:privacy.html`. The one real hit: `app/songrequests.js` `srClean` held
+    literal U+FFFD / U+FFFE / U+FFFF in its regex and replacement; now written as `\u` escapes (same behaviour).
   - **W20. Only if tokens are left (a NEW kind of check: Always Reviewed, one `site-reviewer` round): a detector for
     twice-encoded text in what the site serves.** On 2026-11-16 the Mac shipped "EstÃ¡" on the Spanish privacy page
     for two hours (a `perl` edit read UTF-8 as Latin-1) and the pin recorded the garbled text. `checks.mjs`: fail on
