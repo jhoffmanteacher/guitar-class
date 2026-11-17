@@ -37,6 +37,21 @@ offer both tab and a lyrics / chord chart: answered (coded songs do it as separa
 chords and lyric lines only, no tab); nothing built.
 
 **THE MAC'S OWN LIST, 2026-11-17 (delete each line when it is no longer news):**
+- **QUEUED, the Mac's next job when a builder slot is free: private song audio, step 2a (Jonathan, 2026-11-17: "which
+  songs do i upload for private song audio?").** He is ready to upload. He CANNOT yet: Upload accepts only a file on
+  the site's list, `SONG_FILES` in `app/songfiles.js`, which is empty, and `node tools/song-files.mjs --add` refuses
+  a file that is still in `audio/` ("a private song must not be public too"). So step 2 needs an order that never
+  leaves a song without audio: (1) get the 18 files onto the LIVE list while the cards still play the public copies
+  (the tool and check 1dx need a named in-between state, or the list is written another way: design it, do not
+  loosen 1dx silently); (2) he uploads the 18 (Windows is building a drop zone, W21) and presses Verify all; (3)
+  only then switch the 7 tracks to `private:<id>`, keep the public files one week as the fallback the plan names,
+  then remove them. The 18: 2 files each of Las Mañanitas, Perdón Mamá, Vuelve a la Vida, Ella, Arsenal Efectivo; 4
+  each of Madrecita Querida and Smells Like Teen Spirit (117.4 MB). NOT the 8 Watchtower files: the Journey page's
+  private player is not built. Plan: `Claude outputs/PLAN-private-song-audio-2026-11-13.md`. One Opus builder,
+  `site-reviewer` round before the switch push. Tell him when Upload is ready; until then it is not on his list.
+- **IN FLIGHT: a Chords / Tab switch on one practice card** (Jonathan, 2026-11-17: "chords/tab switch"). Branch
+  `feat/card-views` (worktree `card-views`), one Opus builder: inventory, design, a pilot on one song. Nothing existing
+  is merged or removed.
 - **IN FLIGHT: two-column lyric sheets shown as ONE long column** (Jonathan, 2026-11-17: "you could cut the pdf in
   half and just keep scrolling so it doesn't have columns"). ca-45 and ca-38; display only; the column-change jump
   goes. Branch `feat/sheet-one-column` (worktree `sheet-scroll`), the same Opus builder. Tell him when it is live.
