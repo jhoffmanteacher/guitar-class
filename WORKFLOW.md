@@ -325,6 +325,12 @@ push. Where the Mac is right now: the coach splits with the reviewer's fix A are
       Chord Switch's done screen got this fix before; these two games did not. The clean fix is in
       `coach-strum.js` (put the button inside the row's `.coach-actions`, or give it the class), which is the
       Mac's file until the splits are on main.
+  - **W7 (Windows, 2026-11-16 night): Change Up's setup is "Windows fonts only", closed.** The Mac's games smoke in
+    English shows no `setup-fit` or `changeup-layout` line, so the 7 Change Up lines (663 px here) are this
+    computer's fonts. STILL OPEN: Power Chord Switch's setup in SPANISH (658 px here, 13 lines): the Mac walked
+    English only; Friday's two-language walk on GitHub answers it. If it shows there, fix the fit then. The other
+    W7 item, the "Change pattern" button with no side padding on the Strum Hero and Strum Radar done screens
+    (`coach-strum.js`), is being fixed on Windows now.
 - **W8. The small lint findings from W4, one Fast push:** `trainer-ui.js:188` (`root` does not exist inside
   `factory`: fix the fallback, run `node tools/trainer-sim.mjs`); `tabs/journey.js:748` (the second `at`);
   `practice-minutes.js:1509` (the repeated key `_session`: remove the copy, run `node tools/pm-sim.mjs`); the 9
