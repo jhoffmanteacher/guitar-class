@@ -55,19 +55,6 @@ Added 2026-11-16 (Jonathan: "we'll have to fix the beat map in the future"). Not
 - **Leave alone:** `PC_LEAD`, the metronome click (it lands on the heard beat), and the step snippets' bar dots
   (they light on the heard beat; Jonathan, 2026-11-16: leave them).
 
-## Reported by Jonathan 2026-11-13: Power Chord Switch is not identifying chords correctly in a loud room
-
-- **What Jonathan said:** "the power chord switch is not identifying chords correctly at all. i just tried in a loud
-  room on a student computer. i can flag the specific recording later."
-- **Not looked at yet.** Nothing was run, measured or changed. Wait for him to flag the recording, then bring it in
-  with `node tools/mic-sim/takes-in.mjs` (names removed) and replay it; never open the raw download.
-- **Read first:** `WORKFLOW.md` → "Power Chord Switch: where we stopped" (the grading rule changed 2026-11-14,
-  after this report: the right chord at any time while it is current; the pitch rule and the `ring` / `half` rules
-  were rejected on real takes: do not rebuild them) and `tools/mic-sim/README.md`. Any listening change is
-  danger-zone: Always Reviewed, real takes first.
-- **Ask him when he flags it:** which chords it got wrong, and whether it marked right chords wrong, wrong chords
-  right, or heard nothing.
-
 ## The big parts
 
 Three of the four parts that were over 2,000 lines were split on 2026-11-16 (`teacher-activities.js`,
