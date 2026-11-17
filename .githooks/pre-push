@@ -13,6 +13,8 @@
 #
 #    • validates every module-N.js and class-activities.js
 #    • confirms sw.js's CACHE_VERSION matches the current shell files
+#    • the "never" checks (1dl-1do, tools/never-blocks.mjs) against what
+#      each pushed ref held on the remote before
 #
 #  NOT a replacement for the full `node tools/checks.mjs` before a push —
 #  that one also link-checks ~180 external URLs and auto-bumps sw.js. This
@@ -26,33 +28,70 @@
 # ════════════════════════════════════════════════════════════════════
 
 ROOT=$(git rev-parse --show-toplevel)
+REMOTE="$1"
 
-# Nothing to check on a pure delete (`git push origin :branch`) — git feeds
-# an all-zero local sha for those, and there's no tree to validate.
-deleting_only=1
+# ── What is being pushed (review round 4, 2026-11-14: a commit that was not HEAD went out by hash or by tag) ──
+# git hands this hook one line per ref: <local ref> <local sha> <remote ref> <remote sha>. The local ref is
+# only a NAME (a branch, a tag, HEAD, HEAD~1, or the bare hash itself); what is sent is <local sha>, to
+# <remote ref>. So every line is judged by the commit it sends and where it goes:
+#   - a delete (local sha all zeros) sends nothing: let through (GitHub itself refuses to delete main);
+#   - a ref other than main whose commit <REMOTE>/main already has sends nothing new there: let through
+#     (the Friday check's tag on a pushed commit);
+#   - anything else must send HEAD, this checkout's commit, because the checks below read this checkout's
+#     files: a branch, a tag, a bare hash or HEAD~1 that is not HEAD is refused, whatever its name;
+#   - the checks then compare HEAD with what that remote ref held before (<remote sha>, which this clone
+#     must have), or, for a new ref, with where HEAD left main.
+# What a client-side hook cannot stop: a push with --no-verify, from a clone whose core.hooksPath is not
+# .githooks, from a machine with no node (below), or from GitHub's web editor. GitHub's checks.yml runs the
+# same checks on every push to main afterwards (a red run, not a block).
 HEAD_SHA=$(git rev-parse HEAD)
-not_head=""
-while read -r local_ref local_sha _remote_ref _remote_sha; do
+NL='
+'
+refused=""
+bases=""
+while read -r local_ref local_sha remote_ref remote_sha; do
   [ -z "$local_sha" ] && continue
   case "$local_sha" in
+    *[!0]*) ;;
+    *) printf 'pre-push: %s is deleted (nothing is sent)\n' "$remote_ref"; continue ;;
+  esac
+  commit=$(git rev-parse -q --verify "$local_sha^{commit}" 2>/dev/null)
+  if [ -z "$commit" ]; then
+    refused="$refused$NL    $remote_ref <- $local_ref ($local_sha): not a commit"
+    continue
+  fi
+  if [ "$remote_ref" != "refs/heads/main" ] && git rev-parse -q --verify "refs/remotes/$REMOTE/main^{commit}" >/dev/null 2>&1 \
+     && git merge-base --is-ancestor "$commit" "refs/remotes/$REMOTE/main" 2>/dev/null; then
+    printf 'pre-push: %s <- %s (%s) is already in %s/main: nothing new is sent\n' "$remote_ref" "$local_ref" "$commit" "$REMOTE"
+    continue
+  fi
+  if [ "$commit" != "$HEAD_SHA" ]; then
+    refused="$refused$NL    $remote_ref <- $local_ref ($commit)"
+    continue
+  fi
+  case "$remote_sha" in
     *[!0]*)
-      deleting_only=0
-      # The checks below read this checkout's files, so they only speak for a pushed BRANCH when its tip IS the
-      # checked-out commit. A tag (the Friday check's `git push origin friday-check-<date>`) passes through.
-      case "$local_ref" in
-        refs/heads/*|HEAD)
-          [ "$(git rev-parse "$local_sha^{commit}" 2>/dev/null)" != "$HEAD_SHA" ] && not_head="$not_head $local_ref ($local_sha)"
-          ;;
-      esac
+      if git cat-file -e "$remote_sha^{commit}" 2>/dev/null; then
+        base="$remote_sha"
+      else
+        refused="$refused$NL    $remote_ref: the remote has $remote_sha, which this clone does not have (git fetch $REMOTE first)"
+        continue
+      fi
       ;;
+    *) base=new ;;
+  esac
+  case " $bases " in
+    *" $base "*) ;;
+    *) bases="$bases $base" ;;
   esac
 done
-if [ "$deleting_only" -eq 1 ]; then
-  exit 0
-fi
-if [ -n "$not_head" ]; then
-  printf '\033[31m✗ pre-push: this push sends%s, but this checkout is at %s; the checks read the checked-out files, so they would vouch for the wrong commit. Check out the commit you push (or push HEAD), then push again.\033[0m\n' "$not_head" "$HEAD_SHA"
+if [ -n "$refused" ]; then
+  printf '\033[31m✗ pre-push: refused. This checkout is at %s, and the checks read its files, so they can only vouch for a push of that commit. This push sends:%s\033[0m\n' "$HEAD_SHA" "$refused"
+  printf '  Check out the commit you mean to push, run the checks there, and push HEAD (git push %s HEAD:<branch>).\n' "$REMOTE"
   exit 1
+fi
+if [ -z "$bases" ]; then
+  exit 0
 fi
 # The push sends the COMMIT; the checks read the files. Tracked files that differ from HEAD would make the
 # checks vouch for something that is not being pushed (untracked files do not count).
@@ -90,8 +129,21 @@ fi
 
 # GC_CHECKS_STAGE=push: checks.mjs 1dn (a firestore.rules change needs its
 # RULES-PASTE.md line) refuses here and on GitHub; at a commit it only warns.
-GC_CHECKS_STAGE=push "$NODE" "$ROOT/tools/checks.mjs" --check --skip-links
-status=$?
+# GC_CHECKS_BASE: what the pushed ref held on the remote before (empty for a new
+# ref: where HEAD left main). The full checks run once, with the first ref's
+# base; each other ref's base runs the "never" checks again.
+status=0
+first=1
+for b in $bases; do
+  [ "$b" = new ] && b=""
+  if [ "$first" -eq 1 ]; then
+    GC_CHECKS_BASE="$b" GC_CHECKS_STAGE=push "$NODE" "$ROOT/tools/checks.mjs" --check --skip-links || status=1
+    first=0
+  else
+    printf 'pre-push: the "never" checks again, against %s\n' "${b:-where HEAD left main}"
+    GC_CHECKS_BASE="$b" GC_CHECKS_STAGE=push "$NODE" "$ROOT/tools/never-blocks.mjs" || status=1
+  fi
+done
 
 if [ "$status" -ne 0 ]; then
   printf '\n\033[31m✗ pre-push checks failed — push aborted.\033[0m\n'
