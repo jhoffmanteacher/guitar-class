@@ -41,10 +41,10 @@ Start here. Update this block whenever an item opens or closes; each line says w
   `feat/lead-zero`, cherry-picked into the branch above.
 - **The lyric sheet's "This bar" strip went blank for one step at lead 0** (ca-45, slowest): fixed on that branch
   (`15ee33e`), which is why the three ship together.
-- **The sign-in load fix** (`ship/load-retry`, 8 commits rebuilt on main; rounds: Fable, then Opus deep, round 2
-  CLEAN). Left: a screenshot of the `save.notLoaded` line at 1366×657 in English and Spanish, the changelog entry,
-  full checks, push as `Review: Reviewed`. No second line after a student's first change (Jonathan, 2026-11-17: "no").
-  Then write "load-retry is on main" for Windows (W19).
+- **load-retry is on main (2026-11-17, the Mac; `Review: Reviewed`, `site-reviewer-deep`, 2 rounds: Fable, then Opus;
+  round 2 clean).** After a failed sign-in read the page keeps retrying and says so (`save.notLoaded`, one line at
+  1366×657 in English and Spanish, screenshots taken). Windows: W19 (its test gaps) may start. Not built, by his
+  choice: a second line after a student's first change.
 
 **THIS WEEK ONLY: every agent runs on Opus, reviewers included (Jonathan, 2026-11-16: "heavy fable use this morning
 ran up my total. we can run opusplan stuff").** The Mac and Windows both: pass `model: 'opus'` on every spawn, builders
