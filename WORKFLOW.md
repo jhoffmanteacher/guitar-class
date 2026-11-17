@@ -121,7 +121,8 @@ and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fi
   the count that wrap; if any wrap, ship lessons only and list them here for Jonathan. Screenshots at 1366×657 (a
   lesson step open, a long step, a practice card, an activity board, in Spanish too) and at 2560×1300; the rail and the
   set band must not move (`.claude/rules/rail-layout.md`: measure). CHANGELOG entry. GitHub's walk is its smoke.
-- **W12. The automatic blocks for the "never" rules: fix the two majors, one review, ship or park again.** Branch
+- **W12. ON HOLD (Jonathan, 2026-11-16: a third of the week's usage limit was gone by Monday evening; "if we should put
+  off any work, that's fine"). Do not start until he says. The automatic blocks for the "never" rules: fix the two majors, one review, ship or park again.** Branch
   `tools/never-blocks` is on GitHub since 2026-11-16 (tip `db8b7b7`, 8 commits on `af1166e`; 14 files, tools and
   CLAUDE.md only; self-test 153 of 153 then). Parked 2026-11-14 after review round 4 found 2 MAJOR: (a) a commit that
   is not HEAD can be pushed to a branch by hash or by tag, past the block; (b) a SECOND reword of a frozen quiz can
@@ -143,7 +144,8 @@ and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fi
   the write is refused?). Tighter rules may be published BEFORE the code is pushed, so when the review is clean: push
   the branch, write here "W13 ready: paste <file>", and stop. Jonathan pastes, then the branch goes to main. The old
   `rankBoard` documents are left alone (a console delete is his to name).
-- **W15. Tidy the design values (C13 of the 2026-11-13 list; Jonathan, 2026-11-16: "add it to windows list"). AFTER
+- **W15. ON HOLD, same reason as W12 (a sweep, a golden pair and review rounds: the dearest job on this list). Do not
+  start until he says. Tidy the design values (C13 of the 2026-11-13 list; Jonathan, 2026-11-16: "add it to windows list"). AFTER
   W11 is on main (same lines of `styles.css`).** Nothing may change on screen. The stylesheet holds 59 distinct text
   sizes in 693 declarations, 50 spacing numbers, 24 layer numbers (the research agent's counts, 2026-11-13: count them
   again first and report yours). In this order, each its own commit and its own proof:
