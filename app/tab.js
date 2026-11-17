@@ -396,7 +396,8 @@ function buildTab(spec, opts){
    over the first slot of its bar, the count under every slot.
      strum: { caption, caption_es, pattern: 'D.DU.UDU', bpm?,
               chords: { D5: { frets: [['A',5],['D',7],['G',7]], midi: [50,57,62] } },
-              bars: ['D5', 'C5', …] }        // one chord name per bar
+              bars: ['D5', 'C5', …],         // one chord name per bar
+              hideNames?: true }              // muted strings: no chord name over a bar (ca-53, 2026-11-17)
    It is a `.tab` on purpose, so it gets the tab's header, ▶ Play / BPM row
    and the playSequence cursor (`[data-seq]` + .beat-now) for free — no new
    audio code. Each strum is one sequence entry that rings until the next
@@ -515,7 +516,7 @@ function buildStrum(spec, opts){
         const dirWord = c === 'D' ? t('strum.down') : c === 'U' ? t('strum.up') : stop ? t('strum.stop') : t('strum.miss');
         const arrow = c === 'D' ? '&#x2193;' : c === 'U' ? '&#x2191;' : stop ? '' : '&middot;';
         cells.push(`<div class="strum-cell${k === 0 ? ' strum-cell--bar' : ''}${seq === undefined ? ' strum-cell--miss' : ''}${stop ? ' strum-cell--stop' : ''}"${seqAttr}>`
-          + `<span class="strum-chord">${k === 0 ? escHtml(String(spec.bars[b])) : ''}</span>`
+          + `<span class="strum-chord">${k === 0 && !spec.hideNames ? escHtml(String(spec.bars[b])) : ''}</span>`
           + `<span class="strum-dir" role="img" aria-label="${escAttr(dirWord)}">${arrow}</span>`
           + `<span class="strum-count">${STRUM_COUNT[k]}</span></div>`);
       }

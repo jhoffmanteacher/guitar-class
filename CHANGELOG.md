@@ -6,6 +6,10 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-17 — Strum Pattern — The Chorus: two steps
+
+- **"Strum Pattern — The Chorus" is now two steps.** The muted-strings step shows four bars on one line with no chord names. The A5-only step is gone. The chorus step shows A5 C5 D5 D5 twice.
+
 ## 2026-11-17 — "the cure" keeps the beat when you switch Guitar or speed
 
 - **On the lyrics-and-chords sheets, the next line now scrolls into view just before its first chord,** instead of just after. The dot and the highlight keep their timing.

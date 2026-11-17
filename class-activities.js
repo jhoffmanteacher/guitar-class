@@ -7464,7 +7464,9 @@ window.CLASS_ACTIVITIES = [
      "add on to the sweet child strum lesson class activity to include the
      chorus strums ... a single journey only one ... a new class activity").
      ONE path for everyone (no `paths`, no chooser): it follows ca-46's
-     "full" path — muted strings, then one chord ringing, then the chords.
+     "full" path — muted strings, then the chords (the one-chord A5 step was
+     removed 2026-11-17 by Jonathan; ticks are by step number, so an old
+     step-2 tick now shows on the chords step: his call).
      THE PATTERN is Jonathan's, typed by him 2026-11-16 from that day's
      slides: D on 1, U on the + of 2, D on 4, U on the + of 4 — the same on
      every chorus bar. The hand still swings down on every number and up on
@@ -7494,22 +7496,9 @@ window.CLASS_ACTIVITIES = [
           chords: {
             A5: { frets: [['A', 0], ['D', 2], ['G', 2]], midi: [45, 52, 57] }
           },
-          bars: ['A5', 'A5'],
-        },
-      },
-      {
-        label:    'Practice — A5',
-        label_es: 'Practica — A5',
-        text:    'Hold A5 and strum the pattern 8 times in a row with every strum ringing.',
-        text_es: 'Toca A5 y rasguea el patrón 8 veces seguidas con cada rasgueo sonando.',
-        strum: {
-          caption:    'A5 · the pattern 2 times',
-          caption_es: 'A5 · el patrón 2 veces',
-          pattern: 'D..U..DU',
-          chords: {
-            A5: { frets: [['A', 0], ['D', 2], ['G', 2]], midi: [45, 52, 57] }
-          },
-          bars: ['A5', 'A5'],
+          bars: ['A5', 'A5', 'A5', 'A5'],   // A5 only for ▶ Play strum's sound; hideNames keeps it off the chart
+          barsPerRow: 4,   // four bars on one line (Jonathan, 2026-11-17)
+          hideNames: true, // muted: no chord name over the bars (Jonathan, 2026-11-17)
         },
       },
       {
@@ -7526,8 +7515,8 @@ window.CLASS_ACTIVITIES = [
             C5: { frets: [['A', 3], ['D', 5], ['G', 5]], midi: [48, 55, 60] },
             D5: { frets: [['A', 5], ['D', 7], ['G', 7]], midi: [50, 57, 62] }
           },
-          bars: ['A5', 'C5', 'D5', 'D5'],
-          barsPerRow: 4,   // the whole chorus on one row
+          bars: ['A5', 'C5', 'D5', 'D5', 'A5', 'C5', 'D5', 'D5'],
+          barsPerRow: 4,   // the chorus on one row, shown twice (Jonathan, 2026-11-17)
         },
       },
     ],
