@@ -13,10 +13,6 @@ they're ready"). Work still being built, reviewed or waiting on a push is NOT li
 or when the paste file exists.
 
 **Listen and look (a few minutes each, any class Chromebook or the Mac):**
-1. **"the cure", set the beat by ear.** You heard the click a few ms LATE at Normal speed, Guitar on (2026-11-17).
-   Open the site with `?snipcal=1&mapshift=-15#class-activities/ca-13` on the end of the address, Metronome on,
-   Normal speed; then `-30` in place of `-15`. Tell Claude the number that puts the click on the beat, which device
-   you were on, and whether another song's click (Seven Nation Army, Luna) sounds late too.
 2. **"the cure", bar 85 (the Outro).** The audit says the record plays about 118 ms early there. Does it look off?
 
 **Decide (tell Claude; each is one sentence):**
@@ -75,10 +71,9 @@ Added 2026-11-16 (Jonathan: "we'll have to fix the beat map in the future"). Not
 - **DONE 2026-11-17 for "the cure" only: fault 2 below, and the files' gaps from each other.** Its four files now
   share one map through `fileOffset` in `SNIPPET_TRACKS` (rhythm-down 144 +25.1 ms, rhythm-down 120 +23.6 ms, slow
   full −26.4 ms; `anchor` 0.565 is on the fast full mix). Jonathan chose it, reversing "never a second anchor" for
-  this track. The files agree within 0 to 2 ms (were 25 to 50). NOT done for the cure: the whole map is still about
-  +32 to +44 ms early by the audit (a second method read 19 to 35 ms less: "cannot tell"), so the number is his to
-  set by ear with `?snipcal=1&mapshift=<ms>` on ca-13; it then goes into `anchor`, and into `data-click-anchor` on
-  `tabs/the-cure.html`. New audit line to listen to: bar 85 of the Outro, the record about 118 ms early on all four
+  this track. The files agree within 0 to 2 ms (were 25 to 50). The whole map: SET BY EAR 2026-11-17, `anchor` 0.565 -> 0.570 (+5 ms; Jonathan on ca-30, Normal, Guitar on:
+  0 early, 10 a little late, 5 "sounds good"; the audit had read it 32 to 44 ms early, so his ear and the tool
+  disagree and his ear decides). New audit line to listen to: bar 85 of the Outro, the record about 118 ms early on all four
   files. The cure's numbers in the table above are from BEFORE this change.
 - **Three separate faults in that table:**
   1. A fixed offset per track (the whole map early or late): move the map, one number per file.

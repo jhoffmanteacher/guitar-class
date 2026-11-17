@@ -33,7 +33,7 @@ start delay; the slow full mix 26.4 ms before the fast full mix scaled; the slow
 rhythm-down 50 ms after the slow full mix). So the entry carries
 `fileOffset: { src, srcSlow, srcFullSlow }` (seconds of that file, added to its
 bar lines after the scaling; absent = 0; `anchor` is now the fast FULL mix's
-first downbeat, value unchanged at 0.565). `snipFileOffset()` reads it,
+first downbeat; 0.570 since 2026-11-17, Jonathan by ear, + 5 ms). `snipFileOffset()` reads it,
 `snippetWindow(tr, spec, slow, guitar)` is per FILE (every call of it, and of
 the practice card's wrapper `pcWindow(L, slow, guitar)`, passes the Guitar
 state; 1ak counts their arguments and fails a call without it), the Guitar twin is kept
@@ -221,7 +221,7 @@ Metronome is not a file.**
 `ensurePlayer()` in `tabs/journey.js` schedules the click on an AudioContext.
 Two ways to declare it on `#playalong-frame`:
 
-- **A steady track** ("the cure"): `data-click-anchor="0.565"` (the snippet
+- **A steady track** ("the cure"): `data-click-anchor="0.570"` (the snippet
   `anchor`) with the COUNTED tempos in `data-bpm="72" data-bpm-slow="60"`,
   and (the cure only) `data-click-offsets` = its `fileOffset` in the order
   data-audio, data-audio-slow, data-audio-full, data-audio-slow-full; a

@@ -13,6 +13,7 @@ see `WORKFLOW.md` and the git commit log.
 ## 2026-11-17 — "the cure" keeps the beat when you switch Guitar or speed
 
 - **On the lyrics-and-chords sheets, the next line now scrolls into view just before its first chord,** instead of just after. The dot and the highlight keep their timing.
+- **"the cure": the metronome click and the highlights come a hair later, so the click lands on the beat.** Mr. Hoffman set it by ear.
 - **"the cure" play-alongs and snippets: the highlight and the click now stay on the same beat with Guitar on or off, at both speeds.** Before, turning Guitar off made every highlight come a little sooner.
 
 ## 2026-11-16 — An activity can stay in Today's activities

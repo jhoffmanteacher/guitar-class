@@ -2413,7 +2413,7 @@ window.CLASS_ACTIVITIES = [
      the refrains and bridge C and G share a bar, two plucks each.
      Section map: Jonathan's chord chart (capo 1 —
      the shapes Asus2 Cmaj7 Fmaj7 Dm F C G/B are this site's no-capo A C F
-     D F C G), placed on the click grid (anchor 0.565 s, 3.333 s a bar)
+     D F C G), placed on the click grid (anchor 0.570 s, 3.333 s a bar)
      with bass/chroma readings of the mp3 — see CLAUDE.md. The bridge's
      last four bars (65–68) are the D F C G loop; the final chorus is
      69–80, three laps like the other two. */

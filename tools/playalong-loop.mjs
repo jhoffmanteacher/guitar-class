@@ -296,7 +296,7 @@ const METER = {
 };
 /* CLOCK PINS (see the header). `node tools/playalong-loop.mjs --pins` prints these lines for the site it reads. */
 const CLOCK_PINS = {
-  'the-cure': 'e6740b40a1fb',   // 2026-11-16: + fileOffset (Jonathan's choice, cross-correlated files); anchor unchanged
+  'the-cure': '4388d463cccf',   // 2026-11-17: anchor 0.565 -> 0.570, Jonathan by ear on ca-30 (was e6740b40a1fb: + fileOffset, 2026-11-16)
   'seven-nation-army': 'eb3263796397',
   'luna': 'ed42cedf8f3b',
   'sweet-child-o-mine': '81ebe8a0fe39',

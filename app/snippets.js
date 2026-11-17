@@ -94,8 +94,10 @@ const SNIPPET_TRACKS = {
     // Measured 2026-09-18 with ?snipcal=1 -> Find the first click, off the
     // rhythm-down-metronome file's own first click. Since 2026-11-16 it is
     // the first downbeat of the FAST FULL MIX (srcFull), unchanged in value:
-    // see fileOffset below.
-    anchor: 0.565,
+    // see fileOffset below. 0.565 until 2026-11-17, when Jonathan set it by ear
+    // on ca-30 at Normal with Guitar on (`?snipcal=1&mapshift=`): 0 was early,
+    // 10 a little late, 30 late, 5 "sounds good": so + 5 ms.
+    anchor: 0.570,
     anchorVerified: true,
     /* PER-FILE OFFSETS (Jonathan's choice, 2026-11-16; an exception to "one
        measured number per song, never measure a second anchor", for this
