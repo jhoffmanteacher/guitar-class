@@ -11,7 +11,8 @@
    flushBeforeLeaving / showUnsavedNotice / devBypass / _uidKey), to the save path (app/save.js flushSave,
    queueSave, loadProgress, restoreClassConfigFromCache, the local mirrors), to anything that keeps a student's
    data in localStorage or sessionStorage (a new per-student key, a new cache), or to the unload/hide flushes
-   (shell.js pagehide/online, activities-2.js flushOnHide). About 75 s for the default 120 cases (2026-11-13). Node only.
+   (shell.js pagehide/online, activities-2.js flushOnHide), or to the background retry of a failed sign-in read
+   (app/save.js progressLoadRetry*). About 75 s for the default 120 cases (2026-11-13). Node only.
 
    NODE, NOT A BROWSER, and why. The leak channels on a shared Chromebook are: (1) localStorage, shared by every
    tab and every student of the device; (2) sessionStorage, per tab, which survives a reload; (3) a tab that does
@@ -166,6 +167,11 @@
         8-digit PR tempos), the tab's sessionStorage holds no key the previous student's session wrote, the page
         never read a localStorage key named with another student's uid nor a localStorage VALUE holding another
         student's marker, and the Google popup it opens carries nothing of anyone but the student signing in.
+     R4 late (family load-retry): a screen read long after the sign-in is judged as a first screen against the page's
+        LAST read of the doc, and on top: the page is on the failed-read rules exactly when that read failed, no retry
+        runs after a good one, and the "not loaded yet" line (#load-notice) is up exactly while a retry runs. A late
+        load folds the legacy ticks in at its read (the fold rule above), when Firebase on that page was still signed
+        in as that student. R4's practice-log fallback is the device's copy at the moment of the page's progress read.
      R5 Every page whose sign-in callback ran for a student is gone (reloaded) within 3 s of that student leaving the
         device's sign-in (boot.js: "Sign-out on a shared Chromebook has to be a hard reset, not a state reset"), or the
         student is still signed in with the not-saved notice on screen; so no page ever shows the next student or the
@@ -192,7 +198,13 @@
    two tabs signs out from the other one; the first tab may be frozen and wake to B straight over A), round-trip
    (A-B-A, A-A), teacher (the teacher's account after and before a student, on the student page: see NOT
    MODELLED for the console), playing (Sign out with a note playing and the mic open), failed-reads (B's progress and/or config
-   read refused, offline, or empty right after A), mix (seeded picks of the others). A live quiz is running in
+   read refused, offline, or empty right after A), mix (seeded picks of the others). And load-retry (2026-11-16), NOT
+   in the round robin (the default cases and the K-TAB band stay as they were): a full default run adds 6 cases of it
+   after the 120 (LOAD_RETRY_CASES; replay with --family=load-retry), --family=load-retry runs it alone. A's progress
+   read fails and the page keeps retrying it (app/save.js progressLoadRetryNow): out-pending (A signs out with the
+   retry pending, B signs in on the same tab and is read again 90 s later), frozen (A's second tab is frozen 0-12 s
+   after its sign-in, sometimes with a retried read on the wire, and wakes long after B signed in), positive (the retry
+   loads A's work while A waits; A's screen is read again 40 s in). Each is read again as a LATE screen (R4). A live quiz is running in
    every case, so each tab a student used holds that student's lq-q-opened session key.
 
    BREAK-IT RECORD (2026-11-12; scratch copies given with --root, each one red): no flush before Sign out (R1); no
@@ -626,7 +638,9 @@ function makeClient(world, page){
     world.stats.reads++;
     world.at(tr.at, () => {
       if (!page.alive) return;
-      (page.reads[path] = page.reads[path] || []).push({ at: world.now, ok: tr.ok && ruleAllows(world, 'read', path, who), exists: world.docs.has(path), data: world.docs.has(path) ? clone(world.docs.get(path).data) : null });
+      /* A progress read also keeps the device's localStorage of that moment: what loadProgress falls back to for the
+         practice log (R4), even when another page rewrites that copy later (a late load mirrors the doc's log). */
+      (page.reads[path] = page.reads[path] || []).push({ at: world.now, ok: tr.ok && ruleAllows(world, 'read', path, who), exists: world.docs.has(path), data: world.docs.has(path) ? clone(world.docs.get(path).data) : null, ls: path.startsWith('progress/') ? Object.assign({}, dev.localStorage._d) : undefined, authUid: page.authUser ? page.authUser.uid : null });
       if (!tr.ok){ world.stats.readsFailed++; world.log(`${page.id} read ${path}: FAILED (network)`); rej(Object.assign(new Error('Failed to get document because the client is offline.'), { code: 'unavailable' })); return; }
       if (!ruleAllows(world, 'read', path, who)){ world.stats.readsFailed++; world.log(`${page.id} read ${path}: DENIED`); rej(Object.assign(new Error('Missing or insufficient permissions.'), { code: 'permission-denied' })); return; }
       world.log(`${page.id} read ${path}: ${world.docs.has(path) ? 'ok' : 'no doc'}`);
@@ -954,7 +968,10 @@ function makePage(world, tab, opts){
     document: {
       documentElement: mkEl('html', 'html'), head, body, readyState: 'complete', referrer: '',
       _title: '', get title(){ return this._title; }, set title(v){ this._title = String(v); scanText('document.title', this._title); },
-      getElementById(id){ return page.els[id] || (page.els[id] = mkEl(id)); },
+      /* The "not loaded yet" line (#load-notice, app/save.js) is found by id among <body>'s children, as in a browser, so
+         taking it down is seen (removedAt); the other ids keep the stub's one-element-per-id (the existing cases' notices
+         and their timings stay as they were). */
+      getElementById(id){ if (id === 'load-notice'){ const b = body.children.find(c => c && c.id === id); if (b) return b; } return page.els[id] || (page.els[id] = mkEl(id)); },
       querySelector(){ return null; },
       querySelectorAll(sel){ return sel === '.save-ind' ? [saveInd] : []; },
       createElement(tag){ return mkEl('', tag); }, createDocumentFragment(){ return mkEl('', 'fragment'); }, createTextNode(){ return mkEl('', 'text'); },
@@ -1213,8 +1230,12 @@ const FAMILIES = {
   'teacher': 'the teacher\'s account after a student and a student after the teacher, on the student page (the console is not driven: see NOT MODELLED)',
   'playing': 'Sign out with a sound playing and the mic open (a listening game\'s mic, a note playing)',
   'failed-reads': 'B\'s progress or config read fails or comes back empty right after A',
-  'mix': 'seeded random mixes of all of the above'
+  'mix': 'seeded random mixes of all of the above',
+  /* Not in the round robin of the default cases (their numbering and the K-TAB band stay as they were): a full default
+     run adds LOAD_RETRY_CASES of it after them, and --family=load-retry runs it alone. */
+  'load-retry': 'A\'s progress read fails at sign-in and the page keeps retrying it (app/save.js, 2026-11-16): A signs out with the retry pending and B signs in (same tab, or a frozen second tab that wakes up after B signed in), or the retry loads A\'s work while A waits'
 };
+const LOAD_RETRY_CASES = 6;
 const ACTION_KINDS = ['tick', 'untick', 'answer', 'rep', 'check', 'path', 'pr', 'card'];
 const NET_KINDS = ['up', 'slow', 'refused', 'offline', 'stall'];
 
@@ -1222,7 +1243,7 @@ const NET_KINDS = ['up', 'slow', 'refused', 'offline', 'stall'];
 function caseSeed(idx){ return mix(BASE_SEED, idx); }
 function pick(r, arr){ return arr[Math.floor(r() * arr.length)]; }
 function makeScenario(idx, famFilter){
-  const names = Object.keys(FAMILIES).filter(f => !famFilter.length || famFilter.includes(f));
+  const names = Object.keys(FAMILIES).filter(f => famFilter.length ? famFilter.includes(f) : f !== 'load-retry');
   const fam = names[idx % names.length];
   const seed = caseSeed(idx);
   const r = rng(seed);
@@ -1237,6 +1258,8 @@ function makeScenario(idx, famFilter){
   /* Drawn last, so the draws above stay what they were before these two options existed. */
   sc.lastOnOut = r() < 0.5;
   sc.unloadDelivered = UNLOAD_MODE === 'delivered' ? true : UNLOAD_MODE === 'lost' ? false : r() < 0.5;
+  /* load-retry only, drawn after everything else so the other families' draws stay what they were. */
+  if (fam === 'load-retry'){ sc.lrKind = ['out-pending', 'frozen', 'positive'][idx % 3]; sc.lrLong = r() < 0.5; }
   return sc;
 }
 function actionFor(sc, kind, r, P){
@@ -1528,6 +1551,67 @@ async function runFamily(world, dev, sc, H){
     void t0;
     return a;
   };
+  if (fam === 'load-retry'){
+    /* A's progress read fails from now: 60 s or 5 s (out-pending, frozen), 6-20 s (positive). A changes nothing. */
+    const failFor = sc.lrKind === 'positive' ? Math.round(6000 + 14000 * sc.r()) : sc.lrLong ? 60000 : 5000;
+    world.readFails = [{ prefix: 'progress/' + A.uid, from: world.now, until: world.now + failFor }];
+    world.log(`reads of progress/${A.uid} fail for ${Math.round(failFor / 1000)} s`);
+    const late = (page, P) => { H.firstScreen(page, P); const fs = world.firstScreens[world.firstScreens.length - 1]; fs.late = true; fs.loadNotice = page.ctx.document.body.children.some(c => c && c.id === 'load-notice'); fs.retrying = safeEval(page, '_loadRetry !== null'); };
+    if (sc.lrKind === 'positive'){
+      if (!await H.signIn(tab1, A)) return;
+      world.retryOf = { page: tab1.page.id, who: 'A' };
+      await world.sleep(40000);
+      if (appUp(tab1.page, A)) late(tab1.page, A);
+      await H.act(tab1, A, actionFor(sc, 'tick', sc.r, A));
+      await world.sleep(3000);
+      await H.signOut(tab1, A, 'wait');
+      await world.sleep(3000);
+      if (await H.signIn(tab1, B)) await H.act(tab1, B, actionFor(sc, 'tick', sc.r, B));
+      await settle();
+      return;
+    }
+    if (sc.lrKind === 'out-pending'){
+      if (!await H.signIn(tab1, A)) return;
+      await world.sleep(Math.round(3000 + 15000 * sc.r()));
+      await H.signOut(tab1, A, 'wait');
+      await world.sleep(3000);
+      if (!await H.signIn(tab1, B)) return;
+      await world.sleep(90000);
+      if (appUp(tab1.page, B)) late(tab1.page, B);
+      await H.act(tab1, B, actionFor(sc, 'tick', sc.r, B));
+      await settle();
+      return;
+    }
+    /* frozen: A's second tab is frozen by the browser with its retry pending; A signs out in the first, B signs in
+       there; the frozen tab wakes long after (its retry timer and Firebase's "B" arrive together). */
+    const tab2 = newTab(world, dev, 'T2');
+    tab2.hidden = true;
+    openPage(world, tab2, false);
+    if (!await H.signIn(tab1, A)) return;
+    await world.waitFor(() => appUp(tab2.page, A), 20000, 100);
+    if (appUp(tab2.page, A)) H.firstScreen(tab2.page, A);
+    /* Frozen 0-12 s later: before its first retry, with a retried read on the wire, or after a retry loaded A's work.
+       With the short failure, the network is slow (3-5 s a round trip) for the next 30 s, so a retried read is often on
+       the wire when the tab freezes: it comes back when the tab wakes, after Firebase moved on to B. */
+    if (!sc.lrLong) netWindow(world, dev, 'slow', 30000, Math.round(3000 + 2000 * sc.r()));
+    await world.sleep(Math.round(12000 * sc.r()));
+    tab2.frozenUntil = world.now + 10 * 60000;
+    world.log('T2 frozen by the browser');
+    await world.sleep(1500);
+    await H.signOut(tab1, A, 'wait');
+    await world.sleep(3000);
+    if (!await H.signIn(tab1, B)) return;
+    await world.sleep(Math.round(30000 + 50000 * sc.r()));
+    world.log('B switches to T2');
+    await H.hide(tab1);
+    thaw(world, tab2);
+    await H.show(tab2);
+    if (await world.waitFor(() => appUp(tab2.page, B), 15000, 100)) H.firstScreen(tab2.page, B);
+    await world.sleep(70000);
+    if (appUp(tab2.page, B)) late(tab2.page, B);
+    await settle();
+    return;
+  }
   if (fam === 'last-action'){
     if (!await H.signIn(tab1, A)) return;
     await H.act(tab1, A, actionFor(sc, pick(sc.r, ['answer', 'tick', 'rep']), sc.r, A));
@@ -1846,13 +1930,36 @@ function oracle(sc, world, dev){
   const legacyAt = {};
   const prOf = fs => { const page = world.allPages.find(p => p.id === fs.page); return page && (page.reads['progress/' + world.people[fs.who].uid] || []).filter(x => x.at <= fs.at).pop(); };
   const foldAt = fs => { const pr = prOf(fs); return pr ? pr.at : fs.at; };
-  for (const fs of world.firstScreens.slice().sort((x, y) => foldAt(x) - foldAt(y) || x.at - y.at)){
-    const pr = prOf(fs);
-    fs.legacy = [];
-    if (fs.teacherMode || !pr || !pr.ok || !(legacyLeft[fs.who] || []).length) continue;
-    fs.legacy = legacyLeft[fs.who]; legacyLeft[fs.who] = [];
-    legacyAt[fs.who] = true;
-    world.ledger.push({ kind: 'adopt', who: fs.who, keys: fs.legacy, t: fs.at, page: fs.page, done: true });
+  /* ...or at a LATE load (2026-11-16, app/save.js progressLoadRetryNow): a page whose sign-in read of the student's doc
+     failed, and which read it again successfully before that student did anything there, while Firebase on that page
+     was still signed in as that student, loads it as a sign-in would, folding the legacy ticks in at that read. A first screen of the same student on that page after it counts them as
+     its own (R4). */
+  const lateFolds = [];
+  for (const page of world.allPages){
+    if (page.teacherMode) continue;
+    for (const [k, P] of Object.entries(world.people)){
+      const rs = page.reads['progress/' + P.uid] || [];
+      const okr = rs.length && !rs[0].ok ? rs.find(x => x.ok) : null;
+      if (!okr || okr.authUid !== P.uid || world.ledger.some(a => a.page === page.id && a.who === k && a.t <= okr.at)) continue;
+      lateFolds.push({ late: true, who: k, page: page.id, at: okr.at });
+    }
+  }
+  const folds = world.firstScreens.map(fs => ({ fs, who: fs.who, at: foldAt(fs), t: fs.at })).concat(lateFolds.map(l => ({ late: l, who: l.who, at: l.at, t: l.at })));
+  for (const fs of world.firstScreens) fs.legacy = [];
+  for (const f of folds.sort((x, y) => x.at - y.at || x.t - y.t)){
+    if (!(legacyLeft[f.who] || []).length) continue;
+    if (f.fs){
+      const fs = f.fs, pr = prOf(fs);
+      if (fs.teacherMode || !pr || !pr.ok) continue;
+      fs.legacy = legacyLeft[fs.who]; legacyLeft[fs.who] = [];
+      legacyAt[fs.who] = true;
+      world.ledger.push({ kind: 'adopt', who: fs.who, keys: fs.legacy, t: fs.at, page: fs.page, done: true });
+      continue;
+    }
+    const keys = legacyLeft[f.who]; legacyLeft[f.who] = [];
+    legacyAt[f.who] = true;
+    world.ledger.push({ kind: 'adopt', who: f.who, keys, t: f.at, page: f.late.page, done: true });
+    for (const fs of world.firstScreens) if (fs.page === f.late.page && fs.who === f.who && fs.at >= f.at) fs.legacy = keys;
   }
   /* R1 + R2: each person's final doc. */
   for (const k of Object.keys(world.people)){
@@ -1951,7 +2058,7 @@ function oracle(sc, world, dev){
     const pr = (page.reads['progress/' + P.uid] || []).filter(x => x.at <= fs.at).pop();
     const cf = (page.reads['config/class'] || []).filter(x => x.at <= fs.at).pop();
     const doc = pr && pr.ok && pr.exists ? pr.data : null;
-    const lsAt = world.lsBefore[fs.page] || world.lsLatest || {};
+    const lsAt = (pr && pr.ls) || world.lsBefore[fs.page] || world.lsLatest || {};
     let localLog = {}; try { localLog = JSON.parse(lsAt['practiceLog:' + P.uid] || 'null') || {}; } catch {}
     const want = {
       completed: (doc && doc.completed) || {}, responses: (doc && doc.responses) || {},
@@ -1964,6 +2071,17 @@ function oracle(sc, world, dev){
     const ownOverride = cfg ? ((cfg.periodOverrides || {})[P.uid] || '') : null;
     const ownOpen = cfg ? (Number((cfg.moduleOpenThrough || {})[P.uid]) || 0) : null;
     const gamesOv = cfg ? (cfg.gameOverrides || {})[P.uid] : undefined;
+    /* A LATE screen (family load-retry): read long after the sign-in, once the page's retry has had every chance. The
+       last read of the doc decides it as for a first screen; on top, the page is on the failed-read rules exactly when
+       that read failed, no retry still runs once it succeeded, and the "not loaded yet" line is up exactly while one
+       runs. */
+    if (fs.late){
+      compared += 3;
+      const okRead = !!(pr && pr.ok);
+      if (fs.vals.progressLoadFailed !== !okRead) fail('R4', `${fs.who}'s late screen on ${fs.page}: progressLoadFailed = ${fs.vals.progressLoadFailed}, but the page's last read of the doc ${okRead ? 'succeeded' : 'failed'}`);
+      if (okRead && fs.retrying !== false) fail('R4', `${fs.who}'s late screen on ${fs.page}: a retry still runs (${JSON.stringify(fs.retrying)}) after a good read`);
+      if (fs.loadNotice !== (fs.retrying === true)) fail('R4', `${fs.who}'s late screen on ${fs.page}: the "not loaded yet" line is ${fs.loadNotice ? 'up' : 'down'} while ${fs.retrying === true ? 'a' : 'no'} retry runs`);
+    }
     for (const g of Object.keys(want)){
       compared++;
       if (canon(fs.vals[g]) !== canon(want[g])) fail('R4', `${fs.who}'s first screen on ${fs.page}: ${g} = ${short(canon(fs.vals[g]))}; ${pr && pr.ok ? (doc ? 'the doc holds' : 'no doc, so') : 'the read failed, so'} ${short(canon(want[g]))}`);
@@ -2263,6 +2381,9 @@ async function main(){
   const single = opt('case', null);
   const N = Number(opt('cases', 120));
   const idxs = single != null ? [Number(single)] : Array.from({ length: N }, (_, i) => i);
+  /* A full default run adds the load-retry cases after the round robin (their own family filter). */
+  const extra = new Set();
+  if (single == null && !famFilter.length && N >= 120) for (let i = 0; i < LOAD_RETRY_CASES; i++){ idxs.push(N + i); extra.add(N + i); }
   const fams = {};
   const tot = { compared: 0, writesChecked: 0, screens: 0, landed: 0, told: 0, lost: 0, issued: 0, landedW: 0, refusedRules: 0, refusedServer: 0, lostPage: 0, lostUnload: 0, pages: 0, reloads: 0, reads: 0, readsFailed: 0, notices: 0, ledger: 0, crossRefused: 0, crossUnsent: 0, issuedChecked: 0, unloadSent: 0, unloadCases: 0, r8Anyway: 0 };
   const json = [];
@@ -2270,7 +2391,7 @@ async function main(){
   let failed = 0;
   for (const idx of idxs){
     beat(`case ${idx}`);
-    const { sc, world, dev, res } = await runCase(idx, famFilter);
+    const { sc, world, dev, res } = await runCase(idx, extra.has(idx) ? ['load-retry'] : famFilter);
     const famName = sc.fam === 'mix' ? 'mix/' + sc.sub : sc.fam;
     const f = fams[sc.fam] = fams[sc.fam] || { n: 0, fail: 0 };
     f.n++;
@@ -2289,7 +2410,7 @@ async function main(){
       console.log(`✗ FAIL case ${idx} (seed ${BASE_SEED}, ${what}): ${res.fails.length} finding${res.fails.length > 1 ? 's' : ''}`);
       for (const x of res.fails.slice(0, 8)) console.log(`    ${x.rule} ${x.msg}`);
       if (res.fails.length > 8) console.log(`    … ${res.fails.length - 8} more`);
-      console.log(`    replay: node tools/shared-chromebook-loop.mjs --seed=${BASE_SEED} --case=${idx} --verbose${famFilter.length ? ' --family=' + famFilter.join(',') : ''}${opt('cases', null) ? ' --cases=' + N : ''}${opt('root', null) ? ' --root=' + ROOT : ''}`);
+      console.log(`    replay: node tools/shared-chromebook-loop.mjs --seed=${BASE_SEED} --case=${idx} --verbose${extra.has(idx) ? ' --family=load-retry --cases=' + (idx + 1) : (famFilter.length ? ' --family=' + famFilter.join(',') : '') + (opt('cases', null) ? ' --cases=' + N : '')}${opt('root', null) ? ' --root=' + ROOT : ''}`);
     }
     if (VERBOSE){
       console.log(`\n── case ${idx} (seed ${BASE_SEED}, ${what}, notice choice ${sc.noticeChoice}, B ${sc.bKind})`);

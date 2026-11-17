@@ -252,7 +252,7 @@ function progressApplyDoc(doc){
    redraw would cut something off: progressLoadRetryBusy.
    Everything here belongs to one signed-in student: progressLoadRetryStop() runs at the next loadProgress()
    (any sign-in) and in the signed-out branch (app/start.js), and an answer is applied only when it is still the
-   current retry's and currentUser is the student it read for. Proofs: tools/save-loop.mjs (L1-L7) and
+   current retry's and both currentUser and Firebase's signed-in user are the student it read for. Proofs: tools/save-loop.mjs (L1-L7) and
    tools/shared-chromebook-loop.mjs (family load-retry). */
 const LOAD_RETRY_MS = [2000, 4000, 8000, 15000, 30000, 60000];   // then every 60 s
 const LOAD_RETRY_READ_MS = 15000;    // a read still out after this counts as failed (a stalled get() never settles)
@@ -294,11 +294,11 @@ function progressLoadRetryOnline(){
 /* Would the redraw cut something off? Same list as the update reload's busyReason (app/start.js, the service
    worker block) minus the sign-in and the mic: an exit check part-way (its picks are in memory, and a one-try
    check started on the empty state must not be filed over a stored score), a drill round, a take recording, a
-   practice card playing (rebuildModuleContentPanels stops card audio). */
+   practice card, a backing-track snippet or a tab line playing (rebuildModuleContentPanels stops card audio). */
 function progressLoadRetryBusy(){
   const anyValue = (obj, fn) => Object.keys(obj || {}).some(k => obj[k] && fn(obj[k]));
   try{
-    if(Object.keys(ecRuns).length || pcState || ncLive || chcLive) return true;
+    if(Object.keys(ecRuns).length || pcState || snipState || playSeqState || ncLive || chcLive) return true;
     if(anyValue(recState, s => s.starting || s.recording)) return true;
     return anyValue(shuffleDrills, s => s.phase === 'play') || anyValue(deckDrills, s => s.phase === 'run') || anyValue(earDrills, s => s.phase === 'run');
   }catch(e){ return true; }
@@ -324,7 +324,9 @@ async function progressLoadRetryNow(){
   }catch(e){ doc = null; }
   if(_loadRetry !== r) return;              // stopped while the read was out (sign-out, a new sign-in)
   r.reading = false;
-  if(currentUser !== r.user){ progressLoadRetryStop(); return; }
+  /* Still this student, for the page AND for Firebase: a tab woken from the browser's freeze can run this before its
+     auth callback hears that another student signed in on the Chromebook (that callback then reloads the page). */
+  if(currentUser !== r.user || !(auth && auth.currentUser && auth.currentUser.uid === r.user.uid)){ progressLoadRetryStop(); return; }
   if(!doc){ progressLoadRetryLater(); return; }
   /* From here to the end: one synchronous step, so no click can land between the test and the apply. */
   if(progressWorkSnapshot() !== r.base || progressResetWaiting(doc)){ progressLoadRetryStop(); return; }

@@ -62,7 +62,8 @@
    Sign-in: the tool sets currentUser and runs loadProgress() then caAdoptLocalTicks(), the first two steps of the
    site's own onAuthStateChanged callback (app/start.js), then progressLoadRetryStart() (start.js starts the background
    retry once the app is on screen, when that read failed); showApp() and loadClassConfig() are not run at sign-in
-   (loadClassConfig runs when a hidden tab is shown again, through the site's own listener).
+   (loadClassConfig runs when a hidden tab is shown again, through the site's own listener). Firebase's own
+   auth.currentUser is set to the student with currentUser, as the SDK has it by the time the callback runs.
    THE LATE LOAD (2026-11-16). After a failed sign-in read the page reads the doc again in the background while the
    student has changed nothing (app/save.js progressLoadRetryNow). The oracle's rule (loadFacts): the first successful
    re-read by that tab is the tab's load when it came back before the student's first action began (an exit check
@@ -216,7 +217,8 @@
      L1-L5 (2026-11-16) the late load: it applies the doc and keeps the set on screen, after which held-back categories
      are sent from the real values; a change first stops it at once; 'online' retries at once; an exit check part-way
      defers it; a sign-out stops it (another student signed in on the same page never gets the first one's doc).
-     L6 the Wi-Fi back during the last automatic save retry (the old R10-online-retry). See loadRetryChecks().
+     L6 the Wi-Fi back during the last automatic save retry (the old R10-online-retry); L7 a retried read that comes back
+     after Firebase signed another student in but before the page heard it is not applied. See loadRetryChecks().
      See directedChecks(). A failure prints "✗ FAIL directed …" and exits 1.
 
    Reading a FAIL line: case index, family, the stored value, the values the oracle accepts, and the replay command. */
@@ -781,7 +783,7 @@ function makeTab(world, name, device, opts){
    and, when that read failed, the background retry (start.js starts it once the app is on screen; this tool takes the
    app as on screen when the sign-in has run: __booted). loadClassConfig, progressStartOverAtSignIn and showApp are not
    run here (the reset cases run the first two). */
-const SIGN_IN = 'currentUser = __user; (async () => { await loadProgress(); caAdoptLocalTicks(); progressLoadRetryStart(); })().finally(() => __booted())';
+const SIGN_IN = 'currentUser = __user; auth.currentUser = __user; (async () => { await loadProgress(); caAdoptLocalTicks(); progressLoadRetryStart(); })().finally(() => __booted())';
 /* Run site code from a timer or an event; a throw or a rejected promise is a fault (R12). It runs through the vm with a
    10 s timeout, so a synchronous endless loop is a fault too instead of a hang the watchdog cannot interrupt. */
 const CB_SCRIPT = new vm.Script('__cb()');
@@ -1885,8 +1887,8 @@ async function loadRetryChecks(out, fail){
        comes back at ~8 s). */
     const { world, tab } = await directedRun('L5 sign-out with a read on the wire', START, [{ phase: 'refused', until: T0 + 1000 }, { phase: 'slow', until: T0 + 60000, lat: 4000 }], [
       { at: 3500, what: 'A signs out', code: 'signOut()' },
-      { at: 3600, what: 'Firebase: signed out', probe: t => { t.authCb && callSite(t, () => t.authCb(null)); } },
-      { at: 4000, what: 'B signs in on the same page (no reload)', probe: t => { t.authCb && callSite(t, () => t.authCb(B)); } },
+      { at: 3600, what: 'Firebase: signed out', probe: t => { t.run('auth.currentUser = null'); t.authCb && callSite(t, () => t.authCb(null)); } },
+      { at: 4000, what: 'B signs in on the same page (no reload)', probe: t => { t.ctx.__userB = B; t.run('auth.currentUser = __userB'); t.authCb && callSite(t, () => t.authCb(B)); } },
       { at: 7500, what: '(reads the page after A\'s read came back)', probe: t => { mid = { user: t.run('currentUser && currentUser.uid'), completed: t.run('JSON.stringify(completed)'), retry: t.run('_loadRetry !== null') }; } },
       { at: 20000, what: '(reads the page)', probe: t => { end = { user: t.run('currentUser && currentUser.uid'), completed: t.run('JSON.stringify(completed)'), responses: t.run('JSON.stringify(responses)'), failed: t.run('progressLoadFailed') }; } }
     ], 25000);
@@ -1897,6 +1899,23 @@ async function loadRetryChecks(out, fail){
     if (!mid || mid.user !== B.uid || mid.completed !== '{}' || mid.retry !== false) fail(`directed L5: A's doc reached B's session, or a retry still runs under B; at 7.5 s ${JSON.stringify(mid)}`);
     if (!end || end.user !== B.uid || end.completed !== '{}' || end.responses !== '{}' || end.failed !== false) fail(`directed L5: B's session at 20 s holds ${JSON.stringify(end)}; wanted B's own (no doc: empty)`);
     for (const f of tab.faults) fail(`directed L5: site code ${f} (R12)`);
+  }
+  /* L7 A FROZEN TAB'S ORDER. Firebase already signed another student in on this Chromebook (auth.currentUser is B) but
+     this page's auth callback has not run yet (a tab the browser froze, woken up: its timers and network answers can
+     run before the callback, which then reloads the page). A's retried read comes back in that moment: it must not be
+     applied (it would fold A's device copies into a page that is going away, and its saves would go out under B). */
+  {
+    const B = { uid: 'uid-test-b2', displayName: 'Test Student B', email: 'student.b@example.test', photoURL: null };
+    let mid = null;
+    const { world, tab } = await directedRun('L7 Firebase moved on before the callback', START, [{ phase: 'refused', until: T0 + 1000 }, { phase: 'slow', until: T0 + 60000, lat: 4000 }], [
+      { at: 3500, what: 'Firebase now says B (the page has not heard)', probe: t => { t.ctx.__userB = B; t.run('auth.currentUser = __userB'); } },
+      { at: 8000, what: '(reads the page after A\'s read came back)', probe: t => { mid = { user: t.run('currentUser && currentUser.uid'), failed: t.run('progressLoadFailed'), completed: t.run('JSON.stringify(completed)'), retry: t.run('_loadRetry !== null') }; } }
+    ], 12000);
+    out.checks += 1;
+    const aRead = world.gets.filter(g => g.tab === 'T1' && g.path === 'progress/' + USER.uid && g.ok && g.at > T0 + 3500);
+    if (!aRead.length) fail('directed L7: setup — A\'s retried read did not come back after Firebase moved on');
+    if (!mid || mid.failed !== true || mid.completed !== '{}' || mid.retry !== false) fail(`directed L7 Firebase moved on before the callback: A's doc was applied, or the retry goes on; at 8 s ${JSON.stringify(mid)}`);
+    for (const f of tab.faults) fail(`directed L7: site code ${f} (R12)`);
   }
   /* L6 (the old KNOWN K-online-retry, fixed 2026-11-16 in shell.js's 'online' listener). The page opens offline (no
      SDK, no read); the student answers a question at 3 s; every save fails on the SDK; the Wi-Fi comes back WHILE the
@@ -2054,7 +2073,7 @@ async function resetCases(){
   const OLD_TICKS = Object.keys(OLD.completed);
   const NEW_TICK = 'm7w2-c-sec0-1';
   const mkStorage = () => ({ _d: {}, getItem(k){ return Object.prototype.hasOwnProperty.call(this._d, k) ? this._d[k] : null; }, setItem(k, v){ this._d[k] = String(v); }, removeItem(k){ delete this._d[k]; }, clear(){ this._d = {}; }, key(i){ return Object.keys(this._d)[i] ?? null; }, get length(){ return Object.keys(this._d).length; } });
-  const BOOT = 'currentUser = __user; (async () => { await loadProgress(); caAdoptLocalTicks(); await loadClassConfig(); await progressStartOverAtSignIn(); progressLoadRetryStart(); })().finally(() => __booted())';
+  const BOOT = 'currentUser = __user; auth.currentUser = __user; (async () => { await loadProgress(); caAdoptLocalTicks(); await loadClassConfig(); await progressStartOverAtSignIn(); progressLoadRetryStart(); })().finally(() => __booted())';
   const scenario = async (id, what, script) => {
     beat('reset case ' + id);
     const world = new World(mix(BASE_SEED, 9000 + id.charCodeAt(1) * 7 + id.length));
@@ -2411,7 +2430,7 @@ async function main(){
     const d = await directedChecks();
     directedBad = d.fails.length;
     for (const m of d.fails) console.log(`✗ FAIL directed (seed ${BASE_SEED}): ${m}`);
-    console.log(`  directed checks: ${d.checks - Math.min(d.checks, d.fails.length)} of ${d.checks} hold (D1 the place a student opened is the place stored; D2 a new student's doc is marked once, ${d.txRuns} transaction(s) for three saves, and a tick made offline waits for the reconnect; L1-L5 the late load after a failed sign-in read; L6 the Wi-Fi back during the last save retry)`);
+    console.log(`  directed checks: ${d.checks - Math.min(d.checks, d.fails.length)} of ${d.checks} hold (D1 the place a student opened is the place stored; D2 a new student's doc is marked once, ${d.txRuns} transaction(s) for three saves, and a tick made offline waits for the reconnect; L1-L5 and L7 the late load after a failed sign-in read; L6 the Wi-Fi back during the last save retry)`);
   }
   /* The reset cases (Start over / Delete): with every full run, or alone with --reset. */
   let resetBad = 0, resetN = 0;
