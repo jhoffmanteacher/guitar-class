@@ -420,6 +420,10 @@ const GROUPS = oldGroups.map(g => {
   return { array: g.array, short: g.array.replace(/_JS_PARTS$|_PARTS$/, '').toLowerCase(), loader: g.loader,
     oldFiles: g.files, newFiles: n ? n.files : null, newLoader: n ? n.loader : null };
 });
+/* A new tree with no such list (a pre-cut commit, a list renamed): a new page cannot be built the same way, so the
+   controls cannot run. Say so instead of crashing (review R1-3). */
+const noList = GROUPS.filter(g => !g.newFiles);
+if (noList.length) die(`${NEW.name} declares no ${noList.map(g => g.array).join(' or ')} (no one-line const … = ['…js']; in its app parts, with a function that names it): the tool compares two trees that both have the part lists`);
 
 // top-level names, per file, both trees; which file defines a name
 const declsOf = (tree, f) => { const t = tree.read(f); return t == null ? new Set() : topDecls(t); };
