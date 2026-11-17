@@ -85,13 +85,23 @@
    whether the old list names that file), the cases and seeds it was seen in, and a replay line. The last line
    counts entry points, orders, cases and calls.
 
-   WHAT IT CANNOT SEE. The service worker's caches and which copy of a file a page gets from them (half-K stands
-   in for an old cache), reload timing (SW_RELOAD_MAX_WAIT, the busy-tab wait), more than one tab, layout, audio:
-   tools/update-reload-loop.mjs (Chrome) and tools/sw-upgrade-proof.mjs cover those. Code reached only through
-   arguments a stub cannot stand in for: a call that throws the same way in both controls stops there. The
-   console's own screens need Firestore, which the page does not have, so for TEACHER_JS_PARTS only the calls from
-   outside the console run (about 10), not its board or its buttons. A guard with an extra condition
-   (`teacherView === 'songs' && typeof f === 'function'`) is probed as if the condition held. */
+   THE STATIC PASS (beside the run; see staticPass() below). Every name the new site declares that an old page
+   never gets (only in a new part its old list never fetches, or only in a new app script), referenced from a file
+   an old page runs, with file:line: a reference behind `typeof` is SKIPPED (silently not done), any other THROWS
+   when reached. A part an old-list part fetches itself (loadScriptOnce('…'), a bridge like fix A2) counts as
+   fetched; whether it arrives in time is left to the run (at-resolve, cache-fast).
+
+   WHAT THE RUN CANNOT SEE (the static pass is what covers the first two). Code that runs only during PLAY: a
+   game's own loop (rAF, timers past the first 200 callbacks, the mic loop) never runs in the vm, so a helper
+   moved out of Change Up's loop is invisible to the run. The console's own screens: they need Firestore, which the
+   page does not have, so for TEACHER_JS_PARTS only the calls from outside the console run (about 10), not its
+   board, its student pages or its buttons. Code reached only through arguments a stub cannot stand in for: a call
+   that throws the same way in both controls stops there. A guard with an extra condition (`teacherView ===
+   'songs' && typeof f === 'function'`) is probed as if the condition held. The service worker's caches and which
+   copy of a file a page gets (half-K, mixed-random and new-page-old stand in), reload timing (SW_RELOAD_MAX_WAIT,
+   the busy-tab wait), more than one tab, layout, audio: tools/update-reload-loop.mjs (Chrome) and
+   tools/sw-upgrade-proof.mjs cover those. The static pass cannot see a name built at run time (window[name]) or a
+   call through a value passed from elsewhere. */
 import { readFileSync, existsSync, statSync, readdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { join, dirname, resolve } from 'node:path';
@@ -170,32 +180,48 @@ function openTree(spec){
 }
 
 // ───────────────────────── reading code ─────────────────────────
-/* Comments out, strings kept (inline handlers inside template strings are call sites too). A `/` that starts a
-   regex literal is not modelled; a quote inside one can only make the stripper keep a comment, never drop code. */
-function stripComments(src){
-  let out = '', i = 0;
-  const n = src.length, modes = [];   // 'tpl' (inside a template's text), 'expr' (inside its ${ }), 'brace' ({ } within an expr)
+/* One pass over a script, keeping every character's position (comments and strings become spaces, newlines stay,
+   so an index in the result is an index in the source and line numbers hold):
+     code  comments out, strings kept (an inline handler inside a template string is a call site too);
+     refs  comments out AND string text out, except on…="…" handler attributes inside strings (a name that is only
+           mentioned in a string or a comment is not a reference; a handler in markup is).
+   A `/` that starts a regex literal is not modelled: a quote or `//` inside one can blank the rest of that line. */
+const SCAN = new Map();
+function scanJs(src){
+  if (SCAN.has(src)) return SCAN.get(src);
+  const n = src.length, code = src.split(''), refs = src.split(''), modes = [];
+  const blank = (arr, a, b) => { for (let k = a; k < b; k++) if (arr[k] !== '\n') arr[k] = ' '; };
+  const strText = (a, b) => {
+    blank(refs, a, b);
+    for (const m of src.slice(a, b).matchAll(/\bon[a-z]+\s*=\s*(["'])(.*?)\1/g)) for (let k = a + m.index; k < a + m.index + m[0].length; k++) refs[k] = src[k];
+  };
+  let i = 0;
   while (i < n){
     const c = src[i], d = src[i + 1], top = modes[modes.length - 1];
     if (top === 'tpl'){
-      if (c === '\\'){ out += c + (d ?? ''); i += 2; continue; }
-      if (c === '`'){ modes.pop(); out += c; i++; continue; }
-      if (c === '$' && d === '{'){ modes.push('expr'); out += '${'; i += 2; continue; }
-      out += c; i++; continue;
+      const s0 = i;
+      while (i < n && src[i] !== '`' && !(src[i] === '$' && src[i + 1] === '{')){ if (src[i] === '\\') i++; i++; }
+      strText(s0, Math.min(i, n));
+      if (i >= n) break;
+      if (src[i] === '`'){ modes.pop(); i++; continue; }
+      modes.push('expr'); i += 2; continue;
     }
-    if (c === '/' && d === '/'){ while (i < n && src[i] !== '\n') i++; continue; }
-    if (c === '/' && d === '*'){ const e = src.indexOf('*/', i + 2); i = e < 0 ? n : e + 2; out += ' '; continue; }
+    if (c === '/' && d === '/'){ const e = src.indexOf('\n', i), end = e < 0 ? n : e; blank(code, i, end); blank(refs, i, end); i = end; continue; }
+    if (c === '/' && d === '*'){ const e = src.indexOf('*/', i + 2), end = e < 0 ? n : e + 2; blank(code, i, end); blank(refs, i, end); i = end; continue; }
     if (c === '\'' || c === '"'){
       let j = i + 1; while (j < n && src[j] !== c && src[j] !== '\n'){ if (src[j] === '\\') j++; j++; }
-      out += src.slice(i, j + 1); i = j + 1; continue;
+      strText(i + 1, Math.min(j, n)); i = j + 1; continue;
     }
-    if (c === '`'){ modes.push('tpl'); out += c; i++; continue; }
-    if (c === '{' && top){ modes.push('brace'); out += c; i++; continue; }
-    if (c === '}' && top){ modes.pop(); out += c; i++; continue; }
-    out += c; i++;
+    if (c === '`'){ modes.push('tpl'); i++; continue; }
+    if (c === '{' && top){ modes.push('brace'); i++; continue; }
+    if (c === '}' && top){ modes.pop(); i++; continue; }
+    i++;
   }
-  return out;
+  const r = { code: code.join(''), refs: refs.join('') };
+  SCAN.set(src, r);
+  return r;
 }
+const stripComments = src => scanJs(src).code;
 // Used for DISCOVERY only (names and call sites): a miss shows as a smaller entry count in the summary.
 
 const ID = '[A-Za-z_$][\\w$]*';
@@ -532,6 +558,73 @@ function bindsLocally(text, q){
   return LOCALS.get(text).has(q.replace(/\\\$/g, '$'));
 }
 
+/* ── THE STATIC PASS (review R1-1). The run only reaches what a call from outside reaches with stub arguments; code
+   that runs only during PLAY (a game's rAF / timer / mic loop) or only inside the console's own screens never runs
+   in the vm. So, beside the run: every name the NEW site declares (in a part of a NEW list, or a NEW app script)
+   that an old page never gets, referenced from a file an old page DOES run, is a finding, with file:line.
+   What an old page runs: its OLD eager scripts (old text) and inline handlers, every file of its OLD lists that
+   the new tree has (NEW text: that is what it fetches), and any file one of those fetches itself with a literal
+   loadScriptOnce('…') (a bridge such as fix A / A2: its names count as reachable; WHEN they arrive is the run's
+   question). Names it never gets: declared at top level in a NEW list part or NEW eager script, declared nowhere
+   it runs (nor assigned as window.X there). A reference is an identifier in code (not in a comment, not in a
+   string except an on…="…" handler), not a property (obj.name), not an object key, not shadowed by a binding of
+   the same name in its enclosing top-level function. A reference behind `typeof name` within the 300 characters
+   before it is GUARDED: on an old page it is silently skipped; any other reference throws when reached. */
+function staticPass(){
+  const runs = [];
+  for (const f of oldEager){ const t = OLD.tree.read(f); if (t != null) runs.push({ file: f, text: t, side: 'old' }); }
+  runs.push({ file: 'index.html (inline handlers)', text: inlineHandlers(OLD.tree.read('index.html') || '').join('\n'), side: 'old' });
+  const inRuns = new Set(runs.map(r => r.file));
+  for (const g of GROUPS) for (const f of g.oldFiles) if (!inRuns.has(f) && NEW.tree.has(f)){ runs.push({ file: f, text: NEW.tree.read(f), side: 'new' }); inRuns.add(f); }
+  const bridged = [];
+  for (let k = 0; k < runs.length; k++) if (runs[k].side === 'new'){   // a bridge is a part loading another part itself
+    for (const m of scanJs(runs[k].text).code.matchAll(/\bloadScriptOnce\s*\(\s*['"]([^'"]+)['"]/g)){
+      const f = m[1];
+      if (inRuns.has(f) || !NEW.tree.has(f) || !/\.js$/.test(f)) continue;
+      runs.push({ file: f, text: NEW.tree.read(f), side: 'new' }); inRuns.add(f); bridged.push({ file: f, by: runs[k].file });
+    }
+  }
+  const have = new Set();
+  for (const r of runs){
+    for (const n of topDecls(r.text)) have.add(n);
+    for (const m of scanJs(r.text).code.matchAll(new RegExp(`\\bwindow\\.(${ID})\\s*=(?!=)`, 'g'))) have.add(m[1]);
+  }
+  const newEager = eagerScripts(NEW.tree).filter(s => s.file && !s.inline).map(s => s.file);
+  const homes = new Map();   // a name the old page never gets → the NEW file(s) that declare it
+  for (const f of [...new Set([...GROUPS.flatMap(g => g.newFiles || []), ...newEager])]) for (const n of declsOf(NEW.tree, f))
+    if (!have.has(n)){ if (!homes.has(n)) homes.set(n, []); homes.get(n).push(f); }
+  const found = new Map();   // name → [{ file, line, guarded, fn, text }]
+  if (homes.size) for (const r of runs){
+    const { code, refs } = scanJs(r.text);
+    const lines = r.text.split('\n'), starts = [0];
+    for (let k = 0; k < r.text.length; k++) if (r.text[k] === '\n') starts.push(k + 1);
+    const lineOf = p => { let lo = 0, hi = starts.length - 1; while (lo < hi){ const mid = (lo + hi + 1) >> 1; if (starts[mid] <= p) lo = mid; else hi = mid - 1; } return lo; };
+    // top-level functions: a line that starts `function` / `async function` at column 0, to the next `}` at column 0
+    const regions = [];
+    for (const m of code.matchAll(/^(?:async\s+)?function\s*\*?\s*([\w$]+)[^\n]*$/gm)){
+      const end = code.indexOf('\n}', m.index);
+      regions.push({ a: m.index, b: end < 0 ? code.length : end + 2, name: m[1] });
+    }
+    const regionOf = p => regions.find(x => x.a <= p && p < x.b);
+    for (const m of refs.matchAll(new RegExp(`(?<![\\w$.])(${ID})`, 'g'))){
+      const n = m[1];
+      if (!homes.has(n)) continue;
+      const p = m.index, after = refs.slice(p + n.length, p + n.length + 3), before = refs.slice(Math.max(0, p - 40), p);
+      if (/^\s*:(?!:)/.test(after) && /[{,]\s*$/.test(before)) continue;           // an object key
+      if (/\btypeof\s+$/.test(before)) continue;                                   // the guard itself
+      if (/\b(?:function|const|let|var|class)\s+$/.test(before)) continue;        // a declaration of its own
+      const reg = regionOf(p);
+      if (reg && bindsLocally(code.slice(reg.a, reg.b), n.replace(/\$/g, '\\$'))) continue;   // a local of that name
+      const q = n.replace(/\$/g, '\\$');
+      const guarded = new RegExp(`\\btypeof\\s+${q}\\b`).test(code.slice(Math.max(reg ? reg.a : 0, p - 300), p));
+      const ln = lineOf(p);
+      if (!found.has(n)) found.set(n, []);
+      found.get(n).push({ file: r.file, line: ln + 1, guarded, fn: reg ? reg.name : null, text: lines[ln].trim().slice(0, 110) });
+    }
+  }
+  return { found, homes, bridged, runs: runs.length };
+}
+
 // ───────────────────────── one run ─────────────────────────
 const MISSING = /^(?:(\S+) is not defined|Cannot access '([^']+)' before initialization|(\S+) is not a function)$/;
 function classify(e){
@@ -671,6 +764,9 @@ for (const g of GROUPS){
   console.log(`  ${g.array} (loader ${g.loader}()): old ${g.oldFiles.length} parts, new ${g.newFiles ? g.newFiles.length : 'NO LIST'}` +
     `${same ? ', same list' : ', LIST CHANGED'}${ran ? `; ${g.entries.length} calls from outside it into it (${g.entries.filter(e => e.guarded).length} behind a typeof guard)${SAME ? '; no file differs: run as a self-check' : ''}` : '; no file differs: not run'}`);
 }
+const STATIC = staticPass();
+console.log(`  static: ${STATIC.homes.size} names the new site declares that an old page never gets; ${STATIC.found.size} of them referenced from the ${STATIC.runs} files an old page runs`);
+for (const b of STATIC.bridged) console.log(`  static: ${b.file} is fetched by ${b.by} itself (loadScriptOnce), outside the loader's chain: its names count as reachable; whether they arrive in time is the run's question`);
 if (VERBOSE) for (const g of RUN) console.log(`  ${g.short} entry points (A = called in a loader .then, G = behind a typeof guard any time, S = every caller guards it):\n    ` +
   g.entries.map(e => `${e.call}${e.atResolve || e.guarded || e.guardAll ? ' [' + (e.atResolve ? 'A' : '') + (e.guarded ? 'G' : '') + (e.guardAll ? 'S' : '') + ']' : ''}`).join(' · '));
 if (!RUN.length){ console.log(`\nold-page-loop: no part list and no part file differs${appChanged ? ' (the app scripts do; this tool runs the lazy groups only)' : ''}: nothing to run. ✓ 0 findings`); process.exit(0); }
@@ -845,7 +941,19 @@ if (notes.size) console.log(`\nNOTES (${notes.size}; not findings):\n    ${[...n
 if (before.size) console.log(`\nON BOTH PAGES (${before.size}; old page + old files and new page + new files make these too, so the push does not cause them; not findings):\n    ${[...before.keys()].join('\n    ')}`);
 show(list, `\nFINDINGS (${list.length} cause${list.length === 1 ? '' : 's'}; a call a real caller makes throws or is skipped; [settled] = still broken once every file has arrived, until a reload):`, '✗ ');
 show(windows, `\nWINDOWS (${windows.length}; a user action in the moment between the group loader resolving and a part it loads itself arriving; exit 1 only with --strict):`, '⚠ ');
+const staticList = [...STATIC.found.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+if (staticList.length){
+  const thrown = staticList.filter(([, rs]) => rs.some(r => !r.guarded)).length;
+  console.log(`\nSTATIC (${staticList.length} name${staticList.length === 1 ? '' : 's'} an old page reaches but never gets: ${thrown} with a reference that THROWS when reached, ${staticList.length - thrown} only behind typeof, silently SKIPPED; this covers code the run cannot reach: in-game loops, the console's own screens):`);
+  staticList.forEach(([n, rs], i) => {
+    const un = rs.filter(r => !r.guarded), gd = rs.filter(r => r.guarded);
+    console.log(`  ✗ S${i + 1}. ${n} (only in ${STATIC.homes.get(n).join(', ')} (new), which an old page never fetches): ${un.length ? `${un.length} reference${un.length === 1 ? '' : 's'} THROW when reached` : ''}${un.length && gd.length ? ', ' : ''}${gd.length ? `${gd.length} behind typeof: SKIPPED, silently not done` : ''}`);
+    for (const r of [...un, ...gd].slice(0, VERBOSE ? Infinity : 4))
+      console.log(`       ${r.file}:${r.line}${r.fn ? ` in ${r.fn}()` : ''} [${r.guarded ? 'skipped' : 'throws'}]  ${r.text}`);
+    if (!VERBOSE && rs.length > 4) console.log(`       … ${rs.length - 4} more (--verbose)`);
+  });
+}
 const parts = side => RUN.map(g => `${side === 'old' ? g.oldFiles.length : (g.newFiles || []).length} ${g.short}`).join(' + ');
-const bad = list.length || (ARGS.strict && windows.length);
-console.log(`\nold-page-loop: old ${parts('old')} parts, new ${parts('new')} parts; ${callsSeen.size} entry points × ${seeds.length} orders × ${caseNames.length} cases = ${calls} calls; ${callsHit.size} of the ${callsSeen.size} entry points threw or were skipped (${threw} times): ${list.length} finding${list.length === 1 ? '' : 's'}, ${windows.length} window${windows.length === 1 ? '' : 's'}; ${noiseN} throws matched a control (stub noise). ${bad ? '✗' : '✓'} ${((Date.now() - T0) / 1000).toFixed(1)} s`);
+const bad = list.length || staticList.length || (ARGS.strict && windows.length);
+console.log(`\nold-page-loop: old ${parts('old')} parts, new ${parts('new')} parts; ${callsSeen.size} entry points × ${seeds.length} orders × ${caseNames.length} cases = ${calls} calls; ${callsHit.size} of the ${callsSeen.size} entry points threw or were skipped (${threw} times): ${list.length} finding${list.length === 1 ? '' : 's'}, ${windows.length} window${windows.length === 1 ? '' : 's'}; static: ${staticList.length} name${staticList.length === 1 ? '' : 's'}; ${noiseN} throws matched a control (stub noise). ${bad ? '✗' : '✓'} ${((Date.now() - T0) / 1000).toFixed(1)} s`);
 process.exit(bad ? 1 : 0);
