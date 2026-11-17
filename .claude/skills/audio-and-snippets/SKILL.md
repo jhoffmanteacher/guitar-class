@@ -34,8 +34,9 @@ rhythm-down 50 ms after the slow full mix). So the entry carries
 `fileOffset: { src, srcSlow, srcFullSlow }` (seconds of that file, added to its
 bar lines after the scaling; absent = 0; `anchor` is now the fast FULL mix's
 first downbeat, value unchanged at 0.565). `snipFileOffset()` reads it,
-`snippetWindow(tr, spec, slow, guitar)` is per FILE (every caller passes the
-Guitar state; 1ak fails one that does not), the Guitar twin is kept
+`snippetWindow(tr, spec, slow, guitar)` is per FILE (every call of it, and of
+the practice card's wrapper `pcWindow(L, slow, guitar)`, passes the Guitar
+state; 1ak counts their arguments and fails a call without it), the Guitar twin is kept
 `st.twinDelta` ahead so a swap keeps the musical place, and the Journey page
 copies the numbers as `data-click-offsets` (1bk compares them). 1ak allows
 only the four path keys, each under 0.1 s, and pins the cure's numbers.

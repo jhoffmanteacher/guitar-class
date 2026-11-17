@@ -123,6 +123,10 @@
          looks past a section end that is not the card's end stays on the section's last place. BUILD UP SPEED plays
          PC_BUILD_LAPS (2) laps at each stop of the speed control from the slowest, then Normal, the step on the lap's
          bar line, and the control on screen shows the stop playing.
+     R16 A GUITAR PRESS THAT SWAPS IN THE TWIN keeps the musical place: by the clocks above (R3b included), the twin
+         lags the main element's place by exactly the gap its rate shows the page closing (twinFollow's gain, 0.5),
+         within 4 ms. The lap and Build up speed walks also run with Guitar on where a track has a full mix (the
+         full mixes' own offsets through a lap edge, the spare and every Build step; review R1-2, 2026-11-16).
      R14 BASS NOTES (the rule in the BASS NOTES comment of app/activities.js): with the bass on, a chord-grid section
          carries ONE bass note on beat 1 of every bar: the root in the first bar of a chord (the first bar whose
          beat 1 falls inside it), the 5th in the next, alternating until the chord changes; a new chord starts again
@@ -768,7 +772,12 @@ const PAGE_SRC = String.raw`(() => {
           if (op.op === 'click'){
             const el = root.querySelectorAll(op.sel)[op.i || 0];
             if (!el) throw new Error('nothing to click: ' + op.sel + ' [' + (op.i || 0) + ']');
+            /* R16: a Guitar press that swaps in the twin. The two elements as they stand at the press (file, place,
+               rate the page set), and whether the twin became the audible one; judged in Node. */
+            const st0 = op.sw === 'guitar' ? pcState : null, tw0 = st0 && st0.twin, m0 = st0 && st0.audio;
+            if (tw0 && m0 && !tw0.paused && tw0._ready >= 3) ev.swapPre = { mFile: m0._file, mCt: m0._ct, mRate: m0.playbackRate, tFile: tw0._file, tCt: tw0._ct, tRate: tw0.playbackRate };
             if (op.want == null || el.getAttribute(op.attr) !== op.want) el.click(); else ev.skipped = true;
+            if (ev.swapPre) ev.swapped = !!(pcState && pcState.audio === tw0);
           } else if (op.op === 'speed'){
             const range = root.querySelector('.pc-speed-range');
             if (range){ range.value = String(op.i); range.dispatchEvent(new Event('input', { bubbles: true })); range.dispatchEvent(new Event('change', { bubbles: true })); }
@@ -1219,11 +1228,11 @@ function planWalks(M) {
   }
   /* The lap, from the last section, with the spare ready and with a spare that never loads (the old seek); and once
      from a section in the MIDDLE of the card, which must come back to that section, not to the first. */
-  if (!ch.wholeSong && M.isBase) for (const stop of ['slower', 'normal']) for (const spare of [true, false]) {
+  if (!ch.wholeSong && M.isBase) for (const stop of ['slower', 'normal']) for (const spare of [true, false]) for (const g of (hasFull && spare ? [false, true] : [false])) {
     const si = ch.secs.length - 1, len = msFor(M, stop, lastSec.fromBar - 1, ch.endBar - 1);
-    const ops = setup(stop, false, true, null);
+    const ops = setup(stop, g, true, null);
     ops.push(startOp(si), { op: 'untilAudible', max: 60000, dt: FINE_MS }, { op: 'run', ms: len * 2 + msFor(M, stop, lastSec.fromBar - 1, lastSec.fromBar) * 0.75, dt: FINE_MS }, { op: 'click', sel: '.pc-play', stop: true });
-    walks.push({ kind: 'lap', name: `lap · ${stop} · ${spare ? 'the spare ready' : 'no spare (the seek)'}`, stop, guitar: false, ops, span: 'lap', lapFrom: si, laps: 2, lateNeverLoad: !spare, metro: true, fresh: true });
+    walks.push({ kind: 'lap', name: `lap · ${stop} · ${spare ? 'the spare ready' : 'no spare (the seek)'}${g ? ' · guitar on' : ''}`, stop, guitar: g, ops, span: 'lap', lapFrom: si, laps: 2, lateNeverLoad: !spare, metro: true, fresh: true });
   }
   if (!ch.wholeSong && M.isBase && ch.secs.length >= 3) {
     const si = Math.floor((ch.secs.length - 1) / 2), S = ch.secs[si];
@@ -1276,20 +1285,24 @@ function planWalks(M) {
       ops.push(loopSw('loop'), startOp(si), { op: 'untilAudible', max: 60000, dt: FINE_MS }, { op: 'run', ms: secMs(stop, S) * 3 + msFor(M, stop, S.fromBar - 1, S.fromBar) * 0.5, dt: FINE_MS }, { op: 'click', sel: '.pc-play', stop: true });
       walks.push({ kind: 'lap', loopWalk: true, name: `loop this part · ${S.label} (section ${si + 1} of ${ch.secs.length}) · ${stop}`, stop, guitar: false, ops, span: 'lap', lapFrom: si, loopSi: si, laps: 3, metro: true, fresh: true });
     });
-    if (M.open.hasBuild) for (const spare of [true, false]) {
+    if (M.open.hasBuild) for (const spare of [true, false]) for (const g of (hasFull ? [false, true] : [false])) {
       const si = spare ? cands[0] : ch.secs.length - 1, S = ch.secs[si];
       const plan = [];
       stops.forEach((stop, k) => { for (let n = 0; n < (k < stops.length - 1 ? PC_BUILD_LAPS : 1); n++) plan.push(stop); });
-      const ops = setup(stops[0], false, true, null);
+      const ops = setup(stops[0], g, true, null);
       ops.push(loopSw('build'), startOp(si), { op: 'untilAudible', max: 60000, dt: FINE_MS },
         { op: 'run', ms: plan.reduce((t, stop) => t + secMs(stop, S), 0) + msFor(M, 'normal', S.fromBar - 1, S.fromBar) + 200, dt: STEP_MS }, { op: 'click', sel: '.pc-play', stop: true });
-      walks.push({ kind: 'lap', loopWalk: true, coarse: true, name: `build up speed · ${S.label} (section ${si + 1} of ${ch.secs.length}) · ${plan.length - 1} laps to Normal · ${spare ? 'the spare ready' : 'no spare (the seek)'}`, stop: stops[0], guitar: false, ops, span: 'lap', lapFrom: si, loopSi: si, build: plan, laps: plan.length, lateNeverLoad: !spare, metro: true, fresh: true });
+      walks.push({ kind: 'lap', loopWalk: true, coarse: true, name: `build up speed · ${S.label} (section ${si + 1} of ${ch.secs.length}) · ${plan.length - 1} laps to Normal · ${spare ? 'the spare ready' : 'no spare (the seek)'}${g ? ' · guitar on' : ''}`, stop: stops[0], guitar: g, ops, span: 'lap', lapFrom: si, loopSi: si, build: plan, laps: plan.length, lateNeverLoad: !spare, metro: true, fresh: true });
     }
   }
   return walks;
 }
 /* Laps a stop of Build up speed plays before the next (PC_BUILD_LAPS in app/cards-loop.js; the work order's rule). */
 const PC_BUILD_LAPS = 2;
+/* R16: twinFollow's gain in app/snippets.js (the twin's rate is the main element's times 1 + gap x 0.5, clamped to
+   +-5%). Read off the code, like the rules above; a changed gain shows up as every swap failing R16. */
+const TWIN_GAIN = 0.5;
+const SWAPS = { checked: 0, off: 0 };
 
 function parseKey(k) {
   const [a, lit, ...rest] = k.split('#');
@@ -1382,6 +1395,21 @@ function judge(M, W, res) {
   /* A Guitar or speed switch must have brought the song back before the next control is used. */
   const switchUnresolved = (why) => { if (pendSwitch) { bad(`the ${pendSwitch.kind} switch ${(pendSwitch.t / 1000).toFixed(2)} s into the walk never brought the song back (${why})`); pendSwitch = null; } };
   const onEvent = ({ e, o }) => {
+    /* R16: a Guitar twin swap keeps the MUSICAL place. The twin, playing the other mix, is where the page steers it
+       (twinFollow: its rate is the main element's times 1 + gap x TWIN_GAIN, the gap being how far behind the place
+       the page wants it), so by this tool's own clocks (R3b) the twin's lag behind the main element's musical place
+       must be the gap its rate says the page is still closing. A twin parked at the wrong place (a fileOffset
+       applied twice, or not at all) is off by that file's offset: 25 to 50 ms on "the cure". Skipped while the
+       rate sits at its +-5% clamp (a snap is coming). */
+    if (o.sw === 'guitar' && e.swapPre && e.swapped) {
+      const p = e.swapPre, cm = clk(p.mFile), cw = clk(p.tFile), x = p.tRate / p.mRate - 1;
+      if (cm && cw && Math.abs(x) < 0.049) {
+        const bM = cm.clock.bars(p.mCt), bT = cw.clock.bars(p.tCt), k = Math.floor(bM);
+        const lag = (bM - bT) * (cm.clock.time(k + 1) - cm.clock.time(k)), gap = x / TWIN_GAIN;
+        SWAPS.checked++;
+        if (Math.abs(lag - gap) > 0.004) { SWAPS.off++; bad(`the Guitar press at ${(e.t / 1000).toFixed(2)} s swapped in a twin ${((lag - gap) * 1000).toFixed(1)} ms ${lag > gap ? 'behind' : 'ahead of'} the musical place (${p.tFile.replace(/^audio\//, '')} against ${p.mFile.replace(/^audio\//, '')}): the music jumps when the student presses Guitar`); }
+      }
+    }
     if (o.op === 'click' || o.op === 'speed') switchUnresolved('the next control was used with the song still silent');
     if (o.op === 'speed' && o.stopName) expStop = o.stopName;
     if (o.op === 'speed' && !o.stopName) expStop = STOPS[o.i];
@@ -2190,6 +2218,7 @@ async function main() {
   /* The Loop and Build walks (R15): their own line, after the summary above. */
   const TL = totalsLoop, loopWalksWanted = !SETTING || TL.walks > 0;
   if (loopWalksWanted) console.log(`playalong-loop (Loop this part / Build up speed): ${TL.failed ? '✗' : '✓'} ${TL.cards.size} of the ${loopCards} cards with section buttons, ${TL.walks} walks, ${TL.laps} laps, ${TL.steps.toLocaleString('en-US')} places lit and compared, ${TL.clicks.toLocaleString('en-US')} clicks: ${TL.failed ? TL.failed + ' with a mismatch' : '0 mismatches'}`);
+  console.log(`playalong-loop (R16, Guitar twin swaps): ${SWAPS.off ? '✗' : '✓'} ${SWAPS.checked} swap(s) checked for the musical place, ${SWAPS.off} off`);
   /* --built: the built songs' own line, then the ca-51 pair. */
   let builtFailed = 0;
   if (built) {

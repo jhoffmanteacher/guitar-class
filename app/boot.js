@@ -1147,7 +1147,8 @@ if(snipUrlParam('snipcal') === '1'){
      plays (snipMapShift in app/snippets.js), every file together, as if the
      track's `anchor` were that many ms later (negative: earlier), so Jonathan
      can set by ear whether a song's map sits early or late; the number he
-     settles on is what gets added to `anchor`. Same rules as &lat: only with
+     settles on is what gets added to `anchor` (and to every `barTimes`
+     entry, and to the Journey page's copy). Same rules as &lat: only with
      snipcal=1, absent or blank = no shift. */
   const rawShift = snipUrlParam('mapshift');
   if(rawShift !== null && rawShift.trim() !== ''){

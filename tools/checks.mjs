@@ -8839,26 +8839,31 @@ function checkBackingSnippets() {
   else if (!callsBuildSnippet(teacherSrc, 'renderTeacherActivityDetail'))
     flag('teacher.js: renderTeacherActivityDetail() never calls buildSnippet() — the console preview would not play the day\'s loop (two renderers, see CLAUDE.md)');
 
-  /* The window is per FILE (snipFileOffset): every snippetWindow() call in the
-     app passes the Guitar state of the file it times, as a 4th argument. One
-     that leaves it out times every file as the rhythm-down mix, 25 to 50 ms
-     off on "the cure"'s full mixes, and nothing else would notice. */
+  /* The window is per FILE (snipFileOffset): every call of snippetWindow()
+     in the app passes the Guitar state of the file it times (its 4th
+     argument), and so does every call of pcWindow(), the practice card's
+     wrapper (its 3rd; review R1-1, 2026-11-16: Build up speed's next stop
+     dropped it and nothing went red). One that leaves it out times every
+     file as the rhythm-down mix, 25 to 50 ms off on "the cure"'s full mixes,
+     and nothing else would notice. */
   {
     const code = stripJsComments(appSrc);
-    let calls = 0, short = 0;
-    for (const m of code.matchAll(/(?<![\w.])snippetWindow\s*\(/g)) {
-      if (/function\s+$/.test(code.slice(Math.max(0, m.index - 12), m.index))) continue;   // the definition
-      let i = m.index + m[0].length, depth = 1, commas = 0;
-      for (; i < code.length && depth; i++) {
-        const c = code[i];
-        if ('([{'.includes(c)) depth++;
-        else if (')]}'.includes(c)) depth--;
-        else if (c === ',' && depth === 1) commas++;
+    for (const [fn, want, min, who] of [['snippetWindow', 4, 4, 'snipToggle, snipSetTier, pcWindow, chcStart'], ['pcWindow', 3, 3, 'pcStart, pcRetrack, pcLoopNext']]) {
+      let calls = 0;
+      for (const m of code.matchAll(new RegExp('(?<![\\w.])' + fn + '\\s*\\(', 'g'))) {
+        if (/function\s+$/.test(code.slice(Math.max(0, m.index - 12), m.index))) continue;   // the definition
+        let i = m.index + m[0].length, depth = 1, commas = 0;
+        for (; i < code.length && depth; i++) {
+          const c = code[i];
+          if ('([{'.includes(c)) depth++;
+          else if (')]}'.includes(c)) depth--;
+          else if (c === ',' && depth === 1) commas++;
+        }
+        calls++;
+        if (commas + 1 < want) flag(`app.js: a ${fn}() call passes ${commas + 1} argument(s): "${code.slice(m.index, i).replace(/\s+/g, ' ').slice(0, 120)}" — pass the Guitar state of the file it times (argument ${want}), or the window misses that file's fileOffset`);
       }
-      calls++;
-      if (commas < 3) { short++; flag(`app.js: a snippetWindow() call passes ${commas + 1} argument(s): "${code.slice(m.index, i).replace(/\s+/g, ' ').slice(0, 120)}" — pass the Guitar state of the file it times (4th argument), or the window misses that file's fileOffset`); }
+      if (calls < min) flag(`app.js: found ${calls} ${fn}() call(s), expected at least ${min} (${who}) — 1ak's argument check has gone blind`);
     }
-    if (calls < 4) flag(`app.js: found ${calls} snippetWindow() call(s), expected at least 4 (snipToggle, snipSetTier, pcWindow, chcStart) — 1ak's argument check has gone blind`);
   }
 
   // Every track is fully specified, and its files exist (a 'private:<id>' path: on the SONG_FILES list — audioInfo).
