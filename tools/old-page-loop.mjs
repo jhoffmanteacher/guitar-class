@@ -74,7 +74,8 @@
    safe). fail-<file>: after-push with that one fetch failing once; the caller catches the rejection and the NEXT
    loader call retries (the loader forgets a failed promise), as a second click would. new-page-old-<file>: a NEW
    page with that one part OLD (a new page served while the old worker's cache still holds the file); when the
-   old file is the whole of a split parent, its new child logs "already declared" and nothing is missing: a NOTE.
+   old file is the whole of a split parent and holds every declaration of the new child with the same text, the
+   child only logs "already declared" and nothing is missing: a NOTE; a declaration edited on the way is a finding.
    Each case runs --orders seeded arrival orders: when more than one file is in flight (a part that loads another
    part itself, module data) the seed picks which arrives first, uniformly, so "4 of 12" is the tool's coin, not
    a browser rate. cache-fast is the realistic order for a second old tab: the old list's files arrive at once
@@ -250,6 +251,19 @@ function scanJs(src){
   return r;
 }
 const stripComments = src => scanJs(src).code;
+/* Each top-level declaration's text: from its line (function / const / let / var / class at column 0) to the next
+   such line, comments out, white space folded. Two files' copies of a name compare equal when the code is. */
+function declBlocks(src){
+  const m = new Map(), lines = stripComments(src).split('\n');
+  let cur = null, buf = [];
+  const flush = () => { if (cur) m.set(cur, buf.join(' ').replace(/\s+/g, ' ').trim()); };
+  for (const l of lines){
+    const d = l.match(/^(?:async\s+)?(?:function\s*\*?\s*([\w$]+)|(?:const|let|var|class)\s+([\w$]+))/);
+    if (d){ flush(); cur = d[1] || d[2]; buf = [l]; } else if (cur) buf.push(l);
+  }
+  flush();
+  return m;
+}
 // Used for DISCOVERY only (names and call sites): a miss shows as a smaller entry count in the summary.
 
 const ID = '[A-Za-z_$][\\w$]*';
@@ -932,8 +946,13 @@ for (const r of results){
        missing; the page logs one error. A NOTE, not a finding (a split always does this). */
     const npo = r.case.match(/^new-page-old-(.+?)(?::\w+)?$/);
     if (npo && t.phase === 'load' && /has already been declared/.test(t.key)){
-      const C = t.call.replace(/ running at load$/, ''), have = declsOf(OLD.tree, npo[1]);
-      if ([...declsOf(NEW.tree, C)].every(n => have.has(n))){ const k = `a new page with the old ${npo[1]} logs "${t.key}" when ${C} loads; the old file already holds every name ${C} declares, so nothing is missing (one error report)`; notes.set(k, (notes.get(k) || 0) + 1); continue; }
+      const C = t.call.replace(/ running at load$/, '');
+      /* The names alone are not enough (review R2-6): code moved AND edited on the way runs its OLD body on such a
+         page. So every declaration of C must be in the old F with the same text (comments and white space aside). */
+      const oldB = declBlocks(OLD.tree.read(npo[1]) || ''), newB = declBlocks(NEW.tree.read(C) || '');
+      const missingN = [...newB.keys()].filter(n => !oldB.has(n)), edited = [...newB.keys()].filter(n => oldB.has(n) && oldB.get(n) !== newB.get(n));
+      if (!missingN.length && !edited.length){ const k = `a new page with the old ${npo[1]} logs "${t.key}" when ${C} loads; the old file already holds every declaration of ${C} (${newB.size} of ${newB.size} with the same text), so nothing is missing (one error report)`; notes.set(k, (notes.get(k) || 0) + 1); continue; }
+      if (!missingN.length) t = { ...t, missing: false, key: `a new page with the old ${npo[1]} runs the OLD body of ${edited.join(', ')} (${edited.length} of ${newB.size} declarations of ${C} were edited when moved): ${C} does not load ("${t.key}"), so the new code never runs` };
     }
     threw++;
     // a control's own load throw: that SITE does not load, push or no push
