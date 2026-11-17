@@ -234,8 +234,9 @@
      read that never answers times out (L14); a doc the page cannot apply keeps the failed-read rules (L15); and S13
      (the reset cases) a Delete marker with no doc stops the retry. W19 (2026-11-17, the round 2 review's planted faults):
      L1's sign-in read is a REFUSAL (the denied phase), which must be retried like any other, and the late load clears
-     the refusal flag (progressLoadDenied); L16 the late load draws the page again (the rail's module progress) and asks
-     the period question when the doc holds none. See loadRetryChecks().
+     the refusal flag (progressLoadDenied); L16a/L16b the late load draws the page again (the rail's module progress, the
+     module picker) and asks the period question only when the doc holds none, never while the read has failed (L16b:
+     a doc with a period). See loadRetryChecks().
      See directedChecks(). A failure prints "✗ FAIL directed …" and exits 1.
 
    Reading a FAIL line: case index, family, the stored value, the values the oracle accepts, and the replay command. */
@@ -2224,31 +2225,40 @@ async function loadRetryChecks(out, fail){
       fail(`directed L15 a doc the page cannot apply: at 12 s ${JSON.stringify(mid)}; stored streak ${JSON.stringify(stored && stored.streak)}, reps ${JSON.stringify(stored && stored.practiceLog && stored.practiceLog['m6w1-s1'])}`);
     for (const f of tab.faults) fail(`directed L15: site code ${f} (R12)`);
   }
-  /* L16 THE PAGE IS DRAWN AGAIN (2026-11-17, W19: P15 no redraw, P16 no period question). The app is on screen (the
-     one element appIsOnScreen reads, as the reset cases set it) and the student is on Module 6 (browsing, not a
-     change); the doc holds no period. While the sign-in read has failed the rail shows the empty state (no module
-     progress) and the period question is not asked (maybeShowPeriodPicker: "never ask a question we can't save the
-     answer to"). Once the doc loads (~3.5 s) the page must be drawn from it, as showApp draws it: the rail's module
-     progress (renderProgressStrip, through redrawAllViews: rmp-lbl "done/total", done > 0 from the doc's m6w1-s1
-     'gotit'), and the period question asked (the period-overlay box), both at the late load, not before. */
-  {
-    const NOPERIOD = clone(START); delete NOPERIOD.period;
+  /* L16 THE PAGE IS DRAWN AGAIN (2026-11-17, W19: P15 no redraw, P16 no period question; its review R1-1..R1-3). The
+     app is on screen (the one element appIsOnScreen reads, as the reset cases set it) and the student is on Module 6
+     (browsing, not a change). At 1 s the page asks for the period as showApp does after a failed read
+     (maybeShowPeriodPicker): it must NOT ask ("never ask a question we can't save the answer to", app/shell.js). Once
+     the doc loads (~7 s) the page must be drawn from it, as showApp draws it: the rail's module progress
+     (renderProgressStrip, through redrawAllViews: rmp-lbl "done/total", done > 0 from the doc's m6w1-s1 'gotit'), the
+     module picker set to the module on screen (module-select, which only onModuleChange sets), and the period question
+     asked at the late load when the doc holds no period (L16a), never when it holds one (L16b).
+     Not testable here: applyActivityGate. The lock is off (CA_GATE_LOCKS = false, app/activities-2.js), so it always
+     sets body.ca-gated to false and has nothing to redraw; dropping it changes nothing a student sees today. */
+  for (const [tag, doc, asks] of [['L16a', (() => { const d = clone(START); delete d.period; return d; })(), true], ['L16b', START, false]]){
     let pre = null, mid = null;
-    const { world, tab } = await directedRun('L16 the late load draws the page again', NOPERIOD, [{ phase: 'refused', until: T0 + 3000 }], [
+    const look = t => ({ failed: t.run('progressLoadFailed'), lbl: t.run("document.getElementById('rmp-lbl').textContent"), sel: String(t.run("document.getElementById('module-select').value")), asked: t.boxes.filter(b => b.id === 'period-overlay').map(b => b.at) });
+    const label = `${tag} the late load draws the page again (${asks ? 'no period in the doc' : 'the doc holds period ' + START.period})`;
+    const { world, tab } = await directedRun(label, doc, [{ phase: 'refused', until: T0 + 3000 }], [
       { at: 100, what: '(the app is on screen)', code: "document.getElementById('app').style.display = 'block'" },
+      { at: 1000, what: 'the page asks for the period after the failed read (as showApp does)', code: 'maybeShowPeriodPicker()' },
       { at: 1500, what: 'opens set m6w1 (browsing: not a change)', code: 'lastModuleNum = 6; lastSetId = "m6w1"; saveProgress();' },
-      { at: 2000, what: '(reads the page before the doc loads)', probe: t => { pre = { failed: t.run('progressLoadFailed'), lbl: t.run("document.getElementById('rmp-lbl').textContent"), asked: t.boxes.filter(b => b.id === 'period-overlay').length }; } },
-      { at: 9000, what: '(reads the page after the doc loaded)', probe: t => { mid = { failed: t.run('progressLoadFailed'), lbl: t.run("document.getElementById('rmp-lbl').textContent"), asked: t.boxes.filter(b => b.id === 'period-overlay').map(b => b.at) }; } }
+      { at: 2000, what: '(reads the page before the doc loads)', probe: t => { pre = look(t); } },
+      { at: 9000, what: '(reads the page after the doc loaded)', probe: t => { mid = look(t); } }
     ], 12000, { absent: ['period-overlay'] });
-    out.checks += 2;
+    out.checks += 4;
     const lateAt = (reads(world, T0 - 1).find(g => g.ok) || {}).at;
-    if (!pre || pre.failed !== true || pre.lbl !== '' || pre.asked !== 0 || !mid || mid.failed !== false || lateAt == null)
-      fail(`directed L16: setup — wanted the failed-read state at 2 s (no module progress drawn, no period question) and the doc loaded by 9 s; at 2 s ${JSON.stringify(pre)}, at 9 s ${JSON.stringify(mid)}`);
+    if (!pre || pre.failed !== true || pre.lbl !== '' || pre.sel !== '' || !mid || mid.failed !== false || lateAt == null)
+      fail(`directed ${tag}: setup — wanted the failed-read state at 2 s (no module progress, no module picked) and the doc loaded by 9 s; at 2 s ${JSON.stringify(pre)}, at 9 s ${JSON.stringify(mid)}`);
     else {
-      if (!/^[1-9]\d*\/\d+$/.test(String(mid.lbl))) fail(`directed L16 the late load draws the page again: the rail's module progress at 9 s is ${JSON.stringify(mid.lbl)}; the page was not drawn again from the loaded doc (progressLoadRedraw)`);
-      if (mid.asked.length !== 1 || mid.asked[0] !== lateAt) fail(`directed L16 the late load draws the page again: the period question was ${mid.asked.length ? 'asked at ' + mid.asked.map(rel).join(', ') : 'never asked'}; the doc holds no period, so it is asked when the doc loads (${rel(lateAt)}; maybeShowPeriodPicker)`);
+      if (pre.asked.length) fail(`directed ${label}: the period question was asked at ${pre.asked.map(rel).join(', ')}, while the sign-in read had failed (maybeShowPeriodPicker's progressLoadFailed guard)`);
+      if (!/^[1-9]\d*\/\d+$/.test(String(mid.lbl))) fail(`directed ${label}: the rail's module progress at 9 s is ${JSON.stringify(mid.lbl)}; the page was not drawn again from the loaded doc (progressLoadRedraw)`);
+      if (mid.sel !== '6') fail(`directed ${label}: the module picker at 9 s holds ${JSON.stringify(mid.sel)}; wanted 6, the module on screen (progressLoadRedraw's onModuleChange)`);
+      const late = mid.asked.filter(a => a > T0 + 2000);
+      if (asks && (late.length !== 1 || late[0] !== lateAt)) fail(`directed ${label}: the period question was ${late.length ? 'asked at ' + late.map(rel).join(', ') : 'never asked'}; the doc holds no period, so it is asked when the doc loads (${rel(lateAt)}; maybeShowPeriodPicker)`);
+      if (!asks && late.length) fail(`directed ${label}: the period question was asked at ${late.map(rel).join(', ')}; the doc holds period ${START.period}, so it is never asked`);
     }
-    for (const f of tab.faults) fail(`directed L16: site code ${f} (R12)`);
+    for (const f of tab.faults) fail(`directed ${tag}: site code ${f} (R12)`);
   }
   /* L6 (the old KNOWN K-online-retry, fixed 2026-11-16 in shell.js's 'online' listener). The page opens offline (no
      SDK, no read); the student answers a question at 3 s; every save fails on the SDK; the Wi-Fi comes back WHILE the
