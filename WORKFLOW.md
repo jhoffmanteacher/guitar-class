@@ -39,13 +39,30 @@ chords and lyric lines only, no tab); nothing built.
 **THE MAC SESSION IS PAUSED (Jonathan, 2026-11-17 afternoon: "prepare to pause"). To pick up: read this block, then
 "The Mac's own list" under it.** Everything shipped is on main and confirmed live through `b1fb3a5` (the lyric sheet
 at the top, highlights on the beat); the later pushes are notes only. Nothing is half-pushed.
-- **Two builders were told to stop at a clean point and commit; their branches are LOCAL to the Mac, not on GitHub:**
-  `feat/sheet-one-column` (worktree `.claude/worktrees/sheet-scroll`): FIRST the sheet's dot and chord mark lighting
-  a moment after the "This bar" strip (Jonathan confirmed that is what he sees on ca-45), THEN two-column sheets as
-  one long column. `feat/card-views` (worktree `.claude/worktrees/card-views`): the Chords / Tab switch (inventory,
-  design, a pilot). Each wrote "WHERE I STOPPED" at the end of its details file; those files are in the session
-  scratchpad on the Mac and do not survive a reboot, so read the branch's own commits first (a commit that starts
-  "WIP, not verified:" is exactly that).
+- **Two builders stopped cleanly; both branches are on GitHub as backups, both end in a commit that starts "WIP, not
+  verified:", and their notes are copied to `Claude outputs/pause-2026-11-17/` on the Mac** (read "WHERE I STOPPED"
+  at the end of each; it gives the exact next command).
+  - `feat/sheet-one-column`, `666e6c1` (worktree `.claude/worktrees/sheet-scroll`). The sheet's highlight "behind" the
+    strip (ca-45): measured, the strip's cell, the dot and the chord mark light in the SAME frame (0 frames, ca-38 /
+    44 / 45); what Jonathan sees is MOTION: at a new line the scroll started on that line's first beat, so the dot
+    rode up the screen for 7 to 8 frames (worst 10). Fix, built, NOT proved: the scroll happens 0.3 s BEFORE the next
+    line, so the new line is still on its first beat; Play, a section button or a chord tap puts the line at the top
+    during the count-in; the dot keeps its fill length with reduce motion (a site-wide rule in `styles.css` about
+    line 3061 cut it to 1 frame). Two things it changes that he has not seen: the line just played stays at the top
+    (one line less of what is coming), and the card's controls scroll out of view at Play (Stop stays in the bar).
+    Open: 1 of 8 lines on ca-44 at Normal still moves for 3 frames (4, 2, 1 px), cause not found. Not run: the
+    updated smoke check and its red-on-main proof, `playalong-loop --only ca-45`, `checks.mjs`. The ONE-COLUMN sheet
+    is planned in the notes and not started.
+  - `feat/card-views`, `80ce200` (worktree `.claude/worktrees/card-views`). The Chords / Tab switch. Inventory (26
+    cards): Sweet Child (ca-28 tab, ca-33 chords, ca-45 lyrics; 12 sections), "the cure" (ca-24, ca-30, ca-44; 10)
+    and Luna (ca-27, ca-32; 5) line up section for section with no new music; Watchtower lines up too but already
+    has the Jimi / Neil switch (two switches together: not designed). Built on the pilot ca-33: `card.otherViews` =
+    `{ tab?, chords?, lyrics? }`, filled at the end of `class-activities.js` from the song's other cards; a new part
+    `app/cards-views.js`; the choice kept in `localStorage.caCardViews`, never in `progress/{uid}`; Acordes / Tab /
+    Letra; check 1eq; a mid-song switch walk (R17) in playalong-loop. Proved: `playalong-loop --only ca-33`, all 3
+    views, 24 walks, 0 mismatches. NOT proved: R17 (red 6 of 6 from a bug in its own judge; fixed, not re-run, and
+    its failures do not set the exit code yet), 1eq after its fix. Not started: screenshots, the console's detail
+    page, break-its, `slow-load.mjs`, the full playalong run, the smoke walk, final checks.
 - **Not started:** private song audio step 2a (the queued line below). The 18 files are copied for him in
   `Claude outputs/private-songs-to-upload-2026-11-17/` (exact copies; he does not upload until told).
 - **Red on GitHub, not the Mac's:** "Browser tests → smoke activities (English)" has failed on main since `d2a676c`
