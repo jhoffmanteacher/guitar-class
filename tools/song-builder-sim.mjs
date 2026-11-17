@@ -39,7 +39,9 @@
    STUBBED (pcSheetLoadPdfjs returns a made-up library that serves the made-up pages by the file's bytes and counts
    getTextContent and destroy); sbPdfMounted runs as it is, since the vm's inert page has no pane slot and it returns
    before drawing. A chords pdf at step 1 of a new song, two in one pick at step 4, a scan, a tab pdf, the refusals,
-   Remove, another draft opened; no pdf action writes anything.
+   Remove, another draft opened; no pdf action writes anything. THE EDGE CASES (W10, pdfEdgeCases): "+ New song" twice,
+   with and without a pick being read; a draft switched, and switched back, while a pick is read; Delete (a draft, a
+   published song) with the view left before it is done, and with it kept open.
 
    PART D (2026-11-16; teacher-sb-publish.js). Its own console and store: a made-up draft past steps 1 to 5 (its
    levelled copy stored as the Song files writer stores one) and a made-up imported song on the list (edit 3).
@@ -1046,6 +1048,45 @@ async function pdfEdgeCases(consoleSrc, check){
     check('pdf edge: a draft switched away and back (A, B, A) while three chords pdfs are read: the pick is over, as when B stays open: A lists none of them (not the last two of three), its box and draft get none of their text, the third never opened, each opened document destroyed once, nothing written',
       run('sbSel') === ids.a && run('sbPdf.files.length') === 0 && box == null && aDraft.chartText == null && !aDraft.dirty && Z.rec.opened === 0 && X.rec.destroyed === 1 && Y.rec.destroyed === 1 && F.st.writes.length === w0,
       JSON.stringify({ files: files(), box: (box || '').slice(0, 40), opened: opened([X.rec, Y.rec, Z.rec]), destroyed: [X.rec.destroyed, Y.rec.destroyed, Z.rec.destroyed], writes: F.st.writes.length - w0 }));
+  }
+  /* E5: Delete draft, and the view left before the delete is done: the pdfs and the "Own window" URL go with the draft */
+  const delCase = async (id, how) => {
+    run(`sbOpen(${JSON.stringify(id)})`); await settle();
+    const P = pdfOf(`e5-${how}-chords.pdf`, 'e5c' + how, [PAGES.oneCol]), T = pdfOf(`e5-${how}-tab.pdf`, 'e5t' + how, [PAGES.oneCol]);
+    startPick('chords', [P]); await doneReading(); startPick('tab', [T]); await doneReading();
+    run("sbPdfAct('pdf-window', { dataset: {} })");
+    const url = run('sbPdf.files[sbPdf.cur] && sbPdf.files[sbPdf.cur].url'), had = files();
+    return { P, T, url, had };
+  };
+  {
+    const { P, T, url, had } = await delCase(ids.d, 'left');
+    C.env.confirmAnswer = true;
+    run("sbDeleteDraft(); teacherSbLeave(); teacherView = 'students';"); await settle();
+    const away = { gone: !F.S.has('songDrafts/' + ids.d), files: run('sbPdf.files.length'), destroyed: [P.rec.destroyed, T.rec.destroyed], revoked: revoked.includes(url) };
+    run("teacherView = 'songbuilder'"); run('teacherSbPaint()'); await settle();
+    check('pdf edge: Delete draft, then the view left before the delete is done: the deleted draft\'s pdfs are let go at once, not when the view reopens: none held, each document destroyed once (still once after the view reopens), the "Own window" URL revoked',
+      had === `e5-left-chords.pdf,e5-left-tab.pdf` && url && away.gone && away.files === 0 && away.destroyed.every(n => n === 1) && away.revoked && P.rec.destroyed === 1 && T.rec.destroyed === 1 && run('sbPdf.files.length') === 0,
+      JSON.stringify({ had, url, away, after: [P.rec.destroyed, T.rec.destroyed] }));
+  }
+  /* E6: the same Delete with the view kept open (it was right before W10: a guard) */
+  {
+    const { P, T, url } = await delCase(ids.e, 'kept');
+    run('sbDeleteDraft()'); await settle();
+    check('pdf edge: Delete draft with the view open: the pdfs go with the draft (none held, each document destroyed once, the "Own window" URL revoked)',
+      !F.S.has('songDrafts/' + ids.e) && run('sbSel') === null && run('sbPdf.files.length') === 0 && P.rec.destroyed === 1 && T.rec.destroyed === 1 && url && revoked.includes(url),
+      JSON.stringify({ sel: run('sbSel'), files: run('sbPdf.files.length'), destroyed: [P.rec.destroyed, T.rec.destroyed], revoked: revoked.includes(url) }));
+  }
+  /* E7: a PUBLISHED song deleted (the typed title, teacher-sb-publish.js) with the view left mid-delete: the same */
+  {
+    const { P, T, url } = await delCase(ids.p, 'pub');
+    run(`sbPublished.set(${JSON.stringify(ids.p)}, { title: 'Test 4 Edge P', artist: 'Nobody', ver: 1, audioId: null, doc: null, at: 0 })`);
+    C.env.promptAnswer = 'Test 4 Edge P';
+    run("sbDeleteSong(); teacherSbLeave(); teacherView = 'students';"); await settle();
+    const away = { gone: !F.S.has('songDrafts/' + ids.p), files: run('sbPdf.files.length'), destroyed: [P.rec.destroyed, T.rec.destroyed], revoked: revoked.includes(url) };
+    run("teacherView = 'songbuilder'"); run('teacherSbPaint()'); await settle();
+    check('pdf edge: a published song deleted (the typed title), then the view left before the delete is done: its pdfs are let go at once (none held, each document destroyed once, the "Own window" URL revoked)',
+      away.gone && away.files === 0 && away.destroyed.every(n => n === 1) && away.revoked && P.rec.destroyed === 1 && T.rec.destroyed === 1,
+      JSON.stringify({ away, note: run('sbNote') }));
   }
   const named = F.st.writes.filter(w => !w.path.startsWith('songFiles/') && /\.pdf|%PDF|blob:/.test(JSON.stringify(w)));   // a songFiles write is the mp3's bytes
   check('pdf edge: every write in these cases is the builder\'s own and fits the rules; no pdf, pdf name or object URL is ever written', F.st.violations.length === 0 && F.st.writes.length > 0 && !named.length,

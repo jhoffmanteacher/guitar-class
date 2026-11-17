@@ -17,8 +17,8 @@
 
    NOTHING IS STORED and nothing reaches a student: the pdfs live in this tab's memory (sbPdf), like the
    original mp3 (sbMem.src). A draft opened again asks for them again; the chart text read from them IS in the
-   draft (chart.text), as before. Another draft, a second "+ New song", a deleted draft or the start screen drops them
-   (sbPdfSync); a pick still being read then lands nowhere (W10).
+   draft (chart.text), as before. Another draft, a second "+ New song", a deleted draft (at once, even when the view was
+   left mid-delete) or the start screen drops them (sbPdfSync); a pick still being read then lands nowhere (W10).
    pdf.js (vendor/pdfjs, the practice card's loader pcSheetLoadPdfjs, app/cards.js) draws and reads them; a
    drawing in flight is cancelled when another starts and when the view is left (sbPdfLeave). File names are
    escaped where they are drawn; buttons carry data-* only (the delegated sbClick / sbChange). */
@@ -115,13 +115,18 @@ async function sbPdfPageItems(page){
 }
 
 /* ── Which song the pdfs belong to ── */
-function sbPdfWant(){ return sbSel === 'new' || sbDraft() ? sbSel : null; }
+function sbPdfWant(id){
+  const s = id === undefined ? sbSel : id;
+  return s === 'new' || (sbIsDraftId(s) && sbDrafts && sbDrafts.get(s)) ? s : null;
+}
 function sbPdfDropFile(f){
   if(f.url){ try{ URL.revokeObjectURL(f.url); }catch(e){} f.url = null; }
   if(f.doc){ try{ f.doc.destroy(); }catch(e){} f.doc = null; }
 }
-function sbPdfSync(){
-  const want = sbPdfWant(), owner = want === 'new' ? sbNew : null;
+/* `to`: the song the tab's memory moves to (sbMemFor, teacher-sb-core.js: so a draft deleted while the view is left lets
+   its pdfs go at once, W10); left out, the song shown (sbSel). */
+function sbPdfSync(to){
+  const want = sbPdfWant(to), owner = want === 'new' ? sbNew : null;
   if(sbPdf.id === want && sbPdf.owner === owner) return;
   sbPdfStopDraw();
   sbPdf.files.forEach(sbPdfDropFile);

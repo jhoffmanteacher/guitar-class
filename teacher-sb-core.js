@@ -486,6 +486,7 @@ function sbStopSounds(){
   if(typeof sbPreviewStop === 'function') sbPreviewStop(false);   // the preview card's song (only that card's: never a global stopper)
 }
 function sbMemFor(id){
+  if(typeof sbPdfSync === 'function') sbPdfSync(id);   // the pdfs (teacher-sb-pdf.js) follow too, even with the view left (W10)
   if(sbMem.id === id) return;
   if(sbMem.level && sbMem.level.url){ try{ URL.revokeObjectURL(sbMem.level.url); }catch(e){} }
   sbMem.id = id; sbMem.src = null; sbMem.level = null; sbMem.failed = null;
