@@ -262,6 +262,23 @@ and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fi
     space or punctuation) in every served `.html`, `.js`, `.css` and in `CHANGELOG.md`; it must pass on today's tree
     with no allowlist (if a real string trips it, say which, do not allowlist), and go red on the 2026-11-16 page
     (`git show e25f0d5:privacy.html`).
+- **W21. Manage → Song files: upload MANY files at once, and a drop zone (Jonathan, 2026-11-17: "can the upload
+  button accomodate multiple files or be a drag/drop field for me to drop multiple files?"). Fast (a console view he
+  asked for; `teacher-songfiles.js` only, not the rules, not the loader). Do it before W17 to W20: he is about to
+  upload 18 files.** Today the view has one `<input type="file">` (`data-tsf-file`, `teacherSfChange` reads
+  `inp.files[0]`, `teacherSfUpload(f)` uploads one). Build: the input takes `multiple`, and the box around it is a
+  drop zone (drag over: a visible state; drop: the dropped `.mp3` files). The files go up ONE AT A TIME through the
+  existing `teacherSfUpload` path, unchanged (each is still accepted only if it is exactly a file on the site's
+  list; the store's only writer stays this code). One progress line for the whole batch ("3 of 18: <file>"), a
+  result at the end that names every file refused and why (not on the list, wrong bytes, a connection problem) and
+  how many went up; a refused or failed file never stops the rest; a second drop while one batch runs is refused
+  with a line; leaving Manage mid-batch stops cleanly as a single upload does today. Then it presses nothing else:
+  "Verify all" stays his click. Folders, non-mp3 files and 0 files dropped: one plain line each. Console wording is
+  English only. After: `node tools/song-files-console-sim.mjs` (add cases: 3 good files; a good, a not-listed and a
+  good; a failure in the middle; a second batch during the first; leaving the view) and a screenshot of the drop
+  zone at rest, on drag-over, mid-batch and finished. No name of a real song file needs typing: use the sim's
+  made-up files. The Mac is registering the 18 files in `app/songfiles.js` (`SONG_FILES`) meanwhile: do not edit
+  that list.
 - **W14. NOT YET, dates only (do not start early; leave the line here until done):**
   - about **2026-11-21**: the accessibility scan's ratchet. Read a week of GitHub's "a11y scan" job results; only if
     every run shows 0 new signatures, switch `--a11y-ratchet` on in `browser.yml`, with one `site-reviewer` round on the
