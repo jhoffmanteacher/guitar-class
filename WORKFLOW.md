@@ -270,11 +270,28 @@ push. Where the Mac is right now: the coach splits with the reviewer's fix A are
     the Mac pushes the splits at once, any hour. If A2 is better, say so and the Mac swaps it in.
   - **Part d is on main (the Mac, `ce3821e`, labelled Fast on Jonathan's word; the Friday check reviews it).** So
     W9 is closed (no round 4) and W10 (the pdf pane's three edge cases) is open for Windows now.
+  - **THE COACH SPLITS ARE ON MAIN (the Mac, 2026-11-16 about 21:45, `e9c39a1`, Reviewed, 3 rounds).** Item 4 is
+    done: `coach-chords.js` + `coach-chordcards.js`, `coach-runner.js` + `coach-noterunner.js`, with the bridge
+    for pages opened before the push. The last review (Mac, fresh Opus `site-reviewer-deep`, on `78f6341`): 0
+    BLOCKER, 0 MAJOR, 2 MINOR, "safe to push at any hour". On the rebased tip `old-page-loop --strict` exits 0 from
+    `origin/main` (108,096 calls) and from `3b667ba` (263,400 calls): 0 findings, 0 windows; full `checks.mjs`
+    passed; the games smoke clean. Accepted MINORs: R1-1 (on an old page, two separate arcade clicks during one
+    child fetch can leave the earlier click's screen on top: 2 to 16 of 400 trials; "variant D", splice only when
+    the child fails, or fix A2, would close it: not done) and R1-2 (a new page meeting an OLD whole parent in the
+    old worker's cache: the child throws "already declared", the arcade works, one banner and one site-error
+    entry). The rebase conflicted in `app/boot.js` and `CLAUDE.md` (the two part-list lines sit next to each
+    other: main added a console part, the splits two arcade parts); the Mac resolved it line by line, each side's
+    own line kept, and the tool and checks above ran on the result. Remove the bridge after 2026-12-01 (`todo.md`).
+    `coach-chords.js` and `coach-runner.js` are open to Windows again.
 - **W7. The setup screens taller than 657 px** (the 20 smoke lines: Change Up's setup 663 px, Power Chord Switch's
   setup in Spanish 658 px). The Mac runs the games smoke before it pushes the splits and writes its lines HERE (a
   bullet under this job). If the Mac shows the same lines: fix the fit at 1366×657 in both languages (screenshots
   before and after, CHANGELOG only if a student sees a difference; Fast; the setup screens are `coach-chords.js`,
   so wait for the splits to be on main). If the Mac shows none: write "Windows fonts only" and close it.
+  - **THE MAC'S RUN (2026-11-16, on the splits' tip, `node tools/smoke.mjs --en-only --only games`): "no JavaScript
+    errors", 17 game views, no `setup-fit` or `changeup-layout` line.** So Change Up's 663 px setup is Windows
+    fonts only. English only was walked: Power Chord Switch's Spanish setup (658 px on Windows) is not answered by
+    this run; Friday's two-language walk on GitHub will say.
   - **The Strum Hero / Strum Radar done screens have been SEEN (Windows, 2026-11-16 evening; W3's owed look; one Opus
     agent, headless Chrome at 1366×657, on `b7dae35`).** 16 screens: each game at the top of its range, one step
     below, one step above the bottom, and the bottom; English and Spanish. Every advice line and step button names
