@@ -655,8 +655,11 @@ function staticPass(){
     for (const m of code.matchAll(new RegExp(`\\b(?:window|globalThis|self)\\s*\\[\\s*(['"])(${ID})\\1\\s*\\]`, 'g'))) hits.push({ n: m[2], p: m.index + m[0].indexOf(m[2]), bracket: true });
     for (const { n, p, bracket } of hits){
       if (!homes.has(n)) continue;
-      const after = refs.slice(p + n.length, p + n.length + 3), before = refs.slice(Math.max(0, p - 40), p);
-      if (/^\s*:(?!:)/.test(after) && /[{,]\s*$/.test(before)) continue;           // an object key
+      const after = refs.slice(p + n.length, p + n.length + 3), before = (p < 40 ? '\n' : '') + refs.slice(Math.max(0, p - 40), p);
+      if (/^\s*:(?!:)/.test(after) && /[{,;}\n]\s*$/.test(before)) continue;      // an object key or a label
+      if (/\b(?:break|continue)\s+$/.test(before)) continue;                        // a label's use
+      // a method: `{ name(){ … }`, `, name(a){`, a class's `name(){` (review R2-5)
+      if (/(?:[{,;}\n]|\b(?:static|async|get|set))\s*$/.test(before) && /^\s*\([^()]*\)\s*\{/.test(refs.slice(p + n.length, p + n.length + 200))) continue;
       if (/\btypeof\s+$/.test(before)) continue;                                   // the guard itself
       if (/\b(?:function|const|let|var|class)\s+$/.test(before)) continue;        // a declaration of its own
       const reg = regionOf(p);
@@ -665,6 +668,9 @@ function staticPass(){
       const guarded = new RegExp(`\\btypeof\\s+${q}\\b`).test(code.slice(Math.max(reg ? reg.a : 0, p - 300), p));
       const ln = lineOf(p);
       if (!found.has(n)) found.set(n, []);
+      // one line once (review R2-5: a line with the name three times was listed three times); unguarded wins
+      const same = found.get(n).find(x => x.file === r.file && x.line === ln + 1);
+      if (same){ if (!guarded) same.guarded = false; continue; }
       found.get(n).push({ file: r.file, line: ln + 1, guarded, fn: reg ? reg.name : null, text: lines[ln].trim().slice(0, 110) });
     }
   }
