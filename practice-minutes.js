@@ -1506,6 +1506,6 @@
     _session: function(){ return session; }, _play: function(){ return play; },
     _ownWeeksLine: ownWeeksLine,
     _top5: function(){ return sync() ? top5Info(status().week.secs) : null; }, _publishWeek: function(){ if(sync()) publishWeek(S); }, _loadWeek: function(){ return sync() ? loadWeek() : Promise.resolve(null); },
-    _state: function(){ return S; }, _session: function(){ return session; }, _tick: tick, _media: media, _end: endSession, _buildOps: buildOps
+    _state: function(){ return S; }, _tick: tick, _media: media, _end: endSession, _buildOps: buildOps
   };
 })();
