@@ -175,6 +175,59 @@ push. Where the Mac is right now: the coach splits with the reviewer's fix A are
   - **Part d (the Mac, 18:00):** round 3 on `b922641` found 0 BLOCKER, 1 MAJOR, 6 MINOR; all 7 are fixed at
     `12317b3` in the Mac's worktree (sim 152 of 152, walk 67 of 67), not pushed anywhere yet. Round 3 with a MAJOR
     means Jonathan is asked what happens next; W9 stays "skip" until the line it names appears.
+  - **W6 REVIEW, round 1 (Windows, 2026-11-16 night; a fresh Opus `site-reviewer` on `811c1657`, read-only, no
+    Chrome): 1 BLOCKER, 1 MAJOR, 6 MINOR on the TOOL; and its red verdict on fix A is NOT an artefact.** The lead
+    has not re-opened the quoted lines. The reviewer's files: the Windows scratchpad `rv6\` (`a2.patch`,
+    `static-xref.mjs`, `plants.mjs`, `plants2.mjs`).
+    - **Fix A's three faults are true of a real browser** (traced in `app/boot.js` and `sw.js`): `loadScriptOnce`
+      appends an async `<script>`; `app/boot.js:800` builds the WHOLE chain up front
+      (`list.reduce((p, src) => p.then(() => loadScriptOnce(src)), Promise.resolve())`), so each `src` is fixed at
+      the first call and a `COACH_JS_PARTS.splice` at run time is TOO LATE; fix A's own `loadScriptOnce(child)` is
+      outside that chain, so the chain resolves without it and `app/shell.js:1217`
+      `ensureCoachJs().then(() => openGamesScreen())` throws at `coach-hub.js:739` (`NR_LEVELS.length`): the "could
+      not load" toast. In W2's case 1a (a second old tab) it is close to CERTAIN, not 4 in 12: the first tab's
+      arcade start rewrote the old cache with the new parents, so the second tab gets every listed part from the
+      cache in milliseconds and the two children from the network (the tool's "4 of 12" is its coin-flip arrival
+      model). A failed child is never retried, and with the WIDENED guard `gamesStopMic` / `gamesHideStop` then
+      stop nothing: a Chord Blitz that is running keeps the mic when the Tuner opens or the tab is hidden.
+    - **The reviewer's "fix A2" brings the tool to exit 0 (the Mac is building its own close: compare).** At the
+      end of each shortened parent, in place of fix A's line; keep the NARROW `typeof bcStop` guards (the widened
+      ones are not needed and do harm). For `coach-runner.js` (in `coach-chords.js` use `coach-chordcards.js` and
+      `coach-chords.js`):
+      `if (typeof COACH_JS_PARTS !== 'undefined' && COACH_JS_PARTS.indexOf('coach-noterunner.js') < 0 && typeof loadScriptOnce === 'function' && typeof _lazyScripts === 'object'){`
+      `  const nx = COACH_JS_PARTS[COACH_JS_PARTS.indexOf('coach-runner.js') + 1];`
+      `  const arm = () => { _lazyScripts[nx] = { then: (ok, ko) => loadScriptOnce('coach-noterunner.js').then(() => { delete _lazyScripts[nx]; return loadScriptOnce(nx); }, e => { arm(); throw e; }).then(ok, ko) }; };`
+      `  loadScriptOnce('coach-noterunner.js').catch(() => {});`
+      `  if (nx && !_lazyScripts[nx]) arm();`
+      `}`
+      It fills the loader's slot for the old list's NEXT file with a lazy thenable, so the old chain waits for the
+      child before fetching that file; if the child fails the slot is armed again and the loader rejects (the
+      normal toast; the next call fetches the child again); on a new page `indexOf` finds the child and the block
+      does nothing. Tool results: `3b667ba → A2` exit 0, 0 findings, 0 windows (79 entry points, 21 cases × 12
+      orders); `main → A2` exit 0 (107 entry points, 68 cases); the failed-fetch case shows child error → rejected
+      → child asked again → arrives → the rest of the chain. Proved only in the Node vm: a real-browser run
+      (`update-reload-loop.mjs`) is still owed.
+    - **The tool's own faults (a Windows Opus builder is fixing them now; this is the line the Mac asked for before
+      its cases change. Nothing here weakens a case: three are ADDED checks, so a tree that is clean today can turn
+      red, and that is the point).** R1-1 BLOCKER: it says clean on splits that break old pages when the moved code
+      is reached only during PLAY or only inside the console's own screens (its page never fires rAF, timers or
+      the mic loop): planted `ccResolvePend` (called only from Change Up's running loop) moved to a new part →
+      exit 0; two console helpers moved → exit 0. And on `b5f4526` it printed only "SKIPPED", but
+      `teacher-activities.js:1031` `renderTeacherActivityDetail(id);` is UNGUARDED: an old console page throws
+      when the teacher opens an activity (the note above said "silently skipped": wrong, it throws). Fix: a static
+      cross-reference beside the run: every name declared only in a new file that the old list never fetches,
+      referenced from a file an old page does run, is red (prototype: 27 names on `3b667ba → d6c3e16`, 37 on
+      `b5f4526`, 0 on main → main, 0 on A2). R1-2 MAJOR: a throw AT LOAD in a control is counted as stub noise, so
+      a cut that COPIED the code instead of moving it ("Identifier 'CHORD_RANK' has already been declared" on every
+      new page) still printed "new page + new files 0 findings": a load throw is never noise. MINOR: a new ref
+      with no part list crashes with exit 1 instead of 2; the DOM stub invents every element (a new
+      `getElementById` id that only the new `index.html` has is not seen); the mixed cases are prefixes only (any
+      subset can be old under `sw.js`), and there is no "new page + old cached part" case; arrival orders are
+      uniform, so "N of 12" is not a browser rate; the tool imports only Node built-ins (it must sit in `tools/`
+      of a checkout, or run with `GIT_DIR`: the earlier note said it imports from `tools/`); the header must name
+      in-game code and the console's own screens under "cannot see". Did not break: 11 of 14 planted old-page
+      faults caught; 0 false positives in 17 runs that had to be clean; deterministic; a path with a space and a
+      CRLF copy both work.
 - **W7. The setup screens taller than 657 px** (the 20 smoke lines: Change Up's setup 663 px, Power Chord Switch's
   setup in Spanish 658 px). The Mac runs the games smoke before it pushes the splits and writes its lines HERE (a
   bullet under this job). If the Mac shows the same lines: fix the fit at 1366×657 in both languages (screenshots
