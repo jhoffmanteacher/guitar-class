@@ -112,7 +112,8 @@ push. **The Mac is building three of the five right now: stay out of `app/save.j
 `tools/save-loop.mjs`, `tools/shared-chromebook-loop.mjs` (the failed load at sign-in, `fix/load-retry`),
 `app/cards.js`, `app/snippets.js`, `tools/playalong-loop.mjs` (Play Along highlight timing, `feat/highlight-timing`),
 and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fix/take-no-name`).**
-- **W11. Reading text 15px → 16px, lessons first (Jonathan's P6, 2026-11-13: yes). Fast.** It was queued behind a
+- **W11. Reading text 15px → 16px, lessons first (Jonathan's P6, 2026-11-13: yes). Fast. It stays with Windows: not
+  for the cloud, not for the Mac (Jonathan, 2026-11-16: "windows will pick it up tomorrow anyway").** It was queued behind a
   design-values tidy that never started; it does not need it. Lesson step text is `0.9375rem` at `.step-detail`
   (`styles.css`, about line 448) and activity step text is 15px at `.ca-step-detail` (about line 3116): both to 16px,
   plus the hint text that reads with them. Lessons first, in its own commit; activities second. An activity direction
