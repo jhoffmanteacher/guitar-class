@@ -65,6 +65,10 @@
      settled     once nothing is in flight: everything again, then the listeners.
    A name every caller guards with typeof (tag S) is called through that guard: when the guard finds nothing on a
    page whose own list declares it, that is a SKIPPED finding (gamesResetForUser not running on sign-out).
+   THE SENTINEL. A function in a new group part that returns early until `typeof S === 'function'` (S = bcStop: "the
+   whole arcade is here") promises that every group name it goes on to name exists once S does. The tool reads
+   those names from the body after the guard, and after every arrival and once settled, in every case, reports a
+   state where S exists and one of them does not (STRUCTURE), even when a per-call typeof guard hides the throw.
 
    CASES (per changed group; a group whose list and files are the same in old and new is not run, unless nothing
    differs at all: then every group runs as a self-check). control-old (old page, old files) and control-new (new
@@ -792,7 +796,22 @@ async function runCase(spec, seed, handlers){
   };
   // after every arrival: what other scripts may call at ANY moment, through their typeof guard
   const probe = () => { const was = phase; phase = 'arrival'; for (const en of g.entries) if (en.guarded) call(en.call, en.call, en.name); phase = was; };
-  const deliver = () => { if (page.net.deliverOne()){ arrived++; probe(); } };
+  // the sentinel check (round 3, item 3): after every arrival and once settled
+  const reported = new Set();
+  const structure = () => {
+    for (const r of g.rules || []){
+      let on = false; try { on = page.run(`typeof ${r.sentinel} === 'function'`); } catch {}
+      if (!on) continue;
+      for (const n of r.needs){
+        let ok = false; try { ok = page.run(`typeof ${n} !== 'undefined'`); } catch {}   // a let in its TDZ throws: not defined
+        if (ok || reported.has(`${r.fn}\0${n}`)) continue;
+        reported.add(`${r.fn}\0${n}`);
+        out.throws.push({ phase, call: `structure: ${r.fn}() (${r.file}) after typeof ${r.sentinel}`, key: `STRUCTURE: ${r.sentinel} is defined but ${n} is not: a ${r.sentinel}-guarded ${r.fn}() would throw or silently skip`, missing: true, id: n, structural: true });
+        if (log) log(`      ✗ structure: ${r.sentinel} is defined but ${n} is not (${r.fn})`);
+      }
+    }
+  };
+  const deliver = () => { if (page.net.deliverOne()){ arrived++; const was = phase; phase = 'arrival'; structure(); phase = was; probe(); } };
   async function drain(){
     for (let n = 0; n < 1000; n++){
       await flush(); await flush();
@@ -823,7 +842,7 @@ async function runCase(spec, seed, handlers){
     await drain();
     if (st.failed){ st = start('retry'); await drain(); }   // the next click: the loader forgot the failed promise
     await drain();
-    phase = 'settled'; callAll('settled');
+    phase = 'settled'; structure(); callAll('settled');
     await drain();
   } finally { asyncSink = null; }
   for (const l of page.net.loadErrors){ const c = classify(l.e); out.throws.push({ phase: 'load', call: `${l.src} running at load`, ...c }); }
@@ -839,7 +858,37 @@ const differs = g => !g.newFiles || g.newFiles.join('|') !== g.oldFiles.join('|'
   [...g.oldFiles, ...g.newFiles].some(f => OLD.tree.read(f) !== NEW.tree.read(f));
 const SAME = !GROUPS.some(differs);   // old and new are the same here: run every group anyway, as a self-check of the tool
 const RUN = SAME ? GROUPS.slice() : GROUPS.filter(differs);
-for (const g of RUN){ const r = groupEntries(g); g.entries = r.entries; g.names = r.names; }
+for (const g of RUN){ const r = groupEntries(g); g.entries = r.entries; g.names = r.names; g.rules = structureRules(g); }
+/* Round 3, item 3: the "whole arcade is here" sentinel. A function in a NEW group part that returns early on
+   `if (typeof S !== 'function') return;` (S a name the group declares: bcStop today) promises that once S exists,
+   everything it goes on to name exists too. Read the names from the body after that guard (identifiers the group
+   declares, not properties, not locals, not inside the guard itself), so a per-call `typeof x === 'function'`
+   that hides a missing x is still checked. */
+function structureRules(g){
+  const groupNames = new Set();
+  for (const f of g.newFiles || []) for (const n of declsOf(NEW.tree, f)) groupNames.add(n);
+  for (const f of g.oldFiles) for (const n of declsOf(OLD.tree, f)) groupNames.add(n);
+  const eager = new Set([...oldEagerNames, ...eagerScripts(NEW.tree).filter(s => s.file && !s.inline).flatMap(s => [...declsOf(NEW.tree, s.file)])]);
+  const rules = [];
+  for (const f of g.newFiles || []){
+    const { code, refs } = scanJs(NEW.tree.read(f) || '');
+    for (const m of code.matchAll(new RegExp(`^(?:async\\s+)?function\\s*\\*?\\s*(${ID})\\s*\\(`, 'gm'))){
+      const end = code.indexOf('\n}', m.index), b = end < 0 ? code.length : end;
+      const body = code.slice(m.index, b);
+      const gd = body.match(new RegExp(`if\\s*\\(\\s*typeof\\s+(${ID})\\s*!==?\\s*['"]function['"][^)]*\\)\\s*return\\b`));
+      if (!gd || !groupNames.has(gd[1]) || eager.has(gd[1])) continue;
+      const from = m.index + gd.index + gd[0].length, rest = refs.slice(from, b);
+      const needs = new Set();
+      for (const x of rest.matchAll(new RegExp(`(?<![\\w$.])(${ID})`, 'g'))){
+        const n = x[1];
+        if (n === gd[1] || !groupNames.has(n) || eager.has(n) || bindsLocally(body, n.replace(/\$/g, '\\$'))) continue;
+        needs.add(n);
+      }
+      if (needs.size) rules.push({ fn: m[1], file: f, sentinel: gd[1], needs: [...needs].sort() });
+    }
+  }
+  return rules;
+}
 const appChanged = oldEager.some(f => OLD.tree.read(f) !== NEW.tree.read(f));
 
 console.log(`old-page-loop: old ${OLD.name}, new ${NEW.name}`);
@@ -994,8 +1043,8 @@ for (const r of results){
     threw++;
     // a control's own load throw: that SITE does not load, push or no push
     if (t.phase === 'load' && r.control) t = { ...t, missing: false, key: `the ${r.case.startsWith('control-new') ? 'NEW' : 'OLD'} site itself does not load: ${t.call.replace(/ running at load$/, '')} → ${t.key}` };
-    const k = (t.missing ? `${t.id}\0${t.key.startsWith('SKIPPED') ? 'skip' : 'throw'}` : `${t.call}\0${t.key}`) + (t.window ? '\0window' : '');
-    if (!causes.has(k)) causes.set(k, { id: t.id, key: t.key.startsWith('SKIPPED') ? t.key : (t.missing ? `${t.key.split(':')[0]}: ${t.id} ${/before initialization/.test(t.key) ? 'used before its file ran' : 'is not defined'}` : t.key), calls: new Set(), phases: new Set(), cases: new Map(), first: null, windowOnly: true, pending: new Set() });
+    const k = (t.structural ? `struct\0${t.id}` : t.missing ? `${t.id}\0${t.key.startsWith('SKIPPED') ? 'skip' : 'throw'}` : `${t.call}\0${t.key}`) + (t.window ? '\0window' : '');
+    if (!causes.has(k)) causes.set(k, { id: t.id, key: t.key.startsWith('SKIPPED') || t.structural ? t.key : (t.missing ? `${t.key.split(':')[0]}: ${t.id} ${/before initialization/.test(t.key) ? 'used before its file ran' : 'is not defined'}` : t.key), calls: new Set(), phases: new Set(), cases: new Map(), first: null, windowOnly: true, pending: new Set() });
     const c = causes.get(k);
     if (t.window) for (const p of t.window) c.pending.add(p); else c.windowOnly = false;
     c.calls.add(t.call); c.phases.add(t.phase); if (t.phase !== 'load') callsHit.add(t.call.replace(/ \(async\)$/, ''));
@@ -1016,6 +1065,7 @@ for (const g of RUN){
   const own = fetched.get(g).filter(f => g.oldFiles.includes(f) || (g.newFiles || []).includes(f));
   console.log(`  ${g.short}: ${g.entries.length} calls + ${handlersOf.get(g).length} inline handlers from the new page's markup + ${listenerLabels.size} page listeners; the old page fetched ${own.length} group files after the push (${own.join(', ')})${fetched.get(g).length > own.length ? ` and ${fetched.get(g).length - own.length} others` : ''}`);
   console.log(`  ${g.short} canary: ${g.canary} ✓`);
+  for (const r of g.rules || []) console.log(`  ${g.short} structure: ${r.fn}() (${r.file}) returns early until typeof ${r.sentinel}; after it, it names ${r.needs.length} group names that must then exist: ${r.needs.join(", ")}`);
 }
 const inCases = (c, prefix) => [...c.cases.keys()].some(n => n.startsWith(prefix));
 const all = [...causes.values()].sort((a, b) => (b.id ? 1 : 0) - (a.id ? 1 : 0) || b.calls.size - a.calls.size || a.key.localeCompare(b.key));
