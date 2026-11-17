@@ -25,6 +25,25 @@ Everything else is derived. The slow tier is the same master time-stretched,
 so its grid is the fast file's scaled by `trackBpm/trackBpmSlow`. **Never
 measure a second anchor.**
 
+**One exception, "the cure" only: `fileOffset`** (Jonathan's choice,
+2026-11-16; it reverses "never a second anchor" for this track). Its four files
+are not on one timeline (cross-correlating the files against each other: the
+fast rhythm-down plays 25.06 ms after the fast full mix, exactly one mp3 encoder
+start delay; the slow full mix 26.4 ms before the fast full mix scaled; the slow
+rhythm-down 50 ms after the slow full mix). So the entry carries
+`fileOffset: { src, srcSlow, srcFullSlow }` (seconds of that file, added to its
+bar lines after the scaling; absent = 0; `anchor` is now the fast FULL mix's
+first downbeat, value unchanged at 0.565). `snipFileOffset()` reads it,
+`snippetWindow(tr, spec, slow, guitar)` is per FILE (every caller passes the
+Guitar state; 1ak fails one that does not), the Guitar twin is kept
+`st.twinDelta` ahead so a swap keeps the musical place, and the Journey page
+copies the numbers as `data-click-offsets` (1bk compares them). 1ak allows
+only the four path keys, each under 0.1 s, and pins the cure's numbers.
+These offsets only line the files up with each other; whether the whole map
+sits early or late is Jonathan's ear (`&mapshift=`, below). Another track gets
+one only from cross-correlating its own files, never from a second downbeat
+measurement.
+
 **A BUILT song has ONE file and no slow tier** (Jonathan, 2026-11-14: "the
 browser slows the one file"; `app/builtsongs.js` merges it into
 `SNIPPET_TRACKS` after sign-in, with no `srcSlow`). Its card's four stops are
@@ -59,6 +78,14 @@ Watchtower and Seven Nation Army drift up to half a beat by mid-song.
   in `audio/` but Let It Be's.
 - `?snipcal=1` on the URL gives a snippet card a live timecode for checking a
   number by ear.
+- `?snipcal=1&mapshift=<ms>` (2026-11-16) moves the WHOLE beat map of whatever
+  track plays, every file together, as if `anchor` (and every `barTimes`
+  entry) were that many ms later (negative: earlier); the slow files move by it
+  scaled, exactly as an anchor change would. Absent = no shift; limited to
+  ±500. The number Jonathan settles on by ear is what gets added to `anchor`
+  (and `barTimes`, and the Journey page's copy). Beside `&lat=` and `&lead=`.
+  Practice cards, step snippets and Call the chord read it; the Song Journey
+  pages do not (they do not load the app script).
 
 **The param is matched anywhere in `location.href`** by a delimiter-anchored
 regex, not parsed out of `location.search` (it may sit in the fragment or
@@ -194,7 +221,10 @@ Metronome is not a file.**
 Two ways to declare it on `#playalong-frame`:
 
 - **A steady track** ("the cure"): `data-click-anchor="0.565"` (the snippet
-  `anchor`) with the COUNTED tempos in `data-bpm="72" data-bpm-slow="60"`.
+  `anchor`) with the COUNTED tempos in `data-bpm="72" data-bpm-slow="60"`,
+  and (the cure only) `data-click-offsets` = its `fileOffset` in the order
+  data-audio, data-audio-slow, data-audio-full, data-audio-slow-full; a
+  Slow or Guitar switch there keeps the musical place.
 - **A band that drifts, or a track with an intro at another tempo**:
   `data-click-bars` — every bar's downbeat on the fast file, the same numbers
   as `SNIPPET_TRACKS[<slug>].barTimes` — plus `data-click-beats` (clicks per
@@ -413,8 +443,8 @@ After changing a `SNIPPET_TRACKS` timing field (`anchor`, `barTimes`, `trackBpm`
   bars inside card sections. Additional: run it, report the counted lines, and leave the weak lines and the
   "cannot tell" bars alone.
 - First run (2026-11-12): "the cure" rhythm-down files play about 25 ms (144) and about 50 ms (120) AFTER their full
-  mixes (a file offset, not a map fault: settle it before touching that anchor); the record pushes Luna bar 10 about
-  64 ms early (a steady grid: no number to edit).
+  mixes (a file offset, not a map fault; settled 2026-11-16 with `fileOffset`, which the tool reads, so its MIX lines
+  now list only what is left); the record pushes Luna bar 10 about 64 ms early (a steady grid: no number to edit).
 
 ## Checking the practice-card player: `tools/playalong-loop.mjs`
 After touching a card's chart, `SNIPPET_TRACKS`, the lead (`PC_LEAD`) or the

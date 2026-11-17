@@ -836,7 +836,7 @@ function caOpenLinkedCard(from, id){
    into. Preview ticks are DOM-only and never complete anything.
 
    The player is the snippet engine's arithmetic (snippetWindow /
-   snipBarsAt / snipTimeAtBars, one `anchor` per song) over a window that
+   snipBarsAt / snipTimeAtBars, one `anchor` per song, per file with fileOffset) over a window that
    runs from the first section to the end of the last. Three differences
    from a step snippet, all Jonathan's calls from the mockup rounds:
    - Every start gets a four-click count-in — Play song as well as a

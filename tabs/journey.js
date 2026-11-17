@@ -298,6 +298,14 @@ window.addEventListener('beforeprint', function(){
    Sweet Child, Watchtower and Luna work this way, so no page but Let It Be
    declares a metronome file any more, and those files are gone from audio/.
 
+   PER-FILE OFFSETS (2026-11-16, "the cure"): data-click-offsets, four numbers
+   in the order data-audio, data-audio-slow, data-audio-full,
+   data-audio-slow-full, the same numbers as SNIPPET_TRACKS[...].fileOffset in
+   app/snippets.js (checks.mjs 1bk compares them): seconds of that file added
+   to every click time on it, because the four files are not on one timeline.
+   A Slow or Guitar switch keeps the MUSICAL place (the old file's offset off,
+   the new one's on). Absent = 0 on every file, which is every other page.
+
    ensurePlayer() builds the <audio> element (and its Slow/Metronome/Guitar
    toggles) exactly once, however it's first reached — the top play-along
    box (togglePlayalong) and the floating backing-track pill (toggleTrackFab)
@@ -325,6 +333,14 @@ function ensurePlayer(){
   var clickBars = (d.clickBars || '').split(',').map(parseFloat).filter(isFinite);
   var barClick = clickBars.length > 1;
   var synthClick = barClick || gridClick;
+  /* PER-FILE OFFSETS (above): the playing file's, and curOff = the offset of
+     the file now loaded or being loaded, so a switch can take it off. */
+  var fileOffs = (d.clickOffsets || '').split(',').map(parseFloat);
+  var fileOff = function(){
+    var v = fileOffs[(slowOn ? 1 : 0) + (guitarOn && fullReady ? 2 : 0)];
+    return synthClick && isFinite(v) ? v : 0;
+  };
+  var curOff = 0;
 
   var currentSrc = function(){
     if(synthClick) return guitarOn ? (slowOn ? d.audioSlowFull : d.audioFull) : (slowOn ? d.audioSlow : d.audio);
@@ -347,11 +363,14 @@ function ensurePlayer(){
     var wasPlaying = pendingSwitch ? pendingSwitch.play : !a.paused;
     var t = pendingSwitch ? pendingSwitch.t : a.currentTime;
     if(pendingSwitch) a.removeEventListener('loadedmetadata', pendingSwitch.resume);
+    t -= curOff;                       // PER-FILE OFFSETS: the place on the old file, as a musical place
     if(rescale){
       var bpm = parseFloat(box.dataset.bpm);
       var bpmSlow = parseFloat(box.dataset.bpmSlow);
       if(bpm && bpmSlow) t = slowOn ? t * (bpm / bpmSlow) : t * (bpmSlow / bpm);
     }
+    curOff = fileOff();
+    t = Math.max(0, t + curOff);
     var resume = function(){
       pendingSwitch = null;
       a.currentTime = t;
@@ -365,6 +384,7 @@ function ensurePlayer(){
   };
 
   a.src = currentSrc();
+  curOff = fileOff();
 
   /* The page-made click (data-click-anchor or data-click-bars, above). One
      click per counted beat, the next one scheduled once it is under 100 ms
@@ -437,13 +457,13 @@ function ensurePlayer(){
     var nb, due;                       // the next beat, and its time on the file now playing
     if(barClick){
       var scale = slowOn ? ratio : 1;  // slow-file seconds per fast-file second
-      nb = barNextBeat(now / scale);
+      nb = barNextBeat((now - curOff) / scale);
       due = nb < 0 ? null : barBeatTime(nb);
       if(due === null){ clickRaf = requestAnimationFrame(clickTick); return; }   // past the last downbeat
-      due *= scale;
+      due = due * scale + curOff;
     } else {
       var beat = 60 / parseFloat(slowOn ? d.bpmSlow : d.bpm);
-      var anchor = slowOn ? clickAnchor * ratio : clickAnchor;
+      var anchor = (slowOn ? clickAnchor * ratio : clickAnchor) + curOff;
       nb = Math.ceil((now - anchor) / beat - 1e-6);
       due = anchor + nb * beat;
     }

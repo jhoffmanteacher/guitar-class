@@ -25,7 +25,11 @@
    120, a ratio of exactly 144/120 — so the slow file's grid is the fast
    file's scaled by trackBpm/trackBpmSlow. That is the same rescale
    journey.js does when its own Slow toggle flips mid-song. Measure `anchor`
-   against the FAST file only; never measure a second one.
+   against the FAST file only; never measure a second one. ONE EXCEPTION
+   (Jonathan, 2026-11-16): a track whose four files are not on one timeline
+   may carry `fileOffset` — per file, seconds added to its bar lines, taken
+   from cross-correlating the files against each other, never a second
+   downbeat measurement ("the cure" only; snipFileOffset below).
 
    FELT tempo, not the file's printed tempo. "the cure" reads 144 BPM but the
    room counts 72, four felt beats to a chord (CLAUDE.md, settled song facts),
@@ -88,9 +92,29 @@ const SNIPPET_TRACKS = {
     clickGain: 1.5,                     // in-song click 1.5x louder on this track (Jonathan, 2026-10-10: "a little louder")
     durationSec: 297,                   // the fast file, so 1ak can catch a window past the end
     // Measured 2026-09-18 with ?snipcal=1 -> Find the first click, off the
-    // rhythm-down-metronome file's own first click.
+    // rhythm-down-metronome file's own first click. Since 2026-11-16 it is
+    // the first downbeat of the FAST FULL MIX (srcFull), unchanged in value:
+    // see fileOffset below.
     anchor: 0.565,
     anchorVerified: true,
+    /* PER-FILE OFFSETS (Jonathan's choice, 2026-11-16; an exception to "one
+       measured number per song, never measure a second anchor", for this
+       track only). The four files are not on one timeline: measured by
+       cross-correlating the files against each other (ffmpeg's decode, which
+       Chrome's decode and an <audio> element's currentTime match within
+       1.4 ms), the fast rhythm-down file plays exactly 25.06 ms (1105
+       samples, one mp3 encoder start delay; 29 of 29 ten-second windows)
+       after the fast full mix; the slow full mix plays 26.4 ms before the
+       fast full mix scaled by 144/120 (median of 29 windows, middle half
+       -28.8 to -24.0 ms); the slow rhythm-down file plays 50 ms after the slow
+       full mix (median of 35 windows, middle half 43 to 56 ms). So every
+       bar line of a file is moved by that file's number, in seconds of that
+       file, after the slow-tier scaling (snipFileOffset / snippetWindow).
+       The full mix is the reference (0) because it is the untouched Moises
+       export and the default (Guitar on). These numbers only line the files
+       up with each other; whether the whole map sits early or late is
+       Jonathan's ear (?snipcal=1&mapshift=<ms>). checks.mjs 1ak pins them. */
+    fileOffset: { src: 0.0251, srcSlow: 0.0236, srcFullSlow: -0.0264 },
     /* Cards on this track open on the SLOW tier (Jonathan, 2026-09-19).
        Every "the cure" step tells the student to play at 60 BPM — 29 of them
        say so outright — and this track's slow tier IS 60: feltBpm 72 scaled
@@ -670,8 +694,32 @@ function snippetHasFull(tr){ return !!(tr && tr.srcFull && tr.srcFullSlow); }
 /* Where a snippet's window falls in whichever tempo tier is playing.
    Everything downstream (the loop, the bar dots, the tier switch) reads the
    window from here so there is one copy of the bar arithmetic. */
-function snippetWindow(tr, spec, slow){
+/* Which of a track's four paths plays for this tier and Guitar state: the same
+   rule as snippetSrc() (which 1dx pins as it is), so the window is timed on
+   the file that plays. */
+function snipFileKey(tr, slow, guitar){
+  if(guitar && snippetHasFull(tr)) return slow ? 'srcFullSlow' : 'srcFull';
+  return slow && tr.srcSlow ? 'srcSlow' : 'src';
+}
+/* PER-FILE OFFSETS (see fileOffset on "the cure"): seconds of that file added
+   to every bar line of it. Absent field or key = 0, which is every track but
+   one. */
+function snipFileOffset(tr, slow, guitar){
+  const o = tr.fileOffset, v = o ? o[snipFileKey(tr, slow, guitar)] : 0;
+  return typeof v === 'number' && isFinite(v) ? v : 0;
+}
+/* ?snipcal=1&mapshift=<ms> (app/boot.js): moves the WHOLE map of the track
+   being played, as if `anchor` (and every barTimes entry) were that much
+   later, in fast-file ms; the slow files move by it scaled like everything
+   else. Absent = 0. The number Jonathan settles on is what gets added to
+   anchor. */
+function snipMapShift(){ return typeof window.__snipMapShift === 'number' ? window.__snipMapShift : 0; }
+/* `guitar`: the Guitar state of the file being timed (as passed to
+   snippetSrc) — the window is per FILE, because a track may give its files
+   different offsets (snipFileOffset). Every caller passes it. */
+function snippetWindow(tr, spec, slow, guitar){
   const scale = (slow && tr.srcSlow) ? (tr.trackBpm / tr.trackBpmSlow) : 1;   // a one-file track (no srcSlow) has one clock
+  const off = snipFileOffset(tr, slow, guitar) + snipMapShift() * scale;
   const from = Math.max(1, spec.fromBar), n = Math.max(1, spec.bars);
   /* `edges` holds the n+1 bar lines of the window. A steady-grid track
      spaces them evenly; a live-band track (barTimes) reads each one off its
@@ -682,11 +730,11 @@ function snippetWindow(tr, spec, slow){
   if(Array.isArray(tr.barTimes) && tr.barTimes.length > 1){
     const bt = tr.barTimes, last = bt.length - 1;
     const avg = (bt[last] - bt[0]) / last;
-    const at = i => (i <= last ? bt[i] : bt[last] + (i - last) * avg) * scale;
+    const at = i => (i <= last ? bt[i] : bt[last] + (i - last) * avg) * scale + off;
     edges = Array.from({ length: n + 1 }, (_, k) => at(from - 1 + k));
   } else {
     const bar = (tr.beatsPerBar * 60 / tr.feltBpm) * scale;
-    const start = (tr.anchor * scale) + (from - 1) * bar;
+    const start = (tr.anchor * scale) + off + (from - 1) * bar;
     edges = Array.from({ length: n + 1 }, (_, k) => start + k * bar);
   }
   const start = edges[0], end = edges[n];
@@ -729,6 +777,7 @@ function snippetSrc(tr, slow, guitar){
   // Metronome is not a file — the site makes the click (snipScheduleClick).
   // A private path ('private:<id>', SONG FILES in app/songfiles.js) comes back
   // as its device copy's blob: address once loaded; a public path unchanged.
+  // The same rule as snipFileKey (which file is timed): keep the two in step.
   if(guitar && snippetHasFull(tr)) return songFileSrc(slow ? tr.srcFullSlow : tr.srcFull);
   return songFileSrc(slow && tr.srcSlow ? tr.srcSlow : tr.src);
 }
@@ -751,7 +800,13 @@ function snippetSrc(tr, slow, guitar){
    student scrubbed) seeks, and at most twice a second.
    Whoever owns the state (`st`: snipState or pcState) stops the twin on every
    exit — it is one more element to pause and empty.
-   Only the teacher loads it up front — see twinWanted(). */
+   Only the teacher loads it up front — see twinWanted().
+   PER-FILE OFFSETS (2026-11-16): where a track gives its two mixes different
+   offsets (fileOffset, "the cure"), the same musical place is a different
+   second in each file, so the twin is kept `st.twinDelta` seconds ahead of
+   the audible element (its file's offset minus the playing file's; 0 on
+   every other track). The caller rebuilds its window for the new file before
+   the swap, so the place in bars, and what is lit, does not move. */
 const TWIN_READY_SEC = 0.06, TWIN_SNAP_SEC = 0.25;
 /* A speed switch that keeps the file (Slowest <-> Slower, Slow <-> Normal)
    lands on the position it is already at; seek only if it is further off. */
@@ -772,8 +827,9 @@ function twinSrcIs(el, src){ return !!el && (el.getAttribute('src') === src || (
 /* Point the twin at `src` (the other mix of the tier now playing), creating it
    on first use. Does nothing while it is already there. `onLost(el)` is the
    owner's own load-failure handler (snipAudioError / pcAudioError). */
-function twinPark(st, src, onLost){
+function twinPark(st, src, onLost, delta){
   if(songFileNeedsLoad(src)) return;   // a private mix not loaded yet: no twin; the toggle takes the reload path (SONG FILES)
+  st.twinDelta = delta || 0;           // PER-FILE OFFSETS, above
   let tw = st.twin;
   if(!tw){
     tw = st.twin = new Audio();
@@ -795,6 +851,7 @@ function twinPark(st, src, onLost){
 function twinStop(st){
   const tw = st.twin;
   st.twin = null;
+  st.twinDelta = 0;
   if(tw){ try { tw.pause(); tw.src = ''; } catch(e) {} }
 }
 /* Once per frame, from the owner's rAF loop. */
@@ -803,12 +860,13 @@ function twinFollow(st, main){
   if(!tw || tw.readyState < 3 || tw.seeking) return;
   if(main.paused || main.ended){ if(!tw.paused) tw.pause(); return; }
   const base = main.playbackRate || 1;
-  const gap = main.currentTime - tw.currentTime;           // > 0: the twin is behind
+  const want = main.currentTime + (st.twinDelta || 0);     // the same musical place in the twin's file
+  const gap = want - tw.currentTime;                       // > 0: the twin is behind
   if(Math.abs(gap) > TWIN_SNAP_SEC){
     const now = performance.now();
     if(now - (st.twinSnapAt || 0) > 500){
       st.twinSnapAt = now;
-      try { tw.currentTime = main.currentTime; } catch(e) {}
+      try { tw.currentTime = Math.max(0, want); } catch(e) {}
     }
     return;
   }
@@ -819,7 +877,7 @@ function twinFollow(st, main){
 function twinReady(st, main, src){
   const tw = st.twin;
   return !!(tw && twinSrcIs(tw, src) && tw.readyState >= 3 && !tw.seeking && !tw.paused
-    && !main.paused && Math.abs(tw.currentTime - main.currentTime) < TWIN_READY_SEC);
+    && !main.paused && Math.abs(tw.currentTime - (main.currentTime + (st.twinDelta || 0))) < TWIN_READY_SEC);
 }
 /* Make the twin the audible element. Returns the element that was playing, now
    the muted twin; the caller stores both. */
@@ -829,6 +887,7 @@ function twinSwap(st, main){
   main.muted = true;
   slowestApplyRate(tw, main.playbackRate || 1);
   st.twin = main;
+  st.twinDelta = -(st.twinDelta || 0);  // the old one is now the twin, on the other side
   return tw;
 }
 /* ONE builder, called by caStepHtml() in app.js AND
@@ -951,7 +1010,7 @@ function snipToggle(btn){
   if(!tr) return;
   const slow = card.dataset.slow === '1';
   const guitar = card.dataset.guitar === '1';
-  const win = snippetWindow(tr, spec, slow);
+  const win = snippetWindow(tr, spec, slow, guitar);
   const src = snippetSrc(tr, slow, guitar);
   // A private song not on this page yet: "Loading the song… 40%", then this press again (SONG FILES).
   if(songFileNeedsLoad(src)){ songFileWaitThen(card, src, () => snipToggle(btn), snipWaitUi(card)); return; }
@@ -1142,8 +1201,9 @@ function snipAudioError(st, el){
    with no full mix has nothing to swap to, so it never gets one. */
 function snipParkTwin(st){
   if(!snippetHasFull(st.tr) || !twinWanted(st.card)) return;
-  const card = st.card;
-  twinPark(st, snippetSrc(st.tr, card.dataset.slow === '1', card.dataset.guitar !== '1'), el => snipAudioError(st, el));
+  const card = st.card, slow = card.dataset.slow === '1', guitar = card.dataset.guitar === '1';
+  twinPark(st, snippetSrc(st.tr, slow, !guitar), el => snipAudioError(st, el),
+    snipFileOffset(st.tr, slow, !guitar) - snipFileOffset(st.tr, slow, guitar));
 }
 function snipTick(){
   if(!snipState) return;
@@ -1218,7 +1278,7 @@ function snipSetTier(btn, which){
      back to the start of the window. */
   const pend = snipState.pending;
   const barsIn = pend ? pend.bars : snipBarsAt(snipState.win, audio.currentTime);
-  const win = snippetWindow(tr, spec, slow);
+  const win = snippetWindow(tr, spec, slow, guitar);   // the NEW file's window: a Guitar switch may change the offset
   snipState.win = win;
   const at = snipTimeAtBars(win, isFinite(barsIn) && barsIn > 0 ? barsIn : 0);
   const src = snippetSrc(tr, slow, guitar);

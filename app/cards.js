@@ -899,7 +899,7 @@ function pcActivity(root){
      plays that key's track. Same id, checks and timing either way. */
   return caView((window.CLASS_ACTIVITIES || []).find(x => x.id === id));
 }
-function pcWindow(L, slow){ return snippetWindow(L.tr, { fromBar: L.firstBar, bars: L.totalBars }, slow); }
+function pcWindow(L, slow, guitar){ return snippetWindow(L.tr, { fromBar: L.firstBar, bars: L.totalBars }, slow, guitar); }   // per FILE: see snipFileOffset
 function pcStatus(root, html){ const el = root.querySelector('.pc-status'); if(el) el.innerHTML = html || ''; }   // '' = :empty, see styles.css
 function pcStop(){
   songFileCancelWait();                // a card waiting for its song (SONG FILES, app/songfiles.js) never starts by itself after a stop
@@ -1063,7 +1063,7 @@ function pcStart(root, si, rep, keepBuild){
      a lyric sheet (pcSheetStartAt). The loop, if any, still returns to the
      section's start. */
   const fromRep = Math.max(0, Math.min(L.sections[si].reps - 1, rep | 0));
-  const st = { root, L, audio, win: pcWindow(L, slow), loopFrom: si, fromRep, wholeSong: !!a.card.wholeSong, sheet: !!a.card.sheet, raf: 0, timers: [], lastBeat: -1, counting: true, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null,
+  const st = { root, L, audio, win: pcWindow(L, slow, guitar), loopFrom: si, fromRep, wholeSong: !!a.card.wholeSong, sheet: !!a.card.sheet, raf: 0, timers: [], lastBeat: -1, counting: true, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null,
                loopSi: root.dataset.loop === '1' ? si : -1, build, laps: 0,
                passFrom: L.sections[si].fromBar + fromRep * L.sections[si].bars - L.firstBar };   // where this pass began, in window bars (THE LEAD)
   pcState = st;
@@ -1100,7 +1100,9 @@ function pcGo(st, si){
 function pcParkTwin(st){
   const root = st.root;
   if(!snippetHasFull(st.L.tr) || !twinWanted(root)) return;
-  twinPark(st, snippetSrc(st.L.tr, root.dataset.slow === '1', root.dataset.guitar !== '1'), el => pcAudioError(st, el));
+  const slow = root.dataset.slow === '1', guitar = root.dataset.guitar === '1';
+  twinPark(st, snippetSrc(st.L.tr, slow, !guitar), el => pcAudioError(st, el),
+    snipFileOffset(st.L.tr, slow, !guitar) - snipFileOffset(st.L.tr, slow, guitar));
 }
 /* One bar of clicks (four in 4/4, six in 6/8 — CLICK IN SIX) before the song comes in, on
    every start — otherwise the student is dropped in with no way to find
@@ -1508,7 +1510,7 @@ function pcRetrack(root){
   // A switch still waiting for its file keeps the place it saved — see snipSetTier.
   const pend = st.pending;
   const barsIn = pend ? pend.bars : snipBarsAt(st.win, st.audio.currentTime);
-  st.win = pcWindow(st.L, slow);
+  st.win = pcWindow(st.L, slow, guitar);   // the NEW file's window: a Guitar switch may change the offset
   // The count is queued again on the new clock: take back the one already queued (QUEUED CLICKS).
   const back = cancelQueuedClicks(st);
   st.lastBeat = keptClickCount(st);

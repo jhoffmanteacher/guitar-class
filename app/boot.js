@@ -1109,7 +1109,7 @@ const IS_LOCALHOST = ['localhost','127.0.0.1','[::1]'].includes(location.hostnam
    appeared (2026-09-18). Both shapes work now:
      …/index.html?snipcal=1#class-activities
      …/index.html#class-activities?snipcal=1
-   Captured once at load into window.__snipCal / __snipLat / __pcLead, because the app
+   Captured once at load into window.__snipCal / __snipLat / __pcLead / __snipMapShift, because the app
    rewrites the hash as the student navigates and a param living there would
    otherwise vanish mid-session. */
 function snipUrlParam(name){
@@ -1142,6 +1142,17 @@ if(snipUrlParam('snipcal') === '1'){
   if(rawLead !== null && rawLead.trim() !== ''){
     const ms = Number(rawLead);
     if(isFinite(ms) && ms >= 0 && ms <= 1000) window.__pcLead = ms / 1000;
+  }
+  /* &mapshift=<ms> (2026-11-16): moves the WHOLE beat map of whatever track
+     plays (snipMapShift in app/snippets.js), every file together, as if the
+     track's `anchor` were that many ms later (negative: earlier), so Jonathan
+     can set by ear whether a song's map sits early or late; the number he
+     settles on is what gets added to `anchor`. Same rules as &lat: only with
+     snipcal=1, absent or blank = no shift. */
+  const rawShift = snipUrlParam('mapshift');
+  if(rawShift !== null && rawShift.trim() !== ''){
+    const ms = Number(rawShift);
+    if(isFinite(ms) && Math.abs(ms) <= 500) window.__snipMapShift = ms / 1000;
   }
 }
 function devBypass(){

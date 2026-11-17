@@ -107,7 +107,7 @@ function pcLoopNext(st){
   if(!b || !(st.loopSi >= 0) || pcLoopFlag(st.root, 'hold') || b.laps + 1 < PC_BUILD_LAPS) return null;
   const stops = pcBuildStops(st.root), nx = stops[b.stop + 1];
   if(!nx) return null;
-  return { stop: b.stop + 1, slow: nx.slow, rate: nx.rate, src: snippetSrc(st.L.tr, nx.slow, st.root.dataset.guitar === '1'), win: pcWindow(st.L, nx.slow) };
+  return { stop: b.stop + 1, slow: nx.slow, rate: nx.rate, src: snippetSrc(st.L.tr, nx.slow, st.root.dataset.guitar === '1'), win: pcWindow(st.L, nx.slow, st.root.dataset.guitar === '1') };
 }
 /* A lap is over (pcFrame: the spare took over, or the seek). Counts it, moves Build to `nx`'s stop, re-parks
    the twin on the new stop's other mix, and says where the student is. */

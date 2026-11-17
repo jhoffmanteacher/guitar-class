@@ -62,6 +62,10 @@ audio-and-snippets skill, the song-facts skill):
      tool measures every whole bar inside the file from bar 1.
  R3. The slow file's time is the fast file's times trackBpm / trackBpmSlow (both the barTimes and the anchor are
      scaled; never a second anchor).
+ R3b. A track's optional `fileOffset` ({src, srcSlow, srcFull, srcFullSlow}, seconds of that file; "the cure" only,
+     Jonathan 2026-11-16) moves every bar line of that one file by its number, after R3 (snipFileOffset). The two
+     cross-correlations (MIX, slow-onsets) are read against what those numbers say the lag between the files
+     should be, so they list only what is left.
  R4. Inside a bar the beats are evenly spaced between its two bar lines (the windows, the dots and the click all
      divide a measured bar evenly).
  R5. beatsPerBar counts FELT beats ("the cure": 4 at feltBpm 72 though the file reads 144); a countSix track (Luna,
@@ -1164,6 +1168,13 @@ def absent_skip(root, rel):
     return 'not in the private folder %s; the list: %d bytes, %.1f s' % (sf.song_files_dir(), e['bytes'], e['durationSec'])
 
 
+def file_offset(tr, role):
+    """R3b: seconds added to every bar line of the file playing `role` (0 when the track has no fileOffset)."""
+    key = dict((r, k) for r, k, _ in ROLES)[role]
+    v = (tr.get('fileOffset') or {}).get(key, 0)
+    return float(v) if isinstance(v, (int, float)) else 0.0
+
+
 def audit_track(slug, tr, cards, root, opts, breaks=(), override_E=None):
     files = []
     for role, key, slow in ROLES:
@@ -1200,7 +1211,7 @@ def audit_track(slug, tr, cards, root, opts, breaks=(), override_E=None):
             E0, mapped = override_E, True
         else:
             E0, mapped = fast_bar_lines(tr, fast_dur)
-        E = E0 * scale
+        E = E0 * scale + file_offset(tr, role)
         dur = float(a['duration'])
         keep = np.where(E <= dur + 1e-6)[0]
         E = E[:keep[-1] + 1] if len(keep) else E[:1]
@@ -1219,11 +1230,15 @@ def audit_track(slug, tr, cards, root, opts, breaks=(), override_E=None):
             dur_f = float(A[fr]['duration'])
             ratio, lag0, rr = best_ratio(A[fr]['all'], A[sr_]['all'], scale_slow, dur_f)
             rows = window_lags(A[fr]['all'], A[sr_]['all'], ratio, 2.0, dur_f - 2.0, 0.12)
+            exp = file_offset(tr, sr_) - ratio * file_offset(tr, fr)   # R3b: the lag the offsets already account for
+            rows = [(T, lag - exp, r) for T, lag, r in rows]
             res['xcorr'].append({'kind': 'slow-onsets', 'a': fr, 'b': sr_, 'rows': rows, 'scale': scale_slow,
                                  'ratio': ratio, 'ratio_corr': rr, 'dur_fast': dur_f, 'beat_slow': beat_fast * scale_slow})
     for fr, sr_, sc in (('fast', 'full fast', 1.0), ('slow', 'full slow', 1.0)):
         if fr in A and sr_ in A:
             rows = window_lags(A[fr]['all'], A[sr_]['all'], 1.0, 2.0, float(A[fr]['duration']) - 2.0, 0.15, track_pred=False)
+            exp = file_offset(tr, sr_) - file_offset(tr, fr)   # R3b: the lag the offsets already account for
+            rows = [(T, lag - exp, r) for T, lag, r in rows]
             res['xcorr'].append({'kind': 'mix', 'a': fr, 'b': sr_, 'rows': rows, 'scale': 1.0})
     group_findings(res)
     return res

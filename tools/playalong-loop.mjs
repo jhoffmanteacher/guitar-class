@@ -59,6 +59,8 @@
      R2  Inside a bar the beats are evenly spaced.
      R3  The slow file is the same recording stretched: every time in it is the record-tempo time multiplied by
          trackBpm / trackBpmSlow.
+     R3b A track with `fileOffset` (only "the cure", Jonathan 2026-11-16: its four files are not on one timeline)
+         moves every bar line of one file by that file's number, seconds of that file, after R3; absent = 0.
      R4  The speed slider's two extra stops change how fast a file plays (playbackRate), never where a bar is in
          the file. Slowest is the slow file at SLOWEST_RATE (read from the page); Slow is the record-tempo file
          at a rate halfway between the slow file's tempo and 1.
@@ -290,7 +292,7 @@ const METER = {
 };
 /* CLOCK PINS (see the header). `node tools/playalong-loop.mjs --pins` prints these lines for the site it reads. */
 const CLOCK_PINS = {
-  'the-cure': 'e9e7091cdb4a',
+  'the-cure': 'e6740b40a1fb',   // 2026-11-16: + fileOffset (Jonathan's choice, cross-correlated files); anchor unchanged
   'seven-nation-army': 'eb3263796397',
   'luna': 'ed42cedf8f3b',
   'sweet-child-o-mine': '81ebe8a0fe39',
@@ -832,9 +834,16 @@ const PAGE_SRC = String.raw`(() => {
 const near = (a, b, tol) => Math.abs(a - b) <= tol;
 const rootOf = (name) => { const m = /^[A-G][#b]?/.exec(String(name || '')); return m ? m[0] : '?'; };
 
-/* R1-R3: the clock of one file. bars are counted from 0 at bar 1's downbeat. */
-function clockOf(tr, meter, slow) {
+/* R1-R3: the clock of one file. bars are counted from 0 at bar 1's downbeat. `full`: the full mix of that tier (R3b:
+   a track's `fileOffset` moves every bar line of that one file by its own number, seconds of that file; absent = 0). */
+function fileOffsetOf(tr, slow, full) {
+  const key = full ? (slow ? 'srcFullSlow' : 'srcFull') : (slow && tr.srcSlow ? 'srcSlow' : 'src');
+  const v = tr.fileOffset ? tr.fileOffset[key] : 0;
+  return typeof v === 'number' && isFinite(v) ? v : 0;
+}
+function clockOf(tr, meter, slow, full) {
   const scale = slow ? tr.trackBpm / tr.trackBpmSlow : 1;
+  const off = fileOffsetOf(tr, slow, full);
   const bt = Array.isArray(tr.barTimes) && tr.barTimes.length > 1 ? tr.barTimes : null;
   const steady = meter.beats * 60 / tr.feltBpm;
   const line = (k) => {
@@ -844,9 +853,9 @@ function clockOf(tr, meter, slow) {
     if (k <= last) return bt[k];
     return bt[last] + (k - last) * (bt[last] - bt[0]) / last;
   };
-  const time = (bars) => { const k = Math.floor(bars); return (line(k) + (bars - k) * (line(k + 1) - line(k))) * scale; };
+  const time = (bars) => { const k = Math.floor(bars); return (line(k) + (bars - k) * (line(k + 1) - line(k))) * scale + off; };
   const bars = (t) => {
-    const x = t / scale;
+    const x = (t - off) / scale;
     if (!bt) return (x - tr.anchor) / steady;
     let lo = 0, hi = bt.length - 1;
     if (x < bt[0]) return (x - bt[0]) / (bt[1] - bt[0]);
@@ -857,7 +866,9 @@ function clockOf(tr, meter, slow) {
   return { time, bars, scale, mapped: bt ? bt.length : 0 };
 }
 function clockPin(tr) {
-  const body = JSON.stringify([tr.anchor, tr.barTimes || null, tr.trackBpm, tr.trackBpmSlow, tr.feltBpm, tr.beatsPerBar, !!tr.countSix]);
+  const arr = [tr.anchor, tr.barTimes || null, tr.trackBpm, tr.trackBpmSlow, tr.feltBpm, tr.beatsPerBar, !!tr.countSix];
+  if (tr.fileOffset) arr.push(tr.fileOffset);   // only where a track has one, so every other pin is unchanged
+  const body = JSON.stringify(arr);
   return createHash('sha1').update(body).digest('hex').slice(0, 12);
 }
 /* Which track and tier a file is. */
@@ -1078,7 +1089,7 @@ function tierOf(M, stop, guitar) {
   const full = !!(guitar && tr.srcFull && tr.srcFullSlow);
   const file = full ? (slow ? tr.srcFullSlow : tr.srcFull) : (slow ? tr.srcSlow : tr.src);
   const rate = stop === 'slowest' ? M.consts.slowestRate : stop === 'slow' ? (1 + tr.trackBpmSlow / tr.trackBpm) / 2 : 1;
-  return { slow, full, file, rate, clock: clockOf(tr, M.meter, slow) };
+  return { slow, full, file, rate, clock: clockOf(tr, M.meter, slow, full) };
 }
 /* Real milliseconds a stretch of the song takes at a setting. */
 function msFor(M, stop, fromBar0, toBar0) { const T = tierOf(M, stop, false); return (T.clock.time(toBar0) - T.clock.time(fromBar0)) / T.rate * 1000; }
@@ -1194,7 +1205,7 @@ function planWalks(M) {
     const times = {};
     for (const [f, fi] of Object.entries(M.files)) {
       if (fi.key !== M.view.track) continue;
-      const c = clockOf(M.tr, M.meter, fi.slow), list = [];
+      const c = clockOf(M.tr, M.meter, fi.slow, fi.full), list = [];
       for (let n = (ch.firstBar - 1) * M.meter.steps; n < (ch.endBar - 1) * M.meter.steps; n++) list.push(c.time(n / M.meter.steps));
       times[f] = list;
     }
@@ -1319,7 +1330,7 @@ function judge(M, W, res) {
   if (!res.connected) bad('the card was redrawn in the middle of the walk');
   const files = M.files, keys = res.keys.map(parseKey), R = res.runs, nRuns = R.length / 8;
   const clocks = new Map();
-  const clk = (f) => { if (!clocks.has(f)) { const fi = files[f]; clocks.set(f, fi ? { fi, clock: clockOf(M.tracks[fi.key], M.meterOf(fi.key), fi.slow) } : null); } return clocks.get(f); };
+  const clk = (f) => { if (!clocks.has(f)) { const fi = files[f]; clocks.set(f, fi ? { fi, clock: clockOf(M.tracks[fi.key], M.meterOf(fi.key), fi.slow, fi.full) } : null); } return clocks.get(f); };
   const placeName = (p) => { const S = ch.secs[p.si]; return `${S.reps > 1 ? 'lap ' + (p.rep + 1) + ', ' : ''}${S.grid ? 'step ' : ch.sheet ? 'beat ' : 'note '}${p.at + 1}`; };
   const secName = (p) => { const S = ch.secs[p.si]; return `${S.label}${S.reps > 1 ? ' lap ' + (p.rep + 1) : ''}, ${S.grid ? (meter.sub === 3 ? 'count ' : 'beat ') + ((p.step % meter.steps) + 1) + ' of bar ' + (Math.floor(p.step / meter.steps) + 1) : ch.sheet ? 'beat ' + (p.at % meter.beats + 1) + ' of bar ' + (Math.floor(p.at / meter.beats) + 1) + ' (' + (S.notes[p.ni].rest ? 'rest' : S.notes[p.ni].name) + ')' : 'note ' + (p.ni + 1) + ' (' + (S.notes[p.ni].rest ? 'rest' : S.notes[p.ni].name) + ')'}`; };
   const idx = (p) => (p.grid ? p.step : p.ni);

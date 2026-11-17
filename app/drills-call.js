@@ -1053,7 +1053,7 @@ function chcStart(key){
   if(typeof coachInterrupt === 'function') coachInterrupt(t('coach.interrupt.micLost'));
   try { getAudioCtx().resume(); } catch(e){}
   const M = st.M;
-  const win = snippetWindow(M.L.tr, { fromBar: M.S.fromBar, bars: M.S.bars * M.S.reps }, st.slow);
+  const win = snippetWindow(M.L.tr, { fromBar: M.S.fromBar, bars: M.S.bars * M.S.reps }, st.slow, false);   // it plays the rhythm-down mix (below)
   const audio = new Audio();
   audio.preload = 'auto';
   audio.loop = false;

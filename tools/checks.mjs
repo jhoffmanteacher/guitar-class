@@ -8798,6 +8798,13 @@ const SNIPPET_TRACK_FIELDS = ['src', 'srcSlow',
    cards and Song Journey pages, so no track names a metronome mix. A field
    that comes back would point at a file 1bk refuses to have in audio/. */
 const SNIPPET_METRONOME_FIELDS = ['srcMetronome', 'srcSlowMetronome', 'srcFullMetronome', 'srcFullSlowMetronome'];
+/* PER-FILE OFFSETS (fileOffset, 2026-11-16): the keys a track may give, and the
+   numbers pinned per track. "the cure": cross-correlating its files against
+   each other (fast rhythm-down 25.06 ms after the fast full mix, 29 of 29
+   windows; slow full mix 26.4 ms before the fast full mix scaled; slow
+   rhythm-down 50 ms after the slow full mix), the fast full mix the reference. */
+const SNIPPET_FILE_OFFSET_KEYS = ['src', 'srcSlow', 'srcFull', 'srcFullSlow'];
+const SNIPPET_FILE_OFFSET_PINS = { 'the-cure': { src: 0.0251, srcSlow: 0.0236, srcFullSlow: -0.0264 } };
 function checkBackingSnippets() {
   head('1ak. Backing-track snippets');
   let bad = 0;
@@ -8831,6 +8838,28 @@ function checkBackingSnippets() {
     flag('teacher.js: no renderTeacherActivityDetail() found — 1ak cannot tell whether the console preview gets the snippet');
   else if (!callsBuildSnippet(teacherSrc, 'renderTeacherActivityDetail'))
     flag('teacher.js: renderTeacherActivityDetail() never calls buildSnippet() — the console preview would not play the day\'s loop (two renderers, see CLAUDE.md)');
+
+  /* The window is per FILE (snipFileOffset): every snippetWindow() call in the
+     app passes the Guitar state of the file it times, as a 4th argument. One
+     that leaves it out times every file as the rhythm-down mix, 25 to 50 ms
+     off on "the cure"'s full mixes, and nothing else would notice. */
+  {
+    const code = stripJsComments(appSrc);
+    let calls = 0, short = 0;
+    for (const m of code.matchAll(/(?<![\w.])snippetWindow\s*\(/g)) {
+      if (/function\s+$/.test(code.slice(Math.max(0, m.index - 12), m.index))) continue;   // the definition
+      let i = m.index + m[0].length, depth = 1, commas = 0;
+      for (; i < code.length && depth; i++) {
+        const c = code[i];
+        if ('([{'.includes(c)) depth++;
+        else if (')]}'.includes(c)) depth--;
+        else if (c === ',' && depth === 1) commas++;
+      }
+      calls++;
+      if (commas < 3) { short++; flag(`app.js: a snippetWindow() call passes ${commas + 1} argument(s): "${code.slice(m.index, i).replace(/\s+/g, ' ').slice(0, 120)}" — pass the Guitar state of the file it times (4th argument), or the window misses that file's fileOffset`); }
+    }
+    if (calls < 4) flag(`app.js: found ${calls} snippetWindow() call(s), expected at least 4 (snipToggle, snipSetTier, pcWindow, chcStart) — 1ak's argument check has gone blind`);
+  }
 
   // Every track is fully specified, and its files exist (a 'private:<id>' path: on the SONG_FILES list — audioInfo).
   const trackNames = Object.keys(TRACKS);
@@ -8924,6 +8953,24 @@ function checkBackingSnippets() {
           flag(`SNIPPET_TRACKS['${name}'].barTimes: last downbeat ${bt[bt.length - 1]}s is past durationSec ${tr.durationSec}`);
       }
     }
+    /* fileOffset (optional; Jonathan, 2026-11-16, "the cure" only): seconds
+       added to every bar line of ONE file (snipFileOffset in app/snippets.js),
+       because a track's four files are not always on one timeline. Only the
+       four path names, each a number under 0.1 s in size and naming a path the
+       track has: a bigger number is a bar-sized mistake, not an encoder delay,
+       and an unknown key is a typo snipFileOffset would silently read as 0. */
+    if (tr.fileOffset !== undefined) {
+      const fo = tr.fileOffset;
+      if (!fo || typeof fo !== 'object' || Array.isArray(fo)) flag(`SNIPPET_TRACKS['${name}'].fileOffset: not an object of per-file seconds`);
+      else for (const [k, v] of Object.entries(fo)) {
+        if (!SNIPPET_FILE_OFFSET_KEYS.includes(k)) flag(`SNIPPET_TRACKS['${name}'].fileOffset.${k}: not one of ${SNIPPET_FILE_OFFSET_KEYS.join(', ')} — snipFileOffset would never read it`);
+        else if (typeof v !== 'number' || !Number.isFinite(v) || Math.abs(v) >= 0.1) flag(`SNIPPET_TRACKS['${name}'].fileOffset.${k}: ${JSON.stringify(v)} is not a number of seconds under 0.1 in size`);
+        else if (!tr[k]) flag(`SNIPPET_TRACKS['${name}'].fileOffset.${k}: the track has no ${k} file`);
+      }
+    }
+    // The pinned offsets: changing one moves every highlight on that file (re-measure by cross-correlation, then re-pin).
+    if (JSON.stringify(tr.fileOffset ?? null) !== JSON.stringify(SNIPPET_FILE_OFFSET_PINS[name] ?? null))
+      flag(`SNIPPET_TRACKS['${name}'].fileOffset is ${JSON.stringify(tr.fileOffset ?? null)} but 1ak pins ${JSON.stringify(SNIPPET_FILE_OFFSET_PINS[name] ?? null)} — a per-file offset is measured (cross-correlating the files); change the pin in the same commit, with the measurement`);
     // The slow tier is DERIVED from these two, never measured separately —
     // a slow file that is not a straight time-stretch would put every
     // window on that song out by a growing amount as it plays.
@@ -15200,6 +15247,17 @@ function checkSiteMadeClick() {
       if (!tr) flag(`${page}: data-click-anchor with no SNIPPET_TRACKS['${slug}'] to check it against`);
       else if (!near(Number(d['click-anchor']), tr.anchor, 0.0005))
         flag(`${page}: data-click-anchor is ${d['click-anchor']} but SNIPPET_TRACKS['${slug}'].anchor is ${tr.anchor} — one measured number, two copies`);
+    }
+    /* data-click-offsets (PER-FILE OFFSETS in tabs/journey.js): four numbers in the order data-audio,
+       data-audio-slow, data-audio-full, data-audio-slow-full, a copy of SNIPPET_TRACKS[slug].fileOffset. A track
+       with offsets and a page without them (or the reverse) puts the page's click 25-50 ms off on some files. */
+    if (tr) {
+      const fo = tr.fileOffset || {}, want = ['src', 'srcSlow', 'srcFull', 'srcFullSlow'].map(k => Number(fo[k] || 0));
+      const has = d['click-offsets'] !== undefined, got = has ? d['click-offsets'].split(',').map(Number) : [0, 0, 0, 0];
+      if (got.length !== 4 || got.some(v => !Number.isFinite(v)))
+        flag(`${page}: data-click-offsets "${d['click-offsets']}" is not four numbers (data-audio, data-audio-slow, data-audio-full, data-audio-slow-full)`);
+      else if (got.some((v, i) => !near(v, want[i], 0.00005)))
+        flag(`${page}: data-click-offsets is ${has ? d['click-offsets'] : '(absent)'} but SNIPPET_TRACKS['${slug}'].fileOffset gives ${want.join(',')} (src, srcSlow, srcFull, srcFullSlow) — the page's numbers are a copy; re-copy them`);
     }
     if (!hasBars) continue;
     const raw = d['click-bars'].split(',');
