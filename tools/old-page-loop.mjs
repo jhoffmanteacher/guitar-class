@@ -74,7 +74,9 @@
    each seed makes its own subset of the group's files old (under sw.js any subset can come from an old cache,
    e.g. a new core with an old hub). loaded-before: the group loaded before the push, then the calls (timeline 3:
    safe). fail-<file>: after-push with that one fetch failing once; the caller catches the rejection and the NEXT
-   loader call retries (the loader forgets a failed promise), as a second click would. new-page-old-<file>: a NEW
+   loader call retries (the loader forgets a failed promise), as a second click would. fail-<child>+all-old and
+   fail-<child>+old-<file>: a part the old page loads OUTSIDE its list (a bridged child) fails once while the other
+   list parts are OLD cached copies (all of them, or that one alone). new-page-old-<file>: a NEW
    page with that one part OLD (a new page served while the old worker's cache still holds the file); when the
    old file is the whole of a split parent and holds every declaration of the new child with the same text, the
    child only logs "already declared" and nothing is missing: a NOTE; a declaration edited on the way is a finding.
@@ -933,6 +935,16 @@ for (const b of STATIC.unbridged) console.log(`  static: ${b.by} names loadScrip
 for (const g of RUN){
   const sfx = RUN.length > 1 ? `:${g.short}` : '';
   const cases = [...casesFor(g), ...fetched.get(g).filter(f => g.oldFiles.includes(f) || (g.newFiles || []).includes(f)).map(f => ({ name: `fail-${f}${sfx}`, group: g, page: 'old', serve: () => NEW, failOnce: f }))];
+  /* Round 3, item 2: one failed fetch of a part the old page loads OUTSIDE its list (a bridged child) together with
+     OLD cached copies of the other list parts: all of them old, and each one alone old (an old hub keeps its old
+     guards, so a new hub's widened guards cannot absorb the failure). */
+  const children = fetched.get(g).filter(f => (g.newFiles || []).includes(f) && !g.oldFiles.includes(f));
+  const others = g.oldFiles.filter(f => OLD.tree.has(f));
+  for (const ch of children){
+    const all = new Set(others);
+    cases.push({ name: `fail-${ch}+all-old${sfx}`, group: g, page: 'old', failOnce: ch, serve: (n, src) => all.has(src) ? OLD : NEW });
+    for (const o of others) cases.push({ name: `fail-${ch}+old-${o}${sfx}`, group: g, page: 'old', failOnce: ch, serve: (n, src) => src === o ? OLD : NEW });
+  }
   for (const c of cases){
     if (only && c.name !== only && !c.control) continue;   // the controls always run: they say which throws are stub noise
     for (const s of (c.once ? seeds.slice(0, 1) : seeds)){
