@@ -66,10 +66,13 @@
    differs at all: then every group runs as a self-check). control-old (old page, old files) and control-new (new
    page, new files): a missing name in only one of them is a finding; one both make is printed "ON BOTH PAGES"
    (not caused by the push, never a finding). after-push: the group loaded after the push (W2's timeline 1).
-   half-K: K files arrived before the push (old files, e.g. from an old cache), the rest after (timeline "half").
-   loaded-before: the group loaded before the push, then the calls (timeline 3:
+   half-K: the FIRST K files of the list are old, the rest new (timeline "half"; a prefix only). mixed-random:
+   each seed makes its own subset of the group's files old (under sw.js any subset can come from an old cache,
+   e.g. a new core with an old hub). loaded-before: the group loaded before the push, then the calls (timeline 3:
    safe). fail-<file>: after-push with that one fetch failing once; the caller catches the rejection and the NEXT
-   loader call retries (the loader forgets a failed promise), as a second click would.
+   loader call retries (the loader forgets a failed promise), as a second click would. new-page-old-<file>: a NEW
+   page with that one part OLD (a new page served while the old worker's cache still holds the file); when the
+   old file is the whole of a split parent, its new child logs "already declared" and nothing is missing: a NOTE.
    Each case runs --orders seeded arrival orders: when more than one file is in flight (a part that loads another
    part itself, module data) the seed picks which arrives first, uniformly, so "4 of 12" is the tool's coin, not
    a browser rate. cache-fast is the realistic order for a second old tab: the old list's files arrive at once
@@ -673,10 +676,20 @@ const casesFor = g => {
   ];
   for (let k = 1; k < g.oldFiles.length; k++) c.push({ name: `half-${k}${sfx}`, group: g, page: 'old', serve: n => n < k ? OLD : NEW });
   c.push({ name: 'loaded-before' + sfx, group: g, page: 'old', serve: () => NEW, preload: true });
+  /* Under sw.js ANY subset of the parts can come from an old cache, not only a first K (review R1-5): each seed
+     picks its own subset of the group's files to be old (a file the old tree has), the rest new. */
+  const own = new Set([...g.oldFiles, ...(g.newFiles || [])]);
+  c.push({ name: 'mixed-random' + sfx, group: g, page: 'old', serve: (n, src, seed) => own.has(src) && OLD.tree.has(src) && subsetPick(seed, src) ? OLD : NEW });
   // a second old tab: its list's files from the cache at once, the parts fetched outside the chain last (R1-6)
   c.push({ name: 'cache-fast' + sfx, group: g, page: 'old', serve: () => NEW, cacheFast: true, once: true });
+  /* The other way round: a NEW page given one OLD cached part (a new page served while the old worker's cache
+     still holds that file). One case per new-list file the old tree has with other bytes. */
+  for (const f of (g.newFiles || [])) if (OLD.tree.has(f) && OLD.tree.read(f) !== NEW.tree.read(f))
+    c.push({ name: `new-page-old-${f}${sfx}`, group: g, page: 'new', serve: (n, src) => src === f ? OLD : NEW });
   return c;
 };
+// a seeded coin per (seed, file): the same seed always picks the same subset
+function subsetPick(seed, src){ let h = (seed * 2654435761) >>> 0; for (const ch of src) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0; h ^= h >>> 13; h = Math.imul(h, 0x5bd1e995) >>> 0; h ^= h >>> 15; return (h & 1) === 1; }
 
 const only = ARGS.case, onlySeed = ARGS.seed != null ? parseInt(ARGS.seed, 10) : null;
 const seeds = onlySeed != null ? [onlySeed] : Array.from({ length: ORDERS }, (_, i) => i + 1);
@@ -746,7 +759,7 @@ for (const r of results) if (r.control) for (const t of r.out.throws) if (!hard(
 const ctrlMissing = { 'control-old': new Set(), 'control-new': new Set() };
 for (const r of results) if (r.control) for (const t of r.out.throws) if (hard(t)) ctrlMissing[r.case.replace(/:.*/, '')].add(`${t.call}\0${t.key}\0${t.phase}`);
 const both = new Set([...ctrlMissing['control-old']].filter(k => ctrlMissing['control-new'].has(k)));
-const causes = new Map(), before = new Map();
+const causes = new Map(), before = new Map(), notes = new Map();
 const callsSeen = new Set(), callsHit = new Set();
 let calls = 0, threw = 0, noiseN = 0;
 for (const r of results){
@@ -754,6 +767,14 @@ for (const r of results){
   for (let t of r.out.throws){
     if (!hard(t) && (r.control || noise.has(`${t.call}\0${t.key}`))){ noiseN++; if (VERBOSE && only) console.log(`   noise (same in a control): ${t.call} → ${t.key}`); continue; }
     if (both.has(`${t.call}\0${t.key}\0${t.phase}`)){ const k = `${t.call} → ${t.key} [${t.phase}]`; before.set(k, (before.get(k) || 0) + 1); continue; }
+    /* A new page with one OLD cached part F (the whole file before a split) and the new child C: C does not load
+       ("Identifier … has already been declared"), but when F already declares every name C declares, nothing is
+       missing; the page logs one error. A NOTE, not a finding (a split always does this). */
+    const npo = r.case.match(/^new-page-old-(.+?)(?::\w+)?$/);
+    if (npo && t.phase === 'load' && /has already been declared/.test(t.key)){
+      const C = t.call.replace(/ running at load$/, ''), have = declsOf(OLD.tree, npo[1]);
+      if ([...declsOf(NEW.tree, C)].every(n => have.has(n))){ const k = `a new page with the old ${npo[1]} logs "${t.key}" when ${C} loads; the old file already holds every name ${C} declares, so nothing is missing (one error report)`; notes.set(k, (notes.get(k) || 0) + 1); continue; }
+    }
     threw++;
     // a control's own load throw: that SITE does not load, push or no push
     if (t.phase === 'load' && r.control) t = { ...t, missing: false, key: `the ${r.case.startsWith('control-new') ? 'NEW' : 'OLD'} site itself does not load: ${t.call.replace(/ running at load$/, '')} → ${t.key}` };
@@ -812,6 +833,7 @@ const show = (arr, title, mark) => {
     console.log(`     replay: node tools/old-page-loop.mjs --old ${ARGS.old} --new ${ARGS.new} --case=${f.first.case} --seed=${f.first.seed} --verbose`);
   });
 };
+if (notes.size) console.log(`\nNOTES (${notes.size}; not findings):\n    ${[...notes.keys()].join('\n    ')}`);
 if (before.size) console.log(`\nON BOTH PAGES (${before.size}; old page + old files and new page + new files make these too, so the push does not cause them; not findings):\n    ${[...before.keys()].join('\n    ')}`);
 show(list, `\nFINDINGS (${list.length} cause${list.length === 1 ? '' : 's'}; a call a real caller makes throws or is skipped; [settled] = still broken once every file has arrived, until a reload):`, '✗ ');
 show(windows, `\nWINDOWS (${windows.length}; a user action in the moment between the group loader resolving and a part it loads itself arriving; exit 1 only with --strict):`, '⚠ ');
