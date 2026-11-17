@@ -1561,7 +1561,7 @@ async function runFamily(world, dev, sc, H){
       if (!await H.signIn(tab1, A)) return;
       world.retryOf = { page: tab1.page.id, who: 'A' };
       await world.sleep(40000);
-      if (appUp(tab1.page, A)) late(tab1.page, A);
+      if (appUp(tab1.page, A)){ late(tab1.page, A); world.firstScreens[world.firstScreens.length - 1].mustLoad = failFor; }
       await H.act(tab1, A, actionFor(sc, 'tick', sc.r, A));
       await world.sleep(3000);
       await H.signOut(tab1, A, 'wait');
@@ -2079,6 +2079,8 @@ function oracle(sc, world, dev){
       compared += 3;
       const okRead = !!(pr && pr.ok);
       if (fs.vals.progressLoadFailed !== !okRead) fail('R4', `${fs.who}'s late screen on ${fs.page}: progressLoadFailed = ${fs.vals.progressLoadFailed}, but the page's last read of the doc ${okRead ? 'succeeded' : 'failed'}`);
+      /* positive: the reads stopped failing 20 s or more before this screen, and A did nothing: the retry must have loaded. */
+      if (fs.mustLoad && !okRead) fail('R4', `${fs.who}'s late screen on ${fs.page}: the doc never loaded, though its reads stopped failing ${Math.round(fs.mustLoad / 1000)} s in and the student did nothing (the retry after a failed sign-in read)`);
       if (okRead && fs.retrying !== false) fail('R4', `${fs.who}'s late screen on ${fs.page}: a retry still runs (${JSON.stringify(fs.retrying)}) after a good read`);
       if (fs.loadNotice !== (fs.retrying === true)) fail('R4', `${fs.who}'s late screen on ${fs.page}: the "not loaded yet" line is ${fs.loadNotice ? 'up' : 'down'} while ${fs.retrying === true ? 'a' : 'no'} retry runs`);
     }
