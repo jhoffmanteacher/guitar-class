@@ -287,6 +287,53 @@ push. Where the Mac is right now: the coach splits with the reviewer's fix A are
     the Mac pushes the splits at once, any hour. If A2 is better, say so and the Mac swaps it in.
   - **Part d is on main (the Mac, `ce3821e`, labelled Fast on Jonathan's word; the Friday check reviews it).** So
     W9 is closed (no round 4) and W10 (the pdf pane's three edge cases) is open for Windows now.
+  - **Windows' second opinion on the splits' close (`78f63414`; a fresh Opus `site-reviewer-deep` at xhigh,
+    2026-11-16 night): 0 BLOCKER, 0 MAJOR, 4 MINOR. It agrees with the Mac's review: the push was right. ONE THING
+    TO CHANGE, the bridge's removal date (R1-4).** The lead has not re-opened the quoted lines. Scripts and outputs:
+    the Windows scratchpad `rv6b\`.
+    - **The first REAL-BROWSER evidence for the close.** `update-reload-loop` (29 of 29 here) and `slow-load` (20 of
+      20) never test an old page: both of update-reload-loop's versions are the tip. The reviewer built
+      `rv6b\oldpage-browser.mjs`: headless Chrome with a real service worker, a served folder it switches from OLD
+      (main `06cd881b`) to NEW (the splits merged onto it), able to keep `sw.js` old and to fail or delay any
+      file. 34 tabs: old list + all new files works first time (incl. the second-old-tab case: the list goes 8 →
+      10, 10 scripts, 17 of 17 games open, 0 errors); a failed fetch gives one toast, then the next click works;
+      no banner on any old-page tab. Its Node harness on the real old loader: 1,722 schedules (all 256 old / new
+      subsets × 3 arrival orders, 186 failure schedules), 42,015 calls of `gamesStopMic` / `gamesHideStop` /
+      `coachMicLatencyMs`: 0 throws on a moved name, 0 parts run twice, 0 loader calls that never resolved.
+    - **R1-4 MINOR, but act on it: do NOT remove the bridge on 2026-12-01** (`todo.md:102` and the five "DELIBERATE
+      BRIDGE" comments). A Chromebook asleep with the site open from before the push through Thanksgiving week
+      would then fail exactly as in W2 (Games, the Tuner, Record, the Coach and Note Call throw until a reload).
+      The bridge does nothing on a new page: remove it at the summer reset (skill `summer-reset`).
+    - R1-1 MINOR (the Mac's accepted R1-1, with its cause and a smaller fix than "variant D"): the splice into the
+      old page's list (`coach-chords.js:1406` `COACH_JS_PARTS.splice(at, 0, 'coach-chordcards.js');`,
+      `coach-runner.js:1103`) changes the old loader's GROUP KEY, so a caller of `ensureCoachJs()` that arrives
+      after a parent ran and before its child arrived gets a new chain that resolves BEFORE the first caller's,
+      against the rule at `app/boot.js:797-798` ("callers rely on their .then callbacks running in the order they
+      were attached") that `caFreePlayGames` (`app/activities.js:146-153`) relies on: header Games, then the
+      In-Class free-play Games button while a child is in flight: the student lands on the hub instead of Riff
+      Roulette in 2 of 3 browser timings (old pages only; no error, no mic). Fix proved (22 of 22 call points in
+      order, 1,722 mixes clean, the browser case 3 of 3): delete the splice line and add the child to the list only
+      in the FAILURE callback:
+      `e => { delete _lazyScripts[next]; if (COACH_JS_PARTS.indexOf('coach-chordcards.js') < 0) COACH_JS_PARTS.splice(COACH_JS_PARTS.indexOf('coach-chords.js') + 1, 0, 'coach-chordcards.js'); throw e; }`
+      (the same in `coach-runner.js` for noterunner; the comments above each bridge then need rewording). The
+      tested files are in `rv6b\keep-variants\`. Not urgent: it only affects pages opened before the push.
+    - R1-2 MINOR = the Mac's accepted R1-2 (a new page meeting an old whole parent: a banner and 2 site-error
+      reports, 17 of 17 games still open; a refresh clears it). R1-3 MINOR, the record: `coach-core.js` changed by
+      2 CODE lines as well as 2 comment lines (`:746` and `:2551`, each `typeof nr !== 'undefined' && nr &&
+      nr.micOn`): harmless.
+    - **The widened guards: keep them** (the earlier "they do harm" was about fix A's guard at the TOP of a
+      function; these are per call, `coach-hub.js:387, 393, 394`, so every other stop still runs). They are inert
+      on this tip (0 states with `bcStop` defined and a child's name missing, in 1,722 schedules and 116 in-load
+      browser probes). Remove them WITH the bridge.
+    - **The close, not fix A2:** the same in every state but two: the close lets a later loader caller resolve
+      first (R1-1; A2 does not), and A2's slot object would run the next part twice if two chains adopted it (not
+      reachable today; the close is immune). The close with R1-1's change is at least as good everywhere.
+    - A pure move re-derived (each parent + child, headers off, equals the old file; the whole arcade differs in 11
+      hunks, all bridges or guards); `kill-switch` 14 of 14; `tone-test`, `closed-loop` (identical incl. REAL
+      TAKES), `shared-chromebook-loop` 120 of 120.
+    - For the tool (its builder has these): a slot never cleared on success is reported as "could not run" (exit 2)
+      where it is a real fault; a failed child put back at the END of the list is green, because the tool never
+      combines a failed fetch with an old cached hub.
   - **THE COACH SPLITS ARE ON MAIN (the Mac, 2026-11-16 about 21:45, `e9c39a1`, Reviewed, 3 rounds).** Item 4 is
     done: `coach-chords.js` + `coach-chordcards.js`, `coach-runner.js` + `coach-noterunner.js`, with the bridge
     for pages opened before the push. The last review (Mac, fresh Opus `site-reviewer-deep`, on `78f6341`): 0
