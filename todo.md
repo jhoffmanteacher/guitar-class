@@ -13,7 +13,7 @@ they're ready"). Work still being built, reviewed or waiting on a push is NOT li
 or when the paste file exists.
 
 **Listen and look (a few minutes each, any class Chromebook or the Mac):**
-2. **"the cure", bar 85 (the Outro).** The audit says the record plays about 118 ms early there. Does it look off?
+(nothing to listen to right now)
 
 **Decide (tell Claude; each is one sentence):**
 Decided 2026-11-17: old mic recordings that still hold a name are ignored for now; the sign-in load fix gets NO
@@ -73,8 +73,8 @@ Added 2026-11-16 (Jonathan: "we'll have to fix the beat map in the future"). Not
   full −26.4 ms; `anchor` 0.565 is on the fast full mix). Jonathan chose it, reversing "never a second anchor" for
   this track. The files agree within 0 to 2 ms (were 25 to 50). The whole map: SET BY EAR 2026-11-17, `anchor` 0.565 -> 0.570 (+5 ms; Jonathan on ca-30, Normal, Guitar on:
   0 early, 10 a little late, 5 "sounds good"; the audit had read it 32 to 44 ms early, so his ear and the tool
-  disagree and his ear decides). New audit line to listen to: bar 85 of the Outro, the record about 118 ms early on all four
-  files. The cure's numbers in the table above are from BEFORE this change.
+  disagree and his ear decides). The audit also lists bar 85 of the Outro (the record about 118 ms early on all four
+  files): Jonathan, 2026-11-17, "don't care about bar 85 in outro": settled, do not re-flag or fix it. The cure's numbers in the table above are from BEFORE this change.
 - **Three separate faults in that table:**
   1. A fixed offset per track (the whole map early or late): move the map, one number per file.
   2. "the cure" with Guitar off: its rhythm-down files play 25 ms (144 BPM) and 51 ms (120 BPM) after their full
