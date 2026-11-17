@@ -3465,7 +3465,9 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 .ca-step.ca-step-done .ca-step-label{text-decoration:line-through;color:var(--text2)}
 .ca-step-chev{font-size:0.75rem;color:var(--text3);flex-shrink:0;transition:transform .15s}
 .ca-step:not(.ca-step-collapsed) .ca-step-chev{transform:rotate(90deg)}
-.ca-step-detail{padding:2px 4px 14px 56px;font-size:0.9375rem;line-height:1.55}
+/* 16px reading text, as .step-detail (2026-11-13). Every direction line still measured one line at
+   1366x657 at 16px, EN + ES (1cs's rule), before this shipped. */
+.ca-step-detail{padding:2px 4px 14px 56px;font-size:1rem;line-height:1.55}
 /* Phone gutter, same as .step-detail's (the print rule outranks this). */
 @media(max-width:760px){.ca-step-detail{padding-left:8px}}
 .ca-step.ca-step-collapsed .ca-step-detail{display:none}
