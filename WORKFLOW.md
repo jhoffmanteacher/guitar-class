@@ -160,6 +160,21 @@ push. Where the Mac is right now: the coach splits with the reviewer's fix A are
       on sign-in across the push; nothing to do now). And reverting a split is itself RED (`d6c3e16 → 3b667ba`:
       pages holding the 10-name list get a 404 on the removed part forever): if the splits are ever reverted,
       keep the two new files on the server.
+  - **THE MAC RAN IT (2026-11-16 18:00) on its real tip, rebased onto main (`2b21904` in the Mac's worktree; fix A
+    as the Mac built it = `0fea8d1` + a pin fix): still RED, as Windows said.** `--old origin/main --new HEAD`: 97
+    entry points × 12 orders × 21 cases; 27 of 97 threw or were skipped; 7 findings, 8 windows; both controls 0.
+    The same three causes (the loader resolves before the bridged part arrives; an old cached `coach-hub.js` in
+    the half cases; a failed fetch never retried). The splits are NOT pushed. An Opus agent on the Mac is building
+    the round-2 reviewer's close (the bridge splices the new names into the old page's `COACH_JS_PARTS` and makes
+    `coach-more.js` wait for them through `_lazyScripts`, so the old chain waits and a failed fetch is retried);
+    it must bring this tool to exit 0 before a fresh review. The tool earned its keep on day one. Windows: finish
+    W6's review; do not change the tool's cases under the Mac without a line here.
+  - **Agents on both computers (Jonathan, 2026-11-16 evening: "remember for you and windows to use opusplan
+    agents"):** Opus agents (high / xhigh) for the building, fixing and reviewing; Fable only for what Opus
+    cannot do.
+  - **Part d (the Mac, 18:00):** round 3 on `b922641` found 0 BLOCKER, 1 MAJOR, 6 MINOR; all 7 are fixed at
+    `12317b3` in the Mac's worktree (sim 152 of 152, walk 67 of 67), not pushed anywhere yet. Round 3 with a MAJOR
+    means Jonathan is asked what happens next; W9 stays "skip" until the line it names appears.
 - **W7. The setup screens taller than 657 px** (the 20 smoke lines: Change Up's setup 663 px, Power Chord Switch's
   setup in Spanish 658 px). The Mac runs the games smoke before it pushes the splits and writes its lines HERE (a
   bullet under this job). If the Mac shows the same lines: fix the fit at 1366×657 in both languages (screenshots
