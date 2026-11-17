@@ -3,22 +3,57 @@
 Things to do at some point. Not scheduled. What is open right now lives in
 `WORKFLOW.md` → "Where things stand".
 
-## Next session: start here
+Cleaned 2026-11-16 (Jonathan: "clean up todo and remove everything we have already done"). The file as it was,
+with the full record of the 2026-11-11 cut and its plan: `git show 386d063:todo.md`.
 
-Jonathan will say "read todo.md" in a fresh chat. Do this, in this order:
+## Beat maps: make every Play Along song light the same amount before the beat
 
-1. **Ask him how the real-Chromebook check went** (AskUserQuestion: fine / a problem). The cut went live
-   2026-11-11 at 18:28. He was to sign in as a student on school Wi-Fi, open a set, an In-Class Activity and a
-   game, then the console. If he reports a blank page, a "couldn't load" or anything odd: stop and look at that
-   first. The rollback is two reverts and a push (WORKFLOW.md, 2026-11-11 entry). Do nothing else until it is
-   understood.
-2. **If it went fine: bring `tools/pm-e2e.mjs` up to date** (first bullet of the next section). Small, tools only.
-3. **The second adversarial review of `tools/golden.mjs` is done (2026-11-13): the tool failed it** (second
-   bullet of the next section). Rebuild the tool before any split.
-4. **Stop there and report.** Do NOT split any part in that session. The four big parts get a quiet session of
-   their own (the section after next), one part per change, and `coach-core.js` only with Jonathan present.
+Added 2026-11-16 (Jonathan: "we'll have to fix the beat map in the future"). Not started.
 
-Ordinary work does not wait for any of this: a Fast change or a new activity he asks for comes first.
+- **What is true today.** Since 2026-11-16 every Play Along card lights each highlight 60 ms before the beat is
+  HEARD (`PC_LEAD` in `app/cards.js`; his choice; `?snipcal=1&lead=<ms>` tries another value). The PAGE is now the
+  same on every card. The songs are not: each track's beat map (`anchor`, `barTimes` in `SNIPPET_TRACKS`) sits a
+  fixed amount early or late against the sound, so the real lead is 60 ms plus that track's offset.
+- **Measured 2026-11-16** (`python3 tools/beat-audit.py`, all 14 tracks, 452 s; positive = the map is early, so the
+  highlight comes that much sooner; the numbers in a cell are that track's files; nothing was fixed):
+
+  | Track | Offset, ms | Bar-to-bar scatter, ms |
+  |---|---|---|
+  | the cure, guitar off | +57 / +61 | 7 to 13 |
+  | the cure, full | +38 / +18 | 7 to 13 |
+  | Luna | +34 / +11 | 12 to 21 |
+  | Watchtower | +24 / +25 | 11 to 14 |
+  | Neil | +18 / +20 | 10 to 15 |
+  | Seven Nation Army | +19 / +13 / +18 / −11 | 11 to 12 |
+  | Perdón Mamá | +8 / +3 | 2 to 3 |
+  | Sweet Child O' Mine | +4 / −8 | 9 to 10 |
+  | Vuelve a la Vida | −3 / −13 | 6 to 9 |
+  | Las Mañanitas | −9 / −22 | 23 to 26 (worst bar −479, slow file, bar 42) |
+  | Smells Like Teen Spirit | −14 / −22 | 3 to 5 |
+  | Madrecita Querida, G | −18 / −29 | 23 to 35 (worst −283) |
+  | Madrecita Querida, F | −11 / −28 | 30 to 34 (worst +180 / −211) |
+  | Arsenal | −23 / −27 | 2 |
+  | Ella Baila Sola | −34 / −45 | 8 to 11 |
+
+  The names are the builder's short labels for the tracks: match each to its slug in `SNIPPET_TRACKS` before
+  editing. The tool reads ffmpeg's decode; a browser's mp3 start trim is not modelled, so check one track by ear
+  before trusting a number.
+- **Three separate faults in that table:**
+  1. A fixed offset per track (the whole map early or late): move the map, one number per file.
+  2. "the cure" with Guitar off: its rhythm-down files play 25 ms (144 BPM) and 51 ms (120 BPM) after their full
+     mixes, so every highlight is that much MORE early with Guitar off (ca-13, 18, 19, 24, 30, 44).
+  3. Bars that are not steady: Luna bar 10 plays about 64 ms early on the record (ca-20, ca-27, ca-32); Las
+     Mañanitas (ca-35) and Madrecita Querida in both keys (ca-36) scatter 23 to 35 ms with single bars far off.
+- **Do, in this order:** (1) the fixed offsets, biggest first (the cure, Ella Baila Sola, Luna); (2) the cure's
+  Guitar-off files; (3) the unsteady bars. Luna is a Core song: its bar 10 needs Jonathan's ear
+  (`?snipcal=1`). The Choice songs get the light pass the skill describes.
+- **Rules that apply:** skill `audio-and-snippets` (snippet windows are bars, never seconds; never measure a second
+  anchor; never pitch-correct one mix alone; never re-level the cure) and skill `song-facts`. After each track:
+  `python3 tools/beat-audit.py --only <slug>` and `node tools/playalong-loop.mjs --only <id>`; report both summary
+  lines. `node tools/playalong-loop.mjs --leads` measures the page's lead (it must stay 60.0 ms). A CHANGELOG
+  entry: students see it. The Mac only (audio files, headless Chrome).
+- **Leave alone:** `PC_LEAD`, the metronome click (it lands on the heard beat), and the step snippets' bar dots
+  (they light on the heard beat; Jonathan, 2026-11-16: leave them).
 
 ## Reported by Jonathan 2026-11-13: Power Chord Switch is not identifying chords correctly in a loud room
 
@@ -26,196 +61,70 @@ Ordinary work does not wait for any of this: a Fast change or a new activity he 
   room on a student computer. i can flag the specific recording later."
 - **Not looked at yet.** Nothing was run, measured or changed. Wait for him to flag the recording, then bring it in
   with `node tools/mic-sim/takes-in.mjs` (names removed) and replay it; never open the raw download.
-- **Read first:** `WORKFLOW.md` → "Power Chord Switch: where we stopped" (the strum ratio is 1.8 / 2.19 since
-  2026-11-07; the pitch rule and the `ring` / `half` rules were rejected on real takes: do not rebuild them) and
-  `tools/mic-sim/README.md`. Any listening change is danger-zone: Always Reviewed, real takes first.
+- **Read first:** `WORKFLOW.md` → "Power Chord Switch: where we stopped" (the grading rule changed 2026-11-14,
+  after this report: the right chord at any time while it is current; the pitch rule and the `ring` / `half` rules
+  were rejected on real takes: do not rebuild them) and `tools/mic-sim/README.md`. Any listening change is
+  danger-zone: Always Reviewed, real takes first.
 - **Ask him when he flags it:** which chords it got wrong, and whether it marked right chords wrong, wrong chords
   right, or heard nothing.
 
-## Split the four parts that are already over 2,000 lines
+## The big parts
 
-Added 2026-11-11 (Jonathan: "let's make sure we split those files at some point"). Not urgent, but do it in a
-quiet session before one of them reaches the 2,600-line limit that `checks.mjs` 1cv enforces, so the limit never
-blocks a quick change mid-week.
+Three of the four parts that were over 2,000 lines were split on 2026-11-16 (`teacher-activities.js`,
+`coach-runner.js`, `coach-chords.js`). Left:
 
-| Part | Lines on 2026-11-11 | Where it could be cut (read the banners first; these are guesses) |
-|---|---|---|
-| `teacher-activities.js` | 2,400 | the board (arrange, drag and drop, the one move writer) apart from the list and detail screens |
-| `coach-runner.js` | 2,393 | **Split 2026-11-16** (2,394 lines then): Riff Runner and its Wait Mode stay (1,091 lines at the split; 1,109 after `d6c3e16`'s 3 comment lines and the 15-line bridge below); Note Runner, with its race lane, judge and `gamesResetForUser`, moved whole into `coach-noterunner.js` (1,303 lines and a 7-line header) |
-| `coach-core.js` | 2,329 | only with Jonathan: it is the listening code. Mic recordings (`micRec*`) are the obvious section to move; the detectors, `coachDetectPitch` and every line `tools/mic-sim/` reads stay put |
-| `coach-chords.js` | 2,034 | **Split 2026-11-16** (2,167 lines then): Change Up / Power Chord Switch stay (1,397 lines at the split; 1,412 with the 15-line bridge below); the chord ranks, Chord Blitz and Chord Detective moved whole into `coach-chordcards.js` (770 lines and a 7-line header) |
+- **`coach-core.js`: 2,554 lines on 2026-11-16, 46 under the 2,600 limit that blocks a push (`checks.mjs` 1cv).**
+  Only with Jonathan present: it is the listening code. Mic recordings (`micRec*`) are the obvious section to move;
+  the detectors, `coachDetectPitch` and every line `tools/mic-sim/` reads stay put. Until then add nothing to it.
+  How: move the banner section, whole and unchanged, into a new part loaded right after it; list the file in
+  `COACH_JS_PARTS` (`app/boot.js`) and `sw.js` ASSETS; prove with `node tools/golden.mjs` before and after
+  (`--compare` identical), `node tools/slow-load.mjs`, `tools/old-page-loop.mjs`, the full `node tools/checks.mjs`
+  and the three mic-sim commands in `CLAUDE.md`. It touches load order: Always Reviewed. Check `tools/mic-sim/`
+  and `checks.mjs` for text they pin in the section before moving it.
+- **Remove the 2026-11-16 split bridge on or after 2026-12-01** (also on the Windows list, W14). A page opened
+  before the two coach splits keeps the old 8-name `COACH_JS_PARTS` and never asks for `coach-chordcards.js` or
+  `coach-noterunner.js`. The bridge: the 15-line block at the end of `coach-chords.js` and of `coach-runner.js`,
+  and the `typeof` guards kept as a second net (`cbStop` / `nrStop` / `cdStop` in `gamesStopMic`; the Chord Blitz,
+  Note Runner, Finger Gym and Chord Detective chips in `gamesRenderHub`, `coach-hub.js`; `typeof nr` in
+  `gamesHideStop` and `coachReleaseMicIfIdle`, `coach-core.js`). `grep -n "DELIBERATE BRIDGE" coach-*.js` finds
+  the comment over each (5). Remove them all in one commit, put each guarded line back as it was before the bridge
+  (the parent of the commit "Arcade: a page opened before the coach splits loads the two new parts itself"), and
+  keep the `checks.mjs` pin on the part order.
 
-How: one part per change. Move a banner section, whole and unchanged, into a new part loaded right after the one
-it came from; list the new file in `COACH_JS_PARTS` / `TEACHER_JS_PARTS` (`app/boot.js`) and, for an arcade part,
-in `sw.js` ASSETS (`checks.mjs` says if one is missed). Prove it the way the cut was proved: `node tools/golden.mjs`
-before and after with `--compare` identical, `node tools/slow-load.mjs`, the full `node tools/checks.mjs`; for
-`coach-*` also the three mic-sim commands in `CLAUDE.md`. A split touches load order, so it is Always-Reviewed.
-Check `tools/mic-sim/` and `checks.mjs` for text they pin in the section being moved before moving it.
+## Small things, none urgent
 
-**Remove the 2026-11-16 split bridge on or after 2026-12-01.** A page opened before the push of the two coach
-splits keeps the old 8-name `COACH_JS_PARTS` and never asks for `coach-chordcards.js` or `coach-noterunner.js`
-(review R1-1). The bridge: the 15-line block at the end of `coach-chords.js` and of `coach-runner.js` (the old page
-loads the new part itself, writes it into its list and makes the next part in that list wait for it, so its loader
-runs the new order and fetches a failed part again; proved with `tools/old-page-loop.mjs` from the Windows branch
-`win/w6-2026-11-16`), and `typeof` guards kept as a second net: `cbStop` / `nrStop` / `cdStop` in `gamesStopMic` and
-the Chord Blitz, Note Runner, Finger Gym and Chord Detective chips in `gamesRenderHub` (`coach-hub.js`), `typeof nr`
-in `gamesHideStop` and `coachReleaseMicIfIdle` (`coach-core.js`). `grep -n "DELIBERATE BRIDGE" coach-*.js` finds the
-comment over each (5). Remove them all in one commit, put each guarded line back as it was before the bridge (the
-parent of the commit "Arcade: a page opened before the coach splits loads the two new parts itself"; a rebase changed
-its hash), and keep the `checks.mjs` pin on the part order.
-
-## Follow-ups from the 2026-11-11 cut (none urgent)
-
-- [x] **DONE 2026-11-12** (`tools/pm-e2e.mjs` now expects the folded header on an open card; see its commit). **`tools/pm-e2e.mjs` is out of date, on the old site too.** It expects the practice-minutes strip to show while
-  a practice card is open; since 2026-11-10 an open card folds the header away (checks 1cr, and smoke's own
-  practice-minutes walk passes on that). On 2026-11-11 it failed 3 checks and then threw at line 187, identically
-  on the uncut site and on the cut one. Bring it in line with the folded header, or retire the lines smoke covers.
-- **`tools/golden.mjs` is NOT proof for a split yet: rebuild it first.** The second adversarial review ran
-  2026-11-13 and said no: 3 of 8 planted faults caught; 140 of 281 screenshots were of the wrong screen; two runs
-  of the same unchanged tree differed in 45 files; the games are never played. Jonathan approved all four splits
-  (2026-11-12) only once golden is cleared, so no part is split until the tool is fixed and a fresh reviewer's
-  plants are caught. The rebuild started 2026-11-13 on branch `cl/golden-rebuild` (one builder against review
-  findings R2-1 to R2-6; a fresh reviewer plants its own faults when it reports).
-- **A `golden.mjs --compare` process once printed its result and never exited** (2026-11-11, 39 minutes, 0% CPU;
-  the same command run again took 0.7 s). Cause unknown. Until it is understood, give a compare a time limit
-  when it runs in a chain (`perl -e 'alarm 300; exec @ARGV' node tools/golden.mjs --compare A B`).
+- **Two tools have hung with their work finished or idle, cause unknown.** A `golden.mjs --compare` printed its
+  result and never exited (2026-11-11, 39 minutes, 0% CPU; run again it took 0.7 s). The pre-push hook's
+  `checks.mjs --check --skip-links` sat at 0% CPU for over 5 minutes during a branch push (2026-11-16; the Mac's
+  load was about 10; run by hand it finished). Until understood, give either a time limit when it runs in a chain
+  (`perl -e 'alarm 300; exec @ARGV' node tools/…`).
 - **Comments that still say `app.js` / `coach.js` / `teacher.js`** as a place to look (about 850 mentions; the 40
   most misleading are in `index.html`, `sw.js`, `tuner.js`, `guitar-diagrams.js`, `config-main.js`,
   `tabs/journey.js`, `live-quiz.js`, `fab-tools.js`). CLAUDE.md says the old names are logical names, so this is
   tidying, not a hazard. `sw.js` says the shell is 16 requests; it is 30.
-- **The snapshot tool's known gaps** are listed below under "Step 1, not recorded yet".
-- **Ask Jonathan how the real Chromebook check went** (sign in as a student: a set, an activity, a game; and the
-  console), and whether any student saw a blank page or a "couldn't load" on 2026-11-12.
 
-## Refactor the whole site (the cut is live; the clean-ups are not started)
+## The clean-ups after the cut (Phase 2; not started)
 
-**Status (2026-11-11):** the cut went live on 2026-11-11: `app.js`, `coach.js` and `teacher.js` are now part files
-(`WORKFLOW.md` → "Recently shipped" → 2026-11-11; CLAUDE.md → "Where the code lives"). Still open: Phase 2 (the
-clean-ups) and the items under "Step 1, not recorded yet". The text below is the record, left as written.
+The cut of `app.js`, `coach.js` and `teacher.js` into parts went live 2026-11-11 (`WORKFLOW.md` → "Recently
+shipped" → 2026-11-11; CLAUDE.md → "Where the code lives"). What was planned next and never started, each one
+commit, each proved with a golden snapshot before and after:
 
-Added 2026-11-11 (Jonathan). Idea only: nothing has started.
+- 2a declarations next to their feature, and the switched-off code in one labelled file;
+- 2b one shared "step plan" for the two step renderers (each keeps its own markup), and check 1v rewritten to
+  execute;
+- 2c break up `buildLesson`;
+- 2d break up `showTeacherApp` and `renderTeacherActivities`;
+- 2e (optional, Jonathan's call) move dated history comments out of the code: comments were 43% of `app.js`'s
+  bytes.
 
-The plan, in order:
+**Do not refactor:** inline `onclick` handlers and HTML-by-strings (golden freezes the attribute text); the
+top-level state `let`s; `coachDetectPitch`, the mic filters, `ccLoop`, anything in `coach-core.js`; the bodies of
+the save path and `teacherWriteConfig`; `firestore.rules`, document shapes, storage keys, module and activity
+data, `i18n.js`; the files the standalone pages load and those pages; `practice-minutes.js`, `live-quiz.js`,
+`fab-tools.js`, `tuner.js`, `guitar-diagrams.js`, `trainer-*.js`; `styles.css`; `sw.js` logic.
 
-1. **Strengthen the tests against the site as it is today.** Use the existing
-   site as the reference: grow `tools/checks.mjs`, `tools/smoke.mjs` and the
-   other test tools until they describe what the site does now, well enough to
-   catch a rebuild that behaves differently.
-2. **Fix the tests in place.** Once they pass on the existing site, they stop
-   changing. They are the definition of "the site still works".
-3. **Refactor in a new copy of the code.** The existing site stays untouched
-   and keeps serving the class while the new copy is built.
-4. **Run the same fixed tests on the new copy.** The rebuild is done when the
-   tests that pass on the old site also pass on the new one.
-5. **A/B compare old and new,** then decide whether to switch. Switching is a
-   separate decision, made after the comparison, not part of the refactor.
-
-Started 2026-11-11. State (this branch, `rebuild/site`, worktree `.claude/worktrees/rebuild`; `main` is not touched):
-
-- **Where the copy lives (decided):** this worktree and branch. The old site is the `main` checkout. Both are
-  served locally and compared; nothing is deployed for the comparison.
-- **Step 1, done so far: `tools/golden.mjs`.** It records what a site folder shows and saves (sets, rails,
-  screens, game views, activity cards and steps, the pages that open on their own, the floating tools, the
-  teacher console against the fake class, the live quiz with a made-up game (student screen and stage), a screenshot of every set and page, and what every saving control
-  writes), and `--compare` fails on any difference. Proved: two runs of the same site identical (789 of 789
-  files); a reworded label, a shifted progress key and a one-shade colour change each caught. Its header lists
-  the names the rebuild must keep reachable (the driver contract).
-- **Review round 1 of the tool (2026-11-11): 8 broken copies, 0 caught.** It compared a never-clicked page for
-  the dev user only. Added in answer, and all 8 are now caught: what reaches the server after each click (a
-  made-up student on an in-memory Firestore), the gates for a real student at five stages, every set and My
-  progress in the filled state, Next / Back clicked through every step list, a fingerprint of what each click
-  drew, the saving controls of every In-Class Activity, the console's Settings switches with what each writes,
-  a screenshot of every recorded view, byte copies of the files the rebuild must not change, a fixed time
-  zone, and a compare that fails on unfinished or differently-taken snapshots and says PARTIAL otherwise.
-  A fresh reviewer goes over these additions next (cap: 8 mutations).
-- **Step 1, not recorded yet:** what games and drills do after Start; exit checks being taken and scored; the
-  search panel; the tuner; the live quiz's clock and writes; `loadProgress` and the swap45 move on sign-in;
-  the service worker; phone widths; the Spanish filled state.
-- **Finding (audit of `tools/checks.mjs`, 2026-11-11): 44 of its 110 sections depend on the TEXT of the code**
-  (14 are mainly text checks, 18 data checks and 12 executing checks carry text pins). They fail when code only
-  moves, so they cannot be frozen as they are. Before step 2 each one is either rewritten to test behaviour or
-  listed as "updated together with the code it reads". Hardest ten: 1cg, 1cl, 1ce, 1cp, 1ck, 1d, 1ah, 1ai, 1bo,
-  1bb. Outside checks.mjs the text readers are sw-audio-proof, tuning-sim-proof, pm-sim (lifts 7 teacher.js
-  functions), grid-sim and the mic-sim tools; `diagram-parity-check.mjs` slices app.js by line number and is
-  already unusable: leave it out of the frozen set.
-- **Decided (Jonathan, 2026-11-11): split the tests.** FROZEN = the tests of behaviour: `tools/golden.mjs`,
-  `tools/smoke.mjs`, `tools/console-layout-smoke.mjs`, `tools/pm-e2e.mjs`, `tools/pm-rules-test.mjs`,
-  `tools/rule-zero-proof.mjs`, the simulators, and the 66 `checks.mjs` sections that do not read code text.
-  NOT frozen = the 44 sections that read code text: each may be updated in the same change as the code it
-  reads, and every such update is listed for Jonathan in that change's report. The 44 (by the audit; verify a
-  section before relying on its class):
-  - mainly text (14): 1ac, 1g, 1u, Post-push, 1ah, 1ai, 1as, 1bb, 1bo, 1bl, 1cp, 1cg, 3, 1f
-  - data checks with text pins (18): 1o, 1s, 1v, 1d, 1ak, 1ba, 1bf, 1bf2, 1bq, 1bn, 1bk, 1bj, 1x, 1ab, 1bi, 1e,
-    1ag, 1bt
-  - executing checks with text pins (12): 1cm, 1ce, 0, 1cc, 1cf, 1ch, 1cd, 1bg, 1ca, 1ck, 1cl, 1cs
-- **Power Chord Switch listening code:** may be refactored, but the lines, constants and names listed by
-  Jonathan on 2026-11-11 stay byte for byte or the mic-sim tool is updated in the same change; never touch
-  `tools/mic-sim/takes/`; ask before changing `coachDetectPitch` or the mic filters.
-
-### The shape of the rebuild (planning pass 2026-11-11; cut lines come from section banners, not yet checked body by body)
-
-**Chosen: keep the one global scope and classic scripts; cut `app.js`, `coach.js` and `teacher.js` into feature
-files along their banners with a re-runnable script; then a short list of real clean-ups.** Not ES modules: the
-frozen browser tools assign to top-level `let`s bare (`classActivities = …`, `pcState = st`, `db = …`) and patch
-functions on `window` expecting the site's own calls to see the patch; modules break both. No build step.
-
-Why the three files: app.js 17,900 lines, coach.js 10,700, teacher.js 7,200; 64 / 55 / 51 commits touched them in
-14 days, so sessions collide and every session pays to read them. Main moves about 27 commits a day, so the cut
-must be a SCRIPT that can be re-run on a newer main, with the hand-made clean-ups a short stack on top.
-
-- **Phase 0 (first, no site code moves):**
-  - 0a `tools/site-src.mjs`: `siteSource('app.js'|'coach.js'|'teacher.js')` = the parts concatenated in load
-    order; every tool that reads those files by name calls it (checks.mjs about 51 reads + its file lists,
-    grid-sim, mic-sim closed-loop / eval-takes / fake-pw-take, pm-sim). Proof: every tool's output identical
-    before and after on the unsplit tree, denominators included. Always-Reviewed.
-  - 0b `tools/split-site.mjs`: writes the parts from a cut list; asserts concat(parts) = the source byte for
-    byte and that no cut falls inside a function.
-  - 0c two new tests, run on the old site first: `tools/slow-load.mjs` (each script delayed at random, signed
-    in, `?teacher=true`, a deep link; no exception in 20 loads: the load race nothing tests today), and a
-    checks.mjs section that every function an inline handler or a frozen tool calls resolves once all parts
-    are loaded (1bs only compiles handlers).
-- **Phase 1 (three slices, parallel in three worktrees, disjoint files; pure moves):**
-  - 1A app.js → `app/` (boot, save, tab, snippets, shell, lesson, review, drills, drills-call, audio-ui,
-    explore, activities, cards, start). The one non-pure edit: `auth.onAuthStateChanged` and the other
-    statements that START things move to `app/start.js`, loaded last. Save path moved verbatim: Always-Reviewed.
-  - 1B coach.js keeps lines 1-2326 unmoved (detection, `coachDetectPitch`, the mic-sim lines); the games go to
-    coach-hub / -chords / -ear / -strum / -runner / -more. Proof includes the mic-sim trio, numbers identical.
-  - 1C teacher.js → teacher (core), -activities, -songs, -config (verbatim), -manage, -mic, -students.
-  - 1Z integration by one session: index.html script block, loader lists, sw.js file lists (danger zone),
-    SHELL_FILES, CLAUDE.md and skill file lists; full checks, golden, smoke.
-- **Phase 2 (hand-made, each one commit, snapshot-compared):** 2a declarations next to their feature and the
-  switched-off code in one labelled file; 2b one shared "step plan" for the two step renderers (each keeps its
-  own markup) and check 1v rewritten to execute; 2c break up `buildLesson`; 2d break up `showTeacherApp` and
-  `renderTeacherActivities`; 2e (optional, Jonathan's call) move dated history comments out of the code:
-  comments are 43% of app.js's bytes.
-- **Phase 3:** final sync with main, full golden with screenshots, smoke, slow-load, pm-e2e, console smoke,
-  the mic-sim trio; then the A/B.
-- **Do not refactor:** inline `onclick` handlers and HTML-by-strings (golden freezes the attribute text); the
-  top-level state `let`s; `coachDetectPitch`, the mic filters, `ccLoop`, anything in coach.js 1-2326; the bodies
-  of the save path and `teacherWriteConfig`; firestore.rules, document shapes, storage keys, module and activity
-  data, i18n.js; the files the standalone pages load (their script tags are in the snapshot) and those pages;
-  practice-minutes.js, live-quiz.js, fab-tools.js, tuner.js, guitar-diagrams.js, trainer-*.js; styles.css;
-  sw.js logic; the frozen tools.
-- **Left for the cut slices (from the review of 0a, 2026-11-11):**
-  - `tools/mic-sim/replay-takes.mjs` line 239 runs `git log … -- coach.js` from `tools/mic-sim`, so the pathspec
-    matches nothing TODAY and "the newest take is before the last listening change" can never print (from the
-    repo root it answers 2026-11-07). It is the listening work's tool: tell Jonathan, do not change its output
-    here. After the cut it must name every coach part (`ccLoop` and `ccResolvePend` leave `coach.js`).
-  - checks.mjs 1cg pins the literal `<script defer src="app.js">`; checks messages that print a line number
-    of the combined text (`teacher.js:123`) will be numbers in the concatenation, not in a part: fix both at 1Z.
-  - The vm loaders in checks.mjs, grid-sim and closed-loop run the CONCATENATION as one script, so they cannot
-    see a load-order fault between parts (one script hoists every function): that is what 0c is for.
-  - `index.html`'s part block, the two `*_JS_PARTS` arrays and the sw.js lists must land in ONE change: once
-    parts are declared, checks demand each app and coach part in sw.js ASSETS.
-- **Risks with no test yet:** the load race (0c); the service worker upgrading returning students from one
-  cached `app.js` to about 11 files in one all-or-nothing step (needs an old-lists → new-lists upgrade
-  simulation before the switch); first-load time with more requests (measure on main and on the rebuild for
-  the A/B report).
-
-Open questions for when this starts:
-
-- Where the new copy lives (a folder, a branch or a second repo) and how it is
-  served for the A/B comparison.
-- Which behaviours the tests do not cover yet and must cover before step 2.
-- How student progress keys stay identical in the new copy (the "Three
-  regimes" rules in `CLAUDE.md` still apply).
+**Know before starting:** 44 of the 110 `checks.mjs` sections counted on 2026-11-11 read the TEXT of the code, so
+they fail when code only moves. Each may be updated in the same change as the code it reads, and every such update
+is listed for Jonathan in that change's report (his decision, 2026-11-11; the list of the 44 is in
+`git show 386d063:todo.md`). The golden tool does not record everything: read the "not covered" list each run
+prints.
