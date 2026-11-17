@@ -320,6 +320,33 @@ push. Where the Mac is right now: the coach splits with the reviewer's fix A are
   (`teacher-sb-pdf.js`, `teacher-sb-core.js`: `+ New song` twice keeps the first song's pdfs; a draft switched
   during a multi-file pick; a deleted draft's pdfs kept until the view reopens). Fast; a case for each in
   `tools/song-builder-sim.mjs`, broken once. Jonathan's lens: nothing that adds a click.
+  - **W10 DONE, shipped Fast (Windows, 2026-11-16 night; one Opus agent; `teacher-sb-pdf.js`, `teacher-sb-core.js`,
+    `tools/song-builder-sim.mjs`; nothing that adds a click, no markup changed).** Each case red first in the sim,
+    then green, then broken once. `song-builder-sim` 160 of 160, five runs of five (was 152; 1en's pin moved, the
+    number only); `song-files-console-sim` 88, `built-songs-sim` 148, `backup-proof` held (pdfs are never stored,
+    so never in the backup). The console layout smoke was NOT run after it (Chrome was busy).
+    - **Case 2 was worse than "low": it could SAVE wrong data.** A draft switched during a multi-file pick was
+      judged by id only (`const stale = () => sbStopped(gen) || sbSel !== forId;`), and every unsaved new song has
+      the id `'new'`: pressing "+ New song" again during a pick sent the pdf still being read to the SECOND song;
+      its chords text went into that song's chart box and Next stored it in that draft as `chart.text`. A → B and
+      back to A during a pick dropped the first pdf and kept the last two. Fix: `sbPdfSync` counts its drops
+      (`sbPdf.epoch`) and a pick stops when the count moves.
+    - Case 1, "+ New song" twice: the second new song kept the first one's pdfs for the same reason (both ids are
+      `'new'`): chips said "9 lines read" over an empty chart box. Nothing was stored. Fix: the pdfs belong to the
+      new song's own object (`sbPdf.owner`).
+    - Case 3, a deleted draft's pdfs: both deletes cleared the selection and then painted only when the view was
+      still open, and the pdfs drop only at a paint, so leaving the view mid-delete kept the bytes, the documents
+      and the "Own window" object URL in memory until the view reopened. Fix: one line at the top of `sbMemFor`.
+    - **Found beside the three, NOT fixed (the Mac's files; (a) is Jonathan's call):** (a) a second "+ New song"
+      also keeps the first song's MP3: `sbMemFor('new')` returns early on `if(sbMem.id === id) return;`, the file
+      name shows at step 1 and Next would save the second song with it: keep it or drop it? (b) Next pressed on a
+      new song while a pick is still being read: a pdf that finishes during the save puts its text into
+      `sbNew.chartText`, which was already copied and is then thrown away: its chip says "lines read" but the text
+      is not in the draft (nothing wrong saved; the text is lost without a word). (c) the step-4 paste box is one
+      per tab, so pdf text not yet read is lost when another draft opens, as typed text already is.
+    - A correction to what the lead told its agents today: the `teacher-*.js` parts ARE part of the cache
+      fingerprint (`checks.mjs:87`, `...siteParts('teacher.js', ROOT)` in `SHELL_FILES`); they are only kept out of
+      the precache. A change to one makes "shell cache stale" until the full `checks.mjs` rewrites `sw.js`.
 **MORE FOR WINDOWS (the Mac, 2026-11-16 13:40; Jonathan: "windows is going to do the 20 error events now. update
 workflow for what else you want it to work on").** After the 20 error events and rule AD's review, in this order.
 Agents: Opus at high or xhigh; Fable only if Opus cannot do it. Reviews are read-only: findings go in WORKFLOW (a
