@@ -1335,8 +1335,23 @@ function pcFollow(row, force){
   delta = Math.min(delta, rr.top - (top + pad));                     // …but keep this one below the bar
   if(rr.top < top + pad) delta = rr.top - (top + pad);               // this row is hidden above: bring it down
   if(Math.abs(delta) < 2) return;
-  box.scrollBy({ top: delta, behavior: scrollBehavior() });
+  /* Every number above is a getBoundingClientRect one, which counts the
+     scroll box's own CSS zoom; scrollBy counts in the box's own pixels. Full
+     screen zooms .main (body.ca-full, --ca-zoom, 1.37 on a Chromebook), so
+     each follow there scrolled 1.37 times too far: a jump back to the top of
+     a lyric sheet's second column left the line half a screen low (ca-45,
+     2026-11-16). Measured, not read from --ca-zoom; 1 everywhere else. */
+  const zoom = isDoc || !box.offsetHeight ? 1 : box.getBoundingClientRect().height / box.offsetHeight;
+  box.scrollBy({ top: delta / (zoom > 0 ? zoom : 1), behavior: scrollBehavior() });
 }
+/* Full screen on or off, or a window resize, moves the line being played:
+   entering full screen puts the scroll box back at its top (Chrome 157,
+   measured 2026-11-16: .main from 154 to 0 with the song playing) and the
+   zoom changes every height. Forget the line pcFollow last kept in view, so
+   the next beat (a sheet) or note (a tab) brings it back. */
+function pcRefollow(){ if(pcState){ pcState.sheetLine = null; pcState.row = null; } }
+document.addEventListener('fullscreenchange', pcRefollow);
+window.addEventListener('resize', pcRefollow);
 function pcShowSection(root, L, si){
   root.querySelectorAll('.pc-page').forEach(p => { p.hidden = Number(p.dataset.page) !== si; });
   root.querySelectorAll('.pc-sec').forEach(b => b.classList.toggle('cur', Number(b.dataset.sec) === si));
