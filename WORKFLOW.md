@@ -37,7 +37,10 @@ at high effort and `site-reviewer` / `site-reviewer-deep` at high too, and a clo
 pins in the agent files and CLAUDE.md are NOT changed. No Fable review runs unless he asks for it by name: he will
 say at the end of the week which changes get one, depending on the tokens left (same day: "i'll specify fable reviews
 at the end of the week depending on tokens"). So keep a list here of what shipped this week on an Opus review or
-Fast, for him to pick from. Delete this block when he says the weekly limit has reset. A lead session on Fable is his to switch (`/model`).
+Fast, for him to pick from. So far: no name on a mic take (`3792deb`, `e25f0d5`; Fast, then an
+Opus review in the cloud, routine `trig_01Fkh59ZFbHnMUm6gGhntoor`); Play Along highlight timing (`b607794`, `386d063`;
+Fast, then W16 below); the sign-in load fix (branch `fix/load-retry`, not shipped; round 1 was the one Fable review,
+routine `trig_01Bpx4H1QQDAbyEtf2bqGDAi`). Delete this block when he says the weekly limit has reset. A lead session on Fable is his to switch (`/model`).
 
 **FIXED 2026-11-16 by Windows (Fast; one Opus agent): the "Sweet Child O' Mine — Lyrics and Chords" activity (`ca-45`)
 not scrolling properly in full-screen mode.** Reproduced in headless Chrome with real full screen entered through the
@@ -184,6 +187,21 @@ and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fi
   `model: 'opus'`, effort high, a fresh one per fix round, told to find a pixel that moved and a value the ratchet
   lets through. Label `Review: Reviewed (site-reviewer on Opus, N rounds)`. No CHANGELOG entry (nothing a student
   sees). This is groundwork for a visual pass Jonathan has NOT asked for yet: build no new look.
+- **W16. Review the Play Along highlight timing (shipped Fast 2026-11-16, live; Jonathan: "go ahead with those or ask
+  windows to run some"). ONE Opus `site-reviewer`, high effort, told to break it; it needs a browser, which is why it
+  is yours.** Commits `b607794` and `386d063` (`app/cards.js`, `app/boot.js`, `tools/playalong-loop.mjs`,
+  `tools/smoke.mjs`, `tools/checks.mjs` 1bf, the two skill files). Claim: every highlight of a practice card (tab
+  note, chord-grid beat, first note of a new row, lyric-sheet dot and its "This bar" cell) lights `PC_LEAD` = 60 ms
+  before the HEARD beat (`audio.currentTime` + `snipLatency()`), at every speed; the row lead and the sheet lead are
+  gone; the sheet dot stays filled at least the lead + 0.1 s; `?snipcal=1&lead=<ms>` overrides it and does nothing
+  unless present; a cursor that reads behind the decoder never reads back past where a pass or a lap began
+  (`st.passFrom`). Break: the start of a song, a section button mid-song, Loop this part's lap edge, Build up speed's
+  step, a speed change mid-song, the one-file built-song speeds, Guitar and Metronome toggles, the end of a song (the
+  "This bar" cell must not go blank), full screen, `&lead=0`, `&lead=1000`, `&lead=abc`, `&lat=` beside it. Run
+  `node tools/playalong-loop.mjs` and `--leads`, and the change smoke `--en-only --only activities`. Plant 5 faults
+  of your own and report caught / not caught. Fix a BLOCKER or MAJOR in a Fast push with a fresh re-review; list
+  MINORs here. NOT part of it: each song's own beat map (`todo.md`, "Beat maps"; the Mac is fixing the cure's now:
+  stay out of the `the-cure` entry in `app/snippets.js`).
 - **W14. NOT YET, dates only (do not start early; leave the line here until done):**
   - about **2026-11-21**: the accessibility scan's ratchet. Read a week of GitHub's "a11y scan" job results; only if
     every run shows 0 new signatures, switch `--a11y-ratchet` on in `browser.yml`, with one `site-reviewer` round on the
