@@ -124,13 +124,19 @@ for (let i = 2; i < process.argv.length; i++){
   if (!m) die(`unknown argument ${a}`);
   if (!['old', 'new', 'orders', 'seed', 'case', 'verbose', 'strict', 'list'].includes(m[1])) die(`unknown flag --${m[1]} (the flags are in the header)`);
   if (m[2] !== undefined) ARGS[m[1]] = m[2];
-  else if (['old', 'new', 'orders', 'seed', 'case'].includes(m[1])) ARGS[m[1]] = process.argv[++i];
+  else if (['old', 'new', 'orders', 'seed', 'case'].includes(m[1])){
+    const v = process.argv[++i];
+    if (v === undefined || v.startsWith('--')) die(`--${m[1]} needs a value`);   // review R2-8: --seed with no value ran seed NaN
+    ARGS[m[1]] = v;
+  }
   else ARGS[m[1]] = true;
 }
 const VERBOSE = !!ARGS.verbose;
-const ORDERS = ARGS.orders ? parseInt(ARGS.orders, 10) : 12;
+const ORDERS = ARGS.orders ? Number(ARGS.orders) : 12;
 if (!ARGS.old || !ARGS.new) die('usage: node tools/old-page-loop.mjs --old <ref|folder> --new <ref|folder> [--orders=N] [--case=NAME --seed=S --verbose] [--list]');
-if (!(ORDERS >= 1)) die('--orders must be a number of at least 1');
+if (!(Number.isInteger(ORDERS) && ORDERS >= 1)) die('--orders must be a whole number of at least 1');
+if ('seed' in ARGS && !(/^\d+$/.test(ARGS.seed) && Number(ARGS.seed) >= 1)) die('--seed must be a whole number of at least 1');
+if ('case' in ARGS && !ARGS.case) die('--case needs a case name (--list names them)');
 
 function die(msg){ console.log('old-page-loop: could not run: ' + msg); process.exit(2); }
 
@@ -1007,7 +1013,7 @@ const show = (arr, title, mark) => {
     const cs = [...f.cases.entries()];
     const orderCases = cs.filter(([c]) => !/^cache-fast/.test(c));
     const inOrders = orderCases.reduce((a, [, s]) => a + s.size, 0), ofOrders = orderCases.length * seeds.length;
-    console.log(`     in ${inOrders} of ${ofOrders} seeded runs of the cases it appears in (uniform arrival orders: not a browser rate); in cache-fast (a second old tab, its list from the cache first): ${cs.some(([c]) => /^cache-fast/.test(c)) ? 'YES' : 'no'}`);
+    console.log(`     in ${inOrders} of ${ofOrders} seeded runs of the cases it appears in (uniform arrival orders: not a browser rate); in cache-fast (a second old tab, its list from the cache first): ${cs.some(([c]) => /^cache-fast/.test(c)) ? 'YES' : results.some(r => /^cache-fast/.test(r.case)) ? 'no' : 'not run'}`);
     console.log(`     cases: ${orderCases.slice(0, 8).map(([c, s]) => `${c} ${s.size}/${seeds.length}`).join(', ')}${orderCases.length > 8 ? `, … ${orderCases.length - 8} more` : ''}`);
     console.log(`     replay: node tools/old-page-loop.mjs --old ${ARGS.old} --new ${ARGS.new} --case=${f.first.case} --seed=${f.first.seed} --verbose`);
   });
