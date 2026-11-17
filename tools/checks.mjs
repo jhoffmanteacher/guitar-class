@@ -18026,13 +18026,17 @@ const COUNTIN_PIN = { runs: 44, beeps: 140, rounds: 9, takes: 6, tips: 28 };   /
        saves none, R4-4); "could not hear any strums" only when no sound was heard inside the bars; the chord readings' level gate,
        their clarity and their end, through the real scReadChord; rule b's 0.15 share from both sides; a strum slot already called
        keeps its verdict; a slot is called SC_MISS_GRACE after its window; SC_MISS_GRACE, SC_CHORD_CLARITY and SC_REC_MAX_SEC pinned. */
+/* The made-up student every take-save test above signs in as (W18, review of 3792deb: a student with no email let a planted
+   `owner: currentUser.email` pass). Each value below, and the email's local part, must appear NOWHERE in a saved take. */
+const TAKE_USER = { uid: 'test-student-0', displayName: 'Test 0', email: 'test-0-student@example.com', photoURL: 'https://example.com/photos/test-0-student.png' };
+const TAKE_ID_VALS_JS = JSON.stringify([TAKE_USER.displayName, TAKE_USER.email, TAKE_USER.email.split('@')[0], TAKE_USER.photoURL]);
 async function checkStrumCheck() {
   head('1eh. The strum-pattern check on ca-52: the step, the button, the window, the chord on the 1, two full rounds tick the step (run)');
   let bad = 0;
   const fail = m => { err('1eh (strum-pattern check): ' + m); problems++; bad++; };
   if (!COACH_SANDBOX) { fail("1ca's sandbox did not load, so the strum-pattern check was NOT run"); return; }
   const { run } = COACH_SANDBOX;
-  const n = { pins: 0, onsets: 0, chords: 0, lines: 0, strumSteps: 0, sweeps: 0, tempos: 0, saves: 0, again: 0, reads: 0, nothing: 0, life: 0, restExtras: 0, bar1Extras: 0, lockCases: 0, lateTraps: 0 };
+  const n = { pins: 0, onsets: 0, chords: 0, lines: 0, strumSteps: 0, sweeps: 0, tempos: 0, saves: 0, again: 0, reads: 0, nothing: 0, life: 0, restExtras: 0, bar1Extras: 0, lockCases: 0, lateTraps: 0, gameTakes: 0, idScans: 0 };
   const PIN = { pattern: 'D.DU.UDU', bars: 'D5 D5 C5 C5 G5 G5 D5 D5', rests: '1,4', win: 0.45, rule: 'oc', ratio: 1.15, hfRatio: 1.3, startBpm: 85, octTol: 0.6, missGrace: 60, clarity: 0.55, recMax: 60,
     anchor: { range: 1, step: 5, span: 8, rest: -1.5, wide: 4, wideMin: 6, wideSlack: 1.5, wideAccept: 1, wideTight: 0.15, lock: 0.25, lockMin: 4 }, gate: { level: 0.012, pct: 0.2, floor: 0.003, skip: 300, pre: 20, post: 150 }, octOk: 1, octWrong: 2 };
   try {
@@ -18684,16 +18688,16 @@ async function checkStrumCheck() {
       const r = JSON.parse(await run(`(async () => {
         const Blob_ = function(){}, Sent_ = function(){};
         const keep = { cu: currentUser, ed: ensureDb, db, fb: globalThis.firebase, warn: console.warn, rep: SITE_ERRORS.report, cnt: micTakesCount, pcm: micRecPcm16 };
-        const out = { sets: [], refused: [], warned: [], belt: [] };
+        const out = { sets: [], refused: [], warned: [], belt: [], idVals: [] };
         const probs = (v, p, o) => { if (v instanceof Blob_ || v instanceof Sent_) return o;
           if (v === undefined) o.push(p + ' undefined'); else if (typeof v === 'function') o.push(p + ' function'); else if (typeof v === 'number' && !isFinite(v)) o.push(p + ' ' + v);
           else if (Array.isArray(v)) v.forEach((x, i) => { if (Array.isArray(x)) o.push(p + '[' + i + '] array in array'); probs(x, p + '[' + i + ']', o); });
           else if (v && typeof v === 'object'){ const pr = Object.getPrototypeOf(v); if (pr !== Object.prototype && pr !== null) o.push(p + ' not plain'); Object.keys(v).forEach(k => probs(v[k], p ? p + '.' + k : k, o)); }
           return o; };
-        const strict = (path, v) => { const b = probs(v, '', []); if (b.length){ out.refused.push(path + ': ' + b.slice(0, 3).join(', ')); throw new Error('Unsupported field value: ' + b[0]); } out.sets.push(path); if (/-coach$/.test(path)){ out.win = { frac: v.winFrac, ms: v.winMs, slotMs: v.slotMs }; out.ended = v.barsDone + ' bars, complete ' + v.complete; out.ids = Object.keys(v).filter(k => /name|uid|email|user|student|displayName|photo/i.test(k) && !/^(uid|userAgent)$/.test(k)); out.nameIn = JSON.stringify(v).includes(currentUser.displayName); out.fields = ['metroOn','headphones', 'clicks', 'tooLoud', 'gateLevel', 'gateThreshold', 'anchorRange', 'anchorLock', 'anchorLockMin', 'octTol'].map(k => k + '=' + (k in v ? typeof v[k] : 'missing')).join(','); } };
+        const strict = (path, v) => { const b = probs(v, '', []); if (b.length){ out.refused.push(path + ': ' + b.slice(0, 3).join(', ')); throw new Error('Unsupported field value: ' + b[0]); } out.sets.push(path); out.idVals.push(...${TAKE_ID_VALS_JS}.filter(x => JSON.stringify(v).includes(x)).map(x => path + ' holds ' + JSON.stringify(x))); if (/-coach$/.test(path)){ out.win = { frac: v.winFrac, ms: v.winMs, slotMs: v.slotMs }; out.ended = v.barsDone + ' bars, complete ' + v.complete; out.ids = Object.keys(v).filter(k => /name|uid|email|user|student|displayName|photo/i.test(k) && !/^(uid|userAgent)$/.test(k)); out.idScanned = true; out.fields = ['metroOn','headphones', 'clicks', 'tooLoud', 'gateLevel', 'gateThreshold', 'anchorRange', 'anchorLock', 'anchorLockMin', 'octTol'].map(k => k + '=' + (k in v ? typeof v[k] : 'missing')).join(','); } };
         const ref = path => ({ set: async v => strict(path, v), collection: c => ({ doc: id => ref(path + '/' + c + '/' + id) }) });
         try {
-          currentUser = { uid: 'test-student-0', displayName: 'Test 0' }; micRecPcm16 = () => new Int16Array(4);
+          currentUser = ${JSON.stringify(TAKE_USER)}; micRecPcm16 = () => new Int16Array(4);
           db = { collection: c => ({ doc: id => ref(c + '/' + id) }), runTransaction: ${JSON.stringify(kase)} === 'counterFails' ? async () => { throw Object.assign(new Error('counter down'), { code: 'unavailable' }); }
             : async fn => fn({ get: async () => ({ exists: false }), update: (x, v) => strict('count', v), set: (x, v) => strict('count', v) }) };
           try { localStorage.removeItem('micRecSaved'); } catch (e) {}
@@ -18733,7 +18737,66 @@ async function checkStrumCheck() {
       const wantF = 'metroOn=boolean,headphones=boolean,clicks=boolean,tooLoud=boolean,gateLevel=object,gateThreshold=number,anchorRange=number,anchorLock=number,anchorLockMin=number,octTol=number';
       if (r.fields !== wantF) fail(`the take's beat / gate fields are ${r.fields}, want ${wantF} (gateLevel null when the round never reached bar 1)`);
       /* No name on a take (Jonathan, 2026-11-16): the uid is the only thing tying it to the student; the console names it from its roster (teacherMicWho). */
-      if (!r.ids || r.ids.length || r.nameIn !== false) fail(`the saved take carries the student's identity beyond uid: keys ${JSON.stringify(r.ids)}, the user's name ${r.nameIn ? 'inside it' : 'not checked'} (micRecSaveNow must store no name, email or photo)`);
+      if (!r.ids || r.ids.length || !r.idScanned || r.idVals.length) fail(`the saved take carries the student's identity beyond uid: keys ${JSON.stringify(r.ids)}, values ${r.idScanned ? JSON.stringify(r.idVals) : 'not checked'} (micRecSaveNow must store no name, email or photo)`);
+      n.idScans++;
+    }
+    /* Every game's take, not only this check's (review of 3792deb, W18): Power Chord Switch (ccRecMeta), the Listening Coach (coachRecMeta)
+       and Note Runner (its meta is written inside nrFinish, so nrFinish is run with micRecStop handing it a capture and micRecSave caught,
+       which stops it before it touches games or the weak map) go through the REAL micRecSaveNow for the made-up student (TAKE_USER: a
+       name, an email and a photo); no saved document may carry an identity key beyond uid, or the name, the email, its local part or the
+       photo's address as a VALUE anywhere. The site's micRecSave( calls are counted, so a new game that saves takes must join this list. */
+    {
+      const coachSrc = siteSource('coach.js', ROOT);
+      const callers = (coachSrc.match(/\bmicRecSave\(/g) || []).length - (coachSrc.match(/function micRecSave\(/g) || []).length;
+      if (callers !== 4) fail(`the site calls micRecSave( ${callers} times, pinned 4 (Power Chord Switch, the Listening Coach, Note Runner, this check): a game that saves takes must have its take run through the no-identity test below`);
+      const GAMES = {
+        pw: `cc = { mode: 'power', progIdx: 0, chords: ['D5', 'C5'], ladder: false, bpc: 4, bpm: 60, stageBpms: [60], startBpms: [60], countIns: [4], retimedStages: [], tempoLog: [],
+               changes: [{ t: 3000, from: 'D5', to: 'C5', stage: 0, bpm: 60, result: 'ok', readings: [48.02, 55.1] }, { t: 7000, from: 'C5', to: 'D5', stage: 0, bpm: 60, result: 'miss', readings: null }],
+               evLog: [{ t: 3010, kind: 'strum', midi: [48, 55] }] };
+             return ccRecMeta(true);`,
+        coach: `coach = { mode: 'melody', bpm: 70, beatMs: 60000 / 70, gridOffset: 5, listenStart: 2000,
+               slots: [{ midi: 64, label: 'E', state: 'ok', hit: { devMs: 12.345 } }, { midi: null, midis: [55, 59, 62], chordName: 'G', label: 'G', state: 'miss', loose: true }],
+               events: [{ t: 2010, midi: 64, slot: 0, readings: [64.01, 63.98], look: [64.2] }] };
+             return coachRecMeta();`,
+        nr: `nr = { phase: 'play', timeouts: [], pendings: [], looks: [], micOn: false, gym: false, level: 0, chordMode: false, beatMs: 600, goodMs: 120, perfectMs: 60, score: 300,
+               playable: [{ t: 2000, midi: 40, string: 6, fret: 0, result: 'perfect' }, { t: 2600, midi: 45, string: 5, fret: 0, chord: true, name: 'A5', result: 'pitch', unclear: true }, { t: 3200, midi: 47, string: 5, fret: 2 }],
+               evLog: [{ t: 2005, midi: 40, kind: 'note' }] };
+             let meta = null; const stop = new Error('w18 meta caught');
+             micRecStop = () => ({ n: 1 }); micRecSave = (rec, m) => { meta = m; throw stop; };
+             try { nrFinish(true); } catch (e) { if (e !== stop) throw e; }
+             return meta;`
+      };
+      for (const [mode, metaJs] of Object.entries(GAMES)) {
+        const r = JSON.parse(await run(`(async () => {
+          const keep = { cu: currentUser, ed: ensureDb, db, fb: globalThis.firebase, warn: console.warn, rep: SITE_ERRORS.report, cnt: micTakesCount, pcm: micRecPcm16,
+            cc, coach, nr, nrRaf, stop: micRecStop, save: micRecSave };
+          const out = { sets: [], warned: [], ids: null, idVals: [], meta: false };
+          const Blob_ = function(){}, Sent_ = function(){};
+          const put = (path, v) => { out.sets.push(path); out.idVals.push(...${TAKE_ID_VALS_JS}.filter(x => JSON.stringify(v).includes(x)).map(x => path + ' holds ' + JSON.stringify(x)));
+            if (/^micTakes\\/[^/]+$/.test(path)) out.ids = Object.keys(v).filter(k => /name|uid|email|user|student|displayName|photo/i.test(k) && !/^(uid|userAgent)$/.test(k)); };
+          const ref = path => ({ set: async v => put(path, v), collection: c => ({ doc: id => ref(path + '/' + c + '/' + id) }) });
+          try {
+            currentUser = ${JSON.stringify(TAKE_USER)};   // signed in while the round is played, as on the site
+            const meta = (() => { ${metaJs} })();
+            micRecStop = keep.stop; micRecSave = keep.save;
+            out.meta = !!(meta && meta.fields && meta.fields.game);
+            micRecPcm16 = () => new Int16Array(4);
+            db = { collection: c => ({ doc: id => ref(c + '/' + id) }), runTransaction: async fn => fn({ get: async () => ({ exists: false }), update: (x, v) => put('count', v), set: (x, v) => put('count', v) }) };
+            try { localStorage.removeItem('micRecSaved'); } catch (e) {}
+            ensureDb = async () => db;
+            globalThis.firebase = { firestore: { Blob: { fromUint8Array: () => new Blob_() }, FieldValue: { serverTimestamp: () => new Sent_() } } };
+            console.warn = (a, e) => { out.warned.push(String(a) + ' ' + String(e && e.message || '')); };
+            SITE_ERRORS.report = () => {};
+            if (meta) await micRecSaveNow({ mode: ${JSON.stringify(mode)}, n: 48000, srcRate: 48000, bufs: [], ctx0: 0, perf0: 0, firstPlay: 0.1, frames: 10, frameSum: 170, frameMax: 20, track: 'USB mic', settings: null }, meta);
+            return JSON.stringify(out);
+          } finally { currentUser = keep.cu; ensureDb = keep.ed; db = keep.db; globalThis.firebase = keep.fb; console.warn = keep.warn; SITE_ERRORS.report = keep.rep; micTakesCount = keep.cnt; micRecPcm16 = keep.pcm;
+            cc = keep.cc; coach = keep.coach; nr = keep.nr; nrRaf = keep.nrRaf; micRecStop = keep.stop; micRecSave = keep.save; try { localStorage.removeItem('micRecSaved'); } catch (e) {} }
+        })()`));
+        n.gameTakes++;
+        if (!r.meta || !r.sets.includes(`micTakes/test-student-0-${mode}`) || r.warned.length) { fail(`${mode}: the game's take did not save through micRecSaveNow (meta built: ${r.meta}; written: ${JSON.stringify(r.sets)}; warned: ${JSON.stringify(r.warned)}), so its identity was not checked`); continue; }
+        if (!r.ids || r.ids.length || r.idVals.length) fail(`${mode}: the saved take carries the student's identity beyond uid: keys ${JSON.stringify(r.ids)}, values ${JSON.stringify(r.idVals)} (a take stores no name, email or photo)`);
+        n.idScans++;
+      }
     }
     /* Two full rounds tick ca-52's step (Jonathan, 2026-11-14: "2 full rounds"), through the real caStepHtml, scFinish and scCountRound:
        no Mark done button, the count line; a full round writes <id>:0:r1, the second the step's own tick <id>:0, a third nothing; a
@@ -19064,6 +19127,7 @@ async function checkStrumCheck() {
     run(`setLang('en')`);
   } catch (e) { fail('stopped on an error: ' + (e && e.stack ? e.stack.split('\n').slice(0, 3).join(' | ') : e)); }
   /* pinned totals, so a renamed function cannot turn this into a check of nothing */
+  if (n.gameTakes !== 3 || n.idScans !== 6) fail(`ran ${n.gameTakes} other games' takes (want 3: pw, coach, nr) and ${n.idScans} no-identity scans of a saved take (want 6: this check's 3 rounds and those 3 games)`);
   if (n.saves !== 4 || n.tempos !== 4 || n.sweeps !== 2 || n.onsets !== 14 || n.chords !== 15 || n.lines !== 10 || n.pins !== 18 || n.again !== 3 || n.reads !== 3 || n.nothing !== 8 || n.life !== 6 || n.restExtras !== 71 || n.bar1Extras !== 24 || n.lockCases !== 9 || n.lateTraps !== 6) fail(`ran ${n.saves} take saves (want 4), ${n.tempos} tempo opens (want 4), ${n.sweeps} sweep-and-report rounds (want 2), ${n.onsets} onsets (want 14), ${n.chords} chord cases (15), ${n.lines} end lines (10), ${n.pins} pins (18), ${n.again} strums on a called slot (3), ${n.reads} chord-reading frames (3), ${n.nothing} "could not hear" end screens (8), ${n.life} lifecycle cases (6), ${n.restExtras} extra strums on a rest (71), ${n.bar1Extras} extras on bar 1's first rest (24), ${n.lockCases} lock cases and floors (9), ${n.lateTraps} late starters with a strum heard twice (6)`);
   if (!bad) ok(`1eh: one listening step (ca-52, ${PIN.pattern}, rests on slots ${PIN.rests}) of ${n.strumSteps} strum steps; one button, in a row under the board, none in the console, never disabled; the step's slider drawn at ${PIN.startBpm}, the only tempo control, one tempo with the check; no block element and no per-bar sentence (their strings gone); the tempo controls locked during a round and given back on every exit; its own ratios ${PIN.ratio} / ${PIN.hfRatio} through its own scHearStrum (Strum Radar's still 1.4 / 1.7, run); the pattern-shape grid (a player 0.8 of an eighth late kept on his own 18 slots, with or without the click; one extra strum on a rest called an extra through the grid search, ${n.restExtras} cases, rule AD; one on bar 1's first rest leaves bar 2 right, ${n.bar1Extras} cases; the lock taken in the right cases and right players whose beat moves keep their bars; a late starter with a strum heard twice not trapped a bar off, ${n.lateTraps} rounds); the too-noisy gate at count-in level ${PIN.gate.level} (a quiet count-in with loud clicks not gated, a noisy one gated, the first ${PIN.gate.skip} ms left out; a gated round colours nothing, says one line and still counts); the take's beat and gate fields; window ${PIN.win} of an eighth (${n.onsets} onsets run); chord read on the 1 only, rule ${PIN.rule}: the octave vote, then c (${n.chords} scripted cases, two from real takes); the Metronome's click only with headphones (32 a round, all cleared by Stop), its beat dot and the frame around the board on the same click-grid clock (32 beats, 8 bars' 1s, none with it off, cleared on every exit); local recording mode only on this computer's host with the dev bypass (files, no Firestore; another host or a real account unchanged); two full rounds tick ca-52's step (round 1 <id>:0:r1, round 2 the step; Stopped, short and other steps write nothing; no Mark done button); a whole finish saved nothing else; its take saved through micRecSaveNow into a strict Firestore stub (3 rounds); the real sweep and its one-line end screen on a missed strum and an extra (EN + ES); end lines at 0, 1 and many bars in both languages; the round's life on a made-up clock (${n.life} ways through a real round: the mic off, no timer left and the capture let go after each; a take saved only with a finished bar, complete only when played to the end); "could not hear any strums" only when nothing was heard inside the bars (${n.nothing} end screens, EN + ES); the chord readings' gate, clarity and end (${n.reads} frames); a called slot keeps its verdict (${n.again}); grace ${PIN.missGrace} ms, clarity ${PIN.clarity}, longest take ${PIN.recMax} s`);
 }
@@ -19854,6 +19918,13 @@ async function checkPwTakeEvaluator() {
     level: { loudDb: -20, floorDb: -60, clipPct: 0 }, latency: { settingMs: 50, clickFound: false },
     notes: { n: 16, siteRight: 13, replayPresent: 14, detectorMissed: 1, silentMiss: 1, why: { counted: 13, wrong: 1, 'no-onset': 2 }, offPitch: {}, lowH1H2Db: null, secondLook: 0 } };
   const PLACED = { site: "the site's own beat", beeps: 'the beeps', setting: 'the delay setting alone' };
+  // The Evaluate-all row's name (W18, review of 3792deb): the console's own name for a take, made up with a quote and markup, comes out
+  // escaped in the cell's title (escAttr) and in its text (escHtml); a raw name breaks the attribute and this match
+  {
+    const nm = 'Test "0" <b>', h = ev.html([rows[0]], [nm]);
+    const m = /<tr><td class="nc" title="([^"]*)">([^<]*)<\/td>/.exec(h);
+    if (!m || m[1] !== 'Test &quot;0&quot; &lt;b&gt;' || m[2] !== rows[0].take + ' · Test "0" &lt;b&gt;') fail(`the Evaluate-all row for a take named ${JSON.stringify(nm)} is ${JSON.stringify((h.match(/<tr><td class="nc"[^]*?<\/td>/) || [''])[0])}; want title="Test &quot;0&quot; &lt;b&gt;" and the text escaped (escAttr / escHtml)`);
+  }
   // two takes below 60 BPM in every round (2-click count-ins): the mic-delay line says why they could not measure it
   const slowOnly = ['pw-slow-hum'];
   const renders = [['all', rows, names, []]].concat(['pw-pair', 'pw-fast-bar', 'pw-every2-stop'].map(nm => [nm + ' alone', [byName(nm)], [nm], []]),
