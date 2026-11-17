@@ -435,7 +435,7 @@
       });
     }
     async function askCall(item, t) {
-      var picked = -1, t0 = nowMs();
+      var t0 = nowMs();
       var btns = item.choices.map(function (c, i) { return '<button class="hif-btn hif-choice" data-act="pick" data-i="' + i + '" aria-label="Sound ' + String.fromCharCode(65 + i) + '">Sound ' + String.fromCharCode(65 + i) + '</button>'; }).join('');
       drawFrame(item, '<div class="hif-choices">' + btns + '</div><div class="hif-row"><button class="hif-btn primary" data-act="lock" id="hif-lock" disabled>' + S.btn.lock + '</button>' +
         (item.replayRef ? '<button class="hif-btn" data-act="replay-ref">' + S.btn.replay + '</button>' : '') + '</div>');
@@ -523,7 +523,6 @@
         } else if (res.correct) text = S.fb.right(nm(item.target.midi), item.interval ? item.interval.name + ' ' + item.interval.dir : '');
         else text = missLine(item, ans.tries[0]);
       } else if (item.task === 'call') {
-        var ch = item.choices.filter(function (c) { return c.midi === ans.pick; })[0];
         if (res.correct) text = res.posError ? S.fb.posError : S.fb.right(nm(item.target.midi), item.interval.name + ' ' + item.interval.dir);
         else text = S.fb.picked(nm(ans.pick), nm(item.target.midi));
         if (res.posError) cls = 'warn';
@@ -580,7 +579,6 @@
       return r;
     }
     async function showContrast(c, t) {
-      var sa = core.semisOfName(c.a), sb = core.semisOfName(c.b);
       render('<div class="hif-wrap"><div class="hif-top"><span class="hif-task">' + S.lessonTitle + '</span></div><div class="hif-card"><p class="hif-line">' + esc(S.contrast.title(c.a, c.b)) + '</p>' +
         '<p class="hif-small">' + S.contrast.line + '</p><div class="hif-choices"><button class="hif-btn hif-choice big" id="hif-ca" disabled>' + esc(c.a) + '</button><button class="hif-btn hif-choice big" id="hif-cb" disabled>' + esc(c.b) + '</button></div>' +
         '<div class="hif-row"><button class="hif-btn" data-act="hear-contrast">' + S.contrast.hear + '</button><button class="hif-btn primary" data-act="go">' + S.btn.go + '</button></div></div></div>');
