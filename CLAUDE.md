@@ -93,6 +93,21 @@ change `firestore.rules` without telling Jonathan it needs a console paste;
 re-level "the cure"; delete what is switched off (Daily 5, Take It to a Song
 sections); resurrect the deleted student tour.
 
+**Keep the Mac's load "just right"** (Jonathan, 2026-11-16; the Mac has 8 cores, a low-power i5, 16 GB). Run
+`uptime` and read the 1-minute load BEFORE each of these: spawning an agent, starting a browser run, starting a full
+`checks.mjs`, a proof loop or a golden snapshot. Then:
+- **under 4** and work is queued → start the next job; do not leave the Mac idle.
+- **4 to 8** → just right: start nothing new that is heavy (one light, Node-only job is fine).
+- **over 8** → start nothing; a quick check now takes 7 minutes instead of 2 (measured 2026-11-16 at load 10).
+- **over 12 for 5 minutes** → pause the job that can best wait, and tell Jonathan in one line.
+- **Where work goes, decided before the brief is written:** repo-only, Node-only work (a builder, a reviewer, a fix
+  round) goes to the CLOUD (a routine set to run once, skill `schedule`; push its branch first) or to the Windows
+  list in WORKFLOW. The Mac keeps what only it can do: headless Chrome, audio and other Mac-only files, and the lead.
+- **On the Mac at once:** the lead, at most 2 local agents, at most 1 headless-Chrome run. A 3rd local agent only
+  when the load is under 4 and it is Node-only. Each agent's brief says: one job at a time, no sub-agents, and wait
+  while `uptime` shows over 8 (10 minutes at most, then go on and say so).
+- Every report that ran agents or long jobs ends with one line: the load when it started and the highest you saw.
+
 **Habits that catch the expensive bugs:**
 - Grep before you edit — the same bug lives in sibling copies and in comments
   that describe the old behaviour. Fix them together.
@@ -354,6 +369,7 @@ A review is due when a change is Always-Reviewed ("Fast by default"), Jonathan s
 - **Treat agent output as claims.** Read every quoted line yourself. Make a fixer prove each new guard by breaking the code and pasting the red line. Send product choices found in a review to Jonathan with AskUserQuestion.
 
 **Agents for ordinary work too, at your discretion** (Jonathan, 2026-11-11: "agents and subagents are fine for normal changes too to speed things up"). The 2026-11-08 permission above covered review work only; this widens it. For any change, spawn agents (and let an agent use sub-agents) when that gets the work done sooner: independent parts built in parallel, a long search or audit, a test run while you keep editing. Do not ask first. This overrides the Agent tool's "when in doubt, don't spawn" for this repo. It does not change who reviews what: "Fast by default" still ships with no reviewer, and the reviewer models and effort above stay as pinned.
+- Read the load first and choose cloud, Windows or the Mac: "Keep the Mac's load just right" in "Start here".
 - Still your call each time: a few tool calls or one file family is faster done yourself.
 - Every brief states a size (how many agents or sub-agents, how many browser runs) and the limits in "Brief each agent with the limits".
 - Agents that edit work in their own worktree, created first; you cherry-pick their commits. Only one smoke, `pm-e2e.mjs` or other headless-Chrome run at a time on this machine.
