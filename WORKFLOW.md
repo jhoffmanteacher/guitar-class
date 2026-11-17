@@ -36,6 +36,26 @@ entry added the same day. Part e of the builder: only when he asks. He asked the
 offer both tab and a lyrics / chord chart: answered (coded songs do it as separate cards; a built song holds
 chords and lyric lines only, no tab); nothing built.
 
+**THE MAC SESSION IS PAUSED (Jonathan, 2026-11-17 afternoon: "prepare to pause"). To pick up: read this block, then
+"The Mac's own list" under it.** Everything shipped is on main and confirmed live through `b1fb3a5` (the lyric sheet
+at the top, highlights on the beat); the later pushes are notes only. Nothing is half-pushed.
+- **Two builders were told to stop at a clean point and commit; their branches are LOCAL to the Mac, not on GitHub:**
+  `feat/sheet-one-column` (worktree `.claude/worktrees/sheet-scroll`): FIRST the sheet's dot and chord mark lighting
+  a moment after the "This bar" strip (Jonathan confirmed that is what he sees on ca-45), THEN two-column sheets as
+  one long column. `feat/card-views` (worktree `.claude/worktrees/card-views`): the Chords / Tab switch (inventory,
+  design, a pilot). Each wrote "WHERE I STOPPED" at the end of its details file; those files are in the session
+  scratchpad on the Mac and do not survive a reboot, so read the branch's own commits first (a commit that starts
+  "WIP, not verified:" is exactly that).
+- **Not started:** private song audio step 2a (the queued line below). The 18 files are copied for him in
+  `Claude outputs/private-songs-to-upload-2026-11-17/` (exact copies; he does not upload until told).
+- **Red on GitHub, not the Mac's:** "Browser tests → smoke activities (English)" has failed on main since `d2a676c`
+  (the ca-53 edit of 2026-11-17 by another session); a builder saw one error in the strum check on ca-52 in that
+  walk. Whoever made the ca-52 / ca-53 edits owns it; until it is green a new activities fault hides behind it.
+- **Merged local branches and worktrees that can go** (after `git cherry origin/main <branch>` shows no `+`):
+  `fix/load-retry`, `ship/load-retry`, `fix/take-no-name`, `feat/highlight-timing`, `feat/lead-zero`,
+  `feat/sheet-scroll-top`, `fix/cure-beat-map`, `mac/close-rankboard`, and the review worktrees `review-cure`,
+  `review-rankboard`, `ship-lr`. Delete nothing without checking; never delete a remote branch.
+
 **THE MAC'S OWN LIST, 2026-11-17 (delete each line when it is no longer news):**
 - **QUEUED, the Mac's next job when a builder slot is free: private song audio, step 2a (Jonathan, 2026-11-17: "which
   songs do i upload for private song audio?").** He is ready to upload. He CANNOT yet: Upload accepts only a file on
