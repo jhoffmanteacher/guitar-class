@@ -117,9 +117,8 @@
    tabs/ pages, a ?teacher page's own markup beyond index.html).
 
    WHAT THE STATIC PASS CANNOT SEE. A name built at run time (window[name] with a variable, a string passed to
-   setTimeout) or a call through a value handed over from elsewhere; a name inside a regex literal is wrongly taken
-   for a reference (the scanner does not model regex literals; a quote or // inside one can also blank the rest of
-   that line); a binding of the same name anywhere in the reference's top-level statement shadows it there, even
+   setTimeout) or a call through a value handed over from elsewhere; a regex literal the scanner does not
+   recognise as one (a / right after a ) or a name is read as division); a binding of the same name anywhere in the reference's top-level statement shadows it there, even
    in another inner function; destructuring defaults; an object key written as a string. It reads only the NEW
    text of the list parts an old page fetches: an OLD cached copy of a list part (sw.js) is the run's half-K /
    mixed-random cases, not the static pass. Files fetched lazily outside the part lists (trainer-*.js by the
@@ -214,7 +213,7 @@ function openTree(spec){
      refs  comments out AND string text out, except on…= handler attributes inside strings, up to their closing quote
            or across a ${…} / ' + x + ' to the end of the piece (a name that is only
            mentioned in a string or a comment is not a reference; a handler in markup is).
-   A `/` that starts a regex literal is not modelled: a quote or `//` inside one can blank the rest of that line. */
+   A `/` where an expression starts is read as a regex literal and skipped whole; after a ) or a name it is division. */
 const SCAN = new Map();
 function scanJs(src){
   if (SCAN.has(src)) return SCAN.get(src);
@@ -263,6 +262,18 @@ function scanJs(src){
     if (c === '\'' || c === '"'){
       let j = i + 1; while (j < n && src[j] !== c && src[j] !== '\n'){ if (src[j] === '\\') j++; j++; }
       strText(i + 1, Math.min(j, n)); i = j + 1; continue;
+    }
+    /* A regex literal: a / where an expression starts (after an operator, an opening bracket, a comma, or return /
+       typeof / case …). Its text is skipped as a whole, so a quote or a backtick inside it (coach-core.js:
+       /in field ([\w.`[\]]+)/) no longer opens a string that blanks the rest of the file in refs. */
+    if (c === '/'){
+      let k = i - 1; while (k >= 0 && /\s/.test(src[k])) k--;
+      const prev = k < 0 ? '' : src[k], word = (src.slice(Math.max(0, k - 12), k + 1).match(/[A-Za-z_$][\w$]*$/) || [''])[0];
+      if (prev === '' || /[(,=:[!&|?{};+\-*%<>~^]/.test(prev) || /^(?:return|typeof|case|in|of|void|delete|new|do|else|yield|await)$/.test(word)){
+        let j = i + 1, cls = false;
+        while (j < n && src[j] !== '\n'){ if (src[j] === '\\'){ j += 2; continue; } if (src[j] === '[') cls = true; else if (src[j] === ']') cls = false; else if (src[j] === '/' && !cls) break; j++; }
+        if (j < n && src[j] === '/'){ blank(refs, i + 1, j); i = j + 1; while (i < n && /[a-z]/.test(src[i])) i++; continue; }
+      }
     }
     if (c === '`'){ modes.push('tpl'); tpl.push({ hq: null }); i++; continue; }
     if (c === '{' && top){ modes.push('brace'); i++; continue; }
