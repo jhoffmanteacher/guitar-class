@@ -109,12 +109,15 @@
        offline  the browser knows it is offline: 'offline' / 'online' events fire on that device's open tabs at the
                 phase's ends; writes wait (F12); reads, transactions and the Firestore SDK's <script> fail at once;
        refused  the server REFUSES the write or read after 200-800 ms (permission-denied, quota): nothing is applied.
-                This is the only phase in which set() rejects.
+                The read rejects as 'unavailable' (as offline). This and 'denied' are the only phases in which set() rejects.
+       denied   (2026-11-17, directed check L1 only) 'refused' whose READS reject with permission-denied (a rules refusal,
+                F15): what app/save.js loadProgress records as progressLoadDenied. Never in the seeded families: an
+                account the rules refuse at sign-in gets the access screen (app/boot.js accessRefusedAtBoot), not the app.
        hang     (2026-11-17, directed check L14 only) a read sent in it never settles, ever (the real stalled get());
                 writes wait for the end of the phase, as in a stall.
      F13 (2026-11-17) With no server answer (offline, a stall past 10 s), a get() with no `source` resolves from the
          SDK's memory cache when that holds the doc: here, only the tab's own queued writes, so a PARTIAL doc with
-         metadata.fromCache and hasPendingWrites true; get({ source: 'server' }) never does. F14: the hang phase.
+         metadata.fromCache and hasPendingWrites true; get({ source: 'server' }) never does. F14: the hang phase. F15: the denied phase.
      A self-test of these rules runs before the cases; --fake-fault breaks one rule and the self-test must fail.
    - The start doc (a returning student) holds a non-default value in every category the save path can hold back or
      overwrite, including a path pick for ca-46 (half the two-devices cases start with none, so K2 stays reachable).
@@ -229,7 +232,10 @@
      kind of change stops the retry at once (L11, one run per field of the change snapshot, and by hand before and
      during the read); A's late answer leaves B's own retry alone (L12); the backoff ends at one read a minute (L13); a
      read that never answers times out (L14); a doc the page cannot apply keeps the failed-read rules (L15); and S13
-     (the reset cases) a Delete marker with no doc stops the retry. See loadRetryChecks().
+     (the reset cases) a Delete marker with no doc stops the retry. W19 (2026-11-17, the round 2 review's planted faults):
+     L1's sign-in read is a REFUSAL (the denied phase), which must be retried like any other, and the late load clears
+     the refusal flag (progressLoadDenied); L16 the late load draws the page again (the rail's module progress) and asks
+     the period question when the doc holds none. See loadRetryChecks().
      See directedChecks(). A failure prints "✗ FAIL directed …" and exits 1.
 
    Reading a FAIL line: case index, family, the stored value, the values the oracle accepts, and the replay command. */
@@ -306,7 +312,8 @@ const FAKE_FAULTS = {
   'update-nested-delete': 'update() accepts a FieldValue.delete() nested inside a map value (breaks F4)',
   'offline-rejects-writes': 'an offline set() is rejected instead of waiting for the reconnect (breaks F11)',
   'no-cache-answer': 'an offline get() with a write queued rejects instead of answering from the local cache (breaks F13)',
-  'hang-settles': 'a read sent into a hang settles like a stalled one (breaks F14)'
+  'hang-settles': 'a read sent into a hang settles like a stalled one (breaks F14)',
+  'denied-reads-unavailable': 'a read in a denied phase rejects as unavailable, not permission-denied (breaks F15)'
 };
 function clone(v){
   if (v instanceof FieldDelete || v instanceof FieldIncrement) return v;
@@ -418,7 +425,7 @@ class World {
     const lat = (lo, hi) => Math.round(lo + (hi - lo) * this.r());
     if (ph.phase === 'up') return { ok: true, at: this.now + lat(40, 400) };
     if (ph.phase === 'slow') return { ok: true, at: this.now + (ph.lat || lat(2000, 6000)) };
-    if (ph.phase === 'refused') return { ok: false, at: this.now + lat(200, 800) };
+    if (ph.phase === 'refused' || ph.phase === 'denied') return { ok: false, at: this.now + lat(200, 800) };
     if (ph.phase === 'offline' && FAKE_FAULT === 'offline-rejects-writes') return { ok: false, at: this.now + lat(200, 800) };
     return { ok: null, at: ph.until + lat(40, 400) };
   }
@@ -493,7 +500,7 @@ function makeClient(world, tab){
   };
   const read = (path, o) => new Promise((res, rej) => {
     const serverOnly = !!(o && o.source === 'server');
-    const refusedNow = dev.phaseAt(world.now).phase === 'refused';
+    const phaseNow = dev.phaseAt(world.now).phase, refusedNow = phaseNow === 'refused' || phaseNow === 'denied', deniedNow = phaseNow === 'denied' && FAKE_FAULT !== 'denied-reads-unavailable';
     const tr = world.readTrip(dev);
     const settle = () => {
       const cached = tr.ok !== true && !serverOnly && !refusedNow ? cacheSnap(path) : null;
@@ -515,7 +522,10 @@ function makeClient(world, tab){
         }
         res(s);
       }
-      else { world.gets.push({ tab: tab.name, at: world.now, n: world.evN, alive: tab.alive, path, ok: false }); world.log(`${tab.name} read ${path}: FAILED`); rej(Object.assign(new Error('Failed to get document because the client is offline.'), { code: 'unavailable' })); }
+      /* F15 (2026-11-17, W19): a read sent in a 'denied' phase rejects as a rules refusal (permission-denied); every other
+         failed read as "the client is offline" (unavailable). app/save.js loadProgress records the code
+         (progressLoadDenied), and the late load must retry a refused read like any other (directed L1). */
+      else { world.gets.push({ tab: tab.name, at: world.now, n: world.evN, alive: tab.alive, path, ok: false, denied: deniedNow }); world.log(`${tab.name} read ${path}: ${deniedNow ? 'DENIED' : 'FAILED'}`); rej(deniedNow ? Object.assign(new Error('Missing or insufficient permissions.'), { code: 'permission-denied' }) : Object.assign(new Error('Failed to get document because the client is offline.'), { code: 'unavailable' })); }
     };
     if (tr.ok === 'never'){ world.log(`${tab.name} read ${path}: sent into a hang, never answers`); return; }
     world.at(tr.at, settle, tab, 'net');
@@ -709,6 +719,18 @@ async function fakeSelfTest(){
     dev.phases = [];
     check('F14 hang: a read sent into it never settles; a write waits for the end of the phase and lands', !settled && w.docs.get(P).data.w === 2, JSON.stringify({ settled, d: w.docs.get(P).data }));
   }
+  {
+    const { w, db } = mk();
+    w.docs.set(P, { data: { v: 1 }, version: 1 });
+    dev.phases = [{ phase: 'denied', until: T0 + 2000 }, { phase: 'offline', until: T0 + 4000 }];
+    const codes = [];
+    db.collection('progress').doc('u').get({ source: 'server' }).then(() => codes.push('ok'), e => codes.push(e && e.code));
+    await w.runUntil(T0 + 2500);
+    db.collection('progress').doc('u').get({ source: 'server' }).then(() => codes.push('ok'), e => codes.push(e && e.code));
+    await w.runUntil(T0 + 8000);
+    dev.phases = [];
+    check('F15 a read in a denied phase rejects with permission-denied; an offline read with unavailable', codes.join() === 'permission-denied,unavailable', JSON.stringify(codes));
+  }
   return out;
 }
 
@@ -732,6 +754,9 @@ function makeTab(world, name, device, opts){
   const tab = { name, device, alive: true, hidden: false, docL: {}, winL: {}, lastLandAt: 0, stallQueued: 0, faults: [], net: [], onlines: [], sdkLoads: [], msgs: [], boxes: [],
     sdkBlockedUntil: opts.sdkBlockedUntil || 0, sdkMs: opts.sdkMs || 150, sdkLoadedAt: null, sdkAttempts: 0 };
   const els = {};
+  /* Ids the site only ever creates itself and appends to <body> (opts.absent, directed L16: 'period-overlay'): not found
+     until a box with that id is on the page, as in a browser. Every other id finds a stub element, as before. */
+  const absent = new Set(opts.absent || []);
   const mkEl = id => {
     const e = {
       id, style: { setProperty(){}, removeProperty(){}, getPropertyValue(){ return ''; } }, dataset: {}, children: [], _h: '',
@@ -801,7 +826,7 @@ function makeTab(world, name, device, opts){
     console: { log(){}, info(){}, debug(){}, warn: (...a) => { world.log(`${name} console.warn: ${a.map(x => x && x.message ? x.message : String(x)).join(' ').slice(0, 160)}`); }, error: (...a) => { world.log(`${name} console.error: ${a.map(String).join(' ').slice(0, 160)}`); } },
     document: {
       documentElement: mkEl('html'), head, body, readyState: 'complete',
-      getElementById(id){ const box = tab.boxes.filter(b => b.id === id && b.el.removedAt == null).pop(); if (box) return box.el; return els[id] || (els[id] = mkEl(id)); },
+      getElementById(id){ const box = tab.boxes.filter(b => b.id === id && b.el.removedAt == null).pop(); if (box) return box.el; if (absent.has(id)) return null; return els[id] || (els[id] = mkEl(id)); },
       querySelector(){ return null; }, querySelectorAll(sel){ return /\.save-ind\b/.test(String(sel)) ? [saveInd] : []; }, createElement(){ return made(); }, createDocumentFragment(){ return mkEl(''); }, createTextNode(){ return mkEl(''); },
       addEventListener(type, fn){ (tab.docL[type] = tab.docL[type] || []).push(fn); }, removeEventListener(type, fn){ tab.docL[type] = (tab.docL[type] || []).filter(f => f !== fn); },
       fonts: { ready: Promise.resolve() },
@@ -1787,14 +1812,14 @@ async function runCase(seed, idx, famFilter){
       network up, then a third while the browser is OFFLINE: the third waits in the SDK and lands at the reconnect
       (F12: offline, set() does not fail), and the page never says "save.failed" or "save.notSaving" for it. Counted:
       the transactions the tab ran (1). */
-async function directedRun(label, initial, phases, steps, untilMs){
+async function directedRun(label, initial, phases, steps, untilMs, tabOpts){
   const world = new World(mix(BASE_SEED, 4242));
   const dev = device('chromebook', phases);
   dev.localStorage = { _d: {}, getItem(k){ return Object.prototype.hasOwnProperty.call(this._d, k) ? this._d[k] : null; }, setItem(k, v){ this._d[k] = String(v); }, removeItem(k){ delete this._d[k]; }, clear(){ this._d = {}; }, key(i){ return Object.keys(this._d)[i] ?? null; }, get length(){ return Object.keys(this._d).length; } };
   if (initial) world.docs.set('progress/' + USER.uid, { data: clone(initial), version: 1 });
   CURRENT_WORLD = world;
   world.faults = [];
-  const tab = makeTab(world, 'T1', dev, { root: ROOT, seed: mix(BASE_SEED, 77), sdkMs: 150 });
+  const tab = makeTab(world, 'T1', dev, Object.assign({ root: ROOT, seed: mix(BASE_SEED, 77), sdkMs: 150 }, tabOpts));
   tab.ctx.__booted = () => { tab.booted = true; tab.bootedAt = world.now; };
   siteCall(tab, SIGN_IN);
   let from = T0;
@@ -1882,16 +1907,24 @@ async function loadRetryChecks(out, fail){
   const box = tab => tab.boxes.filter(b => b.id === 'load-notice');
   /* L1 */
   {
-    let mid = null;
-    /* Refused until 6 s: the read that loads (at ~6.5 s) still finds the doc's own place (m6w1), because the place
-       save of 1.5 s keeps failing until then and lands only at ~8.5 s; so keeping m7w1 on screen is the page's doing. */
-    const { world, tab, stored } = await directedRun('L1 a late load', START, [{ phase: 'refused', until: T0 + 6000 }], [
+    let mid = null, atSignIn = null;
+    /* Denied until 6 s: the read that loads (at ~6.5 s) still finds the doc's own place (m6w1), because the place
+       save of 1.5 s keeps failing until then and lands only at ~8.5 s; so keeping m7w1 on screen is the page's doing.
+       The sign-in read is a REFUSAL (permission-denied, F15), and so are the retries until 6 s: a refused read is
+       retried like any other (W19 P12), and the late load clears the refusal flag as a good sign-in read would (W19 P4:
+       progressLoadDenied; today only accessRefusedAtBoot reads it, once per sign-in, after loadProgress resets it). */
+    const { world, tab, stored } = await directedRun('L1 a late load', START, [{ phase: 'denied', until: T0 + 6000 }], [
+      { at: 1000, what: '(reads the page after the sign-in read)', probe: t => { atSignIn = { failed: t.run('progressLoadFailed'), denied: t.run('progressLoadDenied'), retry: t.run('_loadRetry !== null') }; } },
       { at: 1500, what: 'opens set m7w1 (browsing: not a change)', code: 'lastModuleNum = 7; lastSetId = "m7w1"; saveProgress();' },
-      { at: 9000, what: '(reads the page)', probe: t => { mid = { failed: t.run('progressLoadFailed'), set: t.run('lastSetId'), retry: t.run('_loadRetry !== null'), skills: t.run('JSON.stringify(progress)') }; } },
+      { at: 9000, what: '(reads the page)', probe: t => { mid = { failed: t.run('progressLoadFailed'), denied: t.run('progressLoadDenied'), set: t.run('lastSetId'), retry: t.run('_loadRetry !== null'), skills: t.run('JSON.stringify(progress)') }; } },
       { at: 10000, what: 'logs a rep on m6w1-s1 and the day counts for the streak', code: 'logPracticeRep("m6w1-s1"); bumpPracticeStreak();' },
       { at: 13000, what: 'hides the tab', hide: true }
     ], 30000);
-    out.checks += 7;
+    out.checks += 9;
+    if (!atSignIn || atSignIn.failed !== true || atSignIn.denied !== true)
+      fail(`directed L1 a late load: setup — the sign-in read should be REFUSED (permission-denied, a 'denied' phase) by 1 s; ${JSON.stringify(atSignIn)}`);
+    else if (atSignIn.retry !== true) fail('directed L1 a late load: the sign-in read was refused (permission-denied) and no retry runs at 1 s; a refused read is retried like any other failed read (progressLoadRetryStart)');
+    if (!mid || mid.denied !== false) fail(`directed L1 a late load: the late load left the refusal flag set (progressLoadDenied ${JSON.stringify(mid && mid.denied)} at 9 s); a doc that loaded was not refused`);
     const ok = world.gets.filter(g => g.tab === 'T1' && g.path === 'progress/' + USER.uid);
     const lateAt = (ok.find(g => g.ok) || {}).at;
     if (!(ok.length >= 2 && !ok[0].ok && lateAt != null && mid && mid.failed === false && mid.retry === false))
@@ -2190,6 +2223,32 @@ async function loadRetryChecks(out, fail){
     if (!mid || mid.failed !== true || mid.retry !== false || canon(stored && stored.practiceLog) !== canon(START.practiceLog) || canon(stored && stored.streak) !== canon(START.streak))
       fail(`directed L15 a doc the page cannot apply: at 12 s ${JSON.stringify(mid)}; stored streak ${JSON.stringify(stored && stored.streak)}, reps ${JSON.stringify(stored && stored.practiceLog && stored.practiceLog['m6w1-s1'])}`);
     for (const f of tab.faults) fail(`directed L15: site code ${f} (R12)`);
+  }
+  /* L16 THE PAGE IS DRAWN AGAIN (2026-11-17, W19: P15 no redraw, P16 no period question). The app is on screen (the
+     one element appIsOnScreen reads, as the reset cases set it) and the student is on Module 6 (browsing, not a
+     change); the doc holds no period. While the sign-in read has failed the rail shows the empty state (no module
+     progress) and the period question is not asked (maybeShowPeriodPicker: "never ask a question we can't save the
+     answer to"). Once the doc loads (~3.5 s) the page must be drawn from it, as showApp draws it: the rail's module
+     progress (renderProgressStrip, through redrawAllViews: rmp-lbl "done/total", done > 0 from the doc's m6w1-s1
+     'gotit'), and the period question asked (the period-overlay box), both at the late load, not before. */
+  {
+    const NOPERIOD = clone(START); delete NOPERIOD.period;
+    let pre = null, mid = null;
+    const { world, tab } = await directedRun('L16 the late load draws the page again', NOPERIOD, [{ phase: 'refused', until: T0 + 3000 }], [
+      { at: 100, what: '(the app is on screen)', code: "document.getElementById('app').style.display = 'block'" },
+      { at: 1500, what: 'opens set m6w1 (browsing: not a change)', code: 'lastModuleNum = 6; lastSetId = "m6w1"; saveProgress();' },
+      { at: 2000, what: '(reads the page before the doc loads)', probe: t => { pre = { failed: t.run('progressLoadFailed'), lbl: t.run("document.getElementById('rmp-lbl').textContent"), asked: t.boxes.filter(b => b.id === 'period-overlay').length }; } },
+      { at: 9000, what: '(reads the page after the doc loaded)', probe: t => { mid = { failed: t.run('progressLoadFailed'), lbl: t.run("document.getElementById('rmp-lbl').textContent"), asked: t.boxes.filter(b => b.id === 'period-overlay').map(b => b.at) }; } }
+    ], 12000, { absent: ['period-overlay'] });
+    out.checks += 2;
+    const lateAt = (reads(world, T0 - 1).find(g => g.ok) || {}).at;
+    if (!pre || pre.failed !== true || pre.lbl !== '' || pre.asked !== 0 || !mid || mid.failed !== false || lateAt == null)
+      fail(`directed L16: setup — wanted the failed-read state at 2 s (no module progress drawn, no period question) and the doc loaded by 9 s; at 2 s ${JSON.stringify(pre)}, at 9 s ${JSON.stringify(mid)}`);
+    else {
+      if (!/^[1-9]\d*\/\d+$/.test(String(mid.lbl))) fail(`directed L16 the late load draws the page again: the rail's module progress at 9 s is ${JSON.stringify(mid.lbl)}; the page was not drawn again from the loaded doc (progressLoadRedraw)`);
+      if (mid.asked.length !== 1 || mid.asked[0] !== lateAt) fail(`directed L16 the late load draws the page again: the period question was ${mid.asked.length ? 'asked at ' + mid.asked.map(rel).join(', ') : 'never asked'}; the doc holds no period, so it is asked when the doc loads (${rel(lateAt)}; maybeShowPeriodPicker)`);
+    }
+    for (const f of tab.faults) fail(`directed L16: site code ${f} (R12)`);
   }
   /* L6 (the old KNOWN K-online-retry, fixed 2026-11-16 in shell.js's 'online' listener). The page opens offline (no
      SDK, no read); the student answers a question at 3 s; every save fails on the SDK; the Wi-Fi comes back WHILE the
@@ -2723,7 +2782,7 @@ async function main(){
     const d = await directedChecks();
     directedBad = d.fails.length;
     for (const m of d.fails) console.log(`✗ FAIL directed (seed ${BASE_SEED}): ${m}`);
-    console.log(`  directed checks: ${d.checks - Math.min(d.checks, d.fails.length)} of ${d.checks} hold (D1 the place a student opened is the place stored; D2 a new student's doc is marked once, ${d.txRuns} transaction(s) for three saves, and a tick made offline waits for the reconnect; L1-L5, L7-L15 (L8: ${d.busyN} of ${d.busyAll} busy sources) the late load after a failed sign-in read; L6 the Wi-Fi back during the last save retry)`);
+    console.log(`  directed checks: ${d.checks - Math.min(d.checks, d.fails.length)} of ${d.checks} hold (D1 the place a student opened is the place stored; D2 a new student's doc is marked once, ${d.txRuns} transaction(s) for three saves, and a tick made offline waits for the reconnect; L1-L5, L7-L16 (L8: ${d.busyN} of ${d.busyAll} busy sources) the late load after a failed sign-in read; L6 the Wi-Fi back during the last save retry)`);
   }
   /* The reset cases (Start over / Delete): with every full run, or alone with --reset. */
   let resetBad = 0, resetN = 0;
