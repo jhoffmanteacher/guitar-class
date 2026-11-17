@@ -110,6 +110,11 @@
                 phase's ends; writes wait (F12); reads, transactions and the Firestore SDK's <script> fail at once;
        refused  the server REFUSES the write or read after 200-800 ms (permission-denied, quota): nothing is applied.
                 This is the only phase in which set() rejects.
+       hang     (2026-11-17, directed check L14 only) a read sent in it never settles, ever (the real stalled get());
+                writes wait for the end of the phase, as in a stall.
+     F13 (2026-11-17) With no server answer (offline, a stall past 10 s), a get() with no `source` resolves from the
+         SDK's memory cache when that holds the doc: here, only the tab's own queued writes, so a PARTIAL doc with
+         metadata.fromCache and hasPendingWrites true; get({ source: 'server' }) never does. F14: the hang phase.
      A self-test of these rules runs before the cases; --fake-fault breaks one rule and the self-test must fail.
    - The start doc (a returning student) holds a non-default value in every category the save path can hold back or
      overwrite, including a path pick for ca-46 (half the two-devices cases start with none, so K2 stays reachable).
@@ -219,7 +224,12 @@
      defers it; a sign-out stops it (another student signed in on the same page never gets the first one's doc).
      L6 the Wi-Fi back during the last automatic save retry (the old R10-online-retry); L7 a retried read that comes back
      after Firebase signed another student in but before the page heard it is not applied; L8 each of the twelve "busy"
-     states (progressLoadRetryBusy) holds the load back until it ends. See loadRetryChecks().
+     states (progressLoadRetryBusy) holds the load back until it ends. L9-L15 (2026-11-17, the review of fix/load-retry):
+     a partial doc answered from the cache is never applied (L9 a songs row, L10 a place save, queued offline); every
+     kind of change stops the retry at once (L11, one run per field of the change snapshot, and by hand before and
+     during the read); A's late answer leaves B's own retry alone (L12); the backoff ends at one read a minute (L13); a
+     read that never answers times out (L14); a doc the page cannot apply keeps the failed-read rules (L15); and S13
+     (the reset cases) a Delete marker with no doc stops the retry. See loadRetryChecks().
      See directedChecks(). A failure prints "✗ FAIL directed …" and exits 1.
 
    Reading a FAIL line: case index, family, the stored value, the values the oracle accepts, and the replay command. */
@@ -295,7 +305,8 @@ const FAKE_FAULTS = {
   'stall-survives-close': 'a write still queued in a closed tab lands anyway (breaks F11)',
   'update-nested-delete': 'update() accepts a FieldValue.delete() nested inside a map value (breaks F4)',
   'offline-rejects-writes': 'an offline set() is rejected instead of waiting for the reconnect (breaks F11)',
-  'no-cache-answer': 'an offline get() with a write queued rejects instead of answering from the local cache (breaks F13)'
+  'no-cache-answer': 'an offline get() with a write queued rejects instead of answering from the local cache (breaks F13)',
+  'hang-settles': 'a read sent into a hang settles like a stalled one (breaks F14)'
 };
 function clone(v){
   if (v instanceof FieldDelete || v instanceof FieldIncrement) return v;
@@ -416,6 +427,7 @@ class World {
   readTrip(dev){
     const ph = dev.phaseAt(this.now);
     if (ph.phase === 'offline') return { ok: false, at: this.now + Math.round(200 + 600 * this.r()) };
+    if (ph.phase === 'hang' && FAKE_FAULT !== 'hang-settles') return { ok: 'never', at: Infinity };
     const tr = this.trip(dev);
     if (tr.ok !== null) return tr;
     return tr.at - this.now > 10000 ? { ok: false, at: this.now + 10000 } : { ok: true, at: tr.at };
@@ -505,6 +517,7 @@ function makeClient(world, tab){
       }
       else { world.gets.push({ tab: tab.name, at: world.now, n: world.evN, alive: tab.alive, path, ok: false }); world.log(`${tab.name} read ${path}: FAILED`); rej(Object.assign(new Error('Failed to get document because the client is offline.'), { code: 'unavailable' })); }
     };
+    if (tr.ok === 'never'){ world.log(`${tab.name} read ${path}: sent into a hang, never answers`); return; }
     world.at(tr.at, settle, tab, 'net');
   });
   const ref = path => ({
@@ -684,6 +697,17 @@ async function fakeSelfTest(){
     await w.runUntil(T0 + 8000);
     dev.phases = [];
     check('F13 offline: get() answers from the cache with ONLY the queued fields when a write is queued (fromCache), rejects with nothing queued; get({source:"server"}) rejects', got.empty === 'rejected' && got.server === 'rejected' && got.plain && got.plain.exists === true && got.plain.cache === true && JSON.stringify(got.plain.data) === '{"q":1}', JSON.stringify(got));
+  }
+  {
+    const { w, db } = mk();
+    w.docs.set(P, { data: { v: 1 }, version: 1 });
+    dev.phases = [{ phase: 'hang', until: T0 + 4000 }];
+    let settled = false;
+    db.collection('progress').doc('u').get({ source: 'server' }).then(() => { settled = true; }, () => { settled = true; });
+    db.collection('progress').doc('u').set({ w: 2 }, { merge: true });
+    await w.runUntil(T0 + 30000);
+    dev.phases = [];
+    check('F14 hang: a read sent into it never settles; a write waits for the end of the phase and lands', !settled && w.docs.get(P).data.w === 2, JSON.stringify({ settled, d: w.docs.get(P).data }));
   }
   return out;
 }
@@ -1952,6 +1976,9 @@ async function loadRetryChecks(out, fail){
     if (!aRead.length) fail(`directed L5: setup — A's retried read did not come back after A signed out (reads ${JSON.stringify(world.gets.filter(g => g.tab === 'T1').map(g => [g.path, rel(g.at), g.ok]))})`);
     if (!mid || mid.user !== B.uid || mid.completed !== '{}' || mid.retry !== false) fail(`directed L5: A's doc reached B's session, or a retry still runs under B; at 7.5 s ${JSON.stringify(mid)}`);
     if (!end || end.user !== B.uid || end.completed !== '{}' || end.responses !== '{}' || end.failed !== false) fail(`directed L5: B's session at 20 s holds ${JSON.stringify(end)}; wanted B's own (no doc: empty)`);
+    /* The retry stops AT the sign-out (app/start.js, the signed-out branch): the "not loaded yet" line comes down then. */
+    const line = tab.boxes.filter(x => x.id === 'load-notice');
+    if (!line.length || line.some(x => x.el.removedAt == null || x.el.removedAt > T0 + 3600)) fail(`directed L5: the "not loaded yet" line should come down at the sign-out (3.60 s); lines ${JSON.stringify(line.map(x => ({ at: rel(x.at), gone: x.el.removedAt == null ? null : rel(x.el.removedAt) })))}`);
     for (const f of tab.faults) fail(`directed L5: site code ${f} (R12)`);
   }
   /* L7 A FROZEN TAB'S ORDER. Firebase already signed another student in on this Chromebook (auth.currentUser is B) but
@@ -2036,7 +2063,133 @@ async function loadRetryChecks(out, fail){
       if (mid !== true || !end || end.failed !== false || end.skills !== JSON.stringify(START.skills)){ bad++; fail(`directed L8 busy, ${what}: the doc should wait while it runs and load after (at 12 s failed=${mid}; at 24 s ${JSON.stringify(end)})`); }
       for (const f of tab.faults) fail(`directed L8 busy, ${what}: site code ${f} (R12)`);
     }
-    out.busyN = BUSY.length - bad;
+    out.busyN = BUSY.length - bad; out.busyAll = BUSY.length;
+  }
+  /* L11 EVERY KIND OF CHANGE STOPS THE RETRY (review of fix/load-retry R1-2, 2026-11-17). One run per field of the
+     change snapshot (progressWorkSnapshot): the sign-in read is refused (the doc would come back at ~7 s), the student
+     makes ONE change of that kind at 1.5 s through the site's own entry point, and the page is read straight after
+     it: the retry must be stopped and the line taken down at once, and at 12 s the session must still be on the
+     failed-read rules (the doc not applied over the change). A field the snapshot misses lets the doc in over a
+     held-back score, streak or answer. Two more runs change the state WITHOUT queueSave (by hand, like L8): before
+     the retried read goes out (progressLoadRetryNow's first test) and while it is on the wire (its test before the
+     apply). songReady / songReadyAt are not here: nothing in the app writes them (only the Journey pages do). */
+  {
+    const j = JSON.stringify;
+    const KINDS = [
+      ['an answer (responses)', `onResponseChange(${j('m7w1-b-sec1-2')}, ${j('a new answer')}, false)`],
+      ['a PR entry, held back (responses)', `onResponseChange(${j('practice-m6w1-s2')}, "90", true)`],
+      ['a checklist cell (skills; it also counts the day for the streak)', `toggleSkill(${j('m6w1-s4')}, ${j('m6w1')}, 'gotit')`],
+      ['a Module Review rating (skills alone)', `setSkillLevel(${j('mr6-s4')}, 'mr6', '2')`],
+      ['a step tick (completed)', `onCompleteChange(${j('m7w2-c-sec0-1')}, true)`],
+      ['an activity tick (classActivities)', `onClassActivityChange(${j('ca-20')}, true)`],
+      ['an activity-step tick (caSteps)', `onCaStepChange(${j('ca-20:c1')}, true)`],
+      ['a rep, held back (practiceLog)', `logPracticeRep(${j('m7w1-s1')})`],
+      ['a deck best, held back (games)', `dkSaveBest(${j('power-m7')}, 12)`],
+      ['a streak bump, held back (streak)', 'bumpPracticeStreak()'],
+      ['a period (period)', `periodPick(${j('7')})`],
+      ['an exit check filed, held back (exitChecks)', null],
+      ['an un-tick still queued (completed deletes)', `onCompleteChange(${j('m6w1-b-sec0-3')}, false)`],
+      ['an un-tick still queued (classActivities deletes)', `onClassActivityChange(${j('ca-18')}, false)`],
+      ['an un-tick still queued (caSteps deletes)', `onCaStepChange(${j('ca-20:c2')}, false)`]];
+    for (const [what, code] of KINDS){
+      let now = null, mid = null;
+      const steps = [];
+      let at = 1500;
+      if (code) steps.push({ at, what, code });
+      else {
+        const id = 'ca-15', items = DATA.CHECKS[id];
+        /* A pick under 400 ms after the row appeared is ignored (ecPick): 450 ms apart, all before the read at ~2.4 s
+           is answered (refused) and long before the one that loads (~7 s). */
+        steps.push({ at: 500, what: `starts exit check ${id}`, code: `ecStart(${j(id)})` });
+        items.forEach((ans, i) => steps.push({ at: 500 + 450 * (i + 1), what: `picks ${ans}`, code: `ecPick(${j(id)}, { dataset: { pick: ${j(ans)} } })` }));
+        at = 500 + 450 * items.length;
+      }
+      steps.push({ at: at + 1, what: '(reads the page just after)', probe: t => { now = { retry: t.run('_loadRetry !== null'), line: t.boxes.filter(b => b.id === 'load-notice' && b.el.removedAt == null).length }; } });
+      steps.push({ at: 12000, what: '(reads the page)', probe: t => { mid = { failed: t.run('progressLoadFailed'), skills: t.run('JSON.stringify(progress)') }; } });
+      const { world, tab } = await directedRun('L11 a change: ' + what, START, [{ phase: 'refused', until: T0 + 6000 }], steps, 14000);
+      out.checks += 1;
+      const after = reads(world, T0 + at + (code ? 1 : 1000));   // a read sent just before the last pick may answer just after it
+      if (!now || now.retry !== false || now.line !== 0 || after.length || !mid || mid.failed !== true || mid.skills === JSON.stringify(START.skills))
+        fail(`directed L11 a change, ${what}: the retry must stop at that change and the doc never load over it; just after ${JSON.stringify(now)}, reads after it ${after.length}, at 12 s ${JSON.stringify(mid && mid.failed)}`);
+      for (const f of tab.faults) fail(`directed L11 a change, ${what}: site code ${f} (R12)`);
+    }
+    /* By hand, no queueSave: before the retried read goes out, and while it is out (a 4 s round trip from ~2.5 s); and,
+       before the read, the three fields no entry point changes ALONE: an exit check also ticks its activity in memory
+       (ecSubmit), and nothing in the app writes songReady / songReadyAt (the Journey pages do). */
+    for (const [what, atMs, code] of [['games, before the read goes out', 1500, 'games.__l11 = 1'], ['games, while the read is on the wire', 4000, 'games.__l11 = 1'],
+      ['exitChecks, before the read goes out', 1500, 'exitChecks.__l11 = { score: 1 }'], ['songReady, before the read goes out', 1500, 'songReady.__l11 = { 4: true }'],
+      ['songReadyAt, before the read goes out', 1500, 'songReadyAt.__l11 = 1']]){
+      let mid = null;
+      const { world, tab } = await directedRun('L11 a change by hand: ' + what, START, [{ phase: 'refused', until: T0 + 1000 }, { phase: 'slow', until: T0 + 60000, lat: 4000 }], [
+        { at: atMs, what: '(a change with no save asked)', code },
+        { at: 12000, what: '(reads the page)', probe: t => { mid = { failed: t.run('progressLoadFailed'), retry: t.run('_loadRetry !== null'), skills: t.run('JSON.stringify(progress)') }; } }
+      ], 14000);
+      out.checks += 1;
+      const ok = world.gets.filter(g => g.tab === 'T1' && g.path === 'progress/' + USER.uid && g.ok);
+      if (atMs === 4000 && !ok.some(g => g.at > T0 + atMs)) fail(`directed L11 a change by hand, ${what}: setup — no read came back after the change`);
+      if (atMs === 1500 && reads(world, T0 + atMs).length) fail(`directed L11 a change by hand, ${what}: the page still read the doc ${reads(world, T0 + atMs).length} time(s) after the change; the retry must stop before its next read`);
+      if (!mid || mid.failed !== true || mid.retry !== false || mid.skills !== '{}') fail(`directed L11 a change by hand, ${what}: the doc was applied over it, or the retry goes on; at 12 s ${JSON.stringify(mid)}`);
+      for (const f of tab.faults) fail(`directed L11 a change by hand, ${what}: site code ${f} (R12)`);
+    }
+  }
+  /* L12 THE NEXT STUDENT'S OWN RETRY (R1-2). As L5, but B's sign-in read fails too, so B's page runs its own retry. A's
+     retried read comes back (~6.4 s) after B's retry has started: it must leave B's retry alone (progressLoadRetryNow:
+     `_loadRetry !== r`), and B's own doc must load. */
+  {
+    const B = { uid: 'uid-test-b2', displayName: 'Test Student B', email: 'student.b@example.test', photoURL: null };
+    const BDOC = { name: B.displayName, email: B.email, migrations: { swap45: true }, skills: { 'm7w1-s2': 'gotit' }, period: '7' };
+    let mid = null, end = null;
+    const { world, tab } = await directedRun('L12 the next student\'s own retry', START, [{ phase: 'refused', until: T0 + 1000 }, { phase: 'slow', until: T0 + 3900, lat: 4000 }, { phase: 'refused', until: T0 + 5000 }, { phase: 'slow', until: T0 + 60000, lat: 1000 }], [
+      { at: 100, what: '(B has a doc)', probe: (t, w) => { w.docs.set('progress/' + B.uid, { data: clone(BDOC), version: 1 }); } },
+      { at: 3500, what: 'A signs out', code: 'signOut()' },
+      { at: 3600, what: 'Firebase: signed out', probe: t => { t.run('auth.currentUser = null'); t.authCb && callSite(t, () => t.authCb(null)); } },
+      { at: 4000, what: 'B signs in on the same page (no reload); B\'s read is refused', probe: t => { t.ctx.__userB = B; t.run('auth.currentUser = __userB'); t.authCb && callSite(t, () => t.authCb(B)); } },
+      { at: 6000, what: '(reads the page: B\'s retry runs)', probe: t => { mid = { user: t.run('currentUser && currentUser.uid'), failed: t.run('progressLoadFailed'), retry: t.run('_loadRetry !== null && _loadRetry.user.uid') }; } },
+      { at: 40000, what: '(reads the page)', probe: t => { end = { user: t.run('currentUser && currentUser.uid'), failed: t.run('progressLoadFailed'), skills: t.run('JSON.stringify(progress)') }; } }
+    ], 42000);
+    out.checks += 1;
+    const aRead = world.gets.filter(g => g.tab === 'T1' && g.path === 'progress/' + USER.uid && g.ok && g.at > T0 + 6000);
+    if (!aRead.length || !mid || mid.user !== B.uid || mid.failed !== true || mid.retry !== B.uid) fail(`directed L12: setup — wanted B on a failed read with B's own retry running at 6 s and A's read coming back after it; ${JSON.stringify(mid)}, A's late reads ${aRead.length}`);
+    else if (!end || end.user !== B.uid || end.failed !== false || end.skills !== JSON.stringify(BDOC.skills)) fail(`directed L12 the next student's own retry: A's late read stopped B's retry, or B's doc never loaded; at 40 s ${JSON.stringify(end)}`);
+    for (const f of tab.faults) fail(`directed L12: site code ${f} (R12)`);
+  }
+  /* L13 THE BACKOFF ENDS AT ONE READ A MINUTE (R1-2). Every read refused for 130 s: the page reads at most 8 times
+     (sign-in, then ~2, 6, 14, 29, 59, 119 s: LOAD_RETRY_MS), each wait no shorter than the one before. */
+  {
+    const { world, tab } = await directedRun('L13 the backoff', START, [{ phase: 'refused', until: T0 + 130000 }], [], 130000);
+    out.checks += 1;
+    const at = reads(world, T0 - 1).map(g => g.at - T0);
+    const gaps = at.slice(1).map((x, i) => x - at[i]);
+    if (at.length > 8 || at.length < 5 || gaps.some((g, i) => i && g < gaps[i - 1] - 1000)) fail(`directed L13 the backoff: reads at ${at.map(x => (x / 1000).toFixed(1)).join(', ')} s; wanted 5-8 reads, each wait no shorter than the last (LOAD_RETRY_MS)`);
+    for (const f of tab.faults) fail(`directed L13: site code ${f} (R12)`);
+  }
+  /* L14 A READ THAT NEVER ANSWERS (R1-2). A 'hang' phase (a read sent in it never settles, as a real stalled get() can
+     do): the retried read sent at ~2.4 s is lost; LOAD_RETRY_READ_MS (15 s) must count it as failed so the retry goes
+     on, and the doc loads once the network is back (25 s). */
+  {
+    let end = null;
+    const { tab } = await directedRun('L14 a read that never answers', START, [{ phase: 'refused', until: T0 + 1000 }, { phase: 'hang', until: T0 + 25000 }], [
+      { at: 60000, what: '(reads the page)', probe: t => { end = { failed: t.run('progressLoadFailed'), skills: t.run('JSON.stringify(progress)') }; } }
+    ], 62000);
+    out.checks += 1;
+    if (!end || end.failed !== false || end.skills !== JSON.stringify(START.skills)) fail(`directed L14 a read that never answers: at 60 s ${JSON.stringify(end)}; a lost read must time out and the retry go on`);
+    for (const f of tab.faults) fail(`directed L14: site code ${f} (R12)`);
+  }
+  /* L15 A DOC THE PAGE CANNOT APPLY (R1-2). progressApplyDoc throws (forced here by hand: no doc the fake can store
+     makes it throw): the page stays on the failed-read rules for good (the retry stops), so a rep and a streak bump
+     after it are still held back and the stored log and streak are untouched. */
+  {
+    let mid = null;
+    const { tab, stored } = await directedRun('L15 a doc the page cannot apply', START, [{ phase: 'refused', until: T0 + 3000 }], [
+      { at: 500, what: '(progressApplyDoc made to throw)', code: 'progressApplyDoc = function(){ throw new Error("a malformed doc (test)"); }' },
+      { at: 12000, what: '(reads the page)', probe: t => { mid = { failed: t.run('progressLoadFailed'), retry: t.run('_loadRetry !== null') }; } },
+      { at: 13000, what: 'logs a rep on m6w1-s1 and the day counts for the streak', code: 'logPracticeRep("m6w1-s1"); bumpPracticeStreak();' },
+      { at: 16000, what: 'hides the tab', hide: true }
+    ], 30000);
+    out.checks += 1;
+    if (!mid || mid.failed !== true || mid.retry !== false || canon(stored && stored.practiceLog) !== canon(START.practiceLog) || canon(stored && stored.streak) !== canon(START.streak))
+      fail(`directed L15 a doc the page cannot apply: at 12 s ${JSON.stringify(mid)}; stored streak ${JSON.stringify(stored && stored.streak)}, reps ${JSON.stringify(stored && stored.practiceLog && stored.practiceLog['m6w1-s1'])}`);
+    for (const f of tab.faults) fail(`directed L15: site code ${f} (R12)`);
   }
   /* L6 (the old KNOWN K-online-retry, fixed 2026-11-16 in shell.js's 'online' listener). The page opens offline (no
      SDK, no read); the student answers a question at 3 s; every save fails on the SDK; the Wi-Fi comes back WHILE the
@@ -2096,6 +2249,7 @@ function actionCode(a){
      S5 a marker for another student does nothing
      S8 a Delete marker, the student came back, and a sign-in whose progress read fails: nothing is cleared; the retried
         read then loads the doc they came back with (no Start over waits on it)
+     S13 (2026-11-17) a Delete marker, no doc, a sign-in whose progress read fails: the retried read loads nothing and stops
      S9 two Chromebooks sign in at the same moment: applied once (the transaction re-checks)
      S10 (R3-1) Start over, later Delete, the student returns as new and works: the next sign-in keeps that work
      S11 (R3-6) a new student (no doc, no marker) keeps this Chromebook's copies at sign-in
@@ -2370,6 +2524,24 @@ async function resetCases(){
       ['the device copy made since coming back is kept', A.localStorage.getItem('practiceLog:' + USER.uid) !== null],
       ['the doc is untouched', !!doc && doc.completed && doc.completed[NEW_TICK] === true && !w.landed.some(l => l.tx)] ] };
   });
+  /* S13 (2026-11-17, review of fix/load-retry R1-2) A Delete marker and NO doc, and this sign-in's progress read
+     fails: the retried read finds no doc with the Delete waiting (progressResetWaiting): it must not load the empty
+     "new student" state here (only a sign-in runs the Delete's device clean-up, progressStartOverAtSignIn), so the
+     retry stops and the session keeps the failed-read rules. */
+  await scenario('S13', 'a Delete marker, no doc, and this sign-in\'s progress read fails: the retry stops and loads nothing', c => {
+    seed(c.world, OLD);
+    const A = c.dev('A', [{ phase: 'up', until: T0 + 3100 }, { phase: 'refused', until: T0 + 3300 }]);
+    c.teacher(100, 'del');
+    c.boot('A', A, 3100);
+    c.at(9000, () => { c.tab('A').s13 = { failed: c.tab('A').run('progressLoadFailed'), retrying: c.tab('A').run('_loadRetry !== null'), reads: c.world.gets.filter(g => g.tab === 'A' && g.path === 'progress/' + USER.uid).map(g => g.ok && (g.data ? 'doc' : 'none')) }; });
+    return { endMs: 10000, check: (doc, w, tabs) => {
+      const s13 = tabs[0].s13 || {};
+      return [
+        ['the progress read failed and the settings read succeeded', tabs[0].failedAtBoot === true && tabs[0].run('progressMarkers.ok') === true],
+        ['the retried read found no doc, loaded nothing and stopped', s13.failed === true && s13.retrying === false && canon(s13.reads) === canon([false, 'none']), JSON.stringify(s13)],
+        ['no doc was written', !doc] ];
+    } };
+  });
   await scenario('S9', 'two Chromebooks sign in at the same moment: the Start over is applied once', c => {
     seed(c.world, OLD);
     const A = c.dev('A'), B = c.dev('B');
@@ -2551,7 +2723,7 @@ async function main(){
     const d = await directedChecks();
     directedBad = d.fails.length;
     for (const m of d.fails) console.log(`✗ FAIL directed (seed ${BASE_SEED}): ${m}`);
-    console.log(`  directed checks: ${d.checks - Math.min(d.checks, d.fails.length)} of ${d.checks} hold (D1 the place a student opened is the place stored; D2 a new student's doc is marked once, ${d.txRuns} transaction(s) for three saves, and a tick made offline waits for the reconnect; L1-L5, L7 and L8 (${d.busyN} of 10 busy sources) the late load after a failed sign-in read; L6 the Wi-Fi back during the last save retry)`);
+    console.log(`  directed checks: ${d.checks - Math.min(d.checks, d.fails.length)} of ${d.checks} hold (D1 the place a student opened is the place stored; D2 a new student's doc is marked once, ${d.txRuns} transaction(s) for three saves, and a tick made offline waits for the reconnect; L1-L5, L7-L15 (L8: ${d.busyN} of ${d.busyAll} busy sources) the late load after a failed sign-in read; L6 the Wi-Fi back during the last save retry)`);
   }
   /* The reset cases (Start over / Delete): with every full run, or alone with --reset. */
   let resetBad = 0, resetN = 0;
