@@ -264,6 +264,36 @@ and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fi
     - Planted faults, 7: `playalong-loop` caught 4 (the lead twice, the sheet without the lead, the lead not scaled
       by the speed, the `passFrom` lift removed), the smoke 1, `checks.mjs` 0; three were caught by nothing
       (W16-4, W16-5).
+  - **W16-1 FIXED, shipped Fast (Windows, 2026-11-17 early morning; one Opus fixer; `app/cards.js` the sheet's follow
+    only, `tools/smoke.mjs` `sheetFollowWalk`); a fresh Opus re-review is running on the pushed commit, as W16
+    says.** No highlight's timing changed: the dot, the pill and "This bar" still light at `PC_LEAD` (60 ms).
+    - A new `pcSheetFollow` runs every frame and keeps in view the line that will be playing
+      `PC_SHEET_FOLLOW_AHEAD` = 0.3 s before the beat is heard (measured: 0.15 s left 3 of 47 `ca-44` lines late
+      on the slowest view, 2560×1300 full screen; 0.2 s left none; 0.3 leaves room for a slower machine). It never
+      reads behind the dot (`st.passFrom`), never past Loop this part's end (`pcLoopClamp`), and stays on the last
+      line at the song's end; `pcRefollow` and a section or line tap reset it. The full-screen fix (`delta / zoom`)
+      is untouched.
+    - Chords NOT on screen when heard, over `ca-38`, `ca-44`, `ca-45` at 1366×657 and 2560×1300, normal and full
+      screen, Slowest and Normal: **234 of 1,360 before, 0 of 1,360 after** (worst before: 516 ms at the column jump
+      on the big screen; the first review's 240 to 387 ms was an under-measure). A lit line scrolled off screen: 0
+      before, 0 after, in all 24 views.
+    - **A look-and-feel choice Jonathan may want to see: when the lit line and the next line cannot both be on
+      screen (the jump to the top of column 2: `ca-38` chord 165, `ca-45` chord 38; and a chord ringing across
+      lines in two intros), the lit line wins, and the rest of the scroll is an INSTANT jump made when the dot
+      reaches the new line, 60 ms before its chord.** Done smoothly, that jump is a whole column long and still
+      lands 250 to 520 ms late.
+    - Reduce motion: scrolling is already instant there, so there is no look-ahead and the follow waits for the
+      dot as before (0 of 680 late).
+    - The smoke can now see this fault: on `ca-38` at 1366×657 with real smooth scrolling and a fake audio clock
+      running in real time it walks 6 new lines and the column jump: each chord name must be on screen when heard,
+      the follow asked for at least 200 ms before, a lit line never off screen. Red on the code before (9 events),
+      green after; two planted faults caught.
+    - `playalong-loop` full run: 26 cards, 468 walks, 85,673 places, 0 mismatches, 1 known (the same as the
+      review: no lit highlight moved); the activities smoke clean; 1bf unchanged. The lead looked at `ca-45` at
+      the column jump before (the lit chord off screen) and after (its line at the top, dot on it).
+    - Owed: one sentence about the look-ahead in the sheet section of
+      `.claude/skills/in-class-activities/SKILL.md` (about line 576) and in "Practice / Play Along cards" of
+      `.claude/skills/audio-and-snippets/SKILL.md`; a real Chromebook (headless Chrome only).
 - **W14. NOT YET, dates only (do not start early; leave the line here until done):**
   - about **2026-11-21**: the accessibility scan's ratchet. Read a week of GitHub's "a11y scan" job results; only if
     every run shows 0 new signatures, switch `--a11y-ratchet` on in `browser.yml`, with one `site-reviewer` round on the
