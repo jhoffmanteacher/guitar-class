@@ -297,6 +297,20 @@ const UNFOLLOWABLE_TODAY = [
   { file: 'teacher-mic.js', fn: 'micEvalStrumRule', odd: /^Function\(/, count: 2,
     why: "runs the arcade's own onset condition and smoothing code (ccLoop's and coachSmooth's text, taken from the loaded coach parts) to replay recorded takes; that code lives in coach-*.js, which 1dm reads as code" },
 ];
+/* The one console write to progress/… CLAUDE.md allows (its "Never" list, since 2026-11-14): the delete of a
+   student's whole document in teacherRemoveDeleteProgress() (teacher-remove.js), reached from the confirmed
+   Delete dialog; checks.mjs 1ee pins and runs it. Matched exactly: that file and function, a .delete(…) of
+   progress/…, this statement's fingerprint, once. A set or update there, a second delete, or the same delete
+   anywhere else is refused. A deliberate change to that statement updates `sig` here, with Jonathan, and is
+   Always Reviewed (the save path). */
+export const CONSOLE_PROGRESS_DELETE = { file: 'teacher-remove.js', fn: 'teacherRemoveDeleteProgress', detail: '.delete(…)', sig: '91535a24cec4',
+  why: 'Manage → "Delete this student\'s data…" (2026-11-14, Paste C published 2026-11-15): the console deletes one student\'s progress document; it never creates or edits one (CLAUDE.md "Never")' };
+/* A snapshot .ref 1dm cannot trace, the exact case that exists today, pinned with the block it sits in (its
+   statements and the ones feeding it), matched once. */
+const UNTRACED_REFS_TODAY = [
+  { file: 'teacher-remove.js', fn: 'TRM_STEPS', base: 'd', blockSig: '56b7a8d4b623',
+    why: "TRM_STEPS.minutes deletes one student's minutes days and weeks: the snapshots come from teacherAbsDaysGet() and teacherPmWeeksGet() (teacher-students.js), each `return db.collection('minutes').doc(uid).collection('days' | 'weeks')….get(…)`; 1dm does not follow a snapshot returned by another function" },
+];
 const isException = (rec, kind) => UNFOLLOWABLE_TODAY.some(x => x.file === rec.file && x.fn === rec.fn && (kind === 'chain' ? x.match && x.match(rec) : x.odd && x.odd.test(rec.what)));
 
 const compat = (seg, want) => seg === '?' || seg === '*' || seg === want;
@@ -480,17 +494,22 @@ export function checkFirestoreWrites(root = DEFAULT_ROOT) {
   const stalePins = Object.entries(PW).filter(([k, v]) => { const have = (sites.get(k) || []).map(c => c.sig); return v.value.some(x => !have.includes(x)); }).map(([k]) => k);
 
   // Rule 3b: the console never writes progress/… nor lets a reference to it out of a read.
-  let progressReads = 0;
+  let progressReads = 0, consoleDeletes = 0, untracedOk = 0;
+  const CPD = CONSOLE_PROGRESS_DELETE;
   for (const c of found.chains) {
     if (!c.console || !mayBeProgress(c.path)) continue;
     if (c.kind === 'read' || c.kind === 'tracked') { if (c.path[0] === 'progress') progressReads++; continue; }
     if (isException(c, 'chain')) continue;
+    if (c.kind === 'write' && c.path[0] === 'progress' && c.file === CPD.file && c.fn === CPD.fn && c.detail === CPD.detail && c.sig === CPD.sig && !c.handler && ++consoleDeletes === 1) continue;
     const what = c.kind === 'write' ? `writes ${c.path[0] === 'progress' ? 'progress/…' : `a path this check cannot name (${pathString(c.path)}), so it may be progress/…`} with ${c.detail}`
       : `lets a reference to ${c.path[0] === 'progress' ? 'progress/…' : `a path this check cannot name (${pathString(c.path)})`} out of a read (${c.detail}), where it could be written`;
     bad.push(`1dm: refused — ${where(c)} ${what} (${RULE3}). Read it with .get() and change nothing there; a student's own page saves their work.`);
   }
+  const refOk = new Set();
   for (const x of found.refs) {
     if (!x.console) continue;
+    const ex = !x.paths && UNTRACED_REFS_TODAY.find(e => !refOk.has(e) && e.file === x.file && e.fn === x.fn && e.base === x.base && e.blockSig === x.blockSig);
+    if (ex) { refOk.add(ex); untracedOk++; continue; }
     if (!x.paths) bad.push(`1dm: refused — ${where(x)} takes .ref from "${x.base}"; this check cannot tell which query that snapshot came from, so the write it allows may land in progress/… (${RULE3}). Take the snapshot from a db.collection('<name>') query in the same function, as teacherMicDelete and teacherErrorsDeleteOld do.`);
     else if (x.paths.some(mayBeProgress)) bad.push(`1dm: refused — ${where(x)} takes .ref from a progress snapshot (${x.paths.map(pathString).join(', ')}), which is a handle for writing a student's saved work (${RULE3}). Use the snapshot's .data() and change nothing.`);
   }
@@ -587,7 +606,7 @@ export function checkFirestoreWrites(root = DEFAULT_ROOT) {
   if (bad.length) { [...new Set(bad)].forEach(b => r.err(b)); return r.lines; }
   if (stalePins.length) r.warn(`1dm: PROGRESS_WRITERS pins writes the code no longer has: ${stalePins.join(', ')} — re-pin (node tools/never-blocks.mjs --pins --why "<reason>"), so a new write there is caught`);
   const consoleChains = found.chains.filter(c => c.console).length;
-  r.ok(`${entries.filter(e => !e.handlersOf).length} scripts from ${ls.pages.length} pages (${relevant.length} that can reach Firestore read as code, inline handlers included; ${[...consoleFiles].length} console parts): progress/… is written only where PROGRESS_WRITERS says (${sites.size} places, ${[...sites.values()].reduce((a, l) => a + l.length, 0)} write statements, each its pinned fingerprint); in the console ${consoleChains} Firestore chains, ${progressReads} on progress/… and every one a read, ${found.refs.filter(x => x.console).length} snapshot .refs traced to non-progress queries, ${consoleCalls} calls and no mention of the ${reach.size} app functions that save progress (${mentionOk} read as text: the named exception); config/class: ${configReads} reads, ${guardWrites} writes, all inside the one teacherWriteConfig(); ${factories.size} reference-returning functions followed; ${UNFOLLOWABLE_TODAY.length} console shapes it cannot follow, each the exact case named in tools/never-blocks.mjs`);
+  r.ok(`${entries.filter(e => !e.handlersOf).length} scripts from ${ls.pages.length} pages (${relevant.length} that can reach Firestore read as code, inline handlers included; ${[...consoleFiles].length} console parts): progress/… is written only where PROGRESS_WRITERS says (${sites.size} places, ${[...sites.values()].reduce((a, l) => a + l.length, 0)} write statements, each its pinned fingerprint); in the console ${consoleChains} Firestore chains, ${progressReads} reads of progress/… and no other write to it than the one delete CLAUDE.md allows (${CPD.fn}() in ${CPD.file}: ${consoleDeletes} of 1), ${found.refs.filter(x => x.console).length - untracedOk} snapshot .refs traced to non-progress queries and ${untracedOk} untraced, the exact case named (${UNTRACED_REFS_TODAY.length}), ${consoleCalls} calls and no mention of the ${reach.size} app functions that save progress (${mentionOk} read as text: the named exception); config/class: ${configReads} reads, ${guardWrites} writes, all inside the one teacherWriteConfig(); ${factories.size} reference-returning functions followed; ${UNFOLLOWABLE_TODAY.length} console shapes it cannot follow, each the exact case named in tools/never-blocks.mjs`);
   return r.lines;
 }
 

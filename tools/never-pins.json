@@ -80,6 +80,14 @@
    ],
    "why": "Hear It First saves its profile in the signed-in account's own doc (mergeFields trainer) (pinned at origin/main 2f9041a)",
    "date": "2026-11-13"
+  },
+  "app/save.js|progressStartOverAtSignIn": {
+   "value": [
+    "b43cd7212c3f",
+    "50a84192ce7a"
+   ],
+   "why": "rebased onto main efca304 (2026-11-16): progressStartOverAtSignIn is main's Start over (b39299f, 2026-11-14, Reviewed; its tx.get / tx.update of the student's own doc); the Module 4 and 5 Take It to a Song step text lost its record-yourself line (8852498 / 72539e4, Jonathan 2026-11-14: remove the recording lines), the steps kept",
+   "date": "2026-11-16"
   }
  },
  "SWITCH_READS": {
@@ -152,19 +160,19 @@
   },
   "4": {
    "value": [
-    "9014262e",
+    "bb255339",
     "59628d20",
     "83c07e5d",
     "a7c42178",
     "d181121a",
     "e12331e6"
    ],
-   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
-   "date": "2026-11-13"
+   "why": "rebased onto main efca304 (2026-11-16): progressStartOverAtSignIn is main's Start over (b39299f, 2026-11-14, Reviewed; its tx.get / tx.update of the student's own doc); the Module 4 and 5 Take It to a Song step text lost its record-yourself line (8852498 / 72539e4, Jonathan 2026-11-14: remove the recording lines), the steps kept",
+   "date": "2026-11-16"
   },
   "5": {
    "value": [
-    "71e8b80d",
+    "a4ad0885",
     "00bcc49e",
     "560c3e09",
     "6b992898",
@@ -172,8 +180,8 @@
     "563cfd38",
     "39c29dbb"
    ],
-   "why": "pinned at origin/main 2f9041a (never-blocks review round 2)",
-   "date": "2026-11-13"
+   "why": "rebased onto main efca304 (2026-11-16): progressStartOverAtSignIn is main's Start over (b39299f, 2026-11-14, Reviewed; its tx.get / tx.update of the student's own doc); the Module 4 and 5 Take It to a Song step text lost its record-yourself line (8852498 / 72539e4, Jonathan 2026-11-14: remove the recording lines), the steps kept",
+   "date": "2026-11-16"
   },
   "6": {
    "value": [

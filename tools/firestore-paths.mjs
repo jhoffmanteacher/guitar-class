@@ -254,6 +254,29 @@ function analyzeSegment(file, toks, fn, consts, out, ctx) {
   };
 
   // Pass 1 (twice, so a variable built from another variable is known): handles, references, snapshots.
+  /* Every token that names a snapshot (or one of its documents) is kept, so a NAME bound more often in this
+     function than it was traced (a callback parameter `d` of a traced query AND of something else) counts as
+     unknown below, not as the traced query's (2026-11-16: names are per function here, not per scope). */
+  const snapBinds = new Map();   // name → Set of the tokens that bound it to a traced snapshot
+  const snapSet = (tok, paths, scope) => {
+    if (!tok) return;
+    snaps.set(tok.v, paths);
+    if (!snapBinds.has(tok.v)) snapBinds.set(tok.v, new Set());
+    snapBinds.get(tok.v).add(tok);
+    if (scope && !snapScopes.some(z => z.tok === tok)) snapScopes.push({ tok, paths, scope: new Set(scope) });
+  };
+  /* A document parameter's scope: the callback's tokens, or a for…of loop's statement. A .ref on that name
+     inside it is that query's, unless the name is bound again inside (a nested callback's own d). */
+  const snapScopes = [];
+  const loopBody = (arr, e) => { const b = arr[e + 1]; if (b && b.t === 'punc' && b.v === '{') return arr.slice(e + 1, matchClose(arr, e + 1) + 1); let j = e + 1; while (j < arr.length && !(arr[j].t === 'punc' && arr[j].v === ';')) j++; return arr.slice(e + 1, j + 1); };
+  const lhsTok = (arr, k) => { let p = k - 1; if (arr[p] && arr[p].t === 'id' && arr[p].v === 'await') p--; return arr[p - 1]; };
+  const paramTok = a => {
+    if (a[0].t === 'id' && a[1] && a[1].v === '=>') return a[0];
+    if (a[0].v === '(' && a[1] && a[1].t === 'id') return a[1];
+    if (a[0].v === 'function' && a[1] && a[1].v === '(' && a[2] && a[2].t === 'id') return a[2];
+    if (a[0].v === 'async' && a[1] && a[1].t === 'id') return a[1];
+    return null;
+  };
   for (let pass = 0; pass < 2; pass++) {
     for (const { arr, k } of starts) {
       const c = readChain(arr, k);
@@ -267,8 +290,8 @@ function analyzeSegment(file, toks, fn, consts, out, ctx) {
       if (!cp) continue;
       const tail = c.links.slice(cp.tailFrom);
       if (tail.length && tail[tail.length - 1].name === 'get' && tail[tail.length - 1].call) {
-        const cur = snaps.get(name) || [];
-        snaps.set(name, cur.concat(cp.paths));
+        const cur = pass ? (snaps.get(name) || []).filter(p => !cp.paths.some(q => q.join('/') === p.join('/'))) : (snaps.get(name) || []);
+        snapSet(lhsTok(arr, k), cur.concat(cp.paths));
       } else if (tail.every(L => L.name && BUILDERS.has(L.name))) {
         const cur = vars.get(name) || [];
         const add = cp.paths.filter(p => !cur.some(q => q.join('/') === p.join('/')));
@@ -283,25 +306,61 @@ function analyzeSegment(file, toks, fn, consts, out, ctx) {
         const inner = arr.slice(k + 2, e);
         const ofAt = inner.findIndex(y => y.t === 'id' && y.v === 'of');
         if (ofAt > 0 && inner[ofAt - 1].t === 'id' && inner[ofAt + 1] && inner[ofAt + 1].t === 'id' && snaps.has(inner[ofAt + 1].v)) {
-          snaps.set(inner[ofAt - 1].v, snaps.get(inner[ofAt + 1].v));
+          snapSet(inner[ofAt - 1], snaps.get(inner[ofAt + 1].v), loopBody(arr, e));
         }
         continue;
       }
       if (!snaps.has(x.v)) continue;
       const c = readChain(arr, k);
       for (const L of c.links) {
-        if (L.name && SNAP_ITER.has(L.name) && L.call && L.call.length) {
-          const a = L.call;
-          let param = null;
-          if (a[0].t === 'id' && a[1] && a[1].v === '=>') param = a[0].v;
-          else if (a[0].v === '(' && a[1] && a[1].t === 'id') param = a[1].v;
-          else if (a[0].v === 'function' && a[1] && a[1].v === '(' && a[2] && a[2].t === 'id') param = a[2].v;
-          else if (a[0].v === 'async' && a[1] && a[1].t === 'id') param = a[1].v;
-          if (param) snaps.set(param, snaps.get(x.v));
-        }
+        if (L.name && SNAP_ITER.has(L.name) && L.call && L.call.length) snapSet(paramTok(L.call), snaps.get(x.v), L.call);
+      }
+      /* (S.docs || []).forEach(D => …): the same documents, with an empty list when the snapshot has none
+         (teacher-remove.js, 2026-11-14). Only this exact shape: S.docs, `|| []`, the closing bracket, one
+         iterator call. */
+      const j = c.end;
+      if (c.links.length === 1 && c.links[0].name === 'docs' && !c.links[0].call && arr[k - 1] && arr[k - 1].t === 'punc' && arr[k - 1].v === '(' &&
+          ['||', '[', ']', ')', '.'].every((v, n) => arr[j + n] && arr[j + n].t === 'punc' && arr[j + n].v === v) &&
+          arr[j + 5] && arr[j + 5].t === 'id' && SNAP_ITER.has(arr[j + 5].v) && arr[j + 6] && arr[j + 6].v === '(') {
+        const a = arr.slice(j + 7, matchClose(arr, j + 6));
+        if (a.length) snapSet(paramTok(a), snaps.get(x.v), a);
       }
     }
   }
+  /* A name bound more often than it was traced is unknown: a .ref on it is "cannot tell", never the traced
+     query's. Binding sites: NAME =>, const/let/var NAME = / of, NAME = …, a NAME in a parameter list (…) => / function (…) {. */
+  const bindings = new Map(), bindToks = new Set();
+  const countBinds = (arr) => {
+    for (let i = 0; i < arr.length; i++) {
+      const y = arr[i];
+      if (y.t === 'tpl') { y.exprs.forEach(countBinds); continue; }
+      if (y.t !== 'id' || !snapBinds.has(y.v)) continue;
+      const p = arr[i - 1], q = arr[i + 1];
+      if (p && p.t === 'punc' && (p.v === '.' || p.v === '?.')) continue;
+      let bound = false;
+      if (q && q.t === 'punc' && q.v === '=>') bound = true;
+      else if (p && p.t === 'id' && /^(const|let|var)$/.test(p.v)) bound = !(q && q.t === 'punc' && (q.v === ';' || q.v === ','));   // `let s;` holds nothing yet
+      else if (q && q.t === 'punc' && q.v === '=') bound = true;                                                                  // s = …: a new value
+      else if (p && p.t === 'punc' && (p.v === '(' || p.v === ',') && q && q.t === 'punc' && /^[),=]$/.test(q.v)) {
+        let d = 0, e = i + 1;
+        for (; e < arr.length; e++) { const z = arr[e]; if (z.t !== 'punc') continue; if (z.v === '[' || z.v === '(' || z.v === '{') d++; else if (z.v === ']' || z.v === ')' || z.v === '}') { if (!d) break; d--; } }
+        const after = arr[e + 1];
+        if (arr[e] && arr[e].v === ')' && after && after.t === 'punc' && (after.v === '=>' || after.v === '{')) bound = true;
+      }
+      if (bound) { bindings.set(y.v, (bindings.get(y.v) || 0) + 1); bindToks.add(y); }
+    }
+  };
+  countBinds(toks);
+  const nameLevel = new Map(snaps);
+  for (const [name, set] of snapBinds) if ((bindings.get(name) || 0) > set.size) nameLevel.delete(name);
+  /* The snapshot a NAME at token `at` holds: the innermost document parameter whose scope holds it (unless
+     the name is bound again inside that scope), else the function-wide one when that name is never bound
+     to anything untraced, else none. */
+  const traceAt = (name, at) => {
+    const own = snapScopes.filter(z => z.tok.v === name && z.scope.has(at)).sort((a, b) => a.scope.size - b.scope.size)[0];
+    if (own) return [...own.scope].some(t => t !== own.tok && t.v === name && bindToks.has(t)) ? null : own.paths;
+    return nameLevel.has(name) ? nameLevel.get(name) : null;
+  };
 
   // Pass 2: judge every chain.
   const consumed = new Map();   // token array → Set of link positions read as part of a chain
@@ -335,9 +394,9 @@ function analyzeSegment(file, toks, fn, consts, out, ctx) {
     // `.ref` from a snapshot
     c.links.forEach((L, i) => {
       if (L.name !== 'ref' || L.call) return;
-      const traced = snaps.has(c.base) ? snaps.get(c.base) : null;
+      const traced = traceAt(c.base, x);
       const after = c.links.slice(i + 1);
-      out.refs.push({ file, fn, line: x.line, base: c.base, paths: traced, writes: after.some(A => A.name && WRITE_METHODS.has(A.name) && A.call) });
+      out.refs.push({ file, fn, line: x.line, base: c.base, paths: traced, writes: after.some(A => A.name && WRITE_METHODS.has(A.name) && A.call), blockSig: blockSig(arr, k) });
     });
 
     // skip the declaration / assignment target itself, and object keys
@@ -396,6 +455,21 @@ function analyzeSegment(file, toks, fn, consts, out, ctx) {
    options all count, so dropping `merge` or changing the doc is a new fingerprint. */
 const tokSig = t => t.t === 'tpl' ? `tpl(${t.quasis.map(q => JSON.stringify(q)).join(',')};${t.exprs.map(e => e.map(tokSig).join(' ')).join(';')})` : `${t.t}:${t.v}`;
 export const tokenSignature = toks => toks.map(tokSig).join(' ');
+/* A fingerprint of the innermost { … } block that holds arr[k] (the whole array when none): pins an exact
+   case 1dm cannot trace together with the statements that feed it. */
+export function blockSig(arr, k) {
+  let d = 0, a = 0;
+  for (let j = k - 1; j >= 0; j--) {
+    const y = arr[j];
+    if (y.t !== 'punc') continue;
+    if (y.v === '}' || y.v === ')' || y.v === ']') d++;
+    else if (y.v === '(' || y.v === '[') { if (d) d--; }
+    else if (y.v === '{') { if (d) d--; else { a = j; break; } }
+  }
+  const b = arr[a] && arr[a].v === '{' ? matchClose(arr, a) + 1 : arr.length;
+  return createHash('sha256').update(tokenSignature(arr.slice(a, b))).digest('hex').slice(0, 12);
+}
+
 export function statementSig(arr, from, to) {
   let a = from, d = 0, crossed = 0;
   for (let j = from - 1; j >= 0; j--) {
