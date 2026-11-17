@@ -1126,8 +1126,14 @@ async function strumWalk(page, run, events, stats) {
         await metrics(1366, 657); await sleep(400);
         if (lang === 'en') {
           await run('strum:play:' + w, `document.querySelector('.ca-card[open] .ca-step[data-idx="${st.i}"] .tab--strum .play-seq-btn').click()`, 1300);
-          const lit = await run('strum:lit:' + w, `[...document.querySelectorAll('.ca-card[open] .ca-step[data-idx="${st.i}"] .strum-cell.beat-now')].map(c => +c.getAttribute('data-seq'))`, 10);
-          if (!lit || lit.length !== 1 || !(lit[0] >= 1 && lit[0] < hits)) fail(w, 'after 1.3 s of ▶ Play strum the lit arrows are ' + JSON.stringify(lit) + ', expected one, past the first');
+          const litNow = () => run('strum:lit:' + w, `[...document.querySelectorAll('.ca-card[open] .ca-step[data-idx="${st.i}"] .strum-cell.beat-now')].map(c => +c.getAttribute('data-seq'))`, 10);
+          let lit = await litNow();
+          /* A pattern whose second strum is three eighths after the first (ca-53's D..U..DU) is still on its first
+             arrow at 1.3 s at 60 BPM (the second is due at 1.5 s): correct, and it failed this step on 2026-11-16.
+             So while only the FIRST arrow is lit, look again for up to 2.4 s more (a whole bar at 60 BPM is 4 s;
+             no pattern's second strum is later than that). Anything else lit, or nothing, fails at once as before. */
+          for (let i = 0; i < 12 && lit && lit.length === 1 && lit[0] === 0; i++) { await sleep(200); lit = await litNow(); }
+          if (!lit || lit.length !== 1 || !(lit[0] >= 1 && lit[0] < hits)) fail(w, 'after 1.3 to 3.7 s of ▶ Play strum the lit arrows are ' + JSON.stringify(lit) + ', expected one, past the first');
           await run('strum:stop:' + w, `document.querySelector('.ca-card[open] .ca-step[data-idx="${st.i}"] .tab--strum .play-seq-btn').click()`, 300);
           const idle = await run('strum:idle:' + w, `(() => { const b = document.querySelector('.ca-card[open] .ca-step[data-idx="${st.i}"] .tab--strum .play-seq-btn'); return !b.classList.contains('playing') && b.textContent.includes(t('strum.play')); })()`, 10);
           if (!idle) fail(w, 'Stop did not put ▶ Play strum back');

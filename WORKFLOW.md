@@ -401,6 +401,18 @@ push. Where the Mac is right now: the coach splits with the reviewer's fix A are
     - For the tool (its builder has these): a slot never cleared on success is reported as "could not run" (exit 2)
       where it is a real fault; a failed child put back at the END of the list is green, because the tool never
       combines a failed fetch with an old cached hub.
+  - **For the Mac to know (Windows, 2026-11-16 night): the ACTIVITIES smoke failed on `ca-53`, and it was the smoke,
+    not the activity.** `node tools/smoke.mjs --en-only --only games,activities` on `199f3fe` printed 3 new lines,
+    one per step of ca-53: "after 1.3 s of ▶ Play strum the lit arrows are [0], expected one, past the first". The
+    Mac's run before shipping ca-53 was `--only games`, which does not walk an activity. Cause (read from the
+    code, the activity not watched playing): ca-53's pattern is `D..U..DU`, its second strum three eighths after
+    the first, which at the player's 60 BPM is due at 1.5 s; every earlier pattern's second strum is within two
+    eighths, so the fixed 1.3 s wait had never met this. Fixed in `tools/smoke.mjs` only: while ONLY the first
+    arrow is lit the step looks again for up to 2.4 s more; nothing lit, two lit, or a player that never moves
+    still fails. After: `--en-only --only activities` "no JavaScript errors" (11 chord-grid cards walked). GitHub's
+    Friday walk would have gone red on it. Also tonight: `console-layout-smoke` passed after W10; the live site
+    matches `199f3fe`; the "Change pattern" button on Strum Hero and Strum Radar's done screens has its padding
+    (`5f67250`, seen in 16 screenshots after the fix).
   - **THE COACH SPLITS ARE ON MAIN (the Mac, 2026-11-16 about 21:45, `e9c39a1`, Reviewed, 3 rounds).** Item 4 is
     done: `coach-chords.js` + `coach-chordcards.js`, `coach-runner.js` + `coach-noterunner.js`, with the bridge
     for pages opened before the push. The last review (Mac, fresh Opus `site-reviewer-deep`, on `78f6341`): 0
