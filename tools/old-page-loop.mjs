@@ -185,7 +185,8 @@ function openTree(spec){
 /* One pass over a script, keeping every character's position (comments and strings become spaces, newlines stay,
    so an index in the result is an index in the source and line numbers hold):
      code  comments out, strings kept (an inline handler inside a template string is a call site too);
-     refs  comments out AND string text out, except on…="…" handler attributes inside strings (a name that is only
+     refs  comments out AND string text out, except on…= handler attributes inside strings, up to their closing quote
+           or across a ${…} / ' + x + ' to the end of the piece (a name that is only
            mentioned in a string or a comment is not a reference; a handler in markup is).
    A `/` that starts a regex literal is not modelled: a quote or `//` inside one can blank the rest of that line. */
 const SCAN = new Map();
@@ -193,19 +194,42 @@ function scanJs(src){
   if (SCAN.has(src)) return SCAN.get(src);
   const n = src.length, code = src.split(''), refs = src.split(''), modes = [];
   const blank = (arr, a, b) => { for (let k = a; k < b; k++) if (arr[k] !== '\n') arr[k] = ' '; };
-  const strText = (a, b) => {
+  /* Keep a handler attribute's text: from on…= to its closing quote, or to the end of this piece of string when the
+     handler goes on after a ${…} or a ' + x + ' (review R2-1: `onclick="ccPickRate(${i})"` has no closing quote in
+     the piece before ${). Inside one template literal the handler carries on into the next piece (st.hq). */
+  const keep = (a, b) => { for (let k = a; k < b; k++) refs[k] = src[k]; };
+  const strText = (a, b, st) => {
     blank(refs, a, b);
-    for (const m of src.slice(a, b).matchAll(/\bon[a-z]+\s*=\s*(["'])(.*?)\1/g)) for (let k = a + m.index; k < a + m.index + m[0].length; k++) refs[k] = src[k];
+    let k = a;
+    if (st && st.hq){
+      const e = src.indexOf(st.hq, k), stop = e < 0 || e >= b ? b : e;
+      keep(k, stop);
+      if (stop >= b) return;
+      st.hq = null; k = stop + 1;
+    }
+    const re = /\bon[a-z]+\s*=\s*(["']?)/g;
+    re.lastIndex = 0;
+    const piece = src.slice(k, b);
+    let m;
+    while ((m = re.exec(piece))){
+      const s = k + m.index, q = m[1], from = s + m[0].length;
+      let e;
+      if (q){ const x = src.indexOf(q, from); e = x < 0 || x >= b ? -1 : x; }
+      else { const w = piece.slice(from - k).search(/[\s>]/); e = w < 0 ? b : from + w; }
+      if (e < 0){ keep(s, b); if (st) st.hq = q; return; }
+      keep(s, e); re.lastIndex = e + 1 - k;
+    }
   };
+  const tpl = [];   // one state per open template literal
   let i = 0;
   while (i < n){
     const c = src[i], d = src[i + 1], top = modes[modes.length - 1];
     if (top === 'tpl'){
       const s0 = i;
       while (i < n && src[i] !== '`' && !(src[i] === '$' && src[i + 1] === '{')){ if (src[i] === '\\') i++; i++; }
-      strText(s0, Math.min(i, n));
+      strText(s0, Math.min(i, n), tpl[tpl.length - 1]);
       if (i >= n) break;
-      if (src[i] === '`'){ modes.pop(); i++; continue; }
+      if (src[i] === '`'){ modes.pop(); tpl.pop(); i++; continue; }
       modes.push('expr'); i += 2; continue;
     }
     if (c === '/' && d === '/'){ const e = src.indexOf('\n', i), end = e < 0 ? n : e; blank(code, i, end); blank(refs, i, end); i = end; continue; }
@@ -214,7 +238,7 @@ function scanJs(src){
       let j = i + 1; while (j < n && src[j] !== c && src[j] !== '\n'){ if (src[j] === '\\') j++; j++; }
       strText(i + 1, Math.min(j, n)); i = j + 1; continue;
     }
-    if (c === '`'){ modes.push('tpl'); i++; continue; }
+    if (c === '`'){ modes.push('tpl'); tpl.push({ hq: null }); i++; continue; }
     if (c === '{' && top){ modes.push('brace'); i++; continue; }
     if (c === '}' && top){ modes.pop(); i++; continue; }
     i++;
