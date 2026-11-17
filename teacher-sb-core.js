@@ -200,12 +200,14 @@ function sbRows(){
   return rows.sort((a, b) => a.title.localeCompare(b.title));
 }
 /* The steps show for a draft that is not published, for a new song, and for a published song being edited (Edit);
-   a published song otherwise shows its own page (teacher-sb-publish.js). */
+   a published song otherwise shows its own page (teacher-sb-publish.js). Never for a stale draft (review R3-2: a tab
+   that had Edit open when another tab imported the song shows the song's page once it reads the import, so no edit
+   there can publish the older song over the import; its Edit starts from the import). */
 function sbShowsSteps(){
   if(sbSel === null) return false;
   if(sbSel === 'new') return true;
   const pub = sbPublished && sbPublished.has(sbSel), d = sbDraft();
-  return !!d && (!pub || (typeof sbEditing !== 'undefined' && sbEditing.has(sbSel)));
+  return !!d && !d.stale && (!pub || (typeof sbEditing !== 'undefined' && sbEditing.has(sbSel)));
 }
 function sbListHtml(){
   const all = sbRows(), q = sbQuery.trim().toLowerCase();

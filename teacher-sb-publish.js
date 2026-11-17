@@ -28,7 +28,8 @@
    window over 30 ms is pinned (beat.driftOff 0, measured on this copy), the audio id is not on SONG_FILES and no
    other built song uses it with other bytes, the list has room, and the draft is not stale (review R2-1). A chart whose
    bar count is not the recording's is said on Preview and on Publish's Chart row, and does not block (review R2-2,
-   sbChartBarsOff in teacher-sb-chart.js). A record that needs more than SB_PINS_MAX pins
+   sbChartBarsOff in teacher-sb-chart.js; a recording ONE bar longer, its end ringing out, is not said: review R3-5).
+   A record that needs more than SB_PINS_MAX pins
    shows the Beat step's red box here too ("This song does not fit the builder"), and does NOT block (Jonathan,
    2026-11-15 and 2026-11-16). A first Publish asks nothing (one click; Jonathan, 2026-11-16); an edit of a live song
    asks once. The only place it goes:
@@ -36,8 +37,9 @@
      1. ONE transaction (review R1-1): songFiles/{audio.id} read (it must be 'ready' and match the audio entry; read
         inside the transaction, review R2-5, so a copy another tab deletes meanwhile stops it), builtSongsMeta/list read
         (it must have room), builtSongs/{id} = { v, title, artist, audio, song, savedAt: the server's time } (the rules'
-        shape) and the list with songs[id] a new edit number (teacherBsNextVer), every other entry kept, updatedAt the
-        server's time; both land or neither does;
+        shape), the list with songs[id] a new edit number (teacherBsNextVer), every other entry kept, updatedAt the
+        server's time, and the draft itself, savedAt the same server time (review R3-1, see sbDraftStale); all land or
+        none does. The same song again (nothing changed) is refused before it starts (review R3-7);
      2. the song's previous audio, when the edit replaced it: deleted once nothing on the list plays it (sbDeleteAudio).
    So the list never names a song that is not saved. Students get it at their next sign-in, or a tab return (read at
    most every 15 minutes, app/builtsongs.js BS_RETURN_MS); this console's Songs view at once (builtSongsSync).
@@ -58,7 +60,9 @@
    them, kept exactly: the Beat step shows them read-only and sbBarTime follows them). Unchanged, it makes the same song
    as a student's page reads it (sbPubNorm, review R2-3), so Publish reads "no changes" (tools/song-builder-sim.mjs
    proves it). A draft the builder saved BEFORE the same id was imported over it is stale (sbDraftStale, review R2-1):
-   no "changes not published", never published, and rebuilt like this by Edit or Unpublish. NOT recoverable: the chart's original text (the Chart step says so and
+   no "changes not published", never published, no steps shown for it (review R3-2: a tab that had Edit open shows the
+   song's page once it reads the import), its page says Edit starts from the imported song (review R3-6), and Edit or
+   Unpublish rebuild it like this. NOT recoverable: the chart's original text (the Chart step says so and
    shows the grid), the taps and drift windows (the Beat step says the bars came with the song), the loudness
    measurements and the original mp3 (the Volume and Upload steps say so; levelling again needs the original picked,
    as for any reopened draft).
@@ -69,10 +73,11 @@
    THE HEALTH LINE (the list's head): "N published; all pass today's checks", or each song that fails builtSongCheck
    today (a code change to the validator can make an old song fail; a student's page then leaves it out).
 
-   WRITES: builtSongs/{id}, builtSongsMeta/list, songDrafts/{id} (through sbWriteDraft), songFiles/{id} and its pieces
-   (deletes only, sbDeleteAudio): never progress/{uid}, never config/class. tools/song-builder-sim.mjs runs this part
-   against a stub Firestore that checks every write against the rules' shape. Every value from the store or a file
-   is escaped where it is drawn; buttons carry data-* only (sbClick, teacher-sb-core.js, routes them here). */
+   WRITES: builtSongs/{id}, builtSongsMeta/list, songDrafts/{id} (through sbWriteDraft, and in Publish's transaction),
+   songFiles/{id} and its pieces (deletes only, sbDeleteAudio): never progress/{uid}, never config/class.
+   tools/song-builder-sim.mjs runs this part against a stub Firestore that checks every write against the rules' shape.
+   Every value from the store or a file is escaped where it is drawn; buttons carry data-* only (sbClick,
+   teacher-sb-core.js, routes them here). */
 const SB_PV_ID = 'sbpreview';          // the preview card's id and track key while the Preview step is on screen
 let sbPv = null;                       // { id, key, node, act } the preview card on screen
 const sbEditing = new Set();           // published songs whose steps are open in this tab (Edit)
@@ -118,8 +123,11 @@ function sbSameSong(d, p){
 }
 /* A draft saved BEFORE its song was published another way (review R2-1: Manage → Built songs imported the same id, the
    round trip Export, Claude, Import), and not the same song: Edit and Unpublish rebuild it from the published doc, and
-   it is never published. Both times are the server's, from one read (teacherSbLoad); this tab's own Import says so
-   directly (teacherSbImported). */
+   it is never published. Publish writes the draft in its own transaction (review R3-1), so a draft the builder
+   published has its song's server time to the millisecond: only a LATER write of the song (an Import) makes it
+   older, whatever a later code change does to the song the draft makes. The song is compared only then, so an Import
+   that came back unchanged keeps the draft (its pins, its chart text). Both times are the server's, from one read
+   (teacherSbLoad); this tab's own Import says so directly (teacherSbImported). */
 function sbDraftStale(d, p){ return !!(d && p && p.doc && p.at && d.savedAt && p.at > d.savedAt && !sbSameSong(d, p)); }
 /* The draft differs from the published song (the change students do not have yet). */
 function sbPubChanged(d, p){
@@ -330,6 +338,9 @@ async function sbPublish(){
   const why = sbPublishWhy(d, id);
   if(why.length){ sbNote = 'Not published: ' + why[0]; teacherSbPaint(); return; }
   const doc = sbDocOf(d), was = sbPublished && sbPublished.get(id);
+  /* Review R3-7: the same song again is refused here too, not only by the button (it would take a new edit number for a
+     change students cannot see). */
+  if(was && !sbPubChanged(d, was)){ sbNote = 'Not published: nothing has changed since the published song.'; teacherSbPaint(); return; }
   /* A first Publish (a song not on the Songs page: never published, or unpublished) asks nothing: one click (Jonathan,
      2026-11-16, "go ahead"); Unpublish takes it off. An EDIT of a live song still asks, with the open-pages sentence. */
   if(was && !confirm(`Publish your changes to "${doc.title}"? Students get the new version at their next sign-in or tab return. Students who have the song open now keep the old version, or lose its sound, until they reload.`
@@ -349,6 +360,7 @@ async function sbPublish(){
        this commits makes Firestore run the transaction again, which then finds it gone and writes nothing (read
        before the transaction, the song could be listed with its audio deleted). */
     let ver = 0;
+    const draftDoc = sbDraftDoc(d);
     await db.runTransaction(async tx => {
       step = 'check';
       const snap = await tx.get(ref), hs = await tx.get(head);
@@ -362,10 +374,16 @@ async function sbPublish(){
       songs[id] = ver;
       tx.set(db.collection('builtSongs').doc(id), Object.assign({}, doc, { savedAt: firebase.firestore.FieldValue.serverTimestamp() }));
       tx.set(ref, { songs, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+      /* The draft in the same commit (review R3-1): every write of one commit gets the same server time, so the draft is
+         never older than the song it published (sbDraftStale), and a later change to how the builder makes a song can
+         never make it look imported over. */
+      tx.set(db.collection('songDrafts').doc(id), Object.assign({}, draftDoc, { savedAt: firebase.firestore.FieldValue.serverTimestamp() }));
     });
     step = 'done';
+    const now = Date.now();
     if(!sbPublished) sbPublished = new Map();
-    sbPublished.set(id, { title: doc.title, artist: doc.artist, ver, audioId: doc.audio.id, doc: JSON.parse(JSON.stringify(doc)), at: Date.now() });
+    sbPublished.set(id, { title: doc.title, artist: doc.artist, ver, audioId: doc.audio.id, doc: JSON.parse(JSON.stringify(doc)), at: now });
+    d.savedAt = now;
     sbEditing.delete(id);
     if(was && was.doc && was.doc.audio && was.doc.audio.id !== doc.audio.id) await sbDeleteAudio(was.doc.audio.id, null);
     sbNote = was ? `Published the changes to "${doc.title}" (${teacherBsVerText(ver)}). Students get them at their next sign-in or tab return.`
@@ -562,7 +580,9 @@ const SB_EXPORT_HINT = 'Two downloads: the song file (.json) and its levelled .m
 function sbPublishedHtml(id){
   const p = sbPublished.get(id), d = sbDrafts ? sbDrafts.get(id) || null : null, doc = p.doc;
   const off = sbBusy ? ' disabled' : '', verdict = sbPubVerdict(id, p), changed = d && sbPubChanged(d, p);
-  const canDraft = !!(d || (doc && verdict.ok));   // an imported song: Edit and Unpublish rebuild its draft first
+  /* An imported song (no draft, or a stale one: review R2-1) is opened by Edit and Unpublish through a draft rebuilt from
+     it, so only when it passes today's checks. */
+  const own = !!(d && !d.stale), canDraft = own || !!(doc && verdict.ok);
   const acts = (canDraft ? `<button type="button" class="tg-seg-btn ta-act-btn" data-sb-act="edit"${off} title="Opens the Chart step; pick another step below">Edit</button><button type="button" class="tg-seg-btn ta-act-btn" data-sb-act="unpublish"${off}>Unpublish</button>` : '')
     + `<button type="button" class="tg-seg-btn ta-act-btn t-act-danger" data-sb-act="delete-song"${off}>Delete…</button>`;
   let body = '';
@@ -576,8 +596,11 @@ function sbPublishedHtml(id){
         <dt>Today's checks</dt><dd>${verdict.ok ? '<span class="sb-ok">✓</span> ' : '<span class="sb-bad">✗</span> '}${escHtml(verdict.text)}${verdict.ok ? '' : ' <span class="sb-hint">(students\' pages leave it out)</span>'}</dd>
       </dl>`;
   } else body = `<div class="sb-flag red"><span class="fi">!</span><div class="sb-flag-body"><b>The Songs page list names this song, but its song is not in the database.</b> Students' pages skip it. Delete takes it off the list.</div></div>`;
-  const change = d
+  /* Review R3-6: a stale draft (older than an Import of this song) is replaced by Edit and Unpublish: said in one line. */
+  const change = own
     ? `<p class="sb-note">Edit opens the steps again, on the step you pick; students keep this song until you publish the change. Unpublish takes it off students' pages and keeps your work. Delete removes the song, the draft and the recording.</p>`
+    : d && canDraft
+    ? `<p class="sb-note">This song was imported after your draft was last saved, so Edit starts from the imported song and replaces the draft. Students keep this song until you publish a change. Unpublish takes it off students' pages and keeps it here as a draft. Delete removes the song, the draft and the recording.</p>`
     : canDraft ? `<p class="sb-note">This song came in through Manage → Built songs (Import), so it has no draft yet. Edit or Unpublish first makes one from the published song: its sections, bars, lyrics, chord shapes, level and beat come back as they are. What cannot come back: the chart's original text, the taps, the loudness numbers and the original mp3 (pick that at step 1 only to level the song again). Students keep this song until you publish a change.</p>`
     : `<p class="sb-note">This song came in through Manage → Built songs (Import) and fails today's checks, so the builder cannot open it: send its file to Claude, or Delete it. Hidden in the Songs view takes it off students' pages for now.</p>`;
   return `<div class="ta-dhead"><div class="ta-meta">Song builder · Published · ${escHtml(teacherBsVerText(p.ver))} · on the Songs page</div><div class="ta-title-row"><h2 class="ta-title">${escHtml(p.title)} <span class="ta-title-id">${escHtml(p.artist)}</span></h2><div class="ta-actions">${acts}</div></div></div>`

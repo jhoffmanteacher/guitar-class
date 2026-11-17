@@ -14,7 +14,8 @@
    chord symbol it cannot read ("Bdim", "G7#9"). A refused line is left out and FLAGGED until Jonathan says
    "Leave it out" or types its chords. A slash chord or a seventh FOLDS to the plain chord (G/B and G7 are G, Am7
    is Am) and the step says so. Chords over lyrics do not say how long a chord lasts: each gets ONE bar, and the
-   step says how many bars the chart makes against how many the recording has ("Hold the long ones in the grid").
+   step says how many bars the chart makes against how many the recording has ("Hold the long ones in the grid"; a
+   recording one bar longer, its end ringing out, is not flagged: sbChartBarsOff).
    A line that starts with # is ignored (that is what "Leave it out" writes).
 
    SECTIONS take a name from the fixed list (BS_SECTION_NAMES, app/builtsongs.js: the words students see come from
@@ -412,12 +413,15 @@ function sbChartOpen(d, read){
 }
 /* The chart's bar count against the recording's at the beat set (review R2-2): { n, rec } when they differ, else null.
    Never blocks Publish (the Chart step, Preview and Publish's Chart row say it). Not before the beat is set, and not for
-   a chart that came with an imported song (its bars are the song as it was published). */
+   a chart that came with an imported song (its bars are the song as it was published). A recording exactly ONE bar
+   longer than the chart is not said either (review R3-5, decided by the lead on Jonathan's "you pick the way to make
+   things smoothest"): most records hold the last chord a bar or more, and sbBarsIn counts that ringing bar. A chart
+   longer than the recording, or a recording 2 or more bars longer, is said. */
 function sbChartBarsOff(d){
   const beat = typeof sbBeatOf === 'function' ? sbBeatOf(d) : null;
   if(!sbHasChart(d) || d.chart.fromImport || !beat || !d.audio) return null;
   const n = sbChartBars(d.chart.sections), rec = sbBarsIn(beat, d.audio.durationSec);
-  return n === rec ? null : { n, rec };
+  return n === rec || rec === n + 1 ? null : { n, rec };
 }
 function sbBarsOffHtml(d, off, fmt, inGrid){
   const how = fmt === 'bar lines' ? `Add or remove bars ${inGrid ? 'here' : 'in the grid'}.`
@@ -492,7 +496,9 @@ function sbChartPaneHtml(d){
   const nBars = sbChartBars(ch.sections), names = sbChartChords(ch.sections);
   const rec = d.beat && d.audio ? sbBarsIn(d.beat, d.audio.durationSec) : null;
   const stale = d.beat && ch.meter && ch.meter !== d.beat.meter ? `<div class="sb-flag red"><span class="fi">!</span><div class="sb-flag-body"><b>The beat is now ${escHtml(d.beat.meter === '6/8' ? '6/8 in two' : d.beat.meter.slice(0, 1) + ' beats a bar')}; this chart was read in ${escHtml(ch.meter)}.</b> Read it again so its bars fit. <button type="button" class="sb-btn small" data-sb-act="chart-read"${off}>Read it again</button></div></div>` : '';
-  const count = rec == null ? '' : nBars === rec ? `<span class="sb-chip on">✓ ${nBars} bars, the same as the recording</span>` : `<span class="sb-chip${nBars > rec ? ' new' : ''}">${nBars} bars; the recording has ${rec}</span>`;
+  const count = rec == null ? '' : nBars === rec ? `<span class="sb-chip on">✓ ${nBars} bars, the same as the recording</span>`
+    : rec === nBars + 1 ? `<span class="sb-chip on">✓ ${nBars} bars; the recording has one more, its end ringing out</span>`
+    : `<span class="sb-chip${nBars > rec ? ' new' : ''}">${nBars} bars; the recording has ${rec}</span>`;
   /* A chart rebuilt from an imported song (sbDraftFromDoc): there is no pasted text to show. */
   const imp = ch.fromImport ? `<div class="sb-flag sb-flag-info"><span class="fi">i</span><div class="sb-flag-body"><b>This chart came with the imported song.</b> Its original text is not here, so there is nothing under "What was read"; the grid is the song as it was published, with its own chord shapes. Pasting a chart replaces it.</div></div>` : '';
   if(view === 'grid'){

@@ -20,10 +20,11 @@
      1. the audio goes into songFiles/{audio.id} through the Song files writer (teacherSfPutFile in
         teacher-songfiles.js: head 'uploading', the pieces, stale pieces removed, head 'ready'), skipped when the
         store already holds that file, ready and matching;
-     2. ONE transaction (review R2-6, 2026-11-16, as the Song builder's Publish): builtSongs/{id} = { v, title,
-        artist, audio, song, savedAt: the server's time } and builtSongsMeta/list with songs[id] a new EDIT number
-        (what tells every page to fetch the song again; teacherBsNextVer: never one used before), every other entry
-        kept, updatedAt the server's time; both land or neither does.
+     2. ONE transaction (review R2-6, 2026-11-16, as the Song builder's Publish): the audio's head read again (it must
+        still be ready and match, review R3-3), builtSongs/{id} = { v, title, artist, audio, song, savedAt: the
+        server's time } and builtSongsMeta/list with songs[id] a new EDIT number (what tells every page to fetch the
+        song again; teacherBsNextVer: never one used before), every other entry kept, updatedAt the server's time; both
+        land or neither does.
    Importing the same id again replaces that song; a Song builder draft of it saved before is then stale and is
    rebuilt from the import when it is next opened (teacherSbImported, teacher-sb-publish.js; review R2-1). One import
    at a time (and never during a Song files action). Leaving Manage stops it before its next write; a stop or a
@@ -32,9 +33,9 @@
    (builtSongsSync()).
 
    NOT HERE: Publish, Edit, Unpublish, Delete and Export are the Song builder's (teacher-sb-publish.js, Part d,
-   2026-11-16), which writes builtSongs/{id} and builtSongsMeta/list as Import does (both in one transaction; the
-   list first when a song comes off). An imported song shows there as a published song with no draft: Edit and
-   Unpublish rebuild one from it, and Delete and Export work on it. Hidden in the Songs view
+   2026-11-16), which writes builtSongs/{id} and builtSongsMeta/list as Import does (both in one transaction, with the
+   draft itself in Publish's; the list first when a song comes off). An imported song shows there as a published song
+   with no draft: Edit and Unpublish rebuild one from it, and Delete and Export work on it. Hidden in the Songs view
    (config/class.hiddenActivities, the existing writer) still takes any built song off students' pages. A built
    song is never moved to Class activities (teacher-songs.js shows no such button for an 'sb-' id).
 
@@ -254,11 +255,15 @@ async function teacherBsImport(jsonFile, mp3File){
     if(stopped()) throw 'stop';
     teacherBsProgress = `Saving ${doc.title}…`; teacherBsPaint();
     /* The song and the list in ONE transaction (review R2-6, as the Song builder's Publish): both land or neither does,
-       so a song already on the Songs page is never replaced under its old edit number. */
+       so a song already on the Songs page is never replaced under its old edit number. The audio's head is read again
+       INSIDE it (review R3-3, as Publish): a Delete in another tab that removes the audio before this commits makes
+       Firestore run it again, which then finds it gone and writes nothing (the read above, before the upload, could
+       leave the song listed with no audio). */
     const ref = db.collection('builtSongsMeta').doc('list');
     let ver = 0;
     await db.runTransaction(async tx => {
-      const snap = await tx.get(ref);
+      const snap = await tx.get(ref), hs2 = await tx.get(db.collection('songFiles').doc(a.id));
+      if(!teacherSfHeadMatches(hs2.exists ? hs2.data() || {} : null, entry)) throw { audioGone: true };
       const songs = bsListOf(snap.exists ? snap.data() : null);
       ver = teacherBsNextVer(songs[id]);
       songs[id] = ver;
@@ -272,6 +277,7 @@ async function teacherBsImport(jsonFile, mp3File){
     if(typeof builtSongsSync === 'function') builtSongsSync();
   }catch(e){
     if(e && e.shape){ teacherBsEnd(`Nothing was imported: ${e.shape}.`); return; }
+    if(e && e.audioGone){ teacherBsEnd('The import failed: the audio in the database was deleted or changed while the song was being saved (in another tab). The song and the Songs page list were not changed, so students have what they had before. Import again.'); return; }
     const where = step === 'audio'
       ? (w.wrote ? ` The audio is NOT ready (its upload stopped${w.k >= 0 && w.k < w.n ? ` at piece ${w.k + 1} of ${w.n}` : ''}); the song was not added.` : ' Nothing was written.')
       : ' The audio is stored; the song and the Songs page list were not changed, so students have what they had before. Import again.';
