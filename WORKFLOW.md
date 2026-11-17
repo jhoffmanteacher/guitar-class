@@ -76,18 +76,14 @@ at the top, highlights on the beat); the later pushes are notes only. Nothing is
   `review-rankboard`, `ship-lr`. Delete nothing without checking; never delete a remote branch.
 
 **THE MAC'S OWN LIST, 2026-11-17 (delete each line when it is no longer news):**
-- **QUEUED, the Mac's next job when a builder slot is free: private song audio, step 2a (Jonathan, 2026-11-17: "which
-  songs do i upload for private song audio?").** He is ready to upload. He CANNOT yet: Upload accepts only a file on
-  the site's list, `SONG_FILES` in `app/songfiles.js`, which is empty, and `node tools/song-files.mjs --add` refuses
-  a file that is still in `audio/` ("a private song must not be public too"). So step 2 needs an order that never
-  leaves a song without audio: (1) get the 18 files onto the LIVE list while the cards still play the public copies
-  (the tool and check 1dx need a named in-between state, or the list is written another way: design it, do not
-  loosen 1dx silently); (2) he uploads the 18 (Windows is building a drop zone, W21) and presses Verify all; (3)
-  only then switch the 7 tracks to `private:<id>`, keep the public files one week as the fallback the plan names,
-  then remove them. The 18: 2 files each of Las Mañanitas, Perdón Mamá, Vuelve a la Vida, Ella, Arsenal Efectivo; 4
-  each of Madrecita Querida and Smells Like Teen Spirit (117.4 MB). NOT the 8 Watchtower files: the Journey page's
-  private player is not built. Plan: `Claude outputs/PLAN-private-song-audio-2026-11-13.md`. One Opus builder,
-  `site-reviewer` round before the switch push. Tell him when Upload is ready; until then it is not on his list.
+- **Private song audio: step 1 of 3 is on main (2026-11-17, `Review: Reviewed`, `site-reviewer` on Opus, 1 round,
+  clean).** The 18 recordings are on `SONG_FILES` with `"awaitingSwitch": true`; every card still plays its public
+  copy; check 1dz allows that state only while `audio/<file>` matches byte for byte. Manage → Song files opens from
+  the start, its buttons are outlined, the paste-2 warning is replaced. **Step 2 is Jonathan's: drop the 18 files
+  (`Claude outputs/private-songs-to-upload-2026-11-17/`), then Verify all.** Step 3 (the switch,
+  `node tools/song-files.mjs --switch <id>`, `docs/private-audio-step2.md`) ONLY after he says Verify all is green:
+  NO check stops a switch pushed before the upload (the reviewer looked for one), so the order is the lead's to
+  keep. The 8 Watchtower files are not listed (no private player on the Journey page).
 - **IN FLIGHT: a Chords / Tab switch on one practice card** (Jonathan, 2026-11-17: "chords/tab switch"). Branch
   `feat/card-views` (worktree `card-views`), one Opus builder: inventory, design, a pilot on one song. Nothing existing
   is merged or removed.

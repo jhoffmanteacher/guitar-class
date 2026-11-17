@@ -23,6 +23,10 @@ second line after a student's first change.
 7. **On hold until you say go:** the design-values tidy (W15).
 
 **Only you can do:**
+9. **Upload the 18 song recordings (READY since 2026-11-17).** Teacher console → Manage → Song files. Drop every
+   file from `Claude outputs/private-songs-to-upload-2026-11-17/` on the box (they go up one at a time), then press
+   "Verify all". Tell Claude when every row is verified; nothing changes for students until Claude switches the
+   songs over after that.
 10. **The practice copy's key:** `Claude outputs/practice-copy/JONATHAN-STEPS.md` (GitHub secret
     `FIREBASE_PRACTICE_SA`). Until then the practice copy is not published.
 13. **A 30-minute mic test on one class Chromebook** with `mic-check.html` (does ChromeOS force its automatic volume
