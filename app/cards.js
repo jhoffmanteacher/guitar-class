@@ -748,7 +748,7 @@ async function pcSheetDraw(paperOrCol){
   }
   const box = (T, padX, padY) => `left:${(T.x0 - crop.x - padX) * scale}px;top:${(T.y0 - crop.y - padY) * scale}px;width:${(T.x1 - T.x0 + 2 * padX) * scale}px;height:${(T.y1 - T.y0 + 2 * padY) * scale}px`;
   const html = model.toks.map((T, i) => {
-    const at = map.start[i], S = L.sections[at.si];
+    const at = map.start[i];
     return `<button type="button" class="pc-sheet-hit" style="${box(T, 2, 1.5)}" onclick="pcSheetStartAt(this,${i})" aria-label="${escAttr(t('ca.sheetStartAt', {chord: T.name, section: pcSheetWhere(L, at.si, at.rep)}))}"></button>`;
   }).join('');
   paper.insertAdjacentHTML('beforeend', html + '<span class="pc-sheet-line" aria-hidden="true"></span>');
