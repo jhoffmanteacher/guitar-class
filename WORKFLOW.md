@@ -222,6 +222,11 @@ and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fi
     test that `&lead=` does nothing without `snipcal=1` and that `passFrom` is reset at a lap; cap `&lead` at 300 ms;
     the sheet dot's floor that never acts: remove it or test it. Each with its planted fault going red. W16-6 (a lead
     longer than the latency turns playalong-loop red) is moot at lead 0: write one line saying so.
+  - **W18 DONE (Windows, 2026-11-17; one Opus agent; `tools/checks.mjs` only, Fast):** 1eh now saves Power Chord
+    Switch, Listening Coach and Note Runner takes through the real `micRecSaveNow` (6 identity scans, `micRecSave(` call
+    sites pinned at 4); the made-up student has an email and a photo URL and their values fail a take; the Evaluate-all
+    tooltip's escaping is tested in 1cl (1dd stubs that renderer). Every plant went red (name in ccRecMeta /
+    coachRecMeta / Note Runner, `owner: email`, photo in scRecMeta, `escAttr` removed).
   - **W18. Three MINORs from the Opus review of "no name on a mic take" (`3792deb`), tools only (`tools/checks.mjs`
     1eh, 1dd):** (a) 1eh's no-identity check runs only the strum-check take through `micRecSaveNow`: run every game's
     take data through it (`ccRecMeta` in `coach-chords.js`, the Listening Coach's `coachRecMeta`, Note Runner's,
