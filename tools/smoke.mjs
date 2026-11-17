@@ -91,6 +91,9 @@ import { writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+/* THE LEAD the smoke expects (app/cards.js PC_LEAD; checks.mjs 1bf PC_LEAD_PIN): its own number, so a fault in the
+   page's pcLeadBars cannot move the expectation with it (W17). A new lead is Jonathan's: re-pin it here too. */
+const SMOKE_PC_LEAD = 0;
 const args = process.argv.slice(2);
 const opt = (name) => { const i = args.indexOf(name); return i >= 0 ? args[i + 1] : null; };
 const QUIET = args.includes('--quiet');
@@ -215,6 +218,15 @@ async function chordGridWalk(page, run, events, stats) {
   if (!ids || !ids.length) return;
   stats.chordCards = ids.length;
   await run('chord-grid:open', `openClassActivitiesScreen()`, 600);
+  /* THE LEAD (app/cards.js), worked out here and NOT with the page's pcLeadBars / pcLeadShift (W17, 2026-11-17), so a
+     fault inside them goes red: the cursor reads the file (lead - latency) x the card's rate from the decoder, and
+     never back past where the pass began once the decoder is there. The lead is pinned here (checks.mjs 1bf pins
+     the page's PC_LEAD to the same number); the latency and the clock (snipBarsAt) are the page's. */
+  await run('chord-grid:lead-def', `window.__smokeLeadBars = function(st, ct){
+    const lead = ${SMOKE_PC_LEAD}, r = parseFloat(st.root.dataset.rate) > 0 ? parseFloat(st.root.dataset.rate) : 1;
+    const read = snipBarsAt(st.win, ct + (lead - snipLatency()) * r);
+    return read < st.passFrom && snipBarsAt(st.win, ct) >= st.passFrom - 1e-6 ? st.passFrom : read;
+  }; 1`, 50);
   await run('chord-grid:sim-def', `window.__cgSim = function(id, si, maxSec, dt, lap){
     caFocusActivity(id);
     const root = document.querySelector('.ca-card[open] .pc');
@@ -236,8 +248,8 @@ async function chordGridWalk(page, run, events, stats) {
         const t = fake.currentTime;
         if (t < prevT - 0.5) { lapped = true; after.clear(); }
         prevT = t;
-        // THE LEAD (app/cards.js): the cursor reads the file pcLeadShift() from the decoder, on every row alike, never back past where the pass began.
-        const here = pcLocate(L, pcLeadBars(st, t));
+        // THE LEAD (app/cards.js), worked out by the smoke itself (__smokeLeadBars): on every row alike, never back past where the pass began.
+        const here = pcLocate(L, window.__smokeLeadBars(st, t));
         const lit = [...root.querySelectorAll('.pc-tab .beat-now')];
         const sig = lit.map(e => (e.closest('.pc-page').dataset.page) + ':' + (e.dataset.beat ?? '-') + ':' + (e.dataset.seq ?? '-')).join(',');
         if (here && L.sections[here.si].grid) {
@@ -324,7 +336,7 @@ async function chordGridWalk(page, run, events, stats) {
         const cells = [...root.querySelectorAll('.pc-strip-cell')]; const on = cells.map((c, i) => c.classList.contains('now') ? i : -1).filter(i => i >= 0);
         on.forEach(i => lit.add(i));
         // The strip must be on the beat's own cell and carry each chord name on the cell where it starts.
-        const loc = pcLocate(L, pcLeadBars(st, fake.currentTime));
+        const loc = pcLocate(L, window.__smokeLeadBars(st, fake.currentTime));
         if (loc && frames > 3 && !(frames > 3 && st.stripKey == null)) {
           const exp = 2 * (loc.beat % bpb);
           if (on.length !== 1 || on[0] !== exp) { if (wrong.length < 3) wrong.push('strip lit [' + on + '] expected ' + exp + ' at beat ' + loc.beat); }

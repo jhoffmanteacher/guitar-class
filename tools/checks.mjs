@@ -10134,6 +10134,7 @@ function checkEnglishTermsInSpanish(I18N) {
      console preview calls it with preview:true, and
      every silencer that stops a snippet also stops a card (pcStop).
    ════════════════════════════════════════════════════════════════════ */
+const PC_SHEET_AFTER_PIN = 0.1;   // PC_SHEET_SOLID_AFTER: the sheet dot stays filled this long after its beat is heard, under any &lead= (W17)
 const PC_LEAD_PIN = 0;   // ON the heard beat: Jonathan, 2026-11-17 ("exactly on the beat and not ahead of it for everything"); it was 0.06 for one day
 function checkPracticeCards(ctx) {
   head('1bf. Practice cards');
@@ -10311,18 +10312,89 @@ function checkPracticeCards(ctx) {
   /* THE LEAD (app/cards.js, 2026-11-16): every highlight PC_LEAD before the HEARD beat. Pinned by running the page's
      own functions: the default with no ?snipcal=1&lead= override, the cursor's shift from the decoder at two rates,
      and the sheet dot still filled when the beat is heard at every tempo from 50 to 200 BPM. A new number is
-     Jonathan's (he picks it by eye with the override): re-pin PC_LEAD_PIN and LEAD_PINS in tools/playalong-loop.mjs. */
+     Jonathan's (he picks it by eye with the override): re-pin PC_LEAD_PIN, LEAD_PINS in tools/playalong-loop.mjs and
+     SMOKE_PC_LEAD in tools/smoke.mjs. */
   let leadSaid = '';
   if (ctx) {
     try {
+      /* W17 (2026-11-17): pcLeadBars is probed, not only pcLeadShift: it is what pcFrame calls. Its expected value is
+         worked out here from the pinned lead, the latency and snipBarsAt (the clock), never from pcLeadBars or
+         pcLeadShift: at two rates, with a URL lead, and on both sides of where the pass began (st.passFrom). The sheet
+         dot's floor (lead + PC_SHEET_SOLID_AFTER) never acts at PC_LEAD 0; it acts under ?snipcal=1&lead=, so the
+         hollow count runs at every lead the override allows (0, 100, 200, 300 ms), where the dot can be (0.9 beat). */
       const L = vm.runInContext(`(() => { const lat = snipLatency(), r = rate => pcLeadShift({ dataset: { rate: String(rate) } });
-        let hollow = 0; for (let bpm = 50; bpm <= 200; bpm += 5) if (!(pcSheetSolidSec(60 / bpm) > pcLead())) hollow++;
-        return { lead: pcLead(), override: typeof window.__pcLead, lat, s1: r(1), s08: r(0.8), hollow }; })()`, ctx);
+        const PIN = ${PC_LEAD_PIN}, was = window.__pcLead;
+        const a = (window.CLASS_ACTIVITIES || []).find(x => x.view === 'card' && x.card && x.kind !== 'check' && !x.card.wholeSong);
+        const Lay = pcLayout(a), win = pcWindow(Lay, false), bars = [];
+        const want = (rate, lead, ct, from) => { const rd = snipBarsAt(win, ct + (lead - lat) * rate); return rd < from && snipBarsAt(win, ct) >= from - 1e-6 ? from : rd; };
+        const probe = (rate, lead, ct, from) => { const st = { win, root: { dataset: { rate: String(rate) } }, passFrom: from }; if (lead === PIN) delete window.__pcLead; else window.__pcLead = lead;
+          const got = pcLeadBars(st, ct), exp = want(rate, lead, ct, from); if (!(Math.abs(got - exp) < 1e-9)) bars.push(\`rate \${rate}, lead \${lead * 1000} ms, decoder \${ct.toFixed(3)} s, pass from bar \${from}: pcLeadBars \${got.toFixed(4)}, expected \${exp.toFixed(4)}\`); };
+        let n = 0;
+        try {
+          const B2 = snipTimeAtBars(win, 2);
+          for (const rate of [1, 0.8]) for (const lead of [PIN, 0.2]) for (const dt of [-0.3, -0.01, 0.01, 0.05, 0.3]) { probe(rate, lead, B2 + dt, 0); probe(rate, lead, B2 + dt, 2); n += 2; }
+        } finally { if (was === undefined) delete window.__pcLead; else window.__pcLead = was; }
+        let hollow = 0, tried = 0;
+        try { for (const lead of [0, 0.1, 0.2, 0.3]) { window.__pcLead = lead; for (let bpm = 50; bpm <= 200; bpm += 5) { const b = 60 / bpm; if (0.9 * b <= lead + ${PC_SHEET_AFTER_PIN}) continue; tried++; if (!(pcSheetSolidSec(b) >= lead + ${PC_SHEET_AFTER_PIN} - 1e-9)) hollow++; } } }
+        finally { if (was === undefined) delete window.__pcLead; else window.__pcLead = was; }
+        return { lead: pcLead(), override: typeof window.__pcLead, lat, s1: r(1), s08: r(0.8), hollow, tried, bars, n, card: a && a.id }; })()`, ctx);
       if (L.lead !== PC_LEAD_PIN || L.override !== 'undefined') flag(`app/cards.js: pcLead() reads ${L.lead} s (window.__pcLead is ${L.override}); pinned ${PC_LEAD_PIN} s with no URL override — PC_LEAD is Jonathan's number (THE LEAD)`);
       if (Math.abs(L.s1 - (PC_LEAD_PIN - L.lat)) > 1e-9 || Math.abs(L.s08 - (PC_LEAD_PIN - L.lat) * 0.8) > 1e-9) flag(`app/cards.js: pcLeadShift() is ${L.s1} s at rate 1 and ${L.s08} at 0.8; THE LEAD wants (PC_LEAD - snipLatency()) x rate = ${(PC_LEAD_PIN - L.lat).toFixed(3)} and ${((PC_LEAD_PIN - L.lat) * 0.8).toFixed(3)}`);
-      if (L.hollow) flag(`app/cards.js: the lyric sheet's dot is hollow again before its beat is heard at ${L.hollow} of 31 tempos from 50 to 200 BPM (pcSheetSolidSec must outlast pcLead())`);
-      leadSaid = `; every highlight ${L.lead * 1000} ms before the heard beat (the cursor reads ${((L.s1) * 1000).toFixed(0)} ms from the decoder at rate 1), the sheet dot filled through it at 31 of 31 tempos`;
-    } catch (e) { flag('1bf could not run THE LEAD (pcLead / pcLeadShift / pcSheetSolidSec): ' + e.message); }
+      if (L.bars.length) flag(`app/cards.js: pcLeadBars (what pcFrame reads) is off THE LEAD at ${L.bars.length} of ${L.n} probes on ${L.card}: ${L.bars.slice(0, 2).join('; ')}`);
+      if (L.hollow) flag(`app/cards.js: the lyric sheet's dot goes hollow less than ${PC_SHEET_AFTER_PIN * 1000} ms after its beat is heard at ${L.hollow} of ${L.tried} (lead, tempo) pairs from 0 to 300 ms and 50 to 200 BPM (pcSheetSolidSec's floor of lead + PC_SHEET_SOLID_AFTER)`);
+      leadSaid = `; every highlight ${L.lead * 1000} ms before the heard beat (the cursor reads ${((L.s1) * 1000).toFixed(0)} ms from the decoder at rate 1; pcLeadBars on THE LEAD at ${L.n} of ${L.n} probes), the sheet dot filled through the heard beat at ${L.tried} of ${L.tried} (lead, tempo) pairs`;
+    } catch (e) { flag('1bf could not run THE LEAD (pcLead / pcLeadShift / pcLeadBars / pcSheetSolidSec): ' + e.message); }
+    /* W17: a lap starts a new pass, so st.passFrom goes back to the looped section's first bar on BOTH lap paths of
+       pcFrame (the spare's handoff and the seek). Run pcFrame across the end of the window with a pass that began a
+       lap later (a lyric-sheet tap starts at rep > 0) and read st.passFrom after the lap. */
+    try {
+      const P = vm.runInContext(`(() => {
+        const a = (window.CLASS_ACTIVITIES || []).find(x => x.view === 'card' && x.card && x.kind !== 'check' && !x.card.wholeSong);
+        if (!a) return { none: true };
+        const Lay = pcLayout(a), win = pcWindow(Lay, false), start = Lay.sections[0].fromBar - Lay.firstBar, out = [];
+        const AudioWas = Audio, setWas = setTimeout, rafWas = requestAnimationFrame, timers = [];
+        const fakeAudio = () => ({ currentTime: 0, paused: false, ended: false, seeking: false, readyState: 4, playbackRate: 1, src: 'x.mp3', muted: false,
+          play(){ return Promise.resolve(); }, pause(){}, load(){}, addEventListener(){}, removeEventListener(){}, removeAttribute(){}, setAttribute(){} });
+        Audio = function(){ return fakeAudio(); }; setTimeout = (fn) => { timers.push(fn); return timers.length; }; requestAnimationFrame = () => 0;
+        const root = { isConnected: true, dataset: {}, querySelector(){ return null; }, querySelectorAll(){ return []; }, classList: { add(){}, remove(){}, toggle(){}, contains(){ return false; } } };
+        try {
+          for (const path of ['seek', 'spare']) {
+            const audio = fakeAudio();
+            const st = { root, L: Lay, audio, win, loopFrom: 0, fromRep: 1, wholeSong: false, sheet: false, raf: 0, timers: [], lastBeat: -1, counting: false, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null,
+                         loopSi: -1, build: null, laps: 0, spare: null, passFrom: start + Lay.sections[0].bars };
+            pcState = st; timers.length = 0;
+            if (path === 'spare') { const sp = fakeAudio(); sp.currentTime = pcLoopStart(st); st.spare = sp; audio.currentTime = pcLoopEnd(st) - 0.05; }
+            else audio.currentTime = pcLoopEnd(st) - 0.01;
+            pcFrame();
+            for (let i = 0; i < timers.length && i < 20; i++) timers[i]();
+            const lapped = path === 'spare' ? st.audio !== audio : audio.currentTime < pcLoopEnd(st) - 1;
+            out.push({ path, lapped, passFrom: st.passFrom, want: start });
+          }
+        } finally { Audio = AudioWas; setTimeout = setWas; requestAnimationFrame = rafWas; pcState = null; }
+        return { card: a.id, out }; })()`, ctx);
+      if (P.none) flag('1bf found no looping practice card to run a lap through pcFrame');
+      else for (const o of P.out) {
+        if (!o.lapped) flag(`1bf: pcFrame did not lap on ${P.card} by the ${o.path} path — the passFrom test cannot see a lap`);
+        else if (o.passFrom !== o.want) flag(`app/cards.js: after a lap by the ${o.path} path, st.passFrom is ${o.passFrom} on ${P.card}; a lap starts a new pass at the section's first bar (${o.want}), or the cursor holds on the old pass's first bar for a frame (THE LEAD)`);
+      }
+      if (!P.none && P.out.every(o => o.lapped && o.passFrom === o.want)) leadSaid += `; st.passFrom back at the lap's first bar on both lap paths (seek, spare)`;
+    } catch (e) { flag('1bf could not run a lap through pcFrame (the passFrom reset): ' + e.message); }
+    /* W17: &lead= (app/boot.js) is read only with snipcal=1, and capped at 300 ms. The block that reads the URL is run
+       in its own small context against made-up addresses. */
+    try {
+      const bootSrc = siteSource('app.js', ROOT);
+      const i0 = bootSrc.indexOf('function snipUrlParam('), i1 = bootSrc.indexOf('function devBypass(', i0);
+      if (i0 < 0 || i1 < 0) flag('1bf: could not find the URL block in app/boot.js (snipUrlParam ... devBypass) — the &lead test cannot run');
+      else {
+        const leadAt = href => { const w = { location: { href } }; w.window = w; vm.createContext(w); vm.runInContext(bootSrc.slice(i0, i1), w); return w.__pcLead; };
+        const cases = [['https://x/index.html?lead=200#class-activities', undefined], ['https://x/index.html#class-activities?snipcal=0&lead=200', undefined],
+          ['https://x/index.html?snipcal=1&lead=200', 0.2], ['https://x/index.html#class-activities?snipcal=1&lead=900', 0.3],
+          ['https://x/index.html?snipcal=1&lead=300', 0.3], ['https://x/index.html?snipcal=1&lead=', undefined], ['https://x/index.html?snipcal=1&lead=-5', undefined]];
+        const off = cases.filter(([h, w]) => leadAt(h) !== w);
+        if (off.length) flag(`app/boot.js: &lead= read wrong at ${off.length} of ${cases.length} addresses: ${off.slice(0, 2).map(([h, w]) => `${h.replace('https://x/', '')} gave ${leadAt(h)}, expected ${w}`).join('; ')} (only with snipcal=1, at most 300 ms)`);
+        else leadSaid += `; &lead= read only with snipcal=1 and capped at 300 ms (${cases.length} of ${cases.length} addresses)`;
+      }
+    } catch (e) { flag('1bf could not run the &lead= URL block: ' + e.message); }
   }
   if (cards === 0) { flag('1bf found no practice card — it cannot see what it is supposed to guard'); return; }
   if (bad === 0) ok(`${cards} practice card${cards === 1 ? '' : 's'} — sections add up to their bars and land inside the track, one Level up each, both renderers and every silencer wired${leadSaid}`);

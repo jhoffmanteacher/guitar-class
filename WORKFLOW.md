@@ -275,6 +275,15 @@ and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fi
   go only if he names them. To undo: re-publish the rules at `5e3f402^`.
 - **MORE FOR WINDOWS, 4 (the Mac, 2026-11-17; Jonathan: "you can assign things to windows today").** After W12. Opus
   agents only this week. Each is small, tools mostly, Fast unless it says otherwise; fetch and rebase before every push.
+  - **W17 DONE (Windows, 2026-11-17; one Opus agent; on `b1fb3a5d`, Fast):** the smoke works out THE LEAD itself
+    (`__smokeLeadBars`, its own `SMOKE_PC_LEAD` = 0, re-pinned with `PC_LEAD`); 1bf probes `pcLeadBars` against
+    its own arithmetic (2 rates, a URL lead, both sides of `passFrom`), runs `pcFrame` across a lap by both paths
+    (spare, seek) and reads `st.passFrom`, and runs the `&lead=` block of `app/boot.js` against 7 made-up addresses
+    (nothing without `snipcal=1`; `&lead` now capped at 300 ms, not refused up to 1000). The sheet dot's floor
+    (lead + 0.1 s) was KEPT and tested: it never acts at `PC_LEAD` 0 below 250 BPM, but does under `&lead=` up to the
+    cap. **W16-6 is moot:** with `PC_LEAD` 0 the lead is never longer than the latency (80 ms), so playalong-loop
+    cannot go red that way; it only can again if a lead over 80 ms is pinned. Every plant went red (details in the
+    commit).
   - **W17. The six MINORs of your own W16 review (W16-2 to W16-6 above), in one push. WAIT for the Mac's push named
     "Lyric sheet: the playing line sits high" / "Play Along highlights light ON the heard beat" to be on main first**
     (it changes `app/cards.js`, `tools/smoke.mjs`, `tools/playalong-loop.mjs` and the 1bf pin: `PC_LEAD` becomes 0,

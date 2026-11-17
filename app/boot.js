@@ -1137,11 +1137,13 @@ if(snipUrlParam('snipcal') === '1'){
   /* &lead=<ms>: how long before the HEARD beat a practice card's highlight
      appears (PC_LEAD in app/cards.js, THE LEAD), so Jonathan can try values
      on a classroom Chromebook with no code change. Same rules as &lat: only
-     with snipcal=1, absent or blank = the constant, never 0 by accident. */
+     with snipcal=1, absent or blank = the constant, never 0 by accident.
+     Capped at 300 ms (W17, 2026-11-17): a longer lead puts a highlight most of
+     a beat early at the fastest songs; checks.mjs 1bf tests the cap. */
   const rawLead = snipUrlParam('lead');
   if(rawLead !== null && rawLead.trim() !== ''){
     const ms = Number(rawLead);
-    if(isFinite(ms) && ms >= 0 && ms <= 1000) window.__pcLead = ms / 1000;
+    if(isFinite(ms) && ms >= 0) window.__pcLead = Math.min(ms, 300) / 1000;
   }
   /* &mapshift=<ms> (2026-11-16): moves the WHOLE beat map of whatever track
      plays (snipMapShift in app/snippets.js), every file together, as if the

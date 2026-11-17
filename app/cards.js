@@ -544,7 +544,9 @@ function pcLeadBars(st, ct){
    beat, and never less than the lead plus PC_SHEET_SOLID_AFTER: it lights
    PC_LEAD before the beat, so it must still be filled when the beat is heard
    (at 0.175 s ahead it went hollow before the beat on Sweet Child). Never a
-   whole beat, or it would never go hollow. */
+   whole beat, or it would never go hollow. With PC_LEAD 0 the floor never
+   acts below 250 BPM; it acts under `?snipcal=1&lead=<ms>` (up to 300 ms),
+   and checks.mjs 1bf tests it there (W17, 2026-11-17). */
 const PC_SHEET_SOLID = 0.42;      // beats the dot stays filled after a beat
 const PC_SHEET_SOLID_AFTER = 0.1; // real seconds it stays filled after the beat is heard, at least
 function pcSheetSolidSec(beatSec){
