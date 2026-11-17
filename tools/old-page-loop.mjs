@@ -31,10 +31,12 @@
      --verbose            the entry points and their tags; with --case, every request, arrival and call
      --strict             a WINDOW (below) also makes the exit code 1
      --list               print the case names for this --old/--new and exit
+     --self-test          only the tool's own self-test (it also runs at the start of every run), then exit
    Exit 0 = no finding; 1 = a finding (a control's own finding counts); 2 = could not run (a ref or folder that
    cannot be read, no part list or group loader found, a page that cannot be built, an old page that cannot fetch
-   its own list even with its own old files). An old page whose chain gets stuck on the NEW files (it never asks
-   for a list file it does fetch with its old ones) is a finding, exit 1.
+   its own list even with its own old files, a failed self-test). An old page whose chain gets stuck on the NEW
+   files (it never asks for a list file it does fetch with its old ones) is a finding, exit 1; it says whether the
+   loader then never resolves, rejects on every try, or resolves without those files.
 
    WHAT IS REAL. The page is a Node vm with an ordinary global object (vm.constants.DONT_CONTEXTIFY: node's
    intercepted sandbox kept a "not defined" for a global const declared by a LATER script, a false finding no
@@ -67,8 +69,13 @@
    page whose own list declares it, that is a SKIPPED finding (gamesResetForUser not running on sign-out).
    THE SENTINEL. A function in a new group part that returns early until `typeof S === 'function'` (S = bcStop: "the
    whole arcade is here") promises that every group name it goes on to name exists once S does. The tool reads
-   those names from the body after the guard, and after every arrival and once settled, in every case, reports a
-   state where S exists and one of them does not (STRUCTURE), even when a per-call typeof guard hides the throw.
+   those names from the body after the guard, keeping only names declared in a part the NEW list places BEFORE S's
+   own file (a part placed after it, as the strum check after coach-more.js, is behind its own typeof guard by
+   design), and after every arrival, in every case, notes a state where S exists and one of them does not. It is
+   a finding (STRUCTURE), even when a per-call typeof guard hides the throw, only if that name does exist once the
+   page has settled: an ORDER fault. A name that never arrives on that page (a new game part an old list never
+   fetches) is the static pass's question (review R3-1: a correct push adding a game part was red, even on the
+   old page with the old files).
 
    CASES (per changed group; a group whose list and files are the same in old and new is not run, unless nothing
    differs at all: then every group runs as a self-check). control-old (old page, old files) and control-new (new
@@ -114,11 +121,17 @@
    copy of a file a page gets (half-K, mixed-random and new-page-old stand in), reload timing (SW_RELOAD_MAX_WAIT,
    the busy-tab wait), more than one tab, layout, audio: tools/update-reload-loop.mjs (Chrome) and
    tools/sw-upgrade-proof.mjs cover those. Only index.html is modelled as a page (not tuning-sim.html, the
-   tabs/ pages, a ?teacher page's own markup beyond index.html).
+   tabs/ pages, a ?teacher page's own markup beyond index.html). An old page keeps its OLD eager copies of
+   i18n.js, styles.css and the eager helpers (app/*.js): a new part's new t('…') key shows as the raw key there, a
+   new CSS class is unstyled, and a changed signature of an eager function is called the old way; the run does not
+   report any of these (no DOM, no CSS, and t() returns something either way).
 
    WHAT THE STATIC PASS CANNOT SEE. A name built at run time (window[name] with a variable, a string passed to
-   setTimeout) or a call through a value handed over from elsewhere; a regex literal the scanner does not
-   recognise as one (a / right after a ) or a name is read as division); a binding of the same name anywhere in the reference's top-level statement shadows it there, even
+   setTimeout) or a call through a value handed over from elsewhere; the scanner's / guess (a / right after a ) or
+   a name is division, after an operator or a keyword it opens a regex) misreads five shapes, each checked
+   (review round 3): `i++ / 2` (a regex from there), a regex right after `if (…)`, a regex on the line after a
+   line comment (the comment's last word decides), a name `of` and a property `.in` before a / (a regex from
+   there); a misread hides the names up to the next / on that line, or to its end; a binding of the same name anywhere in the reference's top-level statement shadows it there, even
    in another inner function; destructuring defaults; an object key written as a string. It reads only the NEW
    text of the list parts an old page fetches: an OLD cached copy of a list part (sw.js) is the run's half-K /
    mixed-random cases, not the static pass. Files fetched lazily outside the part lists (trainer-*.js by the
@@ -138,7 +151,7 @@ for (let i = 2; i < process.argv.length; i++){
   const a = process.argv[i];
   const m = a.match(/^--([\w-]+)(?:=(.*))?$/);
   if (!m) die(`unknown argument ${a}`);
-  if (!['old', 'new', 'orders', 'seed', 'case', 'verbose', 'strict', 'list'].includes(m[1])) die(`unknown flag --${m[1]} (the flags are in the header)`);
+  if (!['old', 'new', 'orders', 'seed', 'case', 'verbose', 'strict', 'list', 'self-test'].includes(m[1])) die(`unknown flag --${m[1]} (the flags are in the header)`);
   if (m[2] !== undefined) ARGS[m[1]] = m[2];
   else if (['old', 'new', 'orders', 'seed', 'case'].includes(m[1])){
     const v = process.argv[++i];
@@ -149,7 +162,7 @@ for (let i = 2; i < process.argv.length; i++){
 }
 const VERBOSE = !!ARGS.verbose;
 const ORDERS = ARGS.orders ? Number(ARGS.orders) : 12;
-if (!ARGS.old || !ARGS.new) die('usage: node tools/old-page-loop.mjs --old <ref|folder> --new <ref|folder> [--orders=N] [--case=NAME --seed=S --verbose] [--list]');
+if ((!ARGS.old || !ARGS.new) && !ARGS['self-test']) die('usage: node tools/old-page-loop.mjs --old <ref|folder> --new <ref|folder> [--orders=N] [--case=NAME --seed=S --verbose] [--strict] [--list]   or   --self-test');
 if (!(Number.isInteger(ORDERS) && ORDERS >= 1)) die('--orders must be a whole number of at least 1');
 if ('seed' in ARGS && !(/^\d+$/.test(ARGS.seed) && Number(ARGS.seed) >= 1)) die('--seed must be a whole number of at least 1');
 if ('case' in ARGS && !ARGS.case) die('--case needs a case name (--list names them)');
@@ -212,19 +225,21 @@ function openTree(spec){
      code  comments out, strings kept (an inline handler inside a template string is a call site too);
      refs  comments out AND string text out, except on…= handler attributes inside strings, up to their closing quote
            or across a ${…} / ' + x + ' to the end of the piece (a name that is only
-           mentioned in a string or a comment is not a reference; a handler in markup is).
+           mentioned in a string or a comment is not a reference; a handler in markup is);
+     bare  comments, ALL string and template text, regex bodies and each ${ out: where statements start (review
+           round 3: a column-0 line inside template text, 38 in teacher-mic.js, started a new statement).
    A `/` where an expression starts is read as a regex literal and skipped whole; after a ) or a name it is division. */
 const SCAN = new Map();
 function scanJs(src){
   if (SCAN.has(src)) return SCAN.get(src);
-  const n = src.length, code = src.split(''), refs = src.split(''), modes = [];
+  const n = src.length, code = src.split(''), refs = src.split(''), bare = src.split(''), modes = [];
   const blank = (arr, a, b) => { for (let k = a; k < b; k++) if (arr[k] !== '\n') arr[k] = ' '; };
   /* Keep a handler attribute's text: from on…= to its closing quote, or to the end of this piece of string when the
      handler goes on after a ${…} or a ' + x + ' (review R2-1: `onclick="ccPickRate(${i})"` has no closing quote in
      the piece before ${). Inside one template literal the handler carries on into the next piece (st.hq). */
   const keep = (a, b) => { for (let k = a; k < b; k++) refs[k] = src[k]; };
   const strText = (a, b, st) => {
-    blank(refs, a, b);
+    blank(refs, a, b); blank(bare, a, b);
     let k = a;
     if (st && st.hq){
       const e = src.indexOf(st.hq, k), stop = e < 0 || e >= b ? b : e;
@@ -255,10 +270,11 @@ function scanJs(src){
       strText(s0, Math.min(i, n), tpl[tpl.length - 1]);
       if (i >= n) break;
       if (src[i] === '`'){ modes.pop(); tpl.pop(); i++; continue; }
+      bare[i] = bare[i + 1] = ' ';
       modes.push('expr'); i += 2; continue;
     }
-    if (c === '/' && d === '/'){ const e = src.indexOf('\n', i), end = e < 0 ? n : e; blank(code, i, end); blank(refs, i, end); i = end; continue; }
-    if (c === '/' && d === '*'){ const e = src.indexOf('*/', i + 2), end = e < 0 ? n : e + 2; blank(code, i, end); blank(refs, i, end); i = end; continue; }
+    if (c === '/' && d === '/'){ const e = src.indexOf('\n', i), end = e < 0 ? n : e; blank(code, i, end); blank(refs, i, end); blank(bare, i, end); i = end; continue; }
+    if (c === '/' && d === '*'){ const e = src.indexOf('*/', i + 2), end = e < 0 ? n : e + 2; blank(code, i, end); blank(refs, i, end); blank(bare, i, end); i = end; continue; }
     if (c === '\'' || c === '"'){
       let j = i + 1; while (j < n && src[j] !== c && src[j] !== '\n'){ if (src[j] === '\\') j++; j++; }
       strText(i + 1, Math.min(j, n)); i = j + 1; continue;
@@ -272,7 +288,7 @@ function scanJs(src){
       if (prev === '' || /[(,=:[!&|?{};+\-*%<>~^]/.test(prev) || /^(?:return|typeof|case|in|of|void|delete|new|do|else|yield|await)$/.test(word)){
         let j = i + 1, cls = false;
         while (j < n && src[j] !== '\n'){ if (src[j] === '\\'){ j += 2; continue; } if (src[j] === '[') cls = true; else if (src[j] === ']') cls = false; else if (src[j] === '/' && !cls) break; j++; }
-        if (j < n && src[j] === '/'){ blank(refs, i + 1, j); i = j + 1; while (i < n && /[a-z]/.test(src[i])) i++; continue; }
+        if (j < n && src[j] === '/'){ blank(refs, i + 1, j); blank(bare, i + 1, j); i = j + 1; while (i < n && /[a-z]/.test(src[i])) i++; continue; }
       }
     }
     if (c === '`'){ modes.push('tpl'); tpl.push({ hq: null }); i++; continue; }
@@ -280,7 +296,7 @@ function scanJs(src){
     if (c === '}' && top){ modes.pop(); i++; continue; }
     i++;
   }
-  const r = { code: code.join(''), refs: refs.join('') };
+  const r = { code: code.join(''), refs: refs.join(''), bare: bare.join('') };
   SCAN.set(src, r);
   return r;
 }
@@ -532,6 +548,53 @@ function makePage({ pageTree, pageLabel, rand, log, search }){
 
 const flush = () => new Promise(r => setImmediate(r));
 
+/* A reference at p is GUARDED when `typeof NAME` stands in the 300 characters before it, inside its own top-level
+   statement (from regA): a typeof in the statement before does not guard it. */
+function guardedAt(code, regA, p, q){ return new RegExp(`\\btypeof\\s+${q}\\b`).test(code.slice(Math.max(regA, p - 300), p)); }
+/* Round 3, item 2: one failed fetch of a part the old page loads OUTSIDE its list (a bridged child) together with
+   OLD cached copies of the other list parts: all of them old, and each one alone old (an old hub keeps its old
+   guards, so a new hub's widened guards cannot absorb the failure). */
+function bridgedFailCases(g, children, others, sfx, oldSide, newSide){
+  const out = [];
+  for (const ch of children){
+    const all = new Set(others);
+    out.push({ name: `fail-${ch}+all-old${sfx}`, group: g, page: 'old', failOnce: ch, serve: (n, src) => all.has(src) ? oldSide : newSide });
+    for (const o of others) out.push({ name: `fail-${ch}+old-${o}${sfx}`, group: g, page: 'old', failOnce: ch, serve: (n, src) => src === o ? oldSide : newSide });
+  }
+  return out;
+}
+/* The self-test (review round 3, MINOR: three code paths no run noticed when they were broken). It runs at the start
+   of every run (a failure is exit 2: the tool cannot be trusted) and alone with --self-test. Each test is the
+   smallest input that tells the right code from a broken one; the break-it record is in the commit that added it (W22). */
+function selfTest(){
+  const fails = [];
+  const t = (name, ok) => { if (!ok) fails.push(name); };
+  // 1. a handler's text carried across a ${…} ends at its closing quote; markup after it is not a reference
+  const r1 = scanJs('const a = `<b onclick="f(${x})">g(${y}) more text h(1)</b>`;\n').refs;
+  t('handler carry-over ends at its closing quote', /\bf\(/.test(r1) && !/\bh\(1\)/.test(r1) && !/\bg\(/.test(r1));
+  // 2. the typeof guard window: 300 characters, and never across the start of the reference's own statement
+  const pad = ' '.repeat(400), c2 = `function a(){ if (typeof zz === 'function')${pad}zz(); }\n`, p2 = c2.lastIndexOf('zz(');
+  const c3 = `if (typeof zz === 'function') x();\nfunction b(){ zz(); }\n`, p3 = c3.lastIndexOf('zz('), a3 = c3.indexOf('function b');
+  const c4 = `function d(){ if (typeof zz === 'function') zz(); }\n`;
+  t('a typeof 400 characters back does not guard', !guardedAt(c2, 0, p2, 'zz'));
+  t('a typeof in the statement before does not guard', !guardedAt(c3, a3, p3, 'zz'));
+  t('a typeof just before guards', guardedAt(c4, 0, c4.lastIndexOf('zz('), 'zz'));
+  // 3. a failed bridged child with old cached list parts: all-old serves every other part OLD and the child NEW
+  const O = { o: 1 }, N = { n: 1 }, cs = bridgedFailCases({}, ['kid.js'], ['p1.js', 'p2.js'], '', O, N);
+  const allOld = cs.find(c => c.name === 'fail-kid.js+all-old'), oneOld = cs.find(c => c.name === 'fail-kid.js+old-p2.js');
+  t('fail-<child>+all-old serves the other parts OLD', cs.length === 3 && allOld && allOld.failOnce === 'kid.js' && allOld.serve(0, 'p1.js') === O && allOld.serve(0, 'p2.js') === O && allOld.serve(0, 'kid.js') === N);
+  t('fail-<child>+old-<file> serves that one part OLD', oneOld && oneOld.serve(0, 'p2.js') === O && oneOld.serve(0, 'p1.js') === N);
+  // 4. a column-0 line inside template text does not start a statement
+  const b5 = scanJs('function e(){\n  const s = `a\nzz line at column 0\n`;\n}\n').bare;
+  t('template text is blank in the statement view', !/^zz/m.test(b5) && /^function e/m.test(b5));
+  return { n: 7, fails };
+}
+{
+  const st = selfTest();
+  if (st.fails.length) die(`the self-test failed (${st.fails.length} of ${st.n}): ${st.fails.join('; ')}`);
+  if (ARGS['self-test']){ console.log(`old-page-loop: self-test ${st.n} of ${st.n} pass`); process.exit(0); }
+}
+
 // ───────────────────────── setup: trees, groups, entry points ─────────────────────────
 const OLD = { tree: openTree(ARGS.old), label: 'OLD' };
 const NEW = { tree: openTree(ARGS.new), label: 'NEW' };
@@ -681,7 +744,7 @@ function staticPass(){
   }
   const found = new Map();   // name → [{ file, line, guarded, fn, text }]
   if (homes.size) for (const r of runs){
-    const { code, refs } = scanJs(r.text);
+    const { code, refs, bare } = scanJs(r.text);
     const lines = r.text.split('\n'), starts = [0];
     for (let k = 0; k < r.text.length; k++) if (r.text[k] === '\n') starts.push(k + 1);
     const lineOf = p => { let lo = 0, hi = starts.length - 1; while (lo < hi){ const mid = (lo + hi + 1) >> 1; if (starts[mid] <= p) lo = mid; else hi = mid - 1; } return lo; };
@@ -689,9 +752,10 @@ function staticPass(){
        } ) ], and runs to the next such line. A one-line function is its own region (review R2-4: the region used to
        run to the next `}` at column 0, so a later function's local shadowed it and the label was wrong); a
        function nested in a top-level arrow or IIFE shares that statement's region, so its parameters are locals
-       there (R2-5). Named after `function NAME` or `const NAME =` on the first line. */
+       there (R2-5). Named after `function NAME` or `const NAME =` on the first line. Read on `bare`, so a line of
+       template text at column 0 is not a statement (round 3). */
     const regions = [];
-    for (const m of code.matchAll(/^[^\s})\]][^\n]*$/gm)){
+    for (const m of bare.matchAll(/^[^\s})\]][^\n]*$/gm)){
       const nm = m[0].match(/^(?:async\s+)?function\s*\*?\s*([\w$]+)|^(?:const|let|var)\s+([\w$]+)\s*=/);
       if (regions.length) regions[regions.length - 1].b = m.index;
       regions.push({ a: m.index, b: code.length, name: nm ? (nm[1] || nm[2]) : null });
@@ -713,7 +777,7 @@ function staticPass(){
       const reg = regionOf(p);
       if (reg && bindsLocally(code.slice(reg.a, reg.b), n.replace(/\$/g, '\\$'))) continue;   // a local of that name
       const q = n.replace(/\$/g, '\\$');
-      const guarded = new RegExp(`\\btypeof\\s+${q}\\b`).test(code.slice(Math.max(reg ? reg.a : 0, p - 300), p));
+      const guarded = guardedAt(code, reg ? reg.a : 0, p, q);
       const ln = lineOf(p);
       if (!found.has(n)) found.set(n, []);
       // one line once (review R2-5: a line with the name three times was listed three times); unguarded wins
@@ -807,8 +871,12 @@ async function runCase(spec, seed, handlers){
   };
   // after every arrival: what other scripts may call at ANY moment, through their typeof guard
   const probe = () => { const was = phase; phase = 'arrival'; for (const en of g.entries) if (en.guarded) call(en.call, en.call, en.name); phase = was; };
-  // the sentinel check (round 3, item 3): after every arrival and once settled
-  const reported = new Set();
+  /* The sentinel check (round 3, item 3): after every arrival and once settled, a moment where the sentinel exists
+     and a name it promises does not. Such a moment is an ORDER fault only if the name does arrive later (review
+     R3-1): a name that never arrives on this page (a new game part an old list never fetches) is the static pass's
+     question (a guarded reference to a new name is a NOTE there), so a miss is held until the page has settled and
+     reported only if the name exists by then. */
+  const reported = new Set(), structPending = [];
   const structure = () => {
     for (const r of g.rules || []){
       let on = false; try { on = page.run(`typeof ${r.sentinel} === 'function'`); } catch {}
@@ -817,9 +885,16 @@ async function runCase(spec, seed, handlers){
         let ok = false; try { ok = page.run(`typeof ${n} !== 'undefined'`); } catch {}   // a let in its TDZ throws: not defined
         if (ok || reported.has(`${r.fn}\0${n}`)) continue;
         reported.add(`${r.fn}\0${n}`);
-        out.throws.push({ phase, call: `structure: ${r.fn}() (${r.file}) after typeof ${r.sentinel}`, key: `STRUCTURE: ${r.sentinel} is defined but ${n} is not: a ${r.sentinel}-guarded ${r.fn}() would throw or silently skip`, missing: true, id: n, structural: true });
-        if (log) log(`      ✗ structure: ${r.sentinel} is defined but ${n} is not (${r.fn})`);
+        structPending.push({ n, t: { phase, call: `structure: ${r.fn}() (${r.file}) after typeof ${r.sentinel}`, key: `STRUCTURE: ${r.sentinel} is defined but ${n} is not yet (it arrives later): a ${r.sentinel}-guarded ${r.fn}() would throw or silently skip in between`, missing: true, id: n, structural: true } });
+        if (log) log(`      ? structure: ${r.sentinel} is defined but ${n} is not (${r.fn}); a finding if ${n} exists once settled`);
       }
+    }
+  };
+  const structSettle = () => {
+    for (const sp of structPending){
+      let ok = false; try { ok = page.run(`typeof ${sp.n} !== 'undefined'`); } catch {}
+      if (ok){ out.throws.push(sp.t); if (log) log(`      ✗ structure: ${sp.n} arrived after the sentinel: an order fault`); }
+      else if (log) log(`      · structure: ${sp.n} never arrived on this page: left to the static pass`);
     }
   };
   const deliver = () => { if (page.net.deliverOne()){ arrived++; const was = phase; phase = 'arrival'; structure(); phase = was; probe(); } };
@@ -853,8 +928,10 @@ async function runCase(spec, seed, handlers){
     await drain();
     if (st.failed){ st = start('retry'); await drain(); }   // the next click: the loader forgot the failed promise
     await drain();
+    out.loader = st.failed ? 'rejected' : st.done ? 'resolved' : 'pending';   // how the last loader call ended (the stuck-chain wording)
     phase = 'settled'; structure(); callAll('settled');
     await drain();
+    structSettle();
   } finally { asyncSink = null; }
   for (const l of page.net.loadErrors){ const c = classify(l.e); out.throws.push({ phase: 'load', call: `${l.src} running at load`, ...c }); }
   const mine = new Set([...g.oldFiles, ...(g.newFiles || [])]);
@@ -895,6 +972,13 @@ function structureRules(g){
         if (n === gd[1] || !groupNames.has(n) || eager.has(n) || bindsLocally(body, n.replace(/\$/g, '\\$'))) continue;
         needs.add(n);
       }
+      /* The promise is "every part the NEW list places before the sentinel's own file has run" (coach-more.js loads
+         after every game part it stops). A name declared only in a later part, or in the sentinel's own file, is
+         not part of it: a later part's name is behind its own typeof guard by design (review R3-1: the strum
+         check's scStop, a part loaded after coach-more.js). */
+      const nf = g.newFiles || [], home = nf.findIndex(x => declsOf(NEW.tree, x).has(gd[1])), earlier = new Set();
+      for (const x of nf.slice(0, Math.max(0, home))) for (const y of declsOf(NEW.tree, x)) earlier.add(y);
+      for (const y of [...needs]) if (!earlier.has(y)) needs.delete(y);
       if (needs.size) rules.push({ fn: m[1], file: f, sentinel: gd[1], needs: [...needs].sort() });
     }
   }
@@ -975,7 +1059,7 @@ for (const g of RUN){
     const ctl = await runCase({ name: 'probe-control-old', group: g, page: 'old', serve: () => OLD }, 1, []);
     const ctlMissing = g.oldFiles.filter(f => !ctl.requested.includes(f));
     if (ctlMissing.length) die(`${g.array}: the old page never fetched ${ctlMissing.join(', ')} even with its own old files (the fetch layer or the loader call is broken)`);
-    g.stuck = notFetched;
+    g.stuck = notFetched; g.stuckLoader = oldRun.loader;
   }
   if (gone >= 0) g.gone = g.oldFiles[gone];
   const declCount = f => g.entries.filter(e => declsOf(NEW.tree, f).has(e.name)).length;
@@ -1000,11 +1084,7 @@ for (const g of RUN){
      guards, so a new hub's widened guards cannot absorb the failure). */
   const children = fetched.get(g).filter(f => (g.newFiles || []).includes(f) && !g.oldFiles.includes(f));
   const others = g.oldFiles.filter(f => OLD.tree.has(f));
-  for (const ch of children){
-    const all = new Set(others);
-    cases.push({ name: `fail-${ch}+all-old${sfx}`, group: g, page: 'old', failOnce: ch, serve: (n, src) => all.has(src) ? OLD : NEW });
-    for (const o of others) cases.push({ name: `fail-${ch}+old-${o}${sfx}`, group: g, page: 'old', failOnce: ch, serve: (n, src) => src === o ? OLD : NEW });
-  }
+  cases.push(...bridgedFailCases(g, children, others, sfx, OLD, NEW));
   for (const c of cases){
     if (only && c.name !== only && !c.control) continue;   // the controls always run: they say which throws are stub noise
     for (const s of (c.once ? seeds.slice(0, 1) : seeds)){
@@ -1082,7 +1162,7 @@ const inCases = (c, prefix) => [...c.cases.keys()].some(n => n.startsWith(prefix
 const all = [...causes.values()].sort((a, b) => (b.id ? 1 : 0) - (a.id ? 1 : 0) || b.calls.size - a.calls.size || a.key.localeCompare(b.key));
 const list = all.filter(c => !c.windowOnly), windows = all.filter(c => c.windowOnly);
 for (const g of RUN) if (g.stuck) list.unshift({ id: null, windowOnly: false, pending: new Set(), phases: new Set(['load']),
-  key: `the old page's loader never asks for ${g.stuck.join(', ')}: with the new files its chain is stuck (with its own old files it fetches every one), so ${g.loader}() never resolves and the group never finishes loading`,
+  key: `the old page's loader never asks for ${g.stuck.join(', ')}: with the new files its chain is stuck (with its own old files it fetches every one), so ${g.stuckLoader === 'rejected' ? `${g.loader}() rejects, on the first try and on the retry,` : g.stuckLoader === 'resolved' ? `${g.loader}() resolves without them` : `${g.loader}() never resolves (still waiting once nothing more arrives)`} and the group never finishes loading`,
   calls: new Set([`${g.loader}()`]), cases: new Map([['after-push' + (RUN.length > 1 ? ':' + g.short : ''), new Set(seeds)]]), first: { case: 'after-push' + (RUN.length > 1 ? ':' + g.short : ''), seed: seeds[0] } });
 for (const g of RUN) if (g.gone) list.unshift({ id: null, windowOnly: false, pending: new Set(), phases: new Set(['load']),
   key: `the old page's ${g.array} names ${g.gone}, which the new files do not have: ${g.loader}() rejects there on every try, so the group never finishes loading`,
