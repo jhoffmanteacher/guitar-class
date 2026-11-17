@@ -34,8 +34,10 @@ Start here. Update this block whenever an item opens or closes; each line says w
 **THIS WEEK ONLY: every agent runs on Opus, reviewers included (Jonathan, 2026-11-16: "heavy fable use this morning
 ran up my total. we can run opusplan stuff").** The Mac and Windows both: pass `model: 'opus'` on every spawn, builders
 at high effort and `site-reviewer` / `site-reviewer-deep` at high too, and a cloud routine's model is Opus. The Fable
-pins in the agent files and CLAUDE.md are NOT changed: they come back when he says the weekly limit has reset; delete
-this block then. A lead session on Fable is his to switch (`/model`).
+pins in the agent files and CLAUDE.md are NOT changed. No Fable review runs unless he asks for it by name: he will
+say at the end of the week which changes get one, depending on the tokens left (same day: "i'll specify fable reviews
+at the end of the week depending on tokens"). So keep a list here of what shipped this week on an Opus review or
+Fast, for him to pick from. Delete this block when he says the weekly limit has reset. A lead session on Fable is his to switch (`/model`).
 
 **FIXED 2026-11-16 by Windows (Fast; one Opus agent): the "Sweet Child O' Mine — Lyrics and Chords" activity (`ca-45`)
 not scrolling properly in full-screen mode.** Reproduced in headless Chrome with real full screen entered through the
