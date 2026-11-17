@@ -87,6 +87,44 @@ The Windows session deletes this line once its replay matches the README.
 whatever you haven't done to the mac". He says "do the handed-over work in WORKFLOW").** In this order; each ships
 before the next; agents Opus or Fable by the need (Opus at xhigh is allowed where a finding is in dispute). Branches
 named `win/…` are on GitHub (`git fetch`); cherry-pick from them, do not merge them.
+**MORE FOR WINDOWS, 2 (the Mac, 2026-11-16 16:30; Jonathan: "assign tasks to windows via workflow.md for it to do
+using opus agents unattended").** After the `ca-45` full-screen bug and the smoke owed on rule AD. Unattended: Opus
+agents at high or xhigh, each in its own worktree; no question to Jonathan unless a rule says ask (then write it here
+and go on to the next job). In this order; each ships (or reports) before the next. Fetch and rebase before every
+push. Where the Mac is right now: the coach splits with the reviewer's fix A are clean after a second review
+(`0fea8d1`, 0 BLOCKER, 0 MAJOR, 4 MINOR) and the Mac is rebasing and pushing them; Part d's round 2 fixes are built
+(`b922641`, sim 138 of 138, walk 67 of 67) and round 3 is running on the Mac. Stay out of `teacher-sb-*.js`,
+`teacher-builtsongs.js`, `teacher-backup.js`, `coach-chords.js`, `coach-chordcards.js`, `coach-runner.js`,
+`coach-noterunner.js`, `coach-hub.js` and `COACH_JS_PARTS` until both are on main.
+- **W6. A permanent "old page, new files" proof (a new tool; Always Reviewed, `site-reviewer`).** Both reviewers of
+  the coach splits had to build the same throwaway harness: a Node vm page with the real loader from `app/boot.js`,
+  holding the part lists of an OLD commit (`COACH_JS_PARTS`, `TEACHER_JS_PARTS`, the `index.html` script tags) while
+  it is served the files of a NEW one, then calling the entry points every other script calls (`gamesStopMic`,
+  `gamesHideStop`, the hub render, `coachMicLatencyMs`, each game's open). `tools/sw-upgrade-proof.mjs` compares
+  bytes and runs nothing, so it cannot see this. Build `tools/old-page-loop.mjs --old <ref> --new <ref or folder>`:
+  it reports every call that throws on old list + new files, with controls (old + old, new + new must be 0), random
+  arrival orders, and one failed fetch. Prove it on history: `--old 3b667ba --new d6c3e16` must be red (16 of 16 in
+  the reviewers' runs), and on the pushed splits green. Name it in CLAUDE.md's "Where the code lives" (the line
+  about splitting a part) only after its review is clean; it is NOT added to `checks.mjs` (it needs two commits).
+  The Windows scratchpad `rev\` has the first harness.
+- **W7. The setup screens taller than 657 px** (the 20 smoke lines: Change Up's setup 663 px, Power Chord Switch's
+  setup in Spanish 658 px). The Mac runs the games smoke before it pushes the splits and writes its lines HERE (a
+  bullet under this job). If the Mac shows the same lines: fix the fit at 1366×657 in both languages (screenshots
+  before and after, CHANGELOG only if a student sees a difference; Fast; the setup screens are `coach-chords.js`,
+  so wait for the splits to be on main). If the Mac shows none: write "Windows fonts only" and close it.
+- **W8. The small lint findings from W4, one Fast push:** `trainer-ui.js:188` (`root` does not exist inside
+  `factory`: fix the fallback, run `node tools/trainer-sim.mjs`); `tabs/journey.js:748` (the second `at`);
+  `practice-minutes.js:1509` (the repeated key `_session`: remove the copy, run `node tools/pm-sim.mjs`); the 9
+  unused names outside the Mac's files; and the linter's own two "did not parse" slips (`app/drills.js:774`,
+  `teacher-core.js:217`: fix the reader in `tools/lint.mjs`, not the handlers). Also the two stale mentions of
+  `srHearStrum` that the Mac's agent left (the 1eh header in `tools/checks.mjs` and line 8 of
+  `tools/mic-sim/strum-check-replay.mjs` still say the strum check uses it).
+- **W9. Only if the Mac has written "Part d round 3: fixes at <hash>" in this block:** review round 4 of that
+  hash, a fresh Opus `site-reviewer`, read-only, findings here. If the line is not there, skip it.
+- **W10. After Part d is on main (the Mac will say so here): the pdf pane's three low edge cases**
+  (`teacher-sb-pdf.js`, `teacher-sb-core.js`: `+ New song` twice keeps the first song's pdfs; a draft switched
+  during a multi-file pick; a deleted draft's pdfs kept until the view reopens). Fast; a case for each in
+  `tools/song-builder-sim.mjs`, broken once. Jonathan's lens: nothing that adds a click.
 **MORE FOR WINDOWS (the Mac, 2026-11-16 13:40; Jonathan: "windows is going to do the 20 error events now. update
 workflow for what else you want it to work on").** After the 20 error events and rule AD's review, in this order.
 Agents: Opus at high or xhigh; Fable only if Opus cannot do it. Reviews are read-only: findings go in WORKFLOW (a
