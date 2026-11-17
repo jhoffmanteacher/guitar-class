@@ -837,7 +837,14 @@ function pcSheetStrip(st, loc, barsIn){
   if(!loc){ cells.forEach(c => c.classList.remove('now')); return; }
   const S = st.L.sections[loc.si], bpb = st.L.tr.beatsPerBar;
   const local = (st.L.firstBar + barsIn - S.fromBar) * bpb - loc.rep * S.bars * bpb;   // beats into this lap
-  const bar = Math.max(0, Math.floor(local / bpb + 1e-6));
+  /* The beat, then its bar, rounded exactly as pcLocate rounds them (whole
+     beats, 1e-6 of a beat, inside the lap). Until 2026-11-17 the bar was
+     rounded on its own, 1e-6 of a BAR: a read point a few millionths of a
+     beat before a bar line took the next bar's names and lit no cell, for
+     one frame (ca-45 at Slowest, with PC_LEAD 0; at a lap's or a section's
+     start, and past the song's end, too). */
+  const beat = Math.max(0, Math.min(Math.round(S.bars * bpb) - 1, Math.floor(local + 1e-6)));
+  const bar = Math.floor(beat / bpb);
   const key = loc.si + ':' + bar;
   if(st.stripKey !== key){
     st.stripKey = key;
@@ -849,7 +856,7 @@ function pcSheetStrip(st, loc, barsIn){
     cells.forEach((c, i) => { c.classList.toggle('strum', !!marks[i]); c.querySelector('.pc-strip-ch').textContent = marks[i] || ''; });
   }
   // Lit on the BEAT only: the cell stays lit through its "+" and no "+" cell is ever lit.
-  const now = Math.floor(local - bar * bpb + 1e-6) * 2;
+  const now = (beat - bar * bpb) * 2;
   cells.forEach((c, i) => c.classList.toggle('now', i === now));
 }
 /* The bar sticks under whatever already sticks to the top of the scroll box

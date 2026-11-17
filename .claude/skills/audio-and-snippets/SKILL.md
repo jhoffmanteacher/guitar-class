@@ -470,8 +470,8 @@ chart and the beat map. It has no ears: `tools/beat-audit.py` is the tool that l
   take-back: `node tools/metro-press-sim.mjs` (Node only, about 35 s, exit 0; not in `checks.mjs`).
 - The count-in clicks at the tempo of the bar the song comes in on (`pcCountIn`, fixed 2026-11-12; it used the
   window's average bar, 16.9% too fast at Madrecita Querida's Ending).
-- Its two KNOWN entries are real faults on his list, not fixed: a lyric sheet's "This bar" steps one past the end in
-  the song's last stretch (`sheetPastEnd`; only while the cursor reads AHEAD of the decoder, `PC_LEAD` longer than
-  `snipLatency()`, so not with the 60 ms placeholder); it blinks empty for one frame where the cursor's read point
-  lands on a repeat or a new section (`sheetLapBoundary`, the same strip code; 1 step in a full run at 60 ms). The
-  third, the Las Mañanitas Solo highlight stepping back at line starts, went with `PC_ROW_LEAD` (2026-11-16).
+- Its KNOWN list is empty since 2026-11-17. The lyric sheet's two "This bar" faults (`sheetPastEnd`, a step one past
+  the end; `sheetLapBoundary`, a one-frame blank at a lap, section start or, with `PC_LEAD` 0, a bar line) had one
+  cause: `pcSheetStrip` rounded the bar 1e-6 of a BAR past the read point and the beat 1e-6 of a beat. It now takes
+  the beat as `pcLocate` does and the bar from it. The Las Mañanitas Solo highlight stepping back at line starts
+  went with `PC_ROW_LEAD` (2026-11-16).
