@@ -355,6 +355,21 @@ and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fi
   zone at rest, on drag-over, mid-batch and finished. No name of a real song file needs typing: use the sim's
   made-up files. The Mac is registering the 18 files in `app/songfiles.js` (`SONG_FILES`) meanwhile: do not edit
   that list.
+- **W22. The old-page tool (W6): Jonathan answered your question on 2026-11-17: choice (1), "yes, put w6 on the
+  windows list". One more small fix and ONE more review, then put it on main.** Start from
+  `origin/win/w6-2026-11-16-r3` (`91d2d4bf`); rebase onto today's main first (the part lists and the tools have
+  moved: the Mac added `app/cards-views.js` on a branch only, not on main; main has no new part since the splits,
+  check). Build the fix the round 3 reviewer prototyped for its MAJOR R3-1 (your scratchpad `rv8\mut\FIX`): the
+  STRUCTURE check reports a miss only if the name IS defined once the page has settled (an order fault; a name
+  that never arrives is the static pass's job), and it reads the needed names only from files the new list places
+  before the marker's file. Proof: the two false reds go to 0, every true red stays red (the coach splits as first
+  built, twice; Song builder Part d), the shipped splits' close stays 0, plain and `--strict`; its 5 MINORs fixed or
+  listed. ONE fresh Opus `site-reviewer` round on the fix and the rebase (this is round 4, allowed by his answer;
+  a MAJOR again: stop, write it here, leave it on its branch). Clean: put `tools/old-page-loop.mjs` on main as
+  `Review: Reviewed`, name it in CLAUDE.md's "Where the code lives" (the line about splitting a part) with the
+  reviewer's sentence on how to read a push that ADDS a part, and add it to `todo.md`'s `coach-core.js` split
+  steps (it is already named there). It is NOT added to `checks.mjs` (it needs two commits). Opus at `high`
+  (`xhigh` allowed for the reviewer); the simple runs may go to Sonnet (CLAUDE.md, "Sonnet for the simple parts").
 - **W14. NOT YET, dates only (do not start early; leave the line here until done):**
   - about **2026-11-21**: the accessibility scan's ratchet. Read a week of GitHub's "a11y scan" job results; only if
     every run shows 0 new signatures, switch `--a11y-ratchet` on in `browser.yml`, with one `site-reviewer` round on the
