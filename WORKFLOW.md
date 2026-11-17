@@ -54,17 +54,16 @@ screen mid-song. `playalong-loop --only ca-45` and `--only ca-44`: 0 mismatches.
 after pictures at 1366×768 full screen. Nothing was needed in `app/activities-2.js`. Not checked: a real Chromebook
 or the classroom display itself (headless Chrome only): Jonathan's next class will show it.
 
-**For the next session on the Mac (written 2026-11-16; Part b shipped 2026-11-15, Part c 2026-11-16).** Jonathan types "do the
-Mac work in WORKFLOW". Parts b and c are live (entry "Song builder" below). **Waiting on Jonathan, in this order:**
-(1) he builds one real song up to the Beat step and says whether the bar lines sit on the beat; (2) he pastes three
-real charts at the Chart step and says whether they read right (report per chart the lines read, refused and folded
-as COUNTS only: never paste his lyrics into a report). **Part d (Preview, Publish, Edit, Unpublish, Delete, backup,
-Export) is BUILT (2026-11-16, entry "Song builder" below, bullet "Part d"), not pushed: it is ALWAYS REVIEWED
-(`site-reviewer`, before the push), then the change smoke (`--only activities`) and `console-layout-smoke`; its open
-product questions are in that bullet.** Then Jonathan publishes one song and checks it as a student on a Chromebook;
-then stop for Jonathan before Part e.
-Part d must keep his two answers of 2026-11-15: a record over 8 pins is sent to Claude and the line only warns
-(Publish is not blocked by it); the 10-cent pitch rule does block.
+**Song builder Part d SHIPPED 2026-11-16 evening (the Mac), labelled `Review: Fast` on Jonathan's word ("that is me only
+so let's try it and review on friday").** Preview, Publish, Edit, Unpublish, Delete, Export, the backup. Three review
+rounds ran before it (round 1: 2 MAJOR; round 2: 2 MAJOR; round 3: 1 MAJOR, 6 MINOR; every finding fixed, the round 3
+fixes were NOT re-reviewed: the Friday check reads the whole of it). `song-builder-sim` 152 of 152; the builder's
+browser walk 67 of 67; a normal song is 22 presses from "+ New song" to Published. Accepted limits: two console tabs
+acting at the same instant (Publish against Delete…, Import against Unpublish) can leave a listed song with no audio or
+no doc (students skip it or its audio does not load; 3 of 60 and 2 of 60 schedules); R1-5 and R1-7. The bar-count
+warning stays quiet when the recording is exactly one bar longer than the chart (the last chord ringing out). Next:
+Jonathan builds and publishes one real song; then Part e, only when he asks. If he sends an mp3 for the Claude way:
+skill `new-playalong`, 192k.
 **GitHub's "Site checks" is green again (2026-11-16, `190586d`).** It had been red since Part b: check 1en ran
 `tools/song-builder-sim.mjs`, whose fixed wait was too short on a faster machine (the Windows computer and GitHub's
 Linux; the Mac happened to be slow enough). The Windows session fixed the wait; nothing in the builder changed.
