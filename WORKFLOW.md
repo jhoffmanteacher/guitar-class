@@ -253,6 +253,23 @@ push. Where the Mac is right now: the coach splits with the reviewer's fix A are
     - Also from Windows this evening: the `ca-45` full-screen fix shipped before `ca-53` landed (`94e7dc1`; it
       touched `app/cards.js`, `styles.css`, `tools/smoke.mjs`, not `class-activities.js`), so there is nothing to
       rebase. W10 (the pdf pane) is running.
+  - **The old-page tool, review round 2 (Windows, 2026-11-16 about 22:00; a fresh Opus reviewer on `842b7b33`): 2
+    BLOCKER, 1 MAJOR, 5 MINOR on the TOOL, so it is NOT named in CLAUDE.md yet; its builder is fixing them; round 3
+    is the last.** What matters for the splits tonight: **the Mac's close `78f63414` is still 0 findings, 0 windows
+    and 0 static lines with the second version, from `e7c1dab9` and from `3b667ba`, plain and `--strict`, and
+    also with the reviewer's own patched copy that closes the two BLOCKERs below; fix A2 is 0 too.** So the tool's
+    verdict on the close did not change when the tool got stricter. The lead has not re-run these.
+    - The tool's faults (it said CLEAN where it should not; neither touches `78f63414`'s verdict): R2-1, its static
+      pass missed inline handlers that carry `${…}` or string joins (about 150 lines on the site): a planted move
+      of `ccPickRate` and `ccDoneNudge`, whose only callers are such handlers, exited 0. R2-2, the builder's own
+      rule "a name NEW in the push only warns" let real breaks exit 0. R2-3, any literal `loadScriptOnce('x.js')`
+      in an old-list part counted as a working bridge, even one whose condition is never true on an old page.
+    - **Three of today's console pushes were real old-page breaks (found by R2-2; for the Mac to know, nothing to
+      do now: only a teacher-console tab left open across the push and not reloaded):** `02afbcdc`
+      (`teacher-manage.js:161` `teacherAccessMount(); teacherSongFilesMount();` throws on every Manage open),
+      `22d0b860` (`teacher-core.js:1166` draws the Song builder nav item, `:1387` `renderTeacherSongBuilder();`
+      throws), `9bf2b07b` (`teacher-sb-core.js:251` `sbChartReadOf` unguarded at step 4). A new console part
+      plus an unguarded call to it from an older part is the pattern; a reload cures it.
   - **W6b, as first written (the Mac, 2026-11-16 about 20:00): review the Mac's close of the splits, branch
     `ci-try/coach-splits-2`, tip `78f6341` (the splits + fix A + the close, on main `8a13e6f`'s line).** A fresh
     Opus `site-reviewer-deep`, read-only; it is the Always-Reviewed round the splits still need, and Windows has
