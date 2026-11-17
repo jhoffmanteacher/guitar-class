@@ -7376,6 +7376,40 @@ function parseWorkflowYaml(src) {
   if (i < lines.length) throw new Error(`could not read past line ${i + 1}`);
   return out;
 }
+/* 1eq. Twice-encoded text (W20). On 2026-11-16 a `perl` edit read UTF-8 as Latin-1 and "Está" shipped garbled on the
+   Spanish privacy page for two hours; the pin recorded the garbled text. The patterns are the byte signatures of UTF-8
+   read as Latin-1, written as \u escapes so this file never trips on itself. No allowlist: a real string that trips it
+   is reported and fixed or discussed, never listed. Reads every .html, .js and .css the site serves (the repo minus
+   tools, .git, .github, .githooks, .claude, node_modules) and CHANGELOG.md. MIN_FILES is a floor (the walk broke if it drops). */
+function checkTwiceEncoded(root = ROOT, label = '') {
+  head('1eq. Twice-encoded text (UTF-8 read as Latin-1) in what the site serves' + label);
+  const MIN_FILES = 101;
+  const SKIP = new Set(['.git', '.github', '.githooks', '.claude', 'node_modules', 'tools']);
+  const RES = [
+    [/\u00C3[\u0080-\u00BF]/, 'A-tilde before a U+0080-U+00BF character'],
+    [/\u00E2\u20AC/, 'a-circumflex + euro sign'],
+    [/\u00C2[\u0020\u00A0-\u00BF!-\/:-@\[-`{-~]/, 'A-circumflex before a space or punctuation'],
+  ];
+  let n = 0, bad = 0;
+  const walk = d => {
+    for (const e of readdirSync(join(root, d), { withFileTypes: true })) {
+      const p = d ? d + '/' + e.name : e.name;
+      if (e.isDirectory()) { if (!SKIP.has(e.name)) walk(p); continue; }
+      if (!(/\.(html|js|css)$/.test(e.name) || p === 'CHANGELOG.md')) continue;
+      n++;
+      const t = readFileSync(join(root, p), 'utf8');
+      for (const [re, what] of RES) {
+        const m = re.exec(t);
+        if (m) { err(`1eq: ${p} line ${t.slice(0, m.index).split('\n').length} has ${what}: "${t.slice(Math.max(0, m.index - 15), m.index + 15).replace(/\s+/g, ' ')}" (UTF-8 read as Latin-1; fix the text, never allowlist)`); problems++; bad++; break; }
+      }
+    }
+  };
+  walk('');
+  if (n < MIN_FILES) { err(`1eq: read only ${n} files, fewer than ${MIN_FILES}: the walk is broken`); problems++; bad++; }
+  if (!bad) ok(`1eq: read ${n} files, none twice-encoded`);
+  return bad;
+}
+
 function checkPracticeCopy() {
   head('1ed. The practice copy: which Firebase project each address talks to');
   let bad = 0;
@@ -22092,6 +22126,7 @@ function checkNeverRules(sets) {
   checkManageLayout();
   checkSignInAccountChooser();
   checkPracticeCopy();
+  checkTwiceEncoded();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();
