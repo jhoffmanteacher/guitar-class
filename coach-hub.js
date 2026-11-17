@@ -379,8 +379,9 @@ function gamesStopMic(keepPanel){
      pressed in that gap called ccStop() before its file had arrived (review R1-1, 2026-11-11). */
   if (typeof bcStop !== 'function') return;
   /* DELIBERATE BRIDGE, remove after 2026-12-01 (todo.md lists it): the three stops of the 2026-11-16 parts are each
-     guarded, because a page opened before that split loads those parts late (the bridge line at the end of
-     coach-chords.js and coach-runner.js), so for a moment bcStop exists without them. Every other stop still runs. */
+     guarded for a page opened before that split. There the bridge block at the end of coach-chords.js and
+     coach-runner.js loads those parts and makes the part after each wait for it, so bcStop still arrives after them;
+     these guards are a second net. Every other stop still runs. */
   fretStop();
   ccStop();
   if (typeof cbStop === 'function') cbStop();
@@ -690,7 +691,8 @@ function gamesRenderHub(p){
   } catch(e){}
   /* DELIBERATE BRIDGE, remove after 2026-12-01 (todo.md lists it): this chip and the Note Runner, Finger Gym and
      Chord Detective chips below are guarded for a page opened before the 2026-11-16 split, which loads their parts
-     late (Finger Gym reads NR_PASS from coach-noterunner.js). */
+     through the bridge block at the end of coach-chords.js and coach-runner.js (Finger Gym reads NR_PASS from
+     coach-noterunner.js). That block makes the old loader wait for them, so these guards are a second net. */
   const cbChip = gamesBestChip(typeof cbSavedBest === 'function' ? cbSavedBest(saved) : 0, cbBest);
   let fzBest = 0;
   try {

@@ -1094,5 +1094,16 @@ function rnGoReady(){
 
 /* DELIBERATE BRIDGE, remove after 2026-12-01 (todo.md lists it): a page opened before the 2026-11-16
    split still holds the old part list in app/boot.js, which never names coach-noterunner.js, so coach-runner.js
-   asks for it here. A page with the new list skips this line. */
-if (typeof COACH_JS_PARTS !== 'undefined' && COACH_JS_PARTS.indexOf('coach-noterunner.js') < 0 && typeof loadScriptOnce === 'function') loadScriptOnce('coach-noterunner.js').catch(() => {});
+   asks for it here. It also writes the new part into that list (a later ensureCoachJs() waits for it, and fetches
+   it again if it failed) and makes the part the old list's loader asks for next (coach-more.js, where bcStop
+   lives) wait for it, so that loader runs the parts in the new order and fails with its own "could not load"
+   message if the new part does not arrive. A page with the new list skips this block. */
+if (typeof COACH_JS_PARTS !== 'undefined' && COACH_JS_PARTS.indexOf('coach-noterunner.js') < 0 && COACH_JS_PARTS.indexOf('coach-runner.js') >= 0 && typeof loadScriptOnce === 'function'){
+  const at = COACH_JS_PARTS.indexOf('coach-runner.js') + 1, next = COACH_JS_PARTS[at];
+  COACH_JS_PARTS.splice(at, 0, 'coach-noterunner.js');
+  const part = loadScriptOnce('coach-noterunner.js');
+  if (next && typeof _lazyScripts !== 'undefined' && !_lazyScripts[next]){
+    _lazyScripts[next] = part.then(() => { delete _lazyScripts[next]; return loadScriptOnce(next); },
+                                   e => { delete _lazyScripts[next]; throw e; });
+  } else part.catch(() => {});
+}

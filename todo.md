@@ -88,9 +88,9 @@ blocks a quick change mid-week.
 | Part | Lines on 2026-11-11 | Where it could be cut (read the banners first; these are guesses) |
 |---|---|---|
 | `teacher-activities.js` | 2,400 | the board (arrange, drag and drop, the one move writer) apart from the list and detail screens |
-| `coach-runner.js` | 2,393 | **Split 2026-11-16** (2,394 lines then): Riff Runner and its Wait Mode stay (1,091 lines at the split; 1,098 after `d6c3e16`'s 3 comment lines and the 4-line bridge below); Note Runner, with its race lane, judge and `gamesResetForUser`, moved whole into `coach-noterunner.js` (1,303 lines and a 7-line header) |
+| `coach-runner.js` | 2,393 | **Split 2026-11-16** (2,394 lines then): Riff Runner and its Wait Mode stay (1,091 lines at the split; 1,109 after `d6c3e16`'s 3 comment lines and the 15-line bridge below); Note Runner, with its race lane, judge and `gamesResetForUser`, moved whole into `coach-noterunner.js` (1,303 lines and a 7-line header) |
 | `coach-core.js` | 2,329 | only with Jonathan: it is the listening code. Mic recordings (`micRec*`) are the obvious section to move; the detectors, `coachDetectPitch` and every line `tools/mic-sim/` reads stay put |
-| `coach-chords.js` | 2,034 | **Split 2026-11-16** (2,167 lines then): Change Up / Power Chord Switch stay (1,397 lines at the split; 1,401 with the 4-line bridge below); the chord ranks, Chord Blitz and Chord Detective moved whole into `coach-chordcards.js` (770 lines and a 7-line header) |
+| `coach-chords.js` | 2,034 | **Split 2026-11-16** (2,167 lines then): Change Up / Power Chord Switch stay (1,397 lines at the split; 1,412 with the 15-line bridge below); the chord ranks, Chord Blitz and Chord Detective moved whole into `coach-chordcards.js` (770 lines and a 7-line header) |
 
 How: one part per change. Move a banner section, whole and unchanged, into a new part loaded right after the one
 it came from; list the new file in `COACH_JS_PARTS` / `TEACHER_JS_PARTS` (`app/boot.js`) and, for an arcade part,
@@ -101,12 +101,15 @@ Check `tools/mic-sim/` and `checks.mjs` for text they pin in the section being m
 
 **Remove the 2026-11-16 split bridge on or after 2026-12-01.** A page opened before the push of the two coach
 splits keeps the old 8-name `COACH_JS_PARTS` and never asks for `coach-chordcards.js` or `coach-noterunner.js`
-(review R1-1). The bridge: the 4-line block at the end of `coach-chords.js` and of `coach-runner.js` (the old page
-loads the new part itself), and `typeof` guards for the moment before it arrives: `cbStop` / `nrStop` / `cdStop` in
-`gamesStopMic` and the Chord Blitz, Note Runner, Finger Gym and Chord Detective chips in `gamesRenderHub`
-(`coach-hub.js`), `typeof nr` in `gamesHideStop` and `coachReleaseMicIfIdle` (`coach-core.js`). `grep -n "DELIBERATE
-BRIDGE" coach-*.js` finds the comment over each (5). Remove them all in one commit, put each guarded line back as it
-was before (`git show d6c3e16:<file>`), and keep the `checks.mjs` pin on the part order.
+(review R1-1). The bridge: the 15-line block at the end of `coach-chords.js` and of `coach-runner.js` (the old page
+loads the new part itself, writes it into its list and makes the next part in that list wait for it, so its loader
+runs the new order and fetches a failed part again; proved with `tools/old-page-loop.mjs` from the Windows branch
+`win/w6-2026-11-16`), and `typeof` guards kept as a second net: `cbStop` / `nrStop` / `cdStop` in `gamesStopMic` and
+the Chord Blitz, Note Runner, Finger Gym and Chord Detective chips in `gamesRenderHub` (`coach-hub.js`), `typeof nr`
+in `gamesHideStop` and `coachReleaseMicIfIdle` (`coach-core.js`). `grep -n "DELIBERATE BRIDGE" coach-*.js` finds the
+comment over each (5). Remove them all in one commit, put each guarded line back as it was before the bridge (the
+parent of the commit "Arcade: a page opened before the coach splits loads the two new parts itself"; a rebase changed
+its hash), and keep the `checks.mjs` pin on the part order.
 
 ## Follow-ups from the 2026-11-11 cut (none urgent)
 
