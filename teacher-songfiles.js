@@ -12,7 +12,18 @@
      - One row per song: every SONG_FILES entry (the site's list) and every
        songFiles doc in the store, merged by id: id, file name, size, length,
        state, and a status (TEACHER_SF_STATUS below).
-     - Upload (an .mp3 from the teacher's Mac), Verify / Verify all, Delete.
+     - Upload (.mp3 files from the teacher's Mac: picked, or dropped on the drop zone, many at once since W21,
+       2026-11-17), Verify / Verify all, Delete.
+
+   MANY FILES (W21). Picked or dropped files go up ONE AT A TIME through the same path as one file
+   (teacherSfUploadOne), so each is still taken only if it is exactly a file on the list. One progress line for
+   the batch ("3 of 18: <file>"); a refused or failed file never stops the rest; at the end, how many went up
+   and every file not uploaded with its reason (not on the list, wrong bytes, a connection problem…). A second
+   drop while a batch runs is refused with a line; folders, files that are not .mp3 and an empty drop get one
+   plain line each. Leaving Manage stops the batch as it stops one upload. Nothing is verified for the teacher:
+   Verify all stays his click. A dropped file's name is untrusted and is escaped wherever it is drawn. While a
+   batch runs, a drop that misses the zone is swallowed (a window listener added at the batch's start and
+   removed at its end, however it ends), so the dropped file never replaces the console in the tab.
 
    UPLOAD. The browser reads the file, works out its SHA-256 (crypto.subtle)
    and its length (an Audio element's metadata; a file whose length cannot be
@@ -96,6 +107,8 @@ let teacherSfBusy = '';         // '' | 'upload' | 'verify' | 'delete' | 'reset'
 let teacherSfProgress = '';     // the busy line ("Uploading… 3 of 16")
 let teacherSfNote = '';         // one line after an action (plain text)
 let teacherSfOpen = false;      // the list and the upload are shown (any action opens them)
+let teacherSfRefused = [];      // after a batch: one plain-text line per file not uploaded ("<name>: <why>")
+let teacherSfDragOver = false;  // files are being dragged over the drop zone
 const teacherSfChecks = new Map();   // id -> { ok, text }: the last Verify
 
 function teacherSfEntry(id){
@@ -169,16 +182,23 @@ function teacherSfBlockHtml(){
           <button type="button" class="tg-seg-btn" data-tsf-act="toggle" aria-expanded="${open}"${busy ? ' disabled' : ''}>${open ? 'Hide song files' : `Show song files (${listN} on the list, ${teacherSfHeads ? upN + ' in the store' : 'store not read yet'})`}</button>
         </div>
       </div>`;
-  const lines = [teacherSfReadErr, teacherSfProgress, teacherSfNote].filter(Boolean);
-  if(lines.length) html += `<div class="tg-note" role="status">${lines.map(l => `<b>${escHtml(l)}</b>`).join('<br>')}</div>`;
-  if(!open) return html;
+  /* teacherSfNote may hold several lines (a batch's summary, a drop's left-out files): one <b> each. A dropped
+     file's name is untrusted: every line and every refused file is escaped here. */
+  const lines = [teacherSfReadErr, teacherSfProgress, ...String(teacherSfNote || '').split('\n')].filter(Boolean);
+  const refused = teacherSfRefused.length ? `<ul class="tsf-refused">${teacherSfRefused.map(l => `<li>${escHtml(l)}</li>`).join('')}</ul>` : '';
+  const status = lines.length || refused ? `<div class="tg-note" role="status">${lines.map(l => `<b>${escHtml(l)}</b>`).join('<br>')}${refused}</div>` : '';
+  /* Closed: the lines under the title. Open: right under the drop zone, where the files were dropped. */
+  if(!open) return html + status;
   /* Review A1 (2026-11-14): the monthly limit is the site's own count of honest use; the rules cannot count reads,
      so any account the rules let read can download the pieces directly. Until the school-accounts paste 2 is
      published that is any Google account. */
   html += `<div class="tg-note"><strong>Upload real songs only after the school-accounts rules (paste 2) are published.</strong> Until then any signed-in Google account can read these files, and the monthly limit only counts what the site itself downloads.</div>`;
   html += `<div class="tg-note">The site's song recordings, kept in the class database and played only to signed-in accounts. Upload takes an .mp3 from this computer only if it is exactly a file on the site's list (same size and SHA-256). Verify reads a song back the way a Chromebook does and counts against this month's downloads.</div>
-      <div class="tg-note"><label>Upload an .mp3: <input type="file" accept=".mp3,audio/mpeg" data-tsf-file${off}></label>
-        <button type="button" class="tg-seg-btn" data-tsf-act="verify-all"${off}>Verify all</button>
+      <div class="tsf-drop${teacherSfDragOver ? ' tsf-drop-over' : ''}${busy ? ' tsf-drop-busy' : ''}" data-tsf-drop>
+        <div class="tsf-drop-msg">${busy && teacherSfBusy === 'upload' ? 'Uploading: wait for these files to finish before dropping more.' : teacherSfDragOver ? 'Let go to upload these files.' : 'Drop .mp3 files here, as many as you like. They go up one at a time.'}</div>
+        <label>Or pick them: <input type="file" accept=".mp3,audio/mpeg" multiple data-tsf-file${off}></label>
+      </div>${status}
+      <div class="tg-note"><button type="button" class="tg-seg-btn" data-tsf-act="verify-all"${off}>Verify all</button>
         <button type="button" class="tg-seg-btn" data-tsf-act="refresh"${off}>Refresh</button></div>`;
   if(!ids.length) return html + '<div class="t-loading">No song files: the site’s list is empty and the store holds none.</div>';
   return html + `<div class="tg-grid-wrap"><table class="tg-table"><thead><tr><th>Id</th><th>File</th><th>Size</th><th>Length</th><th>State</th><th>Status</th><th></th></tr></thead>`
@@ -193,11 +213,18 @@ function teacherSfPaint(){
     el.dataset.bound = '1';
     el.addEventListener('click', teacherSfClick);
     el.addEventListener('change', teacherSfChange);
+    /* The drop zone's handlers live on the section's element, like the two above: leaving Manage draws other
+       HTML into the box, which drops this element and every listener on it. */
+    el.addEventListener('dragenter', teacherSfDragEnter);
+    el.addEventListener('dragover', teacherSfDragOverZone);
+    el.addEventListener('dragleave', teacherSfDragLeave);
+    el.addEventListener('drop', teacherSfDrop);
   }
 }
 /* Called by renderTeacherManage after it draws: paints from memory, and reads again when that is over 15 s old. */
 function teacherSongFilesMount(){
   if(!document.getElementById('t-songfiles-block')) return;
+  teacherSfDragOver = false;   // a drag that ended off the page left no dragleave behind
   teacherSfPaint();
   if(!teacherSfBusy && Date.now() - teacherSfReadAt > 15000) teacherSfLoad();
 }
@@ -236,7 +263,7 @@ function teacherSfClick(e){
   if(act === 'toggle'){ teacherSfOpen = !teacherSfOpen; teacherSfPaint(); return; }
   if(teacherSfBusy) return;
   if(typeof teacherBsBusy !== 'undefined' && teacherBsBusy) return;   // a built-song import is writing (teacher-builtsongs.js)
-  if(act === 'refresh'){ teacherSfNote = ''; teacherSfLoad(); return; }
+  if(act === 'refresh'){ teacherSfNote = ''; teacherSfRefused = []; teacherSfLoad(); return; }
   if(act === 'reset'){ teacherSfReset(); return; }
   if(act === 'verify-all'){ teacherSfVerifyAll(); return; }
   if(act === 'verify'){ teacherSfVerify(String(id || '')); return; }
@@ -245,10 +272,98 @@ function teacherSfClick(e){
 function teacherSfChange(e){
   const inp = e.target && e.target.closest ? e.target.closest('[data-tsf-file]') : null;
   if(!inp || teacherView !== 'manage') return;
-  const f = inp.files && inp.files[0];
-  if(f) teacherSfUpload(f);
+  teacherSfTakeFiles(Array.from(inp.files || []), 0);
 }
-function teacherSfStart(kind){ teacherSfBusy = kind; teacherSfOpen = true; teacherSfOpGen++; teacherSfNote = ''; teacherSfProgress = ''; teacherSfPaint(); }
+
+/* ── The drop zone (W21, 2026-11-17) ── */
+function teacherSfIsFileDrag(e){
+  const types = e && e.dataTransfer && e.dataTransfer.types;
+  return !!types && Array.from(types).includes('Files');
+}
+function teacherSfZoneOf(e){ return e && e.target && e.target.closest ? e.target.closest('[data-tsf-drop]') : null; }
+/* The drag-over look, on the zone itself (no repaint under the pointer mid-drag) and remembered for the next paint. */
+function teacherSfSetOver(on){
+  if(teacherSfDragOver === on) return;
+  teacherSfDragOver = on;
+  const el = document.getElementById('t-songfiles-block');
+  const z = el && el.querySelector ? el.querySelector('[data-tsf-drop]') : null;
+  if(z && z.classList){
+    z.classList.toggle('tsf-drop-over', on);
+    const msg = z.querySelector('.tsf-drop-msg');
+    if(msg && teacherSfBusy !== 'upload') msg.textContent = on ? 'Let go to upload these files.' : 'Drop .mp3 files here, as many as you like. They go up one at a time.';
+  }
+}
+function teacherSfDragEnter(e){
+  if(!teacherSfIsFileDrag(e) || !teacherSfZoneOf(e)) return;
+  e.preventDefault();
+  teacherSfSetOver(true);
+}
+function teacherSfDragOverZone(e){
+  if(!teacherSfIsFileDrag(e) || !teacherSfZoneOf(e)) return;
+  e.preventDefault();
+  try{ e.dataTransfer.dropEffect = 'copy'; }catch(err){}
+  teacherSfSetOver(true);
+}
+function teacherSfDragLeave(e){
+  const z = teacherSfZoneOf(e);
+  if(!z) return;
+  if(e.relatedTarget && z.contains && z.contains(e.relatedTarget)) return;   // moved onto a child of the zone
+  teacherSfSetOver(false);
+}
+function teacherSfDrop(e){
+  if(!teacherSfIsFileDrag(e) || !teacherSfZoneOf(e)) return;
+  e.preventDefault();
+  teacherSfSetOver(false);
+  if(teacherView !== 'manage') return;
+  /* A folder comes in as an item whose entry is a directory: counted and left out (its files are not read). The
+     items are read now: the browser empties them once this handler returns. */
+  const dt = e.dataTransfer, files = [];
+  let folders = 0;
+  const items = dt.items ? Array.from(dt.items) : [];
+  if(items.length){
+    for(const it of items){
+      if(it.kind !== 'file') continue;
+      const en = typeof it.webkitGetAsEntry === 'function' ? it.webkitGetAsEntry() : null;
+      if(en && en.isDirectory){ folders++; continue; }
+      const f = it.getAsFile();
+      if(f) files.push(f);
+    }
+  } else files.push(...Array.from(dt.files || []));
+  teacherSfTakeFiles(files, folders);
+}
+/* While a batch runs, a drop that misses the zone must not open the dropped file in this tab (that would leave the
+   console mid-batch): the page takes it and does nothing. Added at a batch's start, removed at its end, whichever
+   way it ends. */
+function teacherSfGuardDrag(e){ if(teacherSfIsFileDrag(e)) e.preventDefault(); }
+function teacherSfWindowGuard(on){
+  if(typeof window === 'undefined') return;
+  const f = on ? 'addEventListener' : 'removeEventListener';
+  if(typeof window[f] !== 'function') return;
+  window[f]('dragover', teacherSfGuardDrag);
+  window[f]('drop', teacherSfGuardDrag);
+}
+const teacherSfIsMp3 = f => /\.mp3$/i.test(String(f && f.name || '')) || String(f && f.type || '') === 'audio/mpeg';
+/* Files picked or dropped: refuses while something else runs, leaves out folders and files that are not .mp3 (a
+   plain line each), then one .mp3 goes up as a single upload and two or more as a batch. */
+function teacherSfTakeFiles(files, folders){
+  if(teacherView !== 'manage') return;
+  if(teacherSfBusy){
+    teacherSfNote = teacherSfBusy === 'upload'
+      ? 'One batch at a time: the files you just dropped were not taken. Drop them again when this batch has finished.'
+      : 'Wait for the current action to finish, then drop the files again.';
+    teacherSfPaint(); return;
+  }
+  if(typeof teacherBsBusy !== 'undefined' && teacherBsBusy){ teacherSfNote = 'Wait for the built-song import to finish.'; teacherSfPaint(); return; }
+  const mp3 = files.filter(teacherSfIsMp3), other = files.filter(f => !teacherSfIsMp3(f));
+  const pre = [];
+  if(folders) pre.push(`${folders === 1 ? 'A folder was' : folders + ' folders were'} left out: open the folder and drop the .mp3 files themselves.`);
+  if(other.length) pre.push(`${other.length === 1 ? '1 file was' : other.length + ' files were'} left out because ${other.length === 1 ? 'it is' : 'they are'} not .mp3: ${other.slice(0, 5).map(f => String(f.name || '?')).join(', ')}${other.length > 5 ? ` and ${other.length - 5} more` : ''}.`);
+  if(!files.length && !folders) pre.push('Nothing to upload: no files came with that drop. Drag .mp3 files from your computer.');
+  if(!mp3.length){ teacherSfRefused = []; teacherSfNote = pre.join('\n'); teacherSfPaint(); return; }
+  if(mp3.length === 1 && !pre.length){ teacherSfUpload(mp3[0]); return; }
+  teacherSfUploadFiles(mp3, pre);
+}
+function teacherSfStart(kind){ teacherSfBusy = kind; teacherSfOpen = true; teacherSfOpGen++; teacherSfNote = ''; teacherSfRefused = []; teacherSfProgress = ''; teacherSfPaint(); }
 function teacherSfEnd(note){
   teacherSfBusy = ''; teacherSfOpGen++; teacherSfProgress = ''; teacherSfNote = note;
   teacherSfPaint();
@@ -328,52 +443,117 @@ async function teacherSfPutFile(id, entry, buf, durationSec, w){
   if(w.stopped()) throw 'stop';
   await ref.set(teacherSfHead(id, entry, durationSec, 'ready'));
 }
-async function teacherSfUpload(file){
-  if(teacherSfBusy || !file) return;
-  if(typeof teacherBsBusy !== 'undefined' && teacherBsBusy){ teacherSfNote = 'Wait for the built-song import to finish.'; teacherSfPaint(); return; }
+/* A file refused on its size alone, before it is read: { note, why } or null. */
+function teacherSfSizeRefusal(file){
   const size = Number(file.size);
-  if(!(size > 0)){ teacherSfNote = 'That file is empty. Nothing was uploaded.'; teacherSfPaint(); return; }
-  if(size > TEACHER_SF_MAX_BYTES){ teacherSfNote = `That file is ${size.toLocaleString('en-US')} bytes; the most a song file may be is 36,000,000. Nothing was uploaded.`; teacherSfPaint(); return; }
-  teacherSfStart('upload');
-  teacherSfProgress = 'Reading the file…'; teacherSfPaint();
+  if(!(size > 0)) return { note: 'That file is empty. Nothing was uploaded.', why: 'the file is empty' };
+  if(size > TEACHER_SF_MAX_BYTES) return { note: `That file is ${size.toLocaleString('en-US')} bytes; the most a song file may be is 36,000,000. Nothing was uploaded.`, why: `it is ${size.toLocaleString('en-US')} bytes; the most a song file may be is 36,000,000` };
+  return null;
+}
+/* A list entry with this file name or this size (the file's bytes did not match it): its id, or null. */
+function teacherSfNear(name, bytes){
+  const list = typeof SONG_FILES !== 'undefined' ? SONG_FILES : {};
+  const nm = String(name || '').toLowerCase();
+  return Object.keys(list).find(id => list[id] && (String(list[id].file || '').toLowerCase() === nm || list[id].bytes === bytes)) || null;
+}
+/* One file through the upload path: the size, the read, the match on the list, the question before replacing a
+   matching song, the length, the writes (teacherSfPutFile). It never starts or ends the section's busy state: its
+   caller does (teacherSfUpload for one file, teacherSfUploadFiles for a batch). It never throws. Resolves
+   { ok, id, note, why, stop }: `note` is the sentence a single upload ends with, `why` the short reason a batch
+   lists, `stop` true when the teacher left Manage (the batch then stops). `seen` (a batch's ids so far, or null)
+   refuses a second file of the same song in one batch. */
+async function teacherSfUploadOne(file, progress, seen){
+  const pre = teacherSfSizeRefusal(file);
+  if(pre) return { ok: false, id: null, note: pre.note, why: pre.why };
+  progress('Reading the file…');
   let id = null;
   const stopped = () => teacherView !== 'manage';
-  const w = { stopped, wrote: false, k: -1, n: 0, progress: line => { teacherSfProgress = line; teacherSfPaint(); } };
+  const w = { stopped, wrote: false, k: -1, n: 0, progress };
   try{
     const buf = new Uint8Array(await file.arrayBuffer());
     const sha = sfHex(await crypto.subtle.digest('SHA-256', buf));
     id = teacherSfMatch(sha, buf.length);
     if(!id){
-      teacherSfEnd(`This file is not on the site's list of song files (SHA-256 ${sha.slice(0, 12)}…, ${buf.length.toLocaleString('en-US')} bytes). Claude adds a song to the list first.`);
-      return;
+      const near = teacherSfNear(file.name, buf.length);
+      const said = `SHA-256 ${sha.slice(0, 12)}…, ${buf.length.toLocaleString('en-US')} bytes`;
+      return { ok: false, id: null,
+        note: `This file is not on the site's list of song files (${said}). Claude adds a song to the list first.`,
+        why: near ? `wrong bytes: the list has ${near} under this name or size, but this file is not that file (${said})` : `not on the site's list of song files (${said})` };
     }
+    if(seen && seen.has(id)) return { ok: false, id, note: '', why: `the same song as an earlier file in this batch (${id}), which was uploaded once` };
     const entry = teacherSfEntry(id);
     /* Uploading over a song that is already there and matching (review B7): it goes back to "uploading" for the
        minutes the upload takes, and a Chromebook with no copy is refused in that time. Ask first. */
     const was = teacherSfHeads && teacherSfHeads.get(id);
     if(was && was.state === 'ready' && teacherSfHeadMatches(was, entry)
        && !confirm(`${id} is already uploaded and matches the list. Upload it again? While it uploads, Chromebooks that do not have it yet see "not ready".`)){
-      teacherSfEnd(`Nothing uploaded: ${id} is already there and matches the list.`);
-      return;
+      return { ok: false, id, note: `Nothing uploaded: ${id} is already there and matches the list.`, why: `${id} is already there and matches the list (you chose not to upload it again)` };
     }
     const dur = await teacherSfDuration(file);
-    if(dur == null){ teacherSfEnd(`This browser could not read the length of that file, so it was not uploaded. Is it a whole .mp3?`); return; }
+    if(dur == null) return { ok: false, id, note: `This browser could not read the length of that file, so it was not uploaded. Is it a whole .mp3?`, why: 'this browser could not read its length (is it a whole .mp3?)' };
     const durationSec = Math.round(dur * 100) / 100;
     try{ await teacherSfPutFile(id, entry, buf, durationSec, w); }
-    catch(e){ if(e && e.shape){ teacherSfEnd(`${id} was not uploaded: ${e.shape}.`); return; } throw e; }
-    teacherSfChecks.delete(id);
-    teacherSfEnd(`${id} uploaded: ${w.n} piece${w.n === 1 ? '' : 's'}, ${teacherSfMb(entry.bytes)}, ${teacherSfLen(durationSec)}. Press Verify to read it back.`);
+    catch(e){ if(e && e.shape) return { ok: false, id, note: `${id} was not uploaded: ${e.shape}.`, why: `${id}: ${e.shape}` }; throw e; }
+    return { ok: true, id, why: '', note: `${id} uploaded: ${w.n} piece${w.n === 1 ? '' : 's'}, ${teacherSfMb(entry.bytes)}, ${teacherSfLen(durationSec)}. Press Verify to read it back.` };
   }catch(e){
     const { wrote, k, n } = w;
-    if(e === 'stop' && !wrote){ teacherSfEnd('Stopped: you left Manage before the upload started. Nothing was written.'); return; }
-    if(e === 'stop'){
-      teacherSfEnd(`Stopped: you left Manage during the upload. ${id} is NOT ready (it stays "uploading", which the site refuses to play). Upload it again.`);
-      return;
-    }
-    teacherSfEnd(id
-      ? `The upload of ${id} failed${k >= 0 && k < n ? ` at piece ${k + 1} of ${n}` : ''}: ${teacherSfWhy(e)}. It is NOT ready; the site will not play it. Upload it again.`
-      : `Could not read that file: ${String((e && e.message) || e)}. Nothing was uploaded.`);
+    if(e === 'stop' && !wrote) return { ok: false, stop: true, id, wrote, note: 'Stopped: you left Manage before the upload started. Nothing was written.' };
+    if(e === 'stop') return { ok: false, stop: true, id, wrote, note: `Stopped: you left Manage during the upload. ${id} is NOT ready (it stays "uploading", which the site refuses to play). Upload it again.` };
+    if(!id) return { ok: false, id, note: `Could not read that file: ${String((e && e.message) || e)}. Nothing was uploaded.`, why: `could not read the file (${String((e && e.message) || e)})` };
+    const at = k >= 0 && k < n ? ` at piece ${k + 1} of ${n}` : '';
+    return { ok: false, id,
+      note: `The upload of ${id} failed${at}: ${teacherSfWhy(e)}. It is NOT ready; the site will not play it. Upload it again.`,
+      why: `${id} failed${at}: ${teacherSfWhy(e)}. It is NOT ready; upload it again` };
   }
+}
+async function teacherSfUpload(file){
+  if(teacherSfBusy || !file) return;
+  if(typeof teacherBsBusy !== 'undefined' && teacherBsBusy){ teacherSfNote = 'Wait for the built-song import to finish.'; teacherSfPaint(); return; }
+  const pre = teacherSfSizeRefusal(file);
+  if(pre){ teacherSfNote = pre.note; teacherSfPaint(); return; }
+  teacherSfStart('upload');
+  const r = await teacherSfUploadOne(file, line => { teacherSfProgress = line; teacherSfPaint(); }, null);
+  if(r.ok) teacherSfChecks.delete(r.id);
+  teacherSfEnd(r.note);
+}
+/* Many files (W21, 2026-11-17): one at a time through teacherSfUploadOne, the same path as one file, so each is
+   still taken only if it is exactly a file on the list. One progress line ("3 of 18: <file>"); a refused or
+   failed file never stops the rest; leaving Manage does (the file being written stays "uploading", as with one
+   upload, and the rest are not tried). The end names every file not uploaded and why. Verify all stays the
+   teacher's click. `pre`: lines about what the drop left out (folders, files that are not .mp3). */
+async function teacherSfUploadFiles(files, pre){
+  if(teacherSfBusy || !files.length) return;
+  if(typeof teacherBsBusy !== 'undefined' && teacherBsBusy){ teacherSfNote = 'Wait for the built-song import to finish.'; teacherSfPaint(); return; }
+  teacherSfStart('upload');
+  teacherSfWindowGuard(true);
+  const N = files.length, seen = new Set(), refused = [];
+  let good = 0, stop = null, stopAt = -1;
+  try{
+    for(let i = 0; i < N; i++){
+      const name = String((files[i] && files[i].name) || 'a file');
+      if(teacherView !== 'manage'){ stopAt = i; stop = { wrote: false }; break; }
+      const head = `${i + 1} of ${N}: ${name}`;
+      teacherSfProgress = head; teacherSfPaint();
+      const r = await teacherSfUploadOne(files[i], line => { teacherSfProgress = `${head} (${line})`; teacherSfPaint(); }, seen);
+      if(r.stop){ stopAt = i; stop = r; break; }
+      if(r.ok){ good++; seen.add(r.id); teacherSfChecks.delete(r.id); }
+      else refused.push(`${name}: ${r.why}`);
+    }
+  }catch(e){
+    refused.push(`the batch stopped on an error: ${String((e && e.message) || e)}`);
+  }finally{
+    teacherSfWindowGuard(false);
+  }
+  const lines = pre.slice();
+  if(stop){
+    const left = N - stopAt;
+    lines.push(`Stopped: you left Manage at file ${stopAt + 1} of ${N} (${String(files[stopAt].name || 'a file')}). ${good} of ${N} went up before that; ${left === 1 ? 'that file was' : `that file and the ${left - 1} after it were`} not uploaded.`
+      + (stop.wrote && stop.id ? ` ${stop.id} is NOT ready (it stays "uploading", which the site refuses to play).` : '') + ' Drop them again.');
+  } else {
+    lines.push(`Uploaded ${good} of ${N} file${N === 1 ? '' : 's'}.${refused.length ? ` Not uploaded: ${refused.length} (listed below).` : ''}${good ? ' Press Verify all to read them back.' : ''}`);
+  }
+  teacherSfRefused = refused;   // shown under the note until the next action (teacherSfStart) or Refresh
+  teacherSfEnd(lines.join('\n'));
 }
 
 /* ── Verify ── */

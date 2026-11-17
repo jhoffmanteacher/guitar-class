@@ -35,7 +35,15 @@
    rules, an .mp3 of another size (not even read), other bytes, a length 2 s off, an audio id on SONG_FILES) and an
    audio id another song uses with other bytes each write nothing and say why in one line; one import at a time;
    leaving Manage stops it; Song files names a built song's audio ("Built song: <title>", escaped) and its Delete is
-   refused while a listed song plays it; a stored song the validator refuses shows ✗ and its reason. */
+   refused while a listed song plays it; a stored song the validator refuses shows ✗ and its reason.
+
+   MANY FILES AND THE DROP ZONE (W21, 2026-11-17; four made-up files bat-a … bat-d): 3 good files picked in the
+   file box (multiple) go up one file at a time with one progress line ("2 of 3: bat-b.mp3") and nothing verified;
+   a good, a not-listed (an <img …> name, drawn as text) and a good: the two go up and the end names the third;
+   wrong bytes under a listed name say "wrong bytes"; a failure in the middle never stops the rest; a second drop
+   during a batch is refused with a line and writes nothing; leaving Manage stops the batch at the file being
+   written; the window drop guard is on only during a batch; a folder, a file that is not .mp3 and an empty drop
+   get one line each. */
 import { readFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -197,7 +205,7 @@ function makeConsole(consoleSrc){
   els['t-grid-container'] = mkEl('t-grid-container');
   els['t-songfiles-block'] = mkEl('t-songfiles-block');
   els['t-builtsongs-block'] = mkEl('t-builtsongs-block');
-  const env = { promptAnswer: null, confirmAnswer: true, prompts: [], durations: new Map(), urlN: 0, audioMade: 0 };
+  const env = { promptAnswer: null, confirmAnswer: true, prompts: [], durations: new Map(), urlN: 0, audioMade: 0, win: [] };
   class Audio {
     constructor(){ this.l = {}; env.audioMade++; }
     addEventListener(t, f){ this.l[t] = f; }
@@ -207,7 +215,10 @@ function makeConsole(consoleSrc){
   const box = {
     console: { log() {}, warn() {}, error() {} }, setTimeout, clearTimeout, setInterval: () => 0, clearInterval() {},
     localStorage: { getItem: () => null, setItem() {}, removeItem() {} }, sessionStorage: { getItem: () => null, setItem() {} },
-    navigator: {}, location: { hash: '', search: '' }, addEventListener() {}, crypto: globalThis.crypto, Blob, Audio,
+    navigator: {}, location: { hash: '', search: '' }, crypto: globalThis.crypto, Blob, Audio,
+    // window listeners are counted (W21: the batch's drop guard must be gone however the batch ends)
+    addEventListener(t, f){ env.win.push([t, f]); },
+    removeEventListener(t, f){ const i = env.win.findIndex(x => x[0] === t && x[1] === f); if(i >= 0) env.win.splice(i, 1); },
     URL: { createObjectURL(f){ const u = 'blob:sim/' + (++env.urlN); env.durations.set(u, f && f.__dur); return u; }, revokeObjectURL() {} },
     // The section's element exists only while the Manage HTML painted into the box holds its slot.
     document: { getElementById: id => (id === 't-songfiles-block' || id === 't-builtsongs-block') ? (els['t-grid-container']._html.includes(`id="${id}"`) ? els[id] : null) : (els[id] || null),
@@ -531,6 +542,134 @@ async function runCases(consoleSrc){
   }
   done(c);
 
+  /* ── Many files at once and the drop zone (W21, 2026-11-17) ── */
+  const BATCH = ['bat-a', 'bat-b', 'bat-c', 'bat-d'].map((id, i) => ({ id, bytes: bytesOf(1500 + i * 100, 300 + i) }));
+  const regBatch = c => { for(const s of BATCH) c.run(`SONG_FILES['${s.id}'] = { file: '${s.id}.mp3', bytes: ${s.bytes.length}, sha256: '${sha(s.bytes)}', durationSec: 4 };`); };
+  const B = id => BATCH.find(s => s.id === id);
+  const bfile = (id, name, bytes) => fileOf(bytes || B(id).bytes, 4, name || id + '.mp3');
+  const stateOf = (c, id) => (c.F.S.get('songFiles/' + id) || {}).state;
+  const idle = async c => { for(let i = 0; i < 3000 && c.run('teacherSfBusy'); i++) await new Promise(r => setTimeout(r, 2)); await settle(); };
+  const zoneT = { closest: sel => sel === '[data-tsf-drop]' ? zoneT : null };
+  const dropEv = (files, folders = 0) => {
+    const items = files.map(f => ({ kind: 'file', webkitGetAsEntry: () => ({ isDirectory: false }), getAsFile: () => f }))
+      .concat(Array.from({ length: folders }, () => ({ kind: 'file', webkitGetAsEntry: () => ({ isDirectory: true }), getAsFile: () => ({ name: 'folder', size: 0 }) })));
+    const ev = { prevented: 0, target: zoneT, dataTransfer: { types: ['Files'], items, files }, preventDefault(){ ev.prevented++; } };
+    return ev;
+  };
+  const drop = (c, ev) => { for(const fn of c.block.listeners.drop || []) fn(ev); return ev; };
+  const idsWritten = c => c.F.st.writes.map(w => w.path.split('/')[1]).filter((x, i, a) => i === 0 || x !== a[i - 1]).join(',');
+  const refusedLis = c => (c.block._html.match(/<li>[^<]*<\/li>/g) || []);
+
+  /* batch: 3 good files, picked in the file box (multiple) */
+  c = makeConsole(consoleSrc); register(c); regBatch(c);
+  await managed(c);
+  c.run('teacherSfOpen = true; teacherSfPaint()');
+  {
+    ok(/<input type="file"[^>]*\smultiple\s[^>]*data-tsf-file/.test(c.block._html) && /data-tsf-drop/.test(c.block._html), 'batch: the file box takes many files (multiple) and sits in a drop zone');
+    const w0 = c.env.win.length; let during = -1;
+    c.F.st.hooks.push(w => { if(during < 0 && w.path === 'songFiles/bat-b') during = c.env.win.length; });
+    const inp = { files: ['bat-a', 'bat-b', 'bat-c'].map(id => bfile(id)) };
+    for(const fn of c.block.listeners.change || []) fn({ target: { closest: sel => sel === '[data-tsf-file]' ? inp : null } });
+    await idle(c);
+    ok(['bat-a', 'bat-b', 'bat-c'].every(id => stateOf(c, id) === 'ready') && idsWritten(c) === 'bat-a,bat-b,bat-c',
+      `batch of 3: all 3 ready, written one file at a time, in order (${idsWritten(c)})`);
+    const P = c.block.paints.join('\n');
+    ok(['1 of 3: bat-a.mp3', '2 of 3: bat-b.mp3', '3 of 3: bat-c.mp3'].every(s => P.includes(s)), 'batch of 3: one progress line for the batch ("2 of 3: bat-b.mp3")');
+    ok(/Uploaded 3 of 3 files\. Press Verify all to read them back\./.test(c.block._html) && !refusedLis(c).length, 'batch of 3: the end says "Uploaded 3 of 3 files" and lists no refusal');
+    ok(c.F.st.pieceReads === 0 && !c.F.st.writes.some(w => w.path.startsWith('songFilesUsage/')) && c.run('teacherSfChecks.size') === 0, `batch of 3: nothing is verified for the teacher (${c.F.st.pieceReads} piece reads)`);
+    ok(during === w0 + 2 && c.env.win.length === w0, `batch of 3: the off-zone drop guard is on during the batch (+${during - w0}) and gone after (${c.env.win.length - w0} left)`);
+  }
+  done(c);
+
+  /* batch: a good, a not-listed (an untrusted name) and a good; then wrong bytes under a listed name */
+  c = makeConsole(consoleSrc); register(c); regBatch(c);
+  await managed(c);
+  {
+    const evil = '<img src=x onerror=alert(1)>.mp3';
+    c.run('teacherSfTakeFiles')([bfile('bat-a'), fileOf(bytesOf(1234, 77), 4, evil), bfile('bat-c')], 0);
+    await idle(c);
+    ok(stateOf(c, 'bat-a') === 'ready' && stateOf(c, 'bat-c') === 'ready' && idsWritten(c) === 'bat-a,bat-c', `good, not listed, good: the two good ones go up, the other writes nothing (${idsWritten(c)})`);
+    const lis = refusedLis(c);
+    ok(/Uploaded 2 of 3 files\. Not uploaded: 1 \(listed below\)/.test(c.block._html) && lis.length === 1 && lis[0].includes('&lt;img src=x onerror=alert(1)&gt;.mp3: not on the site'),
+      `good, not listed, good: the end says 2 of 3 and names the refused file and why (${JSON.stringify(lis[0] || '')})`);
+    ok(!c.block.paints.some(p => /<img/i.test(p)), 'good, not listed, good: the dropped file\'s name is drawn as text in every paint');
+    const alt = Uint8Array.from(B('bat-b').bytes); alt[3] ^= 1;
+    c.run('teacherSfTakeFiles')([bfile('bat-b', 'bat-b.mp3', alt), bfile('bat-d')], 0);
+    await idle(c);
+    const l2 = refusedLis(c);
+    ok(!c.F.S.has('songFiles/bat-b') && stateOf(c, 'bat-d') === 'ready' && l2.length === 1 && /^<li>bat-b\.mp3: wrong bytes: the list has bat-b /.test(l2[0]) && /Uploaded 1 of 2 files/.test(c.block._html),
+      `wrong bytes under a listed name: refused as "wrong bytes", the next file still goes up (${JSON.stringify((l2[0] || '').slice(0, 60))})`);
+  }
+  done(c);
+
+  /* batch: a failure in the middle */
+  c = makeConsole(consoleSrc); register(c); regBatch(c);
+  await managed(c);
+  {
+    c.F.st.failWrite = path => path === 'songFiles/bat-b/pieces/0';
+    c.run('teacherSfTakeFiles')(['bat-a', 'bat-b', 'bat-c'].map(id => bfile(id)), 0);
+    await idle(c);
+    const lis = refusedLis(c);
+    ok(stateOf(c, 'bat-a') === 'ready' && stateOf(c, 'bat-b') === 'uploading' && stateOf(c, 'bat-c') === 'ready', `failure in the middle: the files after it still go up; the failed one stays "uploading" (${['bat-a', 'bat-b', 'bat-c'].map(id => stateOf(c, id)).join(', ')})`);
+    ok(/Uploaded 2 of 3 files/.test(c.block._html) && lis.length === 1 && /bat-b\.mp3: bat-b failed at piece 1 of 1: a connection problem \(unavailable\)\. It is NOT ready/.test(lis[0]),
+      `failure in the middle: the end names it as a connection problem (${JSON.stringify(lis[0] || '')})`);
+  }
+  done(c);
+
+  /* batch: a second drop while the first runs */
+  c = makeConsole(consoleSrc); register(c); regBatch(c);
+  await managed(c);
+  {
+    const e1 = drop(c, dropEv(['bat-a', 'bat-b', 'bat-c'].map(id => bfile(id))));
+    await settle(3);
+    const busy = c.run('teacherSfBusy');
+    const e2 = drop(c, dropEv([bfile('bat-d'), bfile('bat-a', 'again.mp3')]));
+    const said = /One batch at a time: the files you just dropped were not taken/.test(c.block._html);
+    await idle(c);
+    ok(busy === 'upload' && said && e1.prevented > 0 && e2.prevented > 0, `second drop during a batch: refused with a line (busy "${busy}", the line ${said ? 'shown' : 'missing'})`);
+    ok(!c.F.st.writes.some(w => /bat-d/.test(w.path)) && ['bat-a', 'bat-b', 'bat-c'].every(id => stateOf(c, id) === 'ready') && /Uploaded 3 of 3 files/.test(c.block._html),
+      'second drop during a batch: none of its files is written, and the first batch finishes whole');
+  }
+  done(c);
+
+  /* batch: leaving Manage stops it */
+  c = makeConsole(consoleSrc); register(c); regBatch(c);
+  await managed(c);
+  {
+    const w0 = c.env.win.length;
+    let left = false;
+    c.F.st.hooks.push(w => { if(!left && w.path === 'songFiles/bat-b/pieces/0'){ left = true; c.run(`teacherView = 'students'`); } });
+    drop(c, dropEv(['bat-a', 'bat-b', 'bat-c'].map(id => bfile(id))));
+    await idle(c);
+    ok(left && stateOf(c, 'bat-a') === 'ready' && stateOf(c, 'bat-b') === 'uploading' && !c.F.st.writes.some(w => /bat-c/.test(w.path)) && c.run('teacherSfBusy') === '',
+      `leave mid-batch: writing stops at the file being written (it stays "uploading"); the rest are not tried (${idsWritten(c)})`);
+    ok(c.env.win.length === w0, `leave mid-batch: the off-zone drop guard is removed (${c.env.win.length - w0} left)`);
+    const n = c.F.st.writes.length;
+    await c.run(`teacherView = 'manage'`); await c.run('renderTeacherManage()'); await settle();
+    ok(/Stopped: you left Manage at file 2 of 3 \(bat-b\.mp3\)\. 1 of 3 went up before that/.test(c.block._html) && /bat-b is NOT ready/.test(c.block._html) && c.F.st.writes.length === n,
+      'leave mid-batch: back on Manage, the section says where it stopped and that bat-b is not ready; nothing more written');
+  }
+  done(c);
+
+  /* the drop zone: a folder, a file that is not .mp3, an empty drop; then all three with two .mp3 files */
+  c = makeConsole(consoleSrc); register(c); regBatch(c);
+  await managed(c);
+  {
+    const txt = { name: 'notes.txt', size: 10, type: 'text/plain', reads: 0, arrayBuffer: async () => { txt.reads++; return new ArrayBuffer(10); } };
+    drop(c, dropEv([], 1)); await settle();
+    ok(/<b>A folder was left out: open the folder and drop the \.mp3 files themselves\.<\/b>/.test(c.block._html) && c.F.st.writes.length === 0, 'drop: a folder gets one plain line, nothing written');
+    drop(c, dropEv([txt])); await settle();
+    ok(/1 file was left out because it is not \.mp3: notes\.txt\./.test(c.block._html) && txt.reads === 0 && c.F.st.writes.length === 0, `drop: a file that is not .mp3 gets one line and is not read (${txt.reads} reads)`);
+    drop(c, dropEv([])); await settle();
+    ok(/Nothing to upload: no files came with that drop/.test(c.block._html) && c.F.st.writes.length === 0, 'drop: 0 files gets one line');
+    drop(c, dropEv([bfile('bat-a'), txt, bfile('bat-b')], 1));
+    await idle(c);
+    const bs = (c.block._html.match(/role="status">([\s\S]*?)<\/div>/) || [, ''])[1].match(/<b>[^<]*<\/b>/g) || [];
+    ok(stateOf(c, 'bat-a') === 'ready' && stateOf(c, 'bat-b') === 'ready' && txt.reads === 0 && bs.length === 3 && /folder/.test(bs[0]) && /not \.mp3/.test(bs[1]) && /Uploaded 2 of 2 files/.test(bs[2]),
+      `drop: two .mp3 files, a text file and a folder: the two go up; one line each for what was left out (${bs.length} lines)`);
+  }
+  done(c);
+
   /* ── Manage → Built songs: Import (teacher-builtsongs.js, Song builder Part a2) ── */
   const BID = FIXTURES.fourFour.id, BAID = audioIdFor(BID, SONG_SHA);
   const bdoc = (() => { const d = withAudio(FIXTURES.fourFour.doc, SONG_BYTES, SONG_SHA, 125.5); d.audio.id = BAID; d.audio.gainDb = 2.5; return d; })();
@@ -718,7 +857,7 @@ if(BREAKS){
     ['a built song\'s audio deleted anyway', "    if(users.length){ teacherSfNote", "    if(false){ teacherSfNote"],
     ['a built song\'s audio drawn as stray', "  return teacherSfOnList(id) ? 'match' : 'built';", "  return teacherSfOnList(id) ? 'match' : 'stray';"],
     ['no list match: any file uploads as the first entry', "return Object.keys(list).find(id => list[id] && list[id].sha256 === sha && list[id].bytes === bytes) || null;", "return Object.keys(list)[0] || null;"],
-    ['no size cap before reading', 'if(size > TEACHER_SF_MAX_BYTES){', 'if(false){'],
+    ['no size cap before reading', 'if(size > TEACHER_SF_MAX_BYTES) return {', 'if(false) return {'],
     ['stale pieces kept', 'for(let j = n; j < TEACHER_SF_MAX_PIECES; j++) batch.delete(', 'for(let j = n; j < n; j++) batch.delete('],
     ['the head written ready from the start', "const head = teacherSfHead(id, entry, durationSec, 'uploading');", "const head = teacherSfHead(id, entry, durationSec, 'ready');"],
     ['a piece one byte short', 'Math.min(buf.length, (k + 1) * SONG_FILE_PIECE)', 'Math.min(buf.length, (k + 1) * SONG_FILE_PIECE - 1)'],
@@ -736,6 +875,19 @@ if(BREAKS){
     ['a Verify result drawn unescaped (review B minor 3)', "${escHtml(chk.text)}", "${chk.text}"],
     ['a read paints over a write (review B minor 3)', "  if(teacherSfBusy) return;                                   // the write's end reads again\n", ''],
     ['one upload at a time dropped', "async function teacherSfUpload(file){\n  if(teacherSfBusy || !file) return;", "async function teacherSfUpload(file){\n  if(!file) return;"],
+    // W21 (2026-11-17): many files at once and the drop zone
+    ['the file box takes only its first file', "teacherSfTakeFiles(Array.from(inp.files || []), 0);", "const f = inp.files && inp.files[0]; if(f) teacherSfUpload(f);"],
+    ['a batch stops at the first refused file', "else refused.push(`${name}: ${r.why}`);", "else { refused.push(`${name}: ${r.why}`); break; }"],
+    ['a batch writes its files all at once', "const r = await teacherSfUploadOne(files[i],", "const r = teacherSfUploadOne(files[i],"],
+    ['the progress line without the count', "const head = `${i + 1} of ${N}: ${name}`;", "const head = name;"],
+    ['a second drop during a batch gets no line', "  if(teacherSfBusy){\n    teacherSfNote = teacherSfBusy === 'upload'", "  if(false){\n    teacherSfNote = teacherSfBusy === 'upload'"],
+    ['leaving Manage does not stop the batch', "if(r.stop){ stopAt = i; stop = r; break; }", "if(r.stop){ continue; }"],
+    ['the off-zone drop guard left on', "  }finally{\n    teacherSfWindowGuard(false);\n  }", "  }finally{\n  }"],
+    ['a refused file\'s name drawn unescaped', "`<li>${escHtml(l)}</li>`", "`<li>${l}</li>`"],
+    ['the batch verifies on its own', "  teacherSfEnd(lines.join('\\n'));\n}", "  teacherSfEnd(lines.join('\\n')); teacherSfVerifyAll();\n}"],
+    ['a file that is not .mp3 is taken', "const mp3 = files.filter(teacherSfIsMp3),", "const mp3 = files.slice(),"],
+    ['a folder is not named', "if(folders) pre.push(", "if(false) pre.push("],
+    ['wrong bytes reported as not on the list', "why: near ? `wrong bytes:", "why: false ? `wrong bytes:"],
   ];
   let caught = 0;
   for(const [name, from, to] of MUT){

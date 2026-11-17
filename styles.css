@@ -1307,6 +1307,12 @@ body.rail-collapsed .rail-tools .tool-popup{
 .tg-class{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:14px 16px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg2);margin-bottom:8px}
 .tg-class-lbl{font-weight:600;font-size:0.9375rem}
 .tg-note{font-size:0.8125rem;color:var(--text2);line-height:1.5;margin:0 2px 16px}
+/* Manage → Song files: the drop zone for many .mp3 files (teacher-songfiles.js, W21) */
+#t-songfiles-block .tsf-drop{border:2px dashed var(--border2);border-radius:var(--radius);background:var(--bg2);padding:18px 16px;margin:0 2px 12px;text-align:center;font-size:0.8125rem;color:var(--text2);transition:background .12s,border-color .12s}
+#t-songfiles-block .tsf-drop-msg{font-size:0.9375rem;font-weight:600;color:var(--text);margin-bottom:8px}
+#t-songfiles-block .tsf-drop-over{border-color:var(--purple-accent);background:var(--purple-bg);border-style:solid}
+#t-songfiles-block .tsf-drop-busy{opacity:.75}
+#t-songfiles-block .tsf-refused{margin:6px 0 0;padding-left:20px}
 /* Done | Not done roll on an activity's console page (teacherDoneRollHtml). */
 .ta-roll{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:0 0 16px}
 .ta-roll-col{border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--bg)}

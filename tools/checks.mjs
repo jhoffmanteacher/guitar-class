@@ -20819,7 +20819,7 @@ function checkSongFilesLoader() {
    not run here. Since 2026-11-14 it also runs Manage → Built songs' Import
    (teacher-builtsongs.js) against the rules' BUILT SONGS shape.
    ════════════════════════════════════════════════════════════════════ */
-const SONG_FILES_CONSOLE_SIM_PIN = 88;   // 57 -> 84 (2026-11-14, Song builder Part a2): Manage → Built songs' Import (27 cases); -> 88 (review round 1: before the rules are published, Delete as on main and Import refused; an Import during Delete's check); 52 -> 57 (review round 1, 2026-11-14): the paste-2 line, a Verify text escaped, a read during a write, a re-upload asked first (2)
+const SONG_FILES_CONSOLE_SIM_PIN = 109;   // 88 -> 109 (W21, 2026-11-17): many files at once and the drop zone (21 cases); 57 -> 84 (2026-11-14, Song builder Part a2): Manage → Built songs' Import (27 cases); -> 88 (review round 1: before the rules are published, Delete as on main and Import refused; an Import during Delete's check); 52 -> 57 (review round 1, 2026-11-14): the paste-2 line, a Verify text escaped, a read during a write, a re-upload asked first (2)
 function checkSongFilesConsole() {
   head('1dy. Song files in the console: upload, verify, delete and the escaping are run against the rules\' shape');
   const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'song-files-console-sim.mjs')], { encoding: 'utf8', timeout: 120000 });
