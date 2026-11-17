@@ -76,6 +76,8 @@ Fast, for him to pick from. So far: no name on a mic take (`3792deb`, `e25f0d5`;
 Opus review in the cloud, routine `trig_01Fkh59ZFbHnMUm6gGhntoor`); Play Along highlight timing (`b607794`, `386d063`;
 Fast, then W16 below); the sign-in load fix (branch `fix/load-retry`, not shipped; round 1 was the one Fable review,
 routine `trig_01Bpx4H1QQDAbyEtf2bqGDAi`). Delete this block when he says the weekly limit has reset. A lead session on Fable is his to switch (`/model`).
+Added 2026-11-17 (Jonathan), a standing rule, not this week only: Sonnet for the simple, tool-proved parts
+(CLAUDE.md, "Sonnet for the simple parts"); reviews and anything with a choice in it stay on Opus.
 
 **FIXED 2026-11-16 by Windows (Fast; one Opus agent): the "Sweet Child O' Mine — Lyrics and Chords" activity (`ca-45`)
 not scrolling properly in full-screen mode.** Reproduced in headless Chrome with real full screen entered through the

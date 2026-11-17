@@ -394,6 +394,17 @@ kind of change to Always-Reviewed. A high review lets a real bug through → mov
 change to `site-reviewer-deep`.
 **Friday check** — a scheduled task, Fridays 11:00 PM Pacific, reviews every `Review: Fast` commit since the last run (`last-run.txt` in the skill, or an older `friday-check-*` tag) (`Review: Reviewed` ones are skipped), fixes and pushes (skill `friday-check`).
 
+**Sonnet for the simple parts** (Jonathan, 2026-11-17: "for opus agents to use sonnet when they can if appropriate").
+An agent, or a lead handing out work, passes `model: 'sonnet'` for work that is mechanical, fully specified, and
+whose result a tool proves: running a tool or a proof and reporting its numbers, a search or an inventory with
+counts, copying or moving files, taking screenshots from a written list, a rebase or a re-pin, test cases written
+from a list someone else settled, one scripted wording change applied to many places. Opus (or what the agent file
+pins) stays for: design and anything with a choice in it, the save path, `firestore.rules`, listening code, load order,
+`sw.js` code, a renderer a student sees, a fix whose cause is not yet known, and every review. Unsure → Opus. A Sonnet
+agent's report is a claim like any other: its proof is read before its work ships. An Opus builder may hand its own
+simple parts to ONE Sonnet sub-agent at a time on the Mac (the load rule); its brief still says "no sub-agents"
+when the lead wants none.
+
 **Effort**: both reviewers are Fable at `medium` during the week (Jonathan, 2026-11-09, after the test in WORKFLOW); the Friday check's reviewers are Opus at `xhigh` (skill `friday-check`); other agents `high`; never `max`. Session: `medium` routine, `high` bug fixes / JS / keyed-MC, `xhigh` danger-zone and sweeps; a tier above the session → ask for `/effort`. Report real numbers, not the premise; name the prior decision a request reverses.
 
 **"Next steps for Power Chord Switch"** → read the `WORKFLOW.md` section "Power Chord Switch: where we stopped" first (the game is in `coach-chords.js`, its listening in `coach-core.js`; that section says `coach.js`): what shipped 2026-11-03, the room-noise decision (a stricter strum ratio for Power Chord Switch only: 2.2 / 2.67 from 2026-11-05, lowered to 1.8 / 2.19 on 2026-11-07; the strum what-if numbers on the real takes and how to roll it back are recorded there), the pitch readings saved in takes since 2026-11-05 and the console's Pitch-rule table (read 2026-11-07: the pitch rule was rejected; do not build it), and what is settled. The practice-minutes heartbeat removal is finished.
