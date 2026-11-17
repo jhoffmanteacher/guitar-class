@@ -13,19 +13,14 @@ they're ready"). Work still being built, reviewed or waiting on a push is NOT li
 or when the paste file exists.
 
 **Listen and look (a few minutes each, any class Chromebook or the Mac):**
-1. **Sweet Child O' Mine lyric sheet (ca-45): the scrolling, LIVE since 2026-11-17.** From the second line on, the
-   line being played sits at the top with what is coming below it. The two columns are still there for now (a
-   jump at the column change); the one-long-column version you asked for is being built and is NOT live yet.
-2. **Play Along highlights are ON the beat, LIVE since 2026-11-17.** If they look late or early on a class
-   Chromebook, try `?snipcal=1&lat=40` or `&lat=120` on the address and say which looks right.
+(nothing to listen to right now; 2026-11-17 he checked the Sweet Child scrolling: "now working properly")
 
 **Decide (tell Claude; each is one sentence):**
 Decided 2026-11-17: old mic recordings that still hold a name are ignored for now; the sign-in load fix gets NO
 second line after a student's first change.
 6. **Friday: which of this week's changes get a Fable review**, and say when the weekly limit has reset (every agent
    is on Opus until then). The list is at the top of WORKFLOW.
-7. **On hold until you say go:** the design-values tidy (W15). (You released the "never" blocks, W12, on 2026-11-17:
-   Windows is building it.)
+7. **On hold until you say go:** the design-values tidy (W15).
 
 **Only you can do:**
 10. **The practice copy's key:** `Claude outputs/practice-copy/JONATHAN-STEPS.md` (GitHub secret
