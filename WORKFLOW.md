@@ -294,6 +294,32 @@ and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fi
     - Owed: one sentence about the look-ahead in the sheet section of
       `.claude/skills/in-class-activities/SKILL.md` (about line 576) and in "Practice / Play Along cards" of
       `.claude/skills/audio-and-snippets/SKILL.md`; a real Chromebook (headless Chrome only).
+  - **W16-1's fix RE-REVIEWED (Windows, 2026-11-17 early morning; a fresh Opus `site-reviewer` with Chrome, on the
+    combined main `5c375845`, with "the cure"'s new beat map): 0 BLOCKER, 0 MAJOR, 3 MINOR: "leave it live".
+    W16 is DONE for Windows; the MINORs are listed, not fixed (to save usage).** The lead has not re-run them.
+    - On the combined main: `playalong-loop` all cards: 26 cards, 480 walks, 86,209 places, 0 mismatches, 1 known;
+      Loop / Build 24 of 24 cards, 876 laps, 0; 123 Guitar swaps, 0 off. The activities smoke 3 runs of 3 clean.
+      Fake clock around every line change: 0 chords late of 663 heard, 0 lit-line-off frames, over `ca-38`,
+      `ca-45` and all four files of `ca-44`. The thinnest margin: one `ca-44` line on screen only 36 ms before
+      its chord (2560 full screen, Slowest, Guitar off); at 1366 the least is 205 ms. Cost: 0.027 ms a frame.
+      The smoke's timed check under CPU throttling ×1 to ×12: the follow asked 276 to 299 ms before (it wants
+      200): low flake risk. Reduce motion and the full-screen fix intact.
+    - W16f-1 MINOR: the follow acts when the lit line OR the look-ahead line changes, so twice a line where the
+      old code acted once: a student who scrolls the sheet by hand is pulled back about as often as before but
+      SOONER (scrolled up 260 px: back after 211 to 1,734 ms, was 744 to 3,927 ms). Not a frame-by-frame fight. One
+      new case: scrolled down so the played line is just above the view with the next line still showing: now
+      pulled back, before left alone. Fix if wanted: in `pcSheetFollow` skip the look-ahead follow when the lit
+      line is not on screen. (Being pulled back from the checks at the bottom is OLD: `pcFollow`'s "leave the
+      student there" rule, `app/cards.js:1406-1407`, covers only `.pc-tab`, and a sheet is not inside one.)
+    - W16f-2 MINOR: three of six planted faults are caught by NO tool, one visible to students: with the
+      follow-on-start removed (`app/cards.js:883` `pcFollow(line, true);`), starting `ca-38` at chord 150 leaves
+      the lit line off screen for 3 s. The smoke's far-line and full-screen checks call `pcFollow` directly. Fix
+      in the smoke: start a far line through `pcStart` with the sheet scrolled to the top, and run the full-screen
+      case through the frame loop.
+    - W16f-3 MINOR, older than the fix: a line that goes BACKWARDS still scrolls smoothly and can be late: Loop
+      this part on `ca-45` Verse 2: the first chord on screen 17 ms after it is heard, each lap; entering full
+      screen mid-song: the lit line off screen 226 to 287 ms (before the fix 225 to 343). Fix: when the new lit
+      line is not on screen, scroll instantly.
 - **W14. NOT YET, dates only (do not start early; leave the line here until done):**
   - about **2026-11-21**: the accessibility scan's ratchet. Read a week of GitHub's "a11y scan" job results; only if
     every run shows 0 new signatures, switch `--a11y-ratchet` on in `browser.yml`, with one `site-reviewer` round on the
