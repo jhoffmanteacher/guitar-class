@@ -8,6 +8,7 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-11-17 — Today's activity: newest number first for earlier days
 
+- **A new song is on the Songs page: American Girl.** Open Songs, find it under More Play Along songs, and play along with the record.
 - **Lyric-sheet play-alongs (Sweet Child O' Mine and the others) keep the line you're playing at the top of the sheet,** so the lines coming next are all below it on screen. Before, you could see only a line or two ahead.
 - **Play Along highlights now light exactly on the beat,** on every card. Before, they lit a little ahead of it.
 - **If your saved work does not load when you sign in (bad Wi-Fi), the site now keeps trying** and tells you so at the top of the screen. When it loads, your work appears. Before, you had to reload the page yourself.

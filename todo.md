@@ -25,7 +25,6 @@ second line after a student's first change.
 **Only you can do:**
 10. **The practice copy's key:** `Claude outputs/practice-copy/JONATHAN-STEPS.md` (GitHub secret
     `FIREBASE_PRACTICE_SA`). Until then the practice copy is not published.
-11. **Song builder: build and publish one real song** (WORKFLOW, "Song builder Part d"). Part e waits for that.
 12. **Private song audio, step 2:** upload the songs in Manage → Song files; then Claude switches the 18 card files.
 13. **A 30-minute mic test on one class Chromebook** with `mic-check.html` (does ChromeOS force its automatic volume
     on?), and tell Claude what it shows.

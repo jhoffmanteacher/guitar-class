@@ -31,6 +31,11 @@ Dates are the Pacific calendar date. `CACHE_VERSION` and commit timestamps may s
 
 Start here. Update this block whenever an item opens or closes; each line says where the detail is.
 
+**Jonathan published his first built song, American Girl, on 2026-11-17 (the Song builder, Publish).** CHANGELOG
+entry added the same day. Part e of the builder: only when he asks. He asked the same day whether a song can
+offer both tab and a lyrics / chord chart: answered (coded songs do it as separate cards; a built song holds
+chords and lyric lines only, no tab); nothing built.
+
 **THE MAC'S OWN LIST, 2026-11-17 (delete each line when it is no longer news):**
 - **IN FLIGHT: two-column lyric sheets shown as ONE long column** (Jonathan, 2026-11-17: "you could cut the pdf in
   half and just keep scrolling so it doesn't have columns"). ca-45 and ca-38; display only; the column-change jump
