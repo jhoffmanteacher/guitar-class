@@ -717,27 +717,32 @@ if (only && !results.some(r => r.case === only)) die(`no case named ${only} (--l
 /* A throw that is not a missing site name is NOISE when a control makes the same throw from the same call:
    the stubs, not the code. Every missing-name throw (and every skip by a typeof guard) is a finding, controls
    included. Findings are grouped by their cause: one missing name, with every call it breaks. */
+/* A throw AT LOAD (a part that does not run through: a SyntaxError, a name read at load that is missing) is never
+   noise: a stub cannot cause it (review R1-2: a cut that COPIED code instead of moving it). */
+const hard = t => t.missing || t.phase === 'load';
 const noise = new Set();
-for (const r of results) if (r.control) for (const t of r.out.throws) if (!t.missing) noise.add(`${t.call}\0${t.key}`);
+for (const r of results) if (r.control) for (const t of r.out.throws) if (!hard(t)) noise.add(`${t.call}\0${t.key}`);
 /* A missing-name throw that BOTH consistent pages make (old page + old files, new page + new files), from the
    same call in the same phase, is not caused by the push: listed apart as "on both pages", never a finding. */
 const ctrlMissing = { 'control-old': new Set(), 'control-new': new Set() };
-for (const r of results) if (r.control) for (const t of r.out.throws) if (t.missing) ctrlMissing[r.case.replace(/:.*/, '')].add(`${t.call}\0${t.key}\0${t.phase}`);
+for (const r of results) if (r.control) for (const t of r.out.throws) if (hard(t)) ctrlMissing[r.case.replace(/:.*/, '')].add(`${t.call}\0${t.key}\0${t.phase}`);
 const both = new Set([...ctrlMissing['control-old']].filter(k => ctrlMissing['control-new'].has(k)));
 const causes = new Map(), before = new Map();
 const callsSeen = new Set(), callsHit = new Set();
 let calls = 0, threw = 0, noiseN = 0;
 for (const r of results){
   calls += r.out.calls;
-  for (const t of r.out.throws){
-    if (!t.missing && (r.control || noise.has(`${t.call}\0${t.key}`))){ noiseN++; if (VERBOSE && only) console.log(`   noise (same in a control): ${t.call} → ${t.key}`); continue; }
+  for (let t of r.out.throws){
+    if (!hard(t) && (r.control || noise.has(`${t.call}\0${t.key}`))){ noiseN++; if (VERBOSE && only) console.log(`   noise (same in a control): ${t.call} → ${t.key}`); continue; }
     if (both.has(`${t.call}\0${t.key}\0${t.phase}`)){ const k = `${t.call} → ${t.key} [${t.phase}]`; before.set(k, (before.get(k) || 0) + 1); continue; }
     threw++;
+    // a control's own load throw: that SITE does not load, push or no push
+    if (t.phase === 'load' && r.control) t = { ...t, missing: false, key: `the ${r.case.startsWith('control-new') ? 'NEW' : 'OLD'} site itself does not load: ${t.call.replace(/ running at load$/, '')} → ${t.key}` };
     const k = (t.missing ? `${t.id}\0${t.key.startsWith('SKIPPED') ? 'skip' : 'throw'}` : `${t.call}\0${t.key}`) + (t.window ? '\0window' : '');
     if (!causes.has(k)) causes.set(k, { id: t.id, key: t.key.startsWith('SKIPPED') ? t.key : (t.missing ? `${t.key.split(':')[0]}: ${t.id} ${/before initialization/.test(t.key) ? 'used before its file ran' : 'is not defined'}` : t.key), calls: new Set(), phases: new Set(), cases: new Map(), first: null, windowOnly: true, pending: new Set() });
     const c = causes.get(k);
     if (t.window) for (const p of t.window) c.pending.add(p); else c.windowOnly = false;
-    c.calls.add(t.call); c.phases.add(t.phase); callsHit.add(t.call.replace(/ \(async\)$/, ''));
+    c.calls.add(t.call); c.phases.add(t.phase); if (t.phase !== 'load') callsHit.add(t.call.replace(/ \(async\)$/, ''));
     if (!c.cases.has(r.case)) c.cases.set(r.case, new Set());
     c.cases.get(r.case).add(r.seed);
     if (!c.first || (!t.window && c.first.window)) c.first = { case: r.case, seed: r.seed, window: !!t.window };
