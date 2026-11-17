@@ -745,8 +745,8 @@ function wsSectionRows(sec, cpb){
     var per = Math.ceil(bars.length / Math.ceil(bars.length / fit));
     for(var j = 0; j < bars.length; j += per) counts.push(Math.min(per, bars.length - j));
   }
-  var rows = [], at = 0;
-  counts.forEach(function(c){ rows.push([].concat.apply([], bars.slice(at, at + c))); at += c; });
+  var rows = [], barAt = 0;
+  counts.forEach(function(c){ rows.push([].concat.apply([], bars.slice(barAt, barAt + c))); barAt += c; });
   return rows;
 }
 /* cpb: characters per beat for the card (wsPreHtml). */
