@@ -404,6 +404,10 @@ pins) stays for: design and anything with a choice in it, the save path, `firest
 agent's report is a claim like any other: its proof is read before its work ships. An Opus builder may hand its own
 simple parts to ONE Sonnet sub-agent at a time on the Mac (the load rule); its brief still says "no sub-agents"
 when the lead wants none.
+**Its effort is set on the spawn too** (`effort:` beside `model:`; Jonathan, 2026-11-17: "your wording about sonnet
+is good. it can also define effort level"): `low` for run-a-tool-and-report, a search or a file copy; `medium` for
+the rest of the Sonnet list (test cases from a settled list, a scripted change over many places). If a Sonnet job
+seems to need `high`, it is not a Sonnet job: give it to Opus.
 
 **Effort**: both reviewers are Fable at `medium` during the week (Jonathan, 2026-11-09, after the test in WORKFLOW); the Friday check's reviewers are Opus at `xhigh` (skill `friday-check`); other agents `high`; never `max`. Session: `medium` routine, `high` bug fixes / JS / keyed-MC, `xhigh` danger-zone and sweeps; a tier above the session → ask for `/effort`. Report real numbers, not the premise; name the prior decision a request reverses.
 
