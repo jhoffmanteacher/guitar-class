@@ -123,6 +123,43 @@ push. Where the Mac is right now: the coach splits with the reviewer's fix A are
   the reviewers' runs), and on the pushed splits green. Name it in CLAUDE.md's "Where the code lives" (the line
   about splitting a part) only after its review is clean; it is NOT added to `checks.mjs` (it needs two commits).
   The Windows scratchpad `rev\` has the first harness.
+  - **W6: BUILT, NOT REVIEWED YET, and it has something for the Mac BEFORE the coach splits are pushed (Windows,
+    2026-11-16 evening).** The tool is `tools/old-page-loop.mjs` on branch `win/w6-2026-11-16` (pushed to GitHub so
+    the Mac can run it; commit `811c1657`, 794 lines, one file; a review by a fresh Opus `site-reviewer` is
+    running on Windows). Run it on the tip that is about to be pushed:
+    `git fetch origin && git show origin/win/w6-2026-11-16:tools/old-page-loop.mjs > /tmp/old-page-loop.mjs` is not
+    enough (it imports from `tools/`): check the file out into `tools/` of a worktree at your tip, then
+    `node tools/old-page-loop.mjs --old origin/main --new <your tip>` (about 19 s for the arcade; it reads both
+    trees from git objects and writes nothing; exit 0 clean, 1 findings, 2 could not run).
+    - What it does: a Node vm page built from the OLD ref's own `index.html` scripts (so the loader and the part
+      lists are the old code), served every later file from the NEW tree; it calls every entry point other
+      scripts use (79 for the arcade: names a group file declares that outside files call, 20 hub-card handlers,
+      31 page listeners) at three moments (when the loader resolves, after each arrival, settled), in 12 seeded
+      arrival orders, with the cases after-push, half-1 to half-7 (the first K parts old, the rest new),
+      loaded-before, and one failed fetch of each part. Controls old + old and new + new must be 0.
+    - On history: `3b667ba → d6c3e16` (the splits as first built) is RED, 5 causes, 33 of 79 entry points throw
+      or are silently skipped (`cbStop`, `nrStop`, `nr`, `nrOffset`, `gamesResetForUser`); both self-controls 0.
+    - **A rebuild of fix A, taken word for word from W2's text above (NOT the Mac's real `0fea8d1`, which is not
+      on GitHub), is still RED in this tool: 10 findings and 8 timing windows. The builder's three causes, none
+      re-checked by the lead or a reviewer yet, so treat them as claims to run, not as proven:**
+      (1) after the push, in 4 of 12 arrival orders, the arcade loader's promise resolves BEFORE
+      `coach-noterunner.js` (which fix A's line fetches on its own, outside the chain) has arrived; Games'
+      `.then(() => openGamesScreen())` then throws "NR_LEVELS is not defined", the student gets the "could not
+      load" toast, and a second click works; (2) in the half-and-half cases an OLD cached `coach-hub.js` still has
+      the narrow `typeof bcStop` guard, so `gamesStopMic` throws `nrStop` (the widened guard only helps pages that
+      got the new `coach-hub.js`); (3) fix A's `.catch(() => {})` means one failed fetch of
+      `coach-chordcards.js` or `coach-noterunner.js` is never retried: the hub, Chord Blitz, Chord Detective,
+      Note Runner and Finger Gym stay broken until a reload, and the widened guard then makes `gamesStopMic` stop
+      nothing. If the Mac's real fix differs (for example it awaits the extra part inside the loader's chain, or
+      retries), the tool will say so: please run it on `0fea8d1` or the rebased tip and write the result here.
+      If it is red there too, the two-push order (fix B in W2) or a tail-loader that the chain waits for is the
+      next thing to try.
+    - Also found by it on main: `b5f4526` (the `teacher-activities.js` split of this morning): an old console
+      page that loads its parts after that push never asks for `teacher-activities-2.js`, so
+      `renderTeacherActivityDetail` is silently skipped until a reload (true, low likelihood: a console tab sitting
+      on sign-in across the push; nothing to do now). And reverting a split is itself RED (`d6c3e16 → 3b667ba`:
+      pages holding the 10-name list get a 404 on the removed part forever): if the splits are ever reverted,
+      keep the two new files on the server.
 - **W7. The setup screens taller than 657 px** (the 20 smoke lines: Change Up's setup 663 px, Power Chord Switch's
   setup in Spanish 658 px). The Mac runs the games smoke before it pushes the splits and writes its lines HERE (a
   bullet under this job). If the Mac shows the same lines: fix the fit at 1366×657 in both languages (screenshots
