@@ -31,6 +31,21 @@ Dates are the Pacific calendar date. `CACHE_VERSION` and commit timestamps may s
 
 Start here. Update this block whenever an item opens or closes; each line says where the detail is.
 
+**THE MAC'S OWN LIST, in flight 2026-11-17 (delete each line when it is live):**
+- **Sweet Child / every lyric sheet: scroll so the playing line sits at the top** (Jonathan, 2026-11-17: "it should
+  scroll down as much as possible to show what's coming next though and not just two lines at a time"; asked twice).
+  Branch `feat/sheet-scroll-top` (worktree `sheet-scroll`), one Opus builder, in its proof stage at 09:50. It ships
+  in ONE push with the next two lines. Tell him when it is live; only then does a "look at it" line go on his list.
+- **Play Along highlights ON the heard beat** (`PC_LEAD` 0; Jonathan, same day: "exactly on the beat and not ahead
+  of it for everything ... it's confusing otherwise"; reverses his 60 ms of 2026-11-16). Commit `ee24cc2` on
+  `feat/lead-zero`, cherry-picked into the branch above.
+- **The lyric sheet's "This bar" strip went blank for one step at lead 0** (ca-45, slowest): fixed on that branch
+  (`15ee33e`), which is why the three ship together.
+- **The sign-in load fix** (`ship/load-retry`, 8 commits rebuilt on main; rounds: Fable, then Opus deep, round 2
+  CLEAN). Left: a screenshot of the `save.notLoaded` line at 1366×657 in English and Spanish, the changelog entry,
+  full checks, push as `Review: Reviewed`. No second line after a student's first change (Jonathan, 2026-11-17: "no").
+  Then write "load-retry is on main" for Windows (W19).
+
 **THIS WEEK ONLY: every agent runs on Opus, reviewers included (Jonathan, 2026-11-16: "heavy fable use this morning
 ran up my total. we can run opusplan stuff").** The Mac and Windows both: pass `model: 'opus'` on every spawn, builders
 at high effort and `site-reviewer` / `site-reviewer-deep` at high too, and a cloud routine's model is Opus. The Fable
