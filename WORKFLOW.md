@@ -227,6 +227,43 @@ and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fi
   of your own and report caught / not caught. Fix a BLOCKER or MAJOR in a Fast push with a fresh re-review; list
   MINORs here. NOT part of it: each song's own beat map (`todo.md`, "Beat maps"; the Mac is fixing the cure's now:
   stay out of the `the-cure` entry in `app/snippets.js`).
+  - **W16 REVIEWED (Windows, 2026-11-16 late night; one fresh Opus `site-reviewer` with Chrome, on main
+    `3b3d666d`): 0 BLOCKER, 1 MAJOR, 5 MINOR. The timing claim HOLDS; the MAJOR is a side effect on the lyric
+    sheet's scrolling, and a Windows Opus fixer is on it now (W16 says: fix a MAJOR in a Fast push with a fresh
+    re-review).** The lead has not re-run the numbers.
+    - **Holds:** every kind of highlight lights 59.4 to 60.5 ms before the heard beat at every speed (261 song
+      walks, 0 of 522 groups unsteady). `playalong-loop --leads --built`: 26 cards, 468 walks, 85,673 places, 0
+      mismatches (1 known, sheetLapBoundary); Loop / Build 24 of 24 cards, 0; 9 built cards, 183 walks, 0. The
+      activities smoke: no errors, the sheet follow passing in and out of full screen at both sizes (tonight's
+      full-screen fix is intact). "This bar" no longer goes blank at a song's end. `keptClickCount` untouched. A
+      300 ms latency (Bluetooth-like): 0 cursor mismatches. `?lead=` without `snipcal=1` does nothing.
+    - **W16-1 MAJOR: on a lyric sheet, a new line that has to SCROLL comes on screen at or after its first chord is
+      heard.** `app/cards.js:819` `if(line && st.sheetLine !== T.y0){ st.sheetLine = T.y0; pcSheetStickyTop(st.root); pcFollow(line, false); }`:
+      the follow rides on the dot's paint, which is now 60 ms before the heard beat where it was about 255 ms; the
+      scroll is smooth, and a sheet's next line is never shown ahead (`:1344`). Measured in Chrome with the page's
+      own functions at 1366×657: chord names that come on screen after their chord is heard: 3 a play on `ca-38`, 7
+      on `ca-44`, 5 on `ca-45`, most by 10 to 30 ms; at the jump to the top of column 2 the line arrives 298 to 315
+      ms after it is lit, so it is off screen about 240 to 255 ms after its chord sounds; at 2560×1300 the worst
+      is 384 to 387 ms. Before the change every downward scroll arrived before its beat (only the column jump was
+      late, by 45 to 130 ms). The smoke cannot see it (`sheetFollowWalk` forces instant scrolling and checks where
+      the line ends up, not when). The reviewer's fix: a separate look-ahead for the sheet's FOLLOW only, about 0.3
+      s before the heard beat; the dot keeps `PC_LEAD`. It is a look-and-feel matter: Jonathan may want to judge it
+      by eye once it is built.
+    - **MINOR, for the Mac (its change; not fixed here):** W16-2, the smoke works out what it expects with the
+      page's own `pcLeadBars` (`tools/smoke.mjs:240`, `:327`), so it cannot catch a fault inside it (the lead
+      applied twice was smoke-green; `playalong-loop` caught it). W16-3, check 1bf probes `pcLeadShift`, not
+      `pcLeadBars`, which is what `pcFrame` calls (three planted faults were checks-green). W16-4, nothing tests
+      that `&lead=` does nothing without `snipcal=1`, or that `passFrom` is reset at a lap (both planted faults
+      green in all three tools; the second would show the previous section's place for about 20 ms after a sheet
+      tap on a later lap followed by a lap). W16-5, the sheet dot's floor of lead + 0.1 s (`app/cards.js:545`)
+      never acts (only above 157 BPM; the sheet songs are 125 or slower) and removing it is green everywhere;
+      `?snipcal=1&lead=1000` is accepted: cap `&lead` at about 300 ms. W16-6, a lead LONGER than `snipLatency()`
+      turns `playalong-loop` red (41 of 96 walks on a copy with latency 0: "past the end of the card the lit cell
+      moved"): Jonathan's 90 ms option, or a device with a latency under 60 ms, would do it; 60 ms is safe; not
+      traced what the page draws in that step.
+    - Planted faults, 7: `playalong-loop` caught 4 (the lead twice, the sheet without the lead, the lead not scaled
+      by the speed, the `passFrom` lift removed), the smoke 1, `checks.mjs` 0; three were caught by nothing
+      (W16-4, W16-5).
 - **W14. NOT YET, dates only (do not start early; leave the line here until done):**
   - about **2026-11-21**: the accessibility scan's ratchet. Read a week of GitHub's "a11y scan" job results; only if
     every run shows 0 new signatures, switch `--a11y-ratchet` on in `browser.yml`, with one `site-reviewer` round on the
