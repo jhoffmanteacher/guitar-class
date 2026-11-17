@@ -505,7 +505,7 @@ function localStringNotesSvg(kind, notes, opts){
 
   var targetY = padT + (sNum - 1) * strGap, openX = padL + openW / 2;
   notes.forEach(function(pair){
-    var fret = pair[0], note = pair[1];
+    var fret = pair[0];
     var cx = fret === 0 ? openX : nutX + (fret - 0.5) * fretW;
     var isOpen = fret === 0;
     s += '<circle cx="' + cx + '" cy="' + targetY + '" r="' + t.b(12) + '" fill="' + (isOpen ? t.bg : NATURALS_LIGHT_GREEN)
