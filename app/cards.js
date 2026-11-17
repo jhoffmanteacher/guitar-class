@@ -884,7 +884,7 @@ function pcSheetStickyTop(root){
 }
 function pcSheetStarted(st){
   pcSheetStickyTop(st.root);
-  st.sheetLine = null; st.stripKey = null; st.sheetShort = null; st.sheetLit = null; st.sheetAim = null;
+  st.sheetLine = null; st.stripKey = null; st.sheetShort = null; st.sheetLit = null; st.sheetAim = null; st.sheetTop = null;
   const paper = st.root.querySelector('.pc-sheet-paper');
   const sh = paper && paper._sheet;
   const where = st.root.querySelector('.pc-sheet-where');
@@ -895,20 +895,34 @@ function pcSheetStarted(st){
   const y = sh.model.toks[first].y0;
   st.sheetLine = y + '|' + y + '|' + y;          // see pcSheetFollow
   st.sheetLit = y;
-  // A start brings its line on screen and no further (the card's own controls stay in view); the first new line goes to the top.
-  pcSheetScroll(st, paper, pcFollowPlan(line, true), false);
+  // A START: the line to the top during the count-in (THE SHEET'S TOP).
+  st.sheetTop = y;
+  pcSheetScroll(st, paper, pcFollowPlan(line, true, null, true), false);
 }
 /* THE SHEET'S TOP (Jonathan, 2026-11-17: "it should scroll down as much as
    possible to show what's coming next though and not just two lines at a
-   time"). When the dot reaches a new line, the sheet scrolls once, smoothly,
-   so that line sits as high as it can: 12 px under the sticky bars (the In
-   class page's bar, "This bar"), with everything below it on screen the
-   music still to come. In the normal case that is one line's height, and
-   the new line was already on screen (it was the line below). Near the end
-   of the sheet the scroll box's end stops it: the line just sits lower. A
-   start (Play, a section button, a chord tap) only brings its line on
-   screen, as before, so the card's own controls stay in view for the
-   count-in; the first new line then goes to the top.
+   time"). Once per line the sheet scrolls, smoothly, so the line being
+   played sits as high as it can: 12 px under the sticky bars (the In class
+   page's bar, "This bar"), with everything below it on screen the music
+   still to come. In the normal case that is one line's height. Near the end
+   of the sheet the scroll box's end stops it: the line just sits lower.
+   WHEN (2026-11-17, Jonathan: "the highlights are a few ms late. they are
+   just behind the gizmo at the top"): the scroll is made when the look-ahead
+   (T, PC_SHEET_FOLLOW_AHEAD before the next line's first beat) reaches the
+   next line, and it puts the line being played, about to end, at the top;
+   the next line is then the second line, standing still when its first beat
+   lights it. Until then the scroll started ON that beat, so the dot and the
+   marked chord name, lit in the same frame as "This bar", rode up the
+   screen for 6 to 9 frames (100-150 ms, Chrome 157, ca-38 / ca-44 / ca-45)
+   after the strip's cell had lit. The cost: the line just played stays on
+   screen above the one being played (one line less ahead).
+   A START (Play, a section button, a chord tap) puts its line at the top
+   too, smoothly, during the count-in (the card's controls scroll up out of
+   view; Stop stays in the page's bar). Until 2026-11-17 a start only
+   brought its line on screen, and the first scroll to the top, about 500 px
+   at 1366x657, took 21 frames: from 0.3 s ahead it still moved 5 frames
+   after the next line's first beat, and from 0.6 s it moved across the
+   beat before.
    - A new line NOT fully on screen when the dot reaches it (Loop this
      part's lap back up, full screen or a resize mid-song via pcRefollow, a
      student's own scroll away) gets there in one instant jump as the dot
@@ -918,9 +932,9 @@ function pcSheetStarted(st){
    - A STUDENT'S OWN SCROLL: if the student scrolled (a wheel or touchpad,
      a touch drag, a scroll key, a press on the scroll bar: pcHandAt) since
      the follow's last scroll, the paper is no longer where that scroll left
-     it (st.sheetAim), and the new line is fully on screen, the sheet is left
-     where the student put it, as the old follow did (it moved only to keep
-     the line in view). The line coming is still brought on screen (THE
+     it (st.sheetAim), and the next line is fully on screen, the sheet is
+     left where the student put it, as the old follow did (it moved only to
+     keep the line in view). The line coming is still brought on screen (THE
      SHEET'S LOOK-AHEAD), and the first line the student's view does not
      show takes the follow back. A scroll the page makes itself (a card
      opening, the follow) is never the student's.
@@ -951,7 +965,8 @@ function pcSheetStarted(st){
    - With "reduce motion" every scroll is a jump (scrollBehavior()), and T
      is read PC_SHEET_JUMP_AHEAD ahead.
    - st.sheetLine is "lit line|T's line|J's line" last followed, st.sheetLit
-     the line the dot was on; null (pcRefollow, a start) makes the next
+     the line the dot was on, st.sheetTop the lit line already put at the
+     top; null (pcRefollow, a start) makes the next
      frame follow again. st.sheetShort is the lit line whose T did not fit
      (null: none): the jump is due. */
 const PC_SHEET_FOLLOW_AHEAD = 0.3;    // real seconds before the beat is heard; see above
@@ -987,17 +1002,23 @@ function pcSheetFollow(st, ct){
   pcSheetStickyTop(st.root);
   const line = paper.querySelector('.pc-sheet-line:not(.pc-sheet-ahead)');
   const next = paper.querySelector('.pc-sheet-ahead');
-  // THE SHEET'S TOP: the dot is on a new line.
+  // The dot is on a new line: it was put in place before its first beat (below), so nothing moves now; one not on screen jumps there.
   if(st.sheetLit !== lit.y0){
     st.sheetLit = lit.y0; st.sheetShort = null;
     const p = pcFollowPlan(line, false, null, true);
-    if(p && !(p.on && pcSheetHandMoved(st, paper))) pcSheetScroll(st, paper, p, !p.on);
+    if(p && !p.on) pcSheetScroll(st, paper, p, true);
   }
-  // THE SHEET'S LOOK-AHEAD: the line coming, when it is not on screen.
-  if(T.y0 !== lit.y0 && st.sheetShort == null){
+  /* THE SHEET'S LOOK-AHEAD: the line coming. THE SHEET'S TOP now (the line being played to the top, which brings
+     the line coming on screen under it); where the two do not fit, the jump below. After a student's own scroll,
+     only the line coming is brought in, as before. */
+  if(T.y0 !== lit.y0 && st.sheetShort == null && st.sheetTop !== lit.y0){
     pcSheetLineBox(sh, next, T);
-    const p = pcFollowPlan(next, false, line);
-    if(p && !p.on){ if(p.short) st.sheetShort = lit.y0; else pcSheetScroll(st, paper, p, false); }
+    const pn = pcFollowPlan(next, false, line);
+    if(pn && !pn.on && pn.short) st.sheetShort = lit.y0;
+    else if(pn){
+      if(!pcSheetHandMoved(st, paper)){ st.sheetTop = lit.y0; pcSheetScroll(st, paper, pcFollowPlan(line, false, null, true), false); }
+      else if(!pn.on) pcSheetScroll(st, paper, pn, false);
+    }
   }
   if(st.sheetShort != null && J.y0 !== lit.y0){
     st.sheetShort = null;
@@ -1556,7 +1577,7 @@ function pcFollowScroll(p, jump){
    zoom changes every height. Forget the line pcFollow last kept in view, so
    the next frame (a sheet: the line being played, jumped back to the top,
    THE SHEET'S TOP) or the next note (a tab) brings it back. */
-function pcRefollow(){ if(pcState){ pcState.sheetLine = null; pcState.sheetLit = null; pcState.sheetAim = null; pcState.sheetShort = null; pcState.row = null; } }
+function pcRefollow(){ if(pcState){ pcState.sheetLine = null; pcState.sheetLit = null; pcState.sheetAim = null; pcState.sheetShort = null; pcState.sheetTop = null; pcState.row = null; } }
 document.addEventListener('fullscreenchange', pcRefollow);
 window.addEventListener('resize', pcRefollow);
 function pcShowSection(root, L, si){

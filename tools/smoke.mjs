@@ -1767,9 +1767,12 @@ async function sheetFollowWalk(page, run, events, stats) {
      - at the first frame its first chord is heard, that chord name is fully on screen (under the sticky bars);
      - a new line one line DOWN (not a jump): its first chord name was fully on screen at least 200 ms before it is
        heard (it was the line below the one being played);
-     - 0.7 s after it is heard (the scroll over), the line being played sits at the top: its box (chord names and
-       lyric) 12 px under the sticky bars, within 3 px, or lower only where the scroll box is at its end. Until
-       2026-11-17 the follow only kept the line on screen, about 500 px down at 1366x657, so this is red there;
+     - from the frame it is heard until 0.7 s after (or until 0.4 s before the next line), its chord name does not
+       move on screen (no scroll ON the beat: the dot, lit in the same frame as "This bar", must not then ride up the
+       screen; Jonathan, 2026-11-17, "the highlights are a few ms late": 6 to 9 frames of motion until then);
+     - 0.7 s after it is heard, the line just played sits at the top (12 px under the sticky bars, within 3 px) and
+       this line under it (after a jump: this line at the top), or lower only where the scroll box is at its end.
+       Before 2026-11-17 the follow only kept the line on screen, about 500 px down at 1366x657;
      - a new line one line down scrolls the sheet exactly once in that window (pcFollowScroll's scrollBy on the
        scroll box), not on every beat; the first new line after the start may take two (the start only brought its
        line on screen);
@@ -1815,8 +1818,9 @@ async function sheetFollowWalk(page, run, events, stats) {
           fake.currentTime = Math.max(snipTimeAtBars(win, 0), heard[i] - 1.0 * rate);
           for (let k = 0; k < 4; k++) await frame();
           window.scrollBehavior = sb; jumping = false; scrolls = 0;
-          const seen = new Set(); let onFrom = null, late = null, judged = false;
+          const seen = new Set(); let onFrom = null, late = null, judged = false, y0 = null, moved = 0;
           const settle = heard[i] + 0.7 * rate, nf = nextFirst(i), quiet = nf == null || heard[nf] > settle + 0.05 * rate;
+          const stillTo = Math.min(settle, nf == null ? Infinity : heard[nf] - 0.4 * rate);
           while (true) {
             await frame(); frames++;
             if (pcState !== st) return { fatal: 'the player stopped' };
@@ -1828,13 +1832,19 @@ async function sheetFollowWalk(page, run, events, stats) {
               judged = true; checked++; const hReal = now - (ct - heard[i]) / rate * 1000;
               if (!isJump && (onFrom == null || hReal - onFrom < 200)) bad.push('chord ' + (i + 1) + ' (' + toks[i].name + '), the first on a new line one line down, was on screen only ' + (onFrom == null ? 'from after' : Math.round(hReal - onFrom) + ' ms before') + ' it is heard; want at least 200 ms (it is the line below the one being played)');
               late = inView(hits[i].getBoundingClientRect(), v) ? 0 : hReal;
+              y0 = hits[i].getBoundingClientRect().top;
             }
+            if (!late && y0 != null && ct < stillTo) moved = Math.max(moved, Math.abs(hits[i].getBoundingClientRect().top - y0));
             if (late) { if (inView(hits[i].getBoundingClientRect(), v)) { bad.push('chord ' + (i + 1) + ' (' + toks[i].name + '), the first on its line' + (isJump ? ' (a jump up to the next column)' : '') + ', is not on screen when it is heard: it arrives ' + Math.round(now - late) + ' ms after'); late = 0; }
               else if (now - late > 1500) { bad.push('chord ' + (i + 1) + ' (' + toks[i].name + ') never came on screen'); break; } }
             if (ct >= settle) {
+              if (moved > 0.5) bad.push('chord ' + (i + 1) + ' (' + toks[i].name + ')' + (isJump ? ', a jump up to the next column' : '') + ': its chord name moved ' + Math.round(moved) + ' px on screen after it was heard (the sheet scrolled on the beat, so the dot lands after "This bar" lights)');
               if (quiet && line) {
+                /* The line just played sits at the top, 12 px under the sticky bars, and this one under it (after a jump:
+                   this one at the top), or lower only where the scroll box is at its end. */
+                const z = paper.getBoundingClientRect().height / (paper.offsetHeight || 1), want = 12 + (isJump ? 0 : (toks[i].y0 - toks[i - 1].y0) * sh.scale * z);
                 const r = line.getBoundingClientRect(), off = r.top - v.top, end = box.scrollTop >= box.scrollHeight - box.clientHeight - 1;
-                if (end ? off < 9 : Math.abs(off - 12) > 3) bad.push('chord ' + (i + 1) + ' (' + toks[i].name + ')' + (isJump ? ', a jump up to the next column' : '') + ': 0.7 s after it is heard its line is ' + Math.round(off) + ' px under the sticky bars; want 12 (THE SHEET\\'S TOP' + (end ? ', or lower at the end of the scroll' : '') + ')');
+                if (end ? off < want - 3 : Math.abs(off - want) > 3) bad.push('chord ' + (i + 1) + ' (' + toks[i].name + ')' + (isJump ? ', a jump up to the next column' : '') + ': 0.7 s after it is heard its line is ' + Math.round(off) + ' px under the sticky bars; want ' + Math.round(want) + (isJump ? '' : ' (the line just played at the top, this one under it)') + (end ? ', or lower at the end of the scroll' : ''));
                 else tops++;
               }
               if (!isJump && !isFirst && scrolls !== 1) bad.push('chord ' + (i + 1) + ' (' + toks[i].name + '), a new line one line down: the sheet scrolled ' + scrolls + ' times from 1 s before it is heard to 0.7 s after; want once');
