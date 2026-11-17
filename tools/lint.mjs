@@ -32,7 +32,10 @@
    puts each `${…}` back as the placeholder $TPL$, undoes the HTML entities and JS escapes, and lints the result
    as a function body on the same page. A value pasted in by string concatenation ('…go(\'' + id + '\')…') is a
    placeholder too. A name built from a placeholder (`pc${kind}Play()`) cannot be checked and is counted as
-   "dynamic". A value that still does not parse is counted as "skipped" (listed with --verbose).
+   "dynamic". An attribute inside a comment (JS, or <!-- --> in a page) is not a handler and is not read. A value
+   that does not parse is read once more with any placeholder that sits straight after a string's closing quote
+   dropped ('${id}'${extraArg}: that placeholder is a piece of code, `,5`); one that still does not parse is
+   counted as "skipped" (listed with --verbose).
 
    ── Load order ──
    Its own check: a statement that runs when its script loads (not inside a function) and uses a name that only a
@@ -160,11 +163,54 @@ function htmlScripts(htmlRel) {
 const HANDLER_STATS = { found: 0, skipped: [], dynamic: new Set() };
 const linter = new Linter({ cwd: ROOT });
 const parses = code => !linter.verify(code, [{ languageOptions: { ecmaVersion: 'latest', sourceType: 'script' } }], { filename: join(ROOT, 'x.js') }).some(m => m.fatal);
+/* The [start, end) ranges of the comments in a script, from the parser (a `//` inside a string, like a URL, is
+   not a comment). A script that does not parse gives none, so nothing in it is skipped. */
+function jsCommentRanges(code, offset = 0) {
+  const ranges = [];
+  const plugin = { rules: { comments: { create(context) { return { Program() {
+    for (const c of context.sourceCode.getAllComments()) ranges.push([c.range[0] + offset, c.range[1] + offset]);
+  } }; } } } };
+  linter.verify(code, [{ plugins: { lintread: plugin }, rules: { 'lintread/comments': 'error' }, languageOptions: { ecmaVersion: 'latest', sourceType: 'script' } }], { filename: join(ROOT, 'x.js') });
+  return ranges;
+}
+/* An HTML page: its <!-- --> comments outside <script>, and the JS comments of its inline <script> blocks. */
+function htmlCommentRanges(html) {
+  const ranges = [], blocks = [];
+  for (const m of html.matchAll(/(<script\b[^>]*>)([\s\S]*?)<\/script>/gi)) {
+    const start = m.index + m[1].length;
+    blocks.push([m.index, m.index + m[0].length]);
+    if (!/\ssrc=/i.test(m[1]) && m[2].trim()) ranges.push(...jsCommentRanges(m[2], start));
+  }
+  for (const m of html.matchAll(/<!--[\s\S]*?-->/g)) {
+    if (!blocks.some(([a, b]) => m.index >= a && m.index < b)) ranges.push([m.index, m.index + m[0].length]);
+  }
+  return ranges;
+}
+/* A ${…} placeholder straight after a string literal's closing quote ('${id}'${extraArg}) can only be a piece of
+   code (`,5`, a further argument), never a value: a value there would not parse at run time either. Such a
+   placeholder is dropped. Used only on a handler that did not parse as read, so a handler that parses is linted
+   exactly as before. */
+function dropFragmentsAfterStrings(body) {
+  let out = '', q = null;
+  for (let i = 0; i < body.length; i++) {
+    const c = body[i];
+    out += c;
+    if (q) {
+      if (c === '\\' && i + 1 < body.length) { out += body[++i]; continue; }
+      if (c === q) { q = null; while (body.startsWith('$TPL$', i + 1)) i += 5; }
+    } else if (c === '"' || c === "'") q = c;
+  }
+  return out;
+}
 function handlerUnit(fileRel, text) {
   const out = [], lineMap = [0];
   const re = /(?<=[\s"'`])on[a-z]{3,}=(\\?)(["'])/g;
+  /* A handler written inside a comment (a note about the old onclick="…('uid')" strings) is not one. */
+  const comments = fileRel.endsWith('.html') ? htmlCommentRanges(text) : jsCommentRanges(text);
+  const inComment = at => comments.some(([a, b]) => at >= a && at < b);
   let m;
   while ((m = re.exec(text))) {
+    if (inComment(m.index)) continue;
     const esc = m[1], q = m[2];
     let i = re.lastIndex, val = '', ok = false;
     while (i < text.length) {
@@ -187,7 +233,9 @@ function handlerUnit(fileRel, text) {
     const body = val.replace(/&quot;/g, '"').replace(/&#0*39;|&#x0*27;|&apos;/gi, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
     if (!/[A-Za-z_$]/.test(body)) continue;
     HANDLER_STATS.found++;
-    const fn = `;(function (event) { ${body}\n});`, line = lineOf(text, m.index);
+    let fn = `;(function (event) { ${body}\n});`;
+    const line = lineOf(text, m.index);
+    if (!parses(fn)) fn = `;(function (event) { ${dropFragmentsAfterStrings(body)}\n});`;
     if (!parses(fn)) { HANDLER_STATS.skipped.push(`${fileRel}:${line} ${body}`); continue; }
     out.push(fn);
     lineMap.push(line, line);
