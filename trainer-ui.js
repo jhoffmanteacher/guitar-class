@@ -185,7 +185,9 @@
   function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
   function createTrainer(deps) {
-    var core = deps.core || root.HIF_CORE, S = STR;
+    /* factory() gets no `root` (as in trainer-core.js / trainer-audio.js): the
+       fallback reads the classic-script global through a typeof guard. */
+    var core = deps.core || (typeof HIF_CORE !== 'undefined' ? HIF_CORE : null), S = STR;
     var rng = deps.rng || Math.random, nowFn = deps.now || Date.now;
     var el = deps.root, pitch = deps.pitch, audio = deps.audio, store = deps.store, fboard = deps.fretboardSvg;
     var eng = null, tok = 0, destroyed = false, timers = [], offs = [];
