@@ -36,10 +36,32 @@ entry added the same day. Part e of the builder: only when he asks. He asked the
 offer both tab and a lyrics / chord chart: answered (coded songs do it as separate cards; a built song holds
 chords and lyric lines only, no tab); nothing built.
 
-**The Mac session was paused and RESUMED the same afternoon (2026-11-17, Jonathan: "continue").** Running again: the
-lyric-sheet builder (part A the motion fix, then the one long column); private song audio step 2a in the cloud
-(routine `trig_01SXasbAnwwSzQNi8eu82h2m`, branch `mac/song-files-2a` when it pushes). Queued for the Mac's browser:
-the Chords / Tab switch (`feat/card-views`). The state at the pause, kept as the record: Everything shipped is on main and confirmed live through `b1fb3a5` (the lyric sheet
+**THE MAC SESSION IS PAUSED AGAIN (2026-11-17 late afternoon; Jonathan closed the lid). No agent is running on the
+Mac; local main equals origin/main; nothing is half-pushed. To pick up, in this order:**
+1. **The one long column for lyric sheets: BUILT AND PROVED by its builder, not shipped.** Commit `fe3cd8b` (on
+   GitHub as `feat/sheet-one-column-2`; the older `feat/sheet-one-column` there is a stale WIP: ignore it). Its Part A
+   (`f7c2a71`) is already live as `fa8dd09`. To ship: `git cherry-pick fe3cd8b` on main (it applied cleanly on
+   `403df10`), LOOK at `Claude outputs/pause-2026-11-17/sheet-one-column-shots/` (the lead had not looked yet), a
+   CHANGELOG line, the full `node tools/checks.mjs`, push Fast, `--live`, then tell Jonathan it is live. Builder's
+   numbers (not re-run by the lead): ca-45 and ca-38 as one column, left-aligned; at the old column change 7 to 12
+   lines ahead (was 0); 1 scroll per line (40 of 40, 56 of 56); 0 late chord names (of 224 and 152); ca-44 unchanged;
+   Print still two columns; `playalong-loop --only ca-45` and `--only ca-38` 0 mismatches. `app/cards.js` becomes
+   2,060 lines (over the 2,000 warning; say so, do not split it in that push).
+2. **The 7 songs to the private store: BUILT, waits for proofs, a review and Jonathan's word.** Branch
+   `mac/song-files-switch`, `81b9274` (on GitHub): the 18 paths are `private:<id>`, the flag gone, the 18 public
+   files removed, CHANGELOG written. He uploaded and verified all 18 (his word, 2026-11-17) and chose: remove the
+   public copies now; go live AFTER SCHOOL, and only when he says **"continue"**. Passed on the branch: full
+   `checks.mjs`, `song-files-sim` 121 of 121, `song-files-console-sim` 115 of 115, `kill-switch/proof` 14 of 14.
+   NOT run yet: the full `node tools/playalong-loop.mjs` (the doc wants its summary line with the private files
+   standing in), `node tools/update-reload-loop.mjs` (`sw.js` changed), one Opus `site-reviewer` round
+   (`docs/private-audio-step2.md`, step 3b). The private copies are in `~/Documents/guitar-class-song-files/` on the
+   Mac (18). Rebase onto main first (1. above touches other files). Do NOT push it before his "continue".
+3. **The Chords / Tab switch:** `feat/card-views`, `80ce200` WIP (on GitHub), about two thirds built; notes in
+   `Claude outputs/pause-2026-11-17/card-views-DETAILS.md` ("WHERE I STOPPED"). Needs the Mac's browser.
+4. **For whoever edited ca-53 today (`d2a676c`):** GitHub's "smoke activities (English)" is red since then; the
+   failing line, seen by a Mac builder: `[strum:ca-53 step 1 en] strum: chord names [], not ["A5","A5","A5","A5"]`:
+   the smoke's expectation for ca-53 step 1 was not updated with the card.
+The state at the pause, kept as the record: Everything shipped is on main and confirmed live through `b1fb3a5` (the lyric sheet
 at the top, highlights on the beat); the later pushes are notes only. Nothing is half-pushed.
 - **Two builders stopped cleanly; both branches are on GitHub as backups, both end in a commit that starts "WIP, not
   verified:", and their notes are copied to `Claude outputs/pause-2026-11-17/` on the Mac** (read "WHERE I STOPPED"
