@@ -325,6 +325,39 @@ and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fi
       this part on `ca-45` Verse 2: the first chord on screen 17 ms after it is heard, each lap; entering full
       screen mid-song: the lit line off screen 226 to 287 ms (before the fix 225 to 343). Fix: when the new lit
       line is not on screen, scroll instantly.
+- **MORE FOR WINDOWS, 4 (the Mac, 2026-11-17; Jonathan: "you can assign things to windows today").** After W12. Opus
+  agents only this week. Each is small, tools mostly, Fast unless it says otherwise; fetch and rebase before every push.
+  - **W17. The six MINORs of your own W16 review (W16-2 to W16-6 above), in one push. WAIT for the Mac's push named
+    "Lyric sheet: the playing line sits high" / "Play Along highlights light ON the heard beat" to be on main first**
+    (it changes `app/cards.js`, `tools/smoke.mjs`, `tools/playalong-loop.mjs` and the 1bf pin: `PC_LEAD` becomes 0,
+    Jonathan 2026-11-17, "exactly on the beat and not ahead of it for everything"). Then, on that code: the smoke
+    works out what it expects WITHOUT the page's own `pcLeadBars`; 1bf probes `pcLeadBars`, what `pcFrame` calls; a
+    test that `&lead=` does nothing without `snipcal=1` and that `passFrom` is reset at a lap; cap `&lead` at 300 ms;
+    the sheet dot's floor that never acts: remove it or test it. Each with its planted fault going red. W16-6 (a lead
+    longer than the latency turns playalong-loop red) is moot at lead 0: write one line saying so.
+  - **W18. Three MINORs from the Opus review of "no name on a mic take" (`3792deb`), tools only (`tools/checks.mjs`
+    1eh, 1dd):** (a) 1eh's no-identity check runs only the strum-check take through `micRecSaveNow`: run every game's
+    take data through it (`ccRecMeta` in `coach-chords.js`, the Listening Coach's `coachRecMeta`, Note Runner's,
+    `scRecMeta`); the reviewer's plant, a name added inside `ccRecMeta`'s fields, must go red. (b) the test student
+    has no email, so a planted `owner: currentUser.email || ''` passed: give the made-up student an email and a photo
+    URL and fail on either VALUE appearing anywhere in the saved take. (c) nothing tests the escaping of the
+    Evaluate-all row's tooltip (`teacher-mic.js`, `title="${escAttr(teacherMicEvalNames[i] || '')}"`): a name with
+    `"` and `<` must come out escaped; removing `escAttr` must go red. Break-it proof for each; no review round.
+  - **W19. AFTER the Mac writes here "load-retry is on main": close the test gaps its round 2 review left
+    (`tools/save-loop.mjs`, `tools/shared-chromebook-loop.mjs`; no site file).** Five of that reviewer's 20 planted
+    faults passed both tools: P4 the denied flag kept after a late load (`progressLoadDenied` not cleared), P11 the
+    Delete marker compared with `>=` where the code has `>`, P12 a denied read never retried, P15 no redraw after the
+    late load, P16 no period question after the late load (`maybeShowPeriodPicker`). Its report's tail was cut off,
+    so re-derive each plant from the code (`app/save.js`, the late-load section) and say if one is not a real fault.
+    Add a case per plant; each must go red; `save-loop` must still end "untagged 0" and the shared tool stay in its
+    K-TAB band. These tools guard the save path: ONE Opus `site-reviewer` round on the new cases.
+  - **W20. Only if tokens are left (a NEW kind of check: Always Reviewed, one `site-reviewer` round): a detector for
+    twice-encoded text in what the site serves.** On 2026-11-16 the Mac shipped "EstÃ¡" on the Spanish privacy page
+    for two hours (a `perl` edit read UTF-8 as Latin-1) and the pin recorded the garbled text. `checks.mjs`: fail on
+    the byte patterns of UTF-8 read as Latin-1 (`Ã` followed by a character in U+0080 to U+00BF, `â€`, `Â` before a
+    space or punctuation) in every served `.html`, `.js`, `.css` and in `CHANGELOG.md`; it must pass on today's tree
+    with no allowlist (if a real string trips it, say which, do not allowlist), and go red on the 2026-11-16 page
+    (`git show e25f0d5:privacy.html`).
 - **W14. NOT YET, dates only (do not start early; leave the line here until done):**
   - about **2026-11-21**: the accessibility scan's ratchet. Read a week of GitHub's "a11y scan" job results; only if
     every run shows 0 new signatures, switch `--a11y-ratchet` on in `browser.yml`, with one `site-reviewer` round on the
