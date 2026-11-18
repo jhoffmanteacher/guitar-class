@@ -5,7 +5,7 @@
    switches. Everything else on the card stays as it is when the view changes: the track, the speed, Guitar, the
    Metronome, the section buttons, Loop this part, Build up speed, full screen, and the place in the song.
      THE VIEWS   A view's name says what it draws: `tab` note by note, `chords` the chord grid (CHORD GRID,
-                 app/cards.js), `lyrics` the PDF sheet (LYRIC SHEET). The card's own view is its kind today
+                 app/cards.js), `lyrics` the PDF sheet (LYRIC SHEET, app/cards-sheet.js). The card's own view is its kind today
                  (caCardViewOwn) and is the default; `otherViews` lists the others with what each needs. A view is a
                  VIRTUAL CARD (caCardViewCard): the card with its display fields (VIEW_FIELDS) swapped for the
                  view's. Its sections are the card's own, section for section (label, fromBar, bars, reps; 1er), so
@@ -114,7 +114,7 @@ function caCardViewSwap(root, raw, name, refocus){
   const st = pcState && pcState.root === root ? pcState : null;
   if(st){
     st.L = L;
-    st.sheet = !!view.card.sheet;
+    st.sheet = !!view.card.sheet && typeof pcSheetHtml === 'function';   /* app/cards-sheet.js (W24 R1-1) */
     // Forget what was painted in the old view: the next frame lights the same beat in this one.
     st.si = -1; st.seq = -1; st.rep = -1; st.beat = -1; st.key = ''; st.row = null; st.stripKey = null;
     st.sheetLine = null; st.sheetLit = null; st.sheetAim = null; st.sheetTop = null;   // as pcRefollow: the next frame follows again
