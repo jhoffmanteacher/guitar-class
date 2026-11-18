@@ -400,7 +400,9 @@ change to `site-reviewer-deep`.
 An agent, or a lead handing out work, passes `model: 'sonnet'` for work that is mechanical, fully specified, and
 whose result a tool proves: running a tool or a proof and reporting its numbers, a search or an inventory with
 counts, copying or moving files, taking screenshots from a written list, a rebase or a re-pin, test cases written
-from a list someone else settled, one scripted wording change applied to many places. Opus (or what the agent file
+from a list someone else settled, one scripted wording change applied to many places. For these, spawn `site-runner`
+(Sonnet, low; `.claude/agents/site-runner.md`), not a `general-purpose` agent on Opus; a `general-purpose` spawn always
+names its `model` (Jonathan, 2026-11-18, after `/usage` showed general-purpose agents at 25%). Opus (or what the agent file
 pins) stays for: design and anything with a choice in it, the save path, `firestore.rules`, listening code, load order,
 `sw.js` code, a renderer a student sees, a fix whose cause is not yet known, and every review. Unsure → Opus. A Sonnet
 agent's report is a claim like any other: its proof is read before its work ships. An Opus builder may hand its own

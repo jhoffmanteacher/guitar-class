@@ -55,8 +55,16 @@ the "never" blocks (W12); American Girl, Jonathan's first built song.
 **Dated:** the accessibility scan's ratchet about 2026-11-21 (a week of 0 new signatures, then one `site-reviewer`
 round on the switch-on); remove the 2026-11-16 split bridge on or after 2026-12-01 (`todo.md`).
 
-**Quiet moments:** split `coach-core.js` (2,554 lines; the push limit is 2,600; only with Jonathan present); split
-`app/cards.js` (over the 2,000 warning); three Chords / Tab MINORs (W23: R1-4 the dot on chord 0 during a count-in
+**For Windows (2026-11-18, Jonathan: "assign to windows or agents"):**
+- [ ] **W24 — split `app/cards.js` (2,062 lines, over the 2,000 warning; not urgent).** Move the lyric-sheet player
+  (`pcSheet*`, one banner section, whole and unchanged) into a new part `app/cards-sheet.js` loaded right after
+  `app/cards.js` (the `site-parts:app.js` block in `index.html` and the `sw.js` lists; `checks.mjs` enforces both).
+  Prove: `node tools/golden.mjs` on the commit before and on yours, `--compare` identical; `node tools/slow-load.mjs`;
+  `node tools/playalong-loop.mjs`; the full `node tools/checks.mjs`. It touches load order: Always Reviewed, one
+  `site-reviewer` on Opus at high (this week's rule, below). Push a `win/w24` branch; the Mac or Jonathan merges.
+
+**Quiet moments:** the `coach-core.js` split is in progress on the Mac (2026-11-18, `wo/split-coach`); split
+`app/cards.js` (W24 above); three Chords / Tab MINORs (W23: R1-4 the dot on chord 0 during a count-in
 after a section tap, fix sketched in the Windows scratchpad `w23-rv2\review.md`; R1-5; R2-3); the update reload
 does not wait for a private song mid-download (`todo.md`, "Small things").
 
@@ -75,7 +83,10 @@ Opus review in the cloud, routine `trig_01Fkh59ZFbHnMUm6gGhntoor`); Play Along h
 Fast, then W16 below); the sign-in load fix (branch `fix/load-retry`, not shipped; round 1 was the one Fable review,
 routine `trig_01Bpx4H1QQDAbyEtf2bqGDAi`); **the Chords / Tab switch (W23, `c83bcf7d`): its 2 `site-reviewer-deep` rounds
 ran on FABLE, against this block. Windows left `model` unset, following the agent file's pin, and missed this rule.
-Counted against this week's Fable use; round 2 was clean.** W22's round 4 was Opus. Delete this block when he says the weekly limit has reset. A lead session on Fable is his to switch (`/model`).
+Counted against this week's Fable use; round 2 was clean.** W22's round 4 was Opus. **Also on FABLE, by the Mac (2026-11-17/18), against this block: `site-reviewer` round 1
+on Look 1 Parts 1-3 (39f1442..ef31d96), round 2 on its fixes (1322a98), and a Parts 4-5 run stopped unfinished; Parts
+4-5 were then reviewed on Opus. Jonathan will pick a Fable review of all of Look 1 and the `coach-core.js` split when
+his limit resets.** Delete this block when he says the weekly limit has reset. A lead session on Fable is his to switch (`/model`).
 Added 2026-11-17 (Jonathan), a standing rule, not this week only: Sonnet for the simple, tool-proved parts
 (CLAUDE.md, "Sonnet for the simple parts"); reviews and anything with a choice in it stay on Opus.
 
