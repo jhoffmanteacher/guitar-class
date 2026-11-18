@@ -73,7 +73,9 @@ at the end of the week depending on tokens"). So keep a list here of what shippe
 Fast, for him to pick from. So far: no name on a mic take (`3792deb`, `e25f0d5`; Fast, then an
 Opus review in the cloud, routine `trig_01Fkh59ZFbHnMUm6gGhntoor`); Play Along highlight timing (`b607794`, `386d063`;
 Fast, then W16 below); the sign-in load fix (branch `fix/load-retry`, not shipped; round 1 was the one Fable review,
-routine `trig_01Bpx4H1QQDAbyEtf2bqGDAi`). Delete this block when he says the weekly limit has reset. A lead session on Fable is his to switch (`/model`).
+routine `trig_01Bpx4H1QQDAbyEtf2bqGDAi`); **the Chords / Tab switch (W23, `c83bcf7d`): its 2 `site-reviewer-deep` rounds
+ran on FABLE, against this block. Windows left `model` unset, following the agent file's pin, and missed this rule.
+Counted against this week's Fable use; round 2 was clean.** W22's round 4 was Opus. Delete this block when he says the weekly limit has reset. A lead session on Fable is his to switch (`/model`).
 Added 2026-11-17 (Jonathan), a standing rule, not this week only: Sonnet for the simple, tool-proved parts
 (CLAUDE.md, "Sonnet for the simple parts"); reviews and anything with a choice in it stay on Opus.
 
