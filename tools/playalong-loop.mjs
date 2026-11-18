@@ -812,7 +812,17 @@ const PAGE_SRC = String.raw`(() => {
               seq: lit && lit.dataset.seq != null ? +lit.dataset.seq : null, beat: lit && lit.dataset.beat != null ? +lit.dataset.beat : null, page: pg ? +pg.dataset.page : null,
               drawn: !!(paper && paper._sheet && paper._sheet.ok), pill: pi, strip: Array.prototype.findIndex.call(root.querySelectorAll('.pc-strip-cell'), function(c){ return c.classList.contains('now'); }),
               pressed: Array.prototype.filter.call(root.querySelectorAll('.ca-view-switch button'), function(b){ return b.getAttribute('aria-pressed') === 'true'; }).map(function(b){ return b.dataset.view; }),
-              loop: root.dataset.loop || '', loopSw: lsw ? lsw.getAttribute('aria-checked') : null };
+              loop: root.dataset.loop || '', loopSw: lsw ? lsw.getAttribute('aria-checked') : null,
+              /* R17: the switch row on screen, under the In class page's sticky bar (the card's top after a press into Chords or Tab). */
+              swOn: (function(){ const sw = root.querySelector('.ca-view-switch'), bar = document.querySelector('.ca-screen .page-topbar');
+                if (!sw) return null; const r = sw.getBoundingClientRect(), under = bar && getComputedStyle(bar).position === 'sticky' ? bar.getBoundingClientRect().bottom : 0;
+                return r.top >= under - 1 && r.bottom <= window.innerHeight + 1; })() };
+          } else if (op.op === 'scrollDown'){
+            /* R17: the page scrolled as far down as it goes (a lyric sheet the song has scrolled, or a student's own scroll). */
+            let box = root.parentElement;
+            while (box && box !== document.body){ const oy = getComputedStyle(box).overflowY; if ((oy === 'auto' || oy === 'scroll') && box.scrollHeight > box.clientHeight) break; box = box.parentElement; }
+            if (!box || box === document.body) box = document.scrollingElement || document.documentElement;
+            box.scrollTop = box.scrollHeight;
           } else if (op.op === 'waitSheet'){
             /* R17: the lyric sheet reads its PDF in REAL time; the fake clock stands still meanwhile. */
             const until = Date.now() + op.max;
@@ -1323,7 +1333,9 @@ function planWalks(M) {
   /* R17 CARD VIEWS: the view switch pressed in the middle of a section while the song plays, to every other view of
      the card, at Slower, Loop this part on for the first one. A probe just before the press, one frame after it, and a
      bar and a half later (after a lyric sheet has drawn: the page's own PDF reading takes real time, the fake clock
-     waits); judgeSwap holds each to the place the clock says is sounding, in the view on screen. */
+     waits); judgeSwap holds each to the place the clock says is sounding, in the view on screen. The page is scrolled
+     as far down as it goes just before the press: after a press into Chords or Tab the switch row must be back on
+     screen under the sticky bar (caCardViewReveal, Jonathan 2026-11-18). */
   if (M.cvCharts && M.view.v.cv) {
     const others = Object.keys(M.cvCharts).filter(n => n !== M.view.v.cv);
     const si = ch.secs.findIndex(S => S.reps > 1) >= 0 ? ch.secs.findIndex(S => S.reps > 1) : 0, S = ch.secs[si];
@@ -1333,7 +1345,7 @@ function planWalks(M) {
       // Into the second lap (or the second bar), on the second half of beat 2: one frame later is still that beat.
       const at = S.fromBar - 1 + (S.reps > 1 ? S.bars : 1) + 1.45 / M.meter.beats;
       ops.push(startOp(si), { op: 'untilAudible', max: 60000, dt: FINE_MS }, { op: 'run', ms: msFor(M, 'slower', S.fromBar - 1, at), dt: FINE_MS },
-        { op: 'probe' }, { op: 'click', sel: `.ca-view-switch button[data-view="${to}"]`, sw: 'view' }, { op: 'run', ms: FINE_MS, dt: FINE_MS }, { op: 'probe' });
+        { op: 'scrollDown' }, { op: 'probe' }, { op: 'click', sel: `.ca-view-switch button[data-view="${to}"]`, sw: 'view' }, { op: 'run', ms: FINE_MS, dt: FINE_MS }, { op: 'probe' });
       if (to === 'lyrics') ops.push({ op: 'waitSheet', max: 15000 }, { op: 'run', ms: FINE_MS, dt: FINE_MS }, { op: 'probe' });
       ops.push({ op: 'run', ms: msFor(M, 'slower', at, at + 1.5), dt: FINE_MS }, { op: 'probe' }, { op: 'click', sel: '.pc-play', stop: true });
       walks.push({ kind: 'viewSwap', name: `view switch mid-section · ${M.view.v.cv} -> ${to}${k === 0 && M.open.hasLoop ? ' · loop this part on' : ''}`, stop: 'slower', guitar: hasFull, ops, to, span: 'none', metro: false, fresh: true });
@@ -1386,6 +1398,9 @@ function judgeSwap(M, W, res) {
         if (!(d > 0 && d < 0.1)) issues.push(`across the press the file moved ${d.toFixed(4)} s (one frame expected: no seek, no stop)`);
         if (q.si !== p.si || q.rep !== p.rep || Math.floor(q.local + 1e-9) !== Math.floor(p.local + 1e-9)) issues.push(`across the press the place moved from ${q.si}:${q.rep}:beat ${Math.floor(q.local)} to ${p.si}:${p.rep}:beat ${Math.floor(p.local)}`);
         if (pr.loop !== b.loop || pr.loopSw !== b.loopSw) issues.push(`across the press Loop this part went from ${b.loop}/${b.loopSw} to ${pr.loop}/${pr.loopSw}`);
+        /* The card's top back on screen after a press into Chords or Tab (Jonathan, 2026-11-18); a lyric sheet scrolls itself. */
+        if (W.to !== 'lyrics' && pr.swOn !== true) issues.push(`after the press into ${W.to} the switch row is ${pr.swOn === null ? 'gone' : 'off the screen'} (it was ${b.swOn ? 'on' : 'off'} it before): the card's top must come back on screen`);
+        if (W.to !== 'lyrics') { SWAPV.reveals++; if (!b.swOn) SWAPV.hidden++; }
       }
     }
     prevPlace = p;
@@ -1399,7 +1414,7 @@ const PC_BUILD_LAPS = 2;
    +-5%). Read off the code, like the rules above; a changed gain shows up as every swap failing R16. */
 const TWIN_GAIN = 0.5;
 const SWAPS = { checked: 0, off: 0 };
-const SWAPV = { walks: 0, probes: 0, failed: 0 };   // R17
+const SWAPV = { walks: 0, probes: 0, failed: 0, reveals: 0, hidden: 0 };   // R17 (reveals: presses into Chords or Tab; hidden: of those, with the switch row off the screen before)
 
 function parseKey(k) {
   const [a, lit, ...rest] = k.split('#');
@@ -2318,7 +2333,7 @@ async function main() {
   const TL = totalsLoop, loopWalksWanted = !SETTING || TL.walks > 0;
   if (loopWalksWanted) console.log(`playalong-loop (Loop this part / Build up speed): ${TL.failed ? '✗' : '✓'} ${TL.cards.size} of the ${loopCards} cards with section buttons, ${TL.walks} walks, ${TL.laps} laps, ${TL.steps.toLocaleString('en-US')} places lit and compared, ${TL.clicks.toLocaleString('en-US')} clicks: ${TL.failed ? TL.failed + ' with a mismatch' : '0 mismatches'}`);
   console.log(`playalong-loop (R16, Guitar twin swaps): ${SWAPS.off ? '✗' : '✓'} ${SWAPS.checked} swap(s) checked for the musical place, ${SWAPS.off} off`);
-  if (SWAPV.walks) console.log(`playalong-loop (R17, card view switch mid-song): ${SWAPV.failed ? '✗' : '✓'} ${SWAPV.walks} walk(s), ${SWAPV.probes} probes, ${SWAPV.failed} with a problem`);
+  if (SWAPV.walks) console.log(`playalong-loop (R17, card view switch mid-song): ${SWAPV.failed ? '✗' : '✓'} ${SWAPV.walks} walk(s), ${SWAPV.probes} probes, ${SWAPV.failed} with a problem; the switch row on screen after ${SWAPV.reveals} presses into Chords or Tab (${SWAPV.hidden} of them made with it scrolled off)`);
   /* --built: the built songs' own line, then the ca-51 pair. */
   let builtFailed = 0;
   if (built) {

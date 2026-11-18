@@ -20,7 +20,8 @@
                  element stays, and with it the speed control, Guitar, the Metronome and the Loop / Build flags. A
                  playing card (pcState) gets the new layout and forgets what it last painted, so the next frame
                  lights the same beat in the new view; its audio elements are not touched (no reload, no seek). A
-                 lyric sheet draws when its PDF is read (pcSheetScan), then marks where the song is.
+                 lyric sheet draws when its PDF is read (pcSheetScan), then marks where the song is. After a
+                 press into Chords or Tab the card's top comes back on screen (caCardViewReveal).
    Built songs (app/builtsongs.js) hold no tab and never get the field. */
 const CA_CARD_VIEWS_KEY = 'caCardViews';
 const CA_CARD_VIEW_NAMES = ['chords', 'tab', 'lyrics'];   // the switch's order
@@ -85,6 +86,25 @@ function caSetCardView(id, name, btn){
   if(mine && !roots.includes(mine)) roots.unshift(mine);
   roots.forEach(root => caCardViewSwap(root, raw, name, root === mine && document.activeElement === btn));
   if(typeof pcSheetScan === 'function') pcSheetScan();   // a sheet left the page: let its observer go; a sheet came: draw it
+  if(mine && name !== 'lyrics') caCardViewReveal(mine);
+}
+/* After a press into Chords or Tab, the card's top back on screen (Jonathan, 2026-11-18, W23 question 4: "scroll back
+   to the card's top"). A lyric sheet is a long column that the song scrolls down the page; swapped for a short tab,
+   the page kept its place, so the switch row and the section playing were above the screen. The card's top goes
+   under the In class page's sticky bar, as caScrollToActivity puts an opening card (the bar measured, not guessed),
+   and only when it is above it. A jump, not a smooth scroll: the playing card's next frame keeps its row on screen
+   (pcFollow, st.row was forgotten) and a smooth scroll still moving would fight it. A press into Lyrics is left to
+   the sheet: it brings the line being played on screen itself (pcSheetStarted / pcSheetFollow). */
+function caCardViewReveal(root){
+  if(!root || !root.isConnected || typeof root.scrollIntoView !== 'function') return;
+  const screen = root.closest('.ca-screen');
+  const bar = screen ? screen.querySelector('.page-topbar') : null;
+  const sticky = bar && bar.offsetHeight && getComputedStyle(bar).position === 'sticky';
+  const under = sticky ? bar.getBoundingClientRect().bottom : 0;
+  if(root.getBoundingClientRect().top >= under - 1) return;   // on screen already: leave the page where it is
+  const card = root.closest('.ca-card') || root;   // the open card's own top, where caScrollToActivity puts it
+  card.style.scrollMarginTop = sticky ? bar.offsetHeight + 'px' : '';
+  card.scrollIntoView({ behavior: 'auto', block: 'start' });
 }
 function caCardViewSwap(root, raw, name, refocus){
   const view = caView(raw);
