@@ -7110,7 +7110,7 @@ function checkTitleHeadings() {
       const J = JSON.stringify;
       const parts = { caNewestModNum: /function caNewestModNum\([^)]*\)\{[\s\S]*?\n\}/.exec(a2), caOnModFoldToggle: /function caOnModFoldToggle\([^)]*\)\{[\s\S]*?\n\}/.exec(a2),
         caFinishedGroupHtml: /function caFinishedGroupHtml\([^)]*\)\{[\s\S]*?\n\}/.exec(a2), headHtml: /function headHtml\(sec\)\{[\s\S]*?\n\s*\}/.exec(a2),
-        "the Unfinished fold's call site (const restNewest … const body …)": /const restNewest = [^\n]*\n\s*const body = restGroups\.some\([\s\S]*?\n\s*: restFlat\.map\([^\n]*;\n/.exec(a2) };
+        "the Unfinished fold's call site (const restNewest … const body …)": /const restNewest = [^\n]*\n(?:\s*const grid = [^\n]*\n)?\s*const body = restGroups\.some\([\s\S]*?\n\s*: (?:restFlat\.map\(|grid\(restFlat\))[^\n]*;\n/.exec(a2) };
       const lost = Object.keys(parts).filter(k => !parts[k]);
       if (lost.length) flag(`could not find ${lost.join(', ')}: which module fold starts open is NOT checked`);
       else {
@@ -7142,7 +7142,7 @@ function checkTitleHeadings() {
           ['Unfinished: an older module when the open card and the swap are in other modules', 'todo', 4, [], 'a5', { from: 'a3', to: 'z' }, false]];
         for (const [what, foldName, num, toggles, openId, swap, want] of cases) {
           const c = vm.createContext({ caOpenId: openId, caModFoldOpen: {}, caFinishedOpen: false, snipState: null, pcState: null, songFileCancelWaitIn() {},
-            escAttr: x => String(x).replace(/"/g, '&quot;'), escHtml: x => String(x), t: k => k, tf: (o, f) => o[f], caIsVisible: () => true, classActivities: {}, caActivityCardHtml: a => `<CARD ${a.id}/>` });
+            escAttr: x => String(x).replace(/"/g, '&quot;'), escHtml: x => String(x), t: k => k, tf: (o, f) => o[f], caIsVisible: () => true, classActivities: {}, caActivityCardHtml: a => `<CARD ${a.id}/>`, caKindRowHtml: a => `<CARD ${a.id}/>` });
           vm.runInContext(prelude, c);
           for (const [tFold, tNum, tOpen] of toggles) {
             const shown = (/data-fold-key="([^"]*)"/.exec(tagOf(vm.runInContext(`__render(${J(tFold)}, null)`, c), tNum)) || [])[1];
@@ -11657,7 +11657,7 @@ function checkTodayByDate(ctx) {
   if (!ctx) { flag('1cq cannot run — the 0b render context is unavailable'); return; }
   const run = x => vm.runInContext(x, ctx);
   const J = JSON.stringify;
-  const EXPECT_RENDERS = 26;
+  const EXPECT_RENDERS = 27;
   let renders = 0, asserts = 0;
   const STATE = ['activityDates', 'classActivities', 'activityBoard', 'activityBoardOn', 'optionalActivityIds', 'hiddenActivityIds', 'keepTodayActivityIds',
     'retiredActivityIds', 'activityForMe', 'activityPins', 'caOpenId', 'caSwap', 'studentPeriod', 'periodOverride', 'currentUser',
@@ -11791,6 +11791,17 @@ function checkTodayByDate(ctx) {
       want(r.headCount === 0 && r.today.length === 0 && r.todayIds.length === 0, `${lang} nothing today: heading ${r.headCount}, Today ${J(r.todayIds)}; expected no heading and no Today cards`);
       want(J(r.todo) === J([B, A]) && r.todoN === 2 && /<details class="ca-todo-group" open/.test(r.html), `${lang} nothing today: the Unfinished fold holds ${J(r.todo)} (${r.todoN}); expected ${J([B, A])} (2), open`);
       want(r.hero === B && r.resumeShown === false && !r.freePlay, `${lang} nothing today: hero ${r.hero}, resume card ${r.resumeShown}, caught-up box ${r.freePlay}; expected ${B}, hidden, none`);
+      /* 4b. Look 1, Part 2 (2026-11-17): the Unfinished rows sit in a two-column .ca-todo-grid (one per module fold), each
+         row with its kind picture first in its summary, the same order; the Completed fold draws no picture. */
+      {
+        const tAt = r.html.indexOf('<details class="ca-todo-group"'), fAt = r.html.indexOf('<details class="ca-finished-group"');
+        const seg = tAt < 0 ? '' : r.html.slice(tAt, fAt > tAt ? fAt : r.html.length);
+        const grids = (seg.match(/<div class="ca-todo-grid"><details class="ca-card/g) || []).length, folds = (seg.match(/<details class="ca-mod-fold"/g) || []).length;
+        const rows = [...seg.matchAll(/<details class="ca-card[^"]*"[^>]*data-id="([^"]+)"[^>]*>\s*<summary class="ca-card-summary"[^>]*><span class="ca-kind ca-kind--(song|strum|other)" aria-hidden="true"><svg/g)].map(m => m[1]);
+        want(grids >= 1 && grids === Math.max(folds, 1) && J(rows) === J(r.todo), `${lang} Unfinished grid: ${grids} .ca-todo-grid for ${folds} module folds, rows with a kind picture ${J(rows)}; expected one grid per fold and every row ${J(r.todo)} with its picture, in order`);
+      }
+      r = render([[A, MA, D.d5, true], [B, MA, D.d7]], lang);
+      want(r.fin.includes(A) && !/class="ca-kind/.test(r.html.slice(r.html.indexOf('<details class="ca-finished-group"'))), `${lang} the Completed fold must draw no kind picture`);
       /* 5. Optional: within one date the required card comes first; an optional card today is not the hero while a
          required card of yesterday is pending. */
       r = render([[A, MA, D.d9, false, true], [B, MA, D.d9], [C, MA, D.d8], [Dd, MA, D.d8, false, true], [E, MA, D.d8]], lang);
@@ -11898,6 +11909,13 @@ function checkTodayByDate(ctx) {
     delete ctx.__r; delete ctx.__s;
   }
   if (renders !== EXPECT_RENDERS * 2) flag(`1cq ran ${renders} page renders, pinned ${EXPECT_RENDERS * 2} (${EXPECT_RENDERS} x EN + ES)`);
+  {
+    // The Unfinished rows' two columns (Look 1, Part 2), read from styles.css: a grid of 400px-floor columns, so two at 1366x657.
+    const g = cssRuleMap(readFileSync(join(ROOT, 'styles.css'), 'utf8')).get('.ca-todo-grid'), d = g && g.get('');
+    asserts++;
+    if (!d || d.get('display') !== 'grid' || !/^repeat\(auto-fill,\s*minmax\(min\(100%,\s*400px\),\s*1fr\)\)$/.test(d.get('grid-template-columns') || ''))
+      flag(`1cq: .ca-todo-grid must be display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr)) (two columns at 1366x657), found ${J(d ? Object.fromEntries(d) : null)}`);
+  }
   if (!bad) ok(`${renders} runs of the real renderClassActivities (${EXPECT_RENDERS} x EN + ES, 6 through caToggleComplete / caFocusActivity) and 6 of caTodayWindow, ${asserts} assertions: every card dated today or yesterday in Today with no cap, pending first (required before optional, today before yesterday, lowest number first) then finished as ✓ rows, the first pending card on the page is always the hero (an optional card never above it: lifted into Today, or required first in each module), Friday's cards Unfinished on a Monday, no heading when neither day has a card, a date chip exactly on yesterday's cards, future / Hidden / other students' cards never counted, a card ticked "Keep in Today's activities" stays in Today after its date (pending after today's and yesterday's, done as a ✓ row, its date chip on; never before its date, Hidden or for other students; unticked = the old rule), the folds keep the old board order with each module's required cards first, the toast and the resume card follow caStartHereId, a deep link to a finished Today card leaves Completed shut, yesterday right across month, year and daylight-saving edges`);
 }
 

@@ -367,6 +367,21 @@ Added 2026-11-17 (Jonathan), a standing rule, not this week only: Sonnet for the
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-17 — Look 1, Part 2: the In class list. Fast.**
+      Work order `Claude outputs/WORK-ORDER-look1-redesign.md`. Today tiles: the kind picture as a left block
+      (`caKindPicHtml`, inline SVG, `aria-hidden`: note / strum arrows / bars by `caKind`), the title and ONE where-you-are
+      line (`caWhereLine`, "Step 2 of 4: D5" from Part 1's `caStepShortName`; a practice card, an exit check or an
+      unstarted unnamed ladder keeps the intro sentence), both one line with an ellipsis, dots and today's button.
+      Unfinished rows: `.ca-todo-grid` per module fold, `repeat(auto-fill,minmax(min(100%,400px),1fr))` (two columns at
+      1366x657, one on a phone), each row through `caKindRowHtml` (the `caActivityCardHtml` row with the picture first;
+      app/cards.js untouched); the Completed fold draws none. Not done: the page heading and "Today's activity" on one
+      line (optional in the work order; the "In class" title is the sticky bar). Measured: 84 tiles (every visible
+      non-library activity, EN 42 + ES 42) title one line 84/84 (74 end in an ellipsis), line one line 84/84; 41
+      Unfinished rows in 2 columns, title one line 41/41, picture 41/41, no sideways scroll; `visible-loop` ✓ every
+      comparison held. Pins: 1cq (grid per fold, rows with pictures in order, none in Completed; the CSS) and 1da (the
+      fold call site); `tools/smoke.mjs` `todayGridWalk` (one-line titles, the Unfinished columns, a card opened from
+      each column).
+
 - [x] **2026-11-17 — Look 1, Part 1: an open Focus step fills the screen. Fast.**
       Work order `Claude outputs/WORK-ORDER-look1-redesign.md` (Jonathan picked "Look 1" 2026-11-17: "the class
       activities get the most use so the redesign of those is paramount"). `caSyncSolo` sets `body.ca-wide` for an open

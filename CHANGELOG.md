@@ -6,6 +6,12 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-17 — The In class list: two columns, and where you are
+
+- **Each card in Today's activity now says where you are,** for example "Step 2 of 4: D5", and has a small picture for its kind: a note for a play-along song, arrows for a strum pattern, bars for everything else.
+- **Unfinished activities are now in two columns,** each with the same small picture, so more of them fit on the screen. The order is the same, read left to right.
+- **Long titles stay on one line** and end in "…" instead of making a card taller.
+
 ## 2026-11-17 — An open activity step fills the screen
 
 - **An open step of an In-Class Activity now uses the whole screen.** The directions are bigger, and strum patterns are drawn about three times larger, so you can read the arrows from your guitar. Tabs get wider but not taller.

@@ -298,6 +298,45 @@ function caCardBodyBlockHtml(a, done, focus, card){
 /* The card sits under caTodayHeadHtml, which carries the label and the date —
    see caStartHereTagHtml. No 🖨 on the collapsed row any more
    (2026-10-31): the open card's bar has it (caSyncTopbar). */
+/* ── Kind pictures (Look 1, Part 2, Jonathan, 2026-11-17: "two columns, each
+   row with a small picture for its kind") ── Decoration only: aria-hidden,
+   no words, drawn inline (no image file, so nothing for sw.js). Three kinds:
+   a play-along card (view:'card') a note, a step ladder with a strum
+   pattern down / up arrows, everything else (drills, tabs, exit checks)
+   bars. Shown on the Today tiles and the Unfinished rows (styles.css scopes
+   it there); the Completed fold does not draw it. */
+const CA_KIND_SVG = {
+  song: '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  strum: '<path d="M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4"/>',
+  other: '<path d="M6 20V11M12 20V4M18 20v-6"/>',
+};
+function caKind(a){
+  if(a && a.kind !== 'check' && caIsCard(a)) return 'song';
+  if(a && (a.steps || []).some(s => s && s.strum)) return 'strum';
+  return 'other';
+}
+function caKindPicHtml(a){
+  const k = caKind(a);
+  return `<span class="ca-kind ca-kind--${k}" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${CA_KIND_SVG[k]}</svg></span>`;
+}
+/* A Today tile's "where you are" line (Look 1, Part 2): for a ladder, the
+   first step not yet done on the student's route, "Step 2 of 4: D5" (the
+   step's name as the Part 1 step buttons show it, caStepShortName), or the
+   last step once all are ticked. '' for a practice card, an exit check, or a
+   ladder nobody has started whose step has no name: the tile then shows
+   the intro's first sentence as before. */
+function caWhereLine(a){
+  if(!a || a.kind === 'check' || caIsCard(a)) return '';
+  const route = caRoute(a);
+  if(!route.length) return '';
+  const next = caDefaultOpenStep(a);
+  const si = next >= 0 ? next : route[route.length - 1];
+  const name = caStepShortName((a.steps || [])[si]);
+  const started = caTickCount(caTickKeys(a)) > 0;
+  if(!name && !started) return '';
+  const head = t('ca.focusStepOf', { n: route.indexOf(si) + 1, total: route.length });
+  return name ? `${head}: ${name}` : head;
+}
 function caHeroCardHtml(a, chipIso = ''){
   if(a.kind === 'check') return caHeroCheckHtml(a, chipIso);
   a = caView(a);   // power-chord version when the switch says so — see caView
@@ -310,7 +349,8 @@ function caHeroCardHtml(a, chipIso = ''){
   // keeps its steps as the help ladder inside it.
   const card = caIsCard(a);
   const titleHtml = caNumHtml(caNumber(a)) + escHtml(caTitle(a));
-  const blurb = caFirstSentence(tf(a, 'intro'));
+  const where = caWhereLine(a);   // "Step 2 of 4: D5" for a ladder (Look 1, Part 2)
+  const blurb = where || caFirstSentence(tf(a, 'intro'));
   const doneAny = caTickCount(caTickKeys(a)) > 0;
   const ctaKey = doneAny ? 'ca.heroKeepGoing' : 'ca.heroStart';
   /* The CTA hides itself once the card is open (CSS, .ca-card--hero[open]) —
@@ -321,10 +361,11 @@ function caHeroCardHtml(a, chipIso = ''){
   const thumbHtml = caHeroThumbHtml(a);
   return `<details class="ca-card ca-card--hero${focus ? ' ca-card--focus' : ''}${card ? ' ca-card--practice' : ''}${caQuietOptional(a, done) ? ' ca-card--optional' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary ca-hero-summary" onclick="caCardMarkOpening(this)">
+      ${caKindPicHtml(a)}
       <div class="ca-hero-main">
         ${caHeroChipHtml(chipIso)}${caStartHereTagHtml(a)}
         <div class="ca-hero-title" role="heading" aria-level="3">${titleHtml}</div>
-        ${blurb ? `<p class="ca-hero-blurb">${escHtml(blurb)}</p>` : ''}
+        ${blurb ? `<p class="ca-hero-blurb${where ? ' ca-hero-where' : ''}">${escHtml(blurb)}</p>` : ''}
         ${caChunkMetaHtml(a)}
       </div>
       <div class="ca-hero-side${thumbHtml ? '' : ' ca-hero-side--cta-only'}">
@@ -344,6 +385,7 @@ function caHeroCheckHtml(a, chipIso = ''){
   const done = classActivities[a.id] === true;
   return `<details class="ca-card ec-card ca-card--hero ca-card--hero-check${caQuietOptional(a, done) ? ' ca-card--optional' : ''}" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary ca-hero-summary" onclick="caCardMarkOpening(this)">
+      ${caKindPicHtml(a)}
       <div class="ca-hero-main">
         ${caHeroChipHtml(chipIso)}${caStartHereTagHtml(a)}
         <div class="ca-hero-title" role="heading" aria-level="3">${escHtml(caTitle(a))}</div>

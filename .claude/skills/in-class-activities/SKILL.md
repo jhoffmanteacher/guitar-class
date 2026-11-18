@@ -141,7 +141,29 @@ gate (`caIsVisible`) and Today both read; 1cq stubs it. In
   the whole width (`.ca-solo-path` → `display:block`). Two columns only when
   each tile gets 440px (`repeat(auto-fit,minmax(min(100%,440px),1fr))`): two at
   1366×657 and wider (the column stops at 944px), one at 125% zoom, in a narrow
-  window and on a phone (≤760px also keeps the stacked hero). Nothing about WHICH cards are in Today, their
+  window and on a phone (≤760px also keeps the stacked hero).
+  **Look 1, Part 2 (Jonathan, 2026-11-17):** every Today tile has its kind
+  picture as a block at its left edge (`caKindPicHtml`, decoration,
+  `aria-hidden`, inline SVG: a play-along card a note, a ladder with a strum
+  pattern down/up arrows, everything else bars), the title on ONE line and
+  ONE line saying where the student is (`caWhereLine`: "Step 2 of 4: D5" for
+  a ladder, the first step not done on the route, the name as Part 1's step
+  buttons show it; a practice card, an exit check or an unstarted ladder
+  with an unnamed step keeps the intro's first sentence), both ending in an
+  ellipsis; then the dots and the button with today's words. The
+  **Unfinished rows are two columns** (`.ca-todo-grid`, one per module fold,
+  `repeat(auto-fill,minmax(min(100%,400px),1fr))`, same order read left to
+  right), each row with its kind picture (`caKindRowHtml`: the row from
+  `caActivityCardHtml` with the picture put first in its summary; app/cards.js
+  is not edited) and its number and title on one line. The Completed fold
+  draws no picture. A finished card in Today carries the picture too. The
+  page heading and "Today's activity" were NOT put on one line (the "In
+  class" title is the sticky bar; the Today label would stick over the
+  lists). Guards: checks.mjs **1cq** (the grid per fold, every row's
+  picture in order, none in Completed, the CSS) and **1da** (the fold call
+  site with its grid); `tools/smoke.mjs` `todayGridWalk` (titles one line,
+  the Unfinished rows two equal columns with pictures, a card opened from
+  each column). Nothing about WHICH cards are in Today, their
   order, `caStartHereId`, the chips, the Optional tag or the caught-up box
   changed. `tools/smoke.mjs` `todayGridWalk` measures the three longest titles
   a student can be given, in both languages.

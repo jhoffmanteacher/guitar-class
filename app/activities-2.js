@@ -1594,7 +1594,7 @@ function renderClassActivities(){
     const todayHtml = todayCards.length
       ? caTodayHeadHtml(todayDay)
         + `<div class="ca-today-grid${todayCards.length > 1 ? ' ca-today-grid--multi' : ''}">`
-        + todayCards.map(a => isDone(a) ? caActivityCardHtml(swapIn(a), chipOf(a)) : caHeroCardHtml(swapIn(a), chipOf(a))).join('')
+        + todayCards.map(a => isDone(a) ? caKindRowHtml(swapIn(a), chipOf(a)) : caHeroCardHtml(swapIn(a), chipOf(a))).join('')
         + `</div>`
       : '';
     let pendingHtml;
@@ -1618,10 +1618,14 @@ function renderClassActivities(){
            2026-09-23, round 2). The nested "Older (n)" fold from round 1
            (item 5) is gone with its name; module headings, when any card
            is placed in a module, do the grouping instead. */
+        /* Two columns (Look 1, Part 2, Jonathan, 2026-11-17): each module's
+           rows (or the flat list) sit in one .ca-todo-grid, same order, read
+           left to right, then down; each row carries its kind picture. */
         const restNewest = caNewestModNum(restGroups);
+        const grid = cards => `<div class="ca-todo-grid">${cards.map(a => caKindRowHtml(swapIn(a))).join('')}</div>`;
         const body = restGroups.some(g => g.sec.mod)
-          ? restGroups.map(g => caModFoldHtml('todo', g.sec, headHtml(g.sec), g.cards.map(a => caActivityCardHtml(swapIn(a))).join(''), g.cards, restNewest, swap)).join('')
-          : restFlat.map(a => caActivityCardHtml(swapIn(a))).join('');
+          ? restGroups.map(g => caModFoldHtml('todo', g.sec, headHtml(g.sec), grid(g.cards), g.cards, restNewest, swap)).join('')
+          : grid(restFlat);
         const openInside = restFlat.some(a => a.id === caOpenId || (swap && a.id === swap.from));
         restHtml = caTodoGroupHtml(body, restCount, openInside);
       }
@@ -1705,6 +1709,15 @@ function caModuleHeadHtml(sec, byId){
 const caModFoldOpen = {};
 function caNewestModNum(groups){
   return groups.reduce((m, g) => (g.sec.mod && g.sec.mod.num > m) ? g.sec.mod.num : m, -Infinity);
+}
+/* A list row (caActivityCardHtml, or caCheckCardHtml for a check) with its
+   kind picture first in the <summary> (Look 1, Part 2): the Unfinished
+   fold's rows and a finished card in Today. The row itself is unchanged
+   (app/cards.js is not edited); the Completed fold calls caActivityCardHtml
+   directly and draws no picture. */
+function caKindRowHtml(a, chipIso){
+  const html = caActivityCardHtml(a, chipIso);
+  return html.replace(/(<summary class="ca-card-summary"[^>]*>)/, (m) => m + caKindPicHtml(a));
 }
 function caModFoldHtml(fold, sec, headHtml, cardsHtml, cards, newest, swap){
   if(!sec.mod || !headHtml) return headHtml + cardsHtml;

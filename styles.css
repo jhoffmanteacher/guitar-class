@@ -2546,7 +2546,7 @@ body.rail-collapsed .rail-tools .tool-popup{
      blurb are screen prompts (the blurb repeats the intro printed right
      under it), so the handout header reads like any other card's. */
   body.print-activity .ca-start-tag,body.print-activity .ca-hero-blurb,
-  body.print-activity .ca-hero-side{display:none !important}
+  body.print-activity .ca-hero-side,body.print-activity .ca-kind{display:none !important}
   body.print-activity .ca-card-summary{cursor:auto}
   /* Every step's body, not just the one the accordion had open on screen. */
   body.print-activity .ca-step-detail{display:block !important}
@@ -3929,12 +3929,15 @@ span.tab-count-held{margin-left:4px}
    height, reading left to right, then down. One card keeps the full width. Two
    or more are tiles with no hero thumbnail (210px does not fit beside the text),
    so the button stands alone at the tile's right. An open card takes the full
-   width (the grid is on its .ca-solo-path). The Unfinished and Completed folds
-   stay full-width lists.
-   Two columns only when each tile gets 440px (every title was measured to fit
-   in two lines at 464): 2 at 1366x657, where the column is 944px; one on a
-   phone, a narrow window or a zoomed-in Chromebook (125% leaves ~840px). The
-   content column never reaches the 1352px a third would need. */
+   width (the grid is on its .ca-solo-path). The Unfinished fold is two columns
+   too since Look 1, Part 2 (.ca-todo-grid, below); the Completed fold stays a
+   full-width list.
+   Two columns only when each tile gets 440px: 2 at 1366x657, where the column
+   is 944px; one on a phone, a narrow window or a zoomed-in Chromebook (125%
+   leaves ~840px). The content column never reaches the 1352px a third would
+   need. Since Look 1, Part 2 (2026-11-17) a tile's title and its line are ONE
+   line each, ending in an ellipsis (below); before, every title was measured
+   to fit in two lines at 464px. */
 .ca-today-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:16px;margin-bottom:12px}
 .ca-today-grid > .ca-card{margin:0;min-width:0}
 /* A finished card in Today's list is a one-line row (caActivityCardHtml), not
@@ -3944,20 +3947,25 @@ span.tab-count-held{margin-left:4px}
 .ca-today-grid--multi .ca-hero-thumb{display:none}
 .ca-today-grid--multi .ca-hero-side{width:auto;justify-content:center}
 .ca-screen.ca-solo .ca-today-grid.ca-solo-path{display:block}
-/* In a half-width tile the title takes the tile's whole width and the Start
-   button sits at the right beside the blurb and step dots: beside the title it
-   left 299px, and six Spanish titles ("… La canción completa con acordes de
-   potencia") ran to three lines. .ca-hero-main's children join the summary's
-   grid (display:contents); dense placement puts the button in the first free
-   right-hand cell, the row under the title. A phone keeps the stacked hero. */
+/* A Today tile (Look 1, Part 2, Jonathan, 2026-11-17): the kind picture as a
+   block at the left edge, then the title on ONE line, ONE line saying where
+   the student is (caWhereLine: "Step 2 of 4: D5"; a practice card or an
+   unstarted unnamed ladder keeps the intro's first sentence), the dots,
+   and the button at the right, centred. Both lines end in an ellipsis
+   rather than wrap, so a tile never grows taller for a long title (until
+   2026-11-17 the title took the tile's whole width and wrapped, six Spanish
+   titles to three lines). A phone keeps the stacked hero, no picture. */
 @media(min-width:761px){
-  .ca-today-grid--multi .ca-hero-summary{display:grid;grid-template-columns:minmax(0,1fr) auto;
-    grid-auto-flow:row dense;column-gap:16px;row-gap:4px;align-items:start}
-  .ca-today-grid--multi .ca-hero-main{display:contents}
-  .ca-today-grid--multi .ca-hero-main > *{grid-column:1/-1;justify-self:start}
-  .ca-today-grid--multi .ca-hero-main > .ca-hero-title ~ *{grid-column:1}
-  .ca-today-grid--multi .ca-hero-side{grid-column:2;grid-row:span 2;align-self:center}
+  .ca-today-grid .ca-hero-summary{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:14px;
+    align-items:center;padding:0 16px 0 0;min-height:104px}
+  .ca-today-grid .ca-hero-summary > .ca-kind{align-self:stretch;width:56px}
+  .ca-today-grid .ca-kind svg{width:26px;height:26px}
+  .ca-today-grid .ca-hero-main{padding:14px 0;min-width:0}
+  .ca-today-grid .ca-hero-main > .ca-hero-title,.ca-today-grid .ca-hero-main > .ca-hero-blurb{align-self:stretch;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ca-today-grid .ca-hero-side{grid-column:3}
 }
+@media(max-width:760px){.ca-today-grid .ca-hero-summary > .ca-kind{display:none}}
 .ca-today-date{font-size:0.9375rem;font-weight:600;color:var(--text2)}
 /* "Since your last visit" (caSinceHtml, 2026-11-13): under Today, in blue so
    it reads as its own group; one plain line, then the cards stacked, the top
@@ -4050,6 +4058,25 @@ span.tab-count-held{margin-left:4px}
    (caTodoGroupHtml, item 2f). Same quiet treatment as "Earlier" below,
    mirrored on purpose: the two are siblings on the page. ── */
 .ca-todo-group{margin:12px 0 4px}
+/* The Unfinished rows in two columns (Look 1, Part 2, Jonathan, 2026-11-17):
+   each module's rows (or the flat list) are one .ca-todo-grid, read left to
+   right, then down, the same order as before. auto-fill keeps a lone last
+   row half width; one column under 400px a column (a phone, a zoomed-in
+   window). An open card takes the whole width (its .ca-solo-path). Each row
+   starts with its kind picture and keeps its number and title on one line. */
+.ca-todo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr));gap:10px 16px;margin-bottom:12px}
+.ca-todo-grid > .ca-card{margin:0;min-width:0}
+.ca-screen.ca-solo .ca-todo-grid.ca-solo-path{display:block}
+.ca-todo-grid .ca-card-title{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* The kind picture (caKindPicHtml): decoration, on the Today tiles and the
+   Unfinished rows only (and a finished card in Today); hidden everywhere else
+   it is drawn (a "Since your last visit" card, the Completed fold draws none). */
+.ca-kind{display:none}
+.ca-today-grid .ca-kind,.ca-todo-grid .ca-kind{display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  background:var(--ca-accent-bg);color:var(--ca-accent)}
+.ca-kind svg{width:20px;height:20px}
+.ca-todo-grid .ca-card-summary > .ca-kind,.ca-today-grid .ca-card-summary:not(.ca-hero-summary) > .ca-kind{align-self:stretch;width:44px;
+  margin:-12px 0 -12px -14px}
 .ca-todo-summary{display:flex;align-items:center;gap:8px;padding:10px 4px;font-weight:600;color:var(--text2);cursor:pointer;list-style:none}
 .ca-todo-summary::-webkit-details-marker{display:none}
 .ca-todo-summary::before{content:'';width:8px;height:8px;border-right:2px solid var(--text3);border-bottom:2px solid var(--text3);transform:rotate(-45deg);transition:transform .15s;flex-shrink:0}
