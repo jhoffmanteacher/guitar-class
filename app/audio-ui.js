@@ -1266,9 +1266,11 @@ window.addEventListener('resize', () => {
    desktop widths. They never both apply — the collapse button is
    display:none below the drawer breakpoint — so `rail-open` and
    `rail-collapsed` can't fight.
-   Collapsed, the rail is a ~62px icon strip: page icons keep their labels
-   as accessible names (clipped, not removed) and gain a translated
-   title=, the three tools stack, and the module/set block is hidden — the
+   Collapsed, the rail is an 88px strip (a 62px icon strip until Look 1,
+   Part 5, 2026-11-17): each page button and tool shows its word under its
+   icon, the report and privacy links stay icon-only (their words clipped,
+   not removed) with a translated title=, the three tools stack, and the
+   module/set block is hidden — the
    sticky set band names the set now, so the rail is not the only place
    that says where you are.
    Remembered per browser. localStorage is wrapped because a student in a
@@ -1276,7 +1278,8 @@ window.addEventListener('resize', () => {
    right answer there is the ordinary wide rail, not a broken page. */
 const RAIL_COLLAPSE_KEY = 'railCollapsed';
 function railIsCollapsed(){ return document.body.classList.contains('rail-collapsed'); }
-function setRailCollapsed(on){
+/* `save` false: the automatic state below, never written to localStorage. */
+function setRailCollapsed(on, save = true){
   document.body.classList.toggle('rail-collapsed', on);
   const btn = document.getElementById('rail-collapse-btn');
   if(btn){
@@ -1301,13 +1304,36 @@ function setRailCollapsed(on){
       if(el && el.classList.contains('open')) closePopup(w, false);
     });
   }
-  try{ localStorage.setItem(RAIL_COLLAPSE_KEY, on ? '1' : '0'); }catch(e){}
+  if(save){ try{ localStorage.setItem(RAIL_COLLAPSE_KEY, on ? '1' : '0'); }catch(e){} }
 }
+/* Pressing the arrow is the student's choice: saved, and it wins on every page. */
 function toggleRailCollapsed(){ setRailCollapsed(!railIsCollapsed()); }
+/* SLIM WHERE IT HAS NOTHING TO SHOW (Look 1, Part 5, Jonathan, 2026-11-17).
+   A student who has never pressed the arrow (no railCollapsed saved) gets the
+   slim strip on In class, Songs, Games and My progress, and the wide menu on
+   Modules, which holds the module and set picker. Moving between pages
+   switches it (syncExploreNav calls railAutoSync); staying on a page never
+   does. The automatic state is never written to localStorage, so it stays
+   a device setting only once the student presses the arrow, as before. */
+function railSavedChoice(){
+  let v = null;
+  try{ v = localStorage.getItem(RAIL_COLLAPSE_KEY); }catch(e){}
+  return v === '1' || v === '0' ? v : null;
+}
+function railAutoSync(onModules){
+  if(railSavedChoice() !== null) return;
+  const want = !onModules;
+  if(railIsCollapsed() !== want) setRailCollapsed(want, false);
+}
 (function restoreRailCollapsed(){
-  let saved = null;
-  try{ saved = localStorage.getItem(RAIL_COLLAPSE_KEY); }catch(e){}
+  const saved = railSavedChoice();
   if(saved === '1') setRailCollapsed(true);
+  /* No saved choice: guess from the address until the first page shows
+     (syncExploreNav then decides): an explore page's hash means slim. */
+  else if(saved === null){
+    const h = (location.hash || '').replace(/^#/, '').split('/')[0];
+    if(h && h !== 'modules') setRailCollapsed(true, false);
+  }
 })();
 // Picking a station or an Explore item shows the main content — close the
 // drawer so students actually see it instead of the nav still covering it.

@@ -153,7 +153,9 @@ Static HTML/JS/CSS, no build; Firebase + Firestore; GitHub deploy. Module 13 is 
 - **Module 13** has custom tab labels (`stations.b.tabSub`, `checklistSub`), and its
   checklist is the graded assessment. A set is exactly two panels, lesson ladder and
   checklist (the per-set Songs tab was removed 2026-08-27).
-- **No in-panel tab bar**: the rail is the only switcher.
+- **No in-panel tab bar**: the rail is the only switcher. With no saved `railCollapsed` the rail is the slim
+  88px strip (a word under each icon) off Modules and the wide menu on Modules (Look 1, Part 5, 2026-11-17;
+  `railAutoSync`, never saved); the arrow saves the student's choice, which then wins everywhere.
 - **Target screen: Chromebook 1366×657.** Every layout is designed and measured there, and it is the priority. A
   bigger screen shows that same layout enlarged to fill it (`site-fill.js`, 2026-11-13: student site, Song Journey
   pages and the console's Live In-Class Games view, the projector's stage; a new `vh`/`vw` is written
@@ -345,7 +347,7 @@ Every new student-facing shell string goes in `i18n.js` (read its header for wir
 | Sign-in and sign-out (`app/start.js`, `signOut` / `_uidKey` in `app/boot.js`), the hide / unload flushes, any per-student localStorage or sessionStorage key | the header of `tools/shared-chromebook-loop.mjs` | After any change: `node tools/shared-chromebook-loop.mjs` (Node only, about 75 s; it should exit 0 with KNOWN K-TAB inside its printed band) |
 | Fixes blocked by frozen modules | skill `summer-reset` | Add any blocked fix there the same day; raising FROZEN_* never unlocks anything; module progress is never wiped, so a module fix waits for a declared key map (not built yet) |
 | Live quiz | `.claude/rules/live-quiz.md` (loads with `live-quiz.js`) | Nothing on the stage may reveal the answer before the reveal; after any change to `live-quiz.js`, its `lq.*` strings or the answers rule: `node tools/live-quiz-loop.mjs` (about 20-35 s; exit 1 = a rule broke, replay with `--case=<name> --verbose`) |
-| Set band, left rail, nav grid | `.claude/rules/rail-layout.md` (loads with `styles.css`/`index.html`) | The nav two-column grid is permanent — don't re-simplify; measure, don't do arithmetic |
+| Set band, left rail, nav grid | `.claude/rules/rail-layout.md` (loads with `styles.css`/`index.html`) | The wide menu's nav two-column grid is permanent — don't re-simplify; the slim strip (default off Modules) shows a word under each icon; measure, don't do arithmetic |
 | Journey tab cards and Journey-page decisions | `.claude/rules/journey-pages.md` (loads with `tabs/**`) | Restyle `.tab` in both stylesheets or neither |
 | Writing any JS (`app/*.js`, `teacher-*.js`, `coach-*.js`, `live-quiz.js`, `fab-tools.js`, `tuner.js`, `tabs/journey.js`) | `.claude/rules/code-hygiene.md` (loads with those files) | Inline handler args use `jsonAttrArg(x)`, never `'${escAttr(x)}'`; never a mid-line `//`; grep sibling copies and old-behaviour comments before and after a fix; stop everything you start; escape student-written values |
 | Teacher console shared config, **`config/class` write rule** | `.claude/rules/teacher-console.md` (loads with `teacher-*.js`) | A superseded read returns the newest read, never `null`; a diverged write never marks the copy current; visibility via `teacherBoardView(cfg).assigned`; after changing which activities a student sees or lands on (`caIsVisible` / `caBlockers` / `caBoardOrder` / the first-card pick, `showApp`'s landing, the console's or the Journey pages' copies, `classConfigSignature`): `node tools/visible-loop.mjs` (about 16 s); before changing `teacherWriteConfig()`, `loadTeacherClassConfig()` or any `config/class` writer, run `node tools/two-consoles-loop.mjs` before and after and report both tables (today's code fails about 10 to 25 of 1,000 schedules on the listed faults) |

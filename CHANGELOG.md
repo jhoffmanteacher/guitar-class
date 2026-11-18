@@ -6,6 +6,11 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-17 — A slimmer left menu
+
+- **The left menu is now a slim strip on In class, Songs, Games and My progress,** with a short word under each icon, so the page gets more room. On Modules it stays wide, because that is where you pick your module and set.
+- **If you press the arrow at the top of the menu,** the site remembers your choice on that computer and uses it on every page, as before.
+
 ## 2026-11-17 — Lessons: chords beside the directions
 
 - **In One step view, a lesson step with chord diagrams or a picture now shows them beside the directions,** with the play button and the Listening Coach under them. The answer box and the hint buttons are underneath, across the whole width.

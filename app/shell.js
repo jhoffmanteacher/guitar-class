@@ -1052,6 +1052,12 @@ function syncExploreNav(){
      requestAnimationFrame — those don't run in a background tab, so the
      student would come back to a page that hadn't restored itself.) */
   if(inColumn !== wasOpen) scrollPane().scrollTo({ top: inColumn ? 0 : practiceScrollTop });
+  /* The slim / wide menu for a student with no saved choice (railAutoSync,
+     app/audio-ui.js; Look 1, Part 5). Modules = no page open and no explore
+     hash: routeExploreHash() closes the old page before opening the new one,
+     and the hash is already the destination, so going In class → Songs
+     never passes through the wide menu. */
+  if(typeof railAutoSync === 'function') railAutoSync(!open && exploreHashBase(location.hash) === '');
   const activeId = open ? open.btn : 'practice-nav-btn';
   [...EXPLORE_PAGES.map(p => p.btn), 'practice-nav-btn'].forEach(id => {
     const b = document.getElementById(id);

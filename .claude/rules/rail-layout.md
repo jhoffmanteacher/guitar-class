@@ -46,9 +46,18 @@ site-fill.js multiplies their thresholds by the fill. The teacher console
   1000px column; All steps view, a narrower window and print read as before.
 - **The rail has two independent states.**
   - `body.rail-open` is the mobile drawer.
-  - **`body.rail-collapsed`** is the 62px icon strip, toggled by
+  - **`body.rail-collapsed`** is the slim strip, toggled by
     `toggleRailCollapsed()` and remembered in `localStorage` under
-    **`railCollapsed`** (try/catch, defaults to expanded).
+    **`railCollapsed`** (try/catch). Since Look 1, Part 5 (Jonathan,
+    2026-11-17) it is 88px with a word under each page button and tool (the
+    labels are SHOWN there, at 0.6875rem; the report and privacy links stay
+    icon-only), measured to fit in both languages ("Mi progreso",
+    "Canciones"), every button 44px or taller. **With nothing saved**,
+    `railAutoSync()` (called by `syncExploreNav()`) makes it slim on In class,
+    Songs, Games and My progress and wide on Modules, and never writes
+    `railCollapsed`; a saved '1' or '0' (the arrow) wins on every page
+    (checks.mjs 1eu, smoke `railDefaultWalk`). Until 2026-11-17 it was a
+    62px icon strip, defaulting to the wide menu everywhere.
   - They never both apply: the collapse button is `display:none` below the
     drawer breakpoint, and the narrow-layout block unwinds the collapsed rules.
   - On top of either, **an open In class card folds the rail away**
@@ -58,9 +67,10 @@ site-fill.js multiplies their thresholds by the fill. The teacher console
     The header folds with it, `#pm-header` included; since Look 1
     (2026-11-17) the card's bar carries a copy of the minutes strip, and an
     open Focus step also lifts the 1000px column (`body.ca-wide`).
-  - Nav labels are **clipped, never `display:none`**: each is its button's
-    accessible name. `index.html` gives every nav item and every tool a
-    translated `title=`.
+  - Nav labels are **never `display:none`**: each is its button's accessible
+    name. The wide menu shows them; the slim strip shows them under the icon
+    (Look 1, Part 5; they were clipped there until then). `index.html` gives
+    every nav item and every tool a translated `title=`.
 - **The tool dock is 1×3 above 760px** (`.rail-tools`: Tuner, Timer, Metro;
   Record was removed 2026-11-14); the drawer shows the same three labelled
   tiles in one row. The labels do not fit a 252px row, so they are

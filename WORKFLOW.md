@@ -367,6 +367,19 @@ Added 2026-11-17 (Jonathan), a standing rule, not this week only: Sonnet for the
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-17 — Look 1, Part 5: the left menu is slim where it has nothing to show. Fast.**
+      Work order `Claude outputs/WORK-ORDER-look1-redesign.md`. With no `railCollapsed` saved, `railAutoSync()`
+      (app/audio-ui.js, called by `syncExploreNav()` with "Modules = no page open and no explore hash") makes the rail
+      the slim strip on In class, Songs, Games and My progress and the wide menu on Modules; never written to
+      localStorage; at load a non-Modules hash starts slim. The arrow (`toggleRailCollapsed`) saves as before and a
+      saved '1' / '0' wins on every page. The strip is 88px (was 62px) with each page button's and tool's word under
+      its icon (0.6875rem; report/privacy stay icon-only); rules above 760px only, so the phone drawer is unchanged.
+      Measured at 1366x657: labels fit 8 of 8 in EN and in ES, every button ≥44px; the wide menu's slack on Modules
+      (m4w2, dev bypass) −70px before and after; no saved choice: 4 pages slim, Modules wide, EN and ES, nothing saved;
+      saved '1' / '0' held on In class, Modules and Songs; a tool popup opens beside the strip; 390px: the drawer as
+      before. Pins: 1eu (new: the real railAutoSync / setRailCollapsed / toggleRailCollapsed, 6 cases), smoke
+      `railDefaultWalk` (the arrow, two reloads). `shared-chromebook-loop`: see the report.
+
 - [x] **2026-11-17 — Look 1, Part 4: a lesson step with its chords beside it; review rounds 1-2 on Parts 1-3. Fast.**
       Work order `Claude outputs/WORK-ORDER-look1-redesign.md`. `buildLesson` marks a step `.step-2col` when it has
       chord diagrams or a figure and no tab (102 of 377 visible steps: 69 chord steps with no tab, 35 figure steps, 2

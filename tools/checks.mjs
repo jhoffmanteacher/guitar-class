@@ -12797,6 +12797,56 @@ function checkRosterSkipsTrainerStub() {
    - teacherFetchStudents keeps only whole counts 1..1000 per song from a
      student-written map (strings, negatives, NaN, huge numbers, a non-object).
    Pinned: every library song (1 button each), 3 non-counted sign-ins, 8 doctored values. */
+/* 1eu. THE LEFT MENU IS SLIM WHERE IT HAS NOTHING TO SHOW (Look 1, Part 5,
+   Jonathan, 2026-11-17). A student who never pressed the arrow (no
+   railCollapsed saved) gets the slim strip off Modules and the wide menu on
+   Modules, and that automatic state is never written; a saved '1' or '0'
+   wins on every page; pressing the arrow saves. Runs the REAL
+   railAutoSync / setRailCollapsed / toggleRailCollapsed in the 0b context
+   with a stub body and storage, and checks syncExploreNav still hands it
+   "Modules = no page open and no explore hash". tools/smoke.mjs
+   (railDefaultWalk) clicks the arrow and reloads in a real browser. */
+function checkRailDefault(ctx) {
+  head('1eu. Left menu: slim off Modules, wide on Modules, for a student with no saved choice; a saved choice wins');
+  let bad = 0, cases = 0;
+  const flag = m => { err('1eu: ' + m); problems++; bad++; };
+  if (!ctx) { flag('cannot run — the 0b render context is unavailable'); return; }
+  const run = x => vm.runInContext(x, ctx);
+  for (const fn of ['railAutoSync', 'setRailCollapsed', 'toggleRailCollapsed', 'syncExploreNav']) if (run(`typeof ${fn}`) !== 'function') { flag(`${fn}() not found (renamed? update 1eu with it)`); return; }
+  const doc = ctx.document, keepBody = doc.body, keepGid = doc.getElementById;
+  const set = new Set();
+  const body = { classList: { contains: c => set.has(c), toggle: (c, on) => { const v = on === undefined ? !set.has(c) : !!on; v ? set.add(c) : set.delete(c); return v; }, add: c => set.add(c), remove: c => set.delete(c) }, style: { setProperty() {} } };
+  try {
+    doc.body = body;
+    doc.getElementById = id => (id === 'rail-collapse-btn' ? null : keepGid(id));
+    const store = run('localStorage');
+    const want = (cond, msg) => { cases++; if (!cond) flag(msg); };
+    const state = () => ({ slim: set.has('rail-collapsed'), saved: store.getItem('railCollapsed') });
+    // No saved choice.
+    store.removeItem('railCollapsed'); set.clear();
+    run('railAutoSync(false)'); let s1 = state();
+    want(s1.slim && s1.saved === null, `no saved choice, off Modules: want the slim strip and nothing saved, got ${JSON.stringify(s1)}`);
+    run('railAutoSync(true)'); s1 = state();
+    want(!s1.slim && s1.saved === null, `no saved choice, on Modules: want the wide menu and nothing saved, got ${JSON.stringify(s1)}`);
+    // A saved choice wins on every page.
+    for (const v of ['1', '0']) {
+      store.setItem('railCollapsed', v); set.clear(); if (v === '1') set.add('rail-collapsed');
+      run('railAutoSync(true)'); const a = state(); run('railAutoSync(false)'); const b = state();
+      want(a.slim === (v === '1') && b.slim === (v === '1') && a.saved === v && b.saved === v, `saved '${v}': the menu must stay ${v === '1' ? 'slim' : 'wide'} on Modules and off it, got ${JSON.stringify([a, b])}`);
+    }
+    // Pressing the arrow saves.
+    store.removeItem('railCollapsed'); set.clear();
+    run('toggleRailCollapsed()'); const c = state();
+    want(c.slim && c.saved === '1', `the arrow must save the student's choice: got ${JSON.stringify(c)}`);
+    store.removeItem('railCollapsed'); set.clear();
+  } catch (e) { flag('the rail code threw — ' + e.message); }
+  finally { doc.body = keepBody; doc.getElementById = keepGid; }
+  const src = run('syncExploreNav.toString()');
+  cases++;
+  if (!/railAutoSync\(!open && exploreHashBase\(location\.hash\) === ''\)/.test(src)) flag("syncExploreNav() must call railAutoSync(!open && exploreHashBase(location.hash) === '') — Modules is no page open and no explore hash");
+  if (cases !== 6) flag(`ran ${cases} cases, pinned 6`);
+  if (!bad) ok(`1eu: railAutoSync run for real: no saved choice gives the slim strip off Modules and the wide menu on Modules and saves nothing; a saved '1' / '0' wins on both; the arrow saves; syncExploreNav decides Modules by "no page and no explore hash" (${cases} cases)`);
+}
 /* 1et. A LESSON STEP WITH ITS CHORDS BESIDE IT (Look 1, Part 4, Jonathan,
    2026-11-17). buildLesson marks a step .step-2col exactly when it has chord
    diagrams or a figure and no tab; styles.css lays that out in two columns in
@@ -22508,6 +22558,7 @@ function checkNeverRules(sets) {
   await checkSongPopularity(rcCtx);
   checkSongTiles(rcCtx);
   checkLessonTwoCol(rcSets, rcCtx);
+  checkRailDefault(rcCtx);
   checkPowerChordPopups(rcSets, rcCtx);
   checkPendingFileSwitch(rcCtx);
   checkTodayByDate(rcCtx);
