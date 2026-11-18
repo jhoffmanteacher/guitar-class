@@ -1697,7 +1697,7 @@ async function cardKeysWalk(page, run, events, stats, base) {
 /* Today's activities side by side (Jonathan, 2026-11-10, work order Part 3). In a real browser, in each language,
    with today stubbed, at 1366x657 (set here: between walks the page is at the headless window's own size, which is
    phone width): the three longest titles a student can be given plus a finished card make a two-column grid (equal
-   widths, reading order = Tab order); no tile's title runs past two lines and nothing sticks out of its tile or the
+   widths, reading order = Tab order); no tile's title runs past three lines and nothing sticks out of its tile or the
    page; at 390px the same four are one column with no sideways scroll; one Today card takes the whole width; an open
    Today card takes the whole width. Everything it sets (today, the dates, the finished mark, the window size) is put
    back. A checkout without the grid (the baseline) skips it. */
@@ -1750,8 +1750,8 @@ async function todayGridWalk(page, run, events, stats) {
         fail(w, `4 Today cards should be a two-column grid of equal tiles: ${JSON.stringify(four.tiles.map(t => [t.id, t.x, t.w]))}`);
       if (four.byEye !== four.dom) fail(w, `reading order ${four.byEye} is not the Tab order ${four.dom}`);
       for (const t of four.tiles) {
-        // One line since Look 1, Part 2 (2026-11-17): a long title ends in an ellipsis instead of growing the tile.
-        if (t.lines > 1) fail(w, `${t.id}'s title runs to ${t.lines} lines in a tile (one line, ending in an ellipsis): "${t.title}"`);
+        // The whole title, at most three lines (2026-11-18; one line with an ellipsis from 2026-11-17 cut most titles).
+        if (t.lines > 3) fail(w, `${t.id}'s title runs to ${t.lines} lines in a tile (three at most): "${t.title}"`);
         if (t.out.length) fail(w, `${t.id}: ${t.out.slice(0, 4).join(', ')} sticks out of its tile`);
       }
       if (four.pageScroll > 0) fail(w, `the page scrolls sideways by ${four.pageScroll}px`);

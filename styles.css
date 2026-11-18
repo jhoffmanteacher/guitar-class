@@ -4032,9 +4032,8 @@ span.tab-count-held{margin-left:4px}
    Two columns only when each tile gets 440px: 2 at 1366x657, where the column
    is 944px; one on a phone, a narrow window or a zoomed-in Chromebook (125%
    leaves ~840px). The content column never reaches the 1352px a third would
-   need. Since Look 1, Part 2 (2026-11-17) a tile's title and its line are ONE
-   line each, ending in an ellipsis (below); before, every title was measured
-   to fit in two lines at 464px. */
+   need. A tile's title wraps to at most three lines and its where-line is one
+   line ending in an ellipsis (below, 2026-11-18). */
 .ca-today-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:16px;margin-bottom:12px}
 .ca-today-grid > .ca-card{margin:0;min-width:0}
 /* A finished card in Today's list is a one-line row (caActivityCardHtml), not
@@ -4045,21 +4044,26 @@ span.tab-count-held{margin-left:4px}
 .ca-today-grid--multi .ca-hero-side{width:auto;justify-content:center}
 .ca-screen.ca-solo .ca-today-grid.ca-solo-path{display:block}
 /* A Today tile (Look 1, Part 2, Jonathan, 2026-11-17): the kind picture as a
-   block at the left edge, then the title on ONE line, ONE line saying where
+   block at the left edge, then the title (whole, up to three lines since 2026-11-18), ONE line saying where
    the student is (caWhereLine: "Step 2 of 4: D5"; a practice card or an
    unstarted unnamed ladder keeps the intro's first sentence), the dots,
-   and the button at the right, centred. Both lines end in an ellipsis
-   rather than wrap, so a tile never grows taller for a long title (until
-   2026-11-17 the title took the tile's whole width and wrapped, six Spanish
-   titles to three lines). A phone keeps the stacked hero, no picture. */
+   and the button at the right, centred. The where-line ends in an ellipsis;
+   the title wraps (from 2026-11-17 to 11-18 it was one line with an ellipsis,
+   which cut 77 of 98 titles). A phone keeps the stacked hero, no picture. */
 @media(min-width:761px){
   .ca-today-grid .ca-hero-summary{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:14px;
     align-items:center;padding:0 16px 0 0;min-height:104px}
   .ca-today-grid .ca-hero-summary > .ca-kind{align-self:stretch;width:56px}
   .ca-today-grid .ca-kind svg{width:26px;height:26px}
   .ca-today-grid .ca-hero-main{padding:14px 0;min-width:0}
-  .ca-today-grid .ca-hero-main > .ca-hero-title,.ca-today-grid .ca-hero-main > .ca-hero-blurb{align-self:stretch;
+  .ca-today-grid .ca-hero-main > .ca-hero-blurb{align-self:stretch;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* The title shows WHOLE (Jonathan, 2026-11-18: "the font is too large to display the full titles"):
+     smaller, and it wraps. At 1366x657 the title column is 275px; at this size 89 of the 98 titles
+     (EN + ES) fit in two lines and all 98 in three (measured 2026-11-18), so the clamp at three never
+     cuts a title today; it only guards a future long one. Reverses the one-line rule of Look 1, Part 2. */
+  .ca-today-grid .ca-hero-main > .ca-hero-title{align-self:stretch;font-size:1.0625rem;line-height:1.25;
+    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden}
   .ca-today-grid .ca-hero-side{grid-column:3}
 }
 @media(max-width:760px){.ca-today-grid .ca-hero-summary > .ca-kind{display:none}}
@@ -4160,11 +4164,16 @@ span.tab-count-held{margin-left:4px}
    right, then down, the same order as before. auto-fill keeps a lone last
    row half width; one column under 400px a column (a phone, a zoomed-in
    window). An open card takes the whole width (its .ca-solo-path). Each row
-   starts with its kind picture and keeps its number and title on one line. */
+   starts with its kind picture; its number and title wrap to two lines at most. */
 .ca-todo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,400px),1fr));gap:10px 16px;margin-bottom:12px}
 .ca-todo-grid > .ca-card{margin:0;min-width:0}
 .ca-screen.ca-solo .ca-todo-grid.ca-solo-path{display:block}
-.ca-todo-grid .ca-card-title{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* The title shows whole (2026-11-18): a bit smaller, wrapping to two lines at most
+   (one line with an ellipsis from 2026-11-17 cut many titles at 1366x657). */
+.ca-todo-grid .ca-card-title{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;
+  overflow:hidden;font-size:0.9375rem;line-height:1.3}
+/* A one-line row beside a two-line one: its summary (and kind picture) fills the stretched row. */
+.ca-todo-grid > .ca-card:not([open]) > .ca-card-summary{height:100%;box-sizing:border-box}
 /* The kind picture (caKindPicHtml): decoration, on the Today tiles and the
    Unfinished rows only (and a finished card in Today); hidden everywhere else
    it is drawn (a "Since your last visit" card, the Completed fold draws none). */

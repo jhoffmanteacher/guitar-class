@@ -6,6 +6,10 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-18 — Whole activity titles on In class
+
+- **Activity titles on the In class page show in full.** Today's cards use a smaller title that wraps to a second (or third) line instead of ending in "…", and the Unfinished list wraps to two lines.
+
 ## 2026-11-18 — Fixes to the new menu and lesson steps
 
 - **Opening Find on Modules no longer folds the left menu** into the slim strip.
