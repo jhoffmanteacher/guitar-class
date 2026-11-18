@@ -6,7 +6,7 @@
   "hosting": {
     "public": ".",
     "predeploy": [
-      "node -e \"if (process.env.GITHUB_ACTIONS !== 'true') { console.error('The practice copy is published by GitHub only (.github/workflows/practice.yml), never by a firebase deploy typed on this computer: nothing was uploaded.'); process.exit(1); }\""
+      "node tools/practice-predeploy.cjs"
     ],
     "ignore": [
       "**/.*",

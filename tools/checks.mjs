@@ -7700,8 +7700,16 @@ function checkPracticeCopy() {
     const lost = MUST.filter(m => !ig.includes(m));
     if (lost.length) flag(`firebase.json hosting.ignore lost ${lost.map(m => `"${m}"`).join(', ')}: a deploy would publish ${lost.length === 1 ? 'it' : 'them'}`);
     if (!j.hosting || j.hosting.public !== '.') flag('firebase.json hosting.public must stay "." (the files are the same on both addresses)');
-    const pre = JSON.stringify((j.hosting && j.hosting.predeploy) || '');
-    if (!/process\.env\.GITHUB_ACTIONS !== 'true'/.test(pre) || !/process\.exit\(1\)/.test(pre)) flag('firebase.json lost the hosting predeploy that stops a `firebase deploy` typed on a Mac (only GitHub publishes the practice copy)');
+    // The predeploy is run, not read: firebase-tools passes it through cross-env-shell, which strips quotes, so it
+    // must be the one quote-free command below, and the script must refuse off GitHub and pass on it (2026-11-18:
+    // the old inline `node -e "…'true'…"` crashed on GitHub and blocked every publish).
+    const preList = (j.hosting && j.hosting.predeploy) || [];
+    if (JSON.stringify(preList) !== JSON.stringify(['node tools/practice-predeploy.cjs'])) flag('firebase.json hosting.predeploy must be exactly ["node tools/practice-predeploy.cjs"] (no quotes: firebase-tools strips them)');
+    else {
+      const runPre = gha => spawnSync(process.execPath, [join(ROOT, 'tools', 'practice-predeploy.cjs')], { env: { ...process.env, GITHUB_ACTIONS: gha }, encoding: 'utf8' }).status;
+      const off = runPre(''), on = runPre('true');
+      if (off !== 1 || on !== 0) flag(`tools/practice-predeploy.cjs must exit 1 off GitHub and 0 on it (got ${off} and ${on}): a deploy typed on a Mac would publish, or GitHub could not`);
+    }
     if (!j.firestore || j.firestore.rules !== 'firestore.rules') flag('firebase.json lost its firestore block (the emulator tools and the practice rules deploy read it)');
     // Every file a page needs stays published: sw.js's lists, every top-level page and script, tabs/, app/.
     const { matchesGlob } = (process.getBuiltinModule && process.getBuiltinModule('node:path')) || {};
