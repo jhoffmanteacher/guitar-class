@@ -367,6 +367,20 @@ Added 2026-11-17 (Jonathan), a standing rule, not this week only: Sonnet for the
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-17 — Look 1, Part 3: Songs as tiles. Fast.**
+      Work order `Claude outputs/WORK-ORDER-look1-redesign.md`. The six Core songs are tiles, three to a row
+      (`.sh-core-grid`, one column ≤760px): a colour block (decoration, by position), the title and the artist (the
+      song's name split at " — ", quotes dropped), ONE main button from `songsCoreActsHtml` (Play Along when
+      `songsPlayAlongCard()` finds a card, else Song Journey) and the backing track (+ Song Journey beside Play Along)
+      small under it; `refreshSongsPlayAlong()` redraws a tile's slot (`data-idx`). The rows' lesson notes are not on
+      the tiles. More Play Along songs: one wrapping row of `.sh-lib-btn` (▶ + name), each through the unchanged
+      `songsLibraryOpen` (the `songOpens` write untouched). "Request a song" (`#sr-slot`) moves into the page's top
+      bar; the legend moves down above the Choice menu (its dots are only there now). Measured at 1366x657, EN and ES:
+      2 rows × 3 tiles of equal height (159px), all above the library row, nothing sticks out, "Toca con la canción"
+      and both links fit (the links take two lines in a tile). Pins: 1es (new: `songsCoreActsHtml` run in 4 cases, one
+      main button, Play Along only with a card; the 3-column grid) and 1ch (one button per library song, the write
+      unchanged); `tools/smoke.mjs` `songTilesWalk` clicks each tile's main button and each library button.
+
 - [x] **2026-11-17 — Look 1, Part 2: the In class list. Fast.**
       Work order `Claude outputs/WORK-ORDER-look1-redesign.md`. Today tiles: the kind picture as a left block
       (`caKindPicHtml`, inline SVG, `aria-hidden`: note / strum arrows / bars by `caKind`), the title and ONE where-you-are

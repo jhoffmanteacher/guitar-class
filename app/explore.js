@@ -313,21 +313,13 @@ async function renderSongsHub(){
     /* Index-based handlers: song names with apostrophes (Sweet Child O'
        Mine…) break when inlined into onclick. */
     const vids = [];
-    /* Core rows (Jonathan, 2026-10-05: "too much going on"): exactly three
-       links, in this order — Play Along (the song's whole-song practice card,
-       only once one is released), Backing track for solos, Song Journey. No
-       Tutorial or Original here; Choice rows keep their own set below. */
-    if(isCoreSix(e)){
-      const slug = songJourneySlug(sg);
-      vids.push(`<span class="sh-play-slot" data-slug="${escAttr(slug)}">${songsPlayAlongBtn(slug)}</span>`);
-      if(sg.backingUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'backing')"><span class="svb-play">&#x25B6;</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> ${t('hub.backingSolos')}${sg.backingKey ? ` (${escHtml(sg.backingKey)})` : ''}</button>`);
-      if(sg.journeyUrl) vids.push(`<button class="song-vid-btn journey" onclick="songsHubVid(${idx},'journey')" title="${escAttr(t('songs.oneSongLayers'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> ${t('songs.songJourney')}</button>`);
-    } else {
+    /* The six Core songs are tiles since Look 1, Part 3 (tile(), below:
+       Play Along or Song Journey as the main button, the backing track and
+       the Song Journey small). Rows are the Choice menu and requests only. */
     if(sg.journeyUrl) vids.push(`<button class="song-vid-btn journey" onclick="songsHubVid(${idx},'journey')" title="${escAttr(t('songs.oneSongLayers'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> ${t('songs.songJourney')}</button>`);
     if(sg.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="songsHubVid(${idx},'tutorial')"><span class="svb-play">&#x25B6;</span>${t('songs.tutorial')}</button>`);
     if(sg.backingUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'backing')"><span class="svb-play">&#x25B6;</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> ${t('hub.backing')}${sg.backingKey ? ` (${escHtml(sg.backingKey)})` : ''}</button>`);
     if(sg.originalUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'original')" title="${escAttr(t('songs.opensYoutube'))}"><span class="svb-play">&#x25B6;</span>${t('songs.original')} <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`);
-    }
     // The six pinned rows sit directly under the "Core songs" section header,
     // where the tag would just repeat it — suppress there only; Focus songs
     // (core:true, type:'Focus') still show their tag inside the choice groups.
@@ -338,15 +330,39 @@ async function renderSongsHub(){
       ${tagHtml}</div>`;
   };
   const renderRows = list => list.map(row).join('');
-  const coreHtml = `<div class="sh-sec-title" role="heading" aria-level="3">${t('hub.coreTitle')}</div><div class="card">${renderRows(coreEntries)}</div>`;
+  /* The six Core songs as tiles, three to a row (Look 1, Part 3, Jonathan,
+     2026-11-17): a colour block (decoration, aria-hidden), the title and the
+     artist (the song's name split at " — "), ONE main button and the other
+     links small under it (songsCoreActsHtml). Same order (CORE_FIRST, then
+     A-Z), same index into songsHubList as the rows had. */
+  const tile = e => {
+    const idx = rowIdx++;
+    const sg = e.song;
+    const nm = tf(sg, 'name'), cut = nm.indexOf(' — ');
+    const title = (cut > 0 ? nm.slice(0, cut) : nm).replace(/^["“”]+|["“”]+$/g, '');
+    const artist = cut > 0 ? nm.slice(cut + 3) : '';
+    return `<div class="sh-tile"><span class="sh-tile-pic" aria-hidden="true">${SH_NOTE_SVG}</span><div class="sh-tile-body">`
+      + `<div class="sh-tile-name">${escHtml(title)}</div>${artist ? `<div class="sh-tile-artist">${escHtml(artist)}</div>` : ''}`
+      + `<div class="sh-play-slot sh-tile-acts" data-slug="${escAttr(songJourneySlug(sg))}" data-idx="${idx}">${songsCoreActsHtml(sg, idx)}</div></div></div>`;
+  };
+  const coreHtml = `<div class="sh-sec-title" role="heading" aria-level="3">${t('hub.coreTitle')}</div><div class="sh-core-grid">${coreEntries.map(tile).join('')}</div>`;
   const groupsHtml = `<div class="sh-sec-title" role="heading" aria-level="3">${t('hub.choiceTitle')}</div>` + groups.map((g, gi) =>
     `<div class="sh-group${gi === 0 ? ' open' : ''}"><button type="button" class="sh-group-head" aria-expanded="${gi === 0}" onclick="toggleHubGroup(this)"><span>${g.title}</span><span class="sh-group-sub">${g.sub}</span><span class="sh-group-count">${t('hub.groupCount', {n: g.entries.length})}</span></button><div class="sh-group-body">${renderRows(g.entries)}</div></div>`).join('');
   const requestHtml = requestEntries.length ? `<div class="card">${renderRows(requestEntries)}</div>` : '';
   // The Mood Chart row that sat here was removed 2026-10-02 (Jonathan). The
   // page itself, mood-chart.html, still ships — nothing on the site links it.
-  /* #sr-slot: "Request a song" and the student's own requests (app/songrequests.js). */
-  p.innerHTML = `<div class="sr-box" id="sr-slot" hidden></div><div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('hub.legendCore')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('hub.legendChoice')}</div></div>
-    ${coreHtml}<div class="sh-lib-slot">${songsLibraryHtml()}</div>${groupsHtml}${requestHtml}`;
+  /* #sr-slot: "Request a song" and the student's own requests (app/songrequests.js).
+     Since Look 1, Part 3 (2026-11-17) it sits in the page's top bar beside the
+     title (same words and behaviour); one #sr-slot on the page, so an old one
+     is removed first. Without the bar it stays at the top of the page. */
+  document.querySelectorAll('#sr-slot').forEach(el => el.remove());
+  const srBar = document.querySelector('#songs-screen .page-topbar');
+  if(srBar) srBar.insertAdjacentHTML('beforeend', '<div class="sr-box sr-box--bar" id="sr-slot" hidden></div>');
+  /* The legend's dots are on the Choice menu's rows only since the Core songs
+     became tiles (Look 1, Part 3), so it sits just above that menu. */
+  const legendHtml = `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('hub.legendCore')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('hub.legendChoice')}</div></div>`;
+  p.innerHTML = `${srBar ? '' : '<div class="sr-box" id="sr-slot" hidden></div>'}
+    ${coreHtml}<div class="sh-lib-slot">${songsLibraryHtml()}</div>${legendHtml}${groupsHtml}${requestHtml}`;
   if(typeof srLoad === 'function') srLoad();
 }
 /* "More Play Along songs" — the song library (see caIsLibrarySong), between
@@ -364,15 +380,15 @@ function songsLibraryHtml(){
   // Along) show their full titles, so the rows can be told apart.
   const name = a => cards.filter(b => short(b) === short(a)).length > 1 ? caTitle(a) : short(a);
   cards.sort((x, y) => name(x).localeCompare(name(y)));
-  const rows = cards.map(a => {
+  /* One wrapping row of buttons, one per song, in this order (Look 1, Part 3,
+     2026-11-17): ▶ and the song's name, ✓ once done. Until then each song was
+     a row with its name and a Play Along button, both opening the card. The
+     click still goes through songsLibraryOpen (the song-open count). */
+  const btns = cards.map(a => {
     const done = classActivities[a.id] === true;
-    const btn = `<button type="button" class="song-vid-btn sh-play-btn${done ? ' done' : ''}" onclick="songsLibraryOpen(${jsonAttrArg(a.id)})"><span class="svb-play">&#x25B6;</span>${t('hub.playAlong')}${done ? ` <svg class="sh-play-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${escAttr(t('hub.playAlongDone'))}"><path d="M5 12.5l4.5 4.5L19 7"/></svg>` : ''}</button>`;
-    // The song name opens the same card as its Play Along button (2026-10-27).
-    return `<div class="song-row"><div class="dot dch"></div>
-      <div class="song-name-col"><button type="button" class="sname sname-link" onclick="songsLibraryOpen(${jsonAttrArg(a.id)})">${escHtml(name(a))}</button></div>
-      <div class="song-vids">${btn}</div></div>`;
+    return `<button type="button" class="sh-lib-btn${done ? ' done' : ''}" onclick="songsLibraryOpen(${jsonAttrArg(a.id)})"><span class="svb-play" aria-hidden="true">&#x25B6;</span>${escHtml(name(a))}${done ? ` <svg class="sh-play-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${escAttr(t('hub.playAlongDone'))}"><path d="M5 12.5l4.5 4.5L19 7"/></svg>` : ''}</button>`;
   }).join('');
-  return `<div class="sh-sec-title" role="heading" aria-level="3">${t('hub.libraryTitle')}</div><div class="card">${rows}</div>`;
+  return `<div class="sh-sec-title" role="heading" aria-level="3">${t('hub.libraryTitle')}</div><div class="sh-lib-row">${btns}</div>`;
 }
 
 /* Songs-hub difficulty group open/close (header button). */
@@ -427,6 +443,22 @@ function songsPlayAlongBtn(slug){
   const done = classActivities[a.id] === true;
   return `<button type="button" class="song-vid-btn sh-play-btn${done ? ' done' : ''}" onclick="songsHubOpenCard('${escAttr(a.id)}')"><span class="svb-play">&#x25B6;</span>${t('hub.playAlong')}${done ? ` <svg class="sh-play-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="${escAttr(t('hub.playAlongDone'))}"><path d="M5 12.5l4.5 4.5L19 7"/></svg>` : ''}</button>`;
 }
+/* A Core tile's buttons (Look 1, Part 3): ONE main button, Play Along when
+   songsPlayAlongCard() finds a card now, else Song Journey; under it, small,
+   the backing track for solos and (when the main button is Play Along) the
+   Song Journey. Never two main buttons, never a Play Along that opens
+   nothing. refreshSongsPlayAlong() redraws it when the class settings land. */
+const SH_NOTE_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>';
+const SH_JOURNEY_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg>';
+function songsCoreActsHtml(sg, idx){
+  if(!sg) return '';
+  const play = songsPlayAlongBtn(songJourneySlug(sg));
+  const journey = cls => sg.journeyUrl ? `<button type="button" class="${cls}" onclick="songsHubVid(${idx},'journey')" title="${escAttr(t('songs.oneSongLayers'))}">${cls.includes('sh-tile-link') ? '' : SH_JOURNEY_SVG + ' '}${t('songs.songJourney')}</button>` : '';
+  const main = play || journey('song-vid-btn journey sh-tile-main');
+  const links = (sg.backingUrl ? `<button type="button" class="sh-tile-link" onclick="songsHubVid(${idx},'backing')">${t('hub.backingSolos')}${sg.backingKey ? ` (${escHtml(sg.backingKey)})` : ''}</button>` : '')
+    + (play ? journey('sh-tile-link') : '');
+  return main + (links ? `<div class="sh-tile-links">${links}</div>` : '');
+}
 function songsHubOpenCard(id){
   caSwap = null;   // from the Songs page it opens under the Songs heading, not in a card's slot
   goExploreHash('class-activities/' + id);
@@ -471,7 +503,8 @@ function refreshSongsPlayAlong(){
   const screen = document.getElementById('songs-screen');
   if(!screen || screen.hidden) return;
   screen.querySelectorAll('.sh-play-slot').forEach(slot => {
-    const html = songsPlayAlongBtn(slot.dataset.slug);
+    // A Core tile's slot (data-idx) holds its main button and its links (songsCoreActsHtml).
+    const html = slot.dataset.idx !== undefined ? songsCoreActsHtml(songsHubList[Number(slot.dataset.idx)], Number(slot.dataset.idx)) : songsPlayAlongBtn(slot.dataset.slug);
     if(songsSlotDiffers(slot, html)) slot.innerHTML = html;
   });
   // The library list reads Hidden / Archive / Delete from the class config.

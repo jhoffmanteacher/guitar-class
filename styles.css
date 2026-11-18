@@ -637,7 +637,49 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .sh-play-slot{display:contents}
 .song-vid-btn.sh-play-btn{border-color:var(--border2);color:var(--text)}
 .sh-play-check{width:1em;height:1em;color:var(--green-text)}
-.legend{display:flex;gap:14px;margin-bottom:8px}
+.legend{display:flex;gap:14px;margin:14px 2px -4px}
+/* ── Songs as tiles (Look 1, Part 3, Jonathan, 2026-11-17) ──
+   The six Core songs, three to a row at 1366x657 (one column under 760px): a
+   colour block with a note (decoration: aria-hidden, colours by position, no
+   art or photos), the title, the artist, ONE main button (Play Along, or Song
+   Journey when no play-along can open) and the other links small under it
+   (songsCoreActsHtml). Every tile in a row the same height. */
+.sh-core-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:6px}
+@media(max-width:760px){.sh-core-grid{grid-template-columns:minmax(0,1fr)}}
+.sh-tile{display:flex;min-width:0;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-card);overflow:hidden}
+.sh-tile-pic{flex:0 0 56px;display:flex;align-items:center;justify-content:center;color:#fff;background:var(--sh-tile,#7a2e2e)}
+.sh-tile-pic svg{width:26px;height:26px}
+.sh-core-grid > .sh-tile:nth-child(6n+1){--sh-tile:#8a2f2f}
+.sh-core-grid > .sh-tile:nth-child(6n+2){--sh-tile:#2b5e88}
+.sh-core-grid > .sh-tile:nth-child(6n+3){--sh-tile:#6a3f9e}
+.sh-core-grid > .sh-tile:nth-child(6n+4){--sh-tile:#3c6b1d}
+.sh-core-grid > .sh-tile:nth-child(6n+5){--sh-tile:#9c4f0b}
+.sh-core-grid > .sh-tile:nth-child(6n+6){--sh-tile:#1e6b67}
+.sh-tile-body{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 12px 10px 14px}
+.sh-tile-name{font-weight:700;font-size:1.0625rem;color:var(--text);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sh-tile-artist{font-size:0.875rem;color:var(--text2);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sh-tile-acts{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-top:8px;max-width:100%}
+.sh-tile .song-vid-btn.sh-play-btn,.sh-tile .song-vid-btn.sh-tile-main{font-size:0.9375rem;font-weight:700;padding:8px 16px;min-height:40px;border-radius:12px;
+  background:var(--brand);border-color:var(--brand);color:var(--brand-text)}
+.sh-tile .song-vid-btn.sh-play-btn .svb-play{color:inherit}
+.sh-tile .song-vid-btn.sh-play-btn:hover,.sh-tile .song-vid-btn.sh-tile-main:hover{filter:brightness(1.1)}
+.sh-tile .song-vid-btn.sh-play-btn .sh-play-check{color:inherit}
+.sh-tile-links{display:flex;flex-wrap:wrap;gap:2px 12px;max-width:100%}
+.sh-tile-link{font-family:inherit;font-size:0.8125rem;padding:2px 0;border:0;background:none;color:var(--blue-text);text-decoration:underline;cursor:pointer;text-align:left}
+.sh-tile-link:hover{color:var(--text)}
+.sh-tile-link:focus-visible,.sh-lib-btn:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
+/* More Play Along songs: one wrapping row of buttons, one per song, same order (songsLibraryHtml). */
+.sh-lib-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+.sh-lib-btn{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:6px 16px;font-family:inherit;font-size:0.9375rem;font-weight:600;
+  border:1px solid var(--border2);border-radius:20px;background:var(--bg);color:var(--text);cursor:pointer}
+.sh-lib-btn:hover{border-color:var(--text2)}
+.sh-lib-btn .svb-play{color:var(--green-text);font-size:0.75rem}
+/* "Request a song" beside the page title (#sr-slot, app/songrequests.js; renderSongsHub puts it in the top bar). */
+.page-topbar > .sr-box--bar{margin:0;padding:0;border:0;background:none;flex:0 1 auto;max-width:62%}
+.page-topbar > .sr-box--bar .sr-head{justify-content:flex-end}
+.page-topbar > .sr-box--bar .sr-line{flex:0 1 auto;text-align:right;color:var(--text2)}
+@media(max-width:760px){#songs-screen .page-topbar{flex-wrap:wrap}.page-topbar > .sr-box--bar{max-width:100%;flex-basis:100%}
+  .page-topbar > .sr-box--bar .sr-head{justify-content:flex-start}.page-topbar > .sr-box--bar .sr-line{text-align:left}}
 .leg{display:flex;align-items:center;gap:5px;font-size:0.875rem;color:var(--text2)}
 .ablock{background:var(--bg3);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px}
 .albl{font-size:0.8125rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:4px}

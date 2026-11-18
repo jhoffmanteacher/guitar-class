@@ -684,9 +684,18 @@ Normal (Jonathan, 2026-10-09: "just below the normal speed of each song").
 **Each Core song row links its whole-song practice card** (Jonathan,
 2026-10-05). The Core list is the only place: no section listing part cards
 atop the Songs page ("too much going on").
-- A Core row shows exactly three links, in this order: **Play Along · Backing
-  track for solos · Song Journey**. No Tutorial or Original on Core rows
-  (Choice rows keep theirs).
+- A Core song is a **tile** since Look 1, Part 3 (Jonathan, 2026-11-17;
+  `songsCoreActsHtml`, three to a row, `.sh-core-grid`): a colour block
+  (decoration), the title and the artist (its name split at " — "), ONE main
+  button, **Play Along** when `songsPlayAlongCard()` finds a card at that
+  moment, otherwise **Song Journey**; under it, small, **Backing track for
+  solos** and (only beside Play Along) **Song Journey**. Never two main
+  buttons, never a Play Along that opens nothing (checks.mjs **1es**,
+  `tools/smoke.mjs` `songTilesWalk`). The rows' old lesson notes ("Listen —
+  the riff…") are not on the tiles. No Tutorial or Original on Core tiles
+  (Choice rows keep theirs). "More Play Along songs" is one wrapping row of
+  buttons, ▶ and the song's name, each through `songsLibraryOpen` (the
+  song-open count, 1ch). "Request a song" sits in the page's top bar.
 - `CORE_FIRST` (Seven Nation Army, Watchtower, "the cure") leads; the rest
   are alphabetical.
 - Play Along opens the song's `view: 'card'` activity with `card.wholeSong`
@@ -700,9 +709,10 @@ atop the Songs page ("too much going on").
   render the card a second time on the Songs page: the `pc*` engine and the
   open-card state (`caOpenId`, `caSyncHash`, the sticky bar) belong to
   In-Class Activities.
-- `songsPlayAlongBtn(slug)` builds the link inside a `.sh-play-slot`
-  (`display:contents`); `refreshSongsPlayAlong()` (end of `loadClassConfig()`)
-  refills only the changed slots when the board or dates land late.
+- `songsPlayAlongBtn(slug)` builds the Play Along button; a tile's buttons
+  sit in a `.sh-play-slot` with `data-idx`, and `refreshSongsPlayAlong()` (end
+  of `loadClassConfig()`) refills only the changed slots through
+  `songsCoreActsHtml` when the board or dates land late.
 - Songs stays a gated page.
 
 **One way round the date: "Play Along now"** (Jonathan, 2026-10-02). Every
@@ -953,7 +963,7 @@ Journey pages also hold Layers 4–5 and the bonus layers.
 | "Take it to a song" box, Modules 1–5 | **switched off 2026-10-18** (`TAKE_TO_SONG_ENABLED = false`, see below); when on, one button per song via `openSongLink(slug, layer)` |
 | "About this set" song names | links; same `openSongLink` |
 | A skill about one core song (checklist row) | `journey: [{ song, layer }]` on the skill → "Open the \"Luna\" Song Journey page" under it (`skillJourneyHtml()` in buildChecklist); same `openSongLink`. 14 skills in Modules 4 and 9–12 (1ab3 pins 14 / 16) |
-| Songs page Core row | Play Along (only with an openable card) · Backing · Song Journey, every row |
+| Songs page Core tile | ONE main button: Play Along (only with an openable card) or else Song Journey; Backing (and Song Journey beside Play Along) small under it |
 | Songs page "More Play Along songs" | every `library: true` practice card, for the WHOLE class, from the day it ships — no board slot, date, #N or "Play Along now"; Who does not hide it (`caIsLibrarySong()`). A song one student asked for reaches students this way; don't build a per-student path back. Off the board (`caBoardOrder` skips `caIsLibraryCard()`); managed in the console's **Songs** tab (`renderTeacherSongs()`). **Songs move both ways**: any non-check card with a `library` field (true = starts on Songs, false = in Class activities) is a song (`caIsSongCard()`); the console's Move to Songs / Move to Class activities buttons write `config/class.songLibrary` (id -> bool), which wins over the field, and the board slot is kept (not a BUILT song, below). **Never a Core song** — checks.mjs 1bq. **Built songs** (2026-11-14, `app/builtsongs.js`): a song Jonathan imports in the console (Manage → Built songs) is merged from the database after sign-in as an ordinary `library: true`, `optional: true` practice card with an `sb-` id; it shows its lyric lines whenever the chart has them (Jonathan: "lyrics always show if they are available": the "No lyrics" rule stays for every CODED card and every song added through `new-playalong`'s card mode); no Move to Class activities for an `sb-` id and `songLibrary` never moves one (`caIsLibraryCard`) until the board part is built (Part e); Hidden is its off switch |
 | Teacher view songs (console tab) | `teacherOnly: true` cards (ca-40), played for the room; students never see one (`caBoardOrder` skips it) until **Move to Class activities** writes `config/class.classSongs[id]` and it joins the board as an ordinary activity (**Move to Teacher view songs** sends it back). No `journey`/`journeyLayer`/`library` on it — checks.mjs 1bn |
 | Journey button on a card | never on a whole-song card; on another activity only while its song has no openable whole-song card (`caJourneyUrl()`) |

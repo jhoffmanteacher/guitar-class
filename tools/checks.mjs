@@ -12788,15 +12788,65 @@ function checkRosterSkipsTrainerStub() {
    progress doc (songsLibraryOpen, app.js); the console's Songs view counts
    students and opens (teacherFetchStudents + renderTeacherSongs, teacher.js).
    Run for real, not found in the source:
-   - the library rows are RENDERED (songsLibraryHtml in the 0b context) and both
-     buttons of every row are clicked through their own onclick: each one
+   - the library rows are RENDERED (songsLibraryHtml in the 0b context) and
+     every song's one button (two per row until Look 1, Part 3) is clicked through its own onclick: each one
      writes { songOpens: { <id>: increment(1) } } with { merge: true } to the
      signed-in student's progress doc and still opens the card;
    - the teacher account, the dev bypass and a signed-out visitor write nothing
      (and still open the card); a Core song row writes nothing;
    - teacherFetchStudents keeps only whole counts 1..1000 per song from a
      student-written map (strings, negatives, NaN, huge numbers, a non-object).
-   Pinned: every library row (2 buttons each), 3 non-counted sign-ins, 8 doctored values. */
+   Pinned: every library song (1 button each), 3 non-counted sign-ins, 8 doctored values. */
+/* 1es. THE CORE SONGS AS TILES (Look 1, Part 3, Jonathan, 2026-11-17). Each of
+   the six Core songs is a tile with ONE main button: Play Along when
+   songsPlayAlongCard() finds a card at that moment, otherwise Song Journey;
+   under it, small, the backing track and (only beside Play Along) the Song
+   Journey. Never two main buttons, never a Play Along that opens nothing.
+   Runs the REAL songsCoreActsHtml in the 0b context for a song with and
+   without an openable card, with and without a backing track, and reads the
+   three-column grid from styles.css. tools/smoke.mjs (songTilesWalk) clicks
+   each tile's main button and each library button in a real browser. */
+function checkSongTiles(ctx) {
+  head('1es. Songs: the six Core songs are tiles, one main button each (Play Along only when a card can open, else Song Journey)');
+  let bad = 0, cases = 0;
+  const flag = m => { err('1es: ' + m); problems++; bad++; };
+  if (!ctx) { flag('cannot run — the 0b render context is unavailable'); return; }
+  const run = x => vm.runInContext(x, ctx);
+  if (run('typeof songsCoreActsHtml') !== 'function') { flag('songsCoreActsHtml() not found in app/explore.js (renamed? update 1es with it)'); return; }
+  let res;
+  try {
+    res = JSON.parse(run(`(() => {
+      const keep = songsPlayAlongCard, stand = (window.CLASS_ACTIVITIES || []).find(a => a.view === 'card' && !caIsLibraryCard(a));
+      const out = [];
+      try {
+        for (const card of [true, false]) for (const backing of [true, false]) {
+          songsPlayAlongCard = () => card ? stand : null;
+          const sg = { name: '"Song" — Band', journeyUrl: 'tabs/the-cure.html', backingUrl: backing ? 'https://www.youtube.com/watch?v=x' : '', backingKey: backing ? 'Am' : '' };
+          const h = String(songsCoreActsHtml(sg, 3));
+          const main = h.split('<div class="sh-tile-links">')[0], links = h.includes('<div class="sh-tile-links">') ? h.split('<div class="sh-tile-links">')[1] : '';
+          out.push({ card, backing, mains: (main.match(/<button\\b/g) || []).length, play: /sh-play-btn/.test(main), playOpens: /songsHubOpenCard\\(/.test(main), journeyMain: /class="song-vid-btn journey sh-tile-main"[^>]*onclick="songsHubVid\\(3,'journey'\\)"/.test(main),
+            backingLink: /class="sh-tile-link" onclick="songsHubVid\\(3,'backing'\\)"/.test(links), journeyLink: /class="sh-tile-link" onclick="songsHubVid\\(3,'journey'\\)"/.test(links) });
+        }
+      } finally { songsPlayAlongCard = keep; }
+      return JSON.stringify(out);
+    })()`));
+  } catch (e) { flag('the tile renderer threw — ' + e.message); return; }
+  for (const r of res) {
+    cases++;
+    const w = `${r.card ? 'a play-along can open' : 'no play-along'}, ${r.backing ? 'a backing track' : 'no backing track'}`;
+    if (r.mains !== 1) flag(`${w}: ${r.mains} main buttons, want exactly 1`);
+    if (r.card && !(r.play && r.playOpens && !r.journeyMain)) flag(`${w}: the main button must be Play Along (songsHubOpenCard), got ${JSON.stringify(r)}`);
+    if (!r.card && !(r.journeyMain && !r.play)) flag(`${w}: with no card the main button must be Song Journey and no Play Along may show, got ${JSON.stringify(r)}`);
+    if (r.backingLink !== r.backing) flag(`${w}: the small backing-track link is ${r.backingLink ? 'shown' : 'missing'}`);
+    if (r.journeyLink !== r.card) flag(`${w}: the small Song Journey link must show beside Play Along only, it is ${r.journeyLink ? 'shown' : 'missing'}`);
+  }
+  const g = cssRuleMap(readFileSync(join(ROOT, 'styles.css'), 'utf8')).get('.sh-core-grid'), d = g && g.get('');
+  cases++;
+  if (!d || d.get('display') !== 'grid' || (d.get('grid-template-columns') || '').replace(/\s+/g, '') !== 'repeat(3,minmax(0,1fr))')
+    flag(`.sh-core-grid must be display:grid; grid-template-columns:repeat(3,minmax(0,1fr)) (three tiles to a row), found ${JSON.stringify(d ? Object.fromEntries(d) : null)}`);
+  if (cases !== 5) flag(`ran ${cases} cases, pinned 5`);
+  if (!bad) ok(`1es: songsCoreActsHtml run for real in 4 cases (a play-along or not × a backing track or not): one main button each, Play Along only when a card can open, else Song Journey, the small links right; three tiles to a row (styles.css)`);
+}
 async function checkSongPopularity(ctx) {
   head('1ch. Song popularity: a Songs-page click counts once, for students only; the console reads it safely');
   let bad = 0;
@@ -12822,7 +12872,8 @@ async function checkSongPopularity(ctx) {
         /* No HTML parser here: take each row's onclick attributes out of the
            markup and un-escape them the way the browser does before running. */
         const unAttr = v => v.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
-        songsLibraryHtml().split('class="song-row"').slice(1).forEach(r => {
+        /* One button per song since Look 1, Part 3 (2026-11-17: "one wrapping row of buttons"); a row had two before. */
+        songsLibraryHtml().split(/(?=<button type="button" class="sh-lib-btn)/).slice(1).forEach(r => {
           const handlers = [...r.matchAll(/onclick="([^"]*)"/g)].map(m => unAttr(m[1]));
           const res = handlers.map(h => { log.length = 0; opened.length = 0; new Function(h)(); return { log: log.slice(), opened: opened.slice() }; });
           out.rows.push({ n: handlers.length, res });
@@ -12844,7 +12895,7 @@ async function checkSongPopularity(ctx) {
   if (rows.rows.length !== rows.lib.length) flag(`songsLibraryHtml drew ${rows.rows.length} rows for ${rows.lib.length} library songs`);
   rows.rows.forEach((r, i) => {
     const id = rows.lib[i];
-    if (r.n !== 2) flag(`library row ${i + 1} has ${r.n} buttons (want the name and Play Along)`);
+    if (r.n !== 1) flag(`library song ${i + 1} has ${r.n} buttons (want one: ▶ and its name)`);
     r.res.forEach((x, j) => {
       const w = x.log[0];
       const okWrite = x.log.length === 1 && w.c === 'progress' && w.id === 'stu-1' && w.merge && w.data && w.data.songOpens && Object.keys(w.data.songOpens).length === 1 && w.data.songOpens[x.opened[0]] && w.data.songOpens[x.opened[0]].__inc === 1 && Object.keys(w.data).sort().join() === 'email,name,songOpens' && w.data.email === 'stu@x.test';
@@ -12952,7 +13003,7 @@ async function checkSongPopularity(ctx) {
       if (mode === 'set rejects' && !v.caught) flag('set rejects: the write promise has no .catch — a refused write raises the global error banner');
     }
   }
-  if (bad === 0) ok(`${rows.rows.length} library rows rendered, ${rows.rows.length * 2} buttons clicked \u2014 each writes one songOpens increment(1) merge to the student's own progress doc and opens its card; the teacher, the dev bypass and a signed-out visitor write nothing; ${core.clicks} Core Play Along clicks write nothing; the console keeps 4 of 8 doctored counts (3, "5"\u21925, 2.9\u21922, 1e9\u21921000); the console Songs view draws 3 exact count lines (an archived student left out); the card opens in 4 failure modes`);
+  if (bad === 0) ok(`${rows.rows.length} library songs rendered, ${rows.rows.length} buttons clicked (one per song) \u2014 each writes one songOpens increment(1) merge to the student's own progress doc and opens its card; the teacher, the dev bypass and a signed-out visitor write nothing; ${core.clicks} Core Play Along clicks write nothing; the console keeps 4 of 8 doctored counts (3, "5"\u21925, 2.9\u21922, 1e9\u21921000); the console Songs view draws 3 exact count lines (an archived student left out); the card opens in 4 failure modes`);
 }
 
 /* 1cd. NOTE CALL POWER CHORDS (ca-43, Jonathan 2026-10-30). The student
@@ -22390,6 +22441,7 @@ function checkNeverRules(sets) {
   checkPowerName(rcCtx);
   await checkRosterSkipsTrainerStub();
   await checkSongPopularity(rcCtx);
+  checkSongTiles(rcCtx);
   checkPowerChordPopups(rcSets, rcCtx);
   checkPendingFileSwitch(rcCtx);
   checkTodayByDate(rcCtx);

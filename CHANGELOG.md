@@ -6,6 +6,12 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-17 — Songs: the six Core songs as tiles
+
+- **The six Core songs are now tiles,** three to a row, each with one big button: **Play Along** when the play-along is open for you, or **Song Journey** when it is not yet. The backing track for solos and the Song Journey are small links under it.
+- **More Play Along songs are one row of buttons,** one per song: tap the song's name to play along.
+- **"Request a song" is now at the top of the page,** beside the title.
+
 ## 2026-11-17 — The In class list: two columns, and where you are
 
 - **Each card in Today's activity now says where you are,** for example "Step 2 of 4: D5", and has a small picture for its kind: a note for a play-along song, arrows for a strum pattern, bars for everything else.
