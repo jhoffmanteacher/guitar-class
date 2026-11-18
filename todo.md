@@ -22,7 +22,7 @@ Decided 2026-11-17: old mic recordings that still hold a name are ignored for no
 second line after a student's first change.
 6. **Friday: which of this week's changes get a Fable review**, and say when the weekly limit has reset (every agent
    is on Opus until then). The list is at the top of WORKFLOW.
-7. **On hold until you say go:** the design-values tidy (W15).
+7. **On hold until the re-design look next week:** the design-values tidy (W15).
 
 **Only you can do:**
 10. **The practice copy's key:** `Claude outputs/practice-copy/JONATHAN-STEPS.md` (GitHub secret
@@ -34,6 +34,20 @@ second line after a student's first change.
 15. **Ask the principal about recording in class** (Ed Code 51512; Claude can draft the one page).
 16. **Be present for the `coach-core.js` split.** It is 46 lines under the limit that blocks a push.
 17. Optional: try 2 to 4 clip-on pickups; delete old `ci-try/*` and `win/*` branches on GitHub.
+
+## Closed: do not list or propose these again (Jonathan, 2026-11-17: "get rid of the 'leave them' on the list so we don't keep seeing them")
+
+From the 2026-11-13 improvements list, never built and now closed: missed review items coming back sooner (C7); a
+guided "strum when the circle flashes" timing set-up (C8); one results-screen shape for every game (C9); the
+console's "who needs you" view, Undo and a Monday spot-check list (C10); a progress display during sign-in (C15);
+strict mode (C17). They come back only if he raises one himself.
+
+## Next week (the week of 2026-11-23): look at a re-design, visually
+
+Jonathan, 2026-11-17: "next week i want to look at re-design visually". Start with pictures only: two looks on three
+screens (a lesson, an In-Class Activity, the Songs page) at 1366x657, English and Spanish, no site change; he picks,
+changes or drops. The design-values tidy (W15, on hold) is built only if he picks a look. Do not start before he
+says so next week.
 
 ## Beat maps: make every Play Along song light the same amount before the beat
 
