@@ -25,6 +25,13 @@
         server's time } and builtSongsMeta/list with songs[id] a new EDIT number (what tells every page to fetch the
         song again; teacherBsNextVer: never one used before), every other entry kept, updatedAt the server's time; both
         land or neither does.
+   A LYRICS SHEET (song.sheet, 2026-11-18): a song file that names one takes its .pdf as an optional third pick (the
+   builder's Export gives it). Checked before anything is written: the pdf's size and SHA-256 are song.sheet's, its id is
+   not on SONG_FILES nor another song's with other bytes; with no pdf picked the store must already hold that sheet,
+   ready and matching, or the import is refused in one line ("pick its .pdf"); a pdf picked for a song file that names
+   none is refused too. The pdf goes up after the audio, through the same writer (durationSec 1), and its head is read
+   again inside the transaction as the audio's is. Import does not check that the sheet follows the song (the Song
+   builder's Lyrics sheet row does, teacher-sb-sheet.js; Claude's tools/built-song-check.mjs --sheet checks the file).
    Importing the same id again replaces that song; a Song builder draft of it saved before is then stale and is
    rebuilt from the import when it is next opened (teacherSbImported, teacher-sb-publish.js; review R2-1). One import
    at a time (and never during a Song files action). Leaving Manage stops it before its next write; a stop or a
@@ -69,19 +76,23 @@ let teacherBsOpGen = 0;
 let teacherBsBusy = '';        // '' | 'import'
 let teacherBsProgress = '';
 let teacherBsNote = '';
-const teacherBsPicked = { json: null, mp3: null };
+const teacherBsPicked = { json: null, mp3: null, pdf: null };
 
-/* The built song whose audio is `audioId`, for the Song files rows: { title, entry } or null. */
+/* The built song whose audio (or lyrics sheet, song.sheet: sheet true) is `audioId`, for the Song files rows:
+   { title, entry, sheet } or null. A sheet's entry is the one the site checks it against (app/builtsongs.js). */
 function teacherBsAudioOwner(audioId){
   if(!teacherBsSongs) return null;
   for(const [, s] of teacherBsSongs){
-    const a = s.doc && s.doc.audio;
+    const a = s.doc && s.doc.audio, sh = s.doc && s.doc.song && s.doc.song.sheet;
     if(a && a.id === audioId && typeof a.bytes === 'number' && typeof a.sha256 === 'string')
-      return { title: String(s.doc.title || ''), entry: { file: audioId + '.mp3', bytes: a.bytes, sha256: a.sha256, durationSec: a.durationSec } };
+      return { title: String(s.doc.title || ''), sheet: false, entry: { file: audioId + '.mp3', bytes: a.bytes, sha256: a.sha256, durationSec: a.durationSec } };
+    if(sh && typeof sh === 'object' && sh.id === audioId && typeof sh.bytes === 'number' && typeof sh.sha256 === 'string')
+      return { title: String(s.doc.title || ''), sheet: true, entry: { file: audioId + '.pdf', bytes: sh.bytes, sha256: sh.sha256, durationSec: 1 } };
   }
   return null;
 }
-/* Every song on the list whose audio is `audioId`, read fresh from the store (Song files' Delete asks this). */
+/* Every song on the list whose audio or lyrics sheet (sheet: true) is `audioId`, read fresh from the store (Song files'
+   Delete asks this, and the Song builder before it deletes a recording or a sheet nothing should name any more). */
 async function teacherBsAudioUsers(audioId){
   await ensureDb();
   /* The list refused (the BUILT SONGS rules not published yet): no built song can exist, since nobody can write
@@ -94,7 +105,8 @@ async function teacherBsAudioUsers(audioId){
   for(const id of ids){
     const snap = await db.collection('builtSongs').doc(id).get();
     const d = snap.exists ? snap.data() || {} : null;
-    if(d && d.audio && d.audio.id === audioId) out.push({ id, title: String(d.title || id) });
+    if(d && d.audio && d.audio.id === audioId) out.push({ id, title: String(d.title || id), sheet: false });
+    else if(d && d.song && d.song.sheet && d.song.sheet.id === audioId) out.push({ id, title: String(d.title || id), sheet: true });
   }
   return out;
 }
@@ -111,7 +123,7 @@ function teacherBsVerdict(id, s){
 function teacherBsRowHtml(id){
   const s = teacherBsSongs.get(id), d = s.doc || {}, v = teacherBsVerdict(id, s);
   return `<tr><td>${escHtml(String(d.title == null ? '—' : d.title))}</td><td>${escHtml(String(d.artist || ''))}</td>`
-    + `<td>${escHtml(teacherSfLen(d.audio && d.audio.durationSec))}</td><td>${escHtml(teacherBsVerText(s.ver))}</td><td>${escHtml(id)}</td>`
+    + `<td>${escHtml(teacherSfLen(d.audio && d.audio.durationSec))}</td><td>${d.song && d.song.sheet ? '<span title="Has a lyrics sheet: its card has a Chords / Lyrics switch">✓</span>' : '—'}</td><td>${escHtml(teacherBsVerText(s.ver))}</td><td>${escHtml(id)}</td>`
     + `<td>${v.ok ? '✓ ' : '✗ '}${escHtml(v.text)}</td></tr>`;
 }
 function teacherBsBlockHtml(){
@@ -125,10 +137,11 @@ function teacherBsBlockHtml(){
   html += `<div class="tg-note">Play Along songs kept in the class database: every student sees them under Songs → More Play Along songs, with no code push. Import takes a song file (.json) and its .mp3 that Claude prepared; importing the same song again replaces it. The Song builder publishes, unpublishes and deletes them; Hidden in the Songs view takes one off students' pages.</div>
       <div class="tg-note"><label>Song file (.json): <input type="file" accept=".json,application/json" data-tbs-file="json"${off}></label>
         <label>Its .mp3: <input type="file" accept=".mp3,audio/mpeg" data-tbs-file="mp3"${off}></label>
+        <label>Its lyrics sheet (.pdf, only if the song file names one): <input type="file" accept=".pdf,application/pdf" data-tbs-file="pdf"${off}></label>
         <button type="button" class="tg-seg-btn" data-tbs-act="import"${busy || !teacherBsPicked.json || !teacherBsPicked.mp3 ? ' disabled' : ''}>Import</button></div>`;
   if(!teacherBsSongs) return html;
   if(!ids.length) return html + '<div class="t-loading">No built songs yet.</div>';
-  return html + `<div class="tg-grid-wrap"><table class="tg-table"><thead><tr><th>Title</th><th>Artist</th><th>Length</th><th>Edit</th><th>Id</th><th>Check</th></tr></thead>`
+  return html + `<div class="tg-grid-wrap"><table class="tg-table"><thead><tr><th>Title</th><th>Artist</th><th>Length</th><th>Lyrics</th><th>Edit</th><th>Id</th><th>Check</th></tr></thead>`
     + `<tbody>${ids.map(teacherBsRowHtml).join('')}</tbody></table></div>`;
 }
 function teacherBsPaint(){
@@ -137,7 +150,7 @@ function teacherBsPaint(){
   if(!el) return;
   /* A repaint draws the two file pickers empty, so the files picked before it are let go too: Import never takes
      files the screen no longer shows (during an import its files are already read). */
-  if(!teacherBsBusy) teacherBsPicked.json = teacherBsPicked.mp3 = null;
+  if(!teacherBsBusy) teacherBsPicked.json = teacherBsPicked.mp3 = teacherBsPicked.pdf = null;
   el.innerHTML = teacherBsBlockHtml();
   if(!el.dataset.bound){
     el.dataset.bound = '1';
@@ -189,12 +202,13 @@ function teacherBsClick(e){
   if(!b || b.disabled || teacherBsBusy) return;
   const act = b.dataset.tbsAct;
   if(act === 'refresh'){ teacherBsNote = ''; teacherBsLoad(); return; }
-  if(act === 'import') teacherBsImport(teacherBsPicked.json, teacherBsPicked.mp3);
+  if(act === 'import') teacherBsImport(teacherBsPicked.json, teacherBsPicked.mp3, teacherBsPicked.pdf);
 }
 function teacherBsChange(e){
   const inp = e.target && e.target.closest ? e.target.closest('[data-tbs-file]') : null;
   if(!inp || teacherView !== 'manage') return;
-  teacherBsPicked[inp.dataset.tbsFile === 'mp3' ? 'mp3' : 'json'] = (inp.files && inp.files[0]) || null;
+  const k = inp.dataset.tbsFile;
+  teacherBsPicked[k === 'mp3' || k === 'pdf' ? k : 'json'] = (inp.files && inp.files[0]) || null;
   teacherBsNote = '';
   const btn = document.querySelector('#t-builtsongs-block [data-tbs-act="import"]');
   if(btn) btn.disabled = !!teacherBsBusy || !teacherBsPicked.json || !teacherBsPicked.mp3;
@@ -212,7 +226,7 @@ function teacherBsEnd(note){
 function teacherBsRefuse(line){ teacherBsNote = 'Nothing was imported: ' + line; teacherBsPaint(); }
 
 /* ── Import ── */
-async function teacherBsImport(jsonFile, mp3File){
+async function teacherBsImport(jsonFile, mp3File, pdfFile){
   if(teacherBsBusy || !jsonFile || !mp3File) return;
   if(typeof teacherSfBusy !== 'undefined' && teacherSfBusy){ teacherBsRefuse('a Song files action is still running. Try again when it ends.'); return; }
   /* Before the BUILT SONGS rules are published the song could not be saved, and its audio would be left stored
@@ -234,6 +248,17 @@ async function teacherBsImport(jsonFile, mp3File){
   }
   if(teacherBsSongs && !teacherBsSongs.has(id) && teacherBsSongs.size >= BS_MAX_SONGS){ teacherBsRefuse(`the list already holds ${BS_MAX_SONGS} songs, the most it can.`); return; }
   if(mp3File.size !== a.bytes){ teacherBsRefuse(`the .mp3 is ${Number(mp3File.size).toLocaleString('en-US')} bytes; the song file says ${a.bytes.toLocaleString('en-US')}. Is it the .mp3 that came with it?`); return; }
+  /* Its lyrics sheet (see the header): the pdf picked must be song.sheet's; none picked, the store must hold it. */
+  const sh = doc.song.sheet && typeof doc.song.sheet === 'object' ? doc.song.sheet : null;
+  if(pdfFile && !sh){ teacherBsRefuse('a .pdf was picked, but the song file names no lyrics sheet. Leave the .pdf out, or pick the song file that names it.'); return; }
+  if(sh){
+    if(typeof SONG_FILES !== 'undefined' && Object.prototype.hasOwnProperty.call(SONG_FILES, sh.id)){ teacherBsRefuse(`its lyrics sheet id ${sh.id} is on the site's list of song files.`); return; }
+    if(teacherBsSongs) for(const [oid, o] of teacherBsSongs){
+      const os = o.doc && o.doc.song && o.doc.song.sheet;
+      if(oid !== id && os && os.id === sh.id && os.sha256 !== sh.sha256){ teacherBsRefuse(`its lyrics sheet id ${sh.id} is already ${oid}'s, with other bytes.`); return; }
+    }
+    if(pdfFile && pdfFile.size !== sh.bytes){ teacherBsRefuse(`the .pdf is ${Number(pdfFile.size).toLocaleString('en-US')} bytes; the song file's lyrics sheet is ${sh.bytes.toLocaleString('en-US')}. Is it the .pdf that came with it?`); return; }
+  }
   teacherBsStart();
   teacherBsProgress = 'Reading the .mp3…'; teacherBsPaint();
   const stopped = () => teacherView !== 'manage';
@@ -246,11 +271,25 @@ async function teacherBsImport(jsonFile, mp3File){
     const dur = await teacherSfDuration(mp3File);
     if(dur == null || Math.abs(dur - a.durationSec) > 0.5){ teacherBsEnd(`Nothing was imported: this browser reads the .mp3 as ${dur == null ? 'no length at all' : teacherSfLen(dur)}, the song file says ${teacherSfLen(a.durationSec)}.`); return; }
     const entry = { file: a.id + '.mp3', bytes: a.bytes, sha256: a.sha256 };
+    const sentry = sh ? { file: sh.id + '.pdf', bytes: sh.bytes, sha256: sh.sha256 } : null;
+    let pbuf = null;
+    if(pdfFile){
+      pbuf = new Uint8Array(await pdfFile.arrayBuffer());
+      const psha = sfHex(await crypto.subtle.digest('SHA-256', pbuf));
+      if(psha !== sh.sha256){ teacherBsEnd(`Nothing was imported: the .pdf's SHA-256 (${psha.slice(0, 12)}…) is not the song file's lyrics sheet. Is it the .pdf that came with it?`); return; }
+    }
     await ensureDb();
     if(stopped()) throw 'stop';
+    let sheetStored = false;
+    if(sh){
+      const ss = await db.collection('songFiles').doc(sh.id).get();
+      sheetStored = teacherSfHeadMatches(ss.exists ? ss.data() || {} : null, sentry);
+      if(!sheetStored && !pbuf){ teacherBsEnd(`Nothing was imported: the song file names a lyrics sheet (${sh.id}) that is not in the database. Pick its .pdf as the third file.`); return; }
+    }
     const hs = await db.collection('songFiles').doc(a.id).get();
     const h = hs.exists ? hs.data() || {} : null;
     if(!teacherSfHeadMatches(h, entry)) await teacherSfPutFile(a.id, entry, buf, Math.round(a.durationSec * 100) / 100, w);
+    if(sh && !sheetStored){ step = 'sheet'; await teacherSfPutFile(sh.id, sentry, pbuf, 1, w); }
     step = 'song';
     if(stopped()) throw 'stop';
     teacherBsProgress = `Saving ${doc.title}…`; teacherBsPaint();
@@ -264,6 +303,7 @@ async function teacherBsImport(jsonFile, mp3File){
     await db.runTransaction(async tx => {
       const snap = await tx.get(ref), hs2 = await tx.get(db.collection('songFiles').doc(a.id));
       if(!teacherSfHeadMatches(hs2.exists ? hs2.data() || {} : null, entry)) throw { audioGone: true };
+      if(sh){ const ss2 = await tx.get(db.collection('songFiles').doc(sh.id)); if(!teacherSfHeadMatches(ss2.exists ? ss2.data() || {} : null, sentry)) throw { audioGone: true }; }
       const songs = bsListOf(snap.exists ? snap.data() : null);
       ver = teacherBsNextVer(songs[id]);
       songs[id] = ver;
@@ -272,14 +312,15 @@ async function teacherBsImport(jsonFile, mp3File){
     });
     /* The Song builder's copy of this song, and a draft of it saved before this Import (review R2-1). */
     if(typeof teacherSbImported === 'function') teacherSbImported(id, doc, ver);
-    teacherBsPicked.json = teacherBsPicked.mp3 = null;
+    teacherBsPicked.json = teacherBsPicked.mp3 = teacherBsPicked.pdf = null;
     teacherBsEnd(`Imported "${doc.title}" (${teacherBsVerText(ver)}). Students see it under Songs → More Play Along songs on their next sign-in or when they come back to the tab.`);
     if(typeof builtSongsSync === 'function') builtSongsSync();
   }catch(e){
     if(e && e.shape){ teacherBsEnd(`Nothing was imported: ${e.shape}.`); return; }
-    if(e && e.audioGone){ teacherBsEnd('The import failed: the audio in the database was deleted or changed while the song was being saved (in another tab). The song and the Songs page list were not changed, so students have what they had before. Import again.'); return; }
+    if(e && e.audioGone){ teacherBsEnd('The import failed: the audio or the lyrics sheet in the database was deleted or changed while the song was being saved (in another tab). The song and the Songs page list were not changed, so students have what they had before. Import again.'); return; }
     const where = step === 'audio'
       ? (w.wrote ? ` The audio is NOT ready (its upload stopped${w.k >= 0 && w.k < w.n ? ` at piece ${w.k + 1} of ${w.n}` : ''}); the song was not added.` : ' Nothing was written.')
+      : step === 'sheet' ? ' The audio is stored; the lyrics sheet is NOT ready (its upload stopped); the song was not added.'
       : ' The audio is stored; the song and the Songs page list were not changed, so students have what they had before. Import again.';
     if(e === 'stop'){ teacherBsEnd('Stopped: you left Manage.' + where); return; }
     teacherBsEnd(`The import failed: ${typeof teacherSfWhy === 'function' ? teacherSfWhy(e) : String((e && (e.code || e.message)) || e)}.${where}`);

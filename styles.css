@@ -1491,6 +1491,14 @@ body.rail-collapsed .rail-tools .tool-popup{
 .sb-root .sb-flag .fi{flex:0 0 20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.75rem;color:var(--bg);background:var(--amber-text)}
 .sb-root .sb-flag.red .fi{background:var(--red-text)}
 .sb-root .sb-flag-body{flex:1 1 auto;min-width:0}
+.sb-root .sb-sheet{margin:0 0 12px}
+.sb-root .sb-sheet .sb-drop.over{border-color:var(--purple-accent);background:var(--purple-bg);border-style:solid}
+.sb-root .sb-sheet-state{margin-top:8px;min-width:0}
+.sb-root .sb-sheet-tbl{max-height:240px;overflow:auto;border:1px solid var(--border2);border-radius:8px;margin-top:4px}
+.sb-root .sb-sheet-tbl table{border-collapse:collapse;width:100%;font-size:0.75rem}
+.sb-root .sb-sheet-tbl th,.sb-root .sb-sheet-tbl td{text-align:left;padding:4px 8px;border-bottom:1px solid var(--border);vertical-align:top;overflow-wrap:anywhere}
+.sb-root .sb-sheet-tbl th{position:sticky;top:0;background:var(--bg2);color:var(--text2);font-weight:600}
+.sb-root .sb-sheet-tbl tr.bad td{background:var(--red-bg)}
 .sb-root .sb-beat-top{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:start;margin-bottom:10px}
 .sb-root .sb-beat-mid{min-width:0}
 .sb-root .sb-beat-bar1{text-align:right}

@@ -37,6 +37,12 @@
    leaving Manage stops it; Song files names a built song's audio ("Built song: <title>", escaped) and its Delete is
    refused while a listed song plays it; a stored song the validator refuses shows ✗ and its reason.
 
+   A LYRICS SHEET (2026-11-18, song.sheet): an Import with its .pdf writes the audio, then the pdf (.pdf, durationSec
+   1, ready), then the song and the list; the same Import again with no .pdf uses the stored sheet; four refusals
+   (a sheet the store lacks and no .pdf, a .pdf for a song file that names none, a .pdf of another size, of other bytes)
+   write nothing; Song files names the pdf "Built song: <title> (lyrics sheet)" and refuses to Delete it; Built songs'
+   Lyrics column reads ✓ or —.
+
    MANY FILES AND THE DROP ZONE (W21, 2026-11-17; four made-up files bat-a … bat-d): 3 good files picked in the
    file box (multiple) go up one file at a time with one progress line ("2 of 3: bat-b.mp3") and nothing verified;
    a good, a not-listed (an <img …> name, drawn as text) and a good: the two go up and the end names the third;
@@ -744,8 +750,8 @@ async function runCases(consoleSrc){
     const nSf = (src.match(/teacherSongFilesMount\(\)/g) || []).length, nBs = (src.match(/teacherBuiltSongsMount\(\)/g) || []).length;
     ok(nSf >= 1 && nBs === nSf, `built: every Manage paint that mounts Song files mounts Built songs too (${nBs} of ${nSf})`);
     ok(/No built songs yet/.test(c.bblock._html) && c.F.st.writes.length === 0, 'built: an empty list says so, and opening Manage writes nothing');
-    c.run(`teacherBsPicked.json = { name: 'a.json' }; teacherBsPicked.mp3 = { name: 'a.mp3' }; teacherBsPaint()`);
-    ok(c.run('teacherBsPicked.json === null && teacherBsPicked.mp3 === null') && /data-tbs-act="import" disabled/.test(c.bblock._html), 'built: a repaint (its pickers drawn empty) lets go of the files picked before it, and Import is off');
+    c.run(`teacherBsPicked.json = { name: 'a.json' }; teacherBsPicked.mp3 = { name: 'a.mp3' }; teacherBsPicked.pdf = { name: 'a.pdf' }; teacherBsPaint()`);
+    ok(c.run('teacherBsPicked.json === null && teacherBsPicked.mp3 === null && teacherBsPicked.pdf === null') && /data-tbs-act="import" disabled/.test(c.bblock._html), 'built: a repaint (its pickers drawn empty) lets go of the files picked before it, and Import is off');
   }
   done(c);
 
@@ -874,6 +880,7 @@ async function runCases(consoleSrc){
     const row = c.block._html.split('<tr').find(r => r.includes(`<td>${BAID}</td>`)) || '';
     ok(/Built song: Test &lt;b&gt;bold&lt;\/b&gt; &amp; co/.test(row) && !/not on the list/.test(row), 'song files: a built song\'s audio reads "Built song: <title>", escaped, not "not on the list"');
     ok(/Test &lt;b&gt;bold&lt;\/b&gt; &amp; co/.test(c.bblock._html) && !/<b>bold/.test(c.bblock._html) && /✓ passes today/.test(c.bblock._html), 'built: the list row is escaped and says the song passes today\'s checks');
+    ok(/<td>2:06<\/td><td>—<\/td>/.test(c.bblock._html), 'built: the Lyrics column reads — for a song with no lyrics sheet');
     const n0 = c.F.st.writes.length;
     c.env.promptAnswer = BAID;
     await c.run('teacherSfDelete')(BAID); await settle(150);
@@ -885,6 +892,55 @@ async function runCases(consoleSrc){
     c.F.S.set('builtSongsMeta/list', { songs: { 'sb-brokenstore': 1 }, updatedAt: TS });
     await c.run('teacherBsLoad()'); await settle(80);
     ok(/✗ audio\.centsOff is 30/.test(c.bblock._html), 'built: a stored song the validator refuses shows ✗ and its first reason');
+  }
+  done(c);
+
+  /* ── A LYRICS SHEET (song.sheet, 2026-11-18): Import's optional .pdf, Song files' row and its Delete, the Lyrics column ── */
+  const PDFB = (() => { const h = new TextEncoder().encode('%PDF-1.4\n'), b = bytesOf(3000, 21); const o = new Uint8Array(h.length + b.length); o.set(h); o.set(b, h.length); return o; })();
+  const SHID = 'sheet-' + BID + '-' + sha(PDFB).slice(0, 8);
+  const sdoc = (() => { const d = JSON.parse(JSON.stringify(bdoc)); d.song.sheet = { id: SHID, bytes: PDFB.length, sha256: sha(PDFB) }; return d; })();
+  const pdfOf = (b, name) => fileOf(b, undefined, name || 'sheet.pdf');
+  const importSheet = async (c, j, m, pf) => { await c.run('teacherBsImport')(j, m, pf); await settle(150); };
+  c = makeConsole(consoleSrc); register(c);
+  await managed(c);
+  {
+    await importSheet(c, jsonOf(importFile(BID, sdoc)), fileOf(SONG, 125.5), pdfOf(PDFB));
+    const paths = c.F.st.writes.map(x => x.op + ' ' + x.path), h = c.F.S.get('songFiles/' + SHID) || {};
+    const iSheet = paths.lastIndexOf('set songFiles/' + SHID), iAudio = paths.lastIndexOf('set songFiles/' + BAID), iSong = paths.indexOf('set builtSongs/' + BID);
+    ok(h.state === 'ready' && h.file === SHID + '.pdf' && h.durationSec === 1 && h.bytes === PDFB.length && h.sha256 === sha(PDFB) && c.F.S.has(`songFiles/${SHID}/pieces/0`)
+      && iAudio >= 0 && iAudio < iSheet && iSheet < iSong && paths.indexOf('set builtSongsMeta/list') > iSong && JSON.stringify((c.F.S.get('builtSongs/' + BID) || {}).song) === JSON.stringify(sdoc.song),
+      `sheet import: the audio, then the lyrics sheet (.pdf, durationSec 1, ready), then the song with song.sheet, then the list (${paths.length} writes)`);
+    await c.run('teacherSfLoad()'); await c.run('teacherBsLoad()'); await settle(80);
+    c.run('teacherSfOpen = true; teacherSfPaint()');
+    const row = c.block._html.split('<tr').find(r => r.includes(`<td>${SHID}</td>`)) || '';
+    ok(/Built song: Test Song Four \(lyrics sheet\)/.test(row) && /data-tsf-act="verify"/.test(row), 'sheet: Song files names the pdf "Built song: <title> (lyrics sheet)", checked against song.sheet (Verify offered)');
+    ok(/<th>Lyrics<\/th>/.test(c.bblock._html) && /<td><span title="Has a lyrics sheet[^"]*">✓<\/span><\/td>/.test(c.bblock._html), 'sheet: Manage → Built songs has a Lyrics column, ✓ for a song with a sheet');
+    const n0 = c.F.st.writes.length;
+    c.env.promptAnswer = SHID;
+    await c.run('teacherSfDelete')(SHID); await settle(150);
+    ok(c.F.st.writes.length === n0 && c.F.S.has('songFiles/' + SHID) && /uses sheet-[a-z0-9-]+ as its lyrics sheet/.test(c.block._html), `sheet: Song files refuses to Delete a pdf a listed song names as its lyrics sheet, and says so (${c.F.st.writes.length - n0} writes)`);
+    // the same song again with no .pdf: the store already holds the sheet, so nothing is uploaded
+    const n1 = c.F.st.writes.length;
+    await importSheet(c, jsonOf(importFile(BID, sdoc)), fileOf(SONG, 125.5), null);
+    const w2 = c.F.st.writes.slice(n1).map(x => x.path);
+    ok(!w2.some(p => p.startsWith('songFiles/')) && w2.includes('builtSongs/' + BID) && /Imported/.test(c.bblock._html), `sheet import again with no .pdf: the stored sheet is used, nothing uploaded (${w2.length} writes)`);
+  }
+  done(c);
+  c = makeConsole(consoleSrc); register(c);
+  await managed(c);
+  {
+    const refusals = [
+      ['a song file that names a sheet the store lacks, no .pdf', [jsonOf(importFile(BID, sdoc)), fileOf(SONG, 125.5), null], /names a lyrics sheet \(sheet-[a-z0-9-]+\) that is not in the database\. Pick its \.pdf/],
+      ['a .pdf for a song file that names none', [jsonOf(importFile(BID, bdoc)), fileOf(SONG, 125.5), pdfOf(PDFB)], /the song file names no lyrics sheet/],
+      ['a .pdf of another size', [jsonOf(importFile(BID, sdoc)), fileOf(SONG, 125.5), pdfOf(PDFB.subarray(0, 2000))], /the \.pdf is 2,000 bytes/],
+      ['a .pdf of other bytes', [jsonOf(importFile(BID, sdoc)), fileOf(SONG, 125.5), pdfOf((() => { const x = PDFB.slice(); x[100] ^= 1; return x; })())], /the \.pdf's SHA-256 [^ ]+ is not the song file's lyrics sheet/],
+    ];
+    for(const [name, a, re] of refusals){
+      const n0 = c.F.st.writes.length;
+      await importSheet(c, ...a);
+      const note = (c.bblock._html.match(/<b>(Nothing was imported:[^<]*)<\/b>/) || [, ''])[1];
+      ok(c.F.st.writes.length === n0 && re.test(note), `sheet import refused (${name}): nothing written, one line (${c.F.st.writes.length - n0} writes; ${JSON.stringify(note.slice(0, 90))})`);
+    }
   }
   done(c);
 
@@ -951,6 +1007,9 @@ if(BREAKS){
     ['an awaiting entry drawn as an ordinary one before upload', "if(!h) return teacherSfAwaiting(id) ? 'awaitNotUp' : 'notUp';", "if(!h) return 'notUp';"],
     ['an awaiting entry drawn as an ordinary one once uploaded', "(teacherSfAwaiting(id) ? 'awaitMatch' : 'match')", "'match'"],
     ['every entry drawn as awaiting', "SONG_FILES[id].awaitingSwitch === true; }", "true; }"],
+    // A LYRICS SHEET (2026-11-18)
+    ['a lyrics sheet drawn without "(lyrics sheet)"', "return o ? o.title + (o.sheet ? ' (lyrics sheet)' : '') : '';", "return o ? o.title : '';"],
+    ['a sheet\'s Delete refusal worded as audio', "${users[0].sheet ? `uses ${id} as its lyrics sheet.", "${false ? `uses ${id} as its lyrics sheet."],
   ];
   let caught = 0;
   for(const [name, from, to] of MUT){
@@ -971,16 +1030,25 @@ if(BREAKS){
     ['an audio id on SONG_FILES imported', "if(typeof SONG_FILES !== 'undefined' && Object.prototype.hasOwnProperty.call(SONG_FILES, a.id)){ teacherBsRefuse(", "if(false){ teacherBsRefuse("],
     ['another song\'s audio id taken', "if(oid !== id && o.doc && o.doc.audio && o.doc.audio.id === a.id && o.doc.audio.sha256 !== a.sha256){ teacherBsRefuse(", "if(false){ teacherBsRefuse("],
     ['the list written before the song', "    step = 'song';", "    step = 'song'; await db.collection('builtSongsMeta').doc('list').set({ songs: { [id]: 1 }, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });"],
-    ['the edit number not raised', "ver = (songs[id] || 0) + 1;", "ver = 1;"],
-    ['other songs dropped from the list', "      songs[id] = ver;\n      tx.set(ref, { songs,", "      tx.set(ref, { songs: { [id]: ver },"],
+    ['the edit number not raised', "ver = teacherBsNextVer(songs[id]);", "ver = 1;"],
+    ['other songs dropped from the list', "tx.set(ref, { songs, updatedAt", "tx.set(ref, { songs: { [id]: ver }, updatedAt"],
     ['the audio uploaded again when it is stored', "if(!teacherSfHeadMatches(h, entry)) await teacherSfPutFile(", "await teacherSfPutFile("],
     ['leaving Manage does not stop the import', "  const stopped = () => teacherView !== 'manage';\n  const w = { stopped, wrote: false, k: -1, n: 0, progress: line => { teacherBsProgress", "  const stopped = () => false;\n  const w = { stopped, wrote: false, k: -1, n: 0, progress: line => { teacherBsProgress"],
     ['two imports at once', "  if(teacherBsBusy || !jsonFile || !mp3File) return;", "  if(!jsonFile || !mp3File) return;"],
     ['a title drawn unescaped', "<td>${escHtml(String(d.title == null ? '—' : d.title))}</td>", "<td>${String(d.title == null ? '—' : d.title)}</td>"],
     ['Import before the rules are published', "  if(teacherBsDenied){ teacherBsRefuse(", "  if(false){ teacherBsRefuse("],
     ['a refused list read stops every Delete', "  catch(e){ if(e && e.code === 'permission-denied') return []; throw e; }", "  catch(e){ throw e; }"],
-    ['a repaint keeps files the pickers no longer show', "  if(!teacherBsBusy) teacherBsPicked.json = teacherBsPicked.mp3 = null;\n", ""],
+    ['a repaint keeps files the pickers no longer show', "  if(!teacherBsBusy) teacherBsPicked.json = teacherBsPicked.mp3 = teacherBsPicked.pdf = null;\n", ""],
     ['the stored song not checked in the list', "  const why = builtSongCheck(id, s.doc);", "  const why = [];"],
+    // A LYRICS SHEET (2026-11-18)
+    ['a song\'s lyrics sheet not counted as in use', "    else if(d && d.song && d.song.sheet && d.song.sheet.id === audioId) out.push(", "    else if(false) out.push("],
+    ['a lyrics sheet not named in Song files', "if(sh && typeof sh === 'object' && sh.id === audioId && typeof sh.bytes === 'number'", "if(false && typeof sh.bytes === 'number'"],
+    ['Import without the sheet in the store', "if(!sheetStored && !pbuf){ teacherBsEnd(", "if(false){ teacherBsEnd("],
+    ['Import without the pdf\'s SHA-256 check', "if(psha !== sh.sha256){", "if(false){"],
+    ['Import without the pdf\'s size check', "if(pdfFile && pdfFile.size !== sh.bytes){", "if(false){"],
+    ['Import takes a pdf for a song with no sheet', "if(pdfFile && !sh){ teacherBsRefuse(", "if(false){ teacherBsRefuse("],
+    ['Import does not upload the pdf', "if(sh && !sheetStored){ step = 'sheet'; await teacherSfPutFile(", "if(false){ step = 'sheet'; await teacherSfPutFile("],
+    ['the Lyrics column always —', "${d.song && d.song.sheet ? '<span", "${false ? '<span"],
   ];
   const bsWith = src => parts.map(p => p === 'teacher-builtsongs.js' ? src : partSrc.get(p)).join('');
   let bcaught = 0;

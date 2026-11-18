@@ -86,46 +86,51 @@ function pcSheetModel(url, cols){
   const priv = pcSheetPrivateId(url);
   if(priv && !songFileHost().user) return Promise.reject(songFileErr('signin'));
   if(pcSheetModels[key]) return pcSheetModels[key];
-  pcSheetModels[key] = pcSheetLoadPdfjs().then(async lib => {
-    const doc = await lib.getDocument(priv ? { data: await songFileLoadBytes(priv) } : url).promise;
-    const pages = [];
-    for(let pn = 1; pn <= doc.numPages; pn++) pages.push(await pcSheetPage(await doc.getPage(pn), one));
-    const all = pages.flatMap(P => P.words);
-    if(!all.length) throw new Error('the PDF has no text — save it from Word, not as a scan');
-    const pad = 14, W = Math.max(...pages.map(P => P.width));
-    const x = Math.max(0, Math.min(...all.map(w => w.x0)) - pad);
-    const w = Math.min(W, Math.max(...all.map(w2 => w2.x1)) + pad) - x;
-    let top = 0, dy = 0, lineOff = 0;
-    const toks = [], fellBack = [], marks = [];
-    const used = pages.filter(P => P.words.length);
-    used.forEach((P, pi) => {
-      P.y = Math.max(0, Math.min(...P.words.map(w2 => w2.y0)) - pad);
-      P.h = Math.min(P.height, Math.max(...P.words.map(w2 => w2.y1)) + pad) - P.y;
-      P.top = top; top += P.h;
-      const split = one ? null : pcSheetSplit(P, x, w, pi === 0, pi === used.length - 1);
-      if(!one && !split && P.toks.some(T => T.col === 1)) fellBack.push(pages.indexOf(P) + 1);
-      let sy = P.y, sh = P.h;
-      if(!one && !split){
-        // A one-column page of a two-column sheet: joined to the page before with a normal line gap, as the columns are.
-        const half = pcSheetHalfGap(P.words), ys = P.words.map(w2 => w2.y0), ye = P.words.map(w2 => w2.y1);
-        if(pi > 0) sy = Math.max(P.y, Math.min(...ys) - half);
-        sh = (pi < used.length - 1 ? Math.min(P.y + P.h, Math.max(...ye) + half) : P.y + P.h) - sy;
-      }
-      P.bands = split || [{ sx: x, sy, sw: w, sh, dx: 0 }];
-      P.bands.forEach(b => { b.dy = dy; dy += b.sh; });
-      P.marks.forEach(m => marks.push({ kind: m.kind, at: toks.length + m.at }));
-      P.toks.forEach(T => {
-        const b = P.bands.length === 1 ? P.bands[0] : P.bands.find(b2 => b2.col === T.col);
-        const a = pcSheetPlace(b, T.x0, T.y0), z = pcSheetPlace(b, T.x1, T.y1);
-        toks.push({ name: T.name, x0: a.x, x1: z.x, y0: a.y, y1: z.y, col: split ? T.col : null, page: pages.indexOf(P) + 1, line: lineOff + T.line });
-      });
-      lineOff += P.lineCount;
-    });
-    return { pages: used.map(P => ({ page: P.page, x, y: P.y, h: P.h, top: P.top, bands: P.bands })), toks, marks,
-      crop: { x: 0, y: 0, w, h: dy }, printH: top, split: !one && used.some(P => P.bands.length > 1), fellBack };
-  });
+  pcSheetModels[key] = pcSheetRead(async () => priv ? { data: await songFileLoadBytes(priv) } : url, one);
   pcSheetModels[key].catch(() => { delete pcSheetModels[key]; });   // a failed load can be tried again
   return pcSheetModels[key];
+}
+/* One PDF read into the model above. src() gives what pdf.js's getDocument takes (a URL, or { data: bytes }). Shared by
+   pcSheetModel and the console's Lyrics sheet row (teacher-sb-sheet.js: a pdf picked on the Mac, read before it is
+   added to a built song). A PDF with no text at all (a scan, a photo) throws code 'notext'. */
+async function pcSheetRead(src, one){
+  const lib = await pcSheetLoadPdfjs();
+  const doc = await lib.getDocument(await src()).promise;
+  const pages = [];
+  for(let pn = 1; pn <= doc.numPages; pn++) pages.push(await pcSheetPage(await doc.getPage(pn), one));
+  const all = pages.flatMap(P => P.words);
+  if(!all.length){ const e = new Error('the PDF has no text — save it from Word, not as a scan'); e.code = 'notext'; throw e; }
+  const pad = 14, W = Math.max(...pages.map(P => P.width));
+  const x = Math.max(0, Math.min(...all.map(w => w.x0)) - pad);
+  const w = Math.min(W, Math.max(...all.map(w2 => w2.x1)) + pad) - x;
+  let top = 0, dy = 0, lineOff = 0;
+  const toks = [], fellBack = [], marks = [];
+  const used = pages.filter(P => P.words.length);
+  used.forEach((P, pi) => {
+    P.y = Math.max(0, Math.min(...P.words.map(w2 => w2.y0)) - pad);
+    P.h = Math.min(P.height, Math.max(...P.words.map(w2 => w2.y1)) + pad) - P.y;
+    P.top = top; top += P.h;
+    const split = one ? null : pcSheetSplit(P, x, w, pi === 0, pi === used.length - 1);
+    if(!one && !split && P.toks.some(T => T.col === 1)) fellBack.push(pages.indexOf(P) + 1);
+    let sy = P.y, sh = P.h;
+    if(!one && !split){
+      // A one-column page of a two-column sheet: joined to the page before with a normal line gap, as the columns are.
+      const half = pcSheetHalfGap(P.words), ys = P.words.map(w2 => w2.y0), ye = P.words.map(w2 => w2.y1);
+      if(pi > 0) sy = Math.max(P.y, Math.min(...ys) - half);
+      sh = (pi < used.length - 1 ? Math.min(P.y + P.h, Math.max(...ye) + half) : P.y + P.h) - sy;
+    }
+    P.bands = split || [{ sx: x, sy, sw: w, sh, dx: 0 }];
+    P.bands.forEach(b => { b.dy = dy; dy += b.sh; });
+    P.marks.forEach(m => marks.push({ kind: m.kind, at: toks.length + m.at }));
+    P.toks.forEach(T => {
+      const b = P.bands.length === 1 ? P.bands[0] : P.bands.find(b2 => b2.col === T.col);
+      const a = pcSheetPlace(b, T.x0, T.y0), z = pcSheetPlace(b, T.x1, T.y1);
+      toks.push({ name: T.name, x0: a.x, x1: z.x, y0: a.y, y1: z.y, col: split ? T.col : null, page: pages.indexOf(P) + 1, line: lineOff + T.line });
+    });
+    lineOff += P.lineCount;
+  });
+  return { pages: used.map(P => ({ page: P.page, x, y: P.y, h: P.h, top: P.top, bands: P.bands })), toks, marks,
+    crop: { x: 0, y: 0, w, h: dy }, printH: top, split: !one && used.some(P => P.bands.length > 1), fellBack, doc };
 }
 /* A two-column page cut into bands for ONE LONG COLUMN (pcSheetModel), or
    null: draw the page whole. The columns are the ones pcSheetPage reads in

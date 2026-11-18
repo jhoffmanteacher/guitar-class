@@ -63,7 +63,11 @@
        on <html>, innerWidth 2560) and no sideways scroll; Live In-Class Games fills like the student site (about
        1.874) and the next view puts it back to 1; last, the Student view address (no ?teacher) fills 2560x1300 and is
        1 at 1366x657;
-     - measures sideways scroll at 390 px.
+     - measures sideways scroll at 390 px;
+     - the Song builder's Lyrics sheet row (2026-11-18, teacher-sb-sheet.js) at 1366x657: two made-up built songs in
+       the stub, made-up pdfs (tools/made-pdf.mjs) read by the real pdf.js; the row with no sheet, a sheet that follows
+       (✓ and Add), one that does not (✗, its reason and the table), a pdf with no text, and a song that has a sheet:
+       each drawn, no sideways scroll, the row and its table inside the detail column (sheet-*.png with --shots).
    Needs Node 22+ (global WebSocket) and Chrome or Chromium; serves the repo
    itself. Takes about 40 seconds. */
 import { createServer } from 'node:http';
@@ -73,6 +77,8 @@ import { tmpdir, platform } from 'node:os';
 import { join, extname, normalize, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import net from 'node:net';
+import { FIXTURES, withAudio } from './built-songs-fixtures.mjs';
+import { madePdf } from './made-pdf.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -1189,6 +1195,49 @@ async function main() {
     await shot('13-dark-1366');
     for (const tab of ['students', 'settings']) { await js(`document.querySelector('[data-ta-tab="${tab}"]').click()`); await sleep(120); await shot(`14-dark-${tab}-1366`); }
     await page.send('Emulation.setEmulatedMedia', { features: [] });
+    /* The Song builder's Lyrics sheet row (2026-11-18, teacher-sb-sheet.js), at 1366x657. Made-up songs and pdfs only. */
+    {
+      await size(1366, 657); await sleep(200);
+      const A = FIXTURES.fourFour.id, B = FIXTURES.beatMap.id, hex = c => c.repeat(64);
+      const docA = withAudio(FIXTURES.fourFour.doc, 900000, hex('a')); docA.audio.id = A + '-aaaaaaaaaa';
+      const docB = withAudio(FIXTURES.beatMap.doc, 800000, hex('b')); docB.audio.id = B + '-bbbbbbbbbb';
+      docB.song.sheet = { id: 'sheet-' + B + '-bbbbbbbb', bytes: 2345, sha256: hex('c') };
+      await js(`__store.set('builtSongs/${A}', ${JSON.stringify(docA)}); __store.set('builtSongs/${B}', ${JSON.stringify(docB)});
+        __store.set('builtSongsMeta/list', { songs: { '${A}': 3, '${B}': 2 } }); sbReadAt = 0;`);
+      await js(`setTeacherView('songbuilder')`);
+      for (let i = 0; i < 60; i++) { await sleep(100); if (await js(`!!(sbPublished && sbPublished.has('${A}'))`)) break; }
+      const LINES = ['G C D Em', 'Test Song Four', '[Intro]', 'G C G C', '[Verse 1]', 'G D Em C', 'Test words for a line', 'G7 D Em C', 'Test words again', '[Chorus]', 'D G C D G C', 'Test more words here', 'D G C D G'];
+      const pdfs = { good: madePdf(LINES), bad: madePdf(LINES.map(l => l === 'D G C D G C' ? 'D G C D A C' : l)), scan: madePdf([]) };
+      const measure = async (state, want) => {
+        const r = await js(`(() => { const row = document.querySelector('[data-sb-sheet]'), det = document.querySelector('[data-sb-detail]'), tbl = document.querySelector('.sb-sheet-tbl');
+          if(row) row.scrollIntoView({ block: 'start' });
+          const rr = row && row.getBoundingClientRect(), dr = det && det.getBoundingClientRect();
+          return { row: !!row, text: row ? row.innerText : '', sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+            right: rr ? Math.round(rr.right) : 0, detRight: dr ? Math.round(dr.right) : 0, tbl: tbl ? { sw: tbl.scrollWidth, cw: tbl.clientWidth, rows: tbl.querySelectorAll('tbody tr').length, h: Math.round(tbl.getBoundingClientRect().height) } : null }; })()`);
+        if (!r.row) fail('sheet:' + state, 'no Lyrics sheet row on the song\'s page');
+        else {
+          if (!want.test(r.text)) fail('sheet:' + state, 'the row does not say ' + want + ': ' + JSON.stringify(r.text.slice(0, 160)));
+          if (r.sideways > 0) fail('sheet:' + state, 'the page scrolls sideways by ' + r.sideways + 'px');
+          if (r.right > r.detRight + 1) fail('sheet:' + state, `the row ends at ${r.right}px, past the detail column (${r.detRight}px)`);
+          if (r.tbl && r.tbl.sw > r.tbl.cw + 1) fail('sheet:' + state, `the table is wider than its box (${r.tbl.sw} > ${r.tbl.cw})`);
+        }
+        stats.sheet = (stats.sheet || []).concat(state + (r.tbl ? ` (table ${r.tbl.rows} rows, ${r.tbl.h}px)` : ''));
+        await sleep(150); await shot('sheet-' + state);
+      };
+      await js(`sbOpen('${A}')`); await sleep(300);
+      await measure('1-empty', /No lyrics sheet\./);
+      const pick = async (name, bytes) => {
+        await js(`sbSheetPick(new File([Uint8Array.from(atob('${Buffer.from(bytes).toString('base64')}'), c => c.charCodeAt(0))], ${JSON.stringify(name)}, { type: 'application/pdf' }))`);
+        for (let i = 0; i < 100; i++) { await sleep(100); if (await js(`!sbSh.reading && !!sbSh.res`)) break; }
+        await sleep(200);
+      };
+      await pick('test-sheet-good.pdf', pdfs.good); await measure('2-follows', /The sheet follows the song: 23 chord names over 23 changes\./);
+      await pick('test-sheet-bad.pdf', pdfs.bad); await measure('3-does-not-follow', /The sheet does not follow the song\.[\s\S]*Chord change 17/);
+      await pick('test-scan.pdf', pdfs.scan); await measure('4-no-text', /That pdf has no text \(a scan or a photo\)\. Save it as a pdf with text\./);
+      await js(`sbOpen('${B}')`); await sleep(300);
+      await measure('5-has-sheet', /This song has a lyrics sheet/);
+      await size(1366, 768);
+    }
     stats.widths = { at1366, at1920: wide };
     await xss('the end of the walk');
     const late = errsSince(0); if (late.length) fail('page', late.length + ' page error(s), first: ' + late[0]);
@@ -1220,6 +1269,7 @@ async function main() {
   if (stats.tree) console.log(`  units tree: ${stats.tree.rows} rows adding up to the board's ${stats.tree.cards} cards, ${stats.tree.clicks} row clicks (Songs, list with a search, Arrange board), ${stats.tree.repaints} repaints after a write, ${stats.tree.reloads} reloads with the fold kept`);
   if (stats.widths) console.log(`  column widths at 1366: sidebar ${Math.round(stats.widths.at1366.side)}, list ${Math.round(stats.widths.at1366.list)}, detail ${Math.round(stats.widths.at1366.detail)}; at 1920: ${Math.round(stats.widths.at1920.side)}, ${Math.round(stats.widths.at1920.list)}, ${Math.round(stats.widths.at1920.detail)}`);
   if (stats.big) console.log(`  2560x1300: ${stats.big} view switches, the console at factor 1 with no sideways scroll, Live In-Class Games filling (1.874) and the next view back at 1; Student view's student site ${stats.studentView ? 'fills (' + stats.studentView + ') and is 1 at 1366x657' : 'NOT checked'}`);
+  if (stats.sheet) console.log(`  Song builder Lyrics sheet row at 1366x657: ${stats.sheet.length} states (${stats.sheet.join(', ')}), no sideways scroll, inside the detail column`);
   if (stats.shots.length) console.log('  screenshots:\n    ' + stats.shots.join('\n    '));
   if (fails.length) { console.log(`\x1b[31m✗ ${fails.length} problem(s):\x1b[0m\n  ` + fails.join('\n  ')); process.exit(1); }
   console.log('\x1b[32m✓ console layout smoke passed\x1b[0m');

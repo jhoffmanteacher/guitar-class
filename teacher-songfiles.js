@@ -58,13 +58,15 @@
    songFileReadPieces checks every piece and the SHA-256.
 
    A BUILT SONG'S AUDIO (not on the list) is shown as "Built song: <title>",
-   checked against that song's audio entry (Verify works on it too). A Song
+   checked against that song's audio entry (Verify works on it too); its LYRICS
+   SHEET (song.sheet, a .pdf, 2026-11-18, teacher-sb-sheet.js) as "Built song:
+   <title> (lyrics sheet)", checked against song.sheet. A Song
    builder draft's levelled copy (teacher-sb-core.js) is shown as "Song builder
    draft: <title>" once the drafts are read (Song files asks for them); Delete
    works on it as on any stray file, and the draft then asks for its mp3 again.
 
-   DELETE removes one song: never the audio a built song on
-   builtSongsMeta/list plays (that list and its songs are read fresh first;
+   DELETE removes one song: never the audio or the lyrics sheet a built song on
+   builtSongsMeta/list uses (that list and its songs are read fresh first;
    the refusal names the song; a list that cannot be read refuses too). Then,
    after the teacher types its id (prompt), one batch
    deletes pieces 0 … TEACHER_SF_MAX_PIECES-1 (every piece id the rules allow)
@@ -122,6 +124,11 @@ function teacherSfEntry(id){
 }
 function teacherSfOnList(id){ return typeof SONG_FILES !== 'undefined' && Object.prototype.hasOwnProperty.call(SONG_FILES, id); }
 function teacherSfPiecesOf(bytes){ return Math.ceil(bytes / SONG_FILE_PIECE); }
+/* The song a built song's or a draft's file belongs to, for its row: "<title>", or "<title> (lyrics sheet)" for a pdf. */
+function teacherSfOwnerText(st, id){
+  const o = st === 'built' ? teacherBsAudioOwner(id) : st === 'draft' ? teacherSbAudioOwner(id) : null;
+  return o ? o.title + (o.sheet ? ' (lyrics sheet)' : '') : '';
+}
 /* The stored head matches the list's entry the way the site checks it (app/songfiles.js sfLoadOnce). */
 function teacherSfHeadMatches(h, entry){
   return !!(h && entry && h.state === 'ready' && h.bytes === entry.bytes && h.sha256 === entry.sha256 && h.pieces === teacherSfPiecesOf(entry.bytes));
@@ -170,7 +177,7 @@ function teacherSfRowHtml(id){
     + `<td style="white-space:nowrap">${escHtml(teacherSfMb(src.bytes))}</td>`
     + `<td>${escHtml(teacherSfLen(src.durationSec))}</td>`
     + `<td>${h ? escHtml(String(h.state == null ? '—' : h.state)) : '—'}</td>`
-    + `<td>${escHtml(TEACHER_SF_STATUS[st] + (st === 'built' ? teacherBsAudioOwner(id).title : st === 'draft' ? teacherSbAudioOwner(id).title : ''))}${chk ? `<div class="tg-note">${chk.ok ? '✓ ' : '✗ '}${escHtml(chk.text)}</div>` : ''}</td>`
+    + `<td>${escHtml(TEACHER_SF_STATUS[st] + teacherSfOwnerText(st, id))}${chk ? `<div class="tg-note">${chk.ok ? '✓ ' : '✗ '}${escHtml(chk.text)}</div>` : ''}</td>`
     + `<td style="white-space:nowrap">${entry && h ? btn('verify', 'Verify') : ''}${h ? btn('delete', 'Delete') : ''}</td></tr>`;
 }
 function teacherSfBlockHtml(){
@@ -621,7 +628,7 @@ async function teacherSfDelete(id){
     let users;
     try{ users = await teacherBsAudioUsers(id); }
     catch(e){ teacherSfNote = `Nothing was deleted: could not check whether a built song plays ${id} (${teacherSfWhy(e)}).`; teacherSfPaint(); return; }
-    if(users.length){ teacherSfNote = `Nothing was deleted: the built song "${users[0].title}"${users.length > 1 ? ` and ${users.length - 1} more` : ''} plays ${id}. Delete or re-import that song first.`; teacherSfPaint(); return; }
+    if(users.length){ teacherSfNote = `Nothing was deleted: the built song "${users[0].title}"${users.length > 1 ? ` and ${users.length - 1} more` : ''} ${users[0].sheet ? `uses ${id} as its lyrics sheet. Remove the sheet on the song's Song builder page, or delete that song,` : `plays ${id}. Delete or re-import that song`} first.`; teacherSfPaint(); return; }
     if(teacherSfOtherBusy()) return;   // an Import or another action began during the read (review R1-5)
   }
   const typed = prompt(`Delete the song file "${id}" from the database? Its pieces and its entry go; the site cannot play it until it is uploaded again. Type its id to delete it:`, '');

@@ -5,6 +5,7 @@
      node tools/song-builder-sim.mjs            every case; exit 0 = all held, 1 = a ✗ line
      node tools/song-builder-sim.mjs --verbose  print every case, not only the failures
      node tools/song-builder-sim.mjs --root DIR another site folder
+     node tools/song-builder-sim.mjs --breaks   also broken copies of the lyrics-sheet code (each must turn a sheet case red)
 
    WHAT IS REAL. The whole console script (siteParts('teacher.js'): every teacher-*.js part, in load order, so the Song
    files writer teacherSfPutFile and teacherBsAudioUsers are the real ones), app/songfiles.js and app/builtsongs.js,
@@ -56,7 +57,15 @@
    list, then the song; a later Publish counts on); leaving mid-publish; the health line; the imported song's page and
    its Export, passed by tools/built-song-check.mjs; Delete (the draft's OK / Cancel never deletes a published song;
    the typed title: the list first, then the song, the draft, its copy; the other song untouched). The rules check
-   above takes builtSongs/{id} and builtSongsMeta/list as firestore.rules "BUILT SONGS" writes them. */
+   above takes builtSongs/{id} and builtSongsMeta/list as firestore.rules "BUILT SONGS" writes them.
+
+   THE LYRICS SHEET (2026-11-18, private chord sheets P4; teacher-sb-sheet.js; sheetCases): the published song's Lyrics
+   sheet row on made-up pdfs (tools/made-pdf.mjs) read by the vendored pdf.js in Node, the check run in the REAL student
+   app (sim-app-page.mjs) on the song's real card: the refusals (over 5 MB, not a pdf, no text, a sheet that does not
+   follow: the reason and the table) write nothing; Add (the pdf through the Song files writer, then one transaction);
+   Edit and Publish keep the sheet (and Publish reads its head); Replace (a stored pdf not uploaded again, the old one
+   deleted); a pdf or a song another tab changed in the gap; Check it again; Export's .pdf; Remove; both chord sets;
+   Delete. --breaks runs these cases against 22 broken copies of the sheet code and of what carries the sheet. */
 import { readFileSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -65,6 +74,7 @@ import vm from 'node:vm';
 import { siteParts } from './site-src.mjs';
 import { appPage } from './sim-app-page.mjs';
 import { FIXTURES, withAudio, audioIdFor } from './built-songs-fixtures.mjs';
+import { madePdf } from './made-pdf.mjs';
 
 const args = process.argv.slice(2);
 const argOf = n => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : null; };
@@ -129,7 +139,7 @@ function clone(v){
   if(v && typeof v === 'object'){ const o = {}; for(const k of Object.keys(v)) o[k] = clone(v[k]); return o; }
   return v;
 }
-const DRAFT_KEYS = 'artist,audio,beat,chart,imported,level,pitch,pubVer,savedAt,source,step,title,v,volume';
+const DRAFT_KEYS = 'artist,audio,beat,chart,imported,level,pitch,pubVer,savedAt,sheet,source,step,title,v,volume';   // sheet: 2026-11-18 (the lyrics sheet, teacher-sb-sheet.js)
 function rulesCheck(op, path, data){
   const p = path.split('/');
   if(op === 'delete') return (p[0] === 'songDrafts' && p.length === 2) || (p[0] === 'songFiles' && (p.length === 2 || (p.length === 4 && p[2] === 'pieces')))
@@ -300,7 +310,7 @@ DUR.set(sha(LEVELLED.get('a')), 24); DUR.set(sha(LEVELLED.get('b')), 24.02); DUR
 /* An edit number the console just made (teacherBsNextVer): from its clock, and past `prev`. */
 const T0_2026 = Date.UTC(2026, 0, 1);
 const freshVer = (v, prev) => Number.isInteger(v) && v > (prev || 0) && v >= Math.floor((Date.now() - T0_2026) / 1000) - 600 && v <= 1e9;
-async function runCases(consoleSrc){
+async function runCases(consoleSrc, sheetSrc){
   const out = [];
   const check = (name, ok, detail) => out.push({ name, ok: !!ok, detail: detail == null ? '' : String(detail) });
   const C = makeConsole(consoleSrc);
@@ -541,6 +551,7 @@ async function runCases(consoleSrc){
   await cutsCases(consoleSrc, check);
   await r2Cases(consoleSrc, check);
   await r3Cases(consoleSrc, check);
+  await sheetCases(consoleSrc, check, sheetSrc);
   return out;
 }
 function box_set(C, k, v){ C.box[k] = v; }
@@ -1447,7 +1458,7 @@ async function importCases(consoleSrc, check){
     const u0 = (F6.S.get('songFilesUsage/' + run('songFileMonth()')) || {}).bytes || 0;
     run('teacherSbPaint()'); await settle();
     check('imported song, Edit on Beat: one songDrafts write (the draft fields, imported, its edit number) and the Beat step opens; nothing is loaded for it',
-      since(w0).join() === 'set songDrafts/' + A && d && Object.keys(d).sort().join(',') === 'artist,audio,beat,chart,imported,level,pitch,pubVer,savedAt,source,step,title,v,volume' && d.imported === true && d.pubVer === 4
+      since(w0).join() === 'set songDrafts/' + A && d && Object.keys(d).sort().join(',') === DRAFT_KEYS && d.imported === true && d.pubVer === 4
       && run('sbShowsSteps()') && run('sbStepOn') === 3 && ((F6.S.get('songFilesUsage/' + run('songFileMonth()')) || {}).bytes || 0) === u0,
       JSON.stringify({ writes: since(w0), keys: d && Object.keys(d).sort().join(','), step: run('sbStepOn') }));
     check('imported song: Upload says its original mp3 is not here, Volume that the levelled copy and its numbers came with the song, Beat shows the bars read-only ("came with the imported song"), Chart that its original text is not here',
@@ -2084,7 +2095,7 @@ async function r3Cases(consoleSrc, check){
     F.db.runTransaction = tx0;
     const listed = !!listOf()[id], doc = !!F.S.get('builtSongs/' + id), head = !!F.S.get('songFiles/' + aid), note = M.run('teacherBsNote');
     check('R3-3: an Import whose transaction runs after Delete… in another tab removed the song and its audio reads the audio again inside it, finds it gone and writes nothing (never a listed song with no audio), and says so',
-      !armed && goneFirst && !listed && !doc && !head && /^The import failed: the audio in the database was deleted or changed while the song was being saved/.test(note) && /students have what they had before/.test(note) && /^Deleted "Test 3 Import Delete"/.test(A.run('sbNote')),
+      !armed && goneFirst && !listed && !doc && !head && /^The import failed: the audio or the lyrics sheet in the database was deleted or changed while the song was being saved/.test(note) && /students have what they had before/.test(note) && /^Deleted "Test 3 Import Delete"/.test(A.run('sbNote')),
       JSON.stringify({ goneFirst, listed, doc, head, note: note.slice(0, 90), A: A.run('sbNote').slice(0, 40) }));
   }
   /* R3-4: Unpublish and Edit of a stale draft whose own levelled copy is not the import's */
@@ -2228,14 +2239,294 @@ async function r3Cases(consoleSrc, check){
     F.st.writes.length + ' writes; ' + (F.st.violations.slice(0, 3).join('; ') || 'no violation'));
 }
 
+/* ── THE LYRICS SHEET (2026-11-18, private chord sheets P4; teacher-sb-sheet.js) ──
+   Its own console and store: a made-up imported song (FIXTURES.fourFour, full chords) and one with both chord sets
+   (FIXTURES.beatMap). The check itself (sbSheetJudge: pdf.js, the song's real card through builtSongExpand, pcLayout,
+   caView and pcSheetAlign) runs in the REAL student app (tools/sim-app-page.mjs) with the vendored pdf.js in Node, on
+   made-up one-column pdfs (Courier: chord lines, [headers], made-up words; no real lyrics), and the console calls it
+   there (the same teacher-sb-sheet.js text as the console under test). Everything else is the console's own code.
+   The refusals (over 5 MB, not a pdf, a pdf with no text, a sheet that does not follow) write nothing; Add (the pdf
+   through the Song files writer, then one transaction: the song read again, the list's edit number, the draft); Edit
+   reads "no changes" and a republish keeps song.sheet and reads its head; Replace (a stored pdf not uploaded again, the
+   old one deleted); a song changed in another tab refuses; Check it again; Export's third file; Remove; Delete. */
+const sheetPdf = madePdf;
+/* fourFour's 23 changes: intro G C G C, verse G D Em C twice, chorus D G (C D G) x3 (its first C is the verse's last). */
+const SHEET_LINES = ['G C D Em', 'Test Song Four', '[Intro]', 'G C G C', '[Verse 1]', 'G D Em C', 'Test words for a line', 'G7 D Em C', 'Test words again', '[Chorus]', 'D G C D G C', 'Test more words here', 'D G C D G'];
+const SHEET_GOOD = sheetPdf(SHEET_LINES);
+const SHEET_GOOD2 = sheetPdf(SHEET_LINES.map(l => l === 'G C G C' ? 'G C G7 C' : l));
+const SHEET_BAD = sheetPdf(SHEET_LINES.map(l => l === 'D G C D G C' ? 'D G C D A C' : l));
+const SHEET_SCAN = sheetPdf([]);
+const SHEET_BOTH = sheetPdf(['[Verse]', 'E A D A E A D A', 'Test words', '[Outro]', 'E A D A']);
+const pdfFileOf = (name, bytes, size) => { const f = { name, size: size == null ? bytes.length : size, reads: 0 }; f.arrayBuffer = async () => { f.reads++; return bytes.slice().buffer; }; return f; };
+async function sheetCases(consoleSrc, check, sheetSrc){
+  const { createRequire } = await import('node:module');
+  const require = createRequire(import.meta.url);
+  const lib = require(join(ROOT, 'vendor/pdfjs/pdf.min.js'));
+  lib.GlobalWorkerOptions.workerSrc = join(ROOT, 'vendor/pdfjs/pdf.worker.min.js');
+  const app = appPage(ROOT);
+  app.ctx.pdfjsLib = { GlobalWorkerOptions: {}, getDocument: src => lib.getDocument(Object.assign({ isEvalSupported: false, verbosity: 0 }, src, { data: new Uint8Array(src.data) })) };
+  app.ctx.loadScriptOnce = () => Promise.resolve();
+  vm.runInContext(sheetSrc, app.ctx, { filename: 'teacher-sb-sheet.js (in the student app)' });
+  const judge = app.run('sbSheetJudge');
+  const F = makeDb(), C = makeConsole(consoleSrc, F), { run, env } = C;
+  C.box.__appJudge = (id, doc, bytes) => judge(id, JSON.parse(JSON.stringify(doc)), new Uint8Array(bytes));
+  run('sbSheetJudge = (id, doc, bytes) => __appJudge(id, doc, bytes);');
+  run('window.__saves = []; teacherMicSaveFile = (name, blob) => { window.__saves.push({ name, blob }); };');
+  const LV = LEVELLED.get('c'), shaL = sha(LV);
+  const putFile = (id, bytes, dur, file) => {
+    F.S.set('songFiles/' + id, { file: file || id + '.mp3', bytes: bytes.length, sha256: sha(bytes), pieces: Math.ceil(bytes.length / 900000), pieceBytes: 900000, durationSec: dur, state: 'ready', uploadedAt: TS });
+    for(let i = 0; i * 900000 < bytes.length; i++) F.S.set(`songFiles/${id}/pieces/${i}`, { i, data: new FakeBytes(bytes.subarray(i * 900000, (i + 1) * 900000)) });
+  };
+  const seed = (name, id) => {
+    const d = withAudio(FIXTURES[name].doc, LV.length, shaL);
+    d.audio.id = audioIdFor(id, shaL);
+    putFile(d.audio.id, LV, d.audio.durationSec);
+    F.S.set('builtSongs/' + id, Object.assign(JSON.parse(JSON.stringify(d)), { savedAt: TS }));
+    return d;
+  };
+  const A = FIXTURES.fourFour.id, B = FIXTURES.beatMap.id;
+  seed('fourFour', A); seed('beatMap', B);
+  F.S.set('builtSongsMeta/list', { songs: { [A]: 3, [B]: 2 }, updatedAt: TS });
+  const nW = () => F.st.writes.length, since = w0 => F.st.writes.slice(w0).map(w => w.op + ' ' + w.path);
+  const sheetIdOf = b => 'sheet-' + A + '-' + sha(b).slice(0, 8);
+  const waitRes = async () => { const t0 = Date.now(); for(;;){ await settle(); if(!run('sbSh.reading') && run('sbSh.res')) return; if(Date.now() - t0 > 20000) return; await sleep(5); } };
+  const pick = async f => { box_set(C, '__f', f); run('sbSheetPick(__f)'); await waitRes(); return run('sbDetailHtml()'); };
+  run('renderTeacherSongBuilder()'); await settle();
+  run(`sbOpen(${JSON.stringify(A)})`); await settle();
+
+  /* S1: the row on a published song's page */
+  {
+    const h = run('sbDetailHtml()');
+    check('sheet: a published song\'s page has a Lyrics sheet row (no sheet yet, a drop zone that takes a pdf), and opening it writes nothing',
+      /Lyrics sheet<\/div>/.test(h) && /No lyrics sheet\./.test(h) && /data-sb-sheet-drop/.test(h) && /data-sb-sheet-file/.test(h) && !/data-sb-act="sheet-add"/.test(h) && nW() === 0, nW() + ' writes');
+  }
+  /* S2-S4: refused before or while it is read: one line, nothing written, no Add */
+  {
+    const w0 = nW();
+    const big = pdfFileOf('big.pdf', SHEET_GOOD, 5000001);
+    const h1 = await pick(big);
+    const h2 = await pick(pdfFileOf('notes.pdf', new TextEncoder().encode('Test notes, not a pdf at all')));
+    const h3 = await pick(pdfFileOf('scan.pdf', SHEET_SCAN));
+    check('sheet refused: over 5 MB (not even read), not a pdf, and a pdf with no text ("That pdf has no text (a scan or a photo). Save it as a pdf with text."): one line each, no Add, nothing written',
+      big.reads === 0 && /a lyrics sheet can be at most 5 MB/.test(h1) && /That file is not a pdf\./.test(h2) && /That pdf has no text \(a scan or a photo\)\. Save it as a pdf with text\./.test(h3)
+        && ![h1, h2, h3].some(h => /data-sb-act="sheet-add"/.test(h)) && nW() === w0,
+      JSON.stringify({ reads: big.reads, writes: since(w0) }));
+  }
+  /* S5: a sheet that does not follow: the reason and the table, nothing written */
+  {
+    const w0 = nW();
+    const h = await pick(pdfFileOf('test <b>sheet</b>.pdf', SHEET_BAD));
+    run("sbSheetAct('sheet-add')"); await settle(60);   // the button is not drawn; pressed anyway, it must write nothing
+    const rows = (h.match(/<tr( class="bad")?><td>/g) || []).length, bad = (h.match(/<tr class="bad">/g) || []).length;
+    check('sheet refused: one that does not follow says where in one line ("Chord change 17 … the card plays G … is A"), shows the table (3 laps: ✓ ✓ ✗), offers no Add (and Add pressed anyway writes nothing), and draws the file name escaped',
+      /The sheet does not follow the song\.<\/b> Chord change 17 [^<]*the card plays G, the sheet's chord \d+ is A\./.test(h) && rows === 3 && bad === 1 && !/data-sb-act="sheet-add"/.test(h)
+        && /Nothing was added: send the pdf to Claude/.test(h) && /test &lt;b&gt;sheet&lt;\/b&gt;\.pdf/.test(h) && nW() === w0,
+      JSON.stringify({ rows, bad, writes: since(w0), why: run('sbSh.res && sbSh.res.why') }));
+  }
+  /* S6: a sheet that follows: ✓ and Add, still nothing written */
+  {
+    const w0 = nW();
+    const h = await pick(pdfFileOf('good.pdf', SHEET_GOOD));
+    check('sheet: one that follows reads "The sheet follows the song: 23 chord names over 23 changes" (the 4 chord-box labels skipped, G7 = G) with one Add button, and nothing is written yet',
+      /The sheet follows the song: 23 chord names over 23 changes\./.test(h) && (h.match(/data-sb-act="sheet-add"/g) || []).length === 1 && /Add to the song/.test(h) && nW() === w0,
+      JSON.stringify({ line: (h.match(/The sheet follows[^<]*/) || [''])[0], writes: since(w0) }));
+  }
+  /* S7: Add to the song */
+  const sid = sheetIdOf(SHEET_GOOD);
+  {
+    const w0 = nW(), ver0 = F.S.get('builtSongsMeta/list').songs[A];
+    run("sbSheetAct('sheet-add')"); await settle(100);
+    const seq = since(w0), doc = F.S.get('builtSongs/' + A), list = F.S.get('builtSongsMeta/list');
+    const head = F.S.get('songFiles/' + sid), bare = Object.assign({}, doc); delete bare.savedAt;
+    const expected = { id: sid, bytes: SHEET_GOOD.length, sha256: sha(SHEET_GOOD) };
+    const idx = p => seq.indexOf(p);
+    check('sheet Add: the pdf goes up through the Song files writer (head uploading, its piece, head ready: .pdf, durationSec 1), THEN one transaction writes the song with song.sheet and the list with a new edit number; nothing else; the song passes the validator and its audio is untouched',
+      head && head.state === 'ready' && head.file === sid + '.pdf' && head.durationSec === 1 && head.sha256 === sha(SHEET_GOOD)
+        && idx('set songFiles/' + sid) === 0 && idx(`set songFiles/${sid}/pieces/0`) > 0 && seq.lastIndexOf('set songFiles/' + sid) < idx('set builtSongs/' + A)
+        && seq.slice(-2).join() === `set builtSongs/${A},set builtSongsMeta/list` && !seq.some(x => /songDrafts|config|progress/.test(x))
+        && JSON.stringify(doc.song.sheet) === JSON.stringify(expected) && doc.savedAt === TS && run('builtSongCheck')(A, bare).length === 0
+        && doc.audio.id === audioIdFor(A, shaL) && freshVer(list.songs[A], ver0) && list.songs[B] === 2,
+      JSON.stringify({ seq: seq.filter(x => !/pieces\/([1-9]|[1-3][0-9])$/.test(x)), sheet: doc.song.sheet, ver: list.songs[A] }));
+    const h = run('sbDetailHtml()'), card = run(`builtSongExpand(${JSON.stringify(A)}, sbPublished.get(${JSON.stringify(A)}).doc).activity.card`);
+    check('sheet Add: the page says the song has a lyrics sheet, offers Check it again and Remove sheet, the note names the new edit, and the card a student\'s page makes has the Lyrics view of the private pdf, read loose, one column',
+      /This song has a lyrics sheet<\/b>/.test(h) && /data-sb-act="sheet-check"/.test(h) && /data-sb-act="sheet-remove"/.test(h) && /^Added the lyrics sheet to "Test Song Four" \(edit/.test(run('sbNote'))
+        && card.otherViews && card.otherViews.lyrics.sheet === 'private:' + sid && card.otherViews.lyrics.sheetRead === 'loose' && card.otherViews.lyrics.sheetColumns === 1,
+      JSON.stringify({ note: run('sbNote'), views: card.otherViews }));
+  }
+  /* S8: Edit then Publish: the sheet rides along */
+  {
+    run("sbPubAct('edit-step', { dataset: { sbV: '6' } })"); await settle();
+    const d = F.S.get('songDrafts/' + A);
+    check('sheet: Edit rebuilds the draft WITH the sheet, and the unchanged song reads "Published (no changes)"',
+      d && JSON.stringify(d.sheet) === JSON.stringify(F.S.get('builtSongs/' + A).song.sheet) && /Published \(no changes\)/.test(run('sbPublishBtnHtml(sbDraft())')),
+      JSON.stringify({ sheet: d && d.sheet, btn: run('sbPublishBtnHtml(sbDraft())').slice(0, 120) }));
+    /* The sheet's head gone: Publish refuses and writes nothing. */
+    run(`sbDrafts.get(${JSON.stringify(A)}).title = 'Test Song Four Again'`);
+    const keepHead = F.S.get('songFiles/' + sid); F.S.delete('songFiles/' + sid);
+    let w0 = nW();
+    run('sbPublish()'); await settle(100);
+    const refused = nW() === w0 && /lyrics sheet is missing from the database/.test(run('sbNote'));
+    F.S.set('songFiles/' + sid, keepHead);
+    w0 = nW();
+    run('sbPublish()'); await settle(100);
+    const doc = F.S.get('builtSongs/' + A);
+    check('sheet: Publish reads the sheet\'s head in its transaction (gone: refused, nothing written); a republished change keeps song.sheet',
+      refused && doc.title === 'Test Song Four Again' && doc.song.sheet && doc.song.sheet.id === sid && since(w0).includes('set builtSongs/' + A),
+      JSON.stringify({ refused, note: run('sbNote'), sheet: doc.song.sheet }));
+    run("sbPubAct('edit-done')"); await settle();
+  }
+  /* S9: Replace with another pdf already in the store: not uploaded again; the draft and the song in one transaction; the old pdf deleted */
+  const sid2 = sheetIdOf(SHEET_GOOD2);
+  {
+    await pick(pdfFileOf('good2.pdf', SHEET_GOOD2));
+    const h = run('sbDetailHtml()');
+    putFile(sid2, SHEET_GOOD2, 1, sid2 + '.pdf');
+    const w0 = nW();
+    run("sbSheetAct('sheet-add')"); await settle(100);
+    const seq = since(w0), doc = F.S.get('builtSongs/' + A), d = F.S.get('songDrafts/' + A);
+    check('sheet Replace: offered as "Replace the sheet with this one"; a pdf the store already holds is not uploaded again; the song, the list and the draft in one transaction with the new sheet; then the old pdf and its pieces deleted',
+      /Replace the sheet with this one/.test(h) && !seq.some(x => x.startsWith('set songFiles/'))
+        && seq.slice(0, 3).join() === `set builtSongs/${A},set builtSongsMeta/list,set songDrafts/${A}` && doc.song.sheet.id === sid2 && d.sheet.id === sid2 && d.savedAt === TS
+        && !F.S.has('songFiles/' + sid) && !F.S.has(`songFiles/${sid}/pieces/0`) && F.S.has('songFiles/' + sid2),
+      JSON.stringify({ seq: seq.filter(x => !/pieces\/([1-9]|[1-3][0-9])$/.test(x)), sheet: doc.song.sheet && doc.song.sheet.id }));
+  }
+  /* S9b: the pdf deleted (another tab) between its upload and the transaction: the head read inside it refuses */
+  {
+    await pick(pdfFileOf('good.pdf', SHEET_GOOD));
+    const rt = F.db.runTransaction;
+    F.db.runTransaction = async fn => { F.db.runTransaction = rt; F.S.delete('songFiles/' + sid); return rt(fn); };
+    const before = JSON.stringify(F.S.get('builtSongs/' + A)), listBefore = JSON.stringify(F.S.get('builtSongsMeta/list'));
+    run("sbSheetAct('sheet-add')"); await settle(100);
+    F.db.runTransaction = rt;
+    check('sheet Add: a pdf deleted in another tab after its upload is found gone by the read inside the transaction: the song and the list untouched, and the note says so',
+      JSON.stringify(F.S.get('builtSongs/' + A)) === before && JSON.stringify(F.S.get('builtSongsMeta/list')) === listBefore && /^Not added: the sheet in the database is missing/.test(run('sbNote')),
+      run('sbNote'));
+    for(let j = 0; j < 40; j++) F.S.delete(`songFiles/${sid}/pieces/${j}`);
+  }
+  /* S10: the song changed in another tab between the read and the Add: refused, the song and the list untouched */
+  {
+    await pick(pdfFileOf('good.pdf', SHEET_GOOD));
+    const other = JSON.parse(JSON.stringify(F.S.get('builtSongs/' + A))); other.title = 'Test Changed Elsewhere';
+    F.S.set('builtSongs/' + A, other);
+    const listBefore = JSON.stringify(F.S.get('builtSongsMeta/list'));
+    run("sbSheetAct('sheet-add')"); await settle(100);
+    const doc = F.S.get('builtSongs/' + A);
+    check('sheet Add: a song another tab changed since this page read it is refused inside the transaction (the song, the list and the draft untouched) and the note says so',
+      doc.title === 'Test Changed Elsewhere' && doc.song.sheet.id === sid2 && JSON.stringify(F.S.get('builtSongsMeta/list')) === listBefore && /^Not added: the song was changed in another tab/.test(run('sbNote')),
+      run('sbNote'));
+    other.title = 'Test Song Four Again'; F.S.set('builtSongs/' + A, other);
+    run('sbReadAt = 0; teacherSbLoad()'); await settle();
+    run(`sbOpen(null); sbOpen(${JSON.stringify(A)})`); await settle();
+    if(F.S.has('songFiles/' + sid)){ for(let j = 0; j < 40; j++) F.S.delete(`songFiles/${sid}/pieces/${j}`); F.S.delete('songFiles/' + sid); }
+  }
+  /* S11: Check it again: the stored pdf read back (counted), the same check */
+  {
+    const used0 = (F.S.get('songFilesUsage/' + (() => { const t = new Date(); return t.getUTCFullYear() + '-' + String(t.getUTCMonth() + 1).padStart(2, '0'); })()) || { bytes: 0 }).bytes;
+    run("sbSheetAct('sheet-check')"); await waitRes();
+    const h = run('sbDetailHtml()');
+    const used1 = (F.S.get('songFilesUsage/' + (() => { const t = new Date(); return t.getUTCFullYear() + '-' + String(t.getUTCMonth() + 1).padStart(2, '0'); })()) || { bytes: 0 }).bytes;
+    check('sheet: Check it again reads the stored pdf (one counted download) and shows the same ✓, "This is the sheet the song has", with no Add',
+      /The sheet follows the song: 23 chord names/.test(h) && /This is the sheet the song has\./.test(h) && !/data-sb-act="sheet-add"/.test(h) && used1 - used0 === Math.ceil(SHEET_GOOD2.length * 4 / 3),
+      JSON.stringify({ used: used1 - used0, line: (h.match(/The sheet [^<]*/) || [''])[0] }));
+  }
+  /* S12: Export: the third file */
+  {
+    run("window.__saves = []; sbPubAct('export', { dataset: { sbV: 'pub' } })"); await settle(100);
+    const sv = run('window.__saves.map(x => x.name)'), pdf = run('window.__saves.find(x => /\\.pdf$/.test(x.name))');
+    const bytes = pdf ? new Uint8Array(await pdf.blob.arrayBuffer()) : null;
+    check('sheet Export: three downloads, .json, .mp3 and the lyrics sheet\'s .pdf (its bytes the stored ones), paired by name',
+      sv.length === 3 && /\.json$/.test(sv[0]) && /\.mp3$/.test(sv[1]) && /\.pdf$/.test(sv[2]) && sv[2].replace(/\.pdf$/, '') === sv[0].replace(/\.json$/, '') && bytes && sha(bytes) === sha(SHEET_GOOD2),
+      JSON.stringify(sv));
+  }
+  /* S13: Remove sheet (Cancel writes nothing; OK: the song, the list and the draft without it, then the pdf deleted) */
+  {
+    env.confirmAnswer = false;
+    let w0 = nW();
+    run("sbSheetAct('sheet-remove')"); await settle(60);
+    const cancelled = nW() === w0;
+    env.confirmAnswer = true;
+    w0 = nW();
+    run("sbSheetAct('sheet-remove')"); await settle(100);
+    const seq = since(w0), doc = F.S.get('builtSongs/' + A), d = F.S.get('songDrafts/' + A);
+    check('sheet Remove: Cancel writes nothing; OK writes the song without song.sheet, the list with a new edit number and the draft with sheet null in one transaction, then deletes the pdf; the page offers the drop zone again',
+      cancelled && seq.slice(0, 3).join() === `set builtSongs/${A},set builtSongsMeta/list,set songDrafts/${A}` && doc.song.sheet === undefined && d.sheet === null
+        && !F.S.has('songFiles/' + sid2) && /No lyrics sheet\./.test(run('sbDetailHtml()')) && run('builtSongCheck')(A, Object.assign({}, doc, { savedAt: undefined })).length === 0,
+      JSON.stringify({ cancelled, seq: seq.filter(x => !/pieces\/([1-9]|[1-3][0-9])$/.test(x)).slice(0, 6) }));
+  }
+  /* S14: a song with both chord sets is checked with each */
+  {
+    run(`sbOpen(${JSON.stringify(B)})`); await settle();
+    const h = await pick(pdfFileOf('both.pdf', SHEET_BOTH));
+    check('sheet: a song with full and power chords is checked against both cards ("… with full and with power chords")',
+      /The sheet follows the song: 12 chord names over 12 changes, with full and with power chords\./.test(h) && run('sbSh.res.modes') === 2,
+      (h.match(/The sheet [^<]*/) || [''])[0]);
+    run("sbSheetAct('sheet-add')"); await settle(100);
+  }
+  /* S15: Delete… a song with a sheet deletes the pdf too; the other song untouched */
+  {
+    const bsid = 'sheet-' + B + '-' + sha(SHEET_BOTH).slice(0, 8);
+    const had = F.S.has('songFiles/' + bsid);
+    env.promptAnswer = 'Test Beat Map';
+    run('sbDeleteSong()'); await settle(100);
+    check('sheet: Delete… of a song with a lyrics sheet deletes its pdf (head and pieces) with the song; the other song and its files stay',
+      had && !F.S.has('builtSongs/' + B) && !F.S.has('songFiles/' + bsid) && !F.S.has(`songFiles/${bsid}/pieces/0`) && F.S.has('builtSongs/' + A) && F.S.has('songFiles/' + audioIdFor(A, shaL)),
+      JSON.stringify({ had, note: run('sbNote') }));
+  }
+  check('sheet: every write fits firestore.rules (songFiles heads and pieces, builtSongs, the list, drafts) and none goes to config/class or progress/',
+    F.st.violations.length === 0 && !F.st.writes.some(w => /^(config|progress)\//.test(w.path)), F.st.writes.length + ' writes; ' + (F.st.violations.slice(0, 3).join('; ') || 'no violation'));
+}
+
 /* ── main ── */
 const parts = siteParts('teacher.js', ROOT);
-for(const p of ['teacher-sb-core.js', 'teacher-sb-beat.js', 'teacher-sb-dsp.js', 'teacher-sb-chart.js', 'teacher-sb-pdf.js', 'teacher-sb-publish.js']) if(!parts.includes(p)){ console.log(`song-builder-sim: ${p} is not a console part (TEACHER_JS_PARTS in app/boot.js)`); process.exit(1); }
+for(const p of ['teacher-sb-core.js', 'teacher-sb-beat.js', 'teacher-sb-dsp.js', 'teacher-sb-chart.js', 'teacher-sb-pdf.js', 'teacher-sb-publish.js', 'teacher-sb-sheet.js']) if(!parts.includes(p)){ console.log(`song-builder-sim: ${p} is not a console part (TEACHER_JS_PARTS in app/boot.js)`); process.exit(1); }
 let res;
-try { res = await runCases(parts.map(read).join('')); }
+try { res = await runCases(parts.map(read).join(''), read('teacher-sb-sheet.js')); }
 catch(e){ console.log('song-builder-sim: the run threw: ' + (e && e.stack || e)); if(STUCK) console.log(`  ✗ ${STUCK_NAME} — ${STUCK}`); process.exit(1); }
 if(STUCK) res.push({ name: STUCK_NAME, ok: false, detail: STUCK });
 const bad = res.filter(r => !r.ok);
 for(const r of res) if(VERBOSE || !r.ok) console.log(`  ${r.ok ? '✓' : '✗'} ${r.name}${r.detail ? ' — ' + r.detail : ''}`);
 console.log(`song-builder-sim: ${res.length} cases, ${bad.length} failed`);
-process.exit(bad.length ? 1 : 0);
+/* --breaks (2026-11-18, the lyrics sheet): broken copies of the sheet code and of what carries the sheet; each must
+   turn at least one of the sheet cases (sheetCases, run alone on its own console and store) red. */
+let missed = 0;
+if(args.includes('--breaks')){
+  const SHEET_BREAKS = [
+    ['teacher-sb-sheet.js', 'no 5 MB cap', 'if(file.size > BS_MAX_SHEET_BYTES){', 'if(false){'],
+    ['teacher-sb-sheet.js', 'a file that is not a pdf is read', "if(head.indexOf('%PDF-') < 0){", 'if(false){'],
+    ['teacher-sb-sheet.js', 'no "no text" line for a scan', "e && e.code === 'notext' ? SB_SHEET_NOTEXT :", 'false ? SB_SHEET_NOTEXT :'],
+    ['teacher-sb-sheet.js', 'Add offered for a sheet that does not follow', "    else if(res && res.ok){", "    else if(res){"],
+    ['teacher-sb-sheet.js', 'Add writes a sheet that did not pass', "if(!f || !f.bytes || sbSh.reading || !res || !res.ok ||", "if(!f || !f.bytes || sbSh.reading || !res ||"],
+    ['teacher-sb-sheet.js', 'the song not read again in the transaction', "if(!now || sbCanon(sbPubNorm(now)) !== sbCanon(sbPubNorm(JSON.parse(was))))", "if(!now)"],
+    ['teacher-sb-sheet.js', 'the list keeps its edit number', "      songs[id] = ver;\n      tx.set(sref,", "      tx.set(sref,"],
+    ['teacher-sb-sheet.js', 'the draft not written with the song', "      if(d) tx.set(db.collection('songDrafts')", "      if(false) tx.set(db.collection('songDrafts')"],
+    ['teacher-sb-sheet.js', 'a replaced or removed sheet left in the store', "    if(cur && !(sheet && sheet.id === cur.id)) await sbDeleteAudio(cur.id, null);\n", ''],
+    ['teacher-sb-sheet.js', 'a stored pdf uploaded again', "if(!teacherSfHeadMatches(hs.exists ? hs.data() || {} : null, entry)) await teacherSfPutFile(sheet.id", "await teacherSfPutFile(sheet.id"],
+    ['teacher-sb-sheet.js', 'the file name drawn unescaped', '<div class="sb-file-name">${escHtml(f.name)}', '<div class="sb-file-name">${f.name}'],
+    ['teacher-sb-sheet.js', 'only the full chords checked', "const modes = act.chordVersions ? ['full', 'power'] : ['full'];", "const modes = ['full'];"],
+    ['teacher-sb-sheet.js', 'Remove without asking', "    if(!confirm(`Remove the lyrics sheet", "    if(false && !confirm(`Remove the lyrics sheet"],
+    ['teacher-sb-sheet.js', 'Check it again not counted', '    await songFileCount(db, songFileCost(sh.bytes));\n    const bytes = await songFileReadPieces(db, sh.id,', '    const bytes = await songFileReadPieces(db, sh.id,'],
+    ['teacher-sb-sheet.js', 'the sheet head not read again in the transaction', "if(!teacherSfHeadMatches(hs2.exists ? hs2.data() || {} : null, entry)) throw", "if(false) throw"],
+    ['teacher-sb-chart.js', 'the draft\'s sheet left out of the song (Edit / Publish drop it)', "  if(d.sheet && typeof d.sheet === 'object') song.sheet =", "  if(false) song.sheet ="],
+    ['teacher-sb-publish.js', 'an imported song\'s rebuilt draft loses its sheet', "pubVer: Number(p.ver) || null, sheet: s.sheet && typeof s.sheet === 'object' ? JSON.parse(JSON.stringify(s.sheet)) : null };", "pubVer: Number(p.ver) || null, sheet: null };"],
+    ['teacher-sb-publish.js', 'Publish does not read the sheet\'s head', "      if(sh){\n        const ss = await tx.get(db.collection('songFiles').doc(sh.id));", "      if(false){\n        const ss = await tx.get(db.collection('songFiles').doc(sh.id));"],
+    ['teacher-sb-publish.js', 'Delete… leaves the sheet', "p.doc && p.doc.song && p.doc.song.sheet && p.doc.song.sheet.id, d && d.sheet && d.sheet.id].filter(Boolean)", "].filter(Boolean)"],
+    ['teacher-sb-publish.js', 'Export leaves the pdf out', "    if(pdf) teacherMicSaveFile(base + '.pdf',", "    if(false) teacherMicSaveFile(base + '.pdf',"],
+    ['teacher-sb-publish.js', 'the row missing from the published song\'s page', "    + (doc && verdict.ok && typeof sbSheetRowHtml === 'function' ? sbSheetRowHtml(id, p) : '');", "    + '';"],
+    ['teacher-sb-core.js', 'the draft writer drops the sheet', "'pubVer', 'imported', 'sheet'];", "'pubVer', 'imported'];"],
+  ];
+  const srcs = new Map(parts.map(p => [p, read(p)]));
+  console.log('\n== broken copies (each must turn at least one lyrics-sheet case red)');
+  for(const [file, name, from, to] of SHEET_BREAKS){
+    const src = srcs.get(file), n = src.split(from).length - 1;
+    if(n !== 1){ console.log(`  ✗ ${name}: its text is in ${file} ${n} times (must be once)`); missed++; continue; }
+    const broken = src.replace(from, () => to);
+    const out = [], check = (nm, ok, detail) => out.push({ name: nm, ok: !!ok, detail });
+    try { await sheetCases(parts.map(p => p === file ? broken : srcs.get(p)).join(''), check, file === 'teacher-sb-sheet.js' ? broken : srcs.get('teacher-sb-sheet.js')); }
+    catch(e){ out.push({ name: 'threw: ' + String(e && e.message || e).slice(0, 100), ok: false }); }
+    const red = out.filter(r => !r.ok);
+    if(red.length) console.log(`  ✓ caught: ${name} — ${red[0].name.slice(0, 90)}`);
+    else { console.log(`  ✗ NOT caught: ${name}`); missed++; }
+  }
+  console.log(`${missed ? '✗' : '✓'} ${SHEET_BREAKS.length - missed} of ${SHEET_BREAKS.length} breaks caught`);
+}
+process.exit(bad.length || missed ? 1 : 0);

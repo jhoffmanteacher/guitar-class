@@ -21,6 +21,8 @@
                chart given at step 1 and not read yet)
        level:  { versions, start, range } | null
        pubVer: the song's last edit number on the list, kept by Unpublish so a later Publish counts on | null
+       sheet:  { id, bytes, sha256, cols? } | null   the published song's lyrics sheet (song.sheet, app/builtsongs.js), set
+               and cleared with the song by the Lyrics sheet row (teacher-sb-sheet.js), so Edit and Publish keep it
        imported: true for a draft rebuilt from an IMPORTED song (sbDraftFromDoc, teacher-sb-publish.js): no source,
                no volume measurements, a beat that came with the song (beat.fromImport), its chord shapes (chart.shapes)
        savedAt: the server's time }
@@ -98,6 +100,7 @@ function sbWhen(ms){
 }
 function sbLen(s){ return typeof teacherSfLen === 'function' ? teacherSfLen(s) : String(Math.round(s)) + ' s'; }
 function sbMb(n){ return (Number(n) / 1e6).toFixed(1) + ' MB'; }
+function sbKbMb(n){ n = Number(n); return n < 1e6 ? Math.max(1, Math.round(n / 1000)) + ' KB' : sbMb(n); }   // a lyrics sheet pdf is often under 0.1 MB
 /* What the validator says of a title and an artist (app/builtsongs.js builtSongCheck's own rules): '' when fine. */
 function sbTitleWhy(title, artist){
   if(!bsText(title, 1, 120)) return 'The title must be 1 to 120 characters of plain text.';
@@ -159,10 +162,14 @@ async function teacherSbLoad(){
   teacherSbPaint();
   if(teacherView === 'manage' && typeof teacherSfPaint === 'function') teacherSfPaint();
 }
-/* For Manage → Song files: the draft whose levelled copy is `audioId`, { title } or null. */
+/* For Manage → Song files: the draft whose levelled copy (or lyrics sheet: sheet true) is `audioId`, { title, sheet }
+   or null. */
 function teacherSbAudioOwner(audioId){
   if(!sbDrafts) return null;
-  for(const [, d] of sbDrafts) if(d.audio && d.audio.id === audioId) return { title: String(d.title || '') };
+  for(const [, d] of sbDrafts){
+    if(d.audio && d.audio.id === audioId) return { title: String(d.title || ''), sheet: false };
+    if(d.sheet && d.sheet.id === audioId) return { title: String(d.title || ''), sheet: true };
+  }
   return null;
 }
 
@@ -177,6 +184,7 @@ function renderTeacherSongBuilder(){
   root.addEventListener('change', sbChange);
   sbBindKeys();
   if(typeof sbPdfMounted === 'function') sbPdfMounted(root);
+  if(typeof sbSheetMounted === 'function') sbSheetMounted(root);   // a published song's Lyrics sheet row (teacher-sb-sheet.js)
   const steps = sbShowsSteps();
   if(steps && sbStepOn === 3 && typeof sbBeatMounted === 'function') sbBeatMounted();
   if(steps && sbStepOn === 4 && typeof sbChartMounted === 'function') sbChartMounted();
@@ -426,6 +434,7 @@ function sbClick(e){
   if(act === 'clear-beat'){ sbClearStep('beat'); return; }
   if(act === 'clear-chart'){ sbClearStep('chart'); return; }
   if(typeof sbPdfAct === 'function' && sbPdfAct(act, b)) return;
+  if(typeof sbSheetAct === 'function' && sbSheetAct(act)) return;
   if(typeof sbChartAct === 'function' && sbChartAct(act, b)) return;
   if(act === 'play-yours'){ sbPlayTen('yours'); return; }
   if(act === 'play-cure'){ sbPlayTen('cure'); return; }
@@ -456,6 +465,7 @@ function sbChange(e){
   const t = e.target;
   if(t.matches('[data-sb-file]')){ const f = t.files && t.files[0]; if(f) sbPickFile(f); return; }
   if(typeof sbPdfChange === 'function' && sbPdfChange(e)) return;
+  if(typeof sbSheetChange === 'function' && sbSheetChange(e)) return;
   if(typeof sbChartChange === 'function' && sbChartChange(e)) return;
   if(typeof sbBeatChange === 'function') sbBeatChange(e);
 }
@@ -487,6 +497,7 @@ function sbStopSounds(){
 }
 function sbMemFor(id){
   if(typeof sbPdfSync === 'function') sbPdfSync(id);   // the pdfs (teacher-sb-pdf.js) follow too, even with the view left (W10)
+  if(typeof sbSheetSync === 'function') sbSheetSync(id);   // and the Lyrics sheet row's pdf (teacher-sb-sheet.js)
   if(sbMem.id === id) return;
   if(sbMem.level && sbMem.level.url){ try{ URL.revokeObjectURL(sbMem.level.url); }catch(e){} }
   sbMem.id = id; sbMem.src = null; sbMem.level = null; sbMem.failed = null;
@@ -607,7 +618,7 @@ function sbAutoLevel(keep){
 }
 /* The one draft writer. Saves the fields a draft has, with the server's time, and keeps the copy in memory. */
 function sbDraftDoc(d){
-  const keep = ['v', 'title', 'artist', 'step', 'source', 'audio', 'volume', 'pitch', 'beat', 'chart', 'level', 'pubVer', 'imported'];
+  const keep = ['v', 'title', 'artist', 'step', 'source', 'audio', 'volume', 'pitch', 'beat', 'chart', 'level', 'pubVer', 'imported', 'sheet'];
   const out = {};
   keep.forEach(k => { out[k] = d[k] === undefined ? null : d[k]; });
   out.v = 1;
@@ -851,6 +862,7 @@ async function sbDeleteDraft(){
     await db.collection('songDrafts').doc(id).delete();
     sbDrafts.delete(id);
     if(d.audio && d.audio.id) await sbDeleteAudio(d.audio.id, null);
+    if(d.sheet && d.sheet.id) await sbDeleteAudio(d.sheet.id, null);   // an unpublished song's lyrics sheet (kept by Unpublish)
     sbMemFor(null); sbSel = null;
     sbNote = `Deleted the draft "${title}".`;
   }catch(e){
