@@ -60,8 +60,10 @@ done since:**
    checks: `✗ busy-card: #class-activities/ca-35, card open, scrolled 456 of 1303px · ran: CDP Runtime.evaluate gave
    no answer in 20000 ms`. The page stopped answering with a practice card open while the update landed. That may be
    a hang on the private-song load (first class to meet it: 2026-11-18), or it may be a flake; it is not known yet.
-   Windows will re-run `node tools/update-reload-loop.mjs` on that case once W23's Chrome runs are done, and write
-   the result here.
+   **FIXED by the Mac (`6936038`): a fault in the TEST, not the site.** The page answered every 2 s probe in 1 to 9
+   ms; the tool's own busy-card wait (up to 20 s for the track in the audio cache, which a private song never enters)
+   ran out at the same 20000 ms limit. busy-card now plays a private song through a stand-in; full run 29 of 29.
+   Windows: nothing to re-run.
    - **Windows, 18:40: it is the TEST, not the site (not proven in a real class).** It fails the same way on Windows
      (28 of 29). busy-card picks the first practice card that has a Play button and scrolls more than 300 px. That is
      ca-35, Las Mañanitas, and its track is now `private:` (`app/snippets.js:415`). `BUSY.card.on` then waits up to
