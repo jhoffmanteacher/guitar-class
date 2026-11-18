@@ -12672,6 +12672,7 @@ function checkCardViews(ctx, i18nTable) {
   else if (/\b(stopCardAudio|pcStop|pcStart|renderClassActivities|caTeacherRedraw|stopAllDemoAudio)\s*\(/.test(press + swap)) flag('app/cards-views.js: a view press stops the song or redraws the page — it swaps the view in place, the song keeps playing');
   const cb = jsFunctionBody(siteSource('app.js', ROOT), 'caCardBodyHtml');
   if (cb === null || !/caViewSwitchHtml\(a\)/.test(stripJsComments(cb))) flag('app/cards.js: caCardBodyHtml() must draw caViewSwitchHtml(a) — the card would have no switch');
+  if (cb !== null && !/typeof caViewSwitchHtml === 'function' \? caViewSwitchHtml\(a\)/.test(stripJsComments(cb))) flag("app/cards.js: the caViewSwitchHtml(a) call must stay behind typeof — a page with the new cards.js and no app/cards-views.js would draw no practice card (W23 R1-1)");
   if (!bad) ok(`1er: ${withViews.length} card${withViews.length === 1 ? "" : "s"} with views (${withViews.map(a => a.id + ': ' + EXPECT[a.id].list.join(' / ')).join('; ')}), shape and sections line up; ${located} sixteenths located at the same section, lap and beat in every view; ${renders} renders (nothing / junk / each view stored, EN + ES, student + console): one switch, one pressed button, the view drawn, default the card's own; ${swOff} renders of the other cards draw no switch; nothing saved, the song not stopped`);
 }
 

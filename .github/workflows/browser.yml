@@ -5,7 +5,7 @@
 # only when the push changed the files they guard:
 #   tools/slow-load.mjs           index.html, sw.js, app/boot.js, app/start.js
 #   tools/update-reload-loop.mjs  sw.js, app/start.js, app/boot.js, teacher-core.js
-#   tools/playalong-loop.mjs      app/cards.js, app/snippets.js, class-activities.js
+#   tools/playalong-loop.mjs      app/cards.js, app/cards-loop.js, app/cards-views.js, app/snippets.js, class-activities.js
 # (and each when its own tool file, or this workflow, or tools/ci/ changed).
 # The full walk in both languages runs on a schedule (Friday evenings, see on:) and as a
 # manual run: Actions -> Browser tests -> Run workflow -> "full".
@@ -126,7 +126,7 @@ jobs:
           pick() { if grep -Eq "$1|$self" <<< "$changed"; then echo true; else echo false; fi; }
           slow_load="$(pick '^(index\.html|sw\.js|app/boot\.js|app/start\.js|tools/slow-load\.mjs)$')"
           update_reload="$(pick '^(sw\.js|app/start\.js|app/boot\.js|teacher-core\.js|tools/update-reload-loop\.mjs)$')"
-          playalong="$(pick '^(app/cards\.js|app/snippets\.js|class-activities\.js|tools/playalong-loop\.mjs)$')"
+          playalong="$(pick '^(app/cards(-loop|-views)?\.js|app/snippets\.js|class-activities\.js|tools/playalong-loop\.mjs)$')"
           echo "slow-load: $slow_load; update-reload: $update_reload; playalong: $playalong"
           { echo "slow_load=$slow_load"; echo "update_reload=$update_reload"; echo "playalong=$playalong"; } >> "$GITHUB_OUTPUT"
 
