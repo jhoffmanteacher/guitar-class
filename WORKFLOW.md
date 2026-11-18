@@ -56,12 +56,22 @@ the "never" blocks (W12); American Girl, Jonathan's first built song.
 round on the switch-on); remove the 2026-11-16 split bridge on or after 2026-12-01 (`todo.md`).
 
 **For Windows (2026-11-18, Jonathan: "assign to windows or agents"):**
-- [ ] **W24 — split `app/cards.js` (2,062 lines, over the 2,000 warning; not urgent).** Move the lyric-sheet player
+- [x] **W24 — split `app/cards.js` (2,062 lines, over the 2,000 warning; not urgent).** Move the lyric-sheet player
   (`pcSheet*`, one banner section, whole and unchanged) into a new part `app/cards-sheet.js` loaded right after
   `app/cards.js` (the `site-parts:app.js` block in `index.html` and the `sw.js` lists; `checks.mjs` enforces both).
   Prove: `node tools/golden.mjs` on the commit before and on yours, `--compare` identical; `node tools/slow-load.mjs`;
   `node tools/playalong-loop.mjs`; the full `node tools/checks.mjs`. It touches load order: Always Reviewed, one
   `site-reviewer` on Opus at high (this week's rule, below). Push a `win/w24` branch; the Mac or Jonathan merges.
+  - **Windows, 2026-11-18: DONE, ready to merge: `origin/win/w24` (`eb973fb7`, 3 commits on `8ecb1dea`, a fast-forward
+    today).** cards.js 2,062 → 1,432; cards-sheet.js 630 (the 630 lines byte for byte). THE LEAD (`PC_LEAD`,
+    `pcLead*`) stayed in cards.js: pcFrame uses it on every card. Review: `site-reviewer` Opus high, 2 rounds. R1: 2 MAJOR
+    fixed (a page with the new cards.js but no cards-sheet.js broke the activities page and Stop: now behind
+    `typeof`, and 1er RUNS the page without the part: 26 cards, 31 renders, 8 view presses, Stop; break-it 6 of 6 red,
+    3 of 3 good spellings green; GitHub's playalong trigger missed `-sheet`). R2 clean (2 MINOR, fixed). Proofs: golden
+    1,571 of 1,573 identical (2 shots, 22 px in the "Preview mode" box on two lesson pages: noise); slow-load 20 loads 0
+    errors; playalong-loop 26 cards 0 mismatches; full checks on each commit. Not run: the change smoke (`--only
+    activities`), run it at the merge. The rebase onto `8ecb1dea` met the CLAUDE.md parts-table line (coach-recordings):
+    kept main's, my edit redone on top.
 
 **Quiet moments:** split `app/cards.js` (W24 above); three Chords / Tab MINORs (W23: R1-4 the dot on chord 0 during a count-in
 after a section tap, fix sketched in the Windows scratchpad `w23-rv2\review.md`; R1-5; R2-3); the update reload
