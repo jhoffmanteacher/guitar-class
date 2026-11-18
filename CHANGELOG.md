@@ -6,6 +6,13 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-17 — Lessons: chords beside the directions
+
+- **In One step view, a lesson step with chord diagrams or a picture now shows them beside the directions,** with the play button and the Listening Coach under them. The answer box and the hint buttons are underneath, across the whole width.
+- **"Mark done" stays at the bottom of the screen on those steps,** with the step's "You've got it when" line beside it.
+- **All steps view looks the same as before.**
+- **On the Songs page, your own song requests are back in the page,** under the "Request a song" line, not squeezed into the top bar.
+
 ## 2026-11-17 — Songs: the six Core songs as tiles
 
 - **The six Core songs are now tiles,** three to a row, each with one big button: **Play Along** when the play-along is open for you, or **Song Journey** when it is not yet. The backing track for solos and the Song Journey are small links under it.

@@ -367,6 +367,25 @@ Added 2026-11-17 (Jonathan), a standing rule, not this week only: Sonnet for the
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-17 — Look 1, Part 4: a lesson step with its chords beside it; review rounds 1-2 on Parts 1-3. Fast.**
+      Work order `Claude outputs/WORK-ORDER-look1-redesign.md`. `buildLesson` marks a step `.step-2col` when it has
+      chord diagrams or a figure and no tab (102 of 377 visible steps: 69 chord steps with no tab, 35 figure steps, 2
+      both; the work order's 528 / 85 / 35 / 38 counted hidden steps too). In One step view, 1100px and wider, on
+      screen: two columns (directions left; the figure, lifted out of the text, the play button, the diagrams and the
+      Listening Coach right in `.step-2col-media`, first in `.step-body`), the response and folds full width below,
+      Mark done sticky at the bottom with a COPY of the got-it line (`.step-done-gotit`; the text's own hides). All
+      steps view, narrower windows and print unchanged (the media box sits where the diagrams always were). Measured
+      over 102 steps × EN/ES: 204/204 two-column, 0 overflow of the 1000px column; nothing under the pinned row at the
+      end of a scroll (204/204); at the top of a step that fits, 36 of 204 have their last 2-29px under the row until
+      the student scrolls. No Module 4 step has 5+ diagrams with no tab (most: 4, m4w2). "below" in English in 12
+      two-column steps (listed in the report; not reworded). Pins: 1et (new: every set rendered EN+ES, the mark both
+      ways, diagrams once, figures in the media column, the copy where the text has a got-it; the CSS), smoke
+      `lessonTwoColWalk`. Review of Parts 1-3 (site-reviewer): round 1 1 MAJOR (a signed-in student's request list
+      drew inside the Songs top bar; fixed in 1322a98 with #sr-list-slot) + 9 MINOR (fixed but R1-9, zoom 150%:
+      reported); round 2 on 1322a98: 0 BLOCKER / 0 MAJOR, 5 MINOR, fixed here: the bar slot never takes the list
+      (R2-1, 3 new song-requests-sim cases, pin 143), the print sheet keeps "Path: …" (R2-2), comments (R2-5); R2-4
+      (dev bypass only) left.
+
 - [x] **2026-11-17 — Look 1, Part 3: Songs as tiles. Fast.**
       Work order `Claude outputs/WORK-ORDER-look1-redesign.md`. The six Core songs are tiles, three to a row
       (`.sh-core-grid`, one column ≤760px): a colour block (decoration, by position), the title and the artist (the

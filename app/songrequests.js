@@ -6,10 +6,13 @@
    (a clean version exists, say). Later the same day: one request per student
    per week.
 
-   WHERE: the top of the Songs page (renderSongsHub in app/explore.js draws
-   the slot #sr-slot and calls srLoad()). One box: a line, the "Request a
-   song" button (or, once this week's request is in, when the student can ask
-   again), and the student's own requests with their state.
+   WHERE: the Songs page (renderSongsHub in app/explore.js draws the slots
+   and calls srLoad()). A line and the "Request a song" button (or, once this
+   week's request is in, when the student can ask again), and the student's
+   own requests with their state. Since Look 1, Part 3 (2026-11-17) the line
+   and the button sit in the page's top bar (#sr-slot.sr-box--bar) and the
+   requests at the top of the page (#sr-list-slot); without the bar slot,
+   one box holds both, as before.
 
    THE DOC: songRequests/<uid>_<week>, one per student per ISO week (the week
    practice minutes uses: PM.calc, Monday first, the student's local date).
@@ -162,7 +165,10 @@ function srPaint(){
   if(!slot) return;
   const listSlot = document.getElementById('sr-list-slot');
   const p = srSlotParts();
-  const html = listSlot ? p.head : p.head + p.list;
+  /* The bar slot never takes the list, even in the moment a re-render has
+     emptied the page and #sr-list-slot is gone (review R2-1). */
+  const inBar = !!(slot.classList && slot.classList.contains('sr-box--bar'));
+  const html = (listSlot || inBar) ? p.head : p.head + p.list;
   slot.innerHTML = html;
   slot.hidden = !html;
   if(listSlot){ listSlot.innerHTML = p.list; listSlot.hidden = !p.list; }

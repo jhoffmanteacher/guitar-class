@@ -340,8 +340,27 @@ function buildLesson(w){
     const isDone = completed[doneKey] === true;
     const isCur = pos === curPos;
     const isOpen = pos === openPos;
+    /* LOOK 1, PART 4 (Jonathan, 2026-11-17): a step with chord diagrams or a
+       figure and no tab is drawn so that ONE STEP view can show it in two
+       columns (styles.css, "Look 1, Part 4"): the directions on the left, the
+       diagrams (or the figure) with the play-sequence button and the
+       Listening Coach on the right, the response and folds full width below,
+       and Mark done pinned to the bottom of the screen with the step's
+       "You've got it when:" line beside it. Render-time only: the step's
+       text is not edited. The figure is lifted out of the text into
+       .step-2col-media (it was the text's last thing, so All steps view and
+       print read in the same order); .step-2col-media sits first in
+       .step-body, so every .step-body rule still reaches the play button and
+       the diagrams. The got-it line beside Mark done is a COPY with its own
+       classes, shown only in One step view at 1100px and wider, where the
+       text's own line is hidden: one of the two shows at a time. */
+    const twoCol = !s.tab && !(s.tabs && s.tabs.length) && ((s.chords && s.chords.length > 0) || /<span class="step-figure/.test(text2));
+    const figs = [];
+    const textHtml = twoCol ? text2.replace(/<span class="step-figure[^"]*">(?:\s*<img\b[^>]*>)+\s*<\/span>/g, m => { figs.push(m); return ''; }) : text2;
+    const gotM = twoCol ? /<span class="got-it"><span class="got-it-lab">([^<]*)<\/span>((?:(?!<\/span>)[\s\S])*)<\/span>/.exec(textHtml) : null;
+    const gotCopy = gotM ? `<span class="step-done-gotit"><span class="step-done-gotit-lab">${gotM[1]}</span>${gotM[2]}</span>` : '';
     // Mark-done is the last row of the step.
-    const doneBtn = `<div class="step-done-row"><button class="step-done-btn${isDone ? ' is-done' : ''}" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${stepDoneHtml(isDone)}</button></div>`;
+    const doneBtn = `<div class="step-done-row">${gotCopy}<button class="step-done-btn${isDone ? ' is-done' : ''}" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${stepDoneHtml(isDone)}</button></div>`;
     const skillsAttr = (s.skills && s.skills.length) ? ` data-skills="${s.skills.join(',')}"` : '';
     const label = stepLabel(s);
     const gnum = numOffset + pos + 1;          // position in the whole ladder
@@ -363,7 +382,9 @@ function buildLesson(w){
       + `<span class="step-label">${escHtml(label)}</span>`
       + `<span class="step-chev" aria-hidden="true">&#x25B6;</span>`
       + `</button>`
-      + `<div class="step-detail"><span class="st-text">${text2}</span><div class="step-body">${playSeqHtml}${chordsHtml}${tabHtml}${tabsHtml}${drillHtml}${respHtml}${foldsHtml}</div>${doneBtn}</div>`
+      + (twoCol
+        ? `<div class="step-detail step-2col"><span class="st-text">${textHtml}</span><div class="step-body"><div class="step-2col-media">${figs.join('')}${playSeqHtml}${chordsHtml}</div>${drillHtml}${respHtml}${foldsHtml}</div>${doneBtn}</div>`
+        : `<div class="step-detail"><span class="st-text">${text2}</span><div class="step-body">${playSeqHtml}${chordsHtml}${tabHtml}${tabsHtml}${drillHtml}${respHtml}${foldsHtml}</div>${doneBtn}</div>`)
       + `</li>`;
    }).join('');
   };

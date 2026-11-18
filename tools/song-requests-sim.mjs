@@ -402,6 +402,25 @@ run('setLang("en")');
   const h2 = run('srSlotHtml()');
   ok(!h2.includes('SECRET') && h2.includes(run("escHtml(t('sr.loading'))")), "a shared Chromebook: the last student's list is not drawn for the next uid");
 }
+/* Look 1, Part 3 (2026-11-17): on the Songs page the line and button sit in the top bar (#sr-slot.sr-box--bar) and the
+   student's list in #sr-list-slot; the bar slot never takes the list, even while a re-render has removed the list slot. */
+{
+  run(`__setUser({ uid: 'fake-uid-8', displayName: 'Eight', email: '' }); srState = { uid: 'fake-uid-8', status: 'ready', list: [{ week: '2020-W01', videoId: ${JSON.stringify(ID)}, title: 'Made-up Old Song', state: 'declined', note: 'Test note' }] };`);
+  for (const k of Object.keys(els)) delete els[k];
+  const mk = (id, cls) => (els[id] = { id, hidden: true, innerHTML: '', classList: { contains: c => (cls || []).includes(c) } });
+  mk('sr-slot', ['sr-box', 'sr-box--bar']); mk('sr-list-slot', ['sr-box']);
+  run('srPaint()');
+  ok(!els['sr-slot'].hidden && els['sr-slot'].innerHTML.includes('srOpen') && !els['sr-slot'].innerHTML.includes('sr-list') && !els['sr-list-slot'].hidden && els['sr-list-slot'].innerHTML.includes('Made-up Old Song'),
+    'two slots: the line and the button in the bar, the list in #sr-list-slot');
+  delete els['sr-list-slot'];
+  run('srPaint()');
+  ok(els['sr-slot'].innerHTML.includes('srOpen') && !els['sr-slot'].innerHTML.includes('sr-list'), 'the bar slot alone (mid re-render): no list in the bar');
+  for (const k of Object.keys(els)) delete els[k];
+  mk('sr-slot', ['sr-box']);
+  run('srPaint()');
+  ok(els['sr-slot'].innerHTML.includes('srOpen') && els['sr-slot'].innerHTML.includes('Made-up Old Song'), 'one plain slot (no bar): the line, the button and the list together, as before');
+  for (const k of Object.keys(els)) delete els[k];
+}
 if(WALK){
   console.log('\n── The form, state by state ──');
   for(const [lang, label, o] of walkOut) console.log(`[${lang}] ${label}\n      box before: ${o.slotBefore || '(empty)'}\n      status: ${o.status || '(none)'}${o.whyShown ? '   [the reason box is showing]' : ''}\n      box after: ${o.slot}`);

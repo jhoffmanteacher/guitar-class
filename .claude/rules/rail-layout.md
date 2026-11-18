@@ -36,6 +36,14 @@ site-fill.js multiplies their thresholds by the fill. The teacher console
   ~880px. A `.step-figure` stops at **720px**, the widest raster in `img/`
   (past that the browser invents pixels). It lives inside `.st-text`, so above
   1240px one rule lets it out of the text measure.
+- **One step view: a step with chord diagrams or a figure and no tab is two
+  columns** (Look 1, Part 4, 2026-11-17; `buildLesson` marks it `.step-2col`,
+  checks.mjs 1et): directions left, the diagrams (or the figure, lifted out of
+  the text into `.step-2col-media`) with the play button and the Listening
+  Coach right, the response and folds full width below, and Mark done sticky
+  at the bottom with a copy of the "You've got it when:" line beside it (the
+  text's own line hides). Only at 1100px and wider, on screen, inside the
+  1000px column; All steps view, a narrower window and print read as before.
 - **The rail has two independent states.**
   - `body.rail-open` is the mobile drawer.
   - **`body.rail-collapsed`** is the 62px icon strip, toggled by

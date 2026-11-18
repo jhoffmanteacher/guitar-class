@@ -471,7 +471,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    below that the figure goes back to following the text. 720 is the real
    ceiling either way — the widest raster figure in img/ is 720px across
    and past that the browser is inventing pixels. */
-@media(min-width:1240px){.dp .st-text > .step-figure{width:720px;max-width:none}}
+@media(min-width:1240px){.dp .st-text > .step-figure,.dp .step-2col-media > .step-figure{width:720px;max-width:none}}
+/* ── Look 1, Part 4 (Jonathan, 2026-11-17): a lesson step with chord diagrams
+   or a figure and no tab (buildLesson, .step-2col) shows in two columns in
+   ONE STEP view, 1100px and wider: the directions left, the diagrams (or the
+   figure) with the play-sequence button and the Listening Coach right
+   (.step-2col-media), the response and the folds full width below, and Mark
+   done pinned to the bottom of the screen with the "You've got it when:"
+   line beside it (a copy, .step-done-gotit; the text's own line hides). In
+   All steps view, below 1100px and in print the step reads as before: the
+   media box is a plain block where the diagrams always were, and the copy
+   never shows. Inside the 1000px column. */
+.step-done-gotit{display:none}
+@media screen and (min-width:1100px){
+  .dp.focus .step-detail.step-2col{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:24px;align-items:start;
+    min-height:calc(100dvh / var(--site-fill,1) - var(--hdr) - var(--eyebrow) - 150px)}
+  .dp.focus .step-2col > .st-text{grid-column:1;grid-row:1;max-width:none}
+  .dp.focus .step-2col > .step-body{display:contents}
+  .dp.focus .step-2col .step-2col-media{grid-column:2;grid-row:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:10px;
+    padding:14px;background:var(--bg2);border-radius:var(--radius)}
+  .dp.focus .step-2col .step-2col-media > .step-figure{width:100%;max-width:100%;margin:0}
+  .dp.focus .step-2col .step-2col-media > .chord-diagrams{justify-content:center;margin:0;padding:0;background:none}
+  .dp.focus .step-2col .step-2col-media > .bpm-control-group{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+  .dp.focus .step-2col > .step-body > :not(.step-2col-media){grid-column:1/-1}
+  /* bottom:-60px: a sticky box stops at the scroller's content edge, and
+     .app-layout .main has 60px of bottom padding, so 0 left the row floating
+     60px above the screen's bottom with the step showing under it. */
+  .dp.focus .step-2col > .step-done-row{grid-column:1/-1;align-self:end;position:sticky;bottom:-60px;z-index:5;margin-top:12px;padding:10px 0;
+    background:var(--bg);border-top:1px solid var(--border)}
+  .dp.focus .step-2col .st-text .got-it{display:none}
+  .dp.focus .step-2col .step-done-gotit{display:block;flex:1;min-width:0;line-height:1.4}
+  .dp.focus .step-2col .step-done-gotit-lab{font-weight:700;color:var(--green-text);margin-right:4px}
+}
 .step-figure img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--border2);background:#fff}
 /* Every figure in img/ is drawn dark-on-light and ships with a light
    background baked in, so on a dark card each one is a glaring white slab.
@@ -676,9 +707,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .sh-lib-btn .svb-play{color:var(--green-text);font-size:0.75rem}
 /* "Request a song" beside the page title (#sr-slot, app/songrequests.js; renderSongsHub puts it in the top bar). */
 .page-topbar > .sr-box--bar{margin:0;padding:0;border:0;background:none;flex:0 1 auto;max-width:76%}
-.page-topbar > .sr-box--bar .sr-head{justify-content:flex-end}
+.page-topbar > .sr-box--bar .sr-head{justify-content:flex-end;flex-wrap:nowrap}
 .page-topbar > .sr-box--bar .sr-line{flex:0 1 auto;text-align:right;color:var(--text2);font-size:0.875rem}
-.page-topbar > .sr-box--bar .sr-head{flex-wrap:nowrap}
 .page-topbar > .sr-box--bar #sr-open-btn{flex-shrink:0;white-space:nowrap}
 #songs-screen .page-topbar > .page-title{flex-shrink:0;white-space:nowrap}
 @media(max-width:760px){#songs-screen .page-topbar{flex-wrap:wrap}.page-topbar > .sr-box--bar{max-width:100%;flex-basis:100%}
@@ -3432,8 +3462,10 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 .ca-step-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:4px 0 6px}
 .ca-screen.ca-solo .ca-solo-card .ca-step-row{position:sticky;top:var(--ca-bar-h,50px);z-index:40;background:var(--bg);
   margin:0 -14px 6px;padding:10px 14px}
-/*    The print sheet has no step row (its buttons are print:none already). */
-@media print{.ca-step-row{display:none !important}}
+/*    On the print sheet the row keeps only "Path: …" (the step buttons are
+      print:none already): flat, in the flow, no Change path button. */
+@media print{.ca-step-row{position:static !important;margin:0 !important;padding:0 !important;background:none !important}
+  .ca-step-row .ca-path-change{display:none !important}}
 /*    The practice copy's strip lifts .ca-focus-nav (firebase-config.js,
       PC_RIDE_UP), but below 761px the row is not pinned: keep it in place. */
 @media(max-width:760px){html.practice-on body.ca-wide .ca-solo-card .ca-focus-nav{translate:none !important}}

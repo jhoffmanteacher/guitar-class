@@ -12797,6 +12797,71 @@ function checkRosterSkipsTrainerStub() {
    - teacherFetchStudents keeps only whole counts 1..1000 per song from a
      student-written map (strings, negatives, NaN, huge numbers, a non-object).
    Pinned: every library song (1 button each), 3 non-counted sign-ins, 8 doctored values. */
+/* 1et. A LESSON STEP WITH ITS CHORDS BESIDE IT (Look 1, Part 4, Jonathan,
+   2026-11-17). buildLesson marks a step .step-2col exactly when it has chord
+   diagrams or a figure and no tab; styles.css lays that out in two columns in
+   ONE STEP view at 1100px and wider, with Mark done pinned to the bottom and
+   a copy of the "You've got it when:" line beside it. Renders EVERY set in
+   English and Spanish through the real buildSet and reads each step's markup:
+   the mark matches the rule both ways, the diagrams are drawn once, every
+   figure of a two-column step sits in .step-2col-media (not in the text), the
+   got-it copy is there exactly when the text has a got-it line, and only on a
+   two-column step; then reads the CSS (two columns, sticky bottom, screen
+   only). tools/smoke.mjs (lessonTwoColWalk) presses Mark done on one. */
+function checkLessonTwoCol(sets, ctx) {
+  head('1et. Lesson: a step with chord diagrams or a figure and no tab is the two-column kind (One step view)');
+  let bad = 0, steps = 0, two = 0;
+  const flag = m => { err('1et: ' + m); problems++; bad++; };
+  if (!ctx || !sets) { flag('cannot run — the 0b render context is unavailable'); return; }
+  const buildSet = vm.runInContext('typeof buildSet === "function" ? buildSet : null', ctx);
+  if (!buildSet) { flag('buildSet() not found'); return; }
+  const shown = [];
+  try {
+    for (const lang of ['en', 'es']) {
+      vm.runInContext(`setLang(${JSON.stringify(lang)})`, ctx);
+      for (const w of sets) {
+        if (w.comingSoon) continue;
+        const html = String(buildSet(w) || '');
+        // Each step up to its own end (the done row closes it): the last step of a list is followed by other panels.
+        const lis = html.split(/(?=<li class="step[ "])/).slice(1).map(x => { const e = x.indexOf('</button></div></div></li>', x.indexOf('class="step-done-row"')); return e >= 0 ? x.slice(0, e + 26) : x; });
+        for (const li of lis) {
+          steps++;
+          const tab = /class="tab[ "]|class="tab-choice-group"/.test(li), chords = /class="chord-diagrams"/.test(li), fig = /class="step-figure/.test(li);
+          const is2 = /<div class="step-detail step-2col">/.test(li), want = !tab && (chords || fig);
+          if (is2) two++;
+          const where = `${w.id} ${lang} step ${(/data-key="([^"]+)"/.exec(li) || [])[1]}`;
+          if (is2 !== want) { flag(`${where}: ${is2 ? 'is' : 'is not'} two-column, but it has ${[tab && 'a tab', chords && 'chord diagrams', fig && 'a figure'].filter(Boolean).join(', ') || 'none of tab / diagrams / figure'}`); continue; }
+          if ((li.match(/class="chord-diagrams"/g) || []).length > 1) flag(`${where}: the chord diagrams are drawn twice`);
+          const copy = /class="step-done-gotit"/.test(li);
+          if (!is2) { if (copy || /step-2col-media/.test(li)) flag(`${where}: a one-column step carries the two-column parts`); continue; }
+          const text = (/<span class="st-text">([\s\S]*?)<\/span><div class="step-body">/.exec(li) || [])[1];
+          const media = (/<div class="step-2col-media">([\s\S]*?)(?=<\/div><(?:div class="(?:sdr|step-resp|step-folds|dk|ear)|\/div>))/.exec(li) || [, ''])[1];
+          if (text == null) { flag(`${where}: no .st-text before .step-body`); continue; }
+          if (/class="step-figure/.test(text)) flag(`${where}: a figure is still in the text (it belongs in .step-2col-media)`);
+          if (fig && !/<div class="step-2col-media"><span class="step-figure/.test(li)) flag(`${where}: the figure is not first in .step-2col-media`);
+          if (chords && !/<div class="step-2col-media">[\s\S]*class="chord-diagrams"/.test(li)) flag(`${where}: the chord diagrams are not in .step-2col-media`);
+          const hasGot = /<span class="got-it"><span class="got-it-lab">/.test(text);
+          if (copy !== hasGot) flag(`${where}: the got-it copy beside Mark done is ${copy ? 'there' : 'missing'} while the text ${hasGot ? 'has' : 'has no'} got-it line`);
+          if (copy && !/<div class="step-done-row"><span class="step-done-gotit"><span class="step-done-gotit-lab">/.test(li)) flag(`${where}: the got-it copy is not first in the done row`);
+          if (shown.length < 1 && lang === 'en') shown.push(where);
+          void media;
+        }
+      }
+    }
+  } catch (e) { flag('the page threw — ' + e.message); }
+  finally { try { vm.runInContext('setLang("en")', ctx); } catch (e) { /* restored by the next check */ } }
+  if (two < 180) flag(`only ${two} two-column steps rendered in EN + ES (102 per language on 2026-11-17): the rule stopped matching`);
+  const rules = cssRuleMap(readFileSync(join(ROOT, 'styles.css'), 'utf8'));
+  const m = '@media screen and (min-width:1100px)';
+  const d = sel => { const x = rules.get(sel); return x && x.get(m); };
+  const grid = d('.dp.focus .step-detail.step-2col'), row = d('.dp.focus .step-2col > .step-done-row');
+  if (!grid || grid.get('display') !== 'grid' || !/minmax\(0,\s*1fr\)\s+minmax\(0,\s*1fr\)/.test(grid.get('grid-template-columns') || '')) flag(`.dp.focus .step-detail.step-2col must be a two-column grid inside ${m}`);
+  // bottom:-60px = the scroller's 60px bottom padding (.app-layout .main), so the row sits on the screen's bottom edge.
+  if (!row || row.get('position') !== 'sticky' || row.get('bottom') !== '-60px') flag(`.dp.focus .step-2col > .step-done-row must be position:sticky; bottom:-60px inside ${m} (Mark done pinned to the bottom of the screen)`);
+  const plain = rules.get('.step-done-gotit'), pd = plain && plain.get('');
+  if (!pd || pd.get('display') !== 'none') flag('.step-done-gotit must be display:none outside One step view (All steps and print read as before)');
+  if (!bad) ok(`1et: ${steps} lesson steps rendered (EN + ES), ${two} two-column: the mark matches "diagrams or a figure, no tab" both ways, diagrams drawn once, figures in the media column, the got-it copy exactly where the text has one; the two-column grid, the sticky Mark done row and the hidden copy read from styles.css`);
+}
 /* 1es. THE CORE SONGS AS TILES (Look 1, Part 3, Jonathan, 2026-11-17). Each of
    the six Core songs is a tile with ONE main button: Play Along when
    songsPlayAlongCard() finds a card at that moment, otherwise Song Journey;
@@ -21055,7 +21120,7 @@ function checkSiteErrors() {
    green fails here. The emulator half is tools/song-requests-rules-test.mjs
    (it needs Java; GitHub runs it after every push, .github/workflows/rules.yml).
    ════════════════════════════════════════════════════════════════════ */
-const SONG_REQUESTS_SIM_PIN = 140;
+const SONG_REQUESTS_SIM_PIN = 143;
 function checkSongRequests() {
   head('1dr. Song requests: the link parser, the form, the escaping and the rules caps are run');
   const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'song-requests-sim.mjs')], { encoding: 'utf8', timeout: 120000 });
@@ -22442,6 +22507,7 @@ function checkNeverRules(sets) {
   await checkRosterSkipsTrainerStub();
   await checkSongPopularity(rcCtx);
   checkSongTiles(rcCtx);
+  checkLessonTwoCol(rcSets, rcCtx);
   checkPowerChordPopups(rcSets, rcCtx);
   checkPendingFileSwitch(rcCtx);
   checkTodayByDate(rcCtx);
