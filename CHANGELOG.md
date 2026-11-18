@@ -6,6 +6,13 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-18 — Fixes to the new menu and lesson steps
+
+- **Opening Find on Modules no longer folds the left menu** into the slim strip.
+- **On a lesson step with chords beside the directions, the tap dots now sit next to "You've got it when" and Mark done,** where the line they count is shown.
+- **Locked pages show their small lock again** in the slim left menu and in the phone menu.
+- **Chord names in the "You've got it when" line beside Mark done are links again,** like everywhere else.
+
 ## 2026-11-17 — A slimmer left menu
 
 - **The left menu is now a slim strip on In class, Songs, Games and My progress,** with a short word under each icon, so the page gets more room. On Modules it stays wide, because that is where you pick your module and set.

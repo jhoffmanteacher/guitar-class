@@ -378,6 +378,16 @@ Added 2026-11-17 (Jonathan), a standing rule, not this week only: Sonnet for the
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-18 — Look 1 Parts 4-5: review fixes (Opus reviews). Fast.**
+      Opus `site-reviewer` on 11ff03f..34b4883: 1 MAJOR (R3-1: #search is a routed hash but no page, so Search on
+      Modules folded the rail; `railHashMode()` in app/shell.js now leaves the rail alone for #search and foreign
+      hashes, in `syncExploreNav` and `restoreRailCollapsed`) + 4 MINOR, all fixed by an Opus `site-fixer`
+      (R3-2 the tap dots move beside the got-it copy in One step view, one set, `stepDotsPlace()`; R3-3 the gate lock
+      in the slim strip and the drawer; R3-4 chord links in the copy; R3-5 the arrow press held when localStorage
+      throws). Round 2 (fresh Opus reviewer): 0 BLOCKER / 0 MAJOR, 4 MINOR, fixed by the Mac (R4-1 the dots follow
+      1100px × the fill; R4-2 1et's All-steps pass; R4-3 this CHANGELOG entry; R4-4 1eu's alias and deep-link loads,
+      18 cases). Seen in a browser: dots beside Mark done / back in All steps and narrow; Search keeps 252px; locks.
+
 - [x] **2026-11-17 — Look 1, Part 5: the left menu is slim where it has nothing to show. Fast.**
       Work order `Claude outputs/WORK-ORDER-look1-redesign.md`. With no `railCollapsed` saved, `railAutoSync()`
       (app/audio-ui.js, called by `syncExploreNav()` with "Modules = no page open and no explore hash") makes the rail
