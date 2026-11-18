@@ -247,8 +247,10 @@ function sbBeatPlay(from, withClicks){
   };
   bt.raf = requestAnimationFrame(loop);
 }
-/* The card's own click (pcClick, app/cards.js) on every counted beat (every eighth in 6/8, accents on 1 and 4),
-   each scheduled once it is under 100 ms away, with the card's latency (snipLatency). */
+/* The card's own click (pcClick, app/cards.js) on every counted beat (every eighth in 6/8), each scheduled once it
+   is under 100 ms away, with the card's latency (snipLatency). Every click the SAME tone, beat 1 included (Jonathan,
+   2026-11-17: "it would be most useful if the clicks were all the same tone ... instead of beat 1 being a different
+   tone"): here the clicks check the grid against the record, not count the bar. The students' card keeps its accent. */
 function sbScheduleClicks(a){
   const d = sbDraft(), beat = sbBeatOf(d), bt = sbBt;
   if(!beat || a.paused || typeof getAudioCtx !== 'function' || typeof pcClick !== 'function') return;
@@ -262,8 +264,7 @@ function sbScheduleClicks(a){
       const ahead = t - now;
       if(ahead > 0.1) return;
       const lat = (typeof snipLatency === 'function' ? snipLatency() : 0) - (ctx.outputLatency || ctx.baseLatency || 0);
-      const accent = m.sub === 3 ? k % 3 === 0 : k === 0;
-      bt.clicks.push(pcClick(ctx.currentTime + Math.max(0, ahead + lat), accent, false, typeof PLAYALONG_CLICK_GAIN === 'number' ? PLAYALONG_CLICK_GAIN : 1));
+      bt.clicks.push(pcClick(ctx.currentTime + Math.max(0, ahead + lat), false, false, typeof PLAYALONG_CLICK_GAIN === 'number' ? PLAYALONG_CLICK_GAIN : 1));
       if(bt.clicks.length > 32) bt.clicks.splice(0, bt.clicks.length - 32);
       bt.lastClick = n;
     }
