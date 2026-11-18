@@ -63,8 +63,7 @@ round on the switch-on); remove the 2026-11-16 split bridge on or after 2026-12-
   `node tools/playalong-loop.mjs`; the full `node tools/checks.mjs`. It touches load order: Always Reviewed, one
   `site-reviewer` on Opus at high (this week's rule, below). Push a `win/w24` branch; the Mac or Jonathan merges.
 
-**Quiet moments:** the `coach-core.js` split is in progress on the Mac (2026-11-18, `wo/split-coach`); split
-`app/cards.js` (W24 above); three Chords / Tab MINORs (W23: R1-4 the dot on chord 0 during a count-in
+**Quiet moments:** split `app/cards.js` (W24 above); three Chords / Tab MINORs (W23: R1-4 the dot on chord 0 during a count-in
 after a section tap, fix sketched in the Windows scratchpad `w23-rv2\review.md`; R1-5; R2-3); the update reload
 does not wait for a private song mid-download (`todo.md`, "Small things").
 
@@ -377,6 +376,17 @@ Added 2026-11-17 (Jonathan), a standing rule, not this week only: Sonnet for the
 ---
 
 ## Recently shipped (post-archive)
+
+- [x] **2026-11-18 — `coach-core.js` split: the mic recordings into `coach-recordings.js` (Jonathan present). Reviewed
+      (site-reviewer on Opus, 2 rounds).** The "Consented mic recordings" section (`MICREC_*`, `micRec*`, old lines
+      1764-2119) moved byte for byte into `coach-recordings.js`, loaded right after `coach-core.js` (`COACH_JS_PARTS`,
+      `sw.js` ASSETS); `coach-core.js` 2,554 → 2,215 lines. A DELIBERATE BRIDGE at the end of `coach-core.js` loads the
+      new part for a page that still holds the old list (remove after 2026-12-01 with the others, todo.md). Round 1:
+      1 MAJOR — `coachMicOff()` called `micRecAbort()` unguarded, so `coachClose()` / `coachStopAll()` threw between
+      the two parts loading or after the new one failed; now `typeof`-guarded (keep the guard when the bridge goes).
+      Round 2: clean (3 MINOR comment fixes, done). Proofs: golden before/after identical (1,287 files); `slow-load`
+      20 loads 0 errors; an old-list browser load runs core → recordings → hub; games smoke clean; `micrec-clock` 13
+      of 13; the closed loop with and without guitar the same as before the split (see the commit); checks green.
 
 - [x] **2026-11-18 — Look 1 Parts 4-5: review fixes (Opus reviews). Fast.**
       Opus `site-reviewer` on 11ff03f..34b4883: 1 MAJOR (R3-1: #search is a routed hash but no page, so Search on

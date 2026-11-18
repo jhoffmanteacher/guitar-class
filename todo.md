@@ -35,7 +35,7 @@ second line after a student's first change.
 14. **Strum check takes from a Chromebook** (ca-46, its eight-bar step): one right, one with a wrong chord, one with
     an extra strum on the rest; then download takes and tell Claude.
 15. **Ask the principal about recording in class** (Ed Code 51512; Claude can draft the one page).
-16. **Be present for the `coach-core.js` split.** It is 46 lines under the limit that blocks a push.
+16. ~~Be present for the `coach-core.js` split.~~ Done 2026-11-18 (`coach-recordings.js`).
 17. Optional: try 2 to 4 clip-on pickups; delete old `ci-try/*` and `win/*` branches on GitHub.
 
 ## Closed: do not list or propose these again (Jonathan, 2026-11-17: "get rid of the 'leave them' on the list so we don't keep seeing them")
@@ -120,21 +120,25 @@ Added 2026-11-16 (Jonathan: "we'll have to fix the beat map in the future"). Not
 Three of the four parts that were over 2,000 lines were split on 2026-11-16 (`teacher-activities.js`,
 `coach-runner.js`, `coach-chords.js`). Left:
 
-- **`coach-core.js`: 2,554 lines on 2026-11-16, 46 under the 2,600 limit that blocks a push (`checks.mjs` 1cv).**
+- **`coach-core.js`: split 2026-11-18 (Jonathan present): the mic-recordings section (`micRec*`) moved whole into
+  `coach-recordings.js`, loaded right after it; `coach-core.js` 2,554 → 2,213 lines.** The notes below are how it was done.
+- *(done)* **`coach-core.js`: 2,554 lines on 2026-11-16, 46 under the 2,600 limit that blocks a push (`checks.mjs` 1cv).**
   Only with Jonathan present: it is the listening code. Mic recordings (`micRec*`) are the obvious section to move;
   the detectors, `coachDetectPitch` and every line `tools/mic-sim/` reads stay put. Until then add nothing to it.
   How: move the banner section, whole and unchanged, into a new part loaded right after it; list the file in
   `COACH_JS_PARTS` (`app/boot.js`) and `sw.js` ASSETS; prove with `node tools/golden.mjs` before and after
-  (`--compare` identical), `node tools/slow-load.mjs`, `tools/old-page-loop.mjs`, the full `node tools/checks.mjs`
+  (`--compare` identical), `node tools/slow-load.mjs`, `tools/old-page-loop.mjs` (parked on `origin/win/w22`, not on main: on 2026-11-18 a browser test with the old list stood in), the full `node tools/checks.mjs`
   and the three mic-sim commands in `CLAUDE.md`. It touches load order: Always Reviewed. Check `tools/mic-sim/`
   and `checks.mjs` for text they pin in the section before moving it.
-- **Remove the 2026-11-16 split bridge on or after 2026-12-01** (also on the Windows list, W14). A page opened
+- **Remove the 2026-11-16 and 2026-11-18 split bridges on or after 2026-12-01** (the 2026-11-18 one is the block at the end
+  of `coach-core.js` that loads `coach-recordings.js` for an old page; keep the `typeof micRecAbort` guard in
+  `coachMicOff()` even after the bridge goes: coach-core.js can run before coach-recordings.js loads). A page opened
   before the two coach splits keeps the old 8-name `COACH_JS_PARTS` and never asks for `coach-chordcards.js` or
   `coach-noterunner.js`. The bridge: the 15-line block at the end of `coach-chords.js` and of `coach-runner.js`,
   and the `typeof` guards kept as a second net (`cbStop` / `nrStop` / `cdStop` in `gamesStopMic`; the Chord Blitz,
   Note Runner, Finger Gym and Chord Detective chips in `gamesRenderHub`, `coach-hub.js`; `typeof nr` in
   `gamesHideStop` and `coachReleaseMicIfIdle`, `coach-core.js`). `grep -n "DELIBERATE BRIDGE" coach-*.js` finds
-  the comment over each (5). Remove them all in one commit, put each guarded line back as it was before the bridge
+  the comment over each (6 since 2026-11-18). Remove them all in one commit, put each guarded line back as it was before the bridge
   (the parent of the commit "Arcade: a page opened before the coach splits loads the two new parts itself"), and
   keep the `checks.mjs` pin on the part order.
 

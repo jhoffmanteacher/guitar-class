@@ -1,4 +1,4 @@
-/* Jonathan's own takes from LOCAL RECORDING MODE (2026-11-14; coach-core.js micRecLocal: the site served from his own computer, the
+/* Jonathan's own takes from LOCAL RECORDING MODE (2026-11-14; coach-recordings.js micRecLocal: the site served from his own computer, the
    dev-bypass button, each round saved as take-<game>-<YYYYMMDD-HHMMSS>.wav + .json). These are the teacher's own playing, never a
    student's: the files carry no name and no uid (the site leaves both out), and this tool checks that before it copies anything.
 

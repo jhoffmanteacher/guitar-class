@@ -135,7 +135,7 @@ let stream = null, ctx = null, src = null, proc = null, mute = null, raf = 0, ri
 let lastMs = 0, capture = null, result = null, gotSettings = null, gotCaps = null, micName = '';
 
 /* The device label can carry its owner's name ("Maria's AirPods"): the same
-   scrub as coach-core.js micRecMicName. */
+   scrub as coach-recordings.js micRecMicName. */
 function cleanLabel(label){
   return String(label || '').replace(/^.*?['’]s\s+/i, '').replace(/\s+de\s+\p{Lu}[^\s()]*(?:\s+\p{Lu}[^\s()]*)*/gu, '');
 }

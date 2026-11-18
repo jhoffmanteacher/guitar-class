@@ -28,7 +28,7 @@ function micTakeExpected(d){
   return Array.isArray(d && d.expected) ? d.expected.filter(e => e && typeof e === 'object') : [];
 }
 /* Whose take, for the console's own screens (never the zips): the roster's name for the take's uid (a take saved since
-   2026-11-16 stores no name, coach-core.js micRecSaveNow), else the name an older take stored, else ''. Each caller keeps
+   2026-11-16 stores no name, coach-recordings.js micRecSaveNow), else the name an older take stored, else ''. Each caller keeps
    its own last fallback (the short uid, "this student", the take label) and escapes the result as before. The roster is
    allStudentsRaw (teacher-core.js), the full list Manage uses, so an archived student is still named. */
 function teacherMicWho(d){

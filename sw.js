@@ -22,7 +22,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-11-18-78593569b6';
+const CACHE_VERSION = 'guitar-class-2026-11-18-4442d1fbac';
 
 /* BACKING-TRACK AUDIO (2026-10-30 rewrite). Every track lives in ONE cache that
    never changes name, AUDIO_CACHE, apart from the shell's CACHE_VERSION: a routine
@@ -272,6 +272,7 @@ const ASSETS = [
   './tuning-sim.html',
   './privacy.html',
   './coach-core.js',
+  './coach-recordings.js',
   './coach-hub.js',
   './coach-chords.js',
   './coach-chordcards.js',
