@@ -73,6 +73,12 @@ round on the switch-on); remove the 2026-11-16 split bridge on or after 2026-12-
     activities`), run it at the merge. The rebase onto `8ecb1dea` met the CLAUDE.md parts-table line (coach-recordings):
     kept main's, my edit redone on top.
 
+**W23's five questions, answered (Jonathan, 2026-11-18):** (1) Watchtower gets BOTH switches (recording and Chords /
+Tab / Lyrics); (2) views not checked against release: OK as is; (3) a power-chord card's Tab shows the power chords as
+tab, not the roots; (4) after a view switch mid-song, scroll back to the card's top; (5) a change whose only `sw.js`
+edit is list lines ships Fast (CLAUDE.md "Not counted"). (1), (3), (4) and the three MINORs (R1-4, R1-5, R2-3) are
+being built on the Mac, after W24's merge.
+
 **Quiet moments:** split `app/cards.js` (W24 above); three Chords / Tab MINORs (W23: R1-4 the dot on chord 0 during a count-in
 after a section tap, fix sketched in the Windows scratchpad `w23-rv2\review.md`; R1-5; R2-3); the update reload
 does not wait for a private song mid-download (`todo.md`, "Small things").

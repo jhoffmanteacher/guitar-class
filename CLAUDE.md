@@ -382,7 +382,7 @@ A review is due when a change is Always-Reviewed ("Fast by default"), Jonathan s
 **Triggers.** Review trigger = 3+ files, a danger-zone file (the console's config plumbing: `teacherWriteConfig()` and the `config/class` reads in `teacher-config.js`,
 `sw.js` code, coach detection in ANY `coach-*.js` part (the onset and pitch detectors and the grading rules: ratios, gates,
 windows; most of it is `coach-core.js` and `ccLoop()` / `ccResolvePend()` / `ccFinish()` in `coach-chords.js`, but each game's own loop and judge count too; not a game's screens, wording, tempo controls or count-in), the app's save path (`app/save.js`, and any other direct write to `progress/{uid}`), `firestore.rules`), or 50+ strings.
-Not counted: `CHANGELOG.md`, `sw.js` version lines and its `AUDIO_HASHES` block (both written by `checks.mjs`, never by hand; a new song's audio is not a danger-zone change), a string's Spanish twin, pin-only
+Not counted: `CHANGELOG.md`, `sw.js` version lines and its `AUDIO_HASHES` block (both written by `checks.mjs`, never by hand; a new song's audio is not a danger-zone change), a file name added to or removed from an `sw.js` list (a new part: Jonathan, 2026-11-18, "list-only ships Fast"; `checks.mjs` holds the lists to the files), a string's Spanish twin, pin-only
 `checks.mjs` edits. A guard on a new default, or extending what a check reads: break-it proof only (paste output). A new KIND of check, or changed logic/matching, is a trigger (`site-reviewer`, high) plus break-it. Reviewer: `site-reviewer-deep`
 for danger-zone / 50+ strings (failing scenario first), else `site-reviewer`. Agent claim → read its quoted lines yourself; agent fix → make it re-derive it on the real code.
 
