@@ -41,17 +41,16 @@ done since:**
 1. **The one long column for lyric sheets is ON MAIN (2026-11-17, Fast; resumed at 3:49 PM).** ca-45 and ca-38 read as
    one column; the lead looked at the old column change on ca-45. `app/cards.js` is now 2,060 lines, over the 2,000
    warning (1cv): split it at a quiet moment, never inside something Jonathan asked for.
-2. **The 7 songs to the private store: BUILT, waits for proofs, a review and Jonathan's word.** Branch
-   `mac/song-files-switch`, `81b9274` (on GitHub): the 18 paths are `private:<id>`, the flag gone, the 18 public
-   files removed, CHANGELOG written. He uploaded and verified all 18 (his word, 2026-11-17) and chose: remove the
-   public copies now; go live AFTER SCHOOL, and only when he says **"continue"**. Passed on the branch: full
-   `checks.mjs`, `song-files-sim` 121 of 121, `song-files-console-sim` 115 of 115, `kill-switch/proof` 14 of 14.
-   NOT run yet: the full `node tools/playalong-loop.mjs` (the doc wants its summary line with the private files
-   standing in), `node tools/update-reload-loop.mjs` (`sw.js` changed), one Opus `site-reviewer` round
-   (`docs/private-audio-step2.md`, step 3b). The private copies are in `~/Documents/guitar-class-song-files/` on the
-   Mac (18). Rebase onto main first (1. above touches other files). Do NOT push it before his "continue".
-3. **The Chords / Tab switch:** `feat/card-views`, `80ce200` WIP (on GitHub), about two thirds built; notes in
-   `Claude outputs/pause-2026-11-17/card-views-DETAILS.md` ("WHERE I STOPPED"). Needs the Mac's browser.
+2. **The 7 songs play from the private store: ON MAIN 2026-11-17, after school, on Jonathan's word ("do after school
+   update"), `Review: Fast`.** The 18 paths are `private:<id>`, the 18 public files are gone from `audio/` and
+   `AUDIO_HASHES`. Passed before the push: full `checks.mjs`, `song-files-sim` 121 of 121, `song-files-console-sim`
+   115 of 115, `kill-switch/proof` 14 of 14, the full `playalong-loop` (26 cards, 480 walks, 0 mismatches, "18
+   private track files stand in"). NOT run before the push, by his go-ahead: an Opus review (the Friday check
+   reads it, or he names it) and `update-reload-loop` (GitHub runs it when `sw.js` changes: read that run). To
+   undo: revert the switch commit (files, paths and flags come back together). First class to meet it: 2026-11-18;
+   each Chromebook downloads a song once ("Loading the song…").
+3. **The Chords / Tab switch: handed to Windows as W23** (`feat/card-views`, `464d4a2`: the WIP and the builder's
+   notes in `docs/wip/card-views-notes.md` on that branch).
 4. **For whoever edited ca-53 today (`d2a676c`):** GitHub's "smoke activities (English)" is red since then; the
    failing line, seen by a Mac builder: `[strum:ca-53 step 1 en] strum: chord names [], not ["A5","A5","A5","A5"]`:
    the smoke's expectation for ca-53 step 1 was not updated with the card.
@@ -434,6 +433,24 @@ and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fi
   reviewer's sentence on how to read a push that ADDS a part, and add it to `todo.md`'s `coach-core.js` split
   steps (it is already named there). It is NOT added to `checks.mjs` (it needs two commits). Opus at `high`
   (`xhigh` allowed for the reviewer); the simple runs may go to Sonnet (CLAUDE.md, "Sonnet for the simple parts").
+- **W23. Finish the Chords / Tab switch (Jonathan, 2026-11-17: "chords/tab switch"; the Mac's builder stopped at a
+  pause, about two thirds done). After W22. Fast when proved.** Branch `origin/feat/card-views` (`464d4a2`): read
+  `docs/wip/card-views-notes.md` first ("WHERE I STOPPED" gives the next command), and DELETE that file in your
+  last commit (it is a hand-over note, not site docs). What is there: `card.otherViews` = `{ tab?, chords?, lyrics? }`
+  filled at the end of `class-activities.js` from a song's other cards; a new part `app/cards-views.js`; the pilot
+  on ca-33 (Sweet Child: Chords its own view, Tab from ca-28, Lyrics from ca-45); the choice in
+  `localStorage.caCardViews`; Acordes / Tab / Letra; check 1eq... NOTE: your W20 also took the label **1eq** on
+  main: rename the card-views check to the next free label. Rebase onto main FIRST: main has changed
+  `app/cards.js` a lot since (the lyric sheet at the top, one long column, `PC_LEAD` 0, the strip fix), your W17,
+  and the 7 songs now play `private:<id>` paths. Left to do: the mid-song switch walk R17 in `playalong-loop` (its
+  judge was fixed, never re-run; make its failures set the exit code); 1eq's fix re-run and its break-its; the
+  Lyrics view must follow the NEW sheet behaviour (one column, the line at the top, the 0.3 s early scroll);
+  screenshots at 1366x657 EN and ES of each view, mid-song before and after a press, and the console's detail page
+  (both step renderers); `slow-load.mjs` for the new part; the full `playalong-loop`; the smoke walk that clicks
+  the switch and reloads; final checks; a CHANGELOG line. Then the same field on "the cure" (ca-30: tab from
+  ca-24, lyrics from ca-44) and Luna (ca-32: tab from ca-27) if the pilot is clean: both line up section for
+  section. NOT Watchtower (it has the Jimi / Neil switch; two switches together is not designed: ask Jonathan
+  through this file). One Opus builder at `high`; Sonnet for the runs and screenshots.
 - **W14. NOT YET, dates only (do not start early; leave the line here until done):**
   - about **2026-11-21**: the accessibility scan's ratchet. Read a week of GitHub's "a11y scan" job results; only if
     every run shows 0 new signatures, switch `--a11y-ratchet` on in `browser.yml`, with one `site-reviewer` round on the

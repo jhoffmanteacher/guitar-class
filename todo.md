@@ -13,6 +13,9 @@ they're ready"). Work still being built, reviewed or waiting on a push is NOT li
 or when the paste file exists.
 
 **Listen and look (a few minutes each, any class Chromebook or the Mac):**
+0. **Try one of the 7 private songs before first period (LIVE since 2026-11-17 after school):** signed in as a
+   student, open Smells Like Teen Spirit (ca-41) or one under Songs → More Play Along songs. It should say "Loading
+   the song…" once, then play; a second open plays at once. If one does not load, tell Claude: one revert undoes it.
 1. **Lyric sheets, LIVE 2026-11-17:** Sweet Child O' Mine (ca-45) and Watchtower (ca-38) are one long column, and a
    new line is already still when its first chord plays. Look right? (The first line change after Play is an
    instant jump, on purpose.)
