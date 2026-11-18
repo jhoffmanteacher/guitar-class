@@ -1017,7 +1017,7 @@ function caView(a){
   if(rv && view.card) view.card = { ...view.card, ...rv.card, track: rv.track };   // the recording's own bars, form and rhythm
   if(rv) ['title', 'title_es', 'intro', 'intro_es'].forEach(f => { if(rv[f]) view[f] = rv[f]; });   // its own name and blurb, where it has them (ca-40)
   if(bass && view.card) view.card = { ...view.card, __bass: a.bassNotes };
-  if(vw && view.card) view.card = caCardViewCard(a.card, vw);   // the view's sections and how it draws them (never combined with the three above: 1eq)
+  if(vw && view.card) view.card = caCardViewCard(a.card, vw);   // the view's sections and how it draws them (never combined with the three above: 1er)
   view.__chordView = true;
   byCombo.set(combo, view);
   return view;

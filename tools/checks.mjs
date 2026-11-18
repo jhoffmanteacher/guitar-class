@@ -10168,7 +10168,7 @@ function checkPracticeCards(ctx) {
     if (a && a.view === 'card' && a.card && a.recordingVersions && typeof a.recordingVersions === 'object')
       for (const [r, v] of Object.entries(a.recordingVersions))
         cardViews.push({ ...a, id: a.id + ' [' + r + ']', card: { ...a.card, ...(v && v.card), track: v && v.track }, __rec: true });
-    // Card views (1eq): each of a card's other views goes through the same rules, with its own sections.
+    // Card views (1er): each of a card's other views goes through the same rules, with its own sections.
     if (a && a.view === 'card' && a.card && a.card.otherViews && typeof a.card.otherViews === 'object')
       for (const [nm, v] of Object.entries(a.card.otherViews))
         cardViews.push({ ...a, id: a.id + ' [view ' + nm + ']', card: { ...a.card, ...(v || {}), sections: (v && v.sections) || a.card.sections }, __rec: true });
@@ -12520,7 +12520,7 @@ function checkRecordingVersions(ctx) {
   if (bad === 0) ok(n + ' cards with recording versions, ' + rendered + ' renders (each recording + nothing stored) \u2014 right track, sections, switch and Guitar switch every time; ' + strumRenders + ' every-strum renders draw ' + strumNames + ' chord names (the Neil cards pinned at 128 each, every lap A5 x4 G5 x3 F5 x6 G5 x3); ' + readbacks + ' title / intro / directions read-backs in EN + ES; ' + consoleReads + ' console titles run through teacherActivityTitle');
 }
 
-/* 1eq. CARD VIEWS (Jonathan, 2026-11-17: "chords/tab switch"; app/cards-views.js). A practice card with
+/* 1er. CARD VIEWS (Jonathan, 2026-11-17: "chords/tab switch"; app/cards-views.js). A practice card with
    `card.otherViews` shows the same song as chords, tab or the lyric sheet, with a switch, and the song keeps playing
    through a press. What can go wrong is quiet: a view whose sections do not line up with the card's (the highlight
    would jump to another place in the song on a press), a lyric view whose sheet does not match its notes (the dot on
@@ -12542,19 +12542,19 @@ function checkRecordingVersions(ctx) {
      writes one localStorage key, and its press neither stops the song nor redraws the page (no stopCardAudio, pcStop,
      renderClassActivities). What a press does in a browser mid-song is tools/playalong-loop.mjs R17 and
      tools/smoke.mjs (click, reload, remembered).
-   Pinned: one card (ca-33, Chords default, then Tab and Lyrics). */
+   Pinned: three cards, each Chords by default (ca-30 and ca-33 then Tab and Lyrics, ca-32 then Tab). */
 function checkCardViews(ctx, i18nTable) {
-  head('1eq. Card views: one practice card as chords, tab or lyrics, with a switch');
-  const EXPECT = { 'ca-33': { own: 'chords', list: ['chords', 'tab', 'lyrics'] } };
+  head('1er. Card views: one practice card as chords, tab or lyrics, with a switch');
+  const EXPECT = { 'ca-30': { own: 'chords', list: ['chords', 'tab', 'lyrics'] }, 'ca-32': { own: 'chords', list: ['chords', 'tab'] }, 'ca-33': { own: 'chords', list: ['chords', 'tab', 'lyrics'] } };
   const VIEW_KEYS = { tab: ['counts'], chords: ['everyStrum', 'restWord'], lyrics: ['sheet', 'sheetChords', 'sheetColumns', 'sheetNamedAgain'] };
   const COMMON = ['caption', 'caption_es', 'sections'];
   const LABEL = { chords: 'ca.viewChords', tab: 'ca.viewTab', lyrics: 'ca.viewLyrics' };
   let bad = 0, renders = 0, located = 0, swOff = 0;
-  const flag = m => { err('1eq: ' + m); problems++; bad++; };
+  const flag = m => { err('1er: ' + m); problems++; bad++; };
   if (!ctx) { flag('cannot run — the 0b render context is unavailable'); return; }
   const run = x => vm.runInContext(x, ctx);
   for (const fn of ['caCardViewList', 'caCardViewMode', 'caCardViewCard', 'caViewSwitchHtml', 'caSetCardView', 'caView', 'caCardBodyHtml', 'pcLayout', 'pcLocate', 'pcSheetMap'])
-    if (run('typeof ' + fn) !== 'function') { flag(fn + '() not found in the app script (renamed? update 1eq)'); return; }
+    if (run('typeof ' + fn) !== 'function') { flag(fn + '() not found in the app script (renamed? update 1er)'); return; }
   const J = JSON.stringify;
   const acts = run('(window.CLASS_ACTIVITIES || []).filter(a => a && a.view === "card" && a.card)');
   const withViews = acts.filter(a => a.card.otherViews !== undefined);
@@ -12598,7 +12598,9 @@ function checkCardViews(ctx, i18nTable) {
       ctx.__eqL0 = L0; ctx.__eqL1 = L1;
       const r = run(`(() => { const out = { n: 0, off: [] }; for (let k = 0; k < ${steps}; k++) { const b = k / ${bpb * 4} + 1e-7;
         const x = pcLocate(window.__eqL0, b), y = pcLocate(window.__eqL1, b); out.n++;
-        const p = [x && x.si, x && x.rep, x && x.beat, y && y.si, y && y.rep, y && y.beat];
+        /* the whole beat: a chord grid on a track counted in six (COUNT IN SIX) gives its cursor's step, three a beat */
+        const wb = (L, q) => q && (L.sections[q.si].grid && L.tr.countSix ? Math.floor(q.beat / 3) : q.beat);
+        const p = [x && x.si, x && x.rep, wb(window.__eqL0, x), y && y.si, y && y.rep, wb(window.__eqL1, y)];
         if (p[0] !== p[3] || p[1] !== p[4] || p[2] !== p[5]) out.off.push([b, p]); } return out; })()`);
       located += r.n;
       r.off.slice(0, 3).forEach(([b, p]) => flag(`${a.id} [${nm}]: at ${b.toFixed(3)} bars into the song the card's own view is section ${p[0]} lap ${p[1]} beat ${p[2]}, this view section ${p[3]} lap ${p[4]} beat ${p[5]}`));
@@ -12620,7 +12622,7 @@ function checkCardViews(ctx, i18nTable) {
         const exp = EXPECT[a.id];
         if (!exp) {
           const h = String(run('caCardBodyHtml(window.__eqCard)'));
-          if (/ca-view-switch/.test(h)) flag(`${a.id} (${lang}): draws a Chords / Tab / Lyrics switch, but it has no otherViews (or is not pinned in 1eq's EXPECT)`);
+          if (/ca-view-switch/.test(h)) flag(`${a.id} (${lang}): draws a Chords / Tab / Lyrics switch, but it has no otherViews (or is not pinned in 1er's EXPECT)`);
           else swOff++;
           continue;
         }
@@ -12670,7 +12672,7 @@ function checkCardViews(ctx, i18nTable) {
   else if (/\b(stopCardAudio|pcStop|pcStart|renderClassActivities|caTeacherRedraw|stopAllDemoAudio)\s*\(/.test(press + swap)) flag('app/cards-views.js: a view press stops the song or redraws the page — it swaps the view in place, the song keeps playing');
   const cb = jsFunctionBody(siteSource('app.js', ROOT), 'caCardBodyHtml');
   if (cb === null || !/caViewSwitchHtml\(a\)/.test(stripJsComments(cb))) flag('app/cards.js: caCardBodyHtml() must draw caViewSwitchHtml(a) — the card would have no switch');
-  if (!bad) ok(`1eq: ${withViews.length} card with views (${withViews.map(a => a.id + ': ' + EXPECT[a.id].list.join(' / ')).join('; ')}), shape and sections line up; ${located} sixteenths located at the same section, lap and beat in every view; ${renders} renders (nothing / junk / each view stored, EN + ES, student + console): one switch, one pressed button, the view drawn, default the card's own; ${swOff} renders of the other cards draw no switch; nothing saved, the song not stopped`);
+  if (!bad) ok(`1er: ${withViews.length} card${withViews.length === 1 ? "" : "s"} with views (${withViews.map(a => a.id + ': ' + EXPECT[a.id].list.join(' / ')).join('; ')}), shape and sections line up; ${located} sixteenths located at the same section, lap and beat in every view; ${renders} renders (nothing / junk / each view stored, EN + ES, student + console): one switch, one pressed button, the view drawn, default the card's own; ${swOff} renders of the other cards draw no switch; nothing saved, the song not stopped`);
 }
 
 /* 1cf. THE CLASS ROSTER SKIPS THE TEACHER'S OWN HEAR IT FIRST STUB (Friday

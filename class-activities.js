@@ -290,7 +290,7 @@
                                            // place in the song maps exactly.
                                            // Filled by reference at the END of this
                                            // file from the song's other cards: no
-                                           // new music. checks.mjs 1eq.
+                                           // new music. checks.mjs 1er.
        sections: [{                       // back to back, in song order
          label, label_es,                  // the tap-to-start button ("Chorus")
          caption, caption_es,              // the heading over its tab page
@@ -7568,18 +7568,24 @@ window.CLASS_ACTIVITIES = [
    - ca-33 (Sweet Child O' Mine in power chords; its own view is Chords):
      Tab = ca-28's tab (the roots, one pluck per bar), Lyrics = ca-45's sheet
      (ca-45 already plays ca-33's sections, above, so the lyrics view keeps the
-     card's own sections and the chord count 1bf2 holds). */
+     card's own sections and the chord count 1bf2 holds).
+   - ca-30 ("the cure" in power chords; Chords): Tab = ca-24's tab, Lyrics =
+     ca-44's sheet (ca-44 plays ca-30's sections, above, as ca-45 does ca-33's).
+   - ca-32 ("Luna" in power chords; Chords): Tab = ca-27's tab.
+   Every pair lines up section for section (label, fromBar, bars, reps; 1er).
+   Not All Along the Watchtower: its cards have the Jimi / Neil recording
+   switch, and two switches on one card are not designed (1er refuses it). */
 (function(){
   const list = window.CLASS_ACTIVITIES;
   const find = id => list.find(a => a.id === id);
-  const host = find('ca-33'), tab = find('ca-28'), sheet = find('ca-45');
-  if(!host || !tab || !sheet) return;
   // The named fields of another card, the same values (its texts are checked where that card is written).
   const take = (c, fields) => { const o = {}; fields.forEach(f => { if(c[f] !== undefined) o[f] = c[f]; }); return o; };
-  host.card.otherViews = {
-    tab: take(tab.card, ['caption', 'caption_es', 'sections']),
-    lyrics: take(sheet.card, ['caption', 'caption_es', 'sheet', 'sheetChords', 'sheetColumns', 'sheetNamedAgain'])
-  };
+  [['ca-33', 'ca-28', 'ca-45'], ['ca-30', 'ca-24', 'ca-44'], ['ca-32', 'ca-27', null]].forEach(([h, t, l]) => {
+    const host = find(h), tab = find(t), sheet = l && find(l);
+    if(!host || !tab || (l && !sheet)) return;
+    host.card.otherViews = { tab: take(tab.card, ['caption', 'caption_es', 'sections']) };
+    if(sheet) host.card.otherViews.lyrics = take(sheet.card, ['caption', 'caption_es', 'sheet', 'sheetChords', 'sheetColumns', 'sheetNamedAgain']);
+  });
 })();
 
 /* All Along the Watchtower — the Neil Young version of ca-26, ca-29 and ca-40

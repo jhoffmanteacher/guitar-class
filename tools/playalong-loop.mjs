@@ -2181,7 +2181,7 @@ async function main() {
   for (const a of cards) {
     const isBuilt = builtIds.has(a.id), TT = isBuilt ? totalsBuilt : totals;
     TT.cards++;
-    const walksBefore = totals.walks + totalsLoop.walks + totalsBuilt.walks;
+    const walksBefore = totals.walks + totalsLoop.walks + totalsBuilt.walks + SWAPV.walks;   // R17 walks count as walked
     for (const x of allViews.filter(y => y.a.id === a.id)) {
       const label = `${a.id} ${viewName(a, x.v)}`;
       const idxView = { rec: x.v.rec ? x.lists.rec.indexOf(x.v.rec) : null, key: x.v.key ? x.lists.key.indexOf(x.v.key) : null, chord: x.v.chord ? x.lists.chord.indexOf(x.v.chord) : null, bass: x.v.bass ? x.lists.bass.indexOf(x.v.bass) : null, cv: x.v.cv ? x.lists.cv.indexOf(x.v.cv) : null };
@@ -2291,7 +2291,7 @@ async function main() {
         W.fresh = false;
       }
     }
-    if (SETTING && totals.walks + totalsLoop.walks + totalsBuilt.walks === walksBefore && !'drawing'.includes(SETTING)) { unwalked.push(a.id); console.log(`✗ ${a.id}: --setting "${SETTING}" matches no walk of this card`); }
+    if (SETTING && totals.walks + totalsLoop.walks + totalsBuilt.walks + SWAPV.walks === walksBefore && !'drawing'.includes(SETTING)) { unwalked.push(a.id); console.log(`✗ ${a.id}: --setting "${SETTING}" matches no walk of this card`); }
   }
   const secs = ((Date.now() - t0) / 1000).toFixed(0);
   const realErrors = pageErrors.filter(e => !/firebase|firestore|googleapis|gstatic|net::ERR|Failed to fetch|ResizeObserver loop/i.test(e));
@@ -2312,7 +2312,7 @@ async function main() {
   stale.forEach(K => console.log(`✗ the KNOWN list names a fault that this full run did not see: ${K.card === '*' ? 'every card' : K.card + ' ' + K.section} (${K.kinds.join(', ')}). If it was fixed, delete its entry.`));
   const failed = totals.failed + (dataIssues.length ? 1 : 0) + (realErrors.length ? 1 : 0) + stale.length;
   const loopCards = cards.filter(a => !builtIds.has(a.id) && allViews.some(y => y.a.id === a.id && y.v.base && y.chart.secs.length > 1)).length;
-  const none = !failed && !totalsLoop.failed && !totalsBuilt.failed && (unwalked.length > 0 || (!totals.walks && !totalsLoop.walks && !totalsBuilt.walks && !(SETTING && 'drawing'.includes(SETTING))));
+  const none = !failed && !totalsLoop.failed && !totalsBuilt.failed && !SWAPV.failed && (unwalked.length > 0 || (!totals.walks && !totalsLoop.walks && !totalsBuilt.walks && !SWAPV.walks && !(SETTING && 'drawing'.includes(SETTING))));
   console.log(`\nplayalong-loop: ${failed || none ? '✗' : '✓'} ${totals.cards} cards, ${totals.views} views, ${totals.pages} pages read, ${totals.walks} walks (card-setting pairs), ${totals.steps.toLocaleString('en-US')} places lit and compared, ${totals.frames.toLocaleString('en-US')} steps of the fake clock, ${totals.clicks.toLocaleString('en-US')} clicks: ${failed ? failed + ' with a mismatch' + ` (${totals.onlyQueued} only the queued Metronome click, scheduled before a press and sounding after it; ${failed - totals.onlyQueued} with anything else)` : '0 mismatches'}${totals.known ? ', ' + totals.known + ' known (listed, not fixed)' : ''} · ${secs} s`);
   /* The Loop and Build walks (R15): their own line, after the summary above. */
   const TL = totalsLoop, loopWalksWanted = !SETTING || TL.walks > 0;
@@ -2377,7 +2377,7 @@ async function main() {
     console.log(`playalong-loop (ca-51 and its built copy): ✗ not compared: ${!pair['ca-51'] ? 'ca-51' : CA51_BUILT_ID} was not walked`);
   }
   if (LEADS) reportLeads(leadWalks);
-  out.totals = totals; out.totalsLoop = { ...TL, cards: [...TL.cards] }; out.failed = failed + TL.failed + builtFailed + pairFailed; out.seconds = Number(secs);
+  out.totals = totals; out.totalsLoop = { ...TL, cards: [...TL.cards] }; out.failed = failed + TL.failed + builtFailed + pairFailed + SWAPV.failed;   // R17 failures count too out.seconds = Number(secs);
   /* A --setting that matched no walk (a typo, or a card without that walk) is not a pass. The drawing alone is a run
      only when it was asked for (--setting drawing). */
   if (none) {
@@ -2388,7 +2388,7 @@ async function main() {
   }
   if (JSON_OUT) writeFileSync(JSON_OUT, JSON.stringify(out, null, 1));
   await page.close();
-  return failed || TL.failed || builtFailed || pairFailed ? 1 : 0;
+  return failed || TL.failed || builtFailed || pairFailed || SWAPV.failed ? 1 : 0;
 }
 
 /* --leads: THE LEAD, measured. Each paint only brackets its lead (the page painted somewhere between two frames of the

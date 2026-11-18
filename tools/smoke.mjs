@@ -641,7 +641,7 @@ async function recordingWalk(page, run, events, stats, base) {
 }
 
 /* Card views (card.otherViews, 2026-11-17 — the Chords / Tab / Lyrics switch,
-   app/cards-views.js). checks.mjs 1eq renders every view; this clicks the switch
+   app/cards-views.js). checks.mjs 1er renders every view; this clicks the switch
    for real. For each card with views: it opens on its own view with nothing
    saved; with the song playing, each press shows that view (a sheet, a chord
    grid or a tab), keeps the same player and audio element playing, and lights

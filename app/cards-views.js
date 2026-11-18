@@ -1,14 +1,14 @@
 /* ══ CARD VIEWS — one practice card, the song as chords, tab or lyrics (Jonathan, 2026-11-17: "chords/tab switch") ══
    He asked "is there a way to offer both tab and lyrics/chord charts for songs?"; until now a song did that only as
    separate cards (Sweet Child: ca-28 tab, ca-33 chords, ca-45 lyrics). A card with `card.otherViews`
-   (class-activities.js, CARD note; checks.mjs 1eq) gets a Chords / Tab / Lyrics switch in the row of the card's other
+   (class-activities.js, CARD note; checks.mjs 1er) gets a Chords / Tab / Lyrics switch in the row of the card's other
    switches. Everything else on the card stays as it is when the view changes: the track, the speed, Guitar, the
    Metronome, the section buttons, Loop this part, Build up speed, full screen, and the place in the song.
      THE VIEWS   A view's name says what it draws: `tab` note by note, `chords` the chord grid (CHORD GRID,
                  app/cards.js), `lyrics` the PDF sheet (LYRIC SHEET). The card's own view is its kind today
                  (caCardViewOwn) and is the default; `otherViews` lists the others with what each needs. A view is a
                  VIRTUAL CARD (caCardViewCard): the card with its display fields (VIEW_FIELDS) swapped for the
-                 view's. Its sections are the card's own, section for section (label, fromBar, bars, reps; 1eq), so
+                 view's. Its sections are the card's own, section for section (label, fromBar, bars, reps; 1er), so
                  pcLayout gives the same window and pcLocate the same section, lap and beat at every moment.
      THE CHOICE  Remembered per card on this device (`localStorage.caCardViews`, { id: view }), like the Full /
                  Power switch (caChordModes): a per-viewer convenience, never written to progress/{uid}. Storage that
@@ -117,7 +117,7 @@ function caCardViewSwap(root, raw, name, refocus){
     st.sheet = !!view.card.sheet;
     // Forget what was painted in the old view: the next frame lights the same beat in this one.
     st.si = -1; st.seq = -1; st.rep = -1; st.beat = -1; st.key = ''; st.row = null; st.stripKey = null;
-    st.sheetLine = null; st.sheetLit = null; st.sheetAim = null; st.sheetShort = null;
+    st.sheetLine = null; st.sheetLit = null; st.sheetAim = null; st.sheetTop = null;   // as pcRefollow: the next frame follows again
     if(st.counting){
       // The count-in: show the section it counts in to, as pcStart did.
       pcShowSection(root, L, st.loopFrom);
