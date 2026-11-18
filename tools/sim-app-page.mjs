@@ -12,7 +12,9 @@ import { join } from 'node:path';
 import vm from 'node:vm';
 import { siteParts } from './site-src.mjs';
 
-export function appPage(root){
+/* opts.without: app parts (as listed in index.html, e.g. 'app/cards-sheet.js') to leave out, as on a page
+   whose copy of that file failed to load (checks.mjs 1er, W24). */
+export function appPage(root, opts = {}){
   const stubStyle = () => ({ setProperty(){}, removeProperty(){}, getPropertyValue(){ return ''; } });
   const el = () => ({
     style: stubStyle(), dataset: {}, children: [], hidden: false,
@@ -50,7 +52,7 @@ export function appPage(root){
   ctx.window = ctx; ctx.globalThis = ctx; ctx.self = ctx;
   vm.createContext(ctx);
   const mods = readdirSync(root).filter(f => /^module-\d+\.js$/.test(f)).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-  for(const f of ['i18n.js', 'guitar-diagrams.js', 'class-activities.js', 'config-main.js', ...mods, ...siteParts('app.js', root)])
+  for(const f of ['i18n.js', 'guitar-diagrams.js', 'class-activities.js', 'config-main.js', ...mods, ...siteParts('app.js', root).filter(f => !(opts.without || []).includes(f))])
     vm.runInContext(readFileSync(join(root, f), 'utf8'), ctx, { filename: f });
   return { ctx, run: code => vm.runInContext(code, ctx) };
 }
