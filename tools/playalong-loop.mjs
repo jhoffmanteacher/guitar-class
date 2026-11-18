@@ -921,7 +921,7 @@ function fileIndex(tracks) {
 /* R17: a card's views (card.otherViews): its own is a sheet's lyrics, a chord grid's chords, else tab; the switch's
    order; what a view replaces (everything a card DRAWS, never how it plays). */
 const CV_ORDER = ['chords', 'tab', 'lyrics'];
-const CV_DRAW = ['caption', 'caption_es', 'sections', 'chordGrid', 'everyStrum', 'restWord', 'counts', 'sheet', 'sheetChords', 'sheetColumns', 'sheetNamedAgain'];
+const CV_DRAW = ['caption', 'caption_es', 'sections', 'chordGrid', 'everyStrum', 'restWord', 'counts', 'sheet', 'sheetChords', 'sheetColumns', 'sheetNamedAgain', 'sheetRead'];
 function ownViewOf(c) { return c.sheet ? 'lyrics' : c.chordGrid ? 'chords' : 'tab'; }
 /* R17 with recordings (both switches, ca-29, 2026-11-18): the card of a recording, with that recording's OWN views
    (a version never inherits the card's); its view list. */

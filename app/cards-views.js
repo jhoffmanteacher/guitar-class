@@ -36,7 +36,7 @@ const CA_CARD_VIEWS_KEY = 'caCardViews';
 const CA_CARD_VIEW_NAMES = ['chords', 'tab', 'lyrics'];   // the switch's order
 const CA_CARD_VIEW_LABELS = { chords: 'ca.viewChords', tab: 'ca.viewTab', lyrics: 'ca.viewLyrics' };
 // The fields that say what a card DRAWS (not how it plays): a view replaces exactly these.
-const CA_CARD_VIEW_FIELDS = ['caption', 'caption_es', 'sections', 'chordGrid', 'everyStrum', 'restWord', 'counts', 'sheet', 'sheetChords', 'sheetColumns', 'sheetNamedAgain'];
+const CA_CARD_VIEW_FIELDS = ['caption', 'caption_es', 'sections', 'chordGrid', 'everyStrum', 'restWord', 'counts', 'sheet', 'sheetChords', 'sheetColumns', 'sheetNamedAgain', 'sheetRead'];
 let caCardViewModes = (() => {
   try { const v = JSON.parse(localStorage.getItem(CA_CARD_VIEWS_KEY) || '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; }
   catch(e) { return {}; }

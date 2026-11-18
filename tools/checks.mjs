@@ -14471,8 +14471,8 @@ function checkPowerName(ctx) {
    reading order: name n is the card's n-th chord CHANGE. If the card's
    notes change (ca-38 shares ca-29's sections, so a ca-29 edit counts) the
    dot walks onto the wrong chords with nothing to say so but the console
-   preview. Checked here, without opening the PDF (pdf.js does not run in
-   Node; the preview compares the PDF itself):
+   preview. Checked here, without opening the PDF (the preview compares the
+   PDF itself; 1ev reads the three PDFs through pdf.js in Node):
    - the PDF exists under sheets/ and pdf.js is vendored where app.js loads it;
    - `sheetChords` is set and equals the chord changes the notes make;
    - `sheetColumns` is 1 or left out (ca-44 is the one-column sheet);
@@ -21480,6 +21480,35 @@ function checkSongRequests() {
    ════════════════════════════════════════════════════════════════════ */
 const SONG_FILES_SIM_PIN = 133;   // 121 -> 133 (2026-11-18, private chord sheets, P1): a .pdf read as bytes (songFileLoadBytes), typed by its name, one shared download, the sign-in rule, a built sheet entry, the sheet card's lines in EN + ES (12 cases); 113 -> 121 (2026-11-14, Song builder Part a2): a built song's audio entry (8 cases); -> 113 (2026-11-14, plant-a-fault gaps 33147bfb56 and 6eb5c43dc5): a blocked IndexedDB open (2 cases), the loading line announced (role="status"); 81 -> 84 (2026-11-14): a sign-out in the same tab stops handing out the loaded copy; -> 101 (review round 1): L1-L5, A2, m4-m6, B1, B4; the "ships empty" case gone (B3); -> 109 (round 2): m1, m6, the three missed plants, two cards waiting for one song
 const SONG_FILES_CLOSE_PIN = 6;
+/* 1ev. THE LOOSE READ of a lyric sheet (2026-11-18, app/cards-sheet.js pcSheetAlign; the Lyrics view of a private
+   song, card.sheetRead 'loose'). RUN by tools/sheet-align-test.mjs (Node, under a second): made-up layouts and
+   made-up chord lines (no lyrics) through the real pcSheetAlign, rule by rule (R1 names folded, R2 the chord boxes
+   above the first header, R3 a name written again, R4 "(Repeat to end)"), each with planted faults that must be a
+   mismatch naming the place; a made-up sheet written as a real pdf (its marks and lines read by pcSheetModel); then the three coded sheet cards (ca-38, ca-44, ca-45), their real PDFs read through
+   the vendored pdf.js and the app's own pcSheetModel: the loose read gives pcSheetMap's map exactly. The case
+   count is pinned (SHEET_ALIGN_PIN) so a deleted case fails here; `node tools/sheet-align-test.mjs --breaks` turns
+   18 broken copies of pcSheetAlign red, one at a time. The source pin: pcSheetDraw uses pcSheetAlign only where
+   card.sheetRead is 'loose', and the view switch carries sheetRead (CA_CARD_VIEW_FIELDS). */
+const SHEET_ALIGN_PIN = 42;
+function checkSheetAlign() {
+  head('1ev. Lyric sheets: the loose read (pcSheetAlign) is run on made-up chord lines and on the three coded sheets');
+  let bad = 0;
+  const fail = m => { err('1ev: ' + m); problems++; bad++; };
+  const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'sheet-align-test.mjs')], { encoding: 'utf8', timeout: 120000 });
+  const m = /sheet-align-test: (\d+) cases, (\d+) failed \((\d+) of (\d+) sheet cards identical\)/.exec(r.stdout || '');
+  if (r.status !== 0 || !m) {
+    fail('tools/sheet-align-test.mjs failed (exit ' + r.status + ')' + (r.error ? ': ' + r.error.message : ''));
+    for (const l of ((r.stdout || '') + (r.stderr || '')).trim().split('\n').filter(l => /✗|Error/.test(l)).slice(0, 8)) console.log(`${C.dim}      ${l}${C.reset}`);
+  } else {
+    if (+m[1] !== SHEET_ALIGN_PIN || +m[2] !== 0) fail(`sheet-align-test ran ${m[1]} cases (${m[2]} failed); pinned at ${SHEET_ALIGN_PIN}. If you changed the test on purpose, re-pin SHEET_ALIGN_PIN (never lower it to hide a deleted case)`);
+    if (+m[3] !== 3 || +m[4] !== 3) fail(`${m[3]} of ${m[4]} coded sheet cards read the same through the loose read (expected 3 of 3)`);
+  }
+  const read = f => { try { return readFileSync(join(ROOT, f), 'utf8'); } catch { return ''; } };
+  const draw = jsFunctionBody(stripJsComments(read('app/cards-sheet.js')), 'pcSheetDraw') || '';
+  if (!/const loose = a\.card\.sheetRead === 'loose';/.test(draw) || !/loose \? pcSheetAlign\(L, model\) : pcSheetMap\(L\)/.test(draw)) fail('app/cards-sheet.js: pcSheetDraw must use pcSheetAlign only where card.sheetRead is \'loose\' (every coded sheet card keeps pcSheetMap)');
+  if (!/const CA_CARD_VIEW_FIELDS = \[[^\]]*'sheetRead'/.test(stripJsComments(read('app/cards-views.js')))) fail('app/cards-views.js: CA_CARD_VIEW_FIELDS must carry sheetRead, or a Lyrics view would be read one name per change');
+  if (!bad) ok(`sheet-align-test: ${m[1]} cases pass (pinned ${SHEET_ALIGN_PIN}); ${m[3]} of ${m[4]} coded sheet cards identical to pcSheetMap; pcSheetDraw reads loose only on sheetRead 'loose'`);
+}
 function checkSongFilesLoader() {
   head('1dx. Song files: the loader is run (pieces, checks, device copy, two tabs, the monthly limit); the player hooks are pinned');
   let bad = 0;
@@ -22863,6 +22892,7 @@ function checkNeverRules(sets) {
   checkRulesSchoolGate();
   checkSongRequests();
   checkSongFilesLoader();
+  checkSheetAlign();
   checkSongFilesConsole();
   checkSongBuilder();
   checkBuiltSongs(rcCtx);

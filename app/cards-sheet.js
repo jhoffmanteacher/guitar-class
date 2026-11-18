@@ -95,8 +95,8 @@ function pcSheetModel(url, cols){
     const pad = 14, W = Math.max(...pages.map(P => P.width));
     const x = Math.max(0, Math.min(...all.map(w => w.x0)) - pad);
     const w = Math.min(W, Math.max(...all.map(w2 => w2.x1)) + pad) - x;
-    let top = 0, dy = 0;
-    const toks = [], fellBack = [];
+    let top = 0, dy = 0, lineOff = 0;
+    const toks = [], fellBack = [], marks = [];
     const used = pages.filter(P => P.words.length);
     used.forEach((P, pi) => {
       P.y = Math.max(0, Math.min(...P.words.map(w2 => w2.y0)) - pad);
@@ -113,13 +113,15 @@ function pcSheetModel(url, cols){
       }
       P.bands = split || [{ sx: x, sy, sw: w, sh, dx: 0 }];
       P.bands.forEach(b => { b.dy = dy; dy += b.sh; });
+      P.marks.forEach(m => marks.push({ kind: m.kind, at: toks.length + m.at }));
       P.toks.forEach(T => {
         const b = P.bands.length === 1 ? P.bands[0] : P.bands.find(b2 => b2.col === T.col);
         const a = pcSheetPlace(b, T.x0, T.y0), z = pcSheetPlace(b, T.x1, T.y1);
-        toks.push({ name: T.name, x0: a.x, x1: z.x, y0: a.y, y1: z.y, col: split ? T.col : null, page: pages.indexOf(P) + 1 });
+        toks.push({ name: T.name, x0: a.x, x1: z.x, y0: a.y, y1: z.y, col: split ? T.col : null, page: pages.indexOf(P) + 1, line: lineOff + T.line });
       });
+      lineOff += P.lineCount;
     });
-    return { pages: used.map(P => ({ page: P.page, x, y: P.y, h: P.h, top: P.top, bands: P.bands })), toks,
+    return { pages: used.map(P => ({ page: P.page, x, y: P.y, h: P.h, top: P.top, bands: P.bands })), toks, marks,
       crop: { x: 0, y: 0, w, h: dy }, printH: top, split: !one && used.some(P => P.bands.length > 1), fellBack };
   });
   pcSheetModels[key].catch(() => { delete pcSheetModels[key]; });   // a failed load can be tried again
@@ -229,11 +231,25 @@ async function pcSheetPage(page, one){
     }
     segs.push(cur);
   });
-  const lines = segs.filter(ws => ws.every(w => PC_SHEET_CHORD_RE.test(w.s)));
-  lines.forEach(ws => { ws.col = !one && ws[0].x0 > vp.width * 0.45 ? 1 : 0; });
+  const isChords = ws => ws.every(w => PC_SHEET_CHORD_RE.test(w.s));
+  const colOf = ws => (!one && ws[0].x0 > vp.width * 0.45 ? 1 : 0);
+  const lines = segs.filter(isChords);
+  lines.forEach(ws => { ws.col = colOf(ws); });
   lines.sort((p, q) => p.col - q.col || p[0].y0 - q[0].y0);
-  const toks = lines.flatMap(ws => ws.map(w => ({ name: w.s, x0: w.x0, x1: w.x1, y0: w.y0, y1: w.y1, col: ws.col })));
-  return { page, width: vp.width, height: vp.height, words, toks };
+  const toks = lines.flatMap((ws, li) => ws.map(w => ({ name: w.s, x0: w.x0, x1: w.x1, y0: w.y0, y1: w.y1, col: ws.col, line: li })));
+  /* THE LOOSE READ's marks (pcSheetAlign): a section header line ("[Verse]") and a "(Repeat to end)" line, each with
+     `at`, how many chord names come before it in reading order. Kinds and places only: no words are kept. */
+  const marks = [];
+  segs.forEach(ws => {
+    if(isChords(ws)) return;
+    const text = ws.map(w => w.s).join(' ');
+    const kind = PC_SHEET_HEAD_RE.test(text) ? 'head' : PC_SHEET_REPEAT_RE.test(text) ? 'repeat' : '';
+    if(!kind) return;
+    const col = colOf(ws), y = ws[0].y0;
+    marks.push({ kind, col, y, at: toks.filter(T => T.col < col || (T.col === col && T.y0 < y)).length });
+  });
+  marks.sort((p, q) => p.at - q.at || p.col - q.col || p.y - q.y);
+  return { page, width: vp.width, height: vp.height, words, toks, marks, lineCount: lines.length };
 }
 /* Which sheet chord each note of the card is: tok[si][rep][ni]. A rest is not a
    chord on the sheet: the dot stays on the chord before it. The count
@@ -255,6 +271,122 @@ function pcSheetMap(L){
     }
   });
   return { tok, start, count: n + 1 };
+}
+/* ── THE LOOSE READ (2026-11-18, Jonathan: a Lyrics view for private songs, built songs first) ──
+   A card with card.sheetRead 'loose' (a built song's Lyrics view, app/builtsongs.js) reads a sheet written the way
+   chord sheets are written on the web, not one name per chord change. pcSheetAlign matches the sheet's chord names,
+   in reading order, to the card's chord CHANGES (as pcSheetMap counts them) under four rules, and nothing looser:
+     R1  a name is folded to what a card can name before it is compared: a 7, maj7, 6, 9, add or sus chord is its
+         triad (E7 = E, Dsus4 = D), a slash chord its chord (G/B = G), m7 / m6 / m9 / min the minor (Am7 = Am),
+         dim / aug / b5 / ° / ø stay apart, and a 5 chord matches the major or the minor on its root (A5 = A = Am).
+         The root is a pitch: D#m = Ebm.
+     R2  the chord names above the sheet's first section header ("[Intro]", a line that is only [ ... ]) are not the
+         song: the chord boxes' labels at the top of the page. With no header, nothing is skipped.
+     R3  a name written again (E7 E7 G G) is the same chord named again, bar by bar: a run of k names that fold to
+         one chord is ONE change, the dot stepping from name to name across that change's bars (name j of k from
+         bar j x bars / k). A run longer than the change's bars is a mismatch. A card that changes to a chord that
+         folds to the same one (A, then A7) takes one name each.
+     R4  a "(Repeat to end)" line after the sheet's last chord line plays that line round again for every change
+         the card still has.
+   Anything else is a mismatch: the dot stays off, as for any sheet that does not follow its card (pcSheetDraw), and
+   `why` says where in one line, with `table` the card's sections lap by lap (what the card plays, what the sheet
+   names there; ok true, false, or null after the first mismatch). For the console (P4, English).
+   On a sheet written one name per change it gives pcSheetMap's map exactly (tools/sheet-align-test.mjs, the three
+   coded sheet cards). The coded sheet cards (ca-38, ca-44, ca-45) keep pcSheetMap: no 'loose' on them. */
+const PC_SHEET_HEAD_RE = /^\[[^\[\]]{1,40}\]$/;
+const PC_SHEET_REPEAT_RE = /^\(?\s*(repeat\s+(to|till|until)\s+(the\s+)?(end|fade)|repetir\s+hasta\s+el\s+final)\s*\)?$/i;
+const PC_SHEET_PC = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+// R1: { pc, q: '' | 'm' | '5' | 'dim' | 'aug' }, or null for a word that is not a chord name.
+function pcSheetFold(name){
+  const m = /^([A-G])(#|b)?([^/]*)(\/[A-G](#|b)?)?$/.exec(String(name || ''));
+  if(!m) return null;
+  const r = m[3];
+  const q = r === '5' ? '5' : /^(dim|°|ø)|b5/.test(r) ? 'dim' : /^(aug|\+)/.test(r) ? 'aug' : /^(m(?!aj)|min)/.test(r) ? 'm' : '';
+  return { pc: (PC_SHEET_PC[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? 11 : 0)) % 12, q };
+}
+function pcSheetSame(a, b){
+  const x = pcSheetFold(a), y = pcSheetFold(b);
+  return !!(x && y && x.pc === y.pc && (x.q === y.q || x.q === '5' || y.q === '5'));
+}
+/* The card's chord changes in play order (pcSheetMap's count), each with the beat it starts on and the bars it
+   lasts (to the next change, or the end of the card), and every note's change and beat. */
+function pcSheetChanges(L){
+  const bpb = L.tr.beatsPerBar > 0 ? L.tr.beatsPerBar : 4;
+  const ch = [], notes = [], laps = [];
+  let prev = null, pos = 0;
+  L.sections.forEach((S, si) => {
+    notes[si] = [];
+    for(let r = 0; r < S.reps; r++){
+      laps.push({ si, rep: r, beat: pos, ch: ch.length });
+      notes[si][r] = S.notes.map((nt, ni) => {
+        const beat = pos + (ni ? S.beatEnds[ni - 1] : 0);
+        if(!nt.rest && (nt.note !== prev || (S.nameAgain && ni === 0))){ ch.push({ si, rep: r, name: nt.note, beat }); prev = nt.note; }
+        return { n: ch.length - 1, beat };
+      });
+      pos += S.bars * bpb;
+    }
+  });
+  ch.forEach((c, i) => { c.bars = Math.max(1, Math.ceil(((i + 1 < ch.length ? ch[i + 1].beat : pos) - c.beat) / bpb - 1e-6)); });
+  return { ch, notes, laps, bpb };
+}
+function pcSheetAlign(L, model){
+  const toks = model.toks, marks = model.marks || [];
+  const { ch, notes, laps, bpb } = pcSheetChanges(L);
+  const head = marks.find(m => m.kind === 'head');
+  const skip = head ? head.at : 0;                                             // R2
+  const seq = [];
+  for(let i = skip; i < toks.length; i++) seq.push(i);
+  const real = seq.length;
+  const last = toks.length ? toks[toks.length - 1].line : -1;
+  const again = real && marks.some(m => m.kind === 'repeat' && m.at === toks.length) ? seq.filter(i => toks[i].line === last) : [];   // R4
+  for(let n = 0; n < ch.length && again.length; n++) seq.push(...again);
+  const lapOf = beat => { let k = 0; while(k + 1 < laps.length && laps[k + 1].beat <= beat + 1e-6) k++; return laps[k]; };
+  const where = c => pcSheetWhere(L, c.si, c.rep);
+  const own = [];
+  let p = 0, why = '', bad = -1;
+  for(let n = 0; n < ch.length; n++){
+    const c = ch[n];
+    if(p >= seq.length){ why = `The sheet runs out of chord names at chord change ${n + 1} (${c.name}, ${where(c)}): the card plays ${ch.length - n} more.`; bad = n; break; }
+    const T = toks[seq[p]];
+    if(!pcSheetSame(T.name, c.name)){ why = `Chord change ${n + 1} (${where(c)}): the card plays ${c.name}, the sheet's chord ${seq[p] + 1} is ${T.name}.`; bad = n; break; }
+    let run = 1, same = 0;
+    // R3, against the card's chord: on a power-chord card E and Em written in turn are one E5.
+    while(p + run < seq.length && pcSheetSame(toks[seq[p + run]].name, c.name)) run++;
+    while(n + 1 + same < ch.length && pcSheetSame(ch[n + 1 + same].name, c.name)) same++;
+    const k = Math.max(1, run - same);
+    if(k > c.bars){ why = `Chord change ${n + 1} (${where(c)}): the sheet names ${T.name} ${k} times in a row, but the card plays it for ${c.bars} bar${c.bars === 1 ? '' : 's'}.`; bad = n; break; }
+    own[n] = { from: p, k };
+    p += k;
+  }
+  if(!why && !ch.length) why = 'The card plays no chords.';
+  if(!why && p < real){ why = `The sheet names ${real - p} more chord${real - p === 1 ? '' : 's'} after the card's last change (from chord ${seq[p] + 1}, ${toks[seq[p]].name}).`; bad = ch.length; }
+  const ok = !why;
+  const tok = notes.map(reps => reps.map(row => row.map(x => {
+    const o = own[x.n];
+    if(!o) return -1;
+    const c = ch[x.n], off = Math.floor((x.beat - c.beat) / bpb + 1e-6);
+    return seq[o.from + Math.min(o.k - 1, Math.floor(off * o.k / c.bars + 1e-6))];
+  })));
+  // A tap on a name starts the lap of the bar it names (the first time the song reaches it).
+  const start = [];
+  own.forEach((o, n) => {
+    const c = ch[n];
+    for(let j = 0; j < o.k; j++){
+      const ti = seq[o.from + j];
+      if(start[ti]) continue;
+      const lp = lapOf(c.beat + Math.ceil(j * c.bars / o.k - 1e-6) * bpb);
+      start[ti] = { si: lp.si, rep: lp.rep, name: toks[ti].name };
+    }
+  });
+  const table = laps.map((lp, li) => {
+    const to = li + 1 < laps.length ? laps[li + 1].ch : ch.length, mine = [];
+    for(let n = lp.ch; n < to; n++) mine.push(n);
+    return { where: pcSheetWhere(L, lp.si, lp.rep), card: mine.map(n => ch[n].name),
+      sheet: mine.filter(n => own[n]).map(n => seq.slice(own[n].from, own[n].from + own[n].k).map(i => toks[i].name).join(' ')),
+      ok: bad < 0 || mine.every(n => n < bad) ? true : mine.length && mine[0] > bad ? null : false };
+  });
+  return { ok, why, table, tok, start, count: ch.length, skipped: skip,
+    cycled: own.filter(o => o.from >= real).length, folded: own.filter((o, n) => toks[seq[o.from]].name !== ch[n].name).length };
 }
 function pcSheetHtml(a, L, preview){
   const c = a.card;
@@ -376,8 +508,10 @@ async function pcSheetDraw(paperOrCol){
   paper.style.width = crop.w * scale + 'px';
   paper._sheetFill = fill;
   msg('');
-  const map = pcSheetMap(L);
-  const ok = map.count === model.toks.length && model.toks.every((T, i) => T.name === map.start[i].name);
+  // THE LOOSE READ on a card that asks for it (a built song's Lyrics view); every other sheet: one name per change.
+  const loose = a.card.sheetRead === 'loose';
+  const map = loose ? pcSheetAlign(L, model) : pcSheetMap(L);
+  const ok = loose ? map.ok : map.count === model.toks.length && model.toks.every((T, i) => T.name === map.start[i].name);
   paper._sheet = { model, scale, map, ok };
   paper.querySelectorAll('.pc-sheet-hit, .pc-sheet-line').forEach(el => el.remove());
   if(!ok){
@@ -385,13 +519,14 @@ async function pcSheetDraw(paperOrCol){
        the console preview, where Jonathan checks a card before class. */
     if(root.dataset.preview === '1'){
       const bad = model.toks.findIndex((T, i) => !map.start[i] || T.name !== map.start[i].name);
-      msg(t('ca.sheetMismatch', {sheet: model.toks.length, card: map.count, at: bad + 1}));
+      msg(loose ? map.why : t('ca.sheetMismatch', {sheet: model.toks.length, card: map.count, at: bad + 1}));
     }
     return;
   }
   const box = (T, padX, padY) => `left:${(T.x0 - crop.x - padX) * scale}px;top:${(T.y0 - crop.y - padY) * scale}px;width:${(T.x1 - T.x0 + 2 * padX) * scale}px;height:${(T.y1 - T.y0 + 2 * padY) * scale}px`;
   const html = model.toks.map((T, i) => {
     const at = map.start[i];
+    if(!at) return '';   // a name the loose read skipped (R2: the chord boxes' labels) starts nothing
     return `<button type="button" class="pc-sheet-hit" style="${box(T, 2, 1.5)}" onclick="pcSheetStartAt(this,${i})" aria-label="${escAttr(t('ca.sheetStartAt', {chord: T.name, section: pcSheetWhere(L, at.si, at.rep)}))}"></button>`;
   }).join('');
   // The line being played, then the line the follow looks ahead to (THE SHEET'S LOOK-AHEAD); both invisible.
