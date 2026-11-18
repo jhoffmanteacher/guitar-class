@@ -144,6 +144,12 @@ function caCardViewSwap(root, raw, name, refocus){
       if(st.sheet) pcSheetStarted(st);
       else pcFollow(root.querySelector('.pc-tab .pc-page:not([hidden]) .tab-grid'), true);
     } else if(st.sheet) pcSheetStickyTop(root);
-  } else pcShowSection(root, L, Math.min(curSec, L.sections.length - 1));
+  } else {
+    const si = Math.min(curSec, L.sections.length - 1);
+    pcShowSection(root, L, si);
+    // Stopped, into Lyrics: the sheet's sticky line names the section the card was on (W23 R2-3; it read the first).
+    const where = root.querySelector('.pc-sheet-where');
+    if(where && typeof pcSheetWhere === 'function') where.textContent = pcSheetWhere(L, si, 0);
+  }
   if(refocus){ const b = root.querySelector(`.ca-view-switch [data-view="${name}"]`); if(b) b.focus({ preventScroll: true }); }
 }

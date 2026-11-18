@@ -1357,9 +1357,10 @@ function planWalks(M) {
       ops.push({ op: 'run', ms: msFor(M, 'slower', at, at + 1.5), dt: FINE_MS }, { op: 'probe' }, { op: 'click', sel: '.pc-play', stop: true });
       walks.push({ kind: 'viewSwap', name: `view switch mid-section · ${M.view.v.cv} -> ${to}${k === 0 && M.open.hasLoop ? ' · loop this part on' : ''}`, stop: 'slower', guitar: hasFull, ops, to, span: 'none', metro: false, fresh: true });
     });
-    /* W23 R1-4: Lyrics pressed in the count-in after a section tap, on a section that is not the first (the last one
-       with laps, else the last). The sheet draws while the fake clock stands still, so the probe is still in the
-       count-in; judgeSwapStill holds the mark to that section's first chord and the sheet's sticky line to its name. */
+    /* W23 R1-4 and R2-3: Lyrics pressed in the count-in after a section tap, and after a stop, on a section that is
+       not the first (the last one with laps, else the last). The sheet draws while the fake clock stands still, so the
+       probe is still in the count-in; judgeSwapStill holds the mark to that section's first chord and the sheet's
+       sticky line to its name. */
     if (M.cvCharts.lyrics && M.view.v.cv !== 'lyrics' && ch.secs.length > 1) {
       let sj = -1;
       ch.secs.forEach((S2, i) => { if (i > 0 && S2.reps > 1) sj = i; });
@@ -1368,6 +1369,10 @@ function planWalks(M) {
       const count = setup('slower', hasFull, false, null);
       count.push(startOp(sj), { op: 'run', ms: 300, dt: FINE_MS }, lyr, { op: 'run', ms: FINE_MS, dt: FINE_MS }, { op: 'waitSheet', max: 15000 }, { op: 'run', ms: FINE_MS, dt: FINE_MS }, { op: 'probe' }, { op: 'click', sel: '.pc-play', stop: true });
       walks.push({ kind: 'viewSwapStill', still: 'count', si: sj, name: `Lyrics pressed in the count-in · ${M.view.v.cv} -> lyrics · ${Sj.label} (section ${sj + 1} of ${ch.secs.length})`, stop: 'slower', guitar: hasFull, ops: count, to: 'lyrics', span: 'none', metro: false, fresh: true });
+      const halt = setup('slower', hasFull, false, null);
+      halt.push(startOp(sj), { op: 'untilAudible', max: 60000, dt: FINE_MS }, { op: 'run', ms: msFor(M, 'slower', Sj.fromBar - 1, Sj.fromBar + 0.5), dt: FINE_MS }, { op: 'click', sel: '.pc-play', stop: true },
+        { op: 'run', ms: FINE_MS, dt: FINE_MS }, lyr, { op: 'run', ms: FINE_MS, dt: FINE_MS }, { op: 'waitSheet', max: 15000 }, { op: 'run', ms: FINE_MS, dt: FINE_MS }, { op: 'probe' });
+      walks.push({ kind: 'viewSwapStill', still: 'stop', si: sj, name: `Lyrics pressed after a stop · ${M.view.v.cv} -> lyrics · ${Sj.label} (section ${sj + 1} of ${ch.secs.length})`, stop: 'slower', guitar: hasFull, ops: halt, to: 'lyrics', span: 'none', metro: false, fresh: true });
     }
   }
   return walks;

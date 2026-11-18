@@ -389,9 +389,13 @@ async function pcSheetDraw(paperOrCol){
   const st = pcState && pcState.root === root ? pcState : null;
   /* Where the mark goes once the sheet is drawn. Playing: the chord being played. In a count-in (a section tap, then
      Lyrics pressed before the song came in; W23 R1-4): the first chord of the lap it counts in to, as pcStart's own
-     pcSheetStarted marks it, line on screen and all (until 2026-11-18 chord 0 for up to 2.5 s). */
+     pcSheetStarted marks it, line on screen and all (until 2026-11-18 chord 0 for up to 2.5 s). Stopped: the first
+     chord of the section the card shows (a stop on Chorus 2 in Tab, then Lyrics; W23 R2-3), so chord 0 on a card
+     just opened. */
   if(st && st.si < 0 && st.counting){ pcSheetStarted(st); return; }
-  const cur = st && st.si >= 0 ? map.tok[st.si][st.rep][st.seq - st.L.sections[st.si].seqOff] : 0;
+  const shown = root.querySelector('.pc-sec.cur');
+  const si = shown ? Math.max(0, Math.min(L.sections.length - 1, Number(shown.dataset.sec) || 0)) : 0;
+  const cur = st && st.si >= 0 ? map.tok[st.si][st.rep][st.seq - st.L.sections[st.si].seqOff] : Math.max(0, map.tok[si][0][0]);
   pcSheetMark(paper, cur, false);
 }
 function pcSheetMark(paper, idx, hit, beatSec){
