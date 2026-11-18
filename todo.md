@@ -13,12 +13,9 @@ they're ready"). Work still being built, reviewed or waiting on a push is NOT li
 or when the paste file exists.
 
 **Listen and look (a few minutes each, any class Chromebook or the Mac):**
-0. **Try one of the 7 private songs before first period (LIVE since 2026-11-17 after school):** signed in as a
-   student, open Smells Like Teen Spirit (ca-41) or one under Songs → More Play Along songs. It should say "Loading
-   the song…" once, then play; a second open plays at once. If one does not load, tell Claude: one revert undoes it.
-1. **Lyric sheets, LIVE 2026-11-17:** Sweet Child O' Mine (ca-45) and Watchtower (ca-38) are one long column, and a
-   new line is already still when its first chord plays. Look right? (The first line change after Play is an
-   instant jump, on purpose.)
+2. **Look 1 in class (LIVE 2026-11-17/18):** watch students on an open activity step (wide, named step buttons,
+   "Got it" at the bottom), the In class list, Songs, a lesson step with chords beside it, and the slim left menu.
+   Tell Claude anything they stumble on.
 
 **Decide (tell Claude; each is one sentence):**
 Decided 2026-11-17: old mic recordings that still hold a name are ignored for now; the sign-in load fix gets NO
@@ -28,15 +25,14 @@ second line after a student's first change.
 7. **On hold until the re-design look next week:** the design-values tidy (W15).
 
 **Only you can do:**
-10. **The practice copy's key:** `Claude outputs/practice-copy/JONATHAN-STEPS.md` (GitHub secret
-    `FIREBASE_PRACTICE_SA`). Until then the practice copy is not published.
-13. **A 30-minute mic test on one class Chromebook** with `mic-check.html` (does ChromeOS force its automatic volume
-    on?), and tell Claude what it shows.
+13. **A mic test on one class Chromebook (a couple of minutes):** in a quiet room open
+    https://jhoffmanteacher.github.io/guitar-class/mic-check.html, press Start the mic, then Ring one note and pluck
+    ONE open string once, let it ring 10 s, press Copy results and paste them to Claude (numbers only). It shows
+    whether ChromeOS turns the mic's volume up and down by itself.
 14. **Strum check takes from a Chromebook** (ca-46, its eight-bar step): one right, one with a wrong chord, one with
     an extra strum on the rest; then download takes and tell Claude.
 15. **Ask the principal about recording in class** (Ed Code 51512; Claude can draft the one page).
-16. ~~Be present for the `coach-core.js` split.~~ Done 2026-11-18 (`coach-recordings.js`).
-17. Optional: try 2 to 4 clip-on pickups; delete old `ci-try/*` and `win/*` branches on GitHub.
+17. Optional: try 2 to 4 clip-on pickups; delete old `ci-try/*` and `win/*` branches on GitHub (`win/w24` is merged).
 
 ## Closed: do not list or propose these again (Jonathan, 2026-11-17: "get rid of the 'leave them' on the list so we don't keep seeing them")
 
