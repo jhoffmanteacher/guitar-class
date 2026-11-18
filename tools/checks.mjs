@@ -12860,15 +12860,16 @@ function checkRailDefault(ctx) {
     want(sync('#search', null) === true, 'Search opened after Songs: the menu must stay as it was (slim)');
     want(sync('', null) === false && store.getItem('railCollapsed') === null, 'back on Modules: want the wide menu, and nothing saved');
     /* restoreRailCollapsed for real: the guess at load follows the same rule. */
-    for (const [hash, slim] of [['#search', false], ['#songs', true], ['', false]]) {
+    // The old aliases and a deep link too (review R4-4): each starts slim.
+    for (const [hash, slim] of [['#search', false], ['#songs', true], ['', false], ['#keep-practicing', true], ['#daily-review', true], ['#class-activities/ca-15', true]]) {
       set.clear(); ctx.location.hash = hash; run('restoreRailCollapsed()');
       want(set.has('rail-collapsed') === slim, `a load on '${hash}' with nothing saved: want the ${slim ? 'slim strip' : 'wide menu'}`);
     }
     set.clear(); run('railPressedChoice = null');
   } catch (e) { flag('the rail code threw — ' + e.message); }
   finally { doc.body = keepBody; doc.getElementById = keepGid; ctx.location.hash = keepHash; }
-  if (cases !== 15) flag(`ran ${cases} cases, pinned 15`);
-  if (!bad) ok(`1eu: railAutoSync run for real: no saved choice gives the slim strip off Modules and the wide menu on Modules and saves nothing; a saved '1' / '0' wins on both; the arrow saves, and holds when localStorage throws; the real syncExploreNav and restoreRailCollapsed: wide on Modules, slim on a page, #search changes nothing (${cases} cases)`);
+  if (cases !== 18) flag(`ran ${cases} cases, pinned 18`);
+  if (!bad) ok(`1eu: railAutoSync run for real: no saved choice gives the slim strip off Modules and the wide menu on Modules and saves nothing; a saved '1' / '0' wins on both; the arrow saves, and holds when localStorage throws; the real syncExploreNav and restoreRailCollapsed: wide on Modules, slim on a page, #search changes nothing; a load on an old alias or a deep link starts slim (${cases} cases)`);
 }
 /* 1et. A LESSON STEP WITH ITS CHORDS BESIDE IT (Look 1, Part 4, Jonathan,
    2026-11-17). buildLesson marks a step .step-2col exactly when it has chord
@@ -12886,7 +12887,7 @@ function checkRailDefault(ctx) {
    only). tools/smoke.mjs (lessonTwoColWalk) presses Mark done on one. */
 function checkLessonTwoCol(sets, ctx) {
   head('1et. Lesson: a step with chord diagrams or a figure and no tab is the two-column kind (One step view)');
-  let bad = 0, steps = 0, two = 0, dotted = 0, besideN = 0;
+  let bad = 0, steps = 0, two = 0, dotted = 0, besideN = 0, listN = 0;
   const flag = m => { err('1et: ' + m); problems++; bad++; };
   if (!ctx || !sets) { flag('cannot run — the 0b render context is unavailable'); return; }
   const buildSet = vm.runInContext('typeof buildSet === "function" ? buildSet : null', ctx);
@@ -12932,8 +12933,24 @@ function checkLessonTwoCol(sets, ctx) {
        got-it copy and before Mark done, and no longer in the text. */
     const keepMM = ctx.matchMedia, store = vm.runInContext('localStorage', ctx), keepView = store.getItem('stationView');
     ctx.matchMedia = q => ({ matches: /min-width:\s*1100px/.test(q), addEventListener() {}, addListener() {} });
-    store.setItem('stationView', 'focus');
+    /* And All steps view at 1100px (review R4-2): the dots stay right after the text's got-it line. */
     try {
+      store.setItem('stationView', 'list');
+      for (const lang of ['en', 'es']) {
+        vm.runInContext(`setLang(${JSON.stringify(lang)})`, ctx);
+        for (const w of sets) {
+          if (w.comingSoon) continue;
+          const html = String(buildSet(w) || '');
+          const lis = html.split(/(?=<li class="step[ "])/).slice(1).map(x => { const e = x.indexOf('</button></div></div></li>', x.indexOf('class="step-done-row"')); return e >= 0 ? x.slice(0, e + 26) : x; });
+          for (const li of lis) {
+            if (!/<div class="step-detail step-2col">/.test(li) || !/class="rep-dots[ "]/.test(li)) continue;
+            const where = `${w.id} ${lang} step ${(/data-key="([^"]+)"/.exec(li) || [])[1]} (1100px, All steps)`;
+            if (/<div class="step-done-row">(?:(?!<\/div><\/div><\/li>)[\s\S])*class="rep-dots[ "]/.test(li) || !/<span class="got-it"><span class="got-it-lab">[^<]*<\/span>(?:(?!<\/span>)[\s\S])*<\/span><div class="rep-dots[ "]/.test(li)) flag(`${where}: in All steps view the tap dots must stay right after the text's got-it line, not in the done row`);
+            else listN++;
+          }
+        }
+      }
+      store.setItem('stationView', 'focus');
       for (const lang of ['en', 'es']) {
         vm.runInContext(`setLang(${JSON.stringify(lang)})`, ctx);
         for (const w of sets) {
@@ -12958,7 +12975,7 @@ function checkLessonTwoCol(sets, ctx) {
   } catch (e) { flag('the page threw — ' + e.message); }
   finally { try { vm.runInContext('setLang("en")', ctx); } catch (e) { /* restored by the next check */ } }
   if (two < 180) flag(`only ${two} two-column steps rendered in EN + ES (102 per language on 2026-11-17): the rule stopped matching`);
-  if (dotted !== 64 || besideN !== dotted) flag(`two-column steps with tap dots: ${dotted} in the text, ${besideN} beside Mark done at 1100px (pinned 64 and 64, 32 per language on 2026-11-18)`);
+  if (dotted !== 64 || besideN !== dotted || listN !== dotted) flag(`two-column steps with tap dots: ${dotted} in the text, ${besideN} beside Mark done at 1100px in One step view, ${listN} after the text in All steps view at 1100px (pinned 64, 64 and 64, 32 per language on 2026-11-18)`);
   const rules = cssRuleMap(readFileSync(join(ROOT, 'styles.css'), 'utf8'));
   const m = '@media screen and (min-width:1100px)';
   const d = sel => { const x = rules.get(sel); return x && x.get(m); };
@@ -12968,7 +12985,7 @@ function checkLessonTwoCol(sets, ctx) {
   if (!row || row.get('position') !== 'sticky' || row.get('bottom') !== '-60px') flag(`.dp.focus .step-2col > .step-done-row must be position:sticky; bottom:-60px inside ${m} (Mark done pinned to the bottom of the screen)`);
   const plain = rules.get('.step-done-gotit'), pd = plain && plain.get('');
   if (!pd || pd.get('display') !== 'none') flag('.step-done-gotit must be display:none outside One step view (All steps and print read as before)');
-  if (!bad) ok(`1et: ${steps} lesson steps rendered (EN + ES), ${two} two-column: the mark matches "diagrams or a figure, no tab" both ways, diagrams drawn once, figures in the media column, the got-it copy exactly where the text has one; ${dotted} with tap dots, one set each, after the text's got-it line and (${besideN}) beside Mark done at 1100px in One step view; the two-column grid, the sticky Mark done row and the hidden copy read from styles.css`);
+  if (!bad) ok(`1et: ${steps} lesson steps rendered (EN + ES), ${two} two-column: the mark matches "diagrams or a figure, no tab" both ways, diagrams drawn once, figures in the media column, the got-it copy exactly where the text has one; ${dotted} with tap dots, one set each, after the text's got-it line and (${besideN}) beside Mark done at 1100px in One step view, (${listN}) still after it in All steps view at 1100px; the two-column grid, the sticky Mark done row and the hidden copy read from styles.css`);
 }
 /* 1es. THE CORE SONGS AS TILES (Look 1, Part 3, Jonathan, 2026-11-17). Each of
    the six Core songs is a tile with ONE main button: Play Along when

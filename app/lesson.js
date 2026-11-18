@@ -846,8 +846,16 @@ function stationViewIsFocus(){ return stationViewMode() === 'focus'; }
    "Look 1, Part 4" in styles.css. */
 const STEP_2COL_MQ = 'screen and (min-width:1100px)';
 let stepDotsPrinting = false;
+/* The same test as the CSS: site-fill.js multiplies the stylesheet's 1100px by
+   the big-screen fill, so the threshold here is 1100 × siteFill() too (review
+   R4-1: at 125% browser zoom on a 1920 display the CSS was one column while
+   the plain 1100px query still said wide). */
 function step2colWide(){
-  try{ return !stepDotsPrinting && typeof matchMedia === 'function' && matchMedia(STEP_2COL_MQ).matches; }
+  try{
+    if(stepDotsPrinting || typeof matchMedia !== 'function') return false;
+    const fill = typeof siteFill === 'function' ? (Number(siteFill()) || 1) : 1;
+    return matchMedia(fill === 1 ? STEP_2COL_MQ : `screen and (min-width:${Math.round(1100 * fill)}px)`).matches;
+  }
   catch(e){ return false; }
 }
 function stepDotsPlace(scope){
@@ -865,11 +873,10 @@ function stepDotsPlace(scope){
     } else if(dots !== near) got.after(dots);
   });
 }
-try{
-  const mq = matchMedia(STEP_2COL_MQ);
-  const onChange = () => stepDotsPlace();
-  if(mq.addEventListener) mq.addEventListener('change', onChange); else if(mq.addListener) mq.addListener(onChange);
-}catch(e){}
+/* Re-placed when the answer flips: a resize across the threshold, or a fill
+   change (site-fill.js sends a resize when the fill changes). */
+let stepDotsWideWas = null;
+window.addEventListener('resize', () => { const w = step2colWide(); if(w !== stepDotsWideWas){ stepDotsWideWas = w; stepDotsPlace(); } });
 window.addEventListener('beforeprint', () => { stepDotsPrinting = true; stepDotsPlace(); });
 window.addEventListener('afterprint', () => { stepDotsPrinting = false; stepDotsPlace(); });
 /* The view switch is a two-segment control (navigability work order
