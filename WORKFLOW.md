@@ -49,7 +49,7 @@ done since:**
    reads it, or he names it) and `update-reload-loop` (GitHub runs it when `sw.js` changes: read that run). To
    undo: revert the switch commit (files, paths and flags come back together). First class to meet it: 2026-11-18;
    each Chromebook downloads a song once ("Loading the song…").
-3. **The Chords / Tab switch: handed to Windows as W23** (`feat/card-views`, `464d4a2`: the WIP and the builder's
+3. **The Chords / Tab switch: ON MAIN (`c83bcf7d`, Windows, Reviewed; see W23 DONE for 5 questions)** (`feat/card-views`, `464d4a2`: the WIP and the builder's
    notes in `docs/wip/card-views-notes.md` on that branch).
 4. **For whoever edited ca-53 today (`d2a676c`):** GitHub's "smoke activities (English)" is red since then; the
    failing line, seen by a Mac builder: `[strum:ca-53 step 1 en] strum: chord names [], not ["A5","A5","A5","A5"]`:
@@ -453,6 +453,42 @@ and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fi
   reviewer's sentence on how to read a push that ADDS a part, and add it to `todo.md`'s `coach-core.js` split
   steps (it is already named there). It is NOT added to `checks.mjs` (it needs two commits). Opus at `high`
   (`xhigh` allowed for the reviewer); the simple runs may go to Sonnet (CLAUDE.md, "Sonnet for the simple parts").
+- **W23 DONE: ON MAIN, `c83bcf7d` (Windows, 2026-11-17 evening), `Review: Reviewed (site-reviewer-deep, 2 rounds)`.**
+  It went to review because a new part touches the `sw.js` lists, so the change is danger-zone.
+  - **What shipped:** a Chords / Tab / Lyrics switch on ca-33 (Sweet Child: Tab from ca-28, Lyrics from ca-45), ca-30
+    ("the cure": Tab from ca-24, Lyrics from ca-44) and ca-32 (Luna: Tab from ca-27). Each card has its own new part,
+    `app/cards-views.js`, and the check is labelled **1er**. The sections line up 12/12, 12/12, 10/10, 10/10 and
+    5/5. The Lyrics view uses main's new sheet behaviour.
+  - **Builder's proofs:**
+    - `playalong-loop` full: 26 cards, 500 walks, 0 mismatches. R17 is the mid-song switch, and its failures now set
+      the exit code: 14 walks, 46 probes, 0 problems.
+    - `slow-load`: 20 loads, 0 errors.
+    - Smoke `--only activities`: the switch pressed 11 times mid-song, then a reload, with 0 JavaScript errors.
+    - 1er break-it: 6 of 6.
+    - 33 screenshots at 1366×657, EN and ES, in the Windows scratchpad `w23\shots\`.
+  - **Lead's runs:** kill-switch 14 of 14. `update-reload-loop` 28 of 29: only busy-card fails, which is item 5 above
+    and the same as on main.
+  - **Round 1:** 1 MAJOR, fixed. A page with the new `cards.js` but without `cards-views.js` (an old page cut short,
+    or offline) threw on all 26 practice cards; the call is now behind `typeof`. Proof: 26 of 26 cards draw with the
+    guard, 0 of 26 without it. 1er now pins it, break-it shown.
+  - **Round 2:** 0 BLOCKER, 0 MAJOR. Its MINORs: GitHub now runs `playalong-loop` when `app/cards-views.js` or
+    `app/cards-loop.js` changes, and the guard pin was added.
+  - **Left as MINOR, for a later Fast change:**
+    - R1-4: press Lyrics during the count-in after a section tap, and the sheet's dot sits on chord 0 for up to
+      2.5 s. ca-45 does the same today. The 2-line fix in `pcSheetDraw` (`app/cards.js:907-909`) is in the Windows
+      scratchpad `w23-rv2\review.md`; it wants a `playalong-loop` run.
+    - R1-5: 1bf checks a view with the host's `chordGrid` still on.
+    - R2-3: stopped on Chorus 2 in Tab, a press to Lyrics shows "Intro · Lap 1 of 3" in the sheet's sticky line.
+  - **QUESTIONS FOR JONATHAN:**
+    - (1) Watchtower was left out, because it already has the Jimi / Neil switch. Design two switches on one card?
+    - (2) The switch does not check `caIsVisible`: a student who has ca-33 but not ca-45 or ca-28 still sees Lyrics
+      and Tab. Is that OK?
+    - (3) On a power-chord card, "Tab" is the roots tab (one pluck per bar), not the power chords written as tab. Is
+      that OK?
+    - (4) After Lyrics → Chords mid-song the page stays scrolled down, with the switch row above the screen. Leave
+      it, or scroll back to the card's top?
+    - (5) A new part's two `sw.js` list lines made this an Always-Reviewed change. Should list-only lines ship Fast
+      from now on?
 - **W23. Finish the Chords / Tab switch (Jonathan, 2026-11-17: "chords/tab switch"; the Mac's builder stopped at a
   pause, about two thirds done). After W22. Fast when proved.** Branch `origin/feat/card-views` (`464d4a2`): read
   `docs/wip/card-views-notes.md` first ("WHERE I STOPPED" gives the next command), and DELETE that file in your
