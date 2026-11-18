@@ -1736,6 +1736,9 @@ window.addEventListener('resize', hideChordPopup);
 function wrapAllChordLinks(){
   /* Step text + per-step hints (single line and bulleted) */
   document.querySelectorAll('.dp .step .st-text').forEach(wrapChordLinksIn);
+  /* The got-it copy beside Mark done on a two-column step (Look 1, Part 4):
+     its chord names are links like the text's own line it copies. */
+  document.querySelectorAll('.dp .step .step-done-gotit').forEach(wrapChordLinksIn);
   document.querySelectorAll('.dp .step .sh').forEach(wrapChordLinksIn);
   document.querySelectorAll('.dp .step .sh-list li').forEach(wrapChordLinksIn);
   /* Step-response prompts (the question text above MC/short-answer inputs) */
