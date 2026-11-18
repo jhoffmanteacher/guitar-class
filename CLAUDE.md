@@ -91,7 +91,9 @@ and `node tools/save-loop.mjs`); write `config/class` except through `teacherWri
 re-level "the cure" (1do); delete what is switched off (Daily 5, Take It to a Song sections; 1do); resurrect the deleted
 student tour (1do). A refusal is never fixed by loosening the check; a frozen-module fix goes to skill `summer-reset`.
 
-**Keep the Mac's load "just right"** (Jonathan, 2026-11-16; the Mac has 8 cores, a low-power i5, 16 GB). Run
+**Keep the Mac's load "just right"** (Jonathan, 2026-11-16; the Mac has 8 cores, a low-power i5, 16 GB). **The Mac
+only** (Jonathan, 2026-11-18: "machine load only matters on the mac"): in a cloud session or on Windows, skip `uptime`,
+these limits and the load line in the report. On the Mac, run
 `uptime` and read the 1-minute load BEFORE each of these: spawning an agent, starting a browser run, starting a full
 `checks.mjs`, a proof loop or a golden snapshot. Then:
 - **under 4** and work is queued → start the next job; do not leave the Mac idle.
@@ -107,7 +109,7 @@ student tour (1do). A refusal is never fixed by loosening the check; a frozen-mo
 - **On the Mac at once:** the lead, at most 2 local agents, at most 1 headless-Chrome run. A 3rd local agent only
   when the load is under 4 and it is Node-only. Each agent's brief says: one job at a time, no sub-agents, and wait
   while `uptime` shows over 8 (10 minutes at most, then go on and say so).
-- Every report that ran agents or long jobs ends with one line: the load when it started and the highest you saw.
+- On the Mac, every report that ran agents or long jobs ends with one line: the load when it started and the highest you saw.
 
 **Habits that catch the expensive bugs:**
 - Grep before you edit — the same bug lives in sibling copies and in comments
