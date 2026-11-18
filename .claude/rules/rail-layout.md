@@ -55,7 +55,9 @@ site-fill.js multiplies their thresholds by the fill. The teacher console
     "Canciones"), every button 44px or taller. **With nothing saved**,
     `railAutoSync()` (called by `syncExploreNav()`) makes it slim on In class,
     Songs, Games and My progress and wide on Modules, and never writes
-    `railCollapsed`; a saved '1' or '0' (the arrow) wins on every page
+    `railCollapsed`; a hash that is no page (`#search`, a panel over the
+    page under it; `railHashMode()` null) leaves it as it is; a saved '1' or
+    '0' (the arrow) wins on every page
     (checks.mjs 1eu, smoke `railDefaultWalk`). Until 2026-11-17 it was a
     62px icon strip, defaulting to the wide menu everywhere.
   - They never both apply: the collapse button is `display:none` below the

@@ -12803,8 +12803,11 @@ function checkRosterSkipsTrainerStub() {
    Modules, and that automatic state is never written; a saved '1' or '0'
    wins on every page; pressing the arrow saves. Runs the REAL
    railAutoSync / setRailCollapsed / toggleRailCollapsed in the 0b context
-   with a stub body and storage, and checks syncExploreNav still hands it
-   "Modules = no page open and no explore hash". tools/smoke.mjs
+   with a stub body and storage, then the REAL syncExploreNav and
+   restoreRailCollapsed over a stub location: Modules = no page open and an
+   empty hash, a page's hash is slim, and #search (a panel over the page
+   under it) changes nothing, on Modules or off it (review round 3, R3-1:
+   Search on Modules folded the module and set picker away). tools/smoke.mjs
    (railDefaultWalk) clicks the arrow and reloads in a real browser. */
 function checkRailDefault(ctx) {
   head('1eu. Left menu: slim off Modules, wide on Modules, for a student with no saved choice; a saved choice wins');
@@ -12812,8 +12815,8 @@ function checkRailDefault(ctx) {
   const flag = m => { err('1eu: ' + m); problems++; bad++; };
   if (!ctx) { flag('cannot run — the 0b render context is unavailable'); return; }
   const run = x => vm.runInContext(x, ctx);
-  for (const fn of ['railAutoSync', 'setRailCollapsed', 'toggleRailCollapsed', 'syncExploreNav']) if (run(`typeof ${fn}`) !== 'function') { flag(`${fn}() not found (renamed? update 1eu with it)`); return; }
-  const doc = ctx.document, keepBody = doc.body, keepGid = doc.getElementById;
+  for (const fn of ['railAutoSync', 'setRailCollapsed', 'toggleRailCollapsed', 'syncExploreNav', 'restoreRailCollapsed']) if (run(`typeof ${fn}`) !== 'function') { flag(`${fn}() not found (renamed? update 1eu with it)`); return; }
+  const doc = ctx.document, keepBody = doc.body, keepGid = doc.getElementById, keepHash = ctx.location.hash;
   const set = new Set();
   const body = { classList: { contains: c => set.has(c), toggle: (c, on) => { const v = on === undefined ? !set.has(c) : !!on; v ? set.add(c) : set.delete(c); return v; }, add: c => set.add(c), remove: c => set.delete(c) }, style: { setProperty() {} } };
   try {
@@ -12839,13 +12842,26 @@ function checkRailDefault(ctx) {
     run('toggleRailCollapsed()'); const c = state();
     want(c.slim && c.saved === '1', `the arrow must save the student's choice: got ${JSON.stringify(c)}`);
     store.removeItem('railCollapsed'); set.clear();
+    /* syncExploreNav for real: every screen hidden except `open` (none = Modules). */
+    let open = null;
+    doc.getElementById = id => { if (id === 'rail-collapse-btn') return null; const e = keepGid(id); e.hasAttribute = a => a === 'hidden' && id !== open; return e; };
+    const sync = (hash, screen) => { ctx.location.hash = hash; open = screen; run('syncExploreNav()'); return set.has('rail-collapsed'); };
+    want(sync('', null) === false, 'syncExploreNav on Modules (no page, empty hash): want the wide menu');
+    want(sync('#search', null) === false, 'Search opened on Modules: the menu must stay wide (#search is no page)');
+    want(sync('', 'songs-screen') === true, 'an empty hash while a page is still open is not Modules: want the slim strip');
+    want(sync('#songs', 'songs-screen') === true, 'syncExploreNav on Songs: want the slim strip');
+    want(sync('#search', null) === true, 'Search opened after Songs: the menu must stay as it was (slim)');
+    want(sync('', null) === false && store.getItem('railCollapsed') === null, 'back on Modules: want the wide menu, and nothing saved');
+    /* restoreRailCollapsed for real: the guess at load follows the same rule. */
+    for (const [hash, slim] of [['#search', false], ['#songs', true], ['', false]]) {
+      set.clear(); ctx.location.hash = hash; run('restoreRailCollapsed()');
+      want(set.has('rail-collapsed') === slim, `a load on '${hash}' with nothing saved: want the ${slim ? 'slim strip' : 'wide menu'}`);
+    }
+    set.clear();
   } catch (e) { flag('the rail code threw — ' + e.message); }
-  finally { doc.body = keepBody; doc.getElementById = keepGid; }
-  const src = run('syncExploreNav.toString()');
-  cases++;
-  if (!/railAutoSync\(!open && exploreHashBase\(location\.hash\) === ''\)/.test(src)) flag("syncExploreNav() must call railAutoSync(!open && exploreHashBase(location.hash) === '') — Modules is no page open and no explore hash");
-  if (cases !== 6) flag(`ran ${cases} cases, pinned 6`);
-  if (!bad) ok(`1eu: railAutoSync run for real: no saved choice gives the slim strip off Modules and the wide menu on Modules and saves nothing; a saved '1' / '0' wins on both; the arrow saves; syncExploreNav decides Modules by "no page and no explore hash" (${cases} cases)`);
+  finally { doc.body = keepBody; doc.getElementById = keepGid; ctx.location.hash = keepHash; }
+  if (cases !== 14) flag(`ran ${cases} cases, pinned 14`);
+  if (!bad) ok(`1eu: railAutoSync run for real: no saved choice gives the slim strip off Modules and the wide menu on Modules and saves nothing; a saved '1' / '0' wins on both; the arrow saves; the real syncExploreNav and restoreRailCollapsed: wide on Modules, slim on a page, #search changes nothing (${cases} cases)`);
 }
 /* 1et. A LESSON STEP WITH ITS CHORDS BESIDE IT (Look 1, Part 4, Jonathan,
    2026-11-17). buildLesson marks a step .step-2col exactly when it has chord

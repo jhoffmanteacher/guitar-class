@@ -1056,8 +1056,10 @@ function syncExploreNav(){
      app/audio-ui.js; Look 1, Part 5). Modules = no page open and no explore
      hash: routeExploreHash() closes the old page before opening the new one,
      and the hash is already the destination, so going In class → Songs
-     never passes through the wide menu. */
-  if(typeof railAutoSync === 'function') railAutoSync(!open && exploreHashBase(location.hash) === '');
+     never passes through the wide menu. A hash that is not a page
+     (railHashMode() null: #search, a foreign hash) leaves the menu as it is. */
+  const railMode = railHashMode(exploreHashBase(location.hash));
+  if(railMode && typeof railAutoSync === 'function') railAutoSync(!open && railMode === 'wide');
   const activeId = open ? open.btn : 'practice-nav-btn';
   [...EXPLORE_PAGES.map(p => p.btn), 'practice-nav-btn'].forEach(id => {
     const b = document.getElementById(id);
@@ -1136,6 +1138,17 @@ const EXPLORE_HASHES = ['', '#games', '#songs', '#keep-practicing', '#daily-revi
 function exploreHashBase(h){
   const i = (h || '').indexOf('/');
   return i === -1 ? (h || '') : h.slice(0, i);
+}
+/* Which menu a hash asks for (railAutoSync, Look 1, Part 5): 'wide' on
+   Modules (''), 'slim' on a page in EXPLORE_PAGES (or an old alias that
+   redirects to My progress), null for anything else. #search is a panel over
+   the page under it and a foreign hash (#main-content) is no page change, so
+   null means "leave the menu as it is": opening Search on Modules used to
+   fold the module and set picker away. */
+function railHashMode(base){
+  if(base === '') return 'wide';
+  if(base === '#keep-practicing' || base === '#daily-review') return 'slim';
+  return EXPLORE_PAGES.some(p => p.hash === base) ? 'slim' : null;
 }
 function exploreHashTail(h){
   const i = (h || '').indexOf('/');

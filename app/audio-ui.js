@@ -1325,16 +1325,16 @@ function railAutoSync(onModules){
   const want = !onModules;
   if(railIsCollapsed() !== want) setRailCollapsed(want, false);
 }
-(function restoreRailCollapsed(){
+/* Named and called once (not an IIFE) so checks.mjs 1eu can run it again. */
+function restoreRailCollapsed(){
   const saved = railSavedChoice();
   if(saved === '1') setRailCollapsed(true);
   /* No saved choice: guess from the address until the first page shows
-     (syncExploreNav then decides): an explore page's hash means slim. */
-  else if(saved === null){
-    const h = (location.hash || '').replace(/^#/, '').split('/')[0];
-    if(h && h !== 'modules') setRailCollapsed(true, false);
-  }
-})();
+     (syncExploreNav then decides): a page's hash means slim; #search or a
+     foreign hash leaves the wide menu, the same rule (railHashMode). */
+  else if(saved === null && railHashMode(exploreHashBase(location.hash)) === 'slim') setRailCollapsed(true, false);
+}
+restoreRailCollapsed();
 // Picking a station or an Explore item shows the main content — close the
 // drawer so students actually see it instead of the nav still covering it.
 document.getElementById('nav-rail')?.addEventListener('click', e => {
