@@ -6,6 +6,19 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-18 — Chords / Tab / Lyrics: Watchtower, power-chord tab, fixes
+
+- **All Along the Watchtower's whole-song power-chord card has both switches.** Pick the recording (Jimi Hendrix or
+  Neil Young) and how to show the song: Chords, Tab, or Lyrics (Lyrics with the Jimi Hendrix recording). Changing the
+  recording keeps your view when that recording has it, otherwise it goes back to Chords.
+- **On the whole-song power-chord cards (Sweet Child O' Mine, "the cure", Luna), Tab shows the power chords you play,
+  written as tab,** instead of the one-note-per-bar roots.
+- **After you switch views mid-song, the page scrolls back to the top of the card,** so the switch and the part that
+  is playing are on screen.
+- **Lyrics fixes:** pressed during the count-in, the dot sits on the part's first chord (not the song's first);
+  stopped on Chorus 2 in Tab, a press to Lyrics now names Chorus 2 instead of the Intro.
+
+
 ## 2026-11-18 — Whole activity titles on In class
 
 - **Activity titles on the In class page show in full.** Today's cards use a smaller title that wraps to a second (or third) line instead of ending in "…", and the Unfinished list wraps to two lines.
