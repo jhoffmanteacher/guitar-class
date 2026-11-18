@@ -25,10 +25,9 @@ second line after a student's first change.
 7. **On hold until the re-design look next week:** the design-values tidy (W15).
 
 **Only you can do:**
-13. **A mic test on one class Chromebook (a couple of minutes):** in a quiet room open
-    https://jhoffmanteacher.github.io/guitar-class/mic-check.html, press Start the mic, then Ring one note and pluck
-    ONE open string once, let it ring 10 s, press Copy results and paste them to Claude (numbers only). It shows
-    whether ChromeOS turns the mic's volume up and down by itself.
+10. **Practice copy, one permission (2 minutes):** the site is live at https://guitar-class-practice.web.app but its
+    database rules did not publish. Steps 8-11 in `Claude outputs/practice-copy/JONATHAN-STEPS.md` (Google Cloud IAM,
+    the firebase-adminsdk row, add the role Service Usage Consumer), then tell Claude to re-run the newest Practice copy run.
 14. **Strum check takes from a Chromebook** (ca-46, its eight-bar step): one right, one with a wrong chord, one with
     an extra strum on the rest; then download takes and tell Claude.
 15. **Ask the principal about recording in class** (Ed Code 51512; Claude can draft the one page).
