@@ -920,7 +920,14 @@ function pcPaint(st, loc){
   if(loc.si !== st.si) pcShowSection(root, st.L, loc.si);
   const cell = root.querySelector(`.pc-tab .pc-page:not([hidden]) ${S.grid ? `[data-beat="${loc.beat}"]` : `[data-seq="${loc.seq}"]`}`);
   const row = cell && cell.closest('.tab-grid');
-  if(row && row !== st.row){ st.row = row; pcFollow(row, false); }
+  if(row && row !== st.row){
+    st.row = row;
+    /* The first follow after a view press (st.keepTop, caCardViewReveal): the switch row stays on screen if the row
+       being played is on screen; only the look-ahead to the next row gives way. Every later row follows as ever. */
+    const keep = st.keepTop && st.keepTop.isConnected && row.getBoundingClientRect().bottom <= window.innerHeight ? st.keepTop : null;
+    st.keepTop = null;
+    pcFollow(row, false, keep);
+  }
   const rep = root.querySelector(`.pc-page[data-page="${loc.si}"] .pc-rep`);
   if(rep && S.reps > 1){
     rep.hidden = false;

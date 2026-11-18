@@ -400,6 +400,18 @@ const PAGE_SRC = String.raw`(() => {
   window.requestAnimationFrame = function(cb){ if (!V.on) return real.raf(cb); const id = VID + V.seq++; V.rafs.push({ id: id, cb: cb }); return id; };
   window.cancelAnimationFrame = function(id){ if (id >= VID){ V.rafs = V.rafs.filter(function(x){ return x.id !== id; }); return; } return real.caf(id); };
   performance.now = function(){ return V.on ? V.t : real.now(); };
+  /* SCROLLS ARE INSTANT in the fake world (R17, 2026-11-18). A walk never yields to the browser between its steps, so a
+     smooth scroll the page starts (pcFollow) cannot move before the next probe on a Mac, while on GitHub's Linux runner
+     the same walk saw it land: the two machines judged different pages. With every scroll made instant (behavior
+     'instant' while V.on), the probe sees where the page has put itself on every machine. The page's own arithmetic
+     (pcFollowScroll returns the distance; the sheet's aim) does not depend on the behaviour. */
+  const instant = function(o){ return o && typeof o === 'object' ? Object.assign({}, o, { behavior: 'instant' }) : o; };
+  [Element.prototype, window].forEach(function(t){ ['scrollBy', 'scrollTo', 'scroll'].forEach(function(k){
+    const f = t[k]; if (typeof f !== 'function') return;
+    t[k] = function(a){ return V.on && arguments.length === 1 ? f.call(this, instant(a)) : f.apply(this, arguments); };
+  }); });
+  const sIV = Element.prototype.scrollIntoView;
+  Element.prototype.scrollIntoView = function(a){ return V.on && a && typeof a === 'object' ? sIV.call(this, instant(a)) : sIV.apply(this, arguments); };
 
   /* An <audio> element with no sound. It loads V.loadMs after it is given a file, seeks at once, and moves
      currentTime by playbackRate while it plays, times its own small fixed skew: element n of a walk runs SKEW[n % 4]
@@ -2339,7 +2351,7 @@ async function main() {
         if (W.kind === 'viewSwap' || W.kind === 'viewSwapStill') {
           const JS = W.kind === 'viewSwap' ? judgeSwap(M, W, res) : judgeSwapStill(M, W, res);
           SWAPV.walks++; SWAPV.probes += JS.stats.probes;
-          if (JS.issues.length) { SWAPV.failed++; console.log(`✗ ${label} · ${W.name}: ${JS.issues.length} problem(s)`); JS.issues.slice(0, VERBOSE ? 400 : 8).forEach(p => console.log('    ' + p)); }
+          if (JS.issues.length) { SWAPV.failed++; console.log(`✗ ${label} · ${W.name}: ${JS.issues.length} problem(s): ${JS.issues[0]}`);   /* the first on the ✗ line: GitHub's annotation keeps only ✗ lines (tools/ci/run-and-annotate.mjs) */ JS.issues.slice(0, VERBOSE ? 400 : 8).forEach(p => console.log('    ' + p)); }
           else if (W.kind === 'viewSwapStill') console.log(`✓ ${label} · ${W.name}: the sheet's mark on the section's first chord and its sticky line naming it${W.still === 'count' ? ', in the count-in' : ', the song stopped'}`);
           else console.log(`✓ ${label} · ${W.name}: ${JS.stats.probes} probes, each lit on the place sounding; the song carried on through the press (same element, file and clock), same section, lap and beat in both views`);
           out.walks.push({ card: a.id, view: viewName(a, x.v), name: W.name, issues: JS.issues, nIssues: JS.issues.length });

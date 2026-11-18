@@ -138,6 +138,10 @@ function caSetCardView(id, name, btn){
    the sheet: it brings the line being played on screen itself (pcSheetStarted / pcSheetFollow). */
 function caCardViewReveal(root){
   if(!root || !root.isConnected || typeof root.scrollIntoView !== 'function') return;
+  /* The playing card's next frame follows its row (pcPaint -> pcFollow), which also brings the NEXT row on screen and
+     on a short screen scrolled the switch row back under the bar at once (GitHub's runner, 2026-11-18). Its first
+     follow after this press keeps the switch row on screen while the row being played is on screen too (st.keepTop). */
+  if(pcState && pcState.root === root) pcState.keepTop = root.querySelector(':scope > .ca-view-switch');
   const screen = root.closest('.ca-screen');
   const bar = screen ? screen.querySelector('.page-topbar') : null;
   const sticky = bar && bar.offsetHeight && getComputedStyle(bar).position === 'sticky';
