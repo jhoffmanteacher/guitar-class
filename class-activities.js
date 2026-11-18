@@ -7565,14 +7565,20 @@ window.CLASS_ACTIVITIES = [
    as tab or as the lyric sheet, with a switch. The data is the song's OTHER
    cards' own, by reference (the same arrays, not copies): nothing is written
    here that is not already a card, and those cards stay where they are.
+   - Tab, on every card here: the card's OWN power chords written as tab, the
+     two-note shapes it plays, note by note at their own beats (renderTabSystem
+     draws a chord note as its frets). The view takes no sections: it is the
+     card's own, so it cannot drift from the chords (Jonathan, 2026-11-18, W23
+     question 3; until then Tab was the roots card's tab, one pluck per bar:
+     ca-28, ca-24, ca-27).
    - ca-33 (Sweet Child O' Mine in power chords; its own view is Chords):
-     Tab = ca-28's tab (the roots, one pluck per bar), Lyrics = ca-45's sheet
-     (ca-45 already plays ca-33's sections, above, so the lyrics view keeps the
-     card's own sections and the chord count 1bf2 holds).
-   - ca-30 ("the cure" in power chords; Chords): Tab = ca-24's tab, Lyrics =
-     ca-44's sheet (ca-44 plays ca-30's sections, above, as ca-45 does ca-33's).
-   - ca-32 ("Luna" in power chords; Chords): Tab = ca-27's tab.
-   Every pair lines up section for section (label, fromBar, bars, reps; 1er).
+     Tab, and Lyrics = ca-45's sheet (ca-45 already plays ca-33's sections,
+     above, so the lyrics view keeps the card's own sections and the chord
+     count 1bf2 holds).
+   - ca-30 ("the cure" in power chords; Chords): Tab, and Lyrics = ca-44's
+     sheet (ca-44 plays ca-30's sections, above, as ca-45 does ca-33's).
+   - ca-32 ("Luna" in power chords; Chords): Tab.
+   Every view lines up section for section (label, fromBar, bars, reps; 1er).
    Not All Along the Watchtower: its cards have the Jimi / Neil recording
    switch, and two switches on one card are not designed (1er refuses it). */
 (function(){
@@ -7580,10 +7586,11 @@ window.CLASS_ACTIVITIES = [
   const find = id => list.find(a => a.id === id);
   // The named fields of another card, the same values (its texts are checked where that card is written).
   const take = (c, fields) => { const o = {}; fields.forEach(f => { if(c[f] !== undefined) o[f] = c[f]; }); return o; };
-  [['ca-33', 'ca-28', 'ca-45'], ['ca-30', 'ca-24', 'ca-44'], ['ca-32', 'ca-27', null]].forEach(([h, t, l]) => {
-    const host = find(h), tab = find(t), sheet = l && find(l);
-    if(!host || !tab || (l && !sheet)) return;
-    host.card.otherViews = { tab: take(tab.card, ['caption', 'caption_es', 'sections']) };
+  [['ca-33', 'ca-45'], ['ca-30', 'ca-44'], ['ca-32', null]].forEach(([h, l]) => {
+    const host = find(h), sheet = l && find(l);
+    if(!host || (l && !sheet)) return;
+    // Tab: the card's own sections (none given here) drawn note by note, its own caption: its power chords as tab.
+    host.card.otherViews = { tab: take(host.card, ['caption', 'caption_es']) };
     if(sheet) host.card.otherViews.lyrics = take(sheet.card, ['caption', 'caption_es', 'sheet', 'sheetChords', 'sheetColumns', 'sheetNamedAgain']);
   });
 })();

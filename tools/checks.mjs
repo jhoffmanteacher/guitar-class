@@ -12618,10 +12618,13 @@ function checkRecordingVersions(ctx) {
      writes one localStorage key, and its press neither stops the song nor redraws the page (no stopCardAudio, pcStop,
      renderClassActivities). What a press does in a browser mid-song is tools/playalong-loop.mjs R17 and
      tools/smoke.mjs (click, reload, remembered).
+   - a power-chord card's Tab (tabOwn) is the card's own chords written as tab: no sections of its own, the card's
+     notes, every one a chord shape, every fret drawn (Jonathan, 2026-11-18; it was the roots card's tab).
    Pinned: three cards, each Chords by default (ca-30 and ca-33 then Tab and Lyrics, ca-32 then Tab). */
 function checkCardViews(ctx, i18nTable) {
   head('1er. Card views: one practice card as chords, tab or lyrics, with a switch');
-  const EXPECT = { 'ca-30': { own: 'chords', list: ['chords', 'tab', 'lyrics'] }, 'ca-32': { own: 'chords', list: ['chords', 'tab'] }, 'ca-33': { own: 'chords', list: ['chords', 'tab', 'lyrics'] } };
+  // tabOwn: the Tab view is the card's own power chords written as tab (Jonathan, 2026-11-18, W23 question 3): no sections of its own, every note a chord shape, every fret drawn.
+  const EXPECT = { 'ca-30': { own: 'chords', list: ['chords', 'tab', 'lyrics'], tabOwn: true }, 'ca-32': { own: 'chords', list: ['chords', 'tab'], tabOwn: true }, 'ca-33': { own: 'chords', list: ['chords', 'tab', 'lyrics'], tabOwn: true } };
   const VIEW_KEYS = { tab: ['counts'], chords: ['everyStrum', 'restWord'], lyrics: ['sheet', 'sheetChords', 'sheetColumns', 'sheetNamedAgain'] };
   const COMMON = ['caption', 'caption_es', 'sections'];
   const LABEL = { chords: 'ca.viewChords', tab: 'ca.viewTab', lyrics: 'ca.viewLyrics' };
@@ -12656,6 +12659,30 @@ function checkCardViews(ctx, i18nTable) {
       if (!Array.isArray(secs) || secs.length !== c.sections.length) { flag(`${vw}: ${Array.isArray(secs) ? secs.length : 'no'} sections, the card has ${c.sections.length} — a view has the card's sections, section for section`); continue; }
       secs.forEach((s, si) => { if (sig(s) !== sig(c.sections[si])) flag(`${vw}: section ${si + 1} is ${sig(s)}, the card's is ${sig(c.sections[si])} (label, fromBar, bars, reps) — a press would move the song to another place`); });
     }
+  }
+  /* A power-chord card's Tab (tabOwn): the card's own chords as tab, so it cannot drift from them: the view gives no
+     sections, the view as drawn plays the card's own notes, every one a chord shape (frets), and the tab draws every
+     fret of every shape (renderTabSystem, one .tab-fret per string a chord sounds). */
+  let tabFrets = 0;
+  for (const a of withViews) {
+    const exp = EXPECT[a.id];
+    if (!exp || !exp.tabOwn) continue;
+    const ov = a.card.otherViews && a.card.otherViews.tab;
+    if (!ov) { flag(`${a.id}: pinned with its power chords as Tab, but it has no Tab view`); continue; }
+    if ('sections' in ov) flag(`${a.id} · otherViews.tab: has sections of its own — the Tab view is the card's own power chords written as tab, so it cannot drift from them`);
+    ctx.__eqCard = a;
+    try {
+      const r = run(`(() => { caCardViewModes[window.__eqCard.id] = 'tab'; try { const v = caView(window.__eqCard); const html = String(caCardBodyHtml(window.__eqCard));
+        const same = JSON.stringify(v.card.sections.map(s => s.notes)) === JSON.stringify(window.__eqCard.card.sections.map(s => s.notes));
+        const notes = v.card.sections.flatMap(s => s.notes).filter(n => !n.rest);
+        return { same, single: notes.filter(n => !Array.isArray(n.frets)).length, want: notes.reduce((x, n) => x + (Array.isArray(n.frets) ? n.frets.length : 1), 0),
+          drawn: (html.match(/<span class="tab-fret">/g) || []).length, grid: v.card.chordGrid === true }; } finally { delete caCardViewModes[window.__eqCard.id]; } })()`);
+      if (!r.same) flag(`${a.id} [tab]: the Tab view does not play the card's own notes — it must be the card's power chords, not another card's tab`);
+      if (r.single) flag(`${a.id} [tab]: ${r.single} single notes in the Tab view — on a power-chord card every note is a chord shape`);
+      if (r.grid) flag(`${a.id} [tab]: drawn as a chord grid, not a tab`);
+      if (r.drawn !== r.want) flag(`${a.id} [tab]: the tab draws ${r.drawn} frets, the card's chords sound ${r.want} strings — every shape must be written out`);
+      tabFrets += r.drawn;
+    } catch (e) { flag(`${a.id} [tab]: rendering threw ${e.message}`); }
   }
   // Every 16th of the song, located in every view: same section, lap and beat as the card's own view.
   for (const a of withViews) {
@@ -12786,7 +12813,7 @@ function checkCardViews(ctx, i18nTable) {
       if (bare.length) flag(`${f}: ${bare.length} st.sheet flag(s) taken from a card without typeof pcSheetHtml: ${bare.join(' | ')} (W24 R1-1)`);
     }
   }
-  if (!bad) ok(`1er: ${withViews.length} card${withViews.length === 1 ? "" : "s"} with views (${withViews.map(a => a.id + ': ' + EXPECT[a.id].list.join(' / ')).join('; ')}), shape and sections line up; ${located} sixteenths located at the same section, lap and beat in every view; ${renders} renders (nothing / junk / each view stored, EN + ES, student + console): one switch, one pressed button, the view drawn, default the card's own; ${swOff} renders of the other cards draw no switch; nothing saved, the song not stopped`);
+  if (!bad) ok(`1er: ${withViews.length} card${withViews.length === 1 ? "" : "s"} with views (${withViews.map(a => a.id + ': ' + EXPECT[a.id].list.join(' / ')).join('; ')}), shape and sections line up; Tab on ${Object.keys(EXPECT).filter(k => EXPECT[k].tabOwn).length} power-chord cards is the card's own chords as tab (${tabFrets} frets drawn); ${located} sixteenths located at the same section, lap and beat in every view; ${renders} renders (nothing / junk / each view stored, EN + ES, student + console): one switch, one pressed button, the view drawn, default the card's own; ${swOff} renders of the other cards draw no switch; nothing saved, the song not stopped`);
 }
 
 /* 1cf. THE CLASS ROSTER SKIPS THE TEACHER'S OWN HEAR IT FIRST STUB (Friday
