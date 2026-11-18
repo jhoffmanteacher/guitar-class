@@ -610,12 +610,28 @@ A Jimi Hendrix / Neil Young switch at the top of the card, Jimi the default.
   `localStorage.caRecordingModes`, for every card of the song),
   `recordingStart`, `recordingVersions: { neil: { label, label_es, track, card } }`.
   The IIFE at the end of class-activities.js builds the Neil cards.
-- Not combinable with key / chord / bass versions. A version's track decides
+- Not combinable with key / chord / bass versions. It DOES combine with the
+  Chords / Tab / Lyrics switch (Jonathan, 2026-11-18, W23 question 1; ca-29):
+  each recording has its own views over its own sections (the card's
+  `otherViews` are Jimi's, `recordingVersions.neil.card.otherViews` Neil's,
+  never inherited; RECORDINGS in `app/cards-views.js`). Jimi: Chords, Tab,
+  Lyrics (ca-38); Neil: Chords, Tab. A recording press keeps a view the new
+  recording has, else the card's own (`caCardViewsFollowRecording`). Both rows
+  sit on one line, each named ("Recording", "Show the song as"). checks.mjs
+  1er / 1cc. A version's track decides
   whether the Guitar switch shows (`snippetHasFull`). ca-38 has none (its PDF
   holds Jimi's 224 chord names). The Song Journey page has no switch yet.
 - Guards: checks.mjs **1cc** (shape, render of every recording, pinned 3 cards /
   1 group) and **1bf** (every version runs through the card rules as a virtual
   card). `tools/smoke.mjs` clicks the switch, reloads and flips back.
+
+**Card views — `card.otherViews`** (Chords / Tab / Lyrics switch, 2026-11-17;
+ca-29, ca-30, ca-32, ca-33; `app/cards-views.js`, checks.mjs 1er, playalong-loop
+R17). The views of one card, swapped in place while the song plays. On these
+power-chord cards Tab is the card's OWN power chords written as tab (no
+sections of its own, so it cannot drift; Jonathan, 2026-11-18), Lyrics a sheet
+card's PDF over the card's sections. After a press into Chords or Tab the
+card's top comes back on screen.
 
 **A card note may be a chord** (the power-chord whole songs ca-29–ca-33):
 `{ frets: [[string, fret], ...], note: 'A5', midi: [...] }`, the shape Module

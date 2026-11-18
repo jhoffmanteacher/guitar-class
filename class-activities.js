@@ -7578,15 +7578,20 @@ window.CLASS_ACTIVITIES = [
    - ca-30 ("the cure" in power chords; Chords): Tab, and Lyrics = ca-44's
      sheet (ca-44 plays ca-30's sections, above, as ca-45 does ca-33's).
    - ca-32 ("Luna" in power chords; Chords): Tab.
-   Every view lines up section for section (label, fromBar, bars, reps; 1er).
-   Not All Along the Watchtower: its cards have the Jimi / Neil recording
-   switch, and two switches on one card are not designed (1er refuses it). */
+   - ca-29 (All Along the Watchtower in power chords; Chords), on Jimi
+     Hendrix's recording: Tab, and Lyrics = ca-38's sheet (ca-38 plays ca-29's
+     sections, above). It also has the Jimi / Neil Young recording switch, so
+     each recording has its own views (Jonathan, 2026-11-18, W23 question 1;
+     RECORDINGS in app/cards-views.js): Neil's are set where his card is
+     built, below (Tab, his own power chords; no lyric sheet follows his
+     form). ca-26 and ca-40 have no views.
+   Every view lines up section for section (label, fromBar, bars, reps; 1er). */
 (function(){
   const list = window.CLASS_ACTIVITIES;
   const find = id => list.find(a => a.id === id);
   // The named fields of another card, the same values (its texts are checked where that card is written).
   const take = (c, fields) => { const o = {}; fields.forEach(f => { if(c[f] !== undefined) o[f] = c[f]; }); return o; };
-  [['ca-33', 'ca-45'], ['ca-30', 'ca-44'], ['ca-32', null]].forEach(([h, l]) => {
+  [['ca-33', 'ca-45'], ['ca-30', 'ca-44'], ['ca-32', null], ['ca-29', 'ca-38']].forEach(([h, l]) => {
     const host = find(h), sheet = l && find(l);
     if(!host || (l && !sheet)) return;
     // Tab: the card's own sections (none given here) drawn note by note, its own caption: its power chords as tab.
@@ -7665,11 +7670,16 @@ window.CLASS_ACTIVITIES = [
     caption_es: 'La canción completa en orden · toca cada nota cuando se ilumine · las notas cambian donde Neil Young cambia de acorde',
     sections: sections(single, [9])
   });
+  const cap29 = {
+    caption:    'The whole song in power chords · strum down on each number, up on each + · the chords change where Neil Young changes them',
+    caption_es: 'La canción completa con acordes de potencia · rasguea hacia abajo en cada número y hacia arriba en cada + · los acordes cambian donde Neil Young los cambia'
+  };
   neil('ca-29', {
     everyStrum: true,   // a strum on every eighth, each with its chord name, like Jimi's (Jonathan, 2026-10-30)
-    caption:    'The whole song in power chords · strum down on each number, up on each + · the chords change where Neil Young changes them',
-    caption_es: 'La canción completa con acordes de potencia · rasguea hacia abajo en cada número y hacia arriba en cada + · los acordes cambian donde Neil Young los cambia',
-    sections: sections(power)
+    ...cap29,
+    sections: sections(power),
+    // Its own views (CARD VIEWS, above; RECORDINGS in app/cards-views.js): Tab, these power chords written as tab. No Lyrics: ca-38's sheet follows Jimi's form.
+    otherViews: { tab: { ...cap29 } }
   });
   // ca-40's Neil title and intro are on its recordingVersions.neil entry (version level), above.
   neil('ca-40', {

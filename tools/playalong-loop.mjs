@@ -923,6 +923,16 @@ function fileIndex(tracks) {
 const CV_ORDER = ['chords', 'tab', 'lyrics'];
 const CV_DRAW = ['caption', 'caption_es', 'sections', 'chordGrid', 'everyStrum', 'restWord', 'counts', 'sheet', 'sheetChords', 'sheetColumns', 'sheetNamedAgain'];
 function ownViewOf(c) { return c.sheet ? 'lyrics' : c.chordGrid ? 'chords' : 'tab'; }
+/* R17 with recordings (both switches, ca-29, 2026-11-18): the card of a recording, with that recording's OWN views
+   (a version never inherits the card's); its view list. */
+function recCardOf(a, rec) {
+  const rv = rec && rec !== a.recording && a.recordingVersions ? a.recordingVersions[rec] : null;
+  return rv ? { ...a.card, ...(rv.card || {}), otherViews: rv.card ? rv.card.otherViews : undefined } : a.card;
+}
+function cvListOf(a, rec) {
+  const c = recCardOf(a, rec);
+  return c.otherViews && Object.keys(c.otherViews).length ? CV_ORDER.filter(n => n === ownViewOf(c) || Object.prototype.hasOwnProperty.call(c.otherViews, n)) : [];
+}
 /* R13: the view of a card. v = { rec, key, chord, bass, cv } as names. */
 function defaultView(a) {
   return {
@@ -933,13 +943,13 @@ function defaultView(a) {
     cv: a.card.otherViews ? ownViewOf(a.card) : null,
   };
 }
-function viewLists(a) {
+function viewLists(a, rec) {
   return {
     rec: a.recordingVersions ? [a.recording, ...Object.keys(a.recordingVersions)] : [],
     key: a.keyVersions ? [a.key, ...Object.keys(a.keyVersions)] : [],
     chord: a.chordVersions ? ['full', 'power'] : [],
     bass: a.bassNotes ? ['off', 'on'] : [],
-    cv: a.card.otherViews ? CV_ORDER.filter(n => n === ownViewOf(a.card) || Object.prototype.hasOwnProperty.call(a.card.otherViews, n)) : [],
+    cv: cvListOf(a, rec === undefined ? (a.recordingVersions ? (a.recordingStart || a.recording) : null) : rec),
   };
 }
 function viewName(a, v) {
@@ -959,11 +969,12 @@ function viewOf(a, v) {
   const kv = v.key && v.key !== a.key ? a.keyVersions[v.key] : null;
   if (kv) track = kv.track;
   /* R17: another card view. */
-  if (v.cv && v.cv !== ownViewOf(a.card)) {
-    const ov = a.card.otherViews[v.cv], base = {};
+  const rc = recCardOf(a, v.rec);
+  if (v.cv && v.cv !== ownViewOf(rc)) {
+    const ov = rc.otherViews[v.cv], base = {};
     Object.keys(card).forEach(k => { if (!CV_DRAW.includes(k)) base[k] = card[k]; });
     CV_DRAW.forEach(k => { if (k in ov) base[k] = ov[k]; });
-    card = { ...base, sections: ov.sections || a.card.sections, chordGrid: v.cv === 'chords' };
+    card = { ...base, sections: ov.sections || rc.sections, chordGrid: v.cv === 'chords' };
   }
   const map = rv ? null : kv ? (v.chord === 'power' ? kv.power : kv.full) : (v.chord === 'power' ? a.chordVersions.power : null);
   const sections = card.sections.map(s => ({ ...s, notes: s.notes.map(n => (map && Array.isArray(n.frets) && Object.prototype.hasOwnProperty.call(map, n.note)) ? { ...n, note: map[n.note].note, frets: map[n.note].frets } : n) }));
@@ -2119,10 +2130,12 @@ async function main() {
   for (const a of consts.cards) {
     const d = defaultView(a), lists = viewLists(a), vs = [{ ...d, base: true }];
     for (const dim of ['rec', 'key', 'chord', 'bass', 'cv']) for (const val of lists[dim]) if (val !== d[dim]) vs.push({ ...d, [dim]: val, base: false, recAlt: dim === 'rec', cvAlt: dim === 'cv' });
+    /* R17: the other views of each other recording (both switches, ca-29: Neil's Tab). */
+    for (const r of lists.rec) if (r !== d.rec) for (const c of cvListOf(a, r)) if (c !== d.cv) vs.push({ ...d, rec: r, cv: c, base: false, recAlt: false, cvAlt: true });
     for (const v of vs) {
       const view = viewOf(a, v), meter = meterOf(view.track);
       if (!tracks[view.track] || !meter) { (builtIds.has(a.id) ? builtIssues : dataIssues).push(`${a.id}: track ${view.track} is unknown`); continue; }
-      allViews.push({ a, v, view, meter, chart: buildChart(view, meter), lists });
+      allViews.push({ a, v, view, meter, chart: buildChart(view, meter), lists: v.rec ? viewLists(a, v.rec) : lists });
     }
   }
   for (const x of allViews) {
@@ -2272,7 +2285,7 @@ async function main() {
         }
       }
       const M = { consts, tracks, files, meterOf, meter: x.meter, meterName: METER[x.view.track], tr: tracks[x.view.track], chart: x.chart, view: x.view, viewLabel: viewName(a, x.v), open: o, scan: o.scan, isBase: x.v.base, recAlt: !!x.v.recAlt, cvAlt: !!x.v.cvAlt, tables: [],
-        cvCharts: x.v.cv ? Object.fromEntries(allViews.filter(y => y.a.id === a.id && y.v.cv).map(y => [y.v.cv, y.chart])) : null };
+        cvCharts: x.v.cv ? Object.fromEntries(allViews.filter(y => y.a.id === a.id && y.v.cv && (y.v.rec || null) === (x.v.rec || null)).map(y => [y.v.cv, y.chart])) : null };
       /* The drawing. */
       let drawIssues = [];
       if (x.chart.problems.length) drawIssues.push('its chart does not add up (see the data above)');

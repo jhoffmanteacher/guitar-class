@@ -2185,6 +2185,9 @@ body.rail-collapsed .rail-tools .tool-popup{
    on the chord switch's line too: one row, not two. */
 .ca-chord-switch:has(+ .ca-bass-switch){display:inline-flex;vertical-align:middle;margin-right:16px}
 .ca-chord-switch.ca-bass-switch{display:inline-flex;vertical-align:middle}
+/* A card with the Recording switch AND the Chords / Tab / Lyrics switch (ca-29, CARD VIEWS, app/cards-views.js):
+   both on one line, each named ("Recording", "Show the song as"); measured one line at 1366x657, EN and ES. */
+.ca-switch-label{align-self:center;font-size:0.8125rem;color:var(--text2);margin-right:2px;white-space:nowrap}
 @media print{.ca-chord-switch,.ca-key-switch + .ca-chord-switch,.ca-chord-switch:has(+ .ca-bass-switch),.ca-chord-switch.ca-bass-switch{display:none}}
 /* The TAB board never scrolls sideways: it fills the card and a long phrase
    wraps into stacked systems (renderTabBlock, TAB_MAX_COLS). --tab-cell-h is
