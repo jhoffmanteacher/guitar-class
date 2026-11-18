@@ -36,6 +36,7 @@
 import { readFileSync, writeFileSync, readdirSync, mkdtempSync, rmSync, existsSync, statSync } from 'node:fs';
 import { spawnSync, spawn } from 'node:child_process';
 import { siteParts, siteSource, siteText, SPLIT_NAMES } from './site-src.mjs';
+import { appPage } from './sim-app-page.mjs';
 import { createHash } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, join, isAbsolute, relative } from 'node:path';
@@ -12722,13 +12723,40 @@ function checkCardViews(ctx, i18nTable) {
   if (cb !== null && !/typeof caViewSwitchHtml === 'function' \? caViewSwitchHtml\(a\)/.test(stripJsComments(cb))) flag("app/cards.js: the caViewSwitchHtml(a) call must stay behind typeof — a page with the new cards.js and no app/cards-views.js would draw no practice card (W23 R1-1)");
   /* The lyric sheet is app/cards-sheet.js, a later part (W24, 2026-11-18). A page with the new cards.js and no
      cards-sheet.js must still draw every card and Stop every song (W24 review R1-1): each `sheet` flag taken from a
-     card is false without pcSheetHtml, and pcStop's pcSheetStopped stays behind typeof. */
-  for (const f of ['app/cards.js', 'app/cards-views.js']) {
-    const s = stripJsComments(readFileSync(join(ROOT, f), 'utf8'));
-    const bare = [...s.matchAll(/!!\w+\.card\.sheet(?!\s*&&\s*typeof pcSheetHtml === 'function')/g)].length;
-    if (bare) flag(`${f}: ${bare} sheet flag(s) read from a card without "&& typeof pcSheetHtml === 'function'": a page without app/cards-sheet.js would call the sheet code (W24 R1-1)`);
-    const stops = [...s.matchAll(/(typeof pcSheetStopped === 'function'\)\s*)?pcSheetStopped\(/g)].filter(m => !m[1]).length;
-    if (stops) flag(`${f}: ${stops} pcSheetStopped( call(s) not behind typeof: Stop would throw on a page without app/cards-sheet.js (W24 R1-1)`);
+     card is false without pcSheetHtml, and pcStop's pcSheetStopped stays behind typeof. RUN, not read (W24 R2-1):
+     the app parts load in a vm WITHOUT cards-sheet.js (timers fire at once), every card is drawn in every view it
+     offers, every view switch is pressed, and pcStop runs on a playing card. The two `st.sheet` flags (pcStart, the
+     view swap) need a playing card the vm cannot make, so they stay pinned by text. */
+  {
+    let P = null;
+    try { P = appPage(ROOT, { without: ['app/cards-sheet.js'] }); } catch (e) { flag(`the app parts do not load without app/cards-sheet.js: ${e.message} (W24 R1-1)`); }
+    if (P) {
+      P.ctx.setTimeout = fn => { fn(); return 0; };
+      const r = P.run(`(() => {
+        const out = { cards: 0, renders: 0, presses: 0, fails: [] };
+        if (typeof pcSheetHtml !== 'undefined') out.fails.push('pcSheetHtml is defined: cards-sheet.js was not left out');
+        for (const a of (window.CLASS_ACTIVITIES || []).filter(x => x.card)) {
+          out.cards++;
+          const views = typeof caCardViewList === 'function' ? caCardViewList(a) : [];
+          for (const v of (views.length ? views : [null])) {
+            try { if (v) caSetCardView(a.id, v, null); out.presses += v ? 1 : 0; caCardBodyHtml(a); out.renders++; }
+            catch (e) { out.fails.push(a.id + (v ? ' (' + v + ')' : '') + ': ' + e.message); }
+          }
+        }
+        let synced = false; const o = pcSyncBarStop; pcSyncBarStop = () => { synced = true; };
+        pcState = { timers: [], clicks: [], audio: { pause(){}, src: '' }, root: { isConnected: true, querySelector(){ return null; }, querySelectorAll(){ return []; } } };
+        try { pcStop(); if (!synced) out.fails.push('pcStop did not reach pcSyncBarStop'); } catch (e) { out.fails.push('pcStop: ' + e.message); }
+        pcSyncBarStop = o;
+        return out;
+      })()`);
+      if (r.fails.length) flag(`a page without app/cards-sheet.js breaks at ${r.fails.length} of ${r.renders + r.fails.length} renders/presses + Stop: ${r.fails.slice(0, 3).join('; ')} (W24 R1-1)`);
+      else ok(`1er: without app/cards-sheet.js, ${r.cards} cards draw in every view (${r.renders} renders, ${r.presses} switch presses) and Stop runs (W24 R1-1)`);
+    }
+    for (const f of ['app/cards.js', 'app/cards-views.js']) {
+      const s = stripJsComments(readFileSync(join(ROOT, f), 'utf8'));
+      const bare = [...s.matchAll(/\bst\.sheet\s*=\s*([^;\n]*)|\bsheet:\s*([^,\n]*)/g)].map(m => m[1] ?? m[2]).filter(v => /\bcard\b/.test(v) && !/typeof\s+pcSheetHtml\s*===?\s*(['"])function\1/.test(v));
+      if (bare.length) flag(`${f}: ${bare.length} st.sheet flag(s) taken from a card without typeof pcSheetHtml: ${bare.join(' | ')} (W24 R1-1)`);
+    }
   }
   if (!bad) ok(`1er: ${withViews.length} card${withViews.length === 1 ? "" : "s"} with views (${withViews.map(a => a.id + ': ' + EXPECT[a.id].list.join(' / ')).join('; ')}), shape and sections line up; ${located} sixteenths located at the same section, lap and beat in every view; ${renders} renders (nothing / junk / each view stored, EN + ES, student + console): one switch, one pressed button, the view drawn, default the card's own; ${swOff} renders of the other cards draw no switch; nothing saved, the song not stopped`);
 }
