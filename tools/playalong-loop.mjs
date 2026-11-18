@@ -2377,7 +2377,7 @@ async function main() {
     console.log(`playalong-loop (ca-51 and its built copy): ✗ not compared: ${!pair['ca-51'] ? 'ca-51' : CA51_BUILT_ID} was not walked`);
   }
   if (LEADS) reportLeads(leadWalks);
-  out.totals = totals; out.totalsLoop = { ...TL, cards: [...TL.cards] }; out.failed = failed + TL.failed + builtFailed + pairFailed + SWAPV.failed;   // R17 failures count too out.seconds = Number(secs);
+  out.totals = totals; out.totalsLoop = { ...TL, cards: [...TL.cards] }; out.failed = failed + TL.failed + builtFailed + pairFailed + SWAPV.failed;   /* R17 failures count too */ out.seconds = Number(secs);
   /* A --setting that matched no walk (a typo, or a card without that walk) is not a pass. The drawing alone is a run
      only when it was asked for (--setting drawing). */
   if (none) {

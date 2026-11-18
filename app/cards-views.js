@@ -28,7 +28,7 @@ const CA_CARD_VIEW_LABELS = { chords: 'ca.viewChords', tab: 'ca.viewTab', lyrics
 // The fields that say what a card DRAWS (not how it plays): a view replaces exactly these.
 const CA_CARD_VIEW_FIELDS = ['caption', 'caption_es', 'sections', 'chordGrid', 'everyStrum', 'restWord', 'counts', 'sheet', 'sheetChords', 'sheetColumns', 'sheetNamedAgain'];
 let caCardViewModes = (() => {
-  try { const v = JSON.parse(localStorage.getItem(CA_CARD_VIEWS_KEY) || '{}'); return v && typeof v === 'object' ? v : {}; }
+  try { const v = JSON.parse(localStorage.getItem(CA_CARD_VIEWS_KEY) || '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; }
   catch(e) { return {}; }
 })();
 function caCardViewOwn(card){ return card && card.sheet ? 'lyrics' : card && card.chordGrid ? 'chords' : 'tab'; }
