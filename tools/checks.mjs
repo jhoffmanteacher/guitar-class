@@ -21671,7 +21671,7 @@ async function checkPlantAFault() {
    looping counts 10 minutes after the last input; no input ever counts nothing; clicks alone keep 2 minutes), section 12's metronome and mic
    cases follow it, section 18 pins the strip's TRUE total ("140/60", "140/140", the ring full at the goal), section 22 the console's
    "385 / 40 min", and a new section 23 runs the gap before the rules paste (nothing lost; since the paste, 2026-11-15, the keepalive sends a day past 1200 s at once). */
-const PM_SIM_PIN = 404;
+const PM_SIM_PIN = 407;
 /* ════════════════════════════════════════════════════════════════════
    1dc. STUDENT DATA NEVER GOES TO CLAUDE (Jonathan, 2026-11-13: "I am allowed to
         store data in google/firestore but not in claude"; "let's block student
@@ -22410,7 +22410,7 @@ function checkPracticeMinutes(i18nTable) {
   }
   // 6. the teacher console's Practice minutes view (2026-11-06; teacher.js). Its maths is run in pm-sim section 17.
   /* Pinned defaults: the item sits right after Students in the console sidebar, the view opens sorted by This week, and it is wired into
-     renderTeacherBody. Its read path is pinned too: it lists minutes/{uid}/weeks from the SERVER and touches nothing else — no days, no
+     renderTeacherBody. Its read path is pinned too: it lists minutes/{uid}/weeks from the SERVER and touches nothing else but today's day record per student (teacherAbsDaysGet(s.uid, day, day), 2026-11-18) — no other days, no
      meta/board (the tag), no rankBoard/weekBoard, no collectionGroup (1cg forbids the wildcard-first rule it would need), and no write of
      any kind. firestore.rules lets the teacher read the weeks docs only (WEEKS_SHIPPED above). */
   {
@@ -22484,6 +22484,10 @@ function checkPracticeMinutes(i18nTable) {
       const named = (b.match(/['"`\/](?:days|meta|board|rankBoard|weekBoard|progress|config)\b/g) || []);
       if (named.length) fail(`teacher.js Practice minutes names ${named.join(', ')}: it reads minutes/{uid}/weeks only (never the tag or the boards)`);
       const gets = (b.match(/\.get\(/g) || []).length;
+      /* Today (2026-11-18): the block's ONE other read is today's day record per student, through the pinned teacherAbsDaysGet with
+         from = to = the read's date, exactly once. Any other days read from here (a range, another student, a second call) fails. */
+      const todayReads = b.match(/teacherAbsDaysGet\([^)]*\)/g) || [];
+      if (todayReads.length !== 1 || todayReads[0] !== 'teacherAbsDaysGet(s.uid, day, day)') fail(`teacher.js Practice minutes: its one days read must be teacherAbsDaysGet(s.uid, day, day), once — today's record only (found ${JSON.stringify(todayReads)})`);
       if (gets !== 1 || /\bdb\.doc\(/.test(b)) fail(`teacher.js Practice minutes: exactly one read call (.get( found ${gets} time(s)${/\bdb\.doc\(/.test(b) ? ', and a db.doc( path read' : ''}) — the weeks list per student`);
       /* Ranks and Top 5 count the WHOLE roster, never the rows the period filter shows (R1-5, N4): the compute call takes roster.filter(…),
          `roster` is teacherPmRoster() in both the reader and the view, and allStudentsRaw appears only inside teacherPmRoster(). */
@@ -22551,7 +22555,7 @@ function checkPracticeMinutes(i18nTable) {
       if (!/window\.PM = \{[\s\S]*?setWeekGoals: setWeekGoals,/.test(eng) || !/o\.weekGoals = liveWeekGoals;/.test(eng)) fail('practice-minutes.js: PM.setWeekGoals must be offered, and cfg() must carry only the handed-in map (o.weekGoals = liveWeekGoals), never one from the settings file');
     }
   }
-  if (!bad) ok(`engine run: ${m[1]} simulation assertions pass (pinned; incl. the teacher console's Practice minutes maths and the This week's goal box); console view pinned (button after Students, This week default, weeks-only server read, the view's block read-only, its one write — the goal box — a single cell-checked pmWeekGoals patch, blank = the flat goal); rules day ceiling = config day ceiling (${cfg ? cfg.dayCeilingMinutes * 60 : '?'} s), no daily limit; no heartbeat or "N playing" query in the engine or config, the heartbeats rules block and index gone; minutes rules owner-only, no delete; older rules untouched; hooks, script order and strings in place`);
+  if (!bad) ok(`engine run: ${m[1]} simulation assertions pass (pinned; incl. the teacher console's Practice minutes maths and the This week's goal box); console view pinned (button after Students, This week default, weeks read plus today's day record per student, the view's block read-only, its one write — the goal box — a single cell-checked pmWeekGoals patch, blank = the flat goal); rules day ceiling = config day ceiling (${cfg ? cfg.dayCeilingMinutes * 60 : '?'} s), no daily limit; no heartbeat or "N playing" query in the engine or config, the heartbeats rules block and index gone; minutes rules owner-only, no delete; older rules untouched; hooks, script order and strings in place`);
 }
 
 /* ════════════════════════════════════════════════════════════════════

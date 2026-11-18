@@ -2351,24 +2351,24 @@ console.log('22. the Practice minutes view as drawn (teacher.js renderTeacherMin
   const grab = (re) => { const m = re.exec(T); return m ? m[0] : null; };
   const parts = {
     cfg: grab(/\nfunction teacherPmCfg\(\)\{[\s\S]*?\n}\n/), phrase: grab(/\nfunction teacherPmGoalPhrase\([\s\S]*?\n}\n/), box: grab(/\nfunction teacherPmGoalBoxHtml\([\s\S]*?\n}\n/),
-    compute: grab(/\nfunction teacherPmCompute\([\s\S]*?\n}\n/), cells: grab(/\nfunction teacherPmRowCells\(r\)\{[\s\S]*?\n}\n/), render: grab(/\nfunction renderTeacherMinutes\(force\)\{[\s\S]*?\n}\n/),
+    compute: grab(/\nfunction teacherPmCompute\([\s\S]*?\n}\n/), cells: grab(/\nfunction teacherPmRowCells\(r\)\{[\s\S]*?\n}\n/), todayLabel: grab(/\nfunction teacherPmTodayLabel\(day\)\{[\s\S]*?\n}\n/), render: grab(/\nfunction renderTeacherMinutes\(force\)\{[\s\S]*?\n}\n/),
   };
   check('teacher.js has renderTeacherMinutes(force) and the helpers it draws with', Object.values(parts).every(Boolean), Object.keys(parts).filter((k) => !parts[k]).join());
   if (Object.values(parts).every(Boolean)) {
     const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     const MON = new Date(2026, 10, 16, 9, 0, 0).getTime(), W = '2026-W47';
-    function view({ readOk = true, data = true, loading = false, goals = {}, active = null, pm = null, error = '', weeks = null } = {}) {
+    function view({ readOk = true, data = true, loading = false, goals = {}, active = null, pm = null, error = '', weeks = null, today = undefined, sort = 'week' } = {}) {
       const world = makeWorld();
       class FakeD extends Date { constructor(...a) { if (a.length) super(...a); else super(MON); } static now() { return MON; } }
       const box = { innerHTML: 'KEEP' };
       const doc = { getElementById: (id) => (id === 't-grid-container' ? box : null), activeElement: active };
       const students = [{ uid: 'u1', name: 'Ana Test', period: '4' }, { uid: 'u2', name: 'Ben Test', period: '7' }];
-      const env = { loads: 0, loading, readOk, error, data: data ? { at: MON, weeks: weeks || { u1: { [W]: 600 }, u2: {} } } : null, cfg: { pmWeekGoals: goals }, students };
+      const env = { loads: 0, loading, readOk, error, data: data ? { at: MON, day: '2026-11-16', weeks: weeks || { u1: { [W]: 600 }, u2: {} }, today } : null, sort, cfg: { pmWeekGoals: goals }, students };
       const make = new Function('PM', 'window', 'document', 'Date', 'escHtml', 'escAttr', 'env',
-        `let teacherStudentsAt = 1, teacherRefreshFailed = false, teacherPmLoading = env.loading, teacherPmError = env.error, teacherPmData = env.data, teacherPmSort = 'week';
+        `let teacherStudentsAt = 1, teacherRefreshFailed = false, teacherPmLoading = env.loading, teacherPmError = env.error, teacherPmData = env.data, teacherPmSort = env.sort || 'week';
          let teacherClassConfigReadOk = env.readOk, teacherClassConfig = env.cfg, teacherPmGoalNote = null; const allStudents = env.students;
          const teacherPmRoster = () => env.students, teacherPmIsTeacher = () => false, teacherStudentPeriod = (s) => s.period, teacherPmPeriod = (s) => s.period, teacherLoadMinutes = () => { env.loads++; };
-         ${parts.cfg}${parts.phrase}${parts.box}${parts.compute}${parts.cells}${parts.render}
+         ${parts.cfg}${parts.phrase}${parts.box}${parts.compute}${parts.cells}${parts.todayLabel}${parts.render}
          return { render: renderTeacherMinutes };`);
       const PM = pm || world.PM;
       const api = make(PM, { PM }, doc, FakeD, esc, esc, env);
@@ -2382,6 +2382,17 @@ console.log('22. the Practice minutes view as drawn (teacher.js renderTeacherMin
        20-minute daily cap, which is gone). A week far past the goal reads as it is. */
     const past = view({ goals: { [W]: 40 }, weeks: { u1: { [W]: 385 * 60 }, u2: { [W]: 41 * 60 } } }); past.api.render();
     check('the console\'s table shows the true week past the goal: "385 / 40 min ✓" and "41 / 40 min ✓" with this week\'s goal at 40', /385 \/ 40 min/.test(past.box.innerHTML) && /41 \/ 40 min/.test(past.box.innerHTML), (past.box.innerHTML.match(/\d+ \/ \d+ min/g) || []).join(' | '));
+    /* Today (2026-11-18): the column shows each student's seconds for the read's date; the Today sort puts the most first; a read
+       without today's numbers shows "—" and never throws. */
+    const td = view({ today: { u1: 120, u2: 900 }, sort: 'today' }); td.api.render();
+    const tdRows = td.box.innerHTML.match(/<tr data-pm-uid="u\d">[\s\S]*?<\/tr>/g) || [];
+    check('Today: a "Today" sort button and column; Ana 2 min, Ben 15 min today; the footnote names the date', /data-pm-sort="today"/.test(td.box.innerHTML) && /<th>Today<\/th>/.test(td.box.innerHTML) && /data-pm-uid="u1"><td[^>]*>Ana Test<\/td><td[^>]*>P4<\/td><td class="pm-t-num">2 min<\/td>/.test(td.box.innerHTML) && /data-pm-uid="u2"><td[^>]*>Ben Test<\/td><td[^>]*>P7<\/td><td class="pm-t-num">15 min<\/td>/.test(td.box.innerHTML) && /Today: minutes on Mon, Nov 16/.test(td.box.innerHTML), tdRows.join(' | ').slice(0, 400));
+    const tdSame = view({ today: { u1: 120, u2: 900 }, sort: 'today', weeks: { u1: { [W]: 1200 }, u2: { [W]: 900 } } });   // Ana leads the WEEK, Ben leads TODAY
+    tdSame.env.students[1].period = '4';   // the same array the view holds
+    tdSame.api.render();
+    check('Today sort, one period: Ben (15 min today) above Ana (2 min today)', tdSame.box.innerHTML.indexOf('data-pm-uid="u2"') >= 0 && tdSame.box.innerHTML.indexOf('data-pm-uid="u2"') < tdSame.box.innerHTML.indexOf('data-pm-uid="u1"'));
+    const tdNone = view(); let tdErr = ''; try { tdNone.api.render(); } catch (e) { tdErr = e.message; }
+    check('a read without today\'s numbers: the Today cells read "—", nothing throws', !tdErr && /<td class="pm-t-num">—<\/td><td class="pm-t-num">10 \/ 60 min/.test(tdNone.box.innerHTML), tdErr);
     const failed = view({ readOk: false }); failed.api.render();
     check('the class settings could not be read: NO table, NO goal box, and the line says so (a table drawn with the flat goal would be a confident wrong answer)', /data-pm-settings-failed/.test(failed.box.innerHTML) && /Could not read the class settings/.test(failed.box.innerHTML) && !/pm-t-table/.test(failed.box.innerHTML) && !/data-pm-goal/.test(failed.box.innerHTML), failed.box.innerHTML.slice(0, 300));
     const failedLoading = view({ readOk: false, loading: true }); failedLoading.api.render();

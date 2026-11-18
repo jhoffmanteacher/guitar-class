@@ -204,7 +204,7 @@ const STUB = String.raw`(() => {
   window.db = fdb; try { db = fdb; } catch (e) {}
   window.ensureDb = async () => fdb; try { ensureDb = window.ensureDb; } catch (e) {}
   window.firebase = window.firebase || {};
-  firebase.firestore = Object.assign(firebase.firestore || {}, { FieldValue: { serverTimestamp: () => 'ts', delete: () => DEL, increment: n => n } });
+  firebase.firestore = Object.assign(firebase.firestore || {}, { FieldValue: { serverTimestamp: () => 'ts', delete: () => DEL, increment: n => n }, FieldPath: { documentId: () => '__name__' } });
   window.confirm = () => true; window.alert = m => { window.__alerts = (window.__alerts || []).concat(String(m)); };
   window.prompt = () => null;
   try { navigator.clipboard.writeText = async () => {}; } catch (e) {}
@@ -350,6 +350,23 @@ async function main() {
         if (a.sideways > 0) fail('goalbox', 'page scrolls sideways by ' + a.sideways + 'px at 1366');
         if (!/The goal this week: 60 minutes\./.test(a.foot)) fail('goalbox', 'footnote: ' + JSON.stringify(a.foot.slice(0, 120)));
         await shot('07-minutes-goal-blank-1366x657');
+        /* Today (2026-11-18): seed 15 minutes today for one student, Refresh, click Today: the button is on, that student tops their
+           period with "15 min" in the Today column (the column right after Period), and a reload of the view keeps the sort. */
+        await js(`(() => { __store.set('minutes/stub-uid-03/days/2026-11-18', { seconds: 900 }); __store.set('minutes/stub-uid-03/days/2026-11-17', { seconds: 3000 }); return true; })()`);
+        await js(`document.querySelector('[data-pm-refresh]').click()`);
+        await waitFor(`!document.querySelector('[data-pm-refresh]').disabled && !!document.querySelector('.pm-t-table')`, 8000);
+        await js(`document.querySelector('[data-pm-sort="today"]').click()`);
+        const td = await js(`(() => { const on = document.querySelector('[data-pm-sort="today"]'); const row = document.querySelector('tr[data-pm-uid="stub-uid-03"]');
+          const grp = row ? (() => { let r = row.previousElementSibling; while (r && !r.classList.contains('tg-group')) { if (r.matches('tr[data-pm-uid]')) return false; r = r.previousElementSibling; } return true; })() : false;
+          const heads = [...document.querySelectorAll('.pm-t-table thead th')].map(x => x.textContent);
+          return { on: !!(on && on.classList.contains('on')), cell: row ? row.children[2].textContent : null, first: grp, head: heads[2],
+            others: [...document.querySelectorAll('tr[data-pm-uid]')].filter(r => r.dataset.pmUid !== 'stub-uid-03').map(r => r.children[2].textContent).filter(t => t !== '0 min').length,
+            sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth }; })()`);
+        if (!td.on || td.cell !== '15 min' || !td.first || td.head !== 'Today' || td.others !== 0 || td.sideways > 0) fail('pm-today', 'Today sort/column: ' + JSON.stringify(td));
+        else stats.pmToday = true;
+        await shot('07b-minutes-today-sort-1366x657');
+        await js(`document.querySelector('[data-pm-sort="week"]').click()`);
+        await js(`(() => { __store.delete('minutes/stub-uid-03/days/2026-11-18'); __store.delete('minutes/stub-uid-03/days/2026-11-17'); return true; })()`);
         await typeGoal('30');
         if (!(await waitFor(`document.querySelector('.pm-t-goal-state')?.textContent === 'Saved'`))) fail('goalbox', 'typing 30 + Enter never reached "Saved": ' + JSON.stringify((await boxInfo()).state));
         const b = await boxInfo();
@@ -1198,6 +1215,7 @@ async function main() {
   }
   console.log(`console-layout-smoke: ${stats.views} sidebar views, ${stats.activities} activities opened (practice card, focus, paths, exit check) x ${stats.tabs / Math.max(stats.activities, 1)} tabs = ${stats.tabs} tab switches, ${stats.filters} filters, ${stats.folds} folds, ${stats.searches} searches, ${stats.writes} Settings writes with the Preview kept, ${stats.repaint} Students repaint, ${stats.counts || 0} list counts equal to the board's (All + P4), ${stats.refreshes || 0} refreshes with the Preview and list scroll kept, ${stats.board} board round trip, ${stats.backs} Backs, `
     + `${stats.chips || 0} chip checks, ${stats.periodWrites || 0} writes under P4/P7/CAS with the song playing, ${stats.renameRefresh || 0} Refresh past a hidden rename, ${stats.audio || 0} sound stops, ${stats.listPicks || 0} list picks kept, ${stats.xss || 0} markup-name checks, ${stats.treePick || 0} tree Built row + board pick, ${stats.twoConsoles || 0} two-console archives (All/P4, write/board)`);
+  if (stats.pmToday) console.log('  Practice minutes Today: 15 min seeded today (and 50 yesterday, not counted), Today sort puts that student first in their period, every other row 0 min');
   if (stats.goalbox) console.log(`  Practice minutes goal box: blank = 60, 30 saved as one cell and read back after a reload, cleared with a blank box, 0 = a break week, 3 bad entries wrote nothing, a config break week switched off`);
   if (stats.tree) console.log(`  units tree: ${stats.tree.rows} rows adding up to the board's ${stats.tree.cards} cards, ${stats.tree.clicks} row clicks (Songs, list with a search, Arrange board), ${stats.tree.repaints} repaints after a write, ${stats.tree.reloads} reloads with the fold kept`);
   if (stats.widths) console.log(`  column widths at 1366: sidebar ${Math.round(stats.widths.at1366.side)}, list ${Math.round(stats.widths.at1366.list)}, detail ${Math.round(stats.widths.at1366.detail)}; at 1920: ${Math.round(stats.widths.at1920.side)}, ${Math.round(stats.widths.at1920.list)}, ${Math.round(stats.widths.at1920.detail)}`);

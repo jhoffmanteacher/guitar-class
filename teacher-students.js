@@ -147,12 +147,15 @@ function teacherStudentCountHtml(tally, universe){
    Server reads only (an offline get() answers empty from the cache).
    Ranks count the whole roster (archived students too: their pages still
    publish to the Top 5 board), whatever the period filter shows.
-   The teacher's own account is never read or ranked. */
+   The teacher's own account is never read or ranked.
+   TODAY (2026-11-18, Jonathan: "give me a 'today' button for the daily minutes"): with each student's weeks, ONE more read of
+   that student's day record for the read's own date, through teacherAbsDaysGet (the console's one days read, pinned in 1cg)
+   with from = to = that date. One more read per student per open / Refresh. The Today column and its sort button show it. */
 const TEACHER_PM_CONCURRENCY=10;
 const TEACHER_PM_READ_MS=20000;   // one student's weeks read that has not answered by then fails the whole read (Refresh retries)
 const TEACHER_PM_PERIODS={'4':true,'7':true,'CAS':true};
-let teacherPmSort='week';      // 'week' | 'all' | 'name' — This week is the default (pinned in checks.mjs 1cg)
-let teacherPmData=null;        // { at, weeks: { uid: { 'YYYY-Www': seconds } } } — the last good read
+let teacherPmSort='week';      // 'week' | 'today' | 'all' | 'name' — This week is the default (pinned in checks.mjs 1cg)
+let teacherPmData=null;        // { at, day, weeks: { uid: { 'YYYY-Www': seconds } }, today: { uid: seconds } } — the last good read (day = the date today's seconds are for)
 let teacherPmLoading=false;
 let teacherPmError='';         // '' | 'denied' (rules not published) | 'failed'
 let teacherPmGen=0;            // a newer read drops an older one
@@ -208,7 +211,8 @@ async function teacherLoadMinutes(){
   if(teacherView==='minutes') renderTeacherMinutes();
   // The class settings are read with the weeks, once per open / Refresh (this week's goal lives there). Its answer is awaited below.
   const settingsRead=loadTeacherClassConfig();
-  const out={};
+  const day=dayStr(new Date());   // the date the Today column is for: the day the read starts
+  const out={}, todayOut={};
   let next=0, stop=false;
   const worker=async()=>{
     while(!stop && next<roster.length){
@@ -217,6 +221,9 @@ async function teacherLoadMinutes(){
       const m={};
       snap.forEach(d=>{ if(/^\d{4}-W\d{2}$/.test(d.id)) m[d.id]=Math.max(0, +((d.data()||{}).seconds)||0); });
       out[s.uid]=m;
+      const ds=await withTimeout(teacherAbsDaysGet(s.uid, day, day), TEACHER_PM_READ_MS);
+      let t=0; ds.forEach(d=>{ if(d.id===day) t=Math.max(0, +((d.data()||{}).seconds)||0); });
+      todayOut[s.uid]=t;
     }
   };
   let err=null;
@@ -234,7 +241,7 @@ async function teacherLoadMinutes(){
     if(teacherPmError==='failed') console.warn('[guitar-class] practice minutes read failed', err);
   } else {
     teacherPmError='';
-    teacherPmData={at:Date.now(), weeks:out};
+    teacherPmData={at:Date.now(), day, weeks:out, today:todayOut};
   }
   if(teacherView==='minutes') renderTeacherMinutes();
 }
@@ -266,7 +273,13 @@ function teacherPmRowCells(r){
     : `${mins(wk.secs)} / ${mins(wk.goal)} min${wk.hit?' <span class="pm-t-hit" title="Goal hit">✓</span>':''}`;
   const rank = r.rank.n===null ? '—' : `${r.rank.n} / ${r.rankTotal}`;
   const top5 = !r.top5 ? '' : r.top5.under ? '<span title="Under the Top 5 minimum this week">—</span>' : r.top5.top ? `<span class="pm-t-top5">#${r.top5.n}</span>` : '';
-  return `<td class="pm-t-num">${week}</td><td class="pm-t-num">${mins(r.last)} min</td><td class="pm-t-num">${r.status.streak} ${r.status.streak===1?'week':'weeks'}</td><td class="pm-t-num">${mins(r.all)} min</td><td class="pm-t-num">${rank}</td><td class="pm-t-num">${top5}</td>`;
+  const today = typeof r.today==='number' ? `${mins(r.today)} min` : '—';
+  return `<td class="pm-t-num">${today}</td><td class="pm-t-num">${week}</td><td class="pm-t-num">${mins(r.last)} min</td><td class="pm-t-num">${r.status.streak} ${r.status.streak===1?'week':'weeks'}</td><td class="pm-t-num">${mins(r.all)} min</td><td class="pm-t-num">${rank}</td><td class="pm-t-num">${top5}</td>`;
+}
+// The Today column's date in words ("Wed, Nov 18"); a read without a date says "today".
+function teacherPmTodayLabel(day){
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(day||'');
+  return m ? new Date(+m[1], +m[2]-1, +m[3], 12).toLocaleDateString([], {weekday:'short', month:'short', day:'numeric'}) : 'today';
 }
 function renderTeacherMinutes(force){
   const box=document.getElementById('t-grid-container');
@@ -293,7 +306,7 @@ function renderTeacherMinutes(force){
   const when = teacherPmLoading ? (teacherPmData ? `Practice minutes as of ${at} · refreshing…` : 'Loading practice minutes…')
     : teacherPmError ? (teacherPmData ? `Could not refresh — showing practice minutes as of ${at}` : teacherPmError==='failed' ? 'Could not load practice minutes.' : '')
     : teacherPmData ? `Practice minutes as of ${at}` : '';
-  const head=`<div class="pm-t-bar"><span class="tg-class-lbl">Sort</span><div class="tg-seg">${seg('week','This week')}${seg('all','All time')}${seg('name','Name')}</div>`+
+  const head=`<div class="pm-t-bar"><span class="tg-class-lbl">Sort</span><div class="tg-seg">${seg('today','Today')}${seg('week','This week')}${seg('all','All time')}${seg('name','Name')}</div>`+
     `<button type="button" class="tg-seg-btn pm-t-refresh" data-pm-refresh ${teacherPmLoading?'disabled':''}>Refresh</button><span class="pm-t-when" data-pm-when>${escHtml(when)}</span></div>`;
   /* This week's goal: the engine's settings with the goals set from this console. The box is for the CURRENT week (the one a student
      is in now), shown whenever the class settings were read; the table works every week out with the same tc, so a week with its own
@@ -308,13 +321,15 @@ function renderTeacherMinutes(force){
   const shown=allStudents.filter(s=>s&&s.uid&&!teacherPmIsTeacher(s)&&teacherPmData.weeks[s.uid]);
   if(!shown.length){ box.innerHTML=head+goalBox+'<div class="t-loading">No students to show.</div>'; return; }
   const rows=teacherPmCompute(roster.filter(s=>teacherPmData.weeks[s.uid]).map(s=>({uid:s.uid, period:teacherPmPeriod(s)})), teacherPmData.weeks, tc, PM.calc.ymd(atD), PM.calc);   // as of the read, like the stamp
+  // Today's seconds onto each row; a read from before this field existed (or a student it missed) shows "—" and sorts last.
+  Object.keys(rows).forEach(uid=>{ const t=teacherPmData.today&&teacherPmData.today[uid]; rows[uid].today=typeof t==='number'?t:null; });
   const nameOf=s=>s.name||s.email||s.uid.slice(0,8)+'…';
   const byName=(a,b)=>nameOf(a).localeCompare(nameOf(b), undefined, {sensitivity:'base'});
   const perOf=s=>String(teacherStudentPeriod(s)||'');   // a string always: a period stored as the number 4 joins '4', not a group of its own
   // Exact values only: '04' or ' 4' (typed by the student) is its own group after CAS, never interleaved with Period 4.
   const perRank=s=>{ const p=perOf(s); return p==='4'?4 : p==='7'?7 : p==='CAS'?8 : !p?Infinity : 9; };
   const perCmp=(a,b)=>(perRank(a)-perRank(b)) || (perOf(a)<perOf(b)?-1:perOf(a)>perOf(b)?1:0);
-  const key=s=>teacherPmSort==='all' ? rows[s.uid].all : rows[s.uid].week;
+  const key=s=>teacherPmSort==='all' ? rows[s.uid].all : teacherPmSort==='today' ? (rows[s.uid].today===null ? -1 : rows[s.uid].today) : rows[s.uid].week;
   const list=shown.slice().sort((a,b)=>perCmp(a,b) || (teacherPmSort==='name' ? 0 : key(b)-key(a)) || byName(a,b));
   const perLabel=p=>!p?'No period':p==='CAS'?'CAS':'Period '+p;
   const perCount=Object.create(null); list.forEach(s=>{ const k=perOf(s); perCount[k]=(perCount[k]||0)+1; });
@@ -322,18 +337,18 @@ function renderTeacherMinutes(force){
   const body=list.map(stu=>{
     const g=perOf(stu);
     // Escaped: g is the student's own answer when no override is set.
-    const groupRow=g!==lastGroup?`<tr class="tg-group"><th colspan="8">${escHtml(perLabel(g))} <span>(${perCount[g]})</span></th></tr>`:'';
+    const groupRow=g!==lastGroup?`<tr class="tg-group"><th colspan="9">${escHtml(perLabel(g))} <span>(${perCount[g]})</span></th></tr>`:'';
     lastGroup=g;
     const name=nameOf(stu), p=g;
     return `${groupRow}<tr data-pm-uid="${escAttr(stu.uid)}"><td class="tg-name" title="${escAttr(name)}">${escHtml(name)}</td><td class="tg-eff">${p?escHtml(p==='CAS'?'CAS':'P'+p):'—'}</td>${teacherPmRowCells(rows[stu.uid])}</tr>`;
   }).join('');
   const c=tc, tableWeek=PM.calc.weekIdOf(PM.calc.ymd(atD));   // the week the table's "This week" column is: the read's own day
   box.innerHTML=head+goalBox+
-    `<div class="tg-grid-wrap" data-tview="minutes"><table class="tg-table pm-t-table"><thead><tr><th>Student</th><th>Period</th><th>This week</th><th>Last week</th><th>Streak</th><th>All time</th><th>Class rank</th><th>Top 5</th></tr></thead><tbody>${body}</tbody></table></div>`+
-    `<div class="tr-meta" style="margin-top:10px">This week: minutes / goal (Monday to Sunday). The goal this week: ${escHtml(teacherPmGoalPhrase(c, tableWeek, PM.calc))}. ✓ = goal hit; "break" = a week off, no goal. Class rank counts every student with at least 1 minute, whatever the period filter shows. Top 5 is inside the student's period, this week; "—" = under ${Math.round(+c.top5MinMinutes||0)} minutes this week. Students do not see a class rank (since Nov 13): their My progress compares this week with their own last week and best week.</div>`;
+    `<div class="tg-grid-wrap" data-tview="minutes"><table class="tg-table pm-t-table"><thead><tr><th>Student</th><th>Period</th><th>Today</th><th>This week</th><th>Last week</th><th>Streak</th><th>All time</th><th>Class rank</th><th>Top 5</th></tr></thead><tbody>${body}</tbody></table></div>`+
+    `<div class="tr-meta" style="margin-top:10px">Today: minutes on ${escHtml(teacherPmTodayLabel(teacherPmData.day))}, as of the time above. This week: minutes / goal (Monday to Sunday). The goal this week: ${escHtml(teacherPmGoalPhrase(c, tableWeek, PM.calc))}. ✓ = goal hit; "break" = a week off, no goal. Class rank counts every student with at least 1 minute, whatever the period filter shows. Top 5 is inside the student's period, this week; "—" = under ${Math.round(+c.top5MinMinutes||0)} minutes this week. Students do not see a class rank (since Nov 13): their My progress compares this week with their own last week and best week.</div>`;
 }
 function teacherSetMinutesSort(v){
-  if(v!=='week' && v!=='all' && v!=='name') return;
+  if(v!=='week' && v!=='today' && v!=='all' && v!=='name') return;
   teacherPmSort=v;
   if(teacherView==='minutes') renderTeacherMinutes();
 }
