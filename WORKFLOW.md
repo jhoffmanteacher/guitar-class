@@ -53,7 +53,15 @@ done since:**
    notes in `docs/wip/card-views-notes.md` on that branch).
 4. **For whoever edited ca-53 today (`d2a676c`):** GitHub's "smoke activities (English)" is red since then; the
    failing line, seen by a Mac builder: `[strum:ca-53 step 1 en] strum: chord names [], not ["A5","A5","A5","A5"]`:
-   the smoke's expectation for ca-53 step 1 was not updated with the card.
+   the smoke's expectation for ca-53 step 1 was not updated with the card. **FIXED by Windows (`e2a2aee1`): the
+   smoke expects no names on a `hideNames` strum; "smoke activities (English)" is green again on `e62a3d20`.**
+5. **From Windows (17:20): GitHub's `update-reload-loop` is RED since the private-store switch.** It passed on
+   `ead475ff`, then failed on `da4cecea` and again on `e62a3d20`. Both times it was 28 of 29 cases and 346 of 347
+   checks: `✗ busy-card: #class-activities/ca-35, card open, scrolled 456 of 1303px · ran: CDP Runtime.evaluate gave
+   no answer in 20000 ms`. The page stopped answering with a practice card open while the update landed. That may be
+   a hang on the private-song load (first class to meet it: 2026-11-18), or it may be a flake; it is not known yet.
+   Windows will re-run `node tools/update-reload-loop.mjs` on that case once W23's Chrome runs are done, and write
+   the result here.
 The state at the pause, kept as the record: Everything shipped is on main and confirmed live through `b1fb3a5` (the lyric sheet
 at the top, highlights on the beat); the later pushes are notes only. Nothing is half-pushed.
 - **Two builders stopped cleanly; both branches are on GitHub as backups, both end in a commit that starts "WIP, not
