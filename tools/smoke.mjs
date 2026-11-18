@@ -678,6 +678,10 @@ async function cardViewsWalk(page, run, events, stats, base) {
     await run('cardviews:' + id + ':reopen', "caFocusActivity('" + id + "')", 500);
     // Play, then press every other view and back to the card's own, the song going on.
     await run('cardviews:' + id + ':play', `(() => { document.querySelector('.ca-card[open] .pc-play').click(); return 1; })()`, 5000);
+    // A song can open on bars before the card's first (Luna: about 10 s at Slower): press once its own view lights.
+    let litOwn = false;
+    for (let i = 0; i < 60 && !litOwn; i++) litOwn = await run('cardviews:' + id + ':wait-lit', `!!(pcState && pcState.si >= 0)`, 500);
+    if (!litOwn) fail(id, 'the song never lit a place in its own view (30 s after the count-in)');
     await run('cardviews:' + id + ':tag', `(() => { if (pcState){ pcState.__smk = 'st1'; pcState.audio.__smk = 'el1'; } return !!pcState; })()`, 10);
     let last = null;
     for (const view of [...list.filter(v => v !== own), own]) {
