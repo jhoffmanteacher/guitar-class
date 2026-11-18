@@ -10171,15 +10171,43 @@ function checkPracticeCards(ctx) {
     if (a && a.view === 'card' && a.card && a.recordingVersions && typeof a.recordingVersions === 'object')
       for (const [r, v] of Object.entries(a.recordingVersions))
         cardViews.push({ ...a, id: a.id + ' [' + r + ']', card: { ...a.card, ...(v && v.card), track: v && v.track }, __rec: true });
-    // Card views (1er): each of a card's other views goes through the same rules, with its own sections.
+    /* Card views (1er): each of a card's other views goes through the same rules AS IT IS DRAWN (W23 R1-5): the
+       app's own caCardViewCard builds it (the card's display fields dropped, the view's put in, chordGrid on for
+       Chords only), so a Tab view is checked without the host's chordGrid and a Chords view with it. */
     if (a && a.view === 'card' && a.card && a.card.otherViews && typeof a.card.otherViews === 'object')
-      for (const [nm, v] of Object.entries(a.card.otherViews))
-        cardViews.push({ ...a, id: a.id + ' [view ' + nm + ']', card: { ...a.card, ...(v || {}), sections: (v && v.sections) || a.card.sections }, __rec: true });
+      for (const nm of Object.keys(a.card.otherViews)) {
+        let vc = null;
+        try { vc = ctx ? vm.runInContext('caCardViewCard', ctx)(a.card, nm) : null; } catch (e) { flag(`${a.id} [view ${nm}]: caCardViewCard() threw ${e.message}`); continue; }
+        if (!vc || !Array.isArray(vc.sections)) { flag(`${a.id} [view ${nm}]: caCardViewCard() is not in the app script (or the 0b context is unavailable): 1bf cannot check the view as it is drawn`); continue; }
+        cardViews.push({ ...a, id: a.id + ' [view ' + nm + ']', card: vc, __rec: true, __view: nm });
+      }
   }
+  let viewsDrawn = 0;
   for (const a of cardViews) {
     if (!a || a.view !== 'card' || !a.card) continue;
     if (!a.__rec) cards++;
     const c = a.card, w = a.id;
+    /* A view as drawn (W23 R1-5): Chords is a chord grid, and every section of it that is not chordGrid:false holds
+       only chords and rests, each starting on an eighth (the grid's columns; three to a beat on a 6/8 track), the
+       rules 1bv holds for the cards whose OWN view is a grid; Tab is drawn note by note (no chordGrid); Lyrics is a
+       sheet. */
+    if (a.__view) {
+      viewsDrawn++;
+      const trv = TRACKS[c.track], perBeat = trv && trv.countSix ? 3 : 2;
+      if (a.__view === 'chords') {
+        if (c.chordGrid !== true) flag(`${w}: a Chords view drawn without card.chordGrid — it would not be a chord grid`);
+        else (c.sections || []).forEach((sec, si) => {
+          if (!sec || sec.chordGrid === false) return;
+          let at = 0;
+          (sec.notes || []).forEach((n, ni) => {
+            if (!n.rest && !Array.isArray(n.frets)) flag(`${w} · card.sections[${si}] · notes[${ni}]: a single note in a Chords view — a chord-grid section holds only chords and rests`);
+            if (Math.abs(at * perBeat - Math.round(at * perBeat)) > 1e-6) flag(`${w} · card.sections[${si}] · notes[${ni}]: starts at beat ${at}, between two eighth-note columns of the chord grid`);
+            at += n.beats > 0 ? n.beats : 1;
+          });
+        });
+      } else if (a.__view === 'tab' && c.chordGrid) flag(`${w}: a Tab view drawn with card.chordGrid on — it would draw the chord grid, not the tab`);
+      else if (a.__view === 'lyrics' && !c.sheet) flag(`${w}: a Lyrics view drawn with no card.sheet`);
+    }
     const tr = TRACKS[c.track];
     if (!tr) { flag(`${w}: card.track "${c.track}" is not in SNIPPET_TRACKS (have: ${Object.keys(TRACKS).join(', ')})`); continue; }
     if (has(c.caption) && !has(c.caption_es)) flag(`${w}: card.caption has no caption_es`);
@@ -10405,7 +10433,7 @@ function checkPracticeCards(ctx) {
     } catch (e) { flag('1bf could not run the &lead= URL block: ' + e.message); }
   }
   if (cards === 0) { flag('1bf found no practice card — it cannot see what it is supposed to guard'); return; }
-  if (bad === 0) ok(`${cards} practice card${cards === 1 ? '' : 's'} — sections add up to their bars and land inside the track, one Level up each, both renderers and every silencer wired${leadSaid}`);
+  if (bad === 0) ok(`${cards} practice card${cards === 1 ? '' : 's'} — sections add up to their bars and land inside the track, one Level up each, both renderers and every silencer wired; ${viewsDrawn} card views checked as drawn (caCardViewCard: Chords a grid of chords and rests on the eighths, Tab no grid, Lyrics a sheet)${leadSaid}`);
 }
 
 /* 1cq. TODAY'S ACTIVITIES = TODAY'S AND YESTERDAY'S CARDS (Jonathan,
