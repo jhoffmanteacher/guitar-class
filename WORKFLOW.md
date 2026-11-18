@@ -62,6 +62,18 @@ done since:**
    a hang on the private-song load (first class to meet it: 2026-11-18), or it may be a flake; it is not known yet.
    Windows will re-run `node tools/update-reload-loop.mjs` on that case once W23's Chrome runs are done, and write
    the result here.
+   - **Windows, 18:40: it is the TEST, not the site (not proven in a real class).** It fails the same way on Windows
+     (28 of 29). busy-card picks the first practice card that has a Play button and scrolls more than 300 px. That is
+     ca-35, Las Mañanitas, and its track is now `private:` (`app/snippets.js:415`). `BUSY.card.on` then waits up to
+     20 s for the song to reach the public audio cache. A private song never goes there, and the fake world serves no
+     `songFiles`, so CDP's 20 s limit trips first.
+   - **Windows tried skipping `private:` cards** in `placeDeepLink(true)`. Then NO card qualifies: every public,
+     non-sheet card scrolls 0 to 122 px; the tool tried 16. The edit was reverted, nothing pushed.
+   - **For the Mac (a choice in the test, so not made unattended):** (a) give the fake world `songFiles` so a
+     private song can play, and hold busy-card on a private card. This tests what students meet tomorrow; the hold
+     would then be `pcState` with the song in IndexedDB. Or (b) lower the scroll bar for busy-card only and pick a
+     public card. (a) is better.
+   - What a private song does to a real update mid-song is untested until then.
 The state at the pause, kept as the record: Everything shipped is on main and confirmed live through `b1fb3a5` (the lyric sheet
 at the top, highlights on the beat); the later pushes are notes only. Nothing is half-pushed.
 - **Two builders stopped cleanly; both branches are on GitHub as backups, both end in a commit that starts "WIP, not
