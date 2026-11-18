@@ -367,6 +367,27 @@ Added 2026-11-17 (Jonathan), a standing rule, not this week only: Sonnet for the
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-17 — Look 1, Part 1: an open Focus step fills the screen. Fast.**
+      Work order `Claude outputs/WORK-ORDER-look1-redesign.md` (Jonathan picked "Look 1" 2026-11-17: "the class
+      activities get the most use so the redesign of those is paramount"). `caSyncSolo` sets `body.ca-wide` for an open
+      `view: 'focus'` card past its path picker: the 1000px column is lifted (window less 40px a side), the direction
+      line is 22px/600 (`.ca-step-dir`), the strum board scales by container units (2-bar arrows 31px → 82px, 4-bar-row
+      41px), a drill stays its size centred (`.ca-step-drill`), Got it is pinned to the bottom (`.ca-focus-nav`
+      fixed; added to `PC_RIDE_UP`). Step buttons moved out of the bar into a sticky named row (`caStepRowHtml`,
+      `caStepShortName` strips "Practice — " / "Practica — " at render time; `caFitStepRow` falls back to numbers
+      when it would wrap: ca-34 EN+ES and ca-46 "In chunks" ES); the step head line is visually hidden, still
+      focusable and printed. Every card's bar carries `PM.stripHtml()` first in `.ca-bar-tools`
+      (`practice-minutes.js` unchanged). Full screen: no zoom on a wide step. Practice cards, exit checks, the path
+      picker, the console preview, module steps and the phone keep their look (the phone's bar no longer holds the
+      step buttons: the card's own row does). Measured over all 105 route steps × EN/ES (210): one-line direction
+      210/210, Got it top 597 on 210/210, no sideways overflow, no strum step scrolls (20/20), step row one row
+      210/210, bar one row 210/210 and 98/98 activities with the worst strip + Optional tag; the tallest tab 651px
+      before and after. Pins: 1cr (28 assertions: wide for a Focus step, not for a card / check / picker; the CSS),
+      1d (the path row in the step row), the practice-minutes block (the bar draws the strip once);
+      `tools/smoke.mjs` `wideStepWalk`; `pm-e2e` expects the bar's strip. Reverses: "the folded view stays at 1×"
+      (2026-11-10) for a Focus step, "step buttons ride in the bar" (2026-10-10), "#pm-header hidden with no strip"
+      (2026-11-10), "the column is 1000px" for an open Focus step.
+
 - [x] **2026-11-16 — "Keep in Today's activities": a checkbox beside the release date. Always Reviewed (a `config/class` writer).**
       Jonathan: "for the teacher dashboard, add an option next to the release date that has a checkbox for 'keep in
       today's activities'". Read as: a ticked card stays in the student's Today group on the days after its release

@@ -290,8 +290,7 @@ function caCardBodyBlockHtml(a, done, focus, card){
   const markLabel = done ? t('ca.completed') : t('ca.markComplete');
   return `<div class="ca-card-body">
       ${card ? caCardBodyHtml(a) : caKeySwitchHtml(a) + caChordSwitchHtml(a) + caIntroHtml(a, focus, chooser ? 0 : openStepIdx)}
-      ${chooser ? caPathChooserHtml(a) : caPathRowHtml(a)}
-      ${stepsHtml && focus ? caFocusDotsHtml(a, openStepIdx) : ''}
+      ${chooser ? caPathChooserHtml(a) : stepsHtml && focus ? caStepRowHtml(a, openStepIdx) : caPathRowHtml(a)}
       ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
       ${chooser ? '' : caMarkRowHtml(a, done, markLabel)}
     </div>`;
@@ -485,7 +484,13 @@ function caStepHtml(a, step, si, isOpen, isDone, opts){
      reads as "not peeking", which is right — activities have no peek mode)
      and for the skill check-off, which activity drills don't offer since
      `drill.skill` is a module skill id and activities have none. */
-  if(step.drill) parts.push(renderShuffleDrill(step.drill, `${a.id}-s${si}`, null));
+  /* In Focus view the drill sits in a .ca-step-drill box, so the wide open
+     step (Look 1, 2026-11-17: body.ca-wide) can keep it at its own size and
+     centre it without touching the drill renderers. */
+  if(step.drill){
+    const dr = renderShuffleDrill(step.drill, `${a.id}-s${si}`, null);
+    parts.push(focus && dr ? `<div class="ca-step-drill">${dr}</div>` : dr);
+  }
   // The Journey door lives in the LAST step and nowhere else (see caJourneyLinkHtml).
   if(si === (a.steps || []).length - 1) parts.push(caJourneyLinkHtml(a));
   // Step text is first-party authored HTML, same trust level as module step
@@ -495,8 +500,13 @@ function caStepHtml(a, step, si, isOpen, isDone, opts){
   /* `|| ''`: a label + drill step (ca-23) has no text at all, and
      wrapGotItWhen passes a non-string straight through — so the template
      printed the word "undefined" under every step label (2026-09-30). */
+  /* Focus view: the line is wrapped in .ca-step-dir, which the wide open step
+     draws bigger (Look 1). The count reads the same: repCountFromGotIt strips
+     tags first. An empty line gets no box. */
+  const lineText = tf(step,'text') || '';
+  const lineHtml = focus && lineText ? `<span class="ca-step-dir">${lineText}</span>` : lineText;
   // The one-line opt-in below: the step has no got-it label, so its whole line's count makes the dots.
-  const detailHtml = `${wrapGotItWhen(tf(step,'text') || '', {
+  const detailHtml = `${wrapGotItWhen(lineHtml, {
       key: `ca:${a.id}:${si}`, isDone, closestSel: '.ca-step', btnSel: focus ? '.ca-focus-next' : '.ca-step-donebtn', id: a.id, extra: si,
       wholeLine: true,
     })}${parts.join('')}`
@@ -525,10 +535,12 @@ function caStepHtml(a, step, si, isOpen, isDone, opts){
     + `</li>`;
 }
 /* ── Focus view (`view: 'focus'` on an activity — Jonathan, 2026-09-25) ──
-   The same step ladder, shown one step at a time: a row of numbered step
-   buttons over the card (done = green ✓, current = filled), only the current
-   step on screen, and a "Got it — next step" button under it in place of
-   Mark done. Presentation only — the steps, the ids, the saved ticks in
+   The same step ladder, shown one step at a time: a row of step buttons
+   over the step (done = green ✓, current = filled; since Look 1, 2026-11-17,
+   each carries its step's name and the row is caStepRowHtml), only the
+   current step on screen, and a "Got it — next step" button under it in
+   place of Mark done (pinned to the bottom of the screen in the wide open
+   view, styles.css "Look 1"). Presentation only — the steps, the ids, the saved ticks in
    caStepDone and the Mark complete row are exactly what the accordion uses,
    so an activity can be switched in or out of Focus view at any time
    without touching anyone's progress.
@@ -665,6 +677,19 @@ function caIntroHtml(a, focus, openStepIdx){
   const later = focus && openStepIdx !== 0;
   return `<p class="coach-tip${later ? ' ca-intro-later' : ''}">${escHtml(intro)}</p>`;
 }
+/* The step row of an open Focus card (Look 1, Jonathan, 2026-11-17): the
+   named step buttons, and on a paths activity "Path: … / Change path" at
+   the right end. Its own row again, directly under the bar and sticky with
+   it (styles.css, .ca-step-row). From 2026-10-10 to 2026-11-17 the buttons
+   rode in the bar as bare numbers, because a row of their own "cost 48px of
+   every step"; the step's own head line (.ca-step-head--focus) is now kept
+   off screen instead (still focusable, still printed), so the height is
+   the same. When the names would wrap the row, caFitBar() (app/activities-2.js)
+   adds .ca-step-row--tight and only the step on screen keeps its name: it is
+   measured after every render and on resize, never worked out from the data. */
+function caStepRowHtml(a, cur){
+  return `<div class="ca-step-row">${caFocusDotsHtml(a, cur)}${caPathRowHtml(a)}</div>`;
+}
 function caFocusDotsHtml(a, cur){
   const steps = a.steps || [];
   const route = caRoute(a);
@@ -678,11 +703,23 @@ function caFocusDotsHtml(a, cur){
     const locked = classActivities[a.id] !== true && reachPos >= 0 && pos > reachPos;
     const cls = `ca-focus-dot${done ? ' is-done' : ''}${si === cur ? ' is-now' : ''}`;
     const label = escAttr(caStepHeadText(st, pos, route.length));
-    return `<button type="button" class="${cls}" onclick="caFocusGo('${escAttr(a.id)}',${si})"`
+    const name = caStepShortName(st);
+    return `<button type="button" class="${cls}" onclick="caFocusGo(${jsonAttrArg(a.id)},${si})"`
       + `${si === cur ? ' aria-current="step"' : ''}${locked ? ` disabled title="${escAttr(t('ca.focusLocked'))}"` : ` title="${label}"`}`
-      + ` aria-label="${label}">${done ? '&#x2713; ' : ''}${pos + 1}</button>`;
+      + ` aria-label="${label}"><span class="ca-focus-dot-num">${done ? '&#x2713;' : pos + 1}</span>`
+      + `${name ? `<span class="ca-focus-dot-name">${escHtml(name)}</span>` : ''}</button>`;
   }).join('');
   return `<div class="ca-focus-dots" role="group" aria-label="${escAttr(t('ca.focusDotsAria'))}">${dots}</div>`;
+}
+/* The name a step button shows (Look 1, 2026-11-17): the step's label with a
+   leading "Practice — " / "Practica — " taken off, at render time (the data
+   is not edited); any other label whole ("Learn — How to read TAB"); no
+   label, no name (the number alone). The button's accessible name is still
+   the whole "Step 2 of 4: Practice — D5" (caStepHeadText). */
+const CA_STEP_NAME_TRIM = /^(?:Practice|Practica|Práctica)\s+—\s+/;
+function caStepShortName(step){
+  const label = step && step.label ? tf(step, 'label') : '';
+  return label ? label.replace(CA_STEP_NAME_TRIM, '') : '';
 }
 function caFocusNavHtml(a, si, isDone){
   const id = escAttr(a.id);

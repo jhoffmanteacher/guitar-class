@@ -397,7 +397,10 @@ function caOnToggle(details){
    bar swaps its "In class" title for that card's name (a button: tap it to
    get back to the card's top) and "n of m done"; closed, the title comes
    back. Net zero height — index.html's #ca-page-title / #ca-bar-open are
-   the two halves, styles.css .ca-screen .page-topbar pins the bar. */
+   the two halves, styles.css .ca-screen .page-topbar pins the bar.
+   Look 1 (2026-11-17): a Focus card's step buttons are no longer in the bar
+   (a named row under it, caStepRowHtml), and every card's bar carries the
+   practice-minutes strip before the tools. */
 function caSyncTopbar(){
   const bar = document.getElementById('ca-bar-open');
   const title = document.getElementById('ca-page-title');
@@ -412,15 +415,20 @@ function caSyncTopbar(){
   const keys = caTickKeys(a);   // a practice card's checks, or a ladder's steps
   const doneN = caTickCount(keys);
   const prog = keys.length ? t('ca.barProgress', {done: doneN, total: keys.length}) : '';
-  /* A Focus card's step buttons ride in the bar instead of on a row of
-     their own above the step (2026-10-10, maximize-the-view): the row cost
-     48px of every step, and up here they stay in reach while the student
-     scrolls. They already show which steps are done (✓), so they stand in
-     for "n of m done". styles.css hides the card's own copy while the card
-     is the open one (.ca-solo-card). Every step move re-renders and every
-     render ends in this function, so the two copies can't disagree. */
-  const steps = caIsFocus(a) && caRoute(a).length > 1 && !caChooserUp(a)
-    ? `<div class="ca-bar-steps">${caFocusDotsHtml(a, caFocusIdx(a))}</div>` : '';
+  /* A Focus card's step buttons are on a row of their own under the bar
+     again, with names (Look 1, 2026-11-17: caStepRowHtml in app/activities.js).
+     From 2026-10-10 they rode here as bare numbers. They show which steps
+     are done (✓), so a Focus card's bar carries no "n of m done". */
+  const steps = caIsFocus(a) && !caChooserUp(a);
+  /* The practice-minutes strip (week ring, minutes, streak) for every kind
+     of card, before the tool buttons (Look 1, Jonathan, 2026-11-17: the
+     header that holds #pm-header folds away while a card is open). It is a
+     plain .pm-strip, so practice-minutes.js's refreshStrip() keeps it
+     current every second (it refills every shown .pm-strip while the
+     header's own strip is up, hidden under the folded header or not) and
+     removes it when the display is switched off; stripHtml() is '' when the
+     display is off or nobody is signed in. Rebuilt with the bar. */
+  const pmStrip = window.PM && typeof window.PM.stripHtml === 'function' ? window.PM.stripHtml() : '';
   /* The open card's own title row is hidden on screen (styles.css, .ca-solo-
      card), and the Optional tag lives in it — so it rides in the bar too, or
      an open card doesn't say it is optional. The 🖨 button lives ONLY here
@@ -440,9 +448,9 @@ function caSyncTopbar(){
   bar.innerHTML = `<button type="button" class="ca-bar-back" onclick="caCloseOpen()">&#x25C0; ${escHtml(t('ca.allActivities'))}</button>`
     + `<button type="button" class="ca-bar-name" onclick="caScrollToActivity('${escAttr(a.id)}')" title="${escAttr(t('ca.barTop'))}" data-i18n-attr="title:ca.barTop">${nameHtml}</button>`
     + optTag
-    + (steps || (prog ? `<span class="ca-bar-prog">${escHtml(prog)}</span>` : ''))
+    + (!steps && prog ? `<span class="ca-bar-prog">${escHtml(prog)}</span>` : '')
     + (caIsCard(a) ? `<button type="button" class="ca-bar-stop" onclick="pcStop()" hidden>&#x25A0; ${escHtml(t('ca.snipStop'))}</button>` : '')
-    + (tools ? `<span class="ca-bar-tools">${tools}</span>` : '');
+    + (tools || pmStrip ? `<span class="ca-bar-tools">${pmStrip}${tools}</span>` : '');
   bar.hidden = false;
   title.hidden = true;
   if(refocusFull){ const b = bar.querySelector('.ca-bar-full'); if(b) b.focus({ preventScroll: true }); }
@@ -455,7 +463,14 @@ function caSyncTopbar(){
    (caBarFabsHtml; four then, three since 2026-11-14) cost the bar ~150px,
    and a Focus card with six or seven step buttons no longer fit on one
    row in Spanish, where "Todas las actividades" and "Pantalla completa" are the bar's widest words (ca-17,
-   ca-21, ca-34, ca-46; ca-34 in English too, with its Optional tag). Only
+   ca-21, ca-34, ca-46; ca-34 in English too, with its Optional tag). Since
+   Look 1 (2026-11-17) the step buttons are in a row of their own and the
+   bar carries the practice-minutes strip instead: measured with the widest
+   strip ("999/600 min") and the Optional tag on every card in both
+   languages, the bar is one row everywhere and goes tight on two Spanish
+   cards on the 1000px column (ca-46's path picker, ca-52), and on a Spanish
+   practice card while its song's Stop shows with the Optional tag
+   (tools/pm-e2e.mjs pins that case). Only
    when the row would wrap, .ca-bar-tight drops the Full screen WORD — the
    icon stays, and the word stays the button's accessible name, as on a
    phone — and closes the gaps up (styles.css). Measured after every build,
@@ -466,13 +481,31 @@ function caFitBar(){
   const bar = document.getElementById('ca-bar-open');
   if(!bar) return;
   bar.classList.remove('ca-bar-tight');
+  caFitStepRow();
   if(bar.hidden || window.matchMedia('(max-width:760px)').matches) return;
   if(caBarRows(bar) > 1) bar.classList.add('ca-bar-tight');
+  caFitStepRow();
+}
+/* The open Focus card's step row (caStepRowHtml, Look 1, 2026-11-17): every
+   button shows its step's name while the row fits on one line; when it
+   would wrap, .ca-step-row--tight leaves the name on the step on screen
+   only, the rest show their number (or ✓). Measured here, after every
+   build (caSyncTopbar ends in caFitBar), on resize and when the bar's
+   height changes. Also publishes the bar's height as --ca-bar-h, the
+   sticky row's top. */
+function caFitStepRow(){
+  const bar = document.querySelector('#class-activities-screen .page-topbar');
+  if(bar && bar.offsetHeight) document.body.style.setProperty('--ca-bar-h', bar.offsetHeight + 'px');
+  const row = document.querySelector('.ca-screen.ca-solo .ca-solo-card .ca-step-row');
+  if(!row) return;
+  row.classList.remove('ca-step-row--tight');
+  if(caBarRows(row, '.ca-focus-dot, .ca-path-row') > 1) row.classList.add('ca-step-row--tight');
 }
 // 1 when every item in the bar sits on the first row, 2 when any has
-// wrapped below it (0 when the bar is not on screen).
-function caBarRows(bar){
-  const kids = Array.from(bar.children).filter(k => k.getClientRects().length);
+// wrapped below it (0 when the bar is not on screen). `sel` measures those
+// descendants instead of the bar's own children (the step row's buttons).
+function caBarRows(bar, sel){
+  const kids = Array.from(sel ? bar.querySelectorAll(sel) : bar.children).filter(k => k.getClientRects().length);
   if(!kids.length) return 0;
   const first = kids[0].getBoundingClientRect();
   return kids.some(k => k.getBoundingClientRect().top >= first.bottom - 1) ? 2 : 1;
@@ -527,7 +560,11 @@ window.addEventListener('resize', () => { caFitBar(); caPlaceToolPopups(); });
    The button in the sticky bar asks the browser for full screen (the
    Fullscreen API — the same thing the video players do): 721px for the
    activity, and styles.css scales it up to the screen's width (body.ca-full,
-   caSyncFullZoom). The site header and the left menu are NOT tied to full
+   caSyncFullZoom) — except an open Focus step, which already fills the
+   width (body.ca-wide, Look 1, 2026-11-17) and gets the extra height with
+   no zoom. Until 2026-11-17 the folded view of every card was "normal size,
+   header and menu hidden" (2026-11-10); a Focus step now uses the full
+   width, practice cards and exit checks still keep the 1000px column. The site header and the left menu are NOT tied to full
    screen any more: since 2026-11-10 they fold away whenever a card is open
    (body.ca-fold, caSyncSolo — Jonathan: "an open activity should fill the
    page"), because the browser won't enter full screen without a tap.
@@ -569,7 +606,10 @@ document.addEventListener('fullscreenchange', () => { caSyncTopbar(); });
    gets a little more, up to the cap. Re-measured on resize because the
    fullscreenchange event can land before the window has finished growing. */
 function caSyncFullZoom(){
-  const z = document.body.classList.contains('ca-full')
+  /* An open Focus step already uses the whole width (body.ca-wide, Look 1,
+     2026-11-17), so full screen gives it the browser's height and no zoom:
+     zooming a full-width column would push it off the right edge. */
+  const z = document.body.classList.contains('ca-full') && !document.body.classList.contains('ca-wide')
     ? Math.min(2, Math.max(1, document.documentElement.clientWidth / 1000)) : 1;
   document.body.style.setProperty('--ca-zoom', z.toFixed(3));
 }
@@ -598,6 +638,13 @@ function caSyncSolo(card){
      activity up (body.ca-full, caSyncFullZoom), and only then. */
   document.body.classList.toggle('ca-fold', on);
   document.body.classList.toggle('ca-full', on && caFullscreenNow());
+  /* An open Focus ladder past its path picker fills the screen (Look 1,
+     Jonathan, 2026-11-17: "the class activities get the most use"):
+     body.ca-wide lifts the 1000px column, scales the strum board up and
+     pins Got it to the bottom (styles.css, "Look 1"). Not for a practice
+     card, an exit check or the path picker, which keep the 1000px column. */
+  const oa = on ? (window.CLASS_ACTIVITIES || []).find(x => x.id === card.dataset.id) : null;
+  document.body.classList.toggle('ca-wide', !!(oa && caIsFocus(oa) && !caChooserUp(oa)));
   caSyncFullZoom();
   if(!on) return;
   card.classList.add('ca-solo-card');

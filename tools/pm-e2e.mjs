@@ -13,7 +13,8 @@
        bars and 8-week row, in English and Spanish
      · colours read back from the browser (getComputedStyle), not assumed
      · uiOn:false draws nothing at all
-     · an OPEN practice card folds the header, and the strip in it, away (2026-11-10, body.ca-fold):
+     · an OPEN practice card folds the header, and the strip in it, away (2026-11-10, body.ca-fold), and
+       the card's own bar carries a copy of the strip with the same numbers (Look 1, 2026-11-17):
        the seconds still count there, the goal toast waits for the strip, and a play run ended
        with "All activities" drops its recap from the strip; Stop pressed ON the card shows the
        recap on the card, beside it, or (no room) when the strip comes back (updated 2026-11-12)
@@ -182,14 +183,15 @@ await waitFor(`PM._play() && PM._session().counted >= 6`);
 await waitFor(`PM.status().week.secs >= 53 * 60`, 15000);
 const st = await ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()); return { pend: s.pend[d], playing: !!(pcState && pcState.audio && !pcState.audio.paused), src: pcState && pcState.audio && pcState.audio.currentSrc, counted: PM._session() && PM._session().counted }; })()`);
 check('the real Play counted seconds from a real <audio> (detached element, wrapped play())', st.counted >= 6 && st.counted <= 12 && /-backing-/.test(st.src || ''), st);
-/* The open card folds the header away: no strip on screen, none in the card bar, and the seconds keep counting. */
-const foldProbe = `(() => { const h = document.getElementById('pm-header'); return { fold: document.body.classList.contains('ca-fold'), headerVis: getComputedStyle(document.querySelector('.header')).visibility, strips: [...document.querySelectorAll('.pm-strip')].filter(e => { if (e.hidden || !e.getClientRects().length) return false; const q = e.getBoundingClientRect(), t = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2); return t && e.contains(t); }).map(e => e.id), stripsInCardBar: document.querySelectorAll('#ca-bar-open .pm-strip').length, filled: [...h.children].map(c => c.textContent.replace(/\\s+/g, ' ').trim()).join(' '), secs: PM.status().week.secs }; })()`;
+/* The open card folds the header away, and the card's own bar carries a copy of the strip (Look 1, 2026-11-17): exactly one strip on
+   screen, the bar's, with the header's numbers, kept current while the seconds count. */
+const foldProbe = `(() => { const h = document.getElementById('pm-header'), cb = document.querySelector('#ca-bar-open .pm-strip'); return { fold: document.body.classList.contains('ca-fold'), headerVis: getComputedStyle(document.querySelector('.header')).visibility, strips: [...document.querySelectorAll('.pm-strip')].filter(e => { if (e.hidden || !e.getClientRects().length) return false; const q = e.getBoundingClientRect(), t = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2); return t && e.contains(t); }).map(e => e.id || 'card-bar'), stripsInCardBar: document.querySelectorAll('#ca-bar-open .pm-strip').length, filled: [...h.children].map(c => c.textContent.replace(/\\s+/g, ' ').trim()).join(' '), barFilled: cb ? [...cb.children].map(c => c.textContent.replace(/\\s+/g, ' ').trim()).join(' ') : null, secs: PM.status().week.secs }; })()`;
 await ev(`PM.refreshStrip(true)`); await sleep(300);
 const fold1 = await ev(foldProbe);
 await sleep(3000);
 const fold1b = await ev(foldProbe);
-check('an open practice card folds the header and its strip away (2026-11-10, body.ca-fold): no strip on screen, none in the card bar', fold1.fold && fold1.headerVis === 'hidden' && fold1.strips.length === 0 && fold1.stripsInCardBar === 0, fold1);
-check('…and the minutes still count while it is folded: the week went up while the song played, and the hidden strip holds "53/60 min 3"', fold1b.secs >= fold1.secs + 2 && fold1.filled === '53/60 min 3', [fold1, fold1b]);
+check('an open practice card folds the header and its strip away (2026-11-10, body.ca-fold), and its bar carries the one strip on screen (Look 1, 2026-11-17)', fold1.fold && fold1.headerVis === 'hidden' && fold1.strips.join() === 'card-bar' && fold1.stripsInCardBar === 1, fold1);
+check('…and the minutes still count while it is folded: the week went up while the song played, and the hidden strip and the bar\'s strip both hold "53/60 min 3"', fold1b.secs >= fold1.secs + 2 && fold1.filled === '53/60 min 3' && fold1.barFilled === '53/60 min 3', [fold1, fold1b]);
 await shot('1-card-folded-en');
 /* "All activities": the header comes back with the strip in it. The run (about 10 s of real play) is under a minute: no recap. */
 await leaveCard(); await sleep(800);
@@ -359,13 +361,17 @@ for (const lang of ['en', 'es']) {
   await ev(`setLang('${lang}')`); await sleep(500);
   for (const stop of [false, true]) for (const opt of [false, true]) {
     const withTag = opt ? "const tag = document.createElement('span'); tag.className = 'ca-optional-tag'; tag.textContent = t('ca.optional'); n.after(tag);" : '';
-    await ev(`(() => { caSyncTopbar(); const n = document.querySelector('#ca-bar-open .ca-bar-name'); ${withTag} document.querySelector('#ca-bar-open .ca-bar-stop').hidden = ${!stop}; return true; })()`); await sleep(250);
+    await ev(`(() => { caSyncTopbar(); const n = document.querySelector('#ca-bar-open .ca-bar-name'); ${withTag} document.querySelector('#ca-bar-open .ca-bar-stop').hidden = ${!stop}; caFitBar(); return true; })()`); await sleep(250);
     const h = await ev(`Math.round(document.querySelector('#class-activities-screen .page-topbar').getBoundingClientRect().height)`);
     const lab = await ev(`Math.round(document.querySelector('#ca-bar-open .ca-bar-full-lab').getBoundingClientRect().width)`);
     cardRows.push(`${lang}${stop ? '+stop' : ''}${opt ? '+optional' : ''}=${h}${lab > 20 ? '' : '(label clipped)'}`);
   }
 }
-check('the practice card\'s bar is one row (≤ 56px) and Full screen has its word back, EN/ES × Stop shown/hidden × Optional tag', cardRows.every((r) => +r.split('=')[1].split('(')[0] <= 56 && !/clipped/.test(r)) && cardRows.length === 8, cardRows);
+/* Since Look 1 (2026-11-17) the bar also carries the minutes strip: re-fitted as pcSyncBarStop() does (caFitBar), the bar is one row in all 8,
+   and Full screen keeps its word in all but the widest case, Spanish with the song's Stop and the Optional tag, where .ca-bar-tight drops the
+   word (the icon and the accessible name stay), as it does for a long Focus bar. */
+check('the practice card\'s bar is one row (≤ 56px) with the minutes strip in it, EN/ES × Stop shown/hidden × Optional tag; Full screen keeps its word in 7 of 8 (not in es+stop+optional)', cardRows.every((r) => +r.split('=')[1].split('(')[0] <= 56) && cardRows.length === 8
+  && cardRows.filter((r) => /clipped/.test(r)).map((r) => r.split('=')[0]).join() === 'es+stop+optional', cardRows);
 await ev(`setLang('en'); caSyncTopbar()`);
 
 /* ── My progress ── */
@@ -594,16 +600,16 @@ for (const lang of ['en', 'es']) {
   await ev(`setLang('${lang}')`); await sleep(400);
   for (const [name, call] of views) {
     await ev(call); await sleep(900);
-    const v = await ev(`(() => { const top = [...document.querySelectorAll('.pm-strip')].filter(e => { if (e.hidden || !e.getClientRects().length) return false; const q = e.getBoundingClientRect(), t = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2); return t && e.contains(t); }).map(e => e.id); const h = document.getElementById(${JSON.stringify(name === 'Games' ? 'pm-games' : 'pm-header')}); return { shown: !h.hidden && !!h.getClientRects().length && getComputedStyle(h).visibility !== 'hidden', top, inCardBar: document.querySelectorAll('#ca-bar-open .pm-strip').length, over: document.documentElement.scrollWidth > document.documentElement.clientWidth, title: h.title,
+    const v = await ev(`(() => { const top = [...document.querySelectorAll('.pm-strip')].filter(e => { if (e.hidden || !e.getClientRects().length) return false; const q = e.getBoundingClientRect(), t = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2); return t && e.contains(t); }).map(e => e.id); const h = document.getElementById(${JSON.stringify(name === 'Games' ? 'pm-games' : 'pm-header')}); return { shown: !h.hidden && !!h.getClientRects().length && getComputedStyle(h).visibility !== 'hidden', top, inCardBar: [...document.querySelectorAll('#ca-bar-open .pm-strip')].filter(e => e.getClientRects().length).length, over: document.documentElement.scrollWidth > document.documentElement.clientWidth, title: h.title,
       fold: document.body.classList.contains('ca-fold') && !document.getElementById('class-activities-screen').hidden && !!document.querySelector('.ca-card[open]') }; })()`);
     /* Games is a full-screen layer (z 120) over the whole page, header included: its own bar carries #pm-games. Exactly one strip is on top in every
-       view but the open card, where none is (the header is folded away) and none is drawn in the card's bar. */
-    if (name === 'a practice card') seen.push(v.fold && !v.shown && v.top.length === 0 && v.inCardBar === 0 && !v.over);
+       view: on the open card it is the one in the card's bar (Look 1, 2026-11-17), the header's being folded away. */
+    if (name === 'a practice card') seen.push(v.fold && !v.shown && v.top.length === 1 && v.top[0] === '' && v.inCardBar === 1 && !v.over);
     else seen.push(v.shown && v.top.length === 1 && v.top[0] === (name === 'Games' ? 'pm-games' : 'pm-header') && !v.inCardBar && !v.over && v.title === (lang === 'en' ? 'Open My progress' : 'Abrir Mi progreso'));
     if (!seen[seen.length - 1]) console.log('    ✗ view', lang, name, JSON.stringify(v));
   }
 }
-check('exactly one strip is showing and on top (nothing covers it), with its tooltip and no sideways scroll, on Modules / In class / Songs / Games (the Games bar\'s own) / My progress; on an open practice card the header is folded away with no strip on screen or in the card bar; EN + ES', seen.length === 12 && seen.every(Boolean), seen);
+check('exactly one strip is showing and on top (nothing covers it), with its tooltip and no sideways scroll, on Modules / In class / Songs / Games (the Games bar\'s own) / My progress; on an open practice card the header is folded away and the one strip is the card bar\'s; EN + ES', seen.length === 12 && seen.every(Boolean), seen);
 /* A goal crossed on the Games screen: the toast drops from the Games bar's strip, above the Games layer. */
 await ev(`setLang('en'); toggleGames()`); await sleep(1200);
 await ev(`(() => { const s = PM._state(), d = PM.calc.ymd(new Date()); s.weeks[PM.calc.weekIdOf(d)] = { seconds: 3600 - 4, goalSeconds: 3600, hit: false }; s.days = {}; s.pend = {}; s.toastWeek = ''; s.pendingToast = false; try { localStorage.removeItem('pm:t:e2e-student'); } catch(e) {} window.__a = new Audio(${JSON.stringify(pillSrc)}); window.__a.play(); return true; })()`);

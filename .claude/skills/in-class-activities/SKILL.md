@@ -181,8 +181,44 @@ should fill the page").
   `#class-activities/<id>` reopens the card folded. "◀ All activities"
   (`caCloseOpen`) brings both back, and so does leaving for another page (the
   CSS is scoped to `#class-activities-screen:not([hidden])`).
-- The **Full screen** button is unchanged: it adds `body.ca-full`, which only
-  zooms the column (`caSyncFullZoom`). The folded view stays at 1×.
+- The **Full screen** button adds `body.ca-full`, which zooms the 1000px
+  column (`caSyncFullZoom`) of a practice card or an exit check. An open
+  Focus step is already full width (`body.ca-wide`, below), so full screen
+  gives it the browser's height and no zoom (`--ca-zoom` 1).
+- **An open Focus step fills the screen** (Look 1, Jonathan, 2026-11-17: "the
+  class activities get the most use so the redesign of those is paramount").
+  `caSyncSolo()` sets `body.ca-wide` for an open `view: 'focus'` card past its
+  path picker; the 1000px column is lifted to the window less 40px a side.
+  NOT for a practice card, an exit check or the path picker (they keep
+  1000px), and not below 761px (the phone keeps its layout). This reverses
+  "Does the new default view scale things up? No" (2026-11-10) for a Focus
+  step only. In that view (styles.css, "Look 1"):
+  - the direction line (`.ca-step-dir`, a span `caStepHtml` puts round the
+    Focus line) is 22px, weight 600, still ONE line in both languages;
+  - the strum board scales with its width through container units (a
+    two-bars-a-row board's arrows about 82px, a `barsPerRow: 4` board's
+    about 41px); `buildStrum()`'s markup is unchanged and every other caller
+    (module steps, the path picker's previews, the console, ca-52's check)
+    keeps today's size;
+  - a tab gets wider, never taller (string spacing and rows-per-page fixed);
+  - a drill keeps its size, centred (`.ca-step-drill`, max 944px);
+  - the Back / Got it row (`.ca-focus-nav`) is pinned to the bottom of the
+    screen, the same place on every step; the column's bottom padding keeps
+    the step scrolling above it. It rides up over the offline bar and the
+    practice copy's strip (`PC_RIDE_UP`, firebase-config.js).
+- **The step row** (`caStepRowHtml`, Look 1): a Focus card's step buttons
+  are a row of their own under the bar again, sticky with it (`--ca-bar-h`),
+  each showing its number (✓ when done) and its step's name: the `label`
+  less a leading "Practice — " / "Practica — " (`caStepShortName`, render
+  time, data untouched). On a paths activity "Path: … / Change path" sits at
+  its right end. When the names would wrap, `caFitStepRow()` (from
+  `caFitBar`, measured, never worked out) adds `.ca-step-row--tight` and only
+  the step on screen keeps its name. From 2026-10-10 to 2026-11-17 the
+  buttons rode in the bar as bare numbers ("a row of their own cost 48px of
+  every step"); the step's own head line (`.ca-step-head--focus`) is now off
+  screen instead (visually hidden, still focusable for `caFocusGo`, still
+  printed), so the height is the same. Each button's accessible name is the
+  whole "Step 2 of 4: Practice — D5". A Focus card's bar has no "n of m done".
 - The rail's Tuner / Timer / Metro go with the rail, so the bar
   carries three round copies (Record was removed from the dock and the bar
   2026-11-14; both go together, or the bar keeps an empty button that throws) (`caBarFabsHtml`, in `.ca-bar-tools` before Print
@@ -190,14 +226,29 @@ should fill the page").
   dock's own popup; styles.css un-hides an open popup and pins it under the
   bar's buttons (`caPlaceToolPopups`). The rail is hidden by `visibility`, not
   `display:none`, for that reason. `railCollapsed` is never touched.
-- The bar stays ONE row at 1366×657: when it would wrap (a Focus card with 6–7
-  step buttons, mostly in Spanish), `caFitBar()` measures it and
-  `.ca-bar-tight` drops the Full screen word (icon kept) and closes the gaps.
+- **The practice-minutes strip rides in the bar** (Look 1, Jonathan,
+  2026-11-17: "show them in the activity's top bar"), for every kind of card,
+  first in `.ca-bar-tools`: `PM.stripHtml()`, a plain `.pm-strip` that
+  `refreshStrip()` keeps current and removes when the display is switched
+  off; '' when the display is off or nobody is signed in. A light pill.
+  `practice-minutes.js` is unchanged.
+- The bar stays ONE row at 1366×657: when it would wrap (the longest Spanish
+  title, the Optional tag and a "999/600 min" strip on the 1000px column),
+  `caFitBar()` measures it and `.ca-bar-tight` drops the Full screen word
+  (icon kept) and closes the gaps. With the strip in the bar this happens on
+  ca-46's path picker and ca-52 in Spanish, and on a Spanish practice card
+  while the song's Stop shows with the Optional tag (pm-e2e pins it).
 - Hidden while a card is open: Find, Español, the account area and
-  `#pm-header`. Minutes still count; a practice-minutes pill waits for the
-  header (`anchorStrip()` finds no strip).
-- Guards: checks.mjs **1cr** (real `caSyncSolo`/`caSyncTopbar`/`caBarTool`
-  plus the CSS rules), `tools/smoke.mjs` `foldWalk`.
+  `#pm-header` (the copy in the bar shows instead; the two never show
+  together). Minutes still count; a practice-minutes pill (week-goal toast,
+  recap) still waits for the header (`anchorStrip()` reads only the host
+  strips).
+- Guards: checks.mjs **1cr** (real `caSyncSolo`/`caSyncTopbar`/`caBarTool`,
+  `body.ca-wide` for a Focus step and not for a card, a check or the picker,
+  plus the CSS rules incl. the wide column and the pinned Got it), the
+  practice-minutes block (the bar draws the strip once), `tools/smoke.mjs`
+  `foldWalk` and `wideStepWalk` (Got it does not move, the next name becomes
+  current, a reload reopens the same view).
 - **Mark complete** closes the card, scrolls to the top and toasts
   `ca.doneNextToast` / `ca.doneAllToast`. Un-marking keeps the card open.
 - A second tap on the current rail row (In class, Songs, My progress, Modules)

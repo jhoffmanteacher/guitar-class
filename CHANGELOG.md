@@ -6,6 +6,13 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-17 — An open activity step fills the screen
+
+- **An open step of an In-Class Activity now uses the whole screen.** The directions are bigger, and strum patterns are drawn about three times larger, so you can read the arrows from your guitar. Tabs get wider but not taller.
+- **The step buttons at the top now say what each step is** ("✓ Muted strings", "2 D5", "3 D5, C5, G5"), so you can see where you are. If the names do not fit, only the step you are on keeps its name.
+- **"Got it — next step" is always in the same place:** the bottom right corner of the screen, on every step.
+- **Your practice minutes and streak now stay in view while an activity is open,** in the bar at the top of the activity.
+
 ## 2026-11-17 — Today's activity: newest number first for earlier days
 
 - **Three whole-song play-alongs now have a Chords / Tab / Lyrics switch:** Sweet Child O' Mine, "the cure" (both in power chords: Chords, Tab or Lyrics) and "Luna" (Chords or Tab). Press one while the song plays: the song keeps going and the highlight stays on the same beat in the new view. The card remembers your choice on that computer.

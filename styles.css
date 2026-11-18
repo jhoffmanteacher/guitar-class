@@ -3270,14 +3270,10 @@ body.explore-open #week-panels{display:none}
      handout always prints it (caIntroHtml in app.js). */
   .ca-screen.ca-solo .ca-solo-card > .ca-card-body > .ca-intro-later{display:none}
 }
-/* 2. A Focus card's step buttons ride in the bar (caSyncTopbar), right after
-      the name; the card's own row of them hides while it is the open card.
-      32px tall here so the bar stays one 48px row. On a phone the bar
-      wraps and the buttons take a row of their own under the name. */
-.ca-bar-steps{flex-shrink:0;align-self:center}
-.ca-bar-steps .ca-focus-dots{margin:0;flex-wrap:nowrap;gap:4px}
-.ca-bar-steps .ca-focus-dot{min-width:40px;min-height:32px;padding:0 10px}
-.ca-screen.ca-solo .ca-solo-card > .ca-card-body > .ca-focus-dots{display:none}
+/* 2. A Focus card's step buttons: a row of their own under the bar, each
+      with its step's name (Look 1, 2026-11-17; caStepRowHtml). From
+      2026-10-10 to 2026-11-17 they rode in the bar as bare numbers. See
+      "Look 1" below for the row's own rules. */
 /* 3. Full screen (caFullBtnHtml) at the bar's right end; when a practice
       card's Stop is showing, Stop takes the push and this sits beside it.
       The header and the rail fold away with any open card, full screen or
@@ -3371,19 +3367,91 @@ body.ca-fold:has(#class-activities-screen:not([hidden])) .rail-tools .tool-popup
 body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:var(--ca-zoom,1)}
 /*    Phone width: the Full screen word is clipped (still the button's
       accessible name; the icon carries it), and a Focus card's bar wraps
-      so the name stays readable and the step buttons get their own row. */
+      so the name stays readable; the tools row wraps under it. */
 @media (max-width:760px){
   .ca-bar-full{padding:6px 9px}
   .ca-bar-full-lab{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
-  .ca-bar-open:has(.ca-bar-steps){flex-wrap:wrap;row-gap:6px}
-  .ca-bar-open:has(.ca-bar-steps) .ca-bar-name{flex:1 1 0}
   /* The 10ch floor above is for the one-row bar; a phone keeps Back, the
      name and Full screen on the first row, so the name gives way here. */
   .ca-bar-name{min-width:0}
-  .ca-bar-steps{order:5;flex:0 0 100%}
-  .ca-bar-steps .ca-focus-dots{flex-wrap:wrap}
-  .ca-screen.ca-solo:has(.ca-bar-steps) .ca-solo-card{scroll-margin-top:92px}
 }
+/* ── Look 1 (Jonathan, 2026-11-17: "the class activities get the most use
+   so the redesign of those is paramount"). An open Focus step fills the
+   screen. Presentation only: no key, tick or step moved.
+   a. The step row (caStepRowHtml): named step buttons, sticky under the bar
+      (--ca-bar-h, measured by caFitStepRow), "Path: … / Change path" at its
+      right end. Scoped to .ca-step-row so the console preview's own
+      .ca-focus-dots (teacher-activities-2.js) keep their look. The open card
+      clips (overflow:clip, not hidden), so the row can stick. */
+.ca-screen.ca-solo .ca-card--focus.ca-solo-card{overflow:clip}
+.ca-step-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:4px 0 6px}
+.ca-screen.ca-solo .ca-solo-card .ca-step-row{position:sticky;top:var(--ca-bar-h,50px);z-index:40;background:var(--bg);
+  margin:0 -14px 6px;padding:10px 14px}
+.ca-step-row .ca-focus-dots{margin:0;gap:8px}
+.ca-step-row .ca-focus-dot{display:inline-flex;align-items:center;gap:8px;min-width:44px;min-height:40px;padding:0 16px;
+  border-radius:20px;border:1px solid var(--border2);background:var(--bg);color:var(--text2);font-size:0.9375rem;white-space:nowrap}
+.ca-step-row .ca-focus-dot-num{font-variant-numeric:tabular-nums}
+.ca-step-row .ca-focus-dot.is-done{background:var(--green-bg);color:var(--green-text);border-color:var(--green-text)}
+.ca-step-row .ca-focus-dot.is-now{background:var(--brand);color:var(--brand-text);border-color:var(--brand)}
+.ca-step-row.ca-step-row--tight .ca-focus-dot:not(.is-now) .ca-focus-dot-name{display:none}
+.ca-step-row.ca-step-row--tight .ca-focus-dot:not(.is-now){padding:0 12px;justify-content:center}
+.ca-step-row .ca-path-row{margin:0 0 0 auto}
+/*    The step's own head line ("Step 2 of 4: Practice — D5") is off screen
+      in the open view: the row says the same. Kept in the page, focusable
+      (caFocusGo moves focus to it) and in print (screen only). */
+@media screen{
+  .ca-screen.ca-solo .ca-solo-card .ca-step-head--focus{position:absolute;width:1px;height:1px;min-height:0;padding:0;margin:-1px;
+    overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+}
+/* b. The open step fills the screen (body.ca-wide, set by caSyncSolo for an
+      open Focus card past its path picker). The 1000px column is lifted to
+      the window less 40px a side; the list, practice cards, exit checks
+      and every other page keep 1000px. The card loses its frame. The
+      phone (≤760px) keeps its own layout. */
+@media (min-width:761px){
+  body.ca-wide:has(#class-activities-screen:not([hidden])) .app-layout .main{max-width:none;margin:0;
+    padding:0 40px calc(var(--ca-nav-h,72px) + 12px)}
+  body.ca-wide .ca-screen.ca-solo .page-shell{padding-bottom:0}
+  body.ca-wide .ca-screen.ca-solo .ca-solo-card{background:transparent;border:0;border-radius:0;margin:0}
+  body.ca-wide .ca-screen.ca-solo .ca-solo-card > .ca-card-body{padding:0}
+  body.ca-wide .ca-screen.ca-solo .ca-solo-card .ca-step-row{margin:0 0 4px;padding:10px 0 8px;background:var(--bg2)}
+  /*  The bar runs edge to edge, its white and its amber rule across the window. */
+  body.ca-wide .ca-screen.ca-solo .page-topbar{margin-inline:-40px;padding-inline:40px}
+  body.ca-wide .ca-screen.ca-solo .ca-solo-card .ca-step-detail{padding:0}
+  /*  The direction line: 22px, weight 600, one line (measured for every step
+      in both languages; the length cap is checks.mjs 1cs). */
+  body.ca-wide .ca-screen.ca-solo .ca-solo-card .ca-step-dir{display:block;font-size:1.375rem;font-weight:600;line-height:1.3;margin:0 0 6px}
+  body.ca-wide .ca-screen.ca-solo .ca-solo-card .ca-step-detail > .rep-dots-line{margin-top:0;margin-bottom:6px}
+  /*  The strum board scales to its width: each arrow takes 95% of its cell
+      (a two-bars-a-row board: about 76px at 1366, was 28px), the chord name
+      and the count follow. A barsPerRow:4 board has twice the cells, so it
+      comes out half the size. Container units, so buildStrum()'s markup is
+      unchanged and its other callers (module steps, the path picker's
+      previews, the console, ca-52's strum check) keep today's size. */
+  body.ca-wide .ca-screen.ca-solo .ca-solo-card .ca-step .strum-board{container-type:inline-size}
+  body.ca-wide .ca-screen.ca-solo .ca-solo-card .ca-step .strum-dir{font-size:clamp(1.75rem, calc(95cqi / var(--strum-cols,16)), 84px)}
+  body.ca-wide .ca-screen.ca-solo .ca-solo-card .ca-step .strum-chord{font-size:clamp(1rem, calc(30cqi / var(--strum-cols,16)), 1.5rem)}
+  body.ca-wide .ca-screen.ca-solo .ca-solo-card .ca-step .strum-count{font-size:clamp(0.875rem, calc(28cqi / var(--strum-cols,16)), 1.375rem)}
+  body.ca-wide .ca-screen.ca-solo .ca-solo-card .ca-step .strum-board{gap:8px}
+  /*  A drill keeps its own size, centred in the wide column. */
+  body.ca-wide .ca-screen.ca-solo .ca-solo-card .ca-step-drill{max-width:944px;margin-inline:auto}
+  /* c. Got it in one place: the Back / Got it row is pinned to the bottom
+        of the screen, the same spot on every step. The column's bottom
+        padding (--ca-nav-h + 24px, above) keeps the step scrolling above it,
+        never behind it. It rides up over the offline banner like the other
+        bottom-fixed controls. */
+  body.ca-wide:has(#class-activities-screen:not([hidden])) .ca-solo-card .ca-step:not(.ca-step-collapsed) .ca-focus-nav{
+    position:fixed;left:0;right:0;bottom:0;z-index:45;margin:0;padding:12px 40px;min-height:var(--ca-nav-h,72px);box-sizing:border-box;
+    background:var(--bg);border-top:1px solid var(--border)}
+  html.offline-on body.ca-wide .ca-solo-card .ca-focus-nav{translate:0 calc(var(--offline-h,0px) * -1)}
+  body.ca-wide .ca-solo-card .ca-focus-next{min-height:48px;padding:12px 30px;font-size:1.0625rem}
+}
+/* d. The practice-minutes strip in the open card's bar (caSyncTopbar), for
+      every kind of card: the header's strip folds away with the header. A
+      light pill here, on the page's own background. */
+.ca-bar-tools > .pm-strip{margin-left:0;background:var(--bg2);color:var(--text);box-shadow:0 0 0 1px var(--border2);padding:4px 10px}
+.ca-bar-tools > .pm-strip .pm-streak b{color:var(--text)}
+.ca-bar-tools > .pm-strip .pm-ring-bg{stroke:var(--border2)}
 /* 4. A practice card's TAB head row. The pager (Previous / Section n of m /
       Next) moves up to the right end of the "Tap a section…" line, which
       was mostly empty — it was a row of its own under the TAB (~30px). The

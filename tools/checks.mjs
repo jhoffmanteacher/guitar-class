@@ -4445,7 +4445,9 @@ function validateClassActivities() {
   if (pathActivities) {
     const appSrc = siteSource('app.js', ROOT);
     const tchSrc = siteSource('teacher.js', ROOT);
-    if (!/\$\{chooser \? caPathChooserHtml\(a\) : caPathRowHtml\(a\)\}/.test(appSrc)) { err('1d: caCardBodyBlockHtml() in app.js no longer draws the path chooser / the "Change path" row'); problems++; }
+    /* Since Look 1 (2026-11-17) an open Focus card's "Change path" row sits at the right end of the step row (caStepRowHtml). */
+    if (!/\$\{chooser \? caPathChooserHtml\(a\) : stepsHtml && focus \? caStepRowHtml\(a, openStepIdx\) : caPathRowHtml\(a\)\}/.test(appSrc)
+      || !/function caStepRowHtml\(a, cur\)\{\s*return `<div class="ca-step-row">\$\{caFocusDotsHtml\(a, cur\)\}\$\{caPathRowHtml\(a\)\}<\/div>`;/.test(appSrc)) { err('1d: caCardBodyBlockHtml() in app.js no longer draws the path chooser / the "Change path" row (in the step row, caStepRowHtml)'); problems++; }
     if (!/const stepsHtml = \(card \|\| chooser\) \? '' : route\.map\(\(si, pos\) => caStepHtml\(a, steps\[si\], si, si === openStepIdx/.test(appSrc)) { err('1d: caCardBodyBlockHtml() in app.js no longer walks caRoute(a) with the step\'s flat index as the key'); problems++; }
     if (!/caPathChooserHtml\(a,\{preview:true\}\)/.test(tchSrc) || !/caPathSteps\(a,pathKey\)\.concat\(caSharedSteps\(a\)\)/.test(tchSrc)) { err('1d: renderTeacherActivityDetail() in teacher.js no longer draws the path chooser and walks the route by path'); problems++; }
   }
@@ -10445,8 +10447,15 @@ function checkPracticeCards(ctx) {
    caSyncTopbar() and caBarTool() in the 0b render context (a card open, a
    card open in full screen, no card), and reads the real styles.css rules
    that do the folding. tools/smoke.mjs (foldWalk) clicks it all in a real
-   browser. Pinned: 21 assertions (22 with the Record button). */
-const FOLD_ASSERTS = 21;
+   browser. Pinned: 21 assertions (22 with the Record button).
+   Look 1 (Jonathan, 2026-11-17): an open Focus ladder past its path picker
+   fills the screen (body.ca-wide, set by the real caSyncSolo); a practice
+   card, an exit check and the path picker do not, and keep the 1000px
+   column. styles.css lifts the column only under body.ca-wide and pins the
+   open step's Got it row (.ca-focus-nav) to the bottom, position:fixed.
+   tools/smoke.mjs (wideStepWalk) presses Got it in a real browser and
+   checks the button did not move. 28 assertions since then. */
+const FOLD_ASSERTS = 28;
 /* 1db. THE PRACTICE-CARD KEYS AND THE TICK POP (2026-11-13).
    Keys (KEYS in app/cards.js): Space or K press the card's Play / Stop, the
    arrows its Previous / Next pager (stopped) or the neighbouring section chip
@@ -11393,7 +11402,7 @@ function checkNoChecklist(ctx) {
   if (!bad) ok(`1ct: ${cards} practice card renders end in one Mark complete and ${extra} extra-song renders in none, EN + ES; no checklist, no ticks counted`);
 }
 function checkFoldedActivity(ctx) {
-  head('1cr. An open activity folds the header and the menu away (no full screen needed); the bar carries the three tools');
+  head('1cr. An open activity folds the header and the menu away (no full screen needed); the bar carries the three tools; an open Focus step fills the screen');
   let bad = 0, asserts = 0;
   const flag = m => { err('1cr: ' + m); problems++; bad++; };
   if (!ctx) { flag('cannot run — the 0b render context is unavailable'); return; }
@@ -11418,6 +11427,7 @@ function checkFoldedActivity(ctx) {
     'fab-tuner': dock('tuner'), 'fab-timer': dock('timer'), 'fab-metro': dock('metro') };
   const a = run(`((window.CLASS_ACTIVITIES || []).find(x => x && x.kind !== 'check' && !x.teacherOnly && x.view !== 'card') || {}).id || null`);
   if (!a) { flag('no Focus/ladder activity to open'); return; }
+  card.dataset = { id: a };
   let savedOpen, savedToggle;
   try {
     savedOpen = run('caOpenId'); savedToggle = run('typeof togglePopup === "function" ? togglePopup : null');
@@ -11469,6 +11479,17 @@ function checkFoldedActivity(ctx) {
     for (const w of tools) run(`caBarTool(${JSON.stringify(w)})`);
     want(JSON.stringify(calls) === JSON.stringify(tools), `caBarTool() should call togglePopup with tuner, timer, metro — called ${JSON.stringify(calls)}`);
     want(btns.every((b, i) => b[1].includes(`onclick="caBarTool(&quot;${tools[i]}&quot;)"`)), 'each tool button\'s onclick should be caBarTool(<its tool>) via jsonAttrArg');
+    // 7. Look 1 (2026-11-17): wide for an open Focus ladder past its path picker; not for a practice card, an exit check or the path picker.
+    const pick = run(`(() => { const L = window.CLASS_ACTIVITIES || []; const f = L.find(x => x.view === 'focus' && !x.teacherOnly && !(x.paths && x.paths.length));
+      const c = L.find(x => x.view === 'card' && !x.teacherOnly); const k = L.find(x => x.kind === 'check'); const p = L.find(x => x.view === 'focus' && x.paths && x.paths.length && !caPathKey(x));
+      return [f && f.id, c && c.id, k && k.id, p && p.id]; })()`);
+    want(pick.every(Boolean), `need a Focus ladder, a practice card, an exit check and an unpicked paths activity to open, found ${JSON.stringify(pick)}`);
+    const wideFor = id => { card.dataset = { id }; doc.fullscreenElement = null; run('caSyncSolo')(card); return pageBody.classList.contains('ca-wide'); };
+    want(wideFor(pick[0]) === true, `an open Focus step (${pick[0]}) must fill the screen: caSyncSolo did not set body.ca-wide`);
+    want(wideFor(pick[1]) === false, `a practice card (${pick[1]}) must keep the 1000px column, but caSyncSolo set body.ca-wide`);
+    want(wideFor(pick[2]) === false, `an exit check (${pick[2]}) must keep the 1000px column, but caSyncSolo set body.ca-wide`);
+    want(wideFor(pick[3]) === false, `the path picker (${pick[3]}, no path picked) must keep today's width, but caSyncSolo set body.ca-wide`);
+    run('caSyncSolo')(null);
   } catch (e) {
     flag('the page threw — ' + e.message);
   } finally {
@@ -11490,8 +11511,16 @@ function checkFoldedActivity(ctx) {
     'the zoom must stay on body.ca-full (Full screen) — .app-layout .main');
   const foldZoom = [...rules.keys()].filter(s => s.startsWith('body.ca-fold') && [...rules.get(s).values()].some(d => d.has('zoom')));
   want(!foldZoom.length, `the folded view must stay at normal size (1×), but these rules zoom it: ${foldZoom.join(', ')}`);
+  // Look 1: the wide column and the pinned Got it, read from styles.css (above 760px only).
+  const wm = '@media (min-width:761px)';
+  const wdecl = (sel, prop) => { const m = rules.get(sel); const d = m && m.get(wm); return d ? d.get(prop) : undefined; };
+  want(wdecl('body.ca-wide:has(#class-activities-screen:not([hidden])) .app-layout .main', 'max-width') === 'none',
+    'an open Focus step must lift the 1000px column: body.ca-wide:has(#class-activities-screen:not([hidden])) .app-layout .main{max-width:none} inside @media (min-width:761px)');
+  const navSel = 'body.ca-wide:has(#class-activities-screen:not([hidden])) .ca-solo-card .ca-step:not(.ca-step-collapsed) .ca-focus-nav';
+  want(wdecl(navSel, 'position') === 'fixed' && wdecl(navSel, 'bottom') === '0',
+    `an open Focus step's Got it row must be pinned to the bottom (position:fixed; bottom:0) — ${navSel}`);
   if (asserts !== FOLD_ASSERTS) flag(`ran ${asserts} assertions, pinned ${FOLD_ASSERTS} — a branch stopped running (or update the pin with the change)`);
-  if (!bad) ok(`1cr: a card open folds the page with no full screen, full screen adds the zoom, no card unfolds it; the bar's 3 tool buttons run togglePopup; 7 CSS rules read (${asserts} assertions)`);
+  if (!bad) ok(`1cr: a card open folds the page with no full screen, full screen adds the zoom, no card unfolds it; the bar's 3 tool buttons run togglePopup; an open Focus step is wide with Got it pinned, a practice card, an exit check and the path picker are not; 9 CSS rules read (${asserts} assertions)`);
 }
 /* 1cs. ONE SHORT LINE PER DIRECTION IN AN IN-CLASS ACTIVITY (Jonathan,
    2026-11-10: "students don't read them anyway"). Every step text, intro,
@@ -22023,11 +22052,16 @@ function checkPracticeMinutes(i18nTable) {
   const app = strip((read('app.js') || '').replace(/\r\n/g, '\n')), jr = strip((read('tabs/journey.js') || '').replace(/\r\n/g, '\n')), eng = read('practice-minutes.js') || '';
   if (!/window\.PM_HOST\s*=\s*\{[\s\S]{0,400}?ui:\s*true/.test(app)) fail('app.js: window.PM_HOST (ui:true) is missing');
   if (!/window\.PM_HOST\s*=\s*\{[\s\S]{0,200}?ui:\s*false/.test(jr)) fail('tabs/journey.js: window.PM_HOST (ui:false) is missing — Song Journey playback would not count');
-  /* The strip lives in the MAIN top bar only (2026-11-03): a hidden <button> in index.html's header, filled by
-     PM.syncHeader() wherever app.js paints #user-area. It must never also be drawn in a practice card's bar. */
+  /* The strip lives in the MAIN top bar (2026-11-03): a hidden <button> in index.html's header, filled by
+     PM.syncHeader() wherever app.js paints #user-area. Since Look 1 (Jonathan, 2026-11-17: "show them in the
+     activity's top bar") an open card's bar carries a copy too: the header, #pm-header with it, folds away whenever
+     a card is open (body.ca-fold, 1cr), so the two never show together. The bar draws it exactly once, through
+     PM.stripHtml() ('' when the display is off or nobody is signed in), first in .ca-bar-tools, and never calls
+     PM.onCardOpen; refreshStrip() keeps it current. */
   const sync = /function caSyncTopbar\(\)\{[\s\S]*?\n\}\n/.exec(app);
   if (!sync) fail('app.js: caSyncTopbar() not found');
-  else if (/stripHtml|onCardOpen|pm-strip/.test(sync[0])) fail('app.js caSyncTopbar(): must not draw the practice-minutes strip (PM.stripHtml / PM.onCardOpen / pm-strip) — it lives in the main top bar only, so it can never show twice');
+  else if ((sync[0].match(/stripHtml\(/g) || []).length !== 1 || /onCardOpen/.test(sync[0]) || !/<span class="ca-bar-tools">\$\{pmStrip\}\$\{tools\}<\/span>/.test(sync[0]))
+    fail('app.js caSyncTopbar(): the open card\'s bar must draw the practice-minutes strip exactly once, through PM.stripHtml(), first in .ca-bar-tools ("<span class=\\"ca-bar-tools\\">${pmStrip}${tools}</span>"), and never call PM.onCardOpen');
   const hdrM = /<header class="header">[\s\S]*?<\/header>/.exec(idx);
   const hdrBtn = hdrM && /<button\b[^>]*\bid="pm-header"[^>]*>/.exec(hdrM[0]);
   if (!hdrBtn) fail('index.html: <button id="pm-header"> is missing from <header class="header"> (the practice-minutes strip)');

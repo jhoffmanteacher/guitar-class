@@ -29,7 +29,9 @@ site-fill.js multiplies their thresholds by the fill. The teacher console
     restores the open tab itself.
 - `.dp-head` is a **title row only**. A single-flow set (Module 13) is the only
   thing that still renders one.
-- **The content column is 1000px.** Running text does not widen: `.st-text`
+- **The content column is 1000px**, everywhere except an open Focus step on
+  In class (Look 1, 2026-11-17: `body.ca-wide`, the window less 40px a side;
+  skill `in-class-activities`). Running text does not widen: `.st-text`
   and friends keep their own 70–72ch caps. Tab boards and snippet cards fill to
   ~880px. A `.step-figure` stops at **720px**, the widest raster in `img/`
   (past that the browser invents pixels). It lives inside `.st-text`, so above
@@ -45,6 +47,9 @@ site-fill.js multiplies their thresholds by the fill. The teacher console
     (`body.ca-fold`, 2026-11-10; skill `in-class-activities`): `visibility:hidden`
     and width 0, not `display:none`, because the tool popups live in
     `.rail-tools` and the card's bar opens them. Neither class above changes.
+    The header folds with it, `#pm-header` included; since Look 1
+    (2026-11-17) the card's bar carries a copy of the minutes strip, and an
+    open Focus step also lifts the 1000px column (`body.ca-wide`).
   - Nav labels are **clipped, never `display:none`**: each is its button's
     accessible name. `index.html` gives every nav item and every tool a
     translated `title=`.

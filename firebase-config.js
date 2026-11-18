@@ -68,7 +68,7 @@ const TEACHER_EMAIL = 'jhoffman@seq.org';
   try {
     var root = document.documentElement;
     var ROOM = '(var(--offline-h,0px) + var(--practice-h,0px))';
-    var PC_RIDE_UP = ['.back-to-top', '#gate-toast', '.lq-banner', '.video-overlay'];
+    var PC_RIDE_UP = ['.back-to-top', '#gate-toast', '.lq-banner', '.video-overlay', 'body.ca-wide .ca-solo-card .ca-focus-nav'];
     // A Journey page's floating tools sit fixed at the bottom; on the main site
     // .fab-group lives in the rail and must not move.
     if (!document.getElementById('app')) PC_RIDE_UP.push('.fab-group');
