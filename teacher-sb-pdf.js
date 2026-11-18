@@ -19,7 +19,7 @@
    original mp3 (sbMem.src). A draft opened again asks for them again; the chart text read from them IS in the
    draft (chart.text), as before. Another draft, a second "+ New song", a deleted draft (at once, even when the view was
    left mid-delete) or the start screen drops them (sbPdfSync); a pick still being read then lands nowhere (W10).
-   pdf.js (vendor/pdfjs, the practice card's loader pcSheetLoadPdfjs, app/cards.js) draws and reads them; a
+   pdf.js (vendor/pdfjs, the practice card's loader pcSheetLoadPdfjs, app/cards-sheet.js) draws and reads them; a
    drawing in flight is cancelled when another starts and when the view is left (sbPdfLeave). File names are
    escaped where they are drawn; buttons carry data-* only (the delegated sbClick / sbChange). */
 const SB_PDF_MAX_FILES = 8;

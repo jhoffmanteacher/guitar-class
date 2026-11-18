@@ -825,7 +825,7 @@ const FAKE_PDFJS = {
 };
 async function pdfCases(consoleSrc, check){
   const F3 = makeDb(), C = makeConsole(consoleSrc, F3), { run } = C;
-  C.box.pcSheetLoadPdfjs = async () => FAKE_PDFJS;      // app/cards.js is not in the console's vm
+  C.box.pcSheetLoadPdfjs = async () => FAKE_PDFJS;      // app/cards-sheet.js is not in the console's vm
   const textOf = run('sbPdfTextOf');
   const read = (t, m) => { const r = run('sbChartRead')(t, m || '4/4'); return { secs: r.sections.map(s => (s.name || '?') + ':' + s.bars.join(' ')).join(' / '), bad: r.bad.length, fmt: r.fmt }; };
   const norm = t => t.split('\n').map(l => l.trim().split(/\s+/).join(' '));
