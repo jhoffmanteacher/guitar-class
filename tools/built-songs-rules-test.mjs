@@ -163,6 +163,10 @@ async function suite(rulesText, quiet) {
     ['without gainDb only', { audio: (() => { const a = audio(); delete a.gainDb; return a; })() }],
     ['without sourceSha256 only', { audio: (() => { const a = audio(); delete a.sourceSha256; return a; })() }],
     ['an empty song map', { song: {} }], ['an audio id like a songFiles id', { audio: audio({ id: 'made-up-song-full-120' }) }],
+    /* song.sheet (2026-11-18, app/builtsongs.js: a chord sheet pdf in the song-file store, the card's Lyrics view):
+       today's rules check the song map's shape only, so a doc with one is written with no paste. */
+    ['a song with a chord sheet (song.sheet)', { song: Object.assign(song(), { sheet: { id: 'sheet-test0song1-0a1b2c3d', bytes: 120000, sha256: 'c'.repeat(64) } }) }],
+    ['a song with a two-column chord sheet (song.sheet.cols 2)', { song: Object.assign(song(), { sheet: { id: 'sheet-test0song1-0a1b2c3d', bytes: 5000000, sha256: 'c'.repeat(64), cols: 2 } }) }],
   ]) await t(label, () => S(T, 'sb-edges0001').set(doc(extra)), true);
   for (const [label, id] of [['an id without sb-', 'test0song1abc'], ['an id with sb_', 'sb_test0song1'], ['an id with a capital', 'sb-Test0song1'],
     ['an id of 7 after sb-', 'sb-' + 'a'.repeat(7)], ['an id of 25 after sb-', 'sb-' + 'a'.repeat(25)], ['an id with a dash after sb-', 'sb-test-song1'],

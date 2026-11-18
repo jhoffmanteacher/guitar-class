@@ -139,6 +139,14 @@ export function brokenFixtures(good){
   add('centsOff -10.5', d => { d.audio.centsOff = -10.5; });
   add('a chart field that would make a whole-song card', d => { d.song.wholeSong = true; });
   add('a chart field that would make a sheet card', d => { d.song.sheet = 'sheets/x.pdf'; });
+  /* song.sheet (2026-11-18, a chord sheet pdf in the song-file store): each field wrong in one way. */
+  const SH = d => ({ id: 'sheet-' + d.audio.id.slice(0, 20) + '-0a1b2c3d', bytes: 120000, sha256: 'c'.repeat(64) });
+  add('a sheet with an extra field', d => { d.song.sheet = Object.assign(SH(d), { name: 'x.pdf' }); });
+  add('a sheet id without sheet-', d => { d.song.sheet = Object.assign(SH(d), { id: 'test-sheet-0a1b' }); });
+  add('a sheet id that is the audio id', d => { d.audio.id = 'sheet-' + d.audio.id.slice(0, 20); d.song.sheet = Object.assign(SH(d), { id: d.audio.id }); });
+  add('a sheet of 5,000,001 bytes', d => { d.song.sheet = Object.assign(SH(d), { bytes: 5000001 }); });
+  add('a sheet SHA-256 in capitals', d => { d.song.sheet = Object.assign(SH(d), { sha256: 'C'.repeat(64) }); });
+  add('a sheet with cols 3', d => { d.song.sheet = Object.assign(SH(d), { cols: 3 }); });
   add('a chart field that would make it required', d => { d.song.optional = false; });
   add('meter 5/4', d => { d.song.meter = '5/4'; });
   /* Object.prototype's own names, where a plain lookup would answer (review R1-1, 2026-11-15). */

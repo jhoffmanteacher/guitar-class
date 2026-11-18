@@ -21663,7 +21663,7 @@ function checkSongBuilder() {
    file (data-slow stays empty), opening on 0.85; and index.html loads
    app/builtsongs.js right after app/snippets.js.
    ════════════════════════════════════════════════════════════════════ */
-const BUILT_SONGS_SIM_PIN = 148;   // 2026-11-14, Song builder Part a2: 14 zero, 63 merge and directions, 44 refused, 27 store, deep-link and tab-return cases (136 -> 139: the 15-minute tab-return throttle; -> 148, review round 1: Object.prototype names, the lyric cap, the directions line)
+const BUILT_SONGS_SIM_PIN = 163;   // 148 -> 163 (2026-11-18, private chord sheets P3): song.sheet checked, expanded to a loose Lyrics view, its pdf entry handed to the loader, its id clashes refused (9 cases), and 6 broken sheet docs refused alone; 2026-11-14, Song builder Part a2: 14 zero, 63 merge and directions, 44 refused, 27 store, deep-link and tab-return cases (136 -> 139: the 15-minute tab-return throttle; -> 148, review round 1: Object.prototype names, the lyric cap, the directions line)
 const ONE_FILE_STOPS = '0.65,0.85,0.9,1', ONE_FILE_OPEN = '0.85';   // Jonathan, 2026-11-14 (work order decision 3)
 function checkBuiltSongs(ctx) {
   head('1em. Built songs: the merge is run (0 songs changes nothing; fixtures, refusals, device copy); the one-file stops are pinned');

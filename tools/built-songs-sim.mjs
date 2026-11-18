@@ -25,6 +25,11 @@
                chord names of the view it opens on, the one-file stops 0.65 / 0.85 / 0.9 / 1 opening on 0.85), are
                on the Songs page list, never visible on In-Class Activities, never on the board, never moved by
                config/class.songLibrary, have no Mark complete, and fit their file
+     sheet     (2026-11-18) a doc with song.sheet passes, expands to ONE Lyrics view (otherViews.lyrics: the private
+               pdf, read loose, one column unless cols 2) and a .pdf song-file entry; merged, the card offers Chords /
+               Lyrics, opens on Chords, and in Lyrics draws the private sheet over the same sections (EN and ES); a sheet
+               id on SONG_FILES or another song's file with other bytes leaves that song out alone; no fixture without
+               song.sheet gets views
      refused   one broken doc per validator rule (tools/built-songs-fixtures.mjs brokenFixtures) is left out
                ALONE while every good song merges; at most one error-log line per page
      store     offline → the device copy; signed out → nothing, not even from the device copy; refused → nothing,
@@ -299,6 +304,50 @@ async function runCases(files){
     ok(shared.fs.st.writes === 0 && p.run('__logs.length') === 0 && p.run('__repaints') === 1, `merge: no write, no error-log line, one repaint (${shared.fs.st.writes} / ${p.run('__logs.length')} / ${p.run('__repaints')})`);
   }
 
+  /* ── sheet: a chord sheet (song.sheet, 2026-11-18): the card gets a Lyrics view of a private pdf, read loose ── */
+  {
+    ok(GOOD.every(g => !base.run(`builtSongExpand(${JSON.stringify(g.id)}, ${JSON.stringify(g.doc)})`).activity.card.otherViews), `sheet: no fixture without song.sheet gets card views (${GOOD.length} of ${GOOD.length})`);
+    const g = GOOD.find(x => x.key === 'fourFour'), sha = hex(77);
+    const withSheet = (cols) => { const d = JSON.parse(JSON.stringify(g.doc)); d.song.sheet = { id: 'sheet-test44-' + sha.slice(0, 8), bytes: 123456, sha256: sha }; if (cols) d.song.sheet.cols = cols; return d; };
+    const d1 = withSheet(), d2 = withSheet(2);
+    ok(base.run(`builtSongCheck(${JSON.stringify(g.id)}, ${JSON.stringify(d1)}).length`) === 0 && base.run(`builtSongCheck(${JSON.stringify(g.id)}, ${JSON.stringify(d2)}).length`) === 0, 'sheet: a doc with song.sheet passes builtSongCheck (cols left out, and cols 2)');
+    const x1 = base.run(`builtSongExpand(${JSON.stringify(g.id)}, ${JSON.stringify(d1)})`), x2 = base.run(`builtSongExpand(${JSON.stringify(g.id)}, ${JSON.stringify(d2)})`);
+    ok(JSON.stringify(x1.activity.card.otherViews) === JSON.stringify({ lyrics: { sheet: 'private:' + d1.song.sheet.id, sheetRead: 'loose', sheetColumns: 1 } }) && !x1.activity.card.sheet,
+      `sheet: the expansion adds one Lyrics view, private, read loose, one column (${JSON.stringify(x1.activity.card.otherViews)})`);
+    ok(JSON.stringify(x2.activity.card.otherViews.lyrics) === JSON.stringify({ sheet: 'private:' + d2.song.sheet.id, sheetRead: 'loose' }), 'sheet: cols 2 reads two columns (no sheetColumns)');
+    ok(JSON.stringify(x1.sheet) === JSON.stringify({ file: d1.song.sheet.id + '.pdf', bytes: 123456, sha256: sha, durationSec: 1 }), 'sheet: and a song-file entry for the pdf (.pdf, its bytes and SHA-256)');
+    const shared = { fs: makeFirestore(), idb: makeIdb(new Map()) };
+    publish(shared.fs, [{ id: g.id, doc: d1 }, ...GOOD.filter(x => x.id !== g.id)]);
+    const p = makePage(files, shared);
+    p.signIn(); await sync(p);
+    const r = p.run(`(() => { const id = ${JSON.stringify(g.id)}; const a = CLASS_ACTIVITIES.find(x => x.id === id);
+      const out = { has: !!a, list: a && caCardViewList(a).join(','), own: a && caCardViewMode(a), entry: songFileEntry(${JSON.stringify(d1.song.sheet.id)}), audio: songFileEntry(${JSON.stringify(d1.audio.id)}) };
+      const sw = caCardBodyHtml(a); out.buttons = (sw.match(/data-view="/g) || []).length; out.chordsFirst = /data-view="chords"[^>]*>[^<]*<\\/button><button[^>]*data-view="lyrics"/.test(sw);
+      caCardViewModes[id] = 'lyrics';
+      const v = caView(a), L = pcLayout(v);
+      out.viewSheet = v.card.sheet; out.viewRead = v.card.sheetRead; out.viewCols = v.card.sheetColumns; out.sameSecs = L && L.sections.length === pcLayout(a).sections.length;
+      const h = caCardBodyHtml(a); out.sheetHtml = h.includes('class="pc-sheet" data-sheet="private:' + ${JSON.stringify(d1.song.sheet.id)} + '"');
+      setLang('es'); out.esSheet = caCardBodyHtml(a).includes('data-sheet="private:'); setLang('en');
+      delete caCardViewModes[id];
+      return out; })()`);
+    ok(r.has && r.list === 'chords,lyrics' && r.own === 'chords' && r.buttons === 2 && r.chordsFirst, `sheet: merged, the card offers Chords / Lyrics, opens on Chords (${r.list}, ${r.buttons} buttons)`);
+    ok(r.entry && r.entry.file === d1.song.sheet.id + '.pdf' && r.entry.bytes === 123456 && r.entry.sha256 === sha && r.audio && r.audio.sha256 === d1.audio.sha256, 'sheet: the merge hands the pdf\'s entry to app/songfiles.js beside the audio\'s');
+    ok(r.viewSheet === 'private:' + d1.song.sheet.id && r.viewRead === 'loose' && r.viewCols === 1 && r.sameSecs && r.sheetHtml && r.esSheet, 'sheet: in Lyrics the card draws the private sheet, read loose, over the same sections (EN and ES)');
+    /* The sheet's id is checked as the audio's is: not on SONG_FILES, not another song's file with other bytes. */
+    const listed = Object.keys(base.run('SONG_FILES'))[0];
+    const d3 = withSheet(); d3.song.sheet.id = listed;
+    const g2 = GOOD.find(x => x.key === 'threeFour'), d4 = withSheet(); d4.song.sheet.id = g2.doc.audio.id;
+    const sh2 = { fs: makeFirestore(), idb: makeIdb(new Map()) };
+    publish(sh2.fs, [{ id: g.id, doc: d3 }, g2]);
+    const p2 = makePage(files, sh2); p2.signIn(); await sync(p2);
+    const sh3 = { fs: makeFirestore(), idb: makeIdb(new Map()) };
+    publish(sh3.fs, [{ id: g.id, doc: d4 }, g2]);
+    const p3 = makePage(files, sh3); p3.signIn(); await sync(p3);
+    ok(!p2.run(`CLASS_ACTIVITIES.some(a => a.id === ${JSON.stringify(g.id)})`) && p2.run(`CLASS_ACTIVITIES.some(a => a.id === ${JSON.stringify(g2.id)})`)
+      && !p3.run(`CLASS_ACTIVITIES.some(a => a.id === ${JSON.stringify(g.id)})`) && p3.run(`CLASS_ACTIVITIES.some(a => a.id === ${JSON.stringify(g2.id)})`),
+      'sheet: a sheet id on SONG_FILES, or another built song\'s audio id with other bytes, leaves that song out alone');
+  }
+
   /* ── refused: one broken doc per rule, each left out alone ── */
   {
     const good = GOOD.find(g => g.key === 'fourFour');
@@ -504,7 +553,14 @@ async function main(){
       ['app/builtsongs.js', 'an extra song made required', "id, view: 'card', library: true, optional: true,", "id, view: 'card', library: true, optional: false,"],
       ['app/builtsongs.js', 'the same edit read again', "if(have && have.ver === list[id] && bsIsObj(have.doc)){", "if(false){"],
       ['app/builtsongs.js', 'every refusal logged', "if(bsLogged) return;\n  bsLogged = true;", "bsLogged = true;"],
-      ['app/builtsongs.js', 'an audio id on SONG_FILES kept', "else if(typeof SONG_FILES !== 'undefined' && Object.prototype.hasOwnProperty.call(SONG_FILES, aid)) why.push(", "else if(false) why.push("],
+      ['app/builtsongs.js', 'an audio (or sheet) id on SONG_FILES kept', "if(typeof SONG_FILES !== 'undefined' && Object.prototype.hasOwnProperty.call(SONG_FILES, fid)){ why.push(", "if(false){ why.push("],
+      /* song.sheet (2026-11-18): a chord sheet pdf in the song-file store, the card's Lyrics view. */
+      ['app/builtsongs.js', 'song.sheet not checked', "  if(s.sheet !== undefined){\n    const sh = s.sheet;", "  if(false){\n    const sh = s.sheet;"],
+      ['app/builtsongs.js', 'a sheet id that is the audio id allowed', "else if(bsIsObj(a) && sh.id === a.id) no(", "else if(false) no("],
+      ['app/builtsongs.js', 'no Lyrics view made from song.sheet', "    act.card.otherViews = { lyrics };\n", ""],
+      ['app/builtsongs.js', 'cols 2 read as one column', "if(s.sheet.cols !== 2) lyrics.sheetColumns = 1;", "lyrics.sheetColumns = 1;"],
+      ['app/builtsongs.js', 'the sheet\'s file not handed to the song-file loader', " if(k.ex.sheet) audio[k.doc.song.sheet.id] = k.ex.sheet;", ""],
+      ['app/builtsongs.js', 'a file id another built song uses with other bytes kept', "if(audioSha.has(fid) && audioSha.get(fid) !== sha){", "if(false){"],
       ['app/builtsongs.js', 'a repaint with no change', "if(sig === bsSig) return false;", ""],
       ['app/builtsongs.js', 'the tab-return throttle dropped', "  if(Date.now() - bsLastRead < BS_RETURN_MS) return;\n", ""],
       ['app/builtsongs.js', 'a refused read does not start the throttle\'s clock', "if(bsDenied(e)){ list = {}; denied = true; bsLastRead = Date.now(); }", "if(bsDenied(e)){ list = {}; denied = true; }"],

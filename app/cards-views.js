@@ -31,7 +31,9 @@
                  has. A recording press keeps the stored view where the new recording has it, else the card's own
                  (caCardViewsFollowRecording). The two rows of buttons sit on one line, each with its visible name
                  (CSS .ca-switch-label). Never with the key / chord / bass versions (1er).
-   Built songs (app/builtsongs.js) hold no tab and never get the field. */
+   Built songs (app/builtsongs.js) hold no tab. One with a chord sheet (song.sheet, 2026-11-18) gets
+   otherViews.lyrics: its pdf in the private song-file store ('private:<id>'), read loose (sheetRead 'loose',
+   pcSheetAlign in app/cards-sheet.js), one column unless the doc says two. Its own view is Chords. */
 const CA_CARD_VIEWS_KEY = 'caCardViews';
 const CA_CARD_VIEW_NAMES = ['chords', 'tab', 'lyrics'];   // the switch's order
 const CA_CARD_VIEW_LABELS = { chords: 'ca.viewChords', tab: 'ca.viewTab', lyrics: 'ca.viewLyrics' };

@@ -2,13 +2,16 @@
 /* built-song-check.mjs — a built song's Import file, checked in Node by the SAME validator every student page
    runs (builtSongCheck in app/builtsongs.js, loaded from the site's own files), 2026-11-14.
 
-     node tools/built-song-check.mjs <song.json> [--audio <stored copy.mp3>] [--root <site folder>]
+     node tools/built-song-check.mjs <song.json> [--audio <stored copy.mp3>] [--sheet <chord sheet.pdf>] [--root <site folder>]
 
    <song.json> is the Import file (app/builtsongs.js, "THE IMPORT FILE"): { id, v, title, artist, audio, song }.
    It prints every reason the site would refuse it, or one ✓ line with what the card holds. With --audio it
    also checks the mp3 against the file's `audio` entry the way the console's Import and every Chromebook do:
    the size in bytes and the SHA-256; and, when ffprobe is on the PATH, the length (within 0.05 s of
    audio.durationSec) and the bitrate (192k constant: Jonathan, 2026-11-14), printed with what was read.
+   With --sheet (2026-11-18, song.sheet: the card's Lyrics view) it checks the pdf against song.sheet: a pdf
+   (%PDF), its size in bytes and its SHA-256. Whether its chord names follow the chart is the console's check
+   (pcSheetAlign, app/cards-sheet.js), which needs pdf.js and a browser; this tool does not read the pdf's text.
    Exit 0: it passes. 1: refused (each reason printed). 2: could not run (no file, not JSON, no site files).
    Made-up or real, nothing leaves this computer: the tool reads two local files and writes nothing. */
 import { readFileSync, existsSync } from 'node:fs';
@@ -45,8 +48,8 @@ export function loadBuiltSongs(root = HERE){
 async function main(){
   const args = process.argv.slice(2);
   const opt = n => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : null; };
-  const file = args.find((a, i) => !a.startsWith('--') && (i === 0 || !['--audio', '--root'].includes(args[i - 1])));
-  const root = resolve(opt('--root') || HERE), audio = opt('--audio');
+  const file = args.find((a, i) => !a.startsWith('--') && (i === 0 || !['--audio', '--root', '--sheet'].includes(args[i - 1])));
+  const root = resolve(opt('--root') || HERE), audio = opt('--audio'), sheetPdf = opt('--sheet');
   if (!file || !existsSync(file)) { console.error('built-song-check: give the song file: node tools/built-song-check.mjs <song.json> [--audio <mp3>]'); return 2; }
   let f;
   try { f = JSON.parse(readFileSync(file, 'utf8')); } catch (e) { console.error('built-song-check: not JSON: ' + e.message); return 2; }
@@ -61,6 +64,20 @@ async function main(){
   const { id, ...doc } = f || {};
   if (!why.length) why.push(...B.check(id, doc));
   if (!why.length && Object.prototype.hasOwnProperty.call(B.SONG_FILES, doc.audio.id)) why.push(`audio.id ${doc.audio.id} is on SONG_FILES (the tracked list wins: the site leaves this song out)`);
+  const sh = doc && doc.song && doc.song.sheet && typeof doc.song.sheet === 'object' ? doc.song.sheet : null;
+  if (!why.length && sh && Object.prototype.hasOwnProperty.call(B.SONG_FILES, sh.id)) why.push(`song.sheet.id ${sh.id} is on SONG_FILES (the tracked list wins: the site leaves this song out)`);
+  let sheetLine = '';
+  if (sheetPdf) {
+    if (!existsSync(sheetPdf)) why.push('no pdf at ' + sheetPdf);
+    else if (!sh) why.push('--sheet was given, but the song file has no song.sheet');
+    else {
+      const bytes = readFileSync(sheetPdf), sha = createHash('sha256').update(bytes).digest('hex');
+      if (bytes.subarray(0, 5).toString('latin1') !== '%PDF-') why.push('the sheet is not a pdf (it does not start with %PDF-)');
+      if (bytes.length !== sh.bytes) why.push(`the pdf is ${bytes.length} bytes; song.sheet says ${sh.bytes}`);
+      if (sha !== sh.sha256) why.push(`the pdf's SHA-256 is ${sha.slice(0, 12)}…; song.sheet says ${String(sh.sha256).slice(0, 12)}…`);
+      sheetLine = `; sheet pdf ${bytes.length.toLocaleString('en-US')} bytes, SHA-256 checked`;
+    }
+  }
   let audioLine = '';
   if (audio) {
     if (!existsSync(audio)) why.push('no mp3 at ' + audio);
@@ -82,7 +99,7 @@ async function main(){
   const ex = B.expand(id, doc);
   const secs = ex.activity.card.sections;
   const lyr = secs.filter(s => s.rowLabels).length;
-  console.log(`built-song-check: ✓ ${id} "${doc.title}" passes: ${doc.song.meter} at ${Math.round(doc.song.bpm * 100) / 100}, ${doc.song.bars.length} bars, ${doc.song.sections.length} section${doc.song.sections.length === 1 ? '' : 's'} (the card plays ${secs.length}), ${Object.keys(doc.song.chords).length} chords, level ${doc.song.level.versions}${doc.song.barTimes ? ', a beat map' : ''}, ${lyr} section${lyr === 1 ? '' : 's'} with lyric lines, ${doc.audio.centsOff} cents${audioLine}`);
+  console.log(`built-song-check: ✓ ${id} "${doc.title}" passes: ${doc.song.meter} at ${Math.round(doc.song.bpm * 100) / 100}, ${doc.song.bars.length} bars, ${doc.song.sections.length} section${doc.song.sections.length === 1 ? '' : 's'} (the card plays ${secs.length}), ${Object.keys(doc.song.chords).length} chords, level ${doc.song.level.versions}${doc.song.barTimes ? ', a beat map' : ''}, ${lyr} section${lyr === 1 ? '' : 's'} with lyric lines, ${doc.audio.centsOff} cents${audioLine}${sh ? `, a Lyrics view (sheet ${sh.id}, read loose, ${sh.cols === 2 ? 'two columns' : 'one column'})` : ''}${sheetLine}`);
   return 0;
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) process.exit(await main());

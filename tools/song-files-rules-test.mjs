@@ -128,6 +128,11 @@ async function suite(rulesText, quiet) {
     await t('…then as ready', () => F(T, 'made-up-song-full-120').set(head()), true);
     await t('a one-piece file (5 bytes)', () => F(T, 'tiny').set(head({ bytes: 5, pieces: 1 })), true);
     await t('a file of exactly 40 pieces (36,000,000 bytes)', () => F(T, 'big').set(head({ bytes: 36000000, pieces: 40 })), true);
+    /* A chord sheet (2026-11-18, a built song's song.sheet): a pdf in the same store, its length written as 1 s (the
+       rules want a length above 0; a pdf has none). Today's rules take it: no paste. */
+    await t('the teacher writes a chord sheet pdf\'s head (sheet-…, a .pdf, 1 s)', () => F(T, 'sheet-made-up-0a1b2c3d').set(head({ file: 'sheet-made-up-0a1b2c3d.pdf', bytes: 250000, pieces: 1, durationSec: 1 })), true);
+    await t('…and its one piece', () => P(T, 'sheet-made-up-0a1b2c3d', 0).set({ i: 0, data: bytes(250000) }), true);
+    await t('a school account reads the sheet\'s head', () => F(A, 'sheet-made-up-0a1b2c3d').get(), true);
     await t('a student cannot write a file', () => F(A, 'made-up-student').set(head()), false);
     await t('a student cannot update a file', () => F(A, 'seeded').update({ state: 'uploading', uploadedAt: FV.serverTimestamp() }), false);
     await t('a student cannot delete a file', () => F(A, 'seeded').delete(), false);

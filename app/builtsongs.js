@@ -22,7 +22,8 @@
    FILE checks everything (builtSongCheck), on every page, before a song is shown, and the list's keys and
    values one by one (the rules cannot loop over a map).
 
-   THE AUDIO is an ordinary songFiles entry (app/songfiles.js, the SONG FILES store) named by `audio`:
+   THE AUDIO is an ordinary songFiles entry (app/songfiles.js, the SONG FILES store) named by `audio` (and a chord
+   sheet, song.sheet below, another one: a .pdf):
      audio { id, bytes, sha256, durationSec, centsOff, gainDb?, sourceSha256? }
        id            the songFiles doc id (the console's Import uploads it there)
        bytes, sha256 what the download is checked against (app/songfiles.js, as for a listed file)
@@ -69,6 +70,16 @@
      range      optional { from, to }: the card plays sections from..to (0-based, inclusive; Jonathan, 2026-11-14:
                 a from-to range, no gaps). Left out = the whole song. The card always LOOPS at its end (no
                 wholeSong; Jonathan: like ca-51)
+     sheet      optional { id, bytes, sha256, cols? } (2026-11-18, Jonathan: a Lyrics view for private songs): his
+                chord sheet, a pdf in the PRIVATE song-file store (app/songfiles.js, A CHORD SHEET), never in the
+                repo. id 'sheet-' + lower-case letters, digits and dashes (a song-file id, never the audio's), bytes
+                up to BS_MAX_SHEET_BYTES, its SHA-256; cols 2 reads a two-column page, left out (or 1) one column
+                (a chord-over-lyric sheet from the web). The card then gets a Chords / Lyrics switch
+                (card.otherViews.lyrics, app/cards-views.js): the pdf drawn as it is, read LOOSE (pcSheetAlign,
+                app/cards-sheet.js: E7 = E, the chord boxes skipped, a name written again, "(Repeat to end)"). A
+                sheet that does not follow the chart draws with no dot; the console checks it before it is added.
+                A page older than this format refuses a doc with song.sheet as an unknown field (the whole song is
+                left out there), so the reader ships before the first sheet is attached.
 
    THE IMPORT FILE (tools/built-song-check.mjs checks one in Node; the console's Import reads one): the doc
    without savedAt, plus its id: { id, v, title, artist, audio, song }.
@@ -82,10 +93,10 @@
      2. each listed song whose edit number the device copy does not already hold is read (get, never a list);
         a doc that is missing or refused is skipped; a failed read keeps the device copy's older version if any.
      3. builtSongCheck on each; a refused song is left out ALONE (at most one anonymous error-log line per page),
-        and so is one whose id is already a coded activity or track, or whose audio id is on SONG_FILES (the
-        tracked list wins) or used by another built song with other bytes.
+        and so is one whose id is already a coded activity or track, or whose audio id (or chord sheet id,
+        song.sheet) is on SONG_FILES (the tracked list wins) or used by another built song with other bytes.
      4. the previous built entries in CLASS_ACTIVITIES and SNIPPET_TRACKS are replaced AS A WHOLE (a song gone
-        from the list is gone from the page), the audio entries handed to app/songfiles.js
+        from the list is gone from the page), the audio (and sheet) entries handed to app/songfiles.js
         (songFilesSetBuilt), and the Songs page's list repainted if it is showing (refreshSongsPlayAlong);
         in the console, its Songs view and Manage → Built songs. Nothing is repainted when nothing changed.
      Signed out → every built entry is removed and the device copy is never used. A deep link to an 'sb-' id that
@@ -111,6 +122,7 @@ const BS_FORMAT = 1;                                    // the `v` this page kno
 const BS_CAP = 105;                                     // checks.mjs 1cs CAP_2A: one rendered line at 1366x657
 const BS_MAX_SECTIONS = 15, BS_MAX_BARS = 600, BS_MAX_CHORDS = 24, BS_MAX_LYRIC = 160, BS_MAX_SONGS = 200;
 const BS_MAX_BYTES = 36000000, BS_MAX_SEC = 1800, BS_MAX_CENTS = 10;
+const BS_SHEET_ID_RE = /^sheet-[a-z0-9-]{1,74}$/, BS_MAX_SHEET_BYTES = 5000000;   // song.sheet: a pdf in the song-file store
 const BS_SEP = ' — ';                              // the long-dash separator songsLibraryHtml() cuts a title at
 /* The fixed list of section names: key -> i18n key. 'Outro' and 'Ending' both read "Final" in Spanish, as on the
    coded cards. */
@@ -248,8 +260,21 @@ function builtSongCheck(id, doc){
   }
   const s = doc.song;
   if(!bsIsObj(s)) return no('song (the chart) is missing');
-  const sx = bsKeysOnly(s, ['meter', 'bpm', 'anchor', 'barTimes', 'chords', 'bars', 'sections', 'level', 'range']);
-  if(sx.length) no(`the chart has unknown field(s): ${sx.slice(0, 4).join(', ')} (a built song is never a whole-song, sheet, journey, teacher-only, check or required card)`);
+  const sx = bsKeysOnly(s, ['meter', 'bpm', 'anchor', 'barTimes', 'chords', 'bars', 'sections', 'level', 'range', 'sheet']);
+  if(sx.length) no(`the chart has unknown field(s): ${sx.slice(0, 4).join(', ')} (a built song is never a whole-song, journey, teacher-only, check or required card)`);
+  if(s.sheet !== undefined){
+    const sh = s.sheet;
+    if(!bsIsObj(sh)) no('song.sheet is not { id, bytes, sha256, cols } (a chord sheet pdf in the song-file store)');
+    else {
+      const ex = bsKeysOnly(sh, ['id', 'bytes', 'sha256', 'cols']);
+      if(ex.length) no(`song.sheet has unknown field(s): ${ex.slice(0, 4).join(', ')}`);
+      if(typeof sh.id !== 'string' || !BS_SHEET_ID_RE.test(sh.id) || !BS_AUDIO_ID_RE.test(sh.id)) no("song.sheet.id is not 'sheet-' and lower-case letters, digits and dashes (a song-file id, up to 80)");
+      else if(bsIsObj(a) && sh.id === a.id) no("song.sheet.id is the audio's id: the sheet is a file of its own");
+      if(!bsInt(sh.bytes) || sh.bytes <= 0 || sh.bytes > BS_MAX_SHEET_BYTES) no('song.sheet.bytes is not a whole number from 1 to 5,000,000');
+      if(typeof sh.sha256 !== 'string' || !BS_SHA_RE.test(sh.sha256)) no('song.sheet.sha256 is not 64 lower-case hex letters');
+      if(sh.cols !== undefined && sh.cols !== 1 && sh.cols !== 2) no('song.sheet.cols is 1 (one column) or 2 (two columns), or left out');
+    }
+  }
   const meter = bsMeter(s.meter);
   if(!meter) return no(`meter ${JSON.stringify(s.meter)} is not 4/4, 3/4 or 6/8`);
   if(!bsNum(s.bpm) || s.bpm < 30 || s.bpm > 260) no('bpm is not a number from 30 to 260 (counted beats a minute)');
@@ -334,6 +359,9 @@ function builtSongCheck(id, doc){
   ['intro', 'intro_es', 'intro_power', 'intro_power_es'].forEach(k => { if(typeof act[k] === 'string' && act[k].length > BS_CAP) no(`the card's ${k} is ${act[k].length} characters (at most ${BS_CAP})`); });
   if(act.library !== true || act.optional !== true || act.journey || act.teacherOnly || act.kind === 'check' || act.card.wholeSong || act.card.sheet || act.view !== 'card')
     no('the card it makes is not an optional extra song (library, optional, no journey, wholeSong, sheet, teacherOnly or check)');
+  const ov = act.card.otherViews;
+  if(ov !== undefined && (!s.sheet || Object.keys(ov).join() !== 'lyrics' || ov.lyrics.sheetRead !== 'loose' || ov.lyrics.sheet !== SONG_FILE_PREFIX + s.sheet.id))
+    no('the card\'s views are not one Lyrics view of its own sheet, read loose');
   return why;
 }
 
@@ -392,12 +420,21 @@ function builtSongExpand(id, doc){
     act.chordStart = lv.start;
     act.intro_power = bsIntro(powerNames, 'en'); act.intro_power_es = bsIntro(powerNames, 'es');
   }
+  /* THE LYRICS VIEW (song.sheet): the card's sections, drawn as his pdf, read loose (CARD VIEWS, app/cards-views.js;
+     THE LOOSE READ, app/cards-sheet.js). One column unless cols is 2. */
+  let sheet = null;
+  if(bsIsObj(s.sheet)){
+    const lyrics = { sheet: SONG_FILE_PREFIX + s.sheet.id, sheetRead: 'loose' };
+    if(s.sheet.cols !== 2) lyrics.sheetColumns = 1;
+    act.card.otherViews = { lyrics };
+    sheet = { file: s.sheet.id + '.pdf', bytes: s.sheet.bytes, sha256: s.sheet.sha256, durationSec: 1 };
+  }
   const track = { src: SONG_FILE_PREFIX + doc.audio.id, trackBpm: s.bpm, feltBpm: s.bpm, beatsPerBar: meter.bpb,
     durationSec: doc.audio.durationSec, anchor: s.anchor, anchorVerified: true };
   if(meter.countSix) track.countSix = true;
   if(Array.isArray(s.barTimes)) track.barTimes = s.barTimes.slice();
   const audio = { file: doc.audio.id + '.mp3', bytes: doc.audio.bytes, sha256: doc.audio.sha256, durationSec: doc.audio.durationSec };
-  return { activity: act, track, audio };
+  return { activity: act, track, audio, sheet };
 }
 /* ── The merge ── */
 let bsApplied = new Map();      // id -> { ver, sha, title } of the built songs on this page now
@@ -469,14 +506,17 @@ function bsKeep(entries){
   const coded = new Set((window.CLASS_ACTIVITIES || []).filter(a => !bsApplied.has(a.id)).map(a => a.id));
   entries.sort((x, y) => x.id < y.id ? -1 : 1).forEach(e => {
     const why = builtSongCheck(e.id, e.doc);
+    /* Its song files: the audio, and the chord sheet when it has one. Each is checked as the audio always was. */
+    const files = why.length ? [] : [['audio', e.doc.audio.id, e.doc.audio.sha256]].concat(bsIsObj(e.doc.song.sheet) ? [['sheet', e.doc.song.sheet.id, e.doc.song.sheet.sha256]] : []);
     if(!why.length){
-      const aid = e.doc.audio.id;
       if(coded.has(e.id) || (typeof SNIPPET_TRACKS !== 'undefined' && Object.prototype.hasOwnProperty.call(SNIPPET_TRACKS, e.id) && !bsApplied.has(e.id))) why.push('its id is already a coded activity or track');
-      else if(typeof SONG_FILES !== 'undefined' && Object.prototype.hasOwnProperty.call(SONG_FILES, aid)) why.push(`its audio id ${aid} is on the site's list of song files (the list wins)`);
-      else if(audioSha.has(aid) && audioSha.get(aid) !== e.doc.audio.sha256) why.push(`its audio id ${aid} is another built song's, with other bytes`);
+      else for(const [what, fid, sha] of files){
+        if(typeof SONG_FILES !== 'undefined' && Object.prototype.hasOwnProperty.call(SONG_FILES, fid)){ why.push(`its ${what} id ${fid} is on the site's list of song files (the list wins)`); break; }
+        if(audioSha.has(fid) && audioSha.get(fid) !== sha){ why.push(`its ${what} id ${fid} is another built song's, with other bytes`); break; }
+      }
     }
     if(why.length){ bsLog(e.id + ': ' + why[0]); return; }
-    audioSha.set(e.doc.audio.id, e.doc.audio.sha256);
+    files.forEach(([, fid, sha]) => audioSha.set(fid, sha));
     kept.push(Object.assign({}, e, { ex: builtSongExpand(e.id, e.doc) }));
   });
   return kept;
@@ -495,7 +535,7 @@ function bsApply(kept){
     kept.forEach(k => { SNIPPET_TRACKS[k.id] = k.ex.track; });
   }
   const audio = {};
-  kept.forEach(k => { audio[k.doc.audio.id] = k.ex.audio; });
+  kept.forEach(k => { audio[k.doc.audio.id] = k.ex.audio; if(k.ex.sheet) audio[k.doc.song.sheet.id] = k.ex.sheet; });
   if(typeof songFilesSetBuilt === 'function') songFilesSetBuilt(audio);
   bsApplied = new Map(kept.map(k => [k.id, { ver: k.ver, sha: k.doc.audio.sha256, title: k.doc.title }]));
   bsSig = sig;
