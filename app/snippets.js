@@ -163,6 +163,11 @@ const SNIPPET_TRACKS = {
        riff 81-104, G-A 105-106, riff 107-114, final E 115-116. */
     anchor: 1.128,
     anchorVerified: true,
+    /* PER-FILE OFFSET (2026-11-17): the slow full mix alone sits about 32 ms off its three sisters (tools/
+       beat-audit.py: -33.3 ms against the full-speed full mix, 29 windows; -21.2 against the slow rhythm-down mix,
+       which is itself -9.5: -30.7 by that route). The slow rhythm-down mix gets its own 9.5 ms too, so Guitar on and
+       off agree at slow speed (they were 21 ms apart). The two full-speed files agree (0.1 ms) and do not move. */
+    fileOffset: { srcSlow: -0.0095, srcFullSlow: -0.032 },
     barTimes: [
       1.128, 3.172, 5.169, 7.169, 9.170, 11.151, 13.089, 15.052, 16.968, 18.909,
       20.831, 22.729, 24.632, 26.529, 28.450, 30.372, 32.268, 34.228, 36.154, 38.092,
@@ -214,6 +219,12 @@ const SNIPPET_TRACKS = {
     durationSec: 163,
     anchor: 12.658,
     anchorVerified: true,
+    /* PER-FILE OFFSETS (2026-11-17, Jonathan: "fix it for regular tempo"): both slow files sit about 35 ms off the
+       full-speed grid scaled by 128/100 (tools/beat-audit.py, 19 windows each: -35.3 and -37.1 ms, middle half -39 to
+       -33); its other measure, each file's own onsets against the grid, says 23 ms. The offsets are the midpoint (29
+       and 31 ms), which leaves about 6 ms by either measure. The full-speed files are the reference and do not move;
+       the two mixes agree at each speed (0.3 ms). */
+    fileOffset: { srcSlow: -0.029, srcFullSlow: -0.031 },
   },
   /* ── LIVE-BAND TRACKS: a beat map instead of a steady grid (2026-09-27) ──
      "the cure" and Luna sit on a steady grid, so one

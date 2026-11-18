@@ -91,6 +91,13 @@ Added 2026-11-16 (Jonathan: "we'll have to fix the beat map in the future"). Not
   0 early, 10 a little late, 5 "sounds good"; the audit had read it 32 to 44 ms early, so his ear and the tool
   disagree and his ear decides). The audit also lists bar 85 of the Outro (the record about 118 ms early on all four
   files): Jonathan, 2026-11-17, "don't care about bar 85 in outro": settled, do not re-flag or fix it. The cure's numbers in the table above are from BEFORE this change.
+- **DONE 2026-11-17 for Luna and Seven Nation Army: their files lined up with each other** (`fileOffset`: Luna's two
+  slow files −29 and −31 ms, to regular tempo, Jonathan: "fix it for regular tempo"; Seven Nation Army's slow files
+  −9.5 and −32 ms). Measured with `tools/beat-audit.py` (file against file): Luna about 35 ms apart → about 6; Seven
+  Nation Army 32 → 3. NOT moved: any song's map as a whole. **Jonathan, 2026-11-17: only the in-class songs matter;
+  the library songs "are fine as approximated"; Sweet Child's chords-over-lyrics beats "land correctly". A guess
+  from the cure's yardstick was tried on paper and dropped (it said Sweet Child was 30 to 40 ms late; his ear says
+  it is right). So: move a whole map only when he hears a song as early or late, with `?snipcal=1&mapshift=<ms>`.**
 - **Three separate faults in that table:**
   1. A fixed offset per track (the whole map early or late): move the map, one number per file.
   2. "the cure" with Guitar off: its rhythm-down files play 25 ms (144 BPM) and 51 ms (120 BPM) after their full

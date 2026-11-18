@@ -8858,7 +8858,8 @@ const SNIPPET_METRONOME_FIELDS = ['srcMetronome', 'srcSlowMetronome', 'srcFullMe
    windows; slow full mix 26.4 ms before the fast full mix scaled; slow
    rhythm-down 50 ms after the slow full mix), the fast full mix the reference. */
 const SNIPPET_FILE_OFFSET_KEYS = ['src', 'srcSlow', 'srcFull', 'srcFullSlow'];
-const SNIPPET_FILE_OFFSET_PINS = { 'the-cure': { src: 0.0251, srcSlow: 0.0236, srcFullSlow: -0.0264 } };
+const SNIPPET_FILE_OFFSET_PINS = { 'the-cure': { src: 0.0251, srcSlow: 0.0236, srcFullSlow: -0.0264 },
+  'luna': { srcSlow: -0.029, srcFullSlow: -0.031 }, 'seven-nation-army': { srcSlow: -0.0095, srcFullSlow: -0.032 } };   // luna, seven-nation-army: 2026-11-17, measured with tools/beat-audit.py
 function checkBackingSnippets() {
   head('1ak. Backing-track snippets');
   let bad = 0;
