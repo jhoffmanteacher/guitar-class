@@ -1099,7 +1099,7 @@ async function twoColumnQuizWalk(page, run, events, stats) {
    out sideways at 1366 or 390 px; then ▶ Play strum lights one arrow and Stop
    puts the button back. A checkout without strum steps skips it. */
 async function strumWalk(page, run, events, stats) {
-  const list = await run('strum:list', `typeof buildStrum === 'function' ? CLASS_ACTIVITIES.filter(a => !a.teacherOnly && (a.steps || []).some(s => s.strum)).map(a => ({ id: a.id, steps: a.steps.map((s, i) => s.strum ? { i, pattern: s.strum.pattern, bars: s.strum.bars, path: s.path || '', listen: s.strum.listen === true } : null).filter(Boolean) })) : []`, 10);
+  const list = await run('strum:list', `typeof buildStrum === 'function' ? CLASS_ACTIVITIES.filter(a => !a.teacherOnly && (a.steps || []).some(s => s.strum)).map(a => ({ id: a.id, steps: a.steps.map((s, i) => s.strum ? { i, pattern: s.strum.pattern, bars: s.strum.bars, hideNames: s.strum.hideNames === true, path: s.path || '', listen: s.strum.listen === true } : null).filter(Boolean) })) : []`, 10);
   if (!list || !list.length) return;
   const fail = (w, text) => events.push({ step: 'strum:' + w, kind: 'strum', text });
   const metrics = (w, h) => page.send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: 1, mobile: false });
@@ -1124,7 +1124,9 @@ async function strumWalk(page, run, events, stats) {
         if (!m) { fail(w, 'no strum board on screen'); continue; }
         if (m.cells !== st.bars.length * 8) fail(w, `${m.cells} cells for ${st.bars.length} bars, not ${st.bars.length * 8}`);
         if (JSON.stringify(m.seqs) !== JSON.stringify([...Array(hits).keys()])) fail(w, `arrow cells numbered ${JSON.stringify(m.seqs)}, not 0..${hits - 1}`);
-        if (JSON.stringify(m.names) !== JSON.stringify(st.bars)) fail(w, `chord names ${JSON.stringify(m.names)}, not ${JSON.stringify(st.bars)}`);
+        // hideNames (ca-53's muted step, 2026-11-17): the bars carry a chord only for ▶ Play strum's sound; no name is drawn.
+        const wantNames = st.hideNames ? [] : st.bars;
+        if (JSON.stringify(m.names) !== JSON.stringify(wantNames)) fail(w, `chord names ${JSON.stringify(m.names)}, not ${JSON.stringify(wantNames)}`);
         if (!m.aligned) fail(w, 'the columns do not line up from row to row');
         if (m.over > 0 || m.docOver > 0) fail(w, `sticks out sideways at 1366 px (${m.over} / ${m.docOver})`);
         await metrics(390, 800); await sleep(400);
