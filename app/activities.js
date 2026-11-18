@@ -322,13 +322,15 @@ function caKindPicHtml(a){
 /* A Today tile's "where you are" line (Look 1, Part 2): for a ladder, the
    first step not yet done on the student's route, "Step 2 of 4: D5" (the
    step's name as the Part 1 step buttons show it, caStepShortName), or the
-   last step once all are ticked. '' for a practice card, an exit check, or a
-   ladder nobody has started whose step has no name: the tile then shows
-   the intro's first sentence as before. */
+   last step once all are ticked. '' for a practice card, an exit check, a
+   paths activity before its path is picked, a one-step ladder, or a ladder
+   nobody has started whose step has no name: the tile then shows the
+   intro's first sentence as before. */
 function caWhereLine(a){
-  if(!a || a.kind === 'check' || caIsCard(a)) return '';
+  if(!a || a.kind === 'check' || caIsCard(a) || caChooserUp(a)) return '';
   const route = caRoute(a);
-  if(!route.length) return '';
+  // A one-step ladder (ca-52) and the path picker (no route yet) keep the intro.
+  if(route.length < 2) return '';
   const next = caDefaultOpenStep(a);
   const si = next >= 0 ? next : route[route.length - 1];
   const name = caStepShortName((a.steps || [])[si]);

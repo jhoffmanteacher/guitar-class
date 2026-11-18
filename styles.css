@@ -665,7 +665,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .sh-tile .song-vid-btn.sh-play-btn:hover,.sh-tile .song-vid-btn.sh-tile-main:hover{filter:brightness(1.1)}
 .sh-tile .song-vid-btn.sh-play-btn .sh-play-check{color:inherit}
 .sh-tile-links{display:flex;flex-wrap:wrap;gap:2px 12px;max-width:100%}
-.sh-tile-link{font-family:inherit;font-size:0.8125rem;padding:2px 0;border:0;background:none;color:var(--blue-text);text-decoration:underline;cursor:pointer;text-align:left}
+.sh-tile-link{font-family:inherit;font-size:0.8125rem;padding:6px 0;border:0;background:none;color:var(--blue-text);text-decoration:underline;cursor:pointer;text-align:left}
 .sh-tile-link:hover{color:var(--text)}
 .sh-tile-link:focus-visible,.sh-lib-btn:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
 /* More Play Along songs: one wrapping row of buttons, one per song, same order (songsLibraryHtml). */
@@ -675,9 +675,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .sh-lib-btn:hover{border-color:var(--text2)}
 .sh-lib-btn .svb-play{color:var(--green-text);font-size:0.75rem}
 /* "Request a song" beside the page title (#sr-slot, app/songrequests.js; renderSongsHub puts it in the top bar). */
-.page-topbar > .sr-box--bar{margin:0;padding:0;border:0;background:none;flex:0 1 auto;max-width:62%}
+.page-topbar > .sr-box--bar{margin:0;padding:0;border:0;background:none;flex:0 1 auto;max-width:76%}
 .page-topbar > .sr-box--bar .sr-head{justify-content:flex-end}
-.page-topbar > .sr-box--bar .sr-line{flex:0 1 auto;text-align:right;color:var(--text2)}
+.page-topbar > .sr-box--bar .sr-line{flex:0 1 auto;text-align:right;color:var(--text2);font-size:0.875rem}
+.page-topbar > .sr-box--bar .sr-head{flex-wrap:nowrap}
+.page-topbar > .sr-box--bar #sr-open-btn{flex-shrink:0;white-space:nowrap}
+#songs-screen .page-topbar > .page-title{flex-shrink:0;white-space:nowrap}
 @media(max-width:760px){#songs-screen .page-topbar{flex-wrap:wrap}.page-topbar > .sr-box--bar{max-width:100%;flex-basis:100%}
   .page-topbar > .sr-box--bar .sr-head{justify-content:flex-start}.page-topbar > .sr-box--bar .sr-line{text-align:left}}
 .leg{display:flex;align-items:center;gap:5px;font-size:0.875rem;color:var(--text2)}
@@ -3429,6 +3432,11 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 .ca-step-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:4px 0 6px}
 .ca-screen.ca-solo .ca-solo-card .ca-step-row{position:sticky;top:var(--ca-bar-h,50px);z-index:40;background:var(--bg);
   margin:0 -14px 6px;padding:10px 14px}
+/*    The print sheet has no step row (its buttons are print:none already). */
+@media print{.ca-step-row{display:none !important}}
+/*    The practice copy's strip lifts .ca-focus-nav (firebase-config.js,
+      PC_RIDE_UP), but below 761px the row is not pinned: keep it in place. */
+@media(max-width:760px){html.practice-on body.ca-wide .ca-solo-card .ca-focus-nav{translate:none !important}}
 .ca-step-row .ca-focus-dots{margin:0;gap:8px}
 .ca-step-row .ca-focus-dot{display:inline-flex;align-items:center;gap:8px;min-width:44px;min-height:40px;padding:0 16px;
   border-radius:20px;border:1px solid var(--border2);background:var(--bg);color:var(--text2);font-size:0.9375rem;white-space:nowrap}
@@ -3450,9 +3458,11 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
       the window less 40px a side; the list, practice cards, exit checks
       and every other page keep 1000px. The card loses its frame. The
       phone (≤760px) keeps its own layout. */
-@media (min-width:761px){
+@media screen and (min-width:761px){
   body.ca-wide:has(#class-activities-screen:not([hidden])) .app-layout .main{max-width:none;margin:0;
-    padding:0 40px calc(var(--ca-nav-h,72px) + 12px)}
+    padding:0 40px calc(var(--ca-nav-h,72px) + 12px);scroll-padding-bottom:calc(var(--ca-nav-h,72px) + 12px)}
+  /* "Top" rides above the pinned Got it row instead of over it. */
+  body.ca-wide:has(#class-activities-screen:not([hidden])) .back-to-top{bottom:calc(var(--ca-nav-h,72px) + 12px)}
   body.ca-wide .ca-screen.ca-solo .page-shell{padding-bottom:0}
   body.ca-wide .ca-screen.ca-solo .ca-solo-card{background:transparent;border:0;border-radius:0;margin:0}
   body.ca-wide .ca-screen.ca-solo .ca-solo-card > .ca-card-body{padding:0}
@@ -3479,9 +3489,11 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
   body.ca-wide .ca-screen.ca-solo .ca-solo-card .ca-step-drill{max-width:944px;margin-inline:auto}
   /* c. Got it in one place: the Back / Got it row is pinned to the bottom
         of the screen, the same spot on every step. The column's bottom
-        padding (--ca-nav-h + 24px, above) keeps the step scrolling above it,
-        never behind it. It rides up over the offline banner like the other
-        bottom-fixed controls. */
+        padding (--ca-nav-h + 12px, above; --ca-nav-h is never set, so 72px)
+        keeps the step scrolling above it, never behind it, and
+        scroll-padding-bottom keeps a focused control above it too. It rides
+        up over the offline banner like the other bottom-fixed controls.
+        Screen only: the print sheet keeps today's layout. */
   body.ca-wide:has(#class-activities-screen:not([hidden])) .ca-solo-card .ca-step:not(.ca-step-collapsed) .ca-focus-nav{
     position:fixed;left:0;right:0;bottom:0;z-index:45;margin:0;padding:12px 40px;min-height:var(--ca-nav-h,72px);box-sizing:border-box;
     background:var(--bg);border-top:1px solid var(--border)}
@@ -3489,11 +3501,10 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
   body.ca-wide .ca-solo-card .ca-focus-next{min-height:48px;padding:12px 30px;font-size:1.0625rem}
 }
 /* d. The practice-minutes strip in the open card's bar (caSyncTopbar), for
-      every kind of card: the header's strip folds away with the header. A
-      light pill here, on the page's own background. */
-.ca-bar-tools > .pm-strip{margin-left:0;background:var(--bg2);color:var(--text);box-shadow:0 0 0 1px var(--border2);padding:4px 10px}
-.ca-bar-tools > .pm-strip .pm-streak b{color:var(--text)}
-.ca-bar-tools > .pm-strip .pm-ring-bg{stroke:var(--border2)}
+      every kind of card: the header's strip folds away with the header. It
+      keeps its own dark pill: its ring, goal and flame colours were chosen
+      for that pill (on a light one the goal ring measured 1.46:1). */
+.ca-bar-tools > .pm-strip{margin-left:0}
 /* 4. A practice card's TAB head row. The pager (Previous / Section n of m /
       Next) moves up to the right end of the "Tap a section…" line, which
       was mostly empty — it was a row of its own under the TAB (~30px). The

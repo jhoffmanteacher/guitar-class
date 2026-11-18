@@ -122,8 +122,9 @@ function srThisWeek(list){
 function srStateLabel(state){
   return t(state === 'adding' ? 'sr.stateAdding' : state === 'declined' ? 'sr.stateDeclined' : 'sr.stateAsked');
 }
-/* The student's own requests, newest week first, at most SR_LIST_SHOWN (the
-   box sits above the Core songs). Every value is escaped: the title and the
+/* The student's own requests, newest week first, at most SR_LIST_SHOWN (since
+   Look 1, Part 3, 2026-11-17, in #sr-list-slot at the top of the Songs page,
+   while the line and the button sit in the top bar). Every value is escaped: the title and the
    note are typed text. The link is rebuilt from the video id. */
 const SR_LIST_SHOWN = 5;
 function srListHtml(list){
@@ -138,25 +139,33 @@ function srListHtml(list){
   }).join('');
   return `<div class="sr-mine-title">${escHtml(t('sr.mineTitle'))}</div><ul class="sr-list">${rows}</ul>`;
 }
-function srSlotHtml(){
-  if(isDevBypassUser()) return `<div class="sr-line">${escHtml(t('sr.intro'))}</div><p class="coach-tip">${escHtml(t('sr.devBypass'))}</p>`;
-  if(!srCanSend()) return '';
+/* The box in two parts: the line (and the button) and the student's own list.
+   srSlotHtml() is both together, as before. */
+function srSlotParts(){
+  if(isDevBypassUser()) return { head: `<div class="sr-line">${escHtml(t('sr.intro'))}</div><p class="coach-tip">${escHtml(t('sr.devBypass'))}</p>`, list: '' };
+  if(!srCanSend()) return { head: '', list: '' };
   const s = srMine();
-  if(s.status === 'idle' || s.status === 'loading') return `<div class="sr-line">${escHtml(t('sr.loading'))}</div>`;
-  if(s.status === 'closed') return `<div class="sr-line">${escHtml(t('sr.closed'))}</div>`;
-  if(s.status === 'failed') return `<div class="sr-line">${escHtml(t('sr.loadFailed'))}</div>`;
+  if(s.status === 'idle' || s.status === 'loading') return { head: `<div class="sr-line">${escHtml(t('sr.loading'))}</div>`, list: '' };
+  if(s.status === 'closed') return { head: `<div class="sr-line">${escHtml(t('sr.closed'))}</div>`, list: '' };
+  if(s.status === 'failed') return { head: `<div class="sr-line">${escHtml(t('sr.loadFailed'))}</div>`, list: '' };
   const mine = srThisWeek(s.list);
   const head = mine
     ? `<div class="sr-line">${escHtml(t('sr.weekUsed', { day: srNextWeekDay(mine.week) }))}</div>`
     : `<div class="sr-head"><div class="sr-line">${escHtml(t('sr.intro'))}</div><button type="button" class="panel-next-btn" id="sr-open-btn" onclick="srOpen()">${escHtml(t('sr.btn'))}</button></div>`;
-  return head + srListHtml(s.list);
+  return { head, list: srListHtml(s.list) };
 }
+function srSlotHtml(){ const p = srSlotParts(); return p.head + p.list; }
+/* #sr-list-slot present (the Songs page since Look 1, Part 3): the line and the
+   button in #sr-slot (the top bar), the list in #sr-list-slot (the page). */
 function srPaint(){
   const slot = document.getElementById('sr-slot');
   if(!slot) return;
-  const html = srSlotHtml();
+  const listSlot = document.getElementById('sr-list-slot');
+  const p = srSlotParts();
+  const html = listSlot ? p.head : p.head + p.list;
   slot.innerHTML = html;
   slot.hidden = !html;
+  if(listSlot){ listSlot.innerHTML = p.list; listSlot.hidden = !p.list; }
 }
 /* Reads the student's own requests (one equality on uid: no composite index)
    and repaints the slot. A newer load drops an older one's answer. */

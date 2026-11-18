@@ -354,14 +354,16 @@ async function renderSongsHub(){
   /* #sr-slot: "Request a song" and the student's own requests (app/songrequests.js).
      Since Look 1, Part 3 (2026-11-17) it sits in the page's top bar beside the
      title (same words and behaviour); one #sr-slot on the page, so an old one
-     is removed first. Without the bar it stays at the top of the page. */
+     is removed first. The student's own requests go in #sr-list-slot at the top
+     of the page (srPaint), not in the bar. Without the bar both stay at the
+     top of the page as before. */
   document.querySelectorAll('#sr-slot').forEach(el => el.remove());
   const srBar = document.querySelector('#songs-screen .page-topbar');
   if(srBar) srBar.insertAdjacentHTML('beforeend', '<div class="sr-box sr-box--bar" id="sr-slot" hidden></div>');
   /* The legend's dots are on the Choice menu's rows only since the Core songs
      became tiles (Look 1, Part 3), so it sits just above that menu. */
   const legendHtml = `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('hub.legendCore')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('hub.legendChoice')}</div></div>`;
-  p.innerHTML = `${srBar ? '' : '<div class="sr-box" id="sr-slot" hidden></div>'}
+  p.innerHTML = `${srBar ? '<div class="sr-box" id="sr-list-slot" hidden></div>' : '<div class="sr-box" id="sr-slot" hidden></div>'}
     ${coreHtml}<div class="sh-lib-slot">${songsLibraryHtml()}</div>${legendHtml}${groupsHtml}${requestHtml}`;
   if(typeof srLoad === 'function') srLoad();
 }

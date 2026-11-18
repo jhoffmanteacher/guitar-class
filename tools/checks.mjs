@@ -11512,10 +11512,10 @@ function checkFoldedActivity(ctx) {
   const foldZoom = [...rules.keys()].filter(s => s.startsWith('body.ca-fold') && [...rules.get(s).values()].some(d => d.has('zoom')));
   want(!foldZoom.length, `the folded view must stay at normal size (1×), but these rules zoom it: ${foldZoom.join(', ')}`);
   // Look 1: the wide column and the pinned Got it, read from styles.css (above 760px only).
-  const wm = '@media (min-width:761px)';
+  const wm = '@media screen and (min-width:761px)';
   const wdecl = (sel, prop) => { const m = rules.get(sel); const d = m && m.get(wm); return d ? d.get(prop) : undefined; };
   want(wdecl('body.ca-wide:has(#class-activities-screen:not([hidden])) .app-layout .main', 'max-width') === 'none',
-    'an open Focus step must lift the 1000px column: body.ca-wide:has(#class-activities-screen:not([hidden])) .app-layout .main{max-width:none} inside @media (min-width:761px)');
+    'an open Focus step must lift the 1000px column: body.ca-wide:has(#class-activities-screen:not([hidden])) .app-layout .main{max-width:none} inside @media screen and (min-width:761px)');
   const navSel = 'body.ca-wide:has(#class-activities-screen:not([hidden])) .ca-solo-card .ca-step:not(.ca-step-collapsed) .ca-focus-nav';
   want(wdecl(navSel, 'position') === 'fixed' && wdecl(navSel, 'bottom') === '0',
     `an open Focus step's Got it row must be pinned to the bottom (position:fixed; bottom:0) — ${navSel}`);
