@@ -478,10 +478,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    figure) with the play-sequence button and the Listening Coach right
    (.step-2col-media), the response and the folds full width below, and Mark
    done pinned to the bottom of the screen with the "You've got it when:"
-   line beside it (a copy, .step-done-gotit; the text's own line hides). In
-   All steps view, below 1100px and in print the step reads as before: the
-   media box is a plain block where the diagrams always were, and the copy
-   never shows. Inside the 1000px column. */
+   line beside it (a copy, .step-done-gotit; the text's own line hides). The
+   line's tap dots (.rep-dots) are MOVED into that row, between the copy and
+   Mark done (buildLesson / stepDotsPlace, app/lesson.js; one set per step).
+   In All steps view, below 1100px and in print the step reads as before: the
+   media box is a plain block where the diagrams always were, the copy never
+   shows and the dots stay under the text's own line. Inside the 1000px
+   column. */
 .step-done-gotit{display:none}
 @media screen and (min-width:1100px){
   .dp.focus .step-detail.step-2col{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:24px;align-items:start;
@@ -502,6 +505,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   .dp.focus .step-2col .st-text .got-it{display:none}
   .dp.focus .step-2col .step-done-gotit{display:block;flex:1;min-width:0;line-height:1.4}
   .dp.focus .step-2col .step-done-gotit-lab{font-weight:700;color:var(--green-text);margin-right:4px}
+  .dp.focus .step-2col > .step-done-row > .rep-dots{flex:none;margin:0;padding-left:0}
 }
 .step-figure img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--border2);background:#fff}
 /* Every figure in img/ is drawn dark-on-light and ships with a light

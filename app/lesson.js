@@ -359,8 +359,18 @@ function buildLesson(w){
     const textHtml = twoCol ? text2.replace(/<span class="step-figure[^"]*">(?:\s*<img\b[^>]*>)+\s*<\/span>/g, m => { figs.push(m); return ''; }) : text2;
     const gotM = twoCol ? /<span class="got-it"><span class="got-it-lab">([^<]*)<\/span>((?:(?!<\/span>)[\s\S])*)<\/span>/.exec(textHtml) : null;
     const gotCopy = gotM ? `<span class="step-done-gotit"><span class="step-done-gotit-lab">${gotM[1]}</span>${gotM[2]}</span>` : '';
+    /* The got-it line's tap dots (wrapGotItWhen puts them right after it) go
+       beside the copy when this build is the two-column layout (One step
+       view, 1100px+): moved, never copied. stepDotsPlace() moves them back
+       and forth after that. */
+    let text2col = textHtml, dotsBeside = '';
+    if(gotM && focusMode && step2colWide()){
+      const at = gotM.index + gotM[0].length;
+      const dm = /^<div class="rep-dots[^"]*"[^>]*>(?:(?!<\/div>)[\s\S])*<\/div>/.exec(textHtml.slice(at));
+      if(dm){ dotsBeside = dm[0]; text2col = textHtml.slice(0, at) + textHtml.slice(at + dm[0].length); }
+    }
     // Mark-done is the last row of the step.
-    const doneBtn = `<div class="step-done-row">${gotCopy}<button class="step-done-btn${isDone ? ' is-done' : ''}" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${stepDoneHtml(isDone)}</button></div>`;
+    const doneBtn = `<div class="step-done-row">${gotCopy}${dotsBeside}<button class="step-done-btn${isDone ? ' is-done' : ''}" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${stepDoneHtml(isDone)}</button></div>`;
     const skillsAttr = (s.skills && s.skills.length) ? ` data-skills="${s.skills.join(',')}"` : '';
     const label = stepLabel(s);
     const gnum = numOffset + pos + 1;          // position in the whole ladder
@@ -383,7 +393,7 @@ function buildLesson(w){
       + `<span class="step-chev" aria-hidden="true">&#x25B6;</span>`
       + `</button>`
       + (twoCol
-        ? `<div class="step-detail step-2col"><span class="st-text">${textHtml}</span><div class="step-body"><div class="step-2col-media">${figs.join('')}${playSeqHtml}${chordsHtml}</div>${drillHtml}${respHtml}${foldsHtml}</div>${doneBtn}</div>`
+        ? `<div class="step-detail step-2col"><span class="st-text">${text2col}</span><div class="step-body"><div class="step-2col-media">${figs.join('')}${playSeqHtml}${chordsHtml}</div>${drillHtml}${respHtml}${foldsHtml}</div>${doneBtn}</div>`
         : `<div class="step-detail"><span class="st-text">${text2}</span><div class="step-body">${playSeqHtml}${chordsHtml}${tabHtml}${tabsHtml}${drillHtml}${respHtml}${foldsHtml}</div>${doneBtn}</div>`)
       + `</li>`;
    }).join('');
@@ -824,6 +834,44 @@ function stationViewMode(){
   catch(e){ return 'focus'; }
 }
 function stationViewIsFocus(){ return stationViewMode() === 'focus'; }
+/* ── The two-column step's tap dots (Look 1 review round 3, R3-2) ──
+   In One step view at 1100px and wider a two-column step (.step-2col) shows
+   its "You've got it when:" line beside Mark done (a copy; the text's own
+   line hides), so the dots that count it sit there too. ONE .rep-dots per
+   step, moved, never copied: in All steps view, a narrower window and print
+   it stays right after the text's own got-it line, where wrapGotItWhen put
+   it. buildLesson places it at render; stepDotsPlace() moves it when the
+   view flips (applyStationView), the window crosses 1100px, or the page
+   prints (the done row does not print). The query matches the CSS block
+   "Look 1, Part 4" in styles.css. */
+const STEP_2COL_MQ = 'screen and (min-width:1100px)';
+let stepDotsPrinting = false;
+function step2colWide(){
+  try{ return !stepDotsPrinting && typeof matchMedia === 'function' && matchMedia(STEP_2COL_MQ).matches; }
+  catch(e){ return false; }
+}
+function stepDotsPlace(scope){
+  const wide = step2colWide();
+  (scope || document).querySelectorAll('.step-detail.step-2col').forEach(det => {
+    const row = det.querySelector(':scope > .step-done-row');
+    const got = det.querySelector(':scope > .st-text .got-it');
+    if(!row || !got) return;
+    const near = got.nextElementSibling;
+    const dots = row.querySelector(':scope > .rep-dots') || (near && near.classList.contains('rep-dots') ? near : null);
+    if(!dots) return;
+    const dp = det.closest('.dp');
+    if(wide && dp && dp.classList.contains('focus')){
+      if(dots.parentNode !== row) row.insertBefore(dots, row.querySelector(':scope > .step-done-btn'));
+    } else if(dots !== near) got.after(dots);
+  });
+}
+try{
+  const mq = matchMedia(STEP_2COL_MQ);
+  const onChange = () => stepDotsPlace();
+  if(mq.addEventListener) mq.addEventListener('change', onChange); else if(mq.addListener) mq.addListener(onChange);
+}catch(e){}
+window.addEventListener('beforeprint', () => { stepDotsPrinting = true; stepDotsPlace(); });
+window.addEventListener('afterprint', () => { stepDotsPrinting = false; stepDotsPlace(); });
 /* The view switch is a two-segment control (navigability work order
    2026-09-23, item 9) — "One step | All steps" with the CURRENT view lit —
    instead of one button whose label named the OTHER view, which read as a
@@ -882,6 +930,7 @@ function applyStationView(dp, focus){
       b.setAttribute('aria-pressed', String(on));
     });
   }
+  stepDotsPlace(dp);
   syncStationFocus(dp);
 }
 

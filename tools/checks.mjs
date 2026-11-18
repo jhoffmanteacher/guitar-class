@@ -12879,11 +12879,14 @@ function checkRailDefault(ctx) {
    the mark matches the rule both ways, the diagrams are drawn once, every
    figure of a two-column step sits in .step-2col-media (not in the text), the
    got-it copy is there exactly when the text has a got-it line, and only on a
-   two-column step; then reads the CSS (two columns, sticky bottom, screen
+   two-column step; a step's tap dots are ONE .rep-dots, after the text's
+   got-it line, and (rendered again as a 1100px window in One step view) in
+   the done row beside the copy instead (R3-2: moved, never copied); then
+   reads the CSS (two columns, sticky bottom, screen
    only). tools/smoke.mjs (lessonTwoColWalk) presses Mark done on one. */
 function checkLessonTwoCol(sets, ctx) {
   head('1et. Lesson: a step with chord diagrams or a figure and no tab is the two-column kind (One step view)');
-  let bad = 0, steps = 0, two = 0;
+  let bad = 0, steps = 0, two = 0, dotted = 0, besideN = 0;
   const flag = m => { err('1et: ' + m); problems++; bad++; };
   if (!ctx || !sets) { flag('cannot run — the 0b render context is unavailable'); return; }
   const buildSet = vm.runInContext('typeof buildSet === "function" ? buildSet : null', ctx);
@@ -12916,14 +12919,46 @@ function checkLessonTwoCol(sets, ctx) {
           const hasGot = /<span class="got-it"><span class="got-it-lab">/.test(text);
           if (copy !== hasGot) flag(`${where}: the got-it copy beside Mark done is ${copy ? 'there' : 'missing'} while the text ${hasGot ? 'has' : 'has no'} got-it line`);
           if (copy && !/<div class="step-done-row"><span class="step-done-gotit"><span class="step-done-gotit-lab">/.test(li)) flag(`${where}: the got-it copy is not first in the done row`);
+          const nd = (li.match(/class="rep-dots[ "]/g) || []).length;
+          if (nd > 1) flag(`${where}: ${nd} sets of tap dots (one per step: moved beside Mark done, never copied)`);
+          if (nd) { dotted++; if (!/<\/span><div class="rep-dots[ "][\s\S]*<\/span><div class="step-body">/.test(li) || /class="step-done-row">[\s\S]*class="rep-dots[ "]/.test(li)) flag(`${where}: outside the 1100px One step layout the tap dots belong right after the text's own got-it line`); }
           if (shown.length < 1 && lang === 'en') shown.push(where);
           void media;
         }
       }
     }
+    /* The same sets as a 1100px+ window in One step view (R3-2): each
+       two-column step's ONE .rep-dots sits in the done row, right after the
+       got-it copy and before Mark done, and no longer in the text. */
+    const keepMM = ctx.matchMedia, store = vm.runInContext('localStorage', ctx), keepView = store.getItem('stationView');
+    ctx.matchMedia = q => ({ matches: /min-width:\s*1100px/.test(q), addEventListener() {}, addListener() {} });
+    store.setItem('stationView', 'focus');
+    try {
+      for (const lang of ['en', 'es']) {
+        vm.runInContext(`setLang(${JSON.stringify(lang)})`, ctx);
+        for (const w of sets) {
+          if (w.comingSoon) continue;
+          const html = String(buildSet(w) || '');
+          const lis = html.split(/(?=<li class="step[ "])/).slice(1).map(x => { const e = x.indexOf('</button></div></div></li>', x.indexOf('class="step-done-row"')); return e >= 0 ? x.slice(0, e + 26) : x; });
+          for (const li of lis) {
+            if (!/<div class="step-detail step-2col">/.test(li)) continue;
+            const nd = (li.match(/class="rep-dots[ "]/g) || []).length;
+            if (!nd) continue;
+            const where = `${w.id} ${lang} step ${(/data-key="([^"]+)"/.exec(li) || [])[1]} (1100px, One step)`;
+            if (nd > 1) flag(`${where}: ${nd} sets of tap dots (one per step)`);
+            else if (!/<div class="step-done-row"><span class="step-done-gotit"><span class="step-done-gotit-lab">[^<]*<\/span>(?:(?!<\/span>)[\s\S])*<\/span><div class="rep-dots[ "](?:(?!<\/div>)[\s\S])*<\/div><button[^>]*class="step-done-btn/.test(li)) flag(`${where}: the tap dots are not beside the got-it copy, before Mark done`);
+            else besideN++;
+          }
+        }
+      }
+    } finally {
+      ctx.matchMedia = keepMM;
+      if (keepView === null) store.removeItem('stationView'); else store.setItem('stationView', keepView);
+    }
   } catch (e) { flag('the page threw — ' + e.message); }
   finally { try { vm.runInContext('setLang("en")', ctx); } catch (e) { /* restored by the next check */ } }
   if (two < 180) flag(`only ${two} two-column steps rendered in EN + ES (102 per language on 2026-11-17): the rule stopped matching`);
+  if (dotted !== 64 || besideN !== dotted) flag(`two-column steps with tap dots: ${dotted} in the text, ${besideN} beside Mark done at 1100px (pinned 64 and 64, 32 per language on 2026-11-18)`);
   const rules = cssRuleMap(readFileSync(join(ROOT, 'styles.css'), 'utf8'));
   const m = '@media screen and (min-width:1100px)';
   const d = sel => { const x = rules.get(sel); return x && x.get(m); };
@@ -12933,7 +12968,7 @@ function checkLessonTwoCol(sets, ctx) {
   if (!row || row.get('position') !== 'sticky' || row.get('bottom') !== '-60px') flag(`.dp.focus .step-2col > .step-done-row must be position:sticky; bottom:-60px inside ${m} (Mark done pinned to the bottom of the screen)`);
   const plain = rules.get('.step-done-gotit'), pd = plain && plain.get('');
   if (!pd || pd.get('display') !== 'none') flag('.step-done-gotit must be display:none outside One step view (All steps and print read as before)');
-  if (!bad) ok(`1et: ${steps} lesson steps rendered (EN + ES), ${two} two-column: the mark matches "diagrams or a figure, no tab" both ways, diagrams drawn once, figures in the media column, the got-it copy exactly where the text has one; the two-column grid, the sticky Mark done row and the hidden copy read from styles.css`);
+  if (!bad) ok(`1et: ${steps} lesson steps rendered (EN + ES), ${two} two-column: the mark matches "diagrams or a figure, no tab" both ways, diagrams drawn once, figures in the media column, the got-it copy exactly where the text has one; ${dotted} with tap dots, one set each, after the text's got-it line and (${besideN}) beside Mark done at 1100px in One step view; the two-column grid, the sticky Mark done row and the hidden copy read from styles.css`);
 }
 /* 1es. THE CORE SONGS AS TILES (Look 1, Part 3, Jonathan, 2026-11-17). Each of
    the six Core songs is a tile with ONE main button: Play Along when

@@ -42,7 +42,8 @@ site-fill.js multiplies their thresholds by the fill. The teacher console
   the text into `.step-2col-media`) with the play button and the Listening
   Coach right, the response and folds full width below, and Mark done sticky
   at the bottom with a copy of the "You've got it when:" line beside it (the
-  text's own line hides). Only at 1100px and wider, on screen, inside the
+  text's own line hides) and that line's tap dots, MOVED there, never copied
+  (`stepDotsPlace()`, app/lesson.js; 1et pins one `.rep-dots` per step). Only at 1100px and wider, on screen, inside the
   1000px column; All steps view, a narrower window and print read as before.
 - **The rail has two independent states.**
   - `body.rail-open` is the mobile drawer.
