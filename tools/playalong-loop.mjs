@@ -813,6 +813,7 @@ const PAGE_SRC = String.raw`(() => {
               drawn: !!(paper && paper._sheet && paper._sheet.ok), pill: pi, strip: Array.prototype.findIndex.call(root.querySelectorAll('.pc-strip-cell'), function(c){ return c.classList.contains('now'); }),
               pressed: Array.prototype.filter.call(root.querySelectorAll('.ca-view-switch button'), function(b){ return b.getAttribute('aria-pressed') === 'true'; }).map(function(b){ return b.dataset.view; }),
               loop: root.dataset.loop || '', loopSw: lsw ? lsw.getAttribute('aria-checked') : null,
+              counting: !!(pcState && pcState.counting), where: root.querySelector('.pc-sheet-where') ? root.querySelector('.pc-sheet-where').textContent : null,
               /* R17: the switch row on screen, under the In class page's sticky bar (the card's top after a press into Chords or Tab). */
               swOn: (function(){ const sw = root.querySelector('.ca-view-switch'), bar = document.querySelector('.ca-screen .page-topbar');
                 if (!sw) return null; const r = sw.getBoundingClientRect(), under = bar && getComputedStyle(bar).position === 'sticky' ? bar.getBoundingClientRect().bottom : 0;
@@ -827,7 +828,13 @@ const PAGE_SRC = String.raw`(() => {
             /* R17: the lyric sheet reads its PDF in REAL time; the fake clock stands still meanwhile. */
             const until = Date.now() + op.max;
             const drawn = function(){ const p = root.querySelector('.pc-sheet-paper'); return !!(p && p._sheet); };
-            while (!drawn() && Date.now() < until) await new Promise(function(r){ real.st(r, 50); });
+            /* pdf.js draws a page in steps, one per requestAnimationFrame: those frames run meanwhile, on the fake
+               clock as it stands (it does not move), but never the card's own frame loop (pcFrame), which would
+               light the song a frame on without the clock. Without this a sheet first drawn while nothing plays (a
+               count-in, a stopped card) never finished. */
+            const pdfFrames = function(){ const q = V.rafs.filter(function(r){ return r.cb !== window.pcFrame; }); if (!q.length) return; V.rafs = V.rafs.filter(function(r){ return r.cb === window.pcFrame; });
+              q.forEach(function(r){ try { r.cb(V.t); } catch (e) { V.errors.push('frame: ' + (e && e.message)); } }); };
+            while (!drawn() && Date.now() < until){ pdfFrames(); await new Promise(function(r){ real.st(r, 50); }); }
             if (!drawn()) ev.timedOut = true;
           } else if (op.op === 'untilSilent'){
             const end = V.t + op.max;
@@ -1350,6 +1357,18 @@ function planWalks(M) {
       ops.push({ op: 'run', ms: msFor(M, 'slower', at, at + 1.5), dt: FINE_MS }, { op: 'probe' }, { op: 'click', sel: '.pc-play', stop: true });
       walks.push({ kind: 'viewSwap', name: `view switch mid-section · ${M.view.v.cv} -> ${to}${k === 0 && M.open.hasLoop ? ' · loop this part on' : ''}`, stop: 'slower', guitar: hasFull, ops, to, span: 'none', metro: false, fresh: true });
     });
+    /* W23 R1-4: Lyrics pressed in the count-in after a section tap, on a section that is not the first (the last one
+       with laps, else the last). The sheet draws while the fake clock stands still, so the probe is still in the
+       count-in; judgeSwapStill holds the mark to that section's first chord and the sheet's sticky line to its name. */
+    if (M.cvCharts.lyrics && M.view.v.cv !== 'lyrics' && ch.secs.length > 1) {
+      let sj = -1;
+      ch.secs.forEach((S2, i) => { if (i > 0 && S2.reps > 1) sj = i; });
+      if (sj < 0) sj = ch.secs.length - 1;
+      const Sj = ch.secs[sj], lyr = { op: 'click', sel: '.ca-view-switch button[data-view="lyrics"]', sw: 'view' };
+      const count = setup('slower', hasFull, false, null);
+      count.push(startOp(sj), { op: 'run', ms: 300, dt: FINE_MS }, lyr, { op: 'run', ms: FINE_MS, dt: FINE_MS }, { op: 'waitSheet', max: 15000 }, { op: 'run', ms: FINE_MS, dt: FINE_MS }, { op: 'probe' }, { op: 'click', sel: '.pc-play', stop: true });
+      walks.push({ kind: 'viewSwapStill', still: 'count', si: sj, name: `Lyrics pressed in the count-in · ${M.view.v.cv} -> lyrics · ${Sj.label} (section ${sj + 1} of ${ch.secs.length})`, stop: 'slower', guitar: hasFull, ops: count, to: 'lyrics', span: 'none', metro: false, fresh: true });
+    }
   }
   return walks;
 }
@@ -1406,6 +1425,27 @@ function judgeSwap(M, W, res) {
     prevPlace = p;
   });
   if (probes.length < 3) issues.push(`${probes.length} probes, expected at least 3`);
+  return { issues, stats: { probes: probes.length } };
+}
+/* W23 R1-4 / R2-3: Lyrics pressed in a count-in (still: 'count') or after a stop ('stop') on section W.si. The sheet's
+   mark is on that section's first chord (lap 1: a section tap and a stopped tab both start a section at its first lap)
+   and its sticky line names that section and lap ("Chorus 2 · Lap 1 of 2"; the English words of ca.cardRepOf). */
+function judgeSwapStill(M, W, res) {
+  const issues = [];
+  if (res.fatal) return { issues: ['the walk could not run: ' + res.fatal], stats: { probes: 0 } };
+  (res.errors || []).forEach(e => issues.push('the page threw: ' + e));
+  if (!res.connected) issues.push('the card was redrawn in the middle of the walk');
+  const probes = res.events.filter(e => e.probe).map(e => e.probe), pr = probes[probes.length - 1];
+  const ch = M.cvCharts.lyrics, S = ch.secs[W.si];
+  if (!pr) return { issues: issues.concat('no probe'), stats: { probes: 0 } };
+  if (W.still === 'count' && !(pr.playing && pr.counting)) issues.push('the probe was not in the count-in (the walk cannot see the count-in mark)');
+  if (W.still === 'stop' && pr.playing) issues.push('the song was still playing at the probe');
+  if (JSON.stringify(pr.pressed) !== JSON.stringify(['lyrics'])) issues.push(`the switch shows ${JSON.stringify(pr.pressed)} pressed`);
+  const want = ch.tok[W.si][0][0];
+  if (!pr.drawn) issues.push('the sheet was not drawn');
+  else if (pr.pill !== want) issues.push(`the mark is on chord name ${pr.pill + 1}, the first chord of ${S.label} is name ${want + 1}`);
+  const where = S.label + (S.reps > 1 ? ` · ${(M.view.card.sections[W.si] || {}).repLabel} 1 of ${S.reps}` : '');
+  if (pr.where !== where) issues.push(`the sheet's sticky line reads "${pr.where}", want "${where}"`);
   return { issues, stats: { probes: probes.length } };
 }
 /* Laps a stop of Build up speed plays before the next (PC_BUILD_LAPS in app/cards-loop.js; the work order's rule). */
@@ -2278,10 +2318,11 @@ async function main() {
           W.fresh = false;
           continue;
         }
-        if (W.kind === 'viewSwap') {
-          const JS = judgeSwap(M, W, res);
+        if (W.kind === 'viewSwap' || W.kind === 'viewSwapStill') {
+          const JS = W.kind === 'viewSwap' ? judgeSwap(M, W, res) : judgeSwapStill(M, W, res);
           SWAPV.walks++; SWAPV.probes += JS.stats.probes;
           if (JS.issues.length) { SWAPV.failed++; console.log(`✗ ${label} · ${W.name}: ${JS.issues.length} problem(s)`); JS.issues.slice(0, VERBOSE ? 400 : 8).forEach(p => console.log('    ' + p)); }
+          else if (W.kind === 'viewSwapStill') console.log(`✓ ${label} · ${W.name}: the sheet's mark on the section's first chord and its sticky line naming it${W.still === 'count' ? ', in the count-in' : ', the song stopped'}`);
           else console.log(`✓ ${label} · ${W.name}: ${JS.stats.probes} probes, each lit on the place sounding; the song carried on through the press (same element, file and clock), same section, lap and beat in both views`);
           out.walks.push({ card: a.id, view: viewName(a, x.v), name: W.name, issues: JS.issues, nIssues: JS.issues.length });
           W.fresh = false;

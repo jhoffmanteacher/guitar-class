@@ -387,6 +387,10 @@ async function pcSheetDraw(paperOrCol){
     if(!paper.querySelector('.' + cls)){ const el = document.createElement('span'); el.className = cls; el.setAttribute('aria-hidden', 'true'); paper.appendChild(el); }
   });
   const st = pcState && pcState.root === root ? pcState : null;
+  /* Where the mark goes once the sheet is drawn. Playing: the chord being played. In a count-in (a section tap, then
+     Lyrics pressed before the song came in; W23 R1-4): the first chord of the lap it counts in to, as pcStart's own
+     pcSheetStarted marks it, line on screen and all (until 2026-11-18 chord 0 for up to 2.5 s). */
+  if(st && st.si < 0 && st.counting){ pcSheetStarted(st); return; }
   const cur = st && st.si >= 0 ? map.tok[st.si][st.rep][st.seq - st.L.sections[st.si].seqOff] : 0;
   pcSheetMark(paper, cur, false);
 }
