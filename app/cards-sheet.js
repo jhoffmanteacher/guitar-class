@@ -68,13 +68,26 @@ function pcSheetLoadPdfjs(){
    a second canvas, pcSheetDraw). A page with no right-column chord line, or
    no clean cut between its columns, is drawn whole as before
    (`fellBack`: its page numbers). */
+/* A PRIVATE SHEET (2026-11-18, the Lyrics view of a private song): card.sheet 'private:<id>' names a pdf in the
+   song-file store (app/songfiles.js, A CHORD SHEET), read only while someone is signed in, as its song is. pdf.js is
+   handed its bytes (songFileLoadBytes): the CSP has no blob: in connect-src. A load that fails says why in the card
+   (PC_SHEET_FILE_LINES: the song-file loader's codes; anything else is ca.sheetFailed). */
+const PC_SHEET_FILE_LINES = { signin: 'ca.sheetSignIn', denied: 'ca.sheetNotAllowed', limit: 'ca.sheetLimit', offline: 'ca.sheetOffline', notready: 'ca.sheetNotReady', clock: 'ca.sheetClock' };
+function pcSheetFailLine(e){
+  const c = e && e.code;
+  return t(typeof c === 'string' && Object.prototype.hasOwnProperty.call(PC_SHEET_FILE_LINES, c) ? PC_SHEET_FILE_LINES[c] : 'ca.sheetFailed');
+}
+function pcSheetPrivateId(url){ return typeof songFileId === 'function' ? songFileId(url) : null; }
 const pcSheetModels = {};
 function pcSheetPlace(b, X, Y){ return { x: b.dx + (X - b.sx), y: b.dy + (Y - b.sy) }; }
 function pcSheetModel(url, cols){
   const one = cols === 1, key = url + (one ? '#1' : '');
+  // Signed out: a private sheet read earlier in this tab is not drawn again (songFileSrc's rule for its song).
+  const priv = pcSheetPrivateId(url);
+  if(priv && !songFileHost().user) return Promise.reject(songFileErr('signin'));
   if(pcSheetModels[key]) return pcSheetModels[key];
   pcSheetModels[key] = pcSheetLoadPdfjs().then(async lib => {
-    const doc = await lib.getDocument(url).promise;
+    const doc = await lib.getDocument(priv ? { data: await songFileLoadBytes(priv) } : url).promise;
     const pages = [];
     for(let pn = 1; pn <= doc.numPages; pn++) pages.push(await pcSheetPage(await doc.getPage(pn), one));
     const all = pages.flatMap(P => P.words);
@@ -311,7 +324,7 @@ async function pcSheetDraw(paperOrCol){
   const msg = text => { let m = paper.querySelector('.pc-sheet-msg'); if(!m){ m = document.createElement('p'); m.className = 'pc-sheet-msg'; paper.appendChild(m); } m.textContent = text; m.hidden = !text; };
   let model;
   try { model = await pcSheetModel(a.card.sheet, a.card.sheetColumns); }
-  catch(e){ if(paper._sheetJob === job) msg(t('ca.sheetFailed')); return; }
+  catch(e){ if(paper._sheetJob === job) msg(pcSheetFailLine(e)); return; }
   if(paper._sheetJob !== job || !paper.isConnected) return;
   const avail = col.clientWidth;
   if(!(avail > 0)) return;

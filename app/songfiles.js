@@ -64,6 +64,11 @@
    the student moved on never starts by itself. A public path goes through
    none of this: snippetSrc() returns it unchanged.
 
+   A CHORD SHEET (2026-11-18, Jonathan: a Lyrics view for private songs) is a file in the same store: a pdf whose
+   listed name ends in .pdf (a built song's `song.sheet`, app/builtsongs.js). A lyric-sheet card names it
+   'private:<id>' in card.sheet, and app/cards-sheet.js reads it with songFileLoadBytes() (below): the same checks,
+   count and device copy as a song, the Blob typed application/pdf.
+
    NOT ON THE SONG JOURNEY PAGES YET (2026-11-14, after review round 2): their
    player (tabs/journey.js) cannot play a private song; checks.mjs 1dx fails
    any 'private:' in tabs/. That player is its own piece of Step 2, with the
@@ -117,6 +122,7 @@ function songFilesSetBuilt(map){
     if(sfUrls.has(id) && (!now || now.sha256 !== was.sha256 || now.bytes !== was.bytes)){
       try { URL.revokeObjectURL(sfUrls.get(id)); } catch(e) {}
       sfUrls.delete(id);
+      sfBlobs.delete(id);
     }
   });
   sfBuilt = next;
@@ -126,6 +132,10 @@ function songFileEntry(id){
   if(Object.prototype.hasOwnProperty.call(SONG_FILES, id)) return SONG_FILES[id];
   return Object.prototype.hasOwnProperty.call(sfBuilt, id) ? sfBuilt[id] : null;
 }
+/* What a stored file is, from its listed name's extension: a chord sheet is a pdf (2026-11-18, the lyric sheets of
+   private songs: app/cards-sheet.js reads its bytes, songFileLoadBytes), every other file a song (mp3). The type
+   goes on the Blob, so the device copy keeps it too. */
+function songFileType(entry){ return /\.pdf$/i.test((entry && entry.file) || '') ? 'application/pdf' : 'audio/mpeg'; }
 function songFileId(src){
   return (typeof src === 'string' && src.indexOf(SONG_FILE_PREFIX) === 0) ? src.slice(SONG_FILE_PREFIX.length) : null;
 }
@@ -181,6 +191,7 @@ function sfCopyOk(rec, entry){
 
 /* ── This page's loaded files ── */
 const sfUrls = new Map();       // id -> blob: address of the checked copy
+const sfBlobs = new Map();      // id -> that checked copy (a Blob), for songFileLoadBytes; dropped with its address
 const sfInflight = new Map();   // id -> { promise, listeners:Set }
 let sfPersistAsked = false;
 /* ONE COUNT, ONE REFUSAL PER SONG PER PAGE (review A2, 2026-11-14). A song is
@@ -340,7 +351,7 @@ async function sfLoadOnce(id, entry, progress, wanted){
       if(e && (e.code === 'missing' || e.code === 'bad')) sfBroken.set(key, 'notready');
       throw e;
     }
-    const b = new Blob([bytes], { type: 'audio/mpeg' });
+    const b = new Blob([bytes], { type: songFileType(entry) });
     /* A full device (QuotaExceededError) or blocked storage: play it from
        memory this time; the next page load downloads it again. */
     try {
@@ -374,6 +385,7 @@ function songFileLoad(id, onProgress, waiter){
       .then(blob => {
         const url = URL.createObjectURL(blob);
         sfUrls.set(id, url);
+        sfBlobs.set(id, blob);
         return url;
       }, e => { throw songFileErr(sfFirestoreCode(e), e && e.message); })
       .finally(() => { if(sfInflight.get(id) === j) sfInflight.delete(id); });
@@ -388,6 +400,18 @@ function songFileLoad(id, onProgress, waiter){
     p.release = () => { if(held){ held = false; job.waiters--; if(onProgress) job.listeners.delete(onProgress); } };
   } else { job.direct++; p.release = () => {}; }
   return p;
+}
+
+/* A file's BYTES for this page (2026-11-18, the lyric sheets of private songs). pdf.js cannot read a blob: address
+   here: index.html's CSP has no blob: in connect-src, so it is handed the bytes (getDocument({ data }), as the
+   console's pdfs are, teacher-sb-pdf.js). The same load as songFileLoad: the same sign-in rule, the same in-flight
+   job (a sheet asked for twice at once downloads once), the same checks, the device copy and the monthly count.
+   Each call gives a fresh copy: pdf.js takes over the buffer it is handed. Rejects with songFileLoad's codes. */
+async function songFileLoadBytes(id){
+  await songFileLoad(id);
+  const b = sfBlobs.get(id);
+  if(!b) throw songFileErr('failed', 'the loaded copy was let go');
+  return new Uint8Array(await b.arrayBuffer());
 }
 
 /* ── The line a card shows while it waits, or instead of playing ── */

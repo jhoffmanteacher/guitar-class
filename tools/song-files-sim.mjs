@@ -161,7 +161,7 @@ function makeTab(src, shared, opts){
   };
   vm.createContext(ctx);
   /* The sim's own list: whatever the site ships on SONG_FILES is cleared, so a real entry never changes a case (review B3). */
-  vm.runInContext(src + `\n;for (const k of Object.keys(SONG_FILES)) delete SONG_FILES[k];\nglobalThis.__api = { SONG_FILES, songFileLoad, songFileSrc, songFileNeedsLoad, songFileWaitThen, songFileCancelWait, songFileCancelWaitIn, songFileWaitingFor, songFileCost, songFileMonth, SONG_FILES_MONTH_LIMIT, SONG_FILE_LINE_KEYS, songFilesSetBuilt, songFileEntry, sfUrls };`, ctx, { filename: 'app/songfiles.js' });
+  vm.runInContext(src + `\n;for (const k of Object.keys(SONG_FILES)) delete SONG_FILES[k];\nglobalThis.__api = { SONG_FILES, songFileLoad, songFileSrc, songFileNeedsLoad, songFileWaitThen, songFileCancelWait, songFileCancelWaitIn, songFileWaitingFor, songFileCost, songFileMonth, SONG_FILES_MONTH_LIMIT, SONG_FILE_LINE_KEYS, songFilesSetBuilt, songFileEntry, sfUrls, songFileLoadBytes, sfBlobs };`, ctx, { filename: 'app/songfiles.js' });
   return { api: ctx.__api, ctx, urls };
 }
 const newShared = o => ({ fs: makeFirestore(), idb: makeIdb(o), locks: makeLocks() });
@@ -260,6 +260,54 @@ async function suite(src, quiet){
     const t2 = makeTab(src, shB); t2.api.songFilesSetBuilt({ 'sb-made-up-a': entry }); await t2.api.songFileLoad('sb-made-up-a');
     t2.api.songFilesSetBuilt({});
     ok('built: a song taken off the list loses its entry and the page\'s loaded copy', t2.api.songFileEntry('sb-made-up-a') === null && !t2.api.sfUrls.has('sb-made-up-a') && await code(t2.api.songFileLoad('sb-made-up-a')) === 'notready');
+  }
+
+  say('== a chord sheet (a .pdf in the store, read as bytes: app/cards-sheet.js, 2026-11-18)');
+  { const shS = newShared();
+    const PDF = bytesOf(PIECE + 4321);
+    PDF.set([0x25, 0x50, 0x44, 0x46], 0);                    // %PDF, as a real sheet starts
+    putFile(shS.fs, 'sheet-made-up', PDF);
+    const tab = makeTab(src, shS); register(tab, 'sheet-made-up', PDF, { file: 'sheet-made-up.pdf', durationSec: 1 });
+    const ps = [tab.api.songFileLoadBytes('sheet-made-up'), tab.api.songFileLoadBytes('sheet-made-up'), tab.api.songFileLoad('sheet-made-up')];
+    const [b1, b2] = await Promise.all(ps);
+    ok('sheet: the bytes are the pdf, byte for byte', b1 instanceof Uint8Array && sha(b1) === sha(PDF));
+    ok('sheet: three asks at once (two for bytes, one for the address) share one download, counted once', shS.fs.st.pieceReads === 2 && usage(shS) === Math.ceil(PDF.length * 4 / 3), `${shS.fs.st.pieceReads} ${usage(shS)}`);
+    ok('sheet: the Blob is typed application/pdf (from the listed name)', tab.urls[0] && tab.urls[0].type === 'application/pdf', tab.urls[0] && tab.urls[0].type);
+    const c1 = await tab.api.songFileLoadBytes('sheet-made-up'); c1[0] = 0;
+    ok('sheet: each call gets its own copy (pdf.js takes over the buffer it is handed)', b2[0] === 0x25 && (await tab.api.songFileLoadBytes('sheet-made-up'))[0] === 0x25);
+    await tick(); await tick();
+    ok('sheet: the device keeps a copy, typed application/pdf', !!shS.idb.stores.get('sheet-made-up') && shS.idb.stores.get('sheet-made-up').blob.type === 'application/pdf');
+    const r0 = shS.fs.st.reads;
+    const next = makeTab(src, shS); register(next, 'sheet-made-up', PDF, { file: 'sheet-made-up.pdf', durationSec: 1 });
+    const b3 = await next.api.songFileLoadBytes('sheet-made-up');
+    ok('sheet: a new page reads it from the device copy: 0 reads, the same bytes', shS.fs.st.reads === r0 && sha(b3) === sha(PDF), String(shS.fs.st.reads - r0));
+    tab.ctx.currentUser = null;
+    ok('sheet: signed out in the same tab, the bytes are refused (signin), nothing read', await code(tab.api.songFileLoadBytes('sheet-made-up')) === 'signin' && shS.fs.st.reads === r0);
+    const M = bytesOf(3000);
+    const shM = newShared(); putFile(shM.fs, 'song-m', M);
+    const tm = makeTab(src, shM); register(tm, 'song-m', M);
+    await tm.api.songFileLoad('song-m');
+    ok('a song (.mp3) is still typed audio/mpeg', tm.urls[0] && tm.urls[0].type === 'audio/mpeg', tm.urls[0] && tm.urls[0].type);
+    const shB = newShared(); putFile(shB.fs, 'sheet-sb-a', PDF);
+    const tb = makeTab(src, shB);
+    const bEntry = { file: 'sheet-sb-a.pdf', bytes: PDF.length, sha256: sha(PDF), durationSec: 1 };
+    tb.api.songFilesSetBuilt({ 'sheet-sb-a': bEntry });
+    const bb = await tb.api.songFileLoadBytes('sheet-sb-a');
+    ok('sheet: a built song\'s sheet entry (songFilesSetBuilt) loads as bytes, typed application/pdf', sha(bb) === sha(PDF) && tb.urls[0].type === 'application/pdf');
+    tb.api.songFilesSetBuilt({});
+    ok('sheet: a built sheet taken off the list lets its loaded copy go (address and bytes): notready', !tb.api.sfBlobs.has('sheet-sb-a') && await code(tb.api.songFileLoadBytes('sheet-sb-a')) === 'notready');
+    const shD = newShared(); putFile(shD.fs, 'sheet-x', PDF); shD.fs.st.deny = true;
+    const td = makeTab(src, shD); register(td, 'sheet-x', PDF, { file: 'sheet-x.pdf', durationSec: 1 });
+    ok('sheet: the rules refuse: denied (the card shows ca.sheetNotAllowed)', await code(td.api.songFileLoadBytes('sheet-x')) === 'denied');
+    /* The sheet card's lines (app/cards-sheet.js PC_SHEET_FILE_LINES): one for every line the loader can end on (not
+       loading; failed is the card's own ca.sheetFailed), each in English and Spanish. */
+    const CS = readFileSync(join(ROOT, 'app/cards-sheet.js'), 'utf8');
+    const m = /const PC_SHEET_FILE_LINES = (\{[^}]*\});/.exec(CS);
+    const lines = m ? Function('return ' + m[1])() : {};
+    const want = Object.keys(tab.api.SONG_FILE_LINE_KEYS).filter(k => k !== 'loading' && k !== 'failed');
+    const gap = want.filter(k => !lines[k]);
+    const noText = [...Object.values(lines), 'ca.sheetFailed'].filter(k => !new RegExp(`'${k.replace('.', '\\.')}':\\s*\\{ en: '[^']+',\\s*(\\n\\s*)?es: '[^']+'`).test(I18N));
+    ok(`sheet: the card has a line for each of the loader's ${want.length} refusals, each in English and Spanish (${Object.keys(lines).length} lines + ca.sheetFailed)`, m && !gap.length && !noText.length, `missing ${gap.join(', ')} | no EN+ES ${noText.join(', ')}`);
   }
 
   say('== refusals: nothing kept, no address');
@@ -551,6 +599,11 @@ async function suite(src, quiet){
 
 /* Each break: [name, old text, new text]. The old text must occur exactly once in app/songfiles.js. */
 const BREAKS = [
+  /* The chord sheets of private songs (2026-11-18): a .pdf in the store, read as bytes. */
+  ['S1: every file is typed audio/mpeg', "{ type: songFileType(entry) }", "{ type: 'audio/mpeg' }"],
+  ['S2: the bytes skip the sign-in rule (a loaded copy handed out after a sign-out)', "async function songFileLoadBytes(id){\n  await songFileLoad(id);", "async function songFileLoadBytes(id){\n  if(sfBlobs.has(id)) return new Uint8Array(await sfBlobs.get(id).arrayBuffer());\n  await songFileLoad(id);"],
+  ['S3: a built sheet taken off the list keeps its bytes', "      sfBlobs.delete(id);\n", ''],
+  ['S4: every call hands out the same buffer', "  return new Uint8Array(await b.arrayBuffer());", "  return b.__u8 || (b.__u8 = new Uint8Array(await b.arrayBuffer()));"],
   /* Song builder Part a2 (2026-11-14): the built songs' audio entries. */
   ['B1: the loader ignores built entries', "  const entry = songFileEntry(id);\n  if(!entry) return Promise.reject(", "  const entry = SONG_FILES[id];\n  if(!entry) return Promise.reject("],
   ['B2: a built entry wins over the list', "  if(Object.prototype.hasOwnProperty.call(SONG_FILES, id)) return SONG_FILES[id];\n  return Object.prototype", "  if(Object.prototype.hasOwnProperty.call(sfBuilt, id)) return sfBuilt[id];\n  return Object.prototype"],

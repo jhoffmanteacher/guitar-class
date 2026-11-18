@@ -21478,7 +21478,7 @@ function checkSongRequests() {
        Journey player cannot play a private song yet; it is its own piece of
        Step 2.
    ════════════════════════════════════════════════════════════════════ */
-const SONG_FILES_SIM_PIN = 121;   // 113 -> 121 (2026-11-14, Song builder Part a2): a built song's audio entry (8 cases); -> 113 (2026-11-14, plant-a-fault gaps 33147bfb56 and 6eb5c43dc5): a blocked IndexedDB open (2 cases), the loading line announced (role="status"); 81 -> 84 (2026-11-14): a sign-out in the same tab stops handing out the loaded copy; -> 101 (review round 1): L1-L5, A2, m4-m6, B1, B4; the "ships empty" case gone (B3); -> 109 (round 2): m1, m6, the three missed plants, two cards waiting for one song
+const SONG_FILES_SIM_PIN = 133;   // 121 -> 133 (2026-11-18, private chord sheets, P1): a .pdf read as bytes (songFileLoadBytes), typed by its name, one shared download, the sign-in rule, a built sheet entry, the sheet card's lines in EN + ES (12 cases); 113 -> 121 (2026-11-14, Song builder Part a2): a built song's audio entry (8 cases); -> 113 (2026-11-14, plant-a-fault gaps 33147bfb56 and 6eb5c43dc5): a blocked IndexedDB open (2 cases), the loading line announced (role="status"); 81 -> 84 (2026-11-14): a sign-out in the same tab stops handing out the loaded copy; -> 101 (review round 1): L1-L5, A2, m4-m6, B1, B4; the "ships empty" case gone (B3); -> 109 (round 2): m1, m6, the three missed plants, two cards waiting for one song
 const SONG_FILES_CLOSE_PIN = 6;
 function checkSongFilesLoader() {
   head('1dx. Song files: the loader is run (pieces, checks, device copy, two tabs, the monthly limit); the player hooks are pinned');
