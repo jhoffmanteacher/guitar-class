@@ -122,7 +122,8 @@
        about 1 s after Stop; the reload waits for the song anyway). busy-card
        therefore plays the card once, lets sw.js store the track, stops, and
        plays it again from the cache, so the takeover can come mid-song and
-       busyReason()'s pcState is what holds the reload.
+       busyReason()'s pcState is what holds the reload. A private song's track stands in as already loaded
+       (BUSY.card: the blocked network can never load one here).
      - registration.update() sometimes resolves without asking the server for
        sw.js at all (seen on In class, about 1 run in 3: Chrome folds it into an
        update check of its own that had already fetched version 1). The tool
@@ -543,7 +544,8 @@ const placeExplore = (toggle, screen, label, frac) => async (c) => {
 };
 /* A deep link to one activity, its practice card open, and the pane scrolled: the browser keeps the address across a reload
    and the router opens the card again from it, so only the scroll depends on the note (review R1-3). Cards are tried in
-   order until one whose page scrolls more than 300 px (with a Play button when the case plays it). */
+   order until one whose page scrolls more than 300 px (with a Play button when the case plays it). A card whose track
+   is a private song is played by busy-card through a stand-in (BUSY.card, below). */
 const placeDeepLink = (needPlay) => async (c) => {
   const ids = await c.js(`CLASS_ACTIVITIES.filter(a => a.card${needPlay ? ' && !a.card.sheet' : ''}).map(a => a.id)`);
   if (!ids.length) throw new Error('no practice-card activity');
@@ -634,8 +636,28 @@ const BUSY = {
      Range path), and while that stream is open the old worker cannot be replaced at all (measured: no takeover for as long
      as the song plays, then one about 1 s after Stop). So the first play is stopped once sw.js has stored the whole track,
      and the card is played again from the cache: the takeover can then happen mid-song, and what holds the reload back is
-     busyReason()'s pcState, the thing under test. */
+     busyReason()'s pcState, the thing under test.
+     A PRIVATE SONG (a track path 'private:<id>', app/songfiles.js; since da4cece, 2026-11-17, ca-35 Las Mañanitas, the
+     only card with a Play button whose page scrolls over 300 px) can never load here: the network is blocked, so the
+     Firebase scripts never load, ensureDb() gives null and Play shows "This song didn't load" within 2 s, with pcState
+     never set. It never goes through sw.js either, so the audio-cache wait below ran its full 20 s and used up the
+     call's own 20 s limit: "CDP Runtime.evaluate gave no answer", every run. The page itself answered a probe every 2 s
+     in 1 to 9 ms all the while (measured 2026-11-17): nothing hung. So each private path of the card's track stands
+     in, already loaded in the page (sfUrls, as songFileLoad leaves it for a signed-in student online), as a blob: of
+     the first public track's bytes, and the card is played once: a blob: is played from memory, not streamed through
+     the worker, so the takeover can come mid-song at once. With no private path this does nothing. */
   card: { on: `(async () => { const play = () => { const b = document.querySelector('.ca-card[open] .pc-play'); if (!b) return false; b.click(); return true; };
+      const tr = (() => { try { return pcLayout(pcActivity(document.querySelector('.ca-card[open] .pc'))).tr; } catch (e) { return null; } })();
+      const priv = tr ? Object.values(tr).filter(v => typeof v === 'string' && v.startsWith('private:')).map(v => v.slice(8)) : [];
+      if (priv.length) {
+        const pub = Object.values(SNIPPET_TRACKS).map(t => t.src).find(s => typeof s === 'string' && s.startsWith('audio/'));
+        if (!pub) return false;
+        const url = URL.createObjectURL(await (await fetch(pub)).blob());
+        priv.forEach(id => sfUrls.set(id, url));
+        if (!play()) return false;
+        await new Promise(r => setTimeout(r, 800));
+        return pcState !== null && /^blob:/.test(pcState.audio.src);
+      }
       const audioCache = async () => { const k = (await caches.keys()).find(n => /audio/.test(n) && !/hashes/.test(n)); return k ? (await (await caches.open(k)).keys()).length : 0; };
       if (!play()) return false;
       for (let i = 0; i < 100 && !(await audioCache()); i++) await new Promise(r => setTimeout(r, 200));
@@ -643,7 +665,7 @@ const BUSY = {
       if (pcState) play();
       await new Promise(r => setTimeout(r, 800));
       return play(); })()`,
-    ready: `pcState !== null`, is: `pcState !== null`, off: `(() => { const b = document.querySelector('.ca-card[open] .pc-play'); if (b) b.click(); return pcState === null; })()`, what: 'a practice card playing (its Play button; pcState set), its track already in the audio cache' },
+    ready: `pcState !== null`, is: `pcState !== null`, off: `(() => { const b = document.querySelector('.ca-card[open] .pc-play'); if (b) b.click(); return pcState === null; })()`, what: 'a practice card playing (its Play button; pcState set), its track already in the audio cache (a private song: standing in as loaded)' },
   /* The other reasons busyReason() gives (and the sign-in popup, held like the others: its having no cap is not tested), one after another in one case (review R1-8):
      each is set before the one before it is cleared, so the page is never idle in between, and each is held for
      CYCLE_MS, at least two of the page's 1.5 s checks. A reason the page ignores lets the reload through inside its own
