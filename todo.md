@@ -140,6 +140,12 @@ Three of the four parts that were over 2,000 lines were split on 2026-11-16 (`te
 
 ## Small things, none urgent
 
+- **An update reload does not wait for a private song that is still downloading** (found 2026-11-17 by the agent
+  fixing `update-reload-loop`'s busy-card case). `busyReason()` in `app/start.js` (about lines 76-104) looks at
+  `pcState`, not at the "Loading the song… 40%" wait, so an update landing mid-download reloads the page: the
+  download is lost and the song is counted against the month again (the "counted once" record lasts one page,
+  `app/songfiles.js` about 199 and 333-336). Nothing hangs; the student presses Play again. Small `start.js` change;
+  not built (Jonathan, same day: "that'll be it").
 - **Two tools have hung with their work finished or idle, cause unknown.** A `golden.mjs --compare` printed its
   result and never exited (2026-11-11, 39 minutes, 0% CPU; run again it took 0.7 s). The pre-push hook's
   `checks.mjs --check --skip-links` sat at 0% CPU for over 5 minutes during a branch push (2026-11-16; the Mac's
