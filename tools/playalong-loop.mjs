@@ -24,7 +24,7 @@
    Exit 0: nothing found. 1: a mismatch. 2: could not run, or nothing was walked (a --setting that matches no walk). 3: the watchdog (no step for --stall seconds).
 
    WHEN TO RUN IT: after any change to a practice card's chart (`card.sections` in class-activities.js), to
-   SNIPPET_TRACKS, or to the player in app/cards.js / app/snippets.js. It is not part of checks.mjs.
+   SNIPPET_TRACKS, or to the player in app/cards.js / app/cards-sheet.js / app/snippets.js. It is not part of checks.mjs.
    One headless-browser run at a time on a machine (not beside smoke.mjs, golden.mjs, pm-e2e.mjs, slow-load.mjs).
 
    WHAT IS REAL. The site's own page in headless Chrome, signed in through the dev bypass, with the card open on

@@ -451,7 +451,7 @@ After changing a `SNIPPET_TRACKS` timing field (`anchor`, `barTimes`, `trackBpm`
 
 ## Checking the practice-card player: `tools/playalong-loop.mjs`
 After touching a card's chart, `SNIPPET_TRACKS`, the lead (`PC_LEAD`) or the
-practice-card player (`app/cards.js`, `app/snippets.js`): `node tools/playalong-loop.mjs` (`--only <id>` for one card;
+practice-card player (`app/cards.js`, `app/cards-sheet.js`, `app/snippets.js`): `node tools/playalong-loop.mjs` (`--only <id>` for one card;
 headless Chrome for Testing, about 6½ minutes for all 26 cards, one browser run at a time). It walks every setting on
 a fake clock and checks the cursor, the drawing, the count-in and the Metronome against an answer worked out from the
 chart and the beat map. It has no ears: `tools/beat-audit.py` is the tool that listens.

@@ -659,7 +659,7 @@ step's tab.
   on a chord starts from that lap (`pcStart(root, si, rep)`).
 - ca-38 has NO `journey` (1bn): it is another view of ca-29, not Layer 3's
   play-along.
-- Engine: `pcSheet*` in `app/cards.js`, beside caCardBodyHtml.
+- Engine: `pcSheet*` in `app/cards-sheet.js` (split off 2026-11-18, W24); caCardBodyHtml in `app/cards.js` calls it.
 
 **Slowest.** A practice card with `card.slowest: true` (all 25 practice cards
 on 2026-11-08) gets a four-stop speed control: Slowest / Slower / **Slow** /

@@ -12720,6 +12720,16 @@ function checkCardViews(ctx, i18nTable) {
   const cb = jsFunctionBody(siteSource('app.js', ROOT), 'caCardBodyHtml');
   if (cb === null || !/caViewSwitchHtml\(a\)/.test(stripJsComments(cb))) flag('app/cards.js: caCardBodyHtml() must draw caViewSwitchHtml(a) — the card would have no switch');
   if (cb !== null && !/typeof caViewSwitchHtml === 'function' \? caViewSwitchHtml\(a\)/.test(stripJsComments(cb))) flag("app/cards.js: the caViewSwitchHtml(a) call must stay behind typeof — a page with the new cards.js and no app/cards-views.js would draw no practice card (W23 R1-1)");
+  /* The lyric sheet is app/cards-sheet.js, a later part (W24, 2026-11-18). A page with the new cards.js and no
+     cards-sheet.js must still draw every card and Stop every song (W24 review R1-1): each `sheet` flag taken from a
+     card is false without pcSheetHtml, and pcStop's pcSheetStopped stays behind typeof. */
+  for (const f of ['app/cards.js', 'app/cards-views.js']) {
+    const s = stripJsComments(readFileSync(join(ROOT, f), 'utf8'));
+    const bare = [...s.matchAll(/!!\w+\.card\.sheet(?!\s*&&\s*typeof pcSheetHtml === 'function')/g)].length;
+    if (bare) flag(`${f}: ${bare} sheet flag(s) read from a card without "&& typeof pcSheetHtml === 'function'": a page without app/cards-sheet.js would call the sheet code (W24 R1-1)`);
+    const stops = [...s.matchAll(/(typeof pcSheetStopped === 'function'\)\s*)?pcSheetStopped\(/g)].filter(m => !m[1]).length;
+    if (stops) flag(`${f}: ${stops} pcSheetStopped( call(s) not behind typeof: Stop would throw on a page without app/cards-sheet.js (W24 R1-1)`);
+  }
   if (!bad) ok(`1er: ${withViews.length} card${withViews.length === 1 ? "" : "s"} with views (${withViews.map(a => a.id + ': ' + EXPECT[a.id].list.join(' / ')).join('; ')}), shape and sections line up; ${located} sixteenths located at the same section, lap and beat in every view; ${renders} renders (nothing / junk / each view stored, EN + ES, student + console): one switch, one pressed button, the view drawn, default the card's own; ${swOff} renders of the other cards draw no switch; nothing saved, the song not stopped`);
 }
 

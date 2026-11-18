@@ -467,10 +467,10 @@ function caCardBodyHtml(a, opts){
   if(!L) return '';
   const preview = !!(opts && opts.preview);
   /* A card with `card.sheet` shows that chord sheet PDF in place of the tab
-     (ca-38 — see LYRIC SHEET below). The sheet is drawn after the HTML is in
+     (ca-38 — see LYRIC SHEET, app/cards-sheet.js). The sheet is drawn after the HTML is in
      the page, so the builder only queues a scan; every caller (the student
      card, the hero card, the console preview) gets it the same way. */
-  const sheet = !!a.card.sheet;
+  const sheet = !!a.card.sheet && typeof pcSheetHtml === 'function';   /* the sheet is app/cards-sheet.js, a later part: a page with the new cards.js without it draws the tab (W24 review R1-1) */
   if(sheet) setTimeout(pcSheetScan, 0);
   return `<div class="pc" data-id="${escAttr(a.id)}"${pcOneFile(L.tr) ? ` data-slow="" data-rate="${PC_ONE_FILE_RATES[1]}"` : ' data-slow="1"'}${snippetHasFull(L.tr) ? ' data-guitar="1"' : ''}${preview ? ' data-preview="1"' : ''}>`
     + caRecordingSwitchHtml(a) + caKeySwitchHtml(a) + caChordSwitchHtml(a) + caBassSwitchHtml(a) + (typeof caViewSwitchHtml === 'function' ? caViewSwitchHtml(a) : '')   /* Chords / Tab / Lyrics: app/cards-views.js, a later part; guarded so a page that has the new cards.js without it still draws the card (W23 review R1-1) */
@@ -551,7 +551,7 @@ function pcStop(){
     if(btn){ btn.innerHTML = pcPlayBtnHtml(false); btn.classList.remove('playing'); }
     root.querySelectorAll('.beat-now').forEach(el => el.classList.remove('beat-now'));
     root.querySelectorAll('.pc-rep').forEach(el => { el.hidden = true; el.textContent = ''; });
-    pcSheetStopped(root);
+    if(typeof pcSheetStopped === 'function') pcSheetStopped(root);   /* app/cards-sheet.js (W24 R1-1) */
     pcStatus(root, '');
   }
   pcSyncBarStop();
@@ -693,7 +693,7 @@ function pcStart(root, si, rep, keepBuild){
      a lyric sheet (pcSheetStartAt). The loop, if any, still returns to the
      section's start. */
   const fromRep = Math.max(0, Math.min(L.sections[si].reps - 1, rep | 0));
-  const st = { root, L, audio, win: pcWindow(L, slow, guitar), loopFrom: si, fromRep, wholeSong: !!a.card.wholeSong, sheet: !!a.card.sheet, raf: 0, timers: [], lastBeat: -1, counting: true, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null,
+  const st = { root, L, audio, win: pcWindow(L, slow, guitar), loopFrom: si, fromRep, wholeSong: !!a.card.wholeSong, sheet: !!a.card.sheet && typeof pcSheetHtml === 'function', raf: 0, timers: [], lastBeat: -1, counting: true, si: -1, seq: -1, rep: -1, beat: -1, key: '', row: null,
                loopSi: root.dataset.loop === '1' ? si : -1, build, laps: 0,
                passFrom: L.sections[si].fromBar + fromRep * L.sections[si].bars - L.firstBar };   // where this pass began, in window bars (THE LEAD)
   pcState = st;
@@ -938,9 +938,9 @@ function pcPaint(st, loc){
    left there; Play itself (`force`) always brings the tab back. Scrolls
    whatever is actually scrolling — .main on a laptop, the page on a phone.
    `keep` (a lyric sheet's line being played, when `row` is the line coming:
-   THE SHEET'S LOOK-AHEAD): the scroll stops short of moving it off screen,
+   THE SHEET'S LOOK-AHEAD, app/cards-sheet.js): the scroll stops short of moving it off screen,
    and pcFollow returns true when it did. `jump`: an instant scroll, not a
-   smooth one. `toTop` (a lyric sheet's line being played, THE SHEET'S TOP):
+   smooth one. `toTop` (a lyric sheet's line being played, THE SHEET'S TOP, app/cards-sheet.js):
    the row goes as high as it can, `pad` under the sticky bars, whatever is
    below it; the scroll box's end stops it there. pcFollowPlan works the
    scroll out without making it (null: none to make); pcFollowScroll makes
@@ -1035,7 +1035,7 @@ function pcFollowScroll(p, jump){
    measured 2026-11-16: .main from 154 to 0 with the song playing) and the
    zoom changes every height. Forget the line pcFollow last kept in view, so
    the next frame (a sheet: the line being played, jumped back to the top,
-   THE SHEET'S TOP) or the next note (a tab) brings it back. */
+   THE SHEET'S TOP, app/cards-sheet.js) or the next note (a tab) brings it back. */
 function pcRefollow(){ if(pcState){ pcState.sheetLine = null; pcState.sheetLit = null; pcState.sheetAim = null; pcState.sheetTop = null; pcState.row = null; } }
 document.addEventListener('fullscreenchange', pcRefollow);
 window.addEventListener('resize', pcRefollow);
