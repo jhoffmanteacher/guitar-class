@@ -12801,7 +12801,8 @@ function checkRosterSkipsTrainerStub() {
    Jonathan, 2026-11-17). A student who never pressed the arrow (no
    railCollapsed saved) gets the slim strip off Modules and the wide menu on
    Modules, and that automatic state is never written; a saved '1' or '0'
-   wins on every page; pressing the arrow saves. Runs the REAL
+   wins on every page; pressing the arrow saves (and, when localStorage
+   throws, is kept in the page: R3-5). Runs the REAL
    railAutoSync / setRailCollapsed / toggleRailCollapsed in the 0b context
    with a stub body and storage, then the REAL syncExploreNav and
    restoreRailCollapsed over a stub location: Modules = no page open and an
@@ -12841,7 +12842,13 @@ function checkRailDefault(ctx) {
     store.removeItem('railCollapsed'); set.clear();
     run('toggleRailCollapsed()'); const c = state();
     want(c.slim && c.saved === '1', `the arrow must save the student's choice: got ${JSON.stringify(c)}`);
-    store.removeItem('railCollapsed'); set.clear();
+    /* A locked-down profile (localStorage throws): the press is kept in the page, so the next page change keeps it. */
+    store.removeItem('railCollapsed'); set.clear(); run('railPressedChoice = null');
+    const keepStore = ctx.localStorage;
+    ctx.localStorage = { getItem() { throw new Error('denied'); }, setItem() { throw new Error('denied'); }, removeItem() {} };
+    try { run('toggleRailCollapsed()'); run('railAutoSync(true)'); want(set.has('rail-collapsed'), 'localStorage throws: the arrow press must survive going back to Modules (railPressedChoice)'); }
+    finally { ctx.localStorage = keepStore; }
+    store.removeItem('railCollapsed'); set.clear(); run('railPressedChoice = null');
     /* syncExploreNav for real: every screen hidden except `open` (none = Modules). */
     let open = null;
     doc.getElementById = id => { if (id === 'rail-collapse-btn') return null; const e = keepGid(id); e.hasAttribute = a => a === 'hidden' && id !== open; return e; };
@@ -12857,11 +12864,11 @@ function checkRailDefault(ctx) {
       set.clear(); ctx.location.hash = hash; run('restoreRailCollapsed()');
       want(set.has('rail-collapsed') === slim, `a load on '${hash}' with nothing saved: want the ${slim ? 'slim strip' : 'wide menu'}`);
     }
-    set.clear();
+    set.clear(); run('railPressedChoice = null');
   } catch (e) { flag('the rail code threw — ' + e.message); }
   finally { doc.body = keepBody; doc.getElementById = keepGid; ctx.location.hash = keepHash; }
-  if (cases !== 14) flag(`ran ${cases} cases, pinned 14`);
-  if (!bad) ok(`1eu: railAutoSync run for real: no saved choice gives the slim strip off Modules and the wide menu on Modules and saves nothing; a saved '1' / '0' wins on both; the arrow saves; the real syncExploreNav and restoreRailCollapsed: wide on Modules, slim on a page, #search changes nothing (${cases} cases)`);
+  if (cases !== 15) flag(`ran ${cases} cases, pinned 15`);
+  if (!bad) ok(`1eu: railAutoSync run for real: no saved choice gives the slim strip off Modules and the wide menu on Modules and saves nothing; a saved '1' / '0' wins on both; the arrow saves, and holds when localStorage throws; the real syncExploreNav and restoreRailCollapsed: wide on Modules, slim on a page, #search changes nothing (${cases} cases)`);
 }
 /* 1et. A LESSON STEP WITH ITS CHORDS BESIDE IT (Look 1, Part 4, Jonathan,
    2026-11-17). buildLesson marks a step .step-2col exactly when it has chord

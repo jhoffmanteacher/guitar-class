@@ -1277,6 +1277,10 @@ window.addEventListener('resize', () => {
    locked-down profile (or a private window) throws on access, and the
    right answer there is the ordinary wide rail, not a broken page. */
 const RAIL_COLLAPSE_KEY = 'railCollapsed';
+/* The arrow's last press in this page, '1' / '0' or null: railSavedChoice()
+   falls back to it when localStorage throws or will not keep the value, so
+   the next page change does not undo the press. */
+let railPressedChoice = null;
 function railIsCollapsed(){ return document.body.classList.contains('rail-collapsed'); }
 /* `save` false: the automatic state below, never written to localStorage. */
 function setRailCollapsed(on, save = true){
@@ -1304,7 +1308,10 @@ function setRailCollapsed(on, save = true){
       if(el && el.classList.contains('open')) closePopup(w, false);
     });
   }
-  if(save){ try{ localStorage.setItem(RAIL_COLLAPSE_KEY, on ? '1' : '0'); }catch(e){} }
+  if(save){
+    railPressedChoice = on ? '1' : '0';
+    try{ localStorage.setItem(RAIL_COLLAPSE_KEY, railPressedChoice); }catch(e){}
+  }
 }
 /* Pressing the arrow is the student's choice: saved, and it wins on every page. */
 function toggleRailCollapsed(){ setRailCollapsed(!railIsCollapsed()); }
@@ -1318,7 +1325,7 @@ function toggleRailCollapsed(){ setRailCollapsed(!railIsCollapsed()); }
 function railSavedChoice(){
   let v = null;
   try{ v = localStorage.getItem(RAIL_COLLAPSE_KEY); }catch(e){}
-  return v === '1' || v === '0' ? v : null;
+  return v === '1' || v === '0' ? v : railPressedChoice;
 }
 function railAutoSync(onModules){
   if(railSavedChoice() !== null) return;
