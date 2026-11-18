@@ -371,6 +371,54 @@ and `coach-core.js`'s `micRec*`, `teacher-mic.js` (no name stored on a take, `fi
   zone at rest, on drag-over, mid-batch and finished. No name of a real song file needs typing: use the sim's
   made-up files. The Mac is registering the 18 files in `app/songfiles.js` (`SONG_FILES`) meanwhile: do not edit
   that list.
+- **W22 STOPPED for Jonathan: round 4 found 0 BLOCKER, 1 MAJOR, 3 MINOR (Windows, 2026-11-17 afternoon).** The
+  tool stays OFF main and is NOT named in CLAUDE.md. Branch `origin/win/w22`, tip `2f2fe76c`: the 21 round-1-to-3
+  commits rebased onto main `3a5bf948` with no conflict, plus one commit (an Opus builder at high) with the R3-1 fix
+  and all 5 round-3 MINORs (stuck-chain wording; the header's traps and old eager copies; template text blanked
+  before statements are split, 0 line shifts in 81 files; `--strict` / `--self-test` in the usage line; a 7-case
+  self-test). A fresh Opus `site-reviewer` at xhigh re-ran 9 of 9 of the builder's numbers, and they match. The two
+  R3-1 false reds are now 0 (a new game part before `coach-more.js`; the strum check's `scStop`). The true reds
+  stay red: `3b667ba→d6c3e16` 5 + 25 static (the lead re-ran it: same), `4ef66ce0→b810d5a2`,
+  `b810d5a2→e83f9e22`, Part d. The close is 0, plain and `--strict`.
+  - **R4-1 MAJOR (`tools/old-page-loop.mjs:896-897` and `:980`): the fix turns real faults GREEN that round 3
+    caught.** It drops a held name that never arrives (the header calls that "the static pass's question", but the
+    static pass never reads old cached copies, :136-137). It also leaves out the sentinel's own file
+    (`nf.slice(0, home)`).
+    - Failing plant P1: move `cdStop` from `coach-chordcards.js` into `coach-hub.js`.
+    - On a half page (old hub, new chordcards), Chord Detective runs without `cdStop`. `gamesStopMic` skips it, and
+      its 50 ms tick throws "cdStop is not defined" until a reload.
+    - Round 3's tool: exit 1. `2f2fe76c`: exit 0. P1b (moved into `coach-more.js`) is the same.
+  - **The reviewer's prototype fix, NOT applied or reviewed:** report a never-arriving name the old site had
+    (`OLD_DEF.has(n)`), use `nf.slice(0, home + 1)`, and keep later-part names when they are UNGUARDED. That last
+    part also covers MINOR R4-2: P3 is SP4 with the `typeof nr` guard removed, which todo.md plans after
+    2026-12-01. Results with it:
+    - Stay 0: C5, C6, C2, C3, SP4, P3c, the close, main.
+    - Turn red: P1, P1b, P3.
+    - True reds still red.
+    The diff (against `2f2fe76c`):
+    `896: if (!ok && OLD_DEF.has(sp.n)){ out.throws.push({ ...sp.t, key: sp.t.key.split(' is not yet (it arrives later)').join(' never arrives on this page, and the old site had it') }); } else if (ok){ …as before… }`
+    `969: const needs = new Set(), unguarded = new Set();`
+    `+975: if (!/\btypeof\s+$/.test(code.slice(Math.max(0, from + x.index - 20), from + x.index)) && !guardedAt(code, m.index, from + x.index, n.replace(/\$/g, '\\$'))) unguarded.add(n);`
+    `980: for (const x of nf.slice(0, home + 1)) …` and `981: … if (!earlier.has(y) && !unguarded.has(y)) needs.delete(y);`
+  - The other MINORs:
+    - R4-3: the self-test still passes with STRUCTURE switched off, or with the handler carry-over removed.
+    - R4-4: the header understates the scanner traps (a backtick in a misread regex hides the rest of the file), and
+      there is a sixth trap, `{a:1} / 2`. Neither occurs in today's code.
+  - The reviewer's revised CLAUDE.md sentence, for when the tool is named: "Before pushing a part split, a new part, a
+    move of a function between parts or a part-list change, run `node tools/old-page-loop.mjs --old origin/main
+    --new HEAD` and fix every ✗ finding. A STRUCTURE finding means a stop names something that is not there when
+    `bcStop` is: put a new game part BEFORE `coach-more.js` and call its stop behind `typeof`. A static line marked
+    'new in this push' is real unless that line can only run after a guarded call into the new part; in a
+    `teacher-*.js` part it hits only a console that signs in after the push: guard the call with `typeof` or accept
+    it, and say which in the report. A STATIC NOTE is not a finding."
+  - **QUESTION FOR JONATHAN (a MAJOR in round 4, the last round W22 allowed):**
+    - (1) Apply the prototype fix and run one more review (round 5). Recommended: the fix is 5 lines, and every
+      reviewer since round 1 has been right on real pushes.
+    - (2) Use round 3's tool (`91d2d4bf`), which catches P1, with R3-1's false red written in its header.
+    - (3) Leave it on its branch, usable by hand.
+    Until he answers: (3) stands. Usable now by hand: `git show origin/win/w22:tools/old-page-loop.mjs` into
+    `tools/` of a checkout. It is right on every real push in history, but it misses a function moved into an
+    EARLIER part.
 - **W22. The old-page tool (W6): Jonathan answered your question on 2026-11-17: choice (1), "yes, put w6 on the
   windows list". One more small fix and ONE more review, then put it on main.** Start from
   `origin/win/w6-2026-11-16-r3` (`91d2d4bf`); rebase onto today's main first (the part lists and the tools have
