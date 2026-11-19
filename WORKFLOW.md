@@ -29,6 +29,7 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
   in the site's load path (`sw.js` code, load order, `app/boot.js`, `app/start.js`) is Always Reviewed and runs
   `slow-load.mjs` and `update-reload-loop.mjs`; a harness-only fix ships Fast with its break-it proof. Report: the
   cause, and N of M walks failing before and after.
+  Windows: started 09:23 (2026-11-19).
 - [ ] **W26 — on or after 2026-11-26: is the accessibility scan ready for its ratchet?** Read GitHub's "a11y scan"
   job on every push to main from 2026-11-19 on: its annotation "a11y: against the baseline: N new signatures, M gone"
   is on each run's page without signing in (the public API allows 60 reads an hour; the run pages are not limited).
