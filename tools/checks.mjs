@@ -21497,6 +21497,23 @@ function checkRemoveOne() {
   if (!bad) ok(`teacherRemoveDeleteProgress: pinned, defined once, called once (the Delete dialog); ${warnLines.length} warning line(s); remove-one-sim ${m ? m[1] : '?'} of ${REMOVE_ONE_SIM_PIN} cases. The rules are the guard (teacher: read and delete, never create or update)`);
 }
 
+/* 1ex. The ways out of a recorded Listening Coach take (2026-11-18, review of the coach-core.js split, R1-1): coachClose() calls
+   coachMicOff() behind a typeof guard since coachMicOff moved to coach-score.js, and a typo or a rename in that guard would leave the mic
+   and the recording running when the card closes, with no other check turning red. tools/mic-sim/coach-take-save.mjs runs the real
+   coachClose / coachInterrupt / gamesHideStop / coachMicOff / micRec* in mic-sim's vm site (about 6 s). */
+const COACH_TAKE_SAVE_PIN = 9;
+function checkCoachTakeSave() {
+  head('1ex. Listening Coach: every way out of a recorded take stops the mic and saves or keeps the right take (coach-take-save.mjs, run)');
+  const fail = m => { err(m); problems++; };
+  const r = spawnSync(process.execPath, [join(ROOT, 'tools', 'mic-sim', 'coach-take-save.mjs'), '--root=' + ROOT], { encoding: 'utf8', timeout: 120000 });
+  const m = /coach-take-save: (\d+) of (\d+) cases pass/.exec(r.stdout || '');
+  if (r.status !== 0 || !m) {
+    fail('1ex: tools/mic-sim/coach-take-save.mjs failed (exit ' + r.status + ')' + (r.error ? ': ' + r.error.message : ''));
+    for (const l of ((r.stdout || '') + (r.stderr || '')).trim().split('\n').filter(l => /^FAIL|✗|Error|not defined/.test(l)).slice(0, 6)) console.log(`${C.dim}      ${l}${C.reset}`);
+  } else if (+m[1] !== COACH_TAKE_SAVE_PIN || +m[2] !== COACH_TAKE_SAVE_PIN) fail(`1ex: coach-take-save passed ${m[1]} of ${m[2]} cases; pinned at ${COACH_TAKE_SAVE_PIN} — re-pin only for a case added or removed on purpose`);
+  else ok(`coach-take-save: ${m[1]} of ${COACH_TAKE_SAVE_PIN} ways out of a recorded take (finish, I'm done, close, hidden tab, …) stop the mic and save or keep the right take`);
+}
+
 function checkSiteErrors() {
   head('1de. Error log: the logger and the view are run; fields, caps and the rules block are pinned');
   let bad = 0;
@@ -23063,6 +23080,7 @@ function checkNeverRules(sets) {
   checkBuiltSongs(rcCtx);
   await checkPlantAFault();
   checkRemoveOne();
+  checkCoachTakeSave();
   checkNeverRules(rcSets);
   await checkBackingLoudness();
   checkSiteFill();

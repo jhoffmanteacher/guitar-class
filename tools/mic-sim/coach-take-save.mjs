@@ -12,7 +12,8 @@
    micRecSaveNow. Stubbed: the recording nodes (the capture is fed silent 4096-sample buffers), Firestore (each set() kept), consent.
    The student is mic-sim's synthetic 'steady' player (or 'noGuitar') in the 'quiet' room; the user is made up (Test 0).
    Each case starts from a full take saved just before, and says whether the document must be replaced and by what.
-   Node only, about 3 s. Not in checks.mjs. Exit 1 when a case fails. */
+   Node only, about 6 s. checks.mjs 1ex runs it (since 2026-11-18: coachClose reaches coachMicOff in coach-score.js through a typeof
+   guard, and this is the tool that turns red when that guard breaks). Exit 1 when a case fails. */
 import { resolve } from 'node:path';
 import { benchSite, worldSource } from './listen-site.mjs';
 

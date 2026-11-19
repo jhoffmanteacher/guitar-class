@@ -55,7 +55,7 @@
        written chord: its ideal share (the share of its strings whose pitch class is a written chord tone, one reading per string) at or
        under 10% ("catchable"); at 20% or more the Coach passes it BY DESIGN ("design"); between, unclear is the honest answer ("between").
        The column splits a wrong or held chord by this, worked out here from the notes.
-     - the report and the gate (coach-core.js "Honesty rules": "A too-quiet/unclear take gets 'I couldn't hear that clearly', never a wrong
+     - the report and the gate (coach-core.js "Honesty rules", the report itself in coach-score.js: "A too-quiet/unclear take gets 'I couldn't hear that clearly', never a wrong
        verdict"; app/audio-ui.js: the gate asks for Good or better): each student kind says what the gate SHOULD do (note-student.mjs:
        pass / fail / either). A right-playing kind whose gate stays shut is a FALSE FAIL, counted apart when the report said "couldn't
        hear" (honest about the mic) and when it said "Needs work" (a verdict on the playing). A kind that did not play the line whose gate

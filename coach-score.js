@@ -6,11 +6,12 @@
    coach-core.js was 2,247 lines, over the 2,000 checks.mjs 1cv warns at),
    moved whole and unchanged; loaded right after coach-core.js
    (COACH_JS_PARTS in app/boot.js). The detectors and the tunables stay in
-   coach-core.js. Every caller runs after load; the one that can run before
-   this part has loaded (or after it failed to) is coachClose()'s call to
-   coachMicOff() in coach-core.js (reached by coachStopAll and the
-   typeof-guarded coachClose() calls in app/explore.js and app/shell.js),
-   and it is typeof-guarded.
+   coach-core.js. Every caller that can run before this part has loaded (or
+   after it failed to) is typeof-guarded: coachClose()'s call to coachMicOff()
+   in coach-core.js (reached by coachStopAll and the guarded coachClose()
+   calls in app/explore.js and app/shell.js), app/drills-call.js and
+   trainer-site-adapter.js. checks.mjs 1ex runs coach-take-save.mjs, which
+   turns red if coachClose's guard stops reaching coachMicOff.
    ════════════════════════════════════════════════════════════════════ */
 /* ══════════ Finish & score ══════════ */
 
