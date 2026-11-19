@@ -1718,6 +1718,9 @@
       es: '{good} de {total} notas correctas ({octs} salieron una octava fuera, lo cual todavía cuenta).' },
     'coach.crit.pitch.dimChords': { en: 'I heard the strums but not the notes clearly. This round I mostly scored your timing, so read the beat feedback.',
       es: 'Escuché los rasgueos, pero no las notas con claridad. Esta vez califiqué sobre todo tu ritmo, así que lee la retroalimentación del tiempo.' },
+    // coach-core.js coachScorePitch, chords: most strums unclear and none right (rule A, 2026-11-18): the chord sound earns nothing this round.
+    'coach.crit.pitch.dimChordsNone': { en: 'I heard the strums but no clear chord notes, so the chord sound gets no credit this round. Strum firmly, with the guitar close to the mic.',
+      es: 'Escuché los rasgueos, pero no notas claras del acorde, así que esta vez el sonido del acorde no suma. Rasguea con firmeza, con la guitarra cerca del micrófono.' },
     'coach.crit.pitch.greatChords': { en: 'The chord tones sounded correct on {good} of {total} beats.',
       es: 'Las notas del acorde sonaron bien en {good} de {total} tiempos.' },
     'coach.crit.pitch.greatQuietMelody': { en: 'You played every note I heard correctly — {good} of {total}; the other {rest} didn’t reach the mic, so keep every pluck at the same volume.',
@@ -1963,8 +1966,8 @@
       es: 'Sube de nivel: pruébalo {n} BPM más rápido.' },
     'games.cc.advice.low': { en: 'Drop {n} BPM and try again.',
       es: 'Baja {n} BPM e inténtalo de nuevo.' },
-    'games.pw.advice.firmer': { en: 'Some strums were not heard. Strum a little firmer, and keep the guitar close to the mic.',
-      es: 'No se oyeron algunos rasgueos. Rasguea un poco más fuerte y mantén la guitarra cerca del micrófono.' },
+    'games.pw.advice.firmer': { en: 'Some strums, or their notes, were not heard clearly. Strum a little firmer, and keep the guitar close to the mic.',
+      es: 'Algunos rasgueos, o sus notas, no se oyeron bien. Rasguea un poco más fuerte y mantén la guitarra cerca del micrófono.' },
     'games.pw.advice.great': { en: 'Level up: try it 5 BPM faster.',
       es: 'Sube de nivel: pruébalo 5 BPM más rápido.' },
     'games.pw.advice.top': { en: 'The tempo cannot go higher. Play it again.',
@@ -2535,11 +2538,13 @@
     // The Songs column on the pairs view: one button per song, the second line counts its switches. The songs view's back button is games.pw.pickDifferent.
     'games.pw.songSub': { en: '{n} switches',
       es: '{n} cambios' },
-    // The big line on the play screen after each change is graded (coach-chords.js ccShowLast): ✓ right (as soon as a strum reads right), ✗ the chord sounded wrong, – no strum heard (both when the chord's time ends; ccSpanRule).
+    // The big line on the play screen after each change is graded (coach-chords.js ccShowLast): ✓ right (as soon as a strum reads right), ✗ the chord sounded wrong (games.pw.last.quiet when the strum gave no notes at all), – no strum heard (both when the chord's time ends; ccSpanRule).
     'games.pw.last.ok': { en: '\u2713 {chord} \u2014 right',
       es: '\u2713 {chord} \u2014 bien' },
     'games.pw.last.wrong': { en: '\u2717 {chord} \u2014 wrong chord',
       es: '\u2717 {chord} \u2014 acorde equivocado' },
+    'games.pw.last.quiet': { en: '\u2717 {chord} \u2014 notes not heard clearly',
+      es: '\u2717 {chord} \u2014 no oí bien las notas' },
     'games.pw.last.miss': { en: '\u2013 {chord} \u2014 no strum heard',
       es: '\u2013 {chord} \u2014 sin rasgueo' },
     // Power Chord Switch's done screen (2026-11-14): it grades the chord, not the timing (coach-chords.js ccSpanRule), so these say nothing about being on time. Change Up keeps games.cc.*.

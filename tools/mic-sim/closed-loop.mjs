@@ -133,8 +133,8 @@
      wrong   the shape one fret high       -> should say wrong chord
      held    the old chord, strummed again -> should say wrong chord (neverMoves does this on every change: one chord behind)
      silent  no strum                      -> should say no strum
-   The game is lenient on purpose (coach.js, ccLoop's comment): a strum with fewer
-   than 3 pitch readings counts on timing alone.
+   Under 3 pitch readings rule A decides (coachToneCredit, 2026-11-18): no reading is never the chord, 1 or 2
+   count only when half are the new chord's notes. The "(N% on 1-2 readings)" column counts the rights decided that way.
 
    Synthetic sound. One number (how long a string rings) is fitted to the classroom takes; the rest is not (student.mjs header). */
 import vm from 'node:vm';
@@ -902,7 +902,7 @@ async function main(){
     }
     if (replay) continue;
     const t = tally(cell);
-    const head = `${st.padEnd(11)} ${room.padEnd(6)} ${micName.padEnd(10)} ${String(fps).padStart(3)} |        ${pc(t.right.ok, t.right.n)} (${pc(t.right.okTiming, t.right.n).trim()} on timing) / ${pc(t.right.off, t.right.n)} / ${pc(t.right.miss, t.right.n)}  |`;
+    const head = `${st.padEnd(11)} ${room.padEnd(6)} ${micName.padEnd(10)} ${String(fps).padStart(3)} |        ${pc(t.right.ok, t.right.n)} (${pc(t.right.okTiming, t.right.n).trim()} on 1-2 readings) / ${pc(t.right.off, t.right.n)} / ${pc(t.right.miss, t.right.n)}  |`;
     const tail = `${pc(t.silent.ok, t.silent.n)} (${pc(t.silent.ok + t.silent.off, t.silent.n).trim()})${t.silent.n ? ' of ' + t.silent.n : ''}`;
     if (cu){
       const w = cell.filter(c => truthOf(c) === 'wrong'), h = cell.filter(c => truthOf(c) === 'held');

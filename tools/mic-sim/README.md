@@ -50,7 +50,7 @@ script.
   STOP. `--offsets=-12,0,7,12` is a what-if: answer each root with those
   semitone offsets without editing app.js. Needs both files, not just
   coach.js. Synthetic audio, not a guitar through a Chromebook mic.
-- `power-switch.mjs <coach.js> [trials] [--harm=std|mid|weak] [--clarity=…]` — Power Chord Switch (Change Up's engine on the three-finger power chords, 2026-10-30): every adjacent pair in `CC_POWER_PROGRESSIONS` through the real `coachPitchReadings` / `ccResolvePend`, as a real change, a held chord (never moved) and a chord one fret high, with `0.55` against `RNW_POWER_CLARITY`. The numbers in the `ccLoop` comment come from here. Synthetic audio only.
+- `power-switch.mjs <coach.js> [trials] [--harm=std|mid|weak] [--clarity=…]` — Power Chord Switch (Change Up's engine on the three-finger power chords, 2026-10-30): every adjacent pair in `CC_POWER_PROGRESSIONS` through the real `coachPitchReadings` / `ccResolvePend`, as a real change, a held chord (never moved) and a chord one fret high, with `0.55` against the live power list (`RNW_POWER_CLARITY` and then `0.55`, as `ccLoop` reads it since 2026-11-18). The numbers in the `ccLoop` comment come from here. Synthetic audio only.
   Since 2026-10-30 the game's "Two random chords" draws only one of the 11 listed pairs (in either order), so
   every pair a student can get is one this tool covers; before, a pool of six chords could draw four
   jumps (F5-D5, G5-B5, A5-B5, A5-C5) it never tested.
@@ -93,6 +93,8 @@ script.
   default loops 21 of 21 (before 16 and 5; now 0 and 21). A strum with under 3 pitch readings counts on timing alone,
   by design (ccLoop's comment), so a pitchless scratch on the beat is still marked right, and both runs still read
   9 of 12 FAIL. Every other case and every table student gave byte-identical `--json` before and after.
+  (That was the rule until 2026-11-18; since rule A, a strum with no pitch is never the chord and 1 or 2 readings count
+  only when half are the new chord's notes: `coachToneCredit`, `coach-core.js`.)
   **`--game=changeup`** (2026-11-11): the same test on CHANGE UP, the sister game on open chords (same `ccLoop`, but the
   shared, looser strum ratios `CHK_ONSET_RATIO` / `CHK_HF_RATIO`, 1.4 / 1.7, and the 0.55 chord gate). Its defaults: 40, 60,
   90, 120 BPM, a change every bar, the loops Am-Em, G-C-D, C-G-Am-F (`--pairs=all` = its 21 loops; Random 4 is left out,

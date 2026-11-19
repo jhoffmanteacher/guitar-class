@@ -1949,12 +1949,15 @@ function coachScorePitch(){
   const octs = slots.filter(s => s.state === 'oct').length;
   const dim = slots.filter(s => s.state === 'dim').length;
 
-  /* Mostly unclear strums: "I heard the strums but not the notes clearly". Level 2 only when most slots are unclear on 3+ readings (the
-     vote's grey zone, between 10% and 20% chord tones): a sound with no pitch, or 1-2 readings off the chord, is never credited (rule A,
-     coachToneCredit), so a round of desk taps, muted strums or typing is level 1 with the same sentence (2026-11-18). */
+  /* Mostly unclear strums: "I heard the strums but not the notes clearly ... I mostly scored your timing" at level 2 (the forgiveness floor
+     in the report then lets timing decide the badge) when most slots are unclear on 3+ readings (the vote's grey zone, between 10% and 20%
+     chord tones), or when any strum was right (as melody's quietMost: one right strum never drops the line below Getting it). A sound with
+     no pitch, or 1-2 readings off the chord, is never credited (rule A, coachToneCredit), so a round of only such sounds (desk taps, muted
+     strums, typing) with nothing right is level 1 and says the chord sound gets no credit (2026-11-18; review R1-1, R1-2). */
   if (coach.mode === 'chords' && dim > slots.length * 0.6){
     const dimRead = slots.filter(s => s.state === 'dim' && s.hit && coachToneCredit(s.hit.classes || [], s.classes) === null).length;
-    return { name, icon, level: dimRead > slots.length * 0.6 ? 2 : 1, sentence: t('coach.crit.pitch.dimChords') };
+    const two = dimRead > slots.length * 0.6 || good > 0;
+    return { name, icon, level: two ? 2 : 1, sentence: t(two ? 'coach.crit.pitch.dimChords' : 'coach.crit.pitch.dimChordsNone') };
   }
   const missed = slots.filter(s => s.state === 'miss').length;
   const denom = Math.max(1, judged.length + missed);

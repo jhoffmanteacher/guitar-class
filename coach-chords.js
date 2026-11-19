@@ -864,8 +864,12 @@ function ccShowLast(c){
   }
   const kind = c.result === 'ok' ? 'ok' : c.result === 'off' ? 'wrong' : 'miss';
   big.className = 'cc-last ' + kind;
-  big.textContent = t('games.pw.last.' + kind, { chord: pwChordName(c.to) });
+  big.textContent = t('games.pw.last.' + (ccNoNotes(c) ? 'quiet' : kind), { chord: pwChordName(c.to) });
 }
+/* A change marked wrong because its strum gave no pitch reading at all (rule A, 2026-11-18): the strum was heard, its notes were not. Its
+   big line says so instead of "wrong chord", and Power Chord Switch's done screen counts it with the unheard strums for "strum a little
+   firmer" (review 2026-11-18, R1-1). Its chip stays ✗: it did not count. */
+function ccNoNotes(c){ return c.result === 'off' && Array.isArray(c.readings) && c.readings.length === 0; }
 
 function ccResolvePend(ch){
   if (ccSpanRule()){ ccSpanResolve(ch.pend.readings); return; }
@@ -1265,7 +1269,8 @@ function ccRenderDone(){
      at the same speed. One miss alone is not enough (it may be a slip), and a game at 85% or better keeps its "Level up". Change Up keeps all
      of it. */
   const unheard = total - ok - off - (cc.unreached || 0);   // not the changes a Stop left unplayed
-  const firmer = ccIsPower() && r < 0.85 && unheard >= 2 && unheard > off;
+  const quiet = cc.changes.filter(ccNoNotes).length;          // strums heard with no notes (ccNoNotes): firmer helps them too
+  const firmer = ccIsPower() && r < 0.85 && unheard + quiet >= 2 && unheard + quiet > off - quiet;
   /* A Stop with changes still ahead, where every change the student DID reach was right (Jonathan, 2026-11-07): the changes never reached say
      nothing about the speed, so there is no "this speed is too fast" and no "Drop 5 BPM" (4 right, then Stop, used to read "4 of 15 ... too
      fast"). The headline counts the changes reached, the advice says to play it through, the breakdown and chips do not call the rest "no strum

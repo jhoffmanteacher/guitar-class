@@ -9,10 +9,11 @@
    Every ordered pair of adjacent chords in CC_POWER_PROGRESSIONS is tried.
 
    usage: node power-switch.mjs <coach.js> [trials=12] [--harm=std|mid|weak]
-          [--clarity=<json>]    (compare only this gate; default compares 0.55 with RNW_POWER_CLARITY)
+          [--clarity=<json>]    (compare only this gate; default compares 0.55 with the live power list, RNW_POWER_CLARITY then 0.55)
    Verdicts, as the game shows them: ok·tone = 3+ readings and they fit the
-   new chord; ok·timing = fewer than 3 readings, so it passed on timing
-   alone (ccResolvePend's rule); off = "on time but sounded messy"; miss = no
+   new chord; ok·timing = 1 or 2 readings, at least half the new chord's
+   notes (rule A, coachToneCredit, 2026-11-18; the label is older: before
+   rule A every strum under 3 readings passed on timing alone); off = "on time but sounded messy"; miss = no
    strum detected on the beat. Synthetic audio only — NOT a guitar through a
    Chromebook mic; check against the console's Mic recordings before tuning. */
 import fs from 'fs';
@@ -117,7 +118,9 @@ function trial(from, to, scenario, seed, gate, isPower){
 const PAIRS = [...new Set(LOOPS.filter(l => l.group !== "song").flatMap(l => l.chords.map((c, i) => c + '>' + l.chords[(i + 1) % l.chords.length])))].map(s => s.split('>'));
 const POWER_RAW = new Function('return ' + (constLine('RNW_POWER_CLARITY').replace(/^const \w+ = |;$/g, '') || '0.55'))();
 // [name, gate, isPower]: Change Up grades with the shared strum ratios, Power Chord Switch with CC_POWER_* (when coach.js has them)
-const GATES = POWER_GATE ? [['custom ' + JSON.stringify(POWER_GATE), POWER_GATE, true]] : [['0.55 (Change Up)', 0.55, false], ['RNW_POWER_CLARITY ' + JSON.stringify(POWER_RAW), POWER_RAW, true]];
+// the live game reads Power Chord Switch with RNW_POWER_CLARITY and then 0.55 (coach-chords.js ccLoop, RNW_POWER_CLARITY.concat([0.55]))
+const POWER_LIVE = Array.isArray(POWER_RAW) ? POWER_RAW.concat([0.55]) : POWER_RAW;
+const GATES = POWER_GATE ? [['custom ' + JSON.stringify(POWER_GATE), POWER_GATE, true]] : [['0.55 (Change Up)', 0.55, false], ['Power Chord Switch ' + JSON.stringify(POWER_LIVE), POWER_LIVE, true]];
 console.log(`${file} · ${PAIRS.length} adjacent chord pairs · harmonics ${opt('harm') || 'std'} · ${TRIALS} trials each`);
 const WANT = { change: 'should pass', held: 'should FAIL (never moved)', sharp: 'should FAIL (one fret off)' };
 for (const [gname, gate, isPower] of GATES){

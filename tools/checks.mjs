@@ -17724,21 +17724,25 @@ function checkCoachVerdicts() {
         ['10 unclear strums with one reading off the chord', R10([10, 'dim', [1]]), 1],
         ['10 unclear strums with two readings off the chord', R10([10, 'dim', [1, 2]]), 1],
         ['10 unclear strums in the vote\'s grey zone (6 readings, one a chord tone)', R10([10, 'dim', grey]), 2],
-        ['7 unclear with no pitch and 3 right', R10([7, 'dim', []], [3, 'ok', [0, 4, 7]]), 1],
+        ['7 unclear with no pitch and 3 right', R10([7, 'dim', []], [3, 'ok', [0, 4, 7]]), 2],
+        ['9 unclear with no pitch and 1 right', R10([9, 'dim', []], [1, 'ok', [0, 4, 7]]), 2],
+        ['7 unclear with no pitch and 3 wrong', R10([7, 'dim', []], [3, 'wrong', [1, 2, 3]]), 1],
         ['7 unclear in the grey zone and 3 right', R10([7, 'dim', grey], [3, 'ok', [0, 4, 7]]), 2],
-        ['4 unclear in the grey zone, 4 with no pitch and 2 right', R10([4, 'dim', grey], [4, 'dim', []], [2, 'ok', [0, 4, 7]]), 1]];
+        ['4 unclear in the grey zone, 4 with no pitch and 2 right', R10([4, 'dim', grey], [4, 'dim', []], [2, 'ok', [0, 4, 7]]), 2],
+        ['4 unclear in the grey zone, 5 with no pitch and 1 wrong', R10([4, 'dim', grey], [5, 'dim', []], [1, 'wrong', [1, 2, 3]]), 1]];
       const half = R10([5, 'dim', []], [5, 'ok', [0, 4, 7]]);
       const scored = JSON.parse(run(`(function(){
         const keep = coach;
         try {
           setLang('en');
           const one = sl => { coach = { mode: 'chords', phase: 'done', beatMs: 1000, slots: sl.map(([st, cls]) => ({ state: st, classes: [0, 4, 7], label: 'C', midi: 48, hit: { classes: cls, readings: cls.map(c => 48 + c) } })) }; const r = coachScorePitch(); return { level: r.level, sentence: r.sentence }; };
-          return JSON.stringify({ rounds: ${JSON.stringify(rounds.map(r => r[1]))}.map(one), half: one(${JSON.stringify(half)}), dimLine: t('coach.crit.pitch.dimChords') });
+          return JSON.stringify({ rounds: ${JSON.stringify(rounds.map(r => r[1]))}.map(one), half: one(${JSON.stringify(half)}), dimLine: t('coach.crit.pitch.dimChords'), noneLine: t('coach.crit.pitch.dimChordsNone') });
         } finally { coach = keep; }
       })()`));
       rounds.forEach(([what, , want], i) => {
         const r = scored.rounds[i];
-        if (r.level !== want || r.sentence !== scored.dimLine) flag(`1ew: the Listening Coach (chords), ${what}: the right-chord score is level ${r.level} saying "${r.sentence}", want level ${want} saying "${scored.dimLine}" (rule A: an unclear strum with no pitch, or 1-2 readings off the chord, earns no credit)`);
+        const wantLine = want === 2 ? scored.dimLine : scored.noneLine;   // level 2 "I mostly scored your timing"; level 1 "the chord sound gets no credit"
+        if (r.level !== want || r.sentence !== wantLine) flag(`1ew: the Listening Coach (chords), ${what}: the right-chord score is level ${r.level} saying "${r.sentence}", want level ${want} saying "${wantLine}" (rule A: an unclear strum with no pitch, or 1-2 readings off the chord, earns no credit; one right strum keeps level 2, as melody's quietMost)`);
         song.ruleACoach++;
       });
       if (scored.half.level !== 3) flag(`1ew: the Listening Coach (chords), 5 unclear strums with no pitch and 5 right: level ${scored.half.level}, want 3 (a round under 60% unclear keeps its ratio of the strums it could read, as before rule A)`);
@@ -18396,10 +18400,20 @@ function checkCoachVerdicts() {
     for (const lang of ['en', 'es']) {
       run(`setLang(${JSON.stringify(lang)}); ccSetup('power'); ccPickRate(2); ccPickProg(1); cc.bpm = 60; ccPrepare(false); ccBeginStage(); cc.phase = 'play'; ccRenderPlay();`);
       if (!/id="cc-last"/.test(bodies['cc-body'])) flag(`1ck: (${lang}) the play screen has no big last-change line`);
-      for (const [res, sym, cls] of [['ok', '\u2713', 'ok'], ['off', '\u2717', 'wrong'], ['miss', '\u2013', 'miss']]) {
-        run(`cc.changes[0].result = ${JSON.stringify(res)}; ccChipRefresh(0);`); song.recChecks++;
-        const got = els['cc-last'].textContent, want = run(`t('games.pw.last.${cls}', { chord: pwChordName(cc.changes[0].to) })`);
-        if (got !== want || !got.startsWith(sym) || !got.includes(run('cc.changes[0].to')) || els['cc-last'].className !== 'cc-last ' + cls) flag(`1ck: (${lang}) a "${res}" change shows "${got}" in class "${els['cc-last'].className}", expected "${want}" in "cc-last ${cls}"`);
+      /* a wrong change with no pitch reading at all says "notes not heard clearly" (quiet), in the wrong colour (rule A, review 2026-11-18 R1-1) */
+      for (const [res, sym, cls, key, rd] of [['ok', '\u2713', 'ok', 'ok', [48]], ['off', '\u2717', 'wrong', 'wrong', [49, 50]], ['off', '\u2717', 'wrong', 'quiet', []], ['miss', '\u2013', 'miss', 'miss', undefined]]) {
+        run(`cc.lastShown = null; cc.changes[0].result = ${JSON.stringify(res)}; cc.changes[0].readings = ${JSON.stringify(rd)}; ccChipRefresh(0);`); song.recChecks++;
+        const got = els['cc-last'].textContent, want = run(`t('games.pw.last.${key}', { chord: pwChordName(cc.changes[0].to) })`);
+        if (got !== want || !got.startsWith(sym) || !got.includes(run('cc.changes[0].to')) || els['cc-last'].className !== 'cc-last ' + cls) flag(`1ck: (${lang}) a "${res}" change (${key}) shows "${got}" in class "${els['cc-last'].className}", expected "${want}" in "cc-last ${cls}"`);
+        if (key !== 'quiet' && got === run(`t('games.pw.last.quiet', { chord: pwChordName(cc.changes[0].to) })`)) flag(`1ck: (${lang}) a "${res}" change with readings ${JSON.stringify(rd)} says the notes were not heard`);
+      }
+      /* Power Chord Switch's done screen: strums heard with no notes count with the unheard ones for "strum a little firmer" (R1-1); 1 or 2
+         readings off the chord are a wrong chord and do not. */
+      for (const [rd, wantFirmer] of [[[], true], [[49], false]]) {
+        run(`ccSetup('power'); cc.phase = 'play'; cc.ladder = false; cc.bpm = 60; cc.rateIdx = 2; cc.bpc = 1;
+          cc.changes = [{ from: 'F5', to: 'G5', result: 'ok' }, { from: 'G5', to: 'F5', result: 'off', readings: ${JSON.stringify(rd)} }, { from: 'F5', to: 'G5', result: 'off', readings: ${JSON.stringify(rd)} }, { from: 'G5', to: 'F5', result: 'off', readings: [49, 50, 51] }]; ccRenderDone();`); song.recChecks++;
+        const firmerLine = run("t('games.pw.advice.firmer')");
+        if (text('cc-body').includes(String(firmerLine).replace(/\s+/g, ' ')) !== wantFirmer) flag(`1ck: (${lang}) 1 right, 2 wrong with readings ${JSON.stringify(rd)} and 1 wrong chord: the done screen ${wantFirmer ? 'does not say' : 'says'} "strum a little firmer"`);
       }
     }
     run("setLang('en')");
@@ -18415,7 +18429,7 @@ function checkCoachVerdicts() {
     if (pk !== 'ccBest:F5-G5:beat') flag(`1ck: a pair's best-score key changed to "${pk}" (a student's saved bests would be lost)`);
     const pairPlan = JSON.parse(run(`JSON.stringify(ccRoundPlan(CC_POWER_PROGRESSIONS[1], CC_POWER_PROGRESSIONS[1].chords, CC_RATES[1]))`));
     if (pairPlan.slots !== 12 || pairPlan.ladder || pairPlan.rounds !== 1) flag(`1ck: a pair's round changed (${pairPlan.slots} slots at "Every 2 beats", expected 12, one round)`);
-    const SONG_PIN = { recChecks: 20, readingChecks: 21, ratioChecks: 165, gridChecks: 60, pickChecks: 68, hintChecks: 20, topChecks: 68, stopChecks: 101, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
+    const SONG_PIN = { recChecks: 26, readingChecks: 21, ratioChecks: 165, gridChecks: 60, pickChecks: 68, hintChecks: 20, topChecks: 68, stopChecks: 101, songs: 2, entries: 16, cardSwitches: 16, hints: 16 * 7 * 2, setups: 16 * 3 * 2, dones: 16 * 2, rounds: 16 * 3, nudges: 16 * 2 };
     for (const [k, n] of Object.entries(SONG_PIN)) if (song[k] !== n) flag(`1ck: ${song[k]} ${k}, pinned ${n} — the check went partly blind (or grew: re-pin on purpose)`);
     songCounts = song;
     run(`setLang('en'); cc = null; ccStop();`);
@@ -18426,7 +18440,7 @@ function checkCoachVerdicts() {
   }
   if (bad === 0 && songCounts) { head('1ck. Power Chord Switch song switches: each activity is checked against its card and the three rounds are run'); ok(`${songCounts.songs} songs, ${songCounts.entries} switch activities (${songCounts.cardSwitches} distinct card switches, each once; Sweet Child's open A5 only next to C5/B5/E5, the fret-5 A5 only next to G5, same pitches as A5); the ladder run for every one (${songCounts.rounds} round changes: 60/65/70 BPM, 21 changes, the BPM buttons ${songCounts.nudges} times: only later rounds, 10..140, off in the last); ${songCounts.hints} "next:" hints (EN+ES) match the diagrams, ${songCounts.setups} setup and ${songCounts.dones} done screens never show the key "A5o", the computer never picks a song, best keys are per switch and the pair keys are unchanged; a saved take carries each change's pitch readings (${songCounts.readingChecks} of 21 changes read back: no strum null, strum with no pitch [], four readings rounded; graded miss, wrong chord (rule A: no pitch is never the chord) and by the vote); the real ccLoop run on scripted frames: Power Chord Switch grades a strum with its own ratios (1.8 / 2.19) and Change Up with the shared ones (1.4 / 1.7) — ${songCounts.ratioChecks} runs just below and above every threshold: Change Up as a pair and as the computer's pick at three speeds, and Power Chord Switch as a song switch (all three rounds), a pair and the computer's pick at three speeds, with a recording live and without; the two lines that choose the ratios are pinned by text; and the saved take records the ratios; the grid moves at most 60 ms for one strum in both games (${songCounts.gridChecks} real ccLoop runs: a stray sound just under half a beat early and late at 10 to 140 BPM and two speeds, with no change open and with the change due next TAKING it, a player 150 ms late still pulls it to within 20 ms in 16 strums, one 300 ms late moves it exactly 60, the take saves the cap (in the document micRecSaveNow writes too) and the console replays an older take, which has none, uncapped); the done screen's tempo-cannot-go-higher line replaces "Level up" exactly when the step up is blocked (${songCounts.topChecks} renders: a pair at 140 and one step below, at 13 of 15 right (just over 85%), 10 of 15, firmer (two ways) and under half, at every switch speed and as the computer's pick, and after a live slow-down; a song switch from 130 and 125, all right, 6 of 7 and under half, Stopped in round 1 or 2 or late, with the Next round buttons pressed, and after a live slow-down of round 1; Change Up at 140 and 40, and one 5 BPM step from each (135, 45: the line and the button name the step ccAgain really takes); EN + ES; the advice line is compared whole); the done screen's "strum a little firmer" hint shows exactly when it is true (${songCounts.stopChecks} real games (the count-in's own callback at a faked clock, the real Stop: saved only after 10 s of play, across a song switch's rounds; "strum firmer" for strums the mic missed and not for changes never reached; the top song switch says 130; a Stop where every change reached was right says neither "too fast" nor "Drop", counts the changes reached, in a pair and across a song switch's rounds, EN + ES, and changes nothing for a wrong change, a full game, nothing reached, 85% or a hearing problem; the song-switch setup tops out at 130 on the readout, the slider and the session), ${songCounts.hintChecks} renders, EN + ES: nothing heard, many heard, a single miss, a tie, mostly wrong chords, 85% and better, Change Up)`); }
   if (bad === 0 && songCounts) { head('1du. Change Up: the strum nearest the chord change decides it; Power Chord Switch: any strum while the chord is the current one'); ok(`${songCounts.pickChecks} real ccLoop runs on scripted frames. Change Up (40 to 90 BPM, every beat and every bar): an early wrong chord then the right one on time is right and never shown before the change; the right one on time then a late wrong one is right; a lone early strum is held and shown about as long after the change as it came before; a Stop while it is held still shows it right; a Stop click that took a change and is dropped leaves the real strum's held verdict, and on the last change the game still counts as finished and awards XP once. Power Chord Switch (15 to 60 BPM, every beat and every bar): the right chord anywhere from the early allowance to the next change is right, shown about 340 ms after its strum; a wrong chord is not shown until the span ends, and a later right one still wins; wrong chord and no strum show when the span ends; one strum is right for one change at most and an early strum of the next chord never makes the current one wrong; Stop finishes a held wrong chord, a dropped Stop click leaves the real strum's verdict, a right last change finishes the game and awards XP once; a tempo press mid-span; the saved take says changePick "span"`); }
-  if (bad === 0 && songCounts) { head('1ew. Rule A: a strum with no pitch is never the chord; 1 or 2 readings must be half its notes (coachToneCredit, one helper)'); ok(`${songCounts.ruleA} real ccLoop runs (Change Up at 40, 60 and 90 BPM; Power Chord Switch at 15, 30 and 60 BPM, every beat and every bar): a strum with no pitch, one or two readings of the old chord: wrong chord; one reading of the new chord, or one of each: right; a strum with no pitch never locks a Power Chord Switch change (the new chord later in the span is right); Power Chord Switch reads with its two power gates and then 0.55; the saved take says toneRule "pitch". The helper against the rule written out: ${songCounts.ruleAHelper} cases. The Listening Coach (chords): ${songCounts.ruleACoach} cases (every 0-3 reading strum keeps the slot verdict it had; unclear strums with no pitch or off the chord score level 1, the grey zone level 2). Note Runner chord notes: ${songCounts.ruleANr} strums graded as before (its 2-reading floor; its half credit is a timing reward)`); }
+  if (bad === 0 && songCounts) { head('1ew. Rule A: a strum with no pitch is never the chord; 1 or 2 readings must be half its notes (coachToneCredit, one helper)'); ok(`${songCounts.ruleA} real ccLoop runs (Change Up at 40, 60 and 90 BPM; Power Chord Switch at 15, 30 and 60 BPM, every beat and every bar): a strum with no pitch, one or two readings of the old chord: wrong chord; one reading of the new chord, or one of each: right; a strum with no pitch never locks a Power Chord Switch change (the new chord later in the span is right); Power Chord Switch reads with its two power gates and then 0.55; the saved take says toneRule "pitch". The helper against the rule written out: ${songCounts.ruleAHelper} cases. The Listening Coach (chords): ${songCounts.ruleACoach} cases (every 0-3 reading strum keeps the slot verdict it had; unclear strums with no pitch or off the chord and none right score level 1 with the no-credit line, the grey zone or one right strum level 2). Note Runner chord notes: ${songCounts.ruleANr} strums graded as before (its 2-reading floor; its half credit is a timing reward)`); }
   if (bad === 0) ok(`${counts.reports} Coach reports, ${counts.descs} chord-card descriptions, ${counts.nrLevels} Note Runner levels ×2 and ${counts.doneScreens} arcade done screens read true; Power Chord Switch: ${counts.pwLoops} loops are three-finger shapes in the right group, ${counts.pwDraws} random draws all listed pairs (11 of 11 and both orders seen), the Again button replays the pair and Start draws, Start sticks in Change Up and not in Power Chord Switch (two columns that fit 657px), Every beat is the first speed button there, the live quiz keeps its 760px shell, ${counts.pwHints} slide hints match the diagrams (EN+ES), ${counts.pwViews} screens/rounds, ${counts.pwMemory} remembered tempo/speed pairs and ${counts.pwGates} pitch gates keep it apart from Change Up; the way back to the chords is one \u25C0 Pick different chords button, first on the songs view and the done screen, run and found absent where it must be (${counts.pwBack} screens, EN + ES); tempo controls: setup −5 +5 and a 10..140 slider in steps of 5, the live change keeps the beat the student is on (re-anchored, exact on a fixed clock), holds 30..140, counts the round at its lowest tempo, moves a song switch's later rounds by the same amount, and the saved take says so (${counts.pwLive} assertions)`);
 }
 
@@ -20624,7 +20638,7 @@ async function checkMicStart() {
    Re-pinned 2026-11-14 for pw-span (one take, one round, 9 changes: a take saved since the whole-span rule, changePick 'span': a right chord
    1200 ms late, outside half a beat but inside its span, must agree, not be a false hit; 7 more agree (8 of its 9), 3 off-grid onsets; review R1-4: the take
    is Stopped 1.3 s into its last change's span, so that span runs past the audio and the change is dropped, where half a beat would not be). */
-const PW_EVAL_PIN = { nearestTakes: 1, spanTakes: 1, ownRules: 6, toneRuleRows: 6, takes: 30, rounds: 53, changes: 421, judged: 397, dropped: 24, agree: 267, 'detector-missed': 58, 'false-hit': 25, 'off-window': 15, 'silent-miss': 32,
+const PW_EVAL_PIN = { nearestTakes: 1, spanTakes: 1, ownRules: 6, toneRuleRows: 7, takes: 30, rounds: 53, changes: 421, judged: 397, dropped: 24, agree: 267, 'detector-missed': 58, 'false-hit': 25, 'off-window': 15, 'silent-miss': 32,
   mismatch: 1, gridOffsets: 397, farGridOffsets: 57, clickRounds: 42, noClickRounds: 11, siteCentred: 45, beepCentred: 6, extra: 41, htmlChecks: 6, hovers: 53, textRounds: 53, evaluateRun: 2, evalTakesLines: 4, crafted: 4, uncappedTakes: 1,
   whatIfTakes: 30, whatIfCandidates: 120, whatIfTruth: 8, whatIfRows: 67, dropNotes: 2, pitchTakes: 8, pitchNone: 22, pitchRight: 86, pitchTimingOnly: 55, pitchRows: 26, ratioRows: 17, legacyCountIn: 1, shortRounds: 11, oneBeepRounds: 1, shortLagRounds: 8, guessedRounds: 7 };
 async function checkPwTakeEvaluator() {
@@ -20936,7 +20950,7 @@ async function checkPwTakeEvaluator() {
     }
     /* 2c'. a take graded with rule A (toneRule 'pitch', coach-chords.js ccRecMeta, 2026-11-18): its rights with under 3 readings had notes
        that fit, so "timing alone" does not exist there. The same take with the stamp has no pitch column, says toneRule 'pitch', and the
-       summary, the console table and the terminal count it apart ("graded with this rule already"), never as a take with no readings. */
+       summary, the console table and the terminal count it apart ("graded with rule A already"), never as a take with no readings. */
     {
       const fi = rows.findIndex(r => r.kind === 'pw' && r.pitch);
       if (fi < 0) fail('no fixture take with readings to stamp toneRule on');
@@ -20947,10 +20961,15 @@ async function checkPwTakeEvaluator() {
         const mixed = rows.slice(); mixed[fi] = rowA;
         const pa = ev.micEvalPitchSummary(mixed);
         if (!pa || pa.graded !== 1 || pa.without !== ps.without || pa.takes.length !== ps.takes.length - 1) fail(`with one take stamped toneRule "pitch" the pitch-rule summary has ${pa && pa.takes.length} takes, ${pa && pa.without} without readings and ${pa && pa.graded} graded by rule A; want ${ps.takes.length - 1}, ${ps.without} and 1`); else tot.toneRuleRows++;
-        const sayA = /1 Power Chord Switch take was graded with this rule already/;
+        const sayA = /1 Power Chord Switch take was graded with rule A already/;
         if (!sayA.test(flat(ev.micEvalText(mixed).split('Pitch-rule what-if')[1] || ''))) fail('the terminal pitch-rule text does not say a take was graded with rule A and left out'); else tot.toneRuleRows++;
         if (!sayA.test(flat(ev.html(mixed, names).split('Pitch-rule what-if')[1] || ''))) fail('the console pitch-rule table does not say a take was graded with rule A and left out'); else tot.toneRuleRows++;
-        if (sayA.test(flat(ev.micEvalText(rows))) || /graded with this rule already/.test(flat(ev.html(rows, names)))) fail('with no take stamped, the pitch-rule text still says a take was graded with rule A'); else tot.toneRuleRows++;
+        if (sayA.test(flat(ev.micEvalText(rows))) || /graded with rule A already/.test(flat(ev.html(rows, names)))) fail('with no take stamped, the pitch-rule text still says a take was graded with rule A'); else tot.toneRuleRows++;
+        /* every take with readings stamped (review 2026-11-18, R1-2): the table goes, but a line still says why, in the console and the terminal */
+        const allA = rows.map((r, i) => r.kind === 'pw' && r.pitch ? ev.micEvalRow(r.take, Object.assign({}, takes[i].meta, { toneRule: 'pitch' }), takes[i].pcm, deps) : r);
+        const nA = allA.filter(r => r.kind === 'pw' && r.toneRule === 'pitch').length, sayAll = new RegExp('every Power Chord Switch take with readings \\(' + nA + '\\) was graded with rule A already');
+        const pz = ev.micEvalPitchSummary(allA);
+        if (!pz || pz.takes.length !== 0 || pz.graded !== nA || !nA || !sayAll.test(flat(ev.micEvalText(allA))) || !sayAll.test(flat(ev.html(allA, names)))) fail(`with all ${nA} takes with readings stamped, the pitch-rule summary is ${pz ? pz.takes.length + ' takes / ' + pz.graded + ' graded' : 'gone'}, or the console or the terminal does not say every take was graded with rule A`); else tot.toneRuleRows++;
       }
     }
     // takes that all lack readings: no pitch-rule table, no summary (an older take is never read as "no readings")

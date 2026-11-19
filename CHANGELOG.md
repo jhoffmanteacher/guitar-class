@@ -6,6 +6,16 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-18 — The mic games check the chord in every strum
+
+- **Power Chord Switch and Change Up: a strum only counts when its notes can be heard.** A tap on the desk, a muted
+  scratch or a strum too soft to hear its notes no longer counts as the right chord just because it came on time. When
+  the strum was heard but its notes were not, the line under the beat dots says "notes not heard clearly", and the
+  end screen tells you to strum a little firmer.
+- **Listening Coach (chords):** a round where the mic heard your strums but none of their notes no longer scores the
+  chord sound as "Getting it"; the report says so. One right strum still keeps it at "Getting it".
+- **Note Runner:** unchanged for right players.
+
 ## 2026-11-18 — Chords / Tab / Lyrics: Watchtower, power-chord tab, fixes
 
 - **All Along the Watchtower's whole-song power-chord card has both switches.** Pick the recording (Jimi Hendrix or

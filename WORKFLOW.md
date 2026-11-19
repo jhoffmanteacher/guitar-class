@@ -1895,6 +1895,28 @@ Moved from its own file on 2026-11-05 (original title "Power Chord Switch — wh
 
 **Status.** The branch `pcs-pending-smoke` was merged into `main` on 2026-11-03 (merge commit ca932f2; smoke clean against the origin/main baseline, full checks passed); Jonathan published `firestore.rules` (take id `(coach|nr|pw)`). The branch can be deleted on GitHub. Same day, e5e0bef: a Stopped game with at least 10 s of audio is saved too, with `complete:false` (2026-11-07: 10 s of PLAY after the first count-in ends); a shorter Stop, or leaving the screen, drops it. The room-noise call is decided (a stricter strum ratio for Power Chord Switch only: "Decision (2026-11-07)", then "Decision (2026-11-05)"). Settled, not to be re-raised: "Later (not chosen yet)".
 
+### Decision (2026-11-18): rule A — a strum with no pitch never counts (reverses 2026-11-07 "no readable pitch, no tick: rejected")
+
+Jonathan: "the power chord switch is very permissive with counting chords correctly. we need to run more checks on that"; he picked
+"A: no pitch never counts" and "Shared fix for all four" (Power Chord Switch, Change Up, Listening Coach chords, Note Runner). Cause measured
+(`Claude outputs/pcs-leniency-2026-11-18/`): a strum with under 3 pitch readings passed on timing alone, and that day 58% of the rights
+were never chord-checked. Rule A is one helper, `coachToneCredit` (`coach-core.js`, `COACH_TONE_FEW = 3`): no reading is never the chord;
+1 or 2 readings count only when at least half are the target's notes; 3+ go to each game's own vote as before. Takes saved since are
+stamped `toneRule: 'pitch'`; older takes replay under their own rule (`ownRule`, `spanTiming`). It differs from the rejected 2026-11-07
+rule, which never ticked under 3 readings.
+- **Real takes, Power Chord Switch** (416 changes): right / wrong / no strum 322 / 49 / 45 -> 296 / 77 / 43; that day's takes 73 -> 64 of
+  101 right. Of the 26 rights removed, 23 have a strum in the recording (whether it was the right chord, the takes cannot say).
+- **Nothing played:** Power Chord Switch 1,902 -> 491 of 4,320 changes marked right (taps, muted strums, typing 100% -> 0%; class talking
+  still 86% at 30 BPM: voices give a pitch). Change Up 826 -> 245 of 2,016.
+- **Right players, Change Up:** about 2 points fewer changes right per change (81.5% -> 79.3% in the review's run); games reaching 85%
+  299 -> 280 of 480. Listening Coach and Note Runner slot verdicts unchanged; only the Coach's chord-sound score moves.
+- **Review** (two `site-reviewer-deep` on Opus, one round, 0 BLOCKER / 0 MAJOR; 17 planted faults caught): fixed its MINORs in the same
+  push. A pitchless wrong change says "notes not heard clearly" and counts toward "strum a little firmer"; the Coach's unclear-strum line is
+  level 2 when any strum was right (melody's quietMost) and has a level-1 twin ("no credit this round"); the console's what-if names rule A
+  and keeps a line when every take is stamped; the mic-sim tools' labels and the default power gate list follow the live game.
+- **Roll back:** the simplest lever is `COACH_TONE_FEW = 0` (`coachToneCredit` then always defers, null, to each caller's old vote); not
+  proved as a rollback, so run the closed loop and 1ew (which turns red) before shipping it.
+
 ### Decision (2026-11-14): grade the chord, not the timing (branch `fix/pcs-whole-slot`)
 
 Jonathan: "it should say correct for the right chord played at any time before the switch. power chord switching is measuring the right
@@ -1966,7 +1988,7 @@ This list is the plan (the separate plan file was deleted 2026-11-04 at Jonathan
 
 1. **Saved takes arrive: DONE** (2026-11-04: 25 takes, 12 Power Chord Switch). If a class shows none, check in order: the rules paste (`micTakes` and `chunks` say `(coach|nr|pw)`), mic collection on in the console, the student's consent (once per device).
 2. **The evaluator: DONE.** `micEvalTakePw` (teacher.js, check 1cl), built 2026-11-04, proven on `tools/mic-sim/fake-pw-take.mjs`, run on the 12 real takes. Per round: strums the game missed, "right" changes with no strum, mic delay from the count-ins (about -73 ms on Chromebook internal mics).
-3. **DECIDED 2026-11-05 (finding: room noise scored a right chord): a stricter strum ratio for Power Chord Switch only** (2.2 / 2.67 from 2026-11-05, 1.8 / 2.19 from 2026-11-07). Not chosen: "no readable pitch, no tick". To do: look at the next takes ("Where things stand" → to watch). Any further change to how a strum is heard is `coach.js` detection: xhigh, Always Reviewed, run `tools/mic-sim/power-switch.mjs` first.
+3. **DECIDED 2026-11-05 (finding: room noise scored a right chord): a stricter strum ratio for Power Chord Switch only** (2.2 / 2.67 from 2026-11-05, 1.8 / 2.19 from 2026-11-07). Not chosen: "no readable pitch, no tick" (rule A, 2026-11-18, is a milder rule and was chosen: its Decision above). To do: look at the next takes ("Where things stand" → to watch). Any further change to how a strum is heard is `coach.js` detection: xhigh, Always Reviewed, run `tools/mic-sim/power-switch.mjs` first.
 4. **Nothing else is waiting** (see "Later (not chosen yet)").
 
 ### Practice-minutes heartbeat removal (not Power Chord Switch): DONE 2026-11-05
