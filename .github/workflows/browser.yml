@@ -25,6 +25,12 @@
 # Pushing a branch named ci-try/<anything> runs this workflow too, to try a
 # change to it before it reaches main.
 #
+# Chrome's install (2026-11-19): every job installs Chrome and its system packages
+# with browser-actions/setup-chrome, given 6 minutes, and tries once more (8 minutes)
+# when that fails or hangs; the steps after it take whichever path worked. That day
+# GitHub's package mirror failed three jobs ("/usr/bin/sudo failed with exit code
+# 100") and hung another for its whole 100-minute job limit, with no site change.
+#
 # Every job runs on ubuntu-24.04 by name, not ubuntu-latest: "latest" moves to
 # a new Ubuntu on GitHub's schedule, and a new image brings new fonts, which
 # move the layout under the smoke. Change it here, on purpose, in its own push.
@@ -157,20 +163,30 @@ jobs:
       # so no tool has to run Chrome with --no-sandbox.
       - name: Let Chrome use its sandbox
         run: if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns; fi
+      # Chrome, with a second try when the first install fails or hangs (header: "Chrome's install").
       - uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
         id: chrome
+        continue-on-error: true
+        timeout-minutes: 6
+        with:
+          chrome-version: ${{ env.CHROME_VERSION }}
+          install-dependencies: true
+      - uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
+        id: chrome2
+        if: ${{ steps.chrome.outcome != 'success' }}
+        timeout-minutes: 8
         with:
           chrome-version: ${{ env.CHROME_VERSION }}
           install-dependencies: true
       - name: Chrome starts
         timeout-minutes: 3
         env:
-          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+          CHROME: ${{ steps.chrome.outputs.chrome-path || steps.chrome2.outputs.chrome-path }}
         run: |
           node tools/ci/run-and-annotate.mjs --title "Chrome start" --log "$RUNNER_TEMP/ci-out/chrome-start.log" --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
       - name: node tools/smoke.mjs --en-only --only ${{ matrix.area }}
         env:
-          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+          CHROME: ${{ steps.chrome.outputs.chrome-path || steps.chrome2.outputs.chrome-path }}
           AREA: ${{ matrix.area }}
         run: |
           node tools/ci/run-and-annotate.mjs --title "smoke $AREA" --log "$RUNNER_TEMP/ci-out/smoke-$AREA.log" --summary '^smoke: (✓|✗|[0-9]+ sets)' --deadline 45 -- node tools/smoke.mjs --en-only --only "$AREA"
@@ -198,20 +214,30 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - name: Let Chrome use its sandbox
         run: if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns; fi
+      # Chrome, with a second try when the first install fails or hangs (header: "Chrome's install").
       - uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
         id: chrome
+        continue-on-error: true
+        timeout-minutes: 6
+        with:
+          chrome-version: ${{ env.CHROME_VERSION }}
+          install-dependencies: true
+      - uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
+        id: chrome2
+        if: ${{ steps.chrome.outcome != 'success' }}
+        timeout-minutes: 8
         with:
           chrome-version: ${{ env.CHROME_VERSION }}
           install-dependencies: true
       - name: Chrome starts
         timeout-minutes: 3
         env:
-          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+          CHROME: ${{ steps.chrome.outputs.chrome-path || steps.chrome2.outputs.chrome-path }}
         run: |
           node tools/ci/run-and-annotate.mjs --title "Chrome start" --log "$RUNNER_TEMP/ci-out/chrome-start.log" --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
       - name: node tools/smoke.mjs
         env:
-          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+          CHROME: ${{ steps.chrome.outputs.chrome-path || steps.chrome2.outputs.chrome-path }}
         run: |
           node tools/ci/run-and-annotate.mjs --title "smoke full walk" --log "$RUNNER_TEMP/ci-out/smoke-full.log" --summary '^smoke: (✓|✗|[0-9]+ sets|Tuning)' --deadline 45 -- node tools/smoke.mjs
       - name: Keep the output
@@ -245,20 +271,30 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - name: Let Chrome use its sandbox
         run: if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns; fi
+      # Chrome, with a second try when the first install fails or hangs (header: "Chrome's install").
       - uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
         id: chrome
+        continue-on-error: true
+        timeout-minutes: 6
+        with:
+          chrome-version: ${{ env.CHROME_VERSION }}
+          install-dependencies: true
+      - uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
+        id: chrome2
+        if: ${{ steps.chrome.outcome != 'success' }}
+        timeout-minutes: 8
         with:
           chrome-version: ${{ env.CHROME_VERSION }}
           install-dependencies: true
       - name: Chrome starts
         timeout-minutes: 3
         env:
-          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+          CHROME: ${{ steps.chrome.outputs.chrome-path || steps.chrome2.outputs.chrome-path }}
         run: |
           node tools/ci/run-and-annotate.mjs --title "Chrome start" --log "$RUNNER_TEMP/ci-out/chrome-start.log" --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
       - name: node tools/smoke.mjs --en-only --only a11y
         env:
-          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+          CHROME: ${{ steps.chrome.outputs.chrome-path || steps.chrome2.outputs.chrome-path }}
         run: |
           node tools/ci/run-and-annotate.mjs --title "a11y scan" --log "$RUNNER_TEMP/ci-out/a11y.log" --summary '^(smoke: (✓|✗)|a11y: [0-9]+ rules|a11y: against the baseline)' --deadline 25 -- node tools/smoke.mjs --en-only --only a11y --a11y-out "$RUNNER_TEMP/ci-out/a11y.json"
       - name: Keep the findings
@@ -291,20 +327,30 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - name: Let Chrome use its sandbox
         run: if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns; fi
+      # Chrome, with a second try when the first install fails or hangs (header: "Chrome's install").
       - uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
         id: chrome
+        continue-on-error: true
+        timeout-minutes: 6
+        with:
+          chrome-version: ${{ env.CHROME_VERSION }}
+          install-dependencies: true
+      - uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
+        id: chrome2
+        if: ${{ steps.chrome.outcome != 'success' }}
+        timeout-minutes: 8
         with:
           chrome-version: ${{ env.CHROME_VERSION }}
           install-dependencies: true
       - name: Chrome starts
         timeout-minutes: 3
         env:
-          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+          CHROME: ${{ steps.chrome.outputs.chrome-path || steps.chrome2.outputs.chrome-path }}
         run: |
           node tools/ci/run-and-annotate.mjs --title "Chrome start" --log "$RUNNER_TEMP/ci-out/chrome-start.log" --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
       - name: node tools/slow-load.mjs
         env:
-          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+          CHROME: ${{ steps.chrome.outputs.chrome-path || steps.chrome2.outputs.chrome-path }}
         run: |
           node tools/ci/run-and-annotate.mjs --title "slow-load" --log "$RUNNER_TEMP/ci-out/slow-load.log" --summary 'slow-load' --deadline 55 -- node tools/slow-load.mjs
       - name: Keep the output
@@ -334,20 +380,30 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - name: Let Chrome use its sandbox
         run: if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns; fi
+      # Chrome, with a second try when the first install fails or hangs (header: "Chrome's install").
       - uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
         id: chrome
+        continue-on-error: true
+        timeout-minutes: 6
+        with:
+          chrome-version: ${{ env.CHROME_VERSION }}
+          install-dependencies: true
+      - uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
+        id: chrome2
+        if: ${{ steps.chrome.outcome != 'success' }}
+        timeout-minutes: 8
         with:
           chrome-version: ${{ env.CHROME_VERSION }}
           install-dependencies: true
       - name: Chrome starts
         timeout-minutes: 3
         env:
-          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+          CHROME: ${{ steps.chrome.outputs.chrome-path || steps.chrome2.outputs.chrome-path }}
         run: |
           node tools/ci/run-and-annotate.mjs --title "Chrome start" --log "$RUNNER_TEMP/ci-out/chrome-start.log" --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
       - name: node tools/update-reload-loop.mjs
         env:
-          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+          CHROME: ${{ steps.chrome.outputs.chrome-path || steps.chrome2.outputs.chrome-path }}
         run: |
           node tools/ci/run-and-annotate.mjs --title "update-reload" --log "$RUNNER_TEMP/ci-out/update-reload.log" --summary '^update-reload: ([0-9]+ of|✗)' --deadline 95 -- node tools/update-reload-loop.mjs
       # The profile clean-up alone, on this runner, with stand-ins for Chrome (about 15 s).
@@ -384,20 +440,30 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - name: Let Chrome use its sandbox
         run: if [ -e /proc/sys/kernel/apparmor_restrict_unprivileged_userns ]; then echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns; fi
+      # Chrome, with a second try when the first install fails or hangs (header: "Chrome's install").
       - uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
         id: chrome
+        continue-on-error: true
+        timeout-minutes: 6
+        with:
+          chrome-version: ${{ env.CHROME_VERSION }}
+          install-dependencies: true
+      - uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
+        id: chrome2
+        if: ${{ steps.chrome.outcome != 'success' }}
+        timeout-minutes: 8
         with:
           chrome-version: ${{ env.CHROME_VERSION }}
           install-dependencies: true
       - name: Chrome starts
         timeout-minutes: 3
         env:
-          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+          CHROME: ${{ steps.chrome.outputs.chrome-path || steps.chrome2.outputs.chrome-path }}
         run: |
           node tools/ci/run-and-annotate.mjs --title "Chrome start" --log "$RUNNER_TEMP/ci-out/chrome-start.log" --summary 'html' --deadline 2 -- "$CHROME" --headless=new --disable-gpu --dump-dom about:blank
       - name: node tools/playalong-loop.mjs
         env:
-          CHROME: ${{ steps.chrome.outputs.chrome-path }}
+          CHROME: ${{ steps.chrome.outputs.chrome-path || steps.chrome2.outputs.chrome-path }}
         run: |
           node tools/ci/run-and-annotate.mjs --title "playalong" --log "$RUNNER_TEMP/ci-out/playalong.log" --summary '^playalong-loop: ' --deadline 40 -- node tools/playalong-loop.mjs --json "$RUNNER_TEMP/ci-out/playalong.json"
       - name: Keep the output
