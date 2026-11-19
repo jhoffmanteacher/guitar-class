@@ -726,7 +726,8 @@ async function cardViewsWalk(page, run, events, stats, base) {
    under test. A checkout without ca-43 skips it. */
 /* W25 DIAGNOSTIC (ci-try/w25-diag only): reload N times like the line below and record every load that ends
    with a part that never ran, with what the network and the service worker did during it. */
-async function w25Diag(page, base, n) {
+async function w25Diag(page, base, n, before) {
+  const w25Start = Date.now(); const size = new Map(); const rid = new Map();
   const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
   const probe = [];
   for (const m of html.matchAll(/<script defer src="([^"]+\.js)"><\/script>/g)) {
@@ -735,7 +736,8 @@ async function w25Diag(page, base, n) {
   }
   let urls = new Map(), net = [], sw = [], js = { sw: 0, net: 0, cache: 0 }, exc = [];
   page.on((m, p) => {
-    if (m === 'Network.requestWillBeSent') urls.set(p.requestId, p.request.url.replace(base, ''));
+    if (m === 'Network.requestWillBeSent') { urls.set(p.requestId, p.request.url.replace(base, '')); rid.set(p.request.url.replace(base, ''), p.requestId); }
+    else if (m === 'Network.loadingFinished' && urls.has(p.requestId)) size.set(urls.get(p.requestId), p.encodedDataLength);
     else if (m === 'Network.loadingFailed') net.push(`FAIL ${urls.get(p.requestId)} ${p.errorText}${p.canceled ? ' canceled' : ''}${p.blockedReason ? ' ' + p.blockedReason : ''}`);
     else if (m === 'Network.responseReceived' && /\.js$/.test(p.response.url) && p.response.url.startsWith(base)) {
       if (p.response.fromServiceWorker) js.sw++; else if (p.response.fromDiskCache) js.cache++; else js.net++;
@@ -761,9 +763,21 @@ async function w25Diag(page, base, n) {
       swAtNav = swLast;
     }
     const MODE = +(process.env.W25_MODE || 0);
+    if (MODE === 5 && before) {
+      // The real sequence: a fresh first visit booted exactly as walk() boots, the chord-grid walk, then the reload.
+      mark(`w25: cycle ${k + 1} of ${n}: fresh boot`);
+      await page.send('Page.navigate', { url: 'about:blank' }); await sleep(500);
+      await page.send('Storage.clearDataForOrigin', { origin: base, storageTypes: 'all' }); await sleep(1000);
+      await page.send('Page.navigate', { url: base + '/index.html' }); await sleep(3000); await pageLoaded(page);
+      try { await page.evalJs('devBypass()'); } catch { /* the probe below reports it */ }
+      await sleep(3500);
+      const c0 = Date.now(); await before(); gap = Date.now() - c0; swAtNav = swLast;
+      if (Date.now() - w25Start > 33 * 60000) { console.log(`smoke: w25 stopping after ${k + 1} cycles (time)`); n = k + 1; }
+    }
+    if (process.env.W25_PLANT) await page.evalJs(`caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('guitar-class-')).map(k => caches.open(k).then(c => c.put('app/builtsongs.js', new Response('', { headers: { 'content-type': 'text/javascript' } })))))).then(() => 1)`).catch(() => 0);
     if (MODE === 1 || MODE === 2) { try { await page.send('ServiceWorker.stopAllWorkers'); } catch { /* none */ } await sleep(300); swAtNav = 'stopped'; }
     if (MODE === 3 || MODE === 4) { await sleep(40000); swAtNav = swLast; gap = 40000; }
-    urls = new Map(); net = []; sw = []; js = { sw: 0, net: 0, cache: 0 }; exc = [];
+    urls = new Map(); net = []; sw = []; js = { sw: 0, net: 0, cache: 0 }; exc = []; size.clear(); rid.clear();
     mark(`w25: reload ${k + 1} of ${n}`);
     const t0 = Date.now();
     await page.send('Page.navigate', { url: base + '/index.html' });
@@ -772,6 +786,13 @@ async function w25Diag(page, base, n) {
     const ctrl = await page.evalJs(`navigator.serviceWorker.controller ? navigator.serviceWorker.controller.state : 'none'`).catch(() => '?');
     if (missing.length) {
       bad++;
+      // What the worker, its cache and the server hold for each missing part now: an empty or cut body would run nothing and throw nothing.
+      const got = []; for (const u of missing.slice(0, 4)) { const id = rid.get('/' + u); if (!id) { got.push(u + '=no-request'); continue; } try { const b = await page.send('Network.getResponseBody', { requestId: id }); got.push(`${u}=${b.body.length}${b.base64Encoded ? 'b64' : ''}`); } catch (e) { got.push(u + '=' + String(e.message).slice(0, 60)); } }
+      const body = await page.evalJs(`Promise.all(${JSON.stringify(missing.slice(0, 4))}.map(async u => {
+        const one = async f => { try { const r = await f(); if (!r) return 'none'; const t = await r.text(); return r.status + '/' + t.length; } catch (e) { return 'ERR ' + e.message; } };
+        return u + ' sw=' + await one(() => fetch(u)) + ' cache=' + await one(() => caches.match(u)) + ' net=' + await one(() => fetch(u + '?w25=' + Date.now(), { cache: 'no-store' }));
+      })).then(a => a.join(' ; '))`).catch(e => 'body probe failed: ' + String(e.message).slice(0, 80));
+      net.unshift(`BODY ${body}`, `PAGE GOT ${got.join(' ')}`);
       lines.push(`smoke: ✗ w25 reload ${k + 1}: ${missing.length} parts never ran (${missing.join(' ')}); loaded=${ok} ${Date.now() - t0}ms gap=${gap} swAtNav=${swAtNav || '-'} controller=${ctrl} js sw/net/disk=${js.sw}/${js.net}/${js.cache}; net: ${net.slice(0, 8).join(' | ') || 'none'}; sw: ${sw.slice(-6).join(' ') || 'none'}; exc: ${exc.slice(0, 3).join(' | ') || 'none'}`);
     } else if (k < 3) lines.push(`smoke: w25 reload ${k + 1} clean: gap=${gap} swAtNav=${swAtNav || '-'} controller=${ctrl} js sw/net/disk=${js.sw}/${js.net}/${js.cache}; net: ${net.slice(0, 4).join(' | ') || 'none'}`);
     try { await page.evalJs('devBypass()'); } catch { /* a missing part: the next reload */ }
@@ -794,7 +815,7 @@ async function noteCallWalk(page, run, events, stats, base) {
      here. */
   await page.send('Page.navigate', { url: base + '/index.html' });
   await sleep(3500); await pageLoaded(page);
-  if (process.env.W25_REPEAT) await w25Diag(page, base, +process.env.W25_REPEAT);
+  if (process.env.W25_REPEAT) await w25Diag(page, base, +process.env.W25_REPEAT, () => chordGridWalk(page, run, events, stats));
   await run('nc:devBypass', 'devBypass()', 3500);
   for (let i = events.length - 1; i >= 0; i--) if (events[i].step === 'nc:devBypass' && /ResizeObserver loop/.test(events[i].text)) events.splice(i, 1);
   const lazy = await run('nc:no-coach', `typeof coachReadFrame === 'undefined' && typeof coachPowerTargets === 'function'`, 10);

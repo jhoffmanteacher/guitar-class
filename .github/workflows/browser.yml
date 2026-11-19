@@ -189,8 +189,8 @@ jobs:
         env:
           CHROME: ${{ steps.chrome.outputs.chrome-path || steps.chrome2.outputs.chrome-path }}
           AREA: ${{ matrix.area }}
-          W25_REPEAT: ${{ matrix.rep < 3 && '50' || '30' }}
-          W25_MODE: ${{ matrix.rep }}
+          W25_REPEAT: '40'
+          W25_MODE: '5'
         run: |
           node tools/ci/run-and-annotate.mjs --title "smoke $AREA" --log "$RUNNER_TEMP/ci-out/smoke-$AREA.log" --summary '^smoke: (✓|✗|[0-9]+ sets|w25)' --deadline 45 -- node tools/smoke.mjs --en-only --only "$AREA"
       - name: Keep the output
