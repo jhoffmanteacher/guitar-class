@@ -49,11 +49,19 @@
      spanFarReads (V1 of the 2026-11-14 review) the whole-span rule, but a strum more than half a beat from its change counts only with a
                  readable chord (3+ pitch readings that fit the new chord); nearer, under 3 readings still passes on timing alone
      spanReads   (V2) the whole-span rule, but every strum needs a readable chord (3+ readings that fit) to make a change right
-     In both, a strum that does not pass is a "wrong chord" for the changes it was heard in, as any strum that does not read right. */
+     In both, a strum that does not pass is a "wrong chord" for the changes it was heard in, as any strum that does not read right.
+   THE CHORD CHECK BEFORE RULE A (2026-11-18). Since then the site's chord check (`base`) never passes a strum with no pitch reading, passes
+   1 or 2 readings only when half are the new chord's notes (coach-core.js coachToneCredit, coach-chords.js ccToneOk), and Power Chord
+   Switch reads a window its two power gates find nothing in again at 0.55. Every rule above was written and measured with the chord check
+   before it (under 3 readings passes on timing alone, the two power gates only), so each one (every window and pick rule) first puts that
+   check back (unTone below) and measures what it did before; only `base` is rule A.
+     spanTiming  the whole-span rule with the chord check before rule A: the site from 2026-11-14 to 2026-11-18. replay-takes.mjs replays a
+                 take stamped changePick 'span' with no toneRule under it for the "reproduced" line (ownRule).
+   On a site from before rule A, unTone leaves the source as it is. */
 export const CAPS = [250, 350, 500, 700], PICKS = ['near', 'last', 'best'];
 export const WINDOW_RULES = ['same', 'first', ...CAPS.map(c => 'w' + c), ...PICKS, ...CAPS.flatMap(c => PICKS.map(p => 'w' + c + p)),
   ...['', ...CAPS.map(c => 'w' + c)].flatMap(w => ['g0', 'gd'].map(g => w + 'near' + g))];
-export const PICK_RULES = ['nearest', 'spanLate', 'spanFarReads', 'spanReads'];
+export const PICK_RULES = ['nearest', 'spanLate', 'spanFarReads', 'spanReads', 'spanTiming'];
 export const RULES = ['base', 'ring', 'half', 'half3', 'both', 'both3', ...WINDOW_RULES, ...PICK_RULES];
 /* The rules replay-takes.mjs runs when no --rules is given (the window rules are many: change-window.mjs runs them). */
 export const DEFAULT_RULES = ['base', 'first'];
@@ -77,6 +85,8 @@ export function applyRule(src, rule, ratio){
     one('CC_POWER_ONSET_RATIO', ratio[0]); one('CC_POWER_HF_RATIO', ratio[1]);
   }
   if (rule === 'base') return src;
+  src = unTone(src);
+  if (rule === 'spanTiming') return src;
   if (rule === 'nearest') return unSpan(src);
   if (rule === 'spanFarReads' || rule === 'spanReads'){
     if (src.indexOf('function ccSpanRule(') < 0) throw new Error('candidates: "' + rule + '" needs a site with the whole-span rule (coach-chords.js ccSpanRule, from 2026-11-14)');
@@ -128,6 +138,21 @@ function ccResolvePend(ch){
 `);
   rep('  if (p.readings.length >= 3){\n    const want = cc.classes[ch.to];', '  if (p.readings.length >= (ccIsPower() ? CC_POWER_TONE_MIN : 3)){\n    const want = cc.classes[ch.to];');
   rep('    toneOk = anyNew > 0.15 && !(oldHits > newHits && oldHits / n > 0.15);', '    toneOk = (ccIsPower() && CC_POWER_TONE_SHARE ? anyNew >= CC_POWER_TONE_SHARE : anyNew > 0.15) && !(oldHits > newHits && oldHits / n > 0.15);');
+  return src;
+}
+
+/* A site with rule A (coach-core.js coachToneCredit, 2026-11-18) given back the chord check it had before: ccToneOk under 3 readings returns
+   null again (passes on timing alone), Power Chord Switch reads with its two power gates only, and a take it saves carries no toneRule.
+   Power Chord Switch and Change Up only (the Listening Coach and Note Runner are not candidates here). A site without rule A is returned
+   as it is. */
+export function unTone(src){
+  if (src.indexOf('function coachToneCredit(') < 0) return src;
+  const rep = (a, b) => { const n = src.split(a).length - 1; if (n !== 1) throw new Error(`candidates(unTone): expected this line once in coach.js, found it ${n} times: ${a.slice(0, 90)}`); src = src.replace(a, () => b); };
+  rep(`  const few = coachToneCredit(readings.map(pcOf), cc.classes[ch.to]);
+  if (few !== null) return few;
+`, '');
+  rep('ccIsPower() ? RNW_POWER_CLARITY.concat([0.55]) : 0.55', 'ccIsPower() ? RNW_POWER_CLARITY : 0.55');
+  rep("toneRule: 'pitch' },", 'toneRule: undefined },');
   return src;
 }
 

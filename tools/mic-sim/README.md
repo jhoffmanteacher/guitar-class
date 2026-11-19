@@ -213,6 +213,18 @@ script.
   inside the bar; its real strums marked right fall 17 (outside), which the takes cannot rank because they do not say
   which chord was played. So no ratio change the takes support: every step that removes false rights beyond the noise
   loses real strums beyond it.
+- **RULE A (2026-11-18, Jonathan): no pitch is never the chord.** `coach-core.js` `coachToneCredit`, one helper: a strum with no pitch
+  reading is never credited as the target chord, 1 or 2 readings only when at least half are its notes, 3+ keep each game's own vote. Called
+  by Power Chord Switch and Change Up (`ccToneOk`), the Listening Coach's chord mode (`coachMatchEvent`, whose slot verdicts it does not
+  change, and `coachScorePitch`: a round mostly of unclear strums with no pitch or off the chord is level 1, not 2) and Note Runner's chord
+  notes (no change: its 2-reading floor is stricter; its half credit is a timing reward, never in the accuracy). Power Chord Switch also
+  reads a window its two power gates find no pitch in again at 0.55 (`[0.22, 0.45, 0.55]`); the summaries hold `[0.22, 0.45]` and `0.55`,
+  and `closed-loop.mjs` makeSite reads the list from those two. Takes say `toneRule: 'pitch'`; `ownRule` replays `span` takes without it
+  under `spanTiming` (candidates.mjs: the whole span with the old chord check), and every window / pick candidate puts the old check back
+  first (`unTone`), so each measures what it did before; only `base` is rule A. The measurement behind it: `Claude outputs/
+  pcs-leniency-2026-11-18/` (candidate `spanTone1w`). The students that measure it stay in the closed loop (`student.mjs`, every default
+  run): `steady3` / `thumb3` (three strums a beat), `wrongFret3`, `wrongStep` (a whole step high; the old chord when it is one), `stuck` /
+  `stuck3` (chord 1 all game), `openStrum` / `open3` (six open strings), `tapper3` / `muted3`. Old students play byte-identically.
 - **`candidates.mjs`** (2026-11-11): candidate Power Chord Switch grading rules (`ring`, `half`, `half3`, `both`,
   `both3`; what each does is in its header), applied to coach.js IN MEMORY. None is in coach.js. `closed-loop.mjs
   --rule=<name>` plays one; `replay-takes.mjs` replays them on real takes. Those five were written for the first-strum

@@ -981,7 +981,11 @@ function nrFinalizeEvent(){
     if (n.chord){
       const want = [((n.midi % 12) + 12) % 12, ((n.midi + 7) % 12) % 12];
       const cls = p.readings.map(r => ((Math.round(r) % 12) + 12) % 12);
-      return { ok: cls.length >= 2 && cls.filter(c => want.indexOf(c) >= 0).length / cls.length >= 0.20,
+      /* 2 readings at least (Note Runner's own floor, stricter than rule A's 1); under 3 the shared rule A (coachToneCredit: half of them
+         chord tones, the same verdicts as the 20% vote), from 3 the 20% vote. A note that is not right here gets Note Runner's half credit
+         ('pitch': on the beat, wrong or unclear note), which is a timing reward: it is never counted in the accuracy (nrFinish). */
+      const few = coachToneCredit(cls, want);
+      return { ok: cls.length >= 2 && (few !== null ? few : cls.filter(c => want.indexOf(c) >= 0).length / cls.length >= 0.20),
                unclear: cls.length < 2 };          // heard a strum, no usable pitch reads
     }
     const ok = (midi !== null && (midi === n.midi || midi === n.midi + 12)) ||

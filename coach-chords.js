@@ -11,6 +11,9 @@
    Power Chord Switch grades the CHORD, not the timing (2026-11-14): a change
    is right when any strum while that chord is the current one reads as it
    (ccSpanRule, below ccHoldFinal).
+   In both games a strum with no pitch reading is never the chord, and one with
+   1 or 2 readings counts only when half of them are its notes (rule A,
+   2026-11-18: ccToneOk, coachToneCredit in coach-core.js).
    ════════════════════════════════════════════════════════════════════ */
 
 const CC_PROGRESSIONS = [
@@ -672,9 +675,10 @@ function ccRecMeta(complete){
               gridStepCapMs: CC_GRID_STEP_CAP_MS,   // the console replays the grid with this cap; a take without it was graded on the uncapped grid
               countInBeats: ccCountInList(),   // each round's count-in clicks, one per stageBpms entry; a take without it counted 4 in every round (before 2026-11-09)
               changeReadings: ccSpanRule()
-                ? 'per change: null = no strum it could use in its span; [] = the strum that decided it had no pitch read; else the midi readings of that strum: for a right change the first strum that read right, for a wrong one the first strum heard (under 3 passes on timing alone)'
-                : 'per change: null = no strum in its window; [] = a strum but no pitch could be read; else the midi readings its chord check used (under 3 passes on timing alone)',
-              changePick: ccSpanRule() ? 'span' : 'nearest' },   // which strum decided a change: 'span' (Power Chord Switch from 2026-11-14) any strum in the chord's span that reads right; 'nearest' (2026-11-13) the one nearest it; none, the first in its window (teacher-mic.js micEvalTakePw)
+                ? 'per change: null = no strum it could use in its span; [] = the strum that decided it had no pitch read (never right); else the midi readings of that strum: for a right change the first strum that read right, for a wrong one the first strum heard (1 or 2 readings right only when half are the new chord\'s notes)'
+                : 'per change: null = no strum in its window; [] = a strum but no pitch could be read (never right); else the midi readings its chord check used (1 or 2 readings right only when half are the new chord\'s notes)',
+              changePick: ccSpanRule() ? 'span' : 'nearest',   // which strum decided a change: 'span' (Power Chord Switch from 2026-11-14) any strum in the chord's span that reads right; 'nearest' (2026-11-13) the one nearest it; none, the first in its window (teacher-mic.js micEvalTakePw)
+              toneRule: 'pitch' },   // the chord check (2026-11-18, rule A, ccToneOk): 'pitch' = no reading is never right, 1 or 2 readings must be half the new chord's notes, power gates [0.22, 0.45, 0.55]; none = under 3 readings passed on timing alone, gates [0.22, 0.45] (teacher-mic.js, tools/mic-sim replay-takes.mjs ownRule)
     expected: cc.changes.map((c, i) => Object.assign({ i, t: c.t, from: c.from, to: c.to, stage: c.stage == null ? 0 : c.stage, bpm: c.bpm, verdict: c.result,
       readings: c.readings ? c.readings.map(r2) : null }, (cc.retimedStages || []).indexOf(c.stage == null ? 0 : c.stage) >= 0 ? { retimed: true } : {})),
     tempoChanges: (cc.tempoLog || []).slice(),
@@ -872,14 +876,20 @@ function ccResolvePend(ch){
      a pend (no strum in its window) keeps no readings at all. */
   ch.readings = p.readings.slice();
   const toneOk = ccToneOk(ch, p.readings);
-  /* Percussive/unclear counts on timing alone. The verdict is HELD, not shown: a closer strum may still come (ccLoop), and ccHoldFinal
-     shows it once none can. Of two checks, the one closer to the change is kept. */
+  /* A strum with no pitch, or 1-2 readings off the new chord, is 'off' (rule A, 2026-11-18; before, under 3 readings counted on timing
+     alone). The verdict is HELD, not shown: a closer strum may still come (ccLoop), and ccHoldFinal shows it once none can. Of two checks,
+     the one closer to the change is kept. */
   const h = { v: toneOk === false ? 'off' : 'ok', readings: ch.readings, dev: p.dev };
   if (!ch.hold || Math.abs(h.dev) < Math.abs(ch.hold.dev)) ch.hold = h;
 }
-/* The chord check of one strum for one change: true = it reads as the change's new chord, false = it does not, null = under 3 pitch
-   readings (it passes on timing alone). */
+/* The chord check of one strum for one change: true = it reads as the change's new chord, false = it does not. Under 3 pitch readings the
+   shared rule A decides (coachToneCredit, coach-core.js; 2026-11-18, Jonathan): no reading is never the chord, 1 or 2 must be at least half
+   the new chord's notes. Until then a strum under 3 readings passed on timing alone (null here), so a desk tap, a muted scratch or a voice
+   on the beat was a right change: on the 41 real takes at 1.8 / 2.19, 109 of 322 rights were decided that way. */
 function ccToneOk(ch, readings){
+  const pcOf = r => ((Math.round(r) % 12) + 12) % 12;
+  const few = coachToneCredit(readings.map(pcOf), cc.classes[ch.to]);
+  if (few !== null) return few;
   let toneOk = null;
   /* Chord-tone vote (same rule as the Coach's chord checks): a strum is
      polyphonic, so readings hop between chord tones — any single-pitch
@@ -908,7 +918,6 @@ function ccToneOk(ch, readings){
   if (readings.length >= 3){
     const want = cc.classes[ch.to];
     const from = cc.classes[ch.from] || [];
-    const pcOf = r => ((Math.round(r) % 12) + 12) % 12;
     const n = readings.length;
     const newOnly = want.filter(c => from.indexOf(c) < 0);
     const oldOnly = from.filter(c => want.indexOf(c) < 0);
@@ -935,8 +944,8 @@ function ccHoldFinal(c){
    before the switch. power chord switching is measuring the right chord not correct on time. that should be for a different activity that
    is teaching tempo/rhythm."). This reverses, for Power Chord Switch only, the nearest-strum rule of 2026-11-13. A change's SPAN runs from
    `win` before it (the early allowance every rule has had: half a beat, at most half the gap between changes) to the next change; the last
-   one's ends where its chord's time ends. ANY strum in the span that reads as the new chord (ccToneOk; under 3 readings passes on timing
-   alone, as before) makes the change right at once, however early or late. A strum that reads as another chord is held, never shown: a
+   one's ends where its chord's time ends. ANY strum in the span that reads as the new chord (ccToneOk; since 2026-11-18 a strum with no
+   pitch never does, and 1 or 2 readings must be half the new chord's notes: rule A) makes the change right at once, however early or late. A strum that reads as another chord is held, never shown: a
    later right strum still wins. Only when the span ends is a change wrong (strums heard, none right) or missed (none heard). One strum is
    credited to one change at most (the earliest it passes), and a strum credited to a change gives no other change a wrong chord: an early
    strum of the next chord never turns the current one wrong.
@@ -1063,13 +1072,19 @@ function ccLoop(){
            35% / 19% of the time at 0.55 and 9% / 1% here; a right change was
            marked messy 3% / 2% at 0.55 and 0% / 1% here.
            NOT fixed by either gate: with a strong low fundamental a low-E
-           strum gives under 3 readings, so it passes on timing alone, and a
-           chord that never changed passes with it (45% of held strums); pairs
+           strum gives under 3 readings, so it passed on timing alone, and a
+           chord that never changed passed with it (45% of held strums); pairs
            that share a note (G5 to C5, A5 to D5) pass held on every mic.
-           That is why the tip checks the chord only "when I can hear the
-           notes clearly, but two chords that share a note can fool me".
+           That is why the tip said it checks the chord only "when I can hear
+           the notes clearly, but two chords that share a note can fool me".
+           Since 2026-11-18 (rule A, ccToneOk; the tip now says "a strum whose
+           notes I cannot hear does not count") no strum passes on timing alone,
+           and Power Chord Switch reads a window its two gates find no pitch in
+           again at the 0.55 chord gate, so a low-E strum that gave no reading
+           may give one (measured as `spanTone1w`, Claude outputs/
+           pcs-leniency-2026-11-18: right chord once a beat 253 -> 252 of 270).
            Check on the console's Mic recordings before tuning. */
-        coachPitchReadings(cc.lastPitchT, p.t + COACH_ATTACK_SKIP, ccIsPower() ? RNW_POWER_CLARITY : 0.55).forEach(r => {
+        coachPitchReadings(cc.lastPitchT, p.t + COACH_ATTACK_SKIP, ccIsPower() ? RNW_POWER_CLARITY.concat([0.55]) : 0.55).forEach(r => {
           cc.lastPitchT = r.t;
           if (r.midi != null && r.t - p.t <= COACH_EVENT_TAIL) p.readings.push(r.midi);
         });

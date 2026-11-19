@@ -1168,6 +1168,9 @@ function micEvalStrumHits(frames, rule, ratio, hfRatio){
    false hits (noise, a chord left ringing). `falseHits` and `agree` are the same denominators
    as the strum what-if's. `unknown` = graded right with no usable readings list. A wrong
    verdict already needs 3+ readings, so the rule never touches those. Measurement only.
+   `toneRule` 'pitch': the take was graded with rule A (coach-chords.js ccRecMeta, 2026-11-18): no strum passed on timing alone, 1 or 2
+   readings only when half were the new chord's notes. It has no `pitch` (its rights with under 3 readings had notes that fit: the
+   what-if's "timing alone" does not exist there), and the summary counts it apart (`graded`). 'timing' = every older take.
    Proved on synthetic takes with known answers: tools/mic-sim/fake-pw-take.mjs,
    checks.mjs 1cl. */
 function micEvalTakePw(pcm, R, d, deps){
@@ -1371,9 +1374,10 @@ function micEvalTakePw(pcm, R, d, deps){
         snrDb: r1(dB(pk) - level.floorDb), replay: o ? 'present' : 'none', siteHeard: !!rd.match[idx], gridOffsetMs: r1(goff), why: { cat } });
     });
   });
-  /* ── pitch rule: "no readable pitch, no tick", from the readings the take saved (null for an older take) ── */
+  /* ── pitch rule: "no readable pitch, no tick", from the readings the take saved (null for an older take, and for a take graded with rule A) ── */
+  const toneRule = d.toneRule === 'pitch' ? 'pitch' : 'timing';
   let pitch = null;
-  if (judged.some(j => j.saved)){
+  if (toneRule === 'timing' && judged.some(j => j.saved)){
     const right = judged.filter(j => j.site === 'right'), known = right.filter(j => j.rn != null), low = list => list.filter(j => j.rn < 3);
     pitch = { right: right.length, withPitch: known.length - low(known).length, timingOnly: low(known).length, unknown: right.length - known.length,
       falseHits: judged.filter(j => j.cat === 'false-hit').length, agree: judged.filter(j => j.cat === 'agree').length,
@@ -1481,7 +1485,7 @@ function micEvalTakePw(pcm, R, d, deps){
   const startMs = rounds.length ? rounds[0].listen - rounds[0].countIn * rounds[0].beat + rounds[0].offs : 0;
   const playMs = Math.max(1, endMs - startMs);
   return {
-    kind: 'pw', changePick: pick, level, latency, notes: summary, perNote: notes, rounds: roundRows, whatIf, whatIfSkipped, strumRatio, pitch,
+    kind: 'pw', changePick: pick, toneRule, level, latency, notes: summary, perNote: notes, rounds: roundRows, whatIf, whatIfSkipped, strumRatio, pitch,
     room: { extraOnsetsPerMin: Math.round(extra / playMs * 60000), extra, onsets: onsets.length }
   };
 }
@@ -1562,12 +1566,13 @@ The first column is the shared ratios these takes were graded with: ${w.totals.p
 /* The pitch rule (micEvalTakePw `pitch`), summed: one line per Power Chord Switch take that saved its readings, and the totals. Takes saved before
    2026-11-05 have none: `without` counts them. Used by the console table, the download and the terminal. No names: the take labels only. */
 function micEvalPitchSummary(rows){
-  const pw = rows.filter(r => r.kind === 'pw'), has = pw.filter(r => r.pitch);
+  const pw = rows.filter(r => r.kind === 'pw'), has = pw.filter(r => r.pitch), graded = pw.filter(r => r.toneRule === 'pitch').length;
   if (!has.length) return null;
   const F = ['right', 'withPitch', 'timingOnly', 'unknown', 'falseHits', 'agree', 'falseHitsRemoved', 'realLost'];
   const pick = p => { const o = {}; F.forEach(k => { o[k] = p[k] || 0; }); return o; };
   const totals = { takes: has.length }; F.forEach(k => { totals[k] = has.reduce((a, r) => a + (r.pitch[k] || 0), 0); });
-  return { rule: 'a change the site graded right on timing alone (under 3 pitch readings) would not be ticked', without: pw.length - has.length,
+  /* without: takes saved before 2026-11-05 (no readings); graded: takes graded with rule A itself (2026-11-18, toneRule 'pitch') */
+  return { rule: 'a change the site graded right on timing alone (under 3 pitch readings) would not be ticked', without: pw.length - has.length - graded, graded,
     takes: has.map(r => Object.assign({ take: r.take, game: r.game }, pick(r.pitch))), totals };
 }
 function micEvalPitchText(rows){
@@ -1577,7 +1582,8 @@ function micEvalPitchText(rows){
   const line = (label, t) => [pad(label, 5), pad(t.right, 6), pad(t.withPitch, 6), pad(t.timingOnly, 7), pad(t.falseHits, 6), pad(t.agree, 6), pad('-' + t.falseHitsRemoved + ' / lost ' + t.realLost, 14)].join(' ');
   const head = [pad('take', 5), pad('right', 6), pad('tone', 6), pad('timing', 7), pad('false', 6), pad('agree', 6), pad('no pitch, no tick', 14)].join(' ');
   return '\n\nPitch-rule what-if (measurement only, the game does not change): "no readable pitch, no tick" = a change the site graded right on timing alone (under 3 pitch readings) would not count. From the readings each take saved' +
-    (w.without ? `; ${w.without} Power Chord Switch ${w.without === 1 ? 'take has' : 'takes have'} none (saved before 2026-11-05) and ${w.without === 1 ? 'is' : 'are'} left out` : '') + '.\n' +
+    (w.without ? `; ${w.without} Power Chord Switch ${w.without === 1 ? 'take has' : 'takes have'} none (saved before 2026-11-05) and ${w.without === 1 ? 'is' : 'are'} left out` : '') +
+    (w.graded ? `; ${w.graded} Power Chord Switch ${w.graded === 1 ? 'take was' : 'takes were'} graded with this rule already (saved since 2026-11-18: no strum passes on timing alone) and ${w.graded === 1 ? 'is' : 'are'} left out` : '') + '.\n' +
     [head].concat(w.takes.map(t => line(t.take, t)), line('all', w.totals)).join('\n') + `
 
 right       changes the site graded right
@@ -1813,7 +1819,7 @@ function teacherMicPitchHtml(rows){
   const body = w.takes.map(t => `<tr><td class="nc wf">${escHtml(t.take)}</td>${cells(t)}<td>−${t.falseHitsRemoved} · lost ${t.realLost}</td></tr>`).join('') +
     `<tr><td class="nc wf"><b>All ${w.totals.takes}</b></td>${cells(w.totals).replace(/<td>(\d+)<\/td>/g, '<td><b>$1</b></td>')}<td><b>−${w.totals.falseHitsRemoved} · lost ${w.totals.realLost}</b></td></tr>`;
   return `<div class="tg-note" style="margin-top:10px"><b>Pitch-rule what-if</b> (measurement only; the game does not change). "No readable pitch, no tick": a change the site graded right on timing alone, with under 3 pitch readings, would not count.
-    <i>−N</i>: false hits that were graded right on timing alone, so their ticks would go. <i>lost M</i>: real strums (the site and the recording agree) that were graded right on timing alone and would lose their tick.${w.without ? ` ${w.without} Power Chord Switch ${w.without === 1 ? 'take has' : 'takes have'} no readings (saved before 2026-11-05) and ${w.without === 1 ? 'is' : 'are'} left out.` : ''}</div>
+    <i>−N</i>: false hits that were graded right on timing alone, so their ticks would go. <i>lost M</i>: real strums (the site and the recording agree) that were graded right on timing alone and would lose their tick.${w.without ? ` ${w.without} Power Chord Switch ${w.without === 1 ? 'take has' : 'takes have'} no readings (saved before 2026-11-05) and ${w.without === 1 ? 'is' : 'are'} left out.` : ''}${w.graded ? ` ${w.graded} Power Chord Switch ${w.graded === 1 ? 'take was' : 'takes were'} graded with this rule already (saved since 2026-11-18: no strum passes on timing alone) and ${w.graded === 1 ? 'is' : 'are'} left out.` : ''}</div>
     <div class="t-grid-wrap"><table><thead><tr><th class="nc">Take</th><th>Graded right</th><th>3+ readings</th><th>Timing alone</th><th>False hits</th><th>Real strums</th><th>No pitch, no tick</th></tr></thead><tbody>${body}</tbody></table></div>`;
 }
 function teacherMicOffText(h){
