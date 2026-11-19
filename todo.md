@@ -20,10 +20,6 @@ second line after a student's first change.
 7. **On hold until the re-design look next week:** the design-values tidy (W15).
 
 **Only you can do:**
-10. **Practice copy, step 12 (a few minutes):** the site is live at https://guitar-class-practice.web.app; you added
-    the permission (steps 8-11, 2026-11-19) but the 10:35 re-run still did not publish the database rules. Step 12 in
-    `Claude outputs/practice-copy/JONATHAN-STEPS.md`: re-run once more, and if the warning stays, paste Claude the
-    red `Error:` line of the step "Publish firestore.rules to the practice database".
 14. **Strum check takes from a Chromebook** (ca-46, its eight-bar step): one right, one with a wrong chord, one with
     an extra strum on the rest; then download takes and tell Claude.
 17. Optional: try 2 to 4 clip-on pickups.
