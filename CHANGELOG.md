@@ -6,6 +6,12 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-19 — Games: the notes heading
+
+- **The Games page's notes group is now called "Notes on the fretboard".** It said "Notes on the low E and A strings",
+  but most levels of Note Hunt and Fret Zap use the other strings too.
+
+
 ## 2026-11-19 — A site update waits for a song that is still loading
 
 - **Play Along: a site update no longer restarts a song that is still loading.** While a card shows "Loading the

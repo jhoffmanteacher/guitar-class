@@ -68,9 +68,9 @@ Update this block whenever an item opens or closes.
 **Waiting on Jonathan (none urgent).** His list is `todo.md` → "For Jonathan". Also:
 - Friday 2026-11-20: which of this week's changes get a Fable review (the list under "This week only"), and whether
   his weekly limit has reset.
-- Three product calls left from the Friday checks: the Games heading "Notes on the low E and A strings" (only 1 of
-  Note Hunt's 5 levels and 1 of Fret Zap's 4 decks keep to them); the practice-minutes keepalive's dead-link guard
-  (up to about 60 s lost, `practice-minutes.js` ~1082); no "goal reached" toast on a Journey page.
+- Two product calls left from the Friday checks: the practice-minutes keepalive's dead-link guard (up to about 60 s
+  lost, `practice-minutes.js` ~1082); no "goal reached" toast on a Journey page. (The Games heading now says "Notes on
+  the fretboard", Jonathan 2026-11-19.)
 - The old-page tool (W22) stays parked on `origin/win/w22` (round 4 found a MAJOR) until a part split needs it.
 - From 2026-11-23: a visual re-design look, pictures first (`todo.md`); W15 waits on his pick. Not before he says.
 

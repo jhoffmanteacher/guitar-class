@@ -12,11 +12,6 @@ ONLY what he can act on today goes here (Jonathan, 2026-11-17: "leave stuff like
 they're ready"). Work still being built, reviewed or waiting on a push is NOT listed: add its line when it is live
 or when the paste file exists.
 
-**Listen and look (a few minutes each, any class Chromebook or the Mac):**
-2. **Look 1 in class (LIVE 2026-11-17/18):** watch students on an open activity step (wide, named step buttons,
-   "Got it" at the bottom), the In class list, Songs, a lesson step with chords beside it, and the slim left menu.
-   Tell Claude anything they stumble on.
-
 **Decide (tell Claude; each is one sentence):**
 Decided 2026-11-17: old mic recordings that still hold a name are ignored for now; the sign-in load fix gets NO
 second line after a student's first change.
@@ -30,8 +25,7 @@ second line after a student's first change.
     the firebase-adminsdk row, add the role Service Usage Consumer), then tell Claude to re-run the newest Practice copy run.
 14. **Strum check takes from a Chromebook** (ca-46, its eight-bar step): one right, one with a wrong chord, one with
     an extra strum on the rest; then download takes and tell Claude.
-15. **Ask the principal about recording in class** (Ed Code 51512; Claude can draft the one page).
-17. Optional: try 2 to 4 clip-on pickups; delete old `ci-try/*` and `win/*` branches on GitHub (`win/w24` is merged).
+17. Optional: try 2 to 4 clip-on pickups.
 
 ## Closed: do not list or propose these again (Jonathan, 2026-11-17: "get rid of the 'leave them' on the list so we don't keep seeing them")
 
