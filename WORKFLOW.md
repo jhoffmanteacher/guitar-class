@@ -28,15 +28,6 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
   `update-reload-loop.mjs`; a harness-only fix ships Fast with its break-it proof. Report the cause and N of M walks
   failing before and after.
   Windows: started 09:23 (2026-11-19).
-- [~] **W29 — the update reload waits for a private song still downloading (Jonathan, 2026-11-19: "build it").** THE
-  MAC TOOK IT at 09:40 (Jonathan: "you decide"): Windows, skip it. `todo.md` → "Small things" → the first item: `busyReason()` (the service-worker block in
-  `app/start.js`) knows a card playing (`pcState`) but not one showing "Loading the song… 40%", so an update landing
-  mid-download reloads the page, the download is lost and the song counts against the month again. Make `busyReason()`
-  return a reason while a card waits for its song (`sfWait`, `app/songfiles.js`, an earlier part), still bounded by
-  `SW_RELOAD_MAX_WAIT`. Prove it in `tools/update-reload-loop.mjs` (a new case: an update during a private song's
-  download waits, then reloads once the song plays; break-it: without the line it reloads mid-download) and run the
-  whole loop (29 cases today) plus `node tools/kill-switch/proof.mjs`. Fast (no `sw.js` code), with a CHANGELOG line;
-  delete the todo.md item in the same push.
 - [ ] **W26 — on or after 2026-11-26: is the accessibility scan ready for its ratchet?** Read GitHub's "a11y scan"
   job on every push to main from 2026-11-19 on: its annotation "a11y: against the baseline: N new signatures, M gone"
   is on each run's page without signing in (the public API allows 60 reads an hour; the run pages are not limited).
@@ -155,6 +146,10 @@ top-tempo advice, the smoke watchdog, school accounts), are in `docs/workflow-hi
 Newest first, 5 lines at most each ("About this file"). Older entries: `docs/workflow-history-to-2026-11-18.md`,
 section 3; what is live since 2026-11-17: "Where things stand".
 
+- **2026-11-19 — W29: a site update waits for a private song still downloading (`5a46d4b`; Jonathan: "build it").**
+  `busyReason()` (`app/start.js`) also waits while a card shows "Loading the song…" (`sfWait`) or any private file is in
+  flight (`sfInflight`), 5 minutes at most. update-reload-loop 29 of 29 cases, 361 of 361 checks; break-it: each half
+  removed turns its own line red. Not changed: the redraw's `progressLoadRetryBusy()` (`app/save.js`). `Review: Fast`.
 - **2026-11-19 — WORKFLOW.md cut from 2,076 lines to 400 (Jonathan: "shorter and more concise").** The old text moved
   unchanged to `docs/workflow-history-to-2026-11-18.md` (all 1,855 old non-blank lines are in one of the two files).
   "For Windows" is now the top section (Jonathan: "put it at the top of workflow and also shift work to windows"):
