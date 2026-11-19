@@ -147,6 +147,11 @@ top-tempo advice, the smoke watchdog, school accounts), are in `docs/workflow-hi
 Newest first, 5 lines at most each ("About this file"). Older entries: `docs/workflow-history-to-2026-11-18.md`,
 section 3; what is live since 2026-11-17: "Where things stand".
 
+- **2026-11-19 — The practice copy: why it would not publish, and the fixes (`a5aba48`, `0899b65`).** Its rules now
+  go out through the Admin SDK (the CLI's Service Usage pre-check was refused 403; the IAM roles had landed on the class
+  project's row and were removed again). From 12:38 the pages failed too: HTTP 429, the free plan's Hosting storage
+  was full (about 290 MB a version, many runs that day). Jonathan set "releases to keep" to 3. Never add IAM roles
+  without checking the project name at the top. `Review: Fast`.
 - **2026-11-19 — W29: a site update waits for a private song still downloading (`5a46d4b`; Jonathan: "build it").**
   `busyReason()` (`app/start.js`) also waits while a card shows "Loading the song…" (`sfWait`) or any private file is in
   flight (`sfInflight`), 5 minutes at most. update-reload-loop 29 of 29 cases, 361 of 361 checks; break-it: each half
