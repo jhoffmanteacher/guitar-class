@@ -726,8 +726,22 @@ async function cardViewsWalk(page, run, events, stats, base) {
    under test. A checkout without ca-43 skips it. */
 /* W25 DIAGNOSTIC (ci-try/w25-diag only): reload N times like the line below and record every load that ends
    with a part that never ran, with what the network and the service worker did during it. */
+/* W25: runs in every new document; says on the console when the page moves its history, reloads or stops loading. */
+function w25Hooks() {
+  const say = (n, a) => {
+    try {
+      const at = new Error().stack.split(String.fromCharCode(10)).slice(2, 4).map(x => x.trim().replace(location.origin, "")).join(" < ");
+      console.debug("W25 " + n + " " + JSON.stringify(a).slice(0, 80) + " rs=" + document.readyState + " " + at);
+    } catch (e) { /* never break the page */ }
+  };
+  for (const n of ["go", "back", "forward", "pushState", "replaceState"]) {
+    const o = History.prototype[n];
+    History.prototype[n] = function (...a) { say("history." + n, a); return o.apply(this, a); };
+  }
+  const st = window.stop; window.stop = function () { say("window.stop", []); return st.call(this); };
+}
 async function w25Diag(page, base, n, before) {
-  const w25Start = Date.now(); const size = new Map(); const rid = new Map();
+  const w25Start = Date.now(); const size = new Map(); const rid = new Map(); let tl = [], tl0 = Date.now(); const T = x => tl.push(`${Date.now() - tl0}:${x}`);
   const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
   const probe = [];
   for (const m of html.matchAll(/<script defer src="([^"]+\.js)"><\/script>/g)) {
@@ -738,6 +752,14 @@ async function w25Diag(page, base, n, before) {
   page.on((m, p) => {
     if (m === 'Network.requestWillBeSent') { urls.set(p.requestId, p.request.url.replace(base, '')); rid.set(p.request.url.replace(base, ''), p.requestId); }
     else if (m === 'Network.loadingFinished' && urls.has(p.requestId)) size.set(urls.get(p.requestId), p.encodedDataLength);
+    else if (m === 'Page.frameRequestedNavigation') T(`REQNAV ${p.reason} ${p.disposition} ${String(p.url).replace(base, '')}`);
+    else if (m === 'Page.frameStartedNavigating') T(`STARTNAV ${p.navigationType} ${String(p.url).replace(base, '')}`);
+    else if (m === 'Page.navigatedWithinDocument') T(`SAMEDOC ${p.navigationType || ''} ${String(p.url).replace(base, '')}`);
+    else if (m === 'Page.frameNavigated' && !p.frame.parentId) T(`NAVIGATED ${p.type} ${p.frame.url.replace(base, '')}`);
+    else if (m === 'Page.frameStoppedLoading') T('STOPPED');
+    else if (m === 'Page.domContentEventFired') T('DCL');
+    else if (m === 'Page.loadEventFired') T('LOAD');
+    else if (m === 'Network.loadingFailed' && urls.has(p.requestId) && /.js$/.test(urls.get(p.requestId))) { T(`ABORT ${urls.get(p.requestId)}`); net.push(`FAIL ${urls.get(p.requestId)} ${p.errorText}${p.canceled ? ' canceled' : ''}`); }
     else if (m === 'Network.loadingFailed') net.push(`FAIL ${urls.get(p.requestId)} ${p.errorText}${p.canceled ? ' canceled' : ''}${p.blockedReason ? ' ' + p.blockedReason : ''}`);
     else if (m === 'Network.responseReceived' && /\.js$/.test(p.response.url) && p.response.url.startsWith(base)) {
       if (p.response.fromServiceWorker) js.sw++; else if (p.response.fromDiskCache) js.cache++; else js.net++;
@@ -748,6 +770,8 @@ async function w25Diag(page, base, n, before) {
     else if (m === 'Runtime.exceptionThrown') exc.push((p.exceptionDetails.exception?.description || p.exceptionDetails.text || '').split('\n')[0].slice(0, 120));
   });
   await page.send('Network.enable'); try { await page.send('ServiceWorker.enable'); } catch { /* not on a page target */ }
+  await page.send('Page.addScriptToEvaluateOnNewDocument', { source: `(${w25Hooks.toString()})();` });
+  page.on((m, p) => { if (m === 'Runtime.consoleAPICalled' && p.type === 'debug' && p.args[0] && String(p.args[0].value).startsWith('W25 ')) T(String(p.args[0].value).slice(4, 260)); });
   let bad = 0; const lines = []; const FRESH = !!process.env.W25_FRESH; let swLast = '';
   page.on((m, p) => { if (m === 'ServiceWorker.workerVersionUpdated' && p.versions.length) swLast = p.versions.map(v => `v${v.versionId}:${v.status}/${v.runningStatus}`).join(','); });
   for (let k = 0; k < n; k++) {
@@ -789,7 +813,7 @@ async function w25Diag(page, base, n, before) {
     if (process.env.W25_PLANT) await page.evalJs(`caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('guitar-class-')).map(k => caches.open(k).then(c => c.put('app/builtsongs.js', new Response('', { headers: { 'content-type': 'text/javascript' } })))))).then(() => 1)`).catch(() => 0);
     if (MODE === 1 || MODE === 2) { try { await page.send('ServiceWorker.stopAllWorkers'); } catch { /* none */ } await sleep(300); swAtNav = 'stopped'; }
     if (MODE === 3 || MODE === 4) { await sleep(40000); swAtNav = swLast; gap = 40000; }
-    urls = new Map(); net = []; sw = []; js = { sw: 0, net: 0, cache: 0 }; exc = []; size.clear(); rid.clear();
+    urls = new Map(); net = []; sw = []; js = { sw: 0, net: 0, cache: 0 }; exc = []; size.clear(); rid.clear(); tl = []; tl0 = Date.now(); T('NAVIGATE-CALL');
     mark(`w25: reload ${k + 1} of ${n}`);
     const t0 = Date.now();
     await page.send('Page.navigate', { url: base + '/index.html' });
@@ -805,7 +829,7 @@ async function w25Diag(page, base, n, before) {
         return u + ' sw=' + await one(() => fetch(u)) + ' cache=' + await one(() => caches.match(u)) + ' net=' + await one(() => fetch(u + '?w25=' + Date.now(), { cache: 'no-store' }));
       })).then(a => a.join(' ; '))`).catch(e => 'body probe failed: ' + String(e.message).slice(0, 80));
       net.unshift(`BODY ${body}`, `PAGE GOT ${got.join(' ')}`);
-      lines.push(`smoke: ✗ w25 reload ${k + 1}: ${missing.length} parts never ran (${missing.join(' ')}); loaded=${ok} ${Date.now() - t0}ms gap=${gap} swAtNav=${swAtNav || '-'} controller=${ctrl} js sw/net/disk=${js.sw}/${js.net}/${js.cache}; net: ${net.slice(0, 8).join(' | ') || 'none'}; sw: ${sw.slice(-6).join(' ') || 'none'}; exc: ${exc.slice(0, 3).join(' | ') || 'none'}`);
+      lines.push(`smoke: ✗ w25 reload ${k + 1}: ${missing.length} parts never ran (${missing.join(' ')}); loaded=${ok} ${Date.now() - t0}ms gap=${gap} swAtNav=${swAtNav || '-'} controller=${ctrl} js sw/net/disk=${js.sw}/${js.net}/${js.cache}; net: ${net.slice(0, 8).join(' | ') || 'none'}; sw: ${sw.slice(-6).join(' ') || 'none'}; exc: ${exc.slice(0, 3).join(' | ') || 'none'}`, `smoke: ✗ w25 reload ${k + 1} timeline: ${tl.slice(0, 30).join(' ')}`);
     } else if (k < 3) lines.push(`smoke: w25 reload ${k + 1} clean: gap=${gap} swAtNav=${swAtNav || '-'} controller=${ctrl} js sw/net/disk=${js.sw}/${js.net}/${js.cache}; net: ${net.slice(0, 4).join(' | ') || 'none'}`);
     try { await page.evalJs('devBypass()'); } catch { /* a missing part: the next reload */ }
     await sleep(800);
