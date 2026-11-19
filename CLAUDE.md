@@ -1,6 +1,6 @@
 # Guitar Class Website — Claude Instructions
 
-Operative rules only. History and the *why*: `WORKFLOW.md` ("Moved from CLAUDE.md" sections) (since 2026-11-08 the why is partly in the skills and rules files; WORKFLOW holds the dated decisions).
+Operative rules only. The *why*: `WORKFLOW.md` → "Rationale behind the CLAUDE.md rules" (since 2026-11-08 partly in the skills and rules files too); the history: `docs/workflow-history-*.md`.
 What is open right now: `WORKFLOW.md` → "Where things stand" (top of the file).
 
 ## Start here — the short list (read this even if you read nothing else)
@@ -273,7 +273,7 @@ Open Chords = 4, Pentatonic = 5. Progress moves once per browser (`swap45*`, `ap
   is on (`uiOn: true` since 2026-11-01; the pin is in `tools/pm-sim.mjs`). Its `firestore.rules` blocks must be published BEFORE the code
   that writes them; no daily limit since 2026-11-15 (a sound counts `soundAloneMinutes` after the last input); `dayCeilingMinutes`
   and the rules' `dayCeilingSeconds()` (24 hours, a guard, not a limit) move together (1cg). Entry:
-  `WORKFLOW.md` → "Recently shipped" → the 2026-11-01 "Practice minutes" entry.
+  `docs/workflow-history-to-2026-11-18.md` → "Recently shipped" → the 2026-11-01 "Practice minutes" entry.
 - **Play-along first**: a song link opens its play-along card if one is openable
   (`songsPlayAlongCard()`, at the click), else the Journey page; no per-song retire list (1bn).
   `TAKE_TO_SONG_ENABLED`/`DAILY5_ENABLED` false: switched off, never deleted (1do).
@@ -419,12 +419,12 @@ seems to need `high`, it is not a Sonnet job: give it to Opus.
 
 **Effort**: both reviewers are Fable at `medium` during the week (Jonathan, 2026-11-09, after the test in WORKFLOW); the Friday check's reviewers are Opus at `xhigh` (skill `friday-check`); other agents `high`; never `max`. Session: `medium` routine, `high` bug fixes / JS / keyed-MC, `xhigh` danger-zone and sweeps; a tier above the session → ask for `/effort`. Report real numbers, not the premise; name the prior decision a request reverses.
 
-**"Next steps for Power Chord Switch"** → read the `WORKFLOW.md` section "Power Chord Switch: where we stopped" first (the game is in `coach-chords.js`, its listening in `coach-core.js`; that section says `coach.js`): what shipped 2026-11-03, the room-noise decision (a stricter strum ratio for Power Chord Switch only: 2.2 / 2.67 from 2026-11-05, lowered to 1.8 / 2.19 on 2026-11-07; the strum what-if numbers on the real takes and how to roll it back are recorded there), the pitch readings saved in takes since 2026-11-05 and the console's Pitch-rule table (read 2026-11-07: the pitch rule was rejected; do not build it), and what is settled. The practice-minutes heartbeat removal is finished.
+**"Next steps for Power Chord Switch"** → read the `WORKFLOW.md` section "Power Chord Switch: where we stopped" first (the game is in `coach-chords.js`, its listening in `coach-core.js` and `coach-score.js`): what is live and binding (rule A, 2026-11-18: a strum with no pitch never counts, in four games; the whole-span rule; the strum ratio 1.8 / 2.19 for Power Chord Switch only), each one's roll-back, what was rejected on measurement and what is settled. Its full record (the strum what-if numbers on the real takes, the 2026-11-07 pitch-rule rejection that rule A replaced): `docs/workflow-history-to-2026-11-18.md`, section 5.
 
 **Work for another session → give the blurb the first time** (Jonathan, 2026-11-11: "just give me the blurb the first time"). Whenever your answer means another Claude session has to do, avoid or know something (a fix you advise it to make, code it must leave alone, a merge it must pull), end that same message with the text to paste to it, in a code block, complete enough to act on alone. Do not wait to be asked, and give a new one when the facts change.
 
 New unrelated topic → AskUserQuestion once: fresh chat or continue?
 
 Dated decisions and reasons behind these rules: `WORKFLOW.md` → "Rationale behind the
-CLAUDE.md rules" and "Moved from CLAUDE.md (trim 2)" (cut to the decisions, the reasons and a
-few rules stated only there; not the full old text).
+CLAUDE.md rules" (with the few rules stated only there); the old "Moved from CLAUDE.md" text:
+`docs/workflow-history-to-2026-11-18.md`, section 4.

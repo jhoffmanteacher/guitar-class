@@ -160,8 +160,8 @@ Three of the four parts that were over 2,000 lines were split on 2026-11-16 (`te
 
 ## The clean-ups after the cut (Phase 2; not started)
 
-The cut of `app.js`, `coach.js` and `teacher.js` into parts went live 2026-11-11 (`WORKFLOW.md` → "Recently
-shipped" → 2026-11-11; CLAUDE.md → "Where the code lives"). What was planned next and never started, each one
+The cut of `app.js`, `coach.js` and `teacher.js` into parts went live 2026-11-11 (`docs/workflow-history-to-2026-11-18.md` →
+"Recently shipped" → 2026-11-11; CLAUDE.md → "Where the code lives"). What was planned next and never started, each one
 commit, each proved with a golden snapshot before and after:
 
 - 2a declarations next to their feature, and the switched-off code in one labelled file;
