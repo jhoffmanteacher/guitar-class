@@ -14,22 +14,29 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
 - Push the work itself as a `win/wNN` branch; the Mac or Jonathan merges it. Agents on Opus this week ("This week
   only", below). Reports as CLAUDE.md says: short, counts with denominators, details in one file.
 
-- [ ] **W25 — the activities smoke on GitHub: a page where some app parts never ran (not urgent).**
-  The Note Call walk (`noteCallWalk` in `tools/smoke.mjs`) reloads the page (`Page.navigate`, 3.5 s, then
-  `pageLoaded()`: `readyState` complete) and sometimes finds a different set of parts never ran: in 3 of the last 42
-  activities walks on main (`11ff03f`, `f9bc655`, `9cb56dd`, 2026-11-17 to 19) and once before (`a0f4047`),
-  e.g. `snipStop`, `isBuiltSongId`, `populateModuleDropdown` not defined; `pcStop`, `pcKeydown`; `NC_LEVELS`,
-  `openClassActivitiesScreen`. The Mac's runs are clean; the 2026-11-02 Mac flake (`chordDiagramSVG`, `NOTES` not
-  defined after the Power Chord walk's reload) looks the same. Each run's page shows its error list without signing
-  in, e.g. https://github.com/jhoffmanteacher/guitar-class/actions/runs/44483184053.
-  First decide: can the SITE end a load with parts missing (a part's fetch failing, maybe through the service worker:
-  a slow Chromebook would meet that too), or is it only the harness? Ideas: log every failed request and what the
-  service worker answered in that walk (the smoke's `NOISE` filter hides `net::ERR` lines), slow the CPU
-  (`Emulation.setCPUThrottlingRate`), repeat the walk 50+ times; a `ci-try/w25-<x>` branch runs it on GitHub. A fix
-  in the site's load path (`sw.js` code, load order, `app/boot.js`, `app/start.js`) is Always Reviewed and runs
-  `slow-load.mjs` and `update-reload-loop.mjs`; a harness-only fix ships Fast with its break-it proof. Report: the
-  cause, and N of M walks failing before and after.
+- [ ] **W25 — the activities smoke on GitHub: a page where some app parts never ran (not urgent).** The Note Call
+  walk (`noteCallWalk`, `tools/smoke.mjs`) reloads (`Page.navigate`, 3.5 s, `pageLoaded()`: `readyState` complete)
+  and in 3 of the last 42 activities walks on main (`11ff03f`, `f9bc655`, `9cb56dd`; also `a0f4047`) found a
+  different set of parts never ran (`snipStop`, `isBuiltSongId`, `pcStop`, `NC_LEVELS` … not defined). The Mac's
+  runs are clean; its 2026-11-02 flake (`chordDiagramSVG` not defined after a reload) looks the same. Each run's page
+  shows the error list without signing in, e.g. https://github.com/jhoffmanteacher/guitar-class/actions/runs/44483184053.
+  First decide: can the SITE end a load with parts missing (a part's fetch failing, maybe through the service worker,
+  which a slow Chromebook would meet too), or only the harness? Ideas: log every failed request and the service
+  worker's answers in that walk (the smoke's `NOISE` filter hides `net::ERR`), slow the CPU
+  (`Emulation.setCPUThrottlingRate`), repeat the walk 50+ times, a `ci-try/w25-<x>` branch for GitHub. A fix in the
+  load path (`sw.js` code, load order, `app/boot.js`, `app/start.js`) is Always Reviewed with `slow-load.mjs` and
+  `update-reload-loop.mjs`; a harness-only fix ships Fast with its break-it proof. Report the cause and N of M walks
+  failing before and after.
   Windows: started 09:23 (2026-11-19).
+- [ ] **W29 — the update reload waits for a private song still downloading (Jonathan, 2026-11-19: "build it").** Next
+  after W25 (started 09:23). `todo.md` → "Small things" → the first item: `busyReason()` (the service-worker block in
+  `app/start.js`) knows a card playing (`pcState`) but not one showing "Loading the song… 40%", so an update landing
+  mid-download reloads the page, the download is lost and the song counts against the month again. Make `busyReason()`
+  return a reason while a card waits for its song (`sfWait`, `app/songfiles.js`, an earlier part), still bounded by
+  `SW_RELOAD_MAX_WAIT`. Prove it in `tools/update-reload-loop.mjs` (a new case: an update during a private song's
+  download waits, then reloads once the song plays; break-it: without the line it reloads mid-download) and run the
+  whole loop (29 cases today) plus `node tools/kill-switch/proof.mjs`. Fast (no `sw.js` code), with a CHANGELOG line;
+  delete the todo.md item in the same push.
 - [ ] **W26 — on or after 2026-11-26: is the accessibility scan ready for its ratchet?** Read GitHub's "a11y scan"
   job on every push to main from 2026-11-19 on: its annotation "a11y: against the baseline: N new signatures, M gone"
   is on each run's page without signing in (the public API allows 60 reads an hour; the run pages are not limited).
@@ -145,14 +152,13 @@ top-tempo advice, the smoke watchdog, school accounts), are in `docs/workflow-hi
 
 ## Recently shipped
 
-Newest first, 5 lines at most each (see the top of this file). Entries up to 2026-11-18:
-`docs/workflow-history-to-2026-11-18.md`, section 3; the list of what is live since 2026-11-17 is in "Where things
-stand".
+Newest first, 5 lines at most each ("About this file"). Older entries: `docs/workflow-history-to-2026-11-18.md`,
+section 3; what is live since 2026-11-17: "Where things stand".
 
 - **2026-11-19 — WORKFLOW.md cut from 2,076 lines to 400 (Jonathan: "shorter and more concise").** The old text moved
   unchanged to `docs/workflow-history-to-2026-11-18.md` (all 1,855 old non-blank lines are in one of the two files).
   "For Windows" is now the top section (Jonathan: "put it at the top of workflow and also shift work to windows"):
-  no more idle commits, W25 to W28. GitHub's browser jobs try Chrome's install twice. `Review: Fast`.
+  no more idle commits, W25 to W29. GitHub's browser jobs try Chrome's install twice. `Review: Fast`.
 
 ---
 
@@ -311,29 +317,24 @@ Skill `session-handoff` (web pushes; Cowork ships a patch pair as one zip).
 ### Rules that were stated only in the old "Moved from CLAUDE.md" text
 
 The full text: `docs/workflow-history-to-2026-11-18.md`, section 4.
-- **Quiz giveaway allowlists:** the entries for Modules 1–6 are carried on purpose. When a module is swept, delete
-  its entries first and let the check say what is left. 1av cannot see a card that prints a whole lookup table
-  ("Am fret 5 … Dm fret 10"): read those by eye.
-- **A ratchet** prefers a list of allowed words over banned ones when the banned word has an innocent twin (1w2 pins
-  the Journey lick labels because "the reach" and "the climb" are fine elsewhere). 1w catches only retired phrases:
-  site terms like "two homes" and the metronome ladder's "top of the ladder" are teaching devices, not idioms.
+- **Quiz giveaway allowlists** (Modules 1–6) are carried on purpose: sweeping a module, delete its entries first and
+  let the check say what is left. 1av misses a card that prints a whole lookup table: read those by eye.
+- **A ratchet** lists allowed words, not banned ones, when a banned word has an innocent twin (1w2). Site terms like
+  "two homes" and "top of the ladder" are teaching devices, not idioms; 1w catches only retired phrases.
 - **To raise `FROZEN_MC_THROUGH_MODULE`,** ask Jonathan which module the class is in.
 - **`moduleOpenThrough` is per module number:** a student set to 4 before the 2026-10-12 swap now has Open Chords
   open; set them to 5 if Pentatonic should be open.
 - **Until a `firestore.rules` change is pasted,** the writes it allows are refused and the feature looks broken with
   no error a student sees.
-- **The Daily 5:** `DAILY5_ENABLED = false` is the whole switch and nothing was deleted; `WARMUP_BANK` in
-  `config-main.js` stays though nothing on screen reads it.
-- **`merge=union` in `.gitattributes`** was tried for the two log files and rejected (it puts the later entry under
-  the earlier, drops the blank line between entries and keeps both versions of a line two sessions edited). No other
-  file joins the keep-both rule.
+- **The Daily 5:** `DAILY5_ENABLED = false` is the whole switch; `WARMUP_BANK` stays though nothing reads it.
+- **`merge=union`** was tried for the two log files and rejected (it misorders entries and keeps both versions of a
+  line two sessions edited). No other file joins the keep-both rule.
 - **The smoke in a cloud container running as root:** point `--chrome` at a two-line wrapper
   (`exec <chrome> --no-sandbox "$@"`), never change the tool.
 - **Pushing to `main` is not a pause point** (2026-08-28): never offer "push the branch instead" as a coin flip.
 - **A sweep's brief opens with the calibration line** ("convert EVERY card; do NOT skip one because the actions flow
   naturally — re-stitch it"), or the agents go timid.
-- **Live preview:** VS Code Live Server (right-click `index.html`); the dev bypass on the sign-in wall loads a mock
-  user whose progress does not save.
+- **Live preview:** VS Code Live Server; the sign-in wall's dev bypass loads a mock user whose progress never saves.
 
 ---
 
@@ -396,5 +397,4 @@ anywhere in the repo to a WORKFLOW.md heading that is not in this file resolves 
 - Older: `git show c751db8:archive/<file>` (`WORKFLOW-2026-buildout.md`, `WORKFLOW-2026-july-fixits.md`,
   `WORKFLOW-2026-research-upgrades-era.md`, `REVIEW-PLAN.md`, `PLAN-COMPACT-CHECKLIST.md`, `PLAN-COMPACT-JOURNEY.md`).
 
-Status: [ ] open · [~] in progress. Dates are the Pacific date; `CACHE_VERSION` and commit times may show the UTC
-date, one day later in the evening.
+Status: [ ] open · [~] in progress. Dates are Pacific (`CACHE_VERSION` and commit times may show the UTC date).
