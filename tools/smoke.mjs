@@ -746,8 +746,20 @@ async function w25Diag(page, base, n) {
     else if (m === 'Runtime.exceptionThrown') exc.push((p.exceptionDetails.exception?.description || p.exceptionDetails.text || '').split('\n')[0].slice(0, 120));
   });
   await page.send('Network.enable'); try { await page.send('ServiceWorker.enable'); } catch { /* not on a page target */ }
-  let bad = 0; const lines = [];
+  let bad = 0; const lines = []; const FRESH = !!process.env.W25_FRESH; let swLast = '';
+  page.on((m, p) => { if (m === 'ServiceWorker.workerVersionUpdated' && p.versions.length) swLast = p.versions.map(v => `v${v.versionId}:${v.status}/${v.runningStatus}`).join(','); });
   for (let k = 0; k < n; k++) {
+    let gap = 0, swAtNav = '';
+    if (FRESH) {
+      // A first visit every time: no worker, no caches, no storage; boot like walk() does, wait, then the first reload.
+      mark(`w25: fresh boot ${k + 1} of ${n}`);
+      await page.send('Page.navigate', { url: 'about:blank' }); await sleep(500);
+      await page.send('Storage.clearDataForOrigin', { origin: base, storageTypes: 'all' }); await sleep(1000);
+      await page.send('Page.navigate', { url: base + '/index.html' }); await sleep(4000); await pageLoaded(page);
+      try { await page.evalJs('devBypass()'); } catch { /* reported below if a part is missing */ }
+      gap = (k % 5) * 5000; await sleep(3500 + gap);
+      swAtNav = swLast;
+    }
     urls = new Map(); net = []; sw = []; js = { sw: 0, net: 0, cache: 0 }; exc = [];
     mark(`w25: reload ${k + 1} of ${n}`);
     const t0 = Date.now();
@@ -757,8 +769,8 @@ async function w25Diag(page, base, n) {
     const ctrl = await page.evalJs(`navigator.serviceWorker.controller ? navigator.serviceWorker.controller.state : 'none'`).catch(() => '?');
     if (missing.length) {
       bad++;
-      lines.push(`smoke: ✗ w25 reload ${k + 1}: ${missing.length} parts never ran (${missing.join(' ')}); loaded=${ok} ${Date.now() - t0}ms controller=${ctrl} js sw/net/disk=${js.sw}/${js.net}/${js.cache}; net: ${net.slice(0, 8).join(' | ') || 'none'}; sw: ${sw.slice(-6).join(' ') || 'none'}; exc: ${exc.slice(0, 3).join(' | ') || 'none'}`);
-    } else if (k < 2) lines.push(`smoke: w25 reload ${k + 1} clean: controller=${ctrl} js sw/net/disk=${js.sw}/${js.net}/${js.cache}; net: ${net.slice(0, 4).join(' | ') || 'none'}`);
+      lines.push(`smoke: ✗ w25 reload ${k + 1}: ${missing.length} parts never ran (${missing.join(' ')}); loaded=${ok} ${Date.now() - t0}ms gap=${gap} swAtNav=${swAtNav || '-'} controller=${ctrl} js sw/net/disk=${js.sw}/${js.net}/${js.cache}; net: ${net.slice(0, 8).join(' | ') || 'none'}; sw: ${sw.slice(-6).join(' ') || 'none'}; exc: ${exc.slice(0, 3).join(' | ') || 'none'}`);
+    } else if (k < 3) lines.push(`smoke: w25 reload ${k + 1} clean: gap=${gap} swAtNav=${swAtNav || '-'} controller=${ctrl} js sw/net/disk=${js.sw}/${js.net}/${js.cache}; net: ${net.slice(0, 4).join(' | ') || 'none'}`);
     try { await page.evalJs('devBypass()'); } catch { /* a missing part: the next reload */ }
     await sleep(800);
   }
