@@ -741,7 +741,7 @@ function w25Hooks() {
   const st = window.stop; window.stop = function () { say("window.stop", []); return st.call(this); };
 }
 async function w25Diag(page, base, n, before) {
-  const w25Start = Date.now(); const size = new Map(); const rid = new Map(); let tl = [], tl0 = Date.now(); const T = x => tl.push(`${Date.now() - tl0}:${x}`);
+  const w25Start = Date.now(); const size = new Map(); const rid = new Map(); let tl = [], tl0 = Date.now(); const swHist = []; const T = x => tl.push(`${Date.now() - tl0}:${x}`);
   const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
   const probe = [];
   for (const m of html.matchAll(/<script defer src="([^"]+\.js)"><\/script>/g)) {
@@ -765,7 +765,7 @@ async function w25Diag(page, base, n, before) {
       if (p.response.fromServiceWorker) js.sw++; else if (p.response.fromDiskCache) js.cache++; else js.net++;
       if (p.response.status !== 200) net.push(`STATUS ${p.response.url.replace(base, '')} ${p.response.status} sw=${!!p.response.fromServiceWorker}`);
     }
-    else if (m === 'ServiceWorker.workerVersionUpdated') for (const v of p.versions) sw.push(`v${v.versionId}:${v.status}/${v.runningStatus}`);
+    else if (m === 'ServiceWorker.workerVersionUpdated') for (const v of p.versions) { sw.push(`v${v.versionId}:${v.status}/${v.runningStatus}`); T(`SW v${v.versionId} ${v.status}/${v.runningStatus}`); }
     else if (m === 'ServiceWorker.workerErrorReported') sw.push('ERR ' + p.errorMessage.errorMessage);
     else if (m === 'Runtime.exceptionThrown') exc.push((p.exceptionDetails.exception?.description || p.exceptionDetails.text || '').split('\n')[0].slice(0, 120));
   });
@@ -773,6 +773,7 @@ async function w25Diag(page, base, n, before) {
   await page.send('Page.addScriptToEvaluateOnNewDocument', { source: `(${w25Hooks.toString()})();` });
   page.on((m, p) => { if (m === 'Runtime.consoleAPICalled' && p.type === 'debug' && p.args[0] && String(p.args[0].value).startsWith('W25 ')) T(String(p.args[0].value).slice(4, 260)); });
   let bad = 0; const lines = []; const FRESH = !!process.env.W25_FRESH; let swLast = '';
+  page.on((m, p) => { if (m === 'ServiceWorker.workerVersionUpdated') for (const v of p.versions) swHist.push({ t: Date.now(), s: `SW v${v.versionId} ${v.status}/${v.runningStatus}` }); });
   page.on((m, p) => { if (m === 'ServiceWorker.workerVersionUpdated' && p.versions.length) swLast = p.versions.map(v => `v${v.versionId}:${v.status}/${v.runningStatus}`).join(','); });
   for (let k = 0; k < n; k++) {
     let gap = 0, swAtNav = '';
@@ -813,7 +814,7 @@ async function w25Diag(page, base, n, before) {
     if (process.env.W25_PLANT) await page.evalJs(`caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('guitar-class-')).map(k => caches.open(k).then(c => c.put('app/builtsongs.js', new Response('', { headers: { 'content-type': 'text/javascript' } })))))).then(() => 1)`).catch(() => 0);
     if (MODE === 1 || MODE === 2) { try { await page.send('ServiceWorker.stopAllWorkers'); } catch { /* none */ } await sleep(300); swAtNav = 'stopped'; }
     if (MODE === 3 || MODE === 4) { await sleep(40000); swAtNav = swLast; gap = 40000; }
-    urls = new Map(); net = []; sw = []; js = { sw: 0, net: 0, cache: 0 }; exc = []; size.clear(); rid.clear(); tl = []; tl0 = Date.now(); T('NAVIGATE-CALL');
+    urls = new Map(); net = []; sw = []; js = { sw: 0, net: 0, cache: 0 }; exc = []; size.clear(); rid.clear(); const pre = swHist.filter(x => Date.now() - x.t < 40000).map(x => `${x.t - Date.now()}:${x.s}`); tl = pre.slice(-6); tl0 = Date.now(); T('NAVIGATE-CALL');
     mark(`w25: reload ${k + 1} of ${n}`);
     const t0 = Date.now();
     await page.send('Page.navigate', { url: base + '/index.html' });
