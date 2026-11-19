@@ -144,12 +144,13 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 50
     concurrency:
-      group: browser-smoke-${{ github.ref }}-${{ matrix.area }}
+      group: browser-smoke-${{ github.ref }}-${{ matrix.area }}-${{ matrix.rep }}
       cancel-in-progress: true
     strategy:
       fail-fast: false
       matrix:
-        area: [sets, games, activities, practice-minutes, tuning-sim]
+        area: [activities]
+        rep: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -188,13 +189,14 @@ jobs:
         env:
           CHROME: ${{ steps.chrome.outputs.chrome-path || steps.chrome2.outputs.chrome-path }}
           AREA: ${{ matrix.area }}
+          W25_REPEAT: '60'
         run: |
-          node tools/ci/run-and-annotate.mjs --title "smoke $AREA" --log "$RUNNER_TEMP/ci-out/smoke-$AREA.log" --summary '^smoke: (✓|✗|[0-9]+ sets)' --deadline 45 -- node tools/smoke.mjs --en-only --only "$AREA"
+          node tools/ci/run-and-annotate.mjs --title "smoke $AREA" --log "$RUNNER_TEMP/ci-out/smoke-$AREA.log" --summary '^smoke: (✓|✗|[0-9]+ sets|w25)' --deadline 45 -- node tools/smoke.mjs --en-only --only "$AREA"
       - name: Keep the output
         if: ${{ failure() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: smoke-${{ matrix.area }}
+          name: smoke-${{ matrix.area }}-${{ matrix.rep }}
           path: ${{ runner.temp }}/ci-out/
           if-no-files-found: warn
           retention-days: 14
@@ -256,7 +258,7 @@ jobs:
   # print no "would fail" line; the planned 2026-11-27 depends on that week.
   a11y:
     name: a11y scan (English, report-only)
-    if: ${{ github.event_name != 'schedule' && !(github.event_name == 'workflow_dispatch' && inputs.full) }}
+    if: ${{ false }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     concurrency:
@@ -312,7 +314,7 @@ jobs:
   slow-load:
     name: slow-load
     needs: changes
-    if: ${{ needs.changes.outputs.slow_load == 'true' }}
+    if: ${{ false }}
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     concurrency:
@@ -365,7 +367,7 @@ jobs:
   update-reload:
     name: update-reload-loop
     needs: changes
-    if: ${{ needs.changes.outputs.update_reload == 'true' }}
+    if: ${{ false }}
     runs-on: ubuntu-24.04
     timeout-minutes: 100
     concurrency:
@@ -425,7 +427,7 @@ jobs:
   playalong:
     name: playalong-loop
     needs: changes
-    if: ${{ needs.changes.outputs.playalong == 'true' }}
+    if: ${{ false }}
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     concurrency:
