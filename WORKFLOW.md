@@ -45,6 +45,7 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
   `A11Y_RATCHET` in `tools/smoke.mjs` is Jonathan's call (planned 2026-11-27), then one `site-reviewer` round.
   **Windows: SCHEDULE** for 2026-11-26 at 7:00 AM Pacific, model `claude-sonnet-5-5` (reading and counting only;
   the public pages need no sign-in and no browser).
+  Windows: scheduled https://claude.ai/code/routines/trig_011u2gbkdE7fC3GsUzfnLyYh for 2026-11-26 7:00 AM Pacific.
 - [ ] **W27 — on or after 2026-12-01: remove the split bridges.** The spec is `todo.md` → "Remove the 2026-11-16
   and 2026-11-18 split bridges" (`grep -n "DELIBERATE BRIDGE" coach-*.js` finds 6; keep the two `typeof` guards it
   names). One commit. It touches load order: Always Reviewed (`site-reviewer`, Opus at high this week), with a golden
