@@ -3665,7 +3665,7 @@ body.ca-full:has(#class-activities-screen:not([hidden])) .app-layout .main{zoom:
 .strum-board{display:flex;flex-direction:column;gap:10px;margin-top:4px}
 .strum-row{display:grid;grid-template-columns:repeat(var(--strum-cols),minmax(0,1fr));border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden}
 .strum-cell{min-width:0;display:flex;flex-direction:column;align-items:center;padding:4px 0 6px;border-left:1px solid transparent}
-.strum-cell--bar{border-left-color:var(--border)}
+.strum-cell--bar{border-left:2px solid var(--text3)}   /* the line between measures: darker since 2026-11-19 (Jonathan: too light to see) */
 .strum-cell--bar:first-child{border-left-color:transparent}
 .strum-chord{height:1.4em;line-height:1.4;font-weight:700;font-size:1rem;color:var(--blue-text);align-self:flex-start;padding-left:6px;white-space:nowrap;position:relative;z-index:1}
 /* (z-index: a chord name wider than its cell runs into the next one, whose sc-bad / sc-now / beat-now background must not cover it) */

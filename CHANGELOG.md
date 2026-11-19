@@ -13,6 +13,12 @@ see `WORKFLOW.md` and the git commit log.
   beat while the dot went hollow halfway through, so the two never looked like one flash.
 
 
+## 2026-11-19 — Strum patterns: a clearer line between measures
+
+- **The line between two measures in a strum pattern is darker and a little thicker**, so you can see where one
+  measure ends and the next begins.
+
+
 ## 2026-11-19 — Games: the notes heading
 
 - **The Games page's notes group is now called "Notes on the fretboard".** It said "Notes on the low E and A strings",

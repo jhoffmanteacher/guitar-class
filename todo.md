@@ -39,8 +39,9 @@ strict mode (C17). They come back only if he raises one himself.
 
 Jonathan, 2026-11-17: "next week i want to look at re-design visually"; 2026-11-19: "start redesign". Pictures only:
 two looks on three screens (a lesson, an In-Class Activity, the Songs page) at 1366x657, English and Spanish, no site
-change, in `Claude outputs/redesign-2026-11/`; he picks, changes or drops. The design-values tidy (W15, on hold) is
-built only if he picks a look.
+change, in `Claude outputs/redesign-2026-11/`; he picks, changes or drops. **He picked Look A, "Tidy plum"
+(2026-11-19)**: today's plum and fonts, tidied (`look-a.css`, `DETAILS.md` in that folder). Next: build it into the
+site with the design-values tidy (W15).
 
 ## Beat maps: make every Play Along song light the same amount before the beat
 

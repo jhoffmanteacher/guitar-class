@@ -73,7 +73,7 @@ Update this block whenever an item opens or closes.
   ACCEPTED; no "goal reached" toast on a Journey page is LEFT as it is. Do not raise the last two again.
 - The old-page tool (W22) stays parked on `origin/win/w22` (round 4 found a MAJOR) until a part split needs it.
 - The visual re-design look STARTED 2026-11-19 (Jonathan: "start redesign"): pictures only, two looks on three screens,
-  in `Claude outputs/redesign-2026-11/`; W15 waits on his pick.
+  in `Claude outputs/redesign-2026-11/`. He picked Look A, "Tidy plum" (2026-11-19); next: build it (with W15).
 
 **Dated:**
 - 2026-11-27 (planned, Jonathan's call): switch on the accessibility scan's ratchet after a week of 0 new signatures
