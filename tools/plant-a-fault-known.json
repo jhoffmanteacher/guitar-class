@@ -314,11 +314,11 @@
    "date": "2026-11-14"
   },
   {
-   "id": "f13f7973b1",
+   "id": "85c6594763",
    "region": "listening",
-   "file": "coach-core.js",
+   "file": "coach-score.js",
    "where": "coachScoreTiming()",
-   "line": 2257,
+   "line": 301,
    "before": "if (devs.length < 3) return { name, icon, soft: true, level: 0, sentence: t('coach.crit.timing.notEnough') };",
    "after": "if (devs.length < 3) return { name, icon, soft: false, level: 0, sentence: t('coach.crit.timing.notEnough') };",
    "class": "harmless",
@@ -326,11 +326,11 @@
    "date": "2026-11-14"
   },
   {
-   "id": "74f50b402a",
+   "id": "779b36ec9f",
    "region": "listening",
-   "file": "coach-core.js",
+   "file": "coach-score.js",
    "where": "coachScoreChanges()",
-   "line": 2346,
+   "line": 390,
    "before": "return { name, icon, soft: true, level: 0, sentence: t('coach.crit.changes.notApplicable') };",
    "after": "return { name, icon, soft: false, level: 0, sentence: t('coach.crit.changes.notApplicable') };",
    "class": "harmless",

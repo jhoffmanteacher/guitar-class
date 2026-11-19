@@ -116,7 +116,9 @@ Three of the four parts that were over 2,000 lines were split on 2026-11-16 (`te
 `coach-runner.js`, `coach-chords.js`). Left:
 
 - **`coach-core.js`: split 2026-11-18 (Jonathan present): the mic-recordings section (`micRec*`) moved whole into
-  `coach-recordings.js`, loaded right after it; `coach-core.js` 2,554 → 2,213 lines.** The notes below are how it was done.
+  `coach-recordings.js`, loaded right after it; `coach-core.js` 2,554 → 2,213 lines. Split again the same day (Jonathan
+  approved): the "Finish & score" section (`coachFinish`, `coachMicOff`, the report and its five criteria) moved whole
+  into `coach-score.js`, loaded right after `coach-core.js`.** The notes below are how it was done.
 - *(done)* **`coach-core.js`: 2,554 lines on 2026-11-16, 46 under the 2,600 limit that blocks a push (`checks.mjs` 1cv).**
   Only with Jonathan present: it is the listening code. Mic recordings (`micRec*`) are the obvious section to move;
   the detectors, `coachDetectPitch` and every line `tools/mic-sim/` reads stay put. Until then add nothing to it.
@@ -126,8 +128,9 @@ Three of the four parts that were over 2,000 lines were split on 2026-11-16 (`te
   and the three mic-sim commands in `CLAUDE.md`. It touches load order: Always Reviewed. Check `tools/mic-sim/`
   and `checks.mjs` for text they pin in the section before moving it.
 - **Remove the 2026-11-16 and 2026-11-18 split bridges on or after 2026-12-01** (the 2026-11-18 one is the block at the end
-  of `coach-core.js` that loads `coach-recordings.js` for an old page; keep the `typeof micRecAbort` guard in
-  `coachMicOff()` even after the bridge goes: coach-core.js can run before coach-recordings.js loads). A page opened
+  of `coach-core.js` that loads `coach-score.js` and `coach-recordings.js` for an old page; keep the `typeof micRecAbort`
+  guard in `coachMicOff()` (`coach-score.js`) and the `typeof coachMicOff` guard in `coachClose()` even after the bridge
+  goes: coach-core.js can run before the later parts load). A page opened
   before the two coach splits keeps the old 8-name `COACH_JS_PARTS` and never asks for `coach-chordcards.js` or
   `coach-noterunner.js`. The bridge: the 15-line block at the end of `coach-chords.js` and of `coach-runner.js`,
   and the `typeof` guards kept as a second net (`cbStop` / `nrStop` / `cdStop` in `gamesStopMic`; the Chord Blitz,

@@ -1718,7 +1718,7 @@
       es: '{good} de {total} notas correctas ({octs} salieron una octava fuera, lo cual todavía cuenta).' },
     'coach.crit.pitch.dimChords': { en: 'I heard the strums but not the notes clearly. This round I mostly scored your timing, so read the beat feedback.',
       es: 'Escuché los rasgueos, pero no las notas con claridad. Esta vez califiqué sobre todo tu ritmo, así que lee la retroalimentación del tiempo.' },
-    // coach-core.js coachScorePitch, chords: most strums unclear and none right (rule A, 2026-11-18): the chord sound earns nothing this round.
+    // coach-score.js coachScorePitch, chords: most strums unclear and none right (rule A, 2026-11-18): the chord sound earns nothing this round.
     'coach.crit.pitch.dimChordsNone': { en: 'I heard the strums but no clear chord notes, so the chord sound gets no credit this round. Strum firmly, with the guitar close to the mic.',
       es: 'Escuché los rasgueos, pero no notas claras del acorde, así que esta vez el sonido del acorde no suma. Rasguea con firmeza, con la guitarra cerca del micrófono.' },
     'coach.crit.pitch.greatChords': { en: 'The chord tones sounded correct on {good} of {total} beats.',

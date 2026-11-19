@@ -3,14 +3,14 @@
    the one-time question, the capture, the local-recording mode and the save
    to micTakes. Split off coach-core.js on 2026-11-18 (Jonathan, with him:
    coach-core.js had reached 2,554 of the 2,600 lines checks.mjs 1cv allows),
-   moved whole and unchanged; loaded right after coach-core.js
+   moved whole and unchanged; loaded after coach-core.js and coach-score.js
    (COACH_JS_PARTS in app/boot.js). Nothing here is detection or grading:
-   the detectors, the scoring criteria and every line tools/mic-sim pins stay
-   in coach-core.js. Every caller is in coach-core.js or a later part and
+   the detectors stay in coach-core.js, the scoring criteria are in
+   coach-score.js. Every caller is in coach-core.js or a later part and
    runs after load, except three typeof-guarded ones that can run before
    this part has loaded (or after it failed to): coachMicOff()'s teardown call
-   (reached by coachClose / coachStopAll) and coachFootText() in coach-core.js,
-   and micRecFootSync() in app/save.js.
+   (coach-score.js since 2026-11-18; reached by coachClose / coachStopAll),
+   coachFootText() in coach-core.js, and micRecFootSync() in app/save.js.
    ════════════════════════════════════════════════════════════════════ */
 /* ══════════ Consented mic recordings (2026-10-08) ══════════
    Real classroom audio to tune the listening on. The Coach footer promises
