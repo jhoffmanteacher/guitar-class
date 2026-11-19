@@ -1618,6 +1618,30 @@ function pwnQuit(key){
 function pwnStopAll(){
   Object.keys(powerNames).forEach(k => { if(powerNames[k].phase === 'play') pwnQuit(k); });
 }
+/* Full screen (the projector): a click on empty screen brings up the next card
+   (Jonathan, 2026-11-19). An answered card moves on as Next does; an unanswered
+   one is swapped for a new random card and counts for nothing. Clicks on a
+   button, link, field or the board's tap spots keep their own job. */
+function pwnSkip(key){
+  const st = powerNames[key];
+  if(!st || st.phase !== 'play') return;
+  if(st.locked){ pwnNext(key); return; }
+  const cur = st.cards[st.idx];
+  const fresh = pwnDeal(st.cfg, 4).find(c => c.note !== cur.note);
+  if(!fresh) return;
+  st.cards[st.idx] = fresh;
+  pwnRepaint(key, pwnPlayHtml(key));
+  pwnShowCard(st);
+}
+document.addEventListener('click', ev => {
+  if(!document.fullscreenElement) return;
+  const tgt = ev.target;
+  if(!tgt || !tgt.closest) return;
+  const own = tgt.closest('button,a,input,select,textarea,label,summary,[role="button"],[onclick]');
+  if(own && !own.classList.contains('pwnr')) return;
+  const key = Object.keys(powerNames).find(k => powerNames[k].phase === 'play' && pwnBox(k) && pwnBox(k).offsetParent);
+  if(key) pwnSkip(key);
+});
 
 /* ── "Keep it sharp" spaced-review card ──
    Up to 3 skills marked "I've got it!" (that have a practice panel), oldest

@@ -6,6 +6,18 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-19 — Live quizzes show the top 3 scores
+
+- **Every live quiz now shows only the top 3 scores**: on the projector after each question and at the end, and on
+  your own screen at the end (your own place and points still show there too).
+
+
+## 2026-11-19 — Name the power chord: click the screen for the next card
+
+- **In full screen, a click anywhere on the screen brings up the next power chord card.** If the card was already
+  answered it moves on as Next does; if not, a new random chord shape takes its place and nothing is scored.
+  Buttons and the fretboard's tap spots still do their own job.
+
 ## 2026-11-19 — Lyric sheets: the count box blinks with the dot
 
 - **Play Along lyric sheets (Sweet Child O' Mine, "the cure", All Along the Watchtower): the "This bar" count box

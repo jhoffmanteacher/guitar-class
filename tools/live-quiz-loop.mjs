@@ -164,7 +164,7 @@
        lobby shows the title, the join line, the count and the players' names sorted by name. The control strip
        during a question shows Reveal (fret / Name) or the six plain choice names (mc), End game, Full screen and
        the hint, nothing else. At Reveal the stage names the answer (a positive control so the matcher is not blind)
-       and its leaderboard (top 5; top 10 at the end) is the points order, ties by name. One tag parser reads every
+       and its leaderboard (top 3, at each Reveal and at the end) is the points order, ties by name. One tag parser reads every
        attribute in all four forms (name="v", name='v', name=v, bare). Before Reveal: the stage carries no attribute
        outside STAGE_Q_ATTRS and its elements come in today's count and order (STAGE_Q_SEQ); the strip no attribute
        outside STRIP_Q_ATTRS; a student's screen, outside the answer buttons, no attribute outside STUDENT_Q_ATTRS (all
@@ -214,11 +214,11 @@
    T   (2026-11-13, rule file) The Questions box before Start is the game's length: 10 on a device that never set it,
        blank = no set number, written as totalQ and unchanged for the whole game. Labels read "Question n of total".
        After the last question's Reveal the strip offers "Final scores" and no next question.
-   H   (2026-11-13, Jonathan: a "hide names" switch for the Top 5 on the projector, OFF by default) The strip carries a
+   H   (2026-11-13, Jonathan: a "hide names" switch for the Top 3 on the projector, OFF by default) The strip carries a
        "Hide names on the projector" box in every state, unticked on a device that never set it. Ticked on a console,
        that console's stage holds no player's name and no uid anywhere in its HTML, in every state, from the paint right
-       after the click on: the lobby shows the title, the join line and the count only; a Reveal's top 5 and the final
-       top 10 are rows of place and "N points" in the rules' order. Unticked, the stage is today's (every R11 check
+       after the click on: the lobby shows the title, the join line and the count only; a Reveal's top 3 and the final
+       top 3 are rows of place and "N points" in the rules' order. Unticked, the stage is today's (every R11 check
        above). The box is the console's own (tab.hideNames is the tool's record of the clicks); the hide-names-* cases
        click it in the lobby, during a question, at a Reveal and on the final scores.
    COVERAGE: a full run (no --case) fails when any rule above was exercised 0 times; the counts print every run.
@@ -1501,10 +1501,10 @@ class World {
       const want = this.model.stageAnswer(view.qIndex);
       this.cover('R11reveal');
       this.check('R11 reveal names the answer', want != null && ans && unesc(ans[1]) === want, () => `question ${view.qIndex + 1}: the Reveal stage's answer line reads ${ans ? JSON.stringify(unesc(ans[1])) : 'nothing'}, want ${JSON.stringify(want)}`);
-      this.checkBoard(html, 5, `question ${view.qIndex + 1}'s Reveal stage`, hidden);
+      this.checkBoard(html, 3, `question ${view.qIndex + 1}'s Reveal stage`, hidden);
       this.checkCountOnly(html, view.qIndex, 'the stage', 'en', true);
     }
-    if (view.state === 'ended') this.checkBoard(html, 10, 'the final stage', hidden);
+    if (view.state === 'ended') this.checkBoard(html, 3, 'the final stage', hidden);
   }
   /* H (Jonathan, 2026-11-13): with "Hide names on the projector" ticked on this console, the stage holds no player's name
      and no uid anywhere in its HTML (text or attribute; not hidden with CSS), in every state. Read from the tool's own
@@ -2454,12 +2454,12 @@ const NOV13_FAULTS = [
 ];
 /* H: "Hide names on the projector" (2026-11-13). */
 const HIDE_FAULTS = [
-  { id: 'h-final-leaks-one', why: 'H: with names hidden, the final scores still name the third row', from: "  const board = rows.slice(0, 10).map(r => lqStageLbRowHtml(r)).join('');", to: "  const board = rows.slice(0, 10).map((r, i) => i === 2 ? lqLbRowHtml(r) : lqStageLbRowHtml(r)).join('');" },
+  { id: 'h-final-leaks-one', why: 'H: with names hidden, the final scores still name the third row', from: "  const board = rows.slice(0, 3).map(r => lqStageLbRowHtml(r)).join('');", to: "  const board = rows.slice(0, 3).map((r, i) => i === 2 ? lqLbRowHtml(r) : lqStageLbRowHtml(r)).join('');" },
   { id: 'h-lobby-chips', why: 'H: with names hidden, the lobby still draws the name chips', from: "const chips = lqTHideNames ? '' : here.map", to: "const chips = here.map" },
   { id: 'h-no-repaint', why: 'H: ticking the box does not repaint the stage (the names stay until the next snapshot)', from: "  try { localStorage.setItem('gc-lq-hidenames', lqTHideNames ? '1' : '0'); } catch(e){}\n  lqPaintStage();\n", to: "  try { localStorage.setItem('gc-lq-hidenames', lqTHideNames ? '1' : '0'); } catch(e){}\n" },
   { id: 'h-default-on', why: 'H: the box is ticked on a device that never set it', from: "lqTHideNames = localStorage.getItem('gc-lq-hidenames') === '1';", to: "lqTHideNames = localStorage.getItem('gc-lq-hidenames') !== '0';" },
   { id: 'h-uid-attr', why: 'H: a hidden row carries the uid in an attribute', from: "  return `<li><span class=\"lq-lb-rank\">", to: "  return `<li data-u=\"${escAttr(r.uid)}\"><span class=\"lq-lb-rank\">" },
-  { id: 'h-reveal-shown', why: 'H: the mc Reveal ignores the box (names stay on the Top 5)', from: "  const board = lqRankedNamed(s).slice(0, 5).map(r => lqStageLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'", to: "  const board = lqRankedNamed(s).slice(0, 5).map(r => lqLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'" },
+  { id: 'h-reveal-shown', why: 'H: the mc Reveal ignores the box (names stay on the Top 3)', from: "  const board = lqRankedNamed(s).slice(0, 3).map(r => lqStageLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'", to: "  const board = lqRankedNamed(s).slice(0, 3).map(r => lqLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'" },
   { id: 'h-strip-box-gone', why: 'H: the strip loses the box during a question', from: "  const full = lqHideNamesInputHtml() + `", to: "  const full = (s && s.state === 'question' ? '' : lqHideNamesInputHtml()) + `" },
   { id: 'h-wrong-points', why: 'H: a hidden row shows the place twice and no points', from: "escHtml(tIn('lq.points', 'en', { n: r.pts || 0 }))", to: "escHtml(tIn('lq.points', 'en', { n: r.rank }))" }
 ];
@@ -2481,7 +2481,7 @@ const R3_FAULTS = [
   { id: 'r3-p6-correct-midq', why: 'R3-1: the answer written into the public doc 400 ms into the question (correct)', from: '  lqTAutoKey = key;\n', to: "  lqTAutoKey = key;\n  setTimeout(() => { const q = lqQuiz(s.quizId); if(lqTSession && lqTSession.state === 'question') lqWrite({ correct: lqType(q) === 'pcname' ? lqPcNameOf(s.target) : lqTargetIds(q, s.target)[0] }, 'fields'); }, 400);\n" },
   { id: 'r3-p2b-new-field', why: 'R3-1: the answer in a NEW doc field (autoAnswer) during the question', from: '  lqTAutoKey = key;\n', to: "  lqTAutoKey = key;\n  setTimeout(() => { const q = lqQuiz(s.quizId); if(lqTSession && lqTSession.state === 'question') lqWrite({ autoAnswer: lqType(q) === 'pcname' ? lqPcNameOf(s.target) : lqTargetIds(q, s.target)[0] }, 'fields'); }, 400);\n" },
   { id: 'r3-p1-locked-frets', why: 'R3-2: the right frets under the student\'s "Locked in" pick', from: '<div class="lq-locked-pick" style="background:${bg}">${escHtml(lqFretPickLabel(mine))}</div>`', to: '<div class="lq-locked-pick" style="background:${bg}">${escHtml(lqFretPickLabel(mine))}</div>` + `<p class="lq-note">${escHtml(lqTargetIds(quiz, s.target).join(\' \'))}</p>`' },
-  { id: 'r3-p4-board-reversed', why: 'R3-4: the mc Reveal leaderboard reversed (2 players, 20 s, question 2) inside a known case', from: "  const board = lqRankedNamed(s).slice(0, 5).map(r => lqStageLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'", to: "  let rk = lqRankedNamed(s).slice(0, 5); if(rk.length === 2 && Number(s.limitSec) === 20 && Number(s.qIndex) === 1) rk = rk.reverse();\n  const board = rk.map(r => lqStageLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'" },
+  { id: 'r3-p4-board-reversed', why: 'R3-4: the mc Reveal leaderboard reversed (2 players, 20 s, question 2) inside a known case', from: "  const board = lqRankedNamed(s).slice(0, 3).map(r => lqStageLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'", to: "  let rk = lqRankedNamed(s).slice(0, 3); if(rk.length === 2 && Number(s.limitSec) === 20 && Number(s.qIndex) === 1) rk = rk.reverse();\n  const board = rk.map(r => lqStageLbRowHtml(r)).join('');\n  return lqBilingualParams('lq.stageAnswerLabel'" },
   { id: 'r3-p3-exit-writes', why: 'R3-5: Exit preview writes to the real doc', from: '  lqTPreview = false;\n  lqTSession = lqTReal;\n', to: "  lqTPreview = false;\n  lqTSession = lqTReal;\n  lqDoc().set({ lastPreview: { quizId: lqTPickedQuizId } }, { merge: true });\n" }
 ];
 /* Round 4 (the Fable check of 4175ee9, 2026-11-12): the reviewer's plants and the ones its brief asked for. */

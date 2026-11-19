@@ -22147,7 +22147,7 @@ async function checkMicZipsAnonymous() {
    1di. LIVE IN-CLASS GAMES — "Hide names on the projector" (Jonathan,
    2026-11-13). A box in the console's control strip, OFF by default. Ticked,
    the stage (the projector) is BUILT with no player name: the lobby keeps
-   only its count, the Top 5 at Reveal and the final scores only place and
+   only its count, the Top 3 at Reveal and the final scores only place and
    points. A teacher's display choice kept on the teacher's device
    (gc-lq-hidenames): it never writes the session doc and never changes a
    student's own screen. EXECUTES the real i18n.js + guitar-diagrams.js +
@@ -22214,11 +22214,11 @@ function checkLiveQuizHideNames() {
     ['mc question', { quizId: mcId, state: 'question' }, 'none'],
     ['fret question', { quizId: fretId, state: 'question', target: { string: 'lowE', note: 'G' } }, 'none'],
     ['Name question', { quizId: pcNameId, state: 'question', target: { string: 'A', fret: 9 } }, 'none'],
-    ['mc Reveal', { quizId: mcId, state: 'reveal', correct: mcChoice, tally: { [mcChoice]: 7 } }, 5],
-    ['fret Reveal', { quizId: fretId, state: 'reveal', target: { string: 'lowE', note: 'G' }, correct: 'lowE:3', correctIds: ['lowE:3'], tally: { 'lowE:3': 7 } }, 5],
-    ['Find Reveal', { quizId: findId, state: 'reveal', target: { string: 'A', note: 'F♯' }, correct: 'A:9', correctIds: ['A:9'], tally: { 'A:9': 7 } }, 5],
-    ['Name Reveal', { quizId: pcNameId, state: 'reveal', target: { string: 'A', fret: 9 }, correct: 'F♯5', tally: { 'F♯5': 7 } }, 5],
-    ['final scores', { quizId: mcId, state: 'ended' }, 10]
+    ['mc Reveal', { quizId: mcId, state: 'reveal', correct: mcChoice, tally: { [mcChoice]: 7 } }, 3],
+    ['fret Reveal', { quizId: fretId, state: 'reveal', target: { string: 'lowE', note: 'G' }, correct: 'lowE:3', correctIds: ['lowE:3'], tally: { 'lowE:3': 7 } }, 3],
+    ['Find Reveal', { quizId: findId, state: 'reveal', target: { string: 'A', note: 'F♯' }, correct: 'A:9', correctIds: ['A:9'], tally: { 'A:9': 7 } }, 3],
+    ['Name Reveal', { quizId: pcNameId, state: 'reveal', target: { string: 'A', fret: 9 }, correct: 'F♯5', tally: { 'F♯5': 7 } }, 3],
+    ['final scores', { quizId: mcId, state: 'ended' }, 3]
   ];
   // The places and points the board must show, from the players above (ties share the lower place, ties read by name).
   const ranked = PLAYERS.map(([uid, name, pts]) => ({ uid, name, pts })).sort((a, b) => b.pts - a.pts || a.name.localeCompare(b.name));

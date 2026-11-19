@@ -1116,7 +1116,7 @@ function lqStudentEndedHtml(s){
   const rows = lqRanked(s.scores);
   const me = rows.find(r => r.uid && r.uid === lqUid()) || null;
   // Other players are "Student": the public scores carry no names (and an older game's leftover names are never drawn). Your own row shows your own name.
-  const top = rows.slice(0, 5).map(r => lqLbRowHtml(Object.assign({}, r, { name: (me && r.uid === me.uid) ? lqName() : t('lq.student') }), 'lq-lb-row' + (me && r.uid === me.uid ? ' me' : ''))).join('');
+  const top = rows.slice(0, 3).map(r => lqLbRowHtml(Object.assign({}, r, { name: (me && r.uid === me.uid) ? lqName() : t('lq.student') }), 'lq-lb-row' + (me && r.uid === me.uid ? ' me' : ''))).join('');
   const mine = me
     ? `<div class="lq-final-me"><div class="lq-final-rank" data-i18n="lq.rank" data-i18n-params="${escAttr(JSON.stringify({n:me.rank,total:rows.length}))}">${escHtml(t('lq.rank',{n:me.rank,total:rows.length}))}</div>`
       + `<div class="lq-final-pts" data-i18n="lq.points" data-i18n-params="${escAttr(JSON.stringify({n:me.pts||0}))}">${escHtml(t('lq.points',{n:me.pts||0}))}</div></div>`
@@ -1389,7 +1389,7 @@ function lqLastQuestionDone(s){
   return total > 0 && Number(s.qIndex) + 1 >= total;
 }
 /* Hide names on the projector (Jonathan, 2026-11-13). A box in the strip, OFF by default. Ticked, every list of
-   names the stage draws (the lobby's chips, the Top 5 at Reveal, the final scores) is BUILT without them: the lobby
+   names the stage draws (the lobby's chips, the Top 3 at Reveal, the final scores) is BUILT without them: the lobby
    keeps only its count, a leaderboard row only its place and points ("1  3000 points"). The names are left out of
    the HTML, not hidden with CSS: a name in the DOM of a projected page is still a name. Kept on this device
    (`gc-lq-hidenames`), like the time box: the teacher's own display choice, never game state, so nothing reaches
@@ -1610,16 +1610,16 @@ function lqStagePcNameQuestionHtml(s, quiz){
 }
 
 // Reveal: the name, then three columns: the box, the tally of all eight, the
-// top 5 (stacked, eight bars and five rows ran the stage past 657px).
+// top 3 (stacked; Top 3 since 2026-11-19, Jonathan: "only show top 3 scores").
 // countOnly (pc-name today): two columns, the box and "n / m correct" over the
-// top 5; no bars, so the room does not see which wrong names were picked.
+// top 3; no bars, so the room does not see which wrong names were picked.
 function lqStageRightCountHtml(s){
   const p = lqRightCount(s);
   return `<div class="lq-st-count"><span class="lq-st-big">${p.n} / ${p.total}</span>${lqBilingual('lq.stageCorrect', 'lq-st-cap')}</div>`;
 }
 function lqStagePcNameRevealHtml(s, quiz){
   const answer = s.correct ? `<div class="lq-st-answer">${escHtml(s.correct)}</div>` : '';
-  const lb = lqRankedNamed(s).slice(0, 5).map(r => lqStageLbRowHtml(r)).join('');
+  const lb = lqRankedNamed(s).slice(0, 3).map(r => lqStageLbRowHtml(r)).join('');
   if(quiz.countOnly) return lqBilingualParams('lq.stageAnswerLabel', 'lq-st-qnum', {n: Number(s.qIndex) + 1}, {n: Number(s.qIndex) + 1})
     + answer
     + `<div class="lq-st-split">${lqPcNameBoxHtml(s.target, 'lq-pcbox-stage')}<div>${lqStageRightCountHtml(s)}<ol class="lq-lb lq-lb-stage">${lb}</ol></div></div>`;
@@ -1633,7 +1633,7 @@ function lqStageRevealHtml(s, quiz){
   if(lqType(quiz) === 'pcname') return lqStagePcNameRevealHtml(s, quiz);
   const c = lqChoice(quiz, s.correct);
   const answer = c ? lqBilingual(c.key, 'lq-st-answer') : '';
-  const board = lqRankedNamed(s).slice(0, 5).map(r => lqStageLbRowHtml(r)).join('');
+  const board = lqRankedNamed(s).slice(0, 3).map(r => lqStageLbRowHtml(r)).join('');
   return lqBilingualParams('lq.stageAnswerLabel', 'lq-st-qnum', {n: Number(s.qIndex) + 1}, {n: Number(s.qIndex) + 1})
     + answer
     + `<div class="lq-st-split">${lqTallyHtml(s, quiz, null)}<ol class="lq-lb lq-lb-stage">${board}</ol></div>`;
@@ -1656,7 +1656,7 @@ function lqFretBilingualAnswer(correctIds, chord){
 
 // The board on the left (static, correct fret(s) green, every tapped marker
 // showing its count — nothing student-identifying), the tally bars and the
-// top-5 leaderboard stacked on the right. A power quiz also draws the chord's
+// top-3 leaderboard stacked on the right. A power quiz also draws the chord's
 // chart box beside the board, for the lowest right fret (the open shape for
 // E5 on low E and A5 on the A string) — after Reveal only.
 function lqStageFretRevealHtml(s, quiz){
@@ -1667,7 +1667,7 @@ function lqStageFretRevealHtml(s, quiz){
   const first = chord ? lqParseFretId(correctIds[0]) : null;
   const box = first ? lqPcBoxSvg(first.string, first.fret) : '';
   if(box) board = `<div class="lq-st-pcwrap">${board}<div class="lq-pcbox lq-pcbox-side">${box}</div></div>`;
-  const lb = lqRankedNamed(s).slice(0, 5).map(r => lqStageLbRowHtml(r)).join('');
+  const lb = lqRankedNamed(s).slice(0, 3).map(r => lqStageLbRowHtml(r)).join('');
   return lqBilingualParams('lq.stageAnswerLabel', 'lq-st-qnum', {n: Number(s.qIndex) + 1}, {n: Number(s.qIndex) + 1})
     + answer
     + `<div class="lq-st-split">${board}<div>${quiz.countOnly ? lqStageRightCountHtml(s) : lqTallyHtml(s, quiz, null)}<ol class="lq-lb lq-lb-stage">${lb}</ol></div></div>`;
@@ -1675,7 +1675,7 @@ function lqStageFretRevealHtml(s, quiz){
 
 function lqStageEndedHtml(s){
   const rows = lqRankedNamed(s);
-  const board = rows.slice(0, 10).map(r => lqStageLbRowHtml(r)).join('');
+  const board = rows.slice(0, 3).map(r => lqStageLbRowHtml(r)).join('');
   return lqBilingual('lq.finalTitle', 'lq-st-title') + `<ol class="lq-lb lq-lb-stage">${board}</ol>`;
 }
 
