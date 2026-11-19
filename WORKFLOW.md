@@ -28,8 +28,8 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
   `update-reload-loop.mjs`; a harness-only fix ships Fast with its break-it proof. Report the cause and N of M walks
   failing before and after.
   Windows: started 09:23 (2026-11-19).
-- [ ] **W29 — the update reload waits for a private song still downloading (Jonathan, 2026-11-19: "build it").** Next
-  after W25 (started 09:23). `todo.md` → "Small things" → the first item: `busyReason()` (the service-worker block in
+- [~] **W29 — the update reload waits for a private song still downloading (Jonathan, 2026-11-19: "build it").** THE
+  MAC TOOK IT at 09:40 (Jonathan: "you decide"): Windows, skip it. `todo.md` → "Small things" → the first item: `busyReason()` (the service-worker block in
   `app/start.js`) knows a card playing (`pcState`) but not one showing "Loading the song… 40%", so an update landing
   mid-download reloads the page, the download is lost and the song counts against the month again. Make `busyReason()`
   return a reason while a card waits for its song (`sfWait`, `app/songfiles.js`, an earlier part), still bounded by
