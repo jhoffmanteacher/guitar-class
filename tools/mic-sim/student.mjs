@@ -96,6 +96,12 @@ const RING = 1.0;
    strum on every beat (what the game's tip asks for), 'change' = only when the
    chord changes. */
 const BASE = { touch: 'pick', amp: 0.12, ringS: RING, strums: 'beat', pWrong: 0, pHeld: 0, pSkip: 0, sigmaMs: 25, lateMs: 0, changeLateMs: 0, drift: 0, liftMs: 90 };
+/* The leniency students (2026-11-18, kept so the leak that rule A closed stays measured: WORKFLOW.md "Power Chord Switch: where we stopped",
+   the 2026-11-18 decision). perBeat = strums (or taps, or muted scratches) per beat, evenly spread (Jonathan: students strum several times per
+   change); stick = stays on the FIRST chord of the round all game; wrongBy = frets the wrong chord sits above the new one (1 = a half step,
+   2 = a whole step; a whole step up can be the old chord, F5-G5: the answer key then says held); openBeats = strums all six open strings on
+   every beat, and on every change (its wrong chord). Students without them sound exactly as before (no extra random draws). */
+export const OPEN6 = [40, 45, 50, 55, 59, 64];
 export const STUDENTS = {
   steady:     { ...BASE },
   beginner:   { ...BASE, pWrong: 0.12, pHeld: 0.08, pSkip: 0.08, sigmaMs: 60, changeLateMs: 70 },
@@ -114,7 +120,17 @@ export const STUDENTS = {
      hand is muting (a scratch with no note in it). The answer key says "no strum" for both: no chord was played. */
   tapper:     { ...BASE, silent: true, tapBeats: true },
   /* mutedStrum's strings sound no pitch: a damped scratch (render, kind 'mute'). */
-  mutedStrum: { ...BASE, silent: true, mutedBeats: true }
+  mutedStrum: { ...BASE, silent: true, mutedBeats: true },
+  steady3:    { ...BASE, perBeat: 3 },
+  thumb3:     { ...BASE, touch: 'thumb', perBeat: 3 },
+  wrongFret3: { ...BASE, pWrong: 1, perBeat: 3 },
+  wrongStep:  { ...BASE, pWrong: 1, wrongBy: 2 },
+  stuck:      { ...BASE, stick: true },
+  stuck3:     { ...BASE, stick: true, perBeat: 3 },
+  openStrum:  { ...BASE, openBeats: true, pWrong: 1 },
+  open3:      { ...BASE, openBeats: true, pWrong: 1, perBeat: 3 },
+  tapper3:    { ...BASE, silent: true, tapBeats: true, perBeat: 3 },
+  muted3:     { ...BASE, silent: true, mutedBeats: true, perBeat: 3 }
 };
 
 /* One string. pluck() starts a note; lift() lets it die in about 30 ms. */
@@ -214,15 +230,20 @@ export class Student {
       const dev = gauss(r) * p.sigmaMs + p.lateMs + tempoErr + (isChange ? Math.abs(gauss(r)) * p.changeLateMs : 0);
       const at = round.listenStartMs + b * round.beatMs + this.o.lagMs + dev;
       let did = 'right';
-      if (p.tapBeats) this.hits.push({ s: Math.round(at / 1000 * SR), amp: p.amp * (0.8 + 0.6 * r()), kind: 'bang' });
-      if (p.mutedBeats) this.hits.push({ s: Math.round(at / 1000 * SR), amp: p.amp * (0.6 + 0.3 * r()), kind: 'mute', n: Math.round((touch.spreadMs + 40) / 1000 * SR), spreadN: Math.round(touch.spreadMs / 1000 * SR), scrape: touch.scrape });
+      /* perBeat > 1: the extra sounds of this beat, at k/perBeat of the beat after this one's, with the same spread */
+      const extra = [];
+      for (let k = 1; k < (p.perBeat || 1); k++) extra.push(round.listenStartMs + (b + k / p.perBeat) * round.beatMs + this.o.lagMs + gauss(r) * p.sigmaMs + p.lateMs + tempoErr);
+      const tapAt = t => this.hits.push({ s: Math.round(t / 1000 * SR), amp: p.amp * (0.8 + 0.6 * r()), kind: 'bang' });
+      const muteAt = t => this.hits.push({ s: Math.round(t / 1000 * SR), amp: p.amp * (0.6 + 0.3 * r()), kind: 'mute', n: Math.round((touch.spreadMs + 40) / 1000 * SR), spreadN: Math.round(touch.spreadMs / 1000 * SR), scrape: touch.scrape });
+      if (p.tapBeats){ tapAt(at); extra.forEach(tapAt); }
+      if (p.mutedBeats){ muteAt(at); extra.forEach(muteAt); }
       if (isChange){
         const x = r();
         did = p.silent ? 'silent' : x < p.pSkip ? 'silent' : x < p.pSkip + p.pHeld ? 'held' : x < p.pSkip + p.pHeld + p.pWrong ? 'wrong' : 'right';
         /* The wrong chord: one fret high (power chords), or, when the round names a `wrongPool` (Change Up's open chords), another chord
            from that pool that is neither the old chord nor the new one, drawn at random. */
         let other = null;
-        if (did === 'wrong' && round.wrongPool){
+        if (did === 'wrong' && round.wrongPool && !p.openBeats){
           const c = round.wrongPool.filter(n => n !== want && n !== prev);
           if (!c.length) throw new Error('student: no other chord to play wrong between ' + prev + ' and ' + want);
           other = c[Math.floor(r() * c.length)];
@@ -231,20 +252,28 @@ export class Student {
            never-moves student is one chord behind on every change. Until 2026-11-11 the hand kept whatever it held, so on a two-chord pair
            the never-moves student stayed on chord 1 all game, which IS the new chord on every second change: half its "held" changes
            were really right, and the old "never moved: caught" figures were measured with that flawed student. */
-        this.cur = did === 'held' ? round.midis[prev] : did === 'wrong' ? (other ? round.midis[other] : round.midis[want].map(m => m + 1)) : did === 'right' ? round.midis[want] : this.cur;
+        this.cur = did === 'held' ? round.midis[prev] : did === 'wrong' ? (p.openBeats ? OPEN6.slice() : other ? round.midis[other] : round.midis[want].map(m => m + (p.wrongBy || 1))) : did === 'right' ? round.midis[want] : this.cur;
+        const same0 = (a, m) => !!a && !!m && a.length === m.length && a.every((x, k) => x === m[k]);
+        if (p.stick && did !== 'silent'){
+          /* stays on the round's first chord: the answer is what that chord is for this change */
+          this.cur = round.midis[round.seq[0]];
+          did = same0(this.cur, round.midis[want]) ? 'right' : same0(this.cur, round.midis[prev]) ? 'held' : 'wrong';
+        }
+        /* a wrong chord a whole step up can be the old chord (F5-G5): the answer key says so */
+        if (did === 'wrong' && !other && !p.openBeats && (p.wrongBy || 1) !== 1 && same0(this.cur, round.midis[prev])) did = 'held';
         /* inSpan: a change skipped on its beat whose chord's later beats are still strummed (every 2 beats or every bar, strumming every beat) with
            the chord in the hand: what a rule that hears the whole chord's time (Power Chord Switch since 2026-11-14) is given. The sound is the same. */
         const later = did === 'silent' && !p.silent && p.strums === 'beat' && round.bpc > 1 && this.cur;
         const same = (a, m) => !!a && !!m && a.length === m.length && a.every((x, k) => x === m[k]);
         const inSpan = later ? (same(this.cur, round.midis[want]) ? 'right' : same(this.cur, round.midis[prev]) ? 'held' : 'wrong') : null;
-        key.push(Object.assign({ beat: b, from: prev, to: want, did, devMs: did === 'silent' ? null : dev, atMs: did === 'silent' ? null : at }, other ? { played: other } : {}, inSpan ? { inSpan } : {}));
+        key.push(Object.assign({ beat: b, from: prev, to: want, did, devMs: did === 'silent' ? null : dev, atMs: did === 'silent' ? null : at }, other ? { played: other } : did === 'wrong' && p.openBeats && round.wrongPool ? { played: 'open strings' } : {}, inSpan ? { inSpan } : {}));
         if (did === 'silent'){ if (!p.silent) this.guitar.lift(at - p.liftMs); continue; }
-        if (did !== 'held') this.guitar.lift(at - p.liftMs);   // the hand leaves the old chord before the new one sounds
+        if (did !== 'held' && !p.stick) this.guitar.lift(at - p.liftMs);   // the hand leaves the old chord before the new one sounds
       } else {
         if (p.silent || (p.strums === 'change' && b > 0)) continue;
-        if (b === 0) this.cur = round.midis[want];
+        if (b === 0) this.cur = p.openBeats ? OPEN6.slice() : round.midis[want];
       }
-      if (this.cur) this.guitar.strum(at, this.cur, p.amp, touch);
+      if (this.cur){ this.guitar.strum(at, this.cur, p.amp, touch); extra.forEach(t => this.guitar.strum(t, this.cur, p.amp, touch)); }
     }
     this.guitar.lift(round.listenStartMs + (beats + 0.5) * round.beatMs + this.o.lagMs);
     return key;
