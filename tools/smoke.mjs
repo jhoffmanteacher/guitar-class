@@ -763,6 +763,18 @@ async function w25Diag(page, base, n, before) {
       swAtNav = swLast;
     }
     const MODE = +(process.env.W25_MODE || 0);
+    if (MODE === 6 && before) {
+      // As walk() really does it: a cold browser cache too, then the boot steps every area runs (the games scripts, four screens).
+      mark(`w25: cycle ${k + 1} of ${n}: cold boot`);
+      await page.send('Page.navigate', { url: 'about:blank' }); await sleep(500);
+      await page.send('Storage.clearDataForOrigin', { origin: base, storageTypes: 'all' }); await page.send('Network.clearBrowserCache'); await sleep(1000);
+      await page.send('Page.navigate', { url: base + '/index.html' }); await sleep(3000); await pageLoaded(page);
+      const step = async (x, w) => { try { await page.evalJs(x); } catch { /* the probe below reports it */ } await sleep(w); };
+      await step('devBypass()', 3500); await step(`setLang('en')`, 600); await step('ensureCoachJs()', 1500);
+      for (const x of ['openSongsScreen()', 'openClassActivitiesScreen()', 'openMyProgressScreen()', 'openGamesScreen()']) await step(x, 900);
+      const c0 = Date.now(); await before(); gap = Date.now() - c0; swAtNav = swLast;
+      if (Date.now() - w25Start > 33 * 60000) { console.log(`smoke: w25 stopping after ${k + 1} cycles (time)`); n = k + 1; }
+    }
     if (MODE === 5 && before) {
       // The real sequence: a fresh first visit booted exactly as walk() boots, the chord-grid walk, then the reload.
       mark(`w25: cycle ${k + 1} of ${n}: fresh boot`);
