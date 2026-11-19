@@ -72,7 +72,7 @@ round on the switch-on); remove the 2026-11-16 split bridge on or after 2026-12-
     errors; playalong-loop 26 cards 0 mismatches; full checks on each commit. Not run: the change smoke (`--only
     activities`), run it at the merge. The rebase onto `8ecb1dea` met the CLAUDE.md parts-table line (coach-recordings):
     kept main's, my edit redone on top.
-- Windows idle, checked 00:20 (2026-11-19); no open W item.
+- Windows idle, checked 02:20 (2026-11-19); no open W item.
 
 **W23's five questions, answered (Jonathan, 2026-11-18):** (1) Watchtower gets BOTH switches (recording and Chords /
 Tab / Lyrics); (2) views not checked against release: OK as is; (3) a power-chord card's Tab shows the power chords as
