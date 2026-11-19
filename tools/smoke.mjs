@@ -741,7 +741,7 @@ function w25Hooks() {
   const st = window.stop; window.stop = function () { say("window.stop", []); return st.call(this); };
 }
 async function w25Diag(page, base, n, before) {
-  const w25Start = Date.now(); const size = new Map(); const rid = new Map(); let tl = [], tl0 = Date.now(); const swHist = []; const T = x => tl.push(`${Date.now() - tl0}:${x}`);
+  const w25Start = Date.now(); const size = new Map(); const rid = new Map(); let tl = [], tl0 = Date.now(); const swHist = [], hHist = []; const T = x => tl.push(`${Date.now() - tl0}:${x}`);
   const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
   const probe = [];
   for (const m of html.matchAll(/<script defer src="([^"]+\.js)"><\/script>/g)) {
@@ -771,7 +771,7 @@ async function w25Diag(page, base, n, before) {
   });
   await page.send('Network.enable'); try { await page.send('ServiceWorker.enable'); } catch { /* not on a page target */ }
   await page.send('Page.addScriptToEvaluateOnNewDocument', { source: `(${w25Hooks.toString()})();` });
-  page.on((m, p) => { if (m === 'Runtime.consoleAPICalled' && p.type === 'debug' && p.args[0] && String(p.args[0].value).startsWith('W25 ')) T(String(p.args[0].value).slice(4, 260)); });
+  page.on((m, p) => { if (m === 'Runtime.consoleAPICalled' && p.type === 'debug' && p.args[0] && String(p.args[0].value).startsWith('W25 ')) { T(String(p.args[0].value).slice(4, 260)); hHist.push({ t: Date.now(), s: String(p.args[0].value).slice(4, 200) }); } });
   let bad = 0; const lines = []; const FRESH = !!process.env.W25_FRESH; let swLast = '';
   page.on((m, p) => { if (m === 'ServiceWorker.workerVersionUpdated') for (const v of p.versions) swHist.push({ t: Date.now(), s: `SW v${v.versionId} ${v.status}/${v.runningStatus}` }); });
   page.on((m, p) => { if (m === 'ServiceWorker.workerVersionUpdated' && p.versions.length) swLast = p.versions.map(v => `v${v.versionId}:${v.status}/${v.runningStatus}`).join(','); });
@@ -814,7 +814,7 @@ async function w25Diag(page, base, n, before) {
     if (process.env.W25_PLANT) await page.evalJs(`caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('guitar-class-')).map(k => caches.open(k).then(c => c.put('app/builtsongs.js', new Response('', { headers: { 'content-type': 'text/javascript' } })))))).then(() => 1)`).catch(() => 0);
     if (MODE === 1 || MODE === 2) { try { await page.send('ServiceWorker.stopAllWorkers'); } catch { /* none */ } await sleep(300); swAtNav = 'stopped'; }
     if (MODE === 3 || MODE === 4) { await sleep(40000); swAtNav = swLast; gap = 40000; }
-    urls = new Map(); net = []; sw = []; js = { sw: 0, net: 0, cache: 0 }; exc = []; size.clear(); rid.clear(); const pre = swHist.filter(x => Date.now() - x.t < 40000).map(x => `${x.t - Date.now()}:${x.s}`); tl = pre.slice(-6); tl0 = Date.now(); T('NAVIGATE-CALL');
+    urls = new Map(); net = []; sw = []; js = { sw: 0, net: 0, cache: 0 }; exc = []; size.clear(); rid.clear(); const pre = swHist.filter(x => Date.now() - x.t < 40000).map(x => `${x.t - Date.now()}:${x.s}`); const hpre = hHist.filter(x => Date.now() - x.t < 8000).map(x => `${x.t - Date.now()}:${x.s}`); tl = pre.slice(-2).concat(hpre.slice(-4)); tl0 = Date.now(); T('NAVIGATE-CALL');
     mark(`w25: reload ${k + 1} of ${n}`);
     const t0 = Date.now();
     await page.send('Page.navigate', { url: base + '/index.html' });
@@ -3353,7 +3353,7 @@ try {
   const prof = mkdtempSync(join(tmpdir(), 'gc-smoke-chrome-'));
   const cdp = await freePort();
   const proc = spawn(chrome, ['--headless=new', `--remote-debugging-port=${cdp}`, `--user-data-dir=${prof}`, '--use-fake-ui-for-media-stream',
-    '--use-fake-device-for-media-stream', '--autoplay-policy=no-user-gesture-required', '--no-first-run', '--disable-gpu', 'about:blank'], { stdio: 'ignore' });
+    '--use-fake-device-for-media-stream', '--autoplay-policy=no-user-gesture-required', '--no-first-run', '--disable-gpu', ...(process.env.W25_NOBFC ? ['--disable-features=BackForwardCache'] : []), 'about:blank'], { stdio: 'ignore' });
   chromeProc = proc;   // stopped and waited for by runCleanup() before the profile below is deleted
   cleanup.push(() => rmSync(prof, { recursive: true, force: true }));
   for (let i = 0; i < 60; i++) { try { await fetch(`http://127.0.0.1:${cdp}/json/version`); break; } catch { await sleep(250); } }

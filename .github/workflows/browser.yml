@@ -191,6 +191,7 @@ jobs:
           AREA: ${{ matrix.area }}
           W25_REPEAT: '40'
           W25_MODE: '6'
+          W25_NOBFC: ${{ matrix.rep < 3 && '1' || '' }}
         run: |
           node tools/ci/run-and-annotate.mjs --title "smoke $AREA" --log "$RUNNER_TEMP/ci-out/smoke-$AREA.log" --summary '^smoke: (✓|✗|[0-9]+ sets|w25)' --deadline 45 -- node tools/smoke.mjs --en-only --only "$AREA"
       - name: Keep the output
