@@ -181,7 +181,7 @@ function caCardViewSwap(root, raw, name, refocus){
     st.L = L;
     st.sheet = !!view.card.sheet && typeof pcSheetHtml === 'function';   /* app/cards-sheet.js (W24 R1-1) */
     // Forget what was painted in the old view: the next frame lights the same beat in this one.
-    st.si = -1; st.seq = -1; st.rep = -1; st.beat = -1; st.key = ''; st.row = null; st.stripKey = null;
+    st.si = -1; st.seq = -1; st.rep = -1; st.beat = -1; st.key = ''; st.row = null; st.stripKey = null; st.stripBeat = null;
     st.sheetLine = null; st.sheetLit = null; st.sheetAim = null; st.sheetTop = null;   // as pcRefollow: the next frame follows again
     if(st.counting){
       // The count-in: show the section it counts in to, as pcStart did.

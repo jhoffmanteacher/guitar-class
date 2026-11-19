@@ -617,9 +617,23 @@ function pcSheetStrip(st, loc, barsIn){
     });
     cells.forEach((c, i) => { c.classList.toggle('strum', !!marks[i]); c.querySelector('.pc-strip-ch').textContent = marks[i] || ''; });
   }
-  // Lit on the BEAT only: the cell stays lit through its "+" and no "+" cell is ever lit.
+  /* Lit on the BEAT only: no "+" cell is ever lit. The cell stays .now through its "+", but it SHOWS lit only as
+     long as the sheet's dot stays filled (Jonathan, 2026-11-19: the box lit for the whole beat while the dot went
+     hollow halfway, so the two never looked like one flash). The same length, pcSheetSolidSec, restarted on every
+     new beat, in the same frame as the dot's (pcFrame paints the dot, then this). */
   const now = (beat - bar * bpb) * 2;
-  cells.forEach((c, i) => c.classList.toggle('now', i === now));
+  const beatKey = loc.si + ':' + loc.rep + ':' + beat;
+  const fresh = st.stripBeat !== beatKey;
+  st.stripBeat = beatKey;
+  if(fresh){
+    const strip = cells[0].parentElement;
+    strip.style.setProperty('--pc-hit', pcSheetSolidSec(st.win.bar / bpb / pcRate(st.root)) + 's');
+  }
+  cells.forEach((c, i) => {
+    const on = i === now;
+    if(on && fresh && c.classList.contains('now')){ c.classList.remove('now'); void c.offsetWidth; }
+    c.classList.toggle('now', on);
+  });
 }
 /* The bar sticks under whatever already sticks to the top of the scroll box
    (.main on a laptop, the page on a phone): the In class page's sticky bar,
@@ -645,7 +659,7 @@ function pcSheetStickyTop(root){
 }
 function pcSheetStarted(st){
   pcSheetStickyTop(st.root);
-  st.sheetLine = null; st.stripKey = null; st.sheetLit = null; st.sheetAim = null; st.sheetTop = null;
+  st.sheetLine = null; st.stripKey = null; st.stripBeat = null; st.sheetLit = null; st.sheetAim = null; st.sheetTop = null;
   const paper = st.root.querySelector('.pc-sheet-paper');
   const sh = paper && paper._sheet;
   const where = st.root.querySelector('.pc-sheet-where');

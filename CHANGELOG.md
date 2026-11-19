@@ -6,6 +6,13 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-19 — Lyric sheets: the count box blinks with the dot
+
+- **Play Along lyric sheets (Sweet Child O' Mine, "the cure", All Along the Watchtower): the "This bar" count box
+  now blinks with the dot.** Both light on the beat and go dark together. Before, the box stayed lit for the whole
+  beat while the dot went hollow halfway through, so the two never looked like one flash.
+
+
 ## 2026-11-19 — Games: the notes heading
 
 - **The Games page's notes group is now called "Notes on the fretboard".** It said "Notes on the low E and A strings",

@@ -3917,8 +3917,12 @@ span.tab-count-held{margin-left:4px}
 .pc-strip-ch{font-size:0.8125rem;font-weight:700;min-height:1.25em;color:var(--text)}
 .pc-strip-n{font-size:0.75rem;color:var(--text2);font-variant-numeric:tabular-nums}
 .pc-strip-cell.strum{background:var(--bg3)}
-.pc-strip-cell.now{border-color:var(--blue-text);background:var(--blue-bg)}
-.pc-strip-cell.now .pc-strip-ch,.pc-strip-cell.now .pc-strip-n{color:var(--blue-text)}
+/* The count box blinks with the sheet's dot: lit for --pc-hit (the dot's own length, set by pcSheetStrip), then
+   back to plain, on every beat (2026-11-19). !important on the duration for the reduce-motion rule, as the dot's. */
+.pc-strip-cell.now{animation:pc-strip-hit var(--pc-hit,0.2s) steps(1,end) forwards;animation-duration:var(--pc-hit,0.2s) !important}
+.pc-strip-cell.now .pc-strip-ch,.pc-strip-cell.now .pc-strip-n{animation:pc-strip-hit-t var(--pc-hit,0.2s) steps(1,end) forwards;animation-duration:var(--pc-hit,0.2s) !important}
+@keyframes pc-strip-hit{0%{border-color:var(--blue-text);background:var(--blue-bg)}100%{}}
+@keyframes pc-strip-hit-t{0%{color:var(--blue-text)}100%{}}
 .pc-sheet-paper{position:relative;margin:12px auto 0;max-width:100%;min-height:120px;background:#fff;border:1px solid var(--border2);border-radius:4px}
 .pc-sheet-paper canvas{display:block;width:100%;height:auto;border-radius:4px}
 /* ONE LONG COLUMN (pcSheetModel): a two-column sheet is drawn as one column on screen; the Print button prints the
