@@ -760,6 +760,9 @@ async function w25Diag(page, base, n) {
       gap = (k % 5) * 5000; await sleep(3500 + gap);
       swAtNav = swLast;
     }
+    const MODE = +(process.env.W25_MODE || 0);
+    if (MODE === 1 || MODE === 2) { try { await page.send('ServiceWorker.stopAllWorkers'); } catch { /* none */ } await sleep(300); swAtNav = 'stopped'; }
+    if (MODE === 3 || MODE === 4) { await sleep(40000); swAtNav = swLast; gap = 40000; }
     urls = new Map(); net = []; sw = []; js = { sw: 0, net: 0, cache: 0 }; exc = [];
     mark(`w25: reload ${k + 1} of ${n}`);
     const t0 = Date.now();
