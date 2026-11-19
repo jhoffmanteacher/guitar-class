@@ -6,6 +6,15 @@ For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
 
+## 2026-11-19 — A cleaner look
+
+- **A cleaner look across the site, same colours and same buttons.** Section labels in a lesson are plum with no
+  line above them; step titles and section headings use the same serif font as the page titles; cards are white
+  with softer edges and one corner size; the menu shows where you are with a white tile and a plum bar; and the
+  step buttons on an In-class card that you cannot open yet have a dashed edge and are easier to read. Dark mode
+  gets the same changes. Nothing moved and no words changed.
+
+
 ## 2026-11-19 — Live quizzes show the top 3 scores
 
 - **Every live quiz now shows only the top 3 scores**: on the projector after each question and at the end, and on
