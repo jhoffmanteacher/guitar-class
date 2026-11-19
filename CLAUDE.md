@@ -100,12 +100,14 @@ these limits and the load line in the report. On the Mac, run
 - **4 to 8** → just right: start nothing new that is heavy (one light, Node-only job is fine).
 - **over 8** → start nothing; a quick check now takes 7 minutes instead of 2 (measured 2026-11-16 at load 10).
 - **over 12 for 5 minutes** → pause the job that can best wait, and tell Jonathan in one line.
-- **Where work goes, decided before the brief is written:** repo-only, Node-only work (a builder, a reviewer, a fix
-  round) goes to the CLOUD first (a routine set to run once, skill `schedule`; push its branch first). The Windows
-  list in WORKFLOW is second choice and never for work that has to happen today: Windows only works while Jonathan
-  has left that computer awake with VS Code running (it reads WORKFLOW.md about once an hour; he said so
-  2026-11-16). Before counting on it, look for a Windows push or WORKFLOW line from the last 2 hours
-  (`git log --since='2 hours ago' origin/main`); none → treat Windows as asleep and say so. The Mac keeps what only it can do: headless Chrome, audio and other Mac-only files, and the lead.
+- **Where work goes, decided before the brief is written** (Jonathan, 2026-11-19: "shift work to windows"): work
+  that need not happen today and needs no Mac-only file goes on the Windows list, the "For Windows" section at the
+  top of WORKFLOW.md (headless Chrome included: Windows runs it too). Repo-only, Node-only work that should happen
+  today goes to the CLOUD (a routine set to run once, skill `schedule`; push its branch first). Windows works only
+  while Jonathan leaves that computer awake with VS Code running (it reads WORKFLOW.md about once an hour). It
+  commits no idle lines since 2026-11-19, only a "started" line under an item it picks up and the DONE note: an
+  item with no "started" line 2 hours after it was added → treat Windows as asleep and say so. The Mac keeps what
+  only it can do: student takes, audio and other Mac-only files (`Claude outputs/`), and the lead.
 - **On the Mac at once:** the lead, at most 2 local agents, at most 1 headless-Chrome run. A 3rd local agent only
   when the load is under 4 and it is Node-only. Each agent's brief says: one job at a time, no sub-agents, and wait
   while `uptime` shows over 8 (10 minutes at most, then go on and say so).

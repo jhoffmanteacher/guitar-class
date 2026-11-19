@@ -1,26 +1,49 @@
 # WORKFLOW.md — Guitar Class
 
-What is open, what was decided, and why. Start with "Where things stand".
+What is open, what was decided, and why. Windows starts with "For Windows", right below; everyone else with
+"Where things stand". How the file is kept short and where its history went: "About this file", at the end.
 
-**Keep this file short** (Jonathan, 2026-11-19: "can we make workflow.md shorter and more concise?"):
-- When an item closes, delete it here; do not tick it. Its record is the commit and the history files below.
-- A "Recently shipped" entry is 5 lines at most: what changed, the commits, the review label, the numbers that
-  matter. Proofs, tables and logs go in the commit message or a DETAILS file.
-- When this file passes 400 lines, move the "Recently shipped" entries older than two weeks, unchanged, to a dated
-  `docs/workflow-history-*.md` file.
+## For Windows (read this first, every time you check)
 
-**History, moved out unchanged.** Search it before re-deriving a fact or re-proposing a stopped idea. A pointer
-anywhere in the repo to a WORKFLOW.md heading that is not in this file resolves there
-(`grep -n "<heading>" docs/workflow-history-*.md`).
-- `docs/workflow-history-to-2026-11-18.md`: every "Recently shipped" entry to 2026-11-18, the closed Open work items
-  and their binding decisions, the old "Moved from CLAUDE.md" text, the full Power Chord Switch record.
-- `docs/workflow-history-2026-11-11-to-17.md`: that week's "Where things stand" (Windows jobs W1 to W23, the Song
-  builder parts, the rules pastes, the private audio steps, the beat maps).
-- Older: `git show c751db8:archive/<file>` (`WORKFLOW-2026-buildout.md`, `WORKFLOW-2026-july-fixits.md`,
-  `WORKFLOW-2026-research-upgrades-era.md`, `REVIEW-PLAN.md`, `PLAN-COMPACT-CHECKLIST.md`, `PLAN-COMPACT-JOURNEY.md`).
+How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
+- `git pull` first. Take the first open W item whose date has come, one at a time, in your own worktree.
+- **Commit no "idle" or "checked" line** (each push to main reruns every GitHub workflow and redeploys the site and
+  the practice copy, and it collides with other sessions' edits here). Push to main only two short edits per item:
+  a line under it when you START ("Windows: started HH:MM"; the Mac reads that as Windows being awake), and the DONE
+  note when it is ready to merge. Rebase before each push (CLAUDE.md step 8).
+- Push the work itself as a `win/wNN` branch; the Mac or Jonathan merges it. Agents on Opus this week ("This week
+  only", below). Reports as CLAUDE.md says: short, counts with denominators, details in one file.
 
-Status: [ ] open · [~] in progress. Dates are the Pacific date; `CACHE_VERSION` and commit times may show the UTC
-date, one day later in the evening.
+- [ ] **W25 — the activities smoke on GitHub: a page where some app parts never ran (not urgent).**
+  The Note Call walk (`noteCallWalk` in `tools/smoke.mjs`) reloads the page (`Page.navigate`, 3.5 s, then
+  `pageLoaded()`: `readyState` complete) and sometimes finds a different set of parts never ran: in 3 of the last 42
+  activities walks on main (`11ff03f`, `f9bc655`, `9cb56dd`, 2026-11-17 to 19) and once before (`a0f4047`),
+  e.g. `snipStop`, `isBuiltSongId`, `populateModuleDropdown` not defined; `pcStop`, `pcKeydown`; `NC_LEVELS`,
+  `openClassActivitiesScreen`. The Mac's runs are clean; the 2026-11-02 Mac flake (`chordDiagramSVG`, `NOTES` not
+  defined after the Power Chord walk's reload) looks the same. Each run's page shows its error list without signing
+  in, e.g. https://github.com/jhoffmanteacher/guitar-class/actions/runs/44483184053.
+  First decide: can the SITE end a load with parts missing (a part's fetch failing, maybe through the service worker:
+  a slow Chromebook would meet that too), or is it only the harness? Ideas: log every failed request and what the
+  service worker answered in that walk (the smoke's `NOISE` filter hides `net::ERR` lines), slow the CPU
+  (`Emulation.setCPUThrottlingRate`), repeat the walk 50+ times; a `ci-try/w25-<x>` branch runs it on GitHub. A fix
+  in the site's load path (`sw.js` code, load order, `app/boot.js`, `app/start.js`) is Always Reviewed and runs
+  `slow-load.mjs` and `update-reload-loop.mjs`; a harness-only fix ships Fast with its break-it proof. Report: the
+  cause, and N of M walks failing before and after.
+- [ ] **W26 — on or after 2026-11-26: is the accessibility scan ready for its ratchet?** Read GitHub's "a11y scan"
+  job on every push to main from 2026-11-19 on: its annotation "a11y: against the baseline: N new signatures, M gone"
+  is on each run's page without signing in (the public API allows 60 reads an hour; the run pages are not limited).
+  Write under this item: runs read, runs with a new signature, and what each one is. Do NOT switch it on:
+  `A11Y_RATCHET` in `tools/smoke.mjs` is Jonathan's call (planned 2026-11-27), then one `site-reviewer` round.
+- [ ] **W27 — on or after 2026-12-01: remove the split bridges.** The spec is `todo.md` → "Remove the 2026-11-16
+  and 2026-11-18 split bridges" (`grep -n "DELIBERATE BRIDGE" coach-*.js` finds 6; keep the two `typeof` guards it
+  names). One commit. It touches load order: Always Reviewed (`site-reviewer`, Opus at high this week), with a golden
+  snapshot before and after (`--compare` identical), `node tools/slow-load.mjs`,
+  `node tools/mic-sim/coach-take-save.mjs` and the full checks. Delete the todo.md item in the same push.
+- [ ] **W28 — when nothing else is open: the most misleading old-name comments.** `todo.md` → "Small things" →
+  "Comments that still say `app.js` / `coach.js` / `teacher.js`": in `index.html`, `tuner.js`, `guitar-diagrams.js`,
+  `config-main.js`, `tabs/journey.js`, `live-quiz.js` and `fab-tools.js`, make each comment name the part
+  (`app/<x>.js`, `coach-<x>.js`, `teacher-<x>.js`). Leave `sw.js` alone (its comments wait for its next real change).
+  Comments only, so the full checks prove no code moved; Fast, no reviewer. Shrink the todo.md item in the same push.
 
 ---
 
@@ -35,8 +58,7 @@ Update this block whenever an item opens or closes.
   to the card's top (`b458ad3`..`3654a33`, `e712baf`).
 - Private chord sheets P1-P4: a built song's lyrics sheet is a pdf in the private store (`a1faa4a`..`e9a1db9`).
 - The 7 record-derived songs play from the private store (`bf0e0ff`; to undo, revert it).
-- In class: whole titles on Today tiles and Unfinished rows (`60f805d`). Console Practice minutes: a Today column
-  (`8247468`).
+- Whole titles on In class's Today tiles (`60f805d`); a Today column in the console's Practice minutes (`8247468`).
 - Rule A (`1be6d04`..`ae11813`): a strum with no pitch never counts as the chord in Power Chord Switch, Change Up,
   the Listening Coach (chords) and Note Runner. Decision and numbers: "Power Chord Switch: where we stopped" below.
 - Three part splits, each moved whole and unchanged: `app/cards.js` → `app/cards-sheet.js` (W24), `coach-core.js`
@@ -47,22 +69,16 @@ Update this block whenever an item opens or closes.
 **Waiting on Jonathan (none urgent).** His list is `todo.md` → "For Jonathan". Also:
 - Friday 2026-11-20: which of this week's changes get a Fable review (the list under "This week only"), and whether
   his weekly limit has reset.
-- Three product calls left from the Friday checks, each with the lead:
-  - The Games heading "Notes on the low E and A strings" (`i18n.js`): Note Runner keeps to those strings, but only 1
-    of Note Hunt's 5 levels and 1 of Fret Zap's 4 decks do.
-  - The practice-minutes keepalive's dead-link guard only sees a commit in flight (up to about 60 s lost,
-    `practice-minutes.js` about line 1082).
-  - The "goal reached" toast never shows on a Journey page (`pendingToast` is per page).
-- The old-page tool (W22) is parked on `origin/win/w22` (its round 4 found a MAJOR). The Mac recommends leaving it
-  parked until a part split needs it.
-- From 2026-11-23: a visual re-design look, pictures only first (`todo.md`). The design-values tidy (W15) waits on
-  his pick. Do not start before he says so.
+- Three product calls left from the Friday checks: the Games heading "Notes on the low E and A strings" (only 1 of
+  Note Hunt's 5 levels and 1 of Fret Zap's 4 decks keep to them); the practice-minutes keepalive's dead-link guard
+  (up to about 60 s lost, `practice-minutes.js` ~1082); no "goal reached" toast on a Journey page.
+- The old-page tool (W22) stays parked on `origin/win/w22` (round 4 found a MAJOR) until a part split needs it.
+- From 2026-11-23: a visual re-design look, pictures first (`todo.md`); W15 waits on his pick. Not before he says.
 
 **Dated:**
-- About 2026-11-21: switch on the accessibility scan's ratchet after a week of 0 new signatures (one `site-reviewer`
-  round on the switch-on).
-- On or after 2026-12-01: remove the split bridges (`todo.md`): the 2026-11-16 one, and the one block at the end of
-  `coach-core.js` that loads `coach-score.js` and `coach-recordings.js` for a page holding an old part list.
+- 2026-11-27 (planned, Jonathan's call): switch on the accessibility scan's ratchet after a week of 0 new signatures
+  (W26 counts them), then one `site-reviewer` round.
+- On or after 2026-12-01: remove the split bridges (W27).
 - About mid-December: Power Chord Switch leaves the class; aim listening work at the Listening Coach and the other
   mic features.
 
@@ -70,27 +86,8 @@ Update this block whenever an item opens or closes.
 - The first classes on rule A. On the recorded takes, Power Chord Switch "right" fell from 322 to 296 of 416 changes.
   Takes recorded from 2026-11-19 are the real test (`node tools/mic-sim/takes-in.mjs`, then the closed loop).
 - The 7 private songs: each Chromebook downloads a song once; the month's count is in Manage → Song files (6 GiB).
-- GitHub's browser tests: on 2026-11-19 GitHub's package mirror failed Chrome's install in three jobs and hung
-  another for its 100-minute limit, with no site change. Every job now tries the install twice (`browser.yml`
-  header, "Chrome's install"). The activities smoke's other red is W25 below.
-
-**For Windows** (Windows reads this file about once an hour while Jonathan leaves it awake):
-- [ ] **W25 — the activities smoke on GitHub: a page where some app parts never ran (2026-11-19; not urgent).**
-  The Note Call walk (`noteCallWalk` in `tools/smoke.mjs`) reloads the page (`Page.navigate`, 3.5 s, then
-  `pageLoaded()`: `readyState` complete) and sometimes finds a different set of parts never ran: in 3 of the last 42
-  activities walks on main (`11ff03f`, `f9bc655`, `9cb56dd`, 2026-11-17 to 19) and once before (`a0f4047`),
-  e.g. `snipStop`, `isBuiltSongId`, `populateModuleDropdown` not defined; `pcStop`, `pcKeydown`; `NC_LEVELS`,
-  `openClassActivitiesScreen`. The Mac's runs are clean. Same symptom as the 2026-11-02 Mac flake (`chordDiagramSVG`
-  / `NOTES` not defined after the Power Chord walk's reload). The error lists are readable without signing in, on each run's page (annotations), e.g.
-  https://github.com/jhoffmanteacher/guitar-class/actions/runs/44483184053.
-  First decide: can the SITE end a load with parts missing (a part's fetch failing, maybe through the service worker:
-  a slow Chromebook would meet that too), or is it only the harness? Ideas: log every failed request and what the
-  service worker answered in that walk (the smoke's `NOISE` filter hides `net::ERR` lines), slow the CPU
-  (`Emulation.setCPUThrottlingRate`), repeat the walk 50+ times; a `ci-try/w25-<x>` branch runs it on GitHub. A fix
-  in the site's load path (`sw.js` code, load order, `app/boot.js`, `app/start.js`) is Always Reviewed and runs
-  `slow-load.mjs` and `update-reload-loop.mjs`; a harness-only fix ships Fast with its break-it proof. Agents on Opus
-  this week. Push a `win/w25` branch; the Mac merges. Report: the cause, and N of M walks failing before and after.
-- Windows idle, checked 08:20 (2026-11-19); W25 added by the Mac at 08:30.
+- GitHub's browser tests: Chrome's install gets a second try since 2026-11-19 (`browser.yml` header); the
+  activities smoke's other red is W25.
 
 **THIS WEEK ONLY: every agent runs on Opus, reviewers included** (Jonathan, 2026-11-16: "heavy fable use this
 morning ran up my total. we can run opusplan stuff"). The Mac, Windows and cloud routines pass `model: 'opus'` on
@@ -151,10 +148,10 @@ Newest first, 5 lines at most each (see the top of this file). Entries up to 202
 `docs/workflow-history-to-2026-11-18.md`, section 3; the list of what is live since 2026-11-17 is in "Where things
 stand".
 
-- **2026-11-19 — WORKFLOW.md cut from 2,076 lines to about 380 (Jonathan: "shorter and more concise").** The old text
-  moved unchanged to `docs/workflow-history-to-2026-11-18.md` (every old line is in one of the two files except the old
-  header, which is in the history file too). GitHub's browser jobs try Chrome's install twice (`browser.yml`). W25 for
-  Windows. `Review: Fast`.
+- **2026-11-19 — WORKFLOW.md cut from 2,076 lines to 400 (Jonathan: "shorter and more concise").** The old text moved
+  unchanged to `docs/workflow-history-to-2026-11-18.md` (all 1,855 old non-blank lines are in one of the two files).
+  "For Windows" is now the top section (Jonathan: "put it at the top of workflow and also shift work to windows"):
+  no more idle commits, W25 to W28. GitHub's browser jobs try Chrome's install twice. `Review: Fast`.
 
 ---
 
@@ -376,3 +373,27 @@ the chord sounded wrong" stay different; the real-guitar mic check passed; no re
 
 **Open, not decided:** a pair started at 30 BPM, sped up to 90 and played well offers "Again at 35" while the setup
 reopens on 90 (`ccRoundBpm` is the one place to change if the student's own tempo should count).
+
+---
+
+## About this file
+
+**Keep this file short** (Jonathan, 2026-11-19: "can we make workflow.md shorter and more concise?"):
+- When an item closes, delete it here; do not tick it. Its record is the commit and the history files below.
+- A "Recently shipped" entry is 5 lines at most: what changed, the commits, the review label, the numbers that
+  matter. Proofs, tables and logs go in the commit message or a DETAILS file.
+- When this file passes 400 lines, move the "Recently shipped" entries older than two weeks, unchanged, to a dated
+  `docs/workflow-history-*.md` file.
+
+**History, moved out unchanged.** Search it before re-deriving a fact or re-proposing a stopped idea. A pointer
+anywhere in the repo to a WORKFLOW.md heading that is not in this file resolves there
+(`grep -n "<heading>" docs/workflow-history-*.md`).
+- `docs/workflow-history-to-2026-11-18.md`: every "Recently shipped" entry to 2026-11-18, the closed Open work items
+  and their binding decisions, the old "Moved from CLAUDE.md" text, the full Power Chord Switch record.
+- `docs/workflow-history-2026-11-11-to-17.md`: that week's "Where things stand" (Windows jobs W1 to W23, the Song
+  builder parts, the rules pastes, the private audio steps, the beat maps).
+- Older: `git show c751db8:archive/<file>` (`WORKFLOW-2026-buildout.md`, `WORKFLOW-2026-july-fixits.md`,
+  `WORKFLOW-2026-research-upgrades-era.md`, `REVIEW-PLAN.md`, `PLAN-COMPACT-CHECKLIST.md`, `PLAN-COMPACT-JOURNEY.md`).
+
+Status: [ ] open · [~] in progress. Dates are the Pacific date; `CACHE_VERSION` and commit times may show the UTC
+date, one day later in the evening.
