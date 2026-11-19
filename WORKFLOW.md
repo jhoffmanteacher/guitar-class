@@ -394,6 +394,17 @@ Added 2026-11-17 (Jonathan), a standing rule, not this week only: Sonnet for the
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-11-18 (night) — `coach-core.js` split 2: Finish & score into `coach-score.js` (Jonathan approved, then
+      went to bed). Reviewed (site-reviewer-deep on Opus, 1 round: 0 BLOCKER / 0 MAJOR / 2 MINOR, both fixed).** f4233e8 and
+      e0dd0cd on main **carry no `Review:` trailer by mistake** (`review-trailer.mjs` refused on a detached worktree and the
+      push went ahead; a pushed commit is never rewritten): read them as Reviewed. The section (old lines 1742-2169:
+      `coachFinish`, `coachMicOff`, the report, the five criteria, `coachMinHeard`) moved byte for byte, loaded right after
+      `coach-core.js`; `coach-core.js` 2,247 → 1,827 lines, `coach-score.js` 441. `coachClose()`'s call to `coachMicOff()`
+      is now `typeof`-guarded (same class as split 1's MAJOR); new check 1ex runs `tools/mic-sim/coach-take-save.mjs`
+      (9 cases), red on a typo in that guard or its removal. The bridge at the end of `coach-core.js` is now ONE block that
+      loads both newer parts in order for a page holding an old list (builder sim 27/27, reviewer sim 3,024/3,024; the
+      two-block shape fails); remove it after 2026-12-01 with the others (todo.md). Proofs: lint unchanged (load-order 0,
+      no-undef 129), slow-load 20 loads 0 errors, tone-test, listen-loop chords 300 takes.
 - [x] **2026-11-18 — `coach-core.js` split: the mic recordings into `coach-recordings.js` (Jonathan present). Reviewed
       (site-reviewer on Opus, 2 rounds).** The "Consented mic recordings" section (`MICREC_*`, `micRec*`, old lines
       1764-2119) moved byte for byte into `coach-recordings.js`, loaded right after `coach-core.js` (`COACH_JS_PARTS`,
