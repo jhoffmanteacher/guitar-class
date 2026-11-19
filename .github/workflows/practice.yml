@@ -102,8 +102,12 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/ft" && cd "$RUNNER_TEMP/ft"
           npm init -y > /dev/null
-          npm install --no-audit --no-fund --save-exact "firebase-tools@$FIREBASE_TOOLS_VERSION" "firebase-admin@$FIREBASE_ADMIN_VERSION"
+          npm install --no-audit --no-fund --save-exact "firebase-tools@$FIREBASE_TOOLS_VERSION"
           echo "$RUNNER_TEMP/ft/node_modules/.bin" >> "$GITHUB_PATH"
+          # The Admin SDK (the rules step) in its OWN folder, so the Firebase tools' install stays exactly as it was.
+          mkdir -p "$RUNNER_TEMP/fa" && cd "$RUNNER_TEMP/fa"
+          npm init -y > /dev/null
+          npm install --no-audit --no-fund --save-exact "firebase-admin@$FIREBASE_ADMIN_VERSION"
 
       - name: The key (written to a file outside the checkout, removed at the end)
         if: env.HAS_KEY == 'true' && steps.kind.outputs.kind != 'none'
@@ -147,7 +151,7 @@ jobs:
         id: rules
         continue-on-error: true
         env:
-          NODE_PATH: ${{ runner.temp }}/ft/node_modules
+          NODE_PATH: ${{ runner.temp }}/fa/node_modules
         # The project is named literally and checked against the key (the key step already refused any other).
         run: |
           node -e '
