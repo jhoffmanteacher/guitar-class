@@ -13,6 +13,16 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
   note when it is ready to merge. Rebase before each push (CLAUDE.md step 8).
 - Push the work itself as a `win/wNN` branch; the Mac or Jonathan merges it. Agents on Opus this week ("This week
   only", below). Reports as CLAUDE.md says: short, counts with denominators, details in one file.
+- **Dated items go to the cloud when they can** (Jonathan, 2026-11-19: "put it into the windows section of workflow for
+  it to schedule those things"). An item marked "Windows: SCHEDULE" below is not done by Windows: as soon as you read
+  it, create a one-time cloud routine for it (skill `schedule`, environment `guitar-class`, `run_once_at` = the time
+  the item names, converted to UTC). The routine body ALWAYS carries `"clear_mcp_connections": true` (otherwise the
+  server attaches Gmail, Drive and Jonathan's other connectors; check the response shows `"mcp_connections":[]`).
+  The routine's prompt is the item's own text, made self-contained, plus: "work on a branch of origin/main; the
+  result goes under this item in WORKFLOW.md, pushed to main after `git fetch` + rebase (CLAUDE.md step 8)". Then
+  push ONE line under the item, "Windows: scheduled <routine link> for <local time>" (it counts as the item's
+  "started" line), and go on to the next item. A routine cannot be deleted from Claude: Jonathan does that at
+  https://claude.ai/code/routines.
 
 - [ ] **W25 — the activities smoke on GitHub: a page where some app parts never ran (not urgent).** The Note Call
   walk (`noteCallWalk`, `tools/smoke.mjs`) reloads (`Page.navigate`, 3.5 s, `pageLoaded()`: `readyState` complete)
@@ -33,11 +43,18 @@ How Windows works (Jonathan, 2026-11-19: "shift work to windows"):
   is on each run's page without signing in (the public API allows 60 reads an hour; the run pages are not limited).
   Write under this item: runs read, runs with a new signature, and what each one is. Do NOT switch it on:
   `A11Y_RATCHET` in `tools/smoke.mjs` is Jonathan's call (planned 2026-11-27), then one `site-reviewer` round.
+  **Windows: SCHEDULE** for 2026-11-26 at 7:00 AM Pacific, model `claude-sonnet-5-5` (reading and counting only;
+  the public pages need no sign-in and no browser).
 - [ ] **W27 — on or after 2026-12-01: remove the split bridges.** The spec is `todo.md` → "Remove the 2026-11-16
   and 2026-11-18 split bridges" (`grep -n "DELIBERATE BRIDGE" coach-*.js` finds 6; keep the two `typeof` guards it
   names). One commit. It touches load order: Always Reviewed (`site-reviewer`, Opus at high this week), with a golden
   snapshot before and after (`--compare` identical), `node tools/slow-load.mjs`,
   `node tools/mic-sim/coach-take-save.mjs` and the full checks. Delete the todo.md item in the same push.
+  **Windows: SCHEDULE only if the cloud can run headless Chrome** (the golden snapshots and `slow-load.mjs` need it;
+  the Look A cloud run of 2026-11-19 is the first to find out: its report, under "Where things stand", says). If it
+  can: a routine for 2026-12-01 at 7:00 AM Pacific, model `claude-opus-5-5`, pushing its work as `ci-try/w27` and
+  never to main (the Always-Reviewed review and the merge stay with the Mac). If it cannot, or nobody has written
+  down the answer by 2026-12-01: Windows does it as before.
 - [ ] **W28 — when nothing else is open: the most misleading old-name comments.** `todo.md` → "Small things" →
   "Comments that still say `app.js` / `coach.js` / `teacher.js`": in `index.html`, `tuner.js`, `guitar-diagrams.js`,
   `config-main.js`, `tabs/journey.js`, `live-quiz.js` and `fab-tools.js`, make each comment name the part
