@@ -258,6 +258,7 @@ export class Student {
           /* stays on the round's first chord: the answer is what that chord is for this change */
           this.cur = round.midis[round.seq[0]];
           did = same0(this.cur, round.midis[want]) ? 'right' : same0(this.cur, round.midis[prev]) ? 'held' : 'wrong';
+          if (did === 'wrong' && round.wrongPool) other = round.seq[0];   // Change Up: the chord in the hand names the wrong chord (wrongClass)
         }
         /* a wrong chord a whole step up can be the old chord (F5-G5): the answer key says so */
         if (did === 'wrong' && !other && !p.openBeats && (p.wrongBy || 1) !== 1 && same0(this.cur, round.midis[prev])) did = 'held';
